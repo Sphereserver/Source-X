@@ -376,56 +376,6 @@ LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg
 	return layer;
 }
 
-bool CChar::CheckCorpseCrime( const CItemCorpse *pCorpse, bool fLooting, bool fTest )
-{
-	ADDTOCALLSTACK("CChar::CheckCorpseCrime");
-	// fLooting = looting as apposed to carving.
-	// RETURN: true = criminal act !
-
-	if ( !pCorpse || !g_Cfg.m_fLootingIsACrime )
-		return false;
-
-	CChar *pCharGhost = pCorpse->m_uidLink.CharFind();
-	if ( !pCharGhost || pCharGhost == this )
-		return false;
-
-	if ( pCharGhost->Noto_GetFlag(this) == NOTO_GOOD )
-	{
-		if ( !fTest )
-		{
-			// Anyone saw me doing this?
-			CheckCrimeSeen(SKILL_NONE, pCharGhost, pCorpse, fLooting ? g_Cfg.GetDefaultMsg(DEFMSG_LOOTING_CRIME) : NULL);
-			Noto_Criminal();
-		}
-		return true;
-	}
-	return false;
-}
-
-CItemCorpse *CChar::FindMyCorpse( bool ignoreLOS, int iRadius ) const
-{
-	ADDTOCALLSTACK("CChar::FindMyCorpse");
-	// If they are standing on their own corpse then res the corpse !
-	CWorldSearch Area(GetTopPoint(), iRadius);
-	for (;;)
-	{
-		CItem *pItem = Area.GetItem();
-		if ( !pItem )
-			break;
-		if ( !pItem->IsType(IT_CORPSE) )
-			continue;
-		CItemCorpse *pCorpse = dynamic_cast<CItemCorpse*>(pItem);
-		if ( !pCorpse || (pCorpse->m_uidLink != GetUID()) )
-			continue;
-		if ( pCorpse->m_itCorpse.m_BaseID != m_prev_id )	// not morphed type
-			continue;
-		if ( !ignoreLOS && !CanSeeLOS(pCorpse) )
-			continue;
-		return pCorpse;
-	}
-	return NULL;
-}
-
 int CChar::GetHealthPercent() const
 {
 	ADDTOCALLSTACK("CChar::GetHealthPercent");

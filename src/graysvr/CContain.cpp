@@ -1726,24 +1726,3 @@ bool CItemContainer::OnTick()
 	}
 	return CItemVendable::OnTick();
 }
-
-////////////////////////////////////////////////////
-// CItemCorpse
-
-CChar *CItemCorpse::IsCorpseSleeping() const
-{
-	ADDTOCALLSTACK("CItemCorpse::IsCorpseSleeping");
-	// Is this corpse really a sleeping person ?
-	// CItemCorpse
-	if ( !IsType(IT_CORPSE) )
-	{
-		DEBUG_ERR(("Corpse (0%lx) doesn't have type T_CORPSE! (it has %d)\n", (DWORD)GetUID(), GetType()));
-		return NULL;
-	}
-
-	CChar *pCharCorpse = m_uidLink.CharFind();
-	if ( pCharCorpse && pCharCorpse->IsStatFlag(STATF_Sleeping) && !GetTimeStamp().IsTimeValid() )
-		return pCharCorpse;
-
-	return NULL;
-}

@@ -1697,14 +1697,8 @@ class CItemCorpse : public CItemContainer
 	// A corpse is a special type of item.
 public:
 	static const char *m_sClassName;
-	CItemCorpse( ITEMID_TYPE id, CItemBase * pItemDef ) :
-		CItemContainer( id, pItemDef )
-	{
-	}
-	virtual ~CItemCorpse()
-	{
-		DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
-	}
+	CItemCorpse( ITEMID_TYPE id, CItemBase * pItemDef );
+	virtual ~CItemCorpse();
 
 private:
 	CItemCorpse(const CItemCorpse& copy);
