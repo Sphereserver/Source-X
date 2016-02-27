@@ -4,6 +4,7 @@
 
 #include "packet.h"
 #include "network.h"
+#include "../graysvr/CItemMessage.h"
 
 /***************************************************************************
  *

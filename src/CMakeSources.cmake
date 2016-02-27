@@ -31,6 +31,8 @@ graysvr/CGMPage.cpp
 graysvr/CItemBase.cpp
 graysvr/CItem.cpp
 graysvr/CItemCorpse.cpp
+graysvr/CItemMessage.cpp
+graysvr/CItemMessage.h
 graysvr/CItemMulti.cpp
 graysvr/CItemMultiCustom.cpp
 graysvr/CItemShip.cpp

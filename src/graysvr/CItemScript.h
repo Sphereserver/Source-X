@@ -1,7 +1,3 @@
-//
-// Created by rot on 27/02/2016.
-//
-
 #ifndef _INC_CITEMSCRIPT_H
 #define _INC_CITEMSCRIPT_H
 

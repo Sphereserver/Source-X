@@ -1,5 +1,6 @@
 #include "graysvr.h"	// predef header.
 #include "CClient.h"
+#include "CItemMessage.h"
 #include "../network/network.h"
 #include "../network/send.h"
 #include "../network/receive.h"

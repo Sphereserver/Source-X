@@ -162,7 +162,6 @@ class CServerDef;
 class CCharBase;
 class CItemBase;
 class CItemContainer;
-class CItemMessage;
 class CItemMap;
 class CItemMultiCustom;
 class CDataBase;
