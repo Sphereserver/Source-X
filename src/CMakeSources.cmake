@@ -36,6 +36,7 @@ graysvr/CItemMultiCustom.cpp
 graysvr/CItemShip.cpp
 graysvr/CItemSpawn.cpp
 graysvr/CItemScript.cpp
+graysvr/CItemScript.h
 graysvr/CItemStone.cpp
 graysvr/CItemVend.cpp
 graysvr/CLog.cpp

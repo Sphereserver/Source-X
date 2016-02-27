@@ -1,5 +1,5 @@
-#include "graysvr.h"
-//#include "CObjBase.h"
+
+#include "CItemScript.h"
 
 
 //////////////////////////////////////

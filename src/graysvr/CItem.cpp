@@ -1,6 +1,8 @@
-#include "graysvr.h"	// predef header.
+//#include "graysvr.h"	// predef header.
+#include "CItemScript.h"
 #include "../network/network.h"
 #include "../network/send.h"
+
 
 /*
 	If you add a new trigger here, be sure to also and ALWAYS add a corresponding
