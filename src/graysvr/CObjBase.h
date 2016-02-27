@@ -1671,13 +1671,8 @@ public:
 	static LPCTSTR const sm_szLoadKeys[];
 	static LPCTSTR const sm_szVerbKeys[];
 public:
-	CItemScript( ITEMID_TYPE id, CItemBase * pItemDef ) : CItemVendable( id, pItemDef )
-	{
-	}
-	virtual ~CItemScript()
-	{
-		DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
-	}
+	CItemScript( ITEMID_TYPE id, CItemBase * pItemDef );
+	virtual ~CItemScript();
 
 private:
 	CItemScript(const CItemScript& copy);

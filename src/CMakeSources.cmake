@@ -30,10 +30,12 @@ graysvr/CContain.cpp
 graysvr/CGMPage.cpp
 graysvr/CItemBase.cpp
 graysvr/CItem.cpp
+graysvr/CItemCorpse.cpp
 graysvr/CItemMulti.cpp
 graysvr/CItemMultiCustom.cpp
 graysvr/CItemShip.cpp
 graysvr/CItemSpawn.cpp
+graysvr/CItemScript.cpp
 graysvr/CItemStone.cpp
 graysvr/CItemVend.cpp
 graysvr/CLog.cpp
