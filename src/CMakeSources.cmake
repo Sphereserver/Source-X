@@ -31,6 +31,7 @@ graysvr/CGMPage.cpp
 graysvr/CItemBase.cpp
 graysvr/CItem.cpp
 graysvr/CItemCorpse.cpp
+graysvr/CItemMap.cpp
 graysvr/CItemMessage.cpp
 graysvr/CItemMessage.h
 graysvr/CItemMulti.cpp
@@ -55,6 +56,7 @@ graysvr/CSector.cpp
 graysvr/CServer.cpp
 graysvr/CServRef.cpp
 graysvr/CServRef.h
+graysvr/CServTime.h
 graysvr/CWebPage.cpp
 graysvr/CWorld.cpp
 graysvr/CWorld.h

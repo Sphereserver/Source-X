@@ -1,5 +1,6 @@
 #include "send.h"
 #include "network.h"
+#include "../graysvr/CItemMap.h"
 #include "../common/zlib/zlib.h"
 
 #ifndef _WIN32

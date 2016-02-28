@@ -1,5 +1,6 @@
 #include "graysvr.h"	// predef header.
 #include "CClient.h"
+#include "CItemMap.h"
 #include "../network/send.h"
 
 bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )

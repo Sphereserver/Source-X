@@ -4,6 +4,7 @@
 #include "../network/network.h" // network thread
 #include "../sphere/asyncdb.h"
 #include "CItemMessage.h"
+#include "CItemMap.h"
 #if !defined(_WIN32) || defined(_LIBEV)
 	#include "../sphere/linuxev.h"
 	#include "UnixTerminal.h"

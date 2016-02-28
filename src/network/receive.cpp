@@ -3,6 +3,7 @@
 #include "network.h"
 #include "../graysvr/CServTime.h"
 #include "../graysvr/CClient.h"
+#include "../graysvr/CItemMap.h"
 
 /***************************************************************************
  *
