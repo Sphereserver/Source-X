@@ -1,6 +1,7 @@
 #include "network.h"
 #include "send.h"
 #include "receive.h"
+#include "../graysvr/CServTime.h"
 
 #if !defined(_WIN32) || defined(_LIBEV)
 	extern LinuxEv g_NetworkEvent;

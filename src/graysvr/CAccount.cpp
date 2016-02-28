@@ -1,6 +1,7 @@
 #include "graysvr.h"	// predef header.
 #include "../common/CMD5.h"
 #include "../network/network.h"
+#include "CServTime.h"
 
 extern "C"
 {

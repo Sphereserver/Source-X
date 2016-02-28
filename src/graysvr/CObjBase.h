@@ -5,6 +5,7 @@
 #ifndef _INC_COBJBASE_H
 #define _INC_COBJBASE_H
 #pragma once
+#include "CServTime.h"
 
 enum MEMORY_TYPE
 {

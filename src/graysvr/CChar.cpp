@@ -1,6 +1,7 @@
 //  CChar is either an NPC or a Player.
 #include "graysvr.h"	// predef header.
 #include "CClient.h"
+#include "CServTime.h"
 #include "../network/network.h"
 
 LPCTSTR const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static

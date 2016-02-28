@@ -1,5 +1,6 @@
 // Actions specific to an NPC.
 #include "graysvr.h"	// predef header.
+#include "CServTime.h"
 #include "../graysvr/CPathFinder.h"
 #include "../network/receive.h"
 

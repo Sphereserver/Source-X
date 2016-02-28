@@ -1,4 +1,5 @@
 #include "graysvr.h"
+#include "CServTime.h"
 
 
 CItemCorpse::CItemCorpse( ITEMID_TYPE id, CItemBase * pItemDef ) :

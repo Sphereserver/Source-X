@@ -4,6 +4,7 @@
 
 #ifndef _INC_CGRAYMAP_H
 #define _INC_CGRAYMAP_H
+#include "../graysvr/CServTime.h"
 
 class CGrayCachedMulItem
 {

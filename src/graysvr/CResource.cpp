@@ -1,4 +1,5 @@
 ﻿#include "graysvr.h"	// predef header.
+#include "CServTime.h"
 #include "../common/grayver.h"
 #include "../common/CFileList.h"
 #include "../network/network.h"

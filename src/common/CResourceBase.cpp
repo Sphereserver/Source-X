@@ -1,6 +1,7 @@
 #include "../graysvr/graysvr.h"
 #include "CFileList.h"
 #include "CResourceBase.h"
+#include "../graysvr/CServTime.h"
 
 //***************************************************
 // CResourceBase

@@ -1,4 +1,5 @@
 #include "../graysvr/graysvr.h"
+#include "../graysvr/CServTime.h"
 #include <algorithm>
 
 ////////////////////////////////////////////////////////////////////////

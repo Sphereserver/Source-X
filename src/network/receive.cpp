@@ -1,6 +1,7 @@
 #include "receive.h"
 #include "send.h"
 #include "network.h"
+#include "../graysvr/CServTime.h"
 #include "../graysvr/CClient.h"
 
 /***************************************************************************

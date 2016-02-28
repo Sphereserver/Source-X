@@ -4,6 +4,7 @@
 
 #include "graysvr.h"	// predef header.
 #include "CClient.h"
+#include "CServTime.h"
 #include "../network/network.h"
 #include "../network/send.h"
 
