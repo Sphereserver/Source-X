@@ -30,6 +30,8 @@ graysvr/CContain.cpp
 graysvr/CGMPage.cpp
 graysvr/CItemBase.cpp
 graysvr/CItem.cpp
+graysvr/CItemCommCrystal.cpp
+graysvr/CItemCommCrystal.h
 graysvr/CItemCorpse.cpp
 graysvr/CItemMap.cpp
 graysvr/CItemMessage.cpp

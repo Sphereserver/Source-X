@@ -1,6 +1,6 @@
 
 #ifndef _INC_CITEMMAP_H
-#define _INC_CITEMMAP_H_H
+#define _INC_CITEMMAP_H
 
 #include "graysvr.h"
 
