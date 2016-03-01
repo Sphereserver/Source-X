@@ -7,6 +7,7 @@
 #pragma once
 #include "CServTime.h"
 
+
 enum MEMORY_TYPE
 {
 	// IT_EQ_MEMORY_OBJ
@@ -3972,4 +3973,19 @@ inline bool CChar::IsSkillNPC( SKILL_TYPE skill )  // static
 	return (skill >= NPCACT_FOLLOW_TARG && skill < NPCACT_QTY);
 }
 
+enum CNC_TYPE
+{
+#define ADD(a,b) CNC_##a,
+#include "../tables/CCharNpc_props.tbl"
+#undef ADD
+	CNC_QTY
+};
+
+enum CPC_TYPE	// Player char.
+{
+#define ADD(a,b) CPC_##a,
+#include "../tables/CCharPlayer_props.tbl"
+#undef ADD
+	CPC_QTY
+};
 #endif

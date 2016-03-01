@@ -200,19 +200,6 @@ CChar * CChar::CreateBasic(CREID_TYPE baseID) // static
 	return new CChar(baseID);
 }
 
-// Create an NPC
-// NOTE: NEVER return NULL
-CChar * CChar::CreateNPC( CREID_TYPE baseID )	// static
-{
-	ADDTOCALLSTACK("CChar::CreateNPC");
-	CChar * pChar = CreateBasic(baseID);
-	ASSERT(pChar);
-	pChar->NPC_LoadScript(true);
-	pChar->NPC_CreateTrigger();
-
-	return pChar;
-}
-
 CChar::CChar( CREID_TYPE baseID ) : CObjBase( false )
 {
 	g_Serv.StatInc( SERV_STAT_CHARS );	// Count created CChars.
@@ -1056,76 +1043,6 @@ bool CChar::ReadScript(CResourceLock &s, bool bVendor)
 	}
 
 	return( true );
-}
-
-// Create an NPC from script.
-void CChar::NPC_LoadScript( bool fRestock )
-{
-	ADDTOCALLSTACK("CChar::NPC_LoadScript");
-	if ( m_pNPC == NULL )
-		// Set a default brian type til we get the real one from scripts.
-		SetNPCBrain(GetNPCBrain(false));	// should have a default brain. watch out for override vendor.
-
-	CCharBase * pCharDef = Char_GetDef();
-
-	// 1) CHARDEF trigger
-	if ( m_pPlayer == NULL ) //	CHARDEF triggers (based on body type)
-	{
-		CChar * pChar = this->GetChar();
-		if ( pChar != NULL )
-		{
-			CGrayUID uidOldAct = pChar->m_Act_Targ;
-			pChar->m_Act_Targ = GetUID();
-			pChar->ReadScriptTrig(pCharDef, CTRIG_Create);
-			pChar->m_Act_Targ = uidOldAct;
-		}
-	}
-	//This remains untouched but moved after the chardef's section
-	if (( fRestock ) && ( IsTrigUsed(TRIGGER_NPCRESTOCK) ))
-		ReadScriptTrig(pCharDef, CTRIG_NPCRestock);
-
-	CreateNewCharCheck();	//This one is giving stats, etc to the char, so we can read/set them in the next triggers.
-}
-
-// @Create trigger, NPC version
-void CChar::NPC_CreateTrigger()
-{
-	ADDTOCALLSTACK("CChar::NPC_CreateTrigger");
-	if (!m_pNPC)
-		return;
-
-	CCharBase *pCharDef = Char_GetDef();
-	TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
-	LPCTSTR pszTrigName = "@Create";
-	CTRIG_TYPE iAction = (CTRIG_TYPE)FindTableSorted(pszTrigName, sm_szTrigName, COUNTOF(sm_szTrigName) - 1);
-
-	// 2) TEVENTS
-	for (size_t i = 0; i < pCharDef->m_TEvents.GetCount(); ++i)
-	{
-		CResourceLink * pLink = pCharDef->m_TEvents[i];
-		if (!pLink || !pLink->HasTrigger(iAction))
-			continue;
-		CResourceLock s;
-		if (!pLink->ResourceLock(s))
-			continue;
-		iRet = CScriptObj::OnTriggerScript(s, pszTrigName, this, 0);
-		if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
-			return;
-	}
-
-	// 4) EVENTSPET triggers
-	for (size_t i = 0; i < g_Cfg.m_pEventsPetLink.GetCount(); ++i)
-	{
-		CResourceLink * pLink = g_Cfg.m_pEventsPetLink[i];
-		if (!pLink || !pLink->HasTrigger(iAction))
-			continue;
-		CResourceLock s;
-		if (!pLink->ResourceLock(s))
-			continue;
-		iRet = CScriptObj::OnTriggerScript(s, pszTrigName, this, 0);
-		if (iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT)
-			return;
-	}
 }
 
 void CChar::OnWeightChange( int iChange )
