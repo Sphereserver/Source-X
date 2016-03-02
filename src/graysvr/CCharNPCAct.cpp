@@ -47,6 +47,53 @@ LPCTSTR const CCharNPC::sm_szVerbKeys[NV_QTY+1] =
 	NULL
 };
 
+void CChar::Action_StartSpecial( CREID_TYPE id )
+{
+	ADDTOCALLSTACK("CChar::Action_StartSpecial");
+	// Take the special creature action.
+	// lay egg, breath weapon (fire, lightning, acid, code, paralyze),
+	//  create web, fire patch, fire ball,
+	// steal, teleport, level drain, absorb magic, curse items,
+	// rust items, stealing, charge, hiding, grab, regenerate, play dead.
+	// Water = put out fire !
+
+	if ( !g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_NOANIM ) )
+		UpdateAnimate( ANIM_CAST_AREA );
+
+	switch ( id )
+	{
+		case CREID_FIRE_ELEM:
+		{
+			// Leave a fire path
+			CItem * pItem = CItem::CreateScript( Calc_GetRandVal(2) ? ITEMID_FX_FIRE_F_EW : ITEMID_FX_FIRE_F_NS, this );
+			ASSERT(pItem);
+			pItem->SetType(IT_FIRE);
+			pItem->m_itSpell.m_spell = static_cast<WORD>(SPELL_Fire_Field);
+			pItem->m_itSpell.m_spelllevel = static_cast<WORD>(100 + Calc_GetRandVal(500));
+			pItem->m_itSpell.m_spellcharges = 1;
+			pItem->m_uidLink = GetUID();
+			pItem->MoveToDecay( GetTopPoint(), 10 + Calc_GetRandVal(50)*TICK_PER_SEC );
+		}
+		break;
+
+		case CREID_GIANT_SPIDER:
+		{
+			// Leave a web path
+			CItem * pItem = CItem::CreateScript( static_cast<ITEMID_TYPE>(Calc_GetRandVal2(ITEMID_WEB1_1, ITEMID_WEB1_4)), this );
+			ASSERT(pItem);
+			pItem->SetType(IT_WEB);
+			pItem->MoveToDecay( GetTopPoint(), 10 + Calc_GetRandVal(170)*TICK_PER_SEC );
+		}
+		break;
+
+		default:
+			SysMessage( "You have no special abilities" );
+			return;
+	}
+
+	UpdateStatVal( STAT_DEX, static_cast<short>(-(5 + Calc_GetRandVal(5)) ));	// the stamina cost
+}
+
 bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command from script
 {
 	ADDTOCALLSTACK("CChar::NPC_OnVerb");

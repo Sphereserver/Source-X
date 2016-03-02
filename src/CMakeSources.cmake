@@ -21,6 +21,7 @@ graysvr/CCharNPCStatus.cpp
 graysvr/CCharPlayer.cpp
 graysvr/CCharSkill.cpp
 graysvr/CCharSpell.cpp
+graysvr/CCharStat.cpp
 graysvr/CCharStatus.cpp
 graysvr/CCharUse.cpp
 graysvr/CChat.cpp
