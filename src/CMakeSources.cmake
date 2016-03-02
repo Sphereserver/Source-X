@@ -9,6 +9,9 @@ graysvr/CCharBase.cpp
 graysvr/CChar.cpp
 graysvr/CCharFight.cpp
 graysvr/CCharNPCAct.cpp
+graysvr/CCharNPCAct_Fight.cpp
+graysvr/CCharNPCAct_Magic.cpp
+graysvr/CCharNPCAct_Vendor.cpp
 graysvr/CCharNPC.cpp
 graysvr/CCharNPCPet.cpp
 graysvr/CCharNPCStatus.cpp

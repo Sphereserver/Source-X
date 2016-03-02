@@ -827,7 +827,6 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 	}
 }
 
-
 // Attach the spell effect for a duration.
 // Add effects which are saved in the save file here.
 // Not in LayerAdd
@@ -2870,7 +2869,6 @@ void CChar::Spell_CastFail()
 	}
 }
 
-
 int CChar::Spell_CastStart()
 {
 	ADDTOCALLSTACK("CChar::Spell_CastStart");
@@ -3020,7 +3018,6 @@ int CChar::Spell_CastStart()
 	SetTimeout(iWaitTime);
 	return iDifficulty;
 }
-
 
 bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem )
 {
@@ -3541,8 +3538,6 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	}
 	return true;
 }
-
-
 
 int CChar::GetSpellEffect( SPELL_TYPE spell, int iSkillLevel, int iEffectMult )
 {
