@@ -7,7 +7,10 @@ graysvr/CBase.h
 graysvr/CCharact.cpp
 graysvr/CCharBase.cpp
 graysvr/CChar.cpp
+graysvr/CCharAttacker.cpp
 graysvr/CCharFight.cpp
+graysvr/CCharMemory.cpp
+graysvr/CCharNotoriety.cpp
 graysvr/CCharNPCAct.cpp
 graysvr/CCharNPCAct_Fight.cpp
 graysvr/CCharNPCAct_Magic.cpp
