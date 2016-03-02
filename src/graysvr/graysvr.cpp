@@ -775,58 +775,6 @@ int Sphere_OnTick()
 	EXC_CATCH;
 	return g_Serv.m_iExitFlag;
 }
-void CServer::ShipTimers_Tick()
-{
-	ADDTOCALLSTACK("CServer::ShipTimers_Tick");
-	std::vector<CItemShip *>::iterator it;
-	for ( it = m_ShipTimers.begin(); it != m_ShipTimers.end(); ) 
-	{
-		CItemShip * pShip = *it;
-		if (pShip && pShip->m_itShip.m_fSail != 0)
-		{
-			pShip->OnTick();
-			++it;
-		}
-		else if ( m_ShipTimers.size() == 1 )
-		{
-			m_ShipTimers.pop_back();
-			break;
-		}
-		else
-			it = m_ShipTimers.erase(it);
-	}
-}
-
-void CServer::ShipTimers_Add(CItemShip * ship)
-{
-	ADDTOCALLSTACK("CServer::ShipTimers_Add");
-	if (!ship)
-		return;
-	m_ShipTimers.push_back(ship);
-}
-
-void CServer::ShipTimers_Delete(CItemShip * ship)
-{
-	ADDTOCALLSTACK("CServer::ShipTimers_Delete");
-	std::vector<CItemShip *>::iterator it;
-	for ( it = m_ShipTimers.begin(); it != m_ShipTimers.end(); ) 
-	{
-		CItemShip * pShip = *it;
-		if (pShip == ship)
-		{	
-			if ( m_ShipTimers.size() == 1 )
-			{
-				m_ShipTimers.pop_back();
-				break;
-			}
-			else
-				it = m_ShipTimers.erase(it);
-		}
-		else
-			++it;
-	}
-}
-
 //*****************************************************
 
 static void Sphere_MainMonitorLoop()

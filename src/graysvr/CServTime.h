@@ -12,82 +12,21 @@ public:
 	static const char *m_sClassName;
 	INT64 m_lPrivateTime;
 public:
-	INT64 GetTimeRaw() const
-	{
-		if ( m_lPrivateTime < 0 )
-			return 0;
-
-		return m_lPrivateTime;
-	}
-	INT64 GetTimeDiff( const CServTime & time ) const
-	{
-		return( m_lPrivateTime - time.m_lPrivateTime );
-	}
-	void Init()
-	{
-		m_lPrivateTime = 0;
-	}
-	void InitTime( INT64 lTimeBase )
-	{
-		if ( lTimeBase < 0 )
-			lTimeBase = 0;
-
-		m_lPrivateTime = lTimeBase;
-	}
-	bool IsTimeValid() const
-	{
-		return( m_lPrivateTime > 0 ? true : false );
-	}
-	CServTime operator+( INT64 iTimeDiff ) const
-	{
-		CServTime time;
-		time.m_lPrivateTime = m_lPrivateTime + iTimeDiff;
-		if ( time.m_lPrivateTime < 0 )
-			time.m_lPrivateTime = 0;
-
-		return( time );
-	}
-	CServTime operator-( INT64 iTimeDiff ) const
-	{
-		CServTime time;
-		time.m_lPrivateTime = m_lPrivateTime - iTimeDiff;
-		if ( time.m_lPrivateTime < 0 )
-			time.m_lPrivateTime = 0;
-
-		return( time );
-	}
-	INT64 operator-( CServTime time ) const
-	{
-		return(m_lPrivateTime-time.m_lPrivateTime);
-	}
-	bool operator==(CServTime time) const
-	{
-		return(m_lPrivateTime==time.m_lPrivateTime);
-	}
-	bool operator!=(CServTime time) const
-	{
-		return(m_lPrivateTime!=time.m_lPrivateTime);
-	}
-	bool operator<(CServTime time) const
-	{
-		return(m_lPrivateTime<time.m_lPrivateTime);
-	}
-	bool operator>(CServTime time) const
-	{
-		return(m_lPrivateTime>time.m_lPrivateTime);
-	}
-	bool operator<=(CServTime time) const
-	{
-		return(m_lPrivateTime<=time.m_lPrivateTime);
-	}
-	bool operator>=(CServTime time) const
-	{
-		return(m_lPrivateTime>=time.m_lPrivateTime);
-	}
-	void SetCurrentTime()
-	{
-		m_lPrivateTime = GetCurrentTime().m_lPrivateTime;
-	}
+	INT64 GetTimeRaw() const;
+	INT64 GetTimeDiff( const CServTime & time ) const;
+	void Init();
+	void InitTime( INT64 lTimeBase );
+	bool IsTimeValid() const;
+	CServTime operator+( INT64 iTimeDiff ) const;
+	CServTime operator-( INT64 iTimeDiff ) const;
+	INT64 operator-( CServTime time ) const;
+	bool operator==(CServTime time) const;
+	bool operator!=(CServTime time) const;
+	bool operator<(CServTime time) const;
+	bool operator>(CServTime time) const;
+	bool operator<=(CServTime time) const;
+	bool operator>=(CServTime time) const;
+	void SetCurrentTime();
 	static CServTime GetCurrentTime();
 };
 #endif // _INC_CSERVTIME_H

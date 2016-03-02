@@ -59,6 +59,7 @@ graysvr/CSector.cpp
 graysvr/CServer.cpp
 graysvr/CServRef.cpp
 graysvr/CServRef.h
+graysvr/CServTime.cpp
 graysvr/CServTime.h
 graysvr/CWebPage.cpp
 graysvr/CWorld.cpp
