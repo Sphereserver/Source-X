@@ -10,6 +10,70 @@
 
 std::vector<CCryptClientKey *> CCrypt::client_keys;
 
+void CCrypt::SetClientVersion( DWORD iVer )
+{
+	m_iClientVersion = iVer;
+}
+
+void CCrypt::SetMasterKeys( DWORD hi, DWORD low )
+{
+	m_MasterHi = hi;
+	m_MasterLo = low;
+}
+
+void CCrypt::SetCryptMask( DWORD hi, DWORD low )
+{
+	m_CryptMaskHi = hi;
+	m_CryptMaskLo= low;
+}
+
+bool CCrypt::SetConnectType( CONNECT_TYPE ctWho )
+{
+	if ( ctWho > CONNECT_NONE && ctWho < CONNECT_QTY )
+	{
+		m_ConnectType = ctWho;
+		return true;
+	}
+
+	return false;
+}
+
+bool CCrypt::SetEncryptionType( ENCRYPTION_TYPE etWho )
+{
+	if ( etWho >= ENC_NONE && etWho < ENC_QTY )
+	{
+		m_GameEnc = etWho;
+		return true;
+	}
+
+	return false;
+}
+
+DWORD CCrypt::GetClientVer() const
+{
+	return( m_iClientVersion );
+}
+
+bool CCrypt::IsValid() const
+{
+	return( m_iClientVersion >= 0 );
+}
+
+bool CCrypt::IsInit() const
+{
+	return( m_fInit );
+}
+
+CONNECT_TYPE CCrypt::GetConnectType() const
+{
+	return( m_ConnectType );
+}
+
+ENCRYPTION_TYPE CCrypt::GetEncryptionType() const
+{
+	return( m_GameEnc );
+}
+
 void CCrypt::ClearKeyTable(void)
 {
 	ADDTOCALLSTACK("CCrypt::ClearKeyTable");

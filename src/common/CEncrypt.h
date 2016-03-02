@@ -177,44 +177,11 @@ private:
 	int GetVersionFromString( LPCTSTR pszVersion );
 
 private:
-	void SetClientVersion( DWORD iVer )
-	{
-		m_iClientVersion = iVer;
-	}
-	
-	void SetMasterKeys( DWORD hi, DWORD low )
-	{
-		m_MasterHi = hi;
-		m_MasterLo = low;
-	}
-	
-	void SetCryptMask( DWORD hi, DWORD low )
-	{
-		m_CryptMaskHi = hi;
-		m_CryptMaskLo= low;
-	}
-	
-	bool SetConnectType( CONNECT_TYPE ctWho )
-	{
-		if ( ctWho > CONNECT_NONE && ctWho < CONNECT_QTY )
-		{
-			m_ConnectType = ctWho;
-			return true;
-		}
-		
-		return false;
-	}
-	
-	bool SetEncryptionType( ENCRYPTION_TYPE etWho )
-	{
-		if ( etWho >= ENC_NONE && etWho < ENC_QTY )
-		{
-			m_GameEnc = etWho;
-			return true;
-		}
-		
-		return false;
-	}
+	void SetClientVersion( DWORD iVer );
+	void SetMasterKeys( DWORD hi, DWORD low );
+	void SetCryptMask( DWORD hi, DWORD low );
+	bool SetConnectType( CONNECT_TYPE ctWho );
+	bool SetEncryptionType( ENCRYPTION_TYPE etWho );
 
 public:
 	TCHAR* WriteClientVer( TCHAR * pStr ) const;
@@ -227,30 +194,11 @@ public:
 	static TCHAR* WriteClientVerString( DWORD iClientVersion, TCHAR * pStr );
 
 public:
-	DWORD GetClientVer() const
-	{
-		return( m_iClientVersion );
-	}
-	
-	bool IsValid() const
-	{
-		return( m_iClientVersion >= 0 );
-	}
-
-	bool IsInit() const
-	{
-		return( m_fInit );
-	}
-		
-	CONNECT_TYPE GetConnectType() const
-	{
-		return( m_ConnectType );
-	}
-	
-	ENCRYPTION_TYPE GetEncryptionType() const
-	{
-		return( m_GameEnc );
-	}
+	DWORD GetClientVer() const;
+	bool IsValid() const;
+	bool IsInit() const;
+	CONNECT_TYPE GetConnectType() const;
+	ENCRYPTION_TYPE GetEncryptionType() const;
 
 // --------- Basic
 public:
