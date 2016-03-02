@@ -36,9 +36,11 @@ graysvr/CItemCommCrystal.h
 graysvr/CItemCorpse.cpp
 graysvr/CItemMap.cpp
 graysvr/CItemMessage.cpp
+graysvr/CItemMemory.h
 graysvr/CItemMessage.h
 graysvr/CItemMulti.cpp
 graysvr/CItemMultiCustom.cpp
+graysvr/CItemPlant.cpp
 graysvr/CItemShip.cpp
 graysvr/CItemSpawn.cpp
 graysvr/CItemScript.cpp
