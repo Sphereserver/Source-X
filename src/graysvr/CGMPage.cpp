@@ -18,6 +18,26 @@ CGMPage::~CGMPage()
 	ClearGMHandler();
 }
 
+LPCTSTR CGMPage::GetName() const
+{
+	return( m_sAccount );
+}
+
+LPCTSTR CGMPage::GetReason() const
+{
+	return( m_sReason );
+}
+
+void CGMPage::SetReason( LPCTSTR pszReason )
+{
+	m_sReason = pszReason;
+}
+
+CClient * CGMPage::FindGMHandler() const
+{
+	return( m_pGMClient );
+}
+
 INT64 CGMPage::GetAge() const
 {
 	ADDTOCALLSTACK("CGMPage::GetAge");
@@ -156,3 +176,7 @@ LPCTSTR CGMPage::GetAccountStatus() const
 		return pClient->GetChar()->GetName();
 }
 
+CGMPage * CGMPage::GetNext() const
+{
+	return( STATIC_CAST <CGMPage*>( CGObListRec::GetNext()));
+}

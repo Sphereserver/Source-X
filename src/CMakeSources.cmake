@@ -55,6 +55,7 @@ graysvr/CItemScript.h
 graysvr/CItemStone.cpp
 graysvr/CItemVend.cpp
 graysvr/CLog.cpp
+graysvr/CLog.h
 graysvr/CObjBase.cpp
 graysvr/CObjBase.h
 graysvr/CPathFinder.cpp

@@ -103,121 +103,7 @@ extern DIR_TYPE GetDirStr( LPCTSTR pszDir );
 extern LPCTSTR GetTimeMinDesc( int dwMinutes );
 extern size_t FindStrWord( LPCTSTR pTextSearch, LPCTSTR pszKeyWord );
 
-extern struct CLog : public CFileText, public CEventLog
-{
-	// subject matter. (severity level is first 4 bits, LOGL_EVENT)
-#define LOGM_ACCOUNTS		0x00080
-//#define LOGM_INIT			0x00100	// start up messages.
-#define LOGM_SAVE			0x00200	// world save status.
-#define LOGM_CLIENTS_LOG	0x00400	// all clients as they log in and out.
-#define LOGM_GM_PAGE		0x00800	// player gm pages.
-#define LOGM_PLAYER_SPEAK	0x01000	// All that the players say.
-#define LOGM_GM_CMDS		0x02000	// Log all GM commands.
-#define LOGM_CHEAT			0x04000	// Probably an exploit !
-#define LOGM_KILLS			0x08000	// Log player combat results.
-#define LOGM_HTTP			0x10000
-//#define	LOGM_NOCONTEXT		0x20000	// do not include context information
-//#define LOGM_DEBUG			0x40000	// debug kind of message with DEBUG: prefix
-
-private:
-	DWORD m_dwMsgMask;			// Level of log detail messages. IsLogMsg()
-	CGTime m_dateStamp;			// last real time stamp.
-	CGString m_sBaseDir;
-
-	const CScript * m_pScriptContext;	// The current context.
-	const CScriptObj * m_pObjectContext;	// The current context.
-
-	static CGTime sm_prevCatchTick;	// don't flood with these.
-public:
-	bool m_fLockOpen;
-	SimpleMutex m_mutex;
-
-public:
-	const CScript * SetScriptContext( const CScript * pScriptContext )
-	{
-		const CScript * pOldScript = m_pScriptContext;
-		m_pScriptContext = pScriptContext;
-		return( pOldScript );
-	}
-	const CScriptObj * SetObjectContext( const CScriptObj * pObjectContext )
-	{
-		const CScriptObj * pOldObject = m_pObjectContext;
-		m_pObjectContext = pObjectContext;
-		return( pOldObject );
-	}
-	bool SetFilePath( LPCTSTR pszName )
-	{
-		ASSERT( ! IsFileOpen());
-		return CFileText::SetFilePath( pszName );
-	}
-
-	LPCTSTR GetLogDir() const
-	{
-		return( m_sBaseDir );
-	}
-	bool OpenLog( LPCTSTR pszName = NULL );	// name set previously.
-	DWORD GetLogMask() const
-	{
-		return( m_dwMsgMask &~ 0x0f ) ;
-	}
-	void SetLogMask( DWORD dwMask )
-	{
-		m_dwMsgMask = GetLogLevel() | ( dwMask &~ 0x0f );
-	}
-	bool IsLoggedMask( DWORD dwMask ) const
-	{
-		return( ((dwMask &~ (0x0f | LOGM_NOCONTEXT | LOGM_DEBUG)) == 0) ||
-				(( GetLogMask() & ( dwMask &~ 0x0f )) != 0) );
-	}
-	LOGL_TYPE GetLogLevel() const
-	{
-		return static_cast<LOGL_TYPE>(m_dwMsgMask & 0x0f);
-	}
-	void SetLogLevel( LOGL_TYPE level )
-	{
-		m_dwMsgMask = GetLogMask() | ( level & 0x0f );
-	}
-	bool IsLoggedLevel( LOGL_TYPE level ) const
-	{
-		return ( ((level & 0x0f) != 0) &&
-				 (GetLogLevel() >= ( level & 0x0f ) ) );
-	}
-	bool IsLogged( DWORD wMask ) const
-	{
-		return IsLoggedMask(wMask) || IsLoggedLevel(static_cast<LOGL_TYPE>(wMask));
-	}
-
-	virtual int EventStr( DWORD wMask, LPCTSTR pszMsg );
-	void _cdecl CatchEvent( const CGrayError * pErr, LPCTSTR pszCatchContext, ...  ) __printfargs(3,4);
-
-public:
-	CLog()
-	{
-		m_fLockOpen = false;
-		m_pScriptContext = NULL;
-		m_pObjectContext = NULL;
-		m_dwMsgMask = LOGL_ERROR |
-			LOGM_INIT | LOGM_CLIENTS_LOG | LOGM_GM_PAGE;
-		SetFilePath( GRAY_FILE "log.log" );	// default name to go to.
-	}
-
-private:
-	CLog(const CLog& copy);
-	CLog& operator=(const CLog& other);
-
-	enum Color
-	{
-		DEFAULT,
-		YELLOW,
-		RED,
-		CYAN
-	};
-
-	/**
-	 * Changes current console color to the specified one. Note, that the color should be reset after being set
-	 */
-	void SetColor(Color color);
-} g_Log;		// Log file
+#include "CLog.h"
 
 //////////////////
 
@@ -248,22 +134,10 @@ private:
 public:
 	CAccountRef FindAccount() const;
 	LPCTSTR GetAccountStatus() const;
-	LPCTSTR GetName() const
-	{
-		return( m_sAccount );
-	}
-	LPCTSTR GetReason() const
-	{
-		return( m_sReason );
-	}
-	void SetReason( LPCTSTR pszReason )
-	{
-		m_sReason = pszReason;
-	}
-	CClient * FindGMHandler() const
-	{
-		return( m_pGMClient );
-	}
+	LPCTSTR GetName() const;
+	LPCTSTR GetReason() const;
+	void SetReason( LPCTSTR pszReason );
+	CClient * FindGMHandler() const;
 	void ClearGMHandler();
 	void SetGMHandler( CClient * pClient );
 	INT64 GetAge() const;
@@ -272,10 +146,7 @@ public:
 	void r_Write( CScript & s ) const;
 	bool r_LoadVal( CScript & s );
 
-	CGMPage * GetNext() const
-	{
-		return( STATIC_CAST <CGMPage*>( CGObListRec::GetNext()));
-	}
+	CGMPage * GetNext() const;
 };
 
 class CChat;
@@ -306,14 +177,7 @@ protected:
 	void SetChatActive();
 	void SetChatInactive();
 public:
-	CChatChanMember()
-	{
-		m_fChatActive = false;
-		m_pChannel = NULL;
-		m_fReceiving = true;
-		m_fAllowWhoIs = true;
-	}
-
+	CChatChanMember();
 	virtual ~CChatChanMember();
 
 private:
@@ -324,24 +188,16 @@ public:
 	CClient * GetClient();
 	const CClient * GetClient() const;
 
-	bool IsChatActive() const
-	{
-		return( m_fChatActive );
-	}
-
-	void SetReceiving(bool fOnOff)
-	{
-		if (m_fReceiving != fOnOff)
-			ToggleReceiving();
-	}
+	bool IsChatActive() const;
+	void SetReceiving(bool fOnOff);
 	void ToggleReceiving();
 
 	void PermitWhoIs();
 	void ForbidWhoIs();
 	void ToggleWhoIs();
 
-	CChatChannel * GetChannel() const { return m_pChannel; }
-	void SetChannel(CChatChannel * pChannel) { m_pChannel = pChannel; }
+	CChatChannel * GetChannel() const;
+	void SetChannel(CChatChannel * pChannel);
 	void SendChatMsg( CHATMSG_TYPE iType, LPCTSTR pszName1 = NULL, LPCTSTR pszName2 = NULL, CLanguageID lang = 0 );
 	void RenameChannel(LPCTSTR pszName);
 
@@ -349,10 +205,7 @@ public:
 	void DontIgnore(LPCTSTR pszName);
 	void ToggleIgnore(LPCTSTR pszName);
 	void ClearIgnoreList();
-	bool IsIgnoring(LPCTSTR pszName) const
-	{
-		return( FindIgnoringIndex( pszName ) != m_IgnoredMembers.BadIndex() );
-	}
+	bool IsIgnoring(LPCTSTR pszName) const;
 };
 
 class CChatChannel : public CGObListRec
@@ -376,48 +229,21 @@ private:
 	size_t FindMemberIndex( LPCTSTR pszName ) const;
 
 public:
-	explicit CChatChannel(LPCTSTR pszName, LPCTSTR pszPassword = NULL)
-	{
-		m_sName = pszName;
-		m_sPassword = pszPassword;
-		m_fVoiceDefault = true;
-	};
+	explicit CChatChannel(LPCTSTR pszName, LPCTSTR pszPassword = NULL);
 
 private:
 	CChatChannel(const CChatChannel& copy);
 	CChatChannel& operator=(const CChatChannel& other);
 
 public:
-	CChatChannel* GetNext() const
-	{
-		return( static_cast <CChatChannel *>( CGObListRec::GetNext()));
-	}
-	LPCTSTR GetName() const
-	{
-		return( m_sName );
-	}
-	LPCTSTR GetModeString() const
-	{
-		// (client needs this) "0" = not passworded, "1" = passworded
-		return(( IsPassworded()) ? "1" : "0" );
-	}
-
-	LPCTSTR GetPassword() const
-	{
-		return( m_sPassword );
-	}
-	void SetPassword( LPCTSTR pszPassword)
-	{
-		m_sPassword = pszPassword;
-		return;
-	}
-	bool IsPassworded() const
-	{
-		return ( !m_sPassword.IsEmpty());
-	}
-
-	bool GetVoiceDefault()  const { return m_fVoiceDefault; }
-	void SetVoiceDefault(bool fVoiceDefault) { m_fVoiceDefault = fVoiceDefault; }
+	CChatChannel* GetNext() const;
+	LPCTSTR GetName() const;
+	LPCTSTR GetModeString() const;
+	LPCTSTR GetPassword() const;
+	void SetPassword( LPCTSTR pszPassword);
+	bool IsPassworded() const;
+	bool GetVoiceDefault()  const;
+	void SetVoiceDefault(bool fVoiceDefault);
 	void ToggleVoiceDefault(LPCTSTR  pszBy);
 	void DisableVoiceDefault(LPCTSTR  pszBy);
 	void EnableVoiceDefault(LPCTSTR  pszBy);
@@ -429,25 +255,9 @@ public:
 	void SendThisMember(CChatChanMember * pMember, CChatChanMember * pToMember = NULL);
 	void SendMembers(CChatChanMember * pMember);
 	void RemoveMember(CChatChanMember * pMember);
-	CChatChanMember * FindMember(LPCTSTR pszName) const
-	{
-		size_t i = FindMemberIndex( pszName );
-		if ( i == m_Members.BadIndex() )
-			return NULL;
-		return m_Members[i];
-	}
-	bool RemoveMember(LPCTSTR pszName)
-	{
-		CChatChanMember * pMember = FindMember(pszName);
-		if ( pMember == NULL )
-			return false;
-		RemoveMember(pMember);
-		return true;
-	}
-	void SetName(LPCTSTR pszName)
-	{
-		m_sName = pszName;
-	}
+	CChatChanMember * FindMember(LPCTSTR pszName) const;
+	bool RemoveMember(LPCTSTR pszName);
+	void SetName(LPCTSTR pszName);
 	bool IsModerator(LPCTSTR pszName) const;
 	bool HasVoice(LPCTSTR pszName) const;
 
@@ -477,47 +287,24 @@ private:
 	bool JoinChannel(CChatChanMember * pMember, LPCTSTR pszChannel, LPCTSTR pszPassword);
 	bool CreateChannel(LPCTSTR pszName, LPCTSTR pszPassword, CChatChanMember * pMember);
 	void CreateJoinChannel(CChatChanMember * pByMember, LPCTSTR pszName, LPCTSTR pszPassword);
-	CChatChannel * FindChannel(LPCTSTR pszChannel) const
-	{
-		CChatChannel * pChannel = GetFirstChannel();
-		for ( ; pChannel != NULL; pChannel = pChannel->GetNext())
-		{
-			if (strcmp(pChannel->GetName(), pszChannel) == 0)
-				break;
-		}
-		return pChannel;
-	};
+	CChatChannel * FindChannel(LPCTSTR pszChannel) const;
 public:
 	static const char *m_sClassName;
-	CChat()
-	{
-		m_fChatsOK = true;
-	}
+	CChat();
 
 private:
 	CChat(const CChat& copy);
 	CChat& operator=(const CChat& other);
 
 public:
-	CChatChannel * GetFirstChannel() const
-	{
-		return STATIC_CAST <CChatChannel *>(m_Channels.GetHead());
-	}
-
+	CChatChannel * GetFirstChannel() const;
 	void EventMsg( CClient * pClient, const NCHAR * pszText, int len, CLanguageID lang ); // Text from a client
-
 	static bool IsValidName(LPCTSTR pszName, bool fPlayer);
-
 	void SendDeleteChannel(CChatChannel * pChannel);
 	void SendNewChannel(CChatChannel * pNewChannel);
-	bool IsDuplicateChannelName(const char * pszName) const
-	{
-		return FindChannel(pszName) != NULL;
-	}
-
+	bool IsDuplicateChannelName(const char * pszName) const;
 	void Broadcast(CChatChanMember * pFrom, LPCTSTR pszText, CLanguageID lang = 0, bool fOverride = false);
 	void QuitChat(CChatChanMember * pClient);
-
 	static void DecorateName(CGString & sName, const CChatChanMember * pMember = NULL, bool fSystem = false);
 	static void GenerateChatName(CGString & sName, const CClient * pClient);
 };
@@ -546,14 +333,8 @@ public:
 	CGTypedArray<DWORD,DWORD>		m_CheckArray;
 	CGObArray<TResponseString *>	m_TextArray;
 public:
-	void AddText( WORD id, LPCTSTR pszText )
-	{
-		m_TextArray.Add(new TResponseString(id, pszText));
-	}
-	LPCTSTR GetName() const
-	{
-		return "ARGD";
-	}
+	void AddText( WORD id, LPCTSTR pszText );
+	LPCTSTR GetName() const;
 	bool r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc );
 
 public:

@@ -1,7 +1,7 @@
 # Main config.
 PROJECT (sphereserver)
  
-CMAKE_MINIMUM_REQUIRED (VERSION 3.0.0)
+CMAKE_MINIMUM_REQUIRED (VERSION 2.8.1)
 
 INCLUDE ("CMakeSources.cmake")
 INCLUDE ("CMakeGitStatus.cmake")

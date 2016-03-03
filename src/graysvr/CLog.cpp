@@ -1,8 +1,81 @@
-#include "graysvr.h"	// predef header.
+#include "../common/graycom.h"
+#include "graysvr.h"  // Change by CServ.h when is done.
+#include "CLog.h"
 #include "UnixTerminal.h"
 
 ///////////////////////////////////////////////////////////////
 // -CLog
+
+CLog::CLog()
+{
+	m_fLockOpen = false;
+	m_pScriptContext = NULL;
+	m_pObjectContext = NULL;
+	m_dwMsgMask = LOGL_ERROR |
+				  LOGM_INIT | LOGM_CLIENTS_LOG | LOGM_GM_PAGE;
+	SetFilePath( GRAY_FILE "log.log" );	// default name to go to.
+}
+
+const CScript * CLog::SetScriptContext( const CScript * pScriptContext )
+{
+	const CScript * pOldScript = m_pScriptContext;
+	m_pScriptContext = pScriptContext;
+	return( pOldScript );
+}
+
+const CScriptObj * CLog::SetObjectContext( const CScriptObj * pObjectContext )
+{
+	const CScriptObj * pOldObject = m_pObjectContext;
+	m_pObjectContext = pObjectContext;
+	return( pOldObject );
+}
+bool CLog::SetFilePath( LPCTSTR pszName )
+{
+	ASSERT( ! IsFileOpen());
+	return CFileText::SetFilePath( pszName );
+}
+
+LPCTSTR CLog::GetLogDir() const
+{
+	return( m_sBaseDir );
+}
+
+DWORD CLog::GetLogMask() const
+{
+	return( m_dwMsgMask &~ 0x0f ) ;
+}
+
+void CLog::SetLogMask( DWORD dwMask )
+{
+	m_dwMsgMask = GetLogLevel() | ( dwMask &~ 0x0f );
+}
+
+bool CLog::IsLoggedMask( DWORD dwMask ) const
+{
+	return( ((dwMask &~ (0x0f | LOGM_NOCONTEXT | LOGM_DEBUG)) == 0) ||
+			(( GetLogMask() & ( dwMask &~ 0x0f )) != 0) );
+}
+
+LOGL_TYPE CLog::GetLogLevel() const
+{
+	return static_cast<LOGL_TYPE>(m_dwMsgMask & 0x0f);
+}
+
+void CLog::SetLogLevel( LOGL_TYPE level )
+{
+	m_dwMsgMask = GetLogMask() | ( level & 0x0f );
+}
+
+bool CLog::IsLoggedLevel( LOGL_TYPE level ) const
+{
+	return ( ((level & 0x0f) != 0) &&
+			 (GetLogLevel() >= ( level & 0x0f ) ) );
+}
+
+bool CLog::IsLogged( DWORD wMask ) const
+{
+	return IsLoggedMask(wMask) || IsLoggedLevel(static_cast<LOGL_TYPE>(wMask));
+}
 
 bool CLog::OpenLog( LPCTSTR pszBaseDirName )	// name set previously.
 {

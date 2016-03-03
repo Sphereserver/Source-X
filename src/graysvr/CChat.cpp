@@ -718,6 +718,32 @@ bool CChat::JoinChannel(CChatChanMember * pMember, LPCTSTR pszChannel, LPCTSTR p
 	return true;
 }
 
+CChatChannel * CChat::FindChannel(LPCTSTR pszChannel) const
+{
+	CChatChannel * pChannel = GetFirstChannel();
+	for ( ; pChannel != NULL; pChannel = pChannel->GetNext())
+	{
+		if (strcmp(pChannel->GetName(), pszChannel) == 0)
+			break;
+	}
+	return pChannel;
+}
+
+CChat::CChat()
+{
+	m_fChatsOK = true;
+}
+
+CChatChannel * CChat::GetFirstChannel() const
+{
+	return STATIC_CAST <CChatChannel *>(m_Channels.GetHead());
+}
+
+bool CChat::IsDuplicateChannelName(const char * pszName) const
+{
+	return FindChannel(pszName) != NULL;
+}
+
 ////////////////////////////////////////////////////////////////////////////
 // -CChatChannel
 
@@ -1210,8 +1236,87 @@ void CChatChannel::ToggleModerator(CChatChanMember * pByMember, LPCTSTR pszName)
 		RevokeModerator(pByMember, pszName);
 }
 
+CChatChannel::CChatChannel(LPCTSTR pszName, LPCTSTR pszPassword)
+{
+	m_sName = pszName;
+	m_sPassword = pszPassword;
+	m_fVoiceDefault = true;
+}
+
+CChatChannel* CChatChannel::GetNext() const
+{
+	return( static_cast <CChatChannel *>( CGObListRec::GetNext()));
+}
+
+LPCTSTR CChatChannel::GetName() const
+{
+	return( m_sName );
+}
+
+LPCTSTR CChatChannel::GetModeString() const
+{
+	// (client needs this) "0" = not passworded, "1" = passworded
+	return(( IsPassworded()) ? "1" : "0" );
+}
+
+LPCTSTR CChatChannel::GetPassword() const
+{
+	return( m_sPassword );
+}
+
+void CChatChannel::SetPassword( LPCTSTR pszPassword)
+{
+	m_sPassword = pszPassword;
+	return;
+}
+
+bool CChatChannel::IsPassworded() const
+{
+	return ( !m_sPassword.IsEmpty());
+}
+
+bool CChatChannel::GetVoiceDefault()  const
+{
+	return m_fVoiceDefault;
+}
+
+void CChatChannel::SetVoiceDefault(bool fVoiceDefault)
+{
+	m_fVoiceDefault = fVoiceDefault;
+}
+
+CChatChanMember * CChatChannel::FindMember(LPCTSTR pszName) const
+{
+	size_t i = FindMemberIndex( pszName );
+	if ( i == m_Members.BadIndex() )
+		return NULL;
+	return m_Members[i];
+}
+
+bool CChatChannel::RemoveMember(LPCTSTR pszName)
+{
+	CChatChanMember * pMember = FindMember(pszName);
+	if ( pMember == NULL )
+		return false;
+	RemoveMember(pMember);
+	return true;
+}
+
+void CChatChannel::SetName(LPCTSTR pszName)
+{
+	m_sName = pszName;
+}
+
 ////////////////////////////////////////////////////////////////////////////
 // -CChatChanMember
+
+CChatChanMember::CChatChanMember()
+{
+	m_fChatActive = false;
+	m_pChannel = NULL;
+	m_fReceiving = true;
+	m_fAllowWhoIs = true;
+}
 
 CChatChanMember::~CChatChanMember()
 {
@@ -1219,6 +1324,27 @@ CChatChanMember::~CChatChanMember()
 	{
 		g_Serv.m_Chats.QuitChat(this);
 	}
+}
+
+CChatChannel * CChatChanMember::GetChannel() const
+{
+	return m_pChannel;
+}
+
+void CChatChanMember::SetChannel(CChatChannel * pChannel)
+{
+	m_pChannel = pChannel;
+}
+
+bool CChatChanMember::IsChatActive() const
+{
+	return( m_fChatActive );
+}
+
+void CChatChanMember::SetReceiving(bool fOnOff)
+{
+	if (m_fReceiving != fOnOff)
+		ToggleReceiving();
 }
 
 void CChatChanMember::SetChatActive()
@@ -1383,4 +1509,9 @@ LPCTSTR CChatChanMember::GetChatName() const
 {
 	ADDTOCALLSTACK("CChatChanMember::GetChatName");
 	return( GetClient()->GetAccount()->m_sChatName );
+}
+
+bool CChatChanMember::IsIgnoring(LPCTSTR pszName) const
+{
+	return( FindIgnoringIndex( pszName ) != m_IgnoredMembers.BadIndex() );
 }

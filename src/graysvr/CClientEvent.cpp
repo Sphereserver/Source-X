@@ -1984,6 +1984,16 @@ void CClient::Event_SetName( CGrayUID uid, const char * pszCharName )
 	pChar->SetName(pszCharName);
 }
 
+void CDialogResponseArgs::AddText( WORD id, LPCTSTR pszText )
+{
+	m_TextArray.Add(new TResponseString(id, pszText));
+}
+
+LPCTSTR CDialogResponseArgs::GetName() const
+{
+	return "ARGD";
+}
+
 bool CDialogResponseArgs::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CDialogResponseArgs::r_WriteVal");
