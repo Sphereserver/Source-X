@@ -2,7 +2,13 @@
 // CGrayData.Cpp
 //
 
-#include "../graysvr/graysvr.h"
+#include "CException.h"
+#include "CFile.h"
+#include "CGrayInst.h"
+#include "graycom.h"
+#include "common.h"
+#include "CGrayMap.h"
+#include "../sphere/threads.h"
 
 //////////////////////////////////////////////////////////////////////
 // -CVerDataMul

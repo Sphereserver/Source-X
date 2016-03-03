@@ -1,4 +1,9 @@
-#include "../graysvr/graysvr.h"
+#include "../graysvr/CServer.h"
+#include "../graysvr/CWorld.h"
+#include "../graysvr/CItemBase.h"
+#include "../graysvr/CLog.h"
+#include "../graysvr/CSector.h"
+
 
 //*************************************************************************
 // -CPointBase

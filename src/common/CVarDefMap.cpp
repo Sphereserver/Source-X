@@ -1,4 +1,12 @@
-#include "../graysvr/graysvr.h"
+#include "CVarDefMap.h"
+#include "graycom.h"
+#include "CExpression.h"
+#include "CScript.h"
+#include "CTextConsole.h"
+#include "../sphere/threads.h"
+#include "../sphere/strings.h"
+#include "../graysvr/CLog.h"
+#include "../graysvr/CServer.h"
 
 static size_t GetIdentifierString( TCHAR * szTag, LPCTSTR pszArgs )
 {

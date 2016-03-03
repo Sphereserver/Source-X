@@ -8,7 +8,6 @@
 #define __CMD5_H__
 
 #include <string.h>
-// #include "../graysvr/graysvr.h"
 
 class CMD5
 {

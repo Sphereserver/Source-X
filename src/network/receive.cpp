@@ -4,6 +4,7 @@
 #include "../graysvr/CServTime.h"
 #include "../graysvr/CClient.h"
 #include "../graysvr/CItemMap.h"
+#include "../graysvr/CItemVendable.h"
 
 /***************************************************************************
  *

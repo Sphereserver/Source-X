@@ -1,4 +1,6 @@
-#include "graysvr.h"	// predef header.
+#include "CItemMulti.h"
+#include "CWorld.h"
+#include "../common/grayproto.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

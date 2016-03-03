@@ -3,6 +3,9 @@
 #pragma once
 
 #include <set>
+#include "CString.h"
+class CTextConsole;
+class CScript;
 
 class CVarDefCont
 {

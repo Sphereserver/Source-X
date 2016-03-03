@@ -1,4 +1,10 @@
-#include "../graysvr/graysvr.h"
+#include "ListDefContMap.h"
+#include "CExpression.h"
+#include "CScript.h"
+#include "CTextConsole.h"
+#include "graycom.h"
+#include "../sphere/strings.h"
+#include "../sphere/threads.h"
 #include <limits>
 
 /***************************************************************************

@@ -2,7 +2,8 @@
 // CItemShip.cpp
 //
 
-#include "graysvr.h"	// predef header.
+#include "CItemShip.h"	// predef header.
+#include "CItemContainer.h"
 #include "CServTime.h"
 #include "../network/send.h"
 

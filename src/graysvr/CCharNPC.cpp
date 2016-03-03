@@ -1,5 +1,5 @@
 // Actions specific to an NPC.
-#include "graysvr.h"	// predef header.
+#include "CCharNPC.h"	// predef header.
 #include "CClient.h"
 #include "CServTime.h"
 

@@ -1,5 +1,5 @@
 
-#include "../graysvr/graysvr.h"
+#include "../graysvr/CServer.h"
 
 #ifdef _WIN32
 	int CGrayError::GetSystemErrorMessage( DWORD dwError, LPTSTR lpszError, UINT nMaxError ) // static

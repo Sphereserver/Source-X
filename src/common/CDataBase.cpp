@@ -1,5 +1,5 @@
 #include "../common/CDataBase.h"
-#include "../graysvr/graysvr.h"
+#include "../graysvr/CServer.h"
 #include "../sphere/asyncdb.h"
 
 extern CDataBaseAsyncHelper g_asyncHdb;

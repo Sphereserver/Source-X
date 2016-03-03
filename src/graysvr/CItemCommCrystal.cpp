@@ -1,5 +1,6 @@
 
 #include "CItemCommCrystal.h"
+#include "CItemVendable.h"
 
 CItemCommCrystal::CItemCommCrystal( ITEMID_TYPE id, CItemBase * pItemDef ) : CItemVendable( id, pItemDef ) {
 }

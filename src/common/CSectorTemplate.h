@@ -1,9 +1,12 @@
 //
 // CSectorTemplate.h
 //
-#ifndef _INC_CSECTOR_H
-#define _INC_CSECTOR_H
+#ifndef _INC_CSECTORTEMPLATE_H
+#define _INC_CSECTORTEMPLATE_H
 #pragma once
+
+#include "../graysvr/CServer.h"
+class CItem;
 
 class CCharsDisconnectList : public CGObList
 {
@@ -147,4 +150,4 @@ public:
 #define SECF_InstaSleep	0x00000002
 };
 
-#endif // _INC_CSECTOR_H
+#endif // _INC_CSECTORTEMPLATE_H

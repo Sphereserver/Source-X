@@ -1,5 +1,13 @@
-#include "graysvr.h"	// predef header.
+#include "CItem.h"
+#include "CItemSpawn.h"
+#include "CChar.h"
+#include "CCharNPC.h"
+#include "CSector.h"
 #include "CServTime.h"
+#include "CWorld.h"
+#include "CLog.h"
+#include "CClient.h"
+#include "graysvr.h"
 
 //////////////////////////////////////////////////////////////////
 // -CSector
@@ -16,6 +24,11 @@ CSector::CSector()
 
 	m_dwFlags = 0;
 	m_fSaveParity = false;
+}
+
+CSector::~CSector()
+{
+	ASSERT( ! HasClients());
 }
 
 enum SC_TYPE
@@ -1186,3 +1199,136 @@ void CSector::OnTick(int iPulseCount)
 	EXC_DEBUG_END;
 }
 
+
+SEASON_TYPE CSector::GetSeason() const
+{
+	return m_Env.m_Season;
+}
+
+// Weather
+WEATHER_TYPE CSector::GetWeather() const	// current weather.
+{
+	return m_Env.m_Weather;
+}
+
+bool CSector::IsRainOverriden() const
+{
+	return(( m_RainChance & LIGHT_OVERRIDE ) ? true : false );
+}
+
+BYTE CSector::GetRainChance() const
+{
+	return( m_RainChance &~ LIGHT_OVERRIDE );
+}
+
+bool CSector::IsColdOverriden() const
+{
+	return(( m_ColdChance & LIGHT_OVERRIDE ) ? true : false );
+}
+
+BYTE CSector::GetColdChance() const
+{
+	return( m_ColdChance &~ LIGHT_OVERRIDE );
+}
+
+// Light
+bool CSector::IsLightOverriden() const
+{
+	return(( m_Env.m_Light & LIGHT_OVERRIDE ) ? true : false );
+}
+
+BYTE CSector::GetLight() const
+{
+	return( m_Env.m_Light &~ LIGHT_OVERRIDE );
+}
+
+bool CSector::IsDark() const
+{
+	return( GetLight() > 6 );
+}
+
+bool CSector::IsNight() const
+{
+	int iMinutes = GetLocalTime();
+	return( iMinutes < 7*60 || iMinutes > (9+12)*60 );
+}
+
+void CSector::LightFlash()
+{
+	SetLightNow( true );
+}
+
+size_t CSector::GetItemComplexity() const
+{
+	return m_Items_Timer.GetCount() + m_Items_Inert.GetCount();
+}
+
+bool CSector::IsItemInSector( const CItem * pItem ) const
+{
+	if ( !pItem )
+		return false;
+
+	return pItem->GetParent() == &m_Items_Inert ||
+		pItem->GetParent() == &m_Items_Timer;
+}
+
+void CSector::AddListenItem()
+{
+	m_ListenItems++;
+}
+
+void CSector::RemoveListenItem()
+{
+	m_ListenItems--;
+}
+
+bool CSector::HasListenItems() const
+{
+	return m_ListenItems ? true : false;
+}
+
+bool CSector::IsCharActiveIn( const CChar * pChar ) //const
+{
+	// assume the char is active (not disconnected)
+	return( pChar->GetParent() == &m_Chars_Active );
+}
+
+bool CSector::IsCharDisconnectedIn( const CChar * pChar ) //const
+{
+	// assume the char is active (not disconnected)
+	return( pChar->GetParent() == &m_Chars_Disconnect );
+}
+
+size_t CSector::GetCharComplexity() const
+{
+	return( m_Chars_Active.GetCount());
+}
+
+size_t CSector::GetInactiveChars() const
+{
+	return( m_Chars_Disconnect.GetCount());
+}
+
+size_t CSector::HasClients() const
+{
+	return( m_Chars_Active.HasClients());
+}
+
+CServTime CSector::GetLastClientTime() const
+{
+	return( m_Chars_Active.m_timeLastClient );
+}
+
+void CSector::ClientAttach( CChar * pChar )
+{
+	if ( ! IsCharActiveIn( pChar ))
+		return;
+	m_Chars_Active.ClientAttach();
+}
+
+void CSector::ClientDetach( CChar * pChar )
+{
+	if ( ! IsCharActiveIn( pChar ))
+		return;
+	m_Chars_Active.ClientDetach();
+}

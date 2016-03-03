@@ -1,5 +1,6 @@
-#include "../graysvr/graysvr.h"
 #include "CacheableScriptFile.h"
+#include "../sphere/threads.h"
+#include "../sphere/strings.h"
 
 CacheableScriptFile::CacheableScriptFile()
 {

@@ -1,4 +1,5 @@
-#include "../graysvr/graysvr.h"
+#include "CSocket.h"
+#include "graycom.h"
 
 //		***		***			***
 //

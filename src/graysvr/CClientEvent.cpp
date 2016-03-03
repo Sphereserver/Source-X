@@ -2,6 +2,7 @@
 #include "CClient.h"
 #include "CItemMessage.h"
 #include "CServTime.h"
+#include "CItemVendable.h"
 #include "../network/network.h"
 #include "../network/send.h"
 #include "../network/receive.h"

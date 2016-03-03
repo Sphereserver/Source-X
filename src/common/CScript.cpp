@@ -1,6 +1,11 @@
 // NOTE: all scripts should be encoded in UTF-8.
 // So they may have full unicode chars inside.
-#include "../graysvr/graysvr.h"
+#include "CScript.h"
+#include "graycom.h"
+#include "CExpression.h"
+#include "CException.h"
+#include "../sphere/threads.h"
+#include "../graysvr/CLog.h"
 
 ///////////////////////////////////////////////////////////////
 // -CScriptKey

@@ -3,6 +3,13 @@
 #include "CClient.h"
 #include "CServTime.h"
 #include "../network/network.h"
+#include "../common/CGrayUID.h"
+#include "../common/CRect.h"
+#include "../common/CObjBaseTemplate.h"
+#include "CContainer.h"
+#include "CItem.h"
+#include "CItemSpawn.h"
+
 
 LPCTSTR const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 {

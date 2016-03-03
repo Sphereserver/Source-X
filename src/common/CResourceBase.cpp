@@ -1,7 +1,12 @@
-#include "../graysvr/graysvr.h"
 #include "CFileList.h"
 #include "CResourceBase.h"
+#include "CException.h"
+#include "CScript.h"
+#include "cregion.h"
 #include "../graysvr/CServTime.h"
+#include "../graysvr/CResource.h"
+#include "../graysvr/CLog.h"
+#include "../graysvr/CChar.h"
 
 //***************************************************
 // CResourceBase

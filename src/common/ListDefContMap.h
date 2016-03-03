@@ -4,8 +4,11 @@
 
 #include <list>
 #include <set>
-//#include "../common/cstring.h"
-//#include "../common/cscript.h"
+
+#include "CString.h"
+
+class CTextConsole;
+class CScript;
 
 class CListDefContElem
 {

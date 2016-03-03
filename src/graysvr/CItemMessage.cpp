@@ -1,4 +1,5 @@
 #include "CItemMessage.h"
+#include "CItemVendable.h"
 
 CItemMessage::CItemMessage( ITEMID_TYPE id, CItemBase * pItemDef ) : CItemVendable( id, pItemDef ) {
 }

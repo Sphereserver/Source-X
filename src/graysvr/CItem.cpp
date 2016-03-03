@@ -1,7 +1,10 @@
 //#include "graysvr.h"	// predef header.
+#include "CItem.h"
 #include "CItemScript.h"
 #include "CItemMap.h"
 #include "CItemCommCrystal.h"
+#include "CItemSpawn.h"
+#include "CItemVendable.h"
 #include "../network/network.h"
 #include "../network/send.h"
 

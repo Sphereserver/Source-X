@@ -1,6 +1,7 @@
 //  CChar is either an NPC or a Player.
 #include <cmath>
 #include "graysvr.h"	// predef header.
+#include "CItemVendable.h"
 
 //----------------------------------------------------------------------
 // Skills

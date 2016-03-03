@@ -1,6 +1,12 @@
 // Common for client and server.
-#include "../graysvr/graysvr.h"
+
+#include "CException.h"
+#include "CScriptObj.h"
+#include "CTextConsole.h"
+#include "../graysvr/CChar.h"
+#include "../graysvr/CClient.h"
 #include "../network/network.h"
+#include "../sphere/threads.h"
 
 //************************************************************************
 // -CTeleport

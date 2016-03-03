@@ -1,4 +1,8 @@
-#include "graysvr.h"	// predef header.
+#include "CContainer.h"
+#include "CItemSpawn.h"
+#include "CLog.h"
+#include "../common/CObjBaseTemplate.h"
+#include "../common/CRegion.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

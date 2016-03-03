@@ -5,6 +5,9 @@
 #define _INC_GRAYPROTO_H
 #pragma once
 
+#include "CString.h"
+#include "../sphere/threads.h"
+
 //---------------------------PROTOCOL DEFS---------------------------
 
 // All these structures must be BYTE packed.

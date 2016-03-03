@@ -3,6 +3,8 @@
 #include "CClient.h"
 #include "CServTime.h"
 #include "CItemMap.h"
+#include "CItemSpawn.h"
+#include "CItemVendable.h"
 #include "../network/network.h"
 #include "../network/send.h"
 

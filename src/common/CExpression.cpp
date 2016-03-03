@@ -1,5 +1,10 @@
 #include <cmath>
-#include "../graysvr/graysvr.h"
+#include "CExpression.h"
+#include "CException.h"
+#include "CResourceBase.h"
+#include "common.h"
+#include "../graysvr/CResource.h"
+#include "../graysvr/CWorld.h"
 
 TCHAR CExpression::sm_szMessages[DEFMSG_QTY][128] =
 {

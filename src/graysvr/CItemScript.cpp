@@ -1,5 +1,6 @@
 
 #include "CItemScript.h"
+#include "CItemVendable.h"
 
 
 //////////////////////////////////////

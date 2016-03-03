@@ -2,7 +2,14 @@
 // CGrayMap.cpp
 //
 
-#include "../graysvr/graysvr.h"
+#include "graymul.h"
+#include "CGrayMap.h"
+#include "CGrayInst.h"
+#include "CException.h"
+#include "../sphere/threads.h"
+#include "../graysvr/CBase.h"
+#include "../graysvr/CLog.h"
+#include "../graysvr/CResource.h"
 
 //////////////////////////////////////////////////////////////////
 // -CGrayMapBlockState

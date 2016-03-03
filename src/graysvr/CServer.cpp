@@ -1,13 +1,17 @@
-#include "graysvr.h"	// predef header.
+#include "CServer.h"	// predef header.
 #include "CServTime.h"
+#include "CChar.h"
+#include "CClient.h"
+#include "CAccount.h"
 
 #include "../common/grayver.h"	// sphere version
 #include "../common/CAssoc.h"
 #include "../common/CFileList.h"
-#include "../network/network.h"
+#include "../common/CTextConsole.h"
 #ifdef _SUBVERSION
  #include "../common/version/GitRevision.h"
 #endif
+#include "../network/network.h"
 
 #ifdef _WIN32
 	#include "ntservice.h"	// g_Service

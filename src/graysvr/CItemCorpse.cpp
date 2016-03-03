@@ -1,5 +1,8 @@
-#include "graysvr.h"
+#include "CItem.h"
+#include "CItemCorpse.h"
 #include "CServTime.h"
+#include "CWorld.h"
+#include "../common/grayproto.h"
 
 
 CItemCorpse::CItemCorpse( ITEMID_TYPE id, CItemBase * pItemDef ) :

@@ -2,7 +2,9 @@
 * @file CQueue.cpp
 */
 
-#include "../graysvr/graysvr.h"
+#include "CQueue.h"
+#include "../sphere/threads.h"
+#include "graycom.h"
 
 CQueueBytes::CQueueBytes()
 {

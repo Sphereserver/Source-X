@@ -2,7 +2,19 @@
 #ifndef _INC_CITEMMAP_H
 #define _INC_CITEMMAP_H
 
-#include "graysvr.h"
+#include "CItemVendable.h"
+
+struct CMapPinRec // Pin on a map
+{
+	short m_x;
+	short m_y;
+
+public:
+	CMapPinRec( short x, short y )
+		: m_x(x), m_y(y)
+	{
+	}
+};
 
 class CItemMap : public CItemVendable
 {

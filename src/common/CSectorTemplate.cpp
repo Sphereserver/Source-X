@@ -1,5 +1,8 @@
-#include "../graysvr/graysvr.h"
+#include "CSectorTemplate.h"
+#include "CException.h"
 #include "../graysvr/CServTime.h"
+#include "../graysvr/CChar.h"
+#include "../graysvr/CLog.h"
 #include <algorithm>
 
 ////////////////////////////////////////////////////////////////////////

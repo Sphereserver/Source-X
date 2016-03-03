@@ -1,0 +1,116 @@
+#ifndef _INC_CPARTY_H
+#define _INC_CPARTY_H
+
+#include "CChat.h"
+#include "CItemShip.h"
+#include "CServRef.h"
+#include "CServTime.h"
+#include "../common/CTextConsole.h"
+#include "../common/CSocket.h"
+#include "../common/CFile.h"
+#include "../common/CDataBase.h"
+#include "../common/sqlite/SQLite.h"
+
+enum SERVMODE_TYPE
+{
+	SERVMODE_RestockAll,	// Major event.
+	SERVMODE_Saving,		// Forced save freezes the system.
+	SERVMODE_Run,			// Game is up and running
+	SERVMODE_ResyncPause,	// paused during resync
+
+	SERVMODE_Loading,		// Initial load.
+	SERVMODE_ResyncLoad,	// Loading after resync
+	SERVMODE_Exiting		// Closing down
+};
+
+
+extern class CServer : public CServerDef, public CTextConsole
+{
+	static LPCTSTR const sm_szVerbKeys[];
+
+public:
+	static const char *m_sClassName;
+	SERVMODE_TYPE m_iModeCode;  // Just some error code to return to system.
+	int  m_iExitFlag;	// identifies who caused the exit. <0 = error
+	bool m_fResyncPause;		// Server is temporarily halted so files can be updated.
+	CTextConsole * m_fResyncRequested;		// A resync pause has been requested by this source.
+
+	CGSocket m_SocketMain;	// This is the incoming monitor socket.(might be multiple ports?)
+	CGSocket m_SocketGod;	// This is for god clients.
+
+							// admin console.
+	int m_iAdminClients;		// how many of my clients are admin consoles ?
+	CGString m_sConsoleText;
+	bool m_fConsoleTextReadyFlag;	// interlocking flag for moving between tasks.
+
+	CServTime m_timeShutdown;	// When to perform the shutdowm (g_World.clock)
+	CChat m_Chats;	// keep all the active chats
+
+	std::vector<CItemShip *> m_ShipTimers;
+	void ShipTimers_Tick();
+	void ShipTimers_Add(CItemShip * ship);
+	void ShipTimers_Delete(CItemShip * ship);
+
+	char	m_PacketFilter[255][32];	// list of packet filtering functions
+	char	m_OutPacketFilter[255][32];	// list of outgoing packet filtering functions
+
+	CFileObj	fhFile;			//	file script object
+	CDataBase	m_hdb;			//	SQL data base
+	CSQLite		m_hldb;			//	Local database
+
+private:
+	void ProfileDump( CTextConsole * pSrc, bool bDump = false );
+
+public:
+	CServer();
+	~CServer();
+
+private:
+	CServer(const CServer& copy);
+	CServer& operator=(const CServer& other);
+
+public:
+	bool IsValidBusy() const;
+	void SetServerMode( SERVMODE_TYPE mode );
+
+	void SetExitFlag( int iFlag );
+	void Shutdown( INT64 iMinutes );
+	bool IsLoading() const
+	{
+		return( m_iModeCode > SERVMODE_Run || m_fResyncPause );
+	}
+	void SetSignals( bool fMsg = true );
+
+	bool SocketsInit(); // Initialize sockets
+	bool SocketsInit( CGSocket & socket );
+	void SocketsClose();
+
+	bool Load();
+
+	void SysMessage( LPCTSTR pMsg ) const;
+	void PrintTelnet( LPCTSTR pszMsg ) const;
+	void PrintStr( LPCTSTR pMsg ) const;
+	int  PrintPercent( long iCount, long iTotal );
+
+	virtual bool r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef );
+	virtual bool r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc = NULL );
+	virtual bool r_LoadVal( CScript & s );
+	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
+
+	LPCTSTR GetStatusString( BYTE iIndex = 0 ) const;
+	INT64 GetAgeHours() const;
+
+	bool OnConsoleCmd( CGString & sText, CTextConsole * pSrc );
+
+	void OnTick();
+
+public:
+	void ListClients( CTextConsole * pClient ) const;
+	void SetResyncPause(bool fPause, CTextConsole * pSrc, bool bMessage = false);
+	bool CommandLine( int argc, TCHAR * argv[] );
+
+	LPCTSTR GetName() const { return( CServerDef::GetName()); }
+	PLEVEL_TYPE GetPrivLevel() const;
+} g_Serv;	// current state stuff not saved.
+
+#endif // _INC_CPARTY_H

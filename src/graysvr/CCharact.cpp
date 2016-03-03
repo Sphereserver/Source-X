@@ -5,8 +5,12 @@
 #include "graysvr.h"	// predef header.
 #include "CClient.h"
 #include "CServTime.h"
+#include "CContainer.h"
+#include "CItem.h"
+#include "CItemSpawn.h"
 #include "../network/network.h"
 #include "../network/send.h"
+#include "../common/CArray.h"
 
 // "GONAME", "GOTYPE", "GOCHAR"
 // 0 = object name

@@ -2,7 +2,7 @@
 // CItemMultiCustom.cpp
 //
 
-#include "graysvr.h"	// predef header.
+#include "CItemMultiCustom.h"	// predef header.
 #include "../network/network.h"
 #include "../network/send.h"
 

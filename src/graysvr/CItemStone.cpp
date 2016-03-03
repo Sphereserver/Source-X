@@ -1,4 +1,6 @@
-#include "graysvr.h"	// predef header.
+#include "CItemStone.h"	// predef header.
+#include "CLog.h"
+#include "CWorld.h"
 
 //////////
 // -CStoneMember

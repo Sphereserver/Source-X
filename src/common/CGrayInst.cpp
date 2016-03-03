@@ -1,6 +1,5 @@
 #include "graycom.h"
 #include "CGrayInst.h"
-#include "../graysvr/graysvr.h"
 
 bool CGrayInstall::FindInstall()
 {

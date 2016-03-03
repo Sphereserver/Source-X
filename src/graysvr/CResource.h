@@ -8,6 +8,12 @@
 #pragma once
 
 #include "../common/CAssoc.h"
+#include "../common/CResourceBase.h"
+#include "../common/cregion.h"
+#include "../common/CArray.h"
+#include "../common/CExpression.h"
+#include "../common/grayproto.h"
+#include "graysvr.h"
 
 class CAccount;
 class CClient;

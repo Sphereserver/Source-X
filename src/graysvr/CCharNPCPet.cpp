@@ -1,5 +1,7 @@
 // Actions specific to an NPC.
 #include "graysvr.h"	// predef header.
+#include "CItemVendable.h"
+#include "CItemSpawn.h"
 
 void CChar::NPC_OnPetCommand( bool fSuccess, CChar * pMaster )
 {
