@@ -676,6 +676,18 @@ void CChar::UpdateDrag( CItem * pItem, CObjBase * pCont, CPointMap * pt )
 	UpdateCanSee(cmd, m_pClient);
 }
 
+void CChar::ObjMessage( LPCTSTR pMsg, const CObjBase * pSrc ) const
+{
+	if ( ! IsClient())
+		return;
+	GetClient()->addObjMessage( pMsg, pSrc );
+}
+void CChar::SysMessage( LPCTSTR pMsg ) const	// Push a message back to the client if there is one.
+{
+	if ( ! IsClient())
+		return;
+	GetClient()->SysMessage( pMsg );
+}
 
 // Push status change to all who can see us.
 // For Weight, AC, Gold must update all
@@ -3402,6 +3414,11 @@ bool CChar::MoveToRoom( CRegionBase * pNewRoom, bool fAllowReject)
 	return true;
 }
 
+bool CChar::MoveToRegionReTest( DWORD dwType )
+{
+	return( MoveToRegion( dynamic_cast <CRegionWorld *>( GetTopPoint().GetRegion( dwType )), false));
+}
+
 // Same as MoveTo
 // This could be us just taking a step or being teleported.
 // Low level: DOES NOT UPDATE DISPLAYS or container flags. (may be offline)
@@ -3455,6 +3472,19 @@ bool CChar::MoveToChar(CPointMap pt, bool bForceFix)
 	return true;
 }
 
+bool CChar::MoveTo(CPointMap pt, bool bForceFix)
+{
+	m_fClimbUpdated = false; // update climb height
+	return MoveToChar( pt, bForceFix);
+}
+
+void CChar::SetTopZ( signed char z )
+{
+	CObjBaseTemplate::SetTopZ( z );
+	m_fClimbUpdated = false; // update climb height
+	FixClimbHeight();
+}
+
 // Move from here to a valid spot.
 // ASSUME "here" is not a valid spot. (even if it really is)
 bool CChar::MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart, bool bFromShip)
@@ -3502,6 +3532,16 @@ bool CChar::MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart, bool bFromS
 		pt.Move( dir );
 	}
 	return false;
+}
+
+bool CChar::MoveNearObj( const CObjBaseTemplate *pObj, WORD iSteps )
+{
+	return CObjBase::MoveNearObj(pObj, iSteps);
+}
+
+bool CChar::MoveNear( CPointMap pt, WORD iSteps )
+{
+	return CObjBase::MoveNear(pt, iSteps);
 }
 
 // "PRIVSET"
@@ -3717,6 +3757,12 @@ stopandret:
 	g_Log.EventDebug("trigger '%s' action '%d' [0%lx]\n", pszTrigName, iAction, (DWORD)GetUID());
 	EXC_DEBUG_END;
 	return iRet;
+}
+
+TRIGRET_TYPE CChar::OnTrigger( CTRIG_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs )
+{
+	ASSERT( trigger < CTRIG_QTY );
+	return( OnTrigger( MAKEINTRESOURCE(trigger), pSrc, pArgs ));
 }
 
 // process m_fStatusUpdate flags

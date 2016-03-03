@@ -575,6 +575,14 @@ bool CItem::IsMovable() const
 	return( IsMovableType());
 }
 
+
+int CItem::GetVisualRange() const	// virtual
+{
+	if ( GetDispID() >= ITEMID_MULTI ) // ( IsTypeMulti() ) why not this?
+		return( UO_MAP_VIEW_RADAR );
+	return( UO_MAP_VIEW_SIZE );
+}
+
 // Retrieve tag.override.speed for this CItem
 // If no tag, then retrieve CItemBase::GetSpeed()
 // Doing this way lets speed be changed for all created weapons from the script itself instead of rewriting one by one.
@@ -584,6 +592,37 @@ BYTE CItem::GetSpeed() const
 		return static_cast<BYTE>(m_TagDefs.GetKeyNum("OVERRIDE.SPEED"));
 	CItemBase * pItemDef = dynamic_cast<CItemBase *>(Base_GetDef());
 	return pItemDef->GetSpeed();
+}
+
+
+void CItem::SetAttr( DWORD dwAttr )
+{
+	m_Attr |= dwAttr;
+}
+
+void CItem::ClrAttr( DWORD dwAttr )
+{
+	m_Attr &= ~dwAttr;
+}
+
+bool CItem::IsAttr( DWORD dwAttr ) const	// ATTR_DECAY
+{
+	return(( m_Attr & dwAttr ) ? true : false );
+}
+
+void CItem::SetCanUse( DWORD dwCanUse )
+{
+	m_CanUse |= dwCanUse;
+}
+
+void CItem::ClrCanUse( DWORD dwCanUse )
+{
+	m_CanUse &= ~dwCanUse;
+}
+
+bool CItem::IsCanUse( DWORD dwCanUse ) const	// CanUse_None
+{
+	return(( m_CanUse & dwCanUse ) ? true : false );
 }
 
 int CItem::IsWeird() const
@@ -635,13 +674,6 @@ signed char CItem::GetFixZ( CPointMap pt, unsigned long wBlockFlags )
 	CGrayMapBlockState block( wBlockFlags, pt.m_z, pt.m_z + zHeight, pt.m_z + 2, zHeight );
 	g_World.GetFixPoint( pt, block);
 	return(block.m_Bottom.m_z);
-}
-
-CItem * CItem::SetType(IT_TYPE type)
-{
-	ADDTOCALLSTACK("CItem::SetType");
-	m_type = type;
-	return this;
 }
 
 int CItem::FixWeirdness()
@@ -1136,6 +1168,17 @@ bool CItem::IsStackable( const CItem * pItem ) const
 	return true;
 }
 
+
+bool CItem::IsStackableType() const
+{
+	return(Can(CAN_I_PILE));
+}
+
+bool CItem::Can(WORD wCan) const
+{
+	return((m_Can & wCan) ? true : false);
+}
+
 bool CItem::Stack( CItem * pItem )
 {
 	ADDTOCALLSTACK("CItem::Stack");
@@ -1236,6 +1279,23 @@ void CItem::SetTimeout( INT64 iDelay )
 	pSector->MoveItemToSector( this, iDelay >= 0 );
 	CItemsList::sm_fNotAMove = false;
 	SetContainerFlags(0);
+}
+
+void CItem::OnMoveFrom()	// Moving from current location.
+{
+}
+
+bool CItem::MoveToUpdate(CPointMap pt, bool bForceFix)
+{
+	bool bReturn = MoveTo(pt, bForceFix);
+	Update();
+	return bReturn;
+}
+
+bool CItem::MoveToDecay(const CPointMap & pt, INT64 iDecayTime, bool bForceFix)
+{
+	SetDecayTime( iDecayTime );
+	return MoveToUpdate( pt, bForceFix);
 }
 
 void CItem::SetDecayTime( INT64 iTime )
@@ -1724,6 +1784,20 @@ bool CItem::SetName( LPCTSTR pszName )
 	return SetNamePool( pszName );
 }
 
+int CItem::GetWeight(WORD amount) const
+{		
+	int iWeight = m_weight * (amount ? amount : GetAmount());
+	CVarDefCont * pReduction = GetDefKey("WEIGHTREDUCTION", true);
+	if (pReduction)
+	{
+		iWeight -= static_cast<int>(IMULDIV( iWeight, pReduction->GetValNum(), 100 ));
+		if ( iWeight < 0)
+			iWeight = 0;
+	}
+	return( iWeight );
+}
+
+
 height_t CItem::GetHeight() const
 {
 	ADDTOCALLSTACK("CItem::GetHeight");
@@ -1816,6 +1890,30 @@ bool CItem::SetBaseID( ITEMID_TYPE id )
 	return( true );
 }
 
+void CItem::OnHear( LPCTSTR pszCmd, CChar * pSrc )
+{
+	// This should never be called directly. Normal items cannot hear. IT_SHIP and IT_COMM_CRYSTAL
+	UNREFERENCED_PARAMETER(pszCmd);
+	UNREFERENCED_PARAMETER(pSrc);
+}
+
+CItemBase * CItem::Item_GetDef() const
+{
+	return( STATIC_CAST <CItemBase*>( Base_GetDef()));
+}
+
+ITEMID_TYPE CItem::GetID() const
+{
+	const CItemBase * pItemDef = Item_GetDef();
+	ASSERT(pItemDef);
+	return( pItemDef->GetID());
+}
+WORD CItem::GetBaseID() const
+{
+	// future: strongly typed enums will remove the need for this cast
+	return( static_cast<WORD>(GetID()));
+}
+
 bool CItem::SetID( ITEMID_TYPE id )
 {
 	ADDTOCALLSTACK("CItem::SetID");
@@ -1826,6 +1924,19 @@ bool CItem::SetID( ITEMID_TYPE id )
 	}
 	SetDispID( id );
 	return( true );
+}
+
+ITEMID_TYPE CItem::GetDispID() const
+{
+	// This is what the item looks like.
+	// May not be the same as the item that defines it's type.
+	return( m_dwDispIndex );
+}
+bool CItem::IsSameDispID( ITEMID_TYPE id ) const	// account for flipped types ?
+{
+	const CItemBase * pItemDef = Item_GetDef();
+	ASSERT(pItemDef);
+	return( pItemDef->IsSameDispID( id ));
 }
 
 bool CItem::SetDispID( ITEMID_TYPE id )
@@ -3303,6 +3414,129 @@ TRIGRET_TYPE CItem::OnTriggerCreate( CTextConsole * pSrc, CScriptTriggerArgs * p
 	return iRet;
 }
 
+
+TRIGRET_TYPE CItem::OnTrigger( ITRIG_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs )
+{
+	ASSERT( trigger < ITRIG_QTY );
+	return( OnTrigger( MAKEINTRESOURCE(trigger), pSrc, pArgs ));
+}
+
+// Item type specific stuff.
+bool CItem::IsType( IT_TYPE type ) const
+{
+	return( m_type == type );
+}
+
+IT_TYPE CItem::GetType() const
+{
+	return( m_type );
+}
+
+CItem * CItem::SetType(IT_TYPE type)
+{
+	ADDTOCALLSTACK("CItem::SetType");
+	m_type = type;
+	return this;
+}
+
+bool CItem::IsTypeLit() const
+{
+	// has m_pattern arg
+	switch(m_type)
+	{
+		case IT_SPELL: // a magic spell effect. (might be equipped)
+		case IT_FIRE:
+		case IT_LIGHT_LIT:
+		case IT_CAMPFIRE:
+		case IT_LAVA:
+		case IT_WINDOW:
+			return( true );
+		default:
+			return( false );
+	}
+}
+
+bool CItem::IsTypeBook() const
+{
+	switch( m_type )
+	{
+		case IT_BOOK:
+		case IT_MESSAGE:
+			return( true );
+		default:
+			return( false );
+	}
+}
+
+bool CItem::IsTypeSpellbook() const
+{
+	return( CItemBase::IsTypeSpellbook(m_type));
+}
+
+bool CItem::IsTypeArmor() const
+{
+	return( CItemBase::IsTypeArmor(m_type));
+}
+
+bool CItem::IsTypeWeapon() const
+{
+	return( CItemBase::IsTypeWeapon(m_type));
+}
+
+bool CItem::IsTypeMulti() const
+{
+	return( CItemBase::IsTypeMulti(m_type));
+}
+
+bool CItem::IsTypeArmorWeapon() const
+{
+	// Armor or weapon.
+	return( IsTypeArmor() || IsTypeWeapon());
+}
+
+bool CItem::IsTypeLocked() const
+{
+	switch ( m_type )
+	{
+		case IT_SHIP_SIDE_LOCKED:
+		case IT_CONTAINER_LOCKED:
+		case IT_SHIP_HOLD_LOCK:
+		case IT_DOOR_LOCKED:
+			return( true );
+		default:
+			return( false );
+	}
+}
+bool CItem::IsTypeLockable() const
+{
+	switch( m_type )
+	{
+		case IT_CONTAINER:
+		case IT_DOOR:
+		case IT_DOOR_OPEN:
+		case IT_SHIP_SIDE:
+		case IT_SHIP_PLANK:
+		case IT_SHIP_HOLD:
+			//case IT_ROPE:
+			return( true );
+		default:
+			return( IsTypeLocked() );
+	}
+}
+bool CItem::IsTypeSpellable() const
+{
+	// m_itSpell
+	switch( m_type )
+	{
+		case IT_SCROLL:
+		case IT_SPELL:
+		case IT_FIRE:
+			return( true );
+		default:
+			return( IsTypeArmorWeapon() );
+	}
+}
+
 void CItem::DupeCopy( const CItem * pItem )
 {
 	ADDTOCALLSTACK("CItem::DupeCopy");
@@ -3338,6 +3572,44 @@ void CItem::SetAnim( ITEMID_TYPE id, int iTime )
 	m_type = IT_ANIM_ACTIVE;
 	SetTimeout( iTime );
 	Update();
+}
+
+CItem* CItem::GetNext() const
+{
+	return( STATIC_CAST <CItem*>( CObjBase::GetNext()));
+}
+
+CItem* CItem::GetPrev() const
+{
+	return( STATIC_CAST <CItem*>( CObjBase::GetPrev()));
+}
+
+CObjBase * CItem::GetContainer() const
+{
+	// What is this CItem contained in ?
+	// Container should be a CChar or CItemContainer
+	return( dynamic_cast <CObjBase*> (GetParent()));
+}
+
+CObjBaseTemplate * CItem::GetTopLevelObj() const
+{
+	// recursively get the item that is at "top" level.
+	const CObjBase* pObj = GetContainer();
+	if ( !pObj )
+		return const_cast <CItem*>(this);
+	else if ( pObj == this )		// to avoid script errors setting same CONT
+		return const_cast <CItem*>(this);
+	return pObj->GetTopLevelObj();
+}
+
+unsigned char CItem::GetContainedGridIndex() const
+{
+	return m_containedGridIndex;
+}
+
+void CItem::SetContainedGridIndex(unsigned char index)
+{
+	m_containedGridIndex = index;
 }
 
 void CItem::Update(const CClient * pClientExclude)
@@ -3422,6 +3694,11 @@ bool CItem::IsValidLockUID() const
 	return( false );
 }
 
+bool CItem::IsKeyLockFit( DWORD dwLockUID ) const
+{
+	return( m_itKey.m_lockUID == dwLockUID );
+}
+
 void CItem::ConvertBolttoCloth()
 {
 	ADDTOCALLSTACK("CItem::ConvertBolttoCloth");
@@ -3500,6 +3777,18 @@ int CItem::ConsumeAmount( int iQty, bool fTest )
 	}
 
 	return( iQtyMax );
+}
+
+
+CREID_TYPE CItem::GetCorpseType() const
+{
+	return static_cast<CREID_TYPE>(GetAmount());	// What does the corpse look like ?
+}
+
+void CItem::SetCorpseType( CREID_TYPE id )
+{
+	// future: strongly typed enums will remove the need for this cast
+	m_amount = static_cast<WORD>(id);	// m_corpse_DispID
 }
 
 SPELL_TYPE CItem::GetScrollSpell() const
@@ -4090,6 +4379,14 @@ SKILL_TYPE CItem::Weapon_GetSkill() const
 	}
 }
 
+bool CItem::IsMemoryTypes( WORD wType ) const
+{
+	// MEMORY_FIGHT
+	if ( ! IsType( IT_EQ_MEMORY_OBJ ))
+		return( false );
+	return(( GetHueAlt() & wType ) ? true : false );
+}
+
 LPCTSTR CItem::Use_SpyGlass( CChar * pUser ) const
 {
 	ADDTOCALLSTACK("CItem::Use_SpyGlass");
@@ -4288,6 +4585,16 @@ LPCTSTR CItem::Use_Sextant( CPointMap pntCoords ) const
 	ADDTOCALLSTACK("CItem::Use_Sextant");
 	// IT_SEXTANT
 	return g_Cfg.Calc_MaptoSextant(pntCoords);
+}
+
+bool CItem::IsBookWritable() const
+{
+	return( m_itBook.m_ResID.GetPrivateUID() == 0 && GetTimeStamp().GetTimeRaw() == 0 );
+}
+
+bool CItem::IsBookSystem() const	// stored in RES_BOOK
+{
+	return( m_itBook.m_ResID.GetResType() == RES_BOOK );
 }
 
 bool CItem::Use_Light()

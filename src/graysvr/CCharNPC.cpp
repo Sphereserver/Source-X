@@ -261,6 +261,11 @@ void CCharNPC::r_WriteChar( CChar * pChar, CScript & s )
 	}
 }
 
+bool CCharNPC::IsVendor() const
+{
+	return( m_Brain == NPCBRAIN_HEALER || m_Brain == NPCBRAIN_BANKER || m_Brain == NPCBRAIN_VENDOR || m_Brain == NPCBRAIN_STABLE );
+}
+
 int CCharNPC::GetNpcAiFlags( const CChar *pChar ) const 
 {
 	CVarDefCont *pVar = pChar->GetKey( "OVERRIDE.NPCAI", true );

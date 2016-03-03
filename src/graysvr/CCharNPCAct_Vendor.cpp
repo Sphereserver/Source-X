@@ -12,6 +12,18 @@ const LAYER_TYPE CChar::sm_VendorLayers[] = // static
 	LAYER_VENDOR_STOCK, LAYER_VENDOR_EXTRA, LAYER_VENDOR_BUYS,
 };
 
+bool CChar::NPC_IsVendor() const
+{
+	return (m_pNPC && m_pNPC->IsVendor());
+}
+
+int CChar::NPC_GetAiFlags()
+{
+	if(m_pNPC == NULL)
+		return 0;
+	return (m_pNPC->GetNpcAiFlags(this));
+}
+
 bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 {
 	ADDTOCALLSTACK("CChar::NPC_Vendor_Restock");

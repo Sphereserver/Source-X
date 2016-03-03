@@ -14,6 +14,26 @@ void CContainer::OnWeightChange( int iChange )
 	m_totalweight += iChange;
 }
 
+CItem * CContainer::GetAt( size_t index ) const
+{
+	return( dynamic_cast <CItem*>( CGObList::GetAt( index )));
+}
+
+int	CContainer::GetTotalWeight() const
+{
+	return( m_totalweight );
+}
+
+CItem* CContainer::GetContentHead() const
+{
+	return( STATIC_CAST <CItem*>( GetHead()));
+}
+
+CItem* CContainer::GetContentTail() const
+{
+	return( STATIC_CAST <CItem*>( GetTail()));
+}
+
 int CContainer::FixWeight()
 {
 	ADDTOCALLSTACK("CContainer::FixWeight");
@@ -495,6 +515,16 @@ bool CContainer::r_GetRefContainer( LPCTSTR &pszKey, CScriptObj *&pRef )
 	return false;
 }
 
+CContainer::CContainer()
+{
+	m_totalweight = 0;
+}
+
+CContainer::~CContainer()
+{
+	DeleteAll(); // call this early so the virtuals will work.
+}
+
 bool CContainer::r_WriteValContainer( LPCTSTR pszKey, CGString &sVal, CTextConsole *pSrc )
 {
 	ADDTOCALLSTACK("CContainer::r_WriteValContainer");
@@ -807,6 +837,11 @@ void CItemContainer::Trade_Delete()
 	pPartner->Delete();
 }
 
+int CItemContainer::GetWeight(WORD amount) const
+{	// true weight == container item + contents.
+	return( CItem::GetWeight(amount) + CContainer::GetTotalWeight());
+}
+
 void CItemContainer::OnWeightChange( int iChange )
 {
 	ADDTOCALLSTACK("CItemContainer::OnWeightChange");
@@ -1080,6 +1115,30 @@ void CItemContainer::ContentAdd( CItem *pItem )
 		pt = pItem->GetUnkPoint();
 
 	ContentAdd(pItem, pt);
+}
+
+bool CItemContainer::IsWeighed() const
+{
+	if ( IsType(IT_EQ_BANK_BOX ))
+		return false;
+	if ( IsType(IT_EQ_VENDOR_BOX))
+		return false;
+	if ( IsAttr(ATTR_MAGIC))	// magic containers have no weight.
+		return false;
+	return true;
+}
+
+bool CItemContainer::IsSearchable() const
+{
+	if ( IsType(IT_EQ_BANK_BOX) )
+		return false;
+	if ( IsType(IT_EQ_VENDOR_BOX) )
+		return false;
+	if ( IsType(IT_CONTAINER_LOCKED) )
+		return false;
+	if ( IsType(IT_EQ_TRADE_WINDOW) )
+		return false;
+	return true;
 }
 
 bool CItemContainer::IsItemInside( const CItem *pItem ) const

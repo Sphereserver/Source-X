@@ -369,6 +369,16 @@ void CChar::ClientAttach( CClient * pClient )
 	FixClimbHeight();
 }
 
+bool CChar::IsClient() const
+{ 
+	return( m_pClient != NULL ); 
+}
+
+CClient * CChar::GetClient() const
+{
+	return( m_pClient );
+}
+
 // Client logged out or NPC is dead.
 void CChar::SetDisconnected()
 {
@@ -541,6 +551,82 @@ signed char CChar::GetFixZ( CPointMap pt, unsigned long wBlockFlags)
 	if (( GetHeightMount( false ) + pt.m_z >= block.m_Top.m_z ) && ( g_Cfg.m_iMountHeight ) && ( !IsPriv( PRIV_GM ) ) && ( !IsPriv( PRIV_ALLMOVE ) ))
 		return pt.m_z;
 	return(block.m_Bottom.m_z);
+}
+
+
+bool CChar::IsStatFlag( DWORD dwStatFlag ) const
+{
+	return(( m_StatFlag & dwStatFlag) ? true : false );
+}
+
+void CChar::StatFlag_Set( DWORD dwStatFlag )
+{
+	m_StatFlag |= dwStatFlag;
+}
+
+void CChar::StatFlag_Clear( DWORD dwStatFlag )
+{
+	m_StatFlag &= ~dwStatFlag;
+}
+
+void CChar::StatFlag_Mod( DWORD dwStatFlag, bool fMod )
+{
+	if ( fMod )
+		m_StatFlag |= dwStatFlag;
+	else
+		m_StatFlag &= ~dwStatFlag;
+}
+
+bool CChar::IsPriv( WORD flag ) const
+{	// PRIV_GM flags
+	if ( m_pPlayer == NULL )
+		return( false );	// NPC's have no privs.
+	return( m_pPlayer->GetAccount()->IsPriv( flag ));
+}
+
+PLEVEL_TYPE CChar::GetPrivLevel() const
+{
+	// The higher the better. // PLEVEL_Counsel
+	if ( ! m_pPlayer )
+		return( PLEVEL_Player );
+	return( m_pPlayer->GetAccount()->GetPrivLevel());
+}
+
+CCharBase * CChar::Char_GetDef() const
+{
+	return( STATIC_CAST <CCharBase*>( Base_GetDef()));
+}
+
+CRegionWorld * CChar::GetRegion() const
+{
+	return m_pArea; // What region are we in now. (for guarded message)
+}
+
+CRegionBase * CChar::GetRoom() const
+{
+	return m_pRoom; // What room are we in now.
+}
+
+int CChar::GetSight() const
+{
+	return static_cast<int>(m_iVisualRange);
+}
+
+void CChar::SetSight(BYTE newSight)
+{
+	m_iVisualRange = newSight;
+	if ( IsClient() )
+		GetClient()->addVisualRange(m_iVisualRange);
+}
+
+bool CChar::Can( WORD wCan ) const
+{
+	return(( m_Can & wCan ) ? true : false );
+}
+
+bool CChar::Can( int wCan ) const
+{
+	return( ( m_Can & static_cast< DWORD >( wCan ) ) ? true : false );
 }
 
 // Clean up weird flags.
@@ -1052,6 +1138,12 @@ void CChar::OnWeightChange( int iChange )
 	UpdateStatsFlag();
 }
 
+int CChar::GetWeight(WORD amount) const
+{
+	UNREFERENCED_PARAMETER(amount);
+	return( CContainer::GetTotalWeight());
+}
+
 bool CChar::SetName( LPCTSTR pszName )
 {
 	ADDTOCALLSTACK("CChar::SetName");
@@ -1095,6 +1187,26 @@ height_t CChar::GetHeight() const
 		return tmpHeight;
 
 	return PLAYER_HEIGHT; //if everything fails
+}
+
+CREID_TYPE CChar::GetID() const
+{
+	CCharBase * pCharDef = Char_GetDef();
+	ASSERT(pCharDef);
+	return( pCharDef->GetID());
+}
+
+WORD CChar::GetBaseID() const
+{
+	// future: strongly typed enums will remove the need for this cast
+	return( static_cast<WORD>(GetID()));
+}
+
+CREID_TYPE CChar::GetDispID() const
+{
+	CCharBase * pCharDef = Char_GetDef();
+	ASSERT(pCharDef);
+	return( pCharDef->GetDispID());
 }
 
 // Just set the base id and not the actual display id.
@@ -1141,6 +1253,45 @@ void CChar::SetID( CREID_TYPE id )
 			GetPackSafe()->ContentAdd(pHand);
 	}
 	UpdateMode(NULL, true);
+}
+
+
+LPCTSTR CChar::GetName() const
+{
+	return GetName( true );
+}
+
+LPCTSTR CChar::GetNameWithoutIncognito() const
+{
+	if ( IsStatFlag( STATF_Incognito ) )
+	{
+		CItem * pSpell = NULL;
+		pSpell = LayerFind(LAYER_SPELL_Incognito);
+		if ( pSpell == NULL )
+			pSpell = LayerFind(LAYER_FLAG_Potion);
+
+		if ( pSpell && pSpell->IsType(IT_SPELL) && (pSpell->m_itSpell.m_spell == SPELL_Incognito))
+			return pSpell->GetName();
+	}
+
+	return GetName();
+}
+
+LPCTSTR CChar::GetName( bool fAllowAlt ) const
+{
+	if ( fAllowAlt )
+	{
+		LPCTSTR pAltName = GetKeyStr( "NAME.ALT" );
+		if ( pAltName && *pAltName )
+			return pAltName;
+	}
+	if ( ! IsIndividualName())			// allow some creatures to go unnamed.
+	{
+		CCharBase * pCharDef = Char_GetDef();
+		ASSERT(pCharDef);
+		return( pCharDef->GetTypeName());	// Just use it's type name instead.
+	}
+	return( CObjBase::GetName());
 }
 
 // Create a brand new Player char. Called directly from the packet.

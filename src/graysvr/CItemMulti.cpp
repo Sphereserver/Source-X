@@ -41,6 +41,11 @@ CItemMulti::~CItemMulti()
 	delete m_pRegion;
 }
 
+const CItemBaseMulti * CItemMulti::Multi_GetDef() const
+{
+	return( STATIC_CAST <const CItemBaseMulti *>( Base_GetDef()));
+}
+
 int CItemMulti::Multi_GetMaxDist() const
 {
 	ADDTOCALLSTACK("CItemMulti::Multi_GetMaxDist");
@@ -563,3 +568,8 @@ size_t CItemMulti::Multi_ListObjs(CObjBase ** ppObjList)
 	}
 	return(iCount);
 }
+
+void CItemMulti::OnComponentCreate( const CItem * pComponent )
+{
+	UNREFERENCED_PARAMETER(pComponent);
+};

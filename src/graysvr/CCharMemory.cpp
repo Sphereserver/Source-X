@@ -202,6 +202,13 @@ CItemMemory * CChar::Memory_CreateObj( CGrayUID uid, WORD MemTypes )
 	return( pMemory );
 }
 
+
+CItemMemory * CChar::Memory_CreateObj( const CObjBase * pObj, WORD MemTypes )
+{
+	ASSERT(pObj);
+	return Memory_CreateObj( pObj->GetUID(), MemTypes );
+}
+
 // Remove all the memories of this type.
 void CChar::Memory_ClearTypes( WORD MemTypes )
 {
@@ -234,6 +241,13 @@ CItemMemory * CChar::Memory_FindObj( CGrayUID uid ) const
 	return NULL;
 }
 
+CItemMemory * CChar::Memory_FindObj( const CObjBase * pObj ) const
+{
+	if ( pObj == NULL )
+		return( NULL );
+	return Memory_FindObj( pObj->GetUID());
+}
+
 // Do we have a certain type of memory.
 // Just find the first one.
 CItemMemory * CChar::Memory_FindTypes( WORD MemTypes ) const
@@ -249,6 +263,26 @@ CItemMemory * CChar::Memory_FindTypes( WORD MemTypes ) const
 		return dynamic_cast<CItemMemory *>(pItem);
 	}
 	return NULL;
+}
+
+CItemMemory * CChar::Memory_FindObjTypes( const CObjBase * pObj, WORD MemTypes ) const
+{
+	CItemMemory * pMemory = Memory_FindObj(pObj);
+	if ( pMemory == NULL )
+		return( NULL );
+	if ( ! pMemory->IsMemoryTypes( MemTypes ))
+		return( NULL );
+	return( pMemory );
+}
+
+CItemMemory * CChar::Memory_AddObj( CGrayUID uid, WORD MemTypes )
+{
+	return Memory_CreateObj( uid, MemTypes );
+}
+
+CItemMemory * CChar::Memory_AddObj( const CObjBase * pObj, WORD MemTypes )
+{
+	return Memory_CreateObj( pObj, MemTypes );
 }
 
 // Looping through all memories ( ForCharMemoryType ).
@@ -303,6 +337,12 @@ CItemMemory * CChar::Memory_AddObjTypes( CGrayUID uid, WORD MemTypes )
 	Memory_AddTypes( pMemory, MemTypes );
 	NotoSave_Delete( uid.CharFind() );
 	return( pMemory );
+}
+
+CItemMemory * CChar::Memory_AddObjTypes( const CObjBase * pObj, WORD MemTypes )
+{
+	ASSERT(pObj);
+	return Memory_AddObjTypes( pObj->GetUID(), MemTypes );
 }
 
 // NOTE: Do not return true unless u update the timer !

@@ -1,5 +1,27 @@
 #include "graysvr.h"	// predef header.
 
+CItemMemory::CItemMemory( ITEMID_TYPE id, CItemBase * pItemDef ) :
+	CItem( ITEMID_MEMORY, pItemDef )
+{
+	UNREFERENCED_PARAMETER(id);
+}
+
+CItemMemory::~CItemMemory()
+{
+	DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
+}
+
+WORD CItemMemory::SetMemoryTypes( WORD wType )	// For memory type objects.
+{
+	SetHueAlt( wType );
+	return( wType );
+}
+
+WORD CItemMemory::GetMemoryTypes() const
+{
+	return( GetHueAlt());	// MEMORY_FIGHT
+}
+
 CItemStone *CItemMemory::Guild_GetLink()
 {
 	ADDTOCALLSTACK("CItemMemory::Guild_GetLink");

@@ -69,6 +69,48 @@ bool CChar::IsResourceMatch( RESOURCE_ID_BASE rid, DWORD dwAmount, DWORD dwArgRe
 	}
 }
 
+bool CChar::IsSpeakAsGhost() const
+{
+	return( IsStatFlag(STATF_DEAD) &&
+		! IsStatFlag( STATF_SpiritSpeak ) &&
+		! IsPriv( PRIV_GM ));
+}
+
+bool CChar::CanUnderstandGhost() const
+{
+	// Can i understand player ghost speak ?
+	if ( m_pNPC && m_pNPC->m_Brain == NPCBRAIN_HEALER )
+		return( true );
+	if ( Skill_GetBase( SKILL_SPIRITSPEAK ) >= g_Cfg.m_iMediumCanHearGhosts )
+		return( true );
+	return( IsStatFlag( STATF_SpiritSpeak|STATF_DEAD ) || IsPriv( PRIV_GM|PRIV_HEARALL ));
+}
+
+bool CChar::IsPlayableCharacter() const
+{
+	return( IsHuman() || IsElf() || IsGargoyle() );
+}
+
+bool CChar::IsHuman() const
+{
+	return( CCharBase::IsHumanID( GetDispID()));
+}
+
+bool CChar::IsElf() const
+{
+	return( CCharBase::IsElfID( GetDispID()));
+}
+
+bool CChar::IsGargoyle() const
+{
+	return( CCharBase::IsGargoyleID( GetDispID()));
+}
+
+CItemContainer * CChar::GetPack() const
+{
+	return( dynamic_cast <CItemContainer *>(LayerFind( LAYER_PACK )));
+}
+
 CItemContainer *CChar::GetBank( LAYER_TYPE layer )
 {
 	ADDTOCALLSTACK("CChar::GetBank");
@@ -116,6 +158,11 @@ CItemContainer *CChar::GetBank( LAYER_TYPE layer )
 		LayerAdd(pBankBox, layer);
 	}
 	return pBankBox;
+}
+
+CItemContainer * CChar::GetPackSafe()
+{
+	return( GetBank(LAYER_PACK));
 }
 
 CItem *CChar::GetBackpackItem(ITEMID_TYPE id)
@@ -211,6 +258,12 @@ bool CChar::CanCarry( const CItem *pItem ) const
 		return false;
 
 	return true;
+}
+
+void CChar::ContentAdd( CItem * pItem )
+{
+	ItemEquip(pItem);
+	//LayerAdd( pItem, LAYER_QTY );
 }
 
 LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg, bool fTest )
@@ -385,6 +438,17 @@ int CChar::GetHealthPercent() const
 	return IMULDIV(Stat_GetVal(STAT_STR), 100, str);
 }
 
+CChar* CChar::GetNext() const
+{
+	return( STATIC_CAST <CChar*>( CObjBase::GetNext()));
+}
+
+CObjBaseTemplate * CChar::GetTopLevelObj() const
+{
+	// Get the object that has a location in the world. (Ground level)
+	return const_cast<CChar*>(this);
+}
+
 bool CChar::IsSwimming() const
 {
 	ADDTOCALLSTACK("CChar::IsSwimming");
@@ -554,6 +618,57 @@ BYTE CChar::GetModeFlag( const CClient *pViewer ) const
 		mode |= CHARMODE_INVIS;
 
 	return mode;
+}
+
+BYTE CChar::GetDirFlag(bool fSquelchForwardStep) const
+{
+	// future: strongly typed enums will remove the need for this cast
+	BYTE dir = static_cast<BYTE>(m_dirFace);
+	ASSERT( dir<DIR_QTY );
+
+	if ( fSquelchForwardStep )
+	{
+		// not so sure this is an intended 'feature' but it seems to work (5.0.2d)
+		switch ( dir )
+		{
+			case DIR_S:
+				return 0x2a;	// 0x32; 0x5a; 0x5c; all also work
+			case DIR_SW:
+				return 0x1d;	// 0x29; 0x5d; 0x65; all also work
+			case DIR_W:
+				return 0x60;
+			default:
+				return ( dir | 0x08 );
+		}
+	}
+
+	if ( IsStatFlag( STATF_Fly ))
+		dir |= 0x80; // running/flying ?
+
+	return( dir );
+}
+
+DWORD CChar::GetMoveBlockFlags(bool bIgnoreGM) const
+{
+	// What things block us ?
+	if ( IsPriv(PRIV_GM|PRIV_ALLMOVE) && !bIgnoreGM)	// nothing blocks us.
+		return( 0xFFFF );
+
+	DWORD dwCan = m_Can;
+	CCharBase * pCharDef = Char_GetDef();
+	if ((pCharDef) && (pCharDef->Can(CAN_C_GHOST)))
+		dwCan |= CAN_C_GHOST;
+
+	if ( IsStatFlag(STATF_Hovering) )
+		dwCan |= CAN_C_HOVER;
+
+	// Inversion of MT_INDOORS, so MT_INDOORS should be named MT_NOINDOORS now.
+	if (dwCan & CAN_C_INDOORS)
+		dwCan &= ~CAN_C_INDOORS;
+	else
+		dwCan |= CAN_C_INDOORS;
+
+	return( dwCan & CAN_C_MOVEMASK );
 }
 
 BYTE CChar::GetLightLevel() const
@@ -1671,6 +1786,22 @@ bool CChar::CanSeeLOS( const CObjBaseTemplate *pObj, WORD wFlags ) const
 	}
 	else
 		return CanSeeLOS(pObj->GetTopPoint(), NULL, pObj->GetVisualRange(), wFlags);
+}
+
+bool CChar::CanSeeItem( const CItem * pItem ) const
+{
+	ASSERT(pItem);
+	if (pItem->IsAttr(ATTR_INVIS))
+	{
+		if (IsPriv(PRIV_GM))
+			return true;
+		TCHAR *uidCheck = Str_GetTemp();
+		sprintf(uidCheck, "SeenBy_0%lx", static_cast<DWORD>(GetUID()));
+
+		if (!pItem->m_TagDefs.GetKeyNum(uidCheck, false))
+			return false;
+	}
+	return( true );
 }
 
 bool CChar::CanTouch( const CPointMap &pt ) const

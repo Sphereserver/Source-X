@@ -40,6 +40,11 @@ SKILL_TYPE CChar::Skill_GetBest( unsigned int iRank ) const
 	return static_cast<SKILL_TYPE>(LOWORD( dwSkillTmp ));
 }
 
+SKILL_TYPE CChar::Skill_GetActive() const
+{
+	return( m_Act_SkillCurrent );
+}
+
 // Retrieves a random magic skill, if iVal is set it will only select from the ones with value > iVal
 SKILL_TYPE CChar::Skill_GetMagicRandom(unsigned short iVal)
 {
@@ -95,6 +100,13 @@ SKILL_TYPE CChar::Skill_GetMagicBest()
 		}
 	}
 	return skill;
+}
+
+SKILLLOCK_TYPE CChar::Skill_GetLock( SKILL_TYPE skill ) const
+{
+	if ( ! m_pPlayer )
+		return( SKILLLOCK_UP );
+	return( m_pPlayer->Skill_GetLock(skill));
 }
 
 unsigned short CChar::Skill_GetAdjusted( SKILL_TYPE skill ) const
@@ -567,6 +579,12 @@ LPCTSTR CChar::Skill_GetName( bool fUse ) const
 		case NPCACT_RUNTO:			return( g_Cfg.GetDefaultMsg(DEFMSG_SKILLACT_RUNNINGTO) );
 		default:					return( g_Cfg.GetDefaultMsg(DEFMSG_SKILLACT_THINKING) );
 	}
+}
+
+unsigned short CChar::Skill_GetBase( SKILL_TYPE skill ) const
+{
+	ASSERT( IsSkillBase(skill));
+	return( m_Skill[skill] );
 }
 
 void CChar::Skill_SetTimeout()

@@ -142,6 +142,16 @@ void CItemVendable::SetPlayerVendorPrice( DWORD lPrice )
 	m_price = maximum(lPrice, 0);
 }
 
+WORD CItemVendable::GetQuality() const
+{
+	return m_quality;
+}
+
+void CItemVendable::SetQuality(WORD quality)
+{
+	m_quality = quality;
+}
+
 DWORD CItemVendable::GetBasePrice() const
 {
 	ADDTOCALLSTACK("CItemVendable::GetBasePrice");

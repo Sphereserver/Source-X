@@ -154,6 +154,22 @@ void CObjBase::SetHue( HUE_TYPE wHue, bool bAvoidTrigger, CTextConsole *pSrc, CO
 	m_wHue = static_cast<SOUND_TYPE>(args.m_iN1);
 }
 
+HUE_TYPE CObjBase::GetHue() const
+{
+	return( m_wHue );
+}
+
+WORD CObjBase::GetHueAlt() const
+{
+	// IT_EQ_MEMORY_OBJ = MEMORY_TYPE mask
+	// IT_EQ_VENDOR_BOX = restock time.
+	return( m_wHue );
+}
+void CObjBase::SetHueAlt( HUE_TYPE wHue )
+{
+	m_wHue = wHue;
+}
+
 int CObjBase::IsWeird() const
 {
 	ADDTOCALLSTACK_INTENSIVE("CObjBase::IsWeird");
@@ -195,6 +211,26 @@ void CObjBase::SetUID( DWORD dwIndex, bool fItem )
 	if ( fItem ) dwIndex |= UID_F_ITEM;
 
 	CObjBaseTemplate::SetUID( dwIndex );
+}
+
+CObjBase* CObjBase::GetNext() const
+{
+	return( STATIC_CAST <CObjBase*>( CGObListRec::GetNext()));
+}
+
+CObjBase* CObjBase::GetPrev() const
+{
+	return( STATIC_CAST <CObjBase*>( CGObListRec::GetPrev()));
+}
+
+LPCTSTR CObjBase::GetName() const	// resolve ambiguity w/CScriptObj
+{
+	return( CObjBaseTemplate::GetName());
+}
+
+LPCTSTR CObjBase::GetResourceName() const
+{
+	return Base_GetDef()->GetResourceName();
 }
 
 void inline CObjBase::SetNamePool_Fail( TCHAR * ppTitles )
@@ -321,6 +357,38 @@ void CObjBase::SetTimeout( INT64 iDelayInTicks )
 		m_timeout.Init();
 	else
 		m_timeout = CServTime::GetCurrentTime() + iDelayInTicks;
+}
+
+bool CObjBase::IsTimerSet() const
+{
+	return( m_timeout.IsTimeValid());
+}
+
+bool CObjBase::IsTimerExpired() const
+{
+	return( GetTimerDiff() <= 0 );
+}
+
+INT64 CObjBase::GetTimerAdjusted() const
+{
+	// RETURN: time in seconds from now.
+	if ( ! IsTimerSet())
+		return( -1 );
+	INT64 iDiffInTicks = GetTimerDiff();
+	if ( iDiffInTicks < 0 )
+		return( 0 );
+	return( iDiffInTicks / TICK_PER_SEC );
+}
+
+INT64 CObjBase::GetTimerDAdjusted() const
+{
+	// RETURN: time in seconds from now.
+	if ( ! IsTimerSet())
+		return( -1 );
+	INT64 iDiffInTicks = GetTimerDiff();
+	if ( iDiffInTicks < 0 )
+		return( 0 );
+	return( iDiffInTicks );
 }
 
 void CObjBase::Sound( SOUND_TYPE id, int iOnce ) const // Play sound effect for player
@@ -2782,6 +2850,49 @@ LPCTSTR CObjBase::GetTriggerActive()
 	return m_RunningTrigger ? m_RunningTrigger : "none";
 }
 
+CVarDefMap * CObjBase::GetTagDefs()
+{
+	return( &m_TagDefs );
+}
+
+BYTE CObjBase::RangeL() const
+{
+	CVarDefCont * pRange = GetDefKey("RANGE", true);
+	return static_cast<BYTE>((pRange ? pRange->GetValNum() : 0) & 0xff);
+}
+
+BYTE CObjBase::RangeH() const
+{
+	CVarDefCont * pRange = GetDefKey("RANGE", true);
+	return static_cast<BYTE>(((pRange ? pRange->GetValNum() : 0)>>8) & 0xff);
+}
+
+CServTime CObjBase::GetTimeStamp() const
+{
+	return m_timestamp;
+}
+
+void CObjBase::SetTimeStamp( INT64 t_time)
+{
+	m_timestamp.InitTime(t_time);
+}
+
+LPCTSTR CObjBase::GetDefStr( LPCTSTR pszKey, bool fZero, bool fDef ) const
+{
+	CVarDefCont	* pVar = GetDefKey( pszKey, fDef );
+	if ( pVar == NULL )
+		return (fZero ? "0" : "");
+	return pVar->GetValStr();
+}
+
+INT64 CObjBase::GetDefNum( LPCTSTR pszKey, bool fZero, bool fDef ) const
+{
+	CVarDefCont	* pVar = GetDefKey( pszKey, fDef );
+	if ( pVar == NULL )
+		return (fZero ? 0 : NULL);
+	return pVar->GetValNum();
+}
+
 void CObjBase::SetTriggerActive(LPCTSTR trig)
 {
 	if (trig)
@@ -2791,6 +2902,103 @@ void CObjBase::SetTriggerActive(LPCTSTR trig)
 		ADDTOCALLSTACK(text);
 	}
 	m_RunningTrigger = trig ? trig : NULL;
+}
+
+void CObjBase::SetDefNum(LPCTSTR pszKey, INT64 iVal, bool fZero )
+{
+	m_BaseDefs.SetNum(pszKey, iVal, fZero);
+}
+
+void CObjBase::SetDefStr(LPCTSTR pszKey, LPCTSTR pszVal, bool fQuoted, bool fZero )
+{
+	m_BaseDefs.SetStr(pszKey, fQuoted, pszVal, fZero);
+}
+
+void CObjBase::DeleteDef(LPCTSTR pszKey)
+{
+	m_BaseDefs.DeleteKey(pszKey);
+}
+
+CVarDefCont * CObjBase::GetDefKey( LPCTSTR pszKey, bool fDef ) const
+{
+	CVarDefCont	* pVar	= m_BaseDefs.GetKey( pszKey );
+	if ( !fDef || pVar )	return pVar;
+	if (IsItem())
+	{
+		CItemBase * pItemDef = STATIC_CAST <CItemBase*>( Base_GetDef());
+		ASSERT(pItemDef);
+		return pItemDef-> m_BaseDefs.GetKey( pszKey );
+	}
+	else
+	{
+		CCharBase * pCharDef = STATIC_CAST <CCharBase*>( Base_GetDef());
+		ASSERT(pCharDef);
+		return pCharDef-> m_BaseDefs.GetKey( pszKey );
+	}
+}
+
+LPCTSTR CObjBase::GetKeyStr( LPCTSTR pszKey, bool fZero, bool fDef ) const
+{
+	CVarDefCont	* pVar = GetKey( pszKey, fDef );
+	if ( pVar == NULL )
+		return (fZero ? "0" : "");
+	return pVar->GetValStr();
+}
+
+INT64 CObjBase::GetKeyNum( LPCTSTR pszKey, bool fZero, bool fDef ) const
+{
+	CVarDefCont	* pVar = GetKey( pszKey, fDef );
+	if ( pVar == NULL )
+		return (fZero ? 0 : NULL);
+	return pVar->GetValNum();
+}
+
+CVarDefCont * CObjBase::GetKey( LPCTSTR pszKey, bool fDef ) const
+{
+	CVarDefCont	* pVar	= m_TagDefs.GetKey( pszKey );
+	if ( !fDef || pVar )	return pVar;
+	if (IsItem())
+	{
+		CItemBase * pItemDef = STATIC_CAST <CItemBase*>( Base_GetDef());
+		ASSERT(pItemDef);
+		return pItemDef-> m_TagDefs.GetKey( pszKey );
+	}
+	else
+	{
+		CCharBase * pCharDef = STATIC_CAST <CCharBase*>( Base_GetDef());
+		ASSERT(pCharDef);
+		return pCharDef-> m_TagDefs.GetKey( pszKey );
+	}
+}
+
+void CObjBase::SetKeyNum(LPCTSTR pszKey, INT64 iVal)
+{
+	m_TagDefs.SetNum(pszKey, iVal);
+}
+
+void CObjBase::SetKeyStr(LPCTSTR pszKey, LPCTSTR pszVal)
+{
+	m_TagDefs.SetStr(pszKey, false, pszVal);
+}
+
+void CObjBase::DeleteKey(LPCTSTR pszKey)
+{
+	m_TagDefs.DeleteKey(pszKey);
+}
+
+
+void CObjBase::DupeCopy( const CObjBase * pObj )
+{
+	CObjBaseTemplate::DupeCopy( pObj );
+	m_wHue = pObj->GetHue();
+	// m_timeout = pObj->m_timeout;
+	m_TagDefs.Copy( &( pObj->m_TagDefs ) );
+	m_BaseDefs.Copy(&(pObj->m_BaseDefs));
+}
+
+CBaseBaseDef * CObjBase::Base_GetDef() const
+{
+	return( STATIC_CAST <CBaseBaseDef *>( m_BaseRef.GetRef() ));
 }
 
 void CObjBase::Delete(bool bforce)
