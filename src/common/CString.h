@@ -7,6 +7,7 @@
 #ifndef _INC_CSTRING_H
 #define _INC_CSTRING_H
 
+#include "graycom.h"
 #include "common.h"
 
 /**

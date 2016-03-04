@@ -13,6 +13,7 @@
 #include "../common/CArray.h"
 #include "../common/CExpression.h"
 #include "../common/grayproto.h"
+#include "../common/CGrayMap.h"
 #include "graysvr.h"
 
 class CAccount;

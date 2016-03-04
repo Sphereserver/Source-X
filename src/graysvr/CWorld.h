@@ -6,9 +6,9 @@
 #define _INC_CWORLD_H
 #pragma once
 
+#include "CSector.h"
 #include "../common/mtrand/mtrand.h"
 #include "CServTime.h"
-#include "CSector.h"
 #include "CItemBase.h"
 
 enum IMPFLAGS_TYPE	// IMPORT and EXPORT flags.

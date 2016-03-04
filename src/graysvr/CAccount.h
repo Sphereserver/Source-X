@@ -3,6 +3,7 @@
 * @file CAcount.h
 */
 
+#include "CResource.h"
 #include "../common/CScript.h"
 #include "../common/CScriptObj.h"
 #include "../common/CMemBlock.h"
@@ -12,7 +13,6 @@
 #include "../common/CSocket.h"
 #include "../common/CTime.h"
 #include "../common/CVarDefMap.h"
-#include "CResource.h"
 #include "CCharRefArray.h"
 
 #ifndef _INC_CACCOUNT_H

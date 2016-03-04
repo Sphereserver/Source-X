@@ -1,8 +1,8 @@
 #ifndef _INC_CPARTY_H
 #define _INC_CPARTY_H
 
-#include "CChat.h"
 #include "CItemShip.h"
+#include "CChat.h"
 #include "CServRef.h"
 #include "CServTime.h"
 #include "../common/CTextConsole.h"
