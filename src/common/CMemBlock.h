@@ -7,6 +7,7 @@
 #define _INC_CMEMBLOCK_H
 
 #include "common.h"
+#include "graycom.h"
 
 #ifndef minimum					// limits.h ?
 	#define minimum(x,y)	((x)<(y)?(x):(y))

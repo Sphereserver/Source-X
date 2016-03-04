@@ -6,6 +6,7 @@
 #include "CGrayUID.h"
 #include "CScript.h"
 #include "CScriptObj.h"
+#include "../graysvr/CServTime.h"
 
 enum RES_TYPE	// all the script resource blocks we know how to deal with !
 {

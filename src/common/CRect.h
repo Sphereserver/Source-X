@@ -7,6 +7,7 @@
 #pragma once
 
 #include "CString.h"
+#include "graymul.h"
 //#include "cscript.h"
 
 class CRegionBase;

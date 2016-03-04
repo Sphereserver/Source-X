@@ -1,10 +1,10 @@
 #ifndef _INC_CGMPAGE_H
 #define _INC_CGMPAGE_H
 
-#include "../common/cstring.h"
+#include "../common/CString.h"
 #include "../common/CArray.h"
 #include "../common/CScriptObj.h"
-#include "../common/crect.h"
+#include "../common/CRect.h"
 #include "CServTime.h"
 
 
