@@ -9,7 +9,9 @@
 #include "../common/CScriptObj.h"
 #include "CServTime.h"
 #include "CContainer.h"
-#include "CItemVendable.h"
+#include "CBase.h"
+#include "CResource.h"
+//#include "CItemVendable.h"
 
 enum MEMORY_TYPE
 {

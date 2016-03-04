@@ -20,6 +20,12 @@
 #define PACK_NEEDED __attribute__ ((packed))
 #endif
 
+#ifdef _WIN32
+//#include "os_windows.h"
+#else
+#include <netinet/in.h>
+#endif
+
 // Pack/unpack in network order.
 
 struct NWORD

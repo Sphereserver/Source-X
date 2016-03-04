@@ -6,6 +6,9 @@
 #define _INC_CSERVERDEF_H
 #pragma once
 
+#include "CSocket.h"
+#include "CEncrypt.h"
+
 enum SERV_STAT_TYPE
 {
 	SERV_STAT_CLIENTS,	// How many clients does it say it has ? (use as % full)

@@ -10,6 +10,7 @@
 #include "CObjBase.h"
 #include "CBase.h"
 #include "CResource.h"
+#include "CItemBase.h"
 
 enum ITC_TYPE	// Item Template commands
 {

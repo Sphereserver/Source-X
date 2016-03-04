@@ -4,6 +4,7 @@
 #include "CBase.h"
 #include "../common/CResourceBase.h"
 #include "../common/CArray.h"
+#include "CResource.h"
 
 enum IT_TYPE		// double click type action.
 {

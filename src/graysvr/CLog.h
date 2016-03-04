@@ -6,7 +6,7 @@
 #include "../common/common.h"
 #include "../common/CTime.h"
 #include "../common/CScriptObj.h"
-#include "../common/cscript.h"
+#include "../common/CScript.h"
 #include "../sphere/mutex.h"
 
 extern struct CLog : public CFileText, public CEventLog
