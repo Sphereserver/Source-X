@@ -15,46 +15,23 @@ private:
 	CGString	m_sName;	// unique name for the individual object.
 	CPointMap	m_pt;		// List is sorted by m_z_sort.
 protected:
-	void DupeCopy( const CObjBaseTemplate * pObj )
-	{
-		// NOTE: Never copy m_UID
-		ASSERT(pObj);
-		m_sName = pObj->m_sName;
-		m_pt = pObj->m_pt;
-	}
+	void DupeCopy( const CObjBaseTemplate * pObj );
 
-	void SetUID( DWORD dwIndex )
-	{
-		// don't set container flags through here.
-		m_UID.SetObjUID( dwIndex );	// Will have UID_F_ITEM as well.
-	}
-	void SetUnkZ( signed char z )
-	{
-		m_pt.m_z = z;
-	}
+	void SetUID( DWORD dwIndex );
+	void SetUnkZ( signed char z );
 
 public:
 	static const char *m_sClassName;
-	CObjBaseTemplate()
-	{
-	}
-	virtual ~CObjBaseTemplate()
-	{
-	}
+	CObjBaseTemplate();
+	virtual ~CObjBaseTemplate();
 
 private:
 	CObjBaseTemplate(const CObjBaseTemplate& copy);
 	CObjBaseTemplate& operator=(const CObjBaseTemplate& other);
 
 public:
-	CObjBaseTemplate * GetNext() const
-	{
-		return( STATIC_CAST <CObjBaseTemplate*> ( CGObListRec::GetNext()));
-	}
-	CObjBaseTemplate * GetPrev() const
-	{
-		return( STATIC_CAST <CObjBaseTemplate*> ( CGObListRec::GetPrev()));
-	}
+	CObjBaseTemplate * GetNext() const;
+	CObjBaseTemplate * GetPrev() const;
 
 	CGrayUID GetUID() const			{	return( m_UID ); }
 	bool IsItem() const				{	return( m_UID.IsItem()); }
@@ -66,185 +43,56 @@ public:
 	bool IsValidUID() const			{	return( m_UID.IsValidUID() ); }
 	bool IsDeleted() const;
 
-	void SetContainerFlags( DWORD dwFlags = 0 )
-	{
-		m_UID.SetObjContainerFlags( dwFlags );
-	}
+	void SetContainerFlags( DWORD dwFlags = 0 );
 
 	virtual int IsWeird() const;
 	virtual CObjBaseTemplate * GetTopLevelObj() const = 0;
 
-	CSector * GetTopSector() const
-	{
-		return GetTopLevelObj()->GetTopPoint().GetSector();
-	}
+	CSector * GetTopSector() const;
 	// Location
 
-	LAYER_TYPE GetEquipLayer() const
-	{
-		return static_cast<LAYER_TYPE>(m_pt.m_z);
-	}
-	void SetEquipLayer( LAYER_TYPE layer )
-	{
-		SetContainerFlags( UID_O_EQUIPPED );
-		m_pt.m_x = 0;	// these don't apply.
-		m_pt.m_y = 0;
-		// future: strongly typed enums will remove the need for this cast
-		m_pt.m_z = static_cast<signed char>(layer); // layer equipped.
-		m_pt.m_map = 0;
-	}
+	LAYER_TYPE GetEquipLayer() const;
+	void SetEquipLayer( LAYER_TYPE layer );
 
-	BYTE GetContainedLayer() const
-	{
-		// used for corpse or Restock count as well in Vendor container.
-		return( m_pt.m_z );
-	}
-	void SetContainedLayer( BYTE layer )
-	{
-		// used for corpse or Restock count as well in Vendor container.
-		m_pt.m_z = layer;
-	}
-	const CPointMap & GetContainedPoint() const
-	{
-		return( m_pt );
-	}
-	void SetContainedPoint( const CPointMap & pt )
-	{
-		SetContainerFlags( UID_O_CONTAINED );
-		m_pt.m_x = pt.m_x;
-		m_pt.m_y = pt.m_y;
-		m_pt.m_z = LAYER_NONE;
-		m_pt.m_map = 0;
-	}
+	BYTE GetContainedLayer() const;
+	void SetContainedLayer( BYTE layer );
+	const CPointMap & GetContainedPoint() const;
+	void SetContainedPoint( const CPointMap & pt );
 
-	void SetTopPoint( const CPointMap & pt )
-	{
-		SetContainerFlags(0);
-		ASSERT( pt.IsValidPoint() );	// already checked b4.
-		m_pt = pt;
-	}
-	const CPointMap & GetTopPoint() const
-	{
-		return( m_pt );
-	}
-	virtual void SetTopZ( signed char z )
-	{
-		m_pt.m_z = z;
-	}
-	signed char GetTopZ() const
-	{
-		return( m_pt.m_z );
-	}
-	unsigned char GetTopMap() const
-	{
-		return( m_pt.m_map );
-	}
+	void SetTopPoint( const CPointMap & pt );
+	const CPointMap & GetTopPoint() const;
+	virtual void SetTopZ( signed char z );
+	signed char GetTopZ() const;
+	unsigned char GetTopMap() const;
 
-	void SetUnkPoint( const CPointMap & pt )
-	{
-		m_pt = pt;
-	}
-	const CPointMap & GetUnkPoint() const
-	{
-		// don't care where this
-		return( m_pt );
-	}
-	signed char GetUnkZ() const	// Equal to GetTopZ ?
-	{
-		return( m_pt.m_z );
-	}
+	void SetUnkPoint( const CPointMap & pt );
+	const CPointMap & GetUnkPoint() const;
+	signed char GetUnkZ() const;
 
 	// Distance and direction
-	int GetTopDist( const CPointMap & pt ) const
-	{
-		return( GetTopPoint().GetDist( pt ));
-	}
+	int GetTopDist( const CPointMap & pt ) const;
 
-	int GetTopDist( const CObjBaseTemplate * pObj ) const
-	{
-		// don't check for logged out.
-		// Assume both already at top level.
-		ASSERT( pObj );
-		if ( pObj->IsDisconnected())
-			return( SHRT_MAX );
-		return( GetTopPoint().GetDist( pObj->GetTopPoint()));
-	}
+	int GetTopDist( const CObjBaseTemplate * pObj ) const;
 
-	int GetTopDistSight( const CPointMap & pt ) const
-	{
-		return( GetTopPoint().GetDistSight( pt ));
-	}
+	int GetTopDistSight( const CPointMap & pt ) const;
 
-	int GetTopDistSight( const CObjBaseTemplate * pObj ) const
-	{
-		// don't check for logged out.
-		// Assume both already at top level.
-		ASSERT( pObj );
-		if ( pObj->IsDisconnected())
-			return( SHRT_MAX );
-		return( GetTopPoint().GetDistSight( pObj->GetTopPoint()));
-	}
+	int GetTopDistSight( const CObjBaseTemplate * pObj ) const;
 
-	int GetDist( const CObjBaseTemplate * pObj ) const
-	{
-		// logged out chars have infinite distance
-		if ( pObj == NULL )
-			return( SHRT_MAX );
-		pObj = pObj->GetTopLevelObj();
-		if ( pObj->IsDisconnected())
-			return( SHRT_MAX );
-		return( GetTopDist( pObj ));
-	}
+	int GetDist( const CObjBaseTemplate * pObj ) const;
 
-	int GetTopDist3D( const CObjBaseTemplate * pObj ) const // 3D Distance between points
-	{
-		// logged out chars have infinite distance
-		// Assume both already at top level.
-		ASSERT( pObj );
-		if ( pObj->IsDisconnected())
-			return( SHRT_MAX );
-		return( GetTopPoint().GetDist3D( pObj->GetTopPoint()));
-	}
+	int GetTopDist3D( const CObjBaseTemplate * pObj ) const;
 
-	DIR_TYPE GetTopDir( const CObjBaseTemplate * pObj, DIR_TYPE DirDefault = DIR_QTY ) const
-	{
-		ASSERT( pObj );
-		return( GetTopPoint().GetDir( pObj->GetTopPoint(), DirDefault ));
-	}
+	DIR_TYPE GetTopDir( const CObjBaseTemplate * pObj, DIR_TYPE DirDefault = DIR_QTY ) const;
 
-	DIR_TYPE GetDir( const CObjBaseTemplate * pObj, DIR_TYPE DirDefault = DIR_QTY ) const
-	{
-		ASSERT( pObj );
-		pObj = pObj->GetTopLevelObj();
-		return( GetTopDir( pObj, DirDefault ));
-	}
+	DIR_TYPE GetDir( const CObjBaseTemplate * pObj, DIR_TYPE DirDefault = DIR_QTY ) const;
 
-	virtual int GetVisualRange() const
-	{
-		return( UO_MAP_VIEW_SIZE );
-	}
+	virtual int GetVisualRange() const;
 
 	// Names
-	LPCTSTR GetIndividualName() const
-	{
-		return( m_sName );
-	}
-	bool IsIndividualName() const
-	{
-		return( ! m_sName.IsEmpty());
-	}
-	virtual LPCTSTR GetName() const
-	{
-		return( m_sName );
-	}
-	virtual bool SetName( LPCTSTR pszName )
-	{
-		// NOTE: Name length <= MAX_NAME_SIZE
-		if ( !pszName )
-			return false;
-		m_sName = pszName;
-		return true;
-	}
+	LPCTSTR GetIndividualName() const;
+	bool IsIndividualName() const;
+	virtual LPCTSTR GetName() const;
+	virtual bool SetName( LPCTSTR pszName );
 };
 
 #endif // _INC_COBJBASETEMPLATE_H

@@ -13,6 +13,16 @@
 //////////////////////////////////////////////////////////////////////
 // -CVerDataMul
 
+CVerDataMul::CVerDataMul()
+{
+
+}
+
+CVerDataMul::~CVerDataMul()
+{
+	Unload();
+}
+
 int CVerDataMul::QCompare( size_t left, DWORD dwRefIndex ) const
 {
 	DWORD dwIndex2 = GetEntry(left)->GetIndex();
@@ -111,6 +121,21 @@ void CVerDataMul::Load( CGFile & file )
 	}
 #endif
 
+}
+
+size_t CVerDataMul::GetCount() const
+{
+	return( m_Data.GetCount());
+}
+
+const CUOVersionBlock * CVerDataMul::GetEntry( size_t i ) const
+{
+	return( &m_Data.ElementAt(i));
+}
+
+void CVerDataMul::Unload()
+{
+	m_Data.Empty();
 }
 
 bool CVerDataMul::FindVerDataBlock( VERFILE_TYPE type, DWORD id, CUOIndexRec & Index ) const

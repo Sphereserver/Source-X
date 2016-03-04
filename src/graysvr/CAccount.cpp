@@ -1,7 +1,12 @@
-#include "graysvr.h"	// predef header.
-#include "../common/CMD5.h"
-#include "../network/network.h"
+#include "CAccount.h"	// predef header.
 #include "CServTime.h"
+#include "CClient.h"
+#include "CChar.h"
+#include "CLog.h"
+#include "../common/CMD5.h"
+#include "../common/CException.h"
+#include "../common/CTextConsole.h"
+#include "../network/network.h"
 
 extern "C"
 {

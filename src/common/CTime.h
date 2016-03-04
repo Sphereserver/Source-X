@@ -19,75 +19,31 @@ public:
 	// Constructors
 	static CGTime GetCurrentTime();
 
-	CGTime()
-	{
-		m_time = 0;
-	}
-	CGTime(time_t time)
-	{
-		m_time = time;
-	}
-	CGTime(const CGTime& timeSrc)
-	{
-		m_time = timeSrc.m_time;
-	}
+	CGTime();
+	CGTime(time_t time);
+	CGTime(const CGTime& timeSrc);
 
 	CGTime( struct tm time );
 	CGTime(int nYear, int nMonth, int nDay, int nHour, int nMin, int nSec, int nDST = -1);
 
-	const CGTime& operator=(const CGTime& timeSrc)
-	{
-		m_time = timeSrc.m_time;
-		return *this;
-	}
+	const CGTime& operator=(const CGTime& timeSrc);
 
-	const CGTime& operator=(time_t t)
-	{
-		m_time = t;
-		return *this;
-	}
+	const CGTime& operator=(time_t t);
 
-	bool operator<=( time_t t ) const
-	{
-		return( m_time <= t );
-	}
-	bool operator==( time_t t ) const
-	{
-		return( m_time == t );
-	}
-	bool operator!=( time_t t ) const
-	{
-		return( m_time != t );
-	}
+	bool operator<=( time_t t ) const;
+	bool operator==( time_t t ) const;
+	bool operator!=( time_t t ) const;
 
-	time_t GetTime() const
-	{
-		return m_time;
-	}
+	time_t GetTime() const;
 
 	// Attributes
 	struct tm* GetLocalTm(struct tm* ptm = NULL) const;
 
-	int GetYear() const
-	{
-		return (GetLocalTm(NULL)->tm_year) + 1900;
-	}
-	int GetMonth() const       // month of year (1 = Jan)
-	{
-		return GetLocalTm(NULL)->tm_mon + 1;
-	}
-	int GetDay() const         // day of month
-	{
-		return GetLocalTm(NULL)->tm_mday;
-	}
-	int GetHour() const
-	{
-		return GetLocalTm(NULL)->tm_hour;
-	}
-	int GetMinute() const
-	{
-		return GetLocalTm(NULL)->tm_min;
-	}
+	int GetYear() const;
+	int GetMonth() const;
+	int GetDay() const;
+	int GetHour() const;
+	int GetMinute() const;
 
 	// Operations
 	LPCTSTR Format(LPCTSTR pszFormat) const;
@@ -95,19 +51,9 @@ public:
 
 	// non CTime operations.
 	bool Read( TCHAR * pVal );
-	void Init()
-	{
-		m_time = -1;
-	}
-	bool IsTimeValid() const
-	{
-		return(( m_time && m_time != -1 ) ? true : false );
-	}
-	int GetDaysTotal() const
-	{
-		// Needs to be more consistant than accurate. just for compares.
-		return(( GetYear() * 366) + (GetMonth()*31) + GetDay() );
-	}
+	void Init();
+	bool IsTimeValid() const;
+	int GetDaysTotal() const;
 };
 
 #endif // _INC_CTIME_H

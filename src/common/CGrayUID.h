@@ -30,100 +30,31 @@ protected:
 	DWORD m_dwInternalVal;
 public:
 
-	bool IsValidUID() const
-	{
-		return( m_dwInternalVal && ( m_dwInternalVal & UID_O_INDEX_MASK ) != UID_O_INDEX_MASK );
-	}
-	void InitUID()
-	{
-		m_dwInternalVal = UID_UNUSED;
-	}
-	void ClearUID()
-	{
-		m_dwInternalVal = UID_CLEAR;
-	}
+	bool IsValidUID() const;
+	void InitUID();
+	void ClearUID();
 
-	bool IsResource() const
-	{
-		if ( m_dwInternalVal & UID_F_RESOURCE )
-			return( IsValidUID() );
-		return( false );
-	}
-	bool IsItem() const	// Item vs. Char
-	{
-		if (( m_dwInternalVal & (UID_F_ITEM|UID_F_RESOURCE)) == UID_F_ITEM )
-			return( true );	// might be static in client ?
-		return( false );
-	}
-	bool IsChar() const	// Item vs. Char
-	{
-		if (( m_dwInternalVal & (UID_F_ITEM|UID_F_RESOURCE)) == 0 )
-			return( IsValidUID());
-		return( false );
-	}
+	bool IsResource() const;
+	bool IsItem() const;
+	bool IsChar() const;
 
-	bool IsObjDisconnected() const	// Not in the game world for some reason.
-	{
-		if (( m_dwInternalVal & (UID_F_RESOURCE|UID_O_DISCONNECT)) == UID_O_DISCONNECT )
-			return( true );
-		return( false );
-	}
-	bool IsObjTopLevel() const	// on the ground in the world.
-	{
-		if (( m_dwInternalVal & (UID_F_RESOURCE|UID_O_DISCONNECT)) == 0 )
-			return( true );	// might be static in client ?
-		return( false );
-	}
+	bool IsObjDisconnected() const;
+	bool IsObjTopLevel() const;
 
-	bool IsItemEquipped() const
-	{
-		if (( m_dwInternalVal & (UID_F_RESOURCE|UID_F_ITEM|UID_O_DISCONNECT)) == (UID_F_ITEM|UID_O_EQUIPPED))
-			return( IsValidUID() );
-		return( false );
-	}
-	bool IsItemInContainer() const
-	{
-		if (( m_dwInternalVal & (UID_F_RESOURCE|UID_F_ITEM|UID_O_DISCONNECT)) == (UID_F_ITEM|UID_O_CONTAINED))
-			return( IsValidUID() );
-		return( false );
-	}
+	bool IsItemEquipped() const;
+	bool IsItemInContainer() const;
 
-	void SetObjContainerFlags( DWORD dwFlags = 0 )
-	{
-		m_dwInternalVal = ( m_dwInternalVal & (UID_O_INDEX_MASK|UID_F_ITEM )) | dwFlags;
-	}
+	void SetObjContainerFlags( DWORD dwFlags = 0 );
 
-	void SetPrivateUID( DWORD dwVal )
-	{
-		m_dwInternalVal = dwVal;
-	}
-	DWORD GetPrivateUID() const
-	{
-		return m_dwInternalVal;
-	}
+	void SetPrivateUID( DWORD dwVal );
+	DWORD GetPrivateUID() const;
 
-	DWORD GetObjUID() const
-	{
-		return( m_dwInternalVal & (UID_O_INDEX_MASK|UID_F_ITEM) );
-	}
-	void SetObjUID( DWORD dwVal )
-	{
-		// can be set to -1 by the client.
-		m_dwInternalVal = ( dwVal & (UID_O_INDEX_MASK|UID_F_ITEM)) | UID_O_DISCONNECT;
-	}
+	DWORD GetObjUID() const;
+	void SetObjUID( DWORD dwVal );
 
-	bool operator == ( DWORD index ) const
-	{
-		return( GetObjUID() == index );
-	}
-	bool operator != ( DWORD index ) const
-	{
-		return( GetObjUID() != index );
-	}
-	operator DWORD () const
-	{
-		return( GetObjUID());
-	}
+	bool operator == ( DWORD index ) const;
+	bool operator != ( DWORD index ) const;
+	operator DWORD () const;
 
 	CObjBase * ObjFind() const;
 	CItem * ItemFind() const; // Does item still exist or has it been deleted
@@ -132,14 +63,8 @@ public:
 
 struct CGrayUID : public CGrayUIDBase
 {
-	CGrayUID()
-	{
-		InitUID();
-	}
-	CGrayUID( DWORD dw )
-	{
-		SetPrivateUID( dw );
-	}
+	CGrayUID();
+	CGrayUID( DWORD dw );
 };
 
 #endif

@@ -6,6 +6,12 @@
 #define _INC_CBASE_H
 #pragma once
 
+#include "../common/CResourceBase.h"
+#include "../common/CString.h"
+#include "../common/CVarDefMap.h"
+#include "../common/graymul.h"
+#include "graysvr.h"
+
 struct CBaseBaseDef : public CResourceLink
 {
 	// Minimal amount of common info to define RES_ITEMDEF or RES_CHARDEF, (it might just be a DUPE)
@@ -131,118 +137,40 @@ public:
 #define CAN_C_NONMOVER		0x10000 // Just stay in place, avoid movement actions.
 
 public:
-	explicit CBaseBaseDef( RESOURCE_ID id ) :
-		CResourceLink( id )
-	{
-		m_dwDispIndex		= 0;	// Assume nothing til told differently.
-		m_attackBase		= 0;
-		m_attackRange		= 0;
-		m_defenseBase		= 0;
-		m_defenseRange		= 0;
-		m_Height			= 0;
-		m_Can			= CAN_C_INDOORS;	// most things can cover us from the weather.
-		SetDefNum("RANGE",1); //m_range			= 1;
-		m_ResLevel		= RDS_T2A;
-		m_ResDispDnHue	= HUE_DEFAULT;
-		m_ResDispDnId = 0;
-		m_BaseResources.setNoMergeOnLoad();
-	}
-	virtual ~CBaseBaseDef()
-	{
-	}
-	
+	CBaseBaseDef( RESOURCE_ID id );
+	virtual ~CBaseBaseDef();
+
 private:
 	CBaseBaseDef(const CBaseBaseDef& copy);
 	CBaseBaseDef& operator=(const CBaseBaseDef& other);
 
 public:
-	LPCTSTR GetTypeName() const
-	{
-		return( m_sName );
-	}
-	virtual LPCTSTR GetName() const
-	{
-		return( GetTypeName());
-	}
-	bool HasTypeName() const	// some CItem may not.
-	{
-		return( ! m_sName.IsEmpty());	// default type name.
-	}
-	virtual void SetTypeName( LPCTSTR pszName )
-	{
-		GETNONWHITESPACE( pszName );
-		m_sName = pszName;
-	}
-	bool Can( WORD wCan ) const
-	{
-		return(( m_Can & wCan ) ? true : false );
-	}
-	virtual void UnLink()
-	{
-		m_BaseResources.RemoveAll();
-		m_TEvents.RemoveAll();
-		CResourceLink::UnLink();
-	}
+	LPCTSTR GetTypeName() const;
+	virtual LPCTSTR GetName() const;
+	bool HasTypeName() const;
+	virtual void SetTypeName( LPCTSTR pszName );
+	bool Can( WORD wCan ) const;
+	virtual void UnLink();
 
 	virtual bool r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc = NULL );
 	virtual bool r_LoadVal( CScript & s );
 
-	bool IsValid() const
-	{
-		return( m_sName.IsValid());
-	}
+	bool IsValid() const;
 
-	BYTE	RangeL() const
-	{
-		return static_cast<BYTE>(GetDefNum("RANGE",true) & 0xff);
-		//return (m_range & 0xff);
-	}
+	BYTE	RangeL() const;
 
-	BYTE	RangeH() const
-	{
-		return static_cast<BYTE>((GetDefNum("RANGE",true)>>8) & 0xff);
-		//return ((m_range>>8) & 0xff);
-	}
+	BYTE	RangeH() const;
 
-	height_t GetHeight() const
-	{
-		return( m_Height );
-	}
-	void SetHeight( height_t Height )
-	{
-		m_Height = Height;
-	}
+	height_t GetHeight() const;
+	void SetHeight( height_t Height );
 	
 	// -------------- ResLevel -------------
-	BYTE GetResLevel() const
-	{
-		return( m_ResLevel );
-	}
-	bool SetResLevel( BYTE ResLevel )
-	{
-		if ( ResLevel >= RDS_T2A && ResLevel < RDS_QTY )
-		{
-			m_ResLevel = ResLevel;
-			return true;
-		}
-		return false;
-	}
-	HUE_TYPE GetResDispDnHue() const
-	{
-		return( m_ResDispDnHue );
-	}
-	void SetResDispDnHue( HUE_TYPE ResDispDnHue )
-	{
-		m_ResDispDnHue = ResDispDnHue;
-	}
-	WORD GetResDispDnId() const
-	{
-		return( m_ResDispDnId );
-	}
-	void SetResDispDnId( WORD ResDispDnId )
-	{
-		m_ResDispDnId = ResDispDnId;
-	}
+	BYTE GetResLevel() const;
+	bool SetResLevel( BYTE ResLevel );
+	HUE_TYPE GetResDispDnHue() const;
+	void SetResDispDnHue( HUE_TYPE ResDispDnHue );
+	WORD GetResDispDnId() const;
+	void SetResDispDnId( WORD ResDispDnId );
 	// -------------------------------------
 
 	void CopyBasic( const CBaseBaseDef * pSrc );

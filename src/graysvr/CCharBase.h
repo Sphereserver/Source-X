@@ -1,10 +1,11 @@
-#ifndef _INC_CITEMBASE_H
-#define _INC_CITEMBASE_H
+#ifndef _INC_CCHARBASE_H
+#define _INC_CCHARBASE_H
 
 #include "../common/graymul.h"
 #include "../common/CResourceBase.h"
 #include "../common/grayproto.h"
 #include "../common/CScript.h"
+#include "../common/CScriptObj.h"
 #include "../common/CString.h"
 #include "../common/CTextConsole.h"
 #include "CBase.h"
@@ -106,6 +107,7 @@ inline bool CCharBase::IsPlayableID( CREID_TYPE id, bool bCheckGhost)
 {
 	return ( CCharBase::IsHumanID( id, bCheckGhost) || CCharBase::IsElfID( id, bCheckGhost) || CCharBase::IsGargoyleID( id, bCheckGhost));
 }
+
 inline bool CCharBase::IsHumanID( CREID_TYPE id, bool bCheckGhost ) // static
 {
 	if ( bCheckGhost == true)
@@ -131,4 +133,4 @@ inline bool CCharBase::IsGargoyleID( CREID_TYPE id, bool bCheckGhost ) // static
 }
 
 
-#endif // _INC_CITEMBASE_H
+#endif // _INC_CCHARBASE_H

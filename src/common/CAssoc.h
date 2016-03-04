@@ -60,19 +60,8 @@ private:
 
 public:
 	// get structure value.
-	void * GetValPtr( const void * pBaseInst ) const
-	{
-		return( ((BYTE *)pBaseInst) + m_offset );
-	}
-	int GetValLength() const
-	{
-		ASSERT(m_type<ELEM_QTY);
-		if ( m_type == ELEM_STRING )
-		{
-			return(m_extra);
-		}
-		return( sm_Lengths[m_type] );
-	}
+	void * GetValPtr( const void * pBaseInst ) const;
+	int GetValLength() const;
 
 	bool GetValStr( const void * pBase, CGString & sVal ) const;
 	bool SetValStr( void * pBase, LPCTSTR pszVal ) const;

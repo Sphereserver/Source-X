@@ -1,9 +1,10 @@
-#include "graysvr.h"	// predef header.
-
 ///////////////////////////////////////////////////////////////
 // -CBaseBaseDef
 
 // 
+#include "CBase.h"
+#include "../common/CException.h"
+#include "../common/common.h"
 
 enum OBC_TYPE
 {
@@ -20,6 +21,61 @@ LPCTSTR const CBaseBaseDef::sm_szLoadKeys[OBC_QTY+1] =
 	#undef ADD
 	NULL
 };
+
+
+CBaseBaseDef::CBaseBaseDef( RESOURCE_ID id ) :
+	CResourceLink( id )
+{
+	m_dwDispIndex		= 0;	// Assume nothing til told differently.
+	m_attackBase		= 0;
+	m_attackRange		= 0;
+	m_defenseBase		= 0;
+	m_defenseRange		= 0;
+	m_Height			= 0;
+	m_Can			= CAN_C_INDOORS;	// most things can cover us from the weather.
+	SetDefNum("RANGE",1); //m_range			= 1;
+	m_ResLevel		= RDS_T2A;
+	m_ResDispDnHue	= HUE_DEFAULT;
+	m_ResDispDnId = 0;
+	m_BaseResources.setNoMergeOnLoad();
+}
+
+CBaseBaseDef::~CBaseBaseDef()
+{
+}
+
+LPCTSTR CBaseBaseDef::GetTypeName() const
+{
+	return( m_sName );
+}
+
+LPCTSTR CBaseBaseDef::GetName() const
+{
+	return( GetTypeName());
+}
+
+bool CBaseBaseDef::HasTypeName() const	// some CItem may not.
+{
+	return( ! m_sName.IsEmpty());	// default type name.
+}
+
+void CBaseBaseDef::SetTypeName( LPCTSTR pszName )
+{
+	GETNONWHITESPACE( pszName );
+	m_sName = pszName;
+}
+
+bool CBaseBaseDef::Can( WORD wCan ) const
+{
+	return(( m_Can & wCan ) ? true : false );
+}
+
+void CBaseBaseDef::UnLink()
+{
+	m_BaseResources.RemoveAll();
+	m_TEvents.RemoveAll();
+	CResourceLink::UnLink();
+}
 
 bool CBaseBaseDef::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
 {
@@ -563,3 +619,66 @@ void CBaseBaseDef::CopyTransfer( CBaseBaseDef * pBase )
 	CopyBasic( pBase );
 }
 
+
+bool CBaseBaseDef::IsValid() const
+{
+	return( m_sName.IsValid());
+}
+
+BYTE CBaseBaseDef::RangeL() const
+{
+	return static_cast<BYTE>(GetDefNum("RANGE",true) & 0xff);
+	//return (m_range & 0xff);
+}
+
+BYTE CBaseBaseDef::RangeH() const
+{
+	return static_cast<BYTE>((GetDefNum("RANGE",true)>>8) & 0xff);
+	//return ((m_range>>8) & 0xff);
+}
+
+height_t CBaseBaseDef::GetHeight() const
+{
+	return( m_Height );
+}
+
+void CBaseBaseDef::SetHeight( height_t Height )
+{
+	m_Height = Height;
+}
+
+
+BYTE CBaseBaseDef::GetResLevel() const
+{
+	return( m_ResLevel );
+}
+
+bool CBaseBaseDef::SetResLevel( BYTE ResLevel )
+{
+	if ( ResLevel >= RDS_T2A && ResLevel < RDS_QTY )
+	{
+		m_ResLevel = ResLevel;
+		return true;
+	}
+	return false;
+}
+
+HUE_TYPE CBaseBaseDef::GetResDispDnHue() const
+{
+	return( m_ResDispDnHue );
+}
+
+void CBaseBaseDef::SetResDispDnHue( HUE_TYPE ResDispDnHue )
+{
+	m_ResDispDnHue = ResDispDnHue;
+}
+
+WORD CBaseBaseDef::GetResDispDnId() const
+{
+	return( m_ResDispDnId );
+}
+
+void CBaseBaseDef::SetResDispDnId( WORD ResDispDnId )
+{
+	m_ResDispDnId = ResDispDnId;
+}

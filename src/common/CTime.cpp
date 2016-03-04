@@ -6,6 +6,8 @@
 
 #include "graycom.h"
 #include "CTime.h"
+#include "CString.h"
+#include "../sphere/threads.h"
 
 #ifndef _WIN32
 #include <sys/time.h>
@@ -184,4 +186,92 @@ bool CGTime::Read(TCHAR *pszVal)
 	m_time = mktime(&atm);
 
 	return true;
+}
+
+CGTime::CGTime()
+{
+	m_time = 0;
+}
+
+CGTime::CGTime(time_t time)
+{
+	m_time = time;
+}
+
+CGTime::CGTime(const CGTime& timeSrc)
+{
+	m_time = timeSrc.m_time;
+}
+
+const CGTime& CGTime::operator=(const CGTime& timeSrc)
+{
+	m_time = timeSrc.m_time;
+	return *this;
+}
+
+const CGTime& CGTime::operator=(time_t t)
+{
+	m_time = t;
+	return *this;
+}
+
+bool CGTime::operator<=( time_t t ) const
+{
+	return( m_time <= t );
+}
+
+bool CGTime::operator==( time_t t ) const
+{
+	return( m_time == t );
+}
+
+bool CGTime::operator!=( time_t t ) const
+{
+	return( m_time != t );
+}
+
+time_t CGTime::GetTime() const
+{
+	return m_time;
+}
+
+int CGTime::GetYear() const
+{
+	return (GetLocalTm(NULL)->tm_year) + 1900;
+}
+
+int CGTime::GetMonth() const       // month of year (1 = Jan)
+{
+	return GetLocalTm(NULL)->tm_mon + 1;
+}
+
+int CGTime::GetDay() const         // day of month
+{
+	return GetLocalTm(NULL)->tm_mday;
+}
+
+int CGTime::GetHour() const
+{
+	return GetLocalTm(NULL)->tm_hour;
+}
+
+int CGTime::GetMinute() const
+{
+	return GetLocalTm(NULL)->tm_min;
+}
+
+void CGTime::Init()
+{
+	m_time = -1;
+}
+
+bool CGTime::IsTimeValid() const
+{
+	return(( m_time && m_time != -1 ) ? true : false );
+}
+
+int CGTime::GetDaysTotal() const
+{
+	// Needs to be more consistant than accurate. just for compares.
+	return(( GetYear() * 366) + (GetMonth()*31) + GetDay() );
 }

@@ -5,6 +5,7 @@
 #include "CTime.h"
 #include "CGrayUID.h"
 #include "CScript.h"
+#include "CScriptObj.h"
 
 enum RES_TYPE	// all the script resource blocks we know how to deal with !
 {

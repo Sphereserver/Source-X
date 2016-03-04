@@ -130,10 +130,12 @@ common/CGrayInst.cpp
 common/CGrayInst.h
 common/CGrayMap.cpp
 common/CGrayMap.h
+common/CGrayUID.cpp
 common/CGrayUID.h
 common/CMD5.cpp
 common/CMD5.h
 common/CMemBlock.h
+common/CObjBaseTemplate.cpp
 common/CObjBaseTemplate.h
 common/common.h
 common/CQueue.cpp

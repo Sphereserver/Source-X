@@ -1,3 +1,4 @@
+#include "CRect.h"
 #include "../graysvr/CServer.h"
 #include "../graysvr/CWorld.h"
 #include "../graysvr/CItemBase.h"

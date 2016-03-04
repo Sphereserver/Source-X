@@ -1,14 +1,20 @@
 //  CChar is either an NPC or a Player.
-#include "graysvr.h"	// predef header.
-#include "CClient.h"
-#include "CServTime.h"
-#include "../network/network.h"
-#include "../common/CGrayUID.h"
-#include "../common/CRect.h"
-#include "../common/CObjBaseTemplate.h"
+#include "CAccount.h"
+#include "CChar.h"
+#include "CCharBase.h"
+#include "CCharNPC.h"
 #include "CContainer.h"
+#include "CClient.h"
 #include "CItem.h"
+#include "CItemContainer.h"
+#include "CItemMemory.h"
 #include "CItemSpawn.h"
+#include "CServTime.h"
+#include "../common/CException.h"
+#include "../common/CGrayUID.h"
+#include "../common/CObjBaseTemplate.h"
+#include "../common/CRect.h"
+#include "../network/network.h"
 
 
 LPCTSTR const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static

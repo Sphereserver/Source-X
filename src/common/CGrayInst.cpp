@@ -1,5 +1,26 @@
 #include "graycom.h"
 #include "CGrayInst.h"
+#include "../graysvr/CLog.h"
+#include "../graysvr/CResource.h"
+#include "../sphere/threads.h"
+
+
+CGrayInstall::CGrayInstall()
+{
+	memset(m_FileFormat, 0, sizeof(m_FileFormat));
+	memset(m_IsMapUopFormat, 0, sizeof(m_IsMapUopFormat));
+	memset(m_UopMapAddress, 0, sizeof(m_UopMapAddress));
+};
+
+CGString CGrayInstall::GetFullExePath( LPCTSTR pszName = NULL ) const
+{
+	return( CGFile::GetMergedFileName( m_sExePath, pszName ));
+}
+
+CGString CGrayInstall::GetFullCDPath( LPCTSTR pszName = NULL ) const
+{
+	return( CGFile::GetMergedFileName( m_sCDPath, pszName ));
+}
 
 bool CGrayInstall::FindInstall()
 {
@@ -148,6 +169,28 @@ LPCTSTR CGrayInstall::GetBaseFileName( VERFILE_TYPE i ) // static
 	};
 
 	return ( i<0 || i>=VERFILE_QTY ) ? NULL : sm_szFileNames[i];
+}
+
+CGFile * CGrayInstall::GetMulFile( VERFILE_TYPE i )
+{
+	ASSERT( i<VERFILE_QTY );
+	return( &(m_File[i]));
+}
+
+VERFILE_FORMAT CGrayInstall::GetMulFormat( VERFILE_TYPE i )
+{
+	ASSERT( i<VERFILE_QTY );
+	return( m_FileFormat[i] );
+}
+
+void CGrayInstall::SetPreferPath( LPCTSTR pszName )
+{
+	m_sPreferPath = pszName;
+}
+
+CGString CGrayInstall::GetPreferPath( LPCTSTR pszName = NULL ) const
+{
+	return CGFile::GetMergedFileName(m_sPreferPath, pszName);
 }
 
 bool CGrayInstall::OpenFile( VERFILE_TYPE i )

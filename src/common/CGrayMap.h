@@ -5,6 +5,8 @@
 #ifndef _INC_CGRAYMAP_H
 #define _INC_CGRAYMAP_H
 #include "../graysvr/CServTime.h"
+#include "graymul.h"
+#include "CRect.h"
 
 class CGrayCachedMulItem
 {
@@ -12,37 +14,18 @@ private:
 	CServTime m_timeRef;		// When in world.GetTime() was this last referenced.
 public:
 	static const char *m_sClassName;
-	CGrayCachedMulItem()
-	{
-		InitCacheTime();
-	}
-	virtual ~CGrayCachedMulItem()
-	{
-	}
+	CGrayCachedMulItem();
+	virtual ~CGrayCachedMulItem();
 
 private:
 	CGrayCachedMulItem(const CGrayCachedMulItem& copy);
 	CGrayCachedMulItem& operator=(const CGrayCachedMulItem& other);
 
 public:
-	void InitCacheTime()
-	{
-		m_timeRef.Init();
-	}
-	bool IsTimeValid() const
-	{
-		return( m_timeRef.IsTimeValid());
-	}
-	void HitCacheTime()
-	{
-		// When in g_World.GetTime() was this last referenced.
-		m_timeRef = CServTime::GetCurrentTime();
-	}
-	INT64 GetCacheAge() const
-	{
-		// In TICK_PER_SEC or milliseconds
-		return( CServTime::GetCurrentTime() - m_timeRef );
-	}
+	void InitCacheTime();
+	bool IsTimeValid() const;
+	void HitCacheTime();
+	INT64 GetCacheAge() const;
 };
 
 class CGrayStaticsBlock
@@ -55,31 +38,16 @@ public:
 	void LoadStatics(size_t iCount, CUOStaticItemRec * pStatics);
 public:
 	static const char *m_sClassName;
-	CGrayStaticsBlock()
-	{
-		m_iStatics = 0;
-		m_pStatics = NULL;
-	}
-	~CGrayStaticsBlock()
-	{
-		if ( m_pStatics != NULL )
-			delete[] m_pStatics;
-	}
+	CGrayStaticsBlock();
+	~CGrayStaticsBlock();
 
 private:
 	CGrayStaticsBlock(const CGrayStaticsBlock& copy);
 	CGrayStaticsBlock& operator=(const CGrayStaticsBlock& other);
 
 public:
-	size_t GetStaticQty() const
-	{
-		return( m_iStatics );
-	}
-	const CUOStaticItemRec * GetStatic( size_t i ) const
-	{
-		ASSERT( i < m_iStatics );
-		return( &m_pStatics[i] );
-	}
+	size_t GetStaticQty() const;
+	const CUOStaticItemRec * GetStatic( size_t i ) const;
 	bool IsStaticPoint( size_t i, int xo, int yo ) const;
 };
 
@@ -123,15 +91,7 @@ private:
 	CGrayMapBlockState& operator=(const CGrayMapBlockState& other);
 
 public:
-	bool IsUsableZ( signed char zBottom, height_t zHeightEstimate ) const
-	{
-		if ( zBottom > m_Top.m_z )	// above something that is already over my head.
-			return( false );
-		// NOTE: Assume multi overlapping items are not normal. so estimates are safe
-		if ( zBottom + zHeightEstimate < m_Bottom.m_z )	// way below my feet
-			return( false );
-		return( true );	
-	}
+	bool IsUsableZ( signed char zBottom, height_t zHeightEstimate ) const;
 	bool CheckTile( DWORD dwItemBlockFlags, signed char zBottom, height_t zheight, DWORD wID );
 	bool CheckTile_Item( DWORD dwItemBlockFlags, signed char zBottom, height_t zheight, DWORD wID );
 	inline void SetTop( DWORD &dwItemBlockFlags, signed char &z, DWORD &dwID );
@@ -148,24 +108,9 @@ struct CMapDiffBlock
 	DWORD m_BlockId;						// Block represented
 	int m_map;								// Map this block is from
 
-	CMapDiffBlock(DWORD dwBlockId, int map)
-	{
-		m_BlockId = dwBlockId;
-		m_map = map;
-		m_iStaticsCount = -1;
-		m_pStaticsBlock = NULL;
-		m_pTerrainBlock = NULL;
-	};
+	CMapDiffBlock(DWORD dwBlockId, int map);
 
-	~CMapDiffBlock()
-	{
-		if ( m_pStaticsBlock != NULL )
-			delete[] m_pStaticsBlock;
-		if ( m_pTerrainBlock != NULL )
-			delete m_pTerrainBlock;
-		m_pStaticsBlock = NULL;
-		m_pTerrainBlock = NULL;
-	};
+	~CMapDiffBlock();
 
 private:
 	CMapDiffBlock(const CMapDiffBlock& copy);
@@ -175,12 +120,7 @@ private:
 class CMapDiffBlockArray : public CGObSortArray< CMapDiffBlock*, DWORD >
 {
 public:
-	int CompareKey( DWORD id, CMapDiffBlock* pBase, bool fNoSpaces ) const
-	{
-		UNREFERENCED_PARAMETER(fNoSpaces);
-		ASSERT( pBase );
-		return ( id - pBase->m_BlockId );
-	}
+	int CompareKey( DWORD id, CMapDiffBlock* pBase, bool fNoSpaces ) const;
 
 public:
 	CMapDiffBlockArray() { };
@@ -233,53 +173,22 @@ private:
 	void LoadDiffs(DWORD dwBlockIndex, int map);
 
 public:
-	explicit CGrayMapBlock( const CPointMap & pt ) :
-		CPointSort( pt )	// The upper left corner.
-	{
-		sm_iCount++;
-		m_map = pt.m_map;
-		Load(pt.m_x/UO_BLOCK_SIZE, pt.m_y/UO_BLOCK_SIZE);
-	}
+	explicit CGrayMapBlock( const CPointMap & pt );
 
-	CGrayMapBlock(int bx, int by, int map) :
-		CPointSort(static_cast<WORD>(bx)* UO_BLOCK_SIZE, static_cast<WORD>(by) * UO_BLOCK_SIZE)
-	{
-		sm_iCount++;
-		m_map = map;
-		Load( bx, by );
-	}
+	CGrayMapBlock(int bx, int by, int map);
 
-	virtual ~CGrayMapBlock()
-	{
-		sm_iCount--;
-	}
+	virtual ~CGrayMapBlock();
 
 private:
 	CGrayMapBlock(const CGrayMapBlock& copy);
 	CGrayMapBlock& operator=(const CGrayMapBlock& other);
 
 public:
-	int GetOffsetX( int x ) const
-	{
-		// Allow this to go out of bounds.
-		// ASSERT( ( x-m_pt.m_x) == UO_BLOCK_OFFSET(x));
-		return( x - m_x );
-	}
-	int GetOffsetY( int y ) const
-	{
-		return( y - m_y );
-	}
+	int GetOffsetX( int x ) const;
+	int GetOffsetY( int y ) const;
 
-	const CUOMapMeter * GetTerrain( int xo, int yo ) const
-	{
-		ASSERT( xo >= 0 && xo < UO_BLOCK_SIZE );
-		ASSERT( yo >= 0 && yo < UO_BLOCK_SIZE );
-		return( &( m_Terrain.m_Meter[ yo*UO_BLOCK_SIZE + xo ] ));
-	}
-	const CUOMapBlock * GetTerrainBlock() const
-	{
-		return( &m_Terrain );
-	}
+	const CUOMapMeter * GetTerrain( int xo, int yo ) const;
+	const CUOMapBlock * GetTerrainBlock() const;
 };
 
 class CGrayMulti : public CGrayCachedMulItem
@@ -291,35 +200,13 @@ protected:
 	CUOMultiItemRec2 * m_pItems;
 	size_t m_iItemQty;
 private:
-	void Init()
-	{
-		m_id = MULTI_QTY;
-		m_pItems = NULL;
-		m_iItemQty = 0;
-	}
-	void Release()
-	{
-		if ( m_pItems != NULL )
-		{
-			delete[] m_pItems;
-			Init();
-		}
-	}
+	void Init();
+	void Release();
 public:
 	static const char *m_sClassName;
-	CGrayMulti()
-	{
-		Init();
-	}
-	explicit CGrayMulti( MULTI_TYPE id )
-	{
-		Init();
-		Load( id );
-	}
-	virtual ~CGrayMulti()
-	{
-		Release();
-	}
+	CGrayMulti();
+	explicit CGrayMulti( MULTI_TYPE id );
+	virtual ~CGrayMulti();
 
 private:
 	CGrayMulti(const CGrayMulti& copy);
@@ -328,19 +215,9 @@ private:
 public:
 	size_t Load( MULTI_TYPE id );
 
-	MULTI_TYPE GetMultiID() const
-	{
-		return( m_id );
-	}
-	size_t GetItemCount() const
-	{
-		return( m_iItemQty );
-	}
-	const CUOMultiItemRec2 * GetItem( size_t i ) const
-	{
-		ASSERT( i<m_iItemQty );
-		return( &(m_pItems[i]) );
-	}
+	MULTI_TYPE GetMultiID() const;
+	size_t GetItemCount() const;
+	const CUOMultiItemRec2 * GetItem( size_t i ) const;
 };
 
 #endif // _INC_CGRAYMAP_H

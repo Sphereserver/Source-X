@@ -1,5 +1,7 @@
 #include "graycom.h"
 #include "CAssoc.h"
+#include "CExpression.h"
+#include "../sphere/threads.h"
 
 //***************************************************************************
 // -CValStr
@@ -71,6 +73,21 @@ bool CElementDef::SetValStr( void * pBase, LPCTSTR pszVal ) const
 			break;
 	}
 	return false;
+}	
+
+void * CElementDef::GetValPtr( const void * pBaseInst ) const
+{
+	return( ((BYTE *)pBaseInst) + m_offset );
+}
+
+int CElementDef::GetValLength() const
+{
+	ASSERT(m_type<ELEM_QTY);
+	if ( m_type == ELEM_STRING )
+	{
+		return(m_extra);
+	}
+	return( sm_Lengths[m_type] );
 }
 
 bool CElementDef::GetValStr( const void * pBase, CGString & sVal ) const

@@ -45,14 +45,8 @@ public:
 	CSVFile m_CsvFiles[8];		// doors.txt, stairs.txt (x2), roof.txt, misc.txt, teleprts.txt, floors.txt, walls.txt
 
 public:
-	CGString GetFullExePath( LPCTSTR pszName = NULL ) const
-	{
-		return( CGFile::GetMergedFileName( m_sExePath, pszName ));
-	}
-	CGString GetFullCDPath( LPCTSTR pszName = NULL ) const
-	{
-		return( CGFile::GetMergedFileName( m_sCDPath, pszName ));
-	}
+	CGString GetFullExePath( LPCTSTR pszName = NULL ) const;
+	CGString GetFullCDPath( LPCTSTR pszName = NULL ) const;
 
 public:
 	bool FindInstall();
@@ -63,25 +57,11 @@ public:
 	void CloseFiles();
 
 	static LPCTSTR GetBaseFileName( VERFILE_TYPE i );
-	CGFile * GetMulFile( VERFILE_TYPE i )
-	{
-		ASSERT( i<VERFILE_QTY );
-		return( &(m_File[i]));
-	}
-	VERFILE_FORMAT GetMulFormat( VERFILE_TYPE i )
-	{
-		ASSERT( i<VERFILE_QTY );
-		return( m_FileFormat[i] );
-	}
+	CGFile * GetMulFile( VERFILE_TYPE i );
+	VERFILE_FORMAT GetMulFormat( VERFILE_TYPE i );
 
-	void SetPreferPath( LPCTSTR pszName )
-	{
-		m_sPreferPath = pszName;
-	}
-	CGString GetPreferPath( LPCTSTR pszName = NULL ) const
-	{
-		return CGFile::GetMergedFileName(m_sPreferPath, pszName);
-	}
+	void SetPreferPath( LPCTSTR pszName );
+	CGString GetPreferPath( LPCTSTR pszName = NULL ) const;
 
 	bool ReadMulIndex( VERFILE_TYPE fileindex, VERFILE_TYPE filedata, DWORD id, CUOIndexRec & Index );
 	bool ReadMulData( VERFILE_TYPE filedata, const CUOIndexRec & Index, void * pData );
@@ -90,12 +70,7 @@ public:
 	bool ReadMulData(CGFile &file, const CUOIndexRec &Index, void * pData);
 	
 public:
-	CGrayInstall()
-	{
-		memset(m_FileFormat, 0, sizeof(m_FileFormat));
-		memset(m_IsMapUopFormat, 0, sizeof(m_IsMapUopFormat));
-		memset(m_UopMapAddress, 0, sizeof(m_UopMapAddress));
-	};
+	CGrayInstall();
 
 private:
 	CGrayInstall(const CGrayInstall& copy);
@@ -115,27 +90,15 @@ private:
 	int QCompare( size_t left, DWORD dwRefIndex ) const;
 	void QSort( size_t left, size_t right );
 public:
-	size_t GetCount() const
-	{
-		return( m_Data.GetCount());
-	}
-	const CUOVersionBlock * GetEntry( size_t i ) const
-	{
-		return( &m_Data.ElementAt(i));
-	}
-	void Unload()
-	{
-		m_Data.Empty();
-	}
+	size_t GetCount() const;
+	const CUOVersionBlock * GetEntry( size_t i ) const;
+	void Unload();
 	void Load( CGFile & file );
 	bool FindVerDataBlock( VERFILE_TYPE type, DWORD id, CUOIndexRec & Index ) const;
 	
 public:
-	CVerDataMul() { };
-	~CVerDataMul()
-	{
-		Unload();
-	}
+	CVerDataMul();
+	~CVerDataMul();
 private:
 	CVerDataMul(const CVerDataMul& copy);
 	CVerDataMul& operator=(const CVerDataMul& other);

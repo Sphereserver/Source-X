@@ -6,6 +6,7 @@
 #include "CGrayMap.h"
 #include "CGrayInst.h"
 #include "CException.h"
+#include "CRect.h"
 #include "../sphere/threads.h"
 #include "../graysvr/CBase.h"
 #include "../graysvr/CLog.h"
@@ -20,6 +21,37 @@
 #define CAN_I_CLIMB		UFLAG2_CLIMBABLE
 #define CAN_I_DOOR		UFLAG4_DOOR
 #endif
+
+CGrayCachedMulItem::CGrayCachedMulItem()
+{
+	InitCacheTime();
+}
+
+CGrayCachedMulItem::~CGrayCachedMulItem()
+{
+}
+
+void CGrayCachedMulItem::InitCacheTime()
+{
+	m_timeRef.Init();
+}
+
+bool CGrayCachedMulItem::IsTimeValid() const
+{
+	return( m_timeRef.IsTimeValid());
+}
+
+void CGrayCachedMulItem::HitCacheTime()
+{
+	// When in g_World.GetTime() was this last referenced.
+	m_timeRef = CServTime::GetCurrentTime();
+}
+
+INT64 CGrayCachedMulItem::GetCacheAge() const
+{
+	// In TICK_PER_SEC or milliseconds
+	return( CServTime::GetCurrentTime() - m_timeRef );
+}
 
 CGrayMapBlockState::CGrayMapBlockState( DWORD dwBlockFlags, signed char z, int iHeight, height_t zHeight ) :
 	m_dwBlockFlags(dwBlockFlags),	m_z(z), m_iHeight(iHeight), m_zClimb(0), m_zHeight(zHeight)
@@ -155,6 +187,16 @@ bool CGrayMapBlockState::CheckTile( DWORD wItemBlockFlags, signed char zBottom, 
 	}
 
 	return true;
+}
+
+bool CGrayMapBlockState::IsUsableZ( signed char zBottom, height_t zHeightEstimate ) const
+{
+	if ( zBottom > m_Top.m_z )	// above something that is already over my head.
+		return( false );
+	// NOTE: Assume multi overlapping items are not normal. so estimates are safe
+	if ( zBottom + zHeightEstimate < m_Bottom.m_z )	// way below my feet
+		return( false );
+	return( true );	
 }
 
 bool CGrayMapBlockState::CheckTile_Item( DWORD wItemBlockFlags, signed char zBottom, height_t zHeight, DWORD dwID )
@@ -321,6 +363,38 @@ bool CGrayMapBlockState::CheckTile_Terrain( DWORD wItemBlockFlags, signed char z
 
 
 //////////////////////////////////////////////////////////////////
+// -CMapDiffblock
+
+CMapDiffBlock::CMapDiffBlock(DWORD dwBlockId, int map)
+{
+	m_BlockId = dwBlockId;
+	m_map = map;
+	m_iStaticsCount = -1;
+	m_pStaticsBlock = NULL;
+	m_pTerrainBlock = NULL;
+};
+
+CMapDiffBlock::~CMapDiffBlock()
+{
+	if ( m_pStaticsBlock != NULL )
+		delete[] m_pStaticsBlock;
+	if ( m_pTerrainBlock != NULL )
+		delete m_pTerrainBlock;
+	m_pStaticsBlock = NULL;
+	m_pTerrainBlock = NULL;
+};
+
+//////////////////////////////////////////////////////////////////
+// -CMapDiffblockArray
+
+int CMapDiffBlockArray::CompareKey( DWORD id, CMapDiffBlock* pBase, bool fNoSpaces ) const
+{
+	UNREFERENCED_PARAMETER(fNoSpaces);
+	ASSERT( pBase );
+	return ( id - pBase->m_BlockId );
+}
+
+//////////////////////////////////////////////////////////////////
 // -CGrayStaticsBlock
 
 void CGrayStaticsBlock::LoadStatics( DWORD ulBlockIndex, int map )
@@ -367,6 +441,29 @@ void CGrayStaticsBlock::LoadStatics( size_t iCount, CUOStaticItemRec * pStatics 
 			delete[] m_pStatics;
 		m_pStatics = NULL;
 	}
+}
+
+CGrayStaticsBlock::CGrayStaticsBlock()
+{
+	m_iStatics = 0;
+	m_pStatics = NULL;
+}
+
+CGrayStaticsBlock::~CGrayStaticsBlock()
+{
+	if ( m_pStatics != NULL )
+		delete[] m_pStatics;
+}
+
+size_t CGrayStaticsBlock::GetStaticQty() const
+{
+	return( m_iStatics );
+}
+
+const CUOStaticItemRec * CGrayStaticsBlock::GetStatic( size_t i ) const
+{
+	ASSERT( i < m_iStatics );
+	return( &m_pStatics[i] );
 }
 
 bool CGrayStaticsBlock::IsStaticPoint( size_t i, int xo, int yo ) const
@@ -497,6 +594,98 @@ void CGrayMapBlock::Load( int bx, int by )
 	}
 
 	m_CacheTime.HitCacheTime();		// validate.
+}
+
+CGrayMapBlock::CGrayMapBlock( const CPointMap & pt ) :
+		CPointSort( pt )	// The upper left corner.
+{
+	sm_iCount++;
+	m_map = pt.m_map;
+	Load(pt.m_x/UO_BLOCK_SIZE, pt.m_y/UO_BLOCK_SIZE);
+}
+
+CGrayMapBlock::CGrayMapBlock(int bx, int by, int map) :
+		CPointSort(static_cast<WORD>(bx)* UO_BLOCK_SIZE, static_cast<WORD>(by) * UO_BLOCK_SIZE)
+{
+	sm_iCount++;
+	m_map = map;
+	Load( bx, by );
+}
+
+CGrayMapBlock::~CGrayMapBlock()
+{
+	sm_iCount--;
+}
+
+int CGrayMapBlock::GetOffsetX( int x ) const
+{
+	// Allow this to go out of bounds.
+	// ASSERT( ( x-m_pt.m_x) == UO_BLOCK_OFFSET(x));
+	return( x - m_x );
+}
+
+int CGrayMapBlock::GetOffsetY( int y ) const
+{
+	return( y - m_y );
+}
+
+const CUOMapMeter * CGrayMapBlock::GetTerrain( int xo, int yo ) const
+{
+	ASSERT( xo >= 0 && xo < UO_BLOCK_SIZE );
+	ASSERT( yo >= 0 && yo < UO_BLOCK_SIZE );
+	return( &( m_Terrain.m_Meter[ yo*UO_BLOCK_SIZE + xo ] ));
+}
+
+const CUOMapBlock * CGrayMapBlock::GetTerrainBlock() const
+{
+	return( &m_Terrain );
+}
+
+
+//////////////////////////////////////////////////////////////////
+// -CGrayMulti
+
+void CGrayMulti::Init()
+{
+	m_id = MULTI_QTY;
+	m_pItems = NULL;
+	m_iItemQty = 0;
+}
+void CGrayMulti::Release()
+{
+	if ( m_pItems != NULL )
+	{
+		delete[] m_pItems;
+		Init();
+	}
+}
+
+CGrayMulti::CGrayMulti()
+{
+	Init();
+}
+CGrayMulti::CGrayMulti( MULTI_TYPE id )
+{
+	Init();
+	Load( id );
+}
+CGrayMulti::~CGrayMulti()
+{
+	Release();
+}
+
+MULTI_TYPE CGrayMulti::GetMultiID() const
+{
+	return( m_id );
+}
+size_t CGrayMulti::GetItemCount() const
+{
+	return( m_iItemQty );
+}
+const CUOMultiItemRec2 * CGrayMulti::GetItem( size_t i ) const
+{
+	ASSERT( i<m_iItemQty );
+	return( &(m_pItems[i]) );
 }
 
 //////////////////////////////////////////////////////////////////

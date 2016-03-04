@@ -13,6 +13,8 @@
 #include "CResource.h"
 //#include "CItemVendable.h"
 
+class CBaseBase;
+
 enum MEMORY_TYPE
 {
 	// IT_EQ_MEMORY_OBJ
