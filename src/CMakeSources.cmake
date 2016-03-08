@@ -24,6 +24,7 @@ graysvr/CCharNPCStatus.cpp
 graysvr/CCharPlayer.cpp
 graysvr/CCharPlayer.h
 graysvr/CCharRefArray.h
+graysvr/CCharRefArray.cpp
 graysvr/CCharSkill.cpp
 graysvr/CCharSpell.cpp
 graysvr/CCharStat.cpp
@@ -39,6 +40,8 @@ graysvr/CClient.h
 graysvr/CClientLog.cpp
 graysvr/CClientMsg.cpp
 graysvr/CClientTarg.cpp
+graysvr/CClientTooltip.h
+graysvr/CClientTooltip.cpp
 graysvr/CClientUse.cpp
 graysvr/CContainer.cpp
 graysvr/CContainer.h
@@ -99,6 +102,7 @@ graysvr/CWorld.cpp
 graysvr/CWorld.h
 graysvr/CWorldImport.cpp
 graysvr/CWorldMap.cpp
+graysvr/enums.h
 graysvr/graysvr.cpp
 graysvr/graysvr.h
 graysvr/resource.h

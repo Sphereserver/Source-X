@@ -79,6 +79,16 @@ typedef unsigned int	ERROR_CODE;
 		*psX	= '\0';				\
 }
 
+#ifndef minimum
+#define minimum(x,y)	((x)<(y)?(x):(y))
+#endif	// minimum
+#ifndef maximum
+#define maximum(x,y)	((x)>(y)?(x):(y))
+#endif //maximum
+
+#define medium(x,y,z)	((x)>(y)?(x):((z)<(y)?(z):(y)))
+
+
 // -----------------------------
 //	Time measurement macroses
 // -----------------------------

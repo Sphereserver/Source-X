@@ -3,7 +3,8 @@
 */
 
 #include "regex/deelx.h"
-#include "graycom.h"
+#include "CString.h"
+
 
 /**
 * @brief Default memory alloc size for CGString.
@@ -570,7 +571,7 @@ size_t Str_ParseCmds(TCHAR * pszCmdLine, TCHAR ** ppCmd, size_t iMax, LPCTSTR ps
 	return(iQty);
 }
 
-size_t Str_ParseCmds(TCHAR * pszCmdLine, INT64 * piCmd, size_t iMax, LPCTSTR pszSep)
+size_t Str_ParseCmds(TCHAR * pszCmdLine, int64_t * piCmd, size_t iMax, LPCTSTR pszSep)
 {
 	TCHAR * ppTmp[256];
 	if (iMax > COUNTOF(ppTmp))

@@ -2,7 +2,7 @@
 // CCharSpell.cpp
 //
 
-#include "graysvr.h"	// predef header.
+//#include "graysvr.h" Removed to test. 	// predef header.
 #include "../network/send.h"
 
 SPELL_TYPE CChar::Spell_GetIndex(SKILL_TYPE skill)	// Returns the first spell for the given skill
@@ -1714,8 +1714,8 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 			Damage is calculated as follows : The range of damage is between power - 2 and power + 1.
 			Then the damage is multiplied based on the victim's current and maximum Stamina values.
 			The more the victim is fatigued, the more damage this spell deals.
-			The damage is multiplied by the result of this formula: 3 - (Cur Stamina ÷ Max Stamina x 2.
-			For example, suppose the base damage for a Strangle hit is 5. The target currently has 40 out of a maximum of 80 stamina. Final damage for that hit is: 5 x (3 - (40 ÷ 80 x 2) = 10.*/
+			The damage is multiplied by the result of this formula: 3 - (Cur Stamina ï¿½ Max Stamina x 2.
+			For example, suppose the base damage for a Strangle hit is 5. The target currently has 40 out of a maximum of 80 stamina. Final damage for that hit is: 5 x (3 - (40 ï¿½ 80 x 2) = 10.*/
 			OnTakeDamage(maximum(1, iDmg), pItem->m_uidLink.CharFind(), DAMAGE_MAGIC | DAMAGE_POISON | DAMAGE_NOREVEAL, 0, 0, 0, 100, 0);
 		}
 		case SPELL_Pain_Spike:

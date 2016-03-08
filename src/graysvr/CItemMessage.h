@@ -1,7 +1,7 @@
 #ifndef _INC_CITEMMESSAGE_H
 #define _INC_CITEMMESSAGE_H
 
-#include "graysvr.h"
+//#include "graysvr.h" Removed to test.
 
 class CItemMessage : public CItemVendable	// A message for a bboard or book text.
 {

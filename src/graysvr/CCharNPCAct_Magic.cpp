@@ -1,5 +1,5 @@
 // Actions specific to an NPC.
-#include "graysvr.h"	// predef header.
+//#include "graysvr.h" Removed to test. 	// predef header.
 
 // Retrieves all the spells this character has to spells[x] list
 int CCharNPC::Spells_GetCount()

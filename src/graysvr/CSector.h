@@ -11,28 +11,6 @@
 
 class CChar;
 class CItemStone;
-struct CSectorEnviron	// When these change it is an CTRIG_EnvironChange,
-{
-#define LIGHT_OVERRIDE 0x80
-public:
-	BYTE m_Light;		// the calculated light level in this area. |0x80 = override.
-	SEASON_TYPE m_Season;		// What is the season for this sector.
-	WEATHER_TYPE m_Weather;		// the weather in this area now.
-public:
-	CSectorEnviron()
-	{
-		m_Light = LIGHT_BRIGHT;	// set based on time later.
-		m_Season = SEASON_Summer;
-		m_Weather = WEATHER_DRY;
-	}
-	void SetInvalid()
-	{
-		// Force a resync of all this. we changed location by teleport etc.
-		m_Light = UCHAR_MAX;	// set based on time later.
-		m_Season = SEASON_QTY;
-		m_Weather = WEATHER_DEFAULT;
-	}
-};
 
 class CSector : public CScriptObj, public CSectorBase	// square region of the world.
 {

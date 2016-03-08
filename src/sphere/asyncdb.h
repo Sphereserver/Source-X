@@ -3,7 +3,7 @@
 
 	#include "threads.h"
 	#include "mutex.h"
-	#include "../graysvr/graysvr.h"
+	//#include "../graysvr/graysvr.h" Removed to test.
 
 	class CDataBaseAsyncHelper : public AbstractSphereThread
 	{

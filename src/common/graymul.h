@@ -3,6 +3,8 @@
 #define _INC_GRAYMUL_H
 #pragma once
 
+#include "common.h"
+
 //---------------------------MUL FILE DEFS---------------------------
 
 // All these structures must be BYTE packed.

@@ -6,6 +6,7 @@
 #pragma once
 
 #include "CString.h"
+#include "graycom.h"
 #include "../sphere/threads.h"
 
 //---------------------------PROTOCOL DEFS---------------------------

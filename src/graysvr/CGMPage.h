@@ -6,10 +6,11 @@
 #include "../common/CScriptObj.h"
 #include "../common/CRect.h"
 #include "CServTime.h"
+#include "CAccount.h"
 
 
 class CClient;	//fixme
-class CAccountRef;
+//class CAccountRef;
 class CGMPage : public CGObListRec, public CScriptObj
 {
 	// RES_GMPAGE

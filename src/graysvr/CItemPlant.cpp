@@ -1,4 +1,4 @@
-#include "graysvr.h"	// predef header.
+//#include "graysvr.h" Removed to test. 	// predef header.
 
 void CItem::Plant_SetTimer()
 {

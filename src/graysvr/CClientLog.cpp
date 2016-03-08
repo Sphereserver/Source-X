@@ -1,5 +1,5 @@
 // Login and low level stuff for the client.
-#include "graysvr.h"	// predef header.
+//#include "graysvr.h" Removed to test. 	// predef header.
 #include "../network/network.h"
 #include "../network/send.h"
 #include "../common/CFileList.h"

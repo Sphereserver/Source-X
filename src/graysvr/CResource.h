@@ -14,13 +14,28 @@
 #include "../common/CExpression.h"
 #include "../common/grayproto.h"
 #include "../common/CGrayMap.h"
-#include "graysvr.h"
+//#include "graysvr.h" Removed to test.
 
 class CAccount;
 class CClient;
 class CServerDef;
 
 typedef CServerDef * CServerRef;
+
+
+enum RESDISPLAY_VERSION
+{
+	RDS_T2A = 1,
+	RDS_LBR,
+	RDS_AOS,
+	RDS_SE,
+	RDS_ML,
+	RDS_KR,
+	RDS_SA,
+	RDS_HS,
+	RDS_TOL,
+	RDS_QTY
+};
 
 // option flags
 enum OF_TYPE
@@ -235,50 +250,6 @@ public:
 private:
 	CValueCurveDef(const CValueCurveDef& copy);
 	CValueCurveDef& operator=(const CValueCurveDef& other);
-};
-
-class CCharRefArray
-{
-private:
-	// List of Players and NPC's involved in the quest/party/account etc..
-	CGTypedArray< CGrayUID, CGrayUID> m_uidCharArray;
-
-public:
-	static const char *m_sClassName;
-	size_t FindChar( const CChar * pChar ) const;
-	bool IsCharIn( const CChar * pChar ) const
-	{
-		return( FindChar( pChar ) != m_uidCharArray.BadIndex() );
-	}
-	size_t AttachChar( const CChar * pChar );
-	size_t InsertChar( const CChar * pChar, size_t i );
-	void DetachChar( size_t i );
-	size_t DetachChar( const CChar * pChar );
-	void DeleteChars();
-	size_t GetCharCount() const
-	{
-		return( m_uidCharArray.GetCount());
-	}
-	CGrayUID GetChar( size_t i ) const
-	{
-		return( m_uidCharArray[i] );
-	}
-	bool IsValidIndex( size_t i ) const
-	{
-		return m_uidCharArray.IsValidIndex( i );
-	}
-	inline size_t BadIndex() const
-	{
-		return m_uidCharArray.BadIndex();
-	}
-	void WritePartyChars( CScript & s );
-
-public:
-	CCharRefArray() { };
-
-private:
-	CCharRefArray(const CCharRefArray& copy);
-	CCharRefArray& operator=(const CCharRefArray& other);
 };
 
 enum RRTRIG_TYPE

@@ -8,12 +8,7 @@
 
 #include "common.h"
 #include "graycom.h"
-
-#ifndef minimum					// limits.h ?
-	#define minimum(x,y)	((x)<(y)?(x):(y))
-	#define maximum(x,y)	((x)>(y)?(x):(y))
-#endif	// minimum
-#define medium(x,y,z)	((x)>(y)?(x):((z)<(y)?(z):(y)))
+#include "macroutils.h"
 
 struct CMemBlock
 {

@@ -5,6 +5,8 @@
 #endif
 
 #include "CString.h"
+#include "CFile.h"
+#include "../sphere/threads.h"
 
 bool CFile::SetFilePath( LPCTSTR pszName )
 {

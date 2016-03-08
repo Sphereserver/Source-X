@@ -1,5 +1,5 @@
 // The physics calculations of the world.
-#include "graysvr.h"	// predef header.
+//#include "graysvr.h" Removed to test. 	// predef header.
 
 //********************************
 // Movement

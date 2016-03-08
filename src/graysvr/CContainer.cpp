@@ -1,7 +1,7 @@
 //
 // CContain.CPP
 //
-#include "graysvr.h"	// predef header.
+//#include "graysvr.h" Removed to test. 	// predef header.
 #include "../common/CObjBaseTemplate.h"
 #include "../common/CGrayUID.h"
 #include "../network/send.h"

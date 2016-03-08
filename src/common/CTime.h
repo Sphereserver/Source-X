@@ -2,6 +2,7 @@
 #define _INC_CTIME_H
 
 #include <time.h>
+#include "common.h"
 
 #ifndef _WIN32
 LONGLONG GetTickCount();

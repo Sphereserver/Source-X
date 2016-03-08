@@ -1,4 +1,4 @@
-#include "graysvr.h"	// predef header.
+//#include "graysvr.h" Removed to test. 	// predef header.
 #include "../common/grayver.h"	// sphere version
 #include "PingServer.h"	// ping server
 #include "../network/network.h" // network thread

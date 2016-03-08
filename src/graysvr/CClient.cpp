@@ -1,4 +1,4 @@
-#include "graysvr.h"	// predef header.
+//#include "graysvr.h" Removed to test. 	// predef header.
 #include "CClient.h"
 #include "CServTime.h"
 #include "CItemSpawn.h"

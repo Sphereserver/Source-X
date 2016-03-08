@@ -1,7 +1,7 @@
 // Stuff for making this application run as an NT service
 
 #ifdef _WIN32
-#include "graysvr.h"
+//#include "graysvr.h" Removed to test.
 #include "../common/grayver.h"
 #include "ntservice.h"
 #include <direct.h>

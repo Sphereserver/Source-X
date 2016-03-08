@@ -1,6 +1,7 @@
 // Actions specific to an NPC.
-#include "graysvr.h"	// predef header.
+//#include "graysvr.h" Removed to test. 	// predef header.
 #include "CServTime.h"
+#include "CChar.h"
 
 
 // Add some enemy to my Attacker list

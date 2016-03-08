@@ -65,11 +65,6 @@
 #define LOBYTE(w)	((BYTE)((DWORD)(w) &  0xff))
 #define HIBYTE(w)	((BYTE)((DWORD)(w) >> 8))
 
-#ifndef minimum					// limits.h ?
-	#define minimum(x,y)	((x)<(y)?(x):(y))
-	#define maximum(x,y)	((x)>(y)?(x):(y))
-#endif	// minimum
-
 #ifndef sign
 	#define sign(n) (((n) < 0) ? -1 : (((n) > 0) ? 1 : 0))
 //	#define abs(n) (((n) < 0) ? (-(n)) : (n))

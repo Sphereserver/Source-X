@@ -1,5 +1,5 @@
 // An item is targetted.
-#include "graysvr.h"	// predef header.
+//#include "graysvr.h" Removed to test. 	// predef header.
 #include "CClient.h"
 #include "CItemVendable.h"
 #include "../network/send.h"

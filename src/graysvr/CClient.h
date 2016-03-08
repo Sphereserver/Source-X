@@ -6,9 +6,15 @@
 #define _INC_CCLIENT_H
 #pragma once
 
+#include "../common/CEncrypt.h"
 #include "CChat.h"
 #include "CGMPage.h"
 #include "CAccount.h"
+#include "CSectorEnviron.h"
+#include "enums.h"
+#include "../network/network.h"
+#include "CItemBase.h"
+#include "../network/receive.h"
 
 enum CV_TYPE
 {

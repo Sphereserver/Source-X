@@ -2,7 +2,7 @@
 #define _WIN32_DCOM
 
 #include "../common/graycom.h"
-#include "../graysvr/graysvr.h"
+//#include "../graysvr/graysvr.h" Removed to test.
 #include "threads.h"
 #if !defined(_WIN32) && !defined(_BSD)
 #include <sys/prctl.h>

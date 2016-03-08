@@ -1,5 +1,5 @@
 // Actions specific to an NPC.
-#include "graysvr.h"	// predef header.
+//#include "graysvr.h" Removed to test. 	// predef header.
 #include "CItemVendable.h"
 #include "CItemSpawn.h"
 

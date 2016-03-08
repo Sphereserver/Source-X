@@ -7,7 +7,7 @@
 #ifndef _INC_CSTRING_H
 #define _INC_CSTRING_H
 
-#include "graycom.h"
+#include <stdint.h>
 #include "common.h"
 
 /**
@@ -493,7 +493,7 @@ size_t Str_ParseCmds(TCHAR * pCmdLine, TCHAR ** ppCmd, size_t iMax, LPCTSTR pSep
 * @param pSep the list of separators (by default "=, \t").
 * @return count of arguments parsed.
 */
-size_t Str_ParseCmds(TCHAR * pCmdLine, INT64 * piCmd, size_t iMax, LPCTSTR pSep = NULL);
+size_t Str_ParseCmds(TCHAR * pCmdLine, int64_t * piCmd, size_t iMax, LPCTSTR pSep = NULL);
 
 /**
 * @brief Look for a string in a table.

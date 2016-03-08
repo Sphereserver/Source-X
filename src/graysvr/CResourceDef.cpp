@@ -1,5 +1,5 @@
 // A variety of resource blocks.
-#include "graysvr.h"	// predef header.
+//#include "graysvr.h" Removed to test. 	// predef header.
 #include "../common/CAssoc.h"
 
 //*******************************************

@@ -6,6 +6,9 @@
 #ifndef _INC_CARRAY_H
 #define _INC_CARRAY_H
 
+#include <limits>
+
+#include "common.h"
 
 #if _MSC_VER
 	#define STANDARD_CPLUSPLUS_THIS(_x_) _x_
@@ -13,6 +16,7 @@
 #endif // _MSC_VER
 #ifdef __MINGW32__
 #define STANDARD_CPLUSPLUS_THIS(_x_) this->_x_
+#include <cstddef>
 #endif  // __MINGW32__
 #ifdef __linux
 #define STANDARD_CPLUSPLUS_THIS(_x_) this->_x_

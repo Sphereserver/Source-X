@@ -2,6 +2,7 @@
 #define _INC_CEXPRSSION_H
 #pragma once
 
+#include <stdint.h>
 #include "CVarDefMap.h"
 #include "ListDefContMap.h"
 
@@ -88,7 +89,7 @@ public:
 public:
 	// Strict G++ Prototyping produces an error when not casting char*& to const char*&
 	// So this is a rather lazy workaround
-	inline INT64 GetSingle( LPTSTR &pArgs )
+	inline int64_t GetSingle( LPTSTR &pArgs )
 	{
 		return GetSingle(const_cast<LPCTSTR &>(pArgs));
 	}
@@ -98,22 +99,22 @@ public:
 		return static_cast<int>(GetRange(const_cast<LPCTSTR &>(pArgs)));
 	}
 
-	inline int GetRangeVals( LPTSTR &pExpr, INT64 * piVals, int iMaxQty )
+	inline int GetRangeVals( LPTSTR &pExpr, int64_t * piVals, int iMaxQty )
 	{
 		return GetRangeVals(const_cast<LPCTSTR &>(pExpr), piVals, iMaxQty );
 	}
 
-	inline INT64 GetVal( LPTSTR &pArgs )
+	inline int64_t GetVal( LPTSTR &pArgs )
 	{
 		return GetVal(const_cast<LPCTSTR &>(pArgs));
 	}
 
 	// Evaluate using the stuff we know.
-	INT64 GetSingle( LPCTSTR & pArgs );
-	INT64 GetVal( LPCTSTR & pArgs );
-	INT64 GetValMath( INT64 lVal, LPCTSTR & pExpr );
-	int GetRangeVals(LPCTSTR & pExpr, INT64 * piVals, int iMaxQty);
-	INT64 GetRange(LPCTSTR & pArgs);
+	int64_t GetSingle( LPCTSTR & pArgs );
+	int64_t GetVal( LPCTSTR & pArgs );
+	int64_t GetValMath( int64_t lVal, LPCTSTR & pExpr );
+	int GetRangeVals(LPCTSTR & pExpr, int64_t * piVals, int iMaxQty);
+	int64_t GetRange(LPCTSTR & pArgs);
 
 public:
 	CExpression();
@@ -124,26 +125,26 @@ private:
 	CExpression& operator=(const CExpression& other);
 } g_Exp;
 
-extern bool IsValidDef( LPCTSTR pszTest );
-extern bool IsValidGameObjDef( LPCTSTR pszTest );
+bool IsValidDef( LPCTSTR pszTest );
+bool IsValidGameObjDef( LPCTSTR pszTest );
 
-extern bool IsSimpleNumberString( LPCTSTR pszTest );
-extern bool IsStrNumericDec( LPCTSTR pszTest );
-extern bool IsStrNumeric( LPCTSTR pszTest );
-extern bool IsStrEmpty( LPCTSTR pszTest );
+bool IsSimpleNumberString( LPCTSTR pszTest );
+bool IsStrNumericDec( LPCTSTR pszTest );
+bool IsStrNumeric( LPCTSTR pszTest );
+bool IsStrEmpty( LPCTSTR pszTest );
 inline extern bool IsCharNumeric( char & Test );
 
 // Numeric formulas
-extern INT64 Calc_GetRandLLVal( INT64 iqty );
-extern INT64 Calc_GetRandLLVal2( INT64 iMin, INT64 iMax );
-extern int Calc_GetRandVal( int iqty );
-extern int Calc_GetRandVal2( int iMin, int iMax );
-extern int Calc_GetLog2( UINT iVal );
-extern int Calc_GetSCurve( int iValDiff, int iVariance );
-extern int Calc_GetBellCurve( int iValDiff, int iVariance );
+int64_t Calc_GetRandLLVal( int64_t iqty );
+int64_t Calc_GetRandLLVal2( int64_t iMin, INT64 iMax );
+int Calc_GetRandVal( int iqty );
+int Calc_GetRandVal2( int iMin, int iMax );
+int Calc_GetLog2( UINT iVal );
+int Calc_GetSCurve( int iValDiff, int iVariance );
+int Calc_GetBellCurve( int iValDiff, int iVariance );
 
-extern DWORD ahextoi( LPCTSTR pArgs ); // Convert hex string to integer
-extern INT64 ahextoi64( LPCTSTR pArgs ); // Convert hex string to INT64
+DWORD ahextoi( LPCTSTR pArgs ); // Convert hex string to integer
+int64_t ahextoi64( LPCTSTR pArgs ); // Convert hex string to INT64
 
 #define Exp_GetSingle( pa ) static_cast<int>(g_Exp.GetSingle( pa ))
 #define Exp_GetLLSingle( pa ) g_Exp.GetSingle( pa )

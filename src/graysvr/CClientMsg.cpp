@@ -1,5 +1,5 @@
 // Game server messages. (No login stuff)
-#include "graysvr.h"	// predef header.
+//#include "graysvr.h" Removed to test. 	// predef header.
 #include "CClient.h"
 #include "CServTime.h"
 #include "CItemMap.h"

@@ -1,7 +1,8 @@
 #ifndef _INC_CITEMCONTAINER_H
 #define _INC_CITEMCONTAINER_H
 
-#include "CItemContainer.h"
+#include "CItemVendable.h"
+#include "CContainer.h"
 
 
 class CItemContainer : public CItemVendable, public CContainer

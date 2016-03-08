@@ -1,6 +1,6 @@
 // Test things to judge what an NPC might be thinking. (want to do)
 // But take no actions here.
-#include "graysvr.h"	// predef header.
+//#include "graysvr.h" Removed to test. 	// predef header.
 #include "CItemVendable.h"
 
 CREID_TYPE CChar::NPC_GetAllyGroupType(CREID_TYPE idTest)	// static

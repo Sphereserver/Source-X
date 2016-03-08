@@ -1,7 +1,7 @@
 // Put up a window for data (other than the console)
 #ifdef _WIN32
 
-#include "graysvr.h"	// predef header.
+//#include "graysvr.h" Removed to test. 	// predef header.
 #include <commctrl.h>	// NM_RCLICK
 #include "resource.h"
 #include "../common/cwindow.h"

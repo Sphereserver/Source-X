@@ -2,8 +2,9 @@
 #define _INC_CREGION_H
 #pragma once
 
-#include "CRect.h"
 #include "graymul.h"
+#include "CRect.h"
+#include "CResourceBase.h"
 
 inline DIR_TYPE GetDirTurn( DIR_TYPE dir, int offset )
 {

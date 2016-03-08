@@ -1,5 +1,5 @@
 // define the base types of an item (rather than the instance)
-#include "graysvr.h"	// predef header.
+//#include "graysvr.h" Removed to test. 	// predef header.
 
 /////////////////////////////////////////////////////////////////
 // -CItemBase

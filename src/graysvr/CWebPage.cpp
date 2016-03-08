@@ -1,4 +1,4 @@
-#include "graysvr.h"	// predef header.
+//#include "graysvr.h" Removed to test. 	// predef header.
 #include "CServTime.h"
 #include "../common/grayver.h"	// sphere version
 #include "../common/CFileList.h"

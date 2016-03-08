@@ -1,4 +1,4 @@
-#include "graysvr.h"	// predef header.
+//#include "graysvr.h" Removed to test. 	// predef header.
 #include "CItemSpawn.h"
 #include "CObjBase.h"
 #include "CChar.h"

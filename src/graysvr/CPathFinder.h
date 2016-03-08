@@ -6,7 +6,7 @@
 #ifndef PATH_FINDER_H
 #define PATH_FINDER_H
 
-#include "../graysvr/graysvr.h"
+//#include "../graysvr/graysvr.h" Removed to test.
 #include <deque>
 #include <list>
 #include <algorithm>

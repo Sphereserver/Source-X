@@ -7,7 +7,7 @@
 #include "CWorld.h"
 #include "CLog.h"
 #include "CClient.h"
-#include "graysvr.h"
+//#include "graysvr.h" Removed to test.
 
 //////////////////////////////////////////////////////////////////
 // -CSector

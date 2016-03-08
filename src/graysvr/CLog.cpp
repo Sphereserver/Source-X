@@ -1,5 +1,5 @@
 #include "../common/graycom.h"
-#include "graysvr.h"  // Change by CServ.h when is done.
+//#include "graysvr.h" Removed to test.   // Change by CServ.h when is done.
 #include "CLog.h"
 #include "UnixTerminal.h"
 

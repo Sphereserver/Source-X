@@ -10,7 +10,6 @@
 #include "../common/CString.h"
 #include "../common/CVarDefMap.h"
 #include "../common/graymul.h"
-#include "graysvr.h"
 
 struct CBaseBaseDef : public CResourceLink
 {

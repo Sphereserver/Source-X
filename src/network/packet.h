@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../common/common.h"
-#include "../graysvr/graysvr.h"
+//#include "../graysvr/graysvr.h" Removed to test.
 
 class NetState;
 class SimplePacketTransaction;
