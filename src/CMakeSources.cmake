@@ -32,6 +32,10 @@ graysvr/CCharStatus.cpp
 graysvr/CCharUse.cpp
 graysvr/CChat.cpp
 graysvr/CChat.h
+graysvr/CChatChannel.cpp
+graysvr/CChatChannel.h
+graysvr/CChatChanMember.cpp
+graysvr/CChatChanMember.h
 graysvr/CClient.cpp
 graysvr/CClientDialog.cpp
 graysvr/CClientEvent.cpp
