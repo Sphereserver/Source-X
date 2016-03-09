@@ -77,7 +77,7 @@ bool CObjBaseTemplate::IsValidUID() const
 	return( m_UID.IsValidUID() );
 }
 
-void CObjBaseTemplate::SetContainerFlags( DWORD dwFlags = 0 )
+void CObjBaseTemplate::SetContainerFlags( DWORD dwFlags )
 {
 	m_UID.SetObjContainerFlags( dwFlags );
 }
@@ -224,13 +224,13 @@ int CObjBaseTemplate::GetTopDist3D( const CObjBaseTemplate * pObj ) const // 3D 
 	return( GetTopPoint().GetDist3D( pObj->GetTopPoint()));
 }
 
-DIR_TYPE CObjBaseTemplate::GetTopDir( const CObjBaseTemplate * pObj, DIR_TYPE DirDefault = DIR_QTY ) const
+DIR_TYPE CObjBaseTemplate::GetTopDir( const CObjBaseTemplate * pObj, DIR_TYPE DirDefault ) const
 {
 	ASSERT( pObj );
 	return( GetTopPoint().GetDir( pObj->GetTopPoint(), DirDefault ));
 }
 
-DIR_TYPE CObjBaseTemplate::GetDir( const CObjBaseTemplate * pObj, DIR_TYPE DirDefault = DIR_QTY ) const
+DIR_TYPE CObjBaseTemplate::GetDir( const CObjBaseTemplate * pObj, DIR_TYPE DirDefault ) const
 {
 	ASSERT( pObj );
 	pObj = pObj->GetTopLevelObj();

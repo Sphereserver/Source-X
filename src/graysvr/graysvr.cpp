@@ -1,10 +1,14 @@
-//#include "graysvr.h" Removed to test. 	// predef header.
+#include "../common/CException.h"
+#include "../common/cgrayinst.h"
 #include "../common/grayver.h"	// sphere version
-#include "PingServer.h"	// ping server
 #include "../network/network.h" // network thread
 #include "../sphere/asyncdb.h"
 #include "CItemMessage.h"
 #include "CItemMap.h"
+#include "graysvr.h"
+#include "PingServer.h"
+#include "CServer.h"
+#include "CWorld.h"
 #if !defined(_WIN32) || defined(_LIBEV)
 	#include "../sphere/linuxev.h"
 	#include "UnixTerminal.h"
@@ -383,30 +387,6 @@ CGStringList	g_AutoComplete;	// auto-complete list
 TScriptProfiler g_profiler;		// script profiler
 CMapList	g_MapList;			// global maps information
 
-DIR_TYPE GetDirStr( LPCTSTR pszDir )
-{
-	char iDir2, iDir = static_cast<char>(toupper(pszDir[0]));
-
-	switch ( iDir )
-	{
-		case 'E': return DIR_E;
-		case 'W': return DIR_W;
-		case 'N':
-			iDir2 = static_cast<char>(toupper(pszDir[1]));
-			if ( iDir2 == 'E' ) return DIR_NE;
-			if ( iDir2 == 'W' ) return DIR_NW;
-			return DIR_N;
-		case 'S':
-			iDir2 = static_cast<char>(toupper(pszDir[1]));
-			if ( iDir2 == 'E' ) return DIR_SE;
-			if ( iDir2 == 'W' ) return DIR_SW;
-			return DIR_S;
-		default:
-			if (( iDir >= '0' ) && ( iDir <= '7' ))
-				return static_cast<DIR_TYPE>(iDir - '0');
-	}
-	return DIR_QTY;
-}
 
 LPCTSTR GetTimeMinDesc( int minutes )
 {

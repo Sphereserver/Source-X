@@ -1,9 +1,14 @@
 #ifndef _INC_CCHAR_H
 #define _INC_CCHAR_H
 
-#include "CObjBase.h"
+#include "CCharBase.h"
 #include "CCharPlayer.h"
 #include "CItemContainer.h"
+#include "CItemCorpse.h"
+#include "CItemMemory.h"
+#include "CItemStone.h"
+#include "CObjBase.h"
+#include "CParty.h"
 #include "../common/grayproto.h"
 
 class CCharNPC;
@@ -1181,6 +1186,11 @@ inline bool CChar::IsSkillNPC( SKILL_TYPE skill )  // static
 {
 	// Is this in the NPC set of skills.
 	return (skill >= NPCACT_FOLLOW_TARG && skill < NPCACT_QTY);
+}
+
+inline CChar * CGrayUIDBase::CharFind() const
+{
+	return( dynamic_cast < CChar * >( ObjFind() ) );
 }
 
 #endif // _INC_CCHAR_H

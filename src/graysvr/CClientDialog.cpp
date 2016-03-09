@@ -1,5 +1,8 @@
 //#include "graysvr.h" Removed to test. 	// predef header.
+#include "CChar.h"
 #include "CClient.h"
+#include "CLog.h"
+#include "../common/CException.h"
 #include "../network/network.h"
 #include "../network/send.h"
 #include "../network/receive.h"

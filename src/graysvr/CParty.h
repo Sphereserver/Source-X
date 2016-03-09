@@ -1,13 +1,14 @@
 #ifndef _INC_CPARTY_H
 #define _INC_CPARTY_H
 
-#include "../common/cstring.h"
 #include "../common/CArray.h"
-#include "../common/CScriptObj.h"
 #include "../common/crect.h"
+#include "../common/CScriptObj.h"
+#include "../common/CString.h"
+#include "../common/CVarDefMap.h"
 #include "../common/grayproto.h"
-#include "CServTime.h"
 #include "CCharRefArray.h"
+#include "CServTime.h"
 
 class PacketSend;
 

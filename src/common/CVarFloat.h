@@ -1,4 +1,6 @@
 #include <map>
+#include "CString.h"
+#include "../graysvr/CObjBase.h"
 
 struct LexNoCaseLess {
 	bool operator()(const CGString& CGStr, const char* pBeg2) const

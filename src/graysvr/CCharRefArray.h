@@ -1,7 +1,7 @@
 #ifndef _INC_CCHARREFARRAY_H
 #define _INC_CCHARREFARRAY_H
 
-#include "CScript.h"
+#include "../common/CScript.h"
 #include "../common/CArray.h"
 #include "../common/CGrayUID.h"
 

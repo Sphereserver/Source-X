@@ -1,4 +1,8 @@
+#include "CException.h"
+#include "CScript.h"
 #include "CsvFile.h"
+#include "graycom.h"
+#include "../sphere/threads.h"
 
 CSVFile::CSVFile()
 {

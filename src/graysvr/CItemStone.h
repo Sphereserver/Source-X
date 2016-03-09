@@ -195,13 +195,4 @@ public:
 	void SetAbbrev( LPCTSTR pAbbrev );
 };
 
-enum CIC_TYPE
-{
-	CIC_AUTHOR,
-	CIC_BODY,
-	CIC_PAGES,
-	CIC_TITLE,
-	CIC_QTY
-};
-
 #endif // _INC_CITEMSTONE_H

@@ -6,15 +6,25 @@
 #define _INC_CCLIENT_H
 #pragma once
 
-#include "../common/CEncrypt.h"
-#include "CChat.h"
-#include "CGMPage.h"
 #include "CAccount.h"
+#include "CChat.h"
+#include "CChatChanMember.h"
+#include "CClientTooltip.h"
+#include "CGMPage.h"
+#include "CItemBase.h"
+#include "CItemContainer.h"
+#include "CItemMultiCustom.h"
 #include "CSectorEnviron.h"
 #include "enums.h"
+#include "../common/CArray.h"
+#include "../common/CEncrypt.h"
+#include "../common/CScriptObj.h"
+#include "../common/CTextConsole.h"
 #include "../network/network.h"
-#include "CItemBase.h"
 #include "../network/receive.h"
+#include "../network/send.h"
+class CItemMap;
+class VendorItem;
 
 enum CV_TYPE
 {
@@ -30,6 +40,59 @@ enum CC_TYPE
 	#include "../tables/CClient_props.tbl"
 	#undef ADD
 	CC_QTY
+};
+
+
+
+
+class CDialogResponseArgs : public CScriptTriggerArgs
+{
+	// The scriptable return from a gump dialog.
+	// "ARG" = dialog args script block. ex. ARGTXT(id), ARGCHK(i)
+public:
+	static const char *m_sClassName;
+	struct TResponseString
+	{
+	public:
+		const WORD m_ID;
+		CGString const m_sText;
+
+		TResponseString( WORD id, LPCTSTR pszText ) : m_ID( id ), m_sText( pszText )
+		{
+		}
+
+	private:
+		TResponseString( const TResponseString& copy );
+		TResponseString& operator=( const TResponseString& other );
+	};
+
+	CGTypedArray<DWORD, DWORD>		m_CheckArray;
+	CGObArray<TResponseString *>	m_TextArray;
+public:
+	void AddText( WORD id, LPCTSTR pszText );
+	LPCTSTR GetName() const;
+	bool r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc );
+
+public:
+	CDialogResponseArgs()
+	{
+	};
+
+private:
+	CDialogResponseArgs( const CDialogResponseArgs& copy );
+	CDialogResponseArgs& operator=( const CDialogResponseArgs& other );
+};
+
+//////////////////
+
+struct CMenuItem 	// describe a menu item.
+{
+public:
+	WORD m_id;			// ITEMID_TYPE in base set.
+	WORD m_color;
+	CGString m_sText;
+public:
+	bool ParseLine( TCHAR * pszArgs, CScriptObj * pObjBase, CTextConsole * pSrc );
 };
 
 

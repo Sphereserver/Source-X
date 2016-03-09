@@ -1,7 +1,17 @@
 #ifndef _INC_CITEMMESSAGE_H
 #define _INC_CITEMMESSAGE_H
 
-//#include "graysvr.h" Removed to test.
+#include "CItemVendable.h"
+#include "../common/CString.h"
+
+enum CIC_TYPE
+{
+	CIC_AUTHOR,
+	CIC_BODY,
+	CIC_PAGES,
+	CIC_TITLE,
+	CIC_QTY
+};
 
 class CItemMessage : public CItemVendable	// A message for a bboard or book text.
 {

@@ -2,10 +2,14 @@
 #define __NETWORK_H__
 #pragma once
 
-#include <CQueue.h>
 #include "packet.h"
+#include "../common/CArray.h"
 #include "../common/common.h"
+#include "../common/CQueue.h"
+#include "../common/grayproto.h"
+#include "../graysvr/CServTime.h"
 #include "../sphere/containers.h"
+#include "../sphere/threads.h"
 
 #define NETWORK_PACKETCOUNT 0x100	// number of unique packets
 #define NETWORK_BUFFERSIZE 0xF000	// size of receive buffer

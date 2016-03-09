@@ -715,4 +715,10 @@ public:
 	virtual bool NotifyDelete();
 };
 
+
+inline CItem * CGrayUIDBase::ItemFind() const
+{
+	// IsItem() may be faster ?
+	return( dynamic_cast < CItem * >( ObjFind() ) );
+}
 #endif // _INC_CITEM_H

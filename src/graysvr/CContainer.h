@@ -1,5 +1,5 @@
-#ifndef _INC_CCHARREFARRAY_H
-#define _INC_CCHARREFARRAY_H
+#ifndef _INC_CCONTAINER_H
+#define _INC_CCONTAINER_H
 
 #include "../common/CArray.h"
 #include "../common/CGrayUID.h"
@@ -59,4 +59,4 @@ public:
 	virtual void OnWeightChange( int iChange );
 	virtual void ContentAdd( CItem * pItem ) = 0;
 };
-#endif // _INC_CCHARREFARRAY_H
+#endif // _INC_CCONTAINER_H

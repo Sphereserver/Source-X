@@ -7,6 +7,7 @@
 
 class NetState;
 class SimplePacketTransaction;
+class AbstractString;
 
 #define PACKET_BUFFERDEFAULT 4
 #define PACKET_BUFFERGROWTH 4

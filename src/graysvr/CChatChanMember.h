@@ -1,9 +1,9 @@
 #ifndef _INC_CCHATCHANMEMBER_H
 #define _INC_CCHATCHANMEMBER_H
 
-#include <grayproto.h>
 #include "../common/CArray.h"
 #include "../common/CString.h"
+#include "../common/grayproto.h
 
 class CClient;
 

@@ -11,6 +11,7 @@
 #include "CContainer.h"
 #include "CBase.h"
 #include "CResource.h"
+#include "CWorld.h"
 //#include "CItemVendable.h"
 
 class CBaseBase;
@@ -105,7 +106,7 @@ public:
 	CVarDefCont * GetKey( LPCTSTR pszKey, bool fDef ) const;
 	void SetKeyNum(LPCTSTR pszKey, INT64 iVal);
 	void SetKeyStr(LPCTSTR pszKey, LPCTSTR pszVal);
-	void DeleteKey(LPCTSTR pszKey);
+	void CObjBase::DeleteKey( LPCTSTR pszKey );
 
 protected:
 	virtual void DupeCopy( const CObjBase * pObj );
@@ -468,4 +469,18 @@ enum CTRIG_TYPE
 
 	CTRIG_QTY				// 130
 };
+
+inline INT64 CObjBase::GetTimerDiff() const
+{
+	// How long till this will expire ?
+	return( g_World.GetTimeDiff( m_timeout ) );
+}
+inline CObjBase * CGrayUIDBase::ObjFind() const
+{
+	if ( IsResource() )
+		return( NULL );
+	return( g_World.FindUID( m_dwInternalVal & UID_O_INDEX_MASK ) );
+}
+
+extern void DeleteKey( LPCTSTR pszKey );
 #endif

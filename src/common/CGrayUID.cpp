@@ -64,7 +64,7 @@ bool CGrayUIDBase::IsItemInContainer() const
 	return( false );
 }
 
-void CGrayUIDBase::SetObjContainerFlags( DWORD dwFlags = 0 )
+void CGrayUIDBase::SetObjContainerFlags( DWORD dwFlags )
 {
 	m_dwInternalVal = ( m_dwInternalVal & (UID_O_INDEX_MASK|UID_F_ITEM )) | dwFlags;
 }

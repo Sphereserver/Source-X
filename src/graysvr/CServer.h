@@ -1,5 +1,5 @@
-#ifndef _INC_CPARTY_H
-#define _INC_CPARTY_H
+#ifndef _INC_CSERVER_H
+#define _INC_CSERVER_H
 
 #include "CItemShip.h"
 #include "CChat.h"
@@ -113,4 +113,4 @@ public:
 	PLEVEL_TYPE GetPrivLevel() const;
 } g_Serv;	// current state stuff not saved.
 
-#endif // _INC_CPARTY_H
+#endif // _INC_CSERVER_H

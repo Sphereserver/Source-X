@@ -2,15 +2,16 @@
 #define __CONTAINERS_H__
 #pragma once
 
+#include <list>
 // a thread-safe implementation of a queue container that doesn't use any locks
 // this only works as long as there is only a single reader thread and writer thread
 template<class T>
 class ThreadSafeQueue
 {
 public:
-	typedef std::list<T> list;
-	typedef typename std::list<T>::iterator iterator;
-	typedef typename std::list<T>::const_iterator const_iterator;
+	typedef list<T> list;
+	typedef typename list<T>::iterator iterator;
+	typedef typename list<T>::const_iterator const_iterator;
 
 private:
 	list m_list;

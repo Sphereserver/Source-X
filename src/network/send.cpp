@@ -1,8 +1,20 @@
-#include "send.h"
 #include "network.h"
-#include "../graysvr/CItemMap.h"
-#include "../graysvr/CItemVendable.h"
+#include "packet.h"
+#include "send.h"
+#include "../common/cgrayinst.h"
+#include "../common/CObjBaseTemplate.h"
 #include "../common/zlib/zlib.h"
+#include "../graysvr/CChar.h"
+#include "../graysvr/CClient.h"
+#include "../graysvr/CClientTooltip.h"
+#include "../graysvr/CItem.h"
+#include "../graysvr/CItemMap.h"
+#include "../graysvr/CItemMultiCustom.h"
+#include "../graysvr/CItemVendable.h"
+#include "../graysvr/CLog.h"
+#include "../graysvr/CObjBase.h"
+#include "../graysvr/CParty.h"
+#include "../graysvr/CWorld.h"
 
 #ifndef _WIN32
 #include <sys/time.h>

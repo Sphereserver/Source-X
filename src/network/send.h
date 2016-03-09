@@ -4,7 +4,11 @@
 
 #include "packet.h"
 #include "network.h"
+#include "../common/grayproto.h"
+#include "../common/CGrayUID.h"
 #include "../graysvr/CItemMessage.h"
+#include "../graysvr/CClientTooltip.h"
+
 
 /***************************************************************************
  *

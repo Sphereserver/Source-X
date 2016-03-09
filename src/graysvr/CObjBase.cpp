@@ -1,8 +1,11 @@
-//#include "graysvr.h" Removed to test. 	// predef header.
-#include "CItemSpawn.h"
-#include "CObjBase.h"
 #include "CChar.h"
+#include "CClient.h"
+#include "CItemSpawn.h"
+#include "CLog.h"
+#include "CObjBase.h"
+#include "graysvr.h"
 #include "../common/grayver.h"
+#include "../common/CException.h"
 #include "../network/network.h"
 #include "../network/send.h"
 
@@ -2988,7 +2991,6 @@ void CObjBase::DeleteKey(LPCTSTR pszKey)
 	m_TagDefs.DeleteKey(pszKey);
 }
 
-
 void CObjBase::DupeCopy( const CObjBase * pObj )
 {
 	CObjBaseTemplate::DupeCopy( pObj );
@@ -3119,4 +3121,30 @@ inline bool CObjBase::CallPersonalTrigger(TCHAR * pArgs, CTextConsole * pSrc, TR
 	}
 
 	return false;
+}
+
+
+DIR_TYPE GetDirStr( LPCTSTR pszDir )
+{
+	char iDir2, iDir = static_cast< char >( toupper( pszDir[ 0 ] ) );
+
+	switch ( iDir )
+	{
+		case 'E': return DIR_E;
+		case 'W': return DIR_W;
+		case 'N':
+			iDir2 = static_cast< char >( toupper( pszDir[ 1 ] ) );
+			if ( iDir2 == 'E' ) return DIR_NE;
+			if ( iDir2 == 'W' ) return DIR_NW;
+			return DIR_N;
+		case 'S':
+			iDir2 = static_cast< char >( toupper( pszDir[ 1 ] ) );
+			if ( iDir2 == 'E' ) return DIR_SE;
+			if ( iDir2 == 'W' ) return DIR_SW;
+			return DIR_S;
+		default:
+			if ( ( iDir >= '0' ) && ( iDir <= '7' ) )
+				return static_cast< DIR_TYPE >( iDir - '0' );
+	}
+	return DIR_QTY;
 }

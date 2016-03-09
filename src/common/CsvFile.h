@@ -6,6 +6,8 @@
 //
 
 #include "CFile.h"
+#include "CacheableScriptFile.h"
+#include <map>
 
 #define MAX_COLUMNS	64	// maximum number of columns in a file
 
