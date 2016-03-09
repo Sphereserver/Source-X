@@ -8,7 +8,6 @@
 
 #include "common.h"
 #include "graycom.h"
-#include "macroutils.h"
 
 struct CMemBlock
 {
