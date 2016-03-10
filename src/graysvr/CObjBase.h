@@ -475,12 +475,6 @@ inline INT64 CObjBase::GetTimerDiff() const
 	// How long till this will expire ?
 	return( g_World.GetTimeDiff( m_timeout ) );
 }
-inline CObjBase * CGrayUIDBase::ObjFind() const
-{
-	if ( IsResource() )
-		return( NULL );
-	return( g_World.FindUID( m_dwInternalVal & UID_O_INDEX_MASK ) );
-}
 
 extern void DeleteKey( LPCTSTR pszKey );
 #endif

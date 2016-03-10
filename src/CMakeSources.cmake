@@ -140,6 +140,7 @@ common/CGrayMap.cpp
 common/CGrayMap.h
 common/CGrayUID.cpp
 common/CGrayUID.h
+common/CGrayUIDextra.h
 common/CMD5.cpp
 common/CMD5.h
 common/CMemBlock.h

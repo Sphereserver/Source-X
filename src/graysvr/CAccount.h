@@ -3,21 +3,25 @@
 * @file CAcount.h
 */
 
-#include "CResource.h"
-#include "../common/CScript.h"
-#include "../common/CScriptObj.h"
-#include "../common/CMemBlock.h"
-#include "../common/CString.h"
-#include "../common/grayproto.h"
-#include "../common/CTextConsole.h"
-#include "../common/CSocket.h"
-#include "../common/CTime.h"
-#include "../common/CVarDefMap.h"
-#include "CCharRefArray.h"
+//#include "CResource.h"
+//#include "../common/CScript.h"
+//#include "../common/CScriptObj.h"
+//#include "../common/CMemBlock.h"
+//#include "../common/CString.h"
+//#include "../common/grayproto.h"
+//#include "../common/CTextConsole.h"
+//#include "../common/CSocket.h"
+//#include "../common/CTime.h"
+//#include "../common/CVarDefMap.h"
+//#include "CCharRefArray.h"
 
 #ifndef _INC_CACCOUNT_H
 #define _INC_CACCOUNT_H
 #pragma once
+
+#include "../common/CScriptObj.h"
+#include "../common/CString.h"
+#include "CCharRefArray.h"
 
 #define PRIV_UNUSED0		0x0001
 #define PRIV_GM				0x0002	///< Acts as a GM (dif from having GM level)
@@ -375,7 +379,7 @@ class CAccounts
 protected:
 	static const char *m_sClassName; ///< TODOC.
 	static LPCTSTR const sm_szVerbKeys[]; ///< ACCOUNT action list.
-	CObNameSortArray	m_Accounts; ///< Sorted CAccount list.
+	CObNameSortArray m_Accounts; ///< Sorted CAccount list.
 public:
 	/**
 	* CAccount needs CAccounts methods.
@@ -443,7 +447,7 @@ public:
 	* @brief Get the CAccount count.
 	* @return The count of CAccounts.
 	*/
-	size_t Account_GetCount() const	{ return( m_Accounts.GetCount() ); }
+	size_t Account_GetCount() const;
 	/**
 	* @brief Get a CAccountRef of an CAccount by his index.
 	* @param index array index of the CAccount.

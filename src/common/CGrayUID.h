@@ -4,11 +4,13 @@
 
 #ifndef _INC_CGRAYUID_H
 #define _INC_CGRAYUID_H
+
+#include "common.h"
 #include "graycom.h"
 
 class CObjBase;
-class CChar;
 class CItem;
+class CChar;
 
 struct CGrayUIDBase		// A unique system serial id. 4 bytes long
 {
@@ -55,10 +57,9 @@ public:
 	bool operator == ( DWORD index ) const;
 	bool operator != ( DWORD index ) const;
 	operator DWORD () const;
-
 	CObjBase * ObjFind() const;
-	CItem * ItemFind() const; // Does item still exist or has it been deleted
-	CChar * CharFind() const; // Does character still exist
+	CItem * ItemFind() const;
+	CChar * CharFind() const;
 };
 
 struct CGrayUID : public CGrayUIDBase

@@ -9,88 +9,6 @@
 #include "../common/CException.h"
 #include "../network/send.h"
 
-//*****************************************************************
-// -CCharRefArray
-
-size_t CCharRefArray::FindChar( const CChar *pChar ) const
-{
-	ADDTOCALLSTACK("CCharRefArray::FindChar");
-	if ( !pChar )
-		return m_uidCharArray.BadIndex();
-
-	CGrayUID uid(pChar->GetUID());
-	size_t iQty = m_uidCharArray.GetCount();
-	for ( size_t i = 0; i < iQty; i++ )
-	{
-		if ( uid == m_uidCharArray[i] )
-			return i;
-	}
-	return m_uidCharArray.BadIndex();
-}
-
-size_t CCharRefArray::AttachChar( const CChar *pChar )
-{
-	ADDTOCALLSTACK("CCharRefArray::AttachChar");
-	size_t i = FindChar(pChar);
-	if ( i != m_uidCharArray.BadIndex() )
-		return i;
-	return m_uidCharArray.Add(pChar->GetUID());
-}
-
-size_t CCharRefArray::InsertChar( const CChar *pChar, size_t i )
-{
-	ADDTOCALLSTACK("CCharRefArray::InsertChar");
-	size_t currentIndex = FindChar(pChar);
-	if ( currentIndex != m_uidCharArray.BadIndex() )
-	{
-		if ( currentIndex == i )	// already there
-			return i;
-		DetachChar(currentIndex);	// remove from list
-	}
-
-	if ( !IsValidIndex(i) )		// prevent from being inserted too high
-		i = GetCharCount();
-
-	m_uidCharArray.InsertAt(i, pChar->GetUID() );
-	return i;
-}
-
-void CCharRefArray::DetachChar( size_t i )
-{
-	ADDTOCALLSTACK("CCharRefArray::DetachChar");
-	m_uidCharArray.RemoveAt(i);
-}
-
-size_t CCharRefArray::DetachChar( const CChar *pChar )
-{
-	ADDTOCALLSTACK("CCharRefArray::DetachChar");
-	size_t i = FindChar(pChar);
-	if ( i != m_uidCharArray.BadIndex() )
-		DetachChar(i);
-	return i;
-}
-
-void CCharRefArray::DeleteChars()
-{
-	ADDTOCALLSTACK("CCharRefArray::DeleteChars");
-	size_t iQty = m_uidCharArray.GetCount();
-	while ( iQty > 0 )
-	{
-		CChar *pChar = m_uidCharArray[--iQty].CharFind();
-		if ( pChar )
-			pChar->Delete();
-	}
-	m_uidCharArray.RemoveAll();
-}
-
-
-void CCharRefArray::WritePartyChars( CScript &s )
-{
-	ADDTOCALLSTACK("CCharRefArray::WritePartyChars");
-	size_t iQty = m_uidCharArray.GetCount();
-	for ( size_t j = 0; j < iQty; j++ )		// write out links to all my chars
-		s.WriteKeyHex("CHARUID", m_uidCharArray[j]);
-}
 
 //*****************************************************************
 // -CPartyDef
@@ -933,4 +851,48 @@ bool CPartyDef::r_Load( CScript &s )
 	ADDTOCALLSTACK("CPartyDef::r_Load");
 	UNREFERENCED_PARAMETER(s);
 	return false; 
+}
+
+
+LPCTSTR CPartyDef::GetDefStr( LPCTSTR pszKey, bool fZero = false ) const
+{
+	return m_BaseDefs.GetKeyStr( pszKey, fZero );
+}
+
+INT64 CPartyDef::GetDefNum( LPCTSTR pszKey, bool fZero = false ) const
+{
+	return m_BaseDefs.GetKeyNum( pszKey, fZero );
+}
+
+void CPartyDef::SetDefNum(LPCTSTR pszKey, INT64 iVal, bool fZero = true)
+{
+	m_BaseDefs.SetNum(pszKey, iVal, fZero);
+}
+
+void CPartyDef::SetDefStr(LPCTSTR pszKey, LPCTSTR pszVal, bool fQuoted = false, bool fZero = true)
+{
+	m_BaseDefs.SetStr(pszKey, fQuoted, pszVal, fZero);
+}
+
+void CPartyDef::DeleteDef(LPCTSTR pszKey)
+{
+	m_BaseDefs.DeleteKey(pszKey);
+}
+
+bool CPartyDef::IsPartyFull() const
+{
+	return (m_Chars.GetCharCount() >= MAX_CHAR_IN_PARTY);
+}
+bool CPartyDef::IsInParty( const CChar * pChar ) const
+{
+	return m_Chars.IsCharIn( pChar );
+}
+bool CPartyDef::IsPartyMaster( const CChar * pChar ) const
+{
+	return (m_Chars.FindChar( pChar ) == 0);
+}
+
+CGrayUID CPartyDef::GetMaster()
+{
+	return m_Chars.GetChar(0);
 }

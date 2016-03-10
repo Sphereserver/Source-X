@@ -2,7 +2,7 @@
 #define _INC_CPARTY_H
 
 #include "../common/CArray.h"
-#include "../common/crect.h"
+#include "../common/CRect.h"
 #include "../common/CScriptObj.h"
 #include "../common/CString.h"
 #include "../common/CVarDefMap.h"
@@ -30,30 +30,11 @@ private:
 	CGString m_pSpeechFunction;
 
 public:
-	LPCTSTR GetDefStr( LPCTSTR pszKey, bool fZero = false ) const
-	{
-		return m_BaseDefs.GetKeyStr( pszKey, fZero );
-	}
-
-	INT64 GetDefNum( LPCTSTR pszKey, bool fZero = false ) const
-	{
-		return m_BaseDefs.GetKeyNum( pszKey, fZero );
-	}
-
-	void SetDefNum(LPCTSTR pszKey, INT64 iVal, bool fZero = true)
-	{
-		m_BaseDefs.SetNum(pszKey, iVal, fZero);
-	}
-
-	void SetDefStr(LPCTSTR pszKey, LPCTSTR pszVal, bool fQuoted = false, bool fZero = true)
-	{
-		m_BaseDefs.SetStr(pszKey, fQuoted, pszVal, fZero);
-	}
-
-	void DeleteDef(LPCTSTR pszKey)
-	{
-		m_BaseDefs.DeleteKey(pszKey);
-	}
+	LPCTSTR GetDefStr( LPCTSTR pszKey, bool fZero = false ) const;
+	INT64 GetDefNum( LPCTSTR pszKey, bool fZero = false ) const;
+	void SetDefNum(LPCTSTR pszKey, INT64 iVal, bool fZero = true);
+	void SetDefStr(LPCTSTR pszKey, LPCTSTR pszVal, bool fQuoted = false, bool fZero = true);
+	void DeleteDef(LPCTSTR pszKey);
 
 private:
 	bool SendMemberMsg( CChar * pCharDest, PacketSend * pPacket );
@@ -73,23 +54,10 @@ public:
 	static bool AcceptEvent( CChar * pCharAccept, CGrayUID uidInviter, bool bForced = false );
 	static bool DeclineEvent( CChar * pCharDecline, CGrayUID uidInviter );
 
-	bool IsPartyFull() const
-	{
-		return (m_Chars.GetCharCount() >= MAX_CHAR_IN_PARTY);
-	}
-	bool IsInParty( const CChar * pChar ) const
-	{
-		return m_Chars.IsCharIn( pChar );
-	}
-	bool IsPartyMaster( const CChar * pChar ) const
-	{
-		return (m_Chars.FindChar( pChar ) == 0);
-	}
-
-	CGrayUID GetMaster() 
-	{ 
-		return m_Chars.GetChar(0); 
-	}
+	bool IsPartyFull() const;
+	bool IsInParty( const CChar * pChar ) const;
+	bool IsPartyMaster( const CChar * pChar ) const;
+	CGrayUID GetMaster();
 
 
 	// Refresh status for party members

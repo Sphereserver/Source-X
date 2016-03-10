@@ -1188,9 +1188,6 @@ inline bool CChar::IsSkillNPC( SKILL_TYPE skill )  // static
 	return (skill >= NPCACT_FOLLOW_TARG && skill < NPCACT_QTY);
 }
 
-inline CChar * CGrayUIDBase::CharFind() const
-{
-	return( dynamic_cast < CChar * >( ObjFind() ) );
-}
+
 
 #endif // _INC_CCHAR_H

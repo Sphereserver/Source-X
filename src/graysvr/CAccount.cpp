@@ -1,12 +1,15 @@
-#include "CAccount.h"	// predef header.
-#include "CServTime.h"
+#include "../common/CException.h"
+#include "../common/CGrayUIDextra.h"
+#include "CAccount.h"
+#include "CLog.h"
 #include "CClient.h"
 #include "CChar.h"
-#include "CLog.h"
-#include "../common/CMD5.h"
-#include "../common/CException.h"
-#include "../common/CTextConsole.h"
-#include "../network/network.h"
+//#include "CServTime.h"
+//#include "CLog.h"
+//#include "../common/CMD5.h"
+//#include "../common/CException.h"
+//#include "../common/CTextConsole.h"
+//#include "../network/network.h"
 
 extern "C"
 {
@@ -17,6 +20,11 @@ extern "C"
 //**********************************************************************
 // -CAccounts
 
+
+size_t CAccounts::Account_GetCount() const
+{
+	return m_Accounts.GetCount();
+}
 
 bool CAccounts::Account_Load( LPCTSTR pszNameRaw, CScript & s, bool fChanges )
 {

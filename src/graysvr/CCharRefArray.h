@@ -5,6 +5,8 @@
 #include "../common/CArray.h"
 #include "../common/CGrayUID.h"
 
+class CChar;
+
 class CCharRefArray
 {
 private:
