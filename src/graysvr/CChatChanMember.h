@@ -3,7 +3,7 @@
 
 #include "../common/CArray.h"
 #include "../common/CString.h"
-#include "../common/grayproto.h
+#include "../common/grayproto.h"
 
 class CClient;
 
