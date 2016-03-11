@@ -1,5 +1,8 @@
 //#include "graysvr.h" Removed to test. 	// predef header.
 
+#include "CItem.h"
+#include "CChar.h"
+
 void CItem::Plant_SetTimer()
 {
 	ADDTOCALLSTACK("CItem::Plant_SetTimer");

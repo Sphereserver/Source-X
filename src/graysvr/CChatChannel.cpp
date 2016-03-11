@@ -1,8 +1,11 @@
 
 #include "CChatChannel.h"
+#include "CChatChanMember.h"
+#include "CChar.h"
+#include "CClient.h"
 
 
-CChatChannel::CChatChannel(LPCTSTR pszName, LPCTSTR pszPassword = NULL)
+CChatChannel::CChatChannel(LPCTSTR pszName, LPCTSTR pszPassword)
 {
     m_sName = pszName;
     m_sPassword = pszPassword;
@@ -19,7 +22,7 @@ LPCTSTR CChatChannel::GetName() const
     return( m_sName );
 }
 
-LPCTSTR GetModeString() const
+LPCTSTR CChatChannel::GetModeString() const
 {
     // (client needs this) "0" = not passworded, "1" = passworded
     return(( IsPassworded()) ? "1" : "0" );
@@ -553,45 +556,6 @@ void CChatChannel::ToggleModerator(CChatChanMember * pByMember, LPCTSTR pszName)
         RevokeModerator(pByMember, pszName);
 }
 
-CChatChannel::CChatChannel(LPCTSTR pszName, LPCTSTR pszPassword)
-{
-    m_sName = pszName;
-    m_sPassword = pszPassword;
-    m_fVoiceDefault = true;
-}
-
-CChatChannel* CChatChannel::GetNext() const
-{
-    return( static_cast <CChatChannel *>( CGObListRec::GetNext()));
-}
-
-LPCTSTR CChatChannel::GetName() const
-{
-    return( m_sName );
-}
-
-LPCTSTR CChatChannel::GetModeString() const
-{
-    // (client needs this) "0" = not passworded, "1" = passworded
-    return(( IsPassworded()) ? "1" : "0" );
-}
-
-LPCTSTR CChatChannel::GetPassword() const
-{
-    return( m_sPassword );
-}
-
-void CChatChannel::SetPassword( LPCTSTR pszPassword)
-{
-    m_sPassword = pszPassword;
-    return;
-}
-
-bool CChatChannel::IsPassworded() const
-{
-    return ( !m_sPassword.IsEmpty());
-}
-
 bool CChatChannel::GetVoiceDefault()  const
 {
     return m_fVoiceDefault;
@@ -600,26 +564,4 @@ bool CChatChannel::GetVoiceDefault()  const
 void CChatChannel::SetVoiceDefault(bool fVoiceDefault)
 {
     m_fVoiceDefault = fVoiceDefault;
-}
-
-CChatChanMember * CChatChannel::FindMember(LPCTSTR pszName) const
-{
-    size_t i = FindMemberIndex( pszName );
-    if ( i == m_Members.BadIndex() )
-        return NULL;
-    return m_Members[i];
-}
-
-bool CChatChannel::RemoveMember(LPCTSTR pszName)
-{
-    CChatChanMember * pMember = FindMember(pszName);
-    if ( pMember == NULL )
-        return false;
-    RemoveMember(pMember);
-    return true;
-}
-
-void CChatChannel::SetName(LPCTSTR pszName)
-{
-    m_sName = pszName;
 }

@@ -4,11 +4,14 @@
 //#include "graysvr.h" Removed to test. 	// predef header.
 #include "../common/CObjBaseTemplate.h"
 #include "../common/CGrayUID.h"
+#include "../common/CException.h"
 #include "../network/send.h"
 #include "CContainer.h"
 #include "CItem.h"
 #include "CItemVendable.h"
 #include "CItemContainer.h"
+#include "CChar.h"
+#include "Triggers.h"
 
 //***************************************************************************
 // -CContainer

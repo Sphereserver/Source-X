@@ -1,12 +1,21 @@
 ////#include "graysvr.h" Removed to test. 	// predef header.
+#include "CChar.h"
+#include "CCharNPC.h"
+#include "CClient.h"
 #include "CItem.h"
 #include "CItemScript.h"
 #include "CItemMap.h"
 #include "CItemCommCrystal.h"
+#include "CItemShip.h"
 #include "CItemSpawn.h"
 #include "CItemVendable.h"
+#include "CItemMessage.h"
+#include "CItemMultiCustom.h"
 #include "../network/network.h"
 #include "../network/send.h"
+#include "Triggers.h"
+#include "CLog.h"
+#include "../common/CException.h"
 
 
 /*

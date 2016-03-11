@@ -2,6 +2,8 @@
 //#include "graysvr.h" Removed to test.   // Change by CServ.h when is done.
 #include "CLog.h"
 #include "UnixTerminal.h"
+#include "CServer.h"
+#include "../common/CEXception.h"
 
 ///////////////////////////////////////////////////////////////
 // -CLog

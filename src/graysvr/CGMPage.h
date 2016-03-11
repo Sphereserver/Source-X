@@ -38,22 +38,10 @@ private:
 public:
 	CAccountRef FindAccount() const;
 	LPCTSTR GetAccountStatus() const;
-	LPCTSTR GetName() const
-	{
-		return( m_sAccount );
-	}
-	LPCTSTR GetReason() const
-	{
-		return( m_sReason );
-	}
-	void SetReason( LPCTSTR pszReason )
-	{
-		m_sReason = pszReason;
-	}
-	CClient * FindGMHandler() const
-	{
-		return( m_pGMClient );
-	}
+	LPCTSTR GetName() const;
+	LPCTSTR GetReason() const;
+	void SetReason( LPCTSTR pszReason );
+	CClient * FindGMHandler() const;
 	void ClearGMHandler();
 	void SetGMHandler( CClient * pClient );
 	INT64 GetAge() const;
@@ -62,10 +50,7 @@ public:
 	void r_Write( CScript & s ) const;
 	bool r_LoadVal( CScript & s );
 
-	CGMPage * GetNext() const
-	{
-		return( STATIC_CAST <CGMPage*>( CGObListRec::GetNext()));
-	}
+	CGMPage * GetNext() const;
 };
 
 #endif // _INC_CGMPAGE_H

@@ -4,6 +4,7 @@
 #include "../graysvr/CItemBase.h"
 #include "../graysvr/CLog.h"
 #include "../graysvr/CSector.h"
+#include "../graysvr/CItem.h"
 
 
 //*************************************************************************
@@ -1090,7 +1091,7 @@ CPointSort::CPointSort( const CPointBase & pt )
 	Set( pt );
 }
 
-virtual CPointSort::~CPointSort()	// just to make this dynamic
+CPointSort::~CPointSort()	// just to make this dynamic
 {
 }
 

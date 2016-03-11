@@ -3,7 +3,11 @@
 #include "CChar.h"
 #include "CClient.h"
 #include "CAccount.h"
+#include "graysvr.h"
+#include "Triggers.h"
+#include "CItemShip.h"
 
+#include "../common/CException.h"
 #include "../common/grayver.h"	// sphere version
 #include "../common/CAssoc.h"
 #include "../common/CFileList.h"
@@ -21,6 +25,7 @@
 
 #if defined(_WIN32) && !defined(_DEBUG)
 	#include "../common/crashdump/crashdump.h"
+
 #endif
 
 #if !defined(_WIN32) || defined(_LIBEV)

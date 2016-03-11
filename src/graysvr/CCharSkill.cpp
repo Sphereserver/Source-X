@@ -2,6 +2,11 @@
 #include <cmath>
 //#include "graysvr.h" Removed to test. 	// predef header.
 #include "CItemVendable.h"
+#include "CChar.h"
+#include "CCharNPC.h"
+#include "CClient.h"
+#include "Triggers.h"
+#include "CLog.h"
 
 //----------------------------------------------------------------------
 // Skills

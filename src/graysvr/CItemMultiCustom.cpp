@@ -2,9 +2,15 @@
 // CItemMultiCustom.cpp
 //
 
+#include <CGrayInst.h>
 #include "CItemMultiCustom.h"	// predef header.
+#include "CClient.h"
+#include "CChar.h"
+#include "../common/CEXception.h"
 #include "../network/network.h"
 #include "../network/send.h"
+#include "Triggers.h"
+#include "CLog.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

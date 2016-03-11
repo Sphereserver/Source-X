@@ -1,6 +1,8 @@
 #include "CItemMulti.h"
 #include "CWorld.h"
+#include "CChar.h"
 #include "../common/grayproto.h"
+#include "../common/CException.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

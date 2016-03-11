@@ -1,6 +1,11 @@
+#include "CChar.h"
 #include "CItemContainer.h"
 #include "CItem.h"
 #include "../network/send.h"
+#include "Triggers.h"
+#include "CLog.h"
+#include "CClient.h"
+#include "../common/CException.h"
 
 //----------------------------------------------------
 // -CItemContainer

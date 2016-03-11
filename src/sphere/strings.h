@@ -1,6 +1,8 @@
 #ifndef STRINGS_H_
 #define STRINGS_H_
 
+//#include "threads.h"
+
 // Base abstract class for strings, provides basic information of what should be available
 // NOTE: The destructor is NOT virtual for a reason. Children should override destroy() instead
 class AbstractString

@@ -8,6 +8,10 @@
 
 #include "CSocket.h"
 #include "CEncrypt.h"
+#include "CServTime.h"
+#include "CScriptObj.h"
+
+class CTextConsole;
 
 enum SERV_STAT_TYPE
 {

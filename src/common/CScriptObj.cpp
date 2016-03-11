@@ -22,6 +22,7 @@
 #include "../graysvr/CClient.h"
 #include "../graysvr/CChar.h"
 #include "../graysvr/CItemStone.h"
+#include "../graysvr/graysvr.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////////////

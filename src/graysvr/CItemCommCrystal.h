@@ -1,6 +1,7 @@
 #ifndef _INC_CITEMCOMMCRYSTAL_H
 #define _INC_CITEMCOMMCRYSTAL_H
 
+#include "CItemVendable.h"
 //#include "graysvr.h" Removed to test.
 
 class CItemCommCrystal : public CItemVendable

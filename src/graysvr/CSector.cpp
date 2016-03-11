@@ -7,6 +7,9 @@
 #include "CWorld.h"
 #include "CLog.h"
 #include "CClient.h"
+#include "../common/CException.h"
+#include "graysvr.h"
+#include "Triggers.h"
 //#include "graysvr.h" Removed to test.
 
 //////////////////////////////////////////////////////////////////

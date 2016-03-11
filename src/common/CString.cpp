@@ -4,6 +4,10 @@
 
 #include "regex/deelx.h"
 #include "CString.h"
+#include "graycom.h"
+#include "../sphere/strings.h"
+#include "CExpression.h"
+#include "../sphere/ProfileData.h"
 
 
 /**

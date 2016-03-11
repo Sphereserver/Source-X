@@ -1,6 +1,9 @@
 #include "../common/CDataBase.h"
 #include "../graysvr/CServer.h"
 #include "../sphere/asyncdb.h"
+#include "../graysvr/CResource.h"
+#include "../graysvr/CLog.h"
+#include "CException.h"
 
 extern CDataBaseAsyncHelper g_asyncHdb;
 

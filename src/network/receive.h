@@ -2,6 +2,8 @@
 #define __RECEIVE_H__
 #pragma once
 
+#include "../common/grayproto.h"
+#include "../common/CGrayUID.h"
 #include "packet.h"
 
 /***************************************************************************

@@ -8,6 +8,7 @@
 #include "../common/CException.h"
 #include "../network/network.h"
 #include "../network/send.h"
+#include "Triggers.h"
 
 bool CObjBaseTemplate::IsDeleted() const
 {

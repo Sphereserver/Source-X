@@ -3,6 +3,7 @@
 #include "CException.h"
 #include "CScriptObj.h"
 #include "CTextConsole.h"
+#include "../graysvr/CLog.h"
 #include "../graysvr/CChar.h"
 #include "../graysvr/CClient.h"
 #include "../network/network.h"

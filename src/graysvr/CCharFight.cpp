@@ -1,7 +1,9 @@
 // Fight/Criminal actions/Noto.
-//#include "graysvr.h" Removed to test. 	// predef header.
+#include "CChar.h"
+#include "CCharNPC.h"
 #include "CClient.h"
 #include "CServTime.h"
+#include "Triggers.h"
 #include "../network/send.h"
 
 // I noticed a crime.

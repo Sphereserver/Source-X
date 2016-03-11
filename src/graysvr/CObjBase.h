@@ -471,6 +471,9 @@ enum CTRIG_TYPE
 	CTRIG_QTY				// 130
 };
 
+
+DIR_TYPE GetDirStr( LPCTSTR pszDir );
+
 inline INT64 CObjBase::GetTimerDiff() const
 {
 	// How long till this will expire ?

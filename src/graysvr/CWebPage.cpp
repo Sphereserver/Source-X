@@ -2,8 +2,12 @@
 #include "CServTime.h"
 #include "../common/grayver.h"	// sphere version
 #include "../common/CFileList.h"
+#include "../common/CException.h"
 #include "../network/network.h"
 #include "../network/send.h"
+#include "CServer.h"
+#include "CClient.h"
+#include "CChar.h"
 
 enum WV_TYPE
 {

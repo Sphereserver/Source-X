@@ -8,6 +8,7 @@
 #include "CItem.h"
 #include "CItemContainer.h"
 #include "CItemMemory.h"
+#include "CItemShip.h"
 #include "CItemSpawn.h"
 #include "CServer.h"
 #include "CServTime.h"
@@ -18,6 +19,7 @@
 #include "../common/CObjBaseTemplate.h"
 #include "../common/CRect.h"
 #include "../network/network.h"
+#include "Triggers.h"
 
 
 LPCTSTR const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static

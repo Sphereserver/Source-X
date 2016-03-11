@@ -1,7 +1,11 @@
 // Actions specific to an NPC.
+#include "CChar.h"
+#include "CCharNPC.h"
 #include "CCharPlayer.h"	// predef header.
 #include "CClient.h"
 #include "CServTime.h"
+#include "../common/CException.h"
+#include "CLog.h"
 
 
 LPCTSTR const CCharPlayer::sm_szLoadKeys[CPC_QTY+1] =
@@ -22,9 +26,13 @@ void CChar::ClearPlayer()
 	if ( g_Serv.m_iModeCode != SERVMODE_Exiting )
 	{
 		if ( m_pPlayer->m_pAccount )
+		{
 			DEBUG_WARN(("Player delete '%s' name '%s'\n", m_pPlayer->GetAccount()->GetName(), GetName()));
+		}
 		else
+		{
 			DEBUG_WARN(("Player delete from account name '%s'\n", GetName()));
+		}
 	}
 
 	// Is this valid ?

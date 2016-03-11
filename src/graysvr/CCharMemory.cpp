@@ -1,6 +1,8 @@
 // Actions specific to an NPC.
 //#include "graysvr.h" Removed to test. 	// predef header.
 #include "CClient.h"
+#include "CChar.h"
+#include "CCharNPC.h"
 #include "CServTime.h"
 #include "../network/send.h"
 

@@ -1,4 +1,7 @@
-#include "../graysvr/CPathFinder.h"
+#include "CPathFinder.h"
+#include "CChar.h"
+#include "../sphere/threads.h"
+#include "../common/CException.h"
 
 unsigned long CPathFinder::Heuristic(CPathFinderPointRef& Pt1,CPathFinderPointRef& Pt2)
 {

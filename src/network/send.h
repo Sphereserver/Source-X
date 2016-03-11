@@ -9,6 +9,7 @@
 #include "../common/grayproto.h"
 #include "../common/CGrayUID.h"
 #include "../graysvr/enums.h"
+#include "../graysvr/CResource.h"
 
 class CItemMap;
 class CMenuItem;
@@ -20,7 +21,9 @@ class CItemMessage;
 class CItemCorpse;
 class CCharRefArray;
 class CItemMultiCustom;
+class CItemShip;
 class CClientTooltip;
+
 
 /***************************************************************************
  *

@@ -1,6 +1,10 @@
 // define the base types of an item (rather than the instance)
 //#include "graysvr.h" Removed to test. 	// predef header.
 
+#include "CItemBase.h"
+#include "CLog.h"
+#include "../common/CException.h"
+
 /////////////////////////////////////////////////////////////////
 // -CItemBase
 

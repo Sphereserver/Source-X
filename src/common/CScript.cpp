@@ -148,7 +148,7 @@ CScriptKey::CScriptKey( TCHAR * pszKey, TCHAR * pszArg ) : m_pszKey( pszKey ), m
 {
 }
 
-virtual CScriptKey::~CScriptKey()
+CScriptKey::~CScriptKey()
 {
 }
 
@@ -616,7 +616,7 @@ void CScript::Close()
 	PhysicalScriptFile::Close();
 }
 
-virtual void CScript::CloseForce()
+void CScript::CloseForce()
 {
 	CScript::Close();
 }
@@ -742,6 +742,6 @@ void CScript::WriteKeyHex( LPCTSTR pszKey, INT64 dwVal )
 #endif  // __MINGW32__
 }
 
-virtual CScript::~CScript()
+CScript::~CScript()
 {
 }

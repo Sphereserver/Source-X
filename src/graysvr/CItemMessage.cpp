@@ -1,5 +1,6 @@
 #include "CItemMessage.h"
 #include "CItemVendable.h"
+#include "../common/CException.h"
 
 CItemMessage::CItemMessage( ITEMID_TYPE id, CItemBase * pItemDef ) : CItemVendable( id, pItemDef ) {
 }

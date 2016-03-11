@@ -8,6 +8,9 @@
 #include "../network/network.h"
 #include "../network/send.h"
 #include "../network/packet.h"
+#include "CLog.h"
+#include "Triggers.h"
+#include "graysvr.h"
 
 #if !defined(_WIN32) || defined(_LIBEV)
 	extern LinuxEv g_NetworkEvent;

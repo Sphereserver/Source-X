@@ -3,6 +3,10 @@
 #include "CItem.h"
 #include "CItemSpawn.h"
 #include "CItemCorpse.h"
+#include "CChar.h"
+#include "CClient.h"
+#include "CCharNPC.h"
+#include "Triggers.h"
 
 static const int MASK_RETURN_FOLLOW_LINKS = 0x02;
 

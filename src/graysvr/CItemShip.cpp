@@ -5,7 +5,11 @@
 #include "CItemShip.h"	// predef header.
 #include "CItemContainer.h"
 #include "CServTime.h"
+#include "CChar.h"
+#include "CClient.h"
 #include "../network/send.h"
+#include "Triggers.h"
+#include "../common/CException.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

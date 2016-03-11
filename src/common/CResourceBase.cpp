@@ -1,5 +1,13 @@
 #include "CResourceBase.h"
 #include "../graysvr/CLog.h"
+#include "CFileList.h"
+#include "CException.h"
+#include "CExpression.h"
+#include "../graysvr/CResource.h"
+#include "../graysvr/CObjBase.h"
+#include "../graysvr/CItem.h"
+#include "../graysvr/CChar.h"
+#include "../graysvr/Triggers.h"
 
 
 RES_TYPE RESOURCE_ID_BASE::GetResType() const
@@ -475,7 +483,7 @@ CResourceDef::CResourceDef( RESOURCE_ID rid, const CVarDefContNum * pDefName = N
 {
 }
 
-virtual CResourceDef::~CResourceDef()	// need a virtual for the dynamic_cast to work.
+CResourceDef::~CResourceDef()	// need a virtual for the dynamic_cast to work.
 {
 	// ?? Attempt to remove m_pDefName ?
 }
@@ -542,7 +550,7 @@ void CResourceDef::SetResourceVar( const CVarDefContNum* pVarNum )
 }
 
 // unlink all this data. (tho don't delete the def as the pointer might still be used !)
-virtual void CResourceDef::UnLink()
+void CResourceDef::UnLink()
 {
 	// This does nothing in the CResourceDef case, Only in the CResourceLink case.
 }
@@ -579,7 +587,7 @@ LPCTSTR CResourceDef::GetResourceName() const
 	return pszTmp;
 }
 
-virtual LPCTSTR CResourceDef::GetName() const	// default to same as the DEFNAME name.
+LPCTSTR CResourceDef::GetName() const	// default to same as the DEFNAME name.
 {
 	return( GetResourceName());
 }
@@ -790,7 +798,7 @@ bool CResourceScript::CheckForChange()
 	return( fChange );
 }
 
-explicit CResourceScript::CResourceScript( LPCTSTR pszFileName )
+CResourceScript::CResourceScript( LPCTSTR pszFileName )
 {
 	Init();
 	SetFilePath( pszFileName );
@@ -1213,7 +1221,7 @@ CResourceNamed::CResourceNamed( RESOURCE_ID rid, LPCTSTR pszName ) : CResourceLi
 {
 }
 
-virtual CResourceNamed::~CResourceNamed()
+CResourceNamed::~CResourceNamed()
 {
 }
 
@@ -1308,7 +1316,7 @@ CScriptFileContext::CScriptFileContext() : m_pPrvScriptContext(NULL)
 	Init();
 }
 
-explicit CScriptFileContext::CScriptFileContext( const CScript * pScriptContext )
+CScriptFileContext::CScriptFileContext( const CScript * pScriptContext )
 {
 	Init();
 	OpenScript( pScriptContext );
@@ -1351,7 +1359,7 @@ CScriptObjectContext::CScriptObjectContext() : m_pPrvObjectContext(NULL)
 	Init();
 }
 
-explicit CScriptObjectContext::CScriptObjectContext( const CScriptObj * pObjectContext )
+CScriptObjectContext::CScriptObjectContext( const CScriptObj * pObjectContext )
 {
 	Init();
 	OpenObject( pObjectContext );
@@ -1591,7 +1599,7 @@ CStringSortArray::CStringSortArray()
 
 }
 
-virtual void CStringSortArray::DestructElements( TCHAR** pElements, size_t nCount )
+void CStringSortArray::DestructElements( TCHAR** pElements, size_t nCount )
 {
 	// delete the objects that we own.
 	for ( size_t i = 0; i < nCount; i++ )

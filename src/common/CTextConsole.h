@@ -2,6 +2,7 @@
 #define _INC_CTEXTCONSOLE_H
 
 #include "../common/CString.h"
+#include "../sphere/strings.h"
 
 class CChar;
 

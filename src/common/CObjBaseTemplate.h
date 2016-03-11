@@ -33,14 +33,14 @@ public:
 	CObjBaseTemplate * GetNext() const;
 	CObjBaseTemplate * GetPrev() const;
 
-	CGrayUID GetUID() const			{	return( m_UID ); }
-	bool IsItem() const				{	return( m_UID.IsItem()); }
-	bool IsChar() const				{	return( m_UID.IsChar()); }
-	bool IsItemInContainer() const	{	return( m_UID.IsItemInContainer() ); }
-	bool IsItemEquipped() const		{	return( m_UID.IsItemEquipped() ); }
-	bool IsDisconnected() const		{	return( m_UID.IsObjDisconnected() ); }
-	bool IsTopLevel() const			{	return( m_UID.IsObjTopLevel() ); }
-	bool IsValidUID() const			{	return( m_UID.IsValidUID() ); }
+	CGrayUID GetUID() const;
+	bool IsItem() const;
+	bool IsChar() const;
+	bool IsItemInContainer() const;
+	bool IsItemEquipped() const;
+	bool IsDisconnected() const;
+	bool IsTopLevel() const;
+	bool IsValidUID() const;
 	bool IsDeleted() const;
 
 	void SetContainerFlags( DWORD dwFlags = 0 );

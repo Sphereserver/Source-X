@@ -5,6 +5,11 @@
 
 #include "../graysvr/CPathFinder.h"
 #include "../graysvr/CClient.h"
+#include "../graysvr/CCharBase.h"
+#include "../graysvr/CCharPlayer.h"
+#include "../graysvr/CCharNPC.h"
+#include "../graysvr/CItemSpawn.h"
+#include "../graysvr/CItemShip.h"
 
 #define ADD(a,b) const char * a::m_sClassName = b
 

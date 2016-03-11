@@ -3,7 +3,15 @@
 //************************
 // Natural resources.
 
-CItem * CWorld::CheckNaturalResource( const CPointMap & pt, IT_TYPE Type, bool fTest, CChar * pCharSrc )
+#include "../common/CRect.h"
+#include "../common/CException.h"
+#include "../sphere/threads.h"
+#include "CItem.h"
+#include "CChar.h"
+#include "Triggers.h"
+#include "CLog.h"
+
+CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fTest, CChar * pCharSrc )
 {
 	ADDTOCALLSTACK("CWorld::CheckNaturalResource");
 	// RETURN: 

@@ -1,7 +1,9 @@
 // Actions specific to an NPC.
+#include "../common/CException.h"
 #include "CCharNPC.h"	// predef header.
 #include "CClient.h"
 #include "CServTime.h"
+#include "Triggers.h"
 
 
 LPCTSTR const CCharNPC::sm_szLoadKeys[CNC_QTY+1] =

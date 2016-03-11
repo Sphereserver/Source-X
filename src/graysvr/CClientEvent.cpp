@@ -6,6 +6,12 @@
 #include "../network/network.h"
 #include "../network/send.h"
 #include "../network/receive.h"
+#include "Triggers.h"
+#include "CChar.h"
+#include "CCharNPC.h"
+#include "../common/CException.h"
+#include "CLog.h"
+#include "graysvr.h"
 #include <wchar.h>
 
 /////////////////////////////////

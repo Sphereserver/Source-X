@@ -1,7 +1,9 @@
 //#include "graysvr.h" Removed to test. 	// predef header.
 #include "CClient.h"
+#include "CChar.h"
 #include "CServTime.h"
 #include "../network/network.h"
+#include "CLog.h"
 
 /////////////////////////////////////////////
 

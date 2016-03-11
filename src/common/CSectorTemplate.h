@@ -75,7 +75,7 @@ public:
 	// Find a point fast.
 	int CompareKey( long id, CPointSort* pBase, bool fNoSpaces ) const;
 public:
-	CObPointSortArray() { };
+	CObPointSortArray();
 private:
 	CObPointSortArray(const CObPointSortArray& copy);
 	CObPointSortArray& operator=(const CObPointSortArray& other);

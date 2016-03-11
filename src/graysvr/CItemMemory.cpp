@@ -1,5 +1,9 @@
 //#include "graysvr.h" Removed to test. 	// predef header.
 
+#include "CItemMemory.h"
+#include "CItemStone.h"
+#include "CChar.h"
+
 CItemMemory::CItemMemory( ITEMID_TYPE id, CItemBase * pItemDef ) :
 	CItem( ITEMID_MEMORY, pItemDef )
 {

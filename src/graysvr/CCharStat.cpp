@@ -1,5 +1,8 @@
 //  CChar is either an NPC or a Player.
 //#include "graysvr.h" Removed to test. 	// predef header.
+#include "CChar.h"
+#include "Triggers.h"
+#include "../common/CException.h"
 
 //----------------------------------------------------------------------
 

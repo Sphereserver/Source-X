@@ -5,6 +5,8 @@
 #include "../common/CArray.h"
 #include "../common/CString.h"
 
+class CChatChanMember;
+
 class CChatChannel : public CGObListRec
 {
     // a number of clients can be attached to this chat channel.
@@ -40,8 +42,8 @@ public:
     void SetPassword( LPCTSTR pszPassword);
     bool IsPassworded() const;
 
-    bool GetVoiceDefault()  const { return m_fVoiceDefault; }
-    void SetVoiceDefault(bool fVoiceDefault) { m_fVoiceDefault = fVoiceDefault; }
+    bool GetVoiceDefault()  const;
+    void SetVoiceDefault(bool fVoiceDefault);
     void ToggleVoiceDefault(LPCTSTR  pszBy);
     void DisableVoiceDefault(LPCTSTR  pszBy);
     void EnableVoiceDefault(LPCTSTR  pszBy);

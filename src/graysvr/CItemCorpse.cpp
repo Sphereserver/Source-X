@@ -2,6 +2,8 @@
 #include "CItemCorpse.h"
 #include "CServTime.h"
 #include "CWorld.h"
+#include "CChar.h"
+#include "CCharNPC.h"
 #include "../common/grayproto.h"
 
 

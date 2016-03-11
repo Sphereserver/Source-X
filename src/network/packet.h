@@ -2,12 +2,15 @@
 #define __PACKET_H__
 #pragma once
 
+#include <list>
+
 #include "../common/common.h"
 //#include "../graysvr/graysvr.h" Removed to test.
 
 class NetState;
 class SimplePacketTransaction;
 class AbstractString;
+class CClient;
 
 #define PACKET_BUFFERDEFAULT 4
 #define PACKET_BUFFERGROWTH 4

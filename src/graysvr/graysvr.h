@@ -27,22 +27,7 @@
 
 ///////////////////////////////////////////////
 
-//	Triggers list
-enum E_TRIGGERS
-{
-	#define ADD(a) TRIGGER_##a,
-	#include "../tables/triggers.tbl"
-	TRIGGER_QTY,
-};
 
-extern bool IsTrigUsed(E_TRIGGERS id);
-extern bool IsTrigUsed(const char *name);
-extern void TriglistInit();
-extern void TriglistClear();
-extern void TriglistAdd(E_TRIGGERS id);
-extern void TriglistAdd(const char *name);
-extern void Triglist(long &total, long &used);
-extern void TriglistPrint();
 
 
 // Text mashers.

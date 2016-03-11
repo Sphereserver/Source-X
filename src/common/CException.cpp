@@ -1,6 +1,8 @@
 
 #include "../graysvr/CServer.h"
 
+#include "CException.h"
+
 #ifdef _WIN32
 	int CGrayError::GetSystemErrorMessage( DWORD dwError, LPTSTR lpszError, UINT nMaxError ) // static
 	{

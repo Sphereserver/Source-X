@@ -109,7 +109,8 @@ graysvr/CWorldMap.cpp
 graysvr/enums.h
 graysvr/graysvr.cpp
 graysvr/graysvr.h
-graysvr/resource.h
+graysvr/Triggers.h
+graysvr/Triggers.cpp
 )
 SOURCE_GROUP (Game FILES ${game_SRCS})
 

@@ -8,6 +8,7 @@
 #include "../common/CString.h"
 #include "../common/CException.h"
 #include "../network/send.h"
+#include "Triggers.h"
 
 
 //*****************************************************************

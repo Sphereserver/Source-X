@@ -2,6 +2,8 @@
 //#include "graysvr.h" Removed to test. 	// predef header.
 #include "CServTime.h"
 #include "CChar.h"
+#include "Triggers.h"
+#include "CClient.h"
 
 
 // Add some enemy to my Attacker list

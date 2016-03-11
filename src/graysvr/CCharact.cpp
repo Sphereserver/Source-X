@@ -2,16 +2,20 @@
 // CCharAct.cpp
 //
 
-//#include "graysvr.h" Removed to test. 	// predef header.
 #include "CChar.h"
+#include "CCharNPC.h"
 #include "CClient.h"
 #include "CServTime.h"
 #include "CContainer.h"
 #include "CItem.h"
 #include "CItemSpawn.h"
+#include "Triggers.h"
 #include "../network/network.h"
 #include "../network/send.h"
 #include "../common/CArray.h"
+#include "../common/CException.h"
+#include "CLog.h"
+#include "graysvr.h"
 
 // "GONAME", "GOTYPE", "GOCHAR"
 // 0 = object name

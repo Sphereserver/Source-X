@@ -1,6 +1,11 @@
 // A variety of resource blocks.
 //#include "graysvr.h" Removed to test. 	// predef header.
 #include "../common/CAssoc.h"
+#include "CChar.h"
+#include "CItemBase.h"
+#include "CResource.h"
+#include "../common/CException.h"
+#include "Triggers.h"
 
 //*******************************************
 // -CValueRangeDef

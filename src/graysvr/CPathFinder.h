@@ -10,6 +10,9 @@
 #include <deque>
 #include <list>
 #include <algorithm>
+#include "../common/CRect.h"
+
+class CChar;
 
 using std::deque;
 using std::list;

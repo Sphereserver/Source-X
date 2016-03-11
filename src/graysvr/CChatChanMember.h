@@ -51,8 +51,8 @@ public:
     void ForbidWhoIs();
     void ToggleWhoIs();
 
-    CChatChannel * GetChannel() const { return m_pChannel; }
-    void SetChannel(CChatChannel * pChannel) { m_pChannel = pChannel; }
+    CChatChannel * GetChannel() const;
+    void SetChannel(CChatChannel * pChannel);
     void SendChatMsg( CHATMSG_TYPE iType, LPCTSTR pszName1 = NULL, LPCTSTR pszName2 = NULL, CLanguageID lang = 0 );
     void RenameChannel(LPCTSTR pszName);
 
