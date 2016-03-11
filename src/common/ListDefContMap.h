@@ -5,6 +5,7 @@
 #include <list>
 #include <set>
 
+#include "graycom.h"
 #include "CString.h"
 
 class CTextConsole;

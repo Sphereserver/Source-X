@@ -1,15 +1,17 @@
 #ifndef _INC_CSERVER_H
 #define _INC_CSERVER_H
 
-#include "CItemShip.h"
 #include "CChat.h"
 #include "CServRef.h"
 #include "CServTime.h"
+#include "../common/common.h"
 #include "../common/CTextConsole.h"
 #include "../common/CSocket.h"
 #include "../common/CFile.h"
 #include "../common/CDataBase.h"
 #include "../common/sqlite/SQLite.h"
+
+class CItemShip;
 
 enum SERVMODE_TYPE
 {

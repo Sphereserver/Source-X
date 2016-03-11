@@ -69,6 +69,32 @@ LPCTSTR const CPointBase::sm_szLoadKeys[PT_QTY+1] =
 	NULL
 };
 
+bool CPointBase::operator== ( const CPointBase & pt ) const
+{
+	return( m_x == pt.m_x && m_y == pt.m_y && m_z == pt.m_z && m_map == pt.m_map );
+}
+
+bool CPointBase::operator!= ( const CPointBase & pt ) const
+{
+	return( ! ( *this == pt ));
+}
+
+const CPointBase CPointBase::operator+= ( const CPointBase & pt )
+{
+	m_x += pt.m_x;
+	m_y += pt.m_y;
+	m_z += pt.m_z;
+	return( * this );
+}
+
+const CPointBase CPointBase::operator-= ( const CPointBase & pt )
+{
+	m_x -= pt.m_x;
+	m_y -= pt.m_y;
+	m_z -= pt.m_z;
+	return( * this );
+}
+
 void CPointBase::InitPoint()
 {
 	m_x = -1;	// invalid location.
@@ -861,6 +887,11 @@ size_t CPointBase::GetRegions( DWORD dwType, CRegionLinks & rlinks ) const
 	return 0;
 }
 
+long CPointBase::GetPointSortIndex() const
+{
+	return( MAKELONG( m_x, m_y ));
+}
+
 //*************************************************************************
 // -CGRect
 
@@ -1009,6 +1040,58 @@ CSector * CGRect::GetSector( int i ) const	// ge all the sectors that make up th
 	int indexoffset = (( i / width ) * g_MapList.GetSectorCols(m_map)) + ( i % width );
 
 	return g_World.GetSector(m_map, iBase+indexoffset);
+}
+
+
+CPointMap::CPointMap()
+{
+	InitPoint();
+}
+
+CPointMap::CPointMap( WORD x, WORD y, signed char z = 0, unsigned char map = 0 )
+{
+	m_x = x;
+	m_y = y;
+	m_z = z;
+	m_map = map;
+}
+
+CPointMap & CPointMap::operator= ( const CPointBase & pt )
+{
+	Set( pt );
+	return( * this );
+}
+
+CPointMap::CPointMap( const CPointBase & pt )
+{
+	Set( pt );
+}
+
+CPointMap::CPointMap( TCHAR * pVal )
+{
+	Read( pVal );
+}
+
+CPointSort::CPointSort()
+{
+	InitPoint();
+}
+
+CPointSort::CPointSort( WORD x, WORD y, signed char z = 0, unsigned char map = 0 )
+{
+	m_x = x;
+	m_y = y;
+	m_z = z;
+	m_map = map;
+}
+
+CPointSort::CPointSort( const CPointBase & pt )
+{
+	Set( pt );
+}
+
+virtual CPointSort::~CPointSort()	// just to make this dynamic
+{
 }
 
 //*************************************************************************

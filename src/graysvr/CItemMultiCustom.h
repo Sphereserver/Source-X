@@ -3,6 +3,8 @@
 
 #include "CItemMulti.h"
 
+class PacketHouseDesign;
+
 class CItemMultiCustom : public CItemMulti
 {
 	// IT_MULTI_CUSTOM

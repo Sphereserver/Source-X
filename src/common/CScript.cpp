@@ -7,13 +7,64 @@
 #include "../sphere/threads.h"
 #include "../graysvr/CLog.h"
 
+
+void CScriptLineContext::Init()
+{
+	m_lOffset = -1;
+	m_iLineNum = -1;
+}
+
+bool CScriptLineContext::IsValid() const
+{
+	return( m_lOffset >= 0 );
+}
+
+CScriptLineContext::CScriptLineContext()
+{
+	Init();
+}
+
+
 ///////////////////////////////////////////////////////////////
 // -CScriptKey
+
+
+bool CScriptKey::IsKey( LPCTSTR pszName ) const
+{
+	ASSERT(m_pszKey);
+	return( ! strcmpi( m_pszKey, pszName ));
+}
+
+bool CScriptKey::IsKeyHead( LPCTSTR pszName, size_t len ) const
+{
+	ASSERT(m_pszKey);
+	return( ! strnicmp( m_pszKey, pszName, len ));
+}
 
 void CScriptKey::InitKey()
 {
 	ADDTOCALLSTACK("CScriptKey::InitKey");
 	m_pszArg = m_pszKey = NULL;
+}
+
+LPCTSTR CScriptKey::GetKey() const
+{
+	// Get the key or section name.
+	ASSERT(m_pszKey);
+	return(m_pszKey);
+}
+
+// Args passed with the key.
+bool CScriptKey::HasArgs() const
+{
+	ASSERT(m_pszArg);
+	return(( m_pszArg[0] ) ? true : false );
+}
+
+TCHAR * CScriptKey::GetArgRaw() const	// Not need to parse at all.
+{
+	ASSERT(m_pszArg);
+	return(m_pszArg);
 }
 
 TCHAR * CScriptKey::GetArgStr( bool * fQuoted )	// this could be a quoted string ?
@@ -40,6 +91,11 @@ TCHAR * CScriptKey::GetArgStr( bool * fQuoted )	// this could be a quoted string
 	}
 
 	return( pStr );
+}
+
+TCHAR * CScriptKey::GetArgStr()
+{
+	return GetArgStr( NULL );
 }
 
 DWORD CScriptKey::GetArgFlag( DWORD dwStart, DWORD dwMask )
@@ -84,6 +140,18 @@ long CScriptKey::GetArgRange()
 	return( Exp_GetRange( m_pszArg ));
 }
 
+CScriptKey::CScriptKey() : m_pszKey(NULL), m_pszArg(NULL)
+{
+}
+
+CScriptKey::CScriptKey( TCHAR * pszKey, TCHAR * pszArg ) : m_pszKey( pszKey ), m_pszArg( pszArg )
+{
+}
+
+virtual CScriptKey::~CScriptKey()
+{
+}
+
 ///////////////////////////////////////////////////////////////
 // -CScriptKeyAlloc
 
@@ -104,6 +172,13 @@ TCHAR * CScriptKeyAlloc::GetKeyBufferRaw( size_t iLen )
 	m_pszKey[0] = '\0';
 
 	return m_pszKey;
+}
+
+TCHAR * CScriptKeyAlloc::GetKeyBuffer()
+{
+	// Get the buffer the key is in.
+	ASSERT(m_Mem.GetData());
+	return reinterpret_cast<TCHAR *>(m_Mem.GetData());
 }
 
 bool CScriptKeyAlloc::ParseKey( LPCTSTR pszKey )
@@ -418,6 +493,18 @@ bool CScript::FindSection( LPCTSTR pszName, UINT uModeFlags )
 	return( false );
 }
 
+LPCTSTR CScript::GetSection() const
+{
+	ASSERT(m_pszKey);
+	return( m_pszKey );
+}
+
+bool CScript::IsSectionType( LPCTSTR pszName ) //const
+{
+	// Only valid after FindNextSection()
+	return( ! strcmpi( GetKey(), pszName ));
+}
+
 bool CScript::ReadKey( bool fRemoveBlanks )
 {
 	ADDTOCALLSTACK("CScript::ReadKey");
@@ -529,6 +616,25 @@ void CScript::Close()
 	PhysicalScriptFile::Close();
 }
 
+virtual void CScript::CloseForce()
+{
+	CScript::Close();
+}
+
+bool CScript::SeekContext( CScriptLineContext LineContext )
+{
+	m_iLineNum = LineContext.m_iLineNum;
+	return Seek( LineContext.m_lOffset, SEEK_SET ) == static_cast<DWORD>(LineContext.m_lOffset);
+}
+
+CScriptLineContext CScript::GetContext() const
+{
+	CScriptLineContext LineContext;
+	LineContext.m_iLineNum = m_iLineNum;
+	LineContext.m_lOffset = GetPosition();
+	return( LineContext );
+}
+
 bool _cdecl CScript::WriteSection( LPCTSTR pszSection, ... )
 {
 	ADDTOCALLSTACK_INTENSIVE("CScript::WriteSection");
@@ -618,3 +724,24 @@ void _cdecl CScript::WriteKeyFormat( LPCTSTR pszKey, LPCTSTR pszVal, ... )
 	va_end( vargs );
 }
 
+void CScript::WriteKeyVal( LPCTSTR pszKey, INT64 dwVal )
+{
+#ifdef __MINGW32__
+	WriteKeyFormat( pszKey, "%I64d", dwVal );
+#else  // __MINGW32__
+	WriteKeyFormat( pszKey, "%lld", dwVal );
+#endif  // __MINGW32__
+}
+
+void CScript::WriteKeyHex( LPCTSTR pszKey, INT64 dwVal )
+{
+#ifdef __MINGW32__
+	WriteKeyFormat( pszKey, "0%I64x", dwVal );
+#else  // __MINGW32__
+	WriteKeyFormat( pszKey, "0%llx", dwVal );
+#endif  // __MINGW32__
+}
+
+virtual CScript::~CScript()
+{
+}

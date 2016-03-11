@@ -3,6 +3,7 @@
 //
 
 //#include "graysvr.h" Removed to test. 	// predef header.
+#include "CChar.h"
 #include "CClient.h"
 #include "CServTime.h"
 #include "CContainer.h"

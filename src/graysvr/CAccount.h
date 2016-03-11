@@ -3,14 +3,14 @@
 * @file CAcount.h
 */
 
-//#include "CResource.h"
+
 //#include "../common/CScript.h"
 //#include "../common/CScriptObj.h"
 //#include "../common/CMemBlock.h"
 //#include "../common/CString.h"
 //#include "../common/grayproto.h"
 //#include "../common/CTextConsole.h"
-//#include "../common/CSocket.h"
+
 //#include "../common/CTime.h"
 //#include "../common/CVarDefMap.h"
 //#include "CCharRefArray.h"
@@ -18,9 +18,11 @@
 #ifndef _INC_CACCOUNT_H
 #define _INC_CACCOUNT_H
 #pragma once
-
+#include "CResource.h"
+#include "../common/grayproto.h"
 #include "../common/CScriptObj.h"
 #include "../common/CString.h"
+#include "../common/CSocket.h"
 #include "CCharRefArray.h"
 
 #define PRIV_UNUSED0		0x0001

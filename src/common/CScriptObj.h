@@ -2,6 +2,7 @@
 #define _INC_CSCRIPTOBJ_H
 #pragma once
 
+#include "CArray.h"
 #include "CScript.h"
 #include "../sphere/threads.h"
 #include "CVarDefMap.h"
@@ -10,7 +11,6 @@
 
 class CChar;
 class CScriptTriggerArgs;
-class CScriptObj;
 
 enum TRIGRUN_TYPE
 {
@@ -54,13 +54,7 @@ private:
 public:
 	static const char *m_sClassName;
 	TRIGRET_TYPE OnTriggerScript( CScript &s, LPCTSTR pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = NULL );
-	virtual TRIGRET_TYPE OnTrigger( LPCTSTR pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = NULL )
-	{
-		UNREFERENCED_PARAMETER(pszTrigName);
-		UNREFERENCED_PARAMETER(pSrc);
-		UNREFERENCED_PARAMETER(pArgs);
-		return( TRIGRET_RET_DEFAULT );
-	}
+	virtual TRIGRET_TYPE OnTrigger( LPCTSTR pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = NULL );
 	bool OnTriggerFind( CScript & s, LPCTSTR pszTrigName );
 	TRIGRET_TYPE OnTriggerRun( CScript &s, TRIGRUN_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pReturn );
 	TRIGRET_TYPE OnTriggerRunVal( CScript &s, TRIGRUN_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
@@ -75,12 +69,7 @@ public:
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
 	bool r_Call( LPCTSTR pszFunction, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * psVal = NULL, TRIGRET_TYPE * piRet = NULL );
 
-	bool r_SetVal( LPCTSTR pszKey, LPCTSTR pszVal )
-	{
-		CScript s( pszKey, pszVal );
-		bool result = r_LoadVal( s );
-		return result;
-	}
+	bool r_SetVal( LPCTSTR pszKey, LPCTSTR pszVal );
 	virtual bool r_LoadVal( CScript & s );
 	virtual bool r_Load( CScript & s );
 

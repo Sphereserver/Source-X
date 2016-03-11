@@ -585,6 +585,12 @@ bool CScriptObj::r_Call( LPCTSTR pszFunction, CTextConsole * pSrc, CScriptTrigge
 	return( true );
 }
 
+bool CScriptObj::r_SetVal( LPCTSTR pszKey, LPCTSTR pszVal )
+{
+	CScript s( pszKey, pszVal );
+	bool result = r_LoadVal( s );
+	return result;
+}
 
 bool CScriptObj::r_LoadVal( CScript & s )
 {
@@ -2056,6 +2062,13 @@ TRIGRET_TYPE CScriptObj::OnTriggerScript( CScript & s, LPCTSTR pszTrigName, CTex
 	return iRet;
 }
 
+virtual TRIGRET_TYPE CScriptObj::OnTrigger( LPCTSTR pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = NULL )
+{
+	UNREFERENCED_PARAMETER(pszTrigName);
+	UNREFERENCED_PARAMETER(pSrc);
+	UNREFERENCED_PARAMETER(pArgs);
+	return( TRIGRET_RET_DEFAULT );
+}
 
 
 enum SK_TYPE

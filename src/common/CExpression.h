@@ -3,6 +3,8 @@
 #pragma once
 
 #include <stdint.h>
+#include "common.h"
+#include "graycom.h"
 #include "CVarDefMap.h"
 #include "ListDefContMap.h"
 

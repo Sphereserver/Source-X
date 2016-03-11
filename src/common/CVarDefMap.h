@@ -4,6 +4,8 @@
 
 #include <set>
 #include "CString.h"
+#include "graycom.h"
+
 class CTextConsole;
 class CScript;
 

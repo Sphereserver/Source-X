@@ -11,6 +11,7 @@
 
 class CVarDefContNum;
 
+
 enum RES_TYPE	// all the script resource blocks we know how to deal with !
 {
 	// NOTE: SPHERE.INI, SPHERETABLE.SCP are read at start.

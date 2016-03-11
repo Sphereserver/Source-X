@@ -8,7 +8,6 @@
 
 #include "CString.h"
 #include "graymul.h"
-//#include "cscript.h"
 
 class CRegionBase;
 class CRegionLinks;
@@ -27,31 +26,10 @@ public:
 	BYTE m_map;			// another map? (only if top level.)
 
 public:
-	bool operator == ( const CPointBase & pt ) const
-	{
-		return( m_x == pt.m_x && m_y == pt.m_y && m_z == pt.m_z && m_map == pt.m_map );
-	}
-
-	bool operator != ( const CPointBase & pt ) const
-	{
-		return( ! ( *this == pt ));
-	}
-
-	const CPointBase operator += ( const CPointBase & pt )
-	{
-		m_x += pt.m_x;
-		m_y += pt.m_y;
-		m_z += pt.m_z;
-		return( * this );
-	}
-
-	const CPointBase operator -= ( const CPointBase & pt )
-	{
-		m_x -= pt.m_x;
-		m_y -= pt.m_y;
-		m_z -= pt.m_z;
-		return( * this );
-	}
+	bool operator == ( const CPointBase & pt ) const;
+	bool operator != ( const CPointBase & pt ) const;
+	const CPointBase operator += ( const CPointBase & pt );
+	const CPointBase operator -= ( const CPointBase & pt );
 
 	void InitPoint();
 	void ZeroPoint();
@@ -97,10 +75,7 @@ public:
 	CRegionBase * GetRegion( DWORD dwType ) const;
 	size_t GetRegions( DWORD dwType, CRegionLinks & rlinks ) const;
 
-	long GetPointSortIndex() const
-	{
-		return( MAKELONG( m_x, m_y ));
-	}
+	long GetPointSortIndex() const;
 
 	bool r_WriteVal( LPCTSTR pszKey, CGString & sVal ) const;
 	bool r_LoadVal( LPCTSTR pszKey, LPCTSTR pszArgs );
@@ -109,52 +84,19 @@ public:
 struct CPointMap : public CPointBase
 {
 	// A point in the world (or in a container) (initialized)
-	CPointMap()
-	{
-		InitPoint();
-	}
-	CPointMap( WORD x, WORD y, signed char z = 0, unsigned char map = 0 )
-	{
-		m_x = x;
-		m_y = y;
-		m_z = z;
-		m_map = map;
-	}
-	CPointMap & operator = ( const CPointBase & pt )
-	{
-		Set( pt );
-		return( * this );
-	}
-	CPointMap( const CPointBase & pt )
-	{
-		Set( pt );
-	}
-	CPointMap( TCHAR * pVal )
-	{
-		Read( pVal );
-	}
+	CPointMap();
+	CPointMap( WORD x, WORD y, signed char z = 0, unsigned char map = 0 );
+	CPointMap & operator = ( const CPointBase & pt );
+	CPointMap( const CPointBase & pt );
+	CPointMap( TCHAR * pVal );
 };
 
 struct CPointSort : public CPointMap
 {
-	CPointSort()
-	{
-		InitPoint();
-	}
-	CPointSort( WORD x, WORD y, signed char z = 0, unsigned char map = 0 )
-	{
-		m_x = x;
-		m_y = y;
-		m_z = z;
-		m_map = map;
-	}
-	CPointSort( const CPointBase & pt )
-	{
-		Set( pt );
-	}
-	virtual ~CPointSort()	// just to make this dynamic
-	{
-	}
+	CPointSort();
+	CPointSort( WORD x, WORD y, signed char z = 0, unsigned char map = 0 );
+	CPointSort( const CPointBase & pt );
+	virtual ~CPointSort(); // just to make this dynamic
 };
 
 #endif	// _INC_CRECT_H

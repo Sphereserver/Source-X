@@ -9,9 +9,9 @@ template<class T>
 class ThreadSafeQueue
 {
 public:
-	typedef list<T> list;
-	typedef typename list<T>::iterator iterator;
-	typedef typename list<T>::const_iterator const_iterator;
+	typedef std::list<T> list;
+	typedef typename std::list<T>::iterator iterator;
+	typedef typename std::list<T>::const_iterator const_iterator;
 
 private:
 	list m_list;

@@ -2,12 +2,8 @@
 #define _INC_CSECTOR_H
 
 #include "../common/CSectorTemplate.h"
-#include "../common/mtrand/mtrand.h"
-#include "../common/CScript.h"
 #include "../common/CScriptObj.h"
-#include "../common/CTextConsole.h"
-#include "../common/grayproto.h"
-#include "../common/graymul.h"
+#include "CSectorEnviron.h"
 
 class CChar;
 class CItemStone;

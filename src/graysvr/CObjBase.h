@@ -7,6 +7,7 @@
 #pragma once
 #include "../common/CObjBaseTemplate.h"
 #include "../common/CScriptObj.h"
+#include "../common/CResourceBase.h"
 #include "CServTime.h"
 #include "CContainer.h"
 #include "CBase.h"
@@ -106,7 +107,7 @@ public:
 	CVarDefCont * GetKey( LPCTSTR pszKey, bool fDef ) const;
 	void SetKeyNum(LPCTSTR pszKey, INT64 iVal);
 	void SetKeyStr(LPCTSTR pszKey, LPCTSTR pszVal);
-	void CObjBase::DeleteKey( LPCTSTR pszKey );
+	void DeleteKey( LPCTSTR pszKey );
 
 protected:
 	virtual void DupeCopy( const CObjBase * pObj );

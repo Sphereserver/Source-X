@@ -2,9 +2,9 @@
 #define _INC_COBJBASETEMPLATE_H
 
 #include "CArray.h"
-#include "graycom.h"
+//#include "graycom.h"
 #include "CString.h"
-#include "CRegion.h"
+#include "CRect.h"
 #include "CGrayUID.h"
 
 class CObjBaseTemplate : public CGObListRec

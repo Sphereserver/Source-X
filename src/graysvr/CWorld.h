@@ -6,10 +6,21 @@
 #define _INC_CWORLD_H
 #pragma once
 
-#include "CSector.h"
+#include "../common/common.h"
+#include "../common/CArray.h"
+#include "../common/CScript.h"
+#include "../common/CScriptObj.h"
 #include "../common/mtrand/mtrand.h"
+#include "../common/CGrayUID.h"
 #include "CServTime.h"
+#include "CSector.h"
 #include "CItemBase.h"
+
+class CObjBase;
+class CItemStone;
+class CItemTypeDef;
+class CObjBaseTemplate;
+
 
 enum IMPFLAGS_TYPE	// IMPORT and EXPORT flags.
 {

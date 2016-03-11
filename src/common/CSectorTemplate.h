@@ -6,16 +6,17 @@
 #pragma once
 
 #include "../graysvr/CServer.h"
+#include "CRegion.h"
 class CItem;
+class CPointSort;
+class CGrayMapBlock;
 
 class CCharsDisconnectList : public CGObList
 {
 public:
 	static const char *m_sClassName;
-
 public:
-	CCharsDisconnectList() { };
-
+	CCharsDisconnectList();
 private:
 	CCharsDisconnectList(const CCharsDisconnectList& copy);
 	CCharsDisconnectList& operator=(const CCharsDisconnectList& other);
@@ -33,7 +34,7 @@ protected:
 	void OnRemoveOb( CGObListRec* pObRec );	// Override this = called when removed from list.
 
 public:
-	size_t HasClients() const { return( m_iClients ); }
+	size_t HasClients() const;
 	void ClientAttach();
 	void ClientDetach();
 	void AddCharToSector( CChar * pChar );
@@ -60,7 +61,7 @@ public:
 	void AddItemToSector( CItem * pItem );
 
 public:
-	CItemsList() { };
+	CItemsList();
 
 private:
 	CItemsList(const CItemsList& copy);
@@ -71,18 +72,10 @@ class CObPointSortArray : public CGObSortArray< CPointSort*, long >
 {
 public:
 	static const char *m_sClassName;
-
 	// Find a point fast.
-	int CompareKey( long id, CPointSort* pBase, bool fNoSpaces ) const
-	{
-		UNREFERENCED_PARAMETER(fNoSpaces);
-		ASSERT( pBase );
-		return( id - pBase->GetPointSortIndex());
-	}
-
+	int CompareKey( long id, CPointSort* pBase, bool fNoSpaces ) const;
 public:
 	CObPointSortArray() { };
-
 private:
 	CObPointSortArray(const CObPointSortArray& copy);
 	CObPointSortArray& operator=(const CObPointSortArray& other);

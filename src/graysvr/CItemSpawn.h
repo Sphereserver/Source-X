@@ -3,6 +3,8 @@
 
 #include "CItem.h"
 
+class CCharBase;
+
 class CItemSpawn : public CItem
 {
 private:

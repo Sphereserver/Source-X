@@ -2,9 +2,8 @@
 #define _INC_CSCRIPT_H
 #pragma once
 
+#include "common.h"
 #include "CMemBlock.h"
-#include "CArray.h"
-#include "CFile.h"
 #include "CacheableScriptFile.h"
 
 #define GRAY_SCRIPT		".scp"
@@ -16,23 +15,10 @@ struct CScriptLineContext
 public:
 	long m_lOffset;
 	int m_iLineNum;		// for debug purposes if there is an error.
-
 public:
-	void Init()
-	{
-		m_lOffset = -1;
-		m_iLineNum = -1;
-	}
-	bool IsValid() const
-	{
-		return( m_lOffset >= 0 );
-	}
-
-public:
-	CScriptLineContext()
-	{
-		Init();
-	}
+	void Init();
+	bool IsValid() const;
+	CScriptLineContext();
 };
 
 class CScriptKey
@@ -46,64 +32,26 @@ protected:
 
 public:
 	static const char *m_sClassName;
-	bool IsKey( LPCTSTR pszName ) const
-	{
-		ASSERT(m_pszKey);
-		return( ! strcmpi( m_pszKey, pszName ));
-	}
-	bool IsKeyHead( LPCTSTR pszName, size_t len ) const
-	{
-		ASSERT(m_pszKey);
-		return( ! strnicmp( m_pszKey, pszName, len ));
-	}
-
+	bool IsKey( LPCTSTR pszName ) const;
+	bool IsKeyHead( LPCTSTR pszName, size_t len ) const;
 	void InitKey();
 
 	// Query the key.
-	LPCTSTR GetKey() const
-	{
-		// Get the key or section name.
-		ASSERT(m_pszKey);
-		return(m_pszKey);
-	}
-
+	LPCTSTR GetKey() const;
 	// Args passed with the key.
-	bool HasArgs() const
-	{
-		ASSERT(m_pszArg);
-		return(( m_pszArg[0] ) ? true : false );
-	}
-	TCHAR * GetArgRaw() const	// Not need to parse at all.
-	{
-		ASSERT(m_pszArg);
-		return(m_pszArg);
-	}
-
+	bool HasArgs() const;
+	TCHAR * GetArgRaw() const; // Not need to parse at all.
 	TCHAR * GetArgStr( bool * fQuoted );	// this could be a quoted string ?
-	TCHAR * GetArgStr()
-	{
-		return GetArgStr( NULL );
-	}
+	TCHAR * GetArgStr();
 	long long GetArgLLVal();
 	long GetArgVal();
 	long GetArgRange();
 	DWORD GetArgFlag( DWORD dwStart, DWORD dwMask );
 
 public:
-	CScriptKey() : m_pszKey(NULL), m_pszArg(NULL)
-	{
-	}
-
-	CScriptKey( TCHAR * pszKey, TCHAR * pszArg ) :
-		m_pszKey( pszKey ),
-		m_pszArg( pszArg )
-	{
-	}
-
-	virtual ~CScriptKey()
-	{
-	}
-
+	CScriptKey();
+	CScriptKey( TCHAR * pszKey, TCHAR * pszArg );
+	virtual ~CScriptKey();
 private:
 	CScriptKey(const CScriptKey& copy);
 	CScriptKey& operator=(const CScriptKey& other);
@@ -123,12 +71,7 @@ protected:
 
 public:
 	static const char *m_sClassName;
-	TCHAR * GetKeyBuffer()
-	{
-		// Get the buffer the key is in. 
-		ASSERT(m_Mem.GetData());
-		return reinterpret_cast<TCHAR *>(m_Mem.GetData());
-	}
+	TCHAR * GetKeyBuffer();
 	bool ParseKey( LPCTSTR pszKey );
 	void ParseKeyLate();
 
@@ -169,41 +112,17 @@ public:
 public:
 	virtual bool Open( LPCTSTR szFilename = NULL, UINT Flags = OF_READ|OF_TEXT );
 	virtual void Close();
-	virtual void CloseForce()
-	{
-		CScript::Close();
-	}
-
-	bool SeekContext( CScriptLineContext LineContext )
-	{
-		m_iLineNum = LineContext.m_iLineNum;
-		return Seek( LineContext.m_lOffset, SEEK_SET ) == static_cast<DWORD>(LineContext.m_lOffset);
-	}
-	CScriptLineContext GetContext() const
-	{
-		CScriptLineContext LineContext;
-		LineContext.m_iLineNum = m_iLineNum;
-		LineContext.m_lOffset = GetPosition();
-		return( LineContext );
-	}
+	virtual void CloseForce();
+	bool SeekContext( CScriptLineContext LineContext );
+	CScriptLineContext GetContext() const;
 
 	// Find sections.
 	bool FindNextSection();
 	virtual bool FindSection( LPCTSTR pszName, UINT uModeFlags ); // Find a section in the current script
-	LPCTSTR GetSection() const
-	{
-		ASSERT(m_pszKey);
-		return( m_pszKey );
-	}
-	bool IsSectionType( LPCTSTR pszName ) //const
-	{
-		// Only valid after FindNextSection()
-		return( ! strcmpi( GetKey(), pszName ));
-	}
-
+	LPCTSTR GetSection() const;
+	bool IsSectionType( LPCTSTR pszName );
 	// Find specific keys in the current section.
 	bool FindKey( LPCTSTR pszName ); // Find a key in the current section
-
 	// read the sections keys.
 	bool ReadKey( bool fRemoveBlanks = true );
 	bool ReadKeyParse();
@@ -213,29 +132,13 @@ public:
 	bool WriteKey( LPCTSTR pszKey, LPCTSTR pszVal );
 	void _cdecl WriteKeyFormat( LPCTSTR pszKey, LPCTSTR pszFormat, ... ) __printfargs(3,4);
 
-	void WriteKeyVal( LPCTSTR pszKey, INT64 dwVal )
-	{
-#ifdef __MINGW32__
-		WriteKeyFormat( pszKey, "%I64d", dwVal );
-#else  // __MINGW32__
-		WriteKeyFormat( pszKey, "%lld", dwVal );
-#endif  // __MINGW32__
-	}
-	void WriteKeyHex( LPCTSTR pszKey, INT64 dwVal )
-	{
-#ifdef __MINGW32__
-		WriteKeyFormat( pszKey, "0%I64x", dwVal );
-#else  // __MINGW32__
-		WriteKeyFormat( pszKey, "0%llx", dwVal );
-#endif  // __MINGW32__
-	}
+	void WriteKeyVal( LPCTSTR pszKey, INT64 dwVal );
+	void WriteKeyHex( LPCTSTR pszKey, INT64 dwVal );
 
 	CScript();
 	CScript( LPCTSTR pszKey );
 	CScript( LPCTSTR pszKey, LPCTSTR pszVal );
-	virtual ~CScript()
-	{
-	}
+	virtual ~CScript();
 };
 
 #endif // _INC_CSCRIPT_H

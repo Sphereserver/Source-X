@@ -2,13 +2,25 @@
 #define __SEND_H__
 #pragma once
 
+#include "../common/graymul.h"
+#include "../common/CRegion.h"
 #include "packet.h"
 #include "network.h"
 #include "../common/grayproto.h"
 #include "../common/CGrayUID.h"
-#include "../graysvr/CItemMessage.h"
-#include "../graysvr/CClientTooltip.h"
+#include "../graysvr/enums.h"
 
+class CItemMap;
+class CMenuItem;
+class CPointMap;
+class CObjBaseTemplate;
+class CSpellDef;
+class CItemContainer;
+class CItemMessage;
+class CItemCorpse;
+class CCharRefArray;
+class CItemMultiCustom;
+class CClientTooltip;
 
 /***************************************************************************
  *

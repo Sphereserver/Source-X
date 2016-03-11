@@ -3,13 +3,17 @@
 #pragma once
 
 #include "packet.h"
-#include "../common/CArray.h"
 #include "../common/common.h"
+#include "../sphere/containers.h"
+#include "../common/CSocket.h"
 #include "../common/CQueue.h"
 #include "../common/grayproto.h"
 #include "../graysvr/CServTime.h"
-#include "../sphere/containers.h"
-#include "../sphere/threads.h"
+#include "../common/CArray.h"
+
+#if !defined(_WIN32) || defined(_LIBEV)
+#include "../sphere/linuxev.h"
+#endif
 
 #define NETWORK_PACKETCOUNT 0x100	// number of unique packets
 #define NETWORK_BUFFERSIZE 0xF000	// size of receive buffer

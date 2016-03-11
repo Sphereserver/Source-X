@@ -1,9 +1,16 @@
 #include "CSectorTemplate.h"
+#include "CRect.h"
 #include "CException.h"
 #include "../graysvr/CServTime.h"
 #include "../graysvr/CChar.h"
 #include "../graysvr/CLog.h"
 #include <algorithm>
+
+
+CCharsDisconnectList::CCharsDisconnectList()
+{
+
+};
 
 ////////////////////////////////////////////////////////////////////////
 // -CCharsActiveList
@@ -27,6 +34,11 @@ void CCharsActiveList::OnRemoveOb( CGObListRec * pObRec )
 	}
 	CGObList::OnRemoveOb(pObRec);
 	pChar->SetContainerFlags(UID_O_DISCONNECT);
+}
+
+size_t CCharsActiveList::HasClients() const
+{
+	return( m_iClients );
 }
 
 void CCharsActiveList::AddCharToSector( CChar * pChar )
@@ -82,6 +94,24 @@ void CItemsList::AddItemToSector( CItem * pItem )
 	ASSERT( pItem );
 	CGObList::InsertHead( pItem );
 }
+
+CItemsList::CItemsList()
+{
+
+};
+
+int CObPointSortArray::CompareKey( long id, CPointSort* pBase, bool fNoSpaces ) const
+{
+	UNREFERENCED_PARAMETER(fNoSpaces);
+	ASSERT( pBase );
+	return( id - pBase->GetPointSortIndex());
+}
+
+
+CObPointSortArray::CObPointSortArray()
+{
+
+};
 
 //////////////////////////////////////////////////////////////////
 // -CSectorBase
@@ -409,6 +439,11 @@ bool CSectorBase::AddTeleport( CTeleport * pTeleport )
 	}
 	m_Teleports.AddSortKey( pTeleport, pTeleport->GetPointSortIndex());
 	return( true );
+}
+
+bool CSectorBase::IsFlagSet( DWORD dwFlag ) const
+{
+	return(( m_dwFlags & dwFlag) ? true : false );
 }
 
 CPointMap CSectorBase::GetBasePoint() const
