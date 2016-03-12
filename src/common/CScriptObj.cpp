@@ -2063,7 +2063,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerScript( CScript & s, LPCTSTR pszTrigName, CTex
 	return iRet;
 }
 
-virtual TRIGRET_TYPE CScriptObj::OnTrigger( LPCTSTR pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = NULL )
+TRIGRET_TYPE CScriptObj::OnTrigger( LPCTSTR pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs)
 {
 	UNREFERENCED_PARAMETER(pszTrigName);
 	UNREFERENCED_PARAMETER(pSrc);

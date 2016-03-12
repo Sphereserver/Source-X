@@ -1,12 +1,13 @@
 // Stuff for making this application run as an NT service
 
 #ifdef _WIN32
-//#include "graysvr.h" Removed to test.
+#include "../common/CException.h"
 #include "../common/grayver.h"
+#include "../graysvr/CLog.h"
+#include "../graysvr/CServer.h"
+#include "../graysvr/graysvr.h"
 #include "ntservice.h"
 #include <direct.h>
-
-CNTService g_Service;
 
 CNTService::CNTService()
 {

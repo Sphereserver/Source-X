@@ -1,24 +1,22 @@
-﻿//#include "graysvr.h" Removed to test. 	// predef header.
-#include <CGrayInst.h>
-#include "CResource.h"
-#include "CServTime.h"
-#include "../common/grayver.h"
-#include "../common/CFileList.h"
-#include "../common/CException.h"
-#include "../network/network.h"
+﻿#include "CAccount.h"
+#include "CChar.h"
+#include "CCharBase.h"
+#include "CClient.h"
 #include "CItemBase.h"
 #include "CItemStone.h"
-#include "CAccount.h"
-#include "CCharBase.h"
-#include "CChar.h"
-#include "CClient.h"
-#include "CWorld.h"
 #include "CLog.h"
-#ifdef _SUBVERSION
- #include "../common/version/GitRevision.h"
+#include "CWorld.h"
+#include "CResource.h"
+#include "CServTime.h"
 #include "graysvr.h"
 #include "Triggers.h"
-
+#include "../common/CException.h"
+#include "../common/CFileList.h"
+#include "../common/CGrayInst.h"
+#include "../common/grayver.h"
+#include "../network/network.h"
+#ifdef _SUBVERSION
+	#include "../common/version/GitRevision.h"
 #endif
 
 CResource::CResource()

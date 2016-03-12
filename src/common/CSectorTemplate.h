@@ -6,9 +6,9 @@
 #pragma once
 
 #include "../graysvr/CServer.h"
+#include "CRect.h"
 #include "CRegion.h"
 class CItem;
-class CPointSort;
 class CGrayMapBlock;
 
 class CCharsDisconnectList : public CGObList

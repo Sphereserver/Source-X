@@ -2,8 +2,9 @@
 #define __RECEIVE_H__
 #pragma once
 
-#include "../common/grayproto.h"
 #include "../common/CGrayUID.h"
+#include "../common/graymul.h"
+#include "../common/grayproto.h"
 #include "packet.h"
 
 /***************************************************************************

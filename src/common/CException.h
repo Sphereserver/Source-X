@@ -1,5 +1,5 @@
-#ifndef _CEXCEPTION_H
-#define _CEXCEPTION_H
+#ifndef _INC_CEXCEPTION_H
+#define _INC_CEXCEPTION_H
 
 // #include <stack>
 #include "../sphere/threads.h"

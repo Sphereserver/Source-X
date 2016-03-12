@@ -3,7 +3,7 @@
 //
 
 #include <vector>
-#include "graycom.h"
+#include "../common/grayproto.h"
 #include "Triggers.h"
 #include "CServer.h"
 

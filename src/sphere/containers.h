@@ -1,11 +1,12 @@
-#ifndef __CONTAINERS_H__
-#define __CONTAINERS_H__
+#ifndef _INC_CONTAINERS_H_
+#define _INC_CONTAINERS_H_
 #pragma once
 
 #include <list>
 // a thread-safe implementation of a queue container that doesn't use any locks
 // this only works as long as there is only a single reader thread and writer thread
 template<class T>
+
 class ThreadSafeQueue
 {
 public:
@@ -19,12 +20,7 @@ private:
 	iterator m_tail;
 
 public:
-	ThreadSafeQueue()
-	{
-		m_list.push_back(T()); // at least one element must be in the queue
-		m_head = m_list.begin();
-		m_tail = m_list.end();
-	}
+	ThreadSafeQueue();
 
 private:
 	ThreadSafeQueue(const ThreadSafeQueue& copy);
@@ -32,74 +28,22 @@ private:
 
 public:
 	// Append an element to the end of the queue (writer)
-	void push(const T& value)
-	{
-		m_list.push_back(value);
-		m_tail = m_list.end();
-		clean();
-	}
+	void push(const T& value);
 
 	// Erase elements from before reader head (writer)
-	void clean(void)
-	{
-		m_list.erase(m_list.begin(), m_head);
-	}
+	void clean(void);
 
 	// Retrieve the number of elements in the queue (reader/writer)
-	size_t size(void) const
-	{
-		if (empty())
-			return 0;
-
-		size_t toSkip = 1;
-		for (const_iterator it = m_list.begin(); it != m_head && it != m_list.end(); ++it)
-		{
-			if (it == m_list.end())
-				break;
-
-			toSkip++;
-		}
-
-		return m_list.size() - toSkip;
-	}
+	size_t size(void) const;
 
 	// Determine if the queue is empty (reader/writer)
-	bool empty(void) const
-	{
-		iterator next = m_head;
-		++next;
-
-		return (next == m_tail);
-	}
+	bool empty(void) const;
 
 	// Remove the first element from the queue (reader)
-	void pop(void)
-	{
-		if (empty())
-			throw CException(LOGL_ERROR, 0, "No elements to read from queue.");
-
-		iterator next = m_head;
-		++next;
-
-		if (next != m_tail)
-			m_head = next;
-	}
+	void pop(void);
 
 	// Retrieve the first element in the queue (reader)
-	T front(void) const
-	{
-		if (empty() == false)
-		{
-			iterator next = m_head;
-			++next;
-
-			if (next != m_tail)
-				return *next;
-		}
-
-		// this should never happen
-		throw CException(LOGL_ERROR, 0, "No elements to read from queue.");
-	}
+	T front(void) const;
 };
 
-#endif
+#endif // _INC_CONTAINERS_H_

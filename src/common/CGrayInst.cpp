@@ -12,12 +12,12 @@ CGrayInstall::CGrayInstall()
 	memset(m_UopMapAddress, 0, sizeof(m_UopMapAddress));
 };
 
-CGString CGrayInstall::GetFullExePath( LPCTSTR pszName = NULL ) const
+CGString CGrayInstall::GetFullExePath( LPCTSTR pszName ) const
 {
 	return( CGFile::GetMergedFileName( m_sExePath, pszName ));
 }
 
-CGString CGrayInstall::GetFullCDPath( LPCTSTR pszName = NULL ) const
+CGString CGrayInstall::GetFullCDPath( LPCTSTR pszName ) const
 {
 	return( CGFile::GetMergedFileName( m_sCDPath, pszName ));
 }
@@ -188,7 +188,7 @@ void CGrayInstall::SetPreferPath( LPCTSTR pszName )
 	m_sPreferPath = pszName;
 }
 
-CGString CGrayInstall::GetPreferPath( LPCTSTR pszName = NULL ) const
+CGString CGrayInstall::GetPreferPath( LPCTSTR pszName ) const
 {
 	return CGFile::GetMergedFileName(m_sPreferPath, pszName);
 }

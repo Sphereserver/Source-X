@@ -2,12 +2,12 @@
 * @file CGString.CPP
 */
 
-#include "regex/deelx.h"
+#include "CExpression.h"
 #include "CString.h"
 #include "graycom.h"
-#include "../sphere/strings.h"
-#include "CExpression.h"
+#include "regex/deelx.h"
 #include "../sphere/ProfileData.h"
+#include "../sphere/strings.h"
 
 
 /**

@@ -258,7 +258,6 @@ bool CPartyDef::MessageEvent( CGrayUID uidDst, CGrayUID uidSrc, const NCHAR *pTe
 }
 
 // ---------------------------------------------------------
-
 void CPartyDef::AcceptMember( CChar *pChar )
 {
 	ADDTOCALLSTACK("CPartyDef::AcceptMember");
@@ -459,7 +458,6 @@ bool CPartyDef::AcceptEvent( CChar *pCharAccept, CGrayUID uidInviter, bool bForc
 }
 
 // ---------------------------------------------------------
-
 enum PDV_TYPE
 {
 	#define ADD(a,b) PDV_##a,
@@ -854,23 +852,22 @@ bool CPartyDef::r_Load( CScript &s )
 	return false; 
 }
 
-
-LPCTSTR CPartyDef::GetDefStr( LPCTSTR pszKey, bool fZero = false ) const
+LPCTSTR CPartyDef::GetDefStr( LPCTSTR pszKey, bool fZero ) const
 {
 	return m_BaseDefs.GetKeyStr( pszKey, fZero );
 }
 
-INT64 CPartyDef::GetDefNum( LPCTSTR pszKey, bool fZero = false ) const
+INT64 CPartyDef::GetDefNum( LPCTSTR pszKey, bool fZero ) const
 {
 	return m_BaseDefs.GetKeyNum( pszKey, fZero );
 }
 
-void CPartyDef::SetDefNum(LPCTSTR pszKey, INT64 iVal, bool fZero = true)
+void CPartyDef::SetDefNum(LPCTSTR pszKey, INT64 iVal, bool fZero )
 {
 	m_BaseDefs.SetNum(pszKey, iVal, fZero);
 }
 
-void CPartyDef::SetDefStr(LPCTSTR pszKey, LPCTSTR pszVal, bool fQuoted = false, bool fZero = true)
+void CPartyDef::SetDefStr(LPCTSTR pszKey, LPCTSTR pszVal, bool fQuoted, bool fZero )
 {
 	m_BaseDefs.SetStr(pszKey, fQuoted, pszVal, fZero);
 }
@@ -884,10 +881,12 @@ bool CPartyDef::IsPartyFull() const
 {
 	return (m_Chars.GetCharCount() >= MAX_CHAR_IN_PARTY);
 }
+
 bool CPartyDef::IsInParty( const CChar * pChar ) const
 {
 	return m_Chars.IsCharIn( pChar );
 }
+
 bool CPartyDef::IsPartyMaster( const CChar * pChar ) const
 {
 	return (m_Chars.FindChar( pChar ) == 0);

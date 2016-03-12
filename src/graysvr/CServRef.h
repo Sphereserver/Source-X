@@ -6,10 +6,10 @@
 #define _INC_CSERVERDEF_H
 #pragma once
 
-#include "CSocket.h"
-#include "CEncrypt.h"
+#include "../common/CEncrypt.h"
+#include "../common/CScriptObj.h"
+#include "../common/CSocket.h"
 #include "CServTime.h"
-#include "CScriptObj.h"
 
 class CTextConsole;
 

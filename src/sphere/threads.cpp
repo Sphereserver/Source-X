@@ -1,8 +1,11 @@
 // this thing is somehow required to be able to initialise OLE
 #define _WIN32_DCOM
 
+#include "../common/CException.h"
 #include "../common/graycom.h"
-//#include "../graysvr/graysvr.h" Removed to test.
+#include "../graysvr/CLog.h"
+#include "../graysvr/CServer.h"
+
 #include "threads.h"
 #if !defined(_WIN32) && !defined(_BSD)
 #include <sys/prctl.h>

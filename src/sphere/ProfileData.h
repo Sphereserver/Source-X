@@ -1,5 +1,5 @@
-#ifndef PROFILEDATA_H
-#define PROFILEDATA_H
+#ifndef _INC_PROFILEDATA_H
+#define _INC_PROFILEDATA_H
 #pragma once
 
 enum PROFILE_TYPE
@@ -90,4 +90,4 @@ private:
 	ProfileTask& operator=(const ProfileTask& other);
 };
 
-#endif // PROFILEDATA_H
+#endif // _INC_PROFILEDATA_H

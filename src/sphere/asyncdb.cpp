@@ -1,4 +1,7 @@
+#include "../common/CScriptObj.h"
 #include "../common/graycom.h"
+#include "../graysvr/Triggers.h"
+#include "../graysvr/CServer.h"
 #include "asyncdb.h"
 
 CDataBaseAsyncHelper g_asyncHdb;

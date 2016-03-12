@@ -1,7 +1,10 @@
-#ifndef STRINGS_H_
-#define STRINGS_H_
+#ifndef _INC_STRINGS_H_
+#define _INC_STRINGS_H_
 
-//#include "threads.h"
+// temporary string storage
+#define THREAD_STRING_STORAGE	4096
+#define THREAD_TSTRING_STORAGE	2048
+#define THREAD_STRING_LENGTH	4096
 
 // Base abstract class for strings, provides basic information of what should be available
 // NOTE: The destructor is NOT virtual for a reason. Children should override destroy() instead

@@ -1,17 +1,17 @@
 //#include "graysvr.h" Removed to test. 	// predef header.
-#include "CServRef.h"
-#include "CServTime.h"
-#include "../common/grayver.h"
-#include "../common/CException.h"
-#include "../sphere/threads.h"
 #include "CLog.h"
 #include "CResource.h"
+#include "CServRef.h"
+#include "CServTime.h"
 #include "CWorld.h"
+#include "../common/CException.h"
+#include "../common/grayproto.h"
+#include "../common/grayver.h"
+#include "../sphere/threads.h"
 
 //	Memory profiling
 #ifdef _WIN32	// (Win32)
 	#include <process.h>
-#include <grayproto.h>
 
 //	grabbed from platform SDK, psapi.h
 	typedef struct _PROCESS_MEMORY_COUNTERS {

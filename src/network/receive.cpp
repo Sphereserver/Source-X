@@ -1,10 +1,17 @@
 #include "receive.h"
 #include "send.h"
 #include "network.h"
-#include "../graysvr/CServTime.h"
+#include "../graysvr/CChar.h"
 #include "../graysvr/CClient.h"
+#include "../graysvr/CItem.h"
 #include "../graysvr/CItemMap.h"
+#include "../graysvr/CItemMessage.h"
+#include "../graysvr/CItemMultiCustom.h"
+#include "../graysvr/CItemShip.h"
 #include "../graysvr/CItemVendable.h"
+#include "../graysvr/CLog.h"
+#include "../graysvr/CServTime.h"
+#include "../graysvr/Triggers.h"
 
 /***************************************************************************
  *

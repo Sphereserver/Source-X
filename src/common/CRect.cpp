@@ -1049,7 +1049,7 @@ CPointMap::CPointMap()
 	InitPoint();
 }
 
-CPointMap::CPointMap( WORD x, WORD y, signed char z = 0, unsigned char map = 0 )
+CPointMap::CPointMap( WORD x, WORD y, signed char z, unsigned char map )
 {
 	m_x = x;
 	m_y = y;
@@ -1078,7 +1078,7 @@ CPointSort::CPointSort()
 	InitPoint();
 }
 
-CPointSort::CPointSort( WORD x, WORD y, signed char z = 0, unsigned char map = 0 )
+CPointSort::CPointSort( WORD x, WORD y, signed char z, unsigned char map )
 {
 	m_x = x;
 	m_y = y;

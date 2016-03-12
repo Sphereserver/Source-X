@@ -479,7 +479,7 @@ CResourceDef::CResourceDef( RESOURCE_ID rid, LPCTSTR pszDefName ) : m_rid( rid )
 	SetResourceName( pszDefName );
 }
 
-CResourceDef::CResourceDef( RESOURCE_ID rid, const CVarDefContNum * pDefName = NULL ) : m_rid( rid ), m_pDefName( pDefName )
+CResourceDef::CResourceDef( RESOURCE_ID rid, const CVarDefContNum * pDefName ) : m_rid( rid ), m_pDefName( pDefName )
 {
 }
 

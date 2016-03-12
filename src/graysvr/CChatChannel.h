@@ -1,7 +1,7 @@
 #ifndef _INC_CCHATCHANNEL_H
 #define _INC_CCHATCHANNEL_H
 
-#include <grayproto.h>
+#include "../common/grayproto.h"
 #include "../common/CArray.h"
 #include "../common/CString.h"
 
