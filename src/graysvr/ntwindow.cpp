@@ -2,10 +2,18 @@
 #ifdef _WIN32
 
 //#include "graysvr.h" Removed to test. 	// predef header.
-#include <commctrl.h>	// NM_RCLICK
+#include "CTextConsole.h"
+#include "CResourceBase.h"
 #include "resource.h"
 #include "../common/cwindow.h"
 #include "../common/grayver.h"	// sphere version
+#include "../common/CException.h"
+#include "CServer.h"
+#include "CResource.h"
+#include "CLog.h"
+#include "graysvr.h"
+
+#include <commctrl.h>	// NM_RCLICK
 
 #define WM_USER_POST_MSG		(WM_USER+10)
 #define WM_USER_TRAY_NOTIFY		(WM_USER+12)
