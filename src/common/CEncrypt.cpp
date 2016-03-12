@@ -2,12 +2,12 @@
 // CEncrypt.cpp
 //
 
+#include "../sphere/threads.h"
+#include "CEncrypt.h"
+#include "CExpression.h"
 #include "graycom.h"
 #include "graymul.h"
 #include "grayproto.h"
-#include "CEncrypt.h"
-#include "CExpression.h"
-#include "../sphere/threads.h"
 
 // #define DEBUG_CRYPT_MSGS 1
 

@@ -1,13 +1,13 @@
 //  CChar is either an NPC or a Player.
+
+#include "../network/network.h"
 #include <cmath>
-//#include "graysvr.h" Removed to test. 	// predef header.
 #include "CChar.h"
 #include "CCharNPC.h"
 #include "CClient.h"
-#include "../network/network.h"
-#include "Triggers.h"
 #include "CLog.h"
 #include "graysvr.h"
+#include "Triggers.h"
 
 bool CChar::IsResourceMatch( RESOURCE_ID_BASE rid, DWORD dwAmount )
 {

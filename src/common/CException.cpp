@@ -1,6 +1,5 @@
 
 #include "../graysvr/CServer.h"
-
 #include "CException.h"
 
 #ifdef _WIN32

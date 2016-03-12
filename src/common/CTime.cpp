@@ -4,10 +4,10 @@
 // Replace the MFC CTime function. Must be usable with file system.
 //
 
-#include "graycom.h"
-#include "CTime.h"
-#include "CString.h"
 #include "../sphere/threads.h"
+#include "CString.h"
+#include "CTime.h"
+#include "graycom.h"
 
 #ifndef _WIN32
 #include <sys/time.h>

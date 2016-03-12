@@ -1,6 +1,7 @@
-#include "packet.h"
-#include "network.h"
+
 #include "../graysvr/CClient.h"
+#include "network.h"
+#include "packet.h"
 
 extern int CvtSystemToNUNICODE( NCHAR * pOut, int iSizeOutChars, LPCTSTR pInp, int iSizeInBytes );
 extern int CvtNUNICODEToSystem( TCHAR * pOut, int iSizeOutBytes, const NCHAR * pInp, int iSizeInChars );

@@ -1,6 +1,6 @@
 // Test things to judge what an NPC might be thinking. (want to do)
 // But take no actions here.
-//#include "graysvr.h" Removed to test. 	// predef header.
+
 #include "CChar.h"
 #include "CCharNPC.h"
 #include "CItemVendable.h"
@@ -354,8 +354,6 @@ bool CChar::NPC_CheckWalkHere( const CPointBase & pt, const CRegionBase * pArea,
 	}
 	return true;
 }
-
-
 
 CItemVendable * CChar::NPC_FindVendableItem( CItemVendable * pVendItem, CItemContainer * pContBuy, CItemContainer * pContStock ) // static
 {

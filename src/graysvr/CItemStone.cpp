@@ -1,8 +1,9 @@
-#include "CItemStone.h"	// predef header.
+
+#include "../common/CException.h"
+#include "CChar.h"
+#include "CItemStone.h"
 #include "CLog.h"
 #include "CWorld.h"
-#include "CChar.h"
-#include "../common/CException.h"
 
 //////////
 // -CStoneMember

@@ -1,7 +1,7 @@
 
+#include "CChar.h"
 #include "CChatChannel.h"
 #include "CChatChanMember.h"
-#include "CChar.h"
 #include "CClient.h"
 
 

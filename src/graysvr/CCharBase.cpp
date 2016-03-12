@@ -1,9 +1,8 @@
-//#include "graysvr.h" Removed to test. 	// predef header.
 
 #include "../common/CException.h"
 #include "CCharBase.h"
-#include "CResource.h"
 #include "CLog.h"
+#include "CResource.h"
 
 /////////////////////////////////////////////////////////////////
 // -CCharBase

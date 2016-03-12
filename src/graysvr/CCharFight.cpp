@@ -1,10 +1,11 @@
 // Fight/Criminal actions/Noto.
+
+#include "../network/send.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 #include "CClient.h"
 #include "CServTime.h"
 #include "Triggers.h"
-#include "../network/send.h"
 
 // I noticed a crime.
 void CChar::OnNoticeCrime( CChar * pCriminal, const CChar * pCharMark )

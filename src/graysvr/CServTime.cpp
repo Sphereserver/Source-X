@@ -1,4 +1,3 @@
-//#include "graysvr.h" Removed to test.
 
 #include "CServTime.h"
 #include "CWorld.h"

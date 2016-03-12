@@ -1,7 +1,8 @@
-#include "graycom.h"
+
+#include "../sphere/threads.h"
 #include "CAssoc.h"
 #include "CExpression.h"
-#include "../sphere/threads.h"
+#include "graycom.h"
 
 //***************************************************************************
 // -CValStr

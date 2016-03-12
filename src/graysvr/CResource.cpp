@@ -1,23 +1,25 @@
-﻿#include "CAccount.h"
+﻿
+#ifdef _SUBVERSION
+	#include "../common/version/GitRevision.h"
+#endif
+#include "../common/CException.h"
+#include "../common/CFileList.h"
+#include "../common/CGrayInst.h"
+#include "../common/grayver.h"
+#include "../network/network.h"
+#include "../sphere/ProfileTask.h"
+#include "CAccount.h"
 #include "CChar.h"
 #include "CCharBase.h"
 #include "CClient.h"
 #include "CItemBase.h"
 #include "CItemStone.h"
 #include "CLog.h"
-#include "CWorld.h"
 #include "CResource.h"
 #include "CServTime.h"
+#include "CWorld.h"
 #include "graysvr.h"
 #include "Triggers.h"
-#include "../common/CException.h"
-#include "../common/CFileList.h"
-#include "../common/CGrayInst.h"
-#include "../common/grayver.h"
-#include "../network/network.h"
-#ifdef _SUBVERSION
-	#include "../common/version/GitRevision.h"
-#endif
 
 CResource::CResource()
 {

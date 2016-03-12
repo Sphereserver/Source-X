@@ -1,6 +1,7 @@
-#include "CClient.h"
+
 #include "CChatChannel.h"
 #include "CChatChanMember.h"
+#include "CClient.h"
 #include "CServer.h"
 
 CChatChanMember::CChatChanMember()

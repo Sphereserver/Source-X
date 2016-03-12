@@ -1,9 +1,10 @@
+
+#include "../network/network.h"
+#include "CChar.h"
 #include "CChat.h"
 #include "CChatChannel.h"
 #include "CChatChanMember.h"
 #include "CClient.h"
-#include "CChar.h"
-#include "../network/network.h"
 
 
 void CChat::EventMsg( CClient * pClient, const NCHAR * pszText, int len, CLanguageID lang ) // Text from a client

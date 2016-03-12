@@ -1,5 +1,5 @@
-#include "CObjBaseTemplate.h"
 
+#include "CObjBaseTemplate.h"
 
 void CObjBaseTemplate::DupeCopy( const CObjBaseTemplate * pObj )
 {

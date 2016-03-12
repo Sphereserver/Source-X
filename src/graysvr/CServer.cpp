@@ -1,21 +1,7 @@
-#include "CServer.h"	// predef header.
-#include "CServTime.h"
-#include "CChar.h"
-#include "CClient.h"
-#include "CAccount.h"
-#include "graysvr.h"
-#include "Triggers.h"
-#include "CItemShip.h"
 
-#include "../common/CException.h"
-#include "../common/grayver.h"	// sphere version
-#include "../common/CAssoc.h"
-#include "../common/CFileList.h"
-#include "../common/CTextConsole.h"
 #ifdef _SUBVERSION
- #include "../common/version/GitRevision.h"
+	#include "../common/version/GitRevision.h"
 #endif
-#include "../network/network.h"
 
 #ifdef _WIN32
 	#include "ntservice.h"	// g_Service
@@ -25,8 +11,23 @@
 
 #if defined(_WIN32) && !defined(_DEBUG)
 	#include "../common/crashdump/crashdump.h"
-
 #endif
+
+#include "../common/CAssoc.h"
+#include "../common/CException.h"
+#include "../common/CFileList.h"
+#include "../common/CTextConsole.h"
+#include "../common/grayver.h"	// sphere version
+#include "../network/network.h"
+#include "../sphere/ProfileTask.h"
+#include "CAccount.h"
+#include "CChar.h"
+#include "CClient.h"
+#include "CItemShip.h"
+#include "CServer.h"
+#include "CServTime.h"
+#include "graysvr.h"
+#include "Triggers.h"
 
 #if !defined(_WIN32) || defined(_LIBEV)
 	extern LinuxEv g_NetworkEvent;

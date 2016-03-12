@@ -2,15 +2,15 @@
 // CGrayMap.cpp
 //
 
-#include "graymul.h"
-#include "CGrayMap.h"
-#include "CGrayInst.h"
 #include "CException.h"
+#include "CGrayInst.h"
+#include "CGrayMap.h"
 #include "CRect.h"
-#include "../sphere/threads.h"
+#include "graymul.h"
 #include "../graysvr/CBase.h"
 #include "../graysvr/CLog.h"
 #include "../graysvr/CResource.h"
+#include "../sphere/threads.h"
 
 //////////////////////////////////////////////////////////////////
 // -CGrayMapBlockState

@@ -1,13 +1,15 @@
+
+#include "../common/CException.h"
+#include "../common/grayver.h"
+#include "../network/network.h"
+#include "../network/send.h"
+#include "../sphere/ProfileTask.h"
 #include "CChar.h"
 #include "CClient.h"
 #include "CItemSpawn.h"
 #include "CLog.h"
 #include "CObjBase.h"
 #include "graysvr.h"
-#include "../common/grayver.h"
-#include "../common/CException.h"
-#include "../network/network.h"
-#include "../network/send.h"
 #include "Triggers.h"
 
 bool CObjBaseTemplate::IsDeleted() const

@@ -1,11 +1,11 @@
-//#include "graysvr.h" Removed to test. 	// predef header.
-#include "CClient.h"
+
+#include "../network/send.h"
 #include "CChar.h"
+#include "CClient.h"
 #include "CItemMap.h"
 #include "CItemSpawn.h"
-#include "../network/send.h"
-#include "Triggers.h"
 #include "CLog.h"
+#include "Triggers.h"
 
 bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 {

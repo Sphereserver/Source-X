@@ -5,8 +5,8 @@
 #include <list>
 // a thread-safe implementation of a queue container that doesn't use any locks
 // this only works as long as there is only a single reader thread and writer thread
-template<class T>
 
+template<class T>
 class ThreadSafeQueue
 {
 public:

@@ -134,10 +134,7 @@ public:
 	CTeleport * GetTeleport( const CPointMap & pt ) const;
 	bool AddTeleport( CTeleport * pTeleport );
 
-	bool IsFlagSet( DWORD dwFlag ) const
-	{
-		return(( m_dwFlags & dwFlag) ? true : false );
-	}
+	bool IsFlagSet( DWORD dwFlag ) const;
 
 #define SECF_NoSleep	0x00000001
 #define SECF_InstaSleep	0x00000002

@@ -1,16 +1,17 @@
-#include "CItem.h"
-#include "CItemSpawn.h"
+
+#include "../common/CException.h"
+#include "../sphere/ProfileTask.h"
 #include "CChar.h"
 #include "CCharNPC.h"
+#include "CClient.h"
+#include "CItem.h"
+#include "CItemSpawn.h"
+#include "CLog.h"
 #include "CSector.h"
 #include "CServTime.h"
 #include "CWorld.h"
-#include "CLog.h"
-#include "CClient.h"
-#include "../common/CException.h"
 #include "graysvr.h"
 #include "Triggers.h"
-//#include "graysvr.h" Removed to test.
 
 //////////////////////////////////////////////////////////////////
 // -CSector

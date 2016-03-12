@@ -1,10 +1,10 @@
 // Actions specific to an NPC.
-//#include "graysvr.h" Removed to test. 	// predef header.
-#include "CClient.h"
+
+#include "../network/send.h"
 #include "CChar.h"
 #include "CCharNPC.h"
+#include "CClient.h"
 #include "CServTime.h"
-#include "../network/send.h"
 
 // Get my guild stone for my guild. even if i'm just a STONEPRIV_CANDIDATE ?
 // ARGS:

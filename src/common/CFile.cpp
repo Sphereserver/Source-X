@@ -1,12 +1,12 @@
-#include "graycom.h"
 
 #ifndef _WIN32
 #include <errno.h>	// errno
 #endif
 
-#include "CString.h"
-#include "CFile.h"
 #include "../sphere/threads.h"
+#include "CFile.h"
+#include "CString.h"
+#include "graycom.h"
 
 bool CFile::SetFilePath( LPCTSTR pszName )
 {

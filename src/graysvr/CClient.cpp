@@ -1,16 +1,17 @@
-//#include "graysvr.h" Removed to test. 	// predef header.
-#include "CClient.h"
-#include "CChar.h"
-#include "CServTime.h"
-#include "CItemSpawn.h"
-#include "CParty.h"
+
 #include "../common/CException.h"
 #include "../network/network.h"
 #include "../network/send.h"
 #include "../network/packet.h"
+#include "../sphere/ProfileTask.h"
+#include "CChar.h"
+#include "CClient.h"
+#include "CItemSpawn.h"
 #include "CLog.h"
-#include "Triggers.h"
+#include "CParty.h"
+#include "CServTime.h"
 #include "graysvr.h"
+#include "Triggers.h"
 
 #if !defined(_WIN32) || defined(_LIBEV)
 	extern LinuxEv g_NetworkEvent;

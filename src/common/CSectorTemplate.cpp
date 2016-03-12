@@ -1,11 +1,13 @@
+
 #include <algorithm>
-#include "CException.h"
-#include "CRect.h"
-#include "CSectorTemplate.h"
 #include "../graysvr/CChar.h"
 #include "../graysvr/CItemShip.h"
 #include "../graysvr/CLog.h"
 #include "../graysvr/CServTime.h"
+#include "../sphere/ProfileTask.h"
+#include "CException.h"
+#include "CRect.h"
+#include "CSectorTemplate.h"
 
 
 CCharsDisconnectList::CCharsDisconnectList()

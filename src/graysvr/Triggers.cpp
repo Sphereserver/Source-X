@@ -4,8 +4,8 @@
 
 #include <vector>
 #include "../common/grayproto.h"
-#include "Triggers.h"
 #include "CServer.h"
+#include "Triggers.h"
 
 //Trigger function start
 

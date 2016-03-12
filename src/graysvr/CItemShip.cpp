@@ -2,14 +2,14 @@
 // CItemShip.cpp
 //
 
-#include "CItemShip.h"	// predef header.
-#include "CItemContainer.h"
-#include "CServTime.h"
+#include "../common/CException.h"
+#include "../network/send.h"
 #include "CChar.h"
 #include "CClient.h"
-#include "../network/send.h"
+#include "CItemContainer.h"
+#include "CItemShip.h"
+#include "CServTime.h"
 #include "Triggers.h"
-#include "../common/CException.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

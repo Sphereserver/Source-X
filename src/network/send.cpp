@@ -1,6 +1,8 @@
-#include "network.h"
-#include "packet.h"
-#include "send.h"
+
+#ifndef _WIN32
+	#include <sys/time.h>
+#endif
+
 #include "../common/CGrayInst.h"
 #include "../common/CObjBaseTemplate.h"
 #include "../common/zlib/zlib.h"
@@ -17,10 +19,10 @@
 #include "../graysvr/CObjBase.h"
 #include "../graysvr/CParty.h"
 #include "../graysvr/CWorld.h"
+#include "network.h"
+#include "packet.h"
+#include "send.h"
 
-#ifndef _WIN32
-#include <sys/time.h>
-#endif
 
 /***************************************************************************
  *

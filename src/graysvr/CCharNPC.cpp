@@ -1,6 +1,7 @@
 // Actions specific to an NPC.
+
 #include "../common/CException.h"
-#include "CCharNPC.h"	// predef header.
+#include "CCharNPC.h"
 #include "CClient.h"
 #include "CServTime.h"
 #include "Triggers.h"

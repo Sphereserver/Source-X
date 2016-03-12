@@ -1,12 +1,8 @@
-//
-// CCharSpell.cpp
-//
 
-//#include "graysvr.h" Removed to test. 	// predef header.
+#include "../network/send.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 #include "CClient.h"
-#include "../network/send.h"
 #include "Triggers.h"
 
 SPELL_TYPE CChar::Spell_GetIndex(SKILL_TYPE skill)	// Returns the first spell for the given skill

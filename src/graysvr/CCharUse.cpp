@@ -1,11 +1,11 @@
 //  CChar is either an NPC or a Player.
-//#include "graysvr.h" Removed to test. 	// predef header.
-#include "CItem.h"
-#include "CItemSpawn.h"
-#include "CItemCorpse.h"
+
 #include "CChar.h"
-#include "CClient.h"
 #include "CCharNPC.h"
+#include "CClient.h"
+#include "CItem.h"
+#include "CItemCorpse.h"
+#include "CItemSpawn.h"
 #include "Triggers.h"
 
 static const int MASK_RETURN_FOLLOW_LINKS = 0x02;

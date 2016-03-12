@@ -1,13 +1,14 @@
+
 #include <cmath>
-#include "CVarFloat.h"
-#include "CScriptObj.h"
-#include "CString.h"
-#include "CExpression.h"
-#include "CResourceBase.h"
-#include "common.h"
-#include "../sphere/threads.h"
 #include "../graysvr/CResource.h"
 #include "../graysvr/CWorld.h"
+#include "../sphere/threads.h"
+#include "CExpression.h"
+#include "common.h"
+#include "CResourceBase.h"
+#include "CScriptObj.h"
+#include "CString.h"
+#include "CVarFloat.h"
 
 typedef double RealType;
 #define VARDEF_FLOAT_MAXBUFFERSIZE 82

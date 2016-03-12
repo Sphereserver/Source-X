@@ -1,15 +1,16 @@
-//#include "graysvr.h" Removed to test. 	// predef header.
-#include "CServTime.h"
-#include "../common/grayver.h"	// sphere version
+
+#include "../common/CException.h"
+#include "../common/grayver.h"
 #include "../network/network.h"
 #include "../network/send.h"
-#include "CObjBase.h"
-#include "CLog.h"
-#include "CItem.h"
+#include "../sphere/ProfileTask.h"
 #include "CChar.h"
 #include "CClient.h"
 #include "CGMPage.h"
-#include "../common/CException.h"
+#include "CItem.h"
+#include "CLog.h"
+#include "CObjBase.h"
+#include "CServTime.h"
 
 #if !defined( _WIN32 )
 #include <time.h>

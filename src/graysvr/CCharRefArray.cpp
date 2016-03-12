@@ -1,6 +1,7 @@
-#include "CCharRefArray.h"
-#include "CChar.h"
+
 #include "../sphere/threads.h"
+#include "CChar.h"
+#include "CCharRefArray.h"
 
 //*****************************************************************
 // -CCharRefArray

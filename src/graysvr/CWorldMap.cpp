@@ -1,15 +1,13 @@
-//#include "graysvr.h" Removed to test. 	// predef header.
-
 //************************
 // Natural resources.
 
-#include "../common/CRect.h"
 #include "../common/CException.h"
+#include "../common/CRect.h"
 #include "../sphere/threads.h"
-#include "CItem.h"
 #include "CChar.h"
-#include "Triggers.h"
+#include "CItem.h"
 #include "CLog.h"
+#include "Triggers.h"
 
 CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fTest, CChar * pCharSrc )
 {

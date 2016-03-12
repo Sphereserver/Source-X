@@ -1,8 +1,9 @@
-#include "graycom.h"
-#include "CGrayInst.h"
+
 #include "../graysvr/CLog.h"
 #include "../graysvr/CResource.h"
 #include "../sphere/threads.h"
+#include "CGrayInst.h"
+#include "graycom.h"
 
 
 CGrayInstall::CGrayInstall()

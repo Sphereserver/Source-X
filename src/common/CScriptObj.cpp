@@ -9,20 +9,21 @@
 	#include <errno.h>	// errno
 #endif
 
-#include "CScriptObj.h"
-#include "CScript.h"
+#include "../graysvr/CAccount.h"
+#include "../graysvr/CChar.h"
+#include "../graysvr/CClient.h"
+#include "../graysvr/CItemStone.h"
+#include "../graysvr/graysvr.h"
+#include "../graysvr/CWorld.h"
+#include "../sphere/ProfileTask.h"
 #include "CException.h"
 #include "CExpression.h"
 #include "CGrayUID.h"
-#include "CTextConsole.h"
-#include "CString.h"
 #include "CMD5.h"
-#include "../graysvr/CWorld.h"
-#include "../graysvr/CAccount.h"
-#include "../graysvr/CClient.h"
-#include "../graysvr/CChar.h"
-#include "../graysvr/CItemStone.h"
-#include "../graysvr/graysvr.h"
+#include "CScript.h"
+#include "CScriptObj.h"
+#include "CString.h"
+#include "CTextConsole.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////////////

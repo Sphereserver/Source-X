@@ -1,10 +1,17 @@
 //  CChar is either an NPC or a Player.
+
+#include "../common/CException.h"
+#include "../common/CGrayUID.h"
+#include "../common/CObjBaseTemplate.h"
+#include "../common/CRect.h"
+#include "../network/network.h"
+#include "../sphere/ProfileTask.h"
 #include "CAccount.h"
 #include "CChar.h"
 #include "CCharBase.h"
 #include "CCharNPC.h"
-#include "CContainer.h"
 #include "CClient.h"
+#include "CContainer.h"
 #include "CItem.h"
 #include "CItemContainer.h"
 #include "CItemMemory.h"
@@ -14,11 +21,6 @@
 #include "CServTime.h"
 #include "CWorld.h"
 #include "graysvr.h"
-#include "../common/CException.h"
-#include "../common/CGrayUID.h"
-#include "../common/CObjBaseTemplate.h"
-#include "../common/CRect.h"
-#include "../network/network.h"
 #include "Triggers.h"
 
 

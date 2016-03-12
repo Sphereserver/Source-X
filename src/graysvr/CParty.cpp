@@ -1,13 +1,14 @@
-#include "graysvr.h"	// predef header.
-#include "CParty.h"
-#include "CChar.h"
-#include "CClient.h"
-#include "CServer.h"
-#include "CLog.h"
+
 #include "../common/CScriptObj.h"
 #include "../common/CString.h"
 #include "../common/CException.h"
 #include "../network/send.h"
+#include "../sphere/ProfileTask.h"
+#include "CChar.h"
+#include "CClient.h"
+#include "CLog.h"
+#include "CParty.h"
+#include "CServer.h"
 #include "Triggers.h"
 
 

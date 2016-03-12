@@ -1,18 +1,18 @@
 // Put up a window for data (other than the console)
 #ifdef _WIN32
 
-//#include "graysvr.h" Removed to test. 	// predef header.
-#include "CTextConsole.h"
-#include "CResourceBase.h"
-#include "resource.h"
+#include "../common/CException.h"
+#include "../common/CResourceBase.h"
+#include "../common/CString.h"
+#include "../common/CTextConsole.h"
 #include "../common/cwindow.h"
 #include "../common/grayver.h"	// sphere version
-#include "../common/CException.h"
-#include "CServer.h"
-#include "CResource.h"
-#include "CLog.h"
-#include "graysvr.h"
-
+#include "../graysvr/CLog.h"
+#include "../graysvr/CResource.h"
+#include "../graysvr/CServer.h"
+#include "../graysvr/graysvr.h"
+#include "../sphere/ProfileTask.h"
+#include "resource.h"
 #include <commctrl.h>	// NM_RCLICK
 
 #define WM_USER_POST_MSG		(WM_USER+10)

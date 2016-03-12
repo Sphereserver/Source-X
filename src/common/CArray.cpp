@@ -1,6 +1,7 @@
-#include "graycom.h"
-#include "CArray.h"
+
 #include "../sphere/threads.h"
+#include "CArray.h"
+#include "graycom.h"
 
 //***************************************************************************
 // -CGObList

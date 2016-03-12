@@ -1,10 +1,10 @@
-//#include "graysvr.h" Removed to test. 	// predef header.
+
 #include "../common/CException.h"
-#include "CServTime.h"
-#include "CGMPage.h"
-#include "CWorld.h"
-#include "CClient.h"
 #include "CChar.h"
+#include "CClient.h"
+#include "CGMPage.h"
+#include "CServTime.h"
+#include "CWorld.h"
 
 //////////////////////////////////////////////////////////////////
 // -CGMPage

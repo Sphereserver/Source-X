@@ -1,13 +1,14 @@
-#include "CResourceBase.h"
+
+#include "../graysvr/CChar.h"
+#include "../graysvr/CItem.h"
 #include "../graysvr/CLog.h"
-#include "CFileList.h"
+#include "../graysvr/CObjBase.h"
+#include "../graysvr/CResource.h"
+#include "../graysvr/Triggers.h"
 #include "CException.h"
 #include "CExpression.h"
-#include "../graysvr/CResource.h"
-#include "../graysvr/CObjBase.h"
-#include "../graysvr/CItem.h"
-#include "../graysvr/CChar.h"
-#include "../graysvr/Triggers.h"
+#include "CFileList.h"
+#include "CResourceBase.h"
 
 
 RES_TYPE RESOURCE_ID_BASE::GetResType() const

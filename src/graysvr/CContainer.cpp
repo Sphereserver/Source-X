@@ -1,16 +1,13 @@
-//
-// CContain.CPP
-//
-//#include "graysvr.h" Removed to test. 	// predef header.
-#include "../common/CObjBaseTemplate.h"
-#include "../common/CGrayUID.h"
+
 #include "../common/CException.h"
+#include "../common/CGrayUID.h"
+#include "../common/CObjBaseTemplate.h"
 #include "../network/send.h"
+#include "CChar.h"
 #include "CContainer.h"
 #include "CItem.h"
-#include "CItemVendable.h"
 #include "CItemContainer.h"
-#include "CChar.h"
+#include "CItemVendable.h"
 #include "Triggers.h"
 
 //***************************************************************************

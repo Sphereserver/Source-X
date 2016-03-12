@@ -1,15 +1,10 @@
+
 #include "../common/CException.h"
 #include "../common/CGrayUIDextra.h"
 #include "CAccount.h"
-#include "CLog.h"
-#include "CClient.h"
 #include "CChar.h"
-//#include "CServTime.h"
-//#include "CLog.h"
-//#include "../common/CMD5.h"
-//#include "../common/CException.h"
-//#include "../common/CTextConsole.h"
-//#include "../network/network.h"
+#include "CClient.h"
+#include "CLog.h"
 
 extern "C"
 {

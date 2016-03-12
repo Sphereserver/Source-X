@@ -1,13 +1,13 @@
 // Common for client and server.
 
+#include "../graysvr/CChar.h"
+#include "../graysvr/CClient.h"
+#include "../graysvr/CLog.h"
+#include "../network/network.h"
+#include "../sphere/threads.h"
 #include "CException.h"
 #include "CScriptObj.h"
 #include "CTextConsole.h"
-#include "../graysvr/CLog.h"
-#include "../graysvr/CChar.h"
-#include "../graysvr/CClient.h"
-#include "../network/network.h"
-#include "../sphere/threads.h"
 
 //************************************************************************
 // -CTeleport

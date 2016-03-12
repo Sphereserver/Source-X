@@ -1,8 +1,9 @@
 // The physics calculations of the world.
-//#include "graysvr.h" Removed to test. 	// predef header.
+
 #include "CResource.h"
 #include "CChar.h"
 #include "CCharNPC.h"
+
 //********************************
 // Movement
 

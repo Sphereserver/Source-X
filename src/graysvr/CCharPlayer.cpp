@@ -1,11 +1,12 @@
 // Actions specific to an NPC.
+
+#include "../common/CException.h"
 #include "CChar.h"
 #include "CCharNPC.h"
-#include "CCharPlayer.h"	// predef header.
+#include "CCharPlayer.h"
 #include "CClient.h"
-#include "CServTime.h"
-#include "../common/CException.h"
 #include "CLog.h"
+#include "CServTime.h"
 
 
 LPCTSTR const CCharPlayer::sm_szLoadKeys[CPC_QTY+1] =

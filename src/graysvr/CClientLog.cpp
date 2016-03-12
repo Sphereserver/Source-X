@@ -1,11 +1,11 @@
 // Login and low level stuff for the client.
-//#include "graysvr.h" Removed to test. 	// predef header.
+
 #include "../common/CEncrypt.h"
 #include "../common/CException.h"
-#include "../network/network.h"
-#include "../network/send.h"
 #include "../common/CFileList.h"
 #include "../common/zlib/zlib.h"
+#include "../network/network.h"
+#include "../network/send.h"
 #include "CClient.h"
 #include "CLog.h"
 

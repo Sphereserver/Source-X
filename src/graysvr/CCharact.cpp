@@ -1,21 +1,19 @@
-//
-// CCharAct.cpp
-//
 
+#include "../common/CArray.h"
+#include "../common/CException.h"
+#include "../network/network.h"
+#include "../network/send.h"
+#include "../sphere/ProfileTask.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 #include "CClient.h"
-#include "CServTime.h"
 #include "CContainer.h"
 #include "CItem.h"
 #include "CItemSpawn.h"
-#include "Triggers.h"
-#include "../network/network.h"
-#include "../network/send.h"
-#include "../common/CArray.h"
-#include "../common/CException.h"
 #include "CLog.h"
+#include "CServTime.h"
 #include "graysvr.h"
+#include "Triggers.h"
 
 // "GONAME", "GOTYPE", "GOCHAR"
 // 0 = object name

@@ -1,28 +1,30 @@
-#include "../common/CException.h"
-#include "../common/cgrayinst.h"
-#include "../common/grayver.h"	// sphere version
-#include "../network/network.h" // network thread
-#include "../sphere/asyncdb.h"
-#include "CItemMessage.h"
-#include "CItemMap.h"
-#include "graysvr.h"
-#include "PingServer.h"
-#include "CServer.h"
-#include "CWorld.h"
-#include "CAccount.h"
+
 #if !defined(_WIN32) || defined(_LIBEV)
 	#include "../sphere/linuxev.h"
 	#include "UnixTerminal.h"
 #endif
 
 #if !defined(pid_t)
-#define pid_t int
+	#define pid_t int
 #endif
 
 #ifdef _WIN32
 	#include "ntservice.h"	// g_Service
 	#include <process.h>	// getpid()
 #endif
+
+#include "../common/CException.h"
+#include "../common/cgrayinst.h"
+#include "../common/grayver.h"	// sphere version
+#include "../network/network.h" // network thread
+#include "../sphere/asyncdb.h"
+#include "CAccount.h"
+#include "CItemMap.h"
+#include "CItemMessage.h"
+#include "CServer.h"
+#include "CWorld.h"
+#include "graysvr.h"
+#include "PingServer.h"
 
 
 CMapList::CMapList()

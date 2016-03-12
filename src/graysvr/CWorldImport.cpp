@@ -1,10 +1,9 @@
-//#include "graysvr.h" Removed to test. 	// predef header.
 
 #include "../common/graymul.h"
 #include "../common/CArray.h"
 #include "CChar.h"
-#include "CObjBase.h"
 #include "CItem.h"
+#include "CObjBase.h"
 
 struct CImportSer : public CGObListRec
 {

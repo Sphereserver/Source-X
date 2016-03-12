@@ -211,6 +211,7 @@ SOURCE_GROUP (Network FILES ${network_SRCS})
 SET (sphere_SRCS
 sphere/asyncdb.cpp
 sphere/asyncdb.h
+sphere/containers.cpp
 sphere/containers.h
 sphere/linuxev.cpp
 sphere/linuxev.h
@@ -218,6 +219,8 @@ sphere/mutex.cpp
 sphere/mutex.h
 sphere/ProfileData.cpp
 sphere/ProfileData.h
+sphere/ProfileTask.cpp
+sphere/ProfileTask.h
 sphere/strings.cpp
 sphere/strings.h
 sphere/threads.cpp

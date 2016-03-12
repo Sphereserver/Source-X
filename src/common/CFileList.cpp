@@ -2,16 +2,15 @@
 * @file CFileList.cpp
 */
 
-#include "graycom.h"
-#include "CFileList.h"
 
 #if defined(_WIN32)
-#include <io.h> 		// findfirst
-#include "../sphere/threads.h"
-
+	#include <io.h> 		// findfirst
+	#include "../sphere/threads.h"
 #else	// LINUX
-#include <dirent.h>
+	#include <dirent.h>
 #endif
+#include "CFileList.h"
+#include "graycom.h"
 
 // Similar to the MFC CFileFind
 bool CFileList::ReadFileInfo( LPCTSTR pszFilePath, time_t & dwDateChange, DWORD & dwSize ) // static

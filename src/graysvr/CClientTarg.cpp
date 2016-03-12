@@ -1,9 +1,9 @@
 // An item is targetted.
-//#include "graysvr.h" Removed to test. 	// predef header.
-#include "CClient.h"
-#include "CChar.h"
-#include "CItemVendable.h"
+
 #include "../network/send.h"
+#include "CChar.h"
+#include "CClient.h"
+#include "CItemVendable.h"
 #include "CLog.h"
 #include "Triggers.h"
 

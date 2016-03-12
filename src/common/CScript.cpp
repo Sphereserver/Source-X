@@ -1,11 +1,12 @@
 // NOTE: all scripts should be encoded in UTF-8.
 // So they may have full unicode chars inside.
+
+#include "../graysvr/CLog.h"
+#include "../sphere/threads.h"
+#include "CException.h"
+#include "CExpression.h"
 #include "CScript.h"
 #include "graycom.h"
-#include "CExpression.h"
-#include "CException.h"
-#include "../sphere/threads.h"
-#include "../graysvr/CLog.h"
 
 
 void CScriptLineContext::Init()

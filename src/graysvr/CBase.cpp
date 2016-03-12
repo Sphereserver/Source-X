@@ -1,10 +1,7 @@
-///////////////////////////////////////////////////////////////
-// -CBaseBaseDef
 
-// 
-#include "CBase.h"
 #include "../common/CException.h"
 #include "../common/common.h"
+#include "CBase.h"
 #include "CResource.h"
 
 enum OBC_TYPE

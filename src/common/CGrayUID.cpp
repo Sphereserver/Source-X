@@ -1,3 +1,4 @@
+
 #include "CGrayUID.h"
 
 bool CGrayUIDBase::IsValidUID() const

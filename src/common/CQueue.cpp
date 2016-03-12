@@ -3,8 +3,8 @@
 */
 
 #include "CQueue.h"
-#include "../sphere/threads.h"
 #include "graycom.h"
+#include "../sphere/threads.h"
 
 CQueueBytes::CQueueBytes()
 {

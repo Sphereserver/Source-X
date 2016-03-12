@@ -1,4 +1,6 @@
+
 #include "../common/graycom.h"
+#include "../sphere/ProfileTask.h"
 #include "PingServer.h"
 
 PingServer g_PingServer;

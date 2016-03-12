@@ -1,19 +1,20 @@
 // Game server messages. (No login stuff)
-//#include "graysvr.h" Removed to test. 	// predef header.
-#include "CClient.h"
-#include "CChar.h"
-#include "CCharNPC.h"
-#include "CServTime.h"
-#include "CItemMap.h"
-#include "CItemSpawn.h"
-#include "CItemVendable.h"
-#include "CItemMessage.h"
+
+#include "../common/CException.h"
 #include "../network/network.h"
 #include "../network/send.h"
+#include "../sphere/ProfileTask.h"
+#include "CChar.h"
+#include "CCharNPC.h"
+#include "CClient.h"
+#include "CItemMap.h"
+#include "CItemMessage.h"
+#include "CItemSpawn.h"
+#include "CItemVendable.h"
 #include "CLog.h"
-#include "../common/CException.h"
-#include "Triggers.h"
+#include "CServTime.h"
 #include "graysvr.h"
+#include "Triggers.h"
 
 // Simple string hashing algorithm function
 // Founded by D. J. Bernstein

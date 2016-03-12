@@ -1,7 +1,7 @@
 #if !defined(_WIN32) || defined(_LIBEV)
 //#include "../graysvr/graysvr.h" Removed to test.
-#include "linuxev.h"
 #include "../network/network.h"
+#include "linuxev.h"
 
 LinuxEv g_NetworkEvent;
 

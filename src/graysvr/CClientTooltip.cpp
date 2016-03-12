@@ -1,3 +1,4 @@
+
 #include "../common/CString.h"
 #include "CClientTooltip.h"
 

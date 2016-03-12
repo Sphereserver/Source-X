@@ -1,6 +1,7 @@
-#include "CacheableScriptFile.h"
-#include "../sphere/threads.h"
+
 #include "../sphere/strings.h"
+#include "../sphere/threads.h"
+#include "CacheableScriptFile.h"
 
 CacheableScriptFile::CacheableScriptFile()
 {
