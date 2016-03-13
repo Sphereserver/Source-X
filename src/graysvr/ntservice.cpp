@@ -9,6 +9,8 @@
 #include "../graysvr/graysvr.h"
 #include "ntservice.h"
 
+CNTService g_Service;
+
 CNTService::CNTService()
 {
 	m_hStatusHandle = NULL;

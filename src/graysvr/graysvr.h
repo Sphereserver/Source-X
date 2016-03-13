@@ -2,15 +2,6 @@
 #define _INC_GRAYSVR_H_
 #pragma once
 
-//	Enable advanced exceptions catching. Consumes some more resources, but is very useful
-//	for debug on a running environment. Also it makes sphere more stable since exceptions
-//	are local
-#ifndef _DEBUG
-	#ifndef EXCEPTIONS_DEBUG
-	#define EXCEPTIONS_DEBUG
-	#endif
-#endif
-
 #if defined(_WIN32) && !defined(_MTNETWORK)
 	// _MTNETWORK enabled via makefile for other systems
 	#define _MTNETWORK

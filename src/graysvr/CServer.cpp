@@ -703,7 +703,7 @@ bool CServer::OnConsoleCmd( CGString & sText, CTextConsole * pSrc )
 #ifdef _TESTEXCEPTION
 		case '$':	// call stack integrity
 			{
-#ifdef EXCEPTIONS_DEBUG
+#ifdef _EXCEPTIONS_DEBUG
 				{ // test without PAUSECALLSTACK
 					EXC_TRY("Test1");
 					ADDTOCALLSTACK("CServer::TestException1");

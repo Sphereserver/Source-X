@@ -20,6 +20,9 @@ TARGET_COMPILE_DEFINITIONS (spheresvr
         PUBLIC _WIN32
 # Temporary setting _CRT_SECURE_NO_WARNINGS to do not spamm so much in the buil proccess while we get rid of -W4 warnings and, after it, -Wall.
         PUBLIC _CRT_SECURE_NO_WARNINGS
+# Enable advanced exceptions catching. Consumes some more resources, but is very useful for debug
+# on a running environment. Also it makes sphere more stable since exceptions are local.
+		PUBLIC _EXCEPTIONS_DEBUG
 )
 TARGET_COMPILE_DEFINITIONS (spheresvrNightly
 # Nighly defs

@@ -87,7 +87,7 @@ public:
 // -------------------------------------------------------------------
 
 //	Exceptions debugging routine.
-#ifdef EXCEPTIONS_DEBUG
+#ifdef _EXCEPTIONS_DEBUG
 
 	#define EXC_TRY(a) \
 		LPCTSTR inLocalBlock = ""; \
