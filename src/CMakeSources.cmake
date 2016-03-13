@@ -95,6 +95,8 @@ graysvr/CResourceDef.cpp
 graysvr/CResource.h
 graysvr/CSector.cpp
 graysvr/CSector.h
+graysvr/CSectorEnviron.h
+graysvr/CSectorEnviron.cpp
 graysvr/CServer.cpp
 graysvr/CServer.h
 graysvr/CServRef.cpp
@@ -211,7 +213,6 @@ SOURCE_GROUP (Network FILES ${network_SRCS})
 SET (sphere_SRCS
 sphere/asyncdb.cpp
 sphere/asyncdb.h
-sphere/containers.cpp
 sphere/containers.h
 sphere/linuxev.cpp
 sphere/linuxev.h

@@ -1,6 +1,7 @@
 
 #include <wchar.h>
 #include "../common/CException.h"
+#include "../common/CGrayUIDextra.h"
 #include "../network/network.h"
 #include "../network/receive.h"
 #include "../network/send.h"

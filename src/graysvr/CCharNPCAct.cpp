@@ -1,6 +1,7 @@
 // Actions specific to an NPC.
 
 #include "../common/CException.h"
+#include "../common/CGrayUIDextra.h"
 #include "../network/receive.h"
 #include "CCharNPC.h"
 #include "CClient.h"

@@ -1,5 +1,6 @@
 
 #include "../common/CException.h"
+#include "../common/CGrayUIDextra.h"
 #include "../common/grayver.h"
 #include "../network/network.h"
 #include "../network/send.h"

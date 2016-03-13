@@ -1,6 +1,7 @@
 // Game server messages. (No login stuff)
 
 #include "../common/CException.h"
+#include "../common/CGrayUIDextra.h"
 #include "../network/network.h"
 #include "../network/send.h"
 #include "../sphere/ProfileTask.h"

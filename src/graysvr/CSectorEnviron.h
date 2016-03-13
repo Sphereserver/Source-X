@@ -1,6 +1,8 @@
 #ifndef _INC_CSECTORENVIRON_H
 #define _INC_CSECTORENVIRON_H
 
+#include "../common/grayproto.h"
+
 struct CSectorEnviron	// When these change it is an CTRIG_EnvironChange,
 {
 #define LIGHT_OVERRIDE 0x80

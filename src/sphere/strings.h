@@ -1,6 +1,8 @@
 #ifndef _INC_STRINGS_H_
 #define _INC_STRINGS_H_
 
+#include "../common/common.h"
+
 // temporary string storage
 #define THREAD_STRING_STORAGE	4096
 #define THREAD_TSTRING_STORAGE	2048

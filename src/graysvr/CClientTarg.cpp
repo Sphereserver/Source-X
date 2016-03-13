@@ -1,5 +1,6 @@
 // An item is targetted.
 
+#include "../common/CGrayUIDextra.h"
 #include "../network/send.h"
 #include "CChar.h"
 #include "CClient.h"

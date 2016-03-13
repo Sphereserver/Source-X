@@ -1,4 +1,5 @@
 
+#include "../common/CGrayUIDextra.h"
 #include "../graysvr/CChar.h"
 #include "../graysvr/CClient.h"
 #include "../graysvr/CItem.h"
@@ -13,6 +14,7 @@
 #include "network.h"
 #include "receive.h"
 #include "send.h"
+
 
 /***************************************************************************
  *

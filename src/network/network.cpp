@@ -5,6 +5,7 @@
 #include "../graysvr/CServer.h"
 #include "../graysvr/CServTime.h"
 #include "../graysvr/CWorld.h"
+#include "../sphere/containers.h"
 #include "../sphere/ProfileTask.h"
 #include "network.h"
 #include "receive.h"

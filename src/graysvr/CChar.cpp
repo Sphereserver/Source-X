@@ -2,6 +2,7 @@
 
 #include "../common/CException.h"
 #include "../common/CGrayUID.h"
+#include "../common/CGrayUIDextra.h"
 #include "../common/CObjBaseTemplate.h"
 #include "../common/CRect.h"
 #include "../network/network.h"

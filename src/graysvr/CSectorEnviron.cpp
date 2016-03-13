@@ -1,7 +1,4 @@
-//
-// Created by rot on 07/03/2016.
-//
-
+#include "../common/graymul.h"
 #include "CSectorEnviron.h"
 
 

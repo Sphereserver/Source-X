@@ -4,6 +4,7 @@
 #endif
 
 #include "../common/CGrayInst.h"
+#include "../common/CGrayUIDextra.h"
 #include "../common/CObjBaseTemplate.h"
 #include "../common/zlib/zlib.h"
 #include "../graysvr/CChar.h"

@@ -1,5 +1,5 @@
 // Fight/Criminal actions/Noto.
-
+#include "../common/CGrayUIDextra.h"
 #include "../network/send.h"
 #include "CChar.h"
 #include "CCharNPC.h"

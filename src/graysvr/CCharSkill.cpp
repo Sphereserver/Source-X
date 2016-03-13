@@ -1,6 +1,7 @@
 //  CChar is either an NPC or a Player.
 
 #include <cmath>
+#include "../common/CGrayUIDextra.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 #include "CClient.h"
