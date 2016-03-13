@@ -10,6 +10,7 @@
 #include "../graysvr/CCharNPC.h"
 #include "../graysvr/CItemSpawn.h"
 #include "../graysvr/CItemShip.h"
+#include "../common/sqlite/SQLite.h"
 
 #define ADD(a,b) const char * a::m_sClassName = b
 
@@ -62,6 +63,7 @@ ADD(CDataBase,				"CDataBase");
 ADD(CItemBaseMulti,			"CItemBaseMulti");
 ADD(CPathFinder,			"CPathFinder");
 ADD(CPartyDef,				"CPartyDef");
+ADD(CSQLite,                "CSQLite");
 ADD(CStoneMember,			"CStoneMember");
 ADD(CVarDefCont,			"CVarDefCont");
 ADD(CVarDefContNum,			"CVarDefContNum");
