@@ -1,5 +1,5 @@
 
-#include "../common/CEXception.h"
+#include "../common/CException.h"
 #include "../common/graycom.h"
 #include "../sphere/ProfileTask.h"
 #include "CLog.h"

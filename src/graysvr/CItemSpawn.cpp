@@ -1,7 +1,7 @@
 
 #include "../common/CObjBaseTemplate.h"
 #include "../common/CRegion.h"
-#include "../common/CEXception.h"
+#include "../common/CException.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 #include "CContainer.h"

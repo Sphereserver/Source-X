@@ -3,6 +3,7 @@
 #include "../common/CGrayUIDextra.h"
 #include "../network/network.h"
 #include "../network/send.h"
+#include "../sphere/ProfileTask.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 #include "CClient.h"
@@ -5554,10 +5555,11 @@ bool CItem::OnTick()
 
 	EXC_SET("default behaviour4");
 	DEBUG_ERR(( "Timer expired without DECAY flag '%s' (UID=0%lx)?\n", GetName(), (DWORD)GetUID()));
-	
+
 #ifndef _WIN32
 	}
-#ifndef _DEBUG
+#ifdef _DEBUG
+
 	catch ( const CGrayError& e )
 	{
 		EXC_CATCH_EXCEPTION(&e);

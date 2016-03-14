@@ -1,6 +1,9 @@
 #ifndef _WIN32
 //#include "graysvr.h" Removed to test. 	// predef header
+#include "../common/CException.h"
+#include "../sphere/threads.h"
 #include "UnixTerminal.h"
+
 #ifndef _USECURSES
 #include <stdio.h>
 #include <unistd.h>

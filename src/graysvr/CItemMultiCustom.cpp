@@ -2,7 +2,7 @@
 // CItemMultiCustom.cpp
 //
 
-#include "../common/CEXception.h"
+#include "../common/CException.h"
 #include "../common/CGrayInst.h"
 #include "../network/network.h"
 #include "../network/send.h"
