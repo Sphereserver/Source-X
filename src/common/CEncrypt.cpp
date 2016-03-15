@@ -459,7 +459,7 @@ int CCrypt::GetVerFromNumber( DWORD maj, DWORD min, DWORD rev, DWORD pat )
 	return (maj * 1000000) + (min * 10000) + (rev * 100) + pat;
 }
 
-TCHAR* CCrypt::WriteClientVerString( DWORD iClientVersion, TCHAR * pStr )
+char* CCrypt::WriteClientVerString( DWORD iClientVersion, char * pStr )
 {
 	ADDTOCALLSTACK("CCrypt::WriteClientVerString");
 	if ( iClientVersion >= MINCLIVER_NEWVERSIONING )
@@ -469,7 +469,7 @@ TCHAR* CCrypt::WriteClientVerString( DWORD iClientVersion, TCHAR * pStr )
 	else
 	{
 		int iVer = sprintf(pStr, "%lu.%lu.%lu", iClientVersion / 1000000, (iClientVersion / 10000) % 100, (iClientVersion % 10000) / 100);
-		int iPatch = iClientVersion % 100;
+		char iPatch = iClientVersion % 100;
 		if ( iPatch )
 		{
 			pStr[iVer++] = iPatch + 'a' - 1;
@@ -486,7 +486,7 @@ int CCrypt::GetVersionFromString( LPCTSTR pszVersion )
 	return CCrypt::GetVerFromString( pszVersion );
 }
 
-TCHAR* CCrypt::WriteClientVer( TCHAR * pStr ) const
+char* CCrypt::WriteClientVer( char * pStr ) const
 {
 	ADDTOCALLSTACK("CCrypt::WriteClientVer");
 	return( CCrypt::WriteClientVerString( GetClientVer(), pStr ) );

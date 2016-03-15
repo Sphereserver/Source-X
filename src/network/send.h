@@ -124,7 +124,7 @@ public:
 	virtual bool canSendTo(const NetState* state) const { return CanSendTo(state); }
 	static bool CanSendTo(const NetState* state)
 	{
-	    return state->isClientVersion(MINCLIVER_SA) || state->isClientSA();
+	    return state->isClientVersion(MINCLIVER_SA) || state->isClientEnhanced();
 	}
 };
 
@@ -1538,7 +1538,7 @@ public:
 	virtual bool canSendTo(const NetState* state) const { return CanSendTo(state); }
 	static bool CanSendTo(const NetState* state)
 	{
-		return state->isClientVersion(MINCLIVER_CUSTOMMULTI) || state->isClientKR() || state->isClientSA();
+		return state->isClientVersion(MINCLIVER_CUSTOMMULTI) || state->isClientKR() || state->isClientEnhanced();
 	}
 };
 
@@ -1654,7 +1654,7 @@ public:
 	virtual bool canSendTo(const NetState* state) const { return CanSendTo(state); }
 	static bool CanSendTo(const NetState* state)
 	{
-		return state->isClientVersion(MINCLIVER_NEWBOOK) || state->isClientKR() || state->isClientSA();
+		return state->isClientVersion(MINCLIVER_NEWBOOK) || state->isClientKR() || state->isClientEnhanced();
 	}
 };
 
@@ -1737,7 +1737,7 @@ public:
 	virtual bool canSendTo(const NetState* state) const { return CanSendTo(state); }
 	static bool CanSendTo(const NetState* state)
 	{
-		return state->isClientVersion(MINCLIVER_CUSTOMMULTI) || state->isClientKR() || state->isClientSA();
+		return state->isClientVersion(MINCLIVER_CUSTOMMULTI) || state->isClientKR() || state->isClientEnhanced();
 	}
 };
 
@@ -1831,7 +1831,7 @@ public:
 	virtual bool canSendTo(const NetState* state) const { return CanSendTo(state); }
 	static bool CanSendTo(const NetState* state)
 	{
-		return state->isClientVersion(MINCLIVER_SA) || state->isClientSA() || state->isClientKR();
+		return state->isClientVersion(MINCLIVER_SA) || state->isClientEnhanced() || state->isClientKR();
 	}
 };
 
@@ -1861,7 +1861,7 @@ public:
 	virtual bool canSendTo(const NetState* state) const { return CanSendTo(state); }
 	static bool CanSendTo(const NetState* state)
 	{
-		return state->isClientVersion(MINCLIVER_SA) || state->isClientSA();
+		return state->isClientVersion(MINCLIVER_SA) || state->isClientEnhanced();
 	}
 };
 
@@ -1880,7 +1880,7 @@ public:
 	virtual bool canSendTo(const NetState* state) const { return CanSendTo(state); }
 	static bool CanSendTo(const NetState* state)
 	{
-	    return state->isClientVersion(MINCLIVER_NEWMAPDISPLAY) || state->isClientSA();
+	    return state->isClientVersion(MINCLIVER_NEWMAPDISPLAY) || state->isClientEnhanced();
 	}
 };
 

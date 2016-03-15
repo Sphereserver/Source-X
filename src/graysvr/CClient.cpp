@@ -563,11 +563,11 @@ bool CClient::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
 			sVal.FormatVal( GetNetState()->isClientKR() );
 			break;
 		case CC_CLIENTISSA:
-			sVal.FormatVal( GetNetState()->isClientSA() );
+			sVal.FormatVal( GetNetState()->isClientEnhanced() );
 			break;
 		case CC_CLIENTVERSION:
 			{
-				TCHAR szVersion[ 128 ];
+				char szVersion[ 128 ];
 				sVal = m_Crypt.WriteClientVer( szVersion );
 			}
 			break;
@@ -596,7 +596,7 @@ bool CClient::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
 				GETNONWHITESPACE(pszKey);
 
 				DWORD iCliVer = GetNetState()->getReportedVersion();
-				TCHAR szVersion[128];
+				char szVersion[128];
 				sVal = CCrypt::WriteClientVerString( iCliVer, szVersion );
 			}
 			break;

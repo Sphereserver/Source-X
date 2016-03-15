@@ -1861,7 +1861,7 @@ void CClient::addPlayerSee( const CPointMap & ptold )
 	AreaItems.SetSearchSquare(true);
 	DWORD	dSeeItems = 0;
 
-	if (GetNetState()->isClientVersion(MINCLIVER_HS) || GetNetState()->isClientSA())
+	if (GetNetState()->isClientVersion(MINCLIVER_HS) || GetNetState()->isClientEnhanced())
 	{
 		for (;;)
 		{
@@ -2431,11 +2431,11 @@ int CClient::addShopItems(CChar * pVendor, LAYER_TYPE layer, bool bReal)
 		}
 	}
 
-	if ( (bReal && GetNetState()->isClientSA()) || !GetNetState()->isClientSA() )
+	if ( (bReal && GetNetState()->isClientEnhanced()) || !GetNetState()->isClientEnhanced() )
 	{
 		int iConvertFactor = pVendor->NPC_GetVendorMarkup(m_pChar );
 		PacketVendorBuyList* cmd = new PacketVendorBuyList();
-		count = cmd->fillContainer(pContainer, iConvertFactor, GetNetState()->isClientSA(), bReal? MAX_ITEMS_CONT : 0);
+		count = cmd->fillContainer(pContainer, iConvertFactor, GetNetState()->isClientEnhanced(), bReal? MAX_ITEMS_CONT : 0);
 		cmd->push(this);
 	}
 
@@ -3592,7 +3592,7 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 
 	if (propertyList->isEmpty() == false)
 	{
-		if (bShop && GetNetState()->isClientSA())
+		if (bShop && GetNetState()->isClientEnhanced())
 		{
 			new PacketPropertyList(this, propertyList);
 		}
@@ -4068,13 +4068,13 @@ BYTE CClient::LogIn( LPCTSTR pszAccName, LPCTSTR pszPassword, CGString & sMsg )
 	if ( GetAccount()) // already logged in.
 		return( PacketLoginError::Success );
 
-	TCHAR szTmp[ MAX_NAME_SIZE ];
+	char szTmp[ MAX_NAME_SIZE ];
 	size_t iLen1 = strlen( pszAccName );
 	size_t iLen2 = strlen( pszPassword );
 	size_t iLen3 = Str_GetBare( szTmp, pszAccName, MAX_NAME_SIZE );
 	if ( iLen1 == 0 || iLen1 != iLen3 || iLen1 > MAX_NAME_SIZE )	// a corrupt message.
 	{
-		TCHAR szVersion[ 256 ];
+		char szVersion[ 256 ];
 		sMsg.Format( g_Cfg.GetDefaultMsg( DEFMSG_MSG_ACC_WCLI ), static_cast<LPCTSTR>(m_Crypt.WriteClientVer( szVersion )));
 		return( PacketLoginError::BadAccount );
 	}
@@ -4082,13 +4082,13 @@ BYTE CClient::LogIn( LPCTSTR pszAccName, LPCTSTR pszPassword, CGString & sMsg )
 	iLen3 = Str_GetBare( szTmp, pszPassword, MAX_NAME_SIZE );
 	if ( iLen2 != iLen3 )	// a corrupt message.
 	{
-		TCHAR szVersion[ 256 ];
+		char szVersion[ 256 ];
 		sMsg.Format( g_Cfg.GetDefaultMsg( DEFMSG_MSG_ACC_WCLI ), static_cast<LPCTSTR>(m_Crypt.WriteClientVer( szVersion )));
 		return( PacketLoginError::BadPassword );
 	}
 
 
-	TCHAR szName[ MAX_ACCOUNT_NAME_SIZE ];
+	char szName[ MAX_ACCOUNT_NAME_SIZE ];
 	if ( !CAccount::NameStrip(szName, pszAccName) || Str_Check(pszAccName) )
 		return( PacketLoginError::BadAccount );
 	else if ( Str_Check(pszPassword) )
@@ -4099,7 +4099,7 @@ BYTE CClient::LogIn( LPCTSTR pszAccName, LPCTSTR pszPassword, CGString & sMsg )
 	{
 		// trying to log in as some sort of guest.
 		// Find or create a new guest account.
-		TCHAR *pszTemp = Str_GetTemp();
+		char *pszTemp = Str_GetTemp();
 		for ( int i = 0; ; i++ )
 		{
 			if ( i>=g_Cfg.m_iGuestsMax )

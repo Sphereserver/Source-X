@@ -184,14 +184,14 @@ private:
 	bool SetEncryptionType( ENCRYPTION_TYPE etWho );
 
 public:
-	TCHAR* WriteClientVer( TCHAR * pStr ) const;
+	char* WriteClientVer( char * pStr ) const;
 	bool SetClientVerEnum( DWORD iVer, bool bSetEncrypt = true );
 	bool SetClientVerIndex( size_t iVer, bool bSetEncrypt = true );
 	void SetClientVer( const CCrypt & crypt );
 	bool SetClientVer( LPCTSTR pszVersion );
 	static int GetVerFromString( LPCTSTR pszVersion );
 	static int GetVerFromNumber( DWORD maj, DWORD min, DWORD rev, DWORD pat );
-	static TCHAR* WriteClientVerString( DWORD iClientVersion, TCHAR * pStr );
+	static char* WriteClientVerString( DWORD iClientVersion, char * pStr );
 
 public:
 	DWORD GetClientVer() const;

@@ -1122,12 +1122,12 @@ enum PROFESSION_TYPE	// profession ids
 	PROFESSION_NINJA		= 0x07
 };
 
-enum GAMECLIENT_TYPE	// game client type, KR and SA are from the 0xE1 packet, other values are for convenience
+enum GAMECLIENT_TYPE	// game client type, KR and Enhanced are from the 0xE1 packet, other values are for convenience
 {
-	CLIENTTYPE_2D = 0x00,	// standard client
+	CLIENTTYPE_2D = 0x00,	// Standard client
 	CLIENTTYPE_3D = 0x01,	// 3D client
 	CLIENTTYPE_KR = 0x02,	// KR client
-	CLIENTTYPE_SA = 0x03	// SA client
+	CLIENTTYPE_EC = 0x03	// Enhanced Client
 };
 
 enum RACE_TYPE		// character race, used in new character creation (0x8D) and status (0x11) packets
