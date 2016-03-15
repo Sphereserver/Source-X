@@ -419,7 +419,7 @@ int CCrypt::GetVerFromString( LPCTSTR pszVersion )
 	int n = 0;
 	int iArgs[4] = { 0,0,0,0 };
 	size_t iMax = strlen(pszVersion);
-	TCHAR ch, chNext;
+	char ch, chNext;
 
 	for ( size_t i = 0; i < iMax; i++ )
 	{
@@ -472,7 +472,7 @@ char* CCrypt::WriteClientVerString( DWORD iClientVersion, char * pStr )
 		char iPatch = iClientVersion % 100;
 		if ( iPatch )
 		{
-			pStr[iVer++] = static_cast<TCHAR>(iPatch + 'a' - 1);
+			pStr[iVer++] = iPatch + 'a' - 1;
 			pStr[iVer] = '\0';
 		}
 	}
@@ -648,7 +648,7 @@ void CCrypt::LoginCryptStart( DWORD dwIP, BYTE * pEvent, size_t iLen )
 	ADDTOCALLSTACK("CCrypt::LoginCryptStart");
 	ASSERT(pEvent != NULL);
 	BYTE m_Raw[ MAX_BUFFER ];
-	TCHAR pszAccountNameCheck[ MAX_ACCOUNT_NAME_SIZE ];
+	char pszAccountNameCheck[ MAX_ACCOUNT_NAME_SIZE ];
 
 	ASSERT( iLen <= sizeof(m_Raw) );
 	memcpy( m_Raw, pEvent, iLen );	

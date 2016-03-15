@@ -3060,13 +3060,13 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	int iDmgPhysical = 0, iDmgFire = 0, iDmgCold = 0, iDmgPoison = 0, iDmgEnergy = 0;
 
 	// Check if the spell is being resisted
-	unsigned short iResist = 0;
+	int iResist = 0;
 	if ( pSpellDef->IsSpellType(SPELLFLAG_RESIST) && pCharSrc && !fPotion )
 	{
 		iResist = Skill_GetBase(SKILL_MAGICRESISTANCE);
-		unsigned short iFirst = iResist / 50;
-		unsigned short iSecond = static_cast<unsigned short>(iResist - (((pCharSrc->Skill_GetBase(SKILL_MAGERY) - 200) / 50) + (1 + (spell / 8)) * 50));
-		unsigned char iResistChance = static_cast<unsigned char>(maximum(iFirst, iSecond) / 30);
+		int iFirst = iResist / 50;
+		int iSecond = iResist - (((pCharSrc->Skill_GetBase(SKILL_MAGERY) - 200) / 50) + (1 + (spell / 8)) * 50);
+		int iResistChance = maximum(iFirst, iSecond) / 30;
 		iResist = Skill_UseQuick(SKILL_MAGICRESISTANCE, iResistChance, true, false) ? 25 : 0;	// If we successfully resist then we have a 25% damage reduction, 0 if we don't.
 
 		if ( IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) )
@@ -3139,7 +3139,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		iEffectMult = static_cast<int>(Args.m_iN3);
 		iD1 = static_cast<DAMAGE_TYPE>(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("DamageType", true)));
 		iDmg = static_cast<int>(Args.m_VarsLocal.GetKeyNum("Dam",true));
-		iResist = static_cast<unsigned short>(Args.m_VarsLocal.GetKeyNum("Resist",true));
+		iResist = static_cast<int>(Args.m_VarsLocal.GetKeyNum("Resist",true));
 
 		switch ( iRet )
 		{
