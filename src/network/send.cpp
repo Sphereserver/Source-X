@@ -2090,7 +2090,7 @@ PacketVendorBuyList::PacketVendorBuyList(void) : PacketSend(XCMD_VendOpenBuy, 8,
 {
 }
 
-int PacketVendorBuyList::fillContainer(const CItemContainer* container, int convertFactor, bool bClientSA, size_t maxItems)
+int PacketVendorBuyList::fillContainer(const CItemContainer* container, int convertFactor, bool bIsClientEnhanced, size_t maxItems)
 {
 	ADDTOCALLSTACK("PacketVendorBuyList::fillContainer");
 
@@ -2103,13 +2103,7 @@ int PacketVendorBuyList::fillContainer(const CItemContainer* container, int conv
 	skip(1);
 	size_t count(0);
 
-	CItem* item;
-	if (bClientSA)
-		item = container->GetContentHead();
-	else
-		item = container->GetContentTail();
-
-	while (item != NULL && count < maxItems)
+	for (CItem* item = (bIsClientEnhanced ? container->GetContentHead() : container->GetContentTail()); item != NULL; item = (bIsClientEnhanced ? item->GetNext() : item->GetPrev()))
 	{
 		if (item->GetAmount() == 0)
 			continue;
@@ -2135,17 +2129,14 @@ int PacketVendorBuyList::fillContainer(const CItemContainer* container, int conv
 
 		LPCTSTR name = venditem->GetName();
 		size_t len = strlen(name) + 1;
-		if (len > 255)
-			len = 255;
+		if (len > UCHAR_MAX)
+			len = UCHAR_MAX;
 
 		writeByte(static_cast<BYTE>(len));
 		writeStringFixedASCII(name, len);
 
-		if (bClientSA)
-			item = item->GetNext();
-		else
-			item = item->GetPrev();
-		count++;
+		if (++count > MAX_ITEMS_CONT)
+			break;
 	}
 
 	// seek back to write count
