@@ -304,7 +304,7 @@ void CServer::PrintStr( LPCTSTR pszMsg ) const
 	PrintTelnet( pszMsg );
 }
 
-int CServer::PrintPercent( long iCount, long iTotal )
+int CServer::PrintPercent( int iCount, int iTotal )
 {
 	ADDTOCALLSTACK("CServer::PrintPercent");
 	// These vals can get very large. so use MulDiv to prevent overflow. (not IMULDIV)

@@ -1125,7 +1125,7 @@ CResourceScript *CResourceLink::GetLinkFile() const
 	return m_pScript;
 }
 
-long CResourceLink::GetLinkOffset() const
+int CResourceLink::GetLinkOffset() const
 {
 	ADDTOCALLSTACK("CResourceLink::GetLinkOffset");
 	return m_Context.m_lOffset;

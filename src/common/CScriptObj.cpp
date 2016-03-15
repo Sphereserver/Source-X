@@ -3048,7 +3048,7 @@ bool CFileObj::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc )
 				if ( iLines < 0 )
 					return( false );
 
-				unsigned long ulSeek = sWrite->GetPosition();
+				unsigned int uiSeek = sWrite->GetPosition();
 				sWrite->SeekToBegin();
 
 				if ( iLines == 0 )
@@ -3068,7 +3068,7 @@ bool CFileObj::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc )
 					}
 				}
 
-				sWrite->Seek(ulSeek);
+				sWrite->Seek(uiSeek);
 
 				if ( size_t iLinelen = strlen(ppArg) )
 				{

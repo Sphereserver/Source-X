@@ -411,7 +411,7 @@ int CGSocket::GetSockOpt( int nOptionName, void * optval, int * poptlen, int nLe
 }
 
 #ifdef _WIN32
-	int CGSocket::IOCtlSocket( long icmd, DWORD * pdwArgs )
+	int CGSocket::IOCtlSocket(int icmd, DWORD * pdwArgs )
 	{
 		return ioctlsocket( m_hSocket, icmd, pdwArgs );
 	}
@@ -430,7 +430,7 @@ int CGSocket::GetSockOpt( int nOptionName, void * optval, int * poptlen, int nLe
 	}
 
 #else
-	int CGSocket::IOCtlSocket( long icmd, int iVal )	// LINUX ?
+	int CGSocket::IOCtlSocket( int icmd, int iVal )	// LINUX ?
 	{
 		return fcntl( m_hSocket, icmd, iVal );
 	}

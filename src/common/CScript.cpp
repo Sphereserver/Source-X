@@ -125,7 +125,7 @@ long long CScriptKey::GetArgLLVal()
 	return( Exp_GetLLVal( m_pszArg ));
 }
 
-long CScriptKey::GetArgVal()
+int CScriptKey::GetArgVal()
 {
 	ADDTOCALLSTACK("CScriptKey::GetArgVal");
 	ASSERT(m_pszKey);
@@ -133,7 +133,7 @@ long CScriptKey::GetArgVal()
 	return( Exp_GetVal( m_pszArg ));
 }
 
-long CScriptKey::GetArgRange()
+int CScriptKey::GetArgRange()
 {
 	ADDTOCALLSTACK("CScriptKey::GetArgRange");
 	ASSERT(m_pszKey);
@@ -399,7 +399,7 @@ bool CScript::FindTextHeader( LPCTSTR pszName ) // Find a section in the current
 	return( true );
 }
 
-DWORD CScript::Seek( long offset, UINT origin )
+DWORD CScript::Seek( int offset, UINT origin )
 {
 	ADDTOCALLSTACK("CScript::Seek");
 	// Go to the start of a new section.

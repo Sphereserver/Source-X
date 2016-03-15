@@ -12,8 +12,8 @@
 class MapAddress
 {
 public:
-	unsigned long dwFirstBlock;
-	unsigned long dwLastBlock;
+	unsigned int dwFirstBlock;
+	unsigned int dwLastBlock;
 	INT64 qwAdress;
 };
 

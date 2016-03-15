@@ -54,7 +54,7 @@ public:
 	void expand(size_t size = 0); // expand packet (resize whilst maintaining position)
 	void resize(size_t newsize); // resize packet
 	void seek(size_t pos = 0); // seek to position
-	void skip(long count = 1); // skip count bytes
+	void skip(int count = 1); // skip count bytes
 
 	BYTE &operator[](size_t index);
 	const BYTE &operator[](size_t index) const;
@@ -139,7 +139,7 @@ public:
 	};
 
 protected:
-	long m_priority; // packet priority
+	int m_priority; // packet priority
 	NetState* m_target; // selected network target for this packet
 	size_t m_lengthPosition; // position of length-byte
 
@@ -159,7 +159,7 @@ public:
 	void send(const CClient* client = NULL, bool appendTransaction = true); // adds the packet to the send queue
 	void push(const CClient* client = NULL, bool appendTransaction = true); // moves the packet to the send queue (will not be used anywhere else)
 
-	long getPriority() const { return m_priority; }; // get packet priority
+	int getPriority() const { return m_priority; }; // get packet priority
 	NetState* getTarget() const { return m_target; }; // get target state
 
 	virtual bool onSend(const CClient* client);
@@ -203,8 +203,8 @@ public:
 	virtual bool empty(void) = 0; // check if any packets are available
 
 	virtual NetState* getTarget(void) const = 0; // get target of the transaction
-	virtual long getPriority(void) const = 0; // get priority of the transaction
-	virtual void setPriority(long priority) = 0; // set priority of the transaction
+	virtual int getPriority(void) const = 0; // get priority of the transaction
+	virtual void setPriority(int priority) = 0; // set priority of the transaction
 };
 
 
@@ -230,8 +230,8 @@ private:
 
 public:
 	NetState* getTarget(void) const { return m_packet->getTarget(); }
-	long getPriority(void) const { return m_packet->getPriority(); }
-	void setPriority(long priority) { m_packet->m_priority = priority; }
+	int getPriority(void) const { return m_packet->getPriority(); }
+	void setPriority(int priority) { m_packet->m_priority = priority; }
 
 	PacketSend* front(void) { return m_packet; };
 	void pop(void) { m_packet = NULL; }
@@ -251,10 +251,10 @@ class ExtendedPacketTransaction : public PacketTransaction
 private:
 	std::list<PacketSend*> m_packets;
 	NetState* m_target;
-	long m_priority;
+	int m_priority;
 
 public:
-	ExtendedPacketTransaction(NetState* target, long priority) : m_target(target), m_priority(priority) { };
+	ExtendedPacketTransaction(NetState* target, int priority) : m_target(target), m_priority(priority) { };
 	~ExtendedPacketTransaction(void);
 
 private:
@@ -263,8 +263,8 @@ private:
 
 public:
 	NetState* getTarget(void) const	{ return m_target; }
-	long getPriority(void) const { return m_priority; }
-	void setPriority(long priority) { m_priority = priority; }
+	int getPriority(void) const { return m_priority; }
+	void setPriority(int priority) { m_priority = priority; }
 
 	void push_back(PacketSend* packet) { m_packets.push_back(packet); }
 	PacketSend* front(void) { return m_packets.front(); };
@@ -287,7 +287,7 @@ private:
 	NetState* m_client;
 
 public:
-	OpenPacketTransaction(const CClient* client, long priority);
+	OpenPacketTransaction(const CClient* client, int priority);
 	~OpenPacketTransaction(void);
 
 private:

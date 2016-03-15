@@ -103,7 +103,7 @@ CItemsList::CItemsList()
 
 };
 
-int CObPointSortArray::CompareKey( long id, CPointSort* pBase, bool fNoSpaces ) const
+int CObPointSortArray::CompareKey( int id, CPointSort* pBase, bool fNoSpaces ) const
 {
 	UNREFERENCED_PARAMETER(fNoSpaces);
 	ASSERT( pBase );
@@ -221,8 +221,8 @@ const CGrayMapBlock * CSectorBase::GetMapBlock( const CPointMap & pt )
 	CGrayMapBlock * pMapBlock;
 
 	// Find it in cache.
-	long lBlock = pntBlock.GetPointSortIndex();
-	MapBlockCache::iterator it = m_MapBlockCache.find(lBlock);
+	int iBlock = pntBlock.GetPointSortIndex();
+	MapBlockCache::iterator it = m_MapBlockCache.find(iBlock);
 	if ( it != m_MapBlockCache.end() )
 	{
 		it->second->m_CacheTime.HitCacheTime();
@@ -249,7 +249,7 @@ const CGrayMapBlock * CSectorBase::GetMapBlock( const CPointMap & pt )
 	}
 
 	// Add it to the cache.
-	m_MapBlockCache[lBlock] = pMapBlock;
+	m_MapBlockCache[iBlock] = pMapBlock;
 	return( pMapBlock );
 }
 

@@ -546,7 +546,7 @@ public:
 	void SetAnim( ITEMID_TYPE id, int iTime );
 
 	int IsWeird() const;
-	signed char GetFixZ(CPointMap pt, unsigned long wBlockFlags = 0 );
+	signed char GetFixZ(CPointMap pt, unsigned int wBlockFlags = 0 );
 	BYTE GetSpeed() const;
 	void SetAttr( DWORD dwAttr );
 	void ClrAttr( DWORD dwAttr );

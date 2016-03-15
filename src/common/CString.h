@@ -144,7 +144,7 @@ public:
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	void FormatVal(long iVal);
+	void FormatVal(int iVal);
 	/**
 	* @brief Print a long long value into the string.
 	* @see Format()
@@ -162,7 +162,7 @@ public:
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	void FormatUVal(unsigned long iVal);
+	void FormatUVal(unsigned int iVal);
 	/**
 	* @brief Print a DWORD value into the string (hex format).
 	* @see Format()

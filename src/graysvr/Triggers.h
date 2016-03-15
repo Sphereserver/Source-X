@@ -15,7 +15,7 @@ void TriglistInit();
 void TriglistClear();
 void TriglistAdd(E_TRIGGERS id);
 void TriglistAdd(const char *name);
-void Triglist(long &total, long &used);
+void Triglist(int &total, int &used);
 void TriglistPrint();
 
 

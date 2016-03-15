@@ -28,6 +28,10 @@
 	#define STDFUNC_UNLINK _unlink
 #endif
 
+// dirty workaround to override the typedef in minwindef.h
+#undef	WORD
+#define WORD unsigned int
+
 extern bool NTWindow_Init( HINSTANCE hInstance, LPTSTR lpCmdLinel, int nCmdShow );
 extern void NTWindow_Exit();
 extern void NTWindow_DeleteIcon();

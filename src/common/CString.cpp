@@ -239,7 +239,7 @@ void _cdecl CGString::Format(LPCTSTR pStr, ...)
 	va_end(vargs);
 }
 
-void CGString::FormatVal(long iVal)
+void CGString::FormatVal(int iVal)
 {
 	Format("%ld", iVal);
 }
@@ -254,7 +254,7 @@ void CGString::FormatULLVal(unsigned long long iVal)
 	Format("%llu", iVal);
 }
 
-void CGString::FormatUVal(unsigned long iVal)
+void CGString::FormatUVal(unsigned int iVal)
 {
 	Format("%lu", iVal);
 }

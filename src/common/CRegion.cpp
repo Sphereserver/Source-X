@@ -321,16 +321,16 @@ bool CRegionBase::RealizeRegion()
 
 	// Attach to all sectors that i overlap.
 	ASSERT( m_iLinkedSectors == 0 );
-	for ( long l = 0; l < g_MapList.GetSectorQty(m_pt.m_map); l++ )
+	for ( int i = 0; i < g_MapList.GetSectorQty(m_pt.m_map); i++ )
 	{
-		CSector *pSector = g_World.GetSector(m_pt.m_map, l);
+		CSector *pSector = g_World.GetSector(m_pt.m_map, i);
 
 		if ( pSector && IsOverlapped(pSector->GetRect()) )
 		{
 			//	Yes, this sector overlapped, so add it to the sector list
 			if ( !pSector->LinkRegion(this) )
 			{
-				g_Log.EventError("Linking sector #%ld for map %d for region %s failed (fatal for this region).\n", l, m_pt.m_map, GetName());
+				g_Log.EventError("Linking sector #%ld for map %d for region %s failed (fatal for this region).\n", i, m_pt.m_map, GetName());
 				return false;
 			}
 			m_iLinkedSectors++;

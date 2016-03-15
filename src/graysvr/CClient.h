@@ -383,7 +383,7 @@ public:
 public:
 	CSocketAddress &GetPeer();								// get peer address
 	LPCTSTR GetPeerStr() const;								// get string representation of the peer address
-	long GetSocketID() const;								// get socket id
+	int GetSocketID() const;								// get socket id
 
 public:
 	explicit CClient(NetState* state);

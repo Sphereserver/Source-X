@@ -21,12 +21,12 @@
 
 // Normal Buffer
 SimpleMutex g_tmpStringMutex;
-volatile long g_tmpStringIndex = 0;
+volatile int g_tmpStringIndex = 0;
 char g_tmpStrings[THREAD_TSTRING_STORAGE][THREAD_STRING_LENGTH];
 
 // TemporaryString Buffer
 SimpleMutex g_tmpTemporaryStringMutex;
-volatile long g_tmpTemporaryStringIndex = 0;
+volatile int g_tmpTemporaryStringIndex = 0;
 
 struct TemporaryStringStorage
 {
@@ -511,8 +511,8 @@ char *AbstractSphereThread::allocateBuffer()
 
 TemporaryStringStorage *AbstractSphereThread::allocateStringBuffer()
 {
-	long initialPosition = g_tmpTemporaryStringIndex;
-	long index;
+	int initialPosition = g_tmpTemporaryStringIndex;
+	int index;
 	for (;;)
 	{
 		index = ++g_tmpTemporaryStringIndex;
@@ -565,16 +565,16 @@ void AbstractSphereThread::printStackTrace()
 	freezeCallStack(true);
 
 	LONGLONG startTime = m_stackInfo[0].startTime;
-	long timedelta;
+	int timedelta;
 	unsigned int threadId = getId();
 
 	g_Log.EventDebug("__ thread (%u) __ |  # | _____ function _____________ | ticks passed from previous function start ______\n", threadId);
-	for( size_t i = 0; i < 0x1000; i++ )
+	for ( size_t i = 0; i < 0x1000; i++ )
 	{
 		if( m_stackInfo[i].startTime == 0 )
 			break;
 
-		timedelta = static_cast<long>(m_stackInfo[i].startTime - startTime);
+		timedelta = static_cast<int>(m_stackInfo[i].startTime - startTime);
 		g_Log.EventDebug(">>         %u     | %2d | %28s | +%ld %s\n",
 			threadId, i, m_stackInfo[i].functionName, timedelta,
 				( i == (m_stackPos - 1) ) ?

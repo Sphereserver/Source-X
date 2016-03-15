@@ -68,12 +68,12 @@ private:
 	CItemsList& operator=(const CItemsList& other);
 };
 
-class CObPointSortArray : public CGObSortArray< CPointSort*, long >
+class CObPointSortArray : public CGObSortArray< CPointSort*, int >
 {
 public:
 	static const char *m_sClassName;
 	// Find a point fast.
-	int CompareKey( long id, CPointSort* pBase, bool fNoSpaces ) const;
+	int CompareKey( int id, CPointSort* pBase, bool fNoSpaces ) const;
 public:
 	CObPointSortArray();
 private:
@@ -87,7 +87,7 @@ protected:
 	int	m_index;		// sector index
 	int m_map;			// sector map
 private:
-	typedef std::map<long, CGrayMapBlock*>	MapBlockCache;
+	typedef std::map<int, CGrayMapBlock*>	MapBlockCache;
 	MapBlockCache							m_MapBlockCache;
 public:
 	static const char *m_sClassName;

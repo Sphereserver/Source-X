@@ -4,7 +4,7 @@
 #include "CChar.h"
 #include "CPathFinder.h"
 
-unsigned long CPathFinder::Heuristic(CPathFinderPointRef& Pt1,CPathFinderPointRef& Pt2)
+unsigned int CPathFinder::Heuristic(CPathFinderPointRef& Pt1,CPathFinderPointRef& Pt2)
 {
 	return 10*(abs(Pt1.m_Point->m_x - Pt2.m_Point->m_x) + abs(Pt1.m_Point->m_y - Pt2.m_Point->m_y));
 }

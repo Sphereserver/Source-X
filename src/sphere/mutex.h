@@ -78,9 +78,9 @@ class AutoResetEvent
 {
 public:
 #ifdef _WIN32
-	static const unsigned long _infinite = INFINITE;
+	static const unsigned int _infinite = INFINITE;
 #else
-	static const unsigned long _infinite = 0xffffffff;
+	static const unsigned int _infinite = 0xffffffff;
 #endif
 
 public:
@@ -92,7 +92,7 @@ private:
 	AutoResetEvent& operator=(const AutoResetEvent& other);
 
 public:
-	void wait(unsigned long timeout = _infinite);
+	void wait(unsigned int timeout = _infinite);
 	void signal();
 
 private:
@@ -110,9 +110,9 @@ class ManualResetEvent
 {
 public:
 #ifdef _WIN32
-	static const unsigned long _infinite = INFINITE;
+	static const unsigned int _infinite = INFINITE;
 #else
-	static const unsigned long _infinite = 0xffffffff;
+	static const unsigned int _infinite = 0xffffffff;
 #endif
 
 public:
@@ -124,7 +124,7 @@ private:
 	ManualResetEvent& operator=(const ManualResetEvent& other);
 
 public:
-	void wait(unsigned long timeout = _infinite);
+	void wait(unsigned int timeout = _infinite);
 	void reset();
 	void set();
 

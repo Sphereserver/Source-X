@@ -327,17 +327,17 @@ LPCTSTR CResource::Calc_MaptoSextant( CPointMap pntCoords )
 	CPointMap zeroPoint;
 	zeroPoint.Read(strcpy(z, g_Cfg.m_sZeroPoint));
 
-	long lLat = (pntCoords.m_y - zeroPoint.m_y) * 360 * 60 / g_MapList.GetY(zeroPoint.m_map);
-	long lLong;
+	int iLat = (pntCoords.m_y - zeroPoint.m_y) * 360 * 60 / g_MapList.GetY(zeroPoint.m_map);
+	int iLong;
 	if ( pntCoords.m_map <= 1 )
-		lLong = (pntCoords.m_x - zeroPoint.m_x) * 360 * 60 / UO_SIZE_X_REAL;
+		iLong = (pntCoords.m_x - zeroPoint.m_x) * 360 * 60 / UO_SIZE_X_REAL;
 	else
-		lLong = (pntCoords.m_x - zeroPoint.m_x) * 360 * 60 / g_MapList.GetX(pntCoords.m_map);
+		iLong = (pntCoords.m_x - zeroPoint.m_x) * 360 * 60 / g_MapList.GetX(pntCoords.m_map);
 
 	TCHAR * pTemp = Str_GetTemp();
 	sprintf( pTemp, "%io %i'%s, %io %i'%s",
-		abs(lLat / 60),  abs(lLat % 60),  (lLat <= 0) ? "N" : "S",
-		abs(lLong / 60), abs(lLong % 60), (lLong >= 0) ? "E" : "W");
+		abs(iLat / 60),  abs(iLat % 60),  (iLat <= 0) ? "N" : "S",
+		abs(iLong / 60), abs(iLong % 60), (iLong >= 0) ? "E" : "W");
 
 	return pTemp;
 }

@@ -41,22 +41,21 @@
 	#define HKEY_LOCAL_MACHINE	(( HKEY ) 0x80000002 )
 #endif
 
-#ifndef BYTE	// might be a typedef ?
-	#ifdef LONGLONG
-		#undef LONGLONG
-	#endif
-	#ifdef LONG
-		#undef LONG
-	#endif
+#undef BYTE
+#undef WORD
+#undef DWORD
+#undef UINT
+#undef LONGLONG
+#undef ULONGLONG
+#undef LONG
 
-	#define BYTE 		unsigned char	// 8 bits
-	#define WORD 		unsigned short	// 16 bits
-	#define DWORD		unsigned long	// 32 bits
-	#define UINT		unsigned int
-	#define LONGLONG	long long 	// this must be 64bit
-	#define ULONGLONG	unsigned long long
-	#define LONG		long		// this stays 32bit!
-#endif	// BYTE
+#define BYTE 		unsigned char	// 8 bits
+#define WORD 		unsigned short	// 16 bits
+#define DWORD		unsigned int	// 32 bits
+#define UINT		unsigned int
+#define LONGLONG	long long 	// this must be 64bit
+#define ULONGLONG	unsigned long long
+#define LONG		long		// this stays 32bit!
 
 #define MAKEWORD(low,high) ((WORD)(((BYTE)(low))|(((WORD)((BYTE)(high)))<<8)))
 #define MAKELONG(low,high) ((LONG)(((WORD)(low))|(((DWORD)((WORD)(high)))<<16)))

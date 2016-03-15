@@ -1518,7 +1518,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 	return false;
 }
 
-long CClient::GetSocketID() const
+int CClient::GetSocketID() const
 {
 	return m_net->id();
 }

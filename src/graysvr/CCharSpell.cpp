@@ -1473,7 +1473,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				if (pClient && IsSetOF(OF_Buffs))
 				{
 					BUFF_ICONS BuffIcon = BI_PROTECTION;
-					unsigned long BuffCliloc = 1075814;
+					unsigned int BuffCliloc = 1075814;
 					if ( spell == SPELL_Arch_Prot )
 					{
 						BuffIcon = BI_ARCHPROTECTION;

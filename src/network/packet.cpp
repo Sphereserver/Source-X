@@ -133,7 +133,7 @@ void Packet::seek(size_t pos)
 	m_position = pos;
 }
 
-void Packet::skip(long count)
+void Packet::skip(int count)
 {
 	// ensure we can't go lower than 0
 	if (count < 0 && static_cast<size_t>(labs(count)) > m_position)
@@ -877,13 +877,13 @@ size_t Packet::readStringNullASCII(WCHAR* buffer, size_t maxlength)
 
 	char* bufferReal = new char[maxlength + 1];
 	readStringNullASCII(bufferReal, maxlength);
-	long length = mbstowcs(buffer, bufferReal, maxlength + 1);
+	int length = mbstowcs(buffer, bufferReal, maxlength + 1);
 	delete[] bufferReal;
 #else
 
 	char* bufferReal = new char[maxlength + 1];
 	readStringNullASCII(bufferReal, maxlength);
-	long length = CvtSystemToNUNICODE(reinterpret_cast<NWORD *>(buffer), static_cast<int>(maxlength), bufferReal, static_cast<int>(maxlength) + 1);
+	int length = CvtSystemToNUNICODE(reinterpret_cast<NWORD *>(buffer), static_cast<int>(maxlength), bufferReal, static_cast<int>(maxlength) + 1);
 	delete[] bufferReal;
 
 	// need to flip byte order to convert NUNICODE to UNICODE
@@ -925,13 +925,13 @@ size_t Packet::readStringNullUNICODE(char* buffer, size_t bufferSize, size_t max
 
 	WCHAR* bufferReal = new WCHAR[maxlength + 1];
 	readStringNullUNICODE(bufferReal, maxlength);
-	long length = wcstombs(buffer, bufferReal, bufferSize);
+	int length = wcstombs(buffer, bufferReal, bufferSize);
 	delete[] bufferReal;
 #else
 
 	WCHAR* bufferReal = new WCHAR[maxlength + 1];
 	readStringNullNUNICODE(bufferReal, maxlength);
-	long length = CvtNUNICODEToSystem(buffer, static_cast<int>(bufferSize), reinterpret_cast<NWORD *>(bufferReal), static_cast<int>(maxlength) + 1);
+	int length = CvtNUNICODEToSystem(buffer, static_cast<int>(bufferSize), reinterpret_cast<NWORD *>(bufferReal), static_cast<int>(maxlength) + 1);
 	delete[] bufferReal;
 #endif
 
@@ -965,13 +965,13 @@ size_t Packet::readStringNullNUNICODE(char* buffer, size_t bufferSize, size_t ma
 
 	WCHAR* bufferReal = new WCHAR[maxlength + 1];
 	readStringNullNUNICODE(bufferReal, maxlength);
-	long length = wcstombs(buffer, bufferReal, bufferSize);
+	int length = wcstombs(buffer, bufferReal, bufferSize);
 	delete[] bufferReal;
 #else
 
 	WCHAR* bufferReal = new WCHAR[maxlength + 1];
 	readStringNullUNICODE(bufferReal, maxlength);
-	long length = CvtNUNICODEToSystem(buffer, static_cast<int>(bufferSize), reinterpret_cast<NWORD *>(bufferReal), static_cast<int>(maxlength) + 1);
+	int length = CvtNUNICODEToSystem(buffer, static_cast<int>(bufferSize), reinterpret_cast<NWORD *>(bufferReal), static_cast<int>(maxlength) + 1);
 	delete[] bufferReal;
 #endif
 
@@ -1290,7 +1290,7 @@ ExtendedPacketTransaction::~ExtendedPacketTransaction(void)
  *
  *
  ***************************************************************************/
-OpenPacketTransaction::OpenPacketTransaction(const CClient* client, long priority)
+OpenPacketTransaction::OpenPacketTransaction(const CClient* client, int priority)
 {
 	ASSERT(client != NULL);
 

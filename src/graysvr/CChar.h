@@ -275,7 +275,7 @@ private:
 public:
 	// Status and attributes ------------------------------------
 	int IsWeird() const;
-	signed char GetFixZ( CPointMap pt, unsigned long wBlockFlags = 0);
+	signed char GetFixZ( CPointMap pt, unsigned int wBlockFlags = 0);
 	virtual void Delete(bool bforce = false);
 	virtual bool NotifyDelete();
 	bool IsStatFlag( DWORD dwStatFlag ) const;

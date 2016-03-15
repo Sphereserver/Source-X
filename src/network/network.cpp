@@ -100,7 +100,7 @@ void xRecordPacket(const CClient* client, Packet* packet, LPCTSTR heading)
  *
  ***************************************************************************/
 
-NetState::NetState(long id)
+NetState::NetState(int id)
 {
 	m_id = id;
 	m_client = NULL;
@@ -398,7 +398,7 @@ bool NetState::canReceive(PacketSend* packet) const
 	return true;
 }
 
-void NetState::beginTransaction(long priority)
+void NetState::beginTransaction(int priority)
 {
 	ADDTOCALLSTACK("NetState::beginTransaction");
 	if (m_outgoing.pendingTransaction != NULL)
@@ -931,10 +931,10 @@ NetworkIn::~NetworkIn(void)
 
 	if (m_states != NULL)
 	{
-		for (long l = 0; l < m_stateCount; l++)
+		for (int i = 0; i < m_stateCount; i++)
 		{
-			delete m_states[l];
-			m_states[l] = NULL;
+			delete m_states[i];
+			m_states[i] = NULL;
 		}
 
 		delete[] m_states;
@@ -995,7 +995,7 @@ void NetworkIn::tick(void)
 
 	EXC_SET("messages");
 	BYTE* buffer = m_buffer;
-	for (long i = 0; i < m_stateCount; i++)
+	for (int i = 0; i < m_stateCount; i++)
 	{
 		EXC_SET("start network profile");
 		ProfileTask networkTask(PROFILE_NETWORK_RX);
@@ -1404,16 +1404,16 @@ int NetworkIn::checkForData(fd_set* storage)
 	}
 
 	EXC_SET("check states");
-	for ( long l = 0; l < m_stateCount; l++ )
+	for (int i = 0; i < m_stateCount; i++ )
 	{
 		EXC_SET("check socket");
-		NetState* state = m_states[l];
+		NetState* state = m_states[i];
 		if ( state->isInUse() == false )
 			continue;
 
 		EXC_SET("cleaning queues");
-		for (int i = 0; i < PacketSend::PRI_QTY; i++)
-			state->m_outgoing.queue[i].clean();
+		for (int ii = 0; ii < PacketSend::PRI_QTY; ii++)
+			state->m_outgoing.queue[ii].clean();
 
 		EXC_SET("check closing");
 		if (state->isClosing())
@@ -1495,8 +1495,8 @@ void NetworkIn::acceptConnection(void)
 		
 		DEBUGNETWORK(("Retrieving IP history for '%s'.\n", client_addr.GetAddrStr()));
 		HistoryIP& ip = m_ips.getHistoryForIP(client_addr);
-		long maxIp = g_Cfg.m_iConnectingMaxIP;
-		long climaxIp = g_Cfg.m_iClientsMaxIP;
+		int maxIp = g_Cfg.m_iConnectingMaxIP;
+		int climaxIp = g_Cfg.m_iClientsMaxIP;
 
 		DEBUGNETWORK(("Incoming connection from '%s' [blocked=%d, ttl=%ld, pings=%ld, connecting=%ld, connected=%ld]\n", 
 			ip.m_ip.GetAddrStr(), ip.m_blocked, ip.m_ttl, ip.m_pings, ip.m_connecting, ip.m_connected));
@@ -1528,7 +1528,7 @@ void NetworkIn::acceptConnection(void)
 		else
 		{
 			EXC_SET("detecting slot");
-			long slot = getStateSlot();
+			int slot = getStateSlot();
 			if ( slot == -1 )			// we do not have enough empty slots for clients
 			{
 				EXC_SET("no slot ready");
@@ -1540,7 +1540,7 @@ void NetworkIn::acceptConnection(void)
 			}
 			else
 			{
-				DEBUGNETWORK(("%lx:Allocated slot for client (%ld).\n", slot, (long)h));
+				DEBUGNETWORK(("%lx:Allocated slot for client (%ld).\n", slot, (int)h));
 
 				EXC_SET("assigning slot");
 				m_states[slot]->init(h, client_addr);
@@ -1558,7 +1558,7 @@ void NetworkIn::acceptConnection(void)
 	EXC_CATCH;
 }
 
-long NetworkIn::getStateSlot(long startFrom)
+int NetworkIn::getStateSlot(int startFrom)
 {
 	ADDTOCALLSTACK("NetworkIn::getStateSlot");
 
@@ -1566,12 +1566,12 @@ long NetworkIn::getStateSlot(long startFrom)
 		startFrom = m_lastGivenSlot + 1;
 
 	//	give ordered slot number, each time incrementing by 1 for easier log view
-	for ( long l = startFrom; l < m_stateCount; l++ )
+	for (int i = startFrom; i < m_stateCount; i++ )
 	{
-		if (m_states[l]->isInUse())
+		if (m_states[i]->isInUse())
 			continue;
 
-		return ( m_lastGivenSlot = l );
+		return ( m_lastGivenSlot = i );
 	}
 
 	//	we did not find empty slots till the end, try rescan from beginning
@@ -1588,11 +1588,11 @@ void NetworkIn::periodic(void)
 
 	EXC_TRY("periodic");
 	// check if max connecting limit is obeyed
-	long connectingMax = g_Cfg.m_iConnectingMax;
+	int connectingMax = g_Cfg.m_iConnectingMax;
 	if (connectingMax > 0)
 	{
 		EXC_SET("limiting connecting clients");
-		long connecting = 0;
+		int connecting = 0;
 
 		ClientIterator clients(this);
 		for (const CClient* client = clients.next(); client != NULL; client = clients.next())
@@ -1618,20 +1618,20 @@ void NetworkIn::periodic(void)
 	m_ips.tick();
 
 	// resize m_states to account for m_iClientsMax changes
-	long max = g_Cfg.m_iClientsMax;
+	int max = g_Cfg.m_iClientsMax;
 	if (max > m_stateCount)
 	{
 		EXC_SET("increasing network state size");
 		DEBUGNETWORK(("Increasing number of client slots from %ld to %ld\n", m_stateCount, max));
 
 		// reallocate state buffer to accomodate additional clients
-		long prevCount = m_stateCount;
+		int prevCount = m_stateCount;
 		NetState** prevStates = m_states;
 
 		NetState** newStates = new NetState*[max];
 		memcpy(newStates, prevStates, m_stateCount * sizeof(NetState*));
-		for (long l = prevCount; l < max; l++)
-			newStates[l] = new NetState(l);
+		for (int i = prevCount; i < max; i++)
+			newStates[i] = new NetState(i);
 		
 		m_states = newStates;
 		m_stateCount = max;
@@ -1648,10 +1648,10 @@ void NetworkIn::periodic(void)
 		defragSlots(max);
 
 		// delete excess states but leave array intact
-		for (long l = max; l < m_stateCount; l++)
+		for (int i = max; i < m_stateCount; i++)
 		{
-			delete m_states[l];
-			m_states[l] = NULL;
+			delete m_states[i];
+			m_states[i] = NULL;
 		}
 
 		m_stateCount = max;
@@ -1660,17 +1660,16 @@ void NetworkIn::periodic(void)
 	EXC_CATCH;
 }
 
-void NetworkIn::defragSlots(long fromSlot)
+void NetworkIn::defragSlots(int fromSlot)
 {
 	ADDTOCALLSTACK("NetworkIn::defragSlots");
 
-	long l = 0;
-	long nextUsedSlot = fromSlot - 1;
+	int nextUsedSlot = fromSlot - 1;
 
-	for (l = 0; l < m_stateCount; l++)
+	for (int i = 0; i < m_stateCount; i++)
 	{
 		// don't interfere with in-use states
-		if (m_states[l] != NULL && m_states[l]->isInUse())
+		if (m_states[i] != NULL && m_states[i]->isInUse())
 			continue;
 
 		// find next used slot
@@ -1689,16 +1688,16 @@ void NetworkIn::defragSlots(long fromSlot)
 		if (slotFound == false)
 			break;
 
-		if (nextUsedSlot != l)
+		if (nextUsedSlot != i)
 		{
-			DEBUGNETWORK(("Moving client '%lx' to slot '%lx'.\n", nextUsedSlot, l));
+			DEBUGNETWORK(("Moving client '%lx' to slot '%lx'.\n", nextUsedSlot, i));
 
 			// swap states
 			NetState* usedSlot = m_states[nextUsedSlot];
-			usedSlot->setId(l);
+			usedSlot->setId(i);
 
-			m_states[nextUsedSlot] = m_states[l];
-			m_states[l] = usedSlot;
+			m_states[nextUsedSlot] = m_states[i];
+			m_states[i] = usedSlot;
 		}
 	}
 }
@@ -1947,12 +1946,12 @@ void NetworkOut::proceedFlush(void)
 	}
 }
 
-int NetworkOut::proceedQueue(CClient* client, long priority)
+int NetworkOut::proceedQueue(CClient* client, int priority)
 {
 	ADDTOCALLSTACK("NetworkOut::proceedQueue");
 
-	long maxClientPackets = NETWORK_MAXPACKETS;
-	long maxClientLength = NETWORK_MAXPACKETLEN;
+	int maxClientPackets = NETWORK_MAXPACKETS;
+	int maxClientLength = NETWORK_MAXPACKETLEN;
 	CServTime time = CServTime::GetCurrentTime();
 
 	NetState* state = client->GetNetState();
@@ -1961,11 +1960,10 @@ int NetworkOut::proceedQueue(CClient* client, long priority)
 	if (state->isWriteClosed() || (state->m_outgoing.queue[priority].empty() && state->m_outgoing.currentTransaction == NULL))
 		return 0;
 
-	long length = 0;
+	int length = 0;
 
 	// send N transactions from the queue
-	int i = 0;
-	for (i = 0; i < maxClientPackets; i++)
+	for (int i = 0; i < maxClientPackets; i++)
 	{
 		// select next transaction
 		while (state->m_outgoing.currentTransaction == NULL)
@@ -2581,8 +2579,8 @@ void NetworkManager::acceptNewConnection(void)
 
 	DEBUGNETWORK(("Retrieving IP history for '%s'.\n", client_addr.GetAddrStr()));
 	HistoryIP& ip = m_ips.getHistoryForIP(client_addr);
-	long maxIp = g_Cfg.m_iConnectingMaxIP;
-	long climaxIp = g_Cfg.m_iClientsMaxIP;
+	int maxIp = g_Cfg.m_iConnectingMaxIP;
+	int climaxIp = g_Cfg.m_iClientsMaxIP;
 
 	DEBUGNETWORK(("Incoming connection from '%s' [blocked=%d, ttl=%ld, pings=%ld, connecting=%ld, connected=%ld]\n",
 		ip.m_ip.GetAddrStr(), ip.m_blocked, ip.m_ttl, ip.m_pings, ip.m_connecting, ip.m_connected));

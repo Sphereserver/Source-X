@@ -497,7 +497,7 @@ void CGrayMapBlock::Load( int bx, int by )
 		m_map = 0;
 	}
 
-	unsigned long ulBlockIndex = (bx*(g_MapList.GetY(m_map)/UO_BLOCK_SIZE) + by);
+	unsigned int ulBlockIndex = (bx*(g_MapList.GetY(m_map)/UO_BLOCK_SIZE) + by);
 
 	if ( !g_MapList.m_maps[m_map] )
 	{
@@ -539,7 +539,7 @@ void CGrayMapBlock::Load( int bx, int by )
 		CUOIndexRec index;
 		index.SetupIndex( ulBlockIndex * sizeof(CUOMapBlock), sizeof(CUOMapBlock));
 
-		unsigned long fileOffset = index.GetFileOffset();
+		unsigned int fileOffset = index.GetFileOffset();
 		if (g_Install.m_IsMapUopFormat[mapNumber])
 		{
 			for ( int i = 0; i < 256; i++ )
@@ -547,7 +547,7 @@ void CGrayMapBlock::Load( int bx, int by )
 				MapAddress pMapAddress = g_Install.m_UopMapAddress[mapNumber][i];
 				if (( ulBlockIndex <= pMapAddress.dwLastBlock ) && ( ulBlockIndex >= pMapAddress.dwFirstBlock ))
 				{
-					fileOffset = static_cast<unsigned long>(pMapAddress.qwAdress + ((ulBlockIndex - pMapAddress.dwFirstBlock)*196));
+					fileOffset = static_cast<unsigned int>(pMapAddress.qwAdress + ((ulBlockIndex - pMapAddress.dwFirstBlock)*196));
 					break;
 				}
 			}
@@ -559,18 +559,18 @@ void CGrayMapBlock::Load( int bx, int by )
 			//
 			// we must therefore determine which block of data contains the map information we need, and then add
 			// the extra number of bytes to our file offset
-			const unsigned long fileHeaderLength = 40; // length of overall file header
-			const unsigned long blockHeaderLength = 12; // length of the block header
-			const unsigned long firstDataEntryOffset = 3412; // offset of first actual data byte within a block
-			const unsigned long firstBlockDataEntryOffset = fileHeaderLength + blockHeaderLength + firstDataEntryOffset; // offset of first actual data byte for the first entry in the file
-			const unsigned long mapBlockLength = 802816; // maximum size of a block
+			const unsigned int fileHeaderLength = 40; // length of overall file header
+			const unsigned int blockHeaderLength = 12; // length of the block header
+			const unsigned int firstDataEntryOffset = 3412; // offset of first actual data byte within a block
+			const unsigned int firstBlockDataEntryOffset = fileHeaderLength + blockHeaderLength + firstDataEntryOffset; // offset of first actual data byte for the first entry in the file
+			const unsigned int mapBlockLength = 802816; // maximum size of a block
 
 			// note: to avoid writing code that parse the UOP format properly we are calculating a new offset based on the
 			// sizes of the blocks as-of client 7.0.24.0. the nature of the UOP format allows the block lengths to differ
 			// and for the data to be compressed, so we should watch out for this in the future (and if this happens we'll
 			// have to handle UOP data properly)
 
-			unsigned long block = fileOffset / mapBlockLength;
+			unsigned int block = fileOffset / mapBlockLength;
 			fileOffset += firstBlockDataEntryOffset + ((firstDataEntryOffset) * (block / 100)) + (blockHeaderLength * block);*/
 		}
 

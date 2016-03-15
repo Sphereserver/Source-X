@@ -393,7 +393,7 @@ public:
 	}
 
 	// Events.
-	long GetEventMask() const
+	int GetEventMask() const
 	{
 		return( (DWORD) SendMessage( EM_GETEVENTMASK ));
 	}

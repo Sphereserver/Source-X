@@ -3978,7 +3978,7 @@ bool CResource::Load( bool fResync )
 
 	if ( !fResync )
 	{
-		long total, used;
+		int total, used;
 		Triglist(total, used);
 		g_Serv.SysMessagef("Done loading scripts (%ld of %ld triggers used).\n", used, total);
 	}
@@ -4056,7 +4056,7 @@ bool CResource::Load( bool fResync )
 	return true;
 }
 
-LPCTSTR CResource::GetDefaultMsg(long lKeyNum)
+LPCTSTR CResource::GetDefaultMsg(int lKeyNum)
 {
 	ADDTOCALLSTACK("CResource::GetDefaultMsg");
 	if (( lKeyNum < 0 ) || ( lKeyNum >= DEFMSG_QTY ))
@@ -4070,10 +4070,10 @@ LPCTSTR CResource::GetDefaultMsg(long lKeyNum)
 LPCTSTR CResource::GetDefaultMsg(LPCTSTR pszKey)
 {
 	ADDTOCALLSTACK("CResource::GetDefaultMsg");
-	for ( long l = 0; l < DEFMSG_QTY; ++l )
+	for (int i = 0; i < DEFMSG_QTY; ++i )
 	{
-		if ( !strcmpi(pszKey, g_Exp.sm_szMsgNames[l]) )
-			return g_Exp.sm_szMessages[l];
+		if ( !strcmpi(pszKey, g_Exp.sm_szMsgNames[i]) )
+			return g_Exp.sm_szMessages[i];
 
 	}
 	g_Log.EventError("Defmessage \"%s\" non existent\n", pszKey);

@@ -13,7 +13,7 @@
 struct CScriptLineContext
 {
 public:
-	long m_lOffset;
+	int m_lOffset;
 	int m_iLineNum;		// for debug purposes if there is an error.
 public:
 	void Init();
@@ -44,8 +44,8 @@ public:
 	TCHAR * GetArgStr( bool * fQuoted );	// this could be a quoted string ?
 	TCHAR * GetArgStr();
 	long long GetArgLLVal();
-	long GetArgVal();
-	long GetArgRange();
+	int GetArgVal();
+	int GetArgRange();
 	DWORD GetArgFlag( DWORD dwStart, DWORD dwMask );
 
 public:
@@ -94,7 +94,7 @@ class CScript : public PhysicalScriptFile, public CScriptKeyAlloc
 {
 private:
 	bool m_fSectionHead;	// File Offset to current section header. [HEADER]
-	long m_lSectionData;	// File Offset to current section data, under section header.
+	int  m_lSectionData;	// File Offset to current section data, under section header.
 
 public:
 	static const char *m_sClassName;
@@ -102,7 +102,7 @@ public:
 protected:
 	void InitBase();
 
-	virtual DWORD Seek( long offset = 0, UINT origin = SEEK_SET );
+	virtual DWORD Seek( int offset = 0, UINT origin = SEEK_SET );
 
 public:
 	// text only functions:

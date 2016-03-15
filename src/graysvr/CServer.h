@@ -92,7 +92,7 @@ public:
 	void SysMessage( LPCTSTR pMsg ) const;
 	void PrintTelnet( LPCTSTR pszMsg ) const;
 	void PrintStr( LPCTSTR pMsg ) const;
-	int  PrintPercent( long iCount, long iTotal );
+	int  PrintPercent( int iCount, int iTotal );
 
 	virtual bool r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef );
 	virtual bool r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc = NULL );
@@ -108,7 +108,7 @@ public:
 
 public:
 	void ListClients( CTextConsole * pClient ) const;
-	void SetResyncPause(bool fPause, CTextConsole * pSrc, bool bMessage = false);
+	void SetResyncPause( bool fPause, CTextConsole * pSrc, bool bMessage = false );
 	bool CommandLine( int argc, TCHAR * argv[] );
 
 	LPCTSTR GetName() const { return( CServerDef::GetName()); }

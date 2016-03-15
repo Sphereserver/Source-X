@@ -523,7 +523,7 @@ int CChar::IsWeird() const
 }
 
 // Get the Z we should be at
-signed char CChar::GetFixZ( CPointMap pt, unsigned long wBlockFlags)
+signed char CChar::GetFixZ( CPointMap pt, unsigned int wBlockFlags)
 {
 	if (! wBlockFlags )
 		wBlockFlags = GetMoveBlockFlags();
@@ -3111,7 +3111,7 @@ do_default:
 			break;
 		case CHC_NIGHTSIGHT:
 			{
-				long fNightsight = s.GetArgVal();
+				int fNightsight = s.GetArgVal();
 				if (!fNightsight)	// Keep old 'switch' from 0 to 1 and viceversa behaviour while no args are given.
 					 fNightsight = !IsStatFlag(STATF_NightSight);
 				SetDefNum(s.GetKey(), fNightsight, false);
@@ -3675,7 +3675,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 
 		case CHV_NEWGOLD:
 			{
-				long amount = s.GetArgVal();
+				int amount = s.GetArgVal();
 				while ( amount > 0 )
 				{
 					CItem *pItem = CItem::CreateScript(ITEMID_GOLD_C1, this);

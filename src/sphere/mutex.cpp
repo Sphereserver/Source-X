@@ -159,7 +159,7 @@ AutoResetEvent::~AutoResetEvent()
 #endif
 }
 
-void AutoResetEvent::wait(unsigned long timeout)
+void AutoResetEvent::wait(unsigned int timeout)
 {
 	if (timeout == 0)
 	{
@@ -243,7 +243,7 @@ ManualResetEvent::~ManualResetEvent()
 #endif
 }
 
-void ManualResetEvent::wait(unsigned long timeout)
+void ManualResetEvent::wait(unsigned int timeout)
 {
 #ifdef _WIN32
 	WaitForSingleObjectEx(m_handle, timeout, FALSE);

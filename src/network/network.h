@@ -71,7 +71,7 @@ typedef std::deque<HistoryIP> IPHistoryList;
 class NetState
 {
 protected:
-	long m_id; // net id
+	int m_id; // net id
 	CGSocket m_socket; // socket
 	CClient* m_client; // client
 	CSocketAddress m_peerAddress; // client address
@@ -131,7 +131,7 @@ public:
 	BYTE m_sequence; // movement sequence
 
 public:
-	explicit NetState(long id);
+	explicit NetState(int id);
 	~NetState(void);
 
 private:
@@ -139,8 +139,8 @@ private:
 	NetState& operator=(const NetState& other);
 
 public:
-	long id(void) const { return m_id; }; // returns ID of the client
-	void setId(long id) { m_id = id; }; // changes ID of the client
+	int id(void) const { return m_id; }; // returns ID of the client
+	void setId(int id) { m_id = id; }; // changes ID of the client
 	void clear(void); // clears state
 	void clearQueues(void); // clears outgoing data queues
 
@@ -185,7 +185,7 @@ public:
 	bool isReportedLessVersion(DWORD version) const { return m_reportedVersion && m_reportedVersion < version; }; // check the maximum reported version
 	bool isClientLessVersion(DWORD version) const { return isCryptLessVersion(version) || isReportedLessVersion(version); } // check the maximum client version
 
-	void beginTransaction(long priority); // begin a transaction for grouping packets
+	void beginTransaction(int priority); // begin a transaction for grouping packets
 	void endTransaction(void); // end transaction
 	
 #ifndef _MTNETWORK
@@ -220,13 +220,13 @@ public:
 struct HistoryIP
 {
 	CSocketAddressIP m_ip;
-	long m_pings;
-	long m_connecting;
-	long m_connected;
+	int m_pings;
+	int m_connecting;
+	int m_connected;
 	bool m_blocked;
-	long m_ttl;
+	int m_ttl;
 	CServTime m_blockExpire;
-	long m_pingDecay;
+	int m_pingDecay;
 
 	void update(void);
 	bool checkPing(void); // IP is blocked -or- too many pings to it?
@@ -374,7 +374,7 @@ public:
 class NetworkIn : public AbstractSphereThread
 {
 private:
-	long m_lastGivenSlot;		// last slot taken by client
+	int m_lastGivenSlot;		// last slot taken by client
 	PacketManager m_packets;	// packet handlers
 	IPHistoryManager m_ips;		// ip history
 
@@ -383,7 +383,7 @@ private:
 
 protected:
 	NetState** m_states;	// client state pool
-	long m_stateCount;		// client state count
+	int m_stateCount;		// client state count
 	CGObList m_clients;		// current list of clients (CClient)
 
 public:
@@ -407,9 +407,9 @@ public:
 
 protected:
 	int checkForData(fd_set* storage); // executes network state request for new packets
-	long getStateSlot(long startFrom = -1); // finds suitable random slot for client to take
+	int getStateSlot(int startFrom = -1); // finds suitable random slot for client to take
 	void periodic(void); // performs periodic actions
-	void defragSlots(long fromSlot = 0); // moves used network slots to front
+	void defragSlots(int fromSlot = 0); // moves used network slots to front
 
 	friend class ClientIterator;
 	friend class SafeClientIterator;
@@ -449,7 +449,7 @@ public:
 	void flush(CClient* client); // forces immediate send of all packets
 
 protected:
-	int proceedQueue(CClient* client, long priority); // send next set of packets with the specified priority (returns number of packets sent)
+	int proceedQueue(CClient* client, int priority); // send next set of packets with the specified priority (returns number of packets sent)
 	int proceedQueueAsync(CClient* client); // send next set of asynchronous packets (returns number of packets sent, 1 max)
 	void proceedQueueBytes(CClient* client); // send next set of bytes
 	void proceedFlush(void); // flush data to pending sockets

@@ -1769,7 +1769,7 @@ bool CWorld::LoadWorld() // Load world from script
 	CGString sDataName;
 	sDataName.Format("%s" GRAY_FILE "data",	static_cast<LPCTSTR>(g_Cfg.m_sWorldBaseDir));
 
-	long iPrevSaveCount = m_iSaveCountID;
+	int iPrevSaveCount = m_iSaveCountID;
 	for (;;)
 	{
 		LoadFile(sDataName, false);

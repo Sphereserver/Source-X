@@ -281,7 +281,7 @@ VERFILE_TYPE CGrayInstall::OpenFiles( DWORD dwMask )
 								{
 									m_IsMapUopFormat[index] = true;
 
-									unsigned long dwHashLo, dwHashHi, dwCompressedSize, dwHeaderLenght, dwFilesInBlock, dwTotalFiles, dwLoop;
+									unsigned int dwHashLo, dwHashHi, dwCompressedSize, dwHeaderLenght, dwFilesInBlock, dwTotalFiles, dwLoop;
 									unsigned long long qwUOPPtr;
 
 									m_Maps[index].Seek( sizeof(DWORD)*3, SEEK_SET );

@@ -75,7 +75,7 @@ void TriglistAdd(const char *name)
     }
 }
 
-void Triglist(long &total, long &used)
+void Triglist(int &total, int &used)
 {
     total = used = 0;
     std::vector<T_TRIGGERS>::iterator it;

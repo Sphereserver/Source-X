@@ -20,9 +20,9 @@
 // Simple string hashing algorithm function
 // Founded by D. J. Bernstein
 // Original code found at: http://www.cse.yorku.ca/~oz/hash.html
-unsigned long HashString(LPCTSTR str, size_t length)
+unsigned int HashString(LPCTSTR str, size_t length)
 {
-    unsigned long hash = 5381;
+    unsigned int hash = 5381;
     for (size_t i = 0; i < length; i++)
 	    hash = ((hash << 5) + hash) + *str++;
 

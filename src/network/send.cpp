@@ -2103,7 +2103,8 @@ int PacketVendorBuyList::fillContainer(const CItemContainer* container, int conv
 	skip(1);
 	size_t count(0);
 
-	for (CItem* item = (bIsClientEnhanced ? container->GetContentHead() : container->GetContentTail()); item != NULL; item = (bIsClientEnhanced ? item->GetNext() : item->GetPrev()))
+	// Enhanced Client needs to receive the prices in reverse order
+	for ( CItem* item = (bIsClientEnhanced ? container->GetContentHead() : container->GetContentTail()); item != NULL; item = (bIsClientEnhanced ? item->GetNext() : item->GetPrev()) )
 	{
 		if (item->GetAmount() == 0)
 			continue;

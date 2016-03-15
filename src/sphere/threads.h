@@ -116,7 +116,7 @@ private:
 	spherethread_t m_handle;
 	unsigned int m_hangCheck;
 	Priority m_priority;
-	unsigned long m_tickPeriod;
+	unsigned int m_tickPeriod;
 	AutoResetEvent m_sleepEvent;
 
 	bool m_terminateRequested;
