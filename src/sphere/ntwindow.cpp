@@ -8,10 +8,11 @@
 #include "../common/cwindow.h"
 #include "../common/grayver.h"	// sphere version
 #include "../graysvr/CLog.h"
+#include "../graysvr/CObjBase.h"
 #include "../graysvr/CResource.h"
 #include "../graysvr/CServer.h"
 #include "../graysvr/graysvr.h"
-#include "../sphere/ProfileTask.h"
+#include "ProfileTask.h"
 #include "resource.h"
 #include <commctrl.h>	// NM_RCLICK
 

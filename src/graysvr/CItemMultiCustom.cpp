@@ -506,7 +506,7 @@ void CItemMultiCustom::AddStairs(CClient * pClientSrc, ITEMID_TYPE id, signed sh
 		if ( !pMultiItem->m_visible )
 			continue;
 
-		AddItem(NULL, pMultiItem->GetDispID(), x + pMultiItem->m_dx, y + pMultiItem->m_dy, static_cast<signed char>(z + pMultiItem->m_dz), iStairID);
+		AddItem(NULL, pMultiItem->GetDispID(), x + pMultiItem->m_dx, y + pMultiItem->m_dy, z + static_cast<signed char>(pMultiItem->m_dz), iStairID);
 	}
 	SendStructureTo(pClientSrc);
 }
@@ -605,7 +605,7 @@ void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, signed s
 				break;
 
 			// floor tiles the ground floor are replaced with dirt tiles
-			if ( ((*j)->m_item.m_wTileID != ITEMID_DIRT_TILE) && (*j)->m_isFloor && (GetPlane(*j) == 1) && (GetPlaneZ(GetPlane(*j)) == (*j)->m_item.m_dz) )
+			if ( ((*j)->m_item.m_wTileID != ITEMID_DIRT_TILE) && (*j)->m_isFloor && (GetPlane(*j) == 1) && (GetPlaneZ(GetPlane(*j)) == static_cast<signed char>((*j)->m_item.m_dz)) )
 				bReplaceDirt = true;
 
 			m_designWorking.m_vectorComponents.erase(j);
@@ -783,7 +783,7 @@ void CItemMultiCustom::SendStructureTo(CClient * pClientSrc)
 				else
 					index = (x * (iHeight - 1)) + y;
 
-				if (( GetPlaneZ(GetPlane(pComp)) != pComp->m_item.m_dz ) ||
+				if (( GetPlaneZ(GetPlane(pComp)) != static_cast<signed char>(pComp->m_item.m_dz) ) ||
 					( pItemBase->GetHeight() == 0 || pComp->m_isFloor ) ||
 					( x < 0 || y < 0 || x >= iWidth || y >= iHeight ) ||
 					( index < 0 || index >= PLANEDATA_BUFFER ))
@@ -818,7 +818,7 @@ void CItemMultiCustom::SendStructureTo(CClient * pClientSrc)
 				continue;
 
 			// stair items can be sent in any order
-			cmd->writeStairData(pComp->m_item.GetDispID(), pComp->m_item.m_dx, pComp->m_item.m_dy, pComp->m_item.m_dz);
+			cmd->writeStairData(pComp->m_item.GetDispID(), pComp->m_item.m_dx, pComp->m_item.m_dy, static_cast<signed char>(pComp->m_item.m_dz));
 		}
 	}
 
@@ -1284,7 +1284,7 @@ void CItemMultiCustom::r_Write( CScript & s )
 	for ( ComponentsContainer::iterator i = m_designMain.m_vectorComponents.begin(); i != m_designMain.m_vectorComponents.end(); ++i )
 	{
 		comp = *i;
-		s.WriteKeyFormat("COMP", "%d,%d,%d,%d,%d", comp->m_item.GetDispID(), comp->m_item.m_dx, comp->m_item.m_dy, comp->m_item.m_dz, comp->m_isStair);
+		s.WriteKeyFormat("COMP", "%d,%d,%d,%d,%d", comp->m_item.GetDispID(), comp->m_item.m_dx, comp->m_item.m_dy, static_cast<signed char>(comp->m_item.m_dz), comp->m_isStair);
 	}
 
 	if ( m_designMain.m_iRevision )

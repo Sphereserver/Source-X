@@ -9,6 +9,7 @@
 #include "graymul.h"
 #include "../graysvr/CBase.h"
 #include "../graysvr/CLog.h"
+#include "../graysvr/CObjBase.h"
 #include "../graysvr/CResource.h"
 #include "../graysvr/CWorld.h"
 #include "../sphere/threads.h"

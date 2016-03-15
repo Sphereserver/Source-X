@@ -1,5 +1,6 @@
 
 #include <cmath>
+#include "../graysvr/CObjBase.h"
 #include "../graysvr/CResource.h"
 #include "../graysvr/CWorld.h"
 #include "CException.h"

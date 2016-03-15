@@ -2905,7 +2905,7 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 						}
 					}
 
-					CGrayUID uid = static_cast<CGrayUID>(pItem->GetDefNum("CRAFTEDBY"));
+					CGrayUID uid = static_cast<CGrayUID>(static_cast<DWORD>(pItem->GetDefNum("CRAFTEDBY")));
 					CChar *pCraftsman = uid.CharFind();
 					if ( pCraftsman )
 					{

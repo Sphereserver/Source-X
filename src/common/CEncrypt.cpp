@@ -472,7 +472,7 @@ char* CCrypt::WriteClientVerString( DWORD iClientVersion, char * pStr )
 		char iPatch = iClientVersion % 100;
 		if ( iPatch )
 		{
-			pStr[iVer++] = iPatch + 'a' - 1;
+			pStr[iVer++] = static_cast<TCHAR>(iPatch + 'a' - 1);
 			pStr[iVer] = '\0';
 		}
 	}

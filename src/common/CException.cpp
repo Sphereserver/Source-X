@@ -1,5 +1,6 @@
 
 #include "../graysvr/CLog.h"
+#include "../graysvr/CObjBase.h"
 #include "../graysvr/CServer.h"
 #include "../graysvr/CWorld.h"
 #include "CException.h"

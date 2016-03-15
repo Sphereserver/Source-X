@@ -4,6 +4,7 @@
 #include "../common/grayver.h"
 #include "../sphere/threads.h"
 #include "CLog.h"
+#include "CObjBase.h"
 #include "CResource.h"
 #include "CServRef.h"
 #include "CServTime.h"

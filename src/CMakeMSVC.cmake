@@ -1,6 +1,6 @@
 # Here it is setting the Visual Studio warning level to 4 and forcint MultiProccessor compilation
-SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4 -MP")
-SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W4 -MP")
+SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4 -MP /wd4127 /wd4131 /wd4310 /wd4996")
+SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W4 -MP /wd4127 /wd4131 /wd4310 /wd4996")
 TARGET_COMPILE_DEFINITIONS (spheresvr
 # Extra defs
         PUBLIC _MTNETWORK
@@ -13,6 +13,8 @@ TARGET_COMPILE_DEFINITIONS (spheresvr
 # Enable advanced exceptions catching. Consumes some more resources, but is very useful for debug
 # on a running environment. Also it makes sphere more stable since exceptions are local.
 		PUBLIC _EXCEPTIONS_DEBUG
+# Removing WINSOCK warnings until the code gets updated or reviewed.		
+		PUBLIC _WINSOCK_DEPRECATED_NO_WARNINGS
 )
 TARGET_COMPILE_DEFINITIONS (spheresvrNightly
 # Extra defs
@@ -22,7 +24,8 @@ TARGET_COMPILE_DEFINITIONS (spheresvrNightly
 # Defines
         PUBLIC _NIGHTLYBUILD
         PUBLIC _WIN32
-        PUBLIC _CRT_SECURE_NO_WARNINGS
+        PUBLIC _CRT_SECURE_NO_WARNINGS	
+		PUBLIC _WINSOCK_DEPRECATED_NO_WARNINGS
 )
 SET_TARGET_PROPERTIES (spheresvr
         PROPERTIES

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "../common/graymul.h"
+#include "../common/crect.h"
 #include "../common/CRegion.h"
 #include "packet.h"
 #include "network.h"
@@ -13,7 +14,6 @@
 
 class CItemMap;
 class CMenuItem;
-class CPointMap;
 class CObjBaseTemplate;
 class CSpellDef;
 class CItemContainer;

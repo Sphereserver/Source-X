@@ -60,7 +60,7 @@
 		if ( g_osInfo.dwOSVersionInfoSize != sizeof(g_osInfo) )
 		{
 			g_osInfo.dwOSVersionInfoSize = sizeof(g_osInfo);
-			if ( ! GetVersionEx(&g_osInfo))
+			if ( ! GetVersionExA(&g_osInfo))
 			{
 				// must be an old version of windows. win95 or win31 ?
 				memset( &g_osInfo, 0, sizeof(g_osInfo));

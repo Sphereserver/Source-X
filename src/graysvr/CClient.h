@@ -23,8 +23,8 @@
 #include "../network/network.h"
 #include "../network/receive.h"
 #include "../network/send.h"
+
 class CItemMap;
-class VendorItem;
 
 enum CV_TYPE
 {
@@ -85,7 +85,7 @@ private:
 
 //////////////////
 
-struct CMenuItem 	// describe a menu item.
+class CMenuItem 	// describe a menu item.
 {
 public:
 	WORD m_id;			// ITEMID_TYPE in base set.

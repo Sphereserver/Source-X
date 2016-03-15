@@ -5,6 +5,7 @@
 #include "../common/CException.h"
 #include "../common/grayver.h"
 #include "../graysvr/CLog.h"
+#include "../graysvr/CObjBase.h"
 #include "../graysvr/CServer.h"
 #include "../graysvr/graysvr.h"
 #include "ntservice.h"

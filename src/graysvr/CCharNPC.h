@@ -11,7 +11,7 @@ enum CNC_TYPE
 	CNC_QTY
 };
 
-struct CCharNPC
+class CCharNPC
 {
 	// This is basically the unique "brains" for any character.
 public:

@@ -1,4 +1,5 @@
 
+#include "CObjBase.h"
 #include "CServTime.h"
 #include "CWorld.h"
 
