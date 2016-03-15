@@ -533,6 +533,7 @@ CContainer::~CContainer()
 
 bool CContainer::r_WriteValContainer( LPCTSTR pszKey, CGString &sVal, CTextConsole *pSrc )
 {
+	UNREFERENCED_PARAMETER(pSrc);
 	ADDTOCALLSTACK("CContainer::r_WriteValContainer");
 	EXC_TRY("WriteVal");
 

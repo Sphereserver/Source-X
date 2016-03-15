@@ -3767,6 +3767,7 @@ size_t NetworkOutput::processPacketQueue(NetState* state, unsigned int priority)
 	ASSERT(client != NULL);
 
 	CServTime time = CServTime::GetCurrentTime();
+	UNREFERENCED_PARAMETER(time);
 
 	size_t maxPacketsToProcess = NETWORK_MAXPACKETS;
 	size_t maxLengthToProcess = NETWORK_MAXPACKETLEN;

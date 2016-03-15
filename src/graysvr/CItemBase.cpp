@@ -1001,6 +1001,7 @@ LPCTSTR const CItemBase::sm_szLoadKeys[IBC_QTY+1] =
 
 bool CItemBase::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pChar )
 {
+	UNREFERENCED_PARAMETER(pChar);
 	ADDTOCALLSTACK("CItemBase::r_WriteVal");
 	EXC_TRY("WriteVal");
 	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))

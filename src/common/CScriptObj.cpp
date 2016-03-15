@@ -2890,6 +2890,7 @@ bool CFileObj::r_LoadVal( CScript & s )
 
 bool CFileObj::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc )
 {
+	UNREFERENCED_PARAMETER(pSrc);
 	ADDTOCALLSTACK("CFileObj::r_WriteVal");
 	EXC_TRY("WriteVal");
 	ASSERT(pszKey != NULL);
@@ -3124,6 +3125,7 @@ bool CFileObj::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc )
 
 bool CFileObj::r_Verb( CScript & s, CTextConsole * pSrc )
 {
+	UNREFERENCED_PARAMETER(pSrc);
 	ADDTOCALLSTACK("CFileObj::r_Verb");
 	EXC_TRY("Verb");
 	ASSERT(pSrc);

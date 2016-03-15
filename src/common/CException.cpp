@@ -269,6 +269,7 @@ void SetExceptionTranslator()
 
 	void _cdecl Signal_Children(int sig = 0)
 	{
+		UNREFERENCED_PARAMETER(sig);
 		while (waitpid((pid_t)(-1), 0, WNOHANG) > 0) {}
 	}
 #endif
