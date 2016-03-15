@@ -682,7 +682,7 @@ int CItem::IsWeird() const
 	return( ( ptCont == NULL ) ? 0x2106 : ptCont->IsWeird() );
 }
 
-signed char CItem::GetFixZ( CPointMap pt, unsigned int wBlockFlags )
+signed char CItem::GetFixZ( CPointMap pt, DWORD wBlockFlags )
 {
 	height_t zHeight = CItemBase::GetItemHeight( GetDispID(), wBlockFlags );
 	CGrayMapBlockState block( wBlockFlags, pt.m_z, pt.m_z + zHeight, pt.m_z + 2, zHeight );

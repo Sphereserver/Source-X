@@ -49,9 +49,9 @@
 #undef ULONGLONG
 #undef LONG
 
-#define BYTE 		unsigned char	// 8 bits
-#define WORD 		unsigned short	// 16 bits
-#define DWORD		unsigned int	// 32 bits
+#define BYTE 		uint8_t		// 8 bits
+#define WORD 		uint16_t	// 16 bits
+#define DWORD		uint32_t	// 32 bits
 #define UINT		unsigned int
 #define LONGLONG	long long 	// this must be 64bit
 #define ULONGLONG	unsigned long long
