@@ -1,5 +1,7 @@
 
+#include "../graysvr/CLog.h"
 #include "../graysvr/CServer.h"
+#include "../graysvr/CWorld.h"
 #include "CException.h"
 
 #ifdef _WIN32

@@ -2,6 +2,8 @@
 #define _INC_UNIXTERMINAL_H_
 #ifndef _WIN32
 
+#include "../common/common.h"
+
 #ifdef _USECURSES
 #include <curses.h>
 #pragma comment(lib, "ncurses")

@@ -5,6 +5,7 @@
 #include <list>
 
 #include "../common/common.h"
+#include "../common/graycom.h"
 //#include "../graysvr/graysvr.h" Removed to test.
 
 class NetState;

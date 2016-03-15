@@ -1164,7 +1164,7 @@ void CSector::OnTick(int iPulseCount)
 		EXC_DEBUGSUB_END;
 #else
 		}
-#ifndef _DEBUG
+#ifdef _DEBUG
 		catch ( const CGrayError& e )
 		{
 			PAUSECALLSTACK;

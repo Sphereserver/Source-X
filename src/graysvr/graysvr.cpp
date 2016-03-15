@@ -14,7 +14,7 @@
 #endif
 
 #include "../common/CException.h"
-#include "../common/cgrayinst.h"
+#include "../common/CGrayInst.h"
 #include "../common/grayver.h"	// sphere version
 #include "../network/network.h" // network thread
 #include "../network/PingServer.h"

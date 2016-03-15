@@ -200,6 +200,7 @@ public:
 	#define EXC_ADD_SCRIPT
 	#define EXC_ADD_SCRIPTSRC
 	#define EXC_ADD_KEYRET(a)
+	#define EXC_CATCH_EXCEPTION(a)
 
 #endif
 

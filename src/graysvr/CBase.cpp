@@ -77,6 +77,7 @@ void CBaseBaseDef::UnLink()
 
 bool CBaseBaseDef::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
 {
+	UNREFERENCED_PARAMETER(pSrc);
 	ADDTOCALLSTACK("CBaseBaseDef::r_WriteVal");
 	EXC_TRY("WriteVal");
 	bool	fZero	= false;

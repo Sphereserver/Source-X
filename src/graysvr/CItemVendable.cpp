@@ -1,5 +1,5 @@
 
-#include "../common/CEXception.h"
+#include "../common/CException.h"
 #include "CItemVendable.h"
 
 CItemVendable::CItemVendable( ITEMID_TYPE id, CItemBase * pDef ) : CItem( id, pDef )

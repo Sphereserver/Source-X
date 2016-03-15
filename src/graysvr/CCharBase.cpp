@@ -136,6 +136,7 @@ LPCTSTR const CCharBase::sm_szLoadKeys[CBC_QTY+1] =
 
 bool CCharBase::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
 {
+	UNREFERENCED_PARAMETER(pSrc);
 	ADDTOCALLSTACK("CCharBase::r_WriteVal");
 	EXC_TRY("WriteVal");
 	switch ( FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))

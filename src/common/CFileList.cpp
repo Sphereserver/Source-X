@@ -9,6 +9,7 @@
 #else	// LINUX
 	#include <dirent.h>
 #endif
+#include "../sphere/threads.h"
 #include "CFileList.h"
 #include "graycom.h"
 
