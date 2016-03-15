@@ -2,8 +2,8 @@
 #include "../common/CEXception.h"
 #include "../common/graycom.h"
 #include "../sphere/ProfileTask.h"
+#include "../sphere/UnixTerminal.h"
 #include "CLog.h"
-#include "UnixTerminal.h"
 #include "CServer.h"
 
 ///////////////////////////////////////////////////////////////
