@@ -4,9 +4,9 @@
 #endif
 
 #ifdef _WIN32
-	#include "ntservice.h"	// g_Service
+	#include "../sphere/ntservice.h"	// g_Service
 #else
-	#include "UnixTerminal.h"
+	#include "../sphere/UnixTerminal.h"
 #endif
 
 #if defined(_WIN32) && !defined(_DEBUG)

@@ -204,8 +204,8 @@ network/receive.cpp
 network/receive.h
 network/send.cpp
 network/send.h
-graysvr/PingServer.cpp
-graysvr/PingServer.h
+network/PingServer.cpp
+network/PingServer.h
 )
 SOURCE_GROUP (Network FILES ${network_SRCS})
 
@@ -226,12 +226,12 @@ sphere/strings.cpp
 sphere/strings.h
 sphere/threads.cpp
 sphere/threads.h
-graysvr/ntservice.cpp
-graysvr/ntservice.h
-graysvr/ntwindow.cpp
-graysvr/UnixTerminal.cpp
-graysvr/UnixTerminal.h
-graysvr/GraySvr.rc
+sphere/ntservice.cpp
+sphere/ntservice.h
+sphere/ntwindow.cpp
+sphere/UnixTerminal.cpp
+sphere/UnixTerminal.h
+sphere/GraySvr.rc
 )
 SOURCE_GROUP (Sphere FILES ${sphere_SRCS})
 
