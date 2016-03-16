@@ -76,9 +76,15 @@ Typedef'ed data storage elements. Add any algorithm specific
 parameters at the bottom of the structs as appropriate.
 */
 
-typedef unsigned char BYTE;
-typedef unsigned long DWORD;
-typedef DWORD fullSbox[4][256];
+// temporary workaround, when we will move to c++11 and set all our data types to a new header we won't need this anymore
+#undef BYTE
+#undef DWORD
+
+//typedef unsigned char BYTE;
+//typedef unsigned int  DWORD;
+#define	BYTE	unsigned char
+#define	DWORD	unsigned long
+typedef DWORD	fullSbox[4][256];
 
 /* The structure for key information */
 typedef struct
