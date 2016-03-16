@@ -3,7 +3,7 @@
 #pragma once
 
 #include "../common/graymul.h"
-#include "../common/crect.h"
+#include "../common/CRect.h"
 #include "../common/CRegion.h"
 #include "packet.h"
 #include "network.h"
