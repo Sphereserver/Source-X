@@ -143,7 +143,7 @@ void CItemSpawn::GenerateItem(CResourceDef *pDef)
 	if ( pItem == NULL )
 		return;
 
-	WORD iAmountPile = static_cast<WORD>(minimum(USHRT_MAX,m_itSpawnItem.m_pile));
+	WORD iAmountPile = static_cast<WORD>(minimum(UINT16_MAX,m_itSpawnItem.m_pile));
 	if ( iAmountPile > 1 )
 	{
 		CItemBase *pItemDef = pItem->Item_GetDef();

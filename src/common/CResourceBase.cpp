@@ -1751,7 +1751,7 @@ bool CResourceQty::Load(LPCTSTR &pszCmds)
 	const char *orig = pszCmds;
 	GETNONWHITESPACE(pszCmds);	// Skip leading spaces.
 
-	m_iQty = LLONG_MIN;
+	m_iQty = INT64_MIN;
 	if ( !IsAlpha(*pszCmds) ) // might be { or .
 	{
 		m_iQty = Exp_GetVal(pszCmds);
@@ -1772,7 +1772,7 @@ bool CResourceQty::Load(LPCTSTR &pszCmds)
 	}
 
 	GETNONWHITESPACE(pszCmds);
-	if ( m_iQty == LLONG_MIN )	// trailing qty?
+	if ( m_iQty == INT64_MIN )	// trailing qty?
 	{
 		if ( *pszCmds == '\0' || *pszCmds == ',' )
 			m_iQty = 1;

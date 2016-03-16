@@ -40,7 +40,7 @@ CCharNPC::CCharNPC( CChar * pChar, NPCBRAIN_TYPE NPCBrain )
 {
 	UNREFERENCED_PARAMETER(pChar);
 	m_Brain = NPCBrain;
-	m_Home_Dist_Wander = SHRT_MAX;	// as far as i want.
+	m_Home_Dist_Wander = INT16_MAX;	// as far as i want.
 	m_Act_Motivation = 0;
 	m_SpeechHue = HUE_TEXT_DEF;
 	m_bonded = 0;
@@ -242,7 +242,7 @@ void CCharNPC::r_WriteChar( CChar * pChar, CScript & s )
 	// This says we are an NPC.
 	s.WriteKeyVal("NPC", m_Brain );
 
-	if ( m_Home_Dist_Wander < SHRT_MAX )
+	if ( m_Home_Dist_Wander < INT16_MAX )
 		s.WriteKeyVal( "HOMEDIST", m_Home_Dist_Wander );
 	if ( m_Act_Motivation )
 		s.WriteKeyHex( "ACTPRI", m_Act_Motivation );

@@ -876,7 +876,7 @@ public:
 	int MatchNext(CContext * pContext) const;
 
 public:
-	CGreedyElxT(ElxInterface * pelx, int nmin = 0, int nmax = INT_MAX);
+	CGreedyElxT(ElxInterface * pelx, int nmin = 0, int nmax = INT32_MAX);
 
 protected:
 	int MatchVart    (CContext * pContext) const;
@@ -1026,7 +1026,7 @@ public:
 	int MatchNext(CContext * pContext) const;
 
 public:
-	CPossessiveElxT(ElxInterface * pelx, int nmin = 0, int nmax = INT_MAX);
+	CPossessiveElxT(ElxInterface * pelx, int nmin = 0, int nmax = INT32_MAX);
 };
 
 typedef CPossessiveElxT <0> CPossessiveElx;
@@ -1120,7 +1120,7 @@ public:
 	int MatchNext(CContext * pContext) const;
 
 public:
-	CReluctantElxT(ElxInterface * pelx, int nmin = 0, int nmax = INT_MAX);
+	CReluctantElxT(ElxInterface * pelx, int nmin = 0, int nmax = INT32_MAX);
 
 protected:
 	int MatchVart    (CContext * pContext) const;
@@ -2308,7 +2308,7 @@ template <class CHART> ElxInterface * CBuilderT <CHART> :: BuildRepeat(int & fla
 
 			// check
 			if(red  <=  1 ) nMax = nMin;
-			if(red  ==  2 ) nMax = INT_MAX;
+			if(red  ==  2 ) nMax = INT32_MAX;
 			if(nMax < nMin) nMax = nMin;
 		}
 		break;
@@ -2323,7 +2323,7 @@ template <class CHART> ElxInterface * CBuilderT <CHART> :: BuildRepeat(int & fla
 
 	case RCHART('*'):
 		nMin = 0;
-		nMax = INT_MAX;
+		nMax = INT32_MAX;
 
 		// skip '*'
 		MoveNext();
@@ -2331,7 +2331,7 @@ template <class CHART> ElxInterface * CBuilderT <CHART> :: BuildRepeat(int & fla
 
 	case RCHART('+'):
 		nMin = 1;
-		nMax = INT_MAX;
+		nMax = INT32_MAX;
 
 		// skip '+'
 		MoveNext();

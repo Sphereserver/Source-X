@@ -6,7 +6,6 @@
 #include "CTextConsole.h"
 #include "graycom.h"
 #include "ListDefContMap.h"
-#include <limits>
 
 /***************************************************************************
 *

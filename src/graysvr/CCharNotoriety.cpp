@@ -454,7 +454,7 @@ void CChar::Noto_Karma( int iKarmaChange, int iBottom, bool bMessage )
 	}
 	else
 	{
-		if (iBottom == INT_MIN)
+		if (iBottom == INT32_MIN)
 			iBottom = g_Cfg.m_iMinKarma;
 		if ( iKarma + iKarmaChange < iBottom )
 			iKarmaChange = iBottom - iKarma;

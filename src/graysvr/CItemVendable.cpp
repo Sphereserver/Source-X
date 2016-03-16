@@ -196,8 +196,8 @@ DWORD CItemVendable::GetVendorPrice( int iConvertFactor )
 	}
 
 	lPrice += IMULDIV(lPrice, maximum(iConvertFactor, -100), 100);
-	if ( lPrice > ULONG_MAX )
-		return ULONG_MAX;
+	if ( lPrice > UINT32_MAX )
+		return UINT32_MAX;
 	
 	return lPrice;
 }

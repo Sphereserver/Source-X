@@ -12,7 +12,7 @@ CSectorEnviron::CSectorEnviron()
 void CSectorEnviron::SetInvalid()
 {
     // Force a resync of all this. we changed location by teleport etc.
-    m_Light = UCHAR_MAX;	// set based on time later.
+    m_Light = UINT8_MAX;	// set based on time later.
     m_Season = SEASON_QTY;
     m_Weather = WEATHER_DEFAULT;
 }

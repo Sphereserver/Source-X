@@ -81,8 +81,8 @@ public:
 	void EndCustomize( bool bForce = false );
 	void SwitchToLevel( CClient * pClientSrc, unsigned char iLevel );
 	void CommitChanges( CClient * pClientSrc = NULL );
-	void AddItem( CClient * pClientSrc, ITEMID_TYPE id, signed short x, signed short y, signed char z = SCHAR_MIN, short iStairID = 0 );
-	void AddStairs( CClient * pClientSrc, ITEMID_TYPE id, signed short x, signed short y, signed char z = SCHAR_MIN, short iStairID = -1 );
+	void AddItem( CClient * pClientSrc, ITEMID_TYPE id, signed short x, signed short y, signed char z = INT8_MIN, short iStairID = 0 );
+	void AddStairs( CClient * pClientSrc, ITEMID_TYPE id, signed short x, signed short y, signed char z = INT8_MIN, short iStairID = -1 );
 	void AddRoof( CClient * pClientSrc, ITEMID_TYPE id, signed short x, signed short y, signed char z );
 	void RemoveItem( CClient * pClientSrc, ITEMID_TYPE id, signed short x, signed short y, signed char z );
 	bool RemoveStairs( Component * pStairComponent );

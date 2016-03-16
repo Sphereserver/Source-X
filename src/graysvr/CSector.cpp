@@ -81,10 +81,10 @@ bool CSector::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
 
 	static const CValStr sm_ComplexityTitles[] =
 	{
-		{ "HIGH", INT_MIN },	// speech can be very complex if low char count
+		{ "HIGH", INT32_MIN },	// speech can be very complex if low char count
 		{ "MEDIUM", 5 },
 		{ "LOW", 10 },
-		{ NULL, INT_MAX }
+		{ NULL, INT32_MAX }
 	};
 
 	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))

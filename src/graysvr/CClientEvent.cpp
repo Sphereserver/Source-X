@@ -650,7 +650,7 @@ void CClient::Event_Skill_Use( SKILL_TYPE skill ) // Skill is clicked on the ski
 			return;
 
 		case SKILL_TRACKING:
-			Cmd_Skill_Tracking(UINT_MAX, false);
+			Cmd_Skill_Tracking(UINT32_MAX, false);
 			break;
 
 		case SKILL_CARTOGRAPHY:
@@ -1028,7 +1028,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t it
 	if (m_pChar == NULL || pVendor == NULL || items == NULL || itemCount <= 0)
 		return;
 
-#define MAX_COST (INT_MAX / 2)
+#define MAX_COST (INT32_MAX / 2)
 	bool bPlayerVendor = pVendor->IsStatFlag(STATF_Pet);
 	pVendor->GetBank(LAYER_VENDOR_STOCK);
 	CItemContainer* pPack = m_pChar->GetPackSafe();

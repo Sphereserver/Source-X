@@ -667,9 +667,9 @@ RealType CVarFloat::GetRandVal( RealType dQty )
 	ADDTOCALLSTACK("CVarFloat::GetRandVal");
 	if ( dQty <= 0 )
 		return( 0 );
-	if ( dQty >= INT_MAX )
+	if ( dQty >= INT32_MAX )
 	{
-		return( static_cast<RealType>(IMULDIV( g_World.m_Rand.randDblExc(), dQty, INT_MAX)) );
+		return( static_cast<RealType>(IMULDIV( g_World.m_Rand.randDblExc(), dQty, INT32_MAX)) );
 	}
 	return g_World.m_Rand.randDblExc(dQty);
 }

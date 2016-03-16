@@ -139,9 +139,9 @@ int CPointBase::GetDist( const CPointBase & pt ) const // Distance between point
 	ADDTOCALLSTACK("CPointBase::GetDist");
 	// Get the basic 2d distance.
 	if ( !pt.IsValidPoint() )
-		return SHRT_MAX;
+		return INT16_MAX;
 	if ( pt.m_map != m_map )
-		return SHRT_MAX;
+		return INT16_MAX;
 
 	return GetDistBase(pt);
 }
@@ -157,9 +157,9 @@ int CPointBase::GetDistSight( const CPointBase & pt ) const // Distance between 
 {
 	ADDTOCALLSTACK("CPointBase::GetDistSight");
 	if ( !pt.IsValidPoint() )
-		return SHRT_MAX;
+		return INT16_MAX;
 	if ( pt.m_map != m_map )
-		return SHRT_MAX;
+		return INT16_MAX;
 
 	return GetDistSightBase(pt);
 }

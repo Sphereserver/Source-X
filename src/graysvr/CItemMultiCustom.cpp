@@ -420,7 +420,7 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, signed shor
 			}
 		}
 
-		if ( z == SCHAR_MIN )
+		if ( z == INT8_MIN )
 		{
 			// determine z level based on player's position
 			if ( pCharSrc != NULL )
@@ -429,7 +429,7 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, signed shor
 				z = 0;
 		}
 
-		Component * pPrevComponents[SCHAR_MAX];
+		Component * pPrevComponents[INT8_MAX];
 		size_t iCount = GetComponentsAt(x, y, z, pPrevComponents, &m_designWorking);
 		if ( iCount > 0 )
 		{
@@ -485,7 +485,7 @@ void CItemMultiCustom::AddStairs(CClient * pClientSrc, ITEMID_TYPE id, signed sh
 		return;
 	}
 
-	if ( z == SCHAR_MIN )
+	if ( z == INT8_MIN )
 	{
 		if ( pCharSrc != NULL )
 			z = GetPlaneZ(GetPlane(pCharSrc->GetTopZ() - GetTopZ()));
@@ -585,7 +585,7 @@ void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, signed s
 		}
 	}
 
-	Component * pComponents[SCHAR_MAX];
+	Component * pComponents[INT8_MAX];
 	size_t iCount = GetComponentsAt(x, y, z, pComponents, &m_designWorking);
 	if ( iCount <= 0 )
 		return;
@@ -975,7 +975,7 @@ size_t CItemMultiCustom::GetComponentsAt(signed short x, signed short y, signed 
 		if ( pComponent->m_item.m_dx != x || pComponent->m_item.m_dy != y )
 			continue;
 
-		if ( z != SCHAR_MIN && GetPlane(static_cast<signed char>(pComponent->m_item.m_dz)) != GetPlane(z) )
+		if ( z != INT8_MIN && GetPlane(static_cast<signed char>(pComponent->m_item.m_dz)) != GetPlane(z) )
 			continue;
 
 		pComponents[count++] = pComponent;

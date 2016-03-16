@@ -2,6 +2,7 @@
 // Define all the data passed from Client to Server.
 
 #ifndef _INC_GRAYPROTO_H
+
 #define _INC_GRAYPROTO_H
 #pragma once
 
@@ -13,18 +14,18 @@
 
 // All these structures must be BYTE packed.
 #if defined _WIN32 && (!__MINGW32__)
-// Microsoft dependant pragma
-#pragma pack(1)
-#define PACK_NEEDED
+	// Microsoft dependant pragma
+	#pragma pack(1)
+	#define PACK_NEEDED
 #else
-// GCC based compiler you can add:
-#define PACK_NEEDED __attribute__ ((packed))
+	// GCC based compiler you can add:
+	#define PACK_NEEDED __attribute__ ((packed))
 #endif
 
 #ifdef _WIN32
-//#include "os_windows.h"
+	//#include "os_windows.h"
 #else
-#include <netinet/in.h>
+	#include <netinet/in.h>
 #endif
 
 // Pack/unpack in network order.

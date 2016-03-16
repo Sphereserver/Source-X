@@ -215,7 +215,7 @@ void CChar::AddGoldToPack( int iAmount, CItemContainer * pPack )
 	{
 		CItem * pGold = CItem::CreateScript( ITEMID_GOLD_C1, this );
 
-		int iGoldStack = minimum( iAmount, USHRT_MAX );
+		int iGoldStack = minimum( iAmount, UINT16_MAX );
 		pGold->SetAmount( iGoldStack );
 
 		Sound( pGold->GetDropSound( pPack ));
@@ -3566,7 +3566,7 @@ bool CChar::SetPrivLevel(CTextConsole * pSrc, LPCTSTR pszFlags)
 	PLEVEL_TYPE PrivLevel = CAccount::GetPrivLevelText(pszFlags);
 
 	// Remove Previous GM Robe
-	ContentConsume(RESOURCE_ID(RES_ITEMDEF, ITEMID_GM_ROBE), INT_MAX);
+	ContentConsume(RESOURCE_ID(RES_ITEMDEF, ITEMID_GM_ROBE), INT32_MAX);
 
 	if ( PrivLevel >= PLEVEL_Counsel )
 	{

@@ -711,7 +711,7 @@ bool CWebPageDef::ServPagePost( CClient * pClient, LPCTSTR pszURLArgs, TCHAR * p
 	// C or CHK or CHECK = the check boxes
 
 	CDialogResponseArgs resp;
-	DWORD dwButtonID = ULONG_MAX;
+	DWORD dwButtonID = UINT32_MAX;
 	for ( size_t i = 0; i < iArgs; i++ )
 	{
 		TCHAR * pszNum = ppArgs[i];

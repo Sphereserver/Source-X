@@ -1394,7 +1394,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 				// IMPFLAGS_ITEMS
 				if ( ! g_World.Export( Arg_ppCmd[0], pSrc->GetChar(),
 					(Arg_Qty >= 2) ? static_cast<WORD>(ATOI(Arg_ppCmd[1])) : IMPFLAGS_ITEMS,
-					(Arg_Qty >= 3)? ATOI(Arg_ppCmd[2]) : SHRT_MAX ))
+					(Arg_Qty >= 3)? ATOI(Arg_ppCmd[2]) : INT16_MAX ))
 				{
 					pSrc->SysMessage( "Export failed\n" );
 				}
@@ -1443,7 +1443,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 				// IMPFLAGS_ITEMS
 				if ( ! g_World.Import( Arg_ppCmd[0], pSrc->GetChar(),
 					(Arg_Qty >= 2) ? static_cast<WORD>(ATOI(Arg_ppCmd[1])) : IMPFLAGS_BOTH,
-					(Arg_Qty>=3)?ATOI(Arg_ppCmd[2]) : SHRT_MAX ))
+					(Arg_Qty>=3)?ATOI(Arg_ppCmd[2]) : INT16_MAX ))
 					pSrc->SysMessage( "Import failed\n" );
 			}
 			else
@@ -1493,7 +1493,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 					break;
 				}
 				if ( ! g_World.Import( Arg_ppCmd[0], pSrc->GetChar(),
-					IMPFLAGS_BOTH|IMPFLAGS_ACCOUNT, SHRT_MAX,
+					IMPFLAGS_BOTH|IMPFLAGS_ACCOUNT, INT16_MAX,
 					Arg_ppCmd[1], Arg_ppCmd[2] ))
 				{
 					pSrc->SysMessage( "Restore failed\n" );

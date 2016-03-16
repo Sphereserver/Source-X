@@ -902,7 +902,7 @@ LPCTSTR CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 	{
 		static const CValStr sm_SkillTitles[] =
 		{
-			{ "", INT_MIN },
+			{ "", INT32_MIN },
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NEOPHYTE),	static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NEOPHYTE", true)) },
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NOVICE), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NOVICE", true)) },
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_APPRENTICE), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_APPRENTICE", true)) },
@@ -913,7 +913,7 @@ LPCTSTR CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_GRANDMASTER), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_GRANDMASTER", true)) },
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ELDER_NINJITSU), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ELDER", true)) },
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY_NINJITSU), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY", true)) },
-			{ NULL, INT_MAX }
+			{ NULL, INT32_MAX }
 		};
 		len = sprintf(pTemp, "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
 	}
@@ -921,7 +921,7 @@ LPCTSTR CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 	{
 		static const CValStr sm_SkillTitles[] =
 		{
-			{ "", INT_MIN },
+			{ "", INT32_MIN },
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NEOPHYTE),	static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NEOPHYTE", true)) },
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NOVICE), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NOVICE", true)) },
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_APPRENTICE), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_APPRENTICE", true)) },
@@ -932,7 +932,7 @@ LPCTSTR CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_GRANDMASTER), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_GRANDMASTER", true)) },
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ELDER_BUSHIDO), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ELDER", true)) },
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY_BUSHIDO), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY", true)) },
-			{ NULL, INT_MAX }
+			{ NULL, INT32_MAX }
 		};
 		len = sprintf(pTemp, "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
 	}
@@ -940,7 +940,7 @@ LPCTSTR CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 	{
 		static const CValStr sm_SkillTitles[] =
 		{
-			{ "", INT_MIN },
+			{ "", INT32_MIN },
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NEOPHYTE),	static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NEOPHYTE", true)) },
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NOVICE), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NOVICE", true)) },
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_APPRENTICE), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_APPRENTICE", true)) },
@@ -951,7 +951,7 @@ LPCTSTR CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_GRANDMASTER),static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_GRANDMASTER", true)) },
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ELDER), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ELDER", true)) },
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY", true)) },
-			{ NULL, INT_MAX }
+			{ NULL, INT32_MAX }
 		};
 		len = sprintf(pTemp, "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
 	}

@@ -1176,7 +1176,7 @@ bool CItem::IsStackable( const CItem * pItem ) const
 		return false;
 
 	// total should not add up to > 64K !!!
-	/*if ( pItem->GetAmount() > ( USHRT_MAX - GetAmount()))
+	/*if ( pItem->GetAmount() > ( UINT16_MAX - GetAmount()))
 		return false;*/
 
 	return true;
@@ -2027,8 +2027,8 @@ bool CItem::SetMaxAmount(WORD amount)
 	if (!IsStackableType())
 		return false;
 
-	if (amount > USHRT_MAX)
-		amount = USHRT_MAX;
+	if (amount > UINT16_MAX)
+		amount = UINT16_MAX;
 	SetDefNum("MaxAmount", amount);
 	return true;
 }
@@ -2878,7 +2878,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 		case IC_MORE2:
 			m_itNormal.m_more2 = s.GetArgVal();
 			if ( IsType(IT_SPAWN_ITEM) )
-				m_itSpawnItem.m_pile = minimum(USHRT_MAX, m_itNormal.m_more2);
+				m_itSpawnItem.m_pile = minimum(UINT16_MAX, m_itNormal.m_more2);
 			return true;
 		case IC_MORE2h:
 			m_itNormal.m_more2 = MAKEDWORD( LOWORD(m_itNormal.m_more2), s.GetArgVal());
@@ -4757,7 +4757,7 @@ void CItem::SetTrapState( IT_TYPE state, ITEMID_TYPE id, int iTimeSec )
 	{
 		iTimeSec = 3*TICK_PER_SEC;
 	}
-	else if ( iTimeSec > 0 && iTimeSec < USHRT_MAX )
+	else if ( iTimeSec > 0 && iTimeSec < UINT16_MAX )
 	{
 		iTimeSec *= TICK_PER_SEC;
 	}
@@ -5071,7 +5071,7 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 	//
 	// RETURN:
 	//  Amount of damage done.
-	//  INT_MAX = destroyed !!!
+	//  INT32_MAX = destroyed !!!
 	//  -1 = invalid target ?
 
 	if ( iDmg <= 0 )
@@ -5119,7 +5119,7 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 				return( 1 );
 		}
 		Delete();
-		return INT_MAX;
+		return INT32_MAX;
 
 	case IT_POTION:
 		if ( RES_GET_INDEX(m_itPotion.m_Type) == SPELL_Explosion )
@@ -5139,7 +5139,7 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 			pItem->MoveToDecay(GetTopLevelObj()->GetTopPoint(), 1);		// almost immediate decay
 
 			ConsumeAmount();
-			return( INT_MAX );
+			return( INT32_MAX );
 		}
 		return( 1 );
 
@@ -5156,7 +5156,7 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 			if ( pSrc )
 				pSrc->SysMessage( g_Cfg.GetDefaultMsg( DEFMSG_WEB_DESTROY ) );
 			Delete();
-			return( INT_MAX );
+			return( INT32_MAX );
 		}
 
 		if ( pSrc )
@@ -5179,7 +5179,7 @@ forcedamage:
 			m_itArmor.m_Hits_Cur = 0;
 			Emote( g_Cfg.GetDefaultMsg( DEFMSG_ITEM_DMG_DESTROYED ) );
 			Delete();
-			return( INT_MAX );
+			return( INT32_MAX );
 		}
 
 		int previousDefense = Armor_GetDefense();

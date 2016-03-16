@@ -179,6 +179,7 @@ common/CVarFloat.cpp
 common/CVarFloat.h
 common/CWindow.cpp
 common/CWindow.h
+common/datatypes.h
 common/graycom.cpp
 common/graycom.h
 common/graymul.h

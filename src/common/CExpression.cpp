@@ -293,9 +293,9 @@ int Calc_GetRandVal( int iqty )
 {
 	if ( iqty <= 0 )
 		return( 0 );
-	if ( iqty >= INT_MAX )
+	if ( iqty >= INT32_MAX )
 	{
-		return( IMULDIV( g_World.m_Rand.randInt(), (DWORD) iqty, INT_MAX )) ;
+		return( IMULDIV( g_World.m_Rand.randInt(), (DWORD) iqty, INT32_MAX )) ;
 	}
 	return( g_World.m_Rand.randInt() % iqty );
 }
@@ -315,9 +315,9 @@ INT64 Calc_GetRandLLVal( INT64 iqty )
 {
 	if ( iqty <= 0 )
 		return( 0 );
-	if ( iqty >= LLONG_MAX )
+	if ( iqty >= INT64_MAX )
 	{
-		return( IMULDIV( g_World.m_Rand.genrand64_int64(), (DWORD) iqty, LLONG_MAX )) ;
+		return( IMULDIV( g_World.m_Rand.genrand64_int64(), (DWORD) iqty, INT64_MAX )) ;
 	}
 	return( g_World.m_Rand.genrand64_int64() % iqty );
 }

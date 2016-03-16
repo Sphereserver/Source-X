@@ -307,7 +307,7 @@ int CContainer::ContentCount( RESOURCE_ID_BASE rid, DWORD dwArg )
 {
 	ADDTOCALLSTACK("CContainer::ContentCount");
 	// Calculate total (gold or other items) in this recursed container
-	return INT_MAX - ContentConsume(rid, INT_MAX, true, dwArg);
+	return INT32_MAX - ContentConsume(rid, INT32_MAX, true, dwArg);
 }
 
 void CContainer::ContentAttrMod( DWORD dwAttr, bool fSet )
@@ -437,7 +437,7 @@ int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iRepli
 		iReplicationQty = ResourceConsume(pResources, iReplicationQty, true, dwArg);
 	}
 
-	int iQtyMin = INT_MAX;
+	int iQtyMin = INT32_MAX;
 	for ( size_t i = 0; i < pResources->GetCount(); i++ )
 	{
 		int iResQty = static_cast<int>(pResources->GetAt(i).GetResQty());
@@ -462,7 +462,7 @@ int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iRepli
 			iQtyMin = iQtyCur;
 	}
 
-	if ( iQtyMin == INT_MAX )	// it has no resources ? So i guess we can make it from nothing ?
+	if ( iQtyMin == INT32_MAX )	// it has no resources ? So i guess we can make it from nothing ?
 		return iReplicationQty;
 
 	return iQtyMin;

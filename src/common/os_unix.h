@@ -1,135 +1,94 @@
 #ifndef OS_UNIX_H
-	#define OS_UNIX_H
-	#pragma once
+	
+#define OS_UNIX_H
+#pragma once
 
-	#include <pthread.h>
-	#include <unistd.h>
-	#include <sys/wait.h>
-	#include <signal.h>
-	#include <exception>
-	#include <setjmp.h>
-	#include <dlfcn.h>
-	#include <errno.h>
-	#include <aio.h>
-	#include <cctype>
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include <exception>
+#include <setjmp.h>
+#include <dlfcn.h>
+#include <errno.h>
+#include <aio.h>
+#include <cctype>
 
-	#ifndef _MAX_PATH			// stdlib.h ?
-		#define _MAX_PATH   260 	// max. length of full pathname
-	#endif
+#ifndef _MAX_PATH			// stdlib.h ?
+	#define _MAX_PATH   260 	// max. length of full pathname
+#endif
 
-	#ifndef STDFUNC_FILENO
-		#define STDFUNC_FILENO fileno
-	#endif
+#ifndef STDFUNC_FILENO
+	#define STDFUNC_FILENO fileno
+#endif
 
-	#ifndef STDFUNC_GETPID
-		#define STDFUNC_GETPID getpid
-	#endif
+#ifndef STDFUNC_GETPID
+	#define STDFUNC_GETPID getpid
+#endif
 
-	#ifndef STDFUNC_UNLINK
-		#define STDFUNC_UNLINK unlink
-	#endif
+#ifndef STDFUNC_UNLINK
+	#define STDFUNC_UNLINK unlink
+#endif
 
-	#ifndef ERROR_SUCCESS
-		#define ERROR_SUCCESS	0
-	#endif
+#ifndef ERROR_SUCCESS
+	#define ERROR_SUCCESS	0
+#endif
 
-	#ifndef UNREFERENCED_PARAMETER
-		#define UNREFERENCED_PARAMETER(P)	(void)(P)
-	#endif
+#ifndef UNREFERENCED_PARAMETER
+	#define UNREFERENCED_PARAMETER(P)	(void)(P)
+#endif
 
-	#ifndef HKEY_LOCAL_MACHINE
-		#define HKEY_LOCAL_MACHINE	(( HKEY ) 0x80000002 )
-	#endif
+#ifndef HKEY_LOCAL_MACHINE
+	#define HKEY_LOCAL_MACHINE	(( HKEY ) 0x80000002 )
+#endif
 
-	#undef BYTE
-	#undef WORD
-	#undef DWORD
-	#undef UINT
-	#undef LONGLONG
-	#undef ULONGLONG
-	#undef LONG
+#define MAKEWORD(low,high)	((WORD)(((BYTE)(low))|(((WORD)((BYTE)(high)))<<8)))
+#define MAKELONG(low,high)	((LONG)(((WORD)(low))|(((DWORD)((WORD)(high)))<<16)))
+#define LOWORD(l)	((WORD)((DWORD)(l) & 0xffff))
+#define HIWORD(l)	((WORD)((DWORD)(l) >> 16))
+#define LOBYTE(w)	((BYTE)((DWORD)(w) &  0xff))
+#define HIBYTE(w)	((BYTE)((DWORD)(w) >> 8))
 
-	/*	//when we will move to c++11 and set all our data types to a new header we would use these definitions
-	typedef uint8_t				BYTE;		// 8 bits
-	typedef uint16_t			WORD;		// 16 bits
-	typedef uint32_t			DWORD;		// 32 bits
-	typedef unsigned int		UINT;
-	typedef long long			LONGLONG; 	// this must be 64bit
-	typedef unsigned long long	ULONGLONG;
-	typedef long				LONG;		// this stays 32bit!
+#ifndef sign
+	#define sign(n) (((n) < 0) ? -1 : (((n) > 0) ? 1 : 0))
+	//#define abs(n) (((n) < 0) ? (-(n)) : (n))
+#endif
 
-	#ifdef UNICODE
-		#include <wchar.h>
-		typedef	wchar_t			TCHAR;
-	#else
-		typedef char			TCHAR;
-	#endif
-	typedef	const TCHAR *		LPCSTR;
-	typedef const TCHAR *		LPCTSTR;
-	typedef	TCHAR *				LPSTR;
-	typedef	TCHAR *				LPTSTR;
-	*/
+#define _cdecl
+#define true	1
+#define false	0
+#define MulDiv	IMULDIV
 
-	#define BYTE 		uint8_t		// 8 bits
-	#define WORD 		uint16_t	// 16 bits
-	#define DWORD		uint32_t	// 32 bits
-	#define UINT		unsigned int
-	#define LONGLONG	long long 	// this must be 64bit
-	#define ULONGLONG	unsigned long long
-	#define LONG		long		// this stays 32bit!
+// unix flushing works perfectly, so we do not need disabling bufer
+#define	FILE_SETNOCACHE(_x_)
+#define FILE_FLUSH(_x_)			fflush(_x_)
 
-	#define MAKEWORD(low,high) ((WORD)(((BYTE)(low))|(((WORD)((BYTE)(high)))<<8)))
-	#define MAKELONG(low,high) ((LONG)(((WORD)(low))|(((DWORD)((WORD)(high)))<<16)))
-	#define LOWORD(l)	((WORD)((DWORD)(l) & 0xffff))
-	#define HIWORD(l)	((WORD)((DWORD)(l) >> 16))
-	#define LOBYTE(w)	((BYTE)((DWORD)(w) &  0xff))
-	#define HIBYTE(w)	((BYTE)((DWORD)(w) >> 8))
+//	thread-specific definitions
+#include "CTime.h"
+#define THREAD_ENTRY_RET void *
+#define CRITICAL_SECTION pthread_mutex_t
+#define Sleep(mSec)	usleep(mSec*1000)	// arg is microseconds = 1/1000000
+#define SleepEx(mSec, unused)		usleep(mSec*1000)	// arg is microseconds = 1/1000000
 
-	#ifndef sign
-		#define sign(n) (((n) < 0) ? -1 : (((n) > 0) ? 1 : 0))
-	//	#define abs(n) (((n) < 0) ? (-(n)) : (n))
-	#endif
+// printf format identifiers
+#define FMTSIZE_T "zu" // linux uses %zu to format size_t
 
-	#define _cdecl
-	#define true 1
-	#define false 0
-	#define TCHAR char
-	#define LPCSTR const char *
-	#define LPCTSTR const char *
-	#define LPSTR char *
-	#define LPTSTR char *
-	#define MulDiv	IMULDIV
-
-	// unix flushing works perfectly, so we do not need disabling bufer
-	#define	FILE_SETNOCACHE(_x_)
-	#define FILE_FLUSH(_x_)			fflush(_x_)
-
-	//	thread-specific definitions
-	#include "CTime.h"
-	#define THREAD_ENTRY_RET void *
-	#define CRITICAL_SECTION pthread_mutex_t
-	#define Sleep(mSec)	usleep(mSec*1000)	// arg is microseconds = 1/1000000
-	#define SleepEx(mSec, unused)		usleep(mSec*1000)	// arg is microseconds = 1/1000000
-
-	// printf format identifiers
-	#define FMTSIZE_T "zu" // linux uses %zu to format size_t
-
-	inline void _strupr( TCHAR * pszStr )
+inline void _strupr( TCHAR * pszStr )
+{
+	// No portable UNIX/LINUX equiv to this.
+	for ( ;pszStr[0] != '\0'; pszStr++ )
 	{
-		// No portable UNIX/LINUX equiv to this.
-		for ( ;pszStr[0] != '\0'; pszStr++ )
-		{
-			*pszStr = toupper( *pszStr );
-		}
+		*pszStr = toupper( *pszStr );
 	}
+}
 
-	inline void _strlwr( TCHAR * pszStr )
+inline void _strlwr( TCHAR * pszStr )
+{
+	// No portable UNIX/LINUX equiv to this.
+	for ( ;pszStr[0] != '\0'; pszStr++ )
 	{
-		// No portable UNIX/LINUX equiv to this.
-		for ( ;pszStr[0] != '\0'; pszStr++ )
-		{
-			*pszStr = tolower( *pszStr );
-		}
+		*pszStr = tolower( *pszStr );
 	}
+}
 
 #endif	//OS_UNIX_H

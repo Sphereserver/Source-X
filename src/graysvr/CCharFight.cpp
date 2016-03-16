@@ -249,7 +249,7 @@ int CChar::Skill_Snooping( SKTRIG_TYPE stage )
 
 	// did anyone see this ?
 	CheckCrimeSeen( SKILL_SNOOPING, pCharMark, pCont, g_Cfg.GetDefaultMsg( DEFMSG_SNOOPING_ATTEMPTING ) );
-	Noto_Karma( -4, INT_MIN, true );
+	Noto_Karma( -4, INT32_MIN, true );
 
 	if ( stage == SKTRIG_FAIL )
 	{
@@ -808,7 +808,7 @@ int CChar::CalcArmorDefense() const
 // RETURN: damage done
 //  -1		= already dead / invalid target.
 //  0		= no damage.
-//  INT_MAX	= killed.
+//  INT32_MAX	= killed.
 int CChar::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType, int iDmgPhysical, int iDmgFire, int iDmgCold, int iDmgPoison, int iDmgEnergy )
 {
 	ADDTOCALLSTACK("CChar::OnTakeDamage");

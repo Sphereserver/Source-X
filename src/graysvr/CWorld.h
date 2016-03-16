@@ -313,8 +313,8 @@ public:
 	void Broadcast( LPCTSTR pMsg );
 	void __cdecl Broadcastf( LPCTSTR pMsg, ...) __printfargs(2,3);
 
-	bool Export( LPCTSTR pszFilename, const CChar* pSrc, WORD iModeFlags = IMPFLAGS_ITEMS, int iDist = SHRT_MAX, int dx = 0, int dy = 0 );
-	bool Import( LPCTSTR pszFilename, const CChar* pSrc, WORD iModeFlags = IMPFLAGS_ITEMS, int iDist = SHRT_MAX, TCHAR *pszAgs1 = NULL, TCHAR *pszAgs2 = NULL );
+	bool Export( LPCTSTR pszFilename, const CChar* pSrc, WORD iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, int dx = 0, int dy = 0 );
+	bool Import( LPCTSTR pszFilename, const CChar* pSrc, WORD iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, TCHAR *pszAgs1 = NULL, TCHAR *pszAgs2 = NULL );
 	bool Save( bool fForceImmediate ); // Save world state
 	void SaveStatics();
 	bool LoadAll();

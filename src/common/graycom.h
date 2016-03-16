@@ -25,8 +25,6 @@
 	#include <winsock2.h>
 	#include <windows.h>
 	#include <dos.h>
-	#include <limits.h>	// INT_MAX, etc
-	#include <limits>	// std::numeric_limits
 	#include <conio.h>
 	#include <sys/timeb.h>
 
@@ -34,31 +32,17 @@
 	#define strnicmp	_strnicmp
 
 	extern const OSVERSIONINFO * GRAY_GetOSInfo();
-	#define INT64			__int64
-	#define INT32			__int32
-
 #else	// _WIN32 else assume LINUX
 
 	#include <sys/types.h>
 	#include <sys/timeb.h>
-	#include <limits.h>	// INT_MAX, etc
-	#include <limits>	// std::numeric_limits
 
 	#define HANDLE			DWORD
 	#define _cdecl
 	#define __cdecl
-	#ifndef LONG
-		#define LONG			DWORD
-	#endif
-	#ifndef LONGLONG
-		#define LONGLONG		DWORD	// This should be 64 bit ???
-	#endif
-	#define WCHAR			unsigned short
+
 	#define FAR
 	#define E_FAIL			0x80004005
-	#define BOOL			unsigned short
-	#define INT64			int64_t
-	#define INT32			int32_t
 
 	#ifdef _BSD
 		int getTimezone();
@@ -66,8 +50,6 @@
 	#else
 		#define _timezone		timezone
 	#endif
-
-	#define PUINT			unsigned int *
 
 	#define IsBadReadPtr( p, len )		((p) == NULL)
 	#define IsBadStringPtr( p, len )	((p) == NULL)

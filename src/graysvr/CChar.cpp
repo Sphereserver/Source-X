@@ -1619,7 +1619,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 	}
 
 	// Get starting items for the profession / skills.
-	int iProfession = INT_MAX;
+	int iProfession = INT32_MAX;
 	bool bCreateSkillItems = true;
 	switch ( prProf )
 	{
@@ -1666,7 +1666,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 	{
 		for ( int i = 1; i < 5; i++ )
 		{
-			int iSkill = INT_MAX;
+			int iSkill = INT32_MAX;
 			switch ( i )
 			{
 				case 1:
@@ -1976,7 +1976,7 @@ do_default:
 						else if( !strnicmp(pszKey, "LAST", 4) )
 						{
 							pszKey += 4;
-							INT64 dwLastTime = INT_MAX, dwCurTime = 0;
+							INT64 dwLastTime = INT32_MAX, dwCurTime = 0;
 
 							for ( size_t iAttacker = 0; iAttacker < m_lastAttackers.size(); ++iAttacker )
 							{
@@ -2358,7 +2358,7 @@ do_default:
 				ptDst.Move( GetDirStr( pszKey ) );
 				CRegionBase * pArea = ptDst.GetRegion( REGION_TYPE_MULTI | REGION_TYPE_AREA );
 				if ( !pArea )
-					sVal.FormatHex( ULONG_MAX );
+					sVal.FormatHex( UINT32_MAX );
 				else
 				{
 					DWORD		wBlockFlags	= 0;
@@ -2727,10 +2727,10 @@ do_default:
 			if ( i >= 0 )
 			{
 				int iVal = s.GetArgVal();
-				if (iVal > SHRT_MAX)
-					iVal = SHRT_MAX;
-				else if (iVal < SHRT_MIN)
-					iVal = SHRT_MIN;
+				if (iVal > INT16_MAX)
+					iVal = INT16_MAX;
+				else if (iVal < INT16_MIN)
+					iVal = INT16_MIN;
 
 				Stat_SetBase(static_cast<STAT_TYPE>(i), static_cast<short>(iVal));
 				return true;

@@ -65,7 +65,7 @@ CChar * CChar::NPC_FightFindBestTarget()
 			return NULL;
 
 		INT64 threat = 0;
-		int iClosest = INT_MAX;
+		int iClosest = INT32_MAX;
 		CChar *pChar = NULL;
 		CChar *pClosest = NULL;
 		SKILL_TYPE skillWeapon = Fight_GetWeaponSkill();

@@ -221,7 +221,7 @@ class CItemBase : public CBaseBaseDef
 	// Describe basic stuff about all items.
 	// Partly based on CUOItemTypeRec/CUOItemTypeRec2
 private:
-	WORD	m_weight;		// weight in WEIGHT_UNITS (USHRT_MAX=not movable) defaults from the .MUL file.
+	WORD	m_weight;		// weight in WEIGHT_UNITS (UINT16_MAX=not movable) defaults from the .MUL file.
 	CGTypedArray<ITEMID_TYPE,ITEMID_TYPE> m_flip_id;	//  can be flipped to make these display ids.
 	IT_TYPE	m_type;			// default double click action type. (if any)
 	CValueRangeDef m_values;		// range of values given a quality skill
@@ -468,7 +468,7 @@ public:
 
 	bool IsMovableType() const
 	{
-		return( m_weight != USHRT_MAX );
+		return( m_weight != UINT16_MAX );
 	}
 	bool IsStackableType() const
 	{

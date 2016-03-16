@@ -197,8 +197,8 @@ public:
 public:
 	void Init()
 	{
-		m_iLo = LLONG_MIN;
-		m_iHi = LLONG_MIN;
+		m_iLo = INT64_MIN;
+		m_iHi = INT64_MIN;
 	}
 	int GetRange() const
 	{

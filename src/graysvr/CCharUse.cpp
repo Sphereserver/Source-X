@@ -644,7 +644,7 @@ bool CChar::Use_Item_Web( CItem * pItemWeb )
 				break;
 
 		case 2:			// web turned into silk
-		case INT_MAX:	// web destroyed
+		case INT32_MAX:	// web destroyed
 			if ( pFlag )
 				pFlag->Delete();
 			return false;
@@ -1426,7 +1426,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 	switch(pItem->GetType()) {
 		case IT_ITEM_STONE: {
 			// Give them this item
-			if (pItem->m_itItemStone.m_wAmount == USHRT_MAX) {
+			if (pItem->m_itItemStone.m_wAmount == UINT16_MAX) {
 				SysMessageDefault(DEFMSG_MSG_IT_IS_DEAD);
 				return true;
 			}
@@ -1441,7 +1441,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 			if (pItem->m_itItemStone.m_wAmount != 0) {
 				pItem->m_itItemStone.m_wAmount--;
 				if (pItem->m_itItemStone.m_wAmount == 0)
-					pItem->m_itItemStone.m_wAmount = USHRT_MAX;
+					pItem->m_itItemStone.m_wAmount = UINT16_MAX;
 			}
 			return true;
 		}
@@ -1782,7 +1782,7 @@ bool CChar::ItemEquipArmor( bool fForce )
 		{
 			pBestArmor[i] = LayerFind(static_cast<LAYER_TYPE>(i));
 			if ( pBestArmor[i] != NULL )
-				iBestScore[i] = INT_MAX;
+				iBestScore[i] = INT32_MAX;
 		}
 	}
 

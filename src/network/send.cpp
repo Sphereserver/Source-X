@@ -107,8 +107,8 @@ PacketCombatDamage::PacketCombatDamage(const CClient* target, WORD damage, CGray
 {
 	ADDTOCALLSTACK("PacketCombatDamage::PacketCombatDamage");
 
-	if ( damage >= USHRT_MAX )
-		damage = USHRT_MAX;
+	if ( damage >= UINT16_MAX )
+		damage = UINT16_MAX;
 
 	writeInt32(defender);
 	writeInt16(damage);
@@ -2130,8 +2130,8 @@ int PacketVendorBuyList::fillContainer(const CItemContainer* container, int conv
 
 		LPCTSTR name = venditem->GetName();
 		size_t len = strlen(name) + 1;
-		if (len > UCHAR_MAX)
-			len = UCHAR_MAX;
+		if (len > UINT8_MAX)
+			len = UINT8_MAX;
 
 		writeByte(static_cast<BYTE>(len));
 		writeStringFixedASCII(name, len);
@@ -4155,8 +4155,8 @@ PacketCombatDamageOld::PacketCombatDamageOld(const CClient* target, BYTE damage,
 {
 	ADDTOCALLSTACK("PacketCombatDamageOld::PacketCombatDamageOld");
 
-	if ( damage >= UCHAR_MAX )
-		damage = UCHAR_MAX;
+	if ( damage >= UINT8_MAX )
+		damage = UINT8_MAX;
 
 	writeByte(0x01);
 	writeInt32(defender);

@@ -1150,7 +1150,7 @@ bool CChar::Skill_Tracking( CGrayUID uidTarg, DIR_TYPE & dirPrv, int iDistMax )
 	if ( pObjTop == NULL )
 		return false;
 
-	int dist = GetTopDist3D(pObjTop);	// disconnect = SHRT_MAX
+	int dist = GetTopDist3D(pObjTop);	// disconnect = INT16_MAX
 	if ( dist > iDistMax )
 		return false;
 

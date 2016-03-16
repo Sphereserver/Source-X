@@ -21,6 +21,11 @@ versions to insure consistency.
 
 ***************************************************************************/
 
+/* placing here these typedefs and removed from aes.h to avoid redefinition of the typedef in the other sphere headers */
+typedef unsigned char	BYTE;
+typedef unsigned int	DWORD;
+
+
 /* for computing subkeys */
 #define	SK_STEP			0x02020202u
 #define	SK_BUMP			0x01010101u

@@ -2344,7 +2344,7 @@ int NetworkOut::sendBytesNow(CClient* client, const BYTE* data, DWORD length)
 #endif
 		{
 			// connection has been lost, client should be cleared
-			ret = INT_MIN;
+			ret = INT32_MIN;
 		}
 		else
 		{
@@ -2354,7 +2354,7 @@ int NetworkOut::sendBytesNow(CClient* client, const BYTE* data, DWORD length)
 				g_Log.Event(LOGM_CLIENTS_LOG|LOGL_WARN, "%lx:TX Error %d\n", state->id(), errCode);
 
 #ifndef _WIN32
-			return INT_MIN;
+			return INT32_MIN;
 #else
 			ret = 0;
 #endif
@@ -2370,7 +2370,7 @@ int NetworkOut::sendBytesNow(CClient* client, const BYTE* data, DWORD length)
 	EXC_DEBUG_START;
 	g_Log.EventDebug("id='%lx', packet '0x%x', length '%lu'\n", state->id(), *data, length);
 	EXC_DEBUG_END;
-	return INT_MIN;
+	return INT32_MIN;
 }
 
 #else

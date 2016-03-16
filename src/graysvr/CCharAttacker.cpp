@@ -124,7 +124,7 @@ INT64 CChar::Attacker_GetHighestThreat()
 // Retrieves the last character that I hit
 CChar * CChar::Attacker_GetLast()
 {
-	INT64 dwLastTime = INT_MAX, dwCurTime = 0;
+	INT64 dwLastTime = INT32_MAX, dwCurTime = 0;
 
 	CChar * retChar = NULL;
 	for (size_t iAttacker = 0; iAttacker < m_lastAttackers.size(); ++iAttacker)

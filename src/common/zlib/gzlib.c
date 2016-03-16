@@ -614,7 +614,7 @@ void ZLIB_INTERNAL gz_error(state, err, msg)
     return;
 }
 
-#ifndef INT_MAX
+#ifndef INT32_MAX
 /* portably return maximum value for an int (when limits.h presumed not
    available) -- we need to do this to cover cases where 2's complement not
    used, since C standard permits 1's complement and sign-bit representations,

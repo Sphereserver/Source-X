@@ -91,7 +91,7 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 		( tiledata.m_flags & UFLAG1_WATER ))
 	{
 		// water can't be picked up.
-		m_weight = USHRT_MAX;
+		m_weight = UINT16_MAX;
 	}
 	else
 	{
@@ -959,7 +959,7 @@ int CItemBase::GetMakeValue( int iQualityLevel )
 
 	CValueRangeDef values = m_values;
 
-	if ( m_values.m_iLo == LLONG_MIN || m_values.m_iHi == LLONG_MIN )
+	if ( m_values.m_iLo == INT64_MIN || m_values.m_iHi == INT64_MIN )
 	{
 		values.m_iLo = CalculateMakeValue(0);		// low quality specimen
 		m_values.m_iLo = -values.m_iLo;			// negative means they will float.
@@ -978,8 +978,8 @@ int CItemBase::GetMakeValue( int iQualityLevel )
 void CItemBase::ResetMakeValue()
 {
 	ADDTOCALLSTACK("CItemBase::ResetMakeValue");
-	m_values.m_iLo = INT_MIN;
-	m_values.m_iHi = INT_MIN;
+	m_values.m_iLo = INT32_MIN;
+	m_values.m_iHi = INT32_MIN;
 	GetMakeValue(0);
 }
 
@@ -2172,8 +2172,8 @@ bool CItemBase::SetMaxAmount(WORD amount)
 	if (!IsStackableType())
 		return false;
 
-	if (amount > USHRT_MAX)
-		amount = USHRT_MAX;
+	if (amount > UINT16_MAX)
+		amount = UINT16_MAX;
 	SetDefNum("MaxAmount", amount, false);
 	return true;
 }

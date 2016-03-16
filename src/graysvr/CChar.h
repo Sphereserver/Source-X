@@ -516,7 +516,7 @@ private:
 	* @param iBottom is the lower value you can have for this execution.
 	* @param bMessage show message to the char or not.
 	*/
-	void Noto_Karma( int iKarma, int iBottom=INT_MIN, bool bMessage = false );
+	void Noto_Karma( int iKarma, int iBottom=INT32_MIN, bool bMessage = false );
 
 	/**
 	* @brief Update Fame with the given value.
@@ -798,7 +798,7 @@ public:
 	TRIGRET_TYPE	Skill_OnCharTrigger( SKILL_TYPE skill, CTRIG_TYPE ctrig, CScriptTriggerArgs * pArgs); //pArgs.m_iN1 will be rewritten with skill
 
 	bool Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg );
-	bool Skill_Tracking( CGrayUID uidTarg, DIR_TYPE & dirPrv, int iDistMax = SHRT_MAX );
+	bool Skill_Tracking( CGrayUID uidTarg, DIR_TYPE & dirPrv, int iDistMax = INT16_MAX );
 	bool Skill_MakeItem( ITEMID_TYPE id, CGrayUID uidTarg, SKTRIG_TYPE stage, bool fSkillOnly = false, int iReplicationQty = 1 );
 	bool Skill_MakeItem_Success();
 	bool Skill_Snoop_Check( const CItemContainer * pItem );

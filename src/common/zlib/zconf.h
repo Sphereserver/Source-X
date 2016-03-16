@@ -396,11 +396,11 @@ typedef uLong FAR uLongf;
 
 #if !defined(Z_U4) && !defined(Z_SOLO) && defined(STDC)
 #  include <limits.h>
-#  if (UINT_MAX == 0xffffffffUL)
+#  if (UINT32_MAX == 0xffffffffUL)
 #    define Z_U4 unsigned
-#  elif (ULONG_MAX == 0xffffffffUL)
+#  elif (UINT32_MAX == 0xffffffffUL)
 #    define Z_U4 unsigned long
-#  elif (USHRT_MAX == 0xffffffffUL)
+#  elif (UINT16_MAX == 0xffffffffUL)
 #    define Z_U4 unsigned short
 #  endif
 #endif

@@ -1373,7 +1373,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 
 		// Now clean up all the held over UIDs
 		SaveThreadClose();
-		m_iSaveStage = INT_MAX;
+		m_iSaveStage = INT32_MAX;
 		return false;
 	}
 

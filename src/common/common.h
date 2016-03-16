@@ -5,6 +5,7 @@
 // 3. 16 bit or 32 bit (_WIN32 defined by compiler)
 // 4. LINUX 32 bit
 #ifndef _INC_COMMON_H
+
 #define _INC_COMMON_H
 #pragma once
 
@@ -24,7 +25,7 @@
 #else
 	#include "os_unix.h"
 #endif
-
+#include "datatypes.h"
 
 
 // use to indicate that a function uses printf-style arguments, allowing GCC
@@ -53,8 +54,8 @@ typedef THREAD_ENTRY_RET ( _cdecl * PTHREAD_ENTRY_PROC )(void *);
 
 #define SCRIPT_MAX_LINE_LEN 4096	// default size.
 
-#define IMULDIVDOWN(a,b,c) (((a)*(b))/(c))
-#define IMULDIV(a,b,c) (((((LONGLONG)(a)*(LONGLONG)(b))+(c / 2))/(c))-(IsNegative((LONGLONG)(a)*(LONGLONG)(b))))
+#define IMULDIVDOWN(a,b,c)	(((a)*(b))/(c))
+#define IMULDIV(a,b,c)		(((((LONGLONG)(a)*(LONGLONG)(b))+(c / 2))/(c))-(IsNegative((LONGLONG)(a)*(LONGLONG)(b))))
 
 #ifndef MAKEDWORD
 	#define MAKEDWORD(low, high) ((DWORD)(((WORD)(low)) | (((DWORD)((WORD)(high))) << 16)))
@@ -68,25 +69,25 @@ typedef unsigned int	ERROR_CODE;
 
 #define ISWHITESPACE(ch)			(IsSpace(ch)||((unsigned char)ch)==0xa0)	// IsSpace
 #define GETNONWHITESPACE( pStr )	while ( ISWHITESPACE( (pStr)[0] )) { (pStr)++; }
-#define _IS_SWITCH(c)    ((c) == '-' || (c) == '/' )	// command line switch.
+#define _IS_SWITCH(c)				((c) == '-' || (c) == '/' )	// command line switch.
 
 #define REMOVE_QUOTES( x )			\
 {									\
 	GETNONWHITESPACE( x );			\
 	if ( *x == '"' )	++x;				\
-	TCHAR * psX	= const_cast<TCHAR*>(strchr( x, '"' ));	\
+		TCHAR * psX	= const_cast<TCHAR*>(strchr( x, '"' ));	\
 	if ( psX )						\
 		*psX	= '\0';				\
 }
 
 #ifndef minimum
-#define minimum(x,y)	((x)<(y)?(x):(y))
+	#define minimum(x,y)	((x)<(y)?(x):(y))
 #endif	// minimum
 #ifndef maximum
-#define maximum(x,y)	((x)>(y)?(x):(y))
+	#define maximum(x,y)	((x)>(y)?(x):(y))
 #endif //maximum
 
-#define medium(x,y,z)	((x)>(y)?(x):((z)<(y)?(z):(y)))
+#define medium(x,y,z)		((x)>(y)?(x):((z)<(y)?(z):(y)))
 
 
 // -----------------------------

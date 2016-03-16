@@ -253,7 +253,7 @@ bool PacketMovementReq::onReceive(NetState* net)
 
 	if ( client->Event_Walk(direction, sequence) )
 	{
-		if ( sequence == UCHAR_MAX )
+		if ( sequence == UINT8_MAX )
 			sequence = 0;
 		net->m_sequence = ++sequence;
 	}
@@ -426,7 +426,7 @@ bool PacketItemDropReq::onReceive(NetState* net)
 
 		// Enhanced clients using containers on 'list view' mode always send grid=255 to server,
 		// this means that the item must placed on first grid slot free, and not on slot 255.
-		if ( grid == UCHAR_MAX )
+		if ( grid == UINT8_MAX )
 			grid = 0;
 	}
 

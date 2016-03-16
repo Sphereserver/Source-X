@@ -805,7 +805,7 @@ bool CScriptObj::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc
 			if ( *pszKey && (( *pszKey < '0' ) || ( *pszKey > '9' )) && *pszKey != '-' )
 				goto badcmd;
 
-			INT64	min = 1000, max = LLONG_MIN;
+			INT64	min = 1000, max = INT64_MIN;
 
 			if ( *pszKey )
 			{
@@ -818,7 +818,7 @@ bool CScriptObj::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc
 				SKIP_ARGSEP(pszKey);
 			}
 
-			if ( max == LLONG_MIN )
+			if ( max == INT64_MIN )
 			{
 				max = min - 1;
 				min = 0;

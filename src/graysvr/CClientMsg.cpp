@@ -522,7 +522,7 @@ void CClient::addSeason(SEASON_TYPE season)
 	new PacketSeason(this, season, true);
 
 	// client resets light level on season change, so resend light here too
-	m_Env.m_Light = UCHAR_MAX;
+	m_Env.m_Light = UINT8_MAX;
 	addLight();
 }
 
@@ -550,12 +550,12 @@ void CClient::addLight()
 	// NOTE: This could just be a flash of light.
 	// Global light level.
 	ASSERT(m_pChar);
-	BYTE iLight = UCHAR_MAX;
+	BYTE iLight = UINT8_MAX;
 
 	if ( m_pChar->m_LocalLight )
 		iLight = m_pChar->m_LocalLight;
 
-	if ( iLight == UCHAR_MAX )
+	if ( iLight == UINT8_MAX )
 		iLight = m_pChar->GetLightLevel();
 		
 	// Scale light level for non-t2a.
