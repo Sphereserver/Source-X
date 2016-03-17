@@ -20,10 +20,13 @@
 
 #include "datatypes.h"
 #ifdef _WIN32
+#ifdef __MINGW32__
+#define _cdecl __cdecl
+#endif //__MINGW32__
 	#include "os_windows.h"
-#else
+#else //_WIN32
 	#include "os_unix.h"
-#endif
+#endif //_WIN32
 
 // use to indicate that a function uses printf-style arguments, allowing GCC
 // to validate the format string and arguments:

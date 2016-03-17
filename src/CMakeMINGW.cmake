@@ -6,9 +6,8 @@ SET (C_OPTS "-s -fno-omit-frame-pointer -ffast-math -O3 -fno-expensive-optimizat
 SET (CXX_OPTS "-s -fno-omit-frame-pointer -ffast-math -fpermissive -O3")
 SET (C_SPECIAL "-fexceptions -fnon-call-exceptions")
 SET (CXX_SPECIAL "-fexceptions -fnon-call-exceptions")
-SET (CMAKE_C_FLAGS "${C_WARNING_FLAGS} ${C_ARCH_OPTS} ${C_OPTS} ${C_SPECIAL}")
-SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-SET (CMAKE_CXX_FLAGS "${CXX_WARNING_FLAGS} ${CXX_ARCH_OPTS} ${CXX_OPTS} ${CXX_SPECIAL}")
+SET (CMAKE_C_FLAGS "${C_WARNING_FLAGS} ${C_ARCH_OPTS} ${C_OPTS} ${C_SPECIAL} -std=c11")
+SET (CMAKE_CXX_FLAGS "${CXX_WARNING_FLAGS} ${CXX_ARCH_OPTS} ${CXX_OPTS} ${CXX_SPECIAL} -std=c++11")
 SET (CMAKE_RC_FLAGS "--target=pe-i386")
 
 TARGET_COMPILE_DEFINITIONS (spheresvr
