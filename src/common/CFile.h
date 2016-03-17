@@ -7,25 +7,21 @@
 #define _INC_CFILE_H
 
 #ifndef _WIN32
-#ifdef LONG
-#undef LONG
-#endif
-#define LONG int
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
+	#include <sys/types.h>
+	#include <sys/stat.h>
+	#include <fcntl.h>
+	#include <unistd.h>
 #endif
 
 #include "CString.h"
 
 #ifndef OF_WRITE
-#define OF_READ             O_RDONLY
-#define OF_WRITE            O_WRONLY
-#define OF_READWRITE        O_RDWR
-#define OF_SHARE_DENY_NONE	0x00
-#define OF_SHARE_DENY_WRITE	0x00	// not defined in LINUX
-#define OF_CREATE			O_CREAT
+	#define OF_READ             O_RDONLY
+	#define OF_WRITE            O_WRONLY
+	#define OF_READWRITE        O_RDWR
+	#define OF_SHARE_DENY_NONE	0x00
+	#define OF_SHARE_DENY_WRITE	0x00	// not defined in LINUX
+	#define OF_CREATE			O_CREAT
 #endif
 
 #define OF_NONCRIT			0x40000000	// just a test.
@@ -34,20 +30,20 @@
 #define OF_DEFAULTMODE		0x80000000
 
 #ifndef HFILE_ERROR
-#define HFILE_ERROR	-1
-#define HFILE int
+	#define HFILE_ERROR	-1
+	#define HFILE int
 #endif // HFILE_ERROR
 
 #ifdef _WIN32
-#define INVALID_HANDLE ((HANDLE) -1)
+	#define INVALID_HANDLE ((HANDLE) -1)
 #endif
 
 #ifdef _WIN32
-#define OSFILE_TYPE		HANDLE
-#define NOFILE_HANDLE	INVALID_HANDLE
+	#define OSFILE_TYPE		HANDLE
+	#define NOFILE_HANDLE	INVALID_HANDLE
 #else
-#define OSFILE_TYPE		HFILE
-#define NOFILE_HANDLE	HFILE_ERROR
+	#define OSFILE_TYPE		HFILE
+	#define NOFILE_HANDLE	HFILE_ERROR
 #endif
 
 class CGrayError;
@@ -122,7 +118,7 @@ public:
 	* @param iOrigin origin (current position or init of the file).
 	* @return position where the position indicator is set on success, -1 on error.
 	*/
-	virtual DWORD Seek( LONG lOffset = 0, UINT iOrigin = SEEK_SET );
+	virtual DWORD Seek( int lOffset = 0, UINT iOrigin = SEEK_SET );
 	/**
 	* @brief Reads data from the file.
 	* @param pData buffer where store the readed data.
@@ -319,7 +315,7 @@ public:
 	* @param origin origin (current position or init of the file).
 	* @return position where the position indicator is set on success, 0 on error.
 	*/
-	virtual DWORD Seek( LONG offset = 0, UINT origin = SEEK_SET );
+	virtual DWORD Seek( int offset = 0, UINT origin = SEEK_SET );
 	/**
 	* @brief Write changes to disk.
 	*/

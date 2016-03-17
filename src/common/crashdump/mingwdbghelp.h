@@ -43,83 +43,83 @@ typedef struct _MINIDUMP_EXCEPTION_INFORMATION {
 
 
 typedef struct _MINIDUMP_USER_STREAM {
-    ULONG32 Type;
-    ULONG   BufferSize;
+    UINT	Type;
+    UINT	BufferSize;
     PVOID   Buffer;
 } MINIDUMP_USER_STREAM, *PMINIDUMP_USER_STREAM;
 
 
 typedef struct _MINIDUMP_USER_STREAM_INFORMATION {
-    ULONG                 UserStreamCount;
+	UINT                  UserStreamCount;
     PMINIDUMP_USER_STREAM UserStreamArray;
 } MINIDUMP_USER_STREAM_INFORMATION, *PMINIDUMP_USER_STREAM_INFORMATION;
 
 
 typedef struct _MINIDUMP_THREAD_CALLBACK {
-    ULONG   ThreadId;
+	UINT    ThreadId;
     HANDLE  ThreadHandle;
     CONTEXT Context;
-    ULONG   SizeOfContext;
-    ULONG64 StackBase;
-    ULONG64 StackEnd;
+	UINT    SizeOfContext;
+    ULLONG  StackBase;
+	ULLONG  StackEnd;
 } MINIDUMP_THREAD_CALLBACK, *PMINIDUMP_THREAD_CALLBACK;
 
 
 typedef struct _MINIDUMP_THREAD_EX_CALLBACK {
-    ULONG   ThreadId;
+    UINT    ThreadId;
     HANDLE  ThreadHandle;
     CONTEXT Context;
-    ULONG   SizeOfContext;
-    ULONG64 StackBase;
-    ULONG64 StackEnd;
-    ULONG64 BackingStoreBase;
-    ULONG64 BackingStoreEnd;
+	UINT    SizeOfContext;
+	ULLONG  StackBase;
+	ULLONG  StackEnd;
+	ULLONG  BackingStoreBase;
+	ULLONG  BackingStoreEnd;
 } MINIDUMP_THREAD_EX_CALLBACK, *PMINIDUMP_THREAD_EX_CALLBACK;
 
 
 typedef struct _MINIDUMP_MODULE_CALLBACK {
     PWCHAR           FullPath;
-    ULONG64          BaseOfImage;
-    ULONG            SizeOfImage;
-    ULONG            CheckSum;
-    ULONG            TimeDateStamp;
+    ULLONG           BaseOfImage;
+	UINT             SizeOfImage;
+	UINT             CheckSum;
+	UINT             TimeDateStamp;
     VS_FIXEDFILEINFO VersionInfo;
     PVOID            CvRecord;
-    ULONG            SizeOfCvRecord;
+	UINT             SizeOfCvRecord;
     PVOID            MiscRecord;
-    ULONG            SizeOfMiscRecord;
+	UINT             SizeOfMiscRecord;
 } MINIDUMP_MODULE_CALLBACK, *PMINIDUMP_MODULE_CALLBACK;
 
 
 typedef struct _MINIDUMP_INCLUDE_THREAD_CALLBACK {
-    ULONG ThreadId;
+	UINT  ThreadId;
 } MINIDUMP_INCLUDE_THREAD_CALLBACK, *PMINIDUMP_INCLUDE_THREAD_CALLBACK;
 
 
 typedef struct _MINIDUMP_INCLUDE_MODULE_CALLBACK {
-    ULONG64 BaseOfImage;
+    ULLONG BaseOfImage;
 } MINIDUMP_INCLUDE_MODULE_CALLBACK, *PMINIDUMP_INCLUDE_MODULE_CALLBACK;
 
 
 typedef struct _MINIDUMP_IO_CALLBACK {
     HANDLE  Handle;
-    ULONG64 Offset;
+    ULLONG  Offset;
     PVOID   Buffer;
-    ULONG   BufferBytes;
+	UINT    BufferBytes;
 } MINIDUMP_IO_CALLBACK, *PMINIDUMP_IO_CALLBACK;
 
 
 typedef struct _MINIDUMP_READ_MEMORY_FAILURE_CALLBACK {
-    ULONG64 Offset;
-    ULONG   Bytes;
+    ULLONG  Offset;
+	UINT    Bytes;
     HRESULT FailureStatus;
 } MINIDUMP_READ_MEMORY_FAILURE_CALLBACK, *PMINIDUMP_READ_MEMORY_FAILURE_CALLBACK;
 
 
 typedef struct _MINIDUMP_CALLBACK_INPUT {
-    ULONG  ProcessId;
+	UINT   ProcessId;
     HANDLE ProcessHandle;
-    ULONG  CallbackType;
+	UINT   CallbackType;
     union {
         HRESULT                               Status;
         MINIDUMP_THREAD_CALLBACK              Thread;
@@ -129,32 +129,32 @@ typedef struct _MINIDUMP_CALLBACK_INPUT {
         MINIDUMP_INCLUDE_MODULE_CALLBACK      IncludeModule;
         MINIDUMP_IO_CALLBACK                  Io;
         MINIDUMP_READ_MEMORY_FAILURE_CALLBACK ReadMemoryFailure;
-        ULONG                                 SecondaryFlags;
+		UINT                                  SecondaryFlags;
     };
 } MINIDUMP_CALLBACK_INPUT, *PMINIDUMP_CALLBACK_INPUT;
 
 
 typedef struct _MINIDUMP_MEMORY_INFO {
-    ULONG64 BaseAddress;
-    ULONG64 AllocationBase;
-    ULONG32 AllocationProtect;
-    ULONG32 __alignment1;
-    ULONG64 RegionSize;
-    ULONG32 State;
-    ULONG32 Protect;
-    ULONG32 Type;
-    ULONG32 __alignment2;
+    ULLONG	BaseAddress;
+	ULLONG	AllocationBase;
+	ULLONG	AllocationProtect;
+	ULLONG	__alignment1;
+	ULLONG	RegionSize;
+	UINT	State;
+	UINT	Protect;
+	UINT	Type;
+	UINT	__alignment2;
 } MINIDUMP_MEMORY_INFO, *PMINIDUMP_MEMORY_INFO;
 
 
 typedef struct _MINIDUMP_CALLBACK_OUTPUT {
     union {
-        ULONG  ModuleWriteFlags;
-        ULONG  ThreadWriteFlags;
-        ULONG  SecondaryFlags;
+		UINT  ModuleWriteFlags;
+		UINT  ThreadWriteFlags;
+		UINT  SecondaryFlags;
         struct {
-            ULONG64 MemoryBase;
-            ULONG   MemorySize;
+            ULLONG MemoryBase;
+			UINT   MemorySize;
         };
         struct {
             BOOL CheckCancel;

@@ -1,6 +1,6 @@
+#pragma once
 #ifndef _INC_CSCRIPT_H
 #define _INC_CSCRIPT_H
-#pragma once
 
 #include "common.h"
 #include "CMemBlock.h"

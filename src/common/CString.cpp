@@ -38,7 +38,7 @@
 //#define DEBUG_STRINGS
 #ifdef DEBUG_STRINGS
 int gAmount = 0;  ///< Current amount of CGString.
-ULONG gMemAmount = 0; ///< Total mem allocated by CGStrings.
+UINT gMemAmount = 0; ///< Total mem allocated by CGStrings.
 int gReallocs = 0; ///< Total reallocs caused by CGString resizing.
 #endif
 

@@ -155,12 +155,12 @@ public:
 		// ASSERT( m_hWnd ); ok for this to be NULL !
 		return( ::MessageBox( m_hWnd, lpszText, lpszTitle, fuStyle ));
 	}
-	LONG_PTR SetWindowLongPtr( int nIndex, LONG_PTR dwNewLong )
+	INT_PTR SetWindowLongPtr( int nIndex, INT_PTR dwNewLong )
 	{
 		ASSERT(m_hWnd);
 		return( ::SetWindowLongPtr( m_hWnd, nIndex, dwNewLong ));
 	}
-	LONG_PTR GetWindowLongPtr( int nIndex ) const
+	INT_PTR GetWindowLongPtr( int nIndex ) const
 	{
 		ASSERT(m_hWnd);
 		return( ::GetWindowLongPtr( m_hWnd, nIndex ));

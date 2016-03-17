@@ -105,7 +105,7 @@ DWORD CFile::GetPosition() const
 #endif
 }
 
-DWORD CFile::Seek( LONG lOffset, UINT iOrigin )
+DWORD CFile::Seek(int lOffset, UINT iOrigin )
 {
 #ifdef _WIN32
 	return SetFilePointer( m_hFile, lOffset, NULL, iOrigin );
@@ -348,7 +348,7 @@ bool CFileText::OpenBase( void FAR * pszExtra )
 	return( true );
 }
 
-DWORD CFileText::Seek( LONG offset, UINT origin )
+DWORD CFileText::Seek(int offset, UINT origin )
 {
 	// true = success
 	if ( ! IsFileOpen())

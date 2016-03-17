@@ -137,7 +137,7 @@ TCHAR * CacheableScriptFile::ReadString(TCHAR *pBuffer, size_t sizemax)
 	return pBuffer;
 }
 
-DWORD CacheableScriptFile::Seek(LONG offset, UINT origin) 
+DWORD CacheableScriptFile::Seek(int offset, UINT origin) 
 {
 	if( useDefaultFile() ) 
 	{
