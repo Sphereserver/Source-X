@@ -5,8 +5,8 @@
 
 #pragma once
 #ifndef DATATYPES_H
-
 #define DATATYPES_H
+
 #include <stdint.h>
 
 typedef long long				LLONG;
@@ -15,7 +15,9 @@ typedef unsigned long long		ULLONG;
 
 #ifdef _WIN32
 
-	#include <windows.h>		// because <minwindef.h> can't be directly included
+	#include <winsock2.h>		// winsock2.h and windows.h are already included in os_windows.h (included by common.h), 
+								//	but including datatypes.h and not common.h may be needed as well, so this way we are covering this eventuality.
+	#include <windows.h>		// Including this because <minwindef.h> can't be directly included.
 
 #else	//	assume unix if !_WIN32
 
