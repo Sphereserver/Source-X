@@ -10,7 +10,7 @@
 #endif
 
 #include "../game/CAccount.h"
-#include "../game/CChar.h"
+#include "../game/Chars/CChar.h"
 #include "../game/CClient.h"
 #include "../game/CItemStone.h"
 #include "../game/graysvr.h"

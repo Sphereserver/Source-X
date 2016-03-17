@@ -1,10 +1,10 @@
 // Actions specific to an NPC.
 #include "../common/CGrayUIDextra.h"
 #include "../network/send.h"
+#include "../CClient.h"
+#include "../CServTime.h"
 #include "CChar.h"
 #include "CCharNPC.h"
-#include "CClient.h"
-#include "CServTime.h"
 
 // Get my guild stone for my guild. even if i'm just a STONEPRIV_CANDIDATE ?
 // ARGS:

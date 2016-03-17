@@ -3,12 +3,12 @@
 #include "../common/CException.h"
 #include "../common/CGrayUIDextra.h"
 #include "../network/receive.h"
+#include "../CClient.h"
+#include "../CLog.h"
+#include "../CPathFinder.h"
+#include "../CServTime.h"
+#include "../Triggers.h"
 #include "CCharNPC.h"
-#include "CClient.h"
-#include "CLog.h"
-#include "CPathFinder.h"
-#include "CServTime.h"
-#include "Triggers.h"
 
 //////////////////////////
 // CChar

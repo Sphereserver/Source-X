@@ -2,10 +2,10 @@
 
 #include "../game/CPathFinder.h"
 #include "../network/receive.h"
+#include "../CServTime.h"
+#include "../Triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
-#include "CServTime.h"
-#include "Triggers.h"
 
 //////////////////////////
 // CChar

@@ -5,7 +5,7 @@
 #include "../network/network.h"
 #include "../network/send.h"
 #include "../sphere/ProfileTask.h"
-#include "CChar.h"
+#include "Chars/CChar.h"
 #include "CClient.h"
 #include "CGMPage.h"
 #include "CItem.h"

@@ -11,7 +11,7 @@
 
 //#include "../common/CTime.h"
 //#include "../common/CVarDefMap.h"
-//#include "CCharRefArray.h"
+//#include "Chars/CCharRefArray.h"
 
 #pragma once
 #ifndef _INC_CACCOUNT_H
@@ -23,7 +23,7 @@
 #include "../common/CScriptObj.h"
 #include "../common/CString.h"
 #include "../common/CSocket.h"
-#include "CCharRefArray.h"
+#include "Chars/CCharRefArray.h"
 
 #define PRIV_UNUSED0		0x0001
 #define PRIV_GM				0x0002	///< Acts as a GM (dif from having GM level)

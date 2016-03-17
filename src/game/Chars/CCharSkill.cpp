@@ -2,12 +2,12 @@
 
 #include <cmath>
 #include "../common/CGrayUIDextra.h"
+#include "../CClient.h"
+#include "../CItemVendable.h"
+#include "../CLog.h"
+#include "../Triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
-#include "CClient.h"
-#include "CItemVendable.h"
-#include "CLog.h"
-#include "Triggers.h"
 
 //----------------------------------------------------------------------
 // Skills

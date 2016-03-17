@@ -1,6 +1,6 @@
 
 #include "../common/CException.h"
-#include "CChar.h"
+#include "Chars/CChar.h"
 #include "CClient.h"
 #include "CGMPage.h"
 #include "CServTime.h"

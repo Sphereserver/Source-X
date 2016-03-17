@@ -4,7 +4,7 @@
 #include "../common/CException.h"
 #include "../network/send.h"
 #include "../sphere/ProfileTask.h"
-#include "CChar.h"
+#include "Chars/CChar.h"
 #include "CClient.h"
 #include "CLog.h"
 #include "CParty.h"

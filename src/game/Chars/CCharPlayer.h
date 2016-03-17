@@ -4,9 +4,9 @@
 #include "../common/graymul.h"
 #include "../common/CResourceBase.h"
 #include "../common/grayproto.h"
-#include "CResource.h"
-#include "CServTime.h"
-#include "CAccount.h"
+#include "../CAccount.h"
+#include "../CResource.h"
+#include "../CServTime.h"
 
 
 enum CPC_TYPE	// Player char.

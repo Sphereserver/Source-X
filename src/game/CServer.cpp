@@ -21,7 +21,7 @@
 #include "../network/network.h"
 #include "../sphere/ProfileTask.h"
 #include "CAccount.h"
-#include "CChar.h"
+#include "Chars/CChar.h"
 #include "CClient.h"
 #include "CItemShip.h"
 #include "CServer.h"

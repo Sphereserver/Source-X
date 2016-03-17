@@ -1,6 +1,6 @@
 // Common for client and server.
 
-#include "../game/CChar.h"
+#include "../game/Chars/CChar.h"
 #include "../game/CClient.h"
 #include "../game/CLog.h"
 #include "../network/network.h"

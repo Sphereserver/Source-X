@@ -1,5 +1,5 @@
 
-#include "../game/CChar.h"
+#include "../game/Chars/CChar.h"
 #include "../game/CItem.h"
 #include "../game/CLog.h"
 #include "../game/CObjBase.h"

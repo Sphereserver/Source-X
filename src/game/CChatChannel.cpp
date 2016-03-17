@@ -1,5 +1,5 @@
 
-#include "CChar.h"
+#include "Chars/CChar.h"
 #include "CChatChannel.h"
 #include "CChatChanMember.h"
 #include "CClient.h"

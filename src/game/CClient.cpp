@@ -5,7 +5,7 @@
 #include "../network/send.h"
 #include "../network/packet.h"
 #include "../sphere/ProfileTask.h"
-#include "CChar.h"
+#include "Chars/CChar.h"
 #include "CClient.h"
 #include "CItemSpawn.h"
 #include "CLog.h"

@@ -1,8 +1,8 @@
 
 #include "../common/CException.h"
+#include "../CLog.h"
+#include "../CResource.h"
 #include "CCharBase.h"
-#include "CLog.h"
-#include "CResource.h"
 
 /////////////////////////////////////////////////////////////////
 // -CCharBase

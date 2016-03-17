@@ -1,9 +1,9 @@
 // Actions specific to an NPC.
 #include "../common/CGrayUIDextra.h"
+#include "../CClient.h"
+#include "../CServTime.h"
+#include "../Triggers.h"
 #include "CChar.h"
-#include "CClient.h"
-#include "CServTime.h"
-#include "Triggers.h"
 
 
 // Add some enemy to my Attacker list

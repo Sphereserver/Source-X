@@ -1,6 +1,6 @@
 
 #include <algorithm>
-#include "../game/CChar.h"
+#include "../game/Chars/CChar.h"
 #include "../game/CItemShip.h"
 #include "../game/CLog.h"
 #include "../game/CServTime.h"

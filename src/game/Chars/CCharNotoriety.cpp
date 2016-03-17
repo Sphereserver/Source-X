@@ -1,9 +1,9 @@
 // Actions specific to an NPC.
 #include "../common/CGrayUIDextra.h"
+#include "../CClient.h"
+#include "../Triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
-#include "CClient.h"
-#include "Triggers.h"
 
 // I'm a murderer?
 bool CChar::Noto_IsMurderer() const

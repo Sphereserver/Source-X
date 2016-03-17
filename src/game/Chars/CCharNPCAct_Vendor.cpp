@@ -2,12 +2,12 @@
 
 #include "../game/CPathFinder.h"
 #include "../network/receive.h"
+#include "../CClient.h"
+#include "../CServTime.h"
+#include "../graysvr.h"
+#include "../Triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
-#include "CClient.h"
-#include "CServTime.h"
-#include "graysvr.h"
-#include "Triggers.h"
 
 //////////////////////////
 // CChar

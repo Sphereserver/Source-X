@@ -1,8 +1,8 @@
 
 #include "../common/CException.h"
 #include "../sphere/ProfileTask.h"
-#include "CChar.h"
-#include "CCharNPC.h"
+#include "Chars/CChar.h"
+#include "Chars/CCharNPC.h"
 #include "CClient.h"
 #include "CItem.h"
 #include "CItemSpawn.h"

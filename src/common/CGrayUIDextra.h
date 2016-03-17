@@ -3,7 +3,7 @@
 
 #include "CGrayUID.h"
 #include "../game/CWorld.h"
-#include "../game/CChar.h"
+#include "../game/Chars/CChar.h"
 #include "../game/CObjBase.h"
 
 inline CObjBase * CGrayUIDBase::ObjFind() const

@@ -1,11 +1,11 @@
 // Actions specific to an NPC.
 
+#include "../CClient.h"
+#include "../CItemSpawn.h"
+#include "../CItemVendable.h"
+#include "../Triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
-#include "CClient.h"
-#include "CItemSpawn.h"
-#include "CItemVendable.h"
-#include "Triggers.h"
 
 void CChar::NPC_OnPetCommand( bool fSuccess, CChar * pMaster )
 {

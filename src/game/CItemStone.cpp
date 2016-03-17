@@ -1,6 +1,6 @@
 
 #include "../common/CException.h"
-#include "CChar.h"
+#include "Chars/CChar.h"
 #include "CItemStone.h"
 #include "CLog.h"
 #include "CWorld.h"

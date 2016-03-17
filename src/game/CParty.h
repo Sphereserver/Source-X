@@ -7,7 +7,7 @@
 #include "../common/CString.h"
 #include "../common/CVarDefMap.h"
 #include "../common/grayproto.h"
-#include "CCharRefArray.h"
+#include "Chars/CCharRefArray.h"
 #include "CServTime.h"
 
 class PacketSend;

@@ -1,15 +1,15 @@
 #ifndef _INC_CCHAR_H
 #define _INC_CCHAR_H
 
+#include "../CItemContainer.h"
+#include "../CItemCorpse.h"
+#include "../CItemMemory.h"
+#include "../CItemStone.h"
+#include "../CObjBase.h"
+#include "../CParty.h"
+#include "../common/grayproto.h"
 #include "CCharBase.h"
 #include "CCharPlayer.h"
-#include "CItemContainer.h"
-#include "CItemCorpse.h"
-#include "CItemMemory.h"
-#include "CItemStone.h"
-#include "CObjBase.h"
-#include "CParty.h"
-#include "../common/grayproto.h"
 
 class CCharNPC;
 

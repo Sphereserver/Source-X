@@ -1,6 +1,6 @@
 
 #include "../network/send.h"
-#include "CChar.h"
+#include "Chars/CChar.h"
 #include "CClient.h"
 #include "CItemMap.h"
 #include "CItemSpawn.h"

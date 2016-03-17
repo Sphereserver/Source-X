@@ -1,8 +1,8 @@
 // The physics calculations of the world.
 
 #include "CResource.h"
-#include "CChar.h"
-#include "CCharNPC.h"
+#include "Chars/CChar.h"
+#include "Chars/CCharNPC.h"
 
 //********************************
 // Movement

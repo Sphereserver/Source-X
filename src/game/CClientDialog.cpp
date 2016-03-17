@@ -4,7 +4,7 @@
 #include "../network/network.h"
 #include "../network/receive.h"
 #include "../network/send.h"
-#include "CChar.h"
+#include "Chars/CChar.h"
 #include "CClient.h"
 #include "CLog.h"
 

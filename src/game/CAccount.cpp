@@ -2,7 +2,7 @@
 #include "../common/CException.h"
 #include "../common/CGrayUIDextra.h"
 #include "CAccount.h"
-#include "CChar.h"
+#include "Chars/CChar.h"
 #include "CClient.h"
 #include "CLog.h"
 

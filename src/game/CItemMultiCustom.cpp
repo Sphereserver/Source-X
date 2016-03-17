@@ -6,7 +6,7 @@
 #include "../common/CGrayInst.h"
 #include "../network/network.h"
 #include "../network/send.h"
-#include "CChar.h"
+#include "Chars/CChar.h"
 #include "CClient.h"
 #include "CItemMultiCustom.h"
 #include "CLog.h"

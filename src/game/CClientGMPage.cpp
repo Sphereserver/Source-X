@@ -1,6 +1,6 @@
 
 #include "../network/network.h"
-#include "CChar.h"
+#include "Chars/CChar.h"
 #include "CClient.h"
 #include "CLog.h"
 #include "CServTime.h"

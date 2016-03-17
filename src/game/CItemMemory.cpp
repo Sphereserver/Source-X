@@ -1,5 +1,5 @@
 
-#include "CChar.h"
+#include "Chars/CChar.h"
 #include "CItemMemory.h"
 #include "CItemStone.h"
 
