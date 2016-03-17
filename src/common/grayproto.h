@@ -1,10 +1,11 @@
-// Protocol formats.
-// Define all the data passed from Client to Server.
+/**
+* @file CAcount.h
+* @brief Protocol formats. Define all the data passed from Client to Server.
+*/
 
-#ifndef _INC_GRAYPROTO_H
-
-#define _INC_GRAYPROTO_H
 #pragma once
+#ifndef _INC_GRAYPROTO_H
+#define _INC_GRAYPROTO_H
 
 #include "CString.h"
 #include "graycom.h"

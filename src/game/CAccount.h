@@ -1,8 +1,6 @@
-
 /**
 * @file CAcount.h
 */
-
 
 //#include "../common/CScript.h"
 //#include "../common/CScriptObj.h"
@@ -15,9 +13,11 @@
 //#include "../common/CVarDefMap.h"
 //#include "CCharRefArray.h"
 
+#pragma once
 #ifndef _INC_CACCOUNT_H
 #define _INC_CACCOUNT_H
-#pragma once
+
+
 #include "CResource.h"
 #include "../common/grayproto.h"
 #include "../common/CScriptObj.h"

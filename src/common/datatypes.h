@@ -1,5 +1,5 @@
 /**
-* @file CArray.h
+* @file datatypes.h
 * @brief Sphere standard data types.
 */
 
@@ -74,10 +74,12 @@ typedef unsigned long long		ULLONG;
 		typedef char			TCHAR;
 	#endif
 	typedef wchar_t				WCHAR;
-	typedef	const char *		LPCSTR;
-	typedef const TCHAR *		LPCTSTR;
+	typedef wchar_t *			LPWSTR;
+	typedef const wchar_t *		LPCWSTR;
 	typedef	char *				LPSTR;
+	typedef	const char *		LPCSTR;
 	typedef	TCHAR *				LPTSTR;
+	typedef const TCHAR *		LPCTSTR;
 
 #endif
 
