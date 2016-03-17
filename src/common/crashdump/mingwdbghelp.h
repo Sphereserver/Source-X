@@ -4,8 +4,10 @@
 */
 
 #ifdef __MINGW32__
+
 #ifndef SPHERESERVER_MINGWDBGHELP_H_H
 #define SPHERESERVER_MINGWDBGHELP_H_H
+
 #include <windows.h>
 
 typedef enum _MINIDUMP_TYPE {
@@ -184,4 +186,5 @@ typedef struct _MINIDUMP_CALLBACK_INFORMATION {
 
 
 #endif //SPHERESERVER_MINGWDBGHELP_H_H
+
 #endif  // __MINGW32__

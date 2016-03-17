@@ -22,10 +22,10 @@
 #endif
 
 #ifndef _MTNETWORK
-NetworkIn g_NetworkIn;
-NetworkOut g_NetworkOut;
+	NetworkIn g_NetworkIn;
+	NetworkOut g_NetworkOut;
 #else
-NetworkManager g_NetworkManager;
+	NetworkManager g_NetworkManager;
 #endif
 
 //
@@ -89,7 +89,7 @@ void xRecordPacket(const CClient* client, Packet* packet, LPCTSTR heading)
 		out.Close();
 	}
 }
-#endif
+#endif	//defined(_PACKETDUMP) || defined(_DUMPSUPPORT)
 
 
 /***************************************************************************
@@ -260,8 +260,8 @@ void NetState::init(SOCKET socket, CSocketAddress addr)
 
 	// disable NAGLE algorythm for data compression/coalescing.
 	// Send as fast as we can. we handle packing ourselves.
-	BOOL nbool = true;
-	m_socket.SetSockOpt(TCP_NODELAY, &nbool, sizeof(BOOL), IPPROTO_TCP);
+	char nbool = true;
+	m_socket.SetSockOpt(TCP_NODELAY, &nbool, sizeof(char), IPPROTO_TCP);
 
 	g_Serv.StatInc(SERV_STAT_CLIENTS);
 	CClient* client = new CClient(this);

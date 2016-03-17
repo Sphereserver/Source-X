@@ -718,12 +718,12 @@ bool CClient::OnRxWebPageRequest( BYTE * pRequest, size_t iLen )
 	llinger.l_onoff = 1;
 	llinger.l_linger = 500;	// in mSec
 	m_net->m_socket.SetSockOpt(SO_LINGER, reinterpret_cast<char *>(&llinger), sizeof(linger));
-	BOOL nbool = true;
-	m_net->m_socket.SetSockOpt(SO_KEEPALIVE, &nbool, sizeof(BOOL));
+	char nbool = true;
+	m_net->m_socket.SetSockOpt(SO_KEEPALIVE, &nbool, sizeof(char));
 
 	// disable NAGLE algorythm for data compression
 	nbool = true;
-	m_net->m_socket.SetSockOpt( TCP_NODELAY, &nbool, sizeof(BOOL), IPPROTO_TCP);
+	m_net->m_socket.SetSockOpt( TCP_NODELAY, &nbool, sizeof(char), IPPROTO_TCP);
 	
 	if ( memcmp(ppLines[0], "POST", 4) == 0 )
 	{

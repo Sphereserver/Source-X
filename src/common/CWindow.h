@@ -1,8 +1,9 @@
 // CWindow = a base window class for controls.
 #ifdef _WIN32
+
+#pragma once
 #ifndef _INC_CWINDOW_H
 #define _INC_CWINDOW_H
-#pragma once
 
 #include "../common/graycom.h"
 #include "CString.h"
@@ -435,4 +436,5 @@ public:
 };
 
 #endif	// _INC_CWINDOW_H
+
 #endif	// _WIN32

@@ -1,6 +1,7 @@
 // Stuff for making this application run as an NT service
 
 #ifdef _WIN32
+
 #include <direct.h>
 #include "../common/CException.h"
 #include "../common/grayver.h"
@@ -514,5 +515,5 @@ do_not_nt_service:
 	return -1;
 }
 
-#endif
+#endif //_WIN32
 

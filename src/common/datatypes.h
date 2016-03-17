@@ -36,7 +36,6 @@ typedef unsigned long long		ULLONG;
 	#undef UINT16
 	#undef UINT32
 	#undef UINT64
-	#undef BOOL
 	
 	typedef uint8_t				BYTE;		// 8 bits
 	typedef uint16_t			WORD;		// 16 bits
@@ -62,8 +61,6 @@ typedef unsigned long long		ULLONG;
 	typedef	uint16_t			UINT16;
 	typedef	uint32_t			UINT32;
 	typedef	uint64_t			UINT64;
-
-	typedef	unsigned short		BOOL;
 	typedef intptr_t			INT_PTR, *PINT_PTR;
 	typedef uintptr_t			UINT_PTR, *PUINT_PTR;
 

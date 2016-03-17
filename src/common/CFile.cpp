@@ -1,6 +1,6 @@
 
 #ifndef _WIN32
-#include <errno.h>	// errno
+	#include <errno.h>	// errno
 #endif
 
 #include "../sphere/threads.h"
@@ -68,7 +68,7 @@ bool CFile::Open( LPCTSTR pszName, UINT uMode, CFileException * e )
 		dwCreationDisposition = OPEN_EXISTING;
 
 	m_hFile = CreateFile( GetFilePath(), dwDesiredAccess, dwShareMode, NULL, dwCreationDisposition, FILE_ATTRIBUTE_NORMAL, NULL );
-#else // _WIN32
+#else
 	m_hFile = open( GetFilePath(), uMode );
 #endif // _WIN32
 	return( m_hFile != NOFILE_HANDLE );

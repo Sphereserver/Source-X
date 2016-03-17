@@ -1,13 +1,14 @@
 #if !defined(_CRASHDUMP_H) && defined(_WIN32) && !defined(_DEBUG) && !defined(_NO_CRASHDUMP)
+
 #define _CRASHDUMP_H
 
 #include <windows.h>
 #ifdef __MINGW32__
-#include "mingwdbghelp.h"
-#else  // __MINGW32__
-#pragma warning(disable:4091)
-#include <Dbghelp.h>
-#pragma warning(default:4091)
+	#include "mingwdbghelp.h"
+#else  // !__MINGW32__
+	#pragma warning(disable:4091)
+	#include <Dbghelp.h>
+	#pragma warning(default:4091)
 #endif  // __MINGW32__
 #include <stdio.h>
 
