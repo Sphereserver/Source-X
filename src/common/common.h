@@ -4,15 +4,13 @@
 // 2. MFC or not MFC  (__AFX_H__ in afx.h or _MFC_VER by compiler)
 // 3. 16 bit or 32 bit (_WIN32 defined by compiler)
 // 4. LINUX 32 bit
-#ifndef _INC_COMMON_H
-
-#define _INC_COMMON_H
 #pragma once
+#ifndef _INC_COMMON_H
+#define _INC_COMMON_H
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <stdarg.h>
 #include <assert.h>
 #include <queue>
@@ -20,13 +18,12 @@
 #include <vector>
 #include <stack>
 
+#include "datatypes.h"
 #ifdef _WIN32
 	#include "os_windows.h"
 #else
 	#include "os_unix.h"
 #endif
-#include "datatypes.h"
-
 
 // use to indicate that a function uses printf-style arguments, allowing GCC
 // to validate the format string and arguments:

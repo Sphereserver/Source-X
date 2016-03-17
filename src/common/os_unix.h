@@ -1,7 +1,6 @@
-#ifndef OS_UNIX_H
-	
-#define OS_UNIX_H
 #pragma once
+#ifndef OS_UNIX_H
+#define OS_UNIX_H
 
 #include <pthread.h>
 #include <unistd.h>
