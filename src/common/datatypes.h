@@ -37,7 +37,6 @@ typedef unsigned long long		ULLONG;
 	#undef UINT32
 	#undef UINT64
 	#undef BOOL
-	#undef PUINT
 	
 	typedef uint8_t				BYTE;		// 8 bits
 	typedef uint16_t			WORD;		// 16 bits
@@ -65,7 +64,8 @@ typedef unsigned long long		ULLONG;
 	typedef	uint64_t			UINT64;
 
 	typedef	unsigned short		BOOL;
-	typedef unsigned int *		PUINT;
+	typedef intptr_t			INT_PTR, *PINT_PTR;
+	typedef uintptr_t			UINT_PTR, *PUINT_PTR;
 
 	#include <wchar.h>
 	#ifdef UNICODE
