@@ -1,3 +1,8 @@
+/**
+* @file CArray.h
+* @brief Sphere standard data types.
+*/
+
 #pragma once
 #ifndef DATATYPES_H
 
@@ -11,22 +16,6 @@ typedef unsigned long long		ULLONG;
 #ifdef _WIN32
 
 	#include <windows.h>		// because <minwindef.h> can't be directly included
-
-	/*
-		Use the following types only if you know that you need them.
-		These types have a specified size, while standard data types (short, int, etc) haven't:
-		for example, sizeof(int) is definied to be >= sizeof(short) and <= sizeof(long), so it hasn't a fixed size;
-		nevertheless, most of the times using int instead of INT32 would suit you.
-		This is valid for both non unix and unix OS.
-	*/
-	#define INT8				__int8
-	#define INT16				__int16
-	#define INT32				__int32
-	#define INT64				__int64
-	#define UINT8				unsigned __int8
-	#define UINT16				unsigned __int16
-	#define UINT32				unsigned __int32
-	#define UINT64				unsigned __int64
 
 #else	//	assume unix if !_WIN32
 
@@ -51,10 +40,19 @@ typedef unsigned long long		ULLONG;
 	typedef uint8_t				BYTE;		// 8 bits
 	typedef uint16_t			WORD;		// 16 bits
 	typedef uint32_t			DWORD;		// 32 bits
+
 	typedef unsigned int		UINT;
 	typedef long long			LONGLONG; 	// this must be 64 bits
 	typedef unsigned long long	ULONGLONG;
 	typedef long				LONG;		// never use long! use int or long long!
+
+	/*
+	Use the following types only if you know that you need them.
+	These types have a specified size, while standard data types (short, int, etc) haven't:
+	for example, sizeof(int) is definied to be >= sizeof(short) and <= sizeof(long), so it hasn't a fixed size;
+	nevertheless, most of the times using int instead of INT32 would suit you.
+	This concept is valid for both non unix and unix OS.
+	*/
 	typedef	int8_t				INT8;
 	typedef	int16_t				INT16;
 	typedef	int32_t				INT32;
@@ -63,6 +61,7 @@ typedef unsigned long long		ULLONG;
 	typedef	uint16_t			UINT16;
 	typedef	uint32_t			UINT32;
 	typedef	uint64_t			UINT64;
+
 	typedef	unsigned short		BOOL;
 	typedef unsigned int *		PUINT;
 
@@ -73,9 +72,9 @@ typedef unsigned long long		ULLONG;
 		typedef char			TCHAR;
 	#endif
 	typedef wchar_t				WCHAR;
-	typedef	const TCHAR *		LPCSTR;
+	typedef	const char *		LPCSTR;
 	typedef const TCHAR *		LPCTSTR;
-	typedef	TCHAR *				LPSTR;
+	typedef	char *				LPSTR;
 	typedef	TCHAR *				LPTSTR;
 
 #endif

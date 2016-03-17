@@ -18,8 +18,8 @@
 
 #include <memory.h>
 #include <ctype.h>
-#include <limits.h>
 #include <string.h>
+#include <stdint.h>
 #include <stdio.h>
 
 #ifdef _WIN32
