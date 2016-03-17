@@ -1,8 +1,8 @@
 
 #include "../common/CDataBase.h"
-#include "../graysvr/CLog.h"
-#include "../graysvr/CResource.h"
-#include "../graysvr/CServer.h"
+#include "../game/CLog.h"
+#include "../game/CResource.h"
+#include "../game/CServer.h"
 #include "../sphere/asyncdb.h"
 #include "CException.h"
 

@@ -7,11 +7,11 @@
 #include "../common/CTextConsole.h"
 #include "../common/cwindow.h"
 #include "../common/grayver.h"	// sphere version
-#include "../graysvr/CLog.h"
-#include "../graysvr/CObjBase.h"
-#include "../graysvr/CResource.h"
-#include "../graysvr/CServer.h"
-#include "../graysvr/graysvr.h"
+#include "../game/CLog.h"
+#include "../game/CObjBase.h"
+#include "../game/CResource.h"
+#include "../game/CServer.h"
+#include "../game/graysvr.h"
 #include "ProfileTask.h"
 #include "resource.h"
 #include <commctrl.h>	// NM_RCLICK

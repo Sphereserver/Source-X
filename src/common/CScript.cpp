@@ -1,7 +1,7 @@
 // NOTE: all scripts should be encoded in UTF-8.
 // So they may have full unicode chars inside.
 
-#include "../graysvr/CLog.h"
+#include "../game/CLog.h"
 #include "../sphere/threads.h"
 #include "CException.h"
 #include "CExpression.h"

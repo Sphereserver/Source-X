@@ -1,8 +1,8 @@
 
 #include <cmath>
-#include "../graysvr/CObjBase.h"
-#include "../graysvr/CResource.h"
-#include "../graysvr/CWorld.h"
+#include "../game/CObjBase.h"
+#include "../game/CResource.h"
+#include "../game/CWorld.h"
 #include "../sphere/threads.h"
 #include "CExpression.h"
 #include "common.h"

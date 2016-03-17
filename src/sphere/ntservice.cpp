@@ -4,10 +4,10 @@
 #include <direct.h>
 #include "../common/CException.h"
 #include "../common/grayver.h"
-#include "../graysvr/CLog.h"
-#include "../graysvr/CObjBase.h"
-#include "../graysvr/CServer.h"
-#include "../graysvr/graysvr.h"
+#include "../game/CLog.h"
+#include "../game/CObjBase.h"
+#include "../game/CServer.h"
+#include "../game/graysvr.h"
 #include "ntservice.h"
 
 CNTService g_Service;

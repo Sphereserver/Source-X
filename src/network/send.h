@@ -9,8 +9,8 @@
 #include "network.h"
 #include "../common/grayproto.h"
 #include "../common/CGrayUID.h"
-#include "../graysvr/enums.h"
-#include "../graysvr/CResource.h"
+#include "../game/enums.h"
+#include "../game/CResource.h"
 
 class CItemMap;
 class CMenuItem;

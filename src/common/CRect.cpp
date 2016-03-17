@@ -1,10 +1,10 @@
 
-#include "../graysvr/CItem.h"
-#include "../graysvr/CItemBase.h"
-#include "../graysvr/CLog.h"
-#include "../graysvr/CSector.h"
-#include "../graysvr/CServer.h"
-#include "../graysvr/CWorld.h"
+#include "../game/CItem.h"
+#include "../game/CItemBase.h"
+#include "../game/CLog.h"
+#include "../game/CSector.h"
+#include "../game/CServer.h"
+#include "../game/CWorld.h"
 #include "CRect.h"
 
 

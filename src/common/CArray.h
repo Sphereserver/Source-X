@@ -6,6 +6,8 @@
 #ifndef _INC_CARRAY_H
 #define _INC_CARRAY_H
 
+#include <limits>
+
 #include "common.h"
 #include "graycom.h"
 

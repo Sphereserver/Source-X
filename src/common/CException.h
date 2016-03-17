@@ -88,7 +88,7 @@ public:
 
 //	Exceptions debugging routine.
 #ifdef _EXCEPTIONS_DEBUG
-#include "../graysvr/CLog.h"
+#include "../game/CLog.h"
 #include "../sphere/ProfileTask.h"
 	#define EXC_TRY(a) \
 		LPCTSTR inLocalBlock = ""; \

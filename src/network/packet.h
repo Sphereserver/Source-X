@@ -6,7 +6,7 @@
 
 #include "../common/common.h"
 #include "../common/graycom.h"
-//#include "../graysvr/graysvr.h" Removed to test.
+//#include "../game/graysvr.h" Removed to test.
 
 class NetState;
 class SimplePacketTransaction;

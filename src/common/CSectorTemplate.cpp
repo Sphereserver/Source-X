@@ -1,9 +1,9 @@
 
 #include <algorithm>
-#include "../graysvr/CChar.h"
-#include "../graysvr/CItemShip.h"
-#include "../graysvr/CLog.h"
-#include "../graysvr/CServTime.h"
+#include "../game/CChar.h"
+#include "../game/CItemShip.h"
+#include "../game/CLog.h"
+#include "../game/CServTime.h"
 #include "../sphere/ProfileTask.h"
 #include "CException.h"
 #include "CRect.h"

@@ -2,9 +2,9 @@
 #define _INC_CGRAYUIDEXTRA_H
 
 #include "CGrayUID.h"
-#include "../graysvr/CWorld.h"
-#include "../graysvr/CChar.h"
-#include "../graysvr/CObjBase.h"
+#include "../game/CWorld.h"
+#include "../game/CChar.h"
+#include "../game/CObjBase.h"
 
 inline CObjBase * CGrayUIDBase::ObjFind() const
 {

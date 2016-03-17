@@ -5,7 +5,7 @@
 #define _INC_CSECTORTEMPLATE_H
 #pragma once
 
-#include "../graysvr/CServer.h"
+#include "../game/CServer.h"
 #include "CRect.h"
 #include "CRegion.h"
 class CItem;
