@@ -8,7 +8,7 @@
 #include "../common/CSocket.h"
 #include "../common/CQueue.h"
 #include "../common/grayproto.h"
-#include "../graysvr/CServTime.h"
+#include "../game/CServTime.h"
 #include "../common/CArray.h"
 
 #if !defined(_WIN32) || defined(_LIBEV)

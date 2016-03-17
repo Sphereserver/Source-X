@@ -1,5 +1,5 @@
 
-#include "../graysvr/CClient.h"
+#include "../game/CClient.h"
 #include "network.h"
 #include "packet.h"
 

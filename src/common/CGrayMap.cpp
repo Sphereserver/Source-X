@@ -7,11 +7,11 @@
 #include "CGrayMap.h"
 #include "CRect.h"
 #include "graymul.h"
-#include "../graysvr/CBase.h"
-#include "../graysvr/CLog.h"
-#include "../graysvr/CObjBase.h"
-#include "../graysvr/CResource.h"
-#include "../graysvr/CWorld.h"
+#include "../game/CBase.h"
+#include "../game/CLog.h"
+#include "../game/CObjBase.h"
+#include "../game/CResource.h"
+#include "../game/CWorld.h"
 #include "../sphere/threads.h"
 
 //////////////////////////////////////////////////////////////////

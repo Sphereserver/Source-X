@@ -1,8 +1,8 @@
 
-#include "../graysvr/CLog.h"
-#include "../graysvr/CObjBase.h"
-#include "../graysvr/CServer.h"
-#include "../graysvr/CWorld.h"
+#include "../game/CLog.h"
+#include "../game/CObjBase.h"
+#include "../game/CServer.h"
+#include "../game/CWorld.h"
 #include "CException.h"
 
 #ifdef _WIN32

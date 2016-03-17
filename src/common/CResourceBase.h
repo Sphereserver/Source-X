@@ -7,7 +7,7 @@
 #include "CArray.h"
 #include "CScript.h"
 #include "CScriptObj.h"
-#include "../graysvr/CServTime.h"
+#include "../game/CServTime.h"
 
 class CVarDefContNum;
 

@@ -9,12 +9,12 @@
 	#include <errno.h>	// errno
 #endif
 
-#include "../graysvr/CAccount.h"
-#include "../graysvr/CChar.h"
-#include "../graysvr/CClient.h"
-#include "../graysvr/CItemStone.h"
-#include "../graysvr/graysvr.h"
-#include "../graysvr/CWorld.h"
+#include "../game/CAccount.h"
+#include "../game/CChar.h"
+#include "../game/CClient.h"
+#include "../game/CItemStone.h"
+#include "../game/graysvr.h"
+#include "../game/CWorld.h"
 #include "../sphere/ProfileTask.h"
 #include "CException.h"
 #include "CExpression.h"

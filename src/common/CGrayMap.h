@@ -4,7 +4,7 @@
 
 #ifndef _INC_CGRAYMAP_H
 #define _INC_CGRAYMAP_H
-#include "../graysvr/CServTime.h"
+#include "../game/CServTime.h"
 #include "CArray.h"
 #include "graymul.h"
 #include "CRect.h"

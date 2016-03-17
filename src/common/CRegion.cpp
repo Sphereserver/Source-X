@@ -1,8 +1,8 @@
 // Common for client and server.
 
-#include "../graysvr/CChar.h"
-#include "../graysvr/CClient.h"
-#include "../graysvr/CLog.h"
+#include "../game/CChar.h"
+#include "../game/CClient.h"
+#include "../game/CLog.h"
 #include "../network/network.h"
 #include "../sphere/threads.h"
 #include "CException.h"

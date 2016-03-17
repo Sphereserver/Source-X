@@ -1,8 +1,8 @@
 
 #include "../common/CScriptObj.h"
 #include "../common/graycom.h"
-#include "../graysvr/CServer.h"
-#include "../graysvr/Triggers.h"
+#include "../game/CServer.h"
+#include "../game/Triggers.h"
 #include "asyncdb.h"
 
 CDataBaseAsyncHelper g_asyncHdb;

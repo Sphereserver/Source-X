@@ -1,6 +1,6 @@
 
-#include "../graysvr/CLog.h"
-#include "../graysvr/CResource.h"
+#include "../game/CLog.h"
+#include "../game/CResource.h"
 #include "../sphere/threads.h"
 #include "CGrayInst.h"
 #include "graycom.h"

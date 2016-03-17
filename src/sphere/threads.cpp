@@ -8,8 +8,8 @@
 #include <algorithm>
 #include "../common/CException.h"
 #include "../common/graycom.h"
-#include "../graysvr/CLog.h"
-#include "../graysvr/CServer.h"
+#include "../game/CLog.h"
+#include "../game/CServer.h"
 #include "ProfileTask.h"
 #include "threads.h"
 

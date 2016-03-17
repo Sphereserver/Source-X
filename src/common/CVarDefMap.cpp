@@ -1,8 +1,8 @@
 
 #include "../sphere/strings.h"
 #include "../sphere/threads.h"
-#include "../graysvr/CLog.h"
-#include "../graysvr/CServer.h"
+#include "../game/CLog.h"
+#include "../game/CServer.h"
 #include "CExpression.h"
 #include "CScript.h"
 #include "CTextConsole.h"
