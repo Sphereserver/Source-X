@@ -2180,14 +2180,14 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 	{
 		const CResourceDef* resource = g_Cfg.ResourceGetDef(RESOURCE_ID(RES_DIALOG, context));
 		if (resource == NULL)
-			g_Log.Event(LOGL_EVENT, "Gump: %lu (%s), Uid: 0x%x, Button: %lu.\n", context, "undef", (DWORD)serial, button);
+			g_Log.Event(LOGL_EVENT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, "undef", (DWORD)serial, button);
 		else
 		{
 			const CDialogDef* dialog = dynamic_cast<const CDialogDef*>(resource);
 			if (dialog == NULL)
-				g_Log.Event(LOGL_EVENT, "Gump: %lu (%s), Uid: 0x%x, Button: %lu.\n", context, "undef", (DWORD)serial, button);
+				g_Log.Event(LOGL_EVENT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, "undef", (DWORD)serial, button);
 			else
-				g_Log.Event(LOGL_EVENT, "Gump: %lu (%s), Uid: 0x%x, Button: %lu.\n", context, (LPCTSTR)dialog->GetName(), (DWORD)serial, button);
+				g_Log.Event(LOGL_EVENT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, (LPCTSTR)dialog->GetName(), (DWORD)serial, button);
 		}
 	}
 #endif
@@ -2522,7 +2522,7 @@ bool PacketScreenSize::onReceive(NetState* net)
 	DWORD x = readInt32();
 	DWORD y = readInt32();
 	
-	DEBUG_MSG(("0x%x - 0x%x (%ld-%ld)\n", x, y, x, y));
+	DEBUG_MSG(("0x%x - 0x%x (%d-%d)\n", x, y, x, y));
 
 	client->SetScreenSize(x, y);
 	return true;

@@ -1145,7 +1145,7 @@ PacketSend::PacketSend(const PacketSend *other)
 
 void PacketSend::initLength(void)
 {
-//	DEBUGNETWORK(("Packet %x starts dynamic with pos %ld.\n", m_buffer[0], m_position));
+//	DEBUGNETWORK(("Packet %x starts dynamic with pos %d.\n", m_buffer[0], m_position));
 
 	m_lengthPosition = m_position;
 	writeInt16(static_cast<WORD>(m_lengthPosition));
@@ -1155,7 +1155,7 @@ void PacketSend::fixLength()
 {
 	if (m_lengthPosition > 0)
 	{
-//		DEBUGNETWORK(("Packet %x closes dynamic data writing %ld as length to pos %d.\n", m_buffer[0], m_position, m_lengthPosition));
+//		DEBUGNETWORK(("Packet %x closes dynamic data writing %d as length to pos %d.\n", m_buffer[0], m_position, m_lengthPosition));
 
 		size_t oldPosition = m_position;
 		m_position = m_lengthPosition;

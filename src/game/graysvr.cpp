@@ -185,7 +185,7 @@ bool CMapList::DetectMapSize(int map)
 			break;
 
 		default:
-			DEBUG_ERR(("Unknown map index %d with file size of %lu bytes. Please specify the correct size manually.\n", index, g_Install.m_Maps[index].GetLength()));
+			DEBUG_ERR(("Unknown map index %d with file size of %u bytes. Please specify the correct size manually.\n", index, g_Install.m_Maps[index].GetLength()));
 			break;
 	}
 
@@ -552,7 +552,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 
 	EXC_SET("finilizing");
 	g_Log.Event(LOGM_INIT, "%s", g_Serv.GetStatusString(0x24));
-	g_Log.Event(LOGM_INIT, "Startup complete. items=%lu, chars=%lu\n", g_Serv.StatGet(SERV_STAT_ITEMS), g_Serv.StatGet(SERV_STAT_CHARS));
+	g_Log.Event(LOGM_INIT, "Startup complete. items=%u, chars=%u\n", g_Serv.StatGet(SERV_STAT_ITEMS), g_Serv.StatGet(SERV_STAT_CHARS));
 
 #ifdef _WIN32
 	g_Log.Event(LOGM_INIT, "Press '?' for console commands\n");
@@ -792,7 +792,7 @@ void defragSphere(char *path)
 			{
 				dBytesRead -= mb10;
 				dTotalMb += 10;
-				g_Log.Event(LOGM_INIT, "Total read %lu Mb\n", dTotalMb);
+				g_Log.Event(LOGM_INIT, "Total read %u Mb\n", dTotalMb);
 			}
 			if (( buf[0] == 'S' ) && ( strstr(buf, "SERIAL=") == buf ))
 			{
@@ -812,7 +812,7 @@ void defragSphere(char *path)
 		inf.Close();
 	}
 	dTotalUIDs = uid;
-	g_Log.Event(LOGM_INIT, "Totally having %lu unique objects (UIDs), latest: 0%x\n", uid, uids[uid-1]);
+	g_Log.Event(LOGM_INIT, "Totally having %u unique objects (UIDs), latest: 0%x\n", uid, uids[uid-1]);
 
 	g_Log.Event(LOGM_INIT, "Quick-Sorting the UIDs array...\n");
 	dword_q_sort(uids, 0, dTotalUIDs-1);
@@ -852,7 +852,7 @@ void defragSphere(char *path)
 			{
 				dBytesRead -= mb5;
 				dTotalMb += 5;
-				g_Log.Event(LOGM_INIT, "Total processed %lu Mb\n", dTotalMb);
+				g_Log.Event(LOGM_INIT, "Total processed %u Mb\n", dTotalMb);
 			}
 			p = buf;
 

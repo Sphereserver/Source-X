@@ -545,7 +545,7 @@ void CTimedFunctionHandler::r_Write( CScript & s )
 			if ( tf->uid.IsValidUID() )
 			{
 				s.WriteKeyFormat( "TimerFCall", "%s", tf->funcname );
-				s.WriteKeyFormat( "TimerFNumbers", "%i,%lu,%i", tick, tf->uid.GetObjUID(), tf->elapsed );
+				s.WriteKeyFormat( "TimerFNumbers", "%i,%u,%i", tick, tf->uid.GetObjUID(), tf->elapsed );
 			}
 		}
 	}
@@ -1568,7 +1568,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 #endif
 
 #ifdef _DEBUG 
-			g_Log.EventDebug("Flushing %lu client(s) output data...\n", g_Serv.StatGet(SERV_STAT_CLIENTS));
+			g_Log.EventDebug("Flushing %u client(s) output data...\n", g_Serv.StatGet(SERV_STAT_CLIENTS));
 #endif
 
 #ifndef _MTNETWORK

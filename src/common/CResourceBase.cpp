@@ -346,7 +346,7 @@ LPCTSTR CResourceBase::ResourceGetName( RESOURCE_ID_BASE rid ) const
 	ASSERT(pszTmp);
 	if ( ! rid.IsValidUID())
 	{
-		sprintf( pszTmp, "%ld", static_cast<long>(rid.GetPrivateUID()) );
+		sprintf( pszTmp, "%d", static_cast<long>(rid.GetPrivateUID()) );
 	}
 	else
 	{
@@ -1213,7 +1213,7 @@ bool CResourceLink::ResourceLock( CResourceLock &s )
 
 	// ret = -2 or -3
 	LPCTSTR pszName = GetResourceName();
-	DEBUG_ERR(("ResourceLock '%s':%ld id=%s FAILED\n", static_cast<LPCTSTR>(s.GetFilePath()), m_Context.m_lOffset, pszName));
+	DEBUG_ERR(("ResourceLock '%s':%d id=%s FAILED\n", static_cast<LPCTSTR>(s.GetFilePath()), m_Context.m_lOffset, pszName));
 
 	return false;
 }

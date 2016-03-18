@@ -241,7 +241,7 @@ void _cdecl CGString::Format(LPCTSTR pStr, ...)
 
 void CGString::FormatVal(int iVal)
 {
-	Format("%ld", iVal);
+	Format("%d", iVal);
 }
 
 void CGString::FormatLLVal(long long iVal)
@@ -256,7 +256,7 @@ void CGString::FormatULLVal(unsigned long long iVal)
 
 void CGString::FormatUVal(unsigned int iVal)
 {
-	Format("%lu", iVal);
+	Format("%u", iVal);
 }
 
 void CGString::FormatHex(DWORD dwVal)

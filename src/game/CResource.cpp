@@ -1930,7 +1930,7 @@ bool CResource::SetKRDialogMap(DWORD rid, DWORD idKRDialog)
 		if ( it->second == idKRDialog )	// already mapped to this kr dialog
 			return true;
 
-		g_Log.Event( LOGL_WARN, "Dialog '%s' is already mapped to KR dialog '%lu'.\n", ResourceGetName(RESOURCE_ID(RES_DIALOG, rid)), it->second);
+		g_Log.Event( LOGL_WARN, "Dialog '%s' is already mapped to KR dialog '%u'.\n", ResourceGetName(RESOURCE_ID(RES_DIALOG, rid)), it->second);
 	}
 
 	// prevent double mapping of KR dialog
@@ -1939,7 +1939,7 @@ bool CResource::SetKRDialogMap(DWORD rid, DWORD idKRDialog)
 		if (it->second != idKRDialog)
 			continue;
 
-		DEBUG_ERR(("KR Dialog '%lu' is already mapped to dialog '%s'.\n", idKRDialog, ResourceGetName(RESOURCE_ID(RES_DIALOG, it->first))));
+		DEBUG_ERR(("KR Dialog '%u' is already mapped to dialog '%s'.\n", idKRDialog, ResourceGetName(RESOURCE_ID(RES_DIALOG, it->first))));
 		return false;
 	}
 
@@ -3980,7 +3980,7 @@ bool CResource::Load( bool fResync )
 	{
 		int total, used;
 		Triglist(total, used);
-		g_Serv.SysMessagef("Done loading scripts (%ld of %ld triggers used).\n", used, total);
+		g_Serv.SysMessagef("Done loading scripts (%d of %d triggers used).\n", used, total);
 	}
 	else
 		g_Log.Event(LOGM_INIT, "Done loading scripts.\n");
@@ -4061,7 +4061,7 @@ LPCTSTR CResource::GetDefaultMsg(int lKeyNum)
 	ADDTOCALLSTACK("CResource::GetDefaultMsg");
 	if (( lKeyNum < 0 ) || ( lKeyNum >= DEFMSG_QTY ))
 	{
-		g_Log.EventError("Defmessage %ld out of range [0..%d]\n", lKeyNum, DEFMSG_QTY-1);
+		g_Log.EventError("Defmessage %d out of range [0..%d]\n", lKeyNum, DEFMSG_QTY-1);
 		return "";
 	}
 	return g_Exp.sm_szMessages[lKeyNum];

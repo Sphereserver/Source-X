@@ -2051,7 +2051,7 @@ void CItem::WriteUOX( CScript & s, int index )
 	ADDTOCALLSTACK("CItem::WriteUOX");
 	s.Printf( "SECTION WORLDITEM %d\n", index );
 	s.Printf( "{\n" );
-	s.Printf( "SERIAL %lu\n", (DWORD) GetUID());
+	s.Printf( "SERIAL %u\n", (DWORD) GetUID());
 	s.Printf( "NAME %s\n", GetName());
 	s.Printf( "ID %d\n", GetDispID());
 	s.Printf( "X %d\n", GetTopPoint().m_x );

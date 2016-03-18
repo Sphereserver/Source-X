@@ -214,7 +214,7 @@ bool CClient::addRelay( const CServerDef * pServ )
 		GetAccount()->m_TagDefs.SetNum("customerid", dwCustomerId);
 	}
 
-	DEBUG_MSG(( "%x:Login_Relay to server %s with AuthId %lu\n", GetSocketID(), ipAddr.GetAddrStr(), dwCustomerId ));
+	DEBUG_MSG(( "%x:Login_Relay to server %s with AuthId %u\n", GetSocketID(), ipAddr.GetAddrStr(), dwCustomerId ));
 
 	EXC_SET("server relay packet");
 	new PacketServerRelay(this, dwAddr, pServ->m_ip.GetPort(), dwCustomerId);
@@ -569,7 +569,7 @@ bool CClient::OnRxPing( const BYTE * pData, size_t iLen )
 			time_t dateChange;
 			DWORD dwSize = 0;
 			CFileList::ReadFileInfo( "Axis.db", dateChange, dwSize );
-			SysMessagef("%lu",dwSize);
+			SysMessagef("%u",dwSize);
 			return true;
 		}
 
@@ -876,7 +876,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
 						pAcc->m_TagDefs.DeleteKey("customerid");
 					}
 
-					DEBUG_MSG(("%x:xProcessClientSetup for %s, with AuthId %lu and CliVersion %lu / CliVersionReported %lu\n", GetSocketID(), pAcc->GetName(), tmSid, tmVer, tmVerReported));
+					DEBUG_MSG(("%x:xProcessClientSetup for %s, with AuthId %u and CliVersion %u / CliVersionReported %u\n", GetSocketID(), pAcc->GetName(), tmSid, tmVer, tmVerReported));
 
 					if ( tmSid != 0 && tmSid == pEvent->CharListReq.m_Account )
 					{

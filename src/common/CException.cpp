@@ -53,7 +53,7 @@ bool CGrayError::GetErrorMessage( LPTSTR lpszError, UINT nMaxError,	UINT * pnHel
 			if ( m_hError & 0x80000000 )
 				sprintf( lpszError, "Error Pri=%d, Code=0x%x(%s), Desc='%s'", m_eSeverity, m_hError, szCode, m_pszDescription );
 			else
-				sprintf( lpszError, "Error Pri=%d, Code=%lu(%s), Desc='%s'", m_eSeverity, m_hError, szCode, m_pszDescription );
+				sprintf( lpszError, "Error Pri=%d, Code=%u(%s), Desc='%s'", m_eSeverity, m_hError, szCode, m_pszDescription );
 			return( true );
 		}
 	}
@@ -62,7 +62,7 @@ bool CGrayError::GetErrorMessage( LPTSTR lpszError, UINT nMaxError,	UINT * pnHel
 	if ( m_hError & 0x80000000 )
 		sprintf( lpszError, "Error Pri=%d, Code=0x%x, Desc='%s'", m_eSeverity, m_hError, m_pszDescription );
 	else
-		sprintf( lpszError, "Error Pri=%d, Code=%lu, Desc='%s'", m_eSeverity, m_hError, m_pszDescription );
+		sprintf( lpszError, "Error Pri=%d, Code=%u, Desc='%s'", m_eSeverity, m_hError, m_pszDescription );
 	return( true );
 }
 
@@ -101,7 +101,7 @@ bool CGrayAssert::GetErrorMessage(LPTSTR lpszError, UINT nMaxError, UINT * pnHel
 {
 	UNREFERENCED_PARAMETER(nMaxError);
 	UNREFERENCED_PARAMETER(pnHelpContext);
-	sprintf(lpszError, "Assert pri=%d:'%s' file '%s', line %ld", m_eSeverity, m_pExp, m_pFile, m_lLine);
+	sprintf(lpszError, "Assert pri=%d:'%s' file '%s', line %d", m_eSeverity, m_pExp, m_pFile, m_lLine);
 	return true;
 }
 

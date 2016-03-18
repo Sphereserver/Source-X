@@ -1120,7 +1120,7 @@ void CClient::addItemName( const CItem * pItem )
 		const CItemVendable * pVendItem = dynamic_cast <const CItemVendable *> (pItem);
 		if ( pVendItem )
 		{
-			len += sprintf( szName+len, " (%lu gp)", pVendItem->GetBasePrice());
+			len += sprintf( szName+len, " (%u gp)", pVendItem->GetBasePrice());
 		}
 	}
 
@@ -2813,7 +2813,7 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 					if (ClilocName)
 					{
 						m_TooltipData.InsertAt(0, t = new CClientTooltip(1116690));
-						t->FormatArgs("%s\t#%lu\t%s", lpPrefix, ClilocName, lpSuffix);
+						t->FormatArgs("%s\t#%u\t%s", lpPrefix, ClilocName, lpSuffix);
 					}
 					else
 					{
@@ -3507,7 +3507,7 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 								CResourceDef * pSpawnItemDef = g_Cfg.ResourceGetDef( pItem->m_itSpawnItem.m_ItemID );
 
 								this->m_TooltipData.Add( t = new CClientTooltip( 1060658 ) ); // ~1_val~: ~2_val~
-								t->FormatArgs( "Item\t%lu %s", maximum(1, pItem->m_itSpawnItem.m_pile), pSpawnItemDef ? pSpawnItemDef->GetName() : "none" );
+								t->FormatArgs( "Item\t%u %s", maximum(1, pItem->m_itSpawnItem.m_pile), pSpawnItemDef ? pSpawnItemDef->GetName() : "none" );
 								this->m_TooltipData.Add( t = new CClientTooltip( 1061169 ) ); // range ~1_val~
 								t->FormatArgs( "%hhu", pItem->m_itSpawnItem.m_DistMax );
 								this->m_TooltipData.Add( t = new CClientTooltip( 1074247 ) ); // Live Creatures: ~1_NUM~ / ~2_MAX~
@@ -3858,7 +3858,7 @@ BYTE CClient::Setup_Delete( DWORD iSlot ) // Deletion of character
 {
 	ADDTOCALLSTACK("CClient::Setup_Delete");
 	ASSERT( GetAccount() );
-	DEBUG_MSG(( "%x:Setup_Delete slot=%lu\n", GetSocketID(), iSlot ));
+	DEBUG_MSG(( "%x:Setup_Delete slot=%u\n", GetSocketID(), iSlot ));
 	if ( iSlot >= COUNTOF(m_tmSetupCharList))
 		return PacketDeleteError::NotExist;
 

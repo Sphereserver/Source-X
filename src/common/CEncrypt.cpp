@@ -464,11 +464,11 @@ char* CCrypt::WriteClientVerString( DWORD iClientVersion, char * pStr )
 	ADDTOCALLSTACK("CCrypt::WriteClientVerString");
 	if ( iClientVersion >= MINCLIVER_NEWVERSIONING )
 	{
-		sprintf(pStr, "%lu.%lu.%lu.%lu", iClientVersion / 1000000, (iClientVersion / 10000) % 100, (iClientVersion % 10000) / 100, iClientVersion % 100);
+		sprintf(pStr, "%u.%u.%u.%u", iClientVersion / 1000000, (iClientVersion / 10000) % 100, (iClientVersion % 10000) / 100, iClientVersion % 100);
 	}
 	else
 	{
-		int iVer = sprintf(pStr, "%lu.%lu.%lu", iClientVersion / 1000000, (iClientVersion / 10000) % 100, (iClientVersion % 10000) / 100);
+		int iVer = sprintf(pStr, "%u.%u.%u", iClientVersion / 1000000, (iClientVersion / 10000) % 100, (iClientVersion % 10000) / 100);
 		char iPatch = iClientVersion % 100;
 		if ( iPatch )
 		{

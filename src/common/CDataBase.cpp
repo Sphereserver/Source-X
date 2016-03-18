@@ -30,7 +30,7 @@ bool CDataBase::Connect(const char *user, const char *password, const char *base
 	long ver = mysql_get_client_version();
 	if ( ver < MIN_MYSQL_VERSION_ALLOW )
 	{
-		g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "Your MySQL client library is too old (version %ld). Minimal allowed version is %d. MySQL support disabled.\n", ver, MIN_MYSQL_VERSION_ALLOW);
+		g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "Your MySQL client library is too old (version %d). Minimal allowed version is %d. MySQL support disabled.\n", ver, MIN_MYSQL_VERSION_ALLOW);
 		g_Cfg.m_bMySql = false;
 		return false;
 	}

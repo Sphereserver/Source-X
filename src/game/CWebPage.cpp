@@ -615,7 +615,7 @@ int CWebPageDef::ServPageRequest( CClient * pClient, LPCTSTR pszURLArgs, CGTime 
 		iLen += sprintf(szTmp + iLen, "Last-Modified: %s\r\n",  CGTime(dateChange).FormatGmt(NULL));
 
 	iLen += sprintf( szTmp + iLen,
-		"Content-Length: %lu\r\n"
+		"Content-Length: %u\r\n"
 		"\r\n",
 		dwSize
 		);

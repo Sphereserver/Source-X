@@ -374,7 +374,7 @@ LPCTSTR CServer::GetStatusString( BYTE iIndex ) const
 		case 0x22: // '"'
 			{
 			// shown in the INFO page in game.
-			sprintf(pTemp, GRAY_TITLE ", Name=%s, Age=%lld, Clients=%lu, Items=%lu, Chars=%lu, Mem=%luK\n",
+			sprintf(pTemp, GRAY_TITLE ", Name=%s, Age=%lld, Clients=%u, Items=%u, Chars=%u, Mem=%uK\n",
 				GetName(), iHours, iClients, StatGet(SERV_STAT_ITEMS), StatGet(SERV_STAT_CHARS), StatGet(SERV_STAT_MEM));
 			}
 			break;
@@ -384,7 +384,7 @@ LPCTSTR CServer::GetStatusString( BYTE iIndex ) const
 			break;
 		case 0x25: // '%'
 			// ConnectUO Status string
-			sprintf(pTemp, GRAY_TITLE " Items=%lu, Mobiles=%lu, Clients=%lu, Mem=%lu", StatGet(SERV_STAT_ITEMS), StatGet(SERV_STAT_CHARS), iClients, StatGet(SERV_STAT_MEM));
+			sprintf(pTemp, GRAY_TITLE " Items=%u, Mobiles=%u, Clients=%u, Mem=%u", StatGet(SERV_STAT_ITEMS), StatGet(SERV_STAT_CHARS), iClients, StatGet(SERV_STAT_MEM));
 			break;
 	}
 
@@ -499,7 +499,7 @@ bool CServer::OnConsoleCmd( CGString & sText, CTextConsole * pSrc )
 				"# = Immediate Save world (## to save both world and statics)\n"
 				"A = Accounts file update\n"
 				"B message = Broadcast a message\n"
-				"C = Clients List (%lu)\n"
+				"C = Clients List (%u)\n"
 				"D = Dump data to external file (DA to dump areas)\n"
 				"E = Clear internal variables (like script profile)\n"
 				"G = Garbage collection\n"
@@ -988,7 +988,7 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 			TScriptProfiler::TScriptProfilerTrigger * pTrig;
 			LONGLONG divby = llTimeProfileFrequency / 1000;
 
-			pSrc->SysMessagef( "Scripts: called %lu times and took %i.%04i msec (%i.%04i msec average). Reporting with highest average.\n",
+			pSrc->SysMessagef( "Scripts: called %u times and took %i.%04i msec (%i.%04i msec average). Reporting with highest average.\n",
 					g_profiler.called,
 					static_cast<int>(g_profiler.total / divby),
 					static_cast<int>(((g_profiler.total * 10000) / (divby)) % 10000),
@@ -996,7 +996,7 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 					static_cast<int>(((average * 10000) / (divby)) % 10000)
 			);
 			if (ftDump != NULL)
-				ftDump->Printf("Scripts: called %lu times and took %i.%04i msec (%i.%04i msec average). Reporting with highest average.\n",
+				ftDump->Printf("Scripts: called %u times and took %i.%04i msec (%i.%04i msec average). Reporting with highest average.\n",
 					g_profiler.called,
 					static_cast<int>(g_profiler.total / divby),
 					static_cast<int>(((g_profiler.total * 10000) / (divby)) % 10000),
@@ -1008,7 +1008,7 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 			{
 				if ( pFun->average > average )
 				{
-					pSrc->SysMessagef( "FUNCTION '%s' called %lu times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
+					pSrc->SysMessagef( "FUNCTION '%s' called %u times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
 						pFun->name,
 						pFun->called,
 						static_cast<int>(pFun->average / divby),
@@ -1021,7 +1021,7 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 						static_cast<int>(((pFun->total * 10000) / (divby)) % 10000)
 					);
 					if (ftDump != NULL)
-						ftDump->Printf("FUNCTION '%s' called %lu times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
+						ftDump->Printf("FUNCTION '%s' called %u times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
 							pFun->name,
 							pFun->called,
 							static_cast<int>(pFun->average / divby),
@@ -1039,7 +1039,7 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 			{
 				if ( pTrig->average > average )
 				{
-					pSrc->SysMessagef( "TRIGGER '%s' called %lu times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
+					pSrc->SysMessagef( "TRIGGER '%s' called %u times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
 						pTrig->name,
 						pTrig->called,
 						static_cast<int>(pTrig->average / divby),
@@ -1052,7 +1052,7 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 						static_cast<int>(((pTrig->total * 10000) / (divby)) % 10000)
 					);
 					if (ftDump != NULL)
-						ftDump->Printf("TRIGGER '%s' called %lu times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
+						ftDump->Printf("TRIGGER '%s' called %u times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
 							pTrig->name,
 							pTrig->called,
 							static_cast<int>(pTrig->average / divby),
