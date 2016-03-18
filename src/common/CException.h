@@ -1,3 +1,9 @@
+/*
+* @file CException.h
+* @brief Management of exceptions.
+*/
+
+#pragma once
 #ifndef _INC_CEXCEPTION_H
 #define _INC_CEXCEPTION_H
 
@@ -88,6 +94,7 @@ public:
 
 //	Exceptions debugging routine.
 #ifdef _EXCEPTIONS_DEBUG
+
 #include "../game/CLog.h"
 #include "../sphere/ProfileTask.h"
 	#define EXC_TRY(a) \
@@ -184,7 +191,7 @@ public:
 	#define EXC_ADD_SCRIPTSRC	g_Log.EventDebug("command '%s' args '%s' [%p]\n", s.GetKey(), s.GetArgRaw(), static_cast<void *>(pSrc));
 	#define EXC_ADD_KEYRET(src)	g_Log.EventDebug("command '%s' ret '%s' [%p]\n", pszKey, (LPCTSTR)sVal, static_cast<void *>(src));
 
-#else
+#else //!_EXCEPTIONS_DEBUG
 
 	#define EXC_TRY(a) {
 	#define EXC_SET(a)
@@ -202,6 +209,6 @@ public:
 	#define EXC_ADD_KEYRET(a)
 	#define EXC_CATCH_EXCEPTION(a)
 
-#endif
+#endif //_EXCEPTIONS_DEBUG
 
-#endif
+#endif //_INC_CEXCEPTION_H

@@ -2,6 +2,7 @@
 * @file CQueue.h
 */
 
+#pragma once
 #ifndef _INC_CQUEUE_H
 #define _INC_CQUEUE_H
 
@@ -74,4 +75,4 @@ public:
 	void AddNewDataFinish( size_t iLen );
 };
 
-#endif
+#endif //_INC_CQUEUE_H

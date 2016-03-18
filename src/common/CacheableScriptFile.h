@@ -1,3 +1,4 @@
+#pragma once
 #ifndef CACHEABLE_SCRIPT_FILE_H
 #define CACHEABLE_SCRIPT_FILE_H
 

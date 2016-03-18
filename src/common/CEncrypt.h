@@ -1,10 +1,11 @@
-//
-// CEncrypt.h
-//
+/*
+* @file CEncrypt.h
+* @brief Support for login encryption and MD5 hashing.
+*/
 
+#pragma once
 #ifndef _INC_CENCRYPT_H
 #define _INC_CENCRYPT_H
-#pragma once
 
 #include "CScript.h"
 
@@ -18,6 +19,7 @@
 #include "CMD5.h"
 
 #define CLIENT_END 0x00000001
+
 
 enum CONNECT_TYPE	// What type of client connection is this ?
 {
@@ -218,4 +220,4 @@ protected:
 	void RelayGameCryptStart( BYTE * pOutput, const BYTE * pInput, size_t iLen );
 };
 
-#endif
+#endif //_INC_CENCRYPT_H

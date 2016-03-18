@@ -1,7 +1,9 @@
-//
-//	CDataBase
-//		mySQL wrapper for easier data operations witheen in-game server
-//
+/*
+* @file CDataBase.h
+* @brief mySQL wrapper for easier data operations witheen in-game server.
+*/
+
+#pragma once
 #ifndef CDATABASE_H
 #define	CDATABASE_H
 
@@ -18,6 +20,7 @@
 #endif
 
 #define	MIN_MYSQL_VERSION_ALLOW	40115
+
 
 class CDataBase : public CScriptObj
 {

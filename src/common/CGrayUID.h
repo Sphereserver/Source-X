@@ -1,7 +1,8 @@
 /**
-* @file CQueue.h
+* @file CGrayUID.h
 */
 
+#pragma once
 #ifndef _INC_CGRAYUID_H
 #define _INC_CGRAYUID_H
 
@@ -68,4 +69,4 @@ struct CGrayUID : public CGrayUIDBase
 	CGrayUID( DWORD dw );
 };
 
-#endif
+#endif //_INC_CGRAYUID_H

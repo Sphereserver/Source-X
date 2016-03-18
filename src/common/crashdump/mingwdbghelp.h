@@ -8,7 +8,6 @@
 #ifndef SPHERESERVER_MINGWDBGHELP_H_H
 #define SPHERESERVER_MINGWDBGHELP_H_H
 
-#include <windows.h>
 #include "../datatypes.h"
 
 typedef enum _MINIDUMP_TYPE {

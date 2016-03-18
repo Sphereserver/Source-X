@@ -1,10 +1,10 @@
-//
-// Crect.h
-//
+/**
+* @file CRect.h
+*/
 
+#pragma once
 #ifndef _INC_CRECT_H
 #define _INC_CRECT_H
-#pragma once
 
 #include "CString.h"
 #include "graymul.h"
@@ -99,5 +99,5 @@ struct CPointSort : public CPointMap
 	virtual ~CPointSort(); // just to make this dynamic
 };
 
-#endif	// _INC_CRECT_H
+#endif	//_INC_CRECT_H
 

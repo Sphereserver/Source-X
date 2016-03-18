@@ -1,6 +1,6 @@
-//
-// CgrayMap.H
-//
+/**
+* @file CGrayMap.h
+*/
 
 #ifndef _INC_CGRAYMAP_H
 #define _INC_CGRAYMAP_H

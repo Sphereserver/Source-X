@@ -4,6 +4,7 @@
 // 2. MFC or not MFC  (__AFX_H__ in afx.h or _MFC_VER by compiler)
 // 3. 16 bit or 32 bit (_WIN32 defined by compiler)
 // 4. LINUX 32 bit
+
 #pragma once
 #ifndef _INC_COMMON_H
 #define _INC_COMMON_H
@@ -20,11 +21,11 @@
 
 #include "datatypes.h"
 #ifdef _WIN32
-#ifdef __MINGW32__
-#define _cdecl __cdecl
-#endif //__MINGW32__
+	#ifdef __MINGW32__
+		#define _cdecl __cdecl
+	#endif
 	#include "os_windows.h"
-#else //_WIN32
+#else //!_WIN32
 	#include "os_unix.h"
 #endif //_WIN32
 
@@ -82,10 +83,10 @@ typedef unsigned int	ERROR_CODE;
 
 #ifndef minimum
 	#define minimum(x,y)	((x)<(y)?(x):(y))
-#endif	// minimum
+#endif
 #ifndef maximum
 	#define maximum(x,y)	((x)>(y)?(x):(y))
-#endif //maximum
+#endif
 
 #define medium(x,y,z)		((x)>(y)?(x):((z)<(y)?(z):(y)))
 
@@ -191,7 +192,7 @@ public:
 		va_end( vargs );
 		return( iret );
 	}
-#endif
+#endif //_DEBUG
 
 	#define DEBUG_ERR(_x_)	g_pLog->EventError _x_
 

@@ -1,29 +1,27 @@
-//
-// CAssoc.H
-// Simple shared usefull base classes.
-//
-///////////////////////////////////////////////////////////////////////////////
+/*
+* @file CAssoc.H
+* @brief Simple shared useful base classes.
+*/
 
+#pragma once
 #ifndef _INC_CASSOC_H
 #define _INC_CASSOC_H
-#pragma once
 
+// #include <shellapi.h>
 #include "CFile.h"
 #include "CArray.h"
 #include "graycom.h"
 
-////////////////////////////////////////////////////////////////////////
-
 #ifndef PT_REG_STRMAX
-#define PT_REG_STRMAX		128
+	#define PT_REG_STRMAX		128
 #endif
 #ifndef PT_REG_ROOTKEY
-#define PT_REG_ROOTKEY		HKEY_LOCAL_MACHINE
+	#define PT_REG_ROOTKEY		HKEY_LOCAL_MACHINE
+#endif
+#ifndef OFFSETOF			// stddef.h ?
+	#define OFFSETOF(s,m)   	(int)( (BYTE *)&(((s *)0)->m) - (BYTE *)0 )
 #endif
 
-////////////////////////////////////////////////////////////////////////
-
-// #include <shellapi.h>
 
 enum ELEM_TYPE	// define types of structure/record elements.
 {
@@ -43,9 +41,6 @@ enum ELEM_TYPE	// define types of structure/record elements.
 	ELEM_QTY
 };
 
-#ifndef OFFSETOF			// stddef.h ?
-	#define OFFSETOF(s,m)   	(int)( (BYTE *)&(((s *)0)->m) - (BYTE *)0 )
-#endif
 
 struct CElementDef
 {
@@ -135,4 +130,3 @@ public:
 };
 
 #endif // _INC_CASSOC_H
-

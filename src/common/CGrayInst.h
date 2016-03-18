@@ -1,6 +1,10 @@
+/**
+* @file CGrayInst.h
+*/
+
+#pragma once
 #ifndef _INC_CGRAYINST_H
 #define _INC_CGRAYINST_H
-#pragma once
 
 #include "../common/graymul.h"
 #include "../common/CFile.h"

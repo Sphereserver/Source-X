@@ -1,10 +1,15 @@
-
-/*
-	This code has been built from scratch using rfc1321 and Colin Plumb's
-	public domain code.
+ /**
+ * @file CGrayUID.h
+ * @brief MD5 hashing.
  */
 
-#if !defined( __CMD5_H__ )
+ /*
+ This code has been built from scratch using rfc1321 and Colin Plumb's
+ public domain code.
+ */
+
+#pragma once
+#ifndef __CMD5_H__ 
 #define __CMD5_H__
 
 #include <string.h>
@@ -45,4 +50,4 @@ public:
 	}
 };
 
-#endif
+#endif //__CMD5_H__
