@@ -420,7 +420,7 @@ void CServer::ListClients( CTextConsole * pConsole ) const
 			if ( pClient->IsPriv(PRIV_GM) || pClient->GetPrivLevel() >= PLEVEL_Counsel )
 				chRank = '+';
 
-			sprintf(tmpMsg, "%lx:Acc%c'%s', Char='%s' (IP: %s)\n",
+			sprintf(tmpMsg, "%x:Acc%c'%s', Char='%s' (IP: %s)\n",
 				pClient->GetSocketID(),
 				chRank,
 				pClient->GetAccount()->GetName(),
@@ -446,7 +446,7 @@ void CServer::ListClients( CTextConsole * pConsole ) const
 					break;
 			}
 
-			sprintf(tmpMsg, "%lx:Acc='%s' (IP: %s) %s\n",
+			sprintf(tmpMsg, "%x:Acc='%s' (IP: %s) %s\n",
 				pClient->GetSocketID(),
 				pClient->GetAccount() != NULL ? pClient->GetAccount()->GetName() : "<NA>",
 				pClient->GetPeerStr(),
@@ -1589,7 +1589,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 
 	EXC_DEBUG_START;
 	EXC_ADD_SCRIPTSRC;
-	g_Log.EventDebug("source '%s' char '%s' uid '0%lx'\n", (pSrc && pSrc->GetName()) ? pSrc->GetName() : "",
+	g_Log.EventDebug("source '%s' char '%s' uid '0%x'\n", (pSrc && pSrc->GetName()) ? pSrc->GetName() : "",
 		(pSrc && pSrc->GetChar()) ? pSrc->GetChar()->GetName() : "",
 		(pSrc && pSrc->GetChar()) ? (DWORD)pSrc->GetChar()->GetUID() : 0 );
 	EXC_DEBUG_END;

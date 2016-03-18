@@ -812,7 +812,7 @@ void defragSphere(char *path)
 		inf.Close();
 	}
 	dTotalUIDs = uid;
-	g_Log.Event(LOGM_INIT, "Totally having %lu unique objects (UIDs), latest: 0%lx\n", uid, uids[uid-1]);
+	g_Log.Event(LOGM_INIT, "Totally having %lu unique objects (UIDs), latest: 0%x\n", uid, uids[uid-1]);
 
 	g_Log.Event(LOGM_INIT, "Quick-Sorting the UIDs array...\n");
 	dword_q_sort(uids, 0, dTotalUIDs-1);
@@ -979,7 +979,7 @@ void defragSphere(char *path)
 				{
 					*p = 0;
 					strcpy(z, p1);
-					sprintf(z1, "0%lx", uid);
+					sprintf(z1, "0%x", uid);
 					strcat(buf, z1);
 					strcat(buf, z);
 				}

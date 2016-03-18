@@ -269,7 +269,7 @@ void CGString::FormatHex(DWORD dwVal)
 	long long dwVal64 = ((int)dwVal);
 	if (dwVal64 < 0)
 		return FormatLLHex(dwVal64);
-	Format("0%lx", dwVal);
+	Format("0%x", dwVal);
 }
 
 void CGString::FormatLLHex(unsigned long long dwVal)

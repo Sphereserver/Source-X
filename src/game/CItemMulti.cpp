@@ -78,7 +78,7 @@ bool CItemMulti::MultiRealizeRegion()
 	const CItemBaseMulti * pMultiDef = Multi_GetDef();
 	if ( pMultiDef == NULL )
 	{
-		DEBUG_ERR(( "Bad Multi type 0%x, uid=0%lx\n", GetID(), (DWORD) GetUID()));
+		DEBUG_ERR(( "Bad Multi type 0%x, uid=0%x\n", GetID(), (DWORD) GetUID()));
 		return false;
 	}
 

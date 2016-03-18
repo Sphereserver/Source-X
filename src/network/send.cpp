@@ -4530,14 +4530,14 @@ bool PacketHouseDesign::writePlaneData(int plane, int itemCount, BYTE* data, int
 	{
 		// an error occured with this floor, but we should be able to continue to the next without problems
 		delete[] compressBuffer;
-		g_Log.EventError("Compress failed with error %d when generating house design for floor %d on building 0%lx.\n", error, plane, (DWORD)m_house->GetUID());
+		g_Log.EventError("Compress failed with error %d when generating house design for floor %d on building 0%x.\n", error, plane, (DWORD)m_house->GetUID());
 		return false;
 	}
 	else if ( compressLength <= 0 || compressLength >= PLANEDATA_BUFFER )
 	{
 		// too much data, but we should be able to continue to the next floor without problems
 		delete[] compressBuffer;
-		g_Log.EventWarn("Floor %d on building 0%lx too large with compressed length of %lu.\n", plane, (DWORD)m_house->GetUID(), compressLength);
+		g_Log.EventWarn("Floor %d on building 0%x too large with compressed length of %lu.\n", plane, (DWORD)m_house->GetUID(), compressLength);
 		return false;
 	}
 
@@ -4591,14 +4591,14 @@ void PacketHouseDesign::flushStairData(void)
 	{
 		// an error occured with this block, but we should be able to continue to the next without problems
 		delete[] compressBuffer;
-		g_Log.EventError("Compress failed with error %d when generating house design on building 0%lx.\n", error, (DWORD)m_house->GetUID());
+		g_Log.EventError("Compress failed with error %d when generating house design on building 0%x.\n", error, (DWORD)m_house->GetUID());
 		return;
 	}
 	else if (compressLength <= 0 || compressLength >= STAIRDATA_BUFFER)
 	{
 		// too much data, but we should be able to continue to the next block without problems
 		delete[] compressBuffer;
-		g_Log.EventWarn("Building 0%lx too large with compressed length of %lu.\n", (DWORD)m_house->GetUID(), compressLength);
+		g_Log.EventWarn("Building 0%x too large with compressed length of %lu.\n", (DWORD)m_house->GetUID(), compressLength);
 		return;
 	}
 

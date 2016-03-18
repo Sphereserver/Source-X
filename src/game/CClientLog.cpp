@@ -101,7 +101,7 @@ bool CClient::addLoginErr(BYTE code)
 	if (code >= COUNTOF(sm_Login_ErrMsg))
 		code = PacketLoginError::Other;
 	
-	g_Log.EventWarn( "%lx:Bad Login %d (%s)\n", GetSocketID(), code, sm_Login_ErrMsg[static_cast<size_t>(code)] );
+	g_Log.EventWarn( "%x:Bad Login %d (%s)\n", GetSocketID(), code, sm_Login_ErrMsg[static_cast<size_t>(code)] );
 
 	// translate the code into a code the client will understand
 	switch (code)
@@ -191,12 +191,12 @@ bool CClient::addRelay( const CServerDef * pServ )
 	if ( ipAddr.IsLocalAddr())	// local server address not yet filled in.
 	{
 		ipAddr = m_net->m_socket.GetSockName();
-		DEBUG_MSG(( "%lx:Login_Relay to %s\n", GetSocketID(), ipAddr.GetAddrStr() ));
+		DEBUG_MSG(( "%x:Login_Relay to %s\n", GetSocketID(), ipAddr.GetAddrStr() ));
 	}
 
 	if ( GetPeer().IsLocalAddr() || GetPeer().IsSameIP( ipAddr ))	// weird problem with client relaying back to self.
 	{
-		DEBUG_MSG(( "%lx:Login_Relay loopback to server %s\n", GetSocketID(), ipAddr.GetAddrStr() ));
+		DEBUG_MSG(( "%x:Login_Relay loopback to server %s\n", GetSocketID(), ipAddr.GetAddrStr() ));
 		ipAddr.SetAddrIP( SOCKET_LOCAL_ADDRESS );
 	}
 
@@ -214,7 +214,7 @@ bool CClient::addRelay( const CServerDef * pServ )
 		GetAccount()->m_TagDefs.SetNum("customerid", dwCustomerId);
 	}
 
-	DEBUG_MSG(( "%lx:Login_Relay to server %s with AuthId %lu\n", GetSocketID(), ipAddr.GetAddrStr(), dwCustomerId ));
+	DEBUG_MSG(( "%x:Login_Relay to server %s with AuthId %lu\n", GetSocketID(), ipAddr.GetAddrStr(), dwCustomerId ));
 
 	EXC_SET("server relay packet");
 	new PacketServerRelay(this, dwAddr, pServ->m_ip.GetPort(), dwCustomerId);
@@ -256,7 +256,7 @@ bool CClient::Login_Relay( unsigned int iRelay ) // Relay player to a selected I
 		pServ = g_Cfg.Server_GetDef(iRelay);
 		if ( pServ == NULL )
 		{
-			DEBUG_ERR(( "%lx:Login_Relay BAD index! %u\n", GetSocketID(), iRelay ));
+			DEBUG_ERR(( "%x:Login_Relay BAD index! %u\n", GetSocketID(), iRelay ));
 			return( false );
 		}
 	}
@@ -388,7 +388,7 @@ bool CClient::OnRxConsole( const BYTE * pData, size_t iLen )
 				iRet = g_Serv.OnConsoleCmd( m_Targ_Text, this );
 
 				if (g_Cfg.m_fTelnetLog && GetPrivLevel() >= g_Cfg.m_iCommandLog)
-					g_Log.Event(LOGM_GM_CMDS, "%lx:'%s' commands '%s'=%d\n", GetSocketID(), GetName(), static_cast<LPCTSTR>(m_Targ_Text), iRet);
+					g_Log.Event(LOGM_GM_CMDS, "%x:'%s' commands '%s'=%d\n", GetSocketID(), GetName(), static_cast<LPCTSTR>(m_Targ_Text), iRet);
 			}
 		}
 	}
@@ -589,14 +589,14 @@ bool CClient::OnRxPing( const BYTE * pData, size_t iLen )
 
 			if ( g_Cfg.m_fCUOStatus == false )
 			{
-				g_Log.Event( LOGM_CLIENTS_LOG|LOGL_EVENT, "%lx:CUO Status request from %s has been rejected.\n", GetSocketID(), GetPeerStr());
+				g_Log.Event( LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:CUO Status request from %s has been rejected.\n", GetSocketID(), GetPeerStr());
 				return false;
 			}
 
 			// enter 'remote admin mode'
 			SetConnectType( CONNECT_TELNET );
 
-			g_Log.Event( LOGM_CLIENTS_LOG|LOGL_EVENT, "%lx:CUO Status request from %s\n", GetSocketID(), GetPeerStr());
+			g_Log.Event( LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:CUO Status request from %s\n", GetSocketID(), GetPeerStr());
 
 			SysMessage( g_Serv.GetStatusString( 0x25 ) );
 
@@ -615,14 +615,14 @@ bool CClient::OnRxPing( const BYTE * pData, size_t iLen )
 
 			if ( g_Cfg.m_fUOGStatus == false )
 			{
-				g_Log.Event( LOGM_CLIENTS_LOG|LOGL_EVENT, "%lx:UOG Status request from %s has been rejected.\n", GetSocketID(), GetPeerStr());
+				g_Log.Event( LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:UOG Status request from %s has been rejected.\n", GetSocketID(), GetPeerStr());
 				return false;
 			}
 
 			// enter 'remote admin mode'
 			SetConnectType( CONNECT_TELNET );
 
-			g_Log.Event( LOGM_CLIENTS_LOG|LOGL_EVENT, "%lx:UOG Status request from %s\n", GetSocketID(), GetPeerStr());
+			g_Log.Event( LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:UOG Status request from %s\n", GetSocketID(), GetPeerStr());
 
 			if (pData[0] == 0x7F)
 				SetConnectType( CONNECT_UOG );
@@ -635,7 +635,7 @@ bool CClient::OnRxPing( const BYTE * pData, size_t iLen )
 		}
 	}
 
-	g_Log.Event( LOGM_CLIENTS_LOG|LOGL_EVENT, "%lx:Unknown/invalid ping data '0x%x' from %s (Len: %" FMTSIZE_T ")\n", GetSocketID(), pData[0], GetPeerStr(), iLen);
+	g_Log.Event( LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Unknown/invalid ping data '0x%x' from %s (Len: %" FMTSIZE_T ")\n", GetSocketID(), pData[0], GetPeerStr(), iLen);
 	return false;
 }
 
@@ -737,7 +737,7 @@ bool CClient::OnRxWebPageRequest( BYTE * pRequest, size_t iLen )
 		// Content-Length: 29
 		// T1=stuff1&B1=Submit&T2=stuff2
 
-		g_Log.Event(LOGM_HTTP|LOGL_EVENT, "%lx:HTTP Page Post '%s'\n", GetSocketID(), static_cast<LPCTSTR>(ppRequest[1]));
+		g_Log.Event(LOGM_HTTP|LOGL_EVENT, "%x:HTTP Page Post '%s'\n", GetSocketID(), static_cast<LPCTSTR>(ppRequest[1]));
 
 		CWebPageDef	*pWebPage = g_Cfg.FindWebPage(ppRequest[1]);
 		if ( !pWebPage )
@@ -764,7 +764,7 @@ bool CClient::OnRxWebPageRequest( BYTE * pRequest, size_t iLen )
 		if ( !Str_GetBare( szPageName, Str_TrimWhitespace(ppRequest[1]), sizeof(szPageName), "!\"#$%&()*,:;<=>?[]^{|}-+'`" ) )
 			return false;
 
-		g_Log.Event(LOGM_HTTP|LOGL_EVENT, "%lx:HTTP Page Request '%s', alive=%d\n", GetSocketID(), static_cast<LPCTSTR>(szPageName), fKeepAlive);
+		g_Log.Event(LOGM_HTTP|LOGL_EVENT, "%x:HTTP Page Request '%s', alive=%d\n", GetSocketID(), static_cast<LPCTSTR>(szPageName), fKeepAlive);
 		if ( CWebPageDef::ServPage(this, szPageName, &dateIfModifiedSince) )
 		{
 			if ( fKeepAlive )
@@ -796,7 +796,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
 
 	if ( !m_Crypt.Init( m_net->m_seed, bincopy.m_Raw, iLen, GetNetState()->isClientKR() ) )
 	{
-		DEBUG_MSG(( "%lx:Odd login message length %" FMTSIZE_T "?\n", GetSocketID(), iLen ));
+		DEBUG_MSG(( "%x:Odd login message length %" FMTSIZE_T "?\n", GetSocketID(), iLen ));
 #ifdef _DEBUG
 		xRecordPacketData(this, (const BYTE *)pEvent, iLen, "client->server");
 #endif
@@ -876,7 +876,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
 						pAcc->m_TagDefs.DeleteKey("customerid");
 					}
 
-					DEBUG_MSG(("%lx:xProcessClientSetup for %s, with AuthId %lu and CliVersion %lu / CliVersionReported %lu\n", GetSocketID(), pAcc->GetName(), tmSid, tmVer, tmVerReported));
+					DEBUG_MSG(("%x:xProcessClientSetup for %s, with AuthId %lu and CliVersion %lu / CliVersionReported %lu\n", GetSocketID(), pAcc->GetName(), tmSid, tmVer, tmVerReported));
 
 					if ( tmSid != 0 && tmSid == pEvent->CharListReq.m_Account )
 					{

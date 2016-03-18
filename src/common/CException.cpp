@@ -51,7 +51,7 @@ bool CGrayError::GetErrorMessage( LPTSTR lpszError, UINT nMaxError,	UINT * pnHel
 		if ( nChars )
 		{
 			if ( m_hError & 0x80000000 )
-				sprintf( lpszError, "Error Pri=%d, Code=0x%lx(%s), Desc='%s'", m_eSeverity, m_hError, szCode, m_pszDescription );
+				sprintf( lpszError, "Error Pri=%d, Code=0x%x(%s), Desc='%s'", m_eSeverity, m_hError, szCode, m_pszDescription );
 			else
 				sprintf( lpszError, "Error Pri=%d, Code=%lu(%s), Desc='%s'", m_eSeverity, m_hError, szCode, m_pszDescription );
 			return( true );
@@ -60,7 +60,7 @@ bool CGrayError::GetErrorMessage( LPTSTR lpszError, UINT nMaxError,	UINT * pnHel
 #endif
 
 	if ( m_hError & 0x80000000 )
-		sprintf( lpszError, "Error Pri=%d, Code=0x%lx, Desc='%s'", m_eSeverity, m_hError, m_pszDescription );
+		sprintf( lpszError, "Error Pri=%d, Code=0x%x, Desc='%s'", m_eSeverity, m_hError, m_pszDescription );
 	else
 		sprintf( lpszError, "Error Pri=%d, Code=%lu, Desc='%s'", m_eSeverity, m_hError, m_pszDescription );
 	return( true );
@@ -146,11 +146,11 @@ bool CGrayException::GetErrorMessage(LPTSTR lpszError, UINT nMaxError, UINT * pn
 		case STATUS_INTEGER_DIVIDE_BY_ZERO:	zMsg = "Integer: Divide by Zero";	break;
 		case STATUS_STACK_OVERFLOW:			zMsg = "Stack Overflow";			break;
 		default:
-			sprintf(lpszError, "code=0x%lx, (0x%lx)", m_hError, m_dwAddress);
+			sprintf(lpszError, "code=0x%x, (0x%x)", m_hError, m_dwAddress);
 			return true;
 	}
 
-	sprintf(lpszError, "\"%s\" (0x%lx)", zMsg, m_dwAddress);
+	sprintf(lpszError, "\"%s\" (0x%x)", zMsg, m_dwAddress);
 	return true;
 }
 

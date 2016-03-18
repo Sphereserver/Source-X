@@ -156,7 +156,7 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fT
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("point '%d,%d,%d,%d' type '%d' [0%lx]\n", pt.m_x, pt.m_y, pt.m_z, pt.m_map, static_cast<int>(Type), 
+	g_Log.EventDebug("point '%d,%d,%d,%d' type '%d' [0%x]\n", pt.m_x, pt.m_y, pt.m_z, pt.m_map, static_cast<int>(Type), 
 		pCharSrc ? static_cast<DWORD>(pCharSrc->GetUID()) : 0);
 	EXC_DEBUG_END;
 	return NULL;

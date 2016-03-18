@@ -349,7 +349,7 @@ bool CGrayMapBlockState::CheckTile_Terrain( DWORD wItemBlockFlags, signed char z
 				if ( (m_Bottom.m_dwBlockFlags & (CAN_I_PLATFORM|CAN_I_CLIMB)) && (z - m_Bottom.m_z <= 4) )
 					return true;
 			}
-			//DEBUG_ERR(("wItemBlockFlags 0x%lx\n",wItemBlockFlags));
+			//DEBUG_ERR(("wItemBlockFlags 0x%x\n",wItemBlockFlags));
 			m_Bottom.m_dwBlockFlags = wItemBlockFlags;
 			m_Bottom.m_dwTile = dwID;
 			m_Bottom.m_z = z;

@@ -316,7 +316,7 @@ void CItemSpawn::OnTick(bool fExec)
 	if ( !pDef )
 	{
 		RESOURCE_ID_BASE rid = IsType(IT_SPAWN_ITEM) ? m_itSpawnItem.m_ItemID : m_itSpawnChar.m_CharID;
-		DEBUG_ERR(("Bad Spawn point uid=0%lx, id=%s\n", (DWORD)GetUID(), g_Cfg.ResourceGetName(rid)));
+		DEBUG_ERR(("Bad Spawn point uid=0%x, id=%s\n", (DWORD)GetUID(), g_Cfg.ResourceGetName(rid)));
 		return;
 	}
 

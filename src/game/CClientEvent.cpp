@@ -417,7 +417,7 @@ void CClient::Event_Item_Drop( CGrayUID uidItem, CPointMap pt, CGrayUID uidOn, u
 				isCheating = m_pChar->GetBank()->IsItemInside( pContItem ) &&
 						m_pChar->GetBank()->m_itEqBankBox.m_pntOpen != m_pChar->GetTopPoint();
 
-//			g_Log.Event( LOGL_WARN, "%lx:IsBank '%d', IsItemInside '%d'\n", m_Socket.GetSocket(), isBank, isBank ? -1 : m_pChar->GetBank()->IsItemInside( pContItem ) );
+//			g_Log.Event( LOGL_WARN, "%x:IsBank '%d', IsItemInside '%d'\n", m_Socket.GetSocket(), isBank, isBank ? -1 : m_pChar->GetBank()->IsItemInside( pContItem ) );
 
 //			if ( pContItem->IsType( IT_EQ_BANK_BOX ) && pContItem->m_itEqBankBox.m_pntOpen != m_pChar->GetTopPoint() )
 
@@ -675,7 +675,7 @@ void CClient::Event_Skill_Use( SKILL_TYPE skill ) // Skill is clicked on the ski
 		const CSkillDef * pSkillDef = g_Cfg.GetSkillDef(skill);
 		if (pSkillDef == NULL || pSkillDef->m_sTargetPrompt.IsEmpty())
 		{
-			DEBUG_ERR(( "%lx: Event_Skill_Use bad skill %d\n", GetSocketID(), skill ));
+			DEBUG_ERR(( "%x: Event_Skill_Use bad skill %d\n", GetSocketID(), skill ));
 			return;
 		}
 
@@ -743,7 +743,7 @@ bool CClient::Event_CheckWalkBuffer()
 	if ( m_iWalkTimeAvg < 0 && iTimeDiff >= 0 )	// TICK_PER_SEC
 	{
 		// Walking too fast.
-		DEBUG_WARN(("%s (%lx): Fast Walk ?\n", GetName(), GetSocketID()));
+		DEBUG_WARN(("%s (%x): Fast Walk ?\n", GetName(), GetSocketID()));
 		if ( IsTrigUsed(TRIGGER_USEREXWALKLIMIT) )
 		{
 			if ( m_pChar->OnTrigger(CTRIG_UserExWalkLimit, m_pChar) != TRIGRET_RET_TRUE )
@@ -982,7 +982,7 @@ bool CClient::Event_Command(LPCTSTR pszCommand, TALKMODE_TYPE mode)
 	}
 
 	if ( GetPrivLevel() >= g_Cfg.m_iCommandLog )
-		g_Log.Event(LOGM_GM_CMDS, "%lx:'%s' commands '%s'=%d\n", GetSocketID(), GetName(), pszCommand, m_bAllowCommand);
+		g_Log.Event(LOGM_GM_CMDS, "%x:'%s' commands '%s'=%d\n", GetSocketID(), GetName(), pszCommand, m_bAllowCommand);
 
 	return !m_bAllowSay;
 }
@@ -1018,7 +1018,7 @@ void CClient::Event_VendorBuy_Cheater( int iCode )
 		"Total cost is too great"
 	};
 
-	g_Log.Event(LOGL_WARN|LOGM_CHEAT, "%lx:Cheater '%s' is submitting illegal buy packet (%s)\n", GetSocketID(), GetAccount()->GetName(), sm_BuyPacketCheats[iCode]);
+	g_Log.Event(LOGL_WARN|LOGM_CHEAT, "%x:Cheater '%s' is submitting illegal buy packet (%s)\n", GetSocketID(), GetAccount()->GetName(), sm_BuyPacketCheats[iCode]);
 	SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CANTBUY));
 }
 
@@ -1268,7 +1268,7 @@ void CClient::Event_VendorSell_Cheater( int iCode )
 		"Bad item UID"
 	};
 
-	g_Log.Event(LOGL_WARN|LOGM_CHEAT, "%lx:Cheater '%s' is submitting illegal sell packet (%s)\n", GetSocketID(),
+	g_Log.Event(LOGL_WARN|LOGM_CHEAT, "%x:Cheater '%s' is submitting illegal sell packet (%s)\n", GetSocketID(),
 		GetAccount()->GetName(),
 		sm_SellPacketCheats[iCode]);
 	SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CANTSELL));
@@ -1842,7 +1842,7 @@ void CClient::Event_Talk( LPCTSTR pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 
 		if ( g_Log.IsLoggedMask(LOGM_PLAYER_SPEAK) )
 		{
-			g_Log.Event( LOGM_PLAYER_SPEAK, "%lx:'%s' Says '%s' mode=%d%s\n",
+			g_Log.Event( LOGM_PLAYER_SPEAK, "%x:'%s' Says '%s' mode=%d%s\n",
 				GetSocketID(), m_pChar->GetName(), pszText, mode, fCancelSpeech ? " (muted)" : "");
 		}
 
@@ -1924,7 +1924,7 @@ void CClient::Event_TalkUNICODE( NWORD* wszText, int iTextLen, HUE_TYPE wHue, TA
 
 		if ( g_Log.IsLoggedMask(LOGM_PLAYER_SPEAK) )
 		{
-			g_Log.Event(LOGM_PLAYER_SPEAK, "%lx:'%s' Says UNICODE '%s' '%s' mode=%d%s\n", GetSocketID(),
+			g_Log.Event(LOGM_PLAYER_SPEAK, "%x:'%s' Says UNICODE '%s' '%s' mode=%d%s\n", GetSocketID(),
 				m_pChar->GetName(), pAccount->m_lang.GetStr(), pszText, mMode, fCancelSpeech ? " (muted)" : "" );
 		}
 
@@ -2196,7 +2196,7 @@ void CClient::Event_SingleClick( CGrayUID uid )
 		return;
 	}
 
-	SysMessagef("Bogus item uid=0%lx?", (DWORD)uid);
+	SysMessagef("Bogus item uid=0%x?", (DWORD)uid);
 }
 
 void CClient::Event_Target(DWORD context, CGrayUID uid, CPointMap pt, BYTE flags, ITEMID_TYPE id)
@@ -2703,7 +2703,7 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, TCHAR *pszName )
 			else if ( !strcmpi(ppArgs[0], "salute") )
 				m_pChar->UpdateAnimate(ANIM_SALUTE);
 			else
-				DEBUG_ERR(("%lx:Event_ExtCmd Animate unk '%s'\n", GetSocketID(), ppArgs[0]));
+				DEBUG_ERR(("%x:Event_ExtCmd Animate unk '%s'\n", GetSocketID(), ppArgs[0]));
 			return;
 		}
 
@@ -2718,9 +2718,9 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, TCHAR *pszName )
 			CGrayUID uid = ATOI(ppArgs[0]);
 			CObjBase *pObj = uid.ObjFind();
 			if ( pObj )
-				DEBUG_ERR(("%lx:Event_ExtCmd AutoTarg '%s' '%s'\n", GetSocketID(), pObj->GetName(), ppArgs[1]));
+				DEBUG_ERR(("%x:Event_ExtCmd AutoTarg '%s' '%s'\n", GetSocketID(), pObj->GetName(), ppArgs[1]));
 			else
-				DEBUG_ERR(("%lx:Event_ExtCmd AutoTarg unk '%s' '%s'\n", GetSocketID(), ppArgs[0], ppArgs[1]));
+				DEBUG_ERR(("%x:Event_ExtCmd AutoTarg unk '%s' '%s'\n", GetSocketID(), ppArgs[0], ppArgs[1]));
 			return;
 		}
 
@@ -2794,7 +2794,7 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, TCHAR *pszName )
 
 		default:
 		{
-			DEBUG_ERR(("%lx:Event_ExtCmd unk %d, '%s'\n", GetSocketID(), type, pszName));
+			DEBUG_ERR(("%x:Event_ExtCmd unk %d, '%s'\n", GetSocketID(), type, pszName));
 			return;
 		}
 	}

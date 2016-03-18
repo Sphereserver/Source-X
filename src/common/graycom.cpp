@@ -34,7 +34,7 @@
 
 	char * LTOA(long value, char *string, int radix)
 	{
-		sprintf(string, (radix == 16) ? "%lx" : "%ld", value);
+		sprintf(string, (radix == 16) ? "%x" : "%ld", value);
 		return string;
 	}
 

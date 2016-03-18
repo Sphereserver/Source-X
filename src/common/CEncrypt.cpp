@@ -580,9 +580,9 @@ bool CCrypt::Init( DWORD dwIP, BYTE * pEvent, size_t iLen, bool isclientKr )
 
 #ifdef DEBUG_CRYPT_MSGS
 #ifndef _WIN32
-		fprintf(stderr, "Called Init Seed(0x%lx)\n", dwIP);
+		fprintf(stderr, "Called Init Seed(0x%x)\n", dwIP);
 #else
-		DEBUG_ERR(("Called Init Seed(0x%lx)\n", dwIP));
+		DEBUG_ERR(("Called Init Seed(0x%x)\n", dwIP));
 #endif
 #endif
 	

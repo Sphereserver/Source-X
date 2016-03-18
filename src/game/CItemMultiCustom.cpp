@@ -338,7 +338,7 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
 	{
 		// items outside the region won't be noticed in los/movement checks,
 		// so the region boundaries need to be stretched to fit all the components
-		g_Log.EventWarn("Building design for 0%lx does not fit inside the MULTIREGION boundaries (design boundaries: %s). Attempting to resize region...\n", (DWORD)GetUID(), rectNew.Write());
+		g_Log.EventWarn("Building design for 0%x does not fit inside the MULTIREGION boundaries (design boundaries: %s). Attempting to resize region...\n", (DWORD)GetUID(), rectNew.Write());
 
 		CGRect rect = m_pRegion->GetRegionRect(0);
 		rectNew.UnionRect(rect);
@@ -377,7 +377,7 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, signed shor
 	CItemBase * pItemBase = CItemBase::FindItemBase(id);
 	if ( pItemBase == NULL )
 	{
-		g_Log.EventWarn("Unscripted item 0%x being added to building 0%lx by 0%lx.\n", id, (DWORD)GetUID(), pCharSrc != NULL? (DWORD)pCharSrc->GetUID() : 0);
+		g_Log.EventWarn("Unscripted item 0%x being added to building 0%x by 0%x.\n", id, (DWORD)GetUID(), pCharSrc != NULL? (DWORD)pCharSrc->GetUID() : 0);
 		SendStructureTo(pClientSrc);
 		return;
 	}
@@ -391,7 +391,7 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, signed shor
 	{
 		if ( !IsValidItem(id, pClientSrc, false) )
 		{
-			g_Log.EventWarn("Invalid item 0%x being added to building 0%lx by 0%lx.\n", id, (DWORD)GetUID(), pCharSrc != NULL? (DWORD)pCharSrc->GetUID() : 0);
+			g_Log.EventWarn("Invalid item 0%x being added to building 0%x by 0%x.\n", id, (DWORD)GetUID(), pCharSrc != NULL? (DWORD)pCharSrc->GetUID() : 0);
 			SendStructureTo(pClientSrc);
 			return;
 		}
@@ -409,7 +409,7 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, signed shor
 			{
 				if ( !rectDesign.IsInsideX( pt.m_x ) || !rectDesign.IsInsideY( pt.m_y - 1 ) )
 				{
-					g_Log.EventWarn("Item 0%x being added to building 0%lx outside of boundaries by 0%lx (%s).\n", id, (DWORD)GetUID(), pCharSrc != NULL? (DWORD)pCharSrc->GetUID() : 0, pt.WriteUsed());
+					g_Log.EventWarn("Item 0%x being added to building 0%x outside of boundaries by 0%x (%s).\n", id, (DWORD)GetUID(), pCharSrc != NULL? (DWORD)pCharSrc->GetUID() : 0, pt.WriteUsed());
 					SendStructureTo(pClientSrc);
 					return;
 				}
@@ -473,14 +473,14 @@ void CItemMultiCustom::AddStairs(CClient * pClientSrc, ITEMID_TYPE id, signed sh
     const CGrayMulti * pMulti = g_Cfg.GetMultiItemDefs(id);
 	if ( pMulti == NULL )
 	{
-		g_Log.EventWarn("Unscripted multi 0%x being added to building 0%lx by 0%lx.\n", id, (DWORD)GetUID(), pCharSrc != NULL? (DWORD)pCharSrc->GetUID() : 0);
+		g_Log.EventWarn("Unscripted multi 0%x being added to building 0%x by 0%x.\n", id, (DWORD)GetUID(), pCharSrc != NULL? (DWORD)pCharSrc->GetUID() : 0);
 		SendStructureTo(pClientSrc);
 		return;
 	}
 	
 	if ( !IsValidItem(id, pClientSrc, true) )
 	{
-		g_Log.EventWarn("Invalid multi 0%x being added to building 0%lx by 0%lx.\n", id, (DWORD)GetUID(), pCharSrc != NULL? (DWORD)pCharSrc->GetUID() : 0);
+		g_Log.EventWarn("Invalid multi 0%x being added to building 0%x by 0%x.\n", id, (DWORD)GetUID(), pCharSrc != NULL? (DWORD)pCharSrc->GetUID() : 0);
 		SendStructureTo(pClientSrc);
 		return;
 	}
@@ -526,21 +526,21 @@ void CItemMultiCustom::AddRoof(CClient * pClientSrc, ITEMID_TYPE id, signed shor
 	CItemBase * pItemBase = CItemBase::FindItemBase(id);
 	if ( pItemBase == NULL )
 	{
-		g_Log.EventWarn("Unscripted roof tile 0%x being added to building 0%lx by 0%lx.\n", id, (DWORD)GetUID(), pCharSrc != NULL? (DWORD)pCharSrc->GetUID() : 0);
+		g_Log.EventWarn("Unscripted roof tile 0%x being added to building 0%x by 0%x.\n", id, (DWORD)GetUID(), pCharSrc != NULL? (DWORD)pCharSrc->GetUID() : 0);
 		SendStructureTo(pClientSrc);
 		return;
 	}
 
 	if ( (pItemBase->GetTFlags() & UFLAG4_ROOF) == 0 )
 	{
-		g_Log.EventWarn("Non-roof tile 0%x being added as a roof to building 0%lx by 0%lx.\n", id, (DWORD)GetUID(), pCharSrc != NULL? (DWORD)pCharSrc->GetUID() : 0);
+		g_Log.EventWarn("Non-roof tile 0%x being added as a roof to building 0%x by 0%x.\n", id, (DWORD)GetUID(), pCharSrc != NULL? (DWORD)pCharSrc->GetUID() : 0);
 		SendStructureTo(pClientSrc);
 		return;
 	}
 
 	if ( z < -3 || z > 12 || (z % 3 != 0) )
 	{
-		g_Log.EventWarn("Roof tile 0%x being added at invalid height %d to building 0%lx by 0%lx.\n", id, z, (DWORD)GetUID(), pCharSrc != NULL? (DWORD)pCharSrc->GetUID() : 0);
+		g_Log.EventWarn("Roof tile 0%x being added at invalid height %d to building 0%x by 0%x.\n", id, z, (DWORD)GetUID(), pCharSrc != NULL? (DWORD)pCharSrc->GetUID() : 0);
 		SendStructureTo(pClientSrc);
 		return;
 	}

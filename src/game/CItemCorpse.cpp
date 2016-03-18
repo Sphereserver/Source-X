@@ -26,7 +26,7 @@ CChar *CItemCorpse::IsCorpseSleeping() const
 	// CItemCorpse
 	if ( !IsType(IT_CORPSE) )
 	{
-		DEBUG_ERR(("Corpse (0%lx) doesn't have type T_CORPSE! (it has %d)\n", (DWORD)GetUID(), GetType()));
+		DEBUG_ERR(("Corpse (0%x) doesn't have type T_CORPSE! (it has %d)\n", (DWORD)GetUID(), GetType()));
 		return NULL;
 	}
 
