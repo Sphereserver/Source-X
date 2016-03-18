@@ -1082,7 +1082,7 @@ PacketCloseVendor::PacketCloseVendor(const CClient* target, const CChar* vendor)
  *
  *
  ***************************************************************************/
-PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* container, bool isShop, bool filterLayers, bool bExtra) : PacketSend(XCMD_Content, 5, PRI_NORMAL), m_container(container->GetUID())
+PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* container, bool bIsShop, bool bFilterLayers, bool bExtra) : PacketSend(XCMD_Content, 5, PRI_NORMAL), m_container(container->GetUID())
 {
 	ADDTOCALLSTACK("PacketItemContents::PacketItemContents");
 	UNREFERENCED_PARAMETER(bExtra);	//Disabled temporary, it seems to prevent buy list from being sent to some old Enhanced Clients
@@ -1102,14 +1102,18 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 		ITEMID_TYPE id;
 		HUE_TYPE hue;
 		LAYER_TYPE layer;
-		int amount;
+		int iAmount;
 		CPointMap pos;
 
-		if (isShop)
+		if (bIsShop)
 		{
-			for (const CItem* item = container->GetContentTail(); item != NULL && m_count < MAX_ITEMS_CONT; item = item->GetPrev())
+			// Classic Client wants the container items sent with order a->z, Enhanced Client with order z->a;
+			// Classic client wants the prices sent (in PacketVendorBuyList::fillBuyData) with order a->z, Enhanced Client with order a->z.
+			for ( CItem* item = ( target->GetNetState()->isClientEnhanced() ? container->GetContentTail() : container->GetContentHead() ) ; 
+				item != NULL && m_count < MAX_ITEMS_CONT ;
+				item = ( target->GetNetState()->isClientEnhanced() ? item->GetPrev() : item->GetNext() ) )
 			{
-				if (filterLayers == true)
+				if (bFilterLayers)
 				{
 					layer = static_cast<LAYER_TYPE>(item->GetContainedLayer());
 					ASSERT(layer < LAYER_HORSE);
@@ -1133,7 +1137,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 
 				itemDefinition = item->Item_GetDef();
 				id = item->GetDispID();
-				amount = item->GetAmount();
+				iAmount = item->GetAmount();
 
 				if (itemDefinition != NULL && target->GetResDisp() < itemDefinition->GetResLevel())
 					id = static_cast<ITEMID_TYPE>(itemDefinition->GetResDispDnId());
@@ -1143,7 +1147,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 					continue;
 
 				hue = item->GetHue() & HUE_MASK_HI;
-				amount = minimum(g_Cfg.m_iVendorMaxSell, amount);
+				iAmount = minimum(g_Cfg.m_iVendorMaxSell, iAmount);
 				pos.m_x = static_cast<signed short>(m_count + 1);
 				pos.m_y = 1;
 
@@ -1160,7 +1164,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 				writeInt32(item->GetUID());
 				writeInt16(static_cast<WORD>(id));
 				writeByte(0);
-				writeInt16(static_cast<WORD>(amount));
+				writeInt16(static_cast<WORD>(iAmount));
 				writeInt16(pos.m_x);
 				writeInt16(pos.m_y);
 				if (includeGrid)
@@ -1175,12 +1179,12 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 		}
 		else
 		{
-			for (const CItem* item = container->GetContentTail(); item != NULL && m_count < MAX_ITEMS_CONT; item = item->GetPrev())
+			for (CItem* item = container->GetContentTail(); item != NULL && m_count < MAX_ITEMS_CONT; item = item->GetPrev())
 			{
 				if (item->IsAttr(ATTR_INVIS) && viewer->CanSee(item) == false)
 					continue;
 
-				if (filterLayers == true)
+				if (bFilterLayers)
 				{
 					layer = static_cast<LAYER_TYPE>(item->GetContainedLayer());
 					ASSERT(layer < LAYER_HORSE);
@@ -1206,7 +1210,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 				id = item->GetDispID();
 				pos = item->GetContainedPoint();
 				hue = item->GetHue() & HUE_MASK_HI;
-				amount = item->GetAmount();
+				iAmount = item->GetAmount();
 
 				if (itemDefinition != NULL && target->GetResDisp() < itemDefinition->GetResLevel())
 					id = static_cast<ITEMID_TYPE>(itemDefinition->GetResDispDnId());
@@ -1224,7 +1228,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 				writeInt32(item->GetUID());
 				writeInt16(static_cast<WORD>(id));
 				writeByte(0);
-				writeInt16(static_cast<WORD>(amount));
+				writeInt16(static_cast<WORD>(iAmount));
 				writeInt16(pos.m_x);
 				writeInt16(pos.m_y);
 				if (includeGrid)
@@ -2090,9 +2094,9 @@ PacketVendorBuyList::PacketVendorBuyList(void) : PacketSend(XCMD_VendOpenBuy, 8,
 {
 }
 
-int PacketVendorBuyList::fillContainer(const CItemContainer* container, int convertFactor, bool bIsClientEnhanced, size_t maxItems)
+int PacketVendorBuyList::fillBuyData(const CItemContainer* container, int iConvertFactor, size_t maxItems)
 {
-	ADDTOCALLSTACK("PacketVendorBuyList::fillContainer");
+	ADDTOCALLSTACK("PacketVendorBuyList::fillBuyData");
 
 	seek(1); // just to be sure
 	initLength();
@@ -2103,8 +2107,9 @@ int PacketVendorBuyList::fillContainer(const CItemContainer* container, int conv
 	skip(1);
 	size_t count(0);
 
-	// Enhanced Client needs to receive the prices in reverse order
-	for ( CItem* item = (bIsClientEnhanced ? container->GetContentHead() : container->GetContentTail()); item != NULL; item = (bIsClientEnhanced ? item->GetNext() : item->GetPrev()) )
+	// Classic Client wants the container items sent (in PacketItemContents) with order a->z, Enhanced Client with order z->a;
+	// Classic Client wants the prices sent with order a->z, Enhanced Client with order a->z.
+	for ( CItem* item = container->GetContentHead() ; item != NULL ; item = item->GetNext() )
 	{
 		if (item->GetAmount() == 0)
 			continue;
@@ -2113,11 +2118,11 @@ int PacketVendorBuyList::fillContainer(const CItemContainer* container, int conv
 		if (venditem == NULL)
 			continue;
 
-		DWORD price = venditem->GetVendorPrice(convertFactor);
+		DWORD price = venditem->GetVendorPrice(iConvertFactor);
 		if (price == 0)
 		{
 			venditem->Item_GetDef()->ResetMakeValue();
-			price = venditem->GetVendorPrice(convertFactor);
+			price = venditem->GetVendorPrice(iConvertFactor);
 
 			if (price == 0 && venditem->IsValidNPCSaleItem())
 				price = venditem->GetBasePrice();
@@ -2136,7 +2141,7 @@ int PacketVendorBuyList::fillContainer(const CItemContainer* container, int conv
 		writeByte(static_cast<BYTE>(len));
 		writeStringFixedASCII(name, len);
 
-		if (++count > MAX_ITEMS_CONT)
+		if (++count > maxItems)
 			break;
 	}
 
@@ -2832,9 +2837,9 @@ PacketVendorSellList::PacketVendorSellList(const CChar* vendor) : PacketSend(XCM
 	writeInt32(vendor->GetUID());
 }
 
-size_t PacketVendorSellList::searchContainer(CClient* target, const CItemContainer* container, CItemContainer* stock1, CItemContainer* stock2, int convertFactor, size_t maxItems)
+size_t PacketVendorSellList::fillSellList(CClient* target, const CItemContainer* container, CItemContainer* stock1, CItemContainer* stock2, int iConvertFactor, size_t maxItems)
 {
-	ADDTOCALLSTACK("PacketVendorSellList::searchContainer");
+	ADDTOCALLSTACK("PacketVendorSellList::fillSellList");
 
 	seek(7); // just to be sure
 
@@ -2874,7 +2879,7 @@ size_t PacketVendorSellList::searchContainer(CClient* target, const CItemContain
 						writeInt16(static_cast<WORD>(vendItem->GetDispID()));
 						writeInt16(static_cast<WORD>(hue));
 						writeInt16(vendItem->GetAmount());
-						writeInt16(static_cast<WORD>(vendSell->GetVendorPrice(convertFactor)));
+						writeInt16(static_cast<WORD>(vendSell->GetVendorPrice(iConvertFactor)));
 
 						LPCTSTR name = vendItem->GetName();
 						int len = strlen(name) + 1;
@@ -2892,8 +2897,7 @@ size_t PacketVendorSellList::searchContainer(CClient* target, const CItemContain
 
 			item = item->GetNext();
 		}
-
-		if (item == NULL)
+		else
 		{
 			if (otherBoxes.empty())
 				break;

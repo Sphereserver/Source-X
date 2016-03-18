@@ -1,6 +1,6 @@
+#pragma once
 #ifndef __SEND_H__
 #define __SEND_H__
-#pragma once
 
 #include "../common/graymul.h"
 #include "../common/CRect.h"
@@ -423,7 +423,7 @@ private:
 	int m_count;
 
 public:
-	PacketItemContents(CClient* target, const CItemContainer* container, bool isShop, bool filterLayers, bool bExtra); // standard content
+	PacketItemContents(CClient* target, const CItemContainer* container, bool bIsShop, bool bFilterLayers, bool bExtra); // standard content
 	PacketItemContents(const CClient* target, const CItem* spellbook); // spellbook spells
 	PacketItemContents(const CClient* target, const CItemContainer* spellbook); // custom spellbook spells
 	virtual bool onSend(const CClient* client);
@@ -718,7 +718,7 @@ class PacketVendorBuyList : public PacketSend
 {
 public:
 	PacketVendorBuyList(void);
-	int fillContainer(const CItemContainer* container, int convertFactor, bool bisClientEnhanced, size_t maxItems = 115);
+	int fillBuyData(const CItemContainer* container, int iConvertFactor, size_t maxItems = 115);
 };
 
 /***************************************************************************
@@ -1011,7 +1011,7 @@ class PacketVendorSellList : public PacketSend
 {
 public:
 	PacketVendorSellList(const CChar* vendor);
-	size_t searchContainer(CClient* target, const CItemContainer* container, CItemContainer* stock1, CItemContainer* stock2, int convertFactor, size_t maxItems = 115);
+	size_t fillSellList(CClient* target, const CItemContainer* container, CItemContainer* stock1, CItemContainer* stock2, int iConvertFactor, size_t maxItems = 115);
 };
 
 /***************************************************************************

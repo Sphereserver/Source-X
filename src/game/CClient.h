@@ -2,9 +2,9 @@
 // CClient.h
 //
 
+#pragma once
 #ifndef _INC_CCLIENT_H
 #define _INC_CCLIENT_H
-#pragma once
 
 #include "CAccount.h"
 #include "CChat.h"
@@ -458,7 +458,7 @@ public:
 	void resendBuffs();
 
 	void addOpenGump( const CObjBase * pCont, GUMP_TYPE gump, bool IsVendorGump = false );
-	void addContents( const CItemContainer * pCont, bool fCorpseEquip = false, bool fCorpseFilter = false, bool fShop = false, bool bExtra = false); // Send items
+	void addContainerContents( const CItemContainer * pCont, bool bCorpseEquip = false, bool bCorpseFilter = false, bool bShop = false, bool bExtra = false); // Send items
 	bool addContainerSetup( const CItemContainer * pCont ); // Send Backpack (with items)
 
 	void addPlayerStart( CChar * pChar );
