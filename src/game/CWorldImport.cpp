@@ -2,7 +2,7 @@
 #include "../common/graymul.h"
 #include "../common/CArray.h"
 #include "chars/CChar.h"
-#include "CItem.h"
+#include "items/CItem.h"
 #include "CObjBase.h"
 
 struct CImportSer : public CGObListRec

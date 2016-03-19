@@ -7,7 +7,7 @@
 #include "../sphere/ProfileTask.h"
 #include "chars/CChar.h"
 #include "clients/CClient.h"
-#include "CItemSpawn.h"
+#include "items/CItemSpawn.h"
 #include "CLog.h"
 #include "CObjBase.h"
 #include "graysvr.h"

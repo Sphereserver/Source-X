@@ -6,7 +6,7 @@
 #include "../network/packet.h"
 #include "../sphere/ProfileTask.h"
 #include "../chars/CChar.h"
-#include "../CItemSpawn.h"
+#include "../items/CItemSpawn.h"
 #include "../CLog.h"
 #include "../CServTime.h"
 #include "../graysvr.h"

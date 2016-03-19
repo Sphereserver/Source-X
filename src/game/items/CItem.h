@@ -1,16 +1,16 @@
 #ifndef _INC_CITEM_H
 #define _INC_CITEM_H
 
-#include "CItemBase.h"
 #include "../common/graymul.h"
 #include "../common/CRect.h"
 #include "../common/CResourceBase.h"
 #include "../common/CObjBaseTemplate.h"
 #include "../common/CGrayMap.h"
 #include "../common/CGrayUID.h"
-#include "CBase.h"
-#include "CResource.h"
-#include "CObjBase.h"
+#include "../CBase.h"
+#include "../CResource.h"
+#include "../CObjBase.h"
+#include "CItemBase.h"
 
 enum ITC_TYPE	// Item Template commands
 {

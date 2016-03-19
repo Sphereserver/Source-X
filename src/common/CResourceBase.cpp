@@ -1,6 +1,6 @@
 
 #include "../game/Chars/CChar.h"
-#include "../game/CItem.h"
+#include "../game/items/CItem.h"
 #include "../game/CLog.h"
 #include "../game/CObjBase.h"
 #include "../game/CResource.h"

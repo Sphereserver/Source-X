@@ -4,12 +4,12 @@
 //
 
 #include "../game/CPathFinder.h"
+#include "../game/chars/CCharBase.h"
+#include "../game/chars/CCharPlayer.h"
+#include "../game/chars/CCharNPC.h"
 #include "../game/clients/CClient.h"
-#include "../game/Chars/CCharBase.h"
-#include "../game/Chars/CCharPlayer.h"
-#include "../game/Chars/CCharNPC.h"
-#include "../game/CItemSpawn.h"
-#include "../game/CItemShip.h"
+#include "../game/items/CItemSpawn.h"
+#include "../game/items/CItemShip.h"
 #include "../common/sqlite/SQLite.h"
 
 #define ADD(a,b) const char * a::m_sClassName = b

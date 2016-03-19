@@ -6,11 +6,11 @@
 #include "../common/CGrayInst.h"
 #include "../network/network.h"
 #include "../network/send.h"
-#include "chars/CChar.h"
-#include "clients/CClient.h"
+#include "../chars/CChar.h"
+#include "../clients/CClient.h"
+#include "../CLog.h"
+#include "../Triggers.h"
 #include "CItemMultiCustom.h"
-#include "CLog.h"
-#include "Triggers.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

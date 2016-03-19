@@ -1,8 +1,8 @@
 // Actions specific to an NPC.
 
 #include "../clients/CClient.h"
-#include "../CItemSpawn.h"
-#include "../CItemVendable.h"
+#include "../items/CItemSpawn.h"
+#include "../items/CItemVendable.h"
 #include "../Triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"

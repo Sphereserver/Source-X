@@ -3,7 +3,7 @@
 #include <cmath>
 #include "../clients/CClient.h"
 #include "../common/CGrayUIDextra.h"
-#include "../CItemVendable.h"
+#include "../items/CItemVendable.h"
 #include "../CLog.h"
 #include "../Triggers.h"
 #include "CChar.h"

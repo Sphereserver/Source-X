@@ -2,8 +2,8 @@
 
 #include "../common/CException.h"
 #include "../sphere/ProfileTask.h"
+#include "../CLog.h"
 #include "CItemBase.h"
-#include "CLog.h"
 
 /////////////////////////////////////////////////////////////////
 // -CItemBase

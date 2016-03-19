@@ -1,9 +1,9 @@
 //  CChar is either an NPC or a Player.
 
 #include "../clients/CClient.h"
-#include "../CItem.h"
-#include "../CItemCorpse.h"
-#include "../CItemSpawn.h"
+#include "../items/CItem.h"
+#include "../items/CItemCorpse.h"
+#include "../items/CItemSpawn.h"
 #include "../Triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"

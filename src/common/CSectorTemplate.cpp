@@ -1,7 +1,7 @@
 
 #include <algorithm>
 #include "../game/Chars/CChar.h"
-#include "../game/CItemShip.h"
+#include "../game/items/CItemShip.h"
 #include "../game/CLog.h"
 #include "../game/CServTime.h"
 #include "../sphere/ProfileTask.h"

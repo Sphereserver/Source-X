@@ -12,7 +12,7 @@
 #include "../game/clients/CAccount.h"
 #include "../game/Chars/CChar.h"
 #include "../game/clients/CClient.h"
-#include "../game/CItemStone.h"
+#include "../game/items/CItemStone.h"
 #include "../game/graysvr.h"
 #include "../game/CWorld.h"
 #include "../sphere/ProfileTask.h"

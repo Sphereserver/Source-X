@@ -13,7 +13,6 @@
 #include "CBase.h"
 #include "CResource.h"
 #include "CWorld.h"
-//#include "CItemVendable.h"
 
 class CBaseBase;
 

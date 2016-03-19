@@ -23,7 +23,7 @@
 #include "chars/CChar.h"
 #include "clients/CAccount.h"
 #include "clients/CClient.h"
-#include "CItemShip.h"
+#include "items/CItemShip.h"
 #include "CServer.h"
 #include "CServTime.h"
 #include "graysvr.h"

@@ -1,9 +1,9 @@
 
 #include "../common/CException.h"
 #include "../common/grayproto.h"
-#include "chars/CChar.h"
+#include "../chars/CChar.h"
+#include "../CWorld.h"
 #include "CItemMulti.h"
-#include "CWorld.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

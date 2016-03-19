@@ -12,9 +12,9 @@
 #include "../common/CScriptObj.h"
 #include "../common/mtrand/mtrand.h"
 #include "../common/CGrayUID.h"
+#include "items/CItemBase.h"
 #include "CServTime.h"
 #include "CSector.h"
-#include "CItemBase.h"
 
 class CObjBase;
 class CItemStone;

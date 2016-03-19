@@ -8,7 +8,7 @@
 #include "chars/CChar.h"
 #include "clients/CClient.h"
 #include "clients/CGMPage.h"
-#include "CItem.h"
+#include "items/CItem.h"
 #include "CLog.h"
 #include "CObjBase.h"
 #include "CServTime.h"

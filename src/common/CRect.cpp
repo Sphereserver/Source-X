@@ -1,6 +1,6 @@
 
-#include "../game/CItem.h"
-#include "../game/CItemBase.h"
+#include "../game/items/CItem.h"
+#include "../game/items/CItemBase.h"
 #include "../game/CLog.h"
 #include "../game/CSector.h"
 #include "../game/CServer.h"

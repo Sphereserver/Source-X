@@ -1,12 +1,12 @@
 
 #include "../common/CException.h"
 #include "../network/send.h"
-#include "chars/CChar.h"
-#include "clients/CClient.h"
+#include "../chars/CChar.h"
+#include "../clients/CClient.h"
+#include "../CLog.h"
+#include "../Triggers.h"
 #include "CItem.h"
 #include "CItemContainer.h"
-#include "CLog.h"
-#include "Triggers.h"
 
 //----------------------------------------------------
 // -CItemContainer

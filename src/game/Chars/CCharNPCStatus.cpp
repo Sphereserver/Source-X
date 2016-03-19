@@ -1,7 +1,7 @@
 // Test things to judge what an NPC might be thinking. (want to do)
 // But take no actions here.
 
-#include "../CItemVendable.h"
+#include "../items/CItemVendable.h"
 #include "../graysvr.h"
 #include "CChar.h"
 #include "CCharNPC.h"

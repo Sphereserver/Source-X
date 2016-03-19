@@ -4,12 +4,12 @@
 
 #include "../common/CException.h"
 #include "../network/send.h"
-#include "chars/CChar.h"
-#include "clients/CClient.h"
+#include "../chars/CChar.h"
+#include "../clients/CClient.h"
+#include "../CServTime.h"
+#include "../Triggers.h"
 #include "CItemContainer.h"
 #include "CItemShip.h"
-#include "CServTime.h"
-#include "Triggers.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

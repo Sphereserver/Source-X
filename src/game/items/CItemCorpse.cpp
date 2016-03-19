@@ -1,11 +1,11 @@
 
 #include "../common/grayproto.h"
-#include "chars/CChar.h"
-#include "chars/CCharNPC.h"
+#include "../chars/CChar.h"
+#include "../chars/CCharNPC.h"
+#include "../CServTime.h"
+#include "../CWorld.h"
 #include "CItem.h"
 #include "CItemCorpse.h"
-#include "CServTime.h"
-#include "CWorld.h"
 
 
 CItemCorpse::CItemCorpse( ITEMID_TYPE id, CItemBase * pItemDef ) :

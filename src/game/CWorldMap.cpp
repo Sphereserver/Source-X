@@ -5,7 +5,7 @@
 #include "../common/CRect.h"
 #include "../sphere/threads.h"
 #include "chars/CChar.h"
-#include "CItem.h"
+#include "items/CItem.h"
 #include "CLog.h"
 #include "Triggers.h"
 

@@ -1,10 +1,10 @@
 #ifndef _INC_CITEMBASE_H
 #define _INC_CITEMBASE_H
 
-#include "CBase.h"
 #include "../common/CResourceBase.h"
 #include "../common/CArray.h"
-#include "CResource.h"
+#include "../CBase.h"
+#include "../CResource.h"
 
 enum IT_TYPE		// double click type action.
 {

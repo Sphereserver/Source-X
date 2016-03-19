@@ -4,10 +4,10 @@
 #include "../common/CObjBaseTemplate.h"
 #include "../network/send.h"
 #include "chars/CChar.h"
+#include "items/CItem.h"
+#include "items/CItemContainer.h"
+#include "items/CItemVendable.h"
 #include "CContainer.h"
-#include "CItem.h"
-#include "CItemContainer.h"
-#include "CItemVendable.h"
 #include "Triggers.h"
 
 //***************************************************************************

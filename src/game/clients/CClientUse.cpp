@@ -1,8 +1,8 @@
 
 #include "../network/send.h"
 #include "../chars/CChar.h"
-#include "../CItemMap.h"
-#include "../CItemSpawn.h"
+#include "../items/CItemMap.h"
+#include "../items/CItemSpawn.h"
 #include "../CLog.h"
 #include "../Triggers.h"
 #include "CClient.h"

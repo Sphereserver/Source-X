@@ -1,9 +1,9 @@
 
 #include "../common/CException.h"
-#include "chars/CChar.h"
+#include "../chars/CChar.h"
+#include "../CLog.h"
+#include "../CWorld.h"
 #include "CItemStone.h"
-#include "CLog.h"
-#include "CWorld.h"
 
 //////////
 // -CStoneMember

@@ -2,11 +2,11 @@
 #include "../common/CObjBaseTemplate.h"
 #include "../common/CRegion.h"
 #include "../common/CException.h"
-#include "chars/CChar.h"
-#include "chars/CCharNPC.h"
-#include "CContainer.h"
+#include "../chars/CChar.h"
+#include "../chars/CCharNPC.h"
+#include "../CLog.h"
+#include "../CContainer.h"
 #include "CItemSpawn.h"
-#include "CLog.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

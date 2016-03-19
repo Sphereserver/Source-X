@@ -2,8 +2,8 @@
 #define _INC_CITEMCORPSE_H
 
 #include "../common/graymul.h"
+#include "../CBase.h"
 #include "CItemContainer.h"
-#include "CBase.h"
 
 class CChar;
 

@@ -1,8 +1,8 @@
 #ifndef _INC_CITEMMESSAGE_H
 #define _INC_CITEMMESSAGE_H
 
-#include "CItemVendable.h"
 #include "../common/CString.h"
+#include "CItemVendable.h"
 
 enum CIC_TYPE
 {

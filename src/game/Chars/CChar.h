@@ -1,13 +1,13 @@
 #ifndef _INC_CCHAR_H
 #define _INC_CCHAR_H
 
-#include "../CItemContainer.h"
-#include "../CItemCorpse.h"
-#include "../CItemMemory.h"
-#include "../CItemStone.h"
-#include "../CObjBase.h"
 #include "../clients/CParty.h"
 #include "../common/grayproto.h"
+#include "../items/CItemContainer.h"
+#include "../items/CItemCorpse.h"
+#include "../items/CItemMemory.h"
+#include "../items/CItemStone.h"
+#include "../CObjBase.h"
 #include "CCharBase.h"
 #include "CCharPlayer.h"
 
