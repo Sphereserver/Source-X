@@ -1,9 +1,9 @@
 // Actions specific to an NPC.
 
+#include "../clients/CClient.h"
 #include "../common/CException.h"
 #include "../common/CGrayUIDextra.h"
 #include "../network/receive.h"
-#include "../CClient.h"
 #include "../CLog.h"
 #include "../CPathFinder.h"
 #include "../CServTime.h"

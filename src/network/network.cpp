@@ -1,6 +1,6 @@
 
 #include "../common/CException.h"
-#include "../game/CClient.h"
+#include "../game/clients/CClient.h"
 #include "../game/CLog.h"
 #include "../game/CServer.h"
 #include "../game/CServTime.h"

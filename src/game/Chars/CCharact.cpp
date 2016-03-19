@@ -1,11 +1,11 @@
 
+#include "../clients/CClient.h"
 #include "../common/CArray.h"
 #include "../common/CException.h"
 #include "../common/CGrayUIDextra.h"
 #include "../network/network.h"
 #include "../network/send.h"
 #include "../sphere/ProfileTask.h"
-#include "../CClient.h"
 #include "../CContainer.h"
 #include "../CItem.h"
 #include "../CItemSpawn.h"

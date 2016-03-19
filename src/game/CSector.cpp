@@ -1,9 +1,9 @@
 
 #include "../common/CException.h"
 #include "../sphere/ProfileTask.h"
-#include "Chars/CChar.h"
-#include "Chars/CCharNPC.h"
-#include "CClient.h"
+#include "chars/CChar.h"
+#include "chars/CCharNPC.h"
+#include "clients/CClient.h"
 #include "CItem.h"
 #include "CItemSpawn.h"
 #include "CLog.h"

@@ -1,8 +1,8 @@
 
 #include "../common/CException.h"
 #include "../network/send.h"
-#include "Chars/CChar.h"
-#include "CClient.h"
+#include "chars/CChar.h"
+#include "clients/CClient.h"
 #include "CItem.h"
 #include "CItemContainer.h"
 #include "CLog.h"

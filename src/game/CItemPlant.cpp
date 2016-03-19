@@ -1,5 +1,5 @@
 
-#include "Chars/CChar.h"
+#include "chars/CChar.h"
 #include "CItem.h"
 
 void CItem::Plant_SetTimer()

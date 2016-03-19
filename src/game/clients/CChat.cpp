@@ -1,6 +1,6 @@
 
 #include "../network/network.h"
-#include "Chars/CChar.h"
+#include "../chars/CChar.h"
 #include "CChat.h"
 #include "CChatChannel.h"
 #include "CChatChanMember.h"

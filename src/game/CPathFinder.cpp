@@ -1,7 +1,7 @@
 
 #include "../common/CException.h"
 #include "../sphere/threads.h"
-#include "Chars/CChar.h"
+#include "chars/CChar.h"
 #include "CPathFinder.h"
 
 unsigned int CPathFinder::Heuristic(CPathFinderPointRef& Pt1,CPathFinderPointRef& Pt2)

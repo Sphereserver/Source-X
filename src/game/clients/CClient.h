@@ -6,16 +6,6 @@
 #ifndef _INC_CCLIENT_H
 #define _INC_CCLIENT_H
 
-#include "CAccount.h"
-#include "CChat.h"
-#include "CChatChanMember.h"
-#include "CClientTooltip.h"
-#include "CGMPage.h"
-#include "CItemBase.h"
-#include "CItemContainer.h"
-#include "CItemMultiCustom.h"
-#include "CSectorEnviron.h"
-#include "enums.h"
 #include "../common/CArray.h"
 #include "../common/CEncrypt.h"
 #include "../common/CScriptObj.h"
@@ -23,6 +13,16 @@
 #include "../network/network.h"
 #include "../network/receive.h"
 #include "../network/send.h"
+#include "../CItemBase.h"
+#include "../CItemContainer.h"
+#include "../CItemMultiCustom.h"
+#include "../CSectorEnviron.h"
+#include "../enums.h"
+#include "CAccount.h"
+#include "CChat.h"
+#include "CChatChanMember.h"
+#include "CClientTooltip.h"
+#include "CGMPage.h"
 
 class CItemMap;
 

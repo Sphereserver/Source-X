@@ -1,29 +1,17 @@
 /**
 * @file CAcount.h
 */
-
-//#include "../common/CScript.h"
-//#include "../common/CScriptObj.h"
-//#include "../common/CMemBlock.h"
-//#include "../common/CString.h"
-//#include "../common/grayproto.h"
-//#include "../common/CTextConsole.h"
-
-//#include "../common/CTime.h"
-//#include "../common/CVarDefMap.h"
-//#include "Chars/CCharRefArray.h"
-
 #pragma once
 #ifndef _INC_CACCOUNT_H
 #define _INC_CACCOUNT_H
 
 
-#include "CResource.h"
+#include "../chars/CCharRefArray.h"
 #include "../common/grayproto.h"
 #include "../common/CScriptObj.h"
 #include "../common/CString.h"
 #include "../common/CSocket.h"
-#include "Chars/CCharRefArray.h"
+#include "../CResource.h"
 
 #define PRIV_UNUSED0		0x0001
 #define PRIV_GM				0x0002	///< Acts as a GM (dif from having GM level)

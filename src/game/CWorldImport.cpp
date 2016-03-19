@@ -1,7 +1,7 @@
 
 #include "../common/graymul.h"
 #include "../common/CArray.h"
-#include "Chars/CChar.h"
+#include "chars/CChar.h"
 #include "CItem.h"
 #include "CObjBase.h"
 

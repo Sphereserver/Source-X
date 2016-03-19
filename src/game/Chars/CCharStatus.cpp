@@ -1,8 +1,8 @@
 //  CChar is either an NPC or a Player.
 
-#include "../network/network.h"
 #include <cmath>
-#include "../CClient.h"
+#include "../network/network.h"
+#include "../clients/CClient.h"
 #include "../CLog.h"
 #include "../graysvr.h"
 #include "../Triggers.h"

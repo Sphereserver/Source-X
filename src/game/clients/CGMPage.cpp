@@ -1,10 +1,10 @@
 
 #include "../common/CException.h"
-#include "Chars/CChar.h"
+#include "../chars/CChar.h"
+#include "../CServTime.h"
+#include "../CWorld.h"
 #include "CClient.h"
 #include "CGMPage.h"
-#include "CServTime.h"
-#include "CWorld.h"
 
 //////////////////////////////////////////////////////////////////
 // -CGMPage

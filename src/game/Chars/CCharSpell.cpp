@@ -1,7 +1,7 @@
 
+#include "../clients/CClient.h"
 #include "../common/CGrayUIDextra.h"
 #include "../network/send.h"
-#include "../CClient.h"
 #include "../Triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"

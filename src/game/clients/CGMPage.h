@@ -5,7 +5,7 @@
 #include "../common/CArray.h"
 #include "../common/CScriptObj.h"
 #include "../common/CRect.h"
-#include "CServTime.h"
+#include "../CServTime.h"
 #include "CAccount.h"
 
 

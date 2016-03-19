@@ -4,12 +4,12 @@
 #include "../common/CException.h"
 #include "../network/send.h"
 #include "../sphere/ProfileTask.h"
-#include "Chars/CChar.h"
+#include "../chars/CChar.h"
+#include "../CLog.h"
+#include "../CServer.h"
+#include "../Triggers.h"
 #include "CClient.h"
-#include "CLog.h"
 #include "CParty.h"
-#include "CServer.h"
-#include "Triggers.h"
 
 
 //*****************************************************************

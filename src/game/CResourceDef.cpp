@@ -2,7 +2,7 @@
 
 #include "../common/CAssoc.h"
 #include "../common/CException.h"
-#include "Chars/CChar.h"
+#include "chars/CChar.h"
 #include "CItemBase.h"
 #include "CResource.h"
 #include "Triggers.h"

@@ -3,7 +3,7 @@
 #include "../common/CGrayUID.h"
 #include "../common/CObjBaseTemplate.h"
 #include "../network/send.h"
-#include "Chars/CChar.h"
+#include "chars/CChar.h"
 #include "CContainer.h"
 #include "CItem.h"
 #include "CItemContainer.h"

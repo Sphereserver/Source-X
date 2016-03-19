@@ -4,8 +4,8 @@
 #include "../common/grayver.h"
 #include "../network/network.h"
 #include "../network/send.h"
-#include "Chars/CChar.h"
-#include "CClient.h"
+#include "chars/CChar.h"
+#include "clients/CClient.h"
 #include "CServer.h"
 #include "CServTime.h"
 

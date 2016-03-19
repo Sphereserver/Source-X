@@ -1,7 +1,7 @@
 
 #include "../common/grayproto.h"
-#include "Chars/CChar.h"
-#include "Chars/CCharNPC.h"
+#include "chars/CChar.h"
+#include "chars/CCharNPC.h"
 #include "CItem.h"
 #include "CItemCorpse.h"
 #include "CServTime.h"

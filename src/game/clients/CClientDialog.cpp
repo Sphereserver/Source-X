@@ -4,9 +4,9 @@
 #include "../network/network.h"
 #include "../network/receive.h"
 #include "../network/send.h"
-#include "Chars/CChar.h"
+#include "../chars/CChar.h"
+#include "../CLog.h"
 #include "CClient.h"
-#include "CLog.h"
 
 // endgroup, master, hue ????
 

@@ -4,8 +4,8 @@
 
 #include "../common/CException.h"
 #include "../network/send.h"
-#include "Chars/CChar.h"
-#include "CClient.h"
+#include "chars/CChar.h"
+#include "clients/CClient.h"
 #include "CItemContainer.h"
 #include "CItemShip.h"
 #include "CServTime.h"

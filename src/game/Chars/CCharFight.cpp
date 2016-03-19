@@ -1,7 +1,7 @@
 // Fight/Criminal actions/Noto.
+#include "../clients/CClient.h"
 #include "../common/CGrayUIDextra.h"
 #include "../network/send.h"
-#include "../CClient.h"
 #include "../CServTime.h"
 #include "../Triggers.h"
 #include "CChar.h"

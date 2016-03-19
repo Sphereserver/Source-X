@@ -1,11 +1,11 @@
 
 #include "../network/send.h"
-#include "Chars/CChar.h"
+#include "../chars/CChar.h"
+#include "../CItemMap.h"
+#include "../CItemSpawn.h"
+#include "../CLog.h"
+#include "../Triggers.h"
 #include "CClient.h"
-#include "CItemMap.h"
-#include "CItemSpawn.h"
-#include "CLog.h"
-#include "Triggers.h"
 
 bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 {

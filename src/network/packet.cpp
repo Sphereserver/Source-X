@@ -1,5 +1,5 @@
 
-#include "../game/CClient.h"
+#include "../game/clients/CClient.h"
 #include "network.h"
 #include "packet.h"
 

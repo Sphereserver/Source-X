@@ -1,7 +1,7 @@
 // Actions specific to an NPC.
 
 #include "../common/CException.h"
-#include "../CClient.h"
+#include "../clients/CClient.h"
 #include "../CLog.h"
 #include "../CServTime.h"
 #include "CChar.h"

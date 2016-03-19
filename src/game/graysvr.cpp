@@ -19,7 +19,7 @@
 #include "../network/network.h" // network thread
 #include "../network/PingServer.h"
 #include "../sphere/asyncdb.h"
-#include "CAccount.h"
+#include "clients/CAccount.h"
 #include "CItemMap.h"
 #include "CItemMessage.h"
 #include "CServer.h"

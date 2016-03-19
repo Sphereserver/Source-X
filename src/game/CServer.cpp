@@ -20,9 +20,9 @@
 #include "../common/grayver.h"	// sphere version
 #include "../network/network.h"
 #include "../sphere/ProfileTask.h"
-#include "CAccount.h"
-#include "Chars/CChar.h"
-#include "CClient.h"
+#include "chars/CChar.h"
+#include "clients/CAccount.h"
+#include "clients/CClient.h"
 #include "CItemShip.h"
 #include "CServer.h"
 #include "CServTime.h"

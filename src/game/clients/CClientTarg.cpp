@@ -2,11 +2,12 @@
 
 #include "../common/CGrayUIDextra.h"
 #include "../network/send.h"
-#include "Chars/CChar.h"
+#include "../chars/CChar.h"
+#include "../CItemMulti.h"
+#include "../CItemVendable.h"
+#include "../CLog.h"
+#include "../Triggers.h"
 #include "CClient.h"
-#include "CItemVendable.h"
-#include "CLog.h"
-#include "Triggers.h"
 
 ////////////////////////////////////////////////////////
 // Targetted GM functions.

@@ -4,7 +4,7 @@
 //
 
 #include "../game/CPathFinder.h"
-#include "../game/CClient.h"
+#include "../game/clients/CClient.h"
 #include "../game/Chars/CCharBase.h"
 #include "../game/Chars/CCharPlayer.h"
 #include "../game/Chars/CCharNPC.h"

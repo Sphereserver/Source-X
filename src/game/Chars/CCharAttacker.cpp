@@ -1,6 +1,6 @@
 // Actions specific to an NPC.
 #include "../common/CGrayUIDextra.h"
-#include "../CClient.h"
+#include "../clients/CClient.h"
 #include "../CServTime.h"
 #include "../Triggers.h"
 #include "CChar.h"

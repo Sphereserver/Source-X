@@ -1,9 +1,9 @@
 
 #include "../network/network.h"
-#include "Chars/CChar.h"
+#include "../chars/CChar.h"
+#include "../CLog.h"
+#include "../CServTime.h"
 #include "CClient.h"
-#include "CLog.h"
-#include "CServTime.h"
 
 /////////////////////////////////////////////
 

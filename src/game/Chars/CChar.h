@@ -6,7 +6,7 @@
 #include "../CItemMemory.h"
 #include "../CItemStone.h"
 #include "../CObjBase.h"
-#include "../CParty.h"
+#include "../clients/CParty.h"
 #include "../common/grayproto.h"
 #include "CCharBase.h"
 #include "CCharPlayer.h"

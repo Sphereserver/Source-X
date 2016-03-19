@@ -1,7 +1,7 @@
 
 #include "../common/CException.h"
 #include "../common/grayproto.h"
-#include "Chars/CChar.h"
+#include "chars/CChar.h"
 #include "CItemMulti.h"
 #include "CWorld.h"
 

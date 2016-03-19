@@ -9,9 +9,9 @@
 	#include <errno.h>	// errno
 #endif
 
-#include "../game/CAccount.h"
+#include "../game/clients/CAccount.h"
 #include "../game/Chars/CChar.h"
-#include "../game/CClient.h"
+#include "../game/clients/CClient.h"
 #include "../game/CItemStone.h"
 #include "../game/graysvr.h"
 #include "../game/CWorld.h"
