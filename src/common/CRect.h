@@ -3,11 +3,12 @@
 */
 
 #pragma once
-#ifndef _INC_CRECT_H
-#define _INC_CRECT_H
+#ifndef CRECT_H
+#define CRECT_H
 
 #include "CString.h"
 #include "graymul.h"
+
 
 class CRegionBase;
 class CRegionLinks;
@@ -99,5 +100,5 @@ struct CPointSort : public CPointMap
 	virtual ~CPointSort(); // just to make this dynamic
 };
 
-#endif	//_INC_CRECT_H
+#endif	// CRECT_H
 

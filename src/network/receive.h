@@ -1,11 +1,17 @@
+/**
+* @file receive.h
+* @brief Inwards packets.
+*/
+
+#pragma once
 #ifndef __RECEIVE_H__
 #define __RECEIVE_H__
-#pragma once
 
 #include "../common/CGrayUID.h"
 #include "../common/graymul.h"
 #include "../common/grayproto.h"
 #include "packet.h"
+
 
 /***************************************************************************
  *
@@ -1449,7 +1455,7 @@ public:
 	virtual bool onReceive(NetState* net);
 };
 
-#endif
+
 
 /***************************************************************************
  *
@@ -1464,3 +1470,6 @@ public:
 	PacketCreateHS();
 	virtual bool onReceive(NetState* net);
 };
+
+
+#endif //__RECEIVE_H__

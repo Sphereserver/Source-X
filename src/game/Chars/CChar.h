@@ -1,3 +1,9 @@
+/**
+* @file CChar.h
+* 
+*/
+
+#pragma once
 #ifndef _INC_CCHAR_H
 #define _INC_CCHAR_H
 
@@ -1187,7 +1193,6 @@ inline bool CChar::IsSkillNPC( SKILL_TYPE skill )  // static
 	// Is this in the NPC set of skills.
 	return (skill >= NPCACT_FOLLOW_TARG && skill < NPCACT_QTY);
 }
-
 
 
 #endif // _INC_CCHAR_H

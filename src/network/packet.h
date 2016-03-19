@@ -1,6 +1,11 @@
+/**
+* @file packet.h
+* @brief Basic packet sending/receiving support.
+*/
+
+#pragma once
 #ifndef __PACKET_H__
 #define __PACKET_H__
-#pragma once
 
 #include <list>
 
@@ -296,4 +301,4 @@ private:
 };
 
 
-#endif
+#endif //__PACKET_H__

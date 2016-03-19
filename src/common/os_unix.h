@@ -1,3 +1,8 @@
+/**
+* @file ox_unix.h
+* @brief Unix-specific declarations.
+*/
+
 #pragma once
 #ifndef OS_UNIX_H
 #define OS_UNIX_H
@@ -12,6 +17,7 @@
 #include <errno.h>
 #include <aio.h>
 #include <cctype>
+
 
 #ifndef _MAX_PATH			// stdlib.h ?
 	#define _MAX_PATH   260 	// max. length of full pathname
@@ -72,6 +78,7 @@
 // printf format identifiers
 #define FMTSIZE_T "zu" // linux uses %zu to format size_t
 
+
 inline void _strupr( TCHAR * pszStr )
 {
 	// No portable UNIX/LINUX equiv to this.
@@ -90,4 +97,5 @@ inline void _strlwr( TCHAR * pszStr )
 	}
 }
 
-#endif	//OS_UNIX_H
+
+#endif	// OS_UNIX_H

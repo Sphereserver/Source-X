@@ -1,15 +1,18 @@
-#ifndef _CSV_FILE_H
-#define _CSV_FILE_H
+/**
+* @file CsvFile.h
+*
+*/
 
-//
-// CsvFile.h
-//
+#pragma once
+#ifndef CSV_FILE_H
+#define CSV_FILE_H
 
 #include "CFile.h"
 #include "CacheableScriptFile.h"
 #include <map>
 
 #define MAX_COLUMNS	64	// maximum number of columns in a file
+
 
 typedef std::map<std::string, std::string> CSVRowData;
 
@@ -44,4 +47,4 @@ public:
 	bool ReadNextRowContent(CSVRowData& target);
 };
 
-#endif
+#endif // CSV_FILE_H

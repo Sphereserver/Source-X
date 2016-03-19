@@ -9,10 +9,11 @@
  */
 
 #pragma once
-#ifndef __CMD5_H__ 
-#define __CMD5_H__
+#ifndef CMD5_H 
+#define CMD5_H
 
 #include <string.h>
+
 
 class CMD5
 {
@@ -50,4 +51,4 @@ public:
 	}
 };
 
-#endif //__CMD5_H__
+#endif //CMD5_H

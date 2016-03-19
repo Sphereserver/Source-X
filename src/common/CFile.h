@@ -3,8 +3,8 @@
 */
 
 #pragma once
-#ifndef _INC_CFILE_H
-#define _INC_CFILE_H
+#ifndef CFILE_H
+#define CFILE_H
 
 #ifndef _WIN32
 	#include <sys/types.h>
@@ -45,6 +45,7 @@
 	#define OSFILE_TYPE		HFILE
 	#define NOFILE_HANDLE	HFILE_ERROR
 #endif
+
 
 class CGrayError;
 #define CFileException CGrayError
@@ -386,4 +387,4 @@ public:
 	size_t _cdecl Printf( LPCTSTR pFormat, ... ) __printfargs(2,3);
 };
 
-#endif // _INC_CFILE_H
+#endif // CFILE_H

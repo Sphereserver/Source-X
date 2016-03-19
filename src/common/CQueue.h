@@ -3,10 +3,11 @@
 */
 
 #pragma once
-#ifndef _INC_CQUEUE_H
-#define _INC_CQUEUE_H
+#ifndef CQUEUE_H
+#define CQUEUE_H
 
 #include "CMemBlock.h"
+
 
 /**
 * @brief FIFO data buffer
@@ -75,4 +76,4 @@ public:
 	void AddNewDataFinish( size_t iLen );
 };
 
-#endif //_INC_CQUEUE_H
+#endif // CQUEUE_H

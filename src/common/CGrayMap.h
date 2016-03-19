@@ -2,12 +2,15 @@
 * @file CGrayMap.h
 */
 
-#ifndef _INC_CGRAYMAP_H
-#define _INC_CGRAYMAP_H
+#pragma once
+#ifndef CGRAYMAP_H
+#define CGRAYMAP_H
+
 #include "../game/CServTime.h"
 #include "CArray.h"
 #include "graymul.h"
 #include "CRect.h"
+
 
 class CGrayCachedMulItem
 {
@@ -221,4 +224,4 @@ public:
 	const CUOMultiItemRec2 * GetItem( size_t i ) const;
 };
 
-#endif // _INC_CGRAYMAP_H
+#endif // CGRAYMAP_H

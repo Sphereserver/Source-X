@@ -1,6 +1,11 @@
+/**
+* @file CScript.h
+*
+*/
+
 #pragma once
-#ifndef _INC_CSCRIPT_H
-#define _INC_CSCRIPT_H
+#ifndef CSCRIPT_H
+#define CSCRIPT_H
 
 #include "common.h"
 #include "CMemBlock.h"
@@ -141,4 +146,4 @@ public:
 	virtual ~CScript();
 };
 
-#endif // _INC_CSCRIPT_H
+#endif // CSCRIPT_H

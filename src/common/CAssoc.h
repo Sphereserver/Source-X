@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef _INC_CASSOC_H
-#define _INC_CASSOC_H
+#ifndef CASSOC_H
+#define CASSOC_H
 
 // #include <shellapi.h>
 #include "CFile.h"
@@ -129,4 +129,4 @@ public:
 	}
 };
 
-#endif // _INC_CASSOC_H
+#endif // CASSOC_H

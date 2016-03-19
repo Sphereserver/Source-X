@@ -1,3 +1,8 @@
+/**
+* @file os_windows.h
+* @brief Windows-specific declarations.
+*/
+
 #pragma once
 #ifndef OS_WINDOWS_H
 #define OS_WINDOWS_H
@@ -14,6 +19,9 @@
 #include <winsock2.h>
 #include <windows.h>
 #include <process.h>
+//	thread-specific definitions
+#include "CTime.h"
+#define THREAD_ENTRY_RET void
 
 #pragma warning(disable:4786)
 
@@ -29,22 +37,10 @@
 	#define STDFUNC_UNLINK _unlink
 #endif
 
-extern bool NTWindow_Init( HINSTANCE hInstance, LPTSTR lpCmdLinel, int nCmdShow );
-extern void NTWindow_Exit();
-extern void NTWindow_DeleteIcon();
-extern bool NTWindow_OnTick( int iWaitmSec );
-extern bool NTWindow_PostMsg( LPCTSTR pszMsg );
-extern bool NTWindow_PostMsgColor( COLORREF color );
-extern void NTWindow_SetWindowTitle( LPCTSTR pText = NULL );
-
 // since the only way to make windows not to buffer file is to remove buffer, we
 // use this instead flushing
 #define	FILE_SETNOCACHE(_x_)	setvbuf(_x_, NULL, _IONBF, 0)
 #define FILE_FLUSH(_x_)
-
-//	thread-specific definitions
-#include "CTime.h"
-#define THREAD_ENTRY_RET void
 
 // printf format identifiers
 #define FMTSIZE_T "Iu" // windows uses %Iu to format size_t
@@ -65,4 +61,14 @@ extern void NTWindow_SetWindowTitle( LPCTSTR pText = NULL );
 	#define __except(P)		catch(int)
 #endif  // __MINGW32__
 
-#endif	//OS_WINDOWS_H
+
+extern bool NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLinel, int nCmdShow);
+extern void NTWindow_Exit();
+extern void NTWindow_DeleteIcon();
+extern bool NTWindow_OnTick(int iWaitmSec);
+extern bool NTWindow_PostMsg(LPCTSTR pszMsg);
+extern bool NTWindow_PostMsgColor(COLORREF color);
+extern void NTWindow_SetWindowTitle(LPCTSTR pText = NULL);
+
+
+#endif	// OS_WINDOWS_H

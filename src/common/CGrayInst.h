@@ -3,13 +3,14 @@
 */
 
 #pragma once
-#ifndef _INC_CGRAYINST_H
-#define _INC_CGRAYINST_H
+#ifndef CGRAYINST_H
+#define CGRAYINST_H
 
 #include "../common/graymul.h"
 #include "../common/CFile.h"
 #include "../common/CArray.h"
 #include "../common/CsvFile.h"
+
 
 ////////////////////////////////////////////////////////
 
@@ -108,4 +109,4 @@ private:
 	CVerDataMul& operator=(const CVerDataMul& other);
 } g_VerData;
 
-#endif	// _INC_CGRAYINST_H
+#endif	// CGRAYINST_H

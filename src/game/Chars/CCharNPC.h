@@ -1,7 +1,14 @@
+/**
+* @file CCharNPC.h
+* 
+*/
+
+#pragma once
 #ifndef _INC_CCHARNPC_H
 #define _INC_CCHARNPC_H
 
 #include "CChar.h"
+
 
 enum CNC_TYPE
 {

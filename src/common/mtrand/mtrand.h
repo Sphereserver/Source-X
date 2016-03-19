@@ -1,5 +1,12 @@
-// MersenneTwister.h
-// Mersenne Twister random number generator -- a C++ class MTRand
+/**
+* @File MersenneTwister.h
+* @Brief Mersenne Twister random number generator -- a C++ class MTRand
+*/
+
+#pragma once
+#ifndef MTRAND_H
+#define MTRAND_H
+
 // Based on code by Makoto Matsumoto, Takuji Nishimura, and Shawn Cokus
 // Richard J. Wagner  v1.1  28 September 2009  wagnerr@umich.edu
 
@@ -592,3 +599,6 @@ inline double MTRand::genrand64_real3(void)
 //      - Revised twist() operator to work on ones'-complement machines
 //      - Fixed reload() function to work when N and M are unsigned
 //      - Added copy constructor and copy operator from Salvador Espana
+
+
+#endif //MTRAND_H

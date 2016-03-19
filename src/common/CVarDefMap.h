@@ -1,10 +1,12 @@
-#ifndef _INC_CVARDEFMAP_H
-#define _INC_CVARDEFMAP_H
+
 #pragma once
+#ifndef CVARDEFMAP_H
+#define CVARDEFMAP_H
 
 #include <set>
 #include "CString.h"
 #include "graycom.h"
+
 
 class CTextConsole;
 class CScript;
@@ -172,4 +174,4 @@ public:
 	void r_WritePrefix( CScript & s, LPCTSTR pszPrefix = NULL, LPCTSTR pszKeyExclude = NULL );
 };
 
-#endif
+#endif // CVARDEFMAP_H

@@ -1,13 +1,17 @@
-//
-// CSectorTemplate.h
-//
-#ifndef _INC_CSECTORTEMPLATE_H
-#define _INC_CSECTORTEMPLATE_H
+/**
+* @file CSectorTemplate.
+*
+*/
+
 #pragma once
+#ifndef CSECTORTEMPLATE_H
+#define CSECTORTEMPLATE_H
 
 #include "../game/CServer.h"
 #include "CRect.h"
 #include "CRegion.h"
+
+
 class CItem;
 class CGrayMapBlock;
 
@@ -140,4 +144,4 @@ public:
 #define SECF_InstaSleep	0x00000002
 };
 
-#endif // _INC_CSECTORTEMPLATE_H
+#endif // CSECTORTEMPLATE_H

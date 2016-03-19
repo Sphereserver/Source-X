@@ -1,3 +1,8 @@
+/**
+* @file send.h
+* @brief Outward packets.
+*/
+
 #pragma once
 #ifndef __SEND_H__
 #define __SEND_H__
@@ -11,6 +16,7 @@
 #include "../common/CGrayUID.h"
 #include "../game/enums.h"
 #include "../game/CResource.h"
+
 
 class CItemMap;
 class CMenuItem;
@@ -1917,4 +1923,4 @@ public:
 	}
 };
 
-#endif
+#endif //__SEND_H__

@@ -1,3 +1,9 @@
+/**
+* @file CCharBase.h
+* 
+*/
+
+#pragma once
 #ifndef _INC_CCHARBASE_H
 #define _INC_CCHARBASE_H
 
@@ -9,6 +15,7 @@
 #include "../common/CString.h"
 #include "../common/CTextConsole.h"
 #include "../CBase.h"
+
 
 class CCharBase : public CBaseBaseDef // define basic info about each "TYPE" of monster/creature.
 {

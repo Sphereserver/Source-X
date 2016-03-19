@@ -1,9 +1,15 @@
+/**
+* @file CChar.h
+*
+*/
+
 #pragma once
 #ifndef CACHEABLE_SCRIPT_FILE_H
 #define CACHEABLE_SCRIPT_FILE_H
 
 #include "CFile.h"
 #include <string>
+
 
 class CacheableScriptFile : public CFileText
 {
@@ -38,4 +44,4 @@ private:
 	bool useDefaultFile() const;
 };
 
-#endif
+#endif //CACHEABLE_SCRIPT_FILE_H

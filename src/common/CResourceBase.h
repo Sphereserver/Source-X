@@ -1,6 +1,7 @@
-#ifndef _INC_CResourceBase_H
-#define _INC_CResourceBase_H
+
 #pragma once
+#ifndef CRESOURCEBASE_H
+#define CRESOURCEBASE_H
 
 #include "common.h"
 #include "CGrayUID.h"
@@ -8,6 +9,7 @@
 #include "CScript.h"
 #include "CScriptObj.h"
 #include "../game/CServTime.h"
+
 
 class CVarDefContNum;
 
@@ -585,4 +587,4 @@ inline LPCTSTR CResourceBase::GetResourceBlockName( RES_TYPE restype )	// static
 	return( sm_szResourceBlocks[restype] );
 }
 
-#endif // _INC_CResourceBase_H
+#endif // CRESOURCEBASE_H

@@ -80,4 +80,4 @@ private:
 	bool addQuery(bool isQuery, LPCTSTR theFunction, LPCTSTR theQuery);
 };
 
-#endif
+#endif //CDATABASE_H

@@ -1,7 +1,8 @@
-// deelx.h
-//
-// DEELX Regular Expression Engine (v1.2)
-//
+/**
+* @file deelx.h
+* @brief DEELX Regular Expression Engine (v1.2)
+*/
+
 // Copyright 2006 (c) RegExLab.com
 // All Rights Reserved.
 //
@@ -13,8 +14,9 @@
 // $Revision: 1.1.2.27 $
 //
 
-#ifndef __DEELX_REGEXP__H__
-#define __DEELX_REGEXP__H__
+#pragma once
+#ifndef DEELX_H
+#define DEELX_H
 
 #include <memory.h>
 #include <ctype.h>
@@ -4181,4 +4183,4 @@ typedef CRegexpT <unsigned short> CRegexpW;
 	typedef CRegexpA CRegexp;
 #endif
 
-#endif//__DEELX_REGEXP__H__
+#endif // DEELX_H

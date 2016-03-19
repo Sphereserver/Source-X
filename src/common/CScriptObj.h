@@ -1,6 +1,11 @@
-#ifndef _INC_CSCRIPTOBJ_H
-#define _INC_CSCRIPTOBJ_H
+/**
+* @file CWindow.h
+* @brief Base window class for controls.
+*/
+
 #pragma once
+#ifndef CSCRIPTOBJ_H
+#define CSCRIPTOBJ_H
 
 #include "CArray.h"
 #include "CScript.h"
@@ -8,6 +13,7 @@
 #include "CVarDefMap.h"
 #include "CVarFloat.h"
 #include "CTextConsole.h"
+
 
 class CChar;
 class CScriptTriggerArgs;
@@ -256,4 +262,4 @@ class CFileObjContainer : public CScriptObj
 		}
 };
 
-#endif	// _INC_CSCRIPTOBJ_H
+#endif	// CSCRIPTOBJ_H

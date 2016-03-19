@@ -1,9 +1,16 @@
+/**
+* @file CCharRefArray.h
+*
+*/
+
+#pragma once
 #ifndef _INC_CCHARREFARRAY_H
 #define _INC_CCHARREFARRAY_H
 
 #include "../common/CScript.h"
 #include "../common/CArray.h"
 #include "../common/CGrayUID.h"
+
 
 class CChar;
 
@@ -38,5 +45,6 @@ private:
 	CCharRefArray(const CCharRefArray& copy);
 	CCharRefArray& operator=(const CCharRefArray& other);
 };
+
 
 #endif // _INC_CCHARREFARRAY_H

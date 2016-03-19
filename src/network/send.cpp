@@ -7,7 +7,7 @@
 #include "../common/CGrayUIDextra.h"
 #include "../common/CObjBaseTemplate.h"
 #include "../common/zlib/zlib.h"
-#include "../game/Chars/CChar.h"
+#include "../game/chars/CChar.h"
 #include "../game/clients/CClient.h"
 #include "../game/clients/CClientTooltip.h"
 #include "../game/clients/CParty.h"

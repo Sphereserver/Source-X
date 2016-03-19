@@ -1,6 +1,12 @@
-#ifndef _INC_GRAYCOM_H
-#define _INC_GRAYCOM_H
+/**
+* @file graycom.h
+*
+*/
+
 #pragma once
+#ifndef GRAYCOM_H
+#define GRAYCOM_H
+
 
 //---------------------------SYSTEM DEFINITIONS---------------------------
 
@@ -137,4 +143,4 @@
 #define FEATURE_EXTRA_SHADOWGUARD	0x10	// 0x200000 feature (unlock TOL shadowguard items on house design)
 
 
-#endif	// _INC_GRAYCOM_H
+#endif	// GRAYCOM_H

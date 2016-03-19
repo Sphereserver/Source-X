@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef _INC_CARRAY_H
-#define _INC_CARRAY_H
+#ifndef CARRAY_H
+#define CARRAY_H
 
 #include <limits>
 
@@ -17,12 +17,13 @@
 	#pragma warning(disable:4505)
 #endif // _MSC_VER
 #ifdef __MINGW32__
-#define STANDARD_CPLUSPLUS_THIS(_x_) this->_x_
-#include <cstddef>
+	#define STANDARD_CPLUSPLUS_THIS(_x_) this->_x_
+	#include <cstddef>
 #endif  // __MINGW32__
 #ifdef __linux
-#define STANDARD_CPLUSPLUS_THIS(_x_) this->_x_
-#endif  // LINUX
+	#define STANDARD_CPLUSPLUS_THIS(_x_) this->_x_
+#endif  // __linux
+
 
 class CGObList;
 
@@ -965,4 +966,4 @@ inline void CGObListRec::RemoveSelf()
 
 #undef STANDARD_CPLUSPLUS_THIS
 
-#endif	// _INC_CARRAY_H
+#endif	// CARRAY_H

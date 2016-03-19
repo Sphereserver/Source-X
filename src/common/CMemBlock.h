@@ -3,11 +3,12 @@
 */
 
 #pragma once
-#ifndef _INC_CMEMBLOCK_H
-#define _INC_CMEMBLOCK_H
+#ifndef CMEMBLOCK_H
+#define CMEMBLOCK_H
 
 #include "common.h"
 #include "graycom.h"
+
 
 struct CMemBlock
 {
@@ -168,4 +169,4 @@ public:
 };
 
 
-#endif	// _INC_CMEMBLOCK_H
+#endif	// CMEMBLOCK_H

@@ -1,12 +1,15 @@
-#ifndef _INC_CTIME_H
-#define _INC_CTIME_H
+
+#pragma once
+#ifndef CTIME_H
+#define CTIME_H
 
 #include <time.h>
 #include "common.h"
 
 #ifndef _WIN32
-LONGLONG GetTickCount();
+	LONGLONG GetTickCount();
 #endif
+
 
 class CGTime	// similar to the MFC CTime and CTimeSpan or COleDateTime
 {
@@ -57,4 +60,4 @@ public:
 	int GetDaysTotal() const;
 };
 
-#endif // _INC_CTIME_H
+#endif // CTIME_H

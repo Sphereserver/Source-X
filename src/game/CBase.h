@@ -1,10 +1,11 @@
-//
-// CBase.h
-//
+/**
+* @file CBase.h
+* 
+*/
 
+#pragma once
 #ifndef _INC_CBASE_H
 #define _INC_CBASE_H
-#pragma once
 
 #include "../common/CResourceBase.h"
 #include "../common/CString.h"
@@ -176,4 +177,4 @@ public:
 	void CopyTransfer( CBaseBaseDef * pSrc );
 };
 
-#endif
+#endif //_INC_CBASE_H

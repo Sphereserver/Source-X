@@ -1,9 +1,15 @@
-#ifndef _INC_CVARFLOAT_H
-#define _INC_CVARFLOAT_H
+/**
+* @file CVarFloat.h
+* @brief Custom float implementation.
+*/
+
 #pragma once
+#ifndef CVARFLOAT_H
+#define CVARFLOAT_H
 
 #include <map>
 #include "CString.h"
+
 
 struct LexNoCaseLess {
 	bool operator()(const CGString& CGStr, const char* pBeg2) const
@@ -83,4 +89,4 @@ private:
 	ObjMap m_ObjMap;
 };
 
-#endif
+#endif // CVARFLOAT_H

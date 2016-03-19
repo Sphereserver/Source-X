@@ -1,10 +1,19 @@
+/**
+* @file grayver.h
+* @brief Versioning stuff.
+*/
+
+#pragma once
+#ifndef GRAYVER_H
+#define GRAYVER_H
+
 #ifdef _SUBVERSION
- #include "./version/GitRevision.h"
+	#include "./version/GitRevision.h"
 #endif
 #ifdef __GITREVISION__
- #define GRAY_VER_BUILD			__GITREVISION__
+	#define GRAY_VER_BUILD			__GITREVISION__
 #else
- #define GRAY_VER_BUILD			0
+	#define GRAY_VER_BUILD			0
 #endif
 
 #define GRAY_VER_FILEVERSION		0,56,3,GRAY_VER_BUILD		// version to be set on generated .exe file
@@ -12,26 +21,29 @@
 #define GRAY_VER_STR				"0.56c"						// share version with all files
 
 #if defined(_DEBUG)
- #define GRAY_VERSION				GRAY_VER_STR "-Debug"
- #define GRAY_VER_FILEFLAGS			0x1L	//VS_FF_DEBUG
+	#define GRAY_VERSION				GRAY_VER_STR "-Debug"
+	#define GRAY_VER_FILEFLAGS			0x1L	//VS_FF_DEBUG
 #elif defined(_NIGHTLYBUILD)
- #define GRAY_VERSION				GRAY_VER_STR "-Nightly"
- #define GRAY_VER_FILEFLAGS			0x2L	//VS_FF_PRERELEASE
+	#define GRAY_VERSION				GRAY_VER_STR "-Nightly"
+	#define GRAY_VER_FILEFLAGS			0x2L	//VS_FF_PRERELEASE
 #elif defined(_PRIVATEBUILD)
- #define GRAY_VERSION				GRAY_VER_STR "-Private"
- #define GRAY_VER_FILEFLAGS			0x8L	//VS_FF_PRIVATEBUILD
+	#define GRAY_VERSION				GRAY_VER_STR "-Private"
+	#define GRAY_VER_FILEFLAGS			0x8L	//VS_FF_PRIVATEBUILD
 #else
- #define GRAY_VERSION				GRAY_VER_STR "-Release"
- #define GRAY_VER_FILEFLAGS			0x0L
+	#define GRAY_VERSION				GRAY_VER_STR "-Release"
+	#define GRAY_VER_FILEFLAGS			0x0L
 #endif
 
 #if defined(_WIN32)
- #define GRAY_VER_FILEOS			0x4L	//VOS__WINDOWS32
- #define GRAY_VER_FILEOS_STR		"[WIN32]"
+	#define GRAY_VER_FILEOS			0x4L	//VOS__WINDOWS32
+	#define GRAY_VER_FILEOS_STR		"[WIN32]"
 #elif defined(_BSD)
- #define GRAY_VER_FILEOS			0x0L	//VOS_UNKNOWN
- #define GRAY_VER_FILEOS_STR		"[FreeBSD]"
+	#define GRAY_VER_FILEOS			0x0L	//VOS_UNKNOWN
+	#define GRAY_VER_FILEOS_STR		"[FreeBSD]"
 #else
- #define GRAY_VER_FILEOS			0x0L	//VOS_UNKNOWN
- #define GRAY_VER_FILEOS_STR		"[Linux]"
+	#define GRAY_VER_FILEOS			0x0L	//VOS_UNKNOWN
+	#define GRAY_VER_FILEOS_STR		"[Linux]"
 #endif
+
+
+#endif // GRAYVER_H

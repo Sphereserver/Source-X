@@ -1,10 +1,12 @@
-#ifndef _INC_CGRAYUIDEXTRA_H
-#define _INC_CGRAYUIDEXTRA_H
+#pragma once
+#ifndef CGRAYUIDEXTRA_H
+#define CGRAYUIDEXTRA_H
 
 #include "CGrayUID.h"
 #include "../game/CWorld.h"
-#include "../game/Chars/CChar.h"
+#include "../game/chars/CChar.h"
 #include "../game/CObjBase.h"
+
 
 inline CObjBase * CGrayUIDBase::ObjFind() const
 {
@@ -24,4 +26,4 @@ inline CChar * CGrayUIDBase::CharFind() const // Does character still exist
 	return dynamic_cast<CChar *>(ObjFind());
 }
 
-#endif //_INC_CGRAYUIDEXTRA_H
+#endif // CGRAYUIDEXTRA_H

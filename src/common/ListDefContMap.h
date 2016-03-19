@@ -1,12 +1,18 @@
-#ifndef _INC_CLISTDEFMAP_H
-#define _INC_CLISTDEFMAP_H
+/**
+* @file ListDefContMap.h
+*
+*/
+
 #pragma once
+#ifndef CLISTDEFMAP_H
+#define CLISTDEFMAP_H
 
 #include <list>
 #include <set>
 
 #include "graycom.h"
 #include "CString.h"
+
 
 class CTextConsole;
 class CScript;
@@ -197,4 +203,4 @@ public:
 	void r_WriteSave( CScript& s );
 };
 
-#endif
+#endif // CLISTDEFMAP_H

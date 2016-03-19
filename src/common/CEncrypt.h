@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef _INC_CENCRYPT_H
-#define _INC_CENCRYPT_H
+#ifndef CENCRYPT_H
+#define CENCRYPT_H
 
 #include "CScript.h"
 
@@ -220,4 +220,4 @@ protected:
 	void RelayGameCryptStart( BYTE * pOutput, const BYTE * pInput, size_t iLen );
 };
 
-#endif //_INC_CENCRYPT_H
+#endif //CENCRYPT_H

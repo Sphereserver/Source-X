@@ -1,6 +1,6 @@
 
 #include "../common/CGrayUIDextra.h"
-#include "../game/Chars/CChar.h"
+#include "../game/chars/CChar.h"
 #include "../game/clients/CClient.h"
 #include "../game/items/CItem.h"
 #include "../game/items/CItemMap.h"

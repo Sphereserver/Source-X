@@ -3,8 +3,8 @@
 */
 
 #pragma once
-#ifndef _INC_CEXPRSSION_H
-#define _INC_CEXPRSSION_H
+#ifndef CEXPRSSION_H
+#define CEXPRSSION_H
 
 #include <stdint.h>
 #include "common.h"
@@ -20,6 +20,7 @@
 #endif
 
 #define EXPRESSION_MAX_KEY_LEN SCRIPT_MAX_SECTION_LEN
+
 
 enum DEFMSG_TYPE
 {
@@ -158,4 +159,4 @@ int64_t ahextoi64( LPCTSTR pArgs ); // Convert hex string to INT64
 #define Exp_GetLLVal( pa )	g_Exp.GetVal( pa )
 #define Exp_GetRange( pa )	g_Exp.GetRange( pa )
 
-#endif	// _INC_CEXPRSSION_H
+#endif	// CEXPRSSION_H

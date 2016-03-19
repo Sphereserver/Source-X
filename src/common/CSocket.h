@@ -1,8 +1,11 @@
-// CSocket.h
+/**
+* @file CSocket.h
+* 
+*/
 
-#ifndef _INC_CSOCKET_H
-#define _INC_CSOCKET_H
 #pragma once
+#ifndef CSOCKET_H
+#define CSOCKET_H
 
 #include "common.h"
 
@@ -29,6 +32,7 @@
 	#define TCP_NODELAY		0x0001
 
 #endif	// _WIN32
+
 
 struct CSocketAddressIP : public in_addr
 {
@@ -154,4 +158,4 @@ public:
 	static short GetProtocolIdByName( LPCTSTR pszName );
 };
 
-#endif // _INC_CSOCKET_H
+#endif // CSOCKET_H

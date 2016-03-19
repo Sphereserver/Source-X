@@ -6,8 +6,8 @@
 // 4. LINUX 32 bit
 
 #pragma once
-#ifndef _INC_COMMON_H
-#define _INC_COMMON_H
+#ifndef COMMON_H
+#define COMMON_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -238,4 +238,4 @@ public:
 	}
 };
 
-#endif	// _INC_COMMON_H
+#endif	// COMMON_H

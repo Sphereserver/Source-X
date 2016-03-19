@@ -3,12 +3,12 @@
 */
 
 #pragma once
-#ifndef _INC_CFILELIST_H
-#define _INC_CFILELIST_H
-
+#ifndef CFILELIST_H
+#define CFILELIST_H
 
 #include "CAssoc.h"
 #include <time.h>
+
 
 /**
 * @brief List of CGStrings with methods to read
@@ -48,4 +48,4 @@ private:
 	CFileList& operator=(const CFileList& other);
 };
 
-#endif	// _INC_CFILELIST_H
+#endif	// CFILELIST_H

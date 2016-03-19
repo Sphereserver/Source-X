@@ -1,9 +1,14 @@
-// Define resources in the MUL files.
-#ifndef _INC_GRAYMUL_H
-#define _INC_GRAYMUL_H
+/**
+* @file graymul.h
+* @brief Define resources in the MUL files.
+*/
+
 #pragma once
+#ifndef GRAYMUL_H
+#define GRAYMUL_H
 
 #include "common.h"
+
 
 //---------------------------MUL FILE DEFS---------------------------
 
@@ -23,8 +28,9 @@
 #define UO_MAP_VIEW_SIZE	18	// Visibility for normal items
 #define UO_MAP_VIEW_RADAR	31	// Visibility for castles, keeps and boats
 
-////////////////////////////////////////////////////////////////////////
-// Shared enum types.
+
+
+//-------------------------SHARED ENUM TYPES-------------------------
 
 // 20 colors of 10 hues and 5 brightnesses, which gives us 1000 colors.
 //  plus black, and default.
@@ -2574,4 +2580,4 @@ struct CUOHuesRec // (Hues.mul)
 #endif
 
 
-#endif // _INC_GRAYMUL_H
+#endif // GRAYMUL_H

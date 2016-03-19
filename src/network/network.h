@@ -1,6 +1,11 @@
+/**
+* @file network.h
+* @brief Networking stuff.
+*/
+
+#pragma once
 #ifndef __NETWORK_H__
 #define __NETWORK_H__
-#pragma once
 
 #include "packet.h"
 #include "../common/common.h"
@@ -12,7 +17,7 @@
 #include "../common/CArray.h"
 
 #if !defined(_WIN32) || defined(_LIBEV)
-#include "../sphere/linuxev.h"
+	#include "../sphere/linuxev.h"
 #endif
 
 #define NETWORK_PACKETCOUNT 0x100	// number of unique packets
@@ -43,12 +48,12 @@
 class CClient;
 struct CSocketAddress;
 #ifndef _MTNETWORK
-class NetworkIn;
+	class NetworkIn;
 #else
-class NetworkManager;
-class NetworkThread;
-class NetworkInput;
-class NetworkOutput;
+	class NetworkManager;
+	class NetworkThread;
+	class NetworkInput;
+	class NetworkOutput;
 #endif
 struct HistoryIP;
 typedef std::deque<HistoryIP> IPHistoryList;
@@ -466,7 +471,7 @@ public:
 
 extern NetworkIn g_NetworkIn;
 extern NetworkOut g_NetworkOut;
-#else
+#else //!_MTNETWORK
 
 class NetworkManager;
 class NetworkThread;
@@ -760,6 +765,6 @@ public:
 // todo: eliminate globals!
 extern NetworkManager g_NetworkManager;
 
-#endif
+#endif //_MTNETWORK
 
-#endif
+#endif //__NETWORK_H__

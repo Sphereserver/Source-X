@@ -1,11 +1,14 @@
-#ifndef _INC_COBJBASETEMPLATE_H
-#define _INC_COBJBASETEMPLATE_H
+
+#pragma once
+#ifndef COBJBASETEMPLATE_H
+#define COBJBASETEMPLATE_H
 
 #include "CArray.h"
 //#include "graycom.h"
 #include "CString.h"
 #include "CRect.h"
 #include "CGrayUID.h"
+
 
 class CObjBaseTemplate : public CGObListRec
 {
@@ -95,4 +98,4 @@ public:
 	virtual bool SetName( LPCTSTR pszName );
 };
 
-#endif // _INC_COBJBASETEMPLATE_H
+#endif // COBJBASETEMPLATE_H
