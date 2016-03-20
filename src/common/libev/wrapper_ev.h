@@ -1,6 +1,7 @@
 
-#ifndef __WRAPPER_EV__H
-#define __WRAPPER_EV__H
+#pragma once
+#ifndef WRAPPER_EV_H
+#define WRAPPER_EV_H
 
 #ifdef _WIN32
 	#undef FD_SETSIZE
@@ -21,4 +22,4 @@
 #endif
 #define EV_STANDALONE 1
 
-#endif
+#endif // WRAPPER_EV_H

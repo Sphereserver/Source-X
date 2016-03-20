@@ -1,7 +1,10 @@
-#ifndef _INC_CITEMSHIP_H
-#define _INC_CITEMSHIP_H
+
+#pragma once
+#ifndef CITEMSHIP_H
+#define CITEMSHIP_H
 
 #include "CItemMulti.h"
+
 
 class CItemShip : public CItemMulti
 {
@@ -54,4 +57,4 @@ public:
 	//CItemBaseMulti::ShipSpeed GetShipSpeed();
 };
 
-#endif // _INC_CITEMSHIP_H
+#endif // CITEMSHIP_H

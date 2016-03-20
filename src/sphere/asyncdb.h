@@ -39,4 +39,4 @@ public:
 	void addQuery(bool isQuery, LPCTSTR sFunction, LPCTSTR sQuery);
 };
 
-#endif //ASYNCDB_H
+#endif // ASYNCDB_H

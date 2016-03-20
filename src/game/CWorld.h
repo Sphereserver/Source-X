@@ -2,9 +2,9 @@
 // CWorld.h
 //
 
-#ifndef _INC_CWORLD_H
-#define _INC_CWORLD_H
 #pragma once
+#ifndef CWORLD_H
+#define CWORLD_H
 
 #include "../common/common.h"
 #include "../common/CArray.h"
@@ -15,6 +15,7 @@
 #include "items/CItemBase.h"
 #include "CServTime.h"
 #include "CSector.h"
+
 
 class CObjBase;
 class CItemStone;
@@ -362,4 +363,4 @@ inline CServTime CServTime::GetCurrentTime()	// static
 	return( g_World.GetCurrentTime());
 }
 
-#endif
+#endif // CWORLD_H

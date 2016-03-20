@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef __PACKET_H__
-#define __PACKET_H__
+#ifndef PACKET_H
+#define PACKET_H
 
 #include <list>
 
@@ -13,13 +13,14 @@
 #include "../common/graycom.h"
 //#include "../game/graysvr.h" Removed to test.
 
+#define PACKET_BUFFERDEFAULT 4
+#define PACKET_BUFFERGROWTH 4
+
+
 class NetState;
 class SimplePacketTransaction;
 class AbstractString;
 class CClient;
-
-#define PACKET_BUFFERDEFAULT 4
-#define PACKET_BUFFERGROWTH 4
 
 /***************************************************************************
  *
@@ -301,4 +302,4 @@ private:
 };
 
 
-#endif //__PACKET_H__
+#endif // PACKET_H

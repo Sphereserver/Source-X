@@ -1,7 +1,11 @@
-#ifndef _INC_CITEMMEMORY_H
-#define _INC_CITEMMEMORY_H
+
+#pragma once
+#ifndef CITEMMEMORY_H
+#define CITEMMEMORY_H
 
 #include "CItem.h"
+
+
 class CItemMemory : public CItem
 {
 	// IT_EQ_MEMORY
@@ -35,4 +39,4 @@ public:
 };
 
 
-#endif //_INC_CITEMMEMORY_H
+#endif // CITEMMEMORY_H

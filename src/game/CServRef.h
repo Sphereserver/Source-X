@@ -2,14 +2,15 @@
 // CServerDef.h
 //
 
-#ifndef _INC_CSERVERDEF_H
-#define _INC_CSERVERDEF_H
 #pragma once
+#ifndef CSERVERDEF_H
+#define CSERVERDEF_H
 
 #include "../common/CEncrypt.h"
 #include "../common/CScriptObj.h"
 #include "../common/CSocket.h"
 #include "CServTime.h"
+
 
 class CTextConsole;
 
@@ -126,4 +127,4 @@ public:
 	}
 };
 
-#endif // _INC_CSERVERDEF_H
+#endif // CSERVERDEF_H

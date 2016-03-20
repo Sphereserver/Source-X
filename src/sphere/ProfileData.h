@@ -1,6 +1,7 @@
-#ifndef _INC_PROFILEDATA_H
-#define _INC_PROFILEDATA_H
+
 #pragma once
+#ifndef PROFILEDATA_H
+#define PROFILEDATA_H
 
 enum PROFILE_TYPE
 {
@@ -71,4 +72,4 @@ public:
 	bool IsEnabled(PROFILE_TYPE id = PROFILE_QTY) const;
 };
 
-#endif // _INC_PROFILEDATA_H
+#endif // PROFILEDATA_H

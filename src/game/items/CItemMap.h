@@ -1,8 +1,10 @@
 
-#ifndef _INC_CITEMMAP_H
-#define _INC_CITEMMAP_H
+#pragma once
+#ifndef CITEMMAP_H
+#define CITEMMAP_H
 
 #include "CItemVendable.h"
+
 
 struct CMapPinRec // Pin on a map
 {
@@ -46,4 +48,4 @@ public:
     virtual void DupeCopy( const CItem * pItem );
 };
 
-#endif //_INC_CITEMMAP_H
+#endif // CITEMMAP_H

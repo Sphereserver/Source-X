@@ -1,6 +1,7 @@
+
+#pragma once
 #ifndef THREADS_H
 #define THREADS_H
-
 
 #include "../common/common.h"
 #include "../common/graycom.h"
@@ -35,6 +36,7 @@
 	#define SPHERE_THREADENTRY_RETNTYPE void *
 	#define SPHERE_THREADENTRY_CALLTYPE
 #endif
+
 
 // Interface for threads. Almost always should be used instead of any implementing classes
 class IThread
@@ -362,18 +364,22 @@ public:
 #define PAUSECALLSTACK STATIC_CAST<AbstractSphereThread *>(ThreadHolder::current())->freezeCallStack(true)
 #define UNPAUSECALLSTACK STATIC_CAST<AbstractSphereThread *>(ThreadHolder::current())->freezeCallStack(false)
 #ifdef _WIN32
-// gcc doesn't seem to optimise addtocallstack very well and cpu usage is maxed out with methods are
-// called extremely often. the _INTENSIVE macro can be used to disable these particular methods from
-// being recorded under linux to regain cpu (at the cost of stack accuracy)
-#define ADDTOCALLSTACK_INTENSIVE(_function_)	ADDTOCALLSTACK(_function_)
+	// gcc doesn't seem to optimise addtocallstack very well and cpu usage is maxed out with methods are
+	// called extremely often. the _INTENSIVE macro can be used to disable these particular methods from
+	// being recorded under linux to regain cpu (at the cost of stack accuracy)
+	#define ADDTOCALLSTACK_INTENSIVE(_function_)	ADDTOCALLSTACK(_function_)
 #else
-#define ADDTOCALLSTACK_INTENSIVE(_function_)
+	#define ADDTOCALLSTACK_INTENSIVE(_function_)
 #endif
-#else
+
+#else // THREAD_TRACK_CALLSTACK
+
 #define ADDTOCALLSTACK(_function_)
 #define ADDTOCALLSTACK_INTENSIVE(_function_)
 #define PAUSECALLSTACK
 #define UNPAUSECALLSTACK
+
 #endif // THREAD_TRACK_CALLSTACK
 
-#endif
+
+#endif // THREADS_H

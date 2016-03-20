@@ -1,10 +1,13 @@
-#ifndef _INC_CITEMBASE_H
-#define _INC_CITEMBASE_H
+
+#pragma once
+#ifndef CITEMBASE_H
+#define CITEMBASE_H
 
 #include "../common/CResourceBase.h"
 #include "../common/CArray.h"
 #include "../CBase.h"
 #include "../CResource.h"
+
 
 enum IT_TYPE		// double click type action.
 {
@@ -632,4 +635,4 @@ inline bool CItemBase::IsValidDispID( ITEMID_TYPE id ) // static
 }
 
 
-#endif // _INC_CITEMBASE_H
+#endif // CITEMBASE_H

@@ -1,5 +1,8 @@
-#ifndef _INC_TRIGGERS_H
-#define _INC_TRIGGERS_H
+
+#pragma once
+#ifndef _TRIGGERS_H
+#define TRIGGERS_H
+
 
 //	Triggers list
 enum E_TRIGGERS
@@ -19,4 +22,4 @@ void Triglist(int &total, int &used);
 void TriglistPrint();
 
 
-#endif //_INC_TRIGGERS_H
+#endif // TRIGGERS_H

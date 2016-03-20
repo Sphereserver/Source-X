@@ -2,17 +2,21 @@
 // NTService.h
 //
 
+#pragma once
+#ifndef NTSERVICE_H
+#define NTSERVICE_H
+
 #ifdef _WIN32
-#ifndef _INC_NTSERVICE_H
-#define _INC_NTSERVICE_H
+
 
 #ifdef __MINGW32__
-#include <excpt.h>
-#else //__MINGW32__
-#include <eh.h> //	exception handling info.
+	#include <excpt.h>
+#else
+	#include <eh.h> //	exception handling info.
 #endif //__MINGW32__
 
 #include "../common/graycom.h"
+
 
 extern class CNTService
 {
@@ -56,5 +60,7 @@ public:
 	}
 } g_Service;
 
-#endif // _INC_NTSERVICE_H
+
+#endif // NTSERVICE_H
+
 #endif // _WIN32

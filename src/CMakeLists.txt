@@ -17,6 +17,9 @@ SET (CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS)
 
 ADD_EXECUTABLE (spheresvr
 		${game_SRCS}
+		${items_SRCS}
+		${chars_SRCS}
+		${clients_SRCS}
 		${common_SRCS}
 		${network_SRCS}
 		${sphere_SRCS}
@@ -31,6 +34,9 @@ ADD_EXECUTABLE (spheresvr
 # Nightly project, maybe we should create it only with enabling a CMake option like 'BuildNightly' or something.
 ADD_EXECUTABLE (spheresvrNightly
 		${game_SRCS}
+		${items_SRCS}
+		${chars_SRCS}
+		${clients_SRCS}
 		${common_SRCS}
 		${network_SRCS}
 		${sphere_SRCS}

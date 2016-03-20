@@ -1,5 +1,8 @@
-#ifndef _INC_LINUXEV_H
-#define _INC_LINUXEV_H
+
+#pragma once
+#ifndef LINUXEV_H
+#define LINUXEV_H
+
 #if !defined(_WIN32) || defined(_LIBEV)
 
 	#include "../common/libev/wrapper_ev.h"
@@ -62,4 +65,4 @@
 	};
 
 #endif
-#endif
+#endif // LINUXEV_H

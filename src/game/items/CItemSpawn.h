@@ -1,7 +1,10 @@
-#ifndef _INC_CITEMSPAWN_H
-#define _INC_CITEMSPAWN_H
+
+#pragma once
+#ifndef CITEMSPAWN_H
+#define CITEMSPAWN_H
 
 #include "CItem.h"
+
 
 class CCharBase;
 
@@ -116,4 +119,4 @@ public:
 	virtual void  r_Write(CScript & s);
 };
 
-#endif // _INC_CITEMSPAWN_H
+#endif // CITEMSPAWN_H

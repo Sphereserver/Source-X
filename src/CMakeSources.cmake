@@ -1,84 +1,5 @@
 # Main game files.
 SET (game_SRCS
-game/chars/CCharact.cpp
-game/chars/CCharBase.cpp
-game/chars/CChar.cpp
-game/chars/CChar.h
-game/chars/CCharAttacker.cpp
-game/chars/CCharBase.h
-game/chars/CCharFight.cpp
-game/chars/CCharMemory.cpp
-game/chars/CCharNotoriety.cpp
-game/chars/CCharNPC.cpp
-game/chars/CCharNPC.h
-game/chars/CCharNPCAct.cpp
-game/chars/CCharNPCAct_Fight.cpp
-game/chars/CCharNPCAct_Magic.cpp
-game/chars/CCharNPCAct_Vendor.cpp
-game/chars/CCharNPCPet.cpp
-game/chars/CCharNPCStatus.cpp
-game/chars/CCharPlayer.cpp
-game/chars/CCharPlayer.h
-game/chars/CCharRefArray.h
-game/chars/CCharRefArray.cpp
-game/chars/CCharSkill.cpp
-game/chars/CCharSpell.cpp
-game/chars/CCharStat.cpp
-game/chars/CCharStatus.cpp
-game/chars/CCharUse.cpp
-game/clients/CAccount.cpp
-game/clients/CAccount.h
-game/clients/CChat.cpp
-game/clients/CChat.h
-game/clients/CChatChannel.cpp
-game/clients/CChatChannel.h
-game/clients/CChatChanMember.cpp
-game/clients/CChatChanMember.h
-game/clients/CClient.cpp
-game/clients/CClientDialog.cpp
-game/clients/CClientEvent.cpp
-game/clients/CClientGMPage.cpp
-game/clients/CClient.h
-game/clients/CClientLog.cpp
-game/clients/CClientMsg.cpp
-game/clients/CClientTarg.cpp
-game/clients/CClientTooltip.h
-game/clients/CClientTooltip.cpp
-game/clients/CClientUse.cpp
-game/clients/CGMPage.cpp
-game/clients/CGMPage.h
-game/clients/CParty.cpp
-game/clients/CParty.h
-game/items/CItem.cpp
-game/items/CItem.h
-game/items/CItemBase.cpp
-game/items/CItemBase.h
-game/items/CItemCommCrystal.cpp
-game/items/CItemCommCrystal.h
-game/items/CItemContainer.cpp
-game/items/CItemContainer.h
-game/items/CItemCorpse.cpp
-game/items/CItemCorpse.h
-game/items/CItemMap.cpp
-game/items/CItemMessage.cpp
-game/items/CItemMemory.cpp
-game/items/CItemMemory.h
-game/items/CItemMessage.h
-game/items/CItemMulti.cpp
-game/items/CItemMulti.h
-game/items/CItemMultiCustom.cpp
-game/items/CItemMultiCustom.h
-game/items/CItemPlant.cpp
-game/items/CItemShip.cpp
-game/items/CItemShip.h
-game/items/CItemSpawn.cpp
-game/items/CItemSpawn.h
-game/items/CItemScript.cpp
-game/items/CItemScript.h
-game/items/CItemStone.cpp
-game/items/CItemStone.h
-game/items/CItemVendable.cpp
-game/items/CItemVendable.h
 game/CBase.cpp
 game/CBase.h
 game/CContainer.cpp
@@ -114,7 +35,101 @@ game/graysvr.h
 game/Triggers.h
 game/Triggers.cpp
 )
-SOURCE_GROUP (Game FILES ${game_SRCS})
+SOURCE_GROUP (game FILES ${game_SRCS})
+
+SET (items_SRCS
+game/items/CItem.cpp
+game/items/CItem.h
+game/items/CItemBase.cpp
+game/items/CItemBase.h
+game/items/CItemCommCrystal.cpp
+game/items/CItemCommCrystal.h
+game/items/CItemContainer.cpp
+game/items/CItemContainer.h
+game/items/CItemCorpse.cpp
+game/items/CItemCorpse.h
+game/items/CItemMap.cpp
+game/items/CItemMap.h
+game/items/CItemMemory.cpp
+game/items/CItemMemory.h
+game/items/CItemMessage.cpp
+game/items/CItemMessage.h
+game/items/CItemMulti.cpp
+game/items/CItemMulti.h
+game/items/CItemMultiCustom.cpp
+game/items/CItemMultiCustom.h
+game/items/CItemPlant.cpp
+game/items/CItemScript.cpp
+game/items/CItemScript.h
+game/items/CItemShip.cpp
+game/items/CItemShip.h
+game/items/CItemSpawn.cpp
+game/items/CItemSpawn.h
+game/items/CItemScript.cpp
+game/items/CItemScript.h
+game/items/CItemStone.cpp
+game/items/CItemStone.h
+game/items/CItemVendable.cpp
+game/items/CItemVendable.h
+)
+SOURCE_GROUP (game\\items FILES ${items_SRCS})
+
+SET (chars_SRCS
+game/chars/CCharact.cpp
+game/chars/CCharBase.cpp
+game/chars/CChar.cpp
+game/chars/CChar.h
+game/chars/CCharAttacker.cpp
+game/chars/CCharBase.h
+game/chars/CCharFight.cpp
+game/chars/CCharMemory.cpp
+game/chars/CCharNotoriety.cpp
+game/chars/CCharNPC.cpp
+game/chars/CCharNPC.h
+game/chars/CCharNPCAct.cpp
+game/chars/CCharNPCAct_Fight.cpp
+game/chars/CCharNPCAct_Magic.cpp
+game/chars/CCharNPCAct_Vendor.cpp
+game/chars/CCharNPCPet.cpp
+game/chars/CCharNPCStatus.cpp
+game/chars/CCharPlayer.cpp
+game/chars/CCharPlayer.h
+game/chars/CCharRefArray.h
+game/chars/CCharRefArray.cpp
+game/chars/CCharSkill.cpp
+game/chars/CCharSpell.cpp
+game/chars/CCharStat.cpp
+game/chars/CCharStatus.cpp
+game/chars/CCharUse.cpp
+)
+SOURCE_GROUP (game\\chars FILES ${chars_SRCS})
+
+SET (clients_SRCS
+game/clients/CAccount.cpp
+game/clients/CAccount.h
+game/clients/CChat.cpp
+game/clients/CChat.h
+game/clients/CChatChannel.cpp
+game/clients/CChatChannel.h
+game/clients/CChatChanMember.cpp
+game/clients/CChatChanMember.h
+game/clients/CClient.cpp
+game/clients/CClientDialog.cpp
+game/clients/CClientEvent.cpp
+game/clients/CClientGMPage.cpp
+game/clients/CClient.h
+game/clients/CClientLog.cpp
+game/clients/CClientMsg.cpp
+game/clients/CClientTarg.cpp
+game/clients/CClientTooltip.h
+game/clients/CClientTooltip.cpp
+game/clients/CClientUse.cpp
+game/clients/CGMPage.cpp
+game/clients/CGMPage.h
+game/clients/CParty.cpp
+game/clients/CParty.h
+)
+SOURCE_GROUP (game\\clients FILES ${clients_SRCS})
 
 # Files containing 'background work'
 SET (common_SRCS
@@ -193,48 +208,7 @@ common/twofish/twofish2.cpp
 common/mtrand/mtrand.h
 common/regex/deelx.h
 )
-SOURCE_GROUP (Common FILES ${common_SRCS})
-
-# Network management files
-SET (network_SRCS
-network/network.cpp
-network/network.h
-network/packet.cpp
-network/packet.h
-network/receive.cpp
-network/receive.h
-network/send.cpp
-network/send.h
-network/PingServer.cpp
-network/PingServer.h
-)
-SOURCE_GROUP (Network FILES ${network_SRCS})
-
-# Main program files: threads, console...
-SET (sphere_SRCS
-sphere/asyncdb.cpp
-sphere/asyncdb.h
-sphere/containers.h
-sphere/linuxev.cpp
-sphere/linuxev.h
-sphere/mutex.cpp
-sphere/mutex.h
-sphere/ProfileData.cpp
-sphere/ProfileData.h
-sphere/ProfileTask.cpp
-sphere/ProfileTask.h
-sphere/strings.cpp
-sphere/strings.h
-sphere/threads.cpp
-sphere/threads.h
-sphere/ntservice.cpp
-sphere/ntservice.h
-sphere/ntwindow.cpp
-sphere/UnixTerminal.cpp
-sphere/UnixTerminal.h
-sphere/GraySvr.rc
-)
-SOURCE_GROUP (Sphere FILES ${sphere_SRCS})
+SOURCE_GROUP (common FILES ${common_SRCS})
 
 # CrashDump files
 SET (crashdump_SRCS
@@ -242,7 +216,7 @@ common/crashdump/crashdump.cpp
 common/crashdump/crashdump.h
 common/crashdump/mingwdbghelp.h
 )
-SOURCE_GROUP (CrashDump FILES ${crashdump_SRCS})
+SOURCE_GROUP (common\\crashdump FILES ${crashdump_SRCS})
 
 # LibEv files
 SET (libev_SRCS
@@ -263,7 +237,7 @@ SET (libev_SRCS
 common/libev/wrapper_ev.c
 common/libev/wrapper_ev.h
 )
-SOURCE_GROUP (libev FILES ${libev_SRCS})
+SOURCE_GROUP (common\\libev FILES ${libev_SRCS})
 
 # SQLite files
 SET (sqlite_SRCS
@@ -272,7 +246,7 @@ common/sqlite/sqlite3.h
 common/sqlite/SQLite.cpp
 common/sqlite/SQLite.h
 )
-SOURCE_GROUP (SQLite FILES ${sqlite_SRCS})
+SOURCE_GROUP (common\\sqlite FILES ${sqlite_SRCS})
 
 # ZLib files
 SET (zlib_SRCS
@@ -303,7 +277,48 @@ common/zlib/zlib.h
 common/zlib/zutil.c
 common/zlib/zutil.h
 )
-SOURCE_GROUP (ZLib FILES ${zlib_SRCS})
+SOURCE_GROUP (common\\zlib FILES ${zlib_SRCS})
+
+# Network management files
+SET (network_SRCS
+network/network.cpp
+network/network.h
+network/packet.cpp
+network/packet.h
+network/receive.cpp
+network/receive.h
+network/send.cpp
+network/send.h
+network/PingServer.cpp
+network/PingServer.h
+)
+SOURCE_GROUP (network FILES ${network_SRCS})
+
+# Main program files: threads, console...
+SET (sphere_SRCS
+sphere/asyncdb.cpp
+sphere/asyncdb.h
+sphere/containers.h
+sphere/linuxev.cpp
+sphere/linuxev.h
+sphere/mutex.cpp
+sphere/mutex.h
+sphere/ProfileData.cpp
+sphere/ProfileData.h
+sphere/ProfileTask.cpp
+sphere/ProfileTask.h
+sphere/strings.cpp
+sphere/strings.h
+sphere/threads.cpp
+sphere/threads.h
+sphere/ntservice.cpp
+sphere/ntservice.h
+sphere/ntwindow.cpp
+sphere/UnixTerminal.cpp
+sphere/UnixTerminal.h
+sphere/GraySvr.rc
+)
+SOURCE_GROUP (sphere FILES ${sphere_SRCS})
 
 # Table definitions
 SET (tables_SRCS
@@ -337,7 +352,7 @@ tables/CStoneMember_props.tbl
 tables/defmessages.tbl
 tables/triggers.tbl
 )
-SOURCE_GROUP (Tables FILES ${tables_SRCS})
+SOURCE_GROUP (tables FILES ${tables_SRCS})
 
 # Misc doc and *.ini files
 SET (docs_TEXT

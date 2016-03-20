@@ -1,7 +1,11 @@
-#ifndef _INC_CSERVTIME_H
-#define _INC_CSERVTIME_H
+
+#pragma once
+#ifndef CSERVTIME_H
+#define CSERVTIME_H
 
 #include "../common/graycom.h"
+
+
 class CServTime
 {
 #undef GetCurrentTime
@@ -29,4 +33,4 @@ public:
 	void SetCurrentTime();
 	static CServTime GetCurrentTime();
 };
-#endif // _INC_CSERVTIME_H
+#endif // CSERVTIME_H

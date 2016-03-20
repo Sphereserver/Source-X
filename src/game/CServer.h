@@ -1,5 +1,7 @@
-#ifndef _INC_CSERVER_H
-#define _INC_CSERVER_H
+
+#pragma once
+#ifndef CSERVER_H
+#define CSERVER_H
 
 #include "../common/common.h"
 #include "../common/CTextConsole.h"
@@ -10,6 +12,7 @@
 #include "clients/CChat.h"
 #include "CServRef.h"
 #include "CServTime.h"
+
 
 class CItemShip;
 
@@ -115,4 +118,4 @@ public:
 	PLEVEL_TYPE GetPrivLevel() const;
 } g_Serv;	// current state stuff not saved.
 
-#endif // _INC_CSERVER_H
+#endif // CSERVER_H

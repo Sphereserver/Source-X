@@ -10,6 +10,7 @@
 
 /* @(#) $Id$ */
 
+#pragma once
 #ifndef DEFLATE_H
 #define DEFLATE_H
 

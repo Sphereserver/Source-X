@@ -1,6 +1,7 @@
-#ifndef _INC_GRAYSVR_H_
-#define _INC_GRAYSVR_H_
+
 #pragma once
+#ifndef GRAYSVR_H
+#define GRAYSVR_H
 
 #if defined(_WIN32) && !defined(_MTNETWORK)
 	// _MTNETWORK enabled via makefile for other systems
@@ -19,8 +20,6 @@
 ///////////////////////////////////////////////
 
 
-
-
 // Text mashers.
 
 extern LPCTSTR GetTimeMinDesc( int dwMinutes );
@@ -28,7 +27,6 @@ extern size_t FindStrWord( LPCTSTR pTextSearch, LPCTSTR pszKeyWord );
 
 #include "CLog.h"
 
-// ---------------------------------------------------------------------------------------------
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -120,5 +118,5 @@ extern LONGLONG llTimeProfileFrequency;
 #define TIME_PROFILE_GET_HI	((llTicksEnd - llTicks)/(llTimeProfileFrequency/1000))
 #define	TIME_PROFILE_GET_LO	((((llTicksEnd - llTicks)*10000)/(llTimeProfileFrequency/1000))%10000)
 
-#endif
+#endif // GRAYSVR_H
 

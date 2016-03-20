@@ -10,6 +10,7 @@
 
 /* @(#) $Id$ */
 
+#pragma once
 #ifndef ZUTIL_H
 #define ZUTIL_H
 

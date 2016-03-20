@@ -1,8 +1,11 @@
-#ifndef _INC_CITEMCOMMCRYSTAL_H
-#define _INC_CITEMCOMMCRYSTAL_H
+
+#pragma once
+#ifndef CITEMCOMMCRYSTAL_H
+#define CITEMCOMMCRYSTAL_H
 
 #include "CItemVendable.h"
 //#include "graysvr.h" Removed to test.
+
 
 class CItemCommCrystal : public CItemVendable
 {
@@ -32,4 +35,4 @@ public:
 };
 
 
-#endif //_INC_CITEMCOMMCRYSTAL_H
+#endif // CITEMCOMMCRYSTAL_H

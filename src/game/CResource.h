@@ -2,10 +2,9 @@
 // CResource.h
 //
 
-
-#ifndef _INC_CRESOURCE_H
-#define _INC_CRESOURCE_H
 #pragma once
+#ifndef CRESOURCE_H
+#define CRESOURCE_H
 
 #include "../common/CAssoc.h"
 #include "../common/CResourceBase.h"
@@ -15,6 +14,7 @@
 #include "../common/grayproto.h"
 #include "../common/CGrayMap.h"
 //#include "graysvr.h" Removed to test.
+
 
 class CAccount;
 class CClient;
@@ -1255,4 +1255,4 @@ public:
 #define IsSetCombatFlags(of)	((g_Cfg.m_iCombatFlags & of) != 0)
 #define IsSetMagicFlags(of)		((g_Cfg.m_iMagicFlags & of) != 0)
 
-#endif	// _INC_CRESOURCE_H
+#endif	// CRESOURCE_H

@@ -1,8 +1,11 @@
-#ifndef _INC_CITEMSCRIPT_H
-#define _INC_CITEMSCRIPT_H
+
+#pragma once
+#ifndef CITEMSCRIPT_H
+#define CITEMSCRIPT_H
 
 #include "CItemVendable.h"
 //#include "graysvr.h" Removed to test.
+
 
 class CItemScript : public CItemVendable	// A message for a bboard or book text.
 {
@@ -28,4 +31,4 @@ public:
 };
 
 
-#endif //_INC_CITEMSCRIPT_H
+#endif // CITEMSCRIPT_H

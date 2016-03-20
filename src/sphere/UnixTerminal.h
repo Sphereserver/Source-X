@@ -1,15 +1,19 @@
-#ifndef _INC_UNIXTERMINAL_H_
-#define _INC_UNIXTERMINAL_H_
+
+#pragma once
+#ifndef UNIXTERMINAL_H
+#define UNIXTERMINAL_H
+
 #ifndef _WIN32
 
 #include "../common/common.h"
 
 #ifdef _USECURSES
-#include <curses.h>
-#pragma comment(lib, "ncurses")
+	#include <curses.h>
+	#pragma comment(lib, "ncurses")
 #else
-#include <termios.h>
+	#include <termios.h>
 #endif
+
 
 class UnixTerminal
 {
@@ -67,4 +71,4 @@ public:
 extern UnixTerminal g_UnixTerminal;
 
 #endif
-#endif
+#endif // UNIXTERMINAL_H

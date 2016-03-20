@@ -1,10 +1,13 @@
-#ifndef _INC_CCONTAINER_H
-#define _INC_CCONTAINER_H
+
+#pragma once
+#ifndef CCONTAINER_H
+#define CCONTAINER_H
 
 #include "../common/CArray.h"
 #include "../common/CGrayUID.h"
 #include "../common/CRect.h"
 #include "../common/CResourceBase.h"
+
 
 class CItemContainer;
 
@@ -59,4 +62,4 @@ public:
 	virtual void OnWeightChange( int iChange );
 	virtual void ContentAdd( CItem * pItem ) = 0;
 };
-#endif // _INC_CCONTAINER_H
+#endif // CCONTAINER_H

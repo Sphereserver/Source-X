@@ -1,4 +1,7 @@
+
 #pragma once
+#ifndef SQLITE_H
+#define SQLITE_H
 
 #include "../graycom.h"
 #include "sqlite3.h"
@@ -220,3 +223,5 @@ private:
 	size_t m_iLen;
 };
 
+
+#endif // SQLITE_H

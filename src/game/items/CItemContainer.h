@@ -1,5 +1,7 @@
-#ifndef _INC_CITEMCONTAINER_H
-#define _INC_CITEMCONTAINER_H
+
+#pragma once
+#ifndef CITEMCONTAINER_H
+#define CITEMCONTAINER_H
 
 #include "../CContainer.h"
 #include "CItemVendable.h"
@@ -66,4 +68,4 @@ public:
 };
 
 
-#endif //_INC_CITEMCONTAINER_H
+#endif // CITEMCONTAINER_H

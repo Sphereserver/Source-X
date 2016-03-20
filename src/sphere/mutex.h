@@ -1,3 +1,5 @@
+
+#pragma once
 #ifndef MUTEX_H
 #define MUTEX_H
 
@@ -6,6 +8,7 @@
 #ifdef _BSD
 	#define PTHREAD_MUTEX_RECURSIVE_NP PTHREAD_MUTEX_RECURSIVE
 #endif
+
 
 class SimpleMutex
 {
@@ -140,4 +143,4 @@ private:
 #endif
 };
 
-#endif
+#endif // MUTEX_H

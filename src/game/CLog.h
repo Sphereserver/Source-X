@@ -1,5 +1,7 @@
-#ifndef _INC_CLOG_H
-#define _INC_CLOG_H
+
+#pragma once
+#ifndef CLOG_H
+#define CLOG_H
 
 #include "../common/graycom.h"
 #include "../common/CFile.h"
@@ -8,6 +10,7 @@
 #include "../common/CScriptObj.h"
 #include "../common/CScript.h"
 #include "../sphere/mutex.h"
+
 
 extern struct CLog : public CFileText, public CEventLog
 {
@@ -76,4 +79,4 @@ private:
 	*/
 	void SetColor(Color color);
 } g_Log;		// Log file
-#endif // _INC_CLOG_H
+#endif // CLOG_H

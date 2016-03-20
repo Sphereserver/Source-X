@@ -1,9 +1,12 @@
-#ifndef _INC_CITEMCORPSE_H
-#define _INC_CITEMCORPSE_H
+
+#pragma once
+#ifndef CITEMCORPSE_H
+#define CITEMCORPSE_H
 
 #include "../common/graymul.h"
 #include "../CBase.h"
 #include "CItemContainer.h"
+
 
 class CChar;
 
@@ -25,4 +28,5 @@ public:
 	int GetWeight(WORD amount = 0) const;
 };
 
-#endif //_INC_CITEMCORPSE_H
+
+#endif // CITEMCORPSE_H

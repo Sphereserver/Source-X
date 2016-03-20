@@ -1,7 +1,10 @@
-#ifndef _INC_CITEMSTONE_H
-#define _INC_CITEMSTONE_H
+
+#pragma once
+#ifndef CITEMSTONE_H
+#define CITEMSTONE_H
 
 #include "CItem.h"
+
 
 enum STONEPRIV_TYPE // Priv level for this char
 {
@@ -195,4 +198,4 @@ public:
 	void SetAbbrev( LPCTSTR pAbbrev );
 };
 
-#endif // _INC_CITEMSTONE_H
+#endif // CITEMSTONE_H

@@ -28,6 +28,7 @@
   (zlib format), rfc1951 (deflate format) and rfc1952 (gzip format).
 */
 
+#pragma once
 #ifndef ZLIB_H
 #define ZLIB_H
 

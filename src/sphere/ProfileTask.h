@@ -1,6 +1,7 @@
-#ifndef _INC_PROFILETASK_H
-#define _INC_PROFILETASK_H
+
 #pragma once
+#ifndef PROFILETASK_H
+#define PROFILETASK_H
 
 #include "threads.h"
 #include "ProfileData.h"
@@ -22,4 +23,5 @@ private:
 	ProfileTask& operator=(const ProfileTask& other);
 };
 
-#endif // _INC_PROFILETASK_H
+
+#endif // PROFILETASK_H

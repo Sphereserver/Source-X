@@ -1,5 +1,7 @@
-#ifndef _INC_STRINGS_H_
-#define _INC_STRINGS_H_
+
+#pragma once
+#ifndef STRINGS_H
+#define STRINGS_H
 
 #include "../common/common.h"
 
@@ -7,6 +9,7 @@
 #define THREAD_STRING_STORAGE	4096
 #define THREAD_TSTRING_STORAGE	2048
 #define THREAD_STRING_LENGTH	4096
+
 
 // Base abstract class for strings, provides basic information of what should be available
 // NOTE: The destructor is NOT virtual for a reason. Children should override destroy() instead
@@ -116,4 +119,4 @@ private:
 	static char m_tempStrings[MAX_TEMP_LINES_NO_CONTEXT][THREAD_STRING_LENGTH];
 };
 
-#endif
+#endif // STRINGS_H

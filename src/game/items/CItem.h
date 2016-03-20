@@ -1,5 +1,7 @@
-#ifndef _INC_CITEM_H
-#define _INC_CITEM_H
+
+#pragma once
+#ifndef CITEM_H
+#define CITEM_H
 
 #include "../common/graymul.h"
 #include "../common/CRect.h"
@@ -11,6 +13,7 @@
 #include "../CResource.h"
 #include "../CObjBase.h"
 #include "CItemBase.h"
+
 
 enum ITC_TYPE	// Item Template commands
 {
@@ -715,4 +718,4 @@ public:
 	virtual bool NotifyDelete();
 };
 
-#endif // _INC_CITEM_H
+#endif // CITEM_H

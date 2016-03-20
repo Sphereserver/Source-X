@@ -1,7 +1,7 @@
 #if !defined(_CRASHDUMP_H) && defined(_WIN32) && !defined(_DEBUG) && !defined(_NO_CRASHDUMP)
+#define CRASHDUMP_H
 
-#define _CRASHDUMP_H
-
+#include <stdio.h>
 #include <windows.h>
 #ifdef __MINGW32__
 	#include "mingwdbghelp.h"
@@ -10,7 +10,6 @@
 	#include <Dbghelp.h>
 	#pragma warning(default:4091)
 #endif  // __MINGW32__
-#include <stdio.h>
 
 typedef BOOL (WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess,
 										 DWORD dwPid,
@@ -37,5 +36,6 @@ class CrashDump
 		CrashDump(const CrashDump& copy);
 		CrashDump& operator=(const CrashDump& other);
 };
+
 
 #endif

@@ -1,9 +1,13 @@
-#ifndef _INC_CITEMMULTI_H
-#define _INC_CITEMMULTI_H
+
+#pragma once
+#ifndef CITEMMULTI_H
+#define CITEMMULTI_H
 
 #include "CItem.h"
+
 #define MAX_MULTI_LIST_OBJS 128
 #define MAX_MULTI_CONTENT 1024
+
 
 class CItemMulti : public CItem
 {
@@ -65,4 +69,4 @@ public:
 	virtual bool  r_LoadVal( CScript & s  );
 	virtual void DupeCopy( const CItem * pItem );
 };
-#endif // _INC_CITEMMULTI_H
+#endif // CITEMMULTI_H

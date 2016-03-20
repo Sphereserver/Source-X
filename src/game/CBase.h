@@ -4,13 +4,14 @@
 */
 
 #pragma once
-#ifndef _INC_CBASE_H
-#define _INC_CBASE_H
+#ifndef CBASE_H
+#define CBASE_H
 
 #include "../common/CResourceBase.h"
 #include "../common/CString.h"
 #include "../common/CVarDefMap.h"
 #include "../common/graymul.h"
+
 
 struct CBaseBaseDef : public CResourceLink
 {
@@ -177,4 +178,4 @@ public:
 	void CopyTransfer( CBaseBaseDef * pSrc );
 };
 
-#endif //_INC_CBASE_H
+#endif // CBASE_H

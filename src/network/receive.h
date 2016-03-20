@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef __RECEIVE_H__
-#define __RECEIVE_H__
+#ifndef RECEIVE_H
+#define RECEIVE_H
 
 #include "../common/CGrayUID.h"
 #include "../common/graymul.h"
@@ -1472,4 +1472,4 @@ public:
 };
 
 
-#endif //__RECEIVE_H__
+#endif //RECEIVE_H

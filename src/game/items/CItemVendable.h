@@ -1,8 +1,11 @@
-#ifndef _INC_CITEMVENDABLE_H
-#define _INC_CITEMVENDABLE_H
+
+#pragma once
+#ifndef CITEMVENDABLE_H
+#define CITEMVENDABLE_H
 
 #include "CItem.h"
 #include "CItemBase.h"
+
 
 class CItemVendable : public CItem
 {
@@ -42,4 +45,4 @@ public:
 };
 
 
-#endif // _INC_CITEMVENDABLE_H
+#endif // CITEMVENDABLE_H

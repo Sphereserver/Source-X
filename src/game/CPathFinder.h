@@ -3,14 +3,17 @@
 //		pathfinding algorytm based on AStar (A*) algorithm
 //		based on A* Pathfinder (Version 1.71a) by Patrick Lester, pwlester@policyalmanac.org
 //
-#ifndef PATH_FINDER_H
-#define PATH_FINDER_H
+
+#pragma once
+#ifndef PATHFINDER_H
+#define PATHFINDER_H
 
 //#include "../game/graysvr.h" Removed to test.
 #include <deque>
 #include <list>
 #include <algorithm>
 #include "../common/CRect.h"
+
 
 class CChar;
 
@@ -126,4 +129,4 @@ protected:
 
 
 
-#endif
+#endif // PATHFINDER_H

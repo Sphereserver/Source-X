@@ -1,9 +1,10 @@
-#ifndef _INC_CSECTOR_H
-#define _INC_CSECTOR_H
+#ifndef CSECTOR_H
+#define CSECTOR_H
 
 #include "../common/CSectorTemplate.h"
 #include "../common/CScriptObj.h"
 #include "CSectorEnviron.h"
+
 
 class CChar;
 class CItemStone;
@@ -112,4 +113,4 @@ public:
 	LPCTSTR GetName() const { return( "Sector" ); }
 };
 
-#endif // _INC_CSECTOR_H
+#endif // CSECTOR_H
