@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef NETWORK_H
-#define NETWORK_H
+#ifndef _INC_NETWORK_H
+#define _INC_NETWORK_H
 
 #include "packet.h"
 #include "../common/common.h"
@@ -768,4 +768,4 @@ extern NetworkManager g_NetworkManager;
 
 #endif //_MTNETWORK
 
-#endif // NETWORK_H
+#endif // _INC_NETWORK_H

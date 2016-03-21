@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef SEND_H
-#define SEND_H
+#ifndef _INC_SEND_H
+#define _INC_SEND_H
 
 #include "../common/graymul.h"
 #include "../common/CRect.h"
@@ -1923,4 +1923,4 @@ public:
 	}
 };
 
-#endif // SEND_H
+#endif // _INC_SEND_H

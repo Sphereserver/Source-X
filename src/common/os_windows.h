@@ -4,8 +4,9 @@
 */
 
 #pragma once
-#ifndef OS_WINDOWS_H
-#define OS_WINDOWS_H
+#ifndef _INC_OS_WINDOWS_H
+#define _INC_OS_WINDOWS_H
+
 
 #define _WIN32_DCOM
 
@@ -71,4 +72,4 @@ extern bool NTWindow_PostMsgColor(COLORREF color);
 extern void NTWindow_SetWindowTitle(LPCTSTR pText = NULL);
 
 
-#endif	// OS_WINDOWS_H
+#endif	// _INC_OS_WINDOWS_H

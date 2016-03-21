@@ -3,8 +3,8 @@
 */
 
 #pragma once
-#ifndef CFILE_H
-#define CFILE_H
+#ifndef _INC_CFILE_H
+#define _INC_CFILE_H
 
 #ifndef _WIN32
 	#include <sys/types.h>
@@ -387,4 +387,4 @@ public:
 	size_t _cdecl Printf( LPCTSTR pFormat, ... ) __printfargs(2,3);
 };
 
-#endif // CFILE_H
+#endif // _INC_CFILE_H

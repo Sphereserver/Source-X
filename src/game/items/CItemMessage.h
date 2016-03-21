@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CITEMMESSAGE_H
-#define CITEMMESSAGE_H
+#ifndef _INC_CITEMMESSAGE_H
+#define _INC_CITEMMESSAGE_H
 
 #include "../common/CString.h"
 #include "CItemVendable.h"
@@ -53,4 +53,4 @@ public:
 };
 
 
-#endif // CITEMMESSAGE_H
+#endif // _INC_CITEMMESSAGE_H

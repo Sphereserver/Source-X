@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CREGION_H
-#define CREGION_H
+#ifndef _INC_CREGION_H
+#define _INC_CREGION_H
 
 #include "graymul.h"
 #include "CRect.h"
@@ -518,4 +518,4 @@ private:
 	CStartLoc& operator=(const CStartLoc& other);
 };
 
-#endif // CREGION_H
+#endif // _INC_CREGION_H

@@ -9,8 +9,8 @@
  */
 
 #pragma once
-#ifndef CMD5_H 
-#define CMD5_H
+#ifndef _INC_CMD5_H 
+#define _INC_CMD5_H
 
 #include <string.h>
 
@@ -51,4 +51,4 @@ public:
 	}
 };
 
-#endif //CMD5_H
+#endif // _INC_CMD5_H

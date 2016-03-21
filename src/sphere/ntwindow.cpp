@@ -93,7 +93,7 @@ public:
 		virtual BOOL DefDialogProc( UINT message, WPARAM wParam, LPARAM lParam );
 	};
 
-	COLORREF		m_dwColorNew;	// setthe color for the next block written.
+	COLORREF		m_dwColorNew;	// set the color for the next block written.
 	COLORREF		m_dwColorPrv;
 	CRichEditCtrl	m_wndLog;
 	int				m_iLogTextLen;
@@ -417,7 +417,7 @@ int CNTWindow::OnCreate( HWND hWnd, LPCREATESTRUCT lParam )
 
 	m_wndLog.m_hWnd = ::CreateWindow( RICHEDIT_CLASS, NULL,
 		ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | /* ES_OEMCONVERT | */
-		WS_CHILD|WS_VISIBLE|WS_VSCROLL,
+		WS_CHILD | WS_VISIBLE | WS_VSCROLL,
 		0, 0, 10, 10,
 		m_hWnd,
 		(HMENU)(UINT) IDC_M_LOG, theApp.m_hInstance, NULL );
@@ -427,7 +427,7 @@ int CNTWindow::OnCreate( HWND hWnd, LPCREATESTRUCT lParam )
 	SetLogFont( "Courier" );
 
 	// TEXTMODE
-	m_wndLog.SetBackgroundColor( false, RGB(0,0,0));
+	m_wndLog.SetBackgroundColor( false, RGB(0,0,0) );
 	CHARFORMAT cf;
 	memset( &cf, 0, sizeof(cf));
 	cf.cbSize = sizeof(cf);

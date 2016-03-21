@@ -3,8 +3,8 @@
 */
 
 #pragma once
-#ifndef CMEMBLOCK_H
-#define CMEMBLOCK_H
+#ifndef _INC_CMEMBLOCK_H
+#define _INC_CMEMBLOCK_H
 
 #include "common.h"
 #include "graycom.h"
@@ -169,4 +169,4 @@ public:
 };
 
 
-#endif	// CMEMBLOCK_H
+#endif	// _INC_CMEMBLOCK_H

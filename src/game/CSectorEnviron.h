@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CSECTORENVIRON_H
-#define CSECTORENVIRON_H
+#ifndef _INC_CSECTORENVIRON_H
+#define _INC_CSECTORENVIRON_H
 
 #include "../common/grayproto.h"
 
@@ -19,4 +19,4 @@ public:
 };
 
 
-#endif // CSECTORENVIRON_H
+#endif // _INC_CSECTORENVIRON_H

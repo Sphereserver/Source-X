@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef PINGSERVER_H
-#define PINGSERVER_H
+#ifndef _INC_PINGSERVER_H
+#define _INC_PINGSERVER_H
 
 #include "../common/CSocket.h"
 #include "../sphere/threads.h"
@@ -34,4 +34,4 @@ public:
 	virtual void waitForClose();
 };
 
-#endif // PINGSERVER_H
+#endif // _INC_PINGSERVER_H

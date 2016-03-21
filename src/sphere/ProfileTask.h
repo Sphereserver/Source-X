@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef PROFILETASK_H
-#define PROFILETASK_H
+#ifndef _INC_PROFILETASK_H
+#define _INC_PROFILETASK_H
 
 #include "threads.h"
 #include "ProfileData.h"
@@ -25,4 +25,4 @@ private:
 };
 
 
-#endif // PROFILETASK_H
+#endif // _INC_PROFILETASK_H

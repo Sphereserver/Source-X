@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef ASYNCDB_H
-#define ASYNCDB_H
+#ifndef _INC_ASYNCDB_H
+#define _INC_ASYNCDB_H
 
 #include "threads.h"
 #include "mutex.h"
@@ -39,4 +39,4 @@ public:
 	void addQuery(bool isQuery, LPCTSTR sFunction, LPCTSTR sQuery);
 };
 
-#endif // ASYNCDB_H
+#endif // _INC_ASYNCDB_H

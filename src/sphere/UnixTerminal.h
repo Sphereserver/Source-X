@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef UNIXTERMINAL_H
-#define UNIXTERMINAL_H
+#ifndef _INC_UNIXTERMINAL_H
+#define _INC_UNIXTERMINAL_H
 
 #ifndef _WIN32
 
@@ -70,5 +70,5 @@ public:
 
 extern UnixTerminal g_UnixTerminal;
 
-#endif
-#endif // UNIXTERMINAL_H
+#endif // !_WIN32
+#endif // _INC_UNIXTERMINAL_H

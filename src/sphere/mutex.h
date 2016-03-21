@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef MUTEX_H
-#define MUTEX_H
+#ifndef _INC_MUTEX_H
+#define _INC_MUTEX_H
 
 #include "../common/common.h"
 
@@ -143,4 +143,4 @@ private:
 #endif
 };
 
-#endif // MUTEX_H
+#endif // _INC_MUTEX_H

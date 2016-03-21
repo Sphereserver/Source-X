@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef CLISTDEFMAP_H
-#define CLISTDEFMAP_H
+#ifndef _INC_CLISTDEFMAP_H
+#define _INC_CLISTDEFMAP_H
 
 #include <list>
 #include <set>
@@ -203,4 +203,4 @@ public:
 	void r_WriteSave( CScript& s );
 };
 
-#endif // CLISTDEFMAP_H
+#endif // _INC_CLISTDEFMAP_H

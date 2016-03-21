@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CONTAINERS_H
-#define CONTAINERS_H
+#ifndef _INC_CONTAINERS_H
+#define _INC_CONTAINERS_H
 
 #include <list>
 // a thread-safe implementation of a queue container that doesn't use any locks
@@ -105,4 +105,4 @@ public:
 	}
 };
 
-#endif // CONTAINERS_H
+#endif // _INC_CONTAINERS_H

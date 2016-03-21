@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef CEXCEPTION_H
-#define CEXCEPTION_H
+#ifndef _INC_CEXCEPTION_H
+#define _INC_CEXCEPTION_H
 
 #include <stack>
 #include "../sphere/threads.h"
@@ -212,4 +212,4 @@ public:
 
 #endif //_EXCEPTIONS_DEBUG
 
-#endif //CEXCEPTION_H
+#endif // _INC_CEXCEPTION_H

@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CRESOURCEBASE_H
-#define CRESOURCEBASE_H
+#ifndef _INC_CRESOURCEBASE_H
+#define _INC_CRESOURCEBASE_H
 
 #include "common.h"
 #include "CGrayUID.h"
@@ -587,4 +587,4 @@ inline LPCTSTR CResourceBase::GetResourceBlockName( RES_TYPE restype )	// static
 	return( sm_szResourceBlocks[restype] );
 }
 
-#endif // CRESOURCEBASE_H
+#endif // _INC_CRESOURCEBASE_H

@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef SQLITE_H
-#define SQLITE_H
+#ifndef _INC_SQLITE_H
+#define _INC_SQLITE_H
 
 #include "../graycom.h"
 #include "sqlite3.h"
@@ -225,4 +225,4 @@ private:
 };
 
 
-#endif // SQLITE_H
+#endif // _INC_SQLITE_H

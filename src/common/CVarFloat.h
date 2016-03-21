@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef CVARFLOAT_H
-#define CVARFLOAT_H
+#ifndef _INC_CVARFLOAT_H
+#define _INC_CVARFLOAT_H
 
 #include <map>
 #include "CString.h"
@@ -89,4 +89,4 @@ private:
 	ObjMap m_ObjMap;
 };
 
-#endif // CVARFLOAT_H
+#endif // _INC_CVARFLOAT_H

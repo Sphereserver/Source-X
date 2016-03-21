@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef CSOCKET_H
-#define CSOCKET_H
+#ifndef _INC_CSOCKET_H
+#define _INC_CSOCKET_H
 
 #include "common.h"
 
@@ -158,4 +158,4 @@ public:
 	static short GetProtocolIdByName( LPCTSTR pszName );
 };
 
-#endif // CSOCKET_H
+#endif // _INC_CSOCKET_H

@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CITEMSTONE_H
-#define CITEMSTONE_H
+#ifndef _INC_CITEMSTONE_H
+#define _INC_CITEMSTONE_H
 
 #include "CItem.h"
 
@@ -198,4 +198,4 @@ public:
 	void SetAbbrev( LPCTSTR pAbbrev );
 };
 
-#endif // CITEMSTONE_H
+#endif // _INC_CITEMSTONE_H

@@ -3,8 +3,8 @@
 */
 
 #pragma once
-#ifndef CFILELIST_H
-#define CFILELIST_H
+#ifndef _INC_CFILELIST_H
+#define _INC_CFILELIST_H
 
 #include "CAssoc.h"
 #include <time.h>
@@ -48,4 +48,4 @@ private:
 	CFileList& operator=(const CFileList& other);
 };
 
-#endif	// CFILELIST_H
+#endif	// _INC_CFILELIST_H

@@ -3,8 +3,8 @@
 //
 
 #pragma once
-#ifndef NTSERVICE_H
-#define NTSERVICE_H
+#ifndef _INC_NTSERVICE_H
+#define _INC_NTSERVICE_H
 
 #ifdef _WIN32
 
@@ -61,6 +61,6 @@ public:
 } g_Service;
 
 
-#endif // NTSERVICE_H
-
 #endif // _WIN32
+
+#endif // _INC_NTSERVICE_H

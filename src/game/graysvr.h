@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef GRAYSVR_H
-#define GRAYSVR_H
+#ifndef _INC_GRAYSVR_H
+#define _INC_GRAYSVR_H
 
 #if defined(_WIN32) && !defined(_MTNETWORK)
 	// _MTNETWORK enabled via makefile for other systems
@@ -70,37 +70,37 @@ struct TScriptProfiler
 {
 	unsigned char	initstate;
 	DWORD		called;
-	LONGLONG	total;
+	LLONG	total;
 	struct TScriptProfilerFunction
 	{
-		TCHAR		name[128];	// name of the function
-		DWORD		called;		// how many times called
-		LONGLONG	total;		// total executions time
-		LONGLONG	min;		// minimal executions time
-		LONGLONG	max;		// maximal executions time
-		LONGLONG	average;	// average executions time
+		TCHAR	name[128];	// name of the function
+		DWORD	called;		// how many times called
+		LLONG	total;		// total executions time
+		LLONG	min;		// minimal executions time
+		LLONG	max;		// maximal executions time
+		LLONG	average;	// average executions time
 		TScriptProfilerFunction *next;
 	}		*FunctionsHead, *FunctionsTail;
 	struct TScriptProfilerTrigger
 	{
-		TCHAR		name[128];	// name of the trigger
-		DWORD		called;		// how many times called
-		LONGLONG	total;		// total executions time
-		LONGLONG	min;		// minimal executions time
-		LONGLONG	max;		// maximal executions time
-		LONGLONG	average;	// average executions time
+		TCHAR	name[128];	// name of the trigger
+		DWORD	called;		// how many times called
+		LLONG	total;		// total executions time
+		LLONG	min;		// minimal executions time
+		LLONG	max;		// maximal executions time
+		LLONG	average;	// average executions time
 		TScriptProfilerTrigger *next;
 	}		*TriggersHead, *TriggersTail;
 };
 extern TScriptProfiler g_profiler;
 
 //	Time measurement macros
-extern LONGLONG llTimeProfileFrequency;
+extern LLONG llTimeProfileFrequency;
 
 #ifdef _WIN32
 
 #define	TIME_PROFILE_INIT	\
-	LONGLONG llTicks(0), llTicksEnd
+	LLONG llTicks(0), llTicksEnd
 #define	TIME_PROFILE_START	\
 	if ( !QueryPerformanceCounter((LARGE_INTEGER *)&llTicks)) llTicks = GetTickCount()
 #define TIME_PROFILE_END	if ( !QueryPerformanceCounter((LARGE_INTEGER *)&llTicksEnd)) llTicksEnd = GetTickCount()
@@ -108,7 +108,7 @@ extern LONGLONG llTimeProfileFrequency;
 #else // !_WIN32
 
 #define	TIME_PROFILE_INIT	\
-	LONGLONG llTicks(0), llTicksEnd
+	LLONG llTicks(0), llTicksEnd
 #define	TIME_PROFILE_START	\
 	llTicks = GetTickCount()
 #define TIME_PROFILE_END	llTicksEnd = GetTickCount();
@@ -119,4 +119,4 @@ extern LONGLONG llTimeProfileFrequency;
 #define	TIME_PROFILE_GET_LO	((((llTicksEnd - llTicks)*10000)/(llTimeProfileFrequency/1000))%10000)
 
 
-#endif // GRAYSVR_H
+#endif // _INC_GRAYSVR_H

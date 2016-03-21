@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef MTRAND_H
-#define MTRAND_H
+#ifndef _INC_MTRAND_H
+#define _INC_MTRAND_H
 
 // Based on code by Makoto Matsumoto, Takuji Nishimura, and Shawn Cokus
 // Richard J. Wagner  v1.1  28 September 2009  wagnerr@umich.edu
@@ -601,4 +601,4 @@ inline double MTRand::genrand64_real3(void)
 //      - Added copy constructor and copy operator from Salvador Espana
 
 
-#endif //MTRAND_H
+#endif // _INC_MTRAND_H

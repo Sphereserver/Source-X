@@ -3,8 +3,8 @@
 //
 
 #pragma once
-#ifndef CRESOURCE_H
-#define CRESOURCE_H
+#ifndef _INC_CRESOURCE_H
+#define _INC_CRESOURCE_H
 
 #include "../common/CAssoc.h"
 #include "../common/CResourceBase.h"
@@ -1255,4 +1255,4 @@ public:
 #define IsSetCombatFlags(of)	((g_Cfg.m_iCombatFlags & of) != 0)
 #define IsSetMagicFlags(of)		((g_Cfg.m_iMagicFlags & of) != 0)
 
-#endif	// CRESOURCE_H
+#endif	// _INC_CRESOURCE_H

@@ -3,8 +3,8 @@
 */
 
 #pragma once
-#ifndef CGRAYUID_H
-#define CGRAYUID_H
+#ifndef _INC_CGRAYUID_H
+#define _INC_CGRAYUID_H
 
 #include "common.h"
 #include "graycom.h"
@@ -70,4 +70,4 @@ struct CGrayUID : public CGrayUIDBase
 	CGrayUID( DWORD dw );
 };
 
-#endif // CGRAYUID_H
+#endif // _INC_CGRAYUID_H

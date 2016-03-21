@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CITEMVENDABLE_H
-#define CITEMVENDABLE_H
+#ifndef _INC_CITEMVENDABLE_H
+#define _INC_CITEMVENDABLE_H
 
 #include "CItem.h"
 #include "CItemBase.h"
@@ -45,4 +45,4 @@ public:
 };
 
 
-#endif // CITEMVENDABLE_H
+#endif // _INC_CITEMVENDABLE_H

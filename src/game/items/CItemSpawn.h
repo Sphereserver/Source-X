@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CITEMSPAWN_H
-#define CITEMSPAWN_H
+#ifndef _INC_CITEMSPAWN_H
+#define _INC_CITEMSPAWN_H
 
 #include "CItem.h"
 
@@ -119,4 +119,4 @@ public:
 	virtual void  r_Write(CScript & s);
 };
 
-#endif // CITEMSPAWN_H
+#endif // _INC_CITEMSPAWN_H

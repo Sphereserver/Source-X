@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CVARDEFMAP_H
-#define CVARDEFMAP_H
+#ifndef _INC_CVARDEFMAP_H
+#define _INC_CVARDEFMAP_H
 
 #include <set>
 #include "CString.h"
@@ -174,4 +174,4 @@ public:
 	void r_WritePrefix( CScript & s, LPCTSTR pszPrefix = NULL, LPCTSTR pszKeyExclude = NULL );
 };
 
-#endif // CVARDEFMAP_H
+#endif // _INC_CVARDEFMAP_H

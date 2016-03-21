@@ -6,8 +6,8 @@
 #pragma once
 #ifdef __MINGW32__
 
-#ifndef MINGWDBGHELP_H
-#define MINGWDBGHELP_H
+#ifndef _INC_MINGWDBGHELP_H
+#define _INC_MINGWDBGHELP_H
 
 #include "../datatypes.h"
 
@@ -186,6 +186,6 @@ typedef struct _MINIDUMP_CALLBACK_INFORMATION {
 } MINIDUMP_CALLBACK_INFORMATION, *PMINIDUMP_CALLBACK_INFORMATION;
 
 
-#endif // MINGWDBGHELP_H
+#endif // _INC_MINGWDBGHELP_H
 
 #endif  // __MINGW32__

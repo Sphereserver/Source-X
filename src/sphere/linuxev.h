@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef LINUXEV_H
-#define LINUXEV_H
+#ifndef _INC_LINUXEV_H
+#define _INC_LINUXEV_H
 
 #if !defined(_WIN32) || defined(_LIBEV)
 
@@ -65,4 +65,4 @@
 	};
 
 #endif
-#endif // LINUXEV_H
+#endif // _INC_LINUXEV_H

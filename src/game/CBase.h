@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef CBASE_H
-#define CBASE_H
+#ifndef _INC_CBASE_H
+#define _INC_CBASE_H
 
 #include "../common/CResourceBase.h"
 #include "../common/CString.h"
@@ -178,4 +178,4 @@ public:
 	void CopyTransfer( CBaseBaseDef * pSrc );
 };
 
-#endif // CBASE_H
+#endif // _INC_CBASE_H

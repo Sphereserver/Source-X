@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef CCHARREFARRAY_H
-#define CCHARREFARRAY_H
+#ifndef _INC_CCHARREFARRAY_H
+#define _INC_CCHARREFARRAY_H
 
 #include "../common/CScript.h"
 #include "../common/CArray.h"

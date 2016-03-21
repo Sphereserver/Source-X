@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CCLIENTTOOLTIP_H
-#define CCLIENTTOOLTIP_H
+#ifndef _INC_CCLIENTTOOLTIP_H
+#define _INC_CCLIENTTOOLTIP_H
 
 #include "../common/common.h"
 #include "../common/graycom.h"
@@ -26,4 +26,4 @@ public:
     void __cdecl FormatArgs(LPCTSTR format, ...) __printfargs(2,3);
 };
 
-#endif // CCLIENTTOOLTIP_H
+#endif // _INC_CCLIENTTOOLTIP_H

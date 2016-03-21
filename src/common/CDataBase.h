@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef CDATABASE_H
-#define	CDATABASE_H
+#ifndef _INC_CDATABASE_H
+#define	_INC_CDATABASE_H
 
 #include "../common/graycom.h"
 #include <mysql.h>
@@ -80,4 +80,4 @@ private:
 	bool addQuery(bool isQuery, LPCTSTR theFunction, LPCTSTR theQuery);
 };
 
-#endif //CDATABASE_H
+#endif // _INC_CDATABASE_H

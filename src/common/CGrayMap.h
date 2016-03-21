@@ -3,8 +3,8 @@
 */
 
 #pragma once
-#ifndef CGRAYMAP_H
-#define CGRAYMAP_H
+#ifndef _INC_CGRAYMAP_H
+#define _INC_CGRAYMAP_H
 
 #include "../game/CServTime.h"
 #include "CArray.h"
@@ -224,4 +224,4 @@ public:
 	const CUOMultiItemRec2 * GetItem( size_t i ) const;
 };
 
-#endif // CGRAYMAP_H
+#endif // _INC_CGRAYMAP_H

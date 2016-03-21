@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CTEXTCONSOLE_H
-#define CTEXTCONSOLE_H
+#ifndef _INC_CTEXTCONSOLE_H
+#define _INC_CTEXTCONSOLE_H
 
 #include "../common/CString.h"
 #include "../sphere/strings.h"
@@ -58,4 +58,4 @@ private:
 	CTextConsole(const CTextConsole& copy);
 	CTextConsole& operator=(const CTextConsole& other);
 };
-#endif // CTEXTCONSOLE_H
+#endif // _INC_CTEXTCONSOLE_H

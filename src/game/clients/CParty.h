@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CPARTY_H
-#define CPARTY_H
+#ifndef _INC_CPARTY_H
+#define _INC_CPARTY_H
 
 #include "../common/CArray.h"
 #include "../common/CRect.h"
@@ -94,4 +94,4 @@ public:
 };
 
 
-#endif // CPARTY_H
+#endif // _INC_CPARTY_H

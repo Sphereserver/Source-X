@@ -1,11 +1,11 @@
 /**
-* @file CChar.h
+* @file CacheableScriptFile.h
 *
 */
 
 #pragma once
-#ifndef CACHEABLESCRIPTFILE_H
-#define CACHEABLESCRIPTFILE_H
+#ifndef _INC_CACHEABLESCRIPTFILE_H
+#define _INC_CACHEABLESCRIPTFILE_H
 
 #include "CFile.h"
 #include <string>
@@ -44,4 +44,4 @@ private:
 	bool useDefaultFile() const;
 };
 
-#endif //CACHEABLESCRIPTFILE_H
+#endif // _INC_CACHEABLESCRIPTFILE_H

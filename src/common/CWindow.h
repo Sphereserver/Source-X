@@ -3,11 +3,11 @@
 * @brief Base window class for controls.
 */
 
-#ifdef _WIN32
-
 #pragma once
-#ifndef CWINDOW_H
-#define CWINDOW_H
+#ifndef _INC_CWINDOW_H
+#define _INC_CWINDOW_H
+
+#ifdef _WIN32
 
 #include "../common/graycom.h"
 #include "CString.h"
@@ -374,7 +374,7 @@ public:
 		range.cpMax = nEndChar;
 		SendMessage( EM_EXSETSEL, 0, (LPARAM) &range );
 	}
-	void GetSel(int& nStartChar, int& nEndChar) const
+	void GetSel( int& nStartChar, int& nEndChar ) const
 	{
 		ASSERT(IsWindow());
 		CHARRANGE range;
@@ -440,6 +440,6 @@ public:
 	}
 };
 
-#endif	// CWINDOW_H
-
 #endif	// _WIN32
+
+#endif	// _INC_CWINDOW_H

@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CITEMMEMORY_H
-#define CITEMMEMORY_H
+#ifndef _INC_CITEMMEMORY_H
+#define _INC_CITEMMEMORY_H
 
 #include "CItem.h"
 

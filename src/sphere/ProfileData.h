@@ -1,7 +1,8 @@
 
 #pragma once
-#ifndef PROFILEDATA_H
-#define PROFILEDATA_H
+#ifndef _INC_PROFILEDATA_H
+#define _INC_PROFILEDATA_H
+
 
 enum PROFILE_TYPE
 {
@@ -32,8 +33,8 @@ class ProfileData
 protected:
 	struct ProfileDataRec
 	{
-		LONGLONG m_Time;	// accumulated time in msec.
-		int m_iCount;		// how many passes made into this.
+		LLONG m_Time;	// accumulated time in msec.
+		int m_iCount;	// how many passes made into this.
 	};
 
 	ProfileDataRec m_AverageTimes[PROFILE_QTY];
@@ -44,11 +45,11 @@ protected:
 	int m_iActiveWindowSeconds;	// The sample window size in seconds. 0=off
 	int	m_iAverageCount;
 
-	LONGLONG m_TimeTotal;	// Average this over a total time period.
+	LLONG m_TimeTotal;			// Average this over a total time period.
 
 	// Store the last time start time.
 	PROFILE_TYPE  m_CurrentTask;	// What task are we currently processing ?
-	LONGLONG m_CurrentTime;			// QueryPerformanceCount()
+	LLONG m_CurrentTime;			// QueryPerformanceCount()
 
 public:
 	ProfileData();
@@ -72,4 +73,4 @@ public:
 	bool IsEnabled(PROFILE_TYPE id = PROFILE_QTY) const;
 };
 
-#endif // PROFILEDATA_H
+#endif // _INC_PROFILEDATA_H

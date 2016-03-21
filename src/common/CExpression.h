@@ -3,8 +3,8 @@
 */
 
 #pragma once
-#ifndef CEXPRSSION_H
-#define CEXPRSSION_H
+#ifndef _INC_CEXPRSSION_H
+#define _INC_CEXPRSSION_H
 
 #include <cinttypes>
 #include "common.h"
@@ -13,7 +13,7 @@
 #include "ListDefContMap.h"
 
 #define _ISCSYMF(ch) ( IsAlpha(ch) || (ch)=='_')	// __iscsym or __iscsymf
-#define _ISCSYM(ch) ( isalnum(ch) || (ch)=='_')	// __iscsym or __iscsymf
+#define _ISCSYM(ch) ( isalnum(ch) || (ch)=='_')		// __iscsym or __iscsymf
 
 #ifndef M_PI 
 	#define M_PI 3.14159265358979323846
@@ -159,4 +159,4 @@ int64_t ahextoi64( LPCTSTR pArgs ); // Convert hex string to INT64
 #define Exp_GetLLVal( pa )	g_Exp.GetVal( pa )
 #define Exp_GetRange( pa )	g_Exp.GetRange( pa )
 
-#endif	// CEXPRSSION_H
+#endif	// _INC_CEXPRSSION_H

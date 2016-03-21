@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CITEMCORPSE_H
-#define CITEMCORPSE_H
+#ifndef _INC_CITEMCORPSE_H
+#define _INC_CITEMCORPSE_H
 
 #include "../common/graymul.h"
 #include "../CBase.h"
@@ -29,4 +29,4 @@ public:
 };
 
 
-#endif // CITEMCORPSE_H
+#endif // _INC_CITEMCORPSE_H

@@ -420,7 +420,7 @@ INT64 CExpression::GetSingle( LPCTSTR & pszArgs )
 		}
 
 		LPCTSTR pStart = pszArgs;
-		ULONGLONG val = 0;
+		ULLONG val = 0;
 		for (;;)
 		{
 			TCHAR ch = *pszArgs;

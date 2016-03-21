@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CITEMMULTICUSTOM_H
-#define CITEMMULTICUSTOM_H
+#ifndef _INC_CITEMMULTICUSTOM_H
+#define _INC_CITEMMULTICUSTOM_H
 
 #include "CItemMulti.h"
 
@@ -110,4 +110,4 @@ public:
 	static signed char GetPlaneZ( unsigned char plane );
 	static bool IsValidItem( ITEMID_TYPE id, CClient * pClientSrc, bool bMulti );
 };
-#endif // CITEMMULTICUSTOM_H
+#endif // _INC_CITEMMULTICUSTOM_H

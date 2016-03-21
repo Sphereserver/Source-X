@@ -3,8 +3,8 @@
 */
 
 #pragma once
-#ifndef CGRAYINST_H
-#define CGRAYINST_H
+#ifndef _INC_CGRAYINST_H
+#define _INC_CGRAYINST_H
 
 #include "../common/graymul.h"
 #include "../common/CFile.h"
@@ -109,4 +109,4 @@ private:
 	CVerDataMul& operator=(const CVerDataMul& other);
 } g_VerData;
 
-#endif	// CGRAYINST_H
+#endif	// _INC_CGRAYINST_H

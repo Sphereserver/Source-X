@@ -5,8 +5,8 @@
 //
 
 #pragma once
-#ifndef PATHFINDER_H
-#define PATHFINDER_H
+#ifndef _INC_PATHFINDER_H
+#define _INC_PATHFINDER_H
 
 //#include "../game/graysvr.h" Removed to test.
 #include <deque>
@@ -129,4 +129,4 @@ protected:
 
 
 
-#endif // PATHFINDER_H
+#endif // _INC_PATHFINDER_H

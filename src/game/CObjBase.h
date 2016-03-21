@@ -3,8 +3,8 @@
 //
 
 #pragma once
-#ifndef COBJBASE_H
-#define COBJBASE_H
+#ifndef _INC_COBJBASE_H
+#define _INC_COBJBASE_H
 
 #include "../common/CObjBaseTemplate.h"
 #include "../common/CScriptObj.h"
@@ -482,4 +482,4 @@ inline INT64 CObjBase::GetTimerDiff() const
 }
 
 extern void DeleteKey( LPCTSTR pszKey );
-#endif // COBJBASE_H
+#endif // _INC_COBJBASE_H

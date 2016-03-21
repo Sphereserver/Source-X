@@ -3,8 +3,8 @@
 //
 
 #pragma once
-#ifndef CSERVERDEF_H
-#define CSERVERDEF_H
+#ifndef _INC_CSERVERDEF_H
+#define _INC_CSERVERDEF_H
 
 #include "../common/CEncrypt.h"
 #include "../common/CScriptObj.h"
@@ -127,4 +127,4 @@ public:
 	}
 };
 
-#endif // CSERVERDEF_H
+#endif // _INC_CSERVERDEF_H

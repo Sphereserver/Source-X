@@ -15,8 +15,8 @@
 //
 
 #pragma once
-#ifndef DEELX_H
-#define DEELX_H
+#ifndef _INC_DEELX_H
+#define _INC_DEELX_H
 
 #include <memory.h>
 #include <ctype.h>
@@ -4184,4 +4184,4 @@ typedef CRegexpT <unsigned short> CRegexpW;
 	typedef CRegexpA CRegexp;
 #endif
 
-#endif // DEELX_H
+#endif // _INC_DEELX_H

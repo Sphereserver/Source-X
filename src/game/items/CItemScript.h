@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CITEMSCRIPT_H
-#define CITEMSCRIPT_H
+#ifndef _INC_CITEMSCRIPT_H
+#define _INC_CITEMSCRIPT_H
 
 #include "CItemVendable.h"
 //#include "graysvr.h" Removed to test.
@@ -31,4 +31,4 @@ public:
 };
 
 
-#endif // CITEMSCRIPT_H
+#endif // _INC_CITEMSCRIPT_H

@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CITEMMULTI_H
-#define CITEMMULTI_H
+#ifndef _INC_CITEMMULTI_H
+#define _INC_CITEMMULTI_H
 
 #include "CItem.h"
 
@@ -69,4 +69,4 @@ public:
 	virtual bool  r_LoadVal( CScript & s  );
 	virtual void DupeCopy( const CItem * pItem );
 };
-#endif // CITEMMULTI_H
+#endif // _INC_CITEMMULTI_H

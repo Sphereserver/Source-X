@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef CSCRIPTOBJ_H
-#define CSCRIPTOBJ_H
+#ifndef _INC_CSCRIPTOBJ_H
+#define _INC_CSCRIPTOBJ_H
 
 #include "CArray.h"
 #include "CScript.h"
@@ -262,4 +262,4 @@ class CFileObjContainer : public CScriptObj
 		}
 };
 
-#endif	// CSCRIPTOBJ_H
+#endif	// _INC_CSCRIPTOBJ_H

@@ -3,8 +3,8 @@
 //
 
 #pragma once
-#ifndef CCLIENT_H
-#define CCLIENT_H
+#ifndef _INC_CCLIENT_H
+#define _INC_CCLIENT_H
 
 #include "../common/CArray.h"
 #include "../common/CEncrypt.h"
@@ -120,7 +120,7 @@ private:
 									// Walk limiting code
 	int	m_iWalkTimeAvg;
 	int m_iWalkStepCount;		// Count the actual steps . Turning does not count.
-	LONGLONG m_timeWalkStep;	// the last %8 walk step time.
+	LLONG m_timeWalkStep;	// the last %8 walk step time.
 
 								// Screensize
 	struct __screensize

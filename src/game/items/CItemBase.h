@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CITEMBASE_H
-#define CITEMBASE_H
+#ifndef _INC_CITEMBASE_H
+#define _INC_CITEMBASE_H
 
 #include "../common/CResourceBase.h"
 #include "../common/CArray.h"
@@ -635,4 +635,4 @@ inline bool CItemBase::IsValidDispID( ITEMID_TYPE id ) // static
 }
 
 
-#endif // CITEMBASE_H
+#endif // _INC_CITEMBASE_H

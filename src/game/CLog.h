@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CLOG_H
-#define CLOG_H
+#ifndef _INC_CLOG_H
+#define _INC_CLOG_H
 
 #include "../common/graycom.h"
 #include "../common/CFile.h"
@@ -15,16 +15,16 @@
 extern struct CLog : public CFileText, public CEventLog
 {
 	// subject matter. (severity level is first 4 bits, LOGL_EVENT)
-#define LOGM_ACCOUNTS		0x00080
+	#define LOGM_ACCOUNTS		0x00080
 	//#define LOGM_INIT			0x00100	// start up messages.
-#define LOGM_SAVE			0x00200	// world save status.
-#define LOGM_CLIENTS_LOG	0x00400	// all clients as they log in and out.
-#define LOGM_GM_PAGE		0x00800	// player gm pages.
-#define LOGM_PLAYER_SPEAK	0x01000	// All that the players say.
-#define LOGM_GM_CMDS		0x02000	// Log all GM commands.
-#define LOGM_CHEAT			0x04000	// Probably an exploit !
-#define LOGM_KILLS			0x08000	// Log player combat results.
-#define LOGM_HTTP			0x10000
+	#define LOGM_SAVE			0x00200	// world save status.
+	#define LOGM_CLIENTS_LOG	0x00400	// all clients as they log in and out.
+	#define LOGM_GM_PAGE		0x00800	// player gm pages.
+	#define LOGM_PLAYER_SPEAK	0x01000	// All that the players say.
+	#define LOGM_GM_CMDS		0x02000	// Log all GM commands.
+	#define LOGM_CHEAT			0x04000	// Probably an exploit !
+	#define LOGM_KILLS			0x08000	// Log player combat results.
+	#define LOGM_HTTP			0x10000
 	//#define	LOGM_NOCONTEXT		0x20000	// do not include context information
 	//#define LOGM_DEBUG			0x40000	// debug kind of message with DEBUG: prefix
 
@@ -79,4 +79,6 @@ private:
 	*/
 	void SetColor(Color color);
 } g_Log;		// Log file
-#endif // CLOG_H
+
+
+#endif // _INC_CLOG_H

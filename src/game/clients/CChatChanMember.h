@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CCHATCHANMEMBER_H
-#define CCHATCHANMEMBER_H
+#ifndef _INC_CCHATCHANMEMBER_H
+#define _INC_CCHATCHANMEMBER_H
 
 #include "../common/CArray.h"
 #include "../common/CString.h"
@@ -66,6 +66,6 @@ public:
     bool IsIgnoring(LPCTSTR pszName) const;
 };
 
-#endif // CCHATCHANMEMBER_H
+#endif // _INC_CCHATCHANMEMBER_H
 
 

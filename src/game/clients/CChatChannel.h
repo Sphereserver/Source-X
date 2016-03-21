@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CCHATCHANNEL_H
-#define CCHATCHANNEL_H
+#ifndef _INC_CCHATCHANNEL_H
+#define _INC_CCHATCHANNEL_H
 
 #include "../common/grayproto.h"
 #include "../common/CArray.h"
@@ -77,4 +77,4 @@ public:
 };
 
 
-#endif // CCHATCHANNEL_H
+#endif // _INC_CCHATCHANNEL_H

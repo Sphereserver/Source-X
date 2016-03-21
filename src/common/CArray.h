@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef CARRAY_H
-#define CARRAY_H
+#ifndef _INC_CARRAY_H
+#define _INC_CARRAY_H
 
 #include <climits>
 
@@ -966,4 +966,4 @@ inline void CGObListRec::RemoveSelf()
 
 #undef STANDARD_CPLUSPLUS_THIS
 
-#endif	// CARRAY_H
+#endif	// _INC_CARRAY_H

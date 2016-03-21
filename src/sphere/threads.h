@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef THREADS_H
-#define THREADS_H
+#ifndef _INC_THREADS_H
+#define _INC_THREADS_H
 
 #include "../common/common.h"
 #include "../common/graycom.h"
@@ -170,7 +170,7 @@ private:
 	struct STACK_INFO_REC
 	{
 		const char *functionName;
-		LONGLONG	startTime;
+		LLONG	startTime;
 	};
 
 	STACK_INFO_REC m_stackInfo[0x1000];
@@ -382,4 +382,4 @@ public:
 #endif // THREAD_TRACK_CALLSTACK
 
 
-#endif // THREADS_H
+#endif // _INC_THREADS_H

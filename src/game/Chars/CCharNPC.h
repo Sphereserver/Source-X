@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef CCHARNPC_H
-#define CCHARNPC_H
+#ifndef _INC_CCHARNPC_H
+#define _INC_CCHARNPC_H
 
 #include "CChar.h"
 
@@ -74,4 +74,4 @@ private:
 };
 
 
-#endif // CCHARNPC_H
+#endif // _INC_CCHARNPC_H

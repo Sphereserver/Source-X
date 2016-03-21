@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef CCHARBASE_H
-#define CCHARBASE_H
+#ifndef _INC_CCHARBASE_H
+#define _INC_CCHARBASE_H
 
 #include "../common/graymul.h"
 #include "../common/CResourceBase.h"
@@ -140,4 +140,4 @@ inline bool CCharBase::IsGargoyleID( CREID_TYPE id, bool bCheckGhost ) // static
 }
 
 
-#endif // CCHARBASE_H
+#endif // _INC_CCHARBASE_H

@@ -983,10 +983,10 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 			pSrc->SysMessagef("Script profiler is not yet informational\n");
 		else
 		{
-			LONGLONG average = g_profiler.total / g_profiler.called;
+			LLONG average = g_profiler.total / g_profiler.called;
 			TScriptProfiler::TScriptProfilerFunction * pFun;
 			TScriptProfiler::TScriptProfilerTrigger * pTrig;
-			LONGLONG divby = llTimeProfileFrequency / 1000;
+			LLONG divby = llTimeProfileFrequency / 1000;
 
 			pSrc->SysMessagef( "Scripts: called %u times and took %i.%04i msec (%i.%04i msec average). Reporting with highest average.\n",
 					g_profiler.called,

@@ -6,8 +6,8 @@
 // 4. LINUX 32 bit
 
 #pragma once
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef _INC_COMMON_H
+#define _INC_COMMON_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -56,7 +56,7 @@ typedef THREAD_ENTRY_RET ( _cdecl * PTHREAD_ENTRY_PROC )(void *);
 #define SCRIPT_MAX_LINE_LEN 4096	// default size.
 
 #define IMULDIVDOWN(a,b,c)	(((a)*(b))/(c))
-#define IMULDIV(a,b,c)		(((((LONGLONG)(a)*(LONGLONG)(b))+(c / 2))/(c))-(IsNegative((LONGLONG)(a)*(LONGLONG)(b))))
+#define IMULDIV(a,b,c)		(((((LLONG)(a)*(LLONG)(b))+(c / 2))/(c))-(IsNegative((LLONG)(a)*(LLONG)(b))))
 
 #ifndef MAKEDWORD
 	#define MAKEDWORD(low, high) ((DWORD)(((WORD)(low)) | (((DWORD)((WORD)(high))) << 16)))
@@ -95,17 +95,17 @@ typedef unsigned int	ERROR_CODE;
 //	Time measurement macroses
 // -----------------------------
 
-extern LONGLONG llTimeProfileFrequency;
+extern LLONG llTimeProfileFrequency;
 
 #ifdef _WIN32
 	#define	TIME_PROFILE_INIT	\
-		LONGLONG llTicks(0), llTicksEnd
+		LLONG llTicks(0), llTicksEnd
 	#define	TIME_PROFILE_START	\
 		if ( !QueryPerformanceCounter((LARGE_INTEGER *)&llTicks)) llTicks = GetTickCount()
 	#define TIME_PROFILE_END	if ( !QueryPerformanceCounter((LARGE_INTEGER *)&llTicksEnd)) llTicksEnd = GetTickCount()
 #else
 	#define	TIME_PROFILE_INIT	\
-		LONGLONG llTicks(0), llTicksEnd
+		LLONG llTicks(0), llTicksEnd
 	#define	TIME_PROFILE_START	\
 		llTicks = GetTickCount()
 	#define TIME_PROFILE_END	llTicksEnd = GetTickCount();
@@ -238,4 +238,4 @@ public:
 	}
 };
 
-#endif	// COMMON_H
+#endif	// _INC_COMMON_H

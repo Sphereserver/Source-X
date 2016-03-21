@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef STRINGS_H
-#define STRINGS_H
+#ifndef _INC_STRINGS_H
+#define _INC_STRINGS_H
 
 #include "../common/common.h"
 
@@ -119,4 +119,4 @@ private:
 	static char m_tempStrings[MAX_TEMP_LINES_NO_CONTEXT][THREAD_STRING_LENGTH];
 };
 
-#endif // STRINGS_H
+#endif // _INC_STRINGS_H

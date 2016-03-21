@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef COBJBASETEMPLATE_H
-#define COBJBASETEMPLATE_H
+#ifndef _INC_COBJBASETEMPLATE_H
+#define _INC_COBJBASETEMPLATE_H
 
 #include "CArray.h"
 //#include "graycom.h"
@@ -98,4 +98,4 @@ public:
 	virtual bool SetName( LPCTSTR pszName );
 };
 
-#endif // COBJBASETEMPLATE_H
+#endif // _INC_COBJBASETEMPLATE_H

@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef CSCRIPT_H
-#define CSCRIPT_H
+#ifndef _INC_CSCRIPT_H
+#define _INC_CSCRIPT_H
 
 #include "common.h"
 #include "CMemBlock.h"

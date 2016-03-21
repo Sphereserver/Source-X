@@ -1,17 +1,19 @@
 
 #pragma once
-#ifndef CSERVTIME_H
-#define CSERVTIME_H
+#ifndef _INC_CSERVTIME_H
+#define _INC_CSERVTIME_H
 
 #include "../common/graycom.h"
 
 
 class CServTime
 {
-#undef GetCurrentTime
-#define TICK_PER_SEC 10
-#define TENTHS_PER_SEC 1
 	// A time stamp in the server/game world.
+
+	#undef GetCurrentTime
+	#define TICK_PER_SEC 10
+	#define TENTHS_PER_SEC 1
+	
 public:
 	static const char *m_sClassName;
 	INT64 m_lPrivateTime;
@@ -35,4 +37,4 @@ public:
 };
 
 
-#endif // CSERVTIME_H
+#endif // _INC_CSERVTIME_H

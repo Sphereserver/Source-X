@@ -564,7 +564,7 @@ void AbstractSphereThread::printStackTrace()
 	// don't allow call stack to be modified whilst we're printing it
 	freezeCallStack(true);
 
-	LONGLONG startTime = m_stackInfo[0].startTime;
+	LLONG startTime = m_stackInfo[0].startTime;
 	int timedelta;
 	unsigned int threadId = getId();
 

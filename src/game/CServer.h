@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CSERVER_H
-#define CSERVER_H
+#ifndef _INC_CSERVER_H
+#define _INC_CSERVER_H
 
 #include "../common/common.h"
 #include "../common/CTextConsole.h"
@@ -118,4 +118,4 @@ public:
 	PLEVEL_TYPE GetPrivLevel() const;
 } g_Serv;	// current state stuff not saved.
 
-#endif // CSERVER_H
+#endif // _INC_CSERVER_H

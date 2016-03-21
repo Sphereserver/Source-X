@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef CSECTORTEMPLATE_H
-#define CSECTORTEMPLATE_H
+#ifndef _INC_CSECTORTEMPLATE_H
+#define _INC_CSECTORTEMPLATE_H
 
 #include "../game/CServer.h"
 #include "CRect.h"
@@ -144,4 +144,4 @@ public:
 #define SECF_InstaSleep	0x00000002
 };
 
-#endif // CSECTORTEMPLATE_H
+#endif // _INC_CSECTORTEMPLATE_H

@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef ENUMS_H
-#define ENUMS_H
+#ifndef _INC_ENUMS_H
+#define _INC_ENUMS_H
 
 
 enum CLIMODE_TYPE	// What mode is the client to server connection in ? (waiting for input ?)
@@ -215,4 +215,4 @@ enum BUFF_ICONS
 	BI_QTY = 1126
 };
 
-#endif // ENUMS_H
+#endif // _INC_ENUMS_H

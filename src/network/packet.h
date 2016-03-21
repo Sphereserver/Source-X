@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef PACKET_H
-#define PACKET_H
+#ifndef _INC_PACKET_H
+#define _INC_PACKET_H
 
 #include <list>
 
@@ -302,4 +302,4 @@ private:
 };
 
 
-#endif // PACKET_H
+#endif // _INC_PACKET_H

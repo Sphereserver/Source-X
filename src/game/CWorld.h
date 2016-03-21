@@ -3,8 +3,8 @@
 //
 
 #pragma once
-#ifndef CWORLD_H
-#define CWORLD_H
+#ifndef _INC_CWORLD_H
+#define _INC_CWORLD_H
 
 #include "../common/common.h"
 #include "../common/CArray.h"
@@ -184,7 +184,7 @@ private:
 	unsigned int m_Sector_Pulse;		// Slow some stuff down that doesn't need constant processing.
 
 	int m_iSaveStage;	// Current stage of the background save.
-	LONGLONG	m_savetimer; // Time it takes to save
+	LLONG	m_savetimer; // Time it takes to save
 
 public:
 	static const char *m_sClassName;
@@ -363,4 +363,4 @@ inline CServTime CServTime::GetCurrentTime()	// static
 	return( g_World.GetCurrentTime());
 }
 
-#endif // CWORLD_H
+#endif // _INC_CWORLD_H

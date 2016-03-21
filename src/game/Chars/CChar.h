@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef CCHAR_H
-#define CCHAR_H
+#ifndef _INC_CCHAR_H
+#define _INC_CCHAR_H
 
 #include "../clients/CParty.h"
 #include "../common/grayproto.h"
@@ -1196,4 +1196,4 @@ inline bool CChar::IsSkillNPC( SKILL_TYPE skill )  // static
 }
 
 
-#endif // CCHAR_H
+#endif // _INC_CCHAR_H

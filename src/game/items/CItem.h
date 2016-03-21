@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CITEM_H
-#define CITEM_H
+#ifndef _INC_CITEM_H
+#define _INC_CITEM_H
 
 #include "../common/graymul.h"
 #include "../common/CRect.h"
@@ -718,4 +718,4 @@ public:
 	virtual bool NotifyDelete();
 };
 
-#endif // CITEM_H
+#endif // _INC_CITEM_H

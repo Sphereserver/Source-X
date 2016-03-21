@@ -3,8 +3,8 @@
 */
 
 #pragma once
-#ifndef CACCOUNT_H
-#define CACCOUNT_H
+#ifndef _INC_CACCOUNT_H
+#define _INC_CACCOUNT_H
 
 
 #include "../chars/CCharRefArray.h"
@@ -488,5 +488,5 @@ public:
 */
 extern CAccounts g_Accounts;
 
-#endif // CACCOUNT_H
+#endif // _INC_CACCOUNT_H
 

@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CITEMCOMMCRYSTAL_H
-#define CITEMCOMMCRYSTAL_H
+#ifndef _INC_CITEMCOMMCRYSTAL_H
+#define _INC_CITEMCOMMCRYSTAL_H
 
 #include "CItemVendable.h"
 //#include "graysvr.h" Removed to test.
@@ -35,4 +35,4 @@ public:
 };
 
 
-#endif // CITEMCOMMCRYSTAL_H
+#endif // _INC_CITEMCOMMCRYSTAL_H

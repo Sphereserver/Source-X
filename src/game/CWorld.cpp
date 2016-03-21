@@ -1358,8 +1358,8 @@ bool CWorld::SaveStage() // Save world state in stages.
 		g_Log.Event(LOGM_SAVE, "Multi data saved   (%s).\n", static_cast<LPCTSTR>(m_FileMultis.GetFilePath()));
 		g_Log.Event(LOGM_SAVE, "Context data saved (%s).\n", static_cast<LPCTSTR>(m_FileData.GetFilePath()));
 
-		LONGLONG	llTicksEnd;
-		LONGLONG	llTicks = m_savetimer;
+		LLONG	llTicksEnd;
+		LLONG	llTicks = m_savetimer;
 		TIME_PROFILE_END;
 
 		TCHAR * time = Str_GetTemp();
@@ -1493,7 +1493,7 @@ bool CWorld::SaveTry( bool fForceImmediate ) // Save world state
 		GarbageCollection();
 	}
 
-	LONGLONG llTicks;
+	LLONG llTicks;
 	TIME_PROFILE_START;
 	m_savetimer = llTicks;
 

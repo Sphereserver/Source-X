@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef CSTRING_H
-#define CSTRING_H
+#ifndef _INC_CSTRING_H
+#define _INC_CSTRING_H
 
 #include <cinttypes>
 #include "common.h"
@@ -537,4 +537,4 @@ void CharToMultiByteNonNull(BYTE*, const char* , size_t);
 // extern TCHAR * Str_GetTemporary(int amount = 1);
 #define Str_GetTemp STATIC_CAST<AbstractSphereThread *>(ThreadHolder::current())->allocateBuffer
 
-#endif // CSTRING_H
+#endif // _INC_CSTRING_H

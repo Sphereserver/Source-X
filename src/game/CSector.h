@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CSECTOR_H
-#define CSECTOR_H
+#ifndef _INC_CSECTOR_H
+#define _INC_CSECTOR_H
 
 #include "../common/CSectorTemplate.h"
 #include "../common/CScriptObj.h"
@@ -115,4 +115,4 @@ public:
 	LPCTSTR GetName() const { return( "Sector" ); }
 };
 
-#endif // CSECTOR_H
+#endif // _INC_CSECTOR_H

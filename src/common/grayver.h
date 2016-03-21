@@ -4,8 +4,9 @@
 */
 
 #pragma once
-#ifndef GRAYVER_H
-#define GRAYVER_H
+#ifndef _INC_GRAYVER_H
+#define _INC_GRAYVER_H
+
 
 #ifdef _SUBVERSION
 	#include "./version/GitRevision.h"
@@ -35,15 +36,15 @@
 #endif
 
 #if defined(_WIN32)
-	#define GRAY_VER_FILEOS			0x4L	//VOS__WINDOWS32
+	#define GRAY_VER_FILEOS			0x4L	// VOS__WINDOWS32
 	#define GRAY_VER_FILEOS_STR		"[WIN32]"
 #elif defined(_BSD)
-	#define GRAY_VER_FILEOS			0x0L	//VOS_UNKNOWN
+	#define GRAY_VER_FILEOS			0x0L	// VOS_UNKNOWN
 	#define GRAY_VER_FILEOS_STR		"[FreeBSD]"
 #else
-	#define GRAY_VER_FILEOS			0x0L	//VOS_UNKNOWN
+	#define GRAY_VER_FILEOS			0x0L	// VOS_UNKNOWN
 	#define GRAY_VER_FILEOS_STR		"[Linux]"
 #endif
 
 
-#endif // GRAYVER_H
+#endif // _INC_GRAYVER_H

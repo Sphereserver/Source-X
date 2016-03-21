@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef DATATYPES_H
-#define DATATYPES_H
+#ifndef _INC_DATATYPES_H
+#define _INC_DATATYPES_H
 
 #include <cinttypes>
 /*  -- Macros from <cinttypes> we should use when formatting numbers inside strings --
@@ -31,8 +31,8 @@ typedef unsigned long long		ULLONG;
 	#undef WORD
 	#undef DWORD
 	#undef UINT
-	#undef LONGLONG
-	#undef ULONGLONG
+	#undef LLONG
+	#undef ULLONG
 	#undef LONG
 	#undef INT8
 	#undef INT16
@@ -48,8 +48,8 @@ typedef unsigned long long		ULLONG;
 	typedef uint32_t			DWORD;		// 32 bits
 
 	typedef unsigned int		UINT;
-	typedef long long			LONGLONG; 	// this must be 64 bits
-	typedef unsigned long long	ULONGLONG;
+	typedef long long			LLONG; 	// this must be 64 bits
+	typedef unsigned long long	ULLONG;
 	typedef long				LONG;		// never use long! use int or long long!
 
 	/*
@@ -84,6 +84,6 @@ typedef unsigned long long		ULLONG;
 	typedef	TCHAR *				LPTSTR;
 	typedef const TCHAR *		LPCTSTR;
 
-#endif
+#endif // _WIN32
 
-#endif
+#endif // _INC_DATATYPES_H

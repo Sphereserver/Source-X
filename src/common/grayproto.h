@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef GRAYPROTO_H
-#define GRAYPROTO_H
+#ifndef _INC_GRAYPROTO_H
+#define _INC_GRAYPROTO_H
 
 #include "CString.h"
 #include "graycom.h"
@@ -3361,4 +3361,4 @@ struct CCommand	// command buffer from server to client.
 #pragma pack()
 #endif
 
-#endif // GRAYPROTO_H
+#endif // _INC_GRAYPROTO_H

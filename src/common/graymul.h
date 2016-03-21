@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef GRAYMUL_H
-#define GRAYMUL_H
+#ifndef _INC_GRAYMUL_H
+#define _INC_GRAYMUL_H
 
 #include "common.h"
 
@@ -2580,4 +2580,4 @@ struct CUOHuesRec // (Hues.mul)
 #endif
 
 
-#endif // GRAYMUL_H
+#endif // _INC_GRAYMUL_H

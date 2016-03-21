@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef TRIGGERS_H
-#define TRIGGERS_H
+#ifndef _INC_TRIGGERS_H
+#define _INC_TRIGGERS_H
 
 
 //	Triggers list
@@ -22,4 +22,4 @@ void Triglist(int &total, int &used);
 void TriglistPrint();
 
 
-#endif // TRIGGERS_H
+#endif // _INC_TRIGGERS_H

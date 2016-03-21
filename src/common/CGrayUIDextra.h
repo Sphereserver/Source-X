@@ -1,6 +1,7 @@
+
 #pragma once
-#ifndef CGRAYUIDEXTRA_H
-#define CGRAYUIDEXTRA_H
+#ifndef _INC_CGRAYUIDEXTRA_H
+#define _INC_CGRAYUIDEXTRA_H
 
 #include "CGrayUID.h"
 #include "../game/CWorld.h"
@@ -26,4 +27,4 @@ inline CChar * CGrayUIDBase::CharFind() const // Does character still exist
 	return dynamic_cast<CChar *>(ObjFind());
 }
 
-#endif // CGRAYUIDEXTRA_H
+#endif // _INC_CGRAYUIDEXTRA_H

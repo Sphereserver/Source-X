@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef CSV_FILE_H
-#define CSV_FILE_H
+#ifndef _INC_CSVFILE_H
+#define _INC_CSVFILE_H
 
 #include "CFile.h"
 #include "CacheableScriptFile.h"
@@ -47,4 +47,4 @@ public:
 	bool ReadNextRowContent(CSVRowData& target);
 };
 
-#endif // CSV_FILE_H
+#endif // _INC_CSVFILE_H

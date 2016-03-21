@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CTIME_H
-#define CTIME_H
+#ifndef _INC_CTIME_H
+#define _INC_CTIME_H
 
 #include <time.h>
 #include "common.h"
@@ -60,4 +60,4 @@ public:
 	int GetDaysTotal() const;
 };
 
-#endif // CTIME_H
+#endif // _INC_CTIME_H

@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef CCHAT_H
-#define CCHAT_H
+#ifndef _INC_CCHAT_H
+#define _INC_CCHAT_H
 
 #include "../common/CString.h"
 #include "../common/CArray.h"
@@ -53,4 +53,4 @@ public:
 	static void GenerateChatName(CGString & sName, const CClient * pClient);
 };
 
-#endif // CCHAT_H
+#endif // _INC_CCHAT_H

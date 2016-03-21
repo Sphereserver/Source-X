@@ -3,8 +3,8 @@
 */
 
 #pragma once
-#ifndef CQUEUE_H
-#define CQUEUE_H
+#ifndef _INC_CQUEUE_H
+#define _INC_CQUEUE_H
 
 #include "CMemBlock.h"
 
@@ -76,4 +76,4 @@ public:
 	void AddNewDataFinish( size_t iLen );
 };
 
-#endif // CQUEUE_H
+#endif // _INC_CQUEUE_H
