@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef CACHEABLE_SCRIPT_FILE_H
-#define CACHEABLE_SCRIPT_FILE_H
+#ifndef CACHEABLESCRIPTFILE_H
+#define CACHEABLESCRIPTFILE_H
 
 #include "CFile.h"
 #include <string>
@@ -44,4 +44,4 @@ private:
 	bool useDefaultFile() const;
 };
 
-#endif //CACHEABLE_SCRIPT_FILE_H
+#endif //CACHEABLESCRIPTFILE_H

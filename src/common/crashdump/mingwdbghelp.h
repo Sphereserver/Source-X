@@ -3,10 +3,11 @@
 * This file is needed for mingw32 because dbghelp.h do not exists.
 */
 
+#pragma once
 #ifdef __MINGW32__
 
-#ifndef SPHERESERVER_MINGWDBGHELP_H
-#define SPHERESERVER_MINGWDBGHELP_H
+#ifndef MINGWDBGHELP_H
+#define MINGWDBGHELP_H
 
 #include "../datatypes.h"
 
@@ -185,6 +186,6 @@ typedef struct _MINIDUMP_CALLBACK_INFORMATION {
 } MINIDUMP_CALLBACK_INFORMATION, *PMINIDUMP_CALLBACK_INFORMATION;
 
 
-#endif // SPHERESERVER_MINGWDBGHELP_H
+#endif // MINGWDBGHELP_H
 
 #endif  // __MINGW32__

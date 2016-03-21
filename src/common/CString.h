@@ -7,7 +7,7 @@
 #ifndef CSTRING_H
 #define CSTRING_H
 
-#include <stdint.h>
+#include <cinttypes>
 #include "common.h"
 
 

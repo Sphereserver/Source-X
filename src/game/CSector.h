@@ -1,3 +1,5 @@
+
+#pragma once
 #ifndef CSECTOR_H
 #define CSECTOR_H
 

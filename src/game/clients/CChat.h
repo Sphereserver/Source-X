@@ -1,14 +1,16 @@
-#ifndef _INC_CCHAT_H
-#define _INC_CCHAT_H
+
+#pragma once
+#ifndef CCHAT_H
+#define CCHAT_H
 
 #include "../common/CString.h"
 #include "../common/CArray.h"
 #include "../common/grayproto.h"
 
+
 class CClient;
 class CChatChannel;
 class CChatChanMember;
-
 
 class CChat
 {
@@ -51,4 +53,4 @@ public:
 	static void GenerateChatName(CGString & sName, const CClient * pClient);
 };
 
-#endif // _INC_CCHAT_H
+#endif // CCHAT_H

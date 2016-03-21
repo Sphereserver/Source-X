@@ -768,4 +768,4 @@ extern NetworkManager g_NetworkManager;
 
 #endif //_MTNETWORK
 
-#endif //NETWORK_H
+#endif // NETWORK_H

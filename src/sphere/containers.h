@@ -1,10 +1,12 @@
-#ifndef _INC_CONTAINERS_H_
-#define _INC_CONTAINERS_H_
+
 #pragma once
+#ifndef CONTAINERS_H
+#define CONTAINERS_H
 
 #include <list>
 // a thread-safe implementation of a queue container that doesn't use any locks
 // this only works as long as there is only a single reader thread and writer thread
+
 
 template<class T>
 class ThreadSafeQueue
@@ -103,4 +105,4 @@ public:
 	}
 };
 
-#endif
+#endif // CONTAINERS_H

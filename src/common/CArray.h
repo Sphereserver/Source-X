@@ -7,7 +7,7 @@
 #ifndef CARRAY_H
 #define CARRAY_H
 
-#include <limits>
+#include <climits>
 
 #include "common.h"
 #include "graycom.h"

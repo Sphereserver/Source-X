@@ -21,7 +21,7 @@
 #include <memory.h>
 #include <ctype.h>
 #include <string.h>
-#include <stdint.h>
+#include <cinttypes>
 #include <stdio.h>
 
 #ifdef _WIN32
@@ -29,6 +29,7 @@
 #else
 	#define DEELEX_CALLTYPE
 #endif
+
 
 //
 // Data Reference

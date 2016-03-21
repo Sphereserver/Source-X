@@ -105,7 +105,7 @@ extern LONGLONG llTimeProfileFrequency;
 	if ( !QueryPerformanceCounter((LARGE_INTEGER *)&llTicks)) llTicks = GetTickCount()
 #define TIME_PROFILE_END	if ( !QueryPerformanceCounter((LARGE_INTEGER *)&llTicksEnd)) llTicksEnd = GetTickCount()
 
-#else
+#else // !_WIN32
 
 #define	TIME_PROFILE_INIT	\
 	LONGLONG llTicks(0), llTicksEnd
@@ -113,10 +113,10 @@ extern LONGLONG llTimeProfileFrequency;
 	llTicks = GetTickCount()
 #define TIME_PROFILE_END	llTicksEnd = GetTickCount();
 
-#endif
+#endif // _WIN32
 
 #define TIME_PROFILE_GET_HI	((llTicksEnd - llTicks)/(llTimeProfileFrequency/1000))
 #define	TIME_PROFILE_GET_LO	((((llTicksEnd - llTicks)*10000)/(llTimeProfileFrequency/1000))%10000)
 
-#endif // GRAYSVR_H
 
+#endif // GRAYSVR_H

@@ -7,7 +7,7 @@
 #include "common.h"
 
 #ifndef _WIN32
-	LONGLONG GetTickCount();
+	LLONG GetTickCount();
 #endif
 
 

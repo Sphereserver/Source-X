@@ -1472,4 +1472,4 @@ public:
 };
 
 
-#endif //RECEIVE_H
+#endif // RECEIVE_H

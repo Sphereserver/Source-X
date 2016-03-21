@@ -1,6 +1,6 @@
 
 #pragma once
-#ifndef _TRIGGERS_H
+#ifndef TRIGGERS_H
 #define TRIGGERS_H
 
 

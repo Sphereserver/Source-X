@@ -33,4 +33,6 @@ public:
 	void SetCurrentTime();
 	static CServTime GetCurrentTime();
 };
+
+
 #endif // CSERVTIME_H

@@ -8,6 +8,7 @@
 
 #define CurrentProfileData static_cast<AbstractSphereThread *>(ThreadHolder::current())->m_profile
 
+
 class ProfileTask
 {
 private:

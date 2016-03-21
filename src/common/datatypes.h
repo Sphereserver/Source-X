@@ -7,7 +7,13 @@
 #ifndef DATATYPES_H
 #define DATATYPES_H
 
-#include <stdint.h>
+#include <cinttypes>
+/*  -- Macros from <cinttypes> we should use when formatting numbers inside strings --
+	--  (like in printf/sprintf/etc) to achieve best cross-platform support			--
+	PRIu8		//for BYTE
+	PRIu16		//for WORD
+	PRIu32		//for DWORD
+*/
 
 typedef long long				LLONG;
 typedef unsigned long long		ULLONG;
@@ -61,8 +67,8 @@ typedef unsigned long long		ULLONG;
 	typedef	uint16_t			UINT16;
 	typedef	uint32_t			UINT32;
 	typedef	uint64_t			UINT64;
-	typedef intptr_t			INT_PTR, *PINT_PTR;
-	typedef uintptr_t			UINT_PTR, *PUINT_PTR;
+	//typedef intptr_t			INT_PTR, *PINT_PTR;		// used only for windows-specific code, and definied in windows.h
+	//typedef uintptr_t			UINT_PTR, *PUINT_PTR;	// used only for windows-specific code, and definied in windows.h
 
 	#include <wchar.h>
 	#ifdef UNICODE

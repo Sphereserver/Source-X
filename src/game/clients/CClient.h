@@ -3,8 +3,8 @@
 //
 
 #pragma once
-#ifndef _INC_CCLIENT_H
-#define _INC_CCLIENT_H
+#ifndef CCLIENT_H
+#define CCLIENT_H
 
 #include "../common/CArray.h"
 #include "../common/CEncrypt.h"
@@ -23,6 +23,7 @@
 #include "CChatChanMember.h"
 #include "CClientTooltip.h"
 #include "CGMPage.h"
+
 
 class CItemMap;
 

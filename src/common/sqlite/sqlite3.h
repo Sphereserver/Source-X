@@ -30,8 +30,8 @@
 ** the version number) and changes its name to "sqlite3.h" as
 ** part of the build process.
 */
-#ifndef _SQLITE3_H_
-#define _SQLITE3_H_
+#ifndef SQLITE3_H
+#define SQLITE3_H
 #include <stdarg.h>     /* Needed for the definition of va_list */
 
 /*
@@ -7734,7 +7734,7 @@ SQLITE_API void SQLITE_STDCALL sqlite3_stmt_scanstatus_reset(sqlite3_stmt*);
 #ifdef __cplusplus
 }  /* End of the 'extern "C"' block */
 #endif
-#endif /* _SQLITE3_H_ */
+#endif /* SQLITE3_H */
 
 /*
 ** 2010 August 30
@@ -7749,8 +7749,8 @@ SQLITE_API void SQLITE_STDCALL sqlite3_stmt_scanstatus_reset(sqlite3_stmt*);
 *************************************************************************
 */
 
-#ifndef _SQLITE3RTREE_H_
-#define _SQLITE3RTREE_H_
+#ifndef SQLITE3RTREE_H
+#define SQLITE3RTREE_H
 
 
 #ifdef __cplusplus
@@ -7851,5 +7851,5 @@ struct sqlite3_rtree_query_info {
 }  /* end of the 'extern "C"' block */
 #endif
 
-#endif  /* ifndef _SQLITE3RTREE_H_ */
+#endif  /* ifndef SQLITE3RTREE_H */
 

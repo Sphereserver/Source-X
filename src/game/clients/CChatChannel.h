@@ -1,9 +1,12 @@
-#ifndef _INC_CCHATCHANNEL_H
-#define _INC_CCHATCHANNEL_H
+
+#pragma once
+#ifndef CCHATCHANNEL_H
+#define CCHATCHANNEL_H
 
 #include "../common/grayproto.h"
 #include "../common/CArray.h"
 #include "../common/CString.h"
+
 
 class CChatChanMember;
 
@@ -74,4 +77,4 @@ public:
 };
 
 
-#endif //_INC_CCHATCHANNEL_H
+#endif // CCHATCHANNEL_H

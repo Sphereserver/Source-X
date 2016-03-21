@@ -1,4 +1,4 @@
-#include <limits>
+#include <climits>
 
 #include "../sphere/strings.h"
 #include "../sphere/threads.h"

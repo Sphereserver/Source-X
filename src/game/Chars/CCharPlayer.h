@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef _INC_CCHARPLAYER_H
-#define _INC_CCHARPLAYER_H
+#ifndef CCHARPLAYER_H
+#define CCHARPLAYER_H
 
 #include "../clients/CAccount.h"
 #include "../common/graymul.h"
@@ -80,4 +80,4 @@ private:
 };
 
 
-#endif //_INC_CCHARPLAYER_H
+#endif // CCHARPLAYER_H

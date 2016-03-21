@@ -15,6 +15,7 @@
 
 #define SCRIPT_MAX_SECTION_LEN 128
 
+
 struct CScriptLineContext
 {
 public:

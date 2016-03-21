@@ -1,5 +1,7 @@
-#ifndef _INC_CGMPAGE_H
-#define _INC_CGMPAGE_H
+
+#pragma once
+#ifndef CGMPAGE_H
+#define CGMPAGE_H
 
 #include "../common/CString.h"
 #include "../common/CArray.h"
@@ -53,4 +55,4 @@ public:
 	CGMPage * GetNext() const;
 };
 
-#endif // _INC_CGMPAGE_H
+#endif // CGMPAGE_H

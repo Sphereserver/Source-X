@@ -34,4 +34,4 @@ public:
 	virtual void waitForClose();
 };
 
-#endif //PINGSERVER_H
+#endif // PINGSERVER_H

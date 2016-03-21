@@ -25,9 +25,9 @@
 		#define _cdecl __cdecl
 	#endif
 	#include "os_windows.h"
-#else //!_WIN32
+#else // !_WIN32
 	#include "os_unix.h"
-#endif //_WIN32
+#endif // _WIN32
 
 // use to indicate that a function uses printf-style arguments, allowing GCC
 // to validate the format string and arguments:

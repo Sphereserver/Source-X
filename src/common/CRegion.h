@@ -7,6 +7,7 @@
 #include "CRect.h"
 #include "CResourceBase.h"
 
+
 inline DIR_TYPE GetDirTurn( DIR_TYPE dir, int offset )
 {
 	// Turn in a direction.

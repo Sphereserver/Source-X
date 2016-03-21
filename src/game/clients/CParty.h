@@ -1,5 +1,7 @@
-#ifndef _INC_CPARTY_H
-#define _INC_CPARTY_H
+
+#pragma once
+#ifndef CPARTY_H
+#define CPARTY_H
 
 #include "../common/CArray.h"
 #include "../common/CRect.h"
@@ -9,6 +11,7 @@
 #include "../common/grayproto.h"
 #include "../chars/CCharRefArray.h"
 #include "../CServTime.h"
+
 
 class PacketSend;
 
@@ -91,4 +94,4 @@ public:
 };
 
 
-#endif // _INC_CPARTY_H
+#endif // CPARTY_H

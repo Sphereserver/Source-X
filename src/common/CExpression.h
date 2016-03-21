@@ -6,7 +6,7 @@
 #ifndef CEXPRSSION_H
 #define CEXPRSSION_H
 
-#include <stdint.h>
+#include <cinttypes>
 #include "common.h"
 #include "graycom.h"
 #include "CVarDefMap.h"
