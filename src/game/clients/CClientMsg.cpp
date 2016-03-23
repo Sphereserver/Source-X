@@ -370,9 +370,9 @@ void CClient::addItem_OnGround( CItem * pItem ) // Send items (on ground)
 		if (pCorpse != NULL)
 		{
 			// send all the items on the corpse.
-			addContainerContents( pCorpse, false, true, false );
+			addContents( pCorpse, false, true, false );
 			// equip the proper items on the corpse.
-			addContainerContents( pCorpse, true, true, false );
+			addContents( pCorpse, true, true, false );
 		}
 	}
 
@@ -439,17 +439,17 @@ void CClient::addItem( CItem * pItem )
 	}
 }
 
-void CClient::addContainerContents( const CItemContainer * pContainer, bool bCorpseEquip, bool bCorpseFilter, bool bShop, bool bExtra) // Send Backpack (with items)
+void CClient::addContents( const CItemContainer * pContainer, bool fCorpseEquip, bool fCorpseFilter, bool fShop, bool bExtra) // Send Backpack (with items)
 {
-	ADDTOCALLSTACK("CClient::addContainerContents");
+	ADDTOCALLSTACK("CClient::addContents");
 	// NOTE: We needed to send the header for this FIRST !!!
 	// 1 = equip a corpse
 	// 0 = contents.
 
-	if (bCorpseEquip)
+	if (fCorpseEquip == true)
 		new PacketCorpseEquipment(this, pContainer);
 	else
-		new PacketItemContents(this, pContainer, bShop, bCorpseFilter, bExtra);
+		new PacketItemContents(this, pContainer, fShop, fCorpseFilter, bExtra);
 
 	return;
 }
@@ -482,7 +482,7 @@ bool CClient::addContainerSetup( const CItemContainer * pContainer ) // Send Bac
 	OpenPacketTransaction transaction(this, PacketSend::PRI_NORMAL);
 
 	addOpenGump(pContainer, gump);
-	addContainerContents(pContainer, false, false, false);
+	addContents(pContainer, false, false, false);
 
 	LogOpenedContainer(pContainer);
 	return true;
@@ -2420,16 +2420,16 @@ int CClient::addShopItems(CChar * pVendor, LAYER_TYPE layer, bool bReal)
 		return( -1 );
 
 	addItem(pContainer);
-	int iCount = 0;
+	int count = 0;
 	//	Classic clients will crash without extra packets:
 	// if bReal is false this call will send the extra packets
 	if ( bReal )
 	{
-		addContainerContents(pContainer, false, false, true, false);
-		for (const CItem* item = pContainer->GetContentHead(); item != NULL && iCount < MAX_ITEMS_CONT; item = item->GetNext())
+		addContents(pContainer, false, false, true, false);
+		for (const CItem* item = pContainer->GetContentHead(); item != NULL && count < MAX_ITEMS_CONT; item = item->GetNext())
 		{
 			addAOSTooltip(item, false, true);
-			iCount++;
+			count++;
 		}
 	}
 
@@ -2437,7 +2437,7 @@ int CClient::addShopItems(CChar * pVendor, LAYER_TYPE layer, bool bReal)
 	{
 		int iConvertFactor = pVendor->NPC_GetVendorMarkup(m_pChar );
 		PacketVendorBuyList* cmd = new PacketVendorBuyList();
-		iCount = cmd->fillBuyData(pContainer, iConvertFactor, bReal ? MAX_ITEMS_CONT : 0);
+		count = cmd->fillContainer(pContainer, iConvertFactor, GetNetState()->isClientEnhanced(), bReal? MAX_ITEMS_CONT : 0);
 		cmd->push(this);
 	}
 
@@ -2445,7 +2445,7 @@ int CClient::addShopItems(CChar * pVendor, LAYER_TYPE layer, bool bReal)
 	if ( pContainer->GetCount() > MAX_ITEMS_CONT )
 		g_Log.Event( LOGL_WARN, "Vendor 0%x '%s' has exceeded their stock limit! (%d/%d items)\n", static_cast<DWORD>(pVendor->GetUID()), pVendor->GetName(), pContainer->GetCount(), MAX_ITEMS_CONT);
 
-	return iCount;
+	return count;
 }
 
 bool CClient::addShopMenuBuy( CChar * pVendor )
@@ -2459,7 +2459,9 @@ bool CClient::addShopMenuBuy( CChar * pVendor )
 
 	//	non-player vendors could be restocked on-the-fly
 	if ( !pVendor->IsStatFlag(STATF_Pet) )
+	{
 		pVendor->NPC_Vendor_Restock(false, true);
+	}
 
 	addChar(pVendor);
 
@@ -2491,9 +2493,11 @@ bool CClient::addShopMenuSell( CChar * pVendor )
 
 	//	non-player vendors could be restocked on-the-fly
 	if ( !pVendor->IsStatFlag(STATF_Pet) )
+	{
 		pVendor->NPC_Vendor_Restock(false, true);
+	}
 
-	int iConvertFactor			 = - pVendor->NPC_GetVendorMarkup( m_pChar );
+	int iConvertFactor		= - pVendor->NPC_GetVendorMarkup( m_pChar );
 
 	CItemContainer * pContainer1 = pVendor->GetBank( LAYER_VENDOR_BUYS );
 	addItem( pContainer1 );
@@ -2506,10 +2510,12 @@ bool CClient::addShopMenuSell( CChar * pVendor )
 	addItem( pContainer3 );
 
 	if ( pVendor->IsStatFlag( STATF_Pet ))	// Player vendor.
+	{
 		pContainer2 = NULL; // no stock
+	}
 
 	PacketVendorSellList cmd(pVendor);
-	size_t count = cmd.fillSellList(this, m_pChar->GetPackSafe(), pContainer1, pContainer2, iConvertFactor);
+	size_t count = cmd.searchContainer(this, m_pChar->GetPackSafe(), pContainer1, pContainer2, iConvertFactor);
 	if (count <= 0)
 		return false;
 	
@@ -2527,11 +2533,11 @@ void CClient::addBankOpen( CChar * pChar, LAYER_TYPE layer )
 	ASSERT(pBankBox);
 	addItem( pBankBox );	// may crash client if we dont do this.
 
-	//if ( pChar != GetChar())
-	//{
+	if ( pChar != GetChar())
+	{
 		// xbank verb on others needs this ?
 		// addChar( pChar );
-	//}
+	}
 
 	pBankBox->OnOpenEvent( m_pChar, pChar );
 	addContainerSetup( pBankBox );
@@ -2604,7 +2610,7 @@ void CClient::addBulletinBoard( const CItemContainer * pBoard )
 
 	// Send Content messages for all the items on the bboard.
 	// Not sure what x,y are here, date/time maybe ?
-	addContainerContents( pBoard, false, false, false );
+	addContents( pBoard, false, false, false );
 
 	// The client will now ask for the headers it wants.
 }

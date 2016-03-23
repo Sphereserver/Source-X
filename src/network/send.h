@@ -724,7 +724,7 @@ class PacketVendorBuyList : public PacketSend
 {
 public:
 	PacketVendorBuyList(void);
-	int fillBuyData(const CItemContainer* container, int iConvertFactor, size_t maxItems = 115);
+	int fillContainer(const CItemContainer* container, int convertFactor, bool bisClientEnhanced, size_t maxItems = 115);
 };
 
 /***************************************************************************
@@ -1017,7 +1017,7 @@ class PacketVendorSellList : public PacketSend
 {
 public:
 	PacketVendorSellList(const CChar* vendor);
-	size_t fillSellList(CClient* target, const CItemContainer* container, CItemContainer* stock1, CItemContainer* stock2, int iConvertFactor, size_t maxItems = 115);
+	size_t searchContainer(CClient* target, const CItemContainer* container, CItemContainer* stock1, CItemContainer* stock2, int convertFactor, size_t maxItems = 115);
 };
 
 /***************************************************************************
