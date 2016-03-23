@@ -367,12 +367,10 @@ void CClient::addItem_OnGround( CItem * pItem ) // Send items (on ground)
 	if (IsPriv(PRIV_DEBUG) == false && (pItem->GetDispID() == ITEMID_CORPSE && CCharBase::IsPlayableID(pItem->GetCorpseType())) )	// cloths on corpse
 	{
 		CItemCorpse *pCorpse = static_cast<CItemCorpse *>(pItem);
-		if (pCorpse != NULL)
+		if ( pCorpse )
 		{
-			// send all the items on the corpse.
-			addContents( pCorpse, false, true, false );
-			// equip the proper items on the corpse.
-			addContents( pCorpse, true, true, false );
+			addContents( pCorpse, false, true );	// send all corpse items
+			addContents( pCorpse, true, true );	// equip proper items on corpse
 		}
 	}
 
@@ -439,7 +437,7 @@ void CClient::addItem( CItem * pItem )
 	}
 }
 
-void CClient::addContents( const CItemContainer * pContainer, bool fCorpseEquip, bool fCorpseFilter, bool fShop, bool bExtra) // Send Backpack (with items)
+void CClient::addContents( const CItemContainer * pContainer, bool fCorpseEquip, bool fCorpseFilter, bool fShop ) // Send Backpack (with items)
 {
 	ADDTOCALLSTACK("CClient::addContents");
 	// NOTE: We needed to send the header for this FIRST !!!
@@ -449,7 +447,7 @@ void CClient::addContents( const CItemContainer * pContainer, bool fCorpseEquip,
 	if (fCorpseEquip == true)
 		new PacketCorpseEquipment(this, pContainer);
 	else
-		new PacketItemContents(this, pContainer, fShop, fCorpseFilter, bExtra);
+		new PacketItemContents(this, pContainer, fShop, fCorpseFilter);
 
 	return;
 }
@@ -482,7 +480,7 @@ bool CClient::addContainerSetup( const CItemContainer * pContainer ) // Send Bac
 	OpenPacketTransaction transaction(this, PacketSend::PRI_NORMAL);
 
 	addOpenGump(pContainer, gump);
-	addContents(pContainer, false, false, false);
+	addContents(pContainer);
 
 	LogOpenedContainer(pContainer);
 	return true;
@@ -2408,80 +2406,66 @@ void CClient::addVendorClose( const CChar * pVendor )
 	new PacketCloseVendor(this, pVendor);
 }
 
-int CClient::addShopItems(CChar * pVendor, LAYER_TYPE layer, bool bReal)
+int CClient::addShopItems( CChar * pVendor, LAYER_TYPE layer, bool bReal )
 {
-	ADDTOCALLSTACK("CClient::addShopItems");
+	ADDTOCALLSTACK( "CClient::addShopItems" );
 	// Player buying from vendor.
 	// Show the Buy menu for the contents of this container
 	// RETURN: the number of items in container.
 	//   < 0 = error.
-	CItemContainer * pContainer = pVendor->GetBank( layer );
-	if ( pContainer == NULL )
-		return( -1 );
+	CItemContainer *pContainer = pVendor->GetBank( layer );
+	if ( !pContainer )
+		return -1;
 
-	addItem(pContainer);
+	addItem( pContainer );
 	int count = 0;
+
 	//	Classic clients will crash without extra packets:
 	// if bReal is false this call will send the extra packets
 	if ( bReal )
-	{
-		addContents(pContainer, false, false, true, false);
-		for (const CItem* item = pContainer->GetContentHead(); item != NULL && count < MAX_ITEMS_CONT; item = item->GetNext())
-		{
-			addAOSTooltip(item, false, true);
-			count++;
-		}
-	}
+		addContents( pContainer, false, false, true );
 
-	if ( (bReal && GetNetState()->isClientEnhanced()) || !GetNetState()->isClientEnhanced() )
+	if ( ( bReal && GetNetState()->isClientEnhanced() ) || !GetNetState()->isClientEnhanced() )
 	{
-		int iConvertFactor = pVendor->NPC_GetVendorMarkup(m_pChar );
-		PacketVendorBuyList* cmd = new PacketVendorBuyList();
-		count = cmd->fillContainer(pContainer, iConvertFactor, GetNetState()->isClientEnhanced(), bReal? MAX_ITEMS_CONT : 0);
-		cmd->push(this);
+		PacketVendorBuyList *cmd = new PacketVendorBuyList();
+		count = cmd->fillContainer( pContainer, pVendor->NPC_GetVendorMarkup( m_pChar ), GetNetState()->isClientEnhanced(), bReal ? MAX_ITEMS_CONT : 0 );
+		cmd->push( this );
 	}
 
 	// Send a warning if the vendor somehow has more stock than the allowed limit
 	if ( pContainer->GetCount() > MAX_ITEMS_CONT )
-		g_Log.Event( LOGL_WARN, "Vendor 0%x '%s' has exceeded their stock limit! (%d/%d items)\n", static_cast<DWORD>(pVendor->GetUID()), pVendor->GetName(), pContainer->GetCount(), MAX_ITEMS_CONT);
+		g_Log.Event( LOGL_WARN, "Vendor 0%lx '%s' has exceeded their stock limit! (%d/%d items)\n", static_cast< DWORD >( pVendor->GetUID() ), pVendor->GetName(), pContainer->GetCount(), MAX_ITEMS_CONT );
 
 	return count;
 }
 
 bool CClient::addShopMenuBuy( CChar * pVendor )
 {
-	ADDTOCALLSTACK("CClient::addShopMenuBuy");
+	ADDTOCALLSTACK( "CClient::addShopMenuBuy" );
 	// Try to buy stuff that the vendor has.
 	if ( !pVendor || !pVendor->NPC_IsVendor() )
 		return false;
 
-	OpenPacketTransaction transaction(this, PacketSend::PRI_HIGH);
+	OpenPacketTransaction transaction( this, PacketSend::PRI_HIGH );
 
-	//	non-player vendors could be restocked on-the-fly
-	if ( !pVendor->IsStatFlag(STATF_Pet) )
-	{
-		pVendor->NPC_Vendor_Restock(false, true);
-	}
+	// Non-player vendors could be restocked on-the-fly
+	if ( !pVendor->IsStatFlag( STATF_Pet ) )
+		pVendor->NPC_Vendor_Restock( false, true );
 
-	addChar(pVendor);
-
-	int iRes = addShopItems(pVendor, LAYER_VENDOR_STOCK);
+	int iRes = addShopItems( pVendor, LAYER_VENDOR_STOCK );
 	if ( iRes < 0 )
 		return false;
 
-	//	classic clients will crash without extra packets,
-	//	let's provide some empty packets specialy for them
-	addShopItems(pVendor, LAYER_VENDOR_EXTRA, false);
+	// Classic clients will crash without extra packets, let's provide some empty packets specialy for them
+	addShopItems( pVendor, LAYER_VENDOR_EXTRA, false );
 
 	addOpenGump( pVendor, GUMP_VENDOR_RECT, true );
-	addCharStatWindow( m_pChar->GetUID());	// Make sure the gold total has been updated.
-	
-	return( true );
+	return true;
 }
 
 bool CClient::addShopMenuSell( CChar * pVendor )
 {
-	ADDTOCALLSTACK("CClient::addShopMenuSell");
+	ADDTOCALLSTACK( "CClient::addShopMenuSell" );
 	// Player selling to vendor.
 	// What things do you have in your inventory that the vendor would want ?
 	// Should end with a returned Event_VendorSell()
@@ -2489,37 +2473,30 @@ bool CClient::addShopMenuSell( CChar * pVendor )
 	if ( !pVendor || !pVendor->NPC_IsVendor() )
 		return false;
 
-	OpenPacketTransaction transaction(this, PacketSend::PRI_LOW);
+	OpenPacketTransaction transaction( this, PacketSend::PRI_LOW );
 
 	//	non-player vendors could be restocked on-the-fly
-	if ( !pVendor->IsStatFlag(STATF_Pet) )
-	{
-		pVendor->NPC_Vendor_Restock(false, true);
-	}
+	if ( !pVendor->IsStatFlag( STATF_Pet ) )
+		pVendor->NPC_Vendor_Restock( false, true );
 
-	int iConvertFactor		= - pVendor->NPC_GetVendorMarkup( m_pChar );
-
-	CItemContainer * pContainer1 = pVendor->GetBank( LAYER_VENDOR_BUYS );
+	CItemContainer *pContainer1 = pVendor->GetBank( LAYER_VENDOR_BUYS );
+	CItemContainer *pContainer2 = pVendor->GetBank( LAYER_VENDOR_STOCK );
 	addItem( pContainer1 );
-	CItemContainer * pContainer2 = pVendor->GetBank( LAYER_VENDOR_STOCK );
 	addItem( pContainer2 );
 
-	//	classic clients will crash without extra packets,
-	//	let's provide some empty packets specialy for them
-	CItemContainer * pContainer3 = pVendor->GetBank( LAYER_VENDOR_EXTRA );
+	// Classic clients will crash without extra packets, let's provide some empty packets specialy for them
+	CItemContainer *pContainer3 = pVendor->GetBank( LAYER_VENDOR_EXTRA );
 	addItem( pContainer3 );
 
-	if ( pVendor->IsStatFlag( STATF_Pet ))	// Player vendor.
-	{
-		pContainer2 = NULL; // no stock
-	}
+	if ( pVendor->IsStatFlag( STATF_Pet ) )	// player vendor
+		pContainer2 = NULL;		// no stock
 
-	PacketVendorSellList cmd(pVendor);
-	size_t count = cmd.searchContainer(this, m_pChar->GetPackSafe(), pContainer1, pContainer2, iConvertFactor);
-	if (count <= 0)
+	PacketVendorSellList cmd( pVendor );
+	size_t count = cmd.searchContainer( this, m_pChar->GetPackSafe(), pContainer1, pContainer2, -pVendor->NPC_GetVendorMarkup( m_pChar ) );
+	if ( count <= 0 )
 		return false;
-	
-	cmd.send(this);
+
+	cmd.send( this );
 	return true;
 }
 
@@ -2610,7 +2587,7 @@ void CClient::addBulletinBoard( const CItemContainer * pBoard )
 
 	// Send Content messages for all the items on the bboard.
 	// Not sure what x,y are here, date/time maybe ?
-	addContents( pBoard, false, false, false );
+	addContents( pBoard );
 
 	// The client will now ask for the headers it wants.
 }
