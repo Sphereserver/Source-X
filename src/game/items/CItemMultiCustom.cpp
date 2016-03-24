@@ -307,7 +307,7 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
 		pItem->m_uidLink = GetUID();
 		pItem->ClrAttr(ATTR_DECAY|ATTR_CAN_DECAY);
 		pItem->SetAttr(ATTR_MOVE_NEVER);
-		pItem->GetTagDefs()->SetNum("FIXTURE", static_cast<INT64>(GetUID()));
+		pItem->GetTagDefs()->SetNum("FIXTURE", static_cast<int64>(GetUID()));
 
 		if ( pItem->IsType(IT_DOOR) )
 		{

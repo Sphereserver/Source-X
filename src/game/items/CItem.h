@@ -270,7 +270,7 @@ public:
 		{
 			dword	m_iGold;
 			dword	m_iPlatinum;
-			INT64	m_iWaitTime;
+			int64	m_iWaitTime;
 			byte	m_bCheck;		// morez=Check box for trade window.
 		} m_itEqTradeWindow;
 
@@ -310,7 +310,7 @@ public:
 		struct
 		{
 			RESOURCE_ID_BASE m_ResID;	// more1 = preconfigured book id from RES_BOOK or Time date stamp for the book/message creation. (if |0x80000000)
-										//CServTime   	 m_Time;	// more2= Time date stamp for the book/message creation. (Now Placed inside TIMESTAMP for INT64 support)
+										//CServTime   	 m_Time;	// more2= Time date stamp for the book/message creation. (Now Placed inside TIMESTAMP for int64 support)
 		} m_itBook;
 
 		// IT_DEED
@@ -369,7 +369,7 @@ public:
 			// m_amount = memory type mask.
 			word m_Action;		// more1l = NPC_MEM_ACT_TYPE What sort of action is this memory about ? (1=training, 2=hire, etc)
 			word m_Skill;		// more1h = SKILL_TYPE = training a skill ?
-			dword m_junk2;		// more2 = When did the fight start or action take place ? (Now Placed inside TIMESTAMP for INT64 support)
+			dword m_junk2;		// more2 = When did the fight start or action take place ? (Now Placed inside TIMESTAMP for int64 support)
 			CPointBase m_pt;	// morep = Location the memory occured.
 								// m_uidLink = what is this memory linked to. (must be valid)
 		} m_itEqMemory;
@@ -559,8 +559,8 @@ public:
 	bool IsCanUse( dword dwCanUse ) const;
 
 	height_t GetHeight() const;
-	INT64  GetDecayTime() const;
-	void SetDecayTime( INT64 iTime = 0 );
+	int64  GetDecayTime() const;
+	void SetDecayTime( int64 iTime = 0 );
 	SOUND_TYPE GetDropSound( const CObjBase * pObjOn ) const;
 	bool IsTopLevelMultiLocked() const;
 	bool IsMovableType() const;
@@ -591,12 +591,12 @@ public:
 
 	virtual int GetWeight(word amount = 0) const;
 
-	void SetTimeout( INT64 iDelay );
+	void SetTimeout( int64 iDelay );
 
 	virtual void OnMoveFrom();
 	virtual bool MoveTo(CPointMap pt, bool bForceFix = false); // Put item on the ground here.
 	bool MoveToUpdate(CPointMap pt, bool bForceFix = false);
-	bool MoveToDecay(const CPointMap & pt, INT64 iDecayTime, bool bForceFix = false);
+	bool MoveToDecay(const CPointMap & pt, int64 iDecayTime, bool bForceFix = false);
 	bool MoveToCheck( const CPointMap & pt, CChar * pCharMover = NULL );
 	virtual bool MoveNearObj( const CObjBaseTemplate *pItem, word iSteps = 0 );
 

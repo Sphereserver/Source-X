@@ -570,7 +570,7 @@ bool CDialogDef::GumpSetup( int iPage, CClient * pClient, CObjBase * pObjSrc, lp
 		return( false );
 
 	// starting x,y location.
-	INT64 iSizes[2];
+	int64 iSizes[2];
 	tchar * pszBuf = s.GetKeyBuffer();
 	m_pObj->ParseText( pszBuf, pClient->GetChar() );
 
@@ -725,7 +725,7 @@ TRIGRET_TYPE CClient::Dialog_OnButton( RESOURCE_ID_BASE rid, dword dwButtonID, C
 	// m_tmInpVal.m_PrvGumpID	= rid;
 	// m_tmInpVal.m_UID		= pObj ? pObj->GetUID() : (CGrayUID) 0;
 
-	INT64 piCmd[3];
+	int64 piCmd[3];
 	while ( s.ReadKeyParse())
 	{
 		if ( ! s.IsKeyHead( "ON", 2 ))

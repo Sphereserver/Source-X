@@ -49,7 +49,7 @@ public:
 	tchar * GetArgRaw() const; // Not need to parse at all.
 	tchar * GetArgStr( bool * fQuoted );	// this could be a quoted string ?
 	tchar * GetArgStr();
-	long long GetArgLLVal();
+	llong GetArgLLVal();
 	int GetArgVal();
 	int GetArgRange();
 	dword GetArgFlag( dword dwStart, dword dwMask );
@@ -108,7 +108,7 @@ public:
 protected:
 	void InitBase();
 
-	virtual dword Seek( int offset = 0, UINT origin = SEEK_SET );
+	virtual dword Seek( int offset = 0, uint origin = SEEK_SET );
 
 public:
 	// text only functions:
@@ -116,7 +116,7 @@ public:
 	bool FindTextHeader( lpctstr pszName ); // Find a section in the current script
 
 public:
-	virtual bool Open( lpctstr szFilename = NULL, UINT Flags = OF_READ|OF_TEXT );
+	virtual bool Open( lpctstr szFilename = NULL, uint Flags = OF_READ|OF_TEXT );
 	virtual void Close();
 	virtual void CloseForce();
 	bool SeekContext( CScriptLineContext LineContext );
@@ -124,7 +124,7 @@ public:
 
 	// Find sections.
 	bool FindNextSection();
-	virtual bool FindSection( lpctstr pszName, UINT uModeFlags ); // Find a section in the current script
+	virtual bool FindSection( lpctstr pszName, uint uModeFlags ); // Find a section in the current script
 	lpctstr GetSection() const;
 	bool IsSectionType( lpctstr pszName );
 	// Find specific keys in the current section.
@@ -138,8 +138,8 @@ public:
 	bool WriteKey( lpctstr pszKey, lpctstr pszVal );
 	void _cdecl WriteKeyFormat( lpctstr pszKey, lpctstr pszFormat, ... ) __printfargs(3,4);
 
-	void WriteKeyVal( lpctstr pszKey, INT64 dwVal );
-	void WriteKeyHex( lpctstr pszKey, INT64 dwVal );
+	void WriteKeyVal( lpctstr pszKey, int64 dwVal );
+	void WriteKeyHex( lpctstr pszKey, int64 dwVal );
 
 	CScript();
 	CScript( lpctstr pszKey );

@@ -2916,7 +2916,7 @@ int CChar::Spell_CastStart()
 		}
 	}
 
-	INT64 iWaitTime = pSpellDef->m_CastTime.GetLinear(Skill_GetBase(static_cast<SKILL_TYPE>(iSkill)));
+	int64 iWaitTime = pSpellDef->m_CastTime.GetLinear(Skill_GetBase(static_cast<SKILL_TYPE>(iSkill)));
 	iWaitTime -= GetDefNum("FASTERCASTING", true, true) * 2;	//correct value is 0.25, but sphere can handle only 0.2.
 	if ( iWaitTime < 1 || IsPriv(PRIV_GM) )
 		iWaitTime = 1;
@@ -2954,7 +2954,7 @@ int CChar::Spell_CastStart()
 
 	m_atMagery.m_Spell = static_cast<SPELL_TYPE>(Args.m_iN1);
 	iDifficulty = static_cast<int>(Args.m_iN2);
-	iWaitTime = static_cast<INT64>(Args.m_iN3);
+	iWaitTime = static_cast<int64>(Args.m_iN3);
 
 	pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
 	if ( !pSpellDef )
@@ -2963,8 +2963,8 @@ int CChar::Spell_CastStart()
 	fWOP = Args.m_VarsLocal.GetKeyNum("WOP", true) > 0 ? true : false;
 	if ( fWOP )
 	{
-		INT64 WOPColor = Args.m_VarsLocal.GetKeyNum("WOPColor", true);
-		INT64 WOPFont = Args.m_VarsLocal.GetKeyNum("WOPFont", true);
+		int64 WOPColor = Args.m_VarsLocal.GetKeyNum("WOPColor", true);
+		int64 WOPFont = Args.m_VarsLocal.GetKeyNum("WOPFont", true);
 
 		if ( pSpellDef->m_sRunes[0] == '.' )
 		{

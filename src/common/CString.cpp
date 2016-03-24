@@ -38,7 +38,7 @@
 //#define DEBUG_STRINGS
 #ifdef DEBUG_STRINGS
 int gAmount = 0;  ///< Current amount of CGString.
-UINT gMemAmount = 0; ///< Total mem allocated by CGStrings.
+uint gMemAmount = 0; ///< Total mem allocated by CGStrings.
 int gReallocs = 0; ///< Total reallocs caused by CGString resizing.
 #endif
 
@@ -244,7 +244,7 @@ void CGString::FormatVal(int iVal)
 	Format("%d", iVal);
 }
 
-void CGString::FormatLLVal(long long iVal)
+void CGString::FormatLLVal(llong iVal)
 {
 	Format("%lld", iVal);
 }
@@ -266,7 +266,7 @@ void CGString::FormatHex(dword dwVal)
 	// If iVal is negative we MUST hexformat it as
 	// 64 bit int or reinterpreting it in a 
 	// script might completely mess up
-	long long dwVal64 = ((int)dwVal);
+	llong dwVal64 = ((int)dwVal);
 	if (dwVal64 < 0)
 		return FormatLLHex(dwVal64);
 	Format("0%x", dwVal);

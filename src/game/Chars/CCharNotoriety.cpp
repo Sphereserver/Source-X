@@ -371,7 +371,7 @@ void CChar::Noto_ChangeDeltaMsg( int iDelta, lpctstr pszType )
 #define	NOTO_DEGREES	8
 #define	NOTO_FACTOR		(300/NOTO_DEGREES)
 
-	static UINT const sm_DegreeTable[8] =
+	static uint const sm_DegreeTable[8] =
 	{
 		DEFMSG_MSG_NOTO_CHANGE_1,
 		DEFMSG_MSG_NOTO_CHANGE_2,
@@ -630,7 +630,7 @@ NOTO_TYPE CChar::NotoSave_GetValue( int id, bool bGetColor )
 		return refNotoSave.value;
 }
 
-INT64 CChar::NotoSave_GetTime( int id )
+int64 CChar::NotoSave_GetTime( int id )
 {
 	ADDTOCALLSTACK("CChar::NotoSave_GetTime");
 	if ( !m_notoSaves.size() )

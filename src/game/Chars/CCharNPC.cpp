@@ -121,7 +121,7 @@ bool CCharNPC::r_LoadVal( CChar * pChar, CScript &s )
 		break;
 		case CNC_SPELLADD:
 		{
-			INT64 ppCmd[255];
+			int64 ppCmd[255];
 			size_t count = Str_ParseCmds(s.GetArgStr(), ppCmd, COUNTOF(ppCmd));
 			if (count < 1)
 				return false;

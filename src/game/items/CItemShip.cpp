@@ -1244,7 +1244,7 @@ bool CItemShip::r_LoadVal( CScript & s  )
 					pItemMulti->m_shipSpeed.period = static_cast<uchar>(s.GetArgVal());
 					return true;
 				}
-				INT64 piVal[2];
+				int64 piVal[2];
 				size_t iQty = Str_ParseCmds(s.GetArgStr(), piVal, COUNTOF(piVal));
 				if (iQty == 2)
 				{

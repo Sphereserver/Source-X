@@ -1286,7 +1286,7 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 			{
 				if ( s.HasArgs() )
 				{
-					INT64 piCmd[2];
+					int64 piCmd[2];
 					size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, COUNTOF(piCmd));
 					if ( iArgQty == 2 )
 					{

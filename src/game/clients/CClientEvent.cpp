@@ -793,14 +793,14 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 			// read the value already stored by Sphere main timer. But this value is only updated at
 			// tenths of second precision, which won't work here because we need milliseconds precision.
 			// So to get this precision we must get the system clock manually at each walk request.
-			INT64 iCurTime = CWorldClock::GetSystemClock();
+			int64 iCurTime = CWorldClock::GetSystemClock();
 			if ( iCurTime < m_timeNextEventWalk )		// fastwalk detected
 			{
 				new PacketMovementRej(this, sequence);
 				return false;
 			}
 
-			INT64 iDelay = 0;
+			int64 iDelay = 0;
 			if ( m_pChar->IsStatFlag(STATF_OnHorse|STATF_Hovering) )
 				iDelay = (rawdir & 0x80) ? 70 : 170;	// 100ms : 200ms
 			else
@@ -1035,7 +1035,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t it
 	CItemContainer* pPack = m_pChar->GetPackSafe();
 
 	CItemVendable* pItem;
-	INT64 costtotal = 0;
+	int64 costtotal = 0;
 
 	//	Check if the vendor really has so much items
 	for (size_t i = 0; i < itemCount; ++i)

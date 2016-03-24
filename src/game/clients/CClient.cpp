@@ -938,7 +938,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			break;
 		case CV_ARROWQUEST:
 			{
-				INT64 piVal[3];
+				int64 piVal[3];
 				Str_ParseCmds( s.GetArgRaw(), piVal, COUNTOF(piVal));
 				addArrowQuest( static_cast<int>(piVal[0]), static_cast<int>(piVal[1]), static_cast<int>(piVal[2]) );
 #ifdef _ALPHASPHERE
@@ -1218,7 +1218,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			break;
 		case CV_MIDILIST:
 			{
-				INT64 piMidi[64];
+				int64 piMidi[64];
 				size_t iQty = Str_ParseCmds( s.GetArgStr(), piMidi, COUNTOF(piMidi));
 				if ( iQty > 0 )
 				{

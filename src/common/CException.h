@@ -45,9 +45,9 @@ public:
 	CGrayError& operator=(const CGrayError& other);
 public:
 #ifdef _WIN32
-	static int GetSystemErrorMessage( dword dwError, lptstr lpszError, UINT nMaxError );
+	static int GetSystemErrorMessage( dword dwError, lptstr lpszError, uint nMaxError );
 #endif
-	virtual bool GetErrorMessage( lptstr lpszError, UINT nMaxError,	UINT * pnHelpContext = NULL ) const;
+	virtual bool GetErrorMessage( lptstr lpszError, uint nMaxError,	uint * pnHelpContext = NULL ) const;
 };
 
 class CGrayAssert : public CGrayError
@@ -68,7 +68,7 @@ private:
 	CGrayAssert& operator=(const CGrayAssert& other);
 
 public:
-	virtual bool GetErrorMessage(lptstr lpszError, UINT nMaxError, UINT * pnHelpContext = NULL ) const;
+	virtual bool GetErrorMessage(lptstr lpszError, uint nMaxError, uint * pnHelpContext = NULL ) const;
 };
 
 #ifdef _WIN32
@@ -85,7 +85,7 @@ public:
 		CGrayException& operator=(const CGrayException& other);
 
 	public:
-		virtual bool GetErrorMessage(lptstr lpszError, UINT nMaxError, UINT * pnHelpContext = NULL ) const;
+		virtual bool GetErrorMessage(lptstr lpszError, uint nMaxError, uint * pnHelpContext = NULL ) const;
 	};
 #endif
 

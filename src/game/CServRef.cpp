@@ -175,7 +175,7 @@ void CServerDef::SetValidTime()
 	m_timeLastValid = CServTime::GetCurrentTime();
 }
 
-INT64 CServerDef::GetTimeSinceLastValid() const
+int64 CServerDef::GetTimeSinceLastValid() const
 {
 	ADDTOCALLSTACK("CServerDef::GetTimeSinceLastValid");
 	return( - g_World.GetTimeDiff( m_timeLastValid ));
@@ -478,7 +478,7 @@ bool CServerDef::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc
 	return false;
 }
 
-INT64 CServerDef::GetAgeHours() const
+int64 CServerDef::GetAgeHours() const
 {
 	ADDTOCALLSTACK("CServerDef::GetAgeHours");
 	// This is just the amount of time it has been listed.

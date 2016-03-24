@@ -142,7 +142,7 @@ void CChar::Jail( CTextConsole * pSrc, bool fSet, int iCell )
 {
 	ADDTOCALLSTACK("CChar::Jail");
 
-	CScriptTriggerArgs Args( fSet? 1 : 0, static_cast<INT64>(iCell), static_cast<INT64>(0));
+	CScriptTriggerArgs Args( fSet? 1 : 0, static_cast<int64>(iCell), static_cast<int64>(0));
 
 	if ( fSet )	// set the jailed flag.
 	{
@@ -518,39 +518,39 @@ void CChar::OnRemoveOb( CGObListRec* pObRec )	// Override this = called when rem
 		if (iManaIncrease != 0)
 			Stat_SetMax(STAT_INT, Stat_GetMax(STAT_INT) - iManaIncrease);
 
-		INT64 iDamageIncrease = pItem->GetDefNum("INCREASEDAM", true, true);
+		int64 iDamageIncrease = pItem->GetDefNum("INCREASEDAM", true, true);
 		if ( iDamageIncrease != 0 )
 			SetDefNum("INCREASEDAM", GetDefNum("INCREASEDAM", true) - iDamageIncrease);
 
-		INT64 iDefenseChanceIncrease = pItem->GetDefNum("INCREASEDEFCHANCE", true, true);
+		int64 iDefenseChanceIncrease = pItem->GetDefNum("INCREASEDEFCHANCE", true, true);
 		if ( iDefenseChanceIncrease != 0 )
 			SetDefNum("INCREASEDEFCHANCE", GetDefNum("INCREASEDEFCHANCE", true) - iDefenseChanceIncrease);
 
-		INT64 iFasterCasting = pItem->GetDefNum("FASTERCASTING", true, true);
+		int64 iFasterCasting = pItem->GetDefNum("FASTERCASTING", true, true);
 		if ( iFasterCasting != 0 )
 			SetDefNum("FASTERCASTING", GetDefNum("FASTERCASTING", true) - iFasterCasting);
 
-		INT64 iHitChanceIncrease = pItem->GetDefNum("INCREASEHITCHANCE", true, true);
+		int64 iHitChanceIncrease = pItem->GetDefNum("INCREASEHITCHANCE", true, true);
 		if ( iHitChanceIncrease != 0 )
 			SetDefNum("INCREASEHITCHANCE", GetDefNum("INCREASEHITCHANCE", true) - iHitChanceIncrease);
 
-		INT64 iSpellDamageIncrease = pItem->GetDefNum("INCREASESPELLDAM", true, true);
+		int64 iSpellDamageIncrease = pItem->GetDefNum("INCREASESPELLDAM", true, true);
 		if ( iSpellDamageIncrease != 0 )
 			SetDefNum("INCREASESPELLDAM", GetDefNum("INCREASESPELLDAM", true) - iSpellDamageIncrease);
 
-		INT64 iSwingSpeedIncrease = pItem->GetDefNum("INCREASESWINGSPEED", true, true);
+		int64 iSwingSpeedIncrease = pItem->GetDefNum("INCREASESWINGSPEED", true, true);
 		if ( iSwingSpeedIncrease != 0 )
 			SetDefNum("INCREASESWINGSPEED", GetDefNum("INCREASESWINGSPEED", true) - iSwingSpeedIncrease);
 
-		INT64 iEnhancePotions = pItem->GetDefNum("ENHANCEPOTIONS", true, true);
+		int64 iEnhancePotions = pItem->GetDefNum("ENHANCEPOTIONS", true, true);
 		if (iEnhancePotions != 0)
 			SetDefNum("ENHANCEPOTIONS", GetDefNum("ENHANCEPOTIONS", true) - iEnhancePotions);
 
-		INT64 iLowerManaCost = pItem->GetDefNum("LOWERMANACOST", true, true);
+		int64 iLowerManaCost = pItem->GetDefNum("LOWERMANACOST", true, true);
 		if (iLowerManaCost != 0)
 			SetDefNum("LOWERMANACOST", GetDefNum("LOWERMANACOST", true) - iLowerManaCost);
 
-		INT64 iLuck = pItem->GetDefNum("LUCK", true, true);
+		int64 iLuck = pItem->GetDefNum("LUCK", true, true);
 		if ( iLuck != 0 )
 			SetDefNum("LUCK", GetDefNum("LUCK", true) - iLuck);
 
@@ -2023,39 +2023,39 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 	if (iManaIncrease != 0)
 		Stat_SetMax(STAT_INT, Stat_GetMax(STAT_INT) + iManaIncrease);
 
-	INT64 iDamageIncrease = pItem->GetDefNum("INCREASEDAM", true, true);
+	int64 iDamageIncrease = pItem->GetDefNum("INCREASEDAM", true, true);
 	if (iDamageIncrease != 0)
 		SetDefNum("INCREASEDAM", GetDefNum("INCREASEDAM", true) + iDamageIncrease);
 
-	INT64 iDefenseChanceIncrease = pItem->GetDefNum("INCREASEDEFCHANCE", true, true);
+	int64 iDefenseChanceIncrease = pItem->GetDefNum("INCREASEDEFCHANCE", true, true);
 	if (iDefenseChanceIncrease != 0)
 		SetDefNum("INCREASEDEFCHANCE", GetDefNum("INCREASEDEFCHANCE", true) + iDefenseChanceIncrease);
 
-	INT64 iFasterCasting = pItem->GetDefNum("FASTERCASTING", true, true);
+	int64 iFasterCasting = pItem->GetDefNum("FASTERCASTING", true, true);
 	if (iFasterCasting != 0)
 		SetDefNum("FASTERCASTING", GetDefNum("FASTERCASTING", true) + iFasterCasting);
 
-	INT64 iHitChanceIncrease = pItem->GetDefNum("INCREASEHITCHANCE", true, true);
+	int64 iHitChanceIncrease = pItem->GetDefNum("INCREASEHITCHANCE", true, true);
 	if (iHitChanceIncrease != 0)
 		SetDefNum("INCREASEHITCHANCE", GetDefNum("INCREASEHITCHANCE", true) + iHitChanceIncrease);
 
-	INT64 iSpellDamageIncrease = pItem->GetDefNum("INCREASESPELLDAM", true, true);
+	int64 iSpellDamageIncrease = pItem->GetDefNum("INCREASESPELLDAM", true, true);
 	if (iSpellDamageIncrease != 0)
 		SetDefNum("INCREASESPELLDAM", GetDefNum("INCREASESPELLDAM", true) + iSpellDamageIncrease);
 
-	INT64 iSwingSpeedIncrease = pItem->GetDefNum("INCREASESWINGSPEED", true, true);
+	int64 iSwingSpeedIncrease = pItem->GetDefNum("INCREASESWINGSPEED", true, true);
 	if (iSwingSpeedIncrease != 0)
 		SetDefNum("INCREASESWINGSPEED", GetDefNum("INCREASESWINGSPEED", true) + iSwingSpeedIncrease);
 
-	INT64 iEnhancePotions = pItem->GetDefNum("ENHANCEPOTIONS", true, true);
+	int64 iEnhancePotions = pItem->GetDefNum("ENHANCEPOTIONS", true, true);
 	if (iEnhancePotions != 0)
 		SetDefNum("ENHANCEPOTIONS", GetDefNum("ENHANCEPOTIONS", true) + iEnhancePotions);
 
-	INT64 iLowerManaCost = pItem->GetDefNum("LOWERMANACOST", true, true);
+	int64 iLowerManaCost = pItem->GetDefNum("LOWERMANACOST", true, true);
 	if (iLowerManaCost != 0)
 		SetDefNum("LOWERMANACOST", GetDefNum("LOWERMANACOST", true) + iLowerManaCost);
 
-	INT64 iLuck = pItem->GetDefNum("LUCK", true, true);
+	int64 iLuck = pItem->GetDefNum("LUCK", true, true);
 	if (iLuck != 0)
 		SetDefNum("LUCK", GetDefNum("LUCK", true) + iLuck);
 
@@ -3813,7 +3813,7 @@ void CChar::OnTickStatusUpdate()
 	if ( IsClient() )
 		GetClient()->UpdateStats();
 
-	INT64 iTimeDiff = - g_World.GetTimeDiff( m_timeLastHitsUpdate );
+	int64 iTimeDiff = - g_World.GetTimeDiff( m_timeLastHitsUpdate );
 	if ( g_Cfg.m_iHitsUpdateRate && ( iTimeDiff >= g_Cfg.m_iHitsUpdateRate ) )
 	{
 		if ( m_fStatusUpdate & SU_UPDATE_HITS )
@@ -3903,7 +3903,7 @@ bool CChar::OnTick()
 	ADDTOCALLSTACK("CChar::OnTick");
 
 	EXC_TRY("Tick");
-	INT64 iTimeDiff = -g_World.GetTimeDiff(m_timeLastRegen);
+	int64 iTimeDiff = -g_World.GetTimeDiff(m_timeLastRegen);
 	if ( !iTimeDiff )
 		return true;
 

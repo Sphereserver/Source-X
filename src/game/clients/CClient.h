@@ -148,7 +148,7 @@ public:
 	CServTime m_timeLogin;			// World clock of login time. "LASTCONNECTTIME"
 	CServTime m_timeLastEvent;		// Last time we got event from client.
 	CServTime m_timeLastEventWalk;	// Last time we got a walk event from client (only used to handle STATF_Fly char flag)
-	INT64 m_timeNextEventWalk;		// Fastwalk prevention: only allow more walk requests after this timer
+	int64 m_timeNextEventWalk;		// Fastwalk prevention: only allow more walk requests after this timer
 
 									// GM only stuff.
 	CGMPage * m_pGMPage;		// Current GM page we are connected to.
@@ -738,12 +738,12 @@ public:
 		return m_BaseDefs.GetKeyStr( pszKey, fZero );
 	}
 
-	INT64 GetDefNum( lpctstr pszKey, bool fZero = false ) const
+	int64 GetDefNum( lpctstr pszKey, bool fZero = false ) const
 	{
 		return m_BaseDefs.GetKeyNum( pszKey, fZero );
 	}
 
-	void SetDefNum(lpctstr pszKey, INT64 iVal, bool fZero = true)
+	void SetDefNum(lpctstr pszKey, int64 iVal, bool fZero = true)
 	{
 		m_BaseDefs.SetNum(pszKey, iVal, fZero);
 	}

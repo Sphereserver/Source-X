@@ -233,12 +233,12 @@ void Packet::writeInt32(const dword value)
 	m_buffer[m_position++] = (byte)(value);
 }
 
-void Packet::writeInt64(const INT64 value)
+void Packet::writeInt64(const int64 value)
 {
-	if ((m_position + sizeof(INT64)) > m_bufferSize)
-		expand(sizeof(INT64));
+	if ((m_position + sizeof(int64)) > m_bufferSize)
+		expand(sizeof(int64));
 	
-	ASSERT((m_position + sizeof(INT64)) <= m_bufferSize);
+	ASSERT((m_position + sizeof(int64)) <= m_bufferSize);
 	m_buffer[m_position++] = (byte)(value >> 56);
 	m_buffer[m_position++] = (byte)(value >> 48);
 	m_buffer[m_position++] = (byte)(value >> 40);
@@ -251,10 +251,10 @@ void Packet::writeInt64(const INT64 value)
 
 void Packet::writeInt64(const dword hi, const dword lo)
 {
-	if ((m_position + sizeof(INT64)) > m_bufferSize)
-		expand(sizeof(INT64));
+	if ((m_position + sizeof(int64)) > m_bufferSize)
+		expand(sizeof(int64));
 	
-	ASSERT((m_position + sizeof(INT64)) <= m_bufferSize);
+	ASSERT((m_position + sizeof(int64)) <= m_bufferSize);
 	m_buffer[m_position++] = (byte)(hi);
 	m_buffer[m_position++] = (byte)(hi >> 8);
 	m_buffer[m_position++] = (byte)(hi >> 16);
@@ -696,14 +696,14 @@ dword Packet::readInt32(void)
 	return dw;
 }
 
-INT64 Packet::readInt64(void)
+int64 Packet::readInt64(void)
 {
-	if ((m_position + sizeof(INT64)) > m_length)
+	if ((m_position + sizeof(int64)) > m_length)
 		return 0;
 
 	dword dwHigh = readInt32();
 	dword dwLow = readInt32();
-	INT64 qw = ((INT64)dwHigh << 32) + dwLow;
+	int64 qw = ((int64)dwHigh << 32) + dwLow;
 	return qw;
 }
 void Packet::readStringASCII(char* buffer, size_t length, bool includeNull)

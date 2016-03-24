@@ -1441,7 +1441,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 					pItemMulti->m_shipSpeed.tiles = static_cast<uchar>(s.GetArgVal());
 					return true;
 				}
-				INT64 piVal[2];
+				int64 piVal[2];
 				size_t iQty = Str_ParseCmds(s.GetArgStr(), piVal, COUNTOF(piVal));
 				if (iQty == 2)
 				{
@@ -1824,7 +1824,7 @@ void CItemBaseMulti::SetMultiRegion( tchar * pArgs )
 {
 	ADDTOCALLSTACK("CItemBaseMulti::SetMultiRegion");
 	// inclusive region.
-	INT64 piArgs[5];
+	int64 piArgs[5];
 	size_t iQty = Str_ParseCmds( pArgs, piArgs, COUNTOF(piArgs));
 	if ( iQty <= 1 )
 		return;
@@ -1835,7 +1835,7 @@ void CItemBaseMulti::SetMultiRegion( tchar * pArgs )
 bool CItemBaseMulti::AddComponent( tchar * pArgs )
 {
 	ADDTOCALLSTACK("CItemBaseMulti::AddComponent");
-	INT64 piArgs[4];
+	int64 piArgs[4];
 	size_t iQty = Str_ParseCmds( pArgs, piArgs, COUNTOF(piArgs));
 	if ( iQty <= 1 )
 		return false;
@@ -1900,7 +1900,7 @@ bool CItemBaseMulti::r_LoadVal( CScript &s )
 			return false;
 
 		// SHIPSPEED x[,y]
-		INT64 ppArgs[2];
+		int64 ppArgs[2];
 		size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, COUNTOF(ppArgs));
 		if (iQty < 1)
 			return false;

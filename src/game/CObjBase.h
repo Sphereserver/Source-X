@@ -96,17 +96,17 @@ public:
 	byte	RangeL() const;
 	byte	RangeH() const;
 	CServTime GetTimeStamp() const;
-	void SetTimeStamp( INT64 t_time);
+	void SetTimeStamp( int64 t_time);
 	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
-	INT64 GetDefNum( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
-	void SetDefNum(lpctstr pszKey, INT64 iVal, bool fZero = true);
+	int64 GetDefNum( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
+	void SetDefNum(lpctstr pszKey, int64 iVal, bool fZero = true);
 	void SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true);
 	void DeleteDef(lpctstr pszKey);
 	CVarDefCont * GetDefKey( lpctstr pszKey, bool fDef ) const;
 	lpctstr GetKeyStr( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
-	INT64 GetKeyNum( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
+	int64 GetKeyNum( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
 	CVarDefCont * GetKey( lpctstr pszKey, bool fDef ) const;
-	void SetKeyNum(lpctstr pszKey, INT64 iVal);
+	void SetKeyNum(lpctstr pszKey, int64 iVal);
 	void SetKeyStr(lpctstr pszKey, lpctstr pszVal);
 	void DeleteKey( lpctstr pszKey );
 
@@ -135,7 +135,7 @@ public:
 
 public:
 	// Hue
-	void SetHue( HUE_TYPE wHue, bool bAvoidTrigger = true, CTextConsole *pSrc = NULL, CObjBase *SourceObj = NULL, long long sound = 0 );
+	void SetHue( HUE_TYPE wHue, bool bAvoidTrigger = true, CTextConsole *pSrc = NULL, CObjBase *SourceObj = NULL, llong sound = 0 );
 	HUE_TYPE GetHue() const;
 
 protected:
@@ -144,12 +144,12 @@ protected:
 
 public:
 	// Timer
-	virtual void SetTimeout( INT64 iDelayInTicks );
+	virtual void SetTimeout( int64 iDelayInTicks );
 	bool IsTimerSet() const;
-	INT64 GetTimerDiff() const;	// return: < 0 = in the past ( m_timeout - CServTime::GetCurrentTime() )
+	int64 GetTimerDiff() const;	// return: < 0 = in the past ( m_timeout - CServTime::GetCurrentTime() )
 	bool IsTimerExpired() const;
-	INT64 GetTimerAdjusted() const;
-	INT64 GetTimerDAdjusted() const;
+	int64 GetTimerAdjusted() const;
+	int64 GetTimerDAdjusted() const;
 
 public:
 	// Location
@@ -475,7 +475,7 @@ enum CTRIG_TYPE
 
 DIR_TYPE GetDirStr( lpctstr pszDir );
 
-inline INT64 CObjBase::GetTimerDiff() const
+inline int64 CObjBase::GetTimerDiff() const
 {
 	// How long till this will expire ?
 	return( g_World.GetTimeDiff( m_timeout ) );

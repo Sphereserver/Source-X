@@ -175,8 +175,8 @@ void CChar::Skill_SetBase( SKILL_TYPE skill, int iValue )
 	if ( IsTrigUsed(TRIGGER_SKILLCHANGE) )
 	{
 		CScriptTriggerArgs args;
-		args.m_iN1 = static_cast<long long>(skill);
-		args.m_iN2 = static_cast<long long>(iValue);
+		args.m_iN1 = static_cast<llong>(skill);
+		args.m_iN2 = static_cast<llong>(iValue);
 		if ( OnTrigger(CTRIG_SkillChange, this, &args) == TRIGRET_RET_TRUE )
 			return;
 
@@ -358,8 +358,8 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 		return;
 	}
 
-	INT64 iChance = pSkillDef->m_AdvRate.GetChancePercent(iSkillLevel);
-	INT64 iSkillMax = Skill_GetMax(skill);	// max advance for this skill.
+	int64 iChance = pSkillDef->m_AdvRate.GetChancePercent(iSkillLevel);
+	int64 iSkillMax = Skill_GetMax(skill);	// max advance for this skill.
 
 	CScriptTriggerArgs pArgs( 0 , iChance, iSkillMax);
 	if ( IsTrigUsed(TRIGGER_SKILLGAIN) )
@@ -485,7 +485,7 @@ bool CChar::Skill_CheckSuccess( SKILL_TYPE skill, int difficulty, bool bUseBellC
 	return( iSuccessChance >= Calc_GetRandVal(1000) );
 }
 
-bool CChar::Skill_UseQuick( SKILL_TYPE skill, INT64 difficulty, bool bAllowGain, bool bUseBellCurve )
+bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain, bool bUseBellCurve )
 {
 	ADDTOCALLSTACK("CChar::Skill_UseQuick");
 	// ARGS:
@@ -499,7 +499,7 @@ bool CChar::Skill_UseQuick( SKILL_TYPE skill, INT64 difficulty, bool bAllowGain,
 	if (g_Cfg.IsSkillFlag(skill, SKF_SCRIPTED))
 		return false;
 
-	INT64 result = Skill_CheckSuccess( skill, static_cast<int>(difficulty), bUseBellCurve );
+	int64 result = Skill_CheckSuccess( skill, static_cast<int>(difficulty), bUseBellCurve );
 	CScriptTriggerArgs pArgs( 0 , difficulty, result);
 	TRIGRET_TYPE ret = TRIGRET_RET_DEFAULT;
 
@@ -605,10 +605,10 @@ void CChar::Skill_SetTimeout()
 		return;
 
 	int iSkillLevel = Skill_GetBase(skill);
-	SetTimeout(static_cast<INT64>(pSkillDef->m_Delay.GetLinear(iSkillLevel)));
+	SetTimeout(static_cast<int64>(pSkillDef->m_Delay.GetLinear(iSkillLevel)));
 }
 
-INT64 CChar::Skill_GetTimeout()
+int64 CChar::Skill_GetTimeout()
 {
 	ADDTOCALLSTACK("CChar::Skill_SetTimeout");
 	SKILL_TYPE skill = Skill_GetActive();
@@ -619,7 +619,7 @@ INT64 CChar::Skill_GetTimeout()
 		return 0;
 
 	int iSkillLevel = Skill_GetBase(skill);
-	return static_cast<INT64>(pSkillDef->m_Delay.GetLinear(iSkillLevel));
+	return static_cast<int64>(pSkillDef->m_Delay.GetLinear(iSkillLevel));
 }
 
 
@@ -2585,7 +2585,7 @@ int CChar::Skill_Fighting( SKTRIG_TYPE stage )
 	if ( stage == SKTRIG_START )
 	{
 		m_atFight.m_War_Swing_State = WAR_SWING_EQUIPPING;
-		INT64 iRemainingDelay = g_World.GetTimeDiff(m_atFight.m_timeNextCombatSwing);
+		int64 iRemainingDelay = g_World.GetTimeDiff(m_atFight.m_timeNextCombatSwing);
 		if ( iRemainingDelay < 0 )
 			iRemainingDelay = 0;
 
@@ -2880,7 +2880,7 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 	CVarDefCont * pDam = GetDefKey("THROWDAM",true);
 	if ( pDam )
 	{
-		INT64 DVal[2];
+		int64 DVal[2];
 		size_t iQty = Str_ParseCmds( const_cast<tchar *>(pDam->GetValStr()), DVal, COUNTOF(DVal));
 		switch(iQty)
 		{
@@ -3026,7 +3026,7 @@ int CChar::Skill_Stroke( bool fResource )
 	// fResource means decreasing m_atResource.m_Stroke_Count instead of m_atCreate.m_Stroke_Count
 	SKILL_TYPE skill = Skill_GetActive();
 	SOUND_TYPE sound = SOUND_NONE;
-	INT64 delay = Skill_GetTimeout();
+	int64 delay = Skill_GetTimeout();
 	ANIM_TYPE anim = ANIM_WALK_UNARM;
 	if ( m_atCreate.m_Stroke_Count > 1 )
 	{

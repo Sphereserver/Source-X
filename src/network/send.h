@@ -1675,7 +1675,7 @@ class PacketPropertyList : public PacketSend
 {
 protected:
 	CGrayUID m_object;
-	long long m_time;
+	llong m_time;
 	dword m_version;
 	int m_entryCount;
 

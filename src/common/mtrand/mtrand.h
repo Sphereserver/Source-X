@@ -142,16 +142,15 @@ public:
 
 	//*******64bit functions*******
 	/* initializes mt[NN] with a seed */
-	void init_genrand64(ullong seed);
+	void init_genrand64(uint64 seed);
 	/* initialize by an array with array-length */
 	/* init_key is the array for initializing keys */
 	/* key_length is its length */
-	void init_by_array64(ullong init_key[], 
-				 ullong key_length);
+	void init_by_array64(uint64 init_key[],	uint64 key_length);
 	/* generates a random number on [0, 2^64-1]-interval */
-	ullong genrand64_int64(void);
+	uint64 genrand64_int64(void);
 	/* generates a random number on [0, 2^63-1]-interval */
-	long long genrand64_int63(void);
+	int64 genrand64_int63(void);
 	/* generates a random number on [0,1]-real-interval */
 	double genrand64_real1(void);
 	/* generates a random number on [0,1)-real-interval */
@@ -485,11 +484,11 @@ inline void MTRand::init_by_array64(ullong init_key[],
 }
 
 /* generates a random number on [0, 2^64-1]-interval */
-inline ullong MTRand::genrand64_int64(void)
+inline uint64 MTRand::genrand64_int64(void)
 {
     int i;
-    ullong x;
-    static ullong mag01[2]={0ULL, MATRIX_A};
+	uint64 x;
+    static uint64 mag01[2]={0ULL, MATRIX_A};
 
     if (mti >= NN) { /* generate NN words at one time */
 
@@ -523,9 +522,9 @@ inline ullong MTRand::genrand64_int64(void)
 }
 
 /* generates a random number on [0, 2^63-1]-interval */
-inline long long MTRand::genrand64_int63(void)
+inline int64 MTRand::genrand64_int63(void)
 {
-    return (long long)(genrand64_int64() >> 1);
+    return (int64)(genrand64_int64() >> 1);
 }
 
 /* generates a random number on [0,1]-real-interval */

@@ -79,7 +79,7 @@ public:
 	void SetServerMode( SERVMODE_TYPE mode );
 
 	void SetExitFlag( int iFlag );
-	void Shutdown( INT64 iMinutes );
+	void Shutdown( int64 iMinutes );
 	bool IsLoading() const
 	{
 		return( m_iModeCode > SERVMODE_Run || m_fResyncPause );
@@ -103,7 +103,7 @@ public:
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
 
 	lpctstr GetStatusString( byte iIndex = 0 ) const;
-	INT64 GetAgeHours() const;
+	int64 GetAgeHours() const;
 
 	bool OnConsoleCmd( CGString & sText, CTextConsole * pSrc );
 

@@ -7,7 +7,7 @@
 
 
 // Add some enemy to my Attacker list
-bool CChar::Attacker_Add( CChar * pChar, INT64 threat )
+bool CChar::Attacker_Add( CChar * pChar, int64 threat )
 {
 	ADDTOCALLSTACK("CChar::Attacker_Add");
 	CGrayUID uid = pChar->GetUID();
@@ -69,7 +69,7 @@ bool CChar::Attacker_Add( CChar * pChar, INT64 threat )
 }
 
 // Retrieves damage done to nID enemy
-INT64 CChar::Attacker_GetDam( int id)
+int64 CChar::Attacker_GetDam( int id)
 {
 	ADDTOCALLSTACK("CChar::Attacker_GetDam");
 	if ( ! m_lastAttackers.size() )
@@ -81,7 +81,7 @@ INT64 CChar::Attacker_GetDam( int id)
 }
 
 // Retrieves the amount of time elapsed since the last hit to nID enemy
-INT64 CChar::Attacker_GetElapsed( int id)
+int64 CChar::Attacker_GetElapsed( int id)
 {
 	ADDTOCALLSTACK("CChar::Attacker_GetElapsed");
 	if ( ! m_lastAttackers.size() )
@@ -95,7 +95,7 @@ INT64 CChar::Attacker_GetElapsed( int id)
 }
 
 // Retrieves Threat value that nID enemy represents against me
-INT64 CChar::Attacker_GetThreat( int id)
+int64 CChar::Attacker_GetThreat( int id)
 {
 	ADDTOCALLSTACK("CChar::Attacker_GetThreat");
 	if ( ! m_lastAttackers.size() )
@@ -107,11 +107,11 @@ INT64 CChar::Attacker_GetThreat( int id)
 }
 
 // Retrieves the character with most Threat
-INT64 CChar::Attacker_GetHighestThreat()
+int64 CChar::Attacker_GetHighestThreat()
 {
 	if ( !m_lastAttackers.size() )
 		return -1;
-	INT64 highThreat = 0;
+	int64 highThreat = 0;
 	for ( uint count = 0; count < m_lastAttackers.size(); count++ )
 	{
 		LastAttackers & refAttacker = m_lastAttackers.at(count);
@@ -124,7 +124,7 @@ INT64 CChar::Attacker_GetHighestThreat()
 // Retrieves the last character that I hit
 CChar * CChar::Attacker_GetLast()
 {
-	INT64 dwLastTime = INT32_MAX, dwCurTime = 0;
+	int64 dwLastTime = INT32_MAX, dwCurTime = 0;
 
 	CChar * retChar = NULL;
 	for (size_t iAttacker = 0; iAttacker < m_lastAttackers.size(); ++iAttacker)
@@ -141,7 +141,7 @@ CChar * CChar::Attacker_GetLast()
 }
 
 // Set elapsed time (refreshing it?)
-void CChar::Attacker_SetElapsed( CChar * pChar, INT64 value)
+void CChar::Attacker_SetElapsed( CChar * pChar, int64 value)
 {
 	ADDTOCALLSTACK("CChar::Attacker_SetElapsed(CChar)");
 
@@ -150,7 +150,7 @@ void CChar::Attacker_SetElapsed( CChar * pChar, INT64 value)
 
 
 // Set elapsed time (refreshing it?)
-void CChar::Attacker_SetElapsed( int pChar, INT64 value)
+void CChar::Attacker_SetElapsed( int pChar, int64 value)
 {
 	ADDTOCALLSTACK("CChar::Attacker_SetElapsed(int)");
 	if (pChar < 0)
@@ -164,7 +164,7 @@ void CChar::Attacker_SetElapsed( int pChar, INT64 value)
 }
 
 // Damaged pChar
-void CChar::Attacker_SetDam( CChar * pChar, INT64 value)
+void CChar::Attacker_SetDam( CChar * pChar, int64 value)
 {
 	ADDTOCALLSTACK("CChar::Attacker_SetDam(CChar)");
 
@@ -173,7 +173,7 @@ void CChar::Attacker_SetDam( CChar * pChar, INT64 value)
 
 
 // Damaged pChar
-void CChar::Attacker_SetDam( int pChar, INT64 value)
+void CChar::Attacker_SetDam( int pChar, int64 value)
 {
 	ADDTOCALLSTACK("CChar::Attacker_SetDam(int)");
 	if (pChar < 0)
@@ -187,7 +187,7 @@ void CChar::Attacker_SetDam( int pChar, INT64 value)
 }
 
 // New Treat level
-void CChar::Attacker_SetThreat(CChar * pChar, INT64 value)
+void CChar::Attacker_SetThreat(CChar * pChar, int64 value)
 {
 	ADDTOCALLSTACK("CChar::Attacker_SetThreat(CChar)");
 
@@ -195,7 +195,7 @@ void CChar::Attacker_SetThreat(CChar * pChar, INT64 value)
 }
 
 // New Treat level
-void CChar::Attacker_SetThreat(int pChar, INT64 value)
+void CChar::Attacker_SetThreat(int pChar, int64 value)
 {
 	ADDTOCALLSTACK("CChar::Attacker_SetThreat(int)");
 	if (pChar < 0)

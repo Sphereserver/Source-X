@@ -192,8 +192,8 @@ struct CValueRangeDef
 {
 	// Simple linearity
 public:
-	INT64 m_iLo;
-	INT64 m_iHi;
+	int64 m_iLo;
+	int64 m_iHi;
 public:
 	void Init()
 	{

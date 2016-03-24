@@ -19,7 +19,7 @@ class MapAddress
 public:
 	uint dwFirstBlock;
 	uint dwLastBlock;
-	INT64 qwAdress;
+	int64 qwAdress;
 };
 
 ullong HashFileName(CGString csFile);

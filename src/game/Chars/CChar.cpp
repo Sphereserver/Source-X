@@ -1964,7 +1964,7 @@ do_default:
 						if( !strnicmp(pszKey, "MAX", 3) )
 						{
 							pszKey += 3;
-							INT64 iMaxDmg = -1, iCurDmg = 0;
+							int64 iMaxDmg = -1, iCurDmg = 0;
 
 							for ( size_t iAttacker = 0; iAttacker < m_lastAttackers.size(); ++iAttacker )
 							{
@@ -1979,7 +1979,7 @@ do_default:
 						else if( !strnicmp(pszKey, "LAST", 4) )
 						{
 							pszKey += 4;
-							INT64 dwLastTime = INT32_MAX, dwCurTime = 0;
+							int64 dwLastTime = INT32_MAX, dwCurTime = 0;
 
 							for ( size_t iAttacker = 0; iAttacker < m_lastAttackers.size(); ++iAttacker )
 							{
@@ -3111,7 +3111,7 @@ do_default:
 			} return false;
 		case CHC_MEMORY:
 			{
-				INT64 piCmd[2];
+				int64 piCmd[2];
 				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, COUNTOF(piCmd) );
 				if ( iArgQty < 2 )
 					return( false );
@@ -3449,7 +3449,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_ANIM:
 			// ANIM, ANIM_TYPE action, bool fBackward = false, byte iFrameDelay = 1
 			{
-				INT64 Arg_piCmd[3];		// Maximum parameters in one line
+				int64 Arg_piCmd[3];		// Maximum parameters in one line
 				size_t Arg_Qty = Str_ParseCmds(s.GetArgRaw(), Arg_piCmd, COUNTOF(Arg_piCmd));
 				return UpdateAnimate(static_cast<ANIM_TYPE>(Arg_piCmd[0]), true, false,
 					(Arg_Qty > 1) ? static_cast<uchar>(Arg_piCmd[1]) : 1,
@@ -3525,7 +3525,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				ASSERT( pItem);
 				if ( s.HasArgs())	// how long to last ?
 				{
-					INT64 iTimer = s.GetArgLLVal();
+					int64 iTimer = s.GetArgLLVal();
 					if ( iTimer > 0 )
 						pItem->SetTimeout(iTimer);
 
@@ -3726,7 +3726,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		{		
 			int iSkill = s.GetArgVal();
 			int iTicks = iSkill / 50; 
-			INT64		piCmd[2];
+			int64		piCmd[2];
 			if (Str_ParseCmds(s.GetArgRaw(), piCmd, COUNTOF(piCmd)) > 1)
 				iTicks = static_cast<int>(piCmd[1]);
 
@@ -4057,7 +4057,7 @@ void CChar::ChangeExperience(int delta, CChar *pCharDead)
 	if (!g_Cfg.m_iExperienceMode)
 		return;
 
-	static UINT const keyWords[] =
+	static uint const keyWords[] =
 	{
 		DEFMSG_MSG_EXP_CHANGE_1,		// 0
 		DEFMSG_MSG_EXP_CHANGE_2,

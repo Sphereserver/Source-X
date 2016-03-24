@@ -352,7 +352,7 @@ void CChar::NPC_OnNoticeSnoop( CChar * pCharThief, CChar * pCharMark )
 		return;
 
 	// start making them angry at you.
-	static UINT const sm_szTextSnoop[] =
+	static uint const sm_szTextSnoop[] =
 	{
 		DEFMSG_NPC_GENERIC_SNOOPED_1,
 		DEFMSG_NPC_GENERIC_SNOOPED_2,
@@ -570,10 +570,10 @@ int CChar::NPC_WalkToPoint( bool fRun )
 
 	EXC_SET("Speed counting");
 	// How fast can they move.
-	INT64 iTickNext;
+	int64 iTickNext;
 
 	// TAG.OVERRIDE.MOVERATE
-	INT64 tTick;
+	int64 tTick;
 	CVarDefCont * pValue = GetKey("OVERRIDE.MOVERATE", true);
 	if (pValue)
 		tTick = pValue->GetValNum();	//Taking value from tag.override.moverate
@@ -611,7 +611,7 @@ bool CChar::NPC_LookAtCharGuard( CChar * pChar, bool bFromTrigger )
 	if ( !pChar || pChar->IsStatFlag(STATF_INVUL|STATF_DEAD) || pChar->IsPriv(PRIV_JAILED) || !bFromTrigger )	//|| !pChar->Noto_IsCriminal()
 		return false;
 
-	static UINT const sm_szSpeakGuardJeer[] =
+	static uint const sm_szSpeakGuardJeer[] =
 	{
 		DEFMSG_NPC_GUARD_THREAT_1,
 		DEFMSG_NPC_GUARD_THREAT_2,
@@ -633,7 +633,7 @@ bool CChar::NPC_LookAtCharGuard( CChar * pChar, bool bFromTrigger )
 		return false;
 	}
 
-	static UINT const sm_szSpeakGuardStrike[] =
+	static uint const sm_szSpeakGuardStrike[] =
 	{
 		DEFMSG_NPC_GUARD_STRIKE_1,
 		DEFMSG_NPC_GUARD_STRIKE_2,
@@ -2146,7 +2146,7 @@ void CChar::NPC_OnTickAction()
 	EXC_SET("timer expired");
 	if ( IsTimerExpired() && IsStatFlag(STATF_War) && !(IsSetCombatFlags(COMBAT_PREHIT) && m_atFight.m_War_Swing_State == WAR_SWING_SWINGING))	// Was not reset? PREHIT forces timer to be 0, so it get's defaulted here breaking NPC's speed when PREHIT is enabled. Must not check in this case.
 	{
-		INT64 timeout	= maximum((150-Stat_GetAdjusted(STAT_DEX))/2, 0);
+		int64 timeout	= maximum((150-Stat_GetAdjusted(STAT_DEX))/2, 0);
 		timeout = Calc_GetRandLLVal2(timeout/2, timeout);
 		// default next brain/move tick
 		SetTimeout( TICK_PER_SEC + timeout * TICK_PER_SEC / 10 );

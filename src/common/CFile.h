@@ -89,7 +89,7 @@ public:
 	* @param e TODOC.
 	* @return true if file is open, false otherwise.
 	*/
-	virtual bool Open( lpctstr pszName = NULL, UINT uMode = OF_READ | OF_SHARE_DENY_NONE, CFileException * e = NULL );
+	virtual bool Open( lpctstr pszName = NULL, uint uMode = OF_READ | OF_SHARE_DENY_NONE, CFileException * e = NULL );
 	/**
 	* @brief Closes the file if is open.
 	*/
@@ -119,7 +119,7 @@ public:
 	* @param iOrigin origin (current position or init of the file).
 	* @return position where the position indicator is set on success, -1 on error.
 	*/
-	virtual dword Seek( int lOffset = 0, UINT iOrigin = SEEK_SET );
+	virtual dword Seek( int lOffset = 0, uint iOrigin = SEEK_SET );
 	/**
 	* @brief Reads data from the file.
 	* @param pData buffer where store the readed data.
@@ -163,7 +163,7 @@ private:
 class CGFile : public CFile
 {
 private:
-	UINT m_uMode;	///< MMSYSTEM may use 32 bit flags.
+	uint m_uMode;	///< MMSYSTEM may use 32 bit flags.
 public:
 	static const char *m_sClassName;
 private:
@@ -218,12 +218,12 @@ public:
 	 * Get rid of OF_NONCRIT type flags
 	 * @return mode flags.
 	*/
-	UINT GetMode() const { return( m_uMode & 0x0FFFFFFF ); }
+	uint GetMode() const { return( m_uMode & 0x0FFFFFFF ); }
 	/**
 	* @brief Get open mode (full).
 	* @return full mode flags.
 	*/
-	UINT GetFullMode() const { return m_uMode; }
+	uint GetFullMode() const { return m_uMode; }
 	/**
 	* @brief Check if file is open for write.
 	* @return true if file is open for write, false otherwise.
@@ -242,7 +242,7 @@ public:
 	* @param pExtra TODOC.
 	* @return true if file is open, false otherwise.
 	*/
-	virtual bool Open( lpctstr pszName = NULL, UINT uMode = OF_READ | OF_SHARE_DENY_NONE, void * pExtra = NULL );
+	virtual bool Open( lpctstr pszName = NULL, uint uMode = OF_READ | OF_SHARE_DENY_NONE, void * pExtra = NULL );
 	/**
 	* @brief Closes the file if is open.
 	*/
@@ -316,7 +316,7 @@ public:
 	* @param origin origin (current position or init of the file).
 	* @return position where the position indicator is set on success, 0 on error.
 	*/
-	virtual dword Seek( int offset = 0, UINT origin = SEEK_SET );
+	virtual dword Seek( int offset = 0, uint origin = SEEK_SET );
 	/**
 	* @brief Write changes to disk.
 	*/

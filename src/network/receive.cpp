@@ -1130,11 +1130,11 @@ bool PacketSecureTradeReq::onReceive(NetState* net)
 				return true;
 			}
 
-			INT64 iWaitTime = container->m_itEqTradeWindow.m_iWaitTime;
-			INT64 iTimestamp = g_World.GetCurrentTime().GetTimeRaw();
+			int64 iWaitTime = container->m_itEqTradeWindow.m_iWaitTime;
+			int64 iTimestamp = g_World.GetCurrentTime().GetTimeRaw();
 			if ( iWaitTime > iTimestamp )
 			{
-				INT64 iSeconds = (iWaitTime - iTimestamp) / TICK_PER_SEC;
+				int64 iSeconds = (iWaitTime - iTimestamp) / TICK_PER_SEC;
 				client->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_TRADE_WAIT), iSeconds);
 				return true;
 			}
@@ -4273,8 +4273,8 @@ bool PacketMovementReqNew::onReceive(NetState* net)
 	byte steps = readByte();
 	while ( steps )
 	{
-		skip(8);	//INT64 iTime1 = readInt64();
-		skip(8);	//INT64 iTime2 = readInt64();
+		skip(8);	//int64 iTime1 = readInt64();
+		skip(8);	//int64 iTime2 = readInt64();
 		byte sequence = readByte();
 		byte direction = readByte();
 		dword mode = readInt32();	// 1 = walk, 2 = run
@@ -4316,7 +4316,7 @@ bool PacketTimeSyncRequest::onReceive(NetState* net)
 	CClient* client = net->getClient();
 	ASSERT(client);
 
-	//INT64 iTime = readInt64();	// what we must do with this value?
+	//int64 iTime = readInt64();	// what we must do with this value?
 	new PacketTimeSyncResponse(client);
 	return true;
 }

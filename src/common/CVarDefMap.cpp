@@ -61,7 +61,7 @@ void CVarDefCont::SetKey( lpctstr pszKey )
 *
 ***************************************************************************/
 
-CVarDefContNum::CVarDefContNum( lpctstr pszKey, INT64 iVal ) : CVarDefCont( pszKey ), m_iVal( iVal )
+CVarDefContNum::CVarDefContNum( lpctstr pszKey, int64 iVal ) : CVarDefCont( pszKey ), m_iVal( iVal )
 {
 }
 
@@ -73,12 +73,12 @@ CVarDefContNum::~CVarDefContNum()
 {
 }
 
-INT64 CVarDefContNum::GetValNum() const 
+int64 CVarDefContNum::GetValNum() const 
 { 
 	return( m_iVal ); 
 }
 
-void CVarDefContNum::SetValNum( INT64 iVal ) 
+void CVarDefContNum::SetValNum( int64 iVal ) 
 { 
 	m_iVal = iVal;
 }
@@ -134,7 +134,7 @@ lpctstr CVarDefContStr::GetValStr() const
 	return( m_sVal ); 
 }
 
-inline INT64 CVarDefContStr::GetValNum() const
+inline int64 CVarDefContStr::GetValNum() const
 {
 	lpctstr pszStr = m_sVal;
 	return( Exp_GetVal(pszStr) );
@@ -189,7 +189,7 @@ lpctstr CVarDefMap::CVarDefContTest::GetValStr() const
 	return NULL; 
 }
 	
-INT64 CVarDefMap::CVarDefContTest::GetValNum() const 
+int64 CVarDefMap::CVarDefContTest::GetValNum() const 
 { 
 	return -1; 
 }
@@ -250,7 +250,7 @@ lpctstr CVarDefMap::FindValStr( lpctstr pVal ) const
 	return( NULL );
 }
 
-lpctstr CVarDefMap::FindValNum( INT64 iVal ) const
+lpctstr CVarDefMap::FindValNum( int64 iVal ) const
 {
 	ADDTOCALLSTACK("CVarDefMap::FindValNum");
 	for ( DefSet::const_iterator i = m_Container.begin(); i != m_Container.end(); ++i )
@@ -469,7 +469,7 @@ size_t CVarDefMap::GetCount() const
 	return m_Container.size();
 }
 
-int CVarDefMap::SetNumNew( lpctstr pszName, INT64 iVal )
+int CVarDefMap::SetNumNew( lpctstr pszName, int64 iVal )
 {
 	ADDTOCALLSTACK("CVarDefMap::SetNumNew");
 	CVarDefCont * pVarNum = new CVarDefContNum( pszName, iVal );
@@ -483,14 +483,14 @@ int CVarDefMap::SetNumNew( lpctstr pszName, INT64 iVal )
 		return -1;
 }
 
-int CVarDefMap::SetNumOverride( lpctstr pszKey, INT64 iVal )
+int CVarDefMap::SetNumOverride( lpctstr pszKey, int64 iVal )
 {
 	ADDTOCALLSTACK("CVarDefMap::SetNumOverride");
 	DeleteAtKey(pszKey);
 	return SetNumNew(pszKey,iVal);
 }
 
-int CVarDefMap::SetNum( lpctstr pszName, INT64 iVal, bool fZero )
+int CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fZero )
 {
 	ADDTOCALLSTACK("CVarDefMap::SetNum");
 	ASSERT(pszName);
@@ -621,7 +621,7 @@ CVarDefCont * CVarDefMap::GetKey( lpctstr pszKey ) const
 	return( pReturn );
 }
 
-INT64 CVarDefMap::GetKeyNum( lpctstr pszKey, bool fZero  ) const
+int64 CVarDefMap::GetKeyNum( lpctstr pszKey, bool fZero  ) const
 {
 	ADDTOCALLSTACK("CVarDefMap::GetKeyNum");
 	CVarDefCont * pVar = GetKey(pszKey);

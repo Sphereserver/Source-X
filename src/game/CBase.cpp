@@ -499,7 +499,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 			return true;
 		case OBC_ARMOR:
 			{
-				INT64 piVal[2];
+				int64 piVal[2];
 				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, COUNTOF(piVal));
 				m_defenseBase = static_cast<uchar>(piVal[0]);
 				if ( iQty > 1 )
@@ -514,7 +514,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 			return( true );
 		case OBC_DAM:
 			{
-				INT64 piVal[2];
+				int64 piVal[2];
 				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, COUNTOF(piVal));
 				m_attackBase = static_cast<uchar>(piVal[0]);
 				if ( iQty > 1 )
@@ -546,11 +546,11 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 			return( true );
 		case OBC_RANGE:
 			{
-				INT64 piVal[2];
+				int64 piVal[2];
 				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, COUNTOF(piVal));
 				if ( iQty > 1 )
 				{
-					INT64 iRange = ((piVal[0] & 0xff) << 8) & 0xff00;
+					int64 iRange = ((piVal[0] & 0xff) << 8) & 0xff00;
 					iRange |= (piVal[1] & 0xff);
 					SetDefNum(s.GetKey(),iRange, false);
 					//m_range	 = ((piVal[0] & 0xff) << 8) & 0xff00;

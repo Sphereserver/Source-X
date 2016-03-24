@@ -16,16 +16,16 @@ class CServTime
 	
 public:
 	static const char *m_sClassName;
-	INT64 m_lPrivateTime;
+	int64 m_lPrivateTime;
 public:
-	INT64 GetTimeRaw() const;
-	INT64 GetTimeDiff( const CServTime & time ) const;
+	int64 GetTimeRaw() const;
+	int64 GetTimeDiff( const CServTime & time ) const;
 	void Init();
-	void InitTime( INT64 lTimeBase );
+	void InitTime( int64 lTimeBase );
 	bool IsTimeValid() const;
-	CServTime operator+( INT64 iTimeDiff ) const;
-	CServTime operator-( INT64 iTimeDiff ) const;
-	INT64 operator-( CServTime time ) const;
+	CServTime operator+( int64 iTimeDiff ) const;
+	CServTime operator-( int64 iTimeDiff ) const;
+	int64 operator-( CServTime time ) const;
 	bool operator==(CServTime time) const;
 	bool operator!=(CServTime time) const;
 	bool operator<(CServTime time) const;

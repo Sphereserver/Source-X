@@ -20,7 +20,7 @@ bool CValueRangeDef::Load( tchar * pszDef )
 {
 	ADDTOCALLSTACK("CValueRangeDef::Load");
 	// Typically in {lo# hi#} format. is hi#,lo# is ok too ???
-	INT64 piVal[2];
+	int64 piVal[2];
 	int iQty = g_Exp.GetRangeVals( pszDef, piVal, COUNTOF(piVal));
 	if ( iQty< 0 ) 
 		return(false);
@@ -67,7 +67,7 @@ bool CValueCurveDef::Load( tchar * pszDef )
 {
 	ADDTOCALLSTACK("CValueCurveDef::Load");
 	// ADV_RATE = Chance at 0, to 100.0
-	INT64 Arg_piCmd[101];
+	int64 Arg_piCmd[101];
 	size_t iQty = Str_ParseCmds( pszDef, Arg_piCmd, COUNTOF(Arg_piCmd));
 	m_aiValues.SetCount( iQty );
 	if ( iQty == 0 )

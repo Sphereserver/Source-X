@@ -43,7 +43,7 @@ CClient * CGMPage::FindGMHandler() const
 	return( m_pGMClient );
 }
 
-INT64 CGMPage::GetAge() const
+int64 CGMPage::GetAge() const
 {
 	ADDTOCALLSTACK("CGMPage::GetAge");
 	// How old in seconds.

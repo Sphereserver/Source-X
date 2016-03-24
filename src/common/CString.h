@@ -147,11 +147,11 @@ public:
 	*/
 	void FormatVal(int iVal);
 	/**
-	* @brief Print a long long value into the string.
+	* @brief Print a llong value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	void FormatLLVal(long long iVal);
+	void FormatLLVal(llong iVal);
 	/**
 	* @brief Print a ullong value into the string.
 	* @see Format()

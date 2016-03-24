@@ -287,7 +287,7 @@ VERFILE_TYPE CGrayInstall::OpenFiles( dword dwMask )
 									m_Maps[index].Seek( sizeof(dword)*3, SEEK_SET );
 									m_Maps[index].Read( &dwHashLo, sizeof(dword));
 									m_Maps[index].Read( &dwHashHi, sizeof(dword));
-									qwUOPPtr = ((INT64)dwHashHi << 32) + dwHashLo;
+									qwUOPPtr = ((int64)dwHashHi << 32) + dwHashLo;
 									m_Maps[index].Seek( sizeof(dword), SEEK_CUR );
 									m_Maps[index].Read( &dwTotalFiles, sizeof(dword));
 									m_Maps[index].Seek( static_cast<int>(qwUOPPtr), SEEK_SET );
@@ -298,7 +298,7 @@ VERFILE_TYPE CGrayInstall::OpenFiles( dword dwMask )
 										m_Maps[index].Read( &dwFilesInBlock, sizeof(dword));
 										m_Maps[index].Read( &dwHashLo, sizeof(dword));
 										m_Maps[index].Read( &dwHashHi, sizeof(dword));
-										qwUOPPtr = ((INT64)dwHashHi << 32) + dwHashLo;
+										qwUOPPtr = ((int64)dwHashHi << 32) + dwHashLo;
 
 										while ((dwFilesInBlock > 0)&&(dwTotalFiles > 0))
 										{
@@ -311,12 +311,12 @@ VERFILE_TYPE CGrayInstall::OpenFiles( dword dwMask )
 											m_Maps[index].Read( &dwCompressedSize, sizeof(dword));
 
 											MapAddress pMapAddress;
-											pMapAddress.qwAdress = (((INT64)dwHashHi << 32) + dwHashLo) + dwHeaderLenght;
+											pMapAddress.qwAdress = (((int64)dwHashHi << 32) + dwHashLo) + dwHeaderLenght;
 
 											m_Maps[index].Seek( sizeof(dword), SEEK_CUR );
 											m_Maps[index].Read( &dwHashLo, sizeof(dword));
 											m_Maps[index].Read( &dwHashHi, sizeof(dword));
-											ullong qwHash = ((INT64)dwHashHi << 32) + dwHashLo;
+											ullong qwHash = ((int64)dwHashHi << 32) + dwHashLo;
 											m_Maps[index].Seek( sizeof(dword)+sizeof(word), SEEK_CUR );
 					
 											for (uint x = 0; x < dwLoop; x++)
@@ -539,7 +539,7 @@ bool CGrayInstall::ReadMulData(VERFILE_TYPE filedata, const CUOIndexRec & Index,
 //UOP Filename Hash function
 ullong HashFileName(CGString csFile)
 {
-	UINT eax, ecx, edx, ebx, esi, edi;
+	uint eax, ecx, edx, ebx, esi, edi;
 
 	eax = ecx = edx = 0;
 	ebx = edi = esi = (INT32) csFile.GetLength() + 0xDEADBEEF;
@@ -605,8 +605,8 @@ ullong HashFileName(CGString csFile)
 		edi = ( edi ^ edx ) - ( ( edx >> 18 ) ^ ( edx << 14 ) );
 		eax = ( esi ^ edi ) - ( ( edi >> 8 ) ^ ( edi << 24 ) );
 
-		return ( (INT64) edi << 32 ) | eax;
+		return ( (int64) edi << 32 ) | eax;
 	}
 
-	return ( (INT64) esi << 32 ) | eax;
+	return ( (int64) esi << 32 ) | eax;
 }

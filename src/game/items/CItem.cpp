@@ -1239,7 +1239,7 @@ bool CItem::Stack( CItem * pItem )
 	return true;
 }
 
-INT64 CItem::GetDecayTime() const
+int64 CItem::GetDecayTime() const
 {
 	ADDTOCALLSTACK("CItem::GetDecayTime");
 	// Return time in seconds that it will take to decay this item.
@@ -1266,7 +1266,7 @@ INT64 CItem::GetDecayTime() const
 	return g_Cfg.m_iDecay_Item;
 }
 
-void CItem::SetTimeout( INT64 iDelay )
+void CItem::SetTimeout( int64 iDelay )
 {
 	ADDTOCALLSTACK("CItem::SetTimeout");
 	// PURPOSE:
@@ -1302,13 +1302,13 @@ bool CItem::MoveToUpdate(CPointMap pt, bool bForceFix)
 	return bReturn;
 }
 
-bool CItem::MoveToDecay(const CPointMap & pt, INT64 iDecayTime, bool bForceFix)
+bool CItem::MoveToDecay(const CPointMap & pt, int64 iDecayTime, bool bForceFix)
 {
 	SetDecayTime( iDecayTime );
 	return MoveToUpdate( pt, bForceFix);
 }
 
-void CItem::SetDecayTime( INT64 iTime )
+void CItem::SetDecayTime( int64 iTime )
 {
 	ADDTOCALLSTACK("CItem::SetDecayTime");
 	// iTime = 0 = set default. (TICK_PER_SEC of a sec)
@@ -1438,7 +1438,7 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 
 	MoveTo(ptNewPlace);
 
-	long long iDecayTime = GetDecayTime();
+	llong iDecayTime = GetDecayTime();
 	if ( iDecayTime > 0 )
 	{
 		const CRegionBase * pRegion = ptNewPlace.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA|REGION_TYPE_ROOM);
@@ -2694,7 +2694,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 
 		case IC_USESMAX:
 		{
-			INT64 amount = s.GetArgLLVal();
+			int64 amount = s.GetArgLLVal();
 			SetDefNum(s.GetKey(), amount, false);
 			CVarDefCont * pVar = GetDefKey("Usescur", true);
 			if (!pVar)
@@ -5065,7 +5065,7 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 	if ( iDmg <= 0 )
 		return( 0 );
 
-	INT64 iSelfRepair = GetDefNum("SELFREPAIR", true, true);
+	int64 iSelfRepair = GetDefNum("SELFREPAIR", true, true);
 	if ( iSelfRepair > Calc_GetRandVal(10) )
 	{
 		m_itArmor.m_Hits_Cur += 2;
@@ -5372,7 +5372,7 @@ bool CItem::OnTick()
 				{
 					SetID(static_cast<ITEMID_TYPE>(Calc_GetRandVal2(ITEMID_SKELETON_1, ITEMID_SKELETON_9)));
 					SetHue(static_cast<HUE_TYPE>(HUE_DEFAULT));
-					SetTimeout(static_cast<long long>(g_Cfg.m_iDecay_CorpsePlayer));
+					SetTimeout(static_cast<llong>(g_Cfg.m_iDecay_CorpsePlayer));
 					m_itCorpse.m_carved = 1;	// the corpse can't be carved anymore
 					m_uidLink.InitUID();		// and also it's not linked to the char anymore (others players can loot it without get flagged criminal)
 					RemoveFromView();

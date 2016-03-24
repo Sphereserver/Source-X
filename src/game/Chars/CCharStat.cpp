@@ -340,7 +340,7 @@ short CChar::Stat_GetLimit( STAT_TYPE i ) const
 	}
 }
 
-bool CChar::Stats_Regen(INT64 iTimeDiff)
+bool CChar::Stats_Regen(int64 iTimeDiff)
 {
 	ADDTOCALLSTACK("CChar::Stats_Regen");
 	// Calling regens in all stats and checking REGEN%s/REGEN%sVAL where %s is hits/stam... to check values/delays

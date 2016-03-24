@@ -46,7 +46,7 @@ struct CElementDef
 {
 	static const int sm_Lengths[ELEM_QTY];
 	ELEM_TYPE m_type;
-	UINT	m_offset;	// The offset into the class instance for this item.
+	uint	m_offset;	// The offset into the class instance for this item.
 	// ELEM_STRING = max size.
 	// ELEM_MASK_WORD etc. = Extra masking info if needed. 
 	dword   m_extra;

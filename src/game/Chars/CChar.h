@@ -86,10 +86,10 @@ private:
 
 public:
 	struct LastAttackers {
-		INT64	elapsed;
+		int64	elapsed;
 		dword	charUID;
-		INT64	amountDone;
-		INT64	threat;
+		int64	amountDone;
+		int64	threat;
 		bool	ignore;
 	};
 	std::vector<LastAttackers> m_lastAttackers;
@@ -97,7 +97,7 @@ public:
 	struct NotoSaves {
 		dword		charUID;	// Character viewing me
 		NOTO_TYPE	color;		// Color sent on movement packets
-		INT64		time;		// Update timer
+		int64		time;		// Update timer
 		NOTO_TYPE	value;		// Notoriety type
 	};
 	std::vector<NotoSaves> m_notoSaves;
@@ -135,7 +135,7 @@ public:
 	DIR_TYPE m_dirFace;			// facing this dir.
 	CGString m_sTitle;			// Special title such as "the guard" (replaces the normal skill title).
 	CPointMap m_ptHome;			// What is our "home" region. (towns and bounding of NPC's)
-	INT64 m_virtualGold;		// Virtual gold used by TOL clients
+	int64 m_virtualGold;		// Virtual gold used by TOL clients
 
 	// Speech
 	FONT_TYPE m_fonttype;		// speech font to use (client send this to server, but it's not used)
@@ -384,7 +384,7 @@ public:
 	short	Stat_GetSum() const;
 	short	Stat_GetLimit( STAT_TYPE i ) const;
 	bool Stat_Decrease( STAT_TYPE stat, SKILL_TYPE skill = (SKILL_TYPE)NULL);
-	bool Stats_Regen(INT64 iTimeDiff);
+	bool Stats_Regen(int64 iTimeDiff);
 	ushort Stats_GetRegenVal(STAT_TYPE iStat, bool bGetTicks);
 	SKILLLOCK_TYPE Stat_GetLock(STAT_TYPE stat);
 	void Stat_SetLock(STAT_TYPE stat, SKILLLOCK_TYPE state);
@@ -707,7 +707,7 @@ public:
 	* @param id the entry on the list.
 	* @return time in seconds.
 	*/
-	INT64 NotoSave_GetTime( int id );
+	int64 NotoSave_GetTime( int id );
 
 	/**
 	* @brief Clearing all notoriety data
@@ -792,7 +792,7 @@ public:
 	bool Skill_CanUse( SKILL_TYPE skill );
 
 	void Skill_SetBase( SKILL_TYPE skill, int iValue );
-	bool Skill_UseQuick( SKILL_TYPE skill, INT64 difficulty, bool bAllowGain = true, bool bUseBellCurve = true );
+	bool Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain = true, bool bUseBellCurve = true );
 
 	bool Skill_CheckSuccess( SKILL_TYPE skill, int difficulty, bool bUseBellCurve = true ) const;
 	bool Skill_Wait( SKILL_TYPE skilltry );
@@ -829,7 +829,7 @@ private:
 	int Skill_NaturalResource_Setup( CItem * pResBit );
 	CItem * Skill_NaturalResource_Create( CItem * pResBit, SKILL_TYPE skill );
 	void Skill_SetTimeout();
-	INT64 Skill_GetTimeout();
+	int64 Skill_GetTimeout();
 
 	int	Skill_Scripted( SKTRIG_TYPE stage );
 
@@ -960,28 +960,28 @@ public:
 	};
 
 	int	 Attacker() { return static_cast<int>(m_lastAttackers.size()); }
-	bool Attacker_Add(CChar * pChar, INT64 threat = 0);
+	bool Attacker_Add(CChar * pChar, int64 threat = 0);
 	CChar * Attacker_GetLast();
 	bool Attacker_Delete(CChar * pChar, bool bForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
 	bool Attacker_Delete(int id, bool bForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
 	void Attacker_RemoveChar();
 	void Attacker_Clear();
 	void Attacker_CheckTimeout();
-	INT64 Attacker_GetDam( int attacker );
-	void  Attacker_SetDam( CChar * pChar, INT64 value );
-	void  Attacker_SetDam( int attacker, INT64 value );
+	int64 Attacker_GetDam( int attacker );
+	void  Attacker_SetDam( CChar * pChar, int64 value );
+	void  Attacker_SetDam( int attacker, int64 value );
 	CChar * Attacker_GetUID( int attacker);
-	INT64  Attacker_GetElapsed( int attacker );
-	void  Attacker_SetElapsed( CChar * pChar, INT64 value );
-	void  Attacker_SetElapsed( int pChar, INT64 value );
-	INT64  Attacker_GetThreat( int attacker );
-	void  Attacker_SetThreat( CChar * pChar, INT64 value );
-	void  Attacker_SetThreat(int pChar, INT64 value);
+	int64  Attacker_GetElapsed( int attacker );
+	void  Attacker_SetElapsed( CChar * pChar, int64 value );
+	void  Attacker_SetElapsed( int pChar, int64 value );
+	int64  Attacker_GetThreat( int attacker );
+	void  Attacker_SetThreat( CChar * pChar, int64 value );
+	void  Attacker_SetThreat(int pChar, int64 value);
 	bool Attacker_GetIgnore(int pChar);
 	bool Attacker_GetIgnore(CChar * pChar);
 	void Attacker_SetIgnore(int pChar, bool fIgnore);
 	void Attacker_SetIgnore(CChar * pChar, bool fIgnore);
-	INT64 Attacker_GetHighestThreat();
+	int64 Attacker_GetHighestThreat();
 	int  Attacker_GetID( CChar * pChar );
 	int  Attacker_GetID( CGrayUID pChar );
 

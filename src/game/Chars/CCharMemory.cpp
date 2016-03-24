@@ -117,7 +117,7 @@ bool CChar::Memory_UpdateFlags( CItemMemory * pMemory )
 		return false;
 	}
 
-	INT64 iCheckTime;
+	int64 iCheckTime;
 	if ( wMemTypes & MEMORY_IPET )
 	{
 		StatFlag_Set( STATF_Pet );
@@ -409,11 +409,11 @@ bool CChar::Memory_Fight_OnTick( CItemMemory * pMemory )
 	if ( pTarg == NULL )
 		return( false );	// They are gone for some reason ?
 
-	INT64 elapsed = Attacker_GetElapsed(Attacker_GetID(pTarg));
+	int64 elapsed = Attacker_GetElapsed(Attacker_GetID(pTarg));
 	// Attacker.Elapsed = -1 means no combat end for this attacker.
 	// g_Cfg.m_iAttackerTimeout = 0 means attackers doesnt decay. (but cleared when the attacker is killed or the char dies)
 
-	if ( GetDist(pTarg) > UO_MAP_VIEW_RADAR || ( g_Cfg.m_iAttackerTimeout != 0 && elapsed > static_cast<INT64>(g_Cfg.m_iAttackerTimeout) && elapsed >= 0 ) )
+	if ( GetDist(pTarg) > UO_MAP_VIEW_RADAR || ( g_Cfg.m_iAttackerTimeout != 0 && elapsed > static_cast<int64>(g_Cfg.m_iAttackerTimeout) && elapsed >= 0 ) )
 	{
 		Memory_Fight_Retreat( pTarg, pMemory );
 	clearit:
@@ -421,7 +421,7 @@ bool CChar::Memory_Fight_OnTick( CItemMemory * pMemory )
 		return( true );
 	}
 
-	INT64 iTimeDiff = - g_World.GetTimeDiff( pMemory->GetTimeStamp() );
+	int64 iTimeDiff = - g_World.GetTimeDiff( pMemory->GetTimeStamp() );
 
 	// If am fully healthy then it's not much of a fight.
 	if ( iTimeDiff > 60*60*TICK_PER_SEC )

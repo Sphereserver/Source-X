@@ -3111,7 +3111,7 @@ void NetworkInput::processData()
 			{
 				// check for timeout
 				EXC_SET("check frozen");
-				INT64 iLastEventDiff = -g_World.GetTimeDiff( client->m_timeLastEvent );
+				int64 iLastEventDiff = -g_World.GetTimeDiff( client->m_timeLastEvent );
 				if ( g_Cfg.m_iDeadSocketTime > 0 && iLastEventDiff > g_Cfg.m_iDeadSocketTime )
 				{
 					g_Log.Event(LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Frozen client disconnected.\n", state->id());

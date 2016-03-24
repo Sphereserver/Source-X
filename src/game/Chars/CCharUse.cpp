@@ -62,7 +62,7 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 	size_t iItems = 0;
 	for ( size_t i = 0; i < pCorpseDef->m_BaseResources.GetCount(); i++ )
 	{
-		long long iQty = pCorpseDef->m_BaseResources[i].GetResQty();
+		llong iQty = pCorpseDef->m_BaseResources[i].GetResQty();
 		RESOURCE_ID rid = pCorpseDef->m_BaseResources[i].GetResourceID();
 		if ( rid.GetResType() != RES_ITEMDEF )
 			continue;

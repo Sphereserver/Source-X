@@ -6,7 +6,7 @@
 #include "CException.h"
 
 #ifdef _WIN32
-	int CGrayError::GetSystemErrorMessage( dword dwError, lptstr lpszError, UINT nMaxError ) // static
+	int CGrayError::GetSystemErrorMessage( dword dwError, lptstr lpszError, uint nMaxError ) // static
 	{
 		//	PURPOSE:  copies error message text to a string
 		//
@@ -36,7 +36,7 @@
 	}
 #endif
 
-bool CGrayError::GetErrorMessage( lptstr lpszError, UINT nMaxError,	UINT * pnHelpContext ) const
+bool CGrayError::GetErrorMessage( lptstr lpszError, uint nMaxError,	uint * pnHelpContext ) const
 {
 	UNREFERENCED_PARAMETER(nMaxError);
 	UNREFERENCED_PARAMETER(pnHelpContext);
@@ -97,7 +97,7 @@ CGrayAssert::~CGrayAssert()
 {
 }
 
-bool CGrayAssert::GetErrorMessage(lptstr lpszError, UINT nMaxError, UINT * pnHelpContext) const
+bool CGrayAssert::GetErrorMessage(lptstr lpszError, uint nMaxError, uint * pnHelpContext) const
 {
 	UNREFERENCED_PARAMETER(nMaxError);
 	UNREFERENCED_PARAMETER(pnHelpContext);
@@ -132,7 +132,7 @@ CGrayException::~CGrayException()
 {
 }
 
-bool CGrayException::GetErrorMessage(lptstr lpszError, UINT nMaxError, UINT * pnHelpContext) const
+bool CGrayException::GetErrorMessage(lptstr lpszError, uint nMaxError, uint * pnHelpContext) const
 {
 	UNREFERENCED_PARAMETER(nMaxError);
 	UNREFERENCED_PARAMETER(pnHelpContext);

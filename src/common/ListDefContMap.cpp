@@ -43,7 +43,7 @@ void CListDefContElem::SetKey( lpctstr pszKey )
 *
 *
 ***************************************************************************/
-CListDefContNum::CListDefContNum( lpctstr pszKey, INT64 iVal ) : CListDefContElem( pszKey ), m_iVal( iVal )
+CListDefContNum::CListDefContNum( lpctstr pszKey, int64 iVal ) : CListDefContElem( pszKey ), m_iVal( iVal )
 {
 }
 
@@ -55,12 +55,12 @@ CListDefContNum::~CListDefContNum()
 {
 }
 
-INT64 CListDefContNum::GetValNum() const 
+int64 CListDefContNum::GetValNum() const 
 { 
 	return( m_iVal ); 
 }
 
-void CListDefContNum::SetValNum( INT64 iVal ) 
+void CListDefContNum::SetValNum( int64 iVal ) 
 { 
 	m_iVal = iVal;
 }
@@ -115,7 +115,7 @@ lpctstr CListDefContStr::GetValStr() const
 	return( m_sVal ); 
 }
 
-inline INT64 CListDefContStr::GetValNum() const
+inline int64 CListDefContStr::GetValNum() const
 {
 	lpctstr pszStr = m_sVal;
 	return( Exp_GetVal(pszStr) );
@@ -178,7 +178,7 @@ CListDefContElem* CListDefCont::GetAt(size_t nIndex) const
 	return ElementAt(nIndex);
 }
 
-bool CListDefCont::SetNumAt(size_t nIndex, INT64 iVal)
+bool CListDefCont::SetNumAt(size_t nIndex, int64 iVal)
 {
 	CListDefContElem* pListElem = ElementAt(nIndex);
 
@@ -256,7 +256,7 @@ lpctstr CListDefCont::GetValStr(size_t nIndex) const
 	return pElem->GetValStr();
 }
 
-INT64 CListDefCont::GetValNum(size_t nIndex) const
+int64 CListDefCont::GetValNum(size_t nIndex) const
 {
 	ADDTOCALLSTACK("CListDefCont::GetValNum");
 	CListDefContElem* pElem = ElementAt(nIndex);
@@ -297,7 +297,7 @@ int CListDefCont::FindValStr( lpctstr pVal, size_t nStartIndex /* = 0 */ ) const
 	return -1;
 }
 
-int CListDefCont::FindValNum( INT64 iVal, size_t nStartIndex /* = 0 */ ) const
+int CListDefCont::FindValNum( int64 iVal, size_t nStartIndex /* = 0 */ ) const
 {
 	ADDTOCALLSTACK("CListDefCont::FindValNum");
 
@@ -324,7 +324,7 @@ int CListDefCont::FindValNum( INT64 iVal, size_t nStartIndex /* = 0 */ ) const
 	return -1;
 }
 
-bool CListDefCont::AddElementNum(INT64 iVal)
+bool CListDefCont::AddElementNum(int64 iVal)
 {
 #undef max
 	ADDTOCALLSTACK("CListDefCont::AddElementNum");
@@ -419,8 +419,8 @@ bool compare_insensitive (CListDefContElem * firstelem, CListDefContElem * secon
 
 	if((IsSimpleNumberString(first)) && (IsSimpleNumberString(second)))
 	{
-		INT64 ifirst = firstelem->GetValNum();
-		INT64 isecond = secondelem->GetValNum();
+		int64 ifirst = firstelem->GetValNum();
+		int64 isecond = secondelem->GetValNum();
 		return ( ifirst < isecond );
 	}
 	else
@@ -443,8 +443,8 @@ bool compare_sensitive (CListDefContElem * firstelem, CListDefContElem * seconde
 
 	if((IsSimpleNumberString(first)) && (IsSimpleNumberString(second)))
 	{
-		INT64 ifirst = firstelem->GetValNum();
-		INT64 isecond = secondelem->GetValNum();
+		int64 ifirst = firstelem->GetValNum();
+		int64 isecond = secondelem->GetValNum();
 		return ( ifirst < isecond );
 	}
 	else
@@ -475,7 +475,7 @@ void CListDefCont::Sort(bool bDesc, bool bCase)
 		m_listElements.reverse();
 }
 
-bool CListDefCont::InsertElementNum(size_t nIndex, INT64 iVal)
+bool CListDefCont::InsertElementNum(size_t nIndex, int64 iVal)
 {
 	ADDTOCALLSTACK("CListDefCont::InsertElementNum");
 	if ( nIndex >= m_listElements.size() )

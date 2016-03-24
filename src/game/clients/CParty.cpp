@@ -714,7 +714,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 				return false;
 
 			if ( pCharMaster && !bForced )
-				pCharMaster->SetKeyNum("PARTY_LASTINVITE", (long long)toAdd);
+				pCharMaster->SetKeyNum("PARTY_LASTINVITE", (llong)toAdd);
 			
 			return CPartyDef::AcceptEvent(pCharAdd, GetMaster(), bForced);
 		} break;
@@ -858,12 +858,12 @@ lpctstr CPartyDef::GetDefStr( lpctstr pszKey, bool fZero ) const
 	return m_BaseDefs.GetKeyStr( pszKey, fZero );
 }
 
-INT64 CPartyDef::GetDefNum( lpctstr pszKey, bool fZero ) const
+int64 CPartyDef::GetDefNum( lpctstr pszKey, bool fZero ) const
 {
 	return m_BaseDefs.GetKeyNum( pszKey, fZero );
 }
 
-void CPartyDef::SetDefNum(lpctstr pszKey, INT64 iVal, bool fZero )
+void CPartyDef::SetDefNum(lpctstr pszKey, int64 iVal, bool fZero )
 {
 	m_BaseDefs.SetNum(pszKey, iVal, fZero);
 }

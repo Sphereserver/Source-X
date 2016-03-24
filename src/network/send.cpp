@@ -4385,7 +4385,7 @@ bool PacketPropertyList::onSend(const CClient* client)
 bool PacketPropertyList::hasExpired(int timeout) const
 {
 	ADDTOCALLSTACK("PacketPropertyList::hasExpired");
-	return static_cast<long long>(m_time + timeout) < g_World.GetCurrentTime().GetTimeRaw();
+	return static_cast<llong>(m_time + timeout) < g_World.GetCurrentTime().GetTimeRaw();
 }
 
 
@@ -4738,7 +4738,7 @@ PacketTimeSyncResponse::PacketTimeSyncResponse(const CClient* target) : PacketSe
 {
 	ADDTOCALLSTACK("PacketTimeSyncResponse::PacketTimeSyncResponse");
 
-	INT64 llTime = g_World.GetCurrentTime().GetTimeRaw();
+	int64 llTime = g_World.GetCurrentTime().GetTimeRaw();
 	writeInt64(llTime);
 	writeInt64(llTime+100);
 	writeInt64(llTime+100);	//No idea if different values make a difference. I didn't notice anything different when all values were the same.

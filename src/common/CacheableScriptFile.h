@@ -29,7 +29,7 @@ public:
 	virtual bool IsFileOpen() const;
 	virtual bool IsEOF() const;
 	virtual tchar *ReadString(tchar *pBuffer, size_t sizemax);
-	virtual dword Seek(int offset = 0, UINT origin = SEEK_SET);
+	virtual dword Seek(int offset = 0, uint origin = SEEK_SET);
 	virtual dword GetPosition() const;
 
 private:

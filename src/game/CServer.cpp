@@ -244,7 +244,7 @@ void CServer::SetExitFlag( int iFlag )
 	m_iExitFlag = iFlag;
 }
 
-void CServer::Shutdown( INT64 iMinutes ) // If shutdown is initialized
+void CServer::Shutdown( int64 iMinutes ) // If shutdown is initialized
 {
 	ADDTOCALLSTACK("CServer::Shutdown");
 	if ( iMinutes == 0 )
@@ -343,7 +343,7 @@ int CServer::PrintPercent( int iCount, int iTotal )
 	return iPercent;
 }
 
-INT64 CServer::GetAgeHours() const
+int64 CServer::GetAgeHours() const
 {
 	ADDTOCALLSTACK("CServer::GetAgeHours");
 	return( CServTime::GetCurrentTime().GetTimeRaw() / (60*60*TICK_PER_SEC));
@@ -358,7 +358,7 @@ lpctstr CServer::GetStatusString( byte iIndex ) const
 
 	tchar * pTemp = Str_GetTemp();
 	dword iClients = StatGet(SERV_STAT_CLIENTS);
-	INT64 iHours = GetAgeHours() / 24;
+	int64 iHours = GetAgeHours() / 24;
 
 	switch ( iIndex )
 	{

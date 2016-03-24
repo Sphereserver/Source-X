@@ -29,7 +29,7 @@ public:
 	void InitCacheTime();
 	bool IsTimeValid() const;
 	void HitCacheTime();
-	INT64 GetCacheAge() const;
+	int64 GetCacheAge() const;
 };
 
 class CGrayStaticsBlock

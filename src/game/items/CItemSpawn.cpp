@@ -296,7 +296,7 @@ void CItemSpawn::OnTick(bool fExec)
 {
 	ADDTOCALLSTACK("CitemSpawn:OnTick");
 
-	INT64 iMinutes;
+	int64 iMinutes;
 
 	if ( m_itSpawnChar.m_TimeHiMin <= 0 )
 		iMinutes = Calc_GetRandLLVal(30) + 1;

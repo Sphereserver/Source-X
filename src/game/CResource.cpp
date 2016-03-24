@@ -1619,7 +1619,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc
 					{
 						pszKey += 8;
 						GETNONWHITESPACE(pszKey);
-						INT64 piVal[6];
+						int64 piVal[6];
 
 						// year, month, day, hour, minute, second
 						size_t iQty = Str_ParseCmds(const_cast<tchar*>(pszKey), piVal, COUNTOF(piVal));
@@ -2611,7 +2611,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 				return true;
 			}
 
-			INT64 piNotoLevels[64];
+			int64 piNotoLevels[64];
 			size_t i = 0, iQty = 0;
 
 			// read karma levels

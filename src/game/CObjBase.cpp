@@ -116,7 +116,7 @@ bool CObjBase::IsContainer() const
 	return( dynamic_cast <const CContainer*>(this) != NULL );
 }
 
-void CObjBase::SetHue( HUE_TYPE wHue, bool bAvoidTrigger, CTextConsole *pSrc, CObjBase *SourceObj, long long sound )
+void CObjBase::SetHue( HUE_TYPE wHue, bool bAvoidTrigger, CTextConsole *pSrc, CObjBase *SourceObj, llong sound )
 {
 	if (g_Serv.IsLoading()) //We do not want tons of @Dye being called during world load, just set the hue then continue...
 	{
@@ -358,7 +358,7 @@ void CObjBase::r_WriteSafe( CScript & s )
 	}
 }
 
-void CObjBase::SetTimeout( INT64 iDelayInTicks )
+void CObjBase::SetTimeout( int64 iDelayInTicks )
 {
 	ADDTOCALLSTACK("CObjBase::SetTimeout");
 	// Set delay in TICK_PER_SEC of a sec. -1 = never.
@@ -378,23 +378,23 @@ bool CObjBase::IsTimerExpired() const
 	return( GetTimerDiff() <= 0 );
 }
 
-INT64 CObjBase::GetTimerAdjusted() const
+int64 CObjBase::GetTimerAdjusted() const
 {
 	// RETURN: time in seconds from now.
 	if ( ! IsTimerSet())
 		return( -1 );
-	INT64 iDiffInTicks = GetTimerDiff();
+	int64 iDiffInTicks = GetTimerDiff();
 	if ( iDiffInTicks < 0 )
 		return( 0 );
 	return( iDiffInTicks / TICK_PER_SEC );
 }
 
-INT64 CObjBase::GetTimerDAdjusted() const
+int64 CObjBase::GetTimerDAdjusted() const
 {
 	// RETURN: time in seconds from now.
 	if ( ! IsTimerSet())
 		return( -1 );
-	INT64 iDiffInTicks = GetTimerDiff();
+	int64 iDiffInTicks = GetTimerDiff();
 	if ( iDiffInTicks < 0 )
 		return( 0 );
 	return( iDiffInTicks );
@@ -1735,7 +1735,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 				if ( IsChar() )
 					return false;
 
-				INT64 piVal[2];
+				int64 piVal[2];
 				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, COUNTOF(piVal));
 				m_defenseBase = static_cast<uchar>(piVal[0]);
 				if ( iQty > 1 )
@@ -1749,7 +1749,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 			}
 		case OC_DAM:
 			{
-				INT64 piVal[2];
+				int64 piVal[2];
 				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, COUNTOF(piVal));
 				m_attackBase = static_cast<uchar>(piVal[0]);
 				if ( iQty > 1 )
@@ -1776,11 +1776,11 @@ bool CObjBase::r_LoadVal( CScript & s )
 
 		case OC_RANGE:
 			{
-				INT64 piVal[2];
+				int64 piVal[2];
 				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, COUNTOF(piVal));
 				if ( iQty > 1 )
 				{
-					INT64 iRange = ((piVal[0] & 0xff) << 8) & 0xff00;
+					int64 iRange = ((piVal[0] & 0xff) << 8) & 0xff00;
 					iRange |= (piVal[1] & 0xff);
 					SetDefNum(s.GetKey(),iRange, false);
 				}
@@ -1968,7 +1968,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		case OV_DAMAGE:	//	"Dmg, SourceFlags, SourceCharUid, DmgPhysical(%), DmgFire(%), DmgCold(%), DmgPoison(%), DmgEnergy(%)" = do me some damage.
 			{
 				EXC_SET("DAMAGE");
-				INT64 piCmd[8];
+				int64 piCmd[8];
 				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, COUNTOF(piCmd));
 				if ( iArgQty < 1 )
 					return( false );
@@ -2013,7 +2013,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		case OV_EFFECT: // some visual effect.
 			{
 				EXC_SET("EFFECT");
-				INT64 piCmd[12];
+				int64 piCmd[12];
 				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, COUNTOF(piCmd));
 				if ( iArgQty < 2 )
 					return( false );
@@ -2133,7 +2133,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			{
 				EXC_SET("MOVENEAR");
 				CObjBase *	pObjNear;
-				INT64 piCmd[4];
+				int64 piCmd[4];
 
 				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, COUNTOF(piCmd) );
 				if ( iArgQty <= 0 )
@@ -2210,7 +2210,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			{
 				EXC_SET("RESENDTOOLTIP");
 			
-				INT64 piCmd[2];
+				int64 piCmd[2];
 				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, COUNTOF(piCmd) );
 
 				bool bSendFull = false;
@@ -2255,7 +2255,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		case OV_SOUND:
 			{
 				EXC_SET("SOUND");
-				INT64 piCmd[2];
+				int64 piCmd[2];
 				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, COUNTOF(piCmd));
 				Sound( static_cast<SOUND_TYPE>(piCmd[0]), ( iArgQty > 1 ) ? static_cast<int>(piCmd[1]) : 1 );
 			}
@@ -2263,7 +2263,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		case OV_SPELLEFFECT:	// spell, strength, noresist
 			{
 				EXC_SET("SPELLEFFECT");
-				INT64 piCmd[4];
+				int64 piCmd[4];
 				size_t iArgs = Str_ParseCmds( s.GetArgStr(), piCmd, COUNTOF(piCmd));
 				CItem * pItemSrc = NULL;
 				switch( iArgs )
@@ -2883,7 +2883,7 @@ CServTime CObjBase::GetTimeStamp() const
 	return m_timestamp;
 }
 
-void CObjBase::SetTimeStamp( INT64 t_time)
+void CObjBase::SetTimeStamp( int64 t_time)
 {
 	m_timestamp.InitTime(t_time);
 }
@@ -2896,7 +2896,7 @@ lpctstr CObjBase::GetDefStr( lpctstr pszKey, bool fZero, bool fDef ) const
 	return pVar->GetValStr();
 }
 
-INT64 CObjBase::GetDefNum( lpctstr pszKey, bool fZero, bool fDef ) const
+int64 CObjBase::GetDefNum( lpctstr pszKey, bool fZero, bool fDef ) const
 {
 	CVarDefCont	* pVar = GetDefKey( pszKey, fDef );
 	if ( pVar == NULL )
@@ -2915,7 +2915,7 @@ void CObjBase::SetTriggerActive(lpctstr trig)
 	m_RunningTrigger = trig ? trig : NULL;
 }
 
-void CObjBase::SetDefNum(lpctstr pszKey, INT64 iVal, bool fZero )
+void CObjBase::SetDefNum(lpctstr pszKey, int64 iVal, bool fZero )
 {
 	m_BaseDefs.SetNum(pszKey, iVal, fZero);
 }
@@ -2956,7 +2956,7 @@ lpctstr CObjBase::GetKeyStr( lpctstr pszKey, bool fZero, bool fDef ) const
 	return pVar->GetValStr();
 }
 
-INT64 CObjBase::GetKeyNum( lpctstr pszKey, bool fZero, bool fDef ) const
+int64 CObjBase::GetKeyNum( lpctstr pszKey, bool fZero, bool fDef ) const
 {
 	CVarDefCont	* pVar = GetKey( pszKey, fDef );
 	if ( pVar == NULL )
@@ -2982,7 +2982,7 @@ CVarDefCont * CObjBase::GetKey( lpctstr pszKey, bool fDef ) const
 	}
 }
 
-void CObjBase::SetKeyNum(lpctstr pszKey, INT64 iVal)
+void CObjBase::SetKeyNum(lpctstr pszKey, int64 iVal)
 {
 	m_TagDefs.SetNum(pszKey, iVal);
 }
@@ -3061,7 +3061,7 @@ inline bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TR
 
 			if ( iTriggerArgType == 1 ) // 3 ARGNs
 			{
-				INT64 Arg_piCmd[3];
+				int64 Arg_piCmd[3];
 				iResultArgs = Str_ParseCmds(ppCmdTrigger[2], Arg_piCmd, COUNTOF(Arg_piCmd), ",");
 
 				if ( iResultArgs == 3 )

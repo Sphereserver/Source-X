@@ -136,14 +136,14 @@ struct CResourceQty
 {
 private:
 	RESOURCE_ID m_rid;	// A RES_SKILL, RES_ITEMDEF, or RES_TYPEDEF
-	INT64 m_iQty;			// How much of this ?
+	int64 m_iQty;			// How much of this ?
 public:
 	RESOURCE_ID GetResourceID() const;
 	void SetResourceID( RESOURCE_ID rid, int iQty );
 	RES_TYPE GetResType() const;
 	int GetResIndex() const;
-	INT64 GetResQty() const;
-	void SetResQty( INT64 wQty );
+	int64 GetResQty() const;
+	void SetResQty( int64 wQty );
 	inline bool Load( lptstr & arg )
 	{
 		return Load( const_cast<lpctstr&>(arg) );
@@ -269,7 +269,7 @@ private:
 public:
 	bool IsFirstCheck() const;
 	void ReSync();
-	bool Open( lpctstr pszFilename = NULL, UINT wFlags = OF_READ );
+	bool Open( lpctstr pszFilename = NULL, uint wFlags = OF_READ );
 	virtual void Close();
 	virtual void CloseForce();
 };

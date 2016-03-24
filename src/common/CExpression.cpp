@@ -63,7 +63,7 @@ dword ahextoi( lpctstr pszStr ) // Convert hex string to integer
 	return val;
 }
 
-INT64 ahextoi64( lpctstr pszStr ) // Convert hex string to INT64
+int64 ahextoi64( lpctstr pszStr ) // Convert hex string to int64
 {
 	if ( pszStr == NULL )
 		return 0;
@@ -78,7 +78,7 @@ INT64 ahextoi64( lpctstr pszStr ) // Convert hex string to INT64
 		pszStr--;
 	}
 
-	INT64 val = 0;
+	int64 val = 0;
 	for (;;)
 	{
 		tchar ch = static_cast<tchar>(toupper(*pszStr));
@@ -103,10 +103,10 @@ INT64 ahextoi64( lpctstr pszStr ) // Convert hex string to INT64
 	return val;
 }
 
-INT64 power(INT64 base, INT64 level)
+int64 power(int64 base, int64 level)
 {
 	double rc = pow(static_cast<double>(base), static_cast<double>(level));
-	return static_cast<INT64>(rc);
+	return static_cast<int64>(rc);
 }
 
 inline bool IsCharNumeric( char & Test )
@@ -277,7 +277,7 @@ bool IsValidGameObjDef( lpctstr pszTest )
 /////////////////////////////////////////////////////////////////////////
 // -Calculus
 
-int Calc_GetLog2( UINT iVal )
+int Calc_GetLog2( uint iVal )
 {
 	// This is really log2 + 1
 	int i=0;
@@ -311,7 +311,7 @@ int Calc_GetRandVal2( int iMin, int iMax )
 	return(iMin + g_World.m_Rand.randInt() % ((iMax - iMin) + 1) );
 }
 
-INT64 Calc_GetRandLLVal( INT64 iqty )
+int64 Calc_GetRandLLVal( int64 iqty )
 {
 	if ( iqty <= 0 )
 		return( 0 );
@@ -322,11 +322,11 @@ INT64 Calc_GetRandLLVal( INT64 iqty )
 	return( g_World.m_Rand.genrand64_int64() % iqty );
 }
 
-INT64 Calc_GetRandLLVal2( INT64 iMin, INT64 iMax )
+int64 Calc_GetRandLLVal2( int64 iMin, int64 iMax )
 {
 	if ( iMin > iMax )
 	{
-		INT64 tmp = iMin;
+		int64 tmp = iMin;
 		iMin = iMax;
 		iMax = tmp;
 	}
@@ -400,7 +400,7 @@ CExpression::~CExpression()
 {
 }
 
-INT64 CExpression::GetSingle( lpctstr & pszArgs )
+llong CExpression::GetSingle( lpctstr & pszArgs )
 {
 	ADDTOCALLSTACK("CExpression::GetSingle");
 	// Parse just a single expression without any operators or ranges.
@@ -444,13 +444,13 @@ INT64 CExpression::GetSingle( lpctstr & pszArgs )
 			val += ch;
 			pszArgs ++;
 		}
-		return( (INT64)val );
+		return( (llong)val );
 	}
 	else if ( pszArgs[0] == '.' || IsDigit(pszArgs[0]))
 	{
 		// A decminal number
 try_dec:
-		INT64 iVal = 0;
+		llong iVal = 0;
 		for ( ; ; pszArgs++ )
 		{
 			if ( *pszArgs == '.' )
@@ -516,7 +516,7 @@ try_dec:
 				Str_Parse( const_cast<tchar*>(pszArgs), &(pszArgsNext), ")" );
 	
 				tchar * ppCmd[5];
-				INT64 iResult;
+				llong iResult;
 				size_t iCount = 0;
 	
 				switch ( iIntrinsic )
@@ -557,15 +557,15 @@ try_dec:
 									iCount++; SKIP_ARGSEP(pszArgs);
 									if ( !strcmpi(pszArgs, "e") )
 									{
-										iResult = static_cast<INT64>(log(static_cast<double>(iArgument)));
+										iResult = static_cast<llong>(log(static_cast<double>(iArgument)));
 									}
 									else if ( !strcmpi(pszArgs, "pi") )
 									{
-										iResult = static_cast<INT64>(log(static_cast<double>(iArgument)) / log(M_PI));
+										iResult = static_cast<llong>(log(static_cast<double>(iArgument)) / log(M_PI));
 									}
 									else
 									{
-										INT64 iBase = GetVal(pszArgs);
+										llong iBase = GetVal(pszArgs);
 										if ( iBase <= 0 )
 										{
 											DEBUG_ERR(( "Exp_GetVal: (%lld)Log(%d) is %s\n", iBase, iArgument, (!iBase) ? "infinite" : "undefined" ));
@@ -573,13 +573,13 @@ try_dec:
 										}
 										else
 										{
-											iResult = static_cast<INT64>(log(static_cast<double>(iArgument)) / log(static_cast<double>(iBase)));
+											iResult = static_cast<llong>(log(static_cast<double>(iArgument)) / log(static_cast<double>(iBase)));
 										}
 									}
 								}
 								else
 								{
-									iResult = static_cast<INT64>(log10(static_cast<double>(iArgument)));
+									iResult = static_cast<llong>(log10(static_cast<double>(iArgument)));
 								}							
 							}
 						}
@@ -591,7 +591,7 @@ try_dec:
 						if ( pszArgs && *pszArgs )
 						{
 							iCount = 1;
-							iResult = static_cast<INT64>(exp(static_cast<double>(GetVal(pszArgs))));
+							iResult = static_cast<llong>(exp(static_cast<double>(GetVal(pszArgs))));
 						}
 						else
 						{
@@ -613,7 +613,7 @@ try_dec:
 							if (iTosquare >= 0)
 							{
 								iCount++;
-								iResult = static_cast<INT64>(sqrt(static_cast<double>(iTosquare)));
+								iResult = static_cast<llong>(sqrt(static_cast<double>(iTosquare)));
 							}
 							else
 							{
@@ -628,7 +628,7 @@ try_dec:
 						if ( pszArgs && *pszArgs )
 						{
 							iCount = 1;
-							iResult = static_cast<INT64>(sin(static_cast<double>(GetVal(pszArgs))));
+							iResult = static_cast<llong>(sin(static_cast<double>(GetVal(pszArgs))));
 						}
 						else
 						{
@@ -643,7 +643,7 @@ try_dec:
 						if ( pszArgs && *pszArgs )
 						{
 							iCount = 1;
-							iResult = static_cast<INT64>(asin(static_cast<double>(GetVal(pszArgs))));
+							iResult = static_cast<llong>(asin(static_cast<double>(GetVal(pszArgs))));
 						}
 						else
 						{
@@ -658,7 +658,7 @@ try_dec:
 						if ( pszArgs && *pszArgs )
 						{
 							iCount = 1;
-							iResult = static_cast<INT64>(cos(static_cast<double>(GetVal(pszArgs))));
+							iResult = static_cast<llong>(cos(static_cast<double>(GetVal(pszArgs))));
 						}
 						else
 						{
@@ -673,7 +673,7 @@ try_dec:
 						if ( pszArgs && *pszArgs )
 						{
 							iCount = 1;
-							iResult = static_cast<INT64>(acos(static_cast<double>(GetVal(pszArgs))));
+							iResult = static_cast<llong>(acos(static_cast<double>(GetVal(pszArgs))));
 						}
 						else
 						{
@@ -688,7 +688,7 @@ try_dec:
 						if ( pszArgs && *pszArgs )
 						{
 							iCount = 1;
-							iResult = static_cast<INT64>(tan(static_cast<double>(GetVal(pszArgs))));
+							iResult = static_cast<llong>(tan(static_cast<double>(GetVal(pszArgs))));
 						}
 						else
 						{
@@ -703,7 +703,7 @@ try_dec:
 						if ( pszArgs && *pszArgs )
 						{
 							iCount = 1;
-							iResult = static_cast<INT64>(atan(static_cast<double>(GetVal(pszArgs))));
+							iResult = static_cast<llong>(atan(static_cast<double>(GetVal(pszArgs))));
 						}
 						else
 						{
@@ -777,10 +777,10 @@ try_dec:
 							iResult = 0;
 						else
 						{
-							INT64 val1 = GetVal( ppCmd[0] );
+							int64 val1 = GetVal( ppCmd[0] );
 							if ( iCount == 2 )
 							{
-								INT64 val2 = GetVal( ppCmd[1] );
+								int64 val2 = GetVal( ppCmd[1] );
 								iResult = Calc_GetRandLLVal2( val1, val2 );
 							}
 							else
@@ -834,8 +834,8 @@ try_dec:
 							iResult = 0;
 						else
 						{
-							INT64 a1 = GetSingle(ppCmd[0]);
-							INT64 a2 = GetSingle(ppCmd[1]);
+							llong a1 = GetSingle(ppCmd[0]);
+							llong a2 = GetSingle(ppCmd[1]);
 							if ( a1 < a2 ) iResult = GetSingle(ppCmd[2]);
 							else if ( a1 == a2 ) iResult = ( iCount < 4 ) ? 0 : GetSingle(ppCmd[3]);
 							else iResult = ( iCount < 5 ) ? 0 : GetSingle(ppCmd[4]);
@@ -869,7 +869,7 @@ try_dec:
 		}
 
 		// Must be a symbol of some sort ?
-		long long lVal;
+		llong lVal;
 		if ( m_VarGlobals.GetParseVal( pszArgs, &lVal ) )
 			return(lVal);
 		if ( m_VarDefs.GetParseVal( pszArgs, &lVal ) )
@@ -888,7 +888,7 @@ try_dec:
 	return( 0 );
 }
 
-INT64 CExpression::GetValMath( INT64 lVal, lpctstr & pExpr )
+llong CExpression::GetValMath(llong lVal, lpctstr & pExpr )
 {
 	ADDTOCALLSTACK("CExpression::GetValMath");
 	GETNONWHITESPACE(pExpr);
@@ -942,7 +942,7 @@ INT64 CExpression::GetValMath( INT64 lVal, lpctstr & pExpr )
 		case '/':
 			pExpr++;
 			{
-				long long iVal = GetVal( pExpr );
+				llong iVal = GetVal( pExpr );
 				if ( ! iVal )
 				{
 					DEBUG_ERR(( "Exp_GetVal: Divide by 0\n" ));
@@ -954,7 +954,7 @@ INT64 CExpression::GetValMath( INT64 lVal, lpctstr & pExpr )
 		case '%':
 			pExpr++;
 			{
-				long long iVal = GetVal( pExpr );
+				llong iVal = GetVal( pExpr );
 				if ( ! iVal )
 				{
 					DEBUG_ERR(( "Exp_GetVal: Divide by 0\n" ));
@@ -1016,7 +1016,7 @@ INT64 CExpression::GetValMath( INT64 lVal, lpctstr & pExpr )
 		case '@':
 			pExpr++;
 			{
-				long long iVal = GetVal( pExpr );
+				llong iVal = GetVal( pExpr );
 				if ( (lVal == 0) && (iVal < 0) )
 				{
 					DEBUG_ERR(( "Exp_GetVal: Power of zero with negative exponent is undefined\n" ));
@@ -1032,7 +1032,7 @@ INT64 CExpression::GetValMath( INT64 lVal, lpctstr & pExpr )
 
 int g_getval_reentrant_check = 0;
 
-INT64 CExpression::GetVal( lpctstr & pExpr )
+llong CExpression::GetVal( lpctstr & pExpr )
 {
 	ADDTOCALLSTACK("CExpression::GetVal");
 	// Get a value (default decimal) that could also be an expression.
@@ -1068,13 +1068,13 @@ INT64 CExpression::GetVal( lpctstr & pExpr )
 		g_getval_reentrant_check--;
 		return 0;
 	}
-	INT64 lVal = GetValMath(GetSingle(pExpr), pExpr);
+	llong lVal = GetValMath(GetSingle(pExpr), pExpr);
 	g_getval_reentrant_check--;
 
 	return lVal;
 }
 
-int CExpression::GetRangeVals(lpctstr & pExpr, INT64 * piVals, int iMaxQty)
+int CExpression::GetRangeVals(lpctstr & pExpr, int64 * piVals, int iMaxQty)
 {
 	ADDTOCALLSTACK("CExpression::GetRangeVals");
 	// Get a list of values.
@@ -1129,10 +1129,10 @@ int CExpression::GetRangeVals(lpctstr & pExpr, INT64 * piVals, int iMaxQty)
 	return( iQty );
 }
 
-INT64 CExpression::GetRange(lpctstr & pExpr)
+int64 CExpression::GetRange(lpctstr & pExpr)
 {
 	ADDTOCALLSTACK("CExpression::GetRange");
-	INT64 lVals[256];		// Maximum elements in a list
+	int64 lVals[256];		// Maximum elements in a list
 
 	int iQty = GetRangeVals( pExpr, lVals, COUNTOF(lVals));
 
@@ -1152,7 +1152,7 @@ INT64 CExpression::GetRange(lpctstr & pExpr)
 	// I guess it's weighted values
 	// First get the total of the weights
 
-	INT64 iTotalWeight = 0;
+	int64 iTotalWeight = 0;
 	int i = 1;
 	for ( ; i < iQty; i+=2 )
 	{

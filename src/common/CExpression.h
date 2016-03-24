@@ -2,6 +2,10 @@
 * @file CExpression.h
 */
 
+/* Random values have int64 type because the max size, due to the algorithm, can be an int64;
+	Other calculations have type llong because in the future llong may be bigger than int64 and
+	there's no reason to put an upper limit to the number.	*/
+
 #pragma once
 #ifndef _INC_CEXPRSSION_H
 #define _INC_CEXPRSSION_H
@@ -102,7 +106,7 @@ public:
 public:
 	// Strict G++ Prototyping produces an error when not casting char*& to const char*&
 	// So this is a rather lazy workaround
-	inline int64_t GetSingle( lptstr &pArgs )
+	inline llong GetSingle( lptstr &pArgs )
 	{
 		return GetSingle(const_cast<lpctstr &>(pArgs));
 	}
@@ -112,22 +116,22 @@ public:
 		return static_cast<int>(GetRange(const_cast<lpctstr &>(pArgs)));
 	}
 
-	inline int GetRangeVals( lptstr &pExpr, int64_t * piVals, int iMaxQty )
+	inline int GetRangeVals( lptstr &pExpr, int64 * piVals, int iMaxQty )
 	{
 		return GetRangeVals(const_cast<lpctstr &>(pExpr), piVals, iMaxQty );
 	}
 
-	inline int64_t GetVal( lptstr &pArgs )
+	inline llong GetVal( lptstr &pArgs )
 	{
 		return GetVal(const_cast<lpctstr &>(pArgs));
 	}
 
 	// Evaluate using the stuff we know.
-	int64_t GetSingle( lpctstr & pArgs );
-	int64_t GetVal( lpctstr & pArgs );
-	int64_t GetValMath( int64_t lVal, lpctstr & pExpr );
-	int GetRangeVals(lpctstr & pExpr, int64_t * piVals, int iMaxQty);
-	int64_t GetRange(lpctstr & pArgs);
+	llong GetSingle( lpctstr & pArgs );
+	llong GetVal( lpctstr & pArgs );
+	llong GetValMath( llong lVal, lpctstr & pExpr );
+	int GetRangeVals(lpctstr & pExpr, int64 * piVals, int iMaxQty);
+	int64 GetRange(lpctstr & pArgs);
 
 public:
 	CExpression();
@@ -148,21 +152,21 @@ bool IsStrEmpty( lpctstr pszTest );
 inline extern bool IsCharNumeric( char & Test );
 
 // Numeric formulas
-int64_t Calc_GetRandLLVal( int64_t iqty );
-int64_t Calc_GetRandLLVal2( int64_t iMin, INT64 iMax );
+int64 Calc_GetRandLLVal( int64 iqty );
+int64 Calc_GetRandLLVal2( int64 iMin, int64 iMax );
 int Calc_GetRandVal( int iqty );
 int Calc_GetRandVal2( int iMin, int iMax );
-int Calc_GetLog2( UINT iVal );
+int Calc_GetLog2( uint iVal );
 int Calc_GetSCurve( int iValDiff, int iVariance );
 int Calc_GetBellCurve( int iValDiff, int iVariance );
 
 dword ahextoi( lpctstr pArgs ); // Convert hex string to integer
-int64_t ahextoi64( lpctstr pArgs ); // Convert hex string to INT64
+int64 ahextoi64( lpctstr pArgs ); // Convert hex string to int64
 
-#define Exp_GetSingle( pa ) static_cast<int>(g_Exp.GetSingle( pa ))
-#define Exp_GetLLSingle( pa ) g_Exp.GetSingle( pa )
-#define Exp_GetVal( pa )	static_cast<int>(g_Exp.GetVal( pa ))
-#define Exp_GetLLVal( pa )	g_Exp.GetVal( pa )
-#define Exp_GetRange( pa )	g_Exp.GetRange( pa )
+#define Exp_GetSingle( pa )		static_cast<int>(g_Exp.GetSingle( pa ))
+#define Exp_GetLLSingle( pa )	g_Exp.GetSingle( pa )
+#define Exp_GetVal( pa )		static_cast<int>(g_Exp.GetVal( pa ))
+#define Exp_GetLLVal( pa )		g_Exp.GetVal( pa )
+#define Exp_GetRange( pa )		g_Exp.GetRange( pa )
 
 #endif	// _INC_CEXPRSSION_H

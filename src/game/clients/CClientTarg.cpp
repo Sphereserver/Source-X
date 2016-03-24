@@ -288,7 +288,7 @@ bool CClient::OnTarg_UnExtract( CObjBase * pObj, const CPointMap & pt )
 		if ( ! s.ReadKeyParse())
 			return false; // this has the item count
 
-		INT64 piCmd[4];		// Maximum parameters in one line
+		int64 piCmd[4];		// Maximum parameters in one line
 		Str_ParseCmds( s.GetArgStr(), piCmd, COUNTOF(piCmd));
 
 		CItem * pItem = CItem::CreateTemplate(static_cast<ITEMID_TYPE>(ATOI(s.GetKey())), NULL, m_pChar);
@@ -587,7 +587,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 			tchar szTmp[512];
 			strcpylen( szTmp, m_Targ_Text, COUNTOF(szTmp));
 
-			INT64 piArgs[3];		// Maximum parameters in one line
+			int64 piArgs[3];		// Maximum parameters in one line
 			Str_ParseCmds( szTmp, piArgs, COUNTOF( piArgs ));
 
 			CPointMap ptNudge(static_cast<word>(piArgs[0]),static_cast<word>(piArgs[1]),static_cast<char>(piArgs[2]) );
@@ -692,7 +692,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 			tchar szTmp[256];
 			strcpylen( szTmp, m_Targ_Text, COUNTOF(szTmp));
 
-			INT64 piArgs[16];		// Maximum parameters in one line
+			int64 piArgs[16];		// Maximum parameters in one line
 			size_t iArgQty = Str_ParseCmds( szTmp, piArgs, COUNTOF( piArgs ));
 
 			char z = static_cast<char>(piArgs[0]);	// z height is the first arg.

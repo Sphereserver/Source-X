@@ -117,7 +117,7 @@ dword CScriptKey::GetArgFlag( dword dwStart, dword dwMask )
 		return( dwStart &~ dwMask );
 }
 
-long long CScriptKey::GetArgLLVal()
+llong CScriptKey::GetArgLLVal()
 {
 	ADDTOCALLSTACK("CScriptKey::GetArgLLVal");
 	ASSERT(m_pszKey);
@@ -307,7 +307,7 @@ void CScript::InitBase()
 	InitKey();
 }
 
-bool CScript::Open( lpctstr pszFilename, UINT wFlags )
+bool CScript::Open( lpctstr pszFilename, uint wFlags )
 {
 	ADDTOCALLSTACK("CScript::Open");
 	// If we are in read mode and we have no script file.
@@ -399,7 +399,7 @@ bool CScript::FindTextHeader( lpctstr pszName ) // Find a section in the current
 	return( true );
 }
 
-dword CScript::Seek( int offset, UINT origin )
+dword CScript::Seek( int offset, uint origin )
 {
 	ADDTOCALLSTACK("CScript::Seek");
 	// Go to the start of a new section.
@@ -463,7 +463,7 @@ foundit:
 	return false;
 }
 
-bool CScript::FindSection( lpctstr pszName, UINT uModeFlags )
+bool CScript::FindSection( lpctstr pszName, uint uModeFlags )
 {
 	ADDTOCALLSTACK("CScript::FindSection");
 	// Find a section in the current script
@@ -725,7 +725,7 @@ void _cdecl CScript::WriteKeyFormat( lpctstr pszKey, lpctstr pszVal, ... )
 	va_end( vargs );
 }
 
-void CScript::WriteKeyVal( lpctstr pszKey, INT64 dwVal )
+void CScript::WriteKeyVal( lpctstr pszKey, int64 dwVal )
 {
 #ifdef __MINGW32__
 	WriteKeyFormat( pszKey, "%I64d", dwVal );
@@ -734,7 +734,7 @@ void CScript::WriteKeyVal( lpctstr pszKey, INT64 dwVal )
 #endif  // __MINGW32__
 }
 
-void CScript::WriteKeyHex( lpctstr pszKey, INT64 dwVal )
+void CScript::WriteKeyHex( lpctstr pszKey, int64 dwVal )
 {
 #ifdef __MINGW32__
 	WriteKeyFormat( pszKey, "0%I64x", dwVal );

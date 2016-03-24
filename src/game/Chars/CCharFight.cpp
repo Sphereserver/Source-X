@@ -891,7 +891,7 @@ effect_bounce:
 		}
 	}
 
-	CScriptTriggerArgs Args( iDmg, uType, static_cast<INT64>(0) );
+	CScriptTriggerArgs Args( iDmg, uType, static_cast<int64>(0) );
 	Args.m_VarsLocal.SetNum("ItemDamageChance", 40);
 
 	if ( IsTrigUsed(TRIGGER_GETHIT) )
@@ -1309,7 +1309,7 @@ bool CChar::Fight_Attack( const CChar *pCharTarg, bool btoldByMaster )
 			CheckCrimeSeen(SKILL_NONE, pTarget, NULL, NULL);
 	}
 
-	INT64 threat = 0;
+	int64 threat = 0;
 	if ( btoldByMaster )
 		threat = 1000 + Attacker_GetHighestThreat();
 
@@ -1544,7 +1544,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 	if ( IsSetCombatFlags(COMBAT_PREHIT) && (m_atFight.m_War_Swing_State == WAR_SWING_READY) )
 	{
-		INT64 diff = GetKeyNum("LastHit", true) - g_World.GetCurrentTime().GetTimeRaw();
+		int64 diff = GetKeyNum("LastHit", true) - g_World.GetCurrentTime().GetTimeRaw();
 		if ( diff > 0 )
 		{
 			diff = (diff > 50) ? 50 : diff;

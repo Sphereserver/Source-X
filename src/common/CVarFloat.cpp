@@ -703,7 +703,7 @@ RealType CVarFloat::GetSingle( lpctstr & pArgs )
 			}
 		}
 	}
-	long long lVal;
+	llong lVal;
 	if ( g_Exp.m_VarGlobals.GetParseVal( pArgs, &lVal ) )
 		return( static_cast<int>(lVal) );
 	if ( g_Exp.m_VarDefs.GetParseVal( pArgs, &lVal ) )

@@ -46,7 +46,7 @@ public:
 	CClient * FindGMHandler() const;
 	void ClearGMHandler();
 	void SetGMHandler( CClient * pClient );
-	INT64 GetAge() const;
+	int64 GetAge() const;
 
 	bool r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc );
 	void r_Write( CScript & s ) const;

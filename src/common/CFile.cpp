@@ -34,7 +34,7 @@ lpctstr CFile::GetFileTitle() const
 	return( CGFile::GetFilesTitle( GetFilePath()));
 }
 
-bool CFile::Open( lpctstr pszName, UINT uMode, CFileException * e )
+bool CFile::Open( lpctstr pszName, uint uMode, CFileException * e )
 {
 	UNREFERENCED_PARAMETER(e);
 	ASSERT( m_hFile == NOFILE_HANDLE );
@@ -105,7 +105,7 @@ dword CFile::GetPosition() const
 #endif
 }
 
-dword CFile::Seek(int lOffset, UINT iOrigin )
+dword CFile::Seek(int lOffset, uint iOrigin )
 {
 #ifdef _WIN32
 	return SetFilePointer( m_hFile, lOffset, NULL, iOrigin );
@@ -259,7 +259,7 @@ void CGFile::CloseBase()
 	CFile::Close();
 }
 
-bool CGFile::Open( lpctstr pszFilename, UINT uModeFlags, void FAR * pExtra )
+bool CGFile::Open( lpctstr pszFilename, uint uModeFlags, void FAR * pExtra )
 {
 	ADDTOCALLSTACK("CGFile::Open");
 	// RETURN: true = success.
@@ -348,7 +348,7 @@ bool CFileText::OpenBase( void FAR * pszExtra )
 	return( true );
 }
 
-dword CFileText::Seek(int offset, UINT origin )
+dword CFileText::Seek(int offset, uint origin )
 {
 	// true = success
 	if ( ! IsFileOpen())

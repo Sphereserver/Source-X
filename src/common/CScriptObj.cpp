@@ -805,7 +805,7 @@ bool CScriptObj::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc
 			if ( *pszKey && (( *pszKey < '0' ) || ( *pszKey > '9' )) && *pszKey != '-' )
 				goto badcmd;
 
-			INT64	min = 1000, max = INT64_MIN;
+			int64	min = 1000, max = INT64_MIN;
 
 			if ( *pszKey )
 			{
@@ -844,13 +844,13 @@ badcmd:
 		case SSC_BETWEEN:
 		case SSC_BETWEEN2:
 			{
-				INT64	iMin = Exp_GetLLVal(pszKey);
+				int64	iMin = Exp_GetLLVal(pszKey);
 				SKIP_ARGSEP(pszKey);
-				INT64	iMax = Exp_GetLLVal(pszKey);
+				int64	iMax = Exp_GetLLVal(pszKey);
 				SKIP_ARGSEP(pszKey);
-				INT64 iCurrent = Exp_GetLLVal(pszKey);
+				int64 iCurrent = Exp_GetLLVal(pszKey);
 				SKIP_ARGSEP(pszKey);
-				INT64 iAbsMax = Exp_GetLLVal(pszKey);
+				int64 iAbsMax = Exp_GetLLVal(pszKey);
 				SKIP_ARGSEP(pszKey);
 				if ( index == SSC_BETWEEN2 )
 				{
@@ -942,7 +942,7 @@ badcmd:
 			return( true );
 		case SSC_FVAL:
 			{
-				INT64 iVal = Exp_GetLLVal(pszKey);
+				int64 iVal = Exp_GetLLVal(pszKey);
 				sVal.Format( "%s%lld.%lld", (iVal >= 0) ? "" : "-", llabs(iVal/10), llabs(iVal%10) );
 				return true;
 			}
@@ -977,16 +977,16 @@ badcmd:
 		case SSC_SETBIT:
 		case SSC_CLRBIT:
 			{
-				INT64 val = Exp_GetLLVal(pszKey);
+				int64 val = Exp_GetLLVal(pszKey);
 				SKIP_ARGSEP(pszKey);
-				INT64 bit = Exp_GetLLVal(pszKey);
+				int64 bit = Exp_GetLLVal(pszKey);
 
 				if ( index == SSC_ISBIT )
-					sVal.FormatLLVal(val & ( (INT64)(1) << bit ));
+					sVal.FormatLLVal(val & ( (int64)(1) << bit ));
 				else if ( index == SSC_SETBIT )
-					sVal.FormatLLVal(val | ( (INT64)(1) << bit ));
+					sVal.FormatLLVal(val | ( (int64)(1) << bit ));
 				else
-					sVal.FormatLLVal(val & (~ ( (INT64)(1) << bit )));
+					sVal.FormatLLVal(val & (~ ( (int64)(1) << bit )));
 				break;
 			}
 		case SSC_ISEMPTY:
@@ -1001,7 +1001,7 @@ badcmd:
 		case SSC_StrPos:
 			{
 				GETNONWHITESPACE( pszKey );
-				INT64 iPos = Exp_GetVal( pszKey );
+				int64 iPos = Exp_GetVal( pszKey );
 				tchar ch;
 				if ( IsDigit( *pszKey) && IsDigit( *(pszKey+1) ) )
 					ch = static_cast<tchar>(Exp_GetVal(pszKey));
@@ -1012,7 +1012,7 @@ badcmd:
 				}
 				
 				GETNONWHITESPACE( pszKey );
-				INT64	iLen	= strlen( pszKey );
+				int64	iLen	= strlen( pszKey );
 				if ( iPos < 0 )
 					iPos	= iLen + iPos;
 				if ( iPos < 0 )
@@ -1034,12 +1034,12 @@ badcmd:
 				if ( iQty < 3 )
 					return false;
 
-				INT64	iPos = Exp_GetVal( ppArgs[0] );
-				INT64	iCnt = Exp_GetVal( ppArgs[1] );
+				int64	iPos = Exp_GetVal( ppArgs[0] );
+				int64	iCnt = Exp_GetVal( ppArgs[1] );
 				if ( iCnt < 0 )
 					return false;
 
-				INT64	iLen = strlen( ppArgs[2] );
+				int64	iLen = strlen( ppArgs[2] );
 				if ( iPos < 0 ) iPos += iLen;
 				if ( iPos > iLen || iPos < 0 ) iPos = 0;
 
@@ -1115,7 +1115,7 @@ badcmd:
 				if ( iQty < 2 )
 					return false;
 
-				INT64	iPad = Exp_GetVal( ppArgs[0] );
+				int64	iPad = Exp_GetVal( ppArgs[0] );
 				if ( iPad < 0 )
 					return false;
 				tchar	*buf = Str_GetTemp();
@@ -1241,12 +1241,12 @@ badcmd:
 			} return true;
 		case SSC_MULDIV:
 			{
-				INT64	iNum	= Exp_GetLLVal( pszKey );
+				int64	iNum	= Exp_GetLLVal( pszKey );
 				SKIP_ARGSEP(pszKey);
-				INT64	iMul	= Exp_GetLLVal( pszKey );
+				int64	iMul	= Exp_GetLLVal( pszKey );
 				SKIP_ARGSEP(pszKey);
-				INT64	iDiv	= Exp_GetLLVal( pszKey );
-				INT64 iRes = 0;
+				int64	iDiv	= Exp_GetLLVal( pszKey );
+				int64 iRes = 0;
 
 				if ( iDiv == 0 )
 					g_Log.EventWarn("MULDIV(%lld,%lld,%lld) -> Dividing by '0'\n", iNum, iMul, iDiv);
@@ -2436,7 +2436,7 @@ jump_in:
 			case SK_DOSWITCH:
 				{
 					EXC_SET("dorand/doswitch");
-					INT64 iVal = s.GetArgLLVal();
+					int64 iVal = s.GetArgLLVal();
 					if ( iCmd == SK_DORAND )
 						iVal = Calc_GetRandLLVal(iVal);
 					for ( ; ; --iVal )
@@ -2530,9 +2530,9 @@ jump_in:
 
 							if ( z && *z )
 							{
-								INT64 iN1 = pArgs->m_iN1;
-								INT64 iN2 = pArgs->m_iN2;
-								INT64 iN3 = pArgs->m_iN3;
+								int64 iN1 = pArgs->m_iN1;
+								int64 iN2 = pArgs->m_iN2;
+								int64 iN3 = pArgs->m_iN3;
 								CScriptObj *pO1 = pArgs->m_pO1;
 								CGString s1 = pArgs->m_s1;
 								CGString s1_raw = pArgs->m_s1;
@@ -2599,9 +2599,9 @@ jump_in:
 
 							if ( z && *z )
 							{
-								INT64 iN1 = pArgs->m_iN1;
-								INT64 iN2 = pArgs->m_iN2;
-								INT64 iN3 = pArgs->m_iN3;
+								int64 iN1 = pArgs->m_iN1;
+								int64 iN2 = pArgs->m_iN2;
+								int64 iN3 = pArgs->m_iN3;
 								CScriptObj *pO1 = pArgs->m_pO1;
 								CGString s1 = pArgs->m_s1;
 								CGString s1_raw = pArgs->m_s1;
@@ -3044,7 +3044,7 @@ bool CFileObj::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 				tchar * ppArg = this->GetReadBuffer();
 				ASSERT(ppArg != NULL);
 
-				INT64 iLines = Exp_GetVal(pszKey);
+				int64 iLines = Exp_GetVal(pszKey);
 				if ( iLines < 0 )
 					return( false );
 
@@ -3058,7 +3058,7 @@ bool CFileObj::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 				}
 				else
 				{
-					for ( INT64 x = 1; x <= iLines; ++x )
+					for ( int64 x = 1; x <= iLines; ++x )
 					{
 						if ( sWrite->IsEOF() )
 							break;
@@ -3179,7 +3179,7 @@ bool CFileObj::FileOpen( lpctstr sPath )
 	if ( sWrite->IsFileOpen() )
 		return( false );
 
-	UINT uMode = OF_SHARE_DENY_NONE | OF_TEXT;
+	uint uMode = OF_SHARE_DENY_NONE | OF_TEXT;
 
 	if ( bCreate )	// if we create, we can't append or read
 		uMode |= OF_CREATE;

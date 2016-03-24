@@ -64,7 +64,7 @@ CChar * CChar::NPC_FightFindBestTarget()
 		if ( !m_lastAttackers.size() )
 			return NULL;
 
-		INT64 threat = 0;
+		int64 threat = 0;
 		int iClosest = INT32_MAX;
 		CChar *pChar = NULL;
 		CChar *pClosest = NULL;
@@ -246,7 +246,7 @@ void CChar::NPC_Act_Fight()
 		CVarDefCont * pRange = GetDefKey("THROWRANGE",true);
 		if (pRange)
 		{
-			INT64 RVal[2];
+			int64 RVal[2];
 			size_t iQty = Str_ParseCmds( const_cast<tchar*>(pRange->GetValStr()), RVal, COUNTOF(RVal));
 			switch(iQty)
 			{

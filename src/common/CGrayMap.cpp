@@ -49,7 +49,7 @@ void CGrayCachedMulItem::HitCacheTime()
 	m_timeRef = CServTime::GetCurrentTime();
 }
 
-INT64 CGrayCachedMulItem::GetCacheAge() const
+int64 CGrayCachedMulItem::GetCacheAge() const
 {
 	// In TICK_PER_SEC or milliseconds
 	return( CServTime::GetCurrentTime() - m_timeRef );

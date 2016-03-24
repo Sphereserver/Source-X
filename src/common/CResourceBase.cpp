@@ -829,14 +829,14 @@ void CResourceScript::ReSync()
 	Close();
 }
 
-bool CResourceScript::Open( lpctstr pszFilename, UINT wFlags )
+bool CResourceScript::Open( lpctstr pszFilename, uint wFlags )
 {
 	ADDTOCALLSTACK("CResourceScript::Open");
 	// Open the file if it is not already open for use.
 
 	if ( !IsFileOpen() )
 	{
-		UINT	mode = 0;
+		uint	mode = 0;
 		mode |= OF_SHARE_DENY_WRITE;
 
 		if ( ! CScript::Open( pszFilename, wFlags|mode))	// OF_READ
@@ -1702,12 +1702,12 @@ int CResourceQty::GetResIndex() const
 	return( m_rid.GetResIndex());
 }
 
-INT64 CResourceQty::GetResQty() const
+int64 CResourceQty::GetResQty() const
 {
 	return( m_iQty );
 }
 
-void CResourceQty::SetResQty( INT64 wQty )
+void CResourceQty::SetResQty( int64 wQty )
 {
 	m_iQty = wQty;
 }
@@ -1963,7 +1963,7 @@ void CResourceQtyArray::WriteNames( tchar * pszArgs, size_t index ) const
 			pszArgs += sprintf( pszArgs, ", " );
 		}
 
-		INT64 iQty = GetAt(i).GetResQty();
+		int64 iQty = GetAt(i).GetResQty();
 		if ( iQty )
 		{
 			if ( GetAt(i).GetResType() == RES_SKILL )

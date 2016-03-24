@@ -108,7 +108,7 @@ class CWorldClock
 
 private:
 	CServTime m_timeClock;		// the current relative tick time (in TICK_PER_SEC)
-	INT64 m_Clock_SysPrev;		// System time of the last OnTick() (in CLOCKS_PER_SEC)
+	int64 m_Clock_SysPrev;		// System time of the last OnTick() (in CLOCKS_PER_SEC)
 public:
 	static const char *m_sClassName;
 	CWorldClock()
@@ -122,13 +122,13 @@ private:
 
 public:
 	void Init();
-	void InitTime( INT64 lTimeBase );
+	void InitTime( int64 lTimeBase );
 	bool Advance();
 	CServTime GetCurrentTime() const	// TICK_PER_SEC
 	{
 		return( m_timeClock );
 	}
-	static INT64 GetSystemClock();		// CLOCKS_PER_SEC
+	static int64 GetSystemClock();		// CLOCKS_PER_SEC
 };
 
 class CTimedFunctionHandler
@@ -244,7 +244,7 @@ public:
 	{
 		return m_Clock.GetCurrentTime();  // Time in TICK_PER_SEC
 	}
-	INT64 GetTimeDiff( CServTime time ) const
+	int64 GetTimeDiff( CServTime time ) const
 	{
 		// How long till this event
 		// negative = in the past.
