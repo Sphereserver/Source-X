@@ -135,10 +135,13 @@ public:
 	DIR_TYPE m_dirFace;			// facing this dir.
 	CGString m_sTitle;			// Special title such as "the guard" (replaces the normal skill title).
 	CPointMap m_ptHome;			// What is our "home" region. (towns and bounding of NPC's)
-	FONT_TYPE m_fonttype;		// Speech font to use // can client set this ?
 	INT64 m_virtualGold;		// Virtual gold used by TOL clients
 
-								// In order to revert to original Hue and body.
+	// Speech
+	FONT_TYPE m_fonttype;		// speech font to use (client send this to server, but it's not used)
+	HUE_TYPE m_SpeechHue;		// speech hue to use
+
+	// In order to revert to original Hue and body.
 	CREID_TYPE m_prev_id;		// Backup of body type for ghosts and poly
 	HUE_TYPE m_prev_Hue;		// Backup of skin color. in case of polymorph etc.
 	HUE_TYPE m_wBloodHue;		// Replicating CharDef's BloodColor on the char, or overriding it.

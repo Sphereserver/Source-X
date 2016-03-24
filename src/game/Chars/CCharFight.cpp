@@ -1292,7 +1292,7 @@ bool CChar::Fight_Attack( const CChar *pCharTarg, bool btoldByMaster )
 {
 	ADDTOCALLSTACK("CChar::Fight_Attack");
 
-	if ( !pCharTarg || pCharTarg == this || pCharTarg->IsDisconnected() || !CanSee(pCharTarg) || pCharTarg->IsStatFlag(STATF_DEAD) || IsStatFlag(STATF_DEAD) )
+	if ( !pCharTarg || pCharTarg == this || pCharTarg->IsStatFlag(STATF_DEAD) || IsStatFlag(STATF_DEAD) )
 	{
 		// Not a valid target.
 		Fight_Clear(pCharTarg, true);
@@ -1302,6 +1302,11 @@ bool CChar::Fight_Attack( const CChar *pCharTarg, bool btoldByMaster )
 	{
 		SysMessageDefault(DEFMSG_MSG_GUEST);
 		Fight_Clear(pCharTarg);
+		return false;
+	}
+	else if ( m_pNPC && !CanSee(pCharTarg) )
+	{
+		Skill_Start(SKILL_NONE);
 		return false;
 	}
 

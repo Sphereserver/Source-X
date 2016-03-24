@@ -589,7 +589,7 @@ void CChar::NotoSave_Add( CChar * pChar, NOTO_TYPE value, NOTO_TYPE color  )
 	ADDTOCALLSTACK("CChar::NotoSave_Add");
 	if ( !pChar )
 		return;
-	CGrayUID uid = static_cast<CGrayUID>(pChar->GetUID());
+	CGrayUID uid = pChar->GetUID();
 	if  ( m_notoSaves.size() )	// Checking if I already have him in the list, only if there 's any list.
 	{
 		for (std::vector<NotoSaves>::iterator it = m_notoSaves.begin(); it != m_notoSaves.end(); ++it)

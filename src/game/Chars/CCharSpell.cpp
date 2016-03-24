@@ -478,18 +478,16 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 {
 	ADDTOCALLSTACK("CChar::Spell_Effect_Remove");
 	// we are removing the spell effect.
-	ASSERT(pSpell);
+	// equipped wands do not confer effect.
+	if ( !pSpell || !pSpell->IsTypeSpellable() || pSpell->IsType(IT_WAND) )
+		return;
 
-	if ( !pSpell->IsTypeSpellable() )	// can this item have a spell effect ?
-		return;
-	if ( !pSpell->m_itSpell.m_spell )
-		return;
-	if ( pSpell->IsType(IT_WAND))	// equipped wands do not confer effect.
+	SPELL_TYPE spell = static_cast<SPELL_TYPE>(RES_GET_INDEX(pSpell->m_itSpell.m_spell));
+	const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(spell);
+	if ( !spell || !pSpellDef )
 		return;
 
 	CClient *pClient = GetClient();
-	SPELL_TYPE spell = static_cast<SPELL_TYPE>(RES_GET_INDEX(pSpell->m_itSpell.m_spell));
-	CSpellDef *pSpellDef = g_Cfg.GetSpellDef(spell);
 	short iStatEffect = static_cast<short>(pSpell->m_itSpell.m_spelllevel);
 
 	switch (pSpellDef->m_idLayer)	// spell effects that are common for the same layer fits here
@@ -839,14 +837,13 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 	if ( !pSpell || !pSpell->IsTypeSpellable() || pSpell->IsType(IT_WAND) )
 		return;
 
-	CClient *pClient = GetClient();
-	CChar *pCaster = pSpell->m_uidLink.CharFind();
 	SPELL_TYPE spell = static_cast<SPELL_TYPE>(RES_GET_INDEX(pSpell->m_itSpell.m_spell));
-	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
-
-	if ( !pSpellDef || !spell )
+	const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(spell);
+	if ( !spell || !pSpellDef )
 		return;
 
+	CClient *pClient = GetClient();
+	CChar *pCaster = pSpell->m_uidLink.CharFind();
 	WORD iStatEffect = pSpell->m_itSpell.m_spelllevel;
 	WORD iTimerEffect = static_cast<WORD>(maximum(pSpell->GetTimerAdjusted(), 0));
 
@@ -855,7 +852,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 		CScriptTriggerArgs Args;
 		Args.m_pO1 = pSpell;
 		Args.m_iN1 = spell;
-		TRIGRET_TYPE iRet = OnTrigger(CTRIG_EffectAdd, this, &Args);
+		TRIGRET_TYPE iRet = OnTrigger(CTRIG_EffectAdd, pCaster, &Args);
 		if (iRet == TRIGRET_RET_TRUE)	// Return 1: We don't want nothing to happen, removing memory also.
 		{
 			pSpell->Delete(true);
@@ -1030,6 +1027,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			return;
 		case LAYER_SPELL_Invis:
 			StatFlag_Set(STATF_Invisible);
+			Reveal(STATF_Hidden);	// clear previous Hiding skill effect (this will not reveal the char because STATF_Invisibility still set)
 			UpdateModeFlag();
 			if (pClient && IsSetOF(OF_Buffs))
 			{
@@ -1518,10 +1516,8 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 	ASSERT(pItem);
 
 	SPELL_TYPE spell = static_cast<SPELL_TYPE>(RES_GET_INDEX(pItem->m_itSpell.m_spell));
-
 	int iCharges = pItem->m_itSpell.m_spellcharges;
 	int iLevel = pItem->m_itSpell.m_spelllevel;
-
 
 	switch ( spell )
 	{
@@ -1529,39 +1525,32 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 		case SPELL_Wine:	// 91 = mild drunkeness ?
 		case SPELL_Liquor:	// 92 = extreme drunkeness ?
 		{
-			if ( iLevel <= 0 )
-				return false;
+			// Chance to get sober quickly
+			if ( 10 > Calc_GetRandVal(100) )
+				pItem->m_itSpell.m_spellcharges--;
 
-			// Change to get sober
-			if ( 10 > Calc_GetRandVal(100))
-				return false;
+			Stat_SetVal(STAT_INT, maximum(0, Stat_GetVal(STAT_INT) - 1));
+			Stat_SetVal(STAT_DEX, maximum(0, Stat_GetVal(STAT_DEX) - 1));
 
-			Stat_SetVal( STAT_INT, maximum(0, Stat_GetVal(STAT_INT)-1) );
-			Stat_SetVal( STAT_DEX, maximum(0, Stat_GetVal(STAT_DEX)-1) );
-
-			if ( !Calc_GetRandVal(3))
+			if ( !Calc_GetRandVal(3) )
 			{
-				Speak( g_Cfg.GetDefaultMsg( DEFMSG_SPELL_ALCOHOL_HIC ) );
-				if ( !IsStatFlag(STATF_OnHorse))
+				Speak(g_Cfg.GetDefaultMsg(DEFMSG_SPELL_ALCOHOL_HIC));
+				if ( !IsStatFlag(STATF_OnHorse) )
 				{
-					DIR_TYPE dir = static_cast<DIR_TYPE>(Calc_GetRandVal(8));
-					UpdateDir( dir );
-					UpdateAnimate( ANIM_BOW );
+					UpdateDir(static_cast<DIR_TYPE>(Calc_GetRandVal(8)));
+					UpdateAnimate(ANIM_BOW);
 				}
 			}
 
 			// We will have this effect again
-			//pItem->m_itSpell.m_spelllevel -= 10;
-			pItem->SetTimeout( 5*TICK_PER_SEC );
+			pItem->SetTimeout(5 * TICK_PER_SEC);
 		}
 		break;
 
 		case SPELL_Regenerate:
 		{
 			if (iCharges <= 0 || iLevel <= 0)
-			{
-				return(false);
-			}
+				return false;
 
 			// Gain HP.
 			UpdateStatVal(STAT_STR, static_cast<short>(g_Cfg.GetSpellEffect(spell, iLevel)));
@@ -1592,7 +1581,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 			static const int sm_iPoisonMax[] = { 2, 4, 6, 8, 10 };
 
 			if (iCharges <= 0)
-				return(false);
+				return false;
 
 			int iDmg = 0;
 			// The poison in your body is having an effect.
@@ -1692,18 +1681,18 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 
 			switch (iDiff) //First tick is in 5 seconds (when mem was created), second one in 4, next one in 3, 2 ... and following ones in each second.
 			{
-			case 0:
-				pItem->SetTimeout(4 * TICK_PER_SEC);
-				break;
-			case 1:
-				pItem->SetTimeout(3 * TICK_PER_SEC);
-				break;
-			case 2:
-				pItem->SetTimeout(2 * TICK_PER_SEC);
-				break;
-			default:
-				pItem->SetTimeout(TICK_PER_SEC);
-				break;
+				case 0:
+					pItem->SetTimeout(4 * TICK_PER_SEC);
+					break;
+				case 1:
+					pItem->SetTimeout(3 * TICK_PER_SEC);
+					break;
+				case 2:
+					pItem->SetTimeout(2 * TICK_PER_SEC);
+					break;
+				default:
+					pItem->SetTimeout(TICK_PER_SEC);
+					break;
 			}
 
 			int iSpellPower = static_cast<int>(Calc_GetRandLLVal2(pItem->m_itSpell.m_spelllevel - 2, pItem->m_itSpell.m_spelllevel + 1));
@@ -1715,8 +1704,8 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 			Damage is calculated as follows : The range of damage is between power - 2 and power + 1.
 			Then the damage is multiplied based on the victim's current and maximum Stamina values.
 			The more the victim is fatigued, the more damage this spell deals.
-			The damage is multiplied by the result of this formula: 3 - (Cur Stamina � Max Stamina x 2.
-			For example, suppose the base damage for a Strangle hit is 5. The target currently has 40 out of a maximum of 80 stamina. Final damage for that hit is: 5 x (3 - (40 � 80 x 2) = 10.*/
+			The damage is multiplied by the result of this formula: 3 - (Cur Stamina ÷ Max Stamina x 2.
+			For example, suppose the base damage for a Strangle hit is 5. The target currently has 40 out of a maximum of 80 stamina. Final damage for that hit is: 5 x (3 - (40 ÷ 80 x 2) = 10.*/
 			OnTakeDamage(maximum(1, iDmg), pItem->m_uidLink.CharFind(), DAMAGE_MAGIC | DAMAGE_POISON | DAMAGE_NOREVEAL, 0, 0, 0, 100, 0);
 		}
 		case SPELL_Pain_Spike:
@@ -1727,14 +1716,14 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 		}
 		break;
 
-	default:
-		return( false );
+		default:
+			return false;
 	}
 
 	// Total number of ticks to come back here.
-	if ( --pItem->m_itSpell.m_spellcharges )
-		return( true );
-	return( false );
+	if ( --pItem->m_itSpell.m_spellcharges > 0 )
+		return true;
+	return false;
 }
 
 CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iSkillLevel, int iDuration, CObjBase * pSrc, bool bEquip )
@@ -2940,8 +2929,8 @@ int CChar::Spell_CastStart()
 
 	CScriptTriggerArgs Args(static_cast<int>(m_atMagery.m_Spell), iDifficulty, pItem);
 	Args.m_iN3 = iWaitTime;
-	Args.m_VarsLocal.SetNum("WOP",fWOP);
-	Args.m_VarsLocal.SetNum("WOPColor", m_pNPC ? m_pNPC->m_SpeechHue : g_Cfg.m_iWordsOfPowerColor, true);
+	Args.m_VarsLocal.SetNum("WOP", fWOP);
+	Args.m_VarsLocal.SetNum("WOPColor", g_Cfg.m_iWordsOfPowerColor > 0 ? g_Cfg.m_iWordsOfPowerColor : m_SpeechHue, true);
 	Args.m_VarsLocal.SetNum("WOPFont", g_Cfg.m_iWordsOfPowerFont, true);
 
 	if ( IsTrigUsed(TRIGGER_SPELLCAST) )
@@ -2972,19 +2961,16 @@ int CChar::Spell_CastStart()
 	m_atMagery.m_Spell = static_cast<SPELL_TYPE>(Args.m_iN1);
 	iDifficulty = static_cast<int>(Args.m_iN2);
 	iWaitTime = static_cast<INT64>(Args.m_iN3);
-	fWOP = Args.m_VarsLocal.GetKeyNum("WOP",true) > 0 ? true : false;
-	int WOPColor = static_cast<int>(Args.m_VarsLocal.GetKeyNum("WOPColor", true));
-	if (WOPColor < 0)
-		WOPColor = g_Cfg.m_iWordsOfPowerColor;
-	int WOPFont = static_cast<int>(Args.m_VarsLocal.GetKeyNum("WOPFont", true));
-	if (WOPFont < 0)
-		WOPFont = g_Cfg.m_iWordsOfPowerFont;
 
+	pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
+	if ( !pSpellDef )
+		return -1;
+
+	fWOP = Args.m_VarsLocal.GetKeyNum("WOP", true) > 0 ? true : false;
 	if ( fWOP )
 	{
-		pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
-		if ( !pSpellDef )
-			return -1;
+		INT64 WOPColor = Args.m_VarsLocal.GetKeyNum("WOPColor", true);
+		INT64 WOPFont = Args.m_VarsLocal.GetKeyNum("WOPFont", true);
 
 		if ( pSpellDef->m_sRunes[0] == '.' )
 		{

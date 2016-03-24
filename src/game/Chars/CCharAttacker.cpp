@@ -10,7 +10,7 @@
 bool CChar::Attacker_Add( CChar * pChar, INT64 threat )
 {
 	ADDTOCALLSTACK("CChar::Attacker_Add");
-	CGrayUID uid = static_cast<CGrayUID>(pChar->GetUID());
+	CGrayUID uid = pChar->GetUID();
 	if ( m_lastAttackers.size() )	// Must only check for existing attackers if there are any attacker already.
 	{
 		for ( std::vector<LastAttackers>::iterator it = m_lastAttackers.begin(); it != m_lastAttackers.end(); ++it )

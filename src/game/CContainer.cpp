@@ -437,7 +437,8 @@ int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iRepli
 		iReplicationQty = ResourceConsume(pResources, iReplicationQty, true, dwArg);
 	}
 
-	int iQtyMin = INT32_MAX;
+	CChar *pChar = dynamic_cast<CChar *>(this);
+	int iQtyMin = INT_MAX;
 	for ( size_t i = 0; i < pResources->GetCount(); i++ )
 	{
 		int iResQty = static_cast<int>(pResources->GetAt(i).GetResQty());
@@ -448,12 +449,19 @@ int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iRepli
 		RESOURCE_ID rid = pResources->GetAt(i).GetResourceID();
 		if ( rid.GetResType() == RES_SKILL )
 		{
-			CChar *pChar = dynamic_cast<CChar *>(this);
 			if ( !pChar )
 				continue;
 			if ( pChar->Skill_GetBase(static_cast<SKILL_TYPE>(rid.GetResIndex())) < iResQty )
 				return 0;
 			continue;
+		}
+		else if ( rid.GetResType() == RES_ITEMDEF )	// TAG.MATOVERRIDE_%s
+		{
+			TCHAR * resOverride = Str_GetTemp();
+			sprintf(resOverride,"matoverride_%s",g_Cfg.ResourceGetName( RESOURCE_ID( RES_ITEMDEF, rid ) ));
+			RESOURCE_ID ridOverride = RESOURCE_ID( RES_ITEMDEF , pChar->m_TagDefs.GetKeyNum(resOverride) );
+			if ( ridOverride && rid.GetResIndex() > 0 )
+				rid = ridOverride;
 		}
 
 		int iQtyCur = iQtyTotal - ContentConsume(rid, iQtyTotal, fTest, dwArg);
@@ -462,7 +470,7 @@ int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iRepli
 			iQtyMin = iQtyCur;
 	}
 
-	if ( iQtyMin == INT32_MAX )	// it has no resources ? So i guess we can make it from nothing ?
+	if ( iQtyMin == INT_MAX )	// it has no resources ? So i guess we can make it from nothing ?
 		return iReplicationQty;
 
 	return iQtyMin;
