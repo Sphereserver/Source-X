@@ -2435,7 +2435,7 @@ bool PacketClientVersion::onReceive(NetState* net)
 		net->m_reportedVersion = version;
 		net->detectAsyncMode();
 
-		DEBUG_MSG(("Getting CliVersionReported %lu\n", version));
+		DEBUG_MSG(("Getting CliVersionReported %u\n", version));
 
 		if ((g_Serv.m_ClientVersion.GetClientVer() != 0) && (version != g_Serv.m_ClientVersion.GetClientVer()))
 		{
@@ -2443,7 +2443,7 @@ bool PacketClientVersion::onReceive(NetState* net)
 		}
 		else if ((net->getCryptVersion() < MINCLIVER_TOOLTIP) && (version >= MINCLIVER_TOOLTIP) && (client->GetResDisp() >= RDS_AOS) && (IsAosFlagEnabled(FEATURE_AOS_UPDATE_B))) //workaround for a "bug", which sends all items in LOS before processing this packet
 		{
-			DEBUG_MSG(("m_Crypt.GetClientVer()(%lu) != m_reportedCliver(%lu) == %x\n", net->getCryptVersion(), version, (net->getCryptVersion() != version)));
+			DEBUG_MSG(("m_Crypt.GetClientVer()(%u) != m_reportedCliver(%u) == %x\n", net->getCryptVersion(), version, (net->getCryptVersion() != version)));
 			client->addAOSPlayerSeeNoCrypt();
 		}
 	}

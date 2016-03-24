@@ -521,11 +521,11 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
 
 		if ( RES_GET_INDEX(pVarKey->GetValNum()) == GetResourceID().GetResIndex())
 		{
-			DEBUG_WARN(( "The DEFNAME=%s has a strange type mismatch? 0%llx!=0%x\n", pszName, pVarKey->GetValNum(), GetResourceID().GetPrivateUID() ));
+			DEBUG_WARN(( "The DEFNAME=%s has a strange type mismatch? 0%" PRIx64 "!=0%x\n", pszName, pVarKey->GetValNum(), GetResourceID().GetPrivateUID() ));
 		}
 		else
 		{
-			DEBUG_WARN(( "The DEFNAME=%s already exists! 0%llx!=0%x\n", pszName, RES_GET_INDEX(pVarKey->GetValNum()), GetResourceID().GetResIndex() ));
+			DEBUG_WARN(( "The DEFNAME=%s already exists! 0%" PRIx64 "!=0%x\n", pszName, RES_GET_INDEX(pVarKey->GetValNum()), GetResourceID().GetResIndex() ));
 		}
 
 		iVarNum = g_Exp.m_VarDefs.SetNum( pszName, GetResourceID().GetPrivateUID() );
@@ -1717,9 +1717,7 @@ size_t CResourceQty::WriteKey( tchar * pszArgs, bool fQtyOnly, bool fKeyOnly ) c
 	ADDTOCALLSTACK("CResourceQty::WriteKey");
 	size_t i = 0;
 	if ( (GetResQty() || fQtyOnly) && !fKeyOnly )
-	{
-		i = sprintf( pszArgs, "%lld ", GetResQty());
-	}
+		i = sprintf( pszArgs, "%" PRId64 , GetResQty());
 	if ( !fQtyOnly )
 		i += strcpylen( pszArgs+i, g_Cfg.ResourceGetName( m_rid ));
 	return( i );
@@ -1968,11 +1966,11 @@ void CResourceQtyArray::WriteNames( tchar * pszArgs, size_t index ) const
 		{
 			if ( GetAt(i).GetResType() == RES_SKILL )
 			{
-				pszArgs += sprintf( pszArgs, "%lld.%lld ",
+				pszArgs += sprintf( pszArgs, "%" PRId64 ".%" PRId64 ,
 						iQty / 10, iQty % 10 );
 			}
 			else
-				pszArgs += sprintf( pszArgs, "%lld ", iQty);
+				pszArgs += sprintf( pszArgs, "%" PRId64 , iQty);
 		}
 
 		pszArgs += GetAt(i).WriteNameSingle( pszArgs, static_cast<int>(iQty) );

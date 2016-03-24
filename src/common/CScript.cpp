@@ -730,7 +730,7 @@ void CScript::WriteKeyVal( lpctstr pszKey, int64 dwVal )
 #ifdef __MINGW32__
 	WriteKeyFormat( pszKey, "%I64d", dwVal );
 #else  // __MINGW32__
-	WriteKeyFormat( pszKey, "%lld", dwVal );
+	WriteKeyFormat( pszKey, "%" PRId64 , dwVal );
 #endif  // __MINGW32__
 }
 
@@ -739,7 +739,7 @@ void CScript::WriteKeyHex( lpctstr pszKey, int64 dwVal )
 #ifdef __MINGW32__
 	WriteKeyFormat( pszKey, "0%I64x", dwVal );
 #else  // __MINGW32__
-	WriteKeyFormat( pszKey, "0%llx", dwVal );
+	WriteKeyFormat( pszKey, "0%" PRIx64 , dwVal );
 #endif  // __MINGW32__
 }
 

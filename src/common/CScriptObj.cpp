@@ -943,7 +943,7 @@ badcmd:
 		case SSC_FVAL:
 			{
 				int64 iVal = Exp_GetLLVal(pszKey);
-				sVal.Format( "%s%lld.%lld", (iVal >= 0) ? "" : "-", llabs(iVal/10), llabs(iVal%10) );
+				sVal.Format( "%s%" PRId64 ".%" PRId64 , (iVal >= 0) ? "" : "-", llabs(iVal/10), llabs(iVal%10) );
 				return true;
 			}
 		case SSC_HVAL:
@@ -1051,7 +1051,7 @@ badcmd:
 				buf[iCnt] = '\0';
 
 				if ( g_Cfg.m_wDebugFlags & DEBUGF_SCRIPTS )
-					g_Log.EventDebug("SCRIPT: strsub(%lld,%lld,'%s') -> '%s'\n", iPos, iCnt, ppArgs[2], buf);
+					g_Log.EventDebug("SCRIPT: strsub(%" PRId64 ",%" PRId64 ",'%s') -> '%s'\n", iPos, iCnt, ppArgs[2], buf);
 
 				sVal = buf;
 			}
@@ -1249,12 +1249,12 @@ badcmd:
 				int64 iRes = 0;
 
 				if ( iDiv == 0 )
-					g_Log.EventWarn("MULDIV(%lld,%lld,%lld) -> Dividing by '0'\n", iNum, iMul, iDiv);
+					g_Log.EventWarn("MULDIV(%" PRId64 ",%" PRId64 ",%" PRId64 ") -> Dividing by '0'\n", iNum, iMul, iDiv);
 				else
 					iRes = IMULDIV(iNum,iMul,iDiv);
 
 				if ( g_Cfg.m_wDebugFlags & DEBUGF_SCRIPTS )
-					g_Log.EventDebug("SCRIPT: muldiv(%lld,%lld,%lld) -> %lld\n", iNum, iMul, iDiv, iRes);
+					g_Log.EventDebug("SCRIPT: muldiv(%" PRId64 ",%" PRId64 ",%" PRId64 ") -> %" PRId64 "\n", iNum, iMul, iDiv, iRes);
 
 				sVal.FormatLLVal(iRes);
 			}

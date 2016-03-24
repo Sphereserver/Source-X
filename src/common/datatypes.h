@@ -4,9 +4,10 @@
 */
 
 // If windows.h was included the api string types were declared, so let's declare our aliases.
+// This is outside the main include guard since this file can be loaded multiple times, with windows.h included or not.
 #if defined(_WINDOWS_) && !defined(_INC_DATATYPES_H_STR)
 	/* IMPORTANT: for Windows-specific code, especially when using Windows API calls,
-	we should use WinAPI data types (so, for example, dword instead of dword) */
+	we should use WinAPI data types (so, for example, DWORD instead of dword) */
 	#define _INC_DATATYPES_H_STR
 	typedef	TCHAR		tchar;
 	typedef WCHAR		wchar;
@@ -25,13 +26,17 @@
 
 
 #include <cinttypes>
-/*  -- Macros from <cinttypes> we should use when formatting numbers inside strings --
-	--  (like in printf/sprintf/etc) to achieve best cross-platform support			--
+/*  -- Macros from <cinttypes> we should use when formatting numbers inside strings		--
+	--  (like in printf/sprintf/etc) to achieve best cross-platform/compiler support	--
 	Examples:	(u: unsigned - x: hex - d: decimal)
-	PRIu8		//for byte
-	PRIu16		//for word
-	PRIu32		//for dword
-	PRId64		//for long long
+
+	Mandatory:
+	PRId64		// for long long
+	PRIx64		// llong, hexadecimal
+	PRIu64		// llong, unsigned
+
+	Optional (for now):
+	all the others
 */
 
 typedef unsigned char			uchar;
@@ -46,7 +51,7 @@ typedef uint8_t			byte;		// 8 bits
 typedef uint16_t		word;		// 16 bits
 typedef uint32_t		dword;		// 32 bits
 
-/*			Use the following types only if you know *why* you need them.
+/*		Use the following types only if you know *why* you need them.
 These types have a specified size, while standard data types (short, int, etc) haven't:
 for example, sizeof(int) is definied to be >= sizeof(short) and <= sizeof(long), so it hasn't a fixed size;
 this concept is valid for both non unix and unix OS.
@@ -65,18 +70,7 @@ typedef	uint32_t		uint32;
 typedef	uint64_t		uint64;
 
 
-#ifdef _WIN32
-	
-	// Since on MinGW %llx and %llu throw warnings...
-	#ifdef __MINGW__
-		#undef  PRIu64
-		#undef  PRIx64
-		#define PRIu64 "l64"
-		#define PRIx64 "l64x"
-	#endif
-
-#else	//	assume unix if !_WIN32
-
+#ifndef _WIN32			//	assume unix if !_WIN32
 	#include <wchar.h>
 	#ifdef UNICODE
 		typedef	wchar_t			tchar;
@@ -90,7 +84,6 @@ typedef	uint64_t		uint64;
 	typedef	const char *		lpcstr;
 	typedef	tchar *				lptstr;
 	typedef const tchar *		lpctstr;
-
-#endif // _WIN32
+#endif // !_WIN32
 
 #endif // _INC_DATATYPES_H

@@ -61,7 +61,7 @@ CClient::CClient(NetState* state)
 
 	m_Env.SetInvalid();
 
-	g_Log.Event(LOGM_CLIENTS_LOG, "%lx:Client connected [Total:%lu] ('%s' %ld/%ld)\n",
+	g_Log.Event(LOGM_CLIENTS_LOG, "%x:Client connected [Total:%u] ('%s' %d/%d)\n",
 		GetSocketID(), g_Serv.StatGet(SERV_STAT_CLIENTS), GetPeerStr(), history.m_connecting, history.m_connected);
 
 	m_zLastMessage[0] = 0;
@@ -617,14 +617,14 @@ bool CClient::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
 					SKIP_SEPARATORS(pszKey);
 
 					if ( !strnicmp("X", pszKey, 1) )
-						sVal.Format( "%lu", m_ScreenSize.x );
+						sVal.Format( "%u", m_ScreenSize.x );
 					else if ( !strnicmp("Y", pszKey, 1) )
-						sVal.Format( "%lu", m_ScreenSize.y );
+						sVal.Format( "%u", m_ScreenSize.y );
 					else
 						return( false );
 				}
 				else
-					sVal.Format( "%lu,%lu", m_ScreenSize.x, m_ScreenSize.y );
+					sVal.Format( "%u,%u", m_ScreenSize.x, m_ScreenSize.y );
 			} break;
 		case CC_TARG:
 			sVal.FormatHex(m_Targ_UID);
@@ -896,7 +896,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				}
 
 				if ( g_Cfg.m_wDebugFlags & DEBUGF_SCRIPTS )
-					g_Log.EventDebug("SCRIPT: addcliloc(%lu,'%s')\n", clilocid, static_cast<lpctstr>(LocArgs));
+					g_Log.EventDebug("SCRIPT: addcliloc(%u,'%s')\n", clilocid, static_cast<lpctstr>(LocArgs));
 				this->m_TooltipData.Add(new CClientTooltip(clilocid, LocArgs));
 			}
 			break;
@@ -986,7 +986,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 									CPointMap	pt = pItem->GetTopPoint();
 									m_pChar->Spell_Teleport(pt, true, false);
 									m_pChar->m_Act_Targ = pItem->GetUID();
-									SysMessagef("Bad spawn (0%lx, id=%s). Set as ACT", (dword)pItem->GetUID(), g_Cfg.ResourceGetName(rid));
+									SysMessagef("Bad spawn (0%x, id=%s). Set as ACT", (dword)pItem->GetUID(), g_Cfg.ResourceGetName(rid));
 									fFound = true;
 								}
 							}

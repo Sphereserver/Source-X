@@ -546,7 +546,7 @@ try_dec:
 							llong iArgument = GetVal(pszArgs);
 							if ( iArgument <= 0 )
 							{
-								DEBUG_ERR(( "Exp_GetVal: (x)Log(%lld) is %s\n", iArgument, (!iArgument) ? "infinite" : "undefined" ));
+								DEBUG_ERR(( "Exp_GetVal: (x)Log(%" PRId64 ") is %s\n", iArgument, (!iArgument) ? "infinite" : "undefined" ));
 							}
 							else
 							{
@@ -568,7 +568,7 @@ try_dec:
 										llong iBase = GetVal(pszArgs);
 										if ( iBase <= 0 )
 										{
-											DEBUG_ERR(( "Exp_GetVal: (%lld)Log(%d) is %s\n", iBase, iArgument, (!iBase) ? "infinite" : "undefined" ));
+											DEBUG_ERR(( "Exp_GetVal: (%" PRId64 ")Log(%d) is %s\n", iBase, iArgument, (!iBase) ? "infinite" : "undefined" ));
 											iCount = 0;
 										}
 										else

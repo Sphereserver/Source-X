@@ -1381,7 +1381,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		TIME_PROFILE_END;
 
 		tchar * time = Str_GetTemp();
-		sprintf(time, "%lld.%04lld", static_cast<int64>(TIME_PROFILE_GET_HI/1000), static_cast<int64>(TIME_PROFILE_GET_LO));
+		sprintf(time, "%" PRId64 ".%04lld", static_cast<int64>(TIME_PROFILE_GET_HI/1000), static_cast<int64>(TIME_PROFILE_GET_LO));
 
 		g_Log.Event(LOGM_SAVE, "World save completed, took %s seconds\n", time);
 
@@ -1408,7 +1408,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("stage '%d' qty '%d' time '%lld'\n", m_iSaveStage, m_SectorsQty, m_timeSave.GetTimeRaw());
+	g_Log.EventDebug("stage '%d' qty '%d' time '%" PRId64 "'\n", m_iSaveStage, m_SectorsQty, m_timeSave.GetTimeRaw());
 	EXC_DEBUG_END;
 
 	m_iSaveStage++;	// to avoid loops, we need to skip the current operation in world save
@@ -2265,11 +2265,11 @@ void CWorld::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE wHu
 		{
 			//if ( sTextUID.IsEmpty() )
 			//{
-			//	sTextUID.Format("<%s [%lx]>", pSrc->GetName(), (dword)pSrc->GetUID());
+			//	sTextUID.Format("<%s [%x]>", pSrc->GetName(), (dword)pSrc->GetUID());
 			//}
 			//myName = sTextUID;
 			if ( !*myName )
-				sprintf(myName, "<%s [%lx]>", pSrc->GetName(), (dword)pSrc->GetUID());
+				sprintf(myName, "<%s [%x]>", pSrc->GetName(), (dword)pSrc->GetUID());
 		}
 		if (*myName)
 			pClient->addBarkParse( pszSpeak, pSrc, wHue, mode, font, false, myName );

@@ -391,7 +391,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 				GetPrivLevel() >= PLEVEL_GM &&
 				( g_Cfg.m_wDebugFlags & DEBUGF_ADVANCE_STATS ))
 			{
-				SysMessagef( "%s=%d.%d Difficult=%d Gain Chance=%lld.%lld%% Roll=%d%%",
+				SysMessagef( "%s=%d.%d Difficult=%d Gain Chance=%" PRId64 ".%" PRId64 "%% Roll=%d%%",
 					(lpctstr) pSkillDef->GetKey(),
 					iSkillLevel/10,(iSkillLevel)%10,
 					difficulty/10, iChance/10, iChance%10, iRoll/10 );

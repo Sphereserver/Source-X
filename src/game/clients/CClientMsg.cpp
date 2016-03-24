@@ -2769,7 +2769,7 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 					m_TooltipData.InsertAt(0, t = new CClientTooltip(1050045)); // ~1_PREFIX~~2_NAME~~3_SUFFIX~
 					if (ClilocName)
 					{
-						t->FormatArgs("%s\t%lu\t%s", lpPrefix, ClilocName, lpSuffix);
+						t->FormatArgs("%s\t%u\t%s", lpPrefix, ClilocName, lpSuffix);
 					}
 					else
 					{
@@ -2874,14 +2874,14 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 					if ( ArtifactRarity > 0 )
 					{
 						this->m_TooltipData.Add( t = new CClientTooltip( 1061078 ) ); // artifact rarity ~1_val~
-						t->FormatArgs( "%lld", ArtifactRarity );
+						t->FormatArgs( "%" PRId64 , ArtifactRarity );
 					}
 
 					int64 UsesRemaining = pItem->GetDefNum("USESCUR", true, true);
 					if ( UsesRemaining > 0 )
 					{
 						this->m_TooltipData.Add( t = new CClientTooltip( 1060584 ) ); // uses remaining: ~1_val~
-						t->FormatArgs( "%lld", UsesRemaining );
+						t->FormatArgs( "%" PRId64 , UsesRemaining );
 					}
 
 					if ( pItem->IsTypeArmorWeapon())
@@ -2893,91 +2893,91 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 						if ( DamageIncrease != 0 )
 						{
 							this->m_TooltipData.Add( t = new CClientTooltip( 1060401 ) ); // damage increase ~1_val~%
-							t->FormatArgs( "%lld", DamageIncrease );
+							t->FormatArgs( "%" PRId64 , DamageIncrease );
 						}
 
 						int64 DefenceChanceIncrease = pItem->GetDefNum("INCREASEDEFCHANCE", true, true);
 						if ( DefenceChanceIncrease != 0 )
 						{
 							this->m_TooltipData.Add( t = new CClientTooltip( 1060408 ) ); // defense chance increase ~1_val~%
-							t->FormatArgs( "%lld", DefenceChanceIncrease );
+							t->FormatArgs( "%" PRId64 , DefenceChanceIncrease );
 						}
 
 						int64 DexterityBonus = pItem->GetDefNum("BONUSDEX", true, true);
 						if ( DexterityBonus != 0 )
 						{
 							this->m_TooltipData.Add( t = new CClientTooltip( 1060409 ) ); // dexterity bonus ~1_val~
-							t->FormatArgs( "%lld", DexterityBonus );
+							t->FormatArgs( "%" PRId64 , DexterityBonus );
 						}
 
 						int64 EnhancePotions = pItem->GetDefNum("ENHANCEPOTIONS", true, true);
 						if ( EnhancePotions != 0 )
 						{
 							this->m_TooltipData.Add( t = new CClientTooltip( 1060411 ) ); // enhance potions ~1_val~%
-							t->FormatArgs( "%lld", EnhancePotions );
+							t->FormatArgs( "%" PRId64 , EnhancePotions );
 						}
 
 						int64 FasterCastRecovery = pItem->GetDefNum("FASTERCASTRECOVERY", true, true);
 						if ( FasterCastRecovery != 0 )
 						{
 							this->m_TooltipData.Add( t = new CClientTooltip( 1060412 ) ); // faster cast recovery ~1_val~
-							t->FormatArgs( "%lld", FasterCastRecovery );
+							t->FormatArgs( "%" PRId64 , FasterCastRecovery );
 						}
 
 						int64 FasterCasting = pItem->GetDefNum("FASTERCASTING", true, true);
 						if ( FasterCasting != 0 )
 						{
 							this->m_TooltipData.Add( t = new CClientTooltip( 1060413 ) ); // faster casting ~1_val~
-							t->FormatArgs( "%lld", FasterCasting );
+							t->FormatArgs( "%" PRId64 , FasterCasting );
 						}
 
 						int64 HitChanceIncrease = pItem->GetDefNum("INCREASEHITCHANCE", true, true);
 						if ( HitChanceIncrease != 0 )
 						{
 							this->m_TooltipData.Add( t = new CClientTooltip( 1060415 ) ); // hit chance increase ~1_val~%
-							t->FormatArgs( "%lld", HitChanceIncrease );
+							t->FormatArgs( "%" PRId64 , HitChanceIncrease );
 						}
 
 						int64 HitPointIncrease = pItem->GetDefNum("BONUSHITS", true, true);
 						if ( HitPointIncrease != 0 )
 						{
 							this->m_TooltipData.Add( t = new CClientTooltip( 1060431 ) ); // hit point increase ~1_val~%
-							t->FormatArgs( "%lld", HitPointIncrease );
+							t->FormatArgs( "%" PRId64 , HitPointIncrease );
 						}
 
 						int64 IntelligenceBonus = pItem->GetDefNum("BONUSINT", true, true);
 						if ( IntelligenceBonus != 0 )
 						{
 							this->m_TooltipData.Add( t = new CClientTooltip( 1060432 ) ); // intelligence bonus ~1_val~
-							t->FormatArgs( "%lld", IntelligenceBonus );
+							t->FormatArgs( "%" PRId64 , IntelligenceBonus );
 						}
 
 						int64 LowerManaCost = pItem->GetDefNum("LOWERMANACOST", true, true);
 						if ( LowerManaCost != 0 )
 						{
 							this->m_TooltipData.Add( t = new CClientTooltip( 1060433 ) ); // lower mana cost ~1_val~%
-							t->FormatArgs( "%lld", LowerManaCost );
+							t->FormatArgs( "%" PRId64 , LowerManaCost );
 						}
 
 						int64 LowerReagentCost = pItem->GetDefNum("LOWERREAGENTCOST", true, true);
 						if ( LowerReagentCost != 0 )
 						{
 							this->m_TooltipData.Add( t = new CClientTooltip( 1060434 ) ); // lower reagent cost ~1_val~%
-							t->FormatArgs( "%lld", LowerReagentCost );
+							t->FormatArgs( "%" PRId64 , LowerReagentCost );
 						}
 
 						int64 LowerRequirements = pItem->GetDefNum("LOWERREQ", true, true);
 						if ( LowerRequirements != 0 )
 						{
 							this->m_TooltipData.Add( t = new CClientTooltip( 1060435 ) ); // lower requirements ~1_val~%
-							t->FormatArgs( "%lld", LowerRequirements );
+							t->FormatArgs( "%" PRId64 , LowerRequirements );
 						}
 
 						int64 Luck = pItem->GetDefNum("LUCK", true, true);
 						if ( Luck != 0 )
 						{
 							this->m_TooltipData.Add( t = new CClientTooltip( 1060436 ) ); // luck ~1_val~
-							t->FormatArgs( "%lld", Luck );
+							t->FormatArgs( "%" PRId64 , Luck );
 						}
 
 						if ( pItem->GetDefNum("MAGEARMOR", true, true))
@@ -2987,21 +2987,21 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 						if ( MageWeapon != 0 )
 						{
 							this->m_TooltipData.Add( t = new CClientTooltip( 1060438 ) ); // mage weapon -~1_val~ skill
-							t->FormatArgs( "%lld", MageWeapon );
+							t->FormatArgs( "%" PRId64 , MageWeapon );
 						}
 
 						int64 ManaIncrease = pItem->GetDefNum("BONUSMANA", true, true);
 						if ( ManaIncrease != 0 )
 						{
 							this->m_TooltipData.Add( t = new CClientTooltip( 1060439 ) ); // mana increase ~1_val~
-							t->FormatArgs( "%lld", ManaIncrease );
+							t->FormatArgs( "%" PRId64 , ManaIncrease );
 						}
 
 						int64 ManaRegeneration = pItem->GetDefNum("REGENMANA", true, true);
 						if ( ManaRegeneration != 0 )
 						{
 							this->m_TooltipData.Add( t = new CClientTooltip( 1060440 ) ); // mana regeneration ~1_val~
-							t->FormatArgs( "%lld", ManaRegeneration );
+							t->FormatArgs( "%" PRId64 , ManaRegeneration );
 						}
 
 						if ( pItem->GetDefNum("NIGHTSIGHT", true, true))
@@ -3011,28 +3011,28 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 						if ( ReflectPhysicalDamage != 0 )
 						{
 							this->m_TooltipData.Add( t = new CClientTooltip( 1060442 ) ); // reflect physical damage ~1_val~%
-							t->FormatArgs( "%lld", ReflectPhysicalDamage );
+							t->FormatArgs( "%" PRId64 , ReflectPhysicalDamage );
 						}
 
 						int64 StaminaRegeneration = pItem->GetDefNum("REGENSTAM", true, true);
 						if ( StaminaRegeneration != 0 )
 						{
 							this->m_TooltipData.Add( t = new CClientTooltip( 1060443 ) ); // stamina regeneration ~1_val~
-							t->FormatArgs( "%lld", StaminaRegeneration );
+							t->FormatArgs( "%" PRId64 , StaminaRegeneration );
 						}
 
 						int64 HitPointRegeneration = pItem->GetDefNum("REGENHITS", true, true);
 						if ( HitPointRegeneration != 0 )
 						{
 							this->m_TooltipData.Add( t = new CClientTooltip( 1060444 ) ); // hit point regeneration ~1_val~
-							t->FormatArgs( "%lld", HitPointRegeneration );
+							t->FormatArgs( "%" PRId64 , HitPointRegeneration );
 						}
 
 						int64 SelfRepair = pItem->GetDefNum("SELFREPAIR", true, true);
 						if ( SelfRepair != 0 )
 						{
 							this->m_TooltipData.Add( t = new CClientTooltip( 1060450 ) ); // self repair ~1_val~
-							t->FormatArgs( "%lld", SelfRepair );
+							t->FormatArgs( "%" PRId64 , SelfRepair );
 						}
 
 						if ( pItem->GetDefNum("SPELLCHANNELING", true, true))
@@ -3042,35 +3042,35 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 						if ( SpellDamageIncrease != 0 )
 						{
 							this->m_TooltipData.Add( t = new CClientTooltip( 1060483 ) ); // spell damage increase ~1_val~%
-							t->FormatArgs( "%lld", SpellDamageIncrease );
+							t->FormatArgs( "%" PRId64 , SpellDamageIncrease );
 						}
 
 						int64 StaminaIncrease = pItem->GetDefNum("BONUSSTAM", true, true);
 						if ( StaminaIncrease != 0 )
 						{
 							this->m_TooltipData.Add( t = new CClientTooltip( 1060484 ) ); // stamina increase ~1_val~
-							t->FormatArgs( "%lld", StaminaIncrease );
+							t->FormatArgs( "%" PRId64 , StaminaIncrease );
 						}
 
 						int64 StrengthBonus = pItem->GetDefNum("BONUSSTR", true, true);
 						if ( StrengthBonus != 0 )
 						{
 							this->m_TooltipData.Add( t = new CClientTooltip( 1060485 ) ); // strength bonus ~1_val~
-							t->FormatArgs( "%lld", StrengthBonus );
+							t->FormatArgs( "%" PRId64 , StrengthBonus );
 						}
 
 						int64 SwingSpeedIncrease = pItem->GetDefNum("INCREASESWINGSPEED", true, true);
 						if ( SwingSpeedIncrease != 0 )
 						{
 							this->m_TooltipData.Add( t = new CClientTooltip( 1060486 ) ); // swing speed increase ~1_val~%
-							t->FormatArgs( "%lld", SwingSpeedIncrease );
+							t->FormatArgs( "%" PRId64 , SwingSpeedIncrease );
 						}
 
 						int64 IncreasedKarmaLoss = pItem->GetDefNum("INCREASEKARMALOSS", true, true);
 						if ( IncreasedKarmaLoss != 0 )
 						{
 							this->m_TooltipData.Add( t = new CClientTooltip( 1075210 ) ); // increased karma loss ~1val~%
-							t->FormatArgs( "%lld", IncreasedKarmaLoss );
+							t->FormatArgs( "%" PRId64 , IncreasedKarmaLoss );
 						}
 					}
 
@@ -3100,35 +3100,35 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 									if (PhysicalResist != 0)
 									{
 										this->m_TooltipData.Add(t = new CClientTooltip(1060448)); // physical resist ~1_val~%
-										t->FormatArgs("%lld", PhysicalResist);
+										t->FormatArgs("%" PRId64 , PhysicalResist);
 									}
 
 									int64 FireResist = pItem->GetDefNum("RESFIRE", true, true);
 									if (FireResist != 0)
 									{
 										this->m_TooltipData.Add(t = new CClientTooltip(1060447)); // fire resist ~1_val~%
-										t->FormatArgs("%lld", FireResist);
+										t->FormatArgs("%" PRId64 , FireResist);
 									}
 
 									int64 ColdResist = pItem->GetDefNum("RESCOLD", true, true);
 									if (ColdResist != 0)
 									{
 										this->m_TooltipData.Add(t = new CClientTooltip(1060445)); // cold resist ~1_val~%
-										t->FormatArgs("%lld", ColdResist);
+										t->FormatArgs("%" PRId64 , ColdResist);
 									}
 
 									int64 PoisonResist = pItem->GetDefNum("RESPOISON", true, true);
 									if (PoisonResist != 0)
 									{
 										this->m_TooltipData.Add(t = new CClientTooltip(1060449)); // poison resist ~1_val~%
-										t->FormatArgs("%lld", PoisonResist);
+										t->FormatArgs("%" PRId64 , PoisonResist);
 									}
 
 									int64 EnergyResist = pItem->GetDefNum("RESENERGY", true, true);
 									if (EnergyResist != 0)
 									{
 										this->m_TooltipData.Add(t = new CClientTooltip(1060446)); // energy resist ~1_val~%
-										t->FormatArgs("%lld", EnergyResist);
+										t->FormatArgs("%" PRId64 , EnergyResist);
 									}
 								}
 
@@ -3145,7 +3145,7 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 								if ( StrengthRequirement > 0 )
 								{
 									this->m_TooltipData.Add( t = new CClientTooltip( 1061170 ) ); // strength requirement ~1_val~
-									t->FormatArgs( "%lld", StrengthRequirement );
+									t->FormatArgs( "%" PRId64 , StrengthRequirement );
 								}
 
 								this->m_TooltipData.Add( t = new CClientTooltip( 1060639 ) ); // durability ~1_val~ / ~2_val~
@@ -3175,154 +3175,154 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 								if ( HitColdArea != 0 )
 								{
 									this->m_TooltipData.Add( t = new CClientTooltip( 1060416 ) ); // hit cold area ~1_val~%
-									t->FormatArgs( "%lld", HitColdArea );
+									t->FormatArgs( "%" PRId64 , HitColdArea );
 								}
 
 								int64 HitDispel = pItem->GetDefNum("HITDISPEL", true, true);
 								if ( HitDispel != 0 )
 								{
 									this->m_TooltipData.Add( t = new CClientTooltip( 1060417 ) ); // hit dispel ~1_val~%
-									t->FormatArgs( "%lld", HitDispel );
+									t->FormatArgs( "%" PRId64 , HitDispel );
 								}
 
 								int64 HitEnergyArea = pItem->GetDefNum("HITAREAENERGY", true, true);
 								if ( HitEnergyArea != 0 )
 								{
 									this->m_TooltipData.Add( t = new CClientTooltip( 1060418 ) ); // hit energy area ~1_val~%
-									t->FormatArgs( "%lld", HitEnergyArea );
+									t->FormatArgs( "%" PRId64 , HitEnergyArea );
 								}
 
 								int64 HitFireArea = pItem->GetDefNum("HITAREAFIRE", true, true);
 								if ( HitFireArea != 0 )
 								{
 									this->m_TooltipData.Add( t = new CClientTooltip( 1060419 ) ); // hit fire area ~1_val~%
-									t->FormatArgs( "%lld", HitFireArea );
+									t->FormatArgs( "%" PRId64 , HitFireArea );
 								}
 
 								int64 HitFireball = pItem->GetDefNum("HITFIREBALL", true, true);
 								if ( HitFireball != 0 )
 								{
 									this->m_TooltipData.Add( t = new CClientTooltip( 1060420 ) ); // hit fireball ~1_val~%
-									t->FormatArgs( "%lld", HitFireball );
+									t->FormatArgs( "%" PRId64 , HitFireball );
 								}
 
 								int64 HitHarm = pItem->GetDefNum("HITHARM", true, true);
 								if ( HitHarm != 0 )
 								{
 									this->m_TooltipData.Add( t = new CClientTooltip( 1060421 ) ); // hit harm ~1_val~%
-									t->FormatArgs( "%lld", HitHarm );
+									t->FormatArgs( "%" PRId64 , HitHarm );
 								}
 
 								int64 HitLifeLeech = pItem->GetDefNum("HITLEECHLIFE", true, true);
 								if ( HitLifeLeech != 0 )
 								{
 									this->m_TooltipData.Add( t = new CClientTooltip( 1060422 ) ); // hit life leech ~1_val~%
-									t->FormatArgs( "%lld", HitLifeLeech );
+									t->FormatArgs( "%" PRId64 , HitLifeLeech );
 								}
 
 								int64 HitLightning = pItem->GetDefNum("HITLIGHTNING", true, true);
 								if ( HitLightning != 0 )
 								{
 									this->m_TooltipData.Add( t = new CClientTooltip( 1060422 ) ); // hit lightning ~1_val~%
-									t->FormatArgs( "%lld", HitLightning );
+									t->FormatArgs( "%" PRId64 , HitLightning );
 								}
 
 								int64 HitLowerAttack = pItem->GetDefNum("HITLOWERATK", true, true);
 								if ( HitLowerAttack != 0 )
 								{
 									this->m_TooltipData.Add( t = new CClientTooltip( 1060424 ) ); // hit lower attack ~1_val~%
-									t->FormatArgs( "%lld", HitLowerAttack );
+									t->FormatArgs( "%" PRId64 , HitLowerAttack );
 								}
 
 								int64 HitLowerDefense = pItem->GetDefNum("HITLOWERDEF", true, true);
 								if ( HitLowerDefense != 0 )
 								{
 									this->m_TooltipData.Add( t = new CClientTooltip( 1060425 ) ); // hit lower defense ~1_val~%
-									t->FormatArgs( "%lld", HitLowerDefense );
+									t->FormatArgs( "%" PRId64 , HitLowerDefense );
 								}
 
 								int64 HitMagicArrow = pItem->GetDefNum("HITMAGICARROW", true, true);
 								if ( HitMagicArrow != 0 )
 								{
 									this->m_TooltipData.Add( t = new CClientTooltip( 1060426 ) ); // hit magic arrow ~1_val~%
-									t->FormatArgs( "%lld", HitMagicArrow );
+									t->FormatArgs( "%" PRId64 , HitMagicArrow );
 								}
 
 								int64 HitManaLeech = pItem->GetDefNum("HITLEECHMANA", true, true);
 								if ( HitManaLeech != 0 )
 								{
 									this->m_TooltipData.Add( t = new CClientTooltip( 1060427 ) ); // hit mana leech ~1_val~%
-									t->FormatArgs( "%lld", HitManaLeech );
+									t->FormatArgs( "%" PRId64 , HitManaLeech );
 								}
 
 								int64 HitPhysicalArea = pItem->GetDefNum("HITAREAPHYSICAL", true, true);
 								if ( HitPhysicalArea != 0 )
 								{
 									this->m_TooltipData.Add( t = new CClientTooltip( 1060428 ) ); // hit physical area ~1_val~%
-									t->FormatArgs( "%lld", HitPhysicalArea );
+									t->FormatArgs( "%" PRId64 , HitPhysicalArea );
 								}
 
 								int64 HitPoisonArea = pItem->GetDefNum("HITAREAPOISON", true, true);
 								if ( HitPoisonArea != 0 )
 								{
 									this->m_TooltipData.Add( t = new CClientTooltip( 1060429 ) ); // hit poison area ~1_val~%
-									t->FormatArgs( "%lld", HitPoisonArea );
+									t->FormatArgs( "%" PRId64 , HitPoisonArea );
 								}
 
 								int64 HitStaminaLeech = pItem->GetDefNum("HITLEECHSTAM", true, true);
 								if ( HitStaminaLeech != 0 )
 								{
 									this->m_TooltipData.Add( t = new CClientTooltip( 1060430 ) ); // hit stamina leech ~1_val~%
-									t->FormatArgs( "%lld", HitStaminaLeech );
+									t->FormatArgs( "%" PRId64 , HitStaminaLeech );
 								}
 
 								int64 PhysicalDamage = pItem->GetDefNum("DAMPHYSICAL", true, true);
 								if ( PhysicalDamage != 0 )
 								{
 									this->m_TooltipData.Add( t = new CClientTooltip( 1060403 ) ); // physical damage ~1_val~%
-									t->FormatArgs( "%lld", PhysicalDamage );
+									t->FormatArgs( "%" PRId64 , PhysicalDamage );
 								}
 
 								int64 FireDamage = pItem->GetDefNum("DAMFIRE", true, true);
 								if ( FireDamage != 0 )
 								{
 									this->m_TooltipData.Add( t = new CClientTooltip( 1060405 ) ); // fire damage ~1_val~%
-									t->FormatArgs( "%lld", FireDamage );
+									t->FormatArgs( "%" PRId64 , FireDamage );
 								}
 
 								int64 ColdDamage = pItem->GetDefNum("DAMCOLD", true, true);
 								if ( ColdDamage != 0 )
 								{
 									this->m_TooltipData.Add( t = new CClientTooltip( 1060404 ) ); // cold damage ~1_val~%
-									t->FormatArgs( "%lld", ColdDamage );
+									t->FormatArgs( "%" PRId64 , ColdDamage );
 								}
 
 								int64 PoisonDamage = pItem->GetDefNum("DAMPOISON", true, true);
 								if ( PoisonDamage != 0 )
 								{
 									this->m_TooltipData.Add( t = new CClientTooltip( 1060406 ) ); // poison damage ~1_val~%
-									t->FormatArgs( "%lld", PoisonDamage );
+									t->FormatArgs( "%" PRId64 , PoisonDamage );
 								}
 
 								int64 EnergyDamage = pItem->GetDefNum("DAMENERGY", true, true);
 								if ( EnergyDamage != 0 )
 								{
 									this->m_TooltipData.Add( t = new CClientTooltip( 1060407 ) ); // energy damage ~1_val~%
-									t->FormatArgs( "%lld", EnergyDamage );
+									t->FormatArgs( "%" PRId64 , EnergyDamage );
 								}
 
 								int64 ChaosDamage = pItem->GetDefNum("DAMCHAOS", true, true);
 								if ( ChaosDamage != 0 )
 								{
 									this->m_TooltipData.Add( t = new CClientTooltip( 1072846 ) ); // chaos damage ~1_val~%
-									t->FormatArgs( "%lld", ChaosDamage );
+									t->FormatArgs( "%" PRId64 , ChaosDamage );
 								}
 
 								int64 DirectDamage = pItem->GetDefNum("DAMDIRECT", true, true);
 								if ( DirectDamage != 0 )
 								{
 									this->m_TooltipData.Add( t = new CClientTooltip( 1079978 ) ); // direct damage: ~1_PERCENT~%
-									t->FormatArgs( "%lld", DirectDamage );
+									t->FormatArgs( "%" PRId64 , DirectDamage );
 								}
 
 								this->m_TooltipData.Add( t = new CClientTooltip( 1061168 ) ); // weapon damage ~1_val~ - ~2_val~
@@ -3342,7 +3342,7 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 								if ( StrengthRequirement > 0 )
 								{
 									this->m_TooltipData.Add( t = new CClientTooltip( 1061170 ) ); // strength requirement ~1_val~
-									t->FormatArgs( "%lld", StrengthRequirement );
+									t->FormatArgs( "%" PRId64 , StrengthRequirement );
 								}
 
 								if ( pItem->Item_GetDef()->GetEquipLayer() == LAYER_HAND2 )
@@ -3453,7 +3453,7 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 								this->m_TooltipData.Add( t = new CClientTooltip( 1060659 ) ); // ~1_val~: ~2_val~
 								t->FormatArgs( "Time range\t%hu min / %hu max", pItem->m_itSpawnChar.m_TimeLoMin, pItem->m_itSpawnChar.m_TimeHiMin );
 								this->m_TooltipData.Add( t = new CClientTooltip( 1060660 ) ); // ~1_val~: ~2_val~
-								t->FormatArgs( "Time until next spawn\t%lld sec", pItem->GetTimerAdjusted() );
+								t->FormatArgs( "Time until next spawn\t%" PRId64 " sec", pItem->GetTimerAdjusted() );
 							} break;
 
 						case IT_SPAWN_ITEM:
@@ -3469,7 +3469,7 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 								this->m_TooltipData.Add( t = new CClientTooltip( 1060659 ) ); // ~1_val~: ~2_val~
 								t->FormatArgs( "Time range\t%hu min / %hu max", pItem->m_itSpawnItem.m_TimeLoMin, pItem->m_itSpawnItem.m_TimeHiMin );
 								this->m_TooltipData.Add( t = new CClientTooltip( 1060660 ) ); // ~1_val~: ~2_val~
-								t->FormatArgs( "Time until next spawn\t%lld sec", pItem->GetTimerAdjusted() );
+								t->FormatArgs( "Time until next spawn\t%" PRId64 " sec", pItem->GetTimerAdjusted() );
 							} break;
 
 						case IT_COMM_CRYSTAL:

@@ -374,7 +374,7 @@ lpctstr CServer::GetStatusString( byte iIndex ) const
 		case 0x22: // '"'
 			{
 			// shown in the INFO page in game.
-			sprintf(pTemp, GRAY_TITLE ", Name=%s, Age=%lld, Clients=%u, Items=%u, Chars=%u, Mem=%uK\n",
+			sprintf(pTemp, GRAY_TITLE ", Name=%s, Age=%" PRId64 ", Clients=%u, Items=%u, Chars=%u, Mem=%uK\n",
 				GetName(), iHours, iClients, StatGet(SERV_STAT_ITEMS), StatGet(SERV_STAT_CHARS), StatGet(SERV_STAT_MEM));
 			}
 			break;

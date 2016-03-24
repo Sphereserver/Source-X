@@ -1,5 +1,5 @@
 /**
-* @file CGString.CPP
+* @file CGString.cpp
 */
 
 #include "../sphere/ProfileTask.h"
@@ -246,12 +246,12 @@ void CGString::FormatVal(int iVal)
 
 void CGString::FormatLLVal(llong iVal)
 {
-	Format("%lld", iVal);
+	Format("%" PRId64 , iVal);
 }
 
 void CGString::FormatULLVal(ullong iVal)
 {
-	Format("%llu", iVal);
+	Format("%" PRIu64 , iVal);
 }
 
 void CGString::FormatUVal(uint iVal)
@@ -274,7 +274,7 @@ void CGString::FormatHex(dword dwVal)
 
 void CGString::FormatLLHex(ullong dwVal)
 {
-	Format("0%llx", dwVal);
+	Format("0%" PRIx64 , dwVal);
 }
 
 int CGString::Compare(lpctstr pStr) const
