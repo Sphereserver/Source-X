@@ -13,27 +13,27 @@
 struct CMemBlock
 {
 private:
-	BYTE * m_pData;	 ///< the actual data bytes of the bitmap.
+	byte * m_pData;	 ///< the actual data bytes of the bitmap.
 
 protected:
 	// rather dangerous functions.
 	/**
 	* @brief Sets the internal data pointer. Fails when internal data pointer is not NULL.
 	*/
-	void MemLink( BYTE * pData )
+	void MemLink( byte * pData )
 	{
 		ASSERT( m_pData == NULL );
 		m_pData = pData;
 	}
 	/**
-	* @brief Alloc mem (new BYTE[*] wrapper). Fails if can not alloc or if size is invalid.
+	* @brief Alloc mem (new byte[*] wrapper). Fails if can not alloc or if size is invalid.
 	* @param dwSize size to alloc.
 	* @return pointer to the allocated data.
 	*/
-	BYTE * AllocBase( size_t dwSize )
+	byte * AllocBase( size_t dwSize )
 	{
 		ASSERT(dwSize > 0);
-		BYTE * pData = new BYTE[ dwSize ];
+		byte * pData = new byte[ dwSize ];
 		ASSERT( pData != NULL );
 		return( pData );
 	}
@@ -67,7 +67,7 @@ public:
 	* @brief Gets the internal data pointer.
 	* @return The internal data pointer (can be NULL).
 	*/
-	BYTE * GetData() const
+	byte * GetData() const
 	{
 		return( m_pData );
 	}
@@ -150,7 +150,7 @@ public:
 	void Resize( size_t dwSizeNew )
 	{
 		ASSERT( dwSizeNew != m_dwLength );
-		BYTE * pDataNew = AllocBase( dwSizeNew );
+		byte * pDataNew = AllocBase( dwSizeNew );
 		ASSERT(pDataNew);
 		if ( GetData())
 		{

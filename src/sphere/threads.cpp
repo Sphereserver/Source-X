@@ -382,14 +382,14 @@ bool AbstractThread::checkStuck()
 #pragma pack(push, 8)
 typedef struct tagTHREADNAME_INFO
 {
-	DWORD dwType;
+	dword dwType;
 	LPCTSTR szName;
-	DWORD dwThreadID;
-	DWORD dwFlags;
+	dword dwThreadID;
+	dword dwFlags;
 } THREADNAME_INFO;
 #pragma pack(pop)
 
-const DWORD MS_VC_EXCEPTION = 0x406D1388;
+const dword MS_VC_EXCEPTION = 0x406D1388;
 #endif
 
 void AbstractThread::onStart()
@@ -414,7 +414,7 @@ void AbstractThread::onStart()
 	THREADNAME_INFO info;
 	info.dwType = 0x1000;
 	info.szName = getName();
-	info.dwThreadID = static_cast<DWORD>(-1);
+	info.dwThreadID = static_cast<dword>(-1);
 	info.dwFlags = 0;
 
 	__try
@@ -564,9 +564,9 @@ void AbstractSphereThread::printStackTrace()
 	// don't allow call stack to be modified whilst we're printing it
 	freezeCallStack(true);
 
-	LLONG startTime = m_stackInfo[0].startTime;
+	llong startTime = m_stackInfo[0].startTime;
 	int timedelta;
-	unsigned int threadId = getId();
+	uint threadId = getId();
 
 	g_Log.EventDebug("__ thread (%u) __ |  # | _____ function _____________ | ticks passed from previous function start ______\n", threadId);
 	for ( size_t i = 0; i < 0x1000; i++ )

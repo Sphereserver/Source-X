@@ -19,7 +19,7 @@
 	#define PT_REG_ROOTKEY		HKEY_LOCAL_MACHINE
 #endif
 #ifndef OFFSETOF			// stddef.h ?
-	#define OFFSETOF(s,m)   	(int)( (BYTE *)&(((s *)0)->m) - (BYTE *)0 )
+	#define OFFSETOF(s,m)   	(int)( (byte *)&(((s *)0)->m) - (byte *)0 )
 #endif
 
 
@@ -30,13 +30,13 @@ enum ELEM_TYPE	// define types of structure/record elements.
 	ELEM_STRING,	// Assume max size of REG_SIZE. NULL TERM string.
 	ELEM_BOOL,		// bool = just 1 byte i guess.
 	ELEM_BYTE,		// 1 byte.
-	ELEM_MASK_BYTE,	// bits in a BYTE
+	ELEM_MASK_BYTE,	// bits in a byte
 	ELEM_WORD,		// 2 bytes
-	ELEM_MASK_WORD,	// bits in a WORD
+	ELEM_MASK_WORD,	// bits in a word
 	ELEM_INT,		// Whatever the int size is. 4 i assume
 	ELEM_MASK_INT,
 	ELEM_DWORD,		// 4 bytes.
-	ELEM_MASK_DWORD,	// bits in a DWORD
+	ELEM_MASK_DWORD,	// bits in a dword
 
 	ELEM_QTY
 };
@@ -49,7 +49,7 @@ struct CElementDef
 	UINT	m_offset;	// The offset into the class instance for this item.
 	// ELEM_STRING = max size.
 	// ELEM_MASK_WORD etc. = Extra masking info if needed. 
-	DWORD   m_extra;
+	dword   m_extra;
 
 private:
 	CElementDef& operator=(const CElementDef& other);

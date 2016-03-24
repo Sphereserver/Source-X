@@ -53,7 +53,7 @@ public:
 		Disabled = 0xFF	// tick never
 	};
 
-	virtual unsigned int getId() const = 0;
+	virtual uint getId() const = 0;
 	virtual const char *getName() const = 0;
 
 	virtual bool isActive() const = 0;
@@ -112,13 +112,13 @@ private:
 class AbstractThread : public IThread
 {
 private:
-	unsigned int m_id;
+	uint m_id;
 	const char *m_name;
 	static int m_threadsAvailable;
 	spherethread_t m_handle;
-	unsigned int m_hangCheck;
+	uint m_hangCheck;
 	Priority m_priority;
-	unsigned int m_tickPeriod;
+	uint m_tickPeriod;
 	AutoResetEvent m_sleepEvent;
 
 	bool m_terminateRequested;
@@ -133,7 +133,7 @@ private:
 	AbstractThread& operator=(const AbstractThread& other);
 
 public:
-	unsigned int getId() const { return m_id; }
+	uint getId() const { return m_id; }
 	const char *getName() const { return m_name; }
 
 	bool isActive() const;
@@ -170,7 +170,7 @@ private:
 	struct STACK_INFO_REC
 	{
 		const char *functionName;
-		LLONG	startTime;
+		llong	startTime;
 	};
 
 	STACK_INFO_REC m_stackInfo[0x1000];
@@ -249,7 +249,7 @@ class TlsValue
 {
 private:
 #ifdef _WIN32
-	DWORD _key;
+	dword _key;
 #else
 	pthread_key_t _key;
 #endif

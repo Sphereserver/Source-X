@@ -28,8 +28,8 @@ public:
 	CResourceQtyArray m_FoodType; // FOODTYPE=MEAT 15 (3)
 	short m_MaxFood;	// Derived from foodtype...this is the max amount of food we can eat. (based on str ?)
 
-	WORD  m_defense;	// base defense. (basic to body type) can be modified by armor.
-	DWORD m_Anims;	// Bitmask of animations available for monsters. ANIM_TYPE
+	word  m_defense;	// base defense. (basic to body type) can be modified by armor.
+	dword m_Anims;	// Bitmask of animations available for monsters. ANIM_TYPE
 	HUE_TYPE m_wBloodHue;	// when damaged , what color is the blood (-1) = no blood
 	HUE_TYPE m_wColor;
 
@@ -40,7 +40,7 @@ public:
 
 						// NPC info ----------------------------------------------------
 private:
-	unsigned int m_iHireDayWage;		// if applicable. (NPC)
+	uint m_iHireDayWage;		// if applicable. (NPC)
 public:
 	//SHELTER=FORESTS (P), MOUNTAINS (P)
 	//AVERSIONS=TRAPS, CIVILIZATION
@@ -84,7 +84,7 @@ public:
 	}
 	bool SetDispID( CREID_TYPE id );
 
-	unsigned int GetHireDayWage() const { return( m_iHireDayWage ); }
+	uint GetHireDayWage() const { return( m_iHireDayWage ); }
 
 	static CCharBase * FindCharBase( CREID_TYPE id );
 	static bool IsValidDispID( CREID_TYPE id );

@@ -30,21 +30,21 @@ const int CElementDef::sm_Lengths[ELEM_QTY] =
 	-1,	// ELEM_CSTRING,
 	-1, // ELEM_STRING,	// Assume max size of REG_SIZE
 	sizeof(bool),	// ELEM_BOOL
-	sizeof(BYTE), // ELEM_BYTE,		// 1 byte.
-	sizeof(BYTE), // ELEM_MASK_BYTE,	// bits in a BYTE
-	sizeof(WORD), // ELEM_WORD,		// 2 bytes
-	sizeof(WORD), // ELEM_MASK_WORD,	// bits in a WORD
+	sizeof(byte), // ELEM_BYTE,		// 1 byte.
+	sizeof(byte), // ELEM_MASK_BYTE,	// bits in a byte
+	sizeof(word), // ELEM_WORD,		// 2 bytes
+	sizeof(word), // ELEM_MASK_WORD,	// bits in a word
 	sizeof(int),  // ELEM_INT,		// Whatever the int size is. 4 i assume
 	sizeof(int),  // ELEM_MASK_INT,
-	sizeof(DWORD), // ELEM_DWORD,		// 4 bytes.
-	sizeof(DWORD), // ELEM_MASK_DWORD,	// bits in a DWORD
+	sizeof(dword), // ELEM_DWORD,		// 4 bytes.
+	sizeof(dword), // ELEM_MASK_DWORD,	// bits in a dword
 };
 
 bool CElementDef::SetValStr( void * pBase, LPCTSTR pszVal ) const
 {
 	ADDTOCALLSTACK("CElementDef::SetValStr");
 	// Set the element value as a string.
-	DWORD dwVal = 0;
+	dword dwVal = 0;
 	ASSERT(m_offset>=0);
 	void * pValPtr = GetValPtr(pBase);
 	switch ( m_type )
@@ -65,10 +65,10 @@ bool CElementDef::SetValStr( void * pBase, LPCTSTR pszVal ) const
 			dwVal = Exp_GetVal( pszVal );
 			memcpy( pValPtr, &dwVal, GetValLength());
 			return true;
-		case ELEM_MASK_BYTE:	// bits in a BYTE
-		case ELEM_MASK_WORD:	// bits in a WORD
+		case ELEM_MASK_BYTE:	// bits in a byte
+		case ELEM_MASK_WORD:	// bits in a word
 		case ELEM_MASK_INT:
-		case ELEM_MASK_DWORD:	// bits in a DWORD
+		case ELEM_MASK_DWORD:	// bits in a dword
 			return false;
 		default:
 			break;
@@ -78,7 +78,7 @@ bool CElementDef::SetValStr( void * pBase, LPCTSTR pszVal ) const
 
 void * CElementDef::GetValPtr( const void * pBaseInst ) const
 {
-	return( ((BYTE *)pBaseInst) + m_offset );
+	return( ((byte *)pBaseInst) + m_offset );
 }
 
 int CElementDef::GetValLength() const
@@ -96,7 +96,7 @@ bool CElementDef::GetValStr( const void * pBase, CGString & sVal ) const
 	ADDTOCALLSTACK("CElementDef::GetValStr");
 	// Get the element value as a string.
 
-	DWORD dwVal = 0;
+	dword dwVal = 0;
 	ASSERT(m_offset>=0);
 	void * pValPtr = GetValPtr(pBase);
 	switch ( m_type )
@@ -117,10 +117,10 @@ bool CElementDef::GetValStr( const void * pBase, CGString & sVal ) const
 			memcpy( &dwVal, pValPtr, GetValLength());
 			sVal.Format("%u", dwVal);
 			return true;
-		case ELEM_MASK_BYTE:	// bits in a BYTE
-		case ELEM_MASK_WORD:	// bits in a WORD
+		case ELEM_MASK_BYTE:	// bits in a byte
+		case ELEM_MASK_WORD:	// bits in a word
 		case ELEM_MASK_INT:
-		case ELEM_MASK_DWORD:	// bits in a DWORD
+		case ELEM_MASK_DWORD:	// bits in a dword
 			return false;
 		default:
 			break;

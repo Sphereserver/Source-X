@@ -168,7 +168,7 @@ HUE_TYPE CObjBase::GetHue() const
 	return( m_wHue );
 }
 
-WORD CObjBase::GetHueAlt() const
+word CObjBase::GetHueAlt() const
 {
 	// IT_EQ_MEMORY_OBJ = MEMORY_TYPE mask
 	// IT_EQ_VENDOR_BOX = restock time.
@@ -197,7 +197,7 @@ int CObjBase::IsWeird() const
 	return( 0 );
 }
 
-void CObjBase::SetUID( DWORD dwIndex, bool fItem )
+void CObjBase::SetUID( dword dwIndex, bool fItem )
 {
 	ADDTOCALLSTACK("CObjBase::SetUID");
 	// Move the serial number,
@@ -209,7 +209,7 @@ void CObjBase::SetUID( DWORD dwIndex, bool fItem )
 		if ( ! dwIndex )
 			return;	// The point was just to make sure it was located.
 		// remove the old UID.
-		g_World.FreeUID( ((DWORD)GetUID()) & UID_O_INDEX_MASK );
+		g_World.FreeUID( ((dword)GetUID()) & UID_O_INDEX_MASK );
 	}
 
 	if ( dwIndex != UID_O_INDEX_MASK )	// just wanted to remove it
@@ -315,7 +315,7 @@ bool CObjBase::SetNamePool( LPCTSTR pszName )
 	return true;
 }
 
-bool CObjBase::MoveNearObj( const CObjBaseTemplate *pObj, WORD iSteps )
+bool CObjBase::MoveNearObj( const CObjBaseTemplate *pObj, word iSteps )
 {
 	ADDTOCALLSTACK("CObjBase::MoveNearObj");
 	ASSERT(pObj);
@@ -330,7 +330,7 @@ void CObjBase::r_WriteSafe( CScript & s )
 {
 	ADDTOCALLSTACK("CObjBase::r_WriteSafe");
 	// Write an object with some fault protection.
-	DWORD uid = 0;
+	dword uid = 0;
 	try
 	{
 		uid = GetUID();
@@ -417,7 +417,7 @@ void CObjBase::Sound( SOUND_TYPE id, int iOnce ) const // Play sound effect for 
 	}
 }
 
-void CObjBase::Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSource, BYTE bSpeedSeconds, BYTE bLoop, bool fExplode, DWORD color, DWORD render, WORD effectid, WORD explodeid, WORD explodesound, DWORD effectuid, BYTE type) const
+void CObjBase::Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSource, byte bSpeedSeconds, byte bLoop, bool fExplode, dword color, dword render, word effectid, word explodeid, word explodesound, dword effectuid, byte type) const
 {
 	ADDTOCALLSTACK("CObjBase::Effect");
 	// show for everyone near by.
@@ -548,7 +548,7 @@ void CObjBase::SpeakUTF8Ex( const NWORD * pText, HUE_TYPE wHue, TALKMODE_TYPE mo
 	g_World.SpeakUNICODE( this, pText, wHue, mode, font, lang );
 }
 
-bool CObjBase::MoveNear( CPointMap pt, WORD iSteps )
+bool CObjBase::MoveNear( CPointMap pt, word iSteps )
 {
 	ADDTOCALLSTACK("CObjBase::MoveNear");
 	// Move to nearby this other object.
@@ -558,8 +558,8 @@ bool CObjBase::MoveNear( CPointMap pt, WORD iSteps )
 	for ( int i = 0; i < iSteps; i++ )
 	{
 		pt = ptOld;
-		pt.m_x += static_cast<signed short>(Calc_GetRandVal2(-iSteps, iSteps));
-		pt.m_y += static_cast<signed short>(Calc_GetRandVal2(-iSteps, iSteps));
+		pt.m_x += static_cast<short>(Calc_GetRandVal2(-iSteps, iSteps));
+		pt.m_y += static_cast<short>(Calc_GetRandVal2(-iSteps, iSteps));
 
 		if ( !pt.IsValidPoint() )	// hit the edge of the world, so go back to the previous valid position
 		{
@@ -996,7 +996,7 @@ bool CObjBase::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc )
 					pChar = GetUID().CharFind();
 
 					if ( pChar )
-						sVal.FormatVal(bCanSee ? pChar->CanSee(pObj) : pChar->CanSeeLOS(pt, NULL, pChar->GetVisualRange(), static_cast<WORD>(flags)));
+						sVal.FormatVal(bCanSee ? pChar->CanSee(pObj) : pChar->CanSeeLOS(pt, NULL, pChar->GetVisualRange(), static_cast<word>(flags)));
 					else
 						sVal.FormatVal(0);
 
@@ -1004,7 +1004,7 @@ bool CObjBase::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc )
 				else if ( !pChar )		// no char -> no see
 					sVal.FormatVal(0);
 				else					// standart way src TO current object
-					sVal.FormatVal(bCanSee ? pChar->CanSee(this) : pChar->CanSeeLOS(this, static_cast<WORD>(flags)));
+					sVal.FormatVal(bCanSee ? pChar->CanSee(this) : pChar->CanSeeLOS(this, static_cast<word>(flags)));
 			}
 			break;
 		case OC_COLOR:
@@ -1042,7 +1042,7 @@ bool CObjBase::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc )
 				//strip quotes if any
 				if (*pszArg[0] == '"')
 					pszArg[0]++;
-				BYTE count = 0;
+				byte count = 0;
 				for (TCHAR * pEnd = pszArg[0] + strlen(pszArg[0]) - 1; pEnd >= pszArg[0]; pEnd--)
 				{
 					if (*pEnd == '"')
@@ -1282,11 +1282,11 @@ bool CObjBase::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc )
 
 					if ( pClientToCheck->GetNetState()->isClientKR() )
 					{
-						context = g_Cfg.GetKRDialog( (DWORD)rid ) & 0x00FFFFFF;
+						context = g_Cfg.GetKRDialog( (dword)rid ) & 0x00FFFFFF;
 					}
 					else
 					{
-						context = ((DWORD)rid) & 0x00FFFFFF;
+						context = ((dword)rid) & 0x00FFFFFF;
 					}
 
 					CClient::OpenedGumpsMap_t::iterator itGumpFound = pClientToCheck->m_mapOpenedGumps.find( context );
@@ -1737,9 +1737,9 @@ bool CObjBase::r_LoadVal( CScript & s )
 
 				INT64 piVal[2];
 				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, COUNTOF(piVal));
-				m_defenseBase = static_cast<unsigned char>(piVal[0]);
+				m_defenseBase = static_cast<uchar>(piVal[0]);
 				if ( iQty > 1 )
-					m_defenseRange = static_cast<unsigned char>(piVal[1]) - m_defenseBase;
+					m_defenseRange = static_cast<uchar>(piVal[1]) - m_defenseBase;
 				else
 					m_defenseRange = 0;
 				CChar * pChar = dynamic_cast <CChar*>(GetTopLevelObj());
@@ -1751,9 +1751,9 @@ bool CObjBase::r_LoadVal( CScript & s )
 			{
 				INT64 piVal[2];
 				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, COUNTOF(piVal));
-				m_attackBase = static_cast<unsigned char>(piVal[0]);
+				m_attackBase = static_cast<uchar>(piVal[0]);
 				if ( iQty > 1 )
-					m_attackRange = static_cast<unsigned char>(piVal[1]) - m_attackBase;
+					m_attackRange = static_cast<uchar>(piVal[1]) - m_attackBase;
 				else
 					m_attackRange = 0;
 				CChar * pChar = dynamic_cast <CChar*>(GetTopLevelObj());
@@ -1822,7 +1822,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 				return( false );
 			{
 				CPointMap pt = GetTopPoint();
-				pt.m_map = static_cast<unsigned char>(s.GetArgVal());
+				pt.m_map = static_cast<uchar>(s.GetArgVal());
 
 				//	is the desired mapplane allowed?
 				if ( !g_MapList.m_maps[pt.m_map] )
@@ -1840,7 +1840,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 				CChar * pChar = dynamic_cast <CChar*>(GetTopLevelObj());
 				if ( pChar && pChar->IsChar() )
 				{
-					pChar->m_defense = static_cast<WORD>(pChar->CalcArmorDefense());
+					pChar->m_defense = static_cast<word>(pChar->CalcArmorDefense());
 					pChar->UpdateStatsFlag();
 				}
 			}
@@ -1855,7 +1855,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 			if (!this->IsItem())
 				return false;
 			CItem * pItem = static_cast<CItem*>(this);
-			pItem->m_speed = static_cast<BYTE>(s.GetArgVal());
+			pItem->m_speed = static_cast<byte>(s.GetArgVal());
 			pItem->ResendTooltip();
 			return true;
 		}
@@ -1974,7 +1974,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					return( false );
 				if ( iArgQty > 2 )	// Give it a new source char UID
 				{
-					CObjBaseTemplate * pObj = CGrayUID( static_cast<DWORD>(piCmd[2]) ).ObjFind();
+					CObjBaseTemplate * pObj = CGrayUID( static_cast<dword>(piCmd[2]) ).ObjFind();
 					if ( pObj )
 						pObj = pObj->GetTopLevelObj();
 					pCharSrc = dynamic_cast<CChar*>(pObj);
@@ -2018,7 +2018,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				if ( iArgQty < 2 )
 					return( false );
 				CObjBase *	pThis	= this;
-				//DEBUG_ERR(("this->GetUID() 0%x \n", (DWORD)this->GetUID()));
+				//DEBUG_ERR(("this->GetUID() 0%x \n", (dword)this->GetUID()));
 				if ( piCmd[0] == -1 )
 				{
 					if ( pCharSrc )
@@ -2029,19 +2029,19 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					}
 
 				}
-				//DEBUG_ERR(("this->GetUID() 0%x pThis->GetUID() 0%x pCharSrc->GetUID() 0%x\n",(DWORD)this->GetUID(),(DWORD)pThis->GetUID(),(DWORD)pCharSrc->GetUID()));
+				//DEBUG_ERR(("this->GetUID() 0%x pThis->GetUID() 0%x pCharSrc->GetUID() 0%x\n",(dword)this->GetUID(),(dword)pThis->GetUID(),(dword)pCharSrc->GetUID()));
 				pThis->Effect( static_cast<EFFECT_TYPE>(piCmd[0]), static_cast<ITEMID_TYPE>(RES_GET_INDEX(piCmd[1])),
 					pCharSrc,
-					(iArgQty >= 3)? static_cast<unsigned char>(piCmd[2]) : 5,		// BYTE bSpeedSeconds = 5,
-					(iArgQty >= 4)? static_cast<unsigned char>(piCmd[3]) : 1,		// BYTE bLoop = 1,
+					(iArgQty >= 3)? static_cast<uchar>(piCmd[2]) : 5,		// byte bSpeedSeconds = 5,
+					(iArgQty >= 4)? static_cast<uchar>(piCmd[3]) : 1,		// byte bLoop = 1,
 					(iArgQty >= 5)? (piCmd[4] != 0) : false,						// bool fExplode = false
-					(iArgQty >= 6)? static_cast<unsigned long>(piCmd[5]) : 0,		// hue
-					(iArgQty >= 7)? static_cast<unsigned long>(piCmd[6]) : 0,		// render mode,		
-					(iArgQty >= 8) ? static_cast<WORD>(piCmd[7]) : 0,				// EffectID	//New Packet 0xc7
-					(iArgQty >= 9) ? static_cast<WORD>(piCmd[8]) : 0,				// ExplodeID
-					(iArgQty >= 10) ? static_cast<WORD>(piCmd[9]) : 0,				// ExplodeSound
-					(iArgQty >= 11) ? static_cast<DWORD>(piCmd[10]) : 0,			// EffectUID
-					(iArgQty >= 12) ? static_cast<unsigned char>(piCmd[11]) : 0		// Type
+					(iArgQty >= 6)? static_cast<uint>(piCmd[5]) : 0,		// hue
+					(iArgQty >= 7)? static_cast<uint>(piCmd[6]) : 0,		// render mode,		
+					(iArgQty >= 8) ? static_cast<word>(piCmd[7]) : 0,				// EffectID	//New Packet 0xc7
+					(iArgQty >= 9) ? static_cast<word>(piCmd[8]) : 0,				// ExplodeID
+					(iArgQty >= 10) ? static_cast<word>(piCmd[9]) : 0,				// ExplodeSound
+					(iArgQty >= 11) ? static_cast<dword>(piCmd[10]) : 0,			// EffectUID
+					(iArgQty >= 12) ? static_cast<uchar>(piCmd[11]) : 0		// Type
 					);
 			}
 			break;
@@ -2143,11 +2143,11 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				if ( iArgQty < 2 )
 					piCmd[1] = 1;
 
-				CGrayUID uid = static_cast<unsigned long>(piCmd[0]);
+				CGrayUID uid = static_cast<uint>(piCmd[0]);
 				pObjNear = uid.ObjFind();
 				if ( !pObjNear )
 					return false;
-				MoveNearObj( pObjNear, static_cast<WORD>(piCmd[1]) );
+				MoveNearObj( pObjNear, static_cast<word>(piCmd[1]) );
 				if ( piCmd[2] )
 					Update();
 			}
@@ -2270,7 +2270,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				{
 				case 4:
 					{
-						CGrayUID uid = (DWORD) piCmd[3];
+						CGrayUID uid = (dword) piCmd[3];
 						pItemSrc = uid.ItemFind();
 					}
 				case 3:
@@ -2280,7 +2280,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					}
 					else
 					{
-						CGrayUID uid = (DWORD) piCmd[2];
+						CGrayUID uid = (dword) piCmd[2];
 						pCharSrc = uid.CharFind();
 					}
 					break;
@@ -2430,11 +2430,11 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 					if ( pClientSrc->GetNetState()->isClientKR() )
 					{
-						context = g_Cfg.GetKRDialog( (DWORD)rid ) & 0x00FFFFFF;
+						context = g_Cfg.GetKRDialog( (dword)rid ) & 0x00FFFFFF;
 					}
 					else
 					{
-						context = ((DWORD)rid) & 0x00FFFFFF;
+						context = ((dword)rid) & 0x00FFFFFF;
 					}
 
 					CClient::OpenedGumpsMap_t::iterator itGumpFound = pClientSrc->m_mapOpenedGumps.find( context );
@@ -2457,7 +2457,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				if ( iQty < 1 )
 					return false;
 
-				DWORD rid = g_Cfg.ResourceGetIDType( RES_DIALOG, Arg_ppCmd[0] );
+				dword rid = g_Cfg.ResourceGetIDType( RES_DIALOG, Arg_ppCmd[0] );
 				if ( pClientSrc->GetNetState()->isClientKR() )
 					rid = g_Cfg.GetKRDialog( rid );
 
@@ -2500,7 +2500,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				//DEBUG_WARN(("pszVerb %s",pszVerb));
 				if ( !r_Verb(script, pSrc) )
 				{
-					DEBUG_ERR(( "Can't try %s object %s (0%x)\n", pszVerb, GetName(), static_cast<DWORD>(GetUID())));
+					DEBUG_ERR(( "Can't try %s object %s (0%x)\n", pszVerb, GetName(), static_cast<dword>(GetUID())));
 					return( false );
 				}
 			}
@@ -2534,9 +2534,9 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				if ( pNewSrc == NULL )
 				{
 					if ( index == OV_TRYSRC )
-						DEBUG_ERR(( "Can't trysrc %s object %s (0%x): invalid src uid 0%x\n", pszVerb, GetName(), static_cast<DWORD>(GetUID()), static_cast<DWORD>(NewSrc) ));
+						DEBUG_ERR(( "Can't trysrc %s object %s (0%x): invalid src uid 0%x\n", pszVerb, GetName(), static_cast<dword>(GetUID()), static_cast<dword>(NewSrc) ));
 					else
-						DEBUG_ERR(( "Can't trysrv %s object %s (0%x)\n", pszVerb, GetName(), static_cast<DWORD>(GetUID()) ));
+						DEBUG_ERR(( "Can't trysrv %s object %s (0%x)\n", pszVerb, GetName(), static_cast<dword>(GetUID()) ));
 
 					return false;
 				}
@@ -2544,9 +2544,9 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				if (!r_Verb(script, pNewSrc))
 				{
 					if ( index == OV_TRYSRC )
-						DEBUG_ERR(( "Can't trysrc %s object %s (0%x) with src %s (0%x)\n", pszVerb, GetName(), static_cast<DWORD>(GetUID()), pNewSrc->GetName(), static_cast<DWORD>(NewSrc) ));
+						DEBUG_ERR(( "Can't trysrc %s object %s (0%x) with src %s (0%x)\n", pszVerb, GetName(), static_cast<dword>(GetUID()), pNewSrc->GetName(), static_cast<dword>(NewSrc) ));
 					else
-						DEBUG_ERR(( "Can't trysrv %s object %s (0%x)\n", pszVerb, GetName(), static_cast<DWORD>(GetUID()) ));
+						DEBUG_ERR(( "Can't trysrv %s object %s (0%x)\n", pszVerb, GetName(), static_cast<dword>(GetUID()) ));
 
 					return false;
 				}
@@ -2774,7 +2774,7 @@ void CObjBase::FreePropertyList()
 	m_PropertyList = NULL;
 }
 
-DWORD CObjBase::UpdatePropertyRevision(DWORD hash)
+dword CObjBase::UpdatePropertyRevision(dword hash)
 {
 	ADDTOCALLSTACK("CObjBase::UpdatePropertyRevision");
 
@@ -2866,16 +2866,16 @@ CVarDefMap * CObjBase::GetTagDefs()
 	return( &m_TagDefs );
 }
 
-BYTE CObjBase::RangeL() const
+byte CObjBase::RangeL() const
 {
 	CVarDefCont * pRange = GetDefKey("RANGE", true);
-	return static_cast<BYTE>((pRange ? pRange->GetValNum() : 0) & 0xff);
+	return static_cast<byte>((pRange ? pRange->GetValNum() : 0) & 0xff);
 }
 
-BYTE CObjBase::RangeH() const
+byte CObjBase::RangeH() const
 {
 	CVarDefCont * pRange = GetDefKey("RANGE", true);
-	return static_cast<BYTE>(((pRange ? pRange->GetValNum() : 0)>>8) & 0xff);
+	return static_cast<byte>(((pRange ? pRange->GetValNum() : 0)>>8) & 0xff);
 }
 
 CServTime CObjBase::GetTimeStamp() const

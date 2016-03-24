@@ -62,7 +62,7 @@ private:
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
 
 	const CPointMap GetComponentPoint(Component * pComponent) const;
-	const CPointMap GetComponentPoint(signed short dx, signed short dy, signed char dz) const;
+	const CPointMap GetComponentPoint(short dx, short dy, signed char dz) const;
 	void CopyDesign(DesignDetails * designFrom, DesignDetails * designTo);
 
 private:
@@ -82,14 +82,14 @@ private:
 public:
 	void BeginCustomize( CClient * pClientSrc );
 	void EndCustomize( bool bForce = false );
-	void SwitchToLevel( CClient * pClientSrc, unsigned char iLevel );
+	void SwitchToLevel( CClient * pClientSrc, uchar iLevel );
 	void CommitChanges( CClient * pClientSrc = NULL );
-	void AddItem( CClient * pClientSrc, ITEMID_TYPE id, signed short x, signed short y, signed char z = INT8_MIN, short iStairID = 0 );
-	void AddStairs( CClient * pClientSrc, ITEMID_TYPE id, signed short x, signed short y, signed char z = INT8_MIN, short iStairID = -1 );
-	void AddRoof( CClient * pClientSrc, ITEMID_TYPE id, signed short x, signed short y, signed char z );
-	void RemoveItem( CClient * pClientSrc, ITEMID_TYPE id, signed short x, signed short y, signed char z );
+	void AddItem( CClient * pClientSrc, ITEMID_TYPE id, short x, short y, signed char z = INT8_MIN, short iStairID = 0 );
+	void AddStairs( CClient * pClientSrc, ITEMID_TYPE id, short x, short y, signed char z = INT8_MIN, short iStairID = -1 );
+	void AddRoof( CClient * pClientSrc, ITEMID_TYPE id, short x, short y, signed char z );
+	void RemoveItem( CClient * pClientSrc, ITEMID_TYPE id, short x, short y, signed char z );
 	bool RemoveStairs( Component * pStairComponent );
-	void RemoveRoof( CClient * pClientSrc, ITEMID_TYPE id, signed short x, signed short y, signed char z );
+	void RemoveRoof( CClient * pClientSrc, ITEMID_TYPE id, short x, short y, signed char z );
 	void SendVersionTo( CClient * pClientSrc );
 	void SendStructureTo( CClient * pClientSrc );
 	void BackupStructure();
@@ -100,14 +100,14 @@ public:
 	const CGrayMultiCustom * GetMultiItemDefs();
 	const CGRect GetDesignArea();
 	size_t GetFixtureCount(DesignDetails * pDesign = NULL);
-	size_t GetComponentsAt(signed short dx, signed short dy, signed char dz, Component ** pComponents, DesignDetails * pDesign = NULL);
+	size_t GetComponentsAt(short dx, short dy, signed char dz, Component ** pComponents, DesignDetails * pDesign = NULL);
 	int GetRevision(const CClient * pClientSrc = NULL) const;
-	unsigned char GetLevelCount();
+	uchar GetLevelCount();
 	short GetStairCount();
 
-	static unsigned char GetPlane( signed char z );
-	static unsigned char GetPlane( Component * pComponent );
-	static signed char GetPlaneZ( unsigned char plane );
+	static uchar GetPlane( signed char z );
+	static uchar GetPlane( Component * pComponent );
+	static signed char GetPlaneZ( uchar plane );
 	static bool IsValidItem( ITEMID_TYPE id, CClient * pClientSrc, bool bMulti );
 };
 #endif // _INC_CITEMMULTICUSTOM_H

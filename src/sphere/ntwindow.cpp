@@ -30,7 +30,7 @@ public:
 	{
 	private:
 		bool OnInitDialog();
-		bool OnCommand( WORD wNotifyCode, INT_PTR wID, HWND hwndCtl );
+		bool OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCtl );
 	public:
 		virtual BOOL DefDialogProc( UINT message, WPARAM wParam, LPARAM lParam );
 	};
@@ -39,7 +39,7 @@ public:
 	{
 	private:
 		bool OnInitDialog();
-		bool OnCommand( WORD wNotifyCode, INT_PTR wID, HWND hwndCtl );
+		bool OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCtl );
 	public:
 		virtual BOOL DefDialogProc( UINT message, WPARAM wParam, LPARAM lParam );
 	};
@@ -86,7 +86,7 @@ public:
 		CListbox m_wndListStats;
 	private:
 		bool OnInitDialog();
-		bool OnCommand( WORD wNotifyCode, INT_PTR wID, HWND hwndCtl );
+		bool OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCtl );
 	public:
 		void FillClients();
 		void FillStats();
@@ -118,7 +118,7 @@ private:
 	void	SetLogFont( const char * pszFont );
 
 public:
-	bool OnCommand( WORD wNotifyCode, INT_PTR wID, HWND hwndCtl );
+	bool OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCtl );
 
 	static bool RegisterClass(char *className);
 	static LRESULT WINAPI WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
@@ -160,7 +160,7 @@ bool CNTWindow::CAboutDlg::OnInitDialog()
 	return false;
 }
 
-bool CNTWindow::CAboutDlg::OnCommand( WORD wNotifyCode, INT_PTR wID, HWND hwndCtl )
+bool CNTWindow::CAboutDlg::OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCtl )
 {
 	UNREFERENCED_PARAMETER(wNotifyCode);
 	UNREFERENCED_PARAMETER(hwndCtl);
@@ -199,7 +199,7 @@ bool CNTWindow::COptionsDlg::OnInitDialog()
 	return( false );
 }
 
-bool CNTWindow::COptionsDlg::OnCommand( WORD wNotifyCode, INT_PTR wID, HWND hwndCtl)
+bool CNTWindow::COptionsDlg::OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCtl)
 {
 	UNREFERENCED_PARAMETER(wNotifyCode);
 	UNREFERENCED_PARAMETER(hwndCtl);
@@ -285,7 +285,7 @@ bool CNTWindow::CStatusWnd::OnInitDialog()
 	return( false );
 }
 
-bool CNTWindow::CStatusWnd::OnCommand( WORD wNotifyCode, INT_PTR wID, HWND hwndCtl )
+bool CNTWindow::CStatusWnd::OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCtl )
 {
 	UNREFERENCED_PARAMETER(wNotifyCode);
 	UNREFERENCED_PARAMETER(hwndCtl);
@@ -566,7 +566,7 @@ bool CNTWindow::OnClose()
 	return( true );	// ok to close.
 }
 
-bool CNTWindow::OnCommand( WORD wNotifyCode, INT_PTR wID, HWND hwndCtl )
+bool CNTWindow::OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCtl )
 {
 	// WM_COMMAND
 	UNREFERENCED_PARAMETER(wNotifyCode);
@@ -749,7 +749,7 @@ LRESULT CNTWindow::OnNotify( int idCtrl, NMHDR * pnmh )
 					LRESULT line = m_wndLog.SendMessage(EM_LINEFROMCHAR, m_wndLog.SendMessage(EM_CHARFROMPOS, 0, reinterpret_cast<LPARAM>(&pt)), 0);
 
 					// get the line text
-					reinterpret_cast<WORD*>(zTemp)[0] = SCRIPT_MAX_LINE_LEN - 1; // first WORD is used to indicate the max buffer length
+					reinterpret_cast<word*>(zTemp)[0] = SCRIPT_MAX_LINE_LEN - 1; // first word is used to indicate the max buffer length
 					zTemp[m_wndLog.SendMessage(EM_GETLINE, line, reinterpret_cast<LPARAM>(zTemp))] = '\0';
 					if ( *zTemp == '\0' )
 						break;

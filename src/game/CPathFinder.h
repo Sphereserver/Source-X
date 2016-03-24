@@ -122,7 +122,7 @@ protected:
 
 protected:
 	void Clear();
-	unsigned int Heuristic(CPathFinderPointRef& Pt1,CPathFinderPointRef& Pt2);
+	uint Heuristic(CPathFinderPointRef& Pt1,CPathFinderPointRef& Pt2);
 	void GetChildren(CPathFinderPointRef& Point, std::list<CPathFinderPointRef>& ChildrenRefList );
 	void FillMap();	// prepares map with walkable statuses
 };

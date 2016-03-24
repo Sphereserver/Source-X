@@ -112,7 +112,7 @@ INT64 CChar::Attacker_GetHighestThreat()
 	if ( !m_lastAttackers.size() )
 		return -1;
 	INT64 highThreat = 0;
-	for ( unsigned int count = 0; count < m_lastAttackers.size(); count++ )
+	for ( uint count = 0; count < m_lastAttackers.size(); count++ )
 	{
 		LastAttackers & refAttacker = m_lastAttackers.at(count);
 		if ( refAttacker.threat > highThreat )

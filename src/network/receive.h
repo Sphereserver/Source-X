@@ -239,8 +239,8 @@ public:
 struct VendorItem
 {
 	CGrayUID m_serial;
-	WORD m_amount;
-	DWORD m_price;
+	word m_amount;
+	dword m_price;
 };
 
 class PacketVendorBuyReq : public Packet

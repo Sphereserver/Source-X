@@ -31,7 +31,7 @@ struct CGrayUIDBase		// A unique system serial id. 4 bytes long
 #define UID_O_INDEX_FREE	0x01000000	// Spellbook needs unused UID's ?
 
 protected:
-	DWORD m_dwInternalVal;
+	dword m_dwInternalVal;
 public:
 
 	bool IsValidUID() const;
@@ -48,17 +48,17 @@ public:
 	bool IsItemEquipped() const;
 	bool IsItemInContainer() const;
 
-	void SetObjContainerFlags( DWORD dwFlags = 0 );
+	void SetObjContainerFlags( dword dwFlags = 0 );
 
-	void SetPrivateUID( DWORD dwVal );
-	DWORD GetPrivateUID() const;
+	void SetPrivateUID( dword dwVal );
+	dword GetPrivateUID() const;
 
-	DWORD GetObjUID() const;
-	void SetObjUID( DWORD dwVal );
+	dword GetObjUID() const;
+	void SetObjUID( dword dwVal );
 
-	bool operator == ( DWORD index ) const;
-	bool operator != ( DWORD index ) const;
-	operator DWORD () const;
+	bool operator == ( dword index ) const;
+	bool operator != ( dword index ) const;
+	operator dword () const;
 	CObjBase * ObjFind() const;
 	CItem * ItemFind() const;
 	CChar * CharFind() const;
@@ -67,7 +67,7 @@ public:
 struct CGrayUID : public CGrayUIDBase
 {
 	CGrayUID();
-	CGrayUID( DWORD dw );
+	CGrayUID( dword dw );
 };
 
 #endif // _INC_CGRAYUID_H

@@ -16,8 +16,8 @@
 
 //	grabbed from platform SDK, psapi.h
 	typedef struct _PROCESS_MEMORY_COUNTERS {
-		DWORD cb;
-		DWORD PageFaultCount;
+		dword cb;
+		dword PageFaultCount;
 		SIZE_T PeakWorkingSetSize;
 		SIZE_T WorkingSetSize;
 		SIZE_T QuotaPeakPagedPoolUsage;
@@ -29,7 +29,7 @@
 	} PROCESS_MEMORY_COUNTERS, *PPROCESS_MEMORY_COUNTERS;
 
 	//	PSAPI external definitions
-	typedef	BOOL (WINAPI *pGetProcessMemoryInfo)(HANDLE, PPROCESS_MEMORY_COUNTERS, DWORD);
+	typedef	BOOL (WINAPI *pGetProcessMemoryInfo)(HANDLE, PPROCESS_MEMORY_COUNTERS, dword);
 	HMODULE	m_hmPsapiDll = NULL;
 	pGetProcessMemoryInfo m_GetProcessMemoryInfo = NULL;
 	PROCESS_MEMORY_COUNTERS	pcnt;
@@ -56,11 +56,11 @@ CServerDef::CServerDef( LPCTSTR pszName, CSocketAddressIP dwIP ) :
 	m_eAccApp = ACCAPP_Unspecified;
 }
 
-DWORD CServerDef::StatGet(SERV_STAT_TYPE i) const
+dword CServerDef::StatGet(SERV_STAT_TYPE i) const
 {
 	ADDTOCALLSTACK("CServerDef::StatGet");
 	ASSERT( i >= 0 && i <= SERV_STAT_QTY );
-	DWORD	d = m_dwStat[i];
+	dword	d = m_dwStat[i];
 	EXC_TRY("StatGet");
 	if ( i == SERV_STAT_MEM )	// memory information
 	{
@@ -317,7 +317,7 @@ bool CServerDef::r_LoadVal( CScript & s )
 			SetName( s.GetArgStr());
 			break;
 		case SC_SERVPORT:
-			m_ip.SetPort( static_cast<WORD>(s.GetArgVal()));
+			m_ip.SetPort( static_cast<word>(s.GetArgVal()));
 			break;
 
 		case SC_ACCOUNTS:

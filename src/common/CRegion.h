@@ -191,7 +191,7 @@ public:
 		pt.m_x = static_cast<short>(( m_left + m_right ) / 2);
 		pt.m_y = static_cast<short>((m_top + m_bottom) / 2);
 		pt.m_z = 0;
-		pt.m_map = static_cast<unsigned char>(m_map);
+		pt.m_map = static_cast<uchar>(m_map);
 		return( pt );
 	}
 
@@ -314,7 +314,7 @@ private:
 #define REGION_FLAG_NO_PVP			0x008000	// Players cannot directly harm each other here.
 #define REGION_FLAG_ARENA			0x010000	// Anything goes. no murder counts or crimes.
 
-	DWORD m_dwFlags;
+	dword m_dwFlags;
 
 public:
 	static const char *m_sClassName;
@@ -396,20 +396,20 @@ public:
 		EmptyRegion();
 		return AddRegionRect( rect );
 	}
-	DWORD GetRegionFlags() const
+	dword GetRegionFlags() const
 	{
 		return( m_dwFlags );
 	}
-	bool IsFlag( DWORD dwFlags ) const
+	bool IsFlag( dword dwFlags ) const
 	{	// REGION_FLAG_GUARDED
 		return(( m_dwFlags & dwFlags ) ? true : false );
 	}
 	bool IsGuarded() const;
-	void SetRegionFlags( DWORD dwFlags )
+	void SetRegionFlags( dword dwFlags )
 	{
 		m_dwFlags |= dwFlags;
 	}
-	void TogRegionFlags( DWORD dwFlags, bool fSet )
+	void TogRegionFlags( dword dwFlags, bool fSet )
 	{
 		if ( fSet )
 			m_dwFlags |= dwFlags;

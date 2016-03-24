@@ -65,43 +65,43 @@ bool CGrayUIDBase::IsItemInContainer() const
 	return( false );
 }
 
-void CGrayUIDBase::SetObjContainerFlags( DWORD dwFlags )
+void CGrayUIDBase::SetObjContainerFlags( dword dwFlags )
 {
 	m_dwInternalVal = ( m_dwInternalVal & (UID_O_INDEX_MASK|UID_F_ITEM )) | dwFlags;
 }
 
-void CGrayUIDBase::SetPrivateUID( DWORD dwVal )
+void CGrayUIDBase::SetPrivateUID( dword dwVal )
 {
 	m_dwInternalVal = dwVal;
 }
 
-DWORD CGrayUIDBase::GetPrivateUID() const
+dword CGrayUIDBase::GetPrivateUID() const
 {
 	return m_dwInternalVal;
 }
 
-DWORD CGrayUIDBase::GetObjUID() const
+dword CGrayUIDBase::GetObjUID() const
 {
 	return( m_dwInternalVal & (UID_O_INDEX_MASK|UID_F_ITEM) );
 }
 
-void CGrayUIDBase::SetObjUID( DWORD dwVal )
+void CGrayUIDBase::SetObjUID( dword dwVal )
 {
 	// can be set to -1 by the client.
 	m_dwInternalVal = ( dwVal & (UID_O_INDEX_MASK|UID_F_ITEM)) | UID_O_DISCONNECT;
 }
 
-bool CGrayUIDBase::operator == ( DWORD index ) const
+bool CGrayUIDBase::operator == ( dword index ) const
 {
 	return( GetObjUID() == index );
 }
 
-bool CGrayUIDBase::operator != ( DWORD index ) const
+bool CGrayUIDBase::operator != ( dword index ) const
 {
 	return( GetObjUID() != index );
 }
 
-CGrayUIDBase::operator DWORD () const
+CGrayUIDBase::operator dword () const
 {
 	return( GetObjUID());
 }
@@ -111,7 +111,7 @@ CGrayUID::CGrayUID()
 	InitUID();
 }
 
-CGrayUID::CGrayUID( DWORD dw )
+CGrayUID::CGrayUID( dword dw )
 {
 	SetPrivateUID( dw );
 }

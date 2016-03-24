@@ -32,7 +32,7 @@ class CClient;
 class Packet
 {
 protected:
-	BYTE* m_buffer;				// raw data
+	byte* m_buffer;				// raw data
 	size_t m_bufferSize;		// size of raw data
 
 	size_t m_length;			// length of packet
@@ -42,7 +42,7 @@ protected:
 public:
 	explicit Packet(size_t size = 0);
 	Packet(const Packet& other);
-	Packet(const BYTE* data, size_t size);
+	Packet(const byte* data, size_t size);
 	virtual ~Packet(void);
 
 private:
@@ -52,8 +52,8 @@ public:
 	bool isValid(void) const;
 	size_t getLength(void) const; // get total packet length
 	size_t getPosition(void) const; // get current position
-	BYTE* getData(void) const; // get packet data
-	BYTE* getRemainingData(void) const; // get packet data from current position
+	byte* getData(void) const; // get packet data
+	byte* getRemainingData(void) const; // get packet data from current position
 	size_t getRemainingLength(void) const; // get length of data from current position
 	void dump(AbstractString& output) const; // write packet data to string
 
@@ -62,18 +62,18 @@ public:
 	void seek(size_t pos = 0); // seek to position
 	void skip(int count = 1); // skip count bytes
 
-	BYTE &operator[](size_t index);
-	const BYTE &operator[](size_t index) const;
+	byte &operator[](size_t index);
+	const byte &operator[](size_t index) const;
 
 	// write
 	void writeBool(const bool value); // write boolean (1 byte)
 	void writeCharASCII(const char value); // write ASCII character (1 byte)
 	void writeCharUNICODE(const WCHAR value); // write UNICODE character (2 bytes)
 	void writeCharNUNICODE(const WCHAR value); // write UNICODE character, network order (2 bytes)
-	void writeByte(const BYTE value); // write 8-bit integer (1 byte)
-	void writeInt16(const WORD value); // write 16-bit integer (2 bytes)
-	void writeInt32(const DWORD value); // write 32-bit integer (4 bytes)
-	void writeInt64(const DWORD hi, const DWORD lo); // write 64-bit integer (8 bytes)
+	void writeByte(const byte value); // write 8-bit integer (1 byte)
+	void writeInt16(const word value); // write 16-bit integer (2 bytes)
+	void writeInt32(const dword value); // write 32-bit integer (4 bytes)
+	void writeInt64(const dword hi, const dword lo); // write 64-bit integer (8 bytes)
 	void writeInt64(const INT64 value); // write 64-bit integer (8 bytes)
 	void writeStringASCII(const char* value, bool terminate = true); // write ascii string until null terminator found
 	void writeStringASCII(const WCHAR* value, bool terminate = true); // write ascii string until null terminator found
@@ -87,7 +87,7 @@ public:
 	void writeStringNUNICODE(const WCHAR* value, bool terminate = true); // write unicode string until null terminator found, network order
 	void writeStringFixedNUNICODE(const char* value, size_t size, bool terminate = false); // write fixed-length unicode string, network order
 	void writeStringFixedNUNICODE(const WCHAR* value, size_t size, bool terminate = false); // write fixed-length unicode string, network order
-	void writeData(const BYTE* buffer, size_t size); // write block of data
+	void writeData(const byte* buffer, size_t size); // write block of data
 	void fill(void); // zeroes remaining buffer
 	size_t sync(void);
 	void trim(void); // trim packet length down to current position
@@ -97,9 +97,9 @@ public:
 	char readCharASCII(void); // read ASCII character (1 byte)
 	WCHAR readCharUNICODE(void); // read UNICODE character (2 bytes)
 	WCHAR readCharNUNICODE(void); // read UNICODE character, network order (2 bytes)
-	BYTE readByte(void); // read 8-bit integer (1 byte)
-	WORD readInt16(void); // read 16-bit integer (2 bytes)
-	DWORD readInt32(void); // read 32-bit integer (4 bytes)
+	byte readByte(void); // read 8-bit integer (1 byte)
+	word readInt16(void); // read 16-bit integer (2 bytes)
+	dword readInt32(void); // read 32-bit integer (4 bytes)
 	INT64 readInt64(void); // read 64-bit integer (8 bytes)
 	void readStringASCII(char* buffer, size_t length, bool includeNull = true); // read fixed-length ascii string
 	void readStringASCII(WCHAR* buffer, size_t length, bool includeNull = true); // read fixed-length ascii string
@@ -150,7 +150,7 @@ protected:
 	size_t m_lengthPosition; // position of length-byte
 
 public:
-	explicit PacketSend(BYTE id, size_t len = 0, Priority priority = PRI_NORMAL);
+	explicit PacketSend(byte id, size_t len = 0, Priority priority = PRI_NORMAL);
 	PacketSend(const PacketSend* other);
 	virtual ~PacketSend() { };
 

@@ -25,15 +25,15 @@ private:
 	bool   m_fSaveParity;		// has the sector been saved relative to the char entering it ?
 	CSectorEnviron m_Env;		// Current Environment
 
-	BYTE m_RainChance;		// 0 to 100%
-	BYTE m_ColdChance;		// Will be snow if rain chance success.
-	BYTE m_ListenItems;		// Items on the ground that listen ?
+	byte m_RainChance;		// 0 to 100%
+	byte m_ColdChance;		// Will be snow if rain chance success.
+	byte m_ListenItems;		// Items on the ground that listen ?
 
 private:
 	WEATHER_TYPE GetWeatherCalc() const;
-	BYTE GetLightCalc( bool fQuickSet ) const;
+	byte GetLightCalc( bool fQuickSet ) const;
 	void SetLightNow( bool fFlash = false );
-	bool IsMoonVisible( unsigned int iPhase, int iLocalTime ) const;
+	bool IsMoonVisible( uint iPhase, int iLocalTime ) const;
 	void SetDefaultWeatherChance();
 
 public:
@@ -57,15 +57,15 @@ public:
 	// Weather
 	WEATHER_TYPE GetWeather() const;
 	bool IsRainOverriden() const;
-	BYTE GetRainChance() const;
+	byte GetRainChance() const;
 	bool IsColdOverriden() const;
-	BYTE GetColdChance() const;
+	byte GetColdChance() const;
 	void SetWeather( WEATHER_TYPE w );
 	void SetWeatherChance( bool fRain, int iChance );
 
 	// Light
 	bool IsLightOverriden() const;
-	BYTE GetLight() const;
+	byte GetLight() const;
 	bool IsDark() const;
 	bool IsNight() const;
 	void LightFlash();

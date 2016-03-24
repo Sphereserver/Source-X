@@ -12,7 +12,7 @@
 
 //---------------------------MUL FILE DEFS---------------------------
 
-// All these structures must be BYTE packed.
+// All these structures must be byte packed.
 #if defined _WIN32 && (!__MINGW32__)
 // Microsoft dependant pragma
 #pragma pack(1)
@@ -36,7 +36,7 @@
 //  plus black, and default.
 // Skin color is similar, except there are 7 basic colors of 8 hues.
 // For hair there are 7 colors of 7 hues.
-typedef WORD HUE_TYPE;		// Index into the hues.mul table.
+typedef word HUE_TYPE;		// Index into the hues.mul table.
 
 enum HUE_CODE
 {
@@ -83,7 +83,7 @@ enum HUE_CODE
 	HUE_UNDERWEAR		= 0x8000	// Only can be used on humans.
 };
 
-typedef WORD SOUND_TYPE;	// Sound ID
+typedef word SOUND_TYPE;	// Sound ID
 
 enum SOUND_CODE
 {
@@ -127,10 +127,10 @@ enum SOUND_CODE
 	SOUND_QTY			= 0x300
 };
 
-typedef WORD MIDI_TYPE;	// Music id
+typedef word MIDI_TYPE;	// Music id
 
 #define MULTI_QTY	0x2000	// total address space for multis.
-typedef WORD MULTI_TYPE;	// define a multi (also defined by ITEMID_MULTI)
+typedef word MULTI_TYPE;	// define a multi (also defined by ITEMID_MULTI)
 
 enum ITEMID_TYPE	// InsideUO is great for this stuff.
 {
@@ -2128,7 +2128,7 @@ enum GUMP_TYPE	// The gumps. (most of these are not useful to the server.)
 	GUMP_OPEN_SPELLBOOK		= 0xFFFF
 };
 
-typedef WORD		TERRAIN_TYPE;
+typedef word		TERRAIN_TYPE;
 enum
 {
 	// Terrain samples
@@ -2202,16 +2202,16 @@ struct CUOVersionBlock	// skew list. (verdata.mul)
 {
 	// First 4 bytes of this file = the qty of records.
 private:
-	DWORD m_file;		// file type id. VERFILE_TYPE (ex.tiledata = 0x1E)
-	DWORD m_block;		// tile number. ( items = itemid + 0x200 )
+	dword m_file;		// file type id. VERFILE_TYPE (ex.tiledata = 0x1E)
+	dword m_block;		// tile number. ( items = itemid + 0x200 )
 public:
-	DWORD m_filepos;	// pos in this file to find the patch block.
-	DWORD m_length;
+	dword m_filepos;	// pos in this file to find the patch block.
+	dword m_length;
 
-	WORD  m_wVal3;		// stuff that would have been in CUOIndexRec
-	WORD  m_wVal4;
+	word  m_wVal3;		// stuff that would have been in CUOIndexRec
+	word  m_wVal4;
 public:
-	DWORD GetIndex() const	// a single sortable index.
+	dword GetIndex() const	// a single sortable index.
 	{
 		return( VERDATA_MAKE_INDEX( m_file, m_block ));
 	}
@@ -2219,12 +2219,12 @@ public:
 	{
 		return( static_cast<VERFILE_TYPE>(m_file) );
 	}
-	DWORD GetBlockIndex() const
+	dword GetBlockIndex() const
 	{
 		return( m_block );
 	}
 	// This stuff is for GrayPatch
-	void SetBlock(DWORD dwBlock)
+	void SetBlock(dword dwBlock)
 	{
 		m_block = dwBlock;
 	}
@@ -2238,18 +2238,18 @@ public:
 struct CUOIndexRec	// 12 byte block = used for table indexes. (staidx0.mul,multi.idx,anim.idx)
 {
 private:
-	DWORD	m_dwOffset;	// 0xFFFFFFFF = nothing here ! else pointer to something (CUOStaticItemRec possibly)
-	DWORD 	m_dwLength; // Length of the object in question.
+	dword	m_dwOffset;	// 0xFFFFFFFF = nothing here ! else pointer to something (CUOStaticItemRec possibly)
+	dword 	m_dwLength; // Length of the object in question.
 public:
-	WORD 	m_wVal3;	// Varied uses. ex. GumpSizey
-	WORD 	m_wVal4;	// Varied uses. ex. GumpSizex
+	word 	m_wVal3;	// Varied uses. ex. GumpSizey
+	word 	m_wVal4;	// Varied uses. ex. GumpSizex
 
 public:
-	DWORD GetFileOffset() const
+	dword GetFileOffset() const
 	{
 		return( m_dwOffset );
 	}
-	DWORD GetBlockLength() const
+	dword GetBlockLength() const
 	{
 		return( m_dwLength &~ 0x80000000 );
 	}
@@ -2273,7 +2273,7 @@ public:
 		m_wVal3 = pVerData->m_wVal3;
 		m_wVal4 = pVerData->m_wVal4;
 	}
-	void SetupIndex( DWORD dwOffset, DWORD dwLength )
+	void SetupIndex( dword dwOffset, dword dwLength )
 	{
 		m_dwOffset = dwOffset;
 		m_dwLength = dwLength;
@@ -2289,7 +2289,7 @@ public:
 #define UO_SIZE_Z			127
 #define UO_SIZE_MIN_Z		-127
 
-typedef unsigned char height_t;
+typedef uchar height_t;
 
 class CMapDiffCollection;
 
@@ -2380,9 +2380,9 @@ public:
 
 struct CUOMapMeter	// 3 bytes (map0.mul)
 {
-	WORD m_wTerrainIndex;	// TERRAIN_TYPE index to Radarcol and CUOTerrainTypeRec/CUOTerrainTypeRec2
+	word m_wTerrainIndex;	// TERRAIN_TYPE index to Radarcol and CUOTerrainTypeRec/CUOTerrainTypeRec2
 	signed char m_z;
-	static bool IsTerrainNull( WORD wTerrainIndex )
+	static bool IsTerrainNull( word wTerrainIndex )
 	{
 		switch ( wTerrainIndex )
 		{
@@ -2395,18 +2395,18 @@ struct CUOMapMeter	// 3 bytes (map0.mul)
 
 struct CUOMapBlock	// 196 byte block = 8x8 meters, (map0.mul)
 {
-	WORD m_wID1;	// ?
-	WORD m_wID2;
+	word m_wID1;	// ?
+	word m_wID2;
 	CUOMapMeter m_Meter[ UO_BLOCK_SIZE * UO_BLOCK_SIZE ];
 } PACK_NEEDED;
 
 struct CUOStaticItemRec	// 7 byte block = static items on the map (statics0.mul)
 {
-	WORD	m_wTileID;		// ITEMID_TYPE = Index to tile CUOItemTypeRec/CUOItemTypeRec2
-	BYTE	m_x;		// x <= 7 = offset from block.
-	BYTE 	m_y;		// y <= 7
+	word	m_wTileID;		// ITEMID_TYPE = Index to tile CUOItemTypeRec/CUOItemTypeRec2
+	byte	m_x;		// x <= 7 = offset from block.
+	byte 	m_y;		// y <= 7
 	signed char m_z;	//
-	WORD 	m_wHue;		// HUE_TYPE modifier for the item
+	word 	m_wHue;		// HUE_TYPE modifier for the item
 
 	// For internal caching purposes only. overload this.
 	// LOBYTE(m_wColor) = Blocking flags for this item. (CAN_I_BLOCK)
@@ -2424,8 +2424,8 @@ struct CUOStaticItemRec	// 7 byte block = static items on the map (statics0.mul)
 struct CUOTerrainTypeRec	// size = 0x1a = 26 (tiledata.mul)
 {	
 	// First half of tiledata.mul file is for terrain tiles.
-	DWORD m_flags;	// 0xc0=water, 0x40=dirt or rock, 0x60=lava, 0x50=cave, 0=floor
-	WORD m_index;	// just counts up.  0 = unused.
+	dword m_flags;	// 0xc0=water, 0x40=dirt or rock, 0x60=lava, 0x50=cave, 0=floor
+	word m_index;	// just counts up.  0 = unused.
 	char m_name[20];
 
 } PACK_NEEDED;
@@ -2433,9 +2433,9 @@ struct CUOTerrainTypeRec	// size = 0x1a = 26 (tiledata.mul)
 struct CUOTerrainTypeRec2	// size = 0x1e = 30 (tiledata.mul, High Seas+)
 {
 	// First half of tiledata.mul file is for terrain tiles.
-	DWORD m_flags;	// 0xc0=water, 0x40=dirt or rock, 0x60=lava, 0x50=cave, 0=floor
-	DWORD m_unknown;
-	WORD m_index;	// just counts up.  0 = unused.
+	dword m_flags;	// 0xc0=water, 0x40=dirt or rock, 0x60=lava, 0x50=cave, 0=floor
+	dword m_unknown;
+	word m_index;	// just counts up.  0 = unused.
 	char m_name[20];
 } PACK_NEEDED;
 
@@ -2486,26 +2486,26 @@ struct CUOItemTypeRec	// size = 37 (tiledata.mul)
 #define UFLAG4_STAIRS		0x40000000	//1e=
 #define UFLAG4_WALKABLE		0x80000000	//1f= We can walk here.
 
-	DWORD m_flags;
-	BYTE m_weight;		// 255 = unmovable.
-	BYTE m_layer;		// LAYER_TYPE for UFLAG1_EQUIP, UFLAG3_EQUIP2 or light index for UFLAG3_LIGHT
-	DWORD m_dwUnk6;		// ? qty in the case of UFLAG2_STACKABLE, Spell icons use this as well.
-	DWORD m_dwAnim;		// equipable items animation index. (50000 = male offset, 60000=female) Gump base as well
-	WORD m_wUnk14;		// ?
-	BYTE m_height;		// z height but may not be blocking. ex.UFLAG2_WINDOW
+	dword m_flags;
+	byte m_weight;		// 255 = unmovable.
+	byte m_layer;		// LAYER_TYPE for UFLAG1_EQUIP, UFLAG3_EQUIP2 or light index for UFLAG3_LIGHT
+	dword m_dwUnk6;		// ? qty in the case of UFLAG2_STACKABLE, Spell icons use this as well.
+	dword m_dwAnim;		// equipable items animation index. (50000 = male offset, 60000=female) Gump base as well
+	word m_wUnk14;		// ?
+	byte m_height;		// z height but may not be blocking. ex.UFLAG2_WINDOW
 	char m_name[20];	// sometimes legit not to have a name
 } PACK_NEEDED;
 
 struct CUOItemTypeRec2	// size = 41 (tiledata.mul, High Seas+)
 {
-	DWORD m_flags;
-	DWORD m_dwUnk5;		// ? new in HS
-	BYTE m_weight;		// 255 = unmovable.
-	BYTE m_layer;		// LAYER_TYPE for UFLAG1_EQUIP, UFLAG3_EQUIP2 or light index for UFLAG3_LIGHT
-	DWORD m_dwUnk11;	// ? qty in the case of UFLAG2_STACKABLE, Spell icons use this as well.
-	DWORD m_dwAnim;		// equipable items animation index. (50000 = male offset, 60000=female) Gump base as well
-	WORD m_wUnk19;		// ?
-	BYTE m_height;		// z height but may not be blocking. ex.UFLAG2_WINDOW
+	dword m_flags;
+	dword m_dwUnk5;		// ? new in HS
+	byte m_weight;		// 255 = unmovable.
+	byte m_layer;		// LAYER_TYPE for UFLAG1_EQUIP, UFLAG3_EQUIP2 or light index for UFLAG3_LIGHT
+	dword m_dwUnk11;	// ? qty in the case of UFLAG2_STACKABLE, Spell icons use this as well.
+	dword m_dwAnim;		// equipable items animation index. (50000 = male offset, 60000=female) Gump base as well
+	word m_wUnk19;		// ?
+	byte m_height;		// z height but may not be blocking. ex.UFLAG2_WINDOW
 	char m_name[20];	// sometimes legit not to have a name
 } PACK_NEEDED;
 
@@ -2520,11 +2520,11 @@ struct CUOMultiItemRec // (Multi.mul)
 {
 	// Describe multi's like houses and boats. One single tile.
 	// From Multi.Idx and Multi.mul files.
-	WORD  m_wTileID;	// ITEMID_TYPE = Index to tile CUOItemTypeRec/CUOItemTypeRec2
-	signed short m_dx;	// signed delta.
-	signed short m_dy;
-	signed short m_dz;
-	DWORD m_visible;	// 0 or 1 (non-visible items are things like doors and signs)
+	word  m_wTileID;	// ITEMID_TYPE = Index to tile CUOItemTypeRec/CUOItemTypeRec2
+	short m_dx;	// signed delta.
+	short m_dy;
+	short m_dz;
+	dword m_visible;	// 0 or 1 (non-visible items are things like doors and signs)
 
 	ITEMID_TYPE GetDispID() const
 	{
@@ -2537,12 +2537,12 @@ struct CUOMultiItemRec2 // (Multi.mul, High Seas+)
 {
 	// Describe multi's like houses and boats. One single tile.
 	// From Multi.Idx and Multi.mul files
-	WORD  m_wTileID;	// ITEMID_TYPE = Index to tile CUOItemTypeRec/CUOItemTypeRec2
-	signed short m_dx;	// signed delta.
-	signed short m_dy;
-	signed short m_dz;
-	DWORD m_visible;	// 0 or 1 (non-visible items are things like doors and signs)
-	DWORD m_unknown;	// unknown data
+	word  m_wTileID;	// ITEMID_TYPE = Index to tile CUOItemTypeRec/CUOItemTypeRec2
+	short m_dx;	// signed delta.
+	short m_dy;
+	short m_dz;
+	dword m_visible;	// 0 or 1 (non-visible items are things like doors and signs)
+	dword m_unknown;	// unknown data
 
 	ITEMID_TYPE GetDispID() const
 	{
@@ -2555,15 +2555,15 @@ struct CUOHuesRec // (Hues.mul)
 	short m_color[34];
 	char m_name[20];
 
-	BYTE GetRGB( int rgb ) const
+	byte GetRGB( int rgb ) const
 	{
 		short sColor = m_color[31];
 		if ( rgb == 0 ) // R
-			return static_cast<BYTE>(((sColor & 0x7C00) >> 7));
+			return static_cast<byte>(((sColor & 0x7C00) >> 7));
 		else if ( rgb == 1 )
-			return static_cast<BYTE>(((sColor & 0x3E0) >> 2));
+			return static_cast<byte>(((sColor & 0x3E0) >> 2));
 		else if ( rgb == 3 )
-			return static_cast<BYTE>(((sColor & 0x1F) << 3));
+			return static_cast<byte>(((sColor & 0x1F) << 3));
 
 		return 0;
 	}

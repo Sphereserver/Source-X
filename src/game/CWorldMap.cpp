@@ -157,7 +157,7 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fT
 
 	EXC_DEBUG_START;
 	g_Log.EventDebug("point '%d,%d,%d,%d' type '%d' [0%x]\n", pt.m_x, pt.m_y, pt.m_z, pt.m_map, static_cast<int>(Type), 
-		pCharSrc ? static_cast<DWORD>(pCharSrc->GetUID()) : 0);
+		pCharSrc ? static_cast<dword>(pCharSrc->GetUID()) : 0);
 	EXC_DEBUG_END;
 	return NULL;
 }
@@ -183,10 +183,10 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 	CItem * pItem = NULL;
 	CItemBaseDupe * pDupeDef = NULL;
 	height_t Height = 0;
-	BYTE z = 0;
+	byte z = 0;
 	CPointMap ptTest;
 
-	unsigned int iRetElem = 4;
+	uint iRetElem = 4;
 
 	CPointMap ptElem[5];
 	memset(ptElem, 0, sizeof(ptElem));
@@ -406,7 +406,7 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 	{
 		for ( int y = rect.m_top; y < rect.m_bottom; ++y, pMeter = NULL )
 		{
-			ptTest = CPointMap(static_cast<WORD>(x), static_cast<WORD>(y), pt.m_z, pt.m_map);
+			ptTest = CPointMap(static_cast<word>(x), static_cast<word>(y), pt.m_z, pt.m_map);
 			pMeter = GetMapMeter(ptTest);
 			if ( !pMeter )
 				continue;
@@ -529,7 +529,7 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 	{
 		for ( int y = rect.m_top; y < rect.m_bottom; y++, pMeter = NULL )
 		{
-			CPointMap ptTest(static_cast<WORD>(x), static_cast<WORD>(y), pt.m_z, pt.m_map);
+			CPointMap ptTest(static_cast<word>(x), static_cast<word>(y), pt.m_z, pt.m_map);
 			pMeter = GetMapMeter(ptTest);
 
 			if ( !pMeter )
@@ -571,7 +571,7 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 	{
 		for ( int y = rect.m_top; y < rect.m_bottom; y += UO_BLOCK_SIZE, pMapBlock = NULL )
 		{
-			CPointMap ptTest(static_cast<WORD>(x), static_cast<WORD>(y), pt.m_z, pt.m_map);
+			CPointMap ptTest(static_cast<word>(x), static_cast<word>(y), pt.m_z, pt.m_map);
 			pMapBlock = GetMapBlock( ptTest );
 
 			if ( !pMapBlock )
@@ -628,7 +628,7 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 		{
 			for (int y = rect.m_top; y < rect.m_bottom; y++)
 			{
-				CPointMap ptTest(static_cast<WORD>(x), static_cast<WORD>(y), pt.m_z, pt.m_map);
+				CPointMap ptTest(static_cast<word>(x), static_cast<word>(y), pt.m_z, pt.m_map);
 
 				CRegionLinks rlinks;
 				size_t iRegionQty = ptTest.GetRegions(REGION_TYPE_MULTI, rlinks);
@@ -699,7 +699,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CGrayMapBlockState & block)
 	CItemBase * pItemDef = NULL;
 	CItemBaseDupe * pDupeDef = NULL;
 	CItem * pItem = NULL;
-	DWORD wBlockThis = 0;
+	dword wBlockThis = 0;
 	signed char z = 0;
 	int x2 = 0, y2 = 0;
 
@@ -998,7 +998,7 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CGrayMapBlockState & block, b
 	CItemBase * pItemDef = NULL;
 	CItemBaseDupe * pDupeDef = NULL;
 	CItem * pItem = NULL;
-	DWORD wBlockThis = 0;
+	dword wBlockThis = 0;
 	signed char z = 0;
 	height_t zHeight = 0;
 	int x2 = 0, y2 = 0;
@@ -1257,10 +1257,10 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CGrayMapBlockState & block, b
 	}
 }
 
-signed char CWorld::GetHeightPoint( const CPointBase & pt, DWORD & wBlockFlags, bool fHouseCheck )
+signed char CWorld::GetHeightPoint( const CPointBase & pt, dword & wBlockFlags, bool fHouseCheck )
 {
 	ADDTOCALLSTACK("CWorld::GetHeightPoint");
-	DWORD dwCan = wBlockFlags;
+	dword dwCan = wBlockFlags;
 	CGrayMapBlockState block( wBlockFlags, pt.m_z + (PLAYER_HEIGHT / 2), pt.m_z + PLAYER_HEIGHT );
 
 	GetHeightPoint( pt, block, fHouseCheck );
@@ -1297,7 +1297,7 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CGrayMapBlockState & block, 
 	// Height of statics at/above given coordinates
 	// do gravity here for the z.
 
-	DWORD wBlockThis = 0;
+	dword wBlockThis = 0;
 	const CGrayMapBlock * pMapBlock = GetMapBlock( pt );
 	if ( !pMapBlock )
 	{
@@ -1395,7 +1395,7 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CGrayMapBlockState & block, 
 		wBlockThis = pItemDef->m_Can & (CAN_I_DOOR | CAN_I_WATER | CAN_I_CLIMB | CAN_I_BLOCK | CAN_I_PLATFORM);
 		height_t zHeight = pItemDef->GetHeight();
 
-		DWORD wStaticBlockThis = 0;
+		dword wStaticBlockThis = 0;
 		height_t zStaticHeight = CItemBase::GetItemHeight(pItem->GetDispID(), wStaticBlockThis);
 
 		if (wBlockThis == 0)
@@ -1448,7 +1448,7 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CGrayMapBlockState & block, 
 	}
 }
 
-signed char CWorld::GetHeightPoint2( const CPointBase & pt, DWORD & wBlockFlags, bool fHouseCheck ) // Height of player who walked to X/Y/OLDZ
+signed char CWorld::GetHeightPoint2( const CPointBase & pt, dword & wBlockFlags, bool fHouseCheck ) // Height of player who walked to X/Y/OLDZ
 {
 	ADDTOCALLSTACK("CWorld::GetHeightPoint2");
 	// Given our coords at pt including pt.m_z
@@ -1473,7 +1473,7 @@ signed char CWorld::GetHeightPoint2( const CPointBase & pt, DWORD & wBlockFlags,
 
 	// ??? NOTE: some creatures should be taller than others !!!
 
-	DWORD dwCan = wBlockFlags;
+	dword dwCan = wBlockFlags;
 	CGrayMapBlockState block(wBlockFlags, pt.m_z, PLAYER_HEIGHT);
 
 	GetHeightPoint2( pt, block, fHouseCheck );
@@ -1518,7 +1518,7 @@ signed char CWorld::GetHeightPoint2( const CPointBase & pt, DWORD & wBlockFlags,
 }
 
 
-CItemTypeDef * CWorld::GetTerrainItemTypeDef( DWORD dwTerrainIndex )
+CItemTypeDef * CWorld::GetTerrainItemTypeDef( dword dwTerrainIndex )
 {
 	ADDTOCALLSTACK("CWorld::GetTerrainItemTypeDef");
 	CResourceDef *	pRes = NULL;
@@ -1542,7 +1542,7 @@ CItemTypeDef * CWorld::GetTerrainItemTypeDef( DWORD dwTerrainIndex )
 }
 
 
-IT_TYPE CWorld::GetTerrainItemType( DWORD dwTerrainIndex )
+IT_TYPE CWorld::GetTerrainItemType( dword dwTerrainIndex )
 {
 	ADDTOCALLSTACK("CWorld::GetTerrainItemType");
 	CResourceDef * pRes = NULL;

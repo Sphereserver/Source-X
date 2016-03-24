@@ -38,7 +38,7 @@ private:
 	size_t m_iStatics;
 	CUOStaticItemRec * m_pStatics;	// dyn alloc array block.
 public:
-	void LoadStatics(DWORD dwBlockIndex, int map);
+	void LoadStatics(dword dwBlockIndex, int map);
 	void LoadStatics(size_t iCount, CUOStaticItemRec * pStatics);
 public:
 	static const char *m_sClassName;
@@ -57,8 +57,8 @@ public:
 
 struct CGrayMapBlocker
 {
-	DWORD m_dwBlockFlags;	// How does this item block ? CAN_I_PLATFORM
-	DWORD m_dwTile;			// TERRAIN_QTY + id.
+	dword m_dwBlockFlags;	// How does this item block ? CAN_I_PLATFORM
+	dword m_dwTile;			// TERRAIN_QTY + id.
 	signed char m_z;		// Top of a solid object. or bottom of non blocking one.
 };
 
@@ -74,7 +74,7 @@ struct CGrayMapBlockState
 	//		CAN_C_FIRE_IMMUNE = i can walk into lava etc. - CAN_I_FIRE = UFLAG1_DAMAGE
 	//		CAN_C_HOVER = i can follow hover routes. - CAN_I_HOVER = UFLAG4_HOVEROVER
 
-	const DWORD m_dwBlockFlags;	// The block flags we can overcome.	
+	const dword m_dwBlockFlags;	// The block flags we can overcome.	
 	const signed char m_z;	// the z we start at. (stay at if we are flying)
 	const int m_iHeight;		// The height we need to stand here.
 	const signed char m_zClimb; // We can climb at this height
@@ -87,8 +87,8 @@ struct CGrayMapBlockState
 	CGrayMapBlocker m_Lowest;	// the lowest item we have found.	
 
 public:
-	CGrayMapBlockState( DWORD dwBlockFlags, signed char m_z, int iHeight = PLAYER_HEIGHT, height_t zHeight = PLAYER_HEIGHT );
-	CGrayMapBlockState( DWORD dwBlockFlags, signed char m_z, int iHeight, signed char zClimb, height_t zHeight = PLAYER_HEIGHT );
+	CGrayMapBlockState( dword dwBlockFlags, signed char m_z, int iHeight = PLAYER_HEIGHT, height_t zHeight = PLAYER_HEIGHT );
+	CGrayMapBlockState( dword dwBlockFlags, signed char m_z, int iHeight, signed char zClimb, height_t zHeight = PLAYER_HEIGHT );
 
 private:
 	CGrayMapBlockState(const CGrayMapBlockState& copy);
@@ -96,11 +96,11 @@ private:
 
 public:
 	bool IsUsableZ( signed char zBottom, height_t zHeightEstimate ) const;
-	bool CheckTile( DWORD dwItemBlockFlags, signed char zBottom, height_t zheight, DWORD wID );
-	bool CheckTile_Item( DWORD dwItemBlockFlags, signed char zBottom, height_t zheight, DWORD wID );
-	inline void SetTop( DWORD &dwItemBlockFlags, signed char &z, DWORD &dwID );
-	bool CheckTile_Terrain( DWORD dwItemBlockFlags, signed char z, DWORD dwID );
-	static LPCTSTR GetTileName( DWORD dwID );
+	bool CheckTile( dword dwItemBlockFlags, signed char zBottom, height_t zheight, dword wID );
+	bool CheckTile_Item( dword dwItemBlockFlags, signed char zBottom, height_t zheight, dword wID );
+	inline void SetTop( dword &dwItemBlockFlags, signed char &z, dword &dwID );
+	bool CheckTile_Terrain( dword dwItemBlockFlags, signed char z, dword dwID );
+	static LPCTSTR GetTileName( dword dwID );
 };
 
 struct CMapDiffBlock
@@ -109,10 +109,10 @@ struct CMapDiffBlock
 	CUOStaticItemRec * m_pStaticsBlock;		// Patched statics
 	int m_iStaticsCount;					// Patched statics count
 	CUOMapBlock * m_pTerrainBlock;			// Patched terrain
-	DWORD m_BlockId;						// Block represented
+	dword m_BlockId;						// Block represented
 	int m_map;								// Map this block is from
 
-	CMapDiffBlock(DWORD dwBlockId, int map);
+	CMapDiffBlock(dword dwBlockId, int map);
 
 	~CMapDiffBlock();
 
@@ -121,10 +121,10 @@ private:
 	CMapDiffBlock& operator=(const CMapDiffBlock& other);
 };
 
-class CMapDiffBlockArray : public CGObSortArray< CMapDiffBlock*, DWORD >
+class CMapDiffBlockArray : public CGObSortArray< CMapDiffBlock*, dword >
 {
 public:
-	int CompareKey( DWORD id, CMapDiffBlock* pBase, bool fNoSpaces ) const;
+	int CompareKey( dword id, CMapDiffBlock* pBase, bool fNoSpaces ) const;
 
 public:
 	CMapDiffBlockArray() { };
@@ -140,7 +140,7 @@ private:
 	bool m_bLoaded;
 
 	CMapDiffBlockArray m_pMapDiffBlocks[256];
-	CMapDiffBlock * GetNewBlock( DWORD dwBlockId, int map );
+	CMapDiffBlock * GetNewBlock( dword dwBlockId, int map );
 	void LoadMapDiffs();
 
 public:
@@ -154,7 +154,7 @@ private:
 public:
 	void Init();
 	CMapDiffBlock * GetAtBlock( int bx, int by, int map );
-	CMapDiffBlock * GetAtBlock( DWORD dwBlockId, int map );
+	CMapDiffBlock * GetAtBlock( dword dwBlockId, int map );
 };
 
 class CGrayMapBlock :	// Cache this from the MUL files. 8x8 block of the world.
@@ -174,7 +174,7 @@ public:
 	CGrayCachedMulItem m_CacheTime;	// keep track of the use time of this item. (client does not care about this)
 private:
 	void Load(int bx, int by);	// NOTE: This will "throw" on failure !
-	void LoadDiffs(DWORD dwBlockIndex, int map);
+	void LoadDiffs(dword dwBlockIndex, int map);
 
 public:
 	explicit CGrayMapBlock( const CPointMap & pt );

@@ -46,8 +46,8 @@ protected:
 	CGObArray<CObjBase*> m_UIDs;	// all the UID's in the World. CChar and CItem.
 	int m_iUIDIndexLast;	// remeber the last index allocated so we have more even usage.
 
-	DWORD	*m_FreeUIDs;		//	list of free uids available
-	DWORD	m_FreeOffset;		//	offset of the first free element
+	dword	*m_FreeUIDs;		//	list of free uids available
+	dword	m_FreeOffset;		//	offset of the first free element
 
 public:
 	static const char *m_sClassName;
@@ -73,14 +73,14 @@ public:
 	bool IsSaving() const;
 
 	// UID Managenent
-	DWORD GetUIDCount() const;
+	dword GetUIDCount() const;
 #define UID_PLACE_HOLDER (reinterpret_cast<CObjBase*>(0xFFFFFFFF))
-	CObjBase * FindUID(DWORD dwIndex) const;
-	void FreeUID(DWORD dwIndex);
-	DWORD AllocUID( DWORD dwIndex, CObjBase * pObj );
+	CObjBase * FindUID(dword dwIndex) const;
+	void FreeUID(dword dwIndex);
+	dword AllocUID( dword dwIndex, CObjBase * pObj );
 
-	int FixObjTry( CObjBase * pObj, DWORD dwUID = 0 );
-	int FixObj( CObjBase * pObj, DWORD dwUID = 0 );
+	int FixObjTry( CObjBase * pObj, dword dwUID = 0 );
+	int FixObj( CObjBase * pObj, dword dwUID = 0 );
 
 	void SaveThreadClose();
 	void GarbageCollection_UIDs();
@@ -181,16 +181,16 @@ private:
 	bool		m_bSaveNotificationSent;	// has notification been sent?
 	CServTime	m_timeRespawn;	// when to res dead NPC's ?
 	CServTime	m_timeCallUserFunc;	// when to call next user func
-	unsigned int m_Sector_Pulse;		// Slow some stuff down that doesn't need constant processing.
+	uint m_Sector_Pulse;		// Slow some stuff down that doesn't need constant processing.
 
 	int m_iSaveStage;	// Current stage of the background save.
-	LLONG	m_savetimer; // Time it takes to save
+	llong	m_savetimer; // Time it takes to save
 
 public:
 	static const char *m_sClassName;
 	// World data.
 	CSector **m_Sectors;
-	unsigned int m_SectorsQty;
+	uint m_SectorsQty;
 
 public:
 	int m_iSaveCountID;			// Current archival backup id. Whole World must have this same stage id
@@ -255,26 +255,26 @@ public:
 #define FELUCCA_SYNODIC_PERIOD 840 // in game world minutes
 #define TRAMMEL_FULL_BRIGHTNESS 2 // light units LIGHT_BRIGHT
 #define FELUCCA_FULL_BRIGHTNESS 6 // light units LIGHT_BRIGHT
-	unsigned int GetMoonPhase( bool bMoonIndex = false ) const;
+	uint GetMoonPhase( bool bMoonIndex = false ) const;
 	CServTime GetNextNewMoon( bool bMoonIndex ) const;
 
-	DWORD GetGameWorldTime( CServTime basetime ) const;
-	DWORD GetGameWorldTime() const	// return game world minutes
+	dword GetGameWorldTime( CServTime basetime ) const;
+	dword GetGameWorldTime() const	// return game world minutes
 	{
 		return( GetGameWorldTime( GetCurrentTime()));
 	}
 
 	// CSector World Map stuff.
 	void GetHeightPoint2( const CPointMap & pt, CGrayMapBlockState & block, bool fHouseCheck = false );
-	signed char GetHeightPoint2(const CPointBase & pt, DWORD & wBlockFlags, bool fHouseCheck = false); // Height of player who walked to X/Y/OLDZ
+	signed char GetHeightPoint2(const CPointBase & pt, dword & wBlockFlags, bool fHouseCheck = false); // Height of player who walked to X/Y/OLDZ
 
 	void GetHeightPoint( const CPointMap & pt, CGrayMapBlockState & block, bool fHouseCheck = false );
-	signed char GetHeightPoint( const CPointBase & pt, DWORD & wBlockFlags, bool fHouseCheck = false );
+	signed char GetHeightPoint( const CPointBase & pt, dword & wBlockFlags, bool fHouseCheck = false );
 
 	void GetFixPoint( const CPointMap & pt, CGrayMapBlockState & block);
 
-	CItemTypeDef *	GetTerrainItemTypeDef( DWORD dwIndex );
-	IT_TYPE			GetTerrainItemType( DWORD dwIndex );
+	CItemTypeDef *	GetTerrainItemTypeDef( dword dwIndex );
+	IT_TYPE			GetTerrainItemType( dword dwIndex );
 
 	const CGrayMapBlock * GetMapBlock( const CPointMap & pt )
 	{
@@ -314,8 +314,8 @@ public:
 	void Broadcast( LPCTSTR pMsg );
 	void __cdecl Broadcastf( LPCTSTR pMsg, ...) __printfargs(2,3);
 
-	bool Export( LPCTSTR pszFilename, const CChar* pSrc, WORD iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, int dx = 0, int dy = 0 );
-	bool Import( LPCTSTR pszFilename, const CChar* pSrc, WORD iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, TCHAR *pszAgs1 = NULL, TCHAR *pszAgs2 = NULL );
+	bool Export( LPCTSTR pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, int dx = 0, int dy = 0 );
+	bool Import( LPCTSTR pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, TCHAR *pszAgs1 = NULL, TCHAR *pszAgs2 = NULL );
 	bool Save( bool fForceImmediate ); // Save world state
 	void SaveStatics();
 	bool LoadAll();

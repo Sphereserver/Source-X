@@ -389,7 +389,7 @@ CItem * CItem::CreateHeader( TCHAR * pArg, CObjBase * pCont, bool fDupeCheck, CC
 		// Is the item movable ?
 		if ( ! pItem->IsMovableType() && pCont && pCont->IsItem())
 		{
-			DEBUG_ERR(( "Script Error: 0%x item is not movable type, cont=0%x\n", id, (DWORD)(pCont->GetUID()) ));
+			DEBUG_ERR(( "Script Error: 0%x item is not movable type, cont=0%x\n", id, (dword)(pCont->GetUID()) ));
 			pItem->Delete();
 			return( NULL );
 		}
@@ -604,41 +604,41 @@ int CItem::GetVisualRange() const	// virtual
 // Retrieve tag.override.speed for this CItem
 // If no tag, then retrieve CItemBase::GetSpeed()
 // Doing this way lets speed be changed for all created weapons from the script itself instead of rewriting one by one.
-BYTE CItem::GetSpeed() const
+byte CItem::GetSpeed() const
 {
 	if (m_TagDefs.GetKey("OVERRIDE.SPEED"))
-		return static_cast<BYTE>(m_TagDefs.GetKeyNum("OVERRIDE.SPEED"));
+		return static_cast<byte>(m_TagDefs.GetKeyNum("OVERRIDE.SPEED"));
 	CItemBase * pItemDef = dynamic_cast<CItemBase *>(Base_GetDef());
 	return pItemDef->GetSpeed();
 }
 
 
-void CItem::SetAttr( DWORD dwAttr )
+void CItem::SetAttr( dword dwAttr )
 {
 	m_Attr |= dwAttr;
 }
 
-void CItem::ClrAttr( DWORD dwAttr )
+void CItem::ClrAttr( dword dwAttr )
 {
 	m_Attr &= ~dwAttr;
 }
 
-bool CItem::IsAttr( DWORD dwAttr ) const	// ATTR_DECAY
+bool CItem::IsAttr( dword dwAttr ) const	// ATTR_DECAY
 {
 	return(( m_Attr & dwAttr ) ? true : false );
 }
 
-void CItem::SetCanUse( DWORD dwCanUse )
+void CItem::SetCanUse( dword dwCanUse )
 {
 	m_CanUse |= dwCanUse;
 }
 
-void CItem::ClrCanUse( DWORD dwCanUse )
+void CItem::ClrCanUse( dword dwCanUse )
 {
 	m_CanUse &= ~dwCanUse;
 }
 
-bool CItem::IsCanUse( DWORD dwCanUse ) const	// CanUse_None
+bool CItem::IsCanUse( dword dwCanUse ) const	// CanUse_None
 {
 	return(( m_CanUse & dwCanUse ) ? true : false );
 }
@@ -686,7 +686,7 @@ int CItem::IsWeird() const
 	return( ( ptCont == NULL ) ? 0x2106 : ptCont->IsWeird() );
 }
 
-signed char CItem::GetFixZ( CPointMap pt, DWORD wBlockFlags )
+signed char CItem::GetFixZ( CPointMap pt, dword wBlockFlags )
 {
 	height_t zHeight = CItemBase::GetItemHeight( GetDispID(), wBlockFlags );
 	CGrayMapBlockState block( wBlockFlags, pt.m_z, pt.m_z + zHeight, pt.m_z + 2, zHeight );
@@ -743,7 +743,7 @@ int CItem::FixWeirdness()
 			}
 			else
 			{
-				DEBUG_ERR(("'%s' Bad Link to 0%x\n", GetName(), static_cast<DWORD>(m_uidLink)));
+				DEBUG_ERR(("'%s' Bad Link to 0%x\n", GetName(), static_cast<dword>(m_uidLink)));
 				m_uidLink.InitUID();
 				iResultCode = 0x2205;
 				return( iResultCode );	// get rid of it.
@@ -947,7 +947,7 @@ int CItem::FixWeirdness()
 			// blank unlinked keys.
 			if ( m_itKey.m_lockUID && ! IsValidUID())
 			{
-				DEBUG_ERR(("Key '%s' has bad link to 0%x, blanked out\n", GetName(), static_cast<DWORD>(m_itKey.m_lockUID)));
+				DEBUG_ERR(("Key '%s' has bad link to 0%x, blanked out\n", GetName(), static_cast<dword>(m_itKey.m_lockUID)));
 				m_itKey.m_lockUID.ClearUID();
 			}
 			break;
@@ -1192,7 +1192,7 @@ bool CItem::IsStackableType() const
 	return(Can(CAN_I_PILE));
 }
 
-bool CItem::Can(WORD wCan) const
+bool CItem::Can(word wCan) const
 {
 	return((m_Can & wCan) ? true : false);
 }
@@ -1470,7 +1470,7 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 	if ( ttResult != TRIGRET_RET_TRUE )
 	{
 		// Check if there's too many items on the same spot
-		unsigned int iItemCount = 0;
+		uint iItemCount = 0;
 		CItem * pItem = NULL;
 		CWorldSearch AreaItems(ptNewPlace);
 		for (;;)
@@ -1496,7 +1496,7 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 	return true;
 }
 
-bool CItem::MoveNearObj( const CObjBaseTemplate *pObj, WORD iSteps )
+bool CItem::MoveNearObj( const CObjBaseTemplate *pObj, word iSteps )
 {
 	ADDTOCALLSTACK("CItem::MoveNearObj");
 	// Put in the same container as another item.
@@ -1802,7 +1802,7 @@ bool CItem::SetName( LPCTSTR pszName )
 	return SetNamePool( pszName );
 }
 
-int CItem::GetWeight(WORD amount) const
+int CItem::GetWeight(word amount) const
 {		
 	int iWeight = m_weight * (amount ? amount : GetAmount());
 	CVarDefCont * pReduction = GetDefKey("WEIGHTREDUCTION", true);
@@ -1824,13 +1824,13 @@ height_t CItem::GetHeight() const
 
 	char * heightDef = Str_GetTemp();
 
-	sprintf(heightDef, "itemheight_0%x", static_cast<unsigned int>(GetDispID()));
+	sprintf(heightDef, "itemheight_0%x", static_cast<uint>(GetDispID()));
 	tmpHeight = static_cast<height_t>(g_Exp.m_VarDefs.GetKeyNum(heightDef));
 	//DEBUG_ERR(("2 tmpHeight %d\n",tmpHeight));
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_0a)
 		return tmpHeight;
 
-	sprintf(heightDef, "itemheight_%u", static_cast<unsigned int>(GetDispID()));
+	sprintf(heightDef, "itemheight_%u", static_cast<uint>(GetDispID()));
 	tmpHeight = static_cast<height_t>(g_Exp.m_VarDefs.GetKeyNum(heightDef));
 	//DEBUG_ERR(("3 tmpHeight %d\n",tmpHeight));
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_10)
@@ -1901,7 +1901,7 @@ bool CItem::SetBaseID( ITEMID_TYPE id )
 	if ( pItemDef == NULL )
 	{
 		DEBUG_ERR(( "SetBaseID 0%x invalid item uid=0%x\n",
-		id, (DWORD) GetUID()));
+		id, (dword) GetUID()));
 		return false;
 	}
 	SetBase( pItemDef );	// set new m_type etc
@@ -1926,10 +1926,10 @@ ITEMID_TYPE CItem::GetID() const
 	ASSERT(pItemDef);
 	return( pItemDef->GetID());
 }
-WORD CItem::GetBaseID() const
+word CItem::GetBaseID() const
 {
 	// future: strongly typed enums will remove the need for this cast
-	return( static_cast<WORD>(GetID()));
+	return( static_cast<word>(GetID()));
 }
 
 bool CItem::SetID( ITEMID_TYPE id )
@@ -1980,17 +1980,17 @@ bool CItem::SetDispID( ITEMID_TYPE id )
 	return( true );
 }
 
-void CItem::SetAmount( unsigned int amount )
+void CItem::SetAmount( uint amount )
 {
 	ADDTOCALLSTACK("CItem::SetAmount");
 	// propagate the weight change.
 	// Setting to 0 might be legal if we are deleteing it ?
 
-	unsigned int oldamount = GetAmount();
+	uint oldamount = GetAmount();
 	if ( oldamount == amount )
 		return;
 
-	m_amount = static_cast<WORD>(amount);
+	m_amount = static_cast<word>(amount);
 	// sometimes the diff graphics for the types are not in the client.
 	if ( IsType(IT_ORE))
 	{
@@ -2008,24 +2008,24 @@ void CItem::SetAmount( unsigned int amount )
 	if (pParentCont)
 	{
 		ASSERT( IsItemEquipped() || IsItemInContainer());
-		pParentCont->OnWeightChange(GetWeight(static_cast<WORD>(amount)) - GetWeight(static_cast<WORD>(oldamount)));
+		pParentCont->OnWeightChange(GetWeight(static_cast<word>(amount)) - GetWeight(static_cast<word>(oldamount)));
 	}
 	
 	UpdatePropertyFlag(AUTOTOOLTIP_FLAG_AMOUNT);
 }
 
 
-WORD CItem::GetMaxAmount()
+word CItem::GetMaxAmount()
 {
 	ADDTOCALLSTACK("CItem::GetMaxAmount");
 	if (!IsStackableType())
 		return 0;
 
 	CVarDefCont * pMax = GetDefKey("MaxAmount", false);
-	return static_cast<WORD>(pMax ? pMax->GetValNum() : g_Cfg.m_iItemsMaxAmount);
+	return static_cast<word>(pMax ? pMax->GetValNum() : g_Cfg.m_iItemsMaxAmount);
 };
 
-bool CItem::SetMaxAmount(WORD amount)
+bool CItem::SetMaxAmount(word amount)
 {
 	ADDTOCALLSTACK("CItem::SetMaxAmount");
 	if (!IsStackableType())
@@ -2037,10 +2037,10 @@ bool CItem::SetMaxAmount(WORD amount)
 	return true;
 }
 
-void CItem::SetAmountUpdate( unsigned int amount )
+void CItem::SetAmountUpdate( uint amount )
 {
 	ADDTOCALLSTACK("CItem::SetAmountUpdate");
-	unsigned int oldamount = GetAmount();
+	uint oldamount = GetAmount();
 	SetAmount( amount );
 	if ( oldamount < 5 || amount < 5 )	// beyond this make no visual diff.
 	{
@@ -2055,7 +2055,7 @@ void CItem::WriteUOX( CScript & s, int index )
 	ADDTOCALLSTACK("CItem::WriteUOX");
 	s.Printf( "SECTION WORLDITEM %d\n", index );
 	s.Printf( "{\n" );
-	s.Printf( "SERIAL %u\n", (DWORD) GetUID());
+	s.Printf( "SERIAL %u\n", (dword) GetUID());
 	s.Printf( "NAME %s\n", GetName());
 	s.Printf( "ID %d\n", GetDispID());
 	s.Printf( "X %d\n", GetTopPoint().m_x );
@@ -2229,7 +2229,7 @@ bool CItem::LoadSetContainer( CGrayUID uid, LAYER_TYPE layer )
 	CObjBase * pObjCont = uid.ObjFind();
 	if ( pObjCont == NULL )
 	{
-		DEBUG_ERR(( "Invalid container 0%x\n", (DWORD) uid ));
+		DEBUG_ERR(( "Invalid container 0%x\n", (dword) uid ));
 		return( false );	// not valid object.
 	}
 
@@ -2266,7 +2266,7 @@ bool CItem::LoadSetContainer( CGrayUID uid, LAYER_TYPE layer )
 		}
 	}
 
-	DEBUG_ERR(( "Non container uid=0%x,id=0%x\n", (DWORD) uid, pObjCont->GetBaseID() ));
+	DEBUG_ERR(( "Non container uid=0%x,id=0%x\n", (dword) uid, pObjCont->GetBaseID() ));
 	return( false );	// not a container.
 }
 
@@ -2476,7 +2476,7 @@ bool CItem::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
 				}
 
 				CObjBase * pCont = GetContainer();
-				sVal.FormatHex( pCont ? ((DWORD) pCont->GetUID() ) : 0 );
+				sVal.FormatHex( pCont ? ((dword) pCont->GetUID() ) : 0 );
 			}
 			break;
 		case IC_CONTGRID:
@@ -2710,7 +2710,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 		}	break;
 
 		case IC_MAXAMOUNT:
-			if (!SetMaxAmount(static_cast<unsigned short>(s.GetArgVal())))
+			if (!SetMaxAmount(static_cast<ushort>(s.GetArgVal())))
 				return false;
 			break;
 		case IC_ADDCIRCLE:
@@ -2750,7 +2750,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			m_Attr = s.GetArgVal();
 			break;
 		case IC_BASEWEIGHT:
-			m_weight = (WORD)s.GetArgVal();
+			m_weight = (word)s.GetArgVal();
 			return true;
 		case IC_CAN:
 			m_Can = s.GetArgVal();
@@ -2771,7 +2771,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 		case IC_CONTGRID:
 			if ( !IsItemInContainer() )
 				return false;
-			SetContainedGridIndex(static_cast<unsigned char>(s.GetArgVal()));
+			SetContainedGridIndex(static_cast<uchar>(s.GetArgVal()));
 			return true;
 		case IC_CONTP:
 			{
@@ -2833,7 +2833,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			}
 			else
 			{
-				m_itArmor.m_Hits_Cur = m_itArmor.m_Hits_Max = static_cast<WORD>(s.GetArgVal());
+				m_itArmor.m_Hits_Cur = m_itArmor.m_Hits_Max = static_cast<word>(s.GetArgVal());
 				UpdatePropertyFlag(AUTOTOOLTIP_FLAG_DURABILITY);
 			}
 			return true;
@@ -2891,7 +2891,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			m_itNormal.m_more2 = MAKEDWORD( s.GetArgVal(), HIWORD(m_itNormal.m_more2));
 			break;
 		case IC_MOREM:
-			m_itNormal.m_morep.m_map = static_cast<unsigned char>(s.GetArgVal());
+			m_itNormal.m_morep.m_map = static_cast<uchar>(s.GetArgVal());
 			break;
 		case IC_MOREP:
 			{
@@ -2911,7 +2911,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 						case 4:	// m_map
 							if ( IsDigit(ppVal[3][0]))
 							{
-								pt.m_map = static_cast<unsigned char>(ATOI(ppVal[3]));
+								pt.m_map = static_cast<uchar>(ATOI(ppVal[3]));
 							}
 						case 3: // m_z
 							if ( IsDigit(ppVal[2][0]) || ppVal[2][0] == '-' )
@@ -2943,7 +2943,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			break;
 		case IC_MOREZ:
 			if ( IsTypeSpellbook() )
-				m_itSpellbook.m_baseid = static_cast<WORD>(s.GetArgVal());
+				m_itSpellbook.m_baseid = static_cast<word>(s.GetArgVal());
 			else
 				m_itNormal.m_morep.m_z = static_cast<signed char>(s.GetArgVal());
 			break;
@@ -2991,7 +2991,7 @@ bool CItem::r_Load( CScript & s ) // Load an item from script
 	if ( iResultCode )
 	{
 		DEBUG_ERR(( "Item 0%x Invalid, id=%s, code=0%x\n",
-		(DWORD) GetUID(), GetResourceName(), iResultCode ));
+		(dword) GetUID(), GetResourceName(), iResultCode ));
 		Delete();
 		return( true );
 	}
@@ -3071,7 +3071,7 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 				int iCount = s.GetArgVal();
 				if ( iCount <= 0 ) 
 					iCount = 1;
-				if ( !GetContainer() && ( static_cast<unsigned int>(iCount) > g_Cfg.m_iMaxItemComplexity ))	// if top-level, obey the complexity
+				if ( !GetContainer() && ( static_cast<uint>(iCount) > g_Cfg.m_iMaxItemComplexity ))	// if top-level, obey the complexity
 					iCount = g_Cfg.m_iMaxItemComplexity;
 				while ( iCount-- )
 				{
@@ -3241,11 +3241,11 @@ TRIGRET_TYPE CItem::OnTrigger( LPCTSTR pszTrigName, CTextConsole * pSrc, CScript
 			{
 				if ( pChar )
 				{
-					DEBUG_ERR(( "0%x '%s' has unhandled [TYPEDEF %d] for 0%x '%s'\n", (DWORD) GetUID(), GetName(), GetType(), (DWORD) pChar->GetUID(), pChar->GetName()));
+					DEBUG_ERR(( "0%x '%s' has unhandled [TYPEDEF %d] for 0%x '%s'\n", (dword) GetUID(), GetName(), GetType(), (dword) pChar->GetUID(), pChar->GetName()));
 				}
 				else
 				{
-					DEBUG_ERR(( "0%x '%s' has unhandled [TYPEDEF %d]\n", (DWORD) GetUID(), GetName(), GetType() ));
+					DEBUG_ERR(( "0%x '%s' has unhandled [TYPEDEF %d]\n", (dword) GetUID(), GetName(), GetType() ));
 				}
 				m_type = Item_GetDef()->GetType();
 				iRet = TRIGRET_RET_DEFAULT;
@@ -3288,7 +3288,7 @@ stopandret:
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("trigger '%s' action '%d' char '0%x' [0%x]\n", pszTrigName, iAction, (pSrc && pSrc->GetChar()) ? (DWORD)pSrc->GetChar()->GetUID() : 0, (DWORD)GetUID());
+	g_Log.EventDebug("trigger '%s' action '%d' char '0%x' [0%x]\n", pszTrigName, iAction, (pSrc && pSrc->GetChar()) ? (dword)pSrc->GetChar()->GetUID() : 0, (dword)GetUID());
 	EXC_DEBUG_END;
 	return iRet;
 }
@@ -3399,11 +3399,11 @@ TRIGRET_TYPE CItem::OnTriggerCreate( CTextConsole * pSrc, CScriptTriggerArgs * p
 			{
 				if ( pChar )
 				{
-					DEBUG_ERR(( "0%x '%s' has unhandled [TYPEDEF %d] for 0%x '%s'\n", (DWORD) GetUID(), GetName(), GetType(), (DWORD) pChar->GetUID(), pChar->GetName()));
+					DEBUG_ERR(( "0%x '%s' has unhandled [TYPEDEF %d] for 0%x '%s'\n", (dword) GetUID(), GetName(), GetType(), (dword) pChar->GetUID(), pChar->GetName()));
 				}
 				else
 				{
-					DEBUG_ERR(( "0%x '%s' has unhandled [TYPEDEF %d]\n", (DWORD) GetUID(), GetName(), GetType() ));
+					DEBUG_ERR(( "0%x '%s' has unhandled [TYPEDEF %d]\n", (dword) GetUID(), GetName(), GetType() ));
 				}
 				m_type = Item_GetDef()->GetType();
 				return( TRIGRET_RET_DEFAULT );
@@ -3427,7 +3427,7 @@ TRIGRET_TYPE CItem::OnTriggerCreate( CTextConsole * pSrc, CScriptTriggerArgs * p
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("trigger '%s' action '%d' char '0%x' [0%x]\n", pszTrigName, iAction, (pSrc && pSrc->GetChar()) ? (DWORD)pSrc->GetChar()->GetUID() : 0, (DWORD)GetUID());
+	g_Log.EventDebug("trigger '%s' action '%d' char '0%x' [0%x]\n", pszTrigName, iAction, (pSrc && pSrc->GetChar()) ? (dword)pSrc->GetChar()->GetUID() : 0, (dword)GetUID());
 	EXC_DEBUG_END;
 	return iRet;
 }
@@ -3620,12 +3620,12 @@ CObjBaseTemplate * CItem::GetTopLevelObj() const
 	return pObj->GetTopLevelObj();
 }
 
-unsigned char CItem::GetContainedGridIndex() const
+uchar CItem::GetContainedGridIndex() const
 {
 	return m_containedGridIndex;
 }
 
-void CItem::SetContainedGridIndex(unsigned char index)
+void CItem::SetContainedGridIndex(uchar index)
 {
 	m_containedGridIndex = index;
 }
@@ -3712,7 +3712,7 @@ bool CItem::IsValidLockUID() const
 	return( false );
 }
 
-bool CItem::IsKeyLockFit( DWORD dwLockUID ) const
+bool CItem::IsKeyLockFit( dword dwLockUID ) const
 {
 	return( m_itKey.m_lockUID == dwLockUID );
 }
@@ -3806,7 +3806,7 @@ CREID_TYPE CItem::GetCorpseType() const
 void CItem::SetCorpseType( CREID_TYPE id )
 {
 	// future: strongly typed enums will remove the need for this cast
-	m_amount = static_cast<WORD>(id);	// m_corpse_DispID
+	m_amount = static_cast<word>(id);	// m_corpse_DispID
 }
 
 SPELL_TYPE CItem::GetScrollSpell() const
@@ -4397,7 +4397,7 @@ SKILL_TYPE CItem::Weapon_GetSkill() const
 	}
 }
 
-bool CItem::IsMemoryTypes( WORD wType ) const
+bool CItem::IsMemoryTypes( word wType ) const
 {
 	// MEMORY_FIGHT
 	if ( ! IsType( IT_EQ_MEMORY_OBJ ))
@@ -4415,7 +4415,7 @@ LPCTSTR CItem::Use_SpyGlass( CChar * pUser ) const
 
 #define BASE_SIGHT 26 // 32 (UO_MAP_VIEW_RADAR) is the edge of the radar circle (for the most part)
 	WEATHER_TYPE wtWeather = ptCoords.GetSector()->GetWeather();
-	BYTE iLight = ptCoords.GetSector()->GetLight();
+	byte iLight = ptCoords.GetSector()->GetLight();
 	CGString sSearch;
 	TCHAR	*pResult = Str_GetTemp();
 
@@ -4445,7 +4445,7 @@ LPCTSTR CItem::Use_SpyGlass( CChar * pUser ) const
 			{
 				for (int y = ptCoords.m_y - iVisibility; y <= (ptCoords.m_y + iVisibility); y += 2)
 				{
-					CPointMap ptCur(static_cast<WORD>(x), static_cast<WORD>(y), ptCoords.m_z);
+					CPointMap ptCur(static_cast<word>(x), static_cast<word>(y), ptCoords.m_z);
 					pMeter = g_World.GetMapMeter( ptCur );
 					if ( pMeter == NULL )
 						continue;
@@ -4924,8 +4924,8 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			SetAttr(ATTR_MAGIC);
 			if ( ! m_itWeapon.m_spell || ( pCharSrc && pCharSrc->IsPriv( PRIV_GM )))
 			{
-				m_itWeapon.m_spell = static_cast<WORD>(spell);
-				m_itWeapon.m_spelllevel = static_cast<WORD>(iSkillLevel);
+				m_itWeapon.m_spell = static_cast<word>(spell);
+				m_itWeapon.m_spelllevel = static_cast<word>(iSkillLevel);
 				m_itWeapon.m_spellcharges = 0;
 			}
 
@@ -4940,7 +4940,7 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		return false;
 	}
 
-	WORD uDamage = 0;
+	word uDamage = 0;
 	switch ( spell )
 	{
 		case SPELL_Dispel_Field:
@@ -5126,7 +5126,7 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 
 			if ( pSrc )
 				pItem->m_uidLink = pSrc->GetUID();
-			pItem->m_itExplode.m_iDamage = static_cast<WORD>(g_Cfg.GetSpellEffect(SPELL_Explosion, m_itPotion.m_skillquality));
+			pItem->m_itExplode.m_iDamage = static_cast<word>(g_Cfg.GetSpellEffect(SPELL_Explosion, m_itPotion.m_skillquality));
 			pItem->m_itExplode.m_wFlags = pSpell->IsSpellType(SPELLFLAG_NOUNPARALYZE) ? DAMAGE_FIRE|DAMAGE_NOUNPARALYZE : DAMAGE_FIRE;
 			pItem->m_itExplode.m_iDist = 2;
 			pItem->SetType(IT_EXPLOSION);
@@ -5146,7 +5146,7 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 			return( 0 );
 		}
 
-		if ( static_cast<DWORD>(iDmg) > m_itWeb.m_Hits_Cur || ( uType & DAMAGE_FIRE ))
+		if ( static_cast<dword>(iDmg) > m_itWeb.m_Hits_Cur || ( uType & DAMAGE_FIRE ))
 		{
 			if ( pSrc )
 				pSrc->SysMessage( g_Cfg.GetDefaultMsg( DEFMSG_WEB_DESTROY ) );
@@ -5187,7 +5187,7 @@ forcedamage:
 		{
 			if ( previousDefense != Armor_GetDefense() )
 			{
-				pChar->m_defense = static_cast<WORD>(pChar->CalcArmorDefense());
+				pChar->m_defense = static_cast<word>(pChar->CalcArmorDefense());
 				pChar->UpdateStatsFlag();
 			}
 			else if ( previousDamage != Weapon_GetAttack() )
@@ -5271,7 +5271,7 @@ void CItem::OnExplosion()
 	Sound(0x307);
 }
 
-bool CItem::IsResourceMatch( RESOURCE_ID_BASE rid, DWORD dwArg )
+bool CItem::IsResourceMatch( RESOURCE_ID_BASE rid, dword dwArg )
 {
 	ADDTOCALLSTACK("CItem::IsResourceMatch");
 	// Check for all the matching special cases.
@@ -5549,7 +5549,7 @@ bool CItem::OnTick()
 		return false;
 
 	EXC_SET("default behaviour4");
-	DEBUG_ERR(( "Timer expired without DECAY flag '%s' (UID=0%x)?\n", GetName(), (DWORD)GetUID()));
+	DEBUG_ERR(( "Timer expired without DECAY flag '%s' (UID=0%x)?\n", GetName(), (dword)GetUID()));
 
 #ifndef _WIN32
 	}
@@ -5558,13 +5558,13 @@ bool CItem::OnTick()
 	catch ( const CGrayError& e )
 	{
 		EXC_CATCH_EXCEPTION(&e);
-		g_Log.EventError("'%s' item [0%x] - CGrayError\n", GetName(), (DWORD)GetUID());
+		g_Log.EventError("'%s' item [0%x] - CGrayError\n", GetName(), (dword)GetUID());
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 	}
 	catch (...)
 	{
 		EXC_CATCH_EXCEPTION(NULL);
-		g_Log.EventError("'%s' item [0%x] - ...\n", GetName(), (DWORD)GetUID());
+		g_Log.EventError("'%s' item [0%x] - ...\n", GetName(), (dword)GetUID());
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 	}
 #endif
@@ -5572,7 +5572,7 @@ bool CItem::OnTick()
 	EXC_CATCH;
 	
 	EXC_DEBUG_START;
-	g_Log.EventDebug("CItem::OnTick: '%s' item [0%x]\n", GetName(), (DWORD)GetUID());
+	g_Log.EventDebug("CItem::OnTick: '%s' item [0%x]\n", GetName(), (dword)GetUID());
 	//g_Log.EventError("'%s' item [0%x]\n", GetName(), GetUID());
 	EXC_DEBUG_END;
 #endif

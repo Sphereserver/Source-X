@@ -43,21 +43,21 @@ public:
 	// bool IsItemInside( CItem * pItem ) const;
 
 	CItem * ContentFindRandom() const;
-	void ContentsDump( const CPointMap & pt, DWORD dwAttr = 0 );
+	void ContentsDump( const CPointMap & pt, dword dwAttr = 0 );
 	void ContentsTransfer( CItemContainer * pCont, bool fNoNewbie );
-	void ContentAttrMod( DWORD dwAttr, bool fSet );
+	void ContentAttrMod( dword dwAttr, bool fSet );
 	void ContentNotifyDelete();
 
 	// For resource usage and gold.
-	CItem * ContentFind( RESOURCE_ID_BASE rid, DWORD dwArg = 0, int iDecendLevels = 255 ) const;
-	TRIGRET_TYPE OnContTriggerForLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pResult, CScriptLineContext & StartContext, CScriptLineContext & EndContext, RESOURCE_ID_BASE rid, DWORD dwArg = 0, int iDecendLevels = 255 );
+	CItem * ContentFind( RESOURCE_ID_BASE rid, dword dwArg = 0, int iDecendLevels = 255 ) const;
+	TRIGRET_TYPE OnContTriggerForLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pResult, CScriptLineContext & StartContext, CScriptLineContext & EndContext, RESOURCE_ID_BASE rid, dword dwArg = 0, int iDecendLevels = 255 );
 	TRIGRET_TYPE OnGenericContTriggerForLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pResult, CScriptLineContext & StartContext, CScriptLineContext & EndContext, int iDecendLevels = 255 );
-	int ContentCount( RESOURCE_ID_BASE rid, DWORD dwArg = 0 );
+	int ContentCount( RESOURCE_ID_BASE rid, dword dwArg = 0 );
 	int ContentCountAll() const;
-	int ContentConsume( RESOURCE_ID_BASE rid, int iQty = 1, bool fTest = false, DWORD dwArg = 0 );
+	int ContentConsume( RESOURCE_ID_BASE rid, int iQty = 1, bool fTest = false, dword dwArg = 0 );
 
-	int ResourceConsume( const CResourceQtyArray * pResources, int iReplicationQty, bool fTest = false, DWORD dwArg = 0 );
-	size_t ResourceConsumePart( const CResourceQtyArray * pResources, int iReplicationQty, int iFailPercent, bool fTest = false, DWORD dwArg = 0 );
+	int ResourceConsume( const CResourceQtyArray * pResources, int iReplicationQty, bool fTest = false, dword dwArg = 0 );
+	size_t ResourceConsumePart( const CResourceQtyArray * pResources, int iReplicationQty, int iFailPercent, bool fTest = false, dword dwArg = 0 );
 
 	virtual void OnWeightChange( int iChange );
 	virtual void ContentAdd( CItem * pItem ) = 0;

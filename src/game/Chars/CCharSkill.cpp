@@ -12,7 +12,7 @@
 //----------------------------------------------------------------------
 // Skills
 
-SKILL_TYPE CChar::Skill_GetBest( unsigned int iRank ) const
+SKILL_TYPE CChar::Skill_GetBest( uint iRank ) const
 {
 	ADDTOCALLSTACK("CChar::Skill_GetBest");
 	// Get the top n best skills.
@@ -20,11 +20,11 @@ SKILL_TYPE CChar::Skill_GetBest( unsigned int iRank ) const
 	if ( iRank >= g_Cfg.m_iMaxSkill )
 		iRank = 0;
 
-	DWORD * pdwSkills = new DWORD [iRank + 1];
+	dword * pdwSkills = new dword [iRank + 1];
 	ASSERT(pdwSkills);
-	memset(pdwSkills, 0, (iRank + 1) * sizeof(DWORD));
+	memset(pdwSkills, 0, (iRank + 1) * sizeof(dword));
 
-	DWORD dwSkillTmp;
+	dword dwSkillTmp;
 	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; i++ )
 	{
 		if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex(i) )
@@ -35,7 +35,7 @@ SKILL_TYPE CChar::Skill_GetBest( unsigned int iRank ) const
 		{
 			if ( HIWORD(dwSkillTmp) >= HIWORD(pdwSkills[j]) )
 			{
-				memmove( &pdwSkills[j + 1], &pdwSkills[j], (iRank - j) * sizeof(DWORD) );
+				memmove( &pdwSkills[j + 1], &pdwSkills[j], (iRank - j) * sizeof(dword) );
 				pdwSkills[j] = dwSkillTmp;
 				break;
 			}
@@ -53,12 +53,12 @@ SKILL_TYPE CChar::Skill_GetActive() const
 }
 
 // Retrieves a random magic skill, if iVal is set it will only select from the ones with value > iVal
-SKILL_TYPE CChar::Skill_GetMagicRandom(unsigned short iVal)
+SKILL_TYPE CChar::Skill_GetMagicRandom(ushort iVal)
 {
 	ADDTOCALLSTACK("CChar::Skill_GetMagicRandom");
 	SKILL_TYPE skills[SKILL_QTY];
 	int count = 0;
-	for ( unsigned char i = 0; i < g_Cfg.m_iMaxSkill; i++ )
+	for ( uchar i = 0; i < g_Cfg.m_iMaxSkill; i++ )
 	{
 		SKILL_TYPE skill = static_cast<SKILL_TYPE>(i);
 		if (!g_Cfg.IsSkillFlag(skill, SKF_MAGIC))
@@ -93,7 +93,7 @@ SKILL_TYPE CChar::Skill_GetMagicBest()
 	ADDTOCALLSTACK("CChar::Skill_GetMagicBest");
 	SKILL_TYPE skill = SKILL_NONE;
 	int value = 0;
-	for ( unsigned char i = 0; i < g_Cfg.m_iMaxSkill; i++ )
+	for ( uchar i = 0; i < g_Cfg.m_iMaxSkill; i++ )
 	{
 		if (!g_Cfg.IsSkillFlag(skill, SKF_MAGIC))
 			continue;
@@ -116,7 +116,7 @@ SKILLLOCK_TYPE CChar::Skill_GetLock( SKILL_TYPE skill ) const
 	return( m_pPlayer->Skill_GetLock(skill));
 }
 
-unsigned short CChar::Skill_GetAdjusted( SKILL_TYPE skill ) const
+ushort CChar::Skill_GetAdjusted( SKILL_TYPE skill ) const
 {
 	ADDTOCALLSTACK("CChar::Skill_GetAdjusted");
 	// Get the skill adjusted for str,dex,int = 0-1000
@@ -151,7 +151,7 @@ unsigned short CChar::Skill_GetAdjusted( SKILL_TYPE skill ) const
 
 	ASSERT( IsSkillBase( skill ));
 	const CSkillDef * pSkillDef = g_Cfg.GetSkillDef( skill );
-	unsigned short iAdjSkill = 0;
+	ushort iAdjSkill = 0;
 
 	if (pSkillDef != NULL)
 	{
@@ -159,7 +159,7 @@ unsigned short CChar::Skill_GetAdjusted( SKILL_TYPE skill ) const
 						 ( pSkillDef->m_StatBonus[STAT_INT] * maximum(0,Stat_GetAdjusted( STAT_INT )) ) +
 						 ( pSkillDef->m_StatBonus[STAT_DEX] * maximum(0,Stat_GetAdjusted( STAT_DEX )) );
 
-		iAdjSkill = static_cast<unsigned short>(IMULDIV( pSkillDef->m_StatPercent, iPureBonus, 10000 ));
+		iAdjSkill = static_cast<ushort>(IMULDIV( pSkillDef->m_StatPercent, iPureBonus, 10000 ));
 	}
 
 	return( Skill_GetBase(skill) + iAdjSkill );
@@ -182,7 +182,7 @@ void CChar::Skill_SetBase( SKILL_TYPE skill, int iValue )
 
 		iValue = static_cast<int>(args.m_iN2);
 	}
-	m_Skill[skill] = static_cast<unsigned short>(iValue);
+	m_Skill[skill] = static_cast<ushort>(iValue);
 
 	if ( IsClient())
 		m_pClient->addSkillWindow(skill);	// update the skills list
@@ -434,7 +434,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 			continue;	// nothing grows past this. (even for NPC's)
 
 		// You will tend toward these stat vals if you use this skill a lot
-		BYTE iStatTarg = pSkillDef->m_Stat[i];
+		byte iStatTarg = pSkillDef->m_Stat[i];
 		if ( iStatVal >= iStatTarg )
 			continue;		// you've got higher stats than this skill is good for
 
@@ -588,7 +588,7 @@ LPCTSTR CChar::Skill_GetName( bool fUse ) const
 	}
 }
 
-unsigned short CChar::Skill_GetBase( SKILL_TYPE skill ) const
+ushort CChar::Skill_GetBase( SKILL_TYPE skill ) const
 {
 	ASSERT( IsSkillBase(skill));
 	return( m_Skill[skill] );
@@ -635,7 +635,7 @@ bool CChar::Skill_MakeItem_Success()
 
 	int quality = 0;
 	TCHAR *pszMsg = Str_GetTemp();
-	WORD iSkillLevel = Skill_GetBase(Skill_GetActive());				// primary skill value.
+	word iSkillLevel = Skill_GetBase(Skill_GetActive());				// primary skill value.
 	CItemVendable *pItemVend = dynamic_cast<CItemVendable *>(pItem);		// cast CItemVendable for setting quality and exp later
 
 	if ( m_atCreate.m_Amount != 1 )
@@ -744,7 +744,7 @@ bool CChar::Skill_MakeItem_Success()
 		}
 
 		if ( pItemVend )	// check that the item is vendable before setting quality
-			pItemVend->SetQuality(static_cast<WORD>(quality));
+			pItemVend->SetQuality(static_cast<word>(quality));
 
 		if ( iSkillLevel > 999 && quality > 175 && !IsSetOF(OF_NoItemNaming) )
 		{
@@ -890,7 +890,7 @@ bool CChar::Skill_MakeItem( ITEMID_TYPE id, CGrayUID uidTarg, SKTRIG_TYPE stage,
 
 		m_Act_Targ = uidTarg;	// targetted item to start the make process
 		m_atCreate.m_ItemID = id;
-		m_atCreate.m_Amount = static_cast<WORD>(iReplicationQty);
+		m_atCreate.m_Amount = static_cast<word>(iReplicationQty);
 
 		CResourceQty RetMainSkill = pItemDef->m_SkillMake[i];
 		return Skill_Start(static_cast<SKILL_TYPE>(RetMainSkill.GetResIndex()), static_cast<int>(RetMainSkill.GetResQty() / 10));
@@ -898,7 +898,7 @@ bool CChar::Skill_MakeItem( ITEMID_TYPE id, CGrayUID uidTarg, SKTRIG_TYPE stage,
 
 	if ( stage == SKTRIG_SUCCESS )
 	{
-		m_atCreate.m_Amount = static_cast<WORD>(iReplicationQty); // how much resources we really consumed
+		m_atCreate.m_Amount = static_cast<word>(iReplicationQty); // how much resources we really consumed
 		return Skill_MakeItem_Success();
 	}
 
@@ -1080,7 +1080,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 				CItem * pGem = CItem::CreateScript(pBaseDef->GetID(), this);
 				if ( pGem )
 				{
-					pGem->SetAmount(static_cast<unsigned int>(iOreQty * pBaseDef->m_BaseResources[i].GetResQty()));
+					pGem->SetAmount(static_cast<uint>(iOreQty * pBaseDef->m_BaseResources[i].GetResQty()));
 					ItemBounce(pGem);
 				}
 				continue;
@@ -1163,7 +1163,7 @@ bool CChar::Skill_Tracking( CGrayUID uidTarg, DIR_TYPE & dirPrv, int iDistMax )
 	}
 
 	DIR_TYPE dir = GetDir(pObjTop);
-	ASSERT(dir >= 0 && static_cast<unsigned int>(dir) < COUNTOF(CPointBase::sm_szDirs));
+	ASSERT(dir >= 0 && static_cast<uint>(dir) < COUNTOF(CPointBase::sm_szDirs));
 
 	// Select tracking message based on distance
 	LPCTSTR pszDef;
@@ -1294,7 +1294,7 @@ int CChar::Skill_Mining( SKTRIG_TYPE stage )
 
 	if ( stage == SKTRIG_START )
 	{
-		m_atResource.m_Stroke_Count = static_cast<WORD>(Calc_GetRandVal(5) + 2);
+		m_atResource.m_Stroke_Count = static_cast<word>(Calc_GetRandVal(5) + 2);
 		return Skill_NaturalResource_Setup(pResBit);
 	}
 
@@ -1483,7 +1483,7 @@ int CChar::Skill_Lumberjack( SKTRIG_TYPE stage )
 
 	if ( stage == SKTRIG_START )
 	{
-		m_atResource.m_Stroke_Count = static_cast<WORD>(Calc_GetRandVal(5) + 2);
+		m_atResource.m_Stroke_Count = static_cast<word>(Calc_GetRandVal(5) + 2);
 		return Skill_NaturalResource_Setup(pResBit);
 	}
 
@@ -1863,12 +1863,12 @@ int CChar::Skill_Poisoning( SKTRIG_TYPE stage )
 		case IT_FOOD:
 		case IT_FOOD_RAW:
 		case IT_MEAT_RAW:
-			pItem->m_itFood.m_poison_skill = static_cast<BYTE>(pPoison->m_itPotion.m_skillquality / 10);
+			pItem->m_itFood.m_poison_skill = static_cast<byte>(pPoison->m_itPotion.m_skillquality / 10);
 			break;
 		case IT_WEAPON_MACE_SHARP:
 		case IT_WEAPON_SWORD:		// 13 =
 		case IT_WEAPON_FENCE:		// 14 = can't be used to chop trees. (make kindling)
-			pItem->m_itWeapon.m_poison_skill = static_cast<BYTE>(pPoison->m_itPotion.m_skillquality / 10);
+			pItem->m_itWeapon.m_poison_skill = static_cast<byte>(pPoison->m_itPotion.m_skillquality / 10);
 			pItem->UpdatePropertyFlag(AUTOTOOLTIP_FLAG_POISON);
 			break;
 		default:
@@ -1975,7 +1975,7 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 		if ( pChar->Memory_FindObjTypes( this, MEMORY_FIGHT|MEMORY_HARMEDBY|MEMORY_IRRITATEDBY|MEMORY_AGGREIVED ))	// I've attacked it before ?
 			iDifficulty += 50;
 
-		m_atTaming.m_Stroke_Count = static_cast<WORD>(Calc_GetRandVal(4) + 2);
+		m_atTaming.m_Stroke_Count = static_cast<word>(Calc_GetRandVal(4) + 2);
 		return( iDifficulty );
 	}
 
@@ -3061,9 +3061,9 @@ int CChar::Skill_Stroke( bool fResource )
 		if ( args.m_iN1 == 1 )
 			UpdateDir(m_Act_p);
 		if ( fResource )
-			m_atResource.m_Stroke_Count = static_cast<WORD>(args.m_VarsLocal.GetKeyNum("Strokes", false));
+			m_atResource.m_Stroke_Count = static_cast<word>(args.m_VarsLocal.GetKeyNum("Strokes", false));
 		else
-			m_atCreate.m_Stroke_Count = static_cast<WORD>(args.m_VarsLocal.GetKeyNum("Strokes", false));
+			m_atCreate.m_Stroke_Count = static_cast<word>(args.m_VarsLocal.GetKeyNum("Strokes", false));
 	}
 
 	if ( sound )
@@ -3494,7 +3494,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficulty )
 	{
 		if ( skill != SKILL_NONE && !IsSkillBase(skill) && !IsSkillNPC(skill) )
 		{
-			DEBUG_ERR(("UID:0%x Bad Skill %d for '%s'\n", static_cast<DWORD>(GetUID()), skill, GetName()));
+			DEBUG_ERR(("UID:0%x Bad Skill %d for '%s'\n", static_cast<dword>(GetUID()), skill, GetName()));
 			return false;
 		}
 		m_Act_SkillCurrent = skill;
@@ -3573,13 +3573,13 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficulty )
 		if ( bCraftSkill )
 		{
 			// read crafting parameters
-			pResBase.SetPrivateUID(static_cast<DWORD>(pArgs.m_VarsLocal.GetKeyNum("CraftItemdef", true)));
-			m_atCreate.m_Stroke_Count = static_cast<WORD>(maximum(1, pArgs.m_VarsLocal.GetKeyNum("CraftStrokeCnt", true)));
+			pResBase.SetPrivateUID(static_cast<dword>(pArgs.m_VarsLocal.GetKeyNum("CraftItemdef", true)));
+			m_atCreate.m_Stroke_Count = static_cast<word>(maximum(1, pArgs.m_VarsLocal.GetKeyNum("CraftStrokeCnt", true)));
 			m_atCreate.m_ItemID = static_cast<ITEMID_TYPE>(pResBase.GetResIndex());
-			m_atCreate.m_Amount = static_cast<WORD>(pArgs.m_VarsLocal.GetKeyNum("CraftAmount", true));
+			m_atCreate.m_Amount = static_cast<word>(pArgs.m_VarsLocal.GetKeyNum("CraftAmount", true));
 		}
 		if ( bGatherSkill )
-			m_atResource.m_Stroke_Count = static_cast<WORD>(pArgs.m_VarsLocal.GetKeyNum("GatherStrokeCnt", true));
+			m_atResource.m_Stroke_Count = static_cast<word>(pArgs.m_VarsLocal.GetKeyNum("GatherStrokeCnt", true));
 
 		// Casting sound & animation when starting, Skill_Stroke() will do it the next times.
 		if ( bCraftSkill || bGatherSkill )

@@ -45,12 +45,12 @@ struct CSocketAddressIP : public in_addr
 
 public:
 	CSocketAddressIP();
-	explicit CSocketAddressIP( DWORD dwIP );
+	explicit CSocketAddressIP( dword dwIP );
 	explicit CSocketAddressIP( const char *ip );
 
 public:
-	DWORD GetAddrIP() const;
-	void SetAddrIP( DWORD dwIP );
+	dword GetAddrIP() const;
+	void SetAddrIP( dword dwIP );
 	LPCTSTR GetAddrStr() const;
 	void SetAddrStr( LPCTSTR pszIP );
 	bool IsValidAddr() const;
@@ -71,12 +71,12 @@ struct CSocketAddress : public CSocketAddressIP
 	// similar to sockaddr_in but without the waste.
 	// use this instead.
 private:
-	WORD m_port;
+	word m_port;
 public:
 	CSocketAddress();
-	CSocketAddress( in_addr dwIP, WORD uPort );
-	CSocketAddress( CSocketAddressIP ip, WORD uPort );
-	CSocketAddress( DWORD dwIP, WORD uPort );
+	CSocketAddress( in_addr dwIP, word uPort );
+	CSocketAddress( CSocketAddressIP ip, word uPort );
+	CSocketAddress( dword dwIP, word uPort );
 	explicit CSocketAddress( const sockaddr_in & SockAddrIn );
 	
 	bool operator==( const CSocketAddress & SockAddr ) const;
@@ -87,8 +87,8 @@ public:
 	struct sockaddr_in GetAddrPort() const;
 	void SetAddrPort( const struct sockaddr_in & SockAddrIn );
 	// Just the port.
-	WORD GetPort() const;
-	void SetPort( WORD wPort );
+	word GetPort() const;
+	void SetPort( word wPort );
 	void SetPortStr( LPCTSTR pszPort );
 	bool SetPortExtStr( TCHAR * pszIP );
 	// Port and address together.
@@ -127,8 +127,8 @@ public:
 	int Listen( int iMaxBacklogConnections = SOMAXCONN );
 	int Connect( struct sockaddr_in * pSockAddrIn );
 	int Connect( const CSocketAddress & SockAddr );
-	int Connect( const struct in_addr & ip, WORD wPort );
-	int Connect( LPCTSTR pszHostName, WORD wPort );
+	int Connect( const struct in_addr & ip, word wPort );
+	int Connect( LPCTSTR pszHostName, word wPort );
 	SOCKET Accept( struct sockaddr_in * pSockAddrIn ) const;
 	SOCKET Accept( CSocketAddress & SockAddr ) const;
 	int Send( const void * pData, int len ) const;
@@ -143,8 +143,8 @@ public:
 	int SetSockOpt( int nOptionName, const void* optval, int optlen, int nLevel = SOL_SOCKET ) const;
 	int GetSockOpt( int nOptionName, void* optval, int * poptlen, int nLevel = SOL_SOCKET ) const;
 #ifdef _WIN32
-	int IOCtlSocket(int icmd, DWORD * pdwArgs );
-	int SendAsync( LPWSABUF lpBuffers, DWORD dwBufferCount, LPDWORD lpNumberOfBytesSent, DWORD dwFlags, LPWSAOVERLAPPED lpOverlapped, LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine ) const;
+	int IOCtlSocket(int icmd, dword * pdwArgs );
+	int SendAsync( LPWSABUF lpBuffers, dword dwBufferCount, LPDWORD lpNumberOfBytesSent, dword dwFlags, LPWSAOVERLAPPED lpOverlapped, LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine ) const;
 	void ClearAsync();
 #else
 	int IOCtlSocket(int icmd, int iVal );

@@ -43,17 +43,17 @@ LPCTSTR CLog::GetLogDir() const
 	return( m_sBaseDir );
 }
 
-DWORD CLog::GetLogMask() const
+dword CLog::GetLogMask() const
 {
 	return( m_dwMsgMask &~ 0x0f ) ;
 }
 
-void CLog::SetLogMask( DWORD dwMask )
+void CLog::SetLogMask( dword dwMask )
 {
 	m_dwMsgMask = GetLogLevel() | ( dwMask &~ 0x0f );
 }
 
-bool CLog::IsLoggedMask( DWORD dwMask ) const
+bool CLog::IsLoggedMask( dword dwMask ) const
 {
 	return( ((dwMask &~ (0x0f | LOGM_NOCONTEXT | LOGM_DEBUG)) == 0) ||
 			(( GetLogMask() & ( dwMask &~ 0x0f )) != 0) );
@@ -75,7 +75,7 @@ bool CLog::IsLoggedLevel( LOGL_TYPE level ) const
 			 (GetLogLevel() >= ( level & 0x0f ) ) );
 }
 
-bool CLog::IsLogged( DWORD wMask ) const
+bool CLog::IsLogged( dword wMask ) const
 {
 	return IsLoggedMask(wMask) || IsLoggedLevel(static_cast<LOGL_TYPE>(wMask));
 }
@@ -152,7 +152,7 @@ void CLog::SetColor(Color color)
 	}
 }
 
-int CLog::EventStr( DWORD wMask, LPCTSTR pszMsg )
+int CLog::EventStr( dword wMask, LPCTSTR pszMsg )
 {
 	// NOTE: This could be called in odd interrupt context so don't use dynamic stuff
 	if ( !IsLogged(wMask) )	// I don't care about these.

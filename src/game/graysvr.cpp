@@ -245,7 +245,7 @@ bool WritePidFile(int iMode = 0)
 	}
 }
 
-int CEventLog::VEvent( DWORD wMask, LPCTSTR pszFormat, va_list args )
+int CEventLog::VEvent( dword wMask, LPCTSTR pszFormat, va_list args )
 {
 	if ( pszFormat == NULL || pszFormat[0] == '\0' )
 		return 0;
@@ -277,7 +277,7 @@ LPCTSTR g_szServerDescription =	GRAY_TITLE " Version " GRAY_VERSION " " GRAY_VER
 int g_szServerBuild = 0;
 
 size_t CObjBase::sm_iCount = 0;	// UID table.
-LLONG llTimeProfileFrequency = 1000;	// time profiler
+llong llTimeProfileFrequency = 1000;	// time profiler
 
 // game servers stuff.
 CWorld		g_World;	// the world. (we save this stuff)
@@ -476,10 +476,10 @@ int Sphere_InitServer( int argc, char *argv[] )
 	EXC_TRY("Init");
 	ASSERT(MAX_BUFFER >= sizeof(CCommand));
 	ASSERT(MAX_BUFFER >= sizeof(CEvent));
-	ASSERT(sizeof(int) == sizeof(DWORD));	// make this assumption often.
-	ASSERT(sizeof(ITEMID_TYPE) == sizeof(DWORD));
-	ASSERT(sizeof(WORD) == 2 );
-	ASSERT(sizeof(DWORD) == 4 );
+	ASSERT(sizeof(int) == sizeof(dword));	// make this assumption often.
+	ASSERT(sizeof(ITEMID_TYPE) == sizeof(dword));
+	ASSERT(sizeof(word) == 2 );
+	ASSERT(sizeof(dword) == 4 );
 	ASSERT(sizeof(NWORD) == 2 );
 	ASSERT(sizeof(NDWORD) == 4 );
 	ASSERT(sizeof(CUOItemTypeRec) == 37 ); // byte pack working ?
@@ -709,9 +709,9 @@ static void Sphere_MainMonitorLoop()
 }
 
 //******************************************************
-void dword_q_sort(DWORD numbers[], DWORD left, DWORD right)
+void dword_q_sort(dword numbers[], dword left, dword right)
 {
-	DWORD	pivot, l_hold, r_hold;
+	dword	pivot, l_hold, r_hold;
 
 	l_hold = left;
 	r_hold = right;
@@ -747,29 +747,29 @@ void defragSphere(char *path)
 	CGFile ouf;
 	char z[256], z1[256], buf[1024];
 	size_t i;
-	DWORD uid(0);
+	dword uid(0);
 	char *p(NULL), *p1(NULL);
-	DWORD dBytesRead;
-	DWORD dTotalMb;
-	DWORD mb10(10*1024*1024);
-	DWORD mb5(5*1024*1024);
+	dword dBytesRead;
+	dword dTotalMb;
+	dword mb10(10*1024*1024);
+	dword mb5(5*1024*1024);
 	bool bSpecial;
-	DWORD dTotalUIDs;
+	dword dTotalUIDs;
 
 	char	c,c1,c2;
-	DWORD	d;
+	dword	d;
 
 	//	NOTE: Sure I could use CVarDefArray, but it is extremely slow with memory allocation, takes hours
 	//		to read and save the data. Moreover, it takes less memory in this case and does less convertations.
 #define	MAX_UID	5000000L	// limit to 5mln of objects, takes 5mln*4 = 20mb
-	DWORD	*uids;
+	dword	*uids;
 
 	g_Log.Event(LOGM_INIT,	"Defragmentation (UID alteration) of " GRAY_TITLE " saves.\n"
 		"Use it on your risk and if you know what you are doing since it can possibly harm your server.\n"
 		"The process can take up to several hours depending on the CPU you have.\n"
 		"After finished, you will have your '" GRAY_FILE "*.scp' files converted and saved as '" GRAY_FILE "*.scp.new'.\n");
 
-	uids = (DWORD*)calloc(MAX_UID, sizeof(DWORD));
+	uids = (dword*)calloc(MAX_UID, sizeof(dword));
 	for ( i = 0; i < 3; i++ )
 	{
 		strcpy(z, path);
@@ -936,7 +936,7 @@ void defragSphere(char *path)
 				//	since has amount/2 tryes at worst chance to get the item and never scans the whole array
 				//	It should improve speed since defragmenting 150Mb saves takes ~2:30 on 2.0Mhz CPU
 				{
-					DWORD	dStep = dTotalUIDs/2;
+					dword	dStep = dTotalUIDs/2;
 					d = dStep;
 					for (;;)
 					{

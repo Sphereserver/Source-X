@@ -25,18 +25,18 @@ protected:
 	CItem * Multi_FindItemType( IT_TYPE type ) const;
 	CItem * Multi_FindItemComponent( int iComp ) const;
 	const CItemBaseMulti * Multi_GetDef() const;
-	bool Multi_CreateComponent( ITEMID_TYPE id, signed short dx, signed short dy, signed char dz, DWORD dwKeyCode );
+	bool Multi_CreateComponent( ITEMID_TYPE id, short dx, short dy, signed char dz, dword dwKeyCode );
 
 public:
 	int Multi_GetMaxDist() const;
 	size_t  Multi_ListObjs(CObjBase ** ppObjList);
 	struct ShipSpeed // speed of a ship
 	{
-		unsigned char period;	// time between movement
-		unsigned char tiles;	// distance to move
+		uchar period;	// time between movement
+		uchar tiles;	// distance to move
 	};
 	ShipSpeed m_shipSpeed; // Speed of ships (IT_SHIP)
-	BYTE m_SpeedMode;
+	byte m_SpeedMode;
 
 protected:
 	virtual void OnComponentCreate( const CItem * pComponent );
@@ -58,7 +58,7 @@ public:
 	void OnHearRegion( LPCTSTR pszCmd, CChar * pSrc );
 	CItem * Multi_GetSign();	// or Tiller
 
-	void Multi_Create( CChar * pChar, DWORD dwKeyCode );
+	void Multi_Create( CChar * pChar, dword dwKeyCode );
 	static const CItemBaseMulti * Multi_GetDef( ITEMID_TYPE id );
 
 	virtual bool r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef );

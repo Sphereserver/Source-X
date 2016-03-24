@@ -1460,8 +1460,8 @@ protected:
 	};
 
 protected:
-	static unsigned int Hex2Int(const CHART * pcsz, int length, int & used);
-	static int ReadDec(char * & str, unsigned int & dec);
+	static uint Hex2Int(const CHART * pcsz, int length, int & used);
+	static int ReadDec(char * & str, uint & dec);
 	void MoveNext();
 	int  GetNext2();
 
@@ -1627,9 +1627,9 @@ template <class CHART> void CBuilderT <CHART> :: Clear()
 //
 // hex to int
 //
-template <class CHART> unsigned int CBuilderT <CHART> :: Hex2Int(const CHART * pcsz, int length, int & used)
+template <class CHART> uint CBuilderT <CHART> :: Hex2Int(const CHART * pcsz, int length, int & used)
 {
-	unsigned int result = 0;
+	uint result = 0;
 	int & i = used;
 
 	for(i=0; i<length; i++)
@@ -1754,7 +1754,7 @@ template <class CHART> int CBuilderT <CHART> :: GetNext2()
 				if(m_pattern[m_nNextPos+2] != '{')
 				{
 					int red = 0;
-					unsigned int ch2 = Hex2Int(m_pattern.GetBuffer() + m_nNextPos + 2, 2, red);
+					uint ch2 = Hex2Int(m_pattern.GetBuffer() + m_nNextPos + 2, 2, red);
 
 					delta += red;
 
@@ -1770,7 +1770,7 @@ template <class CHART> int CBuilderT <CHART> :: GetNext2()
 				if(m_pattern[m_nNextPos+2] != '{')
 				{
 					int red = 0;
-					unsigned int ch2 = Hex2Int(m_pattern.GetBuffer() + m_nNextPos + 2, 4, red);
+					uint ch2 = Hex2Int(m_pattern.GetBuffer() + m_nNextPos + 2, 4, red);
 
 					delta += red;
 
@@ -1782,7 +1782,7 @@ template <class CHART> int CBuilderT <CHART> :: GetNext2()
 				else
 				{
 					int red = 0;
-					unsigned int ch2 = Hex2Int(m_pattern.GetBuffer() + m_nNextPos + 3, sizeof(int) * 2, red);
+					uint ch2 = Hex2Int(m_pattern.GetBuffer() + m_nNextPos + 3, sizeof(int) * 2, red);
 
 					delta += red;
 
@@ -2270,7 +2270,7 @@ template <class CHART> ElxInterface * CBuilderT <CHART> :: BuildRepeat(int & fla
 	int bIsQuantifier = 1;
 
 	// quantifier range
-	unsigned int nMin = 0, nMax = 0;
+	uint nMin = 0, nMax = 0;
 
 	switch(curr.ch)
 	{
@@ -2637,7 +2637,7 @@ template <class CHART> ElxInterface * CBuilderT <CHART> :: BuildRecursive(int & 
 				MoveNext(); // skip '>' or '\''
 
 				// check <num>
-				unsigned int number;
+				uint number;
 				char * str = num.GetBuffer();
 
 				if( ReadDec(str, number) ? ( *str == '\0') : 0 )
@@ -2692,7 +2692,7 @@ template <class CHART> ElxInterface * CBuilderT <CHART> :: BuildRecursive(int & 
 				MoveNext(); // skip '>' or '\''
 
 				// check <num>
-				unsigned int number;
+				uint number;
 				char * str = num.GetBuffer();
 
 				if( ReadDec(str, number) ? ( *str == '\0') : 0 )
@@ -2713,7 +2713,7 @@ template <class CHART> ElxInterface * CBuilderT <CHART> :: BuildRecursive(int & 
 					MoveNext();
 				}
 
-				unsigned int rtono = 0;
+				uint rtono = 0;
 				char * str = rto.GetBuffer();
 				ReadDec(str, rtono);
 
@@ -2755,7 +2755,7 @@ template <class CHART> ElxInterface * CBuilderT <CHART> :: BuildRecursive(int & 
 						pos0 ++;
 					}
 
-					unsigned int number;
+					uint number;
 					char * str = numstr.GetBuffer();
 
 					// valid group number
@@ -2807,7 +2807,7 @@ template <class CHART> ElxInterface * CBuilderT <CHART> :: BuildRecursive(int & 
 					MoveNext();
 				}
 
-				unsigned int rtono = 0;
+				uint rtono = 0;
 				char * str = rto.GetBuffer();
 				ReadDec(str, rtono);
 
@@ -2968,7 +2968,7 @@ template <class CHART> ElxInterface * CBuilderT <CHART> :: BuildBackref(int & fl
 		MoveNext(); // skip '>' or '\''
 
 		// check <num>
-		unsigned int number;
+		uint number;
 		char * str = num.GetBuffer();
 
 		if( ReadDec(str, number) ? ( *str == '\0') : 0 )
@@ -2985,7 +2985,7 @@ template <class CHART> ElxInterface * CBuilderT <CHART> :: BuildBackref(int & fl
 	}
 	else
 	{
-		unsigned int nbackref = 0;
+		uint nbackref = 0;
 
 		for(int i=0; i<3; i++)
 		{
@@ -3001,7 +3001,7 @@ template <class CHART> ElxInterface * CBuilderT <CHART> :: BuildBackref(int & fl
 	}
 }
 
-template <class CHART> int CBuilderT <CHART> :: ReadDec(char * & str, unsigned int & dec)
+template <class CHART> int CBuilderT <CHART> :: ReadDec(char * & str, uint & dec)
 {
 	int s = 0;
 	while(str[s] != 0 && isspace(str[s])) s++;
@@ -3009,7 +3009,7 @@ template <class CHART> int CBuilderT <CHART> :: ReadDec(char * & str, unsigned i
 	if(str[s] < '0' || str[s] > '9') return 0;
 
 	dec = 0;
-	unsigned int i;
+	uint i;
 
 	for(i = s; i<sizeof(CHART)*3 + s; i++)
 	{
@@ -4176,7 +4176,7 @@ template <int x> int CRepeatElxT <x> :: MatchNextFixed(CContext * pContext) cons
 
 // Regexp
 typedef CRegexpT <char> CRegexpA;
-typedef CRegexpT <unsigned short> CRegexpW;
+typedef CRegexpT <ushort> CRegexpW;
 
 #if defined(_UNICODE) || defined(UNICODE)
 	typedef CRegexpW CRegexp;

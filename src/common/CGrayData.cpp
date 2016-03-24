@@ -23,9 +23,9 @@ CVerDataMul::~CVerDataMul()
 	Unload();
 }
 
-int CVerDataMul::QCompare( size_t left, DWORD dwRefIndex ) const
+int CVerDataMul::QCompare( size_t left, dword dwRefIndex ) const
 {
-	DWORD dwIndex2 = GetEntry(left)->GetIndex();
+	dword dwIndex2 = GetEntry(left)->GetIndex();
 	return( dwIndex2 - dwRefIndex );
 }
 
@@ -37,7 +37,7 @@ void CVerDataMul::QSort( size_t left, size_t right )
 	size_t j = left;
 	size_t i = right;
 
-	DWORD dwRefIndex = GetEntry( (left + right) / 2 )->GetIndex();
+	dword dwRefIndex = GetEntry( (left + right) / 2 )->GetIndex();
 
 	do
 	{
@@ -87,7 +87,7 @@ void CVerDataMul::Load( CGFile & file )
 		return;
 
 	file.SeekToBegin();
-	DWORD dwQty;
+	dword dwQty;
 	if ( file.Read(static_cast<void *>(&dwQty), sizeof(dwQty)) <= 0 )
 	{
 		throw CGrayError( LOGL_CRIT, CGFile::GetLastError(), "VerData: Read Qty");
@@ -111,8 +111,8 @@ void CVerDataMul::Load( CGFile & file )
 #ifdef _DEBUG
 	for ( size_t i = 0; i < (dwQty - 1); i++ )
 	{
-		DWORD dwIndex1 = GetEntry(i)->GetIndex();
-		DWORD dwIndex2 = GetEntry(i + 1)->GetIndex();
+		dword dwIndex1 = GetEntry(i)->GetIndex();
+		dword dwIndex2 = GetEntry(i + 1)->GetIndex();
 		if ( dwIndex1 > dwIndex2 )
 		{
 			DEBUG_ERR(( "VerData Array is NOT sorted !\n" ));
@@ -138,7 +138,7 @@ void CVerDataMul::Unload()
 	m_Data.Empty();
 }
 
-bool CVerDataMul::FindVerDataBlock( VERFILE_TYPE type, DWORD id, CUOIndexRec & Index ) const
+bool CVerDataMul::FindVerDataBlock( VERFILE_TYPE type, dword id, CUOIndexRec & Index ) const
 {
 	ADDTOCALLSTACK("CVerDataMul::FindVerDataBlock");
 	// Search the verdata.mul for changes to stuff.
@@ -151,13 +151,13 @@ bool CVerDataMul::FindVerDataBlock( VERFILE_TYPE type, DWORD id, CUOIndexRec & I
 		return( false );
 	}
 
-	DWORD dwIndex = VERDATA_MAKE_INDEX(type,id);
+	dword dwIndex = VERDATA_MAKE_INDEX(type,id);
 	const CUOVersionBlock * pArray = m_Data.GetBasePtr();
 	int iLow = 0;
 	while ( iLow <= iHigh )
 	{
 		int i = (iHigh+iLow)/2;
-		DWORD dwIndex2 = pArray[i].GetIndex();
+		dword dwIndex2 = pArray[i].GetIndex();
 		int iCompare = dwIndex - dwIndex2;
 		if ( iCompare == 0 )
 		{
@@ -194,7 +194,7 @@ CGrayItemInfo::CGrayItemInfo( ITEMID_TYPE id )
 	}
 
 	VERFILE_TYPE filedata;
-	DWORD offset;
+	dword offset;
 	CUOIndexRec Index;
 	VERFILE_FORMAT format;
 	if ( g_VerData.FindVerDataBlock( VERFILE_TILEDATA, (id + TERRAIN_QTY) / UOTILE_BLOCK_QTY, Index ))
@@ -262,9 +262,9 @@ ITEMID_TYPE CGrayItemInfo::GetMaxTileDataItem()
 	CGFile* pTileData = g_Install.GetMulFile(VERFILE_TILEDATA);
 	ASSERT(pTileData != NULL);
 
-	DWORD dwLength = pTileData->GetLength();	// length of file
-	DWORD dwEntrySize = 0;						// size of tiledata entry
-	DWORD dwOffset = 0;							// offset to tiledata items
+	dword dwLength = pTileData->GetLength();	// length of file
+	dword dwEntrySize = 0;						// size of tiledata entry
+	dword dwOffset = 0;							// offset to tiledata items
 
 	VERFILE_FORMAT format = g_Install.GetMulFormat(VERFILE_TILEDATA);
 	switch (format)
@@ -287,7 +287,7 @@ ITEMID_TYPE CGrayItemInfo::GetMaxTileDataItem()
 	// items are sorted in blocks of 32 with 4 byte padding between, so determine how
 	// many blocks will fit in the file to find how many items there could be
 	dwLength -= dwOffset;
-	DWORD dwBlocks = (dwLength / ((UOTILE_BLOCK_QTY * dwEntrySize) + 4)) + 1;
+	dword dwBlocks = (dwLength / ((UOTILE_BLOCK_QTY * dwEntrySize) + 4)) + 1;
 	return static_cast<ITEMID_TYPE>(dwBlocks * UOTILE_BLOCK_QTY);
 }
 
@@ -299,7 +299,7 @@ CGrayTerrainInfo::CGrayTerrainInfo( TERRAIN_TYPE id )
 	ASSERT( id < TERRAIN_QTY );
 
 	VERFILE_TYPE filedata;
-	DWORD offset;
+	dword offset;
 	CUOIndexRec Index;
 	VERFILE_FORMAT format;
 	if ( g_VerData.FindVerDataBlock( VERFILE_TILEDATA, id/UOTILE_BLOCK_QTY, Index ))

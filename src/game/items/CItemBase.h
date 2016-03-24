@@ -224,17 +224,17 @@ class CItemBase : public CBaseBaseDef
 	// Describe basic stuff about all items.
 	// Partly based on CUOItemTypeRec/CUOItemTypeRec2
 private:
-	WORD	m_weight;		// weight in WEIGHT_UNITS (UINT16_MAX=not movable) defaults from the .MUL file.
+	word	m_weight;		// weight in WEIGHT_UNITS (UINT16_MAX=not movable) defaults from the .MUL file.
 	CGTypedArray<ITEMID_TYPE,ITEMID_TYPE> m_flip_id;	//  can be flipped to make these display ids.
 	IT_TYPE	m_type;			// default double click action type. (if any)
 	CValueRangeDef m_values;		// range of values given a quality skill
-	BYTE    m_layer;		// Is this item equippable on paperdoll? LAYER=LAYER_TYPE defaults from the .MUL file.
-	DWORD   m_dwFlags;		//  UFLAG4_DOOR from CUOItemTypeRec/CUOItemTypeRec2
-	BYTE	m_speed;
+	byte    m_layer;		// Is this item equippable on paperdoll? LAYER=LAYER_TYPE defaults from the .MUL file.
+	dword   m_dwFlags;		//  UFLAG4_DOOR from CUOItemTypeRec/CUOItemTypeRec2
+	byte	m_speed;
 public:
 	static const char *m_sClassName;
 	SKILL_TYPE m_iSkill;
-	DWORD	m_CanUse;		// CanUse flags.
+	dword	m_CanUse;		// CanUse flags.
 							// Not applicable to all.
 	CResourceQtyArray m_SkillMake;	// what skills to create this ? (and non-consumed items)
 
@@ -243,10 +243,10 @@ public:
 		// IT_NORMAL
 		struct	// used only to script ref all this junk.
 		{
-			DWORD m_tData1;	// TDATA1=
-			DWORD m_tData2;	// TDATA2=
-			DWORD m_tData3;	// TDATA3=
-			DWORD m_tData4;	// TDATA4=
+			dword m_tData1;	// TDATA1=
+			dword m_tData2;	// TDATA2=
+			dword m_tData3;	// TDATA3=
+			dword m_tData4;	// TDATA4=
 		} m_ttNormal;
 
 		// IT_WAND
@@ -293,8 +293,8 @@ public:
 		{
 			int	m_junk1;
 			GUMP_TYPE m_gumpid;	// TDATA2= the gump that comes up when this container is opened.
-			DWORD m_dwMinXY;	// TDATA3= Gump size used.
-			DWORD m_dwMaxXY;	// TDATA4=
+			dword m_dwMinXY;	// TDATA3= Gump size used.
+			dword m_dwMaxXY;	// TDATA4=
 		} m_ttContainer;
 
 		// IT_FIGURINE
@@ -401,16 +401,16 @@ private:
 protected:
 	static void ReplaceItemBase( CItemBase * pOld, CResourceDef * pNew );
 public:
-	static void GetItemTiledataFlags( DWORD & wBlockThis, ITEMID_TYPE id );
-	static height_t GetItemHeightFlags( const CUOItemTypeRec2 & tile, DWORD & wBlockThis );
-	static void GetItemSpecificFlags( const CUOItemTypeRec2 & tile, DWORD & wBlockThis, IT_TYPE type, ITEMID_TYPE id );
+	static void GetItemTiledataFlags( dword & wBlockThis, ITEMID_TYPE id );
+	static height_t GetItemHeightFlags( const CUOItemTypeRec2 & tile, dword & wBlockThis );
+	static void GetItemSpecificFlags( const CUOItemTypeRec2 & tile, dword & wBlockThis, IT_TYPE type, ITEMID_TYPE id );
 	static bool IsTypeArmor( IT_TYPE type );
 	static bool IsTypeWeapon( IT_TYPE type );
 	static bool IsTypeSpellbook( IT_TYPE type );
 	static bool IsTypeMulti( IT_TYPE type );
 	static IT_TYPE GetTypeBase( ITEMID_TYPE id, const CUOItemTypeRec2 &tile );
-	WORD GetMaxAmount();
-	bool SetMaxAmount(WORD amount);
+	word GetMaxAmount();
+	bool SetMaxAmount(word amount);
 
 	static CItemBase * FindItemBase( ITEMID_TYPE id );
 	static bool IsValidDispID( ITEMID_TYPE id );
@@ -425,7 +425,7 @@ public:
 
 	static TCHAR * GetNamePluralize( LPCTSTR pszNameBase, bool fPluralize );
 	static bool GetItemData( ITEMID_TYPE id, CUOItemTypeRec2 * ptile );
-	static height_t GetItemHeight( ITEMID_TYPE id, DWORD & MoveFlags );
+	static height_t GetItemHeight( ITEMID_TYPE id, dword & MoveFlags );
 
 	static CREID_TYPE FindCharTrack( ITEMID_TYPE trackID );
 
@@ -459,7 +459,7 @@ public:
 	{
 		return static_cast<ITEMID_TYPE>(m_dwDispIndex);
 	}
-	DWORD GetTFlags() const
+	dword GetTFlags() const
 	{
 		return( m_dwFlags );
 	}
@@ -477,7 +477,7 @@ public:
 	{
 		return( Can( CAN_I_PILE ));
 	}
-	WORD GetWeight() const
+	word GetWeight() const
 	{
 		// Get weight in tenths of a stone.
 #define WEIGHT_UNITS 10
@@ -485,8 +485,8 @@ public:
 			return( WEIGHT_UNITS );	// If we can pick them up then we should be able to move them
 		return( m_weight );
 	}
-	BYTE GetSpeed() const;
-	WORD GetVolume() const
+	byte GetSpeed() const;
+	word GetVolume() const
 	{
 		return( m_weight / WEIGHT_UNITS );
 	}
@@ -520,10 +520,10 @@ class CItemBaseDupe : public CResourceDef
 public:
 	CResourceRef m_MasterItem;	// What is the "master" item ?
 private:
-	DWORD   m_dwFlags;		//  UFLAG4_DOOR from CUOItemTypeRec/CUOItemTypeRec2
+	dword   m_dwFlags;		//  UFLAG4_DOOR from CUOItemTypeRec/CUOItemTypeRec2
 	height_t	m_Height;
 public:
-	DWORD	m_Can;
+	dword	m_Can;
 	static const char *m_sClassName;
 	CItemBaseDupe( ITEMID_TYPE id, CItemBase * pMasterItem ) :
 		CResourceDef( RESOURCE_ID( RES_ITEMDEF, id )),
@@ -555,7 +555,7 @@ public:
 		m_MasterItem.SetRef(NULL);
 		CResourceDef::UnLink();
 	}
-	DWORD GetTFlags() const
+	dword GetTFlags() const
 	{
 		return( m_dwFlags );
 	}
@@ -563,7 +563,7 @@ public:
 	{
 		return( m_Height );
 	}
-	void SetTFlags( DWORD Flags )
+	void SetTFlags( dword Flags )
 	{
 		m_dwFlags = Flags;
 	}
@@ -584,22 +584,22 @@ public:
 	struct CMultiComponentItem	// a component item of a multi.
 	{
 		ITEMID_TYPE m_id;
-		signed short m_dx;
-		signed short m_dy;
+		short m_dx;
+		short m_dy;
 		signed char m_dz;
 	};
 	struct ShipSpeed // speed of a ship
 	{
-		unsigned char period;	// time between movement
-		unsigned char tiles;	// distance to move
+		uchar period;	// time between movement
+		uchar tiles;	// distance to move
 	};
 
 	CGTypedArray<CMultiComponentItem,CMultiComponentItem&> m_Components;
 	CGRect m_rect;		// my region.
-	DWORD m_dwRegionFlags;	// Base region flags (REGION_FLAG_GUARDED etc)
+	dword m_dwRegionFlags;	// Base region flags (REGION_FLAG_GUARDED etc)
 	CResourceRefArray m_Speech;	// Speech fragment list (other stuff we know)
 	ShipSpeed m_shipSpeed; // Speed of ships (IT_SHIP)
-	BYTE m_SpeedMode;
+	byte m_SpeedMode;
 
 public:
 	explicit CItemBaseMulti( CItemBase* pBase );
@@ -614,7 +614,7 @@ private:
 public:
 	int GetMaxDist() const;
 
-	bool AddComponent( ITEMID_TYPE id, signed short dx, signed short dy, signed char dz );
+	bool AddComponent( ITEMID_TYPE id, short dx, short dy, signed char dz );
 	bool AddComponent( TCHAR * pArgs );
 	void SetMultiRegion( TCHAR * pArgs );
 	bool r_LoadVal( CScript & s );

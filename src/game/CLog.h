@@ -29,7 +29,7 @@ extern struct CLog : public CFileText, public CEventLog
 	//#define LOGM_DEBUG			0x40000	// debug kind of message with DEBUG: prefix
 
 private:
-	DWORD m_dwMsgMask;			// Level of log detail messages. IsLogMsg()
+	dword m_dwMsgMask;			// Level of log detail messages. IsLogMsg()
 	CGTime m_dateStamp;			// last real time stamp.
 	CGString m_sBaseDir;
 
@@ -48,15 +48,15 @@ public:
 
 	LPCTSTR GetLogDir() const;
 	bool OpenLog( LPCTSTR pszName = NULL );	// name set previously.
-	DWORD GetLogMask() const;
-	void SetLogMask( DWORD dwMask );
-	bool IsLoggedMask( DWORD dwMask ) const;
+	dword GetLogMask() const;
+	void SetLogMask( dword dwMask );
+	bool IsLoggedMask( dword dwMask ) const;
 	LOGL_TYPE GetLogLevel() const;
 	void SetLogLevel( LOGL_TYPE level );
 	bool IsLoggedLevel( LOGL_TYPE level ) const;
-	bool IsLogged( DWORD wMask ) const;
+	bool IsLogged( dword wMask ) const;
 
-	virtual int EventStr( DWORD wMask, LPCTSTR pszMsg );
+	virtual int EventStr( dword wMask, LPCTSTR pszMsg );
 	void _cdecl CatchEvent( const CGrayError * pErr, LPCTSTR pszCatchContext, ...  ) __printfargs(3,4);
 
 public:

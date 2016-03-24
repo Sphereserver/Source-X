@@ -18,7 +18,7 @@ CHuffman CClient::m_Comp;
 /////////////////////////////////////////////////////////////////
 // -CClient stuff.
 
-size_t CClient::xCompress( BYTE * pOutput, const BYTE * pInput, size_t iLen ) // static
+size_t CClient::xCompress( byte * pOutput, const byte * pInput, size_t iLen ) // static
 {
 	ADDTOCALLSTACK("CClient::xCompress");
 	// The game server will compress the outgoing data to the clients.
@@ -60,7 +60,7 @@ void CClient::SetConnectType( CONNECT_TYPE iType )
 //---------------------------------------------------------------------
 // Push world display data to this client only.
 
-bool CClient::addLoginErr(BYTE code)
+bool CClient::addLoginErr(byte code)
 {
 	ADDTOCALLSTACK("CClient::addLoginErr");
 	// code
@@ -202,8 +202,8 @@ bool CClient::addRelay( const CServerDef * pServ )
 	}
 
 	EXC_SET("customer id");
-	DWORD dwAddr = ipAddr.GetAddrIP();
-	DWORD dwCustomerId = 0x7f000001;
+	dword dwAddr = ipAddr.GetAddrIP();
+	dword dwCustomerId = 0x7f000001;
 	if ( g_Cfg.m_fUseAuthID )
 	{
 		CGString sCustomerID(pServ->GetName());
@@ -230,7 +230,7 @@ bool CClient::addRelay( const CServerDef * pServ )
 	return( false );
 }
 
-bool CClient::Login_Relay( unsigned int iRelay ) // Relay player to a selected IP
+bool CClient::Login_Relay( uint iRelay ) // Relay player to a selected IP
 {
 	ADDTOCALLSTACK("CClient::Login_Relay");
 	// Client wants to be relayed to another server. XCMD_ServerSelect
@@ -265,7 +265,7 @@ bool CClient::Login_Relay( unsigned int iRelay ) // Relay player to a selected I
 	return addRelay( pServ );
 }
 
-BYTE CClient::Login_ServerList( const char * pszAccount, const char * pszPassword )
+byte CClient::Login_ServerList( const char * pszAccount, const char * pszPassword )
 {
 	ADDTOCALLSTACK("CClient::Login_ServerList");
 	// XCMD_ServersReq
@@ -291,7 +291,7 @@ BYTE CClient::Login_ServerList( const char * pszAccount, const char * pszPasswor
 	// if ( LogIn( pszAccount, pszPassword ) )
 	//   return( PacketLoginError::BadPass );
 	CGString sMsg;
-	BYTE lErr = LogIn( pszAccount, pszPassword, sMsg );
+	byte lErr = LogIn( pszAccount, pszPassword, sMsg );
 	if ( lErr != PacketLoginError::Success )
 	{
 		return( lErr );
@@ -323,7 +323,7 @@ bool CClient::OnRxConsoleLoginComplete()
 	return true;
 }
 
-bool CClient::OnRxConsole( const BYTE * pData, size_t iLen )
+bool CClient::OnRxConsole( const byte * pData, size_t iLen )
 {
 	ADDTOCALLSTACK("CClient::OnRxConsole");
 	// A special console version of the client. (Not game protocol)
@@ -348,7 +348,7 @@ bool CClient::OnRxConsole( const BYTE * pData, size_t iLen )
 			{
 				if ( !m_zLogin[0] )
 				{
-					if ( static_cast<unsigned int>(m_Targ_Text.GetLength()) > (COUNTOF(m_zLogin) - 1) )
+					if ( static_cast<uint>(m_Targ_Text.GetLength()) > (COUNTOF(m_zLogin) - 1) )
 					{
 						SysMessage("Login:\n");
 					}
@@ -396,7 +396,7 @@ bool CClient::OnRxConsole( const BYTE * pData, size_t iLen )
 	return true;
 }
 
-bool CClient::OnRxAxis( const BYTE * pData, size_t iLen )
+bool CClient::OnRxAxis( const byte * pData, size_t iLen )
 {
 	ADDTOCALLSTACK("CClient::OnRxAxis");
 	if ( !iLen || ( GetConnectType() != CONNECT_AXIS ))
@@ -413,7 +413,7 @@ bool CClient::OnRxAxis( const BYTE * pData, size_t iLen )
 			{
 				if ( !m_zLogin[0] )
 				{
-					if ( static_cast<unsigned int>(m_Targ_Text.GetLength()) <= (COUNTOF(m_zLogin) - 1) )
+					if ( static_cast<uint>(m_Targ_Text.GetLength()) <= (COUNTOF(m_zLogin) - 1) )
 						strcpy(m_zLogin, m_Targ_Text);
 					m_Targ_Text.Empty();
 				}
@@ -452,7 +452,7 @@ bool CClient::OnRxAxis( const BYTE * pData, size_t iLen )
 							}
 
 							time_t dateChange;
-							DWORD dwSize;
+							dword dwSize;
 							if ( ! CFileList::ReadFileInfo( "Axis.db", dateChange, dwSize ))
 							{
 								SysMessagef("\"MSG:%s\"", g_Cfg.GetDefaultMsg(DEFMSG_AXIS_INFO_ERROR));
@@ -473,7 +473,7 @@ bool CClient::OnRxAxis( const BYTE * pData, size_t iLen )
 								size_t iLength = FileRead.Read( szTmp, sizeof( szTmp ) );
 								if ( iLength <= 0 )
 									break;
-								packet.setData((BYTE*)szTmp, iLength);
+								packet.setData((byte*)szTmp, iLength);
 								packet.send(this);
 								dwSize -= iLength;
 								if ( dwSize <= 0 )
@@ -497,7 +497,7 @@ bool CClient::OnRxAxis( const BYTE * pData, size_t iLen )
 	return true;
 }
 
-bool CClient::OnRxPing( const BYTE * pData, size_t iLen )
+bool CClient::OnRxPing( const byte * pData, size_t iLen )
 {
 	ADDTOCALLSTACK("CClient::OnRxPing");
 	// packet iLen < 5
@@ -538,7 +538,7 @@ bool CClient::OnRxPing( const BYTE * pData, size_t iLen )
 					if ( pAccount )
 					{
 						CGString sMsg;
-						BYTE lErr = LogIn( pAccount, sMsg );
+						byte lErr = LogIn( pAccount, sMsg );
 						if ( lErr != PacketLoginError::Success )
 						{
 							if ( lErr != PacketLoginError::Invalid )
@@ -568,7 +568,7 @@ bool CClient::OnRxPing( const BYTE * pData, size_t iLen )
 			m_zLogin[0] = 0;
 
 			time_t dateChange;
-			DWORD dwSize = 0;
+			dword dwSize = 0;
 			CFileList::ReadFileInfo( "Axis.db", dateChange, dwSize );
 			SysMessagef("%u",dwSize);
 			return true;
@@ -578,9 +578,9 @@ bool CClient::OnRxPing( const BYTE * pData, size_t iLen )
 		case 0xF1:
 		{
 			// ConnectUO sends a 4-byte packet when requesting status info
-			// BYTE Cmd		(0xF1)
-			// WORD Unk		(0x04)
-			// BYTE SubCmd	(0xFF)
+			// byte Cmd		(0xF1)
+			// word Unk		(0x04)
+			// byte SubCmd	(0xFF)
 
 			if ( iLen != MAKEWORD( pData[2], pData[1] ) )
 				break;
@@ -640,7 +640,7 @@ bool CClient::OnRxPing( const BYTE * pData, size_t iLen )
 	return false;
 }
 
-bool CClient::OnRxWebPageRequest( BYTE * pRequest, size_t iLen )
+bool CClient::OnRxWebPageRequest( byte * pRequest, size_t iLen )
 {
 	ADDTOCALLSTACK("CClient::OnRxWebPageRequest");
 	// Seems to be a web browser pointing at us ? typical stuff :
@@ -799,7 +799,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
 	{
 		DEBUG_MSG(( "%x:Odd login message length %" FMTSIZE_T "?\n", GetSocketID(), iLen ));
 #ifdef _DEBUG
-		xRecordPacketData(this, (const BYTE *)pEvent, iLen, "client->server");
+		xRecordPacketData(this, (const byte *)pEvent, iLen, "client->server");
 #endif
 		addLoginErr( PacketLoginError::BadEncLength );
 		return( false );
@@ -810,7 +810,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
 
 	if ( !xCanEncLogin() )
 	{
-		addLoginErr(static_cast<unsigned char>((m_Crypt.GetEncryptionType() == ENC_NONE? PacketLoginError::EncNoCrypt : PacketLoginError::EncCrypt) ));
+		addLoginErr(static_cast<uchar>((m_Crypt.GetEncryptionType() == ENC_NONE? PacketLoginError::EncNoCrypt : PacketLoginError::EncCrypt) ));
 		return( false );
 	}
 	else if ( m_Crypt.GetConnectType() == CONNECT_LOGIN && !xCanEncLogin(true) )
@@ -819,7 +819,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
 		return( false );
 	}
 	
-	BYTE lErr = PacketLoginError::EncUnknown;
+	byte lErr = PacketLoginError::EncUnknown;
 	
 	m_Crypt.Decrypt( pEvent->m_Raw, bincopy.m_Raw, iLen );
 	
@@ -865,15 +865,15 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
 				CAccountRef pAcc = g_Accounts.Account_Find( szAccount );
 				if (pAcc)
 				{
-					DWORD tmSid = 0x7f000001;
-					DWORD tmVer = static_cast<DWORD>(pAcc->m_TagDefs.GetKeyNum("clientversion"));
-					DWORD tmVerReported = static_cast<DWORD>(pAcc->m_TagDefs.GetKeyNum("reportedcliver"));
+					dword tmSid = 0x7f000001;
+					dword tmVer = static_cast<dword>(pAcc->m_TagDefs.GetKeyNum("clientversion"));
+					dword tmVerReported = static_cast<dword>(pAcc->m_TagDefs.GetKeyNum("reportedcliver"));
 					pAcc->m_TagDefs.DeleteKey("clientversion");
 					pAcc->m_TagDefs.DeleteKey("reportedcliver");
 
 					if ( g_Cfg.m_fUseAuthID )
 					{
-						tmSid = static_cast<DWORD>(pAcc->m_TagDefs.GetKeyNum("customerid"));
+						tmSid = static_cast<dword>(pAcc->m_TagDefs.GetKeyNum("customerid"));
 						pAcc->m_TagDefs.DeleteKey("customerid");
 					}
 
@@ -926,7 +926,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
 #endif
 	}
 	
-	xRecordPacketData(this, (const BYTE *)pEvent, iLen, "client->server");
+	xRecordPacketData(this, (const byte *)pEvent, iLen, "client->server");
 
 	if ( lErr != PacketLoginError::Success )	// it never matched any crypt format.
 	{

@@ -143,7 +143,7 @@ public:
 	HICON SetIcon( HICON hIcon, BOOL fType = false )
 	{
 		// ICON_BIG vs ICON_SMALL
-		return( (HICON)(DWORD) SendMessage( WM_SETICON, (WPARAM)fType, (LPARAM) hIcon ));
+		return( (HICON)(dword) SendMessage( WM_SETICON, (WPARAM)fType, (LPARAM) hIcon ));
 	}
 
 	UINT_PTR SetTimer( UINT_PTR uTimerID, UINT uWaitmSec )
@@ -316,7 +316,7 @@ public:
 
 // Operations
 
-	void SetSel( DWORD dwSelection, BOOL bNoScroll = FALSE )
+	void SetSel( dword dwSelection, BOOL bNoScroll = FALSE )
 	{
 		UNREFERENCED_PARAMETER(bNoScroll);
 		ASSERT(IsWindow());
@@ -362,7 +362,7 @@ public:
 	static const char *m_sClassName;
 	COLORREF SetBackgroundColor( BOOL bSysColor, COLORREF cr )
 	{ 
-		return( (COLORREF)(DWORD) SendMessage( EM_SETBKGNDCOLOR, (WPARAM) bSysColor, (LPARAM) cr ));
+		return( (COLORREF)(dword) SendMessage( EM_SETBKGNDCOLOR, (WPARAM) bSysColor, (LPARAM) cr ));
 	}
 
 	void SetSel( int nStartChar, int nEndChar, BOOL bNoScroll = FALSE )
@@ -383,30 +383,30 @@ public:
 		nEndChar = range.cpMax;
 	}
 
-	DWORD Scroll( int iAction = SB_PAGEDOWN )
+	dword Scroll( int iAction = SB_PAGEDOWN )
 	{
-		return( (DWORD) SendMessage( EM_SCROLL, (WPARAM) iAction ));
+		return( (dword) SendMessage( EM_SCROLL, (WPARAM) iAction ));
 	}
 
 	// Formatting.
 	BOOL SetDefaultCharFormat( CHARFORMAT& cf )
 	{
-		return( (BOOL)(DWORD) SendMessage( EM_SETCHARFORMAT, (WPARAM) SCF_DEFAULT, (LPARAM) &cf ));
+		return( (BOOL)(dword) SendMessage( EM_SETCHARFORMAT, (WPARAM) SCF_DEFAULT, (LPARAM) &cf ));
 	}
 	BOOL SetSelectionCharFormat( CHARFORMAT& cf )
 	{
-		return( (BOOL)(DWORD) SendMessage( EM_SETCHARFORMAT, (WPARAM) SCF_SELECTION, (LPARAM) &cf ));
+		return( (BOOL)(dword) SendMessage( EM_SETCHARFORMAT, (WPARAM) SCF_SELECTION, (LPARAM) &cf ));
 	}
 
 	// Events.
 	int GetEventMask() const
 	{
-		return( (DWORD) SendMessage( EM_GETEVENTMASK ));
+		return( (dword) SendMessage( EM_GETEVENTMASK ));
 	}
-	DWORD SetEventMask( DWORD dwEventMask = ENM_NONE )
+	dword SetEventMask( dword dwEventMask = ENM_NONE )
 	{
 		// ENM_NONE = default.
-		return( (DWORD) SendMessage( EM_SETEVENTMASK, 0, (LPARAM) dwEventMask ));
+		return( (dword) SendMessage( EM_SETEVENTMASK, 0, (LPARAM) dwEventMask ));
 	}
 };
 
@@ -426,11 +426,11 @@ public:
 	}
 	int GetCount() const
 	{
-		return( (int)(DWORD) SendMessage( LB_GETCOUNT ));
+		return( (int)(dword) SendMessage( LB_GETCOUNT ));
 	}
 	int AddString( LPCTSTR lpsz ) const
 	{
-		return( (int)(DWORD) SendMessage( LB_ADDSTRING, 0L, (LPARAM)(lpsz)));
+		return( (int)(dword) SendMessage( LB_ADDSTRING, 0L, (LPARAM)(lpsz)));
 	}
 
 // Implementation

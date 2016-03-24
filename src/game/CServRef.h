@@ -53,7 +53,7 @@ private:
 	CGString m_sStatus;	// last returned status string.
 
 	// statistics
-	DWORD m_dwStat[ SERV_STAT_QTY ];
+	dword m_dwStat[ SERV_STAT_QTY ];
 
 public:
 	static const char *m_sClassName;
@@ -81,7 +81,7 @@ public:
 		return(m_sStatus);
 	}
 
-	DWORD StatGet( SERV_STAT_TYPE i ) const;
+	dword StatGet( SERV_STAT_TYPE i ) const;
 
 	void StatInc( SERV_STAT_TYPE i )
 	{
@@ -93,7 +93,7 @@ public:
 		ASSERT( i>=0 && i<SERV_STAT_QTY );
 		m_dwStat[i]--;
 	}
-	void SetStat( SERV_STAT_TYPE i, DWORD dwVal )
+	void SetStat( SERV_STAT_TYPE i, dword dwVal )
 	{
 		ASSERT( i>=0 && i<SERV_STAT_QTY );
 		m_dwStat[i] = dwVal;

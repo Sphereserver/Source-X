@@ -102,7 +102,7 @@ public:
 	virtual bool r_LoadVal( CScript & s );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
 
-	LPCTSTR GetStatusString( BYTE iIndex = 0 ) const;
+	LPCTSTR GetStatusString( byte iIndex = 0 ) const;
 	INT64 GetAgeHours() const;
 
 	bool OnConsoleCmd( CGString & sText, CTextConsole * pSrc );

@@ -13,14 +13,14 @@
 #define _INC_CMD5_H
 
 #include <string.h>
-
+#include "datatypes.h"
 
 class CMD5
 {
 private:
-	unsigned int m_buffer[4];
-	unsigned int m_bits[2];
-	unsigned char m_input[64];
+	uint m_buffer[4];
+	uint m_bits[2];
+	uchar m_input[64];
 	bool m_finalized;
 
 	void update();
@@ -34,18 +34,18 @@ private:
 
 public:
 	void reset();
-	void update( const unsigned char * data, unsigned int length );
+	void update( const uchar * data, uint length );
 	void finalize();
 
 	// Digest has to be 33 bytes long
 	void digest( char * digest );
 	// Get digest in a "numeric" form to be usable
-	void numericDigest( unsigned char * digest );
+	void numericDigest( uchar * digest );
 	
 	inline static void fastDigest( char * digest, const char * message )
 	{
 		CMD5 ctx;
-		ctx.update( reinterpret_cast<const unsigned char *>(message), static_cast<unsigned int>(strlen( message ) ));
+		ctx.update( reinterpret_cast<const uchar *>(message), static_cast<uint>(strlen( message ) ));
 		ctx.finalize();
 		ctx.digest( digest );
 	}

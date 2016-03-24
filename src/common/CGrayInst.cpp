@@ -55,7 +55,7 @@ bool CGrayInstall::FindInstall()
 	TCHAR szValue[ _MAX_PATH ];
 	DWORD lSize = sizeof( szValue );
 	DWORD dwType = REG_SZ;
-	lRet = RegQueryValueEx(hKey, "ExePath", NULL, &dwType, (BYTE*)szValue, &lSize);
+	lRet = RegQueryValueEx(hKey, "ExePath", NULL, &dwType, (byte*)szValue, &lSize);
 
 	if ( lRet == ERROR_SUCCESS && dwType == REG_SZ )
 	{
@@ -65,7 +65,7 @@ bool CGrayInstall::FindInstall()
 	}
 	else
 	{
-		lRet = RegQueryValueEx(hKey, "InstallDir", NULL, &dwType, (BYTE*)szValue, &lSize);
+		lRet = RegQueryValueEx(hKey, "InstallDir", NULL, &dwType, (byte*)szValue, &lSize);
 		if ( lRet == ERROR_SUCCESS && dwType == REG_SZ )
 			m_sExePath = szValue;
 	}
@@ -73,7 +73,7 @@ bool CGrayInstall::FindInstall()
 	// ??? Find CDROM install base as well, just in case.
 	// uo.cfg CdRomDataPath=e:\uo
 
-	lRet = RegQueryValueEx(hKey, "InstCDPath", NULL, &dwType, (BYTE*)szValue, &lSize);
+	lRet = RegQueryValueEx(hKey, "InstCDPath", NULL, &dwType, (byte*)szValue, &lSize);
 
 	if ( lRet == ERROR_SUCCESS && dwType == REG_SZ )
 	{
@@ -110,7 +110,7 @@ void CGrayInstall::DetectMulVersions()
 		m_FileFormat[VERFILE_MULTIIDX] = VERFORMAT_HIGHSEAS;
 }
 
-bool CGrayInstall::OpenFile( CGFile & file, LPCTSTR pszName, WORD wFlags )
+bool CGrayInstall::OpenFile( CGFile & file, LPCTSTR pszName, word wFlags )
 {
 	ADDTOCALLSTACK("CGrayInstall::OpenFile");
 	ASSERT(pszName);
@@ -215,7 +215,7 @@ bool CGrayInstall::OpenFile( VERFILE_TYPE i )
 	return OpenFile(m_File[i], pszTitle, OF_READ|OF_SHARE_DENY_WRITE);
 }
 
-VERFILE_TYPE CGrayInstall::OpenFiles( DWORD dwMask )
+VERFILE_TYPE CGrayInstall::OpenFiles( dword dwMask )
 {
 	ADDTOCALLSTACK("CGrayInstall::OpenFiles");
 	// Now open all the required files.
@@ -281,23 +281,23 @@ VERFILE_TYPE CGrayInstall::OpenFiles( DWORD dwMask )
 								{
 									m_IsMapUopFormat[index] = true;
 
-									unsigned int dwHashLo, dwHashHi, dwCompressedSize, dwHeaderLenght, dwFilesInBlock, dwTotalFiles, dwLoop;
-									unsigned long long qwUOPPtr;
+									uint dwHashLo, dwHashHi, dwCompressedSize, dwHeaderLenght, dwFilesInBlock, dwTotalFiles, dwLoop;
+									ullong qwUOPPtr;
 
-									m_Maps[index].Seek( sizeof(DWORD)*3, SEEK_SET );
-									m_Maps[index].Read( &dwHashLo, sizeof(DWORD));
-									m_Maps[index].Read( &dwHashHi, sizeof(DWORD));
+									m_Maps[index].Seek( sizeof(dword)*3, SEEK_SET );
+									m_Maps[index].Read( &dwHashLo, sizeof(dword));
+									m_Maps[index].Read( &dwHashHi, sizeof(dword));
 									qwUOPPtr = ((INT64)dwHashHi << 32) + dwHashLo;
-									m_Maps[index].Seek( sizeof(DWORD), SEEK_CUR );
-									m_Maps[index].Read( &dwTotalFiles, sizeof(DWORD));
-									m_Maps[index].Seek( static_cast<long>(qwUOPPtr), SEEK_SET );
+									m_Maps[index].Seek( sizeof(dword), SEEK_CUR );
+									m_Maps[index].Read( &dwTotalFiles, sizeof(dword));
+									m_Maps[index].Seek( static_cast<int>(qwUOPPtr), SEEK_SET );
 									dwLoop = dwTotalFiles;
 
 									while (qwUOPPtr > 0)
 									{
-										m_Maps[index].Read( &dwFilesInBlock, sizeof(DWORD));
-										m_Maps[index].Read( &dwHashLo, sizeof(DWORD));
-										m_Maps[index].Read( &dwHashHi, sizeof(DWORD));
+										m_Maps[index].Read( &dwFilesInBlock, sizeof(dword));
+										m_Maps[index].Read( &dwHashLo, sizeof(dword));
+										m_Maps[index].Read( &dwHashHi, sizeof(dword));
 										qwUOPPtr = ((INT64)dwHashHi << 32) + dwHashLo;
 
 										while ((dwFilesInBlock > 0)&&(dwTotalFiles > 0))
@@ -305,21 +305,21 @@ VERFILE_TYPE CGrayInstall::OpenFiles( DWORD dwMask )
 											dwTotalFiles--;
 											dwFilesInBlock--;
 
-											m_Maps[index].Read( &dwHashLo, sizeof(DWORD));
-											m_Maps[index].Read( &dwHashHi, sizeof(DWORD));
-											m_Maps[index].Read( &dwHeaderLenght, sizeof(DWORD));
-											m_Maps[index].Read( &dwCompressedSize, sizeof(DWORD));
+											m_Maps[index].Read( &dwHashLo, sizeof(dword));
+											m_Maps[index].Read( &dwHashHi, sizeof(dword));
+											m_Maps[index].Read( &dwHeaderLenght, sizeof(dword));
+											m_Maps[index].Read( &dwCompressedSize, sizeof(dword));
 
 											MapAddress pMapAddress;
 											pMapAddress.qwAdress = (((INT64)dwHashHi << 32) + dwHashLo) + dwHeaderLenght;
 
-											m_Maps[index].Seek( sizeof(DWORD), SEEK_CUR );
-											m_Maps[index].Read( &dwHashLo, sizeof(DWORD));
-											m_Maps[index].Read( &dwHashHi, sizeof(DWORD));
-											unsigned long long qwHash = ((INT64)dwHashHi << 32) + dwHashLo;
-											m_Maps[index].Seek( sizeof(DWORD)+sizeof(WORD), SEEK_CUR );
+											m_Maps[index].Seek( sizeof(dword), SEEK_CUR );
+											m_Maps[index].Read( &dwHashLo, sizeof(dword));
+											m_Maps[index].Read( &dwHashHi, sizeof(dword));
+											ullong qwHash = ((INT64)dwHashHi << 32) + dwHashLo;
+											m_Maps[index].Seek( sizeof(dword)+sizeof(word), SEEK_CUR );
 					
-											for (unsigned int x = 0; x < dwLoop; x++)
+											for (uint x = 0; x < dwLoop; x++)
 											{
 												sprintf(z, "build/map%dlegacymul/%.8u.dat", index, x);
 												if (HashFileName(z) == qwHash)
@@ -332,7 +332,7 @@ VERFILE_TYPE CGrayInstall::OpenFiles( DWORD dwMask )
 											}
 										}
 
-										m_Maps[index].Seek( static_cast<long>(qwUOPPtr), SEEK_SET );
+										m_Maps[index].Seek( static_cast<int>(qwUOPPtr), SEEK_SET );
 									}
 								}//End of UOP Map parsing
 								else if (index == 0) // neither file exists, map0 is required
@@ -428,7 +428,7 @@ VERFILE_TYPE CGrayInstall::OpenFiles( DWORD dwMask )
 
 	TCHAR * z = Str_GetTemp();
 	TCHAR * z1 = Str_GetTemp();
-	for ( unsigned char j = 0; j < 7; j++ )
+	for ( uchar j = 0; j < 7; j++ )
 	{
 		if ( j == 5 )	// ML just added some changes on maps 0/1 instead a new map
 			continue;
@@ -485,10 +485,10 @@ void CGrayInstall::CloseFiles()
 	}
 }
 
-bool CGrayInstall::ReadMulIndex(CGFile &file, DWORD id, CUOIndexRec &Index)
+bool CGrayInstall::ReadMulIndex(CGFile &file, dword id, CUOIndexRec &Index)
 {
 	ADDTOCALLSTACK("CGrayInstall::ReadMulIndex");
-	DWORD lOffset = id * sizeof(CUOIndexRec);
+	dword lOffset = id * sizeof(CUOIndexRec);
 
 	if ( file.Seek(lOffset, SEEK_SET) != lOffset )
 		return false;
@@ -505,14 +505,14 @@ bool CGrayInstall::ReadMulData(CGFile &file, const CUOIndexRec &Index, void * pD
 	if ( file.Seek(Index.GetFileOffset(), SEEK_SET) != Index.GetFileOffset() )
 		return false;
 
-	DWORD dwLength = Index.GetBlockLength();
+	dword dwLength = Index.GetBlockLength();
 	if ( file.Read(pData, dwLength) != dwLength )
 		return false;
 
 	return true;
 }
 
-bool CGrayInstall::ReadMulIndex(VERFILE_TYPE fileindex, VERFILE_TYPE filedata, DWORD id, CUOIndexRec & Index)
+bool CGrayInstall::ReadMulIndex(VERFILE_TYPE fileindex, VERFILE_TYPE filedata, dword id, CUOIndexRec & Index)
 {
 	ADDTOCALLSTACK("CGrayInstall::ReadMulIndex");
 	// Read about this data type in one of the index files.
@@ -537,7 +537,7 @@ bool CGrayInstall::ReadMulData(VERFILE_TYPE filedata, const CUOIndexRec & Index,
 
 
 //UOP Filename Hash function
-unsigned long long HashFileName(CGString csFile)
+ullong HashFileName(CGString csFile)
 {
 	UINT eax, ecx, edx, ebx, esi, edi;
 

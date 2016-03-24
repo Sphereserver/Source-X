@@ -55,10 +55,10 @@ public:
 	struct TResponseString
 	{
 	public:
-		const WORD m_ID;
+		const word m_ID;
 		CGString const m_sText;
 
-		TResponseString( WORD id, LPCTSTR pszText ) : m_ID( id ), m_sText( pszText )
+		TResponseString( word id, LPCTSTR pszText ) : m_ID( id ), m_sText( pszText )
 		{
 		}
 
@@ -67,10 +67,10 @@ public:
 		TResponseString& operator=( const TResponseString& other );
 	};
 
-	CGTypedArray<DWORD, DWORD>		m_CheckArray;
+	CGTypedArray<dword, dword>		m_CheckArray;
 	CGObArray<TResponseString *>	m_TextArray;
 public:
-	void AddText( WORD id, LPCTSTR pszText );
+	void AddText( word id, LPCTSTR pszText );
 	LPCTSTR GetName() const;
 	bool r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc );
 
@@ -89,8 +89,8 @@ private:
 class CMenuItem 	// describe a menu item.
 {
 public:
-	WORD m_id;			// ITEMID_TYPE in base set.
-	WORD m_color;
+	word m_id;			// ITEMID_TYPE in base set.
+	word m_color;
 	CGString m_sText;
 public:
 	bool ParseLine( TCHAR * pszArgs, CScriptObj * pObjBase, CTextConsole * pSrc );
@@ -115,25 +115,25 @@ private:
 					 // Client last know state stuff.
 	CSectorEnviron m_Env;		// Last Environment Info Sent. so i don't have to keep resending if it's the same.
 
-	unsigned char m_fUpdateStats;	// update our own status (weight change) when done with the cycle.
+	uchar m_fUpdateStats;	// update our own status (weight change) when done with the cycle.
 
 									// Walk limiting code
 	int	m_iWalkTimeAvg;
 	int m_iWalkStepCount;		// Count the actual steps . Turning does not count.
-	LLONG m_timeWalkStep;	// the last %8 walk step time.
+	llong m_timeWalkStep;	// the last %8 walk step time.
 
 								// Screensize
 	struct __screensize
 	{
-		DWORD x;
-		DWORD y;
+		dword x;
+		dword y;
 	} m_ScreenSize;
 
 	// OxBF - 0x24 AntiCheat
 	struct __bfanticheat
 	{
-		BYTE lastvalue;
-		BYTE count;
+		byte lastvalue;
+		byte count;
 	} m_BfAntiCheat;
 
 	// Promptconsole
@@ -175,7 +175,7 @@ public:
 		// CLIMODE_SETUP_CONNECTING
 		struct
 		{
-			DWORD m_dwIP;
+			dword m_dwIP;
 			int m_iConnect;	// used for debug only.
 			bool m_bNewSeed;
 		} m_tmSetup;
@@ -197,7 +197,7 @@ public:
 		{
 			CGrayUIDBase m_UID;
 			RESOURCE_ID_BASE m_ResourceID;		// What menu is this ?
-			DWORD m_Item[MAX_MENU_ITEMS];	// This saves the inrange tracking targets or other context
+			dword m_Item[MAX_MENU_ITEMS];	// This saves the inrange tracking targets or other context
 		} m_tmMenu;	// the menu that is up.
 
 					// CLIMODE_TARG_PET_CMD
@@ -226,7 +226,7 @@ public:
 		// CLIMODE_TARG_ADDITEM
 		struct
 		{
-			DWORD m_junk0;
+			dword m_junk0;
 			int m_id;
 		} m_tmAdd;
 
@@ -259,13 +259,13 @@ private:
 	bool r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef );
 
 	bool OnRxConsoleLoginComplete();
-	bool OnRxConsole( const BYTE * pData, size_t len );
-	bool OnRxAxis( const BYTE * pData, size_t len );
-	bool OnRxPing( const BYTE * pData, size_t len );
-	bool OnRxWebPageRequest( BYTE * pRequest, size_t len );
+	bool OnRxConsole( const byte * pData, size_t len );
+	bool OnRxAxis( const byte * pData, size_t len );
+	bool OnRxPing( const byte * pData, size_t len );
+	bool OnRxWebPageRequest( byte * pRequest, size_t len );
 
-	BYTE LogIn( CAccountRef pAccount, CGString & sMsg );
-	BYTE LogIn( LPCTSTR pszName, LPCTSTR pPassword, CGString & sMsg );
+	byte LogIn( CAccountRef pAccount, CGString & sMsg );
+	byte LogIn( LPCTSTR pszName, LPCTSTR pPassword, CGString & sMsg );
 
 	bool CanInstantLogOut() const;
 	void Cmd_GM_PageClear();
@@ -288,7 +288,7 @@ private:
 	bool OnTarg_Use_Deed( CItem * pDeed, const CPointMap &pt );
 	bool OnTarg_Use_Item( CObjBase * pObj, CPointMap & pt, ITEMID_TYPE id );
 	bool OnTarg_Party_Add( CChar * pChar );
-	CItem* OnTarg_Use_Multi( const CItemBase * pItemDef, const CPointMap & pt, DWORD dwAttr, HUE_TYPE wHue );
+	CItem* OnTarg_Use_Multi( const CItemBase * pItemDef, const CPointMap & pt, dword dwAttr, HUE_TYPE wHue );
 
 	int OnSkill_AnimalLore( CGrayUID uid, int iTestLevel, bool fTest );
 	int OnSkill_Anatomy( CGrayUID uid, int iTestLevel, bool fTest );
@@ -324,39 +324,39 @@ public:
 	void Event_CombatMode( bool fWar ); // Only for switching to combat mode
 	bool Event_DoubleClick( CGrayUID uid, bool fMacro, bool fTestTouch, bool fScript = false );
 	void Event_ExtCmd( EXTCMD_TYPE type, TCHAR * pszName );
-	void Event_Item_Drop( CGrayUID uidItem, CPointMap pt, CGrayUID uidOn, unsigned char gridIndex = 0 ); // Item is dropped on ground
+	void Event_Item_Drop( CGrayUID uidItem, CPointMap pt, CGrayUID uidOn, uchar gridIndex = 0 ); // Item is dropped on ground
 	void Event_Item_Drop_Fail( CItem *pItem );
 	void Event_Item_Dye( CGrayUID uid, HUE_TYPE wHue );	// Rehue an item
 	void Event_Item_Pickup( CGrayUID uid, int amount ); // Client grabs an item
 	void Event_MailMsg( CGrayUID uid1, CGrayUID uid2 );
-	void Event_Profile( BYTE fWriteMode, CGrayUID uid, LPCTSTR pszProfile, int iProfileLen );
-	void Event_PromptResp( LPCTSTR pszText, size_t len, DWORD context1, DWORD context2, DWORD type, bool bNoStrip = false );
+	void Event_Profile( byte fWriteMode, CGrayUID uid, LPCTSTR pszProfile, int iProfileLen );
+	void Event_PromptResp( LPCTSTR pszText, size_t len, dword context1, dword context2, dword type, bool bNoStrip = false );
 	void Event_SetName( CGrayUID uid, const char * pszCharName );
 	void Event_SingleClick( CGrayUID uid );
 	void Event_Talk( LPCTSTR pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bool bNoStrip = false ); // PC speech
 	void Event_TalkUNICODE( NWORD* wszText, int iTextLen, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, LPCTSTR pszLang );
-	void Event_Target( DWORD context, CGrayUID uid, CPointMap pt, BYTE flags = 0, ITEMID_TYPE id = ITEMID_NOTHING );
-	void Event_Tips( WORD i ); // Tip of the day window
+	void Event_Target( dword context, CGrayUID uid, CPointMap pt, byte flags = 0, ITEMID_TYPE id = ITEMID_NOTHING );
+	void Event_Tips( word i ); // Tip of the day window
 	void Event_ToolTip( CGrayUID uid );
-	void Event_UseToolbar(BYTE bType, DWORD dwArg);
+	void Event_UseToolbar(byte bType, dword dwArg);
 	void Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t itemCount);
 	void Event_VendorBuy_Cheater( int iCode = 0 );
 	void Event_VendorSell(CChar* pVendor, const VendorItem* items, size_t itemCount);
 	void Event_VendorSell_Cheater( int iCode = 0 );
-	bool Event_Walk( BYTE rawdir, BYTE sequence = 0 ); // Player moves
+	bool Event_Walk( byte rawdir, byte sequence = 0 ); // Player moves
 	bool Event_CheckWalkBuffer();
 
 	TRIGRET_TYPE Menu_OnSelect( RESOURCE_ID_BASE rid, int iSelect, CObjBase * pObj );
-	TRIGRET_TYPE Dialog_OnButton( RESOURCE_ID_BASE rid, DWORD dwButtonID, CObjBase * pObj, CDialogResponseArgs * pArgs );
+	TRIGRET_TYPE Dialog_OnButton( RESOURCE_ID_BASE rid, dword dwButtonID, CObjBase * pObj, CDialogResponseArgs * pArgs );
 
-	bool Login_Relay( unsigned int iServer ); // Relay player to a certain IP
-	BYTE Login_ServerList( const char * pszAccount, const char * pszPassword ); // Initial login (Login on "loginserver", new format)
+	bool Login_Relay( uint iServer ); // Relay player to a certain IP
+	byte Login_ServerList( const char * pszAccount, const char * pszPassword ); // Initial login (Login on "loginserver", new format)
 
-	BYTE Setup_Delete( DWORD iSlot ); // Deletion of character
+	byte Setup_Delete( dword iSlot ); // Deletion of character
 	int Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst); // Write character list to packet
-	BYTE Setup_ListReq( const char * pszAccount, const char * pszPassword, bool fTest ); // Gameserver login and character listing
-	BYTE Setup_Play( unsigned int iSlot ); // After hitting "Play Character" button
-	BYTE Setup_Start( CChar * pChar ); // Send character startup stuff to player
+	byte Setup_ListReq( const char * pszAccount, const char * pszPassword, bool fTest ); // Gameserver login and character listing
+	byte Setup_Play( uint iSlot ); // After hitting "Play Character" button
+	byte Setup_Start( CChar * pChar ); // Send character startup stuff to player
 
 
 									   // translated commands.
@@ -368,7 +368,7 @@ public:
 	bool Cmd_CreateItem( ITEMID_TYPE id );
 	bool Cmd_CreateChar( CREID_TYPE id );
 
-	void Cmd_GM_PageMenu( unsigned int iEntryStart = 0 );
+	void Cmd_GM_PageMenu( uint iEntryStart = 0 );
 	void Cmd_GM_PageCmd( LPCTSTR pCmd );
 	void Cmd_GM_PageSelect( size_t iSelect );
 	void Cmd_GM_Page( LPCTSTR pszreason); // Help button (Calls GM Call Menus up)
@@ -376,7 +376,7 @@ public:
 	bool Cmd_Skill_Menu( RESOURCE_ID_BASE rid, int iSelect = -1 );
 	bool Cmd_Skill_Smith( CItem * pIngots );
 	bool Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase * pSrc );
-	bool Cmd_Skill_Tracking( unsigned int track_type = UINT32_MAX, bool fExec = false ); // Fill menu with specified creature types
+	bool Cmd_Skill_Tracking( uint track_type = UINT32_MAX, bool fExec = false ); // Fill menu with specified creature types
 	bool Cmd_Skill_Inscription();
 	bool Cmd_SecureTrade( CChar * pChar, CItem * pItem );
 	bool Cmd_Control( CChar * pChar );
@@ -407,16 +407,16 @@ public:
 	virtual bool r_LoadVal( CScript & s );
 
 	// Low level message traffic.
-	static size_t xCompress( BYTE * pOutput, const BYTE * pInput, size_t inplen );
+	static size_t xCompress( byte * pOutput, const byte * pInput, size_t inplen );
 
 	bool xProcessClientSetup( CEvent * pEvent, size_t iLen );
-	bool xPacketFilter(const BYTE * pEvent, size_t iLen = 0);
-	bool xOutPacketFilter(const BYTE * pEvent, size_t iLen = 0);
+	bool xPacketFilter(const byte * pEvent, size_t iLen = 0);
+	bool xOutPacketFilter(const byte * pEvent, size_t iLen = 0);
 	bool xCanEncLogin(bool bCheckCliver = false);	// Login crypt check
 													// Low level push world data to the client.
 
 	bool addRelay( const CServerDef * pServ );
-	bool addLoginErr(BYTE code);
+	bool addLoginErr(byte code);
 #define SF_UPDATE_HITS		0x01
 #define SF_UPDATE_MANA		0x02
 #define SF_UPDATE_STAM		0x04
@@ -439,12 +439,12 @@ public:
 		m_fUpdateStats |= SF_UPDATE_STAM;
 	}
 	void UpdateStats();
-	bool addDeleteErr(BYTE code, DWORD iSlot);
+	bool addDeleteErr(byte code, dword iSlot);
 	void addSeason(SEASON_TYPE season);
 	void addTime( bool bCurrent = false );
 	void addObjectRemoveCantSee( CGrayUID uid, LPCTSTR pszName = NULL );
 	void closeContainer( const CObjBase * pObj );
-	void closeUIWindow( const CChar* character, DWORD command );
+	void closeUIWindow( const CChar* character, dword command );
 	void addObjectRemove( CGrayUID uid );
 	void addObjectRemove( const CObjBase * pObj );
 	void addRemoveAll( bool fItems, bool fChars );
@@ -454,7 +454,7 @@ public:
 	void addItem_InContainer( const CItem * pItem );
 	void addItem( CItem * pItem );
 
-	void addBuff( const BUFF_ICONS IconId, const DWORD ClilocOne, const DWORD ClilocTwo, const WORD Time = 0, LPCTSTR* pArgs = 0, size_t iArgCount = 0);
+	void addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dword ClilocTwo, const word Time = 0, LPCTSTR* pArgs = 0, size_t iArgCount = 0);
 	void removeBuff(const BUFF_ICONS IconId);
 	void resendBuffs();
 
@@ -470,7 +470,7 @@ public:
 	void addPlayerWarMode();
 
 	void addCharMove( const CChar * pChar );
-	void addCharMove( const CChar * pChar, BYTE bCharDir );
+	void addCharMove( const CChar * pChar, byte bCharDir );
 	void addChar( const CChar * pChar );
 	void addCharName( const CChar * pChar ); // Singleclick text for a character
 	void addItemName( const CItem * pItem );
@@ -480,7 +480,7 @@ public:
 	void addLight();
 	void addMusic( MIDI_TYPE id );
 	void addArrowQuest( int x, int y, int id );
-	void addEffect( EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate * pDst, const CObjBaseTemplate * pSrc, BYTE speed = 5, BYTE loop = 1, bool explode = false, DWORD color = 0, DWORD render = 0, WORD effectid = 0, DWORD explodeid = 0, WORD explodesound = 0, DWORD effectuid = 0, BYTE type = 0 );
+	void addEffect( EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate * pDst, const CObjBaseTemplate * pSrc, byte speed = 5, byte loop = 1, bool explode = false, dword color = 0, dword render = 0, word effectid = 0, dword explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0 );
 	void addSound( SOUND_TYPE id, const CObjBaseTemplate * pBase = NULL, int iRepeat = 1 );
 	void addReSync();
 	void addMap();
@@ -510,16 +510,16 @@ public:
 	void addTargetCancel();
 	void addPromptConsoleFunction( LPCTSTR pszFunction, LPCTSTR pszSysmessage, bool bUnicode = false );
 
-	void addScrollScript( CResourceLock &s, SCROLL_TYPE type, DWORD dwcontext = 0, LPCTSTR pszHeader = NULL );
-	void addScrollResource( LPCTSTR szResourceName, SCROLL_TYPE type, DWORD dwcontext = 0 );
+	void addScrollScript( CResourceLock &s, SCROLL_TYPE type, dword dwcontext = 0, LPCTSTR pszHeader = NULL );
+	void addScrollResource( LPCTSTR szResourceName, SCROLL_TYPE type, dword dwcontext = 0 );
 
 	void addVendorClose( const CChar * pVendor );
 	bool addShopMenuBuy( CChar * pVendor );
 	bool addShopMenuSell( CChar * pVendor );
 	void addBankOpen( CChar * pChar, LAYER_TYPE layer = LAYER_BANKBOX );
 
-	void addSpellbookOpen( CItem * pBook, WORD offset = 1 );
-	void addCustomSpellbookOpen( CItem * pBook, DWORD gumpID );
+	void addSpellbookOpen( CItem * pBook, word offset = 1 );
+	void addCustomSpellbookOpen( CItem * pBook, dword gumpID );
 	bool addBookOpen( CItem * pBook );
 	void addBookPage( const CItem * pBook, size_t iPage, size_t iCount );
 	void addCharStatWindow( CGrayUID uid, bool fRequested = false ); // Opens the status window
@@ -537,10 +537,10 @@ public:
 	void addMapMode( CItemMap * pItem, MAPCMD_TYPE iType, bool fEdit = false );
 
 	void addGumpTextDisp( const CObjBase * pObj, GUMP_TYPE gump, LPCTSTR pszName, LPCTSTR pszText );
-	void addGumpInpVal( bool fcancel, INPVAL_STYLE style, DWORD dwmask, LPCTSTR ptext1, LPCTSTR ptext2, CObjBase * pObj );
+	void addGumpInpVal( bool fcancel, INPVAL_STYLE style, dword dwmask, LPCTSTR ptext1, LPCTSTR ptext2, CObjBase * pObj );
 
 	void addItemMenu( CLIMODE_TYPE mode, const CMenuItem * item, size_t count, CObjBase * pObj = NULL );
-	void addGumpDialog( CLIMODE_TYPE mode, const CGString * sControls, size_t iControls, const CGString * psText, size_t iTexts, int x, int y, CObjBase * pObj = NULL, DWORD rid = 0 );
+	void addGumpDialog( CLIMODE_TYPE mode, const CGString * sControls, size_t iControls, const CGString * psText, size_t iTexts, int x, int y, CObjBase * pObj = NULL, dword rid = 0 );
 
 	bool addGumpDialogProps( CGrayUID uid );
 
@@ -584,14 +584,14 @@ private:
 	PacketDisplayPopup* m_pPopupPacket;
 
 public:
-	void Event_AOSPopupMenuSelect( DWORD uid, WORD EntryTag );
-	void Event_AOSPopupMenuRequest( DWORD uid );
+	void Event_AOSPopupMenuSelect( dword uid, word EntryTag );
+	void Event_AOSPopupMenuRequest( dword uid );
 
 
-	void addShowDamage( int damage, DWORD uid_damage );
-	void addSpeedMode( BYTE speedMode = 0 );
-	void addVisualRange( BYTE visualRange = UO_MAP_VIEW_SIZE );
-	void addIdleWarning( BYTE message );
+	void addShowDamage( int damage, dword uid_damage );
+	void addSpeedMode( byte speedMode = 0 );
+	void addVisualRange( byte visualRange = UO_MAP_VIEW_SIZE );
+	void addIdleWarning( byte message );
 	void addKRToolbar( bool bEnable );
 
 	void SendPacket( TCHAR * pszPacket );
@@ -602,19 +602,19 @@ public:
 	{
 		return( m_pAccount );
 	}
-	bool IsPriv( WORD flag ) const
+	bool IsPriv( word flag ) const
 	{	// PRIV_GM
 		if ( GetAccount() == NULL )
 			return( false );
 		return( GetAccount()->IsPriv( flag ));
 	}
-	void SetPrivFlags( WORD wPrivFlags )
+	void SetPrivFlags( word wPrivFlags )
 	{
 		if ( GetAccount() == NULL )
 			return;
 		GetAccount()->SetPrivFlags( wPrivFlags );
 	}
-	void ClearPrivFlags( WORD wPrivFlags )
+	void ClearPrivFlags( word wPrivFlags )
 	{
 		if ( GetAccount() == NULL )
 			return;
@@ -622,32 +622,32 @@ public:
 	}
 
 	// ------------------------------------------------
-	bool IsResDisp( BYTE flag ) const
+	bool IsResDisp( byte flag ) const
 	{
 		if ( GetAccount() == NULL )
 			return( false );
 		return( GetAccount()->IsResDisp( flag ) );
 	}
-	BYTE GetResDisp() const
+	byte GetResDisp() const
 	{
 		if ( GetAccount() == NULL )
 			return( UINT8_MAX );
 		return( GetAccount()->GetResDisp() );
 	}
-	bool SetResDisp( BYTE res )
+	bool SetResDisp( byte res )
 	{
 		if ( GetAccount() == NULL )
 			return( false );
 		return ( GetAccount()->SetResDisp( res ) );
 	}
-	bool SetGreaterResDisp( BYTE res )
+	bool SetGreaterResDisp( byte res )
 	{
 		if ( GetAccount() == NULL )
 			return( false );
 		return( GetAccount()->SetGreaterResDisp( res ) );
 	}
 	// ------------------------------------------------
-	void SetScreenSize(DWORD x, DWORD y)
+	void SetScreenSize(dword x, dword y)
 	{
 		m_ScreenSize.x = x;
 		m_ScreenSize.y = y;
@@ -676,7 +676,7 @@ public:
 	bool CanHear( const CObjBaseTemplate * pSrc, TALKMODE_TYPE mode ) const;
 
 	bool Dialog_Setup( CLIMODE_TYPE mode, RESOURCE_ID_BASE rid, int iPage, CObjBase * pObj, LPCTSTR Arguments = "" );
-	bool Dialog_Close( CObjBase * pObj, DWORD rid, int buttonID );
+	bool Dialog_Close( CObjBase * pObj, dword rid, int buttonID );
 	void Menu_Setup( RESOURCE_ID_BASE rid, CObjBase * pObj = NULL );
 
 	int OnSkill_Info( SKILL_TYPE skill, CGrayUID uid, int iTestLevel, bool fTest );
@@ -725,7 +725,7 @@ public:
 	CServTime	m_tNextPickup;
 	CVarDefMap	m_TagDefs;
 	CVarDefMap	m_BaseDefs;		// New Variable storage system
-	typedef std::map<DWORD, std::pair<std::pair<DWORD,DWORD>, CPointMap> > OpenedContainerMap_t;
+	typedef std::map<dword, std::pair<std::pair<dword,dword>, CPointMap> > OpenedContainerMap_t;
 	OpenedContainerMap_t m_openedContainers;	// list of UIDs of all opened containers by the client
 
 	CGObArray<CClientTooltip *> m_TooltipData; // Storage for tooltip data while in trigger

@@ -11,7 +11,7 @@ CSocketAddressIP::CSocketAddressIP()
 {
 	s_addr = INADDR_BROADCAST;
 }
-CSocketAddressIP::CSocketAddressIP( DWORD dwIP )
+CSocketAddressIP::CSocketAddressIP( dword dwIP )
 {
 	s_addr = dwIP;
 }
@@ -26,12 +26,12 @@ bool CSocketAddressIP::operator==( const CSocketAddressIP & ip ) const
 	return( IsSameIP( ip ) );
 }
 
-DWORD CSocketAddressIP::GetAddrIP() const
+dword CSocketAddressIP::GetAddrIP() const
 {
 	return( s_addr );
 }
 
-void CSocketAddressIP::SetAddrIP( DWORD dwIP )
+void CSocketAddressIP::SetAddrIP( dword dwIP )
 {
 	s_addr = dwIP;
 }
@@ -60,8 +60,8 @@ bool CSocketAddressIP::IsLocalAddr() const
 
 bool CSocketAddressIP::IsMatchIP( const CSocketAddressIP & ip ) const
 {
-	BYTE		ip1	[4];
-	BYTE		ip2	[4];
+	byte		ip1	[4];
+	byte		ip2	[4];
 
 	memcpy( ip1, (void*) &ip.s_addr,	4 );
 	memcpy( ip2, (void*) &s_addr,		4 );
@@ -89,7 +89,7 @@ bool CSocketAddressIP::SetHostStruct( const struct hostent * pHost )
 	{
 		return( false );
 	}
-	SetAddrIP( *((DWORD*)( pHost->h_addr ))); // 0.1.2.3
+	SetAddrIP( *((dword*)( pHost->h_addr ))); // 0.1.2.3
 	return true;
 }
 
@@ -119,19 +119,19 @@ CSocketAddress::CSocketAddress()
 	m_port = 0;
 }
 
-CSocketAddress::CSocketAddress( in_addr dwIP, WORD uPort )
+CSocketAddress::CSocketAddress( in_addr dwIP, word uPort )
 {
 	s_addr = dwIP.s_addr;
 	m_port = uPort;
 }
 
-CSocketAddress::CSocketAddress( CSocketAddressIP ip, WORD uPort )
+CSocketAddress::CSocketAddress( CSocketAddressIP ip, word uPort )
 {
 	s_addr = ip.GetAddrIP();
 	m_port = uPort;
 }
 
-CSocketAddress::CSocketAddress( DWORD dwIP, WORD uPort )
+CSocketAddress::CSocketAddress( dword dwIP, word uPort )
 {
 	s_addr = dwIP;
 	m_port = uPort;
@@ -158,19 +158,19 @@ bool CSocketAddress::operator==( const struct sockaddr_in & SockAddrIn ) const
 	return( GetAddrIP() == SockAddrIn.sin_addr.s_addr && GetPort() == ntohs( SockAddrIn.sin_port ) );
 }
 
-WORD CSocketAddress::GetPort() const
+word CSocketAddress::GetPort() const
 {
 	return( m_port );
 }
 
-void CSocketAddress::SetPort( WORD wPort )
+void CSocketAddress::SetPort( word wPort )
 {
 	m_port = wPort;
 }
 
 void CSocketAddress::SetPortStr( LPCTSTR pszPort )
 {
-	m_port = static_cast<WORD>(ATOI(pszPort));
+	m_port = static_cast<word>(ATOI(pszPort));
 }
 
 bool CSocketAddress::SetPortExtStr( TCHAR * pszIP )
@@ -313,13 +313,13 @@ int CGSocket::Connect( const CSocketAddress & SockAddr )
 	return( Connect( &SockAddrIn ));
 }
 
-int CGSocket::Connect( const struct in_addr & ip, WORD wPort )
+int CGSocket::Connect( const struct in_addr & ip, word wPort )
 {
 	CSocketAddress SockAddr( ip.s_addr, wPort );
 	return( Connect( SockAddr ));
 }
 
-int CGSocket::Connect( LPCTSTR pszHostName, WORD wPort )
+int CGSocket::Connect( LPCTSTR pszHostName, word wPort )
 {
 	CSocketAddress SockAddr;
 	SockAddr.SetHostStr( pszHostName );
@@ -411,12 +411,12 @@ int CGSocket::GetSockOpt( int nOptionName, void * optval, int * poptlen, int nLe
 }
 
 #ifdef _WIN32
-	int CGSocket::IOCtlSocket(int icmd, DWORD * pdwArgs )
+	int CGSocket::IOCtlSocket(int icmd, dword * pdwArgs )
 	{
-		return ioctlsocket( m_hSocket, icmd, pdwArgs );
+		return ioctlsocket( m_hSocket, icmd, (DWORD*)pdwArgs );
 	}
 
-	int CGSocket::SendAsync( LPWSABUF lpBuffers, DWORD dwBufferCount, LPDWORD lpNumberOfBytesSent, DWORD dwFlags, LPWSAOVERLAPPED lpOverlapped, LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine ) const
+	int CGSocket::SendAsync( LPWSABUF lpBuffers, dword dwBufferCount, LPDWORD lpNumberOfBytesSent, dword dwFlags, LPWSAOVERLAPPED lpOverlapped, LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine ) const
 	{
 		 // RETURN: length sent
 		 return( WSASend( m_hSocket, lpBuffers, dwBufferCount, lpNumberOfBytesSent, dwFlags, lpOverlapped, lpCompletionRoutine ));

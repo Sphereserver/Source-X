@@ -4,7 +4,7 @@
 #include "chars/CChar.h"
 #include "CPathFinder.h"
 
-unsigned int CPathFinder::Heuristic(CPathFinderPointRef& Pt1,CPathFinderPointRef& Pt2)
+uint CPathFinder::Heuristic(CPathFinderPointRef& Pt1,CPathFinderPointRef& Pt2)
 {
 	return 10*(abs(Pt1.m_Point->m_x - Pt2.m_Point->m_x) + abs(Pt1.m_Point->m_y - Pt2.m_Point->m_y));
 }
@@ -147,7 +147,7 @@ int CPathFinder::FindPath() //A* algorithm
 			while ( PathRef.m_Point->GetParent() ) //Rebuild path + save
 			{
 				PathRef.m_Point = const_cast<CPathFinderPoint*>(PathRef.m_Point->GetParent());
-				m_LastPath.push_front(CPointMap(static_cast<WORD>(PathRef.m_Point->m_x + m_RealX), static_cast<WORD>(PathRef.m_Point->m_y + m_RealY), 0, PathRef.m_Point->m_map));
+				m_LastPath.push_front(CPointMap(static_cast<word>(PathRef.m_Point->m_x + m_RealX), static_cast<word>(PathRef.m_Point->m_y + m_RealY), 0, PathRef.m_Point->m_map));
 			}
 			Clear();
 			return PATH_FOUND;
@@ -243,7 +243,7 @@ void CPathFinder::FillMap()
 				m_Points[x][y].m_Walkable = pArea ? PATH_WALKABLE : PATH_UNWALKABLE;
 			}
 
-			m_Points[x][y].Set(static_cast<WORD>(x), static_cast<WORD>(y), pt.m_z, pt.m_map);
+			m_Points[x][y].Set(static_cast<word>(x), static_cast<word>(y), pt.m_z, pt.m_map);
 		}
 	}
 

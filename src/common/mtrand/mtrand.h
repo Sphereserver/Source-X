@@ -81,7 +81,7 @@
 #define LM 0x7FFFFFFFULL /* Least significant 31 bits */
 
 /* The array for the state vector */
-static unsigned long long mt[NN]; 
+static ullong mt[NN]; 
 /* mti==NN+1 means mt[NN] is not initialized */
 static int mti=NN+1; 
 
@@ -142,14 +142,14 @@ public:
 
 	//*******64bit functions*******
 	/* initializes mt[NN] with a seed */
-	void init_genrand64(unsigned long long seed);
+	void init_genrand64(ullong seed);
 	/* initialize by an array with array-length */
 	/* init_key is the array for initializing keys */
 	/* key_length is its length */
-	void init_by_array64(unsigned long long init_key[], 
-				 unsigned long long key_length);
+	void init_by_array64(ullong init_key[], 
+				 ullong key_length);
 	/* generates a random number on [0, 2^64-1]-interval */
-	unsigned long long genrand64_int64(void);
+	ullong genrand64_int64(void);
 	/* generates a random number on [0, 2^63-1]-interval */
 	long long genrand64_int63(void);
 	/* generates a random number on [0,1]-real-interval */
@@ -186,14 +186,14 @@ inline MTRand::uint32 MTRand::hash( time_t t, clock_t c )
 	static uint32 differ = 0;  // guarantee time-based seeds will change
 	
 	uint32 h1 = 0;
-	unsigned char *p = (unsigned char *) &t;
+	uchar *p = (uchar *) &t;
 	for( size_t i = 0; i < sizeof(t); ++i )
 	{
 		h1 *= UINT8_MAX + 2U;
 		h1 += p[i];
 	}
 	uint32 h2 = 0;
-	p = (unsigned char *) &c;
+	p = (uchar *) &c;
 	for( size_t j = 0; j < sizeof(c); ++j )
 	{
 		h2 *= UINT8_MAX + 2U;
@@ -450,7 +450,7 @@ inline MTRand& MTRand::operator=( const MTRand& o )
 
 //*******64bit functions*******
 /* initializes mt[NN] with a seed */
-inline void MTRand::init_genrand64(unsigned long long seed)
+inline void MTRand::init_genrand64(ullong seed)
 {
     mt[0] = seed;
     for (mti=1; mti<NN; mti++) 
@@ -460,10 +460,10 @@ inline void MTRand::init_genrand64(unsigned long long seed)
 /* initialize by an array with array-length */
 /* init_key is the array for initializing keys */
 /* key_length is its length */
-inline void MTRand::init_by_array64(unsigned long long init_key[],
-		     unsigned long long key_length)
+inline void MTRand::init_by_array64(ullong init_key[],
+		     ullong key_length)
 {
-    unsigned long long i, j, k;
+    ullong i, j, k;
     init_genrand64(19650218ULL);
     i=1; j=0;
     k = (NN>key_length ? NN : key_length);
@@ -485,11 +485,11 @@ inline void MTRand::init_by_array64(unsigned long long init_key[],
 }
 
 /* generates a random number on [0, 2^64-1]-interval */
-inline unsigned long long MTRand::genrand64_int64(void)
+inline ullong MTRand::genrand64_int64(void)
 {
     int i;
-    unsigned long long x;
-    static unsigned long long mag01[2]={0ULL, MATRIX_A};
+    ullong x;
+    static ullong mag01[2]={0ULL, MATRIX_A};
 
     if (mti >= NN) { /* generate NN words at one time */
 

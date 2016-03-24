@@ -124,10 +124,10 @@ struct RESOURCE_ID : public RESOURCE_ID_BASE
 
 // Desguise an id as a pointer.
 #ifndef MAKEINTRESOURCE
-#define MAKEINTRESOURCE(id) ((LPCTSTR)((DWORD)((WORD)(id))))
+#define MAKEINTRESOURCE(id) ((LPCTSTR)((dword)((word)(id))))
 #endif
-#define ISINTRESOURCE(p)	(!(((DWORD)p)&0xFFFFF000))
-#define GETINTRESOURCE(p)	(((DWORD)p)&0x0FFF)
+#define ISINTRESOURCE(p)	(!(((dword)p)&0xFFFFF000))
+#define GETINTRESOURCE(p)	(((dword)p)&0x0FFF)
 
 //*********************************************************
 
@@ -249,7 +249,7 @@ private:
 	CServTime m_timeLastAccess;	// CWorld time of last access/Open.
 
 	// Last time it was closed. What did the file params look like ?
-	DWORD m_dwSize;			// Compare to see if this has changed.
+	dword m_dwSize;			// Compare to see if this has changed.
 	CGTime m_dateChange;	// real world time/date of last change.
 
 private:
@@ -358,10 +358,10 @@ private:
 	CResourceScript * m_pScript;	// we already found the script.
 	CScriptLineContext m_Context;
 
-	DWORD m_lRefInstances;	// How many CResourceRef objects refer to this ?
+	dword m_lRefInstances;	// How many CResourceRef objects refer to this ?
 public:
 	static const char *m_sClassName;
-	DWORD	m_dwOnTriggers[MAX_TRIGGERS_ARRAY];
+	dword	m_dwOnTriggers[MAX_TRIGGERS_ARRAY];
 
 #define XTRIG_UNKNOWN 0	// bit 0 is reserved to say there are triggers here that do not conform.
 
@@ -369,7 +369,7 @@ public:
 
 	void AddRefInstance();
 	void DelRefInstance();
-	DWORD GetRefInstances() const;
+	dword GetRefInstances() const;
 
 	bool IsLinked() const;	// been loaded from the scripts ?
 	CResourceScript * GetLinkFile() const;

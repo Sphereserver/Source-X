@@ -585,7 +585,7 @@ void CChat::GenerateChatName(CGString &sName, const CClient * pClient) // static
 		sTempName.Empty();
 
 		// append (n) to the name to make it unique
-		for (unsigned int attempts = 2; attempts <= g_Accounts.Account_GetCount(); attempts++)
+		for (uint attempts = 2; attempts <= g_Accounts.Account_GetCount(); attempts++)
 		{
 			sTempName.Format("%s (%u)", pszName, attempts);
 			if (g_Accounts.Account_FindChat(static_cast<LPCTSTR>(sTempName)) == NULL)

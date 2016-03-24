@@ -198,7 +198,7 @@ void ReportGarbageCollection(CObjBase * pObj, int iResultCode)
 	ASSERT(pObj != NULL);
 
 	DEBUG_ERR(("UID=0%x, id=0%x '%s', Invalid code=%0x (%s)\n",
-		(DWORD)pObj->GetUID(), pObj->GetBaseID(), pObj->GetName(), iResultCode, GetReasonForGarbageCode(iResultCode)));
+		(dword)pObj->GetUID(), pObj->GetBaseID(), pObj->GetName(), iResultCode, GetReasonForGarbageCode(iResultCode)));
 }
 
 //////////////////////////////////////////////////////////////////
@@ -740,7 +740,7 @@ CWorldThread::CWorldThread()
 	m_fSaveParity = false;		// has the sector been saved relative to the char entering it ?
 	m_iUIDIndexLast = 1;
 
-	m_FreeUIDs = (DWORD*)calloc(FREE_UIDS_SIZE, sizeof(DWORD));
+	m_FreeUIDs = (dword*)calloc(FREE_UIDS_SIZE, sizeof(dword));
 	m_FreeOffset = FREE_UIDS_SIZE;
 }
 
@@ -769,12 +769,12 @@ bool CWorldThread::IsSaving() const
 	return (m_FileWorld.IsFileOpen() && m_FileWorld.IsWriteMode());
 }
 
-DWORD CWorldThread::GetUIDCount() const
+dword CWorldThread::GetUIDCount() const
 {
 	return m_UIDs.GetCount();
 }
 
-CObjBase *CWorldThread::FindUID(DWORD dwIndex) const
+CObjBase *CWorldThread::FindUID(dword dwIndex) const
 {
 	if ( !dwIndex || dwIndex >= GetUIDCount() )
 		return NULL;
@@ -783,16 +783,16 @@ CObjBase *CWorldThread::FindUID(DWORD dwIndex) const
 	return m_UIDs[dwIndex];
 }
 
-void CWorldThread::FreeUID(DWORD dwIndex)
+void CWorldThread::FreeUID(dword dwIndex)
 {
 	// Can't free up the UID til after the save !
 	m_UIDs[dwIndex] = ( IsSaving()) ? UID_PLACE_HOLDER : NULL;
 }
 
-DWORD CWorldThread::AllocUID( DWORD dwIndex, CObjBase * pObj )
+dword CWorldThread::AllocUID( dword dwIndex, CObjBase * pObj )
 {
 	ADDTOCALLSTACK("CWorldThread::AllocUID");
-	DWORD dwCountTotal = GetUIDCount();
+	dword dwCountTotal = GetUIDCount();
 
 	if ( !dwIndex )					// auto-select tbe suitable hole
 	{
@@ -817,7 +817,7 @@ DWORD CWorldThread::AllocUID( DWORD dwIndex, CObjBase * pObj )
 		}
 		m_FreeOffset = FREE_UIDS_SIZE;	// mark array invalid, since it does not contain any empty slots
 										// use default allocation for a while, till the next garbage collection
-		DWORD dwCount = dwCountTotal - 1;
+		dword dwCount = dwCountTotal - 1;
 		dwIndex = m_iUIDIndexLast;
 		while ( m_UIDs[dwIndex] != NULL )
 		{
@@ -868,7 +868,7 @@ void CWorldThread::SaveThreadClose()
 	m_FileMultis.Close();
 }
 
-int CWorldThread::FixObjTry( CObjBase * pObj, DWORD dwUID )
+int CWorldThread::FixObjTry( CObjBase * pObj, dword dwUID )
 {
 	ADDTOCALLSTACK_INTENSIVE("CWorldThread::FixObjTry");
 	// RETURN: 0 = success.
@@ -889,7 +889,7 @@ int CWorldThread::FixObjTry( CObjBase * pObj, DWORD dwUID )
 	return pObj->FixWeirdness();
 }
 
-int CWorldThread::FixObj( CObjBase * pObj, DWORD dwUID )
+int CWorldThread::FixObj( CObjBase * pObj, dword dwUID )
 {
 	ADDTOCALLSTACK("CWorldThread::FixObj");
 	// Attempt to fix problems with this item.
@@ -921,7 +921,7 @@ int CWorldThread::FixObj( CObjBase * pObj, DWORD dwUID )
 
 	try
 	{
-		dwUID = (DWORD)pObj->GetUID();
+		dwUID = (dword)pObj->GetUID();
 
 		// is it a real error ?
 		if ( pObj->IsItem())
@@ -1055,10 +1055,10 @@ void CWorldThread::GarbageCollection_UIDs()
 	if ( m_FreeUIDs != NULL )	// new UID engine - search for empty holes and store it in a huge array
 	{							// the size of the array should be enough even for huge shards
 								// to survive till next garbage collection
-		memset(m_FreeUIDs, 0, FREE_UIDS_SIZE * sizeof(DWORD));
+		memset(m_FreeUIDs, 0, FREE_UIDS_SIZE * sizeof(dword));
 		m_FreeOffset = 0;
 
-		for ( DWORD d = 1; d < GetUIDCount(); d++ )
+		for ( dword d = 1; d < GetUIDCount(); d++ )
 		{
 			CObjBase	*pObj = m_UIDs[d];
 
@@ -1283,7 +1283,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		// Sector lighting info.
 		if(IsSetEF(EF_Dynamic_Backsave))
 		{
-			unsigned int szComplexity = 0;
+			uint szComplexity = 0;
 
 			CSector *s = m_Sectors[m_iSaveStage];
 			if( s )
@@ -1291,10 +1291,10 @@ bool CWorld::SaveStage() // Save world state in stages.
 				s->r_Write();
 				szComplexity += ( s->GetCharComplexity() + s->GetInactiveChars())*100 + s->GetItemComplexity();
 			}
-			unsigned int dynStage = m_iSaveStage+1;
+			uint dynStage = m_iSaveStage+1;
 			if( szComplexity <= g_Cfg.m_iSaveStepMaxComplexity )
 			{
-				unsigned int szSectorCnt = 1;
+				uint szSectorCnt = 1;
 				while(dynStage < m_SectorsQty && szSectorCnt <= g_Cfg.m_iSaveSectorsPerTick)
 				{
 					s = m_Sectors[dynStage];
@@ -1376,8 +1376,8 @@ bool CWorld::SaveStage() // Save world state in stages.
 		g_Log.Event(LOGM_SAVE, "Multi data saved   (%s).\n", static_cast<LPCTSTR>(m_FileMultis.GetFilePath()));
 		g_Log.Event(LOGM_SAVE, "Context data saved (%s).\n", static_cast<LPCTSTR>(m_FileData.GetFilePath()));
 
-		LLONG	llTicksEnd;
-		LLONG	llTicks = m_savetimer;
+		llong	llTicksEnd;
+		llong	llTicks = m_savetimer;
 		TIME_PROFILE_END;
 
 		TCHAR * time = Str_GetTemp();
@@ -1511,7 +1511,7 @@ bool CWorld::SaveTry( bool fForceImmediate ) // Save world state
 		GarbageCollection();
 	}
 
-	LLONG llTicks;
+	llong llTicks;
 	TIME_PROFILE_START;
 	m_savetimer = llTicks;
 
@@ -1722,7 +1722,7 @@ bool CWorld::LoadFile( LPCTSTR pszLoadName, bool fError ) // Load world from scr
 	g_Log.Event(LOGM_INIT, "Loading %s...\n", static_cast<LPCTSTR>(pszLoadName));
 
 	// Find the size of the file.
-	DWORD lLoadSize = s.GetLength();
+	dword lLoadSize = s.GetLength();
 	int iLoadStage = 0;
 
 	CScriptFileContext ScriptContext( &s );
@@ -1810,7 +1810,7 @@ bool CWorld::LoadWorld() // Load world from script
 
 		if ( m_Sectors )
 		{
-			for ( unsigned int s = 0; s < m_SectorsQty; s++ )
+			for ( uint s = 0; s < m_SectorsQty; s++ )
 			{
 				// Remove everything from the sectors
 				m_Sectors[s]->Close();
@@ -1878,7 +1878,7 @@ bool CWorld::LoadAll() // Load world from script
 	// Set all the sector light levels now that we know the time.
 	// This should not look like part of the load. (CTRIG_EnvironChange triggers should run)
 	size_t iCount;
-	for ( unsigned int s = 0; s < m_SectorsQty; s++ )
+	for ( uint s = 0; s < m_SectorsQty; s++ )
 	{
 		EXC_TRYSUB("Load");
 		CSector *pSector = m_Sectors[s];
@@ -2147,14 +2147,14 @@ void CWorld::Close()
 	if ( m_Sectors != NULL )
 	{
 		//	free memory allocated by sectors
-		for ( unsigned int s = 0; s < m_SectorsQty; s++ )
+		for ( uint s = 0; s < m_SectorsQty; s++ )
 		{
 			// delete everything in sector
 			m_Sectors[s]->Close();
 		}
 		// do this in two loops because destructors of items 
 		// may access server sectors
-		for ( unsigned int s = 0; s < m_SectorsQty; s++ )
+		for ( uint s = 0; s < m_SectorsQty; s++ )
 		{
 			// delete the sectors
 			delete m_Sectors[s];
@@ -2265,11 +2265,11 @@ void CWorld::Speak( const CObjBaseTemplate * pSrc, LPCTSTR pszText, HUE_TYPE wHu
 		{
 			//if ( sTextUID.IsEmpty() )
 			//{
-			//	sTextUID.Format("<%s [%lx]>", pSrc->GetName(), (DWORD)pSrc->GetUID());
+			//	sTextUID.Format("<%s [%lx]>", pSrc->GetName(), (dword)pSrc->GetUID());
 			//}
 			//myName = sTextUID;
 			if ( !*myName )
-				sprintf(myName, "<%s [%lx]>", pSrc->GetName(), (DWORD)pSrc->GetUID());
+				sprintf(myName, "<%s [%lx]>", pSrc->GetName(), (dword)pSrc->GetUID());
 		}
 		if (*myName)
 			pClient->addBarkParse( pszSpeak, pSrc, wHue, mode, font, false, myName );
@@ -2371,7 +2371,7 @@ void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const NCHAR * pwText, 
 			if ( wTextUID[0] == '\0' )
 			{
 				TCHAR * pszMsg = Str_GetTemp();
-				sprintf(pszMsg, "<%s [%x]>", pSrc->GetName(), static_cast<DWORD>(pSrc->GetUID()));
+				sprintf(pszMsg, "<%s [%x]>", pSrc->GetName(), static_cast<dword>(pSrc->GetUID()));
 				int iLen = CvtSystemToNUNICODE( wTextUID, COUNTOF(wTextUID), pszMsg, -1 );
 				for ( size_t i = 0; pwText[i] && iLen < MAX_TALK_BUFFER - 1; i++, iLen++ )
 				{
@@ -2406,7 +2406,7 @@ void __cdecl CWorld::Broadcastf(LPCTSTR pMsg, ...) // System broadcast in bold t
 //////////////////////////////////////////////////////////////////
 // Game time.
 
-DWORD CWorld::GetGameWorldTime( CServTime basetime ) const
+dword CWorld::GetGameWorldTime( CServTime basetime ) const
 {
 	ADDTOCALLSTACK("CWorld::GetGameWorldTime");
 	// basetime = TICK_PER_SEC time.
@@ -2414,7 +2414,7 @@ DWORD CWorld::GetGameWorldTime( CServTime basetime ) const
 	// 8 real world seconds = 1 game minute.
 	// 1 real minute = 7.5 game minutes
 	// 3.2 hours = 1 game day.
-	return( static_cast<unsigned long>(basetime.GetTimeRaw() / g_Cfg.m_iGameMinuteLength) );
+	return( static_cast<uint>(basetime.GetTimeRaw() / g_Cfg.m_iGameMinuteLength) );
 }
 
 CServTime CWorld::GetNextNewMoon( bool bMoonIndex ) const
@@ -2422,13 +2422,13 @@ CServTime CWorld::GetNextNewMoon( bool bMoonIndex ) const
 	ADDTOCALLSTACK("CWorld::GetNextNewMoon");
 	// "Predict" the next new moon for this moon
 	// Get the period
-	DWORD iSynodic = bMoonIndex ? FELUCCA_SYNODIC_PERIOD : TRAMMEL_SYNODIC_PERIOD;
+	dword iSynodic = bMoonIndex ? FELUCCA_SYNODIC_PERIOD : TRAMMEL_SYNODIC_PERIOD;
 
 	// Add a "month" to the current game time
-	DWORD iNextMonth = GetGameWorldTime() + iSynodic;
+	dword iNextMonth = GetGameWorldTime() + iSynodic;
 
 	// Get the game time when this cycle will start
-	DWORD iNewStart = static_cast<DWORD>(iNextMonth - static_cast<double>(iNextMonth % iSynodic));
+	dword iNewStart = static_cast<dword>(iNextMonth - static_cast<double>(iNextMonth % iSynodic));
 
 	// Convert to TICK_PER_SEC ticks
 	CServTime time;
@@ -2436,7 +2436,7 @@ CServTime CWorld::GetNextNewMoon( bool bMoonIndex ) const
 	return(time);
 }
 
-unsigned int CWorld::GetMoonPhase (bool bMoonIndex) const
+uint CWorld::GetMoonPhase (bool bMoonIndex) const
 {
 	ADDTOCALLSTACK("CWorld::GetMoonPhase ");
 	// bMoonIndex is FALSE if we are looking for the phase of Trammel,
@@ -2451,7 +2451,7 @@ unsigned int CWorld::GetMoonPhase (bool bMoonIndex) const
 	//			              SynodicPeriod
 	//
 
-	DWORD dwCurrentTime = GetGameWorldTime();	// game world time in minutes
+	dword dwCurrentTime = GetGameWorldTime();	// game world time in minutes
 
 	if (!bMoonIndex)
 	{

@@ -21,14 +21,14 @@ private:
 	CItemMemory& operator=(const CItemMemory& other);
 
 public:
-	WORD SetMemoryTypes( WORD wType );
+	word SetMemoryTypes( word wType );
 
-	WORD GetMemoryTypes() const;
+	word GetMemoryTypes() const;
 
 	bool Guild_IsAbbrevOn() const;
 	void Guild_SetAbbrev( bool fAbbrevShow );
-	WORD Guild_GetVotes() const;
-	void Guild_SetVotes( WORD wVotes );
+	word Guild_GetVotes() const;
+	void Guild_SetVotes( word wVotes );
 	int Guild_SetLoyalTo( CGrayUID uid );
 	CGrayUID Guild_GetLoyalTo() const;
 	int Guild_SetTitle( LPCTSTR pszTitle );

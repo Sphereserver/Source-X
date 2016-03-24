@@ -102,38 +102,38 @@ public:
 	* @brief Sets the position indicator at the end of the file.
 	* @return The length of the file on success, -1 on error.
 	*/
-	DWORD SeekToEnd() { return( Seek( 0, SEEK_END )); }
+	dword SeekToEnd() { return( Seek( 0, SEEK_END )); }
 	/**
 	* @brief Get the length of the file.
 	* @return the length of the file.
 	*/
-	DWORD GetLength();
+	dword GetLength();
 	/**
 	* @brief Gets the position indicator of the file.
 	* @return The position indicator of the file.
 	*/
-	virtual DWORD GetPosition() const;
+	virtual dword GetPosition() const;
 	/**
 	* @brief Set the position indicator.
 	* @param lOffset position to set.
 	* @param iOrigin origin (current position or init of the file).
 	* @return position where the position indicator is set on success, -1 on error.
 	*/
-	virtual DWORD Seek( int lOffset = 0, UINT iOrigin = SEEK_SET );
+	virtual dword Seek( int lOffset = 0, UINT iOrigin = SEEK_SET );
 	/**
 	* @brief Reads data from the file.
 	* @param pData buffer where store the readed data.
 	* @param dwLength count of bytes to read.
 	* @return count of bytes readed.
 	*/
-	virtual DWORD Read( void * pData, DWORD dwLength ) const;
+	virtual dword Read( void * pData, dword dwLength ) const;
 	/**
 	* @brief writes supplied data into file.
 	* @param pData data to write.
 	* @param dwLength lenght of the data to write.
 	* @return true is success, false otherwise.
 	*/
-	virtual bool Write( const void * pData, DWORD dwLength ) const;
+	virtual bool Write( const void * pData, dword dwLength ) const;
 #ifdef _WIN32
 	/**
 	* @brief Notify a file input / output error (win32 only).
@@ -316,7 +316,7 @@ public:
 	* @param origin origin (current position or init of the file).
 	* @return position where the position indicator is set on success, 0 on error.
 	*/
-	virtual DWORD Seek( int offset = 0, UINT origin = SEEK_SET );
+	virtual dword Seek( int offset = 0, UINT origin = SEEK_SET );
 	/**
 	* @brief Write changes to disk.
 	*/
@@ -325,14 +325,14 @@ public:
 	* @brief Get position indicator position.
 	* @return The position indicator if file is opened, -1 otherwise.
 	*/
-	DWORD GetPosition() const;
+	dword GetPosition() const;
 	/**
 	* @brief Reads data from the file.
 	* @param pBuffer buffer where store the readed data.
 	* @param sizemax count of bytes to read.
 	* @return count of bytes readed.
 	*/
-	DWORD Read( void * pBuffer, size_t sizemax ) const;
+	dword Read( void * pBuffer, size_t sizemax ) const;
 	/**
 	* @brief Reads from a file a line (up to sizemax - 1 characters).
 	* @param pBuffer buffer where store the readed data.
@@ -347,9 +347,9 @@ public:
 	* @return true is success, false otherwise.
 	*/
 #ifndef _WIN32
-	bool Write( const void * pData, DWORD iLen ) const;
+	bool Write( const void * pData, dword iLen ) const;
 #else
-	bool Write( const void * pData, DWORD iLen );
+	bool Write( const void * pData, dword iLen );
 #endif
 	/**
 	* @brief write string into file.

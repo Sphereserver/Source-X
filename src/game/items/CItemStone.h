@@ -145,8 +145,8 @@ private:
 
 	MEMORY_TYPE GetMemoryType() const;
 
-	LPCTSTR GetCharter(unsigned int iLine) const;
-	void SetCharter( unsigned int iLine, LPCTSTR pCharter );
+	LPCTSTR GetCharter(uint iLine) const;
+	void SetCharter( uint iLine, LPCTSTR pCharter );
 	LPCTSTR GetWebPageURL() const;
 	void SetWebPage( LPCTSTR pWebPage );
 	void ElectMaster();

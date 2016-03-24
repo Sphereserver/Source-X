@@ -484,7 +484,7 @@ void CChar::Noto_Karma( int iKarmaChange, int iBottom, bool bMessage )
 	}
 }
 
-extern unsigned int Calc_ExpGet_Exp(unsigned int);
+extern uint Calc_ExpGet_Exp(uint);
 
 void CChar::Noto_Kill(CChar * pKill, bool fPetKill, int iTotalKillers)
 {
@@ -528,7 +528,7 @@ void CChar::Noto_Kill(CChar * pKill, bool fPetKill, int iTotalKillers)
 					args.m_iN1 = 0;
 			}
 
-			m_pPlayer->m_wMurders = static_cast<WORD>(args.m_iN1);
+			m_pPlayer->m_wMurders = static_cast<word>(args.m_iN1);
 			NotoSave_Update();
 			if ( args.m_iN2 )
 				Noto_Criminal();
@@ -710,7 +710,7 @@ int CChar::NotoSave_GetID( CChar * pChar )
 		{
 			NotoSaves & refNotoSave = m_notoSaves.at(count);
 			CGrayUID uid = refNotoSave.charUID;
-			if ( uid.CharFind() && uid == static_cast<DWORD>(pChar->GetUID()) )
+			if ( uid.CharFind() && uid == static_cast<dword>(pChar->GetUID()) )
 				return count;
 			count++;
 		}
@@ -730,7 +730,7 @@ bool CChar::NotoSave_Delete( CChar * pChar )
 		{
 			NotoSaves & refNotoSave = m_notoSaves.at(count);
 			CGrayUID uid = refNotoSave.charUID;
-			if ( uid.CharFind() && uid == static_cast<DWORD>(pChar->GetUID()) )
+			if ( uid.CharFind() && uid == static_cast<dword>(pChar->GetUID()) )
 			{
 				m_notoSaves.erase(it);
 				return true;

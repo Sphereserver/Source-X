@@ -26,7 +26,7 @@ CChar *CItemCorpse::IsCorpseSleeping() const
 	// CItemCorpse
 	if ( !IsType(IT_CORPSE) )
 	{
-		DEBUG_ERR(("Corpse (0%x) doesn't have type T_CORPSE! (it has %d)\n", (DWORD)GetUID(), GetType()));
+		DEBUG_ERR(("Corpse (0%x) doesn't have type T_CORPSE! (it has %d)\n", (dword)GetUID(), GetType()));
 		return NULL;
 	}
 
@@ -37,7 +37,7 @@ CChar *CItemCorpse::IsCorpseSleeping() const
 	return NULL;
 }
 
-int CItemCorpse::GetWeight(WORD amount) const
+int CItemCorpse::GetWeight(word amount) const
 {
 	UNREFERENCED_PARAMETER(amount);
 	// GetAmount is messed up.
@@ -102,7 +102,7 @@ CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 {
 	ADDTOCALLSTACK("CChar::MakeCorpse");
 
-	WORD wFlags = static_cast<WORD>(m_TagDefs.GetKeyNum("DEATHFLAGS", true));
+	word wFlags = static_cast<word>(m_TagDefs.GetKeyNum("DEATHFLAGS", true));
 	if (wFlags & DEATH_NOCORPSE)
 		return( NULL );
 	if (IsStatFlag(STATF_Conjured) && !(wFlags & (DEATH_NOCONJUREDEFFECT|DEATH_HASCORPSE)))

@@ -184,7 +184,7 @@ enum BODYPART_TYPE
 #define DAMAGE_NOUNPARALYZE	0x8000  // victim won't be unparalyzed
 #define DAMAGE_FIXED		0x10000	// already fixed damage, don't do calcs ... only create blood, anim, sounds... and update memories and attacker
 
-typedef DWORD DAMAGE_TYPE;		// describe a type of damage.
+typedef dword DAMAGE_TYPE;		// describe a type of damage.
 
 ///////////////////////////////////////
 
@@ -383,8 +383,8 @@ class CSpellDef : public CResourceLink	// 1 based spells. See SPELL_*
 {
 	// RES_SPELL
 private:
-	DWORD	m_dwFlags;
-	DWORD	m_dwGroup;
+	dword	m_dwFlags;
+	dword	m_dwGroup;
 
 #define SPELLFLAG_DIR_ANIM			0x0000001 // Evoke type cast or directed. (animation)
 #define SPELLFLAG_TARG_ITEM			0x0000002 // Need to target an object
@@ -431,8 +431,8 @@ public:
 	ITEMID_TYPE m_idSpell;		// The rune graphic for this.
 	ITEMID_TYPE m_idScroll;		// The scroll graphic item for this.
 	ITEMID_TYPE m_idEffect;		// Animation effect ID
-	WORD m_wManaUse;			// How much mana does it need.
-	WORD m_wTithingUse;			// Tithing points required for this spell.
+	word m_wManaUse;			// How much mana does it need.
+	word m_wTithingUse;			// Tithing points required for this spell.
 	LAYER_TYPE m_idLayer;		// Where the layer buff/debuff/data is stored.
 
 	CValueCurveDef	m_CastTime;		// In TICK_PER_SEC.
@@ -441,7 +441,7 @@ public:
 	CValueCurveDef	m_Interrupt;	// chance to interrupt a spell
 	
 public:
-	bool IsSpellType( DWORD wFlags ) const
+	bool IsSpellType( dword wFlags ) const
 	{
 		return(( m_dwFlags & wFlags ) ? true : false );
 	}
@@ -534,11 +534,11 @@ public:
 	static const char *m_sClassName;
 	CGString m_sName;	// The name of this skill class.
 
-	WORD m_StatSumMax;
-	DWORD m_SkillSumMax;
+	word m_StatSumMax;
+	dword m_SkillSumMax;
 
-	WORD m_StatMax[STAT_BASE_QTY];	// STAT_BASE_QTY
-	WORD m_SkillLevelMax[ SKILL_QTY ];
+	word m_StatMax[STAT_BASE_QTY];	// STAT_BASE_QTY
+	word m_SkillLevelMax[ SKILL_QTY ];
 
 private:
 	void Init();
@@ -616,17 +616,17 @@ public:
 
 	// Stat effects.
 	// You will tend toward these stat vals if you use this skill a lot.
-	BYTE m_Stat[STAT_BASE_QTY];	// STAT_STR, STAT_INT, STAT_DEX
-	BYTE m_StatPercent; // BONUS_STATS = % of success depending on stats
-	BYTE m_StatBonus[STAT_BASE_QTY]; // % of each stat toward success at skill, total 100
+	byte m_Stat[STAT_BASE_QTY];	// STAT_STR, STAT_INT, STAT_DEX
+	byte m_StatPercent; // BONUS_STATS = % of success depending on stats
+	byte m_StatBonus[STAT_BASE_QTY]; // % of each stat toward success at skill, total 100
 
 	CValueCurveDef	m_AdvRate;		// ADV_RATE defined "skill curve" 0 to 100 skill levels.
 	CValueCurveDef	m_Values;	// VALUES= influence for items made with 0 to 100 skill levels.
 	int			m_GainRadius; // GAINRADIUS= max. amount of skill above the necessary skill for a task to gain from it
 	int			m_Range;
 
-	DWORD			m_dwFlags;
-	DWORD			m_dwGroup;
+	dword			m_dwFlags;
+	dword			m_dwGroup;
 	
 	// Delay before skill complete. modified by skill level of course !
 public:
@@ -710,7 +710,7 @@ public:
 #define DEBUGF_WALK				0x2000	// debug flags for Walking stuff
 #define DEBUGF_PACKETS			0x4000	// log packets to file
 #define DEBUGF_NETWORK			0x8000	// debug flags for networking
-	WORD m_wDebugFlags;			// DEBUG In game effects to turn on and off.
+	word m_wDebugFlags;			// DEBUG In game effects to turn on and off.
 
 	// Decay
 	int  m_iDecay_Item;			// Base decay time in minutes.
@@ -722,14 +722,14 @@ public:
 	int  m_iSavePeriod;			// Minutes between saves.
 	int  m_iSaveBackupLevels;	// How many backup levels.
 	int  m_iSaveBackgroundTime;	// Speed of the background save in minutes.
-	unsigned int  m_iSaveSectorsPerTick;     // max number of sectors per dynamic background save step
-	unsigned int  m_iSaveStepMaxComplexity;  // maximum "number of items+characters" saved at once during dynamic background save
+	uint  m_iSaveSectorsPerTick;     // max number of sectors per dynamic background save step
+	uint  m_iSaveStepMaxComplexity;  // maximum "number of items+characters" saved at once during dynamic background save
 	bool m_fSaveGarbageCollect;	// Always force a full garbage collection.
 
 	// Account
 	int  m_iDeadSocketTime;
 	int	 m_iArriveDepartMsg;		// General switch to turn on/off arrival/depart messages.
-	unsigned int  m_iClientsMax;	// Maximum (FD_SETSIZE) open connections to server
+	uint  m_iClientsMax;	// Maximum (FD_SETSIZE) open connections to server
 	int  m_iClientsMaxIP;			// Maximum (FD_SETSIZE) open connections to server per IP
 	int  m_iConnectingMax;			// max clients connecting
 	int  m_iConnectingMaxIP;		// max clients connecting
@@ -737,7 +737,7 @@ public:
 	int  m_iGuestsMax;				// Allow guests who have no accounts ?
 	int  m_iClientLingerTime;		// How long logged out clients linger in seconds.
 	int  m_iMinCharDeleteTime;		// How old must a char be ? (minutes)
-	BYTE  m_iMaxCharsPerAccount;	// Maximum characters allowed on an account.
+	byte  m_iMaxCharsPerAccount;	// Maximum characters allowed on an account.
 	bool m_fLocalIPAdmin;			// The local ip is the admin ?
 	bool m_fMd5Passwords;			// Should MD5 hashed passwords be used?
 
@@ -774,9 +774,9 @@ public:
 	int	 m_iBankIMax;			// Maximum number of items allowed in bank.
 	int  m_iBankWMax;			// Maximum weight in WEIGHT_UNITS stones allowed in bank.
 	int  m_iVendorMaxSell;		// Max things a vendor will sell in one shot.
-	unsigned int  m_iMaxCharComplexity;		// How many chars per sector.
-	unsigned int  m_iMaxItemComplexity;		// How many items per meter.
-	unsigned int  m_iMaxSectorComplexity;	// How many items per sector.
+	uint  m_iMaxCharComplexity;		// How many chars per sector.
+	uint  m_iMaxItemComplexity;		// How many items per meter.
+	uint  m_iMaxSectorComplexity;	// How many items per sector.
 	bool m_fGenericSounds;		// Do players receive generic (not them-devoted) sounds
 	bool m_fAutoNewbieKeys;		// Are house and boat keys newbied automatically?
 	int  m_iStamRunningPenalty;		// Weight penalty for running (+N% of max carry weight)
@@ -803,7 +803,7 @@ public:
 	int  m_iCombatFlags;		// combat flags
 	int  m_iMagicFlags;			// magic flags
 	int  m_iRacialFlags;		// racial traits flags
-	unsigned char m_iSkillFlags;// Skill flags (expansion checks, etc)
+	uchar m_iSkillFlags;// Skill flags (expansion checks, etc)
 	int  m_iRevealFlags;		///* reveal flags used for SPELL_REVEAL (mostly for backwards).
 
 	// Criminal/Karma
@@ -830,9 +830,9 @@ public:
 	int		m_iExperimental;
 	int		m_iOptionFlags;
 	int		m_iWoolGrowthTime;	// how long till wool grows back on sheared sheep, in minutes
-	unsigned int m_iAttackerTimeout;	// Timeout for attacker.*
-	unsigned int m_iNotoTimeout;	// Timeout for NOTOriety checks.*
-	unsigned int m_iMaxSkill;
+	uint m_iAttackerTimeout;	// Timeout for attacker.*
+	uint m_iNotoTimeout;	// Timeout for NOTOriety checks.*
+	uint m_iMaxSkill;
 
 	int		m_iDistanceYell;
 	int		m_iDistanceWhisper;
@@ -928,7 +928,7 @@ public:
 #define LEVEL_MODE_LINEAR		0
 #define	LEVEL_MODE_DOUBLE		1
 	int		m_iLevelMode;
-	unsigned int m_iLevelNextAt;
+	uint m_iLevelNextAt;
 
 	bool	m_bAutoResDisp;
 	int		m_iAutoPrivFlags;
@@ -968,14 +968,14 @@ public:
 
 	// network settings
 #ifdef _MTNETWORK
-	unsigned int m_iNetworkThreads;			// number of network threads to create
-	unsigned int m_iNetworkThreadPriority;	// priority of network threads
+	uint m_iNetworkThreads;			// number of network threads to create
+	uint m_iNetworkThreadPriority;	// priority of network threads
 #endif
 	int			m_fUseAsyncNetwork;			// 0=normal send, 1=async send, 2=async send for 4.0.0+ only
 	int			m_iNetMaxPings;				// max pings before blocking an ip
 	int			m_iNetHistoryTTL;			// time to remember an ip
 	int			m_iNetMaxPacketsPerTick;	// max packets to send per tick (per queue)
-	unsigned int m_iNetMaxLengthPerTick;		// max packet length to send per tick (per queue) (also max length of individual packets)
+	uint m_iNetMaxLengthPerTick;		// max packet length to send per tick (per queue) (also max length of individual packets)
 	int			m_iNetMaxQueueSize;			// max packets to hold per queue (comment out for unlimited)
 	bool		m_fUsePacketPriorities;		// true to prioritise sending packets
 	bool		m_fUseExtraBuffer;			// true to queue packet data in an extra buffer
@@ -1076,7 +1076,7 @@ public:
 	void PrintEFOFFlags( bool bEF = true, bool bOF = true, CTextConsole *pSrc = NULL );
 
 	// ResDisp Flag
-	int GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res = RDS_T2A, unsigned char chars = 5 );
+	int GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res = RDS_T2A, uchar chars = 5 );
 
 	// Specialized resource accessors.
 
@@ -1180,12 +1180,12 @@ public:
 	LPCTSTR GetDefaultMsg(LPCTSTR pszKey);
 	LPCTSTR	GetDefaultMsg(int lKeyNum);
 
-typedef std::map<DWORD,DWORD> KRGumpsMap;
+typedef std::map<dword,dword> KRGumpsMap;
 	KRGumpsMap m_mapKRGumps;
 
-	bool SetKRDialogMap(DWORD rid, DWORD idKRDialog);
-	DWORD GetKRDialogMap(DWORD idKRDialog);
-	DWORD GetKRDialog(DWORD rid);
+	bool SetKRDialogMap(dword rid, dword idKRDialog);
+	dword GetKRDialogMap(dword idKRDialog);
+	dword GetKRDialog(dword rid);
 
 	bool GenerateDefname(TCHAR *pObjectName, size_t iInputLength, LPCTSTR pPrefix, TCHAR *pOutput, bool bCheckConflict = true, CVarDefMap* vDefnames = NULL);
 	bool DumpUnscriptedItems(CTextConsole * pSrc, LPCTSTR pszFilename);
@@ -1225,7 +1225,7 @@ public:
 
 	int			m_iOriginX;	// keep track of position when parsing
 	int			m_iOriginY;
-	WORD		m_iPage;		// page to open the dialog in
+	word		m_iPage;		// page to open the dialog in
 
 	bool		m_bNoDispose;	// contains 'nodispose' control
 };

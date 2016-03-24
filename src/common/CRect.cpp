@@ -204,9 +204,9 @@ bool CPointBase::IsCharValid() const
 {
 	if ( m_z <= -UO_SIZE_Z || m_z >= UO_SIZE_Z )
 		return( false );
-	if (m_x <= 0 || m_x >= static_cast<signed short>(g_MapList.GetX(m_map)))
+	if (m_x <= 0 || m_x >= static_cast<short>(g_MapList.GetX(m_map)))
 		return( false );
-	if (m_y <= 0 || m_y >= static_cast<signed short>(g_MapList.GetY(m_map)))
+	if (m_y <= 0 || m_y >= static_cast<short>(g_MapList.GetY(m_map)))
 		return( false );
 	return( true );
 }
@@ -214,9 +214,9 @@ bool CPointBase::IsCharValid() const
 void CPointBase::ValidatePoint()
 {
 	if ( m_x < 0 ) m_x = 0;
-	if (m_x >= static_cast<signed short>(g_MapList.GetX(m_map))) m_x = static_cast<signed short>(g_MapList.GetX(m_map) - 1);
+	if (m_x >= static_cast<short>(g_MapList.GetX(m_map))) m_x = static_cast<short>(g_MapList.GetX(m_map) - 1);
 	if ( m_y < 0 ) m_y = 0;
-	if (m_y >= static_cast<signed short>(g_MapList.GetY(m_map))) m_y = static_cast<signed short>(g_MapList.GetY(m_map) - 1);
+	if (m_y >= static_cast<short>(g_MapList.GetY(m_map))) m_y = static_cast<short>(g_MapList.GetY(m_map) - 1);
 }
 
 bool CPointBase::IsSame2D( const CPointBase & pt ) const
@@ -232,7 +232,7 @@ void CPointBase::Set( const CPointBase & pt )
 	m_map = pt.m_map;
 }
 
-void CPointBase::Set( WORD x, WORD y, signed char z, unsigned char map )
+void CPointBase::Set( word x, word y, signed char z, uchar map )
 {
 	m_x = x;
 	m_y = y;
@@ -244,16 +244,16 @@ void CPointBase::Move( DIR_TYPE dir )
 {
 	// Move a point in a direction.
 	ASSERT( dir <= DIR_QTY );
-	m_x += static_cast<signed short>(sm_Moves[dir][0]);
-	m_y += static_cast<signed short>(sm_Moves[dir][1]);
+	m_x += static_cast<short>(sm_Moves[dir][0]);
+	m_y += static_cast<short>(sm_Moves[dir][1]);
 }
 
 void CPointBase::MoveN( DIR_TYPE dir, int amount )
 {
 	// Move a point in a direction.
 	ASSERT( dir <= DIR_QTY );
-	m_x += static_cast<signed short>(sm_Moves[dir][0] * amount);
-	m_y += static_cast<signed short>(sm_Moves[dir][1] * amount);
+	m_x += static_cast<short>(sm_Moves[dir][0] * amount);
+	m_y += static_cast<short>(sm_Moves[dir][1] * amount);
 }
 
 bool CPointBase::r_WriteVal( LPCTSTR pszKey, CGString & sVal ) const
@@ -411,7 +411,7 @@ bool CPointBase::r_WriteVal( LPCTSTR pszKey, CGString & sVal ) const
 					if (pMultiItem->m_visible == 0)
 						continue;
 
-					CPointMap ptTest(static_cast<WORD>(ptMulti.m_x + pMultiItem->m_dx), static_cast<WORD>(ptMulti.m_y + pMultiItem->m_dy), static_cast<signed char>(ptMulti.m_z + pMultiItem->m_dz), this->m_map);
+					CPointMap ptTest(static_cast<word>(ptMulti.m_x + pMultiItem->m_dx), static_cast<word>(ptMulti.m_y + pMultiItem->m_dy), static_cast<signed char>(ptMulti.m_z + pMultiItem->m_dz), this->m_map);
 					if (GetDist(ptTest) > 0)
 						continue;
 
@@ -476,7 +476,7 @@ bool CPointBase::r_WriteVal( LPCTSTR pszKey, CGString & sVal ) const
 						break;
 					if (pMultiItem->m_visible == 0)
 						continue;
-					CPointMap ptTest(static_cast<WORD>(ptMulti.m_x + pMultiItem->m_dx), static_cast<WORD>(ptMulti.m_y + pMultiItem->m_dy), static_cast<signed char>(ptMulti.m_z + pMultiItem->m_dz), this->m_map);
+					CPointMap ptTest(static_cast<word>(ptMulti.m_x + pMultiItem->m_dx), static_cast<word>(ptMulti.m_y + pMultiItem->m_dy), static_cast<signed char>(ptMulti.m_z + pMultiItem->m_dz), this->m_map);
 					if (GetDist(ptTest) > 0)
 						continue;
 
@@ -514,7 +514,7 @@ bool CPointBase::r_WriteVal( LPCTSTR pszKey, CGString & sVal ) const
 						break;
 					if (pMultiItem->m_visible == 0)
 						continue;
-					CPointMap ptTest(static_cast<WORD>(ptMulti.m_x + pMultiItem->m_dx), static_cast<WORD>(ptMulti.m_y + pMultiItem->m_dy), static_cast<signed char>(ptMulti.m_z + pMultiItem->m_dz), this->m_map);
+					CPointMap ptTest(static_cast<word>(ptMulti.m_x + pMultiItem->m_dx), static_cast<word>(ptMulti.m_y + pMultiItem->m_dy), static_cast<signed char>(ptMulti.m_z + pMultiItem->m_dz), this->m_map);
 					if (GetDist(ptTest) > 0)
 						continue;
 
@@ -719,9 +719,9 @@ bool CPointBase::r_LoadVal( LPCTSTR pszKey, LPCTSTR pszArgs )
 	int iVal = Exp_GetVal(pszArgs);
 	switch (index)
 	{
-		case 0: m_map = static_cast<unsigned char>(iVal); break;
-		case 1: m_x = static_cast<signed short>(iVal); break;
-		case 2: m_y = static_cast<signed short>(iVal); break;
+		case 0: m_map = static_cast<uchar>(iVal); break;
+		case 1: m_x = static_cast<short>(iVal); break;
+		case 2: m_y = static_cast<short>(iVal); break;
 		case 3: m_z = static_cast<signed char>(iVal); break;
 	}
 	return( true );
@@ -825,7 +825,7 @@ size_t CPointBase::Read( TCHAR * pszVal )
 		case 4:	// m_map
 			if ( IsDigit(ppVal[3][0]))
 			{
-				m_map = static_cast<unsigned char>(ATOI(ppVal[3]));
+				m_map = static_cast<uchar>(ATOI(ppVal[3]));
 				if ( !g_MapList.m_maps[m_map] )
 				{
 					g_Log.EventError("Unsupported map #%d specified. Auto-fixing that to 0.\n", m_map);
@@ -838,9 +838,9 @@ size_t CPointBase::Read( TCHAR * pszVal )
 				m_z = static_cast<signed char>(ATOI(ppVal[2]));
 			}
 		case 2:
-			m_y = static_cast<signed short>(ATOI(ppVal[1]));
+			m_y = static_cast<short>(ATOI(ppVal[1]));
 		case 1:
-			m_x = static_cast<signed short>(ATOI(ppVal[0]));
+			m_x = static_cast<short>(ATOI(ppVal[0]));
 		case 0:
 			break;
 	}
@@ -860,7 +860,7 @@ CSector * CPointBase::GetSector() const
 	return g_World.GetSector(m_map, ((m_y / g_MapList.GetSectorSize(m_map) * g_MapList.GetSectorCols(m_map)) + ( m_x / g_MapList.GetSectorSize(m_map) )));
 }
 
-CRegionBase * CPointBase::GetRegion( DWORD dwType ) const
+CRegionBase * CPointBase::GetRegion( dword dwType ) const
 {
 	ADDTOCALLSTACK("CPointBase::GetRegion");
 	// What region in the current CSector am i in ?
@@ -876,7 +876,7 @@ CRegionBase * CPointBase::GetRegion( DWORD dwType ) const
 	return NULL;
 }
 
-size_t CPointBase::GetRegions( DWORD dwType, CRegionLinks & rlinks ) const
+size_t CPointBase::GetRegions( dword dwType, CRegionLinks & rlinks ) const
 {
 	ADDTOCALLSTACK("CPointBase::GetRegions");
 	if ( !IsValidPoint() )
@@ -964,40 +964,40 @@ CPointBase CGRect::GetRectCorner( DIR_TYPE dir ) const
 	// Get the point if a directional corner of the CRectMap.
 	CPointBase pt;
 	pt.m_z = 0;	// NOTE: remember this is a nonsense value.
-	pt.m_map = static_cast<unsigned char>(m_map);
+	pt.m_map = static_cast<uchar>(m_map);
 	switch ( dir )
 	{
 		case DIR_N:
-			pt.m_x = static_cast<signed short>((m_left + m_right) / 2);
-			pt.m_y = static_cast<signed short>(m_top);
+			pt.m_x = static_cast<short>((m_left + m_right) / 2);
+			pt.m_y = static_cast<short>(m_top);
 			break;
 		case DIR_NE:
-			pt.m_x = static_cast<signed short>(m_right);
-			pt.m_y = static_cast<signed short>(m_top);
+			pt.m_x = static_cast<short>(m_right);
+			pt.m_y = static_cast<short>(m_top);
 			break;
 		case DIR_E:
-			pt.m_x = static_cast<signed short>(m_right);
-			pt.m_y = static_cast<signed short>((m_top + m_bottom) / 2);
+			pt.m_x = static_cast<short>(m_right);
+			pt.m_y = static_cast<short>((m_top + m_bottom) / 2);
 			break;
 		case DIR_SE:
-			pt.m_x = static_cast<signed short>(m_right);
-			pt.m_y = static_cast<signed short>(m_bottom);
+			pt.m_x = static_cast<short>(m_right);
+			pt.m_y = static_cast<short>(m_bottom);
 			break;
 		case DIR_S:
-			pt.m_x = static_cast<signed short>((m_left + m_right) / 2);
-			pt.m_y = static_cast<signed short>(m_bottom);
+			pt.m_x = static_cast<short>((m_left + m_right) / 2);
+			pt.m_y = static_cast<short>(m_bottom);
 			break;
 		case DIR_SW:
-			pt.m_x = static_cast<signed short>(m_left);
-			pt.m_y = static_cast<signed short>(m_bottom);
+			pt.m_x = static_cast<short>(m_left);
+			pt.m_y = static_cast<short>(m_bottom);
 			break;
 		case DIR_W:
-			pt.m_x = static_cast<signed short>(m_left);
-			pt.m_y = static_cast<signed short>((m_top + m_bottom) / 2);
+			pt.m_x = static_cast<short>(m_left);
+			pt.m_y = static_cast<short>((m_top + m_bottom) / 2);
 			break;
 		case DIR_NW:
-			pt.m_x = static_cast<signed short>(m_left);
-			pt.m_y = static_cast<signed short>(m_top);
+			pt.m_x = static_cast<short>(m_left);
+			pt.m_y = static_cast<short>(m_top);
 			break;
 		case DIR_QTY:
 			pt = GetCenter();
@@ -1050,7 +1050,7 @@ CPointMap::CPointMap()
 	InitPoint();
 }
 
-CPointMap::CPointMap( WORD x, WORD y, signed char z, unsigned char map )
+CPointMap::CPointMap( word x, word y, signed char z, uchar map )
 {
 	m_x = x;
 	m_y = y;
@@ -1079,7 +1079,7 @@ CPointSort::CPointSort()
 	InitPoint();
 }
 
-CPointSort::CPointSort( WORD x, WORD y, signed char z, unsigned char map )
+CPointSort::CPointSort( word x, word y, signed char z, uchar map )
 {
 	m_x = x;
 	m_y = y;

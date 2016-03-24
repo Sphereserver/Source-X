@@ -20,7 +20,7 @@ void CQueueBytes::Empty()
 	m_iDataQty = 0;
 }
 
-const BYTE * CQueueBytes::RemoveDataLock() const
+const byte * CQueueBytes::RemoveDataLock() const
 {
 	return m_Mem.GetData();
 }
@@ -35,7 +35,7 @@ void CQueueBytes::RemoveDataAmount( size_t iSize )
 	memmove( m_Mem.GetData(), m_Mem.GetData()+iSize, m_iDataQty );
 }
 
-BYTE * CQueueBytes::AddNewDataLock( size_t iLen )
+byte * CQueueBytes::AddNewDataLock( size_t iLen )
 {
 	ADDTOCALLSTACK("CQueueBytes::AddNewDataLock");
 	// lock the queue to place this data in it.
@@ -58,7 +58,7 @@ void CQueueBytes::AddNewDataFinish( size_t iLen )
 	m_iDataQty += iLen;
 }
 
-void CQueueBytes::AddNewData( const BYTE * pData, size_t iLen )
+void CQueueBytes::AddNewData( const byte * pData, size_t iLen )
 {
 	ADDTOCALLSTACK("CQueueBytes::AddNewData");
 	// Add new data to the end of the queue.

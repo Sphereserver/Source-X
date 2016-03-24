@@ -35,17 +35,17 @@ class CGrayError
 	// similar to CFileException and CException
 public:
 	LOGL_TYPE m_eSeverity;	// const
-	DWORD m_hError;	// HRESULT S_OK, "winerror.h" code. 0x20000000 = start of custom codes.
+	dword m_hError;	// HRESULT S_OK, "winerror.h" code. 0x20000000 = start of custom codes.
 	LPCTSTR m_pszDescription;
 public:
-	CGrayError( LOGL_TYPE eSev, DWORD hErr, LPCTSTR pszDescription );
+	CGrayError( LOGL_TYPE eSev, dword hErr, LPCTSTR pszDescription );
 	CGrayError( const CGrayError& e );	// copy contstructor needed.
 	virtual ~CGrayError();
 public:
 	CGrayError& operator=(const CGrayError& other);
 public:
 #ifdef _WIN32
-	static int GetSystemErrorMessage( DWORD dwError, LPTSTR lpszError, UINT nMaxError );
+	static int GetSystemErrorMessage( dword dwError, LPTSTR lpszError, UINT nMaxError );
 #endif
 	virtual bool GetErrorMessage( LPTSTR lpszError, UINT nMaxError,	UINT * pnHelpContext = NULL ) const;
 };
@@ -77,9 +77,9 @@ public:
 	{
 	public:
 		static const char *m_sClassName;
-		const DWORD m_dwAddress;
+		const dword m_dwAddress;
 
-		CGrayException(unsigned int uCode, DWORD dwAddress);
+		CGrayException(uint uCode, dword dwAddress);
 		virtual ~CGrayException();
 	private:
 		CGrayException& operator=(const CGrayException& other);
@@ -101,7 +101,7 @@ public:
 	#define EXC_TRY(a) \
 		LPCTSTR inLocalBlock = ""; \
 		LPCTSTR inLocalArgs = a; \
-		unsigned int inLocalBlockCnt(0); \
+		uint inLocalBlockCnt(0); \
 		bool bCATCHExcept = false; \
 		UNREFERENCED_PARAMETER(bCATCHExcept); \
 		try \
@@ -141,7 +141,7 @@ public:
 	#define EXC_TRYSUB(a) \
 		LPCTSTR inLocalSubBlock = ""; \
 		LPCTSTR inLocalSubArgs = a; \
-		unsigned int inLocalSubBlockCnt(0); \
+		uint inLocalSubBlockCnt(0); \
 		bool bCATCHExceptSub = false; \
 		UNREFERENCED_PARAMETER(bCATCHExceptSub); \
 		try \

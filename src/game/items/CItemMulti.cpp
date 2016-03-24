@@ -79,7 +79,7 @@ bool CItemMulti::MultiRealizeRegion()
 	const CItemBaseMulti * pMultiDef = Multi_GetDef();
 	if ( pMultiDef == NULL )
 	{
-		DEBUG_ERR(( "Bad Multi type 0%x, uid=0%x\n", GetID(), (DWORD) GetUID()));
+		DEBUG_ERR(( "Bad Multi type 0%x, uid=0%x\n", GetID(), (dword) GetUID()));
 		return false;
 	}
 
@@ -104,7 +104,7 @@ bool CItemMulti::MultiRealizeRegion()
 	m_pRegion->SetRegionRect( rect );
 	m_pRegion->m_pt = pt;
 
-	DWORD dwFlags;
+	dword dwFlags;
 	if ( IsType(IT_SHIP))
 	{
 		dwFlags = REGION_FLAG_SHIP;
@@ -146,7 +146,7 @@ void CItemMulti::MultiUnRealizeRegion()
 	}
 }
 
-bool CItemMulti::Multi_CreateComponent( ITEMID_TYPE id, signed short dx, signed short dy, signed char dz, DWORD dwKeyCode )
+bool CItemMulti::Multi_CreateComponent( ITEMID_TYPE id, short dx, short dy, signed char dz, dword dwKeyCode )
 {
 	ADDTOCALLSTACK("CItemMulti::Multi_CreateComponent");
 	CItem * pItem = CreateTemplate( id );
@@ -203,7 +203,7 @@ bool CItemMulti::Multi_CreateComponent( ITEMID_TYPE id, signed short dx, signed 
 	return( fNeedKey );
 }
 
-void CItemMulti::Multi_Create( CChar * pChar, DWORD dwKeyCode )
+void CItemMulti::Multi_Create( CChar * pChar, dword dwKeyCode )
 {
 	ADDTOCALLSTACK("CItemMulti::Multi_Create");
 	// Create house or Ship extra stuff.

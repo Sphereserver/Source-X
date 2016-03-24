@@ -81,9 +81,9 @@ private:
 	CLocalObjMap& operator=(const CLocalObjMap& other);
 
 public:
-	CObjBase * Get( unsigned short Number );
-	bool Insert( unsigned short Number, CObjBase * pObj, bool ForceSet = false );
-	typedef std::map<unsigned short, CObjBase*> ObjMap;
+	CObjBase * Get( ushort Number );
+	bool Insert( ushort Number, CObjBase * pObj, bool ForceSet = false );
+	typedef std::map<ushort, CObjBase*> ObjMap;
 
 private:
 	ObjMap m_ObjMap;

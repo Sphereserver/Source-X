@@ -22,8 +22,8 @@
 
 #define NETWORK_PACKETCOUNT 0x100	// number of unique packets
 #define NETWORK_BUFFERSIZE 0xF000	// size of receive buffer
-#define NETWORK_SEEDLEN_OLD (sizeof( DWORD ))
-#define NETWORK_SEEDLEN_NEW (1 + (sizeof( DWORD ) * 5))
+#define NETWORK_SEEDLEN_OLD (sizeof( dword ))
+#define NETWORK_SEEDLEN_NEW (1 + (sizeof( dword ) * 5))
 
 #define NETWORK_MAXPACKETS		g_Cfg.m_iNetMaxPacketsPerTick	// max packets to send per tick (per queue)
 #define NETWORK_MAXPACKETLEN	g_Cfg.m_iNetMaxLengthPerTick	// max packet length to send per tick (per queue)
@@ -59,7 +59,7 @@ struct HistoryIP;
 typedef std::deque<HistoryIP> IPHistoryList;
 
 #if defined(_PACKETDUMP) || defined(_DUMPSUPPORT)
-	void xRecordPacketData(const CClient* client, const BYTE* data, size_t length, LPCTSTR heading);
+	void xRecordPacketData(const CClient* client, const byte* data, size_t length, LPCTSTR heading);
 	void xRecordPacket(const CClient* client, Packet* packet, LPCTSTR heading);
 #else
 	#define xRecordPacketData(_client_, _data_, _length, _heading_)
@@ -90,7 +90,7 @@ protected:
 	volatile bool m_needsFlush; // does data need to be flushed
 
 	bool m_seeded; // is seed received
-	DWORD m_seed; // client seed
+	dword m_seed; // client seed
 	bool m_newseed; // is the client using new seed
 
 	bool m_useAsync; // is this socket using asynchronous sends
@@ -131,9 +131,9 @@ protected:
 
 public:
 	GAMECLIENT_TYPE m_clientType; // type of client
-	DWORD m_clientVersion; // client version (encryption)
-	DWORD m_reportedVersion; // client version (reported)
-	BYTE m_sequence; // movement sequence
+	dword m_clientVersion; // client version (encryption)
+	dword m_reportedVersion; // client version (reported)
+	byte m_sequence; // movement sequence
 
 public:
 	explicit NetState(int id);
@@ -164,8 +164,8 @@ public:
 	void setSendingAsync(bool isSending) volatile { m_isSendingAsync = isSending; }; // set if async packet is being sent
 
 	GAMECLIENT_TYPE getClientType(void) const { return m_clientType; }; // determined client type
-	DWORD getCryptVersion(void) const { return m_clientVersion; }; // version as determined by encryption
-	DWORD getReportedVersion(void) const { return m_reportedVersion; }; // version as reported by client
+	dword getCryptVersion(void) const { return m_clientVersion; }; // version as determined by encryption
+	dword getReportedVersion(void) const { return m_reportedVersion; }; // version as reported by client
 
 	void markReadClosed(void) volatile; // mark socket as closed by read thread
 	void markWriteClosed(void) volatile; // mark socket as closed by write thread
@@ -183,12 +183,12 @@ public:
 	bool isClientKR(void) const { return m_clientType == CLIENTTYPE_KR; }; // is this a KR client?
 	bool isClientEnhanced(void) const { return m_clientType == CLIENTTYPE_EC; }; // is this a Enhanced client?
 
-	bool isCryptVersion(DWORD version) const { return m_clientVersion && m_clientVersion >= version; }; // check the minimum crypt version
-	bool isReportedVersion(DWORD version) const { return m_reportedVersion && m_reportedVersion >= version; }; // check the minimum reported verson
-	bool isClientVersion(DWORD version) const { return isCryptVersion(version) || isReportedVersion(version); } // check the minimum client version
-	bool isCryptLessVersion(DWORD version) const { return m_clientVersion && m_clientVersion < version; }; // check the maximum crypt version
-	bool isReportedLessVersion(DWORD version) const { return m_reportedVersion && m_reportedVersion < version; }; // check the maximum reported version
-	bool isClientLessVersion(DWORD version) const { return isCryptLessVersion(version) || isReportedLessVersion(version); } // check the maximum client version
+	bool isCryptVersion(dword version) const { return m_clientVersion && m_clientVersion >= version; }; // check the minimum crypt version
+	bool isReportedVersion(dword version) const { return m_reportedVersion && m_reportedVersion >= version; }; // check the minimum reported verson
+	bool isClientVersion(dword version) const { return isCryptVersion(version) || isReportedVersion(version); } // check the minimum client version
+	bool isCryptLessVersion(dword version) const { return m_clientVersion && m_clientVersion < version; }; // check the maximum crypt version
+	bool isReportedLessVersion(dword version) const { return m_reportedVersion && m_reportedVersion < version; }; // check the maximum reported version
+	bool isClientLessVersion(dword version) const { return isCryptLessVersion(version) || isReportedLessVersion(version); } // check the maximum client version
 
 	void beginTransaction(int priority); // begin a transaction for grouping packets
 	void endTransaction(void); // end transaction
@@ -294,17 +294,17 @@ private:
 public:
 	void registerStandardPackets(void);	// register standard packet handlers
 
-	void registerPacket(unsigned int id, Packet* handler);		// register packet handler
-	void registerExtended(unsigned int id, Packet* handler);	// register extended packet handler
-	void registerEncoded(unsigned int id, Packet* handler);		// register encoded packet handler
+	void registerPacket(uint id, Packet* handler);		// register packet handler
+	void registerExtended(uint id, Packet* handler);	// register extended packet handler
+	void registerEncoded(uint id, Packet* handler);		// register encoded packet handler
 
-	void unregisterPacket(unsigned int id);		// remove packet handler
-	void unregisterExtended(unsigned int id);	// remove extended packet handler
-	void unregisterEncoded(unsigned int id);	// remove encoded packet handler
+	void unregisterPacket(uint id);		// remove packet handler
+	void unregisterExtended(uint id);	// remove extended packet handler
+	void unregisterEncoded(uint id);	// remove encoded packet handler
 
-	Packet* getHandler(unsigned int id) const;			// get handler for packet
-	Packet* getExtendedHandler(unsigned int id) const;	// get handler for extended packet
-	Packet* getEncodedHandler(unsigned int id) const;	// get handler for encoded packet
+	Packet* getHandler(uint id) const;			// get handler for packet
+	Packet* getExtendedHandler(uint id) const;	// get handler for extended packet
+	Packet* getEncodedHandler(uint id) const;	// get handler for encoded packet
 };
 
 
@@ -383,8 +383,8 @@ private:
 	PacketManager m_packets;	// packet handlers
 	IPHistoryManager m_ips;		// ip history
 
-	BYTE* m_buffer;			// receive buffer
-	BYTE* m_decryptBuffer;	// receive buffer for decryption
+	byte* m_buffer;			// receive buffer
+	byte* m_decryptBuffer;	// receive buffer for decryption
 
 protected:
 	NetState** m_states;	// client state pool
@@ -431,7 +431,7 @@ protected:
 class NetworkOut : public AbstractSphereThread
 {
 private:
-	BYTE* m_encryptBuffer; // buffer for encryption
+	byte* m_encryptBuffer; // buffer for encryption
 
 public:
 	static const char* m_sClassName;
@@ -460,7 +460,7 @@ protected:
 	void proceedFlush(void); // flush data to pending sockets
 	bool sendPacket(CClient* client, PacketSend* packet); // send packet to a client
 	bool sendPacketNow(CClient* client, PacketSend* packet); // send packet to a client now
-	int sendBytesNow(CClient* client, const BYTE* data, DWORD length); // send bytes to a client (returns number of bytes sent, < 0 for failure)
+	int sendBytesNow(CClient* client, const byte* data, dword length); // send bytes to a client (returns number of bytes sent, < 0 for failure)
 
 public:
 	void onAsyncSendComplete(NetState* state, bool success); // handle completion of async send
@@ -493,8 +493,8 @@ class NetworkInput
 {
 private:
 	NetworkThread* m_thread;	// owning network thread
-	BYTE* m_receiveBuffer;		// buffer for received data
-	BYTE* m_decryptBuffer;		// buffer for decrypted data
+	byte* m_receiveBuffer;		// buffer for received data
+	byte* m_decryptBuffer;		// buffer for decrypted data
 
 public:
 	static const char* m_sClassName;
@@ -535,7 +535,7 @@ private:
 
 private:
 	NetworkThread* m_thread;	// owning network thread
-	BYTE* m_encryptBuffer;		// buffer for encrpyted data
+	byte* m_encryptBuffer;		// buffer for encrpyted data
 
 public:
 	static const char* m_sClassName;
@@ -557,13 +557,13 @@ public:
 
 private:
 	void checkFlushRequests(void);										// check for clients who need data flushing
-	size_t processPacketQueue(NetState* state, unsigned int priority);	// process a client's packet queue
+	size_t processPacketQueue(NetState* state, uint priority);	// process a client's packet queue
 	size_t processAsyncQueue(NetState* state);							// process a client's async queue
 	bool processByteQueue(NetState* state);								// process a client's byte queue
 
 	bool sendPacket(NetState* state, PacketSend* packet);				// send packet to client (can be queued for async operation)
 	bool sendPacketData(NetState* state, PacketSend* packet);			// send packet data to client
-	size_t sendData(NetState* state, const BYTE* data, size_t length);	// send raw data to client
+	size_t sendData(NetState* state, const byte* data, size_t length);	// send raw data to client
 };
 
 

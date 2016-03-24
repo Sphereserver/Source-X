@@ -290,7 +290,7 @@ void CClient::Announce( bool fArrive ) const
 			pMurders->SetTimeout(pMurders->m_itEqMurderCount.m_Decay_Balance * TICK_PER_SEC);
 		else			// or make it inactive on logout
 		{
-			pMurders->m_itEqMurderCount.m_Decay_Balance = static_cast<DWORD>(pMurders->GetTimerAdjusted());
+			pMurders->m_itEqMurderCount.m_Decay_Balance = static_cast<dword>(pMurders->GetTimerAdjusted());
 			pMurders->SetTimeout(-1);
 		}
 	}
@@ -595,7 +595,7 @@ bool CClient::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
 				pszKey += strlen(sm_szLoadKeys[index]);
 				GETNONWHITESPACE(pszKey);
 
-				DWORD iCliVer = GetNetState()->getReportedVersion();
+				dword iCliVer = GetNetState()->getReportedVersion();
 				if ( pszKey[0] == '\0' )
 				{
 					// Return full version string (eg: 5.0.2d)
@@ -867,7 +867,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 						ArgsCount++;
 				}
 
-				addBuff(static_cast<BUFF_ICONS>(iArgs[0]), iArgs[1], iArgs[2], static_cast<WORD>(iArgs[3]), Args, ArgsCount);
+				addBuff(static_cast<BUFF_ICONS>(iArgs[0]), iArgs[1], iArgs[2], static_cast<word>(iArgs[3]), Args, ArgsCount);
 			}
 			break;
 		case CV_REMOVEBUFF:
@@ -885,7 +885,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			{
 				TCHAR * ppLocArgs[256];
 				size_t qty = Str_ParseCmds(s.GetArgRaw(), ppLocArgs, COUNTOF(ppLocArgs), ",");
-				DWORD clilocid = Exp_GetVal(ppLocArgs[0]);
+				dword clilocid = Exp_GetVal(ppLocArgs[0]);
 
 				CGString LocArgs;
 				for ( size_t y = 1 ; y < qty; y++ )
@@ -933,7 +933,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					DEBUG_ERR(("Bad AddContextEntry usage: TextEntry < 100 is reserved for server usage!\n"));
 					return true;
 				}
-				m_pPopupPacket->addOption(static_cast<WORD>(entrytag), static_cast<DWORD>(Exp_GetVal(ppLocArgs[1])), static_cast<WORD>(Exp_GetVal(ppLocArgs[2])), static_cast<WORD>(Exp_GetVal(ppLocArgs[3])));
+				m_pPopupPacket->addOption(static_cast<word>(entrytag), static_cast<dword>(Exp_GetVal(ppLocArgs[1])), static_cast<word>(Exp_GetVal(ppLocArgs[2])), static_cast<word>(Exp_GetVal(ppLocArgs[3])));
 			}
 			break;
 		case CV_ARROWQUEST:
@@ -986,7 +986,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 									CPointMap	pt = pItem->GetTopPoint();
 									m_pChar->Spell_Teleport(pt, true, false);
 									m_pChar->m_Act_Targ = pItem->GetUID();
-									SysMessagef("Bad spawn (0%lx, id=%s). Set as ACT", (DWORD)pItem->GetUID(), g_Cfg.ResourceGetName(rid));
+									SysMessagef("Bad spawn (0%lx, id=%s). Set as ACT", (dword)pItem->GetUID(), g_Cfg.ResourceGetName(rid));
 									fFound = true;
 								}
 							}
@@ -1179,7 +1179,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					CPointMap po = pObj->GetTopLevelObj()->GetTopPoint();
 					CPointMap pnt = po;
 					pnt.MoveN( DIR_W, 3 );
-					DWORD wBlockFlags = m_pChar->GetMoveBlockFlags();
+					dword wBlockFlags = m_pChar->GetMoveBlockFlags();
 					pnt.m_z = g_World.GetHeightPoint2( pnt, wBlockFlags );	// ??? Get Area
 					m_pChar->m_dirFace = pnt.GetDir( po, m_pChar->m_dirFace ); // Face the player
 					m_pChar->Spell_Teleport( pnt, true, false );

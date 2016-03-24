@@ -14,13 +14,13 @@ CItemMemory::~CItemMemory()
 	DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
 }
 
-WORD CItemMemory::SetMemoryTypes( WORD wType )	// For memory type objects.
+word CItemMemory::SetMemoryTypes( word wType )	// For memory type objects.
 {
 	SetHueAlt( wType );
 	return( wType );
 }
 
-WORD CItemMemory::GetMemoryTypes() const
+word CItemMemory::GetMemoryTypes() const
 {
 	return( GetHueAlt());	// MEMORY_FIGHT
 }
@@ -45,13 +45,13 @@ void CItemMemory::Guild_SetAbbrev(bool fAbbrevShow)
 	m_itEqMemory.m_Action = fAbbrevShow;
 }
 
-WORD CItemMemory::Guild_GetVotes() const
+word CItemMemory::Guild_GetVotes() const
 {
 	ADDTOCALLSTACK("CItemMemory::Guild_GetVotes");
 	return m_itEqMemory.m_Skill;
 }
 
-void CItemMemory::Guild_SetVotes(WORD wVotes)
+void CItemMemory::Guild_SetVotes(word wVotes)
 {
 	ADDTOCALLSTACK("CItemMemory::Guild_SetVotes");
 	m_itEqMemory.m_Skill = wVotes;
@@ -61,14 +61,14 @@ int CItemMemory::Guild_SetLoyalTo(CGrayUID uid)
 {
 	ADDTOCALLSTACK("CItemMemory::Guild_SetLoyalTo");
 	// Some other place checks to see if this is a valid member.
-	return GetTagDefs()->SetNum("LoyalTo", (DWORD)uid, false);
+	return GetTagDefs()->SetNum("LoyalTo", (dword)uid, false);
 }
 
 CGrayUID CItemMemory::Guild_GetLoyalTo() const
 {
 	ADDTOCALLSTACK("CItemMemory::Guild_GetLoyalTo");
 	CItemMemory *pObj = const_cast<CItemMemory *>(this);
-	CGrayUID iUid(static_cast<DWORD>(pObj->GetTagDefs()->GetKeyNum("LoyalTo", true)));
+	CGrayUID iUid(static_cast<dword>(pObj->GetTagDefs()->GetKeyNum("LoyalTo", true)));
 	return iUid;
 }
 

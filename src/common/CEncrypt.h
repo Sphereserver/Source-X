@@ -54,11 +54,11 @@ enum ENCRYPTION_TYPE
 class CHuffman
 {
 private:
-	static const WORD sm_xCompress_Base[COMPRESS_TREE_SIZE];
+	static const word sm_xCompress_Base[COMPRESS_TREE_SIZE];
 public:
 	static const char *m_sClassName;
 	
-	static size_t Compress( BYTE * pOutput, const BYTE * pInput, size_t inplen );
+	static size_t Compress( byte * pOutput, const byte * pInput, size_t inplen );
 
 public:
 	CHuffman() { };
@@ -72,9 +72,9 @@ private:
 
 struct CCryptClientKey
 {
-	DWORD m_client;
-	DWORD m_key_1;
-	DWORD m_key_2;
+	dword m_client;
+	dword m_key_1;
+	dword m_key_2;
 	ENCRYPTION_TYPE m_EncType;
 };
 
@@ -84,30 +84,30 @@ public:
 	union CCryptKey
 	{
 		#define CRYPT_GAMESEED_LENGTH	8
-		BYTE  u_cKey[CRYPT_GAMESEED_LENGTH];
-		DWORD u_iKey[2];
+		byte  u_cKey[CRYPT_GAMESEED_LENGTH];
+		dword u_iKey[2];
 	};
 private:
 	bool m_fInit;
 	bool m_fRelayPacket;
-	DWORD m_iClientVersion;
+	dword m_iClientVersion;
 	ENCRYPTION_TYPE m_GameEnc;
 
 protected:
-	DWORD m_MasterHi;
-	DWORD m_MasterLo;
+	dword m_MasterHi;
+	dword m_MasterLo;
 
-	DWORD m_CryptMaskHi;
-	DWORD m_CryptMaskLo;
+	dword m_CryptMaskHi;
+	dword m_CryptMaskLo;
 
-	DWORD m_seed;	// seed ip we got from the client.
+	dword m_seed;	// seed ip we got from the client.
 	
 	CONNECT_TYPE m_ConnectType;
 	
 //	#define TOTAL_CLIENTS 33
-//	static const DWORD client_keys[TOTAL_CLIENTS+2][4];
+//	static const dword client_keys[TOTAL_CLIENTS+2][4];
 
-	static const WORD packet_size[0xde];
+	static const word packet_size[0xde];
 
 public:
 	static void ClearKeyTable(void);
@@ -116,7 +116,7 @@ public:
 	static void addNoCryptKey(void);
 
 	// --------------- Generic -----------------------------------
-	static int GetPacketSize(BYTE packet);
+	static int GetPacketSize(byte packet);
 	// --------------- EOF Generic -------------------------------
 
 protected:
@@ -124,11 +124,11 @@ protected:
 	#define TFISH_RESET 0x100
 	keyInstance tf_key;
 	cipherInstance tf_cipher;
-	BYTE tf_cipherTable[TFISH_RESET];
+	byte tf_cipherTable[TFISH_RESET];
 	int tf_position;
 private:
 	void InitTwoFish();
-	void DecryptTwoFish( BYTE * pOutput, const BYTE * pInput, size_t iLen );
+	void DecryptTwoFish( byte * pOutput, const byte * pInput, size_t iLen );
 	// --------------- EOF TwoFish ----------------------------
 	
 	
@@ -141,8 +141,8 @@ protected:
 	#define CRYPT_GAMETABLE_STEP	3
 	#define CRYPT_GAMETABLE_MODULO	11
 	#define CRYPT_GAMETABLE_TRIGGER	21036
-	static const BYTE sm_key_table[CRYPT_GAMEKEY_COUNT][CRYPT_GAMEKEY_LENGTH];
-	static const BYTE sm_seed_table[2][CRYPT_GAMEKEY_COUNT][2][CRYPT_GAMESEED_LENGTH];
+	static const byte sm_key_table[CRYPT_GAMEKEY_COUNT][CRYPT_GAMEKEY_LENGTH];
+	static const byte sm_seed_table[2][CRYPT_GAMEKEY_COUNT][2][CRYPT_GAMESEED_LENGTH];
 	static bool  sm_fTablesReady;
 public:
 	int	m_gameTable;
@@ -154,8 +154,8 @@ private:
 	void InitSeed( int iTable );
 	static void InitTables();
 	static void PrepareKey( CCrypt::CCryptKey & key, int iTable );
-	void DecryptBlowFish( BYTE * pOutput, const BYTE * pInput, size_t iLen );
-	BYTE DecryptBFByte( BYTE bEnc );
+	void DecryptBlowFish( byte * pOutput, const byte * pInput, size_t iLen );
+	byte DecryptBFByte( byte bEnc );
 	void InitBlowFish();
 	// -------------- EOF BlowFish -----------------------
 
@@ -163,40 +163,40 @@ protected:
 	// -------------------- MD5 ------------------------------
 	#define MD5_RESET 0x0F
 	CMD5 md5_engine;
-	unsigned int md5_position;
-	BYTE md5_digest[16];
+	uint md5_position;
+	byte md5_digest[16];
 protected:
-	void EncryptMD5( BYTE * pOutput, const BYTE * pInput, size_t iLen );
-	void InitMD5(BYTE * ucInitialize);
+	void EncryptMD5( byte * pOutput, const byte * pInput, size_t iLen );
+	void InitMD5(byte * ucInitialize);
 	// ------------------ EOF MD5 ----------------------------
 
 private:
 	// ------------- Old Encryption ----------------------
-	void DecryptOld( BYTE * pOutput, const BYTE * pInput, size_t iLen  );
+	void DecryptOld( byte * pOutput, const byte * pInput, size_t iLen  );
 	// ------------- EOF Old Encryption ------------------
 
 private:
 	int GetVersionFromString( LPCTSTR pszVersion );
 
 private:
-	void SetClientVersion( DWORD iVer );
-	void SetMasterKeys( DWORD hi, DWORD low );
-	void SetCryptMask( DWORD hi, DWORD low );
+	void SetClientVersion( dword iVer );
+	void SetMasterKeys( dword hi, dword low );
+	void SetCryptMask( dword hi, dword low );
 	bool SetConnectType( CONNECT_TYPE ctWho );
 	bool SetEncryptionType( ENCRYPTION_TYPE etWho );
 
 public:
 	char* WriteClientVer( char * pStr ) const;
-	bool SetClientVerEnum( DWORD iVer, bool bSetEncrypt = true );
+	bool SetClientVerEnum( dword iVer, bool bSetEncrypt = true );
 	bool SetClientVerIndex( size_t iVer, bool bSetEncrypt = true );
 	void SetClientVer( const CCrypt & crypt );
 	bool SetClientVer( LPCTSTR pszVersion );
 	static int GetVerFromString( LPCTSTR pszVersion );
-	static int GetVerFromNumber( DWORD maj, DWORD min, DWORD rev, DWORD pat );
-	static char* WriteClientVerString( DWORD iClientVersion, char * pStr );
+	static int GetVerFromNumber( dword maj, dword min, dword rev, dword pat );
+	static char* WriteClientVerString( dword iClientVersion, char * pStr );
 
 public:
-	DWORD GetClientVer() const;
+	dword GetClientVer() const;
 	bool IsValid() const;
 	bool IsInit() const;
 	CONNECT_TYPE GetConnectType() const;
@@ -210,14 +210,14 @@ private:
 	CCrypt& operator=(const CCrypt& other);
 
 public:
-	bool Init( DWORD dwIP, BYTE * pEvent, size_t iLen, bool isclientKr = false );
-	void InitFast( DWORD dwIP, CONNECT_TYPE ctInit, bool fRelay = true );
-	void Decrypt( BYTE * pOutput, const BYTE * pInput, size_t iLen );
-	void Encrypt( BYTE * pOutput, const BYTE * pInput, size_t iLen );
+	bool Init( dword dwIP, byte * pEvent, size_t iLen, bool isclientKr = false );
+	void InitFast( dword dwIP, CONNECT_TYPE ctInit, bool fRelay = true );
+	void Decrypt( byte * pOutput, const byte * pInput, size_t iLen );
+	void Encrypt( byte * pOutput, const byte * pInput, size_t iLen );
 protected:
-	void LoginCryptStart( DWORD dwIP, BYTE * pEvent, size_t iLen );
-	void GameCryptStart( DWORD dwIP, BYTE * pEvent, size_t iLen );
-	void RelayGameCryptStart( BYTE * pOutput, const BYTE * pInput, size_t iLen );
+	void LoginCryptStart( dword dwIP, byte * pEvent, size_t iLen );
+	void GameCryptStart( dword dwIP, byte * pEvent, size_t iLen );
+	void RelayGameCryptStart( byte * pOutput, const byte * pInput, size_t iLen );
 };
 
 #endif // _INC_CENCRYPT_H

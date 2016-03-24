@@ -349,7 +349,7 @@ INT64 CServer::GetAgeHours() const
 	return( CServTime::GetCurrentTime().GetTimeRaw() / (60*60*TICK_PER_SEC));
 }
 
-LPCTSTR CServer::GetStatusString( BYTE iIndex ) const
+LPCTSTR CServer::GetStatusString( byte iIndex ) const
 {
 	ADDTOCALLSTACK("CServer::GetStatusString");
 	// NOTE: The key names should match those in CServerDef::r_LoadVal
@@ -357,7 +357,7 @@ LPCTSTR CServer::GetStatusString( BYTE iIndex ) const
 	// 0 or 0x21 = main status.
 
 	TCHAR * pTemp = Str_GetTemp();
-	DWORD iClients = StatGet(SERV_STAT_CLIENTS);
+	dword iClients = StatGet(SERV_STAT_CLIENTS);
 	INT64 iHours = GetAgeHours() / 24;
 
 	switch ( iIndex )
@@ -983,10 +983,10 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 			pSrc->SysMessagef("Script profiler is not yet informational\n");
 		else
 		{
-			LLONG average = g_profiler.total / g_profiler.called;
+			llong average = g_profiler.total / g_profiler.called;
 			TScriptProfiler::TScriptProfilerFunction * pFun;
 			TScriptProfiler::TScriptProfilerTrigger * pTrig;
-			LLONG divby = llTimeProfileFrequency / 1000;
+			llong divby = llTimeProfileFrequency / 1000;
 
 			pSrc->SysMessagef( "Scripts: called %u times and took %i.%04i msec (%i.%04i msec average). Reporting with highest average.\n",
 					g_profiler.called,
@@ -1393,7 +1393,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 					break;
 				// IMPFLAGS_ITEMS
 				if ( ! g_World.Export( Arg_ppCmd[0], pSrc->GetChar(),
-					(Arg_Qty >= 2) ? static_cast<WORD>(ATOI(Arg_ppCmd[1])) : IMPFLAGS_ITEMS,
+					(Arg_Qty >= 2) ? static_cast<word>(ATOI(Arg_ppCmd[1])) : IMPFLAGS_ITEMS,
 					(Arg_Qty >= 3)? ATOI(Arg_ppCmd[2]) : INT16_MAX ))
 				{
 					pSrc->SysMessage( "Export failed\n" );
@@ -1442,7 +1442,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 				}
 				// IMPFLAGS_ITEMS
 				if ( ! g_World.Import( Arg_ppCmd[0], pSrc->GetChar(),
-					(Arg_Qty >= 2) ? static_cast<WORD>(ATOI(Arg_ppCmd[1])) : IMPFLAGS_BOTH,
+					(Arg_Qty >= 2) ? static_cast<word>(ATOI(Arg_ppCmd[1])) : IMPFLAGS_BOTH,
 					(Arg_Qty>=3)?ATOI(Arg_ppCmd[2]) : INT16_MAX ))
 					pSrc->SysMessage( "Import failed\n" );
 			}
@@ -1591,7 +1591,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 	EXC_ADD_SCRIPTSRC;
 	g_Log.EventDebug("source '%s' char '%s' uid '0%x'\n", (pSrc && pSrc->GetName()) ? pSrc->GetName() : "",
 		(pSrc && pSrc->GetChar()) ? pSrc->GetChar()->GetName() : "",
-		(pSrc && pSrc->GetChar()) ? (DWORD)pSrc->GetChar()->GetUID() : 0 );
+		(pSrc && pSrc->GetChar()) ? (dword)pSrc->GetChar()->GetUID() : 0 );
 	EXC_DEBUG_END;
 	return false;
 }
@@ -1650,7 +1650,7 @@ bool CServer::CommandLine( int argc, TCHAR * argv[] )
 				continue;
 #endif
 			case 'P':
-				m_ip.SetPort(static_cast<WORD>(ATOI(pArg + 1)));
+				m_ip.SetPort(static_cast<word>(ATOI(pArg + 1)));
 				continue;
 			case 'N':
 				// Set the system name.
@@ -1821,7 +1821,7 @@ bool CServer::SocketsInit() // Initialize sockets
 		for ( size_t i = 0; pHost->h_addr_list[i] != NULL; i++ )
 		{
 			CSocketAddressIP ip;
-			ip.SetAddrIP(*((DWORD*)(pHost->h_addr_list[i]))); // 0.1.2.3
+			ip.SetAddrIP(*((dword*)(pHost->h_addr_list[i]))); // 0.1.2.3
 			if ( !m_ip.IsLocalAddr() && !m_ip.IsSameIP(ip) )
 				continue;
 			g_Log.Event(LOGM_INIT, "Monitoring IP %s:%d\n", ip.GetAddrStr(), m_ip.GetPort());

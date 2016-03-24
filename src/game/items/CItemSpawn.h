@@ -21,13 +21,13 @@ public:
 	/* I don't want to inherit SetAmount, GetAmount and m_iAmount from the parent CItem class. I need to redefine them for CItemSpawn class
 	*	so that when i set AMOUNT to the spawn item, i don't really set the "item amount/quantity" property, but the "spawn item AMOUNT" property.
 	*	This way, even if there is a stackable spawn item (default in Enhanced Client), i won't increase the item stack quantity and i can't pick
-	*	from pile the spawn item. Plus, since the max amount of spawnable objects per single spawn item is the max size of a BYTE, we can change
+	*	from pile the spawn item. Plus, since the max amount of spawnable objects per single spawn item is the max size of a byte, we can change
 	*	the data type accepted/returned.
 	*/
-	void SetAmount(BYTE iAmount);
-	BYTE GetAmount();
-	BYTE m_iAmount;				// Amount of objects to spawn.
-	BYTE m_currentSpawned;		// Amount of current objects already spawned. Get it from scripts via COUNT property (read-only).
+	void SetAmount(byte iAmount);
+	byte GetAmount();
+	byte m_iAmount;				// Amount of objects to spawn.
+	byte m_currentSpawned;		// Amount of current objects already spawned. Get it from scripts via COUNT property (read-only).
 
 								/**
 								* @brief Overrides onTick for this class.
@@ -68,7 +68,7 @@ public:
 	*
 	* @return the count of items/chars.
 	*/
-	BYTE GetCount();
+	byte GetCount();
 
 	/**
 	* @brief Removing one UID in Spawn's m_obj[].

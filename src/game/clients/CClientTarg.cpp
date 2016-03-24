@@ -33,12 +33,12 @@ bool CClient::OnTarg_Obj_Set( CObjBase * pObj )
 	{
 		const CItem * pItem = STATIC_CAST <CItem*> (pObj);
 		if ( pItem->GetAmount() > 1 )
-			sprintf(pszLogMsg, "'%s' commands uid=0%x (%s) [amount=%u] to '%s'", GetName(), static_cast<DWORD>(pObj->GetUID()), pObj->GetName(), pItem->GetAmount(), static_cast<LPCTSTR>(m_Targ_Text));
+			sprintf(pszLogMsg, "'%s' commands uid=0%x (%s) [amount=%u] to '%s'", GetName(), static_cast<dword>(pObj->GetUID()), pObj->GetName(), pItem->GetAmount(), static_cast<LPCTSTR>(m_Targ_Text));
 		else
-			sprintf(pszLogMsg, "'%s' commands uid=0%x (%s) to '%s'", GetName(), static_cast<DWORD>(pObj->GetUID()), pObj->GetName(), static_cast<LPCTSTR>(m_Targ_Text));
+			sprintf(pszLogMsg, "'%s' commands uid=0%x (%s) to '%s'", GetName(), static_cast<dword>(pObj->GetUID()), pObj->GetName(), static_cast<LPCTSTR>(m_Targ_Text));
 	}
 	else
-		sprintf(pszLogMsg, "'%s' commands uid=0%x (%s) to '%s'", GetName(), static_cast<DWORD>(pObj->GetUID()), pObj->GetName(), static_cast<LPCTSTR>(m_Targ_Text));
+		sprintf(pszLogMsg, "'%s' commands uid=0%x (%s) to '%s'", GetName(), static_cast<dword>(pObj->GetUID()), pObj->GetName(), static_cast<LPCTSTR>(m_Targ_Text));
 
 	// Check priv level for the new verb.
 	if ( ! g_Cfg.CanUsePrivVerb( pObj, m_Targ_Text, this ))
@@ -295,7 +295,7 @@ bool CClient::OnTarg_UnExtract( CObjBase * pObj, const CPointMap & pt )
 		if ( pItem == NULL )
 			return( false );
 
-		CPointMap ptOffset( static_cast<WORD>(piCmd[0]), static_cast<WORD>(piCmd[1]), static_cast<signed char>(piCmd[2]) );
+		CPointMap ptOffset( static_cast<word>(piCmd[0]), static_cast<word>(piCmd[1]), static_cast<signed char>(piCmd[2]) );
 		ptOffset += pt;
 		ptOffset.m_map = pt.m_map;
 		pItem->MoveToUpdate( ptOffset );
@@ -441,7 +441,7 @@ int CClient::Cmd_Extract( CScript * pScript, CRectMap &rect, int & zlowest )
 	{
 		for ( int my = rect.m_top; my <= rect.m_bottom; my++)
 		{
-			CPointMap ptCur(static_cast<WORD>(mx), static_cast<WORD>(my), 0, static_cast<unsigned char>(rect.m_map));
+			CPointMap ptCur(static_cast<word>(mx), static_cast<word>(my), 0, static_cast<uchar>(rect.m_map));
 			const CGrayMapBlock * pBlock = g_World.GetMapBlock( ptCur );
 			if ( pBlock == NULL )
 				continue;
@@ -590,7 +590,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 			INT64 piArgs[3];		// Maximum parameters in one line
 			Str_ParseCmds( szTmp, piArgs, COUNTOF( piArgs ));
 
-			CPointMap ptNudge(static_cast<WORD>(piArgs[0]),static_cast<WORD>(piArgs[1]),static_cast<signed char>(piArgs[2]) );
+			CPointMap ptNudge(static_cast<word>(piArgs[0]),static_cast<word>(piArgs[1]),static_cast<signed char>(piArgs[2]) );
 
 			CWorldSearch AreaItem( ptCtr, iRadius );
 			AreaItem.SetAllShow( IsPriv( PRIV_ALLSHOW ));
@@ -706,7 +706,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 					CItem * pItem = CItem::CreateTemplate(static_cast<ITEMID_TYPE>(RES_GET_INDEX(piArgs[iArg])), NULL, m_pChar);
 					ASSERT(pItem);
 					pItem->SetAttr( ATTR_MOVE_NEVER );
-					CPointMap ptCur(static_cast<WORD>(mx), static_cast<WORD>(my), z, pt.m_map);
+					CPointMap ptCur(static_cast<word>(mx), static_cast<word>(my), z, pt.m_map);
 					pItem->MoveToUpdate( ptCur );
 					iCount++;
 				}
@@ -905,7 +905,7 @@ int CClient::OnSkill_EvalInt( CGrayUID uid, int iSkillLevel, bool fTest )
 	int iIntEntry = (iIntVal-1) / 10;
 	if ( iIntEntry < 0 )
 		iIntEntry = 0;
-	if ( static_cast<unsigned int>(iIntEntry) >= COUNTOF( sm_szIntDesc ))
+	if ( static_cast<uint>(iIntEntry) >= COUNTOF( sm_szIntDesc ))
 		iIntEntry = COUNTOF( sm_szIntDesc )-1;
 
 	SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_EVALINT_RESULT ), pChar->GetName(), sm_szIntDesc[iIntEntry]);
@@ -939,7 +939,7 @@ int CClient::OnSkill_EvalInt( CGrayUID uid, int iSkillLevel, bool fTest )
 		int iMagicEntry = iMagicSkill / 200;
 		if ( iMagicEntry < 0 )
 			iMagicEntry = 0;
-		if ( static_cast<unsigned int>(iMagicEntry) >= COUNTOF(sm_szMagicDesc))
+		if ( static_cast<uint>(iMagicEntry) >= COUNTOF(sm_szMagicDesc))
 			iMagicEntry = COUNTOF(sm_szMagicDesc)-1;
 
 		int iManaEntry = 0;
@@ -948,7 +948,7 @@ int CClient::OnSkill_EvalInt( CGrayUID uid, int iSkillLevel, bool fTest )
 
 		if ( iManaEntry < 0 )
 			iManaEntry = 0;
-		if ( static_cast<unsigned int>(iManaEntry) >= COUNTOF(sm_szManaDesc))
+		if ( static_cast<uint>(iManaEntry) >= COUNTOF(sm_szManaDesc))
 			iManaEntry = COUNTOF(sm_szManaDesc)-1;
 
 		SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_EVALINT_RESULT_2 ), static_cast<LPCTSTR>(sm_szMagicDesc[iMagicEntry]), static_cast<LPCTSTR>(sm_szManaDesc[iManaEntry]));
@@ -1051,7 +1051,7 @@ int CClient::OnSkill_ArmsLore( CGrayUID uid, int iSkillLevel, bool fTest )
 	// Poisoned ?
 	if ( fWeapon && pItem->m_itWeapon.m_poison_skill )
 	{
-		unsigned int iLevel = IMULDIV( pItem->m_itWeapon.m_poison_skill, COUNTOF(sm_szPoisonMessages), 100 );
+		uint iLevel = IMULDIV( pItem->m_itWeapon.m_poison_skill, COUNTOF(sm_szPoisonMessages), 100 );
 		if ( iLevel >= COUNTOF(sm_szPoisonMessages))
 			iLevel = COUNTOF(sm_szPoisonMessages) - 1;
 		len += sprintf( pszTemp+len, " %s", sm_szPoisonMessages[iLevel] );
@@ -1113,14 +1113,14 @@ int CClient::OnSkill_Anatomy( CGrayUID uid, int iSkillLevel, bool fTest )
 	int iStrEntry = (iStrVal-1)/10;
 	if ( iStrEntry < 0 )
 		iStrEntry = 0;
-	if ( static_cast<unsigned int>(iStrEntry) >= COUNTOF( sm_szStrEval ))
+	if ( static_cast<uint>(iStrEntry) >= COUNTOF( sm_szStrEval ))
 		iStrEntry = COUNTOF( sm_szStrEval )-1;
 
 	int iDexVal = pChar->Stat_GetAdjusted(STAT_DEX);
 	int iDexEntry = (iDexVal-1)/10;
 	if ( iDexEntry < 0 )
 		iDexEntry = 0;
-	if ( static_cast<unsigned int>(iDexEntry) >= COUNTOF( sm_szDexEval ))
+	if ( static_cast<uint>(iDexEntry) >= COUNTOF( sm_szDexEval ))
 		iDexEntry = COUNTOF( sm_szDexEval )-1;
 
 	TCHAR * pszTemp = Str_GetTemp();
@@ -1214,7 +1214,7 @@ int CClient::OnSkill_TasteID( CGrayUID uid, int iSkillLevel, bool fTest )
 		return( -SKTRIG_QTY );
 	}
 
-	unsigned int iPoisonLevel = 0;
+	uint iPoisonLevel = 0;
 	switch ( pItem->GetType())
 	{
 		case IT_POTION:
@@ -1251,7 +1251,7 @@ int CClient::OnSkill_TasteID( CGrayUID uid, int iSkillLevel, bool fTest )
 
 	if ( iPoisonLevel )
 	{
-		unsigned int iLevel = IMULDIV( iPoisonLevel, COUNTOF(sm_szPoisonMessages), 1000 );
+		uint iLevel = IMULDIV( iPoisonLevel, COUNTOF(sm_szPoisonMessages), 1000 );
 		if ( iLevel >= COUNTOF(sm_szPoisonMessages))
 			iLevel = COUNTOF(sm_szPoisonMessages) - 1;
 		SysMessage( sm_szPoisonMessages[iLevel] );
@@ -1452,7 +1452,7 @@ bool CClient::OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt )
 	m_pChar->m_atMagery.m_SummonID		= m_tmSkillMagery.m_SummonID;
 
 	m_pChar->m_Act_TargPrv				= m_Targ_PrvUID;	// Source (wand or you?)
-	m_pChar->m_Act_Targ					= pObj ? (DWORD) pObj->GetUID() : UID_CLEAR ;
+	m_pChar->m_Act_Targ					= pObj ? (dword) pObj->GetUID() : UID_CLEAR ;
 	m_pChar->m_Act_p					= pt;
 	m_Targ_p							= pt;
 
@@ -1597,7 +1597,7 @@ bool CClient::OnTarg_Use_Deed( CItem * pDeed, const CPointMap & pt )
 	return true;
 }
 
-CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, const CPointMap & pt, DWORD dwAttr, HUE_TYPE wHue )
+CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, const CPointMap & pt, dword dwAttr, HUE_TYPE wHue )
 {
 	ADDTOCALLSTACK("CClient::OnTarg_Use_Multi");
 	// Might be a IT_MULTI or it might not. place it anyhow.
@@ -1641,7 +1641,7 @@ CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, const CPointMap &
 					if ( ! IsPriv( PRIV_GM )) return( NULL );
 				}
 
-				DWORD wBlockFlags = ( fShip ) ? CAN_C_SWIM : CAN_C_WALK;
+				dword wBlockFlags = ( fShip ) ? CAN_C_SWIM : CAN_C_WALK;
 				ptn.m_z = g_World.GetHeightPoint2( ptn, wBlockFlags, true ); //hm...should really use the 2nd function ? it does fixed #2373
 				if ( abs( ptn.m_z - pt.m_z ) > 4 )
 				{
@@ -2262,7 +2262,7 @@ static LPCTSTR const sm_Txt_LoomUse[] =
 			iUsed = pItemUse->ConsumeAmount( iNeed );
 		}
 
-		if ( static_cast<unsigned int>(iHave  + iUsed) < (COUNTOF( sm_Txt_LoomUse ) - 1) )
+		if ( static_cast<uint>(iHave  + iUsed) < (COUNTOF( sm_Txt_LoomUse ) - 1) )
 		{
 			pItemTarg->m_itLoom.m_ClothQty += iUsed;
 			SysMessage( sm_Txt_LoomUse[ pItemTarg->m_itLoom.m_ClothQty ] );
@@ -2546,7 +2546,7 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 	sprintf(sTemp, g_Cfg.GetDefaultMsg( DEFMSG_PARTY_INVITE_TARG ), m_pChar->GetName());
 	pChar->SysMessage( sTemp );
 
-	m_pChar->SetKeyNum("PARTY_LASTINVITE", static_cast<DWORD>(pChar->GetUID()));
+	m_pChar->SetKeyNum("PARTY_LASTINVITE", static_cast<dword>(pChar->GetUID()));
 	m_pChar->SetKeyNum("PARTY_LASTINVITETIME", g_World.GetCurrentTime().GetTimeRaw() + (Calc_GetRandVal2(2,5) * TICK_PER_SEC));
 
 	new PacketPartyInvite(pChar->GetClient(), m_pChar);

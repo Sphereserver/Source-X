@@ -473,7 +473,7 @@ bool CRegionBase::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pS
 					if ( pSector == NULL ) break;
 					iClients += pSector->m_Chars_Active.HasClients();
 				}
-				sVal.FormatVal(static_cast<long>(iClients));
+				sVal.FormatVal(static_cast<int>(iClients));
 				break;
 			}
 		case RC_EVENTS:
@@ -533,7 +533,7 @@ bool CRegionBase::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pS
 				pszKey += 4;
 				if ( *pszKey == '\0' )
 				{
-					sVal.FormatVal( static_cast<long>(iQty));
+					sVal.FormatVal( static_cast<int>(iQty));
 					return true;
 				}
 				SKIP_SEPARATORS( pszKey );
@@ -557,7 +557,7 @@ bool CRegionBase::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pS
 			sVal.FormatVal( IsFlag(REGION_FLAG_SAFE));
 			break;
 		case RC_TAGCOUNT:
-			sVal.FormatVal( static_cast<long>(m_TagDefs.GetCount()) );
+			sVal.FormatVal( static_cast<int>(m_TagDefs.GetCount()) );
 			break;
 		case RC_TAGAT:
 			{
@@ -698,7 +698,7 @@ bool CRegionBase::r_LoadVal( CScript & s )
 			TogRegionFlags( REGION_ANTIMAGIC_ALL, ! s.GetArgVal());
 			break;
 		case RC_MAP:
-			m_pt.m_map = static_cast<unsigned char>(s.GetArgVal());
+			m_pt.m_map = static_cast<uchar>(s.GetArgVal());
 			break;
 		case RC_MARK:
 		case RC_RECALLIN:

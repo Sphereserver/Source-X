@@ -22,14 +22,14 @@ struct CBaseBaseDef : public CResourceLink
 	static LPCTSTR const sm_szLoadKeys[];
 	// Base type of both CItemBase and CCharBase
 protected:
-	DWORD m_dwDispIndex;	// The base artwork id. (may be the same as GetResourceID() in base set.) but can also be "flipped"
+	dword m_dwDispIndex;	// The base artwork id. (may be the same as GetResourceID() in base set.) but can also be "flipped"
 	CGString m_sName;		// default type name. (ei, "human" vs specific "Dennis")
 private:
 	height_t	m_Height;
 	// -------------- ResLevel -------------
-	BYTE	m_ResLevel;
+	byte	m_ResLevel;
 	HUE_TYPE 	m_ResDispDnHue;
-	WORD		m_ResDispDnId;
+	word		m_ResDispDnId;
 	// -------------------------------------
 	
 public:
@@ -40,15 +40,15 @@ public:
 	CResourceRefArray	m_TEvents;			// Action or motivation type indexes. (NPC only)
 
 	CResourceQtyArray	m_BaseResources;	// RESOURCES=10 MEAT (What is this made of)
-	//WORD				m_range;
+	//word				m_range;
 
-	WORD    m_attackBase;	// base attack for weapons/chars. not magic plus
-	WORD	m_attackRange;	// variable range of attack damage.
+	word    m_attackBase;	// base attack for weapons/chars. not magic plus
+	word	m_attackRange;	// variable range of attack damage.
 
-	WORD	m_defenseBase;
-	WORD	m_defenseRange;
+	word	m_defenseBase;
+	word	m_defenseRange;
 
-	DWORD	m_Can;			// Base attribute flags. CAN_C_GHOST
+	dword	m_Can;			// Base attribute flags. CAN_C_GHOST
 
 public:
 	LPCTSTR GetDefStr( LPCTSTR pszKey, bool fZero = false ) const
@@ -150,7 +150,7 @@ public:
 	virtual LPCTSTR GetName() const;
 	bool HasTypeName() const;
 	virtual void SetTypeName( LPCTSTR pszName );
-	bool Can( WORD wCan ) const;
+	bool Can( word wCan ) const;
 	virtual void UnLink();
 
 	virtual bool r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc = NULL );
@@ -158,20 +158,20 @@ public:
 
 	bool IsValid() const;
 
-	BYTE	RangeL() const;
+	byte	RangeL() const;
 
-	BYTE	RangeH() const;
+	byte	RangeH() const;
 
 	height_t GetHeight() const;
 	void SetHeight( height_t Height );
 	
 	// -------------- ResLevel -------------
-	BYTE GetResLevel() const;
-	bool SetResLevel( BYTE ResLevel );
+	byte GetResLevel() const;
+	bool SetResLevel( byte ResLevel );
 	HUE_TYPE GetResDispDnHue() const;
 	void SetResDispDnHue( HUE_TYPE ResDispDnHue );
-	WORD GetResDispDnId() const;
-	void SetResDispDnId( WORD ResDispDnId );
+	word GetResDispDnId() const;
+	void SetResDispDnId( word ResDispDnId );
 	// -------------------------------------
 
 	void CopyBasic( const CBaseBaseDef * pSrc );

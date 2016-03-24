@@ -30,7 +30,7 @@ Packet::Packet(const Packet& other) : m_buffer(NULL)
 	copy(other);
 }
 
-Packet::Packet(const BYTE* data, size_t size) : m_buffer(NULL)
+Packet::Packet(const byte* data, size_t size) : m_buffer(NULL)
 {
 	clear();
 	m_expectedLength = 0;
@@ -58,12 +58,12 @@ size_t Packet::getPosition(void) const
 	return m_position;
 }
 
-BYTE* Packet::getData(void) const
+byte* Packet::getData(void) const
 {
 	return m_buffer;
 }
 
-BYTE* Packet::getRemainingData(void) const
+byte* Packet::getRemainingData(void) const
 {
 	if (m_position >= m_length)
 		return NULL;
@@ -110,7 +110,7 @@ void Packet::resize(size_t newsize)
 	ASSERT(newsize > 0);
 	if ( newsize > m_bufferSize )		// increase buffer, copying the contents
 	{
-		BYTE* buffer = new BYTE[newsize];
+		byte* buffer = new byte[newsize];
 		if (m_buffer != NULL)
 		{
 			memcpy(buffer, m_buffer, m_bufferSize);
@@ -142,13 +142,13 @@ void Packet::skip(int count)
 		m_position += count;
 }
 
-BYTE &Packet::operator[](size_t index)
+byte &Packet::operator[](size_t index)
 {
 	ASSERT(index <= m_length);
 	return m_buffer[index];
 }
 
-const BYTE &Packet::operator[](size_t index) const
+const byte &Packet::operator[](size_t index) const
 {
 	ASSERT(index <= m_length);
 	return m_buffer[index];
@@ -156,11 +156,11 @@ const BYTE &Packet::operator[](size_t index) const
 
 void Packet::writeBool(const bool value)
 {
-	if ((m_position + sizeof(BYTE)) > m_bufferSize)
-		expand(sizeof(BYTE));
+	if ((m_position + sizeof(byte)) > m_bufferSize)
+		expand(sizeof(byte));
 
-	ASSERT((m_position + sizeof(BYTE)) <= m_bufferSize);
-	m_buffer[m_position++] = (BYTE)(value ? 1 : 0);
+	ASSERT((m_position + sizeof(byte)) <= m_bufferSize);
+	m_buffer[m_position++] = (byte)(value ? 1 : 0);
 }
 
 void Packet::writeCharASCII(const char value)
@@ -169,7 +169,7 @@ void Packet::writeCharASCII(const char value)
 		expand(sizeof(char));
 	
 	ASSERT((m_position + sizeof(char)) <= m_bufferSize);
-	m_buffer[m_position++] = (BYTE)(value);
+	m_buffer[m_position++] = (byte)(value);
 }
 
 void Packet::writeCharUNICODE(const WCHAR value)
@@ -178,8 +178,8 @@ void Packet::writeCharUNICODE(const WCHAR value)
 		expand(sizeof(WCHAR));
 	
 	ASSERT((m_position + sizeof(WCHAR)) <= m_bufferSize);
-	m_buffer[m_position++] = (BYTE)(value);
-	m_buffer[m_position++] = (BYTE)(value >> 8);
+	m_buffer[m_position++] = (byte)(value);
+	m_buffer[m_position++] = (byte)(value >> 8);
 }
 
 void Packet::writeCharNUNICODE(const WCHAR value)
@@ -188,49 +188,49 @@ void Packet::writeCharNUNICODE(const WCHAR value)
 		expand(sizeof(WCHAR));
 	
 	ASSERT((m_position + sizeof(WCHAR)) <= m_bufferSize);
-	m_buffer[m_position++] = (BYTE)(value >> 8);
-	m_buffer[m_position++] = (BYTE)(value);
+	m_buffer[m_position++] = (byte)(value >> 8);
+	m_buffer[m_position++] = (byte)(value);
 }
 
-void Packet::writeByte(const BYTE value)
+void Packet::writeByte(const byte value)
 {
-	if ((m_position + sizeof(BYTE)) > m_bufferSize)
-		expand(sizeof(BYTE));
+	if ((m_position + sizeof(byte)) > m_bufferSize)
+		expand(sizeof(byte));
 	
-	ASSERT((m_position + sizeof(BYTE)) <= m_bufferSize);
+	ASSERT((m_position + sizeof(byte)) <= m_bufferSize);
 	m_buffer[m_position++] = value;
 }
 
-void Packet::writeData(const BYTE* buffer, size_t size)
+void Packet::writeData(const byte* buffer, size_t size)
 {
-	if ((m_position + (sizeof(BYTE) * size)) > m_bufferSize)
-		expand((sizeof(BYTE) * size));
+	if ((m_position + (sizeof(byte) * size)) > m_bufferSize)
+		expand((sizeof(byte) * size));
 	
-	ASSERT((m_position + (sizeof(BYTE) * size)) <= m_bufferSize);
-	memcpy(&m_buffer[m_position], buffer, sizeof(BYTE) * size);
+	ASSERT((m_position + (sizeof(byte) * size)) <= m_bufferSize);
+	memcpy(&m_buffer[m_position], buffer, sizeof(byte) * size);
 	m_position += size;
 }
 
-void Packet::writeInt16(const WORD value)
+void Packet::writeInt16(const word value)
 {
-	if ((m_position + sizeof(WORD)) > m_bufferSize)
-		expand(sizeof(WORD));
+	if ((m_position + sizeof(word)) > m_bufferSize)
+		expand(sizeof(word));
 	
-	ASSERT((m_position + sizeof(WORD)) <= m_bufferSize);
-	m_buffer[m_position++] = (BYTE)(value >> 8);
-	m_buffer[m_position++] = (BYTE)(value);
+	ASSERT((m_position + sizeof(word)) <= m_bufferSize);
+	m_buffer[m_position++] = (byte)(value >> 8);
+	m_buffer[m_position++] = (byte)(value);
 }
 
-void Packet::writeInt32(const DWORD value)
+void Packet::writeInt32(const dword value)
 {
-	if ((m_position + sizeof(DWORD)) > m_bufferSize)
-		expand(sizeof(DWORD));
+	if ((m_position + sizeof(dword)) > m_bufferSize)
+		expand(sizeof(dword));
 	
-	ASSERT((m_position + sizeof(DWORD)) <= m_bufferSize);
-	m_buffer[m_position++] = (BYTE)(value >> 24);
-	m_buffer[m_position++] = (BYTE)(value >> 16);
-	m_buffer[m_position++] = (BYTE)(value >> 8);
-	m_buffer[m_position++] = (BYTE)(value);
+	ASSERT((m_position + sizeof(dword)) <= m_bufferSize);
+	m_buffer[m_position++] = (byte)(value >> 24);
+	m_buffer[m_position++] = (byte)(value >> 16);
+	m_buffer[m_position++] = (byte)(value >> 8);
+	m_buffer[m_position++] = (byte)(value);
 }
 
 void Packet::writeInt64(const INT64 value)
@@ -239,30 +239,30 @@ void Packet::writeInt64(const INT64 value)
 		expand(sizeof(INT64));
 	
 	ASSERT((m_position + sizeof(INT64)) <= m_bufferSize);
-	m_buffer[m_position++] = (BYTE)(value >> 56);
-	m_buffer[m_position++] = (BYTE)(value >> 48);
-	m_buffer[m_position++] = (BYTE)(value >> 40);
-	m_buffer[m_position++] = (BYTE)(value >> 32);
-	m_buffer[m_position++] = (BYTE)(value >> 24);
-	m_buffer[m_position++] = (BYTE)(value >> 16);
-	m_buffer[m_position++] = (BYTE)(value >> 8);
-	m_buffer[m_position++] = (BYTE)(value);
+	m_buffer[m_position++] = (byte)(value >> 56);
+	m_buffer[m_position++] = (byte)(value >> 48);
+	m_buffer[m_position++] = (byte)(value >> 40);
+	m_buffer[m_position++] = (byte)(value >> 32);
+	m_buffer[m_position++] = (byte)(value >> 24);
+	m_buffer[m_position++] = (byte)(value >> 16);
+	m_buffer[m_position++] = (byte)(value >> 8);
+	m_buffer[m_position++] = (byte)(value);
 }
 
-void Packet::writeInt64(const DWORD hi, const DWORD lo)
+void Packet::writeInt64(const dword hi, const dword lo)
 {
 	if ((m_position + sizeof(INT64)) > m_bufferSize)
 		expand(sizeof(INT64));
 	
 	ASSERT((m_position + sizeof(INT64)) <= m_bufferSize);
-	m_buffer[m_position++] = (BYTE)(hi);
-	m_buffer[m_position++] = (BYTE)(hi >> 8);
-	m_buffer[m_position++] = (BYTE)(hi >> 16);
-	m_buffer[m_position++] = (BYTE)(hi >> 24);
-	m_buffer[m_position++] = (BYTE)(lo);
-	m_buffer[m_position++] = (BYTE)(lo >> 8);
-	m_buffer[m_position++] = (BYTE)(lo >> 16);
-	m_buffer[m_position++] = (BYTE)(lo >> 24);
+	m_buffer[m_position++] = (byte)(hi);
+	m_buffer[m_position++] = (byte)(hi >> 8);
+	m_buffer[m_position++] = (byte)(hi >> 16);
+	m_buffer[m_position++] = (byte)(hi >> 24);
+	m_buffer[m_position++] = (byte)(lo);
+	m_buffer[m_position++] = (byte)(lo >> 8);
+	m_buffer[m_position++] = (byte)(lo >> 16);
+	m_buffer[m_position++] = (byte)(lo >> 24);
 }
 
 void Packet::writeStringASCII(const char* value, bool terminate)
@@ -624,7 +624,7 @@ void Packet::trim(void)
 
 bool Packet::readBool(void)
 {
-	if ((m_position + sizeof(BYTE)) > m_length)
+	if ((m_position + sizeof(byte)) > m_length)
 		return false;
 
 	return (m_buffer[m_position++] != 0);
@@ -662,32 +662,32 @@ WCHAR Packet::readCharNUNICODE(void)
 	return wc;
 }
 
-BYTE Packet::readByte(void)
+byte Packet::readByte(void)
 {
-	if ((m_position + sizeof(BYTE)) > m_length)
+	if ((m_position + sizeof(byte)) > m_length)
 		return 0;
 
 	return m_buffer[m_position++];
 }
 
-WORD Packet::readInt16(void)
+word Packet::readInt16(void)
 {
-	if ((m_position + sizeof(WORD)) > m_length)
+	if ((m_position + sizeof(word)) > m_length)
 		return 0;
 
-	WORD w =(( m_buffer[m_position] <<  8 ) |
+	word w =(( m_buffer[m_position] <<  8 ) |
 			 ( m_buffer[m_position + 1]));
 
 	m_position += 2;
 	return w;
 }
 
-DWORD Packet::readInt32(void)
+dword Packet::readInt32(void)
 {
-	if ((m_position + sizeof(DWORD)) > m_length)
+	if ((m_position + sizeof(dword)) > m_length)
 		return 0;
 
-	DWORD dw = ((m_buffer[m_position] << 24) |
+	dword dw = ((m_buffer[m_position] << 24) |
 			   (m_buffer[m_position + 1] << 16) |
 			   (m_buffer[m_position + 2] << 8) |
 			   (m_buffer[m_position + 3]));
@@ -701,8 +701,8 @@ INT64 Packet::readInt64(void)
 	if ((m_position + sizeof(INT64)) > m_length)
 		return 0;
 
-	DWORD dwHigh = readInt32();
-	DWORD dwLow = readInt32();
+	dword dwHigh = readInt32();
+	dword dwLow = readInt32();
 	INT64 qw = ((INT64)dwHigh << 32) + dwLow;
 	return qw;
 }
@@ -997,7 +997,7 @@ void Packet::dump(AbstractString& output) const
 	output.append("        0  1  2  3  4  5  6  7   8  9  A  B  C  D  E  F\n");
 	output.append("       -- -- -- -- -- -- -- --  -- -- -- -- -- -- -- --\n");
 
-	unsigned int byteIndex = 0;
+	uint byteIndex = 0;
 	size_t whole = m_length >> 4;
 	size_t rem = m_length & 0x0f;
 	size_t idx = 0;
@@ -1012,7 +1012,7 @@ void Packet::dump(AbstractString& output) const
 
 		for (size_t j = 0; j < 16; j++)
 		{
-			BYTE c = m_buffer[idx++];
+			byte c = m_buffer[idx++];
 			PROTECT_BYTE(c);
 
 			sprintf(z, "%02x", static_cast<int>(c));
@@ -1046,7 +1046,7 @@ void Packet::dump(AbstractString& output) const
 		{
 			if (j < rem)
 			{
-				BYTE c = m_buffer[idx++];
+				byte c = m_buffer[idx++];
 				PROTECT_BYTE(c);
 
 				sprintf(z, "%02x", static_cast<int>(c));
@@ -1125,7 +1125,7 @@ bool Packet::onReceive(NetState* client)
  *
  *
  ***************************************************************************/
-PacketSend::PacketSend(BYTE id, size_t len, Priority priority)
+PacketSend::PacketSend(byte id, size_t len, Priority priority)
 	: m_priority(priority), m_target(NULL), m_lengthPosition(0)
 {
 	if (len > 0)
@@ -1148,7 +1148,7 @@ void PacketSend::initLength(void)
 //	DEBUGNETWORK(("Packet %x starts dynamic with pos %d.\n", m_buffer[0], m_position));
 
 	m_lengthPosition = m_position;
-	writeInt16(static_cast<WORD>(m_lengthPosition));
+	writeInt16(static_cast<word>(m_lengthPosition));
 }
 
 void PacketSend::fixLength()
@@ -1159,7 +1159,7 @@ void PacketSend::fixLength()
 
 		size_t oldPosition = m_position;
 		m_position = m_lengthPosition;
-		writeInt16(static_cast<WORD>(oldPosition));
+		writeInt16(static_cast<word>(oldPosition));
 		m_position = oldPosition;
 		m_lengthPosition = 0;
 		m_length = m_position;

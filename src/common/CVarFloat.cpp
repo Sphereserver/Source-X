@@ -656,9 +656,9 @@ RealType CVarFloat::GetSingle( LPCTSTR & pArgs )
 	}
 	long long lVal;
 	if ( g_Exp.m_VarGlobals.GetParseVal( pArgs, &lVal ) )
-		return( static_cast<long>(lVal) );
+		return( static_cast<int>(lVal) );
 	if ( g_Exp.m_VarDefs.GetParseVal( pArgs, &lVal ) )
-		return( static_cast<long>(lVal) );
+		return( static_cast<int>(lVal) );
 	return 0;
 }
 
@@ -802,7 +802,7 @@ CLocalObjMap::~CLocalObjMap()
 	m_ObjMap.clear();
 }
 
-CObjBase * CLocalObjMap::Get( unsigned short Number )
+CObjBase * CLocalObjMap::Get( ushort Number )
 {
 	ADDTOCALLSTACK("CLocalObjMap::Get");
 	if ( !Number )
@@ -813,7 +813,7 @@ CObjBase * CLocalObjMap::Get( unsigned short Number )
 	return i->second;
 }
 
-bool CLocalObjMap::Insert( unsigned short Number, CObjBase * pObj, bool ForceSet )
+bool CLocalObjMap::Insert( ushort Number, CObjBase * pObj, bool ForceSet )
 {
 	ADDTOCALLSTACK("CLocalObjMap::Insert");
 	if ( !Number )

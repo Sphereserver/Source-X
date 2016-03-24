@@ -35,12 +35,12 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 					CClient::OpenedContainerMap_t::iterator itContainerFound = m_openedContainers.find(pContainer->GetUID().GetPrivateUID());
 					if ( itContainerFound != m_openedContainers.end() )
 					{
-						DWORD dwTopContainerUID = (((*itContainerFound).second).first).first;
-						DWORD dwTopMostContainerUID = (((*itContainerFound).second).first).second;
+						dword dwTopContainerUID = (((*itContainerFound).second).first).first;
+						dword dwTopMostContainerUID = (((*itContainerFound).second).first).second;
 						CPointMap ptOpenedContainerPosition = ((*itContainerFound).second).second;
 						const CObjBaseTemplate *pObjTop = pItem->GetTopLevelObj();
 
-						DWORD dwTopContainerUID_ToCheck = 0;
+						dword dwTopContainerUID_ToCheck = 0;
 						if ( pContainer->GetContainer() )
 							dwTopContainerUID_ToCheck = pContainer->GetContainer()->GetUID().GetPrivateUID();
 						else
@@ -632,7 +632,7 @@ void CClient::Cmd_EditItem( CObjBase *pObj, int iSelect )
 		m_tmMenu.m_Item[count] = pItem->GetUID();
 		item[count].m_sText = pItem->GetName();
 		ITEMID_TYPE idi = pItem->GetDispID();
-		item[count].m_id = static_cast<WORD>(idi);
+		item[count].m_id = static_cast<word>(idi);
 		item[count].m_color = 0;
 
 		if ( !pItem->IsType(IT_EQ_MEMORY_OBJ) )
@@ -1036,7 +1036,7 @@ bool CClient::Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase *pSrc )
 	}
 }
 
-bool CClient::Cmd_Skill_Tracking( unsigned int track_sel, bool fExec )
+bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 {
 	ADDTOCALLSTACK("CClient::Cmd_Skill_Tracking");
 	// look around for stuff.
@@ -1146,7 +1146,7 @@ bool CClient::Cmd_Skill_Tracking( unsigned int track_sel, bool fExec )
 			}
 
 			count++;
-			item[count].m_id = static_cast<WORD>(pCharDef->m_trackID);
+			item[count].m_id = static_cast<word>(pCharDef->m_trackID);
 			item[count].m_color = 0;
 			item[count].m_sText = pChar->GetName();
 			m_tmMenu.m_Item[count] = pChar->GetUID();
@@ -1371,12 +1371,12 @@ bool CClient::Cmd_SecureTrade( CChar *pChar, CItem *pItem )
 		PacketTradeAction cmd2(SECURE_TRADE_UPDATELEDGER);
 		if ( GetNetState()->isClientVersion(MINCLIVER_NEWSECURETRADE) )
 		{
-			cmd2.prepareUpdateLedger(pCont1, static_cast<DWORD>(m_pChar->m_virtualGold % 1000000000), static_cast<DWORD>(m_pChar->m_virtualGold / 1000000000));
+			cmd2.prepareUpdateLedger(pCont1, static_cast<dword>(m_pChar->m_virtualGold % 1000000000), static_cast<dword>(m_pChar->m_virtualGold / 1000000000));
 			cmd2.send(this);
 		}
 		if ( pChar->GetClient()->GetNetState()->isClientVersion(MINCLIVER_NEWSECURETRADE) )
 		{
-			cmd2.prepareUpdateLedger(pCont2, static_cast<DWORD>(pChar->m_virtualGold % 1000000000), static_cast<DWORD>(pChar->m_virtualGold / 1000000000));
+			cmd2.prepareUpdateLedger(pCont2, static_cast<dword>(pChar->m_virtualGold % 1000000000), static_cast<dword>(pChar->m_virtualGold / 1000000000));
 			cmd2.send(pChar->GetClient());
 		}
 	}

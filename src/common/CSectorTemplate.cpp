@@ -264,7 +264,7 @@ bool CSectorBase::IsInDungeon() const
 	return ( pRegion && pRegion->IsFlag(REGION_FLAG_UNDERGROUND) );
 }
 
-CRegionBase * CSectorBase::GetRegion( const CPointBase & pt, DWORD dwType ) const
+CRegionBase * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) const
 {
 	ADDTOCALLSTACK("CSectorBase::GetRegion");
 	// Does it match the mask of types we care about ?
@@ -313,7 +313,7 @@ CRegionBase * CSectorBase::GetRegion( const CPointBase & pt, DWORD dwType ) cons
 }
 
 // Balkon: get regions list (to cicle through intercepted house regions)
-size_t CSectorBase::GetRegions( const CPointBase & pt, DWORD dwType, CRegionLinks & rlist ) const
+size_t CSectorBase::GetRegions( const CPointBase & pt, dword dwType, CRegionLinks & rlist ) const
 {
 	ADDTOCALLSTACK("CSectorBase::GetRegions");
 	size_t iQty = m_RegionLinks.GetCount();
@@ -444,7 +444,7 @@ bool CSectorBase::AddTeleport( CTeleport * pTeleport )
 	return( true );
 }
 
-bool CSectorBase::IsFlagSet( DWORD dwFlag ) const
+bool CSectorBase::IsFlagSet( dword dwFlag ) const
 {
 	return(( m_dwFlags & dwFlag) ? true : false );
 }
@@ -454,10 +454,10 @@ CPointMap CSectorBase::GetBasePoint() const
 	ADDTOCALLSTACK("CSectorBase::GetBasePoint");
 	// What is the coord base of this sector. upper left point.
 	ASSERT( m_index >= 0 && m_index < g_MapList.GetSectorQty(m_map) );
-	CPointMap pt(( static_cast<WORD>((m_index % g_MapList.GetSectorCols(m_map)) * g_MapList.GetSectorSize(m_map))),
-		static_cast<WORD>((m_index / g_MapList.GetSectorCols(m_map)) * g_MapList.GetSectorSize(m_map)),
+	CPointMap pt(( static_cast<word>((m_index % g_MapList.GetSectorCols(m_map)) * g_MapList.GetSectorSize(m_map))),
+		static_cast<word>((m_index / g_MapList.GetSectorCols(m_map)) * g_MapList.GetSectorSize(m_map)),
 		0,
-		static_cast<unsigned char>(m_map));
+		static_cast<uchar>(m_map));
 	return( pt );
 }
 

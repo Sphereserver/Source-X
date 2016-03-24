@@ -21,10 +21,7 @@ versions to insure consistency.
 
 ***************************************************************************/
 
-/* placing here these typedefs and removed from aes.h to avoid redefinition of the typedef in the other sphere headers */
-typedef unsigned char	BYTE;
-typedef unsigned int	DWORD;
-
+#include "../datatypes.h"
 
 /* for computing subkeys */
 #define	SK_STEP			0x02020202u
@@ -36,9 +33,9 @@ g(x) = x**4 + (a + 1/a) x**3 + a x**2 + (a + 1/a) x + 1
 where a = primitive root of field generator 0x14D */
 #define	RS_GF_FDBK		0x14D		/* field generator */
 #define	RS_rem(x)		\
-		{ BYTE  b  = (BYTE) (x >> 24);											 \
-	  DWORD g2 = ((b << 1) ^ ((b & 0x80) ? RS_GF_FDBK : 0 )) & 0xFF;		 \
-	  DWORD g3 = ((b >> 1) & 0x7F) ^ ((b & 1) ? RS_GF_FDBK >> 1 : 0 ) ^ g2 ; \
+		{ byte  b  = (byte) (x >> 24);											 \
+	  dword g2 = ((b << 1) ^ ((b & 0x80) ? RS_GF_FDBK : 0 )) & 0xFF;		 \
+	  dword g3 = ((b >> 1) & 0x7F) ^ ((b & 1) ? RS_GF_FDBK >> 1 : 0 ) ^ g2 ; \
 	  x = (x << 8) ^ (g3 << 24) ^ (g2 << 16) ^ (g3 << 8) ^ b;				 \
 		}
 
@@ -71,9 +68,9 @@ where a = primitive root of field generator 0x14D */
 #define	LFSR2(x) ( ((x) >> 2)  ^ (((x) & 0x02) ?   MDS_GF_FDBK/2 : 0)  \
 							   ^ (((x) & 0x01) ?   MDS_GF_FDBK/4 : 0))
 
-#define	Mx_1(x) ((DWORD)  (x))		/* force result to dword so << will work */
-#define	Mx_X(x) ((DWORD) ((x) ^ 		   LFSR2(x)))	/* 5B */
-#define	Mx_Y(x) ((DWORD) ((x) ^ LFSR1(x) ^ LFSR2(x)))	/* EF */
+#define	Mx_1(x) ((dword)  (x))		/* force result to dword so << will work */
+#define	Mx_X(x) ((dword) ((x) ^ 		   LFSR2(x)))	/* 5B */
+#define	Mx_Y(x) ((dword) ((x) ^ LFSR1(x) ^ LFSR2(x)))	/* EF */
 
 #define	M00		Mul_1
 #define	M01		Mul_Y
@@ -142,7 +139,7 @@ how these constants are to be  used.
 * log2(skXor[ 0.. 0])
 * log2(skDup[ 0.. 6])=   ---  2.37  0.44  3.94  8.36 13.04 17.99
 ***********************************************************************/
-CONST BYTE P8x8[2][256] =
+CONST byte P8x8[2][256] =
 {
 	/*  p0:   */
 	/*  dpMax      = 10.  lpMax 	 = 64.  cycleCnt=   1  1  1  0. 		*/

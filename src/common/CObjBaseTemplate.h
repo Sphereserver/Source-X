@@ -20,7 +20,7 @@ private:
 protected:
 	void DupeCopy( const CObjBaseTemplate * pObj );
 
-	void SetUID( DWORD dwIndex );
+	void SetUID( dword dwIndex );
 	void SetUnkZ( signed char z );
 
 public:
@@ -46,7 +46,7 @@ public:
 	bool IsValidUID() const;
 	bool IsDeleted() const;
 
-	void SetContainerFlags( DWORD dwFlags = 0 );
+	void SetContainerFlags( dword dwFlags = 0 );
 
 	virtual int IsWeird() const;
 	virtual CObjBaseTemplate * GetTopLevelObj() const = 0;
@@ -57,8 +57,8 @@ public:
 	LAYER_TYPE GetEquipLayer() const;
 	void SetEquipLayer( LAYER_TYPE layer );
 
-	BYTE GetContainedLayer() const;
-	void SetContainedLayer( BYTE layer );
+	byte GetContainedLayer() const;
+	void SetContainedLayer( byte layer );
 	const CPointMap & GetContainedPoint() const;
 	void SetContainedPoint( const CPointMap & pt );
 
@@ -66,7 +66,7 @@ public:
 	const CPointMap & GetTopPoint() const;
 	virtual void SetTopZ( signed char z );
 	signed char GetTopZ() const;
-	unsigned char GetTopMap() const;
+	uchar GetTopMap() const;
 
 	void SetUnkPoint( const CPointMap & pt );
 	const CPointMap & GetUnkPoint() const;

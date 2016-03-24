@@ -99,7 +99,7 @@ TCHAR * CScriptKey::GetArgStr()
 	return GetArgStr( NULL );
 }
 
-DWORD CScriptKey::GetArgFlag( DWORD dwStart, DWORD dwMask )
+dword CScriptKey::GetArgFlag( dword dwStart, dword dwMask )
 {
 	ADDTOCALLSTACK("CScriptKey::GetArgFlag");
 	// No args = toggle the flag.
@@ -399,7 +399,7 @@ bool CScript::FindTextHeader( LPCTSTR pszName ) // Find a section in the current
 	return( true );
 }
 
-DWORD CScript::Seek( int offset, UINT origin )
+dword CScript::Seek( int offset, UINT origin )
 {
 	ADDTOCALLSTACK("CScript::Seek");
 	// Go to the start of a new section.
@@ -625,7 +625,7 @@ void CScript::CloseForce()
 bool CScript::SeekContext( CScriptLineContext LineContext )
 {
 	m_iLineNum = LineContext.m_iLineNum;
-	return Seek( LineContext.m_lOffset, SEEK_SET ) == static_cast<DWORD>(LineContext.m_lOffset);
+	return Seek( LineContext.m_lOffset, SEEK_SET ) == static_cast<dword>(LineContext.m_lOffset);
 }
 
 CScriptLineContext CScript::GetContext() const

@@ -105,7 +105,7 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 		}
 
 		if ( iQty > 1 )
-			pPart->SetAmount(static_cast<unsigned int>(iQty));
+			pPart->SetAmount(static_cast<uint>(iQty));
 
 		if ( pChar && pChar->m_pPlayer )
 		{
@@ -151,8 +151,8 @@ void CChar::Use_MoonGate( CItem * pItem )
 
 		// Set it's current destination based on the moon phases.
 		// ensure iTrammelPhrase isn't smaller than iFeluccaPhase, to avoid uint underflow in next calculation
-		unsigned int iTrammelPhase = g_World.GetMoonPhase(false) % iCount;
-		unsigned int iFeluccaPhase = g_World.GetMoonPhase(true) % iCount;
+		uint iTrammelPhase = g_World.GetMoonPhase(false) % iCount;
+		uint iFeluccaPhase = g_World.GetMoonPhase(true) % iCount;
 		if ( iTrammelPhase < iFeluccaPhase )
 			iTrammelPhase += iCount;
 
@@ -493,7 +493,7 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 		if ( pCont )
 		{
 			//check for UID
-			CGrayUID uidCont = static_cast<DWORD>(pCont->GetValNum());
+			CGrayUID uidCont = static_cast<dword>(pCont->GetValNum());
 			CItemContainer *pNewCont = dynamic_cast<CItemContainer*>(uidCont.ItemFind());
 			if ( !pNewCont )	//if no UID, check for ITEMID_TYPE
 			{
@@ -527,8 +527,8 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 	CVarDefCont *pVarAnimColor = pWeapon->GetDefKey("AMMOANIMHUE", true);
 	CVarDefCont *pVarAnimRender = pWeapon->GetDefKey("AMMOANIMRENDER", true);
 	ITEMID_TYPE AmmoAnim;
-	DWORD AmmoHue;
-	DWORD AmmoRender;
+	dword AmmoHue;
+	dword AmmoRender;
 
 	if ( pVarAnim )
 	{
@@ -539,8 +539,8 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 	else
 		AmmoAnim = static_cast<ITEMID_TYPE>(pWeaponDef->m_ttWeaponBow.m_idAmmoX.GetResIndex());
 
-	AmmoHue = pVarAnimColor ? static_cast<DWORD>(pVarAnimColor->GetValNum()) : 0;
-	AmmoRender = pVarAnimRender ? static_cast<DWORD>(pVarAnimRender->GetValNum()) : 0;
+	AmmoHue = pVarAnimColor ? static_cast<dword>(pVarAnimColor->GetValNum()) : 0;
+	AmmoRender = pVarAnimRender ? static_cast<dword>(pVarAnimRender->GetValNum()) : 0;
 	
 	pButte->Effect(EFFECT_BOLT, AmmoAnim, this, 16, 0, false, AmmoHue, AmmoRender);
 	pButte->Sound(0x224);
@@ -799,7 +799,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 	bool fSuccess = Skill_UseQuick(static_cast<SKILL_TYPE>(RetMainSkill.GetResIndex()), iDifficulty);
 	if ( fSuccess )
 	{
-		pItemArmor->m_itArmor.m_Hits_Cur = static_cast<WORD>(iTotalHits);
+		pItemArmor->m_itArmor.m_Hits_Cur = static_cast<word>(iTotalHits);
 		pszText = g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_1);
 	}
 	else
@@ -984,7 +984,7 @@ void CChar::Use_Drink( CItem * pItem )
 			Spell_Effect_Remove(pDrunkLayer);
 			pDrunkLayer->m_itSpell.m_spellcharges += 10;
 			if ( pDrunkLayer->m_itSpell.m_spelllevel < 500 )
-				pDrunkLayer->m_itSpell.m_spelllevel += static_cast<WORD>(iStrength);
+				pDrunkLayer->m_itSpell.m_spelllevel += static_cast<word>(iStrength);
 			Spell_Effect_Add(pDrunkLayer);
 		}
 		else

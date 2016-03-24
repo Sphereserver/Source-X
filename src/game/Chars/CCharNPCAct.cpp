@@ -74,8 +74,8 @@ void CChar::Action_StartSpecial( CREID_TYPE id )
 			CItem * pItem = CItem::CreateScript( Calc_GetRandVal(2) ? ITEMID_FX_FIRE_F_EW : ITEMID_FX_FIRE_F_NS, this );
 			ASSERT(pItem);
 			pItem->SetType(IT_FIRE);
-			pItem->m_itSpell.m_spell = static_cast<WORD>(SPELL_Fire_Field);
-			pItem->m_itSpell.m_spelllevel = static_cast<WORD>(100 + Calc_GetRandVal(500));
+			pItem->m_itSpell.m_spell = static_cast<word>(SPELL_Fire_Field);
+			pItem->m_itSpell.m_spelllevel = static_cast<word>(100 + Calc_GetRandVal(500));
 			pItem->m_itSpell.m_spellcharges = 1;
 			pItem->m_uidLink = GetUID();
 			pItem->MoveToDecay( GetTopPoint(), 10 + Calc_GetRandVal(50)*TICK_PER_SEC );
@@ -702,7 +702,7 @@ bool CChar::NPC_LookAtCharMonster( CChar * pChar )
 
 	if ( Fight_Attack( pChar ) == false )
 		return false;
-	m_pNPC->m_Act_Motivation = static_cast<unsigned char>(iActMotivation);
+	m_pNPC->m_Act_Motivation = static_cast<uchar>(iActMotivation);
 	return true;
 }
 
@@ -1370,7 +1370,7 @@ void CChar::NPC_Act_GoHome()
 		}
 		else
 		{
-			g_Log.Event( LOGL_WARN, "Guard 0%x '%s' has no guard post (%s)!\n", static_cast<DWORD>(GetUID()), GetName(), GetTopPoint().WriteUsed());
+			g_Log.Event( LOGL_WARN, "Guard 0%x '%s' has no guard post (%s)!\n", static_cast<dword>(GetUID()), GetName(), GetTopPoint().WriteUsed());
 
 			// If we arent conjured and still got no valid home
 			// then set our status to conjured and take our life.
@@ -1593,7 +1593,7 @@ bool CChar::NPC_Act_Food()
 	if ( iFoodLevel > 40 )
 		return false;							// and it is at least 60% hungry
 
-	m_pNPC->m_Act_Motivation = static_cast<unsigned char>((50 - (iFoodLevel / 2)));
+	m_pNPC->m_Act_Motivation = static_cast<uchar>((50 - (iFoodLevel / 2)));
 
 	short	iEatAmount = 1;
 	int		iSearchDistance = 2;
@@ -2159,7 +2159,7 @@ void CChar::NPC_OnTickAction()
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("'%s' [0%x]\n", GetName(), (DWORD)GetUID());
+	g_Log.EventDebug("'%s' [0%x]\n", GetName(), (dword)GetUID());
 	EXC_DEBUG_END;
 }
 
@@ -2235,7 +2235,7 @@ void CChar::NPC_Pathfinding()
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("'%s' point '%d,%d,%d,%d' [0%x]\n", GetName(), local.m_x, local.m_y, local.m_z, local.m_map, (DWORD)GetUID());
+	g_Log.EventDebug("'%s' point '%d,%d,%d,%d' [0%x]\n", GetName(), local.m_x, local.m_y, local.m_z, local.m_map, (dword)GetUID());
 	EXC_DEBUG_END;
 }
 

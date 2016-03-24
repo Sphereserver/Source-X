@@ -12,11 +12,11 @@
 #ifndef _WIN32
 #include <sys/time.h>
 
-LLONG GetTickCount()
+llong GetTickCount()
 {
 	struct timeval tv;
 	gettimeofday( &tv, NULL );
-	return (LLONG) (((LLONG) tv.tv_sec * 1000) + ((LLONG) tv.tv_usec/1000));
+	return (llong) (((llong) tv.tv_sec * 1000) + ((llong) tv.tv_usec/1000));
 }
 #endif
 
@@ -72,7 +72,7 @@ struct tm* CGTime::GetLocalTm(struct tm* ptm) const
 #endif
 
 #ifdef _WIN32
-void __cdecl invalidParameterHandler(const wchar_t* expression, const wchar_t* function, const wchar_t* file, unsigned int line, uintptr_t pReserved)
+void __cdecl invalidParameterHandler(const wchar_t* expression, const wchar_t* function, const wchar_t* file, uint line, uintptr_t pReserved)
 {
 	// bad format has been specified
 	UNREFERENCED_PARAMETER(expression);

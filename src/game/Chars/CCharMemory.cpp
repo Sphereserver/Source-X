@@ -14,14 +14,14 @@ CItemStone * CChar::Guild_Find( MEMORY_TYPE MemType ) const
 	ADDTOCALLSTACK("CChar::Guild_Find");
 	if ( ! m_pPlayer )
 		return( NULL );
-	CItemMemory * pMyGMem = Memory_FindTypes(static_cast<WORD>(MemType));
+	CItemMemory * pMyGMem = Memory_FindTypes(static_cast<word>(MemType));
 	if ( ! pMyGMem )
 		return( NULL );
 	CItemStone * pMyStone = dynamic_cast <CItemStone*>( pMyGMem->m_uidLink.ItemFind());
 	if ( pMyStone == NULL )
 	{
 		// Some sort of mislink ! fix it.
-		const_cast <CChar*>(this)->Memory_ClearTypes(static_cast<WORD>(MemType)); 	// Make them forget they were ever in this guild....again!
+		const_cast <CChar*>(this)->Memory_ClearTypes(static_cast<word>(MemType)); 	// Make them forget they were ever in this guild....again!
 		return( NULL );
 	}
 	return( pMyStone );
@@ -38,7 +38,7 @@ CStoneMember * CChar::Guild_FindMember( MEMORY_TYPE MemType ) const
 	if ( pMember == NULL )
 	{
 		// Some sort of mislink ! fix it.
-		const_cast <CChar*>(this)->Memory_ClearTypes(static_cast<WORD>(MemType)); 	// Make them forget they were ever in this guild....again!
+		const_cast <CChar*>(this)->Memory_ClearTypes(static_cast<word>(MemType)); 	// Make them forget they were ever in this guild....again!
 		return( NULL );
 	}
 	return( pMember );
@@ -110,7 +110,7 @@ bool CChar::Memory_UpdateFlags( CItemMemory * pMemory )
 	ASSERT(pMemory);
 	ASSERT(pMemory->IsType(IT_EQ_MEMORY_OBJ));
 
-	WORD wMemTypes = pMemory->GetMemoryTypes();
+	word wMemTypes = pMemory->GetMemoryTypes();
 
 	if ( !wMemTypes )	// No memories here anymore so kill it.
 	{
@@ -136,12 +136,12 @@ bool CChar::Memory_UpdateFlags( CItemMemory * pMemory )
 
 // Just clear these flags but do not delete the memory.
 // RETURN: true = still useful memory.
-bool CChar::Memory_UpdateClearTypes( CItemMemory * pMemory, WORD MemTypes )
+bool CChar::Memory_UpdateClearTypes( CItemMemory * pMemory, word MemTypes )
 {
 	ADDTOCALLSTACK("CChar::Memory_UpdateClearTypes");
 	ASSERT(pMemory);
 
-	WORD wPrvMemTypes = pMemory->GetMemoryTypes();
+	word wPrvMemTypes = pMemory->GetMemoryTypes();
 	bool fMore = ( pMemory->SetMemoryTypes( wPrvMemTypes &~ MemTypes ) != 0);
 
 	MemTypes &= wPrvMemTypes;	// Which actually got turned off ?
@@ -159,7 +159,7 @@ bool CChar::Memory_UpdateClearTypes( CItemMemory * pMemory, WORD MemTypes )
 }
 
 // Adding a new flag to the given pMemory
-void CChar::Memory_AddTypes( CItemMemory * pMemory, WORD MemTypes )
+void CChar::Memory_AddTypes( CItemMemory * pMemory, word MemTypes )
 {
 	ADDTOCALLSTACK("CChar::Memory_AddTypes");
 	if ( pMemory )
@@ -172,7 +172,7 @@ void CChar::Memory_AddTypes( CItemMemory * pMemory, WORD MemTypes )
 }
 
 // Clear the memory object of this type.
-bool CChar::Memory_ClearTypes( CItemMemory * pMemory, WORD MemTypes )
+bool CChar::Memory_ClearTypes( CItemMemory * pMemory, word MemTypes )
 {
 	ADDTOCALLSTACK("CChar::Memory_ClearTypes");
 	if ( pMemory )
@@ -187,7 +187,7 @@ bool CChar::Memory_ClearTypes( CItemMemory * pMemory, WORD MemTypes )
 // Create a memory about this object.
 // NOTE: Does not check if object already has a memory.!!!
 //  Assume it does not !
-CItemMemory * CChar::Memory_CreateObj( CGrayUID uid, WORD MemTypes )
+CItemMemory * CChar::Memory_CreateObj( CGrayUID uid, word MemTypes )
 {
 	ADDTOCALLSTACK("CChar::Memory_CreateObj");
 
@@ -205,14 +205,14 @@ CItemMemory * CChar::Memory_CreateObj( CGrayUID uid, WORD MemTypes )
 }
 
 
-CItemMemory * CChar::Memory_CreateObj( const CObjBase * pObj, WORD MemTypes )
+CItemMemory * CChar::Memory_CreateObj( const CObjBase * pObj, word MemTypes )
 {
 	ASSERT(pObj);
 	return Memory_CreateObj( pObj->GetUID(), MemTypes );
 }
 
 // Remove all the memories of this type.
-void CChar::Memory_ClearTypes( WORD MemTypes )
+void CChar::Memory_ClearTypes( word MemTypes )
 {
 	ADDTOCALLSTACK("CChar::Memory_ClearTypes");
 	CItem *pItemNext = NULL;
@@ -252,7 +252,7 @@ CItemMemory * CChar::Memory_FindObj( const CObjBase * pObj ) const
 
 // Do we have a certain type of memory.
 // Just find the first one.
-CItemMemory * CChar::Memory_FindTypes( WORD MemTypes ) const
+CItemMemory * CChar::Memory_FindTypes( word MemTypes ) const
 {
 	ADDTOCALLSTACK("CChar::Memory_FindTypes");
 	if ( !MemTypes )
@@ -267,7 +267,7 @@ CItemMemory * CChar::Memory_FindTypes( WORD MemTypes ) const
 	return NULL;
 }
 
-CItemMemory * CChar::Memory_FindObjTypes( const CObjBase * pObj, WORD MemTypes ) const
+CItemMemory * CChar::Memory_FindObjTypes( const CObjBase * pObj, word MemTypes ) const
 {
 	CItemMemory * pMemory = Memory_FindObj(pObj);
 	if ( pMemory == NULL )
@@ -277,18 +277,18 @@ CItemMemory * CChar::Memory_FindObjTypes( const CObjBase * pObj, WORD MemTypes )
 	return( pMemory );
 }
 
-CItemMemory * CChar::Memory_AddObj( CGrayUID uid, WORD MemTypes )
+CItemMemory * CChar::Memory_AddObj( CGrayUID uid, word MemTypes )
 {
 	return Memory_CreateObj( uid, MemTypes );
 }
 
-CItemMemory * CChar::Memory_AddObj( const CObjBase * pObj, WORD MemTypes )
+CItemMemory * CChar::Memory_AddObj( const CObjBase * pObj, word MemTypes )
 {
 	return Memory_CreateObj( pObj, MemTypes );
 }
 
 // Looping through all memories ( ForCharMemoryType ).
-TRIGRET_TYPE CChar::OnCharTrigForMemTypeLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pResult, WORD wMemType )
+TRIGRET_TYPE CChar::OnCharTrigForMemTypeLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pResult, word wMemType )
 {
 	ADDTOCALLSTACK("CChar::OnCharTrigForMemTypeLoop");
 	CScriptLineContext StartContext = s.GetContext();
@@ -328,7 +328,7 @@ TRIGRET_TYPE CChar::OnCharTrigForMemTypeLoop( CScript &s, CTextConsole * pSrc, C
 }
 
 // Adding a new value for this memory, updating notoriety
-CItemMemory * CChar::Memory_AddObjTypes( CGrayUID uid, WORD MemTypes )
+CItemMemory * CChar::Memory_AddObjTypes( CGrayUID uid, word MemTypes )
 {
 	ADDTOCALLSTACK("CChar::Memory_AddObjTypes");
 	CItemMemory * pMemory = Memory_FindObj( uid );
@@ -341,7 +341,7 @@ CItemMemory * CChar::Memory_AddObjTypes( CGrayUID uid, WORD MemTypes )
 	return( pMemory );
 }
 
-CItemMemory * CChar::Memory_AddObjTypes( const CObjBase * pObj, WORD MemTypes )
+CItemMemory * CChar::Memory_AddObjTypes( const CObjBase * pObj, word MemTypes )
 {
 	ASSERT(pObj);
 	return Memory_AddObjTypes( pObj->GetUID(), MemTypes );
@@ -447,7 +447,7 @@ void CChar::Memory_Fight_Start( const CChar * pTarg )
 		return;
 	}
 
-	WORD MemTypes;
+	word MemTypes;
 	CItemMemory * pMemory = Memory_FindObj( pTarg );
 	if ( pMemory == NULL )
 	{

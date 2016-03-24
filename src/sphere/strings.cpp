@@ -110,8 +110,8 @@ bool AbstractString::startsWithHead(const char *s)
 {
 	for( int i = 0; ; i++ )
 	{
-		char ch1 = static_cast<unsigned char>(tolower(m_buf[0]));
-		char ch2 = static_cast<unsigned char>(tolower(s[0]));
+		char ch1 = static_cast<uchar>(tolower(m_buf[0]));
+		char ch2 = static_cast<uchar>(tolower(s[0]));
 		if( ch2 == '\0' )
 		{
 			if( !isalnum(ch1) )

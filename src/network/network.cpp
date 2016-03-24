@@ -33,7 +33,7 @@
 //
 #if defined(_PACKETDUMP) || defined(_DUMPSUPPORT)
 
-void xRecordPacketData(const CClient* client, const BYTE* data, size_t length, LPCTSTR heading)
+void xRecordPacketData(const CClient* client, const byte* data, size_t length, LPCTSTR heading)
 {
 #ifdef _DUMPSUPPORT
 	if (client->GetAccount() != NULL && strnicmp(client->GetAccount()->GetName(), (LPCTSTR) g_Cfg.m_sDumpAccPackets, strlen( client->GetAccount()->GetName())))
@@ -411,7 +411,7 @@ void NetState::beginTransaction(int priority)
 
 	//DEBUGNETWORK(("%x:Starting a new packet transaction.\n", id()));
 
-	m_outgoing.pendingTransaction = new ExtendedPacketTransaction(this, g_Cfg.m_fUsePacketPriorities? priority : static_cast<long>(PacketSend::PRI_NORMAL));
+	m_outgoing.pendingTransaction = new ExtendedPacketTransaction(this, g_Cfg.m_fUsePacketPriorities? priority : static_cast<int>(PacketSend::PRI_NORMAL));
 }
 
 void NetState::endTransaction(void)
@@ -461,7 +461,7 @@ void HistoryIP::setBlocked(bool isBlocked, int timeout)
 		CScriptTriggerArgs args(m_ip.GetAddrStr());
 		args.m_iN1 = timeout;
 		g_Serv.r_Call("f_onserver_blockip", &g_Serv, &args);
-		timeout = static_cast<long>(args.m_iN1);
+		timeout = static_cast<int>(args.m_iN1);
 	}
 
 	m_blocked = isBlocked;
@@ -587,15 +587,15 @@ PacketManager::~PacketManager(void)
 {
 	// delete standard packet handlers
 	for (size_t i = 0; i < COUNTOF(m_handlers); ++i)
-		unregisterPacket(static_cast<unsigned int>(i));
+		unregisterPacket(static_cast<uint>(i));
 
 	// delete extended packet handlers
 	for (size_t i = 0; i < COUNTOF(m_extended); ++i)
-		unregisterExtended(static_cast<unsigned int>(i));
+		unregisterExtended(static_cast<uint>(i));
 
 	// delete encoded packet handlers
 	for (size_t i = 0; i < COUNTOF(m_encoded); ++i)
-		unregisterEncoded(static_cast<unsigned int>(i));
+		unregisterEncoded(static_cast<uint>(i));
 }
 
 void PacketManager::registerStandardPackets(void)
@@ -714,7 +714,7 @@ void PacketManager::registerStandardPackets(void)
 	registerEncoded(EXTAOS_QuestButton, new PacketQuestButton());				// quest button press
 }
 
-void PacketManager::registerPacket(unsigned int id, Packet* handler)
+void PacketManager::registerPacket(uint id, Packet* handler)
 {
 	// assign standard packet handler
 	ADDTOCALLSTACK("PacketManager::registerPacket");
@@ -723,7 +723,7 @@ void PacketManager::registerPacket(unsigned int id, Packet* handler)
 	m_handlers[id] = handler;
 }
 
-void PacketManager::registerExtended(unsigned int id, Packet* handler)
+void PacketManager::registerExtended(uint id, Packet* handler)
 {
 	// assign extended packet handler
 	ADDTOCALLSTACK("PacketManager::registerExtended");
@@ -732,7 +732,7 @@ void PacketManager::registerExtended(unsigned int id, Packet* handler)
 	m_extended[id] = handler;
 }
 
-void PacketManager::registerEncoded(unsigned int id, Packet* handler)
+void PacketManager::registerEncoded(uint id, Packet* handler)
 {
 	// assign encoded packet handler
 	ADDTOCALLSTACK("PacketManager::registerEncoded");
@@ -741,7 +741,7 @@ void PacketManager::registerEncoded(unsigned int id, Packet* handler)
 	m_encoded[id] = handler;
 }
 
-void PacketManager::unregisterPacket(unsigned int id)
+void PacketManager::unregisterPacket(uint id)
 {
 	// delete standard packet handler
 	ADDTOCALLSTACK("PacketManager::unregisterPacket");
@@ -753,7 +753,7 @@ void PacketManager::unregisterPacket(unsigned int id)
 	m_handlers[id] = NULL;	
 }
 
-void PacketManager::unregisterExtended(unsigned int id)
+void PacketManager::unregisterExtended(uint id)
 {
 	// delete extended packet handler
 	ADDTOCALLSTACK("PacketManager::unregisterExtended");
@@ -765,7 +765,7 @@ void PacketManager::unregisterExtended(unsigned int id)
 	m_extended[id] = NULL;	
 }
 
-void PacketManager::unregisterEncoded(unsigned int id)
+void PacketManager::unregisterEncoded(uint id)
 {
 	// delete encoded packet handler
 	ADDTOCALLSTACK("PacketManager::unregisterEncoded");
@@ -777,7 +777,7 @@ void PacketManager::unregisterEncoded(unsigned int id)
 	m_encoded[id] = NULL;	
 }
 
-Packet* PacketManager::getHandler(unsigned int id) const
+Packet* PacketManager::getHandler(uint id) const
 {
 	// get standard packet handler
 	if (id >= COUNTOF(m_handlers))
@@ -786,7 +786,7 @@ Packet* PacketManager::getHandler(unsigned int id) const
 	return m_handlers[id];
 }
 
-Packet* PacketManager::getExtendedHandler(unsigned int id) const
+Packet* PacketManager::getExtendedHandler(uint id) const
 {
 	// get extended packet handler
 	if (id >= COUNTOF(m_extended))
@@ -795,7 +795,7 @@ Packet* PacketManager::getExtendedHandler(unsigned int id) const
 	return m_extended[id];
 }
 
-Packet* PacketManager::getEncodedHandler(unsigned int id) const
+Packet* PacketManager::getEncodedHandler(uint id) const
 {
 	// get encoded packet handler
 	if (id >= COUNTOF(m_encoded))
@@ -948,8 +948,8 @@ void NetworkIn::onStart(void)
 {
 	AbstractSphereThread::onStart();
 	m_lastGivenSlot = -1;
-	m_buffer = new BYTE[NETWORK_BUFFERSIZE];
-	m_decryptBuffer = new BYTE[NETWORK_BUFFERSIZE];
+	m_buffer = new byte[NETWORK_BUFFERSIZE];
+	m_decryptBuffer = new byte[NETWORK_BUFFERSIZE];
 
 	DEBUGNETWORK(("Registering packets...\n"));
 	m_packets.registerStandardPackets();
@@ -994,7 +994,7 @@ void NetworkIn::tick(void)
 		acceptConnection();
 
 	EXC_SET("messages");
-	BYTE* buffer = m_buffer;
+	byte* buffer = m_buffer;
 	for (int i = 0; i < m_stateCount; i++)
 	{
 		EXC_SET("start network profile");
@@ -1066,7 +1066,7 @@ void NetworkIn::tick(void)
 					}
 
 					EXC_SET("game client seed");
-					DWORD seed(0);
+					dword seed(0);
 					size_t iSeedLen(0);
 					if (client->m_newseed || (buffer[0] == XCMD_NewSeed && received >= NETWORK_SEEDLEN_NEW))
 					{
@@ -1079,7 +1079,7 @@ void NetworkIn::tick(void)
 							// we already received the 0xEF on its own, so move the pointer
 							// back 1 byte to align it
 							iSeedLen = NETWORK_SEEDLEN_NEW - 1;
-							pEvent = (CEvent *)(((BYTE*)pEvent) - 1);
+							pEvent = (CEvent *)(((byte*)pEvent) - 1);
 						}
 						else
 						{
@@ -1092,7 +1092,7 @@ void NetworkIn::tick(void)
 							DEBUG_WARN(("%x:New Login Handshake Detected. Client Version: %u.%u.%u.%u\n", client->id(), pEvent->NewSeed.m_Version_Maj, pEvent->NewSeed.m_Version_Min, pEvent->NewSeed.m_Version_Rev, pEvent->NewSeed.m_Version_Pat);
 
 							client->m_reportedVersion = CCrypt::GetVerFromNumber(pEvent->NewSeed.m_Version_Maj, pEvent->NewSeed.m_Version_Min, pEvent->NewSeed.m_Version_Rev, pEvent->NewSeed.m_Version_Pat);
-							seed = (DWORD) pEvent->NewSeed.m_Seed;
+							seed = (dword) pEvent->NewSeed.m_Seed;
 						}
 						else
 						{
@@ -1286,7 +1286,7 @@ void NetworkIn::tick(void)
 
 		while (len > 0 && !client->isClosing())
 		{
-			BYTE packetID = packet->getRemainingData()[0];
+			byte packetID = packet->getRemainingData()[0];
 			Packet* handler = m_packets.getHandler(packetID);
 
 			if (handler != NULL)
@@ -1316,7 +1316,7 @@ void NetworkIn::tick(void)
 				handler->seek();
 				for (size_t j = 0; j < packetLength; j++)
 				{
-					BYTE next = packet->readByte();
+					byte next = packet->readByte();
 					handler->writeByte(next);
 				}
 
@@ -1521,7 +1521,7 @@ void NetworkIn::acceptConnection(void)
 			else if ( climaxIp && ip.m_connected > climaxIp )
 				g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected. (CLIENTMAXIP reached %d/%d)\n", (LPCTSTR)client_addr.GetAddrStr(), ip.m_connected, climaxIp);
 			else if ( ip.m_pings >= NETHISTORY_MAXPINGS )
-				g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected. (MAXPINGS reached %d/%d)\n", (LPCTSTR)client_addr.GetAddrStr(), ip.m_pings, static_cast<long>(NETHISTORY_MAXPINGS));
+				g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected. (MAXPINGS reached %d/%d)\n", (LPCTSTR)client_addr.GetAddrStr(), ip.m_pings, static_cast<int>(NETHISTORY_MAXPINGS));
 			else
 				g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected.\n", (LPCTSTR)client_addr.GetAddrStr());
 		}
@@ -1716,7 +1716,7 @@ NetworkOut::NetworkOut(void) : AbstractSphereThread("NetworkOut", IThread::RealT
 	m_profile.EnableProfile(PROFILE_NETWORK_TX);
 	m_profile.EnableProfile(PROFILE_DATA_TX);
 
-	m_encryptBuffer = new BYTE[MAX_BUFFER];
+	m_encryptBuffer = new byte[MAX_BUFFER];
 }
 
 NetworkOut::~NetworkOut(void)
@@ -1739,7 +1739,7 @@ void NetworkOut::tick(void)
 		return;
 	}
 
-	static unsigned char iCount = 0;
+	static uchar iCount = 0;
 	EXC_TRY("NetworkOut");
 
 	iCount++;
@@ -2139,7 +2139,7 @@ bool NetworkOut::sendPacket(CClient* client, PacketSend* packet)
 
 #ifdef _WIN32
 
-void CALLBACK SendCompleted(DWORD dwError, DWORD cbTransferred, LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
+void CALLBACK SendCompleted(dword dwError, dword cbTransferred, LPWSAOVERLAPPED lpOverlapped, dword dwFlags)
 {
 	UNREFERENCED_PARAMETER(dwFlags);
 	ADDTOCALLSTACK("SendCompleted");
@@ -2179,8 +2179,8 @@ bool NetworkOut::sendPacketNow(CClient* client, PacketSend* packet)
 	EXC_SET("send trigger");
 	if (packet->onSend(client))
 	{
-		BYTE* sendBuffer = NULL;
-		DWORD sendBufferLength = 0;
+		byte* sendBuffer = NULL;
+		dword sendBufferLength = 0;
 
 		if (state->m_client == NULL)
 		{
@@ -2279,7 +2279,7 @@ bool NetworkOut::sendPacketNow(CClient* client, PacketSend* packet)
 	return false;
 }
 
-int NetworkOut::sendBytesNow(CClient* client, const BYTE* data, DWORD length)
+int NetworkOut::sendBytesNow(CClient* client, const byte* data, dword length)
 {
 	ADDTOCALLSTACK("NetworkOut::sendBytesNow");
 
@@ -2301,7 +2301,7 @@ int NetworkOut::sendBytesNow(CClient* client, const BYTE* data, DWORD length)
 		state->m_bufferWSA.len = length;
 		state->m_bufferWSA.buf = (CHAR*)data;
 
-		DWORD bytesSent;
+		dword bytesSent;
 		if (state->m_socket.SendAsync(&state->m_bufferWSA, 1, &bytesSent, 0, &state->m_overlapped, SendCompleted) == 0)
 		{
 			ret = bytesSent;
@@ -2417,7 +2417,7 @@ const char * GenerateNetworkThreadName(size_t id)
  *
  *
  ***************************************************************************/
-void CALLBACK SendCompleted(DWORD dwError, DWORD cbTransferred, LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
+void CALLBACK SendCompleted(dword dwError, dword cbTransferred, LPWSAOVERLAPPED lpOverlapped, dword dwFlags)
 {
 	UNREFERENCED_PARAMETER(dwFlags);
 	ADDTOCALLSTACK("SendCompleted");
@@ -2602,7 +2602,7 @@ void NetworkManager::acceptNewConnection(void)
 		else if ( climaxIp && ip.m_connected > climaxIp )
 			g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected. (CLIENTMAXIP reached %d/%d)\n", static_cast<LPCTSTR>(client_addr.GetAddrStr()), ip.m_connected, climaxIp);
 		else if ( ip.m_pings >= NETHISTORY_MAXPINGS )
-			g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected. (MAXPINGS reached %d/%d)\n", static_cast<LPCTSTR>(client_addr.GetAddrStr()), ip.m_pings, static_cast<long>(NETHISTORY_MAXPINGS) );
+			g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected. (MAXPINGS reached %d/%d)\n", static_cast<LPCTSTR>(client_addr.GetAddrStr()), ip.m_pings, static_cast<int>(NETHISTORY_MAXPINGS) );
 		else
 			g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected.\n", static_cast<LPCTSTR>(client_addr.GetAddrStr()));
 
@@ -2623,7 +2623,7 @@ void NetworkManager::acceptNewConnection(void)
 		return;
 	}
 
-	DEBUGNETWORK(("%x:Allocated slot for client (%u).\n", state->id(), static_cast<unsigned long>(h)));
+	DEBUGNETWORK(("%x:Allocated slot for client (%u).\n", state->id(), static_cast<uint>(h)));
 
 	// assign slot
 	EXC_SET("assigning slot");
@@ -2681,7 +2681,7 @@ void NetworkManager::start(void)
 	ASSERT(m_stateCount == 0);
 	m_states = new NetState*[g_Cfg.m_iClientsMax];
 	for (size_t l = 0; l < g_Cfg.m_iClientsMax; l++)
-		m_states[l] = new NetState(static_cast<long>(l));
+		m_states[l] = new NetState(static_cast<int>(l));
 	m_stateCount = g_Cfg.m_iClientsMax;
 
 	DEBUGNETWORK(("Created %" FMTSIZE_T " network slots (system limit of %d clients)\n", m_stateCount, FD_SETSIZE));
@@ -2969,8 +2969,8 @@ void NetworkThread::flushAllClients(void)
  ***************************************************************************/
 NetworkInput::NetworkInput(void) : m_thread(NULL)
 {
-	m_receiveBuffer = new BYTE[NETWORK_BUFFERSIZE];
-	m_decryptBuffer = new BYTE[NETWORK_BUFFERSIZE];
+	m_receiveBuffer = new byte[NETWORK_BUFFERSIZE];
+	m_decryptBuffer = new byte[NETWORK_BUFFERSIZE];
 }
 
 NetworkInput::~NetworkInput()
@@ -3060,7 +3060,7 @@ void NetworkInput::receiveData()
 
 		// our objective here is to take the received data and separate it into packets to
 		// be stored in NetState::m_incoming.rawPackets
-		BYTE* buffer = m_receiveBuffer;
+		byte* buffer = m_receiveBuffer;
 		while (received > 0)
 		{
 			// currently we just take the data and push it into a queue for the main thread
@@ -3281,7 +3281,7 @@ bool NetworkInput::processGameClientData(NetState* state, Packet* buffer)
 	while (remainingLength > 0 && state->isClosing() == false)
 	{
 		ASSERT(remainingLength == packet->getRemainingLength());
-		BYTE packetId = packet->getRemainingData()[0];
+		byte packetId = packet->getRemainingData()[0];
 		Packet* handler = m_thread->m_manager.getPacketManager().getHandler(packetId);
 
 		if (handler != NULL)
@@ -3299,14 +3299,14 @@ bool NetworkInput::processGameClientData(NetState* state, Packet* buffer)
 			//  allow skipping the packet which we do not wish to get
 			if (client->xPacketFilter(packet->getRemainingData(), packetLength))
 			{
-				packet->skip(static_cast<long>(packetLength));
+				packet->skip(static_cast<int>(packetLength));
 				continue;
 			}
 
 			// copy data to handler
 			handler->seek();
 			handler->writeData(packet->getRemainingData(), packetLength);
-			packet->skip(static_cast<long>(packetLength));
+			packet->skip(static_cast<int>(packetLength));
 
 			// move to position 1 (no need for id) and fire onReceive()
 			handler->resize(packetLength);
@@ -3322,7 +3322,7 @@ bool NetworkInput::processGameClientData(NetState* state, Packet* buffer)
 				// todo: adjust packet filter to specify size!
 				// packet has been handled by filter but we don't know how big the packet
 				// actually is.. we can only assume the entire buffer is used.
-				packet->skip(static_cast<long>(remainingLength));
+				packet->skip(static_cast<int>(remainingLength));
 				remainingLength = 0;
 				break;
 			}
@@ -3331,7 +3331,7 @@ bool NetworkInput::processGameClientData(NetState* state, Packet* buffer)
 			// strange behaviours (it's unlikely that only 1 byte is incorrect), so
 			// it's best to just discard everything we have
 			g_Log.Event(LOGM_CLIENTS_LOG|LOGL_WARN, "%x:Unknown game packet (0x%x) received.\n", state->id(), packetId);
-			packet->skip(static_cast<long>(remainingLength));
+			packet->skip(static_cast<int>(remainingLength));
 			remainingLength = 0;
 		}
 	}
@@ -3408,7 +3408,7 @@ bool NetworkInput::processOtherClientData(NetState* state, Packet* buffer)
 				if (buffer->getRemainingLength() < iEncKrLen)
 					return false; // need more data
 
-				buffer->skip(static_cast<long>(iEncKrLen));
+				buffer->skip(static_cast<int>(iEncKrLen));
 				return true;
 			}
 
@@ -3493,7 +3493,7 @@ bool NetworkInput::processUnknownClientData(NetState* state, Packet* buffer)
 		// at least 4 bytes and not a web request, so must assume
 		// it is a game client seed
 		EXC_SET("game client seed");
-		DWORD seed = 0;
+		dword seed = 0;
 
 		DEBUGNETWORK(("%x:Client connected with a seed length of %" FMTSIZE_T " ([0]=0x%x)\n", state->id(), buffer->getRemainingLength(), static_cast<int>(buffer->getRemainingData()[0])));
 		if (state->m_newseed || (buffer->getRemainingData()[0] == XCMD_NewSeed && buffer->getRemainingLength() >= NETWORK_SEEDLEN_NEW))
@@ -3510,10 +3510,10 @@ bool NetworkInput::processUnknownClientData(NetState* state, Packet* buffer)
 			if (buffer->getRemainingLength() >= (NETWORK_SEEDLEN_NEW - 1))
 			{
 				seed = buffer->readInt32();
-				DWORD versionMajor = buffer->readInt32();
-				DWORD versionMinor = buffer->readInt32();
-				DWORD versionRevision = buffer->readInt32();
-				DWORD versionPatch = buffer->readInt32();
+				dword versionMajor = buffer->readInt32();
+				dword versionMinor = buffer->readInt32();
+				dword versionRevision = buffer->readInt32();
+				dword versionPatch = buffer->readInt32();
 
 				DEBUG_WARN(("%x:New Login Handshake Detected. Client Version: %u.%u.%u.%u\n", state->id(), versionMajor, versionMinor, versionRevision, versionPatch));
 				state->m_reportedVersion = CCrypt::GetVerFromNumber(versionMajor, versionMinor, versionRevision, versionPatch);
@@ -3598,7 +3598,7 @@ bool NetworkInput::processUnknownClientData(NetState* state, Packet* buffer)
  ***************************************************************************/
 NetworkOutput::NetworkOutput() : m_thread(NULL)
 {
-	m_encryptBuffer = new BYTE[MAX_BUFFER];
+	m_encryptBuffer = new byte[MAX_BUFFER];
 }
 
 NetworkOutput::~NetworkOutput()
@@ -3617,7 +3617,7 @@ bool NetworkOutput::processOutput()
 
 	ProfileTask networkTask(PROFILE_NETWORK_TX);
 		
-	static unsigned char tick = 0;
+	static uchar tick = 0;
 	EXC_TRY("NetworkOutput");
 	tick++;
 
@@ -3748,7 +3748,7 @@ size_t NetworkOutput::flush(NetState* state)
 	return packetsSent;
 }
 
-size_t NetworkOutput::processPacketQueue(NetState* state, unsigned int priority)
+size_t NetworkOutput::processPacketQueue(NetState* state, uint priority)
 {
 	// process a client's packet queue
 	ADDTOCALLSTACK("NetworkOutput::processPacketQueue");
@@ -3971,7 +3971,7 @@ bool NetworkOutput::sendPacketData(NetState* state, PacketSend* packet)
 	}
 
 	EXC_SET("prepare data");
-	BYTE* sendBuffer = NULL;
+	byte* sendBuffer = NULL;
 	size_t sendBufferLength = 0;
 
 	if (client->GetConnectType() == CONNECT_GAME)
@@ -4023,7 +4023,7 @@ bool NetworkOutput::sendPacketData(NetState* state, PacketSend* packet)
 	return false;
 }
 
-size_t NetworkOutput::sendData(NetState* state, const BYTE* data, size_t length)
+size_t NetworkOutput::sendData(NetState* state, const byte* data, size_t length)
 {
 	// send raw data to client
 	ADDTOCALLSTACK("NetworkOutput::sendData");
@@ -4047,10 +4047,10 @@ size_t NetworkOutput::sendData(NetState* state, const BYTE* data, size_t length)
 		ZeroMemory(&state->m_overlapped, sizeof(WSAOVERLAPPED));
 		state->m_overlapped.hEvent = state;
 		state->m_bufferWSA.len = static_cast<ULONG>(length);
-		state->m_bufferWSA.buf = reinterpret_cast<CHAR *>(const_cast<BYTE *>(data));
+		state->m_bufferWSA.buf = reinterpret_cast<CHAR *>(const_cast<byte *>(data));
 
 		DWORD bytesSent;
-		if (state->m_socket.SendAsync(&state->m_bufferWSA, 1, &bytesSent, 0, &state->m_overlapped, SendCompleted) == 0)
+		if (state->m_socket.SendAsync(&state->m_bufferWSA, 1, &bytesSent, 0, &state->m_overlapped, (LPWSAOVERLAPPED_COMPLETION_ROUTINE)SendCompleted) == 0)
 		{
 			result = bytesSent;
 			state->setSendingAsync(true);
@@ -4112,7 +4112,7 @@ size_t NetworkOutput::sendData(NetState* state, const BYTE* data, size_t length)
 	}
 
 	if (result > 0 && result != _failed_result())
-		CurrentProfileData.Count(PROFILE_DATA_TX, static_cast<DWORD>(result));
+		CurrentProfileData.Count(PROFILE_DATA_TX, static_cast<dword>(result));
 
 	return result;
 	EXC_CATCH;

@@ -17,7 +17,7 @@ ProfileData::ProfileData()
 	m_iActiveWindowSeconds = 10;
 	m_iAverageCount = 1;
 
-	LLONG llTicks;
+	llong llTicks;
 	TIME_PROFILE_START;
 
 	m_CurrentTime = llTicks;
@@ -39,7 +39,7 @@ void ProfileData::SetActive(int iSampleSec)
 	if (m_iActiveWindowSeconds == 0)
 		return;
 
-	LLONG llTicks;
+	llong llTicks;
 	TIME_PROFILE_START;
 
 	m_CurrentTime = llTicks;
@@ -90,11 +90,11 @@ void ProfileData::Start(PROFILE_TYPE id)
 	}
 
 	// Get the current precise time.
-	LLONG llTicks;
+	llong llTicks;
 	TIME_PROFILE_START;
 
 	// accumulate the time for this task.
-	LLONG Diff = ( llTicks - m_CurrentTime );
+	llong Diff = ( llTicks - m_CurrentTime );
 	m_TimeTotal += Diff;
 	m_CurrentTimes[m_CurrentTask].m_Time += Diff;
 	m_CurrentTimes[m_CurrentTask].m_iCount ++;
@@ -104,7 +104,7 @@ void ProfileData::Start(PROFILE_TYPE id)
 	m_CurrentTask = id;
 }
 
-void ProfileData::Count(PROFILE_TYPE id, DWORD dwVal)
+void ProfileData::Count(PROFILE_TYPE id, dword dwVal)
 {
 	ADDTOCALLSTACK("ProfileData::Count");
 

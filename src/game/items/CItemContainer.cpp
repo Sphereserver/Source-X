@@ -109,7 +109,7 @@ void CItemContainer::Trade_Status( bool bCheck )
 	if ( IsTrigUsed(TRIGGER_TRADEACCEPTED) || IsTrigUsed(TRIGGER_CHARTRADEACCEPTED) )
 	{
 		CScriptTriggerArgs Args1(pChar1);
-		unsigned short i = 1;
+		ushort i = 1;
 		for ( CItem *pItem = pPartner->GetContentHead(); pItem != NULL; pItem = pItem->GetNext(), i++ )
 			Args1.m_VarObjs.Insert(i, pItem, true);
 		Args1.m_iN1 = --i;
@@ -187,7 +187,7 @@ void CItemContainer::Trade_Status( bool bCheck )
 	Delete();
 }
 
-void CItemContainer::Trade_UpdateGold( DWORD platinum, DWORD gold )
+void CItemContainer::Trade_UpdateGold( dword platinum, dword gold )
 {
 	ADDTOCALLSTACK("CItemContainer::Trade_UpdateGold");
 	// Update trade gold/platinum values on TOL clients
@@ -208,8 +208,8 @@ void CItemContainer::Trade_UpdateGold( DWORD platinum, DWORD gold )
 	INT64 iMaxValue = pChar1->m_virtualGold;
 	if ( gold + (platinum * 1000000000) > iMaxValue )
 	{
-		gold = static_cast<DWORD>(iMaxValue % 1000000000);
-		platinum = static_cast<DWORD>(iMaxValue / 1000000000);
+		gold = static_cast<dword>(iMaxValue % 1000000000);
+		platinum = static_cast<dword>(iMaxValue / 1000000000);
 		bUpdateChar1 = true;
 	}
 
@@ -271,7 +271,7 @@ void CItemContainer::Trade_Delete()
 	pPartner->Delete();
 }
 
-int CItemContainer::GetWeight(WORD amount) const
+int CItemContainer::GetWeight(word amount) const
 {	// true weight == container item + contents.
 	return( CItem::GetWeight(amount) + CContainer::GetTotalWeight());
 }
@@ -304,10 +304,10 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 	static const struct // we can probably get this from MUL file some place.
 	{
 		GUMP_TYPE m_gump;
-		WORD m_minx;
-		WORD m_miny;
-		WORD m_maxx;
-		WORD m_maxy;
+		word m_minx;
+		word m_miny;
+		word m_maxx;
+		word m_maxy;
 	}
 
 	sm_ContSize[] =
@@ -368,12 +368,12 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 		int tmp_MaxY = (pItemDef->m_ttContainer.m_dwMaxXY & 0xFFFF);
 		DEBUG_WARN(("Custom container gump id %d for 0%x\n", gump, GetDispID()));
 		return CPointMap(
-			static_cast<WORD>(tmp_MinX + Calc_GetRandVal(tmp_MaxX - tmp_MinX)),
-			static_cast<WORD>(tmp_MinY + Calc_GetRandVal(tmp_MaxY - tmp_MinY)),
+			static_cast<word>(tmp_MinX + Calc_GetRandVal(tmp_MaxX - tmp_MinX)),
+			static_cast<word>(tmp_MinY + Calc_GetRandVal(tmp_MaxY - tmp_MinY)),
 			0);
 	}
 
-	unsigned int i = 0;
+	uint i = 0;
 	for ( ; ; i++ )
 	{
 		if ( i >= COUNTOF(sm_ContSize) )
@@ -387,12 +387,12 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 	}
 
 	return CPointMap(
-		static_cast<WORD>(sm_ContSize[i].m_minx + Calc_GetRandVal(sm_ContSize[i].m_maxx - sm_ContSize[i].m_minx)),
-		static_cast<WORD>(sm_ContSize[i].m_miny + Calc_GetRandVal(sm_ContSize[i].m_maxy - sm_ContSize[i].m_miny)),
+		static_cast<word>(sm_ContSize[i].m_minx + Calc_GetRandVal(sm_ContSize[i].m_maxx - sm_ContSize[i].m_minx)),
+		static_cast<word>(sm_ContSize[i].m_miny + Calc_GetRandVal(sm_ContSize[i].m_maxy - sm_ContSize[i].m_miny)),
 		0);
 }
 
-void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, unsigned char gridIndex )
+void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, uchar gridIndex )
 {
 	ADDTOCALLSTACK("CItemContainer::ContentAdd");
 	// Add to CItemContainer
@@ -496,7 +496,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, unsigned char gridI
 		case IT_EQ_VENDOR_BOX:
 			if ( !IsItemEquipped() )	// vendor boxes should ALWAYS be equipped !
 			{
-				DEBUG_ERR(("Un-equipped vendor box uid=0%x is bad\n", (DWORD)GetUID()));
+				DEBUG_ERR(("Un-equipped vendor box uid=0%x is bad\n", (dword)GetUID()));
 				break;
 			}
 			{
@@ -509,7 +509,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, unsigned char gridI
 				}
 
 				pItemVend->SetPlayerVendorPrice(0);	// unpriced yet.
-				pItemVend->SetContainedLayer(static_cast<unsigned char>(pItem->GetAmount()));
+				pItemVend->SetContainedLayer(static_cast<uchar>(pItem->GetAmount()));
 			}
 			break;
 		case IT_GAME_BOARD:
@@ -956,7 +956,7 @@ void CItemContainer::Game_Create()
 	CPointMap pt;
 
 	// Chess has 2 rows of 8 pieces on each side
-	static const WORD sm_ChessRow[] =
+	static const word sm_ChessRow[] =
 	{
 		5,
 		40,
@@ -965,7 +965,7 @@ void CItemContainer::Game_Create()
 	};
 
 	// Checkers has 3 rows of 4 pieces on each side
-	static const WORD sm_CheckerRow[] =
+	static const word sm_CheckerRow[] =
 	{
 		30,
 		55,
@@ -976,7 +976,7 @@ void CItemContainer::Game_Create()
 	};
 
 	// Backgammon has an odd setup
-	static const WORD sm_BackgammonRow[] =
+	static const word sm_BackgammonRow[] =
 	{
 		// White Side
 		// Position 13

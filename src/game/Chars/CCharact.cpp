@@ -24,9 +24,9 @@ bool CChar::TeleportToObj( int iType, TCHAR * pszArgs )
 {
 	ADDTOCALLSTACK("CChar::TeleportToObj");
 
-	DWORD dwUID = m_Act_Targ.GetObjUID() &~ UID_F_ITEM;
-	DWORD dwTotal = g_World.GetUIDCount();
-	DWORD dwCount = dwTotal-1;
+	dword dwUID = m_Act_Targ.GetObjUID() &~ UID_F_ITEM;
+	dword dwTotal = g_World.GetUIDCount();
+	dword dwCount = dwTotal-1;
 
 	int iArg = 0;
 	if ( iType )
@@ -297,7 +297,7 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 			else if ( pItem->IsTypeArmor())
 			{
 				// Shield of some sort.
-				m_defense = static_cast<WORD>(CalcArmorDefense());
+				m_defense = static_cast<word>(CalcArmorDefense());
 				StatFlag_Set( STATF_HasShield );
 				UpdateStatsFlag();
 			}
@@ -317,7 +317,7 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 		case LAYER_SKIRT:
 		case LAYER_LEGS:
 			// If armor or clothing = change in defense rating.
-			m_defense = static_cast<WORD>(CalcArmorDefense());
+			m_defense = static_cast<word>(CalcArmorDefense());
 			UpdateStatsFlag();
 			break;
 
@@ -333,7 +333,7 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 		case LAYER_FLAG_Stuck:
 			StatFlag_Set( STATF_Freeze );
 			if ( IsClient() )
-				GetClient()->addBuff(BI_PARALYZE, 1075827, 1075828, static_cast<WORD>(pItem->GetTimerAdjusted()));
+				GetClient()->addBuff(BI_PARALYZE, 1075827, 1075828, static_cast<word>(pItem->GetTimerAdjusted()));
 			break;
 		default:
 			break;
@@ -401,7 +401,7 @@ void CChar::OnRemoveOb( CGObListRec* pObRec )	// Override this = called when rem
 			else if ( pItem->IsTypeArmor())
 			{
 				// Shield
-				m_defense = static_cast<WORD>(CalcArmorDefense());
+				m_defense = static_cast<word>(CalcArmorDefense());
 				StatFlag_Clear( STATF_HasShield );
 				UpdateStatsFlag();
 			}
@@ -423,7 +423,7 @@ void CChar::OnRemoveOb( CGObListRec* pObRec )	// Override this = called when rem
 		case LAYER_ROBE:		// 22 = robe over all.
 		case LAYER_SKIRT:
 		case LAYER_LEGS:
-			m_defense = static_cast<WORD>(CalcArmorDefense());
+			m_defense = static_cast<word>(CalcArmorDefense());
 			UpdateStatsFlag();
 			break;
 
@@ -567,7 +567,7 @@ void CChar::OnRemoveOb( CGObListRec* pObRec )	// Override this = called when rem
 }
 
 // shrunk or died. (or sleeping)
-void CChar::DropAll( CItemContainer * pCorpse, DWORD dwAttr )
+void CChar::DropAll( CItemContainer * pCorpse, dword dwAttr )
 {
 	ADDTOCALLSTACK("CChar::DropAll");
 	if ( IsStatFlag( STATF_Conjured ))
@@ -634,7 +634,7 @@ void CChar::UnEquipAllItems( CItemContainer * pDest, bool bLeaveHands )
 					CItem *pDupe = CItem::CreateDupeItem(pItem);
 					pDest->ContentAdd(pDupe);
 					// Equip layer only matters on a corpse.
-					pDupe->SetContainedLayer(static_cast<BYTE>(layer));
+					pDupe->SetContainedLayer(static_cast<byte>(layer));
 				}
 				continue;
 			case LAYER_DRAGGING:
@@ -658,7 +658,7 @@ void CChar::UnEquipAllItems( CItemContainer * pDest, bool bLeaveHands )
 			if ( pDest->IsType(IT_CORPSE) )
 			{
 				// Equip layer only matters on a corpse.
-				pItem->SetContainedLayer(static_cast<BYTE>(layer));
+				pItem->SetContainedLayer(static_cast<byte>(layer));
 			}
 		}
 		else if ( pPack )
@@ -792,7 +792,7 @@ void CChar::UpdateStatVal( STAT_TYPE type, short iChange, short iLimit )
 }
 
 // Calculate the action to be used to call UpdateAnimate() with it
-ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackward, BYTE iFrameDelay, BYTE iAnimLen )
+ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackward, byte iFrameDelay, byte iAnimLen )
 {
 	ADDTOCALLSTACK("CChar::UpdateAnimate");
 	UNREFERENCED_PARAMETER(iAnimLen);
@@ -1069,14 +1069,14 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
 // ARGS:
 //   fBackward = make the anim go in reverse.
 //   iFrameDelay = in seconds (approx), 0=fastest, 1=slower
-bool CChar::UpdateAnimate(ANIM_TYPE action, bool fTranslate, bool fBackward , BYTE iFrameDelay , BYTE iAnimLen)
+bool CChar::UpdateAnimate(ANIM_TYPE action, bool fTranslate, bool fBackward , byte iFrameDelay , byte iAnimLen)
 {
 	ADDTOCALLSTACK("CChar::UpdateAnimate");
 	if (action < 0 || action >= ANIM_QTY)
 		return false;
 
 	ANIM_TYPE_NEW subaction = static_cast<ANIM_TYPE_NEW>(-1);
-	BYTE variation = 0;		//Seems to have some effect for humans/elfs vs gargoyles
+	byte variation = 0;		//Seems to have some effect for humans/elfs vs gargoyles
 	if (fTranslate)
 		action = GenerateAnimate( action, true, fBackward);
 	ANIM_TYPE_NEW action1 = static_cast<ANIM_TYPE_NEW>(action);
@@ -1605,11 +1605,11 @@ int CChar::ItemPickup(CItem * pItem, int amount)
 			CClient::OpenedContainerMap_t::iterator itContainerFound = client->m_openedContainers.find( pItemCont->GetUID().GetPrivateUID() );
 			if ( itContainerFound != client->m_openedContainers.end() )
 			{
-				DWORD dwTopContainerUID = (((*itContainerFound).second).first).first;
-				DWORD dwTopMostContainerUID = (((*itContainerFound).second).first).second;
+				dword dwTopContainerUID = (((*itContainerFound).second).first).first;
+				dword dwTopMostContainerUID = (((*itContainerFound).second).first).second;
 				CPointMap ptOpenedContainerPosition = ((*itContainerFound).second).second;
 
-				DWORD dwTopContainerUID_ToCheck = 0;
+				dword dwTopContainerUID_ToCheck = 0;
 				if ( pItemCont->GetContainer() )
 					dwTopContainerUID_ToCheck = pItemCont->GetContainer()->GetUID().GetPrivateUID();
 				else
@@ -1676,7 +1676,7 @@ int CChar::ItemPickup(CItem * pItem, int amount)
 		amount = maximum(1, minimum(amount, iAmountMax));
 
 	//int iItemWeight = ( amount == iAmountMax ) ? pItem->GetWeight() : pItem->Item_GetDef()->GetWeight() * amount;
-	int iItemWeight = pItem->GetWeight(static_cast<WORD>(amount));
+	int iItemWeight = pItem->GetWeight(static_cast<word>(amount));
 
 	// Is it too heavy to even drag ?
 	bool fDrop = false;
@@ -2120,7 +2120,7 @@ void CChar::EatAnim( LPCTSTR pszName, short iQty )
 
 // Some outside influence may be revealing us.
 // -1 = reveal everything, also invisible GMs
-bool CChar::Reveal( DWORD dwFlags )
+bool CChar::Reveal( dword dwFlags )
 {
 	ADDTOCALLSTACK("CChar::Reveal");
 
@@ -2315,7 +2315,7 @@ CItem * CChar::Horse_GetMountItem() const
 					pItem = pItemMount;
 
 					DEBUG_ERR(("UID=0%x, id=0%x '%s', Fixed mount item UID=0%x, id=0%x '%s'\n",
-						(DWORD)GetUID(), GetBaseID(), GetName(), (DWORD)(pItem->GetUID()), pItem->GetBaseID(), pItem->GetName()));
+						(dword)GetUID(), GetBaseID(), GetName(), (dword)(pItem->GetUID()), pItem->GetBaseID(), pItem->GetName()));
 				}
 			}
 		}
@@ -2516,7 +2516,7 @@ bool CChar::OnTickEquip( CItem * pItem )
 					if ( args.m_iN2 < 1 ) args.m_iN2 = g_Cfg.m_iMurderDecayTime;
 				}
 
-				m_pPlayer->m_wMurders = static_cast<WORD>(args.m_iN1);
+				m_pPlayer->m_wMurders = static_cast<word>(args.m_iN1);
 				NotoSave_Update();
 				if ( m_pPlayer->m_wMurders == 0 ) return( false );
 				pItem->SetTimeout(args.m_iN2);	// update it's decay time.
@@ -2600,7 +2600,7 @@ bool CChar::SetPoison( int iSkill, int iTicks, CChar * pCharSrc )
 		// If caster have more than 100.0 in magery and poisoning and it's distance is lesser than 3 tiles, he has a 10% change to inflict lethal poison
 		if (pCharSrc->Skill_GetBase(SKILL_MAGERY) > 1000 && pCharSrc->Skill_GetBase(SKILL_POISONING) > 1000 && GetDist(pCharSrc) < 3 && Calc_GetRandVal(10) == 1)
 		{
-			pPoison->m_itSpell.m_pattern = static_cast<unsigned char>(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(16, 33), 100));
+			pPoison->m_itSpell.m_pattern = static_cast<uchar>(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(16, 33), 100));
 			pPoison->m_itSpell.m_spelllevel = 4;
 			pPoison->m_itSpell.m_spellcharges = 80;	//1 min / 20 sec
 		}
@@ -2611,19 +2611,19 @@ bool CChar::SetPoison( int iSkill, int iTicks, CChar * pCharSrc )
 		}
 		else if (iSkill < 851) // Normal
 		{
-			pPoison->m_itSpell.m_pattern = static_cast<unsigned char>(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(5, 10), 100));
+			pPoison->m_itSpell.m_pattern = static_cast<uchar>(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(5, 10), 100));
 			pPoison->m_itSpell.m_spelllevel = 1;
 			pPoison->m_itSpell.m_spellcharges = 30;
 		}
 		else if (iSkill < 1000) // Greater
 		{
-			pPoison->m_itSpell.m_pattern = static_cast<unsigned char>(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(7, 15), 100));
+			pPoison->m_itSpell.m_pattern = static_cast<uchar>(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(7, 15), 100));
 			pPoison->m_itSpell.m_spelllevel = 2;
 			pPoison->m_itSpell.m_spellcharges = 60;
 		}
 		else	// Deadly.
 		{
-			pPoison->m_itSpell.m_pattern = static_cast<unsigned char>(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(15, 30), 100));
+			pPoison->m_itSpell.m_pattern = static_cast<uchar>(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(15, 30), 100));
 			pPoison->m_itSpell.m_spelllevel = 3;
 			pPoison->m_itSpell.m_spellcharges = 60;
 		}
@@ -2954,7 +2954,7 @@ CRegionBase * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool f
 	}
 
 	// ok to go here ? physical blocking objects ?
-	WORD wBlockFlags = 0;
+	word wBlockFlags = 0;
 	height_t ClimbHeight = 0;
 	CRegionBase *pArea = NULL;
 
@@ -3437,7 +3437,7 @@ bool CChar::MoveToRoom( CRegionBase * pNewRoom, bool fAllowReject)
 	return true;
 }
 
-bool CChar::MoveToRegionReTest( DWORD dwType )
+bool CChar::MoveToRegionReTest( dword dwType )
 {
 	return( MoveToRegion( dynamic_cast <CRegionWorld *>( GetTopPoint().GetRegion( dwType )), false));
 }
@@ -3519,7 +3519,7 @@ bool CChar::MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart, bool bFromS
 	pt.m_z += PLAYER_HEIGHT;
 	signed char startZ = pt.m_z;
 
-	WORD wCan = static_cast<WORD>(GetMoveBlockFlags(true));	// CAN_C_SWIM
+	word wCan = static_cast<word>(GetMoveBlockFlags(true));	// CAN_C_SWIM
 	for ( int i=0; i<iDist; ++i )
 	{
 		if ( pt.IsValidPoint() )
@@ -3532,7 +3532,7 @@ bool CChar::MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart, bool bFromS
 				continue;
 			}
 
-			DWORD wBlockFlags = wCan;
+			dword wBlockFlags = wCan;
 			// Reset Z back to start Z + PLAYER_HEIGHT so we don't climb buildings
 			pt.m_z = startZ;
 			// Set new Z so we don't end up floating or underground
@@ -3557,12 +3557,12 @@ bool CChar::MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart, bool bFromS
 	return false;
 }
 
-bool CChar::MoveNearObj( const CObjBaseTemplate *pObj, WORD iSteps )
+bool CChar::MoveNearObj( const CObjBaseTemplate *pObj, word iSteps )
 {
 	return CObjBase::MoveNearObj(pObj, iSteps);
 }
 
-bool CChar::MoveNear( CPointMap pt, WORD iSteps )
+bool CChar::MoveNear( CPointMap pt, word iSteps )
 {
 	return CObjBase::MoveNear(pt, iSteps);
 }
@@ -3777,7 +3777,7 @@ stopandret:
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("trigger '%s' action '%d' [0%x]\n", pszTrigName, iAction, (DWORD)GetUID());
+	g_Log.EventDebug("trigger '%s' action '%d' [0%x]\n", pszTrigName, iAction, (dword)GetUID());
 	EXC_DEBUG_END;
 	return iRet;
 }

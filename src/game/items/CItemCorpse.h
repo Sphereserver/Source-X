@@ -25,7 +25,7 @@ private:
 
 public:
 	CChar * IsCorpseSleeping() const;
-	int GetWeight(WORD amount = 0) const;
+	int GetWeight(word amount = 0) const;
 };
 
 

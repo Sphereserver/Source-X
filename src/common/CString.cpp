@@ -249,17 +249,17 @@ void CGString::FormatLLVal(long long iVal)
 	Format("%lld", iVal);
 }
 
-void CGString::FormatULLVal(unsigned long long iVal)
+void CGString::FormatULLVal(ullong iVal)
 {
 	Format("%llu", iVal);
 }
 
-void CGString::FormatUVal(unsigned int iVal)
+void CGString::FormatUVal(uint iVal)
 {
 	Format("%u", iVal);
 }
 
-void CGString::FormatHex(DWORD dwVal)
+void CGString::FormatHex(dword dwVal)
 {
 	// In principle, all values in sphere logic are
 	// signed.. 
@@ -272,7 +272,7 @@ void CGString::FormatHex(DWORD dwVal)
 	Format("0%x", dwVal);
 }
 
-void CGString::FormatLLHex(unsigned long long dwVal)
+void CGString::FormatLLHex(ullong dwVal)
 {
 	Format("0%llx", dwVal);
 }
@@ -629,7 +629,7 @@ int FindTableHeadSorted(LPCTSTR pszFind, LPCTSTR const * ppszTable, int iCount, 
 	while (iLow <= iHigh)
 	{
 		int i = (iHigh + iLow) / 2;
-		LPCTSTR pszName = *((LPCTSTR const *)(((const BYTE*)ppszTable) + (i*iElemSize)));
+		LPCTSTR pszName = *((LPCTSTR const *)(((const byte*)ppszTable) + (i*iElemSize)));
 		int iCompare = Str_CmpHeadI(pszFind, pszName);
 		if (iCompare == 0)
 			return(i);
@@ -652,7 +652,7 @@ int FindTableHead(LPCTSTR pszFind, LPCTSTR const * ppszTable, int iCount, int iE
 		int iCompare = Str_CmpHeadI(pszFind, *ppszTable);
 		if (!iCompare)
 			return(i);
-		ppszTable = (LPCTSTR const *)(((const BYTE*)ppszTable) + iElemSize);
+		ppszTable = (LPCTSTR const *)(((const byte*)ppszTable) + iElemSize);
 	}
 	return(-1);
 }
@@ -670,7 +670,7 @@ int FindTableSorted(LPCTSTR pszFind, LPCTSTR const * ppszTable, int iCount, int 
 	while (iLow <= iHigh)
 	{
 		int i = (iHigh + iLow) / 2;
-		LPCTSTR pszName = *((LPCTSTR const *)(((const BYTE*)ppszTable) + (i*iElemSize)));
+		LPCTSTR pszName = *((LPCTSTR const *)(((const byte*)ppszTable) + (i*iElemSize)));
 		int iCompare = strcmpi(pszFind, pszName);
 		if (iCompare == 0)
 			return(i);
@@ -693,7 +693,7 @@ int FindTable(LPCTSTR pszFind, LPCTSTR const * ppszTable, int iCount, int iElemS
 	{
 		if (!strcmpi(*ppszTable, pszFind))
 			return(i);
-		ppszTable = (LPCTSTR const *)(((const BYTE*)ppszTable) + iElemSize);
+		ppszTable = (LPCTSTR const *)(((const byte*)ppszTable) + iElemSize);
 	}
 	return(-1);
 }
@@ -1049,11 +1049,11 @@ MATCH_TYPE Str_Match(LPCTSTR pPattern, LPCTSTR pText)
 }
 
 
-void CharToMultiByteNonNull(BYTE * Dest, const char * Src, size_t MBytes) {
+void CharToMultiByteNonNull(byte * Dest, const char * Src, size_t MBytes) {
 	for (size_t idx = 0; idx != MBytes * 2; idx += 2) {
 		if (Src[idx / 2] == '\0')
 			break;
-		Dest[idx] = static_cast<BYTE>(Src[idx / 2]);
+		Dest[idx] = static_cast<byte>(Src[idx / 2]);
 	}
 }
 

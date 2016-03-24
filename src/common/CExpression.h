@@ -150,7 +150,7 @@ int Calc_GetLog2( UINT iVal );
 int Calc_GetSCurve( int iValDiff, int iVariance );
 int Calc_GetBellCurve( int iValDiff, int iVariance );
 
-DWORD ahextoi( LPCTSTR pArgs ); // Convert hex string to integer
+dword ahextoi( LPCTSTR pArgs ); // Convert hex string to integer
 int64_t ahextoi64( LPCTSTR pArgs ); // Convert hex string to INT64
 
 #define Exp_GetSingle( pa ) static_cast<int>(g_Exp.GetSingle( pa ))

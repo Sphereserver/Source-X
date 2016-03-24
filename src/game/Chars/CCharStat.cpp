@@ -360,7 +360,7 @@ bool CChar::Stats_Regen(INT64 iTimeDiff)
 		if ((i == STAT_STR) && (g_Cfg.m_iRacialFlags & RACIALF_HUMAN_TOUGH) && IsHuman())
 			mod += 2;		// Humans always have +2 hitpoint regeneration (Tough racial trait)
 
-		m_Stat[i].m_regen += static_cast<unsigned short>(iTimeDiff);
+		m_Stat[i].m_regen += static_cast<ushort>(iTimeDiff);
 		if (m_Stat[i].m_regen < iRate)
 			continue;
 
@@ -388,7 +388,7 @@ bool CChar::Stats_Regen(INT64 iTimeDiff)
 			else if (i > STAT_FOOD)
 				i = STAT_FOOD;
 			mod = static_cast<short>(Args.m_VarsLocal.GetKeyNum("Value", true));
-			StatLimit = static_cast<unsigned short>(Args.m_VarsLocal.GetKeyNum("StatLimit", true));
+			StatLimit = static_cast<ushort>(Args.m_VarsLocal.GetKeyNum("StatLimit", true));
 			if (i == STAT_FOOD)
 				HitsHungerLoss = static_cast<int>(Args.m_VarsLocal.GetKeyNum("HitsHungerLoss", true));
 		}
@@ -404,7 +404,7 @@ bool CChar::Stats_Regen(INT64 iTimeDiff)
 	}
 	return true;
 }
-unsigned short CChar::Stats_GetRegenVal(STAT_TYPE iStat, bool bGetTicks)
+ushort CChar::Stats_GetRegenVal(STAT_TYPE iStat, bool bGetTicks)
 {
 	ADDTOCALLSTACK("CChar::Stats_GetRegenVal");
 	// Return regen rates and regen val for the given stat.
@@ -436,16 +436,16 @@ unsigned short CChar::Stats_GetRegenVal(STAT_TYPE iStat, bool bGetTicks)
 		if ( bGetTicks )
 		{
 			sprintf(sRegen, "REGEN%s", stat);
-			unsigned short iRate = static_cast<unsigned short>( GetDefNum(sRegen, true) ) * TICK_PER_SEC;
+			ushort iRate = static_cast<ushort>( GetDefNum(sRegen, true) ) * TICK_PER_SEC;
 			if ( iRate )
 				return maximum(0, iRate);
 
-			return static_cast<unsigned short>(maximum(0, g_Cfg.m_iRegenRate[iStat]));
+			return static_cast<ushort>(maximum(0, g_Cfg.m_iRegenRate[iStat]));
 		}
 		else
 		{
 			sprintf(sRegen, "REGENVAL%s", stat);
-			return static_cast<unsigned short>(maximum(1, GetDefNum(sRegen, true)));
+			return static_cast<ushort>(maximum(1, GetDefNum(sRegen, true)));
 		}
 	}
 	return 0;

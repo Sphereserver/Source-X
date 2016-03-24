@@ -1051,7 +1051,7 @@ bool CResource::r_LoadVal( CScript &s )
 			m_iMapCacheTime = s.GetArgVal() * TICK_PER_SEC;
 			break;
 		case RC_MAXCHARSPERACCOUNT:
-			m_iMaxCharsPerAccount = static_cast<unsigned char>(s.GetArgVal());
+			m_iMaxCharsPerAccount = static_cast<uchar>(s.GetArgVal());
 			if ( m_iMaxCharsPerAccount > MAX_CHARS_PER_ACCT )
 				m_iMaxCharsPerAccount = MAX_CHARS_PER_ACCT;
 			break;
@@ -1298,7 +1298,7 @@ bool CResource::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc
 					case 4:
 						if ( IsDigit(ppVal[3][0]) )
 						{
-							pt.m_map = static_cast<unsigned char>(ATOI(ppVal[3]));
+							pt.m_map = static_cast<uchar>(ATOI(ppVal[3]));
 						}
 					case 3:
 						if ( IsDigit(ppVal[2][0]) || (( iArgs == 4 ) && ( ppVal[2][0] == '-' )) )
@@ -1306,7 +1306,7 @@ bool CResource::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc
 							pt.m_z = static_cast<signed char>(( iArgs == 4 ) ? ATOI(ppVal[2]) : 0);
 							if ( iArgs == 3 )
 							{
-								pt.m_map = static_cast<unsigned char>(ATOI(ppVal[2]));
+								pt.m_map = static_cast<uchar>(ATOI(ppVal[2]));
 							}
 						}
 					case 2:
@@ -1485,8 +1485,8 @@ bool CResource::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc
 		if ( !strnicmp( pszKey, "CLIENT.",7))
 		{
 			pszKey += 7;
-			unsigned int cli_num = static_cast<unsigned int>(Exp_GetVal(pszKey));
-			unsigned int i = 0;
+			uint cli_num = static_cast<uint>(Exp_GetVal(pszKey));
+			uint i = 0;
 			SKIP_SEPARATORS(pszKey);
 
 			if (cli_num >= g_Serv.StatGet( SERV_STAT_CLIENTS ))
@@ -1610,7 +1610,7 @@ bool CResource::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc
 		case RC_RTICKS:
 			{
 				if ( pszKey[6] != '.' )
-					sVal.FormatUVal(static_cast<unsigned long>(CGTime::GetCurrentTime().GetTime()));
+					sVal.FormatUVal(static_cast<uint>(CGTime::GetCurrentTime().GetTime()));
 				else
 				{
 					pszKey += 6;
@@ -1630,7 +1630,7 @@ bool CResource::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc
 						if ( datetime.GetTime() == -1 )
 							sVal.FormatVal(-1);
 						else
-							sVal.FormatUVal(static_cast<unsigned long>(datetime.GetTime()));
+							sVal.FormatUVal(static_cast<uint>(datetime.GetTime()));
 					}
 					else if ( !strnicmp("FORMAT", pszKey, 6) )
 					{
@@ -1916,7 +1916,7 @@ bool CResource::IsObscene( LPCTSTR pszText ) const
 	return( false );
 }
 
-bool CResource::SetKRDialogMap(DWORD rid, DWORD idKRDialog)
+bool CResource::SetKRDialogMap(dword rid, dword idKRDialog)
 {
 	ADDTOCALLSTACK("CResource::SetKRDialogMap");
 	// Defines a link between the given ResourceID and KR DialogID, so that
@@ -1947,7 +1947,7 @@ bool CResource::SetKRDialogMap(DWORD rid, DWORD idKRDialog)
 	return true;
 }
 
-DWORD CResource::GetKRDialogMap(DWORD idKRDialog)
+dword CResource::GetKRDialogMap(dword idKRDialog)
 {
 	ADDTOCALLSTACK("CResource::GetKRDialogMap");
 	// Translates the given KR DialogID into the ResourceID of its scripted dialog.
@@ -1963,7 +1963,7 @@ DWORD CResource::GetKRDialogMap(DWORD idKRDialog)
 	return 0;
 }
 
-DWORD CResource::GetKRDialog(DWORD rid)
+dword CResource::GetKRDialog(dword rid)
 {
 	ADDTOCALLSTACK("CResource::GetKRDialog");
 	// Translates the given ResourceID into it's equivalent KR DialogID.
@@ -2012,7 +2012,7 @@ PLEVEL_TYPE CResource::GetPrivCommandLevel( LPCTSTR pszCmd ) const
 	// NOTE: This does not attempt to parse anything.
 
 	// Is this command avail for your priv level (or lower) ?
-	unsigned int ilevel = PLEVEL_QTY;
+	uint ilevel = PLEVEL_QTY;
 	while ( ilevel > 0 )
 	{
 		--ilevel;
@@ -2212,14 +2212,14 @@ void CResource::LoadSortSpells()
 
 //*************************************************************
 
-int CResource::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, unsigned char chars )
+int CResource::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar chars )
 {
 	int retValue = 0;
 	bool bResOk = false;
 
 	if ( bCharlist )
 	{
-		//	BYTE[4] Flags
+		//	byte[4] Flags
 		//		0x0001	= unknown
 		//		0x0002	= send config/req logout (IGR?)
 		//		0x0004	= single character (siege) (alternative seen, Limit Characters)
@@ -2274,8 +2274,8 @@ int CResource::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, unsigned c
 	}
 	else
 	{
-		//	BYTE[2] feature# (<= 6.0.14.1)
-		//	BYTE[4] feature# (>= 6.0.14.2)
+		//	byte[2] feature# (<= 6.0.14.1)
+		//	byte[4] feature# (>= 6.0.14.2)
 		//		0x00001	T2A upgrade, enables chatbutton
 		//		0x00002	Enables LBR update.  (of course LBR installation is required)
 		//				(plays MP3 instead of midis, 2D LBR client shows new LBR monsters, ... )
@@ -2305,7 +2305,7 @@ int CResource::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, unsigned c
 		//	Note1: this message is send immediately after login.
 		//	Note2: on OSI  servers this controls features OSI enables/disables via �upgrade codes.�
 		//	Note3: a 3 doesn�t seem to �hurt� older (NON LBR) clients.
-		//	Note4: value is BYTE[2] prior to client 6.0.14.2
+		//	Note4: value is byte[2] prior to client 6.0.14.2
 
 		bResOk = ( res >= RDS_T2A );
 		if ( bResOk )
@@ -2437,7 +2437,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 			return false;
 		}
 
-		rid.SetPrivateUID( static_cast<unsigned long>(pVarNum->GetValNum()) );
+		rid.SetPrivateUID( static_cast<uint>(pVarNum->GetValNum()) );
 		restype	= rid.GetResType();
 
 		CResourceDef *	pRes = NULL;
@@ -2659,7 +2659,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 	case RES_PLEVEL:
 		{
 			int index = rid.GetResIndex();
-			if ( index < 0 || static_cast<unsigned int>(index) >= COUNTOF(m_PrivCommands) )
+			if ( index < 0 || static_cast<uint>(index) >= COUNTOF(m_PrivCommands) )
 				return false;
 			while ( pScript->ReadKey() )
 			{
@@ -3030,7 +3030,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 					pServ->m_ip.SetHostPortStr( pScript->GetKey());
 					if ( pScript->ReadKey())
 					{
-						pServ->m_ip.SetPort( static_cast<WORD>(pScript->GetArgVal()));
+						pServ->m_ip.SetPort( static_cast<word>(pScript->GetArgVal()));
 					}
 				}
 				if ( ! strcmpi( pServ->GetName(), g_Serv.GetName()))
@@ -3165,7 +3165,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 			CDialogDef *pDef = dynamic_cast<CDialogDef *>( g_Cfg.ResourceGetDefByName(RES_DIALOG, pScript->GetKey()) );
 			if ( pDef != NULL )
 			{
-				g_Cfg.SetKRDialogMap( (DWORD)pDef->GetResourceID(), pScript->GetArgVal());
+				g_Cfg.SetKRDialogMap( (dword)pDef->GetResourceID(), pScript->GetArgVal());
 			}
 			else
 			{
@@ -3440,7 +3440,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, LPCTSTR pszName, CVar
 						return( ridinvalid );
 				}
 			}
-			rid.SetPrivateUID( static_cast<unsigned long>(pVarNum->GetValNum()));
+			rid.SetPrivateUID( static_cast<uint>(pVarNum->GetValNum()));
 			if ( restype != rid.GetResType())
 			{
 				switch ( restype )
@@ -3458,7 +3458,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, LPCTSTR pszName, CVar
 						return( ridinvalid );
 				}
 			}
-			else if ( fNewStyleDef && static_cast<DWORD>(pVarNum->GetValNum()) != rid.GetPrivateUID() )
+			else if ( fNewStyleDef && static_cast<dword>(pVarNum->GetValNum()) != rid.GetPrivateUID() )
 			{
 				DEBUG_ERR(( "WARNING: region redefines DEFNAME '%s' for another region!\n", pszName ));
 			}

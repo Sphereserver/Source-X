@@ -12,11 +12,11 @@ class CClientTooltip
 {
 public:
     static const char *m_sClassName;
-    DWORD m_clilocid;
+    dword m_clilocid;
     TCHAR m_args[SCRIPT_MAX_LINE_LEN];
 
 public:
-    explicit CClientTooltip(DWORD clilocid, LPCTSTR args = NULL);
+    explicit CClientTooltip(dword clilocid, LPCTSTR args = NULL);
 
 private:
     CClientTooltip(const CClientTooltip& copy);

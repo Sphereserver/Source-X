@@ -341,13 +341,13 @@ bool CSkillDef::r_LoadVal( CScript &s )
 		m_AdvRate.Load( s.GetArgStr());
 		break;
 	case SKC_BONUS_DEX: // "BONUS_DEX"
-		m_StatBonus[STAT_DEX] = static_cast<unsigned char>(s.GetArgVal());
+		m_StatBonus[STAT_DEX] = static_cast<uchar>(s.GetArgVal());
 		break;
 	case SKC_BONUS_INT: // "BONUS_INT"
-		m_StatBonus[STAT_INT] = static_cast<unsigned char>(s.GetArgVal());
+		m_StatBonus[STAT_INT] = static_cast<uchar>(s.GetArgVal());
 		break;
 	case SKC_BONUS_STR: // "BONUS_STR"
-		m_StatBonus[STAT_STR] = static_cast<unsigned char>(s.GetArgVal());
+		m_StatBonus[STAT_STR] = static_cast<uchar>(s.GetArgVal());
 		break;
 	case SKC_DEFNAME: // "DEFNAME"
 		return SetResourceName( s.GetArgStr());
@@ -376,16 +376,16 @@ bool CSkillDef::r_LoadVal( CScript &s )
 		m_Range = s.GetArgVal();
 		break;
 	case SKC_BONUS_STATS: // "BONUS_STATS"
-		m_StatPercent = static_cast<unsigned char>(s.GetArgVal());
+		m_StatPercent = static_cast<uchar>(s.GetArgVal());
 		break;
 	case SKC_STAT_DEX: // "STAT_DEX"
-		m_Stat[STAT_DEX] = static_cast<unsigned char>(s.GetArgVal());
+		m_Stat[STAT_DEX] = static_cast<uchar>(s.GetArgVal());
 		break;
 	case SKC_STAT_INT: // "STAT_INT"
-		m_Stat[STAT_INT] = static_cast<unsigned char>(s.GetArgVal());
+		m_Stat[STAT_INT] = static_cast<uchar>(s.GetArgVal());
 		break;
 	case SKC_STAT_STR: // "STAT_STR"
-		m_Stat[STAT_STR] = static_cast<unsigned char>(s.GetArgVal());
+		m_Stat[STAT_STR] = static_cast<uchar>(s.GetArgVal());
 		break;
 	case SKC_TITLE: // "TITLE"
 		m_sTitle = s.GetArgStr();
@@ -507,7 +507,7 @@ bool CSkillClassDef::r_LoadVal( CScript &s )
 		m_SkillSumMax = s.GetArgVal();
 		break;
 	case SCC_STATSUM:
-		m_StatSumMax = static_cast<WORD>(s.GetArgVal());
+		m_StatSumMax = static_cast<word>(s.GetArgVal());
 		break;
 	default:
 		{
@@ -515,14 +515,14 @@ bool CSkillClassDef::r_LoadVal( CScript &s )
 			if ( i != SKILL_NONE )
 			{
 				ASSERT( i >= 0 && static_cast<size_t>(i) < COUNTOF(m_SkillLevelMax));
-				m_SkillLevelMax[i] = static_cast<WORD>(s.GetArgVal());
+				m_SkillLevelMax[i] = static_cast<word>(s.GetArgVal());
 				break;
 			}
 			i = g_Cfg.FindStatKey( s.GetKey());
 			if ( i >= 0 )
 			{
 				ASSERT( static_cast<size_t>(i) < COUNTOF(m_StatMax));
-				m_StatMax[i] = static_cast<WORD>(s.GetArgVal());
+				m_StatMax[i] = static_cast<word>(s.GetArgVal());
 				break;
 			}
 		}
@@ -775,7 +775,7 @@ bool CSpellDef::r_LoadVal( CScript &s )
 			m_idLayer = static_cast<LAYER_TYPE>(s.GetArgVal());
 			break;
 		case SPC_MANAUSE:
-			m_wManaUse = static_cast<WORD>(s.GetArgVal());
+			m_wManaUse = static_cast<word>(s.GetArgVal());
 			break;
 		case SPC_NAME:
 			m_sName = s.GetArgStr();
@@ -803,7 +803,7 @@ bool CSpellDef::r_LoadVal( CScript &s )
 			m_sound = static_cast<SOUND_TYPE>(s.GetArgVal());
 			break;
 		case SPC_TITHINGUSE:
-			m_wTithingUse = static_cast<WORD>(s.GetArgVal());
+			m_wTithingUse = static_cast<word>(s.GetArgVal());
 			break;
 		default:
 			return( CResourceDef::r_LoadVal( s ) );
@@ -975,7 +975,7 @@ bool CRandGroupDef::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * p
 			}
 			else
 			{
-				CGrayUID uidTofind = static_cast<DWORD>(Exp_GetVal(pszKey));
+				CGrayUID uidTofind = static_cast<dword>(Exp_GetVal(pszKey));
 				CChar * pSend = uidTofind.CharFind();
 
 				if ( pSend )

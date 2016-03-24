@@ -1,8 +1,6 @@
 
 #include <algorithm>
 #include <stdio.h>
-#include <string.h>
-
 #include "CMD5.h"
 
 CMD5::CMD5()
@@ -30,13 +28,13 @@ void CMD5::reset()
 	m_bits[1] = 0;
 }
 
-inline void byteReverse( unsigned char *buffer, unsigned int longs )
+inline void byteReverse( uchar *buffer, uint longs )
 {
-	unsigned int temp;
+	uint temp;
     do
 	{
-		temp = static_cast<unsigned int>(static_cast<unsigned int>(buffer[3]) << 8 | buffer[2]) << 16 | (static_cast<unsigned int>(buffer[1]) << 8 | buffer[0]);
-		reinterpret_cast<unsigned int *>(buffer)[0] = temp;
+		temp = static_cast<uint>(static_cast<uint>(buffer[3]) << 8 | buffer[2]) << 16 | (static_cast<uint>(buffer[1]) << 8 | buffer[0]);
+		reinterpret_cast<uint *>(buffer)[0] = temp;
 		buffer += 4;
     }
 	while( --longs );
@@ -51,8 +49,8 @@ inline void byteReverse( unsigned char *buffer, unsigned int longs )
 
 void CMD5::update()
 {
-    register unsigned int a, b, c, d;
-	unsigned int *ptrInput = reinterpret_cast<unsigned int *>( m_input );
+    register uint a, b, c, d;
+	uint *ptrInput = reinterpret_cast<uint *>( m_input );
 
     a = m_buffer[0];
     b = m_buffer[1];
@@ -133,13 +131,13 @@ void CMD5::update()
     m_buffer[3] += d;
 }
 
-void CMD5::update( const unsigned char *data, unsigned int length )
+void CMD5::update( const uchar *data, uint length )
 {
 	if( m_finalized )
 		return;
 		// throw std::exception( "CMD5::update() although finalized flag is set." );
 
-	unsigned int temp = m_bits[0];
+	uint temp = m_bits[0];
 
 	// First Part overlapped?
 	if( (( m_bits[0] = temp + ( length << 3 ) )) < temp )
@@ -155,7 +153,7 @@ void CMD5::update( const unsigned char *data, unsigned int length )
 	// We still have data waiting
 	if( temp )
 	{
-		unsigned char *ptrInput = &m_input[temp];
+		uchar *ptrInput = &m_input[temp];
 
 		// How much is left
 		temp = 64 - temp;
@@ -198,9 +196,9 @@ void CMD5::finalize()
 		//throw std::exception( "CMD5::finalize() although finalized flag is set." );
 
 	// Pad if neccesary to a 448 bit boundary and add the 64 bit of our bitcount
-	unsigned int count = ( m_bits[0] >> 3 ) & 0x3F;
+	uint count = ( m_bits[0] >> 3 ) & 0x3F;
 
-	unsigned char *ptrInput = &m_input[count];
+	uchar *ptrInput = &m_input[count];
 	
 	// Set the first byte of the padding to 0x80
 	*ptrInput++ = 0x80;
@@ -229,27 +227,27 @@ void CMD5::finalize()
 	byteReverse( m_input, 14 );
 
 	// Append Length and update
-	reinterpret_cast<unsigned int *>(m_input)[14] = m_bits[0];
-	reinterpret_cast<unsigned int *>(m_input)[15] = m_bits[1];
+	reinterpret_cast<uint *>(m_input)[14] = m_bits[0];
+	reinterpret_cast<uint *>(m_input)[15] = m_bits[1];
 
 	update();
 
 	// Reverse our Digest
-	byteReverse( reinterpret_cast<unsigned char *>(m_buffer), 4 );
+	byteReverse( reinterpret_cast<uchar *>(m_buffer), 4 );
 
 	m_finalized = true;
 }
 
-void CMD5::numericDigest( unsigned char *digest )
+void CMD5::numericDigest( uchar *digest )
 {
 	if( !m_finalized )
 		return;
 		// throw std::exception( "Call to CMD5::digest() without finalized flag being set." );
 
-	unsigned char * buffer = reinterpret_cast<unsigned char *>( m_buffer );
+	uchar * buffer = reinterpret_cast<uchar *>( m_buffer );
 
 	// 16 byte a 2 characters
-	for ( unsigned int i = 0; i < 16; ++i )
+	for ( uint i = 0; i < 16; ++i )
 	{
 		digest[i] = buffer[i];
 	}
@@ -263,10 +261,10 @@ void CMD5::digest( char *digest )
 
 	digest[0] = 0;
 
-	unsigned char * buffer = reinterpret_cast<unsigned char *>( m_buffer );
+	uchar * buffer = reinterpret_cast<uchar *>( m_buffer );
 
 	// 16 byte a 2 characters
-    for( unsigned int i = 0; i < 16; ++i )
+    for( uint i = 0; i < 16; ++i )
 	{
 		char temp[3];
 		sprintf( temp, "%02x", buffer[i] );

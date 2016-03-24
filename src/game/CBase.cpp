@@ -63,7 +63,7 @@ void CBaseBaseDef::SetTypeName( LPCTSTR pszName )
 	m_sName = pszName;
 }
 
-bool CBaseBaseDef::Can( WORD wCan ) const
+bool CBaseBaseDef::Can( word wCan ) const
 {
 	return(( m_Can & wCan ) ? true : false );
 }
@@ -501,10 +501,10 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 			{
 				INT64 piVal[2];
 				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, COUNTOF(piVal));
-				m_defenseBase = static_cast<unsigned char>(piVal[0]);
+				m_defenseBase = static_cast<uchar>(piVal[0]);
 				if ( iQty > 1 )
 				{
-					m_defenseRange = static_cast<unsigned char>(piVal[1]) - m_defenseBase;
+					m_defenseRange = static_cast<uchar>(piVal[1]) - m_defenseBase;
 				}
 				else
 				{
@@ -516,10 +516,10 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 			{
 				INT64 piVal[2];
 				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, COUNTOF(piVal));
-				m_attackBase = static_cast<unsigned char>(piVal[0]);
+				m_attackBase = static_cast<uchar>(piVal[0]);
 				if ( iQty > 1 )
 				{
-					m_attackRange = static_cast<unsigned char>(piVal[1]) - m_attackBase;
+					m_attackRange = static_cast<uchar>(piVal[1]) - m_attackBase;
 				}
 				else
 				{
@@ -559,7 +559,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 				else
 				{
 					SetDefNum(s.GetKey(),piVal[0], false);
-					//m_range	= static_cast<WORD>(piVal[0]);
+					//m_range	= static_cast<word>(piVal[0]);
 				}
 			}
 			return( true );
@@ -567,7 +567,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 			m_BaseResources.Load( s.GetArgStr());
 			return( true );
 		case OBC_RESLEVEL:
-			return( SetResLevel(static_cast<unsigned char>(s.GetArgVal())) );
+			return( SetResLevel(static_cast<uchar>(s.GetArgVal())) );
 		case OBC_RESDISPDNHUE:
 			SetResDispDnHue(static_cast<HUE_TYPE>(s.GetArgVal()));
 			return( true );
@@ -624,15 +624,15 @@ bool CBaseBaseDef::IsValid() const
 	return( m_sName.IsValid());
 }
 
-BYTE CBaseBaseDef::RangeL() const
+byte CBaseBaseDef::RangeL() const
 {
-	return static_cast<BYTE>(GetDefNum("RANGE",true) & 0xff);
+	return static_cast<byte>(GetDefNum("RANGE",true) & 0xff);
 	//return (m_range & 0xff);
 }
 
-BYTE CBaseBaseDef::RangeH() const
+byte CBaseBaseDef::RangeH() const
 {
-	return static_cast<BYTE>((GetDefNum("RANGE",true)>>8) & 0xff);
+	return static_cast<byte>((GetDefNum("RANGE",true)>>8) & 0xff);
 	//return ((m_range>>8) & 0xff);
 }
 
@@ -647,12 +647,12 @@ void CBaseBaseDef::SetHeight( height_t Height )
 }
 
 
-BYTE CBaseBaseDef::GetResLevel() const
+byte CBaseBaseDef::GetResLevel() const
 {
 	return( m_ResLevel );
 }
 
-bool CBaseBaseDef::SetResLevel( BYTE ResLevel )
+bool CBaseBaseDef::SetResLevel( byte ResLevel )
 {
 	if ( ResLevel >= RDS_T2A && ResLevel < RDS_QTY )
 	{
@@ -672,12 +672,12 @@ void CBaseBaseDef::SetResDispDnHue( HUE_TYPE ResDispDnHue )
 	m_ResDispDnHue = ResDispDnHue;
 }
 
-WORD CBaseBaseDef::GetResDispDnId() const
+word CBaseBaseDef::GetResDispDnId() const
 {
 	return( m_ResDispDnId );
 }
 
-void CBaseBaseDef::SetResDispDnId( WORD ResDispDnId )
+void CBaseBaseDef::SetResDispDnId( word ResDispDnId )
 {
 	m_ResDispDnId = ResDispDnId;
 }

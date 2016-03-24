@@ -107,7 +107,7 @@ bool CScriptTriggerArgs::r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef )
 		if (*pszTemp && IsDigit( *pszTemp ))
 		{
 			char * pEnd;
-			unsigned short number = static_cast<unsigned short>(strtol( pszTemp, &pEnd, 10 ));
+			ushort number = static_cast<ushort>(strtol( pszTemp, &pEnd, 10 ));
 			if ( number > 0 ) // Can only use 1 to 65535 as REFs
 			{
 				pszTemp = pEnd;
@@ -182,7 +182,7 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
 		if (*pszTemp && IsDigit( *pszTemp ))
 		{
 			char * pEnd;
-			unsigned short number = static_cast<unsigned short>(strtol( pszTemp, &pEnd, 10 ));
+			ushort number = static_cast<ushort>(strtol( pszTemp, &pEnd, 10 ));
 			if ( number > 0 ) // Can only use 1 to 65535 as REFs
 			{
 				pszTemp = pEnd;
@@ -374,7 +374,7 @@ bool CScriptTriggerArgs::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsol
 		
 		if ( *pszKey == '\0' )
 		{
-			sVal.FormatVal(static_cast<long>(iQty));
+			sVal.FormatVal(static_cast<int>(iQty));
 			return( true );
 		}
 
@@ -443,7 +443,7 @@ bool CScriptObj::r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef )
 	else if ( !strnicmp(pszKey, "UID.", 4) )
 	{
 		pszKey += 4;
-		CGrayUID uid = static_cast<DWORD>(Exp_GetVal(pszKey));
+		CGrayUID uid = static_cast<dword>(Exp_GetVal(pszKey));
 		SKIP_SEPARATORS(pszKey);
 		pRef = uid.ObjFind();
 		return true;
@@ -451,13 +451,13 @@ bool CScriptObj::r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef )
 	else if ( ! strnicmp( pszKey, "OBJ.", 4 ))
 	{
 		pszKey += 4;
-		pRef = ( (DWORD)g_World.m_uidObj ) ? g_World.m_uidObj.ObjFind() : NULL;
+		pRef = ( (dword)g_World.m_uidObj ) ? g_World.m_uidObj.ObjFind() : NULL;
 		return true;
 	}
 	else if ( !strnicmp(pszKey, "NEW.", 4) )
 	{
 		pszKey += 4;
-		pRef = ( (DWORD)g_World.m_uidNew ) ? g_World.m_uidNew.ObjFind() : NULL;
+		pRef = ( (dword)g_World.m_uidNew ) ? g_World.m_uidNew.ObjFind() : NULL;
 		return true;
 	}
 	else if ( !strnicmp(pszKey, "I.", 2) )
@@ -541,7 +541,7 @@ bool CScriptObj::r_Call( LPCTSTR pszFunction, CTextConsole * pSrc, CScriptTrigge
 			if ( g_profiler.initstate != 0xf1 )	// it is not initalised
 			{
 				memset(&g_profiler, 0, sizeof(g_profiler));
-				g_profiler.initstate = static_cast<unsigned char>(0xf1); // ''
+				g_profiler.initstate = static_cast<uchar>(0xf1); // ''
 			}
 			for ( pFun = g_profiler.FunctionsHead; pFun != NULL; pFun = pFun->next )
 			{
@@ -775,7 +775,7 @@ bool CScriptObj::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc
 		{
 			pObj = dynamic_cast<CObjBase*>(pRef);
 			if ( pObj )
-				sVal.FormatHex( (DWORD) pObj->GetUID() );
+				sVal.FormatHex( (dword) pObj->GetUID() );
 			else
 				sVal.FormatVal( 1 );
 			return( true );
@@ -871,11 +871,11 @@ badcmd:
 			return( true );
 		case SSC_OBJ:
 			if ( !g_World.m_uidObj.ObjFind() ) g_World.m_uidObj = 0;
-			sVal.FormatHex((DWORD)g_World.m_uidObj);
+			sVal.FormatHex((dword)g_World.m_uidObj);
 			return true;
 		case SSC_NEW:
 			if ( !g_World.m_uidNew.ObjFind() ) g_World.m_uidNew = 0;
-			sVal.FormatHex((DWORD)g_World.m_uidNew);
+			sVal.FormatHex((dword)g_World.m_uidNew);
 			return true;
 		case SSC_SRC:
 			if ( pSrc == NULL )
@@ -894,7 +894,7 @@ badcmd:
 			if ( !*pszKey )
 			{
 				pObj = dynamic_cast <CObjBase*> (pRef);	// if it can be converted .
-				sVal.FormatHex( pObj ? (DWORD) pObj->GetUID() : 0 );
+				sVal.FormatHex( pObj ? (dword) pObj->GetUID() : 0 );
 				return true;
 			}
 			return pRef->r_WriteVal( pszKey, sVal, pSrc );
@@ -938,7 +938,7 @@ badcmd:
 			sVal.FormatLLVal( Exp_GetLLVal( pszKey ));
 			return( true );
 		case SSC_UVAL:
-			sVal.FormatULLVal(static_cast<unsigned long long>(Exp_GetLLVal(pszKey)));
+			sVal.FormatULLVal(static_cast<ullong>(Exp_GetLLVal(pszKey)));
 			return( true );
 		case SSC_FVAL:
 			{
@@ -1024,7 +1024,7 @@ badcmd:
 				if ( !pszPos )
 					sVal.FormatVal( -1 );
 				else
-					sVal.FormatVal(static_cast<long>( pszPos - pszKey ) );
+					sVal.FormatVal(static_cast<int>( pszPos - pszKey ) );
 			}
 			return true;
 		case SSC_StrSub:
@@ -1407,7 +1407,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 				CItem *pItem = CItem::CreateHeader(ppCmd[0], NULL, false, pSrc->GetChar());
 				if ( !pItem )
 				{
-					g_World.m_uidNew = (DWORD)0;
+					g_World.m_uidNew = (dword)0;
 					return false;
 				}
 				
@@ -1455,7 +1455,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 				CChar * pChar = CChar::CreateNPC(id);
 				if ( !pChar )
 				{
-					g_World.m_uidNew = (DWORD)0;
+					g_World.m_uidNew = (dword)0;
 					return false;
 				}
 
@@ -1886,11 +1886,11 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 		// No need to loop if there is no valid resource id
 		if ( rid.IsValidUID() )
 		{
-			DWORD dwTotalInstances = 0; // Will acquire the correct value for this during the loop
-			DWORD dwUID = 0;
-			DWORD dwTotal = g_World.GetUIDCount();
-			DWORD dwCount = dwTotal-1;
-			DWORD dwFound = 0;
+			dword dwTotalInstances = 0; // Will acquire the correct value for this during the loop
+			dword dwUID = 0;
+			dword dwTotal = g_World.GetUIDCount();
+			dword dwCount = dwTotal-1;
+			dword dwFound = 0;
 
 			while ( dwCount-- )
 			{
@@ -2017,7 +2017,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerScript( CScript & s, LPCTSTR pszTrigName, CTex
 		if ( g_profiler.initstate != 0xf1 )	// it is not initalised
 		{
 			memset(&g_profiler, 0, sizeof(g_profiler));
-			g_profiler.initstate = static_cast<unsigned char>(0xf1); // ''
+			g_profiler.initstate = static_cast<uchar>(0xf1); // ''
 		}
 
 		for ( pTrig = g_profiler.TriggersHead; pTrig != NULL; pTrig = pTrig->next )
@@ -2277,11 +2277,11 @@ jump_in:
 							if ( iCmd == SK_FORCHARLAYER )
 								iRet = pCharThis->OnCharTrigForLayerLoop(s, pSrc, pArgs, pResult, static_cast<LAYER_TYPE>(s.GetArgVal()));
 							else
-								iRet = pCharThis->OnCharTrigForMemTypeLoop(s, pSrc, pArgs, pResult, static_cast<WORD>(s.GetArgVal()));
+								iRet = pCharThis->OnCharTrigForMemTypeLoop(s, pSrc, pArgs, pResult, static_cast<word>(s.GetArgVal()));
 						}
 						else
 						{
-							DEBUG_ERR(( "FORCHAR[layer/memorytype] called on char 0%x (%s) without arguments.\n", static_cast<DWORD>(pCharThis->GetUID()), pCharThis->GetName() ));
+							DEBUG_ERR(( "FORCHAR[layer/memorytype] called on char 0%x (%s) without arguments.\n", static_cast<dword>(pCharThis->GetUID()), pCharThis->GetName() ));
 							iRet = OnTriggerRun( s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult );
 						}
 					}
@@ -2306,7 +2306,7 @@ jump_in:
 							TCHAR *tempPoint = porigValue;
 							ParseText( tempPoint, pSrc, 0, pArgs );
 							
-							CGrayUID pCurUid = static_cast<DWORD>(Exp_GetVal(tempPoint));
+							CGrayUID pCurUid = static_cast<dword>(Exp_GetVal(tempPoint));
 							if ( pCurUid.IsValidUID() )
 							{
 								CObjBase * pObj = pCurUid.ObjFind();
@@ -2369,19 +2369,19 @@ jump_in:
 								}
 								else
 								{
-									DEBUG_ERR(( "FORCONT[id/type] called on container 0%x with incorrect arguments.\n", (DWORD)pObjCont->GetUID() ));
+									DEBUG_ERR(( "FORCONT[id/type] called on container 0%x with incorrect arguments.\n", (dword)pObjCont->GetUID() ));
 									iRet = OnTriggerRun( s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult );
 								}
 							}
 							else
 							{
-								DEBUG_ERR(( "FORCONT[id/type] called on container 0%x with incorrect arguments.\n", (DWORD)pObjCont->GetUID() ));
+								DEBUG_ERR(( "FORCONT[id/type] called on container 0%x with incorrect arguments.\n", (dword)pObjCont->GetUID() ));
 								iRet = OnTriggerRun( s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult );
 							}
 						}
 						else
 						{
-							DEBUG_ERR(( "FORCONT[id/type] called on container 0%x without arguments.\n", (DWORD)pObjCont->GetUID() ));
+							DEBUG_ERR(( "FORCONT[id/type] called on container 0%x without arguments.\n", (dword)pObjCont->GetUID() ));
 							iRet = OnTriggerRun( s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult );
 						}
 					}
@@ -3048,7 +3048,7 @@ bool CFileObj::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc )
 				if ( iLines < 0 )
 					return( false );
 
-				unsigned int uiSeek = sWrite->GetPosition();
+				uint uiSeek = sWrite->GetPosition();
 				sWrite->SeekToBegin();
 
 				if ( iLines == 0 )

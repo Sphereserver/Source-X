@@ -20,7 +20,7 @@ LPCTSTR const CExpression::sm_szMsgNames[DEFMSG_QTY] =
 	#include "../tables/defmessages.tbl"
 };
 
-DWORD ahextoi( LPCTSTR pszStr ) // Convert hex string to integer
+dword ahextoi( LPCTSTR pszStr ) // Convert hex string to integer
 {
 	// Unfortunatly the library func cant handle the number FFFFFFFF
 	// TCHAR * sstop; return( strtol( s, &sstop, 16 ));
@@ -38,7 +38,7 @@ DWORD ahextoi( LPCTSTR pszStr ) // Convert hex string to integer
 		pszStr--;
 	}
 
-	DWORD val = 0;
+	dword val = 0;
 	for (;;)
 	{
 		TCHAR ch = static_cast<TCHAR>(toupper(*pszStr));
@@ -295,7 +295,7 @@ int Calc_GetRandVal( int iqty )
 		return( 0 );
 	if ( iqty >= INT32_MAX )
 	{
-		return( IMULDIV( g_World.m_Rand.randInt(), (DWORD) iqty, INT32_MAX )) ;
+		return( IMULDIV( g_World.m_Rand.randInt(), (dword) iqty, INT32_MAX )) ;
 	}
 	return( g_World.m_Rand.randInt() % iqty );
 }
@@ -317,7 +317,7 @@ INT64 Calc_GetRandLLVal( INT64 iqty )
 		return( 0 );
 	if ( iqty >= INT64_MAX )
 	{
-		return( IMULDIV( g_World.m_Rand.genrand64_int64(), (DWORD) iqty, INT64_MAX )) ;
+		return( IMULDIV( g_World.m_Rand.genrand64_int64(), (dword) iqty, INT64_MAX )) ;
 	}
 	return( g_World.m_Rand.genrand64_int64() % iqty );
 }
@@ -420,7 +420,7 @@ INT64 CExpression::GetSingle( LPCTSTR & pszArgs )
 		}
 
 		LPCTSTR pStart = pszArgs;
-		ULLONG val = 0;
+		ullong val = 0;
 		for (;;)
 		{
 			TCHAR ch = *pszArgs;
@@ -543,7 +543,7 @@ try_dec:
 
 						if ( pszArgs && *pszArgs )
 						{
-							int iArgument = static_cast<long>(GetVal(pszArgs));
+							int iArgument = static_cast<int>(GetVal(pszArgs));
 							if ( iArgument <= 0 )
 							{
 								DEBUG_ERR(( "Exp_GetVal: (x)Log(%d) is %s\n", iArgument, (!iArgument) ? "infinite" : "undefined" ));
@@ -608,7 +608,7 @@ try_dec:
 
 						if ( pszArgs && *pszArgs )
 						{
-							int iTosquare = static_cast<long>(GetVal(pszArgs));
+							int iTosquare = static_cast<int>(GetVal(pszArgs));
 
 							if (iTosquare >= 0)
 							{
@@ -674,7 +674,7 @@ try_dec:
 						if ( iCount < 2 )
 							iResult = -1;
 						else
-							iResult = Str_IndexOf(ppCmd[0],ppCmd[1],(iCount==3)?static_cast<long>(GetVal(ppCmd[2])):0);
+							iResult = Str_IndexOf(ppCmd[0],ppCmd[1],(iCount==3)?static_cast<int>(GetVal(ppCmd[2])):0);
 					} break;
 
 					case INTRINSIC_STRMATCH:
@@ -708,7 +708,7 @@ try_dec:
 						if ( iCount < 2 )
 							iResult = 0;
 						else
-							iResult = Calc_GetBellCurve( static_cast<long>(GetVal( ppCmd[0] )), static_cast<long>(GetVal( ppCmd[1] )));
+							iResult = Calc_GetBellCurve( static_cast<int>(GetVal( ppCmd[0] )), static_cast<int>(GetVal( ppCmd[1] )));
 					} break;
 
 					case INTRINSIC_STRASCII:

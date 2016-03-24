@@ -539,7 +539,7 @@ bool CDialogDef::GumpSetup( int iPage, CClient * pClient, CObjBase * pObjSrc, LP
 	m_pObj			= pObjSrc;
 	m_iOriginX		= 0;
 	m_iOriginY		= 0;
-	m_iPage			= static_cast<WORD>(iPage);
+	m_iPage			= static_cast<word>(iPage);
 	m_bNoDispose	= false;
 
 	CScriptTriggerArgs	Args(iPage, 0, pObjSrc);
@@ -604,7 +604,7 @@ bool CClient::Dialog_Setup( CLIMODE_TYPE mode, RESOURCE_ID_BASE rid, int iPage, 
 
 	// Now pack it up to send,
 	// m_tmGumpDialog.m_ResourceID = rid;
-	DWORD context = (DWORD)rid;
+	dword context = (dword)rid;
 	if ( GetNetState()->isClientKR() )
 	{
 		// translate to KR's equivalent DialogID
@@ -624,7 +624,7 @@ bool CClient::Dialog_Setup( CLIMODE_TYPE mode, RESOURCE_ID_BASE rid, int iPage, 
 
 
 void CClient::addGumpInpVal( bool fCancel, INPVAL_STYLE style,
-	DWORD iMaxLength,
+	dword iMaxLength,
 	LPCTSTR pszText1,
 	LPCTSTR pszText2,
 	CObjBase * pObj )
@@ -654,7 +654,7 @@ void CClient::addGumpInpVal( bool fCancel, INPVAL_STYLE style,
 }
 
 
-void CClient::addGumpDialog( CLIMODE_TYPE mode, const CGString * psControls, size_t iControls, const CGString * psText, size_t iTexts, int x, int y, CObjBase * pObj, DWORD rid )
+void CClient::addGumpDialog( CLIMODE_TYPE mode, const CGString * psControls, size_t iControls, const CGString * psText, size_t iTexts, int x, int y, CObjBase * pObj, dword rid )
 {
 	ADDTOCALLSTACK("CClient::addGumpDialog");
 	// Add a generic GUMP menu.
@@ -708,7 +708,7 @@ bool CClient::addGumpDialogProps( CGrayUID uid )
 	return( true );
 }
 
-TRIGRET_TYPE CClient::Dialog_OnButton( RESOURCE_ID_BASE rid, DWORD dwButtonID, CObjBase * pObj, CDialogResponseArgs * pArgs )
+TRIGRET_TYPE CClient::Dialog_OnButton( RESOURCE_ID_BASE rid, dword dwButtonID, CObjBase * pObj, CDialogResponseArgs * pArgs )
 {
 	ADDTOCALLSTACK("CClient::Dialog_OnButton");
 	// one of the gump dialog buttons was pressed.
@@ -738,13 +738,13 @@ TRIGRET_TYPE CClient::Dialog_OnButton( RESOURCE_ID_BASE rid, DWORD dwButtonID, C
 		if ( iArgs == 1 )
 		{
 			// single button value
-			if ( (DWORD)piCmd[0] != dwButtonID )
+			if ( (dword)piCmd[0] != dwButtonID )
 				continue;
 		}
 		else
 		{
 			// range of button values
-			if ( dwButtonID < (DWORD)piCmd[0] || dwButtonID > (DWORD)piCmd[1] )
+			if ( dwButtonID < (dword)piCmd[0] || dwButtonID > (dword)piCmd[1] )
 				continue;
 		}
 
@@ -756,7 +756,7 @@ TRIGRET_TYPE CClient::Dialog_OnButton( RESOURCE_ID_BASE rid, DWORD dwButtonID, C
 }
 
 
-bool CClient::Dialog_Close( CObjBase * pObj, DWORD rid, int buttonID )
+bool CClient::Dialog_Close( CObjBase * pObj, dword rid, int buttonID )
 {
 	ADDTOCALLSTACK("CClient::Dialog_Close");
 	int gumpContext = rid & 0x00FFFFFF;
@@ -873,7 +873,7 @@ bool CMenuItem::ParseLine( TCHAR * pszArgs, CScriptObj * pObjBase, CTextConsole 
 		CItemBase * pItemBase = CItemBase::FindItemBase(static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, pszArgStart )));
 		if ( pItemBase != NULL )
 		{
-			m_id = static_cast<WORD>(pItemBase->GetDispID());
+			m_id = static_cast<word>(pItemBase->GetDispID());
 			pObjBase = pItemBase;
 		}
 		else

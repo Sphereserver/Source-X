@@ -576,7 +576,7 @@ int CWebPageDef::ServPageRequest( CClient * pClient, LPCTSTR pszURLArgs, CGTime 
 
 	// Get proper Last-Modified: time.
 	time_t dateChange;
-	DWORD dwSize;
+	dword dwSize;
 	if ( ! CFileList::ReadFileInfo( pszName, dateChange, dwSize ))
 	{
 		return 500;
@@ -588,7 +588,7 @@ int CWebPageDef::ServPageRequest( CClient * pClient, LPCTSTR pszURLArgs, CGTime 
 	{
 		TCHAR *pszTemp = Str_GetTemp();
 		sprintf(pszTemp, "HTTP/1.1 304 Not Modified\r\nDate: %s\r\nServer: " GRAY_TITLE " V " GRAY_VERSION "\r\nContent-Length: 0\r\n\r\n", sDate);
-		new PacketWeb(pClient, (BYTE*)pszTemp, strlen(pszTemp));
+		new PacketWeb(pClient, (byte*)pszTemp, strlen(pszTemp));
 		return 0;
 	}
 
@@ -621,7 +621,7 @@ int CWebPageDef::ServPageRequest( CClient * pClient, LPCTSTR pszURLArgs, CGTime 
 		);
 
 	PacketWeb packet;
-	packet.setData((BYTE*)szTmp, iLen);
+	packet.setData((byte*)szTmp, iLen);
 	packet.send(pClient);
 
 	for (;;)
@@ -629,7 +629,7 @@ int CWebPageDef::ServPageRequest( CClient * pClient, LPCTSTR pszURLArgs, CGTime 
 		iLen = FileRead.Read( szTmp, sizeof( szTmp ) );
 		if ( iLen <= 0 )
 			break;
-		packet.setData((BYTE*)szTmp, iLen);
+		packet.setData((byte*)szTmp, iLen);
 		packet.send(pClient);
 		//dwSize -= iLen;
 		if ( iLen < sizeof( szTmp ) )
@@ -673,7 +673,7 @@ static int HtmlDeCode( TCHAR * pszDst, LPCTSTR pszSrc )
 				if ( ch )
 				{
 					ch = static_cast<TCHAR>(iVal*0x10 + GetHexDigit(ch));
-					if (static_cast<unsigned char>(ch) == 0xa0)
+					if (static_cast<uchar>(ch) == 0xa0)
 						ch = '\0';
 				}
 			}
@@ -711,7 +711,7 @@ bool CWebPageDef::ServPagePost( CClient * pClient, LPCTSTR pszURLArgs, TCHAR * p
 	// C or CHK or CHECK = the check boxes
 
 	CDialogResponseArgs resp;
-	DWORD dwButtonID = UINT32_MAX;
+	dword dwButtonID = UINT32_MAX;
 	for ( size_t i = 0; i < iArgs; i++ )
 	{
 		TCHAR * pszNum = ppArgs[i];
@@ -746,7 +746,7 @@ bool CWebPageDef::ServPagePost( CClient * pClient, LPCTSTR pszURLArgs, TCHAR * p
 				{
 					TCHAR *pszData = Str_GetTemp();
 					HtmlDeCode( pszData, pszNum );
-					resp.AddText(static_cast<WORD>(iNum), pszData);
+					resp.AddText(static_cast<word>(iNum), pszData);
 				}
 				break;
 		}
@@ -760,7 +760,7 @@ bool CWebPageDef::ServPagePost( CClient * pClient, LPCTSTR pszURLArgs, TCHAR * p
 	// Find the correct entry point.
 	while ( s.ReadKeyParse())
 	{
-		if ( !s.IsKeyHead("ON", 2) || ( (DWORD)s.GetArgVal() != dwButtonID ))
+		if ( !s.IsKeyHead("ON", 2) || ( (dword)s.GetArgVal() != dwButtonID ))
 			continue;
 		OnTriggerRunVal(s, TRIGRUN_SECTION_TRUE, pClient, &resp);
 		return true;
@@ -858,7 +858,7 @@ bool CWebPageDef::ServPage( CClient * pClient, TCHAR * pszPage, CGTime * pdateIf
 		sText.GetLength(),
 		static_cast<LPCTSTR>(sText));
 
-	new PacketWeb(pClient, reinterpret_cast<const BYTE *>(sMsgHead.GetPtr()), sMsgHead.GetLength());
+	new PacketWeb(pClient, reinterpret_cast<const byte *>(sMsgHead.GetPtr()), sMsgHead.GetLength());
 	return false;
 }
 

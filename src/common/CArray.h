@@ -706,7 +706,7 @@ void CGTypedArray<TYPE, ARG_TYPE>::SetCount( size_t nNewCount )
 		if (m_nCount > 0)
 		{
 			DestructElements( m_pData, m_nCount );
-			delete[] reinterpret_cast<BYTE *>(m_pData);
+			delete[] reinterpret_cast<byte *>(m_pData);
 			m_nCount = m_nRealCount = 0;	// that's probably wrong.. but SetCount(0) should be never called
 			m_pData = NULL;					// before Clean(true) in CGObArray
 		}
@@ -715,12 +715,12 @@ void CGTypedArray<TYPE, ARG_TYPE>::SetCount( size_t nNewCount )
 
 	if ( nNewCount > m_nCount )
 	{
-		TYPE * pNewData = reinterpret_cast<TYPE *>(new BYTE[ nNewCount * sizeof( TYPE ) ]);
+		TYPE * pNewData = reinterpret_cast<TYPE *>(new byte[ nNewCount * sizeof( TYPE ) ]);
 		if ( m_nCount )
 		{
 			// copy the old stuff to the new array.
 			memcpy( pNewData, m_pData, sizeof(TYPE)*m_nCount );
-			delete[] reinterpret_cast<BYTE *>(m_pData);	// don't call any destructors.
+			delete[] reinterpret_cast<byte *>(m_pData);	// don't call any destructors.
 		}
 
 		// Just construct or init the new stuff.
@@ -740,7 +740,7 @@ void CGTypedArray<TYPE, ARG_TYPE>::SetCount( size_t nNewCount )
 	{
 		if ( m_nRealCount )
 		{
-			delete[] (BYTE*) m_pData;
+			delete[] (byte*) m_pData;
 			m_nCount = m_nRealCount = 0;
 			m_pData = NULL;
 		}
@@ -751,12 +751,12 @@ void CGTypedArray<TYPE, ARG_TYPE>::SetCount( size_t nNewCount )
 	if (( nNewCount > m_nRealCount ) || ( nNewCount < m_nRealCount-10 ))
 	{
 		m_nRealCount = nNewCount + 5;	// auto-allocate space for 5 extra elements
-		TYPE * pNewData = (TYPE*) new BYTE[m_nRealCount * sizeof(TYPE)];
+		TYPE * pNewData = (TYPE*) new byte[m_nRealCount * sizeof(TYPE)];
 
 		// i have already data inside, so move to the new place
 		if ( m_nCount )
 			memcpy(pNewData, m_pData, sizeof(TYPE) * m_nCount);
-		delete[] (BYTE*) m_pData;
+		delete[] (byte*) m_pData;
 		m_pData = pNewData;
 	}
 

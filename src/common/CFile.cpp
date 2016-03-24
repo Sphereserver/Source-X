@@ -41,7 +41,7 @@ bool CFile::Open( LPCTSTR pszName, UINT uMode, CFileException * e )
 	SetFilePath( pszName );
 
 #ifdef _WIN32
-	DWORD dwShareMode, dwCreationDisposition, dwDesiredAccess;
+	dword dwShareMode, dwCreationDisposition, dwDesiredAccess;
 
 	dwDesiredAccess = GENERIC_READ;
 	if ( uMode & OF_WRITE )
@@ -87,16 +87,16 @@ void CFile::Close()
 	}
 }
 
-DWORD CFile::GetLength()
+dword CFile::GetLength()
 {
 	// Get the size of the file.
-	DWORD lPos = GetPosition();	// save current pos.
-	DWORD lSize = SeekToEnd();
+	dword lPos = GetPosition();	// save current pos.
+	dword lSize = SeekToEnd();
 	Seek( lPos, SEEK_SET );	// restore previous pos.
 	return( lSize );
 }
 
-DWORD CFile::GetPosition() const
+dword CFile::GetPosition() const
 {
 #ifdef _WIN32
 	return SetFilePointer( m_hFile, 0, NULL, FILE_CURRENT );
@@ -105,7 +105,7 @@ DWORD CFile::GetPosition() const
 #endif
 }
 
-DWORD CFile::Seek(int lOffset, UINT iOrigin )
+dword CFile::Seek(int lOffset, UINT iOrigin )
 {
 #ifdef _WIN32
 	return SetFilePointer( m_hFile, lOffset, NULL, iOrigin );
@@ -116,26 +116,26 @@ DWORD CFile::Seek(int lOffset, UINT iOrigin )
 #endif
 }
 
-DWORD CFile::Read( void * pData, DWORD dwLength ) const
+dword CFile::Read( void * pData, dword dwLength ) const
 {
 #ifdef _WIN32
 	DWORD dwRead;
-	if ( ! ReadFile( m_hFile, pData, dwLength, &dwRead, NULL ))
+	if ( ! ReadFile( m_hFile, pData, (DWORD)dwLength, &dwRead, NULL ))
 	{
 		NotifyIOError("read");
 		return 0;
 	}
 	return dwRead;
 #else
-	return( read( m_hFile, pData, (long) dwLength ));
+	return( read( m_hFile, pData, (int) dwLength ));
 #endif
 }
 
-bool CFile::Write( const void * pData, DWORD dwLength ) const
+bool CFile::Write( const void * pData, dword dwLength ) const
 {
 #ifdef _WIN32
 	DWORD dwWritten;
-	BOOL ret = ::WriteFile( m_hFile, pData, dwLength, &dwWritten, NULL );
+	BOOL ret = ::WriteFile( m_hFile, pData, (DWORD)dwLength, &dwWritten, NULL );
 	if ( ret == FALSE )
 	{
 		NotifyIOError("write");
@@ -143,7 +143,7 @@ bool CFile::Write( const void * pData, DWORD dwLength ) const
 	}
 	return true;
 #else
-	return( write( m_hFile, (const char *) pData, (long) dwLength ) == (long) dwLength );
+	return( write( m_hFile, (const char *) pData, (int) dwLength ) == (int) dwLength );
 #endif
 }
 
@@ -203,7 +203,7 @@ CGString CGFile::GetMergedFileName( LPCTSTR pszBase, LPCTSTR pszName ) // static
 LPCTSTR CGFile::GetFilesTitle( LPCTSTR pszPath )	// static
 {
 	ADDTOCALLSTACK("CGFile::GetFilesTitle");
-	// Just use COMMDLG.H GetFileTitle(LPCTSTR, LPTSTR, WORD) instead ?
+	// Just use COMMDLG.H GetFileTitle(LPCTSTR, LPTSTR, word) instead ?
 	// strrchr
 	size_t len = strlen(pszPath);
 	while ( len > 0 )
@@ -348,7 +348,7 @@ bool CFileText::OpenBase( void FAR * pszExtra )
 	return( true );
 }
 
-DWORD CFileText::Seek(int offset, UINT origin )
+dword CFileText::Seek(int offset, UINT origin )
 {
 	// true = success
 	if ( ! IsFileOpen())
@@ -371,22 +371,22 @@ void CFileText::Flush() const
 	fflush(m_pStream);
 }
 
-DWORD CFileText::GetPosition() const
+dword CFileText::GetPosition() const
 {
 	// RETURN: -1 = error.
 	if ( ! IsFileOpen())
-		return static_cast<DWORD>(-1);
+		return static_cast<dword>(-1);
 	return( ftell(m_pStream));
 }
 
-DWORD CFileText::Read( void * pBuffer, size_t sizemax ) const
+dword CFileText::Read( void * pBuffer, size_t sizemax ) const
 {
 	// This can return: EOF(-1) constant.
 	// returns the number of full items actually read
 	ASSERT(pBuffer);
 	if ( IsEOF())
 		return( 0 );	// LINUX will ASSERT if we read past end.
-	return( static_cast<DWORD>(fread( pBuffer, 1, sizemax, m_pStream )));
+	return( static_cast<dword>(fread( pBuffer, 1, sizemax, m_pStream )));
 }
 
 TCHAR * CFileText::ReadString( TCHAR * pBuffer, size_t sizemax ) const
@@ -399,9 +399,9 @@ TCHAR * CFileText::ReadString( TCHAR * pBuffer, size_t sizemax ) const
 }
 
 #ifndef _WIN32
-	bool CFileText::Write( const void * pData, DWORD iLen ) const
+	bool CFileText::Write( const void * pData, dword iLen ) const
 #else
-	bool CFileText::Write( const void * pData, DWORD iLen )
+	bool CFileText::Write( const void * pData, dword iLen )
 #endif
 {
 	// RETURN: 1 = success else fail.
@@ -426,7 +426,7 @@ bool CFileText::WriteString( LPCTSTR pStr )
 {
 	// RETURN: < 0 = failed.
 	ASSERT(pStr);
-	return( Write( pStr, static_cast<DWORD>(strlen( pStr ))));
+	return( Write( pStr, static_cast<dword>(strlen( pStr ))));
 }
 
 bool CFileText::IsEOF() const

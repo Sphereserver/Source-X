@@ -52,7 +52,7 @@ public:
 	long long GetArgLLVal();
 	int GetArgVal();
 	int GetArgRange();
-	DWORD GetArgFlag( DWORD dwStart, DWORD dwMask );
+	dword GetArgFlag( dword dwStart, dword dwMask );
 
 public:
 	CScriptKey();
@@ -108,7 +108,7 @@ public:
 protected:
 	void InitBase();
 
-	virtual DWORD Seek( int offset = 0, UINT origin = SEEK_SET );
+	virtual dword Seek( int offset = 0, UINT origin = SEEK_SET );
 
 public:
 	// text only functions:

@@ -37,7 +37,7 @@ private:
 	virtual void OnComponentCreate( const CItem * pComponent );
 
 public:
-	bool Ship_SetMoveDir(DIR_TYPE dir, BYTE speed = 0, bool bWheelMove = false);
+	bool Ship_SetMoveDir(DIR_TYPE dir, byte speed = 0, bool bWheelMove = false);
 	bool Ship_Face(DIR_TYPE dir);
 	bool Ship_Move(DIR_TYPE dir, int distance);
 	static const char *m_sClassName;

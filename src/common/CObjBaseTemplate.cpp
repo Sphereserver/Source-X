@@ -9,7 +9,7 @@ void CObjBaseTemplate::DupeCopy( const CObjBaseTemplate * pObj )
 	m_pt = pObj->m_pt;
 }
 
-void CObjBaseTemplate::SetUID( DWORD dwIndex )
+void CObjBaseTemplate::SetUID( dword dwIndex )
 {
 	// don't set container flags through here.
 	m_UID.SetObjUID( dwIndex );	// Will have UID_F_ITEM as well.
@@ -77,7 +77,7 @@ bool CObjBaseTemplate::IsValidUID() const
 	return( m_UID.IsValidUID() );
 }
 
-void CObjBaseTemplate::SetContainerFlags( DWORD dwFlags )
+void CObjBaseTemplate::SetContainerFlags( dword dwFlags )
 {
 	m_UID.SetObjContainerFlags( dwFlags );
 }
@@ -103,13 +103,13 @@ void CObjBaseTemplate::SetEquipLayer( LAYER_TYPE layer )
 	m_pt.m_map = 0;
 }
 
-BYTE CObjBaseTemplate::GetContainedLayer() const
+byte CObjBaseTemplate::GetContainedLayer() const
 {
 	// used for corpse or Restock count as well in Vendor container.
 	return( m_pt.m_z );
 }
 
-void CObjBaseTemplate::SetContainedLayer( BYTE layer )
+void CObjBaseTemplate::SetContainedLayer( byte layer )
 {
 	// used for corpse or Restock count as well in Vendor container.
 	m_pt.m_z = layer;
@@ -151,7 +151,7 @@ signed char CObjBaseTemplate::GetTopZ() const
 	return( m_pt.m_z );
 }
 
-unsigned char CObjBaseTemplate::GetTopMap() const
+uchar CObjBaseTemplate::GetTopMap() const
 {
 	return( m_pt.m_map );
 }

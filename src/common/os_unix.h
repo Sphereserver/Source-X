@@ -47,12 +47,12 @@
 	#define HKEY_LOCAL_MACHINE	(( HKEY ) 0x80000002 )
 #endif
 
-#define MAKEWORD(low,high)	((WORD)(((BYTE)(low))|(((WORD)((BYTE)(high)))<<8)))
-#define MAKELONG(low,high)	((LONG)(((WORD)(low))|(((DWORD)((WORD)(high)))<<16)))
-#define LOWORD(l)	((WORD)((DWORD)(l) & 0xffff))
-#define HIWORD(l)	((WORD)((DWORD)(l) >> 16))
-#define LOBYTE(w)	((BYTE)((DWORD)(w) &  0xff))
-#define HIBYTE(w)	((BYTE)((DWORD)(w) >> 8))
+#define MAKEWORD(low,high)	((word)(((byte)(low))|(((word)((byte)(high)))<<8)))
+#define MAKELONG(low,high)	((long)(((word)(low))|(((dword)((word)(high)))<<16)))
+#define LOWORD(l)	((word)((dword)(l) & 0xffff))
+#define HIWORD(l)	((word)((dword)(l) >> 16))
+#define LOBYTE(w)	((byte)((dword)(w) &  0xff))
+#define HIBYTE(w)	((byte)((dword)(w) >> 8))
 
 #ifndef sign
 	#define sign(n) (((n) < 0) ? -1 : (((n) > 0) ? 1 : 0))

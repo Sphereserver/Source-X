@@ -9,13 +9,13 @@
 #include "CChar.h"
 #include "CCharNPC.h"
 
-bool CChar::IsResourceMatch( RESOURCE_ID_BASE rid, DWORD dwAmount )
+bool CChar::IsResourceMatch( RESOURCE_ID_BASE rid, dword dwAmount )
 {
 	ADDTOCALLSTACK("CChar::IsResourceMatch");
 	return IsResourceMatch(rid, dwAmount, 0);
 }
 
-bool CChar::IsResourceMatch( RESOURCE_ID_BASE rid, DWORD dwAmount, DWORD dwArgResearch )
+bool CChar::IsResourceMatch( RESOURCE_ID_BASE rid, dword dwAmount, dword dwArgResearch )
 {
 	ADDTOCALLSTACK("CChar::IsResourceMatch");
 	// Is the char a match for this test ?
@@ -489,7 +489,7 @@ bool CChar::IsSwimming() const
 		return false;
 
 	// Is there a solid surface under us?
-	DWORD wBlockFlags = GetMoveBlockFlags();
+	dword wBlockFlags = GetMoveBlockFlags();
 	signed char iSurfaceZ = g_World.GetHeightPoint2(ptTop, wBlockFlags, true);
 	if ( (iSurfaceZ == pt.m_z) && (wBlockFlags & CAN_I_WATER) )
 		return true;
@@ -601,11 +601,11 @@ LPCTSTR CChar::GetPossessPronoun() const
 	}
 }
 
-BYTE CChar::GetModeFlag( const CClient *pViewer ) const
+byte CChar::GetModeFlag( const CClient *pViewer ) const
 {
 	ADDTOCALLSTACK("CChar::GetModeFlag");
 	CCharBase *pCharDef = Char_GetDef();
-	BYTE mode = 0;
+	byte mode = 0;
 
 	if ( IsStatFlag(STATF_Freeze|STATF_Stone) )
 		mode |= CHARMODE_FREEZE;
@@ -630,7 +630,7 @@ BYTE CChar::GetModeFlag( const CClient *pViewer ) const
 	if ( IsStatFlag(STATF_War) )
 		mode |= CHARMODE_WAR;
 
-	DWORD dwFlags = STATF_Sleeping;
+	dword dwFlags = STATF_Sleeping;
 	if ( !g_Cfg.m_iColorInvis )	//This is needed for Serv.ColorInvis to work, proper flags must be set
 		dwFlags |= STATF_Insubstantial;
 	if ( !g_Cfg.m_iColorHidden )	//serv.ColorHidden
@@ -643,10 +643,10 @@ BYTE CChar::GetModeFlag( const CClient *pViewer ) const
 	return mode;
 }
 
-BYTE CChar::GetDirFlag(bool fSquelchForwardStep) const
+byte CChar::GetDirFlag(bool fSquelchForwardStep) const
 {
 	// future: strongly typed enums will remove the need for this cast
-	BYTE dir = static_cast<BYTE>(m_dirFace);
+	byte dir = static_cast<byte>(m_dirFace);
 	ASSERT( dir<DIR_QTY );
 
 	if ( fSquelchForwardStep )
@@ -671,13 +671,13 @@ BYTE CChar::GetDirFlag(bool fSquelchForwardStep) const
 	return( dir );
 }
 
-DWORD CChar::GetMoveBlockFlags(bool bIgnoreGM) const
+dword CChar::GetMoveBlockFlags(bool bIgnoreGM) const
 {
 	// What things block us ?
 	if ( IsPriv(PRIV_GM|PRIV_ALLMOVE) && !bIgnoreGM)	// nothing blocks us.
 		return( 0xFFFF );
 
-	DWORD dwCan = m_Can;
+	dword dwCan = m_Can;
 	CCharBase * pCharDef = Char_GetDef();
 	if ((pCharDef) && (pCharDef->Can(CAN_C_GHOST)))
 		dwCan |= CAN_C_GHOST;
@@ -694,7 +694,7 @@ DWORD CChar::GetMoveBlockFlags(bool bIgnoreGM) const
 	return( dwCan & CAN_C_MOVEMASK );
 }
 
-BYTE CChar::GetLightLevel() const
+byte CChar::GetLightLevel() const
 {
 	ADDTOCALLSTACK("CChar::GetLightLevel");
 	// Get personal light level.
@@ -1097,9 +1097,9 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 							StackDebugInformation::printStackTrace();
 #endif
 							g_Log.EventDebug("%x:EF_FixCanSeeInClosedConts prevents %s, (0%x, '%s') from seeing item uid=0%x (%s, '%s') in container uid=0%x (%s, '%s')\n",
-								pClient->GetSocketID(), pClient->GetAccount()->GetName(), (DWORD)GetUID(), GetName(false),
-								(DWORD)pItem->GetUID(), pItem->GetResourceName(), pItem->GetName(),
-								(DWORD)pObjCont->GetUID(), pObjCont->GetResourceName(), pObjCont->GetName());
+								pClient->GetSocketID(), pClient->GetAccount()->GetName(), (dword)GetUID(), GetName(false),
+								(dword)pItem->GetUID(), pItem->GetResourceName(), pItem->GetName(),
+								(dword)pObjCont->GetUID(), pObjCont->GetResourceName(), pObjCont->GetName());
 						}
 #endif
 
@@ -1175,7 +1175,7 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 	return true;
 }
 
-bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist, WORD wFlags ) const
+bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist, word wFlags ) const
 {
 	ADDTOCALLSTACK("CChar::CanSeeLOS");
 	if ( (m_pPlayer && (g_Cfg.m_iAdvancedLos & ADVANCEDLOS_PLAYER)) || (m_pNPC && (g_Cfg.m_iAdvancedLos & ADVANCEDLOS_NPC)) )
@@ -1204,7 +1204,7 @@ blocked:
 	while ( --iDist >= 0 )
 	{
 		DIR_TYPE dir = ptSrc.GetDir(ptDst);
-		DWORD wBlockFlags;
+		dword wBlockFlags;
 		if ( dir % 2 && !IsSetEF(EF_NoDiagonalCheckLOS) )	// test only diagonal dirs
 		{
 			CPointMap ptTest = ptSrc;
@@ -1273,7 +1273,7 @@ bool inline CChar::CanSeeLOS_New_Failed( CPointMap *pptBlock, CPointMap &ptNow )
 	return false;
 }
 
-bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist, WORD flags ) const
+bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist, word flags ) const
 {
 	ADDTOCALLSTACK("CChar::CanSeeLOS_New");
 	if ( IsPriv(PRIV_GM) )
@@ -1336,11 +1336,11 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 			{
 				CPointMap ptEnd = path.at(path.size() - 1);
 				if ( ptEnd.m_x != dx || ptEnd.m_y != dy || ptEnd.m_z != dz )
-					path.push_back(CPointMap(static_cast<WORD>(dx), static_cast<WORD>(dy), static_cast<signed char>(dz), ptSrc.m_map));
+					path.push_back(CPointMap(static_cast<word>(dx), static_cast<word>(dy), static_cast<signed char>(dz), ptSrc.m_map));
 			}
 			else
 			{
-				path.push_back(CPointMap(static_cast<WORD>(dx), static_cast<WORD>(dy), static_cast<signed char>(dz), ptSrc.m_map));
+				path.push_back(CPointMap(static_cast<word>(dx), static_cast<word>(dy), static_cast<signed char>(dz), ptSrc.m_map));
 			}
 			WARNLOS(("PATH X:%d Y:%d Z:%d\n", dx, dy, dz));
 
@@ -1377,9 +1377,9 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 	CItemBase *pItemDef 				= NULL;
 	CItemBaseDupe *pDupeDef				= NULL;
 
-	DWORD wTFlags = 0;
+	dword wTFlags = 0;
 	height_t Height = 0;
-	WORD terrainid = 0;
+	word terrainid = 0;
 	bool bPath = true;
 	bool bNullTerrain = false;
 
@@ -1454,13 +1454,13 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 						aaa
 						min_z is determined as a minimum of all a/X terrain, where X is ptNow
 						*/
-						BYTE pos_x = UO_BLOCK_OFFSET(ptNow.m_x) > 1 ? UO_BLOCK_OFFSET(ptNow.m_x - 1) : 0;
-						BYTE pos_y = UO_BLOCK_OFFSET(ptNow.m_y) > 1 ? UO_BLOCK_OFFSET(ptNow.m_y - 1) : 0;
-						const BYTE defx = UO_BLOCK_OFFSET(ptNow.m_x);
-						const BYTE defy = UO_BLOCK_OFFSET(ptNow.m_y);
+						byte pos_x = UO_BLOCK_OFFSET(ptNow.m_x) > 1 ? UO_BLOCK_OFFSET(ptNow.m_x - 1) : 0;
+						byte pos_y = UO_BLOCK_OFFSET(ptNow.m_y) > 1 ? UO_BLOCK_OFFSET(ptNow.m_y - 1) : 0;
+						const byte defx = UO_BLOCK_OFFSET(ptNow.m_x);
+						const byte defy = UO_BLOCK_OFFSET(ptNow.m_y);
 						min_z = pBlock->GetTerrain(pos_x, pos_y)->m_z;
 						max_z = pBlock->GetTerrain(defx, defy)->m_z;
-						for ( BYTE posy = pos_y; (abs(defx - UO_BLOCK_OFFSET(pos_x)) <= 1 && pos_x <= 7); ++pos_x )
+						for ( byte posy = pos_y; (abs(defx - UO_BLOCK_OFFSET(pos_x)) <= 1 && pos_x <= 7); ++pos_x )
 						{
 							for ( pos_y = posy; (abs(defy - UO_BLOCK_OFFSET(pos_y)) <= 1 && pos_y <= 7); ++pos_y )
 								min_z = minimum(min_z, pBlock->GetTerrain(pos_x, pos_y)->m_z);
@@ -1639,12 +1639,12 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 
 						if ( ((wTFlags & (UFLAG1_WALL|UFLAG1_BLOCK|UFLAG2_PLATFORM)) || pItemDef->m_Can & CAN_I_BLOCKLOS) && !((wTFlags & UFLAG2_WINDOW) && (flags & LOS_NB_WINDOWS)) )
 						{
-							WARNLOS(("pItem %0lx(%0x) %d,%d,%d - %d\n", (DWORD)pItem->GetUID(), pItem->GetDispID(), pItem->GetUnkPoint().m_x, pItem->GetUnkPoint().m_y, pItem->GetUnkPoint().m_z, Height));
+							WARNLOS(("pItem %0lx(%0x) %d,%d,%d - %d\n", (dword)pItem->GetUID(), pItem->GetDispID(), pItem->GetUnkPoint().m_x, pItem->GetUnkPoint().m_y, pItem->GetUnkPoint().m_z, Height));
 							min_z = pItem->GetUnkPoint().m_z;
 							max_z = minimum(Height + min_z, UO_SIZE_Z);
 							WARNLOS(("wTFlags(0%x)\n", wTFlags));
 
-							WARNLOS(("pItem %0lx(%0x) Z check: %d,%d (Now: %d) (Dest: %d).\n", (DWORD)pItem->GetUID(), pItem->GetDispID(), min_z, max_z, ptNow.m_z, ptDst.m_z));
+							WARNLOS(("pItem %0lx(%0x) Z check: %d,%d (Now: %d) (Dest: %d).\n", (dword)pItem->GetUID(), pItem->GetDispID(), min_z, max_z, ptNow.m_z, ptDst.m_z));
 							if ( min_z <= ptNow.m_z && max_z >= ptNow.m_z )
 							{
 								if ( ptNow.m_x != ptDst.m_x || ptNow.m_y != ptDst.m_y || min_z > ptDst.m_z || max_z < ptDst.m_z )
@@ -1788,7 +1788,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 #undef BETWEENPOINT
 //#undef CALCITEMHEIGHT
 
-bool CChar::CanSeeLOS( const CObjBaseTemplate *pObj, WORD wFlags ) const
+bool CChar::CanSeeLOS( const CObjBaseTemplate *pObj, word wFlags ) const
 {
 	ADDTOCALLSTACK("CChar::CanSeeLOS");
 
@@ -1819,7 +1819,7 @@ bool CChar::CanSeeItem( const CItem * pItem ) const
 		if (IsPriv(PRIV_GM))
 			return true;
 		TCHAR *uidCheck = Str_GetTemp();
-		sprintf(uidCheck, "SeenBy_0%x", static_cast<DWORD>(GetUID()));
+		sprintf(uidCheck, "SeenBy_0%x", static_cast<dword>(GetUID()));
 
 		if (!pItem->m_TagDefs.GetKeyNum(uidCheck, false))
 			return false;
@@ -2279,7 +2279,7 @@ bool CChar::IsVerticalSpace( CPointMap ptDest, bool fForceMount )
 	if ( IsPriv(PRIV_GM | PRIV_ALLMOVE) || !ptDest.IsValidPoint() )
 		return true;
 
-	WORD wBlockFlags = static_cast<WORD>(GetMoveBlockFlags());
+	word wBlockFlags = static_cast<word>(GetMoveBlockFlags());
 	if ( wBlockFlags & CAN_C_WALK )
 		wBlockFlags |= CAN_I_CLIMB;
 
@@ -2291,7 +2291,7 @@ bool CChar::IsVerticalSpace( CPointMap ptDest, bool fForceMount )
 	return true;
 }
 
-CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, WORD *pwBlockFlags, DIR_TYPE dir, height_t *pClimbHeight, bool fPathFinding ) const
+CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, word *pwBlockFlags, DIR_TYPE dir, height_t *pClimbHeight, bool fPathFinding ) const
 {
 	ADDTOCALLSTACK("CChar::CheckValidMove");
 	// Is it ok to move here ? is it blocked ?
@@ -2328,12 +2328,12 @@ CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, WORD *pwBlockFlags, DIR_
 		return NULL;
 	}
 
-	WORD wCan = static_cast<WORD>(GetMoveBlockFlags());
+	word wCan = static_cast<word>(GetMoveBlockFlags());
 	WARNWALK(("GetMoveBlockFlags() (0x%x)\n",wCan));
 	if ( !(wCan & (CAN_C_SWIM| CAN_C_WALK|CAN_C_FLY|CAN_C_RUN|CAN_C_HOVER)) )
 		return NULL;	// cannot move at all, so WTF?
 
-	WORD wBlockFlags = wCan;
+	word wBlockFlags = wCan;
 	if ( wCan & CAN_C_WALK )
 	{
 		wBlockFlags |= CAN_I_CLIMB;		// if we can walk than we can climb. Ignore CAN_C_FLY at all here
@@ -2351,7 +2351,7 @@ CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, WORD *pwBlockFlags, DIR_
 	g_World.GetHeightPoint(ptDest, block, true);
 
 	// Pass along my results.
-	wBlockFlags = static_cast<WORD>(block.m_Bottom.m_dwBlockFlags);
+	wBlockFlags = static_cast<word>(block.m_Bottom.m_dwBlockFlags);
 
 	if ( block.m_Top.m_dwBlockFlags )
 	{
@@ -2406,8 +2406,8 @@ CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, WORD *pwBlockFlags, DIR_
 
 		// CAN_I_CLIMB is not releveant for moving as you would need CAN_C_FLY to negate it. All others seem to match
 		// and the above uncommented checks are redundant (even dont make sense(?))
-		//WORD wMoveBlock = (wBlockFlags & CAN_I_MOVEMASK) &~ (CAN_I_CLIMB);
-		//WORD wMoveBlock = (wBlockFlags & CAN_I_MOVEMASK) &~ (CAN_I_CLIMB|CAN_I_ROOF);
+		//word wMoveBlock = (wBlockFlags & CAN_I_MOVEMASK) &~ (CAN_I_CLIMB);
+		//word wMoveBlock = (wBlockFlags & CAN_I_MOVEMASK) &~ (CAN_I_CLIMB|CAN_I_ROOF);
 		//if ( wMoveBlock &~ wCan )
 		if ( (wBlockFlags & CAN_I_BLOCK) && (!pCharDef->Can(CAN_C_PASSWALLS)) )
 			return NULL;

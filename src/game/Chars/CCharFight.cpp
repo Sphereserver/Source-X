@@ -124,7 +124,7 @@ bool CChar::CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObj
 			{
 				CScriptTriggerArgs Args(pAction);
 				Args.m_iN1 = SkillToSee ? SkillToSee : pCharMark->Skill_GetActive();;
-				Args.m_iN2 = pItem ? (DWORD)pItem->GetUID() : 0;
+				Args.m_iN2 = pItem ? (dword)pItem->GetUID() : 0;
 				Args.m_pO1 = pCharMark;
 				TRIGRET_TYPE iRet = pChar->OnTrigger(CTRIG_SeeSnoop, this, &Args);
 
@@ -643,7 +643,7 @@ static const LAYER_TYPE sm_ArmorLayerFeet[] = { LAYER_SHOES, LAYER_LEGS };						
 
 struct CArmorLayerType
 {
-	WORD m_wCoverage;	// Percentage of humanoid body area
+	word m_wCoverage;	// Percentage of humanoid body area
 	const LAYER_TYPE * m_pLayers;
 };
 
@@ -671,7 +671,7 @@ int CChar::CalcArmorDefense() const
 
 	int iDefenseTotal = 0;
 	int iArmorCount = 0;
-	WORD ArmorRegionMax[ARMOR_QTY];
+	word ArmorRegionMax[ARMOR_QTY];
 #ifndef _WIN32
 	for (int i_tmpN=0; i_tmpN < ARMOR_QTY; i_tmpN++)
 	{
@@ -682,7 +682,7 @@ int CChar::CalcArmorDefense() const
 #endif
 	for ( CItem* pItem=GetContentHead(); pItem!=NULL; pItem=pItem->GetNext())
 	{
-		WORD iDefense = static_cast<WORD>(pItem->Armor_GetDefense());
+		word iDefense = static_cast<word>(pItem->Armor_GetDefense());
 
 		// reverse of sm_ArmorLayers
 		switch ( pItem->GetEquipLayer())
@@ -1047,16 +1047,16 @@ effect_bounce:
 	if ( IsAosFlagEnabled( FEATURE_AOS_DAMAGE ) )
 	{
 		if ( IsClient() )
-			m_pClient->addShowDamage( iDmg, static_cast<DWORD>(GetUID()) );
+			m_pClient->addShowDamage( iDmg, static_cast<dword>(GetUID()) );
 		if ( pSrc->IsClient() && (pSrc != this) )
-			pSrc->m_pClient->addShowDamage( iDmg, static_cast<DWORD>(GetUID()) );
+			pSrc->m_pClient->addShowDamage( iDmg, static_cast<dword>(GetUID()) );
 		else
 		{
 			CChar * pSrcOwner = pSrc->NPC_PetGetOwner();
 			if ( pSrcOwner != NULL )
 			{
 				if ( pSrcOwner->IsClient() )
-					pSrcOwner->m_pClient->addShowDamage( iDmg, static_cast<DWORD>(GetUID()) );
+					pSrcOwner->m_pClient->addShowDamage( iDmg, static_cast<dword>(GetUID()) );
 			}
 		}
 	}
@@ -1646,7 +1646,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		{
 			if ( pCont )
 			{
-				CGrayUID uidCont = static_cast<CGrayUID>(static_cast<DWORD>(pCont->GetValNum()));
+				CGrayUID uidCont = static_cast<CGrayUID>(static_cast<dword>(pCont->GetValNum()));
 				CItemContainer *pNewCont = dynamic_cast<CItemContainer*>(uidCont.ItemFind());
 				if ( !pNewCont )	//if no UID, check for ITEMID_TYPE
 				{
@@ -1722,7 +1722,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		Reveal();
 		if ( !IsSetCombatFlags(COMBAT_NODIRCHANGE) )
 			UpdateDir(pCharTarg);
-		UpdateAnimate(anim, false, false, static_cast<BYTE>(animDelay / TICK_PER_SEC));
+		UpdateAnimate(anim, false, false, static_cast<byte>(animDelay / TICK_PER_SEC));
 		return WAR_SWING_SWINGING;
 	}
 
@@ -1739,13 +1739,13 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		else
 			AmmoAnim = static_cast<ITEMID_TYPE>(pWeaponDef->m_ttWeaponBow.m_idAmmoX.GetResIndex());
 
-		DWORD AmmoHue = 0;
+		dword AmmoHue = 0;
 		if ( pColor )
-			AmmoHue = static_cast<DWORD>(pColor->GetValNum());
+			AmmoHue = static_cast<dword>(pColor->GetValNum());
 
-		DWORD AmmoRender = 0;
+		dword AmmoRender = 0;
 		if ( pRender )
-			AmmoRender = static_cast<DWORD>(pRender->GetValNum());
+			AmmoRender = static_cast<dword>(pRender->GetValNum());
 
 		pCharTarg->Effect(EFFECT_BOLT, AmmoAnim, this, 18, 1, false, AmmoHue, AmmoRender);
 	}
@@ -1898,7 +1898,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		// Check if the weapon is poisoned
 		if ( !IsSetCombatFlags(COMBAT_NOPOISONHIT) && pWeapon->m_itWeapon.m_poison_skill && pWeapon->m_itWeapon.m_poison_skill > Calc_GetRandVal(100) )
 		{
-			BYTE iPoisonDeliver = static_cast<BYTE>(Calc_GetRandVal(pWeapon->m_itWeapon.m_poison_skill));
+			byte iPoisonDeliver = static_cast<byte>(Calc_GetRandVal(pWeapon->m_itWeapon.m_poison_skill));
 			pCharTarg->SetPoison(10 * iPoisonDeliver, iPoisonDeliver / 5, this);
 
 			pWeapon->m_itWeapon.m_poison_skill -= iPoisonDeliver / 2;	// reduce weapon poison charges

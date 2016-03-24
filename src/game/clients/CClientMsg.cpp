@@ -22,9 +22,9 @@
 // Simple string hashing algorithm function
 // Founded by D. J. Bernstein
 // Original code found at: http://www.cse.yorku.ca/~oz/hash.html
-unsigned int HashString(LPCTSTR str, size_t length)
+uint HashString(LPCTSTR str, size_t length)
 {
-    unsigned int hash = 5381;
+    uint hash = 5381;
     for (size_t i = 0; i < length; i++)
 	    hash = ((hash << 5) + hash) + *str++;
 
@@ -56,15 +56,15 @@ void CClient::resendBuffs()
 	if ( pStuck )
 	{
 		removeBuff(BI_PARALYZE);
-		addBuff(BI_PARALYZE, 1075827, 1075828, static_cast<WORD>(pStuck->GetTimerAdjusted()));
+		addBuff(BI_PARALYZE, 1075827, 1075828, static_cast<word>(pStuck->GetTimerAdjusted()));
 	}
 
 	// Spells
 	TCHAR NumBuff[7][8];
 	LPCTSTR pNumBuff[7] = { NumBuff[0], NumBuff[1], NumBuff[2], NumBuff[3], NumBuff[4], NumBuff[5], NumBuff[6] };
 
-	WORD iStatEffect = 0;
-	WORD iTimerEffect = 0;
+	word iStatEffect = 0;
+	word iTimerEffect = 0;
 
 	for ( CItem *pItem = pChar->GetContentHead(); pItem != NULL; pItem = pItem->GetNext() )
 	{
@@ -72,7 +72,7 @@ void CClient::resendBuffs()
 			continue;
 
 		iStatEffect = pItem->m_itSpell.m_spelllevel;
-		iTimerEffect = static_cast<WORD>(maximum(pItem->GetTimerAdjusted(), 0));
+		iTimerEffect = static_cast<word>(maximum(pItem->GetTimerAdjusted(), 0));
 
 		switch ( pItem->m_itSpell.m_spell )
 		{
@@ -160,7 +160,7 @@ void CClient::resendBuffs()
 			case SPELL_Arch_Prot:
 			{
 				BUFF_ICONS BuffIcon = BI_PROTECTION;
-				DWORD BuffCliloc = 1075814;
+				dword BuffCliloc = 1075814;
 				if ( pItem->m_itSpell.m_spell == SPELL_Arch_Prot )
 				{
 					BuffIcon = BI_ARCHPROTECTION;
@@ -220,7 +220,7 @@ void CClient::resendBuffs()
 	}
 }
 
-void CClient::addBuff( const BUFF_ICONS IconId, const DWORD ClilocOne, const DWORD ClilocTwo, const WORD Time, LPCTSTR* pArgs, size_t iArgCount)
+void CClient::addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dword ClilocTwo, const word Time, LPCTSTR* pArgs, size_t iArgCount)
 {
 	ADDTOCALLSTACK("CClient::addBuff");
 	if ( !IsSetOF(OF_Buffs) )
@@ -243,7 +243,7 @@ void CClient::removeBuff(const BUFF_ICONS IconId)
 }
 
 
-bool CClient::addDeleteErr(BYTE code, DWORD iSlot)
+bool CClient::addDeleteErr(byte code, dword iSlot)
 {
 	ADDTOCALLSTACK("CClient::addDeleteErr");
 	// code
@@ -289,7 +289,7 @@ void CClient::closeContainer( const CObjBase * pObj )
 	new PacketCloseContainer(this, pObj);
 }
 
-void CClient::closeUIWindow( const CChar* character, DWORD command )
+void CClient::closeUIWindow( const CChar* character, dword command )
 {
 	ADDTOCALLSTACK("CClient::closeUIWindow");
 	new PacketCloseUIWindow(this, character, command);
@@ -495,8 +495,8 @@ void CClient::LogOpenedContainer(const CItemContainer* pContainer) // record a c
 	CObjBaseTemplate * pTopMostContainer = pContainer->GetTopLevelObj();
 	CObjBase * pTopContainer = pContainer->GetContainer();
 
-	DWORD dwTopMostContainerUID = pTopMostContainer->GetUID().GetPrivateUID();
-	DWORD dwTopContainerUID = 0;
+	dword dwTopMostContainerUID = pTopMostContainer->GetUID().GetPrivateUID();
+	dword dwTopContainerUID = 0;
 	
 	if ( pTopContainer != NULL )
 		dwTopContainerUID = pTopContainer->GetUID().GetPrivateUID();
@@ -550,7 +550,7 @@ void CClient::addLight()
 	// NOTE: This could just be a flash of light.
 	// Global light level.
 	ASSERT(m_pChar);
-	BYTE iLight = UINT8_MAX;
+	byte iLight = UINT8_MAX;
 
 	if ( m_pChar->m_LocalLight )
 		iLight = m_pChar->m_LocalLight;
@@ -742,7 +742,7 @@ void CClient::addBarkParse( LPCTSTR pszText, const CObjBaseTemplate * pSrc, HUE_
 			break;
 	}
 
-	WORD Args[] = { static_cast<WORD>(wHue), static_cast<WORD>(font), static_cast<WORD>(bUnicode) };
+	word Args[] = { static_cast<word>(wHue), static_cast<word>(font), static_cast<word>(bUnicode) };
 
 	if ( *pszText == '@' )
 	{
@@ -764,7 +764,7 @@ void CClient::addBarkParse( LPCTSTR pszText, const CObjBaseTemplate * pSrc, HUE_
 				s++;
 				continue;
 			}
-			Args[i] = static_cast<WORD>(Exp_GetVal(s));
+			Args[i] = static_cast<word>(Exp_GetVal(s));
 			i++;
 
 			if ( *s == ',' )
@@ -774,15 +774,15 @@ void CClient::addBarkParse( LPCTSTR pszText, const CObjBaseTemplate * pSrc, HUE_
 		}
 		pszText++;
 		if ( Args[1] > FONT_QTY )
-			Args[1] = static_cast<WORD>(FONT_NORMAL);
+			Args[1] = static_cast<word>(FONT_NORMAL);
 	}
 
 	if ( Args[0] == HUE_TEXT_DEF )
-		Args[0] = static_cast<WORD>(defaultHue);
+		Args[0] = static_cast<word>(defaultHue);
 	if ( Args[1] == FONT_NORMAL )
-		Args[1] = static_cast<WORD>(defaultFont);
+		Args[1] = static_cast<word>(defaultFont);
 	if ( Args[2] == 0 )
-		Args[2] = static_cast<WORD>(defaultUnicode);
+		Args[2] = static_cast<word>(defaultUnicode);
 
 	if ( m_BarkBuffer.IsEmpty())
 	{
@@ -891,7 +891,7 @@ void CClient::addObjMessage( LPCTSTR pMsg, const CObjBaseTemplate * pSrc, HUE_TY
 	addBarkParse(pMsg, pSrc, wHue, mode);
 }
 
-void CClient::addEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate * pDst, const CObjBaseTemplate * pSrc, BYTE bSpeedSeconds, BYTE bLoop, bool fExplode, DWORD color, DWORD render, WORD effectid, DWORD explodeid, WORD explodesound, DWORD effectuid, BYTE type)
+void CClient::addEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate * pDst, const CObjBaseTemplate * pSrc, byte bSpeedSeconds, byte bLoop, bool fExplode, dword color, dword render, word effectid, dword explodeid, word explodesound, dword effectuid, byte type)
 {
 	ADDTOCALLSTACK("CClient::addEffect");
 	// bSpeedSeconds = seconds = 0=very fast, 7=slow.
@@ -1043,7 +1043,7 @@ void CClient::addCharMove( const CChar * pChar )
 	addCharMove(pChar, pChar->GetDirFlag());
 }
 
-void CClient::addCharMove( const CChar * pChar, BYTE bCharDir )
+void CClient::addCharMove( const CChar * pChar, byte bCharDir )
 {
 	ADDTOCALLSTACK("CClient::addCharMove");
 	// This char has just moved on screen.
@@ -1173,7 +1173,7 @@ void CClient::addItemName( const CItem * pItem )
 		}
 	}
 	if ( IsPriv(PRIV_DEBUG) )
-		len += sprintf(szName+len, " [0%x]", (DWORD) pItem->GetUID());
+		len += sprintf(szName+len, " [0%x]", (dword) pItem->GetUID());
 
 	if (( IsTrigUsed(TRIGGER_AFTERCLICK) ) || ( IsTrigUsed(TRIGGER_ITEMAFTERCLICK) ))
 	{
@@ -1275,7 +1275,7 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 			if ( pChar->IsStatFlag(STATF_Spawned) )
 				strcat(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_SPAWN));
 			if ( IsPriv( PRIV_DEBUG ))
-				sprintf(pszTemp+strlen(pszTemp), " [0%x]", (DWORD) pChar->GetUID());
+				sprintf(pszTemp+strlen(pszTemp), " [0%x]", (dword) pChar->GetUID());
 		}
 	}
 	if ( ! fAllShow && pChar->Skill_GetActive() == NPCACT_Napping )
@@ -1789,7 +1789,7 @@ void CClient::addAOSPlayerSeeNoCrypt()
 	CWorldSearch AreaItems(m_pChar->GetTopPoint(), UO_MAP_VIEW_SIZE);
 	AreaItems.SetAllShow(fAllShow);
 	AreaItems.SetSearchSquare(true);
-	DWORD	dSeeItems = 0;
+	dword	dSeeItems = 0;
 
 	for (;;)
 	{
@@ -1828,7 +1828,7 @@ void CClient::addAOSPlayerSeeNoCrypt()
 	CWorldSearch AreaChars(m_pChar->GetTopPoint(), UO_MAP_VIEW_SIZE);
 	AreaChars.SetAllShow(fAllShow);
 	AreaChars.SetSearchSquare(true);
-	DWORD	dSeeChars(0);
+	dword	dSeeChars(0);
 	for (;;)
 	{
 		CChar	*pChar = AreaChars.GetChar();
@@ -1852,14 +1852,14 @@ void CClient::addPlayerSee( const CPointMap & ptold )
 	// Adjust to my new location, what do I now see here?
 	bool fAllShow = IsPriv(PRIV_ALLSHOW);
 	bool fOsiSight = IsSetOF(OF_OSIMultiSight);
-	BYTE tViewDist = static_cast<BYTE>(m_pChar->GetSight());
+	byte tViewDist = static_cast<byte>(m_pChar->GetSight());
 	CRegionBase * pCurrentCharRegion = m_pChar->GetTopPoint().GetRegion(REGION_TYPE_MULTI);
 
 	//	Items on the ground
 	CWorldSearch AreaItems(m_pChar->GetTopPoint(), UO_MAP_VIEW_RADAR);
 	AreaItems.SetAllShow(fAllShow);
 	AreaItems.SetSearchSquare(true);
-	DWORD	dSeeItems = 0;
+	dword	dSeeItems = 0;
 
 	if (GetNetState()->isClientVersion(MINCLIVER_HS) || GetNetState()->isClientEnhanced())
 	{
@@ -1879,7 +1879,7 @@ void CClient::addPlayerSee( const CPointMap & ptold )
 					{
 						CItemMulti * pMulti = dynamic_cast<CItemMulti*>(pItem);
 						CObjBase * ppObjs[MAX_MULTI_CONTENT];
-						DWORD	dMultiItems = 0;
+						dword	dMultiItems = 0;
 						dMultiItems = pMulti->Multi_ListObjs(ppObjs);
 						new PacketContainer(this, ppObjs, dMultiItems);
 						addItem_OnGround(pItem);
@@ -1912,7 +1912,7 @@ void CClient::addPlayerSee( const CPointMap & ptold )
 					{
 						CItemMulti * pMulti = dynamic_cast<CItemMulti*>(pItem);
 						CObjBase * ppObjs[MAX_MULTI_CONTENT];
-						DWORD	dMultiItems = 0;
+						dword	dMultiItems = 0;
 						dMultiItems = pMulti->Multi_ListObjs(ppObjs);
 						new PacketContainer(this, ppObjs, dMultiItems);
 						addItem_OnGround(pItem);
@@ -1982,7 +1982,7 @@ void CClient::addPlayerSee( const CPointMap & ptold )
 	CWorldSearch AreaChars(m_pChar->GetTopPoint(), tViewDist);
 	AreaChars.SetAllShow(fAllShow);
 	AreaChars.SetSearchSquare(true);
-	DWORD	dSeeChars = 0;
+	dword	dSeeChars = 0;
 
 	for (;;)
 	{
@@ -2011,13 +2011,13 @@ void CClient::addPlayerSeeShip( const CPointMap & ptold )
 	// Adjust to my new location, what do I now see here?
 	bool fAllShow = IsPriv(PRIV_ALLSHOW);
 	bool fOsiSight = IsSetOF(OF_OSIMultiSight);
-	BYTE tViewDist = static_cast<BYTE>(m_pChar->GetSight());
+	byte tViewDist = static_cast<byte>(m_pChar->GetSight());
 
 	//	Items on the ground
 	CWorldSearch AreaItems(m_pChar->GetTopPoint(), UO_MAP_VIEW_RADAR);
 	AreaItems.SetAllShow(fAllShow);
 	AreaItems.SetSearchSquare(true);
-	DWORD	dSeeItems = 0;
+	dword	dSeeItems = 0;
 
 	for (;;)
 	{
@@ -2036,7 +2036,7 @@ void CClient::addPlayerSeeShip( const CPointMap & ptold )
 				{
 					CItemMulti * pMulti = static_cast<CItemMulti*>(pItem);
 					CObjBase * ppObjs[MAX_MULTI_CONTENT];
-					DWORD	dMultiItems = 0;
+					dword	dMultiItems = 0;
 					dMultiItems = pMulti->Multi_ListObjs(ppObjs);
 					new PacketContainer(this, ppObjs, dMultiItems);
 					addItem_OnGround(pItem);
@@ -2067,7 +2067,7 @@ void CClient::addPlayerSeeShip( const CPointMap & ptold )
 				{
 					CItemMulti * pMulti = static_cast<CItemMulti*>(pItem);
 					CObjBase * ppObjs[MAX_MULTI_CONTENT];
-					DWORD	dMultiItems = 0;
+					dword	dMultiItems = 0;
 					dMultiItems = pMulti->Multi_ListObjs(ppObjs);
 					new PacketContainer(this, ppObjs, dMultiItems);
 					addItem_OnGround(pItem);
@@ -2091,7 +2091,7 @@ void CClient::addPlayerSeeShip( const CPointMap & ptold )
 	CWorldSearch AreaChars(m_pChar->GetTopPoint(), tViewDist);
 	AreaChars.SetAllShow(fAllShow);
 	AreaChars.SetSearchSquare(true);
-	DWORD	dSeeChars = 0;
+	dword	dSeeChars = 0;
 
 	for (;;)
 	{
@@ -2305,7 +2305,7 @@ void CClient::addBondedStatus( const CChar * pChar, bool bIsDead )
 	new PacketBondedStatus(this, pChar, bIsDead);
 }
 
-void CClient::addSpellbookOpen( CItem * pBook, WORD offset )
+void CClient::addSpellbookOpen( CItem * pBook, word offset )
 {
 	ADDTOCALLSTACK("CClient::addSpellbookOpen");
 
@@ -2355,7 +2355,7 @@ void CClient::addSpellbookOpen( CItem * pBook, WORD offset )
 }
 
 
-void CClient::addCustomSpellbookOpen( CItem * pBook, DWORD gumpID )
+void CClient::addCustomSpellbookOpen( CItem * pBook, dword gumpID )
 {
 	ADDTOCALLSTACK("CClient::addCustomSpellbookOpen");
 	const CItemContainer *pContainer = static_cast<CItemContainer *>(pBook);
@@ -2378,14 +2378,14 @@ void CClient::addCustomSpellbookOpen( CItem * pBook, DWORD gumpID )
 	new PacketItemContents(this, pContainer);
 }
 
-void CClient::addScrollScript( CResourceLock &s, SCROLL_TYPE type, DWORD context, LPCTSTR pszHeader )
+void CClient::addScrollScript( CResourceLock &s, SCROLL_TYPE type, dword context, LPCTSTR pszHeader )
 {
 	ADDTOCALLSTACK("CClient::addScrollScript");
 
 	new PacketOpenScroll(this, s, type, context, pszHeader);
 }
 
-void CClient::addScrollResource( LPCTSTR pszSec, SCROLL_TYPE type, DWORD scrollID )
+void CClient::addScrollResource( LPCTSTR pszSec, SCROLL_TYPE type, dword scrollID )
 {
 	ADDTOCALLSTACK("CClient::addScrollResource");
 	//
@@ -2695,11 +2695,11 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 		CClientTooltip* t = NULL;
 		this->m_TooltipData.Clean(true);
 
-		//DEBUG_MSG(("Preparing tooltip for 0%x (%s)\n", (DWORD)pObj->GetUID(), pObj->GetName()));
+		//DEBUG_MSG(("Preparing tooltip for 0%x (%s)\n", (dword)pObj->GetUID(), pObj->GetName()));
 
 		if (bNameOnly) // if we only want to display the name (FEATURE_AOS_UPDATE_B disabled)
 		{
-			DWORD ClilocName = static_cast<DWORD>(pObj->GetDefNum("NAMELOC", false, true));
+			dword ClilocName = static_cast<dword>(pObj->GetDefNum("NAMELOC", false, true));
 
 			if (ClilocName)
 				m_TooltipData.InsertAt(0, new CClientTooltip(ClilocName));
@@ -2722,7 +2722,7 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 
 			if ( iRet != TRIGRET_RET_TRUE )
 			{
-				DWORD ClilocName = static_cast<DWORD>(pObj->GetDefNum("NAMELOC", false, true));
+				dword ClilocName = static_cast<dword>(pObj->GetDefNum("NAMELOC", false, true));
 
 				if ( pItem )
 				{
@@ -2781,8 +2781,8 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 
 					// Need to find a way to get the ushort inside hues.mul for index wHue to get this working.
 					// t->FormatArgs("<basefont color=\"#%02x%02x%02x\">%s\t%s\t%s</basefont>",
-					//	(BYTE)((((int)wHue) & 0x7C00) >> 7), (BYTE)((((int)wHue) & 0x3E0) >> 2),
-					//	(BYTE)((((int)wHue) & 0x1F) << 3),lpPrefix, pObj->GetName(), lpSuffix); // ~1_PREFIX~~2_NAME~~3_SUFFIX~
+					//	(byte)((((int)wHue) & 0x7C00) >> 7), (byte)((((int)wHue) & 0x3E0) >> 2),
+					//	(byte)((((int)wHue) & 0x1F) << 3),lpPrefix, pObj->GetName(), lpSuffix); // ~1_PREFIX~~2_NAME~~3_SUFFIX~
 
 					if ( !pChar->IsStatFlag(STATF_Incognito) || ( GetPrivLevel() > pChar->GetPrivLevel() ))
 					{
@@ -2862,7 +2862,7 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 						}
 					}
 
-					CGrayUID uid = static_cast<CGrayUID>(static_cast<DWORD>(pItem->GetDefNum("CRAFTEDBY")));
+					CGrayUID uid = static_cast<CGrayUID>(static_cast<dword>(pItem->GetDefNum("CRAFTEDBY")));
 					CChar *pCraftsman = uid.CharFind();
 					if ( pCraftsman )
 					{
@@ -3334,7 +3334,7 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 								this->m_TooltipData.Add( t = new CClientTooltip( 1061167 ) ); // weapon speed ~1_val~
 								t->FormatArgs( "%hhu", pItem->GetSpeed() );
 
-								BYTE Range = pItem->RangeL();
+								byte Range = pItem->RangeL();
 								if ( Range > 1 )
 								{
 									this->m_TooltipData.Add( t = new CClientTooltip( 1061169 ) ); // range ~1_val~
@@ -3508,8 +3508,8 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 						hash ^= ((value) >> 26) & 0x3F;
 
 		// build a hash value from the tooltip entries
-		DWORD hash = 0;
-		DWORD argumentHash = 0;
+		dword hash = 0;
+		dword argumentHash = 0;
 		for (size_t i = 0; i < m_TooltipData.GetCount(); i++)
 		{
 			CClientTooltip* tipEntry = m_TooltipData.GetAt(i);
@@ -3528,7 +3528,7 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 		//
 		// we still want to generate a hash though, so we don't have to increment
 		// the revision number if the tooltip hasn't actually been changed
-		DWORD revision = 0;
+		dword revision = 0;
 		if (pItem != NULL)
 			revision = pItem->UpdatePropertyRevision(hash);
 		else if (pChar != NULL)
@@ -3586,26 +3586,26 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 		delete propertyList;
 }
 
-void CClient::addShowDamage( int damage, DWORD uid_damage )
+void CClient::addShowDamage( int damage, dword uid_damage )
 {
 	ADDTOCALLSTACK("CClient::addShowDamage");
 	if ( damage < 0 )
 		damage = 0;
 
 	if ( PacketCombatDamage::CanSendTo(GetNetState()) )
-		new PacketCombatDamage(this, static_cast<WORD>(damage), static_cast<CGrayUID>(uid_damage));
+		new PacketCombatDamage(this, static_cast<word>(damage), static_cast<CGrayUID>(uid_damage));
 	else if ( PacketCombatDamageOld::CanSendTo(GetNetState()) )
-		new PacketCombatDamageOld(this, static_cast<BYTE>(damage), static_cast<CGrayUID>(uid_damage));
+		new PacketCombatDamageOld(this, static_cast<byte>(damage), static_cast<CGrayUID>(uid_damage));
 }
 
-void CClient::addSpeedMode( BYTE speedMode )
+void CClient::addSpeedMode( byte speedMode )
 {
 	ADDTOCALLSTACK("CClient::addSpeedMode");
 
 	new PacketSpeedMode(this, speedMode);
 }
 
-void CClient::addVisualRange( BYTE visualRange )
+void CClient::addVisualRange( byte visualRange )
 {
 	ADDTOCALLSTACK("CClient::addVisualRange");
 
@@ -3614,7 +3614,7 @@ void CClient::addVisualRange( BYTE visualRange )
 	new PacketVisualRange(this, visualRange);
 }
 
-void CClient::addIdleWarning( BYTE message )
+void CClient::addIdleWarning( byte message )
 {
 	ADDTOCALLSTACK("CClient::addIdleWarning");
 
@@ -3653,14 +3653,14 @@ void CClient::SendPacket( TCHAR * pszKey )
 		if ( toupper(*pszKey) == 'D' )
 		{
 			++pszKey;
-			DWORD iVal = Exp_GetVal(pszKey);
+			dword iVal = Exp_GetVal(pszKey);
 
 			packet->writeInt32(iVal);
 		}
 		else if ( toupper(*pszKey) == 'W' )
 		{
 			++pszKey;
-			WORD iVal = static_cast<WORD>(Exp_GetVal(pszKey));
+			word iVal = static_cast<word>(Exp_GetVal(pszKey));
 
 			packet->writeInt16(iVal);
 		}
@@ -3668,7 +3668,7 @@ void CClient::SendPacket( TCHAR * pszKey )
 		{
 			if ( toupper(*pszKey) == 'B' )
 				pszKey++;
-			BYTE iVal = static_cast<BYTE>(Exp_GetVal(pszKey));
+			byte iVal = static_cast<byte>(Exp_GetVal(pszKey));
 
 			packet->writeByte(iVal);
 		}
@@ -3681,7 +3681,7 @@ void CClient::SendPacket( TCHAR * pszKey )
 // ---------------------------------------------------------------------
 // Login type stuff.
 
-BYTE CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to player
+byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to player
 {
 	ADDTOCALLSTACK("CClient::Setup_Start");
 	// Play this char.
@@ -3779,7 +3779,7 @@ BYTE CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 	return PacketLoginError::Success;
 }
 
-BYTE CClient::Setup_Play( unsigned int iSlot ) // After hitting "Play Character" button
+byte CClient::Setup_Play( uint iSlot ) // After hitting "Play Character" button
 {
 	ADDTOCALLSTACK("CClient::Setup_Play");
 	// Mode == CLIMODE_SETUP_CHARLIST
@@ -3811,7 +3811,7 @@ BYTE CClient::Setup_Play( unsigned int iSlot ) // After hitting "Play Character"
 	return Setup_Start( pChar );
 }
 
-BYTE CClient::Setup_Delete( DWORD iSlot ) // Deletion of character
+byte CClient::Setup_Delete( dword iSlot ) // Deletion of character
 {
 	ADDTOCALLSTACK("CClient::Setup_Delete");
 	ASSERT( GetAccount() );
@@ -3848,7 +3848,7 @@ BYTE CClient::Setup_Delete( DWORD iSlot ) // Deletion of character
 		return PacketDeleteError::InvalidRequest;
 	}
 
-	g_Log.Event(LOGM_ACCOUNTS|LOGL_EVENT, "%x:Account '%s' deleted char '%s' [0%x] on client login screen.\n", GetSocketID(), GetAccount()->GetName(), pChar->GetName(), static_cast<DWORD>(pChar->GetUID()));
+	g_Log.Event(LOGM_ACCOUNTS|LOGL_EVENT, "%x:Account '%s' deleted char '%s' [0%x] on client login screen.\n", GetSocketID(), GetAccount()->GetName(), pChar->GetName(), static_cast<dword>(pChar->GetUID()));
 	pChar->Delete();
 
 	// refill the list.
@@ -3857,7 +3857,7 @@ BYTE CClient::Setup_Delete( DWORD iSlot ) // Deletion of character
 	return PacketDeleteError::Success;
 }
 
-BYTE CClient::Setup_ListReq( const char * pszAccName, const char * pszPassword, bool fTest )
+byte CClient::Setup_ListReq( const char * pszAccName, const char * pszPassword, bool fTest )
 {
 	ADDTOCALLSTACK("CClient::Setup_ListReq");
 	// XCMD_CharListReq
@@ -3879,7 +3879,7 @@ BYTE CClient::Setup_ListReq( const char * pszAccName, const char * pszPassword, 
 	}
 
 	CGString sMsg;
-	BYTE lErr = LogIn( pszAccName, pszPassword, sMsg );
+	byte lErr = LogIn( pszAccName, pszPassword, sMsg );
 
 	if ( lErr != PacketLoginError::Success )
 	{
@@ -3906,14 +3906,14 @@ BYTE CClient::Setup_ListReq( const char * pszAccName, const char * pszPassword, 
 		return PacketLoginError::Blocked;	//Setup_Start() returns false only when login blocked by Return 1 in @Login
 	}*/
 
-	new PacketEnableFeatures(this, g_Cfg.GetPacketFlag(false, static_cast<RESDISPLAY_VERSION>(pAcc->GetResDisp()), static_cast<unsigned char>(maximum(pAcc->GetMaxChars(), pAcc->m_Chars.GetCharCount()))));
+	new PacketEnableFeatures(this, g_Cfg.GetPacketFlag(false, static_cast<RESDISPLAY_VERSION>(pAcc->GetResDisp()), static_cast<uchar>(maximum(pAcc->GetMaxChars(), pAcc->m_Chars.GetCharCount()))));
 	new PacketCharacterList(this);
 
 	m_Targ_Mode = CLIMODE_SETUP_CHARLIST;
 	return PacketLoginError::Success;
 }
 
-BYTE CClient::LogIn( CAccountRef pAccount, CGString & sMsg )
+byte CClient::LogIn( CAccountRef pAccount, CGString & sMsg )
 {
 	ADDTOCALLSTACK("CClient::LogIn");
 	if ( pAccount == NULL )
@@ -4015,7 +4015,7 @@ BYTE CClient::LogIn( CAccountRef pAccount, CGString & sMsg )
 	return( PacketLoginError::Success );
 }
 
-BYTE CClient::LogIn( LPCTSTR pszAccName, LPCTSTR pszPassword, CGString & sMsg )
+byte CClient::LogIn( LPCTSTR pszAccName, LPCTSTR pszPassword, CGString & sMsg )
 {
 	ADDTOCALLSTACK("CClient::LogIn");
 	// Try to validate this account.

@@ -6,7 +6,7 @@
 #include "CException.h"
 
 #ifdef _WIN32
-	int CGrayError::GetSystemErrorMessage( DWORD dwError, LPTSTR lpszError, UINT nMaxError ) // static
+	int CGrayError::GetSystemErrorMessage( dword dwError, LPTSTR lpszError, UINT nMaxError ) // static
 	{
 		//	PURPOSE:  copies error message text to a string
 		//
@@ -19,14 +19,14 @@
 
 		LPCVOID lpSource = NULL;
 		va_list* Arguments = NULL;
-		DWORD nChars = ::FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+		dword nChars = ::FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 			lpSource,
 			dwError, LANG_NEUTRAL, 
 			lpszError, nMaxError, Arguments );
 
 		if (nChars > 0)
 		{     // successful translation -- trim any trailing junk
-			DWORD index = nChars - 1;      // index of last character
+			dword index = nChars - 1;      // index of last character
 			while ((index >= 0) && ((lpszError[index] == '\n') || (lpszError[index] == '\r')))
 				lpszError[index--] = '\0';
 			nChars = index + 1;
@@ -73,7 +73,7 @@ CGrayError::CGrayError( const CGrayError &e ) :
 {
 }
 
-CGrayError::CGrayError( LOGL_TYPE eSev, DWORD hErr, LPCTSTR pszDescription ) :
+CGrayError::CGrayError( LOGL_TYPE eSev, dword hErr, LPCTSTR pszDescription ) :
 	m_eSeverity( eSev ),
 	m_hError( hErr ),
 	m_pszDescription( pszDescription )
@@ -123,7 +123,7 @@ const unsigned CGrayAssert::GetAssertLine()
 
 #ifdef _WIN32
 
-CGrayException::CGrayException(unsigned int uCode, DWORD dwAddress) :
+CGrayException::CGrayException(uint uCode, dword dwAddress) :
 	m_dwAddress(dwAddress), CGrayError(LOGL_CRIT, uCode, "Exception")
 {
 }
@@ -177,7 +177,7 @@ void Assert_CheckFail( LPCTSTR pExp, LPCTSTR pFile, long lLine )
 			return 0;
 		}
 
-		void _cdecl Sphere_Exception_Win32( unsigned int id, struct _EXCEPTION_POINTERS* pData )
+		void _cdecl Sphere_Exception_Win32( uint id, struct _EXCEPTION_POINTERS* pData )
 		{
 #ifndef _NO_CRASHDUMP
 			if ( CrashDump::IsEnabled() )
@@ -186,9 +186,9 @@ void Assert_CheckFail( LPCTSTR pExp, LPCTSTR pFile, long lLine )
 			}
 #endif
 			// WIN32 gets an exception.
-			DWORD dwCodeStart = (DWORD)(BYTE *) &globalstartsymbol;	// sync up to my MAP file.
+			dword dwCodeStart = (dword)(byte *) &globalstartsymbol;	// sync up to my MAP file.
 
-			DWORD dwAddr = (DWORD)(pData->ExceptionRecord->ExceptionAddress);
+			dword dwAddr = (dword)(pData->ExceptionRecord->ExceptionAddress);
 			dwAddr -= dwCodeStart;
 
 			throw CGrayException(id, dwAddr);

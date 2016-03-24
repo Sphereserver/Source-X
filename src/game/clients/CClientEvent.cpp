@@ -151,7 +151,7 @@ void CClient::Event_Item_Dye( CGrayUID uid, HUE_TYPE wHue ) // Rehue an item
 }
 
 
-void CClient::Event_Tips( WORD i) // Tip of the day window
+void CClient::Event_Tips( word i) // Tip of the day window
 {
 	ADDTOCALLSTACK("CClient::Event_Tips");
 	if (i==0)
@@ -226,7 +226,7 @@ void CClient::Event_Item_Pickup(CGrayUID uid, int amount) // Client grabs an ite
 	EXC_SET("origin");
 	// Where is the item coming from ? (just in case we have to toss it back)
 	CObjBase * pObjParent = dynamic_cast <CObjBase *>(pItem->GetParent());
-	m_Targ_PrvUID = ( pObjParent ) ? (DWORD) pObjParent->GetUID() : UID_CLEAR;
+	m_Targ_PrvUID = ( pObjParent ) ? (dword) pObjParent->GetUID() : UID_CLEAR;
 	m_Targ_p = pItem->GetUnkPoint();
 
 	EXC_SET("ItemPickup");
@@ -274,7 +274,7 @@ void CClient::Event_Item_Drop_Fail( CItem *pItem )
 	pItem->MoveToCheck(m_Targ_p);
 }
 
-void CClient::Event_Item_Drop( CGrayUID uidItem, CPointMap pt, CGrayUID uidOn, unsigned char gridIndex )
+void CClient::Event_Item_Drop( CGrayUID uidItem, CPointMap pt, CGrayUID uidOn, uchar gridIndex )
 {
 	ADDTOCALLSTACK("CClient::Event_Item_Drop");
 	// This started from the Event_Item_Pickup()
@@ -700,7 +700,7 @@ bool CClient::Event_CheckWalkBuffer()
 		return true;
 
 	// Client only allows 4 steps of walk ahead.
-	LLONG CurrTime = static_cast<LLONG>(GetTickCount());
+	llong CurrTime = static_cast<llong>(GetTickCount());
 	int iTimeDiff = static_cast<int>((CurrTime - m_timeWalkStep) / 10);
 	int iTimeMin = m_pChar->IsStatFlag(STATF_OnHorse|STATF_Hovering) ? 70 : 140; // minimum time to move 8 steps
 
@@ -758,7 +758,7 @@ bool CClient::Event_CheckWalkBuffer()
 
 
 
-bool CClient::Event_Walk( BYTE rawdir, BYTE sequence ) // Player moves
+bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 {
 	ADDTOCALLSTACK("CClient::Event_Walk");
 	// The client is sending a walk request to server, so the server must check
@@ -1000,7 +1000,7 @@ void CClient::Event_Attack( CGrayUID uid )
 	if ( pChar == NULL )
 		return;
 
-	new PacketAttack(this, (m_pChar->Fight_Attack(pChar) ? (DWORD)pChar->GetUID() : 0));
+	new PacketAttack(this, (m_pChar->Fight_Attack(pChar) ? (dword)pChar->GetUID() : 0));
 }
 
 // Client/Player buying items from the Vendor
@@ -1120,7 +1120,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t it
 			break;
 
 		pItem = dynamic_cast <CItemVendable *> (items[i].m_serial.ItemFind());
-		WORD amount = items[i].m_amount;
+		word amount = items[i].m_amount;
 
 		if ( pItem == NULL )
 			continue;
@@ -1246,7 +1246,7 @@ do_consume:
 			//m_pChar->ContentConsume( RESOURCE_ID(RES_TYPEDEF,IT_GOLD), static_cast<int>(costtotal));
 
 
-		pVendor->GetBank()->m_itEqBankBox.m_Check_Amount += static_cast<unsigned long>(costtotal);
+		pVendor->GetBank()->m_itEqBankBox.m_Check_Amount += static_cast<uint>(costtotal);
 	}
 
 	//	Clear the vendor display.
@@ -1325,7 +1325,7 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, size_t i
 			amount = pItem->GetAmount();
 		}
 
-		DWORD lPrice = pItemSell->GetVendorPrice(iConvertFactor) * amount;
+		dword lPrice = pItemSell->GetVendorPrice(iConvertFactor) * amount;
 
 		if (( IsTrigUsed(TRIGGER_SELL) ) || ( IsTrigUsed(TRIGGER_ITEMSELL) ))
 		{
@@ -1394,7 +1394,7 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, size_t i
 	}
 }
 
-void CClient::Event_Profile( BYTE fWriteMode, CGrayUID uid, LPCTSTR pszProfile, int iProfileLen )
+void CClient::Event_Profile( byte fWriteMode, CGrayUID uid, LPCTSTR pszProfile, int iProfileLen )
 {
 	ADDTOCALLSTACK("CClient::Event_Profile");
 	UNREFERENCED_PARAMETER(iProfileLen);
@@ -1486,7 +1486,7 @@ void CClient::Event_ToolTip( CGrayUID uid )
 	addToolTip(uid.ObjFind(), z);
 }
 
-void CClient::Event_PromptResp( LPCTSTR pszText, size_t len, DWORD context1, DWORD context2, DWORD type, bool bNoStrip )
+void CClient::Event_PromptResp( LPCTSTR pszText, size_t len, dword context1, dword context2, dword type, bool bNoStrip )
 {
 	ADDTOCALLSTACK("CClient::Event_PromptResp");
 	if (m_pChar == NULL)
@@ -1652,7 +1652,7 @@ void CClient::Event_Talk_Common(TCHAR * szText) // PC speech
 
 	if ( ! strnicmp( szText, "I must consider my sins", 23 ))
 	{
-		unsigned int i = m_pChar->m_pPlayer->m_wMurders;
+		uint i = m_pChar->m_pPlayer->m_wMurders;
 		if ( i >= COUNTOF(sm_szTextMurderer))
 			i = COUNTOF(sm_szTextMurderer)-1;
 		SysMessage( sm_szTextMurderer[i] );
@@ -1996,7 +1996,7 @@ void CClient::Event_SetName( CGrayUID uid, const char * pszCharName )
 	pChar->SetName(pszCharName);
 }
 
-void CDialogResponseArgs::AddText( WORD id, LPCTSTR pszText )
+void CDialogResponseArgs::AddText( word id, LPCTSTR pszText )
 {
 	m_TextArray.Add(new TResponseString(id, pszText));
 }
@@ -2012,7 +2012,7 @@ bool CDialogResponseArgs::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConso
 	EXC_TRY("WriteVal");
 	if ( ! strnicmp( pszKey, "ARGCHK", 6 ))
 	{
-		// CGTypedArray <DWORD,DWORD> m_CheckArray;
+		// CGTypedArray <dword,dword> m_CheckArray;
 		pszKey += 6;
 		SKIP_SEPARATORS(pszKey);
 
@@ -2038,7 +2038,7 @@ bool CDialogResponseArgs::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConso
 		SKIP_SEPARATORS(pszKey);
 		for ( size_t i = 0; i < iQty; i++ )
 		{
-			if ( (DWORD)iNum == m_CheckArray[i] )
+			if ( (dword)iNum == m_CheckArray[i] )
 			{
 				sVal = "1";
 				return( true );
@@ -2200,10 +2200,10 @@ void CClient::Event_SingleClick( CGrayUID uid )
 		return;
 	}
 
-	SysMessagef("Bogus item uid=0%x?", (DWORD)uid);
+	SysMessagef("Bogus item uid=0%x?", (dword)uid);
 }
 
-void CClient::Event_Target(DWORD context, CGrayUID uid, CPointMap pt, BYTE flags, ITEMID_TYPE id)
+void CClient::Event_Target(dword context, CGrayUID uid, CPointMap pt, byte flags, ITEMID_TYPE id)
 {
 	ADDTOCALLSTACK("CClient::Event_Target");
 	// XCMD_Target
@@ -2213,7 +2213,7 @@ void CClient::Event_Target(DWORD context, CGrayUID uid, CPointMap pt, BYTE flags
 	if (m_pChar == NULL)
 		return;
 
-	if (context != (DWORD)GetTargMode())
+	if (context != (dword)GetTargMode())
 	{
 		// unexpected context
 		if (context != 0 && (pt.m_x != -1 || uid.GetPrivateUID() != 0))
@@ -2304,7 +2304,7 @@ void CClient::Event_Target(DWORD context, CGrayUID uid, CPointMap pt, BYTE flags
 	}
 }
 
-void CClient::Event_AOSPopupMenuRequest( DWORD uid ) //construct packet after a client request
+void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a client request
 {
 	ADDTOCALLSTACK("CClient::Event_AOSPopupMenuRequest");
 	CGrayUID uObj = uid;
@@ -2382,7 +2382,7 @@ void CClient::Event_AOSPopupMenuRequest( DWORD uid ) //construct packet after a 
 				m_pPopupPacket->addOption(POPUP_VENDORSELL, 6104, POPUPFLAG_COLOR, 0xFFFF);
 			}
 
-			WORD iEnabled = pChar->IsStatFlag(STATF_DEAD) ? POPUPFLAG_LOCKED : POPUPFLAG_COLOR;
+			word iEnabled = pChar->IsStatFlag(STATF_DEAD) ? POPUPFLAG_LOCKED : POPUPFLAG_COLOR;
 			if ( pChar->NPC_IsOwnedBy(m_pChar, false) )
 			{
 				CREID_TYPE id = pChar->GetID();
@@ -2458,7 +2458,7 @@ void CClient::Event_AOSPopupMenuRequest( DWORD uid ) //construct packet after a 
 	m_pPopupPacket = NULL;
 }
 
-void CClient::Event_AOSPopupMenuSelect(DWORD uid, WORD EntryTag)	//do something after a player selected something from a pop-up menu
+void CClient::Event_AOSPopupMenuSelect(dword uid, word EntryTag)	//do something after a player selected something from a pop-up menu
 {
 	ADDTOCALLSTACK("CClient::Event_AOSPopupMenuSelect");
 	if ( !m_pChar || !EntryTag )
@@ -2615,7 +2615,7 @@ void CClient::Event_BugReport( const TCHAR * pszText, int len, BUGREPORT_TYPE ty
 	}
 }
 
-void CClient::Event_UseToolbar(BYTE bType, DWORD dwArg)
+void CClient::Event_UseToolbar(byte bType, dword dwArg)
 {
 	ADDTOCALLSTACK("CClient::Event_UseToolbar");
 	if ( !m_pChar )
@@ -2806,7 +2806,7 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, TCHAR *pszName )
 
 // ---------------------------------------------------------------------
 
-bool CClient::xPacketFilter( const BYTE * pData, size_t iLen )
+bool CClient::xPacketFilter( const byte * pData, size_t iLen )
 {
 	ADDTOCALLSTACK("CClient::xPacketFilter");
 	
@@ -2855,7 +2855,7 @@ bool CClient::xPacketFilter( const BYTE * pData, size_t iLen )
 	return false;
 }
 
-bool CClient::xOutPacketFilter( const BYTE * pData, size_t iLen )
+bool CClient::xOutPacketFilter( const byte * pData, size_t iLen )
 {
 	ADDTOCALLSTACK("CClient::xOutPacketFilter");
 

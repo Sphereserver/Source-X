@@ -41,9 +41,9 @@
 	#define __printfargs(a,b)
 #endif
 
-#define IsDigit(c) isdigit((unsigned char)c)
-#define IsSpace(c) isspace((unsigned char)c)
-#define IsAlpha(c) isalpha((unsigned char)c)
+#define IsDigit(c) isdigit((uchar)c)
+#define IsSpace(c) isspace((uchar)c)
+#define IsAlpha(c) isalpha((uchar)c)
 #define IsNegative(c) ((c < 0)?1:0)
 
 typedef THREAD_ENTRY_RET ( _cdecl * PTHREAD_ENTRY_PROC )(void *);
@@ -56,19 +56,19 @@ typedef THREAD_ENTRY_RET ( _cdecl * PTHREAD_ENTRY_PROC )(void *);
 #define SCRIPT_MAX_LINE_LEN 4096	// default size.
 
 #define IMULDIVDOWN(a,b,c)	(((a)*(b))/(c))
-#define IMULDIV(a,b,c)		(((((LLONG)(a)*(LLONG)(b))+(c / 2))/(c))-(IsNegative((LLONG)(a)*(LLONG)(b))))
+#define IMULDIV(a,b,c)		(((((llong)(a)*(llong)(b))+(c / 2))/(c))-(IsNegative((llong)(a)*(llong)(b))))
 
 #ifndef MAKEDWORD
-	#define MAKEDWORD(low, high) ((DWORD)(((WORD)(low)) | (((DWORD)((WORD)(high))) << 16)))
+	#define MAKEDWORD(low, high) ((dword)(((word)(low)) | (((dword)((word)(high))) << 16)))
 #endif
 
 #ifndef COUNTOF
 	#define COUNTOF(a)	(sizeof(a)/sizeof((a)[0]))
 #endif
 
-typedef unsigned int	ERROR_CODE;
+typedef uint	ERROR_CODE;
 
-#define ISWHITESPACE(ch)			(IsSpace(ch)||((unsigned char)ch)==0xa0)	// IsSpace
+#define ISWHITESPACE(ch)			(IsSpace(ch)||((uchar)ch)==0xa0)	// IsSpace
 #define GETNONWHITESPACE( pStr )	while ( ISWHITESPACE( (pStr)[0] )) { (pStr)++; }
 #define _IS_SWITCH(c)				((c) == '-' || (c) == '/' )	// command line switch.
 
@@ -95,17 +95,17 @@ typedef unsigned int	ERROR_CODE;
 //	Time measurement macroses
 // -----------------------------
 
-extern LLONG llTimeProfileFrequency;
+extern llong llTimeProfileFrequency;
 
 #ifdef _WIN32
 	#define	TIME_PROFILE_INIT	\
-		LLONG llTicks(0), llTicksEnd
+		llong llTicks(0), llTicksEnd
 	#define	TIME_PROFILE_START	\
 		if ( !QueryPerformanceCounter((LARGE_INTEGER *)&llTicks)) llTicks = GetTickCount()
 	#define TIME_PROFILE_END	if ( !QueryPerformanceCounter((LARGE_INTEGER *)&llTicksEnd)) llTicksEnd = GetTickCount()
 #else
 	#define	TIME_PROFILE_INIT	\
-		LLONG llTicks(0), llTicksEnd
+		llong llTicks(0), llTicksEnd
 	#define	TIME_PROFILE_START	\
 		llTicks = GetTickCount()
 	#define TIME_PROFILE_END	llTicksEnd = GetTickCount();
@@ -138,16 +138,16 @@ extern class CEventLog
 	// May include __LINE__ or __FILE__ macro as well ?
 
 protected:
-	virtual int EventStr(DWORD wMask, LPCTSTR pszMsg)
+	virtual int EventStr(dword wMask, LPCTSTR pszMsg)
 	{
 		UNREFERENCED_PARAMETER(wMask);
 		UNREFERENCED_PARAMETER(pszMsg);
 		return 0;
 	}
-	virtual int VEvent(DWORD wMask, LPCTSTR pszFormat, va_list args);
+	virtual int VEvent(dword wMask, LPCTSTR pszFormat, va_list args);
 
 public:
-	int _cdecl Event( DWORD wMask, LPCTSTR pszFormat, ... ) __printfargs(3,4)
+	int _cdecl Event( dword wMask, LPCTSTR pszFormat, ... ) __printfargs(3,4)
 	{
 		va_list vargs;
 		va_start( vargs, pszFormat );

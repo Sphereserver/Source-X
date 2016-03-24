@@ -210,7 +210,7 @@ SKILLLOCK_TYPE CCharPlayer::Skill_GetLock( SKILL_TYPE skill ) const
 void CCharPlayer::Skill_SetLock( SKILL_TYPE skill, SKILLLOCK_TYPE state )
 {
 	ASSERT( skill >= 0 && static_cast<size_t>(skill) < COUNTOF(m_SkillLock));
-	m_SkillLock[skill] = static_cast<unsigned char>(state);
+	m_SkillLock[skill] = static_cast<uchar>(state);
 }
 
 // only players can have stat locks.
@@ -248,7 +248,7 @@ SKILLLOCK_TYPE CCharPlayer::Stat_GetLock( STAT_TYPE stat ) const
 void CCharPlayer::Stat_SetLock( STAT_TYPE stat, SKILLLOCK_TYPE state )
 {
 	ASSERT( stat >= 0 && static_cast<size_t>(stat) < COUNTOF(m_StatLock));
-	m_StatLock[stat] = static_cast<unsigned char>(state);
+	m_StatLock[stat] = static_cast<uchar>(state);
 }
 
 bool CCharPlayer::r_WriteVal( CChar * pChar, LPCTSTR pszKey, CGString & sVal )
@@ -270,7 +270,7 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, LPCTSTR pszKey, CGString & sVal )
 		if ( *pszKey == 0 )
 		{
 			CItemStone *pMyGuild = pChar->Guild_Find(bIsGuild ? MEMORY_GUILD : MEMORY_TOWN);
-			if ( pMyGuild ) sVal.FormatHex((DWORD)pMyGuild->GetUID());
+			if ( pMyGuild ) sVal.FormatHex((dword)pMyGuild->GetUID());
 			else sVal.FormatVal(0);
 			return true;
 		}
@@ -436,12 +436,12 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 	switch ( FindTableHeadSorted( s.GetKey(), sm_szLoadKeys, CPC_QTY ))
 	{
 		case CPC_DEATHS:
-			m_wDeaths = static_cast<WORD>(s.GetArgVal());
+			m_wDeaths = static_cast<word>(s.GetArgVal());
 			return true;
 		case CPC_DSPEECH:
 			return( m_Speech.r_LoadVal( s, RES_SPEECH ));
 		case CPC_KILLS:
-			m_wMurders = static_cast<WORD>(s.GetArgVal());
+			m_wMurders = static_cast<word>(s.GetArgVal());
 			pChar->NotoSave_Update();
 			return true;
 		case CPC_KRTOOLBARSTATUS:
@@ -476,7 +476,7 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 			} return true;
 		case CPC_SPEEDMODE:
 			{
-				m_speedMode = static_cast<BYTE>(s.GetArgVal());
+				m_speedMode = static_cast<byte>(s.GetArgVal());
 				pChar->UpdateSpeedMode();
 			} return true;
 		case CPC_STATLOCK:

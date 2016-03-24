@@ -75,13 +75,13 @@ public:
 	static const char *m_sClassName;
 	CVarDefMap m_TagDefs;		// attach extra tags here.
 	CVarDefMap m_BaseDefs;		// New Variable storage system
-	DWORD	m_Can;
+	dword	m_Can;
 	
-	WORD	m_attackBase;	// dam for weapons
-	WORD	m_attackRange;	// variable range of attack damage.
+	word	m_attackBase;	// dam for weapons
+	word	m_attackRange;	// variable range of attack damage.
 
-	WORD	m_defenseBase;	// Armor for IsArmor items
-	WORD	m_defenseRange;	// variable range of defense.
+	word	m_defenseBase;	// Armor for IsArmor items
+	word	m_defenseRange;	// variable range of defense.
 	CGrayUID m_uidSpawnItem;		// SpawnItem for this item
 
 	CResourceRefArray m_OEvents;
@@ -93,8 +93,8 @@ public:
 	void SetTriggerActive(LPCTSTR trig = NULL); 
 
 public:
-	BYTE	RangeL() const;
-	BYTE	RangeH() const;
+	byte	RangeL() const;
+	byte	RangeH() const;
 	CServTime GetTimeStamp() const;
 	void SetTimeStamp( INT64 t_time);
 	LPCTSTR GetDefStr( LPCTSTR pszKey, bool fZero = false, bool fDef = false ) const;
@@ -116,18 +116,18 @@ protected:
 public:
 	virtual bool OnTick() = 0;
 	virtual int FixWeirdness() = 0;
-	virtual int GetWeight(WORD amount = 0) const = 0;
-	virtual bool IsResourceMatch( RESOURCE_ID_BASE rid, DWORD dwArg ) = 0;
+	virtual int GetWeight(word amount = 0) const = 0;
+	virtual bool IsResourceMatch( RESOURCE_ID_BASE rid, dword dwArg ) = 0;
 
 	virtual int IsWeird() const;
 	virtual void Delete(bool bforce = false);
 
 	// Accessors
 
-	virtual WORD GetBaseID() const = 0;
+	virtual word GetBaseID() const = 0;
 	CBaseBaseDef * Base_GetDef() const;
 
-	void SetUID( DWORD dwVal, bool fItem );
+	void SetUID( dword dwVal, bool fItem );
 	CObjBase* GetNext() const;
 	CObjBase* GetPrev() const;
 	virtual LPCTSTR GetName() const;	// resolve ambiguity w/CScriptObj
@@ -139,7 +139,7 @@ public:
 	HUE_TYPE GetHue() const;
 
 protected:
-	WORD GetHueAlt() const;
+	word GetHueAlt() const;
 	void SetHueAlt( HUE_TYPE wHue );
 
 public:
@@ -154,14 +154,14 @@ public:
 public:
 	// Location
 	virtual bool MoveTo(CPointMap pt, bool bForceFix = false) = 0;	// Move to a location at top level.
-	virtual bool MoveNear( CPointMap pt, WORD iSteps = 0 );
-	virtual bool MoveNearObj( const CObjBaseTemplate *pObj, WORD iSteps = 0 );
+	virtual bool MoveNear( CPointMap pt, word iSteps = 0 );
+	virtual bool MoveNearObj( const CObjBaseTemplate *pObj, word iSteps = 0 );
 
 	void inline SetNamePool_Fail( TCHAR * ppTitles );
 	bool SetNamePool( LPCTSTR pszName );
 
 	void Sound( SOUND_TYPE id, int iRepeat = 1 ) const; // Play sound effect from this location.
-	void Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSource = NULL, BYTE bspeedseconds = 5, BYTE bloop = 1, bool fexplode = false, DWORD color = 0, DWORD render = 0, WORD effectid = 0, WORD explodeid = 0, WORD explodesound = 0, DWORD effectuid = 0, BYTE type = 0) const;
+	void Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSource = NULL, byte bspeedseconds = 5, byte bloop = 1, bool fexplode = false, dword color = 0, dword render = 0, word effectid = 0, word explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0) const;
 
 	void r_WriteSafe( CScript & s );
 
@@ -211,19 +211,19 @@ public:
 #define SU_UPDATE_HITS			0x01	// update hits to others
 #define SU_UPDATE_MODE			0x02	// update mode to all
 #define SU_UPDATE_TOOLTIP		0x04	// update tooltip to all
-	unsigned char m_fStatusUpdate;	// update flags for next tick
+	uchar m_fStatusUpdate;	// update flags for next tick
 	virtual void OnTickStatusUpdate();
 
 protected:
 	PacketPropertyList* m_PropertyList;	// currently cached property list packet
-	DWORD m_PropertyHash;				// latest property list hash
-	DWORD m_PropertyRevision;			// current property list revision
+	dword m_PropertyHash;				// latest property list hash
+	dword m_PropertyRevision;			// current property list revision
 
 public:
 	PacketPropertyList* GetPropertyList(void) const { return m_PropertyList; }
 	void SetPropertyList(PacketPropertyList* propertyList);
 	void FreePropertyList(void);
-	DWORD UpdatePropertyRevision(DWORD hash);
+	dword UpdatePropertyRevision(dword hash);
 	void UpdatePropertyFlag(int mask);
 };
 

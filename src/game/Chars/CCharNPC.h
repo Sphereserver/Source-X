@@ -28,8 +28,8 @@ public:
 	static LPCTSTR const sm_szVerbKeys[];
 
 	NPCBRAIN_TYPE m_Brain;		// For NPCs: Number of the assigned basic AI block
-	WORD m_Home_Dist_Wander;	// Distance to allow to "wander".
-	BYTE m_Act_Motivation;		// 0-100 (100=very greatly) how bad do i want to do the current action.
+	word m_Home_Dist_Wander;	// Distance to allow to "wander".
+	byte m_Act_Motivation;		// 0-100 (100=very greatly) how bad do i want to do the current action.
 	bool m_bonded;				// Bonded pet
 
 								// We respond to what we here with this.
@@ -39,8 +39,8 @@ public:
 
 	static LPCTSTR const sm_szLoadKeys[];
 
-	WORD	m_nextX[MAX_NPC_PATH_STORAGE_SIZE];	// array of X coords of the next step
-	WORD	m_nextY[MAX_NPC_PATH_STORAGE_SIZE];	// array of Y coords of the next step
+	word	m_nextX[MAX_NPC_PATH_STORAGE_SIZE];	// array of X coords of the next step
+	word	m_nextY[MAX_NPC_PATH_STORAGE_SIZE];	// array of Y coords of the next step
 	CPointMap m_nextPt;							// where the array(^^) wants to go, if changed, recount the path
 	CServTime	m_timeRestock;		//	when last restock happened in sell/buy container
 
@@ -50,8 +50,8 @@ public:
 	std::vector<Spells> m_spells;	// Spells stored in this NPC
 
 	int Spells_GetCount();
-	SPELL_TYPE Spells_GetAt(unsigned char id);
-	bool Spells_DelAt(unsigned char id);
+	SPELL_TYPE Spells_GetAt(uchar id);
+	bool Spells_DelAt(uchar id);
 	bool Spells_Add(SPELL_TYPE spell);
 	int Spells_FindSpell(SPELL_TYPE spell);
 

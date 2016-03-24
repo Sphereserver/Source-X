@@ -256,13 +256,13 @@ CChar * CChar::Spell_Summon( CREID_TYPE id, CPointMap pntTarg )
 		if ( IsSetMagicFlags(MAGICF_SUMMONWALKCHECK) )	// check if the target location is valid
 		{
 			CCharBase *pSummonDef = CCharBase::FindCharBase(id);
-			WORD wCan = 0xFFFF;
+			word wCan = 0xFFFF;
 			if ( pSummonDef != NULL )
 				wCan = pSummonDef->m_Can & CAN_C_MOVEMASK;
 
 			if ( wCan != 0xFFFF )
 			{
-				DWORD wBlockFlags = 0;
+				dword wBlockFlags = 0;
 				g_World.GetHeightPoint2(pntTarg, wBlockFlags, true);
 
 				if ( wBlockFlags & ~wCan )
@@ -844,8 +844,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 
 	CClient *pClient = GetClient();
 	CChar *pCaster = pSpell->m_uidLink.CharFind();
-	WORD iStatEffect = pSpell->m_itSpell.m_spelllevel;
-	WORD iTimerEffect = static_cast<WORD>(maximum(pSpell->GetTimerAdjusted(), 0));
+	word iStatEffect = pSpell->m_itSpell.m_spelllevel;
+	word iTimerEffect = static_cast<word>(maximum(pSpell->GetTimerAdjusted(), 0));
 
 	if (IsTrigUsed(TRIGGER_EFFECTADD))
 	{
@@ -1471,7 +1471,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				if (pClient && IsSetOF(OF_Buffs))
 				{
 					BUFF_ICONS BuffIcon = BI_PROTECTION;
-					unsigned int BuffCliloc = 1075814;
+					uint BuffCliloc = 1075814;
 					if ( spell == SPELL_Arch_Prot )
 					{
 						BuffIcon = BI_ARCHPROTECTION;
@@ -1671,7 +1671,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 			if (IsSetOF(OF_Buffs) && IsClient())
 			{
 				GetClient()->removeBuff(BI_POISON);
-				GetClient()->addBuff(BI_POISON, 1017383, 1070722, static_cast<WORD>(pItem->GetTimerAdjusted()));
+				GetClient()->addBuff(BI_POISON, 1017383, 1070722, static_cast<word>(pItem->GetTimerAdjusted()));
 			}
 			break;
 		}
@@ -1781,8 +1781,8 @@ CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iSki
 	pSpell->SetAttr(pSpellDef ? ATTR_NEWBIE|ATTR_MAGIC : ATTR_NEWBIE);
 	pSpell->SetType(IT_SPELL);
 	pSpell->SetDecayTime(iDuration);
-	pSpell->m_itSpell.m_spell = static_cast<WORD>(spell);
-	pSpell->m_itSpell.m_spelllevel = static_cast<WORD>(g_Cfg.GetSpellEffect(spell, iSkillLevel));
+	pSpell->m_itSpell.m_spell = static_cast<word>(spell);
+	pSpell->m_itSpell.m_spelllevel = static_cast<word>(g_Cfg.GetSpellEffect(spell, iSkillLevel));
 	pSpell->m_itSpell.m_spellcharges = 1;
 	if ( pSrc )
 		pSpell->m_uidLink = pSrc->GetUID();
@@ -1834,7 +1834,7 @@ void CChar::Spell_Area( CPointMap pntTarg, int iDist, int iSkillLevel )
 	}
 }
 
-void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, unsigned int fieldWidth, unsigned int fieldGauge, int iSkillLevel, CChar * pCharSrc, ITEMID_TYPE idnewEW, ITEMID_TYPE idnewNS, int iDuration, HUE_TYPE iColor)
+void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, uint fieldWidth, uint fieldGauge, int iSkillLevel, CChar * pCharSrc, ITEMID_TYPE idnewEW, ITEMID_TYPE idnewNS, int iDuration, HUE_TYPE iColor)
 {
 	ADDTOCALLSTACK("CChar::Spell_Field");
 	// Cast the field spell to here.
@@ -1896,7 +1896,7 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 					ptg.m_y += static_cast<short>(iy);
 				}
 
-				DWORD wBlockFlags = 0;
+				dword wBlockFlags = 0;
 				g_World.GetHeightPoint2(ptg, wBlockFlags, true);
 				if ( wBlockFlags & ( CAN_I_BLOCK | CAN_I_DOOR ) )
 				{
@@ -1984,8 +1984,8 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 
 			CItem * pSpell = CItem::CreateBase( id );
 			ASSERT(pSpell);
-			pSpell->m_itSpell.m_spell = static_cast<WORD>(m_atMagery.m_Spell);
-			pSpell->m_itSpell.m_spelllevel = static_cast<WORD>(iSkillLevel);
+			pSpell->m_itSpell.m_spell = static_cast<word>(m_atMagery.m_Spell);
+			pSpell->m_itSpell.m_spelllevel = static_cast<word>(iSkillLevel);
 			pSpell->m_itSpell.m_spellcharges = 1;
 			pSpell->m_uidLink = GetUID();	// link it back to you
 			pSpell->SetType(IT_SPELL);
@@ -2252,7 +2252,7 @@ bool CChar::Spell_TargCheck()
 	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
 	if ( pSpellDef == NULL )
 	{
-		DEBUG_ERR(( "Bad Spell %d, uid 0%0lx\n", m_atMagery.m_Spell, (DWORD) GetUID()));
+		DEBUG_ERR(( "Bad Spell %d, uid 0%0lx\n", m_atMagery.m_Spell, (dword) GetUID()));
 		return( false );
 	}
 
@@ -2369,9 +2369,9 @@ bool CChar::Spell_CastDone()
 	CREID_TYPE iC1 = CREID_INVALID;
 	HUE_TYPE iColor = HUE_DEFAULT;
 
-	unsigned int fieldWidth = 0;
-	unsigned int fieldGauge = 0;
-	unsigned int areaRadius = 0;
+	uint fieldWidth = 0;
+	uint fieldGauge = 0;
+	uint areaRadius = 0;
 
 	SPELL_TYPE spell = m_atMagery.m_Spell;
 	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
@@ -2449,13 +2449,13 @@ bool CChar::Spell_CastDone()
 		it1test = static_cast<ITEMID_TYPE>(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1", true)));
 		it2test = static_cast<ITEMID_TYPE>(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject2", true)));
 		//Can't be < 0, so max it to 0
-		fieldWidth = static_cast<unsigned int>(maximum(0, Args.m_VarsLocal.GetKeyNum("fieldWidth", true)));
-		fieldGauge = static_cast<unsigned int>(maximum(0, Args.m_VarsLocal.GetKeyNum("fieldGauge", true)));
+		fieldWidth = static_cast<uint>(maximum(0, Args.m_VarsLocal.GetKeyNum("fieldWidth", true)));
+		fieldGauge = static_cast<uint>(maximum(0, Args.m_VarsLocal.GetKeyNum("fieldGauge", true)));
 
 	}
 
 	iC1 = static_cast<CREID_TYPE>(Args.m_VarsLocal.GetKeyNum("CreateObject1", true) & 0xFFFF);
-	areaRadius = static_cast<unsigned int>(maximum(0, Args.m_VarsLocal.GetKeyNum("areaRadius", true)));
+	areaRadius = static_cast<uint>(maximum(0, Args.m_VarsLocal.GetKeyNum("areaRadius", true)));
 	int iDuration = maximum(0, static_cast<int>(Args.m_VarsLocal.GetKeyNum("duration", true)));
 	iColor = static_cast<HUE_TYPE>(maximum(0, Args.m_VarsLocal.GetKeyNum("EffectColor", true)));
 
@@ -2842,7 +2842,7 @@ void CChar::Spell_CastFail()
 	}
 
 	HUE_TYPE iColor = static_cast<HUE_TYPE>(maximum(0, Args.m_VarsLocal.GetKeyNum("EffectColor", true)));
-	DWORD iRender = static_cast<DWORD>(maximum(0, Args.m_VarsLocal.GetKeyNum("EffectRender", true)));
+	dword iRender = static_cast<dword>(maximum(0, Args.m_VarsLocal.GetKeyNum("EffectRender", true)));
 
 	iT1 = static_cast<ITEMID_TYPE>(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1", true)));
 	if (iT1)
@@ -3043,13 +3043,13 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	iSkillLevel = iSkillLevel/2 + Calc_GetRandVal(iSkillLevel/2);	// randomize the effect.
 
 																	// Check if the spell is being resisted
-	unsigned short iResist = 0;
+	ushort iResist = 0;
 	if ( pSpellDef->IsSpellType(SPELLFLAG_RESIST) && pCharSrc && !fPotion )
 	{
 		iResist = Skill_GetBase(SKILL_MAGICRESISTANCE);
-		unsigned short iFirst = iResist / 50;
-		unsigned short iSecond = iResist - (((pCharSrc->Skill_GetBase(SKILL_MAGERY) - 200) / 50) + (1 + (spell / 8)) * 50);
-		unsigned char iResistChance = maximum(iFirst, iSecond) / 30;
+		ushort iFirst = iResist / 50;
+		ushort iSecond = iResist - (((pCharSrc->Skill_GetBase(SKILL_MAGERY) - 200) / 50) + (1 + (spell / 8)) * 50);
+		uchar iResistChance = maximum(iFirst, iSecond) / 30;
 		iResist = Skill_UseQuick(SKILL_MAGICRESISTANCE, iResistChance, true, false) ? 25 : 0;	// If we successfully resist then we have a 25% damage reduction, 0 if we don't.
 
 		if ( IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) )
@@ -3127,11 +3127,11 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	fExplode = Args.m_VarsLocal.GetKeyNum("EffectExplode", true) > 0 ? true : false;
 	iSound = static_cast<SOUND_TYPE>(Args.m_VarsLocal.GetKeyNum("Sound", true));
 	iEffect = static_cast<int>(Args.m_VarsLocal.GetKeyNum("Effect", true));
-	iResist = static_cast<unsigned short>(Args.m_VarsLocal.GetKeyNum("Resist", true));
+	iResist = static_cast<ushort>(Args.m_VarsLocal.GetKeyNum("Resist", true));
 	iDuration = static_cast<int>(Args.m_VarsLocal.GetKeyNum("Duration", true));
 
 	HUE_TYPE iColor = static_cast<HUE_TYPE>(maximum(0, Args.m_VarsLocal.GetKeyNum("EffectColor", true)));
-	DWORD iRender = static_cast<DWORD>(maximum(0, Args.m_VarsLocal.GetKeyNum("EffectRender", true)));
+	dword iRender = static_cast<dword>(maximum(0, Args.m_VarsLocal.GetKeyNum("EffectRender", true)));
 
 	if ( iEffectID > ITEMID_QTY )
 		iEffectID = pSpellDef->m_idEffect;

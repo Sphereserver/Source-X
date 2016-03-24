@@ -332,7 +332,7 @@ CStoneMember::CStoneMember( CItemStone * pStone, CGrayUID uid, STONEPRIV_TYPE iT
 		CChar * pChar = uid.CharFind();
 		if ( pChar != NULL )
 		{
-			pChar->Memory_AddObjTypes(pStone, static_cast<WORD>(pStone->GetMemoryType()));
+			pChar->Memory_AddObjTypes(pStone, static_cast<word>(pStone->GetMemoryType()));
 			if ( pStone->IsTopLevel())
 			{
 				pChar->m_ptHome = pStone->GetTopPoint();	// Our new home.
@@ -368,7 +368,7 @@ CStoneMember::~CStoneMember()
 		CChar * pChar = GetLinkUID().CharFind();
 		if ( pChar )
 		{
-			pChar->Memory_ClearTypes(static_cast<WORD>(pStone->GetMemoryType())); 	// Make them forget they were ever in this guild
+			pChar->Memory_ClearTypes(static_cast<word>(pStone->GetMemoryType())); 	// Make them forget they were ever in this guild
 		}
 	}
 }
@@ -465,13 +465,13 @@ MEMORY_TYPE CItemStone::GetMemoryType() const
 	}
 }
 
-LPCTSTR CItemStone::GetCharter(unsigned int iLine) const
+LPCTSTR CItemStone::GetCharter(uint iLine) const
 {
 	ASSERT(iLine<COUNTOF(m_sCharter));
 	return(  m_sCharter[iLine] );
 }
 
-void CItemStone::SetCharter( unsigned int iLine, LPCTSTR pCharter )
+void CItemStone::SetCharter( uint iLine, LPCTSTR pCharter )
 {
 	ASSERT(iLine<COUNTOF(m_sCharter));
 	m_sCharter[iLine] = pCharter;
@@ -540,7 +540,7 @@ void CItemStone::r_Write( CScript & s )
 	}
 
 	TemporaryString pszTemp;
-	for ( unsigned int i = 0; i < COUNTOF(m_sCharter); i++ )
+	for ( uint i = 0; i < COUNTOF(m_sCharter); i++ )
 	{
 		if ( ! m_sCharter[i].IsEmpty())
 		{
@@ -563,10 +563,10 @@ void CItemStone::r_Write( CScript & s )
 		{
 			s.WriteKeyFormat( "MEMBER",
 				"0%x,%s,%i,0%x,%i,%i,%i",
-				(DWORD) pMember->GetLinkUID() | (pMember->GetLinkUID().IsItem() ? UID_F_ITEM : 0),
+				(dword) pMember->GetLinkUID() | (pMember->GetLinkUID().IsItem() ? UID_F_ITEM : 0),
 				static_cast<LPCTSTR>(pMember->GetTitle()),
 				pMember->GetPriv(),
-				static_cast<DWORD>(pMember->GetLoyalToUID()),
+				static_cast<dword>(pMember->GetLoyalToUID()),
 				pMember->m_UnDef.m_Val1,
 				pMember->m_UnDef.m_Val2,
 				pMember->GetAccountGold());
@@ -657,7 +657,7 @@ bool CItemStone::r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef )
 		if ( !pszKey[0] )
 			return false;
 
-		CGrayUID pMemberUid = static_cast<DWORD>(Exp_GetVal(pszKey));
+		CGrayUID pMemberUid = static_cast<dword>(Exp_GetVal(pszKey));
 		SKIP_SEPARATORS(pszKey);
 
 		CChar * pMemberChar = pMemberUid.CharFind();
@@ -702,7 +702,7 @@ bool CItemStone::r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef )
 		if ( !pszKey[0] )
 			return false;
 
-		CGrayUID pGuildUid = static_cast<DWORD>(Exp_GetVal(pszKey));
+		CGrayUID pGuildUid = static_cast<dword>(Exp_GetVal(pszKey));
 		SKIP_SEPARATORS(pszKey);
 
 		CItem * pMemberGuild = pGuildUid.ItemFind();
@@ -737,18 +737,18 @@ bool CItemStone::r_LoadVal( CScript & s ) // Load an item Script
 			{
 				if ( s.HasArgs() )
 				{
-					CGrayUID pNewMasterUid = (DWORD) s.GetArgVal();
+					CGrayUID pNewMasterUid = (dword) s.GetArgVal();
 					CChar * pChar = pNewMasterUid.CharFind();
 					if ( !pChar )
 					{
-						DEBUG_ERR(( "MASTERUID called on non char 0%x uid.\n", (DWORD)pNewMasterUid ));
+						DEBUG_ERR(( "MASTERUID called on non char 0%x uid.\n", (dword)pNewMasterUid ));
 						return( false );
 					}
 
 					CStoneMember * pNewMaster = GetMember( pChar );
 					if ( !pNewMaster )
 					{
-						DEBUG_ERR(( "MASTERUID called on char 0%x (%s) that is not a valid member of stone with 0x%x uid.\n", (DWORD)pNewMasterUid, pChar->GetName(), (DWORD)GetUID() ));
+						DEBUG_ERR(( "MASTERUID called on char 0%x (%s) that is not a valid member of stone with 0x%x uid.\n", (dword)pNewMasterUid, pChar->GetName(), (dword)GetUID() ));
 						return( false );
 					}
 
@@ -797,7 +797,7 @@ bool CItemStone::r_LoadVal( CScript & s ) // Load an item Script
 
 	if ( s.IsKeyHead( sm_szLoadKeys[STC_CHARTER], 7 ))
 	{
-		unsigned int i = ATOI(s.GetKey() + 7);
+		uint i = ATOI(s.GetKey() + 7);
 		if ( i >= COUNTOF(m_sCharter))
 			return( false );
 		m_sCharter[i] = s.GetArgStr();
@@ -892,7 +892,7 @@ bool CItemStone::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSr
 		if ( !pszCmd[0] )
 			return true;
 
-		CGrayUID pMemberUid = static_cast<DWORD>(Exp_GetVal(pszCmd));
+		CGrayUID pMemberUid = static_cast<dword>(Exp_GetVal(pszCmd));
 		SKIP_SEPARATORS(pszCmd);
 
 		CChar * pMemberChar = pMemberUid.CharFind();
@@ -982,7 +982,7 @@ bool CItemStone::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSr
 		if ( !pszCmd[0] )
 			return true;
 
-		CGrayUID pGuildUid = static_cast<DWORD>(Exp_GetVal(pszCmd));
+		CGrayUID pGuildUid = static_cast<dword>(Exp_GetVal(pszCmd));
 		SKIP_SEPARATORS(pszCmd);
 
 		CItem * pMemberGuild = pGuildUid.ItemFind();
@@ -1000,7 +1000,7 @@ bool CItemStone::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSr
 	else if ( !strnicmp(sm_szLoadKeys[STC_CHARTER], pszKey, 7) )
 	{
 		LPCTSTR pszCmd = pszKey + 7;
-		unsigned int i = ATOI(pszCmd);
+		uint i = ATOI(pszCmd);
 		if ( i >= COUNTOF(m_sCharter))
 			sVal = "";
 		else
@@ -1102,9 +1102,9 @@ bool CItemStone::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSr
 			{
 				CChar * pMaster = GetMaster();
 				if ( pMaster )
-					sVal.FormatHex( (DWORD) pMaster->GetUID() );
+					sVal.FormatHex( (dword) pMaster->GetUID() );
 				else
-					sVal.FormatHex( (DWORD) 0 );
+					sVal.FormatHex( (dword) 0 );
 			}
 			return( true );
 			
@@ -1290,7 +1290,7 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 					size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, COUNTOF(piCmd));
 					if ( iArgQty == 2 )
 					{
-						CGrayUID pGuildUid = static_cast<unsigned long>(piCmd[0]);
+						CGrayUID pGuildUid = static_cast<uint>(piCmd[0]);
 						bool bWeDeclared = (piCmd[1] != 0);
 						CItem * pEnemyItem = pGuildUid.ItemFind();
 						if ( pEnemyItem && (pEnemyItem->IsType(IT_STONE_GUILD) || pEnemyItem->IsType(IT_STONE_TOWN)) )
@@ -1644,7 +1644,7 @@ bool CItemStone::CheckValidMember( CStoneMember * pMember )
 
 	// just delete this member. (it is mislinked)
 	DEBUG_ERR(( "Stone UID=0%x has mislinked member uid=0%x\n", 
-		(DWORD) GetUID(), (DWORD) pMember->GetLinkUID()));
+		(dword) GetUID(), (dword) pMember->GetLinkUID()));
 	return( false );
 }
 

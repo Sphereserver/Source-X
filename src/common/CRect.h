@@ -21,10 +21,10 @@ public:
 	static const int sm_Moves[DIR_QTY+1][2];
 	static LPCTSTR sm_szDirs[DIR_QTY+1];
 public:
-	signed short m_x;	// equipped items dont need x,y
-	signed short m_y;
+	short m_x;	// equipped items dont need x,y
+	short m_y;
 	signed char m_z;	// This might be layer if equipped ? or equipped on corpse. Not used if in other container.
-	BYTE m_map;			// another map? (only if top level.)
+	byte m_map;			// another map? (only if top level.)
 
 public:
 	bool operator == ( const CPointBase & pt ) const;
@@ -52,7 +52,7 @@ public:
 	bool IsSame2D( const CPointBase & pt ) const;
 
 	void Set( const CPointBase & pt );
-	void Set( WORD x, WORD y, signed char z = 0, unsigned char map = 0 );
+	void Set( word x, word y, signed char z = 0, uchar map = 0 );
 	size_t Read( TCHAR * pVal );
 
 	TCHAR * WriteUsed( TCHAR * pszBuffer ) const;
@@ -73,8 +73,8 @@ public:
 #define REGION_TYPE_HOUSE 4
 #define REGION_TYPE_SHIP  8
 #define REGION_TYPE_MULTI 12
-	CRegionBase * GetRegion( DWORD dwType ) const;
-	size_t GetRegions( DWORD dwType, CRegionLinks & rlinks ) const;
+	CRegionBase * GetRegion( dword dwType ) const;
+	size_t GetRegions( dword dwType, CRegionLinks & rlinks ) const;
 
 	long GetPointSortIndex() const;
 
@@ -86,7 +86,7 @@ struct CPointMap : public CPointBase
 {
 	// A point in the world (or in a container) (initialized)
 	CPointMap();
-	CPointMap( WORD x, WORD y, signed char z = 0, unsigned char map = 0 );
+	CPointMap( word x, word y, signed char z = 0, uchar map = 0 );
 	CPointMap & operator = ( const CPointBase & pt );
 	CPointMap( const CPointBase & pt );
 	CPointMap( TCHAR * pVal );
@@ -95,7 +95,7 @@ struct CPointMap : public CPointBase
 struct CPointSort : public CPointMap
 {
 	CPointSort();
-	CPointSort( WORD x, WORD y, signed char z = 0, unsigned char map = 0 );
+	CPointSort( word x, word y, signed char z = 0, uchar map = 0 );
 	CPointSort( const CPointBase & pt );
 	virtual ~CPointSort(); // just to make this dynamic
 };

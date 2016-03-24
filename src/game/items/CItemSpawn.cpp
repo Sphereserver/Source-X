@@ -10,13 +10,13 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-BYTE CItemSpawn::GetAmount()
+byte CItemSpawn::GetAmount()
 {
 	ADDTOCALLSTACK("CItemSpawn::GetAmount");
 	return m_iAmount;
 }
 
-void CItemSpawn::SetAmount(BYTE iAmount)
+void CItemSpawn::SetAmount(byte iAmount)
 {
 	ADDTOCALLSTACK("CItemSpawn::SetAmount");
 	m_iAmount = iAmount;
@@ -121,7 +121,7 @@ CItemSpawn::~CItemSpawn()
 	ADDTOCALLSTACK("CItemSpawn::~CItemSpawn");
 }
 
-BYTE CItemSpawn::GetCount()
+byte CItemSpawn::GetCount()
 {
 	ADDTOCALLSTACK("CitemSpawn:GetCount");
 	return m_currentSpawned;
@@ -135,7 +135,7 @@ void CItemSpawn::GenerateItem(CResourceDef *pDef)
 	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(rid.GetResIndex());
 
 	CItemContainer *pCont = dynamic_cast<CItemContainer *>(GetParent());
-	BYTE iCount = pCont ? static_cast<unsigned char>(pCont->ContentCount(rid)) : GetCount();
+	byte iCount = pCont ? static_cast<uchar>(pCont->ContentCount(rid)) : GetCount();
 	if ( iCount >= GetAmount() )
 		return;
 
@@ -143,7 +143,7 @@ void CItemSpawn::GenerateItem(CResourceDef *pDef)
 	if ( pItem == NULL )
 		return;
 
-	WORD iAmountPile = static_cast<WORD>(minimum(UINT16_MAX,m_itSpawnItem.m_pile));
+	word iAmountPile = static_cast<word>(minimum(UINT16_MAX,m_itSpawnItem.m_pile));
 	if ( iAmountPile > 1 )
 	{
 		CItemBase *pItemDef = pItem->Item_GetDef();
@@ -209,8 +209,8 @@ void CItemSpawn::DelObj(CGrayUID uid)
 	if ( !uid.IsValidUID() )
 		return;
 
-	BYTE iMax = GetCount();
-	for ( BYTE i = 0; i < iMax; i++ )
+	byte iMax = GetCount();
+	for ( byte i = 0; i < iMax; i++ )
 	{
 		if ( m_obj[i] != uid )
 			continue;
@@ -264,8 +264,8 @@ void CItemSpawn::AddObj(CGrayUID uid)
 		}
 	}
 
-	BYTE iMax = maximum(GetAmount(), 1);
-	for (BYTE i = 0; i < iMax; i++ )
+	byte iMax = maximum(GetAmount(), 1);
+	for (byte i = 0; i < iMax; i++ )
 	{
 		if ( !m_obj[i].IsValidUID() )
 		{
@@ -282,7 +282,7 @@ void CItemSpawn::AddObj(CGrayUID uid)
 					ASSERT(pChar->m_pNPC);
 					pChar->StatFlag_Set(STATF_Spawned);
 					pChar->m_ptHome = GetTopPoint();
-					pChar->m_pNPC->m_Home_Dist_Wander = static_cast<WORD>(m_itSpawnChar.m_DistMax);
+					pChar->m_pNPC->m_Home_Dist_Wander = static_cast<word>(m_itSpawnChar.m_DistMax);
 				}
 			}
 			break;
@@ -316,7 +316,7 @@ void CItemSpawn::OnTick(bool fExec)
 	if ( !pDef )
 	{
 		RESOURCE_ID_BASE rid = IsType(IT_SPAWN_ITEM) ? m_itSpawnItem.m_ItemID : m_itSpawnChar.m_CharID;
-		DEBUG_ERR(("Bad Spawn point uid=0%x, id=%s\n", (DWORD)GetUID(), g_Cfg.ResourceGetName(rid)));
+		DEBUG_ERR(("Bad Spawn point uid=0%x, id=%s\n", (dword)GetUID(), g_Cfg.ResourceGetName(rid)));
 		return;
 	}
 
@@ -332,7 +332,7 @@ void CItemSpawn::KillChildren()
 	if (m_currentSpawned <= 0 )
 		return;
 
-	for (BYTE i = 0; i < m_currentSpawned; i++ )
+	for (byte i = 0; i < m_currentSpawned; i++ )
 	{
 		CObjBase *pObj = m_obj[i].ObjFind();
 		if ( !pObj )
@@ -446,7 +446,7 @@ bool CItemSpawn::r_LoadVal(CScript & s)
 		}
 		case ISPW_AMOUNT:
 		{
-			SetAmount(static_cast<BYTE>(s.GetArgVal()));
+			SetAmount(static_cast<byte>(s.GetArgVal()));
 			return true;
 		}
 		case ISPW_DELOBJ:
@@ -480,11 +480,11 @@ void  CItemSpawn::r_Write(CScript & s)
 	if ( GetAmount() != 1 )
 		s.WriteKeyVal("AMOUNT", GetAmount());
 
-	WORD iTotal = GetCount();
+	word iTotal = GetCount();
 	if ( iTotal <= 0 )
 		return;
 
-	for ( BYTE i = 0; i < iTotal; i++ )
+	for ( byte i = 0; i < iTotal; i++ )
 	{
 		if ( !m_obj[i].IsValidUID() )
 			continue;

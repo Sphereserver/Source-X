@@ -153,29 +153,29 @@ public:
 	*/
 	void FormatLLVal(long long iVal);
 	/**
-	* @brief Print a unsigned long long value into the string.
+	* @brief Print a ullong value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	void FormatULLVal(unsigned long long iVal);
+	void FormatULLVal(ullong iVal);
 	/**
 	* @brief Print a unsigned long value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	void FormatUVal(unsigned int iVal);
+	void FormatUVal(uint iVal);
 	/**
-	* @brief Print a DWORD value into the string (hex format).
+	* @brief Print a dword value into the string (hex format).
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	void FormatHex(DWORD dwVal);
+	void FormatHex(dword dwVal);
 	/**
-	* @brief Print a unsigned long long value into the string (hex format).
+	* @brief Print a ullong value into the string (hex format).
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	void FormatLLHex(unsigned long long dwVal);
+	void FormatLLHex(ullong dwVal);
 
 	/**
 	* @brief Compares the CGString to string pStr (strcmp wrapper).
@@ -532,7 +532,7 @@ int FindTableHead(LPCTSTR pFind, LPCTSTR const * ppTable, int iCount, int iElemS
 */
 int FindTableHeadSorted(LPCTSTR pFind, LPCTSTR const * ppTable, int iCount, int iElemSize = sizeof(LPCTSTR));
 
-void CharToMultiByteNonNull(BYTE*, const char* , size_t);
+void CharToMultiByteNonNull(byte*, const char* , size_t);
 
 // extern TCHAR * Str_GetTemporary(int amount = 1);
 #define Str_GetTemp STATIC_CAST<AbstractSphereThread *>(ThreadHolder::current())->allocateBuffer

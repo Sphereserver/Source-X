@@ -13,18 +13,18 @@
 
 std::vector<CCryptClientKey *> CCrypt::client_keys;
 
-void CCrypt::SetClientVersion( DWORD iVer )
+void CCrypt::SetClientVersion( dword iVer )
 {
 	m_iClientVersion = iVer;
 }
 
-void CCrypt::SetMasterKeys( DWORD hi, DWORD low )
+void CCrypt::SetMasterKeys( dword hi, dword low )
 {
 	m_MasterHi = hi;
 	m_MasterLo = low;
 }
 
-void CCrypt::SetCryptMask( DWORD hi, DWORD low )
+void CCrypt::SetCryptMask( dword hi, dword low )
 {
 	m_CryptMaskHi = hi;
 	m_CryptMaskLo= low;
@@ -52,7 +52,7 @@ bool CCrypt::SetEncryptionType( ENCRYPTION_TYPE etWho )
 	return false;
 }
 
-DWORD CCrypt::GetClientVer() const
+dword CCrypt::GetClientVer() const
 {
 	return( m_iClientVersion );
 }
@@ -130,7 +130,7 @@ void CCrypt::addNoCryptKey(void)
 // ---------------------------------------------------------------------------------------------------------------
 // ===============================================================================================================
 
-const WORD CCrypt::packet_size[0xde] = {
+const word CCrypt::packet_size[0xde] = {
 		0x0068, 0x0005, 0x0007, 0x8000, 0x0002, 0x0005, 0x0005, 0x0007, 0x000e, 0x0005, 0x000b, 0x0007, 0x8000, 0x0003, 0x8000, 0x003d, 
 		0x00d7, 0x8000, 0x8000, 0x000a, 0x0006, 0x0009, 0x8000, 0x8000, 0x8000, 0x8000, 0x8000, 0x0025, 0x8000, 0x0005, 0x0004, 0x0008, 
 		0x0013, 0x0008, 0x0003, 0x001a, 0x0007, 0x0014, 0x0005, 0x0002, 0x0005, 0x0001, 0x0005, 0x0002, 0x0002, 0x0011, 0x000f, 0x000a, 
@@ -147,7 +147,7 @@ const WORD CCrypt::packet_size[0xde] = {
 		0x8000, 0x0002, 0x0019, 0x8000, 0x8000, 0x8000, 0x8000, 0x8000, 0x8000, 0x010c, 0x8000, 0x8000, 0x0009, 0x8000 
 };
 
-int CCrypt::GetPacketSize(BYTE packet) // static
+int CCrypt::GetPacketSize(byte packet) // static
 {
 	if ( packet >= 0xde )
 		return( -1 );
@@ -166,7 +166,7 @@ int CCrypt::GetPacketSize(BYTE packet) // static
 
 bool CCrypt::sm_fTablesReady = false;
 
-const BYTE CCrypt::sm_key_table[CRYPT_GAMEKEY_COUNT][CRYPT_GAMEKEY_LENGTH] =
+const byte CCrypt::sm_key_table[CRYPT_GAMEKEY_COUNT][CRYPT_GAMEKEY_LENGTH] =
 {
 	// @ 0f1420 in v2.0.3
 	// @ 0f2420 in v2.0.4 (but not used, go figure)
@@ -197,7 +197,7 @@ const BYTE CCrypt::sm_key_table[CRYPT_GAMEKEY_COUNT][CRYPT_GAMEKEY_LENGTH] =
 	{ 0x30, 0xBF, 0x0A, 0x34, 0xDB, 0x3D }
 };
 
-const BYTE CCrypt::sm_seed_table[2][CRYPT_GAMEKEY_COUNT][2][CRYPT_GAMESEED_LENGTH] =
+const byte CCrypt::sm_seed_table[2][CRYPT_GAMEKEY_COUNT][2][CRYPT_GAMESEED_LENGTH] =
 {
 	// Seed Table - Much of this table is never used.
 	// @0f14b8 in v2.0.3
@@ -259,9 +259,9 @@ const BYTE CCrypt::sm_seed_table[2][CRYPT_GAMEKEY_COUNT][2][CRYPT_GAMESEED_LENGT
 	}
 };
 
-static DWORD sm_dwCodingData[CRYPT_GAMEKEY_COUNT][18+1024];
+static dword sm_dwCodingData[CRYPT_GAMEKEY_COUNT][18+1024];
 
-static const DWORD sm_dwInitData[18+1024] =
+static const dword sm_dwInitData[18+1024] =
 {
 	// @0106248 in v2.0.3
 	// @0107248 in v2.0.4 (but not used, go figure)
@@ -452,7 +452,7 @@ int CCrypt::GetVerFromString( LPCTSTR pszVersion )
 	return (iArgs[0] * 1000000) + (iArgs[1] * 10000) + (iArgs[2] * 100) + iArgs[3];
 }
 
-int CCrypt::GetVerFromNumber( DWORD maj, DWORD min, DWORD rev, DWORD pat )
+int CCrypt::GetVerFromNumber( dword maj, dword min, dword rev, dword pat )
 {
 	ADDTOCALLSTACK("CCrypt::GetVerFromNumber");
 	// Get version of new clients (5.0.6.5+), which report the client version as numbers (eg: 5,0,6,5)
@@ -460,7 +460,7 @@ int CCrypt::GetVerFromNumber( DWORD maj, DWORD min, DWORD rev, DWORD pat )
 	return (maj * 1000000) + (min * 10000) + (rev * 100) + pat;
 }
 
-char* CCrypt::WriteClientVerString( DWORD iClientVersion, char * pStr )
+char* CCrypt::WriteClientVerString( dword iClientVersion, char * pStr )
 {
 	ADDTOCALLSTACK("CCrypt::WriteClientVerString");
 	if ( iClientVersion >= MINCLIVER_NEWVERSIONING )
@@ -493,7 +493,7 @@ char* CCrypt::WriteClientVer( char * pStr ) const
 	return( CCrypt::WriteClientVerString( GetClientVer(), pStr ) );
 }
 
-bool CCrypt::SetClientVerEnum( DWORD iVer, bool bSetEncrypt )
+bool CCrypt::SetClientVerEnum( dword iVer, bool bSetEncrypt )
 {
 	ADDTOCALLSTACK("CCrypt::SetClientVerEnum");
 	for (size_t i = 0; i < client_keys.size(); i++ )
@@ -574,7 +574,7 @@ CCrypt::CCrypt()
 	SetClientVerEnum(0);
 }
 
-bool CCrypt::Init( DWORD dwIP, BYTE * pEvent, size_t iLen, bool isclientKr )
+bool CCrypt::Init( dword dwIP, byte * pEvent, size_t iLen, bool isclientKr )
 {
 	ADDTOCALLSTACK("CCrypt::Init");
 	bool bReturn = true;
@@ -615,7 +615,7 @@ bool CCrypt::Init( DWORD dwIP, BYTE * pEvent, size_t iLen, bool isclientKr )
 	return bReturn;
 }
 
-void CCrypt::InitFast( DWORD dwIP, CONNECT_TYPE ctInit, bool fRelay)
+void CCrypt::InitFast( dword dwIP, CONNECT_TYPE ctInit, bool fRelay)
 {
 	/**
 	 * Quickly set seed and connection type.
@@ -644,11 +644,11 @@ void CCrypt::InitFast( DWORD dwIP, CONNECT_TYPE ctInit, bool fRelay)
 	}
 }
 
-void CCrypt::LoginCryptStart( DWORD dwIP, BYTE * pEvent, size_t iLen )
+void CCrypt::LoginCryptStart( dword dwIP, byte * pEvent, size_t iLen )
 {
 	ADDTOCALLSTACK("CCrypt::LoginCryptStart");
 	ASSERT(pEvent != NULL);
-	BYTE m_Raw[ MAX_BUFFER ];
+	byte m_Raw[ MAX_BUFFER ];
 	char pszAccountNameCheck[ MAX_ACCOUNT_NAME_SIZE ];
 
 	ASSERT( iLen <= sizeof(m_Raw) );
@@ -656,8 +656,8 @@ void CCrypt::LoginCryptStart( DWORD dwIP, BYTE * pEvent, size_t iLen )
 	m_seed = dwIP;
 	SetConnectType( CONNECT_LOGIN );
 	
-	DWORD m_tmp_CryptMaskLo = (((~m_seed) ^ 0x00001357) << 16) | ((( m_seed) ^ 0xffffaaaa) & 0x0000ffff);
-	DWORD m_tmp_CryptMaskHi = ((( m_seed) ^ 0x43210000) >> 16) | (((~m_seed) ^ 0xabcdffff) & 0xffff0000);
+	dword m_tmp_CryptMaskLo = (((~m_seed) ^ 0x00001357) << 16) | ((( m_seed) ^ 0xffffaaaa) & 0x0000ffff);
+	dword m_tmp_CryptMaskHi = ((( m_seed) ^ 0x43210000) >> 16) | (((~m_seed) ^ 0xabcdffff) & 0xffff0000);
 	
 	SetClientVerIndex(0);
 	SetCryptMask(m_tmp_CryptMaskHi, m_tmp_CryptMaskLo);
@@ -742,12 +742,12 @@ void CCrypt::LoginCryptStart( DWORD dwIP, BYTE * pEvent, size_t iLen )
 	m_fInit = true;
 }
 
-void CCrypt::GameCryptStart( DWORD dwIP, BYTE * pEvent, size_t iLen )
+void CCrypt::GameCryptStart( dword dwIP, byte * pEvent, size_t iLen )
 {
 	ADDTOCALLSTACK("CCrypt::GameCryptStart");
 	ASSERT( pEvent != NULL );
 
-	BYTE m_Raw[ MAX_BUFFER ];
+	byte m_Raw[ MAX_BUFFER ];
 	ASSERT( iLen <= sizeof(m_Raw) );
 	memcpy( m_Raw, pEvent, iLen );
 	
@@ -801,7 +801,7 @@ void CCrypt::GameCryptStart( DWORD dwIP, BYTE * pEvent, size_t iLen )
 	m_fInit = true;
 }
 
-void CCrypt::RelayGameCryptStart( BYTE * pOutput, const BYTE * pInput, size_t iLen )
+void CCrypt::RelayGameCryptStart( byte * pOutput, const byte * pInput, size_t iLen )
 {
 	/**
 	 * When the client switches between login and game server without opening a new connection, the first game packet
@@ -829,7 +829,7 @@ void CCrypt::RelayGameCryptStart( BYTE * pOutput, const BYTE * pInput, size_t iL
 	}
 
 	// calculate new seed
-	DWORD dwNewSeed = m_MasterHi ^ m_MasterLo;
+	dword dwNewSeed = m_MasterHi ^ m_MasterLo;
 	dwNewSeed = ((dwNewSeed >> 24) & 0xFF) | ((dwNewSeed >> 8) & 0xFF00) | ((dwNewSeed << 8) & 0xFF0000) | ((dwNewSeed << 24) & 0xFF000000);
 	dwNewSeed ^= m_seed;
 	
@@ -855,7 +855,7 @@ void CCrypt::RelayGameCryptStart( BYTE * pOutput, const BYTE * pInput, size_t iL
 			InitTwoFish();
 			Decrypt(pOutput, pInput, iLen);
 
-			if ((pOutput[0] ^ (BYTE) m_CryptMaskLo) == 0x91)
+			if ((pOutput[0] ^ (byte) m_CryptMaskLo) == 0x91)
 			{
 				bFoundEncrypt = true;
 				break;
@@ -877,7 +877,7 @@ void CCrypt::RelayGameCryptStart( BYTE * pOutput, const BYTE * pInput, size_t iL
 	DecryptOld( pOutput, pOutput, iLen );
 }
 
-void CCrypt::Encrypt( BYTE * pOutput, const BYTE * pInput, size_t iLen )
+void CCrypt::Encrypt( byte * pOutput, const byte * pInput, size_t iLen )
 {
 	ADDTOCALLSTACK("CCrypt::Encrypt");
 	if ( ! iLen )
@@ -898,7 +898,7 @@ void CCrypt::Encrypt( BYTE * pOutput, const BYTE * pInput, size_t iLen )
 }
 
 
-void CCrypt::Decrypt( BYTE * pOutput, const BYTE * pInput, size_t iLen  )
+void CCrypt::Decrypt( byte * pOutput, const byte * pInput, size_t iLen  )
 {
 	ADDTOCALLSTACK("CCrypt::Decrypt");
 	if ( ! iLen )
@@ -942,7 +942,7 @@ void CCrypt::Decrypt( BYTE * pOutput, const BYTE * pInput, size_t iLen  )
 }
 
 
-void CCrypt::EncryptMD5( BYTE * pOutput, const BYTE * pInput, size_t iLen )
+void CCrypt::EncryptMD5( byte * pOutput, const byte * pInput, size_t iLen )
 {
 	ADDTOCALLSTACK("CCrypt::EncryptMD5");
 	for (size_t i = 0; i < iLen; i++)
@@ -952,7 +952,7 @@ void CCrypt::EncryptMD5( BYTE * pOutput, const BYTE * pInput, size_t iLen )
 	}
 }
 
-void CCrypt::DecryptBlowFish( BYTE * pOutput, const BYTE * pInput, size_t iLen )
+void CCrypt::DecryptBlowFish( byte * pOutput, const byte * pInput, size_t iLen )
 {
 	ADDTOCALLSTACK("CCrypt::DecryptBlowFish");
 	while ( (m_gameStreamPos + iLen) > CRYPT_GAMETABLE_TRIGGER) 
@@ -977,10 +977,10 @@ void CCrypt::DecryptBlowFish( BYTE * pOutput, const BYTE * pInput, size_t iLen )
 	m_gameStreamPos += iLen;
 }
 
-void CCrypt::DecryptTwoFish( BYTE * pOutput, const BYTE * pInput, size_t iLen )
+void CCrypt::DecryptTwoFish( byte * pOutput, const byte * pInput, size_t iLen )
 {
 	ADDTOCALLSTACK("CCrypt::DecryptTwoFish");
-	BYTE tmpBuff[TFISH_RESET];
+	byte tmpBuff[TFISH_RESET];
 	
 	for ( size_t i = 0; i < iLen; i++ )
 	{
@@ -995,7 +995,7 @@ void CCrypt::DecryptTwoFish( BYTE * pOutput, const BYTE * pInput, size_t iLen )
 	}
 }
 
-BYTE CCrypt::DecryptBFByte( BYTE bEnc )
+byte CCrypt::DecryptBFByte( byte bEnc )
 {
 	if( !m_gameBlockPos )
 	{
@@ -1003,22 +1003,22 @@ BYTE CCrypt::DecryptBFByte( BYTE bEnc )
 		m_gameBlockPos = 8;
 	}
 	m_gameBlockPos--;
-	BYTE result = bEnc ^ m_Key.u_cKey[m_gameBlockPos];
+	byte result = bEnc ^ m_Key.u_cKey[m_gameBlockPos];
 	m_Key.u_cKey[m_gameBlockPos] = bEnc;
 	
 	return result;
 }
 
-void CCrypt::DecryptOld( BYTE * pOutput, const BYTE * pInput, size_t iLen  )
+void CCrypt::DecryptOld( byte * pOutput, const byte * pInput, size_t iLen  )
 {	
 	ADDTOCALLSTACK("CCrypt::DecryptOld");
 	if ( GetClientVer() >= 0x125370 )
 	{
 		for ( size_t i = 0; i < iLen; i++ )
 		{
-			pOutput[i] = pInput[i] ^ (BYTE) m_CryptMaskLo;
-			DWORD MaskLo = m_CryptMaskLo;
-			DWORD MaskHi = m_CryptMaskHi;
+			pOutput[i] = pInput[i] ^ (byte) m_CryptMaskLo;
+			dword MaskLo = m_CryptMaskLo;
+			dword MaskHi = m_CryptMaskHi;
 			m_CryptMaskLo = ((MaskLo >> 1) | (MaskHi << 31)) ^ m_MasterLo;
 			MaskHi = ((MaskHi >> 1) | (MaskLo << 31)) ^ m_MasterHi;
 			m_CryptMaskHi = ((MaskHi >> 1) | (MaskLo << 31)) ^ m_MasterHi;
@@ -1030,9 +1030,9 @@ void CCrypt::DecryptOld( BYTE * pOutput, const BYTE * pInput, size_t iLen  )
 	{
 		for ( size_t i = 0; i < iLen; i++ )
 		{
-			pOutput[i] = pInput[i] ^ (BYTE) m_CryptMaskLo;
-			DWORD MaskLo = m_CryptMaskLo;
-			DWORD MaskHi = m_CryptMaskHi;
+			pOutput[i] = pInput[i] ^ (byte) m_CryptMaskLo;
+			dword MaskLo = m_CryptMaskLo;
+			dword MaskHi = m_CryptMaskHi;
 			m_CryptMaskHi =
 				(m_MasterHi >> ((5 * MaskHi * MaskHi) & 0xff))
 				+ (MaskHi * m_MasterHi)
@@ -1051,9 +1051,9 @@ void CCrypt::DecryptOld( BYTE * pOutput, const BYTE * pInput, size_t iLen  )
 	{
 		for ( size_t i = 0; i < iLen; i++ )
 		{
-			pOutput[i] = pInput[i] ^ (BYTE) m_CryptMaskLo;
-			DWORD MaskLo = m_CryptMaskLo;
-			DWORD MaskHi = m_CryptMaskHi;
+			pOutput[i] = pInput[i] ^ (byte) m_CryptMaskLo;
+			dword MaskLo = m_CryptMaskLo;
+			dword MaskHi = m_CryptMaskHi;
 			m_CryptMaskLo = ((MaskLo >> 1) | (MaskHi << 31)) ^ m_MasterLo;
 			m_CryptMaskHi = ((MaskHi >> 1) | (MaskLo << 31)) ^ m_MasterHi;
 		}
@@ -1066,7 +1066,7 @@ void CCrypt::DecryptOld( BYTE * pOutput, const BYTE * pInput, size_t iLen  )
 	}
 }
 
-void CCrypt::InitMD5(BYTE * ucInitialize)
+void CCrypt::InitMD5(byte * ucInitialize)
 {
 	ADDTOCALLSTACK("CCrypt::InitMD5");
 	md5_position = 0;
@@ -1081,7 +1081,7 @@ void CCrypt::InitTwoFish()
 	ADDTOCALLSTACK("CCrypt::InitTwoFish");
 	// Taken from t2tfish.cpp / CCryptNew.cpp
 	
-	DWORD dwIP = UNPACKDWORD( ((BYTE*) & m_seed ) );
+	dword dwIP = UNPACKDWORD( ((byte*) & m_seed ) );
 	
 	// fprintf( stderr, "GameCrypt Seed (%x)(%i-%x)\n", m_seed, dwIP, dwIP );
 	
@@ -1097,12 +1097,12 @@ void CCrypt::InitTwoFish()
 	tf_key.key32[0] = tf_key.key32[1] = tf_key.key32[2] = tf_key.key32[3] = dwIP; //0x7f000001;
 	reKey( &tf_key );
 
-	for ( unsigned short i = 0; i < TFISH_RESET; i++ )
-		tf_cipherTable[i] = static_cast<BYTE>(i);
+	for ( ushort i = 0; i < TFISH_RESET; i++ )
+		tf_cipherTable[i] = static_cast<byte>(i);
 
 	tf_position = 0;
 
-	BYTE tmpBuff[TFISH_RESET];
+	byte tmpBuff[TFISH_RESET];
 	blockEncrypt( &tf_cipher, &tf_key, &tf_cipherTable[0], 0x800, &tmpBuff[0] ); // function09
 	memcpy( &tf_cipherTable, &tmpBuff, TFISH_RESET );
 
@@ -1128,7 +1128,7 @@ void CCrypt::InitBlowFish()
 void CCrypt::PrepareKey( CCrypt::CCryptKey & key, int iTable )	// static
 {
 	ADDTOCALLSTACK("CCrypt::PrepareKey");
-	const DWORD *pCodes = sm_dwCodingData[iTable];
+	const dword *pCodes = sm_dwCodingData[iTable];
 
 	key.u_iKey[1] ^= pCodes[0];
 	for(int i=0; i<8; i++)
@@ -1138,7 +1138,7 @@ void CCrypt::PrepareKey( CCrypt::CCryptKey & key, int iTable )	// static
 	}
 	key.u_iKey[0] ^= pCodes[17];
 
-	DWORD tmp = key.u_iKey[0];
+	dword tmp = key.u_iKey[0];
 	key.u_iKey[0] = key.u_iKey[1];
 	key.u_iKey[1] = tmp;
 }
@@ -1146,7 +1146,7 @@ void CCrypt::PrepareKey( CCrypt::CCryptKey & key, int iTable )	// static
 void CCrypt::InitSeed( int iTable )
 {
 	ADDTOCALLSTACK("CCrypt::InitSeed");
-	const BYTE * pKey = sm_seed_table[iTable][m_gameTable][0];
+	const byte * pKey = sm_seed_table[iTable][m_gameTable][0];
 	for ( int i=CRYPT_GAMESEED_LENGTH-1; i>=0; i-- )
 	{
 		m_Key.u_cKey[i] = *pKey++;
@@ -1162,7 +1162,7 @@ void CCrypt::InitTables()		// static
 	{
 		memcpy(sm_dwCodingData[i], sm_dwInitData, sizeof(sm_dwInitData));
 
-		DWORD code[3];
+		dword code[3];
 		code[0] = (sm_key_table[i][0] << 24) + (sm_key_table[i][1] << 16) + (sm_key_table[i][2] << 8) + sm_key_table[i][3];
 		code[1] = (sm_key_table[i][4] << 24) + (sm_key_table[i][5] << 16) + (sm_key_table[i][0] << 8) + sm_key_table[i][1];
 		code[2] = (sm_key_table[i][2] << 24) + (sm_key_table[i][3] << 16) + (sm_key_table[i][4] << 8) + sm_key_table[i][5];
@@ -1187,10 +1187,10 @@ void CCrypt::InitTables()		// static
 
 // Huffman compression
 
-const WORD CHuffman::sm_xCompress_Base[COMPRESS_TREE_SIZE] =	// static
+const word CHuffman::sm_xCompress_Base[COMPRESS_TREE_SIZE] =	// static
 {
 	// The "golden" key for (0.0.0.0)
-	// lowest 4 bits is the length. other source uses 2 int's per WORD here.
+	// lowest 4 bits is the length. other source uses 2 int's per word here.
 	// @ 014b389 in 2.0.3
 	// @ 010a3d8 in 2.0.4
 	0x0002, 0x01f5, 0x0226, 0x0347, 0x0757, 0x0286, 0x03b6, 0x0327,
@@ -1228,16 +1228,16 @@ const WORD CHuffman::sm_xCompress_Base[COMPRESS_TREE_SIZE] =	// static
 	0x00d4 // terminator
 } ;
 
-size_t CHuffman::Compress( BYTE * pOutput, const BYTE * pInput, size_t inplen ) // static
+size_t CHuffman::Compress( byte * pOutput, const byte * pInput, size_t inplen ) // static
 {
 	ADDTOCALLSTACK("CHuffman::Compress");
 	size_t iLen = 0;
 	int bitidx = 0;	// Offset in output byte (xOutVal)
-	BYTE xOutVal = 0;	// Don't bother to init this. It will just roll off all junk anyhow.
+	byte xOutVal = 0;	// Don't bother to init this. It will just roll off all junk anyhow.
 
 	for ( size_t i = 0; i <= inplen; i++ )
 	{
-		WORD value = sm_xCompress_Base[ ( i == inplen ) ? (COMPRESS_TREE_SIZE - 1) : pInput[i] ];
+		word value = sm_xCompress_Base[ ( i == inplen ) ? (COMPRESS_TREE_SIZE - 1) : pInput[i] ];
 		int nBits = value & 0xF;
 		value >>= 4;
 		while ( nBits-- )

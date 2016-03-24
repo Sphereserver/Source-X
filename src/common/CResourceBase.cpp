@@ -13,7 +13,7 @@
 
 RES_TYPE RESOURCE_ID_BASE::GetResType() const
 {
-	DWORD dwVal = RES_GET_TYPE(m_dwInternalVal);
+	dword dwVal = RES_GET_TYPE(m_dwInternalVal);
 	return static_cast<RES_TYPE>(dwVal);
 }
 
@@ -24,7 +24,7 @@ int RESOURCE_ID_BASE::GetResIndex() const
 
 int RESOURCE_ID_BASE::GetResPage() const
 {
-	DWORD dwVal = m_dwInternalVal >> RES_PAGE_SHIFT;
+	dword dwVal = m_dwInternalVal >> RES_PAGE_SHIFT;
 	dwVal &= RES_PAGE_MASK;
 	return(dwVal);
 }
@@ -346,7 +346,7 @@ LPCTSTR CResourceBase::ResourceGetName( RESOURCE_ID_BASE rid ) const
 	ASSERT(pszTmp);
 	if ( ! rid.IsValidUID())
 	{
-		sprintf( pszTmp, "%d", static_cast<long>(rid.GetPrivateUID()) );
+		sprintf( pszTmp, "%d", static_cast<int>(rid.GetPrivateUID()) );
 	}
 	else
 	{
@@ -514,7 +514,7 @@ bool CResourceDef::SetResourceName( LPCTSTR pszName )
 	CVarDefCont * pVarKey = g_Exp.m_VarDefs.GetKey( pszName );
 	if ( pVarKey )
 	{
-		if ( (DWORD)pVarKey->GetValNum() == GetResourceID().GetPrivateUID() )
+		if ( (dword)pVarKey->GetValNum() == GetResourceID().GetPrivateUID() )
 		{
 			return( true );
 		}
@@ -765,7 +765,7 @@ void CResourceScript::Init()
 {
 	m_iOpenCount = 0;
 	m_timeLastAccess.Init();
-	m_dwSize = (std::numeric_limits<DWORD>::max)();			// Compare to see if this has changed.
+	m_dwSize = (std::numeric_limits<dword>::max)();			// Compare to see if this has changed.
 }
 
 bool CResourceScript::CheckForChange()
@@ -773,7 +773,7 @@ bool CResourceScript::CheckForChange()
 	ADDTOCALLSTACK("CResourceScript::CheckForChange");
 	// Get Size/Date info on the file to see if it has changed.
 	time_t dateChange;
-	DWORD dwSize;
+	dword dwSize;
 
 	if ( ! CFileList::ReadFileInfo( GetFilePath(), dateChange, dwSize ))
 	{
@@ -812,7 +812,7 @@ CResourceScript::CResourceScript()
 
 bool CResourceScript::IsFirstCheck() const
 {
-	return( m_dwSize == (std::numeric_limits<DWORD>::max)() && ! m_dateChange.IsTimeValid());
+	return( m_dwSize == (std::numeric_limits<dword>::max)() && ! m_dateChange.IsTimeValid());
 }
 
 void CResourceScript::ReSync()
@@ -1106,7 +1106,7 @@ void CResourceLink::DelRefInstance()
 	m_lRefInstances --;
 }
 
-DWORD CResourceLink::GetRefInstances() const
+dword CResourceLink::GetRefInstances() const
 {
 	return( m_lRefInstances );
 }
@@ -1165,7 +1165,7 @@ void CResourceLink::SetTrigger(int i)
 		{
 			if ( i < 32 )
 			{
-				DWORD flag = 1 << i;
+				dword flag = 1 << i;
 				m_dwOnTriggers[j] |= flag;
 				return;
 			}
@@ -1185,7 +1185,7 @@ bool CResourceLink::HasTrigger(int i) const
 	{
 		if ( i < 32 )
 		{
-			DWORD flag = 1 << i;
+			dword flag = 1 << i;
 			return ((m_dwOnTriggers[j] & flag) != 0);
 		}
 		i -= 32;
@@ -1555,9 +1555,9 @@ CResourceHashArray::CResourceHashArray()
 int CResourceHashArray::CompareKey( RESOURCE_ID_BASE rid, CResourceDef * pBase, bool fNoSpaces ) const
 {
 	UNREFERENCED_PARAMETER(fNoSpaces);
-	DWORD dwID1 = rid.GetPrivateUID();
+	dword dwID1 = rid.GetPrivateUID();
 	ASSERT( pBase );
-	DWORD dwID2 = pBase->GetResourceID().GetPrivateUID();
+	dword dwID2 = pBase->GetResourceID().GetPrivateUID();
 	if (dwID1 > dwID2 )
 		return(1);
 	if (dwID1 == dwID2 )
@@ -1870,7 +1870,7 @@ bool CResourceQtyArray::IsResourceMatchAll( CChar * pChar ) const
 	{
 		RESOURCE_ID ridtest = GetAt(i).GetResourceID();
 
-		if ( ! pChar->IsResourceMatch( ridtest, static_cast<unsigned long>(GetAt(i).GetResQty()) ))
+		if ( ! pChar->IsResourceMatch( ridtest, static_cast<uint>(GetAt(i).GetResQty()) ))
 			return( false );
 	}
 

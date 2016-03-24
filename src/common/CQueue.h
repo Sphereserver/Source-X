@@ -48,7 +48,7 @@ public:
 	* @brief Get the internal data pointer.
 	* @return Pointer to internal data.
 	*/
-	const BYTE * RemoveDataLock() const;
+	const byte * RemoveDataLock() const;
 	/**
 	* @brief Remove an amount of data from the queue.
 	*
@@ -62,13 +62,13 @@ public:
 	* @param pData pointer to the data to add.
 	* @param iLen amount of data to add.
 	*/
-	void AddNewData( const BYTE * pData, size_t iLen );
+	void AddNewData( const byte * pData, size_t iLen );
 	/**
 	* @brief Get the position to add an amount of data, resizing the buffer if needed.
 	* @param iLen length needed.
 	* @return pointer to the position where the data can be added.
 	*/
-	BYTE * AddNewDataLock( size_t iLen );
+	byte * AddNewDataLock( size_t iLen );
 	/**
 	* @brief Increment the data counter.
 	* @param iLen increment to add.

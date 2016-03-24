@@ -75,7 +75,7 @@ bool CItemVendable::r_LoadVal(CScript &s)
 		m_price = s.GetArgVal();
 		return true;
 	case IVC_QUALITY:	// QUALITY
-		SetQuality( static_cast<WORD>(s.GetArgVal()));
+		SetQuality( static_cast<word>(s.GetArgVal()));
 		return true;
 	}
 	return CItem::r_LoadVal(s);
@@ -137,31 +137,31 @@ void CItemVendable::Restock( bool fSellToPlayers )
 	}
 }
 
-void CItemVendable::SetPlayerVendorPrice( DWORD lPrice )
+void CItemVendable::SetPlayerVendorPrice( dword lPrice )
 {
 	ADDTOCALLSTACK("CItemVendable::SetPlayerVendorPrice");
 	// This can only be inside a vendor container.
 	m_price = maximum(lPrice, 0);
 }
 
-WORD CItemVendable::GetQuality() const
+word CItemVendable::GetQuality() const
 {
 	return m_quality;
 }
 
-void CItemVendable::SetQuality(WORD quality)
+void CItemVendable::SetQuality(word quality)
 {
 	m_quality = quality;
 }
 
-DWORD CItemVendable::GetBasePrice() const
+dword CItemVendable::GetBasePrice() const
 {
 	ADDTOCALLSTACK("CItemVendable::GetBasePrice");
 	// Get the price that the player set on his vendor
 	return m_price;
 }
 
-DWORD CItemVendable::GetVendorPrice( int iConvertFactor )
+dword CItemVendable::GetVendorPrice( int iConvertFactor )
 {
 	ADDTOCALLSTACK("CItemVendable::GetVendorPrice");
 	// Player is buying/selling from a vendor.
@@ -177,7 +177,7 @@ DWORD CItemVendable::GetVendorPrice( int iConvertFactor )
 	//    0 = base price
 	// +100 = increase price by 100% (vendor selling to player?)
 
-	DWORD lPrice = m_price;
+	dword lPrice = m_price;
 	if ( lPrice <= 0 )	// set on player vendor.
 	{
 		CItemBase *pItemDef;
@@ -210,7 +210,7 @@ bool CItemVendable::IsValidSaleItem( bool fBuyFromVendor ) const
 	{
 		if ( fBuyFromVendor )
 		{
-			DEBUG_ERR(( "Vendor uid=0%x selling unmovable item %s='%s'\n", static_cast<DWORD>(GetTopLevelObj()->GetUID()), GetResourceName(), GetName()));
+			DEBUG_ERR(( "Vendor uid=0%x selling unmovable item %s='%s'\n", static_cast<dword>(GetTopLevelObj()->GetUID()), GetResourceName(), GetName()));
 		}
 		return( false );
 	}
@@ -235,13 +235,13 @@ bool CItemVendable::IsValidNPCSaleItem() const
 
 	if ( m_price <= 0 && pItemDef->GetMakeValue(0) <= 0 )
 	{
-		DEBUG_ERR(( "Vendor uid=0%x selling unpriced item %s='%s'\n", static_cast<DWORD>(GetTopLevelObj()->GetUID()), GetResourceName(), GetName()));
+		DEBUG_ERR(( "Vendor uid=0%x selling unpriced item %s='%s'\n", static_cast<dword>(GetTopLevelObj()->GetUID()), GetResourceName(), GetName()));
 		return( false );
 	}
 
 	if ( ! IsValidSaleItem( true ))
 	{
-		DEBUG_ERR(( "Vendor uid=0%x selling bad item %s='%s'\n", static_cast<DWORD>(GetTopLevelObj()->GetUID()), GetResourceName(), GetName()));
+		DEBUG_ERR(( "Vendor uid=0%x selling bad item %s='%s'\n", static_cast<dword>(GetTopLevelObj()->GetUID()), GetResourceName(), GetName()));
 		return( false );
 	}
 

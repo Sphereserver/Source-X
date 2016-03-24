@@ -33,7 +33,7 @@ class ProfileData
 protected:
 	struct ProfileDataRec
 	{
-		LLONG m_Time;	// accumulated time in msec.
+		llong m_Time;	// accumulated time in msec.
 		int m_iCount;	// how many passes made into this.
 	};
 
@@ -45,11 +45,11 @@ protected:
 	int m_iActiveWindowSeconds;	// The sample window size in seconds. 0=off
 	int	m_iAverageCount;
 
-	LLONG m_TimeTotal;			// Average this over a total time period.
+	llong m_TimeTotal;			// Average this over a total time period.
 
 	// Store the last time start time.
 	PROFILE_TYPE  m_CurrentTask;	// What task are we currently processing ?
-	LLONG m_CurrentTime;			// QueryPerformanceCount()
+	llong m_CurrentTime;			// QueryPerformanceCount()
 
 public:
 	ProfileData();
@@ -64,7 +64,7 @@ public:
 
 	void SetActive(int iSampleSec);
 	void Start(PROFILE_TYPE id);
-	void Count(PROFILE_TYPE id, DWORD dwVal);
+	void Count(PROFILE_TYPE id, dword dwVal);
 	void EnableProfile(PROFILE_TYPE id);
 
 	PROFILE_TYPE GetCurrentTask() const;

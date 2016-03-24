@@ -50,14 +50,14 @@ private:
 	CGString m_sNewPassword; ///< The new password will be transfered when they use it.
 
 
-	WORD m_PrivFlags; ///< optional privileges for char (bit-mapped)
+	word m_PrivFlags; ///< optional privileges for char (bit-mapped)
 	
-	BYTE m_ResDisp; ///< current CAccount resdisp.
-	BYTE m_MaxChars; ///< Max chars allowed for this CAccount.
+	byte m_ResDisp; ///< current CAccount resdisp.
+	byte m_MaxChars; ///< Max chars allowed for this CAccount.
 	
 	typedef struct { long long m_First; long long m_Last; long long m_Delay; } TimeTriesStruct_t;
 	typedef std::pair<TimeTriesStruct_t, int> BlockLocalTimePair_t;
-	typedef std::map<DWORD,BlockLocalTimePair_t> BlockLocalTime_t;
+	typedef std::map<dword,BlockLocalTimePair_t> BlockLocalTime_t;
 	BlockLocalTime_t m_BlockIP; ///< Password tries.
 
 public:
@@ -197,7 +197,7 @@ public:
 	* @param what resdisp to set.
 	* @return true on success, false otherwise.
 	*/
-	bool SetResDisp(BYTE what)
+	bool SetResDisp(byte what)
 	{
 		if (what >= RDS_T2A && what < RDS_QTY)
 		{
@@ -210,13 +210,13 @@ public:
 	* @brief Gets the current resdisp on this CAccount.
 	* @return The current resdisp.
 	*/
-	BYTE GetResDisp() const { return m_ResDisp; }
+	byte GetResDisp() const { return m_ResDisp; }
 	/**
 	* @brief Updates the resdisp if the current is lesser.
 	* @param what the resdisp to update.
 	* @return true if success, false otherwise.
 	*/
-	bool SetGreaterResDisp(BYTE what)
+	bool SetGreaterResDisp(byte what)
 	{
 		if ( what > m_ResDisp )
 			return SetResDisp( what );	
@@ -232,7 +232,7 @@ public:
 	* @param what the resdisp to check.
 	* @return true if the current resdisp is equal to what, false otherwise.
 	*/
-	bool IsResDisp(BYTE what) const { return ( m_ResDisp == what ); }
+	bool IsResDisp(byte what) const { return ( m_ResDisp == what ); }
 
 	/************************************************************************
 	* Privileges related section.
@@ -259,17 +259,17 @@ public:
 	* @param wPrivFlags Privilege flags to test.
 	* @return true if all the flags are set, false otherwise. 
 	*/
-	bool IsPriv( WORD wPrivFlags ) const { return (m_PrivFlags & wPrivFlags) != 0; }
+	bool IsPriv( word wPrivFlags ) const { return (m_PrivFlags & wPrivFlags) != 0; }
 	/**
 	* @brief Set the privileges flags specified.
 	* @param wPrivFlags flags to set.
 	*/
-	void SetPrivFlags( WORD wPrivFlags ) { m_PrivFlags |= wPrivFlags; }
+	void SetPrivFlags( word wPrivFlags ) { m_PrivFlags |= wPrivFlags; }
 	/**
 	* @brief Unset the privileges flags specified.
 	* @param wPrivFlags flags to unset.
 	*/
-	void ClearPrivFlags( WORD wPrivFlags ) { m_PrivFlags &= ~wPrivFlags; }
+	void ClearPrivFlags( word wPrivFlags ) { m_PrivFlags &= ~wPrivFlags; }
 	/**
 	* @brief Operate with privilege flags.
 	* If pszArgs is empty, only intersection privileges with wPrivFlags are set.
@@ -278,7 +278,7 @@ public:
 	* @param wPrivFlags flags to intersect, set or unset.
 	* @param pszArgs the operation to do.
 	*/
-	void TogPrivFlags( WORD wPrivFlags, LPCTSTR pszArgs );
+	void TogPrivFlags( word wPrivFlags, LPCTSTR pszArgs );
 
 	/************************************************************************
 	* Log in / Log out related section.
@@ -313,7 +313,7 @@ public:
 	* @brief Get the max chars count for this CAccount.
 	* @return the max chars for this CAccount.
 	*/
-	BYTE GetMaxChars() const
+	byte GetMaxChars() const
 	{
 		return minimum(m_MaxChars > 0? m_MaxChars : g_Cfg.m_iMaxCharsPerAccount, MAX_CHARS_PER_ACCT);
 	}
@@ -322,7 +322,7 @@ public:
 	* The max is set only if the current number of chars is lesser than the new value.
 	* @param chars New value for max chars.
 	*/
-	void SetMaxChars(BYTE chars) { m_MaxChars = minimum(chars, MAX_CHARS_PER_ACCT); }
+	void SetMaxChars(byte chars) { m_MaxChars = minimum(chars, MAX_CHARS_PER_ACCT); }
 	/**
 	* @brief Check if a CChar is owned by this CAccount.
 	* @param pChar CChar to check.
@@ -403,7 +403,7 @@ private:
 	* @param dwMask discard any CAccount with this mask.
 	* @return Always true.
 	*/
-	bool Cmd_ListUnused( CTextConsole * pSrc, LPCTSTR pszDays, LPCTSTR pszVerb, LPCTSTR pszArgs, DWORD dwMask = 0);
+	bool Cmd_ListUnused( CTextConsole * pSrc, LPCTSTR pszDays, LPCTSTR pszVerb, LPCTSTR pszArgs, dword dwMask = 0);
 public:
 	/**
 	* @brief Save the accounts file.

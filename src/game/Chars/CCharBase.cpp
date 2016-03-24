@@ -279,7 +279,7 @@ bool CCharBase::r_LoadVal( CScript & s )
 			m_wBloodHue = static_cast<HUE_TYPE>(s.GetArgVal());
 			break;
 		case CBC_ARMOR:
-			m_defense = static_cast<WORD>(s.GetArgVal());
+			m_defense = static_cast<word>(s.GetArgVal());
 			break;
 		case CBC_COLOR:
 			m_wColor = static_cast<HUE_TYPE>(s.GetArgVal());
@@ -322,7 +322,7 @@ bool CCharBase::r_LoadVal( CScript & s )
 			m_iMoveRate = static_cast<short>(s.GetArgVal());
 			break;
 		case CBC_RESDISPDNID:
-			SetResDispDnId(static_cast<WORD>(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr())));
+			SetResDispDnId(static_cast<word>(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr())));
 			break;
 		case CBC_SOUND:
 			m_soundbase = static_cast<SOUND_TYPE>(s.GetArgVal());

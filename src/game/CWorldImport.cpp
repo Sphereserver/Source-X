@@ -10,9 +10,9 @@ struct CImportSer : public CGObListRec
 	// Temporary holding structure for new objects being impoted.
 public:
 	// Translate the import UID's into my UID's
-	const DWORD m_dwSer;		// My Imported serial number
+	const dword m_dwSer;		// My Imported serial number
 	CObjBase * m_pObj;	// new world object corresponding.
-	DWORD m_dwContSer;	// My containers' serial number
+	dword m_dwContSer;	// My containers' serial number
 	LAYER_TYPE m_layer;	// UOX does this diff than us. so store this here.
 public:
 	bool IsTopLevel() const
@@ -20,7 +20,7 @@ public:
 		return( m_dwContSer == UID_UNUSED );
 	}
 
-	CImportSer( DWORD dwSer ) :
+	CImportSer( dword dwSer ) :
 		m_dwSer( dwSer )
 	{
 		m_pObj = NULL;
@@ -42,7 +42,7 @@ struct CImportFile
 
 	CGObList m_ListSer;	// list of imported objects i'm working on.
 
-	const WORD m_wModeFlags;	// IMPFLAGS_TYPE
+	const word m_wModeFlags;	// IMPFLAGS_TYPE
 	const CPointMap m_ptCenter;
 	const int m_iDist;	// distance fom center.
 
@@ -50,7 +50,7 @@ struct CImportFile
 	TCHAR * m_pszArg2;	// name
 
 public:
-	CImportFile( WORD wModeFlags, CPointMap ptCenter, int iDist ) :
+	CImportFile( word wModeFlags, CPointMap ptCenter, int iDist ) :
 		m_wModeFlags(wModeFlags),
 		m_ptCenter(ptCenter),
 		m_iDist(iDist)
@@ -67,8 +67,8 @@ private:
 public:
 	void CheckLast();
 	void ImportFix();
-	bool ImportSCP( CScript & s, WORD wModeFlags );
-	bool ImportWSC( CScript & s, WORD wModeFlags );
+	bool ImportSCP( CScript & s, word wModeFlags );
+	bool ImportWSC( CScript & s, word wModeFlags );
 };
 
 void CImportFile::CheckLast()
@@ -229,7 +229,7 @@ void CImportFile::ImportFix()
 	m_ListSer.DeleteAll();	// done with the list now.
 }
 
-bool CImportFile::ImportSCP( CScript & s, WORD wModeFlags )
+bool CImportFile::ImportSCP( CScript & s, word wModeFlags )
 {
 	ADDTOCALLSTACK("CImportFile::ImportSCP");
 	// Import a SPHERE format SCP file.
@@ -298,7 +298,7 @@ bool CImportFile::ImportSCP( CScript & s, WORD wModeFlags )
 	return( true );
 }
 
-bool CImportFile::ImportWSC( CScript & s, WORD wModeFlags )
+bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 {
 	ADDTOCALLSTACK("CImportFile::ImportWSC");
 	// This file is a WSC or UOX world script file.
@@ -358,7 +358,7 @@ bool CImportFile::ImportWSC( CScript & s, WORD wModeFlags )
 			if ( m_pCurSer != NULL )
 				return( false );
 
-			DWORD dwSerial = ATOI( pArg );
+			dword dwSerial = ATOI( pArg );
 			if ( dwSerial == UID_UNUSED )
 			{
 				DEBUG_ERR(( "Import:Bad serial number\n" ));
@@ -512,14 +512,14 @@ bool CImportFile::ImportWSC( CScript & s, WORD wModeFlags )
 			if ( s.IsKey("X" ))
 			{
 				CPointMap pt = pChar->GetUnkPoint();
-				pt.m_x = static_cast<signed short>(ATOI(pArg));
+				pt.m_x = static_cast<short>(ATOI(pArg));
 				pChar->SetUnkPoint(pt);
 				continue;
 			}
 			else if ( s.IsKey("Y" ))
 			{
 				CPointMap pt = pChar->GetUnkPoint();
-				pt.m_y = static_cast<signed short>(ATOI(pArg));
+				pt.m_y = static_cast<short>(ATOI(pArg));
 				pChar->SetUnkPoint(pt);
 				continue;
 			}
@@ -616,7 +616,7 @@ bool CImportFile::ImportWSC( CScript & s, WORD wModeFlags )
 			}
 			else if ( s.IsKey("KILLS" ) && pChar->m_pPlayer )
 			{
-				pChar->m_pPlayer->m_wMurders = static_cast<WORD>(ATOI(pArg));
+				pChar->m_pPlayer->m_wMurders = static_cast<word>(ATOI(pArg));
 			}
 			else if ( s.IsKey("NPCAITYPE" ))
 			{
@@ -638,7 +638,7 @@ bool CImportFile::ImportWSC( CScript & s, WORD wModeFlags )
 	return( true );
 }
 
-bool CWorld::Import( LPCTSTR pszFilename, const CChar * pSrc, WORD wModeFlags, int iDist, TCHAR * pszArg1, TCHAR * pszArg2 )
+bool CWorld::Import( LPCTSTR pszFilename, const CChar * pSrc, word wModeFlags, int iDist, TCHAR * pszArg1, TCHAR * pszArg2 )
 {
 	ADDTOCALLSTACK("CWorld::Import");
 	// wModeFlags = IMPFLAGS_TYPE
@@ -726,7 +726,7 @@ bool CWorld::DumpAreas( CTextConsole * pSrc, LPCTSTR pszFilename )
 
 
 
-bool CWorld::Export( LPCTSTR pszFilename, const CChar * pSrc, WORD wModeFlags, int iDist, int dx, int dy )
+bool CWorld::Export( LPCTSTR pszFilename, const CChar * pSrc, word wModeFlags, int iDist, int dx, int dy )
 {
 	ADDTOCALLSTACK("CWorld::Export");
 	// wModeFlags = IMPFLAGS_TYPE

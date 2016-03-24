@@ -58,19 +58,19 @@ bool PacketCreate::onReceive(NetState* net, bool hasExtraSkill)
 	ADDTOCALLSTACK("PacketCreate::onReceive[1]");
 	TCHAR charname[MAX_NAME_SIZE];
 	SKILL_TYPE skill1 = SKILL_NONE, skill2 = SKILL_NONE, skill3 = SKILL_NONE, skill4 = SKILL_NONE;
-	BYTE skillval1 = 0, skillval2 = 0, skillval3 = 0, skillval4 = 0;
+	byte skillval1 = 0, skillval2 = 0, skillval3 = 0, skillval4 = 0;
 
 	skip(9); // 4=pattern1, 4=pattern2, 1=kuoc
 	readStringASCII(charname, MAX_NAME_SIZE);
 	skip(2); // 0x00
-	DWORD flags = readInt32();
+	dword flags = readInt32();
 	skip(8); // unk
 	PROFESSION_TYPE prof = static_cast<PROFESSION_TYPE>(readByte());
 	skip(15); // 0x00
-	BYTE sex = readByte();
-	BYTE strength = readByte();
-	BYTE dexterity = readByte();
-	BYTE intelligence = readByte();
+	byte sex = readByte();
+	byte strength = readByte();
+	byte dexterity = readByte();
+	byte intelligence = readByte();
 	skill1 = static_cast<SKILL_TYPE>(readByte());
 	skillval1 = readByte();
 	skill2 = static_cast<SKILL_TYPE>(readByte());
@@ -88,7 +88,7 @@ bool PacketCreate::onReceive(NetState* net, bool hasExtraSkill)
 	ITEMID_TYPE beardid = static_cast<ITEMID_TYPE>(readInt16());
 	HUE_TYPE beardhue = static_cast<HUE_TYPE>(readInt16());
 	skip(1); // shard index
-	BYTE startloc = readByte();
+	byte startloc = readByte();
 	skip(8); // 4=slot, 4=ip
 	HUE_TYPE shirthue = static_cast<HUE_TYPE>(readInt16());
 	HUE_TYPE pantshue = static_cast<HUE_TYPE>(readInt16());
@@ -136,7 +136,7 @@ bool PacketCreate::onReceive(NetState* net, bool hasExtraSkill)
 	}
 
 	// validate race against resdisp
-	BYTE resdisp = net->getClient()->GetAccount() != NULL? net->getClient()->GetAccount()->GetResDisp() : (BYTE)RDS_T2A;
+	byte resdisp = net->getClient()->GetAccount() != NULL? net->getClient()->GetAccount()->GetResDisp() : (byte)RDS_T2A;
 	if (resdisp < RDS_ML) // prior to ML, only human
 	{
 		if (rtRace >= RACETYPE_ELF)
@@ -182,7 +182,7 @@ bool PacketCreate::doCreate(NetState* net, LPCTSTR charname, bool bFemale, RACE_
 	}
 
 	// make sure they don't already have too many characters
-	BYTE iMaxChars = account->GetMaxChars();
+	byte iMaxChars = account->GetMaxChars();
 	size_t iQtyChars = account->m_Chars.GetCharCount();
 	if (iQtyChars >= iMaxChars)
 	{
@@ -244,9 +244,9 @@ bool PacketMovementReq::onReceive(NetState* net)
 	CClient *client = net->getClient();
 	ASSERT(client);
 
-	BYTE direction = readByte();
-	BYTE sequence = readByte();
-	//DWORD crypt = readInt32();	// client fastwalk crypt (not used anymore)
+	byte direction = readByte();
+	byte sequence = readByte();
+	//dword crypt = readInt32();	// client fastwalk crypt (not used anymore)
 
 	if ( net->m_sequence == 0 && sequence != 0 )
 		direction = DIR_QTY;	// setting invalid direction to intentionally reject the walk request
@@ -344,7 +344,7 @@ bool PacketDoubleClick::onReceive(NetState* net)
 {
 	ADDTOCALLSTACK("PacketDoubleClick::onReceive");
 
-	DWORD serial = readInt32();
+	dword serial = readInt32();
 
 	CGrayUID target(serial &~ UID_F_RESOURCE);
 	bool macro = (serial & UID_F_RESOURCE) == UID_F_RESOURCE;
@@ -415,11 +415,11 @@ bool PacketItemDropReq::onReceive(NetState* net)
 		return false;
 
 	CGrayUID serial = readInt32();
-	WORD x = readInt16();
-	WORD y = readInt16();
-	BYTE z = readByte();
+	word x = readInt16();
+	word y = readInt16();
+	byte z = readByte();
 
-	BYTE grid = 0;
+	byte grid = 0;
 	if ( net->isClientVersion(MINCLIVER_ITEMGRID) || net->isClientKR() || net->isClientEnhanced() )
 	{
 		grid = readByte();
@@ -480,7 +480,7 @@ bool PacketTextCommand::onReceive(NetState* net)
 	CClient* client = net->getClient();
 	ASSERT(client);
 	
-	WORD packetLength = readInt16();
+	word packetLength = readInt16();
 	if (packetLength < 5)
 		return false;
 
@@ -646,7 +646,7 @@ bool PacketCharStatusReq::onReceive(NetState* net)
 	ADDTOCALLSTACK("PacketCharStatusReq::onReceive");
 
 	skip(4); // 0xedededed
-	BYTE requestType = readByte();
+	byte requestType = readByte();
 	CGrayUID targetSerial(readInt32());
 
 	CClient* client = net->getClient();
@@ -731,9 +731,9 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 	if (buyer == NULL)
 		return false;
 
-	WORD packetLength = readInt16();
+	word packetLength = readInt16();
 	CGrayUID vendorSerial(readInt32());
-	BYTE flags = readByte();
+	byte flags = readByte();
 	if (flags == 0)
 		return true;
 
@@ -775,7 +775,7 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 	{
 		skip(1); // layer
 		CGrayUID serial(readInt32());
-		WORD amount = readInt16();
+		word amount = readInt16();
 
 		item = dynamic_cast<CItemVendable*>(serial.ItemFind());
 		if (item == NULL || item->IsValidSaleItem(true) == false)
@@ -826,7 +826,7 @@ bool PacketStaticUpdate::onReceive(NetState* net)
 {
 	ADDTOCALLSTACK("PacketStaticUpdate::onReceive");
 	/*skip(12);
-    BYTE UlCmd = readByte();*/
+    byte UlCmd = readByte();*/
 	TemporaryString dump;
 	this->dump(dump);
 	g_Log.EventDebug("%x:Parsing %s", net->id(), static_cast<LPCTSTR>(dump));
@@ -851,9 +851,9 @@ bool PacketMapEdit::onReceive(NetState* net)
 
 	CGrayUID mapSerial(readInt32());
 	MAPCMD_TYPE action = static_cast<MAPCMD_TYPE>(readByte());
-	BYTE pin = readByte();
-	WORD x = readInt16();
-	WORD y = readInt16();
+	byte pin = readByte();
+	word x = readInt16();
+	word y = readInt16();
 
 	CClient* client = net->getClient();
 	ASSERT(client);
@@ -951,7 +951,7 @@ bool PacketCharPlay::onReceive(NetState* net)
 	skip(4); // 0xedededed
 	skip(MAX_NAME_SIZE); // char name
 	skip(MAX_NAME_SIZE); // char pass
-	unsigned int slot = readInt32();
+	uint slot = readInt32();
 	skip(4); // ip
 
 	CClient* client = net->getClient();
@@ -959,7 +959,7 @@ bool PacketCharPlay::onReceive(NetState* net)
 		return false;
 	//ASSERT(client);
 
-	BYTE err = client->Setup_Play(slot);
+	byte err = client->Setup_Play(slot);
 
 	client->addLoginErr(err);
 	return true;
@@ -989,7 +989,7 @@ bool PacketBookPageEdit::onReceive(NetState* net)
 
 	skip(2); // packet length
 	CGrayUID bookSerial(readInt32());
-	WORD pageCount = readInt16();
+	word pageCount = readInt16();
 
 	CItem* book = bookSerial.ItemFind();
 	if (character->CanSee(book) == false)
@@ -998,8 +998,8 @@ bool PacketBookPageEdit::onReceive(NetState* net)
 		return true;
 	}
 
-	WORD page = readInt16();
-	WORD lineCount = readInt16();
+	word page = readInt16();
+	word lineCount = readInt16();
 	if (lineCount == 0xFFFF || getLength() <= 0x0D)
 	{
 		client->addBookPage(book, page, 1); // just a request for a page
@@ -1075,13 +1075,13 @@ bool PacketTarget::onReceive(NetState* net)
 		return false;
 
 	skip(1); // target type
-	DWORD context = readInt32();
-	BYTE flags = readByte();
+	dword context = readInt32();
+	byte flags = readByte();
 	CGrayUID targetSerial(readInt32());
-	WORD x = readInt16();
-	WORD y = readInt16();
+	word x = readInt16();
+	word y = readInt16();
 	skip(1);
-	BYTE z = readByte();
+	byte z = readByte();
 	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(readInt16());
 
 	client->Event_Target(context, targetSerial, CPointMap(x, y, z, character->GetTopMap()), flags, id);
@@ -1331,7 +1331,7 @@ bool PacketPingReq::onReceive(NetState* net)
 {
 	ADDTOCALLSTACK("PacketPingReq::onReceive");
 
-	BYTE value = readByte();
+	byte value = readByte();
 	new PacketPingAck(net->getClient(), value);
 	return true;
 }
@@ -1383,8 +1383,8 @@ bool PacketMenuChoice::onReceive(NetState* net)
 		return false;
 
 	CGrayUID serial(readInt32());
-	WORD context = readInt16();
-	WORD select = readInt16();
+	word context = readInt16();
+	word select = readInt16();
 
 	if (context != client->GetTargMode() || serial != client->m_tmMenu.m_UID)
 	{
@@ -1460,7 +1460,7 @@ bool PacketServersReq::onReceive(NetState* net)
 	CClient* client = net->getClient();
 	ASSERT(client);
 
-	BYTE lErr = client->Login_ServerList(acctname, acctpass);
+	byte lErr = client->Login_ServerList(acctname, acctpass);
 	client->addLoginErr(lErr);
 	return true;
 }
@@ -1481,13 +1481,13 @@ bool PacketCharDelete::onReceive(NetState* net)
 	ADDTOCALLSTACK("PacketCharDelete::onReceive");
 
 	skip(MAX_NAME_SIZE); // charpass
-	DWORD slot = readInt32();
+	dword slot = readInt32();
 	skip(4); // client ip
 
 	CClient* client = net->getClient();
 	ASSERT(client);
 
-	BYTE err = client->Setup_Delete(slot);
+	byte err = client->Setup_Delete(slot);
 	client->addDeleteErr(err,slot);
 	return true;
 }
@@ -1514,26 +1514,26 @@ bool PacketCreateNew::onReceive(NetState* net)
 	skip(30);
 	PROFESSION_TYPE profession = static_cast<PROFESSION_TYPE>(readByte());
 	skip(1);
-	BYTE sex = readByte();
+	byte sex = readByte();
 	RACE_TYPE race = static_cast<RACE_TYPE>(readByte());
-	BYTE strength = readByte();
-	BYTE dexterity = readByte();
-	BYTE intelligence = readByte();
+	byte strength = readByte();
+	byte dexterity = readByte();
+	byte intelligence = readByte();
 	HUE_TYPE hue = static_cast<HUE_TYPE>(readInt16());
 	skip(8);
 	SKILL_TYPE skill1 = static_cast<SKILL_TYPE>(readByte());
-	BYTE skillval1 = readByte();
+	byte skillval1 = readByte();
 	SKILL_TYPE skill2 = static_cast<SKILL_TYPE>(readByte());
-	BYTE skillval2 = readByte();
+	byte skillval2 = readByte();
 	SKILL_TYPE skill4 = static_cast<SKILL_TYPE>(readByte());
-	BYTE skillval4 = readByte();
+	byte skillval4 = readByte();
 	SKILL_TYPE skill3 = static_cast<SKILL_TYPE>(readByte());
-	BYTE skillval3 = readByte();
+	byte skillval3 = readByte();
 	skip(26);
 	HUE_TYPE hairhue = static_cast<HUE_TYPE>(readInt16());
 	ITEMID_TYPE hairid = static_cast<ITEMID_TYPE>(readInt16());
 	skip(14); // unk
-	BYTE portrait = readByte();
+	byte portrait = readByte();
 	skip(1);
 	HUE_TYPE beardhue = static_cast<HUE_TYPE>(readInt16());
 	ITEMID_TYPE beardid = static_cast<ITEMID_TYPE>(readInt16());
@@ -1752,7 +1752,7 @@ bool PacketAllNamesReq::onReceive(NetState* net)
 
 	const CObjBase* object;
 
-	for (WORD length = readInt16(); length > sizeof(DWORD); length -= sizeof(DWORD))
+	for (word length = readInt16(); length > sizeof(dword); length -= sizeof(dword))
 	{
 		object = CGrayUID(readInt32()).ObjFind();
 		if (object == NULL)
@@ -1783,9 +1783,9 @@ bool PacketPromptResponse::onReceive(NetState* net)
 	ADDTOCALLSTACK("PacketPromptResponse::onReceive");
 
 	size_t packetLength = readInt16();
-	DWORD context1 = readInt32();
-	DWORD context2 = readInt32();
-	DWORD type = readInt32();
+	dword context1 = readInt32();
+	dword context2 = readInt32();
+	dword type = readInt32();
 
 	if (packetLength < getPosition())
 		return false;
@@ -1920,7 +1920,7 @@ bool PacketServerSelect::onReceive(NetState* net)
 {
 	ADDTOCALLSTACK("PacketServerSelect::onReceive");
 
-	unsigned int server = readInt16();
+	uint server = readInt16();
 
 	net->getClient()->Login_Relay(server);
 	return true;
@@ -1963,7 +1963,7 @@ bool PacketTipReq::onReceive(NetState* net)
 {
 	ADDTOCALLSTACK("PacketTipReq::onReceive");
 
-	WORD index = readInt16();	// current tip shown to the client
+	word index = readInt16();	// current tip shown to the client
 	bool forward = readBool();	// 0=previous, 1=next
 
 	if (forward)
@@ -1999,8 +1999,8 @@ bool PacketGumpValueInputResponse::onReceive(NetState* net)
 	skip(2); // length
 	CGrayUID uid(readInt32());
 	readInt16(); // context
-	BYTE action = readByte();
-	WORD textLength = readInt16();
+	byte action = readByte();
+	word textLength = readInt16();
 	TCHAR text[MAX_NAME_SIZE];
 	readStringASCII(text, minimum(MAX_NAME_SIZE, textLength));
 
@@ -2048,7 +2048,7 @@ bool PacketGumpValueInputResponse::onReceive(NetState* net)
 			object->Update();
 		}
 
-		g_Log.Event(LOGM_GM_CMDS, "%x:'%s' tweak uid=0%x (%s) to '%s %s'=%d\n", net->id(), client->GetName(), static_cast<DWORD>(object->GetUID()), object->GetName(), static_cast<LPCTSTR>(client->m_Targ_Text), static_cast<LPCTSTR>(text), ret);
+		g_Log.Event(LOGM_GM_CMDS, "%x:'%s' tweak uid=0%x (%s) to '%s %s'=%d\n", net->id(), client->GetName(), static_cast<dword>(object->GetUID()), object->GetName(), static_cast<LPCTSTR>(client->m_Targ_Text), static_cast<LPCTSTR>(text), ret);
 	}
 
 	return true;
@@ -2106,7 +2106,7 @@ bool PacketSpeakReqUNICODE::onReceive(NetState* net)
 		if (toskip > (packetLength * 2))
 			return true;
 
-		skip(static_cast<long>(toskip));
+		skip(static_cast<int>(toskip));
 		TCHAR text[MAX_TALK_BUFFER];
 		readStringNullASCII(text, COUNTOF(text));
 		client->Event_Talk(text, hue, mode, true);
@@ -2145,9 +2145,9 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 
 	skip(2); // length
 	CGrayUID serial(readInt32());
-	DWORD context = readInt32();
-	DWORD button = readInt32();
-	DWORD checkCount = readInt32();
+	dword context = readInt32();
+	dword button = readInt32();
+	dword checkCount = readInt32();
 
 	// relying on the context given by the gump might be a security problem, much like
 	// relying on the uid returned.
@@ -2180,14 +2180,14 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 	{
 		const CResourceDef* resource = g_Cfg.ResourceGetDef(RESOURCE_ID(RES_DIALOG, context));
 		if (resource == NULL)
-			g_Log.Event(LOGL_EVENT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, "undef", (DWORD)serial, button);
+			g_Log.Event(LOGL_EVENT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, "undef", (dword)serial, button);
 		else
 		{
 			const CDialogDef* dialog = dynamic_cast<const CDialogDef*>(resource);
 			if (dialog == NULL)
-				g_Log.Event(LOGL_EVENT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, "undef", (DWORD)serial, button);
+				g_Log.Event(LOGL_EVENT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, "undef", (dword)serial, button);
 			else
-				g_Log.Event(LOGL_EVENT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, (LPCTSTR)dialog->GetName(), (DWORD)serial, button);
+				g_Log.Event(LOGL_EVENT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, (LPCTSTR)dialog->GetName(), (dword)serial, button);
 		}
 	}
 #endif
@@ -2210,12 +2210,12 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 		resp.m_CheckArray.Add(readInt32());
 
 
-	DWORD textCount = readInt32();
+	dword textCount = readInt32();
 	TCHAR* text = Str_GetTemp();
 	for (size_t i = 0; i < textCount; i++)
 	{
-		WORD id = readInt16();
-		WORD length = readInt16();
+		word id = readInt16();
+		word length = readInt16();
 		readStringNUNICODE(text, THREAD_STRING_LENGTH, length, false);
 
 		TCHAR* fix;
@@ -2347,10 +2347,10 @@ bool PacketProfileReq::onReceive(NetState* net)
 	CClient* client = net->getClient();
 	ASSERT(client);
 
-	WORD packetLength = readInt16();
+	word packetLength = readInt16();
 	bool write = readBool();
 	CGrayUID serial(readInt32());
-	WORD textLength(0);
+	word textLength(0);
 	TCHAR* text(NULL);
 
 	if (write == true && packetLength > 12)
@@ -2435,7 +2435,7 @@ bool PacketClientVersion::onReceive(NetState* net)
 		CClient* client = net->getClient();
 		ASSERT(client);
 
-		DWORD version = CCrypt::GetVerFromString(versionStr);
+		dword version = CCrypt::GetVerFromString(versionStr);
 		net->m_reportedVersion = version;
 		net->detectAsyncMode();
 
@@ -2476,7 +2476,7 @@ bool PacketExtendedCommand::onReceive(NetState* net)
 	if (client->GetChar() == NULL)
 		return false;
 
-	WORD packetLength = readInt16();
+	word packetLength = readInt16();
 	EXTDATA_TYPE type = static_cast<EXTDATA_TYPE>(readInt16());
 	seek();
 
@@ -2491,7 +2491,7 @@ bool PacketExtendedCommand::onReceive(NetState* net)
 	handler->seek();
 	for (int i = 0; i < packetLength; i++)
 	{
-		BYTE next = readByte();
+		byte next = readByte();
 		handler->writeByte(next);
 	}
 
@@ -2519,8 +2519,8 @@ bool PacketScreenSize::onReceive(NetState* net)
 	CClient* client = net->getClient();
 	ASSERT(client);
 
-	DWORD x = readInt32();
-	DWORD y = readInt32();
+	dword x = readInt32();
+	dword y = readInt32();
 	
 	DEBUG_MSG(("0x%x - 0x%x (%d-%d)\n", x, y, x, y));
 
@@ -2880,7 +2880,7 @@ bool PacketPopupReq::onReceive(NetState* net)
 
 	if (IsAosFlagEnabled( FEATURE_AOS_POPUP ) && client->GetResDisp() >= RDS_AOS)
 	{
-		DWORD serial(readInt32());
+		dword serial(readInt32());
 		client->Event_AOSPopupMenuRequest(serial);
 	}
 
@@ -2908,8 +2908,8 @@ bool PacketPopupSelect::onReceive(NetState* net)
 
 	if (IsAosFlagEnabled( FEATURE_AOS_POPUP ) && client->GetResDisp() >= RDS_AOS)
 	{
-		DWORD serial = readInt32();
-		WORD tag = readInt16();
+		dword serial = readInt32();
+		word tag = readInt16();
 
 		client->Event_AOSPopupMenuSelect(serial, tag);
 	}
@@ -2939,7 +2939,7 @@ bool PacketChangeStatLock::onReceive(NetState* net)
 	if (character == NULL || character->m_pPlayer == NULL)
 		return false;
 
-	BYTE code = readByte();
+	byte code = readByte();
 	SKILLLOCK_TYPE state = static_cast<SKILLLOCK_TYPE>(readByte());
 
 	if (code >= STAT_BASE_QTY)
@@ -3168,8 +3168,8 @@ bool PacketGargoyleFly::onReceive(NetState* net)
 		return false;
 
 	// The client always send these 2 values to server, but they're not really used
-	//WORD one = readInt16();
-	//DWORD zero = readInt32();
+	//word one = readInt16();
+	//dword zero = readInt32();
 	
 	if ( IsTrigUsed(TRIGGER_TOGGLEFLYING) )
 	{
@@ -3197,7 +3197,7 @@ bool PacketGargoyleFly::onReceive(NetState* net)
 
 	// Sending this packet here instead of calling UpdateAnimate because of conversions, NANIM_TAKEOFF = 9 and the function
 	// is reading 9 from old ANIM_TYPE to know when the character is attacking and modifying its animation accordingly
-	PacketActionBasic *cmd = new PacketActionBasic(character, character->IsStatFlag(STATF_Hovering) ? NANIM_TAKEOFF : NANIM_LANDING, static_cast<ANIM_TYPE_NEW>(0), static_cast<BYTE>(0));
+	PacketActionBasic *cmd = new PacketActionBasic(character, character->IsStatFlag(STATF_Hovering) ? NANIM_TAKEOFF : NANIM_LANDING, static_cast<ANIM_TYPE_NEW>(0), static_cast<byte>(0));
 	ClientIterator it;
 	for ( CClient *pClient = it.next(); pClient != NULL; pClient = it.next() )
 	{
@@ -3238,13 +3238,13 @@ bool PacketWheelBoatMove::onReceive(NetState* net)
 		return false;
 
 	skip(4);
-	//DWORD serial = readInt32(); //player serial
+	//dword serial = readInt32(); //player serial
 	//CGrayUID from(serial &~ UID_F_RESOURCE); //do we need this? NetState provides the player character
 
 	DIR_TYPE facing = static_cast<DIR_TYPE>(readByte()); //new boat facing, yes client send it
 	DIR_TYPE moving = static_cast<DIR_TYPE>(readByte()); //the boat movement
 	//skip(1);
-	BYTE speed = readByte(); //(0 = Stop Movement, 1 = One Tile Movement, 2 = Normal Movement) ***These speeds are NOT the same as 0xF6 packet
+	byte speed = readByte(); //(0 = Stop Movement, 1 = One Tile Movement, 2 = Normal Movement) ***These speeds are NOT the same as 0xF6 packet
 
 	CRegionWorld *area = character->m_pArea;
 	if (area && area->IsFlag(REGION_FLAG_SHIP))
@@ -3262,7 +3262,7 @@ bool PacketWheelBoatMove::onReceive(NetState* net)
 			if ((facing == DIR_N || facing == DIR_E || facing == DIR_S || facing == DIR_W) && pShipItem->m_itShip.m_DirFace != facing) //boat cannot face intermediate directions
 				pShipItem->Ship_Face(moving);
 
-			if (pShipItem->Ship_SetMoveDir(facing, speed, true))//pShipItem->m_itShip.m_DirMove = static_cast<BYTE>(facing);
+			if (pShipItem->Ship_SetMoveDir(facing, speed, true))//pShipItem->m_itShip.m_DirMove = static_cast<byte>(facing);
 				pShipItem->Ship_Move(moving, speed);
 		}
 		else
@@ -3289,9 +3289,9 @@ bool PacketPromptResponseUnicode::onReceive(NetState* net)
 	ADDTOCALLSTACK("PacketPromptResponseUnicode::onReceive");
 
 	size_t length = readInt16();
-	DWORD context1 = readInt32();
-	DWORD context2 = readInt32();
-	DWORD type = readInt32();
+	dword context1 = readInt32();
+	dword context2 = readInt32();
+	dword type = readInt32();
 	TCHAR language[4];
 	readStringASCII(language, COUNTOF(language));
 	
@@ -3326,7 +3326,7 @@ bool PacketViewRange::onReceive(NetState* net)
 	if ( !character )
 		return false;
 
-	BYTE iVal = readByte();
+	byte iVal = readByte();
 	character->SetSight(iVal);
 	return true;
 }
@@ -3414,7 +3414,7 @@ bool PacketAOSTooltipReq::onReceive(NetState* net)
 		return true;
 
 	const CObjBase* object;
-	for (WORD length = readInt16(); length > sizeof(DWORD); length -= sizeof(DWORD))
+	for (word length = readInt16(); length > sizeof(dword); length -= sizeof(dword))
 	{
 		object = CGrayUID(readInt32()).ObjFind();
 		if (object == NULL)
@@ -3451,7 +3451,7 @@ bool PacketEncodedCommand::onReceive(NetState* net)
 	if (character == NULL)
 		return false;
 
-	WORD packetLength = readInt16();
+	word packetLength = readInt16();
 	CGrayUID serial(readInt32());
 	if (character->GetUID() != serial)
 		return false;
@@ -3471,7 +3471,7 @@ bool PacketEncodedCommand::onReceive(NetState* net)
 	handler->seek();
 	for (int i = 0; i < packetLength; i++)
 	{
-		BYTE next = readByte();
+		byte next = readByte();
 		handler->writeByte(next);
 	}
 
@@ -3587,11 +3587,11 @@ bool PacketHouseDesignDestroyItem::onReceive(NetState* net)
 	skip(1); // 0x00
 	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(readInt32());
 	skip(1); // 0x00
-	WORD x = static_cast<WORD>(readInt32());
+	word x = static_cast<word>(readInt32());
 	skip(1); // 0x00
-	WORD y = static_cast<WORD>(readInt32());
+	word y = static_cast<word>(readInt32());
 	skip(1); // 0x00
-	WORD z = static_cast<WORD>(readInt32());
+	word z = static_cast<word>(readInt32());
 
 	house->RemoveItem(client, id, x, y, static_cast<signed char>(z));
 	return true;
@@ -3623,9 +3623,9 @@ bool PacketHouseDesignPlaceItem::onReceive(NetState* net)
 	skip(1); // 0x00
 	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(readInt32());
 	skip(1); // 0x00
-	WORD x = static_cast<WORD>(readInt32());
+	word x = static_cast<word>(readInt32());
 	skip(1); // 0x00
-	WORD y = static_cast<WORD>(readInt32());
+	word y = static_cast<word>(readInt32());
 
 	house->AddItem(client, id, x, y);
 	return true;
@@ -3684,9 +3684,9 @@ bool PacketHouseDesignPlaceStair::onReceive(NetState* net)
 	skip(1); // 0x00
 	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(readInt32() + ITEMID_MULTI);
 	skip(1); // 0x00
-	WORD x = static_cast<WORD>(readInt32());
+	word x = static_cast<word>(readInt32());
 	skip(1); // 0x00
-	WORD y = static_cast<WORD>(readInt32());
+	word y = static_cast<word>(readInt32());
 
 	house->AddStairs(client, id, x, y);
 	return true;
@@ -3770,9 +3770,9 @@ bool PacketHouseDesignSwitch::onReceive(NetState* net)
 		return true;
 
 	skip(1); // 0x00
-	DWORD level = readInt32();
+	dword level = readInt32();
 
-	house->SwitchToLevel(client, static_cast<unsigned char>(level));
+	house->SwitchToLevel(client, static_cast<uchar>(level));
 	return true;
 }
 
@@ -3802,11 +3802,11 @@ bool PacketHouseDesignPlaceRoof::onReceive(NetState* net)
 	skip(1); // 0x00
 	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(readInt32());
 	skip(1); // 0x00
-	WORD x = static_cast<WORD>(readInt32());
+	word x = static_cast<word>(readInt32());
 	skip(1); // 0x00
-	WORD y = static_cast<WORD>(readInt32());
+	word y = static_cast<word>(readInt32());
 	skip(1); // 0x00
-	WORD z = static_cast<WORD>(readInt32());
+	word z = static_cast<word>(readInt32());
 
 	house->AddRoof(client, id, x, y, static_cast<signed char>(z));
 	return true;
@@ -3838,11 +3838,11 @@ bool PacketHouseDesignDestroyRoof::onReceive(NetState* net)
 	skip(1); // 0x00
 	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(readInt32());
 	skip(1); // 0x00
-	WORD x = static_cast<WORD>(readInt32());
+	word x = static_cast<word>(readInt32());
 	skip(1); // 0x00
-	WORD y = static_cast<WORD>(readInt32());
+	word y = static_cast<word>(readInt32());
 	skip(1); // 0x00
-	WORD z = static_cast<WORD>(readInt32());
+	word z = static_cast<word>(readInt32());
 
 	house->RemoveRoof(client, id, x, y, static_cast<signed char>(z));
 	return true;
@@ -3871,7 +3871,7 @@ bool PacketSpecialMove::onReceive(NetState* net)
 		return false;
 
 	skip(1);
-	DWORD ability = readInt32();
+	dword ability = readInt32();
 
 	if ( IsTrigUsed(TRIGGER_USERSPECIALMOVE) )
 	{
@@ -4045,7 +4045,7 @@ bool PacketBugReport::onReceive(NetState* net)
 {
 	ADDTOCALLSTACK("PacketBugReport::onReceive");
 
-	WORD packetLength = readInt16(); // packet length
+	word packetLength = readInt16(); // packet length
 	if (packetLength < 10)
 		return false;
 
@@ -4077,7 +4077,7 @@ bool PacketClientType::onReceive(NetState* net)
 {
 	ADDTOCALLSTACK("PacketClientType::onReceive");
 
-	WORD packetLength = readInt16(); // packet length
+	word packetLength = readInt16(); // packet length
 	if (packetLength < 9)
 		return false;
 
@@ -4137,9 +4137,9 @@ bool PacketUseHotbar::onReceive(NetState* net)
 
 	skip(2); // 1
 	skip(2); // 6
-	BYTE type = readByte();
+	byte type = readByte();
 	skip(1); // zero
-	DWORD parameter = readInt32();
+	dword parameter = readInt32();
 
 	client->Event_UseToolbar(type, parameter);
 	return true;
@@ -4168,12 +4168,12 @@ bool PacketEquipItemMacro::onReceive(NetState* net)
 		return false;
 
 	skip(2); // packet length
-	BYTE itemCount = readByte();
+	byte itemCount = readByte();
 	if ( itemCount > 3 )	// prevent packet exploit sending fake values just to create heavy loops and overload server CPU
 		itemCount = 3;
 
 	CItem* item;
-	for (BYTE i = 0; i < itemCount; i++)
+	for (byte i = 0; i < itemCount; i++)
 	{
 		item = CGrayUID(readInt32()).ItemFind();
 		if (item == NULL)
@@ -4214,13 +4214,13 @@ bool PacketUnEquipItemMacro::onReceive(NetState* net)
 		return false;
 
 	skip(2); // packet length
-	BYTE itemCount = readByte();
+	byte itemCount = readByte();
 	if ( itemCount > 3 )	// prevent packet exploit sending fake values just to create heavy loops and overload server CPU
 		itemCount = 3;
 
 	LAYER_TYPE layer;
 	CItem* item;
-	for (BYTE i = 0; i < itemCount; i++)
+	for (byte i = 0; i < itemCount; i++)
 	{
 		layer = static_cast<LAYER_TYPE>(readInt16());
 
@@ -4274,21 +4274,21 @@ bool PacketMovementReqNew::onReceive(NetState* net)
 	ASSERT(client);
 
 	skip(2);
-	BYTE steps = readByte();
+	byte steps = readByte();
 	while ( steps )
 	{
 		skip(8);	//INT64 iTime1 = readInt64();
 		skip(8);	//INT64 iTime2 = readInt64();
-		BYTE sequence = readByte();
-		BYTE direction = readByte();
-		DWORD mode = readInt32();	// 1 = walk, 2 = run
+		byte sequence = readByte();
+		byte direction = readByte();
+		dword mode = readInt32();	// 1 = walk, 2 = run
 		if ( mode == 2 )
 			direction |= 0x80;
 
 		// The client send these values, but they're not really needed
-		//DWORD x = readInt32();
-		//DWORD y = readInt32();
-		//DWORD z = readInt32();
+		//dword x = readInt32();
+		//dword y = readInt32();
+		//dword z = readInt32();
 		skip(12);
 
 		if ( !client->Event_Walk(direction, sequence) )
@@ -4342,25 +4342,25 @@ bool PacketCrashReport::onReceive(NetState* net)
 	ADDTOCALLSTACK("PacketCrashReport::onReceive");
 
 	skip(2); // packet length
-	BYTE versionMaj = readByte();
-	BYTE versionMin = readByte();
-	BYTE versionRev = readByte();
-	BYTE versionPat = readByte();
-	WORD x = readInt16();
-	WORD y = readInt16();
-	BYTE z = readByte();
-	BYTE map = readByte();
+	byte versionMaj = readByte();
+	byte versionMin = readByte();
+	byte versionRev = readByte();
+	byte versionPat = readByte();
+	word x = readInt16();
+	word y = readInt16();
+	byte z = readByte();
+	byte map = readByte();
 	skip(32); // account name
 	skip(32); // character name
 	skip(15); // ip address
 	skip(4); // unknown
-	DWORD errorCode = readInt32();
+	dword errorCode = readInt32();
 	TCHAR executable[100];
 	readStringASCII(executable, COUNTOF(executable));
 	TCHAR description[100];
 	readStringASCII(description, COUNTOF(description));
 	skip(1); // zero
-	DWORD errorOffset = readInt32();
+	dword errorOffset = readInt32();
 
 	g_Log.Event(LOGM_CLIENTS_LOG|LOGL_WARN, "%x:Client crashed at %d,%d,%d,%d: 0x%08lX %s @ 0x%08lX (%s, %d.%d.%d.%d)\n", net->id(),
 					x, y, z, map,

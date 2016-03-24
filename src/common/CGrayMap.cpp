@@ -55,7 +55,7 @@ INT64 CGrayCachedMulItem::GetCacheAge() const
 	return( CServTime::GetCurrentTime() - m_timeRef );
 }
 
-CGrayMapBlockState::CGrayMapBlockState( DWORD dwBlockFlags, signed char z, int iHeight, height_t zHeight ) :
+CGrayMapBlockState::CGrayMapBlockState( dword dwBlockFlags, signed char z, int iHeight, height_t zHeight ) :
 	m_dwBlockFlags(dwBlockFlags),	m_z(z), m_iHeight(iHeight), m_zClimb(0), m_zHeight(zHeight)
 {
 	// m_z = PLAYER_HEIGHT
@@ -74,7 +74,7 @@ CGrayMapBlockState::CGrayMapBlockState( DWORD dwBlockFlags, signed char z, int i
 	m_zClimbHeight = 0;
 }
 
-CGrayMapBlockState::CGrayMapBlockState( DWORD dwBlockFlags, signed char z, int iHeight, signed char zClimb, height_t zHeight ) :
+CGrayMapBlockState::CGrayMapBlockState( dword dwBlockFlags, signed char z, int iHeight, signed char zClimb, height_t zHeight ) :
 	m_dwBlockFlags(dwBlockFlags),	m_z(z), m_iHeight(iHeight), m_zClimb(zClimb), m_zHeight(zHeight)
 {
 	m_Top.m_dwBlockFlags = 0;
@@ -92,7 +92,7 @@ CGrayMapBlockState::CGrayMapBlockState( DWORD dwBlockFlags, signed char z, int i
 	m_zClimbHeight = 0;
 }
 
-LPCTSTR CGrayMapBlockState::GetTileName( DWORD dwID )	// static
+LPCTSTR CGrayMapBlockState::GetTileName( dword dwID )	// static
 {
 	ADDTOCALLSTACK("CGrayMapBlockState::GetTileName");
 	if ( dwID == 0 )
@@ -102,7 +102,7 @@ LPCTSTR CGrayMapBlockState::GetTileName( DWORD dwID )	// static
 	TCHAR * pStr = Str_GetTemp();
 	if ( dwID < TERRAIN_QTY )
 	{
-		CGrayTerrainInfo land( static_cast<WORD>(dwID) );
+		CGrayTerrainInfo land( static_cast<word>(dwID) );
 		strcpy( pStr, land.m_name );
 	}
 	else
@@ -114,7 +114,7 @@ LPCTSTR CGrayMapBlockState::GetTileName( DWORD dwID )	// static
 	return( pStr );
 }
 
-bool CGrayMapBlockState::CheckTile( DWORD wItemBlockFlags, signed char zBottom, height_t zHeight, DWORD dwID )
+bool CGrayMapBlockState::CheckTile( dword wItemBlockFlags, signed char zBottom, height_t zHeight, dword dwID )
 {
 	ADDTOCALLSTACK("CGrayMapBlockState::CheckTile");
 	// RETURN:
@@ -201,7 +201,7 @@ bool CGrayMapBlockState::IsUsableZ( signed char zBottom, height_t zHeightEstimat
 	return( true );	
 }
 
-bool CGrayMapBlockState::CheckTile_Item( DWORD wItemBlockFlags, signed char zBottom, height_t zHeight, DWORD dwID )
+bool CGrayMapBlockState::CheckTile_Item( dword wItemBlockFlags, signed char zBottom, height_t zHeight, dword dwID )
 {
 	ADDTOCALLSTACK("CGrayMapBlockState::CheckTile_Item");
 	// RETURN:
@@ -287,7 +287,7 @@ bool CGrayMapBlockState::CheckTile_Item( DWORD wItemBlockFlags, signed char zBot
 
 }
 
-inline void CGrayMapBlockState::SetTop( DWORD &wItemBlockFlags, signed char &z, DWORD &dwID )
+inline void CGrayMapBlockState::SetTop( dword &wItemBlockFlags, signed char &z, dword &dwID )
 {
 	ADDTOCALLSTACK("CGrayMapBlockState::SetTop");
 	if ( z < m_Top.m_z )
@@ -298,7 +298,7 @@ inline void CGrayMapBlockState::SetTop( DWORD &wItemBlockFlags, signed char &z, 
 	}
 }
 
-bool CGrayMapBlockState::CheckTile_Terrain( DWORD wItemBlockFlags, signed char z, DWORD dwID )
+bool CGrayMapBlockState::CheckTile_Terrain( dword wItemBlockFlags, signed char z, dword dwID )
 {
 	ADDTOCALLSTACK("CGrayMapBlockState::CheckTile_Terrain");
 	// RETURN:
@@ -367,7 +367,7 @@ bool CGrayMapBlockState::CheckTile_Terrain( DWORD wItemBlockFlags, signed char z
 //////////////////////////////////////////////////////////////////
 // -CMapDiffblock
 
-CMapDiffBlock::CMapDiffBlock(DWORD dwBlockId, int map)
+CMapDiffBlock::CMapDiffBlock(dword dwBlockId, int map)
 {
 	m_BlockId = dwBlockId;
 	m_map = map;
@@ -389,7 +389,7 @@ CMapDiffBlock::~CMapDiffBlock()
 //////////////////////////////////////////////////////////////////
 // -CMapDiffblockArray
 
-int CMapDiffBlockArray::CompareKey( DWORD id, CMapDiffBlock* pBase, bool fNoSpaces ) const
+int CMapDiffBlockArray::CompareKey( dword id, CMapDiffBlock* pBase, bool fNoSpaces ) const
 {
 	UNREFERENCED_PARAMETER(fNoSpaces);
 	ASSERT( pBase );
@@ -399,7 +399,7 @@ int CMapDiffBlockArray::CompareKey( DWORD id, CMapDiffBlock* pBase, bool fNoSpac
 //////////////////////////////////////////////////////////////////
 // -CGrayStaticsBlock
 
-void CGrayStaticsBlock::LoadStatics( DWORD ulBlockIndex, int map )
+void CGrayStaticsBlock::LoadStatics( dword ulBlockIndex, int map )
 {
 	ADDTOCALLSTACK("CGrayStaticsBlock::LoadStatics");
 	// long ulBlockIndex = (bx*(UO_SIZE_Y/UO_BLOCK_SIZE) + by);
@@ -497,7 +497,7 @@ void CGrayMapBlock::Load( int bx, int by )
 		m_map = 0;
 	}
 
-	unsigned int ulBlockIndex = (bx*(g_MapList.GetY(m_map)/UO_BLOCK_SIZE) + by);
+	uint ulBlockIndex = (bx*(g_MapList.GetY(m_map)/UO_BLOCK_SIZE) + by);
 
 	if ( !g_MapList.m_maps[m_map] )
 	{
@@ -539,7 +539,7 @@ void CGrayMapBlock::Load( int bx, int by )
 		CUOIndexRec index;
 		index.SetupIndex( ulBlockIndex * sizeof(CUOMapBlock), sizeof(CUOMapBlock));
 
-		unsigned int fileOffset = index.GetFileOffset();
+		uint fileOffset = index.GetFileOffset();
 		if (g_Install.m_IsMapUopFormat[mapNumber])
 		{
 			for ( int i = 0; i < 256; i++ )
@@ -547,7 +547,7 @@ void CGrayMapBlock::Load( int bx, int by )
 				MapAddress pMapAddress = g_Install.m_UopMapAddress[mapNumber][i];
 				if (( ulBlockIndex <= pMapAddress.dwLastBlock ) && ( ulBlockIndex >= pMapAddress.dwFirstBlock ))
 				{
-					fileOffset = static_cast<unsigned int>(pMapAddress.qwAdress + ((ulBlockIndex - pMapAddress.dwFirstBlock)*196));
+					fileOffset = static_cast<uint>(pMapAddress.qwAdress + ((ulBlockIndex - pMapAddress.dwFirstBlock)*196));
 					break;
 				}
 			}
@@ -559,18 +559,18 @@ void CGrayMapBlock::Load( int bx, int by )
 			//
 			// we must therefore determine which block of data contains the map information we need, and then add
 			// the extra number of bytes to our file offset
-			const unsigned int fileHeaderLength = 40; // length of overall file header
-			const unsigned int blockHeaderLength = 12; // length of the block header
-			const unsigned int firstDataEntryOffset = 3412; // offset of first actual data byte within a block
-			const unsigned int firstBlockDataEntryOffset = fileHeaderLength + blockHeaderLength + firstDataEntryOffset; // offset of first actual data byte for the first entry in the file
-			const unsigned int mapBlockLength = 802816; // maximum size of a block
+			const uint fileHeaderLength = 40; // length of overall file header
+			const uint blockHeaderLength = 12; // length of the block header
+			const uint firstDataEntryOffset = 3412; // offset of first actual data byte within a block
+			const uint firstBlockDataEntryOffset = fileHeaderLength + blockHeaderLength + firstDataEntryOffset; // offset of first actual data byte for the first entry in the file
+			const uint mapBlockLength = 802816; // maximum size of a block
 
 			// note: to avoid writing code that parse the UOP format properly we are calculating a new offset based on the
 			// sizes of the blocks as-of client 7.0.24.0. the nature of the UOP format allows the block lengths to differ
 			// and for the data to be compressed, so we should watch out for this in the future (and if this happens we'll
 			// have to handle UOP data properly)
 
-			unsigned int block = fileOffset / mapBlockLength;
+			uint block = fileOffset / mapBlockLength;
 			fileOffset += firstBlockDataEntryOffset + ((firstDataEntryOffset) * (block / 100)) + (blockHeaderLength * block);*/
 		}
 
@@ -607,7 +607,7 @@ CGrayMapBlock::CGrayMapBlock( const CPointMap & pt ) :
 }
 
 CGrayMapBlock::CGrayMapBlock(int bx, int by, int map) :
-		CPointSort(static_cast<WORD>(bx)* UO_BLOCK_SIZE, static_cast<WORD>(by) * UO_BLOCK_SIZE)
+		CPointSort(static_cast<word>(bx)* UO_BLOCK_SIZE, static_cast<word>(by) * UO_BLOCK_SIZE)
 {
 	sm_iCount++;
 	m_map = map;
@@ -701,7 +701,7 @@ CMapDiffCollection::CMapDiffCollection()
 CMapDiffCollection::~CMapDiffCollection()
 {
 	// Remove all of the loaded dif data
-	for ( unsigned int m = 0; m < 256; m++ )
+	for ( uint m = 0; m < 256; m++ )
 	{
 		while ( m_pMapDiffBlocks[m].GetCount() > 0 )
 		{
@@ -717,8 +717,8 @@ void CMapDiffCollection::LoadMapDiffs()
 	if ( m_bLoaded ) // already loaded
 		return;
 
-	DWORD dwLength = 0, dwBlockId = 0;
-	DWORD dwOffset = 0, dwRead = 0;
+	dword dwLength = 0, dwBlockId = 0;
+	dword dwOffset = 0, dwRead = 0;
 	CMapDiffBlock * pMapDiffBlock = NULL;
 
 	for ( int m = 0; m < 256; ++m )
@@ -847,7 +847,7 @@ void CMapDiffCollection::Init()
 	LoadMapDiffs();
 }
 
-CMapDiffBlock * CMapDiffCollection::GetNewBlock(DWORD dwBlockId, int map)
+CMapDiffBlock * CMapDiffCollection::GetNewBlock(dword dwBlockId, int map)
 {
 	// Retrieve a MapDiff block for the specified block id, or
 	// allocate a new MapDiff block if one doesn't exist already.
@@ -864,12 +864,12 @@ CMapDiffBlock * CMapDiffCollection::GetNewBlock(DWORD dwBlockId, int map)
 
 CMapDiffBlock * CMapDiffCollection::GetAtBlock(int bx, int by, int map)
 {
-	// See GetAtBlock(DWORD,int)
-	DWORD dwBlockId = (bx * (g_MapList.GetY( map ) / UO_BLOCK_SIZE)) + by;
+	// See GetAtBlock(dword,int)
+	dword dwBlockId = (bx * (g_MapList.GetY( map ) / UO_BLOCK_SIZE)) + by;
 	return GetAtBlock( dwBlockId, map );
 }
 
-CMapDiffBlock * CMapDiffCollection::GetAtBlock(DWORD dwBlockId, int map)
+CMapDiffBlock * CMapDiffCollection::GetAtBlock(dword dwBlockId, int map)
 {
 	// Retrieve a MapDiff block for the specified block id
 	ADDTOCALLSTACK("CMapDiffCollection::GetAtBlock");
@@ -889,16 +889,16 @@ CMapDiffBlock * CMapDiffCollection::GetAtBlock(DWORD dwBlockId, int map)
   Vjaka -	here lies mapdiff support sample code from wolfpack
 			for investigation purposes
 
-QMap<unsigned int, unsigned int> mappatches;
-QMap<unsigned int, stIndexRecord> staticpatches;
+QMap<uint, uint> mappatches;
+QMap<uint, stIndexRecord> staticpatches;
 
 struct mapblock
 {
-	unsigned int header;
+	uint header;
 	map_st cells[64];
 };
 
-void MapsPrivate::loadDiffs( const QString& basePath, unsigned int id )
+void MapsPrivate::loadDiffs( const QString& basePath, uint id )
 {
 	ADDTOCALLSTACK("MapsPrivate::loadDiffs");
 	QDir baseFolder( basePath );
@@ -930,10 +930,10 @@ void MapsPrivate::loadDiffs( const QString& basePath, unsigned int id )
 	{
 		QDataStream listinput( &mapdiflist );
 		listinput.setByteOrder( QDataStream::LittleEndian );
-		unsigned int offset = 0;
+		uint offset = 0;
 		while ( !listinput.atEnd() )
 		{
-			unsigned int id;
+			uint id;
 			listinput >> id;
 			mappatches.insert( id, offset );
 			offset += sizeof( mapblock );
@@ -957,7 +957,7 @@ void MapsPrivate::loadDiffs( const QString& basePath, unsigned int id )
 		stIndexRecord record;
 		while ( !listinput.atEnd() )
 		{
-			unsigned int id;
+			uint id;
 			listinput >> id;
 
 			indexinput >> record.offset;
@@ -986,7 +986,7 @@ map_st MapsPrivate::seekMap( ushort x, ushort y )
 {
 	ADDTOCALLSTACK("MapsPrivate::seekMap");
 	// The blockid our cell is in
-	unsigned int blockid = x / 8 * height + y / 8;
+	uint blockid = x / 8 * height + y / 8;
 
 	// See if the block has been cached
 	mapblock* result = mapCache.find( blockid );
@@ -999,7 +999,7 @@ map_st MapsPrivate::seekMap( ushort x, ushort y )
 		// See if the block has been patched
 		if ( mappatches.contains( blockid ) )
 		{
-			unsigned int offset = mappatches[blockid];
+			uint offset = mappatches[blockid];
 			mapdifdata.at( offset );
 			mapdifdata.readBlock( ( char * ) result, sizeof( mapblock ) );
 		}

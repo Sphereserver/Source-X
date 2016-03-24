@@ -163,7 +163,7 @@ bool CSector::r_LoadVal( CScript &s )
 			return true;
 		case SC_LIGHT:
 			if ( g_Cfg.m_bAllowLightOverride )
-				m_Env.m_Light = static_cast<unsigned char>(s.GetArgVal() | LIGHT_OVERRIDE);
+				m_Env.m_Light = static_cast<uchar>(s.GetArgVal() | LIGHT_OVERRIDE);
 			return true;
 		case SC_RAINCHANCE:
 			SetWeatherChance( true, s.HasArgs() ? s.GetArgVal() : -1 );
@@ -494,7 +494,7 @@ LPCTSTR CSector::GetLocalGameTime() const
 	return( GetTimeMinDesc( GetLocalTime()));
 }
 
-bool CSector::IsMoonVisible(unsigned int iPhase, int iLocalTime) const
+bool CSector::IsMoonVisible(uint iPhase, int iLocalTime) const
 {
 	ADDTOCALLSTACK("CSector::IsMoonVisible");
 	// When is moon rise and moon set ?
@@ -522,7 +522,7 @@ bool CSector::IsMoonVisible(unsigned int iPhase, int iLocalTime) const
 	}
 }
 
-BYTE CSector::GetLightCalc( bool fQuickSet ) const
+byte CSector::GetLightCalc( bool fQuickSet ) const
 {
 	ADDTOCALLSTACK("CSector::GetLightCalc");
 	// What is the light level default here in this sector.
@@ -531,7 +531,7 @@ BYTE CSector::GetLightCalc( bool fQuickSet ) const
 		return m_Env.m_Light;
 
 	if ( IsInDungeon() )
-		return static_cast<unsigned char>(g_Cfg.m_iLightDungeon);
+		return static_cast<uchar>(g_Cfg.m_iLightDungeon);
 
 	int localtime = GetLocalTime();
 
@@ -552,7 +552,7 @@ BYTE CSector::GetLightCalc( bool fQuickSet ) const
 		if ( iTargLight < LIGHT_BRIGHT ) iTargLight = LIGHT_BRIGHT;
 		if ( iTargLight > LIGHT_DARK ) iTargLight = LIGHT_DARK;
 
-		return static_cast<unsigned char>(iTargLight);
+		return static_cast<uchar>(iTargLight);
 	}
 
 	int hour = ( localtime / ( 60)) % 24;
@@ -573,12 +573,12 @@ BYTE CSector::GetLightCalc( bool fQuickSet ) const
 	{
 		// Factor in the effects of the moons
 		// Trammel
-		unsigned int iTrammelPhase = g_World.GetMoonPhase( false );
+		uint iTrammelPhase = g_World.GetMoonPhase( false );
 		// Check to see if Trammel is up here...
 
 		if ( IsMoonVisible( iTrammelPhase, localtime ))
 		{
-static const BYTE sm_TrammelPhaseBrightness[] =
+static const byte sm_TrammelPhaseBrightness[] =
 {
 	0, // New Moon
 	TRAMMEL_FULL_BRIGHTNESS / 4,	// Crescent Moon
@@ -594,10 +594,10 @@ static const BYTE sm_TrammelPhaseBrightness[] =
 		}
 
 		// Felucca
-		unsigned int iFeluccaPhase = g_World.GetMoonPhase( true );
+		uint iFeluccaPhase = g_World.GetMoonPhase( true );
 		if ( IsMoonVisible( iFeluccaPhase, localtime ))
 		{
-static const BYTE sm_FeluccaPhaseBrightness[] =
+static const byte sm_FeluccaPhaseBrightness[] =
 {
 	0, // New Moon
 	FELUCCA_FULL_BRIGHTNESS / 4,	// Crescent Moon
@@ -617,7 +617,7 @@ static const BYTE sm_FeluccaPhaseBrightness[] =
 	if ( iTargLight > LIGHT_DARK ) iTargLight = LIGHT_DARK;
 
 	if ( fQuickSet || m_Env.m_Light == iTargLight )		// Initializing the sector
-		return static_cast<unsigned char>(iTargLight);
+		return static_cast<uchar>(iTargLight);
 
 	// Gradual transition to global light level.
 	if ( m_Env.m_Light > iTargLight )
@@ -644,7 +644,7 @@ void CSector::SetLightNow( bool fFlash )
 
 			if ( fFlash )	// This does not seem to work predicably !
 			{
-				BYTE bPrvLight = m_Env.m_Light;
+				byte bPrvLight = m_Env.m_Light;
 				m_Env.m_Light = LIGHT_BRIGHT;	// full bright.
 				pClient->addLight();
 				m_Env.m_Light = bPrvLight;	// back to previous.
@@ -669,11 +669,11 @@ void CSector::SetLight( int light )
 	if ( light < LIGHT_BRIGHT || light > LIGHT_DARK )
 	{
 		m_Env.m_Light &= ~LIGHT_OVERRIDE;
-		m_Env.m_Light = (BYTE) GetLightCalc( true );
+		m_Env.m_Light = (byte) GetLightCalc( true );
 	}
 	else
 	{
-		m_Env.m_Light = (BYTE) ( light | LIGHT_OVERRIDE );
+		m_Env.m_Light = (byte) ( light | LIGHT_OVERRIDE );
 	}
 	SetLightNow(false);
 }
@@ -682,7 +682,7 @@ void CSector::SetDefaultWeatherChance()
 {
 	ADDTOCALLSTACK("CSector::SetDefaultWeatherChance");
 	CPointMap pt = GetBasePoint();
-	BYTE iPercent = static_cast<BYTE>(IMULDIV( pt.m_y, 100, g_MapList.GetY(pt.m_map) ));	// 100 = south
+	byte iPercent = static_cast<byte>(IMULDIV( pt.m_y, 100, g_MapList.GetY(pt.m_map) ));	// 100 = south
 	if ( iPercent < 50 )
 	{
 		// Anywhere north of the Britain Moongate is a good candidate for snow
@@ -779,11 +779,11 @@ void CSector::SetWeatherChance( bool fRain, int iChance )
 	}
 	else if ( fRain )
 	{
-		m_RainChance = static_cast<unsigned char>(iChance | LIGHT_OVERRIDE);
+		m_RainChance = static_cast<uchar>(iChance | LIGHT_OVERRIDE);
 	}
 	else
 	{
-		m_ColdChance = static_cast<unsigned char>(iChance | LIGHT_OVERRIDE);
+		m_ColdChance = static_cast<uchar>(iChance | LIGHT_OVERRIDE);
 	}
 
 	// Recalc the weather immediatly.
@@ -924,7 +924,7 @@ void CSector::RespawnDeadNPCs()
 		pChar->NPC_LoadScript(true);
 
 		// Res them back to their "home".
-		WORD iDist = pChar->m_pNPC->m_Home_Dist_Wander;
+		word iDist = pChar->m_pNPC->m_Home_Dist_Wander;
 		pChar->MoveNear( pChar->m_ptHome, iDist );
 		pChar->NPC_CreateTrigger(); //Removed from NPC_LoadScript() and triggered after char placement
 		pChar->Spell_Resurrection();
@@ -978,7 +978,7 @@ void CSector::OnTick(int iPulseCount)
 	if ( ! ( iPulseCount & 0x7f ))	// 30 seconds or so.
 	{
 		// check for local light level change ?
-		BYTE blightprv = m_Env.m_Light;
+		byte blightprv = m_Env.m_Light;
 		m_Env.m_Light = GetLightCalc( false );
 		if ( m_Env.m_Light != blightprv )
 		{
@@ -1113,7 +1113,7 @@ void CSector::OnTick(int iPulseCount)
 
 		EXC_DEBUGSUB_START;
 		CPointMap pt = GetBasePoint();
-		g_Log.EventDebug("#0 char 0%x '%s'\n", static_cast<DWORD>(pChar->GetUID()), pChar->GetName());
+		g_Log.EventDebug("#0 char 0%x '%s'\n", static_cast<dword>(pChar->GetUID()), pChar->GetName());
 		g_Log.EventDebug("#0 sector #%d [%d,%d,%d,%d]\n", GetIndex(),  pt.m_x, pt.m_y, pt.m_z, pt.m_map);
 		EXC_DEBUGSUB_END;
 	}
@@ -1158,7 +1158,7 @@ void CSector::OnTick(int iPulseCount)
 
 		EXC_DEBUGSUB_START;
 		CPointMap pt = GetBasePoint();
-		g_Log.EventError("#1 item 0%x '%s' [timer=%lld, type=%lld]\n", static_cast<DWORD>(pItem->GetUID()), pItem->GetName(), pItem->GetTimerAdjusted(), static_cast<int>(pItem->GetType()));
+		g_Log.EventError("#1 item 0%x '%s' [timer=%lld, type=%lld]\n", static_cast<dword>(pItem->GetUID()), pItem->GetName(), pItem->GetTimerAdjusted(), static_cast<int>(pItem->GetType()));
 		g_Log.EventError("#1 sector #%d [%d,%d,%d,%d]\n", GetIndex(),  pt.m_x, pt.m_y, pt.m_z, pt.m_map);
 		
 		EXC_DEBUGSUB_END;
@@ -1169,7 +1169,7 @@ void CSector::OnTick(int iPulseCount)
 		{
 			PAUSECALLSTACK;
 			CPointMap pt = GetBasePoint();
-			g_Log.EventError("#2 CGrayError: item 0%x '%s' [timer=%lld, type=%d]\n", static_cast<DWORD>(pItem->GetUID()), pItem->GetName(), pItem->GetTimerAdjusted(), static_cast<int>(pItem->GetType()));
+			g_Log.EventError("#2 CGrayError: item 0%x '%s' [timer=%lld, type=%d]\n", static_cast<dword>(pItem->GetUID()), pItem->GetName(), pItem->GetTimerAdjusted(), static_cast<int>(pItem->GetType()));
 			g_Log.EventError("#2 sector #%d [%d,%d,%d,%d]\n", GetIndex(),  pt.m_x, pt.m_y, pt.m_z, pt.m_map);
 			UNPAUSECALLSTACK;
 			EXC_CATCH_SUB(&e, "Sector");
@@ -1178,7 +1178,7 @@ void CSector::OnTick(int iPulseCount)
 		catch (...)
 		{
 			CPointMap pt = GetBasePoint();
-			g_Log.EventError("#3 ...: item 0%x '%s' [timer=%lld, type=%d]\n", static_cast<DWORD>(pItem->GetUID()), pItem->GetName(), pItem->GetTimerAdjusted(), static_cast<int>(pItem->GetType()));\
+			g_Log.EventError("#3 ...: item 0%x '%s' [timer=%lld, type=%d]\n", static_cast<dword>(pItem->GetUID()), pItem->GetName(), pItem->GetTimerAdjusted(), static_cast<int>(pItem->GetType()));\
 			g_Log.EventError("#3 sector #%d [%d,%d,%d,%d]\n", GetIndex(),  pt.m_x, pt.m_y, pt.m_z, pt.m_map);
 			EXC_CATCH_SUB(NULL, "Sector");
 			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
@@ -1221,7 +1221,7 @@ bool CSector::IsRainOverriden() const
 	return(( m_RainChance & LIGHT_OVERRIDE ) ? true : false );
 }
 
-BYTE CSector::GetRainChance() const
+byte CSector::GetRainChance() const
 {
 	return( m_RainChance &~ LIGHT_OVERRIDE );
 }
@@ -1231,7 +1231,7 @@ bool CSector::IsColdOverriden() const
 	return(( m_ColdChance & LIGHT_OVERRIDE ) ? true : false );
 }
 
-BYTE CSector::GetColdChance() const
+byte CSector::GetColdChance() const
 {
 	return( m_ColdChance &~ LIGHT_OVERRIDE );
 }
@@ -1242,7 +1242,7 @@ bool CSector::IsLightOverriden() const
 	return(( m_Env.m_Light & LIGHT_OVERRIDE ) ? true : false );
 }
 
-BYTE CSector::GetLight() const
+byte CSector::GetLight() const
 {
 	return( m_Env.m_Light &~ LIGHT_OVERRIDE );
 }

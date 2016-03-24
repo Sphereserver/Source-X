@@ -12,7 +12,7 @@ int CCharNPC::Spells_GetCount()
 
 	// This code was meant to check if found spells does really exist
 	int total = 0;
-	for (unsigned int count = 0; count < m_spells.size() ; count++)
+	for (uint count = 0; count < m_spells.size() ; count++)
 	{
 		Spells refSpell = m_spells.at(count);
 		if (!refSpell.id)
@@ -23,7 +23,7 @@ int CCharNPC::Spells_GetCount()
 }
 
 // Retrieve the spell stored at index = n
-SPELL_TYPE CCharNPC::Spells_GetAt(unsigned char id)
+SPELL_TYPE CCharNPC::Spells_GetAt(uchar id)
 {
 	ADDTOCALLSTACK("CCharNPC::Spells_GetAt");
 	if (m_spells.empty())
@@ -37,7 +37,7 @@ SPELL_TYPE CCharNPC::Spells_GetAt(unsigned char id)
 }
 
 // Delete the spell at the given index
-bool CCharNPC::Spells_DelAt(unsigned char id)
+bool CCharNPC::Spells_DelAt(uchar id)
 {
 	ADDTOCALLSTACK("CCharNPC::Spells_DelAt");
 	if (m_spells.empty())
@@ -74,7 +74,7 @@ int CCharNPC::Spells_FindSpell(SPELL_TYPE spellID)
 	if (m_spells.empty())
 		return -1;
 
-	unsigned int count = 0;
+	uint count = 0;
 	while (count < m_spells.size())
 	{
 		Spells spell = m_spells.at(count);
@@ -182,11 +182,11 @@ bool CChar::NPC_FightMagery(CChar * pChar)
 		}
 		return(false);
 	}
-	unsigned char i = 0;
+	uchar i = 0;
 	if (pWand)
-		i = static_cast<unsigned char>(Calc_GetRandVal2(0, count));	//chance between all spells + wand
+		i = static_cast<uchar>(Calc_GetRandVal2(0, count));	//chance between all spells + wand
 	else
-		i = static_cast<unsigned char>(Calc_GetRandVal2(0, count-1));
+		i = static_cast<uchar>(Calc_GetRandVal2(0, count-1));
 
 	if (i > count)	// if i > count then we use wand to cast.
 	{

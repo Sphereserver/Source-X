@@ -41,17 +41,17 @@ public:
 	virtual bool r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc );
 	virtual bool r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef );
 
-	virtual int GetWeight(WORD amount = 0) const;
+	virtual int GetWeight(word amount = 0) const;
 	void OnWeightChange( int iChange );
 
 	void ContentAdd( CItem * pItem );
-	void ContentAdd( CItem * pItem, CPointMap pt, unsigned char gridIndex = 0 );
+	void ContentAdd( CItem * pItem, CPointMap pt, uchar gridIndex = 0 );
 protected:
 	void OnRemoveOb( CGObListRec* pObRec );	// Override this = called when removed from list.
 public:
 	bool IsItemInTrade();
 	void Trade_Status( bool bCheck );
-	void Trade_UpdateGold( DWORD platinum, DWORD gold );
+	void Trade_UpdateGold( dword platinum, dword gold );
 	void Trade_Delete();
 
 	void MakeKey();

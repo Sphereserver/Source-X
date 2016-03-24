@@ -24,7 +24,7 @@ public:
 	* @param dwSize size stored here.
 	* @return false if can not read info from the file, true if info is setted.
 	*/
-	static bool ReadFileInfo( LPCTSTR pszFilePath, time_t & dwDateChange, DWORD & dwSize );
+	static bool ReadFileInfo( LPCTSTR pszFilePath, time_t & dwDateChange, dword & dwSize );
 	/**
 	* @brief Read a dir content and store inside the instance.
 	*

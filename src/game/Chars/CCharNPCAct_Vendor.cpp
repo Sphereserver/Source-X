@@ -382,7 +382,7 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, LPCTSTR pszCmd )
 		if ( pMemory )
 		{
 			pMemory->m_itEqMemory.m_Action = NPC_MEM_ACT_SPEAK_TRAIN;
-			pMemory->m_itEqMemory.m_Skill = static_cast<WORD>(i);
+			pMemory->m_itEqMemory.m_Skill = static_cast<word>(i);
 		}
 		return true;
 	}

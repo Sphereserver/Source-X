@@ -14,7 +14,7 @@
 #include "graycom.h"
 
 // Similar to the MFC CFileFind
-bool CFileList::ReadFileInfo( LPCTSTR pszFilePath, time_t & dwDateChange, DWORD & dwSize ) // static
+bool CFileList::ReadFileInfo( LPCTSTR pszFilePath, time_t & dwDateChange, dword & dwSize ) // static
 {
 	ADDTOCALLSTACK("CFileList::ReadFileInfo");
 #ifdef _WIN32

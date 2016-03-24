@@ -75,10 +75,10 @@ private:
 #define STATF_Ridden		0x40000000	// This is the horse. (don't display me) I am being ridden
 #define STATF_OnHorse		0x80000000	// Mounted on horseback.
 
-	DWORD m_StatFlag;		// Flags above
+	dword m_StatFlag;		// Flags above
 
 #define SKILL_VARIANCE 100		// Difficulty modifier for determining success. 10.0 %
-	unsigned short m_Skill[SKILL_QTY];	// List of skills ( skill * 10 )
+	ushort m_Skill[SKILL_QTY];	// List of skills ( skill * 10 )
 
 										// This is a character that can either be NPC or PC.
 										// Player vs NPC Stuff
@@ -87,7 +87,7 @@ private:
 public:
 	struct LastAttackers {
 		INT64	elapsed;
-		DWORD	charUID;
+		dword	charUID;
 		INT64	amountDone;
 		INT64	threat;
 		bool	ignore;
@@ -95,7 +95,7 @@ public:
 	std::vector<LastAttackers> m_lastAttackers;
 
 	struct NotoSaves {
-		DWORD		charUID;	// Character viewing me
+		dword		charUID;	// Character viewing me
 		NOTO_TYPE	color;		// Color sent on movement packets
 		INT64		time;		// Update timer
 		NOTO_TYPE	value;		// Notoriety type
@@ -117,15 +117,15 @@ public:
 
 	// Combat stuff. cached data. (not saved)
 	CGrayUID m_uidWeapon;		// current Wielded weapon.	(could just get rid of this ?)
-	WORD m_defense;				// calculated armor worn (NOT intrinsic armor)
+	word m_defense;				// calculated armor worn (NOT intrinsic armor)
 
 	height_t m_height;			// Height set in-game or under some trigger (height=) - for both items and chars
 
 	int m_ModMaxWeight;
 	CGrayUID m_UIDLastNewItem;	///< Last item created, used to store on this CChar the UID of the last created item via ITEM or ITEMNEWBIe in @Create and @Restock to prevent COLOR, etc properties to be called with no reference when the item was not really created, ie: ITEM=i_dagger,R5
-	unsigned int m_exp;			// character experience
-	unsigned int m_level;		// character experience level
-	BYTE m_iVisualRange;		// Visual Range
+	uint m_exp;			// character experience
+	uint m_level;		// character experience level
+	byte m_iVisualRange;		// Visual Range
 								//DIR_TYPE m_dirClimb;		// we are standing on a CAN_I_CLIMB or UFLAG2_CLIMBABLE, DIR_QTY = not on climbable
 	bool m_fClimbUpdated;		// FixClimbHeight() called?
 	bool m_fIgnoreNextPetCmd;	// return 1 in speech block for this pet will make it ignore target petcmds while allowing the rest to perform them
@@ -149,7 +149,7 @@ public:
 	void SetTriggerActive(LPCTSTR trig = NULL) { static_cast<CObjBase*>(const_cast<CChar*>(this))->SetTriggerActive(trig); }
 
 	// Client's local light
-	BYTE m_LocalLight;
+	byte m_LocalLight;
 
 	// When events happen to the char. check here for reaction scripts.
 
@@ -160,7 +160,7 @@ public:
 		short	m_mod;			// signed for modifier
 		short	m_val;			// signed for karma
 		short	m_max;			// max
-		unsigned short m_regen;	// Tick time since last regen.
+		ushort m_regen;	// Tick time since last regen.
 	} m_Stat[STAT_QTY];
 
 	CServTime m_timeLastRegen;	// When did i get my last regen tick ?
@@ -182,9 +182,9 @@ public:
 	{
 		struct
 		{
-			DWORD m_Arg1;	// "ACTARG1"
-			DWORD m_Arg2;	// "ACTARG2"
-			DWORD m_Arg3;	// "ACTARG3"
+			dword m_Arg1;	// "ACTARG1"
+			dword m_Arg2;	// "ACTARG2"
+			dword m_Arg3;	// "ACTARG3"
 		} m_atUnk;
 
 		// SKILL_MAGERY
@@ -209,9 +209,9 @@ public:
 		// SKILL_TINKERING
 		struct
 		{
-			WORD m_Stroke_Count;		// ACTARG1 = For smithing, tinkering, etc. all requiring multi strokes.
+			word m_Stroke_Count;		// ACTARG1 = For smithing, tinkering, etc. all requiring multi strokes.
 			ITEMID_TYPE m_ItemID;		// ACTARG2 = Making this item.
-			WORD m_Amount;				// ACTARG3 = How many of this item are we making?
+			word m_Amount;				// ACTARG3 = How many of this item are we making?
 		} m_atCreate;
 
 		// SKILL_LUMBERJACKING
@@ -219,16 +219,16 @@ public:
 		// SKILL_FISHING
 		struct
 		{
-			DWORD m_ridType;			// ACTARG1 = Type of item we're harvesting
-			BYTE m_bounceItem;			// ACTARG2 = Drop item on backpack (true) or drop it on ground (false)
-			WORD m_Stroke_Count;		// ACTARG3 = All requiring multi strokes.
+			dword m_ridType;			// ACTARG1 = Type of item we're harvesting
+			byte m_bounceItem;			// ACTARG2 = Drop item on backpack (true) or drop it on ground (false)
+			word m_Stroke_Count;		// ACTARG3 = All requiring multi strokes.
 		} m_atResource;
 
 		// SKILL_TAMING
 		// SKILL_MEDITATION
 		struct
 		{
-			WORD m_Stroke_Count;		// ACTARG1 = All requiring multi strokes.
+			word m_Stroke_Count;		// ACTARG1 = All requiring multi strokes.
 		} m_atTaming;
 
 		// SKILL_ARCHERY
@@ -285,26 +285,26 @@ private:
 public:
 	// Status and attributes ------------------------------------
 	int IsWeird() const;
-	signed char GetFixZ( CPointMap pt, unsigned int wBlockFlags = 0);
+	signed char GetFixZ( CPointMap pt, uint wBlockFlags = 0);
 	virtual void Delete(bool bforce = false);
 	virtual bool NotifyDelete();
-	bool IsStatFlag( DWORD dwStatFlag ) const;
-	void StatFlag_Set( DWORD dwStatFlag );
-	void StatFlag_Clear( DWORD dwStatFlag );
-	void StatFlag_Mod( DWORD dwStatFlag, bool fMod );
-	bool IsPriv( WORD flag ) const;
+	bool IsStatFlag( dword dwStatFlag ) const;
+	void StatFlag_Set( dword dwStatFlag );
+	void StatFlag_Clear( dword dwStatFlag );
+	void StatFlag_Mod( dword dwStatFlag, bool fMod );
+	bool IsPriv( word flag ) const;
 	PLEVEL_TYPE GetPrivLevel() const;
 
 	CCharBase * Char_GetDef() const;
 	CRegionWorld * GetRegion() const;
 	CRegionBase * GetRoom() const;
 	int GetSight() const;
-	void SetSight(BYTE newSight);
+	void SetSight(byte newSight);
 
-	bool Can( WORD wCan ) const;
+	bool Can( word wCan ) const;
 	bool Can( int wCan ) const;
-	bool IsResourceMatch( RESOURCE_ID_BASE rid, DWORD dwArg );
-	bool IsResourceMatch( RESOURCE_ID_BASE rid, DWORD dwArg, DWORD dwArgResearch );
+	bool IsResourceMatch( RESOURCE_ID_BASE rid, dword dwArg );
+	bool IsResourceMatch( RESOURCE_ID_BASE rid, dword dwArg, dword dwArgResearch );
 
 	bool IsSpeakAsGhost() const;
 	bool CanUnderstandGhost() const;
@@ -317,7 +317,7 @@ public:
 
 								   // Information about us.
 	CREID_TYPE GetID() const;
-	WORD GetBaseID() const;
+	word GetBaseID() const;
 	CREID_TYPE GetDispID() const;
 	void SetID( CREID_TYPE id );
 
@@ -335,9 +335,9 @@ public:
 	bool CanSeeInContainer( const CItemContainer * pContItem ) const;
 	bool CanSee( const CObjBaseTemplate * pObj ) const;
 	inline bool CanSeeLOS_New_Failed( CPointMap * pptBlock, CPointMap &ptNow ) const;
-	bool CanSeeLOS_New( const CPointMap & pd, CPointMap * pBlock = NULL, int iMaxDist = UO_MAP_VIEW_SIGHT, WORD wFlags = 0 ) const;
-	bool CanSeeLOS( const CPointMap & pd, CPointMap * pBlock = NULL, int iMaxDist = UO_MAP_VIEW_SIGHT, WORD wFlags = 0 ) const;
-	bool CanSeeLOS( const CObjBaseTemplate * pObj, WORD wFlags = 0  ) const;
+	bool CanSeeLOS_New( const CPointMap & pd, CPointMap * pBlock = NULL, int iMaxDist = UO_MAP_VIEW_SIGHT, word wFlags = 0 ) const;
+	bool CanSeeLOS( const CPointMap & pd, CPointMap * pBlock = NULL, int iMaxDist = UO_MAP_VIEW_SIGHT, word wFlags = 0 ) const;
+	bool CanSeeLOS( const CObjBaseTemplate * pObj, word wFlags = 0  ) const;
 
 #define LOS_NB_LOCAL_TERRAIN	0x00001 // Terrain inside a region I am standing in does not block LOS
 #define LOS_NB_LOCAL_STATIC		0x00002 // Static items inside a region I am standing in do not block LOS
@@ -361,7 +361,7 @@ public:
 	bool CanTouch( const CObjBase * pObj ) const;
 	IT_TYPE CanTouchStatic( CPointMap & pt, ITEMID_TYPE id, CItem * pItem );
 	bool CanMove( CItem * pItem, bool fMsg = true ) const;
-	BYTE GetLightLevel() const;
+	byte GetLightLevel() const;
 	bool CanUse( CItem * pItem, bool fMoveOrConsume ) const;
 	bool IsMountCapable() const;
 
@@ -385,7 +385,7 @@ public:
 	short	Stat_GetLimit( STAT_TYPE i ) const;
 	bool Stat_Decrease( STAT_TYPE stat, SKILL_TYPE skill = (SKILL_TYPE)NULL);
 	bool Stats_Regen(INT64 iTimeDiff);
-	unsigned short Stats_GetRegenVal(STAT_TYPE iStat, bool bGetTicks);
+	ushort Stats_GetRegenVal(STAT_TYPE iStat, bool bGetTicks);
 	SKILLLOCK_TYPE Stat_GetLock(STAT_TYPE stat);
 	void Stat_SetLock(STAT_TYPE stat, SKILLLOCK_TYPE state);
 
@@ -395,7 +395,7 @@ private:
 	bool TeleportToCli( int iType, int iArgs );
 	bool TeleportToObj( int iType, TCHAR * pszArgs );
 private:
-	CRegionBase * CheckValidMove( CPointBase & ptDest, WORD * pwBlockFlags, DIR_TYPE dir, height_t * ClimbHeight, bool fPathFinding = false ) const;
+	CRegionBase * CheckValidMove( CPointBase & ptDest, word * pwBlockFlags, DIR_TYPE dir, height_t * ClimbHeight, bool fPathFinding = false ) const;
 	void FixClimbHeight();
 	bool MoveToRegion( CRegionWorld * pNewArea, bool fAllowReject);
 	bool MoveToRoom( CRegionBase * pNewRoom, bool fAllowReject);
@@ -407,13 +407,13 @@ public:
 
 	bool IsSwimming() const;
 
-	bool MoveToRegionReTest( DWORD dwType );
+	bool MoveToRegionReTest( dword dwType );
 	bool MoveToChar(CPointMap pt, bool bForceFix = false);
 	bool MoveTo(CPointMap pt, bool bForceFix = false);
 	virtual void SetTopZ( signed char z );
 	bool MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart = 1, bool bFromShip = false);
-	virtual bool MoveNearObj( const CObjBaseTemplate *pObj, WORD iSteps = 0 );
-	bool MoveNear( CPointMap pt, WORD iSteps = 0 );
+	virtual bool MoveNearObj( const CObjBaseTemplate *pObj, word iSteps = 0 );
+	bool MoveNear( CPointMap pt, word iSteps = 0 );
 
 	CRegionBase * CanMoveWalkTo( CPointBase & pt, bool fCheckChars = true, bool fCheckOnly = false, DIR_TYPE dir = DIR_QTY, bool fPathFinding = false );
 	void CheckRevealOnMove();
@@ -447,8 +447,8 @@ public:
 	void UpdateManaFlag() const;
 	void UpdateStamFlag() const;
 	void UpdateRegenTimers( STAT_TYPE iStat, short iVal);
-	ANIM_TYPE GenerateAnimate(ANIM_TYPE action, bool fTranslate = true, bool fBackward = false, BYTE iFrameDelay = 0, BYTE iAnimLen = 7);
-	bool UpdateAnimate(ANIM_TYPE action, bool fTranslate = true, bool fBackward = false, BYTE iFrameDelay = 0, BYTE iAnimLen = 7);
+	ANIM_TYPE GenerateAnimate(ANIM_TYPE action, bool fTranslate = true, bool fBackward = false, byte iFrameDelay = 0, byte iAnimLen = 7);
+	bool UpdateAnimate(ANIM_TYPE action, bool fTranslate = true, bool fBackward = false, byte iFrameDelay = 0, byte iAnimLen = 7);
 
 	void UpdateMode( CClient * pExcludeClient = NULL, bool fFull= false );
 	void UpdateSpeedMode();
@@ -463,9 +463,9 @@ public:
 public:
 	LPCTSTR GetPronoun() const;	// he
 	LPCTSTR GetPossessPronoun() const;	// his
-	BYTE GetModeFlag( const CClient *pViewer = NULL ) const;
-	BYTE GetDirFlag(bool fSquelchForwardStep = false) const;
-	DWORD GetMoveBlockFlags(bool bIgnoreGM = false) const;
+	byte GetModeFlag( const CClient *pViewer = NULL ) const;
+	byte GetDirFlag(bool fSquelchForwardStep = false) const;
+	dword GetMoveBlockFlags(bool bIgnoreGM = false) const;
 
 	int FixWeirdness();
 	void CreateNewCharCheck();
@@ -483,10 +483,10 @@ public:
 	void LayerAdd( CItem * pItem, LAYER_TYPE layer = LAYER_QTY );
 
 	TRIGRET_TYPE OnCharTrigForLayerLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pResult, LAYER_TYPE layer );
-	TRIGRET_TYPE OnCharTrigForMemTypeLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pResult, WORD wMemType );
+	TRIGRET_TYPE OnCharTrigForMemTypeLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pResult, word wMemType );
 
 	void OnWeightChange( int iChange );
-	int GetWeight(WORD amount = 0) const;
+	int GetWeight(word amount = 0) const;
 	int GetWeightLoadPercent( int iWeight ) const;
 
 	CItem * GetSpellbook(SPELL_TYPE iSpell = SPELL_Clumsy) const;
@@ -772,15 +772,15 @@ public:
 	static bool IsSkillBase( SKILL_TYPE skill );
 	static bool IsSkillNPC( SKILL_TYPE skill );
 
-	SKILL_TYPE Skill_GetBest( unsigned int iRank = 0 ) const; // Which skill is the highest for character p
+	SKILL_TYPE Skill_GetBest( uint iRank = 0 ) const; // Which skill is the highest for character p
 	SKILL_TYPE Skill_GetActive() const;
 	LPCTSTR Skill_GetName( bool fUse = false ) const;
-	unsigned short Skill_GetBase( SKILL_TYPE skill ) const;
+	ushort Skill_GetBase( SKILL_TYPE skill ) const;
 	int Skill_GetMax( SKILL_TYPE skill, bool ignoreLock = false ) const;
 	int Skill_GetSum() const;
 	SKILLLOCK_TYPE Skill_GetLock( SKILL_TYPE skill ) const;
-	unsigned short Skill_GetAdjusted(SKILL_TYPE skill) const;
-	SKILL_TYPE Skill_GetMagicRandom(unsigned short iMinValue = 0);
+	ushort Skill_GetAdjusted(SKILL_TYPE skill) const;
+	SKILL_TYPE Skill_GetMagicRandom(ushort iMinValue = 0);
 	SKILL_TYPE Skill_GetMagicBest();
 
 	/**
@@ -878,7 +878,7 @@ private:
 	CItem * Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iSkillLevel, int iDuration, CObjBase * pSrc = NULL, bool bEquip = true );
 	bool Spell_Equip_OnTick( CItem * pItem );
 
-	void Spell_Field(CPointMap pt, ITEMID_TYPE idEW, ITEMID_TYPE idNS, unsigned int fieldWidth, unsigned int fieldGauge, int iSkill, CChar * pCharSrc = NULL, ITEMID_TYPE idnewEW = static_cast<ITEMID_TYPE>(NULL), ITEMID_TYPE idnewNS = static_cast<ITEMID_TYPE>(NULL), int iDuration = 0, HUE_TYPE iColor = HUE_DEFAULT);
+	void Spell_Field(CPointMap pt, ITEMID_TYPE idEW, ITEMID_TYPE idNS, uint fieldWidth, uint fieldGauge, int iSkill, CChar * pCharSrc = NULL, ITEMID_TYPE idnewEW = static_cast<ITEMID_TYPE>(NULL), ITEMID_TYPE idnewNS = static_cast<ITEMID_TYPE>(NULL), int iDuration = 0, HUE_TYPE iColor = HUE_DEFAULT);
 	void Spell_Area( CPointMap pt, int iDist, int iSkill );
 	bool Spell_TargCheck_Face();
 	bool Spell_TargCheck();
@@ -899,23 +899,23 @@ public:
 private:
 	bool Memory_OnTick( CItemMemory * pMemory );
 	bool Memory_UpdateFlags( CItemMemory * pMemory );
-	bool Memory_UpdateClearTypes( CItemMemory * pMemory, WORD MemTypes );
-	void Memory_AddTypes( CItemMemory * pMemory, WORD MemTypes );
-	bool Memory_ClearTypes( CItemMemory * pMemory, WORD MemTypes );
-	CItemMemory * Memory_CreateObj( CGrayUID uid, WORD MemTypes );
-	CItemMemory * Memory_CreateObj( const CObjBase * pObj, WORD MemTypes );
+	bool Memory_UpdateClearTypes( CItemMemory * pMemory, word MemTypes );
+	void Memory_AddTypes( CItemMemory * pMemory, word MemTypes );
+	bool Memory_ClearTypes( CItemMemory * pMemory, word MemTypes );
+	CItemMemory * Memory_CreateObj( CGrayUID uid, word MemTypes );
+	CItemMemory * Memory_CreateObj( const CObjBase * pObj, word MemTypes );
 
 public:
-	void Memory_ClearTypes( WORD MemTypes );
+	void Memory_ClearTypes( word MemTypes );
 	CItemMemory * Memory_FindObj( CGrayUID uid ) const;
 	CItemMemory * Memory_FindObj( const CObjBase * pObj ) const;
-	CItemMemory * Memory_AddObjTypes( CGrayUID uid, WORD MemTypes );
-	CItemMemory * Memory_AddObjTypes( const CObjBase * pObj, WORD MemTypes );
-	CItemMemory * Memory_FindTypes( WORD MemTypes ) const;
-	CItemMemory * Memory_FindObjTypes( const CObjBase * pObj, WORD MemTypes ) const;
+	CItemMemory * Memory_AddObjTypes( CGrayUID uid, word MemTypes );
+	CItemMemory * Memory_AddObjTypes( const CObjBase * pObj, word MemTypes );
+	CItemMemory * Memory_FindTypes( word MemTypes ) const;
+	CItemMemory * Memory_FindObjTypes( const CObjBase * pObj, word MemTypes ) const;
 	// -------- Public alias for MemoryCreateObj ------------------
-	CItemMemory * Memory_AddObj( CGrayUID uid, WORD MemTypes );
-	CItemMemory * Memory_AddObj( const CObjBase * pObj, WORD MemTypes );
+	CItemMemory * Memory_AddObj( CGrayUID uid, word MemTypes );
+	CItemMemory * Memory_AddObj( const CObjBase * pObj, word MemTypes );
 	// ------------------------------------------------------------
 
 public:
@@ -1021,7 +1021,7 @@ public:
 	CItemCorpse * MakeCorpse( bool fFrontFall );
 	bool RaiseCorpse( CItemCorpse * pCorpse );
 	bool Death();
-	bool Reveal( DWORD dwFlags = 0 );
+	bool Reveal( dword dwFlags = 0 );
 	void Jail( CTextConsole * pSrc, bool fSet, int iCell );
 	void EatAnim( LPCTSTR pszName, short iQty );
 	void CallGuards( CChar * pCriminal );
@@ -1037,7 +1037,7 @@ public:
 	virtual void SpeakUTF8Ex( const NWORD * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang );
 
 	bool OnFreezeCheck();
-	void DropAll( CItemContainer * pCorpse = NULL, DWORD dwAttr = 0 );
+	void DropAll( CItemContainer * pCorpse = NULL, dword dwAttr = 0 );
 	void UnEquipAllItems( CItemContainer * pCorpse = NULL, bool bLeaveHands = false );
 	void Wake();
 	void SleepStart( bool fFrontFall );
@@ -1103,7 +1103,7 @@ public:
 	bool NPC_OnTrainHear( CChar * pCharSrc, LPCTSTR pCmd );
 	bool NPC_TrainSkill( CChar * pCharSrc, SKILL_TYPE skill, int toTrain );
 private:
-	bool NPC_CheckWalkHere( const CPointBase & pt, const CRegionBase * pArea, WORD wBlockFlags ) const;
+	bool NPC_CheckWalkHere( const CPointBase & pt, const CRegionBase * pArea, word wBlockFlags ) const;
 	void NPC_OnNoticeSnoop( CChar * pCharThief, CChar * pCharMark );
 
 	void NPC_LootMemory( CItem * pItem );

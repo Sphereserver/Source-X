@@ -505,7 +505,7 @@ bool IsID_Chair( ITEMID_TYPE id ) // static
 	// IT_CHAIR
 
 	// todo: consider enum values for these chairs
-	switch (static_cast<WORD>(id))
+	switch (static_cast<word>(id))
 	{
 		case 0x0459: // 'marble bench'
 		case 0x045a: // 'marble bench'
@@ -653,7 +653,7 @@ bool CItemBase::GetItemData( ITEMID_TYPE id, CUOItemTypeRec2 * pData ) // static
 	return( true );
 }
 
-inline void CItemBase::GetItemSpecificFlags( const CUOItemTypeRec2 & tiledata, DWORD & wBlockThis, IT_TYPE type, ITEMID_TYPE id ) // static
+inline void CItemBase::GetItemSpecificFlags( const CUOItemTypeRec2 & tiledata, dword & wBlockThis, IT_TYPE type, ITEMID_TYPE id ) // static
 {
 	ADDTOCALLSTACK("CItemBase::GetItemSpecificFlags");
 	if ( type == IT_DOOR )
@@ -681,7 +681,7 @@ inline void CItemBase::GetItemSpecificFlags( const CUOItemTypeRec2 & tiledata, D
 	}
 }
 
-void CItemBase::GetItemTiledataFlags( DWORD & wBlockThis, ITEMID_TYPE id ) // static
+void CItemBase::GetItemTiledataFlags( dword & wBlockThis, ITEMID_TYPE id ) // static
 {
 	ADDTOCALLSTACK("CItemBase::GetItemTiledataFlags");
 
@@ -711,7 +711,7 @@ void CItemBase::GetItemTiledataFlags( DWORD & wBlockThis, ITEMID_TYPE id ) // st
 		wBlockThis |= CAN_I_HOVER;
 }
 
-inline height_t CItemBase::GetItemHeightFlags( const CUOItemTypeRec2 & tiledata, DWORD & wBlockThis ) // static
+inline height_t CItemBase::GetItemHeightFlags( const CUOItemTypeRec2 & tiledata, dword & wBlockThis ) // static
 {
 	ADDTOCALLSTACK("CItemBase::GetItemHeightFlags");
 	// Chairs are marked as blocking for some reason ?
@@ -758,7 +758,7 @@ inline height_t CItemBase::GetItemHeightFlags( const CUOItemTypeRec2 & tiledata,
 	return( tiledata.m_height );
 }
 
-height_t CItemBase::GetItemHeight( ITEMID_TYPE id, DWORD & wBlockThis ) // static
+height_t CItemBase::GetItemHeight( ITEMID_TYPE id, dword & wBlockThis ) // static
 {
 	ADDTOCALLSTACK("CItemBase::GetItemHeight");
 	// Get just the height and the blocking flags for the item by id.
@@ -943,10 +943,10 @@ int CItemBase::CalculateMakeValue( int iQualityLevel ) const
 	return( lValue );
 }
 
-BYTE CItemBase::GetSpeed() const
+byte CItemBase::GetSpeed() const
 {
 	if (m_TagDefs.GetKey("OVERRIDE.SPEED"))
-		return static_cast<BYTE>(m_TagDefs.GetKeyNum("OVERRIDE.SPEED"));
+		return static_cast<byte>(m_TagDefs.GetKeyNum("OVERRIDE.SPEED"));
 	return m_speed;
 }
 
@@ -1127,7 +1127,7 @@ bool CItemBase::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pCha
 					if ( i > 0 )
 						iLen += strcpylen( pszTemp+iLen, "," );
 
-					iLen += sprintf(pszTemp + iLen, "0%x", static_cast<unsigned int>(m_flip_id[i]));
+					iLen += sprintf(pszTemp + iLen, "0%x", static_cast<uint>(m_flip_id[i]));
 					ASSERT(iLen < SCRIPT_MAX_LINE_LEN);
 				}
 				sVal = pszTemp;
@@ -1409,7 +1409,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 			SetDefNum(s.GetKey(), s.GetArgVal(), false);
 			break;
 		case IBC_MAXAMOUNT:
-			if (!SetMaxAmount(static_cast<unsigned short>(s.GetArgVal())))
+			if (!SetMaxAmount(static_cast<ushort>(s.GetArgVal())))
 				return false;
 			break;
 		case IBC_SPEEDMODE:
@@ -1417,7 +1417,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 			if (!IsType(IT_SHIP))
 				return false;
 			CItemBaseMulti *pItemMulti = dynamic_cast<CItemBaseMulti*>(this);
-			BYTE speed = static_cast<unsigned char>(s.GetArgVal());
+			byte speed = static_cast<uchar>(s.GetArgVal());
 			if (speed > 4)
 				speed = 4;
 			else if (speed < 1)
@@ -1433,20 +1433,20 @@ bool CItemBase::r_LoadVal( CScript &s )
 				CItemBaseMulti *pItemMulti = dynamic_cast<CItemBaseMulti*>(dynamic_cast<CItemBase*>(this));
 				if (!strcmpi(pszKey, "TILES"))
 				{
-					pItemMulti->m_shipSpeed.tiles = static_cast<unsigned char>(s.GetArgVal());
+					pItemMulti->m_shipSpeed.tiles = static_cast<uchar>(s.GetArgVal());
 					return true;
 				}
 				else if (!strcmpi(pszKey, "PERIOD"))
 				{
-					pItemMulti->m_shipSpeed.tiles = static_cast<unsigned char>(s.GetArgVal());
+					pItemMulti->m_shipSpeed.tiles = static_cast<uchar>(s.GetArgVal());
 					return true;
 				}
 				INT64 piVal[2];
 				size_t iQty = Str_ParseCmds(s.GetArgStr(), piVal, COUNTOF(piVal));
 				if (iQty == 2)
 				{
-					pItemMulti->m_shipSpeed.period = static_cast<unsigned char>(piVal[0]);
-					pItemMulti->m_shipSpeed.tiles = static_cast<unsigned char>(piVal[1]);
+					pItemMulti->m_shipSpeed.period = static_cast<uchar>(piVal[0]);
+					pItemMulti->m_shipSpeed.tiles = static_cast<uchar>(piVal[1]);
 					return true;
 				}
 				else
@@ -1608,7 +1608,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 			break;
 
 		case IBC_LAYER:
-			m_layer = static_cast<unsigned char>(s.GetArgVal());
+			m_layer = static_cast<uchar>(s.GetArgVal());
 			break;
 		case IBC_PILE:
 			break;
@@ -1619,11 +1619,11 @@ bool CItemBase::r_LoadVal( CScript &s )
 			break;
 		
 		case IBC_RESDISPDNID:
-			SetResDispDnId(static_cast<WORD>(g_Cfg.ResourceGetIndexType(RES_ITEMDEF, s.GetArgStr())));
+			SetResDispDnId(static_cast<word>(g_Cfg.ResourceGetIndexType(RES_ITEMDEF, s.GetArgStr())));
 			break;
 
 		case IBC_SPEED:
-			m_speed = static_cast<unsigned char>(s.GetArgVal());
+			m_speed = static_cast<uchar>(s.GetArgVal());
 			break;
 
 		case IBC_SKILL:		// Skill to use.
@@ -1671,7 +1671,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 			// Read in the weight but it may not be decimalized correctly
 			{
 				bool fDecimal = ( strchr( s.GetArgStr(), '.' ) != NULL );
-				m_weight = static_cast<WORD>(s.GetArgVal());
+				m_weight = static_cast<word>(s.GetArgVal());
 				if ( ! fDecimal )
 				{
 					m_weight *= WEIGHT_UNITS;
@@ -1795,7 +1795,7 @@ CItemBaseMulti::CItemBaseMulti( CItemBase* pBase ) :
 	CopyTransfer(pBase);
 }
 
-bool CItemBaseMulti::AddComponent( ITEMID_TYPE id, signed short dx, signed short dy, signed char dz )
+bool CItemBaseMulti::AddComponent( ITEMID_TYPE id, short dx, short dy, signed char dz )
 {
 	ADDTOCALLSTACK("CItemBaseMulti::AddComponent");
 	m_rect.UnionPoint( dx, dy );
@@ -1905,10 +1905,10 @@ bool CItemBaseMulti::r_LoadVal( CScript &s )
 		if (iQty < 1)
 			return false;
 
-		m_shipSpeed.period = static_cast<unsigned char>(ppArgs[0]);
+		m_shipSpeed.period = static_cast<uchar>(ppArgs[0]);
 
 		if (iQty >= 2)
-			m_shipSpeed.tiles = static_cast<unsigned char>(ppArgs[1]);
+			m_shipSpeed.tiles = static_cast<uchar>(ppArgs[1]);
 	} break;
 	case MLC_TSPEECH:
 		return( m_Speech.r_LoadVal( s, RES_SPEECH ));
@@ -2156,17 +2156,17 @@ CItemBaseDupe * CItemBaseDupe::GetDupeRef( ITEMID_TYPE id ) // static
 }
 
 
-WORD CItemBase::GetMaxAmount()
+word CItemBase::GetMaxAmount()
 {
 	ADDTOCALLSTACK("CItemBase::GetMaxAmount");
 	if (!IsStackableType())
 		return 0;
 
-	WORD pMax = static_cast<WORD>(GetDefNum("MaxAmount", false));
-	return pMax ? pMax : static_cast<WORD>(g_Cfg.m_iItemsMaxAmount);
+	word pMax = static_cast<word>(GetDefNum("MaxAmount", false));
+	return pMax ? pMax : static_cast<word>(g_Cfg.m_iItemsMaxAmount);
 };
 
-bool CItemBase::SetMaxAmount(WORD amount)
+bool CItemBase::SetMaxAmount(word amount)
 {
 	ADDTOCALLSTACK("CItemBase::SetMaxAmount");
 	if (!IsStackableType())

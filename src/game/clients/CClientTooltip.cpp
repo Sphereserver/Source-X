@@ -2,7 +2,7 @@
 #include "../common/CString.h"
 #include "CClientTooltip.h"
 
-CClientTooltip::CClientTooltip(DWORD clilocid, LPCTSTR args)
+CClientTooltip::CClientTooltip(dword clilocid, LPCTSTR args)
 {
     m_clilocid = clilocid;
     if ( args )

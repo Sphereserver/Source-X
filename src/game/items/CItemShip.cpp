@@ -51,7 +51,7 @@ bool CItem::Ship_Plank( bool fOpen )
 	if ( IsType(IT_SHIP_PLANK) && (oldType == IT_SHIP_SIDE || oldType == IT_SHIP_SIDE_LOCKED) )
 	{
 		// Save the original Type of the plank if it used to be a ship side
-		m_itShipPlank.m_itSideType = static_cast<WORD>(oldType);
+		m_itShipPlank.m_itSideType = static_cast<word>(oldType);
 	}
 	else if ( oldType == IT_SHIP_PLANK )
 	{
@@ -73,17 +73,17 @@ void CItemShip::Ship_Stop()
 	m_itShip.m_fSail = 0;
 }
 
-bool CItemShip::Ship_SetMoveDir(DIR_TYPE dir, BYTE speed, bool bWheelMove)
+bool CItemShip::Ship_SetMoveDir(DIR_TYPE dir, byte speed, bool bWheelMove)
 {
 	ADDTOCALLSTACK("CItemShip::Ship_SetMoveDir");
 	// Set the direction we will move next time we get a tick.
 	// Called from Packet 0xBF.0x32 : PacketWheelBoatMove to check if ship can move while setting dir and checking times in the proccess, otherwise for each click with mouse it will do 1 move.
 
-	m_itShip.m_DirMove = static_cast<unsigned char>(dir); // we set new direction regardless of click limitations, so click in another direction means changing dir but makes not more moves until ship's timer moves it.
+	m_itShip.m_DirMove = static_cast<uchar>(dir); // we set new direction regardless of click limitations, so click in another direction means changing dir but makes not more moves until ship's timer moves it.
 	if (bWheelMove && m_NextMove > CServTime::GetCurrentTime())
 		return false;
 	
-	unsigned char iSpeed = speed ? speed : 1;
+	uchar iSpeed = speed ? speed : 1;
 	if ( m_itShip.m_DirMove == dir && m_itShip.m_fSail != 0 )
 	{
 		if ( m_itShip.m_DirFace == m_itShip.m_DirMove && m_itShip.m_fSail == 1 )
@@ -208,7 +208,7 @@ bool CItemShip::Ship_MoveDelta(CPointBase pdelta)
 
 		if (!pt.IsValidPoint())  // boat goes out of bounds !
 		{
-			DEBUG_ERR(("Ship uid=0%x out of bounds\n", (DWORD)GetUID()));
+			DEBUG_ERR(("Ship uid=0%x out of bounds\n", (dword)GetUID()));
 			continue;
 		}
 		pObj->MoveTo(pt);
@@ -221,7 +221,7 @@ bool CItemShip::Ship_MoveDelta(CPointBase pdelta)
 		if (tMe == NULL)
 			continue;
 
-		BYTE tViewDist = static_cast<unsigned char>(tMe->GetSight());
+		byte tViewDist = static_cast<uchar>(tMe->GetSight());
 		for (size_t i = 0; i < iCount; i++)
 		{
 			CObjBase * pObj = ppObjs[i];
@@ -299,7 +299,7 @@ bool CItemShip::Ship_CanMoveTo( const CPointMap & pt ) const
 	if ( IsAttr(ATTR_MAGIC ))
 		return( true );
 
-	DWORD wBlockFlags = CAN_I_WATER;
+	dword wBlockFlags = CAN_I_WATER;
 
 	g_World.GetHeightPoint2( pt, wBlockFlags, true );
 	if ( wBlockFlags & CAN_I_WATER )
@@ -325,7 +325,7 @@ bool CItemShip::Ship_Face( DIR_TYPE dir )
 		return false;
 	}
 
-	unsigned int iDirection = 0;
+	uint iDirection = 0;
 	for ( ; ; ++iDirection )
 	{
 		if ( iDirection >= COUNTOF(sm_Ship_FaceDir))
@@ -354,7 +354,7 @@ bool CItemShip::Ship_Face( DIR_TYPE dir )
 	// Check that we can fit into this space.
 	CPointMap ptTmp;
 	ptTmp.m_z = GetTopPoint().m_z;
-	ptTmp.m_map = static_cast<unsigned char>(rect.m_map);
+	ptTmp.m_map = static_cast<uchar>(rect.m_map);
 	for (ptTmp.m_x = static_cast<short>(rect.m_left); ptTmp.m_x < static_cast<short>(rect.m_right); ptTmp.m_x++)
 	{
 		for (ptTmp.m_y = static_cast<short>(rect.m_top); ptTmp.m_y < static_cast<short>(rect.m_bottom); ptTmp.m_y++)
@@ -452,7 +452,7 @@ bool CItemShip::Ship_Face( DIR_TYPE dir )
 		pObj->Update();
 	}
 
-	m_itShip.m_DirFace = static_cast<unsigned char>(dir);
+	m_itShip.m_DirFace = static_cast<uchar>(dir);
 	return true;
 }
 
@@ -794,7 +794,7 @@ bool CItemShip::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fr
 			// Does NOT protect against exploits !
 			if ( ! s.HasArgs())
 				return( false );
-			m_itShip.m_DirMove = static_cast<unsigned char>(GetDirStr(s.GetArgStr()));
+			m_itShip.m_DirMove = static_cast<uchar>(GetDirStr(s.GetArgStr()));
 			CItemMulti * pItemMulti = dynamic_cast<CItemMulti*>(this);
 			return Ship_Move(static_cast<DIR_TYPE>(m_itShip.m_DirMove), pItemMulti->m_shipSpeed.tiles);
 		}
@@ -825,10 +825,10 @@ anchored:
 				break;
 			}
 			DIR_TYPE DirMove = static_cast<DIR_TYPE>(m_itShip.m_DirMove);
-			m_itShip.m_DirMove = static_cast<unsigned char>(GetDirTurn(DirFace, DirMoveChange));
+			m_itShip.m_DirMove = static_cast<uchar>(GetDirTurn(DirFace, DirMoveChange));
 			if (! Ship_Face(static_cast<DIR_TYPE>(m_itShip.m_DirMove)) )
 			{
-				m_itShip.m_DirMove = static_cast<unsigned char>(DirMove);
+				m_itShip.m_DirMove = static_cast<uchar>(DirMove);
 				return false;
 			}
 			break;
@@ -983,7 +983,7 @@ dodirmovechange:
 			CPointMap pt = GetTopPoint();
 			pt.m_z = zold;
 			SetTopZ( -UO_SIZE_Z );	// bottom of the world where i won't get in the way.
-			DWORD wBlockFlags = CAN_I_WATER;
+			dword wBlockFlags = CAN_I_WATER;
 			signed char z = g_World.GetHeightPoint2( pt, wBlockFlags );
 			SetTopZ( zold );	// restore z for now.
 			pt.InitPoint();
@@ -1218,7 +1218,7 @@ bool CItemShip::r_LoadVal( CScript & s  )
 		case IMCS_SPEEDMODE:
 		{
 			CItemMulti *pItemMulti = dynamic_cast<CItemMulti*>(this);
-			BYTE speed = static_cast<BYTE>(s.GetArgVal());
+			byte speed = static_cast<byte>(s.GetArgVal());
 			if (speed > 4)
 				speed = 4;
 			else if (speed < 1)
@@ -1236,20 +1236,20 @@ bool CItemShip::r_LoadVal( CScript & s  )
 				CItemMulti *pItemMulti = dynamic_cast<CItemMulti*>(this);
 				if (!strcmpi(pszKey, "TILES"))
 				{
-					pItemMulti->m_shipSpeed.tiles = static_cast<unsigned char>(s.GetArgVal());
+					pItemMulti->m_shipSpeed.tiles = static_cast<uchar>(s.GetArgVal());
 					return true;
 				}
 				else if (!strcmpi(pszKey, "PERIOD"))
 				{
-					pItemMulti->m_shipSpeed.period = static_cast<unsigned char>(s.GetArgVal());
+					pItemMulti->m_shipSpeed.period = static_cast<uchar>(s.GetArgVal());
 					return true;
 				}
 				INT64 piVal[2];
 				size_t iQty = Str_ParseCmds(s.GetArgStr(), piVal, COUNTOF(piVal));
 				if (iQty == 2)
 				{
-					pItemMulti->m_shipSpeed.period = static_cast<unsigned char>(piVal[0]);
-					pItemMulti->m_shipSpeed.tiles = static_cast<unsigned char>(piVal[1]);
+					pItemMulti->m_shipSpeed.period = static_cast<uchar>(piVal[0]);
+					pItemMulti->m_shipSpeed.tiles = static_cast<uchar>(piVal[1]);
 					return true;
 				}
 				else

@@ -301,7 +301,7 @@ int CChar::NPC_GetTrainMax( const CChar * pStudent, SKILL_TYPE Skill ) const
 	return minimum(iMax, pStudent->Skill_GetMax(Skill));
 }
 
-bool CChar::NPC_CheckWalkHere( const CPointBase & pt, const CRegionBase * pArea, WORD wBlockFlags ) const
+bool CChar::NPC_CheckWalkHere( const CPointBase & pt, const CRegionBase * pArea, word wBlockFlags ) const
 {
 	ADDTOCALLSTACK("CChar::NPC_CheckWalkHere");
 	UNREFERENCED_PARAMETER(wBlockFlags);

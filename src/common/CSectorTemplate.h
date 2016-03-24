@@ -97,7 +97,7 @@ public:
 	static const char *m_sClassName;
 	CObPointSortArray	m_Teleports;		//	CTeleport array
 	CRegionLinks		m_RegionLinks;		//	CRegionBase(s) in this CSector
-	DWORD			m_dwFlags;
+	dword			m_dwFlags;
 public:
 	CCharsActiveList		m_Chars_Active;		// CChar(s) activte in this CSector.
 	CCharsDisconnectList	m_Chars_Disconnect;	// dead NPCs, etc
@@ -128,8 +128,8 @@ public:
 	const CGrayMapBlock * GetMapBlock( const CPointMap & pt );
 
 	// CRegionBase
-	CRegionBase * GetRegion( const CPointBase & pt, DWORD dwType ) const;
-	size_t GetRegions( const CPointBase & pt, DWORD dwType, CRegionLinks & rlist ) const;
+	CRegionBase * GetRegion( const CPointBase & pt, dword dwType ) const;
+	size_t GetRegions( const CPointBase & pt, dword dwType, CRegionLinks & rlist ) const;
 
 	bool UnLinkRegion( CRegionBase * pRegionOld );
 	bool LinkRegion( CRegionBase * pRegionNew );
@@ -138,7 +138,7 @@ public:
 	CTeleport * GetTeleport( const CPointMap & pt ) const;
 	bool AddTeleport( CTeleport * pTeleport );
 
-	bool IsFlagSet( DWORD dwFlag ) const;
+	bool IsFlagSet( dword dwFlag ) const;
 
 #define SECF_NoSleep	0x00000001
 #define SECF_InstaSleep	0x00000002

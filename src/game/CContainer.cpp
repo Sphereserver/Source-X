@@ -113,7 +113,7 @@ void CContainer::r_WriteContent( CScript &s ) const
 	}
 }
 
-CItem *CContainer::ContentFind( RESOURCE_ID_BASE rid, DWORD dwArg, int iDecendLevels ) const
+CItem *CContainer::ContentFind( RESOURCE_ID_BASE rid, dword dwArg, int iDecendLevels ) const
 {
 	ADDTOCALLSTACK("CContainer::ContentFind");
 	// send all the items in the container.
@@ -142,7 +142,7 @@ CItem *CContainer::ContentFind( RESOURCE_ID_BASE rid, DWORD dwArg, int iDecendLe
 	return pItem;
 }
 
-TRIGRET_TYPE CContainer::OnContTriggerForLoop( CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs, CGString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext, RESOURCE_ID_BASE rid, DWORD dwArg, int iDecendLevels )
+TRIGRET_TYPE CContainer::OnContTriggerForLoop( CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs, CGString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext, RESOURCE_ID_BASE rid, dword dwArg, int iDecendLevels )
 {
 	ADDTOCALLSTACK("CContainer::OnContTriggerForLoop");
 	if ( rid.GetResIndex() != 0 )
@@ -259,7 +259,7 @@ CItem *CContainer::ContentFindRandom() const
 	return dynamic_cast<CItem *>(GetAt(Calc_GetRandVal(GetCount())));
 }
 
-int CContainer::ContentConsume( RESOURCE_ID_BASE rid, int amount, bool fTest, DWORD dwArg )
+int CContainer::ContentConsume( RESOURCE_ID_BASE rid, int amount, bool fTest, dword dwArg )
 {
 	ADDTOCALLSTACK("CContainer::ContentConsume");
 	// ARGS:
@@ -303,14 +303,14 @@ int CContainer::ContentConsume( RESOURCE_ID_BASE rid, int amount, bool fTest, DW
 	return amount;
 }
 
-int CContainer::ContentCount( RESOURCE_ID_BASE rid, DWORD dwArg )
+int CContainer::ContentCount( RESOURCE_ID_BASE rid, dword dwArg )
 {
 	ADDTOCALLSTACK("CContainer::ContentCount");
 	// Calculate total (gold or other items) in this recursed container
 	return INT32_MAX - ContentConsume(rid, INT32_MAX, true, dwArg);
 }
 
-void CContainer::ContentAttrMod( DWORD dwAttr, bool fSet )
+void CContainer::ContentAttrMod( dword dwAttr, bool fSet )
 {
 	ADDTOCALLSTACK("CContainer::ContentAttrMod");
 	// Mark the attr
@@ -348,7 +348,7 @@ void CContainer::ContentNotifyDelete()
 	}
 }
 
-void CContainer::ContentsDump( const CPointMap &pt, DWORD dwAttrLeave )
+void CContainer::ContentsDump( const CPointMap &pt, dword dwAttrLeave )
 {
 	ADDTOCALLSTACK("CContainer::ContentsDump");
 	// Just dump the contents onto the ground.
@@ -381,7 +381,7 @@ void CContainer::ContentsTransfer( CItemContainer *pCont, bool fNoNewbie )
 	}
 }
 
-size_t CContainer::ResourceConsumePart( const CResourceQtyArray *pResources, int iReplicationQty, int iDamagePercent, bool fTest, DWORD dwArg )
+size_t CContainer::ResourceConsumePart( const CResourceQtyArray *pResources, int iReplicationQty, int iDamagePercent, bool fTest, dword dwArg )
 {
 	ADDTOCALLSTACK("CContainer::ResourceConsumePart");
 	// Consume just some of the resources.
@@ -419,7 +419,7 @@ size_t CContainer::ResourceConsumePart( const CResourceQtyArray *pResources, int
 	return iMissing;
 }
 
-int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iReplicationQty, bool fTest, DWORD dwArg )
+int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iReplicationQty, bool fTest, dword dwArg )
 {
 	ADDTOCALLSTACK("CContainer::ResourceConsume");
 	// Consume or test all the required resources.

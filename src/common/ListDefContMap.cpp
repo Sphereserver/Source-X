@@ -425,7 +425,7 @@ bool compare_insensitive (CListDefContElem * firstelem, CListDefContElem * secon
 	}
 	else
 	{
-		unsigned int i = 0;
+		uint i = 0;
 		while ( (i < strlen(first)) && (i < strlen(second)))
 		{
 			if (tolower(first[i]) < tolower(second[i])) return true;
@@ -449,7 +449,7 @@ bool compare_sensitive (CListDefContElem * firstelem, CListDefContElem * seconde
 	}
 	else
 	{
-		unsigned int i = 0;
+		uint i = 0;
 		while ( (i < strlen(first)) && (i < strlen(second)))
 		{
 			if (first[i] < second[i]) return true;

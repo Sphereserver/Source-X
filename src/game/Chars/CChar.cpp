@@ -325,7 +325,7 @@ CChar::~CChar()
 
 	if ( m_pParty )
 	{
-		m_pParty->RemoveMember( GetUID(), (DWORD) GetUID() );
+		m_pParty->RemoveMember( GetUID(), (dword) GetUID() );
 		m_pParty = NULL;
 	}
 	Attacker_RemoveChar();	// Removing me from enemy's attacker list (I asume that if he is on my list, I'm on his one and no one have me on their list if I dont have them)
@@ -412,7 +412,7 @@ void CChar::SetDisconnected()
 	}
 	if ( m_pParty )
 	{
-		m_pParty->RemoveMember( GetUID(), (DWORD) GetUID() );
+		m_pParty->RemoveMember( GetUID(), (dword) GetUID() );
 		m_pParty = NULL;
 	}
 	if ( IsDisconnected())
@@ -524,11 +524,11 @@ int CChar::IsWeird() const
 }
 
 // Get the Z we should be at
-signed char CChar::GetFixZ( CPointMap pt, unsigned int wBlockFlags)
+signed char CChar::GetFixZ( CPointMap pt, uint wBlockFlags)
 {
 	if (! wBlockFlags )
 		wBlockFlags = GetMoveBlockFlags();
-	DWORD dwCan = GetMoveBlockFlags();
+	dword dwCan = GetMoveBlockFlags();
 	if ( dwCan & CAN_C_WALK )
 		wBlockFlags |= CAN_I_CLIMB; // If we can walk than we can climb. Ignore CAN_C_FLY at all here
 
@@ -576,22 +576,22 @@ signed char CChar::GetFixZ( CPointMap pt, unsigned int wBlockFlags)
 }
 
 
-bool CChar::IsStatFlag( DWORD dwStatFlag ) const
+bool CChar::IsStatFlag( dword dwStatFlag ) const
 {
 	return(( m_StatFlag & dwStatFlag) ? true : false );
 }
 
-void CChar::StatFlag_Set( DWORD dwStatFlag )
+void CChar::StatFlag_Set( dword dwStatFlag )
 {
 	m_StatFlag |= dwStatFlag;
 }
 
-void CChar::StatFlag_Clear( DWORD dwStatFlag )
+void CChar::StatFlag_Clear( dword dwStatFlag )
 {
 	m_StatFlag &= ~dwStatFlag;
 }
 
-void CChar::StatFlag_Mod( DWORD dwStatFlag, bool fMod )
+void CChar::StatFlag_Mod( dword dwStatFlag, bool fMod )
 {
 	if ( fMod )
 		m_StatFlag |= dwStatFlag;
@@ -599,7 +599,7 @@ void CChar::StatFlag_Mod( DWORD dwStatFlag, bool fMod )
 		m_StatFlag &= ~dwStatFlag;
 }
 
-bool CChar::IsPriv( WORD flag ) const
+bool CChar::IsPriv( word flag ) const
 {	// PRIV_GM flags
 	if ( m_pPlayer == NULL )
 		return( false );	// NPC's have no privs.
@@ -634,21 +634,21 @@ int CChar::GetSight() const
 	return static_cast<int>(m_iVisualRange);
 }
 
-void CChar::SetSight(BYTE newSight)
+void CChar::SetSight(byte newSight)
 {
 	m_iVisualRange = minimum(newSight, 31);		// max value is 18 on classic clients and 31 on enhanced clients
 	if ( IsClient() )
 		GetClient()->addVisualRange(m_iVisualRange);
 }
 
-bool CChar::Can( WORD wCan ) const
+bool CChar::Can( word wCan ) const
 {
 	return(( m_Can & wCan ) ? true : false );
 }
 
 bool CChar::Can( int wCan ) const
 {
-	return( ( m_Can & static_cast< DWORD >( wCan ) ) ? true : false );
+	return( ( m_Can & static_cast< dword >( wCan ) ) ? true : false );
 }
 
 // Clean up weird flags.
@@ -1161,7 +1161,7 @@ void CChar::OnWeightChange( int iChange )
 	UpdateStatsFlag();
 }
 
-int CChar::GetWeight(WORD amount) const
+int CChar::GetWeight(word amount) const
 {
 	UNREFERENCED_PARAMETER(amount);
 	return( CContainer::GetTotalWeight());
@@ -1199,12 +1199,12 @@ height_t CChar::GetHeight() const
 
 	char * heightDef = Str_GetTemp();
 
-	sprintf(heightDef, "height_0%x", static_cast<unsigned int>(pCharDef->GetDispID()));
+	sprintf(heightDef, "height_0%x", static_cast<uint>(pCharDef->GetDispID()));
 	tmpHeight = static_cast<height_t>(g_Exp.m_VarDefs.GetKeyNum(heightDef));
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_0a)
 		return tmpHeight;
 
-	sprintf(heightDef, "height_%u", static_cast<unsigned int>(pCharDef->GetDispID()));
+	sprintf(heightDef, "height_%u", static_cast<uint>(pCharDef->GetDispID()));
 	tmpHeight = static_cast<height_t>(g_Exp.m_VarDefs.GetKeyNum(heightDef));
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_10)
 		return tmpHeight;
@@ -1219,10 +1219,10 @@ CREID_TYPE CChar::GetID() const
 	return( pCharDef->GetID());
 }
 
-WORD CChar::GetBaseID() const
+word CChar::GetBaseID() const
 {
 	// future: strongly typed enums will remove the need for this cast
-	return( static_cast<WORD>(GetID()));
+	return( static_cast<word>(GetID()));
 }
 
 CREID_TYPE CChar::GetDispID() const
@@ -1767,7 +1767,7 @@ bool CChar::r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef )
 				SKIP_SEPARATORS(pszKey);
 				return( true );
 			case CHR_MEMORYFINDTYPE:	// FInd a type of memory.
-				pRef = Memory_FindTypes(static_cast<WORD>(Exp_GetSingle(pszKey)));
+				pRef = Memory_FindTypes(static_cast<word>(Exp_GetSingle(pszKey)));
 				SKIP_SEPARATORS(pszKey);
 				return( true );
 			case CHR_MEMORYFIND:	// Find a memory of a UID
@@ -1880,7 +1880,7 @@ do_default:
 		if ( IsSkillBase(static_cast<SKILL_TYPE>(i)))
 		{
 			// Check some skill name.
-			unsigned short iVal = Skill_GetBase( static_cast<SKILL_TYPE>(i) );
+			ushort iVal = Skill_GetBase( static_cast<SKILL_TYPE>(i) );
 			sVal.Format( "%i.%i", iVal/10, iVal%10 );
 			return( true );
 		}
@@ -1953,7 +1953,7 @@ do_default:
 					{
 						pszKey += 6;
 						if ( m_Act_Targ )
-							sVal.FormatHex(static_cast<DWORD>(m_Fight_Targ));
+							sVal.FormatHex(static_cast<dword>(m_Fight_Targ));
 						else
 							sVal.FormatVal(-1);
 						return true;
@@ -2044,7 +2044,7 @@ do_default:
 				else if ( !strnicmp(pszKey, "BREATH.HUE", 10) || !strnicmp(pszKey, "BREATH.ANIM", 11) || !strnicmp(pszKey, "BREATH.TYPE", 11))
 				{
 					CVarDefCont * pVar = GetDefKey(pszKey, true);
-					sVal.FormatHex(pVar ? static_cast<DWORD>(pVar->GetValNum()) : 0);
+					sVal.FormatHex(pVar ? static_cast<dword>(pVar->GetValNum()) : 0);
 					return true;
 				}
 				return false;
@@ -2088,7 +2088,7 @@ do_default:
 							}
 							else if ( !strnicmp(pszKey, "ELAPSED", 7) )
 							{
-								sVal.FormatVal(static_cast<long>(refnoto.time));
+								sVal.FormatVal(static_cast<int>(refnoto.time));
 								return true;
 							}
 							else if (( !strnicmp(pszKey, "UID", 3) ) || ( *pszKey == '\0' ))
@@ -2177,7 +2177,7 @@ do_default:
 			// Get the top skill.
 			pszKey += 9;
 			{
-				unsigned int iRank = 0;
+				uint iRank = 0;
 				if ( *pszKey == '.' )
 				{
 					SKIP_SEPARATORS(pszKey);
@@ -2331,7 +2331,7 @@ do_default:
 				CPointBase	ptDst	= GetTopPoint();
 				DIR_TYPE	dir = GetDirStr(pszKey);
 				ptDst.Move( dir );
-				WORD		wBlockFlags	= 0;
+				word		wBlockFlags	= 0;
 				CRegionBase	*	pArea;
 				pArea = CheckValidMove( ptDst, &wBlockFlags, dir, NULL );
 				sVal.FormatHex( pArea ? pArea->GetResourceID() : 0 );
@@ -2364,7 +2364,7 @@ do_default:
 					sVal.FormatHex( UINT32_MAX );
 				else
 				{
-					DWORD		wBlockFlags	= 0;
+					dword		wBlockFlags	= 0;
 					g_World.GetHeightPoint2( ptDst, wBlockFlags, true );
 					sVal.FormatHex( wBlockFlags );
 				}
@@ -2443,7 +2443,7 @@ do_default:
 		case CHC_MEMORY:
 			// What is our memory flags about this pSrc person.
 			{
-				DWORD dwFlags	= 0;
+				dword dwFlags	= 0;
 				CItemMemory *	pMemory;
 				pszKey += 6;
 				if ( *pszKey == '.' )
@@ -3110,14 +3110,14 @@ do_default:
 				if ( iArgQty < 2 )
 					return( false );
 
-				CGrayUID	uid		= static_cast<unsigned long>(piCmd[0]);
-				DWORD		dwFlags	= static_cast<unsigned long>(piCmd[1]);
+				CGrayUID	uid		= static_cast<uint>(piCmd[0]);
+				dword		dwFlags	= static_cast<uint>(piCmd[1]);
 
 				CItemMemory * pMemory = Memory_FindObj( uid );
 				if ( pMemory != NULL )
-					pMemory->SetMemoryTypes( static_cast<WORD>(dwFlags) );
+					pMemory->SetMemoryTypes( static_cast<word>(dwFlags) );
 				else
-					pMemory = Memory_AddObjTypes( uid, static_cast<WORD>(dwFlags) );
+					pMemory = Memory_AddObjTypes( uid, static_cast<word>(dwFlags) );
 			}
 			break;
 		case CHC_NIGHTSIGHT:
@@ -3188,7 +3188,7 @@ do_default:
 			m_sTitle = s.GetArgStr();
 			break;
 		case CHC_LIGHT:
-			m_LocalLight = static_cast<unsigned char>(s.GetArgVal());
+			m_LocalLight = static_cast<uchar>(s.GetArgVal());
 			break;
 		case CHC_EXP:
 			m_exp = s.GetArgVal();
@@ -3203,7 +3203,7 @@ do_default:
 			UpdateStatsFlag();
 			break;
 		case CHC_VISUALRANGE:
-			SetSight(static_cast<BYTE>(s.GetArgVal()));
+			SetSight(static_cast<byte>(s.GetArgVal()));
 			break;
 		default:
 			return false;
@@ -3357,7 +3357,7 @@ bool CChar::r_Load( CScript & s ) // Load a character from script
 	int iResultCode = CObjBase::IsWeird();
 	if ( iResultCode )
 	{
-		DEBUG_ERR(( "Char 0%x Invalid, id='%s', code=0%x\n", static_cast<DWORD>(GetUID()), static_cast<LPCTSTR>(GetResourceName()), iResultCode ));
+		DEBUG_ERR(( "Char 0%x Invalid, id='%s', code=0%x\n", static_cast<dword>(GetUID()), static_cast<LPCTSTR>(GetResourceName()), iResultCode ));
 		Delete();
 	}
 
@@ -3441,13 +3441,13 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			}
 			break;
 		case CHV_ANIM:
-			// ANIM, ANIM_TYPE action, bool fBackward = false, BYTE iFrameDelay = 1
+			// ANIM, ANIM_TYPE action, bool fBackward = false, byte iFrameDelay = 1
 			{
 				INT64 Arg_piCmd[3];		// Maximum parameters in one line
 				size_t Arg_Qty = Str_ParseCmds(s.GetArgRaw(), Arg_piCmd, COUNTOF(Arg_piCmd));
 				return UpdateAnimate(static_cast<ANIM_TYPE>(Arg_piCmd[0]), true, false,
-					(Arg_Qty > 1) ? static_cast<unsigned char>(Arg_piCmd[1]) : 1,
-					(Arg_Qty > 2) ? static_cast<unsigned char>(Arg_piCmd[2]) : 1);
+					(Arg_Qty > 1) ? static_cast<uchar>(Arg_piCmd[1]) : 1,
+					(Arg_Qty > 2) ? static_cast<uchar>(Arg_piCmd[2]) : 1);
 			}
 			break;
 		case CHV_ATTACK:
@@ -3695,7 +3695,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				{
 					CItem *pItem = CItem::CreateHeader(s.GetArgStr(), NULL, false, this);
 					if ( !pItem )
-						g_World.m_uidNew = (DWORD)0;
+						g_World.m_uidNew = (dword)0;
 					else
 					{
 						ItemEquip(pItem);
@@ -3793,7 +3793,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 					return Spell_Resurrection( NULL, pCharSrc, true );
 			}
 		case CHV_REVEAL:
-			Reveal(static_cast<DWORD>(s.GetArgVal()));
+			Reveal(static_cast<dword>(s.GetArgVal()));
 			break;
 		case CHV_SALUTE:	//	salute to player
 		{
@@ -3995,10 +3995,10 @@ lbl_cchar_ontriggerspeech:
 }
 
 // Gaining exp
-unsigned int Calc_ExpGet_Exp(unsigned int level)
+uint Calc_ExpGet_Exp(uint level)
 {
-	unsigned int exp = 0;
-	for ( unsigned int lev = 1; lev <= level; lev++ )
+	uint exp = 0;
+	for ( uint lev = 1; lev <= level; lev++ )
 	{
 		switch ( g_Cfg.m_iLevelMode )
 		{
@@ -4015,10 +4015,10 @@ unsigned int Calc_ExpGet_Exp(unsigned int level)
 }
 
 // Increasing level
-unsigned int Calc_ExpGet_Level(unsigned int exp)
+uint Calc_ExpGet_Level(uint exp)
 {
-	unsigned int level = 0; // current level
-	unsigned int req = g_Cfg.m_iLevelNextAt; // required xp for next level
+	uint level = 0; // current level
+	uint req = g_Cfg.m_iLevelNextAt; // required xp for next level
 
 	if (req < 1)	//Must do this check in case ini's LevelNextAt is not set or server will freeze because exp will never decrease in the while.
 		return 0;
@@ -4072,7 +4072,7 @@ void CChar::ChangeExperience(int delta, CChar *pCharDead)
 			// limiting delta to current level? check if delta goes out of level
 			if (g_Cfg.m_bLevelSystem && g_Cfg.m_iExperienceMode&EXP_MODE_DOWN_NOLEVEL)
 			{
-				unsigned int exp = Calc_ExpGet_Exp(m_level);
+				uint exp = Calc_ExpGet_Exp(m_level);
 				if (m_exp + delta < exp)
 					delta = m_exp - exp;
 			}
@@ -4131,7 +4131,7 @@ void CChar::ChangeExperience(int delta, CChar *pCharDead)
 
 	if (g_Cfg.m_bLevelSystem)
 	{
-		unsigned int level = Calc_ExpGet_Level(m_exp);
+		uint level = Calc_ExpGet_Level(m_exp);
 
 		if (level != m_level)
 		{

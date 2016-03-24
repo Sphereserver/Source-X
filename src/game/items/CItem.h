@@ -41,14 +41,14 @@ public:
 
 private:
 	ITEMID_TYPE m_dwDispIndex;		// The current display type. ITEMID_TYPE
-	WORD m_amount;		// Amount of items in pile. 64K max (or corpse type)
+	word m_amount;		// Amount of items in pile. 64K max (or corpse type)
 	IT_TYPE m_type;		// What does this item do when dclicked ? defines dynamic_cast type
-	unsigned char m_containedGridIndex;	// Which grid have i been placed in ? (when in a container)
-	DWORD	m_CanUse;		// Base attribute flags. can_u_all/male/female..
-	WORD	m_weight;
+	uchar m_containedGridIndex;	// Which grid have i been placed in ? (when in a container)
+	dword	m_CanUse;		// Base attribute flags. can_u_all/male/female..
+	word	m_weight;
 
 public:
-	BYTE	m_speed;
+	byte	m_speed;
 	// Attribute flags.
 #define ATTR_IDENTIFIED		0x0001		// This is the identified name. ???
 #define ATTR_DECAY			0x0002		// Timer currently set to decay.
@@ -77,7 +77,7 @@ public:
 #define ATTR_SECURE			0x1000000	// Is Secure
 #define ATTR_REFORGED		0x2000000	// Is Runic Reforged.
 #define ATTR_OPENED			0x4000000	// Is Door Opened.
-	DWORD	m_Attr;
+	dword	m_Attr;
 	// NOTE: If this link is set but not valid -> then delete the whole object !
 	CGrayUID m_uidLink;		// Linked to this other object in the world. (owned, key, etc)
 
@@ -90,8 +90,8 @@ public:
 		// IT_NORMAL
 		struct	// used only to save and restore all this junk.
 		{
-			DWORD m_more1;
-			DWORD m_more2;
+			dword m_more1;
+			dword m_more2;
 			CPointBase m_morep;
 		} m_itNormal;
 
@@ -107,7 +107,7 @@ public:
 		struct	// IsTypeLockable()
 		{
 			CGrayUIDBase m_lockUID;		// more1=the lock code. normally this is the same as the uid (magic lock=non UID)
-			DWORD m_lock_complexity;	// more2=0-1000 = How hard to pick or magic unlock. (conflict with door ?)
+			dword m_lock_complexity;	// more2=0-1000 = How hard to pick or magic unlock. (conflict with door ?)
 		} m_itContainer;
 
 		// IT_SHIP_TILLER
@@ -121,16 +121,16 @@ public:
 		// IT_EQ_BANK_BOX
 		struct
 		{
-			DWORD m_Check_Amount;		// more1=Current amount of gold in account..
-			DWORD m_Check_Restock;		// more2= amount to restock the bank account to
+			dword m_Check_Amount;		// more1=Current amount of gold in account..
+			dword m_Check_Restock;		// more2= amount to restock the bank account to
 			CPointBase m_pntOpen;	// morep=point we are standing on when opened bank box.
 		} m_itEqBankBox;
 
 		// IT_EQ_VENDOR_BOX
 		struct
 		{
-			DWORD m_junk1;
-			DWORD m_junk2;
+			dword m_junk1;
+			dword m_junk2;
 			CPointBase m_pntOpen;	// morep=point we are standing on when opened vendor box.
 		} m_itEqVendorBox;
 
@@ -144,13 +144,13 @@ public:
 		// IT_WEAPON_*
 		struct
 		{
-			WORD m_Hits_Cur;		// more1l=eqiv to quality of the item (armor/weapon).
-			WORD m_Hits_Max;		// more1h=can only be repaired up to this level.
+			word m_Hits_Cur;		// more1l=eqiv to quality of the item (armor/weapon).
+			word m_Hits_Max;		// more1h=can only be repaired up to this level.
 			int  m_spellcharges;	// more2=for a wand etc.
-			WORD m_spell;			// morex=SPELL_TYPE = The magic spell cast on this. (daemons breath)(boots of strength) etc
-			WORD m_spelllevel;		// morey=level of the spell. (0-1000)
-			BYTE m_poison_skill;	// morez=0-100 = Is the weapon poisoned ?
-			BYTE m_nonused;			// morem
+			word m_spell;			// morex=SPELL_TYPE = The magic spell cast on this. (daemons breath)(boots of strength) etc
+			word m_spelllevel;		// morey=level of the spell. (0-1000)
+			byte m_poison_skill;	// morez=0-100 = Is the weapon poisoned ?
+			byte m_nonused;			// morem
 		} m_itWeapon;
 
 		// IT_ARMOR
@@ -160,11 +160,11 @@ public:
 		// IT_JEWELRY
 		struct
 		{
-			WORD m_Hits_Cur;		// more1l= eqiv to quality of the item (armor/weapon).
-			WORD m_Hits_Max;		// more1h= can only be repaired up to this level.
+			word m_Hits_Cur;		// more1l= eqiv to quality of the item (armor/weapon).
+			word m_Hits_Max;		// more1h= can only be repaired up to this level.
 			int  m_spellcharges;	// more2 = ? spell charges ? not sure how used here..
-			WORD m_spell;			// morex = SPELL_TYPE = The magic spell cast on this. (daemons breath)(boots of strength) etc
-			WORD m_spelllevel;		// morey=level of the spell. (0-1000)
+			word m_spell;			// morex = SPELL_TYPE = The magic spell cast on this. (daemons breath)(boots of strength) etc
+			word m_spelllevel;		// morey=level of the spell. (0-1000)
 		} m_itArmor;
 
 		// IT_SPELL = a magic spell effect. (might be equipped)
@@ -178,42 +178,42 @@ public:
 			short m_PolyStr;	// more1l=polymorph effect of this. (on strength)
 			short m_PolyDex;	// more1h=polymorph effect of this. (on dex)
 			int  m_spellcharges; // more2=not sure how used here..
-			WORD m_spell;		// morex=SPELL_TYPE = The magic spell cast on this. (daemons breath)(boots of strength) etc
-			WORD m_spelllevel;	// morey=0-1000=level of the spell.
-			BYTE m_pattern;		// morez = light pattern - CAN_I_LIGHT LIGHT_QTY
+			word m_spell;		// morex=SPELL_TYPE = The magic spell cast on this. (daemons breath)(boots of strength) etc
+			word m_spelllevel;	// morey=0-1000=level of the spell.
+			byte m_pattern;		// morez = light pattern - CAN_I_LIGHT LIGHT_QTY
 		} m_itSpell;
 
 		// IT_SPELLBOOK
 		struct	// Spellbook extra spells.
 		{
-			DWORD m_spells1;	// more1=Mask of avail spells for spell book.
-			DWORD m_spells2;	// more2=Mask of avail spells for spell book.
-			WORD m_maxspells;	// morex = max amount of spells.
-			WORD m_junk1;
-			WORD m_baseid;		// morez
+			dword m_spells1;	// more1=Mask of avail spells for spell book.
+			dword m_spells2;	// more2=Mask of avail spells for spell book.
+			word m_maxspells;	// morex = max amount of spells.
+			word m_junk1;
+			word m_baseid;		// morez
 		} m_itSpellbook;
 
 		// IT_POTION
 		struct
 		{
 			SPELL_TYPE m_Type;		// more1 = potion effect type
-			DWORD m_skillquality;	// more2 = 0-1000 Strength of the resulting spell.
-			WORD m_tick;			// morex = countdown to explode purple.
-			WORD m_junk4;
-			BYTE m_ignited;
+			dword m_skillquality;	// more2 = 0-1000 Strength of the resulting spell.
+			word m_tick;			// morex = countdown to explode purple.
+			word m_junk4;
+			byte m_ignited;
 		} m_itPotion;
 
 		// IT_MAP
 		struct
 		{
-			WORD m_top;			// more1l=in world coords.
-			WORD m_left;		// more1h=
-			WORD m_bottom;		// more2l=
-			WORD m_right;		// more2h=
-			WORD m_junk3;
-			WORD m_junk4;
-			BYTE m_fPinsGlued;	// morez=pins are glued in place. Cannot be moved.
-			BYTE m_map;			// morem=map
+			word m_top;			// more1l=in world coords.
+			word m_left;		// more1h=
+			word m_bottom;		// more2l=
+			word m_right;		// more2h=
+			word m_junk3;
+			word m_junk4;
+			byte m_fPinsGlued;	// morez=pins are glued in place. Cannot be moved.
+			byte m_map;			// morem=map
 		} m_itMap;
 
 		// IT_FRUIT
@@ -224,10 +224,10 @@ public:
 		{
 			ITEMID_TYPE m_cook_id;		// more1=Cooks into this. (only if raw)
 			CREID_TYPE m_MeatType;		// more2= Meat from what type of creature ?
-			WORD m_spell;				// morex=SPELL_TYPE = The magic spell cast on this. ( effect of eating.)
-			WORD m_spelllevel;			// morey=level of the spell. (0-1000)
-			BYTE m_poison_skill;		// morez=0-100 = Is poisoned ?
-			BYTE m_foodval;	
+			word m_spell;				// morex=SPELL_TYPE = The magic spell cast on this. ( effect of eating.)
+			word m_spelllevel;			// morey=level of the spell. (0-1000)
+			byte m_poison_skill;		// morez=0-100 = Is poisoned ?
+			byte m_foodval;	
 		} m_itFood;
 
 		// IT_DRINK
@@ -235,16 +235,16 @@ public:
 		{
 			ITEMID_TYPE m_cook_id;		// more1=Cooks into this. (only if raw)
 			CREID_TYPE m_MeatType;		// more2= Meat from what type of creature ?
-			WORD m_spell;				// morex=SPELL_TYPE = The magic spell cast on this. ( effect of eating.)
-			WORD m_spelllevel;			// morey=level of the spell. (0-1000)
-			BYTE m_poison_skill;		// morez=0-100 = Is poisoned ?
-			BYTE m_foodval;	
+			word m_spell;				// morex=SPELL_TYPE = The magic spell cast on this. ( effect of eating.)
+			word m_spelllevel;			// morey=level of the spell. (0-1000)
+			byte m_poison_skill;		// morez=0-100 = Is poisoned ?
+			byte m_foodval;	
 		} m_itDrink;
 
 		// IT_CORPSE
 		struct	// might just be a sleeping person as well
 		{
-			DWORD			m_carved;		// more1 = Corpse is already carved? (0=not carved, 1=carved)
+			dword			m_carved;		// more1 = Corpse is already carved? (0=not carved, 1=carved)
 			CGrayUIDBase	m_uidKiller;	// more2 = Who killed this corpse, carved or looted it last. sleep=self.
 			CREID_TYPE		m_BaseID;		// morex,morey = The true type of the creature who's corpse this is.
 			DIR_TYPE		m_facing_dir;	// morez = Corpse dir. 0x80 = on face.
@@ -258,30 +258,30 @@ public:
 		struct
 		{
 			// CAN_I_LIGHT may be set for others as well..ie.Moon gate conflict
-			DWORD   m_junk1;
-			DWORD	m_junk2;
-			BYTE	m_burned;	// morex = out of charges? (1=yes / 0=no)
-			WORD	m_charges;	// morey = how long will the torch last ?
-			BYTE	m_pattern;	// morez = light rotation pattern (LIGHT_PATTERN)
+			dword   m_junk1;
+			dword	m_junk2;
+			byte	m_burned;	// morex = out of charges? (1=yes / 0=no)
+			word	m_charges;	// morey = how long will the torch last ?
+			byte	m_pattern;	// morez = light rotation pattern (LIGHT_PATTERN)
 		} m_itLight;
 
 		// IT_EQ_TRADE_WINDOW
 		struct
 		{
-			DWORD	m_iGold;
-			DWORD	m_iPlatinum;
+			dword	m_iGold;
+			dword	m_iPlatinum;
 			INT64	m_iWaitTime;
-			BYTE	m_bCheck;		// morez=Check box for trade window.
+			byte	m_bCheck;		// morez=Check box for trade window.
 		} m_itEqTradeWindow;
 
 		// IT_SPAWN_ITEM
 		struct
 		{
 			RESOURCE_ID_BASE m_ItemID;	// more1=The ITEMID_* or template for items
-			DWORD	m_pile;				// more2=The max # of items to spawn per interval.  If this is 0, spawn up to the total amount.
-			WORD	m_TimeLoMin;		// morex=Lo time in minutes.
-			WORD	m_TimeHiMin;		// morey=Hi time in minutes.
-			BYTE	m_DistMax;			// morez=How far from this will it spawn?
+			dword	m_pile;				// more2=The max # of items to spawn per interval.  If this is 0, spawn up to the total amount.
+			word	m_TimeLoMin;		// morex=Lo time in minutes.
+			word	m_TimeHiMin;		// morey=Hi time in minutes.
+			byte	m_DistMax;			// morez=How far from this will it spawn?
 		} m_itSpawnItem;
 		// Remember that you can access the same bytes from both m_itSpawnChar and m_itSpawnItem, it doesn't matter if it's IT_SPAWN_ITEM or IT_SPAWN_CHAR.
 
@@ -289,20 +289,20 @@ public:
 		struct
 		{
 			RESOURCE_ID_BASE m_CharID;	// more1=CREID_*,  or SPAWNTYPE_*,
-			DWORD	m_unused;		// more2=used only by IT_SPAWN_ITEM, keeping it only for mantaining the structure of the union.
-			WORD	m_TimeLoMin;		// morex=Lo time in minutes.
-			WORD	m_TimeHiMin;		// morey=Hi time in minutes.
-			BYTE	m_DistMax;			// morez=How far from this will they wander?
+			dword	m_unused;		// more2=used only by IT_SPAWN_ITEM, keeping it only for mantaining the structure of the union.
+			word	m_TimeLoMin;		// morex=Lo time in minutes.
+			word	m_TimeHiMin;		// morey=Hi time in minutes.
+			byte	m_DistMax;			// morez=How far from this will they wander?
 		} m_itSpawnChar;
 
 		// IT_EXPLOSION
 		struct
 		{
-			DWORD	m_junk1;
-			DWORD	m_junk2;
-			WORD	m_iDamage;		// morex = damage of the explosion
-			WORD	m_wFlags;		// morey = DAMAGE_TYPE = fire,magic,etc
-			BYTE	m_iDist;		// morez = distance range of damage.
+			dword	m_junk1;
+			dword	m_junk2;
+			word	m_iDamage;		// morex = damage of the explosion
+			word	m_wFlags;		// morey = DAMAGE_TYPE = fire,magic,etc
+			byte	m_iDist;		// morez = distance range of damage.
 		} m_itExplode;	// Make this asyncronous.
 
 						// IT_BOOK
@@ -317,7 +317,7 @@ public:
 		struct
 		{
 			ITEMID_TYPE m_Type;		// more1 = deed for what multi, item or template ?
-			DWORD		m_dwKeyCode;	// more2 = previous key code. (dry docked ship)
+			dword		m_dwKeyCode;	// more2 = previous key code. (dry docked ship)
 		} m_itDeed;
 
 		// IT_CROPS
@@ -326,7 +326,7 @@ public:
 		{
 			int m_Respawn_Sec;		// more1 = plant respawn time in seconds. (for faster growth plants)
 			ITEMID_TYPE m_ReapFruitID;	// more2 = What is the fruit of this plant.
-			WORD m_ReapStages;		// morex = how many more stages of this to go til ripe.
+			word m_ReapStages;		// morex = how many more stages of this to go til ripe.
 		} m_itCrop;
 
 		// IT_TREE
@@ -350,7 +350,7 @@ public:
 		struct
 		{
 			int m_Strength;			// more1 = How many uses til a rune will wear out ?
-			DWORD m_junk2;
+			dword m_junk2;
 			CPointBase m_pntMark;	// morep = rune marked to a location or a teleport ?
 		} m_itRune;
 
@@ -367,9 +367,9 @@ public:
 		struct
 		{
 			// m_amount = memory type mask.
-			WORD m_Action;		// more1l = NPC_MEM_ACT_TYPE What sort of action is this memory about ? (1=training, 2=hire, etc)
-			WORD m_Skill;		// more1h = SKILL_TYPE = training a skill ?
-			DWORD m_junk2;		// more2 = When did the fight start or action take place ? (Now Placed inside TIMESTAMP for INT64 support)
+			word m_Action;		// more1l = NPC_MEM_ACT_TYPE What sort of action is this memory about ? (1=training, 2=hire, etc)
+			word m_Skill;		// more1h = SKILL_TYPE = training a skill ?
+			dword m_junk2;		// more2 = When did the fight start or action take place ? (Now Placed inside TIMESTAMP for INT64 support)
 			CPointBase m_pt;	// morep = Location the memory occured.
 								// m_uidLink = what is this memory linked to. (must be valid)
 		} m_itEqMemory;
@@ -379,10 +379,10 @@ public:
 		struct
 		{
 			CGrayUIDBase m_UIDCreator;	// more1 = who created this house or ship ?
-			BYTE m_fSail;		// more2.b1 = ? speed ?
-			BYTE m_fAnchored;
-			BYTE m_DirMove;		// DIR_TYPE
-			BYTE m_DirFace;
+			byte m_fSail;		// more2.b1 = ? speed ?
+			byte m_fAnchored;
+			byte m_DirMove;		// DIR_TYPE
+			byte m_DirFace;
 			// uidLink = my IT_SHIP_TILLER or IT_SIGN_GUMP,
 			CGrayUIDBase m_Pilot;
 		} m_itShip;
@@ -391,8 +391,8 @@ public:
 		struct
 		{
 			CGrayUIDBase m_lockUID;		// more1 = the lock code. normally this is the same as the uid (magic lock=non UID)
-			DWORD m_lock_complexity;	// more2=0-1000 = How hard to pick or magic unlock. (conflict with door ?)
-			WORD m_itSideType;			// morex = type to become (IT_SHIP_SIDE or IT_SHIP_SIDE_LOCKED)
+			dword m_lock_complexity;	// more2=0-1000 = How hard to pick or magic unlock. (conflict with door ?)
+			word m_itSideType;			// morex = type to become (IT_SHIP_SIDE or IT_SHIP_SIDE_LOCKED)
 		} m_itShipPlank;
 
 		// IT_PORTCULIS
@@ -426,14 +426,14 @@ public:
 		// IT_CANNON_MUZZLE
 		struct
 		{
-			DWORD m_junk1;
-			DWORD m_Load;			// more2 = Is the cannon loaded ? Mask = 1=powder, 2=shot
+			dword m_junk1;
+			dword m_Load;			// more2 = Is the cannon loaded ? Mask = 1=powder, 2=shot
 		} m_itCannon;
 
 		// IT_EQ_MURDER_COUNT
 		struct
 		{
-			DWORD m_Decay_Balance;	// more1 = For the murder flag, how much time is left ?
+			dword m_Decay_Balance;	// more1 = For the murder flag, how much time is left ?
 		} m_itEqMurderCount;
 
 		// IT_ITEM_STONE
@@ -441,8 +441,8 @@ public:
 		{
 			ITEMID_TYPE m_ItemID;	// more1= generate this item or template.
 			int m_iPrice;			// more2= ??? gold to purchase / sellback. (vending machine)
-			WORD m_wRegenTime;		// morex=regen time in seconds. 0 = no regen required.
-			WORD m_wAmount;			// morey=Total amount to deliver. 0 = infinite, 0xFFFF=none left
+			word m_wRegenTime;		// morex=regen time in seconds. 0 = no regen required.
+			word m_wAmount;			// morey=Total amount to deliver. 0 = infinite, 0xFFFF=none left
 		} m_itItemStone;
 
 		// IT_EQ_STUCK
@@ -454,7 +454,7 @@ public:
 		// IT_WEB
 		struct
 		{
-			DWORD m_Hits_Cur;	// more1 = how much damage the web can take.
+			dword m_Hits_Cur;	// more1 = how much damage the web can take.
 		} m_itWeb;
 
 		// IT_DREAM_GATE
@@ -470,9 +470,9 @@ public:
 		{
 			ITEMID_TYPE m_AnimID;	// more1 = What does a trap do when triggered. 0=just use the next id.
 			int	m_Damage;			// more2 = Base damage for a trap.
-			WORD m_wAnimSec;		// morex = How long to animate as a dangerous trap.
-			WORD m_wResetSec;		// morey = How long to sit idle til reset.
-			BYTE m_fPeriodic;		// morez = Does the trap just cycle from active to inactive ?
+			word m_wAnimSec;		// morex = How long to animate as a dangerous trap.
+			word m_wResetSec;		// morey = How long to sit idle til reset.
+			byte m_fPeriodic;		// morez = Does the trap just cycle from active to inactive ?
 		} m_itTrap;
 
 		// IT_ANIM_ACTIVE
@@ -487,16 +487,16 @@ public:
 		struct
 		{
 			ITEMID_TYPE m_SwitchID;	// more1 = the next state of this switch.
-			DWORD		m_junk2;
-			WORD		m_fStep;	// morex = can we just step on this to activate ?
-			WORD		m_wDelay;	// morey = delay this how long before activation.
+			dword		m_junk2;
+			word		m_fStep;	// morex = can we just step on this to activate ?
+			word		m_wDelay;	// morey = delay this how long before activation.
 									// uidLink = the item to use when this item is thrown or used.
 		} m_itSwitch;
 
 		// IT_SOUND
 		struct
 		{
-			DWORD	m_Sound;	// more1 = SOUND_TYPE
+			dword	m_Sound;	// more1 = SOUND_TYPE
 			int		m_Repeat;	// more2 =
 		} m_itSound;
 
@@ -540,7 +540,7 @@ public:
 	virtual void OnHear( LPCTSTR pszCmd, CChar * pSrc );
 	CItemBase * Item_GetDef() const;
 	ITEMID_TYPE GetID() const;
-	WORD GetBaseID() const;
+	word GetBaseID() const;
 	bool SetBaseID( ITEMID_TYPE id );
 	bool SetID( ITEMID_TYPE id );
 	ITEMID_TYPE GetDispID() const;
@@ -549,14 +549,14 @@ public:
 	void SetAnim( ITEMID_TYPE id, int iTime );
 
 	int IsWeird() const;
-	signed char GetFixZ(CPointMap pt, DWORD wBlockFlags = 0 );
-	BYTE GetSpeed() const;
-	void SetAttr( DWORD dwAttr );
-	void ClrAttr( DWORD dwAttr );
-	bool IsAttr( DWORD dwAttr ) const;
-	void SetCanUse( DWORD dwCanUse );
-	void ClrCanUse( DWORD dwCanUse );
-	bool IsCanUse( DWORD dwCanUse ) const;
+	signed char GetFixZ(CPointMap pt, dword wBlockFlags = 0 );
+	byte GetSpeed() const;
+	void SetAttr( dword dwAttr );
+	void ClrAttr( dword dwAttr );
+	bool IsAttr( dword dwAttr ) const;
+	void SetCanUse( dword dwCanUse );
+	void ClrCanUse( dword dwCanUse );
+	bool IsCanUse( dword dwCanUse ) const;
 
 	height_t GetHeight() const;
 	INT64  GetDecayTime() const;
@@ -571,25 +571,25 @@ public:
 	bool  IsStackable( const CItem * pItem ) const;
 	bool  IsStackableType() const;
 
-	bool Can(WORD wCan) const;
+	bool Can(word wCan) const;
 	virtual bool  IsSameType( const CObjBase * pObj ) const;
 	bool  Stack( CItem * pItem );
 	int ConsumeAmount( int iQty = 1, bool fTest = false );
 
 	CREID_TYPE GetCorpseType() const;
 	void  SetCorpseType( CREID_TYPE id );
-	void SetAmount( unsigned int amount );
-	WORD GetMaxAmount();
-	bool SetMaxAmount( WORD amount );
-	void SetAmountUpdate( unsigned int amount );
-	WORD GetAmount() const { return( m_amount ); }
+	void SetAmount( uint amount );
+	word GetMaxAmount();
+	bool SetMaxAmount( word amount );
+	void SetAmountUpdate( uint amount );
+	word GetAmount() const { return( m_amount ); }
 
 	LPCTSTR GetName() const;	// allowed to be default name.
 	LPCTSTR GetNameFull( bool fIdentified ) const;
 
 	virtual bool SetName( LPCTSTR pszName );
 
-	virtual int GetWeight(WORD amount = 0) const;
+	virtual int GetWeight(word amount = 0) const;
 
 	void SetTimeout( INT64 iDelay );
 
@@ -598,14 +598,14 @@ public:
 	bool MoveToUpdate(CPointMap pt, bool bForceFix = false);
 	bool MoveToDecay(const CPointMap & pt, INT64 iDecayTime, bool bForceFix = false);
 	bool MoveToCheck( const CPointMap & pt, CChar * pCharMover = NULL );
-	virtual bool MoveNearObj( const CObjBaseTemplate *pItem, WORD iSteps = 0 );
+	virtual bool MoveNearObj( const CObjBaseTemplate *pItem, word iSteps = 0 );
 
 	CItem* GetNext() const;
 	CItem* GetPrev() const;
 	CObjBase * GetContainer() const;
 	CObjBaseTemplate * GetTopLevelObj() const;
-	unsigned char GetContainedGridIndex() const;
-	void SetContainedGridIndex(unsigned char index);
+	uchar GetContainedGridIndex() const;
+	void SetContainedGridIndex(uchar index);
 
 	void  Update( const CClient * pClientExclude = NULL );		// send this new item to everyone.
 	void  Flip();
@@ -645,11 +645,11 @@ public:
 	bool IsTypeLockable() const;
 	bool IsTypeSpellable() const;
 
-	bool IsResourceMatch( RESOURCE_ID_BASE rid, DWORD dwArg );
+	bool IsResourceMatch( RESOURCE_ID_BASE rid, dword dwArg );
 
 	bool IsValidLockLink( CItem * pItemLock ) const;
 	bool IsValidLockUID() const;
-	bool IsKeyLockFit( DWORD dwLockUID ) const;
+	bool IsKeyLockFit( dword dwLockUID ) const;
 
 	void ConvertBolttoCloth();
 
@@ -691,7 +691,7 @@ public:
 	int Weapon_GetAttack(bool bGetRange = true) const;
 	SKILL_TYPE Weapon_GetSkill() const;
 
-	bool IsMemoryTypes( WORD wType ) const;
+	bool IsMemoryTypes( word wType ) const;
 
 	bool Ship_Plank( bool fOpen );
 

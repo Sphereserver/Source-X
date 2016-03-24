@@ -17,12 +17,12 @@
 class MapAddress
 {
 public:
-	unsigned int dwFirstBlock;
-	unsigned int dwLastBlock;
+	uint dwFirstBlock;
+	uint dwLastBlock;
 	INT64 qwAdress;
 };
 
-unsigned long long HashFileName(CGString csFile);
+ullong HashFileName(CGString csFile);
 
 extern struct CGrayInstall
 {
@@ -56,8 +56,8 @@ public:
 public:
 	bool FindInstall();
 	void DetectMulVersions();
-	VERFILE_TYPE OpenFiles( DWORD dwMask );
-	bool OpenFile( CGFile & file, LPCTSTR pszName, WORD wFlags );
+	VERFILE_TYPE OpenFiles( dword dwMask );
+	bool OpenFile( CGFile & file, LPCTSTR pszName, word wFlags );
 	bool OpenFile( VERFILE_TYPE i );
 	void CloseFiles();
 
@@ -68,10 +68,10 @@ public:
 	void SetPreferPath( LPCTSTR pszName );
 	CGString GetPreferPath( LPCTSTR pszName = NULL ) const;
 
-	bool ReadMulIndex( VERFILE_TYPE fileindex, VERFILE_TYPE filedata, DWORD id, CUOIndexRec & Index );
+	bool ReadMulIndex( VERFILE_TYPE fileindex, VERFILE_TYPE filedata, dword id, CUOIndexRec & Index );
 	bool ReadMulData( VERFILE_TYPE filedata, const CUOIndexRec & Index, void * pData );
 
-	bool ReadMulIndex(CGFile &file, DWORD id, CUOIndexRec &Index);
+	bool ReadMulIndex(CGFile &file, dword id, CUOIndexRec &Index);
 	bool ReadMulData(CGFile &file, const CUOIndexRec &Index, void * pData);
 	
 public:
@@ -92,14 +92,14 @@ public:
 	static const char *m_sClassName;
 	CGTypedArray < CUOVersionBlock, CUOVersionBlock& > m_Data;
 private:
-	int QCompare( size_t left, DWORD dwRefIndex ) const;
+	int QCompare( size_t left, dword dwRefIndex ) const;
 	void QSort( size_t left, size_t right );
 public:
 	size_t GetCount() const;
 	const CUOVersionBlock * GetEntry( size_t i ) const;
 	void Unload();
 	void Load( CGFile & file );
-	bool FindVerDataBlock( VERFILE_TYPE type, DWORD id, CUOIndexRec & Index ) const;
+	bool FindVerDataBlock( VERFILE_TYPE type, dword id, CUOIndexRec & Index ) const;
 	
 public:
 	CVerDataMul();

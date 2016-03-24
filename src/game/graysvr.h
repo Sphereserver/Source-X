@@ -68,39 +68,39 @@ extern int Sphere_MainEntryPoint( int argc, char *argv[] );
 
 struct TScriptProfiler
 {
-	unsigned char	initstate;
-	DWORD		called;
-	LLONG	total;
+	uchar	initstate;
+	dword		called;
+	llong	total;
 	struct TScriptProfilerFunction
 	{
 		TCHAR	name[128];	// name of the function
-		DWORD	called;		// how many times called
-		LLONG	total;		// total executions time
-		LLONG	min;		// minimal executions time
-		LLONG	max;		// maximal executions time
-		LLONG	average;	// average executions time
+		dword	called;		// how many times called
+		llong	total;		// total executions time
+		llong	min;		// minimal executions time
+		llong	max;		// maximal executions time
+		llong	average;	// average executions time
 		TScriptProfilerFunction *next;
 	}		*FunctionsHead, *FunctionsTail;
 	struct TScriptProfilerTrigger
 	{
 		TCHAR	name[128];	// name of the trigger
-		DWORD	called;		// how many times called
-		LLONG	total;		// total executions time
-		LLONG	min;		// minimal executions time
-		LLONG	max;		// maximal executions time
-		LLONG	average;	// average executions time
+		dword	called;		// how many times called
+		llong	total;		// total executions time
+		llong	min;		// minimal executions time
+		llong	max;		// maximal executions time
+		llong	average;	// average executions time
 		TScriptProfilerTrigger *next;
 	}		*TriggersHead, *TriggersTail;
 };
 extern TScriptProfiler g_profiler;
 
 //	Time measurement macros
-extern LLONG llTimeProfileFrequency;
+extern llong llTimeProfileFrequency;
 
 #ifdef _WIN32
 
 #define	TIME_PROFILE_INIT	\
-	LLONG llTicks(0), llTicksEnd
+	llong llTicks(0), llTicksEnd
 #define	TIME_PROFILE_START	\
 	if ( !QueryPerformanceCounter((LARGE_INTEGER *)&llTicks)) llTicks = GetTickCount()
 #define TIME_PROFILE_END	if ( !QueryPerformanceCounter((LARGE_INTEGER *)&llTicksEnd)) llTicksEnd = GetTickCount()
@@ -108,7 +108,7 @@ extern LLONG llTimeProfileFrequency;
 #else // !_WIN32
 
 #define	TIME_PROFILE_INIT	\
-	LLONG llTicks(0), llTicksEnd
+	llong llTicks(0), llTicksEnd
 #define	TIME_PROFILE_START	\
 	llTicks = GetTickCount()
 #define TIME_PROFILE_END	llTicksEnd = GetTickCount();

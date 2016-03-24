@@ -42,7 +42,7 @@
 	#include <sys/types.h>
 	#include <sys/timeb.h>
 
-	#define HANDLE			DWORD
+	#define HANDLE			dword
 	#define _cdecl
 	#define __cdecl
 
