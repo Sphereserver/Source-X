@@ -417,9 +417,9 @@ int CCrypt::GetVerFromString( LPCTSTR pszVersion )
 		return 0;
 
 	int n = 0;
-	int iArgs[4] = { 0,0,0,0 };
+	int iArgs[] = { 0,0,0,0 };
 	size_t iMax = strlen(pszVersion);
-	char ch, chNext;
+	TCHAR ch, chNext;
 
 	for ( size_t i = 0; i < iMax; i++ )
 	{
@@ -445,6 +445,7 @@ int CCrypt::GetVerFromString( LPCTSTR pszVersion )
 		{
 			n++;
 			iArgs[n] = (ch - 'a') + 1;
+			break;
 		}
 	}
 

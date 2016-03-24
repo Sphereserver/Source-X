@@ -2395,12 +2395,12 @@ bool PacketMailMessage::onReceive(NetState* net)
 
 
 /***************************************************************************
- *
- *
- *	Packet 0xBD : PacketClientVersion				client version
- *
- *
- ***************************************************************************/
+*
+*
+*	Packet 0xBD : PacketClientVersion				client version
+*
+*
+***************************************************************************/
 PacketClientVersion::PacketClientVersion() : Packet(0)
 {
 }
@@ -2409,7 +2409,7 @@ bool PacketClientVersion::onReceive(NetState* net)
 {
 	ADDTOCALLSTACK("PacketClientVersion::onReceive");
 
-	if (net->getReportedVersion() > 0)
+	if (net->getReportedVersion())
 		return true;
 
 	size_t length = readInt16();
@@ -2439,15 +2439,15 @@ bool PacketClientVersion::onReceive(NetState* net)
 		net->m_reportedVersion = version;
 		net->detectAsyncMode();
 
-		DEBUG_MSG(("Getting cliver 0x%x/0x%x\n", version, (version & 0xFFFFF0)));
-		
-		if (g_Serv.m_ClientVersion.GetClientVer() != 0 && ((version & 0xFFFFF0) != (DWORD)g_Serv.m_ClientVersion.GetClientVer()))
+		DEBUG_MSG(("Getting CliVersionReported %lu\n", version));
+
+		if ((g_Serv.m_ClientVersion.GetClientVer() != 0) && (version != g_Serv.m_ClientVersion.GetClientVer()))
 		{
 			client->addLoginErr(PacketLoginError::BadVersion);
 		}
 		else if ((net->getCryptVersion() < MINCLIVER_TOOLTIP) && (version >= MINCLIVER_TOOLTIP) && (client->GetResDisp() >= RDS_AOS) && (IsAosFlagEnabled(FEATURE_AOS_UPDATE_B))) //workaround for a "bug", which sends all items in LOS before processing this packet
 		{
-			DEBUG_MSG(("m_Crypt.GetClientVer()(%x) != m_reportedCliver(%x) == %x\n", net->getCryptVersion(), version, (net->getCryptVersion() != version)));
+			DEBUG_MSG(("m_Crypt.GetClientVer()(%lu) != m_reportedCliver(%lu) == %x\n", net->getCryptVersion(), version, (net->getCryptVersion() != version)));
 			client->addAOSPlayerSeeNoCrypt();
 		}
 	}
@@ -3321,9 +3321,13 @@ PacketViewRange::PacketViewRange() : Packet(2)
 bool PacketViewRange::onReceive(NetState* net)
 {
 	ADDTOCALLSTACK("PacketViewRange::onReceive");
-	UNREFERENCED_PARAMETER(net);
 
-	skip(1); // range
+	CChar *character = net->getClient()->GetChar();
+	if ( !character )
+		return false;
+
+	BYTE iVal = readByte();
+	character->SetSight(iVal);
 	return true;
 }
 

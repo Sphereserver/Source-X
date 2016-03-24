@@ -1215,7 +1215,7 @@ PacketItemContents::PacketItemContents(const CClient* target, const CItem* spell
 	// write item count
 	size_t l = getPosition();
 	seek(3);
-	writeInt16(static_cast<WORD>(m_count));
+	writeInt16(m_count);
 	seek(l);
 
 	push(target);
@@ -1247,7 +1247,8 @@ PacketItemContents::PacketItemContents(const CClient* target, const CItemContain
 		writeInt16(item->m_itSpell.m_spell);
 		writeInt16(0);
 		writeInt16(0);
-		if (includeGrid)	writeByte(static_cast<BYTE>(m_count));
+		if (includeGrid)	
+			writeByte(static_cast<BYTE>(m_count));
 		writeInt32(spellbook->GetUID());
 		writeInt16(static_cast<WORD>(HUE_DEFAULT));
 
@@ -1257,7 +1258,7 @@ PacketItemContents::PacketItemContents(const CClient* target, const CItemContain
 	// write item count
 	size_t l = getPosition();
 	seek(3);
-	writeInt16(static_cast<WORD>(m_count));
+	writeInt16(m_count);
 	seek(l);
 
 	push(target);
@@ -2033,16 +2034,12 @@ int PacketVendorBuyList::fillContainer(const CItemContainer* container, int conv
 	size_t countpos = getPosition();
 	skip(1);
 
-	// TO-DO: Probably there's something wrong here, since sphere draw containers items
-	// using last->first order by default, but this packet is using first->last order on
-	// enhanced clients. Maybe both should use the same first->last order?
-
-	for (CItem* item = bClientSA ? container->GetContentHead() : container->GetContentTail(); item != NULL && count < maxItems; item = bClientSA ? item->GetNext() : item->GetPrev())
+	for (CItem* item = container->GetContentHead(); item != NULL && count < maxItems; item = item->GetNext())
 	{
 		if (item->GetAmount() == 0)
 			continue;
 
-		CItemVendable* venditem = dynamic_cast<CItemVendable*>( item );
+		CItemVendable* venditem = static_cast<CItemVendable*>( item );
 		if (venditem == NULL)
 			continue;
 
@@ -2776,7 +2773,7 @@ size_t PacketVendorSellList::searchContainer(CClient* target, const CItemContain
 	if (item == NULL)
 		return 0;
 
-	size_t count(0);
+	size_t count = 0;
 	std::deque<const CItemContainer*> otherBoxes;
 
 	for (;;)
@@ -3003,9 +3000,9 @@ PacketServerList::PacketServerList(const CClient* target) : PacketSend(XCMD_Serv
 	initLength();
 	writeByte(0xFF);
 
-	size_t countPosition(getPosition());
+	WORD count = 0;
+	size_t countPosition = getPosition();
 	skip(2);
-	int count(0);
 
 	writeServerEntry(&g_Serv, ++count, reverseIp);
 
@@ -3023,7 +3020,7 @@ PacketServerList::PacketServerList(const CClient* target) : PacketSend(XCMD_Serv
 
 	size_t endPosition(getPosition());
 	seek(countPosition);
-	writeInt16(static_cast<WORD>(count));
+	writeInt16(count);
 	seek(endPosition);
 
 	push(target);

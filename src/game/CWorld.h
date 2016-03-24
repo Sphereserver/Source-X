@@ -352,8 +352,9 @@ private:
 	CWorldSearch& operator=(const CWorldSearch& other);
 
 public:
-	void SetAllShow( bool fView ) { m_fAllShow = fView; }
-	void SetSearchSquare( bool fSquareSearch ) { m_fSearchSquare = fSquareSearch; }
+	void SetAllShow( bool fView );
+	void SetSearchSquare( bool fSquareSearch );
+	void RestartSearch();		// Setting current obj to NULL will restart the search 
 	CChar * GetChar();
 	CItem * GetItem();
 };

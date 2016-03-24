@@ -272,6 +272,23 @@ void CChar::ContentAdd( CItem * pItem )
 	//LayerAdd( pItem, LAYER_QTY );
 }
 
+bool CChar::CanEquipStr( CItem *pItem ) const
+{
+	ADDTOCALLSTACK("CChar::CanEquipStr");
+	if ( IsPriv(PRIV_GM) )
+		return true;
+
+	CItemBase *pItemDef = pItem->Item_GetDef();
+	LAYER_TYPE layer = pItemDef->GetEquipLayer();
+	if ( !pItemDef->IsTypeEquippable() || !CItemBase::IsVisibleLayer(layer) )
+		return true;
+
+	if ( Stat_GetAdjusted(STAT_STR) >= pItemDef->m_ttEquippable.m_StrReq * (100 - pItem->GetDefNum("LOWERREQ", true, true)) / 100 )
+		return true;
+
+	return false;
+}
+
 LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg, bool fTest )
 {
 	ADDTOCALLSTACK("CChar::CanEquipLayer");

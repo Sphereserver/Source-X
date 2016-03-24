@@ -473,6 +473,8 @@ private:
 protected:
 	void OnRemoveOb( CGObListRec* pObRec );	// Override this = called when removed from list.
 public:
+	bool CanCarry( const CItem * pItem ) const;
+	bool CanEquipStr( CItem * pItem ) const;
 	LAYER_TYPE CanEquipLayer( CItem * pItem, LAYER_TYPE layer, CChar * pCharMsg, bool fTest );
 	CItem * LayerFind( LAYER_TYPE layer ) const;
 	void LayerAdd( CItem * pItem, LAYER_TYPE layer = LAYER_QTY );
@@ -483,7 +485,6 @@ public:
 	void OnWeightChange( int iChange );
 	int GetWeight(WORD amount = 0) const;
 	int GetWeightLoadPercent( int iWeight ) const;
-	bool CanCarry( const CItem * pItem ) const;
 
 	CItem * GetSpellbook(SPELL_TYPE iSpell = SPELL_Clumsy) const;
 	int GetSpellbookExtra(CItem * pBooks[], int &count) const;
@@ -890,8 +891,7 @@ public:
 	bool Spell_Resurrection(CItemCorpse * pCorpse = NULL, CChar * pCharSrc = NULL, bool bNoFail = false);
 	bool Spell_Teleport( CPointMap pt, bool bTakePets = false, bool bCheckAntiMagic = true, bool bDisplayEffect = true, ITEMID_TYPE iEffect = ITEMID_NOTHING, SOUND_TYPE iSound = SOUND_NONE );
 	bool Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool fFailMsg, bool fCheckAntiMagic = true );
-	int	GetSpellEffect( SPELL_TYPE spell, int iSkillLevel, int iEffectMult );
-	int	GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, int iEffectMult, CChar * pCharSrc = NULL );
+	int	GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharSrc = NULL );
 	// Memories about objects in the world. -------------------
 private:
 	bool Memory_OnTick( CItemMemory * pMemory );

@@ -655,6 +655,24 @@ jumpover:
 	}
 }
 
+void CWorldSearch::SetAllShow( bool fView )
+{ 
+	ADDTOCALLSTACK("CWorldSearch::SetAllShow");
+	m_fAllShow = fView;
+}
+
+void CWorldSearch::SetSearchSquare( bool fSquareSearch ) 
+{
+	ADDTOCALLSTACK("CWorldSearch::SetSearchSquare");
+	m_fSearchSquare = fSquareSearch; 
+}
+
+void CWorldSearch::RestartSearch() 
+{
+	ADDTOCALLSTACK("CWorldSearch::RestartSearch");
+	m_pObj = NULL; 
+}
+
 CChar * CWorldSearch::GetChar()
 {
 	ADDTOCALLSTACK("CWorldSearch::GetChar");
