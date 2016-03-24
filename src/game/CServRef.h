@@ -63,7 +63,7 @@ public:
 	CCrypt m_ClientVersion;
 
 	// Breakdown the string. or filled in locally.
-	signed char m_TimeZone;	// Hours from GMT. +5=EST
+	char m_TimeZone;	// Hours from GMT. +5=EST
 	CGString m_sEMail;		// Admin email address.
 	CGString m_sURL;			// URL for the server.
 	CGString m_sLang;

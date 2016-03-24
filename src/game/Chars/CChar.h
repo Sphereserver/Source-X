@@ -285,7 +285,7 @@ private:
 public:
 	// Status and attributes ------------------------------------
 	int IsWeird() const;
-	signed char GetFixZ( CPointMap pt, uint wBlockFlags = 0);
+	char GetFixZ( CPointMap pt, uint wBlockFlags = 0);
 	virtual void Delete(bool bforce = false);
 	virtual bool NotifyDelete();
 	bool IsStatFlag( dword dwStatFlag ) const;
@@ -410,7 +410,7 @@ public:
 	bool MoveToRegionReTest( dword dwType );
 	bool MoveToChar(CPointMap pt, bool bForceFix = false);
 	bool MoveTo(CPointMap pt, bool bForceFix = false);
-	virtual void SetTopZ( signed char z );
+	virtual void SetTopZ( char z );
 	bool MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart = 1, bool bFromShip = false);
 	virtual bool MoveNearObj( const CObjBaseTemplate *pObj, word iSteps = 0 );
 	bool MoveNear( CPointMap pt, word iSteps = 0 );
@@ -890,7 +890,7 @@ private:
 public:
 	inline bool Spell_SimpleEffect( CObjBase * pObj, CObjBase * pObjSrc, SPELL_TYPE &spell, int &iSkillLevel );
 	bool Spell_CastDone();
-	bool OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem );
+	bool OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool bReflecting = false );
 	bool Spell_Resurrection(CItemCorpse * pCorpse = NULL, CChar * pCharSrc = NULL, bool bNoFail = false);
 	bool Spell_Teleport( CPointMap pt, bool bTakePets = false, bool bCheckAntiMagic = true, bool bDisplayEffect = true, ITEMID_TYPE iEffect = ITEMID_NOTHING, SOUND_TYPE iSound = SOUND_NONE );
 	bool Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool fFailMsg, bool fCheckAntiMagic = true );

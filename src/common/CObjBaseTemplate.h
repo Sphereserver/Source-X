@@ -21,7 +21,7 @@ protected:
 	void DupeCopy( const CObjBaseTemplate * pObj );
 
 	void SetUID( dword dwIndex );
-	void SetUnkZ( signed char z );
+	void SetUnkZ( char z );
 
 public:
 	static const char *m_sClassName;
@@ -64,13 +64,13 @@ public:
 
 	void SetTopPoint( const CPointMap & pt );
 	const CPointMap & GetTopPoint() const;
-	virtual void SetTopZ( signed char z );
-	signed char GetTopZ() const;
+	virtual void SetTopZ( char z );
+	char GetTopZ() const;
 	uchar GetTopMap() const;
 
 	void SetUnkPoint( const CPointMap & pt );
 	const CPointMap & GetUnkPoint() const;
-	signed char GetUnkZ() const;
+	char GetUnkZ() const;
 
 	// Distance and direction
 	int GetTopDist( const CPointMap & pt ) const;

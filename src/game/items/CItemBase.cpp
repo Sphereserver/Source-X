@@ -1795,7 +1795,7 @@ CItemBaseMulti::CItemBaseMulti( CItemBase* pBase ) :
 	CopyTransfer(pBase);
 }
 
-bool CItemBaseMulti::AddComponent( ITEMID_TYPE id, short dx, short dy, signed char dz )
+bool CItemBaseMulti::AddComponent( ITEMID_TYPE id, short dx, short dy, char dz )
 {
 	ADDTOCALLSTACK("CItemBaseMulti::AddComponent");
 	m_rect.UnionPoint( dx, dy );
@@ -1839,7 +1839,7 @@ bool CItemBaseMulti::AddComponent( tchar * pArgs )
 	size_t iQty = Str_ParseCmds( pArgs, piArgs, COUNTOF(piArgs));
 	if ( iQty <= 1 )
 		return false;
-	return AddComponent(static_cast<ITEMID_TYPE>(RES_GET_INDEX(piArgs[0])), static_cast<short>(piArgs[1]), static_cast<short>(piArgs[2]), static_cast<signed char>(piArgs[3]) );
+	return AddComponent(static_cast<ITEMID_TYPE>(RES_GET_INDEX(piArgs[0])), static_cast<short>(piArgs[1]), static_cast<short>(piArgs[2]), static_cast<char>(piArgs[3]) );
 }
 
 int CItemBaseMulti::GetMaxDist() const

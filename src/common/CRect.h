@@ -23,7 +23,7 @@ public:
 public:
 	short m_x;	// equipped items dont need x,y
 	short m_y;
-	signed char m_z;	// This might be layer if equipped ? or equipped on corpse. Not used if in other container.
+	char m_z;	// This might be layer if equipped ? or equipped on corpse. Not used if in other container.
 	byte m_map;			// another map? (only if top level.)
 
 public:
@@ -52,7 +52,7 @@ public:
 	bool IsSame2D( const CPointBase & pt ) const;
 
 	void Set( const CPointBase & pt );
-	void Set( word x, word y, signed char z = 0, uchar map = 0 );
+	void Set( word x, word y, char z = 0, uchar map = 0 );
 	size_t Read( tchar * pVal );
 
 	tchar * WriteUsed( tchar * pszBuffer ) const;
@@ -86,7 +86,7 @@ struct CPointMap : public CPointBase
 {
 	// A point in the world (or in a container) (initialized)
 	CPointMap();
-	CPointMap( word x, word y, signed char z = 0, uchar map = 0 );
+	CPointMap( word x, word y, char z = 0, uchar map = 0 );
 	CPointMap & operator = ( const CPointBase & pt );
 	CPointMap( const CPointBase & pt );
 	CPointMap( tchar * pVal );
@@ -95,7 +95,7 @@ struct CPointMap : public CPointBase
 struct CPointSort : public CPointMap
 {
 	CPointSort();
-	CPointSort( word x, word y, signed char z = 0, uchar map = 0 );
+	CPointSort( word x, word y, char z = 0, uchar map = 0 );
 	CPointSort( const CPointBase & pt );
 	virtual ~CPointSort(); // just to make this dynamic
 };

@@ -495,7 +495,7 @@ CItem * CItem::ReadTemplate( CResourceLock & s, CObjBase * pCont ) // static
 					if ( pItem->IsItemInContainer())
 					{
 						fItemAttrib = true;
-						pItem->SetContainedLayer( static_cast<signed char>(pItem->GetAmount()));	// set the Restock amount.
+						pItem->SetContainedLayer( static_cast<char>(pItem->GetAmount()));	// set the Restock amount.
 					}
 				}
 				continue;
@@ -686,7 +686,7 @@ int CItem::IsWeird() const
 	return( ( ptCont == NULL ) ? 0x2106 : ptCont->IsWeird() );
 }
 
-signed char CItem::GetFixZ( CPointMap pt, dword wBlockFlags )
+char CItem::GetFixZ( CPointMap pt, dword wBlockFlags )
 {
 	height_t zHeight = CItemBase::GetItemHeight( GetDispID(), wBlockFlags );
 	CGrayMapBlockState block( wBlockFlags, pt.m_z, pt.m_z + zHeight, pt.m_z + 2, zHeight );
@@ -701,15 +701,11 @@ int CItem::FixWeirdness()
 	// RETURN: 0 = i can't fix this.
 
 	if ( IsType(IT_EQ_MEMORY_OBJ) && ! IsValidUID())
-	{
 		SetUID( UID_CLEAR, true );	// some cases we don't get our UID because we are created during load.
-	}
 
 	int iResultCode = CObjBase::IsWeird();
 	if ( iResultCode )
-	{
 		return( iResultCode );
-	}
 
 	CItemBase * pItemDef = Item_GetDef();
 	ASSERT(pItemDef);
@@ -732,15 +728,11 @@ int CItem::FixWeirdness()
 		// Make sure all my memories are valid !
 		if ( m_uidLink == GetUID() || m_uidLink.ObjFind() == NULL )
 		{
-			if ( m_type == IT_EQ_MEMORY_OBJ )
-			{
+			if ( m_type == IT_EQ_MEMORY_OBJ || m_type == IT_SPELL )
 				return 0; // get rid of it.	(this is not an ERROR per se)
-			}
 			if ( IsAttr(ATTR_STOLEN))
-			{
 				// The item has been laundered.
 				m_uidLink.InitUID();
-			}
 			else
 			{
 				DEBUG_ERR(("'%s' Bad Link to 0%x\n", GetName(), static_cast<dword>(m_uidLink)));
@@ -2845,7 +2837,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			{
 				return( false );
 			}
-			SetUnkZ( static_cast<signed char>(s.GetArgVal())); // GetEquipLayer()
+			SetUnkZ( static_cast<char>(s.GetArgVal())); // GetEquipLayer()
 			return true;
 		case IC_LINK:
 			m_uidLink = s.GetArgVal();
@@ -2916,7 +2908,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 						case 3: // m_z
 							if ( IsDigit(ppVal[2][0]) || ppVal[2][0] == '-' )
 							{
-								pt.m_z = static_cast<signed char>(ATOI(ppVal[2]));
+								pt.m_z = static_cast<char>(ATOI(ppVal[2]));
 							}
 						case 2:
 							pt.m_y = static_cast<short>(ATOI(ppVal[1]));
@@ -2945,7 +2937,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			if ( IsTypeSpellbook() )
 				m_itSpellbook.m_baseid = static_cast<word>(s.GetArgVal());
 			else
-				m_itNormal.m_morep.m_z = static_cast<signed char>(s.GetArgVal());
+				m_itNormal.m_morep.m_z = static_cast<char>(s.GetArgVal());
 			break;
 		case IC_P:
 			// Loading or import ONLY ! others use the r_Verb
@@ -4023,9 +4015,9 @@ bool CItem::Use_Portculis()
 
 	CPointMap pt = GetTopPoint();
 	if ( pt.m_z == m_itPortculis.m_z1 )
-		pt.m_z = static_cast<signed char>(m_itPortculis.m_z2);
+		pt.m_z = static_cast<char>(m_itPortculis.m_z2);
 	else
-		pt.m_z = static_cast<signed char>(m_itPortculis.m_z1);
+		pt.m_z = static_cast<char>(m_itPortculis.m_z1);
 
 	if ( pt.m_z == GetTopZ())
 		return false;
@@ -4878,9 +4870,10 @@ bool CItem::SetMagicLock( CChar * pCharSrc, int iSkillLevel )
 	return( true );
 }
 
-bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem )
+bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool bReflecting )
 {
 	ADDTOCALLSTACK("CItem::OnSpellEffect");
+	UNREFERENCED_PARAMETER(bReflecting);	// items are not affected by Magic Reflection
 	// A spell is cast on this item.
 	// ARGS:
 	//  iSkillLevel = 0-1000 = difficulty. may be slightly larger . how advanced is this spell (might be from a wand)

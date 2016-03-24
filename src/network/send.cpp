@@ -2024,7 +2024,7 @@ PacketVendorBuyList::PacketVendorBuyList(void) : PacketSend(XCMD_VendOpenBuy, 8,
 {
 }
 
-size_t PacketVendorBuyList::fillContainer(const CItemContainer* container, int convertFactor)
+size_t PacketVendorBuyList::fillContainer(const CItemContainer* container, int convertFactor, bool bIsClientEnhanced)
 {
 	ADDTOCALLSTACK("PacketVendorBuyList::fillContainer");
 
@@ -2037,7 +2037,8 @@ size_t PacketVendorBuyList::fillContainer(const CItemContainer* container, int c
 	size_t countpos = getPosition();
 	skip(1);
 
-	for (CItem* item = container->GetContentTail(); item != NULL; item = item->GetPrev())
+	// Enhanced Client wants the prices to be sent in reverse order
+	for ( CItem* item = (bIsClientEnhanced ? container->GetContentHead() : container->GetContentTail()) ; item != NULL ; item = (bIsClientEnhanced ? item->GetNext() : item->GetPrev()) )
 	{
 		CItemVendable* vendorItem = static_cast<CItemVendable *>(item);
 		if (vendorItem == NULL || vendorItem->GetAmount() == 0)

@@ -55,7 +55,7 @@ INT64 CGrayCachedMulItem::GetCacheAge() const
 	return( CServTime::GetCurrentTime() - m_timeRef );
 }
 
-CGrayMapBlockState::CGrayMapBlockState( dword dwBlockFlags, signed char z, int iHeight, height_t zHeight ) :
+CGrayMapBlockState::CGrayMapBlockState( dword dwBlockFlags, char z, int iHeight, height_t zHeight ) :
 	m_dwBlockFlags(dwBlockFlags),	m_z(z), m_iHeight(iHeight), m_zClimb(0), m_zHeight(zHeight)
 {
 	// m_z = PLAYER_HEIGHT
@@ -74,7 +74,7 @@ CGrayMapBlockState::CGrayMapBlockState( dword dwBlockFlags, signed char z, int i
 	m_zClimbHeight = 0;
 }
 
-CGrayMapBlockState::CGrayMapBlockState( dword dwBlockFlags, signed char z, int iHeight, signed char zClimb, height_t zHeight ) :
+CGrayMapBlockState::CGrayMapBlockState( dword dwBlockFlags, char z, int iHeight, char zClimb, height_t zHeight ) :
 	m_dwBlockFlags(dwBlockFlags),	m_z(z), m_iHeight(iHeight), m_zClimb(zClimb), m_zHeight(zHeight)
 {
 	m_Top.m_dwBlockFlags = 0;
@@ -114,13 +114,13 @@ lpctstr CGrayMapBlockState::GetTileName( dword dwID )	// static
 	return( pStr );
 }
 
-bool CGrayMapBlockState::CheckTile( dword wItemBlockFlags, signed char zBottom, height_t zHeight, dword dwID )
+bool CGrayMapBlockState::CheckTile( dword wItemBlockFlags, char zBottom, height_t zHeight, dword dwID )
 {
 	ADDTOCALLSTACK("CGrayMapBlockState::CheckTile");
 	// RETURN:
 	//  true = continue processing
 
-	signed char zTop = zBottom;
+	char zTop = zBottom;
 	if ( (wItemBlockFlags & CAN_I_CLIMB) )
 		zTop = minimum(zTop + ( zHeight / 2 ), UO_SIZE_Z);	// standing position is half way up climbable items.
 	else
@@ -191,7 +191,7 @@ bool CGrayMapBlockState::CheckTile( dword wItemBlockFlags, signed char zBottom, 
 	return true;
 }
 
-bool CGrayMapBlockState::IsUsableZ( signed char zBottom, height_t zHeightEstimate ) const
+bool CGrayMapBlockState::IsUsableZ( char zBottom, height_t zHeightEstimate ) const
 {
 	if ( zBottom > m_Top.m_z )	// above something that is already over my head.
 		return( false );
@@ -201,7 +201,7 @@ bool CGrayMapBlockState::IsUsableZ( signed char zBottom, height_t zHeightEstimat
 	return( true );	
 }
 
-bool CGrayMapBlockState::CheckTile_Item( dword wItemBlockFlags, signed char zBottom, height_t zHeight, dword dwID )
+bool CGrayMapBlockState::CheckTile_Item( dword wItemBlockFlags, char zBottom, height_t zHeight, dword dwID )
 {
 	ADDTOCALLSTACK("CGrayMapBlockState::CheckTile_Item");
 	// RETURN:
@@ -214,7 +214,7 @@ bool CGrayMapBlockState::CheckTile_Item( dword wItemBlockFlags, signed char zBot
 	if ( ! wItemBlockFlags )	// no effect.
 		return( true );
 
-	signed char zTop = zBottom;
+	char zTop = zBottom;
 	
 	if ( (wItemBlockFlags & CAN_I_CLIMB) && (wItemBlockFlags & CAN_I_PLATFORM) )
 		zTop = minimum(zTop + ( zHeight / 2 ), UO_SIZE_Z);	// standing position is half way up climbable items (except platforms).
@@ -287,7 +287,7 @@ bool CGrayMapBlockState::CheckTile_Item( dword wItemBlockFlags, signed char zBot
 
 }
 
-inline void CGrayMapBlockState::SetTop( dword &wItemBlockFlags, signed char &z, dword &dwID )
+inline void CGrayMapBlockState::SetTop( dword &wItemBlockFlags, char &z, dword &dwID )
 {
 	ADDTOCALLSTACK("CGrayMapBlockState::SetTop");
 	if ( z < m_Top.m_z )
@@ -298,7 +298,7 @@ inline void CGrayMapBlockState::SetTop( dword &wItemBlockFlags, signed char &z, 
 	}
 }
 
-bool CGrayMapBlockState::CheckTile_Terrain( dword wItemBlockFlags, signed char z, dword dwID )
+bool CGrayMapBlockState::CheckTile_Terrain( dword wItemBlockFlags, char z, dword dwID )
 {
 	ADDTOCALLSTACK("CGrayMapBlockState::CheckTile_Terrain");
 	// RETURN:

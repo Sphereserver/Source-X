@@ -232,7 +232,7 @@ void CPointBase::Set( const CPointBase & pt )
 	m_map = pt.m_map;
 }
 
-void CPointBase::Set( word x, word y, signed char z, uchar map )
+void CPointBase::Set( word x, word y, char z, uchar map )
 {
 	m_x = x;
 	m_y = y;
@@ -411,7 +411,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CGString & sVal ) const
 					if (pMultiItem->m_visible == 0)
 						continue;
 
-					CPointMap ptTest(static_cast<word>(ptMulti.m_x + pMultiItem->m_dx), static_cast<word>(ptMulti.m_y + pMultiItem->m_dy), static_cast<signed char>(ptMulti.m_z + pMultiItem->m_dz), this->m_map);
+					CPointMap ptTest(static_cast<word>(ptMulti.m_x + pMultiItem->m_dx), static_cast<word>(ptMulti.m_y + pMultiItem->m_dy), static_cast<char>(ptMulti.m_z + pMultiItem->m_dz), this->m_map);
 					if (GetDist(ptTest) > 0)
 						continue;
 
@@ -476,7 +476,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CGString & sVal ) const
 						break;
 					if (pMultiItem->m_visible == 0)
 						continue;
-					CPointMap ptTest(static_cast<word>(ptMulti.m_x + pMultiItem->m_dx), static_cast<word>(ptMulti.m_y + pMultiItem->m_dy), static_cast<signed char>(ptMulti.m_z + pMultiItem->m_dz), this->m_map);
+					CPointMap ptTest(static_cast<word>(ptMulti.m_x + pMultiItem->m_dx), static_cast<word>(ptMulti.m_y + pMultiItem->m_dy), static_cast<char>(ptMulti.m_z + pMultiItem->m_dz), this->m_map);
 					if (GetDist(ptTest) > 0)
 						continue;
 
@@ -514,7 +514,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CGString & sVal ) const
 						break;
 					if (pMultiItem->m_visible == 0)
 						continue;
-					CPointMap ptTest(static_cast<word>(ptMulti.m_x + pMultiItem->m_dx), static_cast<word>(ptMulti.m_y + pMultiItem->m_dy), static_cast<signed char>(ptMulti.m_z + pMultiItem->m_dz), this->m_map);
+					CPointMap ptTest(static_cast<word>(ptMulti.m_x + pMultiItem->m_dx), static_cast<word>(ptMulti.m_y + pMultiItem->m_dy), static_cast<char>(ptMulti.m_z + pMultiItem->m_dz), this->m_map);
 					if (GetDist(ptTest) > 0)
 						continue;
 
@@ -722,7 +722,7 @@ bool CPointBase::r_LoadVal( lpctstr pszKey, lpctstr pszArgs )
 		case 0: m_map = static_cast<uchar>(iVal); break;
 		case 1: m_x = static_cast<short>(iVal); break;
 		case 2: m_y = static_cast<short>(iVal); break;
-		case 3: m_z = static_cast<signed char>(iVal); break;
+		case 3: m_z = static_cast<char>(iVal); break;
 	}
 	return( true );
 }
@@ -835,7 +835,7 @@ size_t CPointBase::Read( tchar * pszVal )
 		case 3: // m_z
 			if ( IsDigit(ppVal[2][0]) || ppVal[2][0] == '-' )
 			{
-				m_z = static_cast<signed char>(ATOI(ppVal[2]));
+				m_z = static_cast<char>(ATOI(ppVal[2]));
 			}
 		case 2:
 			m_y = static_cast<short>(ATOI(ppVal[1]));
@@ -1050,7 +1050,7 @@ CPointMap::CPointMap()
 	InitPoint();
 }
 
-CPointMap::CPointMap( word x, word y, signed char z, uchar map )
+CPointMap::CPointMap( word x, word y, char z, uchar map )
 {
 	m_x = x;
 	m_y = y;
@@ -1079,7 +1079,7 @@ CPointSort::CPointSort()
 	InitPoint();
 }
 
-CPointSort::CPointSort( word x, word y, signed char z, uchar map )
+CPointSort::CPointSort( word x, word y, char z, uchar map )
 {
 	m_x = x;
 	m_y = y;

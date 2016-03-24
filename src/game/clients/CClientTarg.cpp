@@ -295,7 +295,7 @@ bool CClient::OnTarg_UnExtract( CObjBase * pObj, const CPointMap & pt )
 		if ( pItem == NULL )
 			return( false );
 
-		CPointMap ptOffset( static_cast<word>(piCmd[0]), static_cast<word>(piCmd[1]), static_cast<signed char>(piCmd[2]) );
+		CPointMap ptOffset( static_cast<word>(piCmd[0]), static_cast<word>(piCmd[1]), static_cast<char>(piCmd[2]) );
 		ptOffset += pt;
 		ptOffset.m_map = pt.m_map;
 		pItem->MoveToUpdate( ptOffset );
@@ -590,7 +590,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 			INT64 piArgs[3];		// Maximum parameters in one line
 			Str_ParseCmds( szTmp, piArgs, COUNTOF( piArgs ));
 
-			CPointMap ptNudge(static_cast<word>(piArgs[0]),static_cast<word>(piArgs[1]),static_cast<signed char>(piArgs[2]) );
+			CPointMap ptNudge(static_cast<word>(piArgs[0]),static_cast<word>(piArgs[1]),static_cast<char>(piArgs[2]) );
 
 			CWorldSearch AreaItem( ptCtr, iRadius );
 			AreaItem.SetAllShow( IsPriv( PRIV_ALLSHOW ));
@@ -695,7 +695,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 			INT64 piArgs[16];		// Maximum parameters in one line
 			size_t iArgQty = Str_ParseCmds( szTmp, piArgs, COUNTOF( piArgs ));
 
-			signed char z = static_cast<signed char>(piArgs[0]);	// z height is the first arg.
+			char z = static_cast<char>(piArgs[0]);	// z height is the first arg.
 			size_t iArg = 0;
 			for ( int mx = rect.m_left; mx <= rect.m_right; mx++)
 			{

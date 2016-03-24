@@ -1303,7 +1303,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc
 					case 3:
 						if ( IsDigit(ppVal[2][0]) || (( iArgs == 4 ) && ( ppVal[2][0] == '-' )) )
 						{
-							pt.m_z = static_cast<signed char>(( iArgs == 4 ) ? ATOI(ppVal[2]) : 0);
+							pt.m_z = static_cast<char>(( iArgs == 4 ) ? ATOI(ppVal[2]) : 0);
 							if ( iArgs == 3 )
 							{
 								pt.m_map = static_cast<uchar>(ATOI(ppVal[2]));

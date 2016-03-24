@@ -192,7 +192,7 @@ public:
 		= 0;
 	virtual void Flip()
 		= 0;
-	virtual bool OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem )
+	virtual bool OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool bReflecting = false )
 		= 0;
 
 	virtual TRIGRET_TYPE Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CChar * pSrc, CScriptTriggerArgs * pArgs );
@@ -206,7 +206,7 @@ private:
 
 public:
 	//	Some global object variables
-	signed int m_ModAr;
+	int m_ModAr;
 
 #define SU_UPDATE_HITS			0x01	// update hits to others
 #define SU_UPDATE_MODE			0x02	// update mode to all

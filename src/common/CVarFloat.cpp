@@ -451,6 +451,22 @@ RealType CVarFloat::GetSingle( lpctstr & pArgs )
 
 				} break;
 
+				case INTRINSIC_ARCSIN:
+				{
+					if ( pArgs && *pArgs )
+					{
+						iCount = 1;
+						RealType dArgument = MakeFloatMath(pArgs);
+						dResult = asin(dArgument) * 180 / M_PI;
+					}
+					else
+					{
+						iCount = 0;
+						dResult = 0;
+					}
+
+				} break;
+
 				case INTRINSIC_COS:
 				{
 					if ( pArgs && *pArgs )
@@ -458,6 +474,22 @@ RealType CVarFloat::GetSingle( lpctstr & pArgs )
 						iCount = 1;
 						RealType dArgument = MakeFloatMath(pArgs);
 						dResult = cos(dArgument * M_PI / 180);
+					}
+					else
+					{
+						iCount = 0;
+						dResult = 0;
+					}
+
+				} break;
+
+				case INTRINSIC_ARCCOS:
+				{
+					if ( pArgs && *pArgs )
+					{
+						iCount = 1;
+						RealType dArgument = MakeFloatMath(pArgs);
+						dResult = acos(dArgument) * 180 / M_PI;
 					}
 					else
 					{
@@ -482,6 +514,23 @@ RealType CVarFloat::GetSingle( lpctstr & pArgs )
 					}
 
 				} break;
+
+				case INTRINSIC_ARCTAN:
+				{
+					if ( pArgs && *pArgs )
+					{
+						iCount = 1;
+						RealType dArgument = MakeFloatMath(pArgs);
+						dResult = atan(dArgument) * 180 / M_PI;
+					}
+					else
+					{
+						iCount = 0;
+						dResult = 0;
+					}
+
+				} break;
+
 
 				case INTRINSIC_StrIndexOf:
 				{

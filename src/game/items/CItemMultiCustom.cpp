@@ -302,7 +302,7 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
 		CPointMap pt(GetTopPoint());
 		pt.m_x += (*i)->m_item.m_dx;
 		pt.m_y += (*i)->m_item.m_dy;
-		pt.m_z += static_cast<signed char>((*i)->m_item.m_dz);
+		pt.m_z += static_cast<char>((*i)->m_item.m_dz);
 
 		pItem->m_uidLink = GetUID();
 		pItem->ClrAttr(ATTR_DECAY|ATTR_CAN_DECAY);
@@ -362,7 +362,7 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
 	Update();
 }
 
-void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, signed char z, short iStairID)
+void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z, short iStairID)
 {
 	ADDTOCALLSTACK("CItemMultiCustom::AddItem");
 	// add an item to the building design at the given location
@@ -439,7 +439,7 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, sh
 				if ( bFloor != pPrevComponents[i]->m_isFloor )
 					continue;
 
-				RemoveItem(NULL, pPrevComponents[i]->m_item.GetDispID(), pPrevComponents[i]->m_item.m_dx, pPrevComponents[i]->m_item.m_dy, static_cast<signed char>(pPrevComponents[i]->m_item.m_dz));
+				RemoveItem(NULL, pPrevComponents[i]->m_item.GetDispID(), pPrevComponents[i]->m_item.m_dx, pPrevComponents[i]->m_item.m_dy, static_cast<char>(pPrevComponents[i]->m_item.m_dz));
 			}
 		}
 	}
@@ -457,7 +457,7 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, sh
 	m_designWorking.m_iRevision++;
 }
 
-void CItemMultiCustom::AddStairs(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, signed char z, short iStairID)
+void CItemMultiCustom::AddStairs(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z, short iStairID)
 {
 	ADDTOCALLSTACK("CItemMultiCustom::AddStairs");
 	// add a staircase to the building, the given ID must
@@ -506,12 +506,12 @@ void CItemMultiCustom::AddStairs(CClient * pClientSrc, ITEMID_TYPE id, short x, 
 		if ( !pMultiItem->m_visible )
 			continue;
 
-		AddItem(NULL, pMultiItem->GetDispID(), x + pMultiItem->m_dx, y + pMultiItem->m_dy, z + static_cast<signed char>(pMultiItem->m_dz), iStairID);
+		AddItem(NULL, pMultiItem->GetDispID(), x + pMultiItem->m_dx, y + pMultiItem->m_dy, z + static_cast<char>(pMultiItem->m_dz), iStairID);
 	}
 	SendStructureTo(pClientSrc);
 }
 
-void CItemMultiCustom::AddRoof(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, signed char z)
+void CItemMultiCustom::AddRoof(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z)
 {
 	ADDTOCALLSTACK("CItemMultiCustom::AddRoof");
 	// add a roof piece to the building
@@ -551,7 +551,7 @@ void CItemMultiCustom::AddRoof(CClient * pClientSrc, ITEMID_TYPE id, short x, sh
 	AddItem(pClientSrc, id, x, y, z);
 }
 
-void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, signed char z)
+void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z)
 {
 	ADDTOCALLSTACK("CItemMultiCustom::RemoveItem");
 	// remove the item that's found at given location
@@ -605,7 +605,7 @@ void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x,
 				break;
 
 			// floor tiles the ground floor are replaced with dirt tiles
-			if ( ((*j)->m_item.m_wTileID != ITEMID_DIRT_TILE) && (*j)->m_isFloor && (GetPlane(*j) == 1) && (GetPlaneZ(GetPlane(*j)) == static_cast<signed char>((*j)->m_item.m_dz)) )
+			if ( ((*j)->m_item.m_wTileID != ITEMID_DIRT_TILE) && (*j)->m_isFloor && (GetPlane(*j) == 1) && (GetPlaneZ(GetPlane(*j)) == static_cast<char>((*j)->m_item.m_dz)) )
 				bReplaceDirt = true;
 
 			m_designWorking.m_vectorComponents.erase(j);
@@ -648,7 +648,7 @@ bool CItemMultiCustom::RemoveStairs(Component * pStairComponent)
 
 			short x = (*i)->m_item.m_dx;
 			short y = (*i)->m_item.m_dy;
-			signed char z = static_cast<signed char>((*i)->m_item.m_dz);
+			char z = static_cast<char>((*i)->m_item.m_dz);
 
 			i = m_designWorking.m_vectorComponents.erase(i);
 			m_designWorking.m_iRevision++;
@@ -665,7 +665,7 @@ bool CItemMultiCustom::RemoveStairs(Component * pStairComponent)
 	return true;
 }
 
-void CItemMultiCustom::RemoveRoof(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, signed char z)
+void CItemMultiCustom::RemoveRoof(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z)
 {
 	ADDTOCALLSTACK("CItemMultiCustom::RemoveRoof");
 	
@@ -783,7 +783,7 @@ void CItemMultiCustom::SendStructureTo(CClient * pClientSrc)
 				else
 					index = (x * (iHeight - 1)) + y;
 
-				if (( GetPlaneZ(GetPlane(pComp)) != static_cast<signed char>(pComp->m_item.m_dz) ) ||
+				if (( GetPlaneZ(GetPlane(pComp)) != static_cast<char>(pComp->m_item.m_dz) ) ||
 					( pItemBase->GetHeight() == 0 || pComp->m_isFloor ) ||
 					( x < 0 || y < 0 || x >= iWidth || y >= iHeight ) ||
 					( index < 0 || index >= PLANEDATA_BUFFER ))
@@ -818,7 +818,7 @@ void CItemMultiCustom::SendStructureTo(CClient * pClientSrc)
 				continue;
 
 			// stair items can be sent in any order
-			cmd->writeStairData(pComp->m_item.GetDispID(), pComp->m_item.m_dx, pComp->m_item.m_dy, static_cast<signed char>(pComp->m_item.m_dz));
+			cmd->writeStairData(pComp->m_item.GetDispID(), pComp->m_item.m_dx, pComp->m_item.m_dy, static_cast<char>(pComp->m_item.m_dz));
 		}
 	}
 
@@ -891,7 +891,7 @@ void CItemMultiCustom::ResetStructure( CClient * pClientSrc )
 			if ( !pMultiItem->m_visible )
 				continue;
 
-			AddItem(NULL, pMultiItem->GetDispID(), pMultiItem->m_dx, pMultiItem->m_dy, static_cast<signed char>(pMultiItem->m_dz));
+			AddItem(NULL, pMultiItem->GetDispID(), pMultiItem->m_dx, pMultiItem->m_dy, static_cast<char>(pMultiItem->m_dz));
 		}
 	}
 
@@ -956,7 +956,7 @@ size_t CItemMultiCustom::GetFixtureCount(DesignDetails * pDesign)
 	return count;
 }
 
-size_t CItemMultiCustom::GetComponentsAt(short x, short y, signed char z, Component ** pComponents, DesignDetails * pDesign)
+size_t CItemMultiCustom::GetComponentsAt(short x, short y, char z, Component ** pComponents, DesignDetails * pDesign)
 {
 	ADDTOCALLSTACK("CItemMultiCustom::GetComponentsAt");
 	// find a list of components that are located at the given
@@ -975,7 +975,7 @@ size_t CItemMultiCustom::GetComponentsAt(short x, short y, signed char z, Compon
 		if ( pComponent->m_item.m_dx != x || pComponent->m_item.m_dy != y )
 			continue;
 
-		if ( z != INT8_MIN && GetPlane(static_cast<signed char>(pComponent->m_item.m_dz)) != GetPlane(z) )
+		if ( z != INT8_MIN && GetPlane(static_cast<char>(pComponent->m_item.m_dz)) != GetPlane(z) )
 			continue;
 
 		pComponents[count++] = pComponent;
@@ -987,10 +987,10 @@ size_t CItemMultiCustom::GetComponentsAt(short x, short y, signed char z, Compon
 const CPointMap CItemMultiCustom::GetComponentPoint(Component * pComp) const
 {
 	ADDTOCALLSTACK("CItemMultiCustom::GetComponentPoint");
-	return GetComponentPoint(pComp->m_item.m_dx, pComp->m_item.m_dy, static_cast<signed char>(pComp->m_item.m_dz));
+	return GetComponentPoint(pComp->m_item.m_dx, pComp->m_item.m_dy, static_cast<char>(pComp->m_item.m_dz));
 }
 
-const CPointMap CItemMultiCustom::GetComponentPoint(short dx, short dy, signed char dz) const
+const CPointMap CItemMultiCustom::GetComponentPoint(short dx, short dy, char dz) const
 {
 	ADDTOCALLSTACK("CItemMultiCustom::GetComponentPoint");
 	// return the real world location from the given offset
@@ -1174,7 +1174,7 @@ bool CItemMultiCustom::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute com
 					static_cast<ITEMID_TYPE>(Exp_GetVal(ppArgs[0])),
 					static_cast<short>(Exp_GetVal(ppArgs[1])),
 					static_cast<short>(Exp_GetVal(ppArgs[2])),
-					static_cast<signed char>(Exp_GetVal(ppArgs[3])));
+					static_cast<char>(Exp_GetVal(ppArgs[3])));
 		} break;
 
 		case IMCV_ADDMULTI:
@@ -1194,7 +1194,7 @@ bool CItemMultiCustom::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute com
 					id,
 					static_cast<short>(Exp_GetVal(ppArgs[1])),
 					static_cast<short>(Exp_GetVal(ppArgs[2])),
-					static_cast<signed char>(Exp_GetVal(ppArgs[3])),
+					static_cast<char>(Exp_GetVal(ppArgs[3])),
 					(sm_mapValidItems.find(id) == sm_mapValidItems.end()? 0 : -1));
 		} break;
 
@@ -1236,7 +1236,7 @@ bool CItemMultiCustom::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute com
 					static_cast<ITEMID_TYPE>(Exp_GetVal(ppArgs[0])),
 					static_cast<short>(Exp_GetVal(ppArgs[1])),
 					static_cast<short>(Exp_GetVal(ppArgs[2])),
-					static_cast<signed char>(Exp_GetVal(ppArgs[3])));
+					static_cast<char>(Exp_GetVal(ppArgs[3])));
 		} break;
 
 		case IMCV_RESET:
@@ -1284,7 +1284,7 @@ void CItemMultiCustom::r_Write( CScript & s )
 	for ( ComponentsContainer::iterator i = m_designMain.m_vectorComponents.begin(); i != m_designMain.m_vectorComponents.end(); ++i )
 	{
 		comp = *i;
-		s.WriteKeyFormat("COMP", "%d,%d,%d,%d,%d", comp->m_item.GetDispID(), comp->m_item.m_dx, comp->m_item.m_dy, static_cast<signed char>(comp->m_item.m_dz), comp->m_isStair);
+		s.WriteKeyFormat("COMP", "%d,%d,%d,%d,%d", comp->m_item.GetDispID(), comp->m_item.m_dx, comp->m_item.m_dy, static_cast<char>(comp->m_item.m_dz), comp->m_isStair);
 	}
 
 	if ( m_designMain.m_iRevision )
@@ -1420,7 +1420,7 @@ bool CItemMultiCustom::r_LoadVal( CScript & s  )
 					static_cast<ITEMID_TYPE>(ATOI(ppArgs[0])),
 					static_cast<short>(ATOI(ppArgs[1])),
 					static_cast<short>(ATOI(ppArgs[2])),
-					static_cast<signed char>(ATOI(ppArgs[3])),
+					static_cast<char>(ATOI(ppArgs[3])),
 					static_cast<short>(ATOI(ppArgs[4])));
 			return true;
 		}
@@ -1440,7 +1440,7 @@ bool CItemMultiCustom::r_LoadVal( CScript & s  )
 	return false;
 }
 
-uchar CItemMultiCustom::GetPlane( signed char z )
+uchar CItemMultiCustom::GetPlane( char z )
 {
 	if ( z >= 67 )
 		return 4;
@@ -1456,10 +1456,10 @@ uchar CItemMultiCustom::GetPlane( signed char z )
 
 uchar CItemMultiCustom::GetPlane( Component * pComponent )
 {
-	return GetPlane(static_cast<signed char>(pComponent->m_item.m_dz));
+	return GetPlane(static_cast<char>(pComponent->m_item.m_dz));
 }
 
-signed char CItemMultiCustom::GetPlaneZ( uchar plane )
+char CItemMultiCustom::GetPlaneZ( uchar plane )
 {
 	return 7 + ((plane - 1) * 20);
 }

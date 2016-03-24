@@ -454,7 +454,7 @@ bool Table::GoPrev()
 	return false;
 }
 
-bool Table::GoRow(unsigned int iRow)
+bool Table::GoRow(uint iRow)
 {
 	if (this==0) return false;
 	if (iRow<m_lstRows.size())

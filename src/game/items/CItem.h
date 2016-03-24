@@ -549,7 +549,7 @@ public:
 	void SetAnim( ITEMID_TYPE id, int iTime );
 
 	int IsWeird() const;
-	signed char GetFixZ(CPointMap pt, dword wBlockFlags = 0 );
+	char GetFixZ(CPointMap pt, dword wBlockFlags = 0 );
 	byte GetSpeed() const;
 	void SetAttr( dword dwAttr );
 	void ClrAttr( dword dwAttr );
@@ -681,7 +681,7 @@ public:
 	bool IsBookSystem() const;
 
 	void OnExplosion();
-	bool OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem );
+	bool OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool bReflecting = false );
 	int OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType = DAMAGE_HIT_BLUNT );
 
 	int Armor_GetRepairPercent() const;

@@ -15,7 +15,7 @@ void CObjBaseTemplate::SetUID( dword dwIndex )
 	m_UID.SetObjUID( dwIndex );	// Will have UID_F_ITEM as well.
 }
 
-void CObjBaseTemplate::SetUnkZ( signed char z )
+void CObjBaseTemplate::SetUnkZ( char z )
 {
 	m_pt.m_z = z;
 }
@@ -99,7 +99,7 @@ void CObjBaseTemplate::SetEquipLayer( LAYER_TYPE layer )
 	m_pt.m_x = 0;	// these don't apply.
 	m_pt.m_y = 0;
 	// future: strongly typed enums will remove the need for this cast
-	m_pt.m_z = static_cast<signed char>(layer); // layer equipped.
+	m_pt.m_z = static_cast<char>(layer); // layer equipped.
 	m_pt.m_map = 0;
 }
 
@@ -141,12 +141,12 @@ const CPointMap & CObjBaseTemplate::GetTopPoint() const
 	return( m_pt );
 }
 
-void CObjBaseTemplate::SetTopZ( signed char z )
+void CObjBaseTemplate::SetTopZ( char z )
 {
 	m_pt.m_z = z;
 }
 
-signed char CObjBaseTemplate::GetTopZ() const
+char CObjBaseTemplate::GetTopZ() const
 {
 	return( m_pt.m_z );
 }
@@ -167,7 +167,7 @@ const CPointMap & CObjBaseTemplate::GetUnkPoint() const
 	return( m_pt );
 }
 
-signed char CObjBaseTemplate::GetUnkZ() const	// Equal to GetTopZ ?
+char CObjBaseTemplate::GetUnkZ() const	// Equal to GetTopZ ?
 {
 	return( m_pt.m_z );
 }

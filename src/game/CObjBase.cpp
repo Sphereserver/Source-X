@@ -45,7 +45,7 @@ bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
 	{
 		pt.m_x += static_cast<short>(Exp_GetVal(ppCmd[0]));
 		pt.m_y += static_cast<short>(iTmp);
-		pt.m_z += static_cast<signed char>(Exp_GetVal(ppCmd[2]));
+		pt.m_z += static_cast<char>(Exp_GetVal(ppCmd[2]));
 	}
 	else	// a direction by name.
 	{
@@ -2156,7 +2156,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			EXC_SET("NUDGEDOWN");
 			if ( IsTopLevel())
 			{
-				signed char zdiff = static_cast<signed char>(s.GetArgVal());
+				char zdiff = static_cast<char>(s.GetArgVal());
 				SetTopZ( GetTopZ() - ( zdiff ? zdiff : 1 ));
 				Update();
 			}
@@ -2165,7 +2165,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			EXC_SET("NUDGEUP");
 			if ( IsTopLevel())
 			{
-				signed char zdiff = static_cast<signed char>(s.GetArgVal());
+				char zdiff = static_cast<char>(s.GetArgVal());
 				SetTopZ( GetTopZ() + ( zdiff ? zdiff : 1 ));
 				Update();
 			}
@@ -2637,7 +2637,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				return( false );
 			if ( s.HasArgs())
 			{
-				SetUnkZ( static_cast<signed char>(s.GetArgVal()));
+				SetUnkZ( static_cast<char>(s.GetArgVal()));
 			}
 			else if ( IsTopLevel())
 			{

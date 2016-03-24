@@ -2757,7 +2757,7 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 		case EXTCMD_DOOR_AUTO:	// open door macro
 		{
 			CPointMap pt = m_pChar->GetTopPoint();
-			signed char iCharZ = pt.m_z;
+			char iCharZ = pt.m_z;
 
 			pt.Move(m_pChar->m_dirFace);
 			CWorldSearch Area(pt, 1);

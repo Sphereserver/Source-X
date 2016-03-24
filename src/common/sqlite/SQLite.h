@@ -119,7 +119,7 @@ public:
 
 	// Sets the 'iterator' to the [iRow] row
 	// returns false if fails (out of bounds)
-	bool GoRow(unsigned int iRow);
+	bool GoRow(uint iRow);
 
 	// Gets the value of lpColName column, in the current row
 	// returns null if fails (no records)

@@ -979,12 +979,12 @@ dodirmovechange:
 		{
 			if ( ! IsAttr(ATTR_MAGIC ))
 				return( false );
-			signed char zold = GetTopZ();
+			char zold = GetTopZ();
 			CPointMap pt = GetTopPoint();
 			pt.m_z = zold;
 			SetTopZ( -UO_SIZE_Z );	// bottom of the world where i won't get in the way.
 			dword wBlockFlags = CAN_I_WATER;
-			signed char z = g_World.GetHeightPoint2( pt, wBlockFlags );
+			char z = g_World.GetHeightPoint2( pt, wBlockFlags );
 			SetTopZ( zold );	// restore z for now.
 			pt.InitPoint();
 			pt.m_z = z - zold;

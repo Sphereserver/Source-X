@@ -2381,7 +2381,7 @@ public:
 struct CUOMapMeter	// 3 bytes (map0.mul)
 {
 	word m_wTerrainIndex;	// TERRAIN_TYPE index to Radarcol and CUOTerrainTypeRec/CUOTerrainTypeRec2
-	signed char m_z;
+	char m_z;
 	static bool IsTerrainNull( word wTerrainIndex )
 	{
 		switch ( wTerrainIndex )
@@ -2405,7 +2405,7 @@ struct CUOStaticItemRec	// 7 byte block = static items on the map (statics0.mul)
 	word	m_wTileID;		// ITEMID_TYPE = Index to tile CUOItemTypeRec/CUOItemTypeRec2
 	byte	m_x;		// x <= 7 = offset from block.
 	byte 	m_y;		// y <= 7
-	signed char m_z;	//
+	char m_z;	//
 	word 	m_wHue;		// HUE_TYPE modifier for the item
 
 	// For internal caching purposes only. overload this.

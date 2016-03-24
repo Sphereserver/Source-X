@@ -59,7 +59,7 @@ struct CGrayMapBlocker
 {
 	dword m_dwBlockFlags;	// How does this item block ? CAN_I_PLATFORM
 	dword m_dwTile;			// TERRAIN_QTY + id.
-	signed char m_z;		// Top of a solid object. or bottom of non blocking one.
+	char m_z;		// Top of a solid object. or bottom of non blocking one.
 };
 
 struct CGrayMapBlockState
@@ -75,9 +75,9 @@ struct CGrayMapBlockState
 	//		CAN_C_HOVER = i can follow hover routes. - CAN_I_HOVER = UFLAG4_HOVEROVER
 
 	const dword m_dwBlockFlags;	// The block flags we can overcome.	
-	const signed char m_z;	// the z we start at. (stay at if we are flying)
+	const char m_z;	// the z we start at. (stay at if we are flying)
 	const int m_iHeight;		// The height we need to stand here.
-	const signed char m_zClimb; // We can climb at this height
+	const char m_zClimb; // We can climb at this height
 	const height_t m_zHeight; //our height
 	
 	height_t m_zClimbHeight;	// return item climb height here
@@ -87,19 +87,19 @@ struct CGrayMapBlockState
 	CGrayMapBlocker m_Lowest;	// the lowest item we have found.	
 
 public:
-	CGrayMapBlockState( dword dwBlockFlags, signed char m_z, int iHeight = PLAYER_HEIGHT, height_t zHeight = PLAYER_HEIGHT );
-	CGrayMapBlockState( dword dwBlockFlags, signed char m_z, int iHeight, signed char zClimb, height_t zHeight = PLAYER_HEIGHT );
+	CGrayMapBlockState( dword dwBlockFlags, char m_z, int iHeight = PLAYER_HEIGHT, height_t zHeight = PLAYER_HEIGHT );
+	CGrayMapBlockState( dword dwBlockFlags, char m_z, int iHeight, char zClimb, height_t zHeight = PLAYER_HEIGHT );
 
 private:
 	CGrayMapBlockState(const CGrayMapBlockState& copy);
 	CGrayMapBlockState& operator=(const CGrayMapBlockState& other);
 
 public:
-	bool IsUsableZ( signed char zBottom, height_t zHeightEstimate ) const;
-	bool CheckTile( dword dwItemBlockFlags, signed char zBottom, height_t zheight, dword wID );
-	bool CheckTile_Item( dword dwItemBlockFlags, signed char zBottom, height_t zheight, dword wID );
-	inline void SetTop( dword &dwItemBlockFlags, signed char &z, dword &dwID );
-	bool CheckTile_Terrain( dword dwItemBlockFlags, signed char z, dword dwID );
+	bool IsUsableZ( char zBottom, height_t zHeightEstimate ) const;
+	bool CheckTile( dword dwItemBlockFlags, char zBottom, height_t zheight, dword wID );
+	bool CheckTile_Item( dword dwItemBlockFlags, char zBottom, height_t zheight, dword wID );
+	inline void SetTop( dword &dwItemBlockFlags, char &z, dword &dwID );
+	bool CheckTile_Terrain( dword dwItemBlockFlags, char z, dword dwID );
 	static lpctstr GetTileName( dword dwID );
 };
 

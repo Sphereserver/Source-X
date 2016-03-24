@@ -586,7 +586,7 @@ public:
 		ITEMID_TYPE m_id;
 		short m_dx;
 		short m_dy;
-		signed char m_dz;
+		char m_dz;
 	};
 	struct ShipSpeed // speed of a ship
 	{
@@ -614,7 +614,7 @@ private:
 public:
 	int GetMaxDist() const;
 
-	bool AddComponent( ITEMID_TYPE id, short dx, short dy, signed char dz );
+	bool AddComponent( ITEMID_TYPE id, short dx, short dy, char dz );
 	bool AddComponent( tchar * pArgs );
 	void SetMultiRegion( tchar * pArgs );
 	bool r_LoadVal( CScript & s );

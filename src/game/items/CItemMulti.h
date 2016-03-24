@@ -25,7 +25,7 @@ protected:
 	CItem * Multi_FindItemType( IT_TYPE type ) const;
 	CItem * Multi_FindItemComponent( int iComp ) const;
 	const CItemBaseMulti * Multi_GetDef() const;
-	bool Multi_CreateComponent( ITEMID_TYPE id, short dx, short dy, signed char dz, dword dwKeyCode );
+	bool Multi_CreateComponent( ITEMID_TYPE id, short dx, short dy, char dz, dword dwKeyCode );
 
 public:
 	int Multi_GetMaxDist() const;

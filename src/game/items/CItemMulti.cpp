@@ -146,7 +146,7 @@ void CItemMulti::MultiUnRealizeRegion()
 	}
 }
 
-bool CItemMulti::Multi_CreateComponent( ITEMID_TYPE id, short dx, short dy, signed char dz, dword dwKeyCode )
+bool CItemMulti::Multi_CreateComponent( ITEMID_TYPE id, short dx, short dy, char dz, dword dwKeyCode )
 {
 	ADDTOCALLSTACK("CItemMulti::Multi_CreateComponent");
 	CItem * pItem = CreateTemplate( id );

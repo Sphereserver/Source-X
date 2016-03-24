@@ -1765,8 +1765,8 @@ int CChar::ItemPickup(CItem * pItem, int amount)
 	// Do stack dropping if items are stacked
 	if (( trigger == ITRIG_PICKUP_GROUND ) && IsSetEF( EF_ItemStackDrop ))
 	{
-		signed char iItemHeight = maximum(pItem->GetHeight(), 1);
-		signed char	iStackMaxZ = GetTopZ() + 16;
+		char iItemHeight = maximum(pItem->GetHeight(), 1);
+		char	iStackMaxZ = GetTopZ() + 16;
 		CItem * pStack = NULL;
 		CPointMap ptNewPlace = pItem->GetTopPoint();
 		CWorldSearch AreaItems(ptNewPlace);
@@ -1869,7 +1869,7 @@ bool CChar::ItemDrop( CItem * pItem, const CPointMap & pt )
 		//DEBUG_ERR(("Drop: %d / Min: %d / Max: %d\n", pItem->GetFixZ(pt), block.m_Bottom.m_z, block.m_Top.m_z));
 
 		CPointMap ptStack = pt;
-		signed char iStackMaxZ = block.m_Top.m_z;	//pt.m_z + 16;
+		char iStackMaxZ = block.m_Top.m_z;	//pt.m_z + 16;
 		CItem * pStack = NULL;
 		CWorldSearch AreaItems(ptStack);
 		for (;;)
@@ -2543,22 +2543,18 @@ bool CChar::SetPoisonCure( int iSkill, bool fExtra )
 	UNREFERENCED_PARAMETER(iSkill);
 
 	CItem * pPoison = LayerFind( LAYER_FLAG_Poison );
-	if ( pPoison != NULL )
-	{
-		// Is it successful ???
+	if ( pPoison )
 		pPoison->Delete();
-	}
+
 	if ( fExtra )
 	{
 		pPoison = LayerFind( LAYER_FLAG_Hallucination );
-		if ( pPoison != NULL )
-		{
-			// Is it successful ???
+		if ( pPoison )
 			pPoison->Delete();
 		}
-	}
+
 	UpdateModeFlag();
-	return( true );
+	return true;
 }
 
 // SPELL_Poison
@@ -2569,70 +2565,83 @@ bool CChar::SetPoison( int iSkill, int iTicks, CChar * pCharSrc )
 {
 	ADDTOCALLSTACK("CChar::SetPoison");
 
-	if ( IsStatFlag( STATF_Conjured ))
-	{
-		// conjured creatures cannot be poisoned.
+	const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(SPELL_Poison);
+	if ( !pSpellDef )
 		return false;
-	}
-	CItem * pPoison;
-	if ( IsStatFlag( STATF_Poisoned ))
-	{
-		// strengthen the poison ?
-		pPoison = LayerFind( LAYER_FLAG_Poison );
-		if (pPoison && !IsSetMagicFlags(MAGICF_OSIFORMULAS))
-		{
-			pPoison->m_itSpell.m_spellcharges += iTicks;
-		}
-		return false;
-	}
-
-	SysMessage( g_Cfg.GetDefaultMsg( DEFMSG_JUST_BEEN_POISONED ) );
 
 	// Release if paralyzed ?
-	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(SPELL_Poison);
-	if (!pSpellDef->IsSpellType(SPELLFLAG_NOUNPARALYZE))
-		StatFlag_Clear( STATF_Freeze );	// remove paralyze.
+	if ( !pSpellDef->IsSpellType(SPELLFLAG_NOUNPARALYZE) )
+	{
+		CItem *pParalyze = LayerFind(LAYER_SPELL_Paralyze);
+		if ( pParalyze )
+			pParalyze->Delete();
+	}
 
-	// Might be a physical vs. Magical attack.
-	pPoison = Spell_Effect_Create(SPELL_Poison, LAYER_FLAG_Poison, iSkill, 1 + Calc_GetRandVal(2)*TICK_PER_SEC, pCharSrc, false );
+	CItem *pPoison = LayerFind(LAYER_FLAG_Poison);
+	if ( pPoison )
+	{
+		if ( !IsSetMagicFlags(MAGICF_OSIFORMULAS) )		// strengthen the poison
+		{
+			pPoison->m_itSpell.m_spellcharges += iTicks;
+			return true;
+		}
+	}
+	else
+	{
+		pPoison = Spell_Effect_Create(SPELL_Poison, LAYER_FLAG_Poison, iSkill, 1 + Calc_GetRandVal(2) * TICK_PER_SEC, pCharSrc, false);
+		if ( !pPoison )
+		return false;
+		LayerAdd(pPoison, LAYER_FLAG_Poison);
+	}
+
+	pPoison->SetTimeout((5 + Calc_GetRandLLVal(4)) * TICK_PER_SEC);
+
 	if (IsSetMagicFlags(MAGICF_OSIFORMULAS))
 	{
-		// If caster have more than 100.0 in magery and poisoning and it's distance is lesser than 3 tiles, he has a 10% change to inflict lethal poison
-		if (pCharSrc->Skill_GetBase(SKILL_MAGERY) > 1000 && pCharSrc->Skill_GetBase(SKILL_POISONING) > 1000 && GetDist(pCharSrc) < 3 && Calc_GetRandVal(10) == 1)
+		if ( iSkill >= 1000 )
 		{
-			pPoison->m_itSpell.m_pattern = static_cast<uchar>(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(16, 33), 100));
-			pPoison->m_itSpell.m_spelllevel = 4;
-			pPoison->m_itSpell.m_spellcharges = 80;	//1 min / 20 sec
+			if ( GetDist(pCharSrc) < 3 && Calc_GetRandVal(10) == 1 )
+			{
+				// Lethal poison
+				pPoison->m_itSpell.m_pattern = static_cast<byte>(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(16, 33), 100));
+				pPoison->m_itSpell.m_spelllevel = 4;
+				pPoison->m_itSpell.m_spellcharges = 80;		//1 min, 20 sec
 		}
-		else if (iSkill <= 600)	// Lesser
+			else
 		{
-			pPoison->m_itSpell.m_spelllevel = 0;
-			pPoison->m_itSpell.m_spellcharges = 30;
+				// Deadly poison
+				pPoison->m_itSpell.m_pattern = static_cast<byte>(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(15, 30), 100));
+				pPoison->m_itSpell.m_spelllevel = 3;
+				pPoison->m_itSpell.m_spellcharges = 60;
 		}
-		else if (iSkill < 851) // Normal
-		{
-			pPoison->m_itSpell.m_pattern = static_cast<uchar>(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(5, 10), 100));
-			pPoison->m_itSpell.m_spelllevel = 1;
-			pPoison->m_itSpell.m_spellcharges = 30;
 		}
-		else if (iSkill < 1000) // Greater
+		else if ( iSkill >= 851 )
 		{
 			pPoison->m_itSpell.m_pattern = static_cast<uchar>(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(7, 15), 100));
+			// Greater poison
+			pPoison->m_itSpell.m_pattern = static_cast<byte>(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(7, 15), 100));
 			pPoison->m_itSpell.m_spelllevel = 2;
 			pPoison->m_itSpell.m_spellcharges = 60;
 		}
-		else	// Deadly.
+		else if ( iSkill >= 600 )
 		{
-			pPoison->m_itSpell.m_pattern = static_cast<uchar>(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(15, 30), 100));
-			pPoison->m_itSpell.m_spelllevel = 3;
-			pPoison->m_itSpell.m_spellcharges = 60;
+			// Poison
+			pPoison->m_itSpell.m_pattern = static_cast<byte>(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(5, 10), 100));
+			pPoison->m_itSpell.m_spelllevel = 1;
+			pPoison->m_itSpell.m_spellcharges = 30;		}
+		else
+		{
+			// Lesser poison
+			pPoison->m_itSpell.m_spelllevel = 0;
+			pPoison->m_itSpell.m_spellcharges = 30;
 		}
+
 		if (iTicks > 0)
 			pPoison->m_itSpell.m_spellcharges = iTicks;
 	}
 	else
 	{
-		pPoison->m_itSpell.m_spellcharges = iTicks;	// how long to last.
+		pPoison->m_itSpell.m_spellcharges = iTicks;		// effect duration
 	}
 
 	if (IsAosFlagEnabled(FEATURE_AOS_UPDATE_B))
@@ -2645,9 +2654,17 @@ bool CChar::SetPoison( int iSkill, int iTicks, CChar * pCharSrc )
 		}
 	}
 
-	LayerAdd(pPoison, LAYER_FLAG_Poison);	// Creating after setting the whole memory
+	CClient *pClient = GetClient();
+	if ( pClient && IsSetOF(OF_Buffs) )
+	{
+		pClient->removeBuff(BI_POISON);
+		pClient->addBuff(BI_POISON, 1017383, 1070722, static_cast<word>(pPoison->m_itSpell.m_spellcharges));
+	}
+
+	SysMessageDefault(DEFMSG_JUST_BEEN_POISONED);
+	StatFlag_Set(STATF_Poisoned);
 	UpdateStatsFlag();
-	return( true );
+	return true;
 }
 
 // Not sleeping anymore.
@@ -3501,7 +3518,7 @@ bool CChar::MoveTo(CPointMap pt, bool bForceFix)
 	return MoveToChar( pt, bForceFix);
 }
 
-void CChar::SetTopZ( signed char z )
+void CChar::SetTopZ( char z )
 {
 	CObjBaseTemplate::SetTopZ( z );
 	m_fClimbUpdated = false; // update climb height
@@ -3517,7 +3534,7 @@ bool CChar::MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart, bool bFromS
 	CPointMap pt = GetTopPoint();
 	pt.MoveN( dir, iDistStart );
 	pt.m_z += PLAYER_HEIGHT;
-	signed char startZ = pt.m_z;
+	char startZ = pt.m_z;
 
 	word wCan = static_cast<word>(GetMoveBlockFlags(true));	// CAN_C_SWIM
 	for ( int i=0; i<iDist; ++i )

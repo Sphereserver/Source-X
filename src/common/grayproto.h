@@ -1915,7 +1915,7 @@ struct CEvent	// event buffer from client to server..
 			nword m_unkAmount; // 13-14 = amount, no noticable effect on client
 			nword m_x;		// 15-18 = x
 			nword m_y;		// 19-22 = y
-			byte m_z;		// 23 = signed char
+			byte m_z;		// 23 = char
 			byte m_layer;	// 24 = item layer
 			nword m_wHue;	// 25-26 = HUE_TYPE
 			byte m_flags;	// 27 = 0x20 = is it movable, 0x80 = hidden
@@ -2164,7 +2164,7 @@ struct CCommand	// command buffer from server to client.
 			nword m_x;		// 11-12 - | 0x8000 = m_dir arg.
 			nword m_y;		// 13-14 = y | 0xC000 = m_wHue and m_flags fields.
 			byte m_dir;		// (optional)
-			byte m_z;		// 15 = signed char
+			byte m_z;		// 15 = char
 			nword m_wHue;	// 16-17 = HUE_TYPE (optional)
 			byte m_flags;	// 18 = 0x20 = is it movable ? (direction?) (optional)
 		} Put;
@@ -2872,7 +2872,7 @@ struct CCommand	// command buffer from server to client.
 				nword m_count;							// 0=0 based enum
 				char m_servname[32];	// 2
 				byte m_percentfull;						// 34 = 25 or 2e
-				signed char m_timezone;					// 35 = 0x05=east coast or 0x08=west coast
+				char m_timezone;					// 35 = 0x05=east coast or 0x08=west coast
 				byte m_ip[4];							// 36-39 = ip to ping
 			} m_serv[ MAX_SERVERS ];
 		} ServerList;

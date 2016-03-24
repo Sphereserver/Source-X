@@ -724,7 +724,7 @@ class PacketVendorBuyList : public PacketSend
 {
 public:
 	PacketVendorBuyList(void);
-	size_t fillContainer(const CItemContainer* container, int convertFactor);
+	size_t fillContainer(const CItemContainer* container, int convertFactor, bool bIsClientEnhanced = false);
 };
 
 /***************************************************************************

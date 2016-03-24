@@ -280,7 +280,7 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 				if ( !pMultiItem->m_visible )
 					continue;
 
-				ptTest = CPointMap( pMultiItem->m_dx + pt.m_x, pMultiItem->m_dy + pt.m_y, static_cast<signed char>( pMultiItem->m_dz + pt.m_z ), pt.m_map );
+				ptTest = CPointMap( pMultiItem->m_dx + pt.m_x, pMultiItem->m_dy + pt.m_y, static_cast<char>( pMultiItem->m_dz + pt.m_z ), pt.m_map );
 
 				pItemDef = CItemBase::FindItemBase( pMultiItem->GetDispID() );
 				if ( pItemDef == NULL )
@@ -700,7 +700,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CGrayMapBlockState & block)
 	CItemBaseDupe * pDupeDef = NULL;
 	CItem * pItem = NULL;
 	dword wBlockThis = 0;
-	signed char z = 0;
+	char z = 0;
 	int x2 = 0, y2 = 0;
 
 	// Height of statics at/above given coordinates
@@ -820,7 +820,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CGrayMapBlockState & block)
 						if ( pMultiItem->m_dx != x2 || pMultiItem->m_dy != y2 )
 							continue;
 
-						z = static_cast<signed char>(pItem->GetTopZ() + pMultiItem->m_dz);
+						z = static_cast<char>(pItem->GetTopZ() + pMultiItem->m_dz);
 
 						pItemDef = CItemBase::FindItemBase( pMultiItem->GetDispID() );
 						if ( pItemDef != NULL )
@@ -999,7 +999,7 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CGrayMapBlockState & block, b
 	CItemBaseDupe * pDupeDef = NULL;
 	CItem * pItem = NULL;
 	dword wBlockThis = 0;
-	signed char z = 0;
+	char z = 0;
 	height_t zHeight = 0;
 	int x2 = 0, y2 = 0;
 
@@ -1118,7 +1118,7 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CGrayMapBlockState & block, b
 							if ( pMultiItem->m_dx != x2 || pMultiItem->m_dy != y2 )
 								continue;
 
-							z = static_cast<signed char>( pItem->GetTopZ() + pMultiItem->m_dz );
+							z = static_cast<char>( pItem->GetTopZ() + pMultiItem->m_dz );
 							if ( ! block.IsUsableZ(z,block.m_zHeight))
 								continue;
 
@@ -1257,7 +1257,7 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CGrayMapBlockState & block, b
 	}
 }
 
-signed char CWorld::GetHeightPoint( const CPointBase & pt, dword & wBlockFlags, bool fHouseCheck )
+char CWorld::GetHeightPoint( const CPointBase & pt, dword & wBlockFlags, bool fHouseCheck )
 {
 	ADDTOCALLSTACK("CWorld::GetHeightPoint");
 	dword dwCan = wBlockFlags;
@@ -1316,7 +1316,7 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CGrayMapBlockState & block, 
 				if ( ! pMapBlock->m_Statics.IsStaticPoint( i, x2, y2 ))
 					continue;
 				const CUOStaticItemRec * pStatic = pMapBlock->m_Statics.GetStatic( i );
-				signed char z = pStatic->m_z;
+				char z = pStatic->m_z;
 				if ( ! block.IsUsableZ(z,PLAYER_HEIGHT))
 					continue;
 
@@ -1359,7 +1359,7 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CGrayMapBlockState & block, 
 							if ( pMultiItem->m_dx != x2 || pMultiItem->m_dy != y2 )
 								continue;
 
-							signed char zitem = static_cast<signed char>( pItem->GetTopZ() + pMultiItem->m_dz );
+							char zitem = static_cast<char>( pItem->GetTopZ() + pMultiItem->m_dz );
 							if ( ! block.IsUsableZ(zitem,PLAYER_HEIGHT))
 								continue;
 
@@ -1383,7 +1383,7 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CGrayMapBlockState & block, 
 		if ( pItem == NULL )
 			break;
 
-		signed char zitem = pItem->GetTopZ();
+		char zitem = pItem->GetTopZ();
 		if ( ! block.IsUsableZ(zitem,PLAYER_HEIGHT))
 			continue;
 
@@ -1448,7 +1448,7 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CGrayMapBlockState & block, 
 	}
 }
 
-signed char CWorld::GetHeightPoint2( const CPointBase & pt, dword & wBlockFlags, bool fHouseCheck ) // Height of player who walked to X/Y/OLDZ
+char CWorld::GetHeightPoint2( const CPointBase & pt, dword & wBlockFlags, bool fHouseCheck ) // Height of player who walked to X/Y/OLDZ
 {
 	ADDTOCALLSTACK("CWorld::GetHeightPoint2");
 	// Given our coords at pt including pt.m_z

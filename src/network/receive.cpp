@@ -645,23 +645,19 @@ bool PacketCharStatusReq::onReceive(NetState* net)
 {
 	ADDTOCALLSTACK("PacketCharStatusReq::onReceive");
 
-	skip(4); // 0xedededed
-	byte requestType = readByte();
-	CGrayUID targetSerial(readInt32());
-
 	CClient* client = net->getClient();
 	ASSERT(client);
-	if (client->GetChar() == NULL)
+	if ( !client->GetChar() )
 		return false;
 
+	skip(4);	// 0xedededed
+	byte requestType = readByte();
+	CGrayUID targetSerial = static_cast<CGrayUID>(readInt32());
+
 	if ( requestType == 4 )
-	{
-		client->addCharStatWindow(targetSerial, true);
-	}
+		client->addCharStatWindow(targetSerial.CharFind(), true);
 	else if ( requestType == 5 )
-	{
 		client->addSkillWindow(SKILL_QTY);
-	}
 	return true;
 }
 
@@ -3593,7 +3589,7 @@ bool PacketHouseDesignDestroyItem::onReceive(NetState* net)
 	skip(1); // 0x00
 	word z = static_cast<word>(readInt32());
 
-	house->RemoveItem(client, id, x, y, static_cast<signed char>(z));
+	house->RemoveItem(client, id, x, y, static_cast<char>(z));
 	return true;
 }
 
@@ -3808,7 +3804,7 @@ bool PacketHouseDesignPlaceRoof::onReceive(NetState* net)
 	skip(1); // 0x00
 	word z = static_cast<word>(readInt32());
 
-	house->AddRoof(client, id, x, y, static_cast<signed char>(z));
+	house->AddRoof(client, id, x, y, static_cast<char>(z));
 	return true;
 }
 
@@ -3844,7 +3840,7 @@ bool PacketHouseDesignDestroyRoof::onReceive(NetState* net)
 	skip(1); // 0x00
 	word z = static_cast<word>(readInt32());
 
-	house->RemoveRoof(client, id, x, y, static_cast<signed char>(z));
+	house->RemoveRoof(client, id, x, y, static_cast<char>(z));
 	return true;
 }
 

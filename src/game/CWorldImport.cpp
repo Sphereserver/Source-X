@@ -430,7 +430,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			else if ( s.IsKey("Z" ))
 			{
 				CPointMap pt = pItem->GetUnkPoint();
-				pt.m_z = static_cast<signed char>( ATOI(pArg) );
+				pt.m_z = static_cast<char>( ATOI(pArg) );
 				pItem->SetUnkPoint(pt);
 				continue;
 			}
@@ -456,7 +456,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			}
 			else if ( s.IsKey("MOREZ" ))
 			{
-				pItem->m_itNormal.m_morep.m_z = static_cast<signed char>( ATOI(pArg) );
+				pItem->m_itNormal.m_morep.m_z = static_cast<char>( ATOI(pArg) );
 				continue;
 			}
 			else if ( s.IsKey("MORE" ))
@@ -526,7 +526,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			else if ( s.IsKey("Z" ))
 			{
 				CPointMap pt = pChar->GetUnkPoint();
-				pt.m_z = static_cast<signed char>(ATOI(pArg));
+				pt.m_z = static_cast<char>(ATOI(pArg));
 				pChar->SetUnkPoint(pt);
 				continue;
 			}

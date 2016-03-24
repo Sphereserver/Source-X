@@ -484,13 +484,13 @@ bool CChar::IsSwimming() const
 	if ( !pt.IsValidPoint() )
 		return false;
 
-	signed char iDistZ = ptTop.m_z - pt.m_z;
+	char iDistZ = ptTop.m_z - pt.m_z;
 	if ( iDistZ < -PLAYER_HEIGHT )	// far under the water somehow
 		return false;
 
 	// Is there a solid surface under us?
 	dword wBlockFlags = GetMoveBlockFlags();
-	signed char iSurfaceZ = g_World.GetHeightPoint2(ptTop, wBlockFlags, true);
+	char iSurfaceZ = g_World.GetHeightPoint2(ptTop, wBlockFlags, true);
 	if ( (iSurfaceZ == pt.m_z) && (wBlockFlags & CAN_I_WATER) )
 		return true;
 
@@ -1215,8 +1215,8 @@ blocked:
 
 			ptTest.Move(dirTest1);
 			wBlockFlags = CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY;
-			signed char z = g_World.GetHeightPoint2(ptTest, wBlockFlags, true);
-			signed char zDiff = static_cast<signed char>(abs(z - ptTest.m_z));
+			char z = g_World.GetHeightPoint2(ptTest, wBlockFlags, true);
+			char zDiff = static_cast<char>(abs(z - ptTest.m_z));
 
 			if ( (zDiff > PLAYER_HEIGHT) || (wBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR)) )		// blocked
 			{
@@ -1225,7 +1225,7 @@ blocked:
 				{
 					wBlockFlags = CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY;
 					z = g_World.GetHeightPoint2(ptTest, wBlockFlags, true);
-					zDiff = static_cast<signed char>(abs(z - ptTest.m_z));
+					zDiff = static_cast<char>(abs(z - ptTest.m_z));
 					if ( zDiff > PLAYER_HEIGHT )
 						goto blocked;
 
@@ -1243,8 +1243,8 @@ blocked:
 		{
 			ptSrc.Move(dir);	// NOTE: The dir is very coarse and can change slightly.
 			wBlockFlags = CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY;
-			signed char z = g_World.GetHeightPoint2(ptSrc, wBlockFlags, true);
-			signed char zDiff = static_cast<signed char>(abs(z - ptSrc.m_z));
+			char z = g_World.GetHeightPoint2(ptSrc, wBlockFlags, true);
+			char zDiff = static_cast<char>(abs(z - ptSrc.m_z));
 
 			if ( (zDiff > PLAYER_HEIGHT) || (wBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR)) || (iDistTry > iMaxDist) )
 				goto blocked;
@@ -1336,11 +1336,11 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 			{
 				CPointMap ptEnd = path.at(path.size() - 1);
 				if ( ptEnd.m_x != dx || ptEnd.m_y != dy || ptEnd.m_z != dz )
-					path.push_back(CPointMap(static_cast<word>(dx), static_cast<word>(dy), static_cast<signed char>(dz), ptSrc.m_map));
+					path.push_back(CPointMap(static_cast<word>(dx), static_cast<word>(dy), static_cast<char>(dz), ptSrc.m_map));
 			}
 			else
 			{
-				path.push_back(CPointMap(static_cast<word>(dx), static_cast<word>(dy), static_cast<signed char>(dz), ptSrc.m_map));
+				path.push_back(CPointMap(static_cast<word>(dx), static_cast<word>(dy), static_cast<char>(dz), ptSrc.m_map));
 			}
 			WARNLOS(("PATH X:%d Y:%d Z:%d\n", dx, dy, dz));
 
@@ -1387,7 +1387,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 	CRegionBase *pNowRegion = NULL;
 	
 	int lp_x = 0, lp_y = 0; 
-	signed char min_z = 0, max_z = 0;
+	char min_z = 0, max_z = 0;
 	
 	for (size_t i = 0; i < path.size(); lp_x = ptNow.m_x, lp_y = ptNow.m_y, pItemDef = NULL, pStatic = NULL, pMulti = NULL, pMultiItem = NULL, min_z = 0, max_z = 0, ++i )
 	{
@@ -1744,7 +1744,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 								if ( ((wTFlags & (UFLAG1_WALL|UFLAG1_BLOCK|UFLAG2_PLATFORM)) || (pItemDef->m_Can & CAN_I_BLOCKLOS)) && !((wTFlags & UFLAG2_WINDOW) && (flags & LOS_NB_WINDOWS)) )
 								{
 									WARNLOS(("pMultiItem %0x %d,%d,%d - %d\n", pMultiItem->GetDispID(), pMultiItem->m_dx, pMultiItem->m_dy, pMultiItem->m_dz, Height));
-									min_z = static_cast<signed char>(pMultiItem->m_dz) + pItem->GetTopPoint().m_z;
+									min_z = static_cast<char>(pMultiItem->m_dz) + pItem->GetTopPoint().m_z;
 									max_z = minimum(Height + min_z, UO_SIZE_Z);
 									WARNLOS(("wTFlags(0%x)\n", wTFlags));
 
