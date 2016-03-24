@@ -9,7 +9,7 @@
 #include "CVarDefMap.h"
 #include "graycom.h"
 
-static size_t GetIdentifierString( TCHAR * szTag, LPCTSTR pszArgs )
+static size_t GetIdentifierString( tchar * szTag, lpctstr pszArgs )
 {
 	// Copy the identifier (valid char set) out to this buffer.
 	size_t i = 0;
@@ -33,7 +33,7 @@ static size_t GetIdentifierString( TCHAR * szTag, LPCTSTR pszArgs )
 *
 *
 ***************************************************************************/
-CVarDefCont::CVarDefCont( LPCTSTR pszKey ) : m_Key( pszKey ) 
+CVarDefCont::CVarDefCont( lpctstr pszKey ) : m_Key( pszKey ) 
 { 
 	m_Key.MakeLower(); 
 }
@@ -42,12 +42,12 @@ CVarDefCont::~CVarDefCont()
 {
 }
 
-LPCTSTR CVarDefCont::GetKey() const 
+lpctstr CVarDefCont::GetKey() const 
 { 
 	return( m_Key.GetPtr() ); 
 }
 
-void CVarDefCont::SetKey( LPCTSTR pszKey )
+void CVarDefCont::SetKey( lpctstr pszKey )
 { 
 	m_Key = pszKey;
 	m_Key.MakeLower(); 
@@ -61,11 +61,11 @@ void CVarDefCont::SetKey( LPCTSTR pszKey )
 *
 ***************************************************************************/
 
-CVarDefContNum::CVarDefContNum( LPCTSTR pszKey, INT64 iVal ) : CVarDefCont( pszKey ), m_iVal( iVal )
+CVarDefContNum::CVarDefContNum( lpctstr pszKey, INT64 iVal ) : CVarDefCont( pszKey ), m_iVal( iVal )
 {
 }
 
-CVarDefContNum::CVarDefContNum( LPCTSTR pszKey ) : CVarDefCont( pszKey ), m_iVal( 0 )
+CVarDefContNum::CVarDefContNum( lpctstr pszKey ) : CVarDefCont( pszKey ), m_iVal( 0 )
 {
 }
 
@@ -83,7 +83,7 @@ void CVarDefContNum::SetValNum( INT64 iVal )
 	m_iVal = iVal;
 }
 
-inline LPCTSTR CVarDefContNum::GetValStr() const
+inline lpctstr CVarDefContNum::GetValStr() const
 {
 	TemporaryString pszTmp;
 	sprintf(pszTmp, "0%llx", m_iVal);
@@ -96,7 +96,7 @@ bool CVarDefContNum::r_LoadVal( CScript & s )
 	return( true );
 }
 
-bool CVarDefContNum::r_WriteVal( LPCTSTR pKey, CGString & sVal, CTextConsole * pSrc = NULL )
+bool CVarDefContNum::r_WriteVal( lpctstr pKey, CGString & sVal, CTextConsole * pSrc = NULL )
 {
 	UNREFERENCED_PARAMETER(pKey);
 	UNREFERENCED_PARAMETER(pSrc);
@@ -117,11 +117,11 @@ CVarDefCont * CVarDefContNum::CopySelf() const
 *
 ***************************************************************************/
 
-CVarDefContStr::CVarDefContStr( LPCTSTR pszKey, LPCTSTR pszVal ) : CVarDefCont( pszKey ), m_sVal( pszVal ) 
+CVarDefContStr::CVarDefContStr( lpctstr pszKey, lpctstr pszVal ) : CVarDefCont( pszKey ), m_sVal( pszVal ) 
 {
 }
 
-CVarDefContStr::CVarDefContStr( LPCTSTR pszKey ) : CVarDefCont( pszKey )
+CVarDefContStr::CVarDefContStr( lpctstr pszKey ) : CVarDefCont( pszKey )
 {
 }
 
@@ -129,18 +129,18 @@ CVarDefContStr::~CVarDefContStr()
 {
 }
 
-LPCTSTR CVarDefContStr::GetValStr() const 
+lpctstr CVarDefContStr::GetValStr() const 
 { 
 	return( m_sVal ); 
 }
 
 inline INT64 CVarDefContStr::GetValNum() const
 {
-	LPCTSTR pszStr = m_sVal;
+	lpctstr pszStr = m_sVal;
 	return( Exp_GetVal(pszStr) );
 }
 
-void CVarDefContStr::SetValStr( LPCTSTR pszVal ) 
+void CVarDefContStr::SetValStr( lpctstr pszVal ) 
 {
 	if (strlen(pszVal) <= SCRIPT_MAX_LINE_LEN/2)
 		m_sVal.Copy( pszVal );
@@ -155,7 +155,7 @@ bool CVarDefContStr::r_LoadVal( CScript & s )
 	return( true );
 }
 
-bool CVarDefContStr::r_WriteVal( LPCTSTR pKey, CGString & sVal, CTextConsole * pSrc = NULL )
+bool CVarDefContStr::r_WriteVal( lpctstr pKey, CGString & sVal, CTextConsole * pSrc = NULL )
 {
 	UNREFERENCED_PARAMETER(pKey);
 	UNREFERENCED_PARAMETER(pSrc);
@@ -176,7 +176,7 @@ CVarDefCont * CVarDefContStr::CopySelf() const
 *
 ***************************************************************************/
 
-CVarDefMap::CVarDefContTest::CVarDefContTest( LPCTSTR pszKey ) : CVarDefCont( pszKey )
+CVarDefMap::CVarDefContTest::CVarDefContTest( lpctstr pszKey ) : CVarDefCont( pszKey )
 {
 }
 
@@ -184,7 +184,7 @@ CVarDefMap::CVarDefContTest::~CVarDefContTest()
 {
 }
 
-LPCTSTR CVarDefMap::CVarDefContTest::GetValStr() const 
+lpctstr CVarDefMap::CVarDefContTest::GetValStr() const 
 { 
 	return NULL; 
 }
@@ -231,7 +231,7 @@ CVarDefMap::~CVarDefMap()
 	Empty();
 }
 
-LPCTSTR CVarDefMap::FindValStr( LPCTSTR pVal ) const
+lpctstr CVarDefMap::FindValStr( lpctstr pVal ) const
 {
 	ADDTOCALLSTACK("CVarDefMap::FindValStr");
 	for ( DefSet::const_iterator i = m_Container.begin(); i != m_Container.end(); ++i )
@@ -250,7 +250,7 @@ LPCTSTR CVarDefMap::FindValStr( LPCTSTR pVal ) const
 	return( NULL );
 }
 
-LPCTSTR CVarDefMap::FindValNum( INT64 iVal ) const
+lpctstr CVarDefMap::FindValNum( INT64 iVal ) const
 {
 	ADDTOCALLSTACK("CVarDefMap::FindValNum");
 	for ( DefSet::const_iterator i = m_Container.begin(); i != m_Container.end(); ++i )
@@ -285,7 +285,7 @@ CVarDefCont * CVarDefMap::GetAt( size_t at ) const
 		return( NULL );
 }
 
-CVarDefCont * CVarDefMap::GetAtKey( LPCTSTR at ) const
+CVarDefCont * CVarDefMap::GetAtKey( lpctstr at ) const
 {
 	ADDTOCALLSTACK("CVarDefMap::GetAtKey");
 	CVarDefContTest * pVarBase = new CVarDefContTest(at);
@@ -311,7 +311,7 @@ void CVarDefMap::DeleteAt( size_t at )
 	DeleteAtIterator(i);
 }
 
-void CVarDefMap::DeleteAtKey( LPCTSTR at )
+void CVarDefMap::DeleteAtKey( lpctstr at )
 {
 	ADDTOCALLSTACK("CVarDefMap::DeleteAtKey");
 	CVarDefContStr * pVarBased = new CVarDefContStr(at);
@@ -346,7 +346,7 @@ void CVarDefMap::DeleteAtIterator( DefSet::iterator it )
 	}
 }
 
-void CVarDefMap::DeleteKey( LPCTSTR key )
+void CVarDefMap::DeleteKey( lpctstr key )
 {
 	ADDTOCALLSTACK("CVarDefMap::DeleteKey");
 	if ( key && *key)
@@ -419,7 +419,7 @@ bool CVarDefMap::Compare( const CVarDefMap * pArray )
 		for ( DefSet::const_iterator i = pArray->m_Container.begin(); i != pArray->m_Container.end(); ++i )
 		{
 			const CVarDefCont * pVar = (*i);
-			LPCTSTR sKey = pVar->GetKey();
+			lpctstr sKey = pVar->GetKey();
 			if (!GetKey(sKey))
 				return false;
 
@@ -443,7 +443,7 @@ bool CVarDefMap::CompareAll( const CVarDefMap * pArray )
 		for ( DefSet::const_iterator i = pArray->m_Container.begin(); i != pArray->m_Container.end(); ++i )
 		{
 			const CVarDefCont * pVar = (*i);
-			LPCTSTR sKey = pVar->GetKey();
+			lpctstr sKey = pVar->GetKey();
 
 			if (strcmpi(GetKeyStr(sKey, true),pVar->GetValStr()))
 				return false;
@@ -454,7 +454,7 @@ bool CVarDefMap::CompareAll( const CVarDefMap * pArray )
 		for ( DefSet::const_iterator i = m_Container.begin(); i != m_Container.end(); ++i )
 		{
 			const CVarDefCont * pVar = (*i);
-			LPCTSTR sKey = pVar->GetKey();
+			lpctstr sKey = pVar->GetKey();
 
 			if (strcmpi(pArray->GetKeyStr(sKey, true),pVar->GetValStr()))
 				return false;
@@ -469,7 +469,7 @@ size_t CVarDefMap::GetCount() const
 	return m_Container.size();
 }
 
-int CVarDefMap::SetNumNew( LPCTSTR pszName, INT64 iVal )
+int CVarDefMap::SetNumNew( lpctstr pszName, INT64 iVal )
 {
 	ADDTOCALLSTACK("CVarDefMap::SetNumNew");
 	CVarDefCont * pVarNum = new CVarDefContNum( pszName, iVal );
@@ -483,14 +483,14 @@ int CVarDefMap::SetNumNew( LPCTSTR pszName, INT64 iVal )
 		return -1;
 }
 
-int CVarDefMap::SetNumOverride( LPCTSTR pszKey, INT64 iVal )
+int CVarDefMap::SetNumOverride( lpctstr pszKey, INT64 iVal )
 {
 	ADDTOCALLSTACK("CVarDefMap::SetNumOverride");
 	DeleteAtKey(pszKey);
 	return SetNumNew(pszKey,iVal);
 }
 
-int CVarDefMap::SetNum( LPCTSTR pszName, INT64 iVal, bool fZero )
+int CVarDefMap::SetNum( lpctstr pszName, INT64 iVal, bool fZero )
 {
 	ADDTOCALLSTACK("CVarDefMap::SetNum");
 	ASSERT(pszName);
@@ -534,7 +534,7 @@ int CVarDefMap::SetNum( LPCTSTR pszName, INT64 iVal, bool fZero )
 	return static_cast<int>(std::distance(m_Container.begin(), iResult));
 }
 
-int CVarDefMap::SetStrNew( LPCTSTR pszName, LPCTSTR pszVal )
+int CVarDefMap::SetStrNew( lpctstr pszName, lpctstr pszVal )
 {
 	ADDTOCALLSTACK("CVarDefMap::SetStrNew");
 	CVarDefCont * pVarStr = new CVarDefContStr( pszName, pszVal );
@@ -548,14 +548,14 @@ int CVarDefMap::SetStrNew( LPCTSTR pszName, LPCTSTR pszVal )
 		return -1;
 }
 
-int CVarDefMap::SetStrOverride( LPCTSTR pszKey, LPCTSTR pszVal )
+int CVarDefMap::SetStrOverride( lpctstr pszKey, lpctstr pszVal )
 {
 	ADDTOCALLSTACK("CVarDefMap::SetStrOverride");
 	DeleteAtKey(pszKey);
 	return SetStrNew(pszKey,pszVal);
 }
 
-int CVarDefMap::SetStr( LPCTSTR pszName, bool fQuoted, LPCTSTR pszVal, bool fZero )
+int CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, bool fZero )
 {
 	ADDTOCALLSTACK("CVarDefMap::SetStr");
 	// ASSUME: This has been clipped of unwanted beginning and trailing spaces.
@@ -603,7 +603,7 @@ int CVarDefMap::SetStr( LPCTSTR pszName, bool fQuoted, LPCTSTR pszVal, bool fZer
 	return static_cast<int>(std::distance(m_Container.begin(), iResult) );
 }
 
-CVarDefCont * CVarDefMap::GetKey( LPCTSTR pszKey ) const
+CVarDefCont * CVarDefMap::GetKey( lpctstr pszKey ) const
 {
 	ADDTOCALLSTACK("CVarDefMap::GetKey");
 	CVarDefCont * pReturn = NULL;
@@ -621,7 +621,7 @@ CVarDefCont * CVarDefMap::GetKey( LPCTSTR pszKey ) const
 	return( pReturn );
 }
 
-INT64 CVarDefMap::GetKeyNum( LPCTSTR pszKey, bool fZero  ) const
+INT64 CVarDefMap::GetKeyNum( lpctstr pszKey, bool fZero  ) const
 {
 	ADDTOCALLSTACK("CVarDefMap::GetKeyNum");
 	CVarDefCont * pVar = GetKey(pszKey);
@@ -630,7 +630,7 @@ INT64 CVarDefMap::GetKeyNum( LPCTSTR pszKey, bool fZero  ) const
 	return pVar->GetValNum();
 }
 
-LPCTSTR CVarDefMap::GetKeyStr( LPCTSTR pszKey, bool fZero  ) const
+lpctstr CVarDefMap::GetKeyStr( lpctstr pszKey, bool fZero  ) const
 {
 	ADDTOCALLSTACK("CVarDefMap::GetKeyStr");
 	CVarDefCont * pVar = GetKey(pszKey);
@@ -639,10 +639,10 @@ LPCTSTR CVarDefMap::GetKeyStr( LPCTSTR pszKey, bool fZero  ) const
 	return pVar->GetValStr();
 }
 
-CVarDefCont * CVarDefMap::CheckParseKey( LPCTSTR & pszArgs ) const
+CVarDefCont * CVarDefMap::CheckParseKey( lpctstr & pszArgs ) const
 {
 	ADDTOCALLSTACK("CVarDefMap::CheckParseKey");
-	TCHAR szTag[ EXPRESSION_MAX_KEY_LEN ];
+	tchar szTag[ EXPRESSION_MAX_KEY_LEN ];
 	GetIdentifierString( szTag, pszArgs );
 	CVarDefCont * pVar = GetKey(szTag);
 	if ( pVar )
@@ -651,13 +651,13 @@ CVarDefCont * CVarDefMap::CheckParseKey( LPCTSTR & pszArgs ) const
 	return NULL;
 }
 
-CVarDefCont * CVarDefMap::GetParseKey( LPCTSTR & pszArgs ) const
+CVarDefCont * CVarDefMap::GetParseKey( lpctstr & pszArgs ) const
 {
 	ADDTOCALLSTACK("CVarDefMap::GetParseKey");
 	// Skip to the end of the expression name.
 	// The name can only be valid.
 
-	TCHAR szTag[ EXPRESSION_MAX_KEY_LEN ];
+	tchar szTag[ EXPRESSION_MAX_KEY_LEN ];
 	size_t i = GetIdentifierString( szTag, pszArgs );
 	CVarDefCont * pVar = GetKey(szTag);
 	if ( pVar )
@@ -669,7 +669,7 @@ CVarDefCont * CVarDefMap::GetParseKey( LPCTSTR & pszArgs ) const
 	return NULL;
 }
 
-bool CVarDefMap::GetParseVal( LPCTSTR & pszArgs, long long * plVal ) const
+bool CVarDefMap::GetParseVal( lpctstr & pszArgs, long long * plVal ) const
 {
 	ADDTOCALLSTACK("CVarDefMap::GetParseVal");
 	CVarDefCont * pVarBase = GetParseKey( pszArgs );
@@ -679,7 +679,7 @@ bool CVarDefMap::GetParseVal( LPCTSTR & pszArgs, long long * plVal ) const
 	return( true );
 }
 
-void CVarDefMap::DumpKeys( CTextConsole * pSrc, LPCTSTR pszPrefix ) const
+void CVarDefMap::DumpKeys( CTextConsole * pSrc, lpctstr pszPrefix ) const
 {
 	ADDTOCALLSTACK("CVarDefMap::DumpKeys");
 	// List out all the keys.
@@ -690,11 +690,11 @@ void CVarDefMap::DumpKeys( CTextConsole * pSrc, LPCTSTR pszPrefix ) const
 	for ( DefSet::const_iterator i = m_Container.begin(); i != m_Container.end(); ++i )
 	{
 		const CVarDefCont * pVar = (*i);
-		pSrc->SysMessagef(pSrc->GetChar()? "%s%s=%s" : "%s%s=%s\n", static_cast<LPCTSTR>(pszPrefix), static_cast<LPCTSTR>(pVar->GetKey()), static_cast<LPCTSTR>(pVar->GetValStr()));
+		pSrc->SysMessagef(pSrc->GetChar()? "%s%s=%s" : "%s%s=%s\n", static_cast<lpctstr>(pszPrefix), static_cast<lpctstr>(pVar->GetKey()), static_cast<lpctstr>(pVar->GetValStr()));
 	}
 }
 
-void CVarDefMap::ClearKeys(LPCTSTR mask)
+void CVarDefMap::ClearKeys(lpctstr mask)
 {
 	ADDTOCALLSTACK("CVarDefMap::ClearKeys");
 	if ( mask && *mask )
@@ -736,11 +736,11 @@ bool CVarDefMap::r_LoadVal( CScript & s )
 	return( ( SetStr( s.GetKey(), fQuoted, s.GetArgStr( &fQuoted )) >= 0 ) ? true : false );
 }
 
-void CVarDefMap::r_WritePrefix( CScript & s, LPCTSTR pszPrefix, LPCTSTR pszKeyExclude )
+void CVarDefMap::r_WritePrefix( CScript & s, lpctstr pszPrefix, lpctstr pszKeyExclude )
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::r_WritePrefix");
 	TemporaryString z;
-	LPCTSTR		pszVal;
+	lpctstr		pszVal;
 	bool bHasPrefix = (pszPrefix && *pszPrefix);
 	bool bHasExclude = (pszKeyExclude && *pszKeyExclude);
 

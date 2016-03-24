@@ -70,7 +70,7 @@ RESOURCE_ID_BASE & RESOURCE_ID::operator= ( const RESOURCE_ID_BASE & rid )
 //***************************************************
 // CResourceBase
 
-LPCTSTR const CResourceBase::sm_szResourceBlocks[RES_QTY] =	// static
+lpctstr const CResourceBase::sm_szResourceBlocks[RES_QTY] =	// static
 {
 	"AAAUNUSED",	// unused / unknown.
     "ACCOUNT",		// Define an account instance.
@@ -136,36 +136,36 @@ LPCTSTR const CResourceBase::sm_szResourceBlocks[RES_QTY] =	// static
 //*********************************************************
 // Resource Files 
 
-CResourceScript * CResourceBase::FindResourceFile( LPCTSTR pszPath )
+CResourceScript * CResourceBase::FindResourceFile( lpctstr pszPath )
 {
 	ADDTOCALLSTACK("CResourceBase::FindResourceFile");
 	// Just match the titles ( not the whole path)
 
-	LPCTSTR pszTitle = CScript::GetFilesTitle( pszPath );
+	lpctstr pszTitle = CScript::GetFilesTitle( pszPath );
 
 	for ( size_t i = 0; ; i++ )
 	{
 		CResourceScript * pResFile = GetResourceFile(i);
 		if ( pResFile == NULL )
 			break;
-		LPCTSTR pszTitle2 = pResFile->GetFileTitle();
+		lpctstr pszTitle2 = pResFile->GetFileTitle();
 		if ( ! strcmpi( pszTitle2, pszTitle ))
 			return( pResFile );
 	}
 	return( NULL );
 }
 
-CResourceScript * CResourceBase::AddResourceFile( LPCTSTR pszName )
+CResourceScript * CResourceBase::AddResourceFile( lpctstr pszName )
 {
 	ADDTOCALLSTACK("CResourceBase::AddResourceFile");
 	ASSERT(pszName != NULL);
 	// Is this really just a dir name ?
 
-	TCHAR szName[_MAX_PATH];
+	tchar szName[_MAX_PATH];
 	ASSERT(strlen(pszName) < COUNTOF(szName));
 	strcpy(szName, pszName);
 
-	TCHAR szTitle[_MAX_PATH];
+	tchar szTitle[_MAX_PATH];
 	strcpy(szTitle, CScript::GetFilesTitle( szName ));
 
 	if ( szTitle[0] == '\0' )
@@ -174,7 +174,7 @@ CResourceScript * CResourceBase::AddResourceFile( LPCTSTR pszName )
 		return NULL;
 	}
 
-	LPCTSTR pszExt = CScript::GetFilesExt( szTitle );
+	lpctstr pszExt = CScript::GetFilesExt( szTitle );
 	if ( pszExt == NULL )
 	{
 		// No file extension provided, so append .scp to the filename
@@ -205,7 +205,7 @@ CResourceScript * CResourceBase::AddResourceFile( LPCTSTR pszName )
 	return( pNewRes );
 }
 
-void CResourceBase::AddResourceDir( LPCTSTR pszDirName )
+void CResourceBase::AddResourceDir( lpctstr pszDirName )
 {
 	ADDTOCALLSTACK("CResourceBase::AddResourceDir");
 	if ( pszDirName[0] == '\0' )
@@ -223,7 +223,7 @@ void CResourceBase::AddResourceDir( LPCTSTR pszDirName )
 		iRet = filelist.ReadDir( sFilePath, true );
 		if ( iRet < 0 )
 		{
-			DEBUG_ERR(( "DirList=%d for '%s'\n", iRet, static_cast<LPCTSTR>(pszDirName) ));
+			DEBUG_ERR(( "DirList=%d for '%s'\n", iRet, static_cast<lpctstr>(pszDirName) ));
 			return;
 		}
 	}
@@ -258,7 +258,7 @@ void CResourceBase::LoadResourcesOpen( CScript * pScript )
 
 	if ( ! iSections )
 	{
-		DEBUG_WARN(( "No resource sections in '%s'\n", (LPCTSTR)pScript->GetFilePath()));
+		DEBUG_WARN(( "No resource sections in '%s'\n", (lpctstr)pScript->GetFilePath()));
 	}
 }
 
@@ -271,11 +271,11 @@ bool CResourceBase::LoadResources( CResourceScript * pScript )
 
 	if ( ! pScript->Open())
 	{
-		g_Log.Event(LOGL_CRIT|LOGM_INIT, "[RESOURCES] '%s' not found...\n", static_cast<LPCTSTR>(pScript->GetFilePath()));
+		g_Log.Event(LOGL_CRIT|LOGM_INIT, "[RESOURCES] '%s' not found...\n", static_cast<lpctstr>(pScript->GetFilePath()));
 		return( false );
 	}
 
-	g_Log.Event(LOGM_INIT, "Loading %s\n", static_cast<LPCTSTR>(pScript->GetFilePath()));
+	g_Log.Event(LOGM_INIT, "Loading %s\n", static_cast<lpctstr>(pScript->GetFilePath()));
 
 	LoadResourcesOpen( pScript );
 	pScript->Close();
@@ -283,7 +283,7 @@ bool CResourceBase::LoadResources( CResourceScript * pScript )
 	return( true );
 }
 
-CResourceScript * CResourceBase::LoadResourcesAdd( LPCTSTR pszNewFileName )
+CResourceScript * CResourceBase::LoadResourcesAdd( lpctstr pszNewFileName )
 {
 	ADDTOCALLSTACK("CResourceBase::LoadResourcesAdd");
 	// Make sure this is added to my list of resource files
@@ -295,7 +295,7 @@ CResourceScript * CResourceBase::LoadResourcesAdd( LPCTSTR pszNewFileName )
 	return( pScript );
 }
 
-bool CResourceBase::OpenResourceFind( CScript &s, LPCTSTR pszFilename, bool bCritical )
+bool CResourceBase::OpenResourceFind( CScript &s, lpctstr pszFilename, bool bCritical )
 {
 	ADDTOCALLSTACK("CResourceBase::OpenResourceFind");
 	// Open a single resource script file.
@@ -317,7 +317,7 @@ bool CResourceBase::OpenResourceFind( CScript &s, LPCTSTR pszFilename, bool bCri
 		return( true );
 
 	// finally, strip the directory and re-check script file path
-	LPCTSTR pszTitle = CGFile::GetFilesTitle(pszFilename);
+	lpctstr pszTitle = CGFile::GetFilesTitle(pszFilename);
 	sPathName = CGFile::GetMergedFileName( m_sSCPBaseDir, pszTitle );
 	return( s.Open( sPathName, OF_READ ));
 }
@@ -333,7 +333,7 @@ bool CResourceBase::LoadResourceSection( CScript * pScript )
 //*********************************************************
 // Resource Block Definitions
 
-LPCTSTR CResourceBase::ResourceGetName( RESOURCE_ID_BASE rid ) const
+lpctstr CResourceBase::ResourceGetName( RESOURCE_ID_BASE rid ) const
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceGetName");
 	// Get a portable name for the resource id type.
@@ -342,7 +342,7 @@ LPCTSTR CResourceBase::ResourceGetName( RESOURCE_ID_BASE rid ) const
 	if ( pResourceDef )
 		return( pResourceDef->GetResourceName());
 
-	TCHAR * pszTmp = Str_GetTemp();
+	tchar * pszTmp = Str_GetTemp();
 	ASSERT(pszTmp);
 	if ( ! rid.IsValidUID())
 	{
@@ -355,7 +355,7 @@ LPCTSTR CResourceBase::ResourceGetName( RESOURCE_ID_BASE rid ) const
 	return( pszTmp );
 }
 
-LPCTSTR CResourceBase::GetName() const
+lpctstr CResourceBase::GetName() const
 {
 	return "CFG";
 }
@@ -369,7 +369,7 @@ CResourceScript* CResourceBase::GetResourceFile( size_t i )
 	return( m_ResourceFiles[i] );
 }
 
-RESOURCE_ID CResourceBase::ResourceGetID( RES_TYPE restype, LPCTSTR & pszName )
+RESOURCE_ID CResourceBase::ResourceGetID( RES_TYPE restype, lpctstr & pszName )
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceGetID");
 	// Find the Resource ID given this name.
@@ -409,7 +409,7 @@ RESOURCE_ID CResourceBase::ResourceGetID( RES_TYPE restype, LPCTSTR & pszName )
 	return( rid );
 }
 
-RESOURCE_ID CResourceBase::ResourceGetIDType( RES_TYPE restype, LPCTSTR pszName )
+RESOURCE_ID CResourceBase::ResourceGetIDType( RES_TYPE restype, lpctstr pszName )
 {
 	// Get a resource of just this index type.
 	RESOURCE_ID rid = ResourceGetID( restype, pszName );
@@ -421,7 +421,7 @@ RESOURCE_ID CResourceBase::ResourceGetIDType( RES_TYPE restype, LPCTSTR pszName 
 	return( rid );
 }
 
-int CResourceBase::ResourceGetIndexType( RES_TYPE restype, LPCTSTR pszName )
+int CResourceBase::ResourceGetIndexType( RES_TYPE restype, lpctstr pszName )
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceGetIndexType");
 	// Get a resource of just this index type.
@@ -442,7 +442,7 @@ CResourceDef * CResourceBase::ResourceGetDef( RESOURCE_ID_BASE rid ) const
 	return( m_ResHash.GetAt( rid, index ));
 }
 
-CScriptObj * CResourceBase::ResourceGetDefByName( RES_TYPE restype, LPCTSTR pszName )
+CScriptObj * CResourceBase::ResourceGetDefByName( RES_TYPE restype, lpctstr pszName )
 {
 	// resolve a name to the actual resource def.
 	return( ResourceGetDef( ResourceGetID( restype, pszName )));
@@ -466,7 +466,7 @@ bool CResourceBase::ResourceLock( CResourceLock & s, RESOURCE_ID_BASE rid )
 	return( false );
 }
 
-bool CResourceBase::ResourceLock( CResourceLock & s, RES_TYPE restype, LPCTSTR pszName )
+bool CResourceBase::ResourceLock( CResourceLock & s, RES_TYPE restype, lpctstr pszName )
 {
 	return ResourceLock( s, ResourceGetIDType( restype, pszName ));
 }
@@ -475,7 +475,7 @@ bool CResourceBase::ResourceLock( CResourceLock & s, RES_TYPE restype, LPCTSTR p
 /////////////////////////////////////////////////
 // -CResourceDef
 
-CResourceDef::CResourceDef( RESOURCE_ID rid, LPCTSTR pszDefName ) : m_rid( rid ), m_pDefName( NULL )
+CResourceDef::CResourceDef( RESOURCE_ID rid, lpctstr pszDefName ) : m_rid( rid ), m_pDefName( NULL )
 {
 	SetResourceName( pszDefName );
 }
@@ -489,7 +489,7 @@ CResourceDef::~CResourceDef()	// need a virtual for the dynamic_cast to work.
 	// ?? Attempt to remove m_pDefName ?
 }
 
-bool CResourceDef::SetResourceName( LPCTSTR pszName )
+bool CResourceDef::SetResourceName( lpctstr pszName )
 {
 	ADDTOCALLSTACK("CResourceDef::SetResourceName");
 	ASSERT(pszName);
@@ -577,7 +577,7 @@ void CResourceDef::CopyDef( const CResourceDef * pLink )
 }
 
 
-LPCTSTR CResourceDef::GetResourceName() const
+lpctstr CResourceDef::GetResourceName() const
 {
 	ADDTOCALLSTACK("CResourceDef::GetResourceName");
 	if ( m_pDefName )
@@ -588,7 +588,7 @@ LPCTSTR CResourceDef::GetResourceName() const
 	return pszTmp;
 }
 
-LPCTSTR CResourceDef::GetName() const	// default to same as the DEFNAME name.
+lpctstr CResourceDef::GetName() const	// default to same as the DEFNAME name.
 {
 	return( GetResourceName());
 }
@@ -607,16 +607,16 @@ bool	CResourceDef::MakeResourceName()
 	ADDTOCALLSTACK("CResourceDef::MakeResourceName");
 	if ( m_pDefName )
 		return true;
-	LPCTSTR pszName = GetName();
+	lpctstr pszName = GetName();
 
 	GETNONWHITESPACE( pszName );
-	TCHAR * pbuf = Str_GetTemp();
-	TCHAR ch;
-	TCHAR * pszDef;
+	tchar * pbuf = Str_GetTemp();
+	tchar ch;
+	tchar * pszDef;
 
 	strcpy(pbuf, "a_");
 
-	LPCTSTR pszKey = NULL;	// auxiliary, the key of a similar CVarDef, if any found
+	lpctstr pszKey = NULL;	// auxiliary, the key of a similar CVarDef, if any found
 	pszDef = pbuf + 2;
 
 	for ( ; *pszName; pszName++ )
@@ -678,13 +678,13 @@ bool	CRegionBase::MakeRegionName()
 	if ( m_pDefName )
 		return true;
 
-	TCHAR ch;
-	LPCTSTR pszKey = NULL;	// auxiliary, the key of a similar CVarDef, if any found
-	TCHAR * pbuf = Str_GetTemp();
-	TCHAR * pszDef = pbuf + 2;
+	tchar ch;
+	lpctstr pszKey = NULL;	// auxiliary, the key of a similar CVarDef, if any found
+	tchar * pbuf = Str_GetTemp();
+	tchar * pszDef = pbuf + 2;
 	strcpy(pbuf, "a_");
 
-	LPCTSTR pszName = GetName();
+	lpctstr pszName = GetName();
 	GETNONWHITESPACE( pszName );
 
 	if ( !strnicmp( "the ", pszName, 4 ) )
@@ -711,7 +711,7 @@ bool	CRegionBase::MakeRegionName()
 		// collapse multiple spaces together
 		if ( ch == '_' && *(pszDef-1) == '_' )
 			continue;
-		*pszDef = static_cast<TCHAR>(tolower(ch));
+		*pszDef = static_cast<tchar>(tolower(ch));
 		pszDef++;
 	}
 	*pszDef	= '_';
@@ -777,7 +777,7 @@ bool CResourceScript::CheckForChange()
 
 	if ( ! CFileList::ReadFileInfo( GetFilePath(), dateChange, dwSize ))
 	{
-		DEBUG_ERR(( "Can't get stats info for file '%s'\n", static_cast<LPCTSTR>(GetFilePath()) ));
+		DEBUG_ERR(( "Can't get stats info for file '%s'\n", static_cast<lpctstr>(GetFilePath()) ));
 		return false;
 	}
 
@@ -788,7 +788,7 @@ bool CResourceScript::CheckForChange()
 	{
 		if ( m_dwSize != dwSize || m_dateChange != dateChange )
 		{
-			g_Log.Event(LOGL_WARN, "Resource '%s' changed, resync.\n", static_cast<LPCTSTR>(GetFilePath()));
+			g_Log.Event(LOGL_WARN, "Resource '%s' changed, resync.\n", static_cast<lpctstr>(GetFilePath()));
 			fChange = true;
 		}
 	}
@@ -799,7 +799,7 @@ bool CResourceScript::CheckForChange()
 	return( fChange );
 }
 
-CResourceScript::CResourceScript( LPCTSTR pszFileName )
+CResourceScript::CResourceScript( lpctstr pszFileName )
 {
 	Init();
 	SetFilePath( pszFileName );
@@ -829,7 +829,7 @@ void CResourceScript::ReSync()
 	Close();
 }
 
-bool CResourceScript::Open( LPCTSTR pszFilename, UINT wFlags )
+bool CResourceScript::Open( lpctstr pszFilename, UINT wFlags )
 {
 	ADDTOCALLSTACK("CResourceScript::Open");
 	// Open the file if it is not already open for use.
@@ -1015,7 +1015,7 @@ void CResourceLink::ScanSection( RES_TYPE restype )
 	ADDTOCALLSTACK("CResourceLink::ScanSection");
 	// Scan the section we are linking to for useful stuff.
 	ASSERT(m_pScript);
-	LPCTSTR const * ppTable = NULL;
+	lpctstr const * ppTable = NULL;
 	int iQty = 0;
 
 	switch (restype)
@@ -1212,13 +1212,13 @@ bool CResourceLink::ResourceLock( CResourceLock &s )
 	s.AttachObj( this );
 
 	// ret = -2 or -3
-	LPCTSTR pszName = GetResourceName();
-	DEBUG_ERR(("ResourceLock '%s':%d id=%s FAILED\n", static_cast<LPCTSTR>(s.GetFilePath()), m_Context.m_lOffset, pszName));
+	lpctstr pszName = GetResourceName();
+	DEBUG_ERR(("ResourceLock '%s':%d id=%s FAILED\n", static_cast<lpctstr>(s.GetFilePath()), m_Context.m_lOffset, pszName));
 
 	return false;
 }
 
-CResourceNamed::CResourceNamed( RESOURCE_ID rid, LPCTSTR pszName ) : CResourceLink( rid ), m_sName( pszName )
+CResourceNamed::CResourceNamed( RESOURCE_ID rid, lpctstr pszName ) : CResourceLink( rid ), m_sName( pszName )
 {
 }
 
@@ -1227,7 +1227,7 @@ CResourceNamed::~CResourceNamed()
 }
 
 
-LPCTSTR CResourceNamed::GetName() const
+lpctstr CResourceNamed::GetName() const
 {
 	return( m_sName );
 }
@@ -1379,7 +1379,7 @@ CResourceRefArray::CResourceRefArray()
 
 }
 
-LPCTSTR CResourceRefArray::GetResourceName( size_t iIndex ) const
+lpctstr CResourceRefArray::GetResourceName( size_t iIndex ) const
 {
 	// look up the name of the fragment given it's index.
 	CResourceLink * pResourceLink = GetAt( iIndex );
@@ -1398,9 +1398,9 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
 
 	// ? "TOWN" and "REGION" are special !
 
-	TCHAR * pszCmd = s.GetArgStr();
+	tchar * pszCmd = s.GetArgStr();
 
-	TCHAR * ppBlocks[128];	// max is arbitrary
+	tchar * ppBlocks[128];	// max is arbitrary
 	size_t iArgCount = Str_ParseCmds( pszCmd, ppBlocks, COUNTOF(ppBlocks));
 
 	for ( size_t i = 0; i < iArgCount; i++ )
@@ -1485,7 +1485,7 @@ void CResourceRefArray::WriteResourceRefList( CGString & sVal ) const
 {
 	ADDTOCALLSTACK("CResourceRefArray::WriteResourceRefList");
 	TemporaryString tsVal;
-	TCHAR * pszVal = static_cast<TCHAR *>(tsVal);
+	tchar * pszVal = static_cast<tchar *>(tsVal);
 	size_t len = 0;
 	for ( size_t j = 0; j < GetCount(); j++ )
 	{
@@ -1528,7 +1528,7 @@ size_t CResourceRefArray::FindResourceID( RESOURCE_ID_BASE rid ) const
 	return BadIndex();
 }
 
-size_t CResourceRefArray::FindResourceName( RES_TYPE restype, LPCTSTR pszKey ) const
+size_t CResourceRefArray::FindResourceName( RES_TYPE restype, lpctstr pszKey ) const
 {
 	ADDTOCALLSTACK("CResourceRefArray::FindResourceName");
 	// Is this resource already in the list ?
@@ -1538,7 +1538,7 @@ size_t CResourceRefArray::FindResourceName( RES_TYPE restype, LPCTSTR pszKey ) c
 	return FindPtr(pResourceLink);
 }
 
-void CResourceRefArray::r_Write( CScript & s, LPCTSTR pszKey ) const
+void CResourceRefArray::r_Write( CScript & s, lpctstr pszKey ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CResourceRefArray::r_Write");
 	for ( size_t j = 0; j < GetCount(); j++ )
@@ -1600,7 +1600,7 @@ CStringSortArray::CStringSortArray()
 
 }
 
-void CStringSortArray::DestructElements( TCHAR** pElements, size_t nCount )
+void CStringSortArray::DestructElements( tchar** pElements, size_t nCount )
 {
 	// delete the objects that we own.
 	for ( size_t i = 0; i < nCount; i++ )
@@ -1612,22 +1612,22 @@ void CStringSortArray::DestructElements( TCHAR** pElements, size_t nCount )
 		}
 	}
 
-	CGObSortArray<TCHAR*, TCHAR*>::DestructElements(pElements, nCount);
+	CGObSortArray<tchar*, tchar*>::DestructElements(pElements, nCount);
 }
 
 // Sorted array of strings
-int CStringSortArray::CompareKey( TCHAR* pszID1, TCHAR* pszID2, bool fNoSpaces ) const
+int CStringSortArray::CompareKey( tchar* pszID1, tchar* pszID2, bool fNoSpaces ) const
 {
 	UNREFERENCED_PARAMETER(fNoSpaces);
 	ASSERT( pszID2 );
 	return( strcmpi( pszID1, pszID2));
 }
 
-void CStringSortArray::AddSortString( LPCTSTR pszText )
+void CStringSortArray::AddSortString( lpctstr pszText )
 {
 	ASSERT(pszText);
 	size_t len = strlen( pszText );
-	TCHAR * pNew = new TCHAR [ len + 1 ];
+	tchar * pNew = new tchar [ len + 1 ];
 	strcpy( pNew, pszText );
 	AddSortKey( pNew, pNew );
 }
@@ -1638,12 +1638,12 @@ CObNameSortArray::CObNameSortArray()
 }
 
 // Array of CScriptObj. name sorted.
-int CObNameSortArray::CompareKey( LPCTSTR pszID, CScriptObj* pObj, bool fNoSpaces ) const
+int CObNameSortArray::CompareKey( lpctstr pszID, CScriptObj* pObj, bool fNoSpaces ) const
 {
 	ASSERT( pszID );
 	ASSERT( pObj );
 
-	LPCTSTR objStr = pObj->GetName();
+	lpctstr objStr = pObj->GetName();
 	if ( fNoSpaces )
 	{
 		const char * p = strchr( pszID, ' ' );
@@ -1712,7 +1712,7 @@ void CResourceQty::SetResQty( INT64 wQty )
 	m_iQty = wQty;
 }
 
-size_t CResourceQty::WriteKey( TCHAR * pszArgs, bool fQtyOnly, bool fKeyOnly ) const
+size_t CResourceQty::WriteKey( tchar * pszArgs, bool fQtyOnly, bool fKeyOnly ) const
 {
 	ADDTOCALLSTACK("CResourceQty::WriteKey");
 	size_t i = 0;
@@ -1725,7 +1725,7 @@ size_t CResourceQty::WriteKey( TCHAR * pszArgs, bool fQtyOnly, bool fKeyOnly ) c
 	return( i );
 }
 
-size_t CResourceQty::WriteNameSingle( TCHAR * pszArgs, int iQty ) const
+size_t CResourceQty::WriteNameSingle( tchar * pszArgs, int iQty ) const
 {
 	ADDTOCALLSTACK("CResourceQty::WriteNameSingle");
 	if ( GetResType() == RES_ITEMDEF )
@@ -1742,7 +1742,7 @@ size_t CResourceQty::WriteNameSingle( TCHAR * pszArgs, int iQty ) const
 		return( strcpylen( pszArgs, g_Cfg.ResourceGetName( m_rid )) );
 }
 
-bool CResourceQty::Load(LPCTSTR &pszCmds)
+bool CResourceQty::Load(lpctstr &pszCmds)
 {
 	ADDTOCALLSTACK("CResourceQty::Load");
 	// Can be either order.:
@@ -1794,7 +1794,7 @@ CResourceQtyArray::CResourceQtyArray()
 	m_mergeOnLoad = true;
 }
 
-CResourceQtyArray::CResourceQtyArray(LPCTSTR pszCmds)
+CResourceQtyArray::CResourceQtyArray(lpctstr pszCmds)
 {
 	m_mergeOnLoad = true;
 	Load(pszCmds);
@@ -1877,7 +1877,7 @@ bool CResourceQtyArray::IsResourceMatchAll( CChar * pChar ) const
 	return( true );
 }
 
-size_t CResourceQtyArray::Load(LPCTSTR pszCmds)
+size_t CResourceQtyArray::Load(lpctstr pszCmds)
 {
 	ADDTOCALLSTACK("CResourceQtyArray::Load");
 	//	clear-before-load in order not to mess with the previous data
@@ -1930,7 +1930,7 @@ size_t CResourceQtyArray::Load(LPCTSTR pszCmds)
 	return( iValid );
 }
 
-void CResourceQtyArray::WriteKeys( TCHAR * pszArgs, size_t index, bool fQtyOnly, bool fKeyOnly ) const
+void CResourceQtyArray::WriteKeys( tchar * pszArgs, size_t index, bool fQtyOnly, bool fKeyOnly ) const
 {
 	ADDTOCALLSTACK("CResourceQtyArray::WriteKeys");
 	size_t max = GetCount();
@@ -1949,7 +1949,7 @@ void CResourceQtyArray::WriteKeys( TCHAR * pszArgs, size_t index, bool fQtyOnly,
 }
 
 
-void CResourceQtyArray::WriteNames( TCHAR * pszArgs, size_t index ) const
+void CResourceQtyArray::WriteNames( tchar * pszArgs, size_t index ) const
 {
 	ADDTOCALLSTACK("CResourceQtyArray::WriteNames");
 	size_t max = GetCount();

@@ -58,20 +58,20 @@ class PacketPropertyList;
 class CObjBase : public CObjBaseTemplate, public CScriptObj
 {
 	// All Instances of CItem or CChar have these base attributes.
-	static LPCTSTR const sm_szLoadKeys[];
-	static LPCTSTR const sm_szVerbKeys[];
-	static LPCTSTR const sm_szRefKeys[];
+	static lpctstr const sm_szLoadKeys[];
+	static lpctstr const sm_szVerbKeys[];
+	static lpctstr const sm_szRefKeys[];
 
 private:
 	CServTime m_timeout;		// when does this rot away ? or other action. 0 = never, else system time
 	CServTime m_timestamp;
 	HUE_TYPE m_wHue;			// Hue or skin color. (CItems must be < 0x4ff or so)
-	LPCTSTR m_RunningTrigger;
+	lpctstr m_RunningTrigger;
 
 protected:
 	CResourceRef m_BaseRef;	// Pointer to the resource that describes this type.
 public:
-	inline bool CallPersonalTrigger(TCHAR * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult, bool bFull);
+	inline bool CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult, bool bFull);
 	static const char *m_sClassName;
 	CVarDefMap m_TagDefs;		// attach extra tags here.
 	CVarDefMap m_BaseDefs;		// New Variable storage system
@@ -88,27 +88,27 @@ public:
 	static size_t sm_iCount;	// how many total objects in the world ?
 	CVarDefMap * GetTagDefs();
 	virtual void DeletePrepare();
-	bool IsTriggerActive(LPCTSTR trig) ;
-	LPCTSTR GetTriggerActive();
-	void SetTriggerActive(LPCTSTR trig = NULL); 
+	bool IsTriggerActive(lpctstr trig) ;
+	lpctstr GetTriggerActive();
+	void SetTriggerActive(lpctstr trig = NULL); 
 
 public:
 	byte	RangeL() const;
 	byte	RangeH() const;
 	CServTime GetTimeStamp() const;
 	void SetTimeStamp( INT64 t_time);
-	LPCTSTR GetDefStr( LPCTSTR pszKey, bool fZero = false, bool fDef = false ) const;
-	INT64 GetDefNum( LPCTSTR pszKey, bool fZero = false, bool fDef = false ) const;
-	void SetDefNum(LPCTSTR pszKey, INT64 iVal, bool fZero = true);
-	void SetDefStr(LPCTSTR pszKey, LPCTSTR pszVal, bool fQuoted = false, bool fZero = true);
-	void DeleteDef(LPCTSTR pszKey);
-	CVarDefCont * GetDefKey( LPCTSTR pszKey, bool fDef ) const;
-	LPCTSTR GetKeyStr( LPCTSTR pszKey, bool fZero = false, bool fDef = false ) const;
-	INT64 GetKeyNum( LPCTSTR pszKey, bool fZero = false, bool fDef = false ) const;
-	CVarDefCont * GetKey( LPCTSTR pszKey, bool fDef ) const;
-	void SetKeyNum(LPCTSTR pszKey, INT64 iVal);
-	void SetKeyStr(LPCTSTR pszKey, LPCTSTR pszVal);
-	void DeleteKey( LPCTSTR pszKey );
+	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
+	INT64 GetDefNum( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
+	void SetDefNum(lpctstr pszKey, INT64 iVal, bool fZero = true);
+	void SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true);
+	void DeleteDef(lpctstr pszKey);
+	CVarDefCont * GetDefKey( lpctstr pszKey, bool fDef ) const;
+	lpctstr GetKeyStr( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
+	INT64 GetKeyNum( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
+	CVarDefCont * GetKey( lpctstr pszKey, bool fDef ) const;
+	void SetKeyNum(lpctstr pszKey, INT64 iVal);
+	void SetKeyStr(lpctstr pszKey, lpctstr pszVal);
+	void DeleteKey( lpctstr pszKey );
 
 protected:
 	virtual void DupeCopy( const CObjBase * pObj );
@@ -130,8 +130,8 @@ public:
 	void SetUID( dword dwVal, bool fItem );
 	CObjBase* GetNext() const;
 	CObjBase* GetPrev() const;
-	virtual LPCTSTR GetName() const;	// resolve ambiguity w/CScriptObj
-	LPCTSTR GetResourceName() const;
+	virtual lpctstr GetName() const;	// resolve ambiguity w/CScriptObj
+	lpctstr GetResourceName() const;
 
 public:
 	// Hue
@@ -157,34 +157,34 @@ public:
 	virtual bool MoveNear( CPointMap pt, word iSteps = 0 );
 	virtual bool MoveNearObj( const CObjBaseTemplate *pObj, word iSteps = 0 );
 
-	void inline SetNamePool_Fail( TCHAR * ppTitles );
-	bool SetNamePool( LPCTSTR pszName );
+	void inline SetNamePool_Fail( tchar * ppTitles );
+	bool SetNamePool( lpctstr pszName );
 
 	void Sound( SOUND_TYPE id, int iRepeat = 1 ) const; // Play sound effect from this location.
 	void Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSource = NULL, byte bspeedseconds = 5, byte bloop = 1, bool fexplode = false, dword color = 0, dword render = 0, word effectid = 0, word explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0) const;
 
 	void r_WriteSafe( CScript & s );
 
-	virtual bool r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef );
+	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 	virtual void r_Write( CScript & s );
 	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );	// some command on this object as a target
 
-	void Emote(LPCTSTR pText, CClient * pClientExclude = NULL, bool fPossessive = false);
-	void Emote2(LPCTSTR pText, LPCTSTR pText2, CClient * pClientExclude = NULL, bool fPossessive = false);
+	void Emote(lpctstr pText, CClient * pClientExclude = NULL, bool fPossessive = false);
+	void Emote2(lpctstr pText, lpctstr pText2, CClient * pClientExclude = NULL, bool fPossessive = false);
 
-	virtual void Speak( LPCTSTR pText, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_NORMAL );
-	virtual void SpeakUTF8( LPCTSTR pText, HUE_TYPE wHue= HUE_TEXT_DEF, TALKMODE_TYPE mode= TALKMODE_SAY, FONT_TYPE font = FONT_NORMAL, CLanguageID lang = 0 );
+	virtual void Speak( lpctstr pText, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_NORMAL );
+	virtual void SpeakUTF8( lpctstr pText, HUE_TYPE wHue= HUE_TEXT_DEF, TALKMODE_TYPE mode= TALKMODE_SAY, FONT_TYPE font = FONT_NORMAL, CLanguageID lang = 0 );
 	virtual void SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang );
 	
 	void RemoveFromView( CClient * pClientExclude = NULL , bool fHardcoded = true );	// remove this item from all clients.
 	void ResendOnEquip( bool fAllClients = false );	// Fix for Enhanced Client when equipping items via DClick, these must be removed from where they are and sent again.
 	void ResendTooltip( bool bSendFull = false, bool bUseCache = false );	// force reload of tooltip for this object
 	void UpdateCanSee( PacketSend * pPacket, CClient * pClientExclude = NULL ) const;
-	void UpdateObjMessage( LPCTSTR pTextThem, LPCTSTR pTextYou, CClient * pClientExclude, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font = FONT_NORMAL, bool bUnicode = false ) const;
+	void UpdateObjMessage( lpctstr pTextThem, lpctstr pTextYou, CClient * pClientExclude, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font = FONT_NORMAL, bool bUnicode = false ) const;
 
-	TRIGRET_TYPE OnHearTrigger(CResourceLock &s, LPCTSTR pCmd, CChar *pSrc, TALKMODE_TYPE &mode, HUE_TYPE wHue = HUE_DEFAULT);
+	TRIGRET_TYPE OnHearTrigger(CResourceLock &s, lpctstr pCmd, CChar *pSrc, TALKMODE_TYPE &mode, HUE_TYPE wHue = HUE_DEFAULT);
 
 	bool IsContainer() const;
 
@@ -473,7 +473,7 @@ enum CTRIG_TYPE
 };
 
 
-DIR_TYPE GetDirStr( LPCTSTR pszDir );
+DIR_TYPE GetDirStr( lpctstr pszDir );
 
 inline INT64 CObjBase::GetTimerDiff() const
 {
@@ -481,5 +481,5 @@ inline INT64 CObjBase::GetTimerDiff() const
 	return( g_World.GetTimeDiff( m_timeout ) );
 }
 
-extern void DeleteKey( LPCTSTR pszKey );
+extern void DeleteKey( lpctstr pszKey );
 #endif // _INC_COBJBASE_H

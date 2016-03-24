@@ -72,13 +72,13 @@ CGrayUID CItemMemory::Guild_GetLoyalTo() const
 	return iUid;
 }
 
-int CItemMemory::Guild_SetTitle(LPCTSTR pszTitle)
+int CItemMemory::Guild_SetTitle(lpctstr pszTitle)
 {
 	ADDTOCALLSTACK("CItemMemory::Guild_SetTitle");
 	return GetTagDefs()->SetStr("Title", false, pszTitle);
 }
 
-LPCTSTR CItemMemory::Guild_GetTitle() const
+lpctstr CItemMemory::Guild_GetTitle() const
 {
 	ADDTOCALLSTACK("CItemMemory::Guild_GetTitle");
 	return m_TagDefs.GetKeyStr("Title", false);

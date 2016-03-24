@@ -19,7 +19,7 @@ private:
 public:
 	static const char *m_sClassName;
 
-	CVarDefCont( LPCTSTR pszKey );
+	CVarDefCont( lpctstr pszKey );
 	virtual ~CVarDefCont();
 
 private:
@@ -27,10 +27,10 @@ private:
 	CVarDefCont& operator=(const CVarDefCont& other);
 
 public:
-	LPCTSTR GetKey() const;
-	void SetKey( LPCTSTR pszKey );
+	lpctstr GetKey() const;
+	void SetKey( lpctstr pszKey );
 
-	virtual LPCTSTR GetValStr() const = 0;
+	virtual lpctstr GetValStr() const = 0;
 	virtual INT64 GetValNum() const = 0;
 	virtual CVarDefCont * CopySelf() const = 0;
 };
@@ -43,8 +43,8 @@ private:
 public:
 	static const char *m_sClassName;
 
-	CVarDefContNum( LPCTSTR pszKey, INT64 iVal );
-	CVarDefContNum( LPCTSTR pszKey );
+	CVarDefContNum( lpctstr pszKey, INT64 iVal );
+	CVarDefContNum( lpctstr pszKey );
 	~CVarDefContNum();
 
 private:
@@ -54,10 +54,10 @@ private:
 public:
 	INT64 GetValNum() const;
 	void SetValNum( INT64 iVal );
-	LPCTSTR GetValStr() const;
+	lpctstr GetValStr() const;
 
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( LPCTSTR pKey, CGString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pKey, CGString & sVal, CTextConsole * pSrc );
 
 	virtual CVarDefCont * CopySelf() const;
 };
@@ -70,8 +70,8 @@ private:
 public:
 	static const char *m_sClassName;
 
-	CVarDefContStr( LPCTSTR pszKey, LPCTSTR pszVal );
-	explicit CVarDefContStr( LPCTSTR pszKey );
+	CVarDefContStr( lpctstr pszKey, lpctstr pszVal );
+	explicit CVarDefContStr( lpctstr pszKey );
 	~CVarDefContStr();
 
 private:
@@ -79,12 +79,12 @@ private:
 	CVarDefContStr& operator=(const CVarDefContStr& other);
 
 public:
-	LPCTSTR GetValStr() const;
-	void SetValStr( LPCTSTR pszVal );
+	lpctstr GetValStr() const;
+	void SetValStr( lpctstr pszVal );
 	INT64 GetValNum() const;
 
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( LPCTSTR pKey, CGString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pKey, CGString & sVal, CTextConsole * pSrc );
 
 	virtual CVarDefCont * CopySelf() const;
 };
@@ -106,7 +106,7 @@ private:
 		public:
 			static const char *m_sClassName;
 
-			CVarDefContTest( LPCTSTR pszKey );
+			CVarDefContTest( lpctstr pszKey );
 			~CVarDefContTest();
 
 		private:
@@ -114,7 +114,7 @@ private:
 			CVarDefContTest& operator=(const CVarDefContTest& other);
 
 		public:
-			LPCTSTR GetValStr() const;
+			lpctstr GetValStr() const;
 			INT64 GetValNum() const;
 			virtual CVarDefCont * CopySelf() const;
 	};
@@ -126,13 +126,13 @@ public:
 	static const char *m_sClassName;
 
 private:
-	CVarDefCont * GetAtKey( LPCTSTR at ) const;
+	CVarDefCont * GetAtKey( lpctstr at ) const;
 	void DeleteAt( size_t at );
-	void DeleteAtKey( LPCTSTR at );
+	void DeleteAtKey( lpctstr at );
 	void DeleteAtIterator( DefSet::iterator it );
 
-	int SetNumOverride( LPCTSTR pszKey, INT64 iVal );
-	int SetStrOverride( LPCTSTR pszKey, LPCTSTR pszVal );
+	int SetNumOverride( lpctstr pszKey, INT64 iVal );
+	int SetStrOverride( lpctstr pszKey, lpctstr pszVal );
 
 public:
 	void Copy( const CVarDefMap * pArray );
@@ -150,28 +150,28 @@ private:
 	CVarDefMap(const CVarDefMap& copy);
 
 public:
-	LPCTSTR FindValNum( INT64 iVal ) const;
-	LPCTSTR FindValStr( LPCTSTR pVal ) const;
+	lpctstr FindValNum( INT64 iVal ) const;
+	lpctstr FindValStr( lpctstr pVal ) const;
 
-	int SetNumNew( LPCTSTR pszKey, INT64 iVal );
-	int SetNum( LPCTSTR pszKey, INT64 iVal, bool fZero = false );
-	int SetStrNew( LPCTSTR pszKey, LPCTSTR pszVal );
-	int SetStr( LPCTSTR pszKey, bool fQuoted, LPCTSTR pszVal, bool fZero = false );
+	int SetNumNew( lpctstr pszKey, INT64 iVal );
+	int SetNum( lpctstr pszKey, INT64 iVal, bool fZero = false );
+	int SetStrNew( lpctstr pszKey, lpctstr pszVal );
+	int SetStr( lpctstr pszKey, bool fQuoted, lpctstr pszVal, bool fZero = false );
 
 	CVarDefCont * GetAt( size_t at ) const;
-	CVarDefCont * GetKey( LPCTSTR pszKey ) const;
-	INT64 GetKeyNum( LPCTSTR pszKey, bool fZero = false ) const;
-	LPCTSTR GetKeyStr( LPCTSTR pszKey, bool fZero = false ) const;
-	CVarDefCont * GetParseKey( LPCTSTR & pArgs ) const;
-	CVarDefCont * CheckParseKey( LPCTSTR & pszArgs ) const;
-	bool GetParseVal( LPCTSTR & pArgs, long long * plVal ) const;
+	CVarDefCont * GetKey( lpctstr pszKey ) const;
+	INT64 GetKeyNum( lpctstr pszKey, bool fZero = false ) const;
+	lpctstr GetKeyStr( lpctstr pszKey, bool fZero = false ) const;
+	CVarDefCont * GetParseKey( lpctstr & pArgs ) const;
+	CVarDefCont * CheckParseKey( lpctstr & pszArgs ) const;
+	bool GetParseVal( lpctstr & pArgs, long long * plVal ) const;
 
-	void DumpKeys( CTextConsole * pSrc, LPCTSTR pszPrefix = NULL ) const;
-	void ClearKeys(LPCTSTR mask = NULL);
-	void DeleteKey( LPCTSTR key );
+	void DumpKeys( CTextConsole * pSrc, lpctstr pszPrefix = NULL ) const;
+	void ClearKeys(lpctstr mask = NULL);
+	void DeleteKey( lpctstr key );
 
 	bool r_LoadVal( CScript & s );
-	void r_WritePrefix( CScript & s, LPCTSTR pszPrefix = NULL, LPCTSTR pszKeyExclude = NULL );
+	void r_WritePrefix( CScript & s, lpctstr pszPrefix = NULL, lpctstr pszKeyExclude = NULL );
 };
 
 #endif // _INC_CVARDEFMAP_H

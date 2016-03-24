@@ -71,8 +71,8 @@ struct ndword
 
 #define	NCHAR	nword			// a UNICODE text char on the network.
 
-extern int CvtSystemToNUNICODE( NCHAR * pOut, int iSizeOutChars, LPCTSTR pInp, int iSizeInBytes );
-extern int CvtNUNICODEToSystem( TCHAR * pOut, int iSizeOutBytes, const NCHAR * pInp, int iSizeInChars );
+extern int CvtSystemToNUNICODE( NCHAR * pOut, int iSizeOutChars, lpctstr pInp, int iSizeInBytes );
+extern int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const NCHAR * pInp, int iSizeInChars );
 
 class CLanguageID
 {
@@ -101,7 +101,7 @@ public:
 	{
 		return( m_codes[0] != 0 );
 	}
-	void GetStrDef( TCHAR * pszLang )
+	void GetStrDef( tchar * pszLang )
 	{
 		if ( ! IsDef())
 		{
@@ -113,18 +113,18 @@ public:
 			pszLang[3] = '\0';
 		}
 	}
-	void GetStr( TCHAR * pszLang ) const
+	void GetStr( tchar * pszLang ) const
 	{
 		memcpy( pszLang, m_codes, 3 );
 		pszLang[3] = '\0';
 	}
-	LPCTSTR GetStr() const
+	lpctstr GetStr() const
 	{
-		TCHAR * pszTmp = Str_GetTemp();
+		tchar * pszTmp = Str_GetTemp();
 		GetStr( pszTmp );
 		return( pszTmp );
 	}
-	bool Set( LPCTSTR pszLang )
+	bool Set( lpctstr pszLang )
 	{
 		// needs not be terminated!
 		if ( pszLang != NULL )
@@ -1564,7 +1564,7 @@ struct CEvent	// event buffer from client to server..
 			byte  m_ProcessorType;		// @0 = 03
 			word m_ProcessorClock;		// @1 = 01 8E
 			byte  m_nProcessors;		// @3 = 01
-			WCHAR m_wDirectory[0x10];	// @4 = 00 00
+			wchar m_wDirectory[0x10];	// @4 = 00 00
 			byte m_szVideoCardDescrip2[0x20]; // @24 = AA 7E 3F 04 00
 			byte m_szModemManufacturer[0x10];	// @44 = 40 F8
 			byte m_Unk54[0x30];
@@ -1714,7 +1714,7 @@ struct CEvent	// event buffer from client to server..
 			ndword m_prompt;	// 7-10 = prompt id
 			ndword m_type;		// 11-14 = type (0=request/esc, 1=reply)
 			char m_lang[4];		// 15-18 = language (3 chars + NULL)
-			WCHAR m_utext[1];	// 19+ = null terminated unicode text.
+			wchar m_utext[1];	// 19+ = null terminated unicode text.
 		} PromptUNICODE;
 		
 		struct	// size = ?? // Config File (IGR)
@@ -3068,7 +3068,7 @@ struct CCommand	// command buffer from server to client.
 			nword m_font;		// 12-13 = FONT_TYPE
 			ndword m_clilocId;	// 14-17 = Cliloc ID to display
 			char m_charname[MAX_NAME_SIZE];	// 18-47
-			TCHAR m_args[1];		// 48+ = arguments
+			tchar m_args[1];		// 48+ = arguments
 		} SpeakLocalized;
 
 		struct // size = 21 // console prompt request. (unicode version)
@@ -3079,7 +3079,7 @@ struct CCommand	// command buffer from server to client.
 			ndword m_prompt;	// 7-10 = prompt id
 			ndword m_type;		// 11-14 = type (0=request/esc, 1=reply)
 			char m_lang[4];		// 15-18 = lang (3 chars + NULL)
-			WCHAR m_utext[1];	// 19+ = response
+			wchar m_utext[1];	// 19+ = response
 		} PromptUNICODE;
 		
 		struct
@@ -3108,7 +3108,7 @@ struct CCommand	// command buffer from server to client.
 			byte m_affixType;	// 18 = Affix type (0=append, 1=prepend, 2=system)
 			char m_charname[MAX_NAME_SIZE];	// 19-48
 			char m_affix[1];	// 49+ = affix (ASCII only)
-			TCHAR m_args[1];	// 50+len(affix)+ = arguments (UNICODE only)
+			tchar m_args[1];	// 50+len(affix)+ = arguments (UNICODE only)
 		} SpeakLocalizedEx;
 
 		struct	// size = 2 // Logout Confirm Answer
@@ -3143,7 +3143,7 @@ struct CCommand	// command buffer from server to client.
 			{
 				ndword m_LocID;
 				nword m_textlen;
-				TCHAR m_utext[1]; // this is NCHAR !!!
+				tchar m_utext[1]; // this is NCHAR !!!
 			} m_list[1];
 		} AOSTooltip;
 		

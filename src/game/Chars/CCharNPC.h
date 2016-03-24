@@ -25,7 +25,7 @@ public:
 	static const char *m_sClassName;
 	// Stuff that is specific to an NPC character instance (not an NPC type see CCharBase for that).
 	// Any NPC AI stuff will go here.
-	static LPCTSTR const sm_szVerbKeys[];
+	static lpctstr const sm_szVerbKeys[];
 
 	NPCBRAIN_TYPE m_Brain;		// For NPCs: Number of the assigned basic AI block
 	word m_Home_Dist_Wander;	// Distance to allow to "wander".
@@ -37,7 +37,7 @@ public:
 
 	CResourceQty m_Need;	// What items might i need/Desire ? (coded as resource scripts) ex "10 gold,20 logs" etc.
 
-	static LPCTSTR const sm_szLoadKeys[];
+	static lpctstr const sm_szLoadKeys[];
 
 	word	m_nextX[MAX_NPC_PATH_STORAGE_SIZE];	// array of X coords of the next step
 	word	m_nextY[MAX_NPC_PATH_STORAGE_SIZE];	// array of Y coords of the next step
@@ -57,7 +57,7 @@ public:
 
 public:
 	void r_WriteChar( CChar * pChar, CScript & s );
-	bool r_WriteVal( CChar * pChar, LPCTSTR pszKey, CGString & s );
+	bool r_WriteVal( CChar * pChar, lpctstr pszKey, CGString & s );
 	bool r_LoadVal( CChar * pChar, CScript & s );
 
 	bool IsVendor() const;

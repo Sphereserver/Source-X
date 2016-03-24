@@ -393,7 +393,7 @@ public:
 		} m_ttMap;
 	};
 
-	static LPCTSTR const sm_szLoadKeys[];
+	static lpctstr const sm_szLoadKeys[];
 
 private:
 	static CItemBase * MakeDupeReplacement( CItemBase * pBase, ITEMID_TYPE iddupe );
@@ -423,7 +423,7 @@ public:
 
 	static bool IsVisibleLayer( LAYER_TYPE layer );
 
-	static TCHAR * GetNamePluralize( LPCTSTR pszNameBase, bool fPluralize );
+	static tchar * GetNamePluralize( lpctstr pszNameBase, bool fPluralize );
 	static bool GetItemData( ITEMID_TYPE id, CUOItemTypeRec2 * ptile );
 	static height_t GetItemHeight( ITEMID_TYPE id, dword & MoveFlags );
 
@@ -438,7 +438,7 @@ public:
 		return( type == m_type );
 	}
 
-	void SetTypeName( LPCTSTR pszName );
+	void SetTypeName( lpctstr pszName );
 
 	LAYER_TYPE GetEquipLayer() const
 	{
@@ -448,8 +448,8 @@ public:
 	bool IsTypeEquippable() const;
 	GUMP_TYPE IsTypeContainer() const;
 
-	LPCTSTR GetName() const;
-	LPCTSTR GetArticleAndSpace() const;
+	lpctstr GetName() const;
+	lpctstr GetArticleAndSpace() const;
 
 	ITEMID_TYPE GetID() const
 	{
@@ -467,7 +467,7 @@ public:
 	ITEMID_TYPE GetNextFlipID( ITEMID_TYPE id ) const;
 
 	virtual bool r_LoadVal( CScript & s );
-	bool r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc = NULL );
+	bool r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc = NULL );
 
 	bool IsMovableType() const
 	{
@@ -578,7 +578,7 @@ class CItemBaseMulti : public CItemBase
 	// This item is really a multi with other items associated.
 	// define the list of objects it is made of.
 	// NOTE: It does not have to be a true multi item ITEMID_MULTI
-	static LPCTSTR const sm_szLoadKeys[];
+	static lpctstr const sm_szLoadKeys[];
 public:
 	static const char *m_sClassName;
 	struct CMultiComponentItem	// a component item of a multi.
@@ -615,10 +615,10 @@ public:
 	int GetMaxDist() const;
 
 	bool AddComponent( ITEMID_TYPE id, short dx, short dy, signed char dz );
-	bool AddComponent( TCHAR * pArgs );
-	void SetMultiRegion( TCHAR * pArgs );
+	bool AddComponent( tchar * pArgs );
+	void SetMultiRegion( tchar * pArgs );
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pChar );
+	bool r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pChar );
 
 	static CItemBase * MakeMultiRegion( CItemBase * pBase, CScript & s );
 };

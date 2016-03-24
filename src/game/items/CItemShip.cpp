@@ -679,7 +679,7 @@ enum
 	SHV_QTY
 };
 
-LPCTSTR const CItemShip::sm_szVerbKeys[SHV_QTY+1] =
+lpctstr const CItemShip::sm_szVerbKeys[SHV_QTY+1] =
 {
 	"SHIPANCHORDROP",
 	"SHIPANCHORRAISE",
@@ -704,7 +704,7 @@ LPCTSTR const CItemShip::sm_szVerbKeys[SHV_QTY+1] =
 	NULL
 };
 
-bool CItemShip::r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef )
+bool CItemShip::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CItemShip::r_GetRef");
 
@@ -766,7 +766,7 @@ bool CItemShip::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fr
 	// Get current facing dir.
 	DIR_TYPE DirFace = sm_Ship_FaceDir[ Ship_GetFaceOffset() ];
 	int DirMoveChange;
-	LPCTSTR pszSpeak = NULL;
+	lpctstr pszSpeak = NULL;
 
 	switch ( iCmd )
 	{
@@ -1024,7 +1024,7 @@ dodirmovechange:
 			}
 		}
 
-		TCHAR szText[ MAX_TALK_BUFFER ];
+		tchar szText[ MAX_TALK_BUFFER ];
 		strcpy( szText, pszSpeak );
 		pChar->ParseText( szText, &g_Serv );
 		pTiller->Speak( szText, HUE_TEXT_DEF, TALKMODE_SAY, FONT_NORMAL );
@@ -1064,7 +1064,7 @@ enum IMCS_TYPE
 	IMCS_QTY
 };
 
-LPCTSTR const CItemShip::sm_szLoadKeys[IMCS_QTY + 1] = // static
+lpctstr const CItemShip::sm_szLoadKeys[IMCS_QTY + 1] = // static
 {
 	"HATCH",
 	"PILOT",
@@ -1075,7 +1075,7 @@ LPCTSTR const CItemShip::sm_szLoadKeys[IMCS_QTY + 1] = // static
 	NULL
 };
 
-bool CItemShip::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CItemShip::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CItemShip::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -1187,7 +1187,7 @@ bool CItemShip::r_LoadVal( CScript & s  )
 {
 	ADDTOCALLSTACK("CItemShip::r_LoadVal");
 	EXC_TRY("LoadVal");
-	LPCTSTR	pszKey = s.GetKey();
+	lpctstr	pszKey = s.GetKey();
 	IMCS_TYPE index = (IMCS_TYPE)FindTableHeadSorted(pszKey, sm_szLoadKeys, COUNTOF(sm_szLoadKeys) - 1);
 	if (g_Serv.IsLoading())
 	{

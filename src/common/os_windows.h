@@ -20,8 +20,8 @@
 #include <winsock2.h>
 #include <windows.h>
 #include <process.h>
+
 //	thread-specific definitions
-#include "CTime.h"
 #define THREAD_ENTRY_RET void
 
 #pragma warning(disable:4786)

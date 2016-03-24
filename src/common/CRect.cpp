@@ -11,7 +11,7 @@
 //*************************************************************************
 // -CPointBase
 
-LPCTSTR CPointBase::sm_szDirs[DIR_QTY+1] =
+lpctstr CPointBase::sm_szDirs[DIR_QTY+1] =
 {
 	g_Cfg.GetDefaultMsg(DEFMSG_MAP_DIR_0),
 	g_Cfg.GetDefaultMsg(DEFMSG_MAP_DIR_1),
@@ -55,7 +55,7 @@ enum PT_TYPE
 };
 
 
-LPCTSTR const CPointBase::sm_szLoadKeys[PT_QTY+1] =
+lpctstr const CPointBase::sm_szLoadKeys[PT_QTY+1] =
 {
 	"ISNEARTYPE",
 	"M",
@@ -256,7 +256,7 @@ void CPointBase::MoveN( DIR_TYPE dir, int amount )
 	m_y += static_cast<short>(sm_Moves[dir][1] * amount);
 }
 
-bool CPointBase::r_WriteVal( LPCTSTR pszKey, CGString & sVal ) const
+bool CPointBase::r_WriteVal( lpctstr pszKey, CGString & sVal ) const
 {
 	ADDTOCALLSTACK("CPointBase::r_WriteVal");
 	if ( !strnicmp( pszKey, "STATICS", 7 ) )
@@ -708,7 +708,7 @@ bool CPointBase::r_WriteVal( LPCTSTR pszKey, CGString & sVal ) const
 	return true;
 }
 
-bool CPointBase::r_LoadVal( LPCTSTR pszKey, LPCTSTR pszArgs )
+bool CPointBase::r_LoadVal( lpctstr pszKey, lpctstr pszArgs )
 {
 	ADDTOCALLSTACK("CPointBase::r_LoadVal");
 	int index = FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF(sm_szLoadKeys)-1 );
@@ -787,7 +787,7 @@ int CPointBase::StepLinePath( const CPointBase & ptSrc, int iSteps )
 	return( iDist2D );
 }
 
-TCHAR * CPointBase::WriteUsed( TCHAR * pszBuffer ) const
+tchar * CPointBase::WriteUsed( tchar * pszBuffer ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CPointBase::WriteUsed");
 	if ( m_map )
@@ -805,19 +805,19 @@ TCHAR * CPointBase::WriteUsed( TCHAR * pszBuffer ) const
 	return pszBuffer;
 }
 
-LPCTSTR CPointBase::WriteUsed() const
+lpctstr CPointBase::WriteUsed() const
 {
 	return( WriteUsed( Str_GetTemp()));
 }
 
-size_t CPointBase::Read( TCHAR * pszVal )
+size_t CPointBase::Read( tchar * pszVal )
 {
 	ADDTOCALLSTACK("CPointBase::Read");
 	// parse reading the point
 	// NOTE: do not use = as a separator here !
 	m_z = 0;
 	m_map = 0;
-	TCHAR * ppVal[4];
+	tchar * ppVal[4];
 	size_t iArgs = Str_ParseCmds( pszVal, ppVal, COUNTOF( ppVal ), " ,\t" );
 	switch ( iArgs )
 	{
@@ -897,13 +897,13 @@ int CPointBase::GetPointSortIndex() const
 //*************************************************************************
 // -CGRect
 
-size_t CGRect::Read( LPCTSTR pszVal )
+size_t CGRect::Read( lpctstr pszVal )
 {
 	ADDTOCALLSTACK("CGRect::Read");
 	// parse reading the rectangle
-	TCHAR *pszTemp = Str_GetTemp();
+	tchar *pszTemp = Str_GetTemp();
 	strcpy( pszTemp, pszVal );
-	TCHAR * ppVal[5];
+	tchar * ppVal[5];
 	size_t i = Str_ParseCmds( pszTemp, ppVal, COUNTOF( ppVal ), " ,\t");
 	switch (i)
 	{
@@ -952,7 +952,7 @@ size_t CGRect::Read( LPCTSTR pszVal )
 	return( i );
 }
 
-LPCTSTR CGRect::Write() const
+lpctstr CGRect::Write() const
 {
 	ADDTOCALLSTACK("CGRect::Write");
 	return( Write( Str_GetTemp()));
@@ -1069,7 +1069,7 @@ CPointMap::CPointMap( const CPointBase & pt )
 	Set( pt );
 }
 
-CPointMap::CPointMap( TCHAR * pVal )
+CPointMap::CPointMap( tchar * pVal )
 {
 	Read( pVal );
 }

@@ -89,7 +89,7 @@ CResourceDef *CItemSpawn::FixDef()
 	}
 }
 
-int CItemSpawn::GetName(TCHAR *pszOut) const
+int CItemSpawn::GetName(tchar *pszOut) const
 {
 	ADDTOCALLSTACK("CitemSpawn:GetName");
 	RESOURCE_ID_BASE rid;
@@ -98,7 +98,7 @@ int CItemSpawn::GetName(TCHAR *pszOut) const
 	else
 		rid = m_itSpawnChar.m_CharID;	// name the spawn type
 
-	LPCTSTR pszName = NULL;
+	lpctstr pszName = NULL;
 	CResourceDef *pDef = g_Cfg.ResourceGetDef(rid);
 	if ( pDef != NULL )
 		pszName = pDef->GetName();
@@ -387,7 +387,7 @@ enum ISPW_TYPE
 	ISPW_QTY
 };
 
-LPCTSTR const CItemSpawn::sm_szLoadKeys[ISPW_QTY + 1] =
+lpctstr const CItemSpawn::sm_szLoadKeys[ISPW_QTY + 1] =
 {
 	"ADDOBJ",
 	"AMOUNT",
@@ -400,7 +400,7 @@ LPCTSTR const CItemSpawn::sm_szLoadKeys[ISPW_QTY + 1] =
 	NULL
 };
 
-bool CItemSpawn::r_WriteVal(LPCTSTR pszKey, CGString & sVal, CTextConsole *pSrc)
+bool CItemSpawn::r_WriteVal(lpctstr pszKey, CGString & sVal, CTextConsole *pSrc)
 {
 	ADDTOCALLSTACK("CitemSpawn:r_WriteVal");
 	EXC_TRY("WriteVal");

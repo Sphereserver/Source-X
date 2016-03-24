@@ -7,7 +7,7 @@
 #include "CCharNPC.h"
 
 
-LPCTSTR const CCharNPC::sm_szLoadKeys[CNC_QTY+1] =
+lpctstr const CCharNPC::sm_szLoadKeys[CNC_QTY+1] =
 {
 #define ADD(a,b) b,
 #include "../tables/CCharNpc_props.tbl"
@@ -99,7 +99,7 @@ bool CCharNPC::r_LoadVal( CChar * pChar, CScript &s )
 		case CNC_NEED:
 		case CNC_NEEDNAME:
 		{
-			TCHAR * pTmp = s.GetArgRaw();
+			tchar * pTmp = s.GetArgRaw();
 			m_Need.Load(pTmp);
 		}
 		break;
@@ -144,7 +144,7 @@ bool CCharNPC::r_LoadVal( CChar * pChar, CScript &s )
 	return false;
 }
 
-bool CCharNPC::r_WriteVal( CChar * pChar, LPCTSTR pszKey, CGString & sVal )
+bool CCharNPC::r_WriteVal( CChar * pChar, lpctstr pszKey, CGString & sVal )
 {
 	EXC_TRY("WriteVal");
 	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CNC_QTY ))
@@ -176,14 +176,14 @@ bool CCharNPC::r_WriteVal( CChar * pChar, LPCTSTR pszKey, CGString & sVal )
 			break;
 		case CNC_NEED:
 		{
-			TCHAR *pszTmp = Str_GetTemp();
+			tchar *pszTmp = Str_GetTemp();
 			m_Need.WriteKey( pszTmp );
 			sVal = pszTmp;
 		}
 		break;
 		case CNC_NEEDNAME:
 		{
-			TCHAR *pszTmp = Str_GetTemp();
+			tchar *pszTmp = Str_GetTemp();
 			m_Need.WriteNameSingle( pszTmp );
 			sVal = pszTmp;
 		}
@@ -302,7 +302,7 @@ void CChar::NPC_CreateTrigger()
 
 	CCharBase *pCharDef = Char_GetDef();
 	TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
-	LPCTSTR pszTrigName = "@Create";
+	lpctstr pszTrigName = "@Create";
 	CTRIG_TYPE iAction = (CTRIG_TYPE)FindTableSorted(pszTrigName, sm_szTrigName, COUNTOF(sm_szTrigName) - 1);
 
 	// 2) TEVENTS

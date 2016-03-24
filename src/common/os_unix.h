@@ -79,7 +79,7 @@
 #define FMTSIZE_T "zu" // linux uses %zu to format size_t
 
 
-inline void _strupr( TCHAR * pszStr )
+inline void _strupr( tchar * pszStr )
 {
 	// No portable UNIX/LINUX equiv to this.
 	for ( ;pszStr[0] != '\0'; pszStr++ )
@@ -88,7 +88,7 @@ inline void _strupr( TCHAR * pszStr )
 	}
 }
 
-inline void _strlwr( TCHAR * pszStr )
+inline void _strlwr( tchar * pszStr )
 {
 	// No portable UNIX/LINUX equiv to this.
 	for ( ;pszStr[0] != '\0'; pszStr++ )

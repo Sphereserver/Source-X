@@ -100,7 +100,7 @@ public:
 	bool CheckTile_Item( dword dwItemBlockFlags, signed char zBottom, height_t zheight, dword wID );
 	inline void SetTop( dword &dwItemBlockFlags, signed char &z, dword &dwID );
 	bool CheckTile_Terrain( dword dwItemBlockFlags, signed char z, dword dwID );
-	static LPCTSTR GetTileName( dword dwID );
+	static lpctstr GetTileName( dword dwID );
 };
 
 struct CMapDiffBlock

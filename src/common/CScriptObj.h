@@ -51,31 +51,31 @@ class CScriptObj
 #define SKIP_ARGSEP(p)	while ( *(p)== ',' || IsSpace(*p) ){ (p)++; }
 #define SKIP_IDENTIFIERSTRING(p) while ( _ISCSYM(*p) ){ (p)++; }
 
-	static LPCTSTR const sm_szScriptKeys[];
-	static LPCTSTR const sm_szLoadKeys[];
-	static LPCTSTR const sm_szVerbKeys[];
+	static lpctstr const sm_szScriptKeys[];
+	static lpctstr const sm_szLoadKeys[];
+	static lpctstr const sm_szVerbKeys[];
 
 private:
 	TRIGRET_TYPE OnTriggerForLoop( CScript &s, int iType, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pResult );
 public:
 	static const char *m_sClassName;
-	TRIGRET_TYPE OnTriggerScript( CScript &s, LPCTSTR pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = NULL );
-	virtual TRIGRET_TYPE OnTrigger( LPCTSTR pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = NULL );
-	bool OnTriggerFind( CScript & s, LPCTSTR pszTrigName );
+	TRIGRET_TYPE OnTriggerScript( CScript &s, lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = NULL );
+	virtual TRIGRET_TYPE OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = NULL );
+	bool OnTriggerFind( CScript & s, lpctstr pszTrigName );
 	TRIGRET_TYPE OnTriggerRun( CScript &s, TRIGRUN_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pReturn );
 	TRIGRET_TYPE OnTriggerRunVal( CScript &s, TRIGRUN_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
 
-	virtual LPCTSTR GetName() const = 0;	// ( every object must have at least a type name )
+	virtual lpctstr GetName() const = 0;	// ( every object must have at least a type name )
 
 	// Flags = 1 = html
-	size_t ParseText( TCHAR * pszResponse, CTextConsole * pSrc, int iFlags = 0, CScriptTriggerArgs * pArgs = NULL );
+	size_t ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFlags = 0, CScriptTriggerArgs * pArgs = NULL );
 
-	virtual bool r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef );
-	virtual bool r_WriteVal( LPCTSTR pKey, CGString & sVal, CTextConsole * pSrc );
+	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
+	virtual bool r_WriteVal( lpctstr pKey, CGString & sVal, CTextConsole * pSrc );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
-	bool r_Call( LPCTSTR pszFunction, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * psVal = NULL, TRIGRET_TYPE * piRet = NULL );
+	bool r_Call( lpctstr pszFunction, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * psVal = NULL, TRIGRET_TYPE * piRet = NULL );
 
-	bool r_SetVal( LPCTSTR pszKey, LPCTSTR pszVal );
+	bool r_SetVal( lpctstr pszKey, lpctstr pszVal );
 	virtual bool r_LoadVal( CScript & s );
 	virtual bool r_Load( CScript & s );
 
@@ -91,7 +91,7 @@ private:
 class CScriptTriggerArgs : public CScriptObj
 {
 	// All the args an event will need.
-	static LPCTSTR const sm_szLoadKeys[];
+	static lpctstr const sm_szLoadKeys[];
 public:
 	static const char *m_sClassName;
 	INT64							m_iN1;		// "ARGN" or "ARGN1" = a modifying numeric arg to the current trigger.
@@ -104,7 +104,7 @@ public:
 	CGString					m_s1;		// ""ARGS" or "ARGS1" = string 1
 	CGString					m_s1_raw;	// RAW, used to build argv in runtime
 
-	CGPtrTypeArray	<LPCTSTR>	m_v;
+	CGPtrTypeArray	<lpctstr>	m_v;
 
 	CVarDefMap 					m_VarsLocal;// "LOCAL.x" = local variable x
 	CVarFloat					m_VarsFloat;// "FLOAT.x" = float local variable x
@@ -118,7 +118,7 @@ public:
 		m_pO1 = NULL;
 	}
 
-	explicit CScriptTriggerArgs( LPCTSTR pszStr );
+	explicit CScriptTriggerArgs( lpctstr pszStr );
 
 	explicit CScriptTriggerArgs( CScriptObj * pObj ) :
 		m_iN1(0),  m_iN2(0), m_iN3(0), m_pO1(pObj)
@@ -162,13 +162,13 @@ public:
 			*iVar3 = this->m_iN3;
 	}
 		
-	void Init( LPCTSTR pszStr );
+	void Init( lpctstr pszStr );
 	bool r_Verb( CScript & s, CTextConsole * pSrc );
 	bool r_LoadVal( CScript & s );
-	bool r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef );
-	bool r_WriteVal( LPCTSTR pKey, CGString & sVal, CTextConsole * pSrc );
+	bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
+	bool r_WriteVal( lpctstr pKey, CGString & sVal, CTextConsole * pSrc );
 	bool r_Copy( CTextConsole * pSrc );
-	LPCTSTR GetName() const
+	lpctstr GetName() const
 	{
 		return "ARG";
 	}
@@ -182,16 +182,16 @@ class CFileObj : public CScriptObj
 			bool bCreate;
 			bool bRead;
 			bool bWrite;
-			TCHAR * tBuffer;
+			tchar * tBuffer;
 			CGString * cgWriteBuffer;
 			// ----------- //
-			static LPCTSTR const sm_szLoadKeys[];
-			static LPCTSTR const sm_szVerbKeys[];
+			static lpctstr const sm_szLoadKeys[];
+			static lpctstr const sm_szVerbKeys[];
 
 	private:
 			void SetDefaultMode(void);
-			bool FileOpen( LPCTSTR sPath );
-			TCHAR * GetReadBuffer(bool);
+			bool FileOpen( lpctstr sPath );
+			tchar * GetReadBuffer(bool);
 			CGString * GetWriteBuffer(void);
 
 	public:
@@ -209,12 +209,12 @@ class CFileObj : public CScriptObj
 			bool IsInUse();
 			void FlushAndClose();
 
-			virtual bool r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef );
+			virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 			virtual bool r_LoadVal( CScript & s );
-			virtual bool r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc );
+			virtual bool r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc );
 			virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
 
-			LPCTSTR GetName() const
+			lpctstr GetName() const
 			{
 				return "FILE_OBJ";
 			}
@@ -228,8 +228,8 @@ class CFileObjContainer : public CScriptObj
 		int iGlobalTimeout;
 		int iCurrentTick;
 		// ----------- //
-		static LPCTSTR const sm_szLoadKeys[];
-		static LPCTSTR const sm_szVerbKeys[];
+		static lpctstr const sm_szLoadKeys[];
+		static lpctstr const sm_szVerbKeys[];
 
 	private:
 		void ResizeContainer( size_t iNewRange );
@@ -251,12 +251,12 @@ class CFileObjContainer : public CScriptObj
 		bool OnTick();
 		int FixWeirdness();
 
-		virtual bool r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef );
+		virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 		virtual bool r_LoadVal( CScript & s );
-		virtual bool r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc );
+		virtual bool r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc );
 		virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
 
-		LPCTSTR GetName() const
+		lpctstr GetName() const
 		{
 			return "FILE_OBJCONTAINER";
 		}

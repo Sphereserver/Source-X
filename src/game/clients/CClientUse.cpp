@@ -394,7 +394,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 			if ( bIsEquipped || !IsSetOF(OF_NoDClickTarget) )
 			{
 				// Mine at the location
-				TCHAR *pszTemp = Str_GetTemp();
+				tchar *pszTemp = Str_GetTemp();
 				sprintf(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_MACEPICK_TARG), pItem->GetName());
 				addTarget(CLIMODE_TARG_USE_ITEM, pszTemp, true, true);
 				return true;
@@ -431,7 +431,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 
 		case IT_CANNON_BALL:
 		{
-			TCHAR *pszTemp = Str_GetTemp();
+			tchar *pszTemp = Str_GetTemp();
 			sprintf(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_CBALL_PROMT), pItem->GetName());
 			addTarget(CLIMODE_TARG_USE_ITEM, pszTemp);
 			return true;
@@ -464,7 +464,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		case IT_SEED:
 		case IT_PITCHER_EMPTY:
 		{
-			TCHAR *pszTemp = Str_GetTemp();
+			tchar *pszTemp = Str_GetTemp();
 			sprintf(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_PITCHER_TARG), pItem->GetName());
 			addTarget(CLIMODE_TARG_USE_ITEM, pszTemp, true);
 			return true;
@@ -567,7 +567,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 
 		case IT_SEWING_KIT:
 		{
-			TCHAR *pszTemp = Str_GetTemp();
+			tchar *pszTemp = Str_GetTemp();
 			sprintf(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_SEWKIT_PROMT), pItem->GetName());
 			addTarget(CLIMODE_TARG_USE_ITEM, pszTemp);
 			return true;
@@ -1002,7 +1002,7 @@ bool CClient::Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase *pSrc )
 	// Targeted spells
 	if ( pSpellDef->IsSpellType(SPELLFLAG_TARG_OBJ|SPELLFLAG_TARG_XYZ) )
 	{
-		LPCTSTR pPrompt = g_Cfg.GetDefaultMsg(DEFMSG_SELECT_MAGIC_TARGET);
+		lpctstr pPrompt = g_Cfg.GetDefaultMsg(DEFMSG_SELECT_MAGIC_TARGET);
 		if ( !pSpellDef->m_sTargetPrompt.IsEmpty() )
 			pPrompt = pSpellDef->m_sTargetPrompt;
 
@@ -1170,7 +1170,7 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 	}
 
 	// Tracking failed or was cancelled.
-	static LPCTSTR const sm_Track_FailMsg[] =
+	static lpctstr const sm_Track_FailMsg[] =
 	{
 		g_Cfg.GetDefaultMsg( DEFMSG_TRACKING_CANCEL ),
 		g_Cfg.GetDefaultMsg( DEFMSG_TRACKING_FAIL_ANIMAL ),

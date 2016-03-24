@@ -33,11 +33,11 @@ class CItem : public CObjBase
 	// RES_WORLDITEM
 public:
 	static const char *m_sClassName;
-	static LPCTSTR const sm_szLoadKeys[];
-	static LPCTSTR const sm_szVerbKeys[];
-	static LPCTSTR const sm_szRefKeys[];
-	static LPCTSTR const sm_szTrigName[ITRIG_QTY+1];
-	static LPCTSTR const sm_szTemplateTable[ITC_QTY+1];
+	static lpctstr const sm_szLoadKeys[];
+	static lpctstr const sm_szVerbKeys[];
+	static lpctstr const sm_szRefKeys[];
+	static lpctstr const sm_szTrigName[ITRIG_QTY+1];
+	static lpctstr const sm_szTemplateTable[ITC_QTY+1];
 
 private:
 	ITEMID_TYPE m_dwDispIndex;		// The current display type. ITEMID_TYPE
@@ -81,8 +81,8 @@ public:
 	// NOTE: If this link is set but not valid -> then delete the whole object !
 	CGrayUID m_uidLink;		// Linked to this other object in the world. (owned, key, etc)
 
-	bool IsTriggerActive(LPCTSTR trig) { return static_cast<CObjBase*>(const_cast<CItem*>(this))->IsTriggerActive(trig); }
-	void SetTriggerActive(LPCTSTR trig = NULL) { static_cast<CObjBase*>(const_cast<CItem*>(this))->SetTriggerActive(trig); }
+	bool IsTriggerActive(lpctstr trig) { return static_cast<CObjBase*>(const_cast<CItem*>(this))->IsTriggerActive(trig); }
+	void SetTriggerActive(lpctstr trig = NULL) { static_cast<CObjBase*>(const_cast<CItem*>(this))->SetTriggerActive(trig); }
 
 	// Type specific info. IT_TYPE
 	union // 4(more1) + 4(more2) + 6(morep: (2 morex) (2 morey) (1 morez) (1morem) ) = 14 bytes
@@ -537,7 +537,7 @@ protected:
 
 public:
 	virtual bool OnTick();
-	virtual void OnHear( LPCTSTR pszCmd, CChar * pSrc );
+	virtual void OnHear( lpctstr pszCmd, CChar * pSrc );
 	CItemBase * Item_GetDef() const;
 	ITEMID_TYPE GetID() const;
 	word GetBaseID() const;
@@ -584,10 +584,10 @@ public:
 	void SetAmountUpdate( uint amount );
 	word GetAmount() const { return( m_amount ); }
 
-	LPCTSTR GetName() const;	// allowed to be default name.
-	LPCTSTR GetNameFull( bool fIdentified ) const;
+	lpctstr GetName() const;	// allowed to be default name.
+	lpctstr GetNameFull( bool fIdentified ) const;
 
-	virtual bool SetName( LPCTSTR pszName );
+	virtual bool SetName( lpctstr pszName );
 
 	virtual int GetWeight(word amount = 0) const;
 
@@ -616,15 +616,15 @@ public:
 	void r_WriteMore1( CGString & sVal );
 	void r_WriteMore2( CGString & sVal );
 
-	virtual bool r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef );
+	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 	virtual void  r_Write( CScript & s );
-	virtual bool r_WriteVal( LPCTSTR pszKey, CGString & s, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pszKey, CGString & s, CTextConsole * pSrc );
 	virtual bool  r_LoadVal( CScript & s  );
 	virtual bool  r_Load( CScript & s ); // Load an item from script
 	virtual bool  r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
 
 private:
-	TRIGRET_TYPE OnTrigger( LPCTSTR pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
+	TRIGRET_TYPE OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
 	TRIGRET_TYPE OnTriggerCreate(CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
 
 public:
@@ -674,8 +674,8 @@ public:
 	int Use_Trap();
 	bool Use_Light();
 	int Use_LockPick( CChar * pCharSrc, bool fTest, bool fFail );
-	LPCTSTR Use_SpyGlass( CChar * pUser ) const;
-	LPCTSTR Use_Sextant( CPointMap pntCoords ) const;
+	lpctstr Use_SpyGlass( CChar * pUser ) const;
+	lpctstr Use_Sextant( CPointMap pntCoords ) const;
 
 	bool IsBookWritable() const;
 	bool IsBookSystem() const;
@@ -685,7 +685,7 @@ public:
 	int OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType = DAMAGE_HIT_BLUNT );
 
 	int Armor_GetRepairPercent() const;
-	LPCTSTR Armor_GetRepairDesc() const;
+	lpctstr Armor_GetRepairDesc() const;
 	bool Armor_IsRepairable() const;
 	int Armor_GetDefense() const;
 	int Weapon_GetAttack(bool bGetRange = true) const;
@@ -704,7 +704,7 @@ public:
 	CItem * UnStackSplit( int amount, CChar * pCharSrc = NULL );
 
 	static CItem * CreateBase( ITEMID_TYPE id );
-	static CItem * CreateHeader( TCHAR * pArg, CObjBase * pCont = NULL, bool fDupeCheck = false, CChar * pSrc = NULL );
+	static CItem * CreateHeader( tchar * pArg, CObjBase * pCont = NULL, bool fDupeCheck = false, CChar * pSrc = NULL );
 	static CItem * CreateScript(ITEMID_TYPE id, CChar * pSrc = NULL);
 	CItem * GenerateScript(CChar * pSrc = NULL);
 	static CItem * CreateDupeItem( const CItem * pItem, CChar * pSrc = NULL, bool fSetNew = false );

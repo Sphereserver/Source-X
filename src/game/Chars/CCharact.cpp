@@ -20,7 +20,7 @@
 // 0 = object name
 // 1 = char
 // 2 = item type
-bool CChar::TeleportToObj( int iType, TCHAR * pszArgs )
+bool CChar::TeleportToObj( int iType, tchar * pszArgs )
 {
 	ADDTOCALLSTACK("CChar::TeleportToObj");
 
@@ -164,7 +164,7 @@ void CChar::Jail( CTextConsole * pSrc, bool fSet, int iCell )
 		{
 			m_pClient->SetPrivFlags( PRIV_JAILED );
 		}
-		TCHAR szJailName[ 128 ];
+		tchar szJailName[ 128 ];
 		if ( iCell )
 		{
 			sprintf( szJailName, "jail%d", iCell );
@@ -684,13 +684,13 @@ void CChar::UpdateDrag( CItem * pItem, CObjBase * pCont, CPointMap * pt )
 	UpdateCanSee(cmd, m_pClient);
 }
 
-void CChar::ObjMessage( LPCTSTR pMsg, const CObjBase * pSrc ) const
+void CChar::ObjMessage( lpctstr pMsg, const CObjBase * pSrc ) const
 {
 	if ( ! IsClient())
 		return;
 	GetClient()->addObjMessage( pMsg, pSrc );
 }
-void CChar::SysMessage( LPCTSTR pMsg ) const	// Push a message back to the client if there is one.
+void CChar::SysMessage( lpctstr pMsg ) const	// Push a message back to the client if there is one.
 {
 	if ( ! IsClient())
 		return;
@@ -1824,7 +1824,7 @@ bool CChar::ItemBounce( CItem * pItem, bool bDisplayMsg )
 	if ( pItem->GetParent() == pPack )
 		return true;
 
-	LPCTSTR pszWhere = NULL;
+	lpctstr pszWhere = NULL;
 	if ( pPack && CanCarry(pItem) )		// this can happen at load time
 	{
 		pszWhere = g_Cfg.GetDefaultMsg( DEFMSG_MSG_BOUNCE_PACK );
@@ -2072,7 +2072,7 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 // OnEat()
 // Generating eating animation
 // also calling @Eat and setting food's level (along with other possible stats 'local.hits',etc?)
-void CChar::EatAnim( LPCTSTR pszName, short iQty )
+void CChar::EatAnim( lpctstr pszName, short iQty )
 {
 	ADDTOCALLSTACK("CChar::EatAnim");
 	static const SOUND_TYPE sm_EatSounds[] = { 0x03a, 0x03b, 0x03c };
@@ -2081,7 +2081,7 @@ void CChar::EatAnim( LPCTSTR pszName, short iQty )
 	if ( !IsStatFlag(STATF_OnHorse) )
 		UpdateAnimate(ANIM_EAT);
 
-	TCHAR * pszMsg = Str_GetTemp();
+	tchar * pszMsg = Str_GetTemp();
 	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MSG_EATSOME), pszName);
 	Emote(pszMsg);
 
@@ -2177,7 +2177,7 @@ bool CChar::Reveal( dword dwFlags )
 }
 
 // Ignore the font argument here !
-void CChar::SpeakUTF8( LPCTSTR pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
+void CChar::SpeakUTF8( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
 {
 	ADDTOCALLSTACK("CChar::SpeakUTF8");
 
@@ -2214,7 +2214,7 @@ void CChar::SpeakUTF8Ex( const nword * pszText, HUE_TYPE wHue, TALKMODE_TYPE mod
 
 // Speak to all clients in the area.
 // Ignore the font argument here !
-void CChar::Speak( LPCTSTR pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font )
+void CChar::Speak( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font )
 {
 	ADDTOCALLSTACK("CChar::Speak");
 
@@ -2357,7 +2357,7 @@ bool CChar::Horse_Mount(CChar *pHorse)
 	}
 
 	ITEMID_TYPE id;
-	TCHAR * sMountDefname = Str_GetTemp();
+	tchar * sMountDefname = Str_GetTemp();
 	sprintf(sMountDefname, "mount_0x%x", pHorse->GetDispID());
 	id = static_cast<ITEMID_TYPE>(g_Exp.m_VarDefs.GetKeyNum(sMountDefname));
 	if ( id <= ITEMID_NOTHING )
@@ -2735,7 +2735,7 @@ bool CChar::Death()
 	// Give credit for the kill to my attacker(s)
 	int iKillers = 0;
 	CChar * pKiller = NULL;
-	TCHAR * pszKillStr = Str_GetTemp();
+	tchar * pszKillStr = Str_GetTemp();
 	int iKillStrLen = sprintf( pszKillStr, g_Cfg.GetDefaultMsg(DEFMSG_MSG_KILLED_BY), (m_pPlayer)? 'P':'N', GetNameWithoutIncognito() );
 	for ( size_t count = 0; count < m_lastAttackers.size(); count++ )
 	{
@@ -2812,7 +2812,7 @@ bool CChar::Death()
 		if ( !(m_TagDefs.GetKeyNum("DEATHFLAGS", true) & DEATH_NOFAMECHANGE) )
 			Noto_Fame( -Stat_GetAdjusted(STAT_FAME)/10 );
 
-		LPCTSTR pszGhostName = NULL;
+		lpctstr pszGhostName = NULL;
 		CCharBase *pCharDefPrev = CCharBase::FindCharBase( m_prev_id );
 		switch ( m_prev_id )
 		{
@@ -3010,7 +3010,7 @@ CRegionBase * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool f
 			if ( Stat_GetVal(STAT_DEX) < Stat_GetMax(STAT_DEX) )
 				return NULL;
 
-			TCHAR *pszMsg = Str_GetTemp();
+			tchar *pszMsg = Str_GetTemp();
 			if ( Stat_GetVal(STAT_DEX) < iStamReq )		// check if we have enough stamina to push the char
 			{
 				sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MSG_CANTPUSH), pChar->GetName());
@@ -3570,7 +3570,7 @@ bool CChar::MoveNear( CPointMap pt, word iSteps )
 // "PRIVSET"
 // Set this char to be a GM etc. (or take this away)
 // NOTE: They can be off-line at the time.
-bool CChar::SetPrivLevel(CTextConsole * pSrc, LPCTSTR pszFlags)
+bool CChar::SetPrivLevel(CTextConsole * pSrc, lpctstr pszFlags)
 {
 	ADDTOCALLSTACK("CChar::SetPrivLevel");
 
@@ -3618,7 +3618,7 @@ bool CChar::SetPrivLevel(CTextConsole * pSrc, LPCTSTR pszFlags)
 // 4) CHARDEF
 // 5) EVENTSPET/EVENTSPLAYER set on .ini file
 // RETURNS = TRIGRET_TYPE (in cscriptobj.h)
-TRIGRET_TYPE CChar::OnTrigger( LPCTSTR pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs )
+TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs )
 {
 	ADDTOCALLSTACK("CChar::OnTrigger");
 
@@ -3771,7 +3771,7 @@ TRIGRET_TYPE CChar::OnTrigger( LPCTSTR pszTrigName, CTextConsole * pSrc, CScript
 	}
 stopandret:
 	{
-		SetTriggerActive((LPCTSTR)0);
+		SetTriggerActive((lpctstr)0);
 		return iRet;
 	}
 	EXC_CATCH;

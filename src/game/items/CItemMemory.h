@@ -31,8 +31,8 @@ public:
 	void Guild_SetVotes( word wVotes );
 	int Guild_SetLoyalTo( CGrayUID uid );
 	CGrayUID Guild_GetLoyalTo() const;
-	int Guild_SetTitle( LPCTSTR pszTitle );
-	LPCTSTR Guild_GetTitle() const;
+	int Guild_SetTitle( lpctstr pszTitle );
+	lpctstr Guild_GetTitle() const;
 	CItemStone * Guild_GetLink();
 
 	virtual int FixWeirdness();

@@ -19,7 +19,7 @@ struct CBaseBaseDef : public CResourceLink
 	// The unique index id.	(WILL not be the same as artwork if outside artwork range)
 
 	// TAGS
-	static LPCTSTR const sm_szLoadKeys[];
+	static lpctstr const sm_szLoadKeys[];
 	// Base type of both CItemBase and CCharBase
 protected:
 	dword m_dwDispIndex;	// The base artwork id. (may be the same as GetResourceID() in base set.) but can also be "flipped"
@@ -51,27 +51,27 @@ public:
 	dword	m_Can;			// Base attribute flags. CAN_C_GHOST
 
 public:
-	LPCTSTR GetDefStr( LPCTSTR pszKey, bool fZero = false ) const
+	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false ) const
 	{
 		return m_BaseDefs.GetKeyStr( pszKey, fZero );
 	}
 
-	INT64 GetDefNum( LPCTSTR pszKey, bool fZero = false ) const
+	INT64 GetDefNum( lpctstr pszKey, bool fZero = false ) const
 	{
 		return m_BaseDefs.GetKeyNum( pszKey, fZero );
 	}
 
-	void SetDefNum(LPCTSTR pszKey, INT64 iVal, bool fZero = true)
+	void SetDefNum(lpctstr pszKey, INT64 iVal, bool fZero = true)
 	{
 		m_BaseDefs.SetNum(pszKey, iVal, fZero);
 	}
 
-	void SetDefStr(LPCTSTR pszKey, LPCTSTR pszVal, bool fQuoted = false, bool fZero = true)
+	void SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true)
 	{
 		m_BaseDefs.SetStr(pszKey, fQuoted, pszVal, fZero);
 	}
 
-	void DeleteDef(LPCTSTR pszKey)
+	void DeleteDef(lpctstr pszKey)
 	{
 		m_BaseDefs.DeleteKey(pszKey);
 	}
@@ -146,14 +146,14 @@ private:
 	CBaseBaseDef& operator=(const CBaseBaseDef& other);
 
 public:
-	LPCTSTR GetTypeName() const;
-	virtual LPCTSTR GetName() const;
+	lpctstr GetTypeName() const;
+	virtual lpctstr GetName() const;
 	bool HasTypeName() const;
-	virtual void SetTypeName( LPCTSTR pszName );
+	virtual void SetTypeName( lpctstr pszName );
 	bool Can( word wCan ) const;
 	virtual void UnLink();
 
-	virtual bool r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc = NULL );
+	virtual bool r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc = NULL );
 	virtual bool r_LoadVal( CScript & s );
 
 	bool IsValid() const;

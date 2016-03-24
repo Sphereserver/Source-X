@@ -41,14 +41,14 @@ CCharBase::CCharBase( CREID_TYPE id ) :
 
 // From "Bill the carpenter" or "#HUMANMALE the Carpenter",
 // Get "Carpenter"
-LPCTSTR CCharBase::GetTradeName() const
+lpctstr CCharBase::GetTradeName() const
 {
 	ADDTOCALLSTACK("CCharBase::GetTradeName");
-	LPCTSTR pName = CBaseBaseDef::GetTypeName();
+	lpctstr pName = CBaseBaseDef::GetTypeName();
 	if ( pName[0] != '#' )
 		return( pName );
 
-	LPCTSTR pSpace = strchr( pName, ' ' );
+	lpctstr pSpace = strchr( pName, ' ' );
 	if ( pSpace == NULL )
 		return( pName );
 
@@ -104,7 +104,7 @@ bool CCharBase::SetDispID( CREID_TYPE id )
 }
 
 // Setting what do I eat
-void CCharBase::SetFoodType( LPCTSTR pszFood )
+void CCharBase::SetFoodType( lpctstr pszFood )
 {
 	ADDTOCALLSTACK("CCharBase::SetFoodType");
   	m_FoodType.Load( pszFood );
@@ -126,7 +126,7 @@ enum CBC_TYPE
 	CBC_QTY
 };
 
-LPCTSTR const CCharBase::sm_szLoadKeys[CBC_QTY+1] =
+lpctstr const CCharBase::sm_szLoadKeys[CBC_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../tables/CCharBase_props.tbl"
@@ -134,7 +134,7 @@ LPCTSTR const CCharBase::sm_szLoadKeys[CBC_QTY+1] =
 	NULL
 };
 
-bool CCharBase::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CCharBase::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
 {
 	UNREFERENCED_PARAMETER(pSrc);
 	ADDTOCALLSTACK("CCharBase::r_WriteVal");
@@ -159,7 +159,7 @@ bool CCharBase::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc
 			break;
 		case CBC_AVERSIONS:
 			{
-				TCHAR *pszTmp = Str_GetTemp();
+				tchar *pszTmp = Str_GetTemp();
 				m_Aversions.WriteKeys(pszTmp);
 				sVal = pszTmp;
 			}
@@ -178,7 +178,7 @@ bool CCharBase::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc
 			break;
 		case CBC_DESIRES:
 			{
-				TCHAR *pszTmp = Str_GetTemp();
+				tchar *pszTmp = Str_GetTemp();
 				m_Desires.WriteKeys(pszTmp);
 				sVal = pszTmp;
 			}
@@ -194,7 +194,7 @@ bool CCharBase::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc
 			break;
 		case CBC_FOODTYPE:
 			{
-				TCHAR *pszTmp = Str_GetTemp();
+				tchar *pszTmp = Str_GetTemp();
 				m_FoodType.WriteKeys(pszTmp);
 				sVal = pszTmp;
 			}

@@ -33,7 +33,7 @@ bool CSVFile::OpenBase(void * pExtra)
 	// remove all empty lines so that we just have data rows stored
 	for (std::vector<std::string>::iterator i = m_fileContent->begin(); i != m_fileContent->end(); )
 	{
-		LPCTSTR pszLine = i->c_str();
+		lpctstr pszLine = i->c_str();
 		GETNONWHITESPACE(pszLine);
 		if ( *pszLine == '\0' )
 			i = m_fileContent->erase(i);
@@ -42,8 +42,8 @@ bool CSVFile::OpenBase(void * pExtra)
 	}
 
 	// find the types and names of the columns
-	TCHAR * ppColumnTypes[MAX_COLUMNS];
-	TCHAR * ppColumnNames[MAX_COLUMNS];
+	tchar * ppColumnTypes[MAX_COLUMNS];
+	tchar * ppColumnNames[MAX_COLUMNS];
 
 	// first row tells us how many columns there are
 	m_iColumnCount = ReadRowContent(ppColumnTypes, 0);
@@ -65,10 +65,10 @@ bool CSVFile::OpenBase(void * pExtra)
 	// copy the names
 	for (size_t i = 0; i < m_iColumnCount; i++)
 	{
-		m_pszColumnTypes[i] = new TCHAR[128];
+		m_pszColumnTypes[i] = new tchar[128];
 		strcpy(m_pszColumnTypes[i], ppColumnTypes[i]);
 
-		m_pszColumnNames[i] = new TCHAR[128];
+		m_pszColumnNames[i] = new tchar[128];
 		strcpy(m_pszColumnNames[i], ppColumnNames[i]);
 	}
 
@@ -77,21 +77,21 @@ bool CSVFile::OpenBase(void * pExtra)
 	return true;
 }
 
-size_t CSVFile::ReadRowContent(TCHAR ** ppOutput, size_t rowIndex, size_t columns)
+size_t CSVFile::ReadRowContent(tchar ** ppOutput, size_t rowIndex, size_t columns)
 {
 	ADDTOCALLSTACK("CSVFile::ReadRowContent");
 	ASSERT(columns > 0 && columns <= MAX_COLUMNS);
 	if ( GetPosition() != rowIndex )
 		Seek(static_cast<int>(rowIndex), SEEK_SET);
 
-	TCHAR * pszLine = Str_GetTemp();
+	tchar * pszLine = Str_GetTemp();
 	if ( ReadString(pszLine, THREAD_STRING_LENGTH) == NULL )
 		return 0;
 
 	return Str_ParseCmds(pszLine, ppOutput, columns, "\t");
 }
 
-size_t CSVFile::ReadNextRowContent(TCHAR ** ppOutput)
+size_t CSVFile::ReadNextRowContent(tchar ** ppOutput)
 {
 	ADDTOCALLSTACK("CSVFile::ReadNextRowContent");
 	++m_iCurrentRow;
@@ -102,7 +102,7 @@ bool CSVFile::ReadRowContent(size_t rowIndex, CSVRowData& target)
 {
 	ADDTOCALLSTACK("CSVFile::ReadRowContent");
 	// get row data
-	TCHAR * ppRowContent[MAX_COLUMNS];
+	tchar * ppRowContent[MAX_COLUMNS];
 	size_t columns = ReadRowContent(ppRowContent, rowIndex);
 	if ( columns != m_iColumnCount )
 		return false;

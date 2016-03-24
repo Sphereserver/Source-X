@@ -25,13 +25,13 @@ public:
     CGObArray< CGString * > m_Moderators;// Current list of channel's moderators (may or may not be currently in the channel)
     CGPtrTypeArray< CChatChanMember* > m_Members;	// Current list of members in this channel
 private:
-    void SetModerator(LPCTSTR pszName, bool fFlag = true);
-    void SetVoice(LPCTSTR pszName, bool fFlag = true);
-    void RenameChannel(CChatChanMember * pBy, LPCTSTR pszName);
-    size_t FindMemberIndex( LPCTSTR pszName ) const;
+    void SetModerator(lpctstr pszName, bool fFlag = true);
+    void SetVoice(lpctstr pszName, bool fFlag = true);
+    void RenameChannel(CChatChanMember * pBy, lpctstr pszName);
+    size_t FindMemberIndex( lpctstr pszName ) const;
 
 public:
-    explicit CChatChannel(LPCTSTR pszName, LPCTSTR pszPassword = NULL);
+    explicit CChatChannel(lpctstr pszName, lpctstr pszPassword = NULL);
 
 private:
     CChatChannel(const CChatChannel& copy);
@@ -39,40 +39,40 @@ private:
 
 public:
     CChatChannel* GetNext() const;
-    LPCTSTR GetName() const;
-    LPCTSTR GetModeString() const;
-    LPCTSTR GetPassword() const;
-    void SetPassword( LPCTSTR pszPassword);
+    lpctstr GetName() const;
+    lpctstr GetModeString() const;
+    lpctstr GetPassword() const;
+    void SetPassword( lpctstr pszPassword);
     bool IsPassworded() const;
 
     bool GetVoiceDefault()  const;
     void SetVoiceDefault(bool fVoiceDefault);
-    void ToggleVoiceDefault(LPCTSTR  pszBy);
-    void DisableVoiceDefault(LPCTSTR  pszBy);
-    void EnableVoiceDefault(LPCTSTR  pszBy);
-    void Emote(LPCTSTR pszBy, LPCTSTR pszMsg, CLanguageID lang = 0 );
-    void WhoIs(LPCTSTR pszBy, LPCTSTR pszMember);
+    void ToggleVoiceDefault(lpctstr  pszBy);
+    void DisableVoiceDefault(lpctstr  pszBy);
+    void EnableVoiceDefault(lpctstr  pszBy);
+    void Emote(lpctstr pszBy, lpctstr pszMsg, CLanguageID lang = 0 );
+    void WhoIs(lpctstr pszBy, lpctstr pszMember);
     bool AddMember(CChatChanMember * pMember);
     void KickMember( CChatChanMember *pByMember, CChatChanMember * pMember );
-    void Broadcast(CHATMSG_TYPE iType, LPCTSTR pszName, LPCTSTR pszText, CLanguageID lang = 0, bool fOverride = false);
+    void Broadcast(CHATMSG_TYPE iType, lpctstr pszName, lpctstr pszText, CLanguageID lang = 0, bool fOverride = false);
     void SendThisMember(CChatChanMember * pMember, CChatChanMember * pToMember = NULL);
     void SendMembers(CChatChanMember * pMember);
     void RemoveMember(CChatChanMember * pMember);
-    CChatChanMember * FindMember(LPCTSTR pszName) const;
-    bool RemoveMember(LPCTSTR pszName);
-    void SetName(LPCTSTR pszName);
-    bool IsModerator(LPCTSTR pszName) const;
-    bool HasVoice(LPCTSTR pszName) const;
+    CChatChanMember * FindMember(lpctstr pszName) const;
+    bool RemoveMember(lpctstr pszName);
+    void SetName(lpctstr pszName);
+    bool IsModerator(lpctstr pszName) const;
+    bool HasVoice(lpctstr pszName) const;
 
-    void MemberTalk(CChatChanMember * pByMember, LPCTSTR pszText, CLanguageID lang );
-    void ChangePassword(CChatChanMember * pByMember, LPCTSTR pszPassword);
-    void GrantVoice(CChatChanMember * pByMember, LPCTSTR pszName);
-    void RevokeVoice(CChatChanMember * pByMember, LPCTSTR pszName);
-    void ToggleVoice(CChatChanMember * pByMember, LPCTSTR pszName);
-    void GrantModerator(CChatChanMember * pByMember, LPCTSTR pszName);
-    void RevokeModerator(CChatChanMember * pByMember, LPCTSTR pszName);
-    void ToggleModerator(CChatChanMember * pByMember, LPCTSTR pszName);
-    void SendPrivateMessage(CChatChanMember * pFrom, LPCTSTR pszTo, LPCTSTR  pszMsg);
+    void MemberTalk(CChatChanMember * pByMember, lpctstr pszText, CLanguageID lang );
+    void ChangePassword(CChatChanMember * pByMember, lpctstr pszPassword);
+    void GrantVoice(CChatChanMember * pByMember, lpctstr pszName);
+    void RevokeVoice(CChatChanMember * pByMember, lpctstr pszName);
+    void ToggleVoice(CChatChanMember * pByMember, lpctstr pszName);
+    void GrantModerator(CChatChanMember * pByMember, lpctstr pszName);
+    void RevokeModerator(CChatChanMember * pByMember, lpctstr pszName);
+    void ToggleModerator(CChatChanMember * pByMember, lpctstr pszName);
+    void SendPrivateMessage(CChatChanMember * pFrom, lpctstr pszTo, lpctstr  pszMsg);
     void KickAll(CChatChanMember * pMember = NULL);
 };
 

@@ -6,7 +6,7 @@
 #include "CException.h"
 
 #ifdef _WIN32
-	int CGrayError::GetSystemErrorMessage( dword dwError, LPTSTR lpszError, UINT nMaxError ) // static
+	int CGrayError::GetSystemErrorMessage( dword dwError, lptstr lpszError, UINT nMaxError ) // static
 	{
 		//	PURPOSE:  copies error message text to a string
 		//
@@ -36,7 +36,7 @@
 	}
 #endif
 
-bool CGrayError::GetErrorMessage( LPTSTR lpszError, UINT nMaxError,	UINT * pnHelpContext ) const
+bool CGrayError::GetErrorMessage( lptstr lpszError, UINT nMaxError,	UINT * pnHelpContext ) const
 {
 	UNREFERENCED_PARAMETER(nMaxError);
 	UNREFERENCED_PARAMETER(pnHelpContext);
@@ -46,7 +46,7 @@ bool CGrayError::GetErrorMessage( LPTSTR lpszError, UINT nMaxError,	UINT * pnHel
 	if ( m_hError )
 	{
 		// return the message defined by the system for the error code
-		TCHAR szCode[ 1024 ];
+		tchar szCode[ 1024 ];
 		int nChars = GetSystemErrorMessage( m_hError, szCode, sizeof(szCode));
 		if ( nChars )
 		{
@@ -73,7 +73,7 @@ CGrayError::CGrayError( const CGrayError &e ) :
 {
 }
 
-CGrayError::CGrayError( LOGL_TYPE eSev, dword hErr, LPCTSTR pszDescription ) :
+CGrayError::CGrayError( LOGL_TYPE eSev, dword hErr, lpctstr pszDescription ) :
 	m_eSeverity( eSev ),
 	m_hError( hErr ),
 	m_pszDescription( pszDescription )
@@ -88,7 +88,7 @@ CGrayError::~CGrayError()
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-CGrayAssert::CGrayAssert(LOGL_TYPE eSeverity, LPCTSTR pExp, LPCTSTR pFile, long lLine) :
+CGrayAssert::CGrayAssert(LOGL_TYPE eSeverity, lpctstr pExp, lpctstr pFile, long lLine) :
 	CGrayError(eSeverity, 0, "Assert"), m_pExp(pExp), m_pFile(pFile), m_lLine(lLine)
 {
 }
@@ -97,7 +97,7 @@ CGrayAssert::~CGrayAssert()
 {
 }
 
-bool CGrayAssert::GetErrorMessage(LPTSTR lpszError, UINT nMaxError, UINT * pnHelpContext) const
+bool CGrayAssert::GetErrorMessage(lptstr lpszError, UINT nMaxError, UINT * pnHelpContext) const
 {
 	UNREFERENCED_PARAMETER(nMaxError);
 	UNREFERENCED_PARAMETER(pnHelpContext);
@@ -105,9 +105,9 @@ bool CGrayAssert::GetErrorMessage(LPTSTR lpszError, UINT nMaxError, UINT * pnHel
 	return true;
 }
 
-/*LPCTSTR const CGrayAssert::GetAssertFile()
+/*lpctstr const CGrayAssert::GetAssertFile()
 {
-	LPTSTR pTmp = Str_GetTemp();
+	lptstr pTmp = Str_GetTemp();
 	strcpylen( pTmp, m_pFile, strlen( m_pFile ) ); //make a copy, don't send the original
 	return pTmp;
 }
@@ -132,12 +132,12 @@ CGrayException::~CGrayException()
 {
 }
 
-bool CGrayException::GetErrorMessage(LPTSTR lpszError, UINT nMaxError, UINT * pnHelpContext) const
+bool CGrayException::GetErrorMessage(lptstr lpszError, UINT nMaxError, UINT * pnHelpContext) const
 {
 	UNREFERENCED_PARAMETER(nMaxError);
 	UNREFERENCED_PARAMETER(pnHelpContext);
 
-	LPCTSTR zMsg;
+	lpctstr zMsg;
 	switch ( m_hError )
 	{
 		case STATUS_BREAKPOINT:				zMsg = "Breakpoint";				break;
@@ -160,7 +160,7 @@ bool CGrayException::GetErrorMessage(LPTSTR lpszError, UINT nMaxError, UINT * pn
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-void Assert_CheckFail( LPCTSTR pExp, LPCTSTR pFile, long lLine )
+void Assert_CheckFail( lpctstr pExp, lpctstr pFile, long lLine )
 {
 	throw CGrayAssert(LOGL_CRIT, pExp, pFile, lLine);
 }

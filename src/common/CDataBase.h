@@ -50,20 +50,20 @@ public:
 	bool isConnected();
 	bool OnTick();
 
-	virtual bool r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef );
+	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
 
-	LPCTSTR GetName() const
+	lpctstr GetName() const
 	{
 		return "SQL_OBJ";
 	}
 
 public:
 	CVarDefMap	m_QueryResult;
-	static LPCTSTR const sm_szLoadKeys[];
-	static LPCTSTR const sm_szVerbKeys[];
+	static lpctstr const sm_szLoadKeys[];
+	static lpctstr const sm_szVerbKeys[];
 
 private:
 	typedef std::pair<CGString, CScriptTriggerArgs *> FunctionArgsPair_t;
@@ -77,7 +77,7 @@ protected:
 private:
 	SimpleMutex m_connectionMutex;
 	SimpleMutex m_resultMutex;
-	bool addQuery(bool isQuery, LPCTSTR theFunction, LPCTSTR theQuery);
+	bool addQuery(bool isQuery, lpctstr theFunction, lpctstr theQuery);
 };
 
 #endif // _INC_CDATABASE_H

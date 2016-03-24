@@ -319,7 +319,7 @@ bool CResource::Calc_CrimeSeen( CChar * pCharThief, CChar * pCharViewer, SKILL_T
 	return( true );
 }
 
-LPCTSTR CResource::Calc_MaptoSextant( CPointMap pntCoords )
+lpctstr CResource::Calc_MaptoSextant( CPointMap pntCoords )
 {
 	ADDTOCALLSTACK("CResource::Calc_MaptoSextant");
 	// Conversion from map square to degrees, minutes
@@ -334,7 +334,7 @@ LPCTSTR CResource::Calc_MaptoSextant( CPointMap pntCoords )
 	else
 		iLong = (pntCoords.m_x - zeroPoint.m_x) * 360 * 60 / g_MapList.GetX(pntCoords.m_map);
 
-	TCHAR * pTemp = Str_GetTemp();
+	tchar * pTemp = Str_GetTemp();
 	sprintf( pTemp, "%io %i'%s, %io %i'%s",
 		abs(iLat / 60),  abs(iLat % 60),  (iLat <= 0) ? "N" : "S",
 		abs(iLong / 60), abs(iLong % 60), (iLong >= 0) ? "E" : "W");

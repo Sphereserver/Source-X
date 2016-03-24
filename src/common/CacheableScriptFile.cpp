@@ -114,7 +114,7 @@ bool CacheableScriptFile::IsEOF() const
 	return ( m_fileContent == NULL || m_currentLine == m_fileContent->size() );
 }
 
-TCHAR * CacheableScriptFile::ReadString(TCHAR *pBuffer, size_t sizemax) 
+tchar * CacheableScriptFile::ReadString(tchar *pBuffer, size_t sizemax) 
 {
 	if( useDefaultFile() ) 
 	{

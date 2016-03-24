@@ -46,7 +46,7 @@ void CItemContainer::r_Write( CScript &s )
 	r_WriteContent(s);
 }
 
-bool CItemContainer::r_GetRef( LPCTSTR &pszKey, CScriptObj *&pRef )
+bool CItemContainer::r_GetRef( lpctstr &pszKey, CScriptObj *&pRef )
 {
 	ADDTOCALLSTACK("CItemContainer::r_GetRef");
 	if ( r_GetRefContainer(pszKey, pRef) )
@@ -55,7 +55,7 @@ bool CItemContainer::r_GetRef( LPCTSTR &pszKey, CScriptObj *&pRef )
 	return CItemVendable::r_GetRef(pszKey, pRef);
 }
 
-bool CItemContainer::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole *pSrc )
+bool CItemContainer::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole *pSrc )
 {
 	ADDTOCALLSTACK("CItemContainer::r_WriteVal");
 	if ( r_WriteValContainer(pszKey, sVal, pSrc) )
@@ -892,7 +892,7 @@ void CItemContainer::OnOpenEvent( CChar *pCharOpener, const CObjBaseTemplate *pO
 			return;
 
 		int iStones = GetWeight() / WEIGHT_UNITS;
-		TCHAR *pszMsg = Str_GetTemp();
+		tchar *pszMsg = Str_GetTemp();
 		if ( pCharTop == pCharOpener )
 			sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_BVBOX_OPEN_SELF), iStones, GetName());
 		else
@@ -1106,7 +1106,7 @@ enum ICV_TYPE
 	ICV_QTY
 };
 
-LPCTSTR const CItemContainer::sm_szVerbKeys[ICV_QTY+1] =
+lpctstr const CItemContainer::sm_szVerbKeys[ICV_QTY+1] =
 {
 	"CLOSE",
 	"DELETE",

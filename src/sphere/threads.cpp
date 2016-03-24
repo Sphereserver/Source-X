@@ -383,7 +383,7 @@ bool AbstractThread::checkStuck()
 typedef struct tagTHREADNAME_INFO
 {
 	dword dwType;
-	LPCTSTR szName;
+	lpctstr szName;
 	dword dwThreadID;
 	dword dwFlags;
 } THREADNAME_INFO;

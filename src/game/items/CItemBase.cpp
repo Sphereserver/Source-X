@@ -58,7 +58,7 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 	// Stuff read from .mul file.
 	// Some items (like hair) have no names !
 	// Get rid of the strange leading spaces in some of the names.
-	TCHAR szName[ sizeof(tiledata.m_name)+1 ];
+	tchar szName[ sizeof(tiledata.m_name)+1 ];
 	size_t j = 0;
 	for ( size_t i = 0; i < sizeof(tiledata.m_name) && tiledata.m_name[i]; i++ )
 	{
@@ -118,7 +118,7 @@ CItemBase::~CItemBase()
 }
 
 
-void CItemBase::SetTypeName( LPCTSTR pszName )
+void CItemBase::SetTypeName( lpctstr pszName )
 {
 	ADDTOCALLSTACK("CItemBase::SetTypeName");
 	ASSERT(pszName);
@@ -128,7 +128,7 @@ void CItemBase::SetTypeName( LPCTSTR pszName )
 	CBaseBaseDef::SetTypeName( pszName );
 }
 
-LPCTSTR CItemBase::GetArticleAndSpace() const
+lpctstr CItemBase::GetArticleAndSpace() const
 {
 	ADDTOCALLSTACK("CItemBase::GetArticleAndSpace");
 	if ( IsSetOF(OF_NoPrefix) )
@@ -180,17 +180,17 @@ void CItemBase::CopyTransfer( CItemBase * pBase )
 	CBaseBaseDef::CopyTransfer( pBase );	// This will overwrite the CResourceLink!!
 }
 
-LPCTSTR CItemBase::GetName() const
+lpctstr CItemBase::GetName() const
 {
 	ADDTOCALLSTACK("CItemBase::GetName");
 	// Get rid of the strange %s type stuff for pluralize rules of names.
 	return( GetNamePluralize( GetTypeName(), false ));
 }
 
-TCHAR * CItemBase::GetNamePluralize( LPCTSTR pszNameBase, bool fPluralize )	// static
+tchar * CItemBase::GetNamePluralize( lpctstr pszNameBase, bool fPluralize )	// static
 {
 	ADDTOCALLSTACK("CItemBase::GetNamePluralize");
-	TCHAR * pszName = Str_GetTemp();
+	tchar * pszName = Str_GetTemp();
 	size_t j = 0;
 	bool fInside = false;
 	bool fPlural = false;
@@ -991,7 +991,7 @@ enum IBC_TYPE
 	IBC_QTY
 };
 
-LPCTSTR const CItemBase::sm_szLoadKeys[IBC_QTY+1] =
+lpctstr const CItemBase::sm_szLoadKeys[IBC_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../tables/CItemBase_props.tbl"
@@ -999,7 +999,7 @@ LPCTSTR const CItemBase::sm_szLoadKeys[IBC_QTY+1] =
 	NULL
 };
 
-bool CItemBase::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pChar )
+bool CItemBase::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pChar )
 {
 	UNREFERENCED_PARAMETER(pChar);
 	ADDTOCALLSTACK("CItemBase::r_WriteVal");
@@ -1119,7 +1119,7 @@ bool CItemBase::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pCha
 			break;
 		case IBC_DUPELIST:
 			{
-				TCHAR *pszTemp = Str_GetTemp();
+				tchar *pszTemp = Str_GetTemp();
 				size_t iLen = 0;
 				*pszTemp = '\0';
 				for ( size_t i = 0; i < m_flip_id.GetCount(); i++ )
@@ -1240,7 +1240,7 @@ bool CItemBase::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pCha
 					else if ( !strnicmp( pszKey, "VAL", 3 ))
 						fQtyOnly	= true;
 
-					TCHAR *pszTmp = Str_GetTemp();
+					tchar *pszTmp = Str_GetTemp();
 					if ( fKeyOnly || fQtyOnly )
 						m_SkillMake.WriteKeys( pszTmp, index, fQtyOnly, fKeyOnly );
 					else
@@ -1251,7 +1251,7 @@ bool CItemBase::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pCha
 				}
 				else
 				{
-					TCHAR *pszTmp = Str_GetTemp();
+					tchar *pszTmp = Str_GetTemp();
 					m_SkillMake.WriteNames( pszTmp );
 					sVal = pszTmp;
 				}
@@ -1263,7 +1263,7 @@ bool CItemBase::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pCha
 		case IBC_RESMAKE:
 			// Print the resources need to make in nice format.
 			{
-				TCHAR *pszTmp = Str_GetTemp();
+				tchar *pszTmp = Str_GetTemp();
 				m_BaseResources.WriteNames( pszTmp );
 				sVal = pszTmp;
 			}
@@ -1332,7 +1332,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 {
 	ADDTOCALLSTACK("CItemBase::r_LoadVal");
 	EXC_TRY("LoadVal");
-	LPCTSTR	pszKey = s.GetKey();
+	lpctstr	pszKey = s.GetKey();
 	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
 	{
 		//Set as Strings
@@ -1465,7 +1465,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 
 		case IBC_DUPELIST:
 			{
-				TCHAR * ppArgs[512];
+				tchar * ppArgs[512];
 				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), ppArgs, COUNTOF(ppArgs));
 				if ( iArgQty <= 0 )
 					return( false );
@@ -1820,7 +1820,7 @@ bool CItemBaseMulti::AddComponent( ITEMID_TYPE id, short dx, short dy, signed ch
 }
 
 //	TODO: (Vjaka) do i really need map plane here?
-void CItemBaseMulti::SetMultiRegion( TCHAR * pArgs )
+void CItemBaseMulti::SetMultiRegion( tchar * pArgs )
 {
 	ADDTOCALLSTACK("CItemBaseMulti::SetMultiRegion");
 	// inclusive region.
@@ -1832,7 +1832,7 @@ void CItemBaseMulti::SetMultiRegion( TCHAR * pArgs )
 	m_rect.SetRect( static_cast<int>(piArgs[0]), static_cast<int>(piArgs[1]), static_cast<int>(piArgs[2]+1), static_cast<int>(piArgs[3]+1), static_cast<int>(piArgs[4]) );
 }
 
-bool CItemBaseMulti::AddComponent( TCHAR * pArgs )
+bool CItemBaseMulti::AddComponent( tchar * pArgs )
 {
 	ADDTOCALLSTACK("CItemBaseMulti::AddComponent");
 	INT64 piArgs[4];
@@ -1869,7 +1869,7 @@ enum MLC_TYPE
 	MLC_QTY
 };
 
-LPCTSTR const CItemBaseMulti::sm_szLoadKeys[] =
+lpctstr const CItemBaseMulti::sm_szLoadKeys[] =
 {
 	"BASECOMPONENT",
 	"COMPONENT",
@@ -1924,7 +1924,7 @@ bool CItemBaseMulti::r_LoadVal( CScript &s )
 	return false;
 }
 
-bool CItemBaseMulti::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pChar )
+bool CItemBaseMulti::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pChar )
 {
 	ADDTOCALLSTACK("CItemBaseMulti::r_WriteVal");
 	EXC_TRY("WriteVal");

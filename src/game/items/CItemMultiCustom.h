@@ -43,8 +43,8 @@ private:
 	};
 
 private:
-	static LPCTSTR const sm_szLoadKeys[];
-	static LPCTSTR const sm_szVerbKeys[];
+	static lpctstr const sm_szLoadKeys[];
+	static lpctstr const sm_szVerbKeys[];
 
 	DesignDetails m_designMain;
 	DesignDetails m_designWorking;
@@ -55,9 +55,9 @@ private:
 	CRectMap m_rectDesignArea;
 	CGrayMultiCustom * m_pGrayMulti;
 
-	virtual bool r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef );
+	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 	virtual void r_Write( CScript & s );
-	virtual bool r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc );
 	virtual bool r_LoadVal( CScript & s  );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
 

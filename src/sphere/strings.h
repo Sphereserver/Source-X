@@ -52,7 +52,7 @@ public:
 	int lastIndexOf(char c);
 
 	// operator
-	operator LPCTSTR() const;       // as a C string
+	operator lpctstr() const;       // as a C string
 	operator char*();				// as a C string
 	operator const char*&() const;	// as a C string
 

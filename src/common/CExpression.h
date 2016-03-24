@@ -54,7 +54,7 @@ enum INTRINSIC_TYPE
 	INTRINSIC_QTY
 };
 
-static LPCTSTR const sm_IntrinsicFunctions[INTRINSIC_QTY+1] =
+static lpctstr const sm_IntrinsicFunctions[INTRINSIC_QTY+1] =
 {
 	"ABS",		// absolute
 	"COS",		// cosinus
@@ -90,38 +90,38 @@ public:
 	CGString		m_sTmp;
 
 								//	defined default messages
-	static TCHAR sm_szMessages[DEFMSG_QTY][128];			// like: "You put %s to %s"
-	static LPCTSTR const sm_szMsgNames[DEFMSG_QTY];		// like: "put_it"
+	static tchar sm_szMessages[DEFMSG_QTY][128];			// like: "You put %s to %s"
+	static lpctstr const sm_szMsgNames[DEFMSG_QTY];		// like: "put_it"
 
 public:
 	// Strict G++ Prototyping produces an error when not casting char*& to const char*&
 	// So this is a rather lazy workaround
-	inline int64_t GetSingle( LPTSTR &pArgs )
+	inline int64_t GetSingle( lptstr &pArgs )
 	{
-		return GetSingle(const_cast<LPCTSTR &>(pArgs));
+		return GetSingle(const_cast<lpctstr &>(pArgs));
 	}
 
-	inline int GetRange( LPTSTR &pArgs )
+	inline int GetRange( lptstr &pArgs )
 	{
-		return static_cast<int>(GetRange(const_cast<LPCTSTR &>(pArgs)));
+		return static_cast<int>(GetRange(const_cast<lpctstr &>(pArgs)));
 	}
 
-	inline int GetRangeVals( LPTSTR &pExpr, int64_t * piVals, int iMaxQty )
+	inline int GetRangeVals( lptstr &pExpr, int64_t * piVals, int iMaxQty )
 	{
-		return GetRangeVals(const_cast<LPCTSTR &>(pExpr), piVals, iMaxQty );
+		return GetRangeVals(const_cast<lpctstr &>(pExpr), piVals, iMaxQty );
 	}
 
-	inline int64_t GetVal( LPTSTR &pArgs )
+	inline int64_t GetVal( lptstr &pArgs )
 	{
-		return GetVal(const_cast<LPCTSTR &>(pArgs));
+		return GetVal(const_cast<lpctstr &>(pArgs));
 	}
 
 	// Evaluate using the stuff we know.
-	int64_t GetSingle( LPCTSTR & pArgs );
-	int64_t GetVal( LPCTSTR & pArgs );
-	int64_t GetValMath( int64_t lVal, LPCTSTR & pExpr );
-	int GetRangeVals(LPCTSTR & pExpr, int64_t * piVals, int iMaxQty);
-	int64_t GetRange(LPCTSTR & pArgs);
+	int64_t GetSingle( lpctstr & pArgs );
+	int64_t GetVal( lpctstr & pArgs );
+	int64_t GetValMath( int64_t lVal, lpctstr & pExpr );
+	int GetRangeVals(lpctstr & pExpr, int64_t * piVals, int iMaxQty);
+	int64_t GetRange(lpctstr & pArgs);
 
 public:
 	CExpression();
@@ -132,13 +132,13 @@ private:
 	CExpression& operator=(const CExpression& other);
 } g_Exp;
 
-bool IsValidDef( LPCTSTR pszTest );
-bool IsValidGameObjDef( LPCTSTR pszTest );
+bool IsValidDef( lpctstr pszTest );
+bool IsValidGameObjDef( lpctstr pszTest );
 
-bool IsSimpleNumberString( LPCTSTR pszTest );
-bool IsStrNumericDec( LPCTSTR pszTest );
-bool IsStrNumeric( LPCTSTR pszTest );
-bool IsStrEmpty( LPCTSTR pszTest );
+bool IsSimpleNumberString( lpctstr pszTest );
+bool IsStrNumericDec( lpctstr pszTest );
+bool IsStrNumeric( lpctstr pszTest );
+bool IsStrEmpty( lpctstr pszTest );
 inline extern bool IsCharNumeric( char & Test );
 
 // Numeric formulas
@@ -150,8 +150,8 @@ int Calc_GetLog2( UINT iVal );
 int Calc_GetSCurve( int iValDiff, int iVariance );
 int Calc_GetBellCurve( int iValDiff, int iVariance );
 
-dword ahextoi( LPCTSTR pArgs ); // Convert hex string to integer
-int64_t ahextoi64( LPCTSTR pArgs ); // Convert hex string to INT64
+dword ahextoi( lpctstr pArgs ); // Convert hex string to integer
+int64_t ahextoi64( lpctstr pArgs ); // Convert hex string to INT64
 
 #define Exp_GetSingle( pa ) static_cast<int>(g_Exp.GetSingle( pa ))
 #define Exp_GetLLSingle( pa ) g_Exp.GetSingle( pa )

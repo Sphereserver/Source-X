@@ -408,7 +408,7 @@ static const dword sm_dwInitData[18+1024] =
 // ---------------------------------------------------------------------------------------------------------------
 // ===============================================================================================================
 
-int CCrypt::GetVerFromString( LPCTSTR pszVersion )
+int CCrypt::GetVerFromString( lpctstr pszVersion )
 {
 	ADDTOCALLSTACK("CCrypt::GetVerFromString");
 	// Get version of old clients, which report the client version as ASCII string (eg: '5.0.2b')
@@ -419,7 +419,7 @@ int CCrypt::GetVerFromString( LPCTSTR pszVersion )
 	int n = 0;
 	int iArgs[] = { 0,0,0,0 };
 	size_t iMax = strlen(pszVersion);
-	TCHAR ch, chNext;
+	tchar ch, chNext;
 
 	for ( size_t i = 0; i < iMax; i++ )
 	{
@@ -481,7 +481,7 @@ char* CCrypt::WriteClientVerString( dword iClientVersion, char * pStr )
 	return pStr;
 }
 
-int CCrypt::GetVersionFromString( LPCTSTR pszVersion )
+int CCrypt::GetVersionFromString( lpctstr pszVersion )
 {
 	ADDTOCALLSTACK("CCrypt::GetVersionFromString");
 	return CCrypt::GetVerFromString( pszVersion );
@@ -535,7 +535,7 @@ void CCrypt::SetClientVer( const CCrypt & crypt )
 	m_MasterLo = crypt.m_MasterLo;
 }
 
-bool CCrypt::SetClientVer( LPCTSTR pszVersion )
+bool CCrypt::SetClientVer( lpctstr pszVersion )
 {
 	ADDTOCALLSTACK("CCrypt::SetClientVer");
 	int iVer = 0;
@@ -714,7 +714,7 @@ void CCrypt::LoginCryptStart( dword dwIP, byte * pEvent, size_t iLen )
 
 			if ( isValid == true )
 			{
-				LPCTSTR sRawAccountName = reinterpret_cast<LPCTSTR>( m_Raw + 1 );
+				lpctstr sRawAccountName = reinterpret_cast<lpctstr>( m_Raw + 1 );
 				iAccountNameLen = Str_GetBare(pszAccountNameCheck, sRawAccountName, MAX_ACCOUNT_NAME_SIZE, ACCOUNT_NAME_VALID_CHAR);
 
 				// (matex) TODO: What for? We do not really need pszAccountNameCheck here do we?!

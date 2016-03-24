@@ -43,7 +43,7 @@ private:
 public:
     virtual bool IsSameType( const CObjBase * pObj ) const;
     virtual void r_Write( CScript & s );
-    virtual bool r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc = NULL );
+    virtual bool r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc = NULL );
     virtual bool r_LoadVal( CScript & s );
     virtual void DupeCopy( const CItem * pItem );
 };

@@ -64,7 +64,7 @@ void CChar::Guild_Resign( MEMORY_TYPE MemType )
 		{
 			CItemStone * pMyStone = pMember->GetParentStone();
 			ASSERT(pMyStone);
-			SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_MSG_GUILDRESIGN ), static_cast<LPCTSTR>(pMyStone->GetTypeName()) );
+			SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_MSG_GUILDRESIGN ), static_cast<lpctstr>(pMyStone->GetTypeName()) );
 		}
 	}
 
@@ -72,7 +72,7 @@ void CChar::Guild_Resign( MEMORY_TYPE MemType )
 }
 
 // Get my guild abbrev if i have chosen to turn it on.
-LPCTSTR CChar::Guild_Abbrev( MEMORY_TYPE MemType ) const
+lpctstr CChar::Guild_Abbrev( MEMORY_TYPE MemType ) const
 {
 	ADDTOCALLSTACK("CChar::Guild_Abbrev");
 	CStoneMember * pMember = Guild_FindMember(MemType);
@@ -88,13 +88,13 @@ LPCTSTR CChar::Guild_Abbrev( MEMORY_TYPE MemType ) const
 }
 
 // Get my [guild abbrev] if i have chosen to turn it on.
-LPCTSTR CChar::Guild_AbbrevBracket( MEMORY_TYPE MemType ) const
+lpctstr CChar::Guild_AbbrevBracket( MEMORY_TYPE MemType ) const
 {
 	ADDTOCALLSTACK("CChar::Guild_AbbrevBracket");
-	LPCTSTR pszAbbrev = Guild_Abbrev(MemType);
+	lpctstr pszAbbrev = Guild_Abbrev(MemType);
 	if ( pszAbbrev == NULL )
 		return( NULL );
-	TCHAR * pszTemp = Str_GetTemp();
+	tchar * pszTemp = Str_GetTemp();
 	sprintf( pszTemp, " [%s]", pszAbbrev );
 	return( pszTemp );
 }

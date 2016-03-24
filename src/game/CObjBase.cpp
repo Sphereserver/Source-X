@@ -31,14 +31,14 @@ int CObjBaseTemplate::IsWeird() const
 	return 0;
 }
 
-bool GetDeltaStr( CPointMap & pt, TCHAR * pszDir )
+bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
 {
-	TCHAR * ppCmd[3];
+	tchar * ppCmd[3];
 	size_t iQty = Str_ParseCmds( pszDir, ppCmd, COUNTOF(ppCmd));
 	if (iQty <= 0)
 		return( false );
 
-	TCHAR chDir = static_cast<TCHAR>(toupper(ppCmd[0][0]));
+	tchar chDir = static_cast<tchar>(toupper(ppCmd[0][0]));
 	int iTmp = Exp_GetVal( ppCmd[1] );
 
 	if ( IsDigit( chDir ) || chDir == '-' )
@@ -132,8 +132,8 @@ void CObjBase::SetHue( HUE_TYPE wHue, bool bAvoidTrigger, CTextConsole *pSrc, CO
 		Sanity checks are recommended and if possible, avoid using it on universal events. */
 
 	/*	Trigger info to be added to intenal
-		LPCTSTR const CItem::sm_szTrigName	//CItem.cpp
-		LPCTSTR const CChar::sm_szTrigName	//CChar.cpp
+		lpctstr const CItem::sm_szTrigName	//CItem.cpp
+		lpctstr const CChar::sm_szTrigName	//CChar.cpp
 		enum ITRIG_TYPE						//CObjBase.h
 		enum CTRIG_TYPE						//CObjBase.h
 		ADD(DYE,					"@Dye")	//triggers.tbl
@@ -148,7 +148,7 @@ void CObjBase::SetHue( HUE_TYPE wHue, bool bAvoidTrigger, CTextConsole *pSrc, CO
 			if (SourceObj)
 				args.m_pO1 = SourceObj;
 
-			//LPCTSTR sTrig = (IsChar() ? CChar::sm_szTrigName[CTRIG_DYE] : CItem::sm_szTrigName[ITRIG_DYE]);
+			//lpctstr sTrig = (IsChar() ? CChar::sm_szTrigName[CTRIG_DYE] : CItem::sm_szTrigName[ITRIG_DYE]);
 
 			iRet = OnTrigger("@Dye", pSrc, &args);
 
@@ -232,24 +232,24 @@ CObjBase* CObjBase::GetPrev() const
 	return( STATIC_CAST <CObjBase*>( CGObListRec::GetPrev()));
 }
 
-LPCTSTR CObjBase::GetName() const	// resolve ambiguity w/CScriptObj
+lpctstr CObjBase::GetName() const	// resolve ambiguity w/CScriptObj
 {
 	return( CObjBaseTemplate::GetName());
 }
 
-LPCTSTR CObjBase::GetResourceName() const
+lpctstr CObjBase::GetResourceName() const
 {
 	return Base_GetDef()->GetResourceName();
 }
 
-void inline CObjBase::SetNamePool_Fail( TCHAR * ppTitles )
+void inline CObjBase::SetNamePool_Fail( tchar * ppTitles )
 {
 	ADDTOCALLSTACK("CObjBase::SetNamePool_Fail");
 	DEBUG_ERR(( "Name pool '%s' could not be found\n", ppTitles ));
 	CObjBase::SetName( ppTitles );
 }
 
-bool CObjBase::SetNamePool( LPCTSTR pszName )
+bool CObjBase::SetNamePool( lpctstr pszName )
 {
 	ADDTOCALLSTACK("CObjBase::SetNamePool");
 	ASSERT(pszName);
@@ -258,10 +258,10 @@ bool CObjBase::SetNamePool( LPCTSTR pszName )
 	if ( pszName[0] == '#' )
 	{
 		++pszName;
-		TCHAR *pszTmp = Str_GetTemp();
+		tchar *pszTmp = Str_GetTemp();
 		strcpy( pszTmp, pszName );
 
-		TCHAR * ppTitles[2];
+		tchar * ppTitles[2];
 		Str_ParseCmds( pszTmp, ppTitles, COUNTOF(ppTitles));
 
 		CResourceLock s;
@@ -292,10 +292,10 @@ bool CObjBase::SetNamePool( LPCTSTR pszName )
 	}
 	else
 	{
-		LPCTSTR pszTmp = pszName;
+		lpctstr pszTmp = pszName;
 
 		// NOTE: Name must be <= MAX_NAME_SIZE
-		TCHAR szTmp[ MAX_ITEM_NAME_SIZE + 1 ];
+		tchar szTmp[ MAX_ITEM_NAME_SIZE + 1 ];
 		if ( strlen( pszName ) >= MAX_ITEM_NAME_SIZE )
 		{
 			strcpylen( szTmp, pszName, MAX_ITEM_NAME_SIZE );
@@ -303,7 +303,7 @@ bool CObjBase::SetNamePool( LPCTSTR pszName )
 		}
 
 		// Can't be a dupe name with type ?
-		LPCTSTR pszTypeName = Base_GetDef()->GetTypeName();
+		lpctstr pszTypeName = Base_GetDef()->GetTypeName();
 		if ( ! strcmpi( pszTypeName, pszTmp ))
 			pszTmp = "";
 
@@ -436,7 +436,7 @@ void CObjBase::Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSour
 }
 
 
-void CObjBase::Emote(LPCTSTR pText, CClient * pClientExclude, bool fForcePossessive)
+void CObjBase::Emote(lpctstr pText, CClient * pClientExclude, bool fForcePossessive)
 {
 	ADDTOCALLSTACK("CObjBase::Emote");
 	// IF this is not the top level object then it might be possessive ?
@@ -448,8 +448,8 @@ void CObjBase::Emote(LPCTSTR pText, CClient * pClientExclude, bool fForcePossess
 	if ( !pObjTop )
 		return;
 
-	TCHAR *pszThem = Str_GetTemp();
-	TCHAR *pszYou = Str_GetTemp();
+	tchar *pszThem = Str_GetTemp();
+	tchar *pszYou = Str_GetTemp();
 
 	if ( pObjTop->IsChar() )
 	{
@@ -482,7 +482,7 @@ void CObjBase::Emote(LPCTSTR pText, CClient * pClientExclude, bool fForcePossess
 	pObjTop->UpdateObjMessage(pszThem, pszYou, pClientExclude, HUE_TEXT_DEF, TALKMODE_EMOTE);
 }
 
-void CObjBase::Emote2(LPCTSTR pText, LPCTSTR pText1, CClient * pClientExclude, bool fForcePossessive)
+void CObjBase::Emote2(lpctstr pText, lpctstr pText1, CClient * pClientExclude, bool fForcePossessive)
 {
 	ADDTOCALLSTACK("CObjBase::Emote");
 	// IF this is not the top level object then it might be possessive ?
@@ -494,8 +494,8 @@ void CObjBase::Emote2(LPCTSTR pText, LPCTSTR pText1, CClient * pClientExclude, b
 	if ( !pObjTop )
 		return;
 
-	TCHAR *pszThem = Str_GetTemp();
-	TCHAR *pszYou = Str_GetTemp();
+	tchar *pszThem = Str_GetTemp();
+	tchar *pszYou = Str_GetTemp();
 
 	if ( pObjTop->IsChar() )
 	{
@@ -527,13 +527,13 @@ void CObjBase::Emote2(LPCTSTR pText, LPCTSTR pText1, CClient * pClientExclude, b
 	pObjTop->UpdateObjMessage(pszThem, pszYou, pClientExclude, HUE_TEXT_DEF, TALKMODE_EMOTE);
 }
 
-void CObjBase::Speak( LPCTSTR pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font )
+void CObjBase::Speak( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font )
 {
 	ADDTOCALLSTACK("CObjBase::Speak");
 	g_World.Speak( this, pText, wHue, mode, font );
 }
 
-void CObjBase::SpeakUTF8( LPCTSTR pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
+void CObjBase::SpeakUTF8( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
 {
 	ADDTOCALLSTACK("CObjBase::SpeakUTF8");
 	// convert UTF8 to UNICODE.
@@ -588,7 +588,7 @@ bool CObjBase::MoveNear( CPointMap pt, word iSteps )
 	return false;
 }
 
-void CObjBase::UpdateObjMessage( LPCTSTR pTextThem, LPCTSTR pTextYou, CClient * pClientExclude, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, bool bUnicode ) const
+void CObjBase::UpdateObjMessage( lpctstr pTextThem, lpctstr pTextYou, CClient * pClientExclude, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, bool bUnicode ) const
 {
 	ADDTOCALLSTACK("CObjBase::UpdateObjMessage");
 	// Show everyone a msg coming from this object.
@@ -622,7 +622,7 @@ void CObjBase::UpdateCanSee(PacketSend *packet, CClient *exclude) const
 	delete packet;
 }
 
-TRIGRET_TYPE CObjBase::OnHearTrigger( CResourceLock & s, LPCTSTR pszCmd, CChar * pSrc, TALKMODE_TYPE & mode, HUE_TYPE wHue)
+TRIGRET_TYPE CObjBase::OnHearTrigger( CResourceLock & s, lpctstr pszCmd, CChar * pSrc, TALKMODE_TYPE & mode, HUE_TYPE wHue)
 {
 	ADDTOCALLSTACK("CObjBase::OnHearTrigger");
 	// Check all the keys in this script section.
@@ -671,7 +671,7 @@ enum OBR_TYPE
 	OBR_QTY
 };
 
-LPCTSTR const CObjBase::sm_szRefKeys[OBR_QTY+1] =
+lpctstr const CObjBase::sm_szRefKeys[OBR_QTY+1] =
 {
 	"ROOM",
 	"SECTOR",
@@ -681,7 +681,7 @@ LPCTSTR const CObjBase::sm_szRefKeys[OBR_QTY+1] =
 	NULL
 };
 
-bool CObjBase::r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef )
+bool CObjBase::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CObjBase::r_GetRef");
 	int i = FindTableHeadSorted( pszKey, sm_szRefKeys, COUNTOF(sm_szRefKeys)-1 );
@@ -723,7 +723,7 @@ enum OBC_TYPE
 	OC_QTY
 };
 
-LPCTSTR const CObjBase::sm_szLoadKeys[OC_QTY+1] =
+lpctstr const CObjBase::sm_szLoadKeys[OC_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../tables/CObjBase_props.tbl"
@@ -731,7 +731,7 @@ LPCTSTR const CObjBase::sm_szLoadKeys[OC_QTY+1] =
 	NULL
 };
 
-bool CObjBase::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc )
+bool CObjBase::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CObjBase::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -741,7 +741,7 @@ bool CObjBase::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc )
 	{
 		// RES_FUNCTION call
 		// Is it a function returning a value ? Parse args ?
-		LPCTSTR pszArgs = strchr(pszKey, ' ');
+		lpctstr pszArgs = strchr(pszKey, ' ');
 		if ( pszArgs != NULL )
 		{
 			pszArgs++;
@@ -1025,9 +1025,9 @@ bool CObjBase::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc )
 			break;
 		case OC_TEXTF:
 			{
-				TCHAR * key = const_cast<TCHAR*>(pszKey);
+				tchar * key = const_cast<tchar*>(pszKey);
 				key += 5;
-				TCHAR * pszArg[4];
+				tchar * pszArg[4];
 				size_t iArgQty = Str_ParseCmds(key , pszArg, COUNTOF(pszArg));
 				if (iArgQty < 2)
 				{
@@ -1043,7 +1043,7 @@ bool CObjBase::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc )
 				if (*pszArg[0] == '"')
 					pszArg[0]++;
 				byte count = 0;
-				for (TCHAR * pEnd = pszArg[0] + strlen(pszArg[0]) - 1; pEnd >= pszArg[0]; pEnd--)
+				for (tchar * pEnd = pszArg[0] + strlen(pszArg[0]) - 1; pEnd >= pszArg[0]; pEnd--)
 				{
 					if (*pEnd == '"')
 					{
@@ -1315,14 +1315,14 @@ bool CObjBase::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc )
 			CItem * pItem = NULL;
 			if ( *pszKey )
 			{
-				TCHAR * pszArg = Str_GetTemp();
+				tchar * pszArg = Str_GetTemp();
 				strcpylen( pszArg, pszKey, strlen( pszKey ) + 1 );
 
 				CGrayUID uid = Exp_GetVal( pszKey );
 				pItem = dynamic_cast<CItem*> (uid.ObjFind());
 				if (pItem == NULL)
 				{
-					ITEMID_TYPE id = static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetID(RES_ITEMDEF, const_cast<LPCTSTR &>(reinterpret_cast<LPTSTR &>(pszArg))).GetResIndex());
+					ITEMID_TYPE id = static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetID(RES_ITEMDEF, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(pszArg))).GetResIndex());
 					const CItemBase * pItemDef = CItemBase::FindItemBase( id );
 					if ( pItemDef != NULL )
 					{
@@ -1355,14 +1355,14 @@ bool CObjBase::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc )
 			CItem * pItem = NULL;
 			if ( *pszKey )
 			{
-				TCHAR * pszArg = Str_GetTemp();
+				tchar * pszArg = Str_GetTemp();
 				strcpylen( pszArg, pszKey, strlen( pszKey ) + 1 );
 
 				CGrayUID uid = Exp_GetVal( pszKey );
 				pItem = dynamic_cast<CItem*> (uid.ObjFind());
 				if ( pItem == NULL )
 				{
-					ITEMID_TYPE id = static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetID(RES_ITEMDEF, const_cast<LPCTSTR &>(reinterpret_cast<LPTSTR &>(pszArg))).GetResIndex());
+					ITEMID_TYPE id = static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetID(RES_ITEMDEF, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(pszArg))).GetResIndex());
 					const CItemBase * pItemDef = CItemBase::FindItemBase( id );
 					if (pItemDef != NULL)
 					{
@@ -1424,7 +1424,7 @@ bool CObjBase::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc )
 				if ( *pszKey )
 				{
 					TRIGRET_TYPE trReturn;
-					bool bTrigReturn = CallPersonalTrigger(const_cast<TCHAR *>(pszKey), pSrc, trReturn,false);
+					bool bTrigReturn = CallPersonalTrigger(const_cast<tchar *>(pszKey), pSrc, trReturn,false);
 					if ( bTrigReturn )
 						sVal.FormatVal(trReturn);
 
@@ -1499,12 +1499,12 @@ bool CObjBase::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc )
  					SKIP_SEPARATORS( pszKey );
  					if ( ! *pszKey )
  					{
- 						sVal.Format("%s=%s", static_cast<LPCTSTR>(pTagAt->GetKey()), static_cast<LPCTSTR>(pTagAt->GetValStr()));
+ 						sVal.Format("%s=%s", static_cast<lpctstr>(pTagAt->GetKey()), static_cast<lpctstr>(pTagAt->GetValStr()));
  						return( true );
  					}
  					else if ( !strnicmp( pszKey, "KEY", 3 )) // key?
  					{
- 						sVal = static_cast<LPCTSTR>(pTagAt->GetKey());
+ 						sVal = static_cast<lpctstr>(pTagAt->GetKey());
  						return( true );
  					}
  					else if ( !strnicmp( pszKey, "VAL", 3 )) // val?
@@ -1537,12 +1537,12 @@ bool CObjBase::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc )
  					SKIP_SEPARATORS( pszKey );
  					if ( ! *pszKey )
  					{
- 						sVal.Format("%s=%s", static_cast<LPCTSTR>(pTagAt->GetKey()), static_cast<LPCTSTR>(pTagAt->GetValStr()));
+ 						sVal.Format("%s=%s", static_cast<lpctstr>(pTagAt->GetKey()), static_cast<lpctstr>(pTagAt->GetValStr()));
  						return( true );
  					}
  					else if ( !strnicmp( pszKey, "KEY", 3 )) // key?
  					{
- 						sVal = static_cast<LPCTSTR>(pTagAt->GetKey());
+ 						sVal = static_cast<lpctstr>(pTagAt->GetKey());
  						return( true );
  					}
  					else if ( !strnicmp( pszKey, "VAL", 3 )) // val?
@@ -1923,7 +1923,7 @@ enum OV_TYPE
 	OV_QTY
 };
 
-LPCTSTR const CObjBase::sm_szVerbKeys[OV_QTY+1] =
+lpctstr const CObjBase::sm_szVerbKeys[OV_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../tables/CObjBase_functions.tbl"
@@ -1935,7 +1935,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 {
 	ADDTOCALLSTACK("CObjBase::r_Verb");
 	EXC_TRY("Verb");
-	LPCTSTR	pszKey = s.GetKey();
+	lpctstr	pszKey = s.GetKey();
 	ASSERT(pSrc);
 	int	index;
 
@@ -2061,7 +2061,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				if ( pClientSrc == NULL )
 					return( false );
 
-				TCHAR *Arg_ppCmd[2];		// Maximum parameters in one line
+				tchar *Arg_ppCmd[2];		// Maximum parameters in one line
 				size_t iQty = Str_ParseCmds( s.GetArgStr(), Arg_ppCmd, COUNTOF( Arg_ppCmd ));
 
 				CGString sOrgValue;
@@ -2073,7 +2073,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				int iMaxLength = iQty > 1 ? ATOI(Arg_ppCmd[1]) : 1;
 
 				CGString sPrompt;
-				sPrompt.Format("%s (# = default)", static_cast<LPCTSTR>(Arg_ppCmd[0]));
+				sPrompt.Format("%s (# = default)", static_cast<lpctstr>(Arg_ppCmd[0]));
 				pClientSrc->addGumpInpVal( true, INPVAL_STYLE_TEXTEDIT,
 					iMaxLength,	sPrompt, sOrgValue, this );
 			}
@@ -2102,7 +2102,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				if ( pClientSrc == NULL )
 					return( false );
 
-				TCHAR * pszArgs[5];
+				tchar * pszArgs[5];
 				NCHAR ncBuffer[ MAX_TALK_BUFFER ];
 
 				size_t iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, COUNTOF(pszArgs) );
@@ -2184,7 +2184,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				if ( pClientSrc == NULL )
 					return( false );
 
-				TCHAR * pszArgs[2];
+				tchar * pszArgs[2];
 
 				int iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, COUNTOF(pszArgs) );
 				if ( iArgQty == 0 )
@@ -2239,7 +2239,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			// This can have full args. SAYUA Color, Mode, Font, Lang, Text Text
 			{
 				EXC_SET("SAYUA");
-				TCHAR * pszArgs[5];
+				tchar * pszArgs[5];
 				size_t iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, COUNTOF(pszArgs) );
 				if ( iArgQty < 5 )
 					break;
@@ -2316,7 +2316,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				bool		fCrim		= false;
 				bool		fFunction	= false;
 				bool		fMulti		= false;
-				TCHAR		low = static_cast<TCHAR>(tolower(*pszKey));
+				tchar		low = static_cast<tchar>(tolower(*pszKey));
 
 				while (( low >= 'a' ) && ( low <= 'z' ))
 				{
@@ -2329,7 +2329,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					else if ( low == 'm' )
 						fMulti = true;
 
-					low = static_cast<TCHAR>(tolower(*(++pszKey)));
+					low = static_cast<tchar>(tolower(*(++pszKey)));
 				}
 
 				pClientSrc->m_Targ_UID = GetUID();
@@ -2357,7 +2357,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					{
 						if ( !IsStrNumeric( s.GetArgStr() ))
 							DEBUG_ERR(("Invalid argument in Target Multi\n"));
-						LPCTSTR arg = s.GetArgStr();
+						lpctstr arg = s.GetArgStr();
 						ITEMID_TYPE itemid = static_cast<ITEMID_TYPE>(Exp_GetVal(arg));
 						pClientSrc->addTargetItems( CLIMODE_TARG_USE_ITEM, itemid, fGround );
 					}
@@ -2418,7 +2418,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				if ( pClientSrc == NULL )
 					return( false );
 
-				TCHAR *	Arg_ppCmd[3];		// Maximum parameters in one line
+				tchar *	Arg_ppCmd[3];		// Maximum parameters in one line
 				size_t iQty = Str_ParseCmds( s.GetArgStr(), Arg_ppCmd, COUNTOF( Arg_ppCmd ));
 				if ( iQty < 1 )
 					return( false );
@@ -2452,7 +2452,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				if ( pClientSrc == NULL )
 					return( false );
 
-				TCHAR *	Arg_ppCmd[2];		// Maximum parameters in one line
+				tchar *	Arg_ppCmd[2];		// Maximum parameters in one line
 				size_t iQty = Str_ParseCmds( s.GetArgStr(), Arg_ppCmd, COUNTOF( Arg_ppCmd ));
 				if ( iQty < 1 )
 					return false;
@@ -2471,13 +2471,13 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 				if ( iMinPriv >= PLEVEL_QTY )
 				{
-					pSrc->SysMessagef("The %s property can't be changed.", static_cast<LPCTSTR>(s.GetArgStr()));
+					pSrc->SysMessagef("The %s property can't be changed.", static_cast<lpctstr>(s.GetArgStr()));
 					return false;
 				}
 
 				if ( pSrc->GetPrivLevel() < iMinPriv )
 				{
-					pSrc->SysMessagef( "You lack the privilege to change the %s property.", static_cast<LPCTSTR>(s.GetArgStr()));
+					pSrc->SysMessagef( "You lack the privilege to change the %s property.", static_cast<lpctstr>(s.GetArgStr()));
 					return false;
 				}
 
@@ -2486,7 +2486,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				{
 					if ( pCharSrc == NULL || !pCharSrc->CanTouch(this) )
 					{
-						pSrc->SysMessagef("Can't touch %s object %s", static_cast<LPCTSTR>(s.GetArgStr()), GetName());
+						pSrc->SysMessagef("Can't touch %s object %s", static_cast<lpctstr>(s.GetArgStr()), GetName());
 						return false;
 					}
 				}
@@ -2495,7 +2495,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		case OV_TRY:
 			{
 				EXC_SET("TRY or TRYP");
-				LPCTSTR pszVerb = s.GetArgStr();
+				lpctstr pszVerb = s.GetArgStr();
 				CScript script( pszVerb );
 				//DEBUG_WARN(("pszVerb %s",pszVerb));
 				if ( !r_Verb(script, pSrc) )
@@ -2517,7 +2517,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					NewSrc = s.GetArgVal();
 				}
 
-				LPCTSTR pszVerb = s.GetArgStr();
+				lpctstr pszVerb = s.GetArgStr();
 
 				if ( index == OV_TRYSRC )
 				{
@@ -2851,12 +2851,12 @@ void CObjBase::DeletePrepare()
 	RemoveSelf();	// Must remove early or else virtuals will fail.
 }
 
-bool CObjBase::IsTriggerActive(LPCTSTR trig)
+bool CObjBase::IsTriggerActive(lpctstr trig)
 {
 	return m_RunningTrigger == trig ? true : false;
 }
 
-LPCTSTR CObjBase::GetTriggerActive()
+lpctstr CObjBase::GetTriggerActive()
 {
 	return m_RunningTrigger ? m_RunningTrigger : "none";
 }
@@ -2888,7 +2888,7 @@ void CObjBase::SetTimeStamp( INT64 t_time)
 	m_timestamp.InitTime(t_time);
 }
 
-LPCTSTR CObjBase::GetDefStr( LPCTSTR pszKey, bool fZero, bool fDef ) const
+lpctstr CObjBase::GetDefStr( lpctstr pszKey, bool fZero, bool fDef ) const
 {
 	CVarDefCont	* pVar = GetDefKey( pszKey, fDef );
 	if ( pVar == NULL )
@@ -2896,7 +2896,7 @@ LPCTSTR CObjBase::GetDefStr( LPCTSTR pszKey, bool fZero, bool fDef ) const
 	return pVar->GetValStr();
 }
 
-INT64 CObjBase::GetDefNum( LPCTSTR pszKey, bool fZero, bool fDef ) const
+INT64 CObjBase::GetDefNum( lpctstr pszKey, bool fZero, bool fDef ) const
 {
 	CVarDefCont	* pVar = GetDefKey( pszKey, fDef );
 	if ( pVar == NULL )
@@ -2904,7 +2904,7 @@ INT64 CObjBase::GetDefNum( LPCTSTR pszKey, bool fZero, bool fDef ) const
 	return pVar->GetValNum();
 }
 
-void CObjBase::SetTriggerActive(LPCTSTR trig)
+void CObjBase::SetTriggerActive(lpctstr trig)
 {
 	if (trig)
 	{
@@ -2915,22 +2915,22 @@ void CObjBase::SetTriggerActive(LPCTSTR trig)
 	m_RunningTrigger = trig ? trig : NULL;
 }
 
-void CObjBase::SetDefNum(LPCTSTR pszKey, INT64 iVal, bool fZero )
+void CObjBase::SetDefNum(lpctstr pszKey, INT64 iVal, bool fZero )
 {
 	m_BaseDefs.SetNum(pszKey, iVal, fZero);
 }
 
-void CObjBase::SetDefStr(LPCTSTR pszKey, LPCTSTR pszVal, bool fQuoted, bool fZero )
+void CObjBase::SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted, bool fZero )
 {
 	m_BaseDefs.SetStr(pszKey, fQuoted, pszVal, fZero);
 }
 
-void CObjBase::DeleteDef(LPCTSTR pszKey)
+void CObjBase::DeleteDef(lpctstr pszKey)
 {
 	m_BaseDefs.DeleteKey(pszKey);
 }
 
-CVarDefCont * CObjBase::GetDefKey( LPCTSTR pszKey, bool fDef ) const
+CVarDefCont * CObjBase::GetDefKey( lpctstr pszKey, bool fDef ) const
 {
 	CVarDefCont	* pVar	= m_BaseDefs.GetKey( pszKey );
 	if ( !fDef || pVar )	return pVar;
@@ -2948,7 +2948,7 @@ CVarDefCont * CObjBase::GetDefKey( LPCTSTR pszKey, bool fDef ) const
 	}
 }
 
-LPCTSTR CObjBase::GetKeyStr( LPCTSTR pszKey, bool fZero, bool fDef ) const
+lpctstr CObjBase::GetKeyStr( lpctstr pszKey, bool fZero, bool fDef ) const
 {
 	CVarDefCont	* pVar = GetKey( pszKey, fDef );
 	if ( pVar == NULL )
@@ -2956,7 +2956,7 @@ LPCTSTR CObjBase::GetKeyStr( LPCTSTR pszKey, bool fZero, bool fDef ) const
 	return pVar->GetValStr();
 }
 
-INT64 CObjBase::GetKeyNum( LPCTSTR pszKey, bool fZero, bool fDef ) const
+INT64 CObjBase::GetKeyNum( lpctstr pszKey, bool fZero, bool fDef ) const
 {
 	CVarDefCont	* pVar = GetKey( pszKey, fDef );
 	if ( pVar == NULL )
@@ -2964,7 +2964,7 @@ INT64 CObjBase::GetKeyNum( LPCTSTR pszKey, bool fZero, bool fDef ) const
 	return pVar->GetValNum();
 }
 
-CVarDefCont * CObjBase::GetKey( LPCTSTR pszKey, bool fDef ) const
+CVarDefCont * CObjBase::GetKey( lpctstr pszKey, bool fDef ) const
 {
 	CVarDefCont	* pVar	= m_TagDefs.GetKey( pszKey );
 	if ( !fDef || pVar )	return pVar;
@@ -2982,17 +2982,17 @@ CVarDefCont * CObjBase::GetKey( LPCTSTR pszKey, bool fDef ) const
 	}
 }
 
-void CObjBase::SetKeyNum(LPCTSTR pszKey, INT64 iVal)
+void CObjBase::SetKeyNum(lpctstr pszKey, INT64 iVal)
 {
 	m_TagDefs.SetNum(pszKey, iVal);
 }
 
-void CObjBase::SetKeyStr(LPCTSTR pszKey, LPCTSTR pszVal)
+void CObjBase::SetKeyStr(lpctstr pszKey, lpctstr pszVal)
 {
 	m_TagDefs.SetStr(pszKey, false, pszVal);
 }
 
-void CObjBase::DeleteKey(LPCTSTR pszKey)
+void CObjBase::DeleteKey(lpctstr pszKey)
 {
 	m_TagDefs.DeleteKey(pszKey);
 }
@@ -3043,16 +3043,16 @@ TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CCh
 	return TRIGRET_RET_DEFAULT;
 }
 
-inline bool CObjBase::CallPersonalTrigger(TCHAR * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult, bool bFull)
+inline bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult, bool bFull)
 {
 	ADDTOCALLSTACK("CObjBase::CallPersonalTrigger");
 	UNREFERENCED_PARAMETER(bFull);
-	TCHAR * ppCmdTrigger[3];
+	tchar * ppCmdTrigger[3];
 	size_t iResultArgs = Str_ParseCmds(pArgs, ppCmdTrigger, COUNTOF(ppCmdTrigger), ",");
 	
 	if ( iResultArgs > 0 )
 	{
-		LPCTSTR callTrigger = ppCmdTrigger[0];
+		lpctstr callTrigger = ppCmdTrigger[0];
 		CScriptTriggerArgs csTriggerArgs;
 
 		if ( iResultArgs == 3 )
@@ -3095,7 +3095,7 @@ inline bool CObjBase::CallPersonalTrigger(TCHAR * pArgs, CTextConsole * pSrc, TR
 			}
 			else if ( iTriggerArgType == 4 ) // FULL TRIGGER
 			{
-				TCHAR * Arg_ppCmd[5];
+				tchar * Arg_ppCmd[5];
 				iResultArgs = Str_ParseCmds(ppCmdTrigger[2], Arg_ppCmd, COUNTOF(Arg_ppCmd), ",");
 				
 				// ARGS
@@ -3130,7 +3130,7 @@ inline bool CObjBase::CallPersonalTrigger(TCHAR * pArgs, CTextConsole * pSrc, TR
 }
 
 
-DIR_TYPE GetDirStr( LPCTSTR pszDir )
+DIR_TYPE GetDirStr( lpctstr pszDir )
 {
 	char iDir2, iDir = static_cast< char >( toupper( pszDir[ 0 ] ) );
 

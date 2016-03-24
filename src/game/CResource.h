@@ -214,8 +214,8 @@ public:
 		return( static_cast<int>(m_iLo) + Calc_GetRandVal( GetRange()));
 	}
 	int GetRandomLinear( int iPercent ) const;
-	bool Load( TCHAR * pszDef );
-	const TCHAR * Write() const;
+	bool Load( tchar * pszDef );
+	const tchar * Write() const;
 
 public:
 	CValueRangeDef()
@@ -237,8 +237,8 @@ public:
 	{
 		m_aiValues.Empty();
 	}
-	bool Load( TCHAR * pszDef );
-	const TCHAR * Write() const;
+	bool Load( tchar * pszDef );
+	const tchar * Write() const;
 	int GetLinear( int iSkillPercent ) const;
 	int GetChancePercent( int iSkillPercent ) const;
 	int GetRandom() const;
@@ -267,8 +267,8 @@ class CRegionResourceDef : public CResourceLink
 	// When mining/lumberjacking etc. What can we get?
 public:
 	static const char *m_sClassName;
-	static LPCTSTR const sm_szLoadKeys[];
-	static LPCTSTR const sm_szTrigName[RRTRIG_QTY+1];
+	static lpctstr const sm_szLoadKeys[];
+	static lpctstr const sm_szTrigName[RRTRIG_QTY+1];
 
 	// What item do we get when we try to mine this.
 	ITEMID_TYPE m_ReapItem;	// ITEMID_ORE_1 most likely
@@ -288,8 +288,8 @@ private:
 
 public:
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc = NULL );
-	TRIGRET_TYPE OnTrigger( LPCTSTR pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
+	bool r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc = NULL );
+	TRIGRET_TYPE OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
 };
 
 enum WEBPAGE_TYPE
@@ -314,10 +314,10 @@ class CWebPageDef : public CResourceLink
 	// RES_WEBPAGE
 
 	// This is a single web page we are generating or serving.
-	static LPCTSTR const sm_szLoadKeys[];
-	static LPCTSTR const sm_szVerbKeys[];
-	static LPCTSTR const sm_szPageType[];
-	static LPCTSTR const sm_szPageExt[];
+	static lpctstr const sm_szLoadKeys[];
+	static lpctstr const sm_szVerbKeys[];
+	static lpctstr const sm_szPageType[];
+	static lpctstr const sm_szPageExt[];
 private:
 	WEBPAGE_TYPE m_type;				// What basic format of file is this ? 0=text
 	CGString m_sSrcFilePath;	// source template for the generated web page.
@@ -333,31 +333,31 @@ private:
 public:
 	static const char *m_sClassName;
 	static int sm_iListIndex;
-	static LPCTSTR const sm_szTrigName[WTRIG_QTY+1];
+	static lpctstr const sm_szTrigName[WTRIG_QTY+1];
 private:
-	int ServPageRequest( CClient * pClient, LPCTSTR pszURLArgs, CGTime * pdateLastMod );
+	int ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CGTime * pdateLastMod );
 public:
-	LPCTSTR GetName() const
+	lpctstr GetName() const
 	{
 		return( m_sSrcFilePath );
 	}
-	LPCTSTR GetDstName() const
+	lpctstr GetDstName() const
 	{
 		return( m_sDstFilePath );
 	}
-	bool IsMatch( LPCTSTR IsMatchPage ) const;
+	bool IsMatch( lpctstr IsMatchPage ) const;
 
-	bool SetSourceFile( LPCTSTR pszName, CClient * pClient );
-	bool ServPagePost( CClient * pClient, LPCTSTR pszURLArgs, TCHAR * pPostData, int iContentLength );
+	bool SetSourceFile( lpctstr pszName, CClient * pClient );
+	bool ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * pPostData, int iContentLength );
 
 	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc = NULL );
+	virtual bool r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc = NULL );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );	// some command on this object as a target
 
 	void WebPageLog();
-	bool WebPageUpdate( bool fNow, LPCTSTR pszDstName, CTextConsole * pSrc );
+	bool WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * pSrc );
 
-	static bool ServPage( CClient * pClient, TCHAR * pszPage, CGTime * pdateLastMod );
+	static bool ServPage( CClient * pClient, tchar * pszPage, CGTime * pdateLastMod );
 
 public:
 	explicit CWebPageDef( RESOURCE_ID id );
@@ -421,8 +421,8 @@ private:
 
 public:
 	static const char *m_sClassName;
-	static LPCTSTR const sm_szTrigName[SPTRIG_QTY+1];
-	static LPCTSTR const sm_szLoadKeys[];
+	static lpctstr const sm_szTrigName[SPTRIG_QTY+1];
+	static lpctstr const sm_szLoadKeys[];
 	CGString m_sTargetPrompt;	// targetting prompt. (if needed)
 	SOUND_TYPE m_sound;			// What noise does it make when done.
 	CGString m_sRunes;			// Letter Runes for Words of power.
@@ -457,9 +457,9 @@ private:
 	CSpellDef& operator=(const CSpellDef& other);
 
 public:
-	LPCTSTR GetName() const { return( m_sName ); }
+	lpctstr GetName() const { return( m_sName ); }
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc );
 
 	bool GetPrimarySkill( int * piSkill = NULL, int * piQty = NULL ) const;
 };
@@ -468,7 +468,7 @@ class CRandGroupDef	: public CResourceLink // A spawn group.
 {
 	// RES_SPAWN or RES_REGIONTYPE
 private:
-	static LPCTSTR const sm_szLoadKeys[];
+	static lpctstr const sm_szLoadKeys[];
 	int m_iTotalWeight;
 	CResourceQtyArray m_Members;
 private:
@@ -494,7 +494,7 @@ private:
 
 public:
 	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( LPCTSTR pKey, CGString &sVal, CTextConsole * pSrc = NULL );
+	virtual bool r_WriteVal( lpctstr pKey, CGString &sVal, CTextConsole * pSrc = NULL );
 	size_t GetRandMemberIndex( CChar * pCharSrc = NULL, bool bTrigger = true ) const;
 	CResourceQty GetMember( size_t i ) const
 	{
@@ -529,7 +529,7 @@ class CSkillClassDef : public CResourceLink // For skill def table
 {
 	// Similar to character class.
 	// RES_SKILLCLASS
-	static LPCTSTR const sm_szLoadKeys[];
+	static lpctstr const sm_szLoadKeys[];
 public:
 	static const char *m_sClassName;
 	CGString m_sName;	// The name of this skill class.
@@ -558,9 +558,9 @@ private:
 	CSkillClassDef& operator=(const CSkillClassDef& other);
 
 public:
-	LPCTSTR GetName() const { return( m_sName ); }
+	lpctstr GetName() const { return( m_sName ); }
 
-	bool r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc );
 	bool r_LoadVal( CScript & s );
 };
 
@@ -602,8 +602,8 @@ enum SKF_TYPE
 struct CSkillDef : public CResourceLink // For skill def table
 {
 	// RES_SKILL
-	static LPCTSTR const sm_szTrigName[SKTRIG_QTY+1];
-	static LPCTSTR const sm_szLoadKeys[];
+	static lpctstr const sm_szTrigName[SKTRIG_QTY+1];
+	static lpctstr const sm_szLoadKeys[];
 private:
 	CGString m_sKey;	// script key word for skill.
 public:
@@ -638,20 +638,20 @@ private:
 	CSkillDef& operator=(const CSkillDef& other);
 
 public:
-	LPCTSTR GetKey() const
+	lpctstr GetKey() const
 	{
 		return( m_sKey );
 	}
 
-	LPCTSTR GetName() const { return( GetKey()); }
+	lpctstr GetName() const { return( GetKey()); }
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc );
 };
 
-class CSkillKeySortArray : public CGObSortArray< CValStr*, LPCTSTR >
+class CSkillKeySortArray : public CGObSortArray< CValStr*, lpctstr >
 {
 public:
-	int CompareKey( LPCTSTR pszKey, CValStr * pVal, bool fNoSpaces ) const
+	int CompareKey( lpctstr pszKey, CValStr * pVal, bool fNoSpaces ) const
 	{
 		UNREFERENCED_PARAMETER(fNoSpaces);
 		ASSERT( pszKey );
@@ -1046,7 +1046,7 @@ public:
 	CResourceHashArray m_WebPages;	// These can be linked back to the script.
 
 private:
-	RESOURCE_ID ResourceGetNewID( RES_TYPE restype, LPCTSTR pszName, CVarDefContNum ** ppVarNum, bool fNewStyleDef );
+	RESOURCE_ID ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVarDefContNum ** ppVarNum, bool fNewStyleDef );
 
 public:
 	CResource();
@@ -1058,8 +1058,8 @@ private:
 
 public:
 	bool r_LoadVal( CScript &s );
-	bool r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc );
-	bool r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef );
+	bool r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc );
+	bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 
 	bool LoadIni( bool fTest );
 	bool LoadCryptIni( void );
@@ -1080,14 +1080,14 @@ public:
 
 	// Specialized resource accessors.
 
-	bool CanUsePrivVerb( const CScriptObj * pObjTarg, LPCTSTR pszCmd, CTextConsole * pSrc ) const;
-	PLEVEL_TYPE GetPrivCommandLevel( LPCTSTR pszCmd ) const;
+	bool CanUsePrivVerb( const CScriptObj * pObjTarg, lpctstr pszCmd, CTextConsole * pSrc ) const;
+	PLEVEL_TYPE GetPrivCommandLevel( lpctstr pszCmd ) const;
 
-	static STAT_TYPE FindStatKey( LPCTSTR pszKey );
-	static bool IsValidEmailAddressFormat( LPCTSTR pszText );
-	bool IsObscene( LPCTSTR pszText ) const;
+	static STAT_TYPE FindStatKey( lpctstr pszKey );
+	static bool IsValidEmailAddressFormat( lpctstr pszText );
+	bool IsObscene( lpctstr pszText ) const;
 
-	CWebPageDef * FindWebPage( LPCTSTR pszPath ) const;
+	CWebPageDef * FindWebPage( lpctstr pszPath ) const;
 
 	CServerRef Server_GetDef( size_t index );
 
@@ -1107,7 +1107,7 @@ public:
 		return m_SpellDefs[static_cast<size_t>(index)];
 	}
 
-	LPCTSTR GetSkillKey( SKILL_TYPE index ) const
+	lpctstr GetSkillKey( SKILL_TYPE index ) const
 	{
 		// future: underlying type for SPELL_TYPE to avoid casts
 		if (m_SkillIndexDefs.IsValidIndex(static_cast<size_t>(index)) == false)
@@ -1135,7 +1135,7 @@ public:
 		return( m_SkillIndexDefs[static_cast<size_t>(index)] );
 	}
 
-	const CSkillDef* FindSkillDef( LPCTSTR pszKey ) const
+	const CSkillDef* FindSkillDef( lpctstr pszKey ) const
 	{
 		// Find the skill name in the alpha sorted list.
 		// RETURN: SKILL_NONE = error.
@@ -1144,27 +1144,27 @@ public:
 			return( NULL );
 		return( STATIC_CAST <const CSkillDef*>(m_SkillNameDefs[i]));
 	}
-	const CSkillDef* SkillLookup( LPCTSTR pszKey );
-	SKILL_TYPE FindSkillKey( LPCTSTR pszKey ) const;
+	const CSkillDef* SkillLookup( lpctstr pszKey );
+	SKILL_TYPE FindSkillKey( lpctstr pszKey ) const;
 
 	int GetSpellEffect( SPELL_TYPE spell, int iSkillval ) const;
 
-	LPCTSTR GetRune( TCHAR ch ) const
+	lpctstr GetRune( tchar ch ) const
 	{
 		size_t index = static_cast<size_t>(toupper(ch) - 'A');
 		if ( ! m_Runes.IsValidIndex(index))
 			return "?";
 		return( m_Runes[index]->GetPtr() );
 	}
-	LPCTSTR GetNotoTitle( int iLevel, bool bFemale ) const;
+	lpctstr GetNotoTitle( int iLevel, bool bFemale ) const;
 
 	const CGrayMulti * GetMultiItemDefs( CItem * pItem );
 	const CGrayMulti * GetMultiItemDefs( ITEMID_TYPE itemid );
 
-	bool IsConsoleCmd( TCHAR ch ) const;
+	bool IsConsoleCmd( tchar ch ) const;
 
-	CPointMap GetRegionPoint( LPCTSTR pCmd ) const; // Decode a teleport location number into X/Y/Z
-	CRegionBase * GetRegion( LPCTSTR pKey ) const; // Find a region with the given name/defname
+	CPointMap GetRegionPoint( lpctstr pCmd ) const; // Decode a teleport location number into X/Y/Z
+	CRegionBase * GetRegion( lpctstr pKey ) const; // Find a region with the given name/defname
 
 	int Calc_MaxCarryWeight( const CChar * pChar ) const;
 	int Calc_CombatAttackSpeed( CChar * pChar, CItem * pWeapon );
@@ -1174,11 +1174,11 @@ public:
 	int Calc_FameKill( CChar * pKill );
 	int Calc_KarmaKill( CChar * pKill, NOTO_TYPE NotoThem );
 	int Calc_KarmaScale( int iKarma, int iKarmaChange );
-	LPCTSTR Calc_MaptoSextant( CPointMap pntCoords );
+	lpctstr Calc_MaptoSextant( CPointMap pntCoords );
 	
 #define SysMessageDefault( msg )	SysMessage( g_Cfg.GetDefaultMsg( msg ) )
-	LPCTSTR GetDefaultMsg(LPCTSTR pszKey);
-	LPCTSTR	GetDefaultMsg(int lKeyNum);
+	lpctstr GetDefaultMsg(lpctstr pszKey);
+	lpctstr	GetDefaultMsg(int lKeyNum);
 
 typedef std::map<dword,dword> KRGumpsMap;
 	KRGumpsMap m_mapKRGumps;
@@ -1187,23 +1187,23 @@ typedef std::map<dword,dword> KRGumpsMap;
 	dword GetKRDialogMap(dword idKRDialog);
 	dword GetKRDialog(dword rid);
 
-	bool GenerateDefname(TCHAR *pObjectName, size_t iInputLength, LPCTSTR pPrefix, TCHAR *pOutput, bool bCheckConflict = true, CVarDefMap* vDefnames = NULL);
-	bool DumpUnscriptedItems(CTextConsole * pSrc, LPCTSTR pszFilename);
+	bool GenerateDefname(tchar *pObjectName, size_t iInputLength, lpctstr pPrefix, tchar *pOutput, bool bCheckConflict = true, CVarDefMap* vDefnames = NULL);
+	bool DumpUnscriptedItems(CTextConsole * pSrc, lpctstr pszFilename);
 } g_Cfg;
 
 
 
 class CDialogDef : public CResourceLink
 {
-	static LPCTSTR const sm_szLoadKeys[];
+	static lpctstr const sm_szLoadKeys[];
 
 public:
 	static const char *m_sClassName;
-	bool GumpSetup( int iPage, CClient * pClientSrc, CObjBase * pObj, LPCTSTR Arguments = "" );
-	size_t GumpAddText( LPCTSTR pszText );		// add text to the text section, return insertion index
+	bool GumpSetup( int iPage, CClient * pClientSrc, CObjBase * pObj, lpctstr Arguments = "" );
+	size_t GumpAddText( lpctstr pszText );		// add text to the text section, return insertion index
 	bool r_Verb( CScript &s, CTextConsole * pSrc );
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc );
 
 public:
 	explicit CDialogDef( RESOURCE_ID rid );

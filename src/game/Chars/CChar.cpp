@@ -25,7 +25,7 @@
 #include "CCharNPC.h"
 
 
-LPCTSTR const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
+lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 {
 	"@AAAUNUSED",
 	"@AfterClick",
@@ -1073,7 +1073,7 @@ bool CChar::ReadScript(CResourceLock &s, bool bVendor)
 			{
 				case ITC_FULLINTERP:
 					{
-						LPCTSTR		pszArgs	= s.GetArgStr();
+						lpctstr		pszArgs	= s.GetArgStr();
 						GETNONWHITESPACE(pszArgs);
 						fFullInterp = ( *pszArgs == '\0' ) ? true : ( s.GetArgVal() != 0);
 						continue;
@@ -1167,7 +1167,7 @@ int CChar::GetWeight(word amount) const
 	return( CContainer::GetTotalWeight());
 }
 
-bool CChar::SetName( LPCTSTR pszName )
+bool CChar::SetName( lpctstr pszName )
 {
 	ADDTOCALLSTACK("CChar::SetName");
 	return SetNamePool( pszName );
@@ -1279,12 +1279,12 @@ void CChar::SetID( CREID_TYPE id )
 }
 
 
-LPCTSTR CChar::GetName() const
+lpctstr CChar::GetName() const
 {
 	return GetName( true );
 }
 
-LPCTSTR CChar::GetNameWithoutIncognito() const
+lpctstr CChar::GetNameWithoutIncognito() const
 {
 	if ( IsStatFlag( STATF_Incognito ) )
 	{
@@ -1300,11 +1300,11 @@ LPCTSTR CChar::GetNameWithoutIncognito() const
 	return GetName();
 }
 
-LPCTSTR CChar::GetName( bool fAllowAlt ) const
+lpctstr CChar::GetName( bool fAllowAlt ) const
 {
 	if ( fAllowAlt )
 	{
-		LPCTSTR pAltName = GetKeyStr( "NAME.ALT" );
+		lpctstr pAltName = GetKeyStr( "NAME.ALT" );
 		if ( pAltName && *pAltName )
 			return pAltName;
 	}
@@ -1344,7 +1344,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 
 	// Set name
 	bool bNameIsAccepted = true;
-	TCHAR *zCharName = Str_GetTemp();
+	tchar *zCharName = Str_GetTemp();
 	strcpylen(zCharName, pszCharname, MAX_NAME_SIZE);
 
 	if ( !strlen(zCharName) || g_Cfg.IsObscene(zCharName) || Str_CheckName(zCharName) || !strnicmp(zCharName, "lord ", 5) || !strnicmp(zCharName, "lady ", 5) || !strnicmp(zCharName, "seer ", 5) || !strnicmp(zCharName, "gm ", 3) || !strnicmp(zCharName, "admin ", 6) || !strnicmp(zCharName, "counselor ", 10) )
@@ -1729,7 +1729,7 @@ enum CHR_TYPE
 	CHR_QTY
 };
 
-LPCTSTR const CChar::sm_szRefKeys[CHR_QTY+1] =
+lpctstr const CChar::sm_szRefKeys[CHR_QTY+1] =
 {
 	"ACCOUNT",
 	"ACT",
@@ -1742,7 +1742,7 @@ LPCTSTR const CChar::sm_szRefKeys[CHR_QTY+1] =
 	NULL
 };
 
-bool CChar::r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef )
+bool CChar::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CChar::r_GetRef");
 	int i = FindTableHeadSorted( pszKey, sm_szRefKeys, COUNTOF(sm_szRefKeys)-1 );
@@ -1804,7 +1804,7 @@ enum CHC_TYPE
 	CHC_QTY
 };
 
-LPCTSTR const CChar::sm_szLoadKeys[CHC_QTY+1] =
+lpctstr const CChar::sm_szLoadKeys[CHC_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../tables/CChar_props.tbl"
@@ -1812,7 +1812,7 @@ LPCTSTR const CChar::sm_szLoadKeys[CHC_QTY+1] =
 	NULL
 };
 
-bool CChar::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CChar::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CChar::r_WriteVal");
 
@@ -2130,10 +2130,10 @@ do_default:
 					return( true );
 				}
 
-				TCHAR * ppLevel_sep[100];
+				tchar * ppLevel_sep[100];
 				const CGString* pFameAt0 = g_Cfg.m_Fame.GetAt(0);
 
-				TCHAR * pszFameAt0 = new TCHAR[pFameAt0->GetLength() + 1];
+				tchar * pszFameAt0 = new tchar[pFameAt0->GetLength() + 1];
 				strcpylen(pszFameAt0, pFameAt0->GetPtr());
 
 				int iFame = Stat_GetAdjusted(STAT_FAME);
@@ -2165,8 +2165,8 @@ do_default:
 			pszKey += 10;
 			SKIP_SEPARATORS(pszKey);
 			{
-				TCHAR * ppArgs[2];
-				Str_ParseCmds(const_cast<TCHAR *>(pszKey), ppArgs, COUNTOF( ppArgs ));
+				tchar * ppArgs[2];
+				Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, COUNTOF( ppArgs ));
 				SKILL_TYPE iSkill = g_Cfg.FindSkillKey( ppArgs[0] );
 				if ( iSkill == SKILL_NONE )
 					return( false );
@@ -2190,8 +2190,8 @@ do_default:
 			pszKey += 3;
 			SKIP_SEPARATORS(pszKey);
 			{
-				TCHAR * ppArgs[2];
-				Str_ParseCmds(const_cast<TCHAR *>(pszKey), ppArgs, COUNTOF(ppArgs), ":,/" );
+				tchar * ppArgs[2];
+				Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, COUNTOF(ppArgs), ":,/" );
 				sVal = ( pCharDef->IsFemale()) ? ppArgs[1] : ppArgs[0];
 			}
 			return( true );
@@ -2208,10 +2208,10 @@ do_default:
 					return( true );
 				}
 
-				TCHAR * ppLevel_sep[100];
+				tchar * ppLevel_sep[100];
 				const CGString* pKarmaAt0 = g_Cfg.m_Karma.GetAt(0);
 
-				TCHAR * pszKarmaAt0 = new TCHAR[pKarmaAt0->GetLength() + 1];
+				tchar * pszKarmaAt0 = new tchar[pKarmaAt0->GetLength() + 1];
 				strcpylen(pszKarmaAt0, pKarmaAt0->GetPtr());
 
 				int iKarma = Stat_GetAdjusted(STAT_KARMA);
@@ -2254,8 +2254,8 @@ do_default:
 				pszKey += 7;
 				GETNONWHITESPACE(pszKey);
 
-				TCHAR * ppArgs[2];
-				size_t iQty = Str_ParseCmds(const_cast<TCHAR *>(pszKey), ppArgs, COUNTOF( ppArgs ));
+				tchar * ppArgs[2];
+				size_t iQty = Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, COUNTOF( ppArgs ));
 
 				// Check that we have at least the first argument
 				if ( iQty <= 0 )
@@ -2294,8 +2294,8 @@ do_default:
 
 				if ( *pszKey )
 				{
-					TCHAR * ppArgs[2];
-					size_t iQty = Str_ParseCmds(const_cast<TCHAR *>(pszKey), ppArgs, COUNTOF( ppArgs ));
+					tchar * ppArgs[2];
+					size_t iQty = Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, COUNTOF( ppArgs ));
 					if ( iQty == 2 )
 					{
 						SKILL_TYPE iSkill = g_Cfg.FindSkillKey( ppArgs[0] );
@@ -2375,7 +2375,7 @@ do_default:
 			return true;
 		case CHC_GUILDABBREV:
 			{
-				LPCTSTR pszAbbrev = Guild_Abbrev(MEMORY_GUILD);
+				lpctstr pszAbbrev = Guild_Abbrev(MEMORY_GUILD);
 				sVal = ( pszAbbrev ) ? pszAbbrev : "";
 			}
 			return true;
@@ -2492,7 +2492,7 @@ do_default:
 			break;
 		case CHC_TOWNABBREV:
 			{
-				LPCTSTR pszAbbrev = Guild_Abbrev(MEMORY_TOWN);
+				lpctstr pszAbbrev = Guild_Abbrev(MEMORY_TOWN);
 				sVal = ( pszAbbrev ) ? pszAbbrev : "";
 			}
 			return true;
@@ -2704,7 +2704,7 @@ bool CChar::r_LoadVal( CScript & s )
 {
 	ADDTOCALLSTACK("CChar::r_LoadVal");
 	EXC_TRY("LoadVal");
-	LPCTSTR	pszKey	=  s.GetKey();
+	lpctstr	pszKey	=  s.GetKey();
 	CHC_TYPE iKeyNum = (CHC_TYPE) FindTableHeadSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 );
 	if ( iKeyNum < 0 )
 	{
@@ -3090,8 +3090,8 @@ do_default:
 
 				if ( s.GetArgStr() )
 				{
-					TCHAR * ppArgs[2];
-					size_t iQty = Str_ParseCmds(const_cast<TCHAR *>(s.GetArgStr()), ppArgs, COUNTOF( ppArgs ));
+					tchar * ppArgs[2];
+					size_t iQty = Str_ParseCmds(const_cast<tchar *>(s.GetArgStr()), ppArgs, COUNTOF( ppArgs ));
 					if ( iQty == 2 )
 					{
 						SKILL_TYPE iSkill = g_Cfg.FindSkillKey( ppArgs[0] );
@@ -3278,7 +3278,7 @@ void CChar::r_Write( CScript & s )
 	if ( m_StepStealth )
 		s.WriteKeyVal("STEPSTEALTH", m_StepStealth);
 
-	TCHAR szTmp[100];
+	tchar szTmp[100];
 	size_t j = 0;
 	for ( j = 0; j < STAT_QTY; j++ )
 	{
@@ -3357,7 +3357,7 @@ bool CChar::r_Load( CScript & s ) // Load a character from script
 	int iResultCode = CObjBase::IsWeird();
 	if ( iResultCode )
 	{
-		DEBUG_ERR(( "Char 0%x Invalid, id='%s', code=0%x\n", static_cast<dword>(GetUID()), static_cast<LPCTSTR>(GetResourceName()), iResultCode ));
+		DEBUG_ERR(( "Char 0%x Invalid, id='%s', code=0%x\n", static_cast<dword>(GetUID()), static_cast<lpctstr>(GetResourceName()), iResultCode ));
 		Delete();
 	}
 
@@ -3372,7 +3372,7 @@ enum CHV_TYPE
 	CHV_QTY
 };
 
-LPCTSTR const CChar::sm_szVerbKeys[CHV_QTY+1] =
+lpctstr const CChar::sm_szVerbKeys[CHV_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../tables/CChar_functions.tbl"
@@ -3634,10 +3634,10 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			break;
 		case CHV_MAKEITEM:
 		{
-			TCHAR *psTmp = Str_GetTemp();
+			tchar *psTmp = Str_GetTemp();
 			strcpy( psTmp, s.GetArgRaw() );
 			GETNONWHITESPACE( psTmp );
-			TCHAR * ttVal[2];
+			tchar * ttVal[2];
 			int iTmp = 1;
 			size_t iArg = Str_ParseCmds( psTmp, ttVal, COUNTOF( ttVal ), " ,\t" );
 			if ( iArg == 2 )
@@ -3808,7 +3808,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			{
 				if ( s.HasArgs() )
 				{
-					TCHAR * ppArgs[2];
+					tchar * ppArgs[2];
 					if ( Str_ParseCmds( s.GetArgRaw(), ppArgs, COUNTOF( ppArgs )) > 0 )
 					{
 						SKILL_TYPE iSkill = g_Cfg.FindSkillKey( ppArgs[0] );
@@ -3912,19 +3912,19 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 	return false;
 }
 
-bool CChar::OnTriggerSpeech( bool bIsPet, LPCTSTR pszText, CChar * pSrc, TALKMODE_TYPE & mode, HUE_TYPE wHue)
+bool CChar::OnTriggerSpeech( bool bIsPet, lpctstr pszText, CChar * pSrc, TALKMODE_TYPE & mode, HUE_TYPE wHue)
 {
 	ADDTOCALLSTACK("CChar::OnTriggerSpeech");
 
-	LPCTSTR pszName;
+	lpctstr pszName;
 	
 	if ( bIsPet && !g_Cfg.m_sSpeechPet.IsEmpty() )
 	{
-		pszName = static_cast<LPCTSTR>(g_Cfg.m_sSpeechPet);
+		pszName = static_cast<lpctstr>(g_Cfg.m_sSpeechPet);
 	}
 	else if ( !bIsPet && !g_Cfg.m_sSpeechSelf.IsEmpty() )
 	{
-		pszName = static_cast<LPCTSTR>(g_Cfg.m_sSpeechSelf);
+		pszName = static_cast<lpctstr>(g_Cfg.m_sSpeechSelf);
 	}
 	else
 	{

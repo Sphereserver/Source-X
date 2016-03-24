@@ -57,16 +57,16 @@ public: //setting, getting
 	CGString Get( const char* VarName );
 
 public: //parsing
-	static CGString FloatMath( LPCTSTR & Expr );
-	static RealType MakeFloatMath( LPCTSTR & Expr );
+	static CGString FloatMath( lpctstr & Expr );
+	static RealType MakeFloatMath( lpctstr & Expr );
 	static RealType GetRandVal( RealType dQty );
 	static RealType GetRandVal2( RealType dMin, RealType dMax );
 	//Does not work as it should, would be too slow, and nobody needs that
-	/*static RealType GetRange( LPCTSTR & pExpr );
-	static int GetRangeVals( LPCTSTR & pExpr, RealType * piVals, short int iMaxQty );*/
+	/*static RealType GetRange( lpctstr & pExpr );
+	static int GetRangeVals( lpctstr & pExpr, RealType * piVals, short int iMaxQty );*/
 private: //parsing
-	static RealType GetValMath( RealType dVal, LPCTSTR & pExpr );
-	static RealType GetSingle( LPCTSTR & pArgs );
+	static RealType GetValMath( RealType dVal, lpctstr & pExpr );
+	static RealType GetSingle( lpctstr & pArgs );
 };
 
 class CObjBase;

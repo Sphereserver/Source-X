@@ -31,7 +31,7 @@ enum SERVMODE_TYPE
 
 extern class CServer : public CServerDef, public CTextConsole
 {
-	static LPCTSTR const sm_szVerbKeys[];
+	static lpctstr const sm_szVerbKeys[];
 
 public:
 	static const char *m_sClassName;
@@ -92,17 +92,17 @@ public:
 
 	bool Load();
 
-	void SysMessage( LPCTSTR pMsg ) const;
-	void PrintTelnet( LPCTSTR pszMsg ) const;
-	void PrintStr( LPCTSTR pMsg ) const;
+	void SysMessage( lpctstr pMsg ) const;
+	void PrintTelnet( lpctstr pszMsg ) const;
+	void PrintStr( lpctstr pMsg ) const;
 	int  PrintPercent( int iCount, int iTotal );
 
-	virtual bool r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef );
-	virtual bool r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc = NULL );
+	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
+	virtual bool r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc = NULL );
 	virtual bool r_LoadVal( CScript & s );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
 
-	LPCTSTR GetStatusString( byte iIndex = 0 ) const;
+	lpctstr GetStatusString( byte iIndex = 0 ) const;
 	INT64 GetAgeHours() const;
 
 	bool OnConsoleCmd( CGString & sText, CTextConsole * pSrc );
@@ -112,9 +112,9 @@ public:
 public:
 	void ListClients( CTextConsole * pClient ) const;
 	void SetResyncPause( bool fPause, CTextConsole * pSrc, bool bMessage = false );
-	bool CommandLine( int argc, TCHAR * argv[] );
+	bool CommandLine( int argc, tchar * argv[] );
 
-	LPCTSTR GetName() const { return( CServerDef::GetName()); }
+	lpctstr GetName() const { return( CServerDef::GetName()); }
 	PLEVEL_TYPE GetPrivLevel() const;
 } g_Serv;	// current state stuff not saved.
 

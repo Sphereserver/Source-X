@@ -13,17 +13,17 @@ class CClientTooltip
 public:
     static const char *m_sClassName;
     dword m_clilocid;
-    TCHAR m_args[SCRIPT_MAX_LINE_LEN];
+    tchar m_args[SCRIPT_MAX_LINE_LEN];
 
 public:
-    explicit CClientTooltip(dword clilocid, LPCTSTR args = NULL);
+    explicit CClientTooltip(dword clilocid, lpctstr args = NULL);
 
 private:
     CClientTooltip(const CClientTooltip& copy);
     CClientTooltip& operator=(const CClientTooltip& other);
 
 public:
-    void __cdecl FormatArgs(LPCTSTR format, ...) __printfargs(2,3);
+    void __cdecl FormatArgs(lpctstr format, ...) __printfargs(2,3);
 };
 
 #endif // _INC_CCLIENTTOOLTIP_H

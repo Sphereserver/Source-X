@@ -161,11 +161,11 @@ class CTimedFunctionHandler
 		void r_Write( CScript & s );
 		
 		int Load( const char *pszName, bool fQuoted, const char *pszVal );
-		void Add( CGrayUID uid, int numSeconds, LPCTSTR funcname );
+		void Add( CGrayUID uid, int numSeconds, lpctstr funcname );
 		void Erase( CGrayUID uid );
-		void Stop( CGrayUID uid, LPCTSTR funcname );
-		TRIGRET_TYPE Loop(LPCTSTR funcname, int LoopsMade, CScriptLineContext StartContext, CScriptLineContext EndContext, CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pResult);
-		int IsTimer( CGrayUID uid, LPCTSTR funcname );
+		void Stop( CGrayUID uid, lpctstr funcname );
+		TRIGRET_TYPE Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext, CScriptLineContext EndContext, CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pResult);
+		int IsTimer( CGrayUID uid, lpctstr funcname );
 };
 
 extern class CWorld : public CScriptObj, public CWorldThread
@@ -209,7 +209,7 @@ public:
 	CGPtrTypeArray<CItemStone*> m_Stones;	// links to leige/town stones. (not saved array)
 	CGObList m_Parties;	// links to all active parties. CPartyDef
 
-	static LPCTSTR const sm_szLoadKeys[];
+	static lpctstr const sm_szLoadKeys[];
 	CGPtrTypeArray <CItemTypeDef *> m_TileTypes;
 
 	// TimedFunction Container/Wrapper
@@ -217,12 +217,12 @@ public:
 	CGPtrTypeArray<CObjBase*> m_ObjStatusUpdates; // objects that need OnTickStatusUpdate called
 
 private:
-	bool LoadFile( LPCTSTR pszName, bool fError = true );
+	bool LoadFile( lpctstr pszName, bool fError = true );
 	bool LoadWorld();
 
 	bool SaveTry(bool fForceImmediate); // Save world state
 	bool SaveStage();
-	static void GetBackupName( CGString & sArchive, LPCTSTR pszBaseDir, TCHAR chType, int savecount );
+	static void GetBackupName( CGString & sArchive, lpctstr pszBaseDir, tchar chType, int savecount );
 	bool SaveForce(); // Save world state
 
 public:
@@ -295,12 +295,12 @@ public:
 	bool IsTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDistance = 0 );
 	CItem * CheckNaturalResource( const CPointMap & pt, IT_TYPE Type, bool fTest = true, CChar * pCharSrc = NULL );
 
-	static bool OpenScriptBackup( CScript & s, LPCTSTR pszBaseDir, LPCTSTR pszBaseName, int savecount );
+	static bool OpenScriptBackup( CScript & s, lpctstr pszBaseDir, lpctstr pszBaseName, int savecount );
 
 	void r_Write( CScript & s );
-	bool r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc );
 	bool r_LoadVal( CScript & s ) ;
-	bool r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef );
+	bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 
 	void OnTick();
 
@@ -308,21 +308,21 @@ public:
 	void Restock();
 	void RespawnDeadNPCs();
 
-	void Speak( const CObjBaseTemplate * pSrc, LPCTSTR pText, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD );
+	void Speak( const CObjBaseTemplate * pSrc, lpctstr pText, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD );
 	void SpeakUNICODE( const CObjBaseTemplate * pSrc, const NCHAR * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang );
 
-	void Broadcast( LPCTSTR pMsg );
-	void __cdecl Broadcastf( LPCTSTR pMsg, ...) __printfargs(2,3);
+	void Broadcast( lpctstr pMsg );
+	void __cdecl Broadcastf( lpctstr pMsg, ...) __printfargs(2,3);
 
-	bool Export( LPCTSTR pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, int dx = 0, int dy = 0 );
-	bool Import( LPCTSTR pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, TCHAR *pszAgs1 = NULL, TCHAR *pszAgs2 = NULL );
+	bool Export( lpctstr pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, int dx = 0, int dy = 0 );
+	bool Import( lpctstr pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, tchar *pszAgs1 = NULL, tchar *pszAgs2 = NULL );
 	bool Save( bool fForceImmediate ); // Save world state
 	void SaveStatics();
 	bool LoadAll();
-	bool DumpAreas( CTextConsole * pSrc, LPCTSTR pszFilename );
+	bool DumpAreas( CTextConsole * pSrc, lpctstr pszFilename );
 	void Close();
 
-	LPCTSTR GetName() const { return( "World" ); }
+	lpctstr GetName() const { return( "World" ); }
 
 } g_World;
 

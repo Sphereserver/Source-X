@@ -553,7 +553,7 @@ NPCBRAIN_TYPE CChar::GetNPCBrain(bool fDefault) const
 	}
 }
 
-LPCTSTR CChar::GetPronoun() const
+lpctstr CChar::GetPronoun() const
 {
 	ADDTOCALLSTACK("CChar::GetPronoun");
 	switch ( GetDispID() )
@@ -577,7 +577,7 @@ LPCTSTR CChar::GetPronoun() const
 	}
 }
 
-LPCTSTR CChar::GetPossessPronoun() const
+lpctstr CChar::GetPossessPronoun() const
 {
 	ADDTOCALLSTACK("CChar::GetPossessPronoun");
 	switch ( GetDispID() )
@@ -809,7 +809,7 @@ short CChar::Food_GetLevelPercent() const
 	return static_cast<short>(IMULDIV(Stat_GetVal(STAT_FOOD), 100, max));
 }
 
-LPCTSTR CChar::Food_GetLevelMessage(bool fPet, bool fHappy) const
+lpctstr CChar::Food_GetLevelMessage(bool fPet, bool fHappy) const
 {
 	ADDTOCALLSTACK("CChar::Food_GetLevelMessage");
 	int	max = Stat_GetMax(STAT_FOOD);
@@ -820,7 +820,7 @@ LPCTSTR CChar::Food_GetLevelMessage(bool fPet, bool fHappy) const
 
 	if ( fPet )
 	{
-		static LPCTSTR const sm_szPetHunger[] =
+		static lpctstr const sm_szPetHunger[] =
 		{
 			g_Cfg.GetDefaultMsg(DEFMSG_MSG_PET_HAPPY_1),
 			g_Cfg.GetDefaultMsg(DEFMSG_MSG_PET_HAPPY_2),
@@ -831,7 +831,7 @@ LPCTSTR CChar::Food_GetLevelMessage(bool fPet, bool fHappy) const
 			g_Cfg.GetDefaultMsg(DEFMSG_MSG_PET_HAPPY_7),
 			g_Cfg.GetDefaultMsg(DEFMSG_MSG_PET_HAPPY_8)
 		};
-		static LPCTSTR const sm_szPetHappy[] =
+		static lpctstr const sm_szPetHappy[] =
 		{
 			g_Cfg.GetDefaultMsg(DEFMSG_MSG_PET_FOOD_1),
 			g_Cfg.GetDefaultMsg(DEFMSG_MSG_PET_FOOD_2),
@@ -849,7 +849,7 @@ LPCTSTR CChar::Food_GetLevelMessage(bool fPet, bool fHappy) const
 		return fHappy ? sm_szPetHappy[index] : sm_szPetHunger[index];
 	}
 
-	static LPCTSTR const sm_szFoodLevel[] =
+	static lpctstr const sm_szFoodLevel[] =
 	{
 		g_Cfg.GetDefaultMsg(DEFMSG_MSG_FOOD_LVL_1),
 		g_Cfg.GetDefaultMsg(DEFMSG_MSG_FOOD_LVL_2),
@@ -889,13 +889,13 @@ short CChar::Food_CanEat( CObjBase *pObj ) const
 	return 0;
 }
 
-LPCTSTR CChar::GetTradeTitle() const // Paperdoll title for character p (2)
+lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 {
 	ADDTOCALLSTACK("CChar::GetTradeTitle");
 	if ( !m_sTitle.IsEmpty() )
 		return m_sTitle;
 
-	TCHAR *pTemp = Str_GetTemp();
+	tchar *pTemp = Str_GetTemp();
 	CCharBase *pCharDef = Char_GetDef();
 	ASSERT(pCharDef);
 
@@ -1818,7 +1818,7 @@ bool CChar::CanSeeItem( const CItem * pItem ) const
 	{
 		if (IsPriv(PRIV_GM))
 			return true;
-		TCHAR *uidCheck = Str_GetTemp();
+		tchar *uidCheck = Str_GetTemp();
 		sprintf(uidCheck, "SeenBy_0%x", static_cast<dword>(GetUID()));
 
 		if (!pItem->m_TagDefs.GetKeyNum(uidCheck, false))
@@ -2125,7 +2125,7 @@ bool CChar::CanMove( CItem *pItem, bool fMsg ) const
 		{
 			pItem->SetAttr(ATTR_IDENTIFIED);
 			if ( fMsg )
-				SysMessagef("%s %s", static_cast<LPCTSTR>(pItem->GetName()), g_Cfg.GetDefaultMsg(DEFMSG_CANTMOVE_CURSED));
+				SysMessagef("%s %s", static_cast<lpctstr>(pItem->GetName()), g_Cfg.GetDefaultMsg(DEFMSG_CANTMOVE_CURSED));
 
 			return false;
 		}

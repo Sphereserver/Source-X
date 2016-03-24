@@ -14,7 +14,7 @@ CSQLite::~CSQLite()
 	Close();
 }
 
-int CSQLite::Open( LPCTSTR strFileName )
+int CSQLite::Open( lpctstr strFileName )
 {
 	Close();
 
@@ -40,7 +40,7 @@ bool CSQLite::IsOpen()
 	return m_sqlite3!=0;
 }
 
-int CSQLite::QuerySQL( LPCTSTR strSQL,  CVarDefMap & mapQueryResult )
+int CSQLite::QuerySQL( lpctstr strSQL,  CVarDefMap & mapQueryResult )
 {
 
 	mapQueryResult.Empty();
@@ -72,7 +72,7 @@ int CSQLite::QuerySQL( LPCTSTR strSQL,  CVarDefMap & mapQueryResult )
 	return GetLastError();
 }
 
-Table CSQLite::QuerySQL( LPCTSTR strSQL)
+Table CSQLite::QuerySQL( lpctstr strSQL)
 {
 
 	if (!IsOpen()) {
@@ -135,7 +135,7 @@ Table CSQLite::QuerySQL( LPCTSTR strSQL)
 	return retTable;
 }
 
-TablePtr CSQLite::QuerySQLPtr( LPCTSTR strSQL )
+TablePtr CSQLite::QuerySQLPtr( lpctstr strSQL )
 {
 	if (!IsOpen()) {
 		m_iLastError=SQLITE_ERROR;
@@ -207,7 +207,7 @@ void CSQLite::ConvertUTF8ToString( char * strInUTF8MB, stdvstring & strOut )
 	delete [] wChar;
 }
 
-int CSQLite::ExecuteSQL( LPCTSTR strSQL )
+int CSQLite::ExecuteSQL( lpctstr strSQL )
 {
 	if (!IsOpen()) {
 		m_iLastError=SQLITE_ERROR;
@@ -229,7 +229,7 @@ int CSQLite::ExecuteSQL( LPCTSTR strSQL )
 	return iErr;
 }
 
-int CSQLite::IsSQLComplete( LPCTSTR strSQL )
+int CSQLite::IsSQLComplete( lpctstr strSQL )
 {
 	return sqlite3_complete( UTF8MBSTR(strSQL) );
 }
@@ -288,7 +288,7 @@ enum LDBO_TYPE
 	LDBO_QTY
 };
 
-LPCTSTR const CSQLite::sm_szLoadKeys[LDBO_QTY+1] =
+lpctstr const CSQLite::sm_szLoadKeys[LDBO_QTY+1] =
 {
 	"CONNECTED",
 	"ROW",
@@ -304,7 +304,7 @@ enum LDBOV_TYPE
 	LDBOV_QTY
 };
 
-LPCTSTR const CSQLite::sm_szVerbKeys[LDBOV_QTY+1] =
+lpctstr const CSQLite::sm_szVerbKeys[LDBOV_QTY+1] =
 {
 	"CLOSE",
 	"CONNECT",
@@ -313,7 +313,7 @@ LPCTSTR const CSQLite::sm_szVerbKeys[LDBOV_QTY+1] =
 	NULL
 };
 
-bool CSQLite::r_GetRef(LPCTSTR & pszKey, CScriptObj * & pRef)
+bool CSQLite::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
 {
 	ADDTOCALLSTACK("CSQLite::r_GetRef");
 	UNREFERENCED_PARAMETER(pszKey);
@@ -328,7 +328,7 @@ bool CSQLite::r_LoadVal(CScript & s)
 	return false;
 }
 
-bool CSQLite::r_WriteVal(LPCTSTR pszKey, CGString &sVal, CTextConsole *pSrc)
+bool CSQLite::r_WriteVal(lpctstr pszKey, CGString &sVal, CTextConsole *pSrc)
 {
 	ADDTOCALLSTACK("CSQLite::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -404,7 +404,7 @@ bool CSQLite::r_Verb(CScript & s, CTextConsole * pSrc)
 // Table Class...
 
 
-LPCTSTR Table::GetColName( int iCol )
+lpctstr Table::GetColName( int iCol )
 {
 	if (iCol>=0 && iCol<m_iCols)
 	{
@@ -465,7 +465,7 @@ bool Table::GoRow(unsigned int iRow)
 	return false;
 }
 
-LPCTSTR Table::GetValue(LPCTSTR lpColName)
+lpctstr Table::GetValue(lpctstr lpColName)
 {
 	if (!lpColName) return 0;
 	if (m_iPos<0) return 0;
@@ -479,14 +479,14 @@ LPCTSTR Table::GetValue(LPCTSTR lpColName)
 	return 0;
 }
 
-LPCTSTR Table::GetValue(int iColIndex)
+lpctstr Table::GetValue(int iColIndex)
 {
 	if (iColIndex<0 || iColIndex>=m_iCols) return 0;
 	if (m_iPos<0) return 0;
 	return &m_lstRows[m_iPos][iColIndex][0];
 }
 
-LPCTSTR Table::operator [] (LPCTSTR lpColName)
+lpctstr Table::operator [] (lpctstr lpColName)
 {
 	if (!lpColName) return 0;
 	if (m_iPos<0) return 0;
@@ -500,7 +500,7 @@ LPCTSTR Table::operator [] (LPCTSTR lpColName)
 	return 0;
 }
 
-LPCTSTR Table::operator [] (int iColIndex)
+lpctstr Table::operator [] (int iColIndex)
 {
 	if (iColIndex<0 || iColIndex>=m_iCols) return 0;
 	if (m_iPos<0) return 0;
@@ -580,7 +580,7 @@ UTF8MBSTR::UTF8MBSTR()
 	m_iLen=0;
 }
 
-UTF8MBSTR::UTF8MBSTR( LPCTSTR lpStr )
+UTF8MBSTR::UTF8MBSTR( lpctstr lpStr )
 {
 	if (lpStr)
 		m_iLen=ConvertStringToUTF8(lpStr, m_strUTF8_MultiByte);
@@ -605,7 +605,7 @@ UTF8MBSTR::~UTF8MBSTR()
 		delete [] m_strUTF8_MultiByte;
 }
 
-void UTF8MBSTR::operator =( LPCTSTR lpStr )
+void UTF8MBSTR::operator =( lpctstr lpStr )
 {
 	if (m_strUTF8_MultiByte)
 		delete [] m_strUTF8_MultiByte;
@@ -637,7 +637,7 @@ UTF8MBSTR::operator char* ()
 
 UTF8MBSTR::operator stdstring ()
 {
-	TCHAR * strRet;
+	tchar * strRet;
 	ConvertUTF8ToString(m_strUTF8_MultiByte, m_iLen+1, strRet);
 	stdstring cstrRet(strRet);
 	delete [] strRet;
@@ -645,7 +645,7 @@ UTF8MBSTR::operator stdstring ()
 	return cstrRet;
 }
 
-size_t UTF8MBSTR::ConvertStringToUTF8( LPCTSTR strIn, char *& strOutUTF8MB )
+size_t UTF8MBSTR::ConvertStringToUTF8( lpctstr strIn, char *& strOutUTF8MB )
 {
 	size_t len=strlen(strIn);
 	wchar_t * wChar=new wchar_t[len+1];
@@ -659,9 +659,9 @@ size_t UTF8MBSTR::ConvertStringToUTF8( LPCTSTR strIn, char *& strOutUTF8MB )
 	return len;
 }
 
-void UTF8MBSTR::ConvertUTF8ToString( char * strInUTF8MB, size_t len, LPTSTR & strOut )
+void UTF8MBSTR::ConvertUTF8ToString( char * strInUTF8MB, size_t len, lptstr & strOut )
 {
-	strOut=new TCHAR[len];
+	strOut=new tchar[len];
 	strOut[0]=0;
 	wchar_t * wChar=new wchar_t[len];
 	wChar[0]=0;

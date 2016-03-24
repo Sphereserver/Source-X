@@ -41,8 +41,8 @@ class CClient;
 class CAccount : public CScriptObj
 {
 	// RES_ACCOUNT
-	static LPCTSTR const sm_szVerbKeys[]; ///< Action list.
-	static LPCTSTR const sm_szLoadKeys[]; ///< Script fields.
+	static lpctstr const sm_szVerbKeys[]; ///< Action list.
+	static lpctstr const sm_szLoadKeys[]; ///< Script fields.
 private:
 	PLEVEL_TYPE m_PrivLevel; ///< Privileges level of the CAccount.
 	CGString m_sName; ///< Name = no spaces. case independant.
@@ -87,24 +87,24 @@ public:
 	* @param pszName CAccount name.
 	* @param fGuest flag for guest accounts.
 	*/
-	CAccount(LPCTSTR pszName, bool fGuest = false);
+	CAccount(lpctstr pszName, bool fGuest = false);
 
 private:
 	CAccount(const CAccount& copy);
 	CAccount& operator=(const CAccount& other);
 public:
 
-	LPCTSTR GetDefStr( LPCTSTR pszKey, bool fZero = false ) const { return m_BaseDefs.GetKeyStr( pszKey, fZero ); }
-	INT64 GetDefNum( LPCTSTR pszKey, bool fZero = false ) const	{ return m_BaseDefs.GetKeyNum( pszKey, fZero );	}
-	void SetDefNum(LPCTSTR pszKey, INT64 iVal, bool fZero = true) 
+	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false ) const { return m_BaseDefs.GetKeyStr( pszKey, fZero ); }
+	INT64 GetDefNum( lpctstr pszKey, bool fZero = false ) const	{ return m_BaseDefs.GetKeyNum( pszKey, fZero );	}
+	void SetDefNum(lpctstr pszKey, INT64 iVal, bool fZero = true) 
 	{ 
 		m_BaseDefs.SetNum(pszKey, iVal, fZero);
 	}
-	void SetDefStr(LPCTSTR pszKey, LPCTSTR pszVal, bool fQuoted = false, bool fZero = true)
+	void SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true)
 	{
 		m_BaseDefs.SetStr(pszKey, fQuoted, pszVal, fZero);
 	}
-	void DeleteDef(LPCTSTR pszKey) { m_BaseDefs.DeleteKey(pszKey); }
+	void DeleteDef(lpctstr pszKey) { m_BaseDefs.DeleteKey(pszKey); }
 
 	
 	/**
@@ -119,9 +119,9 @@ public:
 	************************************************************************/
 
 	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc );
 	virtual bool r_Verb( CScript &s, CTextConsole * pSrc );
-	virtual bool r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef );
+	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 	void r_Write(CScript & s);
 
 	/************************************************************************
@@ -135,24 +135,24 @@ public:
 	* @param pszNameInp input string.
 	* @return true if name is a valid account name and not repeated, false otherwise.
 	*/
-	static bool NameStrip(TCHAR * pszNameOut, LPCTSTR pszNameInp);
+	static bool NameStrip(tchar * pszNameOut, lpctstr pszNameInp);
 	/**
 	* @brief Get the CAccount name.
 	* @return the CAccount name.
 	*/
-	LPCTSTR GetName() const { return( m_sName ); }
+	lpctstr GetName() const { return( m_sName ); }
 	/**
 	* @brief Get the CAccount password.
 	* @return the CAccount password.
 	*/
-	LPCTSTR GetPassword() const { return( m_sCurPassword ); }
+	lpctstr GetPassword() const { return( m_sCurPassword ); }
 	/**
 	* @brief Set a new password.
 	* fires the server trigger f_onserver_pwchange. If true, return false.
 	* If password is valid, set it and return true.
 	* @return true if the password is set, false otherwise.
 	*/
-	bool SetPassword( LPCTSTR pszPassword, bool isMD5Hash = false );
+	bool SetPassword( lpctstr pszPassword, bool isMD5Hash = false );
 	/**
 	* @brief Removes the current password.
 	* The password can be set on next login.
@@ -167,13 +167,13 @@ public:
 	* @param pszPassword pass to check.
 	* @return true if password is ok and f_onaccount_connect not returns true. False otherwise.
 	*/
-	bool CheckPassword( LPCTSTR pszPassword );
+	bool CheckPassword( lpctstr pszPassword );
 	/**
 	* @brief Get new password.
 	* @return new password.
 	*/
-	LPCTSTR GetNewPassword() const { return( m_sNewPassword ); }
-	void SetNewPassword( LPCTSTR pszPassword );
+	lpctstr GetNewPassword() const { return( m_sNewPassword ); }
+	void SetNewPassword( lpctstr pszPassword );
 	/**
 	* @brief Wrong pw given, check the failed tries to take actions again'st this ip.
 	* If the peer is localhost or 127.0.0.1, the password try do not count.
@@ -247,7 +247,7 @@ public:
 	* @param pszFlags TODOC.
 	* @return TODOC.
 	*/
-	static PLEVEL_TYPE GetPrivLevelText( LPCTSTR pszFlags );
+	static PLEVEL_TYPE GetPrivLevelText( lpctstr pszFlags );
 	/**
 	* @brief Gets the CAccount PLEVEL.
 	* @param pszFlags TODOC.
@@ -278,7 +278,7 @@ public:
 	* @param wPrivFlags flags to intersect, set or unset.
 	* @param pszArgs the operation to do.
 	*/
-	void TogPrivFlags( word wPrivFlags, LPCTSTR pszArgs );
+	void TogPrivFlags( word wPrivFlags, lpctstr pszArgs );
 
 	/************************************************************************
 	* Log in / Log out related section.
@@ -369,7 +369,7 @@ class CAccounts
 {
 protected:
 	static const char *m_sClassName; ///< TODOC.
-	static LPCTSTR const sm_szVerbKeys[]; ///< ACCOUNT action list.
+	static lpctstr const sm_szVerbKeys[]; ///< ACCOUNT action list.
 	CObNameSortArray m_Accounts; ///< Sorted CAccount list.
 public:
 	/**
@@ -391,7 +391,7 @@ private:
 	* @param md5 true if we need md5 to store the password.
 	* @return true if CAccount creation is success, false otherwise.
 	*/
-	bool Cmd_AddNew( CTextConsole * pSrc, LPCTSTR pszName, LPCTSTR pszArg, bool md5=false );
+	bool Cmd_AddNew( CTextConsole * pSrc, lpctstr pszName, lpctstr pszArg, bool md5=false );
 	/**
 	* @brief Do something to all the unused accounts.
 	* First check for accounts with an inactivity of greater or equal to pszDays. Then perform the action to that accounts.
@@ -403,7 +403,7 @@ private:
 	* @param dwMask discard any CAccount with this mask.
 	* @return Always true.
 	*/
-	bool Cmd_ListUnused( CTextConsole * pSrc, LPCTSTR pszDays, LPCTSTR pszVerb, LPCTSTR pszArgs, dword dwMask = 0);
+	bool Cmd_ListUnused( CTextConsole * pSrc, lpctstr pszDays, lpctstr pszVerb, lpctstr pszArgs, dword dwMask = 0);
 public:
 	/**
 	* @brief Save the accounts file.
@@ -418,7 +418,7 @@ public:
 	* @param fChanges false = trap duplicates.
 	* @return true if account is successfully loaded, false otherwise.
 	*/
-	bool Account_Load( LPCTSTR pszNameRaw, CScript & s, bool fChanges );
+	bool Account_Load( lpctstr pszNameRaw, CScript & s, bool fChanges );
 	/**
 	* @brief Load account file.
 	* If fChanges is true, will read acct file.
@@ -433,7 +433,7 @@ public:
 	* @param pSrc command shell interface.
 	* @return the status of the command executed.
 	*/
-	bool Account_OnCmd( TCHAR * pszArgs, CTextConsole * pSrc );
+	bool Account_OnCmd( tchar * pszArgs, CTextConsole * pSrc );
 	/**
 	* @brief Get the CAccount count.
 	* @return The count of CAccounts.
@@ -451,7 +451,7 @@ public:
 	* @param pszName the name of the CAccount we are looking for.
 	* @return CAccountRef if pszName si a valid account name and exists an CAccount with that name, Null otherwise.
 	*/
-	CAccountRef Account_Find( LPCTSTR pszName );
+	CAccountRef Account_Find( lpctstr pszName );
 	/**
 	* @brief Get or create an CAccount in some circumstances.
 	* If there is an CAccount with the provided name, a CAccountRef of the account is returned.
@@ -461,13 +461,13 @@ public:
 	* @param fAutoCreate try to create the account if not exists.
 	* @return CAccountRef if account exists or created, NULL otherwise.
 	*/
-	CAccountRef Account_FindCreate( LPCTSTR pszName, bool fCreate = false );
+	CAccountRef Account_FindCreate( lpctstr pszName, bool fCreate = false );
 	/**
 	* @brief Check if a chat name is already used.
 	* @param pszChatName string containing the name.
 	* @return CAccountRef if the name is already used, NULL otherwise.
 	*/
-	CAccountRef Account_FindChat( LPCTSTR pszName );
+	CAccountRef Account_FindChat( lpctstr pszName );
 	/**
 	* @brief Remove an CAccount.
 	* First try to call the f_onaccount_delete server trigger. If trigger returns true, do not remove the account and return false. If trigger returns false, remove the account and return true.

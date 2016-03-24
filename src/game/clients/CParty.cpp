@@ -108,7 +108,7 @@ void CPartyDef::AddStatsUpdate( CChar *pChar, PacketSend *pPacket )
 }
 
 // ---------------------------------------------------------
-void CPartyDef::SysMessageAll( LPCTSTR pText )
+void CPartyDef::SysMessageAll( lpctstr pText )
 {
 	ADDTOCALLSTACK("CPartyDef::SysMessageAll");
 	// SysMessage to all members of the party.
@@ -225,7 +225,7 @@ bool CPartyDef::MessageEvent( CGrayUID uidDst, CGrayUID uidSrc, const NCHAR *pTe
 	if ( uidDst != (dword)0 )
 		pTo = uidDst.CharFind();
 
-	TCHAR *szText = Str_GetTemp();
+	tchar *szText = Str_GetTemp();
 	CvtNUNICODEToSystem(szText, MAX_TALK_BUFFER, pText, MAX_TALK_BUFFER);
 
 	if ( !m_pSpeechFunction.IsEmpty() )
@@ -312,7 +312,7 @@ bool CPartyDef::RemoveMember( CGrayUID uidRemove, CGrayUID uidCommand )
 	DetachChar(pCharRemove);
 	pCharRemove->SysMessageDefault(DEFMSG_PARTY_LEAVE_2);
 
-	TCHAR *pszMsg = Str_GetTemp();
+	tchar *pszMsg = Str_GetTemp();
 	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_PARTY_LEAVE_1), pCharRemove->GetName());
 	SysMessageAll(pszMsg);
 
@@ -386,7 +386,7 @@ bool CPartyDef::DeclineEvent( CChar *pCharDecline, CGrayUID uidInviter )	// stat
 
 	pCharInviter->DeleteKey("PARTY_LASTINVITE");
 
-	TCHAR *sTemp = Str_GetTemp();
+	tchar *sTemp = Str_GetTemp();
 	sprintf(sTemp, g_Cfg.GetDefaultMsg(DEFMSG_PARTY_DECLINE_2), pCharInviter->GetName());
 	pCharDecline->SysMessage(sTemp);
 	sTemp = Str_GetTemp();
@@ -433,7 +433,7 @@ bool CPartyDef::AcceptEvent( CChar *pCharAccept, CGrayUID uidInviter, bool bForc
 			return false;
 	}
 
-	TCHAR *pszMsg = Str_GetTemp();
+	tchar *pszMsg = Str_GetTemp();
 	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_PARTY_JOINED), pCharAccept->GetName());
 
 	if ( !pParty )
@@ -467,7 +467,7 @@ enum PDV_TYPE
 	PDV_QTY
 };
 
-LPCTSTR const CPartyDef::sm_szVerbKeys[PDV_QTY+1] =
+lpctstr const CPartyDef::sm_szVerbKeys[PDV_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../tables/CParty_functions.tbl"
@@ -483,7 +483,7 @@ enum PDC_TYPE
 	PDC_QTY
 };
 
-LPCTSTR const CPartyDef::sm_szLoadKeys[PDC_QTY+1] =
+lpctstr const CPartyDef::sm_szLoadKeys[PDC_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../tables/CParty_props.tbl"
@@ -491,7 +491,7 @@ LPCTSTR const CPartyDef::sm_szLoadKeys[PDC_QTY+1] =
 	NULL
 };
 
-bool CPartyDef::r_GetRef( LPCTSTR &pszKey, CScriptObj *&pRef )
+bool CPartyDef::r_GetRef( lpctstr &pszKey, CScriptObj *&pRef )
 {
 	ADDTOCALLSTACK("CPartyDef::r_GetRef");
 	if ( !strnicmp("MASTER.", pszKey, 7) )
@@ -526,7 +526,7 @@ bool CPartyDef::r_LoadVal( CScript &s )
 { 
 	ADDTOCALLSTACK("CPartyDef::r_LoadVal");
 	EXC_TRY("LoadVal");
-	LPCTSTR pszKey = s.GetKey();
+	lpctstr pszKey = s.GetKey();
 
 	int index = FindTableHeadSorted(pszKey, sm_szLoadKeys, COUNTOF(sm_szLoadKeys) - 1);
 	switch ( index )
@@ -537,7 +537,7 @@ bool CPartyDef::r_LoadVal( CScript &s )
 				this->m_pSpeechFunction.Empty();
 			else
 			{
-				LPCTSTR pszArg = s.GetArgStr();
+				lpctstr pszArg = s.GetArgStr();
 				CResourceLink *m_pTestEvent = dynamic_cast<CResourceLink *>(g_Cfg.ResourceGetDefByName(RES_FUNCTION, pszArg));
 
 				if ( !m_pTestEvent )
@@ -568,7 +568,7 @@ bool CPartyDef::r_LoadVal( CScript &s )
 	return false;
 }
 
-bool CPartyDef::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole *pSrc )
+bool CPartyDef::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole *pSrc )
 {
 	ADDTOCALLSTACK("CPartyDef::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -687,7 +687,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 	EXC_TRY("Verb");
 	ASSERT(pSrc);
 
-	LPCTSTR pszKey = s.GetKey();
+	lpctstr pszKey = s.GetKey();
 	CScriptObj *pRef;
 	if ( r_GetRef(pszKey, pRef) )
 	{
@@ -721,7 +721,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 
 		case PDV_CLEARTAGS:
 		{
-			LPCTSTR pszArg = s.GetArgStr();
+			lpctstr pszArg = s.GetArgStr();
 			SKIP_SEPARATORS(pszArg);
 			m_TagDefs.ClearKeys(pszArg);
 		} break;
@@ -738,7 +738,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 		case PDV_REMOVEMEMBER:
 		{
 			CGrayUID toRemove;
-			LPCTSTR pszArg = s.GetArgStr();
+			lpctstr pszArg = s.GetArgStr();
 			if ( *pszArg == '@' )
 			{
 				pszArg++;
@@ -760,7 +760,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 		case PDV_SETMASTER:
 		{
 			CGrayUID newMaster;
-			LPCTSTR pszArg = s.GetArgStr();
+			lpctstr pszArg = s.GetArgStr();
 			if ( *pszArg == '@' )
 			{
 				pszArg++;
@@ -782,8 +782,8 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 		case PDV_SYSMESSAGE:
 		{
 			CGrayUID toSysmessage;
-			LPCTSTR pszArg = s.GetArgStr();
-			TCHAR *pUid = Str_GetTemp();
+			lpctstr pszArg = s.GetArgStr();
+			tchar *pUid = Str_GetTemp();
 			size_t x = 0;
 
 			if ( *pszArg == '@' )
@@ -791,7 +791,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 				pszArg++;
 				if ( *pszArg != '@' )
 				{
-					LPCTSTR __pszArg = pszArg;
+					lpctstr __pszArg = pszArg;
 					while ( *pszArg != ' ' )
 					{
 						pszArg++;
@@ -808,7 +808,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 			}
 			else
 			{
-				LPCTSTR __pszArg = pszArg;
+				lpctstr __pszArg = pszArg;
 				while ( *pszArg != ' ' )
 				{
 					pszArg++;
@@ -853,27 +853,27 @@ bool CPartyDef::r_Load( CScript &s )
 	return false; 
 }
 
-LPCTSTR CPartyDef::GetDefStr( LPCTSTR pszKey, bool fZero ) const
+lpctstr CPartyDef::GetDefStr( lpctstr pszKey, bool fZero ) const
 {
 	return m_BaseDefs.GetKeyStr( pszKey, fZero );
 }
 
-INT64 CPartyDef::GetDefNum( LPCTSTR pszKey, bool fZero ) const
+INT64 CPartyDef::GetDefNum( lpctstr pszKey, bool fZero ) const
 {
 	return m_BaseDefs.GetKeyNum( pszKey, fZero );
 }
 
-void CPartyDef::SetDefNum(LPCTSTR pszKey, INT64 iVal, bool fZero )
+void CPartyDef::SetDefNum(lpctstr pszKey, INT64 iVal, bool fZero )
 {
 	m_BaseDefs.SetNum(pszKey, iVal, fZero);
 }
 
-void CPartyDef::SetDefStr(LPCTSTR pszKey, LPCTSTR pszVal, bool fQuoted, bool fZero )
+void CPartyDef::SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted, bool fZero )
 {
 	m_BaseDefs.SetStr(pszKey, fQuoted, pszVal, fZero);
 }
 
-void CPartyDef::DeleteDef(LPCTSTR pszKey)
+void CPartyDef::DeleteDef(lpctstr pszKey)
 {
 	m_BaseDefs.DeleteKey(pszKey);
 }

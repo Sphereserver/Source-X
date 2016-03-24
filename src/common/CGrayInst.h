@@ -50,23 +50,23 @@ public:
 	CSVFile m_CsvFiles[8];		// doors.txt, stairs.txt (x2), roof.txt, misc.txt, teleprts.txt, floors.txt, walls.txt
 
 public:
-	CGString GetFullExePath( LPCTSTR pszName = NULL ) const;
-	CGString GetFullCDPath( LPCTSTR pszName = NULL ) const;
+	CGString GetFullExePath( lpctstr pszName = NULL ) const;
+	CGString GetFullCDPath( lpctstr pszName = NULL ) const;
 
 public:
 	bool FindInstall();
 	void DetectMulVersions();
 	VERFILE_TYPE OpenFiles( dword dwMask );
-	bool OpenFile( CGFile & file, LPCTSTR pszName, word wFlags );
+	bool OpenFile( CGFile & file, lpctstr pszName, word wFlags );
 	bool OpenFile( VERFILE_TYPE i );
 	void CloseFiles();
 
-	static LPCTSTR GetBaseFileName( VERFILE_TYPE i );
+	static lpctstr GetBaseFileName( VERFILE_TYPE i );
 	CGFile * GetMulFile( VERFILE_TYPE i );
 	VERFILE_FORMAT GetMulFormat( VERFILE_TYPE i );
 
-	void SetPreferPath( LPCTSTR pszName );
-	CGString GetPreferPath( LPCTSTR pszName = NULL ) const;
+	void SetPreferPath( lpctstr pszName );
+	CGString GetPreferPath( lpctstr pszName = NULL ) const;
 
 	bool ReadMulIndex( VERFILE_TYPE fileindex, VERFILE_TYPE filedata, dword id, CUOIndexRec & Index );
 	bool ReadMulData( VERFILE_TYPE filedata, const CUOIndexRec & Index, void * pData );

@@ -74,7 +74,7 @@
 
 
 #ifdef NCHAR
-static int CvtSystemToUNICODE( WCHAR & wChar, LPCTSTR pInp, int iSizeInBytes )
+static int CvtSystemToUNICODE( wchar & wChar, lpctstr pInp, int iSizeInBytes )
 {
 	// Convert a UTF8 encoded string to a single unicode char.
 	// RETURN: The length used from input string. < iSizeInBytes
@@ -113,7 +113,7 @@ static int CvtSystemToUNICODE( WCHAR & wChar, LPCTSTR pInp, int iSizeInBytes )
 	if ( iBytes > iSizeInBytes )	// not big enough to hold it.
 		return( 0 );
 
-	WCHAR wCharTmp = ch & ((1<<iStartBits)-1);
+	wchar wCharTmp = ch & ((1<<iStartBits)-1);
 	int iInp = 1;
 	for ( ; iInp < iBytes; iInp++ )
 	{
@@ -128,7 +128,7 @@ static int CvtSystemToUNICODE( WCHAR & wChar, LPCTSTR pInp, int iSizeInBytes )
 	return( iBytes );
 }
 
-static int CvtUNICODEToSystem( TCHAR * pOut, int iSizeOutBytes, WCHAR wChar )
+static int CvtUNICODEToSystem( tchar * pOut, int iSizeOutBytes, wchar wChar )
 {
 	// Convert a single unicode char to system string.
 	// RETURN: The length < iSizeOutBytes
@@ -174,12 +174,12 @@ static int CvtUNICODEToSystem( TCHAR * pOut, int iSizeOutBytes, WCHAR wChar )
 	}
 
 	ASSERT( wChar < (1<<iStartBits));
-	pOut[0] = static_cast<TCHAR>( ( 0xfe << iStartBits ) | wChar );
+	pOut[0] = static_cast<tchar>( ( 0xfe << iStartBits ) | wChar );
 
 	return( iBytes );
 }
 
-int CvtSystemToNUNICODE( NCHAR * pOut, int iSizeOutChars, LPCTSTR pInp, int iSizeInBytes )
+int CvtSystemToNUNICODE( NCHAR * pOut, int iSizeOutChars, lpctstr pInp, int iSizeInBytes )
 {
 	//
 	// Convert the system default text format UTF8 to UNICODE
@@ -220,7 +220,7 @@ int CvtSystemToNUNICODE( NCHAR * pOut, int iSizeOutChars, LPCTSTR pInp, int iSiz
 			0,         // character-type options
 			pInp, // address of string to map
 			iSizeInBytes,      // number of bytes in string
-			reinterpret_cast<LPWSTR>(pOut),  // address of wide-character buffer
+			reinterpret_cast<lpwstr>(pOut),  // address of wide-character buffer
 			iSizeOutChars        // size of buffer
 			);
 		if ( iOutTmp <= 0 )
@@ -237,7 +237,7 @@ int CvtSystemToNUNICODE( NCHAR * pOut, int iSizeOutChars, LPCTSTR pInp, int iSiz
 		// flip all the words to network order .
 		for ( ; iOut<iOutTmp; iOut++ )
 		{
-			pOut[iOut] = *(reinterpret_cast<WCHAR *>(&(pOut[iOut])));
+			pOut[iOut] = *(reinterpret_cast<wchar *>(&(pOut[iOut])));
 		}
 	}
 	else
@@ -256,7 +256,7 @@ int CvtSystemToNUNICODE( NCHAR * pOut, int iSizeOutChars, LPCTSTR pInp, int iSiz
 
 			if ( ch >= 0x80 )	// special UTF8 encoded char.
 			{
-				WCHAR wChar;
+				wchar wChar;
 				int iInpTmp = CvtSystemToUNICODE( wChar, pInp+iInp, iSizeInBytes-iInp );
 				if ( iInpTmp <= 0 )
 				{
@@ -279,7 +279,7 @@ int CvtSystemToNUNICODE( NCHAR * pOut, int iSizeOutChars, LPCTSTR pInp, int iSiz
 	return( iOut );
 }
 
-int CvtNUNICODEToSystem( TCHAR * pOut, int iSizeOutBytes, const NCHAR * pInp, int iSizeInChars )
+int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const NCHAR * pInp, int iSizeInChars )
 {
 	// ARGS:
 	//  iSizeInBytes = space we have (included null char)
@@ -309,7 +309,7 @@ int CvtNUNICODEToSystem( TCHAR * pOut, int iSizeOutBytes, const NCHAR * pInp, in
 		// Windows 98, 2000 or NT
 
 		// Flip all from network order.
-		WCHAR szBuffer[ 1024*8 ];
+		wchar szBuffer[ 1024*8 ];
 		for ( ; iInp < COUNTOF(szBuffer) - 1 && iInp < iSizeInChars && pInp[iInp]; iInp++ )
 		{
 			szBuffer[iInp] = pInp[iInp];
@@ -340,7 +340,7 @@ int CvtNUNICODEToSystem( TCHAR * pOut, int iSizeOutBytes, const NCHAR * pInp, in
 		for ( ; iInp < iSizeInChars; iInp++ )
 		{
 			// Flip all from network order.
-			WCHAR wChar = pInp[iInp];
+			wchar wChar = pInp[iInp];
 			if ( ! wChar )
 				break;
 
@@ -357,7 +357,7 @@ int CvtNUNICODEToSystem( TCHAR * pOut, int iSizeOutBytes, const NCHAR * pInp, in
 			}
 			else
 			{
-				pOut[iOut] = static_cast<TCHAR>(wChar);
+				pOut[iOut] = static_cast<tchar>(wChar);
 				iOut++;
 			}
 		}

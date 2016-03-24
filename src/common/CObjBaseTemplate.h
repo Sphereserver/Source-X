@@ -92,10 +92,10 @@ public:
 	virtual int GetVisualRange() const;
 
 	// Names
-	LPCTSTR GetIndividualName() const;
+	lpctstr GetIndividualName() const;
 	bool IsIndividualName() const;
-	virtual LPCTSTR GetName() const;
-	virtual bool SetName( LPCTSTR pszName );
+	virtual lpctstr GetName() const;
+	virtual bool SetName( lpctstr pszName );
 };
 
 #endif // _INC_COBJBASETEMPLATE_H

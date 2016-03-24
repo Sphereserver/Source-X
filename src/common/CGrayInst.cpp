@@ -13,12 +13,12 @@ CGrayInstall::CGrayInstall()
 	memset(m_UopMapAddress, 0, sizeof(m_UopMapAddress));
 };
 
-CGString CGrayInstall::GetFullExePath( LPCTSTR pszName ) const
+CGString CGrayInstall::GetFullExePath( lpctstr pszName ) const
 {
 	return( CGFile::GetMergedFileName( m_sExePath, pszName ));
 }
 
-CGString CGrayInstall::GetFullCDPath( LPCTSTR pszName ) const
+CGString CGrayInstall::GetFullCDPath( lpctstr pszName ) const
 {
 	return( CGFile::GetMergedFileName( m_sCDPath, pszName ));
 }
@@ -28,7 +28,7 @@ bool CGrayInstall::FindInstall()
 #ifdef _WIN32
 	// Get the install path from the registry.
 
-	static LPCTSTR m_szKeys[] =
+	static lpctstr m_szKeys[] =
 	{
 		"Software\\Origin Worlds Online\\Ultima Online\\1.0",
 		"Software\\Origin Worlds Online\\Ultima Online Third Dawn\\1.0",
@@ -52,14 +52,14 @@ bool CGrayInstall::FindInstall()
 		return( false );
 	}
 
-	TCHAR szValue[ _MAX_PATH ];
+	tchar szValue[ _MAX_PATH ];
 	DWORD lSize = sizeof( szValue );
 	DWORD dwType = REG_SZ;
 	lRet = RegQueryValueEx(hKey, "ExePath", NULL, &dwType, (byte*)szValue, &lSize);
 
 	if ( lRet == ERROR_SUCCESS && dwType == REG_SZ )
 	{
-		TCHAR * pSlash = strrchr( szValue, '\\' );	// get rid of the client.exe part of the name
+		tchar * pSlash = strrchr( szValue, '\\' );	// get rid of the client.exe part of the name
 		if ( pSlash ) * pSlash = '\0';
 		m_sExePath = szValue;
 	}
@@ -110,7 +110,7 @@ void CGrayInstall::DetectMulVersions()
 		m_FileFormat[VERFILE_MULTIIDX] = VERFORMAT_HIGHSEAS;
 }
 
-bool CGrayInstall::OpenFile( CGFile & file, LPCTSTR pszName, word wFlags )
+bool CGrayInstall::OpenFile( CGFile & file, lpctstr pszName, word wFlags )
 {
 	ADDTOCALLSTACK("CGrayInstall::OpenFile");
 	ASSERT(pszName);
@@ -129,10 +129,10 @@ bool CGrayInstall::OpenFile( CGFile & file, LPCTSTR pszName, word wFlags )
 	return false;
 }
 
-LPCTSTR CGrayInstall::GetBaseFileName( VERFILE_TYPE i ) // static
+lpctstr CGrayInstall::GetBaseFileName( VERFILE_TYPE i ) // static
 {
 	ADDTOCALLSTACK("CGrayInstall::GetBaseFileName");
-	static LPCTSTR const sm_szFileNames[VERFILE_QTY] =
+	static lpctstr const sm_szFileNames[VERFILE_QTY] =
 	{
 		"artidx.mul",	// Index to ART
 		"art.mul",		// Artwork such as ground, objects, etc.
@@ -184,12 +184,12 @@ VERFILE_FORMAT CGrayInstall::GetMulFormat( VERFILE_TYPE i )
 	return( m_FileFormat[i] );
 }
 
-void CGrayInstall::SetPreferPath( LPCTSTR pszName )
+void CGrayInstall::SetPreferPath( lpctstr pszName )
 {
 	m_sPreferPath = pszName;
 }
 
-CGString CGrayInstall::GetPreferPath( LPCTSTR pszName ) const
+CGString CGrayInstall::GetPreferPath( lpctstr pszName ) const
 {
 	return CGFile::GetMergedFileName(m_sPreferPath, pszName);
 }
@@ -209,7 +209,7 @@ bool CGrayInstall::OpenFile( VERFILE_TYPE i )
 			return true;
 	}
 
-	LPCTSTR pszTitle = GetBaseFileName(static_cast<VERFILE_TYPE>(i));
+	lpctstr pszTitle = GetBaseFileName(static_cast<VERFILE_TYPE>(i));
 	if ( !pszTitle ) return false;
 
 	return OpenFile(m_File[i], pszTitle, OF_READ|OF_SHARE_DENY_WRITE);
@@ -248,7 +248,7 @@ VERFILE_TYPE CGrayInstall::OpenFiles( dword dwMask )
 
 			case VERFILE_MAP:
 				// map file is handled differently
-				TCHAR z[256];
+				tchar z[256];
 
 				//	check for map files of custom maps
 				for ( int m = 0; m < 256; m++ )
@@ -426,8 +426,8 @@ VERFILE_TYPE CGrayInstall::OpenFiles( dword dwMask )
 	DetectMulVersions();
 	g_MapList.Init();
 
-	TCHAR * z = Str_GetTemp();
-	TCHAR * z1 = Str_GetTemp();
+	tchar * z = Str_GetTemp();
+	tchar * z1 = Str_GetTemp();
 	for ( uchar j = 0; j < 7; j++ )
 	{
 		if ( j == 5 )	// ML just added some changes on maps 0/1 instead a new map

@@ -145,7 +145,7 @@ int AbstractString::lastIndexOf(char c)
 	return ( pos == NULL ) ? -1 : pos - m_buf;
 }
 
-AbstractString::operator LPCTSTR() const
+AbstractString::operator lpctstr() const
 {
 	return m_buf;
 }

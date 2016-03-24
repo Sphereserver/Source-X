@@ -44,7 +44,7 @@ int gReallocs = 0; ///< Total reallocs caused by CGString resizing.
 
 //see os_unix.h
 // #ifndef _WIN32
-// void _strupr( TCHAR * pszStr )
+// void _strupr( tchar * pszStr )
 // {
 // 	// No portable UNIX/LINUX equiv to this.
 // 	for ( ;pszStr[0] != '\0'; pszStr++ )
@@ -53,7 +53,7 @@ int gReallocs = 0; ///< Total reallocs caused by CGString resizing.
 // 	}
 // }
 //
-// void _strlwr( TCHAR * pszStr )
+// void _strlwr( tchar * pszStr )
 // {
 // 	// No portable UNIX/LINUX equiv to this.
 // 	for ( ;pszStr[0] != '\0'; pszStr++ )
@@ -64,14 +64,14 @@ int gReallocs = 0; ///< Total reallocs caused by CGString resizing.
 // #endif
 
 
-size_t strcpylen(TCHAR * pDst, LPCTSTR pSrc)
+size_t strcpylen(tchar * pDst, lpctstr pSrc)
 {
 	strcpy(pDst, pSrc);
 	return(strlen(pDst));
 }
 
 
-size_t strcpylen(TCHAR * pDst, LPCTSTR pSrc, size_t iMaxSize)
+size_t strcpylen(tchar * pDst, lpctstr pSrc, size_t iMaxSize)
 {
 	// it does NOT include the iMaxSize element! (just like memcpy)
 	// so iMaxSize=sizeof() is ok !
@@ -113,7 +113,7 @@ int CGString::SetLength(int iNewLength)
 		gMemAmount += m_iMaxLength;
 		gReallocs++;
 #endif
-		TCHAR	*pNewData = new TCHAR[m_iMaxLength + 1];
+		tchar	*pNewData = new tchar[m_iMaxLength + 1];
 		ASSERT(pNewData);
 
 		int iMinLength = minimum(iNewLength, m_iLength);
@@ -128,7 +128,7 @@ int CGString::SetLength(int iNewLength)
 	return m_iLength;
 }
 
-void CGString::Copy(LPCTSTR pszStr)
+void CGString::Copy(lpctstr pszStr)
 {
 	if ((pszStr != m_pchData) && pszStr)
 	{
@@ -137,21 +137,21 @@ void CGString::Copy(LPCTSTR pszStr)
 	}
 }
 
-void CGString::FormatV(LPCTSTR pszFormat, va_list args)
+void CGString::FormatV(lpctstr pszFormat, va_list args)
 {
 	TemporaryString pszTemp;
 	_vsnprintf(static_cast<char *>(pszTemp), pszTemp.realLength(), pszFormat, args);
 	Copy(pszTemp);
 }
 
-void CGString::Add(TCHAR ch)
+void CGString::Add(tchar ch)
 {
 	int iLen = m_iLength;
 	SetLength(iLen + 1);
 	SetAt(iLen, ch);
 }
 
-void CGString::Add(LPCTSTR pszStr)
+void CGString::Add(lpctstr pszStr)
 {
 	int iLenCat = strlen(pszStr);
 	if (iLenCat)
@@ -183,7 +183,7 @@ CGString::CGString()
 	Init();
 }
 
-CGString::CGString(LPCTSTR pStr)
+CGString::CGString(lpctstr pStr)
 {
 	m_iMaxLength = m_iLength = 0;
 	m_pchData = NULL;
@@ -211,27 +211,27 @@ bool CGString::IsEmpty() const
 {
 	return(!m_iLength);
 }
-TCHAR & CGString::ReferenceAt(int nIndex)       // 0 based
+tchar & CGString::ReferenceAt(int nIndex)       // 0 based
 {
 	ASSERT(nIndex < m_iLength);
 	return m_pchData[nIndex];
 }
-TCHAR CGString::GetAt(int nIndex) const      // 0 based
+tchar CGString::GetAt(int nIndex) const      // 0 based
 {
 	ASSERT(nIndex <= m_iLength);	// allow to get the null char
 	return(m_pchData[nIndex]);
 }
-void CGString::SetAt(int nIndex, TCHAR ch)
+void CGString::SetAt(int nIndex, tchar ch)
 {
 	ASSERT(nIndex < m_iLength);
 	m_pchData[nIndex] = ch;
 	if (!ch) m_iLength = strlen(m_pchData);	// \0 inserted. line truncated
 }
-LPCTSTR CGString::GetPtr() const
+lpctstr CGString::GetPtr() const
 {
 	return(m_pchData);
 }
-void _cdecl CGString::Format(LPCTSTR pStr, ...)
+void _cdecl CGString::Format(lpctstr pStr, ...)
 {
 	va_list vargs;
 	va_start(vargs, pStr);
@@ -277,21 +277,21 @@ void CGString::FormatLLHex(ullong dwVal)
 	Format("0%llx", dwVal);
 }
 
-int CGString::Compare(LPCTSTR pStr) const
+int CGString::Compare(lpctstr pStr) const
 {
 	return (strcmp(m_pchData, pStr));
 }
-int CGString::CompareNoCase(LPCTSTR pStr) const
+int CGString::CompareNoCase(lpctstr pStr) const
 {
 	return (strcmpi(m_pchData, pStr));
 }
 
-int CGString::indexOf(TCHAR c)
+int CGString::indexOf(tchar c)
 {
 	return indexOf(c, 0);
 }
 
-int CGString::indexOf(TCHAR c, int offset)
+int CGString::indexOf(tchar c, int offset)
 {
 	if (offset < 0)
 		return -1;
@@ -323,13 +323,13 @@ int CGString::indexOf(CGString str, int offset)
 	if (slen > len)
 		return -1;
 
-	TCHAR * str_value = new TCHAR[slen + 1];
+	tchar * str_value = new tchar[slen + 1];
 	strcpy(str_value, str.GetPtr());
-	TCHAR firstChar = str_value[0];
+	tchar firstChar = str_value[0];
 
 	for (int i = offset; i < len; i++)
 	{
-		TCHAR c = m_pchData[i];
+		tchar c = m_pchData[i];
 		if (c == firstChar)
 		{
 			int rem = len - i;
@@ -365,12 +365,12 @@ int CGString::indexOf(CGString str)
 	return indexOf(str, 0);
 }
 
-int CGString::lastIndexOf(TCHAR c)
+int CGString::lastIndexOf(tchar c)
 {
 	return lastIndexOf(c, 0);
 }
 
-int CGString::lastIndexOf(TCHAR c, int from)
+int CGString::lastIndexOf(tchar c, int from)
 {
 	if (from < 0)
 		return -1;
@@ -401,12 +401,12 @@ int CGString::lastIndexOf(CGString str, int from)
 	if (slen > len)
 		return -1;
 
-	TCHAR * str_value = new TCHAR[slen + 1];
+	tchar * str_value = new tchar[slen + 1];
 	strcpy(str_value, str.GetPtr());
-	TCHAR firstChar = str_value[0];
+	tchar firstChar = str_value[0];
 	for (int i = (len - 1); i >= from; i--)
 	{
-		TCHAR c = m_pchData[i];
+		tchar c = m_pchData[i];
 		if (c == firstChar)
 		{
 			int rem = i;
@@ -449,14 +449,14 @@ void CGString::Init()
 	gMemAmount += m_iMaxLength;
 #endif
 	m_iLength = 0;
-	m_pchData = new TCHAR[m_iMaxLength + 1];
+	m_pchData = new tchar[m_iMaxLength + 1];
 	m_pchData[m_iLength] = 0;
 }
 
 //***************************************************************************
 // String global functions.
 
-LPCTSTR Str_GetArticleAndSpace(LPCTSTR pszWord)
+lpctstr Str_GetArticleAndSpace(lpctstr pszWord)
 {
 	// NOTE: This is wrong many times.
 	//  ie. some words need no article (plurals) : boots.
@@ -465,8 +465,8 @@ LPCTSTR Str_GetArticleAndSpace(LPCTSTR pszWord)
 
 	if (pszWord)
 	{
-		static const TCHAR sm_Vowels[] = { 'A', 'E', 'I', 'O', 'U' };
-		TCHAR chName = static_cast<TCHAR>(toupper(pszWord[0]));
+		static const tchar sm_Vowels[] = { 'A', 'E', 'I', 'O', 'U' };
+		tchar chName = static_cast<tchar>(toupper(pszWord[0]));
 		for (size_t x = 0; x < COUNTOF(sm_Vowels); x++)
 		{
 			if (chName == sm_Vowels[x])
@@ -476,7 +476,7 @@ LPCTSTR Str_GetArticleAndSpace(LPCTSTR pszWord)
 	return "a ";
 }
 
-size_t Str_TrimEndWhitespace(TCHAR * pStr, size_t len)
+size_t Str_TrimEndWhitespace(tchar * pStr, size_t len)
 {
 	while (len > 0)
 	{
@@ -491,7 +491,7 @@ size_t Str_TrimEndWhitespace(TCHAR * pStr, size_t len)
 	return(len);
 }
 
-TCHAR * Str_TrimWhitespace(TCHAR * pStr)
+tchar * Str_TrimWhitespace(tchar * pStr)
 {
 	// TODO: WARNING! Possible Memory Lake here!
 	GETNONWHITESPACE(pStr);
@@ -499,7 +499,7 @@ TCHAR * Str_TrimWhitespace(TCHAR * pStr)
 	return(pStr);
 }
 
-bool Str_Parse(TCHAR * pLine, TCHAR ** ppLine2, LPCTSTR pszSep)
+bool Str_Parse(tchar * pLine, tchar ** ppLine2, lpctstr pszSep)
 {
 	// Parse a list of args. Just get the next arg.
 	// similar to strtok()
@@ -509,14 +509,14 @@ bool Str_Parse(TCHAR * pLine, TCHAR ** ppLine2, LPCTSTR pszSep)
 		pszSep = "=, \t";
 
 	// skip leading white space.
-	TCHAR * pNonWhite = pLine;
+	tchar * pNonWhite = pLine;
 	GETNONWHITESPACE(pNonWhite);
 	if (pNonWhite != pLine)
 	{
 		memmove(pLine, pNonWhite, strlen(pNonWhite) + 1);
 	}
 
-	TCHAR ch;
+	tchar ch;
 	bool bQuotes = false;
 	for (; ; pLine++)
 	{
@@ -557,7 +557,7 @@ bool Str_Parse(TCHAR * pLine, TCHAR ** ppLine2, LPCTSTR pszSep)
 	return true;
 }
 
-size_t Str_ParseCmds(TCHAR * pszCmdLine, TCHAR ** ppCmd, size_t iMax, LPCTSTR pszSep)
+size_t Str_ParseCmds(tchar * pszCmdLine, tchar ** ppCmd, size_t iMax, lpctstr pszSep)
 {
 	size_t iQty = 0;
 	if (pszCmdLine != NULL && pszCmdLine[0] != '\0')
@@ -575,9 +575,9 @@ size_t Str_ParseCmds(TCHAR * pszCmdLine, TCHAR ** ppCmd, size_t iMax, LPCTSTR ps
 	return(iQty);
 }
 
-size_t Str_ParseCmds(TCHAR * pszCmdLine, int64_t * piCmd, size_t iMax, LPCTSTR pszSep)
+size_t Str_ParseCmds(tchar * pszCmdLine, int64_t * piCmd, size_t iMax, lpctstr pszSep)
 {
-	TCHAR * ppTmp[256];
+	tchar * ppTmp[256];
 	if (iMax > COUNTOF(ppTmp))
 		iMax = COUNTOF(ppTmp);
 
@@ -594,15 +594,15 @@ size_t Str_ParseCmds(TCHAR * pszCmdLine, int64_t * piCmd, size_t iMax, LPCTSTR p
 	return(iQty);
 }
 
-static int Str_CmpHeadI(LPCTSTR pszFind, LPCTSTR pszTable)
+static int Str_CmpHeadI(lpctstr pszFind, lpctstr pszTable)
 {
-	TCHAR ch0 = '_';
+	tchar ch0 = '_';
 	for (size_t i = 0; ; i++)
 	{
 		//	we should always use same case as in other places. since strcmpi lowers,
 		//	we should lower here as well. fucking shit!
-		TCHAR ch1 = static_cast<TCHAR>(tolower(pszFind[i]));
-		TCHAR ch2 = static_cast<TCHAR>(tolower(pszTable[i]));
+		tchar ch1 = static_cast<tchar>(tolower(pszFind[i]));
+		tchar ch2 = static_cast<tchar>(tolower(pszTable[i]));
 		if (ch2 == 0)
 		{
 			if ((!isalnum(ch1)) && (ch1 != ch0))
@@ -616,7 +616,7 @@ static int Str_CmpHeadI(LPCTSTR pszFind, LPCTSTR pszTable)
 	}
 }
 
-int FindTableHeadSorted(LPCTSTR pszFind, LPCTSTR const * ppszTable, int iCount, int iElemSize)
+int FindTableHeadSorted(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
 {
 	// Do a binary search (un-cased) on a sorted table.
 	// RETURN: -1 = not found
@@ -629,7 +629,7 @@ int FindTableHeadSorted(LPCTSTR pszFind, LPCTSTR const * ppszTable, int iCount, 
 	while (iLow <= iHigh)
 	{
 		int i = (iHigh + iLow) / 2;
-		LPCTSTR pszName = *((LPCTSTR const *)(((const byte*)ppszTable) + (i*iElemSize)));
+		lpctstr pszName = *((lpctstr const *)(((const byte*)ppszTable) + (i*iElemSize)));
 		int iCompare = Str_CmpHeadI(pszFind, pszName);
 		if (iCompare == 0)
 			return(i);
@@ -645,19 +645,19 @@ int FindTableHeadSorted(LPCTSTR pszFind, LPCTSTR const * ppszTable, int iCount, 
 	return(-1);
 }
 
-int FindTableHead(LPCTSTR pszFind, LPCTSTR const * ppszTable, int iCount, int iElemSize)
+int FindTableHead(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
 {
 	for (int i = 0; i<iCount; i++)
 	{
 		int iCompare = Str_CmpHeadI(pszFind, *ppszTable);
 		if (!iCompare)
 			return(i);
-		ppszTable = (LPCTSTR const *)(((const byte*)ppszTable) + iElemSize);
+		ppszTable = (lpctstr const *)(((const byte*)ppszTable) + iElemSize);
 	}
 	return(-1);
 }
 
-int FindTableSorted(LPCTSTR pszFind, LPCTSTR const * ppszTable, int iCount, int iElemSize)
+int FindTableSorted(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
 {
 	// Do a binary search (un-cased) on a sorted table.
 	// RETURN: -1 = not found
@@ -670,7 +670,7 @@ int FindTableSorted(LPCTSTR pszFind, LPCTSTR const * ppszTable, int iCount, int 
 	while (iLow <= iHigh)
 	{
 		int i = (iHigh + iLow) / 2;
-		LPCTSTR pszName = *((LPCTSTR const *)(((const byte*)ppszTable) + (i*iElemSize)));
+		lpctstr pszName = *((lpctstr const *)(((const byte*)ppszTable) + (i*iElemSize)));
 		int iCompare = strcmpi(pszFind, pszName);
 		if (iCompare == 0)
 			return(i);
@@ -686,19 +686,19 @@ int FindTableSorted(LPCTSTR pszFind, LPCTSTR const * ppszTable, int iCount, int 
 	return(-1);
 }
 
-int FindTable(LPCTSTR pszFind, LPCTSTR const * ppszTable, int iCount, int iElemSize)
+int FindTable(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
 {
 	// A non-sorted table.
 	for (int i = 0; i<iCount; i++)
 	{
 		if (!strcmpi(*ppszTable, pszFind))
 			return(i);
-		ppszTable = (LPCTSTR const *)(((const byte*)ppszTable) + iElemSize);
+		ppszTable = (lpctstr const *)(((const byte*)ppszTable) + iElemSize);
 	}
 	return(-1);
 }
 
-size_t Str_GetBare(TCHAR * pszOut, LPCTSTR pszInp, size_t iMaxOutSize, LPCTSTR pszStrip)
+size_t Str_GetBare(tchar * pszOut, lpctstr pszInp, size_t iMaxOutSize, lpctstr pszStrip)
 {
 	// That the client can deal with. Basic punctuation and alpha and numbers.
 	// RETURN: Output length.
@@ -711,7 +711,7 @@ size_t Str_GetBare(TCHAR * pszOut, LPCTSTR pszInp, size_t iMaxOutSize, LPCTSTR p
 	size_t j = 0;
 	for (size_t i = 0; ; i++)
 	{
-		TCHAR ch = pszInp[i];
+		tchar ch = pszInp[i];
 		if (ch)
 		{
 			if (ch < ' ' || ch >= 127)
@@ -735,7 +735,7 @@ size_t Str_GetBare(TCHAR * pszOut, LPCTSTR pszInp, size_t iMaxOutSize, LPCTSTR p
 }
 
 
-int Str_IndexOf(TCHAR * pStr1, TCHAR * pStr2, int offset)
+int Str_IndexOf(tchar * pStr1, tchar * pStr2, int offset)
 {
 	if (offset < 0)
 		return -1;
@@ -748,11 +748,11 @@ int Str_IndexOf(TCHAR * pStr1, TCHAR * pStr2, int offset)
 	if (slen > len)
 		return -1;
 
-	TCHAR firstChar = pStr2[0];
+	tchar firstChar = pStr2[0];
 
 	for (int i = offset; i < len; i++)
 	{
-		TCHAR c = pStr1[i];
+		tchar c = pStr1[i];
 		if (c == firstChar)
 		{
 			int rem = len - i;
@@ -780,24 +780,24 @@ int Str_IndexOf(TCHAR * pStr1, TCHAR * pStr2, int offset)
 
 	return -1;
 }
-bool Str_Check(LPCTSTR pszIn)
+bool Str_Check(lpctstr pszIn)
 {
 	if (pszIn == NULL)
 		return true;
 
-	LPCTSTR p = pszIn;
+	lpctstr p = pszIn;
 	while (*p != '\0' && (*p != 0x0A) && (*p != 0x0D))
 		p++;
 
 	return (*p != '\0');
 }
 
-bool Str_CheckName(LPCTSTR pszIn)
+bool Str_CheckName(lpctstr pszIn)
 {
 	if (pszIn == NULL)
 		return true;
 
-	LPCTSTR p = pszIn;
+	lpctstr p = pszIn;
 	while (*p != '\0' &&
 		(
 			((*p >= 'A') && (*p <= 'Z')) ||
@@ -810,7 +810,7 @@ bool Str_CheckName(LPCTSTR pszIn)
 	return (*p != '\0');
 }
 
-TCHAR * Str_MakeFiltered(TCHAR * pStr)
+tchar * Str_MakeFiltered(tchar * pStr)
 {
 	int len = strlen(pStr);
 	for (int i = 0; len; i++, len--)
@@ -832,14 +832,14 @@ TCHAR * Str_MakeFiltered(TCHAR * pStr)
 	return(pStr);
 }
 
-void Str_MakeUnFiltered(TCHAR * pStrOut, LPCTSTR pStrIn, int iSizeMax)
+void Str_MakeUnFiltered(tchar * pStrOut, lpctstr pStrIn, int iSizeMax)
 {
 	int len = strlen(pStrIn);
 	int iIn = 0;
 	int iOut = 0;
 	for (; iOut < iSizeMax && iIn <= len; iIn++, iOut++)
 	{
-		TCHAR ch = pStrIn[iIn];
+		tchar ch = pStrIn[iIn];
 		switch (ch)
 		{
 		case '\b': ch = 'b'; break;
@@ -859,7 +859,7 @@ void Str_MakeUnFiltered(TCHAR * pStrOut, LPCTSTR pStrIn, int iSizeMax)
 
 #define TOLOWER tolower
 
-static MATCH_TYPE Str_Match_After_Star(LPCTSTR pPattern, LPCTSTR pText)
+static MATCH_TYPE Str_Match_After_Star(lpctstr pPattern, lpctstr pText)
 {
 	// pass over existing ? and * in pattern
 	for (; *pPattern == '?' || *pPattern == '*'; pPattern++)
@@ -875,7 +875,7 @@ static MATCH_TYPE Str_Match_After_Star(LPCTSTR pPattern, LPCTSTR pText)
 		return MATCH_VALID;
 
 	// get the next character to match which must be a literal or '['
-	TCHAR nextp = static_cast<TCHAR>(TOLOWER(*pPattern));
+	tchar nextp = static_cast<tchar>(TOLOWER(*pPattern));
 	MATCH_TYPE match = MATCH_INVALID;
 
 	// Continue until we run out of text or definite result seen
@@ -903,12 +903,12 @@ static MATCH_TYPE Str_Match_After_Star(LPCTSTR pPattern, LPCTSTR pText)
 	return match;	// return result
 }
 
-MATCH_TYPE Str_Match(LPCTSTR pPattern, LPCTSTR pText)
+MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText)
 {
 	// case independant
 
-	TCHAR range_start;
-	TCHAR range_end;  // start and end in range
+	tchar range_start;
+	tchar range_end;  // start and end in range
 
 	for (; *pPattern; pPattern++, pText++)
 	{
@@ -955,9 +955,9 @@ MATCH_TYPE Str_Match(LPCTSTR pPattern, LPCTSTR pText)
 
 				// matching a '!', '^', '-', '\' or a ']'
 				if (*pPattern == '\\')
-					range_start = range_end = static_cast<TCHAR>(TOLOWER(*++pPattern));
+					range_start = range_end = static_cast<tchar>(TOLOWER(*++pPattern));
 				else
-					range_start = range_end = static_cast<TCHAR>(TOLOWER(*pPattern));
+					range_start = range_end = static_cast<tchar>(TOLOWER(*pPattern));
 
 				// if end of pattern then bad pattern (Missing ']')
 				if (!*pPattern)
@@ -967,14 +967,14 @@ MATCH_TYPE Str_Match(LPCTSTR pPattern, LPCTSTR pText)
 				if (*++pPattern == '-')
 				{
 					// get the range end
-					range_end = static_cast<TCHAR>(TOLOWER(*++pPattern));
+					range_end = static_cast<tchar>(TOLOWER(*++pPattern));
 					// if end of pattern or construct then bad pattern
 					if (range_end == '\0' || range_end == ']')
 						return MATCH_PATTERN;
 					// special character range end
 					if (range_end == '\\')
 					{
-						range_end = static_cast<TCHAR>(TOLOWER(*++pPattern));
+						range_end = static_cast<tchar>(TOLOWER(*++pPattern));
 						// if end of text then we have a bad pattern
 						if (!range_end)
 							return MATCH_PATTERN;
@@ -986,7 +986,7 @@ MATCH_TYPE Str_Match(LPCTSTR pPattern, LPCTSTR pText)
 				// if the text character is in range then match found.
 				// make sure the range letters have the proper
 				// relationship to one another before comparison
-				TCHAR chText = static_cast<TCHAR>(TOLOWER(*pText));
+				tchar chText = static_cast<tchar>(TOLOWER(*pText));
 				if (range_start < range_end)
 				{
 					if (chText >= range_start && chText <= range_end)
@@ -1057,7 +1057,7 @@ void CharToMultiByteNonNull(byte * Dest, const char * Src, size_t MBytes) {
 	}
 }
 
-int Str_RegExMatch(LPCTSTR pPattern, LPCTSTR pText, TCHAR * lastError)
+int Str_RegExMatch(lpctstr pPattern, lpctstr pText, tchar * lastError)
 {
 	try
 	{

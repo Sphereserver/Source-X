@@ -210,7 +210,7 @@ void CClient::CharDisconnect()
 	m_pChar = NULL;
 }
 
-void CClient::SysMessage( LPCTSTR pszMsg ) const // System message (In lower left corner)
+void CClient::SysMessage( lpctstr pszMsg ) const // System message (In lower left corner)
 {
 	ADDTOCALLSTACK("CClient::SysMessage");
 	// Diff sorts of clients.
@@ -256,10 +256,10 @@ void CClient::Announce( bool fArrive ) const
 
 	// We have logged in or disconnected.
 	// Annouce my arrival or departure.
-	TCHAR *pszMsg = Str_GetTemp();
+	tchar *pszMsg = Str_GetTemp();
 	if ( (g_Cfg.m_iArriveDepartMsg == 2) && (GetPrivLevel() > PLEVEL_Player) )		// notify of GMs
 	{
-		LPCTSTR zTitle = m_pChar->Noto_GetFameTitle();
+		lpctstr zTitle = m_pChar->Noto_GetFameTitle();
 		sprintf(pszMsg, "@231 STAFF: %s%s logged %s.", zTitle, m_pChar->GetName(), (fArrive ? "in" : "out"));
 	}
 	else if ( g_Cfg.m_iArriveDepartMsg == 1 )		// notify of players
@@ -349,7 +349,7 @@ bool CClient::CanHear( const CObjBaseTemplate * pSrc, TALKMODE_TYPE mode ) const
 ////////////////////////////////////////////////////
 
 
-void CClient::addTargetVerb( LPCTSTR pszCmd, LPCTSTR pszArg )
+void CClient::addTargetVerb( lpctstr pszCmd, lpctstr pszArg )
 {
 	ADDTOCALLSTACK("CClient::addTargetVerb");
 	// Target a verb at some object .
@@ -374,12 +374,12 @@ void CClient::addTargetVerb( LPCTSTR pszCmd, LPCTSTR pszArg )
 		return;
 
 	m_Targ_Text.Format( "%s%s%s", pszCmd, ( pszArg[0] && pszCmd[0] ) ? " " : "", pszArg );
-	TCHAR * pszMsg = Str_GetTemp();
-	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_TARGET_COMMAND), static_cast<LPCTSTR>(m_Targ_Text));
+	tchar * pszMsg = Str_GetTemp();
+	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_TARGET_COMMAND), static_cast<lpctstr>(m_Targ_Text));
 	addTarget(CLIMODE_TARG_OBJ_SET, pszMsg);
 }
 
-void CClient::addTargetFunctionMulti( LPCTSTR pszFunction, ITEMID_TYPE itemid, bool fGround )
+void CClient::addTargetFunctionMulti( lpctstr pszFunction, ITEMID_TYPE itemid, bool fGround )
 {
 	ADDTOCALLSTACK("CClient::addTargetFunctionMulti");
 	// Target a verb at some object .
@@ -397,7 +397,7 @@ void CClient::addTargetFunctionMulti( LPCTSTR pszFunction, ITEMID_TYPE itemid, b
 	addTargetFunction( pszFunction, fGround, false );
 }
 
-void CClient::addTargetFunction( LPCTSTR pszFunction, bool fAllowGround, bool fCheckCrime )
+void CClient::addTargetFunction( lpctstr pszFunction, bool fAllowGround, bool fCheckCrime )
 {
 	ADDTOCALLSTACK("CClient::addTargetFunction");
 	// Target a verb at some object .
@@ -409,7 +409,7 @@ void CClient::addTargetFunction( LPCTSTR pszFunction, bool fAllowGround, bool fC
 	addTarget( CLIMODE_TARG_OBJ_FUNC, "", fAllowGround, fCheckCrime );
 }
 
-void CClient::addPromptConsoleFunction( LPCTSTR pszFunction, LPCTSTR pszSysmessage, bool bUnicode )
+void CClient::addPromptConsoleFunction( lpctstr pszFunction, lpctstr pszSysmessage, bool bUnicode )
 {
 	ADDTOCALLSTACK("CClient::addPromptConsoleFunction");
 	// Target a verb at some object .
@@ -431,7 +431,7 @@ enum CLIR_TYPE
 	CLIR_QTY
 };
 
-LPCTSTR const CClient::sm_szRefKeys[CLIR_QTY+1] =
+lpctstr const CClient::sm_szRefKeys[CLIR_QTY+1] =
 {
 	"ACCOUNT",
 	"GMPAGEP",
@@ -443,7 +443,7 @@ LPCTSTR const CClient::sm_szRefKeys[CLIR_QTY+1] =
 	NULL
 };
 
-bool CClient::r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef )
+bool CClient::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CClient::r_GetRef");
 	int i = FindTableHeadSorted( pszKey, sm_szRefKeys, COUNTOF(sm_szRefKeys)-1 );
@@ -467,7 +467,7 @@ bool CClient::r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef )
 			case CLIR_PARTY:
 				if ( !this->m_pChar->m_pParty )
 				{
-					LPCTSTR oldKey = pszKey;
+					lpctstr oldKey = pszKey;
 					if ( !strnicmp(pszKey, ".CREATE", 7) )
 						pszKey +=7;
 
@@ -497,7 +497,7 @@ bool CClient::r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef )
 	return( CScriptObj::r_GetRef( pszKey, pRef ));
 }
 
-LPCTSTR const CClient::sm_szLoadKeys[CC_QTY+1] = // static
+lpctstr const CClient::sm_szLoadKeys[CC_QTY+1] = // static
 {
 	#define ADD(a,b) b,
 	#include "../tables/CClient_props.tbl"
@@ -505,7 +505,7 @@ LPCTSTR const CClient::sm_szLoadKeys[CC_QTY+1] = // static
 	NULL,
 };
 
-LPCTSTR const CClient::sm_szVerbKeys[CV_QTY+1] =	// static
+lpctstr const CClient::sm_szVerbKeys[CV_QTY+1] =	// static
 {
 	#define ADD(a,b) b,
 	#include "../tables/CClient_functions.tbl"
@@ -513,7 +513,7 @@ LPCTSTR const CClient::sm_szVerbKeys[CV_QTY+1] =	// static
 	NULL,
 };
 
-bool CClient::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CClient::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CClient::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -599,7 +599,7 @@ bool CClient::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
 				if ( pszKey[0] == '\0' )
 				{
 					// Return full version string (eg: 5.0.2d)
-					TCHAR szVersion[128];
+					tchar szVersion[128];
 					sVal = CCrypt::WriteClientVerString(iCliVer, szVersion);
 				}
 				else
@@ -664,7 +664,7 @@ bool CClient::r_LoadVal( CScript & s )
 	if ( GetAccount() == NULL )
 		return( false );
 
-	LPCTSTR pszKey = s.GetKey();
+	lpctstr pszKey = s.GetKey();
 
 	if ( s.IsKeyHead( "CTAG.", 5 ) || s.IsKeyHead( "CTAG0.", 6 ) )
 	{
@@ -779,7 +779,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 	// NOTE: Little security here so watch out for dangerous scripts !
 
 	ASSERT(pSrc);
-	LPCTSTR pszKey = s.GetKey();
+	lpctstr pszKey = s.GetKey();
 
 	// Old ver
 	if ( s.IsKeyHead( "SET", 3 ) && ( g_Cfg.m_Functions.ContainsKey( pszKey ) == false ) )
@@ -812,15 +812,15 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			if ( s.HasArgs())
 			{
 				// FindItemName ???
-				TCHAR * pszArgs = s.GetArgStr();
-				if ( !IsValidGameObjDef( static_cast<LPCTSTR>(pszArgs) ) )
+				tchar * pszArgs = s.GetArgStr();
+				if ( !IsValidGameObjDef( static_cast<lpctstr>(pszArgs) ) )
 				{
 					g_Log.EventWarn("Invalid ADD argument '%s'\n", pszArgs);
 					SysMessageDefault( DEFMSG_CMD_INVALID );
 					return true;
 				}
 
-				RESOURCE_ID rid = g_Cfg.ResourceGetID( RES_QTY, const_cast<LPCTSTR &>(reinterpret_cast<LPTSTR &>(pszArgs)));
+				RESOURCE_ID rid = g_Cfg.ResourceGetID( RES_QTY, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(pszArgs)));
 				if (( rid.GetResType() == RES_CHARDEF ) || ( rid.GetResType() == RES_SPAWN ))
 				{
 					m_Targ_PrvUID.InitUID();
@@ -840,7 +840,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			break;
 		case CV_ADDBUFF:
 			{
-				TCHAR * ppArgs[11];
+				tchar * ppArgs[11];
 				Str_ParseCmds( s.GetArgStr(), ppArgs, COUNTOF(ppArgs));
 
 				int iArgs[4];
@@ -858,7 +858,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					break;
 				}
 
-				LPCTSTR Args[7];
+				lpctstr Args[7];
 				size_t ArgsCount = 0;
 				for ( int i = 0; i < 7; ++i )
 				{
@@ -883,7 +883,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		case CV_ADDCLILOC:
 			// Add cliloc in @ClientTooltip trigger
 			{
-				TCHAR * ppLocArgs[256];
+				tchar * ppLocArgs[256];
 				size_t qty = Str_ParseCmds(s.GetArgRaw(), ppLocArgs, COUNTOF(ppLocArgs), ",");
 				dword clilocid = Exp_GetVal(ppLocArgs[0]);
 
@@ -896,13 +896,13 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				}
 
 				if ( g_Cfg.m_wDebugFlags & DEBUGF_SCRIPTS )
-					g_Log.EventDebug("SCRIPT: addcliloc(%lu,'%s')\n", clilocid, static_cast<LPCTSTR>(LocArgs));
+					g_Log.EventDebug("SCRIPT: addcliloc(%lu,'%s')\n", clilocid, static_cast<lpctstr>(LocArgs));
 				this->m_TooltipData.Add(new CClientTooltip(clilocid, LocArgs));
 			}
 			break;
 		case CV_ADDCONTEXTENTRY:
 			{
-				TCHAR * ppLocArgs[20];
+				tchar * ppLocArgs[20];
 				if ( Str_ParseCmds(s.GetArgRaw(), ppLocArgs, COUNTOF(ppLocArgs), ",") > 4 )
 				{
 					DEBUG_ERR(("Bad AddContextEntry usage: Function takes maximum of 4 arguments!\n"));
@@ -1055,7 +1055,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			{
 				if ( s.HasArgs() )
 				{
-					LPCTSTR pszArgs = s.GetArgStr();
+					lpctstr pszArgs = s.GetArgStr();
 					SKIP_SEPARATORS(pszArgs);
 					m_TagDefs.ClearKeys(pszArgs);
 				}
@@ -1129,7 +1129,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			}
 			else
 			{
-				TCHAR * ppArgs[2];
+				tchar * ppArgs[2];
 				Str_ParseCmds( s.GetArgStr(), ppArgs, COUNTOF( ppArgs ));
 
 				m_Targ_Text = ppArgs[0]; // Point at the options, if any
@@ -1149,7 +1149,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			}
 			else
 			{
-				TCHAR * ppArgs[2];
+				tchar * ppArgs[2];
 				Str_ParseCmds( s.GetArgStr(), ppArgs, COUNTOF( ppArgs ));
 
 				m_Targ_Text = ppArgs[0]; // Point at the options, if any
@@ -1268,7 +1268,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 
 		case CV_OPENTRADEWINDOW:
 		{
-			TCHAR *ppArgs[2];
+			tchar *ppArgs[2];
 			Str_ParseCmds(s.GetArgStr(), ppArgs, COUNTOF(ppArgs));
 
 			CChar *pChar = NULL;
@@ -1348,7 +1348,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				m_tmSkillMagery.m_Spell = SPELL_Summon;
 				m_tmSkillMagery.m_SummonID = static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr()));
 
-				LPCTSTR pPrompt = g_Cfg.GetDefaultMsg(DEFMSG_SELECT_MAGIC_TARGET);
+				lpctstr pPrompt = g_Cfg.GetDefaultMsg(DEFMSG_SELECT_MAGIC_TARGET);
 				if ( !pSpellDef->m_sTargetPrompt.IsEmpty() )
 					pPrompt = pSpellDef->m_sTargetPrompt;
 
@@ -1386,7 +1386,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			break;
 		case CV_SYSMESSAGEF: //There is still an issue with numbers not resolving properly when %i,%d,or other numeric format code is in use
 			{
-				TCHAR * pszArgs[4];
+				tchar * pszArgs[4];
 				size_t iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, COUNTOF(pszArgs) );
 				if ( iArgQty < 2 )
 				{
@@ -1401,7 +1401,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				//strip quotes if any
 				if ( *pszArgs[0] == '"' )
 					pszArgs[0]++;
-				for (TCHAR * pEnd = pszArgs[0] + strlen( pszArgs[0] ) - 1; pEnd >= pszArgs[0]; pEnd-- )
+				for (tchar * pEnd = pszArgs[0] + strlen( pszArgs[0] ) - 1; pEnd >= pszArgs[0]; pEnd-- )
 				{
 					if ( *pEnd == '"' )
 					{
@@ -1414,7 +1414,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		case CV_SMSGU:
 		case CV_SYSMESSAGEUA:
 			{
-				TCHAR * pszArgs[5];
+				tchar * pszArgs[5];
 				size_t iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, COUNTOF(pszArgs) );
 				if ( iArgQty > 4 )
 				{
@@ -1430,7 +1430,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		case CV_SMSGL:
 		case CV_SYSMESSAGELOC:
 			{
-				TCHAR * ppArgs[256];
+				tchar * ppArgs[256];
 				size_t iArgQty = Str_ParseCmds( s.GetArgRaw(), ppArgs, COUNTOF(ppArgs), "," );
 				if ( iArgQty > 1 )
 				{
@@ -1456,7 +1456,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		case CV_SMSGLEX:
 		case CV_SYSMESSAGELOCEX:
 			{
-				TCHAR * ppArgs[256];
+				tchar * ppArgs[256];
 				size_t iArgQty = Str_ParseCmds( s.GetArgRaw(), ppArgs, COUNTOF(ppArgs), "," );
 				if ( iArgQty > 2 )
 				{
@@ -1511,7 +1511,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				if ( r_WriteVal( s.GetKey(), sVal, pSrc ))
 				{
 					// if ( !s.IsKeyHead( "CTAG.", 5 ) && !s.IsKeyHead( "CTAG0.", 6 ) ) // We don't want output related to ctag
-					//	SysMessagef( "%s = %s", (LPCTSTR) s.GetKey(), (LPCTSTR) sVal );	// feedback on what we just did.
+					//	SysMessagef( "%s = %s", (lpctstr) s.GetKey(), (lpctstr) sVal );	// feedback on what we just did.
 
 					return( true );
 				}
@@ -1537,7 +1537,7 @@ CSocketAddress &CClient::GetPeer()
 	return m_net->m_peerAddress;
 }
 
-LPCTSTR CClient::GetPeerStr() const
+lpctstr CClient::GetPeerStr() const
 {
 	return m_net->m_peerAddress.GetAddrStr();
 }

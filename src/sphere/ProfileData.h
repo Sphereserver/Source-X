@@ -68,8 +68,8 @@ public:
 	void EnableProfile(PROFILE_TYPE id);
 
 	PROFILE_TYPE GetCurrentTask() const;
-	LPCTSTR GetName(PROFILE_TYPE id) const;
-	LPCTSTR GetDescription(PROFILE_TYPE id) const;
+	lpctstr GetName(PROFILE_TYPE id) const;
+	lpctstr GetDescription(PROFILE_TYPE id) const;
 	bool IsEnabled(PROFILE_TYPE id = PROFILE_QTY) const;
 };
 

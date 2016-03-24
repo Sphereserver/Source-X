@@ -7,7 +7,7 @@
 //***************************************************************************
 // -CValStr
 
-LPCTSTR CValStr::FindName( int iVal ) const
+lpctstr CValStr::FindName( int iVal ) const
 {
 	ADDTOCALLSTACK("CValStr::FindName");
 	size_t i = 0;
@@ -40,7 +40,7 @@ const int CElementDef::sm_Lengths[ELEM_QTY] =
 	sizeof(dword), // ELEM_MASK_DWORD,	// bits in a dword
 };
 
-bool CElementDef::SetValStr( void * pBase, LPCTSTR pszVal ) const
+bool CElementDef::SetValStr( void * pBase, lpctstr pszVal ) const
 {
 	ADDTOCALLSTACK("CElementDef::SetValStr");
 	// Set the element value as a string.
@@ -52,7 +52,7 @@ bool CElementDef::SetValStr( void * pBase, LPCTSTR pszVal ) const
 		case ELEM_VOID:
 			return false;
 		case ELEM_STRING:
-			strcpylen(static_cast<TCHAR *>(pValPtr), pszVal, GetValLength() - 1);
+			strcpylen(static_cast<tchar *>(pValPtr), pszVal, GetValLength() - 1);
 			return( true );
 		case ELEM_CSTRING:
 			*static_cast<CGString *>(pValPtr) = pszVal;
@@ -104,7 +104,7 @@ bool CElementDef::GetValStr( const void * pBase, CGString & sVal ) const
 		case ELEM_VOID:
 			return false;
 		case ELEM_STRING:
-			sVal = static_cast<TCHAR *>(pValPtr);
+			sVal = static_cast<tchar *>(pValPtr);
 			return( true );
 		case ELEM_CSTRING:
 			sVal = *static_cast<CGString *>(pValPtr);

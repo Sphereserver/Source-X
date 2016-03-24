@@ -32,13 +32,13 @@ const CScriptObj * CLog::SetObjectContext( const CScriptObj * pObjectContext )
 	m_pObjectContext = pObjectContext;
 	return( pOldObject );
 }
-bool CLog::SetFilePath( LPCTSTR pszName )
+bool CLog::SetFilePath( lpctstr pszName )
 {
 	ASSERT( ! IsFileOpen());
 	return CFileText::SetFilePath( pszName );
 }
 
-LPCTSTR CLog::GetLogDir() const
+lpctstr CLog::GetLogDir() const
 {
 	return( m_sBaseDir );
 }
@@ -80,7 +80,7 @@ bool CLog::IsLogged( dword wMask ) const
 	return IsLoggedMask(wMask) || IsLoggedLevel(static_cast<LOGL_TYPE>(wMask));
 }
 
-bool CLog::OpenLog( LPCTSTR pszBaseDirName )	// name set previously.
+bool CLog::OpenLog( lpctstr pszBaseDirName )	// name set previously.
 {
 	if ( m_fLockOpen )	// the log is already locked open
 		return( false );
@@ -106,7 +106,7 @@ bool CLog::OpenLog( LPCTSTR pszBaseDirName )	// name set previously.
 
 	// Get the new name based on date.
 	m_dateStamp = CGTime::GetCurrentTime();
-	TCHAR *pszTemp = Str_GetTemp();
+	tchar *pszTemp = Str_GetTemp();
 	sprintf(pszTemp, GRAY_FILE "%d-%02d-%02d.log",
 		m_dateStamp.GetYear(), m_dateStamp.GetMonth(), m_dateStamp.GetDay());
 	CGString sFileName = GetMergedFileName(m_sBaseDir, pszTemp);
@@ -152,7 +152,7 @@ void CLog::SetColor(Color color)
 	}
 }
 
-int CLog::EventStr( dword wMask, LPCTSTR pszMsg )
+int CLog::EventStr( dword wMask, lpctstr pszMsg )
 {
 	// NOTE: This could be called in odd interrupt context so don't use dynamic stuff
 	if ( !IsLogged(wMask) )	// I don't care about these.
@@ -186,11 +186,11 @@ int CLog::EventStr( dword wMask, LPCTSTR pszMsg )
 #endif
 		}
 
-		TCHAR szTime[32];
+		tchar szTime[32];
 		sprintf(szTime, "%02d:%02d:", datetime.GetHour(), datetime.GetMinute());
 		m_dateStamp = datetime;
 
-		LPCTSTR pszLabel = NULL;
+		lpctstr pszLabel = NULL;
 
 		switch (wMask & 0x07)
 		{
@@ -211,7 +211,7 @@ int CLog::EventStr( dword wMask, LPCTSTR pszMsg )
 			pszLabel = "DEBUG:";
 
 		// Get the script context. (if there is one)
-		TCHAR szScriptContext[ _MAX_PATH + 16 ];
+		tchar szScriptContext[ _MAX_PATH + 16 ];
 		if ( !( wMask&LOGM_NOCONTEXT ) && m_pScriptContext )
 		{
 			CScriptLineContext LineContext = m_pScriptContext->GetContext();
@@ -277,7 +277,7 @@ int CLog::EventStr( dword wMask, LPCTSTR pszMsg )
 
 CGTime CLog::sm_prevCatchTick;
 
-void _cdecl CLog::CatchEvent( const CGrayError * pErr, LPCTSTR pszCatchContext, ... )
+void _cdecl CLog::CatchEvent( const CGrayError * pErr, lpctstr pszCatchContext, ... )
 {
 	CGTime timeCurrent = CGTime::GetCurrentTime();
 	if ( sm_prevCatchTick.GetTime() == timeCurrent.GetTime() )	// prevent message floods.
@@ -285,7 +285,7 @@ void _cdecl CLog::CatchEvent( const CGrayError * pErr, LPCTSTR pszCatchContext, 
 	// Keep a record of what we catch.
 	try
 	{
-		TCHAR szMsg[512];
+		tchar szMsg[512];
 		LOGL_TYPE eSeverity;
 		int iLen = 0;
 		if ( pErr != NULL )

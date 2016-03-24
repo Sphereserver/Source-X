@@ -7,7 +7,7 @@
 
 /////////////////////////////////////////////
 
-void CClient::Cmd_GM_Page( LPCTSTR pszReason ) // Help button (Calls GM Call Menus up)
+void CClient::Cmd_GM_Page( lpctstr pszReason ) // Help button (Calls GM Call Menus up)
 {
 	ADDTOCALLSTACK("CClient::Cmd_GM_Page");
 	// Player pressed the help button.
@@ -22,7 +22,7 @@ void CClient::Cmd_GM_Page( LPCTSTR pszReason ) // Help button (Calls GM Call Men
 
 	const CPointMap & ptPlayerLocation = m_pChar->GetTopPoint();
 
-	TCHAR * pszMsg = Str_GetTemp();
+	tchar * pszMsg = Str_GetTemp();
 	sprintf(pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_MSG_GMPAGE_REC ),
 		    m_pChar->GetName(), (dword) m_pChar->GetUID(),
 		    ptPlayerLocation.m_x, ptPlayerLocation.m_y, ptPlayerLocation.m_z, ptPlayerLocation.m_map,
@@ -170,7 +170,7 @@ enum GPV_TYPE
 	GPV_QTY
 };
 
-static LPCTSTR const sm_pszGMPageVerbs[GPV_QTY] =
+static lpctstr const sm_pszGMPageVerbs[GPV_QTY] =
 {
 	"BAN",
 	"CURRENT",
@@ -188,10 +188,10 @@ static LPCTSTR const sm_pszGMPageVerbs[GPV_QTY] =
 	"WIPE"
 };
 
-void CClient::Cmd_GM_PageCmd( LPCTSTR pszCmd )
+void CClient::Cmd_GM_PageCmd( lpctstr pszCmd )
 {
 	ADDTOCALLSTACK("CClient::Cmd_GM_PageCmd");
-	static LPCTSTR const sm_pszGMPageVerbsHelp[] =
+	static lpctstr const sm_pszGMPageVerbsHelp[] =
 	{
 		".PAGE on/off\n",
 		".PAGE list = list of pages.\n",

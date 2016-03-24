@@ -243,7 +243,7 @@ int CObjBaseTemplate::GetVisualRange() const
 }
 
 // Names
-LPCTSTR CObjBaseTemplate::GetIndividualName() const
+lpctstr CObjBaseTemplate::GetIndividualName() const
 {
 	return( m_sName );
 }
@@ -253,12 +253,12 @@ bool CObjBaseTemplate::IsIndividualName() const
 	return( ! m_sName.IsEmpty());
 }
 
-LPCTSTR CObjBaseTemplate::GetName() const
+lpctstr CObjBaseTemplate::GetName() const
 {
 	return( m_sName );
 }
 
-bool CObjBaseTemplate::SetName( LPCTSTR pszName )
+bool CObjBaseTemplate::SetName( lpctstr pszName )
 {
 	// NOTE: Name length <= MAX_NAME_SIZE
 	if ( !pszName )

@@ -26,9 +26,9 @@ static const SOUND_TYPE sm_Sounds_Ghost[] =
 	SOUND_GHOST_5
 };
 
-LPCTSTR GetReasonForGarbageCode(int iCode = -1)
+lpctstr GetReasonForGarbageCode(int iCode = -1)
 {
-	LPCTSTR pStr;
+	lpctstr pStr;
 	switch ( iCode )
 	{
 		case -1:
@@ -334,7 +334,7 @@ void CTimedFunctionHandler::Erase( CGrayUID uid )
 	}
 }
 
-int CTimedFunctionHandler::IsTimer( CGrayUID uid, LPCTSTR funcname )
+int CTimedFunctionHandler::IsTimer( CGrayUID uid, lpctstr funcname )
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::IsTimer");
 	for ( int tick = 0; tick < TICK_PER_SEC; tick++ )
@@ -352,7 +352,7 @@ int CTimedFunctionHandler::IsTimer( CGrayUID uid, LPCTSTR funcname )
 	return 0;
 }
 
-void CTimedFunctionHandler::Stop( CGrayUID uid, LPCTSTR funcname )
+void CTimedFunctionHandler::Stop( CGrayUID uid, lpctstr funcname )
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::Stop");
 	for ( int tick = 0; tick < TICK_PER_SEC; tick++ )
@@ -383,7 +383,7 @@ void CTimedFunctionHandler::Stop( CGrayUID uid, LPCTSTR funcname )
 	}
 }
 
-TRIGRET_TYPE CTimedFunctionHandler::Loop(LPCTSTR funcname, int LoopsMade, CScriptLineContext StartContext, CScriptLineContext EndContext, CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pResult)
+TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext, CScriptLineContext EndContext, CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pResult)
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::Loop");
 	bool endLooping = false;
@@ -424,7 +424,7 @@ TRIGRET_TYPE CTimedFunctionHandler::Loop(LPCTSTR funcname, int LoopsMade, CScrip
 	return TRIGRET_ENDIF;
 }
 
-void CTimedFunctionHandler::Add( CGrayUID uid, int numSeconds, LPCTSTR funcname )
+void CTimedFunctionHandler::Add( CGrayUID uid, int numSeconds, lpctstr funcname )
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::Add");
 	ASSERT(funcname != NULL);
@@ -479,7 +479,7 @@ int CTimedFunctionHandler::Load( const char *pszName, bool fQuoted, const char *
 	}
 	else if ( strcmpi( pszName, "TimerFNumbers" ) == 0 )
 	{
-		TCHAR * ppVal[4];
+		tchar * ppVal[4];
 		strcpy( tempBuffer, pszVal );	//because pszVal is constant and Str_ParseCmds wants a non-constant string
 		size_t iArgs = Str_ParseCmds( tempBuffer, ppVal, COUNTOF( ppVal ), " ,\t" );
 		if ( iArgs == 3 )
@@ -1202,7 +1202,7 @@ void CWorld::Init()
 	}
 	ASSERT(m_SectorsQty);
 
-	g_Log.Event(LOGM_INIT, "Allocating map sectors:%s\n", static_cast<LPCTSTR>(z));
+	g_Log.Event(LOGM_INIT, "Allocating map sectors:%s\n", static_cast<lpctstr>(z));
 	EXC_CATCH;
 }
 
@@ -1214,7 +1214,7 @@ CWorld::~CWorld()
 ///////////////////////////////////////////////
 // Loading and Saving.
 
-void CWorld::GetBackupName( CGString & sArchive, LPCTSTR pszBaseDir, TCHAR chType, int iSaveCount ) // static
+void CWorld::GetBackupName( CGString & sArchive, lpctstr pszBaseDir, tchar chType, int iSaveCount ) // static
 {
 	ADDTOCALLSTACK("CWorld::GetBackupName");
 	int iCount = iSaveCount;
@@ -1232,7 +1232,7 @@ void CWorld::GetBackupName( CGString & sArchive, LPCTSTR pszBaseDir, TCHAR chTyp
 		GRAY_SCRIPT );
 }
 
-bool CWorld::OpenScriptBackup( CScript & s, LPCTSTR pszBaseDir, LPCTSTR pszBaseName, int iSaveCount ) // static
+bool CWorld::OpenScriptBackup( CScript & s, lpctstr pszBaseDir, lpctstr pszBaseName, int iSaveCount ) // static
 {
 	ADDTOCALLSTACK("CWorld::OpenScriptBackup");
 	ASSERT(pszBaseName);
@@ -1250,12 +1250,12 @@ bool CWorld::OpenScriptBackup( CScript & s, LPCTSTR pszBaseDir, LPCTSTR pszBaseN
 	if ( rename( sSaveName, sArchive ))
 	{
 		// May not exist if this is the first time.
-		g_Log.Event(LOGM_SAVE|LOGL_WARN, "Rename %s to '%s' FAILED code %d?\n", static_cast<LPCTSTR>(sSaveName), static_cast<LPCTSTR>(sArchive), CGFile::GetLastError() );
+		g_Log.Event(LOGM_SAVE|LOGL_WARN, "Rename %s to '%s' FAILED code %d?\n", static_cast<lpctstr>(sSaveName), static_cast<lpctstr>(sArchive), CGFile::GetLastError() );
 	}
 
 	if ( ! s.Open( sSaveName, OF_WRITE|OF_TEXT|OF_DEFAULTMODE ))
 	{
-		g_Log.Event(LOGM_SAVE|LOGL_CRIT, "Save '%s' FAILED\n", static_cast<LPCTSTR>(sSaveName));
+		g_Log.Event(LOGM_SAVE|LOGL_CRIT, "Save '%s' FAILED\n", static_cast<lpctstr>(sSaveName));
 		return( false );
 	}
 
@@ -1371,16 +1371,16 @@ bool CWorld::SaveStage() // Save world state in stages.
 		m_iSaveCountID++;	// Save only counts if we get to the end winout trapping.
 		m_timeSave = GetCurrentTime() + g_Cfg.m_iSavePeriod;	// next save time.
 
-		g_Log.Event(LOGM_SAVE, "World data saved   (%s).\n", static_cast<LPCTSTR>(m_FileWorld.GetFilePath()));
-		g_Log.Event(LOGM_SAVE, "Player data saved  (%s).\n", static_cast<LPCTSTR>(m_FilePlayers.GetFilePath()));
-		g_Log.Event(LOGM_SAVE, "Multi data saved   (%s).\n", static_cast<LPCTSTR>(m_FileMultis.GetFilePath()));
-		g_Log.Event(LOGM_SAVE, "Context data saved (%s).\n", static_cast<LPCTSTR>(m_FileData.GetFilePath()));
+		g_Log.Event(LOGM_SAVE, "World data saved   (%s).\n", static_cast<lpctstr>(m_FileWorld.GetFilePath()));
+		g_Log.Event(LOGM_SAVE, "Player data saved  (%s).\n", static_cast<lpctstr>(m_FilePlayers.GetFilePath()));
+		g_Log.Event(LOGM_SAVE, "Multi data saved   (%s).\n", static_cast<lpctstr>(m_FileMultis.GetFilePath()));
+		g_Log.Event(LOGM_SAVE, "Context data saved (%s).\n", static_cast<lpctstr>(m_FileData.GetFilePath()));
 
 		llong	llTicksEnd;
 		llong	llTicks = m_savetimer;
 		TIME_PROFILE_END;
 
-		TCHAR * time = Str_GetTemp();
+		tchar * time = Str_GetTemp();
 		sprintf(time, "%lld.%04lld", static_cast<INT64>(TIME_PROFILE_GET_HI/1000), static_cast<INT64>(TIME_PROFILE_GET_LO));
 
 		g_Log.Event(LOGM_SAVE, "World save completed, took %s seconds\n", time);
@@ -1431,7 +1431,7 @@ bool CWorld::SaveForce() // Save world state
 	bool	bSave = true;
 	bool	bSuccess = true;
 
-	static LPCTSTR const msgs[] =
+	static lpctstr const msgs[] =
 	{
 		"garbage collection",
 		"sectors",
@@ -1691,7 +1691,7 @@ void CWorld::SaveStatics()
 
 		m_FileStatics.WriteSection( "EOF" );
 		m_FileStatics.Close();
-		g_Log.Event(LOGM_SAVE, "Statics data saved (%s).\n", static_cast<LPCTSTR>(m_FileStatics.GetFilePath()));
+		g_Log.Event(LOGM_SAVE, "Statics data saved (%s).\n", static_cast<lpctstr>(m_FileStatics.GetFilePath()));
 	}
 	catch (const CGrayError& e)
 	{
@@ -1707,19 +1707,19 @@ void CWorld::SaveStatics()
 
 /////////////////////////////////////////////////////////////////////
 
-bool CWorld::LoadFile( LPCTSTR pszLoadName, bool fError ) // Load world from script
+bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from script
 {
 	CScript s;
 	if ( ! s.Open( pszLoadName, OF_READ|OF_TEXT|OF_DEFAULTMODE ) )
 	{
 		if ( fError )
-			g_Log.Event(LOGM_INIT|LOGL_ERROR, "Can't Load %s\n", static_cast<LPCTSTR>(pszLoadName));
+			g_Log.Event(LOGM_INIT|LOGL_ERROR, "Can't Load %s\n", static_cast<lpctstr>(pszLoadName));
 		else
-			g_Log.Event(LOGM_INIT|LOGL_WARN, "Can't Load %s\n", static_cast<LPCTSTR>(pszLoadName));
+			g_Log.Event(LOGM_INIT|LOGL_WARN, "Can't Load %s\n", static_cast<lpctstr>(pszLoadName));
 		return( false );
 	}
 
-	g_Log.Event(LOGM_INIT, "Loading %s...\n", static_cast<LPCTSTR>(pszLoadName));
+	g_Log.Event(LOGM_INIT, "Loading %s...\n", static_cast<lpctstr>(pszLoadName));
 
 	// Find the size of the file.
 	dword lLoadSize = s.GetLength();
@@ -1760,7 +1760,7 @@ bool CWorld::LoadFile( LPCTSTR pszLoadName, bool fError ) // Load world from scr
 		return( true );
 	}
 
-	g_Log.Event( LOGM_INIT|LOGL_CRIT, "No [EOF] marker. '%s' is corrupt!\n", static_cast<LPCTSTR>(s.GetFilePath()));
+	g_Log.Event( LOGM_INIT|LOGL_CRIT, "No [EOF] marker. '%s' is corrupt!\n", static_cast<lpctstr>(s.GetFilePath()));
 	return( false );
 }
 
@@ -1773,19 +1773,19 @@ bool CWorld::LoadWorld() // Load world from script
 	// NOTE: WE MUST Sync these files ! CHAR and WORLD !!!
 
 	CGString sStaticsName;
-	sStaticsName.Format("%s" GRAY_FILE "statics", static_cast<LPCTSTR>(g_Cfg.m_sWorldBaseDir));
+	sStaticsName.Format("%s" GRAY_FILE "statics", static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
 	CGString sWorldName;
-	sWorldName.Format("%s" GRAY_FILE "world", static_cast<LPCTSTR>(g_Cfg.m_sWorldBaseDir));
+	sWorldName.Format("%s" GRAY_FILE "world", static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
 	CGString sMultisName;
-	sMultisName.Format("%s" GRAY_FILE "multis", static_cast<LPCTSTR>(g_Cfg.m_sWorldBaseDir));
+	sMultisName.Format("%s" GRAY_FILE "multis", static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
 	CGString sCharsName;
-	sCharsName.Format("%s" GRAY_FILE "chars", static_cast<LPCTSTR>(g_Cfg.m_sWorldBaseDir));
+	sCharsName.Format("%s" GRAY_FILE "chars", static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
 	CGString sDataName;
-	sDataName.Format("%s" GRAY_FILE "data",	static_cast<LPCTSTR>(g_Cfg.m_sWorldBaseDir));
+	sDataName.Format("%s" GRAY_FILE "data",	static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
 	int iPrevSaveCount = m_iSaveCountID;
 	for (;;)
@@ -1924,7 +1924,7 @@ void CWorld::r_Write( CScript & s )
 	s.Flush();	// Force this out to the file now.
 }
 
-bool CWorld::r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef )
+bool CWorld::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CWorld::r_GetRef");
 	if ( ! strnicmp( pszKey, "LASTNEW", 7 ))
@@ -1957,7 +1957,7 @@ enum WC_TYPE
 	WC_QTY
 };
 
-LPCTSTR const CWorld::sm_szLoadKeys[WC_QTY+1] =	// static
+lpctstr const CWorld::sm_szLoadKeys[WC_QTY+1] =	// static
 {
 	"PREVBUILD",
 	"SAVECOUNT",
@@ -1967,7 +1967,7 @@ LPCTSTR const CWorld::sm_szLoadKeys[WC_QTY+1] =	// static
 	NULL
 };
 
-bool CWorld::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc )
+bool CWorld::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CWorld::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -2046,7 +2046,7 @@ bool CWorld::r_LoadVal( CScript &s )
 	ADDTOCALLSTACK("CWorld::r_LoadVal");
 	EXC_TRY("LoadVal");
 
-	LPCTSTR	pszKey = s.GetKey();
+	lpctstr	pszKey = s.GetKey();
 	switch ( FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF(sm_szLoadKeys)-1 ))
 	{
 		case WC_PREVBUILD:
@@ -2189,7 +2189,7 @@ void CWorld::GarbageCollection()
 	g_Log.Flush();
 }
 
-void CWorld::Speak( const CObjBaseTemplate * pSrc, LPCTSTR pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font )
+void CWorld::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font )
 {
 	ADDTOCALLSTACK("CWorld::Speak");
 	if ( !pszText || !pszText[0] )
@@ -2225,9 +2225,9 @@ void CWorld::Speak( const CObjBaseTemplate * pSrc, LPCTSTR pszText, HUE_TYPE wHu
 		if ( ! pClient->CanHear( pSrc, mode ))
 			continue;
 
-		TCHAR * myName = Str_GetTemp();
+		tchar * myName = Str_GetTemp();
 
-		LPCTSTR pszSpeak = pszText;
+		lpctstr pszSpeak = pszText;
 		pChar = pClient->GetChar();
 
 		if ( pChar != NULL )
@@ -2370,7 +2370,7 @@ void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const NCHAR * pwText, 
 		{
 			if ( wTextUID[0] == '\0' )
 			{
-				TCHAR * pszMsg = Str_GetTemp();
+				tchar * pszMsg = Str_GetTemp();
 				sprintf(pszMsg, "<%s [%x]>", pSrc->GetName(), static_cast<dword>(pSrc->GetUID()));
 				int iLen = CvtSystemToNUNICODE( wTextUID, COUNTOF(wTextUID), pszMsg, -1 );
 				for ( size_t i = 0; pwText[i] && iLen < MAX_TALK_BUFFER - 1; i++, iLen++ )
@@ -2386,13 +2386,13 @@ void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const NCHAR * pwText, 
 	}
 }
 
-void CWorld::Broadcast(LPCTSTR pMsg) // System broadcast in bold text
+void CWorld::Broadcast(lpctstr pMsg) // System broadcast in bold text
 {
 	ADDTOCALLSTACK("CWorld::Broadcast");
 	Speak( NULL, pMsg, HUE_TEXT_DEF, TALKMODE_BROADCAST, FONT_BOLD );
 }
 
-void __cdecl CWorld::Broadcastf(LPCTSTR pMsg, ...) // System broadcast in bold text
+void __cdecl CWorld::Broadcastf(lpctstr pMsg, ...) // System broadcast in bold text
 {
 	ADDTOCALLSTACK("CWorld::Broadcastf");
 	TemporaryString sTemp;

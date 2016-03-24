@@ -36,12 +36,12 @@ void CSocketAddressIP::SetAddrIP( dword dwIP )
 	s_addr = dwIP;
 }
 
-LPCTSTR CSocketAddressIP::GetAddrStr() const
+lpctstr CSocketAddressIP::GetAddrStr() const
 {
 	return inet_ntoa( *this );
 }
 
-void CSocketAddressIP::SetAddrStr( LPCTSTR pszIP )
+void CSocketAddressIP::SetAddrStr( lpctstr pszIP )
 {
 	// NOTE: This must be in 1.2.3.4 format.
 	s_addr = inet_addr( pszIP );
@@ -93,7 +93,7 @@ bool CSocketAddressIP::SetHostStruct( const struct hostent * pHost )
 	return true;
 }
 
-bool CSocketAddressIP::SetHostStr( LPCTSTR pszHostName )
+bool CSocketAddressIP::SetHostStr( lpctstr pszHostName )
 {
 	// try to resolve the host name with DNS for the true ip address.
 	if ( pszHostName[0] == '\0' )
@@ -168,15 +168,15 @@ void CSocketAddress::SetPort( word wPort )
 	m_port = wPort;
 }
 
-void CSocketAddress::SetPortStr( LPCTSTR pszPort )
+void CSocketAddress::SetPortStr( lpctstr pszPort )
 {
 	m_port = static_cast<word>(ATOI(pszPort));
 }
 
-bool CSocketAddress::SetPortExtStr( TCHAR * pszIP )
+bool CSocketAddress::SetPortExtStr( tchar * pszIP )
 {
 	// assume the port is at the end of the line.
-	TCHAR * pszPort = strchr( pszIP, ',' );
+	tchar * pszPort = strchr( pszIP, ',' );
 	if ( pszPort == NULL )
 	{
 		pszPort = strchr( pszIP, ':' );
@@ -190,10 +190,10 @@ bool CSocketAddress::SetPortExtStr( TCHAR * pszIP )
 }
 
 // Port and address together.
-bool CSocketAddress::SetHostPortStr( LPCTSTR pszIP )
+bool CSocketAddress::SetHostPortStr( lpctstr pszIP )
 {
 	// NOTE: This is a blocking call !!!!
-	TCHAR szIP[256];
+	tchar szIP[256];
 	strncpy( szIP, pszIP, sizeof(szIP));
 	SetPortExtStr( szIP );
 	return SetHostStr( szIP );
@@ -319,7 +319,7 @@ int CGSocket::Connect( const struct in_addr & ip, word wPort )
 	return( Connect( SockAddr ));
 }
 
-int CGSocket::Connect( LPCTSTR pszHostName, word wPort )
+int CGSocket::Connect( lpctstr pszHostName, word wPort )
 {
 	CSocketAddress SockAddr;
 	SockAddr.SetHostStr( pszHostName );
@@ -473,7 +473,7 @@ void CGSocket::CloseSocket( SOCKET hClose )
 #endif
 }
 
-short CGSocket::GetProtocolIdByName( LPCTSTR pszName )
+short CGSocket::GetProtocolIdByName( lpctstr pszName )
 {
 	protoent * ppe;
 

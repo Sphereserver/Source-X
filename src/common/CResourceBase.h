@@ -8,6 +8,7 @@
 #include "CArray.h"
 #include "CScript.h"
 #include "CScriptObj.h"
+#include "CTime.h"
 #include "../game/CServTime.h"
 
 
@@ -124,7 +125,7 @@ struct RESOURCE_ID : public RESOURCE_ID_BASE
 
 // Desguise an id as a pointer.
 #ifndef MAKEINTRESOURCE
-#define MAKEINTRESOURCE(id) ((LPCTSTR)((dword)((word)(id))))
+#define MAKEINTRESOURCE(id) ((lpctstr)((dword)((word)(id))))
 #endif
 #define ISINTRESOURCE(p)	(!(((dword)p)&0xFFFFF000))
 #define GETINTRESOURCE(p)	(((dword)p)&0x0FFF)
@@ -143,13 +144,13 @@ public:
 	int GetResIndex() const;
 	INT64 GetResQty() const;
 	void SetResQty( INT64 wQty );
-	inline bool Load( LPTSTR & arg )
+	inline bool Load( lptstr & arg )
 	{
-		return Load( const_cast<LPCTSTR&>(arg) );
+		return Load( const_cast<lpctstr&>(arg) );
 	}
-	bool Load( LPCTSTR & pszCmds );
-	size_t WriteKey( TCHAR * pszArgs, bool fQtyOnly = false, bool fKeyOnly = false ) const;
-	size_t WriteNameSingle( TCHAR * pszArgs, int iQty = 0 ) const;
+	bool Load( lpctstr & pszCmds );
+	size_t WriteKey( tchar * pszArgs, bool fQtyOnly = false, bool fKeyOnly = false ) const;
+	size_t WriteNameSingle( tchar * pszArgs, int iQty = 0 ) const;
 public:
 	CResourceQty() : m_iQty(0) { };
 };
@@ -160,7 +161,7 @@ class CResourceQtyArray : public CGTypedArray<CResourceQty, CResourceQty&>
 public:
 	static const char *m_sClassName;
 	CResourceQtyArray();
-	explicit CResourceQtyArray(LPCTSTR pszCmds);
+	explicit CResourceQtyArray(lpctstr pszCmds);
 	bool operator == ( const CResourceQtyArray & array ) const;
 	CResourceQtyArray& operator=(const CResourceQtyArray& other);
 
@@ -168,9 +169,9 @@ private:
 	CResourceQtyArray(const CResourceQtyArray& copy);
 
 public:
-	size_t Load( LPCTSTR pszCmds );
-	void WriteKeys( TCHAR * pszArgs, size_t index = 0, bool fQtyOnly = false, bool fKeyOnly = false ) const;
-	void WriteNames( TCHAR * pszArgs, size_t index = 0 ) const;
+	size_t Load( lpctstr pszCmds );
+	void WriteKeys( tchar * pszArgs, size_t index = 0, bool fQtyOnly = false, bool fKeyOnly = false ) const;
+	void WriteNames( tchar * pszArgs, size_t index = 0 ) const;
 
 	size_t FindResourceID( RESOURCE_ID_BASE rid ) const;
 	size_t FindResourceType( RES_TYPE type ) const;
@@ -258,7 +259,7 @@ private:
 
 public:
 	static const char *m_sClassName;
-	explicit CResourceScript( LPCTSTR pszFileName );
+	explicit CResourceScript( lpctstr pszFileName );
 	CResourceScript();
 
 private:
@@ -268,7 +269,7 @@ private:
 public:
 	bool IsFirstCheck() const;
 	void ReSync();
-	bool Open( LPCTSTR pszFilename = NULL, UINT wFlags = OF_READ );
+	bool Open( lpctstr pszFilename = NULL, UINT wFlags = OF_READ );
 	virtual void Close();
 	virtual void CloseForce();
 };
@@ -317,7 +318,7 @@ protected:
 	const CVarDefContNum * m_pDefName;	// The name of the resource. (optional)
 public:
 	static const char *m_sClassName;
-	CResourceDef( RESOURCE_ID rid, LPCTSTR pszDefName );
+	CResourceDef( RESOURCE_ID rid, lpctstr pszDefName );
 	CResourceDef( RESOURCE_ID rid, const CVarDefContNum * pDefName = NULL );
 	virtual ~CResourceDef();
 
@@ -332,11 +333,11 @@ public:
 	void CopyDef( const CResourceDef * pLink );
 
 	// Get the name of the resource item. (Used for saving) may be number or name
-	LPCTSTR GetResourceName() const;
-	virtual LPCTSTR GetName() const;	// default to same as the DEFNAME name.
+	lpctstr GetResourceName() const;
+	virtual lpctstr GetName() const;	// default to same as the DEFNAME name.
 
 	// Give it another DEFNAME= even if it already has one. it's ok to have multiple names.
-	bool SetResourceName( LPCTSTR pszName );
+	bool SetResourceName( lpctstr pszName );
 	void SetResourceVar( const CVarDefContNum* pVarNum );
 
 	// unlink all this data. (tho don't delete the def as the pointer might still be used !)
@@ -398,7 +399,7 @@ public:
 	static const char *m_sClassName;
 	const CGString m_sName;
 public:
-	CResourceNamed( RESOURCE_ID rid, LPCTSTR pszName );
+	CResourceNamed( RESOURCE_ID rid, lpctstr pszName );
 	virtual ~CResourceNamed();
 
 private:
@@ -406,7 +407,7 @@ private:
 	CResourceNamed& operator=(const CResourceNamed& other);
 
 public:
-	LPCTSTR GetName() const;
+	lpctstr GetName() const;
 };
 
 //***********************************************************
@@ -434,7 +435,7 @@ class CResourceRefArray : public CGPtrTypeArray<CResourceRef>
 	// Define a list of pointer references to resource. (Not owned by the list)
 	// An indexed list of CResourceLink s.
 private:
-	LPCTSTR GetResourceName( size_t iIndex ) const;
+	lpctstr GetResourceName( size_t iIndex ) const;
 public:
 	static const char *m_sClassName;
 	CResourceRefArray();
@@ -445,17 +446,17 @@ private:
 public:
 	size_t FindResourceType( RES_TYPE type ) const;
 	size_t FindResourceID( RESOURCE_ID_BASE rid ) const;
-	size_t FindResourceName( RES_TYPE restype, LPCTSTR pszKey ) const;
+	size_t FindResourceName( RES_TYPE restype, lpctstr pszKey ) const;
 
 	void WriteResourceRefList( CGString & sVal ) const;
 	bool r_LoadVal( CScript & s, RES_TYPE restype );
-	void r_Write( CScript & s, LPCTSTR pszKey ) const;
+	void r_Write( CScript & s, lpctstr pszKey ) const;
 
 	inline bool ContainsResourceID( RESOURCE_ID_BASE & rid ) const
 	{
 		return FindResourceID(rid) != BadIndex();
 	}
-	inline bool ContainsResourceName( RES_TYPE restype, LPCTSTR & pszKey ) const
+	inline bool ContainsResourceName( RES_TYPE restype, lpctstr & pszKey ) const
 	{
 		return FindResourceName(restype, pszKey) != BadIndex();
 	}
@@ -502,7 +503,7 @@ public:
 
 //*************************************************
 
-struct CStringSortArray : public CGObSortArray< TCHAR*, TCHAR* >
+struct CStringSortArray : public CGObSortArray< tchar*, tchar* >
 {
 public:
 	CStringSortArray();
@@ -510,13 +511,13 @@ private:
 	CStringSortArray(const CStringSortArray& copy);
 	CStringSortArray& operator=(const CStringSortArray& other);
 public:
-	virtual void DestructElements( TCHAR** pElements, size_t nCount );
+	virtual void DestructElements( tchar** pElements, size_t nCount );
 	// Sorted array of strings
-	int CompareKey( TCHAR* pszID1, TCHAR* pszID2, bool fNoSpaces ) const;
-	void AddSortString( LPCTSTR pszText );
+	int CompareKey( tchar* pszID1, tchar* pszID2, bool fNoSpaces ) const;
+	void AddSortString( lpctstr pszText );
 };
 
-class CObNameSortArray : public CGObSortArray< CScriptObj*, LPCTSTR >
+class CObNameSortArray : public CGObSortArray< CScriptObj*, lpctstr >
 {
 public:
 	static const char *m_sClassName;
@@ -527,7 +528,7 @@ private:
 
 public:
 	// Array of CScriptObj. name sorted.
-	int CompareKey( LPCTSTR pszID, CScriptObj* pObj, bool fNoSpaces ) const;
+	int CompareKey( lpctstr pszID, CScriptObj* pObj, bool fNoSpaces ) const;
 };
 
 //***************************************************************8
@@ -535,7 +536,7 @@ public:
 class CResourceBase : public CScriptObj
 {
 protected:
-	static LPCTSTR const sm_szResourceBlocks[RES_QTY];
+	static lpctstr const sm_szResourceBlocks[RES_QTY];
 
 	CGObArray< CResourceScript* > m_ResourceFiles;	// All resource files we need to get blocks from later.
 
@@ -547,28 +548,28 @@ public:
 	CGString m_sSCPBaseDir;		// if we want to get *.SCP files from elsewhere.
 
 protected:
-	CResourceScript * AddResourceFile( LPCTSTR pszName );
-	void AddResourceDir( LPCTSTR pszDirName );
+	CResourceScript * AddResourceFile( lpctstr pszName );
+	void AddResourceDir( lpctstr pszDirName );
 
 public:
 	void LoadResourcesOpen( CScript * pScript );
 	bool LoadResources( CResourceScript * pScript );
-	static LPCTSTR GetResourceBlockName( RES_TYPE restype );
-	LPCTSTR GetName() const;
+	static lpctstr GetResourceBlockName( RES_TYPE restype );
+	lpctstr GetName() const;
 	CResourceScript* GetResourceFile( size_t i );
-	RESOURCE_ID ResourceGetID( RES_TYPE restype, LPCTSTR & pszName );
-	RESOURCE_ID ResourceGetIDType( RES_TYPE restype, LPCTSTR pszName );
-	int ResourceGetIndexType( RES_TYPE restype, LPCTSTR pszName );
-	LPCTSTR ResourceGetName( RESOURCE_ID_BASE rid ) const;
-	CScriptObj * ResourceGetDefByName( RES_TYPE restype, LPCTSTR pszName );
+	RESOURCE_ID ResourceGetID( RES_TYPE restype, lpctstr & pszName );
+	RESOURCE_ID ResourceGetIDType( RES_TYPE restype, lpctstr pszName );
+	int ResourceGetIndexType( RES_TYPE restype, lpctstr pszName );
+	lpctstr ResourceGetName( RESOURCE_ID_BASE rid ) const;
+	CScriptObj * ResourceGetDefByName( RES_TYPE restype, lpctstr pszName );
 	bool ResourceLock( CResourceLock & s, RESOURCE_ID_BASE rid );
-	bool ResourceLock( CResourceLock & s, RES_TYPE restype, LPCTSTR pszName );
+	bool ResourceLock( CResourceLock & s, RES_TYPE restype, lpctstr pszName );
 
-	CResourceScript * FindResourceFile( LPCTSTR pszTitle );
-	CResourceScript * LoadResourcesAdd( LPCTSTR pszNewName );
+	CResourceScript * FindResourceFile( lpctstr pszTitle );
+	CResourceScript * LoadResourcesAdd( lpctstr pszNewName );
 	
 	virtual CResourceDef * ResourceGetDef( RESOURCE_ID_BASE rid ) const;
-	virtual bool OpenResourceFind( CScript &s, LPCTSTR pszFilename, bool bCritical = true );
+	virtual bool OpenResourceFind( CScript &s, lpctstr pszFilename, bool bCritical = true );
 	virtual bool LoadResourceSection( CScript * pScript ) = 0;
 
 public:
@@ -580,7 +581,7 @@ private:
 	CResourceBase& operator=(const CResourceBase& other);
 };
 
-inline LPCTSTR CResourceBase::GetResourceBlockName( RES_TYPE restype )	// static
+inline lpctstr CResourceBase::GetResourceBlockName( RES_TYPE restype )	// static
 {
 	if ( restype < 0 || restype >= RES_QTY )
 		restype = RES_UNKNOWN;

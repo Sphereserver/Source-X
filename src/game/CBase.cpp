@@ -12,7 +12,7 @@ enum OBC_TYPE
 	OBC_QTY
 };
 
-LPCTSTR const CBaseBaseDef::sm_szLoadKeys[OBC_QTY+1] =
+lpctstr const CBaseBaseDef::sm_szLoadKeys[OBC_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../tables/CBaseBaseDef_props.tbl"
@@ -42,12 +42,12 @@ CBaseBaseDef::~CBaseBaseDef()
 {
 }
 
-LPCTSTR CBaseBaseDef::GetTypeName() const
+lpctstr CBaseBaseDef::GetTypeName() const
 {
 	return( m_sName );
 }
 
-LPCTSTR CBaseBaseDef::GetName() const
+lpctstr CBaseBaseDef::GetName() const
 {
 	return( GetTypeName());
 }
@@ -57,7 +57,7 @@ bool CBaseBaseDef::HasTypeName() const	// some CItem may not.
 	return( ! m_sName.IsEmpty());	// default type name.
 }
 
-void CBaseBaseDef::SetTypeName( LPCTSTR pszName )
+void CBaseBaseDef::SetTypeName( lpctstr pszName )
 {
 	GETNONWHITESPACE( pszName );
 	m_sName = pszName;
@@ -75,7 +75,7 @@ void CBaseBaseDef::UnLink()
 	CResourceLink::UnLink();
 }
 
-bool CBaseBaseDef::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
 {
 	UNREFERENCED_PARAMETER(pSrc);
 	ADDTOCALLSTACK("CBaseBaseDef::r_WriteVal");
@@ -303,7 +303,7 @@ bool CBaseBaseDef::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * p
 						else if ( !strnicmp( pszKey, "VAL", 3 ))
 							fQtyOnly	= true;
 
-						TCHAR *pszTmp = Str_GetTemp();
+						tchar *pszTmp = Str_GetTemp();
 						m_BaseResources.WriteKeys( pszTmp, index, fQtyOnly, fKeyOnly );
 						if ( fQtyOnly && pszTmp[0] == '\0' )
 							strcpy( pszTmp, "0" );
@@ -313,7 +313,7 @@ bool CBaseBaseDef::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * p
 				}
 				else
 				{
-					TCHAR *pszTmp = Str_GetTemp();
+					tchar *pszTmp = Str_GetTemp();
 					m_BaseResources.WriteKeys( pszTmp );
 					sVal = pszTmp;
 				}

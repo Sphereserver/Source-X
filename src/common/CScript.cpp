@@ -30,13 +30,13 @@ CScriptLineContext::CScriptLineContext()
 // -CScriptKey
 
 
-bool CScriptKey::IsKey( LPCTSTR pszName ) const
+bool CScriptKey::IsKey( lpctstr pszName ) const
 {
 	ASSERT(m_pszKey);
 	return( ! strcmpi( m_pszKey, pszName ));
 }
 
-bool CScriptKey::IsKeyHead( LPCTSTR pszName, size_t len ) const
+bool CScriptKey::IsKeyHead( lpctstr pszName, size_t len ) const
 {
 	ASSERT(m_pszKey);
 	return( ! strnicmp( m_pszKey, pszName, len ));
@@ -48,7 +48,7 @@ void CScriptKey::InitKey()
 	m_pszArg = m_pszKey = NULL;
 }
 
-LPCTSTR CScriptKey::GetKey() const
+lpctstr CScriptKey::GetKey() const
 {
 	// Get the key or section name.
 	ASSERT(m_pszKey);
@@ -62,25 +62,25 @@ bool CScriptKey::HasArgs() const
 	return(( m_pszArg[0] ) ? true : false );
 }
 
-TCHAR * CScriptKey::GetArgRaw() const	// Not need to parse at all.
+tchar * CScriptKey::GetArgRaw() const	// Not need to parse at all.
 {
 	ASSERT(m_pszArg);
 	return(m_pszArg);
 }
 
-TCHAR * CScriptKey::GetArgStr( bool * fQuoted )	// this could be a quoted string ?
+tchar * CScriptKey::GetArgStr( bool * fQuoted )	// this could be a quoted string ?
 {
 	ADDTOCALLSTACK("CScriptKey::GetArgStr");
 	ASSERT(m_pszKey);
 
-	TCHAR * pStr = GetArgRaw();
+	tchar * pStr = GetArgRaw();
 	if ( *pStr != '"' )
 		return( pStr );
 
 	pStr++;
-	//TCHAR * pEnd = strchr( pStr, '"' );
+	//tchar * pEnd = strchr( pStr, '"' );
 	// search for last qoute sybol starting from the end
-	for (TCHAR * pEnd = pStr + strlen( pStr ) - 1; pEnd >= pStr; pEnd-- )
+	for (tchar * pEnd = pStr + strlen( pStr ) - 1; pEnd >= pStr; pEnd-- )
 	{
 		if ( *pEnd == '"' )
 		{
@@ -94,7 +94,7 @@ TCHAR * CScriptKey::GetArgStr( bool * fQuoted )	// this could be a quoted string
 	return( pStr );
 }
 
-TCHAR * CScriptKey::GetArgStr()
+tchar * CScriptKey::GetArgStr()
 {
 	return GetArgStr( NULL );
 }
@@ -145,7 +145,7 @@ CScriptKey::CScriptKey() : m_pszKey(NULL), m_pszArg(NULL)
 {
 }
 
-CScriptKey::CScriptKey( TCHAR * pszKey, TCHAR * pszArg ) : m_pszKey( pszKey ), m_pszArg( pszArg )
+CScriptKey::CScriptKey( tchar * pszKey, tchar * pszArg ) : m_pszKey( pszKey ), m_pszArg( pszArg )
 {
 }
 
@@ -156,7 +156,7 @@ CScriptKey::~CScriptKey()
 ///////////////////////////////////////////////////////////////
 // -CScriptKeyAlloc
 
-TCHAR * CScriptKeyAlloc::GetKeyBufferRaw( size_t iLen )
+tchar * CScriptKeyAlloc::GetKeyBufferRaw( size_t iLen )
 {
 	ADDTOCALLSTACK("CScriptKeyAlloc::GetKeyBufferRaw");
 	// iLen = length of the string we want to hold.
@@ -175,14 +175,14 @@ TCHAR * CScriptKeyAlloc::GetKeyBufferRaw( size_t iLen )
 	return m_pszKey;
 }
 
-TCHAR * CScriptKeyAlloc::GetKeyBuffer()
+tchar * CScriptKeyAlloc::GetKeyBuffer()
 {
 	// Get the buffer the key is in.
 	ASSERT(m_Mem.GetData());
-	return reinterpret_cast<TCHAR *>(m_Mem.GetData());
+	return reinterpret_cast<tchar *>(m_Mem.GetData());
 }
 
-bool CScriptKeyAlloc::ParseKey( LPCTSTR pszKey )
+bool CScriptKeyAlloc::ParseKey( lpctstr pszKey )
 {
 	ADDTOCALLSTACK("CScriptKeyAlloc::ParseKey");
 	// Skip leading white space 
@@ -194,7 +194,7 @@ bool CScriptKeyAlloc::ParseKey( LPCTSTR pszKey )
 
 	GETNONWHITESPACE( pszKey );
 
-	TCHAR * pBuffer = GetKeyBufferRaw( strlen( pszKey ));
+	tchar * pBuffer = GetKeyBufferRaw( strlen( pszKey ));
 	ASSERT(pBuffer);
 
 	size_t iLen = m_Mem.GetDataLength() - 1;
@@ -205,7 +205,7 @@ bool CScriptKeyAlloc::ParseKey( LPCTSTR pszKey )
 	return( true );
 }
 
-bool CScriptKeyAlloc::ParseKey( LPCTSTR pszKey, LPCTSTR pszVal )
+bool CScriptKeyAlloc::ParseKey( lpctstr pszKey, lpctstr pszVal )
 {
 	ADDTOCALLSTACK("CScriptKeyAlloc::ParseKey");
 	ASSERT(pszKey);
@@ -250,7 +250,7 @@ size_t CScriptKeyAlloc::ParseKeyEnd()
 	size_t len = 0;
 	for ( ; len < SCRIPT_MAX_LINE_LEN; len++ )
 	{
-		TCHAR ch = m_pszKey[len];
+		tchar ch = m_pszKey[len];
 		if ( ch == '\0' )
 			break;
 		if ( ch == '/' && m_pszKey[len + 1] == '/' )
@@ -286,13 +286,13 @@ CScript::CScript()
 	InitBase();
 }
 
-CScript::CScript( LPCTSTR pszKey )
+CScript::CScript( lpctstr pszKey )
 {
 	InitBase();
 	ParseKey(pszKey);
 }
 
-CScript::CScript( LPCTSTR pszKey, LPCTSTR pszVal )
+CScript::CScript( lpctstr pszKey, lpctstr pszVal )
 {
 	InitBase();
 	ParseKey( pszKey, pszVal );
@@ -307,7 +307,7 @@ void CScript::InitBase()
 	InitKey();
 }
 
-bool CScript::Open( LPCTSTR pszFilename, UINT wFlags )
+bool CScript::Open( lpctstr pszFilename, UINT wFlags )
 {
 	ADDTOCALLSTACK("CScript::Open");
 	// If we are in read mode and we have no script file.
@@ -325,14 +325,14 @@ bool CScript::Open( LPCTSTR pszFilename, UINT wFlags )
 		SetFilePath( pszFilename );
 	}
 
-	LPCTSTR pszTitle = GetFileTitle();
+	lpctstr pszTitle = GetFileTitle();
 	if ( pszTitle == NULL || pszTitle[0] == '\0' )
 		return( false );
 
-	LPCTSTR pszExt = GetFilesExt( GetFilePath() ); 
+	lpctstr pszExt = GetFilesExt( GetFilePath() ); 
 	if ( pszExt == NULL )
 	{
-		TCHAR szTemp[ _MAX_PATH ];
+		tchar szTemp[ _MAX_PATH ];
 		strcpy( szTemp, GetFilePath() );
 		strcat( szTemp, GRAY_SCRIPT );
 		SetFilePath( szTemp );
@@ -343,7 +343,7 @@ bool CScript::Open( LPCTSTR pszFilename, UINT wFlags )
 	{
 		if ( ! ( wFlags & OF_NONCRIT ))
 		{
-			g_Log.Event(LOGL_WARN, "'%s' not found...\n", static_cast<LPCTSTR>(GetFilePath()));
+			g_Log.Event(LOGL_WARN, "'%s' not found...\n", static_cast<lpctstr>(GetFilePath()));
 		}
 		return( false );
 	}
@@ -373,7 +373,7 @@ bool CScript::ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened 
 	return( false );
 }
 
-bool CScript::FindTextHeader( LPCTSTR pszName ) // Find a section in the current script
+bool CScript::FindTextHeader( lpctstr pszName ) // Find a section in the current script
 {
 	ADDTOCALLSTACK("CScript::FindTextHeader");
 	// RETURN: false = EOF reached.
@@ -463,7 +463,7 @@ foundit:
 	return false;
 }
 
-bool CScript::FindSection( LPCTSTR pszName, UINT uModeFlags )
+bool CScript::FindSection( lpctstr pszName, UINT uModeFlags )
 {
 	ADDTOCALLSTACK("CScript::FindSection");
 	// Find a section in the current script
@@ -477,7 +477,7 @@ bool CScript::FindSection( LPCTSTR pszName, UINT uModeFlags )
 	}
 
 	TemporaryString pszSec;
-	sprintf(static_cast<TCHAR *>(pszSec), "[%s]", pszName);
+	sprintf(static_cast<tchar *>(pszSec), "[%s]", pszName);
 	if ( FindTextHeader(pszSec))
 	{
 		// Success
@@ -489,18 +489,18 @@ bool CScript::FindSection( LPCTSTR pszName, UINT uModeFlags )
 
 	if ( ! ( uModeFlags & OF_NONCRIT ))
 	{
-		g_Log.Event(LOGL_WARN, "Did not find '%s' section '%s'\n", static_cast<LPCTSTR>(GetFileTitle()), static_cast<LPCTSTR>(pszName));
+		g_Log.Event(LOGL_WARN, "Did not find '%s' section '%s'\n", static_cast<lpctstr>(GetFileTitle()), static_cast<lpctstr>(pszName));
 	}
 	return( false );
 }
 
-LPCTSTR CScript::GetSection() const
+lpctstr CScript::GetSection() const
 {
 	ASSERT(m_pszKey);
 	return( m_pszKey );
 }
 
-bool CScript::IsSectionType( LPCTSTR pszName ) //const
+bool CScript::IsSectionType( lpctstr pszName ) //const
 {
 	// Only valid after FindNextSection()
 	return( ! strcmpi( GetKey(), pszName ));
@@ -540,14 +540,14 @@ bool CScript::ReadKeyParse() // Read line from script
 	if ( !m_pszArg[0] || ( m_pszArg[1] != '=' && m_pszArg[1] != '+' && m_pszArg[1] != '-' ) || !strchr( ".*+-/%|&!^", m_pszArg[0] ) )
 		return true;
 
-	static LPCTSTR const sm_szEvalTypes[] =
+	static lpctstr const sm_szEvalTypes[] =
 	{
 		"eval",
 		"floatval"
 	};
 
 	EXC_SET("parse");
-	LPCTSTR	pszArgs	= m_pszArg;
+	lpctstr	pszArgs	= m_pszArg;
 	pszArgs += 2;
 	GETNONWHITESPACE( pszArgs );
 	TemporaryString buf;
@@ -558,7 +558,7 @@ bool CScript::ReadKeyParse() // Read line from script
 	{
 		if ( *pszArgs == '"' )
 		{
-			TCHAR *	pQuote	= const_cast<TCHAR*>(strchr( pszArgs+1, '"' ));
+			tchar *	pQuote	= const_cast<tchar*>(strchr( pszArgs+1, '"' ));
 			if ( pQuote )
 			{
 				pszArgs++;
@@ -590,7 +590,7 @@ bool CScript::ReadKeyParse() // Read line from script
 	return false;
 }
 
-bool CScript::FindKey( LPCTSTR pszName ) // Find a key in the current section
+bool CScript::FindKey( lpctstr pszName ) // Find a key in the current section
 {
 	ADDTOCALLSTACK("CScript::FindKey");
 	if ( strlen( pszName ) > SCRIPT_MAX_SECTION_LEN )
@@ -636,7 +636,7 @@ CScriptLineContext CScript::GetContext() const
 	return( LineContext );
 }
 
-bool _cdecl CScript::WriteSection( LPCTSTR pszSection, ... )
+bool _cdecl CScript::WriteSection( lpctstr pszSection, ... )
 {
 	ADDTOCALLSTACK_INTENSIVE("CScript::WriteSection");
 	// Write out the section header.
@@ -652,7 +652,7 @@ bool _cdecl CScript::WriteSection( LPCTSTR pszSection, ... )
 	return( true );
 }
 
-bool CScript::WriteKey( LPCTSTR pszKey, LPCTSTR pszVal )
+bool CScript::WriteKey( lpctstr pszKey, lpctstr pszVal )
 {
 	ADDTOCALLSTACK_INTENSIVE("CScript::WriteKey");
 	if ( pszKey == NULL || pszKey[0] == '\0' )
@@ -660,13 +660,13 @@ bool CScript::WriteKey( LPCTSTR pszKey, LPCTSTR pszVal )
 		return false;
 	}
 
-	TCHAR ch = '\0';
-	TCHAR * pszSep;
+	tchar ch = '\0';
+	tchar * pszSep;
 	if ( pszVal == NULL || pszVal[0] == '\0' )
 	{
-		pszSep = const_cast<TCHAR*>(strchr( pszKey, '\n' ));
+		pszSep = const_cast<tchar*>(strchr( pszKey, '\n' ));
 		if ( pszSep == NULL )
-			pszSep = const_cast<TCHAR*>(strchr( pszKey, '\r' )); // acts like const_cast
+			pszSep = const_cast<tchar*>(strchr( pszKey, '\r' )); // acts like const_cast
 
 		if ( pszSep != NULL )
 		{
@@ -683,9 +683,9 @@ bool CScript::WriteKey( LPCTSTR pszKey, LPCTSTR pszVal )
 	}
 	else
 	{
-		pszSep = const_cast<TCHAR*>(strchr( pszVal, '\n' ));
+		pszSep = const_cast<tchar*>(strchr( pszVal, '\n' ));
 		if ( pszSep == NULL )
-			pszSep = const_cast<TCHAR*>(strchr( pszVal, '\r' )); // acts like const_cast
+			pszSep = const_cast<tchar*>(strchr( pszVal, '\r' )); // acts like const_cast
 
 		if ( pszSep != NULL )
 		{
@@ -703,10 +703,10 @@ bool CScript::WriteKey( LPCTSTR pszKey, LPCTSTR pszVal )
 	return( true );
 }
 
-//void _cdecl CScript::WriteKeyFormat( LPCTSTR pszKey, LPCTSTR pszVal, ... )
+//void _cdecl CScript::WriteKeyFormat( lpctstr pszKey, lpctstr pszVal, ... )
 //{
 //	ADDTOCALLSTACK("CScript::WriteKeyFormat");
-//	TCHAR	*pszTemp = Str_GetTemp();
+//	tchar	*pszTemp = Str_GetTemp();
 //	va_list vargs;
 //	va_start( vargs, pszVal );
 //	vsprintf(pszTemp, pszVal, vargs);
@@ -714,7 +714,7 @@ bool CScript::WriteKey( LPCTSTR pszKey, LPCTSTR pszVal )
 //	va_end( vargs );
 //}
 
-void _cdecl CScript::WriteKeyFormat( LPCTSTR pszKey, LPCTSTR pszVal, ... )
+void _cdecl CScript::WriteKeyFormat( lpctstr pszKey, lpctstr pszVal, ... )
 {
 	ADDTOCALLSTACK_INTENSIVE("CScript::WriteKeyFormat");
 	TemporaryString pszTemp;
@@ -725,7 +725,7 @@ void _cdecl CScript::WriteKeyFormat( LPCTSTR pszKey, LPCTSTR pszVal, ... )
 	va_end( vargs );
 }
 
-void CScript::WriteKeyVal( LPCTSTR pszKey, INT64 dwVal )
+void CScript::WriteKeyVal( lpctstr pszKey, INT64 dwVal )
 {
 #ifdef __MINGW32__
 	WriteKeyFormat( pszKey, "%I64d", dwVal );
@@ -734,7 +734,7 @@ void CScript::WriteKeyVal( LPCTSTR pszKey, INT64 dwVal )
 #endif  // __MINGW32__
 }
 
-void CScript::WriteKeyHex( LPCTSTR pszKey, INT64 dwVal )
+void CScript::WriteKeyHex( lpctstr pszKey, INT64 dwVal )
 {
 #ifdef __MINGW32__
 	WriteKeyFormat( pszKey, "0%I64x", dwVal );

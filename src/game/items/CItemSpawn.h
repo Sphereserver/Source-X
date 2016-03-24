@@ -11,8 +11,8 @@ class CCharBase;
 class CItemSpawn : public CItem
 {
 private:
-	static LPCTSTR const sm_szLoadKeys[];
-	static LPCTSTR const sm_szVerbKeys[];
+	static lpctstr const sm_szLoadKeys[];
+	static lpctstr const sm_szVerbKeys[];
 	CGrayUID m_obj[UINT8_MAX];	///< Storing UIDs of the created items/chars.
 
 public:
@@ -110,11 +110,11 @@ public:
 	*
 	* @return the name of the resource.
 	*/
-	int GetName(TCHAR * pszOut) const;
+	int GetName(tchar * pszOut) const;
 
 	CItemSpawn(ITEMID_TYPE id , CItemBase * pItemDef);
 	virtual ~CItemSpawn();
-	virtual bool r_WriteVal(LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc);
+	virtual bool r_WriteVal(lpctstr pszKey, CGString & sVal, CTextConsole * pSrc);
 	virtual bool  r_LoadVal(CScript & s);
 	virtual void  r_Write(CScript & s);
 };

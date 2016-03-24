@@ -117,7 +117,7 @@ bool CItemMulti::MultiRealizeRegion()
 	dwFlags |= pMultiDef->m_dwRegionFlags;
 	m_pRegion->SetRegionFlags( dwFlags );
 
-	TCHAR *pszTemp = Str_GetTemp();
+	tchar *pszTemp = Str_GetTemp();
 	sprintf(pszTemp, "%s (%s)", pRegionBack->GetName(), GetName());
 	m_pRegion->SetName(pszTemp);
 
@@ -355,7 +355,7 @@ CItem * CItemMulti::Multi_GetSign()
 	return( pTiller );
 }
 
-void CItemMulti::OnHearRegion( LPCTSTR pszCmd, CChar * pSrc )
+void CItemMulti::OnHearRegion( lpctstr pszCmd, CChar * pSrc )
 {
 	ADDTOCALLSTACK("CItemMulti::OnHearRegion");
 	// IT_SHIP or IT_MULTI
@@ -385,13 +385,13 @@ enum
 	SHV_QTY
 };
 
-LPCTSTR const CItemMulti::sm_szVerbKeys[SHV_QTY+1] =
+lpctstr const CItemMulti::sm_szVerbKeys[SHV_QTY+1] =
 {
 	"MULTICREATE",
 	NULL
 };
 
-bool CItemMulti::r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef )
+bool CItemMulti::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CItemMulti::r_GetRef");
 	// COMP(x).
@@ -456,7 +456,7 @@ void CItemMulti::r_Write( CScript & s )
 		m_pRegion->r_WriteBody( s, "REGION." );
 	}
 }
-bool CItemMulti::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CItemMulti::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CItemMulti::r_WriteVal");
 	if ( !strnicmp(pszKey, "COMP", 4) )

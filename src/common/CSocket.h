@@ -51,8 +51,8 @@ public:
 public:
 	dword GetAddrIP() const;
 	void SetAddrIP( dword dwIP );
-	LPCTSTR GetAddrStr() const;
-	void SetAddrStr( LPCTSTR pszIP );
+	lpctstr GetAddrStr() const;
+	void SetAddrStr( lpctstr pszIP );
 	bool IsValidAddr() const;
 	bool IsLocalAddr() const;
 
@@ -61,7 +61,7 @@ public:
 
 	bool SetHostStruct( const struct hostent * pHost );
 
-	bool SetHostStr( LPCTSTR pszHostName );
+	bool SetHostStr( lpctstr pszHostName );
 	bool operator==( const CSocketAddressIP & ip ) const;
 };
 
@@ -89,10 +89,10 @@ public:
 	// Just the port.
 	word GetPort() const;
 	void SetPort( word wPort );
-	void SetPortStr( LPCTSTR pszPort );
-	bool SetPortExtStr( TCHAR * pszIP );
+	void SetPortStr( lpctstr pszPort );
+	bool SetPortExtStr( tchar * pszIP );
 	// Port and address together.
-	bool SetHostPortStr( LPCTSTR pszIP );
+	bool SetHostPortStr( lpctstr pszIP );
 };
 
 class CGSocket
@@ -128,7 +128,7 @@ public:
 	int Connect( struct sockaddr_in * pSockAddrIn );
 	int Connect( const CSocketAddress & SockAddr );
 	int Connect( const struct in_addr & ip, word wPort );
-	int Connect( LPCTSTR pszHostName, word wPort );
+	int Connect( lpctstr pszHostName, word wPort );
 	SOCKET Accept( struct sockaddr_in * pSockAddrIn ) const;
 	SOCKET Accept( CSocketAddress & SockAddr ) const;
 	int Send( const void * pData, int len ) const;
@@ -155,7 +155,7 @@ public:
 	void Close();
 
 	static void CloseSocket( SOCKET hClose );
-	static short GetProtocolIdByName( LPCTSTR pszName );
+	static short GetProtocolIdByName( lpctstr pszName );
 };
 
 #endif // _INC_CSOCKET_H

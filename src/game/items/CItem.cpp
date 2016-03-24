@@ -29,7 +29,7 @@
 	character trigger (even if it does not make sense)! CTRIG_item* will be automatically
 	called when one of these triggers fired, depending on their index. So NEVER unalign the two lists!
 */
-LPCTSTR const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
+lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 {
 	"@AAAUNUSED",
 	"@AfterClick",
@@ -335,13 +335,13 @@ CItem * CItem::GenerateScript( CChar * pSrc)
 	return(this);
 }
 
-CItem * CItem::CreateHeader( TCHAR * pArg, CObjBase * pCont, bool fDupeCheck, CChar * pSrc )
+CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CChar * pSrc )
 {
 	ADDTOCALLSTACK("CItem::CreateHeader");
 	// Just read info on a single item carryed by a CChar.
 	// ITEM=#id,#amount,R#chance
 
-	RESOURCE_ID rid = g_Cfg.ResourceGetID( RES_ITEMDEF, const_cast<LPCTSTR &>(reinterpret_cast<LPTSTR &>(pArg)) );
+	RESOURCE_ID rid = g_Cfg.ResourceGetID( RES_ITEMDEF, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(pArg)) );
 	if ( ! rid.IsValidUID())
 		return( NULL );
 	if ( rid.GetResType() != RES_ITEMDEF && rid.GetResType() != RES_TEMPLATE )
@@ -411,7 +411,7 @@ CItem * CItem::CreateHeader( TCHAR * pArg, CObjBase * pCont, bool fDupeCheck, CC
 	return( pItem );
 }
 
-LPCTSTR const CItem::sm_szTemplateTable[ITC_QTY+1] =
+lpctstr const CItem::sm_szTemplateTable[ITC_QTY+1] =
 {
 	"BREAK",
 	"BUY",
@@ -1515,7 +1515,7 @@ bool CItem::MoveNearObj( const CObjBaseTemplate *pObj, word iSteps )
 	}
 }
 
-LPCTSTR CItem::GetName() const
+lpctstr CItem::GetName() const
 {
 	ADDTOCALLSTACK("CItem::GetName");
 	// allow some items to go unnamed (just use type name).
@@ -1523,7 +1523,7 @@ LPCTSTR CItem::GetName() const
 	CItemBase * pItemDef = Item_GetDef();
 	ASSERT(pItemDef);
 
-	LPCTSTR pszNameBase;
+	lpctstr pszNameBase;
 	if ( IsIndividualName())
 	{
 		pszNameBase = CObjBase::GetName();
@@ -1563,17 +1563,17 @@ LPCTSTR CItem::GetName() const
 	return( CItemBase::GetNamePluralize( pszNameBase, m_amount != 1 && ! IsType(IT_CORPSE) ));
 }
 
-LPCTSTR CItem::GetNameFull( bool fIdentified ) const
+lpctstr CItem::GetNameFull( bool fIdentified ) const
 {
 	ADDTOCALLSTACK("CItem::GetNameFull");
-	// Should be LPCTSTR
+	// Should be lpctstr
 	// Get a full descriptive name. Prefixing and postfixing.
 
 	size_t len = 0;
-	TCHAR * pTemp = Str_GetTemp();
+	tchar * pTemp = Str_GetTemp();
 
-	LPCTSTR pszTitle = NULL;
-	LPCTSTR pszName = GetName();
+	lpctstr pszTitle = NULL;
+	lpctstr pszName = GetName();
 
 	CItemBase * pItemDef = Item_GetDef();
 	ASSERT(pItemDef);
@@ -1780,7 +1780,7 @@ LPCTSTR CItem::GetNameFull( bool fIdentified ) const
 	return( pTemp );
 }
 
-bool CItem::SetName( LPCTSTR pszName )
+bool CItem::SetName( lpctstr pszName )
 {
 	ADDTOCALLSTACK("CItem::SetName");
 	// Can't be a dupe name with type name ?
@@ -1788,7 +1788,7 @@ bool CItem::SetName( LPCTSTR pszName )
 	CItemBase * pItemDef = Item_GetDef();
 	ASSERT(pItemDef);
 
-	LPCTSTR pszTypeName = pItemDef->GetTypeName();
+	lpctstr pszTypeName = pItemDef->GetTypeName();
 	if ( ! strnicmp( pszName, "a ", 2 ))
 	{
 		if ( ! strcmpi( pszTypeName, pszName+2 ))
@@ -1908,7 +1908,7 @@ bool CItem::SetBaseID( ITEMID_TYPE id )
 	return( true );
 }
 
-void CItem::OnHear( LPCTSTR pszCmd, CChar * pSrc )
+void CItem::OnHear( lpctstr pszCmd, CChar * pSrc )
 {
 	// This should never be called directly. Normal items cannot hear. IT_SHIP and IT_COMM_CRYSTAL
 	UNREFERENCED_PARAMETER(pszCmd);
@@ -2278,7 +2278,7 @@ enum ICR_TYPE
 	ICR_QTY
 };
 
-LPCTSTR const CItem::sm_szRefKeys[ICR_QTY+1] =
+lpctstr const CItem::sm_szRefKeys[ICR_QTY+1] =
 {
 	"CONT",
 	"LINK",
@@ -2286,7 +2286,7 @@ LPCTSTR const CItem::sm_szRefKeys[ICR_QTY+1] =
 	NULL
 };
 
-bool CItem::r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef )
+bool CItem::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CItem::r_GetRef");
 	int i = FindTableHeadSorted( pszKey, sm_szRefKeys, COUNTOF(sm_szRefKeys)-1 );
@@ -2323,7 +2323,7 @@ enum IC_TYPE
 	IC_QTY
 };
 
-LPCTSTR const CItem::sm_szLoadKeys[IC_QTY+1] =
+lpctstr const CItem::sm_szLoadKeys[IC_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../tables/CItem_props.tbl"
@@ -2332,7 +2332,7 @@ LPCTSTR const CItem::sm_szLoadKeys[IC_QTY+1] =
 };
 
 
-bool CItem::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CItem::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CItem::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -2715,7 +2715,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			break;
 		case IC_ADDCIRCLE:
 			{
-				TCHAR	*ppVal[2];
+				tchar	*ppVal[2];
 				size_t amount = Str_ParseCmds(s.GetArgStr(), ppVal, COUNTOF(ppVal), " ,\t");
 				bool includeLower = 0;
 				int addCircle = 0;
@@ -2776,14 +2776,14 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 		case IC_CONTP:
 			{
 				CPointMap pt;	// invalid point
-				TCHAR *pszTemp = Str_GetTemp();
+				tchar *pszTemp = Str_GetTemp();
 				strcpy( pszTemp, s.GetArgStr() );
 				GETNONWHITESPACE( pszTemp );
 
 				if ( IsDigit( pszTemp[0] ) || pszTemp[0] == '-' )
 				{
 					pt.m_map = 0; pt.m_z = 0;
-					TCHAR * ppVal[2];
+					tchar * ppVal[2];
 					size_t iArgs = Str_ParseCmds( pszTemp, ppVal, COUNTOF( ppVal ), " ,\t" );
 					if ( iArgs < 2 ) 
 					{
@@ -2896,14 +2896,14 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 		case IC_MOREP:
 			{
 				CPointMap pt;	// invalid point
-				TCHAR *pszTemp = Str_GetTemp();
+				tchar *pszTemp = Str_GetTemp();
 				strcpy( pszTemp, s.GetArgStr() );
 				GETNONWHITESPACE( pszTemp );
 				size_t iArgs = 0;
 				if ( IsDigit( pszTemp[0] ) || pszTemp[0] == '-' )
 				{
 					pt.m_map = 0; pt.m_z = 0;
-					TCHAR * ppVal[4];
+					tchar * ppVal[4];
 					iArgs = Str_ParseCmds( pszTemp, ppVal, COUNTOF( ppVal ), " ,\t" );
 					switch ( iArgs )
 					{
@@ -3007,7 +3007,7 @@ enum CIV_TYPE
 	CIV_QTY
 };
 
-LPCTSTR const CItem::sm_szVerbKeys[CIV_QTY+1] =
+lpctstr const CItem::sm_szVerbKeys[CIV_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../tables/CItem_functions.tbl"
@@ -3118,7 +3118,7 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 	return false;
 }
 
-TRIGRET_TYPE CItem::OnTrigger( LPCTSTR pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs )
+TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs )
 {
 	ADDTOCALLSTACK("CItem::OnTrigger");
 
@@ -3282,7 +3282,7 @@ TRIGRET_TYPE CItem::OnTrigger( LPCTSTR pszTrigName, CTextConsole * pSrc, CScript
 	}
 stopandret:
 	{
-		SetTriggerActive((LPCTSTR)0);
+		SetTriggerActive((lpctstr)0);
 		return iRet;
 	}
 	EXC_CATCH;
@@ -3300,7 +3300,7 @@ TRIGRET_TYPE CItem::OnTriggerCreate( CTextConsole * pSrc, CScriptTriggerArgs * p
 		pSrc = &g_Serv;
 
 	ITRIG_TYPE iAction;
-	LPCTSTR pszTrigName = sm_szTrigName[ITRIG_Create];
+	lpctstr pszTrigName = sm_szTrigName[ITRIG_Create];
 	if ( ISINTRESOURCE(pszTrigName))
 	{
 		iAction = (ITRIG_TYPE) GETINTRESOURCE(pszTrigName);
@@ -4405,7 +4405,7 @@ bool CItem::IsMemoryTypes( word wType ) const
 	return(( GetHueAlt() & wType ) ? true : false );
 }
 
-LPCTSTR CItem::Use_SpyGlass( CChar * pUser ) const
+lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 {
 	ADDTOCALLSTACK("CItem::Use_SpyGlass");
 	// IT_SPY_GLASS
@@ -4417,7 +4417,7 @@ LPCTSTR CItem::Use_SpyGlass( CChar * pUser ) const
 	WEATHER_TYPE wtWeather = ptCoords.GetSector()->GetWeather();
 	byte iLight = ptCoords.GetSector()->GetLight();
 	CGString sSearch;
-	TCHAR	*pResult = Str_GetTemp();
+	tchar	*pResult = Str_GetTemp();
 
 	// Weather bonus
 	double rWeatherSight = wtWeather == WEATHER_RAIN ? (0.25 * BASE_SIGHT) : 0.0;
@@ -4468,7 +4468,7 @@ LPCTSTR CItem::Use_SpyGlass( CChar * pUser ) const
 			}
 
 			if ( ptLand.IsValidPoint())
-				sSearch.Format( "%s %s. ", g_Cfg.GetDefaultMsg(DEFMSG_USE_SPYGLASS_LAND), static_cast<LPCTSTR>(CPointBase::sm_szDirs[ ptCoords.GetDir(ptLand) ]) );
+				sSearch.Format( "%s %s. ", g_Cfg.GetDefaultMsg(DEFMSG_USE_SPYGLASS_LAND), static_cast<lpctstr>(CPointBase::sm_szDirs[ ptCoords.GetDir(ptLand) ]) );
 			else if (iLight > 3)
 				sSearch = g_Cfg.GetDefaultMsg(DEFMSG_USE_SPYGLASS_DARK);
 			else if (wtWeather == WEATHER_RAIN)
@@ -4548,16 +4548,16 @@ LPCTSTR CItem::Use_SpyGlass( CChar * pUser ) const
 		if (iItemSighted == 1)
 		{
 			if ( iDist > UO_MAP_VIEW_RADAR) // if beyond ship visibility in the radar window, don't be specific
-				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_STH_DIR), static_cast<LPCTSTR>(CPointBase::sm_szDirs[ dir ]) );
+				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_STH_DIR), static_cast<lpctstr>(CPointBase::sm_szDirs[ dir ]) );
 			else
-				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_ITEM_DIR), static_cast<LPCTSTR>(pItemSighted->GetNameFull(false)), static_cast<LPCTSTR>(CPointBase::sm_szDirs[ dir ]) );
+				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_ITEM_DIR), static_cast<lpctstr>(pItemSighted->GetNameFull(false)), static_cast<lpctstr>(CPointBase::sm_szDirs[ dir ]) );
 		}
 		else
 		{
 			if ( iDist > UO_MAP_VIEW_RADAR) // if beyond ship visibility in the radar window, don't be specific
 				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_ITEM_DIR_MANY), CPointBase::sm_szDirs[ dir ] );
 			else
-				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_SPECIAL_DIR), static_cast<LPCTSTR>(pItemSighted->GetNameFull(false)), static_cast<LPCTSTR>(CPointBase::sm_szDirs[ dir ]));
+				sSearch.Format(g_Cfg.GetDefaultMsg(DEFMSG_SHIP_SEEN_SPECIAL_DIR), static_cast<lpctstr>(pItemSighted->GetNameFull(false)), static_cast<lpctstr>(CPointBase::sm_szDirs[ dir ]));
 		}
 		strcat( pResult, sSearch);
 	}
@@ -4598,7 +4598,7 @@ LPCTSTR CItem::Use_SpyGlass( CChar * pUser ) const
 	return pResult;
 }
 
-LPCTSTR CItem::Use_Sextant( CPointMap pntCoords ) const
+lpctstr CItem::Use_Sextant( CPointMap pntCoords ) const
 {
 	ADDTOCALLSTACK("CItem::Use_Sextant");
 	// IT_SEXTANT
@@ -5039,7 +5039,7 @@ int CItem::Armor_GetRepairPercent() const
  	return( IMULDIV( m_itArmor.m_Hits_Cur, 100, m_itArmor.m_Hits_Max ));
 }
 
-LPCTSTR CItem::Armor_GetRepairDesc() const
+lpctstr CItem::Armor_GetRepairDesc() const
 {
 	ADDTOCALLSTACK("CItem::Armor_GetRepairDesc");
 	if ( m_itArmor.m_Hits_Cur > m_itArmor.m_Hits_Max )
@@ -5196,7 +5196,7 @@ forcedamage:
 			}
 		}
 
-		TCHAR *pszMsg = Str_GetTemp();
+		tchar *pszMsg = Str_GetTemp();
 		if ( pSrc != NULL )
 		{
 			if (pSrc->IsPriv(PRIV_DETAIL))
@@ -5479,7 +5479,7 @@ bool CItem::OnTick()
 					else
 					{
 						m_itPotion.m_tick --;
-						TCHAR *pszMsg = Str_GetTemp();
+						tchar *pszMsg = Str_GetTemp();
 						CObjBase* pObj = static_cast<CObjBase*>(GetTopLevelObj());
 						ASSERT(pObj);
 						pObj->Speak(ITOA(m_itPotion.m_tick, pszMsg, 10), HUE_RED);

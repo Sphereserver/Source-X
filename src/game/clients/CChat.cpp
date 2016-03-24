@@ -33,11 +33,11 @@ void CChat::EventMsg( CClient * pClient, const NCHAR * pszText, int len, CLangua
 
 	CChatChannel * pChannel =  pMe->GetChannel();
 
-	TCHAR szText[MAX_TALK_BUFFER * 2];
+	tchar szText[MAX_TALK_BUFFER * 2];
 	CvtNUNICODEToSystem( szText, sizeof(szText), pszText, len );
 
 	// The 1st character is a command byte, join channel, private message someone, etc etc
-	TCHAR * szMsg = szText+1;
+	tchar * szMsg = szText+1;
 	switch ( szText[0] )
 	{
 	case 'a':	// a = client typed a plain message in the text entry area
@@ -73,7 +73,7 @@ not_in_a_channel:
 			if (szMsg[i] == '"')
 				break;
 		szMsg[i] = '\0';
-		TCHAR * pszPassword = szMsg + i + 1;
+		tchar * pszPassword = szMsg + i + 1;
 		if (pszPassword[0] == ' ') // skip leading space if any
 			pszPassword++;
 		JoinChannel( pMe, szMsg + 1, pszPassword);
@@ -81,7 +81,7 @@ not_in_a_channel:
 	};
 	case 'c':	// c = client creating (and joining) new channel
 	{
-		TCHAR * pszPassword = NULL;
+		tchar * pszPassword = NULL;
 		size_t iMsgLength = strlen(szMsg);
 		for (size_t i = 0; i < iMsgLength; i++)
 		{
@@ -115,7 +115,7 @@ not_in_a_channel:
 	{
 		if (!pChannel)
 			goto not_in_a_channel;
-		TCHAR buffer[2048];
+		tchar buffer[2048];
 		strcpy(buffer, szMsg);
 		// Separate the recipient from the message (look for a space)
 		size_t i = 0;
@@ -295,10 +295,10 @@ void CChat::QuitChat(CChatChanMember * pClient)
 	pClient->SetChatInactive();
 }
 
-void CChat::DoCommand(CChatChanMember * pBy, LPCTSTR szMsg)
+void CChat::DoCommand(CChatChanMember * pBy, lpctstr szMsg)
 {
 	ADDTOCALLSTACK("CChat::DoCommand");
-	static LPCTSTR const sm_szCmd_Chat[] =
+	static lpctstr const sm_szCmd_Chat[] =
 	{
 		"ALLKICK",
 		"BC",
@@ -314,12 +314,12 @@ void CChat::DoCommand(CChatChanMember * pBy, LPCTSTR szMsg)
 	ASSERT(pBy != NULL);
 	ASSERT(szMsg != NULL);
 
-	TCHAR buffer[2048];
+	tchar buffer[2048];
 	ASSERT(strlen(szMsg) < COUNTOF(buffer));
 	strcpy(buffer, szMsg);
 
-	TCHAR * pszCommand = buffer;
-	TCHAR * pszText = NULL;
+	tchar * pszCommand = buffer;
+	tchar * pszText = NULL;
 	size_t iCommandLength = strlen(pszCommand);
 	for (size_t i = 0; i < iCommandLength; i++)
 	{
@@ -430,7 +430,7 @@ void CChat::DoCommand(CChatChanMember * pBy, LPCTSTR szMsg)
 		}
 		default:
 		{
-			TCHAR *pszMsg = Str_GetTemp();
+			tchar *pszMsg = Str_GetTemp();
 			sprintf(pszMsg, "Unknown command: '%s'", pszCommand);
 
 			DecorateName(sFrom, NULL, true);
@@ -450,7 +450,7 @@ void CChat::KillChannels()
 	m_Channels.Empty();
 }
 
-void CChat::WhereIs(CChatChanMember * pBy, LPCTSTR pszName ) const
+void CChat::WhereIs(CChatChanMember * pBy, lpctstr pszName ) const
 {
 	ADDTOCALLSTACK("CChat::WhereIs");
 	
@@ -460,7 +460,7 @@ void CChat::WhereIs(CChatChanMember * pBy, LPCTSTR pszName ) const
 		if ( ! strcmp( pClient->GetChatName(), pszName))
 			continue;
 
-		TCHAR *pszMsg = Str_GetTemp();
+		tchar *pszMsg = Str_GetTemp();
 		if (! pClient->IsChatActive() || !pClient->GetChannel())
 			sprintf(pszMsg, "%s is not currently in a conference.", pszName);
 		else
@@ -495,7 +495,7 @@ void CChat::SendDeleteChannel(CChatChannel * pChannel)
 	}
 }
 
-bool CChat::IsValidName( LPCTSTR pszName, bool fPlayer ) // static
+bool CChat::IsValidName( lpctstr pszName, bool fPlayer ) // static
 {
 	ADDTOCALLSTACK("CChat::IsValidName");
 	// Channels can have spaces, but not player names
@@ -560,7 +560,7 @@ void CChat::DecorateName(CGString &sName, const CChatChanMember * pMember, bool 
 	if (!pMember || !pChannel)
 		sName.Format("%i%s", iResult, "SYSTEM");
 	else
-		sName.Format("%i%s", iResult, static_cast<LPCTSTR>(pMember->GetChatName()));
+		sName.Format("%i%s", iResult, static_cast<lpctstr>(pMember->GetChatName()));
 }
 
 void CChat::GenerateChatName(CGString &sName, const CClient * pClient) // static
@@ -569,7 +569,7 @@ void CChat::GenerateChatName(CGString &sName, const CClient * pClient) // static
 		return;
 
 	// decide upon 'base' name
-	LPCTSTR pszName = NULL;
+	lpctstr pszName = NULL;
 	if (pClient->GetChar() != NULL)
 		pszName = pClient->GetChar()->GetName();
 	else if (pClient->GetAccount() != NULL)
@@ -588,7 +588,7 @@ void CChat::GenerateChatName(CGString &sName, const CClient * pClient) // static
 		for (uint attempts = 2; attempts <= g_Accounts.Account_GetCount(); attempts++)
 		{
 			sTempName.Format("%s (%u)", pszName, attempts);
-			if (g_Accounts.Account_FindChat(static_cast<LPCTSTR>(sTempName)) == NULL)
+			if (g_Accounts.Account_FindChat(static_cast<lpctstr>(sTempName)) == NULL)
 				break;
 
 			sTempName.Empty();
@@ -599,7 +599,7 @@ void CChat::GenerateChatName(CGString &sName, const CClient * pClient) // static
 	sName.Copy(sTempName.GetPtr());
 }
 
-void CChat::Broadcast(CChatChanMember *pFrom, LPCTSTR pszText, CLanguageID lang, bool fOverride)
+void CChat::Broadcast(CChatChanMember *pFrom, lpctstr pszText, CLanguageID lang, bool fOverride)
 {
 	ADDTOCALLSTACK("CChat::Broadcast");
 	ClientIterator it;
@@ -616,7 +616,7 @@ void CChat::Broadcast(CChatChanMember *pFrom, LPCTSTR pszText, CLanguageID lang,
 	}
 }
 
-void CChat::CreateJoinChannel(CChatChanMember * pByMember, LPCTSTR pszName, LPCTSTR pszPassword)
+void CChat::CreateJoinChannel(CChatChanMember * pByMember, lpctstr pszName, lpctstr pszPassword)
 {
 	ADDTOCALLSTACK("CChat::CreateJoinChannel");
 	if ( ! IsValidName( pszName, false ))
@@ -634,7 +634,7 @@ void CChat::CreateJoinChannel(CChatChanMember * pByMember, LPCTSTR pszName, LPCT
 	}
 }
 
-bool CChat::CreateChannel(LPCTSTR pszName, LPCTSTR pszPassword, CChatChanMember * pMember)
+bool CChat::CreateChannel(lpctstr pszName, lpctstr pszPassword, CChatChanMember * pMember)
 {
 	ADDTOCALLSTACK("CChat::CreateChannel");
 	if (!m_fChatsOK)
@@ -652,7 +652,7 @@ bool CChat::CreateChannel(LPCTSTR pszName, LPCTSTR pszPassword, CChatChanMember 
 	return true;
 }
 
-bool CChat::JoinChannel(CChatChanMember * pMember, LPCTSTR pszChannel, LPCTSTR pszPassword)
+bool CChat::JoinChannel(CChatChanMember * pMember, lpctstr pszChannel, lpctstr pszPassword)
 {
 	ADDTOCALLSTACK("CChat::JoinChannel");
 	ASSERT(pMember != NULL);
@@ -720,7 +720,7 @@ bool CChat::JoinChannel(CChatChanMember * pMember, LPCTSTR pszChannel, LPCTSTR p
 	return true;
 }
 
-CChatChannel * CChat::FindChannel(LPCTSTR pszChannel) const
+CChatChannel * CChat::FindChannel(lpctstr pszChannel) const
 {
 	CChatChannel * pChannel = GetFirstChannel();
 	for ( ; pChannel != NULL; pChannel = pChannel->GetNext())

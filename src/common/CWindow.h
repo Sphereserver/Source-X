@@ -86,7 +86,7 @@ public:
 		ASSERT(m_hWnd);
 		return( ::GetDlgItem( m_hWnd, id ));
 	}
-	BOOL SetDlgItemText( int nIDDlgItem, LPCTSTR lpString )
+	BOOL SetDlgItemText( int nIDDlgItem, lpctstr lpString )
 	{
 		ASSERT(m_hWnd);
 		return( ::SetDlgItemText( m_hWnd, nIDDlgItem, lpString ));
@@ -123,12 +123,12 @@ public:
 	}
 
 	// Standard windows props.
-	int GetWindowText( LPTSTR lpszText, int iLen )
+	int GetWindowText( lptstr lpszText, int iLen )
 	{
 		ASSERT( m_hWnd );
 		return ::GetWindowText( m_hWnd, lpszText, iLen );
 	}
-	BOOL SetWindowText( LPCTSTR lpszText )
+	BOOL SetWindowText( lpctstr lpszText )
 	{
 		ASSERT( m_hWnd );
 		return ::SetWindowText( m_hWnd, lpszText );
@@ -156,7 +156,7 @@ public:
 		ASSERT(m_hWnd);
 		return( ::KillTimer( m_hWnd, uTimerID ));
 	}
-	int MessageBox( LPCTSTR lpszText, LPCTSTR lpszTitle, UINT fuStyle = MB_OK ) const
+	int MessageBox( lpctstr lpszText, lpctstr lpszTitle, UINT fuStyle = MB_OK ) const
 	{
 		// ASSERT( m_hWnd ); ok for this to be NULL !
 		return( ::MessageBox( m_hWnd, lpszText, lpszTitle, fuStyle ));
@@ -172,7 +172,7 @@ public:
 		return( ::GetWindowLongPtr( m_hWnd, nIndex ));
 	}
 
-	int SetDlgItemText( int ID, LPCTSTR lpszText ) const
+	int SetDlgItemText( int ID, lpctstr lpszText ) const
 	{
 		return ::SetDlgItemText(m_hWnd, ID, lpszText);
 	}
@@ -214,9 +214,9 @@ class CWinApp	// Similar to MFC type
 {
 public:
 	static const char *m_sClassName;
-	LPCTSTR	 	m_pszAppName;	// Specifies the name of the application. (display freindly)
+	lpctstr	 	m_pszAppName;	// Specifies the name of the application. (display freindly)
 	HINSTANCE 	m_hInstance;	// Identifies the current instance of the application.
-	LPTSTR 		m_lpCmdLine;	// Points to a null-terminated string that specifies the command line for the application.
+	lptstr 		m_lpCmdLine;	// Points to a null-terminated string that specifies the command line for the application.
 	CWindow *	m_pMainWnd;		// Holds a pointer to the application's main window. For an example of how to initialize m_pMainWnd, see InitInstance.
 	CGString	m_pszExeName;	// The module name of the application.
 	CGString	m_pszProfileName;	// the path to the profile.
@@ -239,7 +239,7 @@ private:
 	CWinApp& operator=(const CWinApp& other);
 
 public:
-	void InitInstance( LPCTSTR pszAppName, HINSTANCE hInstance, LPTSTR lpszCmdLine )
+	void InitInstance( lpctstr pszAppName, HINSTANCE hInstance, lptstr lpszCmdLine )
 	{
 		m_pszAppName = pszAppName;	// assume this is a static data pointer valid forever.
 		m_hInstance	= hInstance;
@@ -250,7 +250,7 @@ public:
 			return;
 		m_pszExeName = szFileName;
 
-        LPTSTR pszTmp = const_cast<LPTSTR>(strrchr( m_pszExeName, '\\' ));	// Get title
+        lptstr pszTmp = const_cast<lptstr>(strrchr( m_pszExeName, '\\' ));	// Get title
         lstrcpy( szFileName, ( pszTmp == NULL ) ? m_pszExeName : ( pszTmp + 1 ));
 		pszTmp = strrchr( szFileName, '.' );	// Get extension.
 		if ( pszTmp != NULL )
@@ -341,7 +341,7 @@ public:
 		nEndChar = HIWORD(nSelection);
 	}
 
-	void ReplaceSel( LPCTSTR lpszNewText, BOOL bCanUndo = FALSE )
+	void ReplaceSel( lpctstr lpszNewText, BOOL bCanUndo = FALSE )
 	{
 		ASSERT(IsWindow());
 		SendMessage( EM_REPLACESEL, (WPARAM) bCanUndo, (LPARAM) lpszNewText );
@@ -428,7 +428,7 @@ public:
 	{
 		return( (int)(dword) SendMessage( LB_GETCOUNT ));
 	}
-	int AddString( LPCTSTR lpsz ) const
+	int AddString( lpctstr lpsz ) const
 	{
 		return( (int)(dword) SendMessage( LB_ADDSTRING, 0L, (LPARAM)(lpsz)));
 	}

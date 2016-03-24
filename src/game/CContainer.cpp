@@ -457,7 +457,7 @@ int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iRepli
 		}
 		else if ( rid.GetResType() == RES_ITEMDEF )	// TAG.MATOVERRIDE_%s
 		{
-			TCHAR * resOverride = Str_GetTemp();
+			tchar * resOverride = Str_GetTemp();
 			sprintf(resOverride,"matoverride_%s",g_Cfg.ResourceGetName( RESOURCE_ID( RES_ITEMDEF, rid ) ));
 			RESOURCE_ID ridOverride = RESOURCE_ID( RES_ITEMDEF , pChar->m_TagDefs.GetKeyNum(resOverride) );
 			if ( ridOverride && rid.GetResIndex() > 0 )
@@ -495,7 +495,7 @@ int CContainer::ContentCountAll() const
 	return iTotal;
 }
 
-bool CContainer::r_GetRefContainer( LPCTSTR &pszKey, CScriptObj *&pRef )
+bool CContainer::r_GetRefContainer( lpctstr &pszKey, CScriptObj *&pRef )
 {
 	ADDTOCALLSTACK("CContainer::r_GetRefContainer");
 	if ( !strnicmp(pszKey, "FIND", 4) )				// find*
@@ -539,13 +539,13 @@ CContainer::~CContainer()
 	DeleteAll(); // call this early so the virtuals will work.
 }
 
-bool CContainer::r_WriteValContainer( LPCTSTR pszKey, CGString &sVal, CTextConsole *pSrc )
+bool CContainer::r_WriteValContainer( lpctstr pszKey, CGString &sVal, CTextConsole *pSrc )
 {
 	UNREFERENCED_PARAMETER(pSrc);
 	ADDTOCALLSTACK("CContainer::r_WriteValContainer");
 	EXC_TRY("WriteVal");
 
-	static LPCTSTR const sm_szParams[] =
+	static lpctstr const sm_szParams[] =
 	{
 		"count",
 		"fcount",
@@ -557,7 +557,7 @@ bool CContainer::r_WriteValContainer( LPCTSTR pszKey, CGString &sVal, CTextConso
 	if ( i < 0 )
 		return false;
 
-	LPCTSTR	pKey = pszKey + strlen(sm_szParams[i]);
+	lpctstr	pKey = pszKey + strlen(sm_szParams[i]);
 	SKIP_SEPARATORS(pKey);
 	switch ( i )
 	{

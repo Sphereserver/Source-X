@@ -92,14 +92,14 @@ CGrayMapBlockState::CGrayMapBlockState( dword dwBlockFlags, signed char z, int i
 	m_zClimbHeight = 0;
 }
 
-LPCTSTR CGrayMapBlockState::GetTileName( dword dwID )	// static
+lpctstr CGrayMapBlockState::GetTileName( dword dwID )	// static
 {
 	ADDTOCALLSTACK("CGrayMapBlockState::GetTileName");
 	if ( dwID == 0 )
 	{
 		return( "<null>" );
 	}
-	TCHAR * pStr = Str_GetTemp();
+	tchar * pStr = Str_GetTemp();
 	if ( dwID < TERRAIN_QTY )
 	{
 		CGrayTerrainInfo land( static_cast<word>(dwID) );
@@ -412,7 +412,7 @@ void CGrayStaticsBlock::LoadStatics( dword ulBlockIndex, int map )
 		// make sure that the statics block length is valid
 		if ((index.GetBlockLength() % sizeof(CUOStaticItemRec)) != 0)
 		{
-			TCHAR *pszTemp = Str_GetTemp();
+			tchar *pszTemp = Str_GetTemp();
 			sprintf(pszTemp, "CGrapMapBlock: Read Statics - Block Length of %u", index.GetBlockLength());
 			throw CGrayError(LOGL_CRIT, CGFile::GetLastError(), pszTemp);
 		}

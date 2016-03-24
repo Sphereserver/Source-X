@@ -60,21 +60,21 @@ public:
 	int GetValLength() const;
 
 	bool GetValStr( const void * pBase, CGString & sVal ) const;
-	bool SetValStr( void * pBase, LPCTSTR pszVal ) const;
+	bool SetValStr( void * pBase, lpctstr pszVal ) const;
 };
 
 class CAssocReg	// associate members of some class/structure with entries in the registry.
 {
 	// LAST = { NULL, 0, ELEM_VOID }
 public:
-	LPCTSTR m_pszKey;	// A single key identifier to be cat to a base key. NULL=last
+	lpctstr m_pszKey;	// A single key identifier to be cat to a base key. NULL=last
 	CElementDef m_elem;
 public:
 	static const char *m_sClassName;
 private:
 	CAssocReg& operator=(const CAssocReg& other);
 public:
-	operator LPCTSTR() const
+	operator lpctstr() const
 	{
 		return( m_pszKey );
 	}
@@ -92,7 +92,7 @@ class CGStringListRec : public CGObListRec, public CGString
 	friend class CGStringList;
 public:
 	static const char *m_sClassName;
-	explicit CGStringListRec( LPCTSTR pszVal ) : CGString( pszVal )
+	explicit CGStringListRec( lpctstr pszVal ) : CGString( pszVal )
 	{
 	}
 private:
@@ -119,11 +119,11 @@ public:
 	{
 		return STATIC_CAST<CGStringListRec *>( CGObList::GetHead() );
 	}
-	void AddHead( LPCTSTR pszVal )
+	void AddHead( lpctstr pszVal )
 	{
 		InsertHead( new CGStringListRec( pszVal ));
 	}
-	void AddTail( LPCTSTR pszVal )
+	void AddTail( lpctstr pszVal )
 	{
 		InsertTail( new CGStringListRec( pszVal ));
 	}

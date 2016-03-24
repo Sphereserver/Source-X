@@ -13,11 +13,11 @@ CItemScript::~CItemScript() {
     DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
 }
 
-LPCTSTR const CItemScript::sm_szLoadKeys[] = {
+lpctstr const CItemScript::sm_szLoadKeys[] = {
     NULL,
 };
 
-LPCTSTR const CItemScript::sm_szVerbKeys[] = {
+lpctstr const CItemScript::sm_szVerbKeys[] = {
     NULL,
 };
 
@@ -27,7 +27,7 @@ void CItemScript::r_Write(CScript & s)
     CItemVendable::r_Write(s);
 }
 
-bool CItemScript::r_WriteVal(LPCTSTR pszKey, CGString & sVal, CTextConsole *pSrc)
+bool CItemScript::r_WriteVal(lpctstr pszKey, CGString & sVal, CTextConsole *pSrc)
 {
     ADDTOCALLSTACK("CItemScript::r_WriteVal");
     return CItemVendable::r_WriteVal(pszKey, sVal, pSrc);

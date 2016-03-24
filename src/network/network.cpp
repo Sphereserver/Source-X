@@ -33,10 +33,10 @@
 //
 #if defined(_PACKETDUMP) || defined(_DUMPSUPPORT)
 
-void xRecordPacketData(const CClient* client, const byte* data, size_t length, LPCTSTR heading)
+void xRecordPacketData(const CClient* client, const byte* data, size_t length, lpctstr heading)
 {
 #ifdef _DUMPSUPPORT
-	if (client->GetAccount() != NULL && strnicmp(client->GetAccount()->GetName(), (LPCTSTR) g_Cfg.m_sDumpAccPackets, strlen( client->GetAccount()->GetName())))
+	if (client->GetAccount() != NULL && strnicmp(client->GetAccount()->GetName(), (lpctstr) g_Cfg.m_sDumpAccPackets, strlen( client->GetAccount()->GetName())))
 		return;
 #else
 	if (!(g_Cfg.m_wDebugFlags & DEBUGF_PACKETS))
@@ -47,10 +47,10 @@ void xRecordPacketData(const CClient* client, const byte* data, size_t length, L
 	xRecordPacket(client, &packet, heading);
 }
 
-void xRecordPacket(const CClient* client, Packet* packet, LPCTSTR heading)
+void xRecordPacket(const CClient* client, Packet* packet, lpctstr heading)
 {
 #ifdef _DUMPSUPPORT
-	if (client->GetAccount() != NULL && strnicmp(client->GetAccount()->GetName(), (LPCTSTR) g_Cfg.m_sDumpAccPackets, strlen( client->GetAccount()->GetName())))
+	if (client->GetAccount() != NULL && strnicmp(client->GetAccount()->GetName(), (lpctstr) g_Cfg.m_sDumpAccPackets, strlen( client->GetAccount()->GetName())))
 		return;
 #else
 	if (!(g_Cfg.m_wDebugFlags & DEBUGF_PACKETS))
@@ -62,11 +62,11 @@ void xRecordPacket(const CClient* client, Packet* packet, LPCTSTR heading)
 
 #ifdef _DEBUG
 	// write to console
-	g_Log.EventDebug("%x:%s %s\n", client->GetSocketID(), heading, (LPCTSTR)dump);
+	g_Log.EventDebug("%x:%s %s\n", client->GetSocketID(), heading, (lpctstr)dump);
 #endif
 
 	// build file name
-	TCHAR fname[64];
+	tchar fname[64];
 	strcpy(fname, "packets_");
 	if (client->GetAccount())
 		strcat(fname, client->GetAccount()->GetName());
@@ -85,7 +85,7 @@ void xRecordPacket(const CClient* client, Packet* packet, LPCTSTR heading)
 	CFileText out;
 	if (out.Open(sFullFileName, OF_READWRITE|OF_TEXT))
 	{
-		out.Printf("%s %s\n\n", heading, (LPCTSTR)dump);
+		out.Printf("%s %s\n\n", heading, (lpctstr)dump);
 		out.Close();
 	}
 }
@@ -1350,7 +1350,7 @@ void NetworkIn::tick(void)
 		TemporaryString dump;
 		packet->dump(dump);
 
-		g_Log.EventDebug("%x:Parsing %s", client->id(), (LPCTSTR)dump);
+		g_Log.EventDebug("%x:Parsing %s", client->id(), (lpctstr)dump);
 
 		client->m_packetExceptions++;
 		if (client->m_packetExceptions > 10 && client->m_client != NULL)
@@ -1515,15 +1515,15 @@ void NetworkIn::acceptConnection(void)
 			CLOSESOCKET(h);
 
 			if (ip.m_blocked)
-				g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected. (Blocked IP)\n", (LPCTSTR)client_addr.GetAddrStr());
+				g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected. (Blocked IP)\n", (lpctstr)client_addr.GetAddrStr());
 			else if ( maxIp && ip.m_connecting > maxIp )
-				g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected. (CONNECTINGMAXIP reached %d/%d)\n", (LPCTSTR)client_addr.GetAddrStr(), ip.m_connecting, maxIp);
+				g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected. (CONNECTINGMAXIP reached %d/%d)\n", (lpctstr)client_addr.GetAddrStr(), ip.m_connecting, maxIp);
 			else if ( climaxIp && ip.m_connected > climaxIp )
-				g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected. (CLIENTMAXIP reached %d/%d)\n", (LPCTSTR)client_addr.GetAddrStr(), ip.m_connected, climaxIp);
+				g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected. (CLIENTMAXIP reached %d/%d)\n", (lpctstr)client_addr.GetAddrStr(), ip.m_connected, climaxIp);
 			else if ( ip.m_pings >= NETHISTORY_MAXPINGS )
-				g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected. (MAXPINGS reached %d/%d)\n", (LPCTSTR)client_addr.GetAddrStr(), ip.m_pings, static_cast<int>(NETHISTORY_MAXPINGS));
+				g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected. (MAXPINGS reached %d/%d)\n", (lpctstr)client_addr.GetAddrStr(), ip.m_pings, static_cast<int>(NETHISTORY_MAXPINGS));
 			else
-				g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected.\n", (LPCTSTR)client_addr.GetAddrStr());
+				g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected.\n", (lpctstr)client_addr.GetAddrStr());
 		}
 		else
 		{
@@ -1536,7 +1536,7 @@ void NetworkIn::acceptConnection(void)
 
 				CLOSESOCKET(h);
 
-				g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected. (CLIENTMAX reached)\n", (LPCTSTR)client_addr.GetAddrStr());
+				g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected. (CLIENTMAX reached)\n", (lpctstr)client_addr.GetAddrStr());
 			}
 			else
 			{
@@ -2596,15 +2596,15 @@ void NetworkManager::acceptNewConnection(void)
 		CLOSESOCKET(h);
 
 		if (ip.m_blocked)
-			g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected. (Blocked IP)\n", static_cast<LPCTSTR>(client_addr.GetAddrStr()));
+			g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected. (Blocked IP)\n", static_cast<lpctstr>(client_addr.GetAddrStr()));
 		else if ( maxIp && ip.m_connecting > maxIp )
-			g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected. (CONNECTINGMAXIP reached %d/%d)\n", static_cast<LPCTSTR>(client_addr.GetAddrStr()), ip.m_connecting, maxIp);
+			g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected. (CONNECTINGMAXIP reached %d/%d)\n", static_cast<lpctstr>(client_addr.GetAddrStr()), ip.m_connecting, maxIp);
 		else if ( climaxIp && ip.m_connected > climaxIp )
-			g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected. (CLIENTMAXIP reached %d/%d)\n", static_cast<LPCTSTR>(client_addr.GetAddrStr()), ip.m_connected, climaxIp);
+			g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected. (CLIENTMAXIP reached %d/%d)\n", static_cast<lpctstr>(client_addr.GetAddrStr()), ip.m_connected, climaxIp);
 		else if ( ip.m_pings >= NETHISTORY_MAXPINGS )
-			g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected. (MAXPINGS reached %d/%d)\n", static_cast<LPCTSTR>(client_addr.GetAddrStr()), ip.m_pings, static_cast<int>(NETHISTORY_MAXPINGS) );
+			g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected. (MAXPINGS reached %d/%d)\n", static_cast<lpctstr>(client_addr.GetAddrStr()), ip.m_pings, static_cast<int>(NETHISTORY_MAXPINGS) );
 		else
-			g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected.\n", static_cast<LPCTSTR>(client_addr.GetAddrStr()));
+			g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected.\n", static_cast<lpctstr>(client_addr.GetAddrStr()));
 
 		return;
 	}
@@ -2619,7 +2619,7 @@ void NetworkManager::acceptNewConnection(void)
 		DEBUGNETWORK(("Unable to allocate new slot for client, too many clients already connected.\n"));
 		CLOSESOCKET(h);
 
-		g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected. (CLIENTMAX reached)\n", static_cast<LPCTSTR>(client_addr.GetAddrStr()));
+		g_Log.Event(LOGM_CLIENTS_LOG|LOGL_ERROR, "Connection from %s rejected. (CLIENTMAX reached)\n", static_cast<lpctstr>(client_addr.GetAddrStr()));
 		return;
 	}
 
@@ -3341,7 +3341,7 @@ bool NetworkInput::processGameClientData(NetState* state, Packet* buffer)
 	TemporaryString dump;
 	packet->dump(dump);
 
-	g_Log.EventDebug("%x:Parsing %s", state->id(), static_cast<LPCTSTR>(dump));
+	g_Log.EventDebug("%x:Parsing %s", state->id(), static_cast<lpctstr>(dump));
 
 	state->m_packetExceptions++;
 	if (state->m_packetExceptions > 10)

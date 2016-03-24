@@ -84,7 +84,7 @@ void __cdecl invalidParameterHandler(const wchar_t* expression, const wchar_t* f
 }
 #endif
 
-void FormatDateTime(TCHAR * pszTemp, LPCTSTR pszFormat, const struct tm * ptmTemp)
+void FormatDateTime(tchar * pszTemp, lpctstr pszFormat, const struct tm * ptmTemp)
 {
 	ASSERT(pszTemp != NULL);
 	ASSERT(pszFormat != NULL);
@@ -120,9 +120,9 @@ void FormatDateTime(TCHAR * pszTemp, LPCTSTR pszFormat, const struct tm * ptmTem
 #endif
 }
 
-LPCTSTR CGTime::Format(LPCTSTR pszFormat) const
+lpctstr CGTime::Format(lpctstr pszFormat) const
 {
-	TCHAR * pszTemp = Str_GetTemp();
+	tchar * pszTemp = Str_GetTemp();
 
 	if ( pszFormat == NULL )
 	{
@@ -140,9 +140,9 @@ LPCTSTR CGTime::Format(LPCTSTR pszFormat) const
 	return pszTemp;
 }
 
-LPCTSTR CGTime::FormatGmt(LPCTSTR pszFormat) const
+lpctstr CGTime::FormatGmt(lpctstr pszFormat) const
 {
-	TCHAR * pszTemp = Str_GetTemp();
+	tchar * pszTemp = Str_GetTemp();
 	if ( pszFormat == NULL )
 	{
 		pszFormat = "%a, %d %b %Y %H:%M:%S GMT";
@@ -161,12 +161,12 @@ LPCTSTR CGTime::FormatGmt(LPCTSTR pszFormat) const
 
 //**************************************************************
 
-bool CGTime::Read(TCHAR *pszVal)
+bool CGTime::Read(tchar *pszVal)
 {
 	ADDTOCALLSTACK("CGTime::Read");
 	// Read the full date format.
 
-	TCHAR *ppCmds[10];
+	tchar *ppCmds[10];
 	size_t iQty = Str_ParseCmds( pszVal, ppCmds, COUNTOF(ppCmds), "/,: \t");
 	if ( iQty < 6 )
 		return false;

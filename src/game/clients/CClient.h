@@ -58,7 +58,7 @@ public:
 		const word m_ID;
 		CGString const m_sText;
 
-		TResponseString( word id, LPCTSTR pszText ) : m_ID( id ), m_sText( pszText )
+		TResponseString( word id, lpctstr pszText ) : m_ID( id ), m_sText( pszText )
 		{
 		}
 
@@ -70,9 +70,9 @@ public:
 	CGTypedArray<dword, dword>		m_CheckArray;
 	CGObArray<TResponseString *>	m_TextArray;
 public:
-	void AddText( word id, LPCTSTR pszText );
-	LPCTSTR GetName() const;
-	bool r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc );
+	void AddText( word id, lpctstr pszText );
+	lpctstr GetName() const;
+	bool r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc );
 
 public:
 	CDialogResponseArgs()
@@ -93,7 +93,7 @@ public:
 	word m_color;
 	CGString m_sText;
 public:
-	bool ParseLine( TCHAR * pszArgs, CScriptObj * pObjBase, CTextConsole * pSrc );
+	bool ParseLine( tchar * pszArgs, CScriptObj * pObjBase, CTextConsole * pSrc );
 };
 
 
@@ -101,13 +101,13 @@ class CClient : public CGObListRec, public CScriptObj, public CChatChanMember, p
 {
 	// TCP/IP connection to the player or console.
 private:
-	static LPCTSTR const sm_szCmd_Redirect[];		// default to redirect these.
+	static lpctstr const sm_szCmd_Redirect[];		// default to redirect these.
 
 public:
 	static const char *m_sClassName;
-	static LPCTSTR const sm_szRefKeys[];
-	static LPCTSTR const sm_szLoadKeys[];
-	static LPCTSTR const sm_szVerbKeys[];
+	static lpctstr const sm_szRefKeys[];
+	static lpctstr const sm_szLoadKeys[];
+	static lpctstr const sm_szVerbKeys[];
 private:
 	CChar * m_pChar;			// What char are we playing ?
 	NetState* m_net; // network state
@@ -256,7 +256,7 @@ private:
 	static CHuffman m_Comp;
 
 private:
-	bool r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef );
+	bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 
 	bool OnRxConsoleLoginComplete();
 	bool OnRxConsole( const byte * pData, size_t len );
@@ -265,7 +265,7 @@ private:
 	bool OnRxWebPageRequest( byte * pRequest, size_t len );
 
 	byte LogIn( CAccountRef pAccount, CGString & sMsg );
-	byte LogIn( LPCTSTR pszName, LPCTSTR pPassword, CGString & sMsg );
+	byte LogIn( lpctstr pszName, lpctstr pPassword, CGString & sMsg );
 
 	bool CanInstantLogOut() const;
 	void Cmd_GM_PageClear();
@@ -309,32 +309,32 @@ private:
 
 	// Commands from client
 	void Event_Skill_Use( SKILL_TYPE x ); // Skill is clicked on the skill list
-	void Event_Talk_Common(TCHAR * szText ); // PC speech
-	bool Event_Command( LPCTSTR pszCommand, TALKMODE_TYPE mode = TALKMODE_SYSTEM ); // Client entered a '/' command like /ADD
+	void Event_Talk_Common(tchar * szText ); // PC speech
+	bool Event_Command( lpctstr pszCommand, TALKMODE_TYPE mode = TALKMODE_SYSTEM ); // Client entered a '/' command like /ADD
 
 public:
 	void GetAdjustedCharID( const CChar * pChar, CREID_TYPE & id, HUE_TYPE &wHue ) const;
 	void GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMID_TYPE & id, HUE_TYPE &wHue ) const;
 
 	void Event_Attack(CGrayUID uid);
-	void Event_Book_Title( CGrayUID uid, LPCTSTR pszTitle, LPCTSTR pszAuthor );
-	void Event_BugReport( const TCHAR * pszText, int len, BUGREPORT_TYPE type, CLanguageID lang = 0 );
+	void Event_Book_Title( CGrayUID uid, lpctstr pszTitle, lpctstr pszAuthor );
+	void Event_BugReport( const tchar * pszText, int len, BUGREPORT_TYPE type, CLanguageID lang = 0 );
 	void Event_ChatButton(const NCHAR * pszName); // Client's chat button was pressed
 	void Event_ChatText( const NCHAR * pszText, int len, CLanguageID lang = 0 ); // Text from a client
 	void Event_CombatMode( bool fWar ); // Only for switching to combat mode
 	bool Event_DoubleClick( CGrayUID uid, bool fMacro, bool fTestTouch, bool fScript = false );
-	void Event_ExtCmd( EXTCMD_TYPE type, TCHAR * pszName );
+	void Event_ExtCmd( EXTCMD_TYPE type, tchar * pszName );
 	void Event_Item_Drop( CGrayUID uidItem, CPointMap pt, CGrayUID uidOn, uchar gridIndex = 0 ); // Item is dropped on ground
 	void Event_Item_Drop_Fail( CItem *pItem );
 	void Event_Item_Dye( CGrayUID uid, HUE_TYPE wHue );	// Rehue an item
 	void Event_Item_Pickup( CGrayUID uid, int amount ); // Client grabs an item
 	void Event_MailMsg( CGrayUID uid1, CGrayUID uid2 );
-	void Event_Profile( byte fWriteMode, CGrayUID uid, LPCTSTR pszProfile, int iProfileLen );
-	void Event_PromptResp( LPCTSTR pszText, size_t len, dword context1, dword context2, dword type, bool bNoStrip = false );
+	void Event_Profile( byte fWriteMode, CGrayUID uid, lpctstr pszProfile, int iProfileLen );
+	void Event_PromptResp( lpctstr pszText, size_t len, dword context1, dword context2, dword type, bool bNoStrip = false );
 	void Event_SetName( CGrayUID uid, const char * pszCharName );
 	void Event_SingleClick( CGrayUID uid );
-	void Event_Talk( LPCTSTR pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bool bNoStrip = false ); // PC speech
-	void Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, LPCTSTR pszLang );
+	void Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bool bNoStrip = false ); // PC speech
+	void Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, lpctstr pszLang );
 	void Event_Target( dword context, CGrayUID uid, CPointMap pt, byte flags = 0, ITEMID_TYPE id = ITEMID_NOTHING );
 	void Event_Tips( word i ); // Tip of the day window
 	void Event_ToolTip( CGrayUID uid );
@@ -369,9 +369,9 @@ public:
 	bool Cmd_CreateChar( CREID_TYPE id );
 
 	void Cmd_GM_PageMenu( uint iEntryStart = 0 );
-	void Cmd_GM_PageCmd( LPCTSTR pCmd );
+	void Cmd_GM_PageCmd( lpctstr pCmd );
 	void Cmd_GM_PageSelect( size_t iSelect );
-	void Cmd_GM_Page( LPCTSTR pszreason); // Help button (Calls GM Call Menus up)
+	void Cmd_GM_Page( lpctstr pszreason); // Help button (Calls GM Call Menus up)
 
 	bool Cmd_Skill_Menu( RESOURCE_ID_BASE rid, int iSelect = -1 );
 	bool Cmd_Skill_Smith( CItem * pIngots );
@@ -383,7 +383,7 @@ public:
 
 public:
 	CSocketAddress &GetPeer();								// get peer address
-	LPCTSTR GetPeerStr() const;								// get string representation of the peer address
+	lpctstr GetPeerStr() const;								// get string representation of the peer address
 	int GetSocketID() const;								// get socket id
 
 public:
@@ -403,7 +403,7 @@ public:
 	}
 
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute script type command on me
-	virtual bool r_WriteVal( LPCTSTR pszKey, CGString & s, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pszKey, CGString & s, CTextConsole * pSrc );
 	virtual bool r_LoadVal( CScript & s );
 
 	// Low level message traffic.
@@ -442,7 +442,7 @@ public:
 	bool addDeleteErr(byte code, dword iSlot);
 	void addSeason(SEASON_TYPE season);
 	void addTime( bool bCurrent = false );
-	void addObjectRemoveCantSee( CGrayUID uid, LPCTSTR pszName = NULL );
+	void addObjectRemoveCantSee( CGrayUID uid, lpctstr pszName = NULL );
 	void closeContainer( const CObjBase * pObj );
 	void closeUIWindow( const CChar* character, dword command );
 	void addObjectRemove( CGrayUID uid );
@@ -454,7 +454,7 @@ public:
 	void addItem_InContainer( const CItem * pItem );
 	void addItem( CItem * pItem );
 
-	void addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dword ClilocTwo, const word Time = 0, LPCTSTR* pArgs = 0, size_t iArgCount = 0);
+	void addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dword ClilocTwo, const word Time = 0, lpctstr* pArgs = 0, size_t iArgCount = 0);
 	void removeBuff(const BUFF_ICONS IconId);
 	void resendBuffs();
 
@@ -488,30 +488,30 @@ public:
 	void addChangeServer();
 	void addPlayerUpdate();
 
-	void addBark( LPCTSTR pText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_DEFAULT, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD );
+	void addBark( lpctstr pText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_DEFAULT, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD );
 	void addBarkUNICODE( const NCHAR * pText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang = 0 );
-	void addBarkLocalized( int iClilocId, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_DEFAULT, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD, LPCTSTR pArgs = NULL );
-	void addBarkLocalizedEx( int iClilocId, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_DEFAULT, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD, AFFIX_TYPE affix = AFFIX_APPEND, LPCTSTR pAffix = NULL, LPCTSTR pArgs = NULL );
-	void addBarkParse( LPCTSTR pszText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font = FONT_NORMAL, bool bUnicode = false, LPCTSTR name = "" );
-	void addSysMessage( LPCTSTR pMsg ); // System message (In lower left corner)
-	void addObjMessage( LPCTSTR pMsg, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_OBJ ); // The message when an item is clicked
+	void addBarkLocalized( int iClilocId, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_DEFAULT, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD, lpctstr pArgs = NULL );
+	void addBarkLocalizedEx( int iClilocId, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_DEFAULT, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD, AFFIX_TYPE affix = AFFIX_APPEND, lpctstr pAffix = NULL, lpctstr pArgs = NULL );
+	void addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font = FONT_NORMAL, bool bUnicode = false, lpctstr name = "" );
+	void addSysMessage( lpctstr pMsg ); // System message (In lower left corner)
+	void addObjMessage( lpctstr pMsg, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_OBJ ); // The message when an item is clicked
 
 	void addDyeOption( const CObjBase * pBase );
-	void addWebLaunch( LPCTSTR pMsg ); // Direct client to a web page
+	void addWebLaunch( lpctstr pMsg ); // Direct client to a web page
 
-	void addPromptConsole( CLIMODE_TYPE mode, LPCTSTR pMsg, CGrayUID context1 = 0, CGrayUID context2 = 0, bool bUnicode = false );
-	void addTarget( CLIMODE_TYPE targmode, LPCTSTR pMsg, bool fAllowGround = false, bool fCheckCrime = false, int iTimeout = 0 ); // Send targetting cursor to client
+	void addPromptConsole( CLIMODE_TYPE mode, lpctstr pMsg, CGrayUID context1 = 0, CGrayUID context2 = 0, bool bUnicode = false );
+	void addTarget( CLIMODE_TYPE targmode, lpctstr pMsg, bool fAllowGround = false, bool fCheckCrime = false, int iTimeout = 0 ); // Send targetting cursor to client
 	void addTargetDeed( const CItem * pDeed );
 	bool addTargetItems( CLIMODE_TYPE targmode, ITEMID_TYPE id, bool fGround = true );
 	bool addTargetChars( CLIMODE_TYPE mode, CREID_TYPE id, bool fNoto, int iTimeout = 0 );
-	void addTargetVerb( LPCTSTR pCmd, LPCTSTR pArg );
-	void addTargetFunctionMulti( LPCTSTR pszFunction, ITEMID_TYPE itemid, bool fGround );
-	void addTargetFunction( LPCTSTR pszFunction, bool fAllowGround, bool fCheckCrime );
+	void addTargetVerb( lpctstr pCmd, lpctstr pArg );
+	void addTargetFunctionMulti( lpctstr pszFunction, ITEMID_TYPE itemid, bool fGround );
+	void addTargetFunction( lpctstr pszFunction, bool fAllowGround, bool fCheckCrime );
 	void addTargetCancel();
-	void addPromptConsoleFunction( LPCTSTR pszFunction, LPCTSTR pszSysmessage, bool bUnicode = false );
+	void addPromptConsoleFunction( lpctstr pszFunction, lpctstr pszSysmessage, bool bUnicode = false );
 
-	void addScrollScript( CResourceLock &s, SCROLL_TYPE type, dword dwcontext = 0, LPCTSTR pszHeader = NULL );
-	void addScrollResource( LPCTSTR szResourceName, SCROLL_TYPE type, dword dwcontext = 0 );
+	void addScrollScript( CResourceLock &s, SCROLL_TYPE type, dword dwcontext = 0, lpctstr pszHeader = NULL );
+	void addScrollResource( lpctstr szResourceName, SCROLL_TYPE type, dword dwcontext = 0 );
 
 	void addVendorClose( const CChar * pVendor );
 	bool addShopMenuBuy( CChar * pVendor );
@@ -532,12 +532,12 @@ public:
 	void addBulletinBoard( const CItemContainer * pBoard );
 	bool addBBoardMessage( const CItemContainer * pBoard, BBOARDF_TYPE flag, CGrayUID uidMsg );
 
-	void addToolTip( const CObjBase * pObj, LPCTSTR psztext );
+	void addToolTip( const CObjBase * pObj, lpctstr psztext );
 	void addDrawMap( CItemMap * pItem );
 	void addMapMode( CItemMap * pItem, MAPCMD_TYPE iType, bool fEdit = false );
 
-	void addGumpTextDisp( const CObjBase * pObj, GUMP_TYPE gump, LPCTSTR pszName, LPCTSTR pszText );
-	void addGumpInpVal( bool fcancel, INPVAL_STYLE style, dword dwmask, LPCTSTR ptext1, LPCTSTR ptext2, CObjBase * pObj );
+	void addGumpTextDisp( const CObjBase * pObj, GUMP_TYPE gump, lpctstr pszName, lpctstr pszText );
+	void addGumpInpVal( bool fcancel, INPVAL_STYLE style, dword dwmask, lpctstr ptext1, lpctstr ptext2, CObjBase * pObj );
 
 	void addItemMenu( CLIMODE_TYPE mode, const CMenuItem * item, size_t count, CObjBase * pObj = NULL );
 	void addGumpDialog( CLIMODE_TYPE mode, const CGString * sControls, size_t iControls, const CGString * psText, size_t iTexts, int x, int y, CObjBase * pObj = NULL, dword rid = 0 );
@@ -545,7 +545,7 @@ public:
 	bool addGumpDialogProps( CGrayUID uid );
 
 	void addLoginComplete();
-	void addChatSystemMessage(CHATMSG_TYPE iType, LPCTSTR pszName1 = NULL, LPCTSTR pszName2 = NULL, CLanguageID lang = 0 );
+	void addChatSystemMessage(CHATMSG_TYPE iType, lpctstr pszName1 = NULL, lpctstr pszName2 = NULL, CLanguageID lang = 0 );
 
 	void addCharPaperdoll( CChar * pChar );
 
@@ -594,7 +594,7 @@ public:
 	void addIdleWarning( byte message );
 	void addKRToolbar( bool bEnable );
 
-	void SendPacket( TCHAR * pszPacket );
+	void SendPacket( tchar * pszPacket );
 	void LogOpenedContainer(const CItemContainer* pContainer);
 
 	// Test what I can do
@@ -660,7 +660,7 @@ public:
 			return( PLEVEL_Guest );
 		return( GetAccount()->GetPrivLevel());
 	}
-	LPCTSTR GetName() const
+	lpctstr GetName() const
 	{
 		if ( GetAccount() == NULL )
 			return( "NA" );
@@ -671,11 +671,11 @@ public:
 		return( m_pChar );
 	}
 
-	void SysMessage( LPCTSTR pMsg ) const; // System message (In lower left corner)
+	void SysMessage( lpctstr pMsg ) const; // System message (In lower left corner)
 	bool CanSee( const CObjBaseTemplate * pObj ) const;
 	bool CanHear( const CObjBaseTemplate * pSrc, TALKMODE_TYPE mode ) const;
 
-	bool Dialog_Setup( CLIMODE_TYPE mode, RESOURCE_ID_BASE rid, int iPage, CObjBase * pObj, LPCTSTR Arguments = "" );
+	bool Dialog_Setup( CLIMODE_TYPE mode, RESOURCE_ID_BASE rid, int iPage, CObjBase * pObj, lpctstr Arguments = "" );
 	bool Dialog_Close( CObjBase * pObj, dword rid, int buttonID );
 	void Menu_Setup( RESOURCE_ID_BASE rid, CObjBase * pObj = NULL );
 
@@ -703,7 +703,7 @@ public:
 	{
 		return( m_Targ_Mode );
 	}
-	void SetTargMode( CLIMODE_TYPE targmode = CLIMODE_NORMAL, LPCTSTR pszPrompt = NULL, int iTimeout = 0 );
+	void SetTargMode( CLIMODE_TYPE targmode = CLIMODE_NORMAL, lpctstr pszPrompt = NULL, int iTimeout = 0 );
 	void ClearTargMode()
 	{
 		// done with the last mode.
@@ -733,27 +733,27 @@ public:
 	CItemMultiCustom * m_pHouseDesign; // The building this client is designing
 
 public:
-	LPCTSTR GetDefStr( LPCTSTR pszKey, bool fZero = false ) const
+	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false ) const
 	{
 		return m_BaseDefs.GetKeyStr( pszKey, fZero );
 	}
 
-	INT64 GetDefNum( LPCTSTR pszKey, bool fZero = false ) const
+	INT64 GetDefNum( lpctstr pszKey, bool fZero = false ) const
 	{
 		return m_BaseDefs.GetKeyNum( pszKey, fZero );
 	}
 
-	void SetDefNum(LPCTSTR pszKey, INT64 iVal, bool fZero = true)
+	void SetDefNum(lpctstr pszKey, INT64 iVal, bool fZero = true)
 	{
 		m_BaseDefs.SetNum(pszKey, iVal, fZero);
 	}
 
-	void SetDefStr(LPCTSTR pszKey, LPCTSTR pszVal, bool fQuoted = false, bool fZero = true)
+	void SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true)
 	{
 		m_BaseDefs.SetStr(pszKey, fQuoted, pszVal, fZero);
 	}
 
-	void DeleteDef(LPCTSTR pszKey)
+	void DeleteDef(lpctstr pszKey)
 	{
 		m_BaseDefs.DeleteKey(pszKey);
 	}

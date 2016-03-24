@@ -11,7 +11,7 @@ class CItemVendable : public CItem
 {
 	// Any item that can be sold and has value.
 private:
-	static LPCTSTR const sm_szLoadKeys[];
+	static lpctstr const sm_szLoadKeys[];
 	word m_quality;		// 0-100 quality.
 	dword m_price;		// The price of this item if on a vendor. (allow random (but remembered) pluctuations)
 
@@ -40,7 +40,7 @@ public:
 
 	void Restock( bool fSellToPlayers );
 	virtual void  r_Write( CScript & s );
-	virtual bool r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc );
 	virtual bool  r_LoadVal( CScript & s  );
 };
 

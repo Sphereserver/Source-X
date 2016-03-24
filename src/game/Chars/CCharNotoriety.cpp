@@ -250,7 +250,7 @@ HUE_TYPE CChar::Noto_GetHue( const CChar * pCharViewer, bool fIncog ) const
 }
 
 
-LPCTSTR CChar::Noto_GetFameTitle() const
+lpctstr CChar::Noto_GetFameTitle() const
 {
 	ADDTOCALLSTACK("CChar::Noto_GetFameTitle");
 	if ( IsStatFlag(STATF_Incognito|STATF_Polymorph) )
@@ -305,16 +305,16 @@ int CChar::Noto_GetLevel() const
 	return( ( i * (g_Cfg.m_NotoFameLevels.GetCount() + 1) ) + j );
 }
 
-LPCTSTR CChar::Noto_GetTitle() const
+lpctstr CChar::Noto_GetTitle() const
 {
 	ADDTOCALLSTACK("CChar::Noto_GetTitle");
 
-	LPCTSTR pTitle = Noto_IsMurderer() ? g_Cfg.GetDefaultMsg( DEFMSG_TITLE_MURDERER ) : ( IsStatFlag(STATF_Criminal) ? g_Cfg.GetDefaultMsg( DEFMSG_TITLE_CRIMINAL ) :  g_Cfg.GetNotoTitle(Noto_GetLevel(), Char_GetDef()->IsFemale()) );
-	LPCTSTR pFameTitle = GetKeyStr("NAME.PREFIX");
+	lpctstr pTitle = Noto_IsMurderer() ? g_Cfg.GetDefaultMsg( DEFMSG_TITLE_MURDERER ) : ( IsStatFlag(STATF_Criminal) ? g_Cfg.GetDefaultMsg( DEFMSG_TITLE_CRIMINAL ) :  g_Cfg.GetNotoTitle(Noto_GetLevel(), Char_GetDef()->IsFemale()) );
+	lpctstr pFameTitle = GetKeyStr("NAME.PREFIX");
 	if ( !*pFameTitle )
 		pFameTitle = Noto_GetFameTitle();
 
-	TCHAR * pTemp = Str_GetTemp();
+	tchar * pTemp = Str_GetTemp();
 	sprintf( pTemp, "%s%s%s%s%s%s",
 		(pTitle[0]) ? ( Char_GetDef()->IsFemale() ? g_Cfg.GetDefaultMsg( DEFMSG_TITLE_ARTICLE_FEMALE ) : g_Cfg.GetDefaultMsg( DEFMSG_TITLE_ARTICLE_MALE ) )  : "",
 		pTitle,
@@ -362,7 +362,7 @@ bool CChar::Noto_Criminal( CChar * pChar )
 	return true;
 }
 
-void CChar::Noto_ChangeDeltaMsg( int iDelta, LPCTSTR pszType )
+void CChar::Noto_ChangeDeltaMsg( int iDelta, lpctstr pszType )
 {
 	ADDTOCALLSTACK("CChar::Noto_ChangeDeltaMsg");
 	if ( !iDelta )
@@ -385,7 +385,7 @@ void CChar::Noto_ChangeDeltaMsg( int iDelta, LPCTSTR pszType )
 
 	int iDegree = minimum(abs(iDelta) / NOTO_FACTOR, 7);
 
-	TCHAR *pszMsg = Str_GetTemp();
+	tchar *pszMsg = Str_GetTemp();
 	sprintf( pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_MSG_NOTO_CHANGE_0 ), 
 		( iDelta < 0 ) ? g_Cfg.GetDefaultMsg( DEFMSG_MSG_NOTO_CHANGE_LOST ) : g_Cfg.GetDefaultMsg( DEFMSG_MSG_NOTO_CHANGE_GAIN ),
 		g_Cfg.GetDefaultMsg(sm_DegreeTable[iDegree]), pszType );
@@ -399,7 +399,7 @@ void CChar::Noto_ChangeNewMsg( int iPrvLevel )
 	if ( iPrvLevel != Noto_GetLevel())
 	{
 		// reached a new title level ?
-		SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_MSG_NOTO_GETTITLE ), static_cast<LPCTSTR>(Noto_GetTitle()));
+		SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_MSG_NOTO_GETTITLE ), static_cast<lpctstr>(Noto_GetTitle()));
 	}
 }
 

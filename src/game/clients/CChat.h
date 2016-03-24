@@ -19,14 +19,14 @@ private:
 	bool m_fChatsOK;	// allowed to create new chats ?
 	CGObList m_Channels;		// CChatChannel // List of chat channels.
 private:
-	void DoCommand(CChatChanMember * pBy, LPCTSTR szMsg);
+	void DoCommand(CChatChanMember * pBy, lpctstr szMsg);
 	void DeleteChannel(CChatChannel * pChannel);
-	void WhereIs(CChatChanMember * pBy, LPCTSTR pszName) const;
+	void WhereIs(CChatChanMember * pBy, lpctstr pszName) const;
 	void KillChannels();
-	bool JoinChannel(CChatChanMember * pMember, LPCTSTR pszChannel, LPCTSTR pszPassword);
-	bool CreateChannel(LPCTSTR pszName, LPCTSTR pszPassword, CChatChanMember * pMember);
-	void CreateJoinChannel(CChatChanMember * pByMember, LPCTSTR pszName, LPCTSTR pszPassword);
-	CChatChannel * FindChannel(LPCTSTR pszChannel) const;
+	bool JoinChannel(CChatChanMember * pMember, lpctstr pszChannel, lpctstr pszPassword);
+	bool CreateChannel(lpctstr pszName, lpctstr pszPassword, CChatChanMember * pMember);
+	void CreateJoinChannel(CChatChanMember * pByMember, lpctstr pszName, lpctstr pszPassword);
+	CChatChannel * FindChannel(lpctstr pszChannel) const;
 public:
 	static const char *m_sClassName;
 	CChat();
@@ -40,13 +40,13 @@ public:
 
 	void EventMsg( CClient * pClient, const NCHAR * pszText, int len, CLanguageID lang ); // Text from a client
 
-	static bool IsValidName(LPCTSTR pszName, bool fPlayer);
+	static bool IsValidName(lpctstr pszName, bool fPlayer);
 
 	void SendDeleteChannel(CChatChannel * pChannel);
 	void SendNewChannel(CChatChannel * pNewChannel);
 	bool IsDuplicateChannelName(const char * pszName) const;
 
-	void Broadcast(CChatChanMember * pFrom, LPCTSTR pszText, CLanguageID lang = 0, bool fOverride = false);
+	void Broadcast(CChatChanMember * pFrom, lpctstr pszText, CLanguageID lang = 0, bool fOverride = false);
 	void QuitChat(CChatChanMember * pClient);
 
 	static void DecorateName(CGString & sName, const CChatChanMember * pMember = NULL, bool fSystem = false);

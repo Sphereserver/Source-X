@@ -46,8 +46,8 @@ struct CImportFile
 	const CPointMap m_ptCenter;
 	const int m_iDist;	// distance fom center.
 
-	TCHAR * m_pszArg1;	// account
-	TCHAR * m_pszArg2;	// name
+	tchar * m_pszArg1;	// account
+	tchar * m_pszArg2;	// name
 
 public:
 	CImportFile( word wModeFlags, CPointMap ptCenter, int iDist ) :
@@ -339,8 +339,8 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			continue;
 
 		// Parse the line.
-		TCHAR* pKey = const_cast<TCHAR*>(strchr(s.GetKey(), ' '));
-		LPCTSTR pArg = NULL;
+		tchar* pKey = const_cast<tchar*>(strchr(s.GetKey(), ' '));
+		lpctstr pArg = NULL;
 
 		if (pKey != NULL)
 		{
@@ -638,7 +638,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 	return( true );
 }
 
-bool CWorld::Import( LPCTSTR pszFilename, const CChar * pSrc, word wModeFlags, int iDist, TCHAR * pszArg1, TCHAR * pszArg2 )
+bool CWorld::Import( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, int iDist, tchar * pszArg1, tchar * pszArg2 )
 {
 	ADDTOCALLSTACK("CWorld::Import");
 	// wModeFlags = IMPFLAGS_TYPE
@@ -696,7 +696,7 @@ bool CWorld::Import( LPCTSTR pszFilename, const CChar * pSrc, word wModeFlags, i
 
 
 
-bool CWorld::DumpAreas( CTextConsole * pSrc, LPCTSTR pszFilename )
+bool CWorld::DumpAreas( CTextConsole * pSrc, lpctstr pszFilename )
 {
 	ADDTOCALLSTACK("CWorld::DumpAreas");
 	if ( pSrc == NULL )
@@ -726,7 +726,7 @@ bool CWorld::DumpAreas( CTextConsole * pSrc, LPCTSTR pszFilename )
 
 
 
-bool CWorld::Export( LPCTSTR pszFilename, const CChar * pSrc, word wModeFlags, int iDist, int dx, int dy )
+bool CWorld::Export( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, int iDist, int dx, int dy )
 {
 	ADDTOCALLSTACK("CWorld::Export");
 	// wModeFlags = IMPFLAGS_TYPE

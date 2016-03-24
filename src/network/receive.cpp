@@ -56,7 +56,7 @@ bool PacketCreate::onReceive(NetState* net)
 bool PacketCreate::onReceive(NetState* net, bool hasExtraSkill)
 {
 	ADDTOCALLSTACK("PacketCreate::onReceive[1]");
-	TCHAR charname[MAX_NAME_SIZE];
+	tchar charname[MAX_NAME_SIZE];
 	SKILL_TYPE skill1 = SKILL_NONE, skill2 = SKILL_NONE, skill3 = SKILL_NONE, skill4 = SKILL_NONE;
 	byte skillval1 = 0, skillval2 = 0, skillval3 = 0, skillval4 = 0;
 
@@ -155,7 +155,7 @@ bool PacketCreate::onReceive(NetState* net, bool hasExtraSkill)
 		startloc, 0, flags);
 }
 
-bool PacketCreate::doCreate(NetState* net, LPCTSTR charname, bool bFemale, RACE_TYPE rtRace, short wStr, short wDex, short wInt, PROFESSION_TYPE prProf, SKILL_TYPE skSkill1, int iSkillVal1, SKILL_TYPE skSkill2, int iSkillVal2, SKILL_TYPE skSkill3, int iSkillVal3, SKILL_TYPE skSkill4, int iSkillVal4, HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, int iStartLoc, int iPortrait, int iFlags)
+bool PacketCreate::doCreate(NetState* net, lpctstr charname, bool bFemale, RACE_TYPE rtRace, short wStr, short wDex, short wInt, PROFESSION_TYPE prProf, SKILL_TYPE skSkill1, int iSkillVal1, SKILL_TYPE skSkill2, int iSkillVal2, SKILL_TYPE skSkill3, int iSkillVal3, SKILL_TYPE skSkill4, int iSkillVal4, HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, int iStartLoc, int iPortrait, int iFlags)
 {
 	ADDTOCALLSTACK("PacketCreate::doCreate");
 
@@ -297,7 +297,7 @@ bool PacketSpeakReq::onReceive(NetState* net)
 	if (packetLength > MAX_TALK_BUFFER)
 		packetLength = MAX_TALK_BUFFER;
 
-	TCHAR text[MAX_TALK_BUFFER];
+	tchar text[MAX_TALK_BUFFER];
 	readStringASCII(text, minimum(COUNTOF(text), packetLength));
 
 	client->Event_Talk(text, hue, mode, false);
@@ -485,7 +485,7 @@ bool PacketTextCommand::onReceive(NetState* net)
 		return false;
 
 	EXTCMD_TYPE type = static_cast<EXTCMD_TYPE>(readByte());
-	TCHAR name[MAX_TALK_BUFFER];
+	tchar name[MAX_TALK_BUFFER];
 	readStringNullASCII(name, MAX_TALK_BUFFER-1);
 
 	client->Event_ExtCmd(type, name);
@@ -829,7 +829,7 @@ bool PacketStaticUpdate::onReceive(NetState* net)
     byte UlCmd = readByte();*/
 	TemporaryString dump;
 	this->dump(dump);
-	g_Log.EventDebug("%x:Parsing %s", net->id(), static_cast<LPCTSTR>(dump));
+	g_Log.EventDebug("%x:Parsing %s", net->id(), static_cast<lpctstr>(dump));
 	return true;
 }
 
@@ -1014,7 +1014,7 @@ bool PacketBookPageEdit::onReceive(NetState* net)
 	skip(-4);
 
 	size_t len = 0;
-	TCHAR* content = Str_GetTemp();
+	tchar* content = Str_GetTemp();
 
 	for (int i = 0; i < pageCount; i++)
 	{
@@ -1231,7 +1231,7 @@ bool PacketBulletinBoardReq::onReceive(NetState* net)
 			}
 
 			size_t lenstr = readByte();
-			TCHAR* str = Str_GetTemp();
+			tchar* str = Str_GetTemp();
 			readStringASCII(str, lenstr, false);
 			if (Str_Check(str))
 				return true;
@@ -1353,7 +1353,7 @@ bool PacketCharRename::onReceive(NetState* net)
 	ADDTOCALLSTACK("PacketCharRename::onReceive");
 
 	CGrayUID serial(readInt32());
-	TCHAR* name = Str_GetTemp();
+	tchar* name = Str_GetTemp();
 	readStringASCII(name, MAX_NAME_SIZE);
 
 	net->getClient()->Event_SetName(serial, name);
@@ -1451,9 +1451,9 @@ bool PacketServersReq::onReceive(NetState* net)
 {
 	ADDTOCALLSTACK("PacketServersReq::onReceive");
 
-	TCHAR acctname[MAX_ACCOUNT_NAME_SIZE];
+	tchar acctname[MAX_ACCOUNT_NAME_SIZE];
 	readStringASCII(acctname, COUNTOF(acctname));
-	TCHAR acctpass[MAX_NAME_SIZE];
+	tchar acctpass[MAX_NAME_SIZE];
 	readStringASCII(acctpass, COUNTOF(acctpass));
 	skip(1);
 
@@ -1509,7 +1509,7 @@ bool PacketCreateNew::onReceive(NetState* net)
 	ADDTOCALLSTACK("PacketCreateNew::onReceive");
 
 	skip(10); // 2=length, 4=pattern1, 4=pattern2
-	TCHAR charname[MAX_NAME_SIZE];
+	tchar charname[MAX_NAME_SIZE];
 	readStringASCII(charname, MAX_NAME_SIZE);
 	skip(30);
 	PROFESSION_TYPE profession = static_cast<PROFESSION_TYPE>(readByte());
@@ -1664,9 +1664,9 @@ bool PacketCharListReq::onReceive(NetState* net)
 	ADDTOCALLSTACK("PacketCharListReq::onReceive");
 
 	skip(4);
-	TCHAR acctname[MAX_ACCOUNT_NAME_SIZE];
+	tchar acctname[MAX_ACCOUNT_NAME_SIZE];
 	readStringASCII(acctname, COUNTOF(acctname));
-	TCHAR acctpass[MAX_NAME_SIZE];
+	tchar acctpass[MAX_NAME_SIZE];
 	readStringASCII(acctpass, COUNTOF(acctpass));
 
 	net->getClient()->Setup_ListReq(acctname, acctpass, false);
@@ -1694,10 +1694,10 @@ bool PacketBookHeaderEdit::onReceive(NetState* net)
 	skip(1); // unknown
 	skip(2); // pages
 
-	TCHAR title[2 * MAX_NAME_SIZE];
+	tchar title[2 * MAX_NAME_SIZE];
 	readStringASCII(title, COUNTOF(title));
 
-	TCHAR author[MAX_NAME_SIZE];
+	tchar author[MAX_NAME_SIZE];
 	readStringASCII(author, COUNTOF(author));
 
 	net->getClient()->Event_Book_Title(bookSerial, title, author);
@@ -1794,7 +1794,7 @@ bool PacketPromptResponse::onReceive(NetState* net)
 	if (packetLength > MAX_TALK_BUFFER)
 		packetLength = MAX_TALK_BUFFER;
 
-	TCHAR* text = Str_GetTemp();
+	tchar* text = Str_GetTemp();
 	readStringASCII(text, packetLength, false);
 
 	net->getClient()->Event_PromptResp(text, packetLength, context1, context2, type);
@@ -2001,10 +2001,10 @@ bool PacketGumpValueInputResponse::onReceive(NetState* net)
 	readInt16(); // context
 	byte action = readByte();
 	word textLength = readInt16();
-	TCHAR text[MAX_NAME_SIZE];
+	tchar text[MAX_NAME_SIZE];
 	readStringASCII(text, minimum(MAX_NAME_SIZE, textLength));
 
-	TCHAR* fix;
+	tchar* fix;
 	if ((fix = strchr(text, '\n')) != NULL)
 		*fix = '\0';
 	if ((fix = strchr(text, '\r')) != NULL)
@@ -2035,20 +2035,20 @@ bool PacketGumpValueInputResponse::onReceive(NetState* net)
 		bool ret = object->r_Verb(script, client->GetChar());
 		if (ret == false)
 		{
-			client->SysMessagef("Invalid set: %s = %s", static_cast<LPCTSTR>(client->m_Targ_Text), static_cast<LPCTSTR>(text));
+			client->SysMessagef("Invalid set: %s = %s", static_cast<lpctstr>(client->m_Targ_Text), static_cast<lpctstr>(text));
 		}
 		else
 		{
 			if (client->IsPriv(PRIV_DETAIL))
 			{
-				client->SysMessagef("Set: %s = %s", static_cast<LPCTSTR>(client->m_Targ_Text), static_cast<LPCTSTR>(text));
+				client->SysMessagef("Set: %s = %s", static_cast<lpctstr>(client->m_Targ_Text), static_cast<lpctstr>(text));
 			}
 
 			object->RemoveFromView(); // weird client thing
 			object->Update();
 		}
 
-		g_Log.Event(LOGM_GM_CMDS, "%x:'%s' tweak uid=0%x (%s) to '%s %s'=%d\n", net->id(), client->GetName(), static_cast<dword>(object->GetUID()), object->GetName(), static_cast<LPCTSTR>(client->m_Targ_Text), static_cast<LPCTSTR>(text), ret);
+		g_Log.Event(LOGM_GM_CMDS, "%x:'%s' tweak uid=0%x (%s) to '%s %s'=%d\n", net->id(), client->GetName(), static_cast<dword>(object->GetUID()), object->GetName(), static_cast<lpctstr>(client->m_Targ_Text), static_cast<lpctstr>(text), ret);
 	}
 
 	return true;
@@ -2079,7 +2079,7 @@ bool PacketSpeakReqUNICODE::onReceive(NetState* net)
 	TALKMODE_TYPE mode = static_cast<TALKMODE_TYPE>(readByte());
 	HUE_TYPE hue = static_cast<HUE_TYPE>(readInt16());
 	FONT_TYPE font = static_cast<FONT_TYPE>(readInt16());
-	TCHAR language[4];
+	tchar language[4];
 	readStringASCII(language, COUNTOF(language));
 
 	if (packetLength < getPosition())
@@ -2107,7 +2107,7 @@ bool PacketSpeakReqUNICODE::onReceive(NetState* net)
 			return true;
 
 		skip(static_cast<int>(toskip));
-		TCHAR text[MAX_TALK_BUFFER];
+		tchar text[MAX_TALK_BUFFER];
 		readStringNullASCII(text, COUNTOF(text));
 		client->Event_Talk(text, hue, mode, true);
 	}
@@ -2187,7 +2187,7 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 			if (dialog == NULL)
 				g_Log.Event(LOGL_EVENT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, "undef", (dword)serial, button);
 			else
-				g_Log.Event(LOGL_EVENT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, (LPCTSTR)dialog->GetName(), (dword)serial, button);
+				g_Log.Event(LOGL_EVENT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, (lpctstr)dialog->GetName(), (dword)serial, button);
 		}
 	}
 #endif
@@ -2211,14 +2211,14 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 
 
 	dword textCount = readInt32();
-	TCHAR* text = Str_GetTemp();
+	tchar* text = Str_GetTemp();
 	for (size_t i = 0; i < textCount; i++)
 	{
 		word id = readInt16();
 		word length = readInt16();
 		readStringNUNICODE(text, THREAD_STRING_LENGTH, length, false);
 
-		TCHAR* fix;
+		tchar* fix;
 		if ((fix = strchr(text, '\n')) != NULL)
 			*fix = '\0';
 		if ((fix = strchr(text, '\r')) != NULL)
@@ -2260,7 +2260,7 @@ bool PacketChatCommand::onReceive(NetState* net)
 	ASSERT(client);
 
 	size_t packetLength = readInt16();
-	TCHAR language[4];
+	tchar language[4];
 	readStringASCII(language, COUNTOF(language));
 
 	if (packetLength < getPosition())
@@ -2351,7 +2351,7 @@ bool PacketProfileReq::onReceive(NetState* net)
 	bool write = readBool();
 	CGrayUID serial(readInt32());
 	word textLength(0);
-	TCHAR* text(NULL);
+	tchar* text(NULL);
 
 	if (write == true && packetLength > 12)
 	{
@@ -2420,7 +2420,7 @@ bool PacketClientVersion::onReceive(NetState* net)
 	if (length > 20)
 		length = 20;
 
-	TCHAR* versionStr = Str_GetTemp();
+	tchar* versionStr = Str_GetTemp();
 	readStringASCII(versionStr, length, false);
 
 	if (Str_Check(versionStr))
@@ -2727,7 +2727,7 @@ bool PacketLanguage::onReceive(NetState* net)
 	CClient* client = net->getClient();
 	ASSERT(client);
 
-	TCHAR language[4];
+	tchar language[4];
 	readStringNullASCII(language, COUNTOF(language));
 
 	client->GetAccount()->m_lang.Set(language);
@@ -3292,14 +3292,14 @@ bool PacketPromptResponseUnicode::onReceive(NetState* net)
 	dword context1 = readInt32();
 	dword context2 = readInt32();
 	dword type = readInt32();
-	TCHAR language[4];
+	tchar language[4];
 	readStringASCII(language, COUNTOF(language));
 	
 	if (length < getPosition())
 		return false;
 
 	length = (length - getPosition()) / 2;
-	TCHAR* text = Str_GetTemp();
+	tchar* text = Str_GetTemp();
 	readStringUNICODE(text, THREAD_STRING_LENGTH, length+1);
 
 	net->getClient()->Event_PromptResp(text, length, context1, context2, type);
@@ -3373,8 +3373,8 @@ bool PacketBookHeaderEditNew::onReceive(NetState* net)
 	skip(1); // writable
 	skip(2); // pages
 
-	TCHAR title[2 * MAX_NAME_SIZE];
-	TCHAR author[MAX_NAME_SIZE];
+	tchar title[2 * MAX_NAME_SIZE];
+	tchar author[MAX_NAME_SIZE];
 
 	size_t titleLength = readInt16();
 	readStringASCII(title, minimum(titleLength, COUNTOF(title)));
@@ -4016,7 +4016,7 @@ bool PacketHardwareInfo::onReceive(NetState* net)
 	skip(4); // screen depth
 	skip(2); // directx major
 	skip(2); // directx minor
-	skip(64 * sizeof(WCHAR)); // video card description
+	skip(64 * sizeof(wchar)); // video card description
 	skip(4); // video card vendor id
 	skip(4); // video card device id
 	skip(4); // video card memory
@@ -4024,8 +4024,8 @@ bool PacketHardwareInfo::onReceive(NetState* net)
 	skip(1); // clients running
 	skip(1); // clients installed
 	skip(1); // clients partial installed
-	skip(4 * sizeof(WCHAR)); // language
-	skip(32 * sizeof(WCHAR)); // unknown
+	skip(4 * sizeof(wchar)); // language
+	skip(32 * sizeof(wchar)); // unknown
 	return true;
 }
 
@@ -4049,12 +4049,12 @@ bool PacketBugReport::onReceive(NetState* net)
 	if (packetLength < 10)
 		return false;
 
-	TCHAR language[4];
+	tchar language[4];
 	readStringASCII(language, COUNTOF(language));
 
 	BUGREPORT_TYPE type = static_cast<BUGREPORT_TYPE>(readInt16());
 
-	TCHAR text[MAX_TALK_BUFFER];
+	tchar text[MAX_TALK_BUFFER];
 	int textLength = readStringNullNUNICODE(text, MAX_TALK_BUFFER, MAX_TALK_BUFFER-1);
 
 	net->getClient()->Event_BugReport(text, textLength, type, CLanguageID(language));
@@ -4355,9 +4355,9 @@ bool PacketCrashReport::onReceive(NetState* net)
 	skip(15); // ip address
 	skip(4); // unknown
 	dword errorCode = readInt32();
-	TCHAR executable[100];
+	tchar executable[100];
 	readStringASCII(executable, COUNTOF(executable));
-	TCHAR description[100];
+	tchar description[100];
 	readStringASCII(description, COUNTOF(description));
 	skip(1); // zero
 	dword errorOffset = readInt32();

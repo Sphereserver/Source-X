@@ -25,7 +25,7 @@ private:
 public:
 	static const char *m_sClassName;
 
-	explicit CListDefContElem(LPCTSTR pszKey);
+	explicit CListDefContElem(lpctstr pszKey);
 	virtual ~CListDefContElem(void);
 
 private:
@@ -33,10 +33,10 @@ private:
 	CListDefContElem& operator=(const CListDefContElem& other);
 
 public:
-	LPCTSTR GetKey() const;
-	void SetKey( LPCTSTR pszKey );
+	lpctstr GetKey() const;
+	void SetKey( lpctstr pszKey );
 
-	virtual LPCTSTR GetValStr() const = 0;
+	virtual lpctstr GetValStr() const = 0;
 	virtual INT64 GetValNum() const = 0;
 	virtual CListDefContElem * CopySelf() const = 0;
 };
@@ -49,8 +49,8 @@ private:
 public:
 	static const char *m_sClassName;
 
-	explicit CListDefContNum(LPCTSTR pszKey);
-	CListDefContNum(LPCTSTR pszKey, INT64 iVal);
+	explicit CListDefContNum(lpctstr pszKey);
+	CListDefContNum(lpctstr pszKey, INT64 iVal);
 	~CListDefContNum(void);
 
 private:
@@ -60,10 +60,10 @@ private:
 public:
 	INT64 GetValNum() const;
 	void SetValNum( INT64 iVal );
-	LPCTSTR GetValStr() const;
+	lpctstr GetValStr() const;
 
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( LPCTSTR pKey, CGString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pKey, CGString & sVal, CTextConsole * pSrc );
 
 	virtual CListDefContElem * CopySelf() const;
 };
@@ -76,8 +76,8 @@ private:
 public:
 	static const char *m_sClassName;
 
-	CListDefContStr(LPCTSTR pszKey, LPCTSTR pszVal);
-	explicit CListDefContStr(LPCTSTR pszKey);
+	CListDefContStr(lpctstr pszKey, lpctstr pszVal);
+	explicit CListDefContStr(lpctstr pszKey);
 	~CListDefContStr(void);
 
 private:
@@ -85,12 +85,12 @@ private:
 	CListDefContStr& operator=(const CListDefContStr& other);
 
 public:
-	LPCTSTR GetValStr() const;
-	void SetValStr( LPCTSTR pszVal );
+	lpctstr GetValStr() const;
+	void SetValStr( lpctstr pszVal );
 	INT64 GetValNum() const;
 
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( LPCTSTR pKey, CGString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pKey, CGString & sVal, CTextConsole * pSrc );
 
 	virtual CListDefContElem * CopySelf() const;
 };
@@ -112,7 +112,7 @@ protected:
 public:
 	static const char *m_sClassName;
 
-	explicit CListDefCont(LPCTSTR pszKey);
+	explicit CListDefCont(lpctstr pszKey);
 	~CListDefCont(void);
 
 private:
@@ -120,36 +120,36 @@ private:
 	CListDefCont& operator=(const CListDefCont& other);
 
 public:
-	LPCTSTR GetKey() const;
-	void SetKey( LPCTSTR pszKey );
+	lpctstr GetKey() const;
+	void SetKey( lpctstr pszKey );
 
 	CListDefContElem* GetAt(size_t nIndex) const;
 	bool SetNumAt(size_t nIndex, INT64 iVal);
-	bool SetStrAt(size_t nIndex, LPCTSTR pszVal);
+	bool SetStrAt(size_t nIndex, lpctstr pszVal);
 	size_t GetCount() const;
 
-	LPCTSTR GetValStr(size_t nIndex) const;
+	lpctstr GetValStr(size_t nIndex) const;
 	INT64 GetValNum(size_t nIndex) const;
 
 	int FindValNum( INT64 iVal, size_t nStartIndex = 0 ) const;
-	int FindValStr( LPCTSTR pVal, size_t nStartIndex = 0 ) const;
+	int FindValStr( lpctstr pVal, size_t nStartIndex = 0 ) const;
 
 	bool AddElementNum(INT64 iVal);
-	bool AddElementStr(LPCTSTR pszKey);
+	bool AddElementStr(lpctstr pszKey);
 
 	bool RemoveElement(size_t nIndex);
 	void RemoveAll();
 	void Sort(bool bDesc = false, bool bCase = false);
 
 	bool InsertElementNum(size_t nIndex, INT64 iVal);
-	bool InsertElementStr(size_t nIndex, LPCTSTR pszKey);
+	bool InsertElementStr(size_t nIndex, lpctstr pszKey);
 
 	CListDefCont * CopySelf();
 	void PrintElements(CGString& strElements) const;
-	void DumpElements( CTextConsole * pSrc, LPCTSTR pszPrefix = NULL ) const;
+	void DumpElements( CTextConsole * pSrc, lpctstr pszPrefix = NULL ) const;
 	void r_WriteSave( CScript& s );
 	bool r_LoadVal( CScript& s );
-	bool r_LoadVal( LPCTSTR pszArg );
+	bool r_LoadVal( lpctstr pszArg );
 };
 
 class CListDefMap
@@ -176,9 +176,9 @@ private:
 	CListDefMap(const CListDefMap& copy);
 
 private:
-	CListDefCont * GetAtKey( LPCTSTR at );
+	CListDefCont * GetAtKey( lpctstr at );
 	inline void DeleteAt( size_t at );
-	inline void DeleteAtKey( LPCTSTR at );
+	inline void DeleteAtKey( lpctstr at );
 	inline void DeleteAtIterator( DefSet::iterator it );
 
 public:
@@ -186,20 +186,20 @@ public:
 	void Empty();
 	size_t GetCount() const;
 
-	LPCTSTR FindValNum( INT64 iVal ) const;
-	LPCTSTR FindValStr( LPCTSTR pVal ) const;
+	lpctstr FindValNum( INT64 iVal ) const;
+	lpctstr FindValStr( lpctstr pVal ) const;
 
 	CListDefCont * GetAt( size_t at );
-	CListDefCont * GetKey( LPCTSTR pszKey ) const;
+	CListDefCont * GetKey( lpctstr pszKey ) const;
 
-	CListDefCont* AddList(LPCTSTR pszKey);
+	CListDefCont* AddList(lpctstr pszKey);
 
-	void DumpKeys( CTextConsole * pSrc, LPCTSTR pszPrefix = NULL );
-	void ClearKeys(LPCTSTR mask = NULL);
-	void DeleteKey( LPCTSTR key );
+	void DumpKeys( CTextConsole * pSrc, lpctstr pszPrefix = NULL );
+	void ClearKeys(lpctstr mask = NULL);
+	void DeleteKey( lpctstr key );
 
-	bool r_LoadVal( LPCTSTR pszKey, CScript & s );
-	bool r_Write( CTextConsole *pSrc, LPCTSTR pszString, CGString& strVal );
+	bool r_LoadVal( lpctstr pszKey, CScript & s );
+	bool r_Write( CTextConsole *pSrc, lpctstr pszString, CGString& strVal );
 	void r_WriteSave( CScript& s );
 };
 

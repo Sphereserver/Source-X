@@ -1118,7 +1118,7 @@ enum
 	IMCV_QTY
 };
 
-LPCTSTR const CItemMultiCustom::sm_szVerbKeys[IMCV_QTY+1] =
+lpctstr const CItemMultiCustom::sm_szVerbKeys[IMCV_QTY+1] =
 {
 	"ADDITEM",
 	"ADDMULTI",
@@ -1133,7 +1133,7 @@ LPCTSTR const CItemMultiCustom::sm_szVerbKeys[IMCV_QTY+1] =
 	NULL
 };
 
-bool CItemMultiCustom::r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef )
+bool CItemMultiCustom::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CItemMultiCustom::r_GetRef");
 	if (!strcmpi("DESIGNER.", pszKey))
@@ -1165,7 +1165,7 @@ bool CItemMultiCustom::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute com
 	{
 		case IMCV_ADDITEM:
 		{
-			TCHAR * ppArgs[4];
+			tchar * ppArgs[4];
 			size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, COUNTOF(ppArgs), ",");
 			if ( iQty != 4 )
 				return false;
@@ -1179,7 +1179,7 @@ bool CItemMultiCustom::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute com
 
 		case IMCV_ADDMULTI:
 		{
-			TCHAR * ppArgs[4];
+			tchar * ppArgs[4];
 			size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, COUNTOF(ppArgs), ",");
 			if ( iQty != 4 )
 				return false;
@@ -1227,7 +1227,7 @@ bool CItemMultiCustom::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute com
 
 		case IMCV_REMOVEITEM:
 		{
-			TCHAR * ppArgs[4];
+			tchar * ppArgs[4];
 			size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, COUNTOF(ppArgs), ",");
 			if ( iQty != 4 )
 				return false;
@@ -1302,7 +1302,7 @@ enum IMCC_TYPE
 	IMCC_QTY
 };
 
-LPCTSTR const CItemMultiCustom::sm_szLoadKeys[IMCC_QTY+1] = // static
+lpctstr const CItemMultiCustom::sm_szLoadKeys[IMCC_QTY+1] = // static
 {
 	"COMPONENTS",
 	"DESIGN",
@@ -1313,7 +1313,7 @@ LPCTSTR const CItemMultiCustom::sm_szLoadKeys[IMCC_QTY+1] = // static
 	NULL
 };
 
-bool CItemMultiCustom::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CItemMultiCustom::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CItemMultiCustom::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -1411,7 +1411,7 @@ bool CItemMultiCustom::r_LoadVal( CScript & s  )
 	{
 		if ( s.IsKey("COMP") )
 		{
-			TCHAR * ppArgs[5];
+			tchar * ppArgs[5];
 			size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, COUNTOF(ppArgs), ",");
 			if ( iQty != 5 )
 				return false;
@@ -1566,8 +1566,8 @@ bool CItemMultiCustom::LoadValidItems()
 	g_Log.EventDebug("file index '%d\n", iFileIndex);
 	g_Log.EventDebug("file name '%s'\n", sm_szItemFiles[i][0]);
 
-	TCHAR* pszRowFull = Str_GetTemp();
-	TCHAR* pszHeaderFull = Str_GetTemp();
+	tchar* pszRowFull = Str_GetTemp();
+	tchar* pszHeaderFull = Str_GetTemp();
 	for ( CSVRowData::iterator itCsv = csvDataRow.begin(); itCsv != csvDataRow.end(); ++itCsv )
 	{
 		strcat(pszHeaderFull, "\t");

@@ -59,7 +59,7 @@ enum PC_TYPE
 	PC_QTY
 };
 
-bool CChar::NPC_OnHearPetCmd( LPCTSTR pszCmd, CChar *pSrc, bool fAllPets )
+bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 {
 	ADDTOCALLSTACK("CChar::NPC_OnHearPetCmd");
 	// This should just be another speech block !!!
@@ -82,7 +82,7 @@ bool CChar::NPC_OnHearPetCmd( LPCTSTR pszCmd, CChar *pSrc, bool fAllPets )
 		return true;
 	}
 
-	static LPCTSTR const sm_Pet_table[] =
+	static lpctstr const sm_Pet_table[] =
 	{
 		"ATTACK",
 		"BOUGHT",
@@ -147,7 +147,7 @@ bool CChar::NPC_OnHearPetCmd( LPCTSTR pszCmd, CChar *pSrc, bool fAllPets )
 
 	bool bTargAllowGround = false;
 	bool bCheckCrime = false;
-	LPCTSTR pTargPrompt = NULL;
+	lpctstr pTargPrompt = NULL;
 	CCharBase *pCharDef = Char_GetDef();
 
 	switch ( iCmd )
@@ -254,13 +254,13 @@ bool CChar::NPC_OnHearPetCmd( LPCTSTR pszCmd, CChar *pSrc, bool fAllPets )
 
 			uint iWage = pCharDef->GetHireDayWage();
 			CItemContainer *pBank = GetBank();
-			TCHAR *pszMsg = Str_GetTemp();
+			tchar *pszMsg = Str_GetTemp();
 			if ( NPC_IsVendor() )
 			{
 				CItemContainer *pCont = GetBank(LAYER_VENDOR_STOCK);
-				TCHAR *pszTemp1 = Str_GetTemp();
-				TCHAR *pszTemp2 = Str_GetTemp();
-				TCHAR *pszTemp3 = Str_GetTemp();
+				tchar *pszTemp1 = Str_GetTemp();
+				tchar *pszTemp2 = Str_GetTemp();
+				tchar *pszTemp3 = Str_GetTemp();
 				if ( iWage )
 				{
 					sprintf(pszTemp1, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_1), pBank->m_itEqBankBox.m_Check_Amount);
@@ -293,7 +293,7 @@ bool CChar::NPC_OnHearPetCmd( LPCTSTR pszCmd, CChar *pSrc, bool fAllPets )
 			if ( pBank )
 			{
 				uint iWage = pCharDef->GetHireDayWage();
-				TCHAR *pszMsg = Str_GetTemp();
+				tchar *pszMsg = Str_GetTemp();
 				if ( pBank->m_itEqBankBox.m_Check_Amount > iWage )
 				{
 					sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_GETGOLD_1), pBank->m_itEqBankBox.m_Check_Amount - iWage);
@@ -356,7 +356,7 @@ bool CChar::NPC_OnHearPetCmd( LPCTSTR pszCmd, CChar *pSrc, bool fAllPets )
 	return true;
 }
 
-bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const CPointMap &pt, LPCTSTR pszArgs )
+bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const CPointMap &pt, lpctstr pszArgs )
 {
 	ADDTOCALLSTACK("CChar::NPC_OnHearPetCmdTarg");
 	// Pet commands that required a target.
@@ -620,7 +620,7 @@ bool CChar::NPC_CheckHirelingStatus()
 	}
 	else
 	{
-		TCHAR* pszMsg = Str_GetTemp();
+		tchar* pszMsg = Str_GetTemp();
 		sprintf(pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_WAGE_COST ), iWage);
 		Speak(pszMsg);
 
@@ -669,7 +669,7 @@ void CChar::NPC_OnHirePayMore( CItem * pGold, bool fHire )
 		pGold->Delete();
 	}
 
-	TCHAR *pszMsg = Str_GetTemp();
+	tchar *pszMsg = Str_GetTemp();
 	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_HIRE_TIME), pBank->m_itEqBankBox.m_Check_Amount / iWage);
 	Speak(pszMsg);
 }
@@ -758,7 +758,7 @@ bool CChar::NPC_OnHireHear( CChar * pCharSrc )
 		return false;
 	}
 
-	TCHAR *pszMsg = Str_GetTemp();
+	tchar *pszMsg = Str_GetTemp();
 	sprintf(pszMsg, Calc_GetRandVal(2) ?
 		g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_HIRE_AMNT ) :
 		g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_HIRE_RATE ), iWage );
@@ -798,7 +798,7 @@ bool CChar::NPC_SetVendorPrice( CItem * pItem, int iPrice )
 	if ( iPrice < 0 )	// just a test.
 		return( true );
 
-	TCHAR *pszMsg = Str_GetTemp();
+	tchar *pszMsg = Str_GetTemp();
 	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_SETPRICE_1), pVendItem->GetName(), iPrice);
 	Speak(pszMsg);
 
@@ -823,7 +823,7 @@ void CChar::NPC_PetDesert()
 	if ( ! pCharOwn->CanSee(this))
 		pCharOwn->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_DESERTED), GetName());
 
-	TCHAR	*pszMsg = Str_GetTemp();
+	tchar	*pszMsg = Str_GetTemp();
 	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_DECIDE_MASTER), GetName());
 	Speak(pszMsg);
 

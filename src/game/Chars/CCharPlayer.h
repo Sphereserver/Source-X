@@ -35,7 +35,7 @@ private:
 public:
 	static const char *m_sClassName;
 	CAccount * m_pAccount;	// The account index. (for idle players mostly)
-	static LPCTSTR const sm_szVerbKeys[];
+	static lpctstr const sm_szVerbKeys[];
 
 	CServTime m_timeLastUsed;	// Time the player char was last used.
 
@@ -46,21 +46,21 @@ public:
 	byte m_speedMode;		// speed mode (0x0 = Normal movement, 0x1 = Fast movement, 0x2 = Slow movement, 0x3 and above = Hybrid movement)
 	dword m_pflag;			// PFLAG
 
-	static LPCTSTR const sm_szLoadKeys[];
+	static lpctstr const sm_szLoadKeys[];
 
 	CResourceRefArray m_Speech;	// Speech fragment list (other stuff we know)
 
 public:
-	SKILL_TYPE Skill_GetLockType( LPCTSTR pszKey ) const;
+	SKILL_TYPE Skill_GetLockType( lpctstr pszKey ) const;
 	SKILLLOCK_TYPE Skill_GetLock( SKILL_TYPE skill ) const;
 	void Skill_SetLock( SKILL_TYPE skill, SKILLLOCK_TYPE state );
 
-	STAT_TYPE Stat_GetLockType( LPCTSTR pszKey ) const;
+	STAT_TYPE Stat_GetLockType( lpctstr pszKey ) const;
 	SKILLLOCK_TYPE Stat_GetLock( STAT_TYPE stat ) const;
 	void Stat_SetLock( STAT_TYPE stat, SKILLLOCK_TYPE state );
 
 	void r_WriteChar( CChar * pChar, CScript & s );
-	bool r_WriteVal( CChar * pChar, LPCTSTR pszKey, CGString & s );
+	bool r_WriteVal( CChar * pChar, lpctstr pszKey, CGString & s );
 	bool r_LoadVal( CChar * pChar, CScript & s );
 
 	bool SetSkillClass( CChar * pChar, RESOURCE_ID rid );

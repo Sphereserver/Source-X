@@ -145,9 +145,9 @@ PROFILE_TYPE ProfileData::GetCurrentTask() const
 	return m_CurrentTask;
 }
 
-LPCTSTR ProfileData::GetName(PROFILE_TYPE id) const
+lpctstr ProfileData::GetName(PROFILE_TYPE id) const
 {
-	static LPCTSTR const sm_pszProfileName[PROFILE_QTY] =
+	static lpctstr const sm_pszProfileName[PROFILE_QTY] =
 	{
 		"IDLE",
 		"OVERHEAD",
@@ -167,10 +167,10 @@ LPCTSTR ProfileData::GetName(PROFILE_TYPE id) const
 	return (( id >= 0 ) && ( id < PROFILE_QTY )) ? sm_pszProfileName[id] : "";
 }
 
-LPCTSTR ProfileData::GetDescription(PROFILE_TYPE id) const
+lpctstr ProfileData::GetDescription(PROFILE_TYPE id) const
 {
 	ADDTOCALLSTACK("ProfileData::GetDesc");
-	TCHAR * pszTmp = Str_GetTemp();
+	tchar * pszTmp = Str_GetTemp();
 	int iCount	= m_PreviousTimes[id].m_iCount;
 
 	if ( id >= PROFILE_DATA_QTY )

@@ -49,7 +49,7 @@ PacketGeneric::PacketGeneric(const CClient* target, byte *data, size_t length) :
  *
  *
  ***************************************************************************/
-PacketTelnet::PacketTelnet(const CClient* target, LPCTSTR message, bool bNullTerminated) : PacketSend(0, 0, PRI_HIGHEST)
+PacketTelnet::PacketTelnet(const CClient* target, lpctstr message, bool bNullTerminated) : PacketSend(0, 0, PRI_HIGHEST)
 {
 	ADDTOCALLSTACK("PacketTelnet::PacketTelnet");
 
@@ -548,7 +548,7 @@ PacketPlayerStart::PacketPlayerStart(const CClient* target) : PacketSend(XCMD_St
  *
  *
  ***************************************************************************/
-PacketMessageASCII::PacketMessageASCII(const CClient* target, LPCTSTR pszText, const CObjBaseTemplate * source, HUE_TYPE hue, TALKMODE_TYPE mode, FONT_TYPE font) : PacketSend(XCMD_Speak, 42, PRI_NORMAL)
+PacketMessageASCII::PacketMessageASCII(const CClient* target, lpctstr pszText, const CObjBaseTemplate * source, HUE_TYPE hue, TALKMODE_TYPE mode, FONT_TYPE font) : PacketSend(XCMD_Speak, 42, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketMessageASCII::PacketMessageASCII");
 
@@ -1562,10 +1562,10 @@ void PacketBookPageContent::addPage(const CItem* book, size_t page)
 			if (page > 0 && page <= message->GetPageCount())
 			{
 				// copy the pages from the book
-				LPCTSTR text = message->GetPageText(page - 1);
+				lpctstr text = message->GetPageText(page - 1);
 				if (text != NULL)
 				{
-					for (TCHAR ch = *text; ch != '\0'; ch = *(++text))
+					for (tchar ch = *text; ch != '\0'; ch = *(++text))
 					{
 						if (ch == '\t')
 						{
@@ -1918,7 +1918,7 @@ PacketBulletinBoard::PacketBulletinBoard(const CClient* target, BBOARDF_TYPE act
 		writeInt32(0);
 
 	size_t lenstr = 0;
-	TCHAR* tempstr = Str_GetTemp();
+	tchar* tempstr = Str_GetTemp();
 
 	// author name. if it has one.
 	if (message->m_sAuthor.IsEmpty())
@@ -1928,7 +1928,7 @@ PacketBulletinBoard::PacketBulletinBoard(const CClient* target, BBOARDF_TYPE act
 	}
 	else
 	{
-		LPCTSTR author = message->m_sAuthor;
+		lpctstr author = message->m_sAuthor;
 
 		lenstr = strlen(author) + 1;
 		if (lenstr > 255) lenstr = 255;
@@ -1961,7 +1961,7 @@ PacketBulletinBoard::PacketBulletinBoard(const CClient* target, BBOARDF_TYPE act
 
 		for (size_t i = 0; i < lines; i++)
 		{
-			LPCTSTR text = message->GetPageText(i);
+			lpctstr text = message->GetPageText(i);
 			if (text == NULL)
 				continue;
 
@@ -2056,7 +2056,7 @@ size_t PacketVendorBuyList::fillContainer(const CItemContainer* container, int c
 				price = 100000;
 		}
 
-		LPCTSTR name = vendorItem->GetName();
+		lpctstr name = vendorItem->GetName();
 		size_t len = strlen(name) + 1;
 		if (len > UCHAR_MAX)
 			len = UCHAR_MAX;
@@ -2251,7 +2251,7 @@ PacketDisplayMenu::PacketDisplayMenu(const CClient* target, CLIMODE_TYPE mode, c
 	int len = items[0].m_sText.GetLength();
 	if (len > 255) len = 255;
 	writeByte(static_cast<byte>(len));
-	writeStringFixedASCII(static_cast<LPCTSTR>(items[0].m_sText), len);
+	writeStringFixedASCII(static_cast<lpctstr>(items[0].m_sText), len);
 
 	writeByte(static_cast<byte>(count));
 	for (size_t i = 1; i <= count; i++)
@@ -2262,7 +2262,7 @@ PacketDisplayMenu::PacketDisplayMenu(const CClient* target, CLIMODE_TYPE mode, c
 		len = items[i].m_sText.GetLength();
 		if (len > 255) len = 255;
 		writeByte(static_cast<byte>(len));
-		writeStringFixedASCII(static_cast<LPCTSTR>(items[i].m_sText), len);
+		writeStringFixedASCII(static_cast<lpctstr>(items[i].m_sText), len);
 	}
 
 	push(target);
@@ -2383,7 +2383,7 @@ PacketPaperdoll::PacketPaperdoll(const CClient* target, const CChar* character) 
 	}
 	else
 	{
-		TCHAR* text = Str_GetTemp();
+		tchar* text = Str_GetTemp();
 		int len = 0;
 
 		const CStoneMember* guildMember = character->Guild_FindMember(MEMORY_GUILD);
@@ -2493,7 +2493,7 @@ bool PacketCorpseEquipment::onSend(const CClient* client)
  *
  *
  ***************************************************************************/
-PacketSignGump::PacketSignGump(const CClient* target, const CObjBase* object, GUMP_TYPE gump, LPCTSTR unknown, LPCTSTR text) : PacketSend(XCMD_GumpTextDisp, 13, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
+PacketSignGump::PacketSignGump(const CClient* target, const CObjBase* object, GUMP_TYPE gump, lpctstr unknown, lpctstr text) : PacketSend(XCMD_GumpTextDisp, 13, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketSignGump::PacketSignGump");
 
@@ -2634,7 +2634,7 @@ PacketDisplayBook::PacketDisplayBook(const CClient* target, CItem* book) : Packe
 
 		// make sure book is named
 		if (title.IsEmpty() == false)
-			book->SetName(static_cast<LPCTSTR>(title));
+			book->SetName(static_cast<lpctstr>(title));
 	}
 	else
 	{
@@ -2645,7 +2645,7 @@ PacketDisplayBook::PacketDisplayBook(const CClient* target, CItem* book) : Packe
 			isWritable = message->IsBookWritable();
 			pages = isWritable? MAX_BOOK_PAGES : message->GetPageCount();
 			title = message->GetName();
-			author = message->m_sAuthor.IsEmpty()? g_Cfg.GetDefaultMsg(DEFMSG_BOOK_AUTHOR_UNKNOWN) : static_cast<LPCTSTR>(message->m_sAuthor);
+			author = message->m_sAuthor.IsEmpty()? g_Cfg.GetDefaultMsg(DEFMSG_BOOK_AUTHOR_UNKNOWN) : static_cast<lpctstr>(message->m_sAuthor);
 		}
 	}
 
@@ -2654,8 +2654,8 @@ PacketDisplayBook::PacketDisplayBook(const CClient* target, CItem* book) : Packe
 	writeBool(isWritable);
 	writeBool(isWritable);
 	writeInt16(static_cast<word>(pages));
-	writeStringFixedASCII(static_cast<LPCTSTR>(title), 60);
-	writeStringFixedASCII(static_cast<LPCTSTR>(author), 30);
+	writeStringFixedASCII(static_cast<lpctstr>(title), 60);
+	writeStringFixedASCII(static_cast<lpctstr>(author), 30);
 
 	push(target);
 }
@@ -2799,7 +2799,7 @@ size_t PacketVendorSellList::searchContainer(CClient* target, const CItemContain
 						if (hue > HUE_QTY)
 							hue &= HUE_MASK_LO;
 
-						LPCTSTR name = vendItem->GetName();
+						lpctstr name = vendItem->GetName();
 						size_t len = strlen(name) + 1;
 						if (len > UCHAR_MAX)
 							len = UCHAR_MAX;
@@ -2927,7 +2927,7 @@ PacketStaminaUpdate::PacketStaminaUpdate(const CChar* character, bool full) : Pa
  *
  *
  ***************************************************************************/
-PacketWebPage::PacketWebPage(const CClient* target, LPCTSTR url) : PacketSend(XCMD_Web, 3, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
+PacketWebPage::PacketWebPage(const CClient* target, lpctstr url) : PacketSend(XCMD_Web, 3, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketWebPage::PacketWebPage");
 
@@ -2945,7 +2945,7 @@ PacketWebPage::PacketWebPage(const CClient* target, LPCTSTR url) : PacketSend(XC
  *
  *
  ***************************************************************************/
-PacketOpenScroll::PacketOpenScroll(const CClient* target, CResourceLock &s, SCROLL_TYPE type, dword context, LPCTSTR header) : PacketSend(XCMD_Scroll, 10, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
+PacketOpenScroll::PacketOpenScroll(const CClient* target, CResourceLock &s, SCROLL_TYPE type, dword context, lpctstr header) : PacketSend(XCMD_Scroll, 10, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketOpenScroll::PacketOpenScroll");
 
@@ -3101,8 +3101,8 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 		{
 			const CStartLoc *start = g_Cfg.m_StartDefs[i];
 			writeByte(static_cast<byte>(i));
-			writeStringFixedASCII(static_cast<LPCTSTR>(start->m_sArea), MAX_NAME_SIZE + 2);
-			writeStringFixedASCII(static_cast<LPCTSTR>(start->m_sName), MAX_NAME_SIZE + 2);
+			writeStringFixedASCII(static_cast<lpctstr>(start->m_sArea), MAX_NAME_SIZE + 2);
+			writeStringFixedASCII(static_cast<lpctstr>(start->m_sName), MAX_NAME_SIZE + 2);
 			writeInt32(start->m_pt.m_x);
 			writeInt32(start->m_pt.m_y);
 			writeInt32(start->m_pt.m_z);
@@ -3117,8 +3117,8 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 		{
 			const CStartLoc *start = g_Cfg.m_StartDefs[i];
 			writeByte(static_cast<byte>(i));
-			writeStringFixedASCII(static_cast<LPCTSTR>(start->m_sArea), MAX_NAME_SIZE + 1);
-			writeStringFixedASCII(static_cast<LPCTSTR>(start->m_sName), MAX_NAME_SIZE + 1);
+			writeStringFixedASCII(static_cast<lpctstr>(start->m_sArea), MAX_NAME_SIZE + 1);
+			writeStringFixedASCII(static_cast<lpctstr>(start->m_sName), MAX_NAME_SIZE + 1);
 		}
 	}
 
@@ -3169,7 +3169,7 @@ PacketAttack::PacketAttack(const CClient* target, CGrayUID serial) : PacketSend(
  *
  *
  ***************************************************************************/
-PacketGumpValueInput::PacketGumpValueInput(const CClient* target, bool cancel, INPVAL_STYLE style, dword maxLength, LPCTSTR text, LPCTSTR caption, CObjBase* object) : PacketSend(XCMD_GumpInpVal, 21, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
+PacketGumpValueInput::PacketGumpValueInput(const CClient* target, bool cancel, INPVAL_STYLE style, dword maxLength, lpctstr text, lpctstr caption, CObjBase* object) : PacketSend(XCMD_GumpInpVal, 21, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketGumpValueInput::PacketGumpValueInput");
 
@@ -3187,7 +3187,7 @@ PacketGumpValueInput::PacketGumpValueInput(const CClient* target, bool cancel, I
 	writeByte(static_cast<byte>(style));
 	writeInt32(maxLength);
 
-	TCHAR* z(NULL);
+	tchar* z(NULL);
 	switch (style)
 	{
 		case INPVAL_STYLE_NOEDIT: // None
@@ -3253,7 +3253,7 @@ PacketMessageUNICODE::PacketMessageUNICODE(const CClient* target, const nword* p
 	else
 		writeStringFixedASCII(source->GetName(), 30);
 
-	writeStringUNICODE(reinterpret_cast<const WCHAR*>(pszText));
+	writeStringUNICODE(reinterpret_cast<const wchar*>(pszText));
 
 	push(target);
 }
@@ -3326,7 +3326,7 @@ void PacketGumpDialog::writeCompressedControls(const CGString* controls, size_t 
 
 		int controlLengthActual = 0;
 		for (size_t i = 0; i < controlCount; i++)
-			controlLengthActual += sprintf(&toCompress[controlLengthActual], "{%s}", static_cast<LPCTSTR>(controls[i]));
+			controlLengthActual += sprintf(&toCompress[controlLengthActual], "{%s}", static_cast<lpctstr>(controls[i]));
 		controlLengthActual++;
 
 		ASSERT(controlLengthActual == controlLength);
@@ -3360,7 +3360,7 @@ void PacketGumpDialog::writeCompressedControls(const CGString* controls, size_t 
 		for (size_t i = 0; i < textCount; i++)
 		{
 			writeInt16(static_cast<word>(texts[i].GetLength()));
-			writeStringFixedNUNICODE(static_cast<LPCTSTR>(texts[i]), texts[i].GetLength());
+			writeStringFixedNUNICODE(static_cast<lpctstr>(texts[i]), texts[i].GetLength());
 		}
 
 		size_t textsLength = getPosition() - textsPosition;
@@ -3406,7 +3406,7 @@ void PacketGumpDialog::writeStandardControls(const CGString* controls, size_t co
 	for (size_t i = 0; i < controlCount; i++)
 	{
 		writeCharASCII('{');
-		writeStringASCII(static_cast<LPCTSTR>(controls[i]), false);
+		writeStringASCII(static_cast<lpctstr>(controls[i]), false);
 		writeCharASCII('}');
 	}
 
@@ -3421,7 +3421,7 @@ void PacketGumpDialog::writeStandardControls(const CGString* controls, size_t co
 	for (size_t i = 0; i < textCount; i++)
 	{
 		writeInt16(static_cast<word>(texts[i].GetLength()));
-		writeStringFixedNUNICODE(static_cast<LPCTSTR>(texts[i]), texts[i].GetLength());
+		writeStringFixedNUNICODE(static_cast<lpctstr>(texts[i]), texts[i].GetLength());
 	}
 }
 
@@ -3433,7 +3433,7 @@ void PacketGumpDialog::writeStandardControls(const CGString* controls, size_t co
  *
  *
  ***************************************************************************/
-PacketChatMessage::PacketChatMessage(const CClient* target, CHATMSG_TYPE type, LPCTSTR param1, LPCTSTR param2, CLanguageID language) : PacketSend(XCMD_ChatReq, 11, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
+PacketChatMessage::PacketChatMessage(const CClient* target, CHATMSG_TYPE type, lpctstr param1, lpctstr param2, CLanguageID language) : PacketSend(XCMD_ChatReq, 11, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketChatMessage::PacketChatMessage");
 
@@ -3462,7 +3462,7 @@ PacketChatMessage::PacketChatMessage(const CClient* target, CHATMSG_TYPE type, L
  *
  *
  ***************************************************************************/
-PacketTooltip::PacketTooltip(const CClient* target, const CObjBase* object, LPCTSTR text) : PacketSend(XCMD_ToolTip, 8, g_Cfg.m_fUsePacketPriorities? PRI_IDLE : PRI_NORMAL)
+PacketTooltip::PacketTooltip(const CClient* target, const CObjBase* object, lpctstr text) : PacketSend(XCMD_ToolTip, 8, g_Cfg.m_fUsePacketPriorities? PRI_IDLE : PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketTooltip::PacketTooltip");
 
@@ -3498,10 +3498,10 @@ PacketProfile::PacketProfile(const CClient* target, const CChar* character) : Pa
 		CGString sConstText;
 		sConstText.Format("%s, %s", character->Noto_GetTitle(), character->GetTradeTitle());
 
-		writeStringNUNICODE(static_cast<LPCTSTR>(sConstText));
+		writeStringNUNICODE(static_cast<lpctstr>(sConstText));
 
 		if (character->m_pPlayer != NULL)
-			writeStringNUNICODE(static_cast<LPCTSTR>(character->m_pPlayer->m_sProfile));
+			writeStringNUNICODE(static_cast<lpctstr>(character->m_pPlayer->m_sProfile));
 		else
 			writeCharNUNICODE('\0');
 	}
@@ -3704,7 +3704,7 @@ PacketPartyChat::PacketPartyChat(const CChar* source, const NCHAR* text) : Packe
 	ADDTOCALLSTACK("PacketPartyChat::PacketPartyChat");
 
 	writeInt32(source->GetUID());
-	writeStringUNICODE(reinterpret_cast<const WCHAR*>(text));
+	writeStringUNICODE(reinterpret_cast<const wchar*>(text));
 }
 
 
@@ -4118,7 +4118,7 @@ PacketSpeedMode::PacketSpeedMode(const CClient* target, byte mode) : PacketExten
  *
  *
  ***************************************************************************/
-PacketMessageLocalised::PacketMessageLocalised(const CClient* target, int cliloc, const CObjBaseTemplate* source, HUE_TYPE hue, TALKMODE_TYPE mode, FONT_TYPE font, LPCTSTR args) : PacketSend(XCMD_SpeakLocalized, 50, PRI_NORMAL)
+PacketMessageLocalised::PacketMessageLocalised(const CClient* target, int cliloc, const CObjBaseTemplate* source, HUE_TYPE hue, TALKMODE_TYPE mode, FONT_TYPE font, lpctstr args) : PacketSend(XCMD_SpeakLocalized, 50, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketMessageLocalised::PacketMessageLocalised");
 
@@ -4179,7 +4179,7 @@ PacketVisualRange::PacketVisualRange(const CClient* target, byte range) : Packet
  *
  *
  ***************************************************************************/
-PacketMessageLocalisedEx::PacketMessageLocalisedEx(const CClient* target, int cliloc, const CObjBaseTemplate* source, HUE_TYPE hue, TALKMODE_TYPE mode, FONT_TYPE font, AFFIX_TYPE affixType, LPCTSTR affix, LPCTSTR args) : PacketSend(XCMD_SpeakLocalizedEx, 52, PRI_NORMAL)
+PacketMessageLocalisedEx::PacketMessageLocalisedEx(const CClient* target, int cliloc, const CObjBaseTemplate* source, HUE_TYPE hue, TALKMODE_TYPE mode, FONT_TYPE font, AFFIX_TYPE affixType, lpctstr affix, lpctstr args) : PacketSend(XCMD_SpeakLocalizedEx, 52, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketMessageLocalisedEx::PacketMessageLocalisedEx");
 
@@ -4280,7 +4280,7 @@ PacketDisplayBookNew::PacketDisplayBookNew(const CClient* target, CItem* book) :
 
 		// make sure book is named
 		if (title.IsEmpty() == false)
-			book->SetName(static_cast<LPCTSTR>(title));
+			book->SetName(static_cast<lpctstr>(title));
 	}
 	else
 	{
@@ -4291,7 +4291,7 @@ PacketDisplayBookNew::PacketDisplayBookNew(const CClient* target, CItem* book) :
 			isWritable = message->IsBookWritable();
 			pages = isWritable? MAX_BOOK_PAGES : message->GetPageCount();
 			title = message->GetName();
-			author = message->m_sAuthor.IsEmpty()? g_Cfg.GetDefaultMsg(DEFMSG_BOOK_AUTHOR_UNKNOWN) : static_cast<LPCTSTR>(message->m_sAuthor);
+			author = message->m_sAuthor.IsEmpty()? g_Cfg.GetDefaultMsg(DEFMSG_BOOK_AUTHOR_UNKNOWN) : static_cast<lpctstr>(message->m_sAuthor);
 		}
 	}
 
@@ -4338,7 +4338,7 @@ PacketPropertyList::PacketPropertyList(const CObjBase* object, dword version, co
 		size_t tipLength = strlen(tipEntry->m_args);
 		
 		writeInt32(tipEntry->m_clilocid);
-		writeInt16(static_cast<word>(tipLength * sizeof(WCHAR)));
+		writeInt16(static_cast<word>(tipLength * sizeof(wchar)));
 		writeStringFixedUNICODE(tipEntry->m_args, tipLength);
 	}
 
@@ -4609,7 +4609,7 @@ bool PacketPropertyListVersion::onSend(const CClient* client)
  *
  *
  ***************************************************************************/
-PacketBuff::PacketBuff(const CClient* target, const BUFF_ICONS iconId, const dword clilocOne, const dword clilocTwo, const word time, LPCTSTR* args, size_t argCount) : PacketSend(XCMD_BuffPacket, 72, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
+PacketBuff::PacketBuff(const CClient* target, const BUFF_ICONS iconId, const dword clilocOne, const dword clilocTwo, const word time, lpctstr* args, size_t argCount) : PacketSend(XCMD_BuffPacket, 72, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketBuff::PacketBuff");
 	// At date of 04/2015 RUOSI seems to have a different structure than the one we have with one more argument and different order... however this one seems to keep working: http://ruosi.org/packetguide/index.xml#serverDF

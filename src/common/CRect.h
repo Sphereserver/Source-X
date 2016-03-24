@@ -17,9 +17,9 @@ class CSector;
 struct CPointBase	// Non initialized 3d point.
 {
 public:
-	static LPCTSTR const sm_szLoadKeys[];
+	static lpctstr const sm_szLoadKeys[];
 	static const int sm_Moves[DIR_QTY+1][2];
-	static LPCTSTR sm_szDirs[DIR_QTY+1];
+	static lpctstr sm_szDirs[DIR_QTY+1];
 public:
 	short m_x;	// equipped items dont need x,y
 	short m_y;
@@ -53,10 +53,10 @@ public:
 
 	void Set( const CPointBase & pt );
 	void Set( word x, word y, signed char z = 0, uchar map = 0 );
-	size_t Read( TCHAR * pVal );
+	size_t Read( tchar * pVal );
 
-	TCHAR * WriteUsed( TCHAR * pszBuffer ) const;
-	LPCTSTR WriteUsed() const;
+	tchar * WriteUsed( tchar * pszBuffer ) const;
+	lpctstr WriteUsed() const;
 
 	void Move( DIR_TYPE dir );
 	void MoveN( DIR_TYPE dir, int amount );
@@ -78,8 +78,8 @@ public:
 
 	int GetPointSortIndex() const;
 
-	bool r_WriteVal( LPCTSTR pszKey, CGString & sVal ) const;
-	bool r_LoadVal( LPCTSTR pszKey, LPCTSTR pszArgs );
+	bool r_WriteVal( lpctstr pszKey, CGString & sVal ) const;
+	bool r_LoadVal( lpctstr pszKey, lpctstr pszArgs );
 };
 
 struct CPointMap : public CPointBase
@@ -89,7 +89,7 @@ struct CPointMap : public CPointBase
 	CPointMap( word x, word y, signed char z = 0, uchar map = 0 );
 	CPointMap & operator = ( const CPointBase & pt );
 	CPointMap( const CPointBase & pt );
-	CPointMap( TCHAR * pVal );
+	CPointMap( tchar * pVal );
 };
 
 struct CPointSort : public CPointMap

@@ -153,7 +153,7 @@ int CChar::NPC_GetVendorMarkup( const CChar * pChar ) const
 	return( iHostility );
 }
 
-size_t CChar::NPC_OnHearName( LPCTSTR pszText ) const
+size_t CChar::NPC_OnHearName( lpctstr pszText ) const
 {
 	ADDTOCALLSTACK("CChar::NPC_OnHearName");
 	// Did I just hear my name in this text ?
@@ -161,7 +161,7 @@ size_t CChar::NPC_OnHearName( LPCTSTR pszText ) const
 	// RETURN:
 	//  index to skip past the name.
 
-	LPCTSTR pszName = GetName();
+	lpctstr pszName = GetName();
 
 	size_t i = FindStrWord( pszText, pszName );
 	if ( i )

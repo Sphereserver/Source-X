@@ -43,7 +43,7 @@ CChar * CTextConsole::GetChar() const
 	return( const_cast <CChar *>( dynamic_cast <const CChar *>( this )));
 }
 
-int CTextConsole::OnConsoleKey( CGString & sText, TCHAR nChar, bool fEcho )
+int CTextConsole::OnConsoleKey( CGString & sText, tchar nChar, bool fEcho )
 {
 	ADDTOCALLSTACK("CTextConsole::OnConsoleKey");
 	// eventaully we should call OnConsoleCmd
@@ -75,8 +75,8 @@ commandtoolong:
 	}
 	else if ( nChar == 9 )			// TAB (auto-completion)
 	{
-		LPCTSTR p = NULL;
-		LPCTSTR tmp = NULL;
+		lpctstr p = NULL;
+		lpctstr tmp = NULL;
 		size_t inputLen = 0;
 		bool matched(false);
 
@@ -136,7 +136,7 @@ commandtoolong:
 	if ( fEcho )
 	{
 		// Echo
-		TCHAR szTmp[2];
+		tchar szTmp[2];
 		szTmp[0] = nChar;
 		szTmp[1] = '\0';
 		SysMessage( szTmp );
@@ -268,7 +268,7 @@ void CServer::Shutdown( INT64 iMinutes ) // If shutdown is initialized
 	g_World.Broadcastf(g_Cfg.GetDefaultMsg( DEFMSG_MSG_SERV_SHUTDOWN ), iMinutes);
 }
 
-void CServer::SysMessage( LPCTSTR pszMsg ) const
+void CServer::SysMessage( lpctstr pszMsg ) const
 {
 	// Print just to the main console.
 	if ( !pszMsg || ISINTRESOURCE(pszMsg) )
@@ -281,7 +281,7 @@ void CServer::SysMessage( LPCTSTR pszMsg ) const
 #endif
 }
 
-void CServer::PrintTelnet( LPCTSTR pszMsg ) const
+void CServer::PrintTelnet( lpctstr pszMsg ) const
 {
 	if ( ! m_iAdminClients )
 		return;
@@ -297,7 +297,7 @@ void CServer::PrintTelnet( LPCTSTR pszMsg ) const
 	}
 }
 
-void CServer::PrintStr( LPCTSTR pszMsg ) const
+void CServer::PrintStr( lpctstr pszMsg ) const
 {
 	// print to all consoles.
 	SysMessage( pszMsg );
@@ -313,7 +313,7 @@ int CServer::PrintPercent( int iCount, int iTotal )
 
     //int iPercent = MulDiv( iCount, 100, iTotal );
 	int iPercent = IMULDIV( iCount, 100, iTotal );
-	TCHAR *pszTemp = Str_GetTemp();
+	tchar *pszTemp = Str_GetTemp();
 	sprintf(pszTemp, "%d%%", iPercent);
 	size_t len = strlen(pszTemp);
 
@@ -349,14 +349,14 @@ INT64 CServer::GetAgeHours() const
 	return( CServTime::GetCurrentTime().GetTimeRaw() / (60*60*TICK_PER_SEC));
 }
 
-LPCTSTR CServer::GetStatusString( byte iIndex ) const
+lpctstr CServer::GetStatusString( byte iIndex ) const
 {
 	ADDTOCALLSTACK("CServer::GetStatusString");
 	// NOTE: The key names should match those in CServerDef::r_LoadVal
 	// A ping will return this as well.
 	// 0 or 0x21 = main status.
 
-	TCHAR * pTemp = Str_GetTemp();
+	tchar * pTemp = Str_GetTemp();
 	dword iClients = StatGet(SERV_STAT_CLIENTS);
 	INT64 iHours = GetAgeHours() / 24;
 
@@ -367,7 +367,7 @@ LPCTSTR CServer::GetStatusString( byte iIndex ) const
 			{
 				char szVersion[128];
 				sprintf(pTemp, GRAY_TITLE ", Name=%s, Port=%d, Ver=" GRAY_VERSION ", TZ=%d, EMail=%s, URL=%s, Lang=%s, CliVer=%s\n",
-					GetName(), m_ip.GetPort(), m_TimeZone, static_cast<LPCTSTR>(m_sEMail), static_cast<LPCTSTR>(m_sURL), static_cast<LPCTSTR>(m_sLang),
+					GetName(), m_ip.GetPort(), m_TimeZone, static_cast<lpctstr>(m_sEMail), static_cast<lpctstr>(m_sURL), static_cast<lpctstr>(m_sLang),
 					m_ClientVersion.WriteClientVer(szVersion));
 			}
 			break;
@@ -380,7 +380,7 @@ LPCTSTR CServer::GetStatusString( byte iIndex ) const
 			break;
 		case 0x24: // '$'
 			// show at startup.
-			sprintf(pTemp, "Admin=%s, URL=%s, Lang=%s, TZ=%d\n", static_cast<LPCTSTR>(m_sEMail), static_cast<LPCTSTR>(m_sURL), static_cast<LPCTSTR>(m_sLang), m_TimeZone);
+			sprintf(pTemp, "Admin=%s, URL=%s, Lang=%s, TZ=%d\n", static_cast<lpctstr>(m_sEMail), static_cast<lpctstr>(m_sURL), static_cast<lpctstr>(m_sLang), m_TimeZone);
 			break;
 		case 0x25: // '%'
 			// ConnectUO Status string
@@ -402,8 +402,8 @@ void CServer::ListClients( CTextConsole * pConsole ) const
 		return;
 
 	const CChar * pCharCmd = pConsole->GetChar();
-	TCHAR * pszMsg = Str_GetTemp();
-	TCHAR * tmpMsg = Str_GetTemp();
+	tchar * pszMsg = Str_GetTemp();
+	tchar * tmpMsg = Str_GetTemp();
 	size_t numClients = 0;
 
 	ClientIterator it;
@@ -416,7 +416,7 @@ void CServer::ListClients( CTextConsole * pConsole ) const
 			if ( pCharCmd != NULL && pCharCmd->CanDisturb( pChar ) == false )
 				continue;
 
-			TCHAR chRank = '=';
+			tchar chRank = '=';
 			if ( pClient->IsPriv(PRIV_GM) || pClient->GetPrivLevel() >= PLEVEL_Counsel )
 				chRank = '+';
 
@@ -432,7 +432,7 @@ void CServer::ListClients( CTextConsole * pConsole ) const
 			if ( pConsole->GetPrivLevel() < pClient->GetPrivLevel())
 				continue;
 
-			LPCTSTR pszState;
+			lpctstr pszState;
 			switch ( pClient->GetConnectType() )
 			{
 				case CONNECT_TELNET:
@@ -485,7 +485,7 @@ bool CServer::OnConsoleCmd( CGString & sText, CTextConsole * pSrc )
 		return true;
 
 	// Convert first character to lowercase
-	TCHAR low = static_cast<TCHAR>(tolower(sText[0]));
+	tchar low = static_cast<tchar>(tolower(sText[0]));
 	bool fRet = true;
 
 	if ((( len > 2 ) || (( len == 2 ) && ( sText[1] != '#' ))) && ( sText[0] != 'd' ))
@@ -541,7 +541,7 @@ bool CServer::OnConsoleCmd( CGString & sText, CTextConsole * pSrc )
 			} break;
 		case 'd': // dump
 			{
-				LPCTSTR pszKey = sText + 1;
+				lpctstr pszKey = sText + 1;
 				GETNONWHITESPACE( pszKey );
 				switch ( tolower(*pszKey) )
 				{
@@ -764,7 +764,7 @@ bool CServer::OnConsoleCmd( CGString & sText, CTextConsole * pSrc )
 longcommand:
 	if ((( len > 1 ) && ( sText[1] != ' ' )) || ( low == 'b' ))
 	{
-		LPCTSTR	pszText = sText;
+		lpctstr	pszText = sText;
 		
 		if ( !strnicmp(pszText, "strip", 5) || !strnicmp(pszText, "tngstrip", 8))
 		{
@@ -774,7 +774,7 @@ longcommand:
 			char			*z = Str_GetTemp();
 			char			*y = Str_GetTemp();
 			char			*x;
-			LPCTSTR			dirname;
+			lpctstr			dirname;
 
 			if ( g_Cfg.m_sStripPath.IsEmpty() )
 			{
@@ -911,7 +911,7 @@ longcommand:
 	}
 	else
 	{
-		pSrc->SysMessagef("unknown command '%s'\n", static_cast<LPCTSTR>(sText));
+		pSrc->SysMessagef("unknown command '%s'\n", static_cast<lpctstr>(sText));
 		fRet = false;
 	}
 
@@ -1084,7 +1084,7 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 
 // ---------------------------------------------------------------------
 
-bool CServer::r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef )
+bool CServer::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CServer::r_GetRef");
 	if ( IsDigit( pszKey[0] ))
@@ -1123,7 +1123,7 @@ bool CServer::r_LoadVal( CScript &s )
 	return CServerDef::r_LoadVal(s);
 }
 
-bool CServer::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CServer::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CServer::r_WriteVal");
 	if ( !strnicmp(pszKey, "ACCOUNT.", 8) )
@@ -1132,11 +1132,11 @@ bool CServer::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
 		CAccountRef pAccount = NULL;
 		
 		// extract account name/index to a temporary buffer
-		TCHAR * pszTemp = Str_GetTemp();
-		TCHAR * pszTempStart = pszTemp;
+		tchar * pszTemp = Str_GetTemp();
+		tchar * pszTempStart = pszTemp;
 
 		strcpy(pszTemp, pszKey);
-		TCHAR * split = strchr(pszTemp, '.');
+		tchar * split = strchr(pszTemp, '.');
 		if ( split != NULL )
 			*split = '\0';
 
@@ -1218,7 +1218,7 @@ enum SV_TYPE
 	SV_QTY
 };
 
-LPCTSTR const CServer::sm_szVerbKeys[SV_QTY+1] =
+lpctstr const CServer::sm_szVerbKeys[SV_QTY+1] =
 {
 	"ACCOUNT",
 	"ACCOUNTS", // read only
@@ -1263,8 +1263,8 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 		return false;
 
 	EXC_TRY("Verb");
-	LPCTSTR pszKey = s.GetKey();
-	TCHAR *pszMsg = NULL;
+	lpctstr pszKey = s.GetKey();
+	tchar *pszMsg = NULL;
 
 	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, COUNTOF( sm_szVerbKeys )-1 );
 
@@ -1344,7 +1344,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			{
 				int iTimeDecay(-1);
 
-				TCHAR* ppArgs[2];
+				tchar* ppArgs[2];
 				if (Str_ParseCmds(s.GetArgRaw(), ppArgs, COUNTOF(ppArgs), ", ") == false)
 					return false;
 
@@ -1387,7 +1387,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 				return( false );
 			if ( s.HasArgs())
 			{
-				TCHAR * Arg_ppCmd[5];
+				tchar * Arg_ppCmd[5];
 				size_t Arg_Qty = Str_ParseCmds( s.GetArgRaw(), Arg_ppCmd, COUNTOF( Arg_ppCmd ));
 				if ( Arg_Qty <= 0 )
 					break;
@@ -1434,7 +1434,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 				return( false );
 			if (s.HasArgs())
 			{
-				TCHAR * Arg_ppCmd[5];
+				tchar * Arg_ppCmd[5];
 				size_t Arg_Qty = Str_ParseCmds( s.GetArgRaw(), Arg_ppCmd, COUNTOF( Arg_ppCmd ));
 				if ( Arg_Qty <= 0 )
 				{
@@ -1459,7 +1459,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 
 		case SV_LOG:
 			{
-				LPCTSTR	pszArgs = s.GetArgStr();
+				lpctstr	pszArgs = s.GetArgStr();
 				int		mask = LOGL_EVENT;
 				if ( pszArgs && ( *pszArgs == '@' ))
 				{
@@ -1486,7 +1486,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 				return( false );
 			if (s.HasArgs())
 			{
-				TCHAR * Arg_ppCmd[4];
+				tchar * Arg_ppCmd[4];
 				size_t Arg_Qty = Str_ParseCmds( s.GetArgRaw(), Arg_ppCmd, COUNTOF( Arg_ppCmd ));
 				if ( Arg_Qty <= 0 )
 				{
@@ -1600,7 +1600,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 
 extern void defragSphere(char *);
 
-bool CServer::CommandLine( int argc, TCHAR * argv[] )
+bool CServer::CommandLine( int argc, tchar * argv[] )
 {
 	// Console Command line.
 	// This runs after script file enum but before loading the world file.
@@ -1609,7 +1609,7 @@ bool CServer::CommandLine( int argc, TCHAR * argv[] )
 
 	for ( int argn = 1; argn < argc; argn++ )
 	{
-		TCHAR * pArg = argv[argn];
+		tchar * pArg = argv[argn];
 		if ( ! _IS_SWITCH(pArg[0]))
 			continue;
 
@@ -1695,7 +1695,7 @@ bool CServer::CommandLine( int argc, TCHAR * argv[] )
 			case 'Q':
 				return false;
 			default:
-				g_Log.Event(LOGM_INIT|LOGL_CRIT, "Don't recognize command line data '%s'\n", static_cast<LPCTSTR>(argv[argn]));
+				g_Log.Event(LOGM_INIT|LOGL_CRIT, "Don't recognize command line data '%s'\n", static_cast<lpctstr>(argv[argn]));
 				break;
 		}
 	}
@@ -1802,7 +1802,7 @@ bool CServer::SocketsInit() // Initialize sockets
 	// What are we listing our port as to the world.
 	// Tell the admin what we know.
 
-	TCHAR szName[ _MAX_PATH ];
+	tchar szName[ _MAX_PATH ];
 	struct hostent * pHost = NULL;
 
 	int iRet = gethostname(szName, sizeof(szName));
@@ -1850,7 +1850,7 @@ void CServer::OnTick()
 #ifndef _WIN32
 	if (g_UnixTerminal.isReady())
 	{
-		TCHAR c = g_UnixTerminal.read();
+		tchar c = g_UnixTerminal.read();
 		if ( OnConsoleKey(m_sConsoleText, c, false) == 2 )
 			m_fConsoleTextReadyFlag = true;
 	}
@@ -1902,7 +1902,7 @@ bool CServer::Load()
 
 #ifdef _WIN32
 	EXC_SET("init winsock");
-	TCHAR * wSockInfo = Str_GetTemp();
+	tchar * wSockInfo = Str_GetTemp();
 	if ( !m_SocketMain.IsOpen() )
 	{
 		WSADATA wsaData;
@@ -1971,7 +1971,7 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 	if ( m_ClientVersion.GetClientVer() )
 	{
 		char szVersion[128];
-		g_Log.Event(LOGM_INIT, "ClientVersion=%s\n", static_cast<LPCTSTR>(m_ClientVersion.WriteClientVer(szVersion)));
+		g_Log.Event(LOGM_INIT, "ClientVersion=%s\n", static_cast<lpctstr>(m_ClientVersion.WriteClientVer(szVersion)));
 		if ( !m_ClientVersion.IsValid() )
 		{
 			g_Log.Event(LOGL_FATAL|LOGM_INIT, "Bad Client Version '%s'\n", szVersion);

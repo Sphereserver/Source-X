@@ -76,12 +76,12 @@ public:
 	* @param pszName new file path.
 	* @return true if new file name is setted, false otherwise.
 	*/
-	virtual bool SetFilePath( LPCTSTR pszName );
+	virtual bool SetFilePath( lpctstr pszName );
 	/**
 	* @brief Gets the basename of the file.
 	* @return the basename of the file (name withouth paths).
 	*/
-	LPCTSTR GetFileTitle() const;
+	lpctstr GetFileTitle() const;
 	/**
 	* @brief Open a file in a specified mode.
 	* @param pszName file to open.
@@ -89,7 +89,7 @@ public:
 	* @param e TODOC.
 	* @return true if file is open, false otherwise.
 	*/
-	virtual bool Open( LPCTSTR pszName = NULL, UINT uMode = OF_READ | OF_SHARE_DENY_NONE, CFileException * e = NULL );
+	virtual bool Open( lpctstr pszName = NULL, UINT uMode = OF_READ | OF_SHARE_DENY_NONE, CFileException * e = NULL );
 	/**
 	* @brief Closes the file if is open.
 	*/
@@ -139,7 +139,7 @@ public:
 	* @brief Notify a file input / output error (win32 only).
 	* @param szMessage error to notify.
 	*/
-	void NotifyIOError( LPCTSTR szMessage ) const;
+	void NotifyIOError( lpctstr szMessage ) const;
 #endif
 
 public:
@@ -183,20 +183,20 @@ public:
 	* @param pszPath file path.
 	* @return the basename of the file (name withouth paths).
 	*/
-	static LPCTSTR GetFilesTitle( LPCTSTR pszPath );
+	static lpctstr GetFilesTitle( lpctstr pszPath );
 	/**
 	* @brief Gets the file extension, if any.
 	* @param pszName file path where get the extension.
 	* @return The extension of the file or NULL if the file has no extension.
 	*/
-	static LPCTSTR GetFilesExt( LPCTSTR pszName );
+	static lpctstr GetFilesExt( lpctstr pszName );
 	/**
 	* @brief Merges path and filename, adding slashes if needed.
 	* @param pszBase path.
 	* @param pszName filename.
 	* @return merged path.
 	*/
-	static CGString GetMergedFileName( LPCTSTR pszBase, LPCTSTR pszName );
+	static CGString GetMergedFileName( lpctstr pszBase, lpctstr pszName );
 	/**
 	* @brief Return the last IO error code.
 	* @return IO error code.
@@ -206,7 +206,7 @@ public:
 	* @brief Gets the file extension, if any.
 	* @return The extension of the file or NULL if the file has no extension.
 	*/
-	LPCTSTR GetFileExt() const;
+	lpctstr GetFileExt() const;
 	/**
 	* @brief Check if file es in binary mode.
 	* @return Always true (this method is virtual).
@@ -242,7 +242,7 @@ public:
 	* @param pExtra TODOC.
 	* @return true if file is open, false otherwise.
 	*/
-	virtual bool Open( LPCTSTR pszName = NULL, UINT uMode = OF_READ | OF_SHARE_DENY_NONE, void * pExtra = NULL );
+	virtual bool Open( lpctstr pszName = NULL, UINT uMode = OF_READ | OF_SHARE_DENY_NONE, void * pExtra = NULL );
 	/**
 	* @brief Closes the file if is open.
 	*/
@@ -284,7 +284,7 @@ protected:
 	* - "a+b"
 	* @return string that describes the open mode.
 	*/
-	LPCTSTR GetModeStr() const;
+	lpctstr GetModeStr() const;
 #ifdef _WIN32
 	bool	bNoBuffer;	///< TODOC.
 #endif
@@ -339,7 +339,7 @@ public:
 	* @param sizemax count of characters to read.
 	* @return the str readed if success, NULL on errors.
 	*/
-	TCHAR * ReadString( TCHAR * pBuffer, size_t sizemax ) const;
+	tchar * ReadString( tchar * pBuffer, size_t sizemax ) const;
 	/**
 	* @brief writes supplied data into file.
 	* @param pData data to write.
@@ -355,7 +355,7 @@ public:
 	* @brief write string into file.
 	* @return true is success, false otherwise.
 	*/
-	bool WriteString( LPCTSTR pStr );
+	bool WriteString( lpctstr pStr );
 	/**
 	* @brief Check if file is open.
 	* @return true if is open, false otherwise.
@@ -377,14 +377,14 @@ public:
 	* @param args argument list.
 	* @return total chars of the output.
 	*/
-	size_t VPrintf( LPCTSTR pFormat, va_list args );
+	size_t VPrintf( lpctstr pFormat, va_list args );
 	/**
 	* @brief print in file a string with arguments (printf like).
 	* @param pFormat string in "printf like" format.
 	* @param ... argument list.
 	* @return total chars of the output.
 	*/
-	size_t _cdecl Printf( LPCTSTR pFormat, ... ) __printfargs(2,3);
+	size_t _cdecl Printf( lpctstr pFormat, ... ) __printfargs(2,3);
 };
 
 #endif // _INC_CFILE_H

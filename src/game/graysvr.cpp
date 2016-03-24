@@ -62,7 +62,7 @@ bool CMapList::Load(int map, char *args)
 	}
 	else if ( !m_mapsinitalized[map] )	// disable double intialization
 	{
-		TCHAR * ppCmd[5];	// maxx,maxy,sectorsize,mapnum[like 0 for map0/statics0/staidx0],mapid
+		tchar * ppCmd[5];	// maxx,maxy,sectorsize,mapnum[like 0 for map0/statics0/staidx0],mapid
 		size_t iCount = Str_ParseCmds(args, ppCmd, COUNTOF(ppCmd), ",");
 
 		if ( iCount <= 0 )	// simple MAPX= same as disabling the map
@@ -212,7 +212,7 @@ void CMapList::Init()
 
 bool WritePidFile(int iMode = 0)
 {
-	LPCTSTR	file = GRAY_FILE ".pid";
+	lpctstr	file = GRAY_FILE ".pid";
 	FILE	*pidFile;
 
 	if ( iMode == 1 )		// delete
@@ -245,7 +245,7 @@ bool WritePidFile(int iMode = 0)
 	}
 }
 
-int CEventLog::VEvent( dword wMask, LPCTSTR pszFormat, va_list args )
+int CEventLog::VEvent( dword wMask, lpctstr pszFormat, va_list args )
 {
 	if ( pszFormat == NULL || pszFormat[0] == '\0' )
 		return 0;
@@ -255,14 +255,14 @@ int CEventLog::VEvent( dword wMask, LPCTSTR pszFormat, va_list args )
 	if ( ! len ) strncpy(pszTemp, pszFormat, (SCRIPT_MAX_LINE_LEN - 1));
 
 	// This get rids of exploits done sending 0x0C to the log subsytem.
-	// TCHAR *	 pFix;
+	// tchar *	 pFix;
 	// if ( ( pFix = strchr( pszText, 0x0C ) ) )
 	//	*pFix = ' ';
 
 	return EventStr(wMask, pszTemp);
 }
 
-LPCTSTR const g_Stat_Name[STAT_QTY] =	// not sorted obviously.
+lpctstr const g_Stat_Name[STAT_QTY] =	// not sorted obviously.
 {
 	"STR",
 	"INT",
@@ -272,7 +272,7 @@ LPCTSTR const g_Stat_Name[STAT_QTY] =	// not sorted obviously.
 	"FAME",
 };
 
-LPCTSTR g_szServerDescription =	GRAY_TITLE " Version " GRAY_VERSION " " GRAY_VER_FILEOS_STR	" by www.spherecommunity.net";
+lpctstr g_szServerDescription =	GRAY_TITLE " Version " GRAY_VERSION " " GRAY_VER_FILEOS_STR	" by www.spherecommunity.net";
 
 int g_szServerBuild = 0;
 
@@ -294,14 +294,14 @@ TScriptProfiler g_profiler;		// script profiler
 CMapList	g_MapList;			// global maps information
 
 
-LPCTSTR GetTimeMinDesc( int minutes )
+lpctstr GetTimeMinDesc( int minutes )
 {
-	TCHAR	*pTime = Str_GetTemp();
+	tchar	*pTime = Str_GetTemp();
 
 	int minute = minutes % 60;
 	int hour = ( minutes / 60 ) % 24;
 
-	LPCTSTR pMinDif;
+	lpctstr pMinDif;
 	if ( minute <= 14 )
 //		pMinDif = "";
 		pMinDif = g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_QUARTER_FIRST);
@@ -318,7 +318,7 @@ LPCTSTR GetTimeMinDesc( int minutes )
 		hour = ( hour + 1 ) % 24;
 	}
 /*
-	static LPCTSTR const sm_ClockHour[] =
+	static lpctstr const sm_ClockHour[] =
 	{
 		"midnight",
 		"one",
@@ -335,7 +335,7 @@ LPCTSTR GetTimeMinDesc( int minutes )
 		"noon"
 	};
 */
-	LPCTSTR sm_ClockHour[] =
+	lpctstr sm_ClockHour[] =
 	{
  		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_ZERO),
  		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_ONE),
@@ -352,7 +352,7 @@ LPCTSTR GetTimeMinDesc( int minutes )
  		g_Cfg.GetDefaultMsg(DEFMSG_CLOCK_HOUR_TWELVE),
 	};
 
-	LPCTSTR pTail;
+	lpctstr pTail;
 	if ( hour == 0 || hour==12 )
 		pTail = "";
 	else if ( hour > 12 )
@@ -378,7 +378,7 @@ LPCTSTR GetTimeMinDesc( int minutes )
 	return pTime;
 }
 
-size_t FindStrWord( LPCTSTR pTextSearch, LPCTSTR pszKeyWord )
+size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord )
 {
 	// Find any of the pszKeyWord in the pTextSearch string.
 	// Make sure we look for starts of words.
@@ -519,14 +519,14 @@ int Sphere_InitServer( int argc, char *argv[] )
 		CFileText	dict;
 		if ( dict.Open(GRAY_FILE ".dic", OF_READ|OF_TEXT|OF_DEFAULTMODE) )
 		{
-			TCHAR * pszTemp = Str_GetTemp();
+			tchar * pszTemp = Str_GetTemp();
 			size_t count = 0;
 			while ( !dict.IsEOF() )
 			{
 				dict.ReadString(pszTemp, SCRIPT_MAX_LINE_LEN-1);
 				if ( *pszTemp )
 				{
-					TCHAR *c = strchr(pszTemp, '\r');
+					tchar *c = strchr(pszTemp, '\r');
 					if ( c != NULL )
 						*c = '\0';
 
@@ -593,7 +593,7 @@ void Sphere_ExitServer()
 	g_Serv.SocketsClose();
 	g_World.Close();
 
-	LPCTSTR Reason;
+	lpctstr Reason;
 	switch ( g_Serv.m_iExitFlag )
 	{
 		case -10:	Reason = "Unexpected error occurred";			break;

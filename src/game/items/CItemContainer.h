@@ -10,7 +10,7 @@
 class CItemContainer : public CItemVendable, public CContainer
 {
 	// This item has other items inside it.
-	static LPCTSTR const sm_szVerbKeys[];
+	static lpctstr const sm_szVerbKeys[];
 public:
 	static const char *m_sClassName;
 	// bool m_fTinkerTrapped;	// magic trap is diff.
@@ -38,8 +38,8 @@ public:
 
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
 	virtual void  r_Write( CScript & s );
-	virtual bool r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc );
-	virtual bool r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef );
+	virtual bool r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc );
+	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 
 	virtual int GetWeight(word amount = 0) const;
 	void OnWeightChange( int iChange );

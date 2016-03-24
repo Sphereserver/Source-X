@@ -184,7 +184,7 @@ bool CChar::NPC_StablePetRetrieve( CChar * pCharPlayer )
 		{
 			if ( !pCharPlayer->Use_Figurine(pItem) )
 			{
-				TCHAR *pszTemp = Str_GetTemp();
+				tchar *pszTemp = Str_GetTemp();
 				sprintf(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_NPC_STABLEMASTER_CLAIM_FOLLOWER), pItem->GetName());
 				Speak(pszTemp);
 				return true;
@@ -235,7 +235,7 @@ int CChar::NPC_OnTrainCheck( CChar * pCharSrc, SKILL_TYPE Skill )
 		iMaxDecrease = iTrainVal;
 	}
 
-	LPCTSTR pszMsg;
+	lpctstr pszMsg;
 	if ( iSkillVal <= 0 )
 	{
 		pszMsg = g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_DUNNO_2 );
@@ -340,7 +340,7 @@ bool CChar::NPC_TrainSkill( CChar * pCharSrc, SKILL_TYPE skill, int toTrain )
 	return true;
 }
 
-bool CChar::NPC_OnTrainHear( CChar * pCharSrc, LPCTSTR pszCmd )
+bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 {
 	ADDTOCALLSTACK("CChar::NPC_OnTrainHear");
 	// We are asking for training ?
@@ -367,7 +367,7 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, LPCTSTR pszCmd )
 		if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex(static_cast<SKILL_TYPE>(i)) )
 			continue;
 
-		LPCTSTR pSkillKey = g_Cfg.GetSkillKey(static_cast<SKILL_TYPE>(i));
+		lpctstr pSkillKey = g_Cfg.GetSkillKey(static_cast<SKILL_TYPE>(i));
 		if ( FindStrWord( pszCmd, pSkillKey ) <= 0)
 			continue;
 
@@ -376,7 +376,7 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, LPCTSTR pszCmd )
 		if ( iTrainCost <= 0 )
 			return true;
 
-		sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_NPC_TRAINER_PRICE), iTrainCost, static_cast<LPCTSTR>(pSkillKey));
+		sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_NPC_TRAINER_PRICE), iTrainCost, static_cast<lpctstr>(pSkillKey));
 		Speak(pszMsg);
 		CItemMemory * pMemory = Memory_AddObjTypes( pCharSrc, MEMORY_SPEAK );
 		if ( pMemory )
@@ -391,7 +391,7 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, LPCTSTR pszCmd )
 	// Just tell them what we can teach them or set up a memory to train.
 	strcpy( pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_PRICE_1 ) );
 
-	LPCTSTR pPrvSkill = NULL;
+	lpctstr pPrvSkill = NULL;
 
 	size_t iCount = 0;
 	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; i++ )

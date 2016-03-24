@@ -77,7 +77,7 @@ void CChar::OnNoticeCrime( CChar * pCriminal, const CChar * pCharMark )
 //  SkillToSee = NONE = everyone can notice this.
 // RETURN:
 //  true = somebody saw me.
-bool CChar::CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObjBase * pItem, LPCTSTR pAction )
+bool CChar::CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObjBase * pItem, lpctstr pAction )
 {
 	ADDTOCALLSTACK("CChar::CheckCrimeSeen");
 
@@ -1603,7 +1603,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 	SKILL_TYPE skill = Skill_GetActive();
 	RESOURCE_ID_BASE rid;
-	LPCTSTR t_Str;
+	lpctstr t_Str;
 
 	if ( g_Cfg.IsSkillFlag(skill, SKF_RANGED) )
 	{

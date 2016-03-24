@@ -224,7 +224,7 @@ bool __cdecl CDataBase::execf(char *fmt, ...)
 	return this->exec(buf);
 }
 
-bool CDataBase::addQuery(bool isQuery, LPCTSTR theFunction, LPCTSTR theQuery)
+bool CDataBase::addQuery(bool isQuery, lpctstr theFunction, lpctstr theQuery)
 {
 	if ( g_Cfg.m_Functions.ContainsKey( theFunction ) == false )
 	{
@@ -314,7 +314,7 @@ enum DBO_TYPE
 	DBO_QTY
 };
 
-LPCTSTR const CDataBase::sm_szLoadKeys[DBO_QTY+1] =
+lpctstr const CDataBase::sm_szLoadKeys[DBO_QTY+1] =
 {
 	"AEXECUTE",
 	"AQUERY",
@@ -333,7 +333,7 @@ enum DBOV_TYPE
 	DBOV_QTY
 };
 
-LPCTSTR const CDataBase::sm_szVerbKeys[DBOV_QTY+1] =
+lpctstr const CDataBase::sm_szVerbKeys[DBOV_QTY+1] =
 {
 	"CLOSE",
 	"CONNECT",
@@ -342,7 +342,7 @@ LPCTSTR const CDataBase::sm_szVerbKeys[DBOV_QTY+1] =
 	NULL
 };
 
-bool CDataBase::r_GetRef(LPCTSTR & pszKey, CScriptObj * & pRef)
+bool CDataBase::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
 {
 	ADDTOCALLSTACK("CDataBase::r_GetRef");
 	UNREFERENCED_PARAMETER(pszKey);
@@ -356,7 +356,7 @@ bool CDataBase::r_LoadVal(CScript & s)
 	UNREFERENCED_PARAMETER(s);
 	return false;
 /*
-	LPCTSTR pszKey = s.GetKey();
+	lpctstr pszKey = s.GetKey();
 	EXC_TRY("LoadVal");
 
 	int index = FindTableHeadSorted(pszKey, sm_szLoadKeys, COUNTOF(sm_szLoadKeys)-1);
@@ -377,7 +377,7 @@ bool CDataBase::r_LoadVal(CScript & s)
 */
 }
 
-bool CDataBase::r_WriteVal(LPCTSTR pszKey, CGString &sVal, CTextConsole *pSrc)
+bool CDataBase::r_WriteVal(lpctstr pszKey, CGString &sVal, CTextConsole *pSrc)
 {
 	ADDTOCALLSTACK("CDataBase::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -401,8 +401,8 @@ bool CDataBase::r_WriteVal(LPCTSTR pszKey, CGString &sVal, CTextConsole *pSrc)
 
 				if ( pszKey[0] != '\0' )
 				{
-					TCHAR * ppArgs[2];
-					if ( Str_ParseCmds(const_cast<TCHAR *>(pszKey), ppArgs, COUNTOF( ppArgs )) != 2) 
+					tchar * ppArgs[2];
+					if ( Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, COUNTOF( ppArgs )) != 2) 
 					{
 						DEBUG_ERR(("Not enough arguments for %s\n", CDataBase::sm_szLoadKeys[index]));
 					}
@@ -429,7 +429,7 @@ bool CDataBase::r_WriteVal(LPCTSTR pszKey, CGString &sVal, CTextConsole *pSrc)
 
 			if ( pszKey[0] != '\0' )
 			{
-				TCHAR * escapedString = Str_GetTemp();
+				tchar * escapedString = Str_GetTemp();
 				
 				SimpleThreadLock lock(m_connectionMutex);
 				if ( isConnected() && mysql_real_escape_string(_myData, escapedString, pszKey, static_cast<uint>(strlen(pszKey))) )

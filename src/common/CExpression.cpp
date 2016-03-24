@@ -8,22 +8,22 @@
 #include "common.h"
 #include "CResourceBase.h"
 
-TCHAR CExpression::sm_szMessages[DEFMSG_QTY][128] =
+tchar CExpression::sm_szMessages[DEFMSG_QTY][128] =
 {
 	#define MSG(a,b) b,
 	#include "../tables/defmessages.tbl"
 };
 
-LPCTSTR const CExpression::sm_szMsgNames[DEFMSG_QTY] =
+lpctstr const CExpression::sm_szMsgNames[DEFMSG_QTY] =
 {
 	#define MSG(a,b) #a,
 	#include "../tables/defmessages.tbl"
 };
 
-dword ahextoi( LPCTSTR pszStr ) // Convert hex string to integer
+dword ahextoi( lpctstr pszStr ) // Convert hex string to integer
 {
 	// Unfortunatly the library func cant handle the number FFFFFFFF
-	// TCHAR * sstop; return( strtol( s, &sstop, 16 ));
+	// tchar * sstop; return( strtol( s, &sstop, 16 ));
 
 	if ( pszStr == NULL )
 		return 0;
@@ -41,7 +41,7 @@ dword ahextoi( LPCTSTR pszStr ) // Convert hex string to integer
 	dword val = 0;
 	for (;;)
 	{
-		TCHAR ch = static_cast<TCHAR>(toupper(*pszStr));
+		tchar ch = static_cast<tchar>(toupper(*pszStr));
 		if ( IsDigit(ch) )
 			ch -= '0';
 		else if ( bHex && ( ch >= 'A' ) && ( ch <= 'F' ))
@@ -63,7 +63,7 @@ dword ahextoi( LPCTSTR pszStr ) // Convert hex string to integer
 	return val;
 }
 
-INT64 ahextoi64( LPCTSTR pszStr ) // Convert hex string to INT64
+INT64 ahextoi64( lpctstr pszStr ) // Convert hex string to INT64
 {
 	if ( pszStr == NULL )
 		return 0;
@@ -81,7 +81,7 @@ INT64 ahextoi64( LPCTSTR pszStr ) // Convert hex string to INT64
 	INT64 val = 0;
 	for (;;)
 	{
-		TCHAR ch = static_cast<TCHAR>(toupper(*pszStr));
+		tchar ch = static_cast<tchar>(toupper(*pszStr));
 		if ( IsDigit(ch) )
 			ch -= '0';
 		else if ( bHex && ( ch >= 'A' ) && ( ch <= 'F' ))
@@ -122,7 +122,7 @@ inline bool IsCharNumeric( char & Test )
 	return false;
 }
 
-bool IsStrEmpty( LPCTSTR pszTest )
+bool IsStrEmpty( lpctstr pszTest )
 {
 	if ( !pszTest || !*pszTest ) return true;
 
@@ -134,7 +134,7 @@ bool IsStrEmpty( LPCTSTR pszTest )
 	return true;
 }
 
-bool IsStrNumericDec( LPCTSTR pszTest )
+bool IsStrNumericDec( lpctstr pszTest )
 {
 	if ( !pszTest || !*pszTest ) return false;
 
@@ -148,7 +148,7 @@ bool IsStrNumericDec( LPCTSTR pszTest )
 }
 
 
-bool IsStrNumeric( LPCTSTR pszTest )
+bool IsStrNumeric( lpctstr pszTest )
 {
 	if ( !pszTest || !*pszTest )
 		return false;
@@ -168,7 +168,7 @@ bool IsStrNumeric( LPCTSTR pszTest )
 	return true;
 }
 
-bool IsSimpleNumberString( LPCTSTR pszTest )
+bool IsSimpleNumberString( lpctstr pszTest )
 {
 	// is this a string or a simple numeric expression ?
 	// string = 1 2 3, sdf, sdf sdf sdf, 123d, 123 d,
@@ -180,7 +180,7 @@ bool IsSimpleNumberString( LPCTSTR pszTest )
 
 	for ( ; ; pszTest++ )
 	{
-		TCHAR ch = *pszTest;
+		tchar ch = *pszTest;
 		if ( ! ch )
 		{
 			return( true );
@@ -225,7 +225,7 @@ bool IsSimpleNumberString( LPCTSTR pszTest )
 	}
 }
 
-static size_t GetIdentifierString( TCHAR * szTag, LPCTSTR pszArgs )
+static size_t GetIdentifierString( tchar * szTag, lpctstr pszArgs )
 {
 	// Copy the identifier (valid char set) out to this buffer.
 	size_t i = 0;
@@ -242,7 +242,7 @@ static size_t GetIdentifierString( TCHAR * szTag, LPCTSTR pszArgs )
 	return i;
 }
 
-bool IsValidDef( LPCTSTR pszTest )
+bool IsValidDef( lpctstr pszTest )
 {
 	CVarDefCont * pVarBase = g_Exp.m_VarDefs.CheckParseKey( pszTest );
 	if ( pVarBase == NULL )
@@ -255,14 +255,14 @@ bool IsValidDef( LPCTSTR pszTest )
 	return true;
 }
 
-bool IsValidGameObjDef( LPCTSTR pszTest )
+bool IsValidGameObjDef( lpctstr pszTest )
 {
 	if (!IsSimpleNumberString(pszTest))
 	{
 		CVarDefCont * pVarBase = g_Exp.m_VarDefs.CheckParseKey( pszTest );
 		if ( pVarBase == NULL )
 			return false;
-		TCHAR ch = *pVarBase->GetValStr();
+		tchar ch = *pVarBase->GetValStr();
 		if (( ! ch ) || ( ch == '<'))
 			return false;
 
@@ -400,14 +400,14 @@ CExpression::~CExpression()
 {
 }
 
-INT64 CExpression::GetSingle( LPCTSTR & pszArgs )
+INT64 CExpression::GetSingle( lpctstr & pszArgs )
 {
 	ADDTOCALLSTACK("CExpression::GetSingle");
 	// Parse just a single expression without any operators or ranges.
 	ASSERT(pszArgs);
 	GETNONWHITESPACE( pszArgs );
 
-	LPCTSTR orig = pszArgs;
+	lpctstr orig = pszArgs;
 	if (pszArgs[0]=='.') pszArgs++;
 
 	if ( pszArgs[0] == '0' )	// leading '0' = hex value.
@@ -419,16 +419,16 @@ INT64 CExpression::GetSingle( LPCTSTR & pszArgs )
 			goto try_dec;
 		}
 
-		LPCTSTR pStart = pszArgs;
+		lpctstr pStart = pszArgs;
 		ullong val = 0;
 		for (;;)
 		{
-			TCHAR ch = *pszArgs;
+			tchar ch = *pszArgs;
 			if ( IsDigit( ch ))
 				ch -= '0';
 			else
 			{
-				ch = static_cast<TCHAR>(tolower(ch));
+				ch = static_cast<tchar>(tolower(ch));
 				if ( ch > 'f' || ch <'a' )
 				{
 					if ( ch == '.' && pStart[0] != '0' )	// ok i'm confused. it must be decimal.
@@ -512,10 +512,10 @@ try_dec:
 			if ( pszArgs[iLen] == '(' )
 			{
 				pszArgs += (iLen + 1);
-				TCHAR * pszArgsNext;
-				Str_Parse( const_cast<TCHAR*>(pszArgs), &(pszArgsNext), ")" );
+				tchar * pszArgsNext;
+				Str_Parse( const_cast<tchar*>(pszArgs), &(pszArgsNext), ")" );
 	
-				TCHAR * ppCmd[5];
+				tchar * ppCmd[5];
 				INT64 iResult;
 				size_t iCount = 0;
 	
@@ -670,7 +670,7 @@ try_dec:
 
 					case INTRINSIC_StrIndexOf:
 					{
-						iCount = Str_ParseCmds( const_cast<TCHAR*>(pszArgs), ppCmd, 3, "," );
+						iCount = Str_ParseCmds( const_cast<tchar*>(pszArgs), ppCmd, 3, "," );
 						if ( iCount < 2 )
 							iResult = -1;
 						else
@@ -679,7 +679,7 @@ try_dec:
 
 					case INTRINSIC_STRMATCH:
 					{
-						iCount = Str_ParseCmds( const_cast<TCHAR*>(pszArgs), ppCmd, 2, "," );
+						iCount = Str_ParseCmds( const_cast<tchar*>(pszArgs), ppCmd, 2, "," );
 						if ( iCount < 2 )
 							iResult = 0;
 						else
@@ -688,12 +688,12 @@ try_dec:
 
 					case INTRINSIC_STRREGEX:
 					{
-						iCount = Str_ParseCmds( const_cast<TCHAR*>(pszArgs), ppCmd, 2, "," );
+						iCount = Str_ParseCmds( const_cast<tchar*>(pszArgs), ppCmd, 2, "," );
 						if ( iCount < 2 )
 							iResult = 0;
 						else
 						{
-							TCHAR * tLastError = Str_GetTemp();
+							tchar * tLastError = Str_GetTemp();
 							iResult = Str_RegExMatch( ppCmd[0], ppCmd[1], tLastError );
 							if ( iResult == -1 )
 							{
@@ -704,7 +704,7 @@ try_dec:
 
 					case INTRINSIC_RANDBELL:
 					{
-						iCount = Str_ParseCmds( const_cast<TCHAR*>(pszArgs), ppCmd, 2, "," );
+						iCount = Str_ParseCmds( const_cast<tchar*>(pszArgs), ppCmd, 2, "," );
 						if ( iCount < 2 )
 							iResult = 0;
 						else
@@ -727,7 +727,7 @@ try_dec:
 
 					case INTRINSIC_RAND:
 					{
-						iCount = Str_ParseCmds( const_cast<TCHAR*>(pszArgs), ppCmd, 2, "," );
+						iCount = Str_ParseCmds( const_cast<tchar*>(pszArgs), ppCmd, 2, "," );
 						if ( iCount <= 0 )
 							iResult = 0;
 						else
@@ -745,7 +745,7 @@ try_dec:
 
 					case INTRINSIC_STRCMP:
 					{
-						iCount = Str_ParseCmds( const_cast<TCHAR*>(pszArgs), ppCmd, 2, "," );
+						iCount = Str_ParseCmds( const_cast<tchar*>(pszArgs), ppCmd, 2, "," );
 						if ( iCount < 2 )
 							iResult = 1;
 						else
@@ -754,7 +754,7 @@ try_dec:
 
 					case INTRINSIC_STRCMPI:
 					{
-						iCount = Str_ParseCmds( const_cast<TCHAR*>(pszArgs), ppCmd, 2, "," );
+						iCount = Str_ParseCmds( const_cast<tchar*>(pszArgs), ppCmd, 2, "," );
 						if ( iCount < 2 )
 							iResult = 1;
 						else
@@ -784,7 +784,7 @@ try_dec:
 
 					case INTRINSIC_QVAL:
 					{
-						iCount = Str_ParseCmds( const_cast<TCHAR*>(pszArgs), ppCmd, 5, "," );
+						iCount = Str_ParseCmds( const_cast<tchar*>(pszArgs), ppCmd, 5, "," );
 						if ( iCount < 3 )
 							iResult = 0;
 						else
@@ -833,7 +833,7 @@ try_dec:
 #pragma endregion intrinsics
 
 	// hard end ! Error of some sort.
-	TCHAR szTag[ EXPRESSION_MAX_KEY_LEN ];
+	tchar szTag[ EXPRESSION_MAX_KEY_LEN ];
 	size_t i = GetIdentifierString( szTag, pszArgs );
 	pszArgs += i;	// skip it.
 	if (strlen(orig)> 1)
@@ -843,7 +843,7 @@ try_dec:
 	return( 0 );
 }
 
-INT64 CExpression::GetValMath( INT64 lVal, LPCTSTR & pExpr )
+INT64 CExpression::GetValMath( INT64 lVal, lpctstr & pExpr )
 {
 	ADDTOCALLSTACK("CExpression::GetValMath");
 	GETNONWHITESPACE(pExpr);
@@ -987,7 +987,7 @@ INT64 CExpression::GetValMath( INT64 lVal, LPCTSTR & pExpr )
 
 int g_getval_reentrant_check = 0;
 
-INT64 CExpression::GetVal( LPCTSTR & pExpr )
+INT64 CExpression::GetVal( lpctstr & pExpr )
 {
 	ADDTOCALLSTACK("CExpression::GetVal");
 	// Get a value (default decimal) that could also be an expression.
@@ -1029,7 +1029,7 @@ INT64 CExpression::GetVal( LPCTSTR & pExpr )
 	return lVal;
 }
 
-int CExpression::GetRangeVals(LPCTSTR & pExpr, INT64 * piVals, int iMaxQty)
+int CExpression::GetRangeVals(lpctstr & pExpr, INT64 * piVals, int iMaxQty)
 {
 	ADDTOCALLSTACK("CExpression::GetRangeVals");
 	// Get a list of values.
@@ -1084,7 +1084,7 @@ int CExpression::GetRangeVals(LPCTSTR & pExpr, INT64 * piVals, int iMaxQty)
 	return( iQty );
 }
 
-INT64 CExpression::GetRange(LPCTSTR & pExpr)
+INT64 CExpression::GetRange(lpctstr & pExpr)
 {
 	ADDTOCALLSTACK("CExpression::GetRange");
 	INT64 lVals[256];		// Maximum elements in a list

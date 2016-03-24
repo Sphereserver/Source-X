@@ -41,7 +41,7 @@
 //////////////////////////////////////////////////////////////////////
 // -CServerDef
 
-CServerDef::CServerDef( LPCTSTR pszName, CSocketAddressIP dwIP ) :
+CServerDef::CServerDef( lpctstr pszName, CSocketAddressIP dwIP ) :
 	m_ip( dwIP, GRAY_DEF_PORT )	// SOCKET_LOCAL_ADDRESS
 {
 	// Statistics.
@@ -105,7 +105,7 @@ dword CServerDef::StatGet(SERV_STAT_TYPE i) const
 			else
 			{
 				CFileText inf;
-				TCHAR * buf = Str_GetTemp(), * head;
+				tchar * buf = Str_GetTemp(), * head;
 
 				sprintf(buf, "/proc/%d/status", getpid());
 				if ( inf.Open(buf, OF_READ|OF_TEXT) )
@@ -147,14 +147,14 @@ dword CServerDef::StatGet(SERV_STAT_TYPE i) const
 	return 0;
 }
 
-void CServerDef::SetName( LPCTSTR pszName )
+void CServerDef::SetName( lpctstr pszName )
 {
 	ADDTOCALLSTACK("CServerDef::SetName");
 	if ( ! pszName )
 		return;
 
 	// No HTML tags using <> either.
-	TCHAR szName[ 2*MAX_SERVER_NAME_SIZE ];
+	tchar szName[ 2*MAX_SERVER_NAME_SIZE ];
 	size_t len = Str_GetBare( szName, pszName, sizeof(szName), "<>/\"\\" );
 	if ( len <= 0 )
 		return;
@@ -208,7 +208,7 @@ enum SC_TYPE
 	SC_QTY
 };
 
-LPCTSTR const CServerDef::sm_szLoadKeys[SC_QTY+1] =	// static
+lpctstr const CServerDef::sm_szLoadKeys[SC_QTY+1] =	// static
 {
 	"ACCAPP",
 	"ACCAPPS",
@@ -235,7 +235,7 @@ LPCTSTR const CServerDef::sm_szLoadKeys[SC_QTY+1] =	// static
 	NULL
 };
 
-static LPCTSTR const sm_AccAppTable[ ACCAPP_QTY ] =
+static lpctstr const sm_AccAppTable[ ACCAPP_QTY ] =
 {
 	"Closed",		// Closed. Not accepting more.
 	"Unused",
@@ -289,7 +289,7 @@ bool CServerDef::r_LoadVal( CScript & s )
 			break;
 		case SC_LANG:
 			{
-				TCHAR szLang[ 32 ];
+				tchar szLang[ 32 ];
 				Str_GetBare( szLang, s.GetArgStr(), sizeof(szLang), "<>/\"\\" );
 				if ( g_Cfg.IsObscene(szLang))	// Is the name unacceptable?
 					return( false );
@@ -369,7 +369,7 @@ bool CServerDef::r_LoadVal( CScript & s )
 	return false;
 }
 
-bool CServerDef::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc )
+bool CServerDef::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CServerDef::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -451,14 +451,14 @@ bool CServerDef::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc
 			sVal = GetName();
 			break;
 		}
-		sVal.Format("<a href=\"http://%s\">%s</a>", static_cast<LPCTSTR>(m_sURL), GetName());
+		sVal.Format("<a href=\"http://%s\">%s</a>", static_cast<lpctstr>(m_sURL), GetName());
 		break;
 	case SC_VERSION:
 		sVal = GRAY_VERSION;
 		break;
 	default:
 		{
-			LPCTSTR pszArgs = strchr(pszKey, ' ');
+			lpctstr pszArgs = strchr(pszKey, ' ');
 			if (pszArgs != NULL)
 				GETNONWHITESPACE(pszArgs);
 

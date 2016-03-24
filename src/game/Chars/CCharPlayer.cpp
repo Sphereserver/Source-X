@@ -9,7 +9,7 @@
 #include "CCharPlayer.h"
 
 
-LPCTSTR const CCharPlayer::sm_szLoadKeys[CPC_QTY+1] =
+lpctstr const CCharPlayer::sm_szLoadKeys[CPC_QTY+1] =
 {
 #define ADD(a,b) b,
 #include "../tables/CCharPlayer_props.tbl"
@@ -72,7 +72,7 @@ bool CChar::SetPlayerAccount(CAccount *pAccount)
 
 
 
-bool CChar::SetPlayerAccount( LPCTSTR pszAccName )
+bool CChar::SetPlayerAccount( lpctstr pszAccName )
 {
 	ADDTOCALLSTACK("CChar::SetPlayerAccount");
 	CAccountRef pAccount = g_Accounts.Account_FindCreate( pszAccName, g_Serv.m_eAccApp == ACCAPP_Free );
@@ -176,14 +176,14 @@ CSkillClassDef * CCharPlayer::GetSkillClass() const
 }
 
 // only players can have skill locks.
-SKILL_TYPE CCharPlayer::Skill_GetLockType( LPCTSTR pszKey ) const
+SKILL_TYPE CCharPlayer::Skill_GetLockType( lpctstr pszKey ) const
 {
 	ADDTOCALLSTACK("CCharPlayer::Skill_GetLockType");
 
-	TCHAR szTmpKey[128];
+	tchar szTmpKey[128];
 	strcpylen( szTmpKey, pszKey, COUNTOF(szTmpKey) );
 
-	TCHAR * ppArgs[3];
+	tchar * ppArgs[3];
 	size_t i = Str_ParseCmds( szTmpKey, ppArgs, COUNTOF(ppArgs), ".[]" );
 	if ( i <= 1 )
 		return( SKILL_NONE );
@@ -214,14 +214,14 @@ void CCharPlayer::Skill_SetLock( SKILL_TYPE skill, SKILLLOCK_TYPE state )
 }
 
 // only players can have stat locks.
-STAT_TYPE CCharPlayer::Stat_GetLockType( LPCTSTR pszKey ) const
+STAT_TYPE CCharPlayer::Stat_GetLockType( lpctstr pszKey ) const
 {
 	ADDTOCALLSTACK("CCharPlayer::Stat_GetLockType");
 
-	TCHAR szTmpKey[128];
+	tchar szTmpKey[128];
 	strcpylen( szTmpKey, pszKey, COUNTOF(szTmpKey) );
 
-	TCHAR * ppArgs[3];
+	tchar * ppArgs[3];
 	size_t i = Str_ParseCmds( szTmpKey, ppArgs, COUNTOF(ppArgs), ".[]" );
 	if ( i <= 1 )
 		return( STAT_NONE );
@@ -251,7 +251,7 @@ void CCharPlayer::Stat_SetLock( STAT_TYPE stat, SKILLLOCK_TYPE state )
 	m_StatLock[stat] = static_cast<uchar>(state);
 }
 
-bool CCharPlayer::r_WriteVal( CChar * pChar, LPCTSTR pszKey, CGString & sVal )
+bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr pszKey, CGString & sVal )
 {
 	ADDTOCALLSTACK("CCharPlayer::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -314,7 +314,7 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, LPCTSTR pszKey, CGString & sVal )
 			return( true );
 		case CPC_PROFILE:
 			{
-				TCHAR szLine[SCRIPT_MAX_LINE_LEN-16];
+				tchar szLine[SCRIPT_MAX_LINE_LEN-16];
 				Str_MakeUnFiltered( szLine, m_sProfile, sizeof(szLine));
 				sVal = szLine;
 			}
@@ -368,7 +368,7 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 	ADDTOCALLSTACK("CCharPlayer::r_LoadVal");
 	EXC_TRY("LoadVal");
 	
-	LPCTSTR pszKey = s.GetKey();
+	lpctstr pszKey = s.GetKey();
 
 	if ( !strnicmp(pszKey, "GMPAGE", 6) )		//	GM pages
 	{
@@ -388,7 +388,7 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 			if ( !strcmpi(pszKey, "HANDLE") )
 			{
 				CChar *ppChar = pChar;
-				LPCTSTR pszArgs = s.GetArgStr(); //Moved here because of error with quoted strings!?!?
+				lpctstr pszArgs = s.GetArgStr(); //Moved here because of error with quoted strings!?!?
 				if ( *pszArgs )
 					ppChar = dynamic_cast<CChar*>(g_World.FindUID(s.GetArgVal()));
 
@@ -538,7 +538,7 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 	EXC_SET("saving profile");
 	if ( ! m_sProfile.IsEmpty())
 	{
-		TCHAR szLine[SCRIPT_MAX_LINE_LEN-16];
+		tchar szLine[SCRIPT_MAX_LINE_LEN-16];
 		Str_MakeUnFiltered( szLine, m_sProfile, sizeof(szLine));
 		s.WriteKey( "PROFILE", szLine );
 	}
@@ -548,7 +548,7 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 	{
 		if ( ! m_StatLock[x] )
 			continue;
-		TCHAR szTemp[128];
+		tchar szTemp[128];
 		sprintf( szTemp, "StatLock[%d]", x );	// smaller storage space.
 		s.WriteKeyVal( szTemp, m_StatLock[x] );
 	}
@@ -559,7 +559,7 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 		ASSERT(j < COUNTOF(m_SkillLock));
 		if ( ! m_SkillLock[j] )
 			continue;
-		TCHAR szTemp[128];
+		tchar szTemp[128];
 		sprintf( szTemp, "SkillLock[%" FMTSIZE_T "]", j );	// smaller storage space.
 		s.WriteKeyVal( szTemp, m_SkillLock[j] );
 	}
@@ -574,7 +574,7 @@ enum CPV_TYPE	// Player char.
 	CPV_QTY
 };
 
-LPCTSTR const CCharPlayer::sm_szVerbKeys[CPV_QTY+1] =
+lpctstr const CCharPlayer::sm_szVerbKeys[CPV_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../tables/CCharPlayer_functions.tbl"
@@ -589,7 +589,7 @@ bool CChar::Player_OnVerb( CScript &s, CTextConsole * pSrc )
 	if ( !m_pPlayer || !pSrc )
 		return false;
 
-	LPCTSTR pszKey = s.GetKey();
+	lpctstr pszKey = s.GetKey();
 	int cpVerb = FindTableSorted( pszKey, CCharPlayer::sm_szVerbKeys, COUNTOF(CCharPlayer::sm_szVerbKeys)-1 );
 
 	if ( cpVerb <= -1 )

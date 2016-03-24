@@ -109,7 +109,7 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 
 		if ( pChar && pChar->m_pPlayer )
 		{
-			TCHAR *pszMsg = Str_GetTemp();
+			tchar *pszMsg = Str_GetTemp();
 			sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_CORPSE_NAME), pPart->GetName(), pChar->GetName());
 			pPart->SetName(pszMsg);
 			pPart->m_uidLink = pChar->GetUID();
@@ -388,7 +388,7 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 		CItemBase *pAmmoDef = CItemBase::FindItemBase(AmmoID);
 		if ( pAmmoDef )
 		{
-			TCHAR *pszMsg = Str_GetTemp();
+			tchar *pszMsg = Str_GetTemp();
 			sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHB_REM), pAmmoDef->GetName(), (pButte->m_itArcheryButte.m_AmmoCount == 1) ? "" : g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHB_REMS));
 			Emote(pszMsg);
 
@@ -424,7 +424,7 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 	// Determine ammo type
 	CVarDefCont *pVarAmmoType = pWeapon->GetDefKey("AMMOTYPE", true);
 	RESOURCE_ID_BASE rid;
-	LPCTSTR t_Str;
+	lpctstr t_Str;
 
 	if ( pVarAmmoType )
 	{
@@ -555,13 +555,13 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 		// Small chance of destroying the ammo
 		if ( pAmmoDef && !Calc_GetRandVal(10) )
 		{
-			TCHAR *pszMsg = Str_GetTemp();
+			tchar *pszMsg = Str_GetTemp();
 			sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHB_DEST), pAmmoDef->GetName());
 			Emote(pszMsg, NULL, true);
 			return true;
 		}
 
-		static LPCTSTR const sm_Txt_ArcheryButte_Failure[] =
+		static lpctstr const sm_Txt_ArcheryButte_Failure[] =
 		{
 			g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHB_MISS_1),
 			g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHB_MISS_2),
@@ -575,13 +575,13 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 		// Very small chance of destroying another arrow
 		if ( pAmmoDef && !Calc_GetRandVal(50) && pButte->m_itArcheryButte.m_AmmoCount )
 		{
-			TCHAR *pszMsg = Str_GetTemp();
+			tchar *pszMsg = Str_GetTemp();
 			sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHB_SPLIT), pAmmoDef->GetName());
 			Emote(pszMsg, NULL, true);
 			return true;
 		}
 
-		static LPCTSTR const sm_Txt_ArcheryButte_Success[] =
+		static lpctstr const sm_Txt_ArcheryButte_Success[] =
 		{
 			g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHB_HIT_1),
 			g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHB_HIT_2),
@@ -794,7 +794,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 		iDifficulty = iSkillLevel / 4;
 
 	// apply arms lore skillgain now
-	LPCTSTR pszText;
+	lpctstr pszText;
 	Skill_Experience(SKILL_ARMSLORE, iArmsLoreDiff);
 	bool fSuccess = Skill_UseQuick(static_cast<SKILL_TYPE>(RetMainSkill.GetResIndex()), iDifficulty);
 	if ( fSuccess )
@@ -829,7 +829,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 	if ( pItemArmor->m_itArmor.m_Hits_Cur <= 0 )
 		pszText = g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_5);
 
-	TCHAR *pszMsg = Str_GetTemp();
+	tchar *pszMsg = Str_GetTemp();
 	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_MSG), pszText, pItemArmor->GetName());
 	Emote(pszMsg);
 
@@ -922,7 +922,7 @@ bool CChar::Use_Eat( CItem * pItemFood, short iQty )
 
 	Use_EatQty(pItemFood, iQty);
 
-	LPCTSTR pMsg;
+	lpctstr pMsg;
 	int index = IMULDIV(Stat_GetVal(STAT_FOOD), 5, Stat_GetMax(STAT_FOOD));
 	switch ( index )
 	{
@@ -1693,7 +1693,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 				return false;
 
 			// Spyglass will tell you the moon phases
-			static LPCTSTR const sm_sPhases[8] =
+			static lpctstr const sm_sPhases[8] =
 					{
 							g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_SPYGLASS_M1),
 							g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_SPYGLASS_M2),
@@ -1719,7 +1719,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 			if ((GetTopPoint().m_map <= 1) && (GetTopPoint().m_x > UO_SIZE_X_REAL))    // dungeons and T2A lands
 				ObjMessage(g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_SEXTANT_T2A), this);
 			else {
-				TCHAR *pszMsg = Str_GetTemp();
+				tchar *pszMsg = Str_GetTemp();
 				sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_SEXTANT), m_pArea->GetName(),
 				        pItem->Use_Sextant(GetTopPoint()));
 				ObjMessage(pszMsg, this);

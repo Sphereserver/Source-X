@@ -22,9 +22,9 @@ class CPartyDef : public CGObListRec, public CScriptObj
 
 public:
 	static const char *m_sClassName;
-	static LPCTSTR const sm_szVerbKeys[];
-	static LPCTSTR const sm_szLoadKeys[];
-	static LPCTSTR const sm_szLoadKeysM[];
+	static lpctstr const sm_szVerbKeys[];
+	static lpctstr const sm_szLoadKeys[];
+	static lpctstr const sm_szLoadKeysM[];
 private:
 	CCharRefArray m_Chars;
 	CGString m_sName;
@@ -33,11 +33,11 @@ private:
 	CGString m_pSpeechFunction;
 
 public:
-	LPCTSTR GetDefStr( LPCTSTR pszKey, bool fZero = false ) const;
-	INT64 GetDefNum( LPCTSTR pszKey, bool fZero = false ) const;
-	void SetDefNum(LPCTSTR pszKey, INT64 iVal, bool fZero = true);
-	void SetDefStr(LPCTSTR pszKey, LPCTSTR pszVal, bool fQuoted = false, bool fZero = true);
-	void DeleteDef(LPCTSTR pszKey);
+	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false ) const;
+	INT64 GetDefNum( lpctstr pszKey, bool fZero = false ) const;
+	void SetDefNum(lpctstr pszKey, INT64 iVal, bool fZero = true);
+	void SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true);
+	void DeleteDef(lpctstr pszKey);
 
 private:
 	bool SendMemberMsg( CChar * pCharDest, PacketSend * pPacket );
@@ -73,7 +73,7 @@ public:
 	// void MessageAll( CGrayUID uidSrc, const NCHAR * pText, int ilenmsg );
 	// bool MessageMember( CGrayUID uidDst, CGrayUID uidSrc, const NCHAR * pText, int ilenmsg );
 	// Sysmessage sending wrappers
-	void SysMessageAll( LPCTSTR pText );
+	void SysMessageAll( lpctstr pText );
 
 	// Commands
 	bool Disband( CGrayUID uidMaster );
@@ -85,9 +85,9 @@ public:
 
 	// -------------------------------
 
-	LPCTSTR GetName() const { return static_cast<LPCTSTR>(m_sName); }
-	bool r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef );
-	bool r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc );
+	lpctstr GetName() const { return static_cast<lpctstr>(m_sName); }
+	bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
+	bool r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc );
 	bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
 	bool r_LoadVal( CScript & s );
 	bool r_Load( CScript & s );

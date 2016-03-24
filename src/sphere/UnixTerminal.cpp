@@ -39,7 +39,7 @@ bool UnixTerminal::isReady()
 	if (c >= 0 && c < 256)
 	{
 		// character input received
-		m_nextChar = static_cast<TCHAR>(c);
+		m_nextChar = static_cast<tchar>(c);
 		return true;
 	}
 
@@ -86,17 +86,17 @@ bool UnixTerminal::isReady()
 	fputc(c, stdout);
 	fflush(stdout);
 
-	m_nextChar = static_cast<TCHAR>(c);
+	m_nextChar = static_cast<tchar>(c);
 	return m_nextChar != '\0';
 #endif
 
 	return false;
 }
 
-TCHAR UnixTerminal::read()
+tchar UnixTerminal::read()
 {
 	ADDTOCALLSTACK("UnixTerminal::read");
-	TCHAR c = m_nextChar;
+	tchar c = m_nextChar;
 	m_nextChar = '\0';
 	return c;
 }
@@ -119,7 +119,7 @@ void UnixTerminal::setColor(COLOR_TYPE color)
 #endif
 }
 
-void UnixTerminal::print(LPCTSTR message)
+void UnixTerminal::print(lpctstr message)
 {
 	ADDTOCALLSTACK("UnixTerminal::print");
 	ASSERT(message != NULL);

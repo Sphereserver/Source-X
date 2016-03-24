@@ -9,6 +9,7 @@
 #include "../common/CEncrypt.h"
 #include "../common/CScriptObj.h"
 #include "../common/CSocket.h"
+#include "CTime.h"
 #include "CServTime.h"
 
 
@@ -40,7 +41,7 @@ enum ACCAPP_TYPE	// types of new account applications.
 
 class CServerDef : public CScriptObj
 {
-	static LPCTSTR const sm_szLoadKeys[];
+	static lpctstr const sm_szLoadKeys[];
 
 private:
 	CGString m_sName;	// What the name should be. Fill in from ping.
@@ -69,14 +70,14 @@ public:
 	ACCAPP_TYPE m_eAccApp;	// types of new account applications.
 
 public:
-	CServerDef( LPCTSTR pszName, CSocketAddressIP dwIP );
+	CServerDef( lpctstr pszName, CSocketAddressIP dwIP );
 
 private:
 	CServerDef(const CServerDef& copy);
 	CServerDef& operator=(const CServerDef& other);
 
 public:
-	LPCTSTR GetStatus() const
+	lpctstr GetStatus() const
 	{
 		return(m_sStatus);
 	}
@@ -99,8 +100,8 @@ public:
 		m_dwStat[i] = dwVal;
 	}
 
-	LPCTSTR GetName() const { return( m_sName ); }
-	void SetName( LPCTSTR pszName );
+	lpctstr GetName() const { return( m_sName ); }
+	void SetName( lpctstr pszName );
 
 	virtual INT64 GetAgeHours() const;
 
@@ -114,7 +115,7 @@ public:
 	INT64 GetTimeSinceLastValid() const;
 
 	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( LPCTSTR pKey, CGString &sVal, CTextConsole * pSrc = NULL );
+	virtual bool r_WriteVal( lpctstr pKey, CGString &sVal, CTextConsole * pSrc = NULL );
 
 	bool IsConnected() const
 	{

@@ -73,7 +73,7 @@ typedef uint	ERROR_CODE;
 {									\
 	GETNONWHITESPACE( x );			\
 	if ( *x == '"' )	++x;				\
-		TCHAR * psX	= const_cast<TCHAR*>(strchr( x, '"' ));	\
+		tchar * psX	= const_cast<tchar*>(strchr( x, '"' ));	\
 	if ( psX )						\
 		*psX	= '\0';				\
 }
@@ -135,16 +135,16 @@ extern class CEventLog
 	// May include __LINE__ or __FILE__ macro as well ?
 
 protected:
-	virtual int EventStr(dword wMask, LPCTSTR pszMsg)
+	virtual int EventStr(dword wMask, lpctstr pszMsg)
 	{
 		UNREFERENCED_PARAMETER(wMask);
 		UNREFERENCED_PARAMETER(pszMsg);
 		return 0;
 	}
-	virtual int VEvent(dword wMask, LPCTSTR pszFormat, va_list args);
+	virtual int VEvent(dword wMask, lpctstr pszFormat, va_list args);
 
 public:
-	int _cdecl Event( dword wMask, LPCTSTR pszFormat, ... ) __printfargs(3,4)
+	int _cdecl Event( dword wMask, lpctstr pszFormat, ... ) __printfargs(3,4)
 	{
 		va_list vargs;
 		va_start( vargs, pszFormat );
@@ -153,7 +153,7 @@ public:
 		return( iret );
 	}
 
-	int _cdecl EventDebug(LPCTSTR pszFormat, ...) __printfargs(2,3)
+	int _cdecl EventDebug(lpctstr pszFormat, ...) __printfargs(2,3)
 	{
 		va_list vargs;
 		va_start(vargs, pszFormat);
@@ -162,7 +162,7 @@ public:
 		return iret;
 	}
 
-	int _cdecl EventError(LPCTSTR pszFormat, ...) __printfargs(2,3)
+	int _cdecl EventError(lpctstr pszFormat, ...) __printfargs(2,3)
 	{
 		va_list vargs;
 		va_start(vargs, pszFormat);
@@ -171,7 +171,7 @@ public:
 		return iret;
 	}
 
-	int _cdecl EventWarn(LPCTSTR pszFormat, ...) __printfargs(2,3)
+	int _cdecl EventWarn(lpctstr pszFormat, ...) __printfargs(2,3)
 	{
 		va_list vargs;
 		va_start(vargs, pszFormat);
@@ -181,7 +181,7 @@ public:
 	}
 
 #ifdef _DEBUG
-	int _cdecl EventEvent( LPCTSTR pszFormat, ... ) __printfargs(2,3)
+	int _cdecl EventEvent( lpctstr pszFormat, ... ) __printfargs(2,3)
 	{
 		va_list vargs;
 		va_start( vargs, pszFormat );
@@ -220,15 +220,15 @@ struct CValStr
 	// Associate a val with a string.
 	// Assume sorted values from min to max.
 public:
-	LPCTSTR m_pszName;
+	lpctstr m_pszName;
 	int m_iVal;
 public:
-	void SetValues( int iVal, LPCTSTR pszName )
+	void SetValues( int iVal, lpctstr pszName )
 	{
 		m_iVal = iVal;
 		m_pszName = pszName;
 	}
-	LPCTSTR FindName( int iVal ) const;
+	lpctstr FindName( int iVal ) const;
 	void SetValue( int iVal )
 	{
 		m_iVal = iVal;

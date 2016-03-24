@@ -28,9 +28,9 @@ private:
     bool GetWhoIs() const { return m_fAllowWhoIs; }
     void SetWhoIs(bool fAllowWhoIs) { m_fAllowWhoIs = fAllowWhoIs; }
     bool IsReceivingAllowed() const { return m_fReceiving; }
-    LPCTSTR GetChatName() const;
+    lpctstr GetChatName() const;
 
-    size_t FindIgnoringIndex( LPCTSTR pszName) const;
+    size_t FindIgnoringIndex( lpctstr pszName) const;
 
 protected:
     void SetChatActive();
@@ -56,14 +56,14 @@ public:
 
     CChatChannel * GetChannel() const;
     void SetChannel(CChatChannel * pChannel);
-    void SendChatMsg( CHATMSG_TYPE iType, LPCTSTR pszName1 = NULL, LPCTSTR pszName2 = NULL, CLanguageID lang = 0 );
-    void RenameChannel(LPCTSTR pszName);
+    void SendChatMsg( CHATMSG_TYPE iType, lpctstr pszName1 = NULL, lpctstr pszName2 = NULL, CLanguageID lang = 0 );
+    void RenameChannel(lpctstr pszName);
 
-    void Ignore(LPCTSTR pszName);
-    void DontIgnore(LPCTSTR pszName);
-    void ToggleIgnore(LPCTSTR pszName);
+    void Ignore(lpctstr pszName);
+    void DontIgnore(lpctstr pszName);
+    void ToggleIgnore(lpctstr pszName);
     void ClearIgnoreList();
-    bool IsIgnoring(LPCTSTR pszName) const;
+    bool IsIgnoring(lpctstr pszName) const;
 };
 
 #endif // _INC_CCHATCHANMEMBER_H

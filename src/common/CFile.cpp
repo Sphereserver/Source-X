@@ -8,7 +8,7 @@
 #include "CString.h"
 #include "graycom.h"
 
-bool CFile::SetFilePath( LPCTSTR pszName )
+bool CFile::SetFilePath( lpctstr pszName )
 {
 	ADDTOCALLSTACK("CFile::SetFilePath");
 	if ( pszName == NULL )
@@ -28,13 +28,13 @@ bool CFile::SetFilePath( LPCTSTR pszName )
 	return( true );
 }
 
-LPCTSTR CFile::GetFileTitle() const
+lpctstr CFile::GetFileTitle() const
 {
 	ADDTOCALLSTACK("CFile::GetFileTitle");
 	return( CGFile::GetFilesTitle( GetFilePath()));
 }
 
-bool CFile::Open( LPCTSTR pszName, UINT uMode, CFileException * e )
+bool CFile::Open( lpctstr pszName, UINT uMode, CFileException * e )
 {
 	UNREFERENCED_PARAMETER(e);
 	ASSERT( m_hFile == NOFILE_HANDLE );
@@ -148,11 +148,11 @@ bool CFile::Write( const void * pData, dword dwLength ) const
 }
 
 #ifdef _WIN32
-void CFile::NotifyIOError( LPCTSTR szMessage ) const
+void CFile::NotifyIOError( lpctstr szMessage ) const
 {
 	LPVOID lpMsgBuf;
-	FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, GetLastError(), 0, reinterpret_cast<LPTSTR>(&lpMsgBuf), 0, NULL );
-	DEBUG_ERR(( "File I/O \"%s\" failed on file \"%s\" (%d): %s\n", szMessage, static_cast<LPCTSTR>(GetFilePath()), GetLastError(), static_cast<LPTSTR>(lpMsgBuf) ));
+	FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, GetLastError(), 0, reinterpret_cast<lptstr>(&lpMsgBuf), 0, NULL );
+	DEBUG_ERR(( "File I/O \"%s\" failed on file \"%s\" (%d): %s\n", szMessage, static_cast<lpctstr>(GetFilePath()), GetLastError(), static_cast<lptstr>(lpMsgBuf) ));
 
 	LocalFree( lpMsgBuf );
 }
@@ -171,12 +171,12 @@ int CGFile::GetLastError()	// static
 #endif
 }
 
-CGString CGFile::GetMergedFileName( LPCTSTR pszBase, LPCTSTR pszName ) // static
+CGString CGFile::GetMergedFileName( lpctstr pszBase, lpctstr pszName ) // static
 {
 	ADDTOCALLSTACK("CGFile::GetMergedFileName");
 	// Merge path and file name.
 
-	TCHAR szFilePath[ _MAX_PATH ];
+	tchar szFilePath[ _MAX_PATH ];
 	if ( pszBase && pszBase[0] )
 	{
 		strcpy( szFilePath, pszBase );
@@ -200,10 +200,10 @@ CGString CGFile::GetMergedFileName( LPCTSTR pszBase, LPCTSTR pszName ) // static
 	return static_cast<CGString>(szFilePath);
 }
 
-LPCTSTR CGFile::GetFilesTitle( LPCTSTR pszPath )	// static
+lpctstr CGFile::GetFilesTitle( lpctstr pszPath )	// static
 {
 	ADDTOCALLSTACK("CGFile::GetFilesTitle");
-	// Just use COMMDLG.H GetFileTitle(LPCTSTR, LPTSTR, word) instead ?
+	// Just use COMMDLG.H GetFileTitle(lpctstr, lptstr, word) instead ?
 	// strrchr
 	size_t len = strlen(pszPath);
 	while ( len > 0 )
@@ -218,7 +218,7 @@ LPCTSTR CGFile::GetFilesTitle( LPCTSTR pszPath )	// static
 	return( pszPath + len );
 }
 
-LPCTSTR CGFile::GetFilesExt( LPCTSTR pszName )	// static
+lpctstr CGFile::GetFilesExt( lpctstr pszName )	// static
 {
 	ADDTOCALLSTACK("CGFile::GetFilesExt");
 	// get the EXTension including the .
@@ -237,7 +237,7 @@ LPCTSTR CGFile::GetFilesExt( LPCTSTR pszName )	// static
 	return( NULL );	// has no ext.
 }
 
-LPCTSTR CGFile::GetFileExt() const
+lpctstr CGFile::GetFileExt() const
 {
 	ADDTOCALLSTACK("CGFile::GetFileExt");
 	// get the EXTension including the .
@@ -259,7 +259,7 @@ void CGFile::CloseBase()
 	CFile::Close();
 }
 
-bool CGFile::Open( LPCTSTR pszFilename, UINT uModeFlags, void FAR * pExtra )
+bool CGFile::Open( lpctstr pszFilename, UINT uModeFlags, void FAR * pExtra )
 {
 	ADDTOCALLSTACK("CGFile::Open");
 	// RETURN: true = success.
@@ -302,7 +302,7 @@ void CGFile::Close()
 //***************************************************************************
 // -CFileText
 
-LPCTSTR CFileText::GetModeStr() const
+lpctstr CFileText::GetModeStr() const
 {
 	ADDTOCALLSTACK("CFileText::GetModeStr");
 	// end of line translation is crap. ftell and fseek don't work correctly when you use it.
@@ -389,7 +389,7 @@ dword CFileText::Read( void * pBuffer, size_t sizemax ) const
 	return( static_cast<dword>(fread( pBuffer, 1, sizemax, m_pStream )));
 }
 
-TCHAR * CFileText::ReadString( TCHAR * pBuffer, size_t sizemax ) const
+tchar * CFileText::ReadString( tchar * pBuffer, size_t sizemax ) const
 {
 	// Read a line of text. NULL = EOF
 	ASSERT(pBuffer);
@@ -422,7 +422,7 @@ TCHAR * CFileText::ReadString( TCHAR * pBuffer, size_t sizemax ) const
 	return ( iStatus == 1 );
 }
 
-bool CFileText::WriteString( LPCTSTR pStr )
+bool CFileText::WriteString( lpctstr pStr )
 {
 	// RETURN: < 0 = failed.
 	ASSERT(pStr);
@@ -436,7 +436,7 @@ bool CFileText::IsEOF() const
 	return(( feof( m_pStream )) ? true : false );
 }
 
-size_t CFileText::VPrintf( LPCTSTR pFormat, va_list args )
+size_t CFileText::VPrintf( lpctstr pFormat, va_list args )
 {
 	ASSERT(pFormat);
 	if ( ! IsFileOpen())
@@ -446,7 +446,7 @@ size_t CFileText::VPrintf( LPCTSTR pFormat, va_list args )
 	return( lenret );
 }
 
-size_t _cdecl CFileText::Printf( LPCTSTR pFormat, ... )
+size_t _cdecl CFileText::Printf( lpctstr pFormat, ... )
 {
 	ASSERT(pFormat);
 	va_list vargs;

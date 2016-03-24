@@ -109,10 +109,10 @@ public:
 	CRegionWorld * m_pArea;		// What region are we in now. (for guarded message)
 	CRegionBase * m_pRoom;		// What room we are in now.
 
-	static LPCTSTR const sm_szRefKeys[];
-	static LPCTSTR const sm_szLoadKeys[];
-	static LPCTSTR const sm_szVerbKeys[];
-	static LPCTSTR const sm_szTrigName[CTRIG_QTY+1];
+	static lpctstr const sm_szRefKeys[];
+	static lpctstr const sm_szLoadKeys[];
+	static lpctstr const sm_szVerbKeys[];
+	static lpctstr const sm_szTrigName[CTRIG_QTY+1];
 	static const LAYER_TYPE sm_VendorLayers[3];
 
 	// Combat stuff. cached data. (not saved)
@@ -145,8 +145,8 @@ public:
 	CREID_TYPE m_prev_id;		// Backup of body type for ghosts and poly
 	HUE_TYPE m_prev_Hue;		// Backup of skin color. in case of polymorph etc.
 	HUE_TYPE m_wBloodHue;		// Replicating CharDef's BloodColor on the char, or overriding it.
-	bool IsTriggerActive(LPCTSTR trig) { return static_cast<CObjBase*>(const_cast<CChar*>(this))->IsTriggerActive(trig); }
-	void SetTriggerActive(LPCTSTR trig = NULL) { static_cast<CObjBase*>(const_cast<CChar*>(this))->SetTriggerActive(trig); }
+	bool IsTriggerActive(lpctstr trig) { return static_cast<CObjBase*>(const_cast<CChar*>(this))->IsTriggerActive(trig); }
+	void SetTriggerActive(lpctstr trig = NULL) { static_cast<CObjBase*>(const_cast<CChar*>(this))->SetTriggerActive(trig); }
 
 	// Client's local light
 	byte m_LocalLight;
@@ -313,7 +313,7 @@ public:
 	bool IsElf() const;
 	bool IsGargoyle() const;
 	int	 GetHealthPercent() const;
-	LPCTSTR GetTradeTitle() const; // Paperdoll title for character p (2)
+	lpctstr GetTradeTitle() const; // Paperdoll title for character p (2)
 
 								   // Information about us.
 	CREID_TYPE GetID() const;
@@ -321,13 +321,13 @@ public:
 	CREID_TYPE GetDispID() const;
 	void SetID( CREID_TYPE id );
 
-	LPCTSTR GetName() const;
+	lpctstr GetName() const;
 
-	LPCTSTR GetNameWithoutIncognito() const;
+	lpctstr GetNameWithoutIncognito() const;
 
-	LPCTSTR GetName( bool fAllowAlt ) const;
+	lpctstr GetName( bool fAllowAlt ) const;
 
-	bool SetName( LPCTSTR pName );
+	bool SetName( lpctstr pName );
 	height_t GetHeightMount( bool fEyeSubstract = false ) const;
 	height_t GetHeight() const;
 
@@ -367,7 +367,7 @@ public:
 
 	short  Food_CanEat( CObjBase * pObj ) const;
 	short  Food_GetLevelPercent() const;
-	LPCTSTR Food_GetLevelMessage( bool fPet, bool fHappy ) const;
+	lpctstr Food_GetLevelMessage( bool fPet, bool fHappy ) const;
 
 public:
 	short	Stat_GetAdjusted( STAT_TYPE i ) const;
@@ -393,7 +393,7 @@ public:
 	// Location and movement ------------------------------------
 private:
 	bool TeleportToCli( int iType, int iArgs );
-	bool TeleportToObj( int iType, TCHAR * pszArgs );
+	bool TeleportToObj( int iType, tchar * pszArgs );
 private:
 	CRegionBase * CheckValidMove( CPointBase & ptDest, word * pwBlockFlags, DIR_TYPE dir, height_t * ClimbHeight, bool fPathFinding = false ) const;
 	void FixClimbHeight();
@@ -426,19 +426,19 @@ public:
 	bool IsClient() const;
 	CClient * GetClient() const;
 
-	bool SetPrivLevel( CTextConsole * pSrc, LPCTSTR pszFlags );
+	bool SetPrivLevel( CTextConsole * pSrc, lpctstr pszFlags );
 	bool CanDisturb( const CChar * pChar ) const;
 	void SetDisconnected();
 	bool SetPlayerAccount( CAccount * pAccount );
-	bool SetPlayerAccount( LPCTSTR pszAccount );
+	bool SetPlayerAccount( lpctstr pszAccount );
 	bool SetNPCBrain( NPCBRAIN_TYPE NPCBrain );
 	NPCBRAIN_TYPE GetNPCBrain( bool fDefault = true ) const; // return 1 for animal, 2 for monster, 3 for NPC humans and PCs
 	void ClearNPC();
 	void ClearPlayer();
 
 public:
-	void ObjMessage( LPCTSTR pMsg, const CObjBase * pSrc ) const;
-	void SysMessage( LPCTSTR pMsg ) const;
+	void ObjMessage( lpctstr pMsg, const CObjBase * pSrc ) const;
+	void SysMessage( lpctstr pMsg ) const;
 
 	void UpdateStatsFlag() const;
 	void UpdateStatVal( STAT_TYPE type, short iChange = 0, short iLimit = 0 );
@@ -461,8 +461,8 @@ public:
 	void Update(const CClient * pClientExclude = NULL);
 
 public:
-	LPCTSTR GetPronoun() const;	// he
-	LPCTSTR GetPossessPronoun() const;	// his
+	lpctstr GetPronoun() const;	// he
+	lpctstr GetPossessPronoun() const;	// his
 	byte GetModeFlag( const CClient *pViewer = NULL ) const;
 	byte GetDirFlag(bool fSquelchForwardStep = false) const;
 	dword GetMoveBlockFlags(bool bIgnoreGM = false) const;
@@ -499,17 +499,17 @@ public:
 	void AddGoldToPack( int iAmount, CItemContainer * pPack=NULL );
 
 	//private:
-	virtual TRIGRET_TYPE OnTrigger( LPCTSTR pTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
+	virtual TRIGRET_TYPE OnTrigger( lpctstr pTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
 	TRIGRET_TYPE OnTrigger( CTRIG_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = NULL );
 
 public:
 	// Load/Save----------------------------------
 
-	virtual bool r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef );
+	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
 	virtual bool r_LoadVal( CScript & s );
 	virtual bool r_Load( CScript & s );  // Load a character from Script
-	virtual bool r_WriteVal( LPCTSTR pszKey, CGString & s, CTextConsole * pSrc = NULL );
+	virtual bool r_WriteVal( lpctstr pszKey, CGString & s, CTextConsole * pSrc = NULL );
 	virtual void r_Write( CScript & s );
 
 	void r_WriteParity( CScript & s );	
@@ -552,7 +552,7 @@ private:
 	* @param iDelta Amount of Karma/Fame changed.
 	* @param pszType String containing 'Karma' or 'Fame' to pass as argument to the given text.
 	*/
-	void Noto_ChangeDeltaMsg( int iDelta, LPCTSTR pszType );
+	void Noto_ChangeDeltaMsg( int iDelta, lpctstr pszType );
 
 public:
 	// Notoriety code
@@ -641,7 +641,7 @@ public:
 	*
 	* @return string with the title.
 	*/
-	LPCTSTR Noto_GetFameTitle() const;
+	lpctstr Noto_GetFameTitle() const;
 
 	/**
 	* @brief Paperdoll title for character.
@@ -649,7 +649,7 @@ public:
 	* This checks for <tag.name.prefix> <nototitle> <name> <tag.name.suffix> and the sex to send the correct text to the paperdoll.
 	* @return string with the title.
 	*/
-	LPCTSTR Noto_GetTitle() const;
+	lpctstr Noto_GetTitle() const;
 
 	/**
 	* @brief I killed someone, should I have credits? and penalties?
@@ -774,7 +774,7 @@ public:
 
 	SKILL_TYPE Skill_GetBest( uint iRank = 0 ) const; // Which skill is the highest for character p
 	SKILL_TYPE Skill_GetActive() const;
-	LPCTSTR Skill_GetName( bool fUse = false ) const;
+	lpctstr Skill_GetName( bool fUse = false ) const;
 	ushort Skill_GetBase( SKILL_TYPE skill ) const;
 	int Skill_GetMax( SKILL_TYPE skill, bool ignoreLock = false ) const;
 	int Skill_GetSum() const;
@@ -925,7 +925,7 @@ public:
 private:
 	void OnNoticeCrime( CChar * pCriminal, const CChar * pCharMark );
 public:
-	bool CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObjBase * pItem, LPCTSTR pAction );
+	bool CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObjBase * pItem, lpctstr pAction );
 
 private:
 	// Armor, weapons and combat ------------------------------------
@@ -1023,7 +1023,7 @@ public:
 	bool Death();
 	bool Reveal( dword dwFlags = 0 );
 	void Jail( CTextConsole * pSrc, bool fSet, int iCell );
-	void EatAnim( LPCTSTR pszName, short iQty );
+	void EatAnim( lpctstr pszName, short iQty );
 	void CallGuards( CChar * pCriminal );
 
 #define DEATH_NOFAMECHANGE 0x01
@@ -1032,8 +1032,8 @@ public:
 #define DEATH_NOCONJUREDEFFECT 0x08
 #define DEATH_HASCORPSE 0x010
 
-	virtual void Speak( LPCTSTR pText, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_NORMAL );
-	virtual void SpeakUTF8( LPCTSTR pText, HUE_TYPE wHue= HUE_TEXT_DEF, TALKMODE_TYPE mode= TALKMODE_SAY, FONT_TYPE font= FONT_NORMAL, CLanguageID lang = 0 );
+	virtual void Speak( lpctstr pText, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_NORMAL );
+	virtual void SpeakUTF8( lpctstr pText, HUE_TYPE wHue= HUE_TEXT_DEF, TALKMODE_TYPE mode= TALKMODE_SAY, FONT_TYPE font= FONT_NORMAL, CLanguageID lang = 0 );
 	virtual void SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang );
 
 	bool OnFreezeCheck();
@@ -1045,8 +1045,8 @@ public:
 	void Guild_Resign( MEMORY_TYPE memtype );
 	CItemStone * Guild_Find( MEMORY_TYPE memtype ) const;
 	CStoneMember * Guild_FindMember( MEMORY_TYPE memtype ) const;
-	LPCTSTR Guild_Abbrev( MEMORY_TYPE memtype ) const;
-	LPCTSTR Guild_AbbrevBracket( MEMORY_TYPE memtype ) const;
+	lpctstr Guild_Abbrev( MEMORY_TYPE memtype ) const;
+	lpctstr Guild_AbbrevBracket( MEMORY_TYPE memtype ) const;
 
 	void Use_EatQty( CItem * pFood, short iQty = 1 );
 	bool Use_Eat( CItem * pItem, short iQty = 1 );
@@ -1100,7 +1100,7 @@ public:
 	bool NPC_OnHireHear( CChar * pCharSrc );
 	int	 NPC_OnTrainCheck( CChar * pCharSrc, SKILL_TYPE Skill );
 	bool NPC_OnTrainPay( CChar * pCharSrc, CItemMemory * pMemory, CItem * pGold );
-	bool NPC_OnTrainHear( CChar * pCharSrc, LPCTSTR pCmd );
+	bool NPC_OnTrainHear( CChar * pCharSrc, lpctstr pCmd );
 	bool NPC_TrainSkill( CChar * pCharSrc, SKILL_TYPE skill, int toTrain );
 private:
 	bool NPC_CheckWalkHere( const CPointBase & pt, const CRegionBase * pArea, word wBlockFlags ) const;
@@ -1161,13 +1161,13 @@ public:
 	int NPC_GetVendorMarkup( const CChar * pChar ) const;
 
 	void NPC_OnPetCommand( bool fSuccess, CChar * pMaster );
-	bool NPC_OnHearPetCmd( LPCTSTR pszCmd, CChar * pSrc, bool fAllPets = false );
-	bool NPC_OnHearPetCmdTarg( int iCmd, CChar * pSrc, CObjBase * pObj, const CPointMap & pt, LPCTSTR pszArgs );
-	size_t  NPC_OnHearName( LPCTSTR pszText ) const;
-	void NPC_OnHear( LPCTSTR pCmd, CChar * pSrc, bool fAllPets = false );
+	bool NPC_OnHearPetCmd( lpctstr pszCmd, CChar * pSrc, bool fAllPets = false );
+	bool NPC_OnHearPetCmdTarg( int iCmd, CChar * pSrc, CObjBase * pObj, const CPointMap & pt, lpctstr pszArgs );
+	size_t  NPC_OnHearName( lpctstr pszText ) const;
+	void NPC_OnHear( lpctstr pCmd, CChar * pSrc, bool fAllPets = false );
 	bool NPC_OnItemGive( CChar * pCharSrc, CItem * pItem );
 	bool NPC_SetVendorPrice( CItem * pItem, int iPrice );
-	bool OnTriggerSpeech(bool bIsPet, LPCTSTR pszText, CChar * pSrc, TALKMODE_TYPE & mode, HUE_TYPE wHue = HUE_DEFAULT);
+	bool OnTriggerSpeech(bool bIsPet, lpctstr pszText, CChar * pSrc, TALKMODE_TYPE & mode, HUE_TYPE wHue = HUE_DEFAULT);
 
 	// Outside events that occur to us.
 	int  OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType, int iDmgPhysical = 0, int iDmgFire = 0, int iDmgCold = 0, int iDmgPoison = 0, int iDmgEnergy = 0 );

@@ -284,13 +284,13 @@ CResource::~CResource()
 
 
 // SKILL ITEMDEF, etc
-bool CResource::r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef )
+bool CResource::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CResource::r_GetRef");
-	TCHAR * pszSep = const_cast<TCHAR*>(strchr( pszKey, '(' ));	// acts like const_cast
+	tchar * pszSep = const_cast<tchar*>(strchr( pszKey, '(' ));	// acts like const_cast
 	if ( pszSep == NULL )
 	{
-		pszSep = const_cast<TCHAR*>(strchr( pszKey, '.' ));
+		pszSep = const_cast<tchar*>(strchr( pszKey, '.' ));
 		if ( pszSep == NULL )
 			return( false );
 	}
@@ -322,7 +322,7 @@ bool CResource::r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef )
 	if ( pszKey[0] == '\0' )
 		return( false );
 
-	pszSep = const_cast<TCHAR*>(strchr( pszKey, '.' ));
+	pszSep = const_cast<tchar*>(strchr( pszKey, '.' ));
 	if ( pszSep != NULL )
 	{
 		*pszSep = '\0';
@@ -837,7 +837,7 @@ bool CResource::r_LoadVal( CScript &s )
 	ADDTOCALLSTACK("CResource::r_LoadVal");
 	EXC_TRY("LoadVal");
 
-	int i = FindTableHeadSorted( s.GetKey(), reinterpret_cast<LPCTSTR const *>(sm_szLoadKeys), COUNTOF( sm_szLoadKeys )-1, sizeof(sm_szLoadKeys[0]));
+	int i = FindTableHeadSorted( s.GetKey(), reinterpret_cast<lpctstr const *>(sm_szLoadKeys), COUNTOF( sm_szLoadKeys )-1, sizeof(sm_szLoadKeys[0]));
 	if ( i < 0 )
 	{
 		if ( s.IsKeyHead( "REGEN", 5 ))			//	REGENx=<stat regeneration rate>
@@ -871,7 +871,7 @@ bool CResource::r_LoadVal( CScript &s )
 
 				if ( length >= 2/*at least .X*/ && str[0] == '.' && isdigit(str[1]) )
 				{
-					LPCTSTR pszStr = &(str[1]);
+					lpctstr pszStr = &(str[1]);
 					int nMapNumber = Exp_GetVal(pszStr);
 
 					if ( g_MapList.IsMapSupported(nMapNumber) )
@@ -1228,7 +1228,7 @@ bool CResource::r_LoadVal( CScript &s )
 }
 
 
-const CSkillDef * CResource::SkillLookup( LPCTSTR pszKey )
+const CSkillDef * CResource::SkillLookup( lpctstr pszKey )
 {
 	ADDTOCALLSTACK("CResource::SkillLookup");
 
@@ -1247,12 +1247,12 @@ const CSkillDef * CResource::SkillLookup( LPCTSTR pszKey )
 
 
 
-bool CResource::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CResource::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CResource::r_WriteVal");
 	EXC_TRY("WriteVal");
 	// Just do stats values for now.
-	int index = FindTableHeadSorted( pszKey, reinterpret_cast<LPCTSTR const *>(sm_szLoadKeys), COUNTOF(sm_szLoadKeys) - 1, sizeof(sm_szLoadKeys[0]) );
+	int index = FindTableHeadSorted( pszKey, reinterpret_cast<lpctstr const *>(sm_szLoadKeys), COUNTOF(sm_szLoadKeys) - 1, sizeof(sm_szLoadKeys[0]) );
 	if ( index < 0 )
 	{
 		if ( !strnicmp( pszKey, "REGEN", 5 ))
@@ -1281,16 +1281,16 @@ bool CResource::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc
 		if ( !strnicmp(pszKey, "MAP(", 4) )
 		{
 			pszKey += 4;
-			TCHAR * pszArgsNext;
-			Str_Parse( const_cast<TCHAR*>(pszKey), &(pszArgsNext), ")" );
+			tchar * pszArgsNext;
+			Str_Parse( const_cast<tchar*>(pszKey), &(pszArgsNext), ")" );
 			sVal.FormatVal(0);
 
 			CPointMap pt;
 			if ( IsDigit( pszKey[0] ) || pszKey[0] == '-' )
 			{
 				pt.m_map = 0; pt.m_z = 0;
-				TCHAR * ppVal[4];
-				size_t iArgs = Str_ParseCmds( const_cast<TCHAR*>(pszKey), ppVal, COUNTOF( ppVal ), "," );
+				tchar * ppVal[4];
+				size_t iArgs = Str_ParseCmds( const_cast<tchar*>(pszKey), ppVal, COUNTOF( ppVal ), "," );
 
 				switch ( iArgs )
 				{
@@ -1325,7 +1325,7 @@ bool CResource::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc
 
 		if ( !strnicmp( pszKey, "MAPLIST.",8) )
 		{
-			LPCTSTR pszCmd = pszKey + 8;
+			lpctstr pszCmd = pszKey + 8;
 			int iNumber = Exp_GetVal(pszCmd);
 			SKIP_SEPARATORS(pszCmd);
 			sVal.FormatVal(0);
@@ -1391,7 +1391,7 @@ bool CResource::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc
 
 		if (!strnicmp( pszKey, "FUNCTIONS.", 10))
 		{
-			LPCTSTR pszCmd = pszKey + 10;
+			lpctstr pszCmd = pszKey + 10;
 
 			if ( !strnicmp( pszCmd, "COUNT", 5 ))
 			{
@@ -1429,7 +1429,7 @@ bool CResource::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc
 		if ( ( !strnicmp( pszKey, "GUILDSTONES.", 12) ) || ( !strnicmp( pszKey, "TOWNSTONES.", 11) ) )
 		{
 			bool bGuild = !strnicmp( pszKey, "GUILDSTONES.",12);
-			LPCTSTR pszCmd = pszKey + 11 + ( (bGuild) ? 1 : 0 );
+			lpctstr pszCmd = pszKey + 11 + ( (bGuild) ? 1 : 0 );
 			CItemStone * pStone = NULL;
 			size_t x = 0;
 
@@ -1622,7 +1622,7 @@ bool CResource::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc
 						INT64 piVal[6];
 
 						// year, month, day, hour, minute, second
-						size_t iQty = Str_ParseCmds(const_cast<TCHAR*>(pszKey), piVal, COUNTOF(piVal));
+						size_t iQty = Str_ParseCmds(const_cast<tchar*>(pszKey), piVal, COUNTOF(piVal));
 						if ( iQty != 6 )
 							return false;
 
@@ -1636,10 +1636,10 @@ bool CResource::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc
 					{
 						pszKey += 6;
 						GETNONWHITESPACE( pszKey );
-						TCHAR *ppVal[2];
+						tchar *ppVal[2];
 
 						// timestamp, formatstr
-						size_t iQty = Str_ParseCmds(const_cast<TCHAR*>(pszKey), ppVal, COUNTOF(ppVal));
+						size_t iQty = Str_ParseCmds(const_cast<tchar*>(pszKey), ppVal, COUNTOF(ppVal));
 						if ( iQty < 1 )
 							return false;
 
@@ -1751,13 +1751,13 @@ bool CResource::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc
 
 //*************************************************************
 
-bool CResource::IsConsoleCmd( TCHAR ch ) const
+bool CResource::IsConsoleCmd( tchar ch ) const
 {
 	ADDTOCALLSTACK("CResource::IsConsoleCmd");
 	return (ch == '.' || ch == '/' );
 }
 
-SKILL_TYPE CResource::FindSkillKey( LPCTSTR pszKey ) const
+SKILL_TYPE CResource::FindSkillKey( lpctstr pszKey ) const
 {
 	ADDTOCALLSTACK("CResource::FindSkillKey");
 	// Find the skill name in the alpha sorted list.
@@ -1780,7 +1780,7 @@ SKILL_TYPE CResource::FindSkillKey( LPCTSTR pszKey ) const
 	return static_cast<SKILL_TYPE>(pSkillDef->GetResourceID().GetResIndex());
 }
 
-STAT_TYPE CResource::FindStatKey( LPCTSTR pszKey ) // static
+STAT_TYPE CResource::FindStatKey( lpctstr pszKey ) // static
 {
 	ADDTOCALLSTACK("CResource::FindStatKey");
 	return (STAT_TYPE) FindTable( pszKey, g_Stat_Name, COUNTOF( g_Stat_Name ));
@@ -1799,7 +1799,7 @@ int CResource::GetSpellEffect( SPELL_TYPE spell, int iSkillVal ) const
 	return( pSpellDef->m_Effect.GetLinear( iSkillVal ));
 }
 
-LPCTSTR CResource::GetNotoTitle( int iLevel, bool bFemale ) const
+lpctstr CResource::GetNotoTitle( int iLevel, bool bFemale ) const
 {
 	ADDTOCALLSTACK("CResource::GetNotoTitle");
 	// Retrieve the title used for the given noto level and gender
@@ -1811,7 +1811,7 @@ LPCTSTR CResource::GetNotoTitle( int iLevel, bool bFemale ) const
 	else
 	{
 		// check if a female title is present
-		LPCTSTR pFemaleTitle = strchr(m_NotoTitles[iLevel]->GetPtr(), ',');
+		lpctstr pFemaleTitle = strchr(m_NotoTitles[iLevel]->GetPtr(), ',');
 		if (pFemaleTitle == NULL)
 			return m_NotoTitles[iLevel]->GetPtr();
 
@@ -1820,13 +1820,13 @@ LPCTSTR CResource::GetNotoTitle( int iLevel, bool bFemale ) const
 			return pFemaleTitle;
 		
 		// copy string so that it can be null-terminated without modifying m_NotoTitles
-		TCHAR* pTitle = Str_GetTemp();
+		tchar* pTitle = Str_GetTemp();
 		strcpylen(pTitle, m_NotoTitles[iLevel]->GetPtr(), m_NotoTitles[iLevel]->GetLength() - strlen(pFemaleTitle));
 		return pTitle;
 	}
 }
 
-bool CResource::IsValidEmailAddressFormat( LPCTSTR pszEmail ) // static
+bool CResource::IsValidEmailAddressFormat( lpctstr pszEmail ) // static
 {
 	ADDTOCALLSTACK("CResource::IsValidEmailAddressFormat");
 	// what are the invalid email name chars ?
@@ -1836,14 +1836,14 @@ bool CResource::IsValidEmailAddressFormat( LPCTSTR pszEmail ) // static
 	if ( len1 <= 0 || len1 > 128 )
 		return( false );
 
-	TCHAR szEmailStrip[256];
+	tchar szEmailStrip[256];
 	size_t len2 = Str_GetBare( szEmailStrip, pszEmail,
 		sizeof(szEmailStrip),
 		" !\"#%&()*,/:;<=>?[\\]^{|}'`+" );
 	if ( len2 != len1 )
 		return( false );
 
-	TCHAR * pszAt = const_cast<TCHAR*>(strchr( pszEmail, '@' ));
+	tchar * pszAt = const_cast<tchar*>(strchr( pszEmail, '@' ));
 	if ( ! pszAt )
 		return( false );
 	if ( pszAt == pszEmail )
@@ -1862,7 +1862,7 @@ CServerRef CResource::Server_GetDef( size_t index )
 	return( CServerRef( STATIC_CAST <CServerDef*>( m_Servers[index] )));
 }
 
-CWebPageDef * CResource::FindWebPage( LPCTSTR pszPath ) const
+CWebPageDef * CResource::FindWebPage( lpctstr pszPath ) const
 {
 	ADDTOCALLSTACK("CResource::FindWebPage");
 	if ( pszPath == NULL )
@@ -1873,7 +1873,7 @@ CWebPageDef * CResource::FindWebPage( LPCTSTR pszPath ) const
 		return( STATIC_CAST <CWebPageDef*>( m_WebPages[0] ));
 	}
 
-	LPCTSTR pszTitle = CGFile::GetFilesTitle(pszPath);
+	lpctstr pszTitle = CGFile::GetFilesTitle(pszPath);
 
 	if ( pszTitle == NULL || pszTitle[0] == '\0' )
 	{
@@ -1897,7 +1897,7 @@ CWebPageDef * CResource::FindWebPage( LPCTSTR pszPath ) const
 	return( NULL );
 }
 
-bool CResource::IsObscene( LPCTSTR pszText ) const
+bool CResource::IsObscene( lpctstr pszText ) const
 {
 	ADDTOCALLSTACK("CResource::IsObscene");
 	// does this text contain obscene content?
@@ -1905,7 +1905,7 @@ bool CResource::IsObscene( LPCTSTR pszText ) const
 
 	for ( size_t i = 0; i < m_Obscene.GetCount(); i++ )
 	{
-		TCHAR* match = new TCHAR[ strlen(m_Obscene[i])+3 ];
+		tchar* match = new tchar[ strlen(m_Obscene[i])+3 ];
 		sprintf(match,"%s%s%s","*",m_Obscene[i],"*");
 		MATCH_TYPE ematch = Str_Match( match , pszText );
 		delete[] match;
@@ -2005,7 +2005,7 @@ const CGrayMulti * CResource::GetMultiItemDefs( ITEMID_TYPE itemid )
 	return pMulti;
 }
 
-PLEVEL_TYPE CResource::GetPrivCommandLevel( LPCTSTR pszCmd ) const
+PLEVEL_TYPE CResource::GetPrivCommandLevel( lpctstr pszCmd ) const
 {
 	ADDTOCALLSTACK("CResource::GetPrivCommandLevel");
 	// What is this commands plevel ?
@@ -2016,7 +2016,7 @@ PLEVEL_TYPE CResource::GetPrivCommandLevel( LPCTSTR pszCmd ) const
 	while ( ilevel > 0 )
 	{
 		--ilevel;
-		LPCTSTR const * pszTable = m_PrivCommands[ilevel].GetBasePtr();
+		lpctstr const * pszTable = m_PrivCommands[ilevel].GetBasePtr();
 		size_t iCount = m_PrivCommands[ilevel].GetCount();
 		if ( FindTableHeadSorted( pszCmd, pszTable, iCount ) >= 0 )
 			return( static_cast<PLEVEL_TYPE>(ilevel) );
@@ -2027,7 +2027,7 @@ PLEVEL_TYPE CResource::GetPrivCommandLevel( LPCTSTR pszCmd ) const
 	return ( static_cast<PLEVEL_TYPE>(m_iDefaultCommandLevel) ); // default level.
 }
 
-bool CResource::CanUsePrivVerb( const CScriptObj * pObjTarg, LPCTSTR pszCmd, CTextConsole * pSrc ) const
+bool CResource::CanUsePrivVerb( const CScriptObj * pObjTarg, lpctstr pszCmd, CTextConsole * pSrc ) const
 {
 	ADDTOCALLSTACK("CResource::CanUsePrivVerb");
 	// can i use this verb on this object ?
@@ -2080,13 +2080,13 @@ bool CResource::CanUsePrivVerb( const CScriptObj * pObjTarg, LPCTSTR pszCmd, CTe
 
 	// Is this command avail for your priv level (or lower) ?
 	PLEVEL_TYPE ilevel;
-	TCHAR *myCmd = Str_GetTemp();
+	tchar *myCmd = Str_GetTemp();
 
 	size_t pOs = strcspn(pszCmd," "); //position of space :)
 	strncpy ( myCmd, pszCmd, pOs );
 	myCmd[pOs] = '\0';
 
-	TCHAR * pOd; //position of dot :)
+	tchar * pOd; //position of dot :)
 	while ( (pOd = strchr(myCmd, '.')) != NULL )
 	{
 		ilevel = GetPrivCommandLevel( myCmd );
@@ -2105,7 +2105,7 @@ bool CResource::CanUsePrivVerb( const CScriptObj * pObjTarg, LPCTSTR pszCmd, CTe
 
 //*************************************************************
 
-CPointMap CResource::GetRegionPoint( LPCTSTR pCmd ) const // Decode a teleport location number into X/Y/Z
+CPointMap CResource::GetRegionPoint( lpctstr pCmd ) const // Decode a teleport location number into X/Y/Z
 {
 	ADDTOCALLSTACK("CResource::GetRegionPoint");
 	// get a point from a name. (probably the name of a region)
@@ -2128,7 +2128,7 @@ CPointMap CResource::GetRegionPoint( LPCTSTR pCmd ) const // Decode a teleport l
 	CPointMap pt;	// invalid point
 	if ( IsDigit( pCmd[0] ) || pCmd[0] == '-' )
 	{
-		TCHAR *pszTemp = Str_GetTemp();
+		tchar *pszTemp = Str_GetTemp();
 		strcpy( pszTemp, pCmd );
 		size_t iCount = pt.Read( pszTemp );
 		if ( iCount >= 2 )
@@ -2149,7 +2149,7 @@ CPointMap CResource::GetRegionPoint( LPCTSTR pCmd ) const // Decode a teleport l
 	return( pt );
 }
 
-CRegionBase * CResource::GetRegion( LPCTSTR pKey ) const
+CRegionBase * CResource::GetRegion( lpctstr pKey ) const
 {
 	ADDTOCALLSTACK("CResource::GetRegion");
 	// get a region from a name or areadef.
@@ -2377,7 +2377,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 	CScriptFileContext FileContext( pScript );	// set this as the context.
 	CVarDefContNum * pVarNum = NULL;
 	RESOURCE_ID rid;
-	LPCTSTR		pszSection	= pScript->GetSection();
+	lpctstr		pszSection	= pScript->GetSection();
 
 	RES_TYPE restype;
 	if ( !strnicmp( pszSection, "DEFMESSAGE", 10 ) )
@@ -2426,7 +2426,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 
 	if (( restype == RES_WORLDSCRIPT ) || ( restype == RES_WS ))
 	{
-		LPCTSTR	pszDef = pScript->GetArgStr();
+		lpctstr	pszDef = pScript->GetArgStr();
 		CVarDefCont * pVarBase = g_Exp.m_VarDefs.GetKey( pszDef );
 		pVarNum = NULL;
 		if ( pVarBase )
@@ -2457,7 +2457,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 
 	if ( restype < 0 )
 	{
-		g_Log.Event( LOGL_WARN|LOGM_INIT, "Unknown section '%s' in '%s'\n", static_cast<LPCTSTR>(pScript->GetKey()), static_cast<LPCTSTR>(pScript->GetFileTitle()));
+		g_Log.Event( LOGL_WARN|LOGM_INIT, "Unknown section '%s' in '%s'\n", static_cast<lpctstr>(pScript->GetKey()), static_cast<lpctstr>(pScript->GetFileTitle()));
 		return false;
 	}
 	else
@@ -2470,7 +2470,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 
 	if ( !rid.IsValidUID() )
 	{
-		DEBUG_ERR(( "Invalid %s block index '%s'\n", pszSection, static_cast<LPCTSTR>(pScript->GetArgStr())));
+		DEBUG_ERR(( "Invalid %s block index '%s'\n", pszSection, static_cast<lpctstr>(pScript->GetArgStr())));
 		return( false );
 	}
 
@@ -2482,7 +2482,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 	CResourceDef * pNewDef = NULL;
 	CResourceDef * pPrvDef = NULL;
 
-	if ( m_ResourceList.ContainsKey( const_cast<TCHAR *>(pszSection) ))
+	if ( m_ResourceList.ContainsKey( const_cast<tchar *>(pszSection) ))
 	{
 
 		CListDefCont* pListBase = g_Exp.m_ListInternals.GetKey(pszSection);
@@ -2521,7 +2521,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 
 	case RES_BLOCKIP:
 		{
-			TCHAR* ipBuffer = Str_GetTemp();
+			tchar* ipBuffer = Str_GetTemp();
 			while ( pScript->ReadKeyParse())
 			{
 				strcpy(ipBuffer, pScript->GetKey());
@@ -2543,7 +2543,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		// just get a block of defs.
 		while ( pScript->ReadKeyParse())
 		{
-			LPCTSTR	pszKey = pScript->GetKey();
+			lpctstr	pszKey = pScript->GetKey();
 			if ( fNewStyleDef )
 			{
 				//	search for this.
@@ -2570,7 +2570,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		{
 			while ( pScript->ReadKey())
 			{
-				LPCTSTR pName = pScript->GetKeyBuffer();	
+				lpctstr pName = pScript->GetKeyBuffer();	
 				m_ResourceList.AddSortString( pName );
 			}
 		}
@@ -2580,7 +2580,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 			size_t i = 0;
 			while ( pScript->ReadKey())
 			{
-				LPCTSTR pName = pScript->GetKeyBuffer();
+				lpctstr pName = pScript->GetKeyBuffer();
 				if ( *pName == '<' )
 					pName = "";
 				
@@ -2594,7 +2594,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 			size_t i = 0;
 			while ( pScript->ReadKey())
 			{
-				LPCTSTR pName = pScript->GetKeyBuffer();
+				lpctstr pName = pScript->GetKeyBuffer();
 				if ( *pName == '<' )
 					pName = "";
 				
@@ -2638,7 +2638,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 			i = 0;
 			while ( pScript->ReadKey())
 			{
-				LPCTSTR pName = pScript->GetKeyBuffer();
+				lpctstr pName = pScript->GetKeyBuffer();
 				if ( *pName == '<' )
 					pName = "";
 
@@ -2663,7 +2663,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 				return false;
 			while ( pScript->ReadKey() )
 			{
-				LPCTSTR	key = pScript->GetKey();
+				lpctstr	key = pScript->GetKey();
 				m_PrivCommands[index].AddSortString(key);
 			}
 		}
@@ -3114,7 +3114,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		while ( pScript->ReadKeyParse() )
 		{
 			bool fQuoted = false;
-			LPCTSTR pszKey = pScript->GetKey();
+			lpctstr pszKey = pScript->GetKey();
 			if ( strstr(pszKey, "VAR.") )  // This is for backward compatibility from Rcs
 				pszKey = pszKey + 4;
 
@@ -3185,7 +3185,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 	case RES_WORLDCHAR:	// saved in world file.
 		if ( ! rid.IsValidUID())
 		{
-			g_Log.Event(LOGL_ERROR|LOGM_INIT, "Undefined char type '%s'\n", static_cast<LPCTSTR>(pScript->GetArgStr()));
+			g_Log.Event(LOGL_ERROR|LOGM_INIT, "Undefined char type '%s'\n", static_cast<lpctstr>(pScript->GetArgStr()));
 			return( false );
 		}
 		return( CChar::CreateBasic(static_cast<CREID_TYPE>(rid.GetResIndex()))->r_Load(*pScript));
@@ -3193,7 +3193,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 	case RES_WORLDITEM:	// saved in world file.
 		if ( ! rid.IsValidUID())
 		{
-			g_Log.Event(LOGL_ERROR|LOGM_INIT, "Undefined item type '%s'\n", static_cast<LPCTSTR>(pScript->GetArgStr()));
+			g_Log.Event(LOGL_ERROR|LOGM_INIT, "Undefined item type '%s'\n", static_cast<lpctstr>(pScript->GetArgStr()));
 			return( false );
 		}
 		return( CItem::CreateBase(static_cast<ITEMID_TYPE>(rid.GetResIndex()))->r_Load(*pScript));
@@ -3234,7 +3234,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 
 //*************************************************************
 
-RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, LPCTSTR pszName, CVarDefContNum ** ppVarNum, bool fNewStyleDef )
+RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVarDefContNum ** ppVarNum, bool fNewStyleDef )
 {
 	ADDTOCALLSTACK("CResource::ResourceGetNewID");
 	// We are reading in a script block.
@@ -3291,10 +3291,10 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, LPCTSTR pszName, CVar
 		{
 			if ( pszName[0] == '\0' )
 				return( ridinvalid );
-			TCHAR * pArg1 = Str_GetTemp();
+			tchar * pArg1 = Str_GetTemp();
 			strcpy( pArg1, pszName );
 			pszName = pArg1;
-			TCHAR * pArg2;
+			tchar * pArg2;
 			Str_Parse( pArg1, &pArg2 );
 			if ( ! strcmpi( pArg2, "TEXT" ))
 				iPage = RES_DIALOG_TEXT;
@@ -3312,10 +3312,10 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, LPCTSTR pszName, CVar
 		{
 			if ( pszName[0] == '\0' )
 				return( ridinvalid );
-			TCHAR * pArg1 = Str_GetTemp();
+			tchar * pArg1 = Str_GetTemp();
 			strcpy( pArg1, pszName );
 			pszName = pArg1;
-			TCHAR * pArg2;
+			tchar * pArg2;
 			Str_Parse( pArg1, &pArg2 );
 			if ( ! strcmpi( pArg2, "HUMAN" ))
 				iPage = RACETYPE_HUMAN;
@@ -3436,7 +3436,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, LPCTSTR pszName, CVar
 							return( ResourceGetNewID(restype, pVarStr->GetValStr(), ppVarNum, fNewStyleDef) );
 					}
 					default:
-						DEBUG_ERR(( "Re-Using name '%s' to define block\n", static_cast<LPCTSTR>(pszName) ));
+						DEBUG_ERR(( "Re-Using name '%s' to define block\n", static_cast<lpctstr>(pszName) ));
 						return( ridinvalid );
 				}
 			}
@@ -3454,7 +3454,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, LPCTSTR pszName, CVar
 						// These are not truly defining a new DEFNAME
 						break;
 					default:
-						DEBUG_ERR(( "Redefined name '%s' from %s to %s\n", static_cast<LPCTSTR>(pszName), static_cast<LPCTSTR>(GetResourceBlockName(rid.GetResType())), static_cast<LPCTSTR>(GetResourceBlockName(restype)) ));
+						DEBUG_ERR(( "Redefined name '%s' from %s to %s\n", static_cast<lpctstr>(pszName), static_cast<lpctstr>(GetResourceBlockName(rid.GetResType())), static_cast<lpctstr>(GetResourceBlockName(restype)) ));
 						return( ridinvalid );
 				}
 			}
@@ -3470,11 +3470,11 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, LPCTSTR pszName, CVar
 				{
 					if ( g_Cfg.m_wDebugFlags & DEBUGF_SCRIPTS )
 					{
-						g_pLog->EventWarn("Redef resource '%s'\n", static_cast<LPCTSTR>(pszName));
+						g_pLog->EventWarn("Redef resource '%s'\n", static_cast<lpctstr>(pszName));
 					}
 					else
 					{
-						DEBUG_WARN(( "Redef resource '%s'\n", static_cast<LPCTSTR>(pszName) ));
+						DEBUG_WARN(( "Redef resource '%s'\n", static_cast<lpctstr>(pszName) ));
 					}
 				}
 			}
@@ -3719,7 +3719,7 @@ void CResource::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
 	if ( g_Serv.IsLoading() ) return;
 	if ( bOF )
 	{
-		TCHAR zOptionFlags[512];
+		tchar zOptionFlags[512];
 		zOptionFlags[0] = '\0';
 
 		if ( IsSetOF(OF_NoDClickTarget) ) catresname(zOptionFlags, "NoDClickTarget");
@@ -3748,7 +3748,7 @@ void CResource::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
 	}
 	if ( bEF )
 	{
-		TCHAR zExperimentalFlags[512];
+		tchar zExperimentalFlags[512];
 		zExperimentalFlags[0] = '\0';
 
 		if ( IsSetEF(EF_NoDiagonalCheckLOS) ) catresname(zExperimentalFlags, "NoDiagonalCheckLOS");
@@ -3891,7 +3891,7 @@ bool CResource::Load( bool fResync )
 	if ( i != VERFILE_QTY )
 	{
 		g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " GRAY_FILE ".INI file is corrupt or missing\n" );
-		g_Log.Event( LOGL_FATAL|LOGM_INIT, "MUL File '%s' not found...\n", static_cast<LPCTSTR>(g_Install.GetBaseFileName(i)));
+		g_Log.Event( LOGL_FATAL|LOGM_INIT, "MUL File '%s' not found...\n", static_cast<lpctstr>(g_Install.GetBaseFileName(i)));
 		return( false );
 	}
 
@@ -3963,7 +3963,7 @@ bool CResource::Load( bool fResync )
 	// Make sure we have the basics.
 	if ( g_Serv.GetName()[0] == '\0' )	// make sure we have a set name
 	{
-		TCHAR szName[ MAX_SERVER_NAME_SIZE ];
+		tchar szName[ MAX_SERVER_NAME_SIZE ];
 		int iRet = gethostname( szName, sizeof( szName ));
 		g_Serv.SetName(( ! iRet && szName[0] ) ? szName : GRAY_TITLE );
 	}
@@ -4056,7 +4056,7 @@ bool CResource::Load( bool fResync )
 	return true;
 }
 
-LPCTSTR CResource::GetDefaultMsg(int lKeyNum)
+lpctstr CResource::GetDefaultMsg(int lKeyNum)
 {
 	ADDTOCALLSTACK("CResource::GetDefaultMsg");
 	if (( lKeyNum < 0 ) || ( lKeyNum >= DEFMSG_QTY ))
@@ -4067,7 +4067,7 @@ LPCTSTR CResource::GetDefaultMsg(int lKeyNum)
 	return g_Exp.sm_szMessages[lKeyNum];
 }
 
-LPCTSTR CResource::GetDefaultMsg(LPCTSTR pszKey)
+lpctstr CResource::GetDefaultMsg(lpctstr pszKey)
 {
 	ADDTOCALLSTACK("CResource::GetDefaultMsg");
 	for (int i = 0; i < DEFMSG_QTY; ++i )
@@ -4080,7 +4080,7 @@ LPCTSTR CResource::GetDefaultMsg(LPCTSTR pszKey)
 	return "";
 }
 
-bool CResource::GenerateDefname(TCHAR *pObjectName, size_t iInputLength, LPCTSTR pPrefix, TCHAR *pOutput, bool bCheckConflict, CVarDefMap* vDefnames)
+bool CResource::GenerateDefname(tchar *pObjectName, size_t iInputLength, lpctstr pPrefix, tchar *pOutput, bool bCheckConflict, CVarDefMap* vDefnames)
 {
 	ADDTOCALLSTACK("CResource::GenerateDefname");
 	if ( !pOutput )
@@ -4115,7 +4115,7 @@ bool CResource::GenerateDefname(TCHAR *pObjectName, size_t iInputLength, LPCTSTR
 		else if ( _ISCSYMF(pObjectName[i]) )
 		{
 			if (pObjectName[i] != '_' || (iOut > 0 && pOutput[iOut - 1] != '_')) // avoid double '_'
-				pOutput[iOut++] = static_cast<TCHAR>(tolower(pObjectName[i]));
+				pOutput[iOut++] = static_cast<tchar>(tolower(pObjectName[i]));
 		}
 	}
 
@@ -4163,7 +4163,7 @@ bool CResource::GenerateDefname(TCHAR *pObjectName, size_t iInputLength, LPCTSTR
 	return true;
 }
 
-bool CResource::DumpUnscriptedItems( CTextConsole * pSrc, LPCTSTR pszFilename )
+bool CResource::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilename )
 {
 	ADDTOCALLSTACK("CResource::DumpUnscriptedItems");
 	if ( pSrc == NULL )
@@ -4179,9 +4179,9 @@ bool CResource::DumpUnscriptedItems( CTextConsole * pSrc, LPCTSTR pszFilename )
 	if ( ! s.Open( pszFilename, OF_WRITE|OF_TEXT|OF_DEFAULTMODE ))
 		return false;
 
-	TCHAR sItemName[21];
+	tchar sItemName[21];
 	TemporaryString sDefnameBuffer;
-	TCHAR * pDefnameBuffer = static_cast<TCHAR *>(sDefnameBuffer);
+	tchar * pDefnameBuffer = static_cast<tchar *>(sDefnameBuffer);
 	CVarDefMap defnames;
 
 	s.Printf("// Unscripted items, generated by " GRAY_TITLE " at %s\n", CGTime::GetCurrentTime().Format(NULL));
@@ -4247,8 +4247,8 @@ bool CItemTypeDef::r_LoadVal( CScript & s )
 {
 	ADDTOCALLSTACK("CItemTypeDef::r_LoadVal");
 	EXC_TRY("LoadVal");
-	LPCTSTR		pszKey	= s.GetKey();
-	LPCTSTR		pszArgs	= s.GetArgStr();
+	lpctstr		pszKey	= s.GetKey();
+	lpctstr		pszArgs	= s.GetArgStr();
 
 	if ( !strnicmp( pszKey, "TERRAIN", 7 ) )
 	{

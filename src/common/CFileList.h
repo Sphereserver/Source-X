@@ -24,7 +24,7 @@ public:
 	* @param dwSize size stored here.
 	* @return false if can not read info from the file, true if info is setted.
 	*/
-	static bool ReadFileInfo( LPCTSTR pszFilePath, time_t & dwDateChange, dword & dwSize );
+	static bool ReadFileInfo( lpctstr pszFilePath, time_t & dwDateChange, dword & dwSize );
 	/**
 	* @brief Read a dir content and store inside the instance.
 	*
@@ -33,7 +33,7 @@ public:
 	* @param bShowError Show debug info if can not open the dir.
 	* @return -1 on error, otherwise the number of elements listed.
 	*/
-	int ReadDir( LPCTSTR pszFilePath, bool bShowError = true );
+	int ReadDir( lpctstr pszFilePath, bool bShowError = true );
 
 public:
 	CFileList() { };

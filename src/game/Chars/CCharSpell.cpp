@@ -110,7 +110,7 @@ bool CChar::Spell_Teleport( CPointMap ptNew, bool bTakePets, bool bCheckAntiMagi
 		if ( !pJail || !pJail->IsInside2d(ptNew) )
 		{
 			// Must be /PARDONed to leave jail area
-			static LPCTSTR const sm_szPunishMsg[] =
+			static lpctstr const sm_szPunishMsg[] =
 			{
 				g_Cfg.GetDefaultMsg(DEFMSG_SPELL_TELE_JAILED_1),
 				g_Cfg.GetDefaultMsg(DEFMSG_SPELL_TELE_JAILED_2)
@@ -123,7 +123,7 @@ bool CChar::Spell_Teleport( CPointMap ptNew, bool bTakePets, bool bCheckAntiMagi
 
 			if ( iCell )
 			{
-				TCHAR szJailName[128];
+				tchar szJailName[128];
 				sprintf(szJailName, "jail%d", iCell);
 				pJail = g_Cfg.GetRegion(szJailName);
 			}
@@ -863,8 +863,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 	}
 
 	// Buffs related variables
-	TCHAR NumBuff[7][8];
-	LPCTSTR pNumBuff[7] = { NumBuff[0], NumBuff[1], NumBuff[2], NumBuff[3], NumBuff[4], NumBuff[5], NumBuff[6] };
+	tchar NumBuff[7][8];
+	lpctstr pNumBuff[7] = { NumBuff[0], NumBuff[1], NumBuff[2], NumBuff[3], NumBuff[4], NumBuff[5], NumBuff[6] };
 
 	switch (pSpellDef->m_idLayer)
 	{
@@ -1610,7 +1610,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 						break;
 				}
 
-				static LPCTSTR const sm_Poison_Message[] =
+				static lpctstr const sm_Poison_Message[] =
 				{
 					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_OSIPOISON_LESSER),
 					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_OSIPOISON_STANDARD),
@@ -1619,7 +1619,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_OSIPOISON_LETHAL)
 
 				};
-				static LPCTSTR const sm_Poison_Message_Other[] =
+				static lpctstr const sm_Poison_Message_Other[] =
 				{
 					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_OSIPOISON_LESSER1),
 					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_OSIPOISON_STANDARD1),
@@ -1648,7 +1648,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 				iDmg = IMULDIV(Stat_GetMax(STAT_STR), iLevel * 2, 100);
 				pItem->SetTimeout((5 + Calc_GetRandLLVal(4)) * TICK_PER_SEC);
 
-				static LPCTSTR const sm_Poison_Message[] =
+				static lpctstr const sm_Poison_Message[] =
 				{
 					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_POISON_1),
 					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_POISON_2),
@@ -1656,7 +1656,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 					g_Cfg.GetDefaultMsg(DEFMSG_SPELL_POISON_4)
 				};
 
-				TCHAR * pszMsg = Str_GetTemp();
+				tchar * pszMsg = Str_GetTemp();
 				sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_SPELL_LOOKS), sm_Poison_Message[iLevel]);
 				Emote(pszMsg, GetClient());
 				SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_SPELL_YOUFEEL), sm_Poison_Message[iLevel]);
@@ -2979,12 +2979,12 @@ int CChar::Spell_CastStart()
 		else
 		{
 			size_t len = 0;
-			TCHAR * pszTemp = Str_GetTemp();
+			tchar * pszTemp = Str_GetTemp();
 
 			size_t i;
 			for ( i = 0; ; i++ )
 			{
-				TCHAR ch = pSpellDef->m_sRunes[i];
+				tchar ch = pSpellDef->m_sRunes[i];
 				if ( !ch )
 					break;
 				len += strcpylen(pszTemp+len, g_Cfg.GetRune(ch));

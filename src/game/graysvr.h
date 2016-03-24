@@ -22,8 +22,8 @@
 
 // Text mashers.
 
-extern LPCTSTR GetTimeMinDesc( int dwMinutes );
-extern size_t FindStrWord( LPCTSTR pTextSearch, LPCTSTR pszKeyWord );
+extern lpctstr GetTimeMinDesc( int dwMinutes );
+extern size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord );
 
 #include "CLog.h"
 
@@ -53,9 +53,9 @@ protected:
 
 //////////////////////////////////////////////////////////////
 
-extern LPCTSTR g_szServerDescription;
+extern lpctstr g_szServerDescription;
 extern int g_szServerBuild;
-extern LPCTSTR const g_Stat_Name[STAT_QTY];
+extern lpctstr const g_Stat_Name[STAT_QTY];
 extern CGStringList g_AutoComplete;
 
 extern int Sphere_InitServer( int argc, char *argv[] );
@@ -73,7 +73,7 @@ struct TScriptProfiler
 	llong	total;
 	struct TScriptProfilerFunction
 	{
-		TCHAR	name[128];	// name of the function
+		tchar	name[128];	// name of the function
 		dword	called;		// how many times called
 		llong	total;		// total executions time
 		llong	min;		// minimal executions time
@@ -83,7 +83,7 @@ struct TScriptProfiler
 	}		*FunctionsHead, *FunctionsTail;
 	struct TScriptProfilerTrigger
 	{
-		TCHAR	name[128];	// name of the trigger
+		tchar	name[128];	// name of the trigger
 		dword	called;		// how many times called
 		llong	total;		// total executions time
 		llong	min;		// minimal executions time

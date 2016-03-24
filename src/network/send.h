@@ -55,7 +55,7 @@ class PacketTelnet : public PacketSend
 {
 public:
 
-	PacketTelnet(const CClient* target, LPCTSTR message, bool bNullTerminated = false);
+	PacketTelnet(const CClient* target, lpctstr message, bool bNullTerminated = false);
 };
 
 /***************************************************************************
@@ -180,7 +180,7 @@ public:
 class PacketMessageASCII : public PacketSend
 {
 public:
-	PacketMessageASCII(const CClient* target, LPCTSTR pszText, const CObjBaseTemplate* source, HUE_TYPE hue, TALKMODE_TYPE mode, FONT_TYPE font);
+	PacketMessageASCII(const CClient* target, lpctstr pszText, const CObjBaseTemplate* source, HUE_TYPE hue, TALKMODE_TYPE mode, FONT_TYPE font);
 };
 
 /***************************************************************************
@@ -920,7 +920,7 @@ public:
 class PacketSignGump : public PacketSend
 {
 public:
-	PacketSignGump(const CClient* target, const CObjBase* object, GUMP_TYPE gump, LPCTSTR unknown, LPCTSTR text);
+	PacketSignGump(const CClient* target, const CObjBase* object, GUMP_TYPE gump, lpctstr unknown, lpctstr text);
 };
 
 /***************************************************************************
@@ -1069,7 +1069,7 @@ public:
 class PacketWebPage : public PacketSend
 {
 public:
-	PacketWebPage(const CClient* target, LPCTSTR url);
+	PacketWebPage(const CClient* target, lpctstr url);
 };
 
 /***************************************************************************
@@ -1082,7 +1082,7 @@ public:
 class PacketOpenScroll : public PacketSend
 {
 public:
-	PacketOpenScroll(const CClient* target, CResourceLock &s, SCROLL_TYPE type, dword context, LPCTSTR header);
+	PacketOpenScroll(const CClient* target, CResourceLock &s, SCROLL_TYPE type, dword context, lpctstr header);
 };
 
 /***************************************************************************
@@ -1135,7 +1135,7 @@ public:
 class PacketGumpValueInput : public PacketSend
 {
 public:
-	PacketGumpValueInput(const CClient* target, bool cancel, INPVAL_STYLE style, dword maxLength, LPCTSTR text, LPCTSTR caption, CObjBase* object);
+	PacketGumpValueInput(const CClient* target, bool cancel, INPVAL_STYLE style, dword maxLength, lpctstr text, lpctstr caption, CObjBase* object);
 };
 
 /***************************************************************************
@@ -1193,7 +1193,7 @@ protected:
 class PacketChatMessage : public PacketSend
 {
 public:
-	PacketChatMessage(const CClient* target, CHATMSG_TYPE type, LPCTSTR param1, LPCTSTR param2, CLanguageID language);
+	PacketChatMessage(const CClient* target, CHATMSG_TYPE type, lpctstr param1, lpctstr param2, CLanguageID language);
 };
 
 /***************************************************************************
@@ -1206,7 +1206,7 @@ public:
 class PacketTooltip : public PacketSend
 {
 public:
-	PacketTooltip(const CClient* target, const CObjBase* object, LPCTSTR text);
+	PacketTooltip(const CClient* target, const CObjBase* object, lpctstr text);
 };
 
 /***************************************************************************
@@ -1603,7 +1603,7 @@ public:
 class PacketMessageLocalised : public PacketSend
 {
 public:
-	PacketMessageLocalised(const CClient* target, int cliloc, const CObjBaseTemplate* source, HUE_TYPE hue, TALKMODE_TYPE mode, FONT_TYPE font, LPCTSTR args);
+	PacketMessageLocalised(const CClient* target, int cliloc, const CObjBaseTemplate* source, HUE_TYPE hue, TALKMODE_TYPE mode, FONT_TYPE font, lpctstr args);
 };
 
 /***************************************************************************
@@ -1629,7 +1629,7 @@ public:
 class PacketMessageLocalisedEx : public PacketSend
 {
 public:
-	PacketMessageLocalisedEx(const CClient* target, int cliloc, const CObjBaseTemplate* source, HUE_TYPE hue, TALKMODE_TYPE mode, FONT_TYPE font, AFFIX_TYPE affixType, LPCTSTR affix, LPCTSTR args);
+	PacketMessageLocalisedEx(const CClient* target, int cliloc, const CObjBaseTemplate* source, HUE_TYPE hue, TALKMODE_TYPE mode, FONT_TYPE font, AFFIX_TYPE affixType, lpctstr affix, lpctstr args);
 };
 
 /***************************************************************************
@@ -1780,7 +1780,7 @@ public:
 class PacketBuff : public PacketSend
 {
 public:
-	PacketBuff(const CClient* target, const BUFF_ICONS iconId, const dword clilocOne, const dword clilocTwo, const word time, LPCTSTR* args, size_t argCount); // add buff
+	PacketBuff(const CClient* target, const BUFF_ICONS iconId, const dword clilocOne, const dword clilocTwo, const word time, lpctstr* args, size_t argCount); // add buff
 	PacketBuff(const CClient* target, const BUFF_ICONS iconId); // remove buff
 
 	virtual bool canSendTo(const NetState* state) const { return CanSendTo(state); }

@@ -11,7 +11,7 @@ CItemMessage::~CItemMessage() {
     UnLoadSystemPages();
 }
 
-LPCTSTR const CItemMessage::sm_szLoadKeys[CIC_QTY+1] = {
+lpctstr const CItemMessage::sm_szLoadKeys[CIC_QTY+1] = {
     "AUTHOR",
     "BODY",
     "PAGES",	// (W)
@@ -30,7 +30,7 @@ void CItemMessage::r_Write(CScript & s)
     for ( size_t i = 0; i < GetPageCount(); ++i )
     {
         sprintf(pszTemp, "BODY.%" FMTSIZE_T, i);
-        LPCTSTR pszText = GetPageText(i);
+        lpctstr pszText = GetPageText(i);
         s.WriteKey(pszTemp, pszText != NULL ? pszText : "");
     }
 }
@@ -69,7 +69,7 @@ bool CItemMessage::r_LoadVal(CScript &s)
     return false;
 }
 
-bool CItemMessage::r_WriteVal(LPCTSTR pszKey, CGString &sVal, CTextConsole *pSrc)
+bool CItemMessage::r_WriteVal(lpctstr pszKey, CGString &sVal, CTextConsole *pSrc)
 {
     ADDTOCALLSTACK("CItemMessage::r_WriteVal");
     EXC_TRY("WriteVal");
@@ -107,7 +107,7 @@ bool CItemMessage::r_WriteVal(LPCTSTR pszKey, CGString &sVal, CTextConsole *pSrc
     return false;
 }
 
-LPCTSTR const CItemMessage::sm_szVerbKeys[] =
+lpctstr const CItemMessage::sm_szVerbKeys[] =
         {
                 "ERASE",
                 "PAGE",
@@ -171,7 +171,7 @@ size_t CItemMessage::GetPageCount() const
     return m_sBodyLines.GetCount();
 }
 
-LPCTSTR CItemMessage::GetPageText( size_t iPage ) const
+lpctstr CItemMessage::GetPageText( size_t iPage ) const
 {
     if ( m_sBodyLines.IsValidIndex(iPage) == false )
         return NULL;
@@ -180,13 +180,13 @@ LPCTSTR CItemMessage::GetPageText( size_t iPage ) const
     return m_sBodyLines[iPage]->GetPtr();
 }
 
-void CItemMessage::SetPageText( size_t iPage, LPCTSTR pszText )
+void CItemMessage::SetPageText( size_t iPage, lpctstr pszText )
 {
     if ( pszText == NULL )
         return;
     m_sBodyLines.SetAtGrow( iPage, new CGString( pszText ));
 }
-void CItemMessage::AddPageText( LPCTSTR pszText )
+void CItemMessage::AddPageText( lpctstr pszText )
 {
     m_sBodyLines.Add( new CGString( pszText ));
 }

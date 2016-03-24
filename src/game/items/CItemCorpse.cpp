@@ -115,7 +115,7 @@ CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 	if (pCorpse == NULL)	// weird internal error
 		return( NULL );
 
-	TCHAR *pszMsg = Str_GetTemp();
+	tchar *pszMsg = Str_GetTemp();
 	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MSG_CORPSE_OF), GetName());
 	pCorpse->SetName(pszMsg);
 	pCorpse->SetHue(GetHue());

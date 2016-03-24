@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////////////
 // -CGMPage
 
-CGMPage::CGMPage( LPCTSTR pszAccount ) :
+CGMPage::CGMPage( lpctstr pszAccount ) :
 	m_sAccount( pszAccount )
 {
 	m_pGMClient = NULL;
@@ -23,17 +23,17 @@ CGMPage::~CGMPage()
 	ClearGMHandler();
 }
 
-LPCTSTR CGMPage::GetName() const
+lpctstr CGMPage::GetName() const
 {
 	return( m_sAccount );
 }
 
-LPCTSTR CGMPage::GetReason() const
+lpctstr CGMPage::GetReason() const
 {
 	return( m_sReason );
 }
 
-void CGMPage::SetReason( LPCTSTR pszReason )
+void CGMPage::SetReason( lpctstr pszReason )
 {
 	m_sReason = pszReason;
 }
@@ -93,7 +93,7 @@ enum GC_TYPE
 	GC_QTY
 };
 
-LPCTSTR const CGMPage::sm_szLoadKeys[GC_QTY+1] =
+lpctstr const CGMPage::sm_szLoadKeys[GC_QTY+1] =
 {
 	"ACCOUNT",
 	"P",
@@ -103,7 +103,7 @@ LPCTSTR const CGMPage::sm_szLoadKeys[GC_QTY+1] =
 	NULL
 };
 
-bool CGMPage::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc )
+bool CGMPage::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CGMPage::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -169,7 +169,7 @@ CAccountRef CGMPage::FindAccount() const
 	return( g_Accounts.Account_Find( m_sAccount ));
 }
 
-LPCTSTR CGMPage::GetAccountStatus() const
+lpctstr CGMPage::GetAccountStatus() const
 {
 	ADDTOCALLSTACK("CGMPage::GetAccountStatus");
 	CClient * pClient = FindAccount()->FindClient();

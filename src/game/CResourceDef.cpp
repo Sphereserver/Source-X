@@ -16,7 +16,7 @@ int CValueRangeDef::GetRandomLinear( int iPercent ) const
 	return( ( GetRandom() + GetLinear(iPercent) ) / 2 ); 
 }
 
-bool CValueRangeDef::Load( TCHAR * pszDef )
+bool CValueRangeDef::Load( tchar * pszDef )
 {
 	ADDTOCALLSTACK("CValueRangeDef::Load");
 	// Typically in {lo# hi#} format. is hi#,lo# is ok too ???
@@ -37,7 +37,7 @@ bool CValueRangeDef::Load( TCHAR * pszDef )
 	return( true );
 }
 
-const TCHAR * CValueRangeDef::Write() const
+const tchar * CValueRangeDef::Write() const
 {
 	ADDTOCALLSTACK("CValueRangeDef::Write");
 	return( NULL );
@@ -46,10 +46,10 @@ const TCHAR * CValueRangeDef::Write() const
 //*******************************************
 // -CValueCurveDef
 
-const TCHAR * CValueCurveDef::Write() const
+const tchar * CValueCurveDef::Write() const
 {
 	ADDTOCALLSTACK("CValueCurveDef::Write");
-	TCHAR * pszOut = Str_GetTemp();
+	tchar * pszOut = Str_GetTemp();
 	size_t j = 0;
 	size_t iQty = m_aiValues.GetCount();
 	for ( size_t i = 0; i < iQty; i++ )
@@ -63,7 +63,7 @@ const TCHAR * CValueCurveDef::Write() const
 	return pszOut;
 }
 
-bool CValueCurveDef::Load( TCHAR * pszDef )
+bool CValueCurveDef::Load( tchar * pszDef )
 {
 	ADDTOCALLSTACK("CValueCurveDef::Load");
 	// ADV_RATE = Chance at 0, to 100.0
@@ -175,7 +175,7 @@ int CValueCurveDef::GetChancePercent( int iSkillPercent ) const
 //*******************************************
 // -CSkillDef
 
-LPCTSTR const CSkillDef::sm_szTrigName[SKTRIG_QTY+1] = 
+lpctstr const CSkillDef::sm_szTrigName[SKTRIG_QTY+1] = 
 {
 	"@AAAUNUSED",
 	"@ABORT",
@@ -217,7 +217,7 @@ enum SKC_TYPE
 	SKC_QTY
 };
 
-LPCTSTR const CSkillDef::sm_szLoadKeys[SKC_QTY+1] =
+lpctstr const CSkillDef::sm_szLoadKeys[SKC_QTY+1] =
 {
 	"ADV_RATE",
 	"BONUS_DEX",
@@ -255,7 +255,7 @@ CSkillDef::CSkillDef( SKILL_TYPE skill ) :
 	m_AdvRate.Init();
 }
 
-bool CSkillDef::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CSkillDef::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CSkillDef::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -423,7 +423,7 @@ enum SCC_TYPE
 	SCC_QTY
 };
 
-LPCTSTR const CSkillClassDef::sm_szLoadKeys[SCC_QTY+1] =
+lpctstr const CSkillClassDef::sm_szLoadKeys[SCC_QTY+1] =
 {
 	"DEFNAME",
 	"NAME",
@@ -448,7 +448,7 @@ void CSkillClassDef::Init()
 	}
 }
 
-bool CSkillClassDef::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CSkillClassDef::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CSkillClassDef::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -541,7 +541,7 @@ bool CSkillClassDef::r_LoadVal( CScript &s )
 //*******************************************
 // -CSpellDef
 
-LPCTSTR const CSpellDef::sm_szTrigName[SPTRIG_QTY+1] = 
+lpctstr const CSpellDef::sm_szTrigName[SPTRIG_QTY+1] = 
 {
 	"@AAAUNUSED",
 	"@EFFECT",
@@ -577,7 +577,7 @@ enum SPC_TYPE
 	SPC_QTY
 };
 
-LPCTSTR const CSpellDef::sm_szLoadKeys[SPC_QTY+1] =
+lpctstr const CSpellDef::sm_szLoadKeys[SPC_QTY+1] =
 {
 	"CAST_TIME",
 	"DEFNAME",
@@ -621,7 +621,7 @@ CSpellDef::CSpellDef( SPELL_TYPE id ) :
 
 
 
-bool CSpellDef::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CSpellDef::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CSpellDef::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -690,7 +690,7 @@ bool CSpellDef::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc
 					else if ( !strnicmp( pszKey, "VAL", 3 ))
 						fQtyOnly = true;
 
-					TCHAR *pszTmp = Str_GetTemp();
+					tchar *pszTmp = Str_GetTemp();
 					m_Reags.WriteKeys( pszTmp, index, fQtyOnly, fKeyOnly );
 					if ( fQtyOnly && pszTmp[0] == '\0' )
 						strcpy( pszTmp, "0" ); // Return 0 for empty quantity
@@ -698,7 +698,7 @@ bool CSpellDef::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc
 				}
 				else
 				{
-					TCHAR *pszTmp = Str_GetTemp();
+					tchar *pszTmp = Str_GetTemp();
 					m_Reags.WriteKeys( pszTmp );
 					sVal = pszTmp;
 				}
@@ -716,7 +716,7 @@ bool CSpellDef::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc
 			break;
 		case SPC_SKILLREQ:
 			{
-				TCHAR *pszTmp = Str_GetTemp();
+				tchar *pszTmp = Str_GetTemp();
 				m_SkillReq.WriteKeys( pszTmp );
 				sVal = pszTmp;
 			}
@@ -850,7 +850,7 @@ enum RGC_TYPE
 	RGC_QTY
 };
 
-LPCTSTR const CRandGroupDef::sm_szLoadKeys[RGC_QTY+1] =
+lpctstr const CRandGroupDef::sm_szLoadKeys[RGC_QTY+1] =
 {
 	"CALCMEMBERINDEX",
 	"CATEGORY",
@@ -901,12 +901,12 @@ bool CRandGroupDef::r_LoadVal( CScript &s )
 		case RGC_ID:	// "ID"
 		case RGC_CONTAINER:
 			{
-				TCHAR	*ppCmd[2];
+				tchar	*ppCmd[2];
 				size_t iArgs = Str_ParseCmds(s.GetArgStr(), ppCmd, COUNTOF(ppCmd));
 				CResourceQty rec;
 
 				rec.SetResourceID(
-					g_Cfg.ResourceGetID(RES_CHARDEF, const_cast<LPCTSTR &>(reinterpret_cast<LPTSTR &>(ppCmd[0]))),
+					g_Cfg.ResourceGetID(RES_CHARDEF, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(ppCmd[0]))),
 					( iArgs > 1 && ppCmd[1][0] ) ? Exp_GetVal(ppCmd[1]) : 1 );
 				m_iTotalWeight += static_cast<int>(rec.GetResQty());
 				m_Members.Add(rec);
@@ -940,7 +940,7 @@ bool CRandGroupDef::r_LoadVal( CScript &s )
 	return false;
 }
 
-bool CRandGroupDef::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc )
+bool CRandGroupDef::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CRandGroupDef::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -1017,7 +1017,7 @@ bool CRandGroupDef::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * p
 					else if ( !strnicmp( pszKey, "VAL", 3 ))
 						fQtyOnly = true;
 
-					TCHAR *pszTmp = Str_GetTemp();
+					tchar *pszTmp = Str_GetTemp();
 					m_Members.WriteKeys( pszTmp, index, fQtyOnly, fKeyOnly );
 					if ( fQtyOnly && pszTmp[0] == '\0' )
 						strcpy( pszTmp, "0" );
@@ -1027,7 +1027,7 @@ bool CRandGroupDef::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * p
 			}
 			else
 			{
-				TCHAR *pszTmp = Str_GetTemp();
+				tchar *pszTmp = Str_GetTemp();
 				m_Members.WriteKeys( pszTmp );
 				sVal = pszTmp;
 			}
@@ -1123,7 +1123,7 @@ enum RMC_TYPE
 	RMC_QTY
 };
 
-LPCTSTR const CRegionResourceDef::sm_szLoadKeys[RMC_QTY+1] =
+lpctstr const CRegionResourceDef::sm_szLoadKeys[RMC_QTY+1] =
 {
 	"AMOUNT",
 	"DEFNAME",
@@ -1134,7 +1134,7 @@ LPCTSTR const CRegionResourceDef::sm_szLoadKeys[RMC_QTY+1] =
 	NULL
 };
 
-LPCTSTR const CRegionResourceDef::sm_szTrigName[RRTRIG_QTY+1] =	// static
+lpctstr const CRegionResourceDef::sm_szTrigName[RRTRIG_QTY+1] =	// static
 {
 	"@AAAUNUSED",
 	"@ResourceFound",
@@ -1145,7 +1145,7 @@ LPCTSTR const CRegionResourceDef::sm_szTrigName[RRTRIG_QTY+1] =	// static
 
 
 
-TRIGRET_TYPE CRegionResourceDef::OnTrigger( LPCTSTR pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs )
+TRIGRET_TYPE CRegionResourceDef::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs )
 {
 	ADDTOCALLSTACK("CRegionResourceDef::OnTrigger");
 	// Attach some trigger to the cchar. (PC or NPC)
@@ -1197,7 +1197,7 @@ bool CRegionResourceDef::r_LoadVal( CScript & s )
 	return false;
 }
 
-bool CRegionResourceDef::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CRegionResourceDef::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CRegionResourceDef::r_WriteVal");
 	EXC_TRY("r_WriteVal");

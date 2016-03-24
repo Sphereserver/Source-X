@@ -22,7 +22,7 @@
 // Simple string hashing algorithm function
 // Founded by D. J. Bernstein
 // Original code found at: http://www.cse.yorku.ca/~oz/hash.html
-uint HashString(LPCTSTR str, size_t length)
+uint HashString(lpctstr str, size_t length)
 {
     uint hash = 5381;
     for (size_t i = 0; i < length; i++)
@@ -60,8 +60,8 @@ void CClient::resendBuffs()
 	}
 
 	// Spells
-	TCHAR NumBuff[7][8];
-	LPCTSTR pNumBuff[7] = { NumBuff[0], NumBuff[1], NumBuff[2], NumBuff[3], NumBuff[4], NumBuff[5], NumBuff[6] };
+	tchar NumBuff[7][8];
+	lpctstr pNumBuff[7] = { NumBuff[0], NumBuff[1], NumBuff[2], NumBuff[3], NumBuff[4], NumBuff[5], NumBuff[6] };
 
 	word iStatEffect = 0;
 	word iTimerEffect = 0;
@@ -220,7 +220,7 @@ void CClient::resendBuffs()
 	}
 }
 
-void CClient::addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dword ClilocTwo, const word Time, LPCTSTR* pArgs, size_t iArgCount)
+void CClient::addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dword ClilocTwo, const word Time, lpctstr* pArgs, size_t iArgCount)
 {
 	ADDTOCALLSTACK("CClient::addBuff");
 	if ( !IsSetOF(OF_Buffs) )
@@ -274,7 +274,7 @@ void CClient::addTime( bool bCurrent )
 	}
 }
 
-void CClient::addObjectRemoveCantSee( CGrayUID uid, LPCTSTR pszName )
+void CClient::addObjectRemoveCantSee( CGrayUID uid, lpctstr pszName )
 {
 	ADDTOCALLSTACK("CClient::addObjectRemoveCantSee");
 	// Seems this object got out of sync some how.
@@ -599,7 +599,7 @@ bool CClient::addKick( CTextConsole * pSrc, bool fBlock )
 	if ( ! GetAccount()->Kick( pSrc, fBlock ))
 		return( false );
 
-	LPCTSTR pszAction = fBlock ? "KICK" : "DISCONNECT";
+	lpctstr pszAction = fBlock ? "KICK" : "DISCONNECT";
 	SysMessagef("You have been %sed by '%s'", pszAction, pSrc->GetName());
 
 	if ( IsConnectTypePacket() )
@@ -654,7 +654,7 @@ void CClient::addBarkUNICODE( const NCHAR * pwText, const CObjBaseTemplate * pSr
 	new PacketMessageUNICODE(this, pwText, pSrc, wHue, mode, font, lang);
 }
 
-void CClient::addBarkLocalized( int iClilocId, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, LPCTSTR pArgs )
+void CClient::addBarkLocalized( int iClilocId, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, lpctstr pArgs )
 {
 	ADDTOCALLSTACK("CClient::addBarkLocalized");
 	if ( iClilocId <= 0 )
@@ -672,7 +672,7 @@ void CClient::addBarkLocalized( int iClilocId, const CObjBaseTemplate * pSrc, HU
 	new PacketMessageLocalised(this, iClilocId, pSrc, wHue, mode, font, pArgs);
 }
 
-void CClient::addBarkLocalizedEx( int iClilocId, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, AFFIX_TYPE affix, LPCTSTR pAffix, LPCTSTR pArgs )
+void CClient::addBarkLocalizedEx( int iClilocId, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, AFFIX_TYPE affix, lpctstr pAffix, lpctstr pArgs )
 {
 	ADDTOCALLSTACK("CClient::addBarkLocalizedEx");
 	if ( iClilocId <= 0 )
@@ -690,7 +690,7 @@ void CClient::addBarkLocalizedEx( int iClilocId, const CObjBaseTemplate * pSrc, 
 	new PacketMessageLocalisedEx(this, iClilocId, pSrc, wHue, mode, font, affix, pAffix, pArgs);
 }
 
-void CClient::addBarkParse( LPCTSTR pszText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, bool bUnicode, LPCTSTR name)
+void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, bool bUnicode, lpctstr name)
 {
 	ADDTOCALLSTACK("CClient::addBarkParse");
 	if ( !pszText )
@@ -793,8 +793,8 @@ void CClient::addBarkParse( LPCTSTR pszText, const CObjBaseTemplate * pSrc, HUE_
 	{
 		case 3:	// Extended localized message (with affixed ASCII text)
 		{
-            TCHAR * ppArgs[256];
-			size_t iQty = Str_ParseCmds(const_cast<TCHAR *>(m_BarkBuffer.GetPtr()), ppArgs, COUNTOF(ppArgs), "," );
+            tchar * ppArgs[256];
+			size_t iQty = Str_ParseCmds(const_cast<tchar *>(m_BarkBuffer.GetPtr()), ppArgs, COUNTOF(ppArgs), "," );
 			int iClilocId = Exp_GetVal( ppArgs[0] );
 			int iAffixType = Exp_GetVal( ppArgs[1] );
 			CGString CArgs;
@@ -811,8 +811,8 @@ void CClient::addBarkParse( LPCTSTR pszText, const CObjBaseTemplate * pSrc, HUE_
 
 		case 2:	// Localized
 		{
-            TCHAR * ppArgs[256];
-			size_t iQty = Str_ParseCmds(const_cast<TCHAR *>(m_BarkBuffer.GetPtr()), ppArgs, COUNTOF(ppArgs), "," );
+            tchar * ppArgs[256];
+			size_t iQty = Str_ParseCmds(const_cast<tchar *>(m_BarkBuffer.GetPtr()), ppArgs, COUNTOF(ppArgs), "," );
 			int iClilocId = Exp_GetVal( ppArgs[0] );
 			CGString CArgs;
 			for ( size_t i = 1; i < iQty; i++ )
@@ -852,7 +852,7 @@ bark_default:
 
 
 
-void CClient::addBark( LPCTSTR pszText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font )
+void CClient::addBark( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font )
 {
 	ADDTOCALLSTACK("CClient::addBark");
 	if ( pszText == NULL )
@@ -873,7 +873,7 @@ void CClient::addBark( LPCTSTR pszText, const CObjBaseTemplate * pSrc, HUE_TYPE 
 	new PacketMessageASCII(this, pszText, pSrc, wHue, mode, font);
 }
 
-void CClient::addObjMessage( LPCTSTR pMsg, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode ) // The message when an item is clicked
+void CClient::addObjMessage( lpctstr pMsg, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode ) // The message when an item is clicked
 {
 	ADDTOCALLSTACK("CClient::addObjMessage");
 	if ( !pMsg )
@@ -937,7 +937,7 @@ void CClient::GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMI
 			// the resdispdnid of the mount's chardef
 			if ( idHorse != pItem->m_itFigurine.m_ID )
 			{
-				TCHAR * sMountDefname = Str_GetTemp();
+				tchar * sMountDefname = Str_GetTemp();
 				sprintf(sMountDefname, "mount_0x%x", idHorse);
 				ITEMID_TYPE idMountItem = static_cast<ITEMID_TYPE>(g_Exp.m_VarDefs.GetKeyNum(sMountDefname));
 				if ( idMountItem > ITEMID_NOTHING )
@@ -1090,9 +1090,9 @@ void CClient::addItemName( const CItem * pItem )
 		return;
 
 	bool fIdentified = ( IsPriv(PRIV_GM) || pItem->IsAttr( ATTR_IDENTIFIED ));
-	LPCTSTR pszNameFull = pItem->GetNameFull( fIdentified );
+	lpctstr pszNameFull = pItem->GetNameFull( fIdentified );
 
-	TCHAR szName[ MAX_ITEM_NAME_SIZE + 256 ];
+	tchar szName[ MAX_ITEM_NAME_SIZE + 256 ];
 	size_t len = strcpylen( szName, pszNameFull, COUNTOF(szName) );
 
 	const CContainer* pCont = dynamic_cast<const CContainer*>(pItem);
@@ -1186,7 +1186,7 @@ void CClient::addItemName( const CItem * pItem )
 		if ( ret == TRIGRET_RET_TRUE )
 			return;
 
-		LPCTSTR pNewStr = Args.m_VarsLocal.GetKeyStr("ClickMsgText");
+		lpctstr pNewStr = Args.m_VarsLocal.GetKeyStr("ClickMsgText");
 
 		if ( pNewStr != NULL )
 			strcpylen(szName, pNewStr, COUNTOF(szName));
@@ -1205,8 +1205,8 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 
 	HUE_TYPE wHue	= pChar->Noto_GetHue( m_pChar, true );
 
-	TCHAR *pszTemp = Str_GetTemp();
-	LPCTSTR prefix = pChar->GetKeyStr( "NAME.PREFIX" );
+	tchar *pszTemp = Str_GetTemp();
+	lpctstr prefix = pChar->GetKeyStr( "NAME.PREFIX" );
 	if ( ! *prefix )
 		prefix = pChar->Noto_GetFameTitle();
 
@@ -1217,7 +1217,7 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 	if ( !pChar->IsStatFlag(STATF_Incognito) || ( GetPrivLevel() > pChar->GetPrivLevel() ))
 	{
 		// Guild abbrev.
-		LPCTSTR pAbbrev = pChar->Guild_AbbrevBracket(MEMORY_TOWN);
+		lpctstr pAbbrev = pChar->Guild_AbbrevBracket(MEMORY_TOWN);
 		if ( pAbbrev )
 		{
 			strcat( pszTemp, pAbbrev );
@@ -1235,7 +1235,7 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 	{
 		if ( pChar->GetNPCBrain() == NPCBRAIN_HUMAN )
 		{
-			LPCTSTR title = pChar->GetTradeTitle();
+			lpctstr title = pChar->GetTradeTitle();
 			if ( *title )
 			{
 				strcat( pszTemp, " " );
@@ -1306,7 +1306,7 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 		if ( ret == TRIGRET_RET_TRUE )
 			return;
 
-		LPCTSTR pNewStr = Args.m_VarsLocal.GetKeyStr("ClickMsgText");
+		lpctstr pNewStr = Args.m_VarsLocal.GetKeyStr("ClickMsgText");
 
 		if ( pNewStr != NULL )
 			strcpy(pszTemp, pNewStr);
@@ -1375,7 +1375,7 @@ void CClient::addPlayerWarMode()
 	new PacketWarMode(this, m_pChar);
 }
 
-void CClient::addToolTip( const CObjBase * pObj, LPCTSTR pszText )
+void CClient::addToolTip( const CObjBase * pObj, lpctstr pszText )
 {
 	ADDTOCALLSTACK("CClient::addToolTip");
 	if ( pObj == NULL )
@@ -1492,7 +1492,7 @@ int CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
 	return count;
 }
 
-void CClient::SetTargMode( CLIMODE_TYPE targmode, LPCTSTR pPrompt, int iTimeout )
+void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int iTimeout )
 {
 	ADDTOCALLSTACK("CClient::SetTargMode");
 	// ??? Get rid of menu stuff if previous targ mode.
@@ -1625,7 +1625,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, LPCTSTR pPrompt, int iTimeout 
 		addSysMessage( pPrompt );
 }
 
-void CClient::addPromptConsole( CLIMODE_TYPE mode, LPCTSTR pPrompt, CGrayUID context1, CGrayUID context2, bool bUnicode )
+void CClient::addPromptConsole( CLIMODE_TYPE mode, lpctstr pPrompt, CGrayUID context1, CGrayUID context2, bool bUnicode )
 {
 	ADDTOCALLSTACK("CClient::addPromptConsole");
 
@@ -1638,7 +1638,7 @@ void CClient::addPromptConsole( CLIMODE_TYPE mode, LPCTSTR pPrompt, CGrayUID con
 	new PacketAddPrompt(this, context1, context2, bUnicode);
 }
 
-void CClient::addTarget( CLIMODE_TYPE targmode, LPCTSTR pPrompt, bool fAllowGround, bool fCheckCrime, int iTimeout ) // Send targetting cursor to client
+void CClient::addTarget( CLIMODE_TYPE targmode, lpctstr pPrompt, bool fAllowGround, bool fCheckCrime, int iTimeout ) // Send targetting cursor to client
 {
 	ADDTOCALLSTACK("CClient::addTarget");
 	// Expect XCMD_Target back.
@@ -1670,7 +1670,7 @@ bool CClient::addTargetChars( CLIMODE_TYPE mode, CREID_TYPE baseID, bool fNotoCh
 	if ( pBase == NULL )
 		return( false );
 
-	TCHAR * pszTemp = Str_GetTemp();
+	tchar * pszTemp = Str_GetTemp();
 	sprintf(pszTemp, "%s '%s'?", g_Cfg.GetDefaultMsg(DEFMSG_WHERE_TO_SUMMON), pBase->GetTradeName());
 
 	addTarget(mode, pszTemp, true, fNotoCheck, iTimeout);
@@ -1685,7 +1685,7 @@ bool CClient::addTargetItems( CLIMODE_TYPE targmode, ITEMID_TYPE id, bool fGroun
 
 	ASSERT(m_pChar);
 
-	LPCTSTR pszName;
+	lpctstr pszName;
 	CItemBase * pItemDef;
 	if ( id < ITEMID_TEMPLATE )
 	{
@@ -1711,7 +1711,7 @@ bool CClient::addTargetItems( CLIMODE_TYPE targmode, ITEMID_TYPE id, bool fGroun
 		pszName = "template";
 	}
 
-	TCHAR *pszTemp = Str_GetTemp();
+	tchar *pszTemp = Str_GetTemp();
 	sprintf(pszTemp, "%s %s?", g_Cfg.GetDefaultMsg(DEFMSG_WHERE_TO_PLACE), pszName);
 
 	if ( CItemBase::IsID_Multi( id ))	// a multi we get from Multi.mul
@@ -2378,14 +2378,14 @@ void CClient::addCustomSpellbookOpen( CItem * pBook, dword gumpID )
 	new PacketItemContents(this, pContainer);
 }
 
-void CClient::addScrollScript( CResourceLock &s, SCROLL_TYPE type, dword context, LPCTSTR pszHeader )
+void CClient::addScrollScript( CResourceLock &s, SCROLL_TYPE type, dword context, lpctstr pszHeader )
 {
 	ADDTOCALLSTACK("CClient::addScrollScript");
 
 	new PacketOpenScroll(this, s, type, context, pszHeader);
 }
 
-void CClient::addScrollResource( LPCTSTR pszSec, SCROLL_TYPE type, dword scrollID )
+void CClient::addScrollResource( lpctstr pszSec, SCROLL_TYPE type, dword scrollID )
 {
 	ADDTOCALLSTACK("CClient::addScrollResource");
 	//
@@ -2600,14 +2600,14 @@ void CClient::addLoginComplete()
 	new PacketLoginComplete(this);
 }
 
-void CClient::addChatSystemMessage( CHATMSG_TYPE iType, LPCTSTR pszName1, LPCTSTR pszName2, CLanguageID lang )
+void CClient::addChatSystemMessage( CHATMSG_TYPE iType, lpctstr pszName1, lpctstr pszName2, CLanguageID lang )
 {
 	ADDTOCALLSTACK("CClient::addChatSystemMessage");
 
 	new PacketChatMessage(this, iType, pszName1, pszName2, lang);
 }
 
-void CClient::addGumpTextDisp( const CObjBase * pObj, GUMP_TYPE gump, LPCTSTR pszName, LPCTSTR pszText )
+void CClient::addGumpTextDisp( const CObjBase * pObj, GUMP_TYPE gump, lpctstr pszName, lpctstr pszText )
 {
 	ADDTOCALLSTACK("CClient::addGumpTextDisp");
 	// ??? how do we control where exactly the text goes ??
@@ -2739,7 +2739,7 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 				}
 				else if ( pChar )
 				{
-					LPCTSTR lpPrefix = pChar->GetKeyStr("NAME.PREFIX");
+					lpctstr lpPrefix = pChar->GetKeyStr("NAME.PREFIX");
 					// HUE_TYPE wHue = m_pChar->Noto_GetHue( pChar, true );
 
 					if ( ! *lpPrefix )
@@ -2748,7 +2748,7 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 					if ( ! *lpPrefix )
 						lpPrefix = " ";
 
-					TCHAR * lpSuffix = Str_GetTemp();
+					tchar * lpSuffix = Str_GetTemp();
 					strcpy(lpSuffix, pChar->GetKeyStr("NAME.SUFFIX"));
 
 					const CStoneMember * pGuildMember = pChar->Guild_FindMember(MEMORY_GUILD);
@@ -3391,7 +3391,7 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 								if ( !pt.IsValidPoint() )
 									break;
 
-								LPCTSTR regionName = g_Cfg.GetDefaultMsg(DEFMSG_RUNE_LOCATION_UNK);
+								lpctstr regionName = g_Cfg.GetDefaultMsg(DEFMSG_RUNE_LOCATION_UNK);
 								if ( pt.GetRegion(REGION_TYPE_AREA) )
 									regionName = pt.GetRegion(REGION_TYPE_AREA)->GetName();
 								bool regionMulti = (pt.GetRegion(REGION_TYPE_MULTI) != NULL);
@@ -3434,7 +3434,7 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 						case IT_SPAWN_CHAR:
 							{
 								CResourceDef * pSpawnCharDef = g_Cfg.ResourceGetDef( pItem->m_itSpawnChar.m_CharID );
-								LPCTSTR pszName = NULL;
+								lpctstr pszName = NULL;
 								if ( pSpawnCharDef )
 								{
 									CCharBase *pCharBase = dynamic_cast<CCharBase*>( pSpawnCharDef );
@@ -3632,7 +3632,7 @@ void CClient::addKRToolbar( bool bEnable )
 
 
 // --------------------------------------------------------------------
-void CClient::SendPacket( TCHAR * pszKey )
+void CClient::SendPacket( tchar * pszKey )
 {
 	ADDTOCALLSTACK("CClient::SendPacket");
 	PacketSend* packet = new PacketSend(0, 0, PacketSend::PRI_NORMAL);
@@ -3717,7 +3717,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 		fQuickLogIn	= (Args.m_iN2 != 0);
 	}
 
-	TCHAR *z = Str_GetTemp();
+	tchar *z = Str_GetTemp();
 	if ( !fQuickLogIn )
 	{
 		if ( !fNoMessages )
@@ -3922,7 +3922,7 @@ byte CClient::LogIn( CAccountRef pAccount, CGString & sMsg )
 	if ( pAccount->IsPriv( PRIV_BLOCKED ))
 	{
 		g_Log.Event(LOGM_CLIENTS_LOG, "%x: Account '%s' is blocked.\n", GetSocketID(), pAccount->GetName());
-		sMsg.Format( g_Cfg.GetDefaultMsg( DEFMSG_MSG_ACC_BLOCKED ), static_cast<LPCTSTR>(g_Serv.m_sEMail));
+		sMsg.Format( g_Cfg.GetDefaultMsg( DEFMSG_MSG_ACC_BLOCKED ), static_cast<lpctstr>(g_Serv.m_sEMail));
 		return( PacketLoginError::Blocked );
 	}
 
@@ -4015,7 +4015,7 @@ byte CClient::LogIn( CAccountRef pAccount, CGString & sMsg )
 	return( PacketLoginError::Success );
 }
 
-byte CClient::LogIn( LPCTSTR pszAccName, LPCTSTR pszPassword, CGString & sMsg )
+byte CClient::LogIn( lpctstr pszAccName, lpctstr pszPassword, CGString & sMsg )
 {
 	ADDTOCALLSTACK("CClient::LogIn");
 	// Try to validate this account.
@@ -4032,7 +4032,7 @@ byte CClient::LogIn( LPCTSTR pszAccName, LPCTSTR pszPassword, CGString & sMsg )
 	if ( iLen1 == 0 || iLen1 != iLen3 || iLen1 > MAX_NAME_SIZE )	// a corrupt message.
 	{
 		char szVersion[ 256 ];
-		sMsg.Format( g_Cfg.GetDefaultMsg( DEFMSG_MSG_ACC_WCLI ), static_cast<LPCTSTR>(m_Crypt.WriteClientVer( szVersion )));
+		sMsg.Format( g_Cfg.GetDefaultMsg( DEFMSG_MSG_ACC_WCLI ), static_cast<lpctstr>(m_Crypt.WriteClientVer( szVersion )));
 		return( PacketLoginError::BadAccount );
 	}
 
@@ -4040,7 +4040,7 @@ byte CClient::LogIn( LPCTSTR pszAccName, LPCTSTR pszPassword, CGString & sMsg )
 	if ( iLen2 != iLen3 )	// a corrupt message.
 	{
 		char szVersion[ 256 ];
-		sMsg.Format( g_Cfg.GetDefaultMsg( DEFMSG_MSG_ACC_WCLI ), static_cast<LPCTSTR>(m_Crypt.WriteClientVer( szVersion )));
+		sMsg.Format( g_Cfg.GetDefaultMsg( DEFMSG_MSG_ACC_WCLI ), static_cast<lpctstr>(m_Crypt.WriteClientVer( szVersion )));
 		return( PacketLoginError::BadPassword );
 	}
 

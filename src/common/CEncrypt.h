@@ -176,7 +176,7 @@ private:
 	// ------------- EOF Old Encryption ------------------
 
 private:
-	int GetVersionFromString( LPCTSTR pszVersion );
+	int GetVersionFromString( lpctstr pszVersion );
 
 private:
 	void SetClientVersion( dword iVer );
@@ -190,8 +190,8 @@ public:
 	bool SetClientVerEnum( dword iVer, bool bSetEncrypt = true );
 	bool SetClientVerIndex( size_t iVer, bool bSetEncrypt = true );
 	void SetClientVer( const CCrypt & crypt );
-	bool SetClientVer( LPCTSTR pszVersion );
-	static int GetVerFromString( LPCTSTR pszVersion );
+	bool SetClientVer( lpctstr pszVersion );
+	static int GetVerFromString( lpctstr pszVersion );
 	static int GetVerFromNumber( dword maj, dword min, dword rev, dword pat );
 	static char* WriteClientVerString( dword iClientVersion, char * pStr );
 

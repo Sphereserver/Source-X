@@ -27,18 +27,18 @@ bool CClient::OnTarg_Obj_Set( CObjBase * pObj )
 	}
 
 	// Parse the command.
-	TCHAR * pszLogMsg = Str_GetTemp();
+	tchar * pszLogMsg = Str_GetTemp();
 
 	if ( pObj->IsItem() )
 	{
 		const CItem * pItem = STATIC_CAST <CItem*> (pObj);
 		if ( pItem->GetAmount() > 1 )
-			sprintf(pszLogMsg, "'%s' commands uid=0%x (%s) [amount=%u] to '%s'", GetName(), static_cast<dword>(pObj->GetUID()), pObj->GetName(), pItem->GetAmount(), static_cast<LPCTSTR>(m_Targ_Text));
+			sprintf(pszLogMsg, "'%s' commands uid=0%x (%s) [amount=%u] to '%s'", GetName(), static_cast<dword>(pObj->GetUID()), pObj->GetName(), pItem->GetAmount(), static_cast<lpctstr>(m_Targ_Text));
 		else
-			sprintf(pszLogMsg, "'%s' commands uid=0%x (%s) to '%s'", GetName(), static_cast<dword>(pObj->GetUID()), pObj->GetName(), static_cast<LPCTSTR>(m_Targ_Text));
+			sprintf(pszLogMsg, "'%s' commands uid=0%x (%s) to '%s'", GetName(), static_cast<dword>(pObj->GetUID()), pObj->GetName(), static_cast<lpctstr>(m_Targ_Text));
 	}
 	else
-		sprintf(pszLogMsg, "'%s' commands uid=0%x (%s) to '%s'", GetName(), static_cast<dword>(pObj->GetUID()), pObj->GetName(), static_cast<LPCTSTR>(m_Targ_Text));
+		sprintf(pszLogMsg, "'%s' commands uid=0%x (%s) to '%s'", GetName(), static_cast<dword>(pObj->GetUID()), pObj->GetName(), static_cast<lpctstr>(m_Targ_Text));
 
 	// Check priv level for the new verb.
 	if ( ! g_Cfg.CanUsePrivVerb( pObj, m_Targ_Text, this ))
@@ -76,7 +76,7 @@ bool CClient::OnTarg_Obj_Function( CObjBase * pObj, const CPointMap & pt, ITEMID
 {
 	ADDTOCALLSTACK("CClient::OnTarg_Obj_Function");
 	m_Targ_p	= pt;
-	LPCTSTR	pSpace	= strchr( m_Targ_Text, ' ' );
+	lpctstr	pSpace	= strchr( m_Targ_Text, ' ' );
 	if ( !pSpace )
 		pSpace	= strchr( m_Targ_Text, '\t' );
 	if ( pSpace )
@@ -86,7 +86,7 @@ bool CClient::OnTarg_Obj_Function( CObjBase * pObj, const CPointMap & pt, ITEMID
 	Args.m_VarsLocal.SetNum( "ID", id, true );
 	Args.m_pO1	= pObj;
 	CGString sVal;
-	m_pChar->r_Call( static_cast<LPCTSTR>(m_Targ_Text), this, &Args, &sVal );
+	m_pChar->r_Call( static_cast<lpctstr>(m_Targ_Text), this, &Args, &sVal );
 	return true;
 }
 
@@ -103,7 +103,7 @@ bool CClient::OnTarg_Obj_Info( CObjBase * pObj, const CPointMap & pt, ITEMID_TYP
 	}
 	else
 	{
-		TCHAR *pszTemp = Str_GetTemp();
+		tchar *pszTemp = Str_GetTemp();
 		size_t len = 0;
 		if ( id )
 		{
@@ -273,7 +273,7 @@ bool CClient::OnTarg_UnExtract( CObjBase * pObj, const CPointMap & pt )
 	if ( ! g_Cfg.OpenResourceFind( s, m_Targ_Text ))
 		return false;
 
-	TCHAR *pszTemp = Str_GetTemp();
+	tchar *pszTemp = Str_GetTemp();
 	sprintf(pszTemp, "%i template id", m_tmTile.m_id);
 	if ( ! s.FindTextHeader(pszTemp))
 		return false;
@@ -578,13 +578,13 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 			Cmd_Extract( &s, rect, zlowest );
 		}
 
-		SysMessagef( "%d Statics Extracted to '%s', id=%d", iCount, static_cast<LPCTSTR>(m_Targ_Text), m_tmTile.m_id );
+		SysMessagef( "%d Statics Extracted to '%s', id=%d", iCount, static_cast<lpctstr>(m_Targ_Text), m_tmTile.m_id );
 		}
 		break;
 
 	case CV_NUDGE:
 		{
-			TCHAR szTmp[512];
+			tchar szTmp[512];
 			strcpylen( szTmp, m_Targ_Text, COUNTOF(szTmp));
 
 			INT64 piArgs[3];		// Maximum parameters in one line
@@ -689,7 +689,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 
 	case CV_TILE:
 		{
-			TCHAR szTmp[256];
+			tchar szTmp[256];
 			strcpylen( szTmp, m_Targ_Text, COUNTOF(szTmp));
 
 			INT64 piArgs[16];		// Maximum parameters in one line
@@ -759,10 +759,10 @@ int CClient::OnSkill_AnimalLore( CGrayUID uid, int iSkillLevel, bool fTest )
 		return Calc_GetRandVal(60);
 	}
 
-	LPCTSTR pszHe = pChar->GetPronoun();
-	LPCTSTR pszHis = pChar->GetPossessPronoun();
+	lpctstr pszHe = pChar->GetPronoun();
+	lpctstr pszHis = pChar->GetPossessPronoun();
 
-	TCHAR *pszTemp = Str_GetTemp();
+	tchar *pszTemp = Str_GetTemp();
 
 	// What kind of animal.
 	if ( pChar->IsIndividualName())
@@ -786,7 +786,7 @@ int CClient::OnSkill_AnimalLore( CGrayUID uid, int iSkillLevel, bool fTest )
 
 	// How well fed ?
 	// Food count = 30 minute intervals.
-	LPCTSTR pszText = pChar->IsStatFlag(STATF_Conjured) ?
+	lpctstr pszText = pChar->IsStatFlag(STATF_Conjured) ?
 						g_Cfg.GetDefaultMsg(DEFMSG_ANIMALLORE_CONJURED) : 
 						pChar->Food_GetLevelMessage(pCharOwner ? true : false, true);
 
@@ -845,7 +845,7 @@ int CClient::OnSkill_ItemID( CGrayUID uid, int iSkillLevel, bool fTest )
 	else
 	{
 		SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_ITEMID_GOLD ),
-			(pItemVend->GetVendorPrice(-15) * pItem->GetAmount()), static_cast<LPCTSTR>(pItemVend->GetNameFull(true)));
+			(pItemVend->GetVendorPrice(-15) * pItem->GetAmount()), static_cast<lpctstr>(pItemVend->GetNameFull(true)));
 	}
 
 	// Whats it made of ?
@@ -855,7 +855,7 @@ int CClient::OnSkill_ItemID( CGrayUID uid, int iSkillLevel, bool fTest )
 
 	if ( iSkillLevel > 40 && pItemDef->m_BaseResources.GetCount() > 0)
 	{
-		TCHAR *pszTemp = Str_GetTemp();
+		tchar *pszTemp = Str_GetTemp();
 		strcpy(pszTemp, g_Cfg.GetDefaultMsg( DEFMSG_ITEMID_MADEOF ));
 
 		pItemDef->m_BaseResources.WriteNames( pszTemp + strlen(pszTemp) );
@@ -887,7 +887,7 @@ int CClient::OnSkill_EvalInt( CGrayUID uid, int iSkillLevel, bool fTest )
 		return Calc_GetRandVal(60);
 	}
 
-	static LPCTSTR const sm_szIntDesc[] =
+	static lpctstr const sm_szIntDesc[] =
 	{
 		g_Cfg.GetDefaultMsg( DEFMSG_EVALINT_INT_1 ),
 		g_Cfg.GetDefaultMsg( DEFMSG_EVALINT_INT_2 ),
@@ -910,7 +910,7 @@ int CClient::OnSkill_EvalInt( CGrayUID uid, int iSkillLevel, bool fTest )
 
 	SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_EVALINT_RESULT ), pChar->GetName(), sm_szIntDesc[iIntEntry]);
 
-	static LPCTSTR const sm_szMagicDesc[] =
+	static lpctstr const sm_szMagicDesc[] =
 	{
 		g_Cfg.GetDefaultMsg( DEFMSG_EVALINT_MAG_1 ),
 		g_Cfg.GetDefaultMsg( DEFMSG_EVALINT_MAG_2 ),
@@ -920,7 +920,7 @@ int CClient::OnSkill_EvalInt( CGrayUID uid, int iSkillLevel, bool fTest )
 		g_Cfg.GetDefaultMsg( DEFMSG_EVALINT_MAG_6 )
 	};
 
-	static LPCTSTR const sm_szManaDesc[] =
+	static lpctstr const sm_szManaDesc[] =
 	{
 		g_Cfg.GetDefaultMsg( DEFMSG_EVALINT_MAN_1 ),
 		g_Cfg.GetDefaultMsg( DEFMSG_EVALINT_MAN_2 ),
@@ -951,12 +951,12 @@ int CClient::OnSkill_EvalInt( CGrayUID uid, int iSkillLevel, bool fTest )
 		if ( static_cast<uint>(iManaEntry) >= COUNTOF(sm_szManaDesc))
 			iManaEntry = COUNTOF(sm_szManaDesc)-1;
 
-		SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_EVALINT_RESULT_2 ), static_cast<LPCTSTR>(sm_szMagicDesc[iMagicEntry]), static_cast<LPCTSTR>(sm_szManaDesc[iManaEntry]));
+		SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_EVALINT_RESULT_2 ), static_cast<lpctstr>(sm_szMagicDesc[iMagicEntry]), static_cast<lpctstr>(sm_szManaDesc[iManaEntry]));
 	}
 
 	return iSkillLevel;
 }
-static LPCTSTR const sm_szPoisonMessages[] =
+static lpctstr const sm_szPoisonMessages[] =
 {
 	g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_PSN_1 ),
 	g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_PSN_2 ),
@@ -986,7 +986,7 @@ int CClient::OnSkill_ArmsLore( CGrayUID uid, int iSkillLevel, bool fTest )
 		return Calc_GetRandVal(60);
 	}
 
-	TCHAR *pszTemp = Str_GetTemp();
+	tchar *pszTemp = Str_GetTemp();
 	size_t len = 0;
 	bool fWeapon;
 	int iHitsCur;
@@ -1082,7 +1082,7 @@ int CClient::OnSkill_Anatomy( CGrayUID uid, int iSkillLevel, bool fTest )
 
 	// Add in error cased on your skill level.
 
-	static LPCTSTR const sm_szStrEval[] =
+	static lpctstr const sm_szStrEval[] =
 	{
 		g_Cfg.GetDefaultMsg( DEFMSG_ANATOMY_STR_1 ),
 		g_Cfg.GetDefaultMsg( DEFMSG_ANATOMY_STR_2 ),
@@ -1095,7 +1095,7 @@ int CClient::OnSkill_Anatomy( CGrayUID uid, int iSkillLevel, bool fTest )
 		g_Cfg.GetDefaultMsg( DEFMSG_ANATOMY_STR_9 ),
 		g_Cfg.GetDefaultMsg( DEFMSG_ANATOMY_STR_10 )
 	};
-	static LPCTSTR const sm_szDexEval[] =
+	static lpctstr const sm_szDexEval[] =
 	{
 		g_Cfg.GetDefaultMsg( DEFMSG_ANATOMY_DEX_1 ),
 		g_Cfg.GetDefaultMsg( DEFMSG_ANATOMY_DEX_2 ),
@@ -1123,7 +1123,7 @@ int CClient::OnSkill_Anatomy( CGrayUID uid, int iSkillLevel, bool fTest )
 	if ( static_cast<uint>(iDexEntry) >= COUNTOF( sm_szDexEval ))
 		iDexEntry = COUNTOF( sm_szDexEval )-1;
 
-	TCHAR * pszTemp = Str_GetTemp();
+	tchar * pszTemp = Str_GetTemp();
 	sprintf(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_ANATOMY_RESULT), pChar->GetName(), sm_szStrEval[iStrEntry], sm_szDexEval[iDexEntry]);
 	addObjMessage(pszTemp, pChar);
 
@@ -1156,7 +1156,7 @@ int CClient::OnSkill_Forensics( CGrayUID uid, int iSkillLevel, bool fTest )
 		return (pCorpse->m_uidLink == m_pChar->GetUID()) ? 2 : Calc_GetRandVal(60);
 
 	CChar * pCharKiller = pCorpse->m_itCorpse.m_uidKiller.CharFind();
-	LPCTSTR pName = pCharKiller ? pCharKiller->GetName() : NULL;
+	lpctstr pName = pCharKiller ? pCharKiller->GetName() : NULL;
 
 	if ( pCorpse->IsCorpseSleeping() )
 	{
@@ -1164,7 +1164,7 @@ int CClient::OnSkill_Forensics( CGrayUID uid, int iSkillLevel, bool fTest )
 		return 1;
 	}
 
-	TCHAR * pszTemp = Str_GetTemp();
+	tchar * pszTemp = Str_GetTemp();
 	if ( pCorpse->m_itCorpse.m_carved )
 	{
 		int len = sprintf( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_CARVE_1), pCorpse->GetName() );
@@ -1239,7 +1239,7 @@ int CClient::OnSkill_TasteID( CGrayUID uid, int iSkillLevel, bool fTest )
 		default:
 			if ( ! fTest )
 			{
-				SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_TASTEID_RESULT ), static_cast<LPCTSTR>(pItem->GetNameFull(false)));
+				SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_TASTEID_RESULT ), static_cast<lpctstr>(pItem->GetNameFull(false)));
 			}
 			return 1;
 	}
@@ -1258,7 +1258,7 @@ int CClient::OnSkill_TasteID( CGrayUID uid, int iSkillLevel, bool fTest )
 	}
 	else
 	{
-		SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_TASTEID_RESULT ), static_cast<LPCTSTR>(pItem->GetNameFull(false)));
+		SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_TASTEID_RESULT ), static_cast<lpctstr>(pItem->GetNameFull(false)));
 	}
 
 	return iSkillLevel;
@@ -2025,7 +2025,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 			RESOURCE_ID defaultseed = g_Cfg.ResourceGetIDType( RES_ITEMDEF, "DEFAULTSEED" );
 			pItemTarg->SetDispID(static_cast<ITEMID_TYPE>(defaultseed.GetResIndex()));
 			pItemTarg->SetType(IT_SEED);
-			TCHAR *pszTemp = Str_GetTemp();
+			tchar *pszTemp = Str_GetTemp();
 			sprintf(pszTemp, "%s seed", pItemTarg->GetName());
 			pItemTarg->SetName(pszTemp);
 			pItemTarg->Update();
@@ -2224,7 +2224,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 			return( false );
 
 		{
-static LPCTSTR const sm_Txt_LoomUse[] =
+static lpctstr const sm_Txt_LoomUse[] =
 {
 	g_Cfg.GetDefaultMsg( DEFMSG_ITEMUSE_BOLT_1 ),
 	g_Cfg.GetDefaultMsg( DEFMSG_ITEMUSE_BOLT_2 ),
@@ -2539,7 +2539,7 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 			return( false );
 	}
 
-	TCHAR * sTemp = Str_GetTemp();
+	tchar * sTemp = Str_GetTemp();
 	sprintf(sTemp, g_Cfg.GetDefaultMsg( DEFMSG_PARTY_INVITE ), pChar->GetName());
 	m_pChar->SysMessage( sTemp );
 	sTemp = Str_GetTemp();

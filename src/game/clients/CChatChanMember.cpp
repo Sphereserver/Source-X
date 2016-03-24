@@ -71,7 +71,7 @@ void CChatChanMember::SetChatInactive()
     m_fChatActive = false;
 }
 
-size_t CChatChanMember::FindIgnoringIndex(LPCTSTR pszName) const
+size_t CChatChanMember::FindIgnoringIndex(lpctstr pszName) const
 {
     ADDTOCALLSTACK("CChatChanMember::FindIgnoringIndex");
     for ( size_t i = 0; i < m_IgnoredMembers.GetCount(); i++)
@@ -82,7 +82,7 @@ size_t CChatChanMember::FindIgnoringIndex(LPCTSTR pszName) const
     return m_IgnoredMembers.BadIndex();
 }
 
-void CChatChanMember::Ignore(LPCTSTR pszName)
+void CChatChanMember::Ignore(lpctstr pszName)
 {
     ADDTOCALLSTACK("CChatChanMember::Ignore");
     if (!IsIgnoring(pszName))
@@ -91,7 +91,7 @@ void CChatChanMember::Ignore(LPCTSTR pszName)
         SendChatMsg(CHATMSG_AlreadyIgnoringPlayer, pszName);
 }
 
-void CChatChanMember::DontIgnore(LPCTSTR pszName)
+void CChatChanMember::DontIgnore(lpctstr pszName)
 {
     ADDTOCALLSTACK("CChatChanMember::DontIgnore");
     if (IsIgnoring(pszName))
@@ -100,7 +100,7 @@ void CChatChanMember::DontIgnore(LPCTSTR pszName)
         SendChatMsg(CHATMSG_NotIgnoring, pszName);
 }
 
-void CChatChanMember::ToggleIgnore(LPCTSTR pszName)
+void CChatChanMember::ToggleIgnore(lpctstr pszName)
 {
     ADDTOCALLSTACK("CChatChanMember::ToggleIgnore");
     size_t i = FindIgnoringIndex( pszName );
@@ -137,7 +137,7 @@ void CChatChanMember::ClearIgnoreList()
     SendChatMsg(CHATMSG_NoLongerIgnoringAnyone);
 }
 
-void CChatChanMember::RenameChannel(LPCTSTR pszName)
+void CChatChanMember::RenameChannel(lpctstr pszName)
 {
     ADDTOCALLSTACK("CChatChanMember::RenameChannel");
     CChatChannel * pChannel = GetChannel();
@@ -149,7 +149,7 @@ void CChatChanMember::RenameChannel(LPCTSTR pszName)
         pChannel->RenameChannel(this, pszName);
 }
 
-void CChatChanMember::SendChatMsg(CHATMSG_TYPE iType, LPCTSTR pszName1, LPCTSTR pszName2, CLanguageID lang )
+void CChatChanMember::SendChatMsg(CHATMSG_TYPE iType, lpctstr pszName1, lpctstr pszName2, CLanguageID lang )
 {
     ADDTOCALLSTACK("CChatChanMember::SendChatMsg");
     GetClient()->addChatSystemMessage(iType, pszName1, pszName2, lang );
@@ -199,13 +199,13 @@ const CClient * CChatChanMember::GetClient() const
     return( static_cast <const CClient*>( this ));
 }
 
-LPCTSTR CChatChanMember::GetChatName() const
+lpctstr CChatChanMember::GetChatName() const
 {
     ADDTOCALLSTACK("CChatChanMember::GetChatName");
     return( GetClient()->GetAccount()->m_sChatName );
 }
 
-bool CChatChanMember::IsIgnoring(LPCTSTR pszName) const
+bool CChatChanMember::IsIgnoring(lpctstr pszName) const
 {
     return( FindIgnoringIndex( pszName ) != m_IgnoredMembers.BadIndex() );
 }

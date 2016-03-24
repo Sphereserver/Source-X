@@ -392,7 +392,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 				( g_Cfg.m_wDebugFlags & DEBUGF_ADVANCE_STATS ))
 			{
 				SysMessagef( "%s=%d.%d Difficult=%d Gain Chance=%lld.%lld%% Roll=%d%%",
-					(LPCTSTR) pSkillDef->GetKey(),
+					(lpctstr) pSkillDef->GetKey(),
 					iSkillLevel/10,(iSkillLevel)%10,
 					difficulty/10, iChance/10, iChance%10, iRoll/10 );
 			}
@@ -547,7 +547,7 @@ void CChar::Skill_Cleanup()
 	SetTimeout( m_pPlayer ? -1 : TICK_PER_SEC );	// we should get a brain tick next time
 }
 
-LPCTSTR CChar::Skill_GetName( bool fUse ) const
+lpctstr CChar::Skill_GetName( bool fUse ) const
 {
 	ADDTOCALLSTACK("CChar::Skill_GetName");
 	// Name the current skill we are doing.
@@ -561,7 +561,7 @@ LPCTSTR CChar::Skill_GetName( bool fUse ) const
 		if ( !fUse )
 			return( g_Cfg.GetSkillKey(skill));
 
-		TCHAR * pszText = Str_GetTemp();
+		tchar * pszText = Str_GetTemp();
 		sprintf( pszText, "%s %s", g_Cfg.GetDefaultMsg(DEFMSG_SKILLACT_USING), g_Cfg.GetSkillKey(skill));
 		return( pszText );
 	}
@@ -634,7 +634,7 @@ bool CChar::Skill_MakeItem_Success()
 		return false;
 
 	int quality = 0;
-	TCHAR *pszMsg = Str_GetTemp();
+	tchar *pszMsg = Str_GetTemp();
 	word iSkillLevel = Skill_GetBase(Skill_GetActive());				// primary skill value.
 	CItemVendable *pItemVend = dynamic_cast<CItemVendable *>(pItem);		// cast CItemVendable for setting quality and exp later
 
@@ -749,7 +749,7 @@ bool CChar::Skill_MakeItem_Success()
 		if ( iSkillLevel > 999 && quality > 175 && !IsSetOF(OF_NoItemNaming) )
 		{
 			// A GM made this, and it is of high quality
-			TCHAR *szNewName = Str_GetTemp();
+			tchar *szNewName = Str_GetTemp();
 			sprintf(szNewName, g_Cfg.GetDefaultMsg(DEFMSG_GRANDMASTER_MARK), pItem->GetName(), GetName());
 			pItem->SetName(szNewName);
 
@@ -1045,7 +1045,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 		return false;
 	}
 
-	TCHAR * pszMsg = Str_GetTemp();
+	tchar * pszMsg = Str_GetTemp();
 	sprintf(pszMsg, "%s %s", g_Cfg.GetDefaultMsg( DEFMSG_MINING_SMELT ), pItemOre->GetName());
 	Emote(pszMsg);
 
@@ -1166,7 +1166,7 @@ bool CChar::Skill_Tracking( CGrayUID uidTarg, DIR_TYPE & dirPrv, int iDistMax )
 	ASSERT(dir >= 0 && static_cast<uint>(dir) < COUNTOF(CPointBase::sm_szDirs));
 
 	// Select tracking message based on distance
-	LPCTSTR pszDef;
+	lpctstr pszDef;
 	if ( dist <= 0 )
 		pszDef = g_Cfg.GetDefaultMsg(DEFMSG_TRACKING_RESULT_0);
 	else if ( dist < 16 )
@@ -1180,7 +1180,7 @@ bool CChar::Skill_Tracking( CGrayUID uidTarg, DIR_TYPE & dirPrv, int iDistMax )
 
 	if ( pszDef[0] )
 	{
-		TCHAR *pszMsg = Str_GetTemp();
+		tchar *pszMsg = Str_GetTemp();
 		sprintf(pszMsg, pszDef, pObj->GetName(), pObjTop->IsDisconnected() ? g_Cfg.GetDefaultMsg(DEFMSG_TRACKING_RESULT_DISC) : CPointBase::sm_szDirs[dir]);
 		ObjMessage(pszMsg, this);
 	}
@@ -1984,7 +1984,7 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 
 	if ( stage == SKTRIG_STROKE )
 	{
-		static LPCTSTR const sm_szTameSpeak[] =
+		static lpctstr const sm_szTameSpeak[] =
 		{
 			g_Cfg.GetDefaultMsg( DEFMSG_TAMING_1 ),
 			g_Cfg.GetDefaultMsg( DEFMSG_TAMING_2 ),
@@ -1995,7 +1995,7 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 		if ( m_atTaming.m_Stroke_Count <= 0 || IsPriv( PRIV_GM ))
 			return( 0 );
 
-		TCHAR * pszMsg = Str_GetTemp();
+		tchar * pszMsg = Str_GetTemp();
 		sprintf(pszMsg, sm_szTameSpeak[ Calc_GetRandVal( COUNTOF( sm_szTameSpeak )) ], pChar->GetName());
 		Speak(pszMsg);
 
@@ -2012,7 +2012,7 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 	if ( pMemory && pMemory->m_itEqMemory.m_Action == NPC_MEM_ACT_TAMED)
 	{
 		// I did, no skill to tame it again
-		TCHAR * pszMsg = Str_GetTemp();
+		tchar * pszMsg = Str_GetTemp();
 		sprintf(pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_TAMING_REMEMBER ), pChar->GetName());
 		ObjMessage(pszMsg, pChar );
 
@@ -2408,7 +2408,7 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 	{
 		if ( pChar != this )
 		{
-			TCHAR * pszMsg = Str_GetTemp();
+			tchar * pszMsg = Str_GetTemp();
 			sprintf(pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_HEALING_TO ), pChar->GetName());
 			Emote(pszMsg);
 		}
@@ -2881,7 +2881,7 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 	if ( pDam )
 	{
 		INT64 DVal[2];
-		size_t iQty = Str_ParseCmds( const_cast<TCHAR *>(pDam->GetValStr()), DVal, COUNTOF(DVal));
+		size_t iQty = Str_ParseCmds( const_cast<tchar *>(pDam->GetValStr()), DVal, COUNTOF(DVal));
 		switch(iQty)
 		{
 			case 1:
@@ -2896,7 +2896,7 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 	CVarDefCont * pRock = GetDefKey("THROWOBJ",true);
     if ( pRock )
 	{
-		LPCTSTR t_Str = pRock->GetValStr();
+		lpctstr t_Str = pRock->GetValStr();
 		RESOURCE_ID_BASE rid = static_cast<RESOURCE_ID_BASE>(g_Cfg.ResourceGetID( RES_ITEMDEF, t_Str ));
 		id = static_cast<ITEMID_TYPE>(rid.GetResIndex());
 		if (!iDamage)

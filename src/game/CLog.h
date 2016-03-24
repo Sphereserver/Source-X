@@ -44,10 +44,10 @@ public:
 public:
 	const CScript * SetScriptContext( const CScript * pScriptContext );
 	const CScriptObj * SetObjectContext( const CScriptObj * pObjectContext );
-	bool SetFilePath( LPCTSTR pszName );
+	bool SetFilePath( lpctstr pszName );
 
-	LPCTSTR GetLogDir() const;
-	bool OpenLog( LPCTSTR pszName = NULL );	// name set previously.
+	lpctstr GetLogDir() const;
+	bool OpenLog( lpctstr pszName = NULL );	// name set previously.
 	dword GetLogMask() const;
 	void SetLogMask( dword dwMask );
 	bool IsLoggedMask( dword dwMask ) const;
@@ -56,8 +56,8 @@ public:
 	bool IsLoggedLevel( LOGL_TYPE level ) const;
 	bool IsLogged( dword wMask ) const;
 
-	virtual int EventStr( dword wMask, LPCTSTR pszMsg );
-	void _cdecl CatchEvent( const CGrayError * pErr, LPCTSTR pszCatchContext, ...  ) __printfargs(3,4);
+	virtual int EventStr( dword wMask, lpctstr pszMsg );
+	void _cdecl CatchEvent( const CGrayError * pErr, lpctstr pszCatchContext, ...  ) __printfargs(3,4);
 
 public:
 	CLog();

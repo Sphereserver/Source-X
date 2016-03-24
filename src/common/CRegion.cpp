@@ -12,12 +12,12 @@
 //************************************************************************
 // -CTeleport
 
-CTeleport::CTeleport( TCHAR * pszArgs )
+CTeleport::CTeleport( tchar * pszArgs )
 {
 	// RES_TELEPORT
 	// Assume valid iArgs >= 5
 
-	TCHAR * ppCmds[4];
+	tchar * ppCmds[4];
 	size_t iArgs = Str_ParseCmds( pszArgs, ppCmds, COUNTOF( ppCmds ), "=" );
 	if ( iArgs < 2 )
 	{
@@ -267,7 +267,7 @@ bool CGRegion::IsEqualRegion( const CGRegion * pRegionTest ) const
 //*************************************************************************
 // -CRegionBase
 
-CRegionBase::CRegionBase( RESOURCE_ID rid, LPCTSTR pszName ) :
+CRegionBase::CRegionBase( RESOURCE_ID rid, lpctstr pszName ) :
 	CResourceDef( rid )
 {
 	m_dwFlags	= 0;
@@ -354,7 +354,7 @@ bool CRegionBase::AddRegionRect( const CRectMap & rect )
 	return( true );
 }
 
-void CRegionBase::SetName( LPCTSTR pszName )
+void CRegionBase::SetName( lpctstr pszName )
 {
 	ADDTOCALLSTACK("CRegionBase::SetName");
 	if ( pszName == NULL || pszName[0] == '%' )
@@ -404,7 +404,7 @@ enum RC_TYPE
 	RC_QTY
 };
 
-LPCTSTR const CRegionBase::sm_szLoadKeys[RC_QTY+1] =	// static (Sorted)
+lpctstr const CRegionBase::sm_szLoadKeys[RC_QTY+1] =	// static (Sorted)
 {
 	"ANNOUNCE",
 	"ARENA",
@@ -441,7 +441,7 @@ LPCTSTR const CRegionBase::sm_szLoadKeys[RC_QTY+1] =	// static (Sorted)
 	NULL
 };
 
-bool CRegionBase::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CRegionBase::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CRegionBase::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -576,12 +576,12 @@ bool CRegionBase::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pS
 					SKIP_SEPARATORS( pszKey );
 					if ( ! *pszKey )
 					{
-						sVal.Format("%s=%s", static_cast<LPCTSTR>(pTagAt->GetKey()), static_cast<LPCTSTR>(pTagAt->GetValStr()));
+						sVal.Format("%s=%s", static_cast<lpctstr>(pTagAt->GetKey()), static_cast<lpctstr>(pTagAt->GetValStr()));
 						return( true );
 					}
 					else if ( !strnicmp( pszKey, "KEY", 3 )) // key?
 					{
-						sVal = static_cast<LPCTSTR>(pTagAt->GetKey());
+						sVal = static_cast<lpctstr>(pTagAt->GetKey());
 						return( true );
 					}
 					else if ( !strnicmp( pszKey, "VAL", 3 )) // val?
@@ -634,7 +634,7 @@ bool CRegionBase::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pS
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("command '%s' ret '%s' [%p]\n", pszKey, static_cast<LPCTSTR>(sVal), static_cast<void *>(pSrc));
+	g_Log.EventDebug("command '%s' ret '%s' [%p]\n", pszKey, static_cast<lpctstr>(sVal), static_cast<void *>(pSrc));
 	EXC_DEBUG_END;
 	return false;
 }
@@ -754,7 +754,7 @@ bool CRegionBase::r_LoadVal( CScript & s )
 }
 
 
-void CRegionBase::r_WriteBody( CScript & s, LPCTSTR pszPrefix )
+void CRegionBase::r_WriteBody( CScript & s, lpctstr pszPrefix )
 {
 	ADDTOCALLSTACK("CRegionBase::r_WriteBody");
 	TemporaryString z;
@@ -812,7 +812,7 @@ void CRegionBase::r_WriteBase( CScript &s )
 		s.WriteKey("NAME", GetName());
 
 	if ( ! m_sGroup.IsEmpty() )
-		s.WriteKey("GROUP", static_cast<LPCTSTR>(m_sGroup));
+		s.WriteKey("GROUP", static_cast<lpctstr>(m_sGroup));
 
 	CRegionBase::r_WriteBody( s, "" );
 
@@ -896,7 +896,7 @@ enum RV_TYPE
 	RV_QTY
 };
 
-LPCTSTR const CRegionBase::sm_szVerbKeys[RV_QTY+1] =
+lpctstr const CRegionBase::sm_szVerbKeys[RV_QTY+1] =
 {
 	"ALLCLIENTS",
 	"TAGLIST",
@@ -916,7 +916,7 @@ bool CRegionBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command 
 {
 	ADDTOCALLSTACK("CRegionBase::r_Verb");
 	EXC_TRY("Verb");
-	LPCTSTR pszKey = s.GetKey();
+	lpctstr pszKey = s.GetKey();
 
 	if ( !strnicmp(pszKey, "CLEARTAGS", 9) )
 	{
@@ -969,7 +969,7 @@ bool CRegionBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command 
 	return false;
 }
 
-bool CRegionBase::SendSectorsVerb( LPCTSTR pszVerb, LPCTSTR pszArgs, CTextConsole * pSrc )
+bool CRegionBase::SendSectorsVerb( lpctstr pszVerb, lpctstr pszArgs, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CRegionBase::SendSectorsVerb");
 	// Send a command to all the CSectors in this region.
@@ -990,7 +990,7 @@ bool CRegionBase::SendSectorsVerb( LPCTSTR pszVerb, LPCTSTR pszArgs, CTextConsol
 	return( fRet );
 }
 
-LPCTSTR const CRegionBase::sm_szTrigName[RTRIG_QTY+1] =	// static
+lpctstr const CRegionBase::sm_szTrigName[RTRIG_QTY+1] =	// static
 {
 	"@AAAUNUSED",
 	"@CLIPERIODIC",
@@ -1042,7 +1042,7 @@ TRIGRET_TYPE CRegionBase::OnRegionTrigger( CTextConsole * pSrc, RTRIG_TYPE iActi
 //*************************************************************************
 // -CRegionWorld
 
-CRegionWorld::CRegionWorld( RESOURCE_ID rid, LPCTSTR pszName ) :
+CRegionWorld::CRegionWorld( RESOURCE_ID rid, lpctstr pszName ) :
 	CRegionBase( rid, pszName )
 {
 }
@@ -1059,7 +1059,7 @@ enum RWC_TYPE
 	RWC_QTY
 };
 
-LPCTSTR const CRegionWorld::sm_szLoadKeys[RWC_QTY+1] =	// static
+lpctstr const CRegionWorld::sm_szLoadKeys[RWC_QTY+1] =	// static
 {
 	"DEFNAME",
 	"REGION",
@@ -1067,13 +1067,13 @@ LPCTSTR const CRegionWorld::sm_szLoadKeys[RWC_QTY+1] =	// static
 	NULL
 };
 
-bool CRegionWorld::r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef )
+bool CRegionWorld::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CRegionWorld::r_GetRef");
 	return( CRegionBase::r_GetRef( pszKey, pRef ));
 }
 
-bool CRegionWorld::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CRegionWorld::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CRegionWorld::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -1115,7 +1115,7 @@ bool CRegionWorld::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * p
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("command '%s' ret '%s' [%p]\n", pszKey, static_cast<LPCTSTR>(sVal), static_cast<void *>(pSrc));
+	g_Log.EventDebug("command '%s' ret '%s' [%p]\n", pszKey, static_cast<lpctstr>(sVal), static_cast<void *>(pSrc));
 	EXC_DEBUG_END;
 	return false;
 }
@@ -1159,7 +1159,7 @@ void CRegionWorld::r_WriteModified( CScript &s )
 }
 
 
-void CRegionWorld::r_WriteBody( CScript &s, LPCTSTR pszPrefix )
+void CRegionWorld::r_WriteBody( CScript &s, lpctstr pszPrefix )
 {
 	ADDTOCALLSTACK("CRegionWorld::r_WriteBody");
 	CRegionBase::r_WriteBody( s, pszPrefix );
@@ -1180,7 +1180,7 @@ void CRegionWorld::r_Write( CScript &s )
 	RWV_QTY
 };*/
 
-/*LPCTSTR const CRegionWorld::sm_szVerbKeys[] =
+/*lpctstr const CRegionWorld::sm_szVerbKeys[] =
 {
 	"TAGLIST",
 	NULL
@@ -1190,7 +1190,7 @@ bool CRegionWorld::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command
 {
 	ADDTOCALLSTACK("CRegionWorld::r_Verb");
 	EXC_TRY("Verb");
-/*	LPCTSTR pszKey = s.GetKey();
+/*	lpctstr pszKey = s.GetKey();
 
 	if ( !strnicmp(pszKey, "CLEARTAGS", 9) )
 	{

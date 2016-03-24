@@ -247,7 +247,7 @@ void CChar::NPC_Act_Fight()
 		if (pRange)
 		{
 			INT64 RVal[2];
-			size_t iQty = Str_ParseCmds( const_cast<TCHAR*>(pRange->GetValStr()), RVal, COUNTOF(RVal));
+			size_t iQty = Str_ParseCmds( const_cast<tchar*>(pRange->GetValStr()), RVal, COUNTOF(RVal));
 			switch(iQty)
 			{
 				case 1:
@@ -267,7 +267,7 @@ void CChar::NPC_Act_Fight()
 				ITEMID_TYPE id = ITEMID_NOTHING;
 				if (pRock)
 				{
-					LPCTSTR t_Str = pRock->GetValStr();
+					lpctstr t_Str = pRock->GetValStr();
 					RESOURCE_ID_BASE rid = static_cast<RESOURCE_ID_BASE>(g_Cfg.ResourceGetID( RES_ITEMDEF, t_Str ));
 					ITEMID_TYPE obj = static_cast<ITEMID_TYPE>(rid.GetResIndex());
 					if ( ContentFind( RESOURCE_ID(RES_ITEMDEF,obj), 0, 2 ) )

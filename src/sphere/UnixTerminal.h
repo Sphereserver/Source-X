@@ -23,7 +23,7 @@ private:
 #else
 	termios m_original;
 #endif
-	TCHAR m_nextChar;
+	tchar m_nextChar;
 	bool m_isColorEnabled;
 	bool m_prepared;
 
@@ -51,9 +51,9 @@ protected:
 
 public:
 	bool isReady();
-	TCHAR read();
+	tchar read();
 	void prepare();
-	void print(LPCTSTR message);
+	void print(lpctstr message);
 	void setColor(COLOR_TYPE color);
 	void setColorEnabled(bool enable);
 

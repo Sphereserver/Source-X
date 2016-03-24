@@ -9,7 +9,7 @@ CItemCommCrystal::~CItemCommCrystal() {
     DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
 }
 
-LPCTSTR const CItemCommCrystal::sm_szLoadKeys[] =
+lpctstr const CItemCommCrystal::sm_szLoadKeys[] =
         {
                 "SPEECH",
                 NULL,
@@ -34,7 +34,7 @@ bool CItemCommCrystal::MoveTo(CPointMap pt, bool bForceFix)
     return CItem::MoveTo(pt, bForceFix);
 }
 
-void CItemCommCrystal::OnHear(LPCTSTR pszCmd, CChar *pSrc)
+void CItemCommCrystal::OnHear(lpctstr pszCmd, CChar *pSrc)
 {
     ADDTOCALLSTACK("CItemCommCrystal::OnHear");
     // IT_COMM_CRYSTAL
@@ -76,7 +76,7 @@ void CItemCommCrystal::r_Write(CScript & s)
     m_Speech.r_Write(s, "SPEECH");
 }
 
-bool CItemCommCrystal::r_WriteVal(LPCTSTR pszKey, CGString & sVal, CTextConsole *pSrc)
+bool CItemCommCrystal::r_WriteVal(lpctstr pszKey, CGString & sVal, CTextConsole *pSrc)
 {
     ADDTOCALLSTACK("CItemCommCrystal::r_WriteVal");
     switch ( FindTableSorted(pszKey, sm_szLoadKeys, COUNTOF(sm_szLoadKeys) - 1) )

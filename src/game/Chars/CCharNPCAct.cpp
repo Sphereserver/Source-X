@@ -33,7 +33,7 @@ enum NV_TYPE
 	NV_QTY
 };
 
-LPCTSTR const CCharNPC::sm_szVerbKeys[NV_QTY+1] =
+lpctstr const CCharNPC::sm_szVerbKeys[NV_QTY+1] =
 {
 	"BUY",
 	"BYE",
@@ -216,7 +216,7 @@ void CChar::NPC_ActStart_SpeakTo( CChar * pSrc )
 	UpdateDir(pSrc);
 }
 
-void CChar::NPC_OnHear( LPCTSTR pszCmd, CChar * pSrc, bool fAllPets )
+void CChar::NPC_OnHear( lpctstr pszCmd, CChar * pSrc, bool fAllPets )
 {
 	ADDTOCALLSTACK("CChar::NPC_OnHear");
 	// This CChar has heard you say something.
@@ -246,7 +246,7 @@ void CChar::NPC_OnHear( LPCTSTR pszCmd, CChar * pSrc, bool fAllPets )
 					CChar * pCharOld = m_Act_Targ.CharFind();
 					if (pCharOld != NULL)
 					{
-						TCHAR * z = Str_GetTemp();
+						tchar * z = Str_GetTemp();
 						sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_NPC_GENERIC_INTERRUPT), pCharOld->GetName(), pSrc->GetName());
 						Speak(z);
 					}
@@ -626,7 +626,7 @@ bool CChar::NPC_LookAtCharGuard( CChar * pChar, bool bFromTrigger )
 		if ( Calc_GetRandVal(10))
 			return( false );
 
-		TCHAR *pszMsg = Str_GetTemp();
+		tchar *pszMsg = Str_GetTemp();
 		sprintf(pszMsg, g_Cfg.GetDefaultMsg(sm_szSpeakGuardJeer[ Calc_GetRandVal( COUNTOF( sm_szSpeakGuardJeer )) ]), pChar->GetName());
 		Speak(pszMsg);
 		UpdateDir(pChar);
@@ -758,25 +758,25 @@ bool CChar::NPC_LookAtCharHealer( CChar * pChar )
 	if ( !pChar->IsStatFlag(STATF_DEAD) || (pChar->m_pNPC && pChar->m_pNPC->m_bonded) )
 		return false;
 
-	static LPCTSTR const sm_szHealerRefuseEvils[] =
+	static lpctstr const sm_szHealerRefuseEvils[] =
 	{
 		g_Cfg.GetDefaultMsg( DEFMSG_NPC_HEALER_REF_EVIL_1 ),
 		g_Cfg.GetDefaultMsg( DEFMSG_NPC_HEALER_REF_EVIL_2 ),
 		g_Cfg.GetDefaultMsg( DEFMSG_NPC_HEALER_REF_EVIL_3 )
 	};
-	static LPCTSTR const sm_szHealerRefuseCriminals[] =
+	static lpctstr const sm_szHealerRefuseCriminals[] =
 	{
 		g_Cfg.GetDefaultMsg( DEFMSG_NPC_HEALER_REF_CRIM_1 ),
 		g_Cfg.GetDefaultMsg( DEFMSG_NPC_HEALER_REF_CRIM_2 ),
 		g_Cfg.GetDefaultMsg( DEFMSG_NPC_HEALER_REF_CRIM_3 )
 	};
-	static LPCTSTR const sm_szHealerRefuseGoods[] =
+	static lpctstr const sm_szHealerRefuseGoods[] =
 	{
 		g_Cfg.GetDefaultMsg( DEFMSG_NPC_HEALER_REF_GOOD_1 ),
 		g_Cfg.GetDefaultMsg( DEFMSG_NPC_HEALER_REF_GOOD_2 ),
 		g_Cfg.GetDefaultMsg( DEFMSG_NPC_HEALER_REF_GOOD_3 )
 	};
-	static LPCTSTR const sm_szHealer[] =
+	static lpctstr const sm_szHealer[] =
 	{
 		g_Cfg.GetDefaultMsg( DEFMSG_NPC_HEALER_RES_1 ),
 		g_Cfg.GetDefaultMsg( DEFMSG_NPC_HEALER_RES_2 ),
@@ -787,7 +787,7 @@ bool CChar::NPC_LookAtCharHealer( CChar * pChar )
 
 	UpdateDir( pChar );
 
-	LPCTSTR pszRefuseMsg;
+	lpctstr pszRefuseMsg;
 
 	int iDist = GetDist( pChar );
 	if ( pChar->IsStatFlag( STATF_Insubstantial ))
@@ -1320,12 +1320,12 @@ bool CChar::NPC_Act_Talk()
 	{
 		if ( NPC_CanSpeak())
 		{
-			static LPCTSTR const sm_szText[] =
+			static lpctstr const sm_szText[] =
 			{
 				g_Cfg.GetDefaultMsg( DEFMSG_NPC_GENERIC_GONE_1 ),
 				g_Cfg.GetDefaultMsg( DEFMSG_NPC_GENERIC_GONE_2 )
 			};
-			TCHAR *pszMsg = Str_GetTemp();
+			tchar *pszMsg = Str_GetTemp();
 			sprintf(pszMsg, sm_szText[ Calc_GetRandVal( COUNTOF( sm_szText )) ], pChar->GetName());
 			Speak(pszMsg);
 		}
@@ -1963,7 +1963,7 @@ bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
 
 			if ( NPC_CanSpeak() )
 			{
-				TCHAR *pszMsg = Str_GetTemp();
+				tchar *pszMsg = Str_GetTemp();
 				sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_NPC_BANKER_DEPOSIT), pItem->GetAmount());
 				Speak(pszMsg);
 			}

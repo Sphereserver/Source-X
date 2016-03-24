@@ -33,22 +33,22 @@ class CScriptKey
 	// This is usually in the form of KEY=ARG
 	// Unknown allocation of pointers.
 protected:
-	TCHAR * m_pszKey;		// The key. (or just start of the line)
-	TCHAR * m_pszArg;		// for parsing the last read line.	KEY=ARG or KEY ARG
+	tchar * m_pszKey;		// The key. (or just start of the line)
+	tchar * m_pszArg;		// for parsing the last read line.	KEY=ARG or KEY ARG
 
 public:
 	static const char *m_sClassName;
-	bool IsKey( LPCTSTR pszName ) const;
-	bool IsKeyHead( LPCTSTR pszName, size_t len ) const;
+	bool IsKey( lpctstr pszName ) const;
+	bool IsKeyHead( lpctstr pszName, size_t len ) const;
 	void InitKey();
 
 	// Query the key.
-	LPCTSTR GetKey() const;
+	lpctstr GetKey() const;
 	// Args passed with the key.
 	bool HasArgs() const;
-	TCHAR * GetArgRaw() const; // Not need to parse at all.
-	TCHAR * GetArgStr( bool * fQuoted );	// this could be a quoted string ?
-	TCHAR * GetArgStr();
+	tchar * GetArgRaw() const; // Not need to parse at all.
+	tchar * GetArgStr( bool * fQuoted );	// this could be a quoted string ?
+	tchar * GetArgStr();
 	long long GetArgLLVal();
 	int GetArgVal();
 	int GetArgRange();
@@ -56,7 +56,7 @@ public:
 
 public:
 	CScriptKey();
-	CScriptKey( TCHAR * pszKey, TCHAR * pszArg );
+	CScriptKey( tchar * pszKey, tchar * pszArg );
 	virtual ~CScriptKey();
 private:
 	CScriptKey(const CScriptKey& copy);
@@ -70,15 +70,15 @@ protected:
 	CMemLenBlock m_Mem;	// the buffer to hold data read.
 
 protected:
-	TCHAR * GetKeyBufferRaw( size_t iSize );
+	tchar * GetKeyBufferRaw( size_t iSize );
 
-	bool ParseKey( LPCTSTR pszKey, LPCTSTR pszArgs );
+	bool ParseKey( lpctstr pszKey, lpctstr pszArgs );
 	size_t ParseKeyEnd();
 
 public:
 	static const char *m_sClassName;
-	TCHAR * GetKeyBuffer();
-	bool ParseKey( LPCTSTR pszKey );
+	tchar * GetKeyBuffer();
+	bool ParseKey( lpctstr pszKey );
 	void ParseKeyLate();
 
 public:
@@ -113,10 +113,10 @@ protected:
 public:
 	// text only functions:
 	virtual bool ReadTextLine( bool fRemoveBlanks );	// looking for a section or reading strangly formated section.
-	bool FindTextHeader( LPCTSTR pszName ); // Find a section in the current script
+	bool FindTextHeader( lpctstr pszName ); // Find a section in the current script
 
 public:
-	virtual bool Open( LPCTSTR szFilename = NULL, UINT Flags = OF_READ|OF_TEXT );
+	virtual bool Open( lpctstr szFilename = NULL, UINT Flags = OF_READ|OF_TEXT );
 	virtual void Close();
 	virtual void CloseForce();
 	bool SeekContext( CScriptLineContext LineContext );
@@ -124,26 +124,26 @@ public:
 
 	// Find sections.
 	bool FindNextSection();
-	virtual bool FindSection( LPCTSTR pszName, UINT uModeFlags ); // Find a section in the current script
-	LPCTSTR GetSection() const;
-	bool IsSectionType( LPCTSTR pszName );
+	virtual bool FindSection( lpctstr pszName, UINT uModeFlags ); // Find a section in the current script
+	lpctstr GetSection() const;
+	bool IsSectionType( lpctstr pszName );
 	// Find specific keys in the current section.
-	bool FindKey( LPCTSTR pszName ); // Find a key in the current section
+	bool FindKey( lpctstr pszName ); // Find a key in the current section
 	// read the sections keys.
 	bool ReadKey( bool fRemoveBlanks = true );
 	bool ReadKeyParse();
 
 	// Write stuff out to a script file.
-	bool _cdecl WriteSection( LPCTSTR pszSection, ... ) __printfargs(2,3);
-	bool WriteKey( LPCTSTR pszKey, LPCTSTR pszVal );
-	void _cdecl WriteKeyFormat( LPCTSTR pszKey, LPCTSTR pszFormat, ... ) __printfargs(3,4);
+	bool _cdecl WriteSection( lpctstr pszSection, ... ) __printfargs(2,3);
+	bool WriteKey( lpctstr pszKey, lpctstr pszVal );
+	void _cdecl WriteKeyFormat( lpctstr pszKey, lpctstr pszFormat, ... ) __printfargs(3,4);
 
-	void WriteKeyVal( LPCTSTR pszKey, INT64 dwVal );
-	void WriteKeyHex( LPCTSTR pszKey, INT64 dwVal );
+	void WriteKeyVal( lpctstr pszKey, INT64 dwVal );
+	void WriteKeyHex( lpctstr pszKey, INT64 dwVal );
 
 	CScript();
-	CScript( LPCTSTR pszKey );
-	CScript( LPCTSTR pszKey, LPCTSTR pszVal );
+	CScript( lpctstr pszKey );
+	CScript( lpctstr pszKey, lpctstr pszVal );
 	virtual ~CScript();
 };
 

@@ -19,7 +19,7 @@
 /////////////////////////////////
 // Events from the Client.
 
-LPCTSTR const CClient::sm_szCmd_Redirect[13] =
+lpctstr const CClient::sm_szCmd_Redirect[13] =
 {
 	"BANK",
 	"CONTROL",
@@ -79,7 +79,7 @@ void CClient::Event_ChatButton(const NCHAR * pszName) // Client's chat button wa
 			// OK, we got a nick, now store it with the account stuff.
 
 			// Make it non unicode
-			TCHAR szChatName[ MAX_NAME_SIZE * 2 + 2 ];
+			tchar szChatName[ MAX_NAME_SIZE * 2 + 2 ];
 			CvtNUNICODEToSystem( szChatName, sizeof(szChatName), pszName, 128 );
 
 			if ( ! CChat::IsValidName(szChatName, true) ||
@@ -171,7 +171,7 @@ void CClient::Event_Tips( word i) // Tip of the day window
 
 
 
-void CClient::Event_Book_Title( CGrayUID uid, LPCTSTR pszTitle, LPCTSTR pszAuthor )
+void CClient::Event_Book_Title( CGrayUID uid, lpctstr pszTitle, lpctstr pszAuthor )
 {
 	ADDTOCALLSTACK("CClient::Event_Book_Title");
 	// XCMD_BookOpen : user is changing the books title/author info.
@@ -912,7 +912,7 @@ void CClient::Event_CombatMode( bool fWar ) // Only for switching to combat mode
 	m_pChar->UpdateMode( this, m_pChar->IsStatFlag( STATF_DEAD ));
 }
 
-bool CClient::Event_Command(LPCTSTR pszCommand, TALKMODE_TYPE mode)
+bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 {
 	ADDTOCALLSTACK("CClient::Event_Command");
 	if ( mode == 13 || mode == 14 ) // guild and alliance don't pass this.
@@ -1010,7 +1010,7 @@ void CClient::Event_VendorBuy_Cheater( int iCode )
 	ADDTOCALLSTACK("CClient::Event_VendorBuy_Cheater");
 
 	// iCode descriptions
-	static LPCTSTR const sm_BuyPacketCheats[] =
+	static lpctstr const sm_BuyPacketCheats[] =
 	{
 		"Other",
 		"Bad vendor UID",
@@ -1227,9 +1227,9 @@ do_consume:
 
 	//	Step #5
 	//	Say the message about the bought goods
-	TCHAR *sMsg = Str_GetTemp();
-	TCHAR *pszTemp1 = Str_GetTemp();
-	TCHAR *pszTemp2 = Str_GetTemp();
+	tchar *sMsg = Str_GetTemp();
+	tchar *pszTemp1 = Str_GetTemp();
+	tchar *pszTemp2 = Str_GetTemp();
 	sprintf(pszTemp1, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_HYARE), m_pChar->GetName());
 	sprintf(pszTemp2, fBoss ? g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_S1) : g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_B1),
 		costtotal, (costtotal==1) ? "" : g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CA));
@@ -1261,7 +1261,7 @@ void CClient::Event_VendorSell_Cheater( int iCode )
 	ADDTOCALLSTACK("CClient::Event_VendorSell_Cheater");
 
 	// iCode descriptions
-	static LPCTSTR const sm_SellPacketCheats[] =
+	static lpctstr const sm_SellPacketCheats[] =
 	{
 		"Other",
 		"Bad vendor UID",
@@ -1394,7 +1394,7 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, size_t i
 	}
 }
 
-void CClient::Event_Profile( byte fWriteMode, CGrayUID uid, LPCTSTR pszProfile, int iProfileLen )
+void CClient::Event_Profile( byte fWriteMode, CGrayUID uid, lpctstr pszProfile, int iProfileLen )
 {
 	ADDTOCALLSTACK("CClient::Event_Profile");
 	UNREFERENCED_PARAMETER(iProfileLen);
@@ -1461,7 +1461,7 @@ void CClient::Event_MailMsg( CGrayUID uid1, CGrayUID uid2 )
 		return;
 	}
 	// Might be an NPC ?
-	TCHAR * pszMsg = Str_GetTemp();
+	tchar * pszMsg = Str_GetTemp();
 	sprintf(pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_MSG_MAILBAG_DROP_2 ), m_pChar->GetName());
 	pChar->SysMessage(pszMsg);
 }
@@ -1486,14 +1486,14 @@ void CClient::Event_ToolTip( CGrayUID uid )
 	addToolTip(uid.ObjFind(), z);
 }
 
-void CClient::Event_PromptResp( LPCTSTR pszText, size_t len, dword context1, dword context2, dword type, bool bNoStrip )
+void CClient::Event_PromptResp( lpctstr pszText, size_t len, dword context1, dword context2, dword type, bool bNoStrip )
 {
 	ADDTOCALLSTACK("CClient::Event_PromptResp");
 	if (m_pChar == NULL)
 		return;
 
 	// result of addPrompt
-	TCHAR szText[MAX_TALK_BUFFER];
+	tchar szText[MAX_TALK_BUFFER];
 
 	if ( Str_Check( pszText ) )
 		return;
@@ -1518,8 +1518,8 @@ void CClient::Event_PromptResp( LPCTSTR pszText, size_t len, dword context1, dwo
 			len = Str_GetBare( szText, pszText, COUNTOF(szText), "|~,=[]{|}~" );
 	}
 
-	LPCTSTR pszReName = NULL;
-	LPCTSTR pszPrefix = NULL;
+	lpctstr pszReName = NULL;
+	lpctstr pszPrefix = NULL;
 
 	switch ( promptMode )
 	{
@@ -1623,7 +1623,7 @@ void CClient::Event_PromptResp( LPCTSTR pszText, size_t len, dword context1, dwo
 
 
 
-void CClient::Event_Talk_Common(TCHAR * szText) // PC speech
+void CClient::Event_Talk_Common(tchar * szText) // PC speech
 {
 	ADDTOCALLSTACK("CClient::Event_Talk_Common");
 	// ??? Allow NPC's to talk to each other in the future.
@@ -1642,7 +1642,7 @@ void CClient::Event_Talk_Common(TCHAR * szText) // PC speech
 		return;
 	}
 
-	static LPCTSTR const sm_szTextMurderer[] =
+	static lpctstr const sm_szTextMurderer[] =
 	{
 		g_Cfg.GetDefaultMsg( DEFMSG_NPC_TEXT_MURD_1 ),
 		g_Cfg.GetDefaultMsg( DEFMSG_NPC_TEXT_MURD_2 ),
@@ -1663,7 +1663,7 @@ void CClient::Event_Talk_Common(TCHAR * szText) // PC speech
 	// They can't hear u if your dead.
 	bool fGhostSpeak = m_pChar->IsSpeakAsGhost();
 
-	LPCTSTR pszCallWord = g_Exp.m_VarDefs.GetKeyStr("guardcall");
+	lpctstr pszCallWord = g_Exp.m_VarDefs.GetKeyStr("guardcall");
 	if (!strnicmp(szText, "", 0))
 		pszCallWord = "GUARD,GUARDS";
 
@@ -1789,7 +1789,7 @@ void CClient::Event_Talk_Common(TCHAR * szText) // PC speech
 
 
 
-void CClient::Event_Talk( LPCTSTR pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bool bNoStrip) // PC speech
+void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bool bNoStrip) // PC speech
 {
 	ADDTOCALLSTACK("CClient::Event_Talk");
 
@@ -1811,7 +1811,7 @@ void CClient::Event_Talk( LPCTSTR pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 		m_pChar->m_SpeechHue = wHue;
 
 	// Rip out the unprintables first.
-	TCHAR szText[MAX_TALK_BUFFER];
+	tchar szText[MAX_TALK_BUFFER];
 	size_t len;
 
 	if ( bNoStrip )
@@ -1823,7 +1823,7 @@ void CClient::Event_Talk( LPCTSTR pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 	}
 	else
 	{
-		TCHAR szTextG[MAX_TALK_BUFFER];
+		tchar szTextG[MAX_TALK_BUFFER];
 		strncpy( szTextG, pszText, MAX_TALK_BUFFER - 1 );
 		szTextG[MAX_TALK_BUFFER - 1] = '\0';
 		len = Str_GetBare( szText, szTextG, sizeof(szText)-1 );
@@ -1838,7 +1838,7 @@ void CClient::Event_Talk( LPCTSTR pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 	if ( !Event_Command(pszText,mode) )
 	{
 		bool	fCancelSpeech	= false;
-		TCHAR	z[MAX_TALK_BUFFER];
+		tchar	z[MAX_TALK_BUFFER];
 
 		if ( m_pChar->OnTriggerSpeech(false, pszText, m_pChar, mode, wHue) )
 			fCancelSpeech	= true;
@@ -1875,12 +1875,12 @@ void CClient::Event_Talk( LPCTSTR pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 		if ( !fCancelSpeech && ( len <= 128 ) ) // From this point max 128 chars
 		{
 			m_pChar->SpeakUTF8(z, wHue, static_cast<TALKMODE_TYPE>(mode), m_pChar->m_fonttype, GetAccount()->m_lang);
-			Event_Talk_Common(static_cast<TCHAR*>(z));
+			Event_Talk_Common(static_cast<tchar*>(z));
 		}
 	}
 }
 
-void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TALKMODE_TYPE mMode, FONT_TYPE font, LPCTSTR pszLang )
+void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TALKMODE_TYPE mMode, FONT_TYPE font, lpctstr pszLang )
 {
 	ADDTOCALLSTACK("CClient::Event_TalkUNICODE");
 	// Get the text in wide bytes.
@@ -1909,14 +1909,14 @@ void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TA
 	if ( mMode == TALKMODE_SYSTEM )
 		m_pChar->m_SpeechHue = wHue;
 
-	TCHAR szText[MAX_TALK_BUFFER];
+	tchar szText[MAX_TALK_BUFFER];
 	const nword * puText = wszText;
 
 	int iLen = CvtNUNICODEToSystem( szText, sizeof(szText), wszText, iTextLen );
 	if ( iLen <= 0 )
 		return;
 
-	TCHAR* pszText = szText;
+	tchar* pszText = szText;
 	GETNONWHITESPACE(pszText);
 
 	if ( !Event_Command(pszText, mMode) )
@@ -1958,7 +1958,7 @@ void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TA
 		if ( !fCancelSpeech && ( iLen <= 128 ) ) // From this point max 128 chars
 		{
 			m_pChar->SpeakUTF8Ex(puText, wHue, mMode, font, pAccount->m_lang);
-			Event_Talk_Common(static_cast<TCHAR*>(pszText));
+			Event_Talk_Common(static_cast<tchar*>(pszText));
 		}
 	}
 }
@@ -1996,17 +1996,17 @@ void CClient::Event_SetName( CGrayUID uid, const char * pszCharName )
 	pChar->SetName(pszCharName);
 }
 
-void CDialogResponseArgs::AddText( word id, LPCTSTR pszText )
+void CDialogResponseArgs::AddText( word id, lpctstr pszText )
 {
 	m_TextArray.Add(new TResponseString(id, pszText));
 }
 
-LPCTSTR CDialogResponseArgs::GetName() const
+lpctstr CDialogResponseArgs::GetName() const
 {
 	return "ARGD";
 }
 
-bool CDialogResponseArgs::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc )
+bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CDialogResponseArgs::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -2598,7 +2598,7 @@ void CClient::Event_AOSPopupMenuSelect(dword uid, word EntryTag)	//do something 
 	}
 }
 
-void CClient::Event_BugReport( const TCHAR * pszText, int len, BUGREPORT_TYPE type, CLanguageID lang )
+void CClient::Event_BugReport( const tchar * pszText, int len, BUGREPORT_TYPE type, CLanguageID lang )
 {
 	ADDTOCALLSTACK("CClient::Event_BugReport");
 	UNREFERENCED_PARAMETER(len);
@@ -2660,7 +2660,7 @@ void CClient::Event_UseToolbar(byte bType, dword dwArg)
 
 //----------------------------------------------------------------------
 
-void CClient::Event_ExtCmd( EXTCMD_TYPE type, TCHAR *pszName )
+void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 {
 	ADDTOCALLSTACK("CClient::Event_ExtCmd");
 	if ( !m_pChar )
@@ -2675,7 +2675,7 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, TCHAR *pszName )
 		strcpy(pszName, Args.m_s1);
 	}
 
-	TCHAR *ppArgs[2];
+	tchar *ppArgs[2];
 	Str_ParseCmds(pszName, ppArgs, COUNTOF(ppArgs), " ");
 
 	switch ( type )
@@ -2815,7 +2815,7 @@ bool CClient::xPacketFilter( const byte * pData, size_t iLen )
 	{
 		CScriptTriggerArgs Args(pData[0]);
 		enum TRIGRET_TYPE trigReturn;
-		TCHAR idx[5];
+		tchar idx[5];
 
 		Args.m_s1 = GetPeerStr();
 		Args.m_pO1 = this; // Yay for ARGO.SENDPACKET
@@ -2823,7 +2823,7 @@ bool CClient::xPacketFilter( const byte * pData, size_t iLen )
 
 		size_t bytes = iLen;
 		size_t bytestr = minimum(bytes, SCRIPT_MAX_LINE_LEN);
-		TCHAR *zBuf = Str_GetTemp();
+		tchar *zBuf = Str_GetTemp();
 
 		Args.m_VarsLocal.SetNum("NUM", bytes);
 		memcpy(zBuf, &(pData[0]), bytestr);
@@ -2864,7 +2864,7 @@ bool CClient::xOutPacketFilter( const byte * pData, size_t iLen )
 	{
 		CScriptTriggerArgs Args(pData[0]);
 		enum TRIGRET_TYPE trigReturn;
-		TCHAR idx[5];
+		tchar idx[5];
 
 		Args.m_s1 = GetPeerStr();
 		Args.m_pO1 = this;
@@ -2872,7 +2872,7 @@ bool CClient::xOutPacketFilter( const byte * pData, size_t iLen )
 
 		size_t bytes = iLen;
 		size_t bytestr = minimum(bytes, SCRIPT_MAX_LINE_LEN);
-		TCHAR *zBuf = Str_GetTemp();
+		tchar *zBuf = Str_GetTemp();
 
 		Args.m_VarsLocal.SetNum("NUM", bytes);
 		memcpy(zBuf, &(pData[0]), bytestr);

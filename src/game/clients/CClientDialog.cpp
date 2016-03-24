@@ -59,7 +59,7 @@ enum GUMPCTL_TYPE	// controls we can put in a gump.
 
 //*******************************************
 // -CDialogDef
-LPCTSTR const CDialogDef::sm_szLoadKeys[GUMPCTL_QTY+1] =
+lpctstr const CDialogDef::sm_szLoadKeys[GUMPCTL_QTY+1] =
 {
 	"button",
 	"buttontileart",
@@ -105,7 +105,7 @@ LPCTSTR const CDialogDef::sm_szLoadKeys[GUMPCTL_QTY+1] =
 };
 
 
-size_t CDialogDef::GumpAddText( LPCTSTR pszText )
+size_t CDialogDef::GumpAddText( lpctstr pszText )
 {
 	ADDTOCALLSTACK("CDialogDef::GumpAddText");
 	m_sText[m_iTexts] = pszText;
@@ -137,7 +137,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 	ADDTOCALLSTACK("CDialogDef::r_Verb");
 	EXC_TRY("Verb");
 	// The first part of the key is GUMPCTL_TYPE
-	LPCTSTR pszKey = s.GetKey();
+	lpctstr pszKey = s.GetKey();
 
 	int index = FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF(sm_szLoadKeys)-1 );
 	if ( index < 0 )
@@ -151,7 +151,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 		return m_pObj->r_Verb(s, pSrc);
 	}
 	
-	LPCTSTR pszArgs	= s.GetArgStr();
+	lpctstr pszArgs	= s.GetArgStr();
 
 	switch( index )
 	{
@@ -511,7 +511,7 @@ CDialogDef::CDialogDef( RESOURCE_ID rid ) :
 }
 
 
-bool	CDialogDef::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc )
+bool	CDialogDef::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CDialogDef::r_WriteVal");
 	if ( !m_pObj )
@@ -529,7 +529,7 @@ bool		CDialogDef::r_LoadVal( CScript & s )
 }
 
 
-bool CDialogDef::GumpSetup( int iPage, CClient * pClient, CObjBase * pObjSrc, LPCTSTR Arguments )
+bool CDialogDef::GumpSetup( int iPage, CClient * pClient, CObjBase * pObjSrc, lpctstr Arguments )
 {
 	ADDTOCALLSTACK("CDialogDef::GumpSetup");
 	CResourceLock	s;
@@ -571,7 +571,7 @@ bool CDialogDef::GumpSetup( int iPage, CClient * pClient, CObjBase * pObjSrc, LP
 
 	// starting x,y location.
 	INT64 iSizes[2];
-	TCHAR * pszBuf = s.GetKeyBuffer();
+	tchar * pszBuf = s.GetKeyBuffer();
 	m_pObj->ParseText( pszBuf, pClient->GetChar() );
 
 	Str_ParseCmds( pszBuf, iSizes, COUNTOF(iSizes) );
@@ -585,7 +585,7 @@ bool CDialogDef::GumpSetup( int iPage, CClient * pClient, CObjBase * pObjSrc, LP
 
 
 
-bool CClient::Dialog_Setup( CLIMODE_TYPE mode, RESOURCE_ID_BASE rid, int iPage, CObjBase * pObj, LPCTSTR Arguments )
+bool CClient::Dialog_Setup( CLIMODE_TYPE mode, RESOURCE_ID_BASE rid, int iPage, CObjBase * pObj, lpctstr Arguments )
 {
 	ADDTOCALLSTACK("CClient::Dialog_Setup");
 	if ( pObj == NULL )
@@ -625,8 +625,8 @@ bool CClient::Dialog_Setup( CLIMODE_TYPE mode, RESOURCE_ID_BASE rid, int iPage, 
 
 void CClient::addGumpInpVal( bool fCancel, INPVAL_STYLE style,
 	dword iMaxLength,
-	LPCTSTR pszText1,
-	LPCTSTR pszText2,
+	lpctstr pszText1,
+	lpctstr pszText2,
 	CObjBase * pObj )
 {
 	ADDTOCALLSTACK("CClient::addGumpInpVal");
@@ -697,7 +697,7 @@ bool CClient::addGumpDialogProps( CGrayUID uid )
 	if ( uid.IsChar() )
 		addSkillWindow(static_cast<SKILL_TYPE>(g_Cfg.m_iMaxSkill), true);
 
-	TCHAR *pszMsg = Str_GetTemp();
+	tchar *pszMsg = Str_GetTemp();
 	strcpy(pszMsg, pObj->IsItem() ? "d_ITEMPROP1" : "d_CHARPROP1" );
 
 	RESOURCE_ID rid = g_Cfg.ResourceGetIDType(RES_DIALOG, pszMsg);
@@ -846,7 +846,7 @@ TRIGRET_TYPE CClient::Menu_OnSelect( RESOURCE_ID_BASE rid, int iSelect, CObjBase
 	return( TRIGRET_ENDIF );
 }
 
-bool CMenuItem::ParseLine( TCHAR * pszArgs, CScriptObj * pObjBase, CTextConsole * pSrc )
+bool CMenuItem::ParseLine( tchar * pszArgs, CScriptObj * pObjBase, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CMenuItem::ParseLine");
 
@@ -856,7 +856,7 @@ bool CMenuItem::ParseLine( TCHAR * pszArgs, CScriptObj * pObjBase, CTextConsole 
 		return false;
 	}
 
-	TCHAR * pszArgStart = pszArgs;
+	tchar * pszArgStart = pszArgs;
 	while ( _ISCSYM( *pszArgs ))
 		pszArgs++;
 

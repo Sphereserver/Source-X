@@ -177,13 +177,13 @@ public:
 			m_bottom = cy;
 	}
 
-	size_t Read( LPCTSTR pVal );
-	TCHAR * Write( TCHAR * pBuffer ) const
+	size_t Read( lpctstr pVal );
+	tchar * Write( tchar * pBuffer ) const
 	{
 		sprintf(pBuffer, "%d,%d,%d,%d,%d", m_left, m_top, m_right, m_bottom, m_map);
 		return( pBuffer );
 	}
-	LPCTSTR Write() const;
+	lpctstr Write() const;
 
 	CPointBase GetCenter() const
 	{
@@ -322,9 +322,9 @@ public:
 	int m_iLinkedSectors;	// just for statistics tracking. How many sectors are linked ?
 	int m_iModified;
 
-	static LPCTSTR const sm_szLoadKeys[];
-	static LPCTSTR const sm_szTrigName[RTRIG_QTY+1];
-	static LPCTSTR const sm_szVerbKeys[];
+	static lpctstr const sm_szLoadKeys[];
+	static lpctstr const sm_szTrigName[RTRIG_QTY+1];
+	static lpctstr const sm_szVerbKeys[];
 
 	CResourceRefArray		m_Events;	// trigger [REGION x] when entered or exited RES_REGIONTYPE
 	CVarDefMap				m_TagDefs;		// attach extra tags here.
@@ -333,33 +333,33 @@ public:
 	TRIGRET_TYPE OnRegionTrigger( CTextConsole * pChar, RTRIG_TYPE trig );
 
 public:
-	LPCTSTR GetDefStr( LPCTSTR pszKey, bool fZero = false ) const
+	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false ) const
 	{
 		return m_BaseDefs.GetKeyStr( pszKey, fZero );
 	}
 
-	INT64 GetDefNum( LPCTSTR pszKey, bool fZero = false ) const
+	INT64 GetDefNum( lpctstr pszKey, bool fZero = false ) const
 	{
 		return m_BaseDefs.GetKeyNum( pszKey, fZero );
 	}
 
-	void SetDefNum(LPCTSTR pszKey, INT64 iVal, bool fZero = true)
+	void SetDefNum(lpctstr pszKey, INT64 iVal, bool fZero = true)
 	{
 		m_BaseDefs.SetNum(pszKey, iVal, fZero);
 	}
 
-	void SetDefStr(LPCTSTR pszKey, LPCTSTR pszVal, bool fQuoted = false, bool fZero = true)
+	void SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true)
 	{
 		m_BaseDefs.SetStr(pszKey, fQuoted, pszVal, fZero);
 	}
 
-	void DeleteDef(LPCTSTR pszKey)
+	void DeleteDef(lpctstr pszKey)
 	{
 		m_BaseDefs.DeleteKey(pszKey);
 	}
 
 private:
-	bool SendSectorsVerb( LPCTSTR pszVerb, LPCTSTR pszArgs, CTextConsole * pSrc ); // distribute to the CSectors
+	bool SendSectorsVerb( lpctstr pszVerb, lpctstr pszArgs, CTextConsole * pSrc ); // distribute to the CSectors
 
 public:
 	virtual bool RealizeRegion();
@@ -371,8 +371,8 @@ public:
 #define REGMOD_GROUP	0x0010
 
 	void	SetModified( int iModFlag );
-	void SetName( LPCTSTR pszName );
-	LPCTSTR GetName() const
+	void SetName( lpctstr pszName );
+	lpctstr GetName() const
 	{
 		return( m_sName );
 	}
@@ -384,8 +384,8 @@ public:
 	void r_WriteBase( CScript & s );
 
 	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( LPCTSTR pKey, CGString & sVal, CTextConsole * pSrc );
-	virtual void r_WriteBody( CScript & s, LPCTSTR pszPrefix );
+	virtual bool r_WriteVal( lpctstr pKey, CGString & sVal, CTextConsole * pSrc );
+	virtual void r_WriteBody( CScript & s, lpctstr pszPrefix );
 	virtual void r_WriteModified( CScript & s );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
 	virtual void r_Write( CScript & s );
@@ -427,7 +427,7 @@ public:
 	bool	MakeRegionName();
 
 public:
-	explicit CRegionBase( RESOURCE_ID rid, LPCTSTR pszName = NULL );
+	explicit CRegionBase( RESOURCE_ID rid, lpctstr pszName = NULL );
 	virtual ~CRegionBase();
 
 private:
@@ -443,23 +443,23 @@ class CRegionWorld : public CRegionBase
 	// [AREA] = RES_AREA
 public:
 	static const char *m_sClassName;
-	static LPCTSTR const sm_szLoadKeys[];
-	static LPCTSTR const sm_szVerbKeys[];
+	static lpctstr const sm_szLoadKeys[];
+	static lpctstr const sm_szVerbKeys[];
 
 public:
 	const CRandGroupDef * FindNaturalResource( int /* IT_TYPE */ type ) const;
 
 public:
-	virtual bool r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef );
+	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( LPCTSTR pKey, CGString & sVal, CTextConsole * pSrc );
-	virtual void r_WriteBody( CScript &s, LPCTSTR pszPrefix );
+	virtual bool r_WriteVal( lpctstr pKey, CGString & sVal, CTextConsole * pSrc );
+	virtual void r_WriteBody( CScript &s, lpctstr pszPrefix );
 	virtual void r_WriteModified( CScript &s );
 	virtual void r_Write( CScript & s );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
 
 public:
-	explicit CRegionWorld( RESOURCE_ID rid, LPCTSTR pszName = NULL );
+	explicit CRegionWorld( RESOURCE_ID rid, lpctstr pszName = NULL );
 	virtual ~CRegionWorld();
 
 private:
@@ -483,7 +483,7 @@ public:
 		bNpc = false;
 	}
 
-	explicit CTeleport( TCHAR * pszArgs );
+	explicit CTeleport( tchar * pszArgs );
 
 	virtual ~CTeleport()
 	{
@@ -507,7 +507,7 @@ public:
 	int iClilocDescription; //Only for clients 7.00.13 +
 
 public:
-	explicit CStartLoc( LPCTSTR pszArea )
+	explicit CStartLoc( lpctstr pszArea )
 	{
 		m_sArea = pszArea;
 		iClilocDescription = 1149559;

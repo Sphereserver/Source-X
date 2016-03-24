@@ -77,7 +77,7 @@ CGString CVarFloat::Get( const char* VarName )
 
 short int Reentrant_Count = 0;
 
-CGString CVarFloat::FloatMath( LPCTSTR & Expr )
+CGString CVarFloat::FloatMath( lpctstr & Expr )
 {
 	ADDTOCALLSTACK("CVarFloat::FloatMath");
 	//DEBUG_ERR(("FloatMath\n"));
@@ -87,7 +87,7 @@ CGString CVarFloat::FloatMath( LPCTSTR & Expr )
 	return CGString( szReal );
 }
 
-RealType CVarFloat::MakeFloatMath( LPCTSTR & Expr )
+RealType CVarFloat::MakeFloatMath( lpctstr & Expr )
 {
 	ADDTOCALLSTACK("CVarFloat::MakeFloatMath");
 	//DEBUG_ERR(("MakeFloatMath\n"));
@@ -109,7 +109,7 @@ RealType CVarFloat::MakeFloatMath( LPCTSTR & Expr )
 	return dVal;
 }
 
-RealType CVarFloat::GetValMath( RealType dVal, LPCTSTR & pExpr )
+RealType CVarFloat::GetValMath( RealType dVal, lpctstr & pExpr )
 {
 	ADDTOCALLSTACK("CVarFloat::GetValMath");
 	//DEBUG_ERR(("GetValMath  dVal %f  pExpr %s\n",dVal,pExpr));
@@ -241,7 +241,7 @@ RealType CVarFloat::GetValMath( RealType dVal, LPCTSTR & pExpr )
 	return dVal;
 }
 
-RealType CVarFloat::GetSingle( LPCTSTR & pArgs )
+RealType CVarFloat::GetSingle( lpctstr & pArgs )
 {
 	ADDTOCALLSTACK("CVarFloat::GetSingle");
 	//DEBUG_ERR(("GetSingle  pArgs %s\n",pArgs));
@@ -261,7 +261,7 @@ RealType CVarFloat::GetSingle( LPCTSTR & pArgs )
 		break;
 	}*/
 	bool IsNum = false;
-	for (TCHAR ch = static_cast<TCHAR>(tolower(*pArgs)); ch; ch = static_cast<TCHAR>(tolower(*(++pArgs))))
+	for (tchar ch = static_cast<tchar>(tolower(*pArgs)); ch; ch = static_cast<tchar>(tolower(*(++pArgs))))
     {
         if (( IsDigit( ch ) ) || ( ch == '.' ) || ( ch == ',' ))
         {
@@ -324,10 +324,10 @@ RealType CVarFloat::GetSingle( LPCTSTR & pArgs )
 		if ( pArgs[iLen] == '(' )
 		{
 			pArgs += (iLen + 1);
-			TCHAR * pArgsNext;
-			Str_Parse( const_cast<TCHAR*>(pArgs), &(pArgsNext), ")" );
+			tchar * pArgsNext;
+			Str_Parse( const_cast<tchar*>(pArgs), &(pArgsNext), ")" );
 
-			TCHAR * ppCmd[5];
+			tchar * ppCmd[5];
 			RealType dResult;
 			size_t iCount;
 			const char * cparg1 = NULL; //some functions need a const char instead of a char and GCC cannot bear it :)
@@ -352,14 +352,14 @@ RealType CVarFloat::GetSingle( LPCTSTR & pArgs )
 
 				case INTRINSIC_LOGARITHM:
 				{
-					iCount = Str_ParseCmds( const_cast<TCHAR*>(pArgs), ppCmd, 3, "," );
+					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 3, "," );
 					if ( iCount < 1 )
 					{
 						dResult = 0;
 						break;
 					} 
 
-					LPCTSTR tCmd = ppCmd[0];
+					lpctstr tCmd = ppCmd[0];
 					RealType dArgument = MakeFloatMath( tCmd );
 
 					if ( iCount < 2 )
@@ -485,7 +485,7 @@ RealType CVarFloat::GetSingle( LPCTSTR & pArgs )
 
 				case INTRINSIC_StrIndexOf:
 				{
-					iCount = Str_ParseCmds( const_cast<TCHAR*>(pArgs), ppCmd, 3, "," );
+					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 3, "," );
 					if ( iCount < 2 )
 						dResult = -1;
 					else
@@ -497,7 +497,7 @@ RealType CVarFloat::GetSingle( LPCTSTR & pArgs )
 
 				case INTRINSIC_STRMATCH:
 				{
-					iCount = Str_ParseCmds( const_cast<TCHAR*>(pArgs), ppCmd, 2, "," );
+					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 2, "," );
 					if ( iCount < 2 )
 						dResult = 0;
 					else
@@ -506,12 +506,12 @@ RealType CVarFloat::GetSingle( LPCTSTR & pArgs )
 
 				case INTRINSIC_STRREGEX:
 				{
-					iCount = Str_ParseCmds( const_cast<TCHAR*>(pArgs), ppCmd, 2, "," );
+					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 2, "," );
 					if ( iCount < 2 )
 						dResult = 0;
 					else
 					{
-						TCHAR * tLastError = Str_GetTemp();
+						tchar * tLastError = Str_GetTemp();
 						dResult = Str_RegExMatch( ppCmd[0], ppCmd[1], tLastError );
 						if ( dResult < 0 )
 						{
@@ -522,7 +522,7 @@ RealType CVarFloat::GetSingle( LPCTSTR & pArgs )
 
 				case INTRINSIC_RANDBELL:
 				{
-					iCount = Str_ParseCmds( const_cast<TCHAR*>(pArgs), ppCmd, 2, "," );
+					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 2, "," );
 					if ( iCount < 2 )
 						dResult = 0;
 					else
@@ -549,7 +549,7 @@ RealType CVarFloat::GetSingle( LPCTSTR & pArgs )
 
 				case INTRINSIC_RAND:
 				{
-					iCount = Str_ParseCmds( const_cast<TCHAR*>(pArgs), ppCmd, 2, "," );
+					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 2, "," );
 					if ( iCount <= 0 )
 						dResult = 0;
 					else
@@ -569,7 +569,7 @@ RealType CVarFloat::GetSingle( LPCTSTR & pArgs )
 
 				case INTRINSIC_STRCMP:
 				{
-					iCount = Str_ParseCmds( const_cast<TCHAR*>(pArgs), ppCmd, 2, "," );
+					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 2, "," );
 					if ( iCount < 2 )
 						dResult = 1;
 					else
@@ -578,7 +578,7 @@ RealType CVarFloat::GetSingle( LPCTSTR & pArgs )
 
 				case INTRINSIC_STRCMPI:
 				{
-					iCount = Str_ParseCmds( const_cast<TCHAR*>(pArgs), ppCmd, 2, "," );
+					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 2, "," );
 					if ( iCount < 2 )
 						dResult = 1;
 					else
@@ -608,7 +608,7 @@ RealType CVarFloat::GetSingle( LPCTSTR & pArgs )
 
 				case INTRINSIC_QVAL:
 				{
-					iCount = Str_ParseCmds( const_cast<TCHAR*>(pArgs), ppCmd, 5, "," );
+					iCount = Str_ParseCmds( const_cast<tchar*>(pArgs), ppCmd, 5, "," );
 					if ( iCount < 3 )
 						dResult = 0;
 					else
@@ -688,7 +688,7 @@ RealType CVarFloat::GetRandVal2( RealType dMin, RealType dMax )
 }
 
 //Does not work as it should, would be too slow, and nobody needs that
-/*RealType CVarFloat::GetRange( LPCTSTR & pExpr )
+/*RealType CVarFloat::GetRange( lpctstr & pExpr )
 {
 	RealType dVals[256];		// Maximum elements in a list
 
@@ -738,7 +738,7 @@ RealType CVarFloat::GetRandVal2( RealType dMin, RealType dMax )
 	return( dVals[i-1] );
 }
 
-int CVarFloat::GetRangeVals( LPCTSTR & pExpr, RealType * piVals, short int iMaxQty )
+int CVarFloat::GetRangeVals( lpctstr & pExpr, RealType * piVals, short int iMaxQty )
 {
 	ADDTOCALLSTACK("CVarFloat::GetRangeVals");
 	// Get a list of values.

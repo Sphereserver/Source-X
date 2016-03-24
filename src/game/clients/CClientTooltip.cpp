@@ -2,7 +2,7 @@
 #include "../common/CString.h"
 #include "CClientTooltip.h"
 
-CClientTooltip::CClientTooltip(dword clilocid, LPCTSTR args)
+CClientTooltip::CClientTooltip(dword clilocid, lpctstr args)
 {
     m_clilocid = clilocid;
     if ( args )
@@ -11,7 +11,7 @@ CClientTooltip::CClientTooltip(dword clilocid, LPCTSTR args)
         m_args[0] = '\0';
 }
 
-void __cdecl CClientTooltip::FormatArgs(LPCTSTR format, ...)
+void __cdecl CClientTooltip::FormatArgs(lpctstr format, ...)
 {
     va_list vargs;
     va_start( vargs, format );

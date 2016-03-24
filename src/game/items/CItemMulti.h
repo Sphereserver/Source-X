@@ -14,8 +14,8 @@ class CItemMulti : public CItem
 	// IT_MULTI IT_SHIP
 	// A ship or house etc.
 private:
-	static LPCTSTR const sm_szLoadKeys[];
-	static LPCTSTR const sm_szVerbKeys[];
+	static lpctstr const sm_szLoadKeys[];
+	static lpctstr const sm_szVerbKeys[];
 
 protected:
 	CRegionWorld * m_pRegion;		// we own this region.
@@ -55,17 +55,17 @@ public:
 	virtual bool OnTick();
 	virtual bool MoveTo(CPointMap pt, bool bForceFix = false); // Put item on the ground here.
 	virtual void OnMoveFrom();	// Moving from current location.
-	void OnHearRegion( LPCTSTR pszCmd, CChar * pSrc );
+	void OnHearRegion( lpctstr pszCmd, CChar * pSrc );
 	CItem * Multi_GetSign();	// or Tiller
 
 	void Multi_Create( CChar * pChar, dword dwKeyCode );
 	static const CItemBaseMulti * Multi_GetDef( ITEMID_TYPE id );
 
-	virtual bool r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef );
+	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
 
 	virtual void  r_Write( CScript & s );
-	virtual bool r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc );
 	virtual bool  r_LoadVal( CScript & s  );
 	virtual void DupeCopy( const CItem * pItem );
 };

@@ -36,39 +36,39 @@ class CGrayError
 public:
 	LOGL_TYPE m_eSeverity;	// const
 	dword m_hError;	// HRESULT S_OK, "winerror.h" code. 0x20000000 = start of custom codes.
-	LPCTSTR m_pszDescription;
+	lpctstr m_pszDescription;
 public:
-	CGrayError( LOGL_TYPE eSev, dword hErr, LPCTSTR pszDescription );
+	CGrayError( LOGL_TYPE eSev, dword hErr, lpctstr pszDescription );
 	CGrayError( const CGrayError& e );	// copy contstructor needed.
 	virtual ~CGrayError();
 public:
 	CGrayError& operator=(const CGrayError& other);
 public:
 #ifdef _WIN32
-	static int GetSystemErrorMessage( dword dwError, LPTSTR lpszError, UINT nMaxError );
+	static int GetSystemErrorMessage( dword dwError, lptstr lpszError, UINT nMaxError );
 #endif
-	virtual bool GetErrorMessage( LPTSTR lpszError, UINT nMaxError,	UINT * pnHelpContext = NULL ) const;
+	virtual bool GetErrorMessage( lptstr lpszError, UINT nMaxError,	UINT * pnHelpContext = NULL ) const;
 };
 
 class CGrayAssert : public CGrayError
 {
 protected:
-	LPCTSTR const m_pExp;
-	LPCTSTR const m_pFile;
+	lpctstr const m_pExp;
+	lpctstr const m_pFile;
 	const long m_lLine;
 public:
 	/*
-	LPCTSTR const GetAssertFile();
+	lpctstr const GetAssertFile();
 	const unsigned GetAssertLine();
 	*/
 	static const char *m_sClassName;
-	CGrayAssert(LOGL_TYPE eSeverity, LPCTSTR pExp, LPCTSTR pFile, long lLine);
+	CGrayAssert(LOGL_TYPE eSeverity, lpctstr pExp, lpctstr pFile, long lLine);
 	virtual ~CGrayAssert();
 private:
 	CGrayAssert& operator=(const CGrayAssert& other);
 
 public:
-	virtual bool GetErrorMessage(LPTSTR lpszError, UINT nMaxError, UINT * pnHelpContext = NULL ) const;
+	virtual bool GetErrorMessage(lptstr lpszError, UINT nMaxError, UINT * pnHelpContext = NULL ) const;
 };
 
 #ifdef _WIN32
@@ -85,7 +85,7 @@ public:
 		CGrayException& operator=(const CGrayException& other);
 
 	public:
-		virtual bool GetErrorMessage(LPTSTR lpszError, UINT nMaxError, UINT * pnHelpContext = NULL ) const;
+		virtual bool GetErrorMessage(lptstr lpszError, UINT nMaxError, UINT * pnHelpContext = NULL ) const;
 	};
 #endif
 
@@ -99,8 +99,8 @@ public:
 #include "../game/CLog.h"
 #include "../sphere/ProfileTask.h"
 	#define EXC_TRY(a) \
-		LPCTSTR inLocalBlock = ""; \
-		LPCTSTR inLocalArgs = a; \
+		lpctstr inLocalBlock = ""; \
+		lpctstr inLocalArgs = a; \
 		uint inLocalBlockCnt(0); \
 		bool bCATCHExcept = false; \
 		UNREFERENCED_PARAMETER(bCATCHExcept); \
@@ -139,8 +139,8 @@ public:
 	} catch ( ... ) { g_Log.EventError("Exception adding debug message on the exception.\n"); CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); }}
 
 	#define EXC_TRYSUB(a) \
-		LPCTSTR inLocalSubBlock = ""; \
-		LPCTSTR inLocalSubArgs = a; \
+		lpctstr inLocalSubBlock = ""; \
+		lpctstr inLocalSubArgs = a; \
 		uint inLocalSubBlockCnt(0); \
 		bool bCATCHExceptSub = false; \
 		UNREFERENCED_PARAMETER(bCATCHExceptSub); \
@@ -190,7 +190,7 @@ public:
 
 	#define EXC_ADD_SCRIPT		g_Log.EventDebug("command '%s' args '%s'\n", s.GetKey(), s.GetArgRaw());
 	#define EXC_ADD_SCRIPTSRC	g_Log.EventDebug("command '%s' args '%s' [%p]\n", s.GetKey(), s.GetArgRaw(), static_cast<void *>(pSrc));
-	#define EXC_ADD_KEYRET(src)	g_Log.EventDebug("command '%s' ret '%s' [%p]\n", pszKey, (LPCTSTR)sVal, static_cast<void *>(src));
+	#define EXC_ADD_KEYRET(src)	g_Log.EventDebug("command '%s' ret '%s' [%p]\n", pszKey, (lpctstr)sVal, static_cast<void *>(src));
 
 #else //!_EXCEPTIONS_DEBUG
 

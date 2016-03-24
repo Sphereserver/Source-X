@@ -18,8 +18,8 @@ class CSector : public CScriptObj, public CSectorBase	// square region of the wo
 
 public:
 	static const char *m_sClassName;
-	static LPCTSTR const sm_szVerbKeys[];
-	static LPCTSTR const sm_szLoadKeys[];
+	static lpctstr const sm_szVerbKeys[];
+	static lpctstr const sm_szLoadKeys[];
 
 private:
 	bool   m_fSaveParity;		// has the sector been saved relative to the char entering it ?
@@ -49,7 +49,7 @@ public:
 
 	// Time
 	int GetLocalTime() const;
-	LPCTSTR GetLocalGameTime() const;
+	lpctstr GetLocalGameTime() const;
 
 	SEASON_TYPE GetSeason() const;
 	void SetSeason( SEASON_TYPE season );
@@ -80,7 +80,7 @@ public:
 	void AddListenItem();
 	void RemoveListenItem();
 	bool HasListenItems() const;
-	void OnHearItem( CChar * pChar, TCHAR * szText );
+	void OnHearItem( CChar * pChar, tchar * szText );
 
 	// Chars in the sector.
 	bool IsCharActiveIn( const CChar * pChar );
@@ -97,7 +97,7 @@ public:
 
 	// General.
 	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc );
 	virtual void r_Write();
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
 
@@ -112,7 +112,7 @@ public:
 	void RespawnDeadNPCs();
 
 	void Close();
-	LPCTSTR GetName() const { return( "Sector" ); }
+	lpctstr GetName() const { return( "Sector" ); }
 };
 
 #endif // _INC_CSECTOR_H

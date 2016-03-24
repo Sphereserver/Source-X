@@ -55,7 +55,7 @@ enum SC_TYPE
 	SC_QTY
 };
 
-LPCTSTR const CSector::sm_szLoadKeys[SC_QTY+1] =
+lpctstr const CSector::sm_szLoadKeys[SC_QTY+1] =
 {
 	"CLIENTS",
 	"COLDCHANCE",
@@ -74,7 +74,7 @@ LPCTSTR const CSector::sm_szLoadKeys[SC_QTY+1] =
 	NULL
 };
 
-bool CSector::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CSector::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CSector::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -191,7 +191,7 @@ enum SEV_TYPE
 	SEV_QTY
 };
 
-LPCTSTR const CSector::sm_szVerbKeys[SEV_QTY+1] =
+lpctstr const CSector::sm_szVerbKeys[SEV_QTY+1] =
 {
 	#define ADD(a,b) b,
 	#include "../tables/CSector_functions.tbl"
@@ -488,7 +488,7 @@ int CSector::GetLocalTime() const
 	return (iLocalTime % (24*60));
 }
 
-LPCTSTR CSector::GetLocalGameTime() const
+lpctstr CSector::GetLocalGameTime() const
 {
 	ADDTOCALLSTACK("CSector::GetLocalGameTime");
 	return( GetTimeMinDesc( GetLocalTime()));
@@ -790,7 +790,7 @@ void CSector::SetWeatherChance( bool fRain, int iChance )
 	SetWeather( GetWeatherCalc());
 }
 
-void CSector::OnHearItem( CChar * pChar, TCHAR * szText )
+void CSector::OnHearItem( CChar * pChar, tchar * szText )
 {
 	ADDTOCALLSTACK("CSector::OnHearItem");
 	// report to any of the items that something was said.

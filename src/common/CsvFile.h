@@ -19,8 +19,8 @@ typedef std::map<std::string, std::string> CSVRowData;
 class CSVFile : public CacheableScriptFile
 {
 private:
-	TCHAR * m_pszColumnTypes[MAX_COLUMNS];
-	TCHAR * m_pszColumnNames[MAX_COLUMNS];
+	tchar * m_pszColumnTypes[MAX_COLUMNS];
+	tchar * m_pszColumnNames[MAX_COLUMNS];
 	size_t m_iColumnCount;
 	size_t m_iCurrentRow;
 
@@ -40,10 +40,10 @@ public:
 	size_t GetCurrentRow() const { return m_iCurrentRow; }
 
 public:
-	size_t ReadRowContent(TCHAR ** ppOutput, size_t row, size_t columns = MAX_COLUMNS);
+	size_t ReadRowContent(tchar ** ppOutput, size_t row, size_t columns = MAX_COLUMNS);
 	bool ReadRowContent(size_t row, CSVRowData& target);
 
-	size_t ReadNextRowContent(TCHAR ** ppOutput);
+	size_t ReadNextRowContent(tchar ** ppOutput);
 	bool ReadNextRowContent(CSVRowData& target);
 };
 

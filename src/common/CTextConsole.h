@@ -27,22 +27,22 @@ class CTextConsole
 	// A base class for any class that can act like a console and issue commands.
 	// CClient, CChar, CServer, CFileConsole
 protected:
-	int OnConsoleKey( CGString & sText, TCHAR nChar, bool fEcho );
+	int OnConsoleKey( CGString & sText, tchar nChar, bool fEcho );
 public:
 	static const char *m_sClassName;
 	// What privs do i have ?
 	virtual PLEVEL_TYPE GetPrivLevel() const = 0;
-	virtual LPCTSTR GetName() const = 0;	// ( every object must have at least a type name )
+	virtual lpctstr GetName() const = 0;	// ( every object must have at least a type name )
 	virtual CChar * GetChar() const;	// are we also a CChar ? dynamic_cast ?
 
-	virtual void SysMessage( LPCTSTR pszMessage ) const = 0;	// Feed back message.
-	void VSysMessage( LPCTSTR pszFormat, va_list args ) const
+	virtual void SysMessage( lpctstr pszMessage ) const = 0;	// Feed back message.
+	void VSysMessage( lpctstr pszFormat, va_list args ) const
 	{
 		TemporaryString pszTemp;
 		_vsnprintf( pszTemp, pszTemp.realLength(), pszFormat, args );
 		SysMessage( pszTemp );
 	}
-	void _cdecl SysMessagef( LPCTSTR pszFormat, ... ) const __printfargs(2,3)
+	void _cdecl SysMessagef( lpctstr pszFormat, ... ) const __printfargs(2,3)
 	{
 		va_list vargs;
 		va_start( vargs, pszFormat );

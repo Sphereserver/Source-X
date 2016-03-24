@@ -411,7 +411,7 @@ ushort CChar::Stats_GetRegenVal(STAT_TYPE iStat, bool bGetTicks)
 	// bGetTicks = true returns the regen ticks
 	// bGetTicks = false returns the values of regeneration.
 
-	LPCTSTR stat = "";
+	lpctstr stat = "";
 	switch ( iStat )
 	{
 		case STAT_STR:

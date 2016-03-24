@@ -36,7 +36,7 @@ public:
 	virtual void waitForClose();
 
 public:
-	void addQuery(bool isQuery, LPCTSTR sFunction, LPCTSTR sQuery);
+	void addQuery(bool isQuery, lpctstr sFunction, lpctstr sQuery);
 };
 
 #endif // _INC_ASYNCDB_H

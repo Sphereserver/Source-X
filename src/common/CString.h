@@ -17,7 +17,7 @@
 class CGString
 {
 private:
-	TCHAR	*m_pchData; ///< Data pointer.
+	tchar	*m_pchData; ///< Data pointer.
 	int		m_iLength; ///< Length of string.
 	int		m_iMaxLength; ///< Size of memory allocated pointed by m_pchData.
 
@@ -52,7 +52,7 @@ public:
 	* @see Copy()
 	* @param pStr string to copy.
 	*/
-	CGString(LPCTSTR pStr);
+	CGString(lpctstr pStr);
 	/**
 	* @brief Copy constructor.
 	*
@@ -99,20 +99,20 @@ public:
 	* @see strcpylen()
 	* @param pStr string to copy.
 	*/
-	void Copy(LPCTSTR pStr);
+	void Copy(lpctstr pStr);
 
 	/**
 	* @brief Gets the reference to character a specified position (0 based).
 	* @param nIndex position of the character.
 	* @return reference to character in position nIndex.
 	*/
-	TCHAR & ReferenceAt(int nIndex);
+	tchar & ReferenceAt(int nIndex);
 	/**
 	* @brief Gets the caracter in a specified position (0 based).
 	* @param nIndex position of the character.
 	* @return character in position nIndex.
 	*/
-	TCHAR GetAt(int nIndex) const;
+	tchar GetAt(int nIndex) const;
 	/**
 	* @brief Puts a character in a specified position (0 based).
 	*
@@ -120,26 +120,26 @@ public:
 	* @param nIndex position to put the character.
 	* @param ch character to put.
 	*/
-	void SetAt(int nIndex, TCHAR ch);
+	void SetAt(int nIndex, tchar ch);
 	/**
 	* @brief Gets the internal pointer.
 	* @return Pointer to internal data.
 	*/
-	LPCTSTR GetPtr() const;
+	lpctstr GetPtr() const;
 
 	/**
 	* @brief Join a formated string (printf like) with values and copy into this.
 	* @param pStr formated string.
 	* @param args list of values.
 	*/
-	void FormatV(LPCTSTR pStr, va_list args);
+	void FormatV(lpctstr pStr, va_list args);
 	/**
 	* @brief Join a formated string (printf like) with values and copy into this.
 	* @see FormatV()
 	* @param pStr formated string.
 	* @param ... list of values.
 	*/
-	void _cdecl Format(LPCTSTR pStr, ...) __printfargs(2, 3);
+	void _cdecl Format(lpctstr pStr, ...) __printfargs(2, 3);
 	/**
 	* @brief Print a long value into the string.
 	* @see Format()
@@ -187,7 +187,7 @@ public:
 	* @param pStr string to compare.
 	* @return <0 if te first character that not match has lower value in CGString than in pStr. 0 if hte contents of both are equal. >0 if the first character that does not match has greater value in CGString than pStr.
 	*/
-	int Compare(LPCTSTR pStr) const;
+	int Compare(lpctstr pStr) const;
 	/**
 	* @brief Compares the CGString to string pStr (case insensitive) (_strcmpi wrapper).
 	*
@@ -198,20 +198,20 @@ public:
 	* @param pStr string to compare.
 	* @return <0 if te first character that not match has lower value in CGString than in pStr. 0 if hte contents of both are equal. >0 if the first character that does not match has greater value in CGString than pStr.
 	*/
-	int CompareNoCase(LPCTSTR pStr) const;
+	int CompareNoCase(lpctstr pStr) const;
 	/**
 	* @brief Look for the first occurence of c in CGString.
 	* @param c character to look for.
 	* @return position of the character in CGString if any, -1 otherwise.
 	*/
-	int indexOf(TCHAR c);
+	int indexOf(tchar c);
 	/**
 	* @brief Look for the first occurence of c in CGString from a position.
 	* @param c character to look for.
 	* @param offset position from start the search.
 	* @return position of the character in CGString if any, -1 otherwise.
 	*/
-	int indexOf(TCHAR c, int offset);
+	int indexOf(tchar c, int offset);
 	/**
 	* @brief Look for the first occurence of a substring in CGString from a position.
 	* @param str substring to look for.
@@ -230,14 +230,14 @@ public:
 	* @param c character to look for.
 	* @return position of the character in CGString if any, -1 otherwise.
 	*/
-	int lastIndexOf(TCHAR c);
+	int lastIndexOf(tchar c);
 	/**
 	* @brief Look for the last occurence of c in CGString from a position to the end.
 	* @param c character to look for.
 	* @param from position where stop the search.
 	* @return position of the character in CGString if any, -1 otherwise.
 	*/
-	int lastIndexOf(TCHAR c, int from);
+	int lastIndexOf(tchar c, int from);
 	/**
 	* @brief Look for the last occurence of a substring in CGString from a position to the end.
 	* @param str substring to look for.
@@ -255,12 +255,12 @@ public:
 	* @brief Adds a char at the end of the CGString.
 	* @param ch character to add.
 	*/
-	void Add(TCHAR ch);
+	void Add(tchar ch);
 	/**
 	* @brief Adds a string at the end of the CGString.
 	* @parampszStrh string to add.
 	*/
-	void Add(LPCTSTR pszStr);
+	void Add(lpctstr pszStr);
 	/**
 	* @brief Reverses the CGString.
 	*/
@@ -280,7 +280,7 @@ public:
 	* @param nIndex position of the character.
 	* @return character in position nIndex.
 	*/
-	TCHAR operator[](int nIndex) const
+	tchar operator[](int nIndex) const
 	{
 		return GetAt(nIndex);
 	}
@@ -290,15 +290,15 @@ public:
 	* @param nIndex position of the character.
 	* @return reference to character in position nIndex.
 	*/
-	TCHAR & operator[](int nIndex)
+	tchar & operator[](int nIndex)
 	{
 		return ReferenceAt(nIndex);
 	}
 	/**
-	* @brief cast as const LPCSTR.
+	* @brief cast as const lpcstr.
 	* @return internal data pointer.
 	*/
-	operator LPCTSTR() const
+	operator lpctstr() const
 	{
 		return(GetPtr());
 	}
@@ -307,7 +307,7 @@ public:
 	* @param psz string to concatenate with.
 	* @return The result of concatenate the CGString with psz.
 	*/
-	const CGString& operator+=(LPCTSTR psz)	// like strcat
+	const CGString& operator+=(lpctstr psz)	// like strcat
 	{
 		Add(psz);
 		return(*this);
@@ -317,7 +317,7 @@ public:
 	* @param ch character to concatenate with.
 	* @return The result of concatenate the CGString with ch.
 	*/
-	const CGString& operator+=(TCHAR ch)
+	const CGString& operator+=(tchar ch)
 	{
 		Add(ch);
 		return(*this);
@@ -327,7 +327,7 @@ public:
 	* @param pStr string to copy.
 	* @return the CGString.
 	*/
-	const CGString& operator=(LPCTSTR pStr)
+	const CGString& operator=(lpctstr pStr)
 	{
 		Copy(pStr);
 		return(*this);
@@ -366,7 +366,7 @@ enum MATCH_TYPE
 * @param pText text to match against the pattern.
 * @return a MATCH_TYPE
 */
-MATCH_TYPE Str_Match(LPCTSTR pPattern, LPCTSTR pText);
+MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText);
 
 /**
 * @brief check if a string matches a regex.
@@ -375,7 +375,7 @@ MATCH_TYPE Str_Match(LPCTSTR pPattern, LPCTSTR pText);
 * @param lastError if any error, error description is stored here.
 * @return 1 is regex is matched, 0 if not, -1 if errors.
 */
-int Str_RegExMatch(LPCTSTR pPattern, LPCTSTR pText, TCHAR * lastError);
+int Str_RegExMatch(lpctstr pPattern, lpctstr pText, tchar * lastError);
 
 /**
 * @brief Wrapper to cstring strcpy, but returns the length of the string copied.
@@ -383,7 +383,7 @@ int Str_RegExMatch(LPCTSTR pPattern, LPCTSTR pText, TCHAR * lastError);
 * @param pSrc source data.
 * @return length of the string copied.
 */
-size_t strcpylen(TCHAR * pDst, LPCTSTR pSrc);
+size_t strcpylen(tchar * pDst, lpctstr pSrc);
 /**
 * @brief Wrapper to cstring strncpy, but returns the length of string copied.
 * @param pDst dest memory space.
@@ -391,14 +391,14 @@ size_t strcpylen(TCHAR * pDst, LPCTSTR pSrc);
 * @param iMaxSize max data to be coppied.
 * @return length of the string copied.
 */
-size_t strcpylen(TCHAR * pDst, LPCTSTR pSrc, size_t imaxlen);
+size_t strcpylen(tchar * pDst, lpctstr pSrc, size_t imaxlen);
 
 /**
 * @brief Give the article and space to a word. For example, for "boot" will return "a ".
 * @param pszWords word to add the article.
 * @return string with the article and a space.
 */
-LPCTSTR Str_GetArticleAndSpace(LPCTSTR pszWords);
+lpctstr Str_GetArticleAndSpace(lpctstr pszWords);
 /**
 * @brief Filter specific characters from a string.
 * @param pszOut output string.
@@ -407,17 +407,17 @@ LPCTSTR Str_GetArticleAndSpace(LPCTSTR pszWords);
 * @param pszStrip characters to strip (default "{|}~", non printable characters for client).
 * @return size of the filtered string.
 */
-size_t Str_GetBare(TCHAR * pszOut, LPCTSTR pszInp, size_t iMaxSize, LPCTSTR pszStrip = NULL);
+size_t Str_GetBare(tchar * pszOut, lpctstr pszInp, size_t iMaxSize, lpctstr pszStrip = NULL);
 /**
 * @param pszIn string to check.
 * @return true if string is empty or has '\c' or '\n' characters, false otherwise.
 */
-bool Str_Check(LPCTSTR pszIn);
+bool Str_Check(lpctstr pszIn);
 /**
 * @param pszIn string to check.
 * @return false if string match "[a-zA-Z0-9_- \'\.]+", true otherwise.
 */
-bool Str_CheckName(LPCTSTR pszIn);
+bool Str_CheckName(lpctstr pszIn);
 /**
 * @brief replace string representation of special characters by special characters.
 *
@@ -430,7 +430,7 @@ bool Str_CheckName(LPCTSTR pszIn);
 * @param pStr string to make replaces on.
 * @return string with replaces in (same as pStr).
 */
-TCHAR * Str_MakeFiltered(TCHAR * pStr);
+tchar * Str_MakeFiltered(tchar * pStr);
 /**
 * @brief replace special characters by string representation.
 *
@@ -444,20 +444,20 @@ TCHAR * Str_MakeFiltered(TCHAR * pStr);
 * @param pStrIn input string.
 * @param iSizeMax length of the input string.
 */
-void Str_MakeUnFiltered(TCHAR * pStrOut, LPCTSTR pStrIn, int iSizeMax);
+void Str_MakeUnFiltered(tchar * pStrOut, lpctstr pStrIn, int iSizeMax);
 /**
 * @brief remove trailing white spaces from a string.
 * @param pStr string where remove trailing spaces.
 * @param len length of the string.
 * @return new lenght of the string.
 */
-size_t Str_TrimEndWhitespace(TCHAR * pStr, size_t len);
+size_t Str_TrimEndWhitespace(tchar * pStr, size_t len);
 /**
 * @brief Removes heading and trailing white spaces of a string.
 * @param pStr string where remove the white spaces.
 * @return string with the heading and trailing spaces removed.
 */
-TCHAR * Str_TrimWhitespace(TCHAR * pStr);
+tchar * Str_TrimWhitespace(tchar * pStr);
 /**
 * @brief find a substring in a string from an offset.
 * @param pStr1 string where find the substring.
@@ -465,7 +465,7 @@ TCHAR * Str_TrimWhitespace(TCHAR * pStr);
 * @param offset position where to start the search.
 * @return -1 for a bad offset or if string if not found, otherwise the position of the substring in string.
 */
-int Str_IndexOf(TCHAR * pStr1, TCHAR * pStr2, int offset = 0);
+int Str_IndexOf(tchar * pStr1, tchar * pStr2, int offset = 0);
 /**
 * @brief Parse a simple argument from a list of arguments.
 * 
@@ -476,7 +476,7 @@ int Str_IndexOf(TCHAR * pStr1, TCHAR * pStr2, int offset = 0);
 * @param pSep the list of separators (by default "=, \t").
 * @return false if there are no more args to parse, true otherwise.
 */
-bool Str_Parse(TCHAR * pLine, TCHAR ** ppArg = NULL, LPCTSTR pSep = NULL);
+bool Str_Parse(tchar * pLine, tchar ** ppArg = NULL, lpctstr pSep = NULL);
 /**
 * @brief Parse a list of arguments.
 * @param pCmdLine list of arguments to parse.
@@ -485,7 +485,7 @@ bool Str_Parse(TCHAR * pLine, TCHAR ** ppArg = NULL, LPCTSTR pSep = NULL);
 * @param pSep the list of separators (by default "=, \t").
 * @return count of arguments parsed.
 */
-size_t Str_ParseCmds(TCHAR * pCmdLine, TCHAR ** ppCmd, size_t iMax, LPCTSTR pSep = NULL);
+size_t Str_ParseCmds(tchar * pCmdLine, tchar ** ppCmd, size_t iMax, lpctstr pSep = NULL);
 /**
 * @brief Parse a list of arguments (integer version).
 * @param pCmdLine list of arguments to parse.
@@ -494,7 +494,7 @@ size_t Str_ParseCmds(TCHAR * pCmdLine, TCHAR ** ppCmd, size_t iMax, LPCTSTR pSep
 * @param pSep the list of separators (by default "=, \t").
 * @return count of arguments parsed.
 */
-size_t Str_ParseCmds(TCHAR * pCmdLine, int64_t * piCmd, size_t iMax, LPCTSTR pSep = NULL);
+size_t Str_ParseCmds(tchar * pCmdLine, int64_t * piCmd, size_t iMax, lpctstr pSep = NULL);
 
 /**
 * @brief Look for a string in a table.
@@ -504,7 +504,7 @@ size_t Str_ParseCmds(TCHAR * pCmdLine, int64_t * piCmd, size_t iMax, LPCTSTR pSe
 * @param iElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
-int FindTable(LPCTSTR pFind, LPCTSTR const * ppTable, int iCount, int iElemSize = sizeof(LPCTSTR));
+int FindTable(lpctstr pFind, lpctstr const * ppTable, int iCount, int iElemSize = sizeof(lpctstr));
 /**
 * @brief Look for a string in a table (binary search).
 * @param pFind string we are looking for.
@@ -513,7 +513,7 @@ int FindTable(LPCTSTR pFind, LPCTSTR const * ppTable, int iCount, int iElemSize 
 * @param iElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
-int FindTableSorted(LPCTSTR pFind, LPCTSTR const * ppTable, int iCount, int iElemSize = sizeof(LPCTSTR));/**
+int FindTableSorted(lpctstr pFind, lpctstr const * ppTable, int iCount, int iElemSize = sizeof(lpctstr));/**
 * @brief Look for a string header in a table (uses Str_CmpHeadI to compare instead of strcmpi).
 * @param pFind string we are looking for.
 * @param ppTable table where we are looking for the string.
@@ -521,7 +521,7 @@ int FindTableSorted(LPCTSTR pFind, LPCTSTR const * ppTable, int iCount, int iEle
 * @param iElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
-int FindTableHead(LPCTSTR pFind, LPCTSTR const * ppTable, int iCount, int iElemSize = sizeof(LPCTSTR));
+int FindTableHead(lpctstr pFind, lpctstr const * ppTable, int iCount, int iElemSize = sizeof(lpctstr));
 /**
 * @brief Look for a string header in a table (binary search, uses Str_CmpHeadI to compare instead of strcmpi).
 * @param pFind string we are looking for.
@@ -530,11 +530,11 @@ int FindTableHead(LPCTSTR pFind, LPCTSTR const * ppTable, int iCount, int iElemS
 * @param iElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
-int FindTableHeadSorted(LPCTSTR pFind, LPCTSTR const * ppTable, int iCount, int iElemSize = sizeof(LPCTSTR));
+int FindTableHeadSorted(lpctstr pFind, lpctstr const * ppTable, int iCount, int iElemSize = sizeof(lpctstr));
 
 void CharToMultiByteNonNull(byte*, const char* , size_t);
 
-// extern TCHAR * Str_GetTemporary(int amount = 1);
+// extern tchar * Str_GetTemporary(int amount = 1);
 #define Str_GetTemp STATIC_CAST<AbstractSphereThread *>(ThreadHolder::current())->allocateBuffer
 
 #endif // _INC_CSTRING_H

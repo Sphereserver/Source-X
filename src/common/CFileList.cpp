@@ -14,7 +14,7 @@
 #include "graycom.h"
 
 // Similar to the MFC CFileFind
-bool CFileList::ReadFileInfo( LPCTSTR pszFilePath, time_t & dwDateChange, dword & dwSize ) // static
+bool CFileList::ReadFileInfo( lpctstr pszFilePath, time_t & dwDateChange, dword & dwSize ) // static
 {
 	ADDTOCALLSTACK("CFileList::ReadFileInfo");
 #ifdef _WIN32
@@ -48,11 +48,11 @@ bool CFileList::ReadFileInfo( LPCTSTR pszFilePath, time_t & dwDateChange, dword 
 	return( true );
 }
 
-int CFileList::ReadDir( LPCTSTR pszFileDir, bool bShowError )
+int CFileList::ReadDir( lpctstr pszFileDir, bool bShowError )
 {
 	ADDTOCALLSTACK("CFileList::ReadDir");
 	// NOTE: It seems NOT to like the trailing \ alone
-	TCHAR szFileDir[_MAX_PATH];
+	tchar szFileDir[_MAX_PATH];
 	size_t len = strcpylen(szFileDir, pszFileDir);
 #ifdef _WIN32
 	if ( len > 0 )

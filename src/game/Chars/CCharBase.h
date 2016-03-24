@@ -50,10 +50,10 @@ public:
 									// If this is an NPC.
 									// We respond to what we here with this.
 	CResourceRefArray m_Speech;	// Speech fragment list (other stuff we know)
-	static LPCTSTR const sm_szLoadKeys[];
+	static lpctstr const sm_szLoadKeys[];
 
 private:
-	void SetFoodType( LPCTSTR pszFood );
+	void SetFoodType( lpctstr pszFood );
 	void CopyBasic( const CCharBase * pCharDef );
 
 public:
@@ -98,10 +98,10 @@ public:
 		return(( m_Can & CAN_C_FEMALE ) ? true : false );
 	}
 
-	LPCTSTR GetTradeName() const;
+	lpctstr GetTradeName() const;
 
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc = NULL );
+	bool r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc = NULL );
 	bool r_Load( CScript & s );
 };
 

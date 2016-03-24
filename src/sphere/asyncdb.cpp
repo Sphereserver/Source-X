@@ -57,7 +57,7 @@ void CDataBaseAsyncHelper::waitForClose()
 	AbstractSphereThread::waitForClose();
 }
 
-void CDataBaseAsyncHelper::addQuery(bool isQuery, LPCTSTR sFunction, LPCTSTR sQuery)
+void CDataBaseAsyncHelper::addQuery(bool isQuery, lpctstr sFunction, lpctstr sQuery)
 {
 	SimpleThreadLock stlThelock(m_queryMutex);
 

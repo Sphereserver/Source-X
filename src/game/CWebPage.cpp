@@ -19,7 +19,7 @@ enum WV_TYPE
 	WV_QTY
 };
 
-LPCTSTR const CWebPageDef::sm_szVerbKeys[WV_QTY+1] =
+lpctstr const CWebPageDef::sm_szVerbKeys[WV_QTY+1] =
 {
 	"CLIENTLIST",	// make a table of all the clients.
 	"GMPAGELIST",	// make a table of the gm pages.
@@ -43,11 +43,11 @@ public:
 	{
 		return PLEVEL_Admin;
 	}
-	virtual LPCTSTR GetName() const
+	virtual lpctstr GetName() const
 	{
 		return "WebFile";
 	}
-	virtual void SysMessage( LPCTSTR pszMessage ) const
+	virtual void SysMessage( lpctstr pszMessage ) const
 	{
 		if ( pszMessage == NULL || ISINTRESOURCE(pszMessage))
 			return;
@@ -99,7 +99,7 @@ enum WC_TYPE
 	WC_QTY
 };
 
-LPCTSTR const CWebPageDef::sm_szLoadKeys[WC_QTY+1] =
+lpctstr const CWebPageDef::sm_szLoadKeys[WC_QTY+1] =
 {
 	"PLEVEL",				// What priv level does one need to be to view this page.
 	"WEBPAGEFILE",			// For periodic generated pages.
@@ -109,7 +109,7 @@ LPCTSTR const CWebPageDef::sm_szLoadKeys[WC_QTY+1] =
 	NULL
 };
 
-bool CWebPageDef::r_WriteVal( LPCTSTR pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CWebPageDef::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CWebPageDef::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -184,7 +184,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 	EXC_TRY("Verb");
 	ASSERT(pSrc);
 	sm_iListIndex = 0;
-	TCHAR *pszTmp2 = Str_GetTemp();
+	tchar *pszTmp2 = Str_GetTemp();
 
 	WV_TYPE iHeadKey = (WV_TYPE) FindTableSorted( s.GetKey(), sm_szVerbKeys, COUNTOF(sm_szVerbKeys)-1 );
 	switch ( iHeadKey )
@@ -211,7 +211,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 	
 					sm_iListIndex++;
 	
-					LPCTSTR pszArgs = s.GetArgStr();
+					lpctstr pszArgs = s.GetArgStr();
 					if ( pszArgs[0] == '\0' )
 						pszArgs = "<tr><td>%NAME%</td><td>%REGION.NAME%</td></tr>\n";
 					strcpy( pszTmp2, pszArgs );
@@ -271,7 +271,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 	return false;
 }
 
-bool CWebPageDef::WebPageUpdate( bool fNow, LPCTSTR pszDstName, CTextConsole * pSrc )
+bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CWebPageDef::WebPageUpdate");
 	// Generate the status web pages.
@@ -313,7 +313,7 @@ bool CWebPageDef::WebPageUpdate( bool fNow, LPCTSTR pszDstName, CTextConsole * p
 	CFileConsole FileOut;
 	if ( ! FileOut.m_FileOut.Open( pszDstName, OF_WRITE|OF_TEXT ))
 	{
-		DEBUG_ERR(( "Can't open web page output '%s'\n", static_cast<LPCTSTR>(pszDstName) ));
+		DEBUG_ERR(( "Can't open web page output '%s'\n", static_cast<lpctstr>(pszDstName) ));
 		return false;
 	}
 
@@ -321,10 +321,10 @@ bool CWebPageDef::WebPageUpdate( bool fNow, LPCTSTR pszDstName, CTextConsole * p
 
 	while ( FileRead.ReadTextLine( false ))
 	{
-		TCHAR *pszTmp = Str_GetTemp();
+		tchar *pszTmp = Str_GetTemp();
 		strcpy( pszTmp, FileRead.GetKey());
 
-		TCHAR * pszHead = strstr( pszTmp, "<script language=\"Sphere\">" );
+		tchar * pszHead = strstr( pszTmp, "<script language=\"Sphere\">" );
 		if ( pszHead != NULL )
 		{
 			// Deal with the stuff preceding the scripts.
@@ -343,7 +343,7 @@ bool CWebPageDef::WebPageUpdate( bool fNow, LPCTSTR pszDstName, CTextConsole * p
 		if ( fScriptMode )
 		{
 			GETNONWHITESPACE(pszHead);
-			TCHAR * pszFormat = pszHead;
+			tchar * pszFormat = pszHead;
 
 			pszHead = strstr( pszFormat, "</script>" );
 			if ( pszHead != NULL )
@@ -359,7 +359,7 @@ bool CWebPageDef::WebPageUpdate( bool fNow, LPCTSTR pszDstName, CTextConsole * p
 				CScript script( pszFormat );
 				if ( ! r_Verb( script, &FileOut ))
 				{
-					DEBUG_ERR(( "Web page source format error '%s'\n", static_cast<LPCTSTR>(pszTmp) ));
+					DEBUG_ERR(( "Web page source format error '%s'\n", static_cast<lpctstr>(pszTmp) ));
 					continue;
 				}
 			}
@@ -388,15 +388,15 @@ void CWebPageDef::WebPageLog()
 	if ( ! FileRead.Open( m_sDstFilePath, OF_READ|OF_TEXT ))
 		return;
 
-	LPCTSTR pszExt = FileRead.GetFileExt();
+	lpctstr pszExt = FileRead.GetFileExt();
 
-	TCHAR szName[ _MAX_PATH ];
+	tchar szName[ _MAX_PATH ];
 	strcpy( szName, m_sDstFilePath );
 	szName[ m_sDstFilePath.GetLength() - strlen(pszExt) ] = '\0';
 
 	CGTime datetime = CGTime::GetCurrentTime();
 
-	TCHAR *pszTemp = Str_GetTemp();
+	tchar *pszTemp = Str_GetTemp();
 	sprintf(pszTemp, "%s%d%02d%02d%s", szName, datetime.GetYear()%100, datetime.GetMonth(), datetime.GetDay(), pszExt);
 
 	CFileText FileTest;
@@ -407,7 +407,7 @@ void CWebPageDef::WebPageLog()
 	WebPageUpdate(true, pszTemp, &g_Serv);
 }
 
-LPCTSTR const CWebPageDef::sm_szPageExt[] =
+lpctstr const CWebPageDef::sm_szPageExt[] =
 {
 	".bmp",
 	".gif",
@@ -419,7 +419,7 @@ LPCTSTR const CWebPageDef::sm_szPageExt[] =
 	".txt",
 };
 
-bool CWebPageDef::SetSourceFile( LPCTSTR pszName, CClient * pClient )
+bool CWebPageDef::SetSourceFile( lpctstr pszName, CClient * pClient )
 {
 	ADDTOCALLSTACK("CWebPageDef::SetSourceFile");
 	static WEBPAGE_TYPE const sm_szPageExtType[] =
@@ -440,7 +440,7 @@ bool CWebPageDef::SetSourceFile( LPCTSTR pszName, CClient * pClient )
 	if ( iLen <= 3 )
 		return( false );
 
-	LPCTSTR pszExt = CGFile::GetFilesExt( pszName );
+	lpctstr pszExt = CGFile::GetFilesExt( pszName );
 	if ( pszExt == NULL || pszExt[0] == '\0' )
 		return( false );
 
@@ -456,7 +456,7 @@ bool CWebPageDef::SetSourceFile( LPCTSTR pszName, CClient * pClient )
 		CScript FileRead;
 		if ( ! g_Cfg.OpenResourceFind( FileRead, pszName ))
 		{
-			DEBUG_ERR(( "Can't open web page input '%s'\n", static_cast<LPCTSTR>(m_sSrcFilePath) ));
+			DEBUG_ERR(( "Can't open web page input '%s'\n", static_cast<lpctstr>(m_sSrcFilePath) ));
 			return( false );
 		}
 		m_sSrcFilePath = FileRead.GetFilePath();
@@ -477,14 +477,14 @@ bool CWebPageDef::SetSourceFile( LPCTSTR pszName, CClient * pClient )
 	return( true );
 }
 
-bool CWebPageDef::IsMatch( LPCTSTR pszMatch ) const
+bool CWebPageDef::IsMatch( lpctstr pszMatch ) const
 {
 	ADDTOCALLSTACK("CWebPageDef::IsMatch");
 	if ( pszMatch == NULL )	// match all.
 		return( true );
 
-	LPCTSTR pszDstName = GetDstName();
-	LPCTSTR pszTry;
+	lpctstr pszDstName = GetDstName();
+	lpctstr pszTry;
 
 	if ( pszDstName[0] )
 	{
@@ -500,7 +500,7 @@ bool CWebPageDef::IsMatch( LPCTSTR pszMatch ) const
 	return( ! strcmpi( pszTry, pszMatch ));
 }
 
-LPCTSTR const CWebPageDef::sm_szPageType[WEBPAGE_QTY+1] =
+lpctstr const CWebPageDef::sm_szPageType[WEBPAGE_QTY+1] =
 {
 	"text/html",		// WEBPAGE_TEMPLATE
 	"text/html",		// WEBPAGE_TEXT
@@ -510,14 +510,14 @@ LPCTSTR const CWebPageDef::sm_szPageType[WEBPAGE_QTY+1] =
 	NULL,				// WEBPAGE_QTY
 };
 
-LPCTSTR const CWebPageDef::sm_szTrigName[WTRIG_QTY+1] =	// static
+lpctstr const CWebPageDef::sm_szTrigName[WTRIG_QTY+1] =	// static
 {
 	"@AAAUNUSED",
 	"@Load",
 	NULL,
 };
 
-int CWebPageDef::ServPageRequest( CClient * pClient, LPCTSTR pszURLArgs, CGTime * pdateIfModifiedSince )
+int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CGTime * pdateIfModifiedSince )
 {
 	ADDTOCALLSTACK("CWebPageDef::ServPageRequest");
 	UNREFERENCED_PARAMETER(pszURLArgs);
@@ -549,7 +549,7 @@ int CWebPageDef::ServPageRequest( CClient * pClient, LPCTSTR pszURLArgs, CGTime 
 
 	CGTime datetime = CGTime::GetCurrentTime();
 
-	LPCTSTR pszName;
+	lpctstr pszName;
 	bool fGenerate = false;
 
 	if ( m_type == WEBPAGE_TEMPLATE ) // my version of cgi
@@ -586,7 +586,7 @@ int CWebPageDef::ServPageRequest( CClient * pClient, LPCTSTR pszURLArgs, CGTime 
 
 	if ( !fGenerate || !pdateIfModifiedSince || (pdateIfModifiedSince->IsTimeValid() && pdateIfModifiedSince->GetTime() > dateChange) )
 	{
-		TCHAR *pszTemp = Str_GetTemp();
+		tchar *pszTemp = Str_GetTemp();
 		sprintf(pszTemp, "HTTP/1.1 304 Not Modified\r\nDate: %s\r\nServer: " GRAY_TITLE " V " GRAY_VERSION "\r\nContent-Length: 0\r\n\r\n", sDate);
 		new PacketWeb(pClient, (byte*)pszTemp, strlen(pszTemp));
 		return 0;
@@ -598,15 +598,15 @@ int CWebPageDef::ServPageRequest( CClient * pClient, LPCTSTR pszURLArgs, CGTime 
 		return 500;
 
 	// Send the header first.
-	TCHAR szTmp[8*1024];
+	tchar szTmp[8*1024];
 	size_t iLen = sprintf(szTmp,
 		"HTTP/1.1 200 OK\r\n" // 100 Continue
 		"Date: %s\r\n"
 		"Server: " GRAY_TITLE " V " GRAY_VERSION "\r\n"
 		"Accept-Ranges: bytes\r\n"
 		"Content-Type: %s\r\n",
-		static_cast<LPCTSTR>(sDate),
-		static_cast<LPCTSTR>(sm_szPageType[m_type]) // type of the file. image/gif, image/x-xbitmap, image/jpeg
+		static_cast<lpctstr>(sDate),
+		static_cast<lpctstr>(sm_szPageType[m_type]) // type of the file. image/gif, image/x-xbitmap, image/jpeg
 		);
 
 	if ( m_type == WEBPAGE_TEMPLATE )
@@ -641,24 +641,24 @@ int CWebPageDef::ServPageRequest( CClient * pClient, LPCTSTR pszURLArgs, CGTime 
 	return 0;
 }
 
-static int GetHexDigit( TCHAR ch )
+static int GetHexDigit( tchar ch )
 {
 	if ( IsDigit( ch ))
 		return( ch - '0' );
 
-	ch = static_cast<TCHAR>(toupper(ch));
+	ch = static_cast<tchar>(toupper(ch));
 	if ( ch > 'F' || ch <'A' )
 		return( -1 );
 
 	return( ch - ( 'A' - 10 ));
 }
 
-static int HtmlDeCode( TCHAR * pszDst, LPCTSTR pszSrc )
+static int HtmlDeCode( tchar * pszDst, lpctstr pszSrc )
 {
 	int i = 0;
 	for (;;)
 	{
-		TCHAR ch = *pszSrc++;
+		tchar ch = *pszSrc++;
 		if ( ch == '+' )
 		{
 			ch = ' ';
@@ -672,7 +672,7 @@ static int HtmlDeCode( TCHAR * pszDst, LPCTSTR pszSrc )
 				ch = *pszSrc++;
 				if ( ch )
 				{
-					ch = static_cast<TCHAR>(iVal*0x10 + GetHexDigit(ch));
+					ch = static_cast<tchar>(iVal*0x10 + GetHexDigit(ch));
 					if (static_cast<uchar>(ch) == 0xa0)
 						ch = '\0';
 				}
@@ -686,7 +686,7 @@ static int HtmlDeCode( TCHAR * pszDst, LPCTSTR pszSrc )
 	return( i );
 }
 
-bool CWebPageDef::ServPagePost( CClient * pClient, LPCTSTR pszURLArgs, TCHAR * pContentData, int iContentLength )
+bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * pContentData, int iContentLength )
 {
 	ADDTOCALLSTACK("CWebPageDef::ServPagePost");
 	UNREFERENCED_PARAMETER(pszURLArgs);
@@ -701,7 +701,7 @@ bool CWebPageDef::ServPagePost( CClient * pClient, LPCTSTR pszURLArgs, TCHAR * p
 
 	// Parse the data.
 	pContentData[iContentLength] = 0;
-	TCHAR * ppArgs[64];
+	tchar * ppArgs[64];
 	size_t iArgs = Str_ParseCmds(pContentData, ppArgs, COUNTOF(ppArgs), "&");
 	if (( iArgs <= 0 ) || ( iArgs >= 63 ))
 		return false;
@@ -714,7 +714,7 @@ bool CWebPageDef::ServPagePost( CClient * pClient, LPCTSTR pszURLArgs, TCHAR * p
 	dword dwButtonID = UINT32_MAX;
 	for ( size_t i = 0; i < iArgs; i++ )
 	{
-		TCHAR * pszNum = ppArgs[i];
+		tchar * pszNum = ppArgs[i];
 		while ( IsAlpha(*pszNum) )
 			pszNum++;
 
@@ -744,7 +744,7 @@ bool CWebPageDef::ServPagePost( CClient * pClient, LPCTSTR pszURLArgs, TCHAR * p
 			case 'T':
 				if ( iNum > 0 )
 				{
-					TCHAR *pszData = Str_GetTemp();
+					tchar *pszData = Str_GetTemp();
 					HtmlDeCode( pszData, pszNum );
 					resp.AddText(static_cast<word>(iNum), pszData);
 				}
@@ -771,12 +771,12 @@ bool CWebPageDef::ServPagePost( CClient * pClient, LPCTSTR pszURLArgs, TCHAR * p
 	return( false );
 }
 
-bool CWebPageDef::ServPage( CClient * pClient, TCHAR * pszPage, CGTime * pdateIfModifiedSince )	// static
+bool CWebPageDef::ServPage( CClient * pClient, tchar * pszPage, CGTime * pdateIfModifiedSince )	// static
 {
 	ADDTOCALLSTACK("CWebPageDef::ServPage");
 	// make sure this is a valid format for the request.
 
-	TCHAR szPageName[_MAX_PATH];
+	tchar szPageName[_MAX_PATH];
 	Str_GetBare( szPageName, pszPage, sizeof(szPageName), "!\"#$%&()*,:;<=>?[]^{|}-+'`" );
 
 	int iError = 404;
@@ -805,7 +805,7 @@ bool CWebPageDef::ServPage( CClient * pClient, TCHAR * pszPage, CGTime * pdateIf
 
 	pClient->m_Targ_Text = pszPage;
 
-	TCHAR	*pszTemp = Str_GetTemp();
+	tchar	*pszTemp = Str_GetTemp();
 	sprintf(pszTemp, GRAY_FILE "%d.htm", iError);
 	pWebPage = g_Cfg.FindWebPage(pszTemp);
 	if ( pWebPage )
@@ -817,7 +817,7 @@ bool CWebPageDef::ServPage( CClient * pClient, TCHAR * pszPage, CGTime * pdateIf
 	// Hmm we should do something !!!?
 	// Try to give a reasonable default error msg.
 
-	LPCTSTR pszErrText;
+	lpctstr pszErrText;
 	switch (iError)
 	{
 		case 401: pszErrText = "Authorization Required"; break;
@@ -843,7 +843,7 @@ bool CWebPageDef::ServPage( CClient * pClient, TCHAR * pszPage, CGTime * pdateIf
 		iError,
 		iError,
 		iError,
-		static_cast<LPCTSTR>(pszErrText));
+		static_cast<lpctstr>(pszErrText));
 
 	sMsgHead.Format(
 		"HTTP/1.1 %d %s\r\n"
@@ -853,10 +853,10 @@ bool CWebPageDef::ServPage( CClient * pClient, TCHAR * pszPage, CGTime * pdateIf
 		"Content-Length: %d\r\n"
 		"Connection: close\r\n"
 		"\r\n%s",
-		iError, static_cast<LPCTSTR>(pszErrText),
-		static_cast<LPCTSTR>(sDate),
+		iError, static_cast<lpctstr>(pszErrText),
+		static_cast<lpctstr>(sDate),
 		sText.GetLength(),
-		static_cast<LPCTSTR>(sText));
+		static_cast<lpctstr>(sText));
 
 	new PacketWeb(pClient, reinterpret_cast<const byte *>(sMsgHead.GetPtr()), sMsgHead.GetLength());
 	return false;

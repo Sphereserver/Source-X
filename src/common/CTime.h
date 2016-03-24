@@ -50,11 +50,11 @@ public:
 	int GetMinute() const;
 
 	// Operations
-	LPCTSTR Format(LPCTSTR pszFormat) const;
-	LPCTSTR FormatGmt(LPCTSTR pszFormat) const;
+	lpctstr Format(lpctstr pszFormat) const;
+	lpctstr FormatGmt(lpctstr pszFormat) const;
 
 	// non CTime operations.
-	bool Read( TCHAR * pVal );
+	bool Read( tchar * pVal );
 	void Init();
 	bool IsTimeValid() const;
 	int GetDaysTotal() const;

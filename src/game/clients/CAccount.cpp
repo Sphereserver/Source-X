@@ -21,7 +21,7 @@ size_t CAccounts::Account_GetCount() const
 	return m_Accounts.GetCount();
 }
 
-bool CAccounts::Account_Load( LPCTSTR pszNameRaw, CScript & s, bool fChanges )
+bool CAccounts::Account_Load( lpctstr pszNameRaw, CScript & s, bool fChanges )
 {
 	ADDTOCALLSTACK("CAccounts::Account_Load");
 
@@ -31,7 +31,7 @@ bool CAccounts::Account_Load( LPCTSTR pszNameRaw, CScript & s, bool fChanges )
 		pszNameRaw = s.GetArgStr();
 	}
 
-	TCHAR szName[MAX_ACCOUNT_NAME_SIZE];
+	tchar szName[MAX_ACCOUNT_NAME_SIZE];
 	if ( !CAccount::NameStrip(szName, pszNameRaw) )
 	{
 		if ( !fChanges )
@@ -67,8 +67,8 @@ bool CAccounts::Account_Load( LPCTSTR pszNameRaw, CScript & s, bool fChanges )
 bool CAccounts::Account_LoadAll( bool fChanges, bool fClearChanges )
 {
 	ADDTOCALLSTACK("CAccounts::Account_LoadAll");
-	LPCTSTR pszBaseDir;
-	LPCTSTR pszBaseName;
+	lpctstr pszBaseDir;
+	lpctstr pszBaseName;
 	char	*z = Str_GetTemp();
 
 	pszBaseDir = g_Cfg.m_sAcctBaseDir.IsEmpty() ? g_Cfg.m_sWorldBaseDir : g_Cfg.m_sAcctBaseDir;
@@ -87,7 +87,7 @@ bool CAccounts::Account_LoadAll( bool fChanges, bool fClearChanges )
 
 											//	auto-creating account files
 			if ( !Account_SaveAll() )
-				g_Log.Event(LOGL_FATAL|LOGM_INIT, "Can't open account file '%s'\n", static_cast<LPCTSTR>(s.GetFilePath()));
+				g_Log.Event(LOGL_FATAL|LOGM_INIT, "Can't open account file '%s'\n", static_cast<lpctstr>(s.GetFilePath()));
 			else
 				return true;
 		}
@@ -126,7 +126,7 @@ bool CAccounts::Account_SaveAll()
 	// Look for changes FIRST.
 	Account_LoadAll(true);
 
-	LPCTSTR pszBaseDir;
+	lpctstr pszBaseDir;
 
 	if ( g_Cfg.m_sAcctBaseDir.IsEmpty() ) pszBaseDir = g_Cfg.m_sWorldBaseDir;
 	else pszBaseDir = g_Cfg.m_sAcctBaseDir;
@@ -153,7 +153,7 @@ bool CAccounts::Account_SaveAll()
 	return false;
 }
 
-CAccountRef CAccounts::Account_FindChat( LPCTSTR pszChatName )
+CAccountRef CAccounts::Account_FindChat( lpctstr pszChatName )
 {
 	ADDTOCALLSTACK("CAccounts::Account_FindChat");
 	for ( size_t i = 0; i < m_Accounts.GetCount(); i++ )
@@ -165,10 +165,10 @@ CAccountRef CAccounts::Account_FindChat( LPCTSTR pszChatName )
 	return NULL;
 }
 
-CAccountRef CAccounts::Account_Find( LPCTSTR pszName )
+CAccountRef CAccounts::Account_Find( lpctstr pszName )
 {
 	ADDTOCALLSTACK("CAccounts::Account_Find");
-	TCHAR szName[ MAX_ACCOUNT_NAME_SIZE ];
+	tchar szName[ MAX_ACCOUNT_NAME_SIZE ];
 
 	if ( !CAccount::NameStrip(szName, pszName) )
 		return( NULL );
@@ -180,7 +180,7 @@ CAccountRef CAccounts::Account_Find( LPCTSTR pszName )
 	return NULL;
 }
 
-CAccountRef CAccounts::Account_FindCreate( LPCTSTR pszName, bool fAutoCreate )
+CAccountRef CAccounts::Account_FindCreate( lpctstr pszName, bool fAutoCreate )
 {
 	ADDTOCALLSTACK("CAccounts::Account_FindCreate");
 
@@ -191,7 +191,7 @@ CAccountRef CAccounts::Account_FindCreate( LPCTSTR pszName, bool fAutoCreate )
 	if ( fAutoCreate )	// Create if not found.
 	{
 		bool fGuest = ( g_Serv.m_eAccApp == ACCAPP_GuestAuto || g_Serv.m_eAccApp == ACCAPP_GuestTrial || ! strnicmp( pszName, "GUEST", 5 ));
-		TCHAR szName[ MAX_ACCOUNT_NAME_SIZE ];
+		tchar szName[ MAX_ACCOUNT_NAME_SIZE ];
 
 		if (( pszName[0] >= '0' ) && ( pszName[0] <= '9' ))
 			g_Log.Event(LOGL_ERROR|LOGM_INIT, "Account '%s': BAD name. Due to account enumerations incompatibilities, account names could not start with digits.\n", pszName);
@@ -250,7 +250,7 @@ CAccountRef CAccounts::Account_Get( size_t index )
 	return( CAccountRef( STATIC_CAST <CAccount *>( m_Accounts[index])));
 }
 
-bool CAccounts::Cmd_AddNew( CTextConsole * pSrc, LPCTSTR pszName, LPCTSTR pszArg, bool md5 )
+bool CAccounts::Cmd_AddNew( CTextConsole * pSrc, lpctstr pszName, lpctstr pszArg, bool md5 )
 {
 	ADDTOCALLSTACK("CAccounts::Cmd_AddNew");
 	if (pszName == NULL || pszName[0] == '\0')
@@ -266,7 +266,7 @@ bool CAccounts::Cmd_AddNew( CTextConsole * pSrc, LPCTSTR pszName, LPCTSTR pszArg
 		return false;
 	}
 	
-	TCHAR szName[ MAX_ACCOUNT_NAME_SIZE ];
+	tchar szName[ MAX_ACCOUNT_NAME_SIZE ];
 
 	if ( !CAccount::NameStrip(szName, pszName) )
 	{
@@ -298,7 +298,7 @@ enum VACS_TYPE
 	VACS_QTY ///< TODOC.
 };
 
-LPCTSTR const CAccounts::sm_szVerbKeys[] =	// CAccounts:: // account group verbs.
+lpctstr const CAccounts::sm_szVerbKeys[] =	// CAccounts:: // account group verbs.
 {
 	"ADD",
 	"ADDMD5",
@@ -310,7 +310,7 @@ LPCTSTR const CAccounts::sm_szVerbKeys[] =	// CAccounts:: // account group verbs
 	NULL,
 };
 
-bool CAccounts::Cmd_ListUnused(CTextConsole * pSrc, LPCTSTR pszDays, LPCTSTR pszVerb, LPCTSTR pszArgs, dword dwMask)
+bool CAccounts::Cmd_ListUnused(CTextConsole * pSrc, lpctstr pszDays, lpctstr pszVerb, lpctstr pszArgs, dword dwMask)
 {
 	ADDTOCALLSTACK("CAccounts::Cmd_ListUnused");
 	int iDaysTest = Exp_GetVal(pszDays);
@@ -356,7 +356,7 @@ bool CAccounts::Cmd_ListUnused(CTextConsole * pSrc, LPCTSTR pszDays, LPCTSTR psz
 		{
 			iCount--;
 			pSrc->SysMessagef( "Can't Delete PrivLevel %d Account '%s' this way.\n",
-				pAccount->GetPrivLevel(), static_cast<LPCTSTR>(pAccount->GetName()) );
+				pAccount->GetPrivLevel(), static_cast<lpctstr>(pAccount->GetName()) );
 		}
 		else
 		{
@@ -384,7 +384,7 @@ bool CAccounts::Cmd_ListUnused(CTextConsole * pSrc, LPCTSTR pszDays, LPCTSTR psz
 	return true;
 }
 
-bool CAccounts::Account_OnCmd( TCHAR * pszArgs, CTextConsole * pSrc )
+bool CAccounts::Account_OnCmd( tchar * pszArgs, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CAccounts::Account_OnCmd");
 	ASSERT( pSrc );
@@ -392,7 +392,7 @@ bool CAccounts::Account_OnCmd( TCHAR * pszArgs, CTextConsole * pSrc )
 	if ( pSrc->GetPrivLevel() < PLEVEL_Admin )
 		return( false );
 
-	TCHAR * ppCmd[5];
+	tchar * ppCmd[5];
 	size_t iQty = Str_ParseCmds( pszArgs, ppCmd, COUNTOF( ppCmd ));
 
 	VACS_TYPE index;
@@ -407,7 +407,7 @@ bool CAccounts::Account_OnCmd( TCHAR * pszArgs, CTextConsole * pSrc )
 		index = (VACS_TYPE) FindTableSorted( ppCmd[0], sm_szVerbKeys, COUNTOF( sm_szVerbKeys )-1 );
 	}
 
-	static LPCTSTR const sm_pszCmds[] =
+	static lpctstr const sm_pszCmds[] =
 	{
 		"/ACCOUNT UPDATE\n",
 		"/ACCOUNT UNUSED days [command]\n",
@@ -493,7 +493,7 @@ bool CAccounts::Account_OnCmd( TCHAR * pszArgs, CTextConsole * pSrc )
 // -CAccount
 
 
-bool CAccount::NameStrip( TCHAR * pszNameOut, LPCTSTR pszNameInp )
+bool CAccount::NameStrip( tchar * pszNameOut, lpctstr pszNameInp )
 {
 	ADDTOCALLSTACK("CAccount::NameStrip");
 
@@ -515,7 +515,7 @@ bool CAccount::NameStrip( TCHAR * pszNameOut, LPCTSTR pszNameInp )
 	return true;
 }
 
-static LPCTSTR const sm_szPrivLevels[ PLEVEL_QTY+1 ] =
+static lpctstr const sm_szPrivLevels[ PLEVEL_QTY+1 ] =
 {
 	"Guest",		// 0 = This is just a guest account. (cannot PK)
 	"Player",		// 1 = Player or NPC.
@@ -528,7 +528,7 @@ static LPCTSTR const sm_szPrivLevels[ PLEVEL_QTY+1 ] =
 	NULL
 };
 
-PLEVEL_TYPE CAccount::GetPrivLevelText( LPCTSTR pszFlags ) // static
+PLEVEL_TYPE CAccount::GetPrivLevelText( lpctstr pszFlags ) // static
 {
 	ADDTOCALLSTACK("CAccount::GetPrivLevelText");
 	int level = FindTable( pszFlags, sm_szPrivLevels, COUNTOF(sm_szPrivLevels)-1 );
@@ -544,11 +544,11 @@ PLEVEL_TYPE CAccount::GetPrivLevelText( LPCTSTR pszFlags ) // static
 	return static_cast<PLEVEL_TYPE>(level);
 }
 
-CAccount::CAccount( LPCTSTR pszName, bool fGuest )
+CAccount::CAccount( lpctstr pszName, bool fGuest )
 {
 	g_Serv.StatInc( SERV_STAT_ACCOUNTS );
 
-	TCHAR szName[ MAX_ACCOUNT_NAME_SIZE ];
+	tchar szName[ MAX_ACCOUNT_NAME_SIZE ];
 	if ( !CAccount::NameStrip( szName, pszName ) )
 	{
 		g_Log.Event(LOGL_ERROR|LOGM_INIT, "Account '%s': BAD name\n", pszName);
@@ -673,7 +673,7 @@ size_t CAccount::AttachChar( CChar * pChar )
 	return( i );
 }
 
-void CAccount::TogPrivFlags( word wPrivFlags, LPCTSTR pszArgs )
+void CAccount::TogPrivFlags( word wPrivFlags, lpctstr pszArgs )
 {
 	ADDTOCALLSTACK("CAccount::TogPrivFlags");
 
@@ -760,9 +760,9 @@ bool CAccount::Kick( CTextConsole * pSrc, bool fBlock )
 		pSrc->SysMessagef( g_Cfg.GetDefaultMsg(DEFMSG_MSG_ACC_BLOCK), GetName() );
 	}
 
-	LPCTSTR pszAction = fBlock ? "KICK" : "DISCONNECT";
+	lpctstr pszAction = fBlock ? "KICK" : "DISCONNECT";
 
-	TCHAR * z = Str_GetTemp();
+	tchar * z = Str_GetTemp();
 	sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_ACC_KICK), GetName(), pszAction, pSrc->GetName());
 	g_Log.Event(LOGL_EVENT|LOGM_GM_CMDS, "%s\n", z);
 	
@@ -860,7 +860,7 @@ void CAccount::ClearPasswordTries(bool bAll)
 	}
 }
 
-bool CAccount::CheckPassword( LPCTSTR pszPassword )
+bool CAccount::CheckPassword( lpctstr pszPassword )
 {
 	ADDTOCALLSTACK("CAccount::CheckPassword");
 	ASSERT(pszPassword);
@@ -914,7 +914,7 @@ bool CAccount::CheckPassword( LPCTSTR pszPassword )
 	return( false );	// failure.
 }
 
-bool CAccount::SetPassword( LPCTSTR pszPassword, bool isMD5Hash )
+bool CAccount::SetPassword( lpctstr pszPassword, bool isMD5Hash )
 {
 	ADDTOCALLSTACK("CAccount::SetPassword");
 	bool useMD5 = g_Cfg.m_fMd5Passwords;
@@ -987,18 +987,18 @@ bool CAccount::SetPassword( LPCTSTR pszPassword, bool isMD5Hash )
 }
 
 // Generate a new password
-void CAccount::SetNewPassword( LPCTSTR pszPassword )
+void CAccount::SetNewPassword( lpctstr pszPassword )
 {
 	ADDTOCALLSTACK("CAccount::SetNewPassword");
 	if ( !pszPassword || !pszPassword[0] )		// no password given, auto-generate password
 	{
-		static TCHAR const passwdChars[] = "ABCDEFGHJKLMNPQRTUVWXYZ2346789";
+		static tchar const passwdChars[] = "ABCDEFGHJKLMNPQRTUVWXYZ2346789";
 		size_t len = strlen(passwdChars);
 		size_t charsCnt = Calc_GetRandVal(4) + 6;	// 6 - 10 chars
 		if ( charsCnt > (MAX_ACCOUNT_PASSWORD_ENTER - 1) )
 			charsCnt = MAX_ACCOUNT_PASSWORD_ENTER - 1;
 
-		TCHAR szTmp[MAX_ACCOUNT_PASSWORD_ENTER + 1];
+		tchar szTmp[MAX_ACCOUNT_PASSWORD_ENTER + 1];
 		for ( size_t i = 0; i < charsCnt; ++i )
 			szTmp[i] = passwdChars[Calc_GetRandVal(len)];
 
@@ -1068,7 +1068,7 @@ enum AC_TYPE
 	AC_QTY
 };
 
-LPCTSTR const CAccount::sm_szLoadKeys[AC_QTY+1] = // static
+lpctstr const CAccount::sm_szLoadKeys[AC_QTY+1] = // static
 {
 	"ACCOUNT",
 	"BLOCK",
@@ -1099,7 +1099,7 @@ LPCTSTR const CAccount::sm_szLoadKeys[AC_QTY+1] = // static
 	NULL,
 };
 
-bool CAccount::r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef )
+bool CAccount::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CAccount::r_GetRef");
 	if ( ! strnicmp( pszKey, "CHAR.", 5 ))
@@ -1117,7 +1117,7 @@ bool CAccount::r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef )
 	return( CScriptObj::r_GetRef( pszKey, pRef ));
 }
 
-bool CAccount::r_WriteVal( LPCTSTR pszKey, CGString &sVal, CTextConsole * pSrc )
+bool CAccount::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CAccount::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -1377,7 +1377,7 @@ void CAccount::r_Write(CScript &s)
 	if ( GetPrivLevel() >= PLEVEL_QTY )
 		return;
 
-	s.WriteSection("%s", static_cast<LPCTSTR>(m_sName));
+	s.WriteSection("%s", static_cast<lpctstr>(m_sName));
 
 	if ( GetPrivLevel() != PLEVEL_Player )
 	{
@@ -1445,7 +1445,7 @@ void CAccount::r_Write(CScript &s)
 	}
 	if ( ! m_sChatName.IsEmpty())
 	{
-		s.WriteKey( "CHATNAME", static_cast<LPCTSTR>(m_sChatName));
+		s.WriteKey( "CHATNAME", static_cast<lpctstr>(m_sChatName));
 	}
 	if ( m_lang.IsDef())
 	{
@@ -1466,7 +1466,7 @@ enum AV_TYPE
 	AV_TAGLIST
 };
 
-LPCTSTR const CAccount::sm_szVerbKeys[] =
+lpctstr const CAccount::sm_szVerbKeys[] =
 {
 	"BLOCK",
 	"DELETE",
@@ -1481,7 +1481,7 @@ bool CAccount::r_Verb( CScript &s, CTextConsole * pSrc )
 	EXC_TRY("Verb");
 	ASSERT(pSrc);
 
-	LPCTSTR pszKey = s.GetKey();
+	lpctstr pszKey = s.GetKey();
 
 	// can't change accounts higher than you in any way
 	if (( pSrc->GetPrivLevel() < GetPrivLevel() ) &&  ( pSrc->GetPrivLevel() < PLEVEL_Admin ))
@@ -1513,7 +1513,7 @@ bool CAccount::r_Verb( CScript &s, CTextConsole * pSrc )
 		case AV_DELETE: // "DELETE"
 			{
 				CClient * pClient = FindClient();
-				LPCTSTR sCurrentName = GetName();
+				lpctstr sCurrentName = GetName();
 
 				if ( pClient )
 				{

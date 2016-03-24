@@ -53,7 +53,7 @@ private:
 
 public:
 	static const char *m_sClassName;
-	CStoneMember( CItemStone * pStone, CGrayUID uid, STONEPRIV_TYPE iType, LPCTSTR pTitle = "", CGrayUID loyaluidLink = 0, bool fArg1 = false, bool fArg2 = false, int nAccountGold = 0);
+	CStoneMember( CItemStone * pStone, CGrayUID uid, STONEPRIV_TYPE iType, lpctstr pTitle = "", CGrayUID loyaluidLink = 0, bool fArg1 = false, bool fArg2 = false, int nAccountGold = 0);
 	virtual ~CStoneMember();
 
 private:
@@ -70,7 +70,7 @@ public:
 	void SetPriv(STONEPRIV_TYPE iPriv);
 	bool IsPrivMaster() const;
 	bool IsPrivMember() const;
-	LPCTSTR GetPrivName() const;
+	lpctstr GetPrivName() const;
 
 	// If the member is really a war flag (STONEPRIV_ENEMY)
 	void SetWeDeclared(bool f);
@@ -83,20 +83,20 @@ public:
 	void ToggleAbbrev();
 	void SetAbbrev(bool mode);
 
-	LPCTSTR GetTitle() const;
-	void SetTitle( LPCTSTR pTitle );
+	lpctstr GetTitle() const;
+	void SetTitle( lpctstr pTitle );
 	CGrayUID GetLoyalToUID() const;
 	bool SetLoyalTo( const CChar * pChar);
 	int GetAccountGold() const;
 	void SetAccountGold( int iGold );
 	// ---------------------------------
 
-	static LPCTSTR const sm_szLoadKeys[];
-	static LPCTSTR const sm_szVerbKeys[];
+	static lpctstr const sm_szLoadKeys[];
+	static lpctstr const sm_szVerbKeys[];
 
-	LPCTSTR GetName() const { return m_sClassName; }
-	virtual bool r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef );
-	virtual bool r_WriteVal( LPCTSTR pKey, CGString & sVal, CTextConsole * pSrc );
+	lpctstr GetName() const { return m_sClassName; }
+	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
+	virtual bool r_WriteVal( lpctstr pKey, CGString & sVal, CTextConsole * pSrc );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
 	virtual bool r_LoadVal( CScript & s );
 };
@@ -128,10 +128,10 @@ class CItemStone : public CItem, public CGObList
 	// ATTR_OWNED = auto promote to member.
 
 	friend class CStoneMember;
-	static LPCTSTR const sm_szVerbKeys[];
-	static LPCTSTR const sm_szLoadKeys[];
-	static LPCTSTR const sm_szLoadKeysM[];
-	static LPCTSTR const sm_szLoadKeysG[];
+	static lpctstr const sm_szVerbKeys[];
+	static lpctstr const sm_szLoadKeys[];
+	static lpctstr const sm_szLoadKeysM[];
+	static lpctstr const sm_szLoadKeysG[];
 private:
 	CGString m_sCharter[6];
 	CGString m_sWebPageURL;
@@ -140,15 +140,15 @@ private:
 private:
 
 	void SetTownName();
-	bool SetName( LPCTSTR pszName );
+	bool SetName( lpctstr pszName );
 	virtual bool MoveTo(CPointMap pt, bool bForceFix = false);
 
 	MEMORY_TYPE GetMemoryType() const;
 
-	LPCTSTR GetCharter(uint iLine) const;
-	void SetCharter( uint iLine, LPCTSTR pCharter );
-	LPCTSTR GetWebPageURL() const;
-	void SetWebPage( LPCTSTR pWebPage );
+	lpctstr GetCharter(uint iLine) const;
+	void SetCharter( uint iLine, lpctstr pCharter );
+	lpctstr GetWebPageURL() const;
+	void SetWebPage( lpctstr pWebPage );
 	void ElectMaster();
 public:
 	static const char *m_sClassName;
@@ -177,13 +177,13 @@ private:
 
 public:
 	virtual void r_Write( CScript & s );
-	virtual bool r_WriteVal( LPCTSTR pszKey, CGString & s, CTextConsole * pSrc );
-	virtual bool r_GetRef( LPCTSTR & pszKey, CScriptObj * & pRef );
+	virtual bool r_WriteVal( lpctstr pszKey, CGString & s, CTextConsole * pSrc );
+	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 	virtual bool r_LoadVal( CScript & s );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
 
-	LPCTSTR GetTypeName() const;
-	static bool IsUniqueName( LPCTSTR pName );
+	lpctstr GetTypeName() const;
+	static bool IsUniqueName( lpctstr pName );
 	CChar * GetMaster() const;
 	bool NoMembers() const;
 	CStoneMember * GetMasterMember() const;
@@ -193,9 +193,9 @@ public:
 	// Simple accessors.
 	STONEALIGN_TYPE GetAlignType() const;
 	void SetAlignType(STONEALIGN_TYPE iAlign);
-	LPCTSTR GetAlignName() const;
-	LPCTSTR GetAbbrev() const;
-	void SetAbbrev( LPCTSTR pAbbrev );
+	lpctstr GetAlignName() const;
+	lpctstr GetAbbrev() const;
+	void SetAbbrev( lpctstr pAbbrev );
 };
 
 #endif // _INC_CITEMSTONE_H

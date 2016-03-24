@@ -74,7 +74,7 @@ bool CClient::addLoginErr(byte code)
 		return( true );
 
 	// console message to display for each login error code
-	static LPCTSTR const sm_Login_ErrMsg[] =
+	static lpctstr const sm_Login_ErrMsg[] =
 	{
 		"Account does not exist",
 		"The account entered is already being used",
@@ -146,7 +146,7 @@ bool CClient::addLoginErr(byte code)
 }
 
 
-void CClient::addSysMessage(LPCTSTR pszMsg) // System message (In lower left corner)
+void CClient::addSysMessage(lpctstr pszMsg) // System message (In lower left corner)
 {
 	ADDTOCALLSTACK("CClient::addSysMessage");
 	if ( !pszMsg )
@@ -165,7 +165,7 @@ void CClient::addSysMessage(LPCTSTR pszMsg) // System message (In lower left cor
 }
 
 
-void CClient::addWebLaunch( LPCTSTR pPage )
+void CClient::addWebLaunch( lpctstr pPage )
 {
 	ADDTOCALLSTACK("CClient::addWebLaunch");
 	// Direct client to a web page
@@ -272,14 +272,14 @@ byte CClient::Login_ServerList( const char * pszAccount, const char * pszPasswor
 	// Initial login (Login on "loginserver", new format)
 	// If the messages are garbled make sure they are terminated to correct length.
 
-	TCHAR szAccount[MAX_ACCOUNT_NAME_SIZE+3];
+	tchar szAccount[MAX_ACCOUNT_NAME_SIZE+3];
 	size_t iLenAccount = Str_GetBare( szAccount, pszAccount, sizeof(szAccount)-1 );
 	if ( iLenAccount > MAX_ACCOUNT_NAME_SIZE )
 		return( PacketLoginError::BadAccount );
 	if ( iLenAccount != strlen(pszAccount))
 		return( PacketLoginError::BadAccount );
 
-	TCHAR szPassword[MAX_NAME_SIZE+3];
+	tchar szPassword[MAX_NAME_SIZE+3];
 	size_t iLenPassword = Str_GetBare( szPassword, pszPassword, sizeof( szPassword )-1 );
 	if ( iLenPassword > MAX_NAME_SIZE )
 		return( PacketLoginError::BadPassword );
@@ -389,7 +389,7 @@ bool CClient::OnRxConsole( const byte * pData, size_t iLen )
 				iRet = g_Serv.OnConsoleCmd( m_Targ_Text, this );
 
 				if (g_Cfg.m_fTelnetLog && GetPrivLevel() >= g_Cfg.m_iCommandLog)
-					g_Log.Event(LOGM_GM_CMDS, "%x:'%s' commands '%s'=%d\n", GetSocketID(), GetName(), static_cast<LPCTSTR>(m_Targ_Text), iRet);
+					g_Log.Event(LOGM_GM_CMDS, "%x:'%s' commands '%s'=%d\n", GetSocketID(), GetName(), static_cast<lpctstr>(m_Targ_Text), iRet);
 			}
 		}
 	}
@@ -466,7 +466,7 @@ bool CClient::OnRxAxis( const byte * pData, size_t iLen )
 								return false;
 							}
 
-							TCHAR szTmp[8*1024];
+							tchar szTmp[8*1024];
 							PacketWeb packet;
 							for (;;)
 							{
@@ -485,7 +485,7 @@ bool CClient::OnRxAxis( const byte * pData, size_t iLen )
 					}
 					else if ( ! sMsg.IsEmpty())
 					{
-						SysMessagef("\"MSG:%s\"", (LPCTSTR)sMsg);
+						SysMessagef("\"MSG:%s\"", (lpctstr)sMsg);
 						return false;
 					}
 					m_Targ_Text.Empty();
@@ -656,7 +656,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t iLen )
 	if ( !strpbrk( reinterpret_cast<char *>(pRequest), " \t\012\015" ) )	// malformed request
 		return false;
 
-	TCHAR * ppLines[16];
+	tchar * ppLines[16];
 	size_t iQtyLines = Str_ParseCmds(reinterpret_cast<char *>(pRequest), ppLines, COUNTOF(ppLines), "\r\n");
 	if (( iQtyLines < 1 ) || ( iQtyLines >= 15 ))	// too long request
 		return false;
@@ -664,11 +664,11 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t iLen )
 	// Look for what they want to do with the connection.
 	bool fKeepAlive = false;
 	CGTime dateIfModifiedSince;
-	TCHAR * pszReferer = NULL;
+	tchar * pszReferer = NULL;
 	size_t iContentLength = 0;
 	for ( size_t j = 1; j < iQtyLines; j++ )
 	{
-		TCHAR	*pszArgs = Str_TrimWhitespace(ppLines[j]);
+		tchar	*pszArgs = Str_TrimWhitespace(ppLines[j]);
 		if ( !strnicmp(pszArgs, "Connection:", 11 ) )
 		{
 			pszArgs += 11;
@@ -694,7 +694,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t iLen )
 		}
 	}
 
-	TCHAR * ppRequest[4];
+	tchar * ppRequest[4];
 	size_t iQtyArgs = Str_ParseCmds(ppLines[0], ppRequest, COUNTOF(ppRequest), " ");
 	if (( iQtyArgs < 2 ) || ( strlen(ppRequest[1]) >= _MAX_PATH ))
 		return false;
@@ -738,7 +738,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t iLen )
 		// Content-Length: 29
 		// T1=stuff1&B1=Submit&T2=stuff2
 
-		g_Log.Event(LOGM_HTTP|LOGL_EVENT, "%x:HTTP Page Post '%s'\n", GetSocketID(), static_cast<LPCTSTR>(ppRequest[1]));
+		g_Log.Event(LOGM_HTTP|LOGL_EVENT, "%x:HTTP Page Post '%s'\n", GetSocketID(), static_cast<lpctstr>(ppRequest[1]));
 
 		CWebPageDef	*pWebPage = g_Cfg.FindWebPage(ppRequest[1]);
 		if ( !pWebPage )
@@ -761,11 +761,11 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t iLen )
 		// Host: localhost:2593\r\n
 		// \r\n
 
-		TCHAR szPageName[_MAX_PATH];
+		tchar szPageName[_MAX_PATH];
 		if ( !Str_GetBare( szPageName, Str_TrimWhitespace(ppRequest[1]), sizeof(szPageName), "!\"#$%&()*,:;<=>?[]^{|}-+'`" ) )
 			return false;
 
-		g_Log.Event(LOGM_HTTP|LOGL_EVENT, "%x:HTTP Page Request '%s', alive=%d\n", GetSocketID(), static_cast<LPCTSTR>(szPageName), fKeepAlive);
+		g_Log.Event(LOGM_HTTP|LOGL_EVENT, "%x:HTTP Page Request '%s', alive=%d\n", GetSocketID(), static_cast<lpctstr>(szPageName), fKeepAlive);
 		if ( CWebPageDef::ServPage(this, szPageName, &dateIfModifiedSince) )
 		{
 			if ( fKeepAlive )
@@ -823,7 +823,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
 	
 	m_Crypt.Decrypt( pEvent->m_Raw, bincopy.m_Raw, iLen );
 	
-	TCHAR szAccount[MAX_ACCOUNT_NAME_SIZE+3];
+	tchar szAccount[MAX_ACCOUNT_NAME_SIZE+3];
 
 	switch ( pEvent->Default.m_Cmd )
 	{
