@@ -2582,7 +2582,7 @@ bool PacketPartyMessage::onReceive(NetState* net)
 				return false;
 
 			CGrayUID serial(readInt32());
-			NWORD * text = reinterpret_cast<NWORD *>(Str_GetTemp());
+			nword * text = reinterpret_cast<nword *>(Str_GetTemp());
 			int length = readStringNullUNICODE(reinterpret_cast<WCHAR *>(text), MAX_TALK_BUFFER);
 			character->m_pParty->MessageEvent(serial, character->GetUID(), text, length);
 		} break;
@@ -2593,7 +2593,7 @@ bool PacketPartyMessage::onReceive(NetState* net)
 			if (character->m_pParty == NULL)
 				return false;
 
-			NWORD * text = reinterpret_cast<NWORD *>(Str_GetTemp());
+			nword * text = reinterpret_cast<nword *>(Str_GetTemp());
 			int length = readStringNullUNICODE(reinterpret_cast<WCHAR *>(text), MAX_TALK_BUFFER);
 			character->m_pParty->MessageEvent(CGrayUID(0), character->GetUID(), text, length);
 		} break;

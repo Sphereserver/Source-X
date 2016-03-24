@@ -48,7 +48,7 @@
 #endif
 
 #define MAKEWORD(low,high)	((word)(((byte)(low))|(((word)((byte)(high)))<<8)))
-#define MAKELONG(low,high)	((long)(((word)(low))|(((dword)((word)(high)))<<16)))
+//#define MAKELONG(low,high)	((long)(((word)(low))|(((dword)((word)(high)))<<16)))
 #define LOWORD(l)	((word)((dword)(l) & 0xffff))
 #define HIWORD(l)	((word)((dword)(l) >> 16))
 #define LOBYTE(w)	((byte)((dword)(w) &  0xff))

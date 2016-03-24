@@ -480,8 +480,8 @@ int Sphere_InitServer( int argc, char *argv[] )
 	ASSERT(sizeof(ITEMID_TYPE) == sizeof(dword));
 	ASSERT(sizeof(word) == 2 );
 	ASSERT(sizeof(dword) == 4 );
-	ASSERT(sizeof(NWORD) == 2 );
-	ASSERT(sizeof(NDWORD) == 4 );
+	ASSERT(sizeof(nword) == 2 );
+	ASSERT(sizeof(ndword) == 4 );
 	ASSERT(sizeof(CUOItemTypeRec) == 37 ); // byte pack working ?
 	ASSERT((std::numeric_limits<size_t>::min)() == 0); // ensure unsigned
 

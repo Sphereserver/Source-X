@@ -321,11 +321,11 @@ void Packet::writeStringASCII(const WCHAR* value, bool terminate)
 	{
 		size_t i;
 		for (i = 0; value[i]; ++i)
-			reinterpret_cast<WCHAR *>(buffer)[i] = reinterpret_cast<const NWORD *>(value)[i];
+			reinterpret_cast<WCHAR *>(buffer)[i] = reinterpret_cast<const nword *>(value)[i];
 		reinterpret_cast<WCHAR *>(buffer)[i] = '\0';
 	}
 
-	CvtNUNICODEToSystem(buffer, THREAD_STRING_LENGTH, reinterpret_cast<NWORD *>(buffer), THREAD_STRING_LENGTH);
+	CvtNUNICODEToSystem(buffer, THREAD_STRING_LENGTH, reinterpret_cast<nword *>(buffer), THREAD_STRING_LENGTH);
 
 	writeStringASCII(buffer, terminate);
 #endif
@@ -364,11 +364,11 @@ void Packet::writeStringFixedASCII(const WCHAR* value, size_t size, bool termina
 	{
 		size_t i;
 		for (i = 0; value[i] != '\0'; ++i)
-			reinterpret_cast<WCHAR *>(buffer)[i] = reinterpret_cast<const NWORD *>(value)[i];
+			reinterpret_cast<WCHAR *>(buffer)[i] = reinterpret_cast<const nword *>(value)[i];
 		reinterpret_cast<WCHAR *>(buffer)[i] = '\0';
 	}
 	
-	CvtNUNICODEToSystem(buffer, THREAD_STRING_LENGTH, reinterpret_cast<NWORD *>(buffer), THREAD_STRING_LENGTH);
+	CvtNUNICODEToSystem(buffer, THREAD_STRING_LENGTH, reinterpret_cast<nword *>(buffer), THREAD_STRING_LENGTH);
 
 	writeStringFixedASCII(buffer, size, terminate);
 #endif
@@ -393,7 +393,7 @@ void Packet::writeStringUNICODE(const char* value, bool terminate)
 	ASSERT(value != NULL);
 
 	WCHAR * buffer = reinterpret_cast<WCHAR *>(Str_GetTemp());
-	CvtSystemToNUNICODE(reinterpret_cast<NWORD *>(buffer), THREAD_STRING_LENGTH / sizeof(WCHAR), value, static_cast<int>(strlen(value)));
+	CvtSystemToNUNICODE(reinterpret_cast<nword *>(buffer), THREAD_STRING_LENGTH / sizeof(WCHAR), value, static_cast<int>(strlen(value)));
 	
 	writeStringNUNICODE(buffer, terminate);
 #endif
@@ -425,7 +425,7 @@ void Packet::writeStringFixedUNICODE(const char* value, size_t size, bool termin
 	ASSERT(value != NULL);
 
 	WCHAR * buffer = reinterpret_cast<WCHAR *>(Str_GetTemp());
-	CvtSystemToNUNICODE(reinterpret_cast<NWORD *>(buffer), THREAD_STRING_LENGTH / sizeof(WCHAR), value, static_cast<int>(strlen(value)));
+	CvtSystemToNUNICODE(reinterpret_cast<nword *>(buffer), THREAD_STRING_LENGTH / sizeof(WCHAR), value, static_cast<int>(strlen(value)));
 	
 	writeStringFixedNUNICODE(buffer, size, terminate);
 #endif
@@ -507,7 +507,7 @@ void Packet::writeStringNUNICODE(const char* value, bool terminate)
 	ASSERT(value != NULL);
 
 	WCHAR* buffer = reinterpret_cast<WCHAR *>(Str_GetTemp());
-	CvtSystemToNUNICODE(reinterpret_cast<NWORD *>(buffer), THREAD_STRING_LENGTH / sizeof(WCHAR), value, static_cast<int>(strlen(value)));
+	CvtSystemToNUNICODE(reinterpret_cast<nword *>(buffer), THREAD_STRING_LENGTH / sizeof(WCHAR), value, static_cast<int>(strlen(value)));
 	
 	writeStringUNICODE(buffer, terminate);
 #endif
@@ -539,7 +539,7 @@ void Packet::writeStringFixedNUNICODE(const char* value, size_t size, bool termi
 	ASSERT(value != NULL);
 	
 	WCHAR* buffer = reinterpret_cast<WCHAR *>(Str_GetTemp());
-	CvtSystemToNUNICODE(reinterpret_cast<NWORD *>(buffer), THREAD_STRING_LENGTH / sizeof(WCHAR), value, static_cast<int>(strlen(value)));
+	CvtSystemToNUNICODE(reinterpret_cast<nword *>(buffer), THREAD_STRING_LENGTH / sizeof(WCHAR), value, static_cast<int>(strlen(value)));
 	
 	writeStringFixedUNICODE(buffer, size, terminate);
 #endif
@@ -747,14 +747,14 @@ void Packet::readStringASCII(WCHAR* buffer, size_t length, bool includeNull)
 	
 	char* bufferReal = new char[length + 1];
 	readStringASCII(bufferReal, length, includeNull);
-	CvtSystemToNUNICODE(reinterpret_cast<NWORD *>(buffer), static_cast<int>(length), bufferReal, static_cast<int>(length) + 1);
+	CvtSystemToNUNICODE(reinterpret_cast<nword *>(buffer), static_cast<int>(length), bufferReal, static_cast<int>(length) + 1);
 	delete[] bufferReal;
 
 	// need to flip byte order to convert NUNICODE to UNICODE
 	{
 		size_t i;
 		for (i = 0; buffer[i]; ++i)
-			buffer[i] = reinterpret_cast<NWORD *>(buffer)[i];
+			buffer[i] = reinterpret_cast<nword *>(buffer)[i];
 		buffer[i] = '\0';
 	}
 #endif
@@ -801,7 +801,7 @@ void Packet::readStringUNICODE(char* buffer, size_t bufferSize, size_t length, b
 
 	WCHAR* bufferReal = new WCHAR[length + 1];
 	readStringNUNICODE(bufferReal, length, includeNull);
-	CvtNUNICODEToSystem(buffer, static_cast<int>(bufferSize), reinterpret_cast<NWORD *>(bufferReal), static_cast<int>(length) + 1);
+	CvtNUNICODEToSystem(buffer, static_cast<int>(bufferSize), reinterpret_cast<nword *>(bufferReal), static_cast<int>(length) + 1);
 	delete[] bufferReal;
 #endif
 }
@@ -847,7 +847,7 @@ void Packet::readStringNUNICODE(char* buffer, size_t bufferSize, size_t length, 
 
 	WCHAR* bufferReal = new WCHAR[length + 1];
 	readStringUNICODE(bufferReal, length, includeNull);
-	CvtNUNICODEToSystem(buffer, static_cast<int>(bufferSize), reinterpret_cast<NWORD *>(bufferReal), static_cast<int>(length) + 1);
+	CvtNUNICODEToSystem(buffer, static_cast<int>(bufferSize), reinterpret_cast<nword *>(bufferReal), static_cast<int>(length) + 1);
 	delete[] bufferReal;
 #endif
 }
@@ -883,14 +883,14 @@ size_t Packet::readStringNullASCII(WCHAR* buffer, size_t maxlength)
 
 	char* bufferReal = new char[maxlength + 1];
 	readStringNullASCII(bufferReal, maxlength);
-	int length = CvtSystemToNUNICODE(reinterpret_cast<NWORD *>(buffer), static_cast<int>(maxlength), bufferReal, static_cast<int>(maxlength) + 1);
+	int length = CvtSystemToNUNICODE(reinterpret_cast<nword *>(buffer), static_cast<int>(maxlength), bufferReal, static_cast<int>(maxlength) + 1);
 	delete[] bufferReal;
 
 	// need to flip byte order to convert NUNICODE to UNICODE
 	{
 		size_t i;
 		for (i = 0; buffer[i]; ++i)
-			buffer[i] = reinterpret_cast<NWORD *>(buffer)[i];
+			buffer[i] = reinterpret_cast<nword *>(buffer)[i];
 		buffer[i] = '\0';
 	}
 #endif
@@ -931,7 +931,7 @@ size_t Packet::readStringNullUNICODE(char* buffer, size_t bufferSize, size_t max
 
 	WCHAR* bufferReal = new WCHAR[maxlength + 1];
 	readStringNullNUNICODE(bufferReal, maxlength);
-	int length = CvtNUNICODEToSystem(buffer, static_cast<int>(bufferSize), reinterpret_cast<NWORD *>(bufferReal), static_cast<int>(maxlength) + 1);
+	int length = CvtNUNICODEToSystem(buffer, static_cast<int>(bufferSize), reinterpret_cast<nword *>(bufferReal), static_cast<int>(maxlength) + 1);
 	delete[] bufferReal;
 #endif
 
@@ -971,7 +971,7 @@ size_t Packet::readStringNullNUNICODE(char* buffer, size_t bufferSize, size_t ma
 
 	WCHAR* bufferReal = new WCHAR[maxlength + 1];
 	readStringNullUNICODE(bufferReal, maxlength);
-	int length = CvtNUNICODEToSystem(buffer, static_cast<int>(bufferSize), reinterpret_cast<NWORD *>(bufferReal), static_cast<int>(maxlength) + 1);
+	int length = CvtNUNICODEToSystem(buffer, static_cast<int>(bufferSize), reinterpret_cast<nword *>(bufferReal), static_cast<int>(maxlength) + 1);
 	delete[] bufferReal;
 #endif
 

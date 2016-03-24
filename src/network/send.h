@@ -1148,7 +1148,7 @@ public:
 class PacketMessageUNICODE : public PacketSend
 {
 public:
-	PacketMessageUNICODE(const CClient* target, const NWORD* pszText, const CObjBaseTemplate* source, HUE_TYPE hue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID language);
+	PacketMessageUNICODE(const CClient* target, const nword* pszText, const CObjBaseTemplate* source, HUE_TYPE hue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID language);
 };
 
 /***************************************************************************
@@ -1714,7 +1714,7 @@ class PacketHouseDesign : public PacketSend
 private:
 	struct StairData
 	{
-		NWORD m_id;
+		nword m_id;
 		byte m_x;
 		byte m_y;
 		byte m_z;

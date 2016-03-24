@@ -1880,7 +1880,7 @@ void CClient::Event_Talk( LPCTSTR pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 	}
 }
 
-void CClient::Event_TalkUNICODE( NWORD* wszText, int iTextLen, HUE_TYPE wHue, TALKMODE_TYPE mMode, FONT_TYPE font, LPCTSTR pszLang )
+void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TALKMODE_TYPE mMode, FONT_TYPE font, LPCTSTR pszLang )
 {
 	ADDTOCALLSTACK("CClient::Event_TalkUNICODE");
 	// Get the text in wide bytes.
@@ -1910,7 +1910,7 @@ void CClient::Event_TalkUNICODE( NWORD* wszText, int iTextLen, HUE_TYPE wHue, TA
 		m_pChar->m_SpeechHue = wHue;
 
 	TCHAR szText[MAX_TALK_BUFFER];
-	const NWORD * puText = wszText;
+	const nword * puText = wszText;
 
 	int iLen = CvtNUNICODEToSystem( szText, sizeof(szText), wszText, iTextLen );
 	if ( iLen <= 0 )

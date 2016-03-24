@@ -334,7 +334,7 @@ public:
 	void Event_SetName( CGrayUID uid, const char * pszCharName );
 	void Event_SingleClick( CGrayUID uid );
 	void Event_Talk( LPCTSTR pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bool bNoStrip = false ); // PC speech
-	void Event_TalkUNICODE( NWORD* wszText, int iTextLen, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, LPCTSTR pszLang );
+	void Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, LPCTSTR pszLang );
 	void Event_Target( dword context, CGrayUID uid, CPointMap pt, byte flags = 0, ITEMID_TYPE id = ITEMID_NOTHING );
 	void Event_Tips( word i ); // Tip of the day window
 	void Event_ToolTip( CGrayUID uid );

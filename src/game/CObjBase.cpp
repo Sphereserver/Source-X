@@ -542,7 +542,7 @@ void CObjBase::SpeakUTF8( LPCTSTR pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT
 	g_World.SpeakUNICODE( this, szBuffer, wHue, mode, font, lang );
 }
 
-void CObjBase::SpeakUTF8Ex( const NWORD * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
+void CObjBase::SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
 {
 	ADDTOCALLSTACK("CObjBase::SpeakUTF8Ex");
 	g_World.SpeakUNICODE( this, pText, wHue, mode, font, lang );

@@ -32,7 +32,7 @@
 
 // Pack/unpack in network order.
 
-struct NWORD
+struct nword
 {
 	// Deal with the stupid Little Endian / Big Endian crap just once.
 	// On little endian machines this code would do nothing.
@@ -41,7 +41,7 @@ struct NWORD
 	{
 		return( ntohs( m_val ));
 	}
-	NWORD & operator = ( word val )
+	nword & operator = ( word val )
 	{
 		m_val = htons( val );
 		return( * this );
@@ -51,14 +51,14 @@ struct NWORD
 #define UNPACKWORD(p)	MAKEWORD((p)[1],(p)[0])	// low,high
 
 } PACK_NEEDED;
-struct NDWORD
+struct ndword
 {
 	dword m_val;
 	operator dword () const
 	{
 		return( ntohl( m_val ));
 	}
-	NDWORD & operator = ( dword val )
+	ndword & operator = ( dword val )
 	{
 		m_val = htonl( val );
 		return( * this );
@@ -69,7 +69,7 @@ struct NDWORD
 
 } PACK_NEEDED;
 
-#define	NCHAR	NWORD			// a UNICODE text char on the network.
+#define	NCHAR	nword			// a UNICODE text char on the network.
 
 extern int CvtSystemToNUNICODE( NCHAR * pOut, int iSizeOutChars, LPCTSTR pInp, int iSizeInBytes );
 extern int CvtNUNICODEToSystem( TCHAR * pOut, int iSizeOutBytes, const NCHAR * pInp, int iSizeInChars );
@@ -455,7 +455,7 @@ enum EXTAOS_TYPE
 union CExtData
 {
 	byte Default[1];			// Unknown stuff.
-	NDWORD WalkCode[16];	// EXTDATA_WalkCode_Prime or EXTDATA_WalkCode_Add
+	ndword WalkCode[16];	// EXTDATA_WalkCode_Prime or EXTDATA_WalkCode_Add
 
 	struct
 	{
@@ -466,7 +466,7 @@ union CExtData
 	struct
 	{
 		byte m_code;	// PARTYMSG_TYPE
-		NDWORD m_UID;		// source/dest uid.
+		ndword m_UID;		// source/dest uid.
 		NCHAR m_msg[MAX_TALK_BUFFER];	// text of the msg. var len
 	} Party_Msg_Rsp;	// from server.
 
@@ -474,7 +474,7 @@ union CExtData
 	{
 		byte m_code;	// PARTYMSG_TYPE
 		byte m_Qty;
-		NDWORD m_uids[3];
+		ndword m_uids[3];
 	} Party_Msg_Data;	// from client.
 
 	struct // EXTDATA_Map_Change = 0x08
@@ -484,14 +484,14 @@ union CExtData
 
 	struct	// EXTDATA_GumpChange = 0x04
 	{
-		NDWORD	dialogID;
-		NDWORD	buttonID;
+		ndword	dialogID;
+		ndword	buttonID;
 	} GumpChange;	// from server
 
 	struct	// EXTDATA_ScreenSize = 0x05
 	{
-		NDWORD m_x;
-		NDWORD m_y;
+		ndword m_x;
+		ndword m_y;
 	} ScreenSize;	// from client
 
 	struct	// EXTDATA_Arrow_Click = 0x07
@@ -506,83 +506,83 @@ union CExtData
 
 	struct // EXTDATA_OldAOSTooltipInfo	= 0x10 (server version)
 	{
-		NDWORD m_uid;
-		NDWORD m_ListID;
+		ndword m_uid;
+		ndword m_ListID;
 	} OldAOSTooltipInfo;
 
 	struct // EXTDATA_OldAOSTooltipInfo = 0x10 (client version)
 	{
-		NDWORD m_uid;
+		ndword m_uid;
 	} OldAOSTooltipRequest;
 
 	struct  // EXTDATA_Popup_Request = 0x13
 	{
-		NDWORD m_UID;
+		ndword m_UID;
 	} Popup_Request; // from client
 
 	struct  // EXTDATA_Popup_Display = 0x14
 	{
-		NWORD m_unk1; // 2
-		NDWORD m_UID;
+		nword m_unk1; // 2
+		ndword m_UID;
 		byte m_NumPopups;
 		struct
 		{
-			NDWORD m_TextID;
-			NWORD m_EntryTag;
-			NWORD m_Flags;
+			ndword m_TextID;
+			nword m_EntryTag;
+			nword m_Flags;
 			char memreserve[112];
 		} m_List;
 	} KRPopup_Display;
 
 	struct  // EXTDATA_Popup_Display = 0x14
 	{
-		NWORD m_unk1; // 1
-		NDWORD m_UID;
+		nword m_unk1; // 1
+		ndword m_UID;
 		byte m_NumPopups;
 		struct
 		{
-			NWORD m_EntryTag;
-			NWORD m_TextID;
-			NWORD m_Flags;
-			NWORD m_Color;
+			nword m_EntryTag;
+			nword m_TextID;
+			nword m_Flags;
+			nword m_Color;
 			char memreserve[112];
 		} m_List;
 	} Popup_Display;
 
 	struct  // EXTDATA_Popup_Select = 0x15
 	{
-		NDWORD m_UID;
-		NWORD m_EntryTag;
+		ndword m_UID;
+		nword m_EntryTag;
 	} Popup_Select;
 	
 	struct // EXTDATA_Codex_Wisdom = 0x17
 	{
 		byte m_unk_1; // 0x01 always
-		NDWORD m_messageid;
+		ndword m_messageid;
 		byte m_presentation; // 0 = Flash, 1 = Direct
 	} Codex_Wisdom;
 	
 	struct // EXTDATA_Map_Diff = 0x18
 	{
-		NDWORD m_maps_number;
+		ndword m_maps_number;
 		struct
 		{
-			NDWORD m_map_patch;
-			NDWORD m_static_patch;
+			ndword m_map_patch;
+			ndword m_static_patch;
 		} m_patch[1];
 	} Map_Diff;
 
 	struct // EXTDATA_Stats_Enable = 0x19 type 0
 	{
 		byte m_type; // 0x00
-		NDWORD m_UID; // (of Bonded Pet?)
+		ndword m_UID; // (of Bonded Pet?)
 		byte m_unk; // 0x01
 	} Bonded_Status;
 
 	struct // EXTDATA_Stats_Enable = 0x19 type 2
 	{
 		byte m_type; // 0x02
-		NDWORD m_UID;
+		ndword m_UID;
 		byte m_unk; // 0x00
 		byte m_lockbits; // Bits: XXSSDDII (s=strength, d=dex, i=int), 0 = up, 1 = down, 2 = locked
 	} Stats_Enable;
@@ -595,58 +595,58 @@ union CExtData
 	
 	struct  // EXTDATA_NewSpellbook = 0x1b
 	{
-		NWORD m_Unk1;
-		NDWORD m_UID;
-		NWORD m_ItemId;
-		NWORD m_Offset;
+		nword m_Unk1;
+		ndword m_UID;
+		nword m_ItemId;
+		nword m_Offset;
 #ifdef _WIN32
 		dword m_Content0;
 		dword m_Content1;
 #else
-		NDWORD m_Content0;
-		NDWORD m_Content1;
+		ndword m_Content0;
+		ndword m_Content1;
 #endif
 	} NewSpellbook;
 
 	struct  // EXTDATA_NewSpellSelect = 0x1C
 	{
-		NWORD m_Unk1;
-		NWORD m_SpellId;
+		nword m_Unk1;
+		nword m_SpellId;
 	} NewSpellSelect;
 
 	struct  // EXTDATA_NewSpellSelectWyatt = 0x1C (version as in wyatt docs)
 	{
-		NWORD m_HasSpell; // 2=no spell, 1=has spellbook, 0=no spellbook but has spell
-		NDWORD m_SpellBook; // if 1 spellbook uid
-		NWORD m_Expansionflag; // 0x0 = LBR&AOS; 0x1 = SE; 0x2 = ML;
-		NWORD m_SpellId; // 0x00 if last spell
+		nword m_HasSpell; // 2=no spell, 1=has spellbook, 0=no spellbook but has spell
+		ndword m_SpellBook; // if 1 spellbook uid
+		nword m_Expansionflag; // 0x0 = LBR&AOS; 0x1 = SE; 0x2 = ML;
+		nword m_SpellId; // 0x00 if last spell
 	} NewSpellSelectWyatt;
 
 	struct // EXTDATA_HouseDesignVer = 0x1d
 	{
-		NDWORD m_HouseUID;
-		NDWORD m_Version;
+		ndword m_HouseUID;
+		ndword m_Version;
 	} HouseDesignVersion;
 
 	struct // EXTDATA_HouseDesignDet = 0x1e
 	{
-		NDWORD m_HouseUID;
+		ndword m_HouseUID;
 	} HouseDesignDetail;
 
 	struct // EXTDATA_HouseCustom = 0x20
 	{
-		NDWORD m_HouseSerial;
+		ndword m_HouseSerial;
 		byte m_type; // 0x04 = start; 0x05 = end;
-		NWORD m_unk1; // 0x0000
-		NWORD m_unk2; // 0xFFFF
-		NWORD m_unk3; // 0xFFFF
+		nword m_unk1; // 0x0000
+		nword m_unk2; // 0xFFFF
+		nword m_unk3; // 0xFFFF
 		byte  m_unk4; // 0xFF
 	} HouseCustom;
 
 	struct  // EXTDATA_DamagePacketOld = 0x22 (LBR/AOS damage counter)
 	{
 		byte m_unk1;
-		NDWORD m_UID;
+		ndword m_UID;
 		byte m_dmg;
 	} DamagePacketOld;  // from server
 
@@ -669,13 +669,13 @@ union CExtData
 
 	struct // EXTDATA_BandageMacro = 0x2c
 	{
-		NDWORD m_bandageSerial;
-		NDWORD m_targetSerial;
+		ndword m_bandageSerial;
+		ndword m_targetSerial;
 	} BandageMacro;
 
 	struct // EXTDATA_GargoyleFly = 0x32
 	{
-		NWORD m_one;	// always 1
+		nword m_one;	// always 1
 		dword m_zero;	// always 0
 	} GargoyleFly;
 
@@ -704,13 +704,13 @@ union CExtAosData
 	struct
 	{
 		byte m_Unk_00_1; // 0x00
-		NDWORD m_Dispid;
+		ndword m_Dispid;
 		byte m_Unk_00_2; // 0x00
-		NDWORD m_PosX;
+		ndword m_PosX;
 		byte m_Unk_00_3; // 0x00
-		NDWORD m_PosY;
+		ndword m_PosY;
 		byte m_Unk_00_4; // 0x00
-		NDWORD m_PosZ;
+		ndword m_PosZ;
 		byte m_Unk; 	 // 0x0A
 		
 	} HouseDestroyItem;
@@ -718,11 +718,11 @@ union CExtAosData
 	struct
 	{
 		byte m_Unk_00_1; // 0x00
-		NDWORD m_Dispid;
+		ndword m_Dispid;
 		byte m_Unk_00_2; // 0x00
-		NDWORD m_PosX;
+		ndword m_PosX;
 		byte m_Unk_00_3; // 0x00
-		NDWORD m_PosY;
+		ndword m_PosY;
 		byte m_Unk; 	 // 0x0A
 		
 	} HousePlaceItem;
@@ -736,11 +736,11 @@ union CExtAosData
 	struct
 	{
 		byte m_Unk_00_1; // 0x00
-		NDWORD m_Dispid;
+		ndword m_Dispid;
 		byte m_Unk_00_2; // 0x00
-		NDWORD m_PosX;
+		ndword m_PosX;
 		byte m_Unk_00_3; // 0x00
-		NDWORD m_PosY;
+		ndword m_PosY;
 		byte m_Unk; 	 // 0x0A
 		
 	} HousePlaceStair;
@@ -760,7 +760,7 @@ union CExtAosData
 	struct
 	{
 		byte m_Unk_00_1; // 0x00
-		NDWORD m_Floor;
+		ndword m_Floor;
 		byte m_Unk; 	 // 0x0A
 		
 	} HouseSwitchFloor;
@@ -768,33 +768,33 @@ union CExtAosData
 	struct
 	{
 		byte m_Unk_00_1; // 0x00
-		NDWORD m_Roof;
+		ndword m_Roof;
 		byte m_Unk_00_2; // 0x00
-		NDWORD m_PosX;
+		ndword m_PosX;
 		byte m_Unk_00_3; // 0x00
-		NDWORD m_PosY;
+		ndword m_PosY;
 		byte m_Unk_00_4; // 0x00
-		NDWORD m_PosZ;
+		ndword m_PosZ;
 		byte m_Unk;		 // 0x0A
 	} HousePlaceRoof;
 
 	struct
 	{
 		byte m_Unk_00_1; // 0x00
-		NDWORD m_Roof;
+		ndword m_Roof;
 		byte m_Unk_00_2; // 0x00
-		NDWORD m_PosX;
+		ndword m_PosX;
 		byte m_Unk_00_3; // 0x00
-		NDWORD m_PosY;
+		ndword m_PosY;
 		byte m_Unk_00_4; // 0x00
-		NDWORD m_PosZ;
+		ndword m_PosZ;
 		byte m_Unk;		 // 0x0A
 	} HouseDestroyRoof;
 
 	struct
 	{
 		byte m_Unk_0;	// 0x00
-		NDWORD m_Ability;
+		ndword m_Ability;
 		byte m_Unk; 	// 0x0A
 		
 	} SpecialMove;
@@ -1176,15 +1176,15 @@ struct CEvent	// event buffer from client to server..
 		struct	// XCMD_Create, size = 100	// create a new char
 		{
 			byte m_Cmd;		// 0=0
-			NDWORD m_pattern1; // 0xedededed
-			NDWORD m_pattern2; // 0xffffffff
+			ndword m_pattern1; // 0xedededed
+			ndword m_pattern2; // 0xffffffff
 			byte m_kuoc; // KUOC Signal (0x00 normally. 0xff for Krrios' client)
 
 			char m_charname[MAX_NAME_SIZE];		// 10
 			//char m_charpass[MAX_NAME_SIZE];		// Not used anymore
 			
 			byte m_unk8[2];
-			NDWORD m_flags;
+			ndword m_flags;
 			byte m_unk10[8];
 			byte m_prof;
 			byte m_unk11[15];
@@ -1201,11 +1201,11 @@ struct CEvent	// event buffer from client to server..
 			byte m_skill3;
 			byte m_val3;
 
-			NWORD m_wSkinHue;	// 0x50 // HUE_TYPE
-			NWORD m_hairid;
-			NWORD m_hairHue;
-			NWORD m_beardid;
-			NWORD m_beardHue;	// 0x58
+			nword m_wSkinHue;	// 0x50 // HUE_TYPE
+			nword m_hairid;
+			nword m_hairHue;
+			nword m_beardid;
+			nword m_beardHue;	// 0x58
 			byte m_unk2;
 			byte m_startloc;
 			byte m_unk3;
@@ -1213,8 +1213,8 @@ struct CEvent	// event buffer from client to server..
 			byte m_unk5;
 			byte m_slot;
 			byte m_clientip[4];
-			NWORD m_shirtHue;
-			NWORD m_pantsHue;
+			nword m_shirtHue;
+			nword m_pantsHue;
 		} Create;
 
 		struct	// size = 7
@@ -1222,81 +1222,81 @@ struct CEvent	// event buffer from client to server..
 			byte m_Cmd;		// 0 = 0x02
 			byte m_dir;		// 1 = DIR_TYPE (| 0x80 = running)
 			byte m_count; 	// 2 = just a count that goes up as we walk. (handshake)
-			NDWORD m_cryptcode;
+			ndword m_cryptcode;
 		} Walk;
 
 		struct // size = 38
 		{
 			byte m_Cmd;		// 0     = 0xF0  XCMD_WalkRequestNew
-			NWORD m_len;	// 1-2   = length of packet
+			nword m_len;	// 1-2   = length of packet
 			byte m_unk1;	// 3     = 01
-			NDWORD m_unk2;	// 4-7   = 00 00 01 22
-			NDWORD m_unk3;	// 8-11  = AE . DF 64
-			NDWORD m_unk4;	// 12-15 = 00 00 01 22
-			NDWORD m_unk5;	// 16-19 = AE 8A BC 1A
+			ndword m_unk2;	// 4-7   = 00 00 01 22
+			ndword m_unk3;	// 8-11  = AE . DF 64
+			ndword m_unk4;	// 12-15 = 00 00 01 22
+			ndword m_unk5;	// 16-19 = AE 8A BC 1A
 			byte m_count;	// 20    = increments every packet
 			byte m_dir;		// 21    = new direction
-			NDWORD m_mode;	// 22-25 = movement mode (1 = walk, 2 = run)
-			NDWORD m_x;		// 26-29 = new x position
-			NDWORD m_y;		// 30-33 = new y position
-			NDWORD m_z;		// 34-37 = new z position
+			ndword m_mode;	// 22-25 = movement mode (1 = walk, 2 = run)
+			ndword m_x;		// 26-29 = new x position
+			ndword m_y;		// 30-33 = new y position
+			ndword m_z;		// 34-37 = new z position
 		} WalkNew;
 
 		struct // size = 9
 		{
 			byte m_Cmd;		// 0   = 0xF1  XCMD_TSyncRequest
-			NDWORD m_unk1;	// 1-4 = 00 00 01 22
-			NDWORD m_unk2;	// 5-8 = AE .. E1 0E
+			ndword m_unk1;	// 1-4 = 00 00 01 22
+			ndword m_unk2;	// 5-8 = AE .. E1 0E
 		} TSyncRequest;
 
 		struct	// size = >3	// user typed in text.
 		{
 			byte m_Cmd;		// 0 = 0x03
-			NWORD m_len;	// 1,2=length of packet
+			nword m_len;	// 1,2=length of packet
 			byte m_mode;	// 3=mode(9=yell) TALKMODE_TYPE
-			NWORD m_wHue;
-			NWORD m_font;	// 6,7 = FONT_TYPE
+			nword m_wHue;
+			nword m_font;	// 6,7 = FONT_TYPE
 			char m_text[1];	// 8=var size MAX_TALK_BUFFER
 		} Talk;
 
 		struct	// size = 5
 		{
 			byte m_Cmd;	// 0 = 0x05, 0x06 or 0x09
-			NDWORD m_UID;
+			ndword m_UID;
 		} Click;	// Attack, DClick, Click
 
 		struct // size = 7 = pick up an item
 		{
 			byte m_Cmd;			// 0 = 0x07
-			NDWORD m_UID;		// 1-4
-			NWORD m_amount;
+			ndword m_UID;		// 1-4
+			nword m_amount;
 		} ItemPickupReq;
 
 		struct	// size = 14 = drop item on ground or in container.
 		{
 			byte m_Cmd;			// 0 = 0x08
-			NDWORD m_UID;		// 1-4 = object being dropped.
-			NWORD m_x;		// 5,6 = 255 = invalid
-			NWORD m_y;		// 7,8
+			ndword m_UID;		// 1-4 = object being dropped.
+			nword m_x;		// 5,6 = 255 = invalid
+			nword m_y;		// 7,8
 			byte m_z;			// 9
-			NDWORD m_UIDCont;	// 10 = dropped on this object. 0xFFFFFFFF = no object
+			ndword m_UIDCont;	// 10 = dropped on this object. 0xFFFFFFFF = no object
 		} ItemDropReq;
 
 		struct	// size = 15 = drop item on ground or in container.
 		{
 			byte m_Cmd;			// 0 = 0x08
-			NDWORD m_UID;		// 1-4 = object being dropped.
-			NWORD m_x;		// 5,6 = 255 = invalid
-			NWORD m_y;		// 7,8
+			ndword m_UID;		// 1-4 = object being dropped.
+			nword m_x;		// 5,6 = 255 = invalid
+			nword m_y;		// 7,8
 			byte m_z;			// 9
 			byte m_grid;		// 10	(Client 6.0.1.7+)
-			NDWORD m_UIDCont;	// 11 = dropped on this object. 0xFFFFFFFF = no object
+			ndword m_UIDCont;	// 11 = dropped on this object. 0xFFFFFFFF = no object
 		} ItemDropReqNew;
 
 		struct	// size > 3
 		{
 			byte m_Cmd;		// 0 = 0x12
-			NWORD m_len;	// 1-2 = len
+			nword m_len;	// 1-2 = len
 			byte m_type;	// 3 = 0xc7=anim, 0x24=skill...
 			char m_name[1];	// 4=var size string
 		} ExtCmd;
@@ -1304,15 +1304,15 @@ struct CEvent	// event buffer from client to server..
 		struct	// size = 10 = item dropped on paper doll.
 		{
 			byte m_Cmd;		// 0 = 0x13
-			NDWORD m_UID;	// 1-4	item UID.
+			ndword m_UID;	// 1-4	item UID.
 			byte m_layer;	// LAYER_TYPE
-			NDWORD m_UIDChar;
+			ndword m_UIDChar;
 		} ItemEquipReq;
 
 		struct // size = ? reserved GM tool message.
 		{
 			byte m_Cmd;		// 0 = 0x11
-			NWORD m_len;	// 1-2 = len
+			nword m_len;	// 1-2 = len
 			byte m_type;	// 3 = sub type
 
 		} GMToolMsg;
@@ -1335,18 +1335,18 @@ struct CEvent	// event buffer from client to server..
 		struct	// size = 10	// Client requests stats.
 		{
 			byte m_Cmd;		// 0 =0x34
-			NDWORD m_edededed;	// 1-4 = 0xedededed
+			ndword m_edededed;	// 1-4 = 0xedededed
 			byte m_type;	// 5 = 4 = Basic Stats (Packet 0x11 Response)  5 = Request Skills (Packet 0x3A Response)
-			NDWORD m_UID;	// 6 = character UID for status
+			ndword m_UID;	// 6 = character UID for status
 		} CharStatReq;
 
 		struct // size = ??? = Get a skill lock (or multiple)
 		{
 			byte m_Cmd;		// 0= 0x3A
-			NWORD m_len;	// 1= varies
+			nword m_len;	// 1= varies
 			struct
 			{
-				NWORD m_index;	// skill index
+				nword m_index;	// skill index
 				byte m_lock;	// SKILLLOCK_TYPE current lock mode (0 = none (up), 1 = down, 2 = locked)
 			} skills[1];
 		} Skill;
@@ -1354,34 +1354,34 @@ struct CEvent	// event buffer from client to server..
 		struct // size = variable // Buy item from vendor.
 		{
 			byte m_Cmd;			// 0 =0x3b
-			NWORD m_len;		// 1-2=
-			NDWORD m_UIDVendor;	// 3-6=
+			nword m_len;		// 1-2=
+			ndword m_UIDVendor;	// 3-6=
 			byte m_flag;	// 0x00 = no items following, 0x02 - items following
 			struct
 			{
 				byte m_layer; // (0x1A)
-				NDWORD m_UID; // itemID (from 3C packet)
-				NWORD m_amount; //  # bought
+				ndword m_UID; // itemID (from 3C packet)
+				nword m_amount; //  # bought
 			} m_item[1];
 		} VendorBuy;
 
 		struct	// size = 11	// plot course on map.
 		{
 			byte m_Cmd;		// 0 = 0x56
-			NDWORD m_UID;  // uid of the map
+			ndword m_UID;  // uid of the map
 			byte m_action;	// 1, MAPCMD_TYPE 1: add pin, 5: delete pin, 6: toggle edit/noedit or cancel while in edit
 			byte m_pin;
-			NWORD m_pin_x;
-			NWORD m_pin_y;
+			nword m_pin_x;
+			nword m_pin_y;
 		} MapEdit;
 
 		struct	// size = 0x49 = 73	// play this slot char
 		{
 			byte m_Cmd;			// 0 = 0x5D
-			NDWORD m_edededed;	// 1-4 = ed ed ed ed
+			ndword m_edededed;	// 1-4 = ed ed ed ed
 			char m_charname[MAX_NAME_SIZE];
 			char m_charpass[MAX_NAME_SIZE];
-			NDWORD m_slot;		// 0x44 = slot
+			ndword m_slot;		// 0x44 = slot
 			byte m_clientip[4];	// = 18 80 ea 15
 		} CharPlay;
 
@@ -1391,14 +1391,14 @@ struct CEvent	// event buffer from client to server..
 		struct	// size > 3 // user is changing a book page.
 		{
 			byte m_Cmd;		// 0 = 0x66
-			NWORD m_len;	// 1-2
-			NDWORD m_UID;	// 3-6 = the book
-			NWORD m_pages;	// 7-8 = 0x0001 = # of pages here
+			nword m_len;	// 1-2
+			ndword m_UID;	// 3-6 = the book
+			nword m_pages;	// 7-8 = 0x0001 = # of pages here
 			// repeat these fields for multiple pages.
 			struct
 			{
-				NWORD m_pagenum;	// 9-10=page number  (1 based)
-				NWORD m_lines;	// 11
+				nword m_pagenum;	// 9-10=page number  (1 based)
+				nword m_lines;	// 11
 				char m_text[1];
 			} m_page[1];
 		} BookPage;
@@ -1406,41 +1406,41 @@ struct CEvent	// event buffer from client to server..
 		struct	// size = var // Client text Hue changed but it does not tell us to what !!
 		{
 			byte m_Cmd;		// 0=0x69
-			NWORD m_len;
-			NWORD m_index;
+			nword m_len;
+			nword m_index;
 		} Options;
 
 		struct	// size = 19
 		{
 			byte m_Cmd;		// 0 = 0x6C
 			byte m_TargType;	// 1 = 0=select object, 1=x,y,z=allow ground
-			NDWORD m_context;	// 2-5 = we sent this at target setup.
+			ndword m_context;	// 2-5 = we sent this at target setup.
 			byte m_fCheckCrime;		// 6= 0
 
-			NDWORD m_UID;	// 7-10	= serial number of the target.
-			NWORD m_x;		// 11,12
-			NWORD m_y;		// 13,14
+			ndword m_UID;	// 7-10	= serial number of the target.
+			nword m_x;		// 11,12
+			nword m_y;		// 13,14
 			byte m_unk2;	// 15 = fd ?
 			byte m_z;		// 16
-			NWORD m_id;		// 17-18 = static id of tile
+			nword m_id;		// 17-18 = static id of tile
 		} Target;
 
 		struct // size = var // Secure trading
 		{
 			byte m_Cmd;		// 0=0x6F
-			NWORD m_len;	// 1-2 = len
+			nword m_len;	// 1-2 = len
 			byte m_action;	// 3 = trade action
-			NDWORD m_UID;	// 4-7 = uid
-			NDWORD m_UID1;	// 8-11
+			ndword m_UID;	// 4-7 = uid
+			ndword m_UID1;	// 8-11
 		} SecureTrade;
 
 		struct // size = var (0x0c)	// Bulletin request
 		{
 			byte m_Cmd;		// 0=0x71
-			NWORD m_len;	// 1-2 = len = 0x0c
+			nword m_len;	// 1-2 = len = 0x0c
 			byte m_flag;	// 3= BBOARDF_TYPE 0=board name, 5=new message, 4=associate message, 1=message header, 2=message body
-			NDWORD m_UID;	// 4-7 = UID for the bboard.
-			NDWORD m_UIDMsg; // 8- = name or links data.
+			ndword m_UID;	// 4-7 = UID for the bboard.
+			ndword m_UIDMsg; // 8- = name or links data.
 			byte m_data[1];	// submit new message data here.
 		} BBoard;
 
@@ -1460,17 +1460,17 @@ struct CEvent	// event buffer from client to server..
 		struct // size = 35	// set the name for this NPC (pet) char
 		{
 			byte m_Cmd;		// 0=0x75
-			NDWORD m_UID;
+			ndword m_UID;
 			char m_charname[ MAX_NAME_SIZE ];
 		} CharName;
 
 		struct	// size = 13	// choice off a menu
 		{
 			byte m_Cmd;		// 0 = 0x7d
-			NDWORD m_UID;	// 1 = char id from 0x7c message
-			NWORD m_context;	// 5,6 = context info passed from server
-			NWORD m_select;	// 7,8	= what item selected from menu. 1 based ?
-			NDWORD m_unk9;
+			ndword m_UID;	// 1 = char id from 0x7c message
+			nword m_context;	// 5,6 = context info passed from server
+			nword m_select;	// 7,8	= what item selected from menu. 1 based ?
+			ndword m_unk9;
 		} MenuChoice;
 
 		struct // size = 62		// first login to req listing the servers.
@@ -1485,14 +1485,14 @@ struct CEvent	// event buffer from client to server..
 		{
 			byte m_Cmd;		// 0 = 0x83
 			byte m_charpass[MAX_NAME_SIZE];
-			NDWORD m_slot;	// 0x22
+			ndword m_slot;	// 0x22
 			byte m_clientip[4];
 		} CharDelete;
 
 		struct	// size = 65	// request to list the chars I can play.
 		{
 			byte m_Cmd;		  // 0 = 0x91
-			NDWORD m_Account; // 1-4 = account id from XCMD_Relay message to log server.
+			ndword m_Account; // 1-4 = account id from XCMD_Relay message to log server.
 			char m_acctname[MAX_ACCOUNT_NAME_SIZE];	// This is corrupted or encrypted seperatly ?
 			char m_acctpass[MAX_NAME_SIZE];
 		} CharListReq;
@@ -1500,10 +1500,10 @@ struct CEvent	// event buffer from client to server..
 		struct // size = 98 // Get a change to the book title.
 		{
 			byte m_Cmd;			// 0 = 0x93
-			NDWORD m_UID;		// 1-4 = book
+			ndword m_UID;		// 1-4 = book
 			byte m_writable;	// 5 = 0 = non writable, 1 = writable. (NOT USED HERE)
 			byte m_NEWunk1;
-			NWORD m_pages;		// 6-7 = number of pages. (NOT USED HERE)
+			nword m_pages;		// 6-7 = number of pages. (NOT USED HERE)
 			char m_title[ 2 * MAX_NAME_SIZE ];
 			char m_author[ MAX_NAME_SIZE ];
 		} BookOpen;
@@ -1511,25 +1511,25 @@ struct CEvent	// event buffer from client to server..
 		struct	// size = 9		// select Hue from dye chart.
 		{
 			byte m_Cmd;		// 0x95
-			NDWORD m_UID;	// 1-4
-			NWORD m_unk5;	// = 0
-			NWORD m_wHue;	// 7,8	HUE_TYPE
+			ndword m_UID;	// 1-4
+			nword m_unk5;	// = 0
+			nword m_wHue;	// 7,8	HUE_TYPE
 		} DyeVat;
 
 		struct	// size = 9		// New AllNames3D.
 		{
 			byte m_Cmd;		// 0x98
-			NWORD m_len;	// Always 7
-			NDWORD m_UID;
+			nword m_len;	// Always 7
+			ndword m_UID;
 		} AllNames3D;
 
 		struct // size = 16+var = console Prompt response.
 		{
 			byte m_Cmd;		// 0x9a
-			NWORD m_len;	// 1-2
-			NDWORD m_serial;	// 3-6 = serial
-			NDWORD m_prompt;	// 7-10 = prompt id
-			NDWORD m_type;	// 11-14 = type (0=request/esc, 1=reply)
+			nword m_len;	// 1-2
+			ndword m_serial;	// 3-6 = serial
+			ndword m_prompt;	// 7-10 = prompt id
+			ndword m_type;	// 11-14 = type (0=request/esc, 1=reply)
 			char m_text[1];	// 15+ = null terminated text.
 		} Prompt;
 
@@ -1542,20 +1542,20 @@ struct CEvent	// event buffer from client to server..
 		struct // size = var // Sell stuff to vendor
 		{
 			byte m_Cmd;		// 0=0x9F
-			NWORD m_len;	// 1-2
-			NDWORD m_UIDVendor;	// 3-6
-			NWORD m_count;		// 7-8
+			nword m_len;	// 1-2
+			ndword m_UIDVendor;	// 3-6
+			nword m_count;		// 7-8
 			struct
 			{
-				NDWORD m_UID;
-				NWORD m_amount;
+				ndword m_UID;
+				nword m_amount;
 			} m_item[1];
 		} VendorSell;
 
 		struct	// size = 3;	// relay me to the server i choose.
 		{
 			byte m_Cmd;		// 0 = 0xa0
-			NWORD m_select;	// 2 = selection this server number
+			nword m_select;	// 2 = selection this server number
 		} ServerSelect;
 
 		struct	// sizeof = 149 // not sure what this is for.
@@ -1584,34 +1584,34 @@ struct CEvent	// event buffer from client to server..
 		struct // size = 5	// scroll close
 		{
 			byte m_Cmd;			// 0=0xA6
-			NDWORD m_context;	// 1= context info passed from server
+			ndword m_context;	// 1= context info passed from server
 		} Scroll;
 
 		struct	// size = 4 // request for tip
 		{
 			byte m_Cmd;		// 0=0xA7
-			NWORD m_index;
+			nword m_index;
 			byte m_type;	// 0=tips, 1=notice
 		} TipReq;
 
 		struct // size = var // Get text from gump input
 		{
 			byte m_Cmd;		// 0=0xAC
-			NWORD m_len;
-			NDWORD m_UID;	// just another context really.
-			NWORD m_context; // = context info passed from server
+			nword m_len;
+			ndword m_UID;	// just another context really.
+			nword m_context; // = context info passed from server
 			byte m_retcode; // 0=canceled, 1=okayed
-			NWORD m_textlen; // length of text entered
+			nword m_textlen; // length of text entered
 			char m_text[MAX_NAME_SIZE];
 		} GumpInpValRet;
 
 		struct // size = var // Unicode Speech Request
 		{
 			byte m_Cmd;		// 0=0xAD
-			NWORD m_len;
+			nword m_len;
 			byte m_mode;	// (0=say, 2=emote, 8=whisper, 9=yell) TALKMODE_TYPE
-			NWORD m_wHue;	// HUE_TYPE
-			NWORD m_font;	// FONT_TYPE
+			nword m_wHue;	// HUE_TYPE
+			nword m_font;	// FONT_TYPE
 			char m_lang[4];	// lang (null terminated, "ENU" for US english.) CLanguageID
 			NCHAR m_utext[1];	// NCHAR[?] text (null terminated, ?=(msgsize-12)/2) MAX_TALK_BUFFER
 		} TalkUNICODE;
@@ -1619,17 +1619,17 @@ struct CEvent	// event buffer from client to server..
 		struct // size = var // Get gump button change
 		{
 			byte m_Cmd;				//  0 =  0xB1
-			NWORD m_len;			//  1 -  2
-			NDWORD m_UID;			//  1 -  4
-			NDWORD m_context;	//  7 - 10 = context info passed from server
-			NDWORD m_buttonID;		// 11 - 14 = what button was pressed ?
-			NDWORD m_checkQty;	// 15 - 18
-			NDWORD m_checkIds[1];	// 19 - ?? id of a checkbox or radio button that is checked
-			NDWORD m_textQty;	// textentry boxes have returned data
+			nword m_len;			//  1 -  2
+			ndword m_UID;			//  1 -  4
+			ndword m_context;	//  7 - 10 = context info passed from server
+			ndword m_buttonID;		// 11 - 14 = what button was pressed ?
+			ndword m_checkQty;	// 15 - 18
+			ndword m_checkIds[1];	// 19 - ?? id of a checkbox or radio button that is checked
+			ndword m_textQty;	// textentry boxes have returned data
 			struct
 			{
-				NWORD m_id;		// id specified in the gump definition file
-				NWORD m_len;		// length of the string (in unicode so multiply by 2!)
+				nword m_id;		// id specified in the gump definition file
+				nword m_len;		// length of the string (in unicode so multiply by 2!)
 				NCHAR m_utext[1];	// character data (in unicode!):
 			} m_texts[1];
 		} GumpDialogRet;
@@ -1637,15 +1637,15 @@ struct CEvent	// event buffer from client to server..
 		struct // size = 13?	// ?Request user name
 		{
 			byte m_Cmd;		// 0 = 0xb2
-			NDWORD m_uid;	// 1 = targ uid ?
-			NDWORD m_unk2;
-			NDWORD m_unk3;
+			ndword m_uid;	// 1 = targ uid ?
+			ndword m_unk2;
+			ndword m_unk3;
 		} ChatReq;
 
 		struct // size = various
 		{
 			byte m_Cmd;		//	0   = 0xb3
-			NWORD m_len;	//  1-2 = packet length
+			nword m_len;	//  1-2 = packet length
 			char m_lang[4];	//	3-6 = unicode language code CLanguageID
 			NCHAR m_utext[1];	//	7-? = text from client
 		} ChatText;
@@ -1660,7 +1660,7 @@ struct CEvent	// event buffer from client to server..
 		struct // size = 9	// request for tooltip
 		{
 			byte m_Cmd;			// 0 = 0xb6
-			NDWORD m_UID;		// 1-4
+			ndword m_UID;		// 1-4
 			byte m_langID;	// 5 = 1 = english CLanguageID
 			byte m_lang[3];	// 6-8 = ENU = english
 		} ToolTipReq;
@@ -1668,26 +1668,26 @@ struct CEvent	// event buffer from client to server..
 		struct	// size = 8 // Get Character Profile.
 		{
 			byte m_Cmd;		// 0=0xB8
-			NWORD m_len;	// 1 - 2
+			nword m_len;	// 1 - 2
 			byte m_WriteMode;	// 3; 0 = Get profile, 1 = Set profile
-			NDWORD m_UID;	// 4=uid
+			ndword m_UID;	// 4=uid
 			byte m_unk1;	// 8
 			byte m_retcode; // ????? 0=canceled, 1=okayed or something similar???
-			NWORD m_textlen; // length of text entered
+			nword m_textlen; // length of text entered
 			NCHAR m_utext[1]; // Text, unicode!
 		} CharProfile;
 
 		struct	// size = 9 // mail msg. get primed with itself at start.
 		{
 			byte m_Cmd;		// 0=0xBB
-			NDWORD m_uid1;	// 1-4 = uid
-			NDWORD m_uid2;	// 5-8 = uid
+			ndword m_uid1;	// 1-4 = uid
+			ndword m_uid2;	// 5-8 = uid
 		} MailMsg;
 
 		struct	// size = ??
 		{
 			byte m_Cmd;		// 0=0xBD
-			NWORD m_len;	// 1-2 = len of packet
+			nword m_len;	// 1-2 = len of packet
 			char m_text[1024];
 		} ClientVersion;
 
@@ -1701,18 +1701,18 @@ struct CEvent	// event buffer from client to server..
 		{
 			// walk codes from the > 1.26.0 server to be sent back in the Walk messages
 			byte m_Cmd;	// 0=0xbf
-			NWORD m_len;	// 1 - 2 (len = 5 + (# of codes * 4)
-			NWORD m_type;	// 3 - 4 EXTDATA_TYPE 1=prime LIFO stack, 2=add to beginning of LIFO stack, 6=add to party
+			nword m_len;	// 1 - 2 (len = 5 + (# of codes * 4)
+			nword m_type;	// 3 - 4 EXTDATA_TYPE 1=prime LIFO stack, 2=add to beginning of LIFO stack, 6=add to party
 			CExtData m_u;
 		} ExtData;
 
 		struct // size = 21+var = console Prompt response.
 		{
 			byte m_Cmd;			// 0xc2
-			NWORD m_len;		// 1-2
-			NDWORD m_serial;	// 3-6 = serial
-			NDWORD m_prompt;	// 7-10 = prompt id
-			NDWORD m_type;		// 11-14 = type (0=request/esc, 1=reply)
+			nword m_len;		// 1-2
+			ndword m_serial;	// 3-6 = serial
+			ndword m_prompt;	// 7-10 = prompt id
+			ndword m_type;		// 11-14 = type (0=request/esc, 1=reply)
 			char m_lang[4];		// 15-18 = language (3 chars + NULL)
 			WCHAR m_utext[1];	// 19+ = null terminated unicode text.
 		} PromptUNICODE;
@@ -1720,7 +1720,7 @@ struct CEvent	// event buffer from client to server..
 		struct	// size = ?? // Config File (IGR)
 		{
 			byte m_Cmd;		// 0=0xD0
-			NWORD m_len;	// 1 - 2
+			nword m_len;	// 1 - 2
 			byte m_type;	// file type
 			byte m_config_data[1]; // Data m_len-4
 		} ConfigFile;
@@ -1734,40 +1734,40 @@ struct CEvent	// event buffer from client to server..
 		struct // size = 17+var // Get a change to the book title.
 		{
 			byte m_Cmd;			// 0 = 0xD4
-			NWORD m_len;		// 1-2 = length
-			NDWORD m_UID;		// 3-6 = book
+			nword m_len;		// 1-2 = length
+			ndword m_UID;		// 3-6 = book
 			byte m_unk1;		// 7 = 0x00
 			byte m_writable;	// 8 = 0 = non writable, 1 = writable
-			NWORD m_pages;		// 9-10 = number of pages
-			NWORD m_titlelen;	// 11-12 = title length
+			nword m_pages;		// 9-10 = number of pages
+			nword m_titlelen;	// 11-12 = title length
 			char m_title[1];	// 13 - = title
-			NWORD m_authorlen;	// = author length
+			nword m_authorlen;	// = author length
 			char m_author[1];	// = author
 		} BookOpenNew;
 		
 		struct	// sizeof = 268 // Spy2.
 		{
 			byte m_Cmd;		// 0=0xD9
-			NWORD m_len;
+			nword m_len;
 			byte m_client; // 1 = client version < 4.0.1a; 0 = client version >= 4.0.1a
-			NDWORD m_IstanceId;
-			NDWORD m_OSMajor;
-			NDWORD m_OSMinor;
-			NDWORD m_OSRevision;
+			ndword m_IstanceId;
+			ndword m_OSMajor;
+			ndword m_OSMinor;
+			ndword m_OSRevision;
 			byte m_CPUManufacter;
-			NDWORD m_CPUFamily;
-			NDWORD m_CPUModel;
-			NDWORD m_CPUClockSpeed;
+			ndword m_CPUFamily;
+			ndword m_CPUModel;
+			ndword m_CPUClockSpeed;
 			byte m_PhysicalMemory;
-			NDWORD m_ScreenWidth;
-			NDWORD m_ScreenHeight;
-			NDWORD m_ScreenDepth;
-			NWORD m_DXMajor;
-			NWORD m_DXMinor;
+			ndword m_ScreenWidth;
+			ndword m_ScreenHeight;
+			ndword m_ScreenDepth;
+			nword m_DXMajor;
+			nword m_DXMinor;
 			char m_VCDesc[64];
-			NDWORD m_VCVendor;
-			NDWORD m_VCDevice;
-			NDWORD m_VCMemory;
+			ndword m_VCVendor;
+			ndword m_VCDevice;
+			ndword m_VCMemory;
 			byte m_Distribution;
 			byte m_ClientRunning;
 			byte m_ClientInstalled;
@@ -1779,25 +1779,25 @@ struct CEvent	// event buffer from client to server..
 		struct
 		{
 			byte m_Cmd;	// 0 = 0xd6
-			NWORD m_len;	// 1 - 2 (len = 5 + (# of codes * 4)
-			NDWORD m_uid[1];
+			nword m_len;	// 1 - 2 (len = 5 + (# of codes * 4)
+			ndword m_uid[1];
 		} AosItemInfoRequest;
 
 		struct
 		{
 			byte m_Cmd;	// 0=0xd7
-			NWORD m_len;	// 1 - 2 (len = 5 + (# of codes * 4)
-			NDWORD m_uid; 
-			NWORD m_type;	// 3 - 4 EXTDATA_TYPE
+			nword m_len;	// 1 - 2 (len = 5 + (# of codes * 4)
+			ndword m_uid; 
+			nword m_type;	// 3 - 4 EXTDATA_TYPE
 			CExtAosData m_u;
 		} ExtAosData;
 
 		struct // XCMD_CreateNew, size = ? // create a new char (KR/SA)
 		{
 			byte m_Cmd;						// 0 = 0x8D
-			NWORD m_len;					// 1 - 2 = length
-			NDWORD m_pattern1;				// 3 - 6 = 0xedededed
-			NDWORD m_pattern2;				// 7 - 10 = 0xffffffff
+			nword m_len;					// 1 - 2 = length
+			ndword m_pattern1;				// 3 - 6 = 0xedededed
+			ndword m_pattern2;				// 7 - 10 = 0xffffffff
 			char m_charname[MAX_NAME_SIZE];	// 11 - 40 = ascii name
 			char m_unknown[30];				// 41 - 70 = "Unknown"
 			byte m_profession;				// 71 = profession (0=custom)
@@ -1807,7 +1807,7 @@ struct CEvent	// event buffer from client to server..
 			byte m_str;						// 75 = str
 			byte m_dex;						// 76 = dex
 			byte m_int;						// 77 = int
-			NWORD m_wSkinHue;				// 78 - 79 = skin hue
+			nword m_wSkinHue;				// 78 - 79 = skin hue
 			byte m_unk2[8];	// 80 - 87
 
 			// skill values only used if m_prof=0
@@ -1821,48 +1821,48 @@ struct CEvent	// event buffer from client to server..
 			byte m_val3;					// 94 = skill #3 val
 
 			byte m_unk3[26];	// 95 - 121
-			NWORD m_hairHue;				// 122 - 123 = hair hue
-			NWORD m_hairId;					// 124 - 125 = hair id
+			nword m_hairHue;				// 122 - 123 = hair hue
+			nword m_hairId;					// 124 - 125 = hair id
 			byte m_unk4[11];	// 126 - 136
-			NWORD m_wSkinHue2;				// 137 - 138 = skin hue (included twice?)
+			nword m_wSkinHue2;				// 137 - 138 = skin hue (included twice?)
 			byte m_unk5;	// 139
-			byte m_portrait;				// 140 = portrait id (could be NWORD)
+			byte m_portrait;				// 140 = portrait id (could be nword)
 			byte m_unk6;	// 141
-			NWORD m_beardHue;				// 142 - 143 = beard hue
-			NWORD m_beardId;				// 144 - 145 = beard id
+			nword m_beardHue;				// 142 - 143 = beard hue
+			nword m_beardId;				// 144 - 145 = beard id
 		} CreateKR;
 
 		struct // XCMD_BugReport
 		{
 			byte m_Cmd;			// 0=0xe0
-			NWORD m_len;		// 1 - 2 (len = )
+			nword m_len;		// 1 - 2 (len = )
 			char m_Language[4];	// 3 - 6 (lang, ENU)
-			NWORD m_type;		// 7 - 8 (bug type)
+			nword m_type;		// 7 - 8 (bug type)
 			NCHAR m_utext[1];	// 9 - ? (NCHAR[?] text)
 		} BugReport;
 
 		struct // XCMD_KRClientType
 		{
 			byte m_Cmd;			// 0=0xe1
-			NWORD m_len;		// 1 - 2 (len = )
-			NWORD m_one;		// 3 - 4 (0x01)
-			NDWORD m_clientType;		// 5 - 8 (0x02 = KR, 0x03 = SA)
+			nword m_len;		// 1 - 2 (len = )
+			nword m_one;		// 3 - 4 (0x01)
+			ndword m_clientType;		// 5 - 8 (0x02 = KR, 0x03 = SA)
 		} KRClientType;
 
 		struct // XCMD_EncryptionReply
 		{
 			byte m_Cmd;			// 0 = 0xE4
-			NWORD m_len;		// 1 - 2 = length
-			NDWORD m_lenUnk1;				// 3 - 6 = length of m_unk1
+			nword m_len;		// 1 - 2 = length
+			ndword m_lenUnk1;				// 3 - 6 = length of m_unk1
 			byte m_unk1[1];					// 7 - ? = ?
 		} EncryptionReply;
 
 		struct // XCMD_HighlightUIRemove
 		{
 			byte m_Cmd;				// 0 = 0xE8
-			NDWORD m_Uid;			// 1 - 4 = serial uid
-			NWORD m_IdUi;			// 5 - 6 = id ui
-			NDWORD m_destUid;		// 7 - 11 = destination serial uid
+			ndword m_Uid;			// 1 - 4 = serial uid
+			nword m_IdUi;			// 5 - 6 = id ui
+			ndword m_destUid;		// 7 - 11 = destination serial uid
 			byte m_One;				// 12 = 0x01
 			byte m_One2;			// 13 = 0x01
 		} HighlightUIRemove;
@@ -1870,93 +1870,93 @@ struct CEvent	// event buffer from client to server..
 		struct // XCMD_UseHotbar
 		{
 			byte m_Cmd;				// 0 = 0xEB
-			NWORD m_One;			// 1 - 2 = 0x01
-			NWORD m_Six;			// 3 - 4 = 0x06
+			nword m_One;			// 1 - 2 = 0x01
+			nword m_Six;			// 3 - 4 = 0x06
 			byte m_Type;			// 5 = 0x1 � spell, 0x2 � weapon ability, 0x3 � skill, 0x4 � item, 0x5 � scroll
 			byte m_Zero;			// 6 = 0x00
-			NDWORD m_ObjectUID;		// 7 - 11 = serial uid
+			ndword m_ObjectUID;		// 7 - 11 = serial uid
 		} UseHotbar;
 
 		struct // XCMD_MacroEquipItem
 		{
 			byte m_Cmd;			// 0=0xec
-			NWORD m_len;		// 1 - 2 (len)
+			nword m_len;		// 1 - 2 (len)
 			byte m_count;		// 3	 (number of layers)
-			NDWORD m_items[1];	// 4 - ? (items to equip)
+			ndword m_items[1];	// 4 - ? (items to equip)
 		} MacroEquipItems;
 
 		struct // XCMD_MacroUnEquipItem
 		{
 			byte m_Cmd;			// 0=0xed
-			NWORD m_len;		// 1 - 2 (len)
+			nword m_len;		// 1 - 2 (len)
 			byte m_count;		// 3	 (number of layers)
-			NWORD m_layers[1];	// 4 - ? (layers to unequip)
+			nword m_layers[1];	// 4 - ? (layers to unequip)
 		} MacroUnEquipItems;
 
 		struct // XCMD_NewSeed		// 21 bytes
 		{
 			byte m_Cmd;				// 0 = 0xEF
-			NDWORD m_Seed;			// 1 - 4   = seed
-			NDWORD m_Version_Maj;	// 5 - 8   = Ver Major
-			NDWORD m_Version_Min;	// 9 - 12  = Ver Minor
-			NDWORD m_Version_Rev;	// 13 - 16 = Ver Revision
-			NDWORD m_Version_Pat;	// 17 - 20 = Ver Patch
+			ndword m_Seed;			// 1 - 4   = seed
+			ndword m_Version_Maj;	// 5 - 8   = Ver Major
+			ndword m_Version_Min;	// 9 - 12  = Ver Minor
+			ndword m_Version_Rev;	// 13 - 16 = Ver Revision
+			ndword m_Version_Pat;	// 17 - 20 = Ver Patch
 		} NewSeed;
 
 		struct // XCMD_PutNew	// size = 24	// draw the item at a location
 		{
 			byte m_Cmd;		// 0 = 0xF3
-			NWORD m_unk;	// 1-2 = 0x001
+			nword m_unk;	// 1-2 = 0x001
 			byte m_type;	// 3 = type (0x0=TileData, 0x2=Multi)
-			NDWORD m_UID;	// 4-7 = UID | UID_O_ITEM | UID_F_RESOURCE
-			NWORD m_id;		// 8-9
+			ndword m_UID;	// 4-7 = UID | UID_O_ITEM | UID_F_RESOURCE
+			nword m_id;		// 8-9
 			byte m_dir;		// 10 = direction
-			NWORD m_amount;	// 11-12 = amount
-			NWORD m_unkAmount; // 13-14 = amount, no noticable effect on client
-			NWORD m_x;		// 15-18 = x
-			NWORD m_y;		// 19-22 = y
+			nword m_amount;	// 11-12 = amount
+			nword m_unkAmount; // 13-14 = amount, no noticable effect on client
+			nword m_x;		// 15-18 = x
+			nword m_y;		// 19-22 = y
 			byte m_z;		// 23 = signed char
 			byte m_layer;	// 24 = item layer
-			NWORD m_wHue;	// 25-26 = HUE_TYPE
+			nword m_wHue;	// 25-26 = HUE_TYPE
 			byte m_flags;	// 27 = 0x20 = is it movable, 0x80 = hidden
 		} PutNew;
 
 		struct // XCMD_CrashReport	// 310+ bytes
 		{
 			byte m_Cmd;					// 0 = 0xF4
-			NWORD m_len;				// 1-2 = length
+			nword m_len;				// 1-2 = length
 			byte m_versionMaj;			// 3 = exe version (major)
 			byte m_versionMin;			// 4 = exe version (minor)
 			byte m_versionRev;			// 5 = exe version (revision)
 			byte m_versionPat;			// 6 = exe version (patch)
-			NWORD m_x;					// 7-8 = location x
-			NWORD m_y;					// 9-10 = location y
+			nword m_x;					// 7-8 = location x
+			nword m_y;					// 9-10 = location y
 			byte m_z;					// 11= location z
 			byte m_map;					// 12 = location map
 			char m_account[32];			// 13-44 = account name
 			char m_charname[32];		// 45-76 = character name
 			char m_ipAddress[15];		// 77-91
-			NDWORD m_unk;				// 92-95
-			NDWORD m_errorCode;			// 96-99 = error code
+			ndword m_unk;				// 92-95
+			ndword m_errorCode;			// 96-99 = error code
 			char m_executable[100];		// 100-199 = executable name
 			char m_description[100];	// 200-299 = error description
 			byte m_zero;				// 300
-			NDWORD m_offset;			// 301-304 = exception offset
+			ndword m_offset;			// 301-304 = exception offset
 			byte m_addressCount;		// 305 = address count
-			NDWORD m_address[1];		// 306-.. = address
+			ndword m_address[1];		// 306-.. = address
 		} CrashReport;
 
 		/*
 			byte m_Cmd;		// 0=0
-			NDWORD m_pattern1; // 0xedededed
-			NDWORD m_pattern2; // 0xffffffff
+			ndword m_pattern1; // 0xedededed
+			ndword m_pattern2; // 0xffffffff
 			byte m_kuoc; // KUOC Signal (0x00 normally. 0xff for Krrios' client)
 
 			char m_charname[MAX_NAME_SIZE];		// 10
 			//char m_charpass[MAX_NAME_SIZE];		// Not used anymore
 			
 			byte m_unk8[2];
-			NDWORD m_flags;
+			ndword m_flags;
 			byte m_unk10[8];
 			byte m_prof;
 			byte m_unk11[15];
@@ -1973,11 +1973,11 @@ struct CEvent	// event buffer from client to server..
 			byte m_skill3;
 			byte m_val3;
 
-			NWORD m_wSkinHue;	// 0x50 // HUE_TYPE
-			NWORD m_hairid;
-			NWORD m_hairHue;
-			NWORD m_beardid;
-			NWORD m_beardHue;	// 0x58
+			nword m_wSkinHue;	// 0x50 // HUE_TYPE
+			nword m_hairid;
+			nword m_hairHue;
+			nword m_beardid;
+			nword m_beardHue;	// 0x58
 			byte m_unk2;
 			byte m_startloc;
 			byte m_unk3;
@@ -1985,17 +1985,17 @@ struct CEvent	// event buffer from client to server..
 			byte m_unk5;
 			byte m_slot;
 			byte m_clientip[4];
-			NWORD m_shirtHue;
-			NWORD m_pantsHue;*/
+			nword m_shirtHue;
+			nword m_pantsHue;*/
 		struct // XCMD_CreateHS, size = 106 // create a new char (uohs)
 		{
 			byte m_Cmd;						// 0 = 0xF8
-			NDWORD m_pattern1;				// 1 - 4 = 0xedededed
-			NDWORD m_pattern2;				// 5 - 8 = 0xffffffff
+			ndword m_pattern1;				// 1 - 4 = 0xedededed
+			ndword m_pattern2;				// 5 - 8 = 0xffffffff
 			byte m_kuoc;					// 9 = 0x0 (0xFF = Krrios)
 			char m_charname[MAX_NAME_SIZE];	// 10 - 39 = ascii name
 			byte m_unk1[2];					// 40 - 41 = 0x00
-			NDWORD m_flags;					// 42 - 45 = flags
+			ndword m_flags;					// 42 - 45 = flags
 			byte m_unk2[8];					// 46 - 53 = unknown
 			byte m_prof;					// 54 = profession
 			byte m_unk3[15];				// 55 - 69 = unknown
@@ -2011,17 +2011,17 @@ struct CEvent	// event buffer from client to server..
 			byte m_val3;					// 79 = skill value 3
 			byte m_skill4;					// 80 = skill id 4
 			byte m_val4;					// 81 = skill value 4
-			NWORD m_wSkinHue;				// 82 - 83 = skin hue
-			NWORD m_hairid;					// 84 - 85 = hair id
-			NWORD m_hairHue;				// 86 - 87 = hair hue
-			NWORD m_beardid;				// 88 - 89 = beard id
-			NWORD m_beardHue;				// 90 - 91 = beard hue
+			nword m_wSkinHue;				// 82 - 83 = skin hue
+			nword m_hairid;					// 84 - 85 = hair id
+			nword m_hairHue;				// 86 - 87 = hair hue
+			nword m_beardid;				// 88 - 89 = beard id
+			nword m_beardHue;				// 90 - 91 = beard hue
 			byte m_server;					// 92 = server index
 			byte m_startloc;				// 93 = start location
-			NDWORD m_slot;					// 94 - 97 = character slot
-			NDWORD m_clientip;				// 98 - 101 = client ip
-			NWORD m_shirtHue;				// 102 - 103 = shirt hue
-			NWORD m_pantsHue;				// 104 - 105 = pants hue
+			ndword m_slot;					// 94 - 97 = character slot
+			ndword m_clientip;				// 98 - 101 = client ip
+			nword m_shirtHue;				// 102 - 103 = shirt hue
+			nword m_pantsHue;				// 104 - 105 = pants hue
 		} CreateHS;
 	};
 } PACK_NEEDED;
@@ -2041,102 +2041,102 @@ struct CCommand	// command buffer from server to client.
 		struct  // Damage (SE/AOS damage counter)
 		{
 			byte m_Cmd;
-			NDWORD m_UID;
-			NWORD m_dmg;
+			ndword m_UID;
+			nword m_dmg;
 		} DamagePacket;  // from server
 
 		struct // size = 36 + 30 = 66	// Get full status on char.
 		{
 			byte m_Cmd;			// 0 = 0x11
-			NWORD  m_len;		// 1-2 = size of packet (2 bytes)
-			NDWORD m_UID;		// 3-6 = (first byte is suspected to be an id byte - 0x00 = player)
+			nword  m_len;		// 1-2 = size of packet (2 bytes)
+			ndword m_UID;		// 3-6 = (first byte is suspected to be an id byte - 0x00 = player)
 			char m_charname[ MAX_NAME_SIZE ];	// 7-36= character name (30 bytes) ( 00 padded at end)
-			NWORD m_health;		// 37-38 = current health
-			NWORD m_maxhealth;	// 39-40 = max health
+			nword m_health;		// 37-38 = current health
+			nword m_maxhealth;	// 39-40 = max health
 			byte m_perm;		// 41 = permission to change name ? 0=stats invalid, 1=stats valid., 0xff = i can change the name
 			byte m_ValidStats;	// 42 = 0 not valid, 1 = till weight, 2 = till statcap, 3 till follower, 4 = till the end, 5 = include maxweight+race.
 			// only send the rest here if player.
 			byte m_sex;			// 43 = sex (0 = male)
-			NWORD m_str;		// 44-45 = strength
-			NWORD m_dex;		// 46-47 = dexterity
-			NWORD m_int;		// 48-49 = intelligence
-			NWORD m_stam;		// 50-51 = current stamina
-			NWORD m_maxstam;	// 52-53 = max stamina
-			NWORD m_mana;		// 54-55 = current mana
-			NWORD m_maxmana;	// max mana (2 bytes)
-			NDWORD m_gold;		// 58-61 = gold
-			NWORD m_armor;		// 62-63 = armor class
-			NWORD m_weight;		// 64-65 = weight in stones
+			nword m_str;		// 44-45 = strength
+			nword m_dex;		// 46-47 = dexterity
+			nword m_int;		// 48-49 = intelligence
+			nword m_stam;		// 50-51 = current stamina
+			nword m_maxstam;	// 52-53 = max stamina
+			nword m_mana;		// 54-55 = current mana
+			nword m_maxmana;	// max mana (2 bytes)
+			ndword m_gold;		// 58-61 = gold
+			nword m_armor;		// 62-63 = armor class
+			nword m_weight;		// 64-65 = weight in stones
 			// new {5}
-			// NWORD m_maxweight;
+			// nword m_maxweight;
 			// byte m_race;
 			// new (2)
-			NWORD m_statcap;
+			nword m_statcap;
 			// new (3)
 			byte m_curFollower;
 			byte m_maxFollower;
 			// new (4)
-			NWORD m_ResFire;
-			NWORD m_ResCold;
-			NWORD m_ResPoison;
-			NWORD m_ResEnergy;
-			NWORD m_Luck;
-			NWORD m_minDamage;
-			NWORD m_maxDamage;
-			NDWORD m_Tithing;
+			nword m_ResFire;
+			nword m_ResCold;
+			nword m_ResPoison;
+			nword m_ResEnergy;
+			nword m_Luck;
+			nword m_minDamage;
+			nword m_maxDamage;
+			ndword m_Tithing;
 		} Status;
 
 		struct // size = 36 + 30 = 66	// Get full status on char.
 		{
 			byte m_Cmd;			// 0 = 0x11
-			NWORD  m_len;		// 1-2 = size of packet (2 bytes)
-			NDWORD m_UID;		// 3-6 = (first byte is suspected to be an id byte - 0x00 = player)
+			nword  m_len;		// 1-2 = size of packet (2 bytes)
+			ndword m_UID;		// 3-6 = (first byte is suspected to be an id byte - 0x00 = player)
 			char m_charname[ MAX_NAME_SIZE ];	// 7-36= character name (30 bytes) ( 00 padded at end)
-			NWORD m_health;		// 37-38 = current health
-			NWORD m_maxhealth;	// 39-40 = max health
+			nword m_health;		// 37-38 = current health
+			nword m_maxhealth;	// 39-40 = max health
 			byte m_perm;		// 41 = permission to change name ? 0=stats invalid, 1=stats valid., 0xff = i can change the name
 			byte m_ValidStats;	// 42 = 0 not valid, 1 = till weight, 2 = till statcap, 3 till follower, 4 = till the end.
 			// only send the rest here if player.
 			byte m_sex;			// 43 = sex (0 = male)
-			NWORD m_str;		// 44-45 = strength
-			NWORD m_dex;		// 46-47 = dexterity
-			NWORD m_int;		// 48-49 = intelligence
-			NWORD m_stam;		// 50-51 = current stamina
-			NWORD m_maxstam;	// 52-53 = max stamina
-			NWORD m_mana;		// 54-55 = current mana
-			NWORD m_maxmana;	// max mana (2 bytes)
-			NDWORD m_gold;		// 58-61 = gold
-			NWORD m_armor;		// 62-63 = armor class
-			NWORD m_weight;		// 64-65 = weight in stones
-			NWORD m_maxWeight;	// 66-68 = max weight in stones
+			nword m_str;		// 44-45 = strength
+			nword m_dex;		// 46-47 = dexterity
+			nword m_int;		// 48-49 = intelligence
+			nword m_stam;		// 50-51 = current stamina
+			nword m_maxstam;	// 52-53 = max stamina
+			nword m_mana;		// 54-55 = current mana
+			nword m_maxmana;	// max mana (2 bytes)
+			ndword m_gold;		// 58-61 = gold
+			nword m_armor;		// 62-63 = armor class
+			nword m_weight;		// 64-65 = weight in stones
+			nword m_maxWeight;	// 66-68 = max weight in stones
 			byte m_race;		// 69 = race (1=human, 2=elf, 3=gargoyle) (RACE_TYPE)
-			NWORD m_statcap;
+			nword m_statcap;
 			byte m_curFollower;
 			byte m_maxFollower;
-			NWORD m_ResFire;
-			NWORD m_ResCold;
-			NWORD m_ResPoison;
-			NWORD m_ResEnergy;
-			NWORD m_Luck;
-			NWORD m_minDamage;
-			NWORD m_maxDamage;
-			NDWORD m_Tithing;
+			nword m_ResFire;
+			nword m_ResCold;
+			nword m_ResPoison;
+			nword m_ResEnergy;
+			nword m_Luck;
+			nword m_minDamage;
+			nword m_maxDamage;
+			ndword m_Tithing;
 			// new {6}
-			NWORD m_ResPhysicalMax;
-			NWORD m_ResFireMax;
-			NWORD m_ResColdMax;
-			NWORD m_ResPoisonMax;
-			NWORD m_ResEnergyMax;
-			NWORD m_IncreaseDefChance;
-			NWORD m_IncreaceDefChanceMax;
-			NWORD m_IncreaseHitChance;
-			NWORD m_IncreaseSwingSpeed;
-			NWORD m_IncreaseDam;
-			NWORD m_LowerReagentCost;
-			NWORD m_IncreaseSpellDam;
-			NWORD m_FasterCastRecovery;
-			NWORD m_FasterCasting;
-			NWORD m_LowerManaCost;
+			nword m_ResPhysicalMax;
+			nword m_ResFireMax;
+			nword m_ResColdMax;
+			nword m_ResPoisonMax;
+			nword m_ResEnergyMax;
+			nword m_IncreaseDefChance;
+			nword m_IncreaceDefChanceMax;
+			nword m_IncreaseHitChance;
+			nword m_IncreaseSwingSpeed;
+			nword m_IncreaseDam;
+			nword m_LowerReagentCost;
+			nword m_IncreaseSpellDam;
+			nword m_FasterCastRecovery;
+			nword m_FasterCasting;
+			nword m_LowerManaCost;
 		} StatusNew;
  
 		struct // size = ? change colour of hp bar, SA
@@ -2144,12 +2144,12 @@ struct CCommand	// command buffer from server to client.
 #define HEALTHCOLOR_GREEN	1
 #define HEALTHCOLOR_YELLOW	2
 			byte m_Cmd;		// 0 = 0x17 / XCMD_HealthBarColor
-			NWORD m_len;	// 1-2 = len
-			NDWORD m_UID;	// 3-6 = character serial
-			NWORD m_count;	// 7-8 = number of states
+			nword m_len;	// 1-2 = len
+			ndword m_UID;	// 3-6 = character serial
+			nword m_count;	// 7-8 = number of states
 			struct
 			{
-				NWORD m_color;	// 9-10 = status color (1=green, 2=yellow)
+				nword m_color;	// 9-10 = status color (1=green, 2=yellow)
 				byte m_state;	// 11 = color state
 			} m_states[1];
 		} HealthBarColor;
@@ -2157,15 +2157,15 @@ struct CCommand	// command buffer from server to client.
 		struct // size = 19	or var len // draw the item at a location
 		{
 			byte m_Cmd;		// 0 = 0x1a = XCMD_Put
-			NWORD m_len;	// 1-2 = var len = 0x0013 or 0x000e or 0x000f
-			NDWORD m_UID;	// 3-6 = UID | UID_O_ITEM | UID_F_RESOURCE
-			NWORD m_id;		// 7-8
-			NWORD m_amount;	// 9-10 - only present if m_UID | UID_F_RESOURCE = pile (optional)
-			NWORD m_x;		// 11-12 - | 0x8000 = m_dir arg.
-			NWORD m_y;		// 13-14 = y | 0xC000 = m_wHue and m_flags fields.
+			nword m_len;	// 1-2 = var len = 0x0013 or 0x000e or 0x000f
+			ndword m_UID;	// 3-6 = UID | UID_O_ITEM | UID_F_RESOURCE
+			nword m_id;		// 7-8
+			nword m_amount;	// 9-10 - only present if m_UID | UID_F_RESOURCE = pile (optional)
+			nword m_x;		// 11-12 - | 0x8000 = m_dir arg.
+			nword m_y;		// 13-14 = y | 0xC000 = m_wHue and m_flags fields.
 			byte m_dir;		// (optional)
 			byte m_z;		// 15 = signed char
-			NWORD m_wHue;	// 16-17 = HUE_TYPE (optional)
+			nword m_wHue;	// 16-17 = HUE_TYPE (optional)
 			byte m_flags;	// 18 = 0x20 = is it movable ? (direction?) (optional)
 		} Put;
 
@@ -2176,21 +2176,21 @@ struct CCommand	// command buffer from server to client.
 		struct // size = 37	// start up player
 		{
 			byte	m_Cmd;			// 0 = 0x1B
-			NDWORD	m_UID;			// 1-4
-			NDWORD	m_unk_5_8;		// 5-8 = 00 00 00 00
-			NWORD	m_id;			// 9-10
-			NWORD	m_x;			// 11-12
-			NWORD	m_y;			// 13-14
-			NWORD	m_z;			// 15-16
+			ndword	m_UID;			// 1-4
+			ndword	m_unk_5_8;		// 5-8 = 00 00 00 00
+			nword	m_id;			// 9-10
+			nword	m_x;			// 11-12
+			nword	m_y;			// 13-14
+			nword	m_z;			// 15-16
 			byte	m_dir;			// 17
 			byte	m_unk_18;		// 18 = 00
-			NDWORD	m_unk_19_22;	// 19-22 = FF FF FF FF
-			NWORD	m_boundX;	// 23-14
-			NWORD	m_boundY;	// 23-14
-			NWORD	m_mode;			// 27-28 = CHARMODE_WAR
-			NWORD	m_boundH;	// 29-30 = 0960
-			NWORD	m_zero_31;
-			NDWORD	m_zero_33;
+			ndword	m_unk_19_22;	// 19-22 = FF FF FF FF
+			nword	m_boundX;	// 23-14
+			nword	m_boundY;	// 23-14
+			nword	m_mode;			// 27-28 = CHARMODE_WAR
+			nword	m_boundH;	// 29-30 = 0960
+			nword	m_zero_31;
+			ndword	m_zero_33;
 		} Start;
 
 		// Char mode flags
@@ -2206,12 +2206,12 @@ struct CCommand	// command buffer from server to client.
 		struct // size = 14 + 30 + var
 		{
 			byte m_Cmd;			// 0 = 0x1C
-			NWORD m_len;		// 1-2 = var len size.
-			NDWORD m_UID;		// 3-6 = UID num of speaker. 01010101 = system
-			NWORD m_id;			// 7-8 = CREID_TYPE of speaker.
+			nword m_len;		// 1-2 = var len size.
+			ndword m_UID;		// 3-6 = UID num of speaker. 01010101 = system
+			nword m_id;			// 7-8 = CREID_TYPE of speaker.
 			byte m_mode;		// 9 = TALKMODE_TYPE
-			NWORD m_wHue;		// 10-11 = HUE_TYPE.
-			NWORD m_font;		// 12-13 = FONT_TYPE
+			nword m_wHue;		// 10-11 = HUE_TYPE.
+			nword m_font;		// 12-13 = FONT_TYPE
 			char m_charname[MAX_NAME_SIZE];	// 14
 			char m_text[1];		// var size. MAX_TALK_BUFFER
 		} Speak;
@@ -2219,20 +2219,20 @@ struct CCommand	// command buffer from server to client.
 		struct // sizeo = 5	// remove an object (item or char)
 		{
 			byte m_Cmd;			// 0 = 0x1D
-			NDWORD m_UID;		// 1-4 = object UID.
+			ndword m_UID;		// 1-4 = object UID.
 		} Remove;
 
 		struct // size = 19 // set client player view x,y,z.
 		{
 			byte m_Cmd;			// 0 = 0x20
-			NDWORD m_UID;		// 1-4 = my UID.
-			NWORD m_id;			// 5-6
+			ndword m_UID;		// 1-4 = my UID.
+			nword m_id;			// 5-6
 			byte m_zero7;		// 7 = 0
-			NWORD m_wHue;		// 8-9 = HUE_TYPE
+			nword m_wHue;		// 8-9 = HUE_TYPE
 			byte m_mode;		// 10 = 0=normal, 4=poison, 0x40=attack, 0x80=hidden CHARMODE_WAR
-			NWORD m_x;			// 11-12
-			NWORD m_y;			// 13-14
-			NWORD m_zero15;		// 15-16 = noto ?
+			nword m_x;			// 11-12
+			nword m_y;			// 13-14
+			nword m_zero15;		// 15-16 = noto ?
 			byte m_dir;			// 17 = high bit set = run
 			byte m_z;			// 18
 		} View;
@@ -2241,8 +2241,8 @@ struct CCommand	// command buffer from server to client.
 		{
 			byte m_Cmd;			// 0 = 0x21
 			byte m_count;		// sequence #
-			NWORD m_x;
-			NWORD m_y;
+			nword m_x;
+			nword m_y;
 			byte m_dir;			// DIR_TYPE
 			byte m_z;
 		} WalkCancel;
@@ -2257,58 +2257,58 @@ struct CCommand	// command buffer from server to client.
 		struct // size = 26
 		{
 			byte m_Cmd;		// 0=0x23
-			NWORD m_id;
-			NWORD m_unk3;	// 3-4 = 0
-			NWORD m_unk5;	// 5-9 = ?
+			nword m_id;
+			nword m_unk3;	// 3-4 = 0
+			nword m_unk5;	// 5-9 = ?
 			byte  m_unk7;	// 7 = 0, 72, 99, c1, 73
-			NDWORD m_srcUID; // NULL if from ground.
-			NWORD m_src_x;
-			NWORD m_src_y;
+			ndword m_srcUID; // NULL if from ground.
+			nword m_src_x;
+			nword m_src_y;
 			byte m_src_z;
-			NDWORD m_dstUID;
-			NWORD m_dst_x;
-			NWORD m_dst_y;
+			ndword m_dstUID;
+			nword m_dst_x;
+			nword m_dst_y;
 			byte m_dst_z;
 		} DragAnim;
 
 		struct // size = 7	// Open a container gump
 		{
 			byte m_Cmd;		// 0 = 0x24
-			NDWORD m_UID;	// 1-4
-			NWORD m_gump;	// 5 = gump graphic id. GUMP_TYPE
+			ndword m_UID;	// 1-4
+			nword m_gump;	// 5 = gump graphic id. GUMP_TYPE
 		} ContOpen;
 
 		struct // size = 20	// Add Single Item To Container.
 		{
 			byte m_Cmd;		// 0 = 0x25
-			NDWORD m_UID;	// 1-4
-			NWORD m_id;
+			ndword m_UID;	// 1-4
+			nword m_id;
 			byte m_zero7;
-			NWORD m_amount;
-			NWORD m_x;
-			NWORD m_y;
-			NDWORD m_UIDCont;	// the container.
-			NWORD m_wHue;		// HUE_TYPE
+			nword m_amount;
+			nword m_x;
+			nword m_y;
+			ndword m_UIDCont;	// the container.
+			nword m_wHue;		// HUE_TYPE
 		} ContAdd;
 
 		struct // size = 21	// Add Single Item To Container.
 		{
 			byte m_Cmd;		// 0 = 0x25
-			NDWORD m_UID;	// 1-4
-			NWORD m_id;
+			ndword m_UID;	// 1-4
+			nword m_id;
 			byte m_zero7;
-			NWORD m_amount;
-			NWORD m_x;
-			NWORD m_y;
+			nword m_amount;
+			nword m_x;
+			nword m_y;
 			byte m_grid;
-			NDWORD m_UIDCont;	// the container.
-			NWORD m_wHue;		// HUE_TYPE
+			ndword m_UIDCont;	// the container.
+			nword m_wHue;		// HUE_TYPE
 		} ContAddNew;
 
 		struct // size = 5	// Kick the player off.
 		{
 			byte m_Cmd;		// 0 = 0x26
-			NDWORD m_unk1;	// 1-4 = 0 = GM who issued kick ?
+			ndword m_unk1;	// 1-4 = 0 = GM who issued kick ?
 		} Kick;
 
 		struct // size = 2	// kill a drag. (Bounce)
@@ -2326,32 +2326,32 @@ struct CCommand	// command buffer from server to client.
 		struct // size = 15 = equip this item
 		{
 			byte m_Cmd;			// 0 = 0x2e
-			NDWORD m_UID;		// 1-4 = object UID.
-			NWORD m_id;			// 5-6
+			ndword m_UID;		// 1-4 = object UID.
+			nword m_id;			// 5-6
 			byte m_zero7;
 			byte m_layer;		// 8=LAYER_TYPE
-			NDWORD m_UIDchar;	// 9-12=UID num of owner.
-			NWORD m_wHue;		// HUE_TYPE
+			ndword m_UIDchar;	// 9-12=UID num of owner.
+			nword m_wHue;		// HUE_TYPE
 		} ItemEquip;
 
 		struct // size = 10	// There is a fight some place.
 		{
 			byte m_Cmd;		// 0 = 0x2f
 			byte m_dir;		// 1 = 0 = DIR_TYPE
-			NDWORD m_AttackerUID;
-			NDWORD m_AttackedUID;
+			ndword m_AttackerUID;
+			ndword m_AttackedUID;
 		} Fight;
 
 		struct // size = ?? = Fill in the skills list.
 		{
 			byte m_Cmd;		// 0= 0x3A
-			NWORD m_len;	// 1=
+			nword m_len;	// 1=
 			byte m_single;	// 3=0 = all w/ 0 term, ff=single and no terminator
 			struct
 			{
-				NWORD m_index;	// 1 based, 0 = terminator. (no val)
-				NWORD m_val;	// Skill * 10 (stat modified!)
-				NWORD m_valraw; // Skill * 10 (stat unmodified!)
+				nword m_index;	// 1 based, 0 = terminator. (no val)
+				nword m_val;	// Skill * 10 (stat modified!)
+				nword m_valraw; // Skill * 10 (stat unmodified!)
 				byte m_lock;	// current lock mode (0 = none (up), 1 = down, 2 = locked)
 			} skills[1];
 		} Skill;
@@ -2359,23 +2359,23 @@ struct CCommand	// command buffer from server to client.
 		struct // size = ??? = Get a skill lock (or multiple)
 		{
 			byte m_Cmd;		// 0= 0x3A
-			NWORD m_len;	// 1= varies
+			nword m_len;	// 1= varies
 			byte m_single;	// 3=0 = all w/ 0 term, ff=single and no terminator
 			struct
 			{
-				NWORD m_index;	// skill index
-				NWORD m_val;	// Skill * 10 (stat modified!)
-				NWORD m_valraw; // Skill * 10 (stat unmodified!)
+				nword m_index;	// skill index
+				nword m_val;	// Skill * 10 (stat modified!)
+				nword m_valraw; // Skill * 10 (stat unmodified!)
 				byte m_lock;	// SKILLLOCK_TYPE current lock mode (0 = none (up), 1 = down, 2 = locked)
-				NWORD m_cap;	// cap of the current skill
+				nword m_cap;	// cap of the current skill
 			} skills[1];
 		} Skill_New;
 
 		struct // size = variable	// close the vendor window.
 		{
 			byte m_Cmd;		// 0 =0x3b
-			NWORD m_len;
-			NDWORD m_UIDVendor;
+			nword m_len;
+			ndword m_UIDVendor;
 			byte m_flag;	// 0x00 = no items following, 0x02 - items following
 		} VendorBuy;
 
@@ -2383,19 +2383,19 @@ struct CCommand	// command buffer from server to client.
 		{
 #define MAX_ITEMS_CONTENT (MAX_BUFFER - 5) / 19
 			byte m_Cmd;		// 0 = 0x3C
-			NWORD m_len;
-			NWORD m_count;
+			nword m_len;
+			nword m_count;
 
 			struct // size = 19
 			{
-				NDWORD m_UID;	// 0-3
-				NWORD m_id;	// 4-5
+				ndword m_UID;	// 0-3
+				nword m_id;	// 4-5
 				byte m_zero6;
-				NWORD m_amount;	// 7-8
-				NWORD m_x;	// 9-10
-				NWORD m_y;	// 11-12
-				NDWORD m_UIDCont;	// 13-16 = What container is it in.
-				NWORD m_wHue;	// 17-18 = HUE_TYPE
+				nword m_amount;	// 7-8
+				nword m_x;	// 9-10
+				nword m_y;	// 11-12
+				ndword m_UIDCont;	// 13-16 = What container is it in.
+				nword m_wHue;	// 17-18 = HUE_TYPE
 			} m_item[ MAX_ITEMS_CONTENT ];
 		} Content;
 
@@ -2403,27 +2403,27 @@ struct CCommand	// command buffer from server to client.
 		{
 #define MAX_ITEMS_CONTENTNEW (MAX_BUFFER - 5) / 20
 			byte m_Cmd;		// 0 = 0x3C
-			NWORD m_len;
-			NWORD m_count;
+			nword m_len;
+			nword m_count;
 
 			struct // size = 19
 			{
-				NDWORD m_UID;	// 0-3
-				NWORD m_id;	// 4-5
+				ndword m_UID;	// 0-3
+				nword m_id;	// 4-5
 				byte m_zero6;
-				NWORD m_amount;	// 7-8
-				NWORD m_x;	// 9-10
-				NWORD m_y;	// 11-12
+				nword m_amount;	// 7-8
+				nword m_x;	// 9-10
+				nword m_y;	// 11-12
 				byte m_grid;	// 13
-				NDWORD m_UIDCont;	// 14-17 = What container is it in.
-				NWORD m_wHue;	// 18-19 = HUE_TYPE
+				ndword m_UIDCont;	// 14-17 = What container is it in.
+				nword m_wHue;	// 18-19 = HUE_TYPE
 			} m_item[ MAX_ITEMS_CONTENTNEW ];
 		} ContentNew;
 
 		struct // size = 6	// personal light level.
 		{
 			byte m_Cmd;		// 0 = 0x4e
-			NDWORD m_UID;	// 1 = creature uid
+			ndword m_UID;	// 1 = creature uid
 			byte m_level;	// 5 = 0 = shape of the light. (LIGHT_PATTERN?)
 		} LightPoint;
 
@@ -2443,11 +2443,11 @@ struct CCommand	// command buffer from server to client.
 		{
 			byte m_Cmd;		// 0 = 0x54
 			byte m_flags;	// 1 = quiet, infinite repeat or single shot (0/1)
-			NWORD m_id;		// 2-3=sound id (SOUND_TYPE)
-			NWORD m_volume;	// 4-5=0 = (speed/volume modifier?)
-			NWORD m_x;		// 6-7
-			NWORD m_y;		// 8-9
-			NWORD m_z;		// 10-11
+			nword m_id;		// 2-3=sound id (SOUND_TYPE)
+			nword m_volume;	// 4-5=0 = (speed/volume modifier?)
+			nword m_x;		// 6-7
+			nword m_y;		// 8-9
+			nword m_z;		// 10-11
 		} Sound;
 
 		struct	// size = 1	// Sent at start up. Cause Client to do full reload and redraw of config.
@@ -2458,11 +2458,11 @@ struct CCommand	// command buffer from server to client.
 		struct	// size = 11
 		{
 			byte m_Cmd; // 0 = 0x56
-			NDWORD m_UID;
+			ndword m_UID;
 			byte m_Mode; // 1: Add a pin location, 5: Display map, pins to follow 7: Editable, no pins follow 8: read only
 			byte m_Req;	// 0: req for read mode, 1: request for edit mode
-			NWORD m_pin_x;
-			NWORD m_pin_y;
+			nword m_pin_x;
+			nword m_pin_y;
 		} MapEdit;
 
 		struct	// size = 4	// Set Game Time. not sure why the client cares about this.
@@ -2484,14 +2484,14 @@ struct CCommand	// command buffer from server to client.
 		struct	// size = 13 + var // send a book page.
 		{
 			byte m_Cmd;		// 0 = 0x66
-			NWORD m_len;	// 1-2
-			NDWORD m_UID;	// 3-6 = the book
-			NWORD m_pages;	// 7-8 = 0x0001 = # of pages here
+			nword m_len;	// 1-2
+			ndword m_UID;	// 3-6 = the book
+			nword m_pages;	// 7-8 = 0x0001 = # of pages here
 			// repeat these fields for multiple pages.
 			struct
 			{
-				NWORD m_pagenum;	// 9-10=page number  (1 based)
-				NWORD m_lines;	// 11
+				nword m_pagenum;	// 9-10=page number  (1 based)
+				nword m_lines;	// 11
 				char m_text[1];
 			} m_page[1];
 		} BookPage;
@@ -2499,40 +2499,40 @@ struct CCommand	// command buffer from server to client.
 		struct	// size = var	// seems to do nothing here.
 		{
 			byte m_Cmd;		// 0=0x69
-			NWORD m_len;
-			NWORD m_index;
+			nword m_len;
+			nword m_index;
 		} Options;
 
 		struct	// size = 19
 		{
 			byte m_Cmd;		// 0 = 0x6C
 			byte m_TargType;	// 1 = 0=select object, 1=x,y,z
-			NDWORD m_context;	// 2-5 = we sent this at target setup.
+			ndword m_context;	// 2-5 = we sent this at target setup.
 			byte m_fCheckCrime;		// 6= 0
 
 			// Unused junk.
-			NDWORD m_UID;	// 7-10	= serial number of the target.
-			NWORD m_x;		// 11,12
-			NWORD m_y;		// 13,14
+			ndword m_UID;	// 7-10	= serial number of the target.
+			nword m_x;		// 11,12
+			nword m_y;		// 13,14
 			byte m_unk2;	// 15 = fd ?
 			byte m_z;		// 16
-			NWORD m_id;		// 17-18 = static id of tile
+			nword m_id;		// 17-18 = static id of tile
 		} Target;
 
 		struct // size = 3 // play music
 		{
 			byte m_Cmd;		// 0 = 0x6d
-			NWORD m_musicid;// 1= music id number
+			nword m_musicid;// 1= music id number
 		} PlayMusic;
 
 		struct // size = 14 // Combat type animation.
 		{
 			byte m_Cmd;			// 0 = 0x6e
-			NDWORD m_UID;		// 1-4=uid
-			NWORD m_action;		// 5-6 = ANIM_TYPE
+			ndword m_UID;		// 1-4=uid
+			nword m_action;		// 5-6 = ANIM_TYPE
 			byte m_zero7;		// 7 = 0 or 5 ?
 			byte m_dir;			// DIR_TYPE
-			NWORD m_repeat;		// 9-10 = repeat count. 0=forever.
+			nword m_repeat;		// 9-10 = repeat count. 0=forever.
 			byte m_backward;	// 11 = backwards (0/1)
 			byte m_repflag;		// 12 = 0=dont repeat. 1=repeat
 			byte m_framedelay;	// 13 = 0=fastest. (number of seconds)
@@ -2541,11 +2541,11 @@ struct CCommand	// command buffer from server to client.
 		struct // size = var < 47 // Secure trading
 		{
 			byte m_Cmd;		// 0=0x6F
-			NWORD m_len;	// 1-2 = len
+			nword m_len;	// 1-2 = len
 			byte m_action;	// 3 = trade action. SECURE_TRADE_TYPE
-			NDWORD m_UID;	// 4-7 = uid = other character
-			NDWORD m_UID1;	// 8-11 = container 1
-			NDWORD m_UID2;	// 12-15 = container 2
+			ndword m_UID;	// 4-7 = uid = other character
+			ndword m_UID1;	// 8-11 = container 1
+			ndword m_UID2;	// 12-15 = container 2
 			byte m_fname;	// 16 = 0=none, 1=name
 			char m_charname[ MAX_NAME_SIZE ];
 		} SecureTrade;
@@ -2554,30 +2554,30 @@ struct CCommand	// command buffer from server to client.
 		{
 			byte m_Cmd;			// 0 = 0x70
 			byte m_motion;		// 1= the motion type. (0=point to point,3=static) EFFECT_TYPE
-			NDWORD m_UID;		// 2-5 = The target item. or source item if point to point.
-			NDWORD m_targUID;	// 6-9 = 0
-			NWORD m_id;			// 10-11 = base display item 0x36d4 = fireball
-			NWORD m_srcx;		// 12
-			NWORD m_srcy;		// 14
+			ndword m_UID;		// 2-5 = The target item. or source item if point to point.
+			ndword m_targUID;	// 6-9 = 0
+			nword m_id;			// 10-11 = base display item 0x36d4 = fireball
+			nword m_srcx;		// 12
+			nword m_srcy;		// 14
 			byte  m_srcz;		// 16
-			NWORD m_dstx;		// 17
-			NWORD m_dsty;		// 19
+			nword m_dstx;		// 17
+			nword m_dsty;		// 19
 			byte  m_dstz;		// 21
 			byte  m_speed;		// 22= 0=very fast, 7=slow.
 			byte  m_loop;		// 23= 0 is really long.  1 is the shortest.
 			word 	m_unk;		// 24=0 HUE_TYPE ?
 			byte 	m_OneDir;		// 26=1=point in single dir else turn.
 			byte 	m_explode;	// 27=effects that explode on impact.
-			NDWORD	m_hue;
-			NDWORD	m_render;
+			ndword	m_hue;
+			ndword	m_render;
 		} Effect;
 
 		struct // size = var (38)	// Bulletin Board stuff
 		{
 			byte m_Cmd;		// 0=0x71
-			NWORD m_len;	// 1-2 = len
+			nword m_len;	// 1-2 = len
 			byte m_flag;	// 3= 0=board name, 4=associate message, 1=message header, 2=message body
-			NDWORD m_UID;	// 4-7 = UID for the bboard.
+			ndword m_UID;	// 4-7 = UID for the bboard.
 			byte m_data[1];	// 8- = name or links data.
 		} BBoard;
 
@@ -2597,12 +2597,12 @@ struct CCommand	// command buffer from server to client.
 		struct // size = var // Open buy window
 		{
 			byte m_Cmd;		// 0 = 0x74
-			NWORD m_len;
-			NDWORD m_VendorUID;
+			nword m_len;
+			ndword m_VendorUID;
 			byte m_count;
 			struct
 			{
-				NDWORD m_price;
+				ndword m_price;
 				byte m_len;
 				char m_text[1];
 			} m_item[1];
@@ -2611,14 +2611,14 @@ struct CCommand	// command buffer from server to client.
 		struct // size = 16	// Move to a new server. Not sure why the client cares about this.
 		{
 			byte m_Cmd;		// 0 = 0x76
-			NWORD m_x;
-			NWORD m_y;
-			NWORD m_z;
+			nword m_x;
+			nword m_y;
+			nword m_z;
 			byte m_unk7_zero;	// is a toggle of some sort
 			word m_serv_boundX;	// distances ?
 			word m_serv_boundY;
-			NWORD m_serv_boundW;	// word ??
-			NWORD m_serv_boundH;	// describes the new server some how.
+			nword m_serv_boundW;	// word ??
+			nword m_serv_boundH;	// describes the new server some how.
 		} ZoneChange;
 
 		// 00 14 00 00 00 04 00 09 00
@@ -2626,13 +2626,13 @@ struct CCommand	// command buffer from server to client.
 		struct // size = 17	// simple move of a char already on screen.
 		{
 			byte m_Cmd;		// 0 = 0x77
-			NDWORD m_UID;	// 1-4
-			NWORD m_id;		// 5-6 = id
-			NWORD m_x;		// 7-8 = x
-			NWORD m_y;		// 9-10
+			ndword m_UID;	// 1-4
+			nword m_id;		// 5-6 = id
+			nword m_x;		// 7-8 = x
+			nword m_y;		// 9-10
 			byte m_z;		// 11
 			byte m_dir;		// 12 = DIR_TYPE (| 0x80 = running ?)
-			NWORD m_wHue;	// 13-14 = HUE_TYPE
+			nword m_wHue;	// 13-14 = HUE_TYPE
 			byte m_mode;	// 15 = CHARMODE_WAR
 			byte m_noto;	// 16 = NOTO_TYPE
 		} CharMove;
@@ -2640,23 +2640,23 @@ struct CCommand	// command buffer from server to client.
 		struct // size = 23 or var len // draw char
 		{
 			byte m_Cmd;		// 0 = 0x78
-			NWORD m_len;	// 1-2 = 0x0017 or var len?
-			NDWORD m_UID;	// 3-6=
-			NWORD m_id;	// 7-8
-			NWORD m_x;	// 9-10
-			NWORD m_y;	// 11-12
+			nword m_len;	// 1-2 = 0x0017 or var len?
+			ndword m_UID;	// 3-6=
+			nword m_id;	// 7-8
+			nword m_x;	// 9-10
+			nword m_y;	// 11-12
 			byte m_z;		// 13
 			byte m_dir;		// 14 = DIR_TYPE
-			NWORD m_wHue;	// 15-16 = HUE_TYPE
+			nword m_wHue;	// 15-16 = HUE_TYPE
 			byte m_mode;	// 17 = CHARMODE_WAR
 			byte m_noto;	// 18 = NOTO_TYPE
 
 			struct	// This packet is extendable to show equip.
 			{
-				NDWORD m_UID;	// 0-3 = 0 = end of the list.
-				NWORD m_id;		// 4-5 = | 0x8000 = include m_wHue.
+				ndword m_UID;	// 0-3 = 0 = end of the list.
+				nword m_id;		// 4-5 = | 0x8000 = include m_wHue.
 				byte m_layer;	// LAYER_TYPE
-				NWORD m_wHue;	// only if m_id | 0x8000
+				nword m_wHue;	// only if m_id | 0x8000
 			} equip[1];
 
 		} Char;
@@ -2664,16 +2664,16 @@ struct CCommand	// command buffer from server to client.
 		struct // size = var // put up a menu of items.
 		{
 			byte m_Cmd;			// 0=0x7C
-			NWORD m_len;
-			NDWORD m_UID;		// if player then gray menu choice bar.
-			NWORD m_context;		// = context info passed from server
+			nword m_len;
+			ndword m_UID;		// if player then gray menu choice bar.
+			nword m_context;		// = context info passed from server
 			byte m_lenname;
 			char m_name[1];		// var len. (not null term)
 			byte m_count;
 			struct		// size = var
 			{
-				NWORD m_id;		// image next to menu.
-				NWORD m_color;	// color of the image
+				nword m_id;		// image next to menu.
+				nword m_color;	// color of the image
 				byte m_lentext;
 				char m_name[1];	// var len. (not null term)
 			} m_item[1];
@@ -2686,7 +2686,7 @@ struct CCommand	// command buffer from server to client.
 			// if it goes further than that, it'll be awesome...what else can we do with this?
 
 			byte m_Cmd; // 0 = 0x81
-			NWORD m_len;
+			nword m_len;
 			byte m_count;
 			byte m_unk;	// ? not sure.
 			CEventCharDef m_char[1];
@@ -2707,7 +2707,7 @@ struct CCommand	// command buffer from server to client.
 		struct // size = var	// refill char list after delete.
 		{
 			byte m_Cmd;		// 0 = 0x86
-			NWORD m_len;
+			nword m_len;
 			byte m_count;
 			CEventCharDef m_char[1];
 		} CharList2;
@@ -2715,7 +2715,7 @@ struct CCommand	// command buffer from server to client.
 		struct // size = 66
 		{
 			byte m_Cmd;			// 0 = 0x88
-			NDWORD m_UID;		// 1-4 =
+			ndword m_UID;		// 1-4 =
 			char m_text[60];	// 5-
 			byte m_mode;		// CHARMODE_WAR 0=normal, 4=poison, 0x40=attack, 0x80=hidden
 		} PaperDoll;
@@ -2723,24 +2723,24 @@ struct CCommand	// command buffer from server to client.
 		struct // size = 7 + count * 5 // Equip stuff on corpse.
 		{
 			byte m_Cmd;		// 0 = 0x89
-			NWORD m_len;
-			NDWORD m_UID;
+			nword m_len;
+			ndword m_UID;
 
 			struct // size = 5
 			{
 				byte m_layer;	// 0 = LAYER_TYPE, list must be null terminated ! LAYER_NONE.
-				NDWORD m_UID;	// 1-4
+				ndword m_UID;	// 1-4
 			} m_item[ MAX_ITEMS_CONT ];
 		} CorpEquip;
 
 		struct	// display a gump with some text on it.
 		{
 			byte m_Cmd; // 0x8b
-			NWORD m_len; // 13 + len(m_unktext) + len(m_text)
-			NDWORD m_UID; // Some uid which doesn't clash with any others that the client might have
-			NWORD m_gump; // Signs and scrolls work well with this. GUMP_TYPE
-			NWORD m_len_unktext; // Evidently m_unktext is either an array of bytes, or a non-nulled char array
-			NWORD m_unk11; // who knows??
+			nword m_len; // 13 + len(m_unktext) + len(m_text)
+			ndword m_UID; // Some uid which doesn't clash with any others that the client might have
+			nword m_gump; // Signs and scrolls work well with this. GUMP_TYPE
+			nword m_len_unktext; // Evidently m_unktext is either an array of bytes, or a non-nulled char array
+			nword m_unk11; // who knows??
 			char m_unktext[1]; // same
 			char m_text[1]; // text to display
 		} GumpTextDisp;
@@ -2749,30 +2749,30 @@ struct CCommand	// command buffer from server to client.
 		{
 			byte m_Cmd;			// 0 = 0x8C
 			byte m_ip[4];		// 1 = struct in_addr
-			NWORD m_port;		// 5 = Port server is on
-			NDWORD m_Account;	// 7-10 = customer id (sent to game server)
+			nword m_port;		// 5 = Port server is on
+			ndword m_Account;	// 7-10 = customer id (sent to game server)
 		} Relay;
 
 		struct	// size = 19
 		{
 			byte m_Cmd; // 0 = 0x90
-			NDWORD m_UID; // uid of the map item
-			NWORD m_Gump_Corner; // GUMP_TYPE always 0x139d....compass tile id in the corner.,
-			NWORD m_x_ul; // upper left x coord.
-			NWORD m_y_ul; // upper left y coord.
-			NWORD m_x_lr; // lower right x coord.
-			NWORD m_y_lr; // lower right y coord.
-			NWORD m_xsize; // client width
-			NWORD m_ysize; // client height
+			ndword m_UID; // uid of the map item
+			nword m_Gump_Corner; // GUMP_TYPE always 0x139d....compass tile id in the corner.,
+			nword m_x_ul; // upper left x coord.
+			nword m_y_ul; // upper left y coord.
+			nword m_x_lr; // lower right x coord.
+			nword m_y_lr; // lower right y coord.
+			nword m_xsize; // client width
+			nword m_ysize; // client height
 		} MapDisplay;	// Map1
 
 		struct // size = 98 // Get a change to the book title.
 		{
 			byte m_Cmd;			// 0 = 0x93
-			NDWORD m_UID;		// 1-4 = book
+			ndword m_UID;		// 1-4 = book
 			byte m_writable;	// 5 = 0 = non writable, 1 = writable. (NOT USED HERE)
 			byte m_NEWunk1;
-			NWORD m_pages;		// 6-7 = number of pages. (NOT USED HERE)
+			nword m_pages;		// 6-7 = number of pages. (NOT USED HERE)
 			char m_title[ 2 * MAX_NAME_SIZE ];
 			char m_author[ MAX_NAME_SIZE ];
 		} BookOpen;
@@ -2780,16 +2780,16 @@ struct CCommand	// command buffer from server to client.
 		struct // size = 9
 		{
 			byte m_Cmd;			// 0 = 0x95
-			NDWORD m_UID;		// 1-4
-			NWORD m_zero5;		// 5-6
-			NWORD m_id;		// 7-8
+			ndword m_UID;		// 1-4
+			nword m_zero5;		// 5-6
+			nword m_id;		// 7-8
 		} DyeVat;
 
 		struct	// size = 9		// New AllNames3D.
 		{
 			byte m_Cmd;		// 0x98
-			NWORD m_len;	// Always 37
-			NDWORD m_UID;
+			nword m_len;	// Always 37
+			ndword m_UID;
 			char m_name[ MAX_NAME_SIZE ];
 		} AllNames3D;
 
@@ -2797,38 +2797,38 @@ struct CCommand	// command buffer from server to client.
 		{
 			byte m_Cmd;				// 0 = 0x99
 			byte m_fAllowGround;	// 1 = 1=ground only, 0=dynamic object
-			NDWORD m_context;		// 2-5 = we sent this at target setup.
+			ndword m_context;		// 2-5 = we sent this at target setup.
 			byte m_zero6[12];		// 6-17
-			NWORD m_id;				// 18-19 = The multi id to preview. (id-0x4000)
-			NWORD m_x;				// 20-21 = x offset
-			NWORD m_y;				// 22-23 = y offset
-			NWORD m_z;				// 24-25 = z offset
+			nword m_id;				// 18-19 = The multi id to preview. (id-0x4000)
+			nword m_x;				// 20-21 = x offset
+			nword m_y;				// 22-23 = y offset
+			nword m_z;				// 24-25 = z offset
 		} TargetMulti;
 
 		struct // size = 16 // console prompt request.
 		{
 			byte m_Cmd;		// 0 = 0x9a
-			NWORD m_len;	// 1-2 = length = 16
-			NDWORD m_serial;	// 3-6 = serial
-			NDWORD m_prompt;	// 7-10 = prompt id
-			NDWORD m_type;	// 11-14 = type (0=request/esc, 1=reply)
+			nword m_len;	// 1-2 = length = 16
+			ndword m_serial;	// 3-6 = serial
+			ndword m_prompt;	// 7-10 = prompt id
+			ndword m_type;	// 11-14 = type (0=request/esc, 1=reply)
 			char m_text[1];	// 15+ = null terminated text? doesn't seem to work.
 		} Prompt;
 
 		struct // size = var	// vendor sell dialog
 		{
 			byte m_Cmd;		// 0 = 0x9e
-			NWORD m_len;	// 1-2
-			NDWORD m_UIDVendor;	// 3-6
-			NWORD m_count;	// 7-8
+			nword m_len;	// 1-2
+			ndword m_UIDVendor;	// 3-6
+			nword m_count;	// 7-8
 			struct
 			{
-				NDWORD m_UID;
-				NWORD m_id;
-				NWORD m_wHue;	// HUE_TYPE
-				NWORD m_amount;
-				NWORD m_price;	// Hmm what if price is > 65K?
-				NWORD m_len;
+				ndword m_UID;
+				nword m_id;
+				nword m_wHue;	// HUE_TYPE
+				nword m_amount;
+				nword m_price;	// Hmm what if price is > 65K?
+				nword m_len;
 				char m_text[1];
 			} m_item[1];
 		} VendOpenSell;
@@ -2836,40 +2836,40 @@ struct CCommand	// command buffer from server to client.
 		struct	// size = 9	// update some change in stats.
 		{
 			byte m_Cmd;	// 0=0xa1 (str), 0xa2 (int), or 0xa3 (dex)
-			NDWORD m_UID;	// 1-4
-			NWORD m_max;	// 5-6
-			NWORD m_val;	// 7-8
+			ndword m_UID;	// 1-4
+			nword m_max;	// 5-6
+			nword m_val;	// 7-8
 		} StatChng;
 
 		struct // size = 3+var
 		{
 			byte m_Cmd;		// 0 = 0xA5
-			NWORD m_len;
+			nword m_len;
 			char m_page[ 1 ];	// var size
 		} Web;
 
 		struct // size = 10 + var	// Read scroll
 		{
 			byte m_Cmd;			// 0=0xA6
-			NWORD m_len;		// 1-2
+			nword m_len;		// 1-2
 			byte  m_type;		// 3 = form or gump = 0=tips,1=notice or 2 (SCROLL_TYPE)
-			NDWORD m_context;	// 4-7 = context info passed from server
-			NWORD m_lentext;	// 8
+			ndword m_context;	// 4-7 = context info passed from server
+			nword m_lentext;	// 8
 			char m_text[1];		// 10
 		} Scroll;
 
 		struct // size = 6+servers*40
 		{
 			byte m_Cmd;				// 0 = 0xA8
-			NWORD m_len;			// 1-2
+			nword m_len;			// 1-2
 			byte m_nextLoginKey;	// 3=next login key the client should use in ServersReq (0x80) packet
-			NWORD m_count;			// 4-5=num servers.
+			nword m_count;			// 4-5=num servers.
 
 #define MAX_SERVERS 32
 #define MAX_SERVER_NAME_SIZE 32
 			struct	// size=40
 			{
-				NWORD m_count;							// 0=0 based enum
+				nword m_count;							// 0=0 based enum
 				char m_servname[32];	// 2
 				byte m_percentfull;						// 34 = 25 or 2e
 				signed char m_timezone;					// 35 = 0x05=east coast or 0x08=west coast
@@ -2880,7 +2880,7 @@ struct CCommand	// command buffer from server to client.
 		struct // size = 4+(5*2*MAX_NAME_SIZE)+1+(starts*63) // list available chars for your account.
 		{
 			byte m_Cmd;		// 0 = 0xa9
-			NWORD m_len;	// 1-2 = var len
+			nword m_len;	// 1-2 = var len
 			byte m_count;	// 3=5 needs to be 5 for some reason.
 			CEventCharDef m_char[1];
 
@@ -2891,39 +2891,39 @@ struct CCommand	// command buffer from server to client.
 				char m_area[MAX_NAME_SIZE+1];
 				char m_name[MAX_NAME_SIZE+1];
 			} m_start[1];
-			NDWORD	m_flags;
+			ndword	m_flags;
 		} CharList;
 
 		struct // size = 5 = response to attack.
 		{
 			byte m_Cmd;		// 0= 0xaa
-			NDWORD m_UID;	// 1= char attacked. 0=attack refused.
+			ndword m_UID;	// 1= char attacked. 0=attack refused.
 		} AttackOK;
 
 		struct // size = 13 + var // Send a gump text entry dialog.
 		{
 			byte m_Cmd;			// 0 = 0xab
-			NWORD m_len;		// 1-2
-			NDWORD m_UID;		// 3-6
-			NWORD m_context;	// 7-8= context info passed from server
-			NWORD m_textlen1;	// length of string #1
+			nword m_len;		// 1-2
+			ndword m_UID;		// 3-6
+			nword m_context;	// 7-8= context info passed from server
+			nword m_textlen1;	// length of string #1
 			char m_text1[256];	// line 1 variable text length
 			byte m_cancel;		// 0 = disable, 1=enable
 			byte m_style;		// 0 = disable, 1=normal, 2=numerical
-			NDWORD m_mask;		// format[1] = max length of textbox input, format[2] = max value of textbox input
-			NWORD m_textlen2;	// length of string #2
+			ndword m_mask;		// format[1] = max length of textbox input, format[2] = max value of textbox input
+			nword m_textlen2;	// length of string #2
 			char m_text2[256];	// line 2 text
 		} GumpInpVal;
 
 		struct // size = 14 + 30 + var // Unicode speech
 		{
 			byte m_Cmd;			// 0 = 0xAE
-			NWORD m_len;		// 1-2 = var len size.
-			NDWORD m_UID;		// 3-6 = UID num of speaker., 0xFFFFFFFF = noone.
-			NWORD m_id;			// 7-8 = CREID_TYPE of speaker. 0xFFFF = none
+			nword m_len;		// 1-2 = var len size.
+			ndword m_UID;		// 3-6 = UID num of speaker., 0xFFFFFFFF = noone.
+			nword m_id;			// 7-8 = CREID_TYPE of speaker. 0xFFFF = none
 			byte m_mode;		// 9 = TALKMODE_TYPE
-			NWORD m_wHue;		// 10-11 = HUE_TYPE.
-			NWORD m_font;		// 12-13 = FONT_TYPE
+			nword m_wHue;		// 10-11 = HUE_TYPE.
+			nword m_font;		// 12-13 = FONT_TYPE
 			char m_lang[4];		// language (same as before) CLanguageID
 			char m_charname[MAX_NAME_SIZE];	//
 			NCHAR m_utext[1];		// text (null terminated, ?=(msgsize-48)/2 MAX_TALK_BUFFER
@@ -2932,27 +2932,27 @@ struct CCommand	// command buffer from server to client.
 		struct // size = 13	// Death anim of a creature
 		{
 			byte m_Cmd;		// 0 = 0xaf
-			NDWORD m_UID;	// 1-4
-			NDWORD m_UIDCorpse; // 5-8
-			NWORD m_DeathFlight;		// 9= in flight ?
-			NWORD m_Death2Anim;	// 11= forward/backward,dir ?
+			ndword m_UID;	// 1-4
+			ndword m_UIDCorpse; // 5-8
+			nword m_DeathFlight;		// 9= in flight ?
+			nword m_Death2Anim;	// 11= forward/backward,dir ?
 		} CharDeath;
 
 		struct // size = 21 + var // Send a gump menu dialog.
 		{
 			byte m_Cmd;		// 0 = 0xb0
-			NWORD m_len;	// 1
-			NDWORD m_UID;	// 3
-			NDWORD m_context;	// 7-10= context info passed from server
-			NDWORD m_x;
-			NDWORD m_y;
-			NWORD m_lenCmds; // 19-20 = command section length.
+			nword m_len;	// 1
+			ndword m_UID;	// 3
+			ndword m_context;	// 7-10= context info passed from server
+			ndword m_x;
+			ndword m_y;
+			nword m_lenCmds; // 19-20 = command section length.
 			char m_commands[1];	// Format commands (var len) { %s }
 			byte m_zeroterm;
-			NWORD m_textlines;	// How many lines of text to follow.
+			nword m_textlines;	// How many lines of text to follow.
 			struct
 			{
-				NWORD m_len;	// len of this line.
+				nword m_len;	// len of this line.
 				NCHAR m_utext[1];	// UNICODE text. (not null term)
 			} m_texts[1];
 		} GumpDialog;
@@ -2960,8 +2960,8 @@ struct CCommand	// command buffer from server to client.
 		struct
 		{
 			byte m_Cmd;			// 0 = 0xb2
-			NWORD m_len;		// 1-2 = length of packet
-			NWORD m_subcmd;		// 3-4 = 0x001a - already in this channel
+			nword m_len;		// 1-2 = length of packet
+			nword m_subcmd;		// 3-4 = 0x001a - already in this channel
 			char m_lang[4];// 5-8 = unicode language code (null term....default = 'enu' (english?) CLanguageID
 			NCHAR m_uname[1];		// 9-? = name in unicode (zero terminated) (may have  prefix, moderator, etc)
 			NCHAR m_uname2[1];	// ?-? = name in unicode (also used for other things (passworded, etc)
@@ -2972,20 +2972,20 @@ struct CCommand	// command buffer from server to client.
 #define MAX_ITEMS_PREVIEW (MAX_BUFFER - 16) / 10
 			// MAX_ITEMS_PREVIEW = 1534
 			byte m_Cmd; // 0 = 0xb4
-			NWORD m_len; // 1-2 = 16 + (10 * m_count)
+			nword m_len; // 1-2 = 16 + (10 * m_count)
 			byte m_fAllowGround; // 3 =
-			NDWORD m_code; // 4-7 = target id
-			NWORD m_xOffset; // 8-9 = x targ offset
-			NWORD m_yOffset; // 10-11 = y targ offset
-			NWORD m_zOffset; // 12-13 = z targ offset
-			NWORD m_count;	// 14-15 = how many items in this preview image
+			ndword m_code; // 4-7 = target id
+			nword m_xOffset; // 8-9 = x targ offset
+			nword m_yOffset; // 10-11 = y targ offset
+			nword m_zOffset; // 12-13 = z targ offset
+			nword m_count;	// 14-15 = how many items in this preview image
 			struct
 			{
-				NWORD m_id;	// 0-1 = ITEMID_TYPE
-				NWORD m_dx;	// 2-3 = delta x
-				NWORD m_dy;	// 4-5 = delta y
-				NWORD m_dz;	// 6-7 = delta z
-				NWORD m_unk;	// 6-7 = ???
+				nword m_id;	// 0-1 = ITEMID_TYPE
+				nword m_dx;	// 2-3 = delta x
+				nword m_dy;	// 4-5 = delta y
+				nword m_dz;	// 6-7 = delta z
+				nword m_unk;	// 6-7 = ???
 			} m_item[MAX_ITEMS_PREVIEW];
 		} TargetItems;
 
@@ -2999,16 +2999,16 @@ struct CCommand	// command buffer from server to client.
 		struct // size = variable	// Put up a tooltip
 		{
 			byte m_Cmd;				// 0 = 0xb7
-			NWORD m_len;			// 1-2
-			NDWORD m_UID;			// 3-6
+			nword m_len;			// 1-2
+			ndword m_UID;			// 3-6
 			NCHAR m_utext[1];		// zero terminated UNICODE string
 		} ToolTip;
 
 		struct	// size = 8 // Show Character Profile.
 		{
 			byte m_Cmd;		// 0=0xB8
-			NWORD m_len;	// 1 - 2
-			NDWORD m_UID;	// 3-6=uid
+			nword m_len;	// 1 - 2
+			ndword m_UID;	// 3-6=uid
 			char m_title[1];	// Description 1 (not unicode!, name, zero terminated)
 			NCHAR m_utext1[1];	// Static Description 2 (unicode!, zero terminated)
 			NCHAR m_utext2[1];	// Player Description 3 (unicode!, zero terminated)
@@ -3024,21 +3024,21 @@ struct CCommand	// command buffer from server to client.
 #define CLI_FEAT_LBR		(CLI_FEAT_LBR_SOUND|CLI_FEAT_LBR_FULL)
 #define CLI_FEAT_T2A_LBR	(CLI_FEAT_T2A|CLI_FEAT_LBR)
 			byte m_Cmd;		// 0 = 0xb9
-			NWORD m_enable;
+			nword m_enable;
 		} FeaturesEnable;
 
 		struct // size = 5	// enable features on client (new)
 		{
 			byte m_Cmd;		// 0 = 0xb9
-			NDWORD m_enable;
+			ndword m_enable;
 		} FeaturesEnableNew;
 
 		struct
 		{
 			byte m_Cmd;	// 0xba
 			byte m_Active;	// 1/0
-			NWORD m_x;
-			NWORD m_y;
+			nword m_x;
+			nword m_y;
 		} Arrow;
 
 		struct	// Season, len = 3
@@ -3052,21 +3052,21 @@ struct CCommand	// command buffer from server to client.
 		{
 			// walk codes from the > 1.26.0 server to be sent back in the Walk messages
 			byte m_Cmd;	// 0=0xbf
-			NWORD m_len;	// 1 - 2 (len = 5 + (# of codes * 4)
-			NWORD m_type;	// 3 - 4 EXTDATA_TYPE = 1=prime LIFO stack, 2=add to beginning of LIFO stack
+			nword m_len;	// 1 - 2 (len = 5 + (# of codes * 4)
+			nword m_type;	// 3 - 4 EXTDATA_TYPE = 1=prime LIFO stack, 2=add to beginning of LIFO stack
 			CExtData m_u;
 		} ExtData;
 
 		struct
 		{
 			byte m_Cmd;			// 0 = 0xc1
-			NWORD m_len;		// 1-2 = var len size.
-			NDWORD m_UID;		// 3-6 = UID num of speaker. 01010101 = system
-			NWORD m_id;			// 7-8 = CREID_TYPE of speaker.
+			nword m_len;		// 1-2 = var len size.
+			ndword m_UID;		// 3-6 = UID num of speaker. 01010101 = system
+			nword m_id;			// 7-8 = CREID_TYPE of speaker.
 			byte m_mode;		// 9 = TALKMODE_TYPE
-			NWORD m_wHue;		// 10-11 = HUE_TYPE.
-			NWORD m_font;		// 12-13 = FONT_TYPE
-			NDWORD m_clilocId;	// 14-17 = Cliloc ID to display
+			nword m_wHue;		// 10-11 = HUE_TYPE.
+			nword m_font;		// 12-13 = FONT_TYPE
+			ndword m_clilocId;	// 14-17 = Cliloc ID to display
 			char m_charname[MAX_NAME_SIZE];	// 18-47
 			TCHAR m_args[1];		// 48+ = arguments
 		} SpeakLocalized;
@@ -3074,10 +3074,10 @@ struct CCommand	// command buffer from server to client.
 		struct // size = 21 // console prompt request. (unicode version)
 		{
 			byte m_Cmd;			// 0 = 0xc2
-			NWORD m_len;		// 1-2 = length = 16
-			NDWORD m_serial;	// 3-6 = serial
-			NDWORD m_prompt;	// 7-10 = prompt id
-			NDWORD m_type;		// 11-14 = type (0=request/esc, 1=reply)
+			nword m_len;		// 1-2 = length = 16
+			ndword m_serial;	// 3-6 = serial
+			ndword m_prompt;	// 7-10 = prompt id
+			ndword m_type;		// 11-14 = type (0=request/esc, 1=reply)
 			char m_lang[4];		// 15-18 = lang (3 chars + NULL)
 			WCHAR m_utext[1];	// 19+ = response
 		} PromptUNICODE;
@@ -3085,7 +3085,7 @@ struct CCommand	// command buffer from server to client.
 		struct
 		{
 			byte m_Cmd; // 0=0xc4
-			NDWORD m_UID;
+			ndword m_UID;
 			byte m_Intensity;
 		} Semivisible;
 		
@@ -3098,13 +3098,13 @@ struct CCommand	// command buffer from server to client.
 		struct
 		{
 			byte m_Cmd;			// 0 = 0xCC
-			NWORD m_len;		// 1-2 = var len size.
-			NDWORD m_UID;		// 3-6 = UID num of speaker. 01010101 = system
-			NWORD m_id;			// 7-8 = CREID_TYPE of speaker.
+			nword m_len;		// 1-2 = var len size.
+			ndword m_UID;		// 3-6 = UID num of speaker. 01010101 = system
+			nword m_id;			// 7-8 = CREID_TYPE of speaker.
 			byte m_mode;		// 9 = TALKMODE_TYPE
-			NWORD m_wHue;		// 10-11 = HUE_TYPE.
-			NWORD m_font;		// 12-13 = FONT_TYPE
-			NDWORD m_clilocId;	// 14-17 = Cliloc ID to display
+			nword m_wHue;		// 10-11 = HUE_TYPE.
+			nword m_font;		// 12-13 = FONT_TYPE
+			ndword m_clilocId;	// 14-17 = Cliloc ID to display
 			byte m_affixType;	// 18 = Affix type (0=append, 1=prepend, 2=system)
 			char m_charname[MAX_NAME_SIZE];	// 19-48
 			char m_affix[1];	// 49+ = affix (ASCII only)
@@ -3120,29 +3120,29 @@ struct CCommand	// command buffer from server to client.
 		struct // size = 17+var // Get a change to the book title.
 		{
 			byte m_Cmd;			// 0 = 0xD4
-			NWORD m_len;		// 1-2 = length
-			NDWORD m_UID;		// 3-6 = book
+			nword m_len;		// 1-2 = length
+			ndword m_UID;		// 3-6 = book
 			byte m_unk1;		// 7 = 0x01
 			byte m_writable;	// 8 = 0 = non writable, 1 = writable
-			NWORD m_pages;		// 9-10 = number of pages
-			NWORD m_titlelen;	// 11-12 = title length
+			nword m_pages;		// 9-10 = number of pages
+			nword m_titlelen;	// 11-12 = title length
 			char m_title[1];	// 13 - = title
-			NWORD m_authorlen;	// = author length
+			nword m_authorlen;	// = author length
 			char m_author[1];	// = author
 		} BookOpenNew;
 		
 		struct
 		{
 			byte m_Cmd; // 0xD6
-			NWORD m_len;
-			NWORD m_Unk1; // 0x0000
-			NDWORD m_UID;
-			NWORD m_Unk2; // 0x0003
-			NDWORD m_ListID;
+			nword m_len;
+			nword m_Unk1; // 0x0000
+			ndword m_UID;
+			nword m_Unk2; // 0x0003
+			ndword m_ListID;
 			struct
 			{
-				NDWORD m_LocID;
-				NWORD m_textlen;
+				ndword m_LocID;
+				nword m_textlen;
 				TCHAR m_utext[1]; // this is NCHAR !!!
 			} m_list[1];
 		} AOSTooltip;
@@ -3150,22 +3150,22 @@ struct CCommand	// command buffer from server to client.
 		struct
 		{
 			byte m_Cmd;	// 0=0xd7
-			NWORD m_len;	// 1 - 2 (len = 5 + (# of codes * 4)
-			NDWORD m_uid; 
-			NWORD m_type;	// 3 - 4 EXTDATA_TYPE
+			nword m_len;	// 1 - 2 (len = 5 + (# of codes * 4)
+			ndword m_uid; 
+			nword m_type;	// 3 - 4 EXTDATA_TYPE
 			CExtAosData m_u;
 		} ExtAosData;
 		
 		struct 
 		{
 			byte m_Cmd; // 0xd8
-			NWORD m_len;
+			nword m_len;
 			byte m_compression; // 0x00 not compressed
 			byte m_unk1;	// 0x00
-			NDWORD m_UID;
-			NDWORD m_revision;
-			NWORD m_itemcount;
-			NWORD m_datasize; // itemcount * 5
+			ndword m_UID;
+			ndword m_revision;
+			nword m_itemcount;
+			nword m_datasize; // itemcount * 5
 			byte m_planeCount;
 			struct
 			{
@@ -3173,7 +3173,7 @@ struct CCommand	// command buffer from server to client.
 				byte m_size;
 				byte m_length;
 				byte m_flags;
-				NWORD m_data[1];
+				nword m_data[1];
 			} m_planeList[1];
 			struct
 			{
@@ -3183,7 +3183,7 @@ struct CCommand	// command buffer from server to client.
 				byte m_flags;
 				struct
 				{
-					NWORD m_id;
+					nword m_id;
 					byte m_x;
 					byte m_y;
 					byte m_z;
@@ -3194,163 +3194,163 @@ struct CCommand	// command buffer from server to client.
 		struct
 		{
 			byte m_Cmd;	// 0 = 0xdc
-			NDWORD m_uid;
-			NDWORD m_ListID;
+			ndword m_uid;
+			ndword m_ListID;
 		} AOSTooltipInfo;
 
 		struct // Send a gump menu dialog.
 		{
 			byte m_Cmd;		// 0 = 0xDD
-			NWORD m_len;	// 1
-			NDWORD m_UID;	// 3
-			NDWORD m_context;	// 7-10= context info passed from server
-			NDWORD m_x;
-			NDWORD m_y;
-			NDWORD m_compressed_lenCmds;
-			NDWORD m_uncompressed_lenCmds;
+			nword m_len;	// 1
+			ndword m_UID;	// 3
+			ndword m_context;	// 7-10= context info passed from server
+			ndword m_x;
+			ndword m_y;
+			ndword m_compressed_lenCmds;
+			ndword m_uncompressed_lenCmds;
 			byte m_commands[1];	// Format commands (Lenght: m_compressed_lenCmds)
-			NDWORD m_lineTxts;
-			NDWORD m_compressed_lenTxts;
-			NDWORD m_uncompressed_lenTxs;
+			ndword m_lineTxts;
+			ndword m_compressed_lenTxts;
+			ndword m_uncompressed_lenTxs;
 			byte m_textlines[1]; // Text lines (Lenght: m_compressed_lenTxts)
 		} CompressedGumpDialog;
 
 		struct
 		{
 			byte m_Cmd;
-			NWORD m_Length;
-			NDWORD m_Uid;
-			NWORD m_IconId_1;
-			NWORD m_Show_1;
-			NDWORD m_unk_1;
-			NWORD m_IconId_2;
-			NWORD m_Show_2;
-			NDWORD m_unk_2;
-			NWORD m_Time;
-			NWORD m_unk_3;
+			nword m_Length;
+			ndword m_Uid;
+			nword m_IconId_1;
+			nword m_Show_1;
+			ndword m_unk_1;
+			nword m_IconId_2;
+			nword m_Show_2;
+			ndword m_unk_2;
+			nword m_Time;
+			nword m_unk_3;
 			byte m_unk_4;
-			NDWORD m_ClilocOne;
-			NDWORD m_ClilocTwo;
-			NDWORD m_unk_5;
-			NWORD m_unk_6;
-			NWORD m_unk_7;
+			ndword m_ClilocOne;
+			ndword m_ClilocTwo;
+			ndword m_unk_5;
+			nword m_unk_6;
+			nword m_unk_7;
 			byte m_MBUTab_1[2];
 			byte m_MBUText_1[6];
 			byte m_MBUTab_2[2];
 			byte m_MBUText_2[6];
 			byte m_MBUTab_3[2];
 			byte m_MBUText_3[6];
-			NWORD m_unk_8;
+			nword m_unk_8;
 		} AddBuff;
 
 		struct
 		{
 			byte m_Cmd;
-			NWORD m_Length;
-			NDWORD m_Uid;
-			NWORD m_IconId;
-			NWORD m_Show;
-			NDWORD m_unk_1;
+			nword m_Length;
+			ndword m_Uid;
+			nword m_IconId;
+			nword m_Show;
+			ndword m_unk_1;
 		} RemoveBuff;
 
 		struct // XCMD_NewAnimUpdate
 		{
 			byte m_Cmd;			// 0=0xe2
-			NDWORD m_uid;		// 1 - 4 (len)
-			NWORD m_action;		// 5 - 6
+			ndword m_uid;		// 1 - 4 (len)
+			nword m_action;		// 5 - 6
 			byte m_zero;		// 7	 (0x00)
-			NWORD m_count;		// 8 - 10 (layers to unequip)
+			nword m_count;		// 8 - 10 (layers to unequip)
 		} NewAnimUpdate;
 
 		struct // XCMD_WaypointShow
 		{
 			byte m_Cmd;				// 0 = 0xE5
-			NWORD m_len;			// 1 - 2 = length
-			NDWORD m_Wpnt_uid;		// 3 - 7 = serial uid
-			NWORD m_Wpnt_px;		// 8 - 9 = X
-			NWORD m_Wpnt_py;		// 10 - 11 = Y
+			nword m_len;			// 1 - 2 = length
+			ndword m_Wpnt_uid;		// 3 - 7 = serial uid
+			nword m_Wpnt_px;		// 8 - 9 = X
+			nword m_Wpnt_py;		// 10 - 11 = Y
 			byte m_Wpnt_pz;			// 12 = Y
 			byte m_Wpnt_pmap;		// 13 = MAP
-			NWORD m_Wpnt_type;		// 14 - 15 = object type (??)
-			NWORD m_ignoreUid;		// 16 - 17 = don't use the uid (0/1)
-			NDWORD m_ClilocId;		// 18 - 22 = clilocId
+			nword m_Wpnt_type;		// 14 - 15 = object type (??)
+			nword m_ignoreUid;		// 16 - 17 = don't use the uid (0/1)
+			ndword m_ClilocId;		// 18 - 22 = clilocId
 			NCHAR m_ClilocArgs[1];	// 23 - ? = clilocArgs
-			NWORD m_zero;			// ? - ?+1 = zero
+			nword m_zero;			// ? - ?+1 = zero
 		} WaypointShow;
 
 		struct // XCMD_WaypointHide
 		{
 			byte m_Cmd;				// 0 = 0xE6
-			NDWORD m_Wpnt_uid;		// 1 - 4 = serial uid
+			ndword m_Wpnt_uid;		// 1 - 4 = serial uid
 		} WaypointHide;
 
 		struct // XCMD_HighlightUIContinue
 		{
 			byte m_Cmd;				// 0 = 0xE7
-			NDWORD m_Uid;			// 1 - 4 = serial uid
-			NWORD m_IdUi;			// 5 - 6 = id ui
-			NDWORD m_destUid;		// 7 - 11 = destination serial uid
+			ndword m_Uid;			// 1 - 4 = serial uid
+			nword m_IdUi;			// 5 - 6 = id ui
+			ndword m_destUid;		// 7 - 11 = destination serial uid
 			byte m_One;				// 12 = 0x01
 		} HighlightUIContinue;
 
 		struct // XCMD_HighlightUIToggle
 		{
 			byte m_Cmd;				// 0 = 0xE9
-			NDWORD m_Uid;			// 1 - 4 = serial uid
-			NWORD m_IdUi;			// 5 - 6 = id ui
+			ndword m_Uid;			// 1 - 4 = serial uid
+			nword m_IdUi;			// 5 - 6 = id ui
 			char m_Desc[64];		// 7 - 71 = dexcription: �ToggleInventory�, �TogglePaperdoll�, �ToggleMap�, ��
-			NDWORD m_commandId;		// 72 - 76 = command Id
+			ndword m_commandId;		// 72 - 76 = command Id
 		} HighlightUIToggle;
 
 		struct // XCMD_ToggleHotbar
 		{
 			byte m_Cmd;				// 0 = 0xEA
-			NWORD m_Enable;			// 1 - 2 = enable
+			nword m_Enable;			// 1 - 2 = enable
 		} ToggleHotbar;
 
 		struct // XCMD_TSyncReply
 		{
 			byte m_Cmd;				// 0 = 0xF2
-			NDWORD m_unk1;			// 1 - 4
-			NDWORD m_unk2;			// 5 - 8
-			NDWORD m_unk3;			// 9 - 12
-			NDWORD m_unk4;			// 13 - 16
-			NDWORD m_unk5;			// 17 - 20
-			NDWORD m_unk6;			// 21 - 24
+			ndword m_unk1;			// 1 - 4
+			ndword m_unk2;			// 5 - 8
+			ndword m_unk3;			// 9 - 12
+			ndword m_unk4;			// 13 - 16
+			ndword m_unk5;			// 17 - 20
+			ndword m_unk6;			// 21 - 24
 		} TSyncReply;
 
 		struct	// XCMD_MapDisplayNew, size = 21
 		{
 			byte m_Cmd; // 0 = 0xF5
-			NDWORD m_UID; // uid of the map item
-			NWORD m_Gump_Corner; // GUMP_TYPE always 0x139d....compass tile id in the corner.,
-			NWORD m_x_ul; // upper left x coord.
-			NWORD m_y_ul; // upper left y coord.
-			NWORD m_x_lr; // lower right x coord.
-			NWORD m_y_lr; // lower right y coord.
-			NWORD m_xsize; // client width
-			NWORD m_ysize; // client height
-			NWORD m_map; // map id
+			ndword m_UID; // uid of the map item
+			nword m_Gump_Corner; // GUMP_TYPE always 0x139d....compass tile id in the corner.,
+			nword m_x_ul; // upper left x coord.
+			nword m_y_ul; // upper left y coord.
+			nword m_x_lr; // lower right x coord.
+			nword m_y_lr; // lower right y coord.
+			nword m_xsize; // client width
+			nword m_ysize; // client height
+			nword m_map; // map id
 		} MapDisplayNew;	// MapX
 
 		struct	// XCMD_MoveShip, size = 18+var
 		{
 			byte m_Cmd; // 0 = 0xF6
-			NWORD m_len;
-			NDWORD m_UID; // uid of the ship
+			nword m_len;
+			ndword m_UID; // uid of the ship
 			byte m_unk1; // 0x04
 			byte m_unk2; // 0x04
 			byte m_unk3; // 0x04
-			NWORD m_shipX; // ship x
-			NWORD m_shipY; // ship y
-			NWORD m_shipZ; // ship z
-			NWORD m_objectCount; // number of objects on deck
+			nword m_shipX; // ship x
+			nword m_shipY; // ship y
+			nword m_shipZ; // ship z
+			nword m_objectCount; // number of objects on deck
 			struct
 			{
-				NDWORD m_UID; // object uid
-				NWORD m_x; // object x
-				NWORD m_y; // object y
-				NWORD m_z; // object z
+				ndword m_UID; // object uid
+				nword m_x; // object x
+				nword m_y; // object y
+				nword m_z; // object z
 			} m_objects[1];
 		} MoveShip;
 	};

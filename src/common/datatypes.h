@@ -64,10 +64,10 @@ typedef	uint64_t		uint64;
 		#define PRIx64 "l64x"
 	#endif
 
-	// If windows.h was already included and then the aliases for WinAPI data types are needed
-	#if defined(__WINNT__) || defined (_MINWINDEF_)
-		/* IMPORTANT: for Windows-specific code, especially when using Windows API calls,
-		we should use WinAPI data types (so, for example, dword instead of dword) */
+	// If these are defined, windows.h was included and the api string types were declared, so let's declare our aliases.
+	#if defined(_WINNT_) || defined(__wtypes_h__) || defined(__wtypesbase_h__)
+		 /* IMPORTANT: for Windows-specific code, especially when using Windows API calls,
+				we should use WinAPI data types (so, for example, dword instead of dword) */
 		typedef	TCHAR		tchar;
 		typedef WCHAR		wchar;
 		typedef LPWSTR		lpwstr;

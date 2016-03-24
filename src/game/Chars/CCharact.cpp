@@ -2195,7 +2195,7 @@ void CChar::SpeakUTF8( LPCTSTR pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_
 }
 
 // Ignore the font argument here !
-void CChar::SpeakUTF8Ex( const NWORD * pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
+void CChar::SpeakUTF8Ex( const nword * pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
 {
 	ADDTOCALLSTACK("CChar::SpeakUTF8Ex");
 

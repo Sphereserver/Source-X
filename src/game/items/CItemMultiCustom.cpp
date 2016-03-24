@@ -748,7 +748,7 @@ void CItemMultiCustom::SendStructureTo(CClient * pClientSrc)
 			iMaxPlane = GetPlane(*i);
 		}
 
-		NWORD wPlaneBuffer[PLANEDATA_BUFFER];
+		nword wPlaneBuffer[PLANEDATA_BUFFER];
 
 		for (int iCurrentPlane = 0; iCurrentPlane <= iMaxPlane; iCurrentPlane++)
 		{
@@ -807,7 +807,7 @@ void CItemMultiCustom::SendStructureTo(CClient * pClientSrc)
 			if (bFoundItems == false)
 				continue;
 
-			int iPlaneSize = (iMaxIndex + 1) * sizeof(NWORD);
+			int iPlaneSize = (iMaxIndex + 1) * sizeof(nword);
 			cmd->writePlaneData(iCurrentPlane, iItemCount, (byte*)wPlaneBuffer, iPlaneSize);
 		}
 

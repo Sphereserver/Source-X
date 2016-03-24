@@ -3221,7 +3221,7 @@ PacketGumpValueInput::PacketGumpValueInput(const CClient* target, bool cancel, I
  *
  *
  ***************************************************************************/
-PacketMessageUNICODE::PacketMessageUNICODE(const CClient* target, const NWORD* pszText, const CObjBaseTemplate * source, HUE_TYPE hue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID language) : PacketSend(XCMD_SpeakUNICODE, 48, PRI_NORMAL)
+PacketMessageUNICODE::PacketMessageUNICODE(const CClient* target, const nword* pszText, const CObjBaseTemplate * source, HUE_TYPE hue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID language) : PacketSend(XCMD_SpeakUNICODE, 48, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketMessageUNICODE::PacketMessageUNICODE");
 

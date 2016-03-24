@@ -19,15 +19,12 @@
 #include <vector>
 #include <stack>
 
-#include "datatypes.h"
 #ifdef _WIN32
-	#ifdef __MINGW32__
-		#define _cdecl __cdecl
-	#endif
 	#include "os_windows.h"
 #else // !_WIN32
 	#include "os_unix.h"
 #endif // _WIN32
+#include "datatypes.h"
 
 // use to indicate that a function uses printf-style arguments, allowing GCC
 // to validate the format string and arguments:

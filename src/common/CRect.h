@@ -76,7 +76,7 @@ public:
 	CRegionBase * GetRegion( dword dwType ) const;
 	size_t GetRegions( dword dwType, CRegionLinks & rlinks ) const;
 
-	long GetPointSortIndex() const;
+	int GetPointSortIndex() const;
 
 	bool r_WriteVal( LPCTSTR pszKey, CGString & sVal ) const;
 	bool r_LoadVal( LPCTSTR pszKey, LPCTSTR pszArgs );

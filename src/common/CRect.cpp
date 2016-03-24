@@ -889,9 +889,9 @@ size_t CPointBase::GetRegions( dword dwType, CRegionLinks & rlinks ) const
 	return 0;
 }
 
-long CPointBase::GetPointSortIndex() const
+int CPointBase::GetPointSortIndex() const
 {
-	return( MAKELONG( m_x, m_y ));
+	return (int)MAKEDWORD( m_x, m_y );
 }
 
 //*************************************************************************
