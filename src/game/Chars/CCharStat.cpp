@@ -348,24 +348,25 @@ bool CChar::Stats_Regen(INT64 iTimeDiff)
 	// calling @RegenStat for each stat if proceed.
 	// iTimeDiff is the next tick the stats are going to regen.
 
+	int HitsHungerLoss = g_Cfg.m_iHitsHungerLoss ? g_Cfg.m_iHitsHungerLoss : 0;
 	for (STAT_TYPE i = STAT_STR; i <= STAT_FOOD; i = static_cast<STAT_TYPE>(i + 1))
 	{
 		if (g_Cfg.m_iRegenRate[i] < 0)
 			continue;
-		int iRate = Stats_GetRegenVal(i, true);
+
+		unsigned short iRate = Stats_GetRegenVal(i, true);
 		if (iRate < 0)
 			iRate = 0;
 
-		short mod = Stats_GetRegenVal(i,false);
+		m_Stat[i].m_regen += static_cast<unsigned short>(iTimeDiff);
+		if ( m_Stat[i].m_regen < iRate )
+			continue;
+
+		short mod = Stats_GetRegenVal(i, false);
 		if ((i == STAT_STR) && (g_Cfg.m_iRacialFlags & RACIALF_HUMAN_TOUGH) && IsHuman())
 			mod += 2;		// Humans always have +2 hitpoint regeneration (Tough racial trait)
 
-		m_Stat[i].m_regen += static_cast<unsigned short>(iTimeDiff);
-		if (m_Stat[i].m_regen < iRate)
-			continue;
-
 		short StatLimit = Stat_GetMax(i);
-		int HitsHungerLoss = g_Cfg.m_iHitsHungerLoss ? g_Cfg.m_iHitsHungerLoss : 0;
 
 		if (IsTrigUsed(TRIGGER_REGENSTAT))
 		{

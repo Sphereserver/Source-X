@@ -701,15 +701,11 @@ int CItem::FixWeirdness()
 	// RETURN: 0 = i can't fix this.
 
 	if ( IsType(IT_EQ_MEMORY_OBJ) && ! IsValidUID())
-	{
 		SetUID( UID_CLEAR, true );	// some cases we don't get our UID because we are created during load.
-	}
 
 	int iResultCode = CObjBase::IsWeird();
 	if ( iResultCode )
-	{
 		return( iResultCode );
-	}
 
 	CItemBase * pItemDef = Item_GetDef();
 	ASSERT(pItemDef);
@@ -732,15 +728,11 @@ int CItem::FixWeirdness()
 		// Make sure all my memories are valid !
 		if ( m_uidLink == GetUID() || m_uidLink.ObjFind() == NULL )
 		{
-			if ( m_type == IT_EQ_MEMORY_OBJ )
-			{
+			if ( m_type == IT_EQ_MEMORY_OBJ || m_type == IT_SPELL )
 				return 0; // get rid of it.	(this is not an ERROR per se)
-			}
 			if ( IsAttr(ATTR_STOLEN))
-			{
 				// The item has been laundered.
 				m_uidLink.InitUID();
-			}
 			else
 			{
 				DEBUG_ERR(("'%s' Bad Link to 0%x\n", GetName(), static_cast<DWORD>(m_uidLink)));
@@ -4878,9 +4870,10 @@ bool CItem::SetMagicLock( CChar * pCharSrc, int iSkillLevel )
 	return( true );
 }
 
-bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem )
+bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool bReflecting )
 {
 	ADDTOCALLSTACK("CItem::OnSpellEffect");
+	UNREFERENCED_PARAMETER(bReflecting);	// items are not affected by Magic Reflection
 	// A spell is cast on this item.
 	// ARGS:
 	//  iSkillLevel = 0-1000 = difficulty. may be slightly larger . how advanced is this spell (might be from a wand)
