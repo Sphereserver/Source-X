@@ -103,10 +103,10 @@ int64 ahextoi64( lpctstr pszStr ) // Convert hex string to int64
 	return val;
 }
 
-int64 power(int64 base, int64 level)
+llong power(llong base, llong level)
 {
 	double rc = pow(static_cast<double>(base), static_cast<double>(level));
-	return static_cast<int64>(rc);
+	return static_cast<llong>(rc);
 }
 
 inline bool IsCharNumeric( char & Test )
@@ -174,32 +174,32 @@ bool IsSimpleNumberString( lpctstr pszTest )
 	// string = 1 2 3, sdf, sdf sdf sdf, 123d, 123 d,
 	// number = 1.0+-\*~|&!%^()2, 0aed, 123
 
-	bool fMathSep = true;	// last non whitespace was a math sep.
-	bool fHextDigitStart = false;
-	bool fWhiteSpace = false;
+	bool fMathSep			= true;	// last non whitespace was a math sep.
+	bool fHextDigitStart	= false;
+	bool fWhiteSpace		= false;
 
 	for ( ; ; pszTest++ )
 	{
 		tchar ch = *pszTest;
 		if ( ! ch )
 		{
-			return( true );
+			return true;
 		}
 		if (( ch >= 'A' && ch <= 'F') || ( ch >= 'a' && ch <= 'f' ))	// isxdigit
 		{
 			if ( ! fHextDigitStart )
-				return( false );
+				return false;
 			fWhiteSpace = false;
 			fMathSep = false;
 			continue;
 		}
-		if ( IsSpace( ch ))
+		if ( IsSpace( ch ) )
 		{
 			fHextDigitStart = false;
 			fWhiteSpace = true;
 			continue;
 		}
-		if ( IsDigit( ch ))
+		if ( IsDigit( ch ) )
 		{
 			if ( fWhiteSpace && ! fMathSep )
 				return false;
@@ -218,7 +218,7 @@ bool IsSimpleNumberString( lpctstr pszTest )
 
 		if ( ! fMathSep )
 		{
-			return( false );
+			return false;
 		}
 		fHextDigitStart = false;
 		fWhiteSpace = false;
@@ -286,13 +286,13 @@ int Calc_GetLog2( uint iVal )
 		ASSERT( i < 32 );
 		iVal >>= 1 ;
 	}
-	return( i );
+	return i;
 }
 
 int Calc_GetRandVal( int iqty )
 {
 	if ( iqty <= 0 )
-		return( 0 );
+		return 0;
 	if ( iqty >= INT32_MAX )
 	{
 		return( IMULDIV( g_World.m_Rand.randInt(), (dword) iqty, INT32_MAX )) ;
@@ -444,9 +444,9 @@ llong CExpression::GetSingle( lpctstr & pszArgs )
 			val += ch;
 			pszArgs ++;
 		}
-		return( (llong)val );
+		return (llong)val;
 	}
-	else if ( pszArgs[0] == '.' || IsDigit(pszArgs[0]))
+	else if ( pszArgs[0] == '.' || IsDigit(pszArgs[0]) )
 	{
 		// A decminal number
 try_dec:
@@ -460,9 +460,9 @@ try_dec:
 			iVal *= 10;
 			iVal += *pszArgs - '0';
 		}
-		return( iVal );
+		return iVal;
 	}
-	else if ( ! _ISCSYMF(pszArgs[0]))
+	else if ( ! _ISCSYMF(pszArgs[0]) )
 	{
 	#pragma region maths
 		// some sort of math op ?
@@ -471,32 +471,32 @@ try_dec:
 		{
 		case '{':
 			pszArgs ++;
-			return( GetRange( pszArgs ));
+			return GetRange( pszArgs );
 		case '[':
 		case '(': // Parse out a sub expression.
 			pszArgs ++;
-			return(GetVal( pszArgs ));
+			return GetVal( pszArgs );
 		case '+':
 			pszArgs++;
 			break;
 		case '-':
 			pszArgs++;
-			return( -GetSingle( pszArgs ));
+			return -GetSingle( pszArgs );
 		case '~':	// Bitwise not.
 			pszArgs++;
-			return( ~GetSingle( pszArgs ));
+			return ~GetSingle( pszArgs );
 		case '!':	// boolean not.
 			pszArgs++;
 			if ( pszArgs[0] == '=' )  // odd condition such as (!=x) which is always true of course.
 			{
 				pszArgs++;		// so just skip it. and compare it to 0
-				return( GetSingle( pszArgs ));
+				return GetSingle( pszArgs );
 			}
-			return( !GetSingle( pszArgs ));
+			return !GetSingle( pszArgs );
 		case ';':	// seperate field.
 		case ',':	// seperate field.
 		case '\0':
-			return( 0 );
+			return 0;
 		}
 #pragma endregion maths
 	}
@@ -543,10 +543,10 @@ try_dec:
 
 						if ( pszArgs && *pszArgs )
 						{
-							int iArgument = static_cast<int>(GetVal(pszArgs));
+							llong iArgument = GetVal(pszArgs);
 							if ( iArgument <= 0 )
 							{
-								DEBUG_ERR(( "Exp_GetVal: (x)Log(%d) is %s\n", iArgument, (!iArgument) ? "infinite" : "undefined" ));
+								DEBUG_ERR(( "Exp_GetVal: (x)Log(%lld) is %s\n", iArgument, (!iArgument) ? "infinite" : "undefined" ));
 							}
 							else
 							{
@@ -608,7 +608,7 @@ try_dec:
 
 						if ( pszArgs && *pszArgs )
 						{
-							int iTosquare = static_cast<int>(GetVal(pszArgs));
+							llong iTosquare = GetVal(pszArgs);
 
 							if (iTosquare >= 0)
 							{
@@ -871,9 +871,9 @@ try_dec:
 		// Must be a symbol of some sort ?
 		llong lVal;
 		if ( m_VarGlobals.GetParseVal( pszArgs, &lVal ) )
-			return(lVal);
+			return lVal;
 		if ( m_VarDefs.GetParseVal( pszArgs, &lVal ) )
-			return(lVal);
+			return lVal;
 	}
 #pragma endregion intrinsics
 
@@ -885,10 +885,10 @@ try_dec:
 		DEBUG_ERR(("Undefined symbol '%s' ['%s']\n", szTag, orig));
 	else
 		DEBUG_ERR(("Undefined symbol '%s'\n", szTag));
-	return( 0 );
+	return 0;
 }
 
-llong CExpression::GetValMath(llong lVal, lpctstr & pExpr )
+llong CExpression::GetValMath( llong lVal, lpctstr & pExpr )
 {
 	ADDTOCALLSTACK("CExpression::GetValMath");
 	GETNONWHITESPACE(pExpr);
@@ -1057,7 +1057,7 @@ llong CExpression::GetVal( lpctstr & pExpr )
 	//	{ red_colors 1 {34 39} 1 }			// same (red_colors expands to a range)
 
 	if ( pExpr == NULL )
-		return( 0 );
+		return 0;
 
 	GETNONWHITESPACE( pExpr );
 
