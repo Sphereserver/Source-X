@@ -261,14 +261,13 @@ void CGString::FormatUVal(uint iVal)
 
 void CGString::FormatHex(dword dwVal)
 {
-	// In principle, all values in sphere logic are
-	// signed.. 
-	// If iVal is negative we MUST hexformat it as
-	// 64 bit int or reinterpreting it in a 
-	// script might completely mess up
-	llong dwVal64 = ((int)dwVal);
-	if (dwVal64 < 0)
-		return FormatLLHex(dwVal64);
+	// In principle, all values in sphere logic are signed...
+	// dwVal may contain a (signed) number "big" as the numeric representation of an unsigned ( +(INT_MAX*2) ),
+	// but in this case its bit representation would be considered as negative, yet we know it's a positive number.
+	// So if it's negative we MUST hexformat it as 64 bit int or reinterpreting it in a 
+	// script WILL completely mess up
+	if (dwVal > (dword)INT_MIN)			// if negative (remember two's complement)
+		return FormatLLHex(dwVal);
 	Format("0%x", dwVal);
 }
 
