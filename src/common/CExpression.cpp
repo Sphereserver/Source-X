@@ -105,8 +105,8 @@ int64 ahextoi64( lpctstr pszStr ) // Convert hex string to int64
 
 llong power(llong base, llong level)
 {
-	double rc = pow(static_cast<double>(base), static_cast<double>(level));
-	return (llong)(rc);
+	double rc = pow((double)base, (double)level);
+	return (llong)rc;
 }
 
 inline bool IsCharNumeric( char & Test )
@@ -557,29 +557,29 @@ try_dec:
 									iCount++; SKIP_ARGSEP(pszArgs);
 									if ( !strcmpi(pszArgs, "e") )
 									{
-										iResult = (llong)(log(static_cast<double>(iArgument)));
+										iResult = (llong)log( (double)iArgument );
 									}
 									else if ( !strcmpi(pszArgs, "pi") )
 									{
-										iResult = (llong)(log(static_cast<double>(iArgument)) / log(M_PI));
+										iResult = (llong)(log( (double)iArgument ) / log( M_PI ));
 									}
 									else
 									{
 										llong iBase = GetVal(pszArgs);
 										if ( iBase <= 0 )
 										{
-											DEBUG_ERR(( "Exp_GetVal: (%" PRId64 ")Log(%d) is %s\n", iBase, iArgument, (!iBase) ? "infinite" : "undefined" ));
+											DEBUG_ERR(( "Exp_GetVal: (%" PRId64 ")Log(%d) is %s\n", iBase, iArgument, (!iBase ? "infinite" : "undefined") ));
 											iCount = 0;
 										}
 										else
 										{
-											iResult = (llong)(log(static_cast<double>(iArgument)) / log(static_cast<double>(iBase)));
+											iResult = (llong)(log( (double)iArgument ) / log( (double)iBase ));
 										}
 									}
 								}
 								else
 								{
-									iResult = (llong)(log10(static_cast<double>(iArgument)));
+									iResult = (llong)log10( (double)iArgument );
 								}							
 							}
 						}
@@ -591,7 +591,7 @@ try_dec:
 						if ( pszArgs && *pszArgs )
 						{
 							iCount = 1;
-							iResult = (llong)(exp(static_cast<double>(GetVal(pszArgs))));
+							iResult = (llong)exp( (double)GetVal( pszArgs ) );
 						}
 						else
 						{
@@ -613,7 +613,7 @@ try_dec:
 							if (iTosquare >= 0)
 							{
 								iCount++;
-								iResult = (llong)(sqrt(static_cast<double>(iTosquare)));
+								iResult = (llong)sqrt( (double)iTosquare );
 							}
 							else
 							{
@@ -628,7 +628,7 @@ try_dec:
 						if ( pszArgs && *pszArgs )
 						{
 							iCount = 1;
-							iResult = (llong)(sin(static_cast<double>(GetVal(pszArgs))));
+							iResult = (llong)sin( (double)GetVal( pszArgs ) );
 						}
 						else
 						{
@@ -643,7 +643,7 @@ try_dec:
 						if ( pszArgs && *pszArgs )
 						{
 							iCount = 1;
-							iResult = (llong)(asin(static_cast<double>(GetVal(pszArgs))));
+							iResult = (llong)asin( (double)GetVal( pszArgs ) );
 						}
 						else
 						{
@@ -658,7 +658,7 @@ try_dec:
 						if ( pszArgs && *pszArgs )
 						{
 							iCount = 1;
-							iResult = (llong)(cos(static_cast<double>(GetVal(pszArgs))));
+							iResult = (llong)cos( (double)GetVal( pszArgs ) );
 						}
 						else
 						{
@@ -673,7 +673,7 @@ try_dec:
 						if ( pszArgs && *pszArgs )
 						{
 							iCount = 1;
-							iResult = (llong)(acos(static_cast<double>(GetVal(pszArgs))));
+							iResult = (llong)acos( (double)GetVal( pszArgs ) );
 						}
 						else
 						{
@@ -688,7 +688,7 @@ try_dec:
 						if ( pszArgs && *pszArgs )
 						{
 							iCount = 1;
-							iResult = (llong)(tan(static_cast<double>(GetVal(pszArgs))));
+							iResult = (llong)tan( (double)GetVal( pszArgs ) );
 						}
 						else
 						{
@@ -703,7 +703,7 @@ try_dec:
 						if ( pszArgs && *pszArgs )
 						{
 							iCount = 1;
-							iResult = (llong)(atan(static_cast<double>(GetVal(pszArgs))));
+							iResult = (llong)atan( (double)GetVal( pszArgs ) );
 						}
 						else
 						{
@@ -719,7 +719,7 @@ try_dec:
 						if ( iCount < 2 )
 							iResult = -1;
 						else
-							iResult = Str_IndexOf(ppCmd[0],ppCmd[1],(iCount==3)?(int)(GetVal(ppCmd[2])):0);
+							iResult = Str_IndexOf( ppCmd[0] , ppCmd[1] , (iCount==3)?(int)GetVal(ppCmd[2]):0 );
 					} break;
 
 					case INTRINSIC_STRMATCH:
@@ -753,7 +753,7 @@ try_dec:
 						if ( iCount < 2 )
 							iResult = 0;
 						else
-							iResult = Calc_GetBellCurve( (int)(GetVal( ppCmd[0] )), (int)(GetVal( ppCmd[1] )));
+							iResult = Calc_GetBellCurve( (int)GetVal( ppCmd[0] ), (int)GetVal( ppCmd[1] ) );
 					} break;
 
 					case INTRINSIC_STRASCII:
@@ -972,7 +972,7 @@ llong CExpression::GetValMath( llong lVal, lpctstr & pExpr )
 			if ( pExpr[0] == '=' )	// boolean ?
 			{
 				pExpr++;
-				lVal = ( lVal >= GetVal( pExpr ));
+				lVal = ( lVal >= GetVal( pExpr ) );
 			}
 			else if ( pExpr[0] == '>' )	// shift
 			{
@@ -981,7 +981,7 @@ llong CExpression::GetValMath( llong lVal, lpctstr & pExpr )
 			}
 			else
 			{
-				lVal = ( lVal > GetVal( pExpr ));
+				lVal = ( lVal > GetVal( pExpr ) );
 			}
 			break;
 		case '<': // boolean
@@ -989,7 +989,7 @@ llong CExpression::GetValMath( llong lVal, lpctstr & pExpr )
 			if ( pExpr[0] == '=' )	// boolean ?
 			{
 				pExpr++;
-				lVal = ( lVal <= GetVal( pExpr ));
+				lVal = ( lVal <= GetVal( pExpr ) );
 			}
 			else if ( pExpr[0] == '<' )	// shift
 			{
@@ -998,7 +998,7 @@ llong CExpression::GetValMath( llong lVal, lpctstr & pExpr )
 			}
 			else
 			{
-				lVal = ( lVal < GetVal( pExpr ));
+				lVal = ( lVal < GetVal( pExpr ) );
 			}
 			break;
 		case '!':
@@ -1006,12 +1006,12 @@ llong CExpression::GetValMath( llong lVal, lpctstr & pExpr )
 			if ( pExpr[0] != '=' )
 				break; // boolean ! is handled as a single expresion.
 			pExpr ++;
-			lVal = ( lVal != GetVal( pExpr ));
+			lVal = ( lVal != GetVal( pExpr ) );
 			break;
 		case '=': // boolean
 			while ( pExpr[0] == '=' )
 				pExpr ++;
-			lVal = ( lVal == GetVal( pExpr ));
+			lVal = ( lVal == GetVal( pExpr ) );
 			break;
 		case '@':
 			pExpr++;
