@@ -180,7 +180,7 @@ CGString CGFile::GetMergedFileName( lpctstr pszBase, lpctstr pszName ) // static
 	if ( pszBase && pszBase[0] )
 	{
 		strcpy( szFilePath, pszBase );
-		int len = static_cast<int>(strlen( szFilePath ));
+		int len = (int)(strlen( szFilePath ));
 		if (len && szFilePath[len - 1] != '\\' && szFilePath[len - 1] != '/')
 		{
 #ifdef _WIN32
@@ -376,7 +376,7 @@ dword CFileText::GetPosition() const
 {
 	// RETURN: -1 = error.
 	if ( !IsFileOpen() )
-		return static_cast<dword>(-1);
+		return (dword)(-1);
 	return ftell(m_pStream);
 }
 
@@ -387,7 +387,7 @@ dword CFileText::Read( void * pBuffer, size_t sizemax ) const
 	ASSERT(pBuffer);
 	if ( IsEOF())
 		return( 0 );	// LINUX will ASSERT if we read past end.
-	return static_cast<dword>(fread( pBuffer, 1, sizemax, m_pStream ));
+	return (dword)(fread( pBuffer, 1, sizemax, m_pStream ));
 }
 
 tchar * CFileText::ReadString( tchar * pBuffer, size_t sizemax ) const
@@ -396,7 +396,7 @@ tchar * CFileText::ReadString( tchar * pBuffer, size_t sizemax ) const
 	ASSERT(pBuffer);
 	if ( IsEOF() )
 		return NULL;	// LINUX will ASSERT if we read past end.
-	return fgets( pBuffer, static_cast<int>(sizemax), m_pStream );
+	return fgets( pBuffer, (int)(sizemax), m_pStream );
 }
 
 #ifndef _WIN32
@@ -427,7 +427,7 @@ bool CFileText::WriteString( lpctstr pStr )
 {
 	// RETURN: < 0 = failed.
 	ASSERT(pStr);
-	return Write( pStr, static_cast<dword>(strlen( pStr )) );
+	return Write( pStr, (dword)(strlen( pStr )) );
 }
 
 bool CFileText::IsEOF() const

@@ -505,7 +505,7 @@ bool IsID_Chair( ITEMID_TYPE id ) // static
 	// IT_CHAIR
 
 	// todo: consider enum values for these chairs
-	switch (static_cast<word>(id))
+	switch ((word)(id))
 	{
 		case 0x0459: // 'marble bench'
 		case 0x045a: // 'marble bench'
@@ -917,7 +917,7 @@ int CItemBase::CalculateMakeValue( int iQualityLevel ) const
 		if ( pItemDef == NULL )
 			continue;
 
-		lValue += pItemDef->GetMakeValue( iQualityLevel ) * static_cast<int>(m_BaseResources[i].GetResQty());
+		lValue += pItemDef->GetMakeValue( iQualityLevel ) * (int)(m_BaseResources[i].GetResQty());
 	}
 
 	// add some value based on the skill required to create it.
@@ -932,7 +932,7 @@ int CItemBase::CalculateMakeValue( int iQualityLevel ) const
 
 		// this is the normal skill required.
 		// if iQuality is much less than iSkillNeed then something is wrong.
-		int iSkillNeed = static_cast<int>(m_SkillMake[i].GetResQty());
+		int iSkillNeed = (int)(m_SkillMake[i].GetResQty());
 		if ( iQualityLevel < iSkillNeed )
 			iQualityLevel = iSkillNeed;
 
@@ -946,7 +946,7 @@ int CItemBase::CalculateMakeValue( int iQualityLevel ) const
 byte CItemBase::GetSpeed() const
 {
 	if (m_TagDefs.GetKey("OVERRIDE.SPEED"))
-		return static_cast<byte>(m_TagDefs.GetKeyNum("OVERRIDE.SPEED"));
+		return (byte)(m_TagDefs.GetKeyNum("OVERRIDE.SPEED"));
 	return m_speed;
 }
 
@@ -1127,7 +1127,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pCha
 					if ( i > 0 )
 						iLen += strcpylen( pszTemp+iLen, "," );
 
-					iLen += sprintf(pszTemp + iLen, "0%x", static_cast<uint>(m_flip_id[i]));
+					iLen += sprintf(pszTemp + iLen, "0%x", (uint)(m_flip_id[i]));
 					ASSERT(iLen < SCRIPT_MAX_LINE_LEN);
 				}
 				sVal = pszTemp;
@@ -1409,7 +1409,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 			SetDefNum(s.GetKey(), s.GetArgVal(), false);
 			break;
 		case IBC_MAXAMOUNT:
-			if (!SetMaxAmount(static_cast<ushort>(s.GetArgVal())))
+			if (!SetMaxAmount((ushort)(s.GetArgVal())))
 				return false;
 			break;
 		case IBC_SPEEDMODE:
@@ -1417,7 +1417,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 			if (!IsType(IT_SHIP))
 				return false;
 			CItemBaseMulti *pItemMulti = dynamic_cast<CItemBaseMulti*>(this);
-			byte speed = static_cast<uchar>(s.GetArgVal());
+			byte speed = (uchar)(s.GetArgVal());
 			if (speed > 4)
 				speed = 4;
 			else if (speed < 1)
@@ -1433,20 +1433,20 @@ bool CItemBase::r_LoadVal( CScript &s )
 				CItemBaseMulti *pItemMulti = dynamic_cast<CItemBaseMulti*>(dynamic_cast<CItemBase*>(this));
 				if (!strcmpi(pszKey, "TILES"))
 				{
-					pItemMulti->m_shipSpeed.tiles = static_cast<uchar>(s.GetArgVal());
+					pItemMulti->m_shipSpeed.tiles = (uchar)(s.GetArgVal());
 					return true;
 				}
 				else if (!strcmpi(pszKey, "PERIOD"))
 				{
-					pItemMulti->m_shipSpeed.tiles = static_cast<uchar>(s.GetArgVal());
+					pItemMulti->m_shipSpeed.tiles = (uchar)(s.GetArgVal());
 					return true;
 				}
 				int64 piVal[2];
 				size_t iQty = Str_ParseCmds(s.GetArgStr(), piVal, COUNTOF(piVal));
 				if (iQty == 2)
 				{
-					pItemMulti->m_shipSpeed.period = static_cast<uchar>(piVal[0]);
-					pItemMulti->m_shipSpeed.tiles = static_cast<uchar>(piVal[1]);
+					pItemMulti->m_shipSpeed.period = (uchar)(piVal[0]);
+					pItemMulti->m_shipSpeed.tiles = (uchar)(piVal[1]);
 					return true;
 				}
 				else
@@ -1608,7 +1608,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 			break;
 
 		case IBC_LAYER:
-			m_layer = static_cast<uchar>(s.GetArgVal());
+			m_layer = (uchar)(s.GetArgVal());
 			break;
 		case IBC_PILE:
 			break;
@@ -1619,11 +1619,11 @@ bool CItemBase::r_LoadVal( CScript &s )
 			break;
 		
 		case IBC_RESDISPDNID:
-			SetResDispDnId(static_cast<word>(g_Cfg.ResourceGetIndexType(RES_ITEMDEF, s.GetArgStr())));
+			SetResDispDnId((word)(g_Cfg.ResourceGetIndexType(RES_ITEMDEF, s.GetArgStr())));
 			break;
 
 		case IBC_SPEED:
-			m_speed = static_cast<uchar>(s.GetArgVal());
+			m_speed = (uchar)(s.GetArgVal());
 			break;
 
 		case IBC_SKILL:		// Skill to use.
@@ -1671,7 +1671,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 			// Read in the weight but it may not be decimalized correctly
 			{
 				bool fDecimal = ( strchr( s.GetArgStr(), '.' ) != NULL );
-				m_weight = static_cast<word>(s.GetArgVal());
+				m_weight = (word)(s.GetArgVal());
 				if ( ! fDecimal )
 				{
 					m_weight *= WEIGHT_UNITS;
@@ -1829,7 +1829,7 @@ void CItemBaseMulti::SetMultiRegion( tchar * pArgs )
 	if ( iQty <= 1 )
 		return;
 	m_Components.Empty();	// might be after a resync
-	m_rect.SetRect( static_cast<int>(piArgs[0]), static_cast<int>(piArgs[1]), static_cast<int>(piArgs[2]+1), static_cast<int>(piArgs[3]+1), static_cast<int>(piArgs[4]) );
+	m_rect.SetRect( (int)(piArgs[0]), (int)(piArgs[1]), (int)(piArgs[2]+1), (int)(piArgs[3]+1), (int)(piArgs[4]) );
 }
 
 bool CItemBaseMulti::AddComponent( tchar * pArgs )
@@ -1839,7 +1839,7 @@ bool CItemBaseMulti::AddComponent( tchar * pArgs )
 	size_t iQty = Str_ParseCmds( pArgs, piArgs, COUNTOF(piArgs));
 	if ( iQty <= 1 )
 		return false;
-	return AddComponent(static_cast<ITEMID_TYPE>(RES_GET_INDEX(piArgs[0])), static_cast<short>(piArgs[1]), static_cast<short>(piArgs[2]), static_cast<char>(piArgs[3]) );
+	return AddComponent(static_cast<ITEMID_TYPE>(RES_GET_INDEX(piArgs[0])), (short)(piArgs[1]), (short)(piArgs[2]), (char)(piArgs[3]) );
 }
 
 int CItemBaseMulti::GetMaxDist() const
@@ -1905,10 +1905,10 @@ bool CItemBaseMulti::r_LoadVal( CScript &s )
 		if (iQty < 1)
 			return false;
 
-		m_shipSpeed.period = static_cast<uchar>(ppArgs[0]);
+		m_shipSpeed.period = (uchar)(ppArgs[0]);
 
 		if (iQty >= 2)
-			m_shipSpeed.tiles = static_cast<uchar>(ppArgs[1]);
+			m_shipSpeed.tiles = (uchar)(ppArgs[1]);
 	} break;
 	case MLC_TSPEECH:
 		return( m_Speech.r_LoadVal( s, RES_SPEECH ));
@@ -2162,8 +2162,8 @@ word CItemBase::GetMaxAmount()
 	if (!IsStackableType())
 		return 0;
 
-	word pMax = static_cast<word>(GetDefNum("MaxAmount", false));
-	return pMax ? pMax : static_cast<word>(g_Cfg.m_iItemsMaxAmount);
+	word pMax = (word)(GetDefNum("MaxAmount", false));
+	return pMax ? pMax : (word)(g_Cfg.m_iItemsMaxAmount);
 };
 
 bool CItemBase::SetMaxAmount(word amount)

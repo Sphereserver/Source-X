@@ -24,7 +24,7 @@ CCharBase::CCharBase( CREID_TYPE id ) :
 	m_Dex = 0;
 	m_Int = 0;
 
-	m_iMoveRate = static_cast<short>(g_Cfg.m_iMoveRate);
+	m_iMoveRate = (short)(g_Cfg.m_iMoveRate);
 
 	if ( IsValidDispID(id))
 	{
@@ -114,7 +114,7 @@ void CCharBase::SetFoodType( lpctstr pszFood )
 	for ( size_t i = 0; i < m_FoodType.GetCount(); i++ )
 	{
 		if ( m_MaxFood < m_FoodType[i].GetResQty())
-			m_MaxFood = static_cast<short>(m_FoodType[i].GetResQty());
+			m_MaxFood = (short)(m_FoodType[i].GetResQty());
 	}
 }
 
@@ -279,7 +279,7 @@ bool CCharBase::r_LoadVal( CScript & s )
 			m_wBloodHue = static_cast<HUE_TYPE>(s.GetArgVal());
 			break;
 		case CBC_ARMOR:
-			m_defense = static_cast<word>(s.GetArgVal());
+			m_defense = (word)(s.GetArgVal());
 			break;
 		case CBC_COLOR:
 			m_wColor = static_cast<HUE_TYPE>(s.GetArgVal());
@@ -288,7 +288,7 @@ bool CCharBase::r_LoadVal( CScript & s )
 			m_Desires.Load( s.GetArgStr() );
 			break;
 		case CBC_DEX:
-			m_Dex = static_cast<short>(s.GetArgVal());
+			m_Dex = (short)(s.GetArgVal());
 			break;
 		case CBC_DISPID:
 			return( false );
@@ -313,22 +313,22 @@ bool CCharBase::r_LoadVal( CScript & s )
 				return SetDispID(static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType( RES_CHARDEF, s.GetArgStr())));
 			}
 		case CBC_INT:
-			m_Int = static_cast<short>(s.GetArgVal());
+			m_Int = (short)(s.GetArgVal());
 			break;
 		case CBC_MAXFOOD:
-			m_MaxFood = static_cast<short>(s.GetArgVal());
+			m_MaxFood = (short)(s.GetArgVal());
 			break;
 		case CBC_MOVERATE:
-			m_iMoveRate = static_cast<short>(s.GetArgVal());
+			m_iMoveRate = (short)(s.GetArgVal());
 			break;
 		case CBC_RESDISPDNID:
-			SetResDispDnId(static_cast<word>(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr())));
+			SetResDispDnId((word)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr())));
 			break;
 		case CBC_SOUND:
 			m_soundbase = static_cast<SOUND_TYPE>(s.GetArgVal());
 			break;
 		case CBC_STR:
-			m_Str = static_cast<short>(s.GetArgVal());
+			m_Str = (short)(s.GetArgVal());
 			break;
 		case CBC_TSPEECH:
 			return( m_Speech.r_LoadVal( s, RES_SPEECH ));
@@ -358,7 +358,7 @@ bool CCharBase::r_Load( CScript & s )
 
 	if ( !IsValidDispID(GetDispID()) )
 	{
- 		g_Log.Event(LOGL_WARN, "Char script '%s' has bad DISPID 0%x. Defaulting to 0%x.\n", GetResourceName(), GetDispID(), static_cast<int>(CREID_MAN));
+ 		g_Log.Event(LOGL_WARN, "Char script '%s' has bad DISPID 0%x. Defaulting to 0%x.\n", GetResourceName(), GetDispID(), (int)(CREID_MAN));
 		m_dwDispIndex = CREID_MAN;
 	}
 	if ( m_Can == CAN_C_INDOORS )

@@ -14,14 +14,14 @@ CItemStone * CChar::Guild_Find( MEMORY_TYPE MemType ) const
 	ADDTOCALLSTACK("CChar::Guild_Find");
 	if ( ! m_pPlayer )
 		return( NULL );
-	CItemMemory * pMyGMem = Memory_FindTypes(static_cast<word>(MemType));
+	CItemMemory * pMyGMem = Memory_FindTypes((word)(MemType));
 	if ( ! pMyGMem )
 		return( NULL );
 	CItemStone * pMyStone = dynamic_cast <CItemStone*>( pMyGMem->m_uidLink.ItemFind());
 	if ( pMyStone == NULL )
 	{
 		// Some sort of mislink ! fix it.
-		const_cast <CChar*>(this)->Memory_ClearTypes(static_cast<word>(MemType)); 	// Make them forget they were ever in this guild....again!
+		const_cast <CChar*>(this)->Memory_ClearTypes((word)(MemType)); 	// Make them forget they were ever in this guild....again!
 		return( NULL );
 	}
 	return( pMyStone );
@@ -38,7 +38,7 @@ CStoneMember * CChar::Guild_FindMember( MEMORY_TYPE MemType ) const
 	if ( pMember == NULL )
 	{
 		// Some sort of mislink ! fix it.
-		const_cast <CChar*>(this)->Memory_ClearTypes(static_cast<word>(MemType)); 	// Make them forget they were ever in this guild....again!
+		const_cast <CChar*>(this)->Memory_ClearTypes((word)(MemType)); 	// Make them forget they were ever in this guild....again!
 		return( NULL );
 	}
 	return( pMember );
@@ -413,7 +413,7 @@ bool CChar::Memory_Fight_OnTick( CItemMemory * pMemory )
 	// Attacker.Elapsed = -1 means no combat end for this attacker.
 	// g_Cfg.m_iAttackerTimeout = 0 means attackers doesnt decay. (but cleared when the attacker is killed or the char dies)
 
-	if ( GetDist(pTarg) > UO_MAP_VIEW_RADAR || ( g_Cfg.m_iAttackerTimeout != 0 && elapsed > static_cast<int64>(g_Cfg.m_iAttackerTimeout) && elapsed >= 0 ) )
+	if ( GetDist(pTarg) > UO_MAP_VIEW_RADAR || ( g_Cfg.m_iAttackerTimeout != 0 && elapsed > (int64)(g_Cfg.m_iAttackerTimeout) && elapsed >= 0 ) )
 	{
 		Memory_Fight_Retreat( pTarg, pMemory );
 	clearit:

@@ -646,7 +646,7 @@ byte CChar::GetModeFlag( const CClient *pViewer ) const
 byte CChar::GetDirFlag(bool fSquelchForwardStep) const
 {
 	// future: strongly typed enums will remove the need for this cast
-	byte dir = static_cast<byte>(m_dirFace);
+	byte dir = (byte)(m_dirFace);
 	ASSERT( dir<DIR_QTY );
 
 	if ( fSquelchForwardStep )
@@ -775,7 +775,7 @@ CItem *CChar::GetSpellbookRandom(SPELL_TYPE iSpell) const	// Retrieves a spellbo
 {
 	ADDTOCALLSTACK("CChar::GetSpellbook");
 	CItem *pBook = NULL;
-	CItem *pBooks[static_cast<int>(SKILL_QTY)];
+	CItem *pBooks[(int)(SKILL_QTY)];
 	// Search for suitable book in hands first
 	int count = 0;
 	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; i++ )
@@ -806,7 +806,7 @@ short CChar::Food_GetLevelPercent() const
 	short max	= Stat_GetMax(STAT_FOOD);
 	if ( max == 0 )
 		return 100;
-	return static_cast<short>(IMULDIV(Stat_GetVal(STAT_FOOD), 100, max));
+	return (short)(IMULDIV(Stat_GetVal(STAT_FOOD), 100, max));
 }
 
 lpctstr CChar::Food_GetLevelMessage(bool fPet, bool fHappy) const
@@ -884,7 +884,7 @@ short CChar::Food_CanEat( CObjBase *pObj ) const
 
 	size_t iRet = pCharDef->m_FoodType.FindResourceMatch(pObj);
 	if ( iRet != pCharDef->m_FoodType.BadIndex() )
-		return static_cast<short>(pCharDef->m_FoodType[iRet].GetResQty());	// how bad do i want it?
+		return (short)(pCharDef->m_FoodType[iRet].GetResQty());	// how bad do i want it?
 
 	return 0;
 }
@@ -920,16 +920,16 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 		static const CValStr sm_SkillTitles[] =
 		{
 			{ "", INT32_MIN },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NEOPHYTE),	static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NEOPHYTE", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NOVICE), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NOVICE", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_APPRENTICE), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_APPRENTICE", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_JOURNEYMAN), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_JOURNEYMAN", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_EXPERT), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_EXPERT", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ADEPT), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ADEPT", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_MASTER), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_MASTER", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_GRANDMASTER), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_GRANDMASTER", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ELDER_NINJITSU), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ELDER", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY_NINJITSU), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NEOPHYTE),	(int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NEOPHYTE", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NOVICE), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NOVICE", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_APPRENTICE), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_APPRENTICE", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_JOURNEYMAN), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_JOURNEYMAN", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_EXPERT), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_EXPERT", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ADEPT), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ADEPT", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_MASTER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_MASTER", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_GRANDMASTER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_GRANDMASTER", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ELDER_NINJITSU), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ELDER", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY_NINJITSU), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY", true)) },
 			{ NULL, INT32_MAX }
 		};
 		len = sprintf(pTemp, "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
@@ -939,16 +939,16 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 		static const CValStr sm_SkillTitles[] =
 		{
 			{ "", INT32_MIN },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NEOPHYTE),	static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NEOPHYTE", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NOVICE), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NOVICE", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_APPRENTICE), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_APPRENTICE", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_JOURNEYMAN), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_JOURNEYMAN", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_EXPERT), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_EXPERT", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ADEPT), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ADEPT", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_MASTER), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_MASTER", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_GRANDMASTER), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_GRANDMASTER", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ELDER_BUSHIDO), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ELDER", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY_BUSHIDO), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NEOPHYTE),	(int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NEOPHYTE", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NOVICE), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NOVICE", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_APPRENTICE), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_APPRENTICE", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_JOURNEYMAN), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_JOURNEYMAN", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_EXPERT), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_EXPERT", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ADEPT), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ADEPT", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_MASTER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_MASTER", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_GRANDMASTER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_GRANDMASTER", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ELDER_BUSHIDO), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ELDER", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY_BUSHIDO), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY", true)) },
 			{ NULL, INT32_MAX }
 		};
 		len = sprintf(pTemp, "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
@@ -958,16 +958,16 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 		static const CValStr sm_SkillTitles[] =
 		{
 			{ "", INT32_MIN },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NEOPHYTE),	static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NEOPHYTE", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NOVICE), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NOVICE", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_APPRENTICE), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_APPRENTICE", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_JOURNEYMAN), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_JOURNEYMAN", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_EXPERT), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_EXPERT", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ADEPT), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ADEPT", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_MASTER), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_MASTER", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_GRANDMASTER),static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_GRANDMASTER", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ELDER), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ELDER", true)) },
-			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY), static_cast<int>(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NEOPHYTE),	(int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NEOPHYTE", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_NOVICE), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_NOVICE", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_APPRENTICE), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_APPRENTICE", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_JOURNEYMAN), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_JOURNEYMAN", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_EXPERT), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_EXPERT", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ADEPT), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ADEPT", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_MASTER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_MASTER", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_GRANDMASTER),(int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_GRANDMASTER", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_ELDER), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_ELDER", true)) },
+			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY", true)) },
 			{ NULL, INT32_MAX }
 		};
 		len = sprintf(pTemp, "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
@@ -1216,7 +1216,7 @@ blocked:
 			ptTest.Move(dirTest1);
 			wBlockFlags = CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY;
 			char z = g_World.GetHeightPoint2(ptTest, wBlockFlags, true);
-			char zDiff = static_cast<char>(abs(z - ptTest.m_z));
+			char zDiff = (char)(abs(z - ptTest.m_z));
 
 			if ( (zDiff > PLAYER_HEIGHT) || (wBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR)) )		// blocked
 			{
@@ -1225,7 +1225,7 @@ blocked:
 				{
 					wBlockFlags = CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY;
 					z = g_World.GetHeightPoint2(ptTest, wBlockFlags, true);
-					zDiff = static_cast<char>(abs(z - ptTest.m_z));
+					zDiff = (char)(abs(z - ptTest.m_z));
 					if ( zDiff > PLAYER_HEIGHT )
 						goto blocked;
 
@@ -1244,7 +1244,7 @@ blocked:
 			ptSrc.Move(dir);	// NOTE: The dir is very coarse and can change slightly.
 			wBlockFlags = CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY;
 			char z = g_World.GetHeightPoint2(ptSrc, wBlockFlags, true);
-			char zDiff = static_cast<char>(abs(z - ptSrc.m_z));
+			char zDiff = (char)(abs(z - ptSrc.m_z));
 
 			if ( (zDiff > PLAYER_HEIGHT) || (wBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR)) || (iDistTry > iMaxDist) )
 				goto blocked;
@@ -1336,11 +1336,11 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 			{
 				CPointMap ptEnd = path.at(path.size() - 1);
 				if ( ptEnd.m_x != dx || ptEnd.m_y != dy || ptEnd.m_z != dz )
-					path.push_back(CPointMap(static_cast<word>(dx), static_cast<word>(dy), static_cast<char>(dz), ptSrc.m_map));
+					path.push_back(CPointMap((word)(dx), (word)(dy), (char)(dz), ptSrc.m_map));
 			}
 			else
 			{
-				path.push_back(CPointMap(static_cast<word>(dx), static_cast<word>(dy), static_cast<char>(dz), ptSrc.m_map));
+				path.push_back(CPointMap((word)(dx), (word)(dy), (char)(dz), ptSrc.m_map));
 			}
 			WARNLOS(("PATH X:%d Y:%d Z:%d\n", dx, dy, dz));
 
@@ -1744,7 +1744,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 								if ( ((wTFlags & (UFLAG1_WALL|UFLAG1_BLOCK|UFLAG2_PLATFORM)) || (pItemDef->m_Can & CAN_I_BLOCKLOS)) && !((wTFlags & UFLAG2_WINDOW) && (flags & LOS_NB_WINDOWS)) )
 								{
 									WARNLOS(("pMultiItem %0x %d,%d,%d - %d\n", pMultiItem->GetDispID(), pMultiItem->m_dx, pMultiItem->m_dy, pMultiItem->m_dz, Height));
-									min_z = static_cast<char>(pMultiItem->m_dz) + pItem->GetTopPoint().m_z;
+									min_z = (char)(pMultiItem->m_dz) + pItem->GetTopPoint().m_z;
 									max_z = minimum(Height + min_z, UO_SIZE_Z);
 									WARNLOS(("wTFlags(0%x)\n", wTFlags));
 
@@ -1819,7 +1819,7 @@ bool CChar::CanSeeItem( const CItem * pItem ) const
 		if (IsPriv(PRIV_GM))
 			return true;
 		tchar *uidCheck = Str_GetTemp();
-		sprintf(uidCheck, "SeenBy_0%x", static_cast<dword>(GetUID()));
+		sprintf(uidCheck, "SeenBy_0%x", (dword)(GetUID()));
 
 		if (!pItem->m_TagDefs.GetKeyNum(uidCheck, false))
 			return false;
@@ -2279,7 +2279,7 @@ bool CChar::IsVerticalSpace( CPointMap ptDest, bool fForceMount )
 	if ( IsPriv(PRIV_GM | PRIV_ALLMOVE) || !ptDest.IsValidPoint() )
 		return true;
 
-	word wBlockFlags = static_cast<word>(GetMoveBlockFlags());
+	word wBlockFlags = (word)(GetMoveBlockFlags());
 	if ( wBlockFlags & CAN_C_WALK )
 		wBlockFlags |= CAN_I_CLIMB;
 
@@ -2328,7 +2328,7 @@ CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, word *pwBlockFlags, DIR_
 		return NULL;
 	}
 
-	word wCan = static_cast<word>(GetMoveBlockFlags());
+	word wCan = (word)(GetMoveBlockFlags());
 	WARNWALK(("GetMoveBlockFlags() (0x%x)\n",wCan));
 	if ( !(wCan & (CAN_C_SWIM| CAN_C_WALK|CAN_C_FLY|CAN_C_RUN|CAN_C_HOVER)) )
 		return NULL;	// cannot move at all, so WTF?
@@ -2351,7 +2351,7 @@ CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, word *pwBlockFlags, DIR_
 	g_World.GetHeightPoint(ptDest, block, true);
 
 	// Pass along my results.
-	wBlockFlags = static_cast<word>(block.m_Bottom.m_dwBlockFlags);
+	wBlockFlags = (word)(block.m_Bottom.m_dwBlockFlags);
 
 	if ( block.m_Top.m_dwBlockFlags )
 	{

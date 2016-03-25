@@ -700,8 +700,8 @@ bool CClient::Event_CheckWalkBuffer()
 		return true;
 
 	// Client only allows 4 steps of walk ahead.
-	llong CurrTime = static_cast<llong>(GetTickCount());
-	int iTimeDiff = static_cast<int>((CurrTime - m_timeWalkStep) / 10);
+	llong CurrTime = (llong)(GetTickCount());
+	int iTimeDiff = (int)((CurrTime - m_timeWalkStep) / 10);
 	int iTimeMin = m_pChar->IsStatFlag(STATF_OnHorse|STATF_Hovering) ? 70 : 140; // minimum time to move 8 steps
 
 	if ( m_pChar->m_pPlayer && m_pChar->m_pPlayer->m_speedMode != 0 )
@@ -1070,7 +1070,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t it
 			CCharBase *pPetDef = CCharBase::FindCharBase( pItem->m_itFigurine.m_ID );
 			if ( pPetDef )
 			{
-				if ( !m_pChar->FollowersUpdate(pVendor, static_cast<short>(maximum(1, pPetDef->GetDefNum("FOLLOWERSLOTS", true)))) )
+				if ( !m_pChar->FollowersUpdate(pVendor, (short)(maximum(1, pPetDef->GetDefNum("FOLLOWERSLOTS", true)))) )
 				{
 					m_pChar->SysMessageDefault( DEFMSG_PETSLOTS_TRY_CONTROL );
 					return;
@@ -1101,9 +1101,9 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t it
 		}
 		else
 		{
-			int iGold = m_pChar->GetPackSafe()->ContentConsume(RESOURCE_ID(RES_TYPEDEF, IT_GOLD), static_cast<int>(costtotal), true);
+			int iGold = m_pChar->GetPackSafe()->ContentConsume(RESOURCE_ID(RES_TYPEDEF, IT_GOLD), (int)(costtotal), true);
 			if ( !g_Cfg.m_fPayFromPackOnly && iGold )
-				iGold = m_pChar->ContentConsume(RESOURCE_ID(RES_TYPEDEF, IT_GOLD), static_cast<int>(costtotal), true);
+				iGold = m_pChar->ContentConsume(RESOURCE_ID(RES_TYPEDEF, IT_GOLD), (int)(costtotal), true);
 
 			if ( iGold )
 			{
@@ -1240,13 +1240,13 @@ do_consume:
 	//	Take the gold and add it to the vendor
 	if ( !fBoss )
 	{
-		int iGold = m_pChar->GetPackSafe()->ContentConsume( RESOURCE_ID(RES_TYPEDEF,IT_GOLD), static_cast<int>(costtotal));
+		int iGold = m_pChar->GetPackSafe()->ContentConsume( RESOURCE_ID(RES_TYPEDEF,IT_GOLD), (int)(costtotal));
 		if ( !g_Cfg.m_fPayFromPackOnly && iGold)
 			m_pChar->ContentConsume( RESOURCE_ID(RES_TYPEDEF,IT_GOLD), iGold);
-			//m_pChar->ContentConsume( RESOURCE_ID(RES_TYPEDEF,IT_GOLD), static_cast<int>(costtotal));
+			//m_pChar->ContentConsume( RESOURCE_ID(RES_TYPEDEF,IT_GOLD), (int)(costtotal));
 
 
-		pVendor->GetBank()->m_itEqBankBox.m_Check_Amount += static_cast<uint>(costtotal);
+		pVendor->GetBank()->m_itEqBankBox.m_Check_Amount += (uint)(costtotal);
 	}
 
 	//	Clear the vendor display.
@@ -1343,7 +1343,7 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, size_t i
 		pBank->m_itEqBankBox.m_Check_Amount -= lPrice;
 
 		// give them the appropriate amount of gold.
-		iGold += static_cast<int>(lPrice);
+		iGold += (int)(lPrice);
 
 		// Take the items from player.
 		// Put items in vendor inventory.
@@ -2842,7 +2842,7 @@ bool CClient::xPacketFilter( const byte * pData, size_t iLen )
 		for ( size_t i = 0; i < bytes; ++i )
 		{
 			sprintf(idx, "%" FMTSIZE_T, i);
-			Args.m_VarsLocal.SetNum(idx, static_cast<int>(pData[i]));
+			Args.m_VarsLocal.SetNum(idx, (int)(pData[i]));
 		}
 
 		//	Call the filtering function
@@ -2891,7 +2891,7 @@ bool CClient::xOutPacketFilter( const byte * pData, size_t iLen )
 		for ( size_t i = 0; i < bytes; ++i )
 		{
 			sprintf(idx, "%" FMTSIZE_T, i);
-			Args.m_VarsLocal.SetNum(idx, static_cast<int>(pData[i]));
+			Args.m_VarsLocal.SetNum(idx, (int)(pData[i]));
 		}
 
 		//	Call the filtering function

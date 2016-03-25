@@ -265,13 +265,13 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 				{
 					sprintf(pszTemp1, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_1), pBank->m_itEqBankBox.m_Check_Amount);
 					sprintf(pszTemp2, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_2), pBank->m_itEqBankBox.m_Check_Amount / iWage);
-					sprintf(pszTemp3, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_3), static_cast<int>(pCont->GetCount()));
+					sprintf(pszTemp3, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_3), (int)(pCont->GetCount()));
 				}
 				else
 				{
 					sprintf(pszTemp1, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_1), pBank->m_itEqBankBox.m_Check_Amount);
 					sprintf(pszTemp2, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_4), pBank->m_itEqBankBox.m_Check_Restock, pBank->GetTimerAdjusted() / 60);
-					sprintf(pszTemp3, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_3), static_cast<int>(pCont->GetCount()));
+					sprintf(pszTemp3, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_STAT_GOLD_3), (int)(pCont->GetCount()));
 				}
 				sprintf(pszMsg, "%s %s %s", pszTemp1, pszTemp2, pszTemp3);
 			}
@@ -481,7 +481,7 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 				break;
 			if ( IsSetOF(OF_PetSlots) )
 			{
-				if ( !pCharTarg->FollowersUpdate(this, static_cast<short>(maximum(1, GetDefNum("FOLLOWERSLOTS", true, true))), true) )
+				if ( !pCharTarg->FollowersUpdate(this, (short)(maximum(1, GetDefNum("FOLLOWERSLOTS", true, true))), true) )
 				{
 					pSrc->SysMessageDefault(DEFMSG_PETSLOTS_TRY_TRANSFER);
 					break;
@@ -552,7 +552,7 @@ void CChar::NPC_PetClearOwners()
 	}
 
 	if ( pOwner && IsSetOF(OF_PetSlots) )
-		pOwner->FollowersUpdate(this, static_cast<short>(-maximum(1, GetDefNum("FOLLOWERSLOTS", true, true))));
+		pOwner->FollowersUpdate(this, (short)(-maximum(1, GetDefNum("FOLLOWERSLOTS", true, true))));
 }
 
 bool CChar::NPC_PetSetOwner( CChar * pChar )
@@ -582,7 +582,7 @@ bool CChar::NPC_PetSetOwner( CChar * pChar )
 	}
 
 	if ( IsSetOF(OF_PetSlots) )
-		pChar->FollowersUpdate(this, static_cast<short>(maximum(1, GetDefNum("FOLLOWERSLOTS", true, true))));
+		pChar->FollowersUpdate(this, (short)(maximum(1, GetDefNum("FOLLOWERSLOTS", true, true))));
 
 	return true;
 }

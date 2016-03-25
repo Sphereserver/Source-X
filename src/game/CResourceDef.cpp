@@ -76,7 +76,7 @@ bool CValueCurveDef::Load( tchar * pszDef )
 	}
 	for ( size_t i = 0; i < iQty; i++ )
 	{
-		m_aiValues[i] = static_cast<int>(Arg_piCmd[i]);
+		m_aiValues[i] = (int)(Arg_piCmd[i]);
 	}
 	return( true );
 }
@@ -132,7 +132,7 @@ int CValueCurveDef::GetLinear( int iSkillPercent ) const
 
 	int iLoVal = m_aiValues[iLoIdx];
 	int iHiVal = m_aiValues[iLoIdx + 1];
-	int iChance = iLoVal + IMULDIV( iHiVal - iLoVal, static_cast<int>(iSkillPercent), static_cast<int>(iSegSize) );
+	int iChance = iLoVal + IMULDIV( iHiVal - iLoVal, (int)(iSkillPercent), (int)(iSegSize) );
 
 	if ( iChance <= 0 )
 		return 0; // less than no chance ?
@@ -341,13 +341,13 @@ bool CSkillDef::r_LoadVal( CScript &s )
 		m_AdvRate.Load( s.GetArgStr());
 		break;
 	case SKC_BONUS_DEX: // "BONUS_DEX"
-		m_StatBonus[STAT_DEX] = static_cast<uchar>(s.GetArgVal());
+		m_StatBonus[STAT_DEX] = (uchar)(s.GetArgVal());
 		break;
 	case SKC_BONUS_INT: // "BONUS_INT"
-		m_StatBonus[STAT_INT] = static_cast<uchar>(s.GetArgVal());
+		m_StatBonus[STAT_INT] = (uchar)(s.GetArgVal());
 		break;
 	case SKC_BONUS_STR: // "BONUS_STR"
-		m_StatBonus[STAT_STR] = static_cast<uchar>(s.GetArgVal());
+		m_StatBonus[STAT_STR] = (uchar)(s.GetArgVal());
 		break;
 	case SKC_DEFNAME: // "DEFNAME"
 		return SetResourceName( s.GetArgStr());
@@ -376,16 +376,16 @@ bool CSkillDef::r_LoadVal( CScript &s )
 		m_Range = s.GetArgVal();
 		break;
 	case SKC_BONUS_STATS: // "BONUS_STATS"
-		m_StatPercent = static_cast<uchar>(s.GetArgVal());
+		m_StatPercent = (uchar)(s.GetArgVal());
 		break;
 	case SKC_STAT_DEX: // "STAT_DEX"
-		m_Stat[STAT_DEX] = static_cast<uchar>(s.GetArgVal());
+		m_Stat[STAT_DEX] = (uchar)(s.GetArgVal());
 		break;
 	case SKC_STAT_INT: // "STAT_INT"
-		m_Stat[STAT_INT] = static_cast<uchar>(s.GetArgVal());
+		m_Stat[STAT_INT] = (uchar)(s.GetArgVal());
 		break;
 	case SKC_STAT_STR: // "STAT_STR"
-		m_Stat[STAT_STR] = static_cast<uchar>(s.GetArgVal());
+		m_Stat[STAT_STR] = (uchar)(s.GetArgVal());
 		break;
 	case SKC_TITLE: // "TITLE"
 		m_sTitle = s.GetArgStr();
@@ -507,7 +507,7 @@ bool CSkillClassDef::r_LoadVal( CScript &s )
 		m_SkillSumMax = s.GetArgVal();
 		break;
 	case SCC_STATSUM:
-		m_StatSumMax = static_cast<word>(s.GetArgVal());
+		m_StatSumMax = (word)(s.GetArgVal());
 		break;
 	default:
 		{
@@ -515,14 +515,14 @@ bool CSkillClassDef::r_LoadVal( CScript &s )
 			if ( i != SKILL_NONE )
 			{
 				ASSERT( i >= 0 && static_cast<size_t>(i) < COUNTOF(m_SkillLevelMax));
-				m_SkillLevelMax[i] = static_cast<word>(s.GetArgVal());
+				m_SkillLevelMax[i] = (word)(s.GetArgVal());
 				break;
 			}
 			i = g_Cfg.FindStatKey( s.GetKey());
 			if ( i >= 0 )
 			{
 				ASSERT( static_cast<size_t>(i) < COUNTOF(m_StatMax));
-				m_StatMax[i] = static_cast<word>(s.GetArgVal());
+				m_StatMax[i] = (word)(s.GetArgVal());
 				break;
 			}
 		}
@@ -775,7 +775,7 @@ bool CSpellDef::r_LoadVal( CScript &s )
 			m_idLayer = static_cast<LAYER_TYPE>(s.GetArgVal());
 			break;
 		case SPC_MANAUSE:
-			m_wManaUse = static_cast<word>(s.GetArgVal());
+			m_wManaUse = (word)(s.GetArgVal());
 			break;
 		case SPC_NAME:
 			m_sName = s.GetArgStr();
@@ -803,7 +803,7 @@ bool CSpellDef::r_LoadVal( CScript &s )
 			m_sound = static_cast<SOUND_TYPE>(s.GetArgVal());
 			break;
 		case SPC_TITHINGUSE:
-			m_wTithingUse = static_cast<word>(s.GetArgVal());
+			m_wTithingUse = (word)(s.GetArgVal());
 			break;
 		default:
 			return( CResourceDef::r_LoadVal( s ) );
@@ -827,7 +827,7 @@ bool CSpellDef::GetPrimarySkill( int * piSkill, int * piQty ) const
 		return NULL;
 
 	if ( piQty != NULL )
-		*piQty = static_cast<int>(m_SkillReq[i].GetResQty());
+		*piQty = (int)(m_SkillReq[i].GetResQty());
 	if ( piSkill != NULL )
 		*piSkill = m_SkillReq[i].GetResIndex();
 	return (g_Cfg.GetSkillDef(static_cast<SKILL_TYPE>(m_SkillReq[i].GetResIndex())) != NULL);
@@ -871,7 +871,7 @@ int CRandGroupDef::CalcTotalWeight()
 	size_t iQty = m_Members.GetCount();
 	for ( size_t i = 0; i < iQty; i++ )
 	{
-		iTotal += static_cast<int>(m_Members[i].GetResQty());
+		iTotal += (int)(m_Members[i].GetResQty());
 	}
 	return( m_iTotalWeight = iTotal );
 }
@@ -908,7 +908,7 @@ bool CRandGroupDef::r_LoadVal( CScript &s )
 				rec.SetResourceID(
 					g_Cfg.ResourceGetID(RES_CHARDEF, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(ppCmd[0]))),
 					( iArgs > 1 && ppCmd[1][0] ) ? Exp_GetVal(ppCmd[1]) : 1 );
-				m_iTotalWeight += static_cast<int>(rec.GetResQty());
+				m_iTotalWeight += (int)(rec.GetResQty());
 				m_Members.Add(rec);
 			}
 			break;
@@ -1056,7 +1056,7 @@ size_t CRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool bTrigger ) cons
 
 		for ( i = 0; iWeight > 0 && i < iCount; i++ )
 		{
-			iWeight -= static_cast<int>(m_Members[i].GetResQty());
+			iWeight -= (int)(m_Members[i].GetResQty());
 		}
 		if ( i >= iCount && iWeight > 0 )
 			return m_Members.BadIndex();
@@ -1088,14 +1088,14 @@ size_t CRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool bTrigger ) cons
 			}
 		}
 		members.Add(i);
-		iTotalWeight += static_cast<int>(m_Members[i].GetResQty());
+		iTotalWeight += (int)(m_Members[i].GetResQty());
 	}
 	iWeight = Calc_GetRandVal( iTotalWeight ) + 1;
 	iCount = members.GetCount();
 
 	for ( i = 0; iWeight > 0 && i < iCount; i++ )
 	{
-		iWeight -= static_cast<int>(m_Members[members[i]].GetResQty());
+		iWeight -= (int)(m_Members[members[i]].GetResQty());
 	}
 	if ( i >= iCount && iWeight > 0 )
 		return m_Members.BadIndex();

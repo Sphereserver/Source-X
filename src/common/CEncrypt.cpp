@@ -1098,7 +1098,7 @@ void CCrypt::InitTwoFish()
 	reKey( &tf_key );
 
 	for ( ushort i = 0; i < TFISH_RESET; i++ )
-		tf_cipherTable[i] = static_cast<byte>(i);
+		tf_cipherTable[i] = (byte)(i);
 
 	tf_position = 0;
 

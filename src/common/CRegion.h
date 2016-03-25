@@ -188,10 +188,10 @@ public:
 	CPointBase GetCenter() const
 	{
 		CPointBase pt;
-		pt.m_x = static_cast<short>(( m_left + m_right ) / 2);
-		pt.m_y = static_cast<short>((m_top + m_bottom) / 2);
+		pt.m_x = (short)(( m_left + m_right ) / 2);
+		pt.m_y = (short)((m_top + m_bottom) / 2);
 		pt.m_z = 0;
-		pt.m_map = static_cast<uchar>(m_map);
+		pt.m_map = (uchar)(m_map);
 		return( pt );
 	}
 

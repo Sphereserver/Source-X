@@ -208,8 +208,8 @@ void CItemContainer::Trade_UpdateGold( dword platinum, dword gold )
 	int64 iMaxValue = pChar1->m_virtualGold;
 	if ( gold + (platinum * 1000000000) > iMaxValue )
 	{
-		gold = static_cast<dword>(iMaxValue % 1000000000);
-		platinum = static_cast<dword>(iMaxValue / 1000000000);
+		gold = (dword)(iMaxValue % 1000000000);
+		platinum = (dword)(iMaxValue / 1000000000);
 		bUpdateChar1 = true;
 	}
 
@@ -368,8 +368,8 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 		int tmp_MaxY = (pItemDef->m_ttContainer.m_dwMaxXY & 0xFFFF);
 		DEBUG_WARN(("Custom container gump id %d for 0%x\n", gump, GetDispID()));
 		return CPointMap(
-			static_cast<word>(tmp_MinX + Calc_GetRandVal(tmp_MaxX - tmp_MinX)),
-			static_cast<word>(tmp_MinY + Calc_GetRandVal(tmp_MaxY - tmp_MinY)),
+			(word)(tmp_MinX + Calc_GetRandVal(tmp_MaxX - tmp_MinX)),
+			(word)(tmp_MinY + Calc_GetRandVal(tmp_MaxY - tmp_MinY)),
 			0);
 	}
 
@@ -387,8 +387,8 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 	}
 
 	return CPointMap(
-		static_cast<word>(sm_ContSize[i].m_minx + Calc_GetRandVal(sm_ContSize[i].m_maxx - sm_ContSize[i].m_minx)),
-		static_cast<word>(sm_ContSize[i].m_miny + Calc_GetRandVal(sm_ContSize[i].m_maxy - sm_ContSize[i].m_miny)),
+		(word)(sm_ContSize[i].m_minx + Calc_GetRandVal(sm_ContSize[i].m_maxx - sm_ContSize[i].m_minx)),
+		(word)(sm_ContSize[i].m_miny + Calc_GetRandVal(sm_ContSize[i].m_maxy - sm_ContSize[i].m_miny)),
 		0);
 }
 
@@ -509,7 +509,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, uchar gridIndex )
 				}
 
 				pItemVend->SetPlayerVendorPrice(0);	// unpriced yet.
-				pItemVend->SetContainedLayer(static_cast<uchar>(pItem->GetAmount()));
+				pItemVend->SetContainedLayer((uchar)(pItem->GetAmount()));
 			}
 			break;
 		case IT_GAME_BOARD:
@@ -695,7 +695,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 	pTagTmp = static_cast<size_t>(GetKeyNum("OVERRIDE.MAXWEIGHT", true));
 	if ( pTagTmp )	// weightcheck does ALSO apply on backpack if tag is set!
 	{
-		if ( (GetWeight() + pItem->GetWeight()) > (static_cast<int>(pTagTmp) * WEIGHT_UNITS) )
+		if ( (GetWeight() + pItem->GetWeight()) > ((int)(pTagTmp) * WEIGHT_UNITS) )
 		{
 			pCharMsg->SysMessageDefault(DEFMSG_CONT_FULL_WEIGHT);
 			return false;
@@ -721,7 +721,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 			int iBankIMax = g_Cfg.m_iBankIMax;
 			CVarDefCont *pTagTemp = GetKey("OVERRIDE.MAXITEMS", false);
 			if ( pTagTemp )
-				iBankIMax = static_cast<int>(pTagTemp->GetValNum());
+				iBankIMax = (int)(pTagTemp->GetValNum());
 
 			if ( iBankIMax >= 0 )
 			{
@@ -744,7 +744,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 			int iBankWMax = g_Cfg.m_iBankWMax;
 			pTagTemp = GetKey("OVERRIDE.MAXWEIGHT", false);
 			if ( pTagTemp )
-				iBankWMax = static_cast<int>(pTagTemp->GetValNum()) * WEIGHT_UNITS;
+				iBankWMax = (int)(pTagTemp->GetValNum()) * WEIGHT_UNITS;
 
 			if ( iBankWMax >= 0 )
 			{

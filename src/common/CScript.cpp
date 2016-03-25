@@ -633,7 +633,7 @@ void CScript::CloseForce()
 bool CScript::SeekContext( CScriptLineContext LineContext )
 {
 	m_iLineNum = LineContext.m_iLineNum;
-	return Seek( LineContext.m_lOffset, SEEK_SET ) == static_cast<dword>(LineContext.m_lOffset);
+	return Seek( LineContext.m_lOffset, SEEK_SET ) == (dword)(LineContext.m_lOffset);
 }
 
 CScriptLineContext CScript::GetContext() const

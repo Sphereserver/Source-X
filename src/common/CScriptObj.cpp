@@ -107,7 +107,7 @@ bool CScriptTriggerArgs::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 		if (*pszTemp && IsDigit( *pszTemp ))
 		{
 			char * pEnd;
-			ushort number = static_cast<ushort>(strtol( pszTemp, &pEnd, 10 ));
+			ushort number = (ushort)(strtol( pszTemp, &pEnd, 10 ));
 			if ( number > 0 ) // Can only use 1 to 65535 as REFs
 			{
 				pszTemp = pEnd;
@@ -182,7 +182,7 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
 		if (*pszTemp && IsDigit( *pszTemp ))
 		{
 			char * pEnd;
-			ushort number = static_cast<ushort>(strtol( pszTemp, &pEnd, 10 ));
+			ushort number = (ushort)(strtol( pszTemp, &pEnd, 10 ));
 			if ( number > 0 ) // Can only use 1 to 65535 as REFs
 			{
 				pszTemp = pEnd;
@@ -374,7 +374,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsol
 		
 		if ( *pszKey == '\0' )
 		{
-			sVal.FormatVal(static_cast<int>(iQty));
+			sVal.FormatVal((int)(iQty));
 			return( true );
 		}
 
@@ -541,7 +541,7 @@ bool CScriptObj::r_Call( lpctstr pszFunction, CTextConsole * pSrc, CScriptTrigge
 			if ( g_profiler.initstate != 0xf1 )	// it is not initalised
 			{
 				memset(&g_profiler, 0, sizeof(g_profiler));
-				g_profiler.initstate = static_cast<uchar>(0xf1); // ''
+				g_profiler.initstate = (uchar)(0xf1); // ''
 			}
 			for ( pFun = g_profiler.FunctionsHead; pFun != NULL; pFun = pFun->next )
 			{
@@ -938,7 +938,7 @@ badcmd:
 			sVal.FormatLLVal( Exp_GetLLVal( pszKey ));
 			return( true );
 		case SSC_UVAL:
-			sVal.FormatULLVal(static_cast<ullong>(Exp_GetLLVal(pszKey)));
+			sVal.FormatULLVal((ullong)(Exp_GetLLVal(pszKey)));
 			return( true );
 		case SSC_FVAL:
 			{
@@ -1024,7 +1024,7 @@ badcmd:
 				if ( !pszPos )
 					sVal.FormatVal( -1 );
 				else
-					sVal.FormatVal(static_cast<int>( pszPos - pszKey ) );
+					sVal.FormatVal((int)( pszPos - pszKey ) );
 			}
 			return true;
 		case SSC_StrSub:
@@ -2017,7 +2017,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerScript( CScript & s, lpctstr pszTrigName, CTex
 		if ( g_profiler.initstate != 0xf1 )	// it is not initalised
 		{
 			memset(&g_profiler, 0, sizeof(g_profiler));
-			g_profiler.initstate = static_cast<uchar>(0xf1); // ''
+			g_profiler.initstate = (uchar)(0xf1); // ''
 		}
 
 		for ( pTrig = g_profiler.TriggersHead; pTrig != NULL; pTrig = pTrig->next )
@@ -2277,11 +2277,11 @@ jump_in:
 							if ( iCmd == SK_FORCHARLAYER )
 								iRet = pCharThis->OnCharTrigForLayerLoop(s, pSrc, pArgs, pResult, static_cast<LAYER_TYPE>(s.GetArgVal()));
 							else
-								iRet = pCharThis->OnCharTrigForMemTypeLoop(s, pSrc, pArgs, pResult, static_cast<word>(s.GetArgVal()));
+								iRet = pCharThis->OnCharTrigForMemTypeLoop(s, pSrc, pArgs, pResult, (word)(s.GetArgVal()));
 						}
 						else
 						{
-							DEBUG_ERR(( "FORCHAR[layer/memorytype] called on char 0%x (%s) without arguments.\n", static_cast<dword>(pCharThis->GetUID()), pCharThis->GetName() ));
+							DEBUG_ERR(( "FORCHAR[layer/memorytype] called on char 0%x (%s) without arguments.\n", (dword)(pCharThis->GetUID()), pCharThis->GetName() ));
 							iRet = OnTriggerRun( s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult );
 						}
 					}
@@ -3243,7 +3243,7 @@ void CFileObjContainer::ResizeContainer( size_t iNewRange )
 	}
 
 	bool bDeleting = ( iNewRange < sFileList.size() );
-	int howMuch = static_cast<int>(iNewRange) - static_cast<int>(sFileList.size());
+	int howMuch = (int)(iNewRange) - (int)(sFileList.size());
 	if ( howMuch < 0 )
 	{
 		howMuch = (-howMuch);

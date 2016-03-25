@@ -142,7 +142,7 @@ void CChar::Jail( CTextConsole * pSrc, bool fSet, int iCell )
 {
 	ADDTOCALLSTACK("CChar::Jail");
 
-	CScriptTriggerArgs Args( fSet? 1 : 0, static_cast<int64>(iCell), static_cast<int64>(0));
+	CScriptTriggerArgs Args( fSet? 1 : 0, (int64)(iCell), (int64)(0));
 
 	if ( fSet )	// set the jailed flag.
 	{
@@ -297,7 +297,7 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 			else if ( pItem->IsTypeArmor())
 			{
 				// Shield of some sort.
-				m_defense = static_cast<word>(CalcArmorDefense());
+				m_defense = (word)(CalcArmorDefense());
 				StatFlag_Set( STATF_HasShield );
 				UpdateStatsFlag();
 			}
@@ -317,7 +317,7 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 		case LAYER_SKIRT:
 		case LAYER_LEGS:
 			// If armor or clothing = change in defense rating.
-			m_defense = static_cast<word>(CalcArmorDefense());
+			m_defense = (word)(CalcArmorDefense());
 			UpdateStatsFlag();
 			break;
 
@@ -333,7 +333,7 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 		case LAYER_FLAG_Stuck:
 			StatFlag_Set( STATF_Freeze );
 			if ( IsClient() )
-				GetClient()->addBuff(BI_PARALYZE, 1075827, 1075828, static_cast<word>(pItem->GetTimerAdjusted()));
+				GetClient()->addBuff(BI_PARALYZE, 1075827, 1075828, (word)(pItem->GetTimerAdjusted()));
 			break;
 		default:
 			break;
@@ -401,7 +401,7 @@ void CChar::OnRemoveOb( CGObListRec* pObRec )	// Override this = called when rem
 			else if ( pItem->IsTypeArmor())
 			{
 				// Shield
-				m_defense = static_cast<word>(CalcArmorDefense());
+				m_defense = (word)(CalcArmorDefense());
 				StatFlag_Clear( STATF_HasShield );
 				UpdateStatsFlag();
 			}
@@ -423,7 +423,7 @@ void CChar::OnRemoveOb( CGObListRec* pObRec )	// Override this = called when rem
 		case LAYER_ROBE:		// 22 = robe over all.
 		case LAYER_SKIRT:
 		case LAYER_LEGS:
-			m_defense = static_cast<word>(CalcArmorDefense());
+			m_defense = (word)(CalcArmorDefense());
 			UpdateStatsFlag();
 			break;
 
@@ -494,27 +494,27 @@ void CChar::OnRemoveOb( CGObListRec* pObRec )	// Override this = called when rem
 				pItem->SetDefNum("HitLeechLife", pItem->GetDefNum("HitLeechLife", true) - pCursedMemory->m_itSpell.m_spelllevel, true);
 		}
 
-		short iStrengthBonus = static_cast<short>(pItem->GetDefNum("BONUSSTR", true, true));
+		short iStrengthBonus = (short)(pItem->GetDefNum("BONUSSTR", true, true));
 		if (iStrengthBonus != 0)
 			Stat_SetMod(STAT_STR, Stat_GetMod(STAT_STR) - iStrengthBonus);
 
-		short iDexterityBonus = static_cast<short>(pItem->GetDefNum("BONUSDEX", true, true));
+		short iDexterityBonus = (short)(pItem->GetDefNum("BONUSDEX", true, true));
 		if (iDexterityBonus != 0)
 			Stat_SetMod(STAT_DEX, Stat_GetMod(STAT_DEX) - iDexterityBonus);
 
-		short iIntelligenceBonus = static_cast<short>(pItem->GetDefNum("BONUSINT", true, true));
+		short iIntelligenceBonus = (short)(pItem->GetDefNum("BONUSINT", true, true));
 		if (iIntelligenceBonus != 0)
 			Stat_SetMod(STAT_INT, Stat_GetMod(STAT_INT) - iIntelligenceBonus);
 
-		short iHitpointIncrease = static_cast<short>(pItem->GetDefNum("BONUSHITS", true, true));
+		short iHitpointIncrease = (short)(pItem->GetDefNum("BONUSHITS", true, true));
 		if (iHitpointIncrease != 0)
 			Stat_SetMax(STAT_STR, Stat_GetMax(STAT_STR) - iHitpointIncrease);
 
-		short iStaminaIncrease = static_cast<short>(pItem->GetDefNum("BONUSSTAM", true, true));
+		short iStaminaIncrease = (short)(pItem->GetDefNum("BONUSSTAM", true, true));
 		if (iStaminaIncrease != 0)
 			Stat_SetMax(STAT_DEX, Stat_GetMax(STAT_DEX) - iStaminaIncrease);
 
-		short iManaIncrease = static_cast<short>(pItem->GetDefNum("BONUSMANA", true, true));
+		short iManaIncrease = (short)(pItem->GetDefNum("BONUSMANA", true, true));
 		if (iManaIncrease != 0)
 			Stat_SetMax(STAT_INT, Stat_GetMax(STAT_INT) - iManaIncrease);
 
@@ -634,7 +634,7 @@ void CChar::UnEquipAllItems( CItemContainer * pDest, bool bLeaveHands )
 					CItem *pDupe = CItem::CreateDupeItem(pItem);
 					pDest->ContentAdd(pDupe);
 					// Equip layer only matters on a corpse.
-					pDupe->SetContainedLayer(static_cast<byte>(layer));
+					pDupe->SetContainedLayer((byte)(layer));
 				}
 				continue;
 			case LAYER_DRAGGING:
@@ -658,7 +658,7 @@ void CChar::UnEquipAllItems( CItemContainer * pDest, bool bLeaveHands )
 			if ( pDest->IsType(IT_CORPSE) )
 			{
 				// Equip layer only matters on a corpse.
-				pItem->SetContainedLayer(static_cast<byte>(layer));
+				pItem->SetContainedLayer((byte)(layer));
 			}
 		}
 		else if ( pPack )
@@ -1676,7 +1676,7 @@ int CChar::ItemPickup(CItem * pItem, int amount)
 		amount = maximum(1, minimum(amount, iAmountMax));
 
 	//int iItemWeight = ( amount == iAmountMax ) ? pItem->GetWeight() : pItem->Item_GetDef()->GetWeight() * amount;
-	int iItemWeight = pItem->GetWeight(static_cast<word>(amount));
+	int iItemWeight = pItem->GetWeight((word)(amount));
 
 	// Is it too heavy to even drag ?
 	bool fDrop = false;
@@ -1999,27 +1999,27 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 			pItem->SetDefNum("HitLeechLife", pItem->GetDefNum("HitLeechLife", true) + pCursedMemory->m_itSpell.m_spelllevel, true);
 	}
 
-	short iStrengthBonus = static_cast<short>(pItem->GetDefNum("BONUSSTR", true, true));
+	short iStrengthBonus = (short)(pItem->GetDefNum("BONUSSTR", true, true));
 	if (iStrengthBonus != 0)
 		Stat_SetMod(STAT_STR, Stat_GetMod(STAT_STR) + iStrengthBonus);
 
-	short iDexterityBonus = static_cast<short>(pItem->GetDefNum("BONUSDEX", true, true));
+	short iDexterityBonus = (short)(pItem->GetDefNum("BONUSDEX", true, true));
 	if (iDexterityBonus != 0)
 		Stat_SetMod(STAT_DEX, Stat_GetMod(STAT_DEX) + iDexterityBonus);
 
-	short iIntelligenceBonus = static_cast<short>(pItem->GetDefNum("BONUSINT", true, true));
+	short iIntelligenceBonus = (short)(pItem->GetDefNum("BONUSINT", true, true));
 	if (iIntelligenceBonus != 0)
 		Stat_SetMod(STAT_INT, Stat_GetMod(STAT_INT) + iIntelligenceBonus);
 
-	short iHitpointIncrease = static_cast<short>(pItem->GetDefNum("BONUSHITS", true, true));
+	short iHitpointIncrease = (short)(pItem->GetDefNum("BONUSHITS", true, true));
 	if (iHitpointIncrease != 0)
 		Stat_SetMax(STAT_STR, Stat_GetMax(STAT_STR) + iHitpointIncrease);
 
-	short iStaminaIncrease = static_cast<short>(pItem->GetDefNum("BONUSSTAM", true, true));
+	short iStaminaIncrease = (short)(pItem->GetDefNum("BONUSSTAM", true, true));
 	if (iStaminaIncrease != 0)
 		Stat_SetMax(STAT_DEX, Stat_GetMax(STAT_DEX) + iStaminaIncrease);
 
-	short iManaIncrease = static_cast<short>(pItem->GetDefNum("BONUSMANA", true, true));
+	short iManaIncrease = (short)(pItem->GetDefNum("BONUSMANA", true, true));
 	if (iManaIncrease != 0)
 		Stat_SetMax(STAT_INT, Stat_GetMax(STAT_INT) + iManaIncrease);
 
@@ -2087,7 +2087,7 @@ void CChar::EatAnim( lpctstr pszName, short iQty )
 
 	short iHits = 0;
 	short iMana = 0;
-	short iStam = static_cast<short>( Calc_GetRandVal2(3, 6) + (iQty / 5) );
+	short iStam = (short)( Calc_GetRandVal2(3, 6) + (iQty / 5) );
 	short iFood = iQty;
 	short iStatsLimit = 0;
 	if ( IsTrigUsed(TRIGGER_EAT) )
@@ -2101,11 +2101,11 @@ void CChar::EatAnim( lpctstr pszName, short iQty )
 		if ( OnTrigger(CTRIG_Eat, this, &Args) == TRIGRET_RET_TRUE )
 			return;
 
-		iHits = static_cast<short>(Args.m_VarsLocal.GetKeyNum("Hits", true)) + Stat_GetVal(STAT_STR);
-		iMana = static_cast<short>(Args.m_VarsLocal.GetKeyNum("Mana", true)) + Stat_GetVal(STAT_INT);
-		iStam = static_cast<short>(Args.m_VarsLocal.GetKeyNum("Stam", true)) + Stat_GetVal(STAT_DEX);
-		iFood = static_cast<short>(Args.m_VarsLocal.GetKeyNum("Food", true)) + Stat_GetVal(STAT_FOOD);
-		iStatsLimit = static_cast<short>(Args.m_iN1);
+		iHits = (short)(Args.m_VarsLocal.GetKeyNum("Hits", true)) + Stat_GetVal(STAT_STR);
+		iMana = (short)(Args.m_VarsLocal.GetKeyNum("Mana", true)) + Stat_GetVal(STAT_INT);
+		iStam = (short)(Args.m_VarsLocal.GetKeyNum("Stam", true)) + Stat_GetVal(STAT_DEX);
+		iFood = (short)(Args.m_VarsLocal.GetKeyNum("Food", true)) + Stat_GetVal(STAT_FOOD);
+		iStatsLimit = (short)(Args.m_iN1);
 	}
 
 	if ( iHits )
@@ -2516,7 +2516,7 @@ bool CChar::OnTickEquip( CItem * pItem )
 					if ( args.m_iN2 < 1 ) args.m_iN2 = g_Cfg.m_iMurderDecayTime;
 				}
 
-				m_pPlayer->m_wMurders = static_cast<word>(args.m_iN1);
+				m_pPlayer->m_wMurders = (word)(args.m_iN1);
 				NotoSave_Update();
 				if ( m_pPlayer->m_wMurders == 0 ) return( false );
 				pItem->SetTimeout(args.m_iN2);	// update it's decay time.
@@ -2603,30 +2603,30 @@ bool CChar::SetPoison( int iSkill, int iTicks, CChar * pCharSrc )
 			if ( GetDist(pCharSrc) < 3 && Calc_GetRandVal(10) == 1 )
 			{
 				// Lethal poison
-				pPoison->m_itSpell.m_pattern = static_cast<byte>(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(16, 33), 100));
+				pPoison->m_itSpell.m_pattern = (byte)(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(16, 33), 100));
 				pPoison->m_itSpell.m_spelllevel = 4;
 				pPoison->m_itSpell.m_spellcharges = 80;		//1 min, 20 sec
 		}
 			else
 		{
 				// Deadly poison
-				pPoison->m_itSpell.m_pattern = static_cast<byte>(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(15, 30), 100));
+				pPoison->m_itSpell.m_pattern = (byte)(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(15, 30), 100));
 				pPoison->m_itSpell.m_spelllevel = 3;
 				pPoison->m_itSpell.m_spellcharges = 60;
 		}
 		}
 		else if ( iSkill >= 851 )
 		{
-			pPoison->m_itSpell.m_pattern = static_cast<uchar>(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(7, 15), 100));
+			pPoison->m_itSpell.m_pattern = (uchar)(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(7, 15), 100));
 			// Greater poison
-			pPoison->m_itSpell.m_pattern = static_cast<byte>(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(7, 15), 100));
+			pPoison->m_itSpell.m_pattern = (byte)(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(7, 15), 100));
 			pPoison->m_itSpell.m_spelllevel = 2;
 			pPoison->m_itSpell.m_spellcharges = 60;
 		}
 		else if ( iSkill >= 600 )
 		{
 			// Poison
-			pPoison->m_itSpell.m_pattern = static_cast<byte>(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(5, 10), 100));
+			pPoison->m_itSpell.m_pattern = (byte)(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(5, 10), 100));
 			pPoison->m_itSpell.m_spelllevel = 1;
 			pPoison->m_itSpell.m_spellcharges = 30;		}
 		else
@@ -2658,7 +2658,7 @@ bool CChar::SetPoison( int iSkill, int iTicks, CChar * pCharSrc )
 	if ( pClient && IsSetOF(OF_Buffs) )
 	{
 		pClient->removeBuff(BI_POISON);
-		pClient->addBuff(BI_POISON, 1017383, 1070722, static_cast<word>(pPoison->m_itSpell.m_spellcharges));
+		pClient->addBuff(BI_POISON, 1017383, 1070722, (word)(pPoison->m_itSpell.m_spellcharges));
 	}
 
 	SysMessageDefault(DEFMSG_JUST_BEEN_POISONED);
@@ -2825,7 +2825,7 @@ bool CChar::Death()
 
 	if ( m_pPlayer )
 	{
-		ChangeExperience(-(static_cast<int>(m_exp) / 10), pKiller);
+		ChangeExperience(-((int)(m_exp) / 10), pKiller);
 		if ( !(m_TagDefs.GetKeyNum("DEATHFLAGS", true) & DEATH_NOFAMECHANGE) )
 			Noto_Fame( -Stat_GetAdjusted(STAT_FAME)/10 );
 
@@ -3016,7 +3016,7 @@ CRegionBase * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool f
 			{
 				CScriptTriggerArgs Args(iStamReq);
 				iRet = pChar->OnTrigger(CTRIG_PersonalSpace, this, &Args);
-				iStamReq = static_cast<short>(Args.m_iN1);
+				iStamReq = (short)(Args.m_iN1);
 
 				if ( iRet == TRIGRET_RET_TRUE )
 					return NULL;
@@ -3057,10 +3057,10 @@ CRegionBase * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool f
 		// Chance to drop more stamina if running or overloaded
 		CVarDefCont * pVal = GetKey("OVERRIDE.RUNNINGPENALTY", true);
 		if ( IsStatFlag(STATF_Fly|STATF_Hovering) )
-			iWeightLoadPercent += pVal ? static_cast<int>(pVal->GetValNum()) : g_Cfg.m_iStamRunningPenalty;
+			iWeightLoadPercent += pVal ? (int)(pVal->GetValNum()) : g_Cfg.m_iStamRunningPenalty;
 
 		pVal = GetKey("OVERRIDE.STAMINALOSSATWEIGHT", true);
-		int iChanceForStamLoss = Calc_GetSCurve(iWeightLoadPercent - (pVal ? static_cast<int>(pVal->GetValNum()) : g_Cfg.m_iStaminaLossAtWeight), 10);
+		int iChanceForStamLoss = Calc_GetSCurve(iWeightLoadPercent - (pVal ? (int)(pVal->GetValNum()) : g_Cfg.m_iStaminaLossAtWeight), 10);
 		if ( iChanceForStamLoss > Calc_GetRandVal(1000) )
 			iStamReq += 1;
 
@@ -3199,7 +3199,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 				// tile that got overlapped. But Sphere doesn't use this method, so this workaround is needed.
 				if ( !bSpellHit )
 				{
-					OnSpellEffect(static_cast<SPELL_TYPE>(RES_GET_INDEX(pItem->m_itSpell.m_spell)), pItem->m_uidLink.CharFind(), static_cast<int>(pItem->m_itSpell.m_spelllevel), pItem);
+					OnSpellEffect(static_cast<SPELL_TYPE>(RES_GET_INDEX(pItem->m_itSpell.m_spell)), pItem->m_uidLink.CharFind(), (int)(pItem->m_itSpell.m_spelllevel), pItem);
 					bSpellHit = true;
 					if ( m_pNPC && fStanding )
 					{
@@ -3536,7 +3536,7 @@ bool CChar::MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart, bool bFromS
 	pt.m_z += PLAYER_HEIGHT;
 	char startZ = pt.m_z;
 
-	word wCan = static_cast<word>(GetMoveBlockFlags(true));	// CAN_C_SWIM
+	word wCan = (word)(GetMoveBlockFlags(true));	// CAN_C_SWIM
 	for ( int i=0; i<iDist; ++i )
 	{
 		if ( pt.IsValidPoint() )

@@ -84,7 +84,7 @@ bool CCharNPC::r_LoadVal( CChar * pChar, CScript &s )
 			pChar->SetDefNum(s.GetKey(), s.GetArgVal(), false );
 			break;
 		case CNC_ACTPRI:
-			m_Act_Motivation = static_cast<uchar>(s.GetArgVal());
+			m_Act_Motivation = (uchar)(s.GetArgVal());
 			break;
 		case CNC_NPC:
 			m_Brain = static_cast<NPCBRAIN_TYPE>(s.GetArgVal());
@@ -94,7 +94,7 @@ bool CCharNPC::r_LoadVal( CChar * pChar, CScript &s )
 			{
 				pChar->m_ptHome = pChar->GetTopPoint();
 			}
-			m_Home_Dist_Wander = static_cast<word>(s.GetArgVal());
+			m_Home_Dist_Wander = (word)(s.GetArgVal());
 			break;
 		case CNC_NEED:
 		case CNC_NEEDNAME:
@@ -260,7 +260,7 @@ int CCharNPC::GetNpcAiFlags( const CChar *pChar ) const
 {
 	CVarDefCont *pVar = pChar->GetKey( "OVERRIDE.NPCAI", true );
 	if (pVar != NULL)
-		return static_cast<int>(pVar->GetValNum());
+		return (int)(pVar->GetValNum());
 	return g_Cfg.m_iNpcAi;
 }
 

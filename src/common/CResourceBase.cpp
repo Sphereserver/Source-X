@@ -346,7 +346,7 @@ lpctstr CResourceBase::ResourceGetName( RESOURCE_ID_BASE rid ) const
 	ASSERT(pszTmp);
 	if ( ! rid.IsValidUID())
 	{
-		sprintf( pszTmp, "%d", static_cast<int>(rid.GetPrivateUID()) );
+		sprintf( pszTmp, "%d", (int)(rid.GetPrivateUID()) );
 	}
 	else
 	{
@@ -1868,7 +1868,7 @@ bool CResourceQtyArray::IsResourceMatchAll( CChar * pChar ) const
 	{
 		RESOURCE_ID ridtest = GetAt(i).GetResourceID();
 
-		if ( ! pChar->IsResourceMatch( ridtest, static_cast<uint>(GetAt(i).GetResQty()) ))
+		if ( ! pChar->IsResourceMatch( ridtest, (uint)(GetAt(i).GetResQty()) ))
 			return( false );
 	}
 
@@ -1973,7 +1973,7 @@ void CResourceQtyArray::WriteNames( tchar * pszArgs, size_t index ) const
 				pszArgs += sprintf( pszArgs, "%" PRId64 , iQty);
 		}
 
-		pszArgs += GetAt(i).WriteNameSingle( pszArgs, static_cast<int>(iQty) );
+		pszArgs += GetAt(i).WriteNameSingle( pszArgs, (int)(iQty) );
 	}
 	*pszArgs = '\0';
 }

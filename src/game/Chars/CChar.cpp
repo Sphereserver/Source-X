@@ -631,7 +631,7 @@ CRegionBase * CChar::GetRoom() const
 
 int CChar::GetSight() const
 {
-	return static_cast<int>(m_iVisualRange);
+	return (int)(m_iVisualRange);
 }
 
 void CChar::SetSight(byte newSight)
@@ -776,7 +776,7 @@ int CChar::FixWeirdness()
 				{
 					int iStatMax = Stat_GetLimit(static_cast<STAT_TYPE>(j));
 					if ( Stat_GetAdjusted(static_cast<STAT_TYPE>(j)) > iStatMax*g_Cfg.m_iOverSkillMultiply )
-						Stat_SetBase(static_cast<STAT_TYPE>(j), static_cast<short>(iStatMax));
+						Stat_SetBase(static_cast<STAT_TYPE>(j), (short)(iStatMax));
 				}
 			}
 		}
@@ -1199,12 +1199,12 @@ height_t CChar::GetHeight() const
 
 	char * heightDef = Str_GetTemp();
 
-	sprintf(heightDef, "height_0%x", static_cast<uint>(pCharDef->GetDispID()));
+	sprintf(heightDef, "height_0%x", (uint)(pCharDef->GetDispID()));
 	tmpHeight = static_cast<height_t>(g_Exp.m_VarDefs.GetKeyNum(heightDef));
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_0a)
 		return tmpHeight;
 
-	sprintf(heightDef, "height_%u", static_cast<uint>(pCharDef->GetDispID()));
+	sprintf(heightDef, "height_%u", (uint)(pCharDef->GetDispID()));
 	tmpHeight = static_cast<height_t>(g_Exp.m_VarDefs.GetKeyNum(heightDef));
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_10)
 		return tmpHeight;
@@ -1222,7 +1222,7 @@ CREID_TYPE CChar::GetID() const
 word CChar::GetBaseID() const
 {
 	// future: strongly typed enums will remove the need for this cast
-	return( static_cast<word>(GetID()));
+	return( (word)(GetID()));
 }
 
 CREID_TYPE CChar::GetDispID() const
@@ -1767,7 +1767,7 @@ bool CChar::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 				SKIP_SEPARATORS(pszKey);
 				return( true );
 			case CHR_MEMORYFINDTYPE:	// FInd a type of memory.
-				pRef = Memory_FindTypes(static_cast<word>(Exp_GetSingle(pszKey)));
+				pRef = Memory_FindTypes((word)(Exp_GetSingle(pszKey)));
 				SKIP_SEPARATORS(pszKey);
 				return( true );
 			case CHR_MEMORYFIND:	// Find a memory of a UID
@@ -1953,7 +1953,7 @@ do_default:
 					{
 						pszKey += 6;
 						if ( m_Act_Targ )
-							sVal.FormatHex(static_cast<dword>(m_Fight_Targ));
+							sVal.FormatHex((dword)(m_Fight_Targ));
 						else
 							sVal.FormatVal(-1);
 						return true;
@@ -2044,7 +2044,7 @@ do_default:
 				else if ( !strnicmp(pszKey, "BREATH.HUE", 10) || !strnicmp(pszKey, "BREATH.ANIM", 11) || !strnicmp(pszKey, "BREATH.TYPE", 11))
 				{
 					CVarDefCont * pVar = GetDefKey(pszKey, true);
-					sVal.FormatHex(pVar ? static_cast<dword>(pVar->GetValNum()) : 0);
+					sVal.FormatHex(pVar ? (dword)(pVar->GetValNum()) : 0);
 					return true;
 				}
 				return false;
@@ -2088,7 +2088,7 @@ do_default:
 							}
 							else if ( !strnicmp(pszKey, "ELAPSED", 7) )
 							{
-								sVal.FormatVal(static_cast<int>(refnoto.time));
+								sVal.FormatVal((int)(refnoto.time));
 								return true;
 							}
 							else if (( !strnicmp(pszKey, "UID", 3) ) || ( *pszKey == '\0' ))
@@ -2738,7 +2738,7 @@ do_default:
 				else if (iVal < INT16_MIN)
 					iVal = INT16_MIN;
 
-				Stat_SetBase(static_cast<STAT_TYPE>(i), static_cast<short>(iVal));
+				Stat_SetBase(static_cast<STAT_TYPE>(i), (short)(iVal));
 				return true;
 			}
 
@@ -2747,7 +2747,7 @@ do_default:
 				i = g_Cfg.FindStatKey( pszKey+1 );
 				if ( i >= 0 )
 				{
-					Stat_SetBase(static_cast<STAT_TYPE>(i), static_cast<short>(s.GetArgVal()));
+					Stat_SetBase(static_cast<STAT_TYPE>(i), (short)(s.GetArgVal()));
 					return true;
 				}
 			}
@@ -2756,7 +2756,7 @@ do_default:
 				i = g_Cfg.FindStatKey( pszKey+3 );
 				if ( i >= 0 )
 				{
-					Stat_SetMod(static_cast<STAT_TYPE>(i), static_cast<short>(s.GetArgVal()));
+					Stat_SetMod(static_cast<STAT_TYPE>(i), (short)(s.GetArgVal()));
 					return true;
 				}
 			}
@@ -2771,19 +2771,19 @@ do_default:
 		case CHC_REGENHITS:
 			{
 				SetDefNum(s.GetKey(), s.GetArgVal(), false);
-				UpdateRegenTimers(STAT_STR, static_cast<short>(s.GetArgVal()));
+				UpdateRegenTimers(STAT_STR, (short)(s.GetArgVal()));
 			}
 			break;
 		case CHC_REGENSTAM:
 			{
 				SetDefNum(s.GetKey(), s.GetArgVal(), false);
-				UpdateRegenTimers(STAT_DEX, static_cast<short>(s.GetArgVal()));
+				UpdateRegenTimers(STAT_DEX, (short)(s.GetArgVal()));
 			}
 			break;
 		case CHC_REGENMANA:
 			{
 				SetDefNum(s.GetKey(), s.GetArgVal(), false);
-				UpdateRegenTimers(STAT_INT, static_cast<short>(s.GetArgVal()));
+				UpdateRegenTimers(STAT_INT, (short)(s.GetArgVal()));
 			}
 			break;
 		case CHC_INCREASEHITCHANCE:
@@ -2831,16 +2831,16 @@ do_default:
 			m_wBloodHue = static_cast<HUE_TYPE>(s.GetArgVal());
 			break;
 		case CHC_MAXFOOD:
-			Stat_SetMax(STAT_FOOD, static_cast<short>(s.GetArgVal()));
+			Stat_SetMax(STAT_FOOD, (short)(s.GetArgVal()));
 			break;
 		case CHC_MAXHITS:
-			Stat_SetMax(STAT_STR, static_cast<short>(s.GetArgVal()));
+			Stat_SetMax(STAT_STR, (short)(s.GetArgVal()));
 			break;
 		case CHC_MAXMANA:
-			Stat_SetMax(STAT_INT, static_cast<short>(s.GetArgVal()));
+			Stat_SetMax(STAT_INT, (short)(s.GetArgVal()));
 			break;
 		case CHC_MAXSTAM:
-			Stat_SetMax(STAT_DEX, static_cast<short>(s.GetArgVal()));
+			Stat_SetMax(STAT_DEX, (short)(s.GetArgVal()));
 			break;
 		case CHC_ACCOUNT:
 			return SetPlayerAccount( s.GetArgStr());
@@ -3009,12 +3009,12 @@ do_default:
 			m_SpeechHue = static_cast<HUE_TYPE>(s.GetArgVal());
 			break;
 		case CHC_FOOD:
-			Stat_SetVal(STAT_FOOD, static_cast<short>(s.GetArgVal()));
+			Stat_SetVal(STAT_FOOD, (short)(s.GetArgVal()));
 			break;
 		case CHC_GOLD:
 		{
 			int currentGold = ContentCount(RESOURCE_ID(RES_TYPEDEF, IT_GOLD));
-			int newGold = static_cast<int>(s.GetArgVal());
+			int newGold = (int)(s.GetArgVal());
 
 			if ( newGold >= 0 )
 			{
@@ -3044,24 +3044,24 @@ do_default:
 		}
 		case CHC_HITPOINTS:
 		case CHC_HITS:
-			Stat_SetVal(STAT_STR, static_cast<short>(s.GetArgVal()));
+			Stat_SetVal(STAT_STR, (short)(s.GetArgVal()));
 			UpdateHitsFlag();
 			break;
 		case CHC_MANA:
-			Stat_SetVal(STAT_INT, static_cast<short>(s.GetArgVal()));
+			Stat_SetVal(STAT_INT, (short)(s.GetArgVal()));
 			UpdateManaFlag();
 			break;
 		case CHC_MODMAXWEIGHT:
-			m_ModMaxWeight = static_cast<int>(s.GetArgVal());
+			m_ModMaxWeight = (int)(s.GetArgVal());
 			UpdateStatsFlag();
 			break;
 		case CHC_STAM:
 		case CHC_STAMINA:
-			Stat_SetVal(STAT_DEX, static_cast<short>(s.GetArgVal()));
+			Stat_SetVal(STAT_DEX, (short)(s.GetArgVal()));
 			UpdateStamFlag();
 			break;
 		case CHC_STEPSTEALTH:
-			m_StepStealth =  static_cast<int>(s.GetArgVal());
+			m_StepStealth =  (int)(s.GetArgVal());
 			break;
 		case CHC_HEIGHT:
 			m_height = static_cast<height_t>(s.GetArgVal());
@@ -3116,14 +3116,14 @@ do_default:
 				if ( iArgQty < 2 )
 					return( false );
 
-				CGrayUID	uid		= static_cast<uint>(piCmd[0]);
-				dword		dwFlags	= static_cast<uint>(piCmd[1]);
+				CGrayUID	uid		= (uint)(piCmd[0]);
+				dword		dwFlags	= (uint)(piCmd[1]);
 
 				CItemMemory * pMemory = Memory_FindObj( uid );
 				if ( pMemory != NULL )
-					pMemory->SetMemoryTypes( static_cast<word>(dwFlags) );
+					pMemory->SetMemoryTypes( (word)(dwFlags) );
 				else
-					pMemory = Memory_AddObjTypes( uid, static_cast<word>(dwFlags) );
+					pMemory = Memory_AddObjTypes( uid, (word)(dwFlags) );
 			}
 			break;
 		case CHC_NIGHTSIGHT:
@@ -3194,7 +3194,7 @@ do_default:
 			m_sTitle = s.GetArgStr();
 			break;
 		case CHC_LIGHT:
-			m_LocalLight = static_cast<uchar>(s.GetArgVal());
+			m_LocalLight = (uchar)(s.GetArgVal());
 			break;
 		case CHC_EXP:
 			m_exp = s.GetArgVal();
@@ -3209,7 +3209,7 @@ do_default:
 			UpdateStatsFlag();
 			break;
 		case CHC_VISUALRANGE:
-			SetSight(static_cast<byte>(s.GetArgVal()));
+			SetSight((byte)(s.GetArgVal()));
 			break;
 		default:
 			return false;
@@ -3363,7 +3363,7 @@ bool CChar::r_Load( CScript & s ) // Load a character from script
 	int iResultCode = CObjBase::IsWeird();
 	if ( iResultCode )
 	{
-		DEBUG_ERR(( "Char 0%x Invalid, id='%s', code=0%x\n", static_cast<dword>(GetUID()), static_cast<lpctstr>(GetResourceName()), iResultCode ));
+		DEBUG_ERR(( "Char 0%x Invalid, id='%s', code=0%x\n", (dword)(GetUID()), static_cast<lpctstr>(GetResourceName()), iResultCode ));
 		Delete();
 	}
 
@@ -3452,8 +3452,8 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				int64 Arg_piCmd[3];		// Maximum parameters in one line
 				size_t Arg_Qty = Str_ParseCmds(s.GetArgRaw(), Arg_piCmd, COUNTOF(Arg_piCmd));
 				return UpdateAnimate(static_cast<ANIM_TYPE>(Arg_piCmd[0]), true, false,
-					(Arg_Qty > 1) ? static_cast<uchar>(Arg_piCmd[1]) : 1,
-					(Arg_Qty > 2) ? static_cast<uchar>(Arg_piCmd[2]) : 1);
+					(Arg_Qty > 1) ? (uchar)(Arg_piCmd[1]) : 1,
+					(Arg_Qty > 2) ? (uchar)(Arg_piCmd[2]) : 1);
 			}
 			break;
 		case CHV_ATTACK:
@@ -3728,7 +3728,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			int iTicks = iSkill / 50; 
 			int64		piCmd[2];
 			if (Str_ParseCmds(s.GetArgRaw(), piCmd, COUNTOF(piCmd)) > 1)
-				iTicks = static_cast<int>(piCmd[1]);
+				iTicks = (int)(piCmd[1]);
 
 			SetPoison(iSkill, iTicks, pSrc->GetChar());
 		}
@@ -3799,7 +3799,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 					return Spell_Resurrection( NULL, pCharSrc, true );
 			}
 		case CHV_REVEAL:
-			Reveal(static_cast<dword>(s.GetArgVal()));
+			Reveal((dword)(s.GetArgVal()));
 			break;
 		case CHV_SALUTE:	//	salute to player
 		{
@@ -4098,12 +4098,12 @@ void CChar::ChangeExperience(int delta, CChar *pCharDead)
 			args.m_pO1 = pCharDead;
 			if (OnTrigger(CTRIG_ExpChange, this, &args) == TRIGRET_RET_TRUE)
 				return;
-			delta = static_cast<int>(args.m_iN1);
+			delta = (int)(args.m_iN1);
 			bShowMsg = (args.m_iN2 != 0);
 		}
 
 		// Do not allow an underflow due to negative Exp Change.
-		if( delta < 0 && static_cast<int>(m_exp) < abs(delta) )
+		if( delta < 0 && (int)(m_exp) < abs(delta) )
 			m_exp = 0;
 		else
 			m_exp += delta;
@@ -4150,13 +4150,13 @@ void CChar::ChangeExperience(int delta, CChar *pCharDead)
 				CScriptTriggerArgs	args(delta);
 				if (OnTrigger(CTRIG_ExpLevelChange, this, &args) == TRIGRET_RET_TRUE)
 					return;
-				delta = static_cast<int>(args.m_iN1);
+				delta = (int)(args.m_iN1);
 				bShowMsg = (args.m_iN2 != 0);
 			}
 
 			level = m_level + delta;
 			// Prevent integer underflow due to negative level change
-			if( delta < 0 && abs(delta) > static_cast<int>(m_level) )
+			if( delta < 0 && abs(delta) > (int)(m_level) )
 				level = 0;
 			if (g_Cfg.m_wDebugFlags&DEBUGF_LEVEL)
 			{

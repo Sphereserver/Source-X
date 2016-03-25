@@ -102,7 +102,7 @@ lpctstr CGrayMapBlockState::GetTileName( dword dwID )	// static
 	tchar * pStr = Str_GetTemp();
 	if ( dwID < TERRAIN_QTY )
 	{
-		CGrayTerrainInfo land( static_cast<word>(dwID) );
+		CGrayTerrainInfo land( (word)(dwID) );
 		strcpy( pStr, land.m_name );
 	}
 	else
@@ -547,7 +547,7 @@ void CGrayMapBlock::Load( int bx, int by )
 				MapAddress pMapAddress = g_Install.m_UopMapAddress[mapNumber][i];
 				if (( ulBlockIndex <= pMapAddress.dwLastBlock ) && ( ulBlockIndex >= pMapAddress.dwFirstBlock ))
 				{
-					fileOffset = static_cast<uint>(pMapAddress.qwAdress + ((ulBlockIndex - pMapAddress.dwFirstBlock)*196));
+					fileOffset = (uint)(pMapAddress.qwAdress + ((ulBlockIndex - pMapAddress.dwFirstBlock)*196));
 					break;
 				}
 			}
@@ -607,7 +607,7 @@ CGrayMapBlock::CGrayMapBlock( const CPointMap & pt ) :
 }
 
 CGrayMapBlock::CGrayMapBlock(int bx, int by, int map) :
-		CPointSort(static_cast<word>(bx)* UO_BLOCK_SIZE, static_cast<word>(by) * UO_BLOCK_SIZE)
+		CPointSort((word)(bx)* UO_BLOCK_SIZE, (word)(by) * UO_BLOCK_SIZE)
 {
 	sm_iCount++;
 	m_map = map;

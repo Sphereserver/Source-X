@@ -129,7 +129,7 @@ int CChar::NPC_GetVendorMarkup( const CChar * pChar ) const
 	pVar = m_TagDefs.GetKey("VENDORMARKUP");
 	if ( pVar )
 	{
-		iHostility += static_cast<int>(pVar->GetValNum());
+		iHostility += (int)(pVar->GetValNum());
 		// add NPC's markup to hostility made by karma difference
 	}
 	else
@@ -137,7 +137,7 @@ int CChar::NPC_GetVendorMarkup( const CChar * pChar ) const
 		pVar = GetRegion()->m_TagDefs.GetKey("VENDORMARKUP");
 		if ( pVar )
 		{
-			iHostility += static_cast<int>(pVar->GetValNum());
+			iHostility += (int)(pVar->GetValNum());
 			// if NPC is unmarked, look if the region is
 		}
 		else
@@ -145,7 +145,7 @@ int CChar::NPC_GetVendorMarkup( const CChar * pChar ) const
 			// neither NPC nor REGION are marked, so look for the chardef
 			if ( pVarCharDef )
 			{
-				iHostility += static_cast<int>(pVarCharDef->GetValNum());
+				iHostility += (int)(pVarCharDef->GetValNum());
 			}
 		}
 	}
@@ -281,7 +281,7 @@ int CChar::NPC_GetTrainMax( const CChar * pStudent, SKILL_TYPE Skill ) const
 	CVarDefCont * pValue = GetKey("OVERRIDE.TRAINSKILLMAXPERCENT",true);
 	if ( pValue ) 
 	{
-		iMax = static_cast<int>(IMULDIV( pValue->GetValNum(), Skill_GetBase(Skill), 100 ));
+		iMax = (int)(IMULDIV( pValue->GetValNum(), Skill_GetBase(Skill), 100 ));
 	} else {
 		iMax = IMULDIV( g_Cfg.m_iTrainSkillPercent, Skill_GetBase(Skill), 100 );
 	}
@@ -289,7 +289,7 @@ int CChar::NPC_GetTrainMax( const CChar * pStudent, SKILL_TYPE Skill ) const
 	pValue = GetKey("OVERRIDE.TRAINSKILLMAX",true);
 	if ( pValue ) 
 	{
-		iMaxAllowed = static_cast<int>(pValue->GetValNum());
+		iMaxAllowed = (int)(pValue->GetValNum());
 	} else {
 		iMaxAllowed = g_Cfg.m_iTrainSkillMax;
 	}
@@ -400,7 +400,7 @@ int CChar::NPC_WantThisItem( CItem * pItem ) const
 	ASSERT(pCharDef != NULL);
 	size_t iRet = pCharDef->m_Desires.FindResourceMatch(pItem);
 	if ( iRet != pCharDef->m_Desires.BadIndex() )
-		return static_cast<int>(pCharDef->m_Desires[iRet].GetResQty());
+		return (int)(pCharDef->m_Desires[iRet].GetResQty());
 
 	// I'm hungry and this is food ?
 	int iFoodLevel = Food_GetLevelPercent();

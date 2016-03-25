@@ -186,7 +186,7 @@ bool PacketCreate::doCreate(NetState* net, lpctstr charname, bool bFemale, RACE_
 	size_t iQtyChars = account->m_Chars.GetCharCount();
 	if (iQtyChars >= iMaxChars)
 	{
-		client->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_MAXCHARS), static_cast<int>(iQtyChars));
+		client->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_MAXCHARS), (int)(iQtyChars));
 		if (client->GetPrivLevel() < PLEVEL_Seer)
 		{
 			client->addLoginErr(PacketLoginError::TooManyChars);
@@ -2044,7 +2044,7 @@ bool PacketGumpValueInputResponse::onReceive(NetState* net)
 			object->Update();
 		}
 
-		g_Log.Event(LOGM_GM_CMDS, "%x:'%s' tweak uid=0%x (%s) to '%s %s'=%d\n", net->id(), client->GetName(), static_cast<dword>(object->GetUID()), object->GetName(), static_cast<lpctstr>(client->m_Targ_Text), static_cast<lpctstr>(text), ret);
+		g_Log.Event(LOGM_GM_CMDS, "%x:'%s' tweak uid=0%x (%s) to '%s %s'=%d\n", net->id(), client->GetName(), (dword)(object->GetUID()), object->GetName(), static_cast<lpctstr>(client->m_Targ_Text), static_cast<lpctstr>(text), ret);
 	}
 
 	return true;
@@ -2102,7 +2102,7 @@ bool PacketSpeakReqUNICODE::onReceive(NetState* net)
 		if (toskip > (packetLength * 2))
 			return true;
 
-		skip(static_cast<int>(toskip));
+		skip((int)(toskip));
 		tchar text[MAX_TALK_BUFFER];
 		readStringNullASCII(text, COUNTOF(text));
 		client->Event_Talk(text, hue, mode, true);
@@ -2111,7 +2111,7 @@ bool PacketSpeakReqUNICODE::onReceive(NetState* net)
 	{
 		NCHAR text[MAX_TALK_BUFFER];
 		readStringUNICODE(reinterpret_cast<WCHAR *>(text), packetLength, false);
-		client->Event_TalkUNICODE(text, static_cast<int>(packetLength), hue, mode, font, language);
+		client->Event_TalkUNICODE(text, (int)(packetLength), hue, mode, font, language);
 	}
 
 	return true;
@@ -2189,7 +2189,7 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 #endif
 
 	// sanity check
-	CClient::OpenedGumpsMap_t::iterator itGumpFound = client->m_mapOpenedGumps.find(static_cast<int>(context));
+	CClient::OpenedGumpsMap_t::iterator itGumpFound = client->m_mapOpenedGumps.find((int)(context));
 	if ((itGumpFound == client->m_mapOpenedGumps.end()) || ((*itGumpFound).second <= 0))
 		return true;
 	
@@ -2269,7 +2269,7 @@ bool PacketChatCommand::onReceive(NetState* net)
 	NCHAR text[MAX_TALK_BUFFER];
 	readStringUNICODE(reinterpret_cast<WCHAR *>(text), textLength, false);
 
-	client->Event_ChatText(text, static_cast<int>(textLength), CLanguageID(language));
+	client->Event_ChatText(text, (int)(textLength), CLanguageID(language));
 	return true;
 }
 
@@ -3193,7 +3193,7 @@ bool PacketGargoyleFly::onReceive(NetState* net)
 
 	// Sending this packet here instead of calling UpdateAnimate because of conversions, NANIM_TAKEOFF = 9 and the function
 	// is reading 9 from old ANIM_TYPE to know when the character is attacking and modifying its animation accordingly
-	PacketActionBasic *cmd = new PacketActionBasic(character, character->IsStatFlag(STATF_Hovering) ? NANIM_TAKEOFF : NANIM_LANDING, static_cast<ANIM_TYPE_NEW>(0), static_cast<byte>(0));
+	PacketActionBasic *cmd = new PacketActionBasic(character, character->IsStatFlag(STATF_Hovering) ? NANIM_TAKEOFF : NANIM_LANDING, static_cast<ANIM_TYPE_NEW>(0), (byte)(0));
 	ClientIterator it;
 	for ( CClient *pClient = it.next(); pClient != NULL; pClient = it.next() )
 	{
@@ -3258,7 +3258,7 @@ bool PacketWheelBoatMove::onReceive(NetState* net)
 			if ((facing == DIR_N || facing == DIR_E || facing == DIR_S || facing == DIR_W) && pShipItem->m_itShip.m_DirFace != facing) //boat cannot face intermediate directions
 				pShipItem->Ship_Face(moving);
 
-			if (pShipItem->Ship_SetMoveDir(facing, speed, true))//pShipItem->m_itShip.m_DirMove = static_cast<byte>(facing);
+			if (pShipItem->Ship_SetMoveDir(facing, speed, true))//pShipItem->m_itShip.m_DirMove = (byte)(facing);
 				pShipItem->Ship_Move(moving, speed);
 		}
 		else
@@ -3583,13 +3583,13 @@ bool PacketHouseDesignDestroyItem::onReceive(NetState* net)
 	skip(1); // 0x00
 	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(readInt32());
 	skip(1); // 0x00
-	word x = static_cast<word>(readInt32());
+	word x = (word)(readInt32());
 	skip(1); // 0x00
-	word y = static_cast<word>(readInt32());
+	word y = (word)(readInt32());
 	skip(1); // 0x00
-	word z = static_cast<word>(readInt32());
+	word z = (word)(readInt32());
 
-	house->RemoveItem(client, id, x, y, static_cast<char>(z));
+	house->RemoveItem(client, id, x, y, (char)(z));
 	return true;
 }
 
@@ -3619,9 +3619,9 @@ bool PacketHouseDesignPlaceItem::onReceive(NetState* net)
 	skip(1); // 0x00
 	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(readInt32());
 	skip(1); // 0x00
-	word x = static_cast<word>(readInt32());
+	word x = (word)(readInt32());
 	skip(1); // 0x00
-	word y = static_cast<word>(readInt32());
+	word y = (word)(readInt32());
 
 	house->AddItem(client, id, x, y);
 	return true;
@@ -3680,9 +3680,9 @@ bool PacketHouseDesignPlaceStair::onReceive(NetState* net)
 	skip(1); // 0x00
 	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(readInt32() + ITEMID_MULTI);
 	skip(1); // 0x00
-	word x = static_cast<word>(readInt32());
+	word x = (word)(readInt32());
 	skip(1); // 0x00
-	word y = static_cast<word>(readInt32());
+	word y = (word)(readInt32());
 
 	house->AddStairs(client, id, x, y);
 	return true;
@@ -3768,7 +3768,7 @@ bool PacketHouseDesignSwitch::onReceive(NetState* net)
 	skip(1); // 0x00
 	dword level = readInt32();
 
-	house->SwitchToLevel(client, static_cast<uchar>(level));
+	house->SwitchToLevel(client, (uchar)(level));
 	return true;
 }
 
@@ -3798,13 +3798,13 @@ bool PacketHouseDesignPlaceRoof::onReceive(NetState* net)
 	skip(1); // 0x00
 	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(readInt32());
 	skip(1); // 0x00
-	word x = static_cast<word>(readInt32());
+	word x = (word)(readInt32());
 	skip(1); // 0x00
-	word y = static_cast<word>(readInt32());
+	word y = (word)(readInt32());
 	skip(1); // 0x00
-	word z = static_cast<word>(readInt32());
+	word z = (word)(readInt32());
 
-	house->AddRoof(client, id, x, y, static_cast<char>(z));
+	house->AddRoof(client, id, x, y, (char)(z));
 	return true;
 }
 
@@ -3834,13 +3834,13 @@ bool PacketHouseDesignDestroyRoof::onReceive(NetState* net)
 	skip(1); // 0x00
 	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(readInt32());
 	skip(1); // 0x00
-	word x = static_cast<word>(readInt32());
+	word x = (word)(readInt32());
 	skip(1); // 0x00
-	word y = static_cast<word>(readInt32());
+	word y = (word)(readInt32());
 	skip(1); // 0x00
-	word z = static_cast<word>(readInt32());
+	word z = (word)(readInt32());
 
-	house->RemoveRoof(client, id, x, y, static_cast<char>(z));
+	house->RemoveRoof(client, id, x, y, (char)(z));
 	return true;
 }
 

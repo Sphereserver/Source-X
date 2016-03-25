@@ -399,7 +399,7 @@ size_t CContainer::ResourceConsumePart( const CResourceQtyArray *pResources, int
 	size_t iQtyRes = pResources->GetCount();
 	for ( size_t i = 0; i < iQtyRes; i++ )
 	{
-		int iResQty = static_cast<int>(pResources->GetAt(i).GetResQty());
+		int iResQty = (int)(pResources->GetAt(i).GetResQty());
 		if ( iResQty <= 0 ) // not sure why this would be true
 			continue;
 
@@ -441,7 +441,7 @@ int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iRepli
 	int iQtyMin = INT_MAX;
 	for ( size_t i = 0; i < pResources->GetCount(); i++ )
 	{
-		int iResQty = static_cast<int>(pResources->GetAt(i).GetResQty());
+		int iResQty = (int)(pResources->GetAt(i).GetResQty());
 		if ( iResQty <= 0 ) // not sure why this would be true
 			continue;
 

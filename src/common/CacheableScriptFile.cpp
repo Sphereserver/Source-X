@@ -46,9 +46,9 @@ bool CacheableScriptFile::OpenBase(void *pExtra)
 
 		// first line may contain utf marker
 		if ( bFirstLine && nStrLen >= 3 &&
-			static_cast<uchar>(buf[0]) == 0xEF &&
-			static_cast<uchar>(buf[1]) == 0xBB &&
-			static_cast<uchar>(buf[2]) == 0xBF )
+			(uchar)(buf[0]) == 0xEF &&
+			(uchar)(buf[1]) == 0xBB &&
+			(uchar)(buf[2]) == 0xBF )
 			bUTF = true;
 
 		std::string strLine((bUTF ? &buf[3]:buf), nStrLen - (bUTF ? 3:0));
@@ -155,7 +155,7 @@ dword CacheableScriptFile::Seek(int offset, uint origin)
 	if ( linenum <= m_fileContent->size() )
 	{
 		m_currentLine = linenum;
-		return static_cast<dword>(linenum);
+		return (dword)(linenum);
 	}
 
 	return 0;
@@ -169,7 +169,7 @@ dword CacheableScriptFile::GetPosition() const
 	}
 
 	ADDTOCALLSTACK("CacheableScriptFile::GetPosition");
-	return static_cast<dword>(m_currentLine);
+	return (dword)(m_currentLine);
 }
 
 void CacheableScriptFile::dupeFrom(CacheableScriptFile *other) 

@@ -75,7 +75,7 @@ bool CItemVendable::r_LoadVal(CScript &s)
 		m_price = s.GetArgVal();
 		return true;
 	case IVC_QUALITY:	// QUALITY
-		SetQuality( static_cast<word>(s.GetArgVal()));
+		SetQuality( (word)(s.GetArgVal()));
 		return true;
 	}
 	return CItem::r_LoadVal(s);
@@ -210,7 +210,7 @@ bool CItemVendable::IsValidSaleItem( bool fBuyFromVendor ) const
 	{
 		if ( fBuyFromVendor )
 		{
-			DEBUG_ERR(( "Vendor uid=0%x selling unmovable item %s='%s'\n", static_cast<dword>(GetTopLevelObj()->GetUID()), GetResourceName(), GetName()));
+			DEBUG_ERR(( "Vendor uid=0%x selling unmovable item %s='%s'\n", (dword)(GetTopLevelObj()->GetUID()), GetResourceName(), GetName()));
 		}
 		return( false );
 	}
@@ -235,13 +235,13 @@ bool CItemVendable::IsValidNPCSaleItem() const
 
 	if ( m_price <= 0 && pItemDef->GetMakeValue(0) <= 0 )
 	{
-		DEBUG_ERR(( "Vendor uid=0%x selling unpriced item %s='%s'\n", static_cast<dword>(GetTopLevelObj()->GetUID()), GetResourceName(), GetName()));
+		DEBUG_ERR(( "Vendor uid=0%x selling unpriced item %s='%s'\n", (dword)(GetTopLevelObj()->GetUID()), GetResourceName(), GetName()));
 		return( false );
 	}
 
 	if ( ! IsValidSaleItem( true ))
 	{
-		DEBUG_ERR(( "Vendor uid=0%x selling bad item %s='%s'\n", static_cast<dword>(GetTopLevelObj()->GetUID()), GetResourceName(), GetName()));
+		DEBUG_ERR(( "Vendor uid=0%x selling bad item %s='%s'\n", (dword)(GetTopLevelObj()->GetUID()), GetResourceName(), GetName()));
 		return( false );
 	}
 

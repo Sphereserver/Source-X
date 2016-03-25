@@ -35,7 +35,7 @@ void CChar::Stat_SetMod( STAT_TYPE i, short iVal )
 			if ( OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE )
 				return;
 			// do not restore argn1 to i, bad things will happen! leave i untouched. (matex)
-			iVal = static_cast<short>(args.m_iN3);
+			iVal = (short)(args.m_iN3);
 		}
 	}
 
@@ -113,7 +113,7 @@ void CChar::Stat_SetMax( STAT_TYPE i, short iVal )
 				if ( OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE )
 					return;
 				// do not restore argn1 to i, bad things will happen! leave it untouched. (matex)
-				iVal = static_cast<short>(args.m_iN3);
+				iVal = (short)(args.m_iN3);
 			}
 		}
 		m_Stat[i].m_max = iVal;
@@ -175,9 +175,9 @@ short CChar::Stat_GetAdjusted( STAT_TYPE i ) const
 	ADDTOCALLSTACK("CChar::Stat_GetAdjusted");
 	short val = Stat_GetBase(i) + Stat_GetMod(i);
 	if ( i == STAT_KARMA )
-		val = static_cast<short>(maximum(g_Cfg.m_iMinKarma, minimum(g_Cfg.m_iMaxKarma, val)));
+		val = (short)(maximum(g_Cfg.m_iMinKarma, minimum(g_Cfg.m_iMaxKarma, val)));
 	else if ( i == STAT_FAME )
-		val = static_cast<short>(maximum(0, minimum(g_Cfg.m_iMaxFame, val)));
+		val = (short)(maximum(0, minimum(g_Cfg.m_iMaxFame, val)));
 
 	return val;
 }
@@ -216,7 +216,7 @@ void CChar::Stat_SetBase( STAT_TYPE i, short iVal )
 			if (OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE)
 				return;
 			// do not restore argn1 to i, bad things will happen! leave i untouched. (matex)
-			iVal = static_cast<short>(args.m_iN3);
+			iVal = (short)(args.m_iN3);
 
 			if (i != STAT_FOOD && m_Stat[i].m_max < 1) // MaxFood cannot depend on something, otherwise if the Stat depends on STR, INT, DEX, fire MaxHits, MaxMana, MaxStam
 			{
@@ -226,7 +226,7 @@ void CChar::Stat_SetBase( STAT_TYPE i, short iVal )
 				if (OnTrigger(CTRIG_StatChange, this, &args) == TRIGRET_RET_TRUE)
 					return;
 				// do not restore argn1 to i, bad things will happen! leave i untouched. (matex)
-				iVal = static_cast<short>(args.m_iN3);
+				iVal = (short)(args.m_iN3);
 			}
 		}
 	}
@@ -256,10 +256,10 @@ void CChar::Stat_SetBase( STAT_TYPE i, short iVal )
 		case STAT_FOOD:
 			break;
 		case STAT_KARMA:
-			iVal = static_cast<short>(maximum(g_Cfg.m_iMinKarma, minimum(g_Cfg.m_iMaxKarma, iVal)));
+			iVal = (short)(maximum(g_Cfg.m_iMinKarma, minimum(g_Cfg.m_iMaxKarma, iVal)));
 			break;
 		case STAT_FAME:
-			iVal = static_cast<short>(maximum(0, minimum(g_Cfg.m_iMaxFame, iVal)));
+			iVal = (short)(maximum(0, minimum(g_Cfg.m_iMaxFame, iVal)));
 			break;
 		default:
 			throw CGrayError(LOGL_CRIT, 0, "Stat_SetBase: index out of range");
@@ -304,14 +304,14 @@ short CChar::Stat_GetLimit( STAT_TYPE i ) const
 		if ( i == STAT_QTY )
 		{
 			pTagStorage = GetKey("OVERRIDE.STATSUM", true);
-			return pTagStorage ? (static_cast<short>(pTagStorage->GetValNum())) : static_cast<short>(pSkillClass->m_StatSumMax);
+			return pTagStorage ? ((short)(pTagStorage->GetValNum())) : (short)(pSkillClass->m_StatSumMax);
 		}
 		ASSERT( i >= 0 && i < STAT_BASE_QTY );
 
-		sprintf(sStatName, "OVERRIDE.STATCAP_%d", static_cast<int>(i));
+		sprintf(sStatName, "OVERRIDE.STATCAP_%d", (int)(i));
 		short iStatMax;
 		if ( (pTagStorage = GetKey(sStatName, true)) != NULL )
-			iStatMax = static_cast<short>(pTagStorage->GetValNum());
+			iStatMax = (short)(pTagStorage->GetValNum());
 		else
 			iStatMax = pSkillClass->m_StatMax[i];
 
@@ -328,13 +328,13 @@ short CChar::Stat_GetLimit( STAT_TYPE i ) const
 		if ( i == STAT_QTY )
 		{
 			pTagStorage = GetKey("OVERRIDE.STATSUM", true);
-			return pTagStorage ? static_cast<short>(pTagStorage->GetValNum()) : 300;
+			return pTagStorage ? (short)(pTagStorage->GetValNum()) : 300;
 		}
 
 		short iStatMax = 100;
-		sprintf(sStatName, "OVERRIDE.STATCAP_%d", static_cast<int>(i));
+		sprintf(sStatName, "OVERRIDE.STATCAP_%d", (int)(i));
 		if ( (pTagStorage = GetKey(sStatName, true)) != NULL )
-			iStatMax = static_cast<short>(pTagStorage->GetValNum());
+			iStatMax = (short)(pTagStorage->GetValNum());
 
 		return( iStatMax );
 	}
@@ -358,7 +358,7 @@ bool CChar::Stats_Regen(int64 iTimeDiff)
 		if (iRate < 0)
 			iRate = 0;
 
-		m_Stat[i].m_regen += static_cast<short>(iTimeDiff);
+		m_Stat[i].m_regen += (short)(iTimeDiff);
 		if ( m_Stat[i].m_regen < iRate )
 			continue;
 
@@ -388,10 +388,10 @@ bool CChar::Stats_Regen(int64 iTimeDiff)
 				i = STAT_STR;
 			else if (i > STAT_FOOD)
 				i = STAT_FOOD;
-			mod = static_cast<short>(Args.m_VarsLocal.GetKeyNum("Value", true));
-			StatLimit = static_cast<ushort>(Args.m_VarsLocal.GetKeyNum("StatLimit", true));
+			mod = (short)(Args.m_VarsLocal.GetKeyNum("Value", true));
+			StatLimit = (ushort)(Args.m_VarsLocal.GetKeyNum("StatLimit", true));
 			if (i == STAT_FOOD)
-				HitsHungerLoss = static_cast<int>(Args.m_VarsLocal.GetKeyNum("HitsHungerLoss", true));
+				HitsHungerLoss = (int)(Args.m_VarsLocal.GetKeyNum("HitsHungerLoss", true));
 		}
 		if (mod == 0)
 			continue;
@@ -437,16 +437,16 @@ ushort CChar::Stats_GetRegenVal(STAT_TYPE iStat, bool bGetTicks)
 		if ( bGetTicks )
 		{
 			sprintf(sRegen, "REGEN%s", stat);
-			ushort iRate = static_cast<ushort>( GetDefNum(sRegen, true) ) * TICK_PER_SEC;
+			ushort iRate = (ushort)( GetDefNum(sRegen, true) ) * TICK_PER_SEC;
 			if ( iRate )
 				return maximum(0, iRate);
 
-			return static_cast<ushort>(maximum(0, g_Cfg.m_iRegenRate[iStat]));
+			return (ushort)(maximum(0, g_Cfg.m_iRegenRate[iStat]));
 		}
 		else
 		{
 			sprintf(sRegen, "REGENVAL%s", stat);
-			return static_cast<ushort>(maximum(1, GetDefNum(sRegen, true)));
+			return (ushort)(maximum(1, GetDefNum(sRegen, true)));
 		}
 	}
 	return 0;
@@ -521,7 +521,7 @@ bool CChar::Stat_Decrease(STAT_TYPE stat, SKILL_TYPE skill)
 		short iStatVal = Stat_GetBase(static_cast<STAT_TYPE>(imin));
 		if ( iStatVal > 10 )
 		{
-			Stat_SetBase(static_cast<STAT_TYPE>(imin), static_cast<short>(iStatVal - 1));
+			Stat_SetBase(static_cast<STAT_TYPE>(imin), (short)(iStatVal - 1));
 			return true;
 		}
 	}

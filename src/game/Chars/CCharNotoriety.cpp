@@ -352,7 +352,7 @@ bool CChar::Noto_Criminal( CChar * pChar )
 		if ( OnTrigger(CTRIG_Criminal, this, &Args) == TRIGRET_RET_TRUE )
 			return false;
 
-		decay = static_cast<int>(Args.m_iN1);
+		decay = (int)(Args.m_iN1);
 	}
 
 	if ( !IsStatFlag(STATF_Criminal) )
@@ -429,7 +429,7 @@ void CChar::Noto_Fame( int iFameChange )
 
 		if ( retType == TRIGRET_RET_TRUE )
 			return;
-		iFameChange = static_cast<int>(Args.m_iN1);
+		iFameChange = (int)(Args.m_iN1);
 	}
 
 	if ( ! iFameChange )
@@ -437,7 +437,7 @@ void CChar::Noto_Fame( int iFameChange )
 
 	iFame += iFameChange;
 	Noto_ChangeDeltaMsg( iFame - Stat_GetAdjusted(STAT_FAME), g_Cfg.GetDefaultMsg( DEFMSG_NOTO_FAME ) );
-	Stat_SetBase(STAT_FAME, static_cast<short>(iFame));
+	Stat_SetBase(STAT_FAME, (short)(iFame));
 }
 
 void CChar::Noto_Karma( int iKarmaChange, int iBottom, bool bMessage )
@@ -467,7 +467,7 @@ void CChar::Noto_Karma( int iKarmaChange, int iBottom, bool bMessage )
 
 		if ( retType == TRIGRET_RET_TRUE )
 			return;
-		iKarmaChange = static_cast<int>(Args.m_iN1);
+		iKarmaChange = (int)(Args.m_iN1);
 	}
 
 	if ( ! iKarmaChange )
@@ -475,7 +475,7 @@ void CChar::Noto_Karma( int iKarmaChange, int iBottom, bool bMessage )
 
 	iKarma += iKarmaChange;
 	Noto_ChangeDeltaMsg( iKarma - Stat_GetAdjusted(STAT_KARMA), g_Cfg.GetDefaultMsg( DEFMSG_NOTO_KARMA ) );
-	Stat_SetBase(STAT_KARMA, static_cast<short>(iKarma));
+	Stat_SetBase(STAT_KARMA, (short)(iKarma));
 	NotoSave_Update();
 	if ( bMessage == true )
 	{
@@ -528,7 +528,7 @@ void CChar::Noto_Kill(CChar * pKill, bool fPetKill, int iTotalKillers)
 					args.m_iN1 = 0;
 			}
 
-			m_pPlayer->m_wMurders = static_cast<word>(args.m_iN1);
+			m_pPlayer->m_wMurders = (word)(args.m_iN1);
 			NotoSave_Update();
 			if ( args.m_iN2 )
 				Noto_Criminal();
@@ -582,7 +582,7 @@ void CChar::Noto_Kill(CChar * pKill, bool fPetKill, int iTotalKillers)
 int CChar::NotoSave() 
 { 
 	ADDTOCALLSTACK("CChar::NotoSave");
-	return static_cast<int>(m_notoSaves.size());
+	return (int)(m_notoSaves.size());
 }
 void CChar::NotoSave_Add( CChar * pChar, NOTO_TYPE value, NOTO_TYPE color  )
 {
@@ -621,7 +621,7 @@ NOTO_TYPE CChar::NotoSave_GetValue( int id, bool bGetColor )
 		return NOTO_INVALID;
 	if ( id < 0 )
 		return NOTO_INVALID;
-	if ( static_cast<int>(m_notoSaves.size()) <= id )
+	if ( (int)(m_notoSaves.size()) <= id )
 		return NOTO_INVALID;
 	NotoSaves & refNotoSave = m_notoSaves.at(id);
 	if (bGetColor && refNotoSave.color != 0 )	// retrieving color if requested... only if a color is greater than 0 (to avoid possible crashes).
@@ -637,7 +637,7 @@ int64 CChar::NotoSave_GetTime( int id )
 		return -1;
 	if ( id < 0 )
 		return NOTO_INVALID;
-	if ( static_cast<int>(m_notoSaves.size()) <= id )
+	if ( (int)(m_notoSaves.size()) <= id )
 		return -1;
 	NotoSaves & refNotoSave = m_notoSaves.at(id);
 	return refNotoSave.time;
@@ -685,7 +685,7 @@ void CChar::NotoSave_Resend( int id )
 	ADDTOCALLSTACK("CChar::NotoSave_Resend()");
 	if ( !m_notoSaves.size() )
 		return;
-	if ( static_cast<int>(m_notoSaves.size()) <= id )
+	if ( (int)(m_notoSaves.size()) <= id )
 		return;
 	NotoSaves & refNotoSave = m_notoSaves.at( id );
 	CGrayUID uid = refNotoSave.charUID;
@@ -710,7 +710,7 @@ int CChar::NotoSave_GetID( CChar * pChar )
 		{
 			NotoSaves & refNotoSave = m_notoSaves.at(count);
 			CGrayUID uid = refNotoSave.charUID;
-			if ( uid.CharFind() && uid == static_cast<dword>(pChar->GetUID()) )
+			if ( uid.CharFind() && uid == (dword)(pChar->GetUID()) )
 				return count;
 			count++;
 		}
@@ -730,7 +730,7 @@ bool CChar::NotoSave_Delete( CChar * pChar )
 		{
 			NotoSaves & refNotoSave = m_notoSaves.at(count);
 			CGrayUID uid = refNotoSave.charUID;
-			if ( uid.CharFind() && uid == static_cast<dword>(pChar->GetUID()) )
+			if ( uid.CharFind() && uid == (dword)(pChar->GetUID()) )
 			{
 				m_notoSaves.erase(it);
 				return true;

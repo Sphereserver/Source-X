@@ -45,7 +45,7 @@ public:
 	inline static void fastDigest( char * digest, const char * message )
 	{
 		CMD5 ctx;
-		ctx.update( reinterpret_cast<const uchar *>(message), static_cast<uint>(strlen( message ) ));
+		ctx.update( reinterpret_cast<const uchar *>(message), (uint)(strlen( message ) ));
 		ctx.finalize();
 		ctx.digest( digest );
 	}

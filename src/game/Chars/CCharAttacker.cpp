@@ -74,7 +74,7 @@ int64 CChar::Attacker_GetDam( int id)
 	ADDTOCALLSTACK("CChar::Attacker_GetDam");
 	if ( ! m_lastAttackers.size() )
 		return -1;
-	if (  static_cast<int>(m_lastAttackers.size()) <= id )
+	if (  (int)(m_lastAttackers.size()) <= id )
 		return -1;
 	LastAttackers & refAttacker = m_lastAttackers.at(id);
 	return refAttacker.amountDone;
@@ -86,7 +86,7 @@ int64 CChar::Attacker_GetElapsed( int id)
 	ADDTOCALLSTACK("CChar::Attacker_GetElapsed");
 	if ( ! m_lastAttackers.size() )
 		return -1;
-	if ( static_cast<int>(m_lastAttackers.size()) <= id )
+	if ( (int)(m_lastAttackers.size()) <= id )
 		return -1;
 	if ( id < 0 )
 		return -1;
@@ -100,7 +100,7 @@ int64 CChar::Attacker_GetThreat( int id)
 	ADDTOCALLSTACK("CChar::Attacker_GetThreat");
 	if ( ! m_lastAttackers.size() )
 		return -1;
-	if ( static_cast<int>(m_lastAttackers.size()) <= id )
+	if ( (int)(m_lastAttackers.size()) <= id )
 		return -1;
 	LastAttackers & refAttacker = m_lastAttackers.at(id);
 	return refAttacker.threat ? refAttacker.threat : 0;
@@ -157,7 +157,7 @@ void CChar::Attacker_SetElapsed( int pChar, int64 value)
 		return;
 	if ( ! m_lastAttackers.size() )
 		return;
-	if ( static_cast<int>(m_lastAttackers.size()) <= pChar )
+	if ( (int)(m_lastAttackers.size()) <= pChar )
 		return;
 	LastAttackers & refAttacker = m_lastAttackers.at( pChar );
 	refAttacker.elapsed = value;
@@ -180,7 +180,7 @@ void CChar::Attacker_SetDam( int pChar, int64 value)
 		return;
 	if ( ! m_lastAttackers.size() )
 		return;
-	if ( static_cast<int>(m_lastAttackers.size()) <= pChar )
+	if ( (int)(m_lastAttackers.size()) <= pChar )
 		return;
 	LastAttackers & refAttacker = m_lastAttackers.at( pChar );
 	refAttacker.amountDone = value;
@@ -204,7 +204,7 @@ void CChar::Attacker_SetThreat(int pChar, int64 value)
 		return;
 	if (!m_lastAttackers.size())
 		return;
-	if (static_cast<int>(m_lastAttackers.size()) <= pChar)
+	if ((int)(m_lastAttackers.size()) <= pChar)
 		return;
 	LastAttackers & refAttacker = m_lastAttackers.at(pChar);
 	refAttacker.threat = value;
@@ -226,7 +226,7 @@ void CChar::Attacker_SetIgnore(int pChar, bool fIgnore)
 		return;
 	if (!m_lastAttackers.size())
 		return;
-	if (static_cast<int>(m_lastAttackers.size()) <= pChar)
+	if ((int)(m_lastAttackers.size()) <= pChar)
 		return;
 	LastAttackers & refAttacker = m_lastAttackers.at(pChar);
 	refAttacker.ignore = fIgnore;
@@ -245,7 +245,7 @@ bool CChar::Attacker_GetIgnore(int id)
 	ADDTOCALLSTACK("CChar::Attacker_GetIgnore(int)");
 	if (!m_lastAttackers.size())
 		return false;
-	if (static_cast<int>(m_lastAttackers.size()) <= id)
+	if ((int)(m_lastAttackers.size()) <= id)
 		return false;
 	if (id < 0)
 		return false;
@@ -311,7 +311,7 @@ CChar * CChar::Attacker_GetUID( int index )
 	ADDTOCALLSTACK("CChar::Attacker_GetUID");
 	if ( ! m_lastAttackers.size() )
 		return NULL;
-	if ( static_cast<int>(m_lastAttackers.size()) <= index )
+	if ( (int)(m_lastAttackers.size()) <= index )
 		return NULL;
 	LastAttackers & refAttacker = m_lastAttackers.at(index);
 	CChar * pChar = static_cast<CChar*>( static_cast<CGrayUID>( refAttacker.charUID ).CharFind() );
@@ -322,7 +322,7 @@ CChar * CChar::Attacker_GetUID( int index )
 bool CChar::Attacker_Delete( int index, bool bForced, ATTACKER_CLEAR_TYPE type )
 {
 	ADDTOCALLSTACK("CChar::Attacker_Delete(int)");
-	if ( !m_lastAttackers.size() || index < 0 || static_cast<int>(m_lastAttackers.size()) <= index )
+	if ( !m_lastAttackers.size() || index < 0 || (int)(m_lastAttackers.size()) <= index )
 		return false;
 
 	LastAttackers &refAttacker = m_lastAttackers.at(index);
@@ -334,7 +334,7 @@ bool CChar::Attacker_Delete( int index, bool bForced, ATTACKER_CLEAR_TYPE type )
 	{
 		CScriptTriggerArgs Args;
 		Args.m_iN1 = 0;
-		Args.m_iN2 = static_cast<int>(type);
+		Args.m_iN2 = (int)(type);
 		TRIGRET_TYPE tRet = OnTrigger(CTRIG_CombatDelete,pChar,&Args);
 		if ( tRet == TRIGRET_RET_TRUE || Args.m_iN1 == 1 )
 			return false;
@@ -374,7 +374,7 @@ void CChar::Attacker_RemoveChar()
 	ADDTOCALLSTACK("CChar::Attacker_RemoveChar");
 	if ( m_lastAttackers.size() )
 	{
-		for ( int count = 0 ; count < static_cast<int>(m_lastAttackers.size()); count++)
+		for ( int count = 0 ; count < (int)(m_lastAttackers.size()); count++)
 		{
 			LastAttackers & refAttacker = m_lastAttackers.at(count);
 			CChar * pSrc = static_cast<CGrayUID>(refAttacker.charUID).CharFind();
@@ -391,7 +391,7 @@ void CChar::Attacker_CheckTimeout()
 	ADDTOCALLSTACK("CChar::Attacker_CheckTimeout");
 	if (m_lastAttackers.size())
 	{
-		for (int count = 0; count < static_cast<int>(m_lastAttackers.size()); count++)
+		for (int count = 0; count < (int)(m_lastAttackers.size()); count++)
 		{
 			LastAttackers & refAttacker = m_lastAttackers.at(count);
 			if ((++(refAttacker.elapsed) > g_Cfg.m_iAttackerTimeout) && (g_Cfg.m_iAttackerTimeout > 0))

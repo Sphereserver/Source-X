@@ -33,7 +33,7 @@ inline void byteReverse( uchar *buffer, uint longs )
 	uint temp;
     do
 	{
-		temp = static_cast<uint>(static_cast<uint>(buffer[3]) << 8 | buffer[2]) << 16 | (static_cast<uint>(buffer[1]) << 8 | buffer[0]);
+		temp = (uint)((uint)(buffer[3]) << 8 | buffer[2]) << 16 | ((uint)(buffer[1]) << 8 | buffer[0]);
 		reinterpret_cast<uint *>(buffer)[0] = temp;
 		buffer += 4;
     }

@@ -340,7 +340,7 @@ RealType CVarFloat::GetSingle( lpctstr & pArgs )
 					if ( pArgs && *pArgs )
 					{
 						iCount = 1;
-						dResult = RES_GET_INDEX(static_cast<int>(MakeFloatMath(pArgs))); // RES_GET_INDEX
+						dResult = RES_GET_INDEX((int)(MakeFloatMath(pArgs))); // RES_GET_INDEX
 					}
 					else
 					{
@@ -540,7 +540,7 @@ RealType CVarFloat::GetSingle( lpctstr & pArgs )
 					else
 					{
 						cparg1 = ppCmd[2];
-						dResult = Str_IndexOf(ppCmd[0], ppCmd[1], (iCount == 3)? static_cast<int>(MakeFloatMath(cparg1)) : 0);
+						dResult = Str_IndexOf(ppCmd[0], ppCmd[1], (iCount == 3)? (int)(MakeFloatMath(cparg1)) : 0);
 					}
 				} break;
 
@@ -578,7 +578,7 @@ RealType CVarFloat::GetSingle( lpctstr & pArgs )
 					{
 						cparg1 = ppCmd[0];
 						cparg2 = ppCmd[1];
-						dResult = Calc_GetBellCurve(static_cast<int>(MakeFloatMath(cparg1)), static_cast<int>(MakeFloatMath(cparg2)));
+						dResult = Calc_GetBellCurve((int)(MakeFloatMath(cparg1)), (int)(MakeFloatMath(cparg2)));
 					}
 				} break;
 
@@ -705,9 +705,9 @@ RealType CVarFloat::GetSingle( lpctstr & pArgs )
 	}
 	llong lVal;
 	if ( g_Exp.m_VarGlobals.GetParseVal( pArgs, &lVal ) )
-		return( static_cast<int>(lVal) );
+		return( (int)(lVal) );
 	if ( g_Exp.m_VarDefs.GetParseVal( pArgs, &lVal ) )
-		return( static_cast<int>(lVal) );
+		return( (int)(lVal) );
 	return 0;
 }
 

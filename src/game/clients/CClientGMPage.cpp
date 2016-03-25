@@ -47,7 +47,7 @@ void CClient::Cmd_GM_Page( lpctstr pszReason ) // Help button (Calls GM Call Men
 	else
 		SysMessageDefault( DEFMSG_MSG_GMPAGE_NOTIFIED );
 
-	sprintf(pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_MSG_GMPAGE_QNUM ), static_cast<int>(g_World.m_GMPages.GetCount()));
+	sprintf(pszMsg, g_Cfg.GetDefaultMsg( DEFMSG_MSG_GMPAGE_QNUM ), (int)(g_World.m_GMPages.GetCount()));
 	SysMessage(pszMsg);
 
 	// Already have a message in the queue ?

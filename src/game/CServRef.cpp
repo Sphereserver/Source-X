@@ -52,7 +52,7 @@ CServerDef::CServerDef( lpctstr pszName, CSocketAddressIP dwIP ) :
 	m_timeCreate = CServTime::GetCurrentTime();
 
 	// Set default time zone from UTC
-	m_TimeZone = static_cast<char>( _timezone / (60 * 60) );	// Greenwich mean time.
+	m_TimeZone = (char)( _timezone / (60 * 60) );	// Greenwich mean time.
 	m_eAccApp = ACCAPP_Unspecified;
 }
 
@@ -317,7 +317,7 @@ bool CServerDef::r_LoadVal( CScript & s )
 			SetName( s.GetArgStr());
 			break;
 		case SC_SERVPORT:
-			m_ip.SetPort( static_cast<word>(s.GetArgVal()));
+			m_ip.SetPort( (word)(s.GetArgVal()));
 			break;
 
 		case SC_ACCOUNTS:
@@ -341,7 +341,7 @@ bool CServerDef::r_LoadVal( CScript & s )
 			SetStat( SERV_STAT_CHARS, s.GetArgVal());
 			break;
 		case SC_TIMEZONE:
-			m_TimeZone = static_cast<char>(s.GetArgVal());
+			m_TimeZone = (char)(s.GetArgVal());
 			break;
 		case SC_URL:
 		case SC_URLLINK:

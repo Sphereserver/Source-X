@@ -414,7 +414,7 @@ void AbstractThread::onStart()
 	THREADNAME_INFO info;
 	info.dwType = 0x1000;
 	info.szName = getName();
-	info.dwThreadID = static_cast<dword>(-1);
+	info.dwThreadID = (dword)(-1);
 	info.dwFlags = 0;
 
 	__try
@@ -574,7 +574,7 @@ void AbstractSphereThread::printStackTrace()
 		if( m_stackInfo[i].startTime == 0 )
 			break;
 
-		timedelta = static_cast<int>(m_stackInfo[i].startTime - startTime);
+		timedelta = (int)(m_stackInfo[i].startTime - startTime);
 		g_Log.EventDebug(">>         %u     | %2d | %28s | +%d %s\n",
 			threadId, i, m_stackInfo[i].functionName, timedelta,
 				( i == (m_stackPos - 1) ) ?

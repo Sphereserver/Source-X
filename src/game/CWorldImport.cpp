@@ -416,21 +416,21 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			if ( s.IsKey("X" ))
 			{
 				CPointMap pt = pItem->GetUnkPoint();
-				pt.m_x = static_cast<short>( ATOI(pArg) );
+				pt.m_x = (short)( ATOI(pArg) );
 				pItem->SetUnkPoint(pt);
 				continue;
 			}
 			else if ( s.IsKey("Y" ))
 			{
 				CPointMap pt = pItem->GetUnkPoint();
-				pt.m_y = static_cast<short>( ATOI(pArg) );
+				pt.m_y = (short)( ATOI(pArg) );
 				pItem->SetUnkPoint(pt);
 				continue;
 			}
 			else if ( s.IsKey("Z" ))
 			{
 				CPointMap pt = pItem->GetUnkPoint();
-				pt.m_z = static_cast<char>( ATOI(pArg) );
+				pt.m_z = (char)( ATOI(pArg) );
 				pItem->SetUnkPoint(pt);
 				continue;
 			}
@@ -446,17 +446,17 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			}
 			else if ( s.IsKey("MOREX" ))
 			{
-				pItem->m_itNormal.m_morep.m_x = static_cast<short>(ATOI(pArg));
+				pItem->m_itNormal.m_morep.m_x = (short)(ATOI(pArg));
 				continue;
 			}
 			else if ( s.IsKey("MOREY" ))
 			{
-				pItem->m_itNormal.m_morep.m_y = static_cast<short>(ATOI(pArg));
+				pItem->m_itNormal.m_morep.m_y = (short)(ATOI(pArg));
 				continue;
 			}
 			else if ( s.IsKey("MOREZ" ))
 			{
-				pItem->m_itNormal.m_morep.m_z = static_cast<char>( ATOI(pArg) );
+				pItem->m_itNormal.m_morep.m_z = (char)( ATOI(pArg) );
 				continue;
 			}
 			else if ( s.IsKey("MORE" ))
@@ -512,21 +512,21 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			if ( s.IsKey("X" ))
 			{
 				CPointMap pt = pChar->GetUnkPoint();
-				pt.m_x = static_cast<short>(ATOI(pArg));
+				pt.m_x = (short)(ATOI(pArg));
 				pChar->SetUnkPoint(pt);
 				continue;
 			}
 			else if ( s.IsKey("Y" ))
 			{
 				CPointMap pt = pChar->GetUnkPoint();
-				pt.m_y = static_cast<short>(ATOI(pArg));
+				pt.m_y = (short)(ATOI(pArg));
 				pChar->SetUnkPoint(pt);
 				continue;
 			}
 			else if ( s.IsKey("Z" ))
 			{
 				CPointMap pt = pChar->GetUnkPoint();
-				pt.m_z = static_cast<char>(ATOI(pArg));
+				pt.m_z = (char)(ATOI(pArg));
 				pChar->SetUnkPoint(pt);
 				continue;
 			}
@@ -564,12 +564,12 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			}
 			else if ( s.IsKey("KARMA" ))
 			{
-				pChar->Stat_SetBase(STAT_KARMA, static_cast<short>(ATOI(pArg)));
+				pChar->Stat_SetBase(STAT_KARMA, (short)(ATOI(pArg)));
 				continue;
 			}
 			else if ( s.IsKey("FAME" ))
 			{
-				pChar->Stat_SetBase(STAT_FAME, static_cast<short>(ATOI(pArg)));
+				pChar->Stat_SetBase(STAT_FAME, (short)(ATOI(pArg)));
 				continue;
 			}
 			else if ( s.IsKey("TITLE" ))
@@ -579,27 +579,27 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			}
 			else if ( s.IsKey("STRENGTH" ))
 			{
-				pChar->Stat_SetBase(STAT_STR, static_cast<short>(ATOI(pArg)));
+				pChar->Stat_SetBase(STAT_STR, (short)(ATOI(pArg)));
 			}
 			else if ( s.IsKey("DEXTERITY" ))
 			{
-				pChar->Stat_SetBase(STAT_DEX, static_cast<short>(ATOI(pArg)));
+				pChar->Stat_SetBase(STAT_DEX, (short)(ATOI(pArg)));
 			}
 			else if ( s.IsKey("INTELLIGENCE" ))
 			{
-				pChar->Stat_SetBase(STAT_INT, static_cast<short>(ATOI(pArg)));
+				pChar->Stat_SetBase(STAT_INT, (short)(ATOI(pArg)));
 			}
 			else if ( s.IsKey("HITPOINTS" ))
 			{
-				pChar->Stat_SetVal(STAT_STR,static_cast<short>(ATOI(pArg)));
+				pChar->Stat_SetVal(STAT_STR,(short)(ATOI(pArg)));
 			}
 			else if ( s.IsKey("STAMINA" ))
 			{
-				pChar->Stat_SetVal(STAT_DEX,static_cast<short>(ATOI(pArg)));
+				pChar->Stat_SetVal(STAT_DEX,(short)(ATOI(pArg)));
 			}
 			else if ( s.IsKey( "MANA" ))
 			{
-				pChar->Stat_SetVal(STAT_INT,static_cast<short>(ATOI(pArg)));
+				pChar->Stat_SetVal(STAT_INT,(short)(ATOI(pArg)));
 			}
 			else if ( s.IsKeyHead( "SKILL", 5 ))
 			{
@@ -616,7 +616,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			}
 			else if ( s.IsKey("KILLS" ) && pChar->m_pPlayer )
 			{
-				pChar->m_pPlayer->m_wMurders = static_cast<word>(ATOI(pArg));
+				pChar->m_pPlayer->m_wMurders = (word)(ATOI(pArg));
 			}
 			else if ( s.IsKey("NPCAITYPE" ))
 			{

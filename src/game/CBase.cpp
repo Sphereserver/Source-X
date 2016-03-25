@@ -501,10 +501,10 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 			{
 				int64 piVal[2];
 				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, COUNTOF(piVal));
-				m_defenseBase = static_cast<uchar>(piVal[0]);
+				m_defenseBase = (uchar)(piVal[0]);
 				if ( iQty > 1 )
 				{
-					m_defenseRange = static_cast<uchar>(piVal[1]) - m_defenseBase;
+					m_defenseRange = (uchar)(piVal[1]) - m_defenseBase;
 				}
 				else
 				{
@@ -516,10 +516,10 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 			{
 				int64 piVal[2];
 				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, COUNTOF(piVal));
-				m_attackBase = static_cast<uchar>(piVal[0]);
+				m_attackBase = (uchar)(piVal[0]);
 				if ( iQty > 1 )
 				{
-					m_attackRange = static_cast<uchar>(piVal[1]) - m_attackBase;
+					m_attackRange = (uchar)(piVal[1]) - m_attackBase;
 				}
 				else
 				{
@@ -559,7 +559,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 				else
 				{
 					SetDefNum(s.GetKey(),piVal[0], false);
-					//m_range	= static_cast<word>(piVal[0]);
+					//m_range	= (word)(piVal[0]);
 				}
 			}
 			return( true );
@@ -567,7 +567,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 			m_BaseResources.Load( s.GetArgStr());
 			return( true );
 		case OBC_RESLEVEL:
-			return( SetResLevel(static_cast<uchar>(s.GetArgVal())) );
+			return( SetResLevel((uchar)(s.GetArgVal())) );
 		case OBC_RESDISPDNHUE:
 			SetResDispDnHue(static_cast<HUE_TYPE>(s.GetArgVal()));
 			return( true );
@@ -626,13 +626,13 @@ bool CBaseBaseDef::IsValid() const
 
 byte CBaseBaseDef::RangeL() const
 {
-	return static_cast<byte>(GetDefNum("RANGE",true) & 0xff);
+	return (byte)(GetDefNum("RANGE",true) & 0xff);
 	//return (m_range & 0xff);
 }
 
 byte CBaseBaseDef::RangeH() const
 {
-	return static_cast<byte>((GetDefNum("RANGE",true)>>8) & 0xff);
+	return (byte)((GetDefNum("RANGE",true)>>8) & 0xff);
 	//return ((m_range>>8) & 0xff);
 }
 

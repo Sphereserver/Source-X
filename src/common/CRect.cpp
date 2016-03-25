@@ -130,7 +130,7 @@ int CPointBase::GetDistBase( const CPointBase & pt ) const // Distance between p
 	// What the heck?
 	/*double dist = sqrt(static_cast<double>((dx * dx) + (dy * dy)));
 
-	return static_cast<int>(( (dist - floor(dist)) > 0.5 ) ? (ceil(dist)) : (floor(dist)));*/
+	return (int)(( (dist - floor(dist)) > 0.5 ) ? (ceil(dist)) : (floor(dist)));*/
 	// Return the real distance return((int) sqrt(dx*dx+dy*dy+dz*dz));
 }
 
@@ -178,7 +178,7 @@ int CPointBase::GetDist3D( const CPointBase & pt ) const // Distance between poi
 	// What the heck?
 	/*double realdist = sqrt(static_cast<double>((dist * dist) + (dz * dz)));
 	
-	return static_cast<int>(( (realdist - floor(realdist)) > 0.5 ) ? (ceil(realdist)) : (floor(realdist)));*/
+	return (int)(( (realdist - floor(realdist)) > 0.5 ) ? (ceil(realdist)) : (floor(realdist)));*/
 }
 
 bool CPointBase::IsValidZ() const
@@ -204,9 +204,9 @@ bool CPointBase::IsCharValid() const
 {
 	if ( m_z <= -UO_SIZE_Z || m_z >= UO_SIZE_Z )
 		return( false );
-	if (m_x <= 0 || m_x >= static_cast<short>(g_MapList.GetX(m_map)))
+	if (m_x <= 0 || m_x >= (short)(g_MapList.GetX(m_map)))
 		return( false );
-	if (m_y <= 0 || m_y >= static_cast<short>(g_MapList.GetY(m_map)))
+	if (m_y <= 0 || m_y >= (short)(g_MapList.GetY(m_map)))
 		return( false );
 	return( true );
 }
@@ -214,9 +214,9 @@ bool CPointBase::IsCharValid() const
 void CPointBase::ValidatePoint()
 {
 	if ( m_x < 0 ) m_x = 0;
-	if (m_x >= static_cast<short>(g_MapList.GetX(m_map))) m_x = static_cast<short>(g_MapList.GetX(m_map) - 1);
+	if (m_x >= (short)(g_MapList.GetX(m_map))) m_x = (short)(g_MapList.GetX(m_map) - 1);
 	if ( m_y < 0 ) m_y = 0;
-	if (m_y >= static_cast<short>(g_MapList.GetY(m_map))) m_y = static_cast<short>(g_MapList.GetY(m_map) - 1);
+	if (m_y >= (short)(g_MapList.GetY(m_map))) m_y = (short)(g_MapList.GetY(m_map) - 1);
 }
 
 bool CPointBase::IsSame2D( const CPointBase & pt ) const
@@ -244,16 +244,16 @@ void CPointBase::Move( DIR_TYPE dir )
 {
 	// Move a point in a direction.
 	ASSERT( dir <= DIR_QTY );
-	m_x += static_cast<short>(sm_Moves[dir][0]);
-	m_y += static_cast<short>(sm_Moves[dir][1]);
+	m_x += (short)(sm_Moves[dir][0]);
+	m_y += (short)(sm_Moves[dir][1]);
 }
 
 void CPointBase::MoveN( DIR_TYPE dir, int amount )
 {
 	// Move a point in a direction.
 	ASSERT( dir <= DIR_QTY );
-	m_x += static_cast<short>(sm_Moves[dir][0] * amount);
-	m_y += static_cast<short>(sm_Moves[dir][1] * amount);
+	m_x += (short)(sm_Moves[dir][0] * amount);
+	m_y += (short)(sm_Moves[dir][1] * amount);
 }
 
 bool CPointBase::r_WriteVal( lpctstr pszKey, CGString & sVal ) const
@@ -411,7 +411,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CGString & sVal ) const
 					if (pMultiItem->m_visible == 0)
 						continue;
 
-					CPointMap ptTest(static_cast<word>(ptMulti.m_x + pMultiItem->m_dx), static_cast<word>(ptMulti.m_y + pMultiItem->m_dy), static_cast<char>(ptMulti.m_z + pMultiItem->m_dz), this->m_map);
+					CPointMap ptTest((word)(ptMulti.m_x + pMultiItem->m_dx), (word)(ptMulti.m_y + pMultiItem->m_dy), (char)(ptMulti.m_z + pMultiItem->m_dz), this->m_map);
 					if (GetDist(ptTest) > 0)
 						continue;
 
@@ -476,7 +476,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CGString & sVal ) const
 						break;
 					if (pMultiItem->m_visible == 0)
 						continue;
-					CPointMap ptTest(static_cast<word>(ptMulti.m_x + pMultiItem->m_dx), static_cast<word>(ptMulti.m_y + pMultiItem->m_dy), static_cast<char>(ptMulti.m_z + pMultiItem->m_dz), this->m_map);
+					CPointMap ptTest((word)(ptMulti.m_x + pMultiItem->m_dx), (word)(ptMulti.m_y + pMultiItem->m_dy), (char)(ptMulti.m_z + pMultiItem->m_dz), this->m_map);
 					if (GetDist(ptTest) > 0)
 						continue;
 
@@ -514,7 +514,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CGString & sVal ) const
 						break;
 					if (pMultiItem->m_visible == 0)
 						continue;
-					CPointMap ptTest(static_cast<word>(ptMulti.m_x + pMultiItem->m_dx), static_cast<word>(ptMulti.m_y + pMultiItem->m_dy), static_cast<char>(ptMulti.m_z + pMultiItem->m_dz), this->m_map);
+					CPointMap ptTest((word)(ptMulti.m_x + pMultiItem->m_dx), (word)(ptMulti.m_y + pMultiItem->m_dy), (char)(ptMulti.m_z + pMultiItem->m_dz), this->m_map);
 					if (GetDist(ptTest) > 0)
 						continue;
 
@@ -719,10 +719,10 @@ bool CPointBase::r_LoadVal( lpctstr pszKey, lpctstr pszArgs )
 	int iVal = Exp_GetVal(pszArgs);
 	switch (index)
 	{
-		case 0: m_map = static_cast<uchar>(iVal); break;
-		case 1: m_x = static_cast<short>(iVal); break;
-		case 2: m_y = static_cast<short>(iVal); break;
-		case 3: m_z = static_cast<char>(iVal); break;
+		case 0: m_map = (uchar)(iVal); break;
+		case 1: m_x = (short)(iVal); break;
+		case 2: m_y = (short)(iVal); break;
+		case 3: m_z = (char)(iVal); break;
 	}
 	return( true );
 }
@@ -782,8 +782,8 @@ int CPointBase::StepLinePath( const CPointBase & ptSrc, int iSteps )
 	if ( ! iDist2D )
 		return 0;
 
-	m_x = static_cast<short>(ptSrc.m_x + IMULDIV( iSteps, dx, iDist2D ));
-	m_y = static_cast<short>(ptSrc.m_y + IMULDIV( iSteps, dy, iDist2D ));
+	m_x = (short)(ptSrc.m_x + IMULDIV( iSteps, dx, iDist2D ));
+	m_y = (short)(ptSrc.m_y + IMULDIV( iSteps, dy, iDist2D ));
 	return( iDist2D );
 }
 
@@ -825,7 +825,7 @@ size_t CPointBase::Read( tchar * pszVal )
 		case 4:	// m_map
 			if ( IsDigit(ppVal[3][0]))
 			{
-				m_map = static_cast<uchar>(ATOI(ppVal[3]));
+				m_map = (uchar)(ATOI(ppVal[3]));
 				if ( !g_MapList.m_maps[m_map] )
 				{
 					g_Log.EventError("Unsupported map #%d specified. Auto-fixing that to 0.\n", m_map);
@@ -835,12 +835,12 @@ size_t CPointBase::Read( tchar * pszVal )
 		case 3: // m_z
 			if ( IsDigit(ppVal[2][0]) || ppVal[2][0] == '-' )
 			{
-				m_z = static_cast<char>(ATOI(ppVal[2]));
+				m_z = (char)(ATOI(ppVal[2]));
 			}
 		case 2:
-			m_y = static_cast<short>(ATOI(ppVal[1]));
+			m_y = (short)(ATOI(ppVal[1]));
 		case 1:
-			m_x = static_cast<short>(ATOI(ppVal[0]));
+			m_x = (short)(ATOI(ppVal[0]));
 		case 0:
 			break;
 	}
@@ -964,40 +964,40 @@ CPointBase CGRect::GetRectCorner( DIR_TYPE dir ) const
 	// Get the point if a directional corner of the CRectMap.
 	CPointBase pt;
 	pt.m_z = 0;	// NOTE: remember this is a nonsense value.
-	pt.m_map = static_cast<uchar>(m_map);
+	pt.m_map = (uchar)(m_map);
 	switch ( dir )
 	{
 		case DIR_N:
-			pt.m_x = static_cast<short>((m_left + m_right) / 2);
-			pt.m_y = static_cast<short>(m_top);
+			pt.m_x = (short)((m_left + m_right) / 2);
+			pt.m_y = (short)(m_top);
 			break;
 		case DIR_NE:
-			pt.m_x = static_cast<short>(m_right);
-			pt.m_y = static_cast<short>(m_top);
+			pt.m_x = (short)(m_right);
+			pt.m_y = (short)(m_top);
 			break;
 		case DIR_E:
-			pt.m_x = static_cast<short>(m_right);
-			pt.m_y = static_cast<short>((m_top + m_bottom) / 2);
+			pt.m_x = (short)(m_right);
+			pt.m_y = (short)((m_top + m_bottom) / 2);
 			break;
 		case DIR_SE:
-			pt.m_x = static_cast<short>(m_right);
-			pt.m_y = static_cast<short>(m_bottom);
+			pt.m_x = (short)(m_right);
+			pt.m_y = (short)(m_bottom);
 			break;
 		case DIR_S:
-			pt.m_x = static_cast<short>((m_left + m_right) / 2);
-			pt.m_y = static_cast<short>(m_bottom);
+			pt.m_x = (short)((m_left + m_right) / 2);
+			pt.m_y = (short)(m_bottom);
 			break;
 		case DIR_SW:
-			pt.m_x = static_cast<short>(m_left);
-			pt.m_y = static_cast<short>(m_bottom);
+			pt.m_x = (short)(m_left);
+			pt.m_y = (short)(m_bottom);
 			break;
 		case DIR_W:
-			pt.m_x = static_cast<short>(m_left);
-			pt.m_y = static_cast<short>((m_top + m_bottom) / 2);
+			pt.m_x = (short)(m_left);
+			pt.m_y = (short)((m_top + m_bottom) / 2);
 			break;
 		case DIR_NW:
-			pt.m_x = static_cast<short>(m_left);
-			pt.m_y = static_cast<short>(m_top);
+			pt.m_x = (short)(m_left);
+			pt.m_y = (short)(m_top);
 			break;
 		case DIR_QTY:
 			pt = GetCenter();

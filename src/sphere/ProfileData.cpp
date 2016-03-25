@@ -175,21 +175,21 @@ lpctstr ProfileData::GetDescription(PROFILE_TYPE id) const
 
 	if ( id >= PROFILE_DATA_QTY )
 	{
-		sprintf(pszTmp, "%i (total: %i) instances", static_cast<int>(m_PreviousTimes[id].m_Time), static_cast<int>(m_AverageTimes[id].m_Time));
+		sprintf(pszTmp, "%i (total: %i) instances", (int)(m_PreviousTimes[id].m_Time), (int)(m_AverageTimes[id].m_Time));
 	}
 	else if ( id >= PROFILE_TIME_QTY )
 	{
-		sprintf(pszTmp, "%i (avg: %i) bytes", static_cast<int>(m_PreviousTimes[id].m_Time), static_cast<int>(m_AverageTimes[id].m_Time));
+		sprintf(pszTmp, "%i (avg: %i) bytes", (int)(m_PreviousTimes[id].m_Time), (int)(m_AverageTimes[id].m_Time));
 	}
 	else
 	{
 		sprintf( pszTmp, "%3i.%04is  avg: %3i.%04is  [samples:%6i  avg:%6i ]  runtime: %is",
-			static_cast<int>( m_PreviousTimes[id].m_Time / ( llTimeProfileFrequency )),
-			static_cast<int>((( m_PreviousTimes[id].m_Time * 10000 ) / ( llTimeProfileFrequency )) % 10000 ),
-			static_cast<int>( m_AverageTimes[id].m_Time / ( llTimeProfileFrequency )),
-			static_cast<int>((( m_AverageTimes[id].m_Time * 10000 ) / ( llTimeProfileFrequency )) % 10000 ),
+			(int)( m_PreviousTimes[id].m_Time / ( llTimeProfileFrequency )),
+			(int)((( m_PreviousTimes[id].m_Time * 10000 ) / ( llTimeProfileFrequency )) % 10000 ),
+			(int)( m_AverageTimes[id].m_Time / ( llTimeProfileFrequency )),
+			(int)((( m_AverageTimes[id].m_Time * 10000 ) / ( llTimeProfileFrequency )) % 10000 ),
 			iCount,
-			static_cast<int>(m_AverageTimes[id].m_iCount),
+			(int)(m_AverageTimes[id].m_iCount),
 			m_iAverageCount );
 	}
 

@@ -105,7 +105,7 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 		}
 
 		if ( iQty > 1 )
-			pPart->SetAmount(static_cast<uint>(iQty));
+			pPart->SetAmount((uint)(iQty));
 
 		if ( pChar && pChar->m_pPlayer )
 		{
@@ -266,7 +266,7 @@ bool CChar::Use_Train_Dummy( CItem * pItem, bool fSetup )
 	char skilltag[32];
 	sprintf(skilltag, "OVERRIDE.PracticeMax.SKILL_%d", skill &~0xD2000000);
 	CVarDefCont *pSkillTag = pItem->GetKey(skilltag, true);
-	int iMaxSkill = pSkillTag ? static_cast<int>(pSkillTag->GetValNum()) : g_Cfg.m_iSkillPracticeMax;
+	int iMaxSkill = pSkillTag ? (int)(pSkillTag->GetValNum()) : g_Cfg.m_iSkillPracticeMax;
 
 	if ( Skill_GetBase(skill) > iMaxSkill )
 	{
@@ -493,7 +493,7 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 		if ( pCont )
 		{
 			//check for UID
-			CGrayUID uidCont = static_cast<dword>(pCont->GetValNum());
+			CGrayUID uidCont = (dword)(pCont->GetValNum());
 			CItemContainer *pNewCont = dynamic_cast<CItemContainer*>(uidCont.ItemFind());
 			if ( !pNewCont )	//if no UID, check for ITEMID_TYPE
 			{
@@ -539,8 +539,8 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 	else
 		AmmoAnim = static_cast<ITEMID_TYPE>(pWeaponDef->m_ttWeaponBow.m_idAmmoX.GetResIndex());
 
-	AmmoHue = pVarAnimColor ? static_cast<dword>(pVarAnimColor->GetValNum()) : 0;
-	AmmoRender = pVarAnimRender ? static_cast<dword>(pVarAnimRender->GetValNum()) : 0;
+	AmmoHue = pVarAnimColor ? (dword)(pVarAnimColor->GetValNum()) : 0;
+	AmmoRender = pVarAnimRender ? (dword)(pVarAnimRender->GetValNum()) : 0;
 	
 	pButte->Effect(EFFECT_BOLT, AmmoAnim, this, 16, 0, false, AmmoHue, AmmoRender);
 	pButte->Sound(0x224);
@@ -788,7 +788,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 		return false;
 
 	CResourceQty RetMainSkill = pItemDef->m_SkillMake[iRes];
-	int iSkillLevel = static_cast<int>(RetMainSkill.GetResQty()) / 10;
+	int iSkillLevel = (int)(RetMainSkill.GetResQty()) / 10;
 	int iDifficulty = IMULDIV(iSkillLevel, iDamagePercent, 100);
 	if ( iDifficulty < iSkillLevel / 4 )
 		iDifficulty = iSkillLevel / 4;
@@ -799,7 +799,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 	bool fSuccess = Skill_UseQuick(static_cast<SKILL_TYPE>(RetMainSkill.GetResIndex()), iDifficulty);
 	if ( fSuccess )
 	{
-		pItemArmor->m_itArmor.m_Hits_Cur = static_cast<word>(iTotalHits);
+		pItemArmor->m_itArmor.m_Hits_Cur = (word)(iTotalHits);
 		pszText = g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_1);
 	}
 	else
@@ -854,7 +854,7 @@ void CChar::Use_EatQty( CItem * pFood, short iQty )
 
 	short iRestore = 0;
 	if ( pFood->m_itFood.m_foodval )
-		iRestore = static_cast<short>(pFood->m_itFood.m_foodval);
+		iRestore = (short)(pFood->m_itFood.m_foodval);
 	else
 		iRestore = pFood->Item_GetDef()->GetVolume();	// some food should have more value than other !
 
@@ -984,7 +984,7 @@ void CChar::Use_Drink( CItem * pItem )
 			Spell_Effect_Remove(pDrunkLayer);
 			pDrunkLayer->m_itSpell.m_spellcharges += 10;
 			if ( pDrunkLayer->m_itSpell.m_spelllevel < 500 )
-				pDrunkLayer->m_itSpell.m_spelllevel += static_cast<word>(iStrength);
+				pDrunkLayer->m_itSpell.m_spelllevel += (word)(iStrength);
 			Spell_Effect_Add(pDrunkLayer);
 		}
 		else
@@ -1007,7 +1007,7 @@ void CChar::Use_Drink( CItem * pItem )
 		int iSkillQuality = pItem->m_itPotion.m_skillquality;
 		if ( g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B )
 		{
-			int iEnhance = static_cast<int>(GetDefNum("EnhancePotions", false));
+			int iEnhance = (int)(GetDefNum("EnhancePotions", false));
 			if ( iEnhance )
 				iSkillQuality += IMULDIV(iSkillQuality, iEnhance, 100);
 		}
@@ -1022,9 +1022,9 @@ void CChar::Use_Drink( CItem * pItem )
 	{
 		short iRestore = 0;
 		if ( pItem->m_itDrink.m_foodval )
-			iRestore = static_cast<short>(pItem->m_itDrink.m_foodval);
+			iRestore = (short)(pItem->m_itDrink.m_foodval);
 		else
-			iRestore = static_cast<short>(pItem->Item_GetDef()->GetVolume());
+			iRestore = (short)(pItem->Item_GetDef()->GetVolume());
 
 		if ( iRestore < 1 )
 			iRestore = 1;
@@ -1090,7 +1090,7 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool bCheckFollowerSlots )
 
 	if ( bCheckFollowerSlots && IsSetOF(OF_PetSlots) )
 	{
-		if ( !FollowersUpdate(pPet, static_cast<short>(maximum(1, pPet->GetDefNum("FOLLOWERSLOTS", true, true))), true) )
+		if ( !FollowersUpdate(pPet, (short)(maximum(1, pPet->GetDefNum("FOLLOWERSLOTS", true, true))), true) )
 		{
 			SysMessageDefault(DEFMSG_PETSLOTS_TRY_CONTROL);
 			if ( bCreatedNewNpc )
@@ -1127,11 +1127,11 @@ bool CChar::FollowersUpdate( CChar * pChar, short iFollowerSlots, bool bCheckOnl
 		if ( OnTrigger(CTRIG_FollowersUpdate, pChar, &Args) == TRIGRET_RET_TRUE )
 			return false;
 
-		iFollowerSlots = static_cast<short>(Args.m_iN2);
+		iFollowerSlots = (short)(Args.m_iN2);
 	}
 
-	short iCurFollower = static_cast<short>(GetDefNum("CURFOLLOWER", true, true));
-	short iMaxFollower = static_cast<short>(GetDefNum("MAXFOLLOWER", true, true));
+	short iCurFollower = (short)(GetDefNum("CURFOLLOWER", true, true));
+	short iMaxFollower = (short)(GetDefNum("MAXFOLLOWER", true, true));
 	short iSetFollower = iCurFollower + iFollowerSlots;
 
 	if ( (iSetFollower > iMaxFollower) && !IsPriv(PRIV_GM) )

@@ -204,8 +204,8 @@ void CChar::NPC_Act_Fight()
 			default:				break;
 		}
 
-		iDist		= static_cast<int>(Args.m_iN1);
-		iMotivation = static_cast<int>(Args.m_iN2);
+		iDist		= (int)(Args.m_iN1);
+		iMotivation = (int)(Args.m_iN2);
 	}
 
 	if ( ! IsStatFlag(STATF_Pet))
@@ -251,11 +251,11 @@ void CChar::NPC_Act_Fight()
 			switch(iQty)
 			{
 				case 1:
-					iRangeMax = static_cast<int>(RVal[0]);
+					iRangeMax = (int)(RVal[0]);
 					break;
 				case 2:
-					iRangeMin = static_cast<int>(RVal[0]);
-					iRangeMax = static_cast<int>(RVal[1]);
+					iRangeMin = (int)(RVal[0]);
+					iRangeMax = (int)(RVal[1]);
 					break;
 			}
 		}

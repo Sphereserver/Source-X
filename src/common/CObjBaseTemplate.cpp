@@ -99,7 +99,7 @@ void CObjBaseTemplate::SetEquipLayer( LAYER_TYPE layer )
 	m_pt.m_x = 0;	// these don't apply.
 	m_pt.m_y = 0;
 	// future: strongly typed enums will remove the need for this cast
-	m_pt.m_z = static_cast<char>(layer); // layer equipped.
+	m_pt.m_z = (char)(layer); // layer equipped.
 	m_pt.m_map = 0;
 }
 

@@ -673,7 +673,7 @@ static int HtmlDeCode( tchar * pszDst, lpctstr pszSrc )
 				if ( ch )
 				{
 					ch = static_cast<tchar>(iVal*0x10 + GetHexDigit(ch));
-					if (static_cast<uchar>(ch) == 0xa0)
+					if ((uchar)(ch) == 0xa0)
 						ch = '\0';
 				}
 			}
@@ -746,7 +746,7 @@ bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * p
 				{
 					tchar *pszData = Str_GetTemp();
 					HtmlDeCode( pszData, pszNum );
-					resp.AddText(static_cast<word>(iNum), pszData);
+					resp.AddText((word)(iNum), pszData);
 				}
 				break;
 		}

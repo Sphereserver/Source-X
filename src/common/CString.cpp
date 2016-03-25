@@ -1052,7 +1052,7 @@ void CharToMultiByteNonNull(byte * Dest, const char * Src, size_t MBytes) {
 	for (size_t idx = 0; idx != MBytes * 2; idx += 2) {
 		if (Src[idx / 2] == '\0')
 			break;
-		Dest[idx] = static_cast<byte>(Src[idx / 2]);
+		Dest[idx] = (byte)(Src[idx / 2]);
 	}
 }
 

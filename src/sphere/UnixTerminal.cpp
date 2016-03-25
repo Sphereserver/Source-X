@@ -115,7 +115,7 @@ void UnixTerminal::setColor(COLOR_TYPE color)
 	if (color == COL_DEFAULT)
 		fprintf(stdout, "\033[0m");
 	else
-		fprintf(stdout, "\033[0;%dm", 30 + static_cast<int>(color));
+		fprintf(stdout, "\033[0;%dm", 30 + (int)(color));
 #endif
 }
 

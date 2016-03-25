@@ -340,7 +340,7 @@ bool CAccounts::Cmd_ListUnused(CTextConsole * pSrc, lpctstr pszDays, lpctstr psz
 		}
 
 		if ( (iDaysCur - iDaysAcc) < iDaysTest ) continue;
-		if ( dwMask && !pAccount->IsPriv(static_cast<word>(dwMask)) ) continue;
+		if ( dwMask && !pAccount->IsPriv((word)(dwMask)) ) continue;
 
 		iCount ++;
 		if ( pszVerb == NULL || pszVerb[0] == '\0' )
@@ -560,7 +560,7 @@ CAccount::CAccount( lpctstr pszName, bool fGuest )
 	else
 		SetPrivLevel(PLEVEL_Player);
 
-	m_PrivFlags = static_cast<word>(g_Cfg.m_iAutoPrivFlags);
+	m_PrivFlags = (word)(g_Cfg.m_iAutoPrivFlags);
 	m_MaxChars = 0;
 
 	m_Total_Connect_Time = 0;
@@ -813,7 +813,7 @@ bool CAccount::CheckPasswordTries(CSocketAddress csaPeerName)
 				}
 				else if ( itResult.second == iAccountMaxTries )
 				{
-					ttsData.m_Delay = ttsData.m_Last + static_cast<llong>(g_Cfg.m_iClientLoginTempBan);
+					ttsData.m_Delay = ttsData.m_Last + (llong)(g_Cfg.m_iClientLoginTempBan);
 					bReturn = false;
 				}
 			}
@@ -1258,12 +1258,12 @@ bool CAccount::r_LoadVal( CScript & s )
 				CChar * pChar = uid.CharFind();
 				if (pChar == NULL)
 				{
-					DEBUG_ERR(( "Invalid CHARUID 0%x for account '%s'\n", static_cast<dword>(uid), GetName()));
+					DEBUG_ERR(( "Invalid CHARUID 0%x for account '%s'\n", (dword)(uid), GetName()));
 					return( false );
 				}
 				if ( ! IsMyAccountChar( pChar ))
 				{
-					DEBUG_ERR(( "CHARUID 0%x (%s) not attached to account '%s'\n", static_cast<dword>(uid), pChar->GetName(), GetName()));
+					DEBUG_ERR(( "CHARUID 0%x (%s) not attached to account '%s'\n", (dword)(uid), pChar->GetName(), GetName()));
 					return( false );
 				}
 				AttachChar(pChar);
@@ -1316,7 +1316,7 @@ bool CAccount::r_LoadVal( CScript & s )
 			m_Last_IP.SetAddrStr( s.GetArgStr());
 			break;
 		case AC_MAXCHARS:
-			SetMaxChars( static_cast<uchar>(s.GetArgVal()) );
+			SetMaxChars( (uchar)(s.GetArgVal()) );
 			break;
 		case AC_MD5PASSWORD:
 			SetPassword( s.GetArgStr(), true);
@@ -1331,7 +1331,7 @@ bool CAccount::r_LoadVal( CScript & s )
 			SetPassword( s.GetArgStr() );
 			break;
 		case AC_PRIV:
-			m_PrivFlags = static_cast<word>(s.GetArgVal());
+			m_PrivFlags = (word)(s.GetArgVal());
 			if ( m_PrivFlags & PRIV_UNUSED )
 			{
 				g_Log.EventError("Fixing PRIV field (0%x) for account %s have not supported flags set (caught by mask 0%x).\n", m_PrivFlags, GetName(), (word)PRIV_UNUSED);
@@ -1339,7 +1339,7 @@ bool CAccount::r_LoadVal( CScript & s )
 			}
 			break;
 		case AC_RESDISP:
-			SetResDisp(static_cast<byte>(s.GetArgVal()));
+			SetResDisp((byte)(s.GetArgVal()));
 			break;
 		case AC_TAG0:
 			{

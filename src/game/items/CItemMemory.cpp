@@ -68,7 +68,7 @@ CGrayUID CItemMemory::Guild_GetLoyalTo() const
 {
 	ADDTOCALLSTACK("CItemMemory::Guild_GetLoyalTo");
 	CItemMemory *pObj = const_cast<CItemMemory *>(this);
-	CGrayUID iUid(static_cast<dword>(pObj->GetTagDefs()->GetKeyNum("LoyalTo", true)));
+	CGrayUID iUid((dword)(pObj->GetTagDefs()->GetKeyNum("LoyalTo", true)));
 	return iUid;
 }
 

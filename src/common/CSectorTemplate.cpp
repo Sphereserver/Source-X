@@ -454,10 +454,10 @@ CPointMap CSectorBase::GetBasePoint() const
 	ADDTOCALLSTACK("CSectorBase::GetBasePoint");
 	// What is the coord base of this sector. upper left point.
 	ASSERT( m_index >= 0 && m_index < g_MapList.GetSectorQty(m_map) );
-	CPointMap pt(( static_cast<word>((m_index % g_MapList.GetSectorCols(m_map)) * g_MapList.GetSectorSize(m_map))),
-		static_cast<word>((m_index / g_MapList.GetSectorCols(m_map)) * g_MapList.GetSectorSize(m_map)),
+	CPointMap pt(( (word)((m_index % g_MapList.GetSectorCols(m_map)) * g_MapList.GetSectorSize(m_map))),
+		(word)((m_index / g_MapList.GetSectorCols(m_map)) * g_MapList.GetSectorSize(m_map)),
 		0,
-		static_cast<uchar>(m_map));
+		(uchar)(m_map));
 	return( pt );
 }
 

@@ -1054,7 +1054,7 @@ bool CResource::r_LoadVal( CScript &s )
 			m_iMapCacheTime = s.GetArgVal() * TICK_PER_SEC;
 			break;
 		case RC_MAXCHARSPERACCOUNT:
-			m_iMaxCharsPerAccount = static_cast<uchar>(s.GetArgVal());
+			m_iMaxCharsPerAccount = (uchar)(s.GetArgVal());
 			if ( m_iMaxCharsPerAccount > MAX_CHARS_PER_ACCT )
 				m_iMaxCharsPerAccount = MAX_CHARS_PER_ACCT;
 			break;
@@ -1301,21 +1301,21 @@ bool CResource::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc
 					case 4:
 						if ( IsDigit(ppVal[3][0]) )
 						{
-							pt.m_map = static_cast<uchar>(ATOI(ppVal[3]));
+							pt.m_map = (uchar)(ATOI(ppVal[3]));
 						}
 					case 3:
 						if ( IsDigit(ppVal[2][0]) || (( iArgs == 4 ) && ( ppVal[2][0] == '-' )) )
 						{
-							pt.m_z = static_cast<char>(( iArgs == 4 ) ? ATOI(ppVal[2]) : 0);
+							pt.m_z = (char)(( iArgs == 4 ) ? ATOI(ppVal[2]) : 0);
 							if ( iArgs == 3 )
 							{
-								pt.m_map = static_cast<uchar>(ATOI(ppVal[2]));
+								pt.m_map = (uchar)(ATOI(ppVal[2]));
 							}
 						}
 					case 2:
-						pt.m_y = static_cast<short>(ATOI(ppVal[1]));
+						pt.m_y = (short)(ATOI(ppVal[1]));
 					case 1:
-						pt.m_x = static_cast<short>(ATOI(ppVal[0]));
+						pt.m_x = (short)(ATOI(ppVal[0]));
 					case 0:
 						break;
 				}
@@ -1403,7 +1403,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc
 			}
 			else if ( m_Functions.ContainsKey(pszCmd) )
 			{
-				sVal.FormatVal(static_cast<int>(GetPrivCommandLevel(pszCmd)));
+				sVal.FormatVal((int)(GetPrivCommandLevel(pszCmd)));
 				return true;
 			}
 
@@ -1424,7 +1424,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc
 			}
 			else if ( !strnicmp( pszCmd, "PLEVEL", 5 ))
 			{
-				sVal.FormatVal(static_cast<int>(GetPrivCommandLevel(m_Functions.GetAt(iNumber)->GetName())));
+				sVal.FormatVal((int)(GetPrivCommandLevel(m_Functions.GetAt(iNumber)->GetName())));
 				return true;
 			}
 		}
@@ -1613,7 +1613,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc
 		case RC_RTICKS:
 			{
 				if ( pszKey[6] != '.' )
-					sVal.FormatUVal(static_cast<uint>(CGTime::GetCurrentTime().GetTime()));
+					sVal.FormatUVal((uint)(CGTime::GetCurrentTime().GetTime()));
 				else
 				{
 					pszKey += 6;
@@ -1629,11 +1629,11 @@ bool CResource::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc
 						if ( iQty != 6 )
 							return false;
 
-						CGTime datetime(static_cast<int>(piVal[0]), static_cast<int>(piVal[1]), static_cast<int>(piVal[2]), static_cast<int>(piVal[3]), static_cast<int>(piVal[4]), static_cast<int>(piVal[5]));
+						CGTime datetime((int)(piVal[0]), (int)(piVal[1]), (int)(piVal[2]), (int)(piVal[3]), (int)(piVal[4]), (int)(piVal[5]));
 						if ( datetime.GetTime() == -1 )
 							sVal.FormatVal(-1);
 						else
-							sVal.FormatUVal(static_cast<uint>(datetime.GetTime()));
+							sVal.FormatUVal((uint)(datetime.GetTime()));
 					}
 					else if ( !strnicmp("FORMAT", pszKey, 6) )
 					{
@@ -2440,7 +2440,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 			return false;
 		}
 
-		rid.SetPrivateUID( static_cast<uint>(pVarNum->GetValNum()) );
+		rid.SetPrivateUID( (uint)(pVarNum->GetValNum()) );
 		restype	= rid.GetResType();
 
 		CResourceDef *	pRes = NULL;
@@ -2620,7 +2620,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 			// read karma levels
 			iQty = Str_ParseCmds(pScript->GetKeyBuffer(), piNotoLevels, COUNTOF(piNotoLevels));
 			for (i = 0; i < iQty; i++)
-				m_NotoKarmaLevels.SetAtGrow(i, static_cast<int>(piNotoLevels[i]));
+				m_NotoKarmaLevels.SetAtGrow(i, (int)(piNotoLevels[i]));
 
 			m_NotoKarmaLevels.SetCount(i);
 
@@ -2633,7 +2633,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 			// read fame levels
 			iQty = Str_ParseCmds(pScript->GetKeyBuffer(), piNotoLevels, COUNTOF(piNotoLevels));
 			for (i = 0; i < iQty; i++)
-				m_NotoFameLevels.SetAtGrow(i, static_cast<int>(piNotoLevels[i]));
+				m_NotoFameLevels.SetAtGrow(i, (int)(piNotoLevels[i]));
 
 			m_NotoFameLevels.SetCount(i);
 
@@ -2662,7 +2662,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 	case RES_PLEVEL:
 		{
 			int index = rid.GetResIndex();
-			if ( index < 0 || static_cast<uint>(index) >= COUNTOF(m_PrivCommands) )
+			if ( index < 0 || (uint)(index) >= COUNTOF(m_PrivCommands) )
 				return false;
 			while ( pScript->ReadKey() )
 			{
@@ -2727,7 +2727,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 			}
 			else
 			{
-				if ( rid.GetResIndex() >= static_cast<int>(g_Cfg.m_iMaxSkill) )
+				if ( rid.GetResIndex() >= (int)(g_Cfg.m_iMaxSkill) )
 					g_Cfg.m_iMaxSkill = rid.GetResIndex() + 1;
 
 				// Just replace any previous CSkillDef
@@ -3033,7 +3033,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 					pServ->m_ip.SetHostPortStr( pScript->GetKey());
 					if ( pScript->ReadKey())
 					{
-						pServ->m_ip.SetPort( static_cast<word>(pScript->GetArgVal()));
+						pServ->m_ip.SetPort( (word)(pScript->GetArgVal()));
 					}
 				}
 				if ( ! strcmpi( pServ->GetName(), g_Serv.GetName()))
@@ -3443,7 +3443,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 						return( ridinvalid );
 				}
 			}
-			rid.SetPrivateUID( static_cast<uint>(pVarNum->GetValNum()));
+			rid.SetPrivateUID( (uint)(pVarNum->GetValNum()));
 			if ( restype != rid.GetResType())
 			{
 				switch ( restype )
@@ -3461,7 +3461,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 						return( ridinvalid );
 				}
 			}
-			else if ( fNewStyleDef && static_cast<dword>(pVarNum->GetValNum()) != rid.GetPrivateUID() )
+			else if ( fNewStyleDef && (dword)(pVarNum->GetValNum()) != rid.GetPrivateUID() )
 			{
 				DEBUG_ERR(( "WARNING: region redefines DEFNAME '%s' for another region!\n", pszName ));
 			}

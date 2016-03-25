@@ -990,18 +990,18 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 
 			pSrc->SysMessagef( "Scripts: called %u times and took %i.%04i msec (%i.%04i msec average). Reporting with highest average.\n",
 					g_profiler.called,
-					static_cast<int>(g_profiler.total / divby),
-					static_cast<int>(((g_profiler.total * 10000) / (divby)) % 10000),
-					static_cast<int>(average / divby),
-					static_cast<int>(((average * 10000) / (divby)) % 10000)
+					(int)(g_profiler.total / divby),
+					(int)(((g_profiler.total * 10000) / (divby)) % 10000),
+					(int)(average / divby),
+					(int)(((average * 10000) / (divby)) % 10000)
 			);
 			if (ftDump != NULL)
 				ftDump->Printf("Scripts: called %u times and took %i.%04i msec (%i.%04i msec average). Reporting with highest average.\n",
 					g_profiler.called,
-					static_cast<int>(g_profiler.total / divby),
-					static_cast<int>(((g_profiler.total * 10000) / (divby)) % 10000),
-					static_cast<int>(average / divby),
-					static_cast<int>(((average * 10000) / (divby)) % 10000)
+					(int)(g_profiler.total / divby),
+					(int)(((g_profiler.total * 10000) / (divby)) % 10000),
+					(int)(average / divby),
+					(int)(((average * 10000) / (divby)) % 10000)
 				);
 
 			for ( pFun = g_profiler.FunctionsHead; pFun != NULL; pFun = pFun->next )
@@ -1011,27 +1011,27 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 					pSrc->SysMessagef( "FUNCTION '%s' called %u times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
 						pFun->name,
 						pFun->called,
-						static_cast<int>(pFun->average / divby),
-						static_cast<int>(((pFun->average * 10000) / (divby)) % 10000),
-						static_cast<int>(pFun->min / divby),
-						static_cast<int>(((pFun->min * 10000) / (divby)) % 10000),
-						static_cast<int>(pFun->max / divby),
-						static_cast<int>(((pFun->max * 10000) / (divby)) % 10000),
-						static_cast<int>(pFun->total / divby),
-						static_cast<int>(((pFun->total * 10000) / (divby)) % 10000)
+						(int)(pFun->average / divby),
+						(int)(((pFun->average * 10000) / (divby)) % 10000),
+						(int)(pFun->min / divby),
+						(int)(((pFun->min * 10000) / (divby)) % 10000),
+						(int)(pFun->max / divby),
+						(int)(((pFun->max * 10000) / (divby)) % 10000),
+						(int)(pFun->total / divby),
+						(int)(((pFun->total * 10000) / (divby)) % 10000)
 					);
 					if (ftDump != NULL)
 						ftDump->Printf("FUNCTION '%s' called %u times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
 							pFun->name,
 							pFun->called,
-							static_cast<int>(pFun->average / divby),
-							static_cast<int>(((pFun->average * 10000) / (divby)) % 10000),
-							static_cast<int>(pFun->min / divby),
-							static_cast<int>(((pFun->min * 10000) / (divby)) % 10000),
-							static_cast<int>(pFun->max / divby),
-							static_cast<int>(((pFun->max * 10000) / (divby)) % 10000),
-							static_cast<int>(pFun->total / divby),
-							static_cast<int>(((pFun->total * 10000) / (divby)) % 10000)
+							(int)(pFun->average / divby),
+							(int)(((pFun->average * 10000) / (divby)) % 10000),
+							(int)(pFun->min / divby),
+							(int)(((pFun->min * 10000) / (divby)) % 10000),
+							(int)(pFun->max / divby),
+							(int)(((pFun->max * 10000) / (divby)) % 10000),
+							(int)(pFun->total / divby),
+							(int)(((pFun->total * 10000) / (divby)) % 10000)
 						);
 				}
 			}
@@ -1042,27 +1042,27 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 					pSrc->SysMessagef( "TRIGGER '%s' called %u times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
 						pTrig->name,
 						pTrig->called,
-						static_cast<int>(pTrig->average / divby),
-						static_cast<int>(((pTrig->average * 10000) / (divby)) % 10000),
-						static_cast<int>(pTrig->min / divby),
-						static_cast<int>(((pTrig->min * 10000) / (divby)) % 10000),
-						static_cast<int>(pTrig->max / divby),
-						static_cast<int>(((pTrig->max * 10000) / (divby)) % 10000),
-						static_cast<int>(pTrig->total / divby),
-						static_cast<int>(((pTrig->total * 10000) / (divby)) % 10000)
+						(int)(pTrig->average / divby),
+						(int)(((pTrig->average * 10000) / (divby)) % 10000),
+						(int)(pTrig->min / divby),
+						(int)(((pTrig->min * 10000) / (divby)) % 10000),
+						(int)(pTrig->max / divby),
+						(int)(((pTrig->max * 10000) / (divby)) % 10000),
+						(int)(pTrig->total / divby),
+						(int)(((pTrig->total * 10000) / (divby)) % 10000)
 					);
 					if (ftDump != NULL)
 						ftDump->Printf("TRIGGER '%s' called %u times, took %i.%04i msec average (%i.%04i min, %i.%04i max), total: %i.%04i msec\n",
 							pTrig->name,
 							pTrig->called,
-							static_cast<int>(pTrig->average / divby),
-							static_cast<int>(((pTrig->average * 10000) / (divby)) % 10000),
-							static_cast<int>(pTrig->min / divby),
-							static_cast<int>(((pTrig->min * 10000) / (divby)) % 10000),
-							static_cast<int>(pTrig->max / divby),
-							static_cast<int>(((pTrig->max * 10000) / (divby)) % 10000),
-							static_cast<int>(pTrig->total / divby),
-							static_cast<int>(((pTrig->total * 10000) / (divby)) % 10000)
+							(int)(pTrig->average / divby),
+							(int)(((pTrig->average * 10000) / (divby)) % 10000),
+							(int)(pTrig->min / divby),
+							(int)(((pTrig->min * 10000) / (divby)) % 10000),
+							(int)(pTrig->max / divby),
+							(int)(((pTrig->max * 10000) / (divby)) % 10000),
+							(int)(pTrig->total / divby),
+							(int)(((pTrig->total * 10000) / (divby)) % 10000)
 						);
 				}
 			}
@@ -1393,7 +1393,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 					break;
 				// IMPFLAGS_ITEMS
 				if ( ! g_World.Export( Arg_ppCmd[0], pSrc->GetChar(),
-					(Arg_Qty >= 2) ? static_cast<word>(ATOI(Arg_ppCmd[1])) : IMPFLAGS_ITEMS,
+					(Arg_Qty >= 2) ? (word)(ATOI(Arg_ppCmd[1])) : IMPFLAGS_ITEMS,
 					(Arg_Qty >= 3)? ATOI(Arg_ppCmd[2]) : INT16_MAX ))
 				{
 					pSrc->SysMessage( "Export failed\n" );
@@ -1442,7 +1442,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 				}
 				// IMPFLAGS_ITEMS
 				if ( ! g_World.Import( Arg_ppCmd[0], pSrc->GetChar(),
-					(Arg_Qty >= 2) ? static_cast<word>(ATOI(Arg_ppCmd[1])) : IMPFLAGS_BOTH,
+					(Arg_Qty >= 2) ? (word)(ATOI(Arg_ppCmd[1])) : IMPFLAGS_BOTH,
 					(Arg_Qty>=3)?ATOI(Arg_ppCmd[2]) : INT16_MAX ))
 					pSrc->SysMessage( "Import failed\n" );
 			}
@@ -1650,7 +1650,7 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 				continue;
 #endif
 			case 'P':
-				m_ip.SetPort(static_cast<word>(ATOI(pArg + 1)));
+				m_ip.SetPort((word)(ATOI(pArg + 1)));
 				continue;
 			case 'N':
 				// Set the system name.

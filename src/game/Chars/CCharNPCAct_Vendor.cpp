@@ -148,7 +148,7 @@ bool CChar::NPC_StablePetSelect( CChar * pCharPlayer )
 		iPetMax += (int)((iSkillVeterinary - 90.0) / 10);
 
 	if ( m_TagDefs.GetKey("MAXPLAYERPETS") )
-		iPetMax = static_cast<int>(m_TagDefs.GetKeyNum("MAXPLAYERPETS"));
+		iPetMax = (int)(m_TagDefs.GetKeyNum("MAXPLAYERPETS"));
 
 	for ( CItem *pItem = pBank->GetContentHead(); pItem != NULL; pItem = pItem->GetNext() )
 	{
@@ -382,7 +382,7 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 		if ( pMemory )
 		{
 			pMemory->m_itEqMemory.m_Action = NPC_MEM_ACT_SPEAK_TRAIN;
-			pMemory->m_itEqMemory.m_Skill = static_cast<word>(i);
+			pMemory->m_itEqMemory.m_Skill = (word)(i);
 		}
 		return true;
 	}

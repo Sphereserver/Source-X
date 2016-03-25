@@ -74,8 +74,8 @@ void CChar::Action_StartSpecial( CREID_TYPE id )
 			CItem * pItem = CItem::CreateScript( Calc_GetRandVal(2) ? ITEMID_FX_FIRE_F_EW : ITEMID_FX_FIRE_F_NS, this );
 			ASSERT(pItem);
 			pItem->SetType(IT_FIRE);
-			pItem->m_itSpell.m_spell = static_cast<word>(SPELL_Fire_Field);
-			pItem->m_itSpell.m_spelllevel = static_cast<word>(100 + Calc_GetRandVal(500));
+			pItem->m_itSpell.m_spell = (word)(SPELL_Fire_Field);
+			pItem->m_itSpell.m_spelllevel = (word)(100 + Calc_GetRandVal(500));
 			pItem->m_itSpell.m_spellcharges = 1;
 			pItem->m_uidLink = GetUID();
 			pItem->MoveToDecay( GetTopPoint(), 10 + Calc_GetRandVal(50)*TICK_PER_SEC );
@@ -97,7 +97,7 @@ void CChar::Action_StartSpecial( CREID_TYPE id )
 			return;
 	}
 
-	UpdateStatVal( STAT_DEX, static_cast<short>(-(5 + Calc_GetRandVal(5)) ));	// the stamina cost
+	UpdateStatVal( STAT_DEX, (short)(-(5 + Calc_GetRandVal(5)) ));	// the stamina cost
 }
 
 bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command from script
@@ -702,7 +702,7 @@ bool CChar::NPC_LookAtCharMonster( CChar * pChar )
 
 	if ( Fight_Attack( pChar ) == false )
 		return false;
-	m_pNPC->m_Act_Motivation = static_cast<uchar>(iActMotivation);
+	m_pNPC->m_Act_Motivation = (uchar)(iActMotivation);
 	return true;
 }
 
@@ -875,7 +875,7 @@ bool CChar::NPC_LookAtItem( CItem * pItem, int iDist )
 				case  TRIGRET_RET_FALSE:	return false;
 				default:					break;
 			}
-			iWantThisItem = static_cast<int>(Args.m_iN2);
+			iWantThisItem = (int)(Args.m_iN2);
 		}
 	}
 
@@ -1229,7 +1229,7 @@ bool CChar::NPC_Act_Follow( bool fFlee, int maxDistance, bool forceDistance )
 		}
 
 		fFlee			= (Args.m_iN1 != 0);
-		maxDistance		= static_cast<int>(Args.m_iN2);
+		maxDistance		= (int)(Args.m_iN2);
 		forceDistance	= (Args.m_iN3 != 0);
 	}
 
@@ -1370,7 +1370,7 @@ void CChar::NPC_Act_GoHome()
 		}
 		else
 		{
-			g_Log.Event( LOGL_WARN, "Guard 0%x '%s' has no guard post (%s)!\n", static_cast<dword>(GetUID()), GetName(), GetTopPoint().WriteUsed());
+			g_Log.Event( LOGL_WARN, "Guard 0%x '%s' has no guard post (%s)!\n", (dword)(GetUID()), GetName(), GetTopPoint().WriteUsed());
 
 			// If we arent conjured and still got no valid home
 			// then set our status to conjured and take our life.
@@ -1593,7 +1593,7 @@ bool CChar::NPC_Act_Food()
 	if ( iFoodLevel > 40 )
 		return false;							// and it is at least 60% hungry
 
-	m_pNPC->m_Act_Motivation = static_cast<uchar>((50 - (iFoodLevel / 2)));
+	m_pNPC->m_Act_Motivation = (uchar)((50 - (iFoodLevel / 2)));
 
 	short	iEatAmount = 1;
 	int		iSearchDistance = 2;
@@ -1672,7 +1672,7 @@ bool CChar::NPC_Act_Food()
 		if ( iClosestFood <= 1 )
 		{
 			//	can take and eat just in place
-			short iEaten = static_cast<short>(pClosestFood->ConsumeAmount(iEatAmount));
+			short iEaten = (short)(pClosestFood->ConsumeAmount(iEatAmount));
 			EatAnim(pClosestFood->GetName(), iEaten);
 			if ( !pClosestFood->GetAmount() )
 			{
@@ -1737,7 +1737,7 @@ bool CChar::NPC_Act_Food()
 			CItem	*pResBit = g_World.CheckNaturalResource(GetTopPoint(), IT_GRASS, true, this);
 			if ( pResBit && pResBit->GetAmount() && ( pResBit->GetTopPoint().m_z == iMyZ ) )
 			{
-				short iEaten = static_cast<short>(pResBit->ConsumeAmount(10));
+				short iEaten = (short)(pResBit->ConsumeAmount(10));
 				EatAnim("grass", iEaten/10);
 
 				//	the bit is not needed in a worldsave, timeout of 10 minutes
@@ -2312,7 +2312,7 @@ void CChar::NPC_Food()
 		{
 			//	can take and eat just in place
 			EXC_SET("eating nearby");
-			short iEaten = static_cast<short>(pClosestFood->ConsumeAmount(iEatAmount));
+			short iEaten = (short)(pClosestFood->ConsumeAmount(iEatAmount));
 			EatAnim(pClosestFood->GetName(), iEaten);
 			if ( !pClosestFood->GetAmount() )
 			{
@@ -2369,7 +2369,7 @@ void CChar::NPC_Food()
 			if ( pResBit && pResBit->GetAmount() && ( pResBit->GetTopPoint().m_z == iMyZ ) )
 			{
 				EXC_SET("eating grass");
-				short iEaten = static_cast<short>(pResBit->ConsumeAmount(15));
+				short iEaten = (short)(pResBit->ConsumeAmount(15));
 				EatAnim("grass", iEaten/10);
 
 				//	the bit is not needed in a worldsave, timeout of 10 minutes

@@ -121,6 +121,6 @@ int CFileList::ReadDir( lpctstr pszFileDir, bool bShowError )
 
 	closedir(dirp);
 #endif
-	return static_cast<int>(GetCount());
+	return (int)(GetCount());
 }
 

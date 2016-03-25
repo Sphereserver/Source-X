@@ -135,10 +135,10 @@ bool CSector::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
 			sVal.FormatVal(GetItemComplexity());
 			return true;
 		case SC_SEASON:
-			sVal.FormatVal(static_cast<int>(GetSeason()));
+			sVal.FormatVal((int)(GetSeason()));
 			return true;
 		case SC_WEATHER:
-			sVal.FormatVal(static_cast<int>(GetWeather()));
+			sVal.FormatVal((int)(GetWeather()));
 			return true;
 	}
 	EXC_CATCH;
@@ -163,7 +163,7 @@ bool CSector::r_LoadVal( CScript &s )
 			return true;
 		case SC_LIGHT:
 			if ( g_Cfg.m_bAllowLightOverride )
-				m_Env.m_Light = static_cast<uchar>(s.GetArgVal() | LIGHT_OVERRIDE);
+				m_Env.m_Light = (uchar)(s.GetArgVal() | LIGHT_OVERRIDE);
 			return true;
 		case SC_RAINCHANCE:
 			SetWeatherChance( true, s.HasArgs() ? s.GetArgVal() : -1 );
@@ -531,7 +531,7 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 		return m_Env.m_Light;
 
 	if ( IsInDungeon() )
-		return static_cast<uchar>(g_Cfg.m_iLightDungeon);
+		return (uchar)(g_Cfg.m_iLightDungeon);
 
 	int localtime = GetLocalTime();
 
@@ -552,7 +552,7 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 		if ( iTargLight < LIGHT_BRIGHT ) iTargLight = LIGHT_BRIGHT;
 		if ( iTargLight > LIGHT_DARK ) iTargLight = LIGHT_DARK;
 
-		return static_cast<uchar>(iTargLight);
+		return (uchar)(iTargLight);
 	}
 
 	int hour = ( localtime / ( 60)) % 24;
@@ -617,7 +617,7 @@ static const byte sm_FeluccaPhaseBrightness[] =
 	if ( iTargLight > LIGHT_DARK ) iTargLight = LIGHT_DARK;
 
 	if ( fQuickSet || m_Env.m_Light == iTargLight )		// Initializing the sector
-		return static_cast<uchar>(iTargLight);
+		return (uchar)(iTargLight);
 
 	// Gradual transition to global light level.
 	if ( m_Env.m_Light > iTargLight )
@@ -682,7 +682,7 @@ void CSector::SetDefaultWeatherChance()
 {
 	ADDTOCALLSTACK("CSector::SetDefaultWeatherChance");
 	CPointMap pt = GetBasePoint();
-	byte iPercent = static_cast<byte>(IMULDIV( pt.m_y, 100, g_MapList.GetY(pt.m_map) ));	// 100 = south
+	byte iPercent = (byte)(IMULDIV( pt.m_y, 100, g_MapList.GetY(pt.m_map) ));	// 100 = south
 	if ( iPercent < 50 )
 	{
 		// Anywhere north of the Britain Moongate is a good candidate for snow
@@ -779,11 +779,11 @@ void CSector::SetWeatherChance( bool fRain, int iChance )
 	}
 	else if ( fRain )
 	{
-		m_RainChance = static_cast<uchar>(iChance | LIGHT_OVERRIDE);
+		m_RainChance = (uchar)(iChance | LIGHT_OVERRIDE);
 	}
 	else
 	{
-		m_ColdChance = static_cast<uchar>(iChance | LIGHT_OVERRIDE);
+		m_ColdChance = (uchar)(iChance | LIGHT_OVERRIDE);
 	}
 
 	// Recalc the weather immediatly.
@@ -1113,7 +1113,7 @@ void CSector::OnTick(int iPulseCount)
 
 		EXC_DEBUGSUB_START;
 		CPointMap pt = GetBasePoint();
-		g_Log.EventDebug("#0 char 0%x '%s'\n", static_cast<dword>(pChar->GetUID()), pChar->GetName());
+		g_Log.EventDebug("#0 char 0%x '%s'\n", (dword)(pChar->GetUID()), pChar->GetName());
 		g_Log.EventDebug("#0 sector #%d [%d,%d,%d,%d]\n", GetIndex(),  pt.m_x, pt.m_y, pt.m_z, pt.m_map);
 		EXC_DEBUGSUB_END;
 	}
@@ -1158,7 +1158,7 @@ void CSector::OnTick(int iPulseCount)
 
 		EXC_DEBUGSUB_START;
 		CPointMap pt = GetBasePoint();
-		g_Log.EventError("#1 item 0%x '%s' [timer=%" PRId64 ", type=%" PRId64 "]\n", static_cast<dword>(pItem->GetUID()), pItem->GetName(), pItem->GetTimerAdjusted(), static_cast<int>(pItem->GetType()));
+		g_Log.EventError("#1 item 0%x '%s' [timer=%" PRId64 ", type=%" PRId64 "]\n", (dword)(pItem->GetUID()), pItem->GetName(), pItem->GetTimerAdjusted(), (int)(pItem->GetType()));
 		g_Log.EventError("#1 sector #%d [%d,%d,%d,%d]\n", GetIndex(),  pt.m_x, pt.m_y, pt.m_z, pt.m_map);
 		
 		EXC_DEBUGSUB_END;
@@ -1169,7 +1169,7 @@ void CSector::OnTick(int iPulseCount)
 		{
 			PAUSECALLSTACK;
 			CPointMap pt = GetBasePoint();
-			g_Log.EventError("#2 CGrayError: item 0%x '%s' [timer=%" PRId64 ", type=%d]\n", static_cast<dword>(pItem->GetUID()), pItem->GetName(), pItem->GetTimerAdjusted(), static_cast<int>(pItem->GetType()));
+			g_Log.EventError("#2 CGrayError: item 0%x '%s' [timer=%" PRId64 ", type=%d]\n", (dword)(pItem->GetUID()), pItem->GetName(), pItem->GetTimerAdjusted(), (int)(pItem->GetType()));
 			g_Log.EventError("#2 sector #%d [%d,%d,%d,%d]\n", GetIndex(),  pt.m_x, pt.m_y, pt.m_z, pt.m_map);
 			UNPAUSECALLSTACK;
 			EXC_CATCH_SUB(&e, "Sector");
@@ -1178,7 +1178,7 @@ void CSector::OnTick(int iPulseCount)
 		catch (...)
 		{
 			CPointMap pt = GetBasePoint();
-			g_Log.EventError("#3 ...: item 0%x '%s' [timer=%" PRId64 ", type=%d]\n", static_cast<dword>(pItem->GetUID()), pItem->GetName(), pItem->GetTimerAdjusted(), static_cast<int>(pItem->GetType()));\
+			g_Log.EventError("#3 ...: item 0%x '%s' [timer=%" PRId64 ", type=%d]\n", (dword)(pItem->GetUID()), pItem->GetName(), pItem->GetTimerAdjusted(), (int)(pItem->GetType()));\
 			g_Log.EventError("#3 sector #%d [%d,%d,%d,%d]\n", GetIndex(),  pt.m_x, pt.m_y, pt.m_z, pt.m_map);
 			EXC_CATCH_SUB(NULL, "Sector");
 			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);

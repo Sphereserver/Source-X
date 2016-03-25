@@ -172,7 +172,7 @@ void CClient::CharDisconnect()
 	{
 		CScriptTriggerArgs Args(iLingerTime, fCanInstaLogOut);
 		m_pChar->OnTrigger(CTRIG_LogOut, m_pChar, &Args);
-		iLingerTime = static_cast<int>(Args.m_iN1);
+		iLingerTime = (int)(Args.m_iN1);
 		fCanInstaLogOut = (Args.m_iN2 != 0);
 	}
 
@@ -290,7 +290,7 @@ void CClient::Announce( bool fArrive ) const
 			pMurders->SetTimeout(pMurders->m_itEqMurderCount.m_Decay_Balance * TICK_PER_SEC);
 		else			// or make it inactive on logout
 		{
-			pMurders->m_itEqMurderCount.m_Decay_Balance = static_cast<dword>(pMurders->GetTimerAdjusted());
+			pMurders->m_itEqMurderCount.m_Decay_Balance = (dword)(pMurders->GetTimerAdjusted());
 			pMurders->SetTimeout(-1);
 		}
 	}
@@ -868,7 +868,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 						ArgsCount++;
 				}
 
-				addBuff(static_cast<BUFF_ICONS>(iArgs[0]), iArgs[1], iArgs[2], static_cast<word>(iArgs[3]), Args, ArgsCount);
+				addBuff(static_cast<BUFF_ICONS>(iArgs[0]), iArgs[1], iArgs[2], (word)(iArgs[3]), Args, ArgsCount);
 			}
 			break;
 		case CV_REMOVEBUFF:
@@ -1355,7 +1355,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 
 				int SpellTimeout = g_Cfg.m_iSpellTimeout * TICK_PER_SEC;
 				if ( GetDefNum("SPELLTIMEOUT", true) )
-					SpellTimeout = static_cast<int>(GetDefNum("SPELLTIMEOUT", true));
+					SpellTimeout = (int)(GetDefNum("SPELLTIMEOUT", true));
 
 				addTarget(CLIMODE_TARG_SKILL_MAGERY, pPrompt, pSpellDef->IsSpellType(SPELLFLAG_TARG_XYZ), pSpellDef->IsSpellType(SPELLFLAG_HARM), SpellTimeout);
 				break;

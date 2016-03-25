@@ -106,7 +106,7 @@ int64 ahextoi64( lpctstr pszStr ) // Convert hex string to int64
 llong power(llong base, llong level)
 {
 	double rc = pow(static_cast<double>(base), static_cast<double>(level));
-	return static_cast<llong>(rc);
+	return (llong)(rc);
 }
 
 inline bool IsCharNumeric( char & Test )
@@ -557,11 +557,11 @@ try_dec:
 									iCount++; SKIP_ARGSEP(pszArgs);
 									if ( !strcmpi(pszArgs, "e") )
 									{
-										iResult = static_cast<llong>(log(static_cast<double>(iArgument)));
+										iResult = (llong)(log(static_cast<double>(iArgument)));
 									}
 									else if ( !strcmpi(pszArgs, "pi") )
 									{
-										iResult = static_cast<llong>(log(static_cast<double>(iArgument)) / log(M_PI));
+										iResult = (llong)(log(static_cast<double>(iArgument)) / log(M_PI));
 									}
 									else
 									{
@@ -573,13 +573,13 @@ try_dec:
 										}
 										else
 										{
-											iResult = static_cast<llong>(log(static_cast<double>(iArgument)) / log(static_cast<double>(iBase)));
+											iResult = (llong)(log(static_cast<double>(iArgument)) / log(static_cast<double>(iBase)));
 										}
 									}
 								}
 								else
 								{
-									iResult = static_cast<llong>(log10(static_cast<double>(iArgument)));
+									iResult = (llong)(log10(static_cast<double>(iArgument)));
 								}							
 							}
 						}
@@ -591,7 +591,7 @@ try_dec:
 						if ( pszArgs && *pszArgs )
 						{
 							iCount = 1;
-							iResult = static_cast<llong>(exp(static_cast<double>(GetVal(pszArgs))));
+							iResult = (llong)(exp(static_cast<double>(GetVal(pszArgs))));
 						}
 						else
 						{
@@ -613,7 +613,7 @@ try_dec:
 							if (iTosquare >= 0)
 							{
 								iCount++;
-								iResult = static_cast<llong>(sqrt(static_cast<double>(iTosquare)));
+								iResult = (llong)(sqrt(static_cast<double>(iTosquare)));
 							}
 							else
 							{
@@ -628,7 +628,7 @@ try_dec:
 						if ( pszArgs && *pszArgs )
 						{
 							iCount = 1;
-							iResult = static_cast<llong>(sin(static_cast<double>(GetVal(pszArgs))));
+							iResult = (llong)(sin(static_cast<double>(GetVal(pszArgs))));
 						}
 						else
 						{
@@ -643,7 +643,7 @@ try_dec:
 						if ( pszArgs && *pszArgs )
 						{
 							iCount = 1;
-							iResult = static_cast<llong>(asin(static_cast<double>(GetVal(pszArgs))));
+							iResult = (llong)(asin(static_cast<double>(GetVal(pszArgs))));
 						}
 						else
 						{
@@ -658,7 +658,7 @@ try_dec:
 						if ( pszArgs && *pszArgs )
 						{
 							iCount = 1;
-							iResult = static_cast<llong>(cos(static_cast<double>(GetVal(pszArgs))));
+							iResult = (llong)(cos(static_cast<double>(GetVal(pszArgs))));
 						}
 						else
 						{
@@ -673,7 +673,7 @@ try_dec:
 						if ( pszArgs && *pszArgs )
 						{
 							iCount = 1;
-							iResult = static_cast<llong>(acos(static_cast<double>(GetVal(pszArgs))));
+							iResult = (llong)(acos(static_cast<double>(GetVal(pszArgs))));
 						}
 						else
 						{
@@ -688,7 +688,7 @@ try_dec:
 						if ( pszArgs && *pszArgs )
 						{
 							iCount = 1;
-							iResult = static_cast<llong>(tan(static_cast<double>(GetVal(pszArgs))));
+							iResult = (llong)(tan(static_cast<double>(GetVal(pszArgs))));
 						}
 						else
 						{
@@ -703,7 +703,7 @@ try_dec:
 						if ( pszArgs && *pszArgs )
 						{
 							iCount = 1;
-							iResult = static_cast<llong>(atan(static_cast<double>(GetVal(pszArgs))));
+							iResult = (llong)(atan(static_cast<double>(GetVal(pszArgs))));
 						}
 						else
 						{
@@ -719,7 +719,7 @@ try_dec:
 						if ( iCount < 2 )
 							iResult = -1;
 						else
-							iResult = Str_IndexOf(ppCmd[0],ppCmd[1],(iCount==3)?static_cast<int>(GetVal(ppCmd[2])):0);
+							iResult = Str_IndexOf(ppCmd[0],ppCmd[1],(iCount==3)?(int)(GetVal(ppCmd[2])):0);
 					} break;
 
 					case INTRINSIC_STRMATCH:
@@ -753,7 +753,7 @@ try_dec:
 						if ( iCount < 2 )
 							iResult = 0;
 						else
-							iResult = Calc_GetBellCurve( static_cast<int>(GetVal( ppCmd[0] )), static_cast<int>(GetVal( ppCmd[1] )));
+							iResult = Calc_GetBellCurve( (int)(GetVal( ppCmd[0] )), (int)(GetVal( ppCmd[1] )));
 					} break;
 
 					case INTRINSIC_STRASCII:

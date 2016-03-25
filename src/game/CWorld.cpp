@@ -1083,7 +1083,7 @@ int64 CWorldClock::GetSystemClock()
 #ifdef _WIN32
 	FILETIME ft;
 	GetSystemTimeAsFileTime(&ft);
-	return ((static_cast<int64>(ft.dwHighDateTime) << 32) + ft.dwLowDateTime) / 10000;
+	return (((int64)(ft.dwHighDateTime) << 32) + ft.dwLowDateTime) / 10000;
 #else
 	struct timespec ts;
 	clock_gettime(CLOCK_REALTIME, &ts);
@@ -1277,7 +1277,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 			GarbageCollection_New();
 		}
 	}
-	else if ( m_iSaveStage < static_cast<int>(m_SectorsQty) )
+	else if ( m_iSaveStage < (int)(m_SectorsQty) )
 	{
 		// NPC Chars in the world secors and the stuff they are carrying.
 		// Sector lighting info.
@@ -1323,7 +1323,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 				m_Sectors[m_iSaveStage]->r_Write();
 		}
 	}
-	else if ( m_iSaveStage == static_cast<int>(m_SectorsQty) )
+	else if ( m_iSaveStage == (int)(m_SectorsQty) )
 	{
 		m_FileData.WriteSection( "TIMERF" );
 		g_World.m_TimedFunctions.r_Write(m_FileData);
@@ -1351,16 +1351,16 @@ bool CWorld::SaveStage() // Save world state in stages.
 			pPage->r_Write(m_FileData);
 		}
 	}
-	else if ( m_iSaveStage == static_cast<int>(m_SectorsQty)+1 )
+	else if ( m_iSaveStage == (int)(m_SectorsQty)+1 )
 	{
 		//	Empty save stage
 	}
-	else if ( m_iSaveStage == static_cast<int>(m_SectorsQty)+2 )
+	else if ( m_iSaveStage == (int)(m_SectorsQty)+2 )
 	{
 		// Now make a backup of the account file.
 		bRc = g_Accounts.Account_SaveAll();
 	}
-	else if ( m_iSaveStage == static_cast<int>(m_SectorsQty)+3 )
+	else if ( m_iSaveStage == (int)(m_SectorsQty)+3 )
 	{
 		// EOF marker to show we reached the end.
 		m_FileData.WriteSection("EOF");
@@ -1381,7 +1381,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		TIME_PROFILE_END;
 
 		tchar * time = Str_GetTemp();
-		sprintf(time, "%" PRId64 ".%04lld", static_cast<int64>(TIME_PROFILE_GET_HI/1000), static_cast<int64>(TIME_PROFILE_GET_LO));
+		sprintf(time, "%" PRId64 ".%04lld", (int64)(TIME_PROFILE_GET_HI/1000), (int64)(TIME_PROFILE_GET_LO));
 
 		g_Log.Event(LOGM_SAVE, "World save completed, took %s seconds\n", time);
 
@@ -1446,13 +1446,13 @@ bool CWorld::SaveForce() // Save world state
 	{
 		try
 		{
-			if (( m_iSaveStage >= 0 ) && ( m_iSaveStage < static_cast<int>(m_SectorsQty) ))
+			if (( m_iSaveStage >= 0 ) && ( m_iSaveStage < (int)(m_SectorsQty) ))
 				pCurBlock = msgs[1];
-			else if ( m_iSaveStage == static_cast<int>(m_SectorsQty) )
+			else if ( m_iSaveStage == (int)(m_SectorsQty) )
 				pCurBlock = msgs[2];
-			else if ( m_iSaveStage == static_cast<int>(m_SectorsQty)+1 )
+			else if ( m_iSaveStage == (int)(m_SectorsQty)+1 )
 				pCurBlock = msgs[3];
-			else if ( m_iSaveStage == static_cast<int>(m_SectorsQty)+2 )
+			else if ( m_iSaveStage == (int)(m_SectorsQty)+2 )
 				pCurBlock = msgs[4];
 			else
 				pCurBlock = msgs[5];
@@ -2371,7 +2371,7 @@ void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const NCHAR * pwText, 
 			if ( wTextUID[0] == '\0' )
 			{
 				tchar * pszMsg = Str_GetTemp();
-				sprintf(pszMsg, "<%s [%x]>", pSrc->GetName(), static_cast<dword>(pSrc->GetUID()));
+				sprintf(pszMsg, "<%s [%x]>", pSrc->GetName(), (dword)(pSrc->GetUID()));
 				int iLen = CvtSystemToNUNICODE( wTextUID, COUNTOF(wTextUID), pszMsg, -1 );
 				for ( size_t i = 0; pwText[i] && iLen < MAX_TALK_BUFFER - 1; i++, iLen++ )
 				{
@@ -2414,7 +2414,7 @@ dword CWorld::GetGameWorldTime( CServTime basetime ) const
 	// 8 real world seconds = 1 game minute.
 	// 1 real minute = 7.5 game minutes
 	// 3.2 hours = 1 game day.
-	return( static_cast<uint>(basetime.GetTimeRaw() / g_Cfg.m_iGameMinuteLength) );
+	return( (uint)(basetime.GetTimeRaw() / g_Cfg.m_iGameMinuteLength) );
 }
 
 CServTime CWorld::GetNextNewMoon( bool bMoonIndex ) const
@@ -2428,7 +2428,7 @@ CServTime CWorld::GetNextNewMoon( bool bMoonIndex ) const
 	dword iNextMonth = GetGameWorldTime() + iSynodic;
 
 	// Get the game time when this cycle will start
-	dword iNewStart = static_cast<dword>(iNextMonth - static_cast<double>(iNextMonth % iSynodic));
+	dword iNewStart = (dword)(iNextMonth - static_cast<double>(iNextMonth % iSynodic));
 
 	// Convert to TICK_PER_SEC ticks
 	CServTime time;

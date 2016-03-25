@@ -56,7 +56,7 @@ void CClient::resendBuffs()
 	if ( pStuck )
 	{
 		removeBuff(BI_PARALYZE);
-		addBuff(BI_PARALYZE, 1075827, 1075828, static_cast<word>(pStuck->GetTimerAdjusted()));
+		addBuff(BI_PARALYZE, 1075827, 1075828, (word)(pStuck->GetTimerAdjusted()));
 	}
 
 	// Spells
@@ -72,7 +72,7 @@ void CClient::resendBuffs()
 			continue;
 
 		iStatEffect = pItem->m_itSpell.m_spelllevel;
-		iTimerEffect = static_cast<word>(maximum(pItem->GetTimerAdjusted(), 0));
+		iTimerEffect = (word)(maximum(pItem->GetTimerAdjusted(), 0));
 
 		switch ( pItem->m_itSpell.m_spell )
 		{
@@ -742,7 +742,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 			break;
 	}
 
-	word Args[] = { static_cast<word>(wHue), static_cast<word>(font), static_cast<word>(bUnicode) };
+	word Args[] = { (word)(wHue), (word)(font), (word)(bUnicode) };
 
 	if ( *pszText == '@' )
 	{
@@ -774,15 +774,15 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		}
 		pszText++;
 		if ( Args[1] > FONT_QTY )
-			Args[1] = static_cast<word>(FONT_NORMAL);
+			Args[1] = (word)(FONT_NORMAL);
 	}
 
 	if ( Args[0] == HUE_TEXT_DEF )
-		Args[0] = static_cast<word>(defaultHue);
+		Args[0] = (word)(defaultHue);
 	if ( Args[1] == FONT_NORMAL )
-		Args[1] = static_cast<word>(defaultFont);
+		Args[1] = (word)(defaultFont);
 	if ( Args[2] == 0 )
-		Args[2] = static_cast<word>(defaultUnicode);
+		Args[2] = (word)(defaultUnicode);
 
 	if ( m_BarkBuffer.IsEmpty())
 	{
@@ -1179,7 +1179,7 @@ void CClient::addItemName( const CItem * pItem )
 	{
 		CScriptTriggerArgs Args( this );
 		Args.m_VarsLocal.SetStrNew("ClickMsgText", &szName[0]);
-		Args.m_VarsLocal.SetNumNew("ClickMsgHue", static_cast<int64>(wHue));
+		Args.m_VarsLocal.SetNumNew("ClickMsgHue", (int64)(wHue));
 
 		TRIGRET_TYPE ret = dynamic_cast<CObjBase*>(const_cast<CItem*>(pItem))->OnTrigger( "@AfterClick", m_pChar, &Args );	// CTRIG_AfterClick, ITRIG_AfterClick
 
@@ -1299,7 +1299,7 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 	{
 		CScriptTriggerArgs Args( this );
 		Args.m_VarsLocal.SetStrNew("ClickMsgText", pszTemp);
-		Args.m_VarsLocal.SetNumNew("ClickMsgHue", static_cast<int64>(wHue));
+		Args.m_VarsLocal.SetNumNew("ClickMsgHue", (int64)(wHue));
 
 		TRIGRET_TYPE ret = dynamic_cast<CObjBase*>(const_cast<CChar*>(pChar))->OnTrigger( "@AfterClick", m_pChar, &Args );	// CTRIG_AfterClick, ITRIG_AfterClick
 
@@ -1852,7 +1852,7 @@ void CClient::addPlayerSee( const CPointMap & ptold )
 	// Adjust to my new location, what do I now see here?
 	bool fAllShow = IsPriv(PRIV_ALLSHOW);
 	bool fOsiSight = IsSetOF(OF_OSIMultiSight);
-	byte tViewDist = static_cast<byte>(m_pChar->GetSight());
+	byte tViewDist = (byte)(m_pChar->GetSight());
 	CRegionBase * pCurrentCharRegion = m_pChar->GetTopPoint().GetRegion(REGION_TYPE_MULTI);
 
 	//	Items on the ground
@@ -2011,7 +2011,7 @@ void CClient::addPlayerSeeShip( const CPointMap & ptold )
 	// Adjust to my new location, what do I now see here?
 	bool fAllShow = IsPriv(PRIV_ALLSHOW);
 	bool fOsiSight = IsSetOF(OF_OSIMultiSight);
-	byte tViewDist = static_cast<byte>(m_pChar->GetSight());
+	byte tViewDist = (byte)(m_pChar->GetSight());
 
 	//	Items on the ground
 	CWorldSearch AreaItems(m_pChar->GetTopPoint(), UO_MAP_VIEW_RADAR);
@@ -2696,7 +2696,7 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 
 		if (bNameOnly) // if we only want to display the name (FEATURE_AOS_UPDATE_B disabled)
 		{
-			dword ClilocName = static_cast<dword>(pObj->GetDefNum("NAMELOC", false, true));
+			dword ClilocName = (dword)(pObj->GetDefNum("NAMELOC", false, true));
 
 			if (ClilocName)
 				m_TooltipData.InsertAt(0, new CClientTooltip(ClilocName));
@@ -2719,7 +2719,7 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 
 			if ( iRet != TRIGRET_RET_TRUE )
 			{
-				dword ClilocName = static_cast<dword>(pObj->GetDefNum("NAMELOC", false, true));
+				dword ClilocName = (dword)(pObj->GetDefNum("NAMELOC", false, true));
 
 				if ( pItem )
 				{
@@ -2859,7 +2859,7 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 						}
 					}
 
-					CGrayUID uid = static_cast<CGrayUID>(static_cast<dword>(pItem->GetDefNum("CRAFTEDBY")));
+					CGrayUID uid = static_cast<CGrayUID>((dword)(pItem->GetDefNum("CRAFTEDBY")));
 					CChar *pCraftsman = uid.CharFind();
 					if ( pCraftsman )
 					{
@@ -3590,9 +3590,9 @@ void CClient::addShowDamage( int damage, dword uid_damage )
 		damage = 0;
 
 	if ( PacketCombatDamage::CanSendTo(GetNetState()) )
-		new PacketCombatDamage(this, static_cast<word>(damage), static_cast<CGrayUID>(uid_damage));
+		new PacketCombatDamage(this, (word)(damage), static_cast<CGrayUID>(uid_damage));
 	else if ( PacketCombatDamageOld::CanSendTo(GetNetState()) )
-		new PacketCombatDamageOld(this, static_cast<byte>(damage), static_cast<CGrayUID>(uid_damage));
+		new PacketCombatDamageOld(this, (byte)(damage), static_cast<CGrayUID>(uid_damage));
 }
 
 void CClient::addSpeedMode( byte speedMode )
@@ -3740,11 +3740,11 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 
 	if ( IsPriv(PRIV_GM_PAGE) && g_World.m_GMPages.GetCount() > 0 )
 	{
-		sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_GMPAGES), static_cast<int>(g_World.m_GMPages.GetCount()), g_Cfg.m_cCommandPrefix);
+		sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_GMPAGES), (int)(g_World.m_GMPages.GetCount()), g_Cfg.m_cCommandPrefix);
 		addSysMessage(z);
 	}
 	if ( IsPriv(PRIV_JAILED) )
-		m_pChar->Jail(&g_Serv, true, static_cast<int>(GetAccount()->m_TagDefs.GetKeyNum("JailCell", true)));
+		m_pChar->Jail(&g_Serv, true, (int)(GetAccount()->m_TagDefs.GetKeyNum("JailCell", true)));
 	if ( g_Serv.m_timeShutdown.IsTimeValid() )
 		addBarkParse(g_Cfg.GetDefaultMsg(DEFMSG_MSG_SERV_SHUTDOWN_SOON), NULL, HUE_TEXT_DEF, TALKMODE_SYSTEM, FONT_BOLD);
 
@@ -3845,7 +3845,7 @@ byte CClient::Setup_Delete( dword iSlot ) // Deletion of character
 		return PacketDeleteError::InvalidRequest;
 	}
 
-	g_Log.Event(LOGM_ACCOUNTS|LOGL_EVENT, "%x:Account '%s' deleted char '%s' [0%x] on client login screen.\n", GetSocketID(), GetAccount()->GetName(), pChar->GetName(), static_cast<dword>(pChar->GetUID()));
+	g_Log.Event(LOGM_ACCOUNTS|LOGL_EVENT, "%x:Account '%s' deleted char '%s' [0%x] on client login screen.\n", GetSocketID(), GetAccount()->GetName(), pChar->GetName(), (dword)(pChar->GetUID()));
 	pChar->Delete();
 
 	// refill the list.
@@ -3903,7 +3903,7 @@ byte CClient::Setup_ListReq( const char * pszAccName, const char * pszPassword, 
 		return PacketLoginError::Blocked;	//Setup_Start() returns false only when login blocked by Return 1 in @Login
 	}*/
 
-	new PacketEnableFeatures(this, g_Cfg.GetPacketFlag(false, static_cast<RESDISPLAY_VERSION>(pAcc->GetResDisp()), static_cast<uchar>(maximum(pAcc->GetMaxChars(), pAcc->m_Chars.GetCharCount()))));
+	new PacketEnableFeatures(this, g_Cfg.GetPacketFlag(false, static_cast<RESDISPLAY_VERSION>(pAcc->GetResDisp()), (uchar)(maximum(pAcc->GetMaxChars(), pAcc->m_Chars.GetCharCount()))));
 	new PacketCharacterList(this);
 
 	m_Targ_Mode = CLIMODE_SETUP_CHARLIST;

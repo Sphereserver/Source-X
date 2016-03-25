@@ -332,7 +332,7 @@ CStoneMember::CStoneMember( CItemStone * pStone, CGrayUID uid, STONEPRIV_TYPE iT
 		CChar * pChar = uid.CharFind();
 		if ( pChar != NULL )
 		{
-			pChar->Memory_AddObjTypes(pStone, static_cast<word>(pStone->GetMemoryType()));
+			pChar->Memory_AddObjTypes(pStone, (word)(pStone->GetMemoryType()));
 			if ( pStone->IsTopLevel())
 			{
 				pChar->m_ptHome = pStone->GetTopPoint();	// Our new home.
@@ -368,7 +368,7 @@ CStoneMember::~CStoneMember()
 		CChar * pChar = GetLinkUID().CharFind();
 		if ( pChar )
 		{
-			pChar->Memory_ClearTypes(static_cast<word>(pStone->GetMemoryType())); 	// Make them forget they were ever in this guild
+			pChar->Memory_ClearTypes((word)(pStone->GetMemoryType())); 	// Make them forget they were ever in this guild
 		}
 	}
 }
@@ -385,7 +385,7 @@ lpctstr CStoneMember::GetPrivName() const
 	STONEPRIV_TYPE iPriv = GetPriv();
 
 	TemporaryString sDefname;
-	sprintf(sDefname, "STONECONFIG_PRIVNAME_PRIVID-%d", static_cast<int>(iPriv));
+	sprintf(sDefname, "STONECONFIG_PRIVNAME_PRIVID-%d", (int)(iPriv));
 	
 	CVarDefCont * pResult = g_Exp.m_VarDefs.GetKey(sDefname);
 	if (pResult)
@@ -566,7 +566,7 @@ void CItemStone::r_Write( CScript & s )
 				(dword) pMember->GetLinkUID() | (pMember->GetLinkUID().IsItem() ? UID_F_ITEM : 0),
 				static_cast<lpctstr>(pMember->GetTitle()),
 				pMember->GetPriv(),
-				static_cast<dword>(pMember->GetLoyalToUID()),
+				(dword)(pMember->GetLoyalToUID()),
 				pMember->m_UnDef.m_Val1,
 				pMember->m_UnDef.m_Val2,
 				pMember->GetAccountGold());
@@ -1290,7 +1290,7 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 					size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, COUNTOF(piCmd));
 					if ( iArgQty == 2 )
 					{
-						CGrayUID pGuildUid = static_cast<uint>(piCmd[0]);
+						CGrayUID pGuildUid = (uint)(piCmd[0]);
 						bool bWeDeclared = (piCmd[1] != 0);
 						CItem * pEnemyItem = pGuildUid.ItemFind();
 						if ( pEnemyItem && (pEnemyItem->IsType(IT_STONE_GUILD) || pEnemyItem->IsType(IT_STONE_TOWN)) )

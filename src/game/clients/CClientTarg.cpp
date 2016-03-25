@@ -33,12 +33,12 @@ bool CClient::OnTarg_Obj_Set( CObjBase * pObj )
 	{
 		const CItem * pItem = STATIC_CAST <CItem*> (pObj);
 		if ( pItem->GetAmount() > 1 )
-			sprintf(pszLogMsg, "'%s' commands uid=0%x (%s) [amount=%u] to '%s'", GetName(), static_cast<dword>(pObj->GetUID()), pObj->GetName(), pItem->GetAmount(), static_cast<lpctstr>(m_Targ_Text));
+			sprintf(pszLogMsg, "'%s' commands uid=0%x (%s) [amount=%u] to '%s'", GetName(), (dword)(pObj->GetUID()), pObj->GetName(), pItem->GetAmount(), static_cast<lpctstr>(m_Targ_Text));
 		else
-			sprintf(pszLogMsg, "'%s' commands uid=0%x (%s) to '%s'", GetName(), static_cast<dword>(pObj->GetUID()), pObj->GetName(), static_cast<lpctstr>(m_Targ_Text));
+			sprintf(pszLogMsg, "'%s' commands uid=0%x (%s) to '%s'", GetName(), (dword)(pObj->GetUID()), pObj->GetName(), static_cast<lpctstr>(m_Targ_Text));
 	}
 	else
-		sprintf(pszLogMsg, "'%s' commands uid=0%x (%s) to '%s'", GetName(), static_cast<dword>(pObj->GetUID()), pObj->GetName(), static_cast<lpctstr>(m_Targ_Text));
+		sprintf(pszLogMsg, "'%s' commands uid=0%x (%s) to '%s'", GetName(), (dword)(pObj->GetUID()), pObj->GetName(), static_cast<lpctstr>(m_Targ_Text));
 
 	// Check priv level for the new verb.
 	if ( ! g_Cfg.CanUsePrivVerb( pObj, m_Targ_Text, this ))
@@ -295,7 +295,7 @@ bool CClient::OnTarg_UnExtract( CObjBase * pObj, const CPointMap & pt )
 		if ( pItem == NULL )
 			return( false );
 
-		CPointMap ptOffset( static_cast<word>(piCmd[0]), static_cast<word>(piCmd[1]), static_cast<char>(piCmd[2]) );
+		CPointMap ptOffset( (word)(piCmd[0]), (word)(piCmd[1]), (char)(piCmd[2]) );
 		ptOffset += pt;
 		ptOffset.m_map = pt.m_map;
 		pItem->MoveToUpdate( ptOffset );
@@ -441,7 +441,7 @@ int CClient::Cmd_Extract( CScript * pScript, CRectMap &rect, int & zlowest )
 	{
 		for ( int my = rect.m_top; my <= rect.m_bottom; my++)
 		{
-			CPointMap ptCur(static_cast<word>(mx), static_cast<word>(my), 0, static_cast<uchar>(rect.m_map));
+			CPointMap ptCur((word)(mx), (word)(my), 0, (uchar)(rect.m_map));
 			const CGrayMapBlock * pBlock = g_World.GetMapBlock( ptCur );
 			if ( pBlock == NULL )
 				continue;
@@ -590,7 +590,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 			int64 piArgs[3];		// Maximum parameters in one line
 			Str_ParseCmds( szTmp, piArgs, COUNTOF( piArgs ));
 
-			CPointMap ptNudge(static_cast<word>(piArgs[0]),static_cast<word>(piArgs[1]),static_cast<char>(piArgs[2]) );
+			CPointMap ptNudge((word)(piArgs[0]),(word)(piArgs[1]),(char)(piArgs[2]) );
 
 			CWorldSearch AreaItem( ptCtr, iRadius );
 			AreaItem.SetAllShow( IsPriv( PRIV_ALLSHOW ));
@@ -695,7 +695,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 			int64 piArgs[16];		// Maximum parameters in one line
 			size_t iArgQty = Str_ParseCmds( szTmp, piArgs, COUNTOF( piArgs ));
 
-			char z = static_cast<char>(piArgs[0]);	// z height is the first arg.
+			char z = (char)(piArgs[0]);	// z height is the first arg.
 			size_t iArg = 0;
 			for ( int mx = rect.m_left; mx <= rect.m_right; mx++)
 			{
@@ -706,7 +706,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 					CItem * pItem = CItem::CreateTemplate(static_cast<ITEMID_TYPE>(RES_GET_INDEX(piArgs[iArg])), NULL, m_pChar);
 					ASSERT(pItem);
 					pItem->SetAttr( ATTR_MOVE_NEVER );
-					CPointMap ptCur(static_cast<word>(mx), static_cast<word>(my), z, pt.m_map);
+					CPointMap ptCur((word)(mx), (word)(my), z, pt.m_map);
 					pItem->MoveToUpdate( ptCur );
 					iCount++;
 				}
@@ -905,7 +905,7 @@ int CClient::OnSkill_EvalInt( CGrayUID uid, int iSkillLevel, bool fTest )
 	int iIntEntry = (iIntVal-1) / 10;
 	if ( iIntEntry < 0 )
 		iIntEntry = 0;
-	if ( static_cast<uint>(iIntEntry) >= COUNTOF( sm_szIntDesc ))
+	if ( (uint)(iIntEntry) >= COUNTOF( sm_szIntDesc ))
 		iIntEntry = COUNTOF( sm_szIntDesc )-1;
 
 	SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_EVALINT_RESULT ), pChar->GetName(), sm_szIntDesc[iIntEntry]);
@@ -939,7 +939,7 @@ int CClient::OnSkill_EvalInt( CGrayUID uid, int iSkillLevel, bool fTest )
 		int iMagicEntry = iMagicSkill / 200;
 		if ( iMagicEntry < 0 )
 			iMagicEntry = 0;
-		if ( static_cast<uint>(iMagicEntry) >= COUNTOF(sm_szMagicDesc))
+		if ( (uint)(iMagicEntry) >= COUNTOF(sm_szMagicDesc))
 			iMagicEntry = COUNTOF(sm_szMagicDesc)-1;
 
 		int iManaEntry = 0;
@@ -948,7 +948,7 @@ int CClient::OnSkill_EvalInt( CGrayUID uid, int iSkillLevel, bool fTest )
 
 		if ( iManaEntry < 0 )
 			iManaEntry = 0;
-		if ( static_cast<uint>(iManaEntry) >= COUNTOF(sm_szManaDesc))
+		if ( (uint)(iManaEntry) >= COUNTOF(sm_szManaDesc))
 			iManaEntry = COUNTOF(sm_szManaDesc)-1;
 
 		SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_EVALINT_RESULT_2 ), static_cast<lpctstr>(sm_szMagicDesc[iMagicEntry]), static_cast<lpctstr>(sm_szManaDesc[iManaEntry]));
@@ -1113,14 +1113,14 @@ int CClient::OnSkill_Anatomy( CGrayUID uid, int iSkillLevel, bool fTest )
 	int iStrEntry = (iStrVal-1)/10;
 	if ( iStrEntry < 0 )
 		iStrEntry = 0;
-	if ( static_cast<uint>(iStrEntry) >= COUNTOF( sm_szStrEval ))
+	if ( (uint)(iStrEntry) >= COUNTOF( sm_szStrEval ))
 		iStrEntry = COUNTOF( sm_szStrEval )-1;
 
 	int iDexVal = pChar->Stat_GetAdjusted(STAT_DEX);
 	int iDexEntry = (iDexVal-1)/10;
 	if ( iDexEntry < 0 )
 		iDexEntry = 0;
-	if ( static_cast<uint>(iDexEntry) >= COUNTOF( sm_szDexEval ))
+	if ( (uint)(iDexEntry) >= COUNTOF( sm_szDexEval ))
 		iDexEntry = COUNTOF( sm_szDexEval )-1;
 
 	tchar * pszTemp = Str_GetTemp();
@@ -1567,7 +1567,7 @@ bool CClient::OnTarg_Pet_Stable( CChar * pCharPet )
 	}
 
 	if ( IsSetOF(OF_PetSlots) )
-		m_pChar->FollowersUpdate(pCharPet, static_cast<short>(-maximum(1, pCharPet->GetDefNum("FOLLOWERSLOTS", true, true))));
+		m_pChar->FollowersUpdate(pCharPet, (short)(-maximum(1, pCharPet->GetDefNum("FOLLOWERSLOTS", true, true))));
 
 	pCharMaster->GetBank()->ContentAdd( pPetItem );
 	pCharMaster->Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_STABLEMASTER_CLAIM ) );
@@ -1613,7 +1613,7 @@ CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, d
 	if ( pMultiDef != NULL && ! (dwAttr&ATTR_MAGIC))
 	{
 		if ( pMultiDef->m_rect.m_bottom > 0 )
-			pt.m_y -= static_cast<short>(pMultiDef->m_rect.m_bottom - 1);
+			pt.m_y -= (short)(pMultiDef->m_rect.m_bottom - 1);
 
 		// Check for items in the way and bumpy terrain.
 
@@ -1625,11 +1625,11 @@ CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, d
 		int x = rect.m_left;
 		for ( ; x <rect.m_right; ++x )
 		{
-			ptn.m_x = static_cast<short>(x);
+			ptn.m_x = (short)(x);
 			int y = rect.m_top;
 			for ( ; y < rect.m_bottom; ++y )
 			{
-				ptn.m_y = static_cast<short>(y);
+				ptn.m_y = (short)(y);
 
 				if ( !ptn.IsValidPoint() )
 				{
@@ -2265,7 +2265,7 @@ static lpctstr const sm_Txt_LoomUse[] =
 			iUsed = pItemUse->ConsumeAmount( iNeed );
 		}
 
-		if ( static_cast<uint>(iHave  + iUsed) < (COUNTOF( sm_Txt_LoomUse ) - 1) )
+		if ( (uint)(iHave  + iUsed) < (COUNTOF( sm_Txt_LoomUse ) - 1) )
 		{
 			pItemTarg->m_itLoom.m_ClothQty += iUsed;
 			SysMessage( sm_Txt_LoomUse[ pItemTarg->m_itLoom.m_ClothQty ] );
@@ -2549,7 +2549,7 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 	sprintf(sTemp, g_Cfg.GetDefaultMsg( DEFMSG_PARTY_INVITE_TARG ), m_pChar->GetName());
 	pChar->SysMessage( sTemp );
 
-	m_pChar->SetKeyNum("PARTY_LASTINVITE", static_cast<dword>(pChar->GetUID()));
+	m_pChar->SetKeyNum("PARTY_LASTINVITE", (dword)(pChar->GetUID()));
 	m_pChar->SetKeyNum("PARTY_LASTINVITETIME", g_World.GetCurrentTime().GetTimeRaw() + (Calc_GetRandVal2(2,5) * TICK_PER_SEC));
 
 	new PacketPartyInvite(pChar->GetClient(), m_pChar);

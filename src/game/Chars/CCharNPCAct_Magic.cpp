@@ -184,9 +184,9 @@ bool CChar::NPC_FightMagery(CChar * pChar)
 	}
 	uchar i = 0;
 	if (pWand)
-		i = static_cast<uchar>(Calc_GetRandVal2(0, count));	//chance between all spells + wand
+		i = (uchar)(Calc_GetRandVal2(0, count));	//chance between all spells + wand
 	else
-		i = static_cast<uchar>(Calc_GetRandVal2(0, count-1));
+		i = (uchar)(Calc_GetRandVal2(0, count-1));
 
 	if (i > count)	// if i > count then we use wand to cast.
 	{
@@ -393,7 +393,7 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
 						CItem * pStone = GetBackpackItem(ITEMID_HEALING_STONE);
 						if (!pStone)
 							break;
-						if ((pStone->m_itNormal.m_morep.m_z == 0) && (Stat_GetVal(STAT_STR) < static_cast<int>(pStone->m_itNormal.m_more2)) && (pStone->m_itNormal.m_more1 >= pStone->m_itNormal.m_more2))
+						if ((pStone->m_itNormal.m_morep.m_z == 0) && (Stat_GetVal(STAT_STR) < (int)(pStone->m_itNormal.m_more2)) && (pStone->m_itNormal.m_more1 >= pStone->m_itNormal.m_more2))
 						{
 							Use_Obj(pStone, false);
 							return true; // we are not casting any spell but suceeded at using the stone created by this one, we are done now.

@@ -632,7 +632,7 @@ void CClient::Cmd_EditItem( CObjBase *pObj, int iSelect )
 		m_tmMenu.m_Item[count] = pItem->GetUID();
 		item[count].m_sText = pItem->GetName();
 		ITEMID_TYPE idi = pItem->GetDispID();
-		item[count].m_id = static_cast<word>(idi);
+		item[count].m_id = (word)(idi);
 		item[count].m_color = 0;
 
 		if ( !pItem->IsType(IT_EQ_MEMORY_OBJ) )
@@ -1008,7 +1008,7 @@ bool CClient::Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase *pSrc )
 
 		int SpellTimeout = g_Cfg.m_iSpellTimeout * TICK_PER_SEC;
 		if ( m_pChar->GetDefNum("SPELLTIMEOUT", true) )
-			SpellTimeout = static_cast<int>(m_pChar->GetDefNum("SPELLTIMEOUT", true));
+			SpellTimeout = (int)(m_pChar->GetDefNum("SPELLTIMEOUT", true));
 
 		addTarget(CLIMODE_TARG_SKILL_MAGERY, pPrompt, pSpellDef->IsSpellType(SPELLFLAG_TARG_XYZ), pSpellDef->IsSpellType(SPELLFLAG_HARM), SpellTimeout);
 		return true;
@@ -1146,7 +1146,7 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 			}
 
 			count++;
-			item[count].m_id = static_cast<word>(pCharDef->m_trackID);
+			item[count].m_id = (word)(pCharDef->m_trackID);
 			item[count].m_color = 0;
 			item[count].m_sText = pChar->GetName();
 			m_tmMenu.m_Item[count] = pChar->GetUID();
@@ -1371,12 +1371,12 @@ bool CClient::Cmd_SecureTrade( CChar *pChar, CItem *pItem )
 		PacketTradeAction cmd2(SECURE_TRADE_UPDATELEDGER);
 		if ( GetNetState()->isClientVersion(MINCLIVER_NEWSECURETRADE) )
 		{
-			cmd2.prepareUpdateLedger(pCont1, static_cast<dword>(m_pChar->m_virtualGold % 1000000000), static_cast<dword>(m_pChar->m_virtualGold / 1000000000));
+			cmd2.prepareUpdateLedger(pCont1, (dword)(m_pChar->m_virtualGold % 1000000000), (dword)(m_pChar->m_virtualGold / 1000000000));
 			cmd2.send(this);
 		}
 		if ( pChar->GetClient()->GetNetState()->isClientVersion(MINCLIVER_NEWSECURETRADE) )
 		{
-			cmd2.prepareUpdateLedger(pCont2, static_cast<dword>(pChar->m_virtualGold % 1000000000), static_cast<dword>(pChar->m_virtualGold / 1000000000));
+			cmd2.prepareUpdateLedger(pCont2, (dword)(pChar->m_virtualGold % 1000000000), (dword)(pChar->m_virtualGold / 1000000000));
 			cmd2.send(pChar->GetClient());
 		}
 	}
