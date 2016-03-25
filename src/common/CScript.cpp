@@ -110,11 +110,11 @@ dword CScriptKey::GetArgFlag( dword dwStart, dword dwMask )
 	ASSERT(m_pszArg);
 
 	if ( ! HasArgs())
-		return( dwStart ^ dwMask );
+		return ( dwStart ^ dwMask );
 	else if ( GetArgVal())
-		return( dwStart | dwMask );
+		return ( dwStart | dwMask );
 	else
-		return( dwStart &~ dwMask );
+		return ( dwStart &~ dwMask );
 }
 
 llong CScriptKey::GetArgLLVal()
@@ -122,7 +122,7 @@ llong CScriptKey::GetArgLLVal()
 	ADDTOCALLSTACK("CScriptKey::GetArgLLVal");
 	ASSERT(m_pszKey);
 	ASSERT(m_pszArg);
-	return( Exp_GetLLVal( m_pszArg ));
+	return Exp_GetLLVal( m_pszArg );
 }
 
 int CScriptKey::GetArgVal()
@@ -130,7 +130,15 @@ int CScriptKey::GetArgVal()
 	ADDTOCALLSTACK("CScriptKey::GetArgVal");
 	ASSERT(m_pszKey);
 	ASSERT(m_pszArg);
-	return( Exp_GetVal( m_pszArg ));
+	return Exp_GetVal( m_pszArg );
+}
+
+llong CScriptKey::GetArgLLRange()
+{
+	ADDTOCALLSTACK("CScriptKey::GetArgRange");
+	ASSERT(m_pszKey);
+	ASSERT(m_pszArg);
+	return Exp_GetLLRange(m_pszArg);
 }
 
 int CScriptKey::GetArgRange()
@@ -138,7 +146,7 @@ int CScriptKey::GetArgRange()
 	ADDTOCALLSTACK("CScriptKey::GetArgRange");
 	ASSERT(m_pszKey);
 	ASSERT(m_pszArg);
-	return( Exp_GetRange( m_pszArg ));
+	return Exp_GetRange( m_pszArg );
 }
 
 CScriptKey::CScriptKey() : m_pszKey(NULL), m_pszArg(NULL)

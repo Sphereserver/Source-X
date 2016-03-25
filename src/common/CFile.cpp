@@ -14,7 +14,7 @@ bool CFile::SetFilePath( lpctstr pszName )
 	if ( pszName == NULL )
 		return false;
 	if ( ! m_strFileName.CompareNoCase( pszName ))
-		return( true );
+		return true;
 	bool fIsOpen = ( m_hFile != NOFILE_HANDLE );
 	if ( fIsOpen )
 	{
@@ -23,9 +23,9 @@ bool CFile::SetFilePath( lpctstr pszName )
 	m_strFileName = pszName;
 	if ( fIsOpen )
 	{
-		return( Open( NULL, OF_READ|OF_BINARY )); // GetMode()	// open it back up. (in same mode as before)
+		return Open( NULL, OF_READ|OF_BINARY ); // GetMode()	// open it back up. (in same mode as before)
 	}
-	return( true );
+	return true;
 }
 
 lpctstr CFile::GetFileTitle() const
@@ -41,7 +41,7 @@ bool CFile::Open( lpctstr pszName, uint uMode, CFileException * e )
 	SetFilePath( pszName );
 
 #ifdef _WIN32
-	dword dwShareMode, dwCreationDisposition, dwDesiredAccess;
+	DWORD dwShareMode, dwCreationDisposition, dwDesiredAccess;
 
 	dwDesiredAccess = GENERIC_READ;
 	if ( uMode & OF_WRITE )
@@ -71,7 +71,7 @@ bool CFile::Open( lpctstr pszName, uint uMode, CFileException * e )
 #else
 	m_hFile = open( GetFilePath(), uMode );
 #endif // _WIN32
-	return( m_hFile != NOFILE_HANDLE );
+	return (m_hFile != NOFILE_HANDLE);
 }
 
 void CFile::Close()
@@ -93,7 +93,7 @@ dword CFile::GetLength()
 	dword lPos = GetPosition();	// save current pos.
 	dword lSize = SeekToEnd();
 	Seek( lPos, SEEK_SET );	// restore previous pos.
-	return( lSize );
+	return lSize;
 }
 
 dword CFile::GetPosition() const
@@ -105,14 +105,14 @@ dword CFile::GetPosition() const
 #endif
 }
 
-dword CFile::Seek(int lOffset, uint iOrigin )
+dword CFile::Seek( int lOffset, uint iOrigin )
 {
 #ifdef _WIN32
 	return SetFilePointer( m_hFile, lOffset, NULL, iOrigin );
 #else
 	if ( m_hFile <= 0 )
-		return( -1 );
-	return( lseek( m_hFile, lOffset, iOrigin ));
+		return -1;
+	return lseek( m_hFile, lOffset, iOrigin );
 #endif
 }
 
@@ -120,14 +120,14 @@ dword CFile::Read( void * pData, dword dwLength ) const
 {
 #ifdef _WIN32
 	DWORD dwRead;
-	if ( ! ReadFile( m_hFile, pData, (DWORD)dwLength, &dwRead, NULL ))
+	if ( !ReadFile( m_hFile, pData, (DWORD)dwLength, &dwRead, NULL ) )
 	{
 		NotifyIOError("read");
 		return 0;
 	}
 	return dwRead;
 #else
-	return( read( m_hFile, pData, (int) dwLength ));
+	return read( m_hFile, pData, (int) dwLength );
 #endif
 }
 
@@ -143,7 +143,7 @@ bool CFile::Write( const void * pData, dword dwLength ) const
 	}
 	return true;
 #else
-	return( write( m_hFile, (const char *) pData, (int) dwLength ) == (int) dwLength );
+	return write( m_hFile, (const char *)pData, (int)dwLength ) == (int)dwLength;
 #endif
 }
 
@@ -181,7 +181,8 @@ CGString CGFile::GetMergedFileName( lpctstr pszBase, lpctstr pszName ) // static
 	{
 		strcpy( szFilePath, pszBase );
 		int len = static_cast<int>(strlen( szFilePath ));
-		if (len && szFilePath[len - 1] != '\\' && szFilePath[len - 1] != '/') {
+		if (len && szFilePath[len - 1] != '\\' && szFilePath[len - 1] != '/')
+		{
 #ifdef _WIN32
 			strcat(szFilePath, "\\");
 #else
@@ -215,7 +216,7 @@ lpctstr CGFile::GetFilesTitle( lpctstr pszPath )	// static
 			break;
 		}
 	}
-	return( pszPath + len );
+	return (pszPath + len);
 }
 
 lpctstr CGFile::GetFilesExt( lpctstr pszName )	// static
@@ -234,14 +235,14 @@ lpctstr CGFile::GetFilesExt( lpctstr pszName )	// static
 			return( pszName + len );
 		}
 	}
-	return( NULL );	// has no ext.
+	return NULL;	// has no ext.
 }
 
 lpctstr CGFile::GetFileExt() const
 {
 	ADDTOCALLSTACK("CGFile::GetFileExt");
 	// get the EXTension including the .
-	return( GetFilesExt( GetFilePath()));
+	return GetFilesExt( GetFilePath() );
 }
 
 
@@ -266,8 +267,8 @@ bool CGFile::Open( lpctstr pszFilename, uint uModeFlags, void FAR * pExtra )
 	// OF_BINARY | OF_WRITE
 	if ( pszFilename == NULL )
 	{
-		if ( IsFileOpen())
-			return( true );
+		if ( IsFileOpen() )
+			return true;
 	}
 	else
 	{
@@ -279,14 +280,14 @@ bool CGFile::Open( lpctstr pszFilename, uint uModeFlags, void FAR * pExtra )
 	else
 		m_strFileName = pszFilename;
 
-	if ( m_strFileName.IsEmpty())
-		return( false );
+	if ( m_strFileName.IsEmpty() )
+		return false;
 
 	m_uMode = uModeFlags;
-	if ( ! OpenBase( pExtra ))
-		return( false );
+	if ( !OpenBase( pExtra ) )
+		return false;
 
-	return( true );
+	return true;
 }
 
 void CGFile::Close()
@@ -308,7 +309,7 @@ lpctstr CFileText::GetModeStr() const
 	// end of line translation is crap. ftell and fseek don't work correctly when you use it.
 	// fopen() args
 	if ( IsBinaryMode())
-		return ( IsWriteMode()) ? "wb" : "rb";
+		return ( IsWriteMode() ? "wb" : "rb" );
 	if ( GetMode() & OF_READWRITE )
 		return "a+b";
 	if ( GetMode() & OF_CREATE )
@@ -322,7 +323,7 @@ lpctstr CFileText::GetModeStr() const
 void CFileText::CloseBase()
 {
 	ADDTOCALLSTACK("CFileText::CloseBase");
-	if ( IsWriteMode())
+	if ( IsWriteMode() )
 	{
 		fflush(m_pStream);
 	}
@@ -337,7 +338,7 @@ bool CFileText::OpenBase( void FAR * pszExtra )
 	UNREFERENCED_PARAMETER(pszExtra);
 
 	// Open a file.
-	m_pStream = fopen( GetFilePath(), GetModeStr());
+	m_pStream = fopen( GetFilePath(), GetModeStr() );
 	if ( m_pStream == NULL )
 	{
 		return( false );
@@ -365,7 +366,7 @@ dword CFileText::Seek(int offset, uint origin )
 
 void CFileText::Flush() const
 {
-	if ( ! IsFileOpen())
+	if ( !IsFileOpen() )
 		return;
 	ASSERT(m_pStream);
 	fflush(m_pStream);
@@ -374,9 +375,9 @@ void CFileText::Flush() const
 dword CFileText::GetPosition() const
 {
 	// RETURN: -1 = error.
-	if ( ! IsFileOpen())
+	if ( !IsFileOpen() )
 		return static_cast<dword>(-1);
-	return( ftell(m_pStream));
+	return ftell(m_pStream);
 }
 
 dword CFileText::Read( void * pBuffer, size_t sizemax ) const
@@ -386,16 +387,16 @@ dword CFileText::Read( void * pBuffer, size_t sizemax ) const
 	ASSERT(pBuffer);
 	if ( IsEOF())
 		return( 0 );	// LINUX will ASSERT if we read past end.
-	return( static_cast<dword>(fread( pBuffer, 1, sizemax, m_pStream )));
+	return static_cast<dword>(fread( pBuffer, 1, sizemax, m_pStream ));
 }
 
 tchar * CFileText::ReadString( tchar * pBuffer, size_t sizemax ) const
 {
 	// Read a line of text. NULL = EOF
 	ASSERT(pBuffer);
-	if ( IsEOF())
-		return( NULL );	// LINUX will ASSERT if we read past end.
-	return( fgets( pBuffer, static_cast<int>(sizemax), m_pStream ));
+	if ( IsEOF() )
+		return NULL;	// LINUX will ASSERT if we read past end.
+	return fgets( pBuffer, static_cast<int>(sizemax), m_pStream );
 }
 
 #ifndef _WIN32
@@ -406,8 +407,8 @@ tchar * CFileText::ReadString( tchar * pBuffer, size_t sizemax ) const
 {
 	// RETURN: 1 = success else fail.
 	ASSERT(pData);
-	if ( ! IsFileOpen())
-		return( false );
+	if ( !IsFileOpen() )
+		return false;
 #ifdef _WIN32 //	Windows flushing, the only safe mode to cancel it ;)
 	if ( !bNoBuffer )
 	{
@@ -426,24 +427,24 @@ bool CFileText::WriteString( lpctstr pStr )
 {
 	// RETURN: < 0 = failed.
 	ASSERT(pStr);
-	return( Write( pStr, static_cast<dword>(strlen( pStr ))));
+	return Write( pStr, static_cast<dword>(strlen( pStr )) );
 }
 
 bool CFileText::IsEOF() const
 {
-	if ( ! IsFileOpen())
-		return( true );
-	return(( feof( m_pStream )) ? true : false );
+	if ( !IsFileOpen() )
+		return true;
+	return ( feof( m_pStream ) ? true : false );
 }
 
 size_t CFileText::VPrintf( lpctstr pFormat, va_list args )
 {
 	ASSERT(pFormat);
-	if ( ! IsFileOpen())
+	if ( !IsFileOpen() )
 		return static_cast<size_t>(-1);
 
 	size_t lenret = vfprintf( m_pStream, pFormat, args );
-	return( lenret );
+	return lenret;
 }
 
 size_t _cdecl CFileText::Printf( lpctstr pFormat, ... )
@@ -453,5 +454,5 @@ size_t _cdecl CFileText::Printf( lpctstr pFormat, ... )
 	va_start( vargs, pFormat );
 	size_t iRet = VPrintf( pFormat, vargs );
 	va_end( vargs );
-	return( iRet );
+	return iRet;
 }

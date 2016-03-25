@@ -1488,7 +1488,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc
 		if ( !strnicmp( pszKey, "CLIENT.",7))
 		{
 			pszKey += 7;
-			uint cli_num = static_cast<uint>(Exp_GetVal(pszKey));
+			uint cli_num = (Exp_GetUVal(pszKey));
 			uint i = 0;
 			SKIP_SEPARATORS(pszKey);
 

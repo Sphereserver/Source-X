@@ -970,22 +970,16 @@ bool CRandGroupDef::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * p
 			GETNONWHITESPACE( pszKey );
 
 			if ( pszKey[0] == '\0' )
-			{
 				sVal.FormatVal( GetRandMemberIndex(NULL, false) );
-			}
 			else
 			{
-				CGrayUID uidTofind = static_cast<dword>(Exp_GetVal(pszKey));
+				CGrayUID uidTofind = Exp_GetDWVal(pszKey);
 				CChar * pSend = uidTofind.CharFind();
 
 				if ( pSend )
-				{
 					sVal.FormatVal( GetRandMemberIndex(pSend, false) );
-				}
 				else
-				{
 					return false;
-				}
 			}
 
 		} break;

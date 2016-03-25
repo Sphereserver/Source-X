@@ -67,7 +67,7 @@ int gReallocs = 0; ///< Total reallocs caused by CGString resizing.
 size_t strcpylen(tchar * pDst, lpctstr pSrc)
 {
 	strcpy(pDst, pSrc);
-	return(strlen(pDst));
+	return strlen(pDst);
 }
 
 
@@ -78,7 +78,7 @@ size_t strcpylen(tchar * pDst, lpctstr pSrc, size_t iMaxSize)
 	ASSERT(iMaxSize);
 	strncpy(pDst, pSrc, iMaxSize - 1);
 	pDst[iMaxSize - 1] = '\0';	// always terminate.
-	return(strlen(pDst));
+	return strlen(pDst);
 }
 
 //***************************************************************************
@@ -200,12 +200,12 @@ CGString::CGString(const CGString &s)
 bool CGString::IsValid() const
 {
 	if (!m_iMaxLength) return false;
-	return(m_pchData[m_iLength] == '\0');
+	return (m_pchData[m_iLength] == '\0');
 }
 
 int CGString::GetLength() const
 {
-	return (m_iLength);
+	return m_iLength;
 }
 bool CGString::IsEmpty() const
 {
@@ -219,7 +219,7 @@ tchar & CGString::ReferenceAt(int nIndex)       // 0 based
 tchar CGString::GetAt(int nIndex) const      // 0 based
 {
 	ASSERT(nIndex <= m_iLength);	// allow to get the null char
-	return(m_pchData[nIndex]);
+	return m_pchData[nIndex];
 }
 void CGString::SetAt(int nIndex, tchar ch)
 {
@@ -229,7 +229,7 @@ void CGString::SetAt(int nIndex, tchar ch)
 }
 lpctstr CGString::GetPtr() const
 {
-	return(m_pchData);
+	return m_pchData;
 }
 void _cdecl CGString::Format(lpctstr pStr, ...)
 {
@@ -278,11 +278,11 @@ void CGString::FormatLLHex(ullong dwVal)
 
 int CGString::Compare(lpctstr pStr) const
 {
-	return (strcmp(m_pchData, pStr));
+	return strcmp(m_pchData, pStr);
 }
 int CGString::CompareNoCase(lpctstr pStr) const
 {
-	return (strcmpi(m_pchData, pStr));
+	return strcmpi(m_pchData, pStr);
 }
 
 int CGString::indexOf(tchar c)
@@ -487,7 +487,7 @@ size_t Str_TrimEndWhitespace(tchar * pStr, size_t len)
 		}
 	}
 	pStr[len] = '\0';
-	return(len);
+	return len;
 }
 
 tchar * Str_TrimWhitespace(tchar * pStr)
@@ -495,7 +495,7 @@ tchar * Str_TrimWhitespace(tchar * pStr)
 	// TODO: WARNING! Possible Memory Lake here!
 	GETNONWHITESPACE(pStr);
 	Str_TrimEndWhitespace(pStr, strlen(pStr));
-	return(pStr);
+	return pStr;
 }
 
 bool Str_Parse(tchar * pLine, tchar ** ppLine2, lpctstr pszSep)
@@ -571,7 +571,7 @@ size_t Str_ParseCmds(tchar * pszCmdLine, tchar ** ppCmd, size_t iMax, lpctstr ps
 	}
 	for (size_t j = iQty; j < iMax; j++)
 		ppCmd[j] = NULL;	// terminate if possible.
-	return(iQty);
+	return iQty;
 }
 
 size_t Str_ParseCmds(tchar * pszCmdLine, int64_t * piCmd, size_t iMax, lpctstr pszSep)
@@ -590,7 +590,7 @@ size_t Str_ParseCmds(tchar * pszCmdLine, int64_t * piCmd, size_t iMax, lpctstr p
 	{
 		piCmd[i] = 0;
 	}
-	return(iQty);
+	return iQty;
 }
 
 static int Str_CmpHeadI(lpctstr pszFind, lpctstr pszTable)
@@ -610,7 +610,7 @@ static int Str_CmpHeadI(lpctstr pszFind, lpctstr pszTable)
 		}
 		if (ch1 != ch2)
 		{
-			return(ch1 - ch2);
+			return (ch1 - ch2);
 		}
 	}
 }
@@ -631,7 +631,7 @@ int FindTableHeadSorted(lpctstr pszFind, lpctstr const * ppszTable, int iCount, 
 		lpctstr pszName = *((lpctstr const *)(((const byte*)ppszTable) + (i*iElemSize)));
 		int iCompare = Str_CmpHeadI(pszFind, pszName);
 		if (iCompare == 0)
-			return(i);
+			return i;
 		if (iCompare > 0)
 		{
 			iLow = i + 1;
@@ -641,7 +641,7 @@ int FindTableHeadSorted(lpctstr pszFind, lpctstr const * ppszTable, int iCount, 
 			iHigh = i - 1;
 		}
 	}
-	return(-1);
+	return -1;
 }
 
 int FindTableHead(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
@@ -650,10 +650,10 @@ int FindTableHead(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iE
 	{
 		int iCompare = Str_CmpHeadI(pszFind, *ppszTable);
 		if (!iCompare)
-			return(i);
-		ppszTable = (lpctstr const *)(((const byte*)ppszTable) + iElemSize);
+			return i;
+		ppszTable = (lpctstr const *)( (const byte*)ppszTable + iElemSize );
 	}
-	return(-1);
+	return -1;
 }
 
 int FindTableSorted(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
@@ -672,7 +672,7 @@ int FindTableSorted(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int 
 		lpctstr pszName = *((lpctstr const *)(((const byte*)ppszTable) + (i*iElemSize)));
 		int iCompare = strcmpi(pszFind, pszName);
 		if (iCompare == 0)
-			return(i);
+			return i;
 		if (iCompare > 0)
 		{
 			iLow = i + 1;
@@ -682,7 +682,7 @@ int FindTableSorted(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int 
 			iHigh = i - 1;
 		}
 	}
-	return(-1);
+	return -1;
 }
 
 int FindTable(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
@@ -691,10 +691,10 @@ int FindTable(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemS
 	for (int i = 0; i<iCount; i++)
 	{
 		if (!strcmpi(*ppszTable, pszFind))
-			return(i);
+			return i;
 		ppszTable = (lpctstr const *)(((const byte*)ppszTable) + iElemSize);
 	}
-	return(-1);
+	return -1;
 }
 
 size_t Str_GetBare(tchar * pszOut, lpctstr pszInp, size_t iMaxOutSize, lpctstr pszStrip)
@@ -730,7 +730,7 @@ size_t Str_GetBare(tchar * pszOut, lpctstr pszInp, size_t iMaxOutSize, lpctstr p
 		if (ch == 0)
 			break;
 	}
-	return(j - 1);
+	return (j - 1);
 }
 
 

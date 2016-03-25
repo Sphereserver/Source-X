@@ -1172,9 +1172,9 @@ bool CItemMultiCustom::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute com
 
 			AddItem(NULL,
 					static_cast<ITEMID_TYPE>(Exp_GetVal(ppArgs[0])),
-					static_cast<short>(Exp_GetVal(ppArgs[1])),
-					static_cast<short>(Exp_GetVal(ppArgs[2])),
-					static_cast<char>(Exp_GetVal(ppArgs[3])));
+					(Exp_GetSVal(ppArgs[1])),
+					(Exp_GetSVal(ppArgs[2])),
+					(Exp_GetCVal(ppArgs[3])));
 		} break;
 
 		case IMCV_ADDMULTI:
@@ -1192,9 +1192,9 @@ bool CItemMultiCustom::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute com
 			// design mode, the pieces need to be added individually
 			AddStairs(NULL,
 					id,
-					static_cast<short>(Exp_GetVal(ppArgs[1])),
-					static_cast<short>(Exp_GetVal(ppArgs[2])),
-					static_cast<char>(Exp_GetVal(ppArgs[3])),
+					(Exp_GetSVal(ppArgs[1])),
+					(Exp_GetSVal(ppArgs[2])),
+					(Exp_GetCVal(ppArgs[3])),
 					(sm_mapValidItems.find(id) == sm_mapValidItems.end()? 0 : -1));
 		} break;
 
@@ -1234,9 +1234,9 @@ bool CItemMultiCustom::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute com
 
 			RemoveItem(NULL,
 					static_cast<ITEMID_TYPE>(Exp_GetVal(ppArgs[0])),
-					static_cast<short>(Exp_GetVal(ppArgs[1])),
-					static_cast<short>(Exp_GetVal(ppArgs[2])),
-					static_cast<char>(Exp_GetVal(ppArgs[3])));
+					(Exp_GetSVal(ppArgs[1])),
+					(Exp_GetSVal(ppArgs[2])),
+					(Exp_GetCVal(ppArgs[3])));
 		} break;
 
 		case IMCV_RESET:

@@ -46,11 +46,12 @@ public:
 	lpctstr GetKey() const;
 	// Args passed with the key.
 	bool HasArgs() const;
-	tchar * GetArgRaw() const; // Not need to parse at all.
+	tchar * GetArgRaw() const;				// Not need to parse at all.
 	tchar * GetArgStr( bool * fQuoted );	// this could be a quoted string ?
 	tchar * GetArgStr();
 	llong GetArgLLVal();
 	int GetArgVal();
+	int64 GetArgLLRange();
 	int GetArgRange();
 	dword GetArgFlag( dword dwStart, dword dwMask );
 

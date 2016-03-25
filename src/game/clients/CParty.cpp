@@ -602,7 +602,7 @@ bool CPartyDef::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole *pSrc )
 			GETNONWHITESPACE(pszKey);
 			if ( pszKey[0] != '\0' )
 			{
-				CGrayUID charToCheck(static_cast<dword>(Exp_GetVal(pszKey)));
+				CGrayUID charToCheck(Exp_GetDWVal(pszKey));
 				CChar *pCharToCheck = charToCheck.CharFind();
 
 				sVal.FormatVal(pCharToCheck && pCharToCheck->m_pParty == this);
@@ -816,7 +816,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 				}
 				strcpylen(pUid, __pszArg, ++x);
 
-				toSysmessage = static_cast<dword>(Exp_GetVal(pUid));
+				toSysmessage = Exp_GetDWVal(pUid);
 			}
 
 			SKIP_SEPARATORS(pszArg);

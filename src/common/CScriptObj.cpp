@@ -443,7 +443,7 @@ bool CScriptObj::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	else if ( !strnicmp(pszKey, "UID.", 4) )
 	{
 		pszKey += 4;
-		CGrayUID uid = static_cast<dword>(Exp_GetVal(pszKey));
+		CGrayUID uid = Exp_GetDWVal(pszKey);
 		SKIP_SEPARATORS(pszKey);
 		pRef = uid.ObjFind();
 		return true;
@@ -2306,7 +2306,7 @@ jump_in:
 							tchar *tempPoint = porigValue;
 							ParseText( tempPoint, pSrc, 0, pArgs );
 							
-							CGrayUID pCurUid = static_cast<dword>(Exp_GetVal(tempPoint));
+							CGrayUID pCurUid = Exp_GetDWVal(tempPoint);
 							if ( pCurUid.IsValidUID() )
 							{
 								CObjBase * pObj = pCurUid.ObjFind();

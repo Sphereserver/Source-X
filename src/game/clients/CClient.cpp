@@ -934,14 +934,14 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					DEBUG_ERR(("Bad AddContextEntry usage: TextEntry < 100 is reserved for server usage!\n"));
 					return true;
 				}
-				m_pPopupPacket->addOption(static_cast<word>(entrytag), static_cast<dword>(Exp_GetVal(ppLocArgs[1])), static_cast<word>(Exp_GetVal(ppLocArgs[2])), static_cast<word>(Exp_GetVal(ppLocArgs[3])));
+				m_pPopupPacket->addOption((word)entrytag, Exp_GetDWVal(ppLocArgs[1]), Exp_GetWVal(ppLocArgs[2]), Exp_GetWVal(ppLocArgs[3]) );
 			}
 			break;
 		case CV_ARROWQUEST:
 			{
 				int64 piVal[3];
 				Str_ParseCmds( s.GetArgRaw(), piVal, COUNTOF(piVal));
-				addArrowQuest( static_cast<int>(piVal[0]), static_cast<int>(piVal[1]), static_cast<int>(piVal[2]) );
+				addArrowQuest( (int)piVal[0], (int)piVal[1], (int)piVal[2] );
 #ifdef _ALPHASPHERE
 				// todo: should use a proper container for these, since the arrows are lost
 				// when the client logs out, and also newer clients support multiple

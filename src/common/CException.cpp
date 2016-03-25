@@ -47,14 +47,14 @@ bool CGrayError::GetErrorMessage( lptstr lpszError, uint nMaxError,	uint * pnHel
 	{
 		// return the message defined by the system for the error code
 		tchar szCode[ 1024 ];
-		int nChars = GetSystemErrorMessage( m_hError, szCode, sizeof(szCode));
+		int nChars = GetSystemErrorMessage( m_hError, szCode, sizeof(szCode) );
 		if ( nChars )
 		{
 			if ( m_hError & 0x80000000 )
 				sprintf( lpszError, "Error Pri=%d, Code=0x%x(%s), Desc='%s'", m_eSeverity, m_hError, szCode, m_pszDescription );
 			else
 				sprintf( lpszError, "Error Pri=%d, Code=%u(%s), Desc='%s'", m_eSeverity, m_hError, szCode, m_pszDescription );
-			return( true );
+			return true;
 		}
 	}
 #endif
@@ -63,7 +63,7 @@ bool CGrayError::GetErrorMessage( lptstr lpszError, uint nMaxError,	uint * pnHel
 		sprintf( lpszError, "Error Pri=%d, Code=0x%x, Desc='%s'", m_eSeverity, m_hError, m_pszDescription );
 	else
 		sprintf( lpszError, "Error Pri=%d, Code=%u, Desc='%s'", m_eSeverity, m_hError, m_pszDescription );
-	return( true );
+	return true;
 }
 
 CGrayError::CGrayError( const CGrayError &e ) :

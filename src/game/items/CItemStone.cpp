@@ -657,7 +657,7 @@ bool CItemStone::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 		if ( !pszKey[0] )
 			return false;
 
-		CGrayUID pMemberUid = static_cast<dword>(Exp_GetVal(pszKey));
+		CGrayUID pMemberUid = Exp_GetDWVal(pszKey);
 		SKIP_SEPARATORS(pszKey);
 
 		CChar * pMemberChar = pMemberUid.CharFind();
@@ -702,7 +702,7 @@ bool CItemStone::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 		if ( !pszKey[0] )
 			return false;
 
-		CGrayUID pGuildUid = static_cast<dword>(Exp_GetVal(pszKey));
+		CGrayUID pGuildUid = Exp_GetDWVal(pszKey);
 		SKIP_SEPARATORS(pszKey);
 
 		CItem * pMemberGuild = pGuildUid.ItemFind();
@@ -892,7 +892,7 @@ bool CItemStone::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSr
 		if ( !pszCmd[0] )
 			return true;
 
-		CGrayUID pMemberUid = static_cast<dword>(Exp_GetVal(pszCmd));
+		CGrayUID pMemberUid = Exp_GetDWVal(pszCmd);
 		SKIP_SEPARATORS(pszCmd);
 
 		CChar * pMemberChar = pMemberUid.CharFind();
@@ -982,7 +982,7 @@ bool CItemStone::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSr
 		if ( !pszCmd[0] )
 			return true;
 
-		CGrayUID pGuildUid = static_cast<dword>(Exp_GetVal(pszCmd));
+		CGrayUID pGuildUid = Exp_GetDWVal(pszCmd);
 		SKIP_SEPARATORS(pszCmd);
 
 		CItem * pMemberGuild = pGuildUid.ItemFind();

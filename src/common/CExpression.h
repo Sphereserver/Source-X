@@ -10,7 +10,6 @@
 #ifndef _INC_CEXPRSSION_H
 #define _INC_CEXPRSSION_H
 
-#include <cinttypes>
 #include "common.h"
 #include "graycom.h"
 #include "CVarDefMap.h"
@@ -111,9 +110,9 @@ public:
 		return GetSingle(const_cast<lpctstr &>(pArgs));
 	}
 
-	inline int GetRange( lptstr &pArgs )
+	inline int64 GetRange( lptstr &pArgs )
 	{
-		return static_cast<int>(GetRange(const_cast<lpctstr &>(pArgs)));
+		return GetRange(const_cast<lpctstr &>(pArgs));
 	}
 
 	inline int GetRangeVals( lptstr &pExpr, int64 * piVals, int iMaxQty )
@@ -163,10 +162,22 @@ int Calc_GetBellCurve( int iValDiff, int iVariance );
 dword ahextoi( lpctstr pArgs ); // Convert hex string to integer
 int64 ahextoi64( lpctstr pArgs ); // Convert hex string to int64
 
-#define Exp_GetSingle( pa )		static_cast<int>(g_Exp.GetSingle( pa ))
-#define Exp_GetLLSingle( pa )	g_Exp.GetSingle( pa )
-#define Exp_GetVal( pa )		static_cast<int>(g_Exp.GetVal( pa ))
-#define Exp_GetLLVal( pa )		g_Exp.GetVal( pa )
-#define Exp_GetRange( pa )		g_Exp.GetRange( pa )
+#define Exp_GetSingle( pa )		(int)	g_Exp.GetSingle( pa )
+#define Exp_GetLLSingle( pa )			g_Exp.GetSingle( pa )
+
+#define Exp_GetRange( pa )		(int)	g_Exp.GetRange( pa )
+#define Exp_GetLLRange( pa )			g_Exp.GetRange( pa )
+
+#define Exp_GetCVal( pa )		(char)	g_Exp.GetVal( pa )
+#define Exp_GetUCVal( pa )		(uchar)	g_Exp.GetVal( pa )
+#define Exp_GetSVal( pa )		(short)	g_Exp.GetVal( pa )
+#define Exp_GetUSVal( pa )		(ushort)g_Exp.GetVal( pa )
+#define Exp_GetVal( pa )		(int)	g_Exp.GetVal( pa )
+#define Exp_GetUVal( pa )		(uint)	g_Exp.GetVal( pa )
+#define Exp_GetLLVal( pa )				g_Exp.GetVal( pa )
+#define Exp_GetULLVal( pa )		(ullong)g_Exp.GetVal( pa )
+#define Exp_GetBVal( pa )		(byte)	g_Exp.GetVal( pa )
+#define Exp_GetWVal( pa )		(word)	g_Exp.GetVal( pa )
+#define Exp_GetDWVal( pa )		(dword)	g_Exp.GetVal( pa )
 
 #endif	// _INC_CEXPRSSION_H

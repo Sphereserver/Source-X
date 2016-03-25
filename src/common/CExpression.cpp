@@ -1110,7 +1110,7 @@ int CExpression::GetRangeVals(lpctstr & pExpr, int64 * piVals, int iMaxQty)
 			case '}':
 			case ']':
 				pExpr++;	// consume this and end.
-				return( iQty );
+				return iQty;
 	
 			case '+':
 			case '*':
@@ -1126,7 +1126,7 @@ int CExpression::GetRangeVals(lpctstr & pExpr, int64 * piVals, int iMaxQty)
 		}
 	}
 
-	return( iQty );
+	return iQty;
 }
 
 int64 CExpression::GetRange(lpctstr & pExpr)
@@ -1138,15 +1138,15 @@ int64 CExpression::GetRange(lpctstr & pExpr)
 
 	if (iQty == 0)
 	{
-		return( 0 );
+		return 0;
 	}
 	if (iQty == 1) // It's just a simple value
 	{
-		return( lVals[0] );
+		return lVals[0];
 	}
 	if (iQty == 2) // It's just a simple range....pick one in range at random
 	{
-		return( Calc_GetRandLLVal2( minimum(lVals[0],lVals[1]), maximum(lVals[0],lVals[1]) ));
+		return Calc_GetRandLLVal2( minimum(lVals[0],lVals[1]), maximum(lVals[0],lVals[1]) );
 	}
 
 	// I guess it's weighted values
@@ -1174,5 +1174,5 @@ int64 CExpression::GetRange(lpctstr & pExpr)
 			break;
 	}
 
-	return( lVals[i-1] );
+	return lVals[i-1];
 }

@@ -764,7 +764,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 				s++;
 				continue;
 			}
-			Args[i] = static_cast<word>(Exp_GetVal(s));
+			Args[i] = (Exp_GetWVal(s));
 			i++;
 
 			if ( *s == ',' )
@@ -3657,7 +3657,7 @@ void CClient::SendPacket( tchar * pszKey )
 		else if ( toupper(*pszKey) == 'W' )
 		{
 			++pszKey;
-			word iVal = static_cast<word>(Exp_GetVal(pszKey));
+			word iVal = (Exp_GetWVal(pszKey));
 
 			packet->writeInt16(iVal);
 		}
@@ -3665,7 +3665,7 @@ void CClient::SendPacket( tchar * pszKey )
 		{
 			if ( toupper(*pszKey) == 'B' )
 				pszKey++;
-			byte iVal = static_cast<byte>(Exp_GetVal(pszKey));
+			byte iVal = (Exp_GetBVal(pszKey));
 
 			packet->writeByte(iVal);
 		}
