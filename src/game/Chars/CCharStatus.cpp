@@ -455,7 +455,7 @@ LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg
 int CChar::GetHealthPercent() const
 {
 	ADDTOCALLSTACK("CChar::GetHealthPercent");
-	int str = Stat_GetAdjusted(STAT_STR);
+	short str = Stat_GetAdjusted(STAT_STR);
 	if ( !str )
 		return 0;
 	return IMULDIV(Stat_GetVal(STAT_STR), 100, str);
@@ -803,7 +803,7 @@ CItem *CChar::GetSpellbookRandom(SPELL_TYPE iSpell) const	// Retrieves a spellbo
 short CChar::Food_GetLevelPercent() const
 {
 	ADDTOCALLSTACK("CChar::Food_GetLevelPercent");
-	int	max	= Stat_GetMax(STAT_FOOD);
+	short max	= Stat_GetMax(STAT_FOOD);
 	if ( max == 0 )
 		return 100;
 	return static_cast<short>(IMULDIV(Stat_GetVal(STAT_FOOD), 100, max));
@@ -812,7 +812,7 @@ short CChar::Food_GetLevelPercent() const
 lpctstr CChar::Food_GetLevelMessage(bool fPet, bool fHappy) const
 {
 	ADDTOCALLSTACK("CChar::Food_GetLevelMessage");
-	int	max = Stat_GetMax(STAT_FOOD);
+	short max = Stat_GetMax(STAT_FOOD);
 	if ( max == 0 )
 		return g_Cfg.GetDefaultMsg(DEFMSG_PET_HAPPY_UNAFFECTED);
 

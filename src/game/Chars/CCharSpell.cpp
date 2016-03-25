@@ -2,6 +2,7 @@
 #include "../clients/CClient.h"
 #include "../common/CGrayUIDextra.h"
 #include "../network/send.h"
+#include "../CWorld.h"
 #include "../Triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
@@ -1735,18 +1736,15 @@ CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iSki
 	// NOTE:
 	//   ATTR_MAGIC without ATTR_MOVE_NEVER is dispellable !
 
-	const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(spell);
-	CItem *pSpell = CItem::CreateBase(pSpellDef ? pSpellDef->m_idSpell : ITEMID_RHAND_POINT_NW);
-	ASSERT(pSpell);
 
-	// Check if there's any previous effect to clear before apply the new effect		
+	// Check if there's any previous effect to clear before apply the new effect	
 	for ( CItem *pSpellPrev = GetContentHead(); pSpellPrev != NULL; pSpellPrev = pSpellPrev->GetNext() )
 	{
 		if ( layer != pSpellPrev->GetEquipLayer() )
 			continue;
 
 		// Some spells create the memory using TIMER=-1 to make the effect last until cast again,
-		// die or logout. So casting this same spell again will just remove the current effect.		
+		// die or logout. So casting this same spell again will just remove the current effect.
 		if ( pSpellPrev->GetTimerAdjusted() == -1 )
 		{
 			pSpellPrev->Delete();
@@ -1760,6 +1758,10 @@ CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iSki
 		pSpellPrev->Delete();
 		break;
 	}
+
+	const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(spell);
+	CItem *pSpell = CItem::CreateBase(pSpellDef ? pSpellDef->m_idSpell : ITEMID_RHAND_POINT_NW);
+	ASSERT(pSpell);
 
 	switch ( layer )
 	{
@@ -2494,9 +2496,7 @@ bool CChar::Spell_CastDone()
 		else
 		{
 			if (pObj)
-			{
 				pObj->OnSpellEffect(spell, this, iSkillLevel, dynamic_cast <CItem*>(pObjSrc));
-			}
 		}
 	}
 	else if (bIsSpellField)
@@ -2866,9 +2866,9 @@ int CChar::Spell_CastStart()
 	// RETURN:
 	//  0-100
 	//  -1 = instant failure.
-	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
-	if ( pSpellDef == NULL )
-		return( -1 );
+	const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
+	if ( !pSpellDef )
+		return -1;
 
 	if ( IsClient() && IsSetMagicFlags(MAGICF_PRECAST) && !pSpellDef->IsSpellType(SPELLFLAG_NOPRECAST) )
 	{
@@ -2877,32 +2877,29 @@ int CChar::Spell_CastStart()
 		m_Act_TargPrv = GetClient()->m_Targ_PrvUID;
 
 		if ( !Spell_CanCast(m_atMagery.m_Spell, true, m_Act_TargPrv.ObjFind(), true) )
-			return(-1);
+			return -1;
 	}
 	else
 	{
 		if ( !Spell_TargCheck() )
-			return(-1);
+			return -1;
 	}
 
-	bool fWOP = ( GetPrivLevel() >= PLEVEL_Counsel ) ? g_Cfg.m_fWordsOfPowerStaff : g_Cfg.m_fWordsOfPowerPlayer;
+	int iSkill;
+	int iDifficulty;
+	if ( !pSpellDef->GetPrimarySkill(&iSkill, &iDifficulty) )
+		return -1;
+
+	iDifficulty /= 10;		// adjust to 0 - 100
+	bool fWOP = (GetPrivLevel() >= PLEVEL_Counsel) ? g_Cfg.m_fWordsOfPowerStaff : g_Cfg.m_fWordsOfPowerPlayer;
 	if ( !NPC_CanSpeak() || IsStatFlag(STATF_Insubstantial) )
 		fWOP = false;
 
-	int iDifficulty;
-	int iSkill;
-	if ( !pSpellDef->GetPrimarySkill( &iSkill, &iDifficulty ) )
-		return -1;
-
-	// Adjust to 0 - 100
-	iDifficulty	/= 10;
-
-	CGrayUID uid(m_Act_TargPrv);
-	CItem * pItem = uid.ItemFind();
 	bool fAllowEquip = false;
-	if ( pItem != NULL )
+	CItem *pItem = m_Act_TargPrv.ItemFind();
+	if ( pItem )
 	{
-		if ( pItem->IsType(IT_WAND))
+		if ( pItem->IsType(IT_WAND) )
 		{
 			// Wand use no words of power. and require no magery.
 			fAllowEquip = true;
@@ -2943,14 +2940,10 @@ int CChar::Spell_CastStart()
 	if ( !g_Cfg.m_fEquippedCast && !fAllowEquip )
 	{
 		if ( !Spell_Unequip(LAYER_HAND1) )
-			return( -1 );
+			return -1;
 		if ( !Spell_Unequip(LAYER_HAND2) )
-			return( -1 );
+			return -1;
 	}
-
-	// Animate casting.
-	if ( !pSpellDef->IsSpellType(SPELLFLAG_NO_CASTANIM) && !IsSetMagicFlags(MAGICF_NOANIM) )
-		UpdateAnimate( (pSpellDef->IsSpellType(SPELLFLAG_DIR_ANIM)) ? ANIM_CAST_DIR : ANIM_CAST_AREA );
 
 	m_atMagery.m_Spell = static_cast<SPELL_TYPE>(Args.m_iN1);
 	iDifficulty = static_cast<int>(Args.m_iN2);
@@ -2959,6 +2952,15 @@ int CChar::Spell_CastStart()
 	pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
 	if ( !pSpellDef )
 		return -1;
+
+	if ( g_Cfg.m_iRevealFlags & REVEALF_SPELLCAST )
+		Reveal(STATF_Hidden|STATF_Invisible);
+	else
+		Reveal(STATF_Hidden);
+
+	// Animate casting
+	if ( !pSpellDef->IsSpellType(SPELLFLAG_NO_CASTANIM) && !IsSetMagicFlags(MAGICF_NOANIM) )
+		UpdateAnimate(pSpellDef->IsSpellType(SPELLFLAG_DIR_ANIM) ? ANIM_CAST_DIR : ANIM_CAST_AREA);
 
 	fWOP = Args.m_VarsLocal.GetKeyNum("WOP", true) > 0 ? true : false;
 	if ( fWOP )
@@ -2972,29 +2974,24 @@ int CChar::Spell_CastStart()
 		}
 		else
 		{
+			tchar *pszTemp = Str_GetTemp();
 			size_t len = 0;
-			tchar * pszTemp = Str_GetTemp();
-
-			size_t i;
-			for ( i = 0; ; i++ )
+			for ( size_t i = 0; ; i++ )
 			{
 				tchar ch = pSpellDef->m_sRunes[i];
 				if ( !ch )
 					break;
-				len += strcpylen(pszTemp+len, g_Cfg.GetRune(ch));
-				pszTemp[len++] = ' ';
+				len += strcpylen(pszTemp + len, g_Cfg.GetRune(ch));
+				if ( pSpellDef->m_sRunes[i + 1] )
+					pszTemp[len++] = ' ';
 			}
-			if ( i > 0 )
+			if ( len > 0 )
 			{
 				pszTemp[len] = 0;
 				Speak(pszTemp, static_cast<HUE_TYPE>(WOPColor), TALKMODE_SPELL, static_cast<FONT_TYPE>(WOPFont));
 			}
 		}
 	}
-	if ( g_Cfg.m_iRevealFlags & REVEALF_SPELLCAST )
-		Reveal(STATF_Hidden|STATF_Invisible);
-	else
-		Reveal(STATF_Hidden);
 
 	SetTimeout(iWaitTime);
 	return iDifficulty;
@@ -3023,6 +3020,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	if ( spell == SPELL_Poison_Field && IsStatFlag(STATF_Poisoned) )
 		return false;
 
+	iSkillLevel = iSkillLevel / 2 + Calc_GetRandVal(iSkillLevel / 2);	// randomize the potency
 	int iEffect = g_Cfg.GetSpellEffect(spell, iSkillLevel);
 	int iDuration = pSpellDef->m_idLayer ? GetSpellDuration(spell, iSkillLevel, pCharSrc) : 0;
 	SOUND_TYPE iSound = pSpellDef->m_sound;
@@ -3034,7 +3032,6 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		iSound = sm_DrinkSounds[Calc_GetRandVal(COUNTOF(sm_DrinkSounds))];
 	}
 
-	iSkillLevel = iSkillLevel/2 + Calc_GetRandVal(iSkillLevel/2);	// randomize the effect.
 
 																	// Check if the spell is being resisted
 	ushort iResist = 0;
@@ -3042,8 +3039,8 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	{
 		iResist = Skill_GetBase(SKILL_MAGICRESISTANCE);
 		ushort iFirst = iResist / 50;
-		ushort iSecond = iResist - (((pCharSrc->Skill_GetBase(SKILL_MAGERY) - 200) / 50) + (1 + (spell / 8)) * 50);
-		uchar iResistChance = maximum(iFirst, iSecond) / 30;
+		ushort iSecond = iResist - (((pCharSrc->Skill_GetBase(SKILL_MAGERY) - 200) / 50) + static_cast<ushort>((1 + (spell / 8)) * 50));
+		uchar iResistChance = static_cast<uchar>(maximum(iFirst, iSecond) / 30);
 		iResist = Skill_UseQuick(SKILL_MAGICRESISTANCE, iResistChance, true, false) ? 25 : 0;	// If we successfully resist then we have a 25% damage reduction, 0 if we don't.
 
 		if ( IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) )
@@ -3115,7 +3112,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	}
 
 	spell = static_cast<SPELL_TYPE>(Args.m_iN1);
-	//iSkillLevel = static_cast<int>(Args.m_iN2);		//since effect/duration is now calculated before triggers, this iSkillLevel turned into a read-only value
+	iSkillLevel = static_cast<int>(Args.m_iN2);		// remember that effect/duration is calculated before triggers
 	DAMAGE_TYPE iDmgType = static_cast<DAMAGE_TYPE>(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("DamageType", true)));
 	ITEMID_TYPE iEffectID = static_cast<ITEMID_TYPE>(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1", true)));
 	fExplode = Args.m_VarsLocal.GetKeyNum("EffectExplode", true) > 0 ? true : false;

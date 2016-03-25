@@ -468,9 +468,10 @@ bool CClient::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 				if ( !this->m_pChar->m_pParty )
 				{
 					lpctstr oldKey = pszKey;
-					if ( !strnicmp(pszKey, ".CREATE", 7) )
+					if ( !strnicmp(pszKey, "CREATE", 7) )
 						pszKey +=7;
 
+					SKIP_SEPARATORS(pszKey);
 					CChar * pChar = static_cast<CChar*>(static_cast<CGrayUID>(Exp_GetSingle(pszKey)).CharFind());
 					if ( !pChar )
 						return false;

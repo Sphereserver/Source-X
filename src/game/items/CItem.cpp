@@ -4874,51 +4874,47 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 {
 	ADDTOCALLSTACK("CItem::OnSpellEffect");
 	UNREFERENCED_PARAMETER(bReflecting);	// items are not affected by Magic Reflection
-	// A spell is cast on this item.
-	// ARGS:
-	//  iSkillLevel = 0-1000 = difficulty. may be slightly larger . how advanced is this spell (might be from a wand)
+											// A spell is cast on this item.
+											// ARGS:
+											//  iSkillLevel = 0-1000 = difficulty. may be slightly larger . how advanced is this spell (might be from a wand)
 
+	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
 	CScriptTriggerArgs Args( spell, iSkillLevel, pSourceItem );
-	TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
 
-	if (( IsTrigUsed(TRIGGER_SPELLEFFECT) ) || ( IsTrigUsed(TRIGGER_ITEMSPELL) ))
+	if ( IsTrigUsed(TRIGGER_SPELLEFFECT) || IsTrigUsed(TRIGGER_ITEMSPELL) )
 	{
-		iRet = OnTrigger( ITRIG_SPELLEFFECT, pCharSrc, &Args );
-		spell = static_cast<SPELL_TYPE>(Args.m_iN1);
+		switch ( OnTrigger(ITRIG_SPELLEFFECT, pCharSrc, &Args) )
+		{
+			case TRIGRET_RET_TRUE:		return false;
+			case TRIGRET_RET_FALSE:		if ( pSpellDef && pSpellDef->IsSpellType(SPELLFLAG_SCRIPTED) ) return true;
+			default:					break;
+		}
 	}
 
-	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef( spell );
-
-	switch ( iRet )
-	{
-		case TRIGRET_RET_TRUE:		return false;
-		case TRIGRET_RET_FALSE:		if ( pSpellDef && pSpellDef->IsSpellType( SPELLFLAG_SCRIPTED ) ) return true;
-		default:					break;
-	}
-	
 	if ( IsTrigUsed(TRIGGER_EFFECT) )
-		iRet = Spell_OnTrigger( spell, SPTRIG_EFFECT, pCharSrc, &Args );
+	{
+		switch (Spell_OnTrigger(spell, SPTRIG_EFFECT, pCharSrc, &Args))
+		{
+			case TRIGRET_RET_TRUE:		return false;
+			case TRIGRET_RET_FALSE:		if ( pSpellDef && pSpellDef->IsSpellType(SPELLFLAG_SCRIPTED) ) return true;
+			default:					break;
+		}
+	}
 
 	spell = static_cast<SPELL_TYPE>(Args.m_iN1);
 	iSkillLevel = static_cast<int>(Args.m_iN2);
 	pSpellDef = g_Cfg.GetSpellDef( spell );
 
-	switch ( iRet )
-	{
-		case TRIGRET_RET_TRUE:		return false;
-		case TRIGRET_RET_FALSE:		if ( pSpellDef && pSpellDef->IsSpellType( SPELLFLAG_SCRIPTED ) ) return true;
-		default:					break;
-	}
 
 	if ( IsType(IT_WAND) )	// try to recharge the wand.
 	{
-		if ( ! m_itWeapon.m_spell || RES_GET_INDEX(m_itWeapon.m_spell) == spell )
+		if ( !m_itWeapon.m_spell || RES_GET_INDEX(m_itWeapon.m_spell) == spell )
 		{
 			SetAttr(ATTR_MAGIC);
-			if ( ! m_itWeapon.m_spell || ( pCharSrc && pCharSrc->IsPriv( PRIV_GM )))
+			if ( !m_itWeapon.m_spell || ( pCharSrc && pCharSrc->IsPriv(PRIV_GM) ) )
 			{
-				m_itWeapon.m_spell = static_cast<word>(spell);
-				m_itWeapon.m_spelllevel = static_cast<word>(iSkillLevel);
+				m_itWeapon.m_spell = static_cast<WORD>(spell);
+				m_itWeapon.m_spelllevel = static_cast<WORD>(iSkillLevel);
 				m_itWeapon.m_spellcharges = 0;
 			}
 
@@ -4933,13 +4929,13 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		return false;
 	}
 
-	word uDamage = 0;
+	WORD uDamage = 0;
 	switch ( spell )
 	{
 		case SPELL_Dispel_Field:
 			if ( GetType() == IT_SPELL )
 			{
-				if ( IsTopLevel())
+				if ( IsTopLevel() )
 					Effect( EFFECT_XYZ, ITEMID_FX_HEAL_EFFECT, pCharSrc, 9, 20 );
 				Delete();
 			}
@@ -4948,7 +4944,7 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		case SPELL_Mass_Dispel:
 			if ( GetType() == IT_SPELL )
 			{
-				if ( IsTopLevel())
+				if ( IsTopLevel() )
 					Effect( EFFECT_XYZ, ITEMID_FX_TELE_VANISH, pCharSrc, 8, 20 );
 				Delete();
 			}
@@ -4969,30 +4965,30 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			break;
 
 		case SPELL_Magic_Lock:
-			if ( ! SetMagicLock( pCharSrc, iSkillLevel ))
+			if ( !SetMagicLock( pCharSrc, iSkillLevel ) )
 				return( false );
 			break;
 
 		case SPELL_Unlock:
-			{
-				if ( !pCharSrc )
-					return false;
+		{
+			if ( !pCharSrc )
+				return false;
 
-				int iDifficulty = Use_LockPick( pCharSrc, true, false );
-				if ( iDifficulty < 0 )
-					return( false );
-				bool fSuccess = pCharSrc->Skill_CheckSuccess( SKILL_MAGERY, iDifficulty );
-				Use_LockPick( pCharSrc, false, ! fSuccess );
-				return fSuccess;
-			}
+			int iDifficulty = Use_LockPick( pCharSrc, true, false );
+			if ( iDifficulty < 0 )
+				return( false );
+			bool fSuccess = pCharSrc->Skill_CheckSuccess( SKILL_MAGERY, iDifficulty );
+			Use_LockPick( pCharSrc, false, ! fSuccess );
+			return fSuccess;
+		}
 
 		case SPELL_Mark:
 			if ( !pCharSrc )
 				return false;
 
-			if ( ! pCharSrc->IsPriv(PRIV_GM))
+			if ( !pCharSrc->IsPriv(PRIV_GM))
 			{
-				if ( ! IsType(IT_RUNE) && ! IsType(IT_TELEPAD) )
+				if ( !IsType(IT_RUNE) && ! IsType(IT_TELEPAD) )
 				{
 					pCharSrc->SysMessage( g_Cfg.GetDefaultMsg(DEFMSG_SPELL_RECALL_NOTRUNE) );
 					return false;

@@ -2934,5 +2934,76 @@ Fixed some spells not being correctly found in case of having multiple books sin
 Script Pack:
 	-sphere_defs.scp: Added SKF_DISABLED
 
-25-02-2015, Nolok
+25-02-2016, Nolok
 Fixed: Spawn items sometimes created with random COUNT property.
+
+28-02-2016, Coruja
+Fixed: Buff spells acting like damage spells.
+Changed: Some changes on spell triggers (@Effect [spells] / @SpellEffect [chars]) to allow more user customization
+	-Renamed LOCAL.Dam to LOCAL.Effect, now it can be used on all spells (damage, buff, etc) instead only on damage spells
+	-Added new LOCAL.Duration to change spell duration
+	-ARGN2 [skill level] is now read-only
+	-ARGN3 [effect multiplicator] got removed, it's no longer needed since now the spell effect value/duration can be changed using LOCAL.Effect/LOCAL.Duration
+
+29-02-2016, Coruja
+Changed: Function REPORTEDCLIVER now will return the full client version string (eg: 5.0.2d) and REPORTEDCLIVER.1 will return the raw version number (eg: 5.0.2d = 5000204).
+Added: Support for [*]UpdateRange client macros.
+
+01-03-2016, Coruja
+Fixed: Sphere crash when any old UO:3D client try to connect.
+Fixed: Chars not checking if it still have enough STR to use equipped items when decrease STR/MODSTR.
+
+05-03-2016, Coruja
+[sphere_monsters.scp]: Added new TOL NPCs Giant Gorilla, Tiger Cub, Tyrannosaurus Rex (incomplete yet).
+[sphere_map_points0/1.scp]: Updated MoonGates template.
+
+07-03-2016, Coruja
+Fixed: Invisibility spell not removing previous Hiding skill effect on success.
+Changed: SPEECHCOLOR property now can be used on players too (read-only).
+Changed: WOPColor .ini setting now will inherit color from char SPEECHCOLOR value if set to 0.
+
+08-03-2016, Coruja
+Fixed: NPCs permanently adding target to ignore list when they can't see it.
+Fixed: NPCs getting stuck over traps / field spells without walk away.
+
+10-03-2016, Coruja
+Fixed: Typedef t_booze returning console error when used more than once.
+Changed: SRC on char trigger @EffectAdd now will point to the spell caster instead target.
+
+11-03-2016, Coruja
+Fixed: Magic Reflection spell effect not working correctly.
+Fixed: Poison / Poison Field spells not calling trigger @EffectAdd on chars.
+Fixed: Console error when call ATTACKER.x function using invalid 'x' value.
+
+14-03-2016, Coruja
+Added: ARCSIN, ARCCOS, ARCTAN intrinsic functions.
+Fixed: Console error when NPCs cast buff/debuff spells on players and die, leaving the spell memory linked on an invalid UID.
+Changed: Slightly changed armor % distribution between layers to match old T2A style.
+	-Distribution on shields is now 7% of ARMOR value instead [Item ARMOR * (Char PARRYING / 10)]. This could reduce a lot of ARMOR on shields, but there's no problem since shields are used to block the entire damage (parrying) and not to raise ARMOR.
+
+15-03-2016, Nolok
+Changed: Reverted ARGN2 on @Effect and @SpellEffect to be Read/Write, since someone still may need it, but keep in mind that effect/duration/etc are calculated before these triggers.
+	Also, since some commit, ARGN2 is the randomized spell "potency" used internally, not the original one used to cast/spelleffect the spell.
+
+16-03-2016, Coruja
+Fixed: Console error (object not placed in the world) when casting spells that equip memories with TIMER=-1.
+Fixed: Weird walk animation when NPCs step on traps / field spells.
+
+17-03-2016, Coruja
+Fixed: Spells WOP sending an extra whitespace at the end (eg: "Rel Por ") breaking Razor/UOSteam WOP formatting feature.
+[Sphere.ini]:
+	-Removed COMBAT_OSIDAMAGEMOD combat flag.
+	-Added new CombatDamageEra setting, which does exactly the same thing using the same formulas, but now able to switch between 3 damage formulas instead 2.
+
+18-03-2016, Coruja
+Fixed: NPCs getting stuck without move when their combat target use hiding/invisibility.
+Added: New LOCAL.ItemDamageLayer (read/write) on trigger @GetHit to get/select the char LAYER that will be damaged on hit.
+
+20-03-2016, Coruja
+Fixed: Sphere not storing correct client version on some specific clients, making it send unsupported packets to these clients (resulting in client crash).
+
+21-03-2016, Coruja
+Changed: Multi placement target now will center to the multi front door (as OSI does) instead multi center.
+
+24-03-2016, Coruja
+Changed: As many users requested, walk through hidden/invisible chars won't require full stamina to pass anymore (this can be customized using ARGN1 on @PersonalSpace trigger)

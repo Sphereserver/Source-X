@@ -632,6 +632,11 @@ bool CChar::OnAttackedBy( CChar * pCharSrc, int iHarmQty, bool fCommandPet, bool
 	return( true );
 }
 
+// Armor layers that can be damaged on combat
+// PS: Hand layers (weapons/shields) are not included here
+static const LAYER_TYPE sm_ArmorDamageLayers[] = { LAYER_SHOES, LAYER_PANTS, LAYER_SHIRT, LAYER_HELM, LAYER_GLOVES, LAYER_COLLAR, LAYER_HALF_APRON, LAYER_CHEST, LAYER_TUNIC, LAYER_ARMS, LAYER_CAPE, LAYER_ROBE, LAYER_SKIRT, LAYER_LEGS };
+
+// Layers covering the armor zone
 static const LAYER_TYPE sm_ArmorLayerHead[] = { LAYER_HELM };															// ARMOR_HEAD
 static const LAYER_TYPE sm_ArmorLayerNeck[] = { LAYER_COLLAR };															// ARMOR_NECK
 static const LAYER_TYPE sm_ArmorLayerBack[] = { LAYER_SHIRT, LAYER_CHEST, LAYER_TUNIC, LAYER_CAPE, LAYER_ROBE };		// ARMOR_BACK
@@ -643,11 +648,11 @@ static const LAYER_TYPE sm_ArmorLayerFeet[] = { LAYER_SHOES, LAYER_LEGS };						
 
 struct CArmorLayerType
 {
-	word m_wCoverage;	// Percentage of humanoid body area
+	WORD m_wCoverage;	// Percentage of humanoid body area
 	const LAYER_TYPE * m_pLayers;
 };
 
-static const CArmorLayerType sm_ArmorLayers[ARMOR_QTY] =	// layers covering the armor zone.
+static const CArmorLayerType sm_ArmorLayers[ARMOR_QTY] =
 {
 	{ 15,	sm_ArmorLayerHead },	// ARMOR_HEAD
 	{ 7,	sm_ArmorLayerNeck },	// ARMOR_NECK
@@ -892,6 +897,7 @@ effect_bounce:
 	}
 
 	CScriptTriggerArgs Args( iDmg, uType, static_cast<int64>(0) );
+	Args.m_VarsLocal.SetNum("ItemDamageLayer", sm_ArmorDamageLayers[Calc_GetRandVal(COUNTOF(sm_ArmorDamageLayers))]);
 	Args.m_VarsLocal.SetNum("ItemDamageChance", 40);
 
 	if ( IsTrigUsed(TRIGGER_GETHIT) )
@@ -905,33 +911,10 @@ effect_bounce:
 	int iItemDamageChance = static_cast<int>(Args.m_VarsLocal.GetKeyNum("ItemDamageChance", true));
 	if ( (iItemDamageChance > Calc_GetRandVal(100)) && !pCharDef->Can(CAN_C_NONHUMANOID) )
 	{
-		int iHitRoll = Calc_GetRandVal(100);
-		BODYPART_TYPE iHitArea = ARMOR_HEAD;
-		while ( iHitArea < (ARMOR_QTY - 1) )
-		{
-			iHitRoll -= sm_ArmorLayers[iHitArea].m_wCoverage;
-			if ( iHitRoll < 0 )
-				break;
-			iHitArea = static_cast<BODYPART_TYPE>( iHitArea + 1 );
-		}
-
-		LAYER_TYPE iHitLayer = LAYER_NONE;
-		switch ( iHitArea )
-		{
-			case ARMOR_HEAD:	iHitLayer = sm_ArmorLayerHead[Calc_GetRandVal(COUNTOF(sm_ArmorLayerHead))];		break;
-			case ARMOR_NECK:	iHitLayer = sm_ArmorLayerNeck[Calc_GetRandVal(COUNTOF(sm_ArmorLayerNeck))];		break;
-			case ARMOR_BACK:	iHitLayer = sm_ArmorLayerBack[Calc_GetRandVal(COUNTOF(sm_ArmorLayerBack))];		break;
-			case ARMOR_CHEST:	iHitLayer = sm_ArmorLayerChest[Calc_GetRandVal(COUNTOF(sm_ArmorLayerChest))];	break;
-			case ARMOR_ARMS:	iHitLayer = sm_ArmorLayerArms[Calc_GetRandVal(COUNTOF(sm_ArmorLayerArms))];		break;
-			case ARMOR_HANDS:	iHitLayer = sm_ArmorLayerHands[Calc_GetRandVal(COUNTOF(sm_ArmorLayerHands))];	break;
-			case ARMOR_LEGS:	iHitLayer = sm_ArmorLayerLegs[Calc_GetRandVal(COUNTOF(sm_ArmorLayerLegs))];		break;
-			case ARMOR_FEET:	iHitLayer = sm_ArmorLayerFeet[Calc_GetRandVal(COUNTOF(sm_ArmorLayerFeet))];		break;
-			default:			break;
-		}
-
-		CItem * pItemHit = LayerFind( iHitLayer );
-		if ( pItemHit != NULL )
-			pItemHit->OnTakeDamage( iDmg, pSrc, uType );
+		LAYER_TYPE iHitLayer = static_cast<LAYER_TYPE>(Args.m_VarsLocal.GetKeyNum("ItemDamageLayer", true));
+		CItem *pItemHit = LayerFind(iHitLayer);
+		if ( pItemHit )
+			pItemHit->OnTakeDamage(iDmg, pSrc, uType);
 	}
 
 	// Remove stuck/paralyze effect
@@ -1146,11 +1129,11 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 	{
 		int iDmgBonus = minimum(static_cast<int>(GetDefNum("INCREASEDAM", true, true)), 100);		// Damage Increase is capped at 100%
 
-		// Racial Bonus (Berserk), gargoyles gains +15% Damage Increase per each 20 HP lost
+																									// Racial Bonus (Berserk), gargoyles gains +15% Damage Increase per each 20 HP lost
 		if ((g_Cfg.m_iRacialFlags & RACIALF_GARG_BERSERK) && IsGargoyle())
 			iDmgBonus += minimum(15 * ((Stat_GetMax(STAT_STR) - Stat_GetVal(STAT_STR)) / 20), 60);		// value is capped at 60%
 
-		// Horrific Beast (necro spell) add +25% Damage Increase
+																										// Horrific Beast (necro spell) add +25% Damage Increase
 		if (g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B)
 		{
 			CItem * pPoly = LayerFind(LAYER_SPELL_Polymorph);
@@ -1158,66 +1141,74 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 				iDmgBonus += 25;
 		}
 
-		if (IsSetCombatFlags(COMBAT_OSIDAMAGEMOD))
+		switch ( g_Cfg.m_iCombatDamageEra )
 		{
-			// AOS damage bonus
-			iDmgBonus += Skill_GetBase(SKILL_TACTICS) / 16;
-			if (Skill_GetBase(SKILL_TACTICS) >= 1000)
-				iDmgBonus += 6;	//6.25
-
-			iDmgBonus += Skill_GetBase(SKILL_ANATOMY) / 20;
-			if (Skill_GetBase(SKILL_ANATOMY) >= 1000)
-				iDmgBonus += 5;
-
-			if (pWeapon != NULL && pWeapon->IsType(IT_WEAPON_AXE))
+			default:
+			case 0:
 			{
-				iDmgBonus += Skill_GetBase(SKILL_LUMBERJACKING) / 50;
-				if (Skill_GetBase(SKILL_LUMBERJACKING) >= 1000)
-					iDmgBonus += 10;
+				// Sphere damage bonus (custom)
+				if ( !iStatBonus )
+					iStatBonus = static_cast<STAT_TYPE>(STAT_STR);
+				if ( !iStatBonusPercent )
+					iStatBonusPercent = 10;
+				iDmgBonus += Stat_GetAdjusted(iStatBonus) * iStatBonusPercent / 100;
+				break;
 			}
 
-			if (Stat_GetAdjusted(STAT_STR) >= 100)
-				iDmgBonus += 5;
-
-			if (!iStatBonus)
-				iStatBonus = static_cast<STAT_TYPE>(STAT_STR);
-			if (!iStatBonusPercent)
-				iStatBonusPercent = 30;
-			iDmgBonus += Stat_GetAdjusted(iStatBonus) * iStatBonusPercent / 100;
-
-
-			// pre-AOS damage bonus
-			/*iDmgBonus += (Skill_GetBase(SKILL_TACTICS) - 500) / 10;
-
-			iDmgBonus += Skill_GetBase(SKILL_ANATOMY) / 50;
-			if (Skill_GetBase(SKILL_ANATOMY) >= 1000)
-				iDmgBonus += 10;
-
-			if (pWeapon != NULL && pWeapon->IsType(IT_WEAPON_AXE))
+			case 1:
 			{
-				iDmgBonus += Skill_GetBase(SKILL_LUMBERJACKING) / 50;
-				if (Skill_GetBase(SKILL_LUMBERJACKING) >= 1000)
+				// pre-AOS damage bonus
+				iDmgBonus += (Skill_GetBase(SKILL_TACTICS) - 500) / 10;
+
+				iDmgBonus += Skill_GetBase(SKILL_ANATOMY) / 50;
+				if ( Skill_GetBase(SKILL_ANATOMY) >= 1000 )
 					iDmgBonus += 10;
+
+				if ( pWeapon != NULL && pWeapon->IsType(IT_WEAPON_AXE) )
+				{
+					iDmgBonus += Skill_GetBase(SKILL_LUMBERJACKING) / 50;
+					if ( Skill_GetBase(SKILL_LUMBERJACKING) >= 1000 )
+						iDmgBonus += 10;
+				}
+
+				if ( !iStatBonus )
+					iStatBonus = static_cast<STAT_TYPE>(STAT_STR);
+				if ( !iStatBonusPercent )
+					iStatBonusPercent = 20;
+				iDmgBonus += Stat_GetAdjusted(iStatBonus) * iStatBonusPercent / 100;
+				break;
 			}
 
-			if (!iStatBonus)
-				iStatBonus = static_cast<STAT_TYPE>(STAT_STR);
-			if (!iStatBonusPercent)
-				iStatBonusPercent = 20;
-			iDmgBonus += Stat_GetAdjusted(iStatBonus) * iStatBonusPercent / 100;*/
-		}
-		else
-		{
-			// Sphere damage bonus (custom)
-			if (!iStatBonus)
-				iStatBonus = static_cast<STAT_TYPE>(STAT_STR);
-			if (!iStatBonusPercent)
-				iStatBonusPercent = 10;
-			iDmgBonus = Stat_GetAdjusted(iStatBonus) * iStatBonusPercent / 100;
+			case 2:
+			{
+				// AOS damage bonus
+				iDmgBonus += Skill_GetBase(SKILL_TACTICS) / 16;
+				if ( Skill_GetBase(SKILL_TACTICS) >= 1000 )
+					iDmgBonus += 6;		//6.25
 
-			iDmgMin += iDmgBonus;
-			iDmgMax += iDmgBonus;
+				iDmgBonus += Skill_GetBase(SKILL_ANATOMY) / 20;
+				if ( Skill_GetBase(SKILL_ANATOMY) >= 1000 )
+					iDmgBonus += 5;
+
+				if ( pWeapon != NULL && pWeapon->IsType(IT_WEAPON_AXE) )
+				{
+					iDmgBonus += Skill_GetBase(SKILL_LUMBERJACKING) / 50;
+					if ( Skill_GetBase(SKILL_LUMBERJACKING) >= 1000 )
+						iDmgBonus += 10;
+				}
+
+				if ( Stat_GetAdjusted(STAT_STR) >= 100 )
+					iDmgBonus += 5;
+
+				if ( !iStatBonus )
+					iStatBonus = static_cast<STAT_TYPE>(STAT_STR);
+				if ( !iStatBonusPercent )
+					iStatBonusPercent = 30;
+				iDmgBonus += Stat_GetAdjusted(iStatBonus) * iStatBonusPercent / 100;
+				break;
+			}
 		}
+
 		iDmgMin += iDmgMin * iDmgBonus / 100;
 		iDmgMax += iDmgMax * iDmgBonus / 100;
 	}
