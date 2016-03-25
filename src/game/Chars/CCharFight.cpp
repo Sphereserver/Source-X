@@ -648,7 +648,7 @@ static const LAYER_TYPE sm_ArmorLayerFeet[] = { LAYER_SHOES, LAYER_LEGS };						
 
 struct CArmorLayerType
 {
-	WORD m_wCoverage;	// Percentage of humanoid body area
+	word m_wCoverage;	// Percentage of humanoid body area
 	const LAYER_TYPE * m_pLayers;
 };
 

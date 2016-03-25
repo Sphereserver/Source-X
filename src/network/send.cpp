@@ -1097,7 +1097,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 	const CChar* viewer = target->GetChar();
 	const CItemBase* itemDefinition;
 	ITEMID_TYPE id;
-	WORD amount;
+	word amount;
 	HUE_TYPE hue;
 	CPointMap pos;
 	LAYER_TYPE layer;
@@ -1116,7 +1116,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 			if ( vendorItem == NULL || vendorItem->GetAmount() == 0 || vendorItem->IsType(IT_GOLD) )
 				continue;
 
-			amount = minimum(static_cast<WORD>(g_Cfg.m_iVendorMaxSell), amount);
+			amount = minimum(static_cast<word>(g_Cfg.m_iVendorMaxSell), amount);
 			pos.m_x = static_cast<signed short>(count + 1);
 			pos.m_y = 1;
 		}
@@ -1159,7 +1159,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 
 									// write item data
 		writeInt32(item->GetUID());
-		writeInt16(static_cast<WORD>(id));
+		writeInt16(static_cast<word>(id));
 		writeByte(0);
 		writeInt16(amount);
 		writeInt16(pos.m_x);
@@ -1167,7 +1167,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 		if ( includeGrid )
 			writeByte(item->GetContainedGridIndex());
 		writeInt32(container->GetUID());
-		writeInt16(static_cast<WORD>(hue));
+		writeInt16(static_cast<word>(hue));
 
 		// include tooltip
 		target->addAOSTooltip(item, false, isShop);
@@ -1203,7 +1203,7 @@ PacketItemContents::PacketItemContents(const CClient* target, const CItem* spell
 		writeInt32(UID_F_ITEM + UID_O_INDEX_FREE + i);
 		writeInt16(0x1F2E);
 		writeByte(0);
-		writeInt16(static_cast<WORD>(i));
+		writeInt16(static_cast<word>(i));
 		writeInt16(0);
 		writeInt16(0);
 		if (includeGrid)
@@ -1244,7 +1244,7 @@ PacketItemContents::PacketItemContents(const CClient* target, const CItemContain
 			continue;
 
 		writeInt32(item->GetUID());
-		writeInt16(static_cast<WORD>(spellDefinition->m_idScroll));
+		writeInt16(static_cast<word>(spellDefinition->m_idScroll));
 		writeByte(0);
 		writeInt16(item->m_itSpell.m_spell);
 		writeInt16(0);
@@ -1252,7 +1252,7 @@ PacketItemContents::PacketItemContents(const CClient* target, const CItemContain
 		if (includeGrid)
 			writeByte(static_cast<BYTE>(count));
 		writeInt32(spellbook->GetUID());
-		writeInt16(static_cast<WORD>(HUE_DEFAULT));
+		writeInt16(static_cast<word>(HUE_DEFAULT));
 
 		count++;
 	}

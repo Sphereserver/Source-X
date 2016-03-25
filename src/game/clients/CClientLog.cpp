@@ -877,7 +877,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
 						pAcc->m_TagDefs.DeleteKey("customerid");
 					}
 
-					DEBUG_MSG(("%lx:xProcessClientSetup for %s, with AuthId %lu and CliVersion %lu / CliVersionReported %lu\n", GetSocketID(), pAcc->GetName(), tmSid, tmVer, tmVerReported));
+					DEBUG_MSG(("%x:xProcessClientSetup for %s, with AuthId %u and CliVersion %u / CliVersionReported %u\n", GetSocketID(), pAcc->GetName(), tmSid, tmVer, tmVerReported));
 
 					if ( tmSid != 0 && tmSid == pEvent->CharListReq.m_Account )
 					{

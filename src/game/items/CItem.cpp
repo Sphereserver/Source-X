@@ -4929,7 +4929,7 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		return false;
 	}
 
-	WORD uDamage = 0;
+	word uDamage = 0;
 	switch ( spell )
 	{
 		case SPELL_Dispel_Field:
