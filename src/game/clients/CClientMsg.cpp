@@ -698,7 +698,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 
 	HUE_TYPE defaultHue = HUE_TEXT_DEF;
 	FONT_TYPE defaultFont = FONT_NORMAL;
-	bool defaultUnicode = 0;
+	bool defaultUnicode = false;
 
 	switch ( mode )
 	{
@@ -732,11 +732,17 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		}
 		case TALKMODE_ITEM:
 		{
-			if ( !pSrc->IsChar() )		// Don't override color on char names to prevent conflict with notoriety color
+			if ( pSrc->IsChar() )
+			{
+				defaultFont = static_cast<FONT_TYPE>(g_Exp.m_VarDefs.GetKeyNum("CMSG_DEF_FONT"));
+				defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("CMSG_DEF_UNICODE", true) > 0 ? true : false;
+			}
+			else
+			{
 				defaultHue = static_cast<HUE_TYPE>(g_Exp.m_VarDefs.GetKeyNum("IMSG_DEF_COLOR"));
-			defaultFont = static_cast<FONT_TYPE>(g_Exp.m_VarDefs.GetKeyNum("IMSG_DEF_FONT"));
-			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("IMSG_DEF_UNICODE", true) > 0 ? true : false;
-			break;
+				defaultFont = static_cast<FONT_TYPE>(g_Exp.m_VarDefs.GetKeyNum("IMSG_DEF_FONT"));
+				defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("IMSG_DEF_UNICODE", true) > 0 ? true : false;
+			}
 		}
 		default:
 			break;
@@ -2681,8 +2687,8 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 
 	if (propertyList == NULL || propertyList->hasExpired(g_Cfg.m_iTooltipCache))
 	{
-		CItem * pItem = ( pObj->IsItem() ? const_cast<CItem *>(dynamic_cast<const CItem *>(pObj)) : NULL );
-		CChar * pChar = ( pObj->IsChar() ? const_cast<CChar *>(dynamic_cast<const CChar *>(pObj)) : NULL );
+		CItem *pItem = pObj->IsItem() ? const_cast<CItem *>(static_cast<const CItem *>(pObj)) : NULL;
+		CChar *pChar = pObj->IsChar() ? const_cast<CChar *>(static_cast<const CChar *>(pObj)) : NULL;
 
 		if (pItem != NULL)
 			pItem->FreePropertyList();

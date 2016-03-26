@@ -152,8 +152,6 @@ common/CFile.h
 common/CFileList.cpp
 common/CFileList.h
 common/CGrayData.cpp
-common/CGrayInst.cpp
-common/CGrayInst.h
 common/CGrayMap.cpp
 common/CGrayMap.h
 common/CGrayUID.cpp
@@ -188,6 +186,8 @@ common/CsvFile.h
 common/CTextConsole.h
 common/CTime.cpp
 common/CTime.h
+common/CUOInstall.cpp
+common/CUOInstall.h
 common/CVarDefMap.cpp
 common/CVarDefMap.h
 common/CVarFloat.cpp

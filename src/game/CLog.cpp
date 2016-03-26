@@ -277,7 +277,7 @@ int CLog::EventStr( dword wMask, lpctstr pszMsg )
 
 CGTime CLog::sm_prevCatchTick;
 
-void _cdecl CLog::CatchEvent( const CGrayError * pErr, lpctstr pszCatchContext, ... )
+void _cdecl CLog::CatchEvent( const CSphereError * pErr, lpctstr pszCatchContext, ... )
 {
 	CGTime timeCurrent = CGTime::GetCurrentTime();
 	if ( sm_prevCatchTick.GetTime() == timeCurrent.GetTime() )	// prevent message floods.

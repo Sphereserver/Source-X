@@ -617,7 +617,7 @@ bool CItemBase::GetItemData( ITEMID_TYPE id, CUOItemTypeRec2 * pData ) // static
 		CGrayItemInfo info( id );
 		*pData = *( static_cast <CUOItemTypeRec2 *>( & info ));
 	}
-	catch ( const CGrayError& e )
+	catch ( const CSphereError& e )
 	{
 		g_Log.CatchEvent( &e, "GetItemData" );
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);

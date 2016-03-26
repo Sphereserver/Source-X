@@ -5,7 +5,7 @@
 #include "../sphere/threads.h"
 #include "CException.h"
 #include "CFile.h"
-#include "CGrayInst.h"
+#include "CUOInstall.h"
 #include "CGrayMap.h"
 #include "common.h"
 #include "graycom.h"
@@ -90,7 +90,7 @@ void CVerDataMul::Load( CGFile & file )
 	dword dwQty;
 	if ( file.Read(static_cast<void *>(&dwQty), sizeof(dwQty)) <= 0 )
 	{
-		throw CGrayError( LOGL_CRIT, CGFile::GetLastError(), "VerData: Read Qty");
+		throw CSphereError( LOGL_CRIT, CGFile::GetLastError(), "VerData: Read Qty");
 	}
 
 	Unload();
@@ -98,7 +98,7 @@ void CVerDataMul::Load( CGFile & file )
 
 	if ( file.Read(static_cast<void *>(m_Data.GetBasePtr()), dwQty * sizeof( CUOVersionBlock )) <= 0 )
 	{
-		throw CGrayError( LOGL_CRIT, CGFile::GetLastError(), "VerData: Read");
+		throw CSphereError( LOGL_CRIT, CGFile::GetLastError(), "VerData: Read");
 	}
 
 	if ( dwQty <= 0 )
@@ -116,7 +116,7 @@ void CVerDataMul::Load( CGFile & file )
 		if ( dwIndex1 > dwIndex2 )
 		{
 			DEBUG_ERR(( "VerData Array is NOT sorted !\n" ));
-			throw CGrayError( LOGL_CRIT, -1, "VerData: NOT Sorted!");
+			throw CSphereError( LOGL_CRIT, -1, "VerData: NOT Sorted!");
 		}
 	}
 #endif
@@ -224,14 +224,14 @@ CGrayItemInfo::CGrayItemInfo( ITEMID_TYPE id )
 
 	if ( g_Install.m_File[filedata].Seek( offset, SEEK_SET ) != offset )
 	{
-		throw CGrayError(LOGL_CRIT, CGFile::GetLastError(), "CTileItemType.ReadInfo: TileData Seek");
+		throw CSphereError(LOGL_CRIT, CGFile::GetLastError(), "CTileItemType.ReadInfo: TileData Seek");
 	}
 
 	switch (format)
 	{
 		case VERFORMAT_HIGHSEAS: // high seas format (CUOItemTypeRec2)
 			if ( g_Install.m_File[filedata].Read( static_cast <CUOItemTypeRec2 *>(this), sizeof(CUOItemTypeRec2)) <= 0 )
-				throw CGrayError(LOGL_CRIT, CGFile::GetLastError(), "CTileItemType.ReadInfo: TileData Read");
+				throw CSphereError(LOGL_CRIT, CGFile::GetLastError(), "CTileItemType.ReadInfo: TileData Read");
 			break;
 
 		case VERFORMAT_ORIGINAL: // old format (CUOItemTypeRec)
@@ -239,7 +239,7 @@ CGrayItemInfo::CGrayItemInfo( ITEMID_TYPE id )
 		{
 			CUOItemTypeRec record;
 			if ( g_Install.m_File[filedata].Read( static_cast <CUOItemTypeRec *>(&record), sizeof(CUOItemTypeRec)) <= 0 )
-				throw CGrayError(LOGL_CRIT, CGFile::GetLastError(), "CTileTerrainType.ReadInfo: TileData Read");
+				throw CSphereError(LOGL_CRIT, CGFile::GetLastError(), "CTileTerrainType.ReadInfo: TileData Read");
 			
 			m_flags = record.m_flags;
 			m_weight = record.m_weight;
@@ -329,14 +329,14 @@ CGrayTerrainInfo::CGrayTerrainInfo( TERRAIN_TYPE id )
 
 	if ( g_Install.m_File[filedata].Seek( offset, SEEK_SET ) != offset )
 	{
-		throw CGrayError(LOGL_CRIT, CGFile::GetLastError(), "CTileTerrainType.ReadInfo: TileData Seek");
+		throw CSphereError(LOGL_CRIT, CGFile::GetLastError(), "CTileTerrainType.ReadInfo: TileData Seek");
 	}
 
 	switch (format)
 	{
 		case VERFORMAT_HIGHSEAS: // high seas format (CUOTerrainTypeRec2)
 			if ( g_Install.m_File[filedata].Read(static_cast <CUOTerrainTypeRec2 *>(this), sizeof(CUOTerrainTypeRec2)) <= 0 )
-				throw CGrayError(LOGL_CRIT, CGFile::GetLastError(), "CTileTerrainType.ReadInfo: TileData Read");
+				throw CSphereError(LOGL_CRIT, CGFile::GetLastError(), "CTileTerrainType.ReadInfo: TileData Read");
 			break;
 
 		case VERFORMAT_ORIGINAL: // old format (CUOTerrainTypeRec)
@@ -344,7 +344,7 @@ CGrayTerrainInfo::CGrayTerrainInfo( TERRAIN_TYPE id )
 		{
 			CUOTerrainTypeRec record;
 			if ( g_Install.m_File[filedata].Read(static_cast <CUOTerrainTypeRec *>(&record), sizeof(CUOTerrainTypeRec)) <= 0 )
-				throw CGrayError(LOGL_CRIT, CGFile::GetLastError(), "CTileTerrainType.ReadInfo: TileData Read");
+				throw CSphereError(LOGL_CRIT, CGFile::GetLastError(), "CTileTerrainType.ReadInfo: TileData Read");
 
 			m_flags = record.m_flags;
 			m_unknown = 0;

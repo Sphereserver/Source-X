@@ -3,7 +3,7 @@
 //
 
 #include "../common/CException.h"
-#include "../common/CGrayInst.h"
+#include "../common/CUOInstall.h"
 #include "../network/network.h"
 #include "../network/send.h"
 #include "../chars/CChar.h"

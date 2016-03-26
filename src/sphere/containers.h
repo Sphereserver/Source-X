@@ -79,7 +79,7 @@ public:
 	void pop( void )
 	{
 		if ( empty() )
-			throw CGrayError( LOGL_ERROR, 0, "No elements to read from queue." );
+			throw CSphereError( LOGL_ERROR, 0, "No elements to read from queue." );
 
 		iterator next = m_head;
 		++next;
@@ -101,7 +101,7 @@ public:
 		}
 
 		// this should never happen
-		throw CGrayError( LOGL_ERROR, 0, "No elements to read from queue." );
+		throw CSphereError( LOGL_ERROR, 0, "No elements to read from queue." );
 	}
 };
 

@@ -47,8 +47,8 @@
 #endif
 
 
-class CGrayError;
-#define CFileException CGrayError
+class CSphereError;
+#define CFileException CSphereError
 
 /**
 * @brief Class that dupes the MFC functionality we need

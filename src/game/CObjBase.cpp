@@ -346,7 +346,7 @@ void CObjBase::r_WriteSafe( CScript & s )
 		}
 		r_Write(s);
 	}
-	catch ( const CGrayError& e )
+	catch ( const CSphereError& e )
 	{
 		g_Log.CatchEvent(&e, "Write Object 0%x", uid);
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);

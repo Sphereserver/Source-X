@@ -903,7 +903,7 @@ int CWorldThread::FixObj( CObjBase * pObj, dword dwUID )
 	{
 		iResultCode = FixObjTry(pObj, dwUID);
 	}
-	catch ( const CGrayError& e ) // catch all
+	catch ( const CSphereError& e ) // catch all
 	{
 		g_Log.CatchEvent( &e, "FixObj" );
 		iResultCode = 0xFFFF;	// bad mem ?
@@ -945,7 +945,7 @@ int CWorldThread::FixObj( CObjBase * pObj, dword dwUID )
 		else
 			pObj->Delete();
 	}
-	catch ( const CGrayError& e )	// catch all
+	catch ( const CSphereError& e )	// catch all
 	{
 		g_Log.CatchEvent( &e, "UID=0%x, Asserted cleanup", dwUID );
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
@@ -1029,7 +1029,7 @@ void CWorldThread::GarbageCollection_UIDs()
 			}
 			iCount ++;
 		}
-		catch ( const CGrayError& e )
+		catch ( const CSphereError& e )
 		{
 			g_Log.CatchEvent(&e, "GarbageCollection_UIDs");
 			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
@@ -1465,7 +1465,7 @@ bool CWorld::SaveForce() // Save world state
 			if ( !bSave && ( pCurBlock != msgs[5] ))
 				goto failedstage;
 		}
-		catch ( const CGrayError& e )
+		catch ( const CSphereError& e )
 		{
 			g_Log.CatchEvent(&e, "Save FAILED for stage %u (%s).", m_iSaveStage, pCurBlock);
 			bSuccess = false;
@@ -1603,7 +1603,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 		fForceImmediate = (Args.m_iN1 != 0);
 		bSaved = SaveTry(fForceImmediate);
 	}
-	catch ( const CGrayError& e )
+	catch ( const CSphereError& e )
 	{
 		g_Log.CatchEvent( &e, "Save FAILED." );
 		Broadcast("Save FAILED. " GRAY_TITLE " is UNSTABLE!");
@@ -1693,7 +1693,7 @@ void CWorld::SaveStatics()
 		m_FileStatics.Close();
 		g_Log.Event(LOGM_SAVE, "Statics data saved (%s).\n", static_cast<lpctstr>(m_FileStatics.GetFilePath()));
 	}
-	catch (const CGrayError& e)
+	catch (const CSphereError& e)
 	{
 		g_Log.CatchEvent(&e, "Statics Save FAILED.");
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
@@ -1741,7 +1741,7 @@ bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from scr
 		{
 			g_Cfg.LoadResourceSection(&s);
 		}
-		catch ( const CGrayError& e )
+		catch ( const CSphereError& e )
 		{
 			g_Log.CatchEvent(&e, "Load Exception line %d " GRAY_TITLE " is UNSTABLE!\n", s.GetContext().m_iLineNum);
 			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);

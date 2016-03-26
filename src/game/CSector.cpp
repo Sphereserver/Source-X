@@ -1165,11 +1165,11 @@ void CSector::OnTick(int iPulseCount)
 #else
 		}
 #ifdef _DEBUG
-		catch ( const CGrayError& e )
+		catch ( const CSphereError& e )
 		{
 			PAUSECALLSTACK;
 			CPointMap pt = GetBasePoint();
-			g_Log.EventError("#2 CGrayError: item 0%x '%s' [timer=%" PRId64 ", type=%d]\n", (dword)(pItem->GetUID()), pItem->GetName(), pItem->GetTimerAdjusted(), (int)(pItem->GetType()));
+			g_Log.EventError("#2 CSphereError: item 0%x '%s' [timer=%" PRId64 ", type=%d]\n", (dword)(pItem->GetUID()), pItem->GetName(), pItem->GetTimerAdjusted(), (int)(pItem->GetType()));
 			g_Log.EventError("#2 sector #%d [%d,%d,%d,%d]\n", GetIndex(),  pt.m_x, pt.m_y, pt.m_z, pt.m_map);
 			UNPAUSECALLSTACK;
 			EXC_CATCH_SUB(&e, "Sector");

@@ -57,7 +57,7 @@ public:
 	bool IsLogged( dword wMask ) const;
 
 	virtual int EventStr( dword wMask, lpctstr pszMsg );
-	void _cdecl CatchEvent( const CGrayError * pErr, lpctstr pszCatchContext, ...  ) __printfargs(3,4);
+	void _cdecl CatchEvent( const CSphereError * pErr, lpctstr pszCatchContext, ...  ) __printfargs(3,4);
 
 public:
 	CLog();

@@ -4,7 +4,7 @@
 #endif
 #include "../common/CException.h"
 #include "../common/CFileList.h"
-#include "../common/CGrayInst.h"
+#include "../common/CUOInstall.h"
 #include "../common/grayver.h"
 #include "../network/network.h"
 #include "../sphere/ProfileTask.h"
@@ -3903,7 +3903,7 @@ bool CResource::Load( bool fResync )
 	{
 		g_VerData.Load( g_Install.m_File[VERFILE_VERDATA] );
 	}
-	catch ( const CGrayError& e )
+	catch ( const CSphereError& e )
 	{
 		g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " GRAY_FILE ".INI file is corrupt or missing\n" );
 		g_Log.CatchEvent( &e, "g_VerData.Load" );

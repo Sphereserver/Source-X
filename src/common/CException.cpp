@@ -6,7 +6,7 @@
 #include "CException.h"
 
 #ifdef _WIN32
-	int CGrayError::GetSystemErrorMessage( dword dwError, lptstr lpszError, uint nMaxError ) // static
+	int CSphereError::GetSystemErrorMessage( dword dwError, lptstr lpszError, uint nMaxError ) // static
 	{
 		//	PURPOSE:  copies error message text to a string
 		//
@@ -36,7 +36,7 @@
 	}
 #endif
 
-bool CGrayError::GetErrorMessage( lptstr lpszError, uint nMaxError,	uint * pnHelpContext ) const
+bool CSphereError::GetErrorMessage( lptstr lpszError, uint nMaxError,	uint * pnHelpContext ) const
 {
 	UNREFERENCED_PARAMETER(nMaxError);
 	UNREFERENCED_PARAMETER(pnHelpContext);
@@ -66,21 +66,21 @@ bool CGrayError::GetErrorMessage( lptstr lpszError, uint nMaxError,	uint * pnHel
 	return true;
 }
 
-CGrayError::CGrayError( const CGrayError &e ) :
+CSphereError::CSphereError( const CSphereError &e ) :
 	m_eSeverity( e.m_eSeverity ),
 	m_hError( e.m_hError ),
 	m_pszDescription( e.m_pszDescription )
 {
 }
 
-CGrayError::CGrayError( LOGL_TYPE eSev, dword hErr, lpctstr pszDescription ) :
+CSphereError::CSphereError( LOGL_TYPE eSev, dword hErr, lpctstr pszDescription ) :
 	m_eSeverity( eSev ),
 	m_hError( hErr ),
 	m_pszDescription( pszDescription )
 {
 }
 
-CGrayError::~CGrayError() 
+CSphereError::~CSphereError() 
 {
 }
 
@@ -89,7 +89,7 @@ CGrayError::~CGrayError()
 // --------------------------------------------------------------------------------
 
 CGrayAssert::CGrayAssert(LOGL_TYPE eSeverity, lpctstr pExp, lpctstr pFile, long lLine) :
-	CGrayError(eSeverity, 0, "Assert"), m_pExp(pExp), m_pFile(pFile), m_lLine(lLine)
+	CSphereError(eSeverity, 0, "Assert"), m_pExp(pExp), m_pFile(pFile), m_lLine(lLine)
 {
 }
 
@@ -124,7 +124,7 @@ const unsigned CGrayAssert::GetAssertLine()
 #ifdef _WIN32
 
 CGrayException::CGrayException(uint uCode, dword dwAddress) :
-	m_dwAddress(dwAddress), CGrayError(LOGL_CRIT, uCode, "Exception")
+	m_dwAddress(dwAddress), CSphereError(LOGL_CRIT, uCode, "Exception")
 {
 }
 
@@ -265,7 +265,7 @@ void SetExceptionTranslator()
 		}
 
 		UNPAUSECALLSTACK;
-		throw CGrayError( LOGL_FATAL, sig, strsignal(sig) );
+		throw CSphereError( LOGL_FATAL, sig, strsignal(sig) );
 	}
 
 	void _cdecl Signal_Children(int sig = 0)

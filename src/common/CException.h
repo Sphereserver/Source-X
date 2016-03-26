@@ -28,8 +28,8 @@ void SetUnixSignals( bool );
 // -------------------------------------------------------------------
 // -------------------------------------------------------------------
 
-#define CException CGrayError
-class CGrayError
+#define CException CSphereError
+class CSphereError
 {
 	// we can throw this structure to produce an error.
 	// similar to CFileException and CException
@@ -38,11 +38,11 @@ public:
 	dword m_hError;	// HRESULT S_OK, "winerror.h" code. 0x20000000 = start of custom codes.
 	lpctstr m_pszDescription;
 public:
-	CGrayError( LOGL_TYPE eSev, dword hErr, lpctstr pszDescription );
-	CGrayError( const CGrayError& e );	// copy contstructor needed.
-	virtual ~CGrayError();
+	CSphereError( LOGL_TYPE eSev, dword hErr, lpctstr pszDescription );
+	CSphereError( const CSphereError& e );	// copy contstructor needed.
+	virtual ~CSphereError();
 public:
-	CGrayError& operator=(const CGrayError& other);
+	CSphereError& operator=(const CSphereError& other);
 public:
 #ifdef _WIN32
 	static int GetSystemErrorMessage( dword dwError, lptstr lpszError, uint nMaxError );
@@ -50,7 +50,7 @@ public:
 	virtual bool GetErrorMessage( lptstr lpszError, uint nMaxError,	uint * pnHelpContext = NULL ) const;
 };
 
-class CGrayAssert : public CGrayError
+class CGrayAssert : public CSphereError
 {
 protected:
 	lpctstr const m_pExp;
@@ -73,7 +73,7 @@ public:
 
 #ifdef _WIN32
 	// Catch and get details on the system exceptions.
-	class CGrayException : public CGrayError
+	class CGrayException : public CSphereError
 	{
 	public:
 		static const char *m_sClassName;
@@ -129,7 +129,7 @@ public:
 	#endif
 
 	#define EXC_CATCH	}	\
-		catch ( const CGrayError& e )	{ EXC_CATCH_EXCEPTION(&e); CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); } \
+		catch ( const CSphereError& e )	{ EXC_CATCH_EXCEPTION(&e); CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); } \
 		catch (...) { EXC_CATCH_EXCEPTION(NULL); CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); }
 
 	#define EXC_DEBUG_START if ( bCATCHExcept ) { try {
@@ -171,7 +171,7 @@ public:
 	#endif
 
 	#define EXC_CATCHSUB(a)	}	\
-		catch ( const CGrayError& e )	\
+		catch ( const CSphereError& e )	\
 						{ \
 						EXC_CATCH_SUB(&e, a); \
 						CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \

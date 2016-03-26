@@ -154,7 +154,7 @@ void UnixTerminal::prepare()
 #else
 	// save existing attributes
 	if (tcgetattr(STDIN_FILENO, &m_original) < 0)
-		throw CGrayError(LOGL_WARN, 0, "failed to get terminal attributes");
+		throw CSphereError(LOGL_WARN, 0, "failed to get terminal attributes");
 
 	// set new terminal attributes
 	termios term_caps = m_original;
@@ -162,7 +162,7 @@ void UnixTerminal::prepare()
 	term_caps.c_cc[VMIN] = 1;
 
 	if (tcsetattr(STDIN_FILENO, TCSANOW, &term_caps) < 0)
-		throw CGrayError(LOGL_WARN, 0, "failed to set terminal attributes");
+		throw CSphereError(LOGL_WARN, 0, "failed to set terminal attributes");
 
 	setbuf(stdin, NULL);
 #endif
@@ -233,7 +233,7 @@ void UnixTerminal::restore()
 #else
 	// restore original terminal state
 	if (tcsetattr(STDIN_FILENO, TCSANOW, &m_original) < 0)
-		throw CGrayError(LOGL_WARN, 0, "failed to restore terminal attributes");
+		throw CSphereError(LOGL_WARN, 0, "failed to restore terminal attributes");
 #endif
 
 	m_prepared = false;

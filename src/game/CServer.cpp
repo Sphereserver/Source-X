@@ -707,9 +707,9 @@ bool CServer::OnConsoleCmd( CGString & sText, CTextConsole * pSrc )
 				{ // test without PAUSECALLSTACK
 					EXC_TRY("Test1");
 					ADDTOCALLSTACK("CServer::TestException1");
-					throw CGrayError( LOGM_DEBUG, 0, "Test Exception #1");
+					throw CSphereError( LOGM_DEBUG, 0, "Test Exception #1");
 					}
-					catch (const CGrayError& e)
+					catch (const CSphereError& e)
 					{
 						// the following call will destroy the stack trace on linux due to
 						// a call to CGFile::Close fromn CLog::EventStr.
@@ -721,9 +721,9 @@ bool CServer::OnConsoleCmd( CGString & sText, CTextConsole * pSrc )
 				{ // test with PAUSECALLSTACK
 					EXC_TRY("Test2");
 					ADDTOCALLSTACK("CServer::TestException2");
-					throw CGrayError( LOGM_DEBUG, 0, "Test Exception #2");
+					throw CSphereError( LOGM_DEBUG, 0, "Test Exception #2");
 					}
-					catch (const CGrayError& e)
+					catch (const CSphereError& e)
 					{
 						PAUSECALLSTACK;
 						// with pausecallstack, the following call won't be recorded
@@ -733,7 +733,7 @@ bool CServer::OnConsoleCmd( CGString & sText, CTextConsole * pSrc )
 					}
 				}
 #else
-				throw CGrayError(LOGL_CRIT, E_FAIL, "This test requires exception debugging enabled");
+				throw CSphereError(LOGL_CRIT, E_FAIL, "This test requires exception debugging enabled");
 #endif
 			} break;
 		case '%':	// throw simple exception
@@ -753,7 +753,7 @@ bool CServer::OnConsoleCmd( CGString & sText, CTextConsole * pSrc )
 			}
 		case '*':	// throw custom exception
 			{
-				throw CGrayError(LOGL_CRIT, E_FAIL, "Test Exception");
+				throw CSphereError(LOGL_CRIT, E_FAIL, "Test Exception");
 			}
 #endif
 		default:

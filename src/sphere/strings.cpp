@@ -189,7 +189,7 @@ void String::ensureLength(int newLength)
 
 		if( newBuf == NULL )
 		{
-			throw CGrayError(LOGL_FATAL, 0, "Run out of memory while allocating memory for string");
+			throw CSphereError(LOGL_FATAL, 0, "Run out of memory while allocating memory for string");
 		}
 
 		if( m_buf != NULL )
@@ -294,7 +294,7 @@ void TemporaryString::ensureLength(int newLength)
 			m_realLength = newLength + newLength/5;
 			char *newBuf = new char[m_realLength+1];
 			if ( newBuf == NULL )
-				throw CGrayError(LOGL_FATAL, 0, "Run out of memory while allocating memory for string");
+				throw CSphereError(LOGL_FATAL, 0, "Run out of memory while allocating memory for string");
 
 			strncpy(newBuf, m_buf, m_length);
 			newBuf[m_length] = '\0';

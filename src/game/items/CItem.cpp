@@ -5544,10 +5544,10 @@ bool CItem::OnTick()
 	}
 #ifdef _DEBUG
 
-	catch ( const CGrayError& e )
+	catch ( const CSphereError& e )
 	{
 		EXC_CATCH_EXCEPTION(&e);
-		g_Log.EventError("'%s' item [0%x] - CGrayError\n", GetName(), (dword)GetUID());
+		g_Log.EventError("'%s' item [0%x] - CSphereError\n", GetName(), (dword)GetUID());
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 	}
 	catch (...)

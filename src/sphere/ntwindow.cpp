@@ -815,7 +815,7 @@ LRESULT CNTWindow::OnNotify( int idCtrl, NMHDR * pnmh )
 
 								// failure occurred
 								int errorCode = CGFile::GetLastError();
-								if (CGrayError::GetSystemErrorMessage(errorCode, z, THREAD_STRING_LENGTH) > 0)
+								if (CSphereError::GetSystemErrorMessage(errorCode, z, THREAD_STRING_LENGTH) > 0)
 									g_Log.Event(LOGL_WARN, "Failed to open '%s' code=%d (%s).\n", filePath, errorCode, z);
 								else
 									g_Log.Event(LOGL_WARN, "Failed to open '%s' code=%d.\n", filePath, errorCode);
@@ -884,7 +884,7 @@ LRESULT WINAPI CNTWindow::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LP
 			return theApp.m_wndMain.OnUserTrayNotify( wParam, lParam );
 		}
 	}
-	catch (const CGrayError& e)
+	catch (const CSphereError& e)
 	{
 		g_Log.CatchEvent(&e, "Window");
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);

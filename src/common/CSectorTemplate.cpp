@@ -235,7 +235,7 @@ const CGrayMapBlock * CSectorBase::GetMapBlock( const CPointMap & pt )
 		pMapBlock = new CGrayMapBlock(pntBlock);
 		ASSERT(pMapBlock != NULL);
 	}
-	catch ( const CGrayError& e )
+	catch ( const CSphereError& e )
 	{
 		g_Log.EventError("Exception creating new memory block at %s. (%s)\n", pntBlock.WriteUsed(), e.m_pszDescription);
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);

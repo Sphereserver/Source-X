@@ -3,7 +3,7 @@
 	#include <sys/time.h>
 #endif
 
-#include "../common/CGrayInst.h"
+#include "../common/CUOInstall.h"
 #include "../common/CGrayUIDextra.h"
 #include "../common/CObjBaseTemplate.h"
 #include "../common/zlib/zlib.h"

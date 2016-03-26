@@ -14,7 +14,7 @@
 #endif
 
 #include "../common/CException.h"
-#include "../common/CGrayInst.h"
+#include "../common/CUOInstall.h"
 #include "../common/grayver.h"	// sphere version
 #include "../network/network.h" // network thread
 #include "../network/PingServer.h"
@@ -283,7 +283,7 @@ llong llTimeProfileFrequency = 1000;	// time profiler
 CWorld		g_World;	// the world. (we save this stuff)
 CServer		g_Serv;	// current state stuff not saved.
 CResource	g_Cfg;
-CGrayInstall g_Install;
+CUOInstall g_Install;
 CVerDataMul	g_VerData;
 CExpression g_Exp;	// Global script variables.
 CLog		g_Log;

@@ -3,7 +3,7 @@
 //
 
 #include "CException.h"
-#include "CGrayInst.h"
+#include "CUOInstall.h"
 #include "CGrayMap.h"
 #include "CRect.h"
 #include "graymul.h"
@@ -414,7 +414,7 @@ void CGrayStaticsBlock::LoadStatics( dword ulBlockIndex, int map )
 		{
 			tchar *pszTemp = Str_GetTemp();
 			sprintf(pszTemp, "CGrapMapBlock: Read Statics - Block Length of %u", index.GetBlockLength());
-			throw CGrayError(LOGL_CRIT, CGFile::GetLastError(), pszTemp);
+			throw CSphereError(LOGL_CRIT, CGFile::GetLastError(), pszTemp);
 		}
 		m_iStatics = index.GetBlockLength()/sizeof(CUOStaticItemRec);
 		ASSERT(m_iStatics);
@@ -422,7 +422,7 @@ void CGrayStaticsBlock::LoadStatics( dword ulBlockIndex, int map )
 		ASSERT(m_pStatics);
 		if ( ! g_Install.ReadMulData(g_Install.m_Statics[g_MapList.m_mapnum[map]], index, m_pStatics) )
 		{
-			throw CGrayError(LOGL_CRIT, CGFile::GetLastError(), "CGrayMapBlock: Read Statics");
+			throw CSphereError(LOGL_CRIT, CGFile::GetLastError(), "CGrayMapBlock: Read Statics");
 		}
 	}
 }
@@ -502,7 +502,7 @@ void CGrayMapBlock::Load( int bx, int by )
 	if ( !g_MapList.m_maps[m_map] )
 	{
 		memset( &m_Terrain, 0, sizeof( m_Terrain ));
-		throw CGrayError(LOGL_CRIT, 0, "CGrayMapBlock: Map is not supported since MUL files for it not available.");
+		throw CSphereError(LOGL_CRIT, 0, "CGrayMapBlock: Map is not supported since MUL files for it not available.");
 	}
 
 	bool bPatchedTerrain = false, bPatchedStatics = false;
@@ -578,14 +578,14 @@ void CGrayMapBlock::Load( int bx, int by )
 		if ( pFile->Seek( fileOffset, SEEK_SET ) != fileOffset )
 		{
 			memset( &m_Terrain, 0, sizeof(m_Terrain));
-			throw CGrayError(LOGL_CRIT, CGFile::GetLastError(), "CGrayMapBlock: Seek Ver");
+			throw CSphereError(LOGL_CRIT, CGFile::GetLastError(), "CGrayMapBlock: Seek Ver");
 		}
 
 		// read terrain data
 		if ( pFile->Read( &m_Terrain, sizeof(CUOMapBlock)) <= 0 )
 		{
 			memset( &m_Terrain, 0, sizeof( m_Terrain ));
-			throw CGrayError(LOGL_CRIT, CGFile::GetLastError(), "CGrayMapBlock: Read");
+			throw CSphereError(LOGL_CRIT, CGFile::GetLastError(), "CGrayMapBlock: Read");
 		}
 	}
 
