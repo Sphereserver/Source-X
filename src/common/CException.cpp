@@ -88,16 +88,16 @@ CSphereError::~CSphereError()
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-CGrayAssert::CGrayAssert(LOGL_TYPE eSeverity, lpctstr pExp, lpctstr pFile, long lLine) :
+CAssert::CAssert(LOGL_TYPE eSeverity, lpctstr pExp, lpctstr pFile, long lLine) :
 	CSphereError(eSeverity, 0, "Assert"), m_pExp(pExp), m_pFile(pFile), m_lLine(lLine)
 {
 }
 
-CGrayAssert::~CGrayAssert()
+CAssert::~CAssert()
 {
 }
 
-bool CGrayAssert::GetErrorMessage(lptstr lpszError, uint nMaxError, uint * pnHelpContext) const
+bool CAssert::GetErrorMessage(lptstr lpszError, uint nMaxError, uint * pnHelpContext) const
 {
 	UNREFERENCED_PARAMETER(nMaxError);
 	UNREFERENCED_PARAMETER(pnHelpContext);
@@ -105,14 +105,14 @@ bool CGrayAssert::GetErrorMessage(lptstr lpszError, uint nMaxError, uint * pnHel
 	return true;
 }
 
-/*lpctstr const CGrayAssert::GetAssertFile()
+/*lpctstr const CAssert::GetAssertFile()
 {
 	lptstr pTmp = Str_GetTemp();
 	strcpylen( pTmp, m_pFile, strlen( m_pFile ) ); //make a copy, don't send the original
 	return pTmp;
 }
 
-const unsigned CGrayAssert::GetAssertLine()
+const unsigned CAssert::GetAssertLine()
 {
 	return m_uLine;
 }*/
@@ -123,16 +123,16 @@ const unsigned CGrayAssert::GetAssertLine()
 
 #ifdef _WIN32
 
-CGrayException::CGrayException(uint uCode, dword dwAddress) :
+CException::CException(uint uCode, dword dwAddress) :
 	m_dwAddress(dwAddress), CSphereError(LOGL_CRIT, uCode, "Exception")
 {
 }
 
-CGrayException::~CGrayException()
+CException::~CException()
 {
 }
 
-bool CGrayException::GetErrorMessage(lptstr lpszError, uint nMaxError, uint * pnHelpContext) const
+bool CException::GetErrorMessage(lptstr lpszError, uint nMaxError, uint * pnHelpContext) const
 {
 	UNREFERENCED_PARAMETER(nMaxError);
 	UNREFERENCED_PARAMETER(pnHelpContext);
@@ -162,7 +162,7 @@ bool CGrayException::GetErrorMessage(lptstr lpszError, uint nMaxError, uint * pn
 
 void Assert_CheckFail( lpctstr pExp, lpctstr pFile, long lLine )
 {
-	throw CGrayAssert(LOGL_CRIT, pExp, pFile, lLine);
+	throw CAssert(LOGL_CRIT, pExp, pFile, lLine);
 }
 
 #if defined(_WIN32) && !defined(_DEBUG)
@@ -191,7 +191,7 @@ void Assert_CheckFail( lpctstr pExp, lpctstr pFile, long lLine )
 			dword dwAddr = (dword)(pData->ExceptionRecord->ExceptionAddress);
 			dwAddr -= dwCodeStart;
 
-			throw CGrayException(id, dwAddr);
+			throw CException(id, dwAddr);
 		}
 	}
 #endif

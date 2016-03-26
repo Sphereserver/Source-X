@@ -28,7 +28,6 @@ void SetUnixSignals( bool );
 // -------------------------------------------------------------------
 // -------------------------------------------------------------------
 
-#define CException CSphereError
 class CSphereError
 {
 	// we can throw this structure to produce an error.
@@ -50,7 +49,7 @@ public:
 	virtual bool GetErrorMessage( lptstr lpszError, uint nMaxError,	uint * pnHelpContext = NULL ) const;
 };
 
-class CGrayAssert : public CSphereError
+class CAssert : public CSphereError
 {
 protected:
 	lpctstr const m_pExp;
@@ -62,10 +61,10 @@ public:
 	const unsigned GetAssertLine();
 	*/
 	static const char *m_sClassName;
-	CGrayAssert(LOGL_TYPE eSeverity, lpctstr pExp, lpctstr pFile, long lLine);
-	virtual ~CGrayAssert();
+	CAssert(LOGL_TYPE eSeverity, lpctstr pExp, lpctstr pFile, long lLine);
+	virtual ~CAssert();
 private:
-	CGrayAssert& operator=(const CGrayAssert& other);
+	CAssert& operator=(const CAssert& other);
 
 public:
 	virtual bool GetErrorMessage(lptstr lpszError, uint nMaxError, uint * pnHelpContext = NULL ) const;
@@ -73,16 +72,16 @@ public:
 
 #ifdef _WIN32
 	// Catch and get details on the system exceptions.
-	class CGrayException : public CSphereError
+	class CException : public CSphereError
 	{
 	public:
 		static const char *m_sClassName;
 		const dword m_dwAddress;
 
-		CGrayException(uint uCode, dword dwAddress);
-		virtual ~CGrayException();
+		CException(uint uCode, dword dwAddress);
+		virtual ~CException();
 	private:
-		CGrayException& operator=(const CGrayException& other);
+		CException& operator=(const CException& other);
 
 	public:
 		virtual bool GetErrorMessage(lptstr lpszError, uint nMaxError, uint * pnHelpContext = NULL ) const;

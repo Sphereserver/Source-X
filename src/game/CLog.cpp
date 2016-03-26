@@ -291,7 +291,7 @@ void _cdecl CLog::CatchEvent( const CSphereError * pErr, lpctstr pszCatchContext
 		if ( pErr != NULL )
 		{
 			eSeverity = pErr->m_eSeverity;
-			const CGrayAssert * pAssertErr = dynamic_cast<const CGrayAssert*>(pErr);
+			const CAssert * pAssertErr = dynamic_cast<const CAssert*>(pErr);
 			if ( pAssertErr )
 				pAssertErr->GetErrorMessage(szMsg, sizeof(szMsg), 0);
 			else

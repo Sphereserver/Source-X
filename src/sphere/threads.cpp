@@ -247,7 +247,7 @@ void AbstractThread::run()
 			// be in tick() but we cannot guarantee it to be called there
 			CurrentProfileData.Start(PROFILE_IDLE);
 		}
-		catch( const CException& e )
+		catch( const CSphereError& e )
 		{
 			gotException = true;
 			g_Log.CatchEvent(&e, "%s::tick", getName());
