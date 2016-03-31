@@ -1163,8 +1163,8 @@ void CSector::OnTick(int iPulseCount)
 		
 		EXC_DEBUGSUB_END;
 #else
-#ifdef _EXCEPTIONS_DEBUG
 		}
+#ifdef _EXCEPTIONS_DEBUG
 		catch ( const CSphereError& e )
 		{
 			PAUSECALLSTACK;
@@ -1183,8 +1183,8 @@ void CSector::OnTick(int iPulseCount)
 			EXC_CATCH_SUB(NULL, "Sector");
 			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 		}
-#endif
-#endif
+#endif //_EXCEPTIONS_DEBUG
+#endif //_WIN32
 	}
 
 	ProfileTask overheadTask(PROFILE_OVERHEAD);
