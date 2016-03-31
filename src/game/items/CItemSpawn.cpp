@@ -203,7 +203,7 @@ void CItemSpawn::GenerateChar(CResourceDef *pDef)
 		g_Log.Event(LOGL_WARN, "%d chars at %s. Sector too complex!\n", iCount, GetTopSector()->GetBasePoint().WriteUsed());
 }
 
-void CItemSpawn::DelObj(CGrayUID uid)
+void CItemSpawn::DelObj(CUID uid)
 {
 	ADDTOCALLSTACK("CitemSpawn:DelObj");
 	if ( !uid.IsValidUID() )
@@ -233,7 +233,7 @@ void CItemSpawn::DelObj(CGrayUID uid)
 	ResendTooltip();
 }
 
-void CItemSpawn::AddObj(CGrayUID uid)
+void CItemSpawn::AddObj(CUID uid)
 {
 	ADDTOCALLSTACK("CitemSpawn:AddObj");
 	// NOTE: This function is also called when loading spawn items
@@ -441,7 +441,7 @@ bool CItemSpawn::r_LoadVal(CScript & s)
 	{
 		case ISPW_ADDOBJ:
 		{
-			AddObj(static_cast<CGrayUID>(s.GetArgVal()));
+			AddObj(static_cast<CUID>(s.GetArgVal()));
 			return true;
 		}
 		case ISPW_AMOUNT:
@@ -451,7 +451,7 @@ bool CItemSpawn::r_LoadVal(CScript & s)
 		}
 		case ISPW_DELOBJ:
 		{
-			DelObj(static_cast<CGrayUID>(s.GetArgVal()));
+			DelObj(static_cast<CUID>(s.GetArgVal()));
 			return true;
 		}
 		case ISPW_RESET:

@@ -54,13 +54,13 @@ private:
 	CPartyDef& operator=(const CPartyDef& other);
 
 public:
-	static bool AcceptEvent( CChar * pCharAccept, CGrayUID uidInviter, bool bForced = false );
-	static bool DeclineEvent( CChar * pCharDecline, CGrayUID uidInviter );
+	static bool AcceptEvent( CChar * pCharAccept, CUID uidInviter, bool bForced = false );
+	static bool DeclineEvent( CChar * pCharDecline, CUID uidInviter );
 
 	bool IsPartyFull() const;
 	bool IsInParty( const CChar * pChar ) const;
 	bool IsPartyMaster( const CChar * pChar ) const;
-	CGrayUID GetMaster();
+	CUID GetMaster();
 
 
 	// Refresh status for party members
@@ -69,15 +69,15 @@ public:
 	bool SendRemoveList( CChar * pCharRemove, bool bFor );
 	bool SendAddList( CChar * pCharDest );
 	// Party message sending wrappers
-	bool MessageEvent( CGrayUID uidDst, CGrayUID uidSrc, const NCHAR * pText, int ilenmsg );
-	// void MessageAll( CGrayUID uidSrc, const NCHAR * pText, int ilenmsg );
-	// bool MessageMember( CGrayUID uidDst, CGrayUID uidSrc, const NCHAR * pText, int ilenmsg );
+	bool MessageEvent( CUID uidDst, CUID uidSrc, const NCHAR * pText, int ilenmsg );
+	// void MessageAll( CUID uidSrc, const NCHAR * pText, int ilenmsg );
+	// bool MessageMember( CUID uidDst, CUID uidSrc, const NCHAR * pText, int ilenmsg );
 	// Sysmessage sending wrappers
 	void SysMessageAll( lpctstr pText );
 
 	// Commands
-	bool Disband( CGrayUID uidMaster );
-	bool RemoveMember( CGrayUID uidRemove, CGrayUID uidCommand );
+	bool Disband( CUID uidMaster );
+	bool RemoveMember( CUID uidRemove, CUID uidCommand );
 	void AcceptMember( CChar * pChar );
 	void SetLootFlag( CChar * pChar, bool fSet );
 	bool GetLootFlag( const CChar * pChar );

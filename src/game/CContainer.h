@@ -4,7 +4,7 @@
 #define _INC_CCONTAINER_H
 
 #include "../common/CArray.h"
-#include "../common/CGrayUID.h"
+#include "../common/CUID.h"
 #include "../common/CRect.h"
 #include "../common/CResourceBase.h"
 

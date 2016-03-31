@@ -14,8 +14,8 @@ private:
 	static lpctstr const sm_szLoadKeys[];
 	static lpctstr const sm_szVerbKeys[];
 
-	CGrayUID m_uidHold;
-	std::vector<CGrayUID> m_uidPlanks;
+	CUID m_uidHold;
+	std::vector<CUID> m_uidPlanks;
 	CServTime m_NextMove;
 
 

@@ -1203,7 +1203,7 @@ bool CItemShip::r_LoadVal( CScript & s  )
 		}
 		else if ( s.IsKey("PLANK") )
 		{
-			CGrayUID uid = s.GetArgVal();
+			CUID uid = s.GetArgVal();
 			m_uidPlanks.push_back( uid );
 			return true;
 		}
@@ -1258,7 +1258,7 @@ bool CItemShip::r_LoadVal( CScript & s  )
 		} break;
 		case IMCS_PILOT:
 		{
-			CChar * pChar = static_cast<CChar*>(static_cast<CGrayUID>(s.GetArgVal()).CharFind());
+			CChar * pChar = static_cast<CChar*>(static_cast<CUID>(s.GetArgVal()).CharFind());
 			if (pChar)
 				m_itShip.m_Pilot = pChar->GetUID() ;
 			else
@@ -1332,7 +1332,7 @@ CItem * CItemShip::GetShipPlank(size_t index)
 {
 	ADDTOCALLSTACK("CItemShip::GetShipPlank");
 	// Check the current list of planks is valid
-	for ( std::vector<CGrayUID>::iterator i = m_uidPlanks.begin(); i != m_uidPlanks.end(); ++i )
+	for ( std::vector<CUID>::iterator i = m_uidPlanks.begin(); i != m_uidPlanks.end(); ++i )
 	{
 		CItem * pItem = (*i).ItemFind();
 		if ( pItem && Multi_IsPartOf( pItem ) )
@@ -1368,7 +1368,7 @@ CItem * CItemShip::GetShipPlank(size_t index)
 	if (index >= m_uidPlanks.size())
 		return NULL;
 
-	CGrayUID uid = m_uidPlanks.at(index);
+	CUID uid = m_uidPlanks.at(index);
 	return uid.ItemFind();
 }
 

@@ -7,14 +7,14 @@
 //#include "graycom.h"
 #include "CString.h"
 #include "CRect.h"
-#include "CGrayUID.h"
+#include "CUID.h"
 
 
 class CObjBaseTemplate : public CGObListRec
 {
 	// A dynamic object of some sort.
 private:
-	CGrayUID	m_UID;		// How the server will refer to this. 0 = static item
+	CUID	m_UID;		// How the server will refer to this. 0 = static item
 	CGString	m_sName;	// unique name for the individual object.
 	CPointMap	m_pt;		// List is sorted by m_z_sort.
 protected:
@@ -36,7 +36,7 @@ public:
 	CObjBaseTemplate * GetNext() const;
 	CObjBaseTemplate * GetPrev() const;
 
-	CGrayUID GetUID() const;
+	CUID GetUID() const;
 	bool IsItem() const;
 	bool IsChar() const;
 	bool IsItemInContainer() const;

@@ -1,7 +1,7 @@
 
 #include "../common/CException.h"
-#include "../common/CGrayUIDextra.h"
-#include "../common/grayver.h"
+#include "../common/CUIDExtra.h"
+#include "../common/sphereversion.h"
 #include "../network/network.h"
 #include "../network/send.h"
 #include "../sphere/ProfileTask.h"
@@ -698,7 +698,7 @@ bool CObjBase::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 				pRef = GetTopLevelObj()->GetTopSector();
 				return( true );
 			case OBR_SPAWNITEM:
-				pRef = (m_uidSpawnItem != static_cast<CGrayUID>(UID_UNUSED)) ? m_uidSpawnItem.ItemFind() : NULL;
+				pRef = (m_uidSpawnItem != static_cast<CUID>(UID_UNUSED)) ? m_uidSpawnItem.ItemFind() : NULL;
 				return true;
 			case OBR_TOPOBJ:
 				if ( pszKey[-1] != '.' )	// only used as a ref !
@@ -979,7 +979,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 				if ( *pszKey )		// has an argument - UID to see(los) or POS to los only
 				{
 					CPointMap pt;
-					CGrayUID uid;
+					CUID uid;
 					CObjBase *pObj = NULL;
 
 					if ( !bCanSee )
@@ -1132,7 +1132,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 						return true;
 					}
 
-					CGrayUID	uid			= Exp_GetVal( pszKey );
+					CUID	uid			= Exp_GetVal( pszKey );
 					SKIP_SEPARATORS( pszKey ); GETNONWHITESPACE( pszKey );
 					pObj	= uid.ObjFind();
 				}
@@ -1174,7 +1174,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 						return true;
 					}
 
-					CGrayUID	uid = Exp_GetVal(pszKey);
+					CUID	uid = Exp_GetVal(pszKey);
 					SKIP_SEPARATORS(pszKey); GETNONWHITESPACE(pszKey);
 					pObj = uid.ObjFind();
 				}
@@ -1318,7 +1318,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 				tchar * pszArg = Str_GetTemp();
 				strcpylen( pszArg, pszKey, strlen( pszKey ) + 1 );
 
-				CGrayUID uid = Exp_GetVal( pszKey );
+				CUID uid = Exp_GetVal( pszKey );
 				pItem = dynamic_cast<CItem*> (uid.ObjFind());
 				if (pItem == NULL)
 				{
@@ -1358,7 +1358,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 				tchar * pszArg = Str_GetTemp();
 				strcpylen( pszArg, pszKey, strlen( pszKey ) + 1 );
 
-				CGrayUID uid = Exp_GetVal( pszKey );
+				CUID uid = Exp_GetVal( pszKey );
 				pItem = dynamic_cast<CItem*> (uid.ObjFind());
 				if ( pItem == NULL )
 				{
@@ -1474,7 +1474,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 			sVal.FormatLLVal(GetTimeStamp().GetTimeRaw());
 			break;
 		case OC_VERSION:
-			sVal = GRAY_VERSION;
+			sVal = SPHERE_VERSION;
 			break;
 		case OC_WEIGHT:
 			sVal.FormatVal( GetWeight());
@@ -1871,7 +1871,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 		case OC_SPAWNITEM:
 			if ( !g_Serv.IsLoading() )	// SPAWNITEM is read-only
 				return false;
-			m_uidSpawnItem = static_cast<CGrayUID>(s.GetArgVal());
+			m_uidSpawnItem = static_cast<CUID>(s.GetArgVal());
 			break;
 		case OC_UID:
 		case OC_SERIAL:
@@ -1974,7 +1974,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					return( false );
 				if ( iArgQty > 2 )	// Give it a new source char UID
 				{
-					CObjBaseTemplate * pObj = CGrayUID( (dword)(piCmd[2]) ).ObjFind();
+					CObjBaseTemplate * pObj = CUID( (dword)(piCmd[2]) ).ObjFind();
 					if ( pObj )
 						pObj = pObj->GetTopLevelObj();
 					pCharSrc = dynamic_cast<CChar*>(pObj);
@@ -2143,7 +2143,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				if ( iArgQty < 2 )
 					piCmd[1] = 1;
 
-				CGrayUID uid = (uint)(piCmd[0]);
+				CUID uid = (uint)(piCmd[0]);
 				pObjNear = uid.ObjFind();
 				if ( !pObjNear )
 					return false;
@@ -2270,7 +2270,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				{
 				case 4:
 					{
-						CGrayUID uid = (dword) piCmd[3];
+						CUID uid = (dword) piCmd[3];
 						pItemSrc = uid.ItemFind();
 					}
 				case 3:
@@ -2280,7 +2280,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					}
 					else
 					{
-						CGrayUID uid = (dword) piCmd[2];
+						CUID uid = (dword) piCmd[2];
 						pCharSrc = uid.CharFind();
 					}
 					break;
@@ -2509,7 +2509,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		case OV_TRYSRV:
 			{
 				EXC_SET("TRYSRC or TRYSRV");
-				CGrayUID NewSrc;
+				CUID NewSrc;
 				CTextConsole * pNewSrc = NULL;
 
 				if ( index == OV_TRYSRC )
@@ -2584,7 +2584,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 			if (s.HasArgs())
 			{
-				CGrayUID uid = s.GetArgVal();
+				CUID uid = s.GetArgVal();
 				if ((!uid.ObjFind()) || (!this->IsChar()))
 					return(false);
 				pCharSrc->GetClient()->Event_SingleClick(uid);
@@ -2599,7 +2599,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				return(false);
 			if (s.HasArgs())
 			{
-				CGrayUID uid = s.GetArgVal();
+				CUID uid = s.GetArgVal();
 
 				if ((!uid.ObjFind()) || (!this->IsChar()))
 					return(false);
@@ -2617,7 +2617,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				return( false );
 			if ( s.HasArgs() )
 			{
-				CGrayUID uid = s.GetArgVal();
+				CUID uid = s.GetArgVal();
 
 				if (( ! uid.ObjFind()) || ( ! this->IsChar() ))
 					return( false );
@@ -3086,7 +3086,7 @@ inline bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TR
 			}
 			else if ( iTriggerArgType == 3 ) // ARGO
 			{
-				CGrayUID guTriggerArg(Exp_GetVal(ppCmdTrigger[2]));
+				CUID guTriggerArg(Exp_GetVal(ppCmdTrigger[2]));
 				CObjBase * pTriggerArgObj = guTriggerArg.ObjFind();
 				if ( pTriggerArgObj )
 				{
@@ -3114,7 +3114,7 @@ inline bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TR
 				// ARGO
 				if ( iResultArgs >= 1 )
 				{
-					CGrayUID guTriggerArg(Exp_GetVal(Arg_ppCmd[0]));
+					CUID guTriggerArg(Exp_GetVal(Arg_ppCmd[0]));
 					CObjBase * pTriggerArgObj = guTriggerArg.ObjFind();
 					if ( pTriggerArgObj )
 						csTriggerArgs.m_pO1 = pTriggerArgObj;

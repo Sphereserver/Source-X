@@ -21,10 +21,11 @@ TARGET_COMPILE_DEFINITIONS (spheresvr
         PUBLIC _CRT_SECURE_NO_WARNINGS
 # Enable advanced exceptions catching. Consumes some more resources, but is very useful for debug
 # on a running environment. Also it makes sphere more stable since exceptions are local.
-		PUBLIC _EXCEPTIONS_DEBUG
+	PUBLIC _EXCEPTIONS_DEBUG
 # Removing WINSOCK warnings until the code gets updated or reviewed.		
-		PUBLIC _WINSOCK_DEPRECATED_NO_WARNINGS
+	PUBLIC _WINSOCK_DEPRECATED_NO_WARNINGS
 )
+
 TARGET_COMPILE_DEFINITIONS (spheresvrNightly
 # Nighly defs
         PUBLIC _NIGHTLYBUILD
@@ -40,9 +41,11 @@ TARGET_COMPILE_DEFINITIONS (spheresvrNightly
         PUBLIC _SUBVERSION
 # Defines
         PUBLIC _WIN32
-        PUBLIC _CRT_SECURE_NO_WARNINGS	
-		PUBLIC _WINSOCK_DEPRECATED_NO_WARNINGS
+        PUBLIC _CRT_SECURE_NO_WARNINGS
+	PUBLIC _EXCEPTIONS_DEBUG
+	PUBLIC _WINSOCK_DEPRECATED_NO_WARNINGS
 )
+
 # Optimization flags set to max.
 SET_TARGET_PROPERTIES (spheresvr PROPERTIES	COMPILE_FLAGS -O3 )
 # Force dynamic linking.

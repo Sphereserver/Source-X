@@ -1,6 +1,6 @@
 
 #include "../clients/CClient.h"
-#include "../common/CGrayUIDextra.h"
+#include "../common/CUIDExtra.h"
 #include "../network/send.h"
 #include "../Triggers.h"
 #include "CChar.h"

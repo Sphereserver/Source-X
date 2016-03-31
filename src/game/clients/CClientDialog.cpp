@@ -1,6 +1,6 @@
 
 #include "../common/CException.h"
-#include "../common/CGrayUIDextra.h"
+#include "../common/CUIDExtra.h"
 #include "../network/network.h"
 #include "../network/receive.h"
 #include "../network/send.h"
@@ -681,7 +681,7 @@ void CClient::addGumpDialog( CLIMODE_TYPE mode, const CGString * psControls, siz
 	}
 }
 
-bool CClient::addGumpDialogProps( CGrayUID uid )
+bool CClient::addGumpDialogProps( CUID uid )
 {
 	ADDTOCALLSTACK("CClient::addGumpDialogProps");
 	// put up a prop dialog for the object.
@@ -723,7 +723,7 @@ TRIGRET_TYPE CClient::Dialog_OnButton( RESOURCE_ID_BASE rid, dword dwButtonID, C
 
 	// Set the auxiliary stuff for INPDLG here
 	// m_tmInpVal.m_PrvGumpID	= rid;
-	// m_tmInpVal.m_UID		= pObj ? pObj->GetUID() : (CGrayUID) 0;
+	// m_tmInpVal.m_UID		= pObj ? pObj->GetUID() : (CUID) 0;
 
 	int64 piCmd[3];
 	while ( s.ReadKeyParse())

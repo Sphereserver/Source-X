@@ -1,5 +1,5 @@
 
-#include "../common/CGrayUIDextra.h"
+#include "../common/CUIDExtra.h"
 #include "../game/chars/CChar.h"
 #include "../game/clients/CClient.h"
 #include "../game/items/CItem.h"
@@ -320,7 +320,7 @@ bool PacketAttackReq::onReceive(NetState* net)
 {
 	ADDTOCALLSTACK("PacketAttackReq::onReceive");
 
-	CGrayUID target(readInt32());
+	CUID target(readInt32());
 
 	CClient* client = net->getClient();
 	ASSERT(client);
@@ -346,7 +346,7 @@ bool PacketDoubleClick::onReceive(NetState* net)
 
 	dword serial = readInt32();
 
-	CGrayUID target(serial &~ UID_F_RESOURCE);
+	CUID target(serial &~ UID_F_RESOURCE);
 	bool macro = (serial & UID_F_RESOURCE) == UID_F_RESOURCE;
 
 	CClient* client = net->getClient();
@@ -371,7 +371,7 @@ bool PacketItemPickupReq::onReceive(NetState* net)
 {
 	ADDTOCALLSTACK("PacketItemPickupReq::onReceive");
 
-	CGrayUID serial(readInt32());
+	CUID serial(readInt32());
 	int amount = readInt16();
 	
 	CClient* client = net->getClient();
@@ -414,7 +414,7 @@ bool PacketItemDropReq::onReceive(NetState* net)
 	if ( !character )
 		return false;
 
-	CGrayUID serial = readInt32();
+	CUID serial = readInt32();
 	word x = readInt16();
 	word y = readInt16();
 	byte z = readByte();
@@ -430,7 +430,7 @@ bool PacketItemDropReq::onReceive(NetState* net)
 			grid = 0;
 	}
 
-	CGrayUID container = readInt32();
+	CUID container = readInt32();
 	CPointMap pt(x, y, z, character->GetTopMap());
 
 	client->Event_Item_Drop(serial, pt, container, grid);
@@ -453,7 +453,7 @@ bool PacketSingleClick::onReceive(NetState* net)
 {
 	ADDTOCALLSTACK("PacketSingleClick::onReceive");
 
-	CGrayUID serial(readInt32());
+	CUID serial(readInt32());
 
 	CClient* client = net->getClient();
 	ASSERT(client);
@@ -511,9 +511,9 @@ bool PacketItemEquipReq::onReceive(NetState* net)
 	CClient* client = net->getClient();
 	ASSERT(client);
 
-	CGrayUID itemSerial(readInt32());
+	CUID itemSerial(readInt32());
 	LAYER_TYPE itemLayer = static_cast<LAYER_TYPE>(readByte());
-	CGrayUID targetSerial(readInt32());
+	CUID targetSerial(readInt32());
 
 	CChar* source = client->GetChar();
 	if (source == NULL)
@@ -652,7 +652,7 @@ bool PacketCharStatusReq::onReceive(NetState* net)
 
 	skip(4);	// 0xedededed
 	byte requestType = readByte();
-	CGrayUID targetSerial = static_cast<CGrayUID>(readInt32());
+	CUID targetSerial = static_cast<CUID>(readInt32());
 
 	if ( requestType == 4 )
 		client->addCharStatWindow(targetSerial.CharFind(), true);
@@ -728,7 +728,7 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 		return false;
 
 	word packetLength = readInt16();
-	CGrayUID vendorSerial(readInt32());
+	CUID vendorSerial(readInt32());
 	byte flags = readByte();
 	if (flags == 0)
 		return true;
@@ -770,7 +770,7 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 	for (size_t i = 0; i < itemCount; i++)
 	{
 		skip(1); // layer
-		CGrayUID serial(readInt32());
+		CUID serial(readInt32());
 		word amount = readInt16();
 
 		item = dynamic_cast<CItemVendable*>(serial.ItemFind());
@@ -845,7 +845,7 @@ bool PacketMapEdit::onReceive(NetState* net)
 {
 	ADDTOCALLSTACK("PacketMapEdit::onReceive");
 
-	CGrayUID mapSerial(readInt32());
+	CUID mapSerial(readInt32());
 	MAPCMD_TYPE action = static_cast<MAPCMD_TYPE>(readByte());
 	byte pin = readByte();
 	word x = readInt16();
@@ -984,7 +984,7 @@ bool PacketBookPageEdit::onReceive(NetState* net)
 		return false;
 
 	skip(2); // packet length
-	CGrayUID bookSerial(readInt32());
+	CUID bookSerial(readInt32());
 	word pageCount = readInt16();
 
 	CItem* book = bookSerial.ItemFind();
@@ -1073,7 +1073,7 @@ bool PacketTarget::onReceive(NetState* net)
 	skip(1); // target type
 	dword context = readInt32();
 	byte flags = readByte();
-	CGrayUID targetSerial(readInt32());
+	CUID targetSerial(readInt32());
 	word x = readInt16();
 	word y = readInt16();
 	skip(1);
@@ -1108,7 +1108,7 @@ bool PacketSecureTradeReq::onReceive(NetState* net)
 
 	skip(2); // length
 	SECURE_TRADE_TYPE action = static_cast<SECURE_TRADE_TYPE>(readByte());
-	CGrayUID containerSerial(readInt32());
+	CUID containerSerial(readInt32());
 
 	CItemContainer* container = dynamic_cast<CItemContainer*>( containerSerial.ItemFind() );
 	if (container == NULL)
@@ -1177,8 +1177,8 @@ bool PacketBulletinBoardReq::onReceive(NetState* net)
 
 	skip(2);
 	BBOARDF_TYPE action = static_cast<BBOARDF_TYPE>(readByte());
-	CGrayUID boardSerial(readInt32());
-	CGrayUID messageSerial(readInt32());
+	CUID boardSerial(readInt32());
+	CUID messageSerial(readInt32());
 
 	CItemContainer* board = dynamic_cast<CItemContainer*>( boardSerial.ItemFind() );
 	if (character->CanSee(board) == false)
@@ -1348,7 +1348,7 @@ bool PacketCharRename::onReceive(NetState* net)
 {
 	ADDTOCALLSTACK("PacketCharRename::onReceive");
 
-	CGrayUID serial(readInt32());
+	CUID serial(readInt32());
 	tchar* name = Str_GetTemp();
 	readStringASCII(name, MAX_NAME_SIZE);
 
@@ -1378,7 +1378,7 @@ bool PacketMenuChoice::onReceive(NetState* net)
 	if (character == NULL)
 		return false;
 
-	CGrayUID serial(readInt32());
+	CUID serial(readInt32());
 	word context = readInt16();
 	word select = readInt16();
 
@@ -1685,7 +1685,7 @@ bool PacketBookHeaderEdit::onReceive(NetState* net)
 {
 	ADDTOCALLSTACK("PacketBookHeaderEdit::onReceive");
 
-	CGrayUID bookSerial(readInt32());
+	CUID bookSerial(readInt32());
 	skip(1); // writable
 	skip(1); // unknown
 	skip(2); // pages
@@ -1716,7 +1716,7 @@ bool PacketDyeObject::onReceive(NetState* net)
 {
 	ADDTOCALLSTACK("PacketDyeObject::onReceive");
 
-	CGrayUID serial(readInt32());
+	CUID serial(readInt32());
 	skip(2); // item id
 	HUE_TYPE hue = static_cast<HUE_TYPE>(readInt16());
 
@@ -1750,7 +1750,7 @@ bool PacketAllNamesReq::onReceive(NetState* net)
 
 	for (word length = readInt16(); length > sizeof(dword); length -= sizeof(dword))
 	{
-		object = CGrayUID(readInt32()).ObjFind();
+		object = CUID(readInt32()).ObjFind();
 		if (object == NULL)
 			continue;
 		else if (character->CanSee(object) == false)
@@ -1847,7 +1847,7 @@ bool PacketVendorSellReq::onReceive(NetState* net)
 		return false;
 
 	skip(2); // length
-	CGrayUID vendorSerial(readInt32());
+	CUID vendorSerial(readInt32());
 	size_t itemCount = readInt16();
 
 	CChar* vendor = vendorSerial.CharFind();
@@ -1892,7 +1892,7 @@ bool PacketVendorSellReq::onReceive(NetState* net)
 
 	for (size_t i = 0; i < itemCount; i++)
 	{
-		items[i].m_serial = CGrayUID(readInt32());
+		items[i].m_serial = CUID(readInt32());
 		items[i].m_amount = readInt16();
 	}
 
@@ -1993,7 +1993,7 @@ bool PacketGumpValueInputResponse::onReceive(NetState* net)
 	ASSERT(client);
 
 	skip(2); // length
-	CGrayUID uid(readInt32());
+	CUID uid(readInt32());
 	readInt16(); // context
 	byte action = readByte();
 	word textLength = readInt16();
@@ -2140,7 +2140,7 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 		return false;
 
 	skip(2); // length
-	CGrayUID serial(readInt32());
+	CUID serial(readInt32());
 	dword context = readInt32();
 	dword button = readInt32();
 	dword checkCount = readInt32();
@@ -2156,7 +2156,7 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 		CChar* viewed = character;
 		if (button == 1 && checkCount > 0)
 		{
-			viewed = CGrayUID(readInt32()).CharFind();
+			viewed = CUID(readInt32()).CharFind();
 			if (viewed == NULL)
 				viewed = character;
 		}
@@ -2319,7 +2319,7 @@ bool PacketToolTipReq::onReceive(NetState* net)
 	CClient* client = net->getClient();
 	ASSERT(client);
 
-	CGrayUID serial(readInt32());
+	CUID serial(readInt32());
 	client->Event_ToolTip(serial);
 	return true;
 }
@@ -2345,7 +2345,7 @@ bool PacketProfileReq::onReceive(NetState* net)
 
 	word packetLength = readInt16();
 	bool write = readBool();
-	CGrayUID serial(readInt32());
+	CUID serial(readInt32());
 	word textLength(0);
 	tchar* text(NULL);
 
@@ -2382,8 +2382,8 @@ bool PacketMailMessage::onReceive(NetState* net)
 	CClient* client = net->getClient();
 	ASSERT(client);
 
-	CGrayUID serial1(readInt32());
-	CGrayUID serial2(readInt32());
+	CUID serial1(readInt32());
+	CUID serial2(readInt32());
 
 	client->Event_MailMsg(serial1, serial2);
 	return true;
@@ -2567,7 +2567,7 @@ bool PacketPartyMessage::onReceive(NetState* net)
 			if (character->m_pParty == NULL)
 				return false;
 
-			CGrayUID serial(readInt32());
+			CUID serial(readInt32());
 			character->m_pParty->RemoveMember(serial, character->GetUID());
 		} break;
 
@@ -2577,7 +2577,7 @@ bool PacketPartyMessage::onReceive(NetState* net)
 			if (character->m_pParty == NULL)
 				return false;
 
-			CGrayUID serial(readInt32());
+			CUID serial(readInt32());
 			nword * text = reinterpret_cast<nword *>(Str_GetTemp());
 			int length = readStringNullUNICODE(reinterpret_cast<wchar *>(text), MAX_TALK_BUFFER);
 			character->m_pParty->MessageEvent(serial, character->GetUID(), text, length);
@@ -2591,7 +2591,7 @@ bool PacketPartyMessage::onReceive(NetState* net)
 
 			nword * text = reinterpret_cast<nword *>(Str_GetTemp());
 			int length = readStringNullUNICODE(reinterpret_cast<wchar *>(text), MAX_TALK_BUFFER);
-			character->m_pParty->MessageEvent(CGrayUID(0), character->GetUID(), text, length);
+			character->m_pParty->MessageEvent(CUID(0), character->GetUID(), text, length);
 		} break;
 
 		case PARTYMSG_Option:
@@ -2607,13 +2607,13 @@ bool PacketPartyMessage::onReceive(NetState* net)
 		case PARTYMSG_Accept:
 		{
 			// we accept or decline the offer of an invite
-			CGrayUID serial(readInt32());
+			CUID serial(readInt32());
 			CPartyDef::AcceptEvent(character, serial);
 		} break;
 
 		case PARTYMSG_Decline:
 		{
-			CGrayUID serial(readInt32());
+			CUID serial(readInt32());
 			CPartyDef::DeclineEvent(character, serial);
 		} break;
 
@@ -2848,7 +2848,7 @@ bool PacketAosTooltipInfo::onReceive(NetState* net)
 	else if (client->GetResDisp() < RDS_AOS || !IsAosFlagEnabled(FEATURE_AOS_UPDATE_B))
 		return true;
 
-	const CObjBase* object = CGrayUID(readInt32()).ObjFind();
+	const CObjBase* object = CUID(readInt32()).ObjFind();
 	if (object != NULL && character->CanSee(object))
 		client->addAOSTooltip(object, true);
 
@@ -3040,7 +3040,7 @@ bool PacketHouseDesignReq::onReceive(NetState* net)
 	CClient* client = net->getClient();
 	ASSERT(client);
 
-	CItem* house = CGrayUID(readInt32()).ItemFind();
+	CItem* house = CUID(readInt32()).ItemFind();
 	if (house == NULL)
 		return true;
 
@@ -3094,8 +3094,8 @@ bool PacketBandageMacro::onReceive(NetState* net)
 	if (character == NULL)
 		return false;
 
-	CItem* bandage = CGrayUID(readInt32()).ItemFind();
-	CObjBase* target = CGrayUID(readInt32()).ObjFind();
+	CItem* bandage = CUID(readInt32()).ItemFind();
+	CObjBase* target = CUID(readInt32()).ObjFind();
 	if (bandage == NULL || target == NULL)
 		return true;
 
@@ -3235,7 +3235,7 @@ bool PacketWheelBoatMove::onReceive(NetState* net)
 
 	skip(4);
 	//dword serial = readInt32(); //player serial
-	//CGrayUID from(serial &~ UID_F_RESOURCE); //do we need this? NetState provides the player character
+	//CUID from(serial &~ UID_F_RESOURCE); //do we need this? NetState provides the player character
 
 	DIR_TYPE facing = static_cast<DIR_TYPE>(readByte()); //new boat facing, yes client send it
 	DIR_TYPE moving = static_cast<DIR_TYPE>(readByte()); //the boat movement
@@ -3364,7 +3364,7 @@ bool PacketBookHeaderEditNew::onReceive(NetState* net)
 	ADDTOCALLSTACK("PacketBookHeaderEditNew::onReceive");
 
 	skip(2); // length
-	CGrayUID bookSerial(readInt32());
+	CUID bookSerial(readInt32());
 	skip(1); // unknown
 	skip(1); // writable
 	skip(2); // pages
@@ -3412,7 +3412,7 @@ bool PacketAOSTooltipReq::onReceive(NetState* net)
 	const CObjBase* object;
 	for (word length = readInt16(); length > sizeof(dword); length -= sizeof(dword))
 	{
-		object = CGrayUID(readInt32()).ObjFind();
+		object = CUID(readInt32()).ObjFind();
 		if (object == NULL)
 			continue;
 		else if (character->CanSee(object) == false)
@@ -3448,7 +3448,7 @@ bool PacketEncodedCommand::onReceive(NetState* net)
 		return false;
 
 	word packetLength = readInt16();
-	CGrayUID serial(readInt32());
+	CUID serial(readInt32());
 	if (character->GetUID() != serial)
 		return false;
 
@@ -4171,7 +4171,7 @@ bool PacketEquipItemMacro::onReceive(NetState* net)
 	CItem* item;
 	for (byte i = 0; i < itemCount; i++)
 	{
-		item = CGrayUID(readInt32()).ItemFind();
+		item = CUID(readInt32()).ItemFind();
 		if (item == NULL)
 			continue;
 

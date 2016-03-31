@@ -1,23 +1,18 @@
 /**
-* @file CGrayUID.h
+* @file CUID.h
 */
 
 #pragma once
-#ifndef _INC_CGRAYUID_H
-#define _INC_CGRAYUID_H
+#ifndef _INC_CUID_H
+#define _INC_CUID_H
 
-#include "common.h"
-#include "graycom.h"
+#include "datatypes.h"
 
 
 class CObjBase;
 class CItem;
 class CChar;
 
-struct CGrayUIDBase		// A unique system serial id. 4 bytes long
-{
-	// This is a ref to a game object. It may or may not be valid.
-	// The top few bits are just flags.
 #define UID_CLEAR			0
 #define UID_UNUSED			0xFFFFFFFF	// 0 = not used as well.
 
@@ -30,10 +25,14 @@ struct CGrayUIDBase		// A unique system serial id. 4 bytes long
 #define UID_O_INDEX_MASK	0x0FFFFFFF	// lose the upper bits.
 #define UID_O_INDEX_FREE	0x01000000	// Spellbook needs unused UID's ?
 
+class CUIDBase		// A unique system serial id. 4 bytes long
+{
+	// This is a ref to a game object. It may or may not be valid.
+	// The top few bits are just flags.
 protected:
 	dword m_dwInternalVal;
-public:
 
+public:
 	bool IsValidUID() const;
 	void InitUID();
 	void ClearUID();
@@ -64,10 +63,11 @@ public:
 	CChar * CharFind() const;
 };
 
-struct CGrayUID : public CGrayUIDBase
+class CUID : public CUIDBase
 {
-	CGrayUID();
-	CGrayUID( dword dw );
+public:
+	CUID();
+	CUID( dword dw );
 };
 
-#endif // _INC_CGRAYUID_H
+#endif // _INC_CUID_H

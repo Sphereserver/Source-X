@@ -4,7 +4,7 @@
 #define _INC_CRESOURCEBASE_H
 
 #include "common.h"
-#include "CGrayUID.h"
+#include "CUID.h"
 #include "CArray.h"
 #include "CScript.h"
 #include "CScriptObj.h"
@@ -96,7 +96,7 @@ enum RES_TYPE	// all the script resource blocks we know how to deal with !
 #define RES_NEWBIE_PROF_SAMURAI		(10000+9)
 #define RES_NEWBIE_PROF_NINJA		(10000+10)
 
-struct RESOURCE_ID_BASE : public CGrayUIDBase
+struct RESOURCE_ID_BASE : public CUIDBase
 {
 #define RES_TYPE_SHIFT	25	// leave 6 bits = 64 for RES_TYPE
 #define RES_TYPE_MASK	63

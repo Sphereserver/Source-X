@@ -178,11 +178,11 @@ CResourceScript * CResourceBase::AddResourceFile( lpctstr pszName )
 	if ( pszExt == NULL )
 	{
 		// No file extension provided, so append .scp to the filename
-		strcat( szName, GRAY_SCRIPT );
-		strcat( szTitle, GRAY_SCRIPT );
+		strcat( szName, SPHERE_SCRIPT );
+		strcat( szTitle, SPHERE_SCRIPT );
 	}
 
-	if ( ! strnicmp( szTitle, GRAY_FILE "tables", strlen(GRAY_FILE "tables")))
+	if ( ! strnicmp( szTitle, SPHERE_FILE "tables", strlen(SPHERE_FILE "tables")))
 	{
 		// Don't dupe this.
 		return NULL;
@@ -211,7 +211,7 @@ void CResourceBase::AddResourceDir( lpctstr pszDirName )
 	if ( pszDirName[0] == '\0' )
 		return;
 
-	CGString sFilePath = CGFile::GetMergedFileName( pszDirName, "*" GRAY_SCRIPT );
+	CGString sFilePath = CGFile::GetMergedFileName( pszDirName, "*" SPHERE_SCRIPT );
 
 	CFileList filelist;
 	int iRet = filelist.ReadDir( sFilePath, false );

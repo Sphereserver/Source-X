@@ -22,10 +22,10 @@ class CStoneMember : public CGObListRec, public CScriptObj	// Members for variou
 	friend class CItemStone;
 private:
 	STONEPRIV_TYPE m_iPriv;	// What is my status level in the guild ?
-	CGrayUID m_uidLinkTo;			// My char uid or enemy stone UID
+	CUID m_uidLinkTo;			// My char uid or enemy stone UID
 
 									// Only apply to members.
-	CGrayUID m_uidLoyalTo;	// Who am i loyal to? invalid value = myself.
+	CUID m_uidLoyalTo;	// Who am i loyal to? invalid value = myself.
 	CGString m_sTitle;		// What is my title in the guild?
 
 	union	// Depends on m_iPriv
@@ -53,7 +53,7 @@ private:
 
 public:
 	static const char *m_sClassName;
-	CStoneMember( CItemStone * pStone, CGrayUID uid, STONEPRIV_TYPE iType, lpctstr pTitle = "", CGrayUID loyaluidLink = 0, bool fArg1 = false, bool fArg2 = false, int nAccountGold = 0);
+	CStoneMember( CItemStone * pStone, CUID uid, STONEPRIV_TYPE iType, lpctstr pTitle = "", CUID loyaluidLink = 0, bool fArg1 = false, bool fArg2 = false, int nAccountGold = 0);
 	virtual ~CStoneMember();
 
 private:
@@ -64,7 +64,7 @@ public:
 	CStoneMember* GetNext() const;
 	CItemStone * GetParentStone() const;
 
-	CGrayUID GetLinkUID() const;
+	CUID GetLinkUID() const;
 
 	STONEPRIV_TYPE GetPriv() const;
 	void SetPriv(STONEPRIV_TYPE iPriv);
@@ -85,7 +85,7 @@ public:
 
 	lpctstr GetTitle() const;
 	void SetTitle( lpctstr pTitle );
-	CGrayUID GetLoyalToUID() const;
+	CUID GetLoyalToUID() const;
 	bool SetLoyalTo( const CChar * pChar);
 	int GetAccountGold() const;
 	void SetAccountGold( int iGold );
@@ -158,7 +158,7 @@ public:
 private:
 	void TheyDeclarePeace( CItemStone* pEnemyStone, bool fForcePeace );
 	bool WeDeclareWar(CItemStone * pEnemyStone);
-	void WeDeclarePeace(CGrayUID uidEnemy, bool fForcePeace = false);
+	void WeDeclarePeace(CUID uidEnemy, bool fForcePeace = false);
 	void AnnounceWar( const CItemStone * pEnemyStone, bool fWeDeclare, bool fWar );
 public:
 	bool IsAtWarWith( const CItemStone * pStone ) const;

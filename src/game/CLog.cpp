@@ -16,7 +16,7 @@ CLog::CLog()
 	m_pObjectContext = NULL;
 	m_dwMsgMask = LOGL_ERROR |
 				  LOGM_INIT | LOGM_CLIENTS_LOG | LOGM_GM_PAGE;
-	SetFilePath( GRAY_FILE "log.log" );	// default name to go to.
+	SetFilePath( SPHERE_FILE "log.log" );	// default name to go to.
 }
 
 const CScript * CLog::SetScriptContext( const CScript * pScriptContext )
@@ -107,7 +107,7 @@ bool CLog::OpenLog( lpctstr pszBaseDirName )	// name set previously.
 	// Get the new name based on date.
 	m_dateStamp = CGTime::GetCurrentTime();
 	tchar *pszTemp = Str_GetTemp();
-	sprintf(pszTemp, GRAY_FILE "%d-%02d-%02d.log",
+	sprintf(pszTemp, SPHERE_FILE "%d-%02d-%02d.log",
 		m_dateStamp.GetYear(), m_dateStamp.GetMonth(), m_dateStamp.GetDay());
 	CGString sFileName = GetMergedFileName(m_sBaseDir, pszTemp);
 

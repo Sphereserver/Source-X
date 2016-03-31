@@ -2,7 +2,7 @@
 
 #include <cmath>
 #include "../clients/CClient.h"
-#include "../common/CGrayUIDextra.h"
+#include "../common/CUIDExtra.h"
 #include "../items/CItemVendable.h"
 #include "../CLog.h"
 #include "../Triggers.h"
@@ -759,7 +759,7 @@ bool CChar::Skill_MakeItem_Success()
 	}
 
 	// Item goes into ACT of player
-	CGrayUID uidOldAct = m_Act_Targ;
+	CUID uidOldAct = m_Act_Targ;
 	m_Act_Targ = pItem->GetUID();
 	TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
 	if ( IsTrigUsed(TRIGGER_SKILLMAKEITEM) )
@@ -811,7 +811,7 @@ int CChar::SkillResourceTest( const CResourceQtyArray * pResources )
 }
 
 
-bool CChar::Skill_MakeItem( ITEMID_TYPE id, CGrayUID uidTarg, SKTRIG_TYPE stage, bool fSkillOnly, int iReplicationQty )
+bool CChar::Skill_MakeItem( ITEMID_TYPE id, CUID uidTarg, SKTRIG_TYPE stage, bool fSkillOnly, int iReplicationQty )
 {
 	ADDTOCALLSTACK("CChar::Skill_MakeItem");
 	// "MAKEITEM"
@@ -1133,7 +1133,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	return true;
 }
 
-bool CChar::Skill_Tracking( CGrayUID uidTarg, DIR_TYPE & dirPrv, int iDistMax )
+bool CChar::Skill_Tracking( CUID uidTarg, DIR_TYPE & dirPrv, int iDistMax )
 {
 	ADDTOCALLSTACK("CChar::Skill_Tracking");
 	// SKILL_TRACKING

@@ -13,7 +13,7 @@
 #include "packet.h"
 #include "network.h"
 #include "../common/grayproto.h"
-#include "../common/CGrayUID.h"
+#include "../common/CUID.h"
 #include "../game/enums.h"
 #include "../game/CResource.h"
 
@@ -82,7 +82,7 @@ public:
 class PacketCombatDamage : public PacketSend
 {
 public:
-	PacketCombatDamage(const CClient* target, word damage, CGrayUID defender);
+	PacketCombatDamage(const CClient* target, word damage, CUID defender);
 
 	virtual bool canSendTo(const NetState* state) const { return CanSendTo(state); }
 	static bool CanSendTo(const NetState* state)
@@ -114,7 +114,7 @@ public:
 class PacketHealthBarUpdate : public PacketSend
 {
 private:
-	CGrayUID m_character;
+	CUID m_character;
 
 public:
 	enum Color
@@ -144,10 +144,10 @@ public:
 class PacketItemWorld : public PacketSend
 {
 private:
-	CGrayUID m_item;
+	CUID m_item;
 
 protected:
-	PacketItemWorld(byte id, size_t size, CGrayUID uid);
+	PacketItemWorld(byte id, size_t size, CUID uid);
 
 public:
 	PacketItemWorld(const CClient* target, CItem* item);
@@ -193,7 +193,7 @@ public:
 class PacketRemoveObject : public PacketSend
 {
 public:
-	PacketRemoveObject(const CClient* target, CGrayUID uid);
+	PacketRemoveObject(const CClient* target, CUID uid);
 };
 
 /***************************************************************************
@@ -260,7 +260,7 @@ public:
 class PacketContainerOpen : public PacketSend
 {
 private:
-	CGrayUID m_container;
+	CUID m_container;
 
 public:
 	PacketContainerOpen(const CClient* target, const CObjBase* container, GUMP_TYPE gump);
@@ -278,7 +278,7 @@ public:
 class PacketItemContainer : public PacketSend
 {
 private:
-	CGrayUID m_item;
+	CUID m_item;
 
 public:
 	PacketItemContainer(const CClient* target, const CItem* item);
@@ -425,7 +425,7 @@ public:
 class PacketItemContents : public PacketSend
 {
 private:
-	CGrayUID m_container;
+	CUID m_container;
 	word m_count;
 
 public:
@@ -763,7 +763,7 @@ public:
 class PacketCharacter : public PacketSend
 {
 private:
-	CGrayUID m_character;
+	CUID m_character;
 
 public:
 	PacketCharacter(CClient* target, const CChar* character);
@@ -902,7 +902,7 @@ public:
 class PacketCorpseEquipment : public PacketSend
 {
 private:
-	CGrayUID m_corpse;
+	CUID m_corpse;
 	int m_count;
 
 public:
@@ -1003,7 +1003,7 @@ public:
 class PacketAddPrompt : public PacketSend
 {
 public:
-	PacketAddPrompt(const CClient* target, CGrayUID context1, CGrayUID context2, bool useUnicode);
+	PacketAddPrompt(const CClient* target, CUID context1, CUID context2, bool useUnicode);
 };
 
 /***************************************************************************
@@ -1122,7 +1122,7 @@ public:
 class PacketAttack : public PacketSend
 {
 public:
-	PacketAttack(const CClient* target, CGrayUID serial);
+	PacketAttack(const CClient* target, CUID serial);
 };
 
 /***************************************************************************
@@ -1388,7 +1388,7 @@ public:
 class PacketPropertyListVersionOld : public PacketExtended
 {
 protected:
-	CGrayUID m_object;
+	CUID m_object;
 
 public:
 	PacketPropertyListVersionOld(const CClient* target, const CObjBase* object, dword version);
@@ -1415,7 +1415,7 @@ private:
 	int m_popupCount;
 
 public:
-	PacketDisplayPopup(const CClient* target, CGrayUID uid);
+	PacketDisplayPopup(const CClient* target, CUID uid);
 
 	void addOption(word entryTag, dword textId, word flags, word color);
 	void finalise(void);
@@ -1571,7 +1571,7 @@ public:
 class PacketCombatDamageOld : public PacketExtended
 {
 public:
-	PacketCombatDamageOld(const CClient* target, byte damage, CGrayUID defender);
+	PacketCombatDamageOld(const CClient* target, byte damage, CUID defender);
 
 	virtual bool canSendTo(const NetState* state) const { return CanSendTo(state); }
 	static bool CanSendTo(const NetState* state)
@@ -1674,7 +1674,7 @@ public:
 class PacketPropertyList : public PacketSend
 {
 protected:
-	CGrayUID m_object;
+	CUID m_object;
 	llong m_time;
 	dword m_version;
 	int m_entryCount;
@@ -1684,7 +1684,7 @@ public:
 	PacketPropertyList(const CClient* target, const PacketPropertyList* other);
 	virtual bool onSend(const CClient* client);
 
-	CGrayUID getObject(void) const { return m_object; }
+	CUID getObject(void) const { return m_object; }
 	dword getVersion(void) const { return m_version; }
 	int getEntryCount(void) const { return m_entryCount; }
 	bool isEmpty(void) const { return m_entryCount == 0; }
@@ -1757,7 +1757,7 @@ public:
 class PacketPropertyListVersion : public PacketSend
 {
 protected:
-	CGrayUID m_object;
+	CUID m_object;
 
 public:
 	PacketPropertyListVersion(const CClient* target, const CObjBase* object, dword version);
@@ -1851,7 +1851,7 @@ public:
 class PacketItemWorldNew : public PacketItemWorld
 {
 protected:
-	PacketItemWorldNew(byte id, size_t size, CGrayUID uid);
+	PacketItemWorldNew(byte id, size_t size, CUID uid);
 
 public:
 	enum DataSource

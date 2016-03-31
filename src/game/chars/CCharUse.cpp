@@ -493,7 +493,7 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 		if ( pCont )
 		{
 			//check for UID
-			CGrayUID uidCont = (dword)(pCont->GetValNum());
+			CUID uidCont = (dword)(pCont->GetValNum());
 			CItemContainer *pNewCont = dynamic_cast<CItemContainer*>(uidCont.ItemFind());
 			if ( !pNewCont )	//if no UID, check for ITEMID_TYPE
 			{

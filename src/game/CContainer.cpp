@@ -1,6 +1,6 @@
 
 #include "../common/CException.h"
-#include "../common/CGrayUID.h"
+#include "../common/CUID.h"
 #include "../common/CObjBaseTemplate.h"
 #include "../network/send.h"
 #include "chars/CChar.h"

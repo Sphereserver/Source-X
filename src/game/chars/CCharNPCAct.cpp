@@ -2,7 +2,7 @@
 
 #include "../clients/CClient.h"
 #include "../common/CException.h"
-#include "../common/CGrayUIDextra.h"
+#include "../common/CUIDExtra.h"
 #include "../network/receive.h"
 #include "../CLog.h"
 #include "../CPathFinder.h"

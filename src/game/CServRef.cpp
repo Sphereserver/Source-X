@@ -1,7 +1,7 @@
 
 #include "../common/CException.h"
 #include "../common/grayproto.h"
-#include "../common/grayver.h"
+#include "../common/sphereversion.h"
 #include "../sphere/threads.h"
 #include "CLog.h"
 #include "CObjBase.h"
@@ -42,7 +42,7 @@
 // -CServerDef
 
 CServerDef::CServerDef( lpctstr pszName, CSocketAddressIP dwIP ) :
-	m_ip( dwIP, GRAY_DEF_PORT )	// SOCKET_LOCAL_ADDRESS
+	m_ip( dwIP, SPHERE_DEF_PORT )	// SOCKET_LOCAL_ADDRESS
 {
 	// Statistics.
 	memset( m_dwStat, 0, sizeof( m_dwStat ));	// THIS MUST BE FIRST !
@@ -454,7 +454,7 @@ bool CServerDef::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc
 		sVal.Format("<a href=\"http://%s\">%s</a>", static_cast<lpctstr>(m_sURL), GetName());
 		break;
 	case SC_VERSION:
-		sVal = GRAY_VERSION;
+		sVal = SPHERE_VERSION;
 		break;
 	default:
 		{

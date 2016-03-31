@@ -6,7 +6,7 @@
 #include "../common/CString.h"
 #include "../common/CTextConsole.h"
 #include "../common/cwindow.h"
-#include "../common/grayver.h"	// sphere version
+#include "../common/sphereversion.h"	// sphere version
 #include "../game/CLog.h"
 #include "../game/CObjBase.h"
 #include "../game/CResource.h"
@@ -149,7 +149,7 @@ CNTApp theApp;
 bool CNTWindow::CAboutDlg::OnInitDialog()
 {
 	char *z = Str_GetTemp();
-	sprintf(z, "%s %s", GRAY_TITLE, GRAY_VERSION);
+	sprintf(z, "%s %s", SPHERE_TITLE, SPHERE_VERSION);
 	#ifdef __GITREVISION__
 	 sprintf(z, "%s (build %d / GIT hash %s)", z, __GITREVISION__, __GITHASH__);
 	#endif
@@ -755,7 +755,7 @@ LRESULT CNTWindow::OnNotify( int idCtrl, NMHDR * pnmh )
 						break;
 
 					//	use dclick to open the corresponding script file
-					TCHAR * pos = strstr(zTemp, GRAY_SCRIPT);
+					TCHAR * pos = strstr(zTemp, SPHERE_SCRIPT);
 					if ( pos != NULL )
 					{
 						//	use two formats of file names:
@@ -791,7 +791,7 @@ LRESULT CNTWindow::OnNotify( int idCtrl, NMHDR * pnmh )
 							// since certain files aren't listed, handle these separately
 							if (filePath == NULL)
 							{
-								if ( strstr(GRAY_FILE "tables" GRAY_SCRIPT, start) )
+								if ( strstr(SPHERE_FILE "tables" SPHERE_SCRIPT, start) )
 								{
 									TCHAR * z = Str_GetTemp();
 									strcpy(z, g_Cfg.m_sSCPBaseDir);
@@ -901,10 +901,10 @@ LRESULT WINAPI CNTWindow::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LP
 
 bool NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
-	theApp.InitInstance(GRAY_TITLE "Server V" GRAY_VERSION, hInstance, lpCmdLine);
+	theApp.InitInstance(SPHERE_TITLE "Server V" SPHERE_VERSION, hInstance, lpCmdLine);
 
 	//	read target window name from the arguments
-	char	className[32] = GRAY_TITLE "Svr";
+	char	className[32] = SPHERE_TITLE "Svr";
 	TCHAR	*argv[32];
 	argv[0] = NULL;
 	size_t argc = Str_ParseCmds(lpCmdLine, &argv[1], COUNTOF(argv)-1, " \t") + 1;
@@ -920,7 +920,7 @@ bool NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLine, int nCmdShow)
 
 	theApp.m_wndMain.m_hWnd = ::CreateWindow(
 		className,
-		GRAY_TITLE " V" GRAY_VERSION, // window name
+		SPHERE_TITLE " V" SPHERE_VERSION, // window name
 		WS_OVERLAPPEDWINDOW,   // window style
 		CW_USEDEFAULT,  // horizontal position of window
 		CW_USEDEFAULT,  // vertical position of window

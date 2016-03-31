@@ -1,6 +1,6 @@
 
 #include "../common/CException.h"
-#include "../common/CGrayUIDextra.h"
+#include "../common/CUIDExtra.h"
 #include "../network/network.h"
 #include "../network/send.h"
 #include "../network/packet.h"
@@ -472,7 +472,7 @@ bool CClient::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 						pszKey +=7;
 
 					SKIP_SEPARATORS(pszKey);
-					CChar * pChar = static_cast<CChar*>(static_cast<CGrayUID>(Exp_GetSingle(pszKey)).CharFind());
+					CChar * pChar = static_cast<CChar*>(static_cast<CUID>(Exp_GetSingle(pszKey)).CharFind());
 					if ( !pChar )
 						return false;
 					if ( !pChar->IsClient() )
@@ -1071,7 +1071,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				CChar *pChar = m_pChar;
 				if ( s.HasArgs() )
 				{
-					CGrayUID uid = s.GetArgVal();
+					CUID uid = s.GetArgVal();
 					pChar = uid.CharFind();
 				}
 				if ( pChar )
@@ -1084,7 +1084,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				CChar *pChar = m_pChar;
 				if ( s.HasArgs() )
 				{
-					CGrayUID uid = s.GetArgVal();
+					CUID uid = s.GetArgVal();
 					pChar = uid.CharFind();
 				}
 				if ( pChar )
@@ -1097,7 +1097,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				CChar *pChar = m_pChar;
 				if ( s.HasArgs() )
 				{
-					CGrayUID uid = s.GetArgVal();
+					CUID uid = s.GetArgVal();
 					pChar = uid.CharFind();
 				}
 				if ( pChar )
@@ -1108,7 +1108,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		case CV_DYE:
 			if ( s.HasArgs() )
 			{
-				CGrayUID uid(s.GetArgVal());
+				CUID uid(s.GetArgVal());
 				CObjBase *pObj = uid.ObjFind();
 				if ( pObj )
 					addDyeOption(pObj);
@@ -1259,7 +1259,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			CChar *pChar = m_pChar;
 			if ( s.HasArgs() )
 			{
-				CGrayUID uid = s.GetArgVal();
+				CUID uid = s.GetArgVal();
 				pChar = uid.CharFind();
 			}
 			if ( pChar )
@@ -1276,12 +1276,12 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			CItem *pItem = NULL;
 			if ( ppArgs[0] )
 			{
-				CGrayUID uidChar = static_cast<CGrayUID>(Exp_GetVal(ppArgs[0]));
+				CUID uidChar = static_cast<CUID>(Exp_GetVal(ppArgs[0]));
 				pChar = uidChar.CharFind();
 			}
 			if ( ppArgs[1] )
 			{
-				CGrayUID uidItem = static_cast<CGrayUID>(Exp_GetVal(ppArgs[1]));
+				CUID uidItem = static_cast<CUID>(Exp_GetVal(ppArgs[1]));
 				pItem = uidItem.ItemFind();
 			}
 			if ( pChar )

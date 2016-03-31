@@ -11,7 +11,7 @@
 #include "CMemBlock.h"
 #include "CacheableScriptFile.h"
 
-#define GRAY_SCRIPT		".scp"
+#define SPHERE_SCRIPT		".scp"
 
 #define SCRIPT_MAX_SECTION_LEN 128
 

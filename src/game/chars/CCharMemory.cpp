@@ -1,6 +1,6 @@
 // Actions specific to an NPC.
 #include "../clients/CClient.h"
-#include "../common/CGrayUIDextra.h"
+#include "../common/CUIDExtra.h"
 #include "../network/send.h"
 #include "../CServTime.h"
 #include "CChar.h"
@@ -187,7 +187,7 @@ bool CChar::Memory_ClearTypes( CItemMemory * pMemory, word MemTypes )
 // Create a memory about this object.
 // NOTE: Does not check if object already has a memory.!!!
 //  Assume it does not !
-CItemMemory * CChar::Memory_CreateObj( CGrayUID uid, word MemTypes )
+CItemMemory * CChar::Memory_CreateObj( CUID uid, word MemTypes )
 {
 	ADDTOCALLSTACK("CChar::Memory_CreateObj");
 
@@ -229,7 +229,7 @@ void CChar::Memory_ClearTypes( word MemTypes )
 }
 
 // Do I have a memory / link for this object ?
-CItemMemory * CChar::Memory_FindObj( CGrayUID uid ) const
+CItemMemory * CChar::Memory_FindObj( CUID uid ) const
 {
 	ADDTOCALLSTACK("CChar::Memory_FindObj");
 	for ( CItem *pItem = GetContentHead(); pItem != NULL; pItem = pItem->GetNext() )
@@ -277,7 +277,7 @@ CItemMemory * CChar::Memory_FindObjTypes( const CObjBase * pObj, word MemTypes )
 	return( pMemory );
 }
 
-CItemMemory * CChar::Memory_AddObj( CGrayUID uid, word MemTypes )
+CItemMemory * CChar::Memory_AddObj( CUID uid, word MemTypes )
 {
 	return Memory_CreateObj( uid, MemTypes );
 }
@@ -328,7 +328,7 @@ TRIGRET_TYPE CChar::OnCharTrigForMemTypeLoop( CScript &s, CTextConsole * pSrc, C
 }
 
 // Adding a new value for this memory, updating notoriety
-CItemMemory * CChar::Memory_AddObjTypes( CGrayUID uid, word MemTypes )
+CItemMemory * CChar::Memory_AddObjTypes( CUID uid, word MemTypes )
 {
 	ADDTOCALLSTACK("CChar::Memory_AddObjTypes");
 	CItemMemory * pMemory = Memory_FindObj( uid );

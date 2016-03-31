@@ -1,6 +1,6 @@
 // An item is targetted.
 
-#include "../common/CGrayUIDextra.h"
+#include "../common/CUIDExtra.h"
 #include "../network/send.h"
 #include "../chars/CChar.h"
 #include "../items/CItemMulti.h"
@@ -723,7 +723,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 //-----------------------------------------------------------------------
 // Targetted Informational skills
 
-int CClient::OnSkill_AnimalLore( CGrayUID uid, int iSkillLevel, bool fTest )
+int CClient::OnSkill_AnimalLore( CUID uid, int iSkillLevel, bool fTest )
 {
 	ADDTOCALLSTACK("CClient::OnSkill_AnimalLore");
 	UNREFERENCED_PARAMETER(iSkillLevel);
@@ -796,7 +796,7 @@ int CClient::OnSkill_AnimalLore( CGrayUID uid, int iSkillLevel, bool fTest )
 	return 0;
 }
 
-int CClient::OnSkill_ItemID( CGrayUID uid, int iSkillLevel, bool fTest )
+int CClient::OnSkill_ItemID( CUID uid, int iSkillLevel, bool fTest )
 {
 	ADDTOCALLSTACK("CClient::OnSkill_ItemID");
 	// SKILL_ITEMID
@@ -868,7 +868,7 @@ int CClient::OnSkill_ItemID( CGrayUID uid, int iSkillLevel, bool fTest )
 	return iSkillLevel;
 }
 
-int CClient::OnSkill_EvalInt( CGrayUID uid, int iSkillLevel, bool fTest )
+int CClient::OnSkill_EvalInt( CUID uid, int iSkillLevel, bool fTest )
 {
 	ADDTOCALLSTACK("CClient::OnSkill_EvalInt");
 	// SKILL_EVALINT
@@ -970,7 +970,7 @@ static lpctstr const sm_szPoisonMessages[] =
 	g_Cfg.GetDefaultMsg( DEFMSG_ARMSLORE_PSN_10 )
 };
 
-int CClient::OnSkill_ArmsLore( CGrayUID uid, int iSkillLevel, bool fTest )
+int CClient::OnSkill_ArmsLore( CUID uid, int iSkillLevel, bool fTest )
 {
 	ADDTOCALLSTACK("CClient::OnSkill_ArmsLore");
 	// SKILL_ARMSLORE
@@ -1061,7 +1061,7 @@ int CClient::OnSkill_ArmsLore( CGrayUID uid, int iSkillLevel, bool fTest )
 	return iSkillLevel;
 }
 
-int CClient::OnSkill_Anatomy( CGrayUID uid, int iSkillLevel, bool fTest )
+int CClient::OnSkill_Anatomy( CUID uid, int iSkillLevel, bool fTest )
 {
 	ADDTOCALLSTACK("CClient::OnSkill_Anatomy");
 	// SKILL_ANATOMY
@@ -1134,7 +1134,7 @@ int CClient::OnSkill_Anatomy( CGrayUID uid, int iSkillLevel, bool fTest )
 	return iSkillLevel;
 }
 
-int CClient::OnSkill_Forensics( CGrayUID uid, int iSkillLevel, bool fTest )
+int CClient::OnSkill_Forensics( CUID uid, int iSkillLevel, bool fTest )
 {
 	ADDTOCALLSTACK("CClient::OnSkill_Forensics");
 	// SKILL_FORENSICS
@@ -1186,7 +1186,7 @@ int CClient::OnSkill_Forensics( CGrayUID uid, int iSkillLevel, bool fTest )
 	return iSkillLevel;
 }
 
-int CClient::OnSkill_TasteID( CGrayUID uid, int iSkillLevel, bool fTest )
+int CClient::OnSkill_TasteID( CUID uid, int iSkillLevel, bool fTest )
 {
 	ADDTOCALLSTACK("CClient::OnSkill_TasteID");
 	// SKILL_TASTEID
@@ -1264,7 +1264,7 @@ int CClient::OnSkill_TasteID( CGrayUID uid, int iSkillLevel, bool fTest )
 	return iSkillLevel;
 }
 
-int CClient::OnSkill_Info( SKILL_TYPE skill, CGrayUID uid, int iSkillLevel, bool fTest )
+int CClient::OnSkill_Info( SKILL_TYPE skill, CUID uid, int iSkillLevel, bool fTest )
 {
 	ADDTOCALLSTACK("CClient::OnSkill_Info");
 	// Skill timer has expired.

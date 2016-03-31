@@ -8,7 +8,7 @@
 #include "../common/CResourceBase.h"
 #include "../common/CObjBaseTemplate.h"
 #include "../common/CGrayMap.h"
-#include "../common/CGrayUID.h"
+#include "../common/CUID.h"
 #include "../CBase.h"
 #include "../CResource.h"
 #include "../CObjBase.h"
@@ -79,7 +79,7 @@ public:
 #define ATTR_OPENED			0x4000000	// Is Door Opened.
 	dword	m_Attr;
 	// NOTE: If this link is set but not valid -> then delete the whole object !
-	CGrayUID m_uidLink;		// Linked to this other object in the world. (owned, key, etc)
+	CUID m_uidLink;		// Linked to this other object in the world. (owned, key, etc)
 
 	bool IsTriggerActive(lpctstr trig) { return static_cast<CObjBase*>(const_cast<CItem*>(this))->IsTriggerActive(trig); }
 	void SetTriggerActive(lpctstr trig = NULL) { static_cast<CObjBase*>(const_cast<CItem*>(this))->SetTriggerActive(trig); }
@@ -106,7 +106,7 @@ public:
 		// IT_SHIP_HOLD_LOCK
 		struct	// IsTypeLockable()
 		{
-			CGrayUIDBase m_lockUID;		// more1=the lock code. normally this is the same as the uid (magic lock=non UID)
+			CUIDBase m_lockUID;		// more1=the lock code. normally this is the same as the uid (magic lock=non UID)
 			dword m_lock_complexity;	// more2=0-1000 = How hard to pick or magic unlock. (conflict with door ?)
 		} m_itContainer;
 
@@ -115,7 +115,7 @@ public:
 		// IT_SIGN_GUMP
 		struct
 		{
-			CGrayUIDBase m_lockUID;		// more1 = the lock code. Normally this is the UID, except if uidLink is set.
+			CUIDBase m_lockUID;		// more1 = the lock code. Normally this is the UID, except if uidLink is set.
 		} m_itKey;
 
 		// IT_EQ_BANK_BOX
@@ -245,7 +245,7 @@ public:
 		struct	// might just be a sleeping person as well
 		{
 			dword			m_carved;		// more1 = Corpse is already carved? (0=not carved, 1=carved)
-			CGrayUIDBase	m_uidKiller;	// more2 = Who killed this corpse, carved or looted it last. sleep=self.
+			CUIDBase	m_uidKiller;	// more2 = Who killed this corpse, carved or looted it last. sleep=self.
 			CREID_TYPE		m_BaseID;		// morex,morey = The true type of the creature who's corpse this is.
 			DIR_TYPE		m_facing_dir;	// morez = Corpse dir. 0x80 = on face.
 											// m_amount = the body type.
@@ -343,7 +343,7 @@ public:
 		struct
 		{
 			CREID_TYPE m_ID;	// more1 = What sort of creature will this turn into.
-			CGrayUIDBase m_UID;	// more2 = If stored by the stables. (offline creature)
+			CUIDBase m_UID;	// more2 = If stored by the stables. (offline creature)
 		} m_itFigurine;
 
 		// IT_RUNE
@@ -378,19 +378,19 @@ public:
 		// IT_SHIP
 		struct
 		{
-			CGrayUIDBase m_UIDCreator;	// more1 = who created this house or ship ?
+			CUIDBase m_UIDCreator;	// more1 = who created this house or ship ?
 			byte m_fSail;		// more2.b1 = ? speed ?
 			byte m_fAnchored;
 			byte m_DirMove;		// DIR_TYPE
 			byte m_DirFace;
 			// uidLink = my IT_SHIP_TILLER or IT_SIGN_GUMP,
-			CGrayUIDBase m_Pilot;
+			CUIDBase m_Pilot;
 		} m_itShip;
 
 		// IT_SHIP_PLANK
 		struct
 		{
-			CGrayUIDBase m_lockUID;		// more1 = the lock code. normally this is the same as the uid (magic lock=non UID)
+			CUIDBase m_lockUID;		// more1 = the lock code. normally this is the same as the uid (magic lock=non UID)
 			dword m_lock_complexity;	// more2=0-1000 = How hard to pick or magic unlock. (conflict with door ?)
 			word m_itSideType;			// morex = type to become (IT_SHIP_SIDE or IT_SHIP_SIDE_LOCKED)
 		} m_itShipPlank;
@@ -609,7 +609,7 @@ public:
 
 	void  Update( const CClient * pClientExclude = NULL );		// send this new item to everyone.
 	void  Flip();
-	bool  LoadSetContainer( CGrayUID uid, LAYER_TYPE layer );
+	bool  LoadSetContainer( CUID uid, LAYER_TYPE layer );
 
 	void WriteUOX( CScript & s, int index );
 

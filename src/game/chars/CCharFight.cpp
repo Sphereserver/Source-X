@@ -1,6 +1,6 @@
 // Fight/Criminal actions/Noto.
 #include "../clients/CClient.h"
-#include "../common/CGrayUIDextra.h"
+#include "../common/CUIDExtra.h"
 #include "../network/send.h"
 #include "../CServTime.h"
 #include "../Triggers.h"
@@ -1336,7 +1336,7 @@ bool CChar::Fight_Attack( const CChar *pCharTarg, bool btoldByMaster )
 	if ( m_pNPC && !btoldByMaster )		// call FindBestTarget when this CChar is a NPC and was not commanded to attack, otherwise it attack directly
 		pTarget = NPC_FightFindBestTarget();
 
-	m_Fight_Targ = pTarget ? pTarget->GetUID() : static_cast<CGrayUID>(UID_UNUSED);
+	m_Fight_Targ = pTarget ? pTarget->GetUID() : static_cast<CUID>(UID_UNUSED);
 	Skill_Start(skillWeapon);
 	return true;
 }
@@ -1628,7 +1628,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		{
 			if ( pCont )
 			{
-				CGrayUID uidCont = static_cast<CGrayUID>((dword)(pCont->GetValNum()));
+				CUID uidCont = static_cast<CUID>((dword)(pCont->GetValNum()));
 				CItemContainer *pNewCont = dynamic_cast<CItemContainer*>(uidCont.ItemFind());
 				if ( !pNewCont )	//if no UID, check for ITEMID_TYPE
 				{

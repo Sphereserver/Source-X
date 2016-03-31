@@ -1,8 +1,8 @@
 //  CChar is either an NPC or a Player.
 
 #include "../common/CException.h"
-#include "../common/CGrayUID.h"
-#include "../common/CGrayUIDextra.h"
+#include "../common/CUID.h"
+#include "../common/CUIDExtra.h"
 #include "../common/CObjBaseTemplate.h"
 #include "../common/CRect.h"
 #include "../network/network.h"
@@ -963,25 +963,25 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 				{
 					pItemCont->SetAttr(ATTR_NEWBIE);
 
-					CChar *pTest = static_cast<CChar*>(static_cast<CGrayUID>(pItemCont->m_itNormal.m_more1).CharFind());
+					CChar *pTest = static_cast<CChar*>(static_cast<CUID>(pItemCont->m_itNormal.m_more1).CharFind());
 					if ( pTest && pTest == pChar )
 						pItemCont->m_itNormal.m_more1 = this->GetUID();
 
-					CChar *pTest2 = static_cast<CChar*>(static_cast<CGrayUID>(pItemCont->m_itNormal.m_more2).CharFind());
+					CChar *pTest2 = static_cast<CChar*>(static_cast<CUID>(pItemCont->m_itNormal.m_more2).CharFind());
 					if ( pTest2 && pTest2 == pChar )
 						pItemCont->m_itNormal.m_more2 = this->GetUID();
 
-					CChar *pTest3 = static_cast<CChar*>(static_cast<CGrayUID>(pItemCont->m_uidLink).CharFind());
+					CChar *pTest3 = static_cast<CChar*>(static_cast<CUID>(pItemCont->m_uidLink).CharFind());
 					if ( pTest3 && pTest3 == pChar )
 						pItemCont->m_uidLink = this->GetUID();
 				}
 			}
 		}
-		CChar * pTest = static_cast<CChar*>(static_cast<CGrayUID>(pItem->m_itNormal.m_more1).CharFind());
+		CChar * pTest = static_cast<CChar*>(static_cast<CUID>(pItem->m_itNormal.m_more1).CharFind());
 		if ( pTest && pTest == pChar)
 			pItem->m_itNormal.m_more1 = this->GetUID();
 
-		CChar * pTest2 = static_cast<CChar*>(static_cast<CGrayUID>(pItem->m_itNormal.m_more2).CharFind());
+		CChar * pTest2 = static_cast<CChar*>(static_cast<CUID>(pItem->m_itNormal.m_more2).CharFind());
 		if ( pTest2)
 		{
 			if ( pTest2 == pChar)
@@ -1003,7 +1003,7 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 			}
 		}
 
-		CChar * pTest3 = static_cast<CChar*>(static_cast<CGrayUID>(pItem->m_uidLink).CharFind());
+		CChar * pTest3 = static_cast<CChar*>(static_cast<CUID>(pItem->m_uidLink).CharFind());
 		if ( pTest3 && pTest3 == pChar)
 			pItem->m_uidLink = this->GetUID();
 		
@@ -1771,7 +1771,7 @@ bool CChar::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 				SKIP_SEPARATORS(pszKey);
 				return( true );
 			case CHR_MEMORYFIND:	// Find a memory of a UID
-				pRef = Memory_FindObj( (CGrayUID) Exp_GetSingle( pszKey ));
+				pRef = Memory_FindObj( (CUID) Exp_GetSingle( pszKey ));
 				SKIP_SEPARATORS(pszKey);
 				return( true );
 			case CHR_OWNER:
@@ -1946,7 +1946,7 @@ do_default:
 					if ( !strnicmp(pszKey, "ID", 2 ) )
 					{
 						pszKey += 3;	// ID + whitspace
-						CChar * pChar = static_cast<CChar*>(static_cast<CGrayUID>(Exp_GetSingle(pszKey)).CharFind());
+						CChar * pChar = static_cast<CChar*>(static_cast<CUID>(Exp_GetSingle(pszKey)).CharFind());
 						sVal.FormatVal(Attacker_GetID(pChar));
 						return true;
 					}else if ( !strnicmp(pszKey, "TARGET", 6 ) )
@@ -2013,7 +2013,7 @@ do_default:
 							}
 							else if (( !strnicmp(pszKey, "UID", 3) ) || ( *pszKey == '\0' ))
 							{
-								CGrayUID uid = refAttacker.charUID;
+								CUID uid = refAttacker.charUID;
 								sVal.FormatHex( uid.CharFind() ? refAttacker.charUID : 0 );
 								return true;
 							}
@@ -2066,7 +2066,7 @@ do_default:
 					if ( !strnicmp(pszKey, "ID", 2 ) )
 					{
 						pszKey += 2;	// ID + whitspace
-						CChar * pChar = static_cast<CChar*>(static_cast<CGrayUID>(Exp_GetSingle(pszKey)).CharFind());
+						CChar * pChar = static_cast<CChar*>(static_cast<CUID>(Exp_GetSingle(pszKey)).CharFind());
 						if ( !NotoSave_GetID(pChar) )
 							sVal.FormatVal( -1 );
 						else
@@ -2093,7 +2093,7 @@ do_default:
 							}
 							else if (( !strnicmp(pszKey, "UID", 3) ) || ( *pszKey == '\0' ))
 							{
-								CGrayUID uid = refnoto.charUID;
+								CUID uid = refnoto.charUID;
 								sVal.FormatHex( uid.CharFind() ? refnoto.charUID : 0 );
 								return true;
 							}
@@ -2449,7 +2449,7 @@ do_default:
 				if ( *pszKey == '.' )
 				{
 					pszKey++;
-					CGrayUID		uid	= Exp_GetVal( pszKey );
+					CUID		uid	= Exp_GetVal( pszKey );
 					pMemory	= Memory_FindObj( uid );
 				}
 				else
@@ -2559,7 +2559,7 @@ do_default:
 		case CHC_DIR:
 			{
 				pszKey +=3;
-				CChar * pChar = static_cast<CChar*>(static_cast<CGrayUID>(Exp_GetSingle(pszKey)).CharFind());
+				CChar * pChar = static_cast<CChar*>(static_cast<CUID>(Exp_GetSingle(pszKey)).CharFind());
 				if ( pChar )
 					sVal.FormatVal( GetDir(pChar));
 				else
@@ -2629,7 +2629,7 @@ do_default:
 				pszKey += 11;
 				GETNONWHITESPACE(pszKey);
 
-				CGrayUID uid = Exp_GetVal( pszKey );
+				CUID uid = Exp_GetVal( pszKey );
 				SKIP_ARGSEP( pszKey );
 				bool fAllowIncog = ( Exp_GetVal( pszKey ) >= 1 );
 				SKIP_ARGSEP( pszKey );
@@ -2889,14 +2889,14 @@ do_default:
 					{
 						if ( m_lastAttackers.size() )
 						{
-							CChar *pChar = static_cast<CChar *>(static_cast<CGrayUID>(s.GetArgVal()).CharFind());
+							CChar *pChar = static_cast<CChar *>(static_cast<CUID>(s.GetArgVal()).CharFind());
 							Attacker_Delete(pChar, false, ATTACKER_CLEAR_SCRIPT);
 						}
 						return true;
 					}
 					else if ( !strnicmp(pszKey, "ADD", 3) )
 					{
-						CChar *pChar = static_cast<CChar *>(static_cast<CGrayUID>(s.GetArgVal()).CharFind());
+						CChar *pChar = static_cast<CChar *>(static_cast<CUID>(s.GetArgVal()).CharFind());
 						if ( !pChar )
 							return false;
 						Fight_Attack(pChar);
@@ -2904,7 +2904,7 @@ do_default:
 					}
 					else if ( !strnicmp(pszKey, "TARGET", 6) )
 					{
-						CChar *pChar = static_cast<CChar *>(static_cast<CGrayUID>(s.GetArgVal()).CharFind());
+						CChar *pChar = static_cast<CChar *>(static_cast<CUID>(s.GetArgVal()).CharFind());
 						if ( !pChar || pChar == this )	// can't set ourself as target
 						{
 							m_Fight_Targ.InitUID();
@@ -3116,7 +3116,7 @@ do_default:
 				if ( iArgQty < 2 )
 					return( false );
 
-				CGrayUID	uid		= (uint)(piCmd[0]);
+				CUID	uid		= (uint)(piCmd[0]);
 				dword		dwFlags	= (uint)(piCmd[1]);
 
 				CItemMemory * pMemory = Memory_FindObj( uid );
@@ -3458,7 +3458,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			break;
 		case CHV_ATTACK:
 		{
-			Fight_Attack(CGrayUID(s.GetArgVal()).CharFind());
+			Fight_Attack(CUID(s.GetArgVal()).CharFind());
 			break;
 		}
 		case CHV_BANK:
@@ -3471,10 +3471,10 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			SoundChar( ( s.HasArgs() ? static_cast<CRESND_TYPE>(s.GetArgVal()) : ( Calc_GetRandVal(2) ? CRESND_RAND1 : CRESND_RAND2 )));
 			break;
 		case CHV_BOUNCE: // uid
-			return ItemBounce( CGrayUID( s.GetArgVal()).ItemFind());
+			return ItemBounce( CUID( s.GetArgVal()).ItemFind());
 		case CHV_BOW:
 		{
-			UpdateDir(CGrayUID(s.GetArgVal()).ObjFind());
+			UpdateDir(CUID(s.GetArgVal()).ObjFind());
 			UpdateAnimate(ANIM_BOW);
 			break;
 		}
@@ -3509,7 +3509,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			SetDisconnected();
 			break;
 		case CHV_DROP:	// uid
-			return ItemDrop( CGrayUID( s.GetArgVal()).ItemFind(), GetTopPoint());
+			return ItemDrop( CUID( s.GetArgVal()).ItemFind(), GetTopPoint());
 		case CHV_DUPE:	// = dupe a creature !
 			{
 			CChar * pChar = CreateNPC( GetID());
@@ -3517,7 +3517,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			pChar->DupeFrom(this,s.GetArgVal() < 1 ? true : false);
 			}break;
 		case CHV_EQUIP:	// uid
-			return ItemEquip( CGrayUID( s.GetArgVal()).ItemFind());
+			return ItemEquip( CUID( s.GetArgVal()).ItemFind());
 		case CHV_EQUIPHALO:
 			{
 				// equip a halo light
@@ -3542,7 +3542,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			return ItemEquipWeapon(false);
 		case CHV_FACE:
 		{
-			UpdateDir(CGrayUID(s.GetArgVal()).ObjFind());
+			UpdateDir(CUID(s.GetArgVal()).ObjFind());
 			break;
 		}
 		case CHV_FIXWEIGHT:
@@ -3570,7 +3570,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_GOUID:	// uid
 			if ( s.HasArgs())
 			{
-				CGrayUID uid( s.GetArgVal());
+				CUID uid( s.GetArgVal());
 				CObjBaseTemplate * pObj = uid.ObjFind();
 				if ( pObj == NULL )
 					return( false );
@@ -3803,7 +3803,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			break;
 		case CHV_SALUTE:	//	salute to player
 		{
-			UpdateDir(CGrayUID(s.GetArgVal()).ObjFind());
+			UpdateDir(CUID(s.GetArgVal()).ObjFind());
 			UpdateAnimate(ANIM_SALUTE);
 			break;
 		}
@@ -3878,7 +3878,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			UpdateMode();
 			break;
 		case CHV_UNEQUIP:	// uid
-			return ItemBounce( CGrayUID( s.GetArgVal()).ItemFind());
+			return ItemBounce( CUID( s.GetArgVal()).ItemFind());
 		case CHV_WHERE:
 			if ( pCharSrc )
 			{

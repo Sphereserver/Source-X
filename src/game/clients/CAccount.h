@@ -75,7 +75,7 @@ public:
 	CSocketAddressIP m_First_IP;	///< First ip logged in from.
 	CGTime m_dateFirstConnect;	///< First date logged in (use localtime()).
 
-	CGrayUID m_uidLastChar;		///< Last CChar logged with this CAccount.
+	CUID m_uidLastChar;		///< Last CChar logged with this CAccount.
 	CCharRefArray m_Chars;		///< CChars attached to this CAccount.
 	CVarDefMap m_TagDefs;		///< Tags storage system.
 	CVarDefMap m_BaseDefs;		///< New Variable storage system.

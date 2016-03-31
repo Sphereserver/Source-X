@@ -37,7 +37,7 @@ CObjBaseTemplate * CObjBaseTemplate::GetPrev() const
 	return( STATIC_CAST <CObjBaseTemplate*> ( CGObListRec::GetPrev()));
 }
 
-CGrayUID CObjBaseTemplate::GetUID() const
+CUID CObjBaseTemplate::GetUID() const
 {	
 	return( m_UID ); 
 }

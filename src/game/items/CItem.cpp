@@ -1,6 +1,6 @@
 
 #include "../common/CException.h"
-#include "../common/CGrayUIDextra.h"
+#include "../common/CUIDExtra.h"
 #include "../network/network.h"
 #include "../network/send.h"
 #include "../sphere/ProfileTask.h"
@@ -2210,7 +2210,7 @@ void CItem::r_Write( CScript & s )
 		s.WriteKey("P", GetTopPoint().WriteUsed());
 }
 
-bool CItem::LoadSetContainer( CGrayUID uid, LAYER_TYPE layer )
+bool CItem::LoadSetContainer( CUID uid, LAYER_TYPE layer )
 {
 	ADDTOCALLSTACK("CItem::LoadSetContainer");
 	// Set the CItem in a container of some sort.
@@ -3094,7 +3094,7 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 		{
 			if (!pCharSrc)
 				return false;
-			CItem * pTarg = static_cast<CItem*>(static_cast<CGrayUID>(s.GetArgVal()).ItemFind());
+			CItem * pTarg = static_cast<CItem*>(static_cast<CUID>(s.GetArgVal()).ItemFind());
 			return pCharSrc->Skill_Mining_Smelt(this, pTarg ? pTarg : NULL);
 		}
 
@@ -3155,7 +3155,7 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 		EXC_SET("chardef");
 		if ( pChar != NULL )
 		{
-			CGrayUID uidOldAct = pChar->m_Act_Targ;
+			CUID uidOldAct = pChar->m_Act_Targ;
 			pChar->m_Act_Targ = GetUID();
 			iRet = pChar->OnTrigger(sCharTrigName,  pSrc, pArgs );
 			pChar->m_Act_Targ = uidOldAct;
@@ -3339,7 +3339,7 @@ TRIGRET_TYPE CItem::OnTriggerCreate( CTextConsole * pSrc, CScriptTriggerArgs * p
 		EXC_SET("chardef");
 		if ( pChar != NULL )
 		{
-			CGrayUID uidOldAct = pChar->m_Act_Targ;
+			CUID uidOldAct = pChar->m_Act_Targ;
 			pChar->m_Act_Targ = GetUID();
 			iRet = pChar->OnTrigger(sCharTrigName,  pSrc, pArgs );
 			pChar->m_Act_Targ = uidOldAct;

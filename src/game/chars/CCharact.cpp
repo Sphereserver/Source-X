@@ -2,7 +2,7 @@
 #include "../clients/CClient.h"
 #include "../common/CArray.h"
 #include "../common/CException.h"
-#include "../common/CGrayUIDextra.h"
+#include "../common/CUIDExtra.h"
 #include "../network/network.h"
 #include "../network/send.h"
 #include "../sphere/ProfileTask.h"
@@ -2232,7 +2232,7 @@ void CChar::Speak( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE
 }
 
 // Convert me into a figurine
-CItem * CChar::Make_Figurine( CGrayUID uidOwner, ITEMID_TYPE id )
+CItem * CChar::Make_Figurine( CUID uidOwner, ITEMID_TYPE id )
 {
 	ADDTOCALLSTACK("CChar::Make_Figurine");
 	if ( IsDisconnected() || m_pPlayer )
@@ -2311,7 +2311,7 @@ CItem * CChar::Horse_GetMountItem() const
 
 				if ( pItemMount != NULL && pItemMount->m_itNormal.m_more2 == GetUID() )
 				{
-					const_cast<CGrayUIDBase&>(m_atRidden.m_FigurineUID) = pItemMount->GetUID();
+					const_cast<CUIDBase&>(m_atRidden.m_FigurineUID) = pItemMount->GetUID();
 					pItem = pItemMount;
 
 					DEBUG_ERR(("UID=0%x, id=0%x '%s', Fixed mount item UID=0%x, id=0%x '%s'\n",
@@ -2756,7 +2756,7 @@ bool CChar::Death()
 	int iKillStrLen = sprintf( pszKillStr, g_Cfg.GetDefaultMsg(DEFMSG_MSG_KILLED_BY), (m_pPlayer)? 'P':'N', GetNameWithoutIncognito() );
 	for ( size_t count = 0; count < m_lastAttackers.size(); count++ )
 	{
-		pKiller = CGrayUID(m_lastAttackers.at(count).charUID).CharFind();
+		pKiller = CUID(m_lastAttackers.at(count).charUID).CharFind();
 		if ( pKiller )
 		{
 			if ( IsTrigUsed(TRIGGER_KILL) )
@@ -3676,7 +3676,7 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 		if ( pChar != NULL && this != pChar )
 		{
 			EXC_SET("chardef");
-			CGrayUID uidOldAct = pChar->m_Act_Targ;
+			CUID uidOldAct = pChar->m_Act_Targ;
 			pChar->m_Act_Targ = GetUID();
 			iRet = pChar->OnTrigger(sCharTrigName, pSrc, pArgs );
 			pChar->m_Act_Targ = uidOldAct;

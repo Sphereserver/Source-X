@@ -973,7 +973,7 @@ bool CRandGroupDef::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * p
 				sVal.FormatVal( GetRandMemberIndex(NULL, false) );
 			else
 			{
-				CGrayUID uidTofind = Exp_GetDWVal(pszKey);
+				CUID uidTofind = Exp_GetDWVal(pszKey);
 				CChar * pSend = uidTofind.CharFind();
 
 				if ( pSend )

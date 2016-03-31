@@ -13,7 +13,7 @@ class CItemSpawn : public CItem
 private:
 	static lpctstr const sm_szLoadKeys[];
 	static lpctstr const sm_szVerbKeys[];
-	CGrayUID m_obj[UINT8_MAX];	///< Storing UIDs of the created items/chars.
+	CUID m_obj[UINT8_MAX];	///< Storing UIDs of the created items/chars.
 
 public:
 	static const char *m_sClassName;
@@ -75,14 +75,14 @@ public:
 	*
 	* @param UID of the obj to remove.
 	*/
-	void DelObj( CGrayUID uid );
+	void DelObj( CUID uid );
 
 	/**
 	* @brief Storing one UID in Spawn's m_obj[].
 	*
 	* @param UID of the obj to add.
 	*/
-	void AddObj( CGrayUID uid );
+	void AddObj( CUID uid );
 
 	/**
 	* @brief Test if the character from more1 exists.

@@ -17,7 +17,7 @@
 #include "../common/CException.h"
 #include "../common/CFileList.h"
 #include "../common/CTextConsole.h"
-#include "../common/grayver.h"	// sphere version
+#include "../common/sphereversion.h"	// sphere version
 #include "../network/network.h"
 #include "../sphere/ProfileTask.h"
 #include "chars/CChar.h"
@@ -158,7 +158,7 @@ commandtoolong:
 ////////////////////////////////////////////////////////////////////////////////////////
 // -CServer
 
-CServer::CServer() : CServerDef( GRAY_TITLE, CSocketAddressIP( SOCKET_LOCAL_ADDRESS ))
+CServer::CServer() : CServerDef( SPHERE_TITLE, CSocketAddressIP( SOCKET_LOCAL_ADDRESS ))
 {
 	m_iExitFlag = 0;
 	m_fResyncPause = false;
@@ -366,7 +366,7 @@ lpctstr CServer::GetStatusString( byte iIndex ) const
 			// typical (first time) poll response.
 			{
 				char szVersion[128];
-				sprintf(pTemp, GRAY_TITLE ", Name=%s, Port=%d, Ver=" GRAY_VERSION ", TZ=%d, EMail=%s, URL=%s, Lang=%s, CliVer=%s\n",
+				sprintf(pTemp, SPHERE_TITLE ", Name=%s, Port=%d, Ver=" SPHERE_VERSION ", TZ=%d, EMail=%s, URL=%s, Lang=%s, CliVer=%s\n",
 					GetName(), m_ip.GetPort(), m_TimeZone, static_cast<lpctstr>(m_sEMail), static_cast<lpctstr>(m_sURL), static_cast<lpctstr>(m_sLang),
 					m_ClientVersion.WriteClientVer(szVersion));
 			}
@@ -374,7 +374,7 @@ lpctstr CServer::GetStatusString( byte iIndex ) const
 		case 0x22: // '"'
 			{
 			// shown in the INFO page in game.
-			sprintf(pTemp, GRAY_TITLE ", Name=%s, Age=%" PRId64 ", Clients=%u, Items=%u, Chars=%u, Mem=%uK\n",
+			sprintf(pTemp, SPHERE_TITLE ", Name=%s, Age=%" PRId64 ", Clients=%u, Items=%u, Chars=%u, Mem=%uK\n",
 				GetName(), iHours, iClients, StatGet(SERV_STAT_ITEMS), StatGet(SERV_STAT_CHARS), StatGet(SERV_STAT_MEM));
 			}
 			break;
@@ -384,7 +384,7 @@ lpctstr CServer::GetStatusString( byte iIndex ) const
 			break;
 		case 0x25: // '%'
 			// ConnectUO Status string
-			sprintf(pTemp, GRAY_TITLE " Items=%u, Mobiles=%u, Clients=%u, Mem=%u", StatGet(SERV_STAT_ITEMS), StatGet(SERV_STAT_CHARS), iClients, StatGet(SERV_STAT_MEM));
+			sprintf(pTemp, SPHERE_TITLE " Items=%u, Mobiles=%u, Clients=%u, Mem=%u", StatGet(SERV_STAT_ITEMS), StatGet(SERV_STAT_CHARS), iClients, StatGet(SERV_STAT_MEM));
 			break;
 	}
 
@@ -788,7 +788,7 @@ longcommand:
 			if ( !strnicmp(pszText, "strip tng", 9) || !strnicmp(pszText, "tngstrip", 8))
 			{
 				strcpy(z, dirname);
-				strcat(z, "sphere_strip_tng" GRAY_SCRIPT);
+				strcat(z, "sphere_strip_tng" SPHERE_SCRIPT);
 				pSrc->SysMessagef("StripFile is %s.\n", z);
 			
 				f1 = fopen(z, "w");
@@ -842,7 +842,7 @@ longcommand:
 			else if ( !strnicmp(pszText, "strip axis", 10) || !strnicmp(pszText, "strip", 5) )
 			{
 				strcpy(z, dirname);
-				strcat(z, "sphere_strip_axis" GRAY_SCRIPT);
+				strcat(z, "sphere_strip_axis" SPHERE_SCRIPT);
 				pSrc->SysMessagef("StripFile is %s.\n", z);
 			
 				f1 = fopen(z, "w");
@@ -1618,10 +1618,10 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 		switch ( toupper(pArg[0]) )
 		{
 			case '?':
-				PrintStr( GRAY_TITLE " \n"
+				PrintStr( SPHERE_TITLE " \n"
 					"Command Line Switches:\n"
 #ifdef _WIN32
-					"-cClassName Setup custom window class name for sphere (default: " GRAY_TITLE "Svr)\n"
+					"-cClassName Setup custom window class name for sphere (default: " SPHERE_TITLE "Svr)\n"
 #else
 					"-c use colored console output (default: off)\n"
 #endif
@@ -1982,7 +1982,7 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 	EXC_SET("finilizing");
 #ifdef _WIN32
 	char *pszTemp = Str_GetTemp();
-	sprintf(pszTemp, GRAY_TITLE " V" GRAY_VERSION " - %s", GetName());
+	sprintf(pszTemp, SPHERE_TITLE " V" SPHERE_VERSION " - %s", GetName());
 	SetConsoleTitle(pszTemp);
 #endif
 

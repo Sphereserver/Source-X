@@ -138,7 +138,7 @@ private:
 
 	// Promptconsole
 	CLIMODE_TYPE m_Prompt_Mode;	// type of prompt
-	CGrayUID m_Prompt_Uid;		// context uid
+	CUID m_Prompt_Uid;		// context uid
 	CGString m_Prompt_Text;		// text (i.e. callback function)
 
 public:
@@ -152,7 +152,7 @@ public:
 
 									// GM only stuff.
 	CGMPage * m_pGMPage;		// Current GM page we are connected to.
-	CGrayUID m_Prop_UID;		// The object of /props (used for skills list as well!)
+	CUID m_Prop_UID;		// The object of /props (used for skills list as well!)
 
 								// Gump stuff
 	typedef std::map<int,int> OpenedGumpsMap_t;
@@ -162,9 +162,9 @@ public:
 private:
 	CLIMODE_TYPE m_Targ_Mode;	// Type of async operation under way.
 public:
-	CGrayUID m_Targ_Last;	// The last object targeted by the client
-	CGrayUID m_Targ_UID;			// The object of interest to apply to the target.
-	CGrayUID m_Targ_PrvUID;		// The object of interest before this.
+	CUID m_Targ_Last;	// The last object targeted by the client
+	CUID m_Targ_UID;			// The object of interest to apply to the target.
+	CUID m_Targ_PrvUID;		// The object of interest before this.
 	CGString m_Targ_Text;		// Text transfered up from client.
 	CPointMap  m_Targ_p;			// For script targeting,
 	CServTime m_Targ_Timeout;	// timeout time for targeting
@@ -181,12 +181,12 @@ public:
 		} m_tmSetup;
 
 		// CLIMODE_SETUP_CHARLIST
-		CGrayUIDBase m_tmSetupCharList[MAX_CHARS_PER_ACCT];
+		CUIDBase m_tmSetupCharList[MAX_CHARS_PER_ACCT];
 
 		// CLIMODE_INPVAL
 		struct
 		{
-			CGrayUIDBase m_UID;
+			CUIDBase m_UID;
 			RESOURCE_ID_BASE m_PrvGumpID;	// the gump that was up before this
 		} m_tmInpVal;
 
@@ -195,7 +195,7 @@ public:
 		// CLIMODE_MENU_GM_PAGES
 		struct
 		{
-			CGrayUIDBase m_UID;
+			CUIDBase m_UID;
 			RESOURCE_ID_BASE m_ResourceID;		// What menu is this ?
 			dword m_Item[MAX_MENU_ITEMS];	// This saves the inrange tracking targets or other context
 		} m_tmMenu;	// the menu that is up.
@@ -290,13 +290,13 @@ private:
 	bool OnTarg_Party_Add( CChar * pChar );
 	CItem* OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, dword dwAttr, HUE_TYPE wHue );
 
-	int OnSkill_AnimalLore( CGrayUID uid, int iTestLevel, bool fTest );
-	int OnSkill_Anatomy( CGrayUID uid, int iTestLevel, bool fTest );
-	int OnSkill_Forensics( CGrayUID uid, int iTestLevel, bool fTest );
-	int OnSkill_EvalInt( CGrayUID uid, int iTestLevel, bool fTest );
-	int OnSkill_ArmsLore( CGrayUID uid, int iTestLevel, bool fTest );
-	int OnSkill_ItemID( CGrayUID uid, int iTestLevel, bool fTest );
-	int OnSkill_TasteID( CGrayUID uid, int iTestLevel, bool fTest );
+	int OnSkill_AnimalLore( CUID uid, int iTestLevel, bool fTest );
+	int OnSkill_Anatomy( CUID uid, int iTestLevel, bool fTest );
+	int OnSkill_Forensics( CUID uid, int iTestLevel, bool fTest );
+	int OnSkill_EvalInt( CUID uid, int iTestLevel, bool fTest );
+	int OnSkill_ArmsLore( CUID uid, int iTestLevel, bool fTest );
+	int OnSkill_ItemID( CUID uid, int iTestLevel, bool fTest );
+	int OnSkill_TasteID( CUID uid, int iTestLevel, bool fTest );
 
 	bool OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt );
 	bool OnTarg_Skill_Herd_Dest( CObjBase * pObj, const CPointMap & pt );
@@ -316,28 +316,28 @@ public:
 	void GetAdjustedCharID( const CChar * pChar, CREID_TYPE & id, HUE_TYPE &wHue ) const;
 	void GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMID_TYPE & id, HUE_TYPE &wHue ) const;
 
-	void Event_Attack(CGrayUID uid);
-	void Event_Book_Title( CGrayUID uid, lpctstr pszTitle, lpctstr pszAuthor );
+	void Event_Attack(CUID uid);
+	void Event_Book_Title( CUID uid, lpctstr pszTitle, lpctstr pszAuthor );
 	void Event_BugReport( const tchar * pszText, int len, BUGREPORT_TYPE type, CLanguageID lang = 0 );
 	void Event_ChatButton(const NCHAR * pszName); // Client's chat button was pressed
 	void Event_ChatText( const NCHAR * pszText, int len, CLanguageID lang = 0 ); // Text from a client
 	void Event_CombatMode( bool fWar ); // Only for switching to combat mode
-	bool Event_DoubleClick( CGrayUID uid, bool fMacro, bool fTestTouch, bool fScript = false );
+	bool Event_DoubleClick( CUID uid, bool fMacro, bool fTestTouch, bool fScript = false );
 	void Event_ExtCmd( EXTCMD_TYPE type, tchar * pszName );
-	void Event_Item_Drop( CGrayUID uidItem, CPointMap pt, CGrayUID uidOn, uchar gridIndex = 0 ); // Item is dropped on ground
+	void Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gridIndex = 0 ); // Item is dropped on ground
 	void Event_Item_Drop_Fail( CItem *pItem );
-	void Event_Item_Dye( CGrayUID uid, HUE_TYPE wHue );	// Rehue an item
-	void Event_Item_Pickup( CGrayUID uid, int amount ); // Client grabs an item
-	void Event_MailMsg( CGrayUID uid1, CGrayUID uid2 );
-	void Event_Profile( byte fWriteMode, CGrayUID uid, lpctstr pszProfile, int iProfileLen );
+	void Event_Item_Dye( CUID uid, HUE_TYPE wHue );	// Rehue an item
+	void Event_Item_Pickup( CUID uid, int amount ); // Client grabs an item
+	void Event_MailMsg( CUID uid1, CUID uid2 );
+	void Event_Profile( byte fWriteMode, CUID uid, lpctstr pszProfile, int iProfileLen );
 	void Event_PromptResp( lpctstr pszText, size_t len, dword context1, dword context2, dword type, bool bNoStrip = false );
-	void Event_SetName( CGrayUID uid, const char * pszCharName );
-	void Event_SingleClick( CGrayUID uid );
+	void Event_SetName( CUID uid, const char * pszCharName );
+	void Event_SingleClick( CUID uid );
 	void Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bool bNoStrip = false ); // PC speech
 	void Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, lpctstr pszLang );
-	void Event_Target( dword context, CGrayUID uid, CPointMap pt, byte flags = 0, ITEMID_TYPE id = ITEMID_NOTHING );
+	void Event_Target( dword context, CUID uid, CPointMap pt, byte flags = 0, ITEMID_TYPE id = ITEMID_NOTHING );
 	void Event_Tips( word i ); // Tip of the day window
-	void Event_ToolTip( CGrayUID uid );
+	void Event_ToolTip( CUID uid );
 	void Event_UseToolbar(byte bType, dword dwArg);
 	void Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t itemCount);
 	void Event_VendorBuy_Cheater( int iCode = 0 );
@@ -442,10 +442,10 @@ public:
 	bool addDeleteErr(byte code, dword iSlot);
 	void addSeason(SEASON_TYPE season);
 	void addTime( bool bCurrent = false );
-	void addObjectRemoveCantSee( CGrayUID uid, lpctstr pszName = NULL );
+	void addObjectRemoveCantSee( CUID uid, lpctstr pszName = NULL );
 	void closeContainer( const CObjBase * pObj );
 	void closeUIWindow( const CChar* character, dword command );
-	void addObjectRemove( CGrayUID uid );
+	void addObjectRemove( CUID uid );
 	void addObjectRemove( const CObjBase * pObj );
 	void addRemoveAll( bool fItems, bool fChars );
 
@@ -499,7 +499,7 @@ public:
 	void addDyeOption( const CObjBase * pBase );
 	void addWebLaunch( lpctstr pMsg ); // Direct client to a web page
 
-	void addPromptConsole( CLIMODE_TYPE mode, lpctstr pMsg, CGrayUID context1 = 0, CGrayUID context2 = 0, bool bUnicode = false );
+	void addPromptConsole( CLIMODE_TYPE mode, lpctstr pMsg, CUID context1 = 0, CUID context2 = 0, bool bUnicode = false );
 	void addTarget( CLIMODE_TYPE targmode, lpctstr pMsg, bool fAllowGround = false, bool fCheckCrime = false, int iTimeout = 0 ); // Send targetting cursor to client
 	void addTargetDeed( const CItem * pDeed );
 	bool addTargetItems( CLIMODE_TYPE targmode, ITEMID_TYPE id, bool fGround = true );
@@ -530,7 +530,7 @@ public:
 	void addBondedStatus( const CChar * pChar, bool bIsDead );
 	void addSkillWindow(SKILL_TYPE skill, bool bFromInfo = false); // Opens the skills list
 	void addBulletinBoard( const CItemContainer * pBoard );
-	bool addBBoardMessage( const CItemContainer * pBoard, BBOARDF_TYPE flag, CGrayUID uidMsg );
+	bool addBBoardMessage( const CItemContainer * pBoard, BBOARDF_TYPE flag, CUID uidMsg );
 
 	void addToolTip( const CObjBase * pObj, lpctstr psztext );
 	void addDrawMap( CItemMap * pItem );
@@ -542,7 +542,7 @@ public:
 	void addItemMenu( CLIMODE_TYPE mode, const CMenuItem * item, size_t count, CObjBase * pObj = NULL );
 	void addGumpDialog( CLIMODE_TYPE mode, const CGString * sControls, size_t iControls, const CGString * psText, size_t iTexts, int x, int y, CObjBase * pObj = NULL, dword rid = 0 );
 
-	bool addGumpDialogProps( CGrayUID uid );
+	bool addGumpDialogProps( CUID uid );
 
 	void addLoginComplete();
 	void addChatSystemMessage(CHATMSG_TYPE iType, lpctstr pszName1 = NULL, lpctstr pszName2 = NULL, CLanguageID lang = 0 );
@@ -679,7 +679,7 @@ public:
 	bool Dialog_Close( CObjBase * pObj, dword rid, int buttonID );
 	void Menu_Setup( RESOURCE_ID_BASE rid, CObjBase * pObj = NULL );
 
-	int OnSkill_Info( SKILL_TYPE skill, CGrayUID uid, int iTestLevel, bool fTest );
+	int OnSkill_Info( SKILL_TYPE skill, CUID uid, int iTestLevel, bool fTest );
 
 	bool Cmd_Use_Item( CItem * pItem, bool fTestTouch, bool fScript = false );
 	void Cmd_EditItem( CObjBase * pObj, int iSelect );

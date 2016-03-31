@@ -7,7 +7,7 @@
 #ifndef _INC_RECEIVE_H
 #define _INC_RECEIVE_H
 
-#include "../common/CGrayUID.h"
+#include "../common/CUID.h"
 #include "../common/graymul.h"
 #include "../common/grayproto.h"
 #include "packet.h"
@@ -238,7 +238,7 @@ public:
  ***************************************************************************/
 struct VendorItem
 {
-	CGrayUID m_serial;
+	CUID m_serial;
 	word m_amount;
 	dword m_price;
 };

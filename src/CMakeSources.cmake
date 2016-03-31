@@ -154,9 +154,9 @@ common/CFileList.h
 common/CGrayData.cpp
 common/CGrayMap.cpp
 common/CGrayMap.h
-common/CGrayUID.cpp
-common/CGrayUID.h
-common/CGrayUIDextra.h
+common/CUID.cpp
+common/CUID.h
+common/CUIDExtra.h
 common/CMD5.cpp
 common/CMD5.h
 common/CMemBlock.h
@@ -199,7 +199,7 @@ common/graycom.cpp
 common/graycom.h
 common/graymul.h
 common/grayproto.h
-common/grayver.h
+common/sphereversion.h
 common/ListDefContMap.cpp
 common/ListDefContMap.h
 common/os_unix.h

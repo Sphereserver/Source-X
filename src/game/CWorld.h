@@ -11,7 +11,7 @@
 #include "../common/CScript.h"
 #include "../common/CScriptObj.h"
 #include "../common/mtrand/mtrand.h"
-#include "../common/CGrayUID.h"
+#include "../common/CUID.h"
 #include "items/CItemBase.h"
 #include "CServTime.h"
 #include "CSector.h"
@@ -138,7 +138,7 @@ class CTimedFunctionHandler
 		{
 			int		elapsed;
 			char	funcname[1024];
-			CGrayUID 	uid;
+			CUID 	uid;
 		};
 
 	private:
@@ -161,11 +161,11 @@ class CTimedFunctionHandler
 		void r_Write( CScript & s );
 		
 		int Load( const char *pszName, bool fQuoted, const char *pszVal );
-		void Add( CGrayUID uid, int numSeconds, lpctstr funcname );
-		void Erase( CGrayUID uid );
-		void Stop( CGrayUID uid, lpctstr funcname );
+		void Add( CUID uid, int numSeconds, lpctstr funcname );
+		void Erase( CUID uid );
+		void Stop( CUID uid, lpctstr funcname );
 		TRIGRET_TYPE Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext, CScriptLineContext EndContext, CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pResult);
-		int IsTimer( CGrayUID uid, lpctstr funcname );
+		int IsTimer( CUID uid, lpctstr funcname );
 };
 
 extern class CWorld : public CScriptObj, public CWorldThread
@@ -198,10 +198,10 @@ public:
 	int m_iPrevBuild;			// Previous __GITREVISION__
 	CServTime m_timeStartup;	// When did the system restore load/save ?
 
-	CGrayUID m_uidLastNewItem;	// for script access.
-	CGrayUID m_uidLastNewChar;	// for script access.
-	CGrayUID m_uidObj;			// for script access - auxiliary obj
-	CGrayUID m_uidNew;			// for script access - auxiliary obj
+	CUID m_uidLastNewItem;	// for script access.
+	CUID m_uidLastNewChar;	// for script access.
+	CUID m_uidObj;			// for script access - auxiliary obj
+	CUID m_uidNew;			// for script access - auxiliary obj
 
 	CGObList m_GMPages;		// Current outstanding GM pages. (CGMPage)
 

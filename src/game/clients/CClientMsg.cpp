@@ -1,7 +1,7 @@
 // Game server messages. (No login stuff)
 
 #include "../common/CException.h"
-#include "../common/CGrayUIDextra.h"
+#include "../common/CUIDExtra.h"
 #include "../network/network.h"
 #include "../network/send.h"
 #include "../sphere/ProfileTask.h"
@@ -274,7 +274,7 @@ void CClient::addTime( bool bCurrent )
 	}
 }
 
-void CClient::addObjectRemoveCantSee( CGrayUID uid, lpctstr pszName )
+void CClient::addObjectRemoveCantSee( CUID uid, lpctstr pszName )
 {
 	ADDTOCALLSTACK("CClient::addObjectRemoveCantSee");
 	// Seems this object got out of sync some how.
@@ -295,7 +295,7 @@ void CClient::closeUIWindow( const CChar* character, dword command )
 	new PacketCloseUIWindow(this, character, command);
 }
 
-void CClient::addObjectRemove( CGrayUID uid )
+void CClient::addObjectRemove( CUID uid )
 {
 	ADDTOCALLSTACK("CClient::addObjectRemove");
 	// Tell the client to remove the item or char
@@ -1466,7 +1466,7 @@ int CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
 
 	for (size_t i = 0; i < iQty; i++)
 	{
-		CGrayUID uid(pAccount->m_Chars.GetChar(i));
+		CUID uid(pAccount->m_Chars.GetChar(i));
 		CChar* pChar = uid.CharFind();
 		if ( pChar == NULL )
 			continue;
@@ -1631,7 +1631,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int iTimeout 
 		addSysMessage( pPrompt );
 }
 
-void CClient::addPromptConsole( CLIMODE_TYPE mode, lpctstr pPrompt, CGrayUID context1, CGrayUID context2, bool bUnicode )
+void CClient::addPromptConsole( CLIMODE_TYPE mode, lpctstr pPrompt, CUID context1, CUID context2, bool bUnicode )
 {
 	ADDTOCALLSTACK("CClient::addPromptConsole");
 
@@ -2576,7 +2576,7 @@ void CClient::addBulletinBoard( const CItemContainer * pBoard )
 	// The client will now ask for the headers it wants.
 }
 
-bool CClient::addBBoardMessage( const CItemContainer * pBoard, BBOARDF_TYPE flag, CGrayUID uidMsg )
+bool CClient::addBBoardMessage( const CItemContainer * pBoard, BBOARDF_TYPE flag, CUID uidMsg )
 {
 	ADDTOCALLSTACK("CClient::addBBoardMessage");
 	ASSERT(pBoard);
@@ -2865,7 +2865,7 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 						}
 					}
 
-					CGrayUID uid = static_cast<CGrayUID>((dword)(pItem->GetDefNum("CRAFTEDBY")));
+					CUID uid = static_cast<CUID>((dword)(pItem->GetDefNum("CRAFTEDBY")));
 					CChar *pCraftsman = uid.CharFind();
 					if ( pCraftsman )
 					{
@@ -3596,9 +3596,9 @@ void CClient::addShowDamage( int damage, dword uid_damage )
 		damage = 0;
 
 	if ( PacketCombatDamage::CanSendTo(GetNetState()) )
-		new PacketCombatDamage(this, (word)(damage), static_cast<CGrayUID>(uid_damage));
+		new PacketCombatDamage(this, (word)(damage), static_cast<CUID>(uid_damage));
 	else if ( PacketCombatDamageOld::CanSendTo(GetNetState()) )
-		new PacketCombatDamageOld(this, (byte)(damage), static_cast<CGrayUID>(uid_damage));
+		new PacketCombatDamageOld(this, (byte)(damage), static_cast<CUID>(uid_damage));
 }
 
 void CClient::addSpeedMode( byte speedMode )

@@ -1,5 +1,5 @@
 // Actions specific to an NPC.
-#include "../common/CGrayUIDextra.h"
+#include "../common/CUIDExtra.h"
 #include "../clients/CClient.h"
 #include "../Triggers.h"
 #include "CChar.h"
@@ -589,7 +589,7 @@ void CChar::NotoSave_Add( CChar * pChar, NOTO_TYPE value, NOTO_TYPE color  )
 	ADDTOCALLSTACK("CChar::NotoSave_Add");
 	if ( !pChar )
 		return;
-	CGrayUID uid = pChar->GetUID();
+	CUID uid = pChar->GetUID();
 	if  ( m_notoSaves.size() )	// Checking if I already have him in the list, only if there 's any list.
 	{
 		for (std::vector<NotoSaves>::iterator it = m_notoSaves.begin(); it != m_notoSaves.end(); ++it)
@@ -688,7 +688,7 @@ void CChar::NotoSave_Resend( int id )
 	if ( (int)(m_notoSaves.size()) <= id )
 		return;
 	NotoSaves & refNotoSave = m_notoSaves.at( id );
-	CGrayUID uid = refNotoSave.charUID;
+	CUID uid = refNotoSave.charUID;
 	CChar * pChar = uid.CharFind();
 	if ( ! pChar )
 		return;
@@ -709,7 +709,7 @@ int CChar::NotoSave_GetID( CChar * pChar )
 		for ( std::vector<NotoSaves>::iterator it = m_notoSaves.begin(); it != m_notoSaves.end(); ++it )
 		{
 			NotoSaves & refNotoSave = m_notoSaves.at(count);
-			CGrayUID uid = refNotoSave.charUID;
+			CUID uid = refNotoSave.charUID;
 			if ( uid.CharFind() && uid == (dword)(pChar->GetUID()) )
 				return count;
 			count++;
@@ -729,7 +729,7 @@ bool CChar::NotoSave_Delete( CChar * pChar )
 		for ( std::vector<NotoSaves>::iterator it = m_notoSaves.begin(); it != m_notoSaves.end(); ++it )
 		{
 			NotoSaves & refNotoSave = m_notoSaves.at(count);
-			CGrayUID uid = refNotoSave.charUID;
+			CUID uid = refNotoSave.charUID;
 			if ( uid.CharFind() && uid == (dword)(pChar->GetUID()) )
 			{
 				m_notoSaves.erase(it);

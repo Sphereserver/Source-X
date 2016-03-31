@@ -1,5 +1,5 @@
 // Actions specific to an NPC.
-#include "../common/CGrayUIDextra.h"
+#include "../common/CUIDExtra.h"
 #include "../clients/CClient.h"
 #include "../CServTime.h"
 #include "../Triggers.h"
@@ -10,7 +10,7 @@
 bool CChar::Attacker_Add( CChar * pChar, int64 threat )
 {
 	ADDTOCALLSTACK("CChar::Attacker_Add");
-	CGrayUID uid = pChar->GetUID();
+	CUID uid = pChar->GetUID();
 	if ( m_lastAttackers.size() )	// Must only check for existing attackers if there are any attacker already.
 	{
 		for ( std::vector<LastAttackers>::iterator it = m_lastAttackers.begin(); it != m_lastAttackers.end(); ++it )
@@ -134,7 +134,7 @@ CChar * CChar::Attacker_GetLast()
 		if (dwCurTime <= dwLastTime)
 		{
 			dwLastTime = dwCurTime;
-			retChar = static_cast<CGrayUID>(refAttacker.charUID).CharFind();
+			retChar = static_cast<CUID>(refAttacker.charUID).CharFind();
 		}
 	}
 	return retChar;
@@ -284,7 +284,7 @@ int CChar::Attacker_GetID( CChar * pChar )
 	for ( std::vector<LastAttackers>::iterator it = m_lastAttackers.begin(); it != m_lastAttackers.end(); ++it )
 	{
 		LastAttackers & refAttacker = m_lastAttackers.at(count);
-		CGrayUID uid = refAttacker.charUID;
+		CUID uid = refAttacker.charUID;
 		if ( ! uid || !uid.CharFind() )
 			continue;
 		CChar * pMe = uid.CharFind()->GetChar();
@@ -299,9 +299,9 @@ int CChar::Attacker_GetID( CChar * pChar )
 }
 
 // Get nID value of attacker list from the given pChar
-int CChar::Attacker_GetID( CGrayUID pChar )
+int CChar::Attacker_GetID( CUID pChar )
 {
-	ADDTOCALLSTACK("CChar::Attacker_GetID(CGrayUID)");
+	ADDTOCALLSTACK("CChar::Attacker_GetID(CUID)");
 	return Attacker_GetID( pChar.CharFind()->GetChar() );
 }
 
@@ -314,7 +314,7 @@ CChar * CChar::Attacker_GetUID( int index )
 	if ( (int)(m_lastAttackers.size()) <= index )
 		return NULL;
 	LastAttackers & refAttacker = m_lastAttackers.at(index);
-	CChar * pChar = static_cast<CChar*>( static_cast<CGrayUID>( refAttacker.charUID ).CharFind() );
+	CChar * pChar = static_cast<CChar*>( static_cast<CUID>( refAttacker.charUID ).CharFind() );
 	return pChar;
 }
 
@@ -326,7 +326,7 @@ bool CChar::Attacker_Delete( int index, bool bForced, ATTACKER_CLEAR_TYPE type )
 		return false;
 
 	LastAttackers &refAttacker = m_lastAttackers.at(index);
-	CChar *pChar = static_cast<CGrayUID>(refAttacker.charUID).CharFind();
+	CChar *pChar = static_cast<CUID>(refAttacker.charUID).CharFind();
 	if ( !pChar )
 		return false;
 
@@ -377,7 +377,7 @@ void CChar::Attacker_RemoveChar()
 		for ( int count = 0 ; count < (int)(m_lastAttackers.size()); count++)
 		{
 			LastAttackers & refAttacker = m_lastAttackers.at(count);
-			CChar * pSrc = static_cast<CGrayUID>(refAttacker.charUID).CharFind();
+			CChar * pSrc = static_cast<CUID>(refAttacker.charUID).CharFind();
 			if ( !pSrc )
 				continue;
 			pSrc->Attacker_Delete(pSrc->Attacker_GetID(this), false, ATTACKER_CLEAR_REMOVEDCHAR);
@@ -396,7 +396,7 @@ void CChar::Attacker_CheckTimeout()
 			LastAttackers & refAttacker = m_lastAttackers.at(count);
 			if ((++(refAttacker.elapsed) > g_Cfg.m_iAttackerTimeout) && (g_Cfg.m_iAttackerTimeout > 0))
 			{
-				CChar *pEnemy = static_cast<CGrayUID>(refAttacker.charUID).CharFind();
+				CChar *pEnemy = static_cast<CUID>(refAttacker.charUID).CharFind();
 				if (pEnemy && (pEnemy->Attacker_GetElapsed(pEnemy->Attacker_GetID(this))> g_Cfg.m_iAttackerTimeout) && (g_Cfg.m_iAttackerTimeout > 0))	//Do not remove if I kept attacking him.
 					Attacker_Delete(count, true, ATTACKER_CLEAR_ELAPSED);
 			}

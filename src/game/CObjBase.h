@@ -82,7 +82,7 @@ public:
 
 	word	m_defenseBase;	// Armor for IsArmor items
 	word	m_defenseRange;	// variable range of defense.
-	CGrayUID m_uidSpawnItem;		// SpawnItem for this item
+	CUID m_uidSpawnItem;		// SpawnItem for this item
 
 	CResourceRefArray m_OEvents;
 	static size_t sm_iCount;	// how many total objects in the world ?

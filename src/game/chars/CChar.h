@@ -116,13 +116,13 @@ public:
 	static const LAYER_TYPE sm_VendorLayers[3];
 
 	// Combat stuff. cached data. (not saved)
-	CGrayUID m_uidWeapon;		// current Wielded weapon.	(could just get rid of this ?)
+	CUID m_uidWeapon;		// current Wielded weapon.	(could just get rid of this ?)
 	word m_defense;				// calculated armor worn (NOT intrinsic armor)
 
 	height_t m_height;			// Height set in-game or under some trigger (height=) - for both items and chars
 
 	int m_ModMaxWeight;
-	CGrayUID m_UIDLastNewItem;	///< Last item created, used to store on this CChar the UID of the last created item via ITEM or ITEMNEWBIe in @Create and @Restock to prevent COLOR, etc properties to be called with no reference when the item was not really created, ie: ITEM=i_dagger,R5
+	CUID m_UIDLastNewItem;	///< Last item created, used to store on this CChar the UID of the last created item via ITEM or ITEMNEWBIe in @Create and @Restock to prevent COLOR, etc properties to be called with no reference when the item was not really created, ie: ITEM=i_dagger,R5
 	uint m_exp;			// character experience
 	uint m_level;		// character experience level
 	byte m_iVisualRange;		// Visual Range
@@ -170,9 +170,9 @@ public:
 
 	// Some character action in progress.
 	SKILL_TYPE	m_Act_SkillCurrent;	// Currently using a skill. Could be combat skill.
-	CGrayUID	m_Act_Targ;			// Current caction target
-	CGrayUID	m_Fight_Targ;		// Current combat target
-	CGrayUID	m_Act_TargPrv;		// Previous target.
+	CUID	m_Act_Targ;			// Current caction target
+	CUID	m_Fight_Targ;		// Current combat target
+	CUID	m_Act_TargPrv;		// Previous target.
 	int			m_Act_Difficulty;	// -1 = fail skill. (0-100) for skill advance calc.
 	CPointBase  m_Act_p;			// Moving to this location. or location of forge we are working on.
 	int			m_StepStealth;		// Max steps allowed to walk invisible while using Stealth skill
@@ -246,13 +246,13 @@ public:
 		// SKILL_TRACKING
 		struct
 		{
-			DIR_TYPE m_PrvDir;			// ACTARG1 = Previous direction of tracking target, used for when to notify player
+			DIR_TYPE m_PrvDir;				// ACTARG1 = Previous direction of tracking target, used for when to notify player
 		} m_atTracking;
 
 		// NPCACT_RIDDEN
 		struct
 		{
-			CGrayUIDBase m_FigurineUID;		// ACTARG1 = This creature is being ridden by this object link. IT_FIGURINE IT_EQ_HORSE
+			CUIDBase m_FigurineUID;		// ACTARG1 = This creature is being ridden by this object link. IT_FIGURINE IT_EQ_HORSE
 		} m_atRidden;
 
 		// NPCACT_TALK
@@ -809,8 +809,8 @@ public:
 	TRIGRET_TYPE	Skill_OnCharTrigger( SKILL_TYPE skill, CTRIG_TYPE ctrig, CScriptTriggerArgs * pArgs); //pArgs.m_iN1 will be rewritten with skill
 
 	bool Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg );
-	bool Skill_Tracking( CGrayUID uidTarg, DIR_TYPE & dirPrv, int iDistMax = INT16_MAX );
-	bool Skill_MakeItem( ITEMID_TYPE id, CGrayUID uidTarg, SKTRIG_TYPE stage, bool fSkillOnly = false, int iReplicationQty = 1 );
+	bool Skill_Tracking( CUID uidTarg, DIR_TYPE & dirPrv, int iDistMax = INT16_MAX );
+	bool Skill_MakeItem( ITEMID_TYPE id, CUID uidTarg, SKTRIG_TYPE stage, bool fSkillOnly = false, int iReplicationQty = 1 );
 	bool Skill_MakeItem_Success();
 	bool Skill_Snoop_Check( const CItemContainer * pItem );
 	void Skill_Cleanup();	 // may have just cancelled targetting.
@@ -902,19 +902,19 @@ private:
 	bool Memory_UpdateClearTypes( CItemMemory * pMemory, word MemTypes );
 	void Memory_AddTypes( CItemMemory * pMemory, word MemTypes );
 	bool Memory_ClearTypes( CItemMemory * pMemory, word MemTypes );
-	CItemMemory * Memory_CreateObj( CGrayUID uid, word MemTypes );
+	CItemMemory * Memory_CreateObj( CUID uid, word MemTypes );
 	CItemMemory * Memory_CreateObj( const CObjBase * pObj, word MemTypes );
 
 public:
 	void Memory_ClearTypes( word MemTypes );
-	CItemMemory * Memory_FindObj( CGrayUID uid ) const;
+	CItemMemory * Memory_FindObj( CUID uid ) const;
 	CItemMemory * Memory_FindObj( const CObjBase * pObj ) const;
-	CItemMemory * Memory_AddObjTypes( CGrayUID uid, word MemTypes );
+	CItemMemory * Memory_AddObjTypes( CUID uid, word MemTypes );
 	CItemMemory * Memory_AddObjTypes( const CObjBase * pObj, word MemTypes );
 	CItemMemory * Memory_FindTypes( word MemTypes ) const;
 	CItemMemory * Memory_FindObjTypes( const CObjBase * pObj, word MemTypes ) const;
 	// -------- Public alias for MemoryCreateObj ------------------
-	CItemMemory * Memory_AddObj( CGrayUID uid, word MemTypes );
+	CItemMemory * Memory_AddObj( CUID uid, word MemTypes );
 	CItemMemory * Memory_AddObj( const CObjBase * pObj, word MemTypes );
 	// ------------------------------------------------------------
 
@@ -983,7 +983,7 @@ public:
 	void Attacker_SetIgnore(CChar * pChar, bool fIgnore);
 	int64 Attacker_GetHighestThreat();
 	int  Attacker_GetID( CChar * pChar );
-	int  Attacker_GetID( CGrayUID pChar );
+	int  Attacker_GetID( CUID pChar );
 
 	//
 	bool Player_OnVerb( CScript &s, CTextConsole * pSrc );
@@ -1002,7 +1002,7 @@ private:
 	CChar * Horse_GetMountChar() const;
 public:
 	CChar * Use_Figurine( CItem * pItem, bool bCheckFollowerSlots = true );
-	CItem * Make_Figurine( CGrayUID uidOwner, ITEMID_TYPE id = ITEMID_NOTHING );
+	CItem * Make_Figurine( CUID uidOwner, ITEMID_TYPE id = ITEMID_NOTHING );
 	CItem * NPC_Shrink();
 	bool FollowersUpdate( CChar * pChar, short iFollowerSlots = 0, bool bCheckOnly = false );
 

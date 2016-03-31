@@ -211,7 +211,7 @@ bool CPartyDef::SendRemoveList( CChar *pCharRemove, bool bFor )
 }
 
 // ---------------------------------------------------------
-bool CPartyDef::MessageEvent( CGrayUID uidDst, CGrayUID uidSrc, const NCHAR *pText, int ilenmsg )
+bool CPartyDef::MessageEvent( CUID uidDst, CUID uidSrc, const NCHAR *pText, int ilenmsg )
 {
 	ADDTOCALLSTACK("CPartyDef::MessageEvent");
 	UNREFERENCED_PARAMETER(ilenmsg);
@@ -270,7 +270,7 @@ void CPartyDef::AcceptMember( CChar *pChar )
 	SendAddList(NULL);
 }
 
-bool CPartyDef::RemoveMember( CGrayUID uidRemove, CGrayUID uidCommand )
+bool CPartyDef::RemoveMember( CUID uidRemove, CUID uidCommand )
 {
 	ADDTOCALLSTACK("CPartyDef::RemoveMember");
 	// ARGS:
@@ -282,7 +282,7 @@ bool CPartyDef::RemoveMember( CGrayUID uidRemove, CGrayUID uidCommand )
 	if ( m_Chars.GetCharCount() <= 0 )
 		return false;
 
-	CGrayUID uidMaster = GetMaster();
+	CUID uidMaster = GetMaster();
 	if ( (uidRemove != uidCommand) && (uidCommand != uidMaster) )
 		return false;
 
@@ -326,7 +326,7 @@ bool CPartyDef::RemoveMember( CGrayUID uidRemove, CGrayUID uidCommand )
 	return true;
 }
 
-bool CPartyDef::Disband( CGrayUID uidMaster )
+bool CPartyDef::Disband( CUID uidMaster )
 {
 	ADDTOCALLSTACK("CPartyDef::Disband");
 	// Make sure i am the master.
@@ -370,7 +370,7 @@ bool CPartyDef::Disband( CGrayUID uidMaster )
 }
 
 // ---------------------------------------------------------
-bool CPartyDef::DeclineEvent( CChar *pCharDecline, CGrayUID uidInviter )	// static
+bool CPartyDef::DeclineEvent( CChar *pCharDecline, CUID uidInviter )	// static
 {
 	ADDTOCALLSTACK("CPartyDef::DeclineEvent");
 	// This should happen after a timeout as well.
@@ -395,7 +395,7 @@ bool CPartyDef::DeclineEvent( CChar *pCharDecline, CGrayUID uidInviter )	// stat
 	return true;
 }
 
-bool CPartyDef::AcceptEvent( CChar *pCharAccept, CGrayUID uidInviter, bool bForced )	// static
+bool CPartyDef::AcceptEvent( CChar *pCharAccept, CUID uidInviter, bool bForced )	// static
 {
 	ADDTOCALLSTACK("CPartyDef::AcceptEvent");
 	// We are accepting the invite to join a party
@@ -602,7 +602,7 @@ bool CPartyDef::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole *pSrc )
 			GETNONWHITESPACE(pszKey);
 			if ( pszKey[0] != '\0' )
 			{
-				CGrayUID charToCheck(Exp_GetDWVal(pszKey));
+				CUID charToCheck(Exp_GetDWVal(pszKey));
 				CChar *pCharToCheck = charToCheck.CharFind();
 
 				sVal.FormatVal(pCharToCheck && pCharToCheck->m_pParty == this);
@@ -707,7 +707,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 		case PDV_ADDMEMBERFORCED:
 		{
 			bool bForced = (iIndex == PDV_ADDMEMBERFORCED);
-			CGrayUID toAdd = (dword)s.GetArgVal();
+			CUID toAdd = (dword)s.GetArgVal();
 			CChar *pCharAdd = toAdd.CharFind();
 			CChar *pCharMaster = GetMaster().CharFind();
 			if ( !pCharAdd || IsInParty(pCharAdd) )
@@ -737,7 +737,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 
 		case PDV_REMOVEMEMBER:
 		{
-			CGrayUID toRemove;
+			CUID toRemove;
 			lpctstr pszArg = s.GetArgStr();
 			if ( *pszArg == '@' )
 			{
@@ -759,7 +759,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 
 		case PDV_SETMASTER:
 		{
-			CGrayUID newMaster;
+			CUID newMaster;
 			lpctstr pszArg = s.GetArgStr();
 			if ( *pszArg == '@' )
 			{
@@ -781,7 +781,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 
 		case PDV_SYSMESSAGE:
 		{
-			CGrayUID toSysmessage;
+			CUID toSysmessage;
 			lpctstr pszArg = s.GetArgStr();
 			tchar *pUid = Str_GetTemp();
 			size_t x = 0;
@@ -893,7 +893,7 @@ bool CPartyDef::IsPartyMaster( const CChar * pChar ) const
 	return (m_Chars.FindChar( pChar ) == 0);
 }
 
-CGrayUID CPartyDef::GetMaster()
+CUID CPartyDef::GetMaster()
 {
 	return m_Chars.GetChar(0);
 }

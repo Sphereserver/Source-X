@@ -1,5 +1,5 @@
  /**
- * @file CGrayUID.h
+ * @file CUID.h
  * @brief MD5 hashing.
  */
 

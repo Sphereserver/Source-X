@@ -73,7 +73,7 @@ CChar * CChar::NPC_FightFindBestTarget()
 		for ( std::vector<LastAttackers>::iterator it = m_lastAttackers.begin(); it != m_lastAttackers.end(); ++it )
 		{
 			LastAttackers &refAttacker = *it;
-			pChar = static_cast<CChar*>(static_cast<CGrayUID>(refAttacker.charUID).CharFind());
+			pChar = static_cast<CChar*>(static_cast<CUID>(refAttacker.charUID).CharFind());
 			if ( !pChar )
 				continue;
 			if ( pChar->IsStatFlag(STATF_DEAD|STATF_Stone|STATF_Invisible|STATF_Insubstantial|STATF_Hidden) )
@@ -182,7 +182,7 @@ void CChar::NPC_Act_Fight()
 	bool		fSkipHardcoded	= false;
 	if ( IsTrigUsed(TRIGGER_NPCACTFIGHT) )
 	{
-		CGrayUID m_oldAct = m_Act_Targ;
+		CUID m_oldAct = m_Act_Targ;
 		CScriptTriggerArgs Args( iDist, iMotivation );
 		switch ( OnTrigger( CTRIG_NPCActFight, pChar, &Args ) )
 		{

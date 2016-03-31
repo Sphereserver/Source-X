@@ -342,7 +342,7 @@ bool CScript::Open( lpctstr pszFilename, uint wFlags )
 	{
 		tchar szTemp[ _MAX_PATH ];
 		strcpy( szTemp, GetFilePath() );
-		strcat( szTemp, GRAY_SCRIPT );
+		strcat( szTemp, SPHERE_SCRIPT );
 		SetFilePath( szTemp );
 		wFlags |= OF_TEXT;
 	}

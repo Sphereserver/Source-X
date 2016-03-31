@@ -1,6 +1,6 @@
 
 #include "../common/CException.h"
-#include "../common/CGrayUIDextra.h"
+#include "../common/CUIDExtra.h"
 #include "../network/network.h"
 #include "../network/receive.h"
 #include "../network/send.h"
@@ -107,7 +107,7 @@ void CClient::Event_ChatText( const NCHAR * pszText, int len, CLanguageID lang )
 	g_Serv.m_Chats.EventMsg( this, pszText, len, lang );
 }
 
-void CClient::Event_Item_Dye( CGrayUID uid, HUE_TYPE wHue ) // Rehue an item
+void CClient::Event_Item_Dye( CUID uid, HUE_TYPE wHue ) // Rehue an item
 {
 	ADDTOCALLSTACK("CClient::Event_Item_Dye");
 	// CLIMODE_DYE : Result from addDyeOption()
@@ -171,7 +171,7 @@ void CClient::Event_Tips( word i) // Tip of the day window
 
 
 
-void CClient::Event_Book_Title( CGrayUID uid, lpctstr pszTitle, lpctstr pszAuthor )
+void CClient::Event_Book_Title( CUID uid, lpctstr pszTitle, lpctstr pszAuthor )
 {
 	ADDTOCALLSTACK("CClient::Event_Book_Title");
 	// XCMD_BookOpen : user is changing the books title/author info.
@@ -194,7 +194,7 @@ void CClient::Event_Book_Title( CGrayUID uid, lpctstr pszTitle, lpctstr pszAutho
 	pBook->m_sAuthor = pszAuthor;
 }
 
-void CClient::Event_Item_Pickup(CGrayUID uid, int amount) // Client grabs an item
+void CClient::Event_Item_Pickup(CUID uid, int amount) // Client grabs an item
 {
 	ADDTOCALLSTACK("CClient::Event_Item_Pickup");
 	EXC_TRY("CClient::Event_Item_Pickup");
@@ -274,7 +274,7 @@ void CClient::Event_Item_Drop_Fail( CItem *pItem )
 	pItem->MoveToCheck(m_Targ_p);
 }
 
-void CClient::Event_Item_Drop( CGrayUID uidItem, CPointMap pt, CGrayUID uidOn, uchar gridIndex )
+void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gridIndex )
 {
 	ADDTOCALLSTACK("CClient::Event_Item_Drop");
 	// This started from the Event_Item_Pickup()
@@ -988,7 +988,7 @@ bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 	return !m_bAllowSay;
 }
 
-void CClient::Event_Attack( CGrayUID uid )
+void CClient::Event_Attack( CUID uid )
 {
 	ADDTOCALLSTACK("CClient::Event_Attack");
 	// d-click in war mode
@@ -1394,7 +1394,7 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, size_t i
 	}
 }
 
-void CClient::Event_Profile( byte fWriteMode, CGrayUID uid, lpctstr pszProfile, int iProfileLen )
+void CClient::Event_Profile( byte fWriteMode, CUID uid, lpctstr pszProfile, int iProfileLen )
 {
 	ADDTOCALLSTACK("CClient::Event_Profile");
 	UNREFERENCED_PARAMETER(iProfileLen);
@@ -1434,7 +1434,7 @@ void CClient::Event_Profile( byte fWriteMode, CGrayUID uid, lpctstr pszProfile, 
 
 
 
-void CClient::Event_MailMsg( CGrayUID uid1, CGrayUID uid2 )
+void CClient::Event_MailMsg( CUID uid1, CUID uid2 )
 {
 	ADDTOCALLSTACK("CClient::Event_MailMsg");
 	UNREFERENCED_PARAMETER(uid2);
@@ -1468,7 +1468,7 @@ void CClient::Event_MailMsg( CGrayUID uid1, CGrayUID uid2 )
 
 
 
-void CClient::Event_ToolTip( CGrayUID uid )
+void CClient::Event_ToolTip( CUID uid )
 {
 	ADDTOCALLSTACK("CClient::Event_ToolTip");
 	CObjBase * pObj = uid.ObjFind();
@@ -1533,7 +1533,7 @@ void CClient::Event_PromptResp( lpctstr pszText, size_t len, dword context1, dwo
 			{
 				if ( type == 0 || szText[0] == '\0' )	// cancel
 					return;
-				CChar * pCharVendor = CGrayUID(context2).CharFind();
+				CChar * pCharVendor = CUID(context2).CharFind();
 				if ( pCharVendor )
 				{
 					pCharVendor->NPC_SetVendorPrice( m_Prompt_Uid.ItemFind(), ATOI(szText) );
@@ -1583,7 +1583,7 @@ void CClient::Event_PromptResp( lpctstr pszText, size_t len, dword context1, dwo
 
 		case CLIMODE_PROMPT_SCRIPT_VERB:
 			{
-				// CChar * pChar = CGrayUID(context2).CharFind();
+				// CChar * pChar = CUID(context2).CharFind();
 				CScript script( m_Prompt_Text, szText );
 				if ( m_pChar )
 					m_pChar->r_Verb( script, this );
@@ -1963,7 +1963,7 @@ void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TA
 	}
 }
 
-void CClient::Event_SetName( CGrayUID uid, const char * pszCharName )
+void CClient::Event_SetName( CUID uid, const char * pszCharName )
 {
 	ADDTOCALLSTACK("CClient::Event_SetName");
 	// Set the name in the character status window.
@@ -2082,7 +2082,7 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConso
 	return false;
 }
 
-bool CClient::Event_DoubleClick( CGrayUID uid, bool fMacro, bool fTestTouch, bool fScript )
+bool CClient::Event_DoubleClick( CUID uid, bool fMacro, bool fTestTouch, bool fScript )
 {
 	ADDTOCALLSTACK("CClient::Event_DoubleClick");
 	// Try to use the object in some way.
@@ -2159,7 +2159,7 @@ bool CClient::Event_DoubleClick( CGrayUID uid, bool fMacro, bool fTestTouch, boo
 	return true;
 }
 
-void CClient::Event_SingleClick( CGrayUID uid )
+void CClient::Event_SingleClick( CUID uid )
 {
 	ADDTOCALLSTACK("CClient::Event_SingleClick");
 	// The client is doing a single click on obj.
@@ -2203,7 +2203,7 @@ void CClient::Event_SingleClick( CGrayUID uid )
 	SysMessagef("Bogus item uid=0%x?", (dword)uid);
 }
 
-void CClient::Event_Target(dword context, CGrayUID uid, CPointMap pt, byte flags, ITEMID_TYPE id)
+void CClient::Event_Target(dword context, CUID uid, CPointMap pt, byte flags, ITEMID_TYPE id)
 {
 	ADDTOCALLSTACK("CClient::Event_Target");
 	// XCMD_Target
@@ -2307,7 +2307,7 @@ void CClient::Event_Target(dword context, CGrayUID uid, CPointMap pt, byte flags
 void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a client request
 {
 	ADDTOCALLSTACK("CClient::Event_AOSPopupMenuRequest");
-	CGrayUID uObj = uid;
+	CUID uObj = uid;
 	CObjBaseTemplate *pObj = uObj.ObjFind();
 	if ( !m_pChar || m_pChar->IsStatFlag(STATF_DEAD) || !CanSee(pObj) )
 		return;
@@ -2464,7 +2464,7 @@ void CClient::Event_AOSPopupMenuSelect(dword uid, word EntryTag)	//do something 
 	if ( !m_pChar || !EntryTag )
 		return;
 
-	CGrayUID uObj = uid;
+	CUID uObj = uid;
 	CObjBase *pObj = uObj.ObjFind();
 	if ( !CanSee(pObj) )
 		return;
@@ -2647,7 +2647,7 @@ void CClient::Event_UseToolbar(byte bType, dword dwArg)
 
 		case 0x04: // Item
 		{
-			Event_DoubleClick(CGrayUID(dwArg), true, true);
+			Event_DoubleClick(CUID(dwArg), true, true);
 		} break;
 
 		case 0x05: // Scroll
@@ -2719,7 +2719,7 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 
 		case EXTCMD_AUTOTARG:	// bizarre new autotarget mode. "target x y z"
 		{
-			CGrayUID uid = ATOI(ppArgs[0]);
+			CUID uid = ATOI(ppArgs[0]);
 			CObjBase *pObj = uid.ObjFind();
 			if ( pObj )
 				DEBUG_ERR(("%x:Event_ExtCmd AutoTarg '%s' '%s'\n", GetSocketID(), pObj->GetName(), ppArgs[1]));

@@ -280,7 +280,7 @@ void CChar::NPC_LoadScript( bool fRestock )
 		CChar * pChar = this->GetChar();
 		if ( pChar != NULL )
 		{
-			CGrayUID uidOldAct = pChar->m_Act_Targ;
+			CUID uidOldAct = pChar->m_Act_Targ;
 			pChar->m_Act_Targ = GetUID();
 			pChar->ReadScriptTrig(pCharDef, CTRIG_Create);
 			pChar->m_Act_Targ = uidOldAct;

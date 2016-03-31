@@ -4,7 +4,7 @@
 #endif
 
 #include "../common/CUOInstall.h"
-#include "../common/CGrayUIDextra.h"
+#include "../common/CUIDExtra.h"
 #include "../common/CObjBaseTemplate.h"
 #include "../common/zlib/zlib.h"
 #include "../game/chars/CChar.h"
@@ -103,7 +103,7 @@ void PacketWeb::setData(const byte * data, size_t length)
  *
  *
  ***************************************************************************/
-PacketCombatDamage::PacketCombatDamage(const CClient* target, word damage, CGrayUID defender) : PacketSend(XCMD_DamagePacket, 7, PRI_NORMAL)
+PacketCombatDamage::PacketCombatDamage(const CClient* target, word damage, CUID defender) : PacketSend(XCMD_DamagePacket, 7, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketCombatDamage::PacketCombatDamage");
 
@@ -364,7 +364,7 @@ bool PacketHealthBarUpdate::onSend(const CClient* client)
  *
  *
  ***************************************************************************/
-PacketItemWorld::PacketItemWorld(byte id, size_t size, CGrayUID uid) : PacketSend(id, size, PRI_NORMAL), m_item(uid)
+PacketItemWorld::PacketItemWorld(byte id, size_t size, CUID uid) : PacketSend(id, size, PRI_NORMAL), m_item(uid)
 {
 }
 
@@ -594,7 +594,7 @@ PacketMessageASCII::PacketMessageASCII(const CClient* target, lpctstr pszText, c
  *
  *
  ***************************************************************************/
-PacketRemoveObject::PacketRemoveObject(const CClient* target, CGrayUID uid) : PacketSend(XCMD_Remove, 5, PRI_NORMAL)
+PacketRemoveObject::PacketRemoveObject(const CClient* target, CUID uid) : PacketSend(XCMD_Remove, 5, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketRemoveObject::PacketRemoveObject");
 
@@ -2726,7 +2726,7 @@ PacketAllNamesResponse::PacketAllNamesResponse(const CClient* target, const CObj
  *
  *
  ***************************************************************************/
-PacketAddPrompt::PacketAddPrompt(const CClient* target, CGrayUID context1, CGrayUID context2, bool useUnicode) : PacketSend((byte)(useUnicode ? XCMD_PromptUNICODE : XCMD_Prompt), 16, g_Cfg.m_fUsePacketPriorities ? PRI_LOW : PRI_NORMAL)
+PacketAddPrompt::PacketAddPrompt(const CClient* target, CUID context1, CUID context2, bool useUnicode) : PacketSend((byte)(useUnicode ? XCMD_PromptUNICODE : XCMD_Prompt), 16, g_Cfg.m_fUsePacketPriorities ? PRI_LOW : PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketAddPrompt::PacketAddPrompt");
 
@@ -3156,7 +3156,7 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
  *
  *
  ***************************************************************************/
-PacketAttack::PacketAttack(const CClient* target, CGrayUID serial) : PacketSend(XCMD_AttackOK, 5, PRI_NORMAL)
+PacketAttack::PacketAttack(const CClient* target, CUID serial) : PacketSend(XCMD_AttackOK, 5, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketAttack::PacketAttack");
 
@@ -3795,7 +3795,7 @@ bool PacketPropertyListVersionOld::onSend(const CClient* client)
  *
  *
  ***************************************************************************/
-PacketDisplayPopup::PacketDisplayPopup(const CClient* target, CGrayUID uid) : PacketExtended(EXTDATA_Popup_Display, 12, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
+PacketDisplayPopup::PacketDisplayPopup(const CClient* target, CUID uid) : PacketExtended(EXTDATA_Popup_Display, 12, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketDisplayPopup::PacketDisplayPopup");
 
@@ -4083,7 +4083,7 @@ PacketHouseEndCustomise::PacketHouseEndCustomise(const CClient* target, const CI
  *
  *
  ***************************************************************************/
-PacketCombatDamageOld::PacketCombatDamageOld(const CClient* target, byte damage, CGrayUID defender) : PacketExtended(EXTDATA_DamagePacketOld, 11, PRI_NORMAL)
+PacketCombatDamageOld::PacketCombatDamageOld(const CClient* target, byte damage, CUID defender) : PacketExtended(EXTDATA_DamagePacketOld, 11, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketCombatDamageOld::PacketCombatDamageOld");
 
@@ -4757,7 +4757,7 @@ PacketTimeSyncResponse::PacketTimeSyncResponse(const CClient* target) : PacketSe
  *
  *
  ***************************************************************************/
-PacketItemWorldNew::PacketItemWorldNew(byte id, size_t size, CGrayUID uid) : PacketItemWorld(id, size, uid)
+PacketItemWorldNew::PacketItemWorldNew(byte id, size_t size, CUID uid) : PacketItemWorld(id, size, uid)
 {
 }
 

@@ -12,7 +12,7 @@ size_t CCharRefArray::FindChar( const CChar *pChar ) const
     if ( !pChar )
         return m_uidCharArray.BadIndex();
 
-    CGrayUID uid(pChar->GetUID());
+    CUID uid(pChar->GetUID());
     size_t iQty = m_uidCharArray.GetCount();
     for ( size_t i = 0; i < iQty; i++ )
     {
@@ -96,7 +96,7 @@ size_t CCharRefArray::GetCharCount() const
     return( m_uidCharArray.GetCount());
 }
 
-CGrayUID CCharRefArray::GetChar( size_t i ) const
+CUID CCharRefArray::GetChar( size_t i ) const
 {
     return( m_uidCharArray[i] );
 }

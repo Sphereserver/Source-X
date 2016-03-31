@@ -9,7 +9,7 @@
 
 #include "../common/CScript.h"
 #include "../common/CArray.h"
-#include "../common/CGrayUID.h"
+#include "../common/CUID.h"
 
 
 class CChar;
@@ -18,7 +18,7 @@ class CCharRefArray
 {
 private:
 	// List of Players and NPC's involved in the quest/party/account etc..
-	CGTypedArray< CGrayUID, CGrayUID> m_uidCharArray;
+	CGTypedArray< CUID, CUID> m_uidCharArray;
 
 public:
 	static const char *m_sClassName;
@@ -30,7 +30,7 @@ public:
 	size_t DetachChar( const CChar * pChar );
 	void DeleteChars();
 	size_t GetCharCount() const;
-	CGrayUID GetChar( size_t i ) const;
+	CUID GetChar( size_t i ) const;
 	bool IsValidIndex( size_t i ) const;
 	inline size_t BadIndex() const
 	{

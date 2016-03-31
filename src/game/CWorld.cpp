@@ -1,7 +1,7 @@
 
 #include "../common/CException.h"
-#include "../common/CGrayUIDextra.h"
-#include "../common/grayver.h"
+#include "../common/CUIDExtra.h"
+#include "../common/sphereversion.h"
 #include "../network/network.h"
 #include "../network/send.h"
 #include "../sphere/ProfileTask.h"
@@ -303,7 +303,7 @@ void CTimedFunctionHandler::OnTick()
 	}
 }
 
-void CTimedFunctionHandler::Erase( CGrayUID uid )
+void CTimedFunctionHandler::Erase( CUID uid )
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::Erase");
 	for ( int tick = 0; tick < TICK_PER_SEC; tick++ )
@@ -334,7 +334,7 @@ void CTimedFunctionHandler::Erase( CGrayUID uid )
 	}
 }
 
-int CTimedFunctionHandler::IsTimer( CGrayUID uid, lpctstr funcname )
+int CTimedFunctionHandler::IsTimer( CUID uid, lpctstr funcname )
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::IsTimer");
 	for ( int tick = 0; tick < TICK_PER_SEC; tick++ )
@@ -352,7 +352,7 @@ int CTimedFunctionHandler::IsTimer( CGrayUID uid, lpctstr funcname )
 	return 0;
 }
 
-void CTimedFunctionHandler::Stop( CGrayUID uid, lpctstr funcname )
+void CTimedFunctionHandler::Stop( CUID uid, lpctstr funcname )
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::Stop");
 	for ( int tick = 0; tick < TICK_PER_SEC; tick++ )
@@ -424,7 +424,7 @@ TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr funcname, int LoopsMade, CScrip
 	return TRIGRET_ENDIF;
 }
 
-void CTimedFunctionHandler::Add( CGrayUID uid, int numSeconds, lpctstr funcname )
+void CTimedFunctionHandler::Add( CUID uid, int numSeconds, lpctstr funcname )
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::Add");
 	ASSERT(funcname != NULL);
@@ -505,12 +505,12 @@ int CTimedFunctionHandler::Load( const char *pszName, bool fQuoted, const char *
 				}
 				else
 				{
-					g_Log.Event( LOGM_INIT|LOGL_ERROR, "Invalid Timerf in %sdata.scp. Each TimerFCall and TimerFNumbers pair must be in that order.\n", GRAY_FILE );
+					g_Log.Event( LOGM_INIT|LOGL_ERROR, "Invalid Timerf in %sdata.scp. Each TimerFCall and TimerFNumbers pair must be in that order.\n", SPHERE_FILE );
 				}
 			}
 			else
 			{
-				g_Log.Event( LOGM_INIT|LOGL_ERROR, "Invalid Timerf line in %sdata.scp: %s=%s\n", GRAY_FILE, pszName, pszVal );
+				g_Log.Event( LOGM_INIT|LOGL_ERROR, "Invalid Timerf line in %sdata.scp: %s=%s\n", SPHERE_FILE, pszName, pszVal );
 			}
 		}
 	}
@@ -525,7 +525,7 @@ int CTimedFunctionHandler::Load( const char *pszName, bool fQuoted, const char *
 		strcpy( tf->funcname, pszVal );
 		if ( !isNew )
 		{
-			g_Log.Event( LOGM_INIT|LOGL_ERROR, "Invalid Timerf in %sdata.scp. Each TimerFCall and TimerFNumbers pair must be in that order.\n", GRAY_FILE );
+			g_Log.Event( LOGM_INIT|LOGL_ERROR, "Invalid Timerf in %sdata.scp. Each TimerFCall and TimerFNumbers pair must be in that order.\n", SPHERE_FILE );
 		}
 	}
 
@@ -1225,11 +1225,11 @@ void CWorld::GetBackupName( CGString & sArchive, lpctstr pszBaseDir, tchar chTyp
 			break;
 		iCount >>= 3;
 	}
-	sArchive.Format( "%s" GRAY_FILE "b%d%d%c%s",
+	sArchive.Format( "%s" SPHERE_FILE "b%d%d%c%s",
 		pszBaseDir,
 		iGroup, iCount&0x07,
 		chType,
-		GRAY_SCRIPT );
+		SPHERE_SCRIPT );
 }
 
 bool CWorld::OpenScriptBackup( CScript & s, lpctstr pszBaseDir, lpctstr pszBaseName, int iSaveCount ) // static
@@ -1245,7 +1245,7 @@ bool CWorld::OpenScriptBackup( CScript & s, lpctstr pszBaseDir, lpctstr pszBaseN
 
 	// rename previous save to archive name.
 	CGString sSaveName;
-	sSaveName.Format( "%s" GRAY_FILE "%s%s", pszBaseDir, pszBaseName, GRAY_SCRIPT );
+	sSaveName.Format( "%s" SPHERE_FILE "%s%s", pszBaseDir, pszBaseName, SPHERE_SCRIPT );
 
 	if ( rename( sSaveName, sArchive ))
 	{
@@ -1606,7 +1606,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 	catch ( const CSphereError& e )
 	{
 		g_Log.CatchEvent( &e, "Save FAILED." );
-		Broadcast("Save FAILED. " GRAY_TITLE " is UNSTABLE!");
+		Broadcast("Save FAILED. " SPHERE_TITLE " is UNSTABLE!");
 		m_FileData.Close();	// close if not already closed.
 		m_FileWorld.Close();	// close if not already closed.
 		m_FilePlayers.Close();	// close if not already closed.
@@ -1616,7 +1616,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 	catch (...)	// catch all
 	{
 		g_Log.CatchEvent( NULL, "Save FAILED" );
-		Broadcast("Save FAILED. " GRAY_TITLE " is UNSTABLE!");
+		Broadcast("Save FAILED. " SPHERE_TITLE " is UNSTABLE!");
 		m_FileData.Close();	// close if not already closed.
 		m_FileWorld.Close();	// close if not already closed.
 		m_FilePlayers.Close();	// close if not already closed.
@@ -1743,12 +1743,12 @@ bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from scr
 		}
 		catch ( const CSphereError& e )
 		{
-			g_Log.CatchEvent(&e, "Load Exception line %d " GRAY_TITLE " is UNSTABLE!\n", s.GetContext().m_iLineNum);
+			g_Log.CatchEvent(&e, "Load Exception line %d " SPHERE_TITLE " is UNSTABLE!\n", s.GetContext().m_iLineNum);
 			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 		}
 		catch (...)
 		{
-			g_Log.CatchEvent(NULL, "Load Exception line %d " GRAY_TITLE " is UNSTABLE!\n", s.GetContext().m_iLineNum);
+			g_Log.CatchEvent(NULL, "Load Exception line %d " SPHERE_TITLE " is UNSTABLE!\n", s.GetContext().m_iLineNum);
 			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 		}
 	}
@@ -1773,19 +1773,19 @@ bool CWorld::LoadWorld() // Load world from script
 	// NOTE: WE MUST Sync these files ! CHAR and WORLD !!!
 
 	CGString sStaticsName;
-	sStaticsName.Format("%s" GRAY_FILE "statics", static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
+	sStaticsName.Format("%s" SPHERE_FILE "statics", static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
 	CGString sWorldName;
-	sWorldName.Format("%s" GRAY_FILE "world", static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
+	sWorldName.Format("%s" SPHERE_FILE "world", static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
 	CGString sMultisName;
-	sMultisName.Format("%s" GRAY_FILE "multis", static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
+	sMultisName.Format("%s" SPHERE_FILE "multis", static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
 	CGString sCharsName;
-	sCharsName.Format("%s" GRAY_FILE "chars", static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
+	sCharsName.Format("%s" SPHERE_FILE "chars", static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
 	CGString sDataName;
-	sDataName.Format("%s" GRAY_FILE "data",	static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
+	sDataName.Format("%s" SPHERE_FILE "data",	static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
 	int iPrevSaveCount = m_iSaveCountID;
 	for (;;)
@@ -1905,7 +1905,7 @@ bool CWorld::LoadAll() // Load world from script
 	EXC_CATCHSUB("Garbage collect");
 
 	// Set the current version now.
-	r_SetVal("VERSION", GRAY_VERSION);	// Set m_iLoadVersion
+	r_SetVal("VERSION", SPHERE_VERSION);	// Set m_iLoadVersion
 
 	return true;
 }
@@ -1916,8 +1916,8 @@ void CWorld::r_Write( CScript & s )
 {
 	ADDTOCALLSTACK("CWorld::r_Write");
 	// Write out the safe header.
-	s.WriteKey("TITLE", GRAY_TITLE " World Script");
-	s.WriteKey("VERSION", GRAY_VERSION);
+	s.WriteKey("TITLE", SPHERE_TITLE " World Script");
+	s.WriteKey("VERSION", SPHERE_VERSION);
 	s.WriteKeyVal("PREVBUILD", __GITREVISION__);
 	s.WriteKeyVal( "TIME", GetCurrentTime().GetTimeRaw() );
 	s.WriteKeyVal( "SAVECOUNT", m_iSaveCountID );
@@ -2024,10 +2024,10 @@ bool CWorld::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 			sVal.FormatLLVal( GetCurrentTime().GetTimeRaw() );
 			break;
 		case WC_TITLE: // 	"TITLE",
-			sVal = (GRAY_TITLE " World Script");
+			sVal = (SPHERE_TITLE " World Script");
 			break;
 		case WC_VERSION: // "VERSION"
-			sVal = GRAY_VERSION;
+			sVal = SPHERE_VERSION;
 			break;
 		default:
 			return( false );

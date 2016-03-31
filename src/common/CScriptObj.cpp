@@ -18,7 +18,7 @@
 #include "../sphere/ProfileTask.h"
 #include "CException.h"
 #include "CExpression.h"
-#include "CGrayUID.h"
+#include "CUID.h"
 #include "CMD5.h"
 #include "CScript.h"
 #include "CScriptObj.h"
@@ -188,7 +188,7 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
 				pszTemp = pEnd;
 				if ( !*pszTemp ) // setting REFx to a new object
 				{
-					CGrayUID uid = s.GetArgVal();
+					CUID uid = s.GetArgVal();
 					CObjBase * pObj = uid.ObjFind();
 					m_VarObjs.Insert( number, pObj, true );
 					pszKey = pszTemp;
@@ -215,7 +215,7 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
 		else
 		{
 			pszKey ++;
-			CObjBase * pObj = static_cast<CObjBase*>(static_cast<CGrayUID>(Exp_GetSingle(pszKey)).ObjFind());
+			CObjBase * pObj = static_cast<CObjBase*>(static_cast<CUID>(Exp_GetSingle(pszKey)).ObjFind());
 			if (!pObj)
 				m_pO1 = NULL;	// no pObj = cleaning argo
 			else
@@ -443,7 +443,7 @@ bool CScriptObj::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	else if ( !strnicmp(pszKey, "UID.", 4) )
 	{
 		pszKey += 4;
-		CGrayUID uid = Exp_GetDWVal(pszKey);
+		CUID uid = Exp_GetDWVal(pszKey);
 		SKIP_SEPARATORS(pszKey);
 		pRef = uid.ObjFind();
 		return true;
@@ -1370,7 +1370,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 
 		case SSV_NEWDUPE:
 			{
-				CGrayUID uid(s.GetArgVal());
+				CUID uid(s.GetArgVal());
 				CObjBase	*pObj = uid.ObjFind();
 				if (pObj == NULL)
 				{
@@ -1416,7 +1416,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 				
 				if ( ppCmd[2] )
 				{
-					CGrayUID uidEquipper = Exp_GetVal(ppCmd[2]);
+					CUID uidEquipper = Exp_GetVal(ppCmd[2]);
 					bool bTriggerEquip = ppCmd[3] != NULL ? (Exp_GetVal(ppCmd[3]) != 0) : false;
 
 					if ( !bTriggerEquip || uidEquipper.IsItem() )
@@ -1517,7 +1517,7 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 	// ARGS:
 	// iFlags = 2=Allow recusive bracket count. 1=use HTML %% as the delimiters.
 	// NOTE:
-	//  html will have opening <script language="GRAY_FILE"> and then closing </script>
+	//  html will have opening <script language="SPHERE_FILE"> and then closing </script>
 	// RETURN:
 	//  New length of the string.
 	//
@@ -2306,7 +2306,7 @@ jump_in:
 							tchar *tempPoint = porigValue;
 							ParseText( tempPoint, pSrc, 0, pArgs );
 							
-							CGrayUID pCurUid = Exp_GetDWVal(tempPoint);
+							CUID pCurUid = Exp_GetDWVal(tempPoint);
 							if ( pCurUid.IsValidUID() )
 							{
 								CObjBase * pObj = pCurUid.ObjFind();
@@ -2569,7 +2569,7 @@ jump_in:
 						CScriptObj *pRef = this;
 						if ( iArgQty == 2 )
 						{
-							CGrayUID uid = (int)piCmd[1];
+							CUID uid = (int)piCmd[1];
 							if ( uid.ObjFind() )
 								pRef = uid.ObjFind();
 						}
