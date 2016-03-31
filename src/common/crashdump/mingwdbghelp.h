@@ -63,8 +63,8 @@ typedef struct _MINIDUMP_THREAD_CALLBACK {
     HANDLE  ThreadHandle;
     CONTEXT Context;
 	UINT    SizeOfContext;
-    ULLONG  StackBase;
-	ULLONG  StackEnd;
+	ullong  StackBase;
+	ullong  StackEnd;
 } MINIDUMP_THREAD_CALLBACK, *PMINIDUMP_THREAD_CALLBACK;
 
 
@@ -73,16 +73,16 @@ typedef struct _MINIDUMP_THREAD_EX_CALLBACK {
     HANDLE  ThreadHandle;
     CONTEXT Context;
 	UINT    SizeOfContext;
-	ULLONG  StackBase;
-	ULLONG  StackEnd;
-	ULLONG  BackingStoreBase;
-	ULLONG  BackingStoreEnd;
+	ullong  StackBase;
+	ullong  StackEnd;
+	ullong  BackingStoreBase;
+	ullong  BackingStoreEnd;
 } MINIDUMP_THREAD_EX_CALLBACK, *PMINIDUMP_THREAD_EX_CALLBACK;
 
 
 typedef struct _MINIDUMP_MODULE_CALLBACK {
     PWCHAR           FullPath;
-    ULLONG           BaseOfImage;
+	ullong           BaseOfImage;
 	UINT             SizeOfImage;
 	UINT             CheckSum;
 	UINT             TimeDateStamp;
@@ -100,20 +100,20 @@ typedef struct _MINIDUMP_INCLUDE_THREAD_CALLBACK {
 
 
 typedef struct _MINIDUMP_INCLUDE_MODULE_CALLBACK {
-    ULLONG BaseOfImage;
+	ullong BaseOfImage;
 } MINIDUMP_INCLUDE_MODULE_CALLBACK, *PMINIDUMP_INCLUDE_MODULE_CALLBACK;
 
 
 typedef struct _MINIDUMP_IO_CALLBACK {
     HANDLE  Handle;
-    ULLONG  Offset;
+	ullong  Offset;
     PVOID   Buffer;
 	UINT    BufferBytes;
 } MINIDUMP_IO_CALLBACK, *PMINIDUMP_IO_CALLBACK;
 
 
 typedef struct _MINIDUMP_READ_MEMORY_FAILURE_CALLBACK {
-    ULLONG  Offset;
+	ullong  Offset;
 	UINT    Bytes;
     HRESULT FailureStatus;
 } MINIDUMP_READ_MEMORY_FAILURE_CALLBACK, *PMINIDUMP_READ_MEMORY_FAILURE_CALLBACK;
@@ -138,11 +138,11 @@ typedef struct _MINIDUMP_CALLBACK_INPUT {
 
 
 typedef struct _MINIDUMP_MEMORY_INFO {
-    ULLONG	BaseAddress;
-	ULLONG	AllocationBase;
-	ULLONG	AllocationProtect;
-	ULLONG	__alignment1;
-	ULLONG	RegionSize;
+	ullong	BaseAddress;
+	ullong	AllocationBase;
+	ullong	AllocationProtect;
+	ullong	__alignment1;
+	ullong	RegionSize;
 	UINT	State;
 	UINT	Protect;
 	UINT	Type;
@@ -156,7 +156,7 @@ typedef struct _MINIDUMP_CALLBACK_OUTPUT {
 		UINT  ThreadWriteFlags;
 		UINT  SecondaryFlags;
         struct {
-            ULLONG MemoryBase;
+			ullong MemoryBase;
 			UINT   MemorySize;
         };
         struct {

@@ -327,7 +327,6 @@ CNTWindow::CNTWindow()
 	m_dwColorPrv		= RGB( 0xaf,0xaf,0xaf );
 	m_iHeightInput		= 0;
    	m_hLogFont			= NULL;
-	m_wndLog.SetSel(0, 0);
 	memset(m_zCommands, 0, sizeof(m_zCommands));
 }
 
@@ -422,6 +421,7 @@ int CNTWindow::OnCreate( HWND hWnd, LPCREATESTRUCT lParam )
 		m_hWnd,
 		(HMENU)(UINT) IDC_M_LOG, theApp.m_hInstance, NULL );
 	ASSERT( m_wndLog.m_hWnd );
+	m_wndLog.SetSel(0, 0);
 
 
 	SetLogFont( "Courier" );
