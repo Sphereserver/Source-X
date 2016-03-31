@@ -3,8 +3,9 @@
 #ifndef _INC_CTEXTCONSOLE_H
 #define _INC_CTEXTCONSOLE_H
 
-#include "../common/CString.h"
 #include "../sphere/strings.h"
+#include "CString.h"
+#include "graycom.h"
 
 
 class CChar;

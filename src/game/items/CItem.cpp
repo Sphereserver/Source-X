@@ -5541,9 +5541,8 @@ bool CItem::OnTick()
 	DEBUG_ERR(( "Timer expired without DECAY flag '%s' (UID=0%x)?\n", GetName(), (dword)GetUID()));
 
 #ifndef _WIN32
+#ifdef _EXCEPTIONS_DEBUG
 	}
-#ifdef _DEBUG
-
 	catch ( const CSphereError& e )
 	{
 		EXC_CATCH_EXCEPTION(&e);

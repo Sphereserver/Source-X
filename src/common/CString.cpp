@@ -2,6 +2,7 @@
 * @file CGString.cpp
 */
 
+#include <climits>
 #include "../sphere/ProfileTask.h"
 #include "../sphere/strings.h"
 #include "regex/deelx.h"

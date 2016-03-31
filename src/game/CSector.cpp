@@ -1163,8 +1163,8 @@ void CSector::OnTick(int iPulseCount)
 		
 		EXC_DEBUGSUB_END;
 #else
+#ifdef _EXCEPTIONS_DEBUG
 		}
-#ifdef _DEBUG
 		catch ( const CSphereError& e )
 		{
 			PAUSECALLSTACK;

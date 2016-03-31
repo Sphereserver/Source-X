@@ -180,7 +180,7 @@ int CLog::EventStr( dword wMask, lpctstr pszMsg )
 		else
 		{
 #ifndef _WIN32
-			UINT	mode = OF_READWRITE|OF_TEXT;
+			uint	mode = OF_READWRITE|OF_TEXT;
 			mode |= OF_SHARE_DENY_WRITE;
 			Open(NULL, mode);	// LINUX needs to close and re-open for each log line !
 #endif

@@ -8,6 +8,7 @@
 #define _INC_CARRAY_H
 
 #include <climits>
+#include <limits>
 
 #include "common.h"
 #include "graycom.h"

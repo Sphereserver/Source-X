@@ -3858,7 +3858,7 @@ void CChar::OnTickFood(short iVal, int HitsHungerLoss)
 		return;
 
 	bool bPet = IsStatFlag(STATF_Pet);
-	LPCTSTR pszMsgLevel = Food_GetLevelMessage(bPet, false);
+	lpctstr pszMsgLevel = Food_GetLevelMessage(bPet, false);
 	SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_HUNGER), pszMsgLevel);
 
 	char *pszMsg = Str_GetTemp();

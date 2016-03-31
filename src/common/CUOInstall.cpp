@@ -542,15 +542,15 @@ ullong HashFileName(CGString csFile)
 	uint eax, ecx, edx, ebx, esi, edi;
 
 	eax = ecx = edx = 0;
-	ebx = edi = esi = (INT32) csFile.GetLength() + 0xDEADBEEF;
+	ebx = edi = esi = (int32) csFile.GetLength() + 0xDEADBEEF;
 
 	int i = 0;
 
 	for ( i = 0; i + 12 < csFile.GetLength(); i += 12 )
 	{
-		edi = (INT32) ( ( csFile[ i + 7 ] << 24 ) | ( csFile[ i + 6 ] << 16 ) | ( csFile[ i + 5 ] << 8 ) | csFile[ i + 4 ] ) + edi;
-		esi = (INT32) ( ( csFile[ i + 11 ] << 24 ) | ( csFile[ i + 10 ] << 16 ) | ( csFile[ i + 9 ] << 8 ) | csFile[ i + 8 ] ) + esi;
-		edx = (INT32) ( ( csFile[ i + 3 ] << 24 ) | ( csFile[ i + 2 ] << 16 ) | ( csFile[ i + 1 ] << 8 ) | csFile[ i ] ) - esi;
+		edi = (int32) ( ( csFile[ i + 7 ] << 24 ) | ( csFile[ i + 6 ] << 16 ) | ( csFile[ i + 5 ] << 8 ) | csFile[ i + 4 ] ) + edi;
+		esi = (int32) ( ( csFile[ i + 11 ] << 24 ) | ( csFile[ i + 10 ] << 16 ) | ( csFile[ i + 9 ] << 8 ) | csFile[ i + 8 ] ) + esi;
+		edx = (int32) ( ( csFile[ i + 3 ] << 24 ) | ( csFile[ i + 2 ] << 16 ) | ( csFile[ i + 1 ] << 8 ) | csFile[ i ] ) - esi;
 
 		edx = ( edx + ebx ) ^ ( esi >> 28 ) ^ ( esi << 4 );
 		esi += edi;
@@ -571,29 +571,29 @@ ullong HashFileName(CGString csFile)
 		switch ( csFile.GetLength() - i )
 		{
 			case 12:
-				esi += (INT32) csFile[ i + 11 ] << 24;
+				esi += (int32) csFile[ i + 11 ] << 24;
 			case 11:
-				esi += (INT32) csFile[ i + 10 ] << 16;
+				esi += (int32) csFile[ i + 10 ] << 16;
 			case 10:
-				esi += (INT32) csFile[ i + 9 ] << 8;
+				esi += (int32) csFile[ i + 9 ] << 8;
 			case 9:
-				esi += (INT32) csFile[ i + 8 ];
+				esi += (int32) csFile[ i + 8 ];
 			case 8:
-				edi += (INT32) csFile[ i + 7 ] << 24;
+				edi += (int32) csFile[ i + 7 ] << 24;
 			case 7:
-				edi += (INT32) csFile[ i + 6 ] << 16;
+				edi += (int32) csFile[ i + 6 ] << 16;
 			case 6:
-				edi += (INT32) csFile[ i + 5 ] << 8;
+				edi += (int32) csFile[ i + 5 ] << 8;
 			case 5:
-				edi += (INT32) csFile[ i + 4 ];
+				edi += (int32) csFile[ i + 4 ];
 			case 4:
-				ebx += (INT32) csFile[ i + 3 ] << 24;
+				ebx += (int32) csFile[ i + 3 ] << 24;
 			case 3:
-				ebx += (INT32) csFile[ i + 2 ] << 16;
+				ebx += (int32) csFile[ i + 2 ] << 16;
 			case 2:
-				ebx += (INT32) csFile[ i + 1 ] << 8;
+				ebx += (int32) csFile[ i + 1 ] << 8;
 			case 1:		
-				ebx += (INT32) csFile[ i ];
+				ebx += (int32) csFile[ i ];
 				break;			
 		}
 
