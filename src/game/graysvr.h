@@ -8,25 +8,16 @@
 	#define _MTNETWORK
 #endif
 
-//#define DEBUGWALKSTUFF 1
-//#ifdef _DEBUG
 #ifdef DEBUGWALKSTUFF
 	#define WARNWALK(_x_)		g_pLog->EventWarn _x_;
 #else
 	#define WARNWALK(_x_)		if ( g_Cfg.m_wDebugFlags & DEBUGF_WALK ) { g_pLog->EventWarn _x_; }
 #endif
-#include "CWorld.h"
-
-///////////////////////////////////////////////
-
 
 // Text mashers.
 
 extern lpctstr GetTimeMinDesc( int dwMinutes );
 extern size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord );
-
-#include "CLog.h"
-
 
 ////////////////////////////////////////////////////////////////////////////////////
 
