@@ -22,6 +22,7 @@
 #include "clients/CAccount.h"
 #include "items/CItemMap.h"
 #include "items/CItemMessage.h"
+#include "CScriptProfiler.h"
 #include "CServer.h"
 #include "CWorld.h"
 #include "graysvr.h"
@@ -290,7 +291,7 @@ CLog		g_Log;
 CEventLog * g_pLog = &g_Log;
 CAccounts	g_Accounts;	// All the player accounts. name sorted CAccount
 CGStringList	g_AutoComplete;	// auto-complete list
-TScriptProfiler g_profiler;		// script profiler
+CScriptProfiler g_profiler;		// script profiler
 CMapList	g_MapList;			// global maps information
 
 

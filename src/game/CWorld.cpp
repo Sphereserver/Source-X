@@ -12,6 +12,7 @@
 #include "CLog.h"
 #include "CObjBase.h"
 #include "CServTime.h"
+#include "CScriptProfiler.h"
 
 #if !defined( _WIN32 )
 #include <time.h>

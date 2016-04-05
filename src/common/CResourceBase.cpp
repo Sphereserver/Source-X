@@ -1550,7 +1550,7 @@ void CResourceRefArray::r_Write( CScript & s, lpctstr pszKey ) const
 CResourceHashArray::CResourceHashArray()
 {
 
-};
+}
 
 int CResourceHashArray::CompareKey( RESOURCE_ID_BASE rid, CResourceDef * pBase, bool fNoSpaces ) const
 {

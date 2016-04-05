@@ -28,6 +28,7 @@
 #include "CServTime.h"
 #include "graysvr.h"
 #include "Triggers.h"
+#include "CScriptProfiler.h"
 
 #if !defined(_WIN32) || defined(_LIBEV)
 	extern LinuxEv g_NetworkEvent;
@@ -589,8 +590,8 @@ bool CServer::OnConsoleCmd( CGString & sText, CTextConsole * pSrc )
 				{
 					if ( g_profiler.initstate == 0xf1 )
 					{
-						TScriptProfiler::TScriptProfilerFunction	*pFun;
-						TScriptProfiler::TScriptProfilerTrigger		*pTrig;
+						CScriptProfiler::CScriptProfilerFunction	*pFun;
+						CScriptProfiler::CScriptProfilerTrigger		*pTrig;
 
 						for ( pFun = g_profiler.FunctionsHead; pFun != NULL; pFun = pFun->next )
 						{
@@ -984,8 +985,8 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 		else
 		{
 			llong average = g_profiler.total / g_profiler.called;
-			TScriptProfiler::TScriptProfilerFunction * pFun;
-			TScriptProfiler::TScriptProfilerTrigger * pTrig;
+			CScriptProfiler::CScriptProfilerFunction * pFun;
+			CScriptProfiler::CScriptProfilerTrigger * pTrig;
 			llong divby = llTimeProfileFrequency / 1000;
 
 			pSrc->SysMessagef( "Scripts: called %u times and took %i.%04i msec (%i.%04i msec average). Reporting with highest average.\n",

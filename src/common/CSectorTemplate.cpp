@@ -13,7 +13,7 @@
 CCharsDisconnectList::CCharsDisconnectList()
 {
 
-};
+}
 
 ////////////////////////////////////////////////////////////////////////
 // -CCharsActiveList
@@ -101,7 +101,7 @@ void CItemsList::AddItemToSector( CItem * pItem )
 CItemsList::CItemsList()
 {
 
-};
+}
 
 int CObPointSortArray::CompareKey( int id, CPointSort* pBase, bool fNoSpaces ) const
 {
@@ -114,7 +114,7 @@ int CObPointSortArray::CompareKey( int id, CPointSort* pBase, bool fNoSpaces ) c
 CObPointSortArray::CObPointSortArray()
 {
 
-};
+}
 
 //////////////////////////////////////////////////////////////////
 // -CSectorBase

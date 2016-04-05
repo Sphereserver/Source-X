@@ -14,6 +14,7 @@
 #include "../game/clients/CClient.h"
 #include "../game/items/CItemStone.h"
 #include "../game/graysvr.h"
+#include "../game/CScriptProfiler.h"
 #include "../game/CWorld.h"
 #include "../sphere/ProfileTask.h"
 #include "CException.h"
@@ -523,7 +524,7 @@ bool CScriptObj::r_Call( lpctstr pszFunction, CTextConsole * pSrc, CScriptTrigge
 	CResourceLock sFunction;
 	if ( pFunction->ResourceLock(sFunction) )
 	{
-		TScriptProfiler::TScriptProfilerFunction *pFun = NULL;
+		CScriptProfiler::CScriptProfilerFunction *pFun = NULL;
 		TIME_PROFILE_INIT;
 
 		//	If functions profiler is on, search this function record and get pointer to it
@@ -551,8 +552,8 @@ bool CScriptObj::r_Call( lpctstr pszFunction, CTextConsole * pSrc, CScriptTrigge
 			// first time function called. so create a record for it
 			if ( pFun == NULL )
 			{
-				pFun = new TScriptProfiler::TScriptProfilerFunction;
-				memset(pFun, 0, sizeof(TScriptProfiler::TScriptProfilerFunction));
+				pFun = new CScriptProfiler::CScriptProfilerFunction;
+				memset(pFun, 0, sizeof(CScriptProfiler::CScriptProfilerFunction));
 				strcpy(pFun->name, pName);
 				if ( g_profiler.FunctionsTail )
 					g_profiler.FunctionsTail->next = pFun;
@@ -2001,7 +2002,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerScript( CScript & s, lpctstr pszTrigName, CTex
 
 	ProfileTask scriptsTask(PROFILE_SCRIPTS);
 
-	TScriptProfiler::TScriptProfilerTrigger	*pTrig = NULL;
+	CScriptProfiler::CScriptProfilerTrigger	*pTrig = NULL;
 	TIME_PROFILE_INIT;
 
 	//	If script profiler is on, search this trigger record and get pointer to it
@@ -2029,8 +2030,8 @@ TRIGRET_TYPE CScriptObj::OnTriggerScript( CScript & s, lpctstr pszTrigName, CTex
 		// first time function called. so create a record for it
 		if ( pTrig == NULL )
 		{
-			pTrig = new TScriptProfiler::TScriptProfilerTrigger;
-			memset(pTrig, 0, sizeof(TScriptProfiler::TScriptProfilerTrigger));
+			pTrig = new CScriptProfiler::CScriptProfilerTrigger;
+			memset(pTrig, 0, sizeof(CScriptProfiler::CScriptProfilerTrigger));
 			strcpy(pTrig->name, pName);
 			if ( g_profiler.TriggersTail )
 				g_profiler.TriggersTail->next = pTrig;

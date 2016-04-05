@@ -14,6 +14,7 @@ game/CResourceCalc.cpp
 game/CResource.cpp
 game/CResourceDef.cpp
 game/CResource.h
+game/CScriptProfiler.h
 game/CSector.cpp
 game/CSector.h
 game/CSectorEnviron.h

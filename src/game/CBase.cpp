@@ -582,7 +582,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 	EXC_DEBUG_END;
 	return false;
 }
-;
+
 // do not copy CResourceLink
 void CBaseBaseDef::CopyBasic( const CBaseBaseDef * pBase )
 {

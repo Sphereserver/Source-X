@@ -66,57 +66,5 @@ extern int Sphere_MainEntryPoint( int argc, char *argv[] );
 // ---------------------------------------------------------------------------------------------
 
 
-struct TScriptProfiler
-{
-	uchar	initstate;
-	dword		called;
-	llong	total;
-	struct TScriptProfilerFunction
-	{
-		tchar	name[128];	// name of the function
-		dword	called;		// how many times called
-		llong	total;		// total executions time
-		llong	min;		// minimal executions time
-		llong	max;		// maximal executions time
-		llong	average;	// average executions time
-		TScriptProfilerFunction *next;
-	}		*FunctionsHead, *FunctionsTail;
-	struct TScriptProfilerTrigger
-	{
-		tchar	name[128];	// name of the trigger
-		dword	called;		// how many times called
-		llong	total;		// total executions time
-		llong	min;		// minimal executions time
-		llong	max;		// maximal executions time
-		llong	average;	// average executions time
-		TScriptProfilerTrigger *next;
-	}		*TriggersHead, *TriggersTail;
-};
-extern TScriptProfiler g_profiler;
-
-//	Time measurement macros
-extern llong llTimeProfileFrequency;
-
-#ifdef _WIN32
-
-#define	TIME_PROFILE_INIT	\
-	llong llTicks(0), llTicksEnd
-#define	TIME_PROFILE_START	\
-	if ( !QueryPerformanceCounter((LARGE_INTEGER *)&llTicks)) llTicks = GetTickCount()
-#define TIME_PROFILE_END	if ( !QueryPerformanceCounter((LARGE_INTEGER *)&llTicksEnd)) llTicksEnd = GetTickCount()
-
-#else // !_WIN32
-
-#define	TIME_PROFILE_INIT	\
-	llong llTicks(0), llTicksEnd
-#define	TIME_PROFILE_START	\
-	llTicks = GetTickCount()
-#define TIME_PROFILE_END	llTicksEnd = GetTickCount();
-
-#endif // _WIN32
-
-#define TIME_PROFILE_GET_HI	((llTicksEnd - llTicks)/(llTimeProfileFrequency/1000))
-#define	TIME_PROFILE_GET_LO	((((llTicksEnd - llTicks)*10000)/(llTimeProfileFrequency/1000))%10000)
-
 
 #endif // _INC_GRAYSVR_H

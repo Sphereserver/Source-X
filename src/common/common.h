@@ -88,30 +88,6 @@ typedef uint	ERROR_CODE;
 
 #define medium(x,y,z)		((x)>(y)?(x):((z)<(y)?(z):(y)))
 
-
-// -----------------------------
-//	Time measurement macroses
-// -----------------------------
-
-extern llong llTimeProfileFrequency;
-
-#ifdef _WIN32
-	#define	TIME_PROFILE_INIT	\
-		llong llTicks(0), llTicksEnd
-	#define	TIME_PROFILE_START	\
-		if ( !QueryPerformanceCounter((LARGE_INTEGER *)&llTicks)) llTicks = GetTickCount()
-	#define TIME_PROFILE_END	if ( !QueryPerformanceCounter((LARGE_INTEGER *)&llTicksEnd)) llTicksEnd = GetTickCount()
-#else
-	#define	TIME_PROFILE_INIT	\
-		llong llTicks(0), llTicksEnd
-	#define	TIME_PROFILE_START	\
-		llTicks = GetTickCount()
-	#define TIME_PROFILE_END	llTicksEnd = GetTickCount();
-#endif
-
-#define TIME_PROFILE_GET_HI	((llTicksEnd - llTicks)/(llTimeProfileFrequency/1000))
-#define	TIME_PROFILE_GET_LO	((((llTicksEnd - llTicks)*10000)/(llTimeProfileFrequency/1000))%10000)
-
 // -----------------------------
 //	CEventLog
 // -----------------------------

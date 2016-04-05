@@ -1,6 +1,7 @@
 
 #include "../common/CString.h"
 #include "../common/graycom.h"
+#include "../game/CScriptProfiler.h"
 #include "ProfileData.h"
 #include "strings.h"
 #include "threads.h"
