@@ -37,19 +37,8 @@ public:
 	virtual CChar * GetChar() const;	// are we also a CChar ? dynamic_cast ?
 
 	virtual void SysMessage( lpctstr pszMessage ) const = 0;	// Feed back message.
-	void VSysMessage( lpctstr pszFormat, va_list args ) const
-	{
-		TemporaryString pszTemp;
-		_vsnprintf( pszTemp, pszTemp.realLength(), pszFormat, args );
-		SysMessage( pszTemp );
-	}
-	void _cdecl SysMessagef( lpctstr pszFormat, ... ) const __printfargs(2,3)
-	{
-		va_list vargs;
-		va_start( vargs, pszFormat );
-		VSysMessage( pszFormat, vargs );
-		va_end( vargs );
-	}
+	void VSysMessage( lpctstr pszFormat, va_list args ) const;
+	void _cdecl SysMessagef( lpctstr pszFormat, ... ) const __printfargs(2,3);
 
 public:
 	CTextConsole() { };

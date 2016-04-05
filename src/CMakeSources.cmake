@@ -184,6 +184,7 @@ common/CString.cpp
 common/CString.h
 common/CsvFile.cpp
 common/CsvFile.h
+common/CTextConsole.cpp
 common/CTextConsole.h
 common/CTime.cpp
 common/CTime.h

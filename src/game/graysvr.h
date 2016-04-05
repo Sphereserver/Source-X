@@ -3,6 +3,9 @@
 #ifndef _INC_GRAYSVR_H
 #define _INC_GRAYSVR_H
 
+#include "../common/common.h"
+#include "../sphere/threads.h"
+
 #if defined(_WIN32) && !defined(_MTNETWORK)
 	// _MTNETWORK enabled via makefile for other systems
 	#define _MTNETWORK
