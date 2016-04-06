@@ -24,18 +24,18 @@ public:
 	 */
 	///@{
 	/**
-	* @brief CGString destructor.
-	*
-	* If DEBUG_STRINGS setted, updates statistical information (total CGString instantiated).
-	*/
-	~CGString();
-	/**
 	* @brief Default constructor.
 	*
 	* Initializes string. If DEBUG_STRINGS setted, update statistical information (total CGString instantiated).
 	* @see Init()
 	*/
 	CGString();
+	/**
+	* @brief CGString destructor.
+	*
+	* If DEBUG_STRINGS setted, updates statistical information (total CGString instantiated).
+	*/
+	~CGString();
 	/**
 	* @brief Copy constructor.
 	*
@@ -55,21 +55,13 @@ public:
 	* @param pStr string to copy.
 	* @return the CGString.
 	*/
-	const CGString& operator=(lpctstr pStr)
-	{
-		Copy(pStr);
-		return(*this);
-	}
+	const CGString& operator=(lpctstr pStr);
 	/**
 	* @brief Copy supplied CGString into the CGString.
 	* @param s CGString to copy.
 	* @return the CGString.
 	*/
-	const CGString& operator=(const CGString &s)
-	{
-		Copy(s.GetPtr());
-		return(*this);
-	}
+	const CGString& operator=(const CGString &s);
 	///@}
 	/** @name Capacity:
 	 */
@@ -116,20 +108,14 @@ public:
 	* @param nIndex position of the character.
 	* @return character in position nIndex.
 	*/
-	tchar operator[](int nIndex) const
-	{
-		return GetAt(nIndex);
-	}
+	tchar operator[](int nIndex) const;
 	/**
 	* @brief Gets the reference to character a specified position (0 based).
 	* @see ReferenceAt()
 	* @param nIndex position of the character.
 	* @return reference to character in position nIndex.
 	*/
-	tchar & operator[](int nIndex)
-	{
-		return ReferenceAt(nIndex);
-	}
+	tchar & operator[](int nIndex);
 	/**
 	* @brief Gets the caracter in a specified position (0 based).
 	* @param nIndex position of the character.
@@ -159,21 +145,13 @@ public:
 	* @param psz string to concatenate with.
 	* @return The result of concatenate the CGString with psz.
 	*/
-	const CGString& operator+=(lpctstr psz)	// like strcat
-	{
-		Add(psz);
-		return(*this);
-	}
+	const CGString& operator+=(lpctstr psz);
 	/**
 	* @brief Concatenate CGString with a character.
 	* @param ch character to concatenate with.
 	* @return The result of concatenate the CGString with ch.
 	*/
-	const CGString& operator+=(tchar ch)
-	{
-		Add(ch);
-		return(*this);
-	}
+	const CGString& operator+=(tchar ch);
 	/**
 	* @brief Adds a char at the end of the CGString.
 	* @param ch character to add.
@@ -243,11 +221,11 @@ public:
 	/**
 	* @brief Changes the capitalization of CGString to upper.
 	*/
-	void MakeUpper() { _strupr(m_pchData); }
+	void MakeUpper();
 	/**
 	* @brief Changes the capitalization of CGString to lower.
 	*/
-	void MakeLower() { _strlwr(m_pchData); }
+	void MakeLower();
 	/**
 	* @brief Reverses the CGString.
 	*/
@@ -260,10 +238,7 @@ public:
 	* @brief cast as const lpcstr.
 	* @return internal data pointer.
 	*/
-	operator lpctstr() const
-	{
-		return(GetPtr());
-	}
+	operator lpctstr() const;
 	/**
 	* @brief Compares the CGString to string pStr (strcmp wrapper).
 	*
@@ -373,24 +348,9 @@ enum MATCH_TYPE
 };
 
 
-/**
-* @brief check if a string matches a pattern.
-* @see MATCH_TYPE
-* @param pPattern pattern to match.
-* @param pText text to match against the pattern.
-* @return a MATCH_TYPE
-*/
-MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText);
-
-/**
-* @brief check if a string matches a regex.
-* @param pPattern regex to match.
-* @param pText text to match against the regex.
-* @param lastError if any error, error description is stored here.
-* @return 1 is regex is matched, 0 if not, -1 if errors.
-*/
-int Str_RegExMatch(lpctstr pPattern, lpctstr pText, tchar * lastError);
-
+/** @name String utilities: Modifiers
+ */
+///@{
 /**
 * @brief Wrapper to cstring strcpy, but returns the length of the string copied.
 * @param pDst dest memory space.
@@ -406,7 +366,6 @@ size_t strcpylen(tchar * pDst, lpctstr pSrc);
 * @return length of the string copied.
 */
 size_t strcpylen(tchar * pDst, lpctstr pSrc, size_t imaxlen);
-
 /**
 * @brief Give the article and space to a word. For example, for "boot" will return "a ".
 * @param pszWords word to add the article.
@@ -422,16 +381,6 @@ lpctstr Str_GetArticleAndSpace(lpctstr pszWords);
 * @return size of the filtered string.
 */
 size_t Str_GetBare(tchar * pszOut, lpctstr pszInp, size_t iMaxSize, lpctstr pszStrip = NULL);
-/**
-* @param pszIn string to check.
-* @return true if string is empty or has '\c' or '\n' characters, false otherwise.
-*/
-bool Str_Check(lpctstr pszIn);
-/**
-* @param pszIn string to check.
-* @return false if string match "[a-zA-Z0-9_- \'\.]+", true otherwise.
-*/
-bool Str_CheckName(lpctstr pszIn);
 /**
 * @brief replace string representation of special characters by special characters.
 *
@@ -472,44 +421,10 @@ size_t Str_TrimEndWhitespace(tchar * pStr, size_t len);
 * @return string with the heading and trailing spaces removed.
 */
 tchar * Str_TrimWhitespace(tchar * pStr);
-/**
-* @brief find a substring in a string from an offset.
-* @param pStr1 string where find the substring.
-* @param pStr2 substring to find.
-* @param offset position where to start the search.
-* @return -1 for a bad offset or if string if not found, otherwise the position of the substring in string.
-*/
-int Str_IndexOf(tchar * pStr1, tchar * pStr2, int offset = 0);
-/**
-* @brief Parse a simple argument from a list of arguments.
-* 
-* From a line like "    a, 2, 3" it will get "a" (Note that removes heading white spaces) 
-* on pLine and  "2, 3" on ppArg.
-* @param pLine line to parse and where store the arg parsed.
-* @param ppArg where to store the other args (non proccessed pLine).
-* @param pSep the list of separators (by default "=, \t").
-* @return false if there are no more args to parse, true otherwise.
-*/
-bool Str_Parse(tchar * pLine, tchar ** ppArg = NULL, lpctstr pSep = NULL);
-/**
-* @brief Parse a list of arguments.
-* @param pCmdLine list of arguments to parse.
-* @param ppCmd where to store de parsed arguments.
-* @param iMax max count of arguments to parse.
-* @param pSep the list of separators (by default "=, \t").
-* @return count of arguments parsed.
-*/
-size_t Str_ParseCmds(tchar * pCmdLine, tchar ** ppCmd, size_t iMax, lpctstr pSep = NULL);
-/**
-* @brief Parse a list of arguments (integer version).
-* @param pCmdLine list of arguments to parse.
-* @param piCmd where to store de parsed arguments.
-* @param iMax max count of arguments to parse.
-* @param pSep the list of separators (by default "=, \t").
-* @return count of arguments parsed.
-*/
-size_t Str_ParseCmds(tchar * pCmdLine, int64_t * piCmd, size_t iMax, lpctstr pSep = NULL);
-
+///@}
+/** @name String utilities: String operations
+ */
+///@{
 /**
 * @brief Look for a string in a table.
 * @param pFind string we are looking for.
@@ -545,6 +460,70 @@ int FindTableHead(lpctstr pFind, lpctstr const * ppTable, int iCount, int iElemS
 * @return the index of string if success, -1 otherwise.
 */
 int FindTableHeadSorted(lpctstr pFind, lpctstr const * ppTable, int iCount, int iElemSize = sizeof(lpctstr));
+/**
+* @param pszIn string to check.
+* @return true if string is empty or has '\c' or '\n' characters, false otherwise.
+*/
+bool Str_Check(lpctstr pszIn);
+/**
+* @param pszIn string to check.
+* @return false if string match "[a-zA-Z0-9_- \'\.]+", true otherwise.
+*/
+bool Str_CheckName(lpctstr pszIn);
+/**
+* @brief find a substring in a string from an offset.
+* @param pStr1 string where find the substring.
+* @param pStr2 substring to find.
+* @param offset position where to start the search.
+* @return -1 for a bad offset or if string if not found, otherwise the position of the substring in string.
+*/
+int Str_IndexOf(tchar * pStr1, tchar * pStr2, int offset = 0);
+/**
+* @brief check if a string matches a pattern.
+* @see MATCH_TYPE
+* @param pPattern pattern to match.
+* @param pText text to match against the pattern.
+* @return a MATCH_TYPE
+*/
+MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText);
+/**
+* @brief Parse a simple argument from a list of arguments.
+*
+* From a line like "    a, 2, 3" it will get "a" (Note that removes heading white spaces)
+* on pLine and  "2, 3" on ppArg.
+* @param pLine line to parse and where store the arg parsed.
+* @param ppArg where to store the other args (non proccessed pLine).
+* @param pSep the list of separators (by default "=, \t").
+* @return false if there are no more args to parse, true otherwise.
+*/
+bool Str_Parse(tchar * pLine, tchar ** ppArg = NULL, lpctstr pSep = NULL);
+/**
+* @brief Parse a list of arguments.
+* @param pCmdLine list of arguments to parse.
+* @param ppCmd where to store de parsed arguments.
+* @param iMax max count of arguments to parse.
+* @param pSep the list of separators (by default "=, \t").
+* @return count of arguments parsed.
+*/
+size_t Str_ParseCmds(tchar * pCmdLine, tchar ** ppCmd, size_t iMax, lpctstr pSep = NULL);
+/**
+* @brief Parse a list of arguments (integer version).
+* @param pCmdLine list of arguments to parse.
+* @param piCmd where to store de parsed arguments.
+* @param iMax max count of arguments to parse.
+* @param pSep the list of separators (by default "=, \t").
+* @return count of arguments parsed.
+*/
+size_t Str_ParseCmds(tchar * pCmdLine, int64_t * piCmd, size_t iMax, lpctstr pSep = NULL);
+/**
+* @brief check if a string matches a regex.
+* @param pPattern regex to match.
+* @param pText text to match against the regex.
+* @param lastError if any error, error description is stored here.
+* @return 1 is regex is matched, 0 if not, -1 if errors.
+*/
+int Str_RegExMatch(lpctstr pPattern, lpctstr pText, tchar * lastError);
+///@}
 
 void CharToMultiByteNonNull(byte*, const char* , size_t);
 
