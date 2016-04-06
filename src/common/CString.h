@@ -16,23 +16,13 @@
 */
 class CGString
 {
-private:
-	tchar	*m_pchData; ///< Data pointer.
-	int		m_iLength; ///< Length of string.
-	int		m_iMaxLength; ///< Size of memory allocated pointed by m_pchData.
-
 public:
 	static const char *m_sClassName;
 
-private:
-	/**
-	* @brief Initializes internal data.
-	*
-	* Allocs STRING_DEFAULT_SIZE by default. If DEBUG_STRINGS setted, updates statistical information (total memory allocated).
-	*/
-	void Init();
-
-public:
+	/** @name Member functions:
+	 *  Constructors, Destructor, Asign operator.
+	 */
+	///@{
 	/**
 	* @brief CGString destructor.
 	*
@@ -60,10 +50,45 @@ public:
 	* @param pStr string to copy.
 	*/
 	CGString(const CGString &s);
-
 	/**
-	* @brief Check if there is data allocated and if the string is zero ended.
-	* @return true if is valid, false otherwise.
+	* @brief Copy supplied string into the CGString.
+	* @param pStr string to copy.
+	* @return the CGString.
+	*/
+	const CGString& operator=(lpctstr pStr)
+	{
+		Copy(pStr);
+		return(*this);
+	}
+	/**
+	* @brief Copy supplied CGString into the CGString.
+	* @param s CGString to copy.
+	* @return the CGString.
+	*/
+	const CGString& operator=(const CGString &s)
+	{
+		Copy(s.GetPtr());
+		return(*this);
+	}
+	///@}
+	/** @name Capacity:
+	 */
+	///@{
+	/**
+	* @brief Sets length to zero.
+	*
+	* If bTotal is true, then free the memory allocated. If DEBUG_STRINGS setted, update statistical information (total memory allocated).
+	* @param bTotal true for free the allocated memory.
+	*/
+	void Empty(bool bTotal = false);
+	/**
+	* @brief Check the length of the CGString.
+	* @return true if length is 0, false otherwise.
+	*/
+	bool IsEmpty() const;
+	/**
+	* @brief Check if there is data allocated and if has zero length.
+	* @return false if no data or zero length, true otherwise.
 	*/
 	bool IsValid() const;
 	/**
@@ -81,38 +106,42 @@ public:
 	* @return the length of the CGString.
 	*/
 	int GetLength() const;
+	///@}
+	/** @name Element access:
+	 */
+	///@{
 	/**
-	* @brief Check the length of the CGString.
-	* @return true if length is 0, false otherwise.
+	* @brief Gets the caracter in a specified position (0 based).
+	* @see GetAt()
+	* @param nIndex position of the character.
+	* @return character in position nIndex.
 	*/
-	bool IsEmpty() const;
-	/**
-	* @brief Sets length to zero.
-	*
-	* If bTotal is true, then free the memory allocated. If DEBUG_STRINGS setted, update statistical information (total memory allocated).
-	* @param bTotal true for free the allocated memory.
-	*/
-	void Empty(bool bTotal = false);
-	/**
-	* @brief Copy a string into the CGString.
-	* @see SetLength()
-	* @see strcpylen()
-	* @param pStr string to copy.
-	*/
-	void Copy(lpctstr pStr);
-
+	tchar operator[](int nIndex) const
+	{
+		return GetAt(nIndex);
+	}
 	/**
 	* @brief Gets the reference to character a specified position (0 based).
+	* @see ReferenceAt()
 	* @param nIndex position of the character.
 	* @return reference to character in position nIndex.
 	*/
-	tchar & ReferenceAt(int nIndex);
+	tchar & operator[](int nIndex)
+	{
+		return ReferenceAt(nIndex);
+	}
 	/**
 	* @brief Gets the caracter in a specified position (0 based).
 	* @param nIndex position of the character.
 	* @return character in position nIndex.
 	*/
 	tchar GetAt(int nIndex) const;
+	/**
+	* @brief Gets the reference to character a specified position (0 based).
+	* @param nIndex position of the character.
+	* @return reference to character in position nIndex.
+	*/
+	tchar & ReferenceAt(int nIndex);
 	/**
 	* @brief Puts a character in a specified position (0 based).
 	*
@@ -121,18 +150,47 @@ public:
 	* @param ch character to put.
 	*/
 	void SetAt(int nIndex, tchar ch);
+	///@}
+	/** @name Modifiers:
+	 */
+	///@{
 	/**
-	* @brief Gets the internal pointer.
-	* @return Pointer to internal data.
+	* @brief Concatenate CGString with a string.
+	* @param psz string to concatenate with.
+	* @return The result of concatenate the CGString with psz.
 	*/
-	lpctstr GetPtr() const;
-
+	const CGString& operator+=(lpctstr psz)	// like strcat
+	{
+		Add(psz);
+		return(*this);
+	}
 	/**
-	* @brief Join a formated string (printf like) with values and copy into this.
-	* @param pStr formated string.
-	* @param args list of values.
+	* @brief Concatenate CGString with a character.
+	* @param ch character to concatenate with.
+	* @return The result of concatenate the CGString with ch.
 	*/
-	void FormatV(lpctstr pStr, va_list args);
+	const CGString& operator+=(tchar ch)
+	{
+		Add(ch);
+		return(*this);
+	}
+	/**
+	* @brief Adds a char at the end of the CGString.
+	* @param ch character to add.
+	*/
+	void Add(tchar ch);
+	/**
+	* @brief Adds a string at the end of the CGString.
+	* @parampszStrh string to add.
+	*/
+	void Add(lpctstr pszStr);
+	/**
+	* @brief Copy a string into the CGString.
+	* @see SetLength()
+	* @see strcpylen()
+	* @param pStr string to copy.
+	*/
+	void Copy(lpctstr pStr);
 	/**
 	* @brief Join a formated string (printf like) with values and copy into this.
 	* @see FormatV()
@@ -141,11 +199,17 @@ public:
 	*/
 	void _cdecl Format(lpctstr pStr, ...) __printfargs(2, 3);
 	/**
-	* @brief Print a long value into the string.
+	* @brief Print a dword value into the string (hex format).
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	void FormatVal(int iVal);
+	void FormatHex(dword dwVal);
+	/**
+	* @brief Print a ullong value into the string (hex format).
+	* @see Format()
+	* @param iVal value to print.
+	*/
+	void FormatLLHex(ullong dwVal);
 	/**
 	* @brief Print a llong value into the string.
 	* @see Format()
@@ -165,18 +229,41 @@ public:
 	*/
 	void FormatUVal(uint iVal);
 	/**
-	* @brief Print a dword value into the string (hex format).
-	* @see Format()
-	* @param iVal value to print.
+	* @brief Join a formated string (printf like) with values and copy into this.
+	* @param pStr formated string.
+	* @param args list of values.
 	*/
-	void FormatHex(dword dwVal);
+	void FormatV(lpctstr pStr, va_list args);
 	/**
-	* @brief Print a ullong value into the string (hex format).
+	* @brief Print a long value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	void FormatLLHex(ullong dwVal);
-
+	void FormatVal(int iVal);
+	/**
+	* @brief Changes the capitalization of CGString to upper.
+	*/
+	void MakeUpper() { _strupr(m_pchData); }
+	/**
+	* @brief Changes the capitalization of CGString to lower.
+	*/
+	void MakeLower() { _strlwr(m_pchData); }
+	/**
+	* @brief Reverses the CGString.
+	*/
+	void Reverse();
+	///@}
+	/** @name String operations:
+	 */
+	///@{
+	/**
+	* @brief cast as const lpcstr.
+	* @return internal data pointer.
+	*/
+	operator lpctstr() const
+	{
+		return(GetPtr());
+	}
 	/**
 	* @brief Compares the CGString to string pStr (strcmp wrapper).
 	*
@@ -200,6 +287,11 @@ public:
 	*/
 	int CompareNoCase(lpctstr pStr) const;
 	/**
+	* @brief Gets the internal pointer.
+	* @return Pointer to internal data.
+	*/
+	lpctstr GetPtr() const;
+	/**
 	* @brief Look for the first occurence of c in CGString.
 	* @param c character to look for.
 	* @return position of the character in CGString if any, -1 otherwise.
@@ -213,18 +305,18 @@ public:
 	*/
 	int indexOf(tchar c, int offset);
 	/**
+	* @brief Look for the first occurence of a substring in CGString.
+	* @param str substring to look for.
+	* @return position of the substring in CGString if any, -1 otherwise.
+	*/
+	int indexOf(CGString str);
+	/**
 	* @brief Look for the first occurence of a substring in CGString from a position.
 	* @param str substring to look for.
 	* @param offset position from start the search.
 	* @return position of the substring in CGString if any, -1 otherwise.
 	*/
 	int indexOf(CGString str, int offset);
-	/**
-	* @brief Look for the first occurence of a substring in CGString.
-	* @param str substring to look for.
-	* @return position of the substring in CGString if any, -1 otherwise.
-	*/
-	int indexOf(CGString str);
 	/**
 	* @brief Look for the last occurence of c in CGString.
 	* @param c character to look for.
@@ -239,109 +331,31 @@ public:
 	*/
 	int lastIndexOf(tchar c, int from);
 	/**
-	* @brief Look for the last occurence of a substring in CGString from a position to the end.
-	* @param str substring to look for.
-	* @param from position where stop the search.
-	* @return position of the substring in CGString if any, -1 otherwise.
-	*/
-	int lastIndexOf(CGString str, int from);
-	/**
 	* @brief Look for the last occurence of a substring in CGString.
 	* @param str substring to look for.
 	* @return position of the substring in CGString if any, -1 otherwise.
 	*/
 	int lastIndexOf(CGString str);
 	/**
-	* @brief Adds a char at the end of the CGString.
-	* @param ch character to add.
+	* @brief Look for the last occurence of a substring in CGString from a position to the end.
+	* @param str substring to look for.
+	* @param from position where stop the search.
+	* @return position of the substring in CGString if any, -1 otherwise.
 	*/
-	void Add(tchar ch);
-	/**
-	* @brief Adds a string at the end of the CGString.
-	* @parampszStrh string to add.
-	*/
-	void Add(lpctstr pszStr);
-	/**
-	* @brief Reverses the CGString.
-	*/
-	void Reverse();
-	/**
-	* @brief Changes the capitalization of CGString to upper.
-	*/
-	void MakeUpper() { _strupr(m_pchData); }
-	/**
-	* @brief Changes the capitalization of CGString to lower.
-	*/
-	void MakeLower() { _strlwr(m_pchData); }
+	int lastIndexOf(CGString str, int from);
+	///@}
 
+private:
 	/**
-	* @brief Gets the caracter in a specified position (0 based).
-	* @see GetAt()
-	* @param nIndex position of the character.
-	* @return character in position nIndex.
+	* @brief Initializes internal data.
+	*
+	* Allocs STRING_DEFAULT_SIZE by default. If DEBUG_STRINGS setted, updates statistical information (total memory allocated).
 	*/
-	tchar operator[](int nIndex) const
-	{
-		return GetAt(nIndex);
-	}
-	/**
-	* @brief Gets the reference to character a specified position (0 based).
-	* @see ReferenceAt()
-	* @param nIndex position of the character.
-	* @return reference to character in position nIndex.
-	*/
-	tchar & operator[](int nIndex)
-	{
-		return ReferenceAt(nIndex);
-	}
-	/**
-	* @brief cast as const lpcstr.
-	* @return internal data pointer.
-	*/
-	operator lpctstr() const
-	{
-		return(GetPtr());
-	}
-	/**
-	* @brief Concatenate CGString with a string.
-	* @param psz string to concatenate with.
-	* @return The result of concatenate the CGString with psz.
-	*/
-	const CGString& operator+=(lpctstr psz)	// like strcat
-	{
-		Add(psz);
-		return(*this);
-	}
-	/**
-	* @brief Concatenate CGString with a character.
-	* @param ch character to concatenate with.
-	* @return The result of concatenate the CGString with ch.
-	*/
-	const CGString& operator+=(tchar ch)
-	{
-		Add(ch);
-		return(*this);
-	}
-	/**
-	* @brief Copy supplied string into the CGString.
-	* @param pStr string to copy.
-	* @return the CGString.
-	*/
-	const CGString& operator=(lpctstr pStr)
-	{
-		Copy(pStr);
-		return(*this);
-	}
-	/**
-	* @brief Copy supplied CGString into the CGString.
-	* @param s CGString to copy.
-	* @return the CGString.
-	*/
-	const CGString& operator=(const CGString &s)
-	{
-		Copy(s.GetPtr());
-		return(*this);
-	}
+	void Init();
+
+	tchar	*m_pchData; ///< Data pointer.
+	int		m_iLength; ///< Length of string.
+	int		m_iMaxLength; ///< Size of memory allocated pointed by m_pchData.
 };
 
 /**
