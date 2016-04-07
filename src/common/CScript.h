@@ -8,7 +8,7 @@
 #define _INC_CSCRIPT_H
 
 #include "common.h"
-#include "CMemBlock.h"
+#include "./sphere_library/CMemBlock.h"
 #include "CacheableScriptFile.h"
 
 #define SPHERE_SCRIPT		".scp"

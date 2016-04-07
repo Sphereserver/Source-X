@@ -158,7 +158,6 @@ common/CUID.h
 common/CUIDExtra.h
 common/CMD5.cpp
 common/CMD5.h
-common/CMemBlock.h
 common/CObjBaseTemplate.cpp
 common/CObjBaseTemplate.h
 common/common.h
@@ -241,6 +240,8 @@ SOURCE_GROUP (common\\libev FILES ${libev_SRCS})
 SET (spherelibrary_SRCS
 common/sphere_library/CArray.cpp
 common/sphere_library/CArray.h
+common/sphere_library/CMemBlock.cpp
+common/sphere_library/CMemBlock.h
 common/sphere_library/CString.cpp
 common/sphere_library/CString.h
 )

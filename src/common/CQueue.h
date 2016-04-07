@@ -6,7 +6,7 @@
 #ifndef _INC_CQUEUE_H
 #define _INC_CQUEUE_H
 
-#include "CMemBlock.h"
+#include "./sphere_library/CMemBlock.h"
 
 
 /**
