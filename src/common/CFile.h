@@ -13,7 +13,7 @@
 	#include <unistd.h>
 #endif
 
-#include "CString.h"
+#include "./sphere_library/CString.h"
 
 #ifndef OF_WRITE
 	#define OF_READ             O_RDONLY

@@ -1,5 +1,5 @@
 
-#include "../common/CString.h"
+#include "../common/sphere_library/CString.h"
 #include "CClientTooltip.h"
 
 CClientTooltip::CClientTooltip(dword clilocid, lpctstr args)

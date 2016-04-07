@@ -11,7 +11,7 @@
 #include <set>
 
 #include "graycom.h"
-#include "CString.h"
+#include "./sphere_library/CString.h"
 
 
 class CTextConsole;

@@ -4,7 +4,7 @@
 #define _INC_CVARDEFMAP_H
 
 #include <set>
-#include "CString.h"
+#include "./sphere_library/CString.h"
 #include "graycom.h"
 
 

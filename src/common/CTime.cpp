@@ -5,7 +5,7 @@
 //
 
 #include "../sphere/threads.h"
-#include "CString.h"
+#include "./sphere_library/CString.h"
 #include "CTime.h"
 #include "graycom.h"
 

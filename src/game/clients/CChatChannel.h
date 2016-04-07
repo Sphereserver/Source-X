@@ -5,7 +5,7 @@
 
 #include "../common/grayproto.h"
 #include "../common/CArray.h"
-#include "../common/CString.h"
+#include "../common/sphere_library/CString.h"
 
 
 class CChatChanMember;

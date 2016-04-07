@@ -17,13 +17,13 @@
 #include "../game/CScriptProfiler.h"
 #include "../game/CWorld.h"
 #include "../sphere/ProfileTask.h"
+#include "./sphere_library/CString.h"
 #include "CException.h"
 #include "CExpression.h"
 #include "CUID.h"
 #include "CMD5.h"
 #include "CScript.h"
 #include "CScriptObj.h"
-#include "CString.h"
 #include "CTextConsole.h"
 
 

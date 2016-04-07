@@ -180,8 +180,6 @@ common/CSectorTemplate.cpp
 common/CSectorTemplate.h
 common/CSocket.cpp
 common/CSocket.h
-common/CString.cpp
-common/CString.h
 common/CsvFile.cpp
 common/CsvFile.h
 common/CTextConsole.cpp
@@ -240,6 +238,13 @@ common/libev/wrapper_ev.c
 common/libev/wrapper_ev.h
 )
 SOURCE_GROUP (common\\libev FILES ${libev_SRCS})
+
+# Sphere library files
+SET (spherelibrary_SRCS
+common/sphere_library/CString.cpp
+common/sphere_library/CString.h
+)
+SOURCE_GROUP (common\\sphere_library FILES ${spherelibrary_SRCS})
 
 # SQLite files
 SET (sqlite_SRCS

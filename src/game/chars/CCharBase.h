@@ -7,12 +7,12 @@
 #ifndef _INC_CCHARBASE_H
 #define _INC_CCHARBASE_H
 
+#include "../common/sphere_library/CString.h"
 #include "../common/graymul.h"
 #include "../common/CResourceBase.h"
 #include "../common/grayproto.h"
 #include "../common/CScript.h"
 #include "../common/CScriptObj.h"
-#include "../common/CString.h"
 #include "../common/CTextConsole.h"
 #include "../CBase.h"
 

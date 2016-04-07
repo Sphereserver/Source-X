@@ -8,7 +8,6 @@
 #include "common.h"
 #include "CResourceBase.h"
 #include "CScriptObj.h"
-#include "CString.h"
 #include "CVarFloat.h"
 
 typedef double RealType;

@@ -5,7 +5,6 @@
 
 #include "../sphere/threads.h"
 #include "CFile.h"
-#include "CString.h"
 #include "graycom.h"
 
 bool CFile::SetFilePath( lpctstr pszName )

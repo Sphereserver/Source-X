@@ -8,7 +8,7 @@
 #define _INC_CVARFLOAT_H
 
 #include <map>
-#include "CString.h"
+#include "./sphere_library/CString.h"
 
 
 struct LexNoCaseLess {

@@ -3,7 +3,7 @@
 #ifndef _INC_CITEMMESSAGE_H
 #define _INC_CITEMMESSAGE_H
 
-#include "../common/CString.h"
+#include "../common/sphere_library/CString.h"
 #include "CItemVendable.h"
 
 

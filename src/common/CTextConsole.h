@@ -4,7 +4,7 @@
 #define _INC_CTEXTCONSOLE_H
 
 #include "../sphere/strings.h"
-#include "CString.h"
+#include "./sphere_library/CString.h"
 #include "graycom.h"
 
 

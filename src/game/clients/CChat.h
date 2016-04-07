@@ -3,7 +3,7 @@
 #ifndef _INC_CCHAT_H
 #define _INC_CCHAT_H
 
-#include "../common/CString.h"
+#include "../common/sphere_library/CString.h"
 #include "../common/CArray.h"
 #include "../common/grayproto.h"
 

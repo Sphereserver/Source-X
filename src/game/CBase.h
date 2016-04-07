@@ -8,9 +8,9 @@
 #define _INC_CBASE_H
 
 #include "../common/CResourceBase.h"
-#include "../common/CString.h"
 #include "../common/CVarDefMap.h"
 #include "../common/graymul.h"
+#include "../common/sphere_library/CString.h"
 
 
 struct CBaseBaseDef : public CResourceLink

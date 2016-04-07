@@ -25,6 +25,7 @@ ADD_EXECUTABLE (spheresvr
 		${sphere_SRCS}
 		${crashdump_SRCS}
 		${libev_SRCS}
+		${spherelibrary_SRCS}
 		${sqlite_SRCS}
 		${zlib_SRCS}
 		${tables_SRCS}
@@ -43,6 +44,7 @@ ADD_EXECUTABLE (spheresvrNightly
 		${crashdump_SRCS}
 		${libev_SRCS}
 		${sqlite_SRCS}
+		${spherelibrary_SRCS}
 		${zlib_SRCS}
 		${tables_SRCS}
 		${docs_TEXT}

@@ -1,6 +1,5 @@
 
 #include "../common/CScriptObj.h"
-#include "../common/CString.h"
 #include "../common/CException.h"
 #include "../network/send.h"
 #include "../sphere/ProfileTask.h"

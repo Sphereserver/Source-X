@@ -3,9 +3,9 @@
 #ifndef _INC_COBJBASETEMPLATE_H
 #define _INC_COBJBASETEMPLATE_H
 
+#include "./sphere_library/CString.h"
 #include "CArray.h"
 //#include "graycom.h"
-#include "CString.h"
 #include "CRect.h"
 #include "CUID.h"
 

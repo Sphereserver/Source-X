@@ -7,7 +7,7 @@
 #ifndef _INC_GRAYPROTO_H
 #define _INC_GRAYPROTO_H
 
-#include "CString.h"
+#include "./sphere_library/CString.h"
 #include "graycom.h"
 #include "../sphere/threads.h"
 

@@ -6,7 +6,7 @@
 #ifndef _INC_CRECT_H
 #define _INC_CRECT_H
 
-#include "CString.h"
+#include "./sphere_library/CString.h"
 #include "graymul.h"
 
 

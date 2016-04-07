@@ -4,7 +4,7 @@
 #define _INC_CCHATCHANMEMBER_H
 
 #include "../common/CArray.h"
-#include "../common/CString.h"
+#include "../common/sphere_library/CString.h"
 #include "../common/grayproto.h"
 
 

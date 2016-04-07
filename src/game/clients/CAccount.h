@@ -10,8 +10,8 @@
 #include "../chars/CCharRefArray.h"
 #include "../common/grayproto.h"
 #include "../common/CScriptObj.h"
-#include "../common/CString.h"
 #include "../common/CSocket.h"
+#include "../common/sphere_library/CString.h"
 #include "../CResource.h"
 
 #define PRIV_UNUSED0		0x0001

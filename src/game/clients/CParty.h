@@ -3,10 +3,10 @@
 #ifndef _INC_CPARTY_H
 #define _INC_CPARTY_H
 
+#include "../common/sphere_library/CString.h"
 #include "../common/CArray.h"
 #include "../common/CRect.h"
 #include "../common/CScriptObj.h"
-#include "../common/CString.h"
 #include "../common/CVarDefMap.h"
 #include "../common/grayproto.h"
 #include "../chars/CCharRefArray.h"

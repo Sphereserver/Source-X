@@ -3,7 +3,7 @@
 #ifndef _INC_CGMPAGE_H
 #define _INC_CGMPAGE_H
 
-#include "../common/CString.h"
+#include "../common/sphere_library/CString.h"
 #include "../common/CArray.h"
 #include "../common/CScriptObj.h"
 #include "../common/CRect.h"
