@@ -19,8 +19,7 @@ class CGString
 public:
 	static const char *m_sClassName;
 
-	/** @name Member functions:
-	 *  Constructors, Destructor, Asign operator.
+	/** @name Constructors, Destructor, Asign operator:
 	 */
 	///@{
 	/**

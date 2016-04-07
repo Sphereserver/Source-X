@@ -8,7 +8,7 @@
 
 #include "../common/graymul.h"
 #include "../common/CFile.h"
-#include "../common/CArray.h"
+#include "../common/sphere_library/CArray.h"
 #include "../common/CsvFile.h"
 
 

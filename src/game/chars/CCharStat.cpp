@@ -457,14 +457,14 @@ SKILLLOCK_TYPE CChar::Stat_GetLock(STAT_TYPE stat)
 	if (!m_pPlayer)
 		return SKILLLOCK_UP;	// Always raising status for NPCs.
 	return m_pPlayer->Stat_GetLock(stat);
-};
+}
 
 void CChar::Stat_SetLock(STAT_TYPE stat, SKILLLOCK_TYPE state)
 {
 	if (!m_pPlayer)
 		return;
 	return m_pPlayer->Stat_SetLock(stat,state);
-};
+}
 
 bool CChar::Stat_Decrease(STAT_TYPE stat, SKILL_TYPE skill)
 {

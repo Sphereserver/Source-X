@@ -578,4 +578,4 @@ size_t CItemMulti::Multi_ListObjs(CObjBase ** ppObjList)
 void CItemMulti::OnComponentCreate( const CItem * pComponent )
 {
 	UNREFERENCED_PARAMETER(pComponent);
-};
+}

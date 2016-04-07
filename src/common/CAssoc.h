@@ -8,8 +8,8 @@
 #define _INC_CASSOC_H
 
 // #include <shellapi.h>
+#include "./sphere_library/CArray.h"
 #include "CFile.h"
-#include "CArray.h"
 #include "graycom.h"
 
 #ifndef PT_REG_STRMAX

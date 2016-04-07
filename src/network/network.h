@@ -14,7 +14,7 @@
 #include "../common/CQueue.h"
 #include "../common/grayproto.h"
 #include "../game/CServTime.h"
-#include "../common/CArray.h"
+#include "../common/sphere_library/CArray.h"
 
 #if !defined(_WIN32) || defined(_LIBEV)
 	#include "../sphere/linuxev.h"

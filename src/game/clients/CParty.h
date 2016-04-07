@@ -4,7 +4,7 @@
 #define _INC_CPARTY_H
 
 #include "../common/sphere_library/CString.h"
-#include "../common/CArray.h"
+#include "../common/sphere_library/CArray.h"
 #include "../common/CRect.h"
 #include "../common/CScriptObj.h"
 #include "../common/CVarDefMap.h"

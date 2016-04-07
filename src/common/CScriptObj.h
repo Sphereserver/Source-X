@@ -7,7 +7,7 @@
 #ifndef _INC_CSCRIPTOBJ_H
 #define _INC_CSCRIPTOBJ_H
 
-#include "CArray.h"
+#include "./sphere_library/CArray.h"
 #include "CScript.h"
 #include "../sphere/threads.h"
 #include "CVarDefMap.h"

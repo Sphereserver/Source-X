@@ -4,7 +4,7 @@
 #define _INC_CCHATCHANNEL_H
 
 #include "../common/grayproto.h"
-#include "../common/CArray.h"
+#include "../common/sphere_library/CArray.h"
 #include "../common/sphere_library/CString.h"
 
 

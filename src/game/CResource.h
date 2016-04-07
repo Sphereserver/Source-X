@@ -7,12 +7,12 @@
 #define _INC_CRESOURCE_H
 
 #include "../common/CAssoc.h"
+#include "../common/CExpression.h"
+#include "../common/CGrayMap.h"
 #include "../common/CResourceBase.h"
 #include "../common/CRegion.h"
-#include "../common/CArray.h"
-#include "../common/CExpression.h"
 #include "../common/grayproto.h"
-#include "../common/CGrayMap.h"
+#include "../common/sphere_library/CArray.h"
 //#include "graysvr.h" Removed to test.
 
 

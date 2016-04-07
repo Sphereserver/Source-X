@@ -7,7 +7,7 @@
 #define _INC_CGRAYMAP_H
 
 #include "../game/CServTime.h"
-#include "CArray.h"
+#include "./sphere_library/CArray.h"
 #include "graymul.h"
 #include "CRect.h"
 

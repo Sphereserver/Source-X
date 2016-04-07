@@ -136,8 +136,6 @@ SOURCE_GROUP (game\\clients FILES ${clients_SRCS})
 SET (common_SRCS
 common/CacheableScriptFile.cpp
 common/CacheableScriptFile.h
-common/CArray.cpp
-common/CArray.h
 common/CAssoc.cpp
 common/CAssoc.h
 common/CDataBase.cpp
@@ -241,6 +239,8 @@ SOURCE_GROUP (common\\libev FILES ${libev_SRCS})
 
 # Sphere library files
 SET (spherelibrary_SRCS
+common/sphere_library/CArray.cpp
+common/sphere_library/CArray.h
 common/sphere_library/CString.cpp
 common/sphere_library/CString.h
 )

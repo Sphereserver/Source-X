@@ -3,9 +3,9 @@
 #ifndef _INC_CRESOURCEBASE_H
 #define _INC_CRESOURCEBASE_H
 
+#include "./sphere_library/CArray.h"
 #include "common.h"
 #include "CUID.h"
-#include "CArray.h"
 #include "CScript.h"
 #include "CScriptObj.h"
 #include "CTime.h"

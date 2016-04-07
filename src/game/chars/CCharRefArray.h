@@ -8,7 +8,7 @@
 #define _INC_CCHARREFARRAY_H
 
 #include "../common/CScript.h"
-#include "../common/CArray.h"
+#include "../common/sphere_library/CArray.h"
 #include "../common/CUID.h"
 
 

@@ -1,6 +1,6 @@
 
 #include "../clients/CClient.h"
-#include "../common/CArray.h"
+#include "../common/sphere_library/CArray.h"
 #include "../common/CException.h"
 #include "../common/CUIDExtra.h"
 #include "../network/network.h"

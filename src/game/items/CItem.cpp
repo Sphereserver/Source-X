@@ -2015,7 +2015,7 @@ word CItem::GetMaxAmount()
 
 	CVarDefCont * pMax = GetDefKey("MaxAmount", false);
 	return (word)(pMax ? pMax->GetValNum() : g_Cfg.m_iItemsMaxAmount);
-};
+}
 
 bool CItem::SetMaxAmount(word amount)
 {

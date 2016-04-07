@@ -4,7 +4,7 @@
 #define _INC_CITEMBASE_H
 
 #include "../common/CResourceBase.h"
-#include "../common/CArray.h"
+#include "../common/sphere_library/CArray.h"
 #include "../CBase.h"
 #include "../CResource.h"
 

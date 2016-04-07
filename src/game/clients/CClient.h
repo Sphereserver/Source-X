@@ -6,7 +6,7 @@
 #define _INC_CCLIENT_H
 #pragma once
 
-#include "../common/CArray.h"
+#include "../common/sphere_library/CArray.h"
 #include "../common/CEncrypt.h"
 #include "../common/CScriptObj.h"
 #include "../common/CTextConsole.h"
