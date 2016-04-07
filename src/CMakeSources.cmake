@@ -161,8 +161,6 @@ common/CMD5.h
 common/CObjBaseTemplate.cpp
 common/CObjBaseTemplate.h
 common/common.h
-common/CQueue.cpp
-common/CQueue.h
 common/CRect.cpp
 common/CRect.h
 common/CRegion.cpp
@@ -242,6 +240,8 @@ common/sphere_library/CArray.cpp
 common/sphere_library/CArray.h
 common/sphere_library/CMemBlock.cpp
 common/sphere_library/CMemBlock.h
+common/sphere_library/CQueue.cpp
+common/sphere_library/CQueue.h
 common/sphere_library/CString.cpp
 common/sphere_library/CString.h
 )
