@@ -1,4 +1,4 @@
-#include "../common/graymul.h"
+#include "../common/spheremul.h"
 #include "CSectorEnviron.h"
 
 

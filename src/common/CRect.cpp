@@ -262,7 +262,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CGString & sVal ) const
 	if ( !strnicmp( pszKey, "STATICS", 7 ) )
 	{
 		pszKey	+= 7;
-		const CGrayMapBlock * pBlock = g_World.GetMapBlock( *(this) );
+		const CSphereMapBlock * pBlock = g_World.GetMapBlock( *(this) );
 		if ( !pBlock ) return false;
 
 		if ( *pszKey == '\0' )
@@ -380,7 +380,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CGString & sVal ) const
 		CRegionLinks rlinks;
 		const CRegionBase* pRegion = NULL;
 		CItem* pItem = NULL;
-		const CGrayMulti* pMulti = NULL;
+		const CSphereMulti* pMulti = NULL;
 		const CUOMultiItemRec2* pMultiItem = NULL;
 		size_t iMultiQty = GetRegions(REGION_TYPE_MULTI, rlinks);
 

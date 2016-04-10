@@ -4,7 +4,7 @@
 #include "../clients/CClient.h"
 #include "../CServTime.h"
 #include "../CPathFinder.h"
-#include "../graysvr.h"
+#include "../spheresvr.h"
 #include "../Triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"

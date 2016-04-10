@@ -2,7 +2,7 @@
 // But take no actions here.
 
 #include "../items/CItemVendable.h"
-#include "../graysvr.h"
+#include "../spheresvr.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 

@@ -1,6 +1,6 @@
 
 #include "../common/CException.h"
-#include "../common/grayproto.h"
+#include "../common/sphereproto.h"
 #include "../common/sphereversion.h"
 #include "../sphere/threads.h"
 #include "CLog.h"

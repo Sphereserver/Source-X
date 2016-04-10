@@ -1,5 +1,5 @@
 #ifndef _WIN32
-//#include "graysvr.h" Removed to test. 	// predef header
+//#include "spheresvr.h" Removed to test. 	// predef header
 #include "../common/CException.h"
 #include "threads.h"
 #include "UnixTerminal.h"

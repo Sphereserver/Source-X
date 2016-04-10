@@ -7,7 +7,7 @@
 #ifndef _INC_CDATABASE_H
 #define	_INC_CDATABASE_H
 
-#include "../common/graycom.h"
+#include "../common/spherecom.h"
 #include <mysql.h>
 #include <errmsg.h>	// mysql standard include
 #include "../common/CScriptObj.h"

@@ -2470,7 +2470,7 @@ void CWorld::OnTick()
 {
 	ADDTOCALLSTACK_INTENSIVE("CWorld::OnTick");
 	// Do this once per tick.
-	// 256 real secs = 1 GRAYhour. 19 light levels. check every 10 minutes or so.
+	// 256 real secs = 1 server hour. 19 light levels. check every 10 minutes or so.
 
 	if ( g_Serv.IsLoading() || !m_Clock.Advance() )
 		return;

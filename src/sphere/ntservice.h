@@ -15,7 +15,7 @@
 	#include <eh.h>			// exception handling info.
 #endif // __MINGW32__
 
-#include "../common/graycom.h"
+#include "../common/spherecom.h"
 
 
 extern class CNTService

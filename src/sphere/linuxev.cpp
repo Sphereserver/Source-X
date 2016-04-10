@@ -1,5 +1,5 @@
 #if !defined(_WIN32) || defined(_LIBEV)
-//#include "../game/graysvr.h" Removed to test.
+//#include "../game/spheresvr.h" Removed to test.
 #include "../network/network.h"
 #include "../game/CServer.h"
 #include "linuxev.h"

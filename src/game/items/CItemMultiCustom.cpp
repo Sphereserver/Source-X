@@ -29,7 +29,7 @@ CItemMultiCustom::CItemMultiCustom( ITEMID_TYPE id, CItemBase * pItemDef ) : CIt
 	m_designRevert.m_pData = NULL;
 	m_designRevert.m_iDataRevision = 0;
 	m_pArchitect = NULL;
-	m_pGrayMulti = NULL;
+	m_pSphereMulti = NULL;
 	m_rectDesignArea.SetRectEmpty();
 
 	if ( !g_Serv.IsLoading() )
@@ -47,10 +47,10 @@ CItemMultiCustom::~CItemMultiCustom()
 		m_pArchitect = NULL;
 	}
 
-	if ( m_pGrayMulti != NULL)
+	if ( m_pSphereMulti != NULL)
 	{
-		delete m_pGrayMulti;
-		m_pGrayMulti = NULL;
+		delete m_pSphereMulti;
+		m_pSphereMulti = NULL;
 	}
 
 	ComponentsContainer::iterator it;
@@ -351,11 +351,11 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
 	m_designMain.m_iRevision++;
 	m_designWorking.m_iRevision = m_designMain.m_iRevision;
 
-	if ( m_pGrayMulti != NULL )
+	if ( m_pSphereMulti != NULL )
 	{
 		// multi object needs to be recreated
-		delete m_pGrayMulti;
-		m_pGrayMulti = NULL;
+		delete m_pSphereMulti;
+		m_pSphereMulti = NULL;
 	}
 
 	// update to all
@@ -470,7 +470,7 @@ void CItemMultiCustom::AddStairs(CClient * pClientSrc, ITEMID_TYPE id, short x, 
 			return;
 	}
 
-    const CGrayMulti * pMulti = g_Cfg.GetMultiItemDefs(id);
+    const CSphereMulti * pMulti = g_Cfg.GetMultiItemDefs(id);
 	if ( pMulti == NULL )
 	{
 		g_Log.EventWarn("Unscripted multi 0%x being added to building 0%x by 0%x.\n", id, (dword)GetUID(), pCharSrc != NULL? (dword)pCharSrc->GetUID() : 0);
@@ -878,7 +878,7 @@ void CItemMultiCustom::ResetStructure( CClient * pClientSrc )
 
 	m_designWorking.m_vectorComponents.clear();
 	m_designWorking.m_iRevision++;
-	const CGrayMulti * pMulti =  g_Cfg.GetMultiItemDefs(GetID());
+	const CSphereMulti * pMulti =  g_Cfg.GetMultiItemDefs(GetID());
 	if ( pMulti != NULL )
 	{
 		size_t iQty = pMulti->GetItemCount();
@@ -1002,18 +1002,18 @@ const CPointMap CItemMultiCustom::GetComponentPoint(short dx, short dy, char dz)
 	return ptBase;
 }
 
-const CItemMultiCustom::CGrayMultiCustom * CItemMultiCustom::GetMultiItemDefs()
+const CItemMultiCustom::CSphereMultiCustom * CItemMultiCustom::GetMultiItemDefs()
 {
 	ADDTOCALLSTACK("CItemMultiCustom::GetMultiItemDefs");
-	// return a CGrayMultiCustom object that represents the components
+	// return a CSphereMultiCustom object that represents the components
 	// in the main design
-	if ( m_pGrayMulti == NULL )
+	if ( m_pSphereMulti == NULL )
 	{
-		m_pGrayMulti = new CGrayMultiCustom;
-		m_pGrayMulti->LoadFrom(&m_designMain);
+		m_pSphereMulti = new CSphereMultiCustom;
+		m_pSphereMulti->LoadFrom(&m_designMain);
 	}
 
-	return m_pGrayMulti;
+	return m_pSphereMulti;
 }
 
 const CGRect CItemMultiCustom::GetDesignArea()
@@ -1026,7 +1026,7 @@ const CGRect CItemMultiCustom::GetDesignArea()
 	{
 		m_rectDesignArea.SetRect(0, 0, 1, 1, GetTopMap());
 
-		const CGrayMulti * pMulti = g_Cfg.GetMultiItemDefs(GetID());
+		const CSphereMulti * pMulti = g_Cfg.GetMultiItemDefs(GetID());
 		if ( pMulti != NULL )
 		{
 			// the client uses the multi items to determine the area
@@ -1583,7 +1583,7 @@ bool CItemMultiCustom::LoadValidItems()
 	return false;
 }
 
-void CItemMultiCustom::CGrayMultiCustom::LoadFrom( CItemMultiCustom::DesignDetails * pDesign )
+void CItemMultiCustom::CSphereMultiCustom::LoadFrom( CItemMultiCustom::DesignDetails * pDesign )
 {
 	m_iItemQty = pDesign->m_vectorComponents.size();
 

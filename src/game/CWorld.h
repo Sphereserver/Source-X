@@ -265,24 +265,24 @@ public:
 	}
 
 	// CSector World Map stuff.
-	void GetHeightPoint2( const CPointMap & pt, CGrayMapBlockState & block, bool fHouseCheck = false );
+	void GetHeightPoint2( const CPointMap & pt, CSphereMapBlockState & block, bool fHouseCheck = false );
 	char GetHeightPoint2(const CPointBase & pt, dword & wBlockFlags, bool fHouseCheck = false); // Height of player who walked to X/Y/OLDZ
 
-	void GetHeightPoint( const CPointMap & pt, CGrayMapBlockState & block, bool fHouseCheck = false );
+	void GetHeightPoint( const CPointMap & pt, CSphereMapBlockState & block, bool fHouseCheck = false );
 	char GetHeightPoint( const CPointBase & pt, dword & wBlockFlags, bool fHouseCheck = false );
 
-	void GetFixPoint( const CPointMap & pt, CGrayMapBlockState & block);
+	void GetFixPoint( const CPointMap & pt, CSphereMapBlockState & block);
 
 	CItemTypeDef *	GetTerrainItemTypeDef( dword dwIndex );
 	IT_TYPE			GetTerrainItemType( dword dwIndex );
 
-	const CGrayMapBlock * GetMapBlock( const CPointMap & pt )
+	const CSphereMapBlock * GetMapBlock( const CPointMap & pt )
 	{
 		return( pt.GetSector()->GetMapBlock(pt));
 	}
 	const CUOMapMeter * GetMapMeter( const CPointMap & pt ) const // Height of MAP0.MUL at given coordinates
 	{
-		const CGrayMapBlock * pMapBlock = pt.GetSector()->GetMapBlock(pt);
+		const CSphereMapBlock * pMapBlock = pt.GetSector()->GetMapBlock(pt);
 		if ( !pMapBlock )
 			return NULL;
 		return( pMapBlock->GetTerrain( UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y)));

@@ -10,7 +10,7 @@
 #include <list>
 #include <set>
 
-#include "graycom.h"
+#include "spherecom.h"
 #include "./sphere_library/CString.h"
 
 

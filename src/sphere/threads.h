@@ -1,10 +1,9 @@
-
 #pragma once
 #ifndef _INC_THREADS_H
 #define _INC_THREADS_H
 
 #include "../common/common.h"
-#include "../common/graycom.h"
+#include "../common/spherecom.h"
 #include "../sphere/mutex.h"
 #include "../sphere/strings.h"
 #include "../sphere/ProfileData.h"

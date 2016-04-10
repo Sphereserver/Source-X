@@ -4,7 +4,7 @@
 #define _INC_CCLIENTTOOLTIP_H
 
 #include "../common/common.h"
-#include "../common/graycom.h"
+#include "../common/spherecom.h"
 
 
 // Storage for Tooltip data while in trigger on an item

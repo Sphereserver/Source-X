@@ -8,8 +8,8 @@
 #define _INC_RECEIVE_H
 
 #include "../common/CUID.h"
-#include "../common/graymul.h"
-#include "../common/grayproto.h"
+#include "../common/spheremul.h"
+#include "../common/sphereproto.h"
 #include "packet.h"
 
 

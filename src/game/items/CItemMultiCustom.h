@@ -30,16 +30,16 @@ private:
 		int m_iDataRevision;
 	};
 
-	class CGrayMultiCustom : public CGrayMulti
+	class CSphereMultiCustom : public CSphereMulti
 	{
 	public:
 		void LoadFrom(DesignDetails * pDesign);
 
 	public:
-		CGrayMultiCustom() { };
+		CSphereMultiCustom() { };
 	private:
-		CGrayMultiCustom(const CGrayMultiCustom& copy);
-		CGrayMultiCustom& operator=(const CGrayMultiCustom& other);
+		CSphereMultiCustom(const CSphereMultiCustom& copy);
+		CSphereMultiCustom& operator=(const CSphereMultiCustom& other);
 	};
 
 private:
@@ -53,7 +53,7 @@ private:
 
 	CClient * m_pArchitect;
 	CRectMap m_rectDesignArea;
-	CGrayMultiCustom * m_pGrayMulti;
+	CSphereMultiCustom * m_pSphereMulti;
 
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 	virtual void r_Write( CScript & s );
@@ -97,7 +97,7 @@ public:
 	void RevertChanges( CClient * pClientSrc = NULL );
 	void ResetStructure( CClient * pClientSrc = NULL );
 
-	const CGrayMultiCustom * GetMultiItemDefs();
+	const CSphereMultiCustom * GetMultiItemDefs();
 	const CGRect GetDesignArea();
 	size_t GetFixtureCount(DesignDetails * pDesign = NULL);
 	size_t GetComponentsAt(short dx, short dy, char dz, Component ** pComponents, DesignDetails * pDesign = NULL);

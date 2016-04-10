@@ -8,12 +8,12 @@
 
 #include "../common/CAssoc.h"
 #include "../common/CExpression.h"
-#include "../common/CGrayMap.h"
+#include "../common/CSphereMap.h"
 #include "../common/CResourceBase.h"
 #include "../common/CRegion.h"
-#include "../common/grayproto.h"
+#include "../common/sphereproto.h"
 #include "../common/sphere_library/CArray.h"
-//#include "graysvr.h" Removed to test.
+//#include "spheresvr.h" Removed to test.
 
 
 class CAccount;
@@ -666,11 +666,11 @@ private:
 	CSkillKeySortArray& operator=(const CSkillKeySortArray& other);
 };
 
-struct CMultiDefArray : public CGObSortArray< CGrayMulti*, MULTI_TYPE >
+struct CMultiDefArray : public CGObSortArray< CSphereMulti*, MULTI_TYPE >
 {
 	// store the static components of a IT_MULTI
 	// Sorted array
-	int CompareKey( MULTI_TYPE id, CGrayMulti* pBase, bool fNoSpaces ) const
+	int CompareKey( MULTI_TYPE id, CSphereMulti* pBase, bool fNoSpaces ) const
 	{
 		UNREFERENCED_PARAMETER(fNoSpaces);
 		ASSERT( pBase );
@@ -695,7 +695,7 @@ public:
 	int	 m_iSectorSleepMask;	// The mask for how long sectors will sleep.
 	bool m_fUseMapDiffs;			// Whether or not to use map diff files.
 
-	CGString m_sWorldBaseDir;	// "e:\graysvr\worldsave\" = world files go here.
+	CGString m_sWorldBaseDir;	// save\" = world files go here.
 	CGString m_sAcctBaseDir;	// Where do the account files go/come from ?
 
 	bool m_fSecure;				// Secure mode. (will trap exceptions)
@@ -1158,8 +1158,8 @@ public:
 	}
 	lpctstr GetNotoTitle( int iLevel, bool bFemale ) const;
 
-	const CGrayMulti * GetMultiItemDefs( CItem * pItem );
-	const CGrayMulti * GetMultiItemDefs( ITEMID_TYPE itemid );
+	const CSphereMulti * GetMultiItemDefs( CItem * pItem );
+	const CSphereMulti * GetMultiItemDefs( ITEMID_TYPE itemid );
 
 	bool IsConsoleCmd( tchar ch ) const;
 

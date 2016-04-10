@@ -5,7 +5,7 @@
 
 #include <set>
 #include "./sphere_library/CString.h"
-#include "graycom.h"
+#include "spherecom.h"
 
 
 class CTextConsole;

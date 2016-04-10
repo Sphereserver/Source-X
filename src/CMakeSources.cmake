@@ -31,8 +31,8 @@ game/CWorld.h
 game/CWorldImport.cpp
 game/CWorldMap.cpp
 game/enums.h
-game/graysvr.cpp
-game/graysvr.h
+game/spheresvr.cpp
+game/spheresvr.h
 game/Triggers.h
 game/Triggers.cpp
 )
@@ -150,9 +150,9 @@ common/CFile.cpp
 common/CFile.h
 common/CFileList.cpp
 common/CFileList.h
-common/CGrayData.cpp
-common/CGrayMap.cpp
-common/CGrayMap.h
+common/CSphereData.cpp
+common/CSphereMap.cpp
+common/CSphereMap.h
 common/CUID.cpp
 common/CUID.h
 common/CUIDExtra.h
@@ -190,10 +190,10 @@ common/CVarFloat.h
 common/CWindow.cpp
 common/CWindow.h
 common/datatypes.h
-common/graycom.cpp
-common/graycom.h
-common/graymul.h
-common/grayproto.h
+common/spherecom.cpp
+common/spherecom.h
+common/spheremul.h
+common/sphereproto.h
 common/sphereversion.h
 common/ListDefContMap.cpp
 common/ListDefContMap.h
@@ -324,7 +324,7 @@ sphere/ntservice.h
 sphere/ntwindow.cpp
 sphere/UnixTerminal.cpp
 sphere/UnixTerminal.h
-sphere/GraySvr.rc
+sphere/SphereSvr.rc
 )
 SOURCE_GROUP (sphere FILES ${sphere_SRCS})
 

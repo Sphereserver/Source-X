@@ -9,7 +9,7 @@
 
 #include "threads.h"
 #include "mutex.h"
-//#include "../game/graysvr.h" Removed to test.
+//#include "../game/spheresvr.h" Removed to test.
 
 
 class CDataBaseAsyncHelper : public AbstractSphereThread

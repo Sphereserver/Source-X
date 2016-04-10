@@ -7,7 +7,7 @@
 #include "CScript.h"
 #include "CTextConsole.h"
 #include "CVarDefMap.h"
-#include "graycom.h"
+#include "spherecom.h"
 
 static size_t GetIdentifierString( tchar * szTag, lpctstr pszArgs )
 {

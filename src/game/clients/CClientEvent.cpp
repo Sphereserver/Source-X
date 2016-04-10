@@ -12,7 +12,7 @@
 #include "../items/CItemVendable.h"
 #include "../CServTime.h"
 #include "../CLog.h"
-#include "../graysvr.h"
+#include "../spheresvr.h"
 #include "../Triggers.h"
 #include "CClient.h"
 

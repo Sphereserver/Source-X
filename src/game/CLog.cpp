@@ -1,6 +1,6 @@
 
 #include "../common/CException.h"
-#include "../common/graycom.h"
+#include "../common/spherecom.h"
 #include "../sphere/ProfileTask.h"
 #include "../sphere/UnixTerminal.h"
 #include "CLog.h"

@@ -8,7 +8,7 @@
 #define _INC_CCHAR_H
 
 #include "../clients/CParty.h"
-#include "../common/grayproto.h"
+#include "../common/sphereproto.h"
 #include "../items/CItemContainer.h"
 #include "../items/CItemCorpse.h"
 #include "../items/CItemMemory.h"

@@ -3,7 +3,7 @@
 #ifndef _INC_CSERVTIME_H
 #define _INC_CSERVTIME_H
 
-#include "../common/graycom.h"
+#include "../common/spherecom.h"
 
 
 class CServTime

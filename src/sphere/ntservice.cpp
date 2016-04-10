@@ -8,7 +8,7 @@
 #include "../game/CLog.h"
 #include "../game/CObjBase.h"
 #include "../game/CServer.h"
-#include "../game/graysvr.h"
+#include "../game/spheresvr.h"
 #include "ntservice.h"
 
 CNTService g_Service;
@@ -454,7 +454,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	argv[0] = NULL;
 	int argc = Str_ParseCmds(lpCmdLine, &argv[1], COUNTOF(argv)-1, " \t") + 1;
 
-	if ( GRAY_GetOSInfo()->dwPlatformId != VER_PLATFORM_WIN32_NT )
+	if ( Sphere_GetOSInfo()->dwPlatformId != VER_PLATFORM_WIN32_NT )
 	{
 		// We are running Win9x - So we are not an NT service.
 do_not_nt_service:

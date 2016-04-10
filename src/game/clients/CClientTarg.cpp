@@ -442,7 +442,7 @@ int CClient::Cmd_Extract( CScript * pScript, CRectMap &rect, int & zlowest )
 		for ( int my = rect.m_top; my <= rect.m_bottom; my++)
 		{
 			CPointMap ptCur((word)(mx), (word)(my), 0, (uchar)(rect.m_map));
-			const CGrayMapBlock * pBlock = g_World.GetMapBlock( ptCur );
+			const CSphereMapBlock * pBlock = g_World.GetMapBlock( ptCur );
 			if ( pBlock == NULL )
 				continue;
 			size_t iQty = pBlock->m_Statics.GetStaticQty();

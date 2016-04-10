@@ -9,7 +9,7 @@
 #include "../items/CItemSpawn.h"
 #include "../CLog.h"
 #include "../CServTime.h"
-#include "../graysvr.h"
+#include "../spheresvr.h"
 #include "../Triggers.h"
 #include "CClient.h"
 #include "CParty.h"

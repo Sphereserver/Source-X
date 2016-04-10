@@ -11,7 +11,7 @@
 #endif
 #include "../sphere/threads.h"
 #include "CFileList.h"
-#include "graycom.h"
+#include "spherecom.h"
 
 // Similar to the MFC CFileFind
 bool CFileList::ReadFileInfo( lpctstr pszFilePath, time_t & dwDateChange, dword & dwSize ) // static

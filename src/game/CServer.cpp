@@ -26,7 +26,7 @@
 #include "items/CItemShip.h"
 #include "CServer.h"
 #include "CServTime.h"
-#include "graysvr.h"
+#include "spheresvr.h"
 #include "Triggers.h"
 #include "CScriptProfiler.h"
 
@@ -1401,7 +1401,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 		case SV_SHRINKMEM:
 			{
 #ifdef _WIN32
-				if ( GRAY_GetOSInfo()->dwPlatformId != 2 )
+				if ( Sphere_GetOSInfo()->dwPlatformId != 2 )
 				{
 					g_Log.EventError( "Command not avaible on Windows 95/98/ME.\n" );
 					return( false );

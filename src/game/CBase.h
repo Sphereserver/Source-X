@@ -9,7 +9,7 @@
 
 #include "../common/CResourceBase.h"
 #include "../common/CVarDefMap.h"
-#include "../common/graymul.h"
+#include "../common/spheremul.h"
 #include "../common/sphere_library/CString.h"
 
 

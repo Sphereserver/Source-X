@@ -10,7 +10,7 @@
 // #include <shellapi.h>
 #include "./sphere_library/CArray.h"
 #include "CFile.h"
-#include "graycom.h"
+#include "spherecom.h"
 
 #ifndef PT_REG_STRMAX
 	#define PT_REG_STRMAX		128

@@ -3,7 +3,7 @@
 #include "../game/CResource.h"
 #include "../sphere/threads.h"
 #include "CUOInstall.h"
-#include "graycom.h"
+#include "spherecom.h"
 
 
 CUOInstall::CUOInstall()

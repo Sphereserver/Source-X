@@ -1,6 +1,6 @@
 
 #include "../common/CException.h"
-#include "../common/grayproto.h"
+#include "../common/sphereproto.h"
 #include "../chars/CChar.h"
 #include "../CWorld.h"
 #include "CItemMulti.h"

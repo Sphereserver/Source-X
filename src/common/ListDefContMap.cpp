@@ -6,7 +6,7 @@
 #include "CExpression.h"
 #include "CScript.h"
 #include "CTextConsole.h"
-#include "graycom.h"
+#include "spherecom.h"
 #include "ListDefContMap.h"
 
 /***************************************************************************

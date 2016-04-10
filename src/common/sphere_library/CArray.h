@@ -11,7 +11,7 @@
 #include <limits>
 
 #include "../common.h"
-#include "../graycom.h"
+#include "../spherecom.h"
 
 #if _MSC_VER
 	#define STANDARD_CPLUSPLUS_THIS(_x_) _x_

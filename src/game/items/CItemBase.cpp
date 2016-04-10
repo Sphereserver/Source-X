@@ -614,7 +614,7 @@ bool CItemBase::GetItemData( ITEMID_TYPE id, CUOItemTypeRec2 * pData ) // static
 
 	try
 	{
-		CGrayItemInfo info( id );
+		CSphereItemInfo info( id );
 		*pData = *( static_cast <CUOItemTypeRec2 *>( & info ));
 	}
 	catch ( const CSphereError& e )
@@ -1933,7 +1933,7 @@ bool CItemBaseMulti::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole *
 	case MLC_BASECOMPONENT:
 	{
 		pszKey += 13;
-		const CGrayMulti* pMulti = g_Cfg.GetMultiItemDefs(GetDispID());
+		const CSphereMulti* pMulti = g_Cfg.GetMultiItemDefs(GetDispID());
 		if (pMulti == NULL)
 			return false;
 

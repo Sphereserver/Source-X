@@ -5,9 +5,9 @@
 #include "../sphere/threads.h"
 #include "CEncrypt.h"
 #include "CExpression.h"
-#include "graycom.h"
-#include "graymul.h"
-#include "grayproto.h"
+#include "spherecom.h"
+#include "spheremul.h"
+#include "sphereproto.h"
 
 // #define DEBUG_CRYPT_MSGS 1
 
@@ -1047,7 +1047,7 @@ void CCrypt::DecryptOld( byte * pOutput, const byte * pInput, size_t iLen  )
 		return;
 	}
 		
-	if ( GetClientVer() ) // GRAY_CLIENT_VER <= 0x125350
+	if ( GetClientVer() ) // CLIENT_VER <= 0x125350
 	{
 		for ( size_t i = 0; i < iLen; i++ )
 		{

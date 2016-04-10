@@ -3,7 +3,7 @@
 #ifndef _INC_CITEMCORPSE_H
 #define _INC_CITEMCORPSE_H
 
-#include "../common/graymul.h"
+#include "../common/spheremul.h"
 #include "../CBase.h"
 #include "CItemContainer.h"
 

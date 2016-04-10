@@ -11,7 +11,7 @@
 #define _INC_CEXPRSSION_H
 
 #include "common.h"
-#include "graycom.h"
+#include "spherecom.h"
 #include "CVarDefMap.h"
 #include "ListDefContMap.h"
 

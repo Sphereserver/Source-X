@@ -13,7 +13,7 @@
 #include "../game/chars/CChar.h"
 #include "../game/clients/CClient.h"
 #include "../game/items/CItemStone.h"
-#include "../game/graysvr.h"
+#include "../game/spheresvr.h"
 #include "../game/CScriptProfiler.h"
 #include "../game/CWorld.h"
 #include "../sphere/ProfileTask.h"

@@ -1,6 +1,6 @@
 
 #include "../common/sphere_library/CString.h"
-#include "../common/graycom.h"
+#include "../common/spherecom.h"
 #include "../game/CScriptProfiler.h"
 #include "ProfileData.h"
 #include "strings.h"

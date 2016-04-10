@@ -5,7 +5,7 @@
 
 #include "../sphere/strings.h"
 #include "./sphere_library/CString.h"
-#include "graycom.h"
+#include "spherecom.h"
 
 
 class CChar;

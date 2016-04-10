@@ -11,7 +11,7 @@
 #include "../CContainer.h"
 #include "../CLog.h"
 #include "../CServTime.h"
-#include "../graysvr.h"
+#include "../spheresvr.h"
 #include "../Triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
@@ -1864,7 +1864,7 @@ bool CChar::ItemDrop( CItem * pItem, const CPointMap & pt )
 
 	if ( IsSetEF( EF_ItemStacking ) )
 	{
-		CGrayMapBlockState block( CAN_C_WALK, pt.m_z, pt.m_z, pt.m_z, maximum(pItem->GetHeight(), 1) );
+		CSphereMapBlockState block( CAN_C_WALK, pt.m_z, pt.m_z, pt.m_z, maximum(pItem->GetHeight(), 1) );
 		//g_World.GetHeightPoint( pt, block, true );
 		//DEBUG_ERR(("Drop: %d / Min: %d / Max: %d\n", pItem->GetFixZ(pt), block.m_Bottom.m_z, block.m_Top.m_z));
 

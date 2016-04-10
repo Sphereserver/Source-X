@@ -6,7 +6,7 @@
 #include "CException.h"
 #include "CExpression.h"
 #include "CScript.h"
-#include "graycom.h"
+#include "spherecom.h"
 
 
 void CScriptLineContext::Init()

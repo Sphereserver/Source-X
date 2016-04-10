@@ -11,7 +11,7 @@
 #include "../common/common.h"
 #include "../sphere/containers.h"
 #include "../common/CSocket.h"
-#include "../common/grayproto.h"
+#include "../common/sphereproto.h"
 #include "../game/CServTime.h"
 #include "../common/sphere_library/CArray.h"
 #include "../common/sphere_library/CQueue.h"

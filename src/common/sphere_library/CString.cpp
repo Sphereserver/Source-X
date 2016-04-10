@@ -8,7 +8,7 @@
 #include "regex/deelx.h"
 #include "CExpression.h"
 #include "CString.h"
-#include "graycom.h"
+#include "spherecom.h"
 
 
 /**

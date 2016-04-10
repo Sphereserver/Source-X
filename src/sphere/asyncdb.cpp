@@ -1,6 +1,6 @@
 
 #include "../common/CScriptObj.h"
-#include "../common/graycom.h"
+#include "../common/spherecom.h"
 #include "../game/CServer.h"
 #include "../game/Triggers.h"
 #include "asyncdb.h"

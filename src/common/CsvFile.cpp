@@ -3,7 +3,7 @@
 #include "CException.h"
 #include "CScript.h"
 #include "CsvFile.h"
-#include "graycom.h"
+#include "spherecom.h"
 
 CSVFile::CSVFile()
 {

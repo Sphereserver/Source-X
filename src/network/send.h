@@ -7,12 +7,12 @@
 #ifndef _INC_SEND_H
 #define _INC_SEND_H
 
-#include "../common/graymul.h"
+#include "../common/spheremul.h"
 #include "../common/CRect.h"
 #include "../common/CRegion.h"
 #include "packet.h"
 #include "network.h"
-#include "../common/grayproto.h"
+#include "../common/sphereproto.h"
 #include "../common/CUID.h"
 #include "../game/enums.h"
 #include "../game/CResource.h"

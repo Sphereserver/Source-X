@@ -10,7 +10,7 @@
 #include "items/CItemSpawn.h"
 #include "CLog.h"
 #include "CObjBase.h"
-#include "graysvr.h"
+#include "spheresvr.h"
 #include "Triggers.h"
 
 bool CObjBaseTemplate::IsDeleted() const

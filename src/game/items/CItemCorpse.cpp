@@ -1,5 +1,5 @@
 
-#include "../common/grayproto.h"
+#include "../common/sphereproto.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
 #include "../CServTime.h"

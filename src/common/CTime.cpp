@@ -7,7 +7,7 @@
 #include "../sphere/threads.h"
 #include "./sphere_library/CString.h"
 #include "CTime.h"
-#include "graycom.h"
+#include "spherecom.h"
 
 #ifndef _WIN32
 #include <sys/time.h>

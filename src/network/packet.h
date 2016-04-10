@@ -10,8 +10,8 @@
 #include <list>
 
 #include "../common/common.h"
-#include "../common/graycom.h"
-//#include "../game/graysvr.h" Removed to test.
+#include "../common/spherecom.h"
+//#include "../game/spheresvr.h" Removed to test.
 
 #define PACKET_BUFFERDEFAULT 4
 #define PACKET_BUFFERGROWTH 4

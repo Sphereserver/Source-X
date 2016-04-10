@@ -3,7 +3,7 @@
 //
 
 #include <vector>
-#include "../common/grayproto.h"
+#include "../common/sphereproto.h"
 #include "CServer.h"
 #include "Triggers.h"
 

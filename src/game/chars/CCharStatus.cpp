@@ -4,7 +4,7 @@
 #include "../network/network.h"
 #include "../clients/CClient.h"
 #include "../CLog.h"
-#include "../graysvr.h"
+#include "../spheresvr.h"
 #include "../Triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
@@ -1362,9 +1362,9 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 	// Ok now we should loop through all the points and checking for maptile, staticx, items, multis.
 	// If something is in the way and it has the wrong flags LOS return false
 	
-	const CGrayMapBlock *pBlock			= NULL;		// Block of the map (for statics)
-	const CUOStaticItemRec *pStatic		= NULL;		// Statics iterator (based on GrayMapBlock)
-	const CGrayMulti *pMulti 			= NULL;		// Multi Def (multi check)
+	const CSphereMapBlock *pBlock			= NULL;		// Block of the map (for statics)
+	const CUOStaticItemRec *pStatic		= NULL;		// Statics iterator (based on SphereMapBlock)
+	const CSphereMulti *pMulti 			= NULL;		// Multi Def (multi check)
 	const CUOMultiItemRec2 *pMultiItem	= NULL;		// Multi item iterator
 	CRegionBase *pRegion				= NULL;		// Nulti regions
 	CRegionLinks rlinks;							// Links to multi regions
@@ -1471,7 +1471,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 							bPath = false;
 							break;
 						}
-						CGrayTerrainInfo land(terrainid);
+						CSphereTerrainInfo land(terrainid);
 						if ( (land.m_flags & UFLAG1_WATER) && (flags & LOS_NC_WATER) )
 							bNullTerrain = true;
 					}
@@ -1969,7 +1969,7 @@ IT_TYPE CChar::CanTouchStatic( CPointMap &pt, ITEMID_TYPE id, CItem *pItem )
 		return IT_JUNK;
 
 	// Is this static really here ?
-	const CGrayMapBlock *pMapBlock = g_World.GetMapBlock(pt);
+	const CSphereMapBlock *pMapBlock = g_World.GetMapBlock(pt);
 	if ( !pMapBlock )
 		return IT_JUNK;
 
@@ -2275,7 +2275,7 @@ bool CChar::IsVerticalSpace( CPointMap ptDest, bool fForceMount )
 	if ( wBlockFlags & CAN_C_WALK )
 		wBlockFlags |= CAN_I_CLIMB;
 
-	CGrayMapBlockState block(wBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 2, GetHeightMount());
+	CSphereMapBlockState block(wBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 2, GetHeightMount());
 	g_World.GetHeightPoint(ptDest, block, true);
 
 	if ( GetHeightMount() + ptDest.m_z + (fForceMount ? 4 : 0) >= block.m_Top.m_z )		// 4 is the mount height
@@ -2332,8 +2332,8 @@ CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, word *pwBlockFlags, DIR_
 		WARNWALK(("wBlockFlags (0%x) wCan(0%x)\n", wBlockFlags, wCan));
 	}
 
-	CGrayMapBlockState block(wBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 3, GetHeightMount());
-	WARNWALK(("\t\tCGrayMapBlockState block( 0%x, %d, %d, %d );ptDest.m_z(%d) m_zClimbHeight(%d)\n", wBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 2, ptDest.m_z, m_zClimbHeight));
+	CSphereMapBlockState block(wBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 3, GetHeightMount());
+	WARNWALK(("\t\tCSphereMapBlockState block( 0%x, %d, %d, %d );ptDest.m_z(%d) m_zClimbHeight(%d)\n", wBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 2, ptDest.m_z, m_zClimbHeight));
 
 	if ( !ptDest.IsValidPoint() )
 	{
@@ -2427,7 +2427,7 @@ void CChar::FixClimbHeight()
 {
 	ADDTOCALLSTACK("CChar::FixClimbHeight");
 	CPointBase pt = GetTopPoint();
-	CGrayMapBlockState block(CAN_I_CLIMB, pt.m_z, pt.m_z + GetHeightMount() + 3, pt.m_z + 2, GetHeightMount());
+	CSphereMapBlockState block(CAN_I_CLIMB, pt.m_z, pt.m_z + GetHeightMount() + 3, pt.m_z + 2, GetHeightMount());
 	g_World.GetHeightPoint(pt, block, true);
 
 	if ( (block.m_Bottom.m_z == pt.m_z) && (block.m_dwBlockFlags & CAN_I_CLIMB) )	// we are standing on stairs

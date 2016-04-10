@@ -1,5 +1,5 @@
 
-#include "../common/graymul.h"
+#include "../common/spheremul.h"
 #include "../common/sphere_library/CArray.h"
 #include "chars/CChar.h"
 #include "items/CItem.h"

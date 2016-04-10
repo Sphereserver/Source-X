@@ -7,7 +7,7 @@
 #define _INC_CRECT_H
 
 #include "./sphere_library/CString.h"
-#include "graymul.h"
+#include "spheremul.h"
 
 
 class CRegionBase;

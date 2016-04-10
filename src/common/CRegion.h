@@ -3,7 +3,7 @@
 #ifndef _INC_CREGION_H
 #define _INC_CREGION_H
 
-#include "graymul.h"
+#include "spheremul.h"
 #include "CRect.h"
 #include "CResourceBase.h"
 
@@ -467,7 +467,7 @@ private:
 	CRegionWorld& operator=(const CRegionWorld& other);
 };
 
-class CTeleport : public CPointSort	// The static world teleporters. GRAYMAP.SCP
+class CTeleport : public CPointSort	// The static world teleporters.
 {
 	// Put a built in trigger here ? can be Array sorted by CPointMap.
 public:
@@ -497,7 +497,7 @@ public:
 	bool RealizeTeleport();
 };
 
-class CStartLoc		// The start locations for creating a new char. GRAY.INI
+class CStartLoc		// The start locations for creating a new char.
 {
 public:
 	static const char *m_sClassName;

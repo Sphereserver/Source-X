@@ -3,7 +3,7 @@
 #ifndef _INC_CLOG_H
 #define _INC_CLOG_H
 
-#include "../common/graycom.h"
+#include "../common/spherecom.h"
 #include "../common/CFile.h"
 #include "../common/common.h"
 #include "../common/CTime.h"

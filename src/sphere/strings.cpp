@@ -1,6 +1,6 @@
 
 #include "../common/CException.h"
-#include "../common/graycom.h"
+#include "../common/spherecom.h"
 #include "strings.h"
 #include "threads.h"
 

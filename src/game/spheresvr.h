@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef _INC_GRAYSVR_H
-#define _INC_GRAYSVR_H
+#ifndef _INC_SPHERESVR_H
+#define _INC_SPHERESVR_H
 
 #include "../common/common.h"
 #include "../sphere/threads.h"
@@ -61,4 +61,4 @@ extern int Sphere_MainEntryPoint( int argc, char *argv[] );
 
 
 
-#endif // _INC_GRAYSVR_H
+#endif // _INC_SPHERESVR_H

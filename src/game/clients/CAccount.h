@@ -8,7 +8,7 @@
 
 
 #include "../chars/CCharRefArray.h"
-#include "../common/grayproto.h"
+#include "../common/sphereproto.h"
 #include "../common/CScriptObj.h"
 #include "../common/CSocket.h"
 #include "../common/sphere_library/CString.h"

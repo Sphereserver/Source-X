@@ -3,15 +3,15 @@
 
 #include "../common/CException.h"
 #include "../common/CResourceBase.h"
-#include "../common/CString.h"
 #include "../common/CTextConsole.h"
 #include "../common/cwindow.h"
 #include "../common/sphereversion.h"	// sphere version
+#include "../common/sphere_library/CString.h"
 #include "../game/CLog.h"
 #include "../game/CObjBase.h"
 #include "../game/CResource.h"
 #include "../game/CServer.h"
-#include "../game/graysvr.h"
+#include "../game/spheresvr.h"
 #include "ProfileTask.h"
 #include "resource.h"
 #include <commctrl.h>	// NM_RCLICK
@@ -378,7 +378,7 @@ void CNTWindow::List_Add( COLORREF color, LPCTSTR pszText )
 	// If the select is on screen then keep scrolling.
 	if ( ! m_fLogScrollLock && ! GetCapture())
 	{
-		if ( GRAY_GetOSInfo()->dwPlatformId == VER_PLATFORM_WIN32_NT )
+		if ( Sphere_GetOSInfo()->dwPlatformId == VER_PLATFORM_WIN32_NT )
 		{
 			m_wndLog.Scroll();
 		}
@@ -445,7 +445,7 @@ int CNTWindow::OnCreate( HWND hWnd, LPCREATESTRUCT lParam )
 		(HMENU)(UINT) IDC_M_INPUT, theApp.m_hInstance, NULL );
 	ASSERT( m_wndInput.m_hWnd );
 
-	if ( GRAY_GetOSInfo()->dwPlatformId > VER_PLATFORM_WIN32s )
+	if ( Sphere_GetOSInfo()->dwPlatformId > VER_PLATFORM_WIN32s )
 	{
 		memset(&pnid,0,sizeof(pnid));
 		pnid.cbSize = sizeof(NOTIFYICONDATA);
@@ -659,7 +659,7 @@ bool CNTWindow::OnSysCommand( WPARAM uCmdType, int xPos, int yPos )
 	switch ( uCmdType )
 	{
 		case SC_MINIMIZE:
-			if ( GRAY_GetOSInfo()->dwPlatformId > VER_PLATFORM_WIN32s )
+			if ( Sphere_GetOSInfo()->dwPlatformId > VER_PLATFORM_WIN32s )
 			{
 				ShowWindow(SW_HIDE);
 				return( true );
@@ -938,7 +938,7 @@ bool NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLine, int nCmdShow)
 
 void NTWindow_DeleteIcon()
 {
-	if ( GRAY_GetOSInfo()->dwPlatformId > VER_PLATFORM_WIN32s )
+	if ( Sphere_GetOSInfo()->dwPlatformId > VER_PLATFORM_WIN32s )
 	{
 		theApp.m_wndMain.pnid.uFlags = 0;
 		Shell_NotifyIcon(NIM_DELETE, &theApp.m_wndMain.pnid);
@@ -1001,7 +1001,7 @@ void NTWindow_SetWindowTitle( LPCTSTR pszText )
 	sprintf(psTitle, "%s - %s (%s) %s", theApp.m_pszAppName, g_Serv.GetName(), pszMode, pszText ? pszText : "" );
 	theApp.m_wndMain.SetWindowText( psTitle );
 
-	if ( GRAY_GetOSInfo()->dwPlatformId > VER_PLATFORM_WIN32s )
+	if ( Sphere_GetOSInfo()->dwPlatformId > VER_PLATFORM_WIN32s )
 	{
 		theApp.m_wndMain.pnid.uFlags = NIF_TIP;
 		strcpylen(theApp.m_wndMain.pnid.szTip, psTitle, COUNTOF(theApp.m_wndMain.pnid.szTip)-1);

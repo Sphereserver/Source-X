@@ -1,12 +1,9 @@
-/**
-* @file CGrayInst.h
-*/
 
 #pragma once
-#ifndef _INC_CGRAYINST_H
-#define _INC_CGRAYINST_H
+#ifndef _INC_CUOINSTALL_H
+#define _INC_CUOINSTALL_H
 
-#include "../common/graymul.h"
+#include "../common/spheremul.h"
 #include "../common/CFile.h"
 #include "../common/sphere_library/CArray.h"
 #include "../common/CsvFile.h"
@@ -109,4 +106,4 @@ private:
 	CVerDataMul& operator=(const CVerDataMul& other);
 } g_VerData;
 
-#endif	// _INC_CGRAYINST_H
+#endif	// _INC_CUOINSTALL_H

@@ -5,7 +5,7 @@
 
 #include "../common/sphere_library/CArray.h"
 #include "../common/sphere_library/CString.h"
-#include "../common/grayproto.h"
+#include "../common/sphereproto.h"
 
 
 class CClient;

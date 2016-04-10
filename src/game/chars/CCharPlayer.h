@@ -8,9 +8,9 @@
 #define CCHARPLAYER_H
 
 #include "../clients/CAccount.h"
-#include "../common/graymul.h"
+#include "../common/spheremul.h"
 #include "../common/CResourceBase.h"
-#include "../common/grayproto.h"
+#include "../common/sphereproto.h"
 #include "../CResource.h"
 #include "../CServTime.h"
 

@@ -5,7 +5,7 @@
 
 #include "./sphere_library/CArray.h"
 #include "./sphere_library/CString.h"
-//#include "graycom.h"
+//#include "spherecom.h"
 #include "CRect.h"
 #include "CUID.h"
 

@@ -8,7 +8,7 @@
 #include "../common/CRect.h"
 #include "../common/CScriptObj.h"
 #include "../common/CVarDefMap.h"
-#include "../common/grayproto.h"
+#include "../common/sphereproto.h"
 #include "../chars/CCharRefArray.h"
 #include "../CServTime.h"
 

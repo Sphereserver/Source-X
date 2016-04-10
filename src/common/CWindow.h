@@ -9,8 +9,8 @@
 
 #ifdef _WIN32
 
-#include "../common/graycom.h"
-#include "CString.h"
+#include "sphere_library/CString.h"
+#include "spherecom.h"
 #include <RICHEDIT.H>	// CRichEditCtrl
 
 

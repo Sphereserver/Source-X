@@ -25,7 +25,7 @@
 #include "CScriptProfiler.h"
 #include "CServer.h"
 #include "CWorld.h"
-#include "graysvr.h"
+#include "spheresvr.h"
 
 
 CMapList::CMapList()
