@@ -429,7 +429,7 @@ private:
 	word m_count;
 
 public:
-	PacketItemContents(CClient* target, const CItemContainer* container, bool isShop, bool filterLayers); // standard content
+	PacketItemContents(CClient* target, const CItemContainer* container, bool boIsShop, bool boFilterLayers); // standard content
 	PacketItemContents(const CClient* target, const CItem* spellbook); // spellbook spells
 	PacketItemContents(const CClient* target, const CItemContainer* spellbook); // custom spellbook spells
 	virtual bool onSend(const CClient* client);
@@ -724,7 +724,7 @@ class PacketVendorBuyList : public PacketSend
 {
 public:
 	PacketVendorBuyList(void);
-	size_t fillContainer(const CItemContainer* container, int convertFactor, bool bIsClientEnhanced = false);
+	size_t fillBuyData(const CItemContainer* container, int iConvertFactor);
 };
 
 /***************************************************************************
@@ -1017,7 +1017,7 @@ class PacketVendorSellList : public PacketSend
 {
 public:
 	PacketVendorSellList(const CChar* vendor);
-	size_t searchContainer(CClient* target, const CItemContainer* container, CItemContainer* stock1, CItemContainer* stock2, int convertFactor);
+	size_t fillSellList(CClient* target, const CItemContainer* container, CItemContainer* stock1, CItemContainer* stock2, int iConvertFactor);
 };
 
 /***************************************************************************

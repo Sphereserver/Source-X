@@ -19,5 +19,5 @@ EXECUTE_PROCESS (COMMAND ${GIT_CMD} ${GIT_ARGS}
 MESSAGE (STATUS "Git revision hash ${GITHASHCMD}")
 
 CONFIGURE_FILE (
- "${PROJECT_SOURCE_DIR}/../common/version/GitRevision.h.in"
- "${PROJECT_SOURCE_DIR}/../common/version/GitRevision.h")
+ "${PROJECT_SOURCE_DIR}/common/version/GitRevision.h.in"
+ "${PROJECT_SOURCE_DIR}/common/version/GitRevision.h")

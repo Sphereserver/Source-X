@@ -369,8 +369,8 @@ void CClient::addItem_OnGround( CItem * pItem ) // Send items (on ground)
 		CItemCorpse *pCorpse = static_cast<CItemCorpse *>(pItem);
 		if ( pCorpse )
 		{
-			addContents( pCorpse, false, true );	// send all corpse items
-			addContents( pCorpse, true, true );	// equip proper items on corpse
+			addContainerContents( pCorpse, false, true );	// send all corpse items
+			addContainerContents( pCorpse, true, true );	// equip proper items on corpse
 		}
 	}
 
@@ -437,17 +437,17 @@ void CClient::addItem( CItem * pItem )
 	}
 }
 
-void CClient::addContents( const CItemContainer * pContainer, bool fCorpseEquip, bool fCorpseFilter, bool fShop ) // Send Backpack (with items)
+void CClient::addContainerContents( const CItemContainer * pContainer, bool boCorpseEquip, bool boCorpseFilter, bool boShop ) // Send Backpack (with items)
 {
-	ADDTOCALLSTACK("CClient::addContents");
+	ADDTOCALLSTACK("CClient::addContainerContents");
 	// NOTE: We needed to send the header for this FIRST !!!
 	// 1 = equip a corpse
 	// 0 = contents.
 
-	if (fCorpseEquip == true)
+	if (boCorpseEquip == true)
 		new PacketCorpseEquipment(this, pContainer);
 	else
-		new PacketItemContents(this, pContainer, fShop, fCorpseFilter);
+		new PacketItemContents(this, pContainer, boShop, boCorpseFilter);
 
 	return;
 }
@@ -480,7 +480,7 @@ bool CClient::addContainerSetup( const CItemContainer * pContainer ) // Send Bac
 	OpenPacketTransaction transaction(this, PacketSend::PRI_NORMAL);
 
 	addOpenGump(pContainer, gump);
-	addContents(pContainer);
+	addContainerContents(pContainer);
 
 	LogOpenedContainer(pContainer);
 	return true;
@@ -2170,13 +2170,13 @@ bool CClient::addShopMenuBuy( CChar * pVendor )
 		return false;
 
 	// Get item list
-	addItem(pContainer);	//isso ta enviando tooltip completo do item ao inves de tooltip so com o nome
-	addContents(pContainer, false, false, true);
+	addItem(pContainer);	// send complete tooltip instead of just the name
+	addContainerContents(pContainer, false, false, true);
 	addItem(pContainerExtra);
 
 	// Get price list
 	PacketVendorBuyList *cmd = new PacketVendorBuyList();
-	size_t count = cmd->fillContainer(pContainer, pVendor->NPC_GetVendorMarkup());
+	size_t count = cmd->fillBuyData(pContainer, pVendor->NPC_GetVendorMarkup());
 	cmd->push(this);
 
 	// Open gump
@@ -2218,7 +2218,7 @@ bool CClient::addShopMenuSell( CChar * pVendor )
 		pContainer2 = NULL;		// no stock
 
 	PacketVendorSellList cmd( pVendor );
-	size_t count = cmd.searchContainer( this, m_pChar->GetPackSafe(), pContainer1, pContainer2, -pVendor->NPC_GetVendorMarkup() );
+	size_t count = cmd.fillSellList( this, m_pChar->GetPackSafe(), pContainer1, pContainer2, -pVendor->NPC_GetVendorMarkup() );
 	if ( count <= 0 )
 		return false;
 
@@ -2313,7 +2313,7 @@ void CClient::addBulletinBoard( const CItemContainer * pBoard )
 
 	// Send Content messages for all the items on the bboard.
 	// Not sure what x,y are here, date/time maybe ?
-	addContents( pBoard );
+	addContainerContents( pBoard );
 
 	// The client will now ask for the headers it wants.
 }
