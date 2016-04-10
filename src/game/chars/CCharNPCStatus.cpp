@@ -101,56 +101,40 @@ CREID_TYPE CChar::NPC_GetAllyGroupType(CREID_TYPE idTest)	// static
 	}
 }
 
-int CChar::NPC_GetVendorMarkup( const CChar * pChar ) const
+int CChar::NPC_GetVendorMarkup() const
 {
 	ADDTOCALLSTACK("CChar::NPC_GetVendorMarkup");
 	// This vendor marks stuff up/down this percentage.
-	// Base this on KARMA. Random is calculated at Restock time
 	// When vendor sells to players this is the markup value.
-	// fBuy: Client buying
+	//
 	// RETURN:
-	//  0-100
+	//  +100% = double price
+	//  0% = default price
+	//  -100% = free
 
-	if ( !pChar || IsStatFlag(STATF_Pet) )	// Not on a hired vendor.
-		return( 0 );
+	if ( IsStatFlag(STATF_Pet) )	// not on a hired vendor
+		return 0;
 
-	CVarDefCont	*pVar = NULL, *pVarCharDef = NULL;
-	CCharBase * pCharDef = Char_GetDef();
-	
-	if ( pCharDef )
-	{
-		// get markup value of NPC-chardef
-		pVarCharDef = pCharDef->m_TagDefs.GetKey("VENDORMARKUP");
-	}
-
-	int iHostility = maximum(NPC_GetHostilityLevelToward(pChar), 0);
-	iHostility = minimum(iHostility + 15, 100);
-
+	// Use char value
+	CVarDefCont	*pVar = NULL;
 	pVar = m_TagDefs.GetKey("VENDORMARKUP");
 	if ( pVar )
-	{
-		iHostility += (int)(pVar->GetValNum());
-		// add NPC's markup to hostility made by karma difference
-	}
-	else
-	{
-		pVar = GetRegion()->m_TagDefs.GetKey("VENDORMARKUP");
-		if ( pVar )
-		{
-			iHostility += (int)(pVar->GetValNum());
-			// if NPC is unmarked, look if the region is
-		}
-		else
-		{
-			// neither NPC nor REGION are marked, so look for the chardef
-			if ( pVarCharDef )
-			{
-				iHostility += (int)(pVarCharDef->GetValNum());
-			}
-		}
-	}
+		return static_cast<int>(pVar->GetValNum());
 
-	return( iHostility );
+	// Use region value
+	pVar = GetRegion()->m_TagDefs.GetKey("VENDORMARKUP");
+	if ( pVar )
+		return static_cast<int>(pVar->GetValNum());
+
+	// Use chardef value
+	CCharBase *pCharDef = Char_GetDef();
+	if ( pCharDef )
+		pVar = pCharDef->m_TagDefs.GetKey("VENDORMARKUP");
+	if ( pVar )
+		return static_cast<int>(pVar->GetValNum());
+
+	// Use default value
+	return 15;
 }
 
 size_t CChar::NPC_OnHearName( lpctstr pszText ) const
@@ -646,35 +630,22 @@ int CChar::NPC_GetAttackMotivation( CChar * pChar, int iMotivation ) const
 	// Am I stronger than he is ? Should I continue fighting ?
 	// Take into consideration AC, health, skills, etc..
 	// RETURN:
-	// <-1 = dead meat. (run away)
-	// 0 = I'm have no interest.
-	// 50 = even match.
-	// 100 = he's a push over.
+	//   < 0 = dead meat. (run away)
+	//   0 = I'm have no interest.
+	//   50 = even match.
+	//   100 = he's a push over.
 
 	if ( !m_pNPC || !pChar || !pChar->m_pArea )
 		return 0;
-	if ( Stat_GetVal(STAT_STR) <= 0 )
-		return -1;		// I'm dead
-	// Is the target interesting ?
-	if ( pChar->m_pArea->IsFlag( REGION_FLAG_SAFE ))	// universal
+	if ( IsStatFlag(STATF_DEAD) || pChar->IsStatFlag(STATF_DEAD) )
 		return 0;
-	if ( pChar->IsStatFlag(STATF_DEAD) && pChar->m_pNPC && pChar->m_pNPC->m_bonded )
+	if ( pChar->m_pArea->IsFlag(REGION_FLAG_SAFE) )
 		return 0;
-	// If the area is guarded then think better of this.
-	if ( pChar->m_pArea->IsGuarded() && m_pNPC->m_Brain != NPCBRAIN_GUARD )		// too smart for this.
-	{
-		iMotivation -= Stat_GetAdjusted(STAT_INT) / 20;
-	}
 
-	// Owned by or is one of my kind ?
-
-	iMotivation += NPC_GetHostilityLevelToward( pChar );
-
+	iMotivation += NPC_GetHostilityLevelToward(pChar);
 	if ( iMotivation > 0 )
-	{
-		// Am i injured etc ?
-		iMotivation = NPC_GetAttackContinueMotivation( pChar, iMotivation );
-	}
+		iMotivation = NPC_GetAttackContinueMotivation(pChar, iMotivation);		// Am i injured etc ?
+
 	return iMotivation;
 }
 

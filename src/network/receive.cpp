@@ -746,7 +746,7 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 		return true;
 	}
 
-	int iConvertFactor = vendor->NPC_GetVendorMarkup(buyer);
+	int iConvertFactor = vendor->NPC_GetVendorMarkup();
 
 	VendorItem items[MAX_ITEMS_CONT];
 	memset(items, 0, sizeof(items));
