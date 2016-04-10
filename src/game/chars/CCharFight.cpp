@@ -1219,6 +1219,12 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 		return( Calc_GetRandVal2(iDmgMin, iDmgMax) );
 }
 
+bool CChar::Fight_IsAttackable()
+{
+	ADDTOCALLSTACK("CChar::IsAttackable");
+	return !IsStatFlag(STATF_DEAD|STATF_Stone|STATF_Invisible|STATF_Insubstantial|STATF_Hidden|STATF_INVUL);
+}
+
 // Clear all my active targets. Toggle out of war mode.
 // Should I add @CombatEnd trigger here too?
 void CChar::Fight_ClearAll()
@@ -1352,8 +1358,9 @@ void CChar::Fight_HitTry()
 	ASSERT( m_atFight.m_War_Swing_State == (WAR_SWING_READY|WAR_SWING_SWINGING) );
 
 	CChar *pCharTarg = m_Fight_Targ.CharFind();
-	if ( !pCharTarg || pCharTarg->IsStatFlag(STATF_DEAD) )	// dead players and dead bonded pets can't be attacked
+	if ( !pCharTarg || !pCharTarg->Fight_IsAttackable() )
 	{
+		// I can't hit this target, try switch to another one
 		if ( !Fight_Attack(NPC_FightFindBestTarget()) )
 		{
 			Skill_Start(SKILL_NONE);
@@ -1969,7 +1976,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 			Sound(0x44d);
 
 		// Make blood effects
-		if ( m_wBloodHue != static_cast<HUE_TYPE>(-1) )
+		if ( pCharTarg->m_wBloodHue != static_cast<HUE_TYPE>(-1) )
 		{
 			static const ITEMID_TYPE sm_Blood[] = { ITEMID_BLOOD1, ITEMID_BLOOD2, ITEMID_BLOOD3, ITEMID_BLOOD4, ITEMID_BLOOD5, ITEMID_BLOOD6, ITEMID_BLOOD_SPLAT };
 			int iBloodQty = (g_Cfg.m_iFeatureSE & FEATURE_SE_UPDATE) ? Calc_GetRandVal2(4, 5) : Calc_GetRandVal2(1, 2);

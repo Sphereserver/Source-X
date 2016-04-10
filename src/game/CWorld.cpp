@@ -2205,7 +2205,7 @@ void CWorld::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE wHu
 			ASSERT(pCharSrc);
 			fSpeakAsGhost = pCharSrc->IsSpeakAsGhost();
 
-			if ( pCharSrc->m_pNPC )
+			if ( wHue == HUE_TEXT_DEF && pCharSrc->m_pNPC )
 				wHue = pCharSrc->m_SpeechHue;
 		}
 	}

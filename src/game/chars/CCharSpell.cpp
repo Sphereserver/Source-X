@@ -987,7 +987,13 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			return;
 		}
 		case LAYER_FLAG_Poison:
-			SetPoison((pCaster->Skill_GetBase(SKILL_MAGERY) + pCaster->Skill_GetBase(SKILL_POISONING)) / 2, iStatEffect / 50, pCaster);
+			StatFlag_Set(STATF_Poisoned);
+			UpdateModeFlag();		
+			if (pClient && IsSetOF(OF_Buffs))		
+			{		
+				pClient->removeBuff(BI_POISON);		
+				pClient->addBuff(BI_POISON, 1017383, 1070722, 2);		
+			}
 			return;
 		case LAYER_SPELL_Night_Sight:
 			StatFlag_Set(STATF_NightSight);
@@ -3143,7 +3149,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			return false;
 		}
 
-		if ( !OnAttackedBy(pCharSrc, 1, false, !(pSpellDef->IsSpellType(SPELLFLAG_FIELD))) )
+		if ( !OnAttackedBy(pCharSrc, 1, false, !pSpellDef->IsSpellType(SPELLFLAG_FIELD)) && !bReflecting )
 			return false;
 
 		// Check if the spell can be reflected
@@ -3151,14 +3157,17 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		{
 			if ( IsStatFlag(STATF_Reflection) )
 			{
-				CItem *pMagicReflect = LayerFind(LAYER_SPELL_Magic_Reflect);
-				pMagicReflect->Delete();
 				Effect(EFFECT_OBJ, ITEMID_FX_GLOW, this, 10, 5);
+				CItem *pMagicReflect = LayerFind(LAYER_SPELL_Magic_Reflect);
+				if ( pMagicReflect )
+					pMagicReflect->Delete();
+
 				if ( pCharSrc->IsStatFlag(STATF_Reflection) )		// caster is under reflection effect too, so the spell will reflect back to default target
 				{
-					pMagicReflect = pCharSrc->LayerFind(LAYER_SPELL_Magic_Reflect);
-					pMagicReflect->Delete();
 					pCharSrc->Effect(EFFECT_OBJ, ITEMID_FX_GLOW, pCharSrc, 10, 5);
+					pMagicReflect = pCharSrc->LayerFind(LAYER_SPELL_Magic_Reflect);
+					if ( pMagicReflect )
+						pMagicReflect->Delete();
 				}
 				else
 				{

@@ -2586,7 +2586,7 @@ int CChar::Skill_Fighting( SKTRIG_TYPE stage )
 	{
 		m_atFight.m_War_Swing_State = WAR_SWING_EQUIPPING;
 		int64 iRemainingDelay = g_World.GetTimeDiff(m_atFight.m_timeNextCombatSwing);
-		if ( iRemainingDelay < 0 )
+		if ( iRemainingDelay < 0 || iRemainingDelay > 255)
 			iRemainingDelay = 0;
 
 		SetTimeout(iRemainingDelay);

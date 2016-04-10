@@ -1612,7 +1612,7 @@ CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, d
 	// Check water/mountains/etc.
 	if ( pMultiDef != NULL && ! (dwAttr&ATTR_MAGIC))
 	{
-		if ( pMultiDef->m_rect.m_bottom > 0 )
+		if ( pMultiDef->m_rect.m_bottom > 0 && (pMultiDef->IsType(IT_MULTI) || pMultiDef->IsType(IT_MULTI_CUSTOM)) )
 			pt.m_y -= (short)(pMultiDef->m_rect.m_bottom - 1);
 
 		// Check for items in the way and bumpy terrain.

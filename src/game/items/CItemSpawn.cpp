@@ -184,10 +184,21 @@ void CItemSpawn::GenerateChar(CResourceDef *pDef)
 	CPointMap pt = GetTopPoint();
 	pChar->NPC_LoadScript(true);
 	pChar->StatFlag_Set(STATF_Spawned);
-	pChar->MoveTo(pt);
+	int iDistMax = m_itSpawnChar.m_DistMax;
+	// Try placing this char near the spawn
+	if ( !pChar->MoveNearObj(this, iDistMax ? (Calc_GetRandVal(iDistMax) + 1) : 1) )
+	{
+		// If this fails, try placing the char ON the spawn
+		if (!pChar->MoveTo(pt))
+		{
+			DEBUG_ERR(("Spawner UID:0%lx is unable to place a character inside the world, deleted the character", (DWORD)(this->GetUID())));
+			pChar->Delete();
+			return;
+		}
+	}
 
 	// Check if the NPC can spawn in this region
-	CRegionBase *pRegion = GetTopPoint().GetRegion(REGION_TYPE_AREA);
+	CRegionBase *pRegion = pt.GetRegion(REGION_TYPE_AREA);
 	if ( !pRegion || (pRegion->IsGuarded() && pChar->Noto_IsEvil()) )
 	{
 		pChar->Delete();
