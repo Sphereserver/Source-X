@@ -7,19 +7,16 @@
 #ifndef _INC_SPHEREVERSION_H
 #define _INC_SPHEREVERSION_H
 
-
-#ifdef _SUBVERSION
+#ifdef _GITVERSION
 	#include "./version/GitRevision.h"
-#endif
-#ifdef __GITREVISION__
 	#define SPHERE_VER_BUILD			__GITREVISION__
 #else
 	#define SPHERE_VER_BUILD			0
 #endif
 
-#define SPHERE_VER_FILEVERSION		0,56,3,SPHERE_VER_BUILD		// version to be set on generated .exe file
+#define SPHERE_VER_FILEVERSION		0,56,4,SPHERE_VER_BUILD		// version to be set on generated .exe file
 #define	SPHERE_VER_NUM				0x00005603L					// version for some internal usage, like compiled scripts
-#define SPHERE_VER_STR				"0.56c"						// share version with all files
+#define SPHERE_VER_STR				"0.56d"						// share version with all files
 
 #if defined(_DEBUG)
 	#define SPHERE_VERSION				SPHERE_VER_STR "-Debug"
