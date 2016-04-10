@@ -118,8 +118,8 @@ struct RESOURCE_ID : public RESOURCE_ID_BASE
 {
 	RESOURCE_ID();
 	RESOURCE_ID( RES_TYPE restype );
-	RESOURCE_ID( RES_TYPE restype, int index );
-	RESOURCE_ID( RES_TYPE restype, int index, int iPage );
+	RESOURCE_ID( RES_TYPE restype, dword index );
+	RESOURCE_ID( RES_TYPE restype, dword index, int iPage );
 	RESOURCE_ID_BASE & operator = ( const RESOURCE_ID_BASE & rid );
 };
 

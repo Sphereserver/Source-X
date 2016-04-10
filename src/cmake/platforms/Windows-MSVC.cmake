@@ -6,7 +6,7 @@ TARGET_COMPILE_DEFINITIONS (spheresvrNightly
         PUBLIC _GITVERSION
 # Defines
         PUBLIC _NIGHTLYBUILD
-        PUBLIC _WIN32
+        PUBLIC _WINDOWS
         PUBLIC _CRT_SECURE_NO_WARNINGS	
 	PUBLIC _EXCEPTIONS_DEBUG
 	PUBLIC _WINSOCK_DEPRECATED_NO_WARNINGS
@@ -14,7 +14,7 @@ TARGET_COMPILE_DEFINITIONS (spheresvrNightly
 
 # Here it is setting the Visual Studio warning level to 4 and forcint MultiProccessor compilation
 SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W4 -MP /wd4127 /wd4131 /wd4310 /wd4996")
-SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W4 -MP /wd4127 /wd4131 /wd4310 /wd4996")
+SET (CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -W4 -MP /wd4127 /wd4131 /wd4310 /wd4996")
 
 SET_TARGET_PROPERTIES ( spheresvr
         PROPERTIES

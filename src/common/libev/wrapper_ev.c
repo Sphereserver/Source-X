@@ -1,3 +1,5 @@
+// Current LibEV version: 4.22
+
 #include "wrapper_ev.h"
 
 // libev produces many warnings which isn't really appropriate for us to
@@ -15,7 +17,6 @@
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
 
-
 #ifdef __MINGW32__
 #include <time.h>
 struct timespec
@@ -24,4 +25,5 @@ struct timespec
     long int tv_nsec;
 };
 #endif  // __MINGW32__
-#include "ev.c"
+
+#include "ev.h"

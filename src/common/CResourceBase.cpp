@@ -45,13 +45,13 @@ RESOURCE_ID::RESOURCE_ID( RES_TYPE restype )
 	m_dwInternalVal = UID_F_RESOURCE|((restype)<<RES_TYPE_SHIFT);
 }
 
-RESOURCE_ID::RESOURCE_ID( RES_TYPE restype, int index )
+RESOURCE_ID::RESOURCE_ID( RES_TYPE restype, dword index )
 {
 	ASSERT( index < RES_INDEX_MASK );
 	m_dwInternalVal = UID_F_RESOURCE|((restype)<<RES_TYPE_SHIFT)|(index);
 }
 
-RESOURCE_ID::RESOURCE_ID( RES_TYPE restype, int index, int iPage )
+RESOURCE_ID::RESOURCE_ID( RES_TYPE restype, dword index, int iPage )
 {
 	ASSERT( index < RES_INDEX_MASK );
 	ASSERT( iPage < RES_PAGE_MASK );

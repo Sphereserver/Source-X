@@ -216,12 +216,9 @@ SOURCE_GROUP (common\\crashdump FILES ${crashdump_SRCS})
 # LibEv files
 SET (libev_SRCS
 #../common/libev/ev.c
-#../common/libev/ev_config.h
-#../common/libev/event.c
-#../common/libev/event.h
-#../common/libev/ev_epoll.c
 #../common/libev/ev.h
-#../common/libev/ev++.h
+#../common/libev/ev_config.h
+#../common/libev/ev_epoll.c
 #../common/libev/ev_kqueue.c
 #../common/libev/ev_poll.c
 #../common/libev/ev_port.c
@@ -229,6 +226,9 @@ SET (libev_SRCS
 #../common/libev/ev_vars.h
 #../common/libev/ev_win32.c
 #../common/libev/ev_wrap.h
+#../common/libev/ev++.h
+#../common/libev/event.c
+#../common/libev/event.h
 ../common/libev/wrapper_ev.c
 ../common/libev/wrapper_ev.h
 )

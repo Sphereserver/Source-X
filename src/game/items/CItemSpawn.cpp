@@ -184,9 +184,9 @@ void CItemSpawn::GenerateChar(CResourceDef *pDef)
 	CPointMap pt = GetTopPoint();
 	pChar->NPC_LoadScript(true);
 	pChar->StatFlag_Set(STATF_Spawned);
-	int iDistMax = m_itSpawnChar.m_DistMax;
+	byte iDistMax = m_itSpawnChar.m_DistMax;
 	// Try placing this char near the spawn
-	if ( !pChar->MoveNearObj(this, iDistMax ? (Calc_GetRandVal(iDistMax) + 1) : 1) )
+	if ( !pChar->MoveNearObj(this, iDistMax ? ((word)Calc_GetRandVal(iDistMax) + 1) : 1) )
 	{
 		// If this fails, try placing the char ON the spawn
 		if (!pChar->MoveTo(pt))

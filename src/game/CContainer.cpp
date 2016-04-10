@@ -459,7 +459,7 @@ int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iRepli
 		{
 			tchar * resOverride = Str_GetTemp();
 			sprintf(resOverride,"matoverride_%s",g_Cfg.ResourceGetName( RESOURCE_ID( RES_ITEMDEF, rid ) ));
-			RESOURCE_ID ridOverride = RESOURCE_ID( RES_ITEMDEF , pChar->m_TagDefs.GetKeyNum(resOverride) );
+			RESOURCE_ID ridOverride = RESOURCE_ID( RES_ITEMDEF , (dword)pChar->m_TagDefs.GetKeyNum(resOverride) );
 			if ( ridOverride && rid.GetResIndex() > 0 )
 				rid = ridOverride;
 		}
