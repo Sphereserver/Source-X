@@ -1919,7 +1919,9 @@ void CWorld::r_Write( CScript & s )
 	// Write out the safe header.
 	s.WriteKey("TITLE", SPHERE_TITLE " World Script");
 	s.WriteKey("VERSION", SPHERE_VERSION);
-	s.WriteKeyVal("PREVBUILD", __GITREVISION__);
+	#ifdef __GITREVISION__
+		s.WriteKeyVal("PREVBUILD", __GITREVISION__);
+	#endif
 	s.WriteKeyVal( "TIME", GetCurrentTime().GetTimeRaw() );
 	s.WriteKeyVal( "SAVECOUNT", m_iSaveCountID );
 	s.Flush();	// Force this out to the file now.

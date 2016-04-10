@@ -1,8 +1,4 @@
-﻿
-#ifdef _SUBVERSION
-	#include "../common/version/GitRevision.h"
-#endif
-#include "../common/CException.h"
+﻿#include "../common/CException.h"
 #include "../common/CFileList.h"
 #include "../common/CUOInstall.h"
 #include "../common/sphereversion.h"

@@ -5,8 +5,8 @@ SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W4 -MP /wd4127 /wd4131 /wd4310 /wd4996")
 TARGET_COMPILE_DEFINITIONS (spheresvr
 # Extra defs
         PUBLIC _MTNETWORK
-# SVN defs
-        PUBLIC _SUBVERSION
+# GIT defs
+        PUBLIC _GITVERSION
 # Defines
         PUBLIC _WIN32
 # Temporary setting _CRT_SECURE_NO_WARNINGS to do not spamm so much in the buil proccess while we get rid of -W4 warnings and, after it, -Wall.
@@ -21,8 +21,8 @@ TARGET_COMPILE_DEFINITIONS (spheresvr
 TARGET_COMPILE_DEFINITIONS (spheresvrNightly
 # Extra defs
         PUBLIC _MTNETWORK
-# SVN defs
-        PUBLIC _SUBVERSION
+# GIT defs
+        PUBLIC _GITVERSION
 # Defines
         PUBLIC _NIGHTLYBUILD
         PUBLIC _WIN32

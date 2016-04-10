@@ -12,8 +12,8 @@ SET (CMAKE_CXX_FLAGS "${CXX_WARNING_FLAGS} ${CXX_ARCH_OPTS} ${CXX_OPTS} ${CXX_SP
 TARGET_COMPILE_DEFINITIONS (spheresvr
 # Extra defs
         PUBLIC _MTNETWORK
-# SVN defs
-        PUBLIC _SUBVERSION
+# GIT defs
+        PUBLIC _GITVERSION
 # Defines
         PUBLIC GRAY_SVR
         PUBLIC _CONSOLE
@@ -32,8 +32,8 @@ TARGET_COMPILE_DEFINITIONS (spheresvrNightly
         PUBLIC DEBUG_CRYPT_MSGS
 # Extra defs
         PUBLIC _MTNETWORK
-# SVN defs
-        PUBLIC _SUBVERSION
+# GIT defs
+        PUBLIC _GITVERSION
 # Defines
         PUBLIC GRAY_SVR
         PUBLIC _CONSOLE

@@ -1,8 +1,4 @@
 
-#ifdef _SUBVERSION
-	#include "../common/version/GitRevision.h"
-#endif
-
 #ifdef _WIN32
 	#include "../sphere/ntservice.h"	// g_Service
 #else
