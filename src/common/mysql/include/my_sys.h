@@ -1,4 +1,4 @@
-/* Copyright (c) 2000, 2014, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2000, 2015, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,8 +17,13 @@
 #define _my_sys_h
 
 #include "my_global.h"                  /* C_MODE_START, C_MODE_END */
-#include "my_pthread.h"
 #include "m_ctype.h"                    /* for CHARSET_INFO */
+
+#include "my_thread.h"                  /* Needed for psi.h */
+#include "mysql/psi/psi.h"
+#include "mysql/service_mysql_alloc.h"
+#include "mysql/psi/mysql_memory.h"
+#include "mysql/psi/mysql_thread.h"
 
 #ifdef HAVE_ALLOCA_H
 #include <alloca.h>
@@ -146,10 +151,6 @@ C_MODE_START
 	/* defines when allocating data */
 extern void *my_multi_malloc(PSI_memory_key key, myf flags, ...);
 
-#include <mysql/psi/psi.h>
-#include <mysql/service_mysql_alloc.h>
-#include <mysql/psi/mysql_memory.h>
-
 /*
   Switch to my_malloc() if the memory block to be allocated is bigger than
   max_alloca_sz.
@@ -205,7 +206,6 @@ extern uint    my_large_page_size;
 #endif /* HAVE_LINUX_LARGE_PAGES */
 
 #define my_alloca(SZ) alloca((size_t) (SZ))
-#define my_afree(PTR) {}
 
 #include <errno.h>			/* errno is a define */
 
@@ -220,8 +220,30 @@ extern void (*local_message_hook)(enum loglevel ll,
 extern uint my_file_limit;
 extern ulong my_thread_stack_size;
 
-extern void (*proc_info_hook)(void *, const PSI_stage_info *, PSI_stage_info *,
-                              const char *, const char *, const unsigned int);
+/*
+  Hooks for reporting execution stage information. The server implementation
+  of these will also set THD::current_cond/current_mutex.
+  By having hooks, we avoid direct dependencies on server code.
+*/
+extern void (*enter_cond_hook)(void *opaque_thd,
+                               mysql_cond_t *cond,
+                               mysql_mutex_t *mutex,
+                               const PSI_stage_info *stage,
+                               PSI_stage_info *old_stage,
+                               const char *src_function,
+                               const char *src_file,
+                               int src_line);
+
+extern void (*exit_cond_hook)(void *opaque_thd,
+                              const PSI_stage_info *stage,
+                              const char *src_function,
+                              const char *src_file,
+                              int src_line);
+
+/*
+  Hook for checking if the thread has been killed.
+*/
+extern int (*is_killed_hook)(const void *opaque_thd);
 
 /* charsets */
 #define MY_ALL_CHARSETS_SIZE 2048
@@ -279,12 +301,19 @@ struct st_my_file_info
 
 extern struct st_my_file_info *my_file_info;
 
+/* needed for client-only build */
+#ifndef PSI_FILE_KEY_DEFINED
+typedef unsigned int PSI_file_key;
+#define PSI_FILE_KEY_DEFINED
+#endif
+
 typedef struct st_dynamic_array
 {
   uchar *buffer;
   uint elements,max_element;
   uint alloc_increment;
   uint size_of_element;
+  PSI_memory_key m_psi_key;
 } DYNAMIC_ARRAY;
 
 typedef struct st_my_tmpdir
@@ -413,6 +442,8 @@ typedef struct st_io_cache		/* Used when cacheing files */
   char *file_name;			/* if used with 'open_cached_file' */
   char *dir,*prefix;
   File file; /* file descriptor */
+  PSI_file_key file_key; /* instrumented file key */
+
   /*
     seek_not_done is set by my_b_seek() to inform the upcoming read/write
     operation that a seek needs to be preformed prior to the actual I/O
@@ -433,12 +464,6 @@ typedef struct st_io_cache		/* Used when cacheing files */
     somewhere else
   */
   my_bool alloced_buffer;
-  /*
-    Offset of the space allotted for commit sequence number from the beginning
-    of the cache that will be used to update it when the transaction has
-    its commit sequence.
-   */
-  uint commit_seq_offset;
 } IO_CACHE;
 
 typedef int (*qsort2_cmp)(const void *, const void *, const void *);
@@ -448,9 +473,10 @@ typedef void (*my_error_reporter)(enum loglevel level, const char *format, ...)
 
 extern my_error_reporter my_charset_error_reporter;
 
-	/* defines for mf_iocache */
+/* defines for mf_iocache */
+extern PSI_file_key key_file_io_cache;
 
-	/* Test if buffer is inited */
+/* Test if buffer is inited */
 #define my_b_clear(info) (info)->buffer=0
 #define my_b_inited(info) (info)->buffer
 #define my_b_EOF INT_MIN
@@ -588,8 +614,7 @@ extern HANDLE   my_get_osfhandle(File fd);
 extern void     my_osmaperr(unsigned long last_error);
 #endif
 
-extern void init_glob_errs(void);
-extern const char** get_global_errmsgs();
+extern const char* get_global_errmsg(int nr);
 extern void wait_for_free_space(const char *filename, int errors);
 extern FILE *my_fopen(const char *FileName,int Flags,myf MyFlags);
 extern FILE *my_fdopen(File Filedes,const char *name, int Flags,myf MyFlags);
@@ -610,9 +635,9 @@ extern void my_printf_error(uint my_err, const char *format,
   __attribute__((format(printf, 2, 4)));
 extern void my_printv_error(uint error, const char *format, myf MyFlags,
                             va_list ap);
-extern int my_error_register(const char** (*get_errmsgs) (),
+extern int my_error_register(const char* (*get_errmsg) (int),
                              int first, int last);
-extern const char **my_error_unregister(int first, int last);
+extern my_bool my_error_unregister(int first, int last);
 extern void my_message(uint my_err, const char *str,myf MyFlags);
 extern void my_message_stderr(uint my_err, const char *str, myf MyFlags);
 void my_message_local_stderr(enum loglevel ll,
@@ -623,7 +648,8 @@ extern void my_end(int infoflag);
 extern int my_redel(const char *from, const char *to, int MyFlags);
 extern int my_copystat(const char *from, const char *to, int MyFlags);
 extern char * my_filename(File fd);
-extern my_bool my_chmod(const char *filename, ulong PermFlags, myf my_flags);
+extern MY_MODE get_file_perm(ulong perm_flags);
+extern my_bool my_chmod(const char *filename, ulong perm_flags, myf my_flags);
 
 #ifdef EXTRA_DEBUG
 void my_print_open_files(void);
@@ -675,15 +701,18 @@ extern void my_qsort(void *base_ptr, size_t total_elems, size_t size,
                      qsort_cmp cmp);
 extern void my_qsort2(void *base_ptr, size_t total_elems, size_t size,
                       qsort2_cmp cmp, const void *cmp_argument);
-extern qsort2_cmp get_ptr_compare(size_t);
 void my_store_ptr(uchar *buff, size_t pack_length, my_off_t pos);
 my_off_t my_get_ptr(uchar *ptr, size_t pack_length);
+extern int init_io_cache_ext(IO_CACHE *info,File file,size_t cachesize,
+                             enum cache_type type,my_off_t seek_offset,
+                             pbool use_async_io, myf cache_myflags,
+                             PSI_file_key file_key);
 extern int init_io_cache(IO_CACHE *info,File file,size_t cachesize,
-			 enum cache_type type,my_off_t seek_offset,
-			 pbool use_async_io, myf cache_myflags);
+                         enum cache_type type,my_off_t seek_offset,
+                         pbool use_async_io, myf cache_myflags);
 extern my_bool reinit_io_cache(IO_CACHE *info,enum cache_type type,
-			       my_off_t seek_offset,pbool use_async_io,
-			       pbool clear_cache);
+                               my_off_t seek_offset,pbool use_async_io,
+                               pbool clear_cache);
 extern void setup_io_cache(IO_CACHE* info);
 extern int _my_b_read(IO_CACHE *info,uchar *Buffer,size_t Count);
 extern int _my_b_read_r(IO_CACHE *info,uchar *Buffer,size_t Count);
@@ -727,8 +756,11 @@ File create_temp_file(char *to, const char *dir, const char *pfx,
 
 #else
 
-extern my_bool my_init_dynamic_array(DYNAMIC_ARRAY *array, uint element_size,
-                                     void *init_buffer, uint init_alloc,
+extern my_bool my_init_dynamic_array(DYNAMIC_ARRAY *array,
+                                     PSI_memory_key key,
+                                     uint element_size,
+                                     void *init_buffer,
+                                     uint init_alloc,
                                      uint alloc_increment);
 /* init_dynamic_array() function is deprecated */
 extern my_bool init_dynamic_array(DYNAMIC_ARRAY *array, uint element_size,
@@ -743,6 +775,7 @@ extern my_bool insert_dynamic(DYNAMIC_ARRAY *array, const void *element);
 extern void *alloc_dynamic(DYNAMIC_ARRAY *array);
 extern void *pop_dynamic(DYNAMIC_ARRAY*);
 extern void get_dynamic(DYNAMIC_ARRAY *array, void *element, uint array_index);
+extern void claim_dynamic(DYNAMIC_ARRAY *array);
 extern void delete_dynamic(DYNAMIC_ARRAY *array);
 extern void freeze_size(DYNAMIC_ARRAY *array);
 static inline void reset_dynamic(DYNAMIC_ARRAY *array)
@@ -769,6 +802,7 @@ extern void init_alloc_root(PSI_memory_key key,
 			    size_t pre_alloc_size);
 extern void *alloc_root(MEM_ROOT *mem_root, size_t Size);
 extern void *multi_alloc_root(MEM_ROOT *mem_root, ...);
+extern void claim_root(MEM_ROOT *root);
 extern void free_root(MEM_ROOT *root, myf MyFLAGS);
 extern void reset_root_defaults(MEM_ROOT *mem_root, size_t block_size,
                                 size_t prealloc_size);
@@ -779,6 +813,9 @@ static inline char *safe_strdup_root(MEM_ROOT *root, const char *str)
 }
 extern char *strmake_root(MEM_ROOT *root,const char *str,size_t len);
 extern void *memdup_root(MEM_ROOT *root,const void *str, size_t len);
+extern void set_memroot_max_capacity(MEM_ROOT *mem_root, size_t size);
+extern void set_memroot_error_reporting(MEM_ROOT *mem_root,
+                                       my_bool report_error);
 extern my_bool my_compress(uchar *, size_t *, size_t *);
 extern my_bool my_uncompress(uchar *, size_t , size_t *);
 extern uchar *my_compress_alloc(const uchar *packet, size_t *len,
@@ -889,9 +926,8 @@ extern size_t escape_string_for_mysql(const CHARSET_INFO *charset_info,
 extern CHARSET_INFO *fs_character_set(void);
 #endif
 extern size_t escape_quotes_for_mysql(CHARSET_INFO *charset_info,
-                                      char *to, size_t to_length,
-                                      const char *from, size_t length);
-
+                                  char *to, size_t to_length,
+                                  const char *from, size_t length, char quote);
 #ifdef _WIN32
 extern my_bool have_tcpip;		/* Is set if tcpip is used */
 
@@ -912,8 +948,6 @@ void my_win_console_putc(const CHARSET_INFO *cs, int c);
 void my_win_console_vfprintf(const CHARSET_INFO *cs, const char *fmt, va_list args);
 int my_win_translate_command_line_args(const CHARSET_INFO *cs, int *ac, char ***av);
 #endif /* _WIN32 */
-
-#include <mysql/psi/psi.h>
 
 #ifdef HAVE_PSI_INTERFACE
 extern MYSQL_PLUGIN_IMPORT struct PSI_bootstrap *PSI_hook;

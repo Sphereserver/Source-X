@@ -2,7 +2,7 @@
 // I try to compile in several different environments.
 // 1. DOS command line or windows (_WINDOWS	by compiler or _INC_WINDOWS in windows.h)
 // 2. MFC or not MFC  (__AFX_H__ in afx.h or _MFC_VER by compiler)
-// 3. 16 bit or 32 bit (_WIN32 defined by compiler)
+// 3. 16 bit or 32 bit (_WINDOWS defined by compiler)
 // 4. LINUX 32 bit
 
 #pragma once
@@ -19,13 +19,13 @@
 #include <vector>
 #include <stack>
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 	#include "os_windows.h"
 #endif
 #include "datatypes.h"
-#ifndef _WIN32
+#ifndef _WINDOWS
 	#include "os_unix.h"
-#endif // _WIN32
+#endif // _WINDOWS
 
 // use to indicate that a function uses printf-style arguments, allowing GCC
 // to validate the format string and arguments:

@@ -4,7 +4,7 @@
 
 #include "CWindow.h"
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 
 ///////////////////////
 // -CDialogBase
@@ -59,4 +59,4 @@ LRESULT WINAPI CWindowBase::WndProc( HWND hWnd, UINT message, WPARAM wParam, LPA
 	return ( pWnd ? pWnd->DefWindowProc(message, wParam, lParam) : ::DefWindowProc(hWnd, message, wParam, lParam) );
 }
 
-#endif // _WIN32
+#endif // _WINDOWS

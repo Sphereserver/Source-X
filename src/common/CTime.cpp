@@ -9,7 +9,7 @@
 #include "CTime.h"
 #include "spherecom.h"
 
-#ifndef _WIN32
+#ifndef _WINDOWS
 #include <sys/time.h>
 
 llong GetTickCount()
@@ -71,7 +71,7 @@ struct tm* CGTime::GetLocalTm(struct tm* ptm) const
 	#define maxTimeBufferSize 128
 #endif
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 void __cdecl invalidParameterHandler(const wchar_t* expression, const wchar_t* function, const wchar_t* file, uint line, uintptr_t pReserved)
 {
 	// bad format has been specified
@@ -90,7 +90,7 @@ void FormatDateTime(tchar * pszTemp, lpctstr pszFormat, const struct tm * ptmTem
 	ASSERT(pszFormat != NULL);
 	ASSERT(ptmTemp != NULL);
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 	// on windows we need to set the invalid parameter handler, or else the program will terminate when a bad format is encountered
 	_invalid_parameter_handler oldHandler, newHandler;
 	newHandler = static_cast<_invalid_parameter_handler>(invalidParameterHandler);
@@ -104,7 +104,7 @@ void FormatDateTime(tchar * pszTemp, lpctstr pszFormat, const struct tm * ptmTem
 	if (strftime( pszTemp, maxTimeBufferSize, pszFormat, ptmTemp) == 0)
 		pszTemp[0] = '\0';
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 	}
 	catch (...)
 	{

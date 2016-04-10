@@ -6,7 +6,7 @@
 #include "../common/common.h"
 #include "../sphere/threads.h"
 
-#if defined(_WIN32) && !defined(_MTNETWORK)
+#if defined(_WINDOWS) && !defined(_MTNETWORK)
 	// _MTNETWORK enabled via makefile for other systems
 	#define _MTNETWORK
 #endif

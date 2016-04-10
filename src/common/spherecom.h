@@ -17,7 +17,7 @@
 #include <ctype.h>
 #include <assert.h>
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 // NOTE: If we want a max number of sockets we must compile for it !
 	#undef FD_SETSIZE
 	#define FD_SETSIZE 1024 // for max of n users ! default = 64
@@ -37,7 +37,7 @@
 	#define strnicmp	_strnicmp
 
 	extern const OSVERSIONINFO * Sphere_GetOSInfo();
-#else	// _WIN32 else assume LINUX
+#else	// _WINDOWS else assume LINUX
 
 	#include <sys/types.h>
 	#include <sys/timeb.h>
@@ -64,7 +64,7 @@
 	#define strcmpi		strcasecmp
 	#define strnicmp	strncasecmp
 	#define _vsnprintf	vsnprintf
-#endif // !_WIN32
+#endif // !_WINDOWS
 
 #ifdef _DEBUG
 	#ifndef ASSERT
@@ -79,7 +79,7 @@
 #else	// _DEBUG
 
 	#ifndef ASSERT
-		/*#ifndef _WIN32
+		/*#ifndef _WINDOWS
 			// In linux, if we get an access violation, an exception isn't thrown.  Instead, we get
 			// a SIG_SEGV, and the process cores. The following code takes care of this for us.
 			extern void Assert_CheckFail( const char * pExp, const char *pFile, long lLine );
@@ -96,7 +96,7 @@
 
 #endif	// ! _DEBUG
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 	#define ATOI atoi
 	#define ITOA _itoa
 	#define LTOA _ltoa

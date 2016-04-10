@@ -6,7 +6,7 @@
 #ifndef _INC_CFILE_H
 #define _INC_CFILE_H
 
-#ifndef _WIN32
+#ifndef _WINDOWS
 	#include <sys/types.h>
 	#include <sys/stat.h>
 	#include <fcntl.h>
@@ -34,11 +34,11 @@
 	#define HFILE int
 #endif // HFILE_ERROR
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 	#define INVALID_HANDLE ((HANDLE) -1)
 #endif
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 	#define OSFILE_TYPE		HANDLE
 	#define NOFILE_HANDLE	INVALID_HANDLE
 #else
@@ -134,7 +134,7 @@ public:
 	* @return true is success, false otherwise.
 	*/
 	virtual bool Write( const void * pData, dword dwLength ) const;
-#ifdef _WIN32
+#ifdef _WINDOWS
 	/**
 	* @brief Notify a file input / output error (win32 only).
 	* @param szMessage error to notify.
@@ -285,7 +285,7 @@ protected:
 	* @return string that describes the open mode.
 	*/
 	lpctstr GetModeStr() const;
-#ifdef _WIN32
+#ifdef _WINDOWS
 	bool	bNoBuffer;	///< TODOC.
 #endif
 protected:
@@ -295,7 +295,7 @@ public:
 	CFileText()
 	{
 		m_pStream = NULL;
-#ifdef _WIN32
+#ifdef _WINDOWS
 		bNoBuffer = false;
 #endif
 	}
@@ -346,7 +346,7 @@ public:
 	* @param iLen lenght of the data to write.
 	* @return true is success, false otherwise.
 	*/
-#ifndef _WIN32
+#ifndef _WINDOWS
 	bool Write( const void * pData, dword iLen ) const;
 #else
 	bool Write( const void * pData, dword iLen );

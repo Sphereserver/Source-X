@@ -251,7 +251,7 @@ void CGSocket::Clear()
 
 int CGSocket::GetLastError(bool bUseErrno)
 {
-#ifdef _WIN32
+#ifdef _WINDOWS
 	UNREFERENCED_PARAMETER(bUseErrno);
 	return( WSAGetLastError() );
 #else
@@ -410,7 +410,7 @@ int CGSocket::GetSockOpt( int nOptionName, void * optval, int * poptlen, int nLe
 	return( getsockopt( m_hSocket, nLevel, nOptionName, reinterpret_cast<char FAR *>(optval), reinterpret_cast<socklen_t *>(poptlen)));
 }
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 	int CGSocket::IOCtlSocket(int icmd, dword * pdwArgs )
 	{
 		return ioctlsocket( m_hSocket, icmd, (DWORD*)pdwArgs );
@@ -443,7 +443,7 @@ int CGSocket::GetSockOpt( int nOptionName, void * optval, int * poptlen, int nLe
 
 void CGSocket::SetNonBlocking(bool bEnable)
 {
-#ifdef _WIN32
+#ifdef _WINDOWS
 	DWORD lVal = bEnable? 1 : 0;	// 0 =  block
 	ioctlsocket(m_hSocket, FIONBIO, &lVal);
 #else
@@ -466,7 +466,7 @@ void CGSocket::Close()
 void CGSocket::CloseSocket( SOCKET hClose )
 {
 	shutdown( hClose, 2 );
-#ifdef _WIN32
+#ifdef _WINDOWS
 	closesocket( hClose );
 #else
 	close( hClose ); // SD_BOTH

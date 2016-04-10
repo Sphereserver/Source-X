@@ -1,4 +1,4 @@
-/* Copyright (c) 2000, 2014, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2000, 2016, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -35,14 +35,14 @@ extern "C" {
 #include <sys/types.h>
 #endif
 typedef char my_bool;
-#if !defined(_WIN32)
+#if !defined(_WINDOWS)
 #define STDCALL
 #else
 #define STDCALL __stdcall
 #endif
 
 #ifndef my_socket_defined
-#ifdef _WIN32
+#ifdef _WINDOWS
 #include <windows.h>
 #ifdef WIN32_LEAN_AND_MEAN
 #include <winsock2.h>
@@ -50,7 +50,7 @@ typedef char my_bool;
 #define my_socket SOCKET
 #else
 typedef int my_socket;
-#endif /* _WIN32 */
+#endif /* _WINDOWS */
 #endif /* my_socket_defined */
 #endif /* MY_GLOBAL_INCLUDED */
 
@@ -108,7 +108,7 @@ typedef char **MYSQL_ROW;		/* return data as array of strings */
 typedef unsigned int MYSQL_FIELD_OFFSET; /* offset to current field */
 
 #ifndef MY_GLOBAL_INCLUDED
-#if defined (_WIN32)
+#if defined (_WINDOWS)
 typedef unsigned __int64 my_ulonglong;
 #else
 typedef unsigned long long my_ulonglong;
@@ -163,7 +163,10 @@ enum mysql_option
   MYSQL_SERVER_PUBLIC_KEY,
   MYSQL_ENABLE_CLEARTEXT_PLUGIN,
   MYSQL_OPT_CAN_HANDLE_EXPIRED_PASSWORDS,
-  MYSQL_OPT_SSL_ENFORCE
+  MYSQL_OPT_SSL_ENFORCE,
+  MYSQL_OPT_MAX_ALLOWED_PACKET, MYSQL_OPT_NET_BUFFER_LENGTH,
+  MYSQL_OPT_TLS_VERSION,
+  MYSQL_OPT_SSL_MODE
 };
 
 /**
@@ -186,7 +189,7 @@ struct st_mysql_options {
   char *ssl_cipher;				/* cipher to use */
   char *shared_memory_base_name;
   unsigned long max_allowed_packet;
-  my_bool use_ssl;				/* if to use SSL or not */
+  my_bool use_ssl;                              /* Deprecated ! Former use_ssl */
   my_bool compress,named_pipe;
   my_bool unused1;
   my_bool unused2;
@@ -230,6 +233,12 @@ enum mysql_protocol_type
 {
   MYSQL_PROTOCOL_DEFAULT, MYSQL_PROTOCOL_TCP, MYSQL_PROTOCOL_SOCKET,
   MYSQL_PROTOCOL_PIPE, MYSQL_PROTOCOL_MEMORY
+};
+
+enum mysql_ssl_mode
+{
+  SSL_MODE_DISABLED= 1, SSL_MODE_PREFERRED, SSL_MODE_REQUIRED,
+  SSL_MODE_VERIFY_CA, SSL_MODE_VERIFY_IDENTITY
 };
 
 typedef struct character_set
@@ -315,19 +324,6 @@ typedef struct st_mysql_res {
 #define MYSQL_CLIENT
 #endif
 
-
-typedef struct st_mysql_parameters
-{
-  unsigned long *p_max_allowed_packet;
-  unsigned long *p_net_buffer_length;
-  void *extension;
-} MYSQL_PARAMETERS;
-
-#if !defined(MYSQL_SERVER) && !defined(EMBEDDED_LIBRARY)
-#define max_allowed_packet (*mysql_get_parameters()->p_max_allowed_packet)
-#define net_buffer_length (*mysql_get_parameters()->p_net_buffer_length)
-#endif
-
 /*
   Set up and bring down the server; to ensure that applications will
   work when linked against either the standard client library or the
@@ -348,7 +344,6 @@ void STDCALL mysql_server_end(void);
 #define mysql_library_init mysql_server_init
 #define mysql_library_end mysql_server_end
 
-MYSQL_PARAMETERS *STDCALL mysql_get_parameters(void);
 
 /*
   Set up and bring down a thread; these function should be called
@@ -483,12 +478,15 @@ unsigned long	STDCALL mysql_hex_string(char *to,const char *from,
 unsigned long STDCALL mysql_real_escape_string(MYSQL *mysql,
 					       char *to,const char *from,
 					       unsigned long length);
-void		STDCALL mysql_debug(const char *debug);
-void 		STDCALL myodbc_remove_escape(MYSQL *mysql,char *name);
-unsigned int	STDCALL mysql_thread_safe(void);
-my_bool		STDCALL mysql_embedded(void);
-my_bool         STDCALL mysql_read_query_result(MYSQL *mysql);
-int             STDCALL mysql_reset_connection(MYSQL *mysql);
+unsigned long STDCALL mysql_real_escape_string_quote(MYSQL *mysql,
+                 char *to, const char *from,
+                 unsigned long length, char quote);
+void          STDCALL mysql_debug(const char *debug);
+void          STDCALL myodbc_remove_escape(MYSQL *mysql,char *name);
+unsigned int  STDCALL mysql_thread_safe(void);
+my_bool       STDCALL mysql_embedded(void);
+my_bool       STDCALL mysql_read_query_result(MYSQL *mysql);
+int           STDCALL mysql_reset_connection(MYSQL *mysql);
 
 /*
   The following definitions are added for the enhanced 

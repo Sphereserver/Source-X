@@ -1,4 +1,4 @@
-#if !defined(_WIN32) || defined(_LIBEV)
+#if !defined(_WINDOWS) || defined(_LIBEV)
 //#include "../game/spheresvr.h" Removed to test.
 #include "../network/network.h"
 #include "../game/CServer.h"
@@ -95,7 +95,7 @@ void LinuxEv::registerClient(NetState * state, EventsID eventCheck)
 	
 	memset(state->iocb(), 0, sizeof(ev_io));
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 	int fd = EV_WIN32_HANDLE_TO_FD(state->m_socket.GetSocket());
 	ev_io_init(state->iocb(), socketslave_cb, fd, (int)eventCheck);
 #else
@@ -138,7 +138,7 @@ void LinuxEv::forceClientwrite(NetState * state)
 
 void LinuxEv::registerMainsocket()
 {
-#ifdef _WIN32
+#ifdef _WINDOWS
 	int fd = EV_WIN32_HANDLE_TO_FD(g_Serv.m_SocketMain.GetSocket());
 	ev_io_init(&m_watchMainsock, socketmain_cb, fd, EV_READ);
 #else

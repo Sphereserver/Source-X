@@ -26,7 +26,7 @@ public:
 	void unlock();
 
 private:
-#ifdef _WIN32
+#ifdef _WINDOWS
 	CRITICAL_SECTION m_criticalSection;
 #else
 	pthread_mutex_t m_criticalSection;
@@ -80,7 +80,7 @@ private:
 class AutoResetEvent
 {
 public:
-#ifdef _WIN32
+#ifdef _WINDOWS
 	static const uint _infinite = INFINITE;
 #else
 	static const uint _infinite = 0xffffffff;
@@ -99,7 +99,7 @@ public:
 	void signal();
 
 private:
-#ifdef _WIN32
+#ifdef _WINDOWS
 	HANDLE m_handle;
 #else
 	pthread_mutex_t m_criticalSection;
@@ -112,7 +112,7 @@ private:
 class ManualResetEvent
 {
 public:
-#ifdef _WIN32
+#ifdef _WINDOWS
 	static const uint _infinite = INFINITE;
 #else
 	static const uint _infinite = 0xffffffff;
@@ -132,7 +132,7 @@ public:
 	void set();
 
 private:
-#ifdef _WIN32
+#ifdef _WINDOWS
 	HANDLE m_handle;
 #else
 	bool m_value;

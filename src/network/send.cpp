@@ -1,5 +1,5 @@
 
-#ifndef _WIN32
+#ifndef _WINDOWS
 	#include <sys/time.h>
 #endif
 

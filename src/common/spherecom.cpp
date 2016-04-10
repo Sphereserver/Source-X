@@ -15,7 +15,7 @@
 	}
 #endif
 
-#ifndef _WIN32
+#ifndef _WINDOWS
 	int	ATOI( const char * str )
 	{
 		int	res;
@@ -207,7 +207,7 @@ int CvtSystemToNUNICODE( NCHAR * pOut, int iSizeOutChars, lpctstr pInp, int iSiz
 
 	int iOut=0;
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 	const OSVERSIONINFO * posInfo = Sphere_GetOSInfo();
 	if ( posInfo->dwPlatformId == VER_PLATFORM_WIN32_NT ||
 		posInfo->dwMajorVersion > 4 )
@@ -298,7 +298,7 @@ int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const NCHAR * pInp, in
 	int iOut=0;
 	int iInp=0;
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 	const OSVERSIONINFO * posInfo = Sphere_GetOSInfo();
 	if ( posInfo->dwPlatformId == VER_PLATFORM_WIN32_NT ||
 		posInfo->dwMajorVersion > 4 )

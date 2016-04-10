@@ -1,5 +1,5 @@
 #pragma once
-#if !defined(_INC_CRASHDUMP_H) && defined(_WIN32) && !defined(_DEBUG) && !defined(_NO_CRASHDUMP)
+#if !defined(_INC_CRASHDUMP_H) && defined(_WINDOWS) && !defined(_DEBUG) && !defined(_NO_CRASHDUMP)
 #define _INC_CRASHDUMP_H
 
 #include <stdio.h>

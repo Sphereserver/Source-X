@@ -1,4 +1,4 @@
-/* Copyright (c) 2009, 2014, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2009, 2016, Oracle and/or its affiliates. All rights reserved.
  
  This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -90,7 +90,7 @@
 /* #undef HAVE_FSYNC */
 /* #undef HAVE_GETHOSTBYADDR_R */
 /* #undef HAVE_GETHRTIME */
-/* #undef HAVE_GETNAMEINFO */
+#define HAVE_GETNAMEINFO 1
 /* #undef HAVE_GETPASS */
 /* #undef HAVE_GETPASSPHRASE */
 /* #undef HAVE_GETPWNAM */
@@ -138,7 +138,7 @@
 /* #undef DNS_USE_CPU_CLOCK_FOR_ID */
 /* #undef HAVE_EPOLL */
 /* #undef HAVE_EVENT_PORTS */
-/* #undef HAVE_INET_NTOP */
+#define HAVE_INET_NTOP 1
 /* #undef HAVE_WORKING_KQUEUE */
 /* #undef HAVE_TIMERADD */
 /* #undef HAVE_TIMERCLEAR */
@@ -158,21 +158,19 @@
 /* #undef FIONREAD_IN_SYS_FILIO */
 /* #undef HAVE_SIGEV_THREAD_ID */
 /* #undef HAVE_SIGEV_PORT */
-/* #undef HAVE_LOG2 */
+#define HAVE_LOG2 1
 
-/* #undef HAVE_ISINF */
+#define HAVE_ISINF 1
 
 /* #undef HAVE_KQUEUE_TIMERS */
 /* #undef HAVE_POSIX_TIMERS */
-#define HAVE_WINDOWS_TIMERS 1
-#define HAVE_MY_TIMER 1
 
 /* Endianess */
 /* #undef WORDS_BIGENDIAN */
 
 /* Type sizes */
-#define SIZEOF_VOIDP     4
-#define SIZEOF_CHARP     4
+#define SIZEOF_VOIDP     8
+#define SIZEOF_CHARP     8
 #define SIZEOF_LONG      4
 #define SIZEOF_SHORT     2
 #define SIZEOF_INT       4
@@ -182,6 +180,7 @@
 /* #undef HAVE_UINT */
 /* #undef HAVE_ULONG */
 /* #undef HAVE_U_INT32_T */
+/* #undef HAVE_STRUCT_TIMESPEC */
 
 /* Code tests*/
 #define STACK_DIRECTION -1
@@ -211,12 +210,12 @@
 /*
  * Platform specific CMake files
  */
-#define MACHINE_TYPE "x86"
+#define MACHINE_TYPE "x86_64"
 /* #undef HAVE_LINUX_LARGE_PAGES */
 /* #undef HAVE_SOLARIS_LARGE_PAGES */
 /* #undef HAVE_SOLARIS_ATOMIC */
 /* #undef HAVE_SOLARIS_STYLE_GETHOST */
-#define SYSTEM_TYPE "Win32"
+#define SYSTEM_TYPE "Win64"
 /* Windows stuff, mostly functions, that have Posix analogs but named differently */
 /* #undef IPPROTO_IPV6 */
 /* #undef IPV6_V6ONLY */
@@ -233,15 +232,16 @@
 #define ENABLED_PROFILING 1
 /* #undef HAVE_ASAN */
 #define ENABLED_LOCAL_INFILE 1
-/* #undef OPTIMIZER_TRACE */
-#define DEFAULT_MYSQL_HOME "C:/Program Files/MySQL/MySQL Server 6.1"
+#define OPTIMIZER_TRACE 1
+#define DEFAULT_MYSQL_HOME "C:/Program Files/MySQL/MySQL Server 5.7"
 #define SHAREDIR "share"
-#define DEFAULT_BASEDIR "C:/Program Files/MySQL/MySQL Server 6.1"
-#define MYSQL_DATADIR "C:/Program Files/MySQL/MySQL Server 6.1/data"
-#define DEFAULT_CHARSET_HOME "C:/Program Files/MySQL/MySQL Server 6.1"
-#define PLUGINDIR "C:/Program Files/MySQL/MySQL Server 6.1/lib/plugin"
+#define DEFAULT_BASEDIR "C:/Program Files/MySQL/MySQL Server 5.7"
+#define MYSQL_DATADIR "C:/Program Files/MySQL/MySQL Server 5.7/data"
+#define MYSQL_KEYRINGDIR "C:/Program Files/MySQL/MySQL Server 5.7/keyring"
+#define DEFAULT_CHARSET_HOME "C:/Program Files/MySQL/MySQL Server 5.7"
+#define PLUGINDIR "C:/Program Files/MySQL/MySQL Server 5.7/lib/plugin"
 /* #undef DEFAULT_SYSCONFDIR */
-#define DEFAULT_TMPDIR P_tmpdir
+#define DEFAULT_TMPDIR ""
 #define INSTALL_SBINDIR "/bin"
 #define INSTALL_BINDIR "/bin"
 #define INSTALL_MYSQLSHAREDIR "/share"
@@ -250,10 +250,10 @@
 #define INSTALL_INCLUDEDIR "/include"
 #define INSTALL_SCRIPTDIR "/scripts"
 #define INSTALL_MYSQLDATADIR "/data"
+#define INSTALL_MYSQLKEYRINGDIR "/keyring"
 /* #undef INSTALL_PLUGINTESTDIR */
 #define INSTALL_INFODIR "/docs"
 #define INSTALL_MYSQLTESTDIR "/mysql-test"
-#define INSTALL_SQLBENCHDIR "/."
 #define INSTALL_DOCREADMEDIR "/."
 #define INSTALL_DOCDIR "/docs"
 #define INSTALL_MANDIR "/man"
@@ -338,7 +338,8 @@
 /*
  * Performance schema
  */
-/* #undef WITH_PERFSCHEMA_STORAGE_ENGINE */
+#define WITH_PERFSCHEMA_STORAGE_ENGINE 1
+/* #undef DISABLE_PSI_THREAD */
 /* #undef DISABLE_PSI_MUTEX */
 /* #undef DISABLE_PSI_RWLOCK */
 /* #undef DISABLE_PSI_COND */
@@ -354,6 +355,14 @@
 /* #undef DISABLE_PSI_METADATA */
 /* #undef DISABLE_PSI_MEMORY */
 /* #undef DISABLE_PSI_TRANSACTION */
+
+/*
+ * syscall
+*/
+/* #undef HAVE_SYS_THREAD_SELFID */
+/* #undef HAVE_SYS_GETTID */
+/* #undef HAVE_PTHREAD_GETTHREADID_NP */
+/* #undef HAVE_INTEGER_PTHREAD_SELF */
 
 /* Platform-specific C++ compiler behaviors we rely upon */
 
@@ -372,17 +381,17 @@
  * MySQL version
  */
 #define DOT_FRM_VERSION 6
-#define MYSQL_VERSION_MAJOR 6
-#define MYSQL_VERSION_MINOR 1
-#define MYSQL_VERSION_PATCH 6
+#define MYSQL_VERSION_MAJOR 5
+#define MYSQL_VERSION_MINOR 7
+#define MYSQL_VERSION_PATCH 11
 #define MYSQL_VERSION_EXTRA ""
 #define PACKAGE "mysql"
 #define PACKAGE_BUGREPORT ""
 #define PACKAGE_NAME "MySQL Server"
-#define PACKAGE_STRING "MySQL Server 6.1.6"
+#define PACKAGE_STRING "MySQL Server 5.7.11"
 #define PACKAGE_TARNAME "mysql"
-#define PACKAGE_VERSION "6.1.6"
-#define VERSION "6.1.6"
+#define PACKAGE_VERSION "5.7.11"
+#define VERSION "5.7.11"
 #define PROTOCOL_VERSION 10
 
 /*
@@ -400,6 +409,7 @@
  * Other
  */
 /* #undef EXTRA_DEBUG */
+/* #undef HAVE_CHOWN */
 
 /*
  * Hardcoded values needed by libevent/NDB/memcached
@@ -418,5 +428,13 @@
 #define HAVE_SYS_STAT_H 1
 #define HAVE_SYS_TYPES_H 1
 #define SIZEOF_CHAR 1
+
+/* For --secure-file-priv */
+#define DEFAULT_SECURE_FILE_PRIV_DIR ""
+#define DEFAULT_SECURE_FILE_PRIV_EMBEDDED_DIR "NULL"
+/* #undef HAVE_LIBNUMA */
+
+/* For default value of --early_plugin_load */
+#define DEFAULT_EARLY_PLUGIN_LOAD "keyring_file=keyring_file.dll"
 
 #endif

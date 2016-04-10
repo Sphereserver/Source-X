@@ -6,7 +6,7 @@
 #ifndef _INC_NTSERVICE_H
 #define _INC_NTSERVICE_H
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 
 
 #ifdef __MINGW32__
@@ -61,6 +61,6 @@ public:
 } g_Service;
 
 
-#endif // _WIN32
+#endif // _WINDOWS
 
 #endif // _INC_NTSERVICE_H

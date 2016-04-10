@@ -3953,7 +3953,7 @@ bool CResource::Load( bool fResync )
 		else
 			pResFile->ReSync();
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 		NTWindow_OnTick(0);
 #endif
 		g_Serv.PrintPercent(j + 1, count);
@@ -4230,7 +4230,7 @@ bool CResource::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilename )
 	s.WriteSection("EOF");
 	s.Close();
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 	NTWindow_SetWindowTitle();
 #endif
 	return true;

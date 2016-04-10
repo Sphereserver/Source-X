@@ -1,11 +1,11 @@
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 	#include "../sphere/ntservice.h"	// g_Service
 #else
 	#include "../sphere/UnixTerminal.h"
 #endif
 
-#if defined(_WIN32) && !defined(_DEBUG)
+#if defined(_WINDOWS) && !defined(_DEBUG)
 	#include "../common/crashdump/crashdump.h"
 #endif
 
@@ -26,7 +26,7 @@
 #include "Triggers.h"
 #include "CScriptProfiler.h"
 
-#if !defined(_WIN32) || defined(_LIBEV)
+#if !defined(_WINDOWS) || defined(_LIBEV)
 	extern LinuxEv g_NetworkEvent;
 #endif
 
@@ -66,7 +66,7 @@ void CServer::SetSignals( bool fMsg )
 	// set_unexpected( &Exception_Unexpected );
 
 	SetUnixSignals(g_Cfg.m_fSecure);
-#ifndef _WIN32
+#ifndef _WINDOWS
 	if ( g_Cfg.m_fSecure )
 	{
 		g_Log.Event( (IsLoading() ? 0 : LOGL_EVENT) | LOGM_INIT, "Signal handlers installed.\n" );
@@ -89,7 +89,7 @@ void CServer::SetServerMode( SERVMODE_TYPE mode )
 {
 	ADDTOCALLSTACK("CServer::SetServerMode");
 	m_iModeCode = mode;
-#ifdef _WIN32
+#ifdef _WINDOWS
 	NTWindow_SetWindowTitle();
 #endif
 }
@@ -151,7 +151,7 @@ void CServer::SysMessage( lpctstr pszMsg ) const
 	if ( !pszMsg || ISINTRESOURCE(pszMsg) )
 		return;
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 	NTWindow_PostMsg(pszMsg);
 #else
 	g_UnixTerminal.print(pszMsg);
@@ -196,7 +196,7 @@ int CServer::PrintPercent( int iCount, int iTotal )
 
 	PrintTelnet(pszTemp);
 
-#ifndef _WIN32
+#ifndef _WINDOWS
 	if ( g_UnixTerminal.isColorEnabled() )
 	{
 		SysMessage(pszTemp);
@@ -204,16 +204,16 @@ int CServer::PrintPercent( int iCount, int iTotal )
 		while ( len > 0) // backspace it
 		{
 			PrintTelnet("\x08");
-#ifndef _WIN32
+#ifndef _WINDOWS
  			SysMessage("\x08");
 #endif
 			len--;
 		}
-#ifndef _WIN32
+#ifndef _WINDOWS
 	}
 #endif
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 	NTWindow_SetWindowTitle(pszTemp);
 	g_Service.OnTick();
 #endif
@@ -1396,7 +1396,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			break;
 		case SV_SHRINKMEM:
 			{
-#ifdef _WIN32
+#ifdef _WINDOWS
 				if ( Sphere_GetOSInfo()->dwPlatformId != 2 )
 				{
 					g_Log.EventError( "Command not avaible on Windows 95/98/ME.\n" );
@@ -1490,17 +1490,17 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 			case '?':
 				PrintStr( SPHERE_TITLE " \n"
 					"Command Line Switches:\n"
-#ifdef _WIN32
+#ifdef _WINDOWS
 					"-cClassName Setup custom window class name for sphere (default: " SPHERE_TITLE "Svr)\n"
 #else
 					"-c use colored console output (default: off)\n"
 #endif
 					"-D Dump global variable DEFNAMEs to defs.txt\n"
-#if defined(_WIN32) && !defined(_DEBUG)
+#if defined(_WINDOWS) && !defined(_DEBUG)
 					"-E Enable the CrashDumper\n"
 #endif
 					"-Gpath/to/saves/ Defrags sphere saves\n"
-#ifdef _WIN32
+#ifdef _WINDOWS
 					"-k install/remove Installs or removes NT Service\n"
 #endif
 					"-Nstring Set the sphere name.\n"
@@ -1509,7 +1509,7 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 					"-Q Quit when finished.\n"
 					);
 				return( false );
-#ifdef _WIN32
+#ifdef _WINDOWS
 			case 'C':
 			case 'K':
 				//	these are parsed in other places - nt service, nt window part, etc
@@ -1546,7 +1546,7 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 					}
 				}
 				continue;
-#if defined(_WIN32) && !defined(_DEBUG) && !defined(_NO_CRASHDUMP)
+#if defined(_WINDOWS) && !defined(_DEBUG) && !defined(_NO_CRASHDUMP)
 			case 'E':
 				CrashDump::Enable();
 				if (CrashDump::IsEnabled())
@@ -1634,7 +1634,7 @@ bool CServer::SocketsInit( CGSocket & socket )
 	socket.SetSockOpt(SO_LINGER, reinterpret_cast<const char *>(&lval), sizeof(lval));
 	socket.SetNonBlocking();
 
-#ifndef _WIN32
+#ifndef _WINDOWS
 	int onNotOff = 1;
 	if(socket.SetSockOpt(SO_REUSEADDR, (char *)&onNotOff , sizeof(onNotOff )) == -1) {
 		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Unable to set SO_REUSEADDR!\n");
@@ -1653,7 +1653,7 @@ bool CServer::SocketsInit( CGSocket & socket )
 	}
 	socket.Listen();
 	
-#if !defined(_WIN32) || defined(_LIBEV)
+#if !defined(_WINDOWS) || defined(_LIBEV)
 #ifdef LIBEV_REGISTERMAIN
 	if ( g_Cfg.m_fUseAsyncNetwork != 0 )
 		g_NetworkEvent.registerMainsocket();
@@ -1703,7 +1703,7 @@ bool CServer::SocketsInit() // Initialize sockets
 void CServer::SocketsClose()
 {
 	ADDTOCALLSTACK("CServer::SocketsClose");
-#if !defined(_WIN32) || defined(_LIBEV)
+#if !defined(_WINDOWS) || defined(_LIBEV)
 #ifdef LIBEV_REGISTERMAIN
 	if ( g_Cfg.m_fUseAsyncNetwork != 0 )
 		g_NetworkEvent.unregisterMainsocket();
@@ -1717,7 +1717,7 @@ void CServer::OnTick()
 	ADDTOCALLSTACK("CServer::OnTick");
 	EXC_TRY("Tick");
 
-#ifndef _WIN32
+#ifndef _WINDOWS
 	if (g_UnixTerminal.isReady())
 	{
 		tchar c = g_UnixTerminal.read();
@@ -1770,7 +1770,7 @@ bool CServer::Load()
 {
 	EXC_TRY("Load");
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 	EXC_SET("init winsock");
 	tchar * wSockInfo = Str_GetTemp();
 	if ( !m_SocketMain.IsOpen() )
@@ -1806,7 +1806,7 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 	g_Log.Event(LOGM_INIT, "%s, compiled at %s (%s)\n", g_szServerDescription, __DATE__, __TIME__);
 #endif
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 	if ( wSockInfo[0] )
 		g_Log.Event(LOGM_INIT, wSockInfo);
 #endif
@@ -1850,7 +1850,7 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 	}
 
 	EXC_SET("finilizing");
-#ifdef _WIN32
+#ifdef _WINDOWS
 	char *pszTemp = Str_GetTemp();
 	sprintf(pszTemp, SPHERE_TITLE " V" SPHERE_VERSION " - %s", GetName());
 	SetConsoleTitle(pszTemp);

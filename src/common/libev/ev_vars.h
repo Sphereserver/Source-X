@@ -74,7 +74,7 @@ VARx(int, evfd)
 VAR (evpipe, int evpipe [2])
 VARx(ev_io, pipe_w)
 
-#if !defined(_WIN32) || EV_GENWRAP
+#if !defined(_WINDOWS) || EV_GENWRAP
 VARx(pid_t, curpid)
 #endif
 
@@ -85,7 +85,7 @@ VARx(void *, vec_ri)
 VARx(void *, vec_ro)
 VARx(void *, vec_wi)
 VARx(void *, vec_wo)
-#if defined(_WIN32) || EV_GENWRAP
+#if defined(_WINDOWS) || EV_GENWRAP
 VARx(void *, vec_eo)
 #endif
 VARx(int, vec_max)

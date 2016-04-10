@@ -3,7 +3,7 @@
 #ifndef _INC_UNIXTERMINAL_H
 #define _INC_UNIXTERMINAL_H
 
-#ifndef _WIN32
+#ifndef _WINDOWS
 
 #include "../common/common.h"
 
@@ -70,5 +70,5 @@ public:
 
 extern UnixTerminal g_UnixTerminal;
 
-#endif // !_WIN32
+#endif // !_WINDOWS
 #endif // _INC_UNIXTERMINAL_H

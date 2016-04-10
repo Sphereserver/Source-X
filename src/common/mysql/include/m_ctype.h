@@ -1,4 +1,4 @@
-/* Copyright (c) 2000, 2014, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2000, 2015, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -232,22 +232,6 @@ typedef struct
   uint mb_len;
 } my_match_t;
 
-enum my_lex_states
-{
-  MY_LEX_START, MY_LEX_CHAR, MY_LEX_IDENT, 
-  MY_LEX_IDENT_SEP, MY_LEX_IDENT_START,
-  MY_LEX_REAL, MY_LEX_HEX_NUMBER, MY_LEX_BIN_NUMBER,
-  MY_LEX_CMP_OP, MY_LEX_LONG_CMP_OP, MY_LEX_STRING, MY_LEX_COMMENT, MY_LEX_END,
-  MY_LEX_OPERATOR_OR_IDENT, MY_LEX_NUMBER_IDENT, MY_LEX_INT_OR_REAL,
-  MY_LEX_REAL_OR_POINT, MY_LEX_BOOL, MY_LEX_EOL, MY_LEX_ESCAPE, 
-  MY_LEX_LONG_COMMENT, MY_LEX_END_LONG_COMMENT, MY_LEX_SEMICOLON, 
-  MY_LEX_SET_VAR, MY_LEX_USER_END, MY_LEX_HOSTNAME, MY_LEX_SKIP, 
-  MY_LEX_USER_VARIABLE_DELIMITER, MY_LEX_SYSTEM_VAR,
-  MY_LEX_IDENT_OR_KEYWORD,
-  MY_LEX_IDENT_OR_HEX, MY_LEX_IDENT_OR_BIN, MY_LEX_IDENT_OR_NCHAR,
-  MY_LEX_STRING_OR_DELIMITER
-};
-
 struct charset_info_st;
 
 typedef struct my_charset_loader_st
@@ -387,6 +371,7 @@ typedef struct my_charset_handler_st
 } MY_CHARSET_HANDLER;
 
 extern MY_CHARSET_HANDLER my_charset_8bit_handler;
+extern MY_CHARSET_HANDLER my_charset_ascii_handler;
 extern MY_CHARSET_HANDLER my_charset_ucs2_handler;
 
 
@@ -415,8 +400,8 @@ typedef struct charset_info_st
   const uint16     *tab_to_uni;
   const MY_UNI_IDX *tab_from_uni;
   const MY_UNICASE_INFO *caseinfo;
-  const uchar *state_map;
-  const uchar *ident_map;
+  const struct lex_state_maps_st *state_maps; /* parser internal data */
+  const uchar *ident_map; /* parser internal data */
   uint      strxfrm_multiply;
   uchar     caseup_multiply;
   uchar     casedn_multiply;
@@ -780,7 +765,8 @@ uint my_mbcharlen_ptr(const CHARSET_INFO *cs, const char *s, const char *e);
   @param[in] a first byte of gb18030 code
   @param[in] b second byte of gb18030 code
   @return    the length of gb18030 code starting with given two bytes,
-             the length would be 2 or 4
+             the length would be 2 or 4 for valid gb18030 code,
+             or 0 for invalid gb18030 code
 */
 #define my_mbcharlen_2(s, a, b)       ((s)->cset->mbcharlen((s),((((a) & 0xFF) << 8) + ((b) & 0xFF))))
 /**

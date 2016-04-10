@@ -1,5 +1,5 @@
 
-#ifndef _WIN32
+#ifndef _WINDOWS
 	#include <errno.h>	// errno
 #endif
 
@@ -39,7 +39,7 @@ bool CFile::Open( lpctstr pszName, uint uMode, CFileException * e )
 	ASSERT( m_hFile == NOFILE_HANDLE );
 	SetFilePath( pszName );
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 	DWORD dwShareMode, dwCreationDisposition, dwDesiredAccess;
 
 	dwDesiredAccess = GENERIC_READ;
@@ -69,7 +69,7 @@ bool CFile::Open( lpctstr pszName, uint uMode, CFileException * e )
 	m_hFile = CreateFile( GetFilePath(), dwDesiredAccess, dwShareMode, NULL, dwCreationDisposition, FILE_ATTRIBUTE_NORMAL, NULL );
 #else
 	m_hFile = open( GetFilePath(), uMode );
-#endif // _WIN32
+#endif // _WINDOWS
 	return (m_hFile != NOFILE_HANDLE);
 }
 
@@ -77,7 +77,7 @@ void CFile::Close()
 {
 	if ( m_hFile != NOFILE_HANDLE )
 	{
-#ifdef _WIN32
+#ifdef _WINDOWS
 		CloseHandle( m_hFile );
 #else
 		close( m_hFile );
@@ -97,7 +97,7 @@ dword CFile::GetLength()
 
 dword CFile::GetPosition() const
 {
-#ifdef _WIN32
+#ifdef _WINDOWS
 	return SetFilePointer( m_hFile, 0, NULL, FILE_CURRENT );
 #else
 	return( lseek( m_hFile, 0, SEEK_CUR ) );
@@ -106,7 +106,7 @@ dword CFile::GetPosition() const
 
 dword CFile::Seek( int lOffset, uint iOrigin )
 {
-#ifdef _WIN32
+#ifdef _WINDOWS
 	return SetFilePointer( m_hFile, lOffset, NULL, iOrigin );
 #else
 	if ( m_hFile <= 0 )
@@ -117,7 +117,7 @@ dword CFile::Seek( int lOffset, uint iOrigin )
 
 dword CFile::Read( void * pData, dword dwLength ) const
 {
-#ifdef _WIN32
+#ifdef _WINDOWS
 	DWORD dwRead;
 	if ( !ReadFile( m_hFile, pData, (DWORD)dwLength, &dwRead, NULL ) )
 	{
@@ -132,7 +132,7 @@ dword CFile::Read( void * pData, dword dwLength ) const
 
 bool CFile::Write( const void * pData, dword dwLength ) const
 {
-#ifdef _WIN32
+#ifdef _WINDOWS
 	DWORD dwWritten;
 	BOOL ret = ::WriteFile( m_hFile, pData, (DWORD)dwLength, &dwWritten, NULL );
 	if ( ret == FALSE )
@@ -146,7 +146,7 @@ bool CFile::Write( const void * pData, dword dwLength ) const
 #endif
 }
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 void CFile::NotifyIOError( lpctstr szMessage ) const
 {
 	LPVOID lpMsgBuf;
@@ -163,7 +163,7 @@ void CFile::NotifyIOError( lpctstr szMessage ) const
 
 int CGFile::GetLastError()	// static
 {
-#ifdef _WIN32
+#ifdef _WINDOWS
 	return ::GetLastError();
 #else
 	return errno;
@@ -182,7 +182,7 @@ CGString CGFile::GetMergedFileName( lpctstr pszBase, lpctstr pszName ) // static
 		int len = (int)(strlen( szFilePath ));
 		if (len && szFilePath[len - 1] != '\\' && szFilePath[len - 1] != '/')
 		{
-#ifdef _WIN32
+#ifdef _WINDOWS
 			strcat(szFilePath, "\\");
 #else
 			strcat(szFilePath, "/");
@@ -398,7 +398,7 @@ tchar * CFileText::ReadString( tchar * pBuffer, size_t sizemax ) const
 	return fgets( pBuffer, (int)(sizemax), m_pStream );
 }
 
-#ifndef _WIN32
+#ifndef _WINDOWS
 	bool CFileText::Write( const void * pData, dword iLen ) const
 #else
 	bool CFileText::Write( const void * pData, dword iLen )
@@ -408,7 +408,7 @@ tchar * CFileText::ReadString( tchar * pBuffer, size_t sizemax ) const
 	ASSERT(pData);
 	if ( !IsFileOpen() )
 		return false;
-#ifdef _WIN32 //	Windows flushing, the only safe mode to cancel it ;)
+#ifdef _WINDOWS //	Windows flushing, the only safe mode to cancel it ;)
 	if ( !bNoBuffer )
 	{
 		setvbuf(m_pStream, NULL, _IONBF, 0);
@@ -416,7 +416,7 @@ tchar * CFileText::ReadString( tchar * pBuffer, size_t sizemax ) const
 	}
 #endif
 	size_t iStatus = fwrite( pData, iLen, 1, m_pStream );
-#ifndef _WIN32	// However, in unix, it works
+#ifndef _WINDOWS	// However, in unix, it works
 	fflush( m_pStream );
 #endif
 	return ( iStatus == 1 );

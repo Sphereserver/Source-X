@@ -7,7 +7,7 @@
 #ifndef _INC_CWINDOW_H
 #define _INC_CWINDOW_H
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 
 #include "sphere_library/CString.h"
 #include "spherecom.h"
@@ -440,6 +440,6 @@ public:
 	}
 };
 
-#endif	// _WIN32
+#endif	// _WINDOWS
 
 #endif	// _INC_CWINDOW_H

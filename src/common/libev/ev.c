@@ -182,7 +182,7 @@
 
 EV_CPP(extern "C" {)
 
-#ifndef _WIN32
+#ifndef _WINDOWS
 # include <sys/time.h>
 # include <sys/wait.h>
 # include <unistd.h>
@@ -268,7 +268,7 @@ EV_CPP(extern "C" {)
 #endif
 
 #ifndef EV_USE_POLL
-# ifdef _WIN32
+# ifdef _WINDOWS
 #  define EV_USE_POLL 0
 # else
 #  define EV_USE_POLL EV_FEATURE_BACKENDS
@@ -384,7 +384,7 @@ EV_CPP(extern "C" {)
 #endif
 
 #if !EV_USE_NANOSLEEP
-# ifndef _WIN32
+# ifndef _WINDOWS
 #  include <sys/select.h>
 # endif
 #endif
@@ -524,7 +524,7 @@ static EV_ATOMIC_T have_monotonic; /* did clock_gettime (CLOCK_MONOTONIC) work? 
 # define EV_WIN32_CLOSE_FD(fd) close (fd)
 #endif
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 # include "ev_win32.c"
 #endif
 
@@ -809,7 +809,7 @@ ev_sleep (ev_tstamp delay)
 
       EV_TS_SET (ts, delay);
       nanosleep (&ts, 0);
-#elif defined(_WIN32)
+#elif defined(_WINDOWS)
       Sleep ((unsigned long)(delay * 1e3));
 #else
       struct timeval tv;
@@ -1044,7 +1044,7 @@ fd_kill (EV_P_ int fd)
 inline_size int
 fd_valid (int fd)
 {
-#ifdef _WIN32
+#ifdef _WINDOWS
   return EV_FD_TO_WIN32_HANDLE (fd) != -1;
 #else
   return fcntl (fd, F_GETFD) != -1;
@@ -1097,7 +1097,7 @@ fd_rearm_all (EV_P)
 inline_speed void
 fd_intern (int fd)
 {
-#ifdef _WIN32
+#ifdef _WINDOWS
   unsigned long arg = 1;
   ioctlsocket (EV_FD_TO_WIN32_HANDLE (fd), FIONBIO, &arg);
 #else
@@ -1384,7 +1384,7 @@ ev_sighandler (int signum)
   EV_P = signals [signum - 1].loop;
 #endif
 
-#ifdef _WIN32
+#ifdef _WINDOWS
   signal (signum, ev_sighandler);
 #endif
 
@@ -1534,7 +1534,7 @@ ev_version_minor (void)
 int inline_size
 enable_secure (void)
 {
-#ifdef _WIN32
+#ifdef _WINDOWS
   return 0;
 #else
   return getuid () != geteuid ()
@@ -1672,7 +1672,7 @@ loop_init (EV_P_ unsigned int flags)
 #endif
 
       /* pid check not overridable via env */
-#ifndef _WIN32
+#ifndef _WINDOWS
       if (flags & EVFLAG_FORKCHECK)
         curpid = getpid ();
 #endif
@@ -2363,7 +2363,7 @@ ev_run (EV_P_ int flags)
       ev_verify (EV_A);
 #endif
 
-#ifndef _WIN32
+#ifndef _WINDOWS
       if (expect_false (curpid)) /* penalise the forking check even more */
         if (expect_false (getpid () != curpid))
           {
@@ -2873,7 +2873,7 @@ ev_signal_start (EV_P_ ev_signal *w)
     if (sigfd < 0) /*TODO*/
 # endif
       {
-# ifdef _WIN32
+# ifdef _WINDOWS
         evpipe_init (EV_A);
 
         signal (w->signum, ev_sighandler);
@@ -2973,7 +2973,7 @@ ev_child_stop (EV_P_ ev_child *w)
 
 #if EV_STAT_ENABLE
 
-# ifdef _WIN32
+# ifdef _WINDOWS
 #  undef lstat
 #  define lstat(a,b) _stati64 (a,b)
 # endif
@@ -3210,7 +3210,7 @@ infy_fork (EV_P)
 
 #endif
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 # define EV_LSTAT(p,b) _stati64 (p, b)
 #else
 # define EV_LSTAT(p,b) lstat (p, b)

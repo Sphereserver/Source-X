@@ -37,7 +37,7 @@
  * either the BSD or the GPL.
  */
 
-#ifndef _WIN32
+#ifndef _WINDOWS
 /* for unix systems */
 # include <sys/select.h>
 # include <inttypes.h>
@@ -113,7 +113,7 @@ select_modify (EV_P_ int fd, int oev, int nev)
         vec_ro = ev_realloc (vec_ro, new_max * NFDBYTES); /* could free/malloc */
         vec_wi = ev_realloc (vec_wi, new_max * NFDBYTES);
         vec_wo = ev_realloc (vec_wo, new_max * NFDBYTES); /* could free/malloc */
-        #ifdef _WIN32
+        #ifdef _WINDOWS
         vec_eo = ev_realloc (vec_eo, new_max * NFDBYTES); /* could free/malloc */
         #endif
 
@@ -152,7 +152,7 @@ select_poll (EV_P_ ev_tstamp timeout)
   memcpy (vec_ro, vec_ri, fd_setsize);
   memcpy (vec_wo, vec_wi, fd_setsize);
 
-#ifdef _WIN32
+#ifdef _WINDOWS
   /* pass in the write set as except set.
    * the idea behind this is to work around a windows bug that causes
    * errors to be reported as an exception and not by setting
@@ -182,7 +182,7 @@ select_poll (EV_P_ ev_tstamp timeout)
           errno -= WSABASEERR;
       #endif
 
-      #ifdef _WIN32
+      #ifdef _WINDOWS
       /* select on windows erroneously returns EINVAL when no fd sets have been
        * provided (this is documented). what microsoft doesn't tell you that this bug
        * exists even when the fd sets _are_ provided, so we have to check for this bug
@@ -224,7 +224,7 @@ select_poll (EV_P_ ev_tstamp timeout)
 
           if (FD_ISSET (handle, (fd_set *)vec_ro)) events |= EV_READ;
           if (FD_ISSET (handle, (fd_set *)vec_wo)) events |= EV_WRITE;
-          #ifdef _WIN32
+          #ifdef _WINDOWS
           if (FD_ISSET (handle, (fd_set *)vec_eo)) events |= EV_WRITE;
           #endif
 
@@ -241,7 +241,7 @@ select_poll (EV_P_ ev_tstamp timeout)
       {
         fd_mask word_r = ((fd_mask *)vec_ro) [word];
         fd_mask word_w = ((fd_mask *)vec_wo) [word];
-        #ifdef _WIN32
+        #ifdef _WINDOWS
         word_w |= ((fd_mask *)vec_eo) [word];
         #endif
 
@@ -275,7 +275,7 @@ select_init (EV_P_ int flags)
   vec_ro  = ev_malloc (sizeof (fd_set));
   vec_wi  = ev_malloc (sizeof (fd_set)); FD_ZERO ((fd_set *)vec_wi);
   vec_wo  = ev_malloc (sizeof (fd_set));
-  #ifdef _WIN32
+  #ifdef _WINDOWS
   vec_eo  = ev_malloc (sizeof (fd_set));
   #endif
 #else
@@ -284,7 +284,7 @@ select_init (EV_P_ int flags)
   vec_ro  = 0;   
   vec_wi  = 0; 
   vec_wo  = 0; 
-  #ifdef _WIN32
+  #ifdef _WINDOWS
   vec_eo  = 0;
   #endif
 #endif
@@ -299,7 +299,7 @@ select_destroy (EV_P)
   ev_free (vec_ro);
   ev_free (vec_wi);
   ev_free (vec_wo);
-  #ifdef _WIN32
+  #ifdef _WINDOWS
   ev_free (vec_eo);
   #endif
 }

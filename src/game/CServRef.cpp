@@ -11,7 +11,7 @@
 #include "CWorld.h"
 
 //	Memory profiling
-#ifdef _WIN32	// (Win32)
+#ifdef _WINDOWS	// (Win32)
 	#include <process.h>
 
 //	grabbed from platform SDK, psapi.h
@@ -67,7 +67,7 @@ dword CServerDef::StatGet(SERV_STAT_TYPE i) const
 		d = 0;
 		if ( m_bPmemory )
 		{
-#ifdef _WIN32
+#ifdef _WINDOWS
 			if ( !m_hmPsapiDll )			// try to load psapi.dll if not loaded yet
 			{
 				EXC_SET("load process info");

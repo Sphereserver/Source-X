@@ -20,7 +20,7 @@ inline DIR_TYPE GetDirTurn( DIR_TYPE dir, int offset )
 }
 
 struct CGRect			// Basic rectangle. (May not be on the map)
-{						// Similar to _WIN32 RECT
+{						// Similar to _WINDOWS RECT
 public:
 	int m_left;		// West	 x=0
 	int m_top;		// North y=0

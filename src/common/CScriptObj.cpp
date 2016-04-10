@@ -3,7 +3,7 @@
 // A scriptable object.
 //
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 	#include <process.h>
 #else
 	#include <errno.h>	// errno
@@ -1156,7 +1156,7 @@ badcmd:
 				
 				bool bWait = (index == SSC_SYSCMD);
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 				_spawnl( bWait ? _P_WAIT : _P_NOWAIT,
 					Arg_ppCmd[0], Arg_ppCmd[0], Arg_ppCmd[1],
 					Arg_ppCmd[2], Arg_ppCmd[3], Arg_ppCmd[4],
@@ -2849,7 +2849,7 @@ bool CFileObj::r_LoadVal( CScript & s )
 				if ( bLine )
 				{
 					ppArgs->Copy( s.GetArgStr() );
-#ifdef _WIN32
+#ifdef _WINDOWS
 					ppArgs->Add( "\r\n" );
 #else
 					ppArgs->Add( "\n" );

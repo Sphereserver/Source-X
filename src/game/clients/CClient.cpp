@@ -14,7 +14,7 @@
 #include "CClient.h"
 #include "CParty.h"
 
-#if !defined(_WIN32) || defined(_LIBEV)
+#if !defined(_WINDOWS) || defined(_LIBEV)
 	extern LinuxEv g_NetworkEvent;
 #endif
 

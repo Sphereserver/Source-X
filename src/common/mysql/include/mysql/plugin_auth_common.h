@@ -1,5 +1,5 @@
 #ifndef MYSQL_PLUGIN_AUTH_COMMON_INCLUDED
-/* Copyright (c) 2010, 2013, Oracle and/or its affiliates. All rights reserved.
+/* Copyright (c) 2010, 2015, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #define MYSQL_PLUGIN_AUTH_COMMON_INCLUDED
 
 /** the max allowed length for a user name */
-#define MYSQL_USERNAME_LENGTH 48
+#define MYSQL_USERNAME_LENGTH 96
 
 /**
   return values of the plugin authenticate_user() method.
@@ -83,11 +83,17 @@
 */
 #define CR_OK_HANDSHAKE_COMPLETE -2
 
+/**
+Flag to be passed back to server from authentication plugins via
+authenticated_as when proxy mapping should be done by the server.
+*/
+#define PROXY_FLAG 0
+
 /*
   We need HANDLE definition if on Windows. Define WIN32_LEAN_AND_MEAN (if
   not already done) to minimize amount of imported declarations.
 */
-#ifdef _WIN32
+#ifdef _WINDOWS
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -99,7 +105,7 @@ typedef struct st_plugin_vio_info
   enum { MYSQL_VIO_INVALID, MYSQL_VIO_TCP, MYSQL_VIO_SOCKET,
          MYSQL_VIO_PIPE, MYSQL_VIO_MEMORY } protocol;
   int socket;     /**< it's set, if the protocol is SOCKET or TCP */
-#ifdef _WIN32
+#ifdef _WINDOWS
   HANDLE handle;  /**< it's set, if the protocol is PIPE or MEMORY */
 #endif
 } MYSQL_PLUGIN_VIO_INFO;

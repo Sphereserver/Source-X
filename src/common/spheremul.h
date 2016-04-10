@@ -13,7 +13,7 @@
 //---------------------------MUL FILE DEFS---------------------------
 
 // All these structures must be byte packed.
-#if defined _WIN32 && (!__MINGW32__)
+#if defined _WINDOWS && (!__MINGW32__)
 // Microsoft dependant pragma
 #pragma pack(1)
 #define PACK_NEEDED
@@ -2575,7 +2575,7 @@ struct CUOHuesRec // (Hues.mul)
 #define LIGHT_BLACK		32
 
 // Turn off structure packing.
-#if defined _WIN32 && (!__MINGW32__)
+#if defined _WINDOWS && (!__MINGW32__)
 #pragma pack()
 #endif
 

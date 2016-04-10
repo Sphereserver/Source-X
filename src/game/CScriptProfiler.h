@@ -34,7 +34,7 @@ extern struct CScriptProfiler
 //	Time measurement macros
 extern llong llTimeProfileFrequency;
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 
 #define	TIME_PROFILE_INIT	\
 	llong llTicks(0), llTicksEnd
@@ -42,7 +42,7 @@ extern llong llTimeProfileFrequency;
 	if ( !QueryPerformanceCounter((LARGE_INTEGER *)&llTicks)) llTicks = GetTickCount()
 #define TIME_PROFILE_END	if ( !QueryPerformanceCounter((LARGE_INTEGER *)&llTicksEnd)) llTicksEnd = GetTickCount()
 
-#else // !_WIN32
+#else // !_WINDOWS
 
 #define	TIME_PROFILE_INIT	\
 	llong llTicks(0), llTicksEnd
@@ -50,7 +50,7 @@ extern llong llTimeProfileFrequency;
 	llTicks = GetTickCount()
 #define TIME_PROFILE_END	llTicksEnd = GetTickCount();
 
-#endif // _WIN32
+#endif // _WINDOWS
 
 #define TIME_PROFILE_GET_HI	((llTicksEnd - llTicks)/(llTimeProfileFrequency/1000))
 #define	TIME_PROFILE_GET_LO	((((llTicksEnd - llTicks)*10000)/(llTimeProfileFrequency/1000))%10000)

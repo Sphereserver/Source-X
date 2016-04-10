@@ -2185,7 +2185,7 @@ void CChar::NPC_Pathfinding()
 
 	//	clear saved steps list
 	EXC_SET("clearing last steps");
-#ifndef _WIN32
+#ifndef _WINDOWS
 	for (int i_tmpN=0;i_tmpN < MAX_NPC_PATH_STORAGE_SIZE;i_tmpN++)
 	{
 		m_pNPC->m_nextX[i_tmpN] = 0;

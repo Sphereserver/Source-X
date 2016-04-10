@@ -1153,7 +1153,7 @@ void CSector::OnTick(int iPulseCount)
 		EXC_SETSUB("UpdateFlags");
 		pItem->OnTickStatusUpdate();
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 		EXC_CATCHSUB("Sector");
 
 		EXC_DEBUGSUB_START;
@@ -1184,7 +1184,7 @@ void CSector::OnTick(int iPulseCount)
 			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 		}
 #endif //_EXCEPTIONS_DEBUG
-#endif //_WIN32
+#endif //_WINDOWS
 	}
 
 	ProfileTask overheadTask(PROFILE_OVERHEAD);

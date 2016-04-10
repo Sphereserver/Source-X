@@ -37,7 +37,7 @@
  * either the BSD or the GPL.
  */
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 
 /* timeb.h is actually xsi legacy functionality */
 #include <sys/timeb.h>

@@ -7,7 +7,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#ifdef _WIN32
+#ifdef _WINDOWS
  #include "windows.h"
 #endif
 

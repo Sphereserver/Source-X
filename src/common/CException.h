@@ -43,7 +43,7 @@ public:
 public:
 	CSphereError& operator=(const CSphereError& other);
 public:
-#ifdef _WIN32
+#ifdef _WINDOWS
 	static int GetSystemErrorMessage( dword dwError, lptstr lpszError, uint nMaxError );
 #endif
 	virtual bool GetErrorMessage( lptstr lpszError, uint nMaxError,	uint * pnHelpContext = NULL ) const;
@@ -70,7 +70,7 @@ public:
 	virtual bool GetErrorMessage(lptstr lpszError, uint nMaxError, uint * pnHelpContext = NULL ) const;
 };
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 	// Catch and get details on the system exceptions.
 	class CException : public CSphereError
 	{

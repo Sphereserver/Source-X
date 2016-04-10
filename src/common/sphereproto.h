@@ -15,7 +15,7 @@
 //---------------------------PROTOCOL DEFS---------------------------
 
 // All these structures must be byte packed.
-#if defined _WIN32 && (!__MINGW32__)
+#if defined _WINDOWS && (!__MINGW32__)
 	// Microsoft dependant pragma
 	#pragma pack(1)
 	#define PACK_NEEDED
@@ -24,7 +24,7 @@
 	#define PACK_NEEDED __attribute__ ((packed))
 #endif
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 	//#include "os_windows.h"
 #else
 	#include <netinet/in.h>
@@ -599,7 +599,7 @@ union CExtData
 		ndword m_UID;
 		nword m_ItemId;
 		nword m_Offset;
-#ifdef _WIN32
+#ifdef _WINDOWS
 		dword m_Content0;
 		dword m_Content1;
 #else
@@ -3357,7 +3357,7 @@ struct CCommand	// command buffer from server to client.
 } PACK_NEEDED;
 
 // Turn off structure packing.
-#if defined _WIN32 && (!__MINGW32__)
+#if defined _WINDOWS && (!__MINGW32__)
 #pragma pack()
 #endif
 

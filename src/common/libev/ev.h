@@ -112,7 +112,7 @@ EV_CPP(extern "C" {)
 #endif
 
 #ifndef EV_CHILD_ENABLE
-# ifdef _WIN32
+# ifdef _WINDOWS
 #  define EV_CHILD_ENABLE 0
 # else
 #  define EV_CHILD_ENABLE EV_FEATURE_WATCHERS
@@ -148,7 +148,7 @@ typedef double ev_tstamp;
 #endif
 
 #if EV_STAT_ENABLE
-# ifdef _WIN32
+# ifdef _WINDOWS
 #  include <time.h>
 #  include <sys/types.h>
 # endif
@@ -348,7 +348,7 @@ typedef struct ev_child
 
 #if EV_STAT_ENABLE
 /* st_nlink = 0 means missing file or other error */
-# ifdef _WIN32
+# ifdef _WINDOWS
 typedef struct _stati64 ev_statdata;
 # else
 typedef struct stat ev_statdata;

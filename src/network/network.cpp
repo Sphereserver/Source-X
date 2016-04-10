@@ -11,11 +11,11 @@
 #include "receive.h"
 #include "send.h"
 
-#if !defined(_WIN32) || defined(_LIBEV)
+#if !defined(_WINDOWS) || defined(_LIBEV)
 	extern LinuxEv g_NetworkEvent;
 #endif
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 #	define CLOSESOCKET(_x_)	{ shutdown(_x_, 2); closesocket(_x_); }
 #else
 #	define CLOSESOCKET(_x_)	{ shutdown(_x_, 2); close(_x_); }
@@ -146,7 +146,7 @@ void NetState::clear(void)
 		g_Log.Event(LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Client disconnected [Total:%u] ('%s')\n",
 			m_id, g_Serv.StatGet(SERV_STAT_CLIENTS), m_peerAddress.GetAddrStr());
 		
-#if !defined(_WIN32) || defined(_LIBEV)
+#if !defined(_WINDOWS) || defined(_LIBEV)
 		if (m_socket.IsOpen() && g_Cfg.m_fUseAsyncNetwork != 0)
 			g_NetworkEvent.unregisterClient(this);
 #endif
@@ -155,7 +155,7 @@ void NetState::clear(void)
 		g_World.m_ObjDelete.InsertHead(client);
 	}
 	
-#ifdef _WIN32
+#ifdef _WINDOWS
 	if (m_socket.IsOpen() && isAsyncMode())
 		m_socket.ClearAsync();
 #endif
@@ -267,7 +267,7 @@ void NetState::init(SOCKET socket, CSocketAddress addr)
 	CClient* client = new CClient(this);
 	m_client = client;
 	
-#if !defined(_WIN32) || defined(_LIBEV)
+#if !defined(_WINDOWS) || defined(_LIBEV)
 	if (g_Cfg.m_fUseAsyncNetwork != 0)
 	{
 		DEBUGNETWORK(("%x:Registering async client\n", id()));
@@ -1378,7 +1378,7 @@ void NetworkIn::tick(void)
 int NetworkIn::checkForData(fd_set* storage)
 {
 //	Berkeley sockets needs nfds to be updated that while in Windows that's ignored
-#ifdef _WIN32
+#ifdef _WINDOWS
 #define ADDTOSELECT(_x_)	FD_SET(_x_, storage)
 #else
 #define ADDTOSELECT(_x_)	{ FD_SET(_x_, storage); if ( _x_ > nfds ) nfds = _x_; }
@@ -1393,7 +1393,7 @@ int NetworkIn::checkForData(fd_set* storage)
 	EXC_SET("zero");
 	FD_ZERO(storage);
 
-#ifndef _WIN32
+#ifndef _WINDOWS
 #ifdef LIBEV_REGISTERMAIN
 	if (g_Cfg.m_fUseAsyncNetwork == 0)
 #endif
@@ -2137,7 +2137,7 @@ bool NetworkOut::sendPacket(CClient* client, PacketSend* packet)
 	return sendPacketNow(client, packet);
 }
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 
 void CALLBACK SendCompleted(dword dwError, dword cbTransferred, LPWSAOVERLAPPED lpOverlapped, dword dwFlags)
 {
@@ -2292,7 +2292,7 @@ int NetworkOut::sendBytesNow(CClient* client, const byte* data, dword length)
 	// send data
 	EXC_SET("sending");
 
-#if defined(_WIN32) && !defined(_LIBEV)
+#if defined(_WINDOWS) && !defined(_LIBEV)
 	if (state->isAsyncMode())
 	{
 		// send via async winsock
@@ -2323,7 +2323,7 @@ int NetworkOut::sendBytesNow(CClient* client, const byte* data, dword length)
 		EXC_SET("error parse");
 		int errCode = CGSocket::GetLastError(true);
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 		if (state->isAsyncMode() && errCode == WSA_IO_PENDING)
 		{
 			// safe to ignore this, data has actually been sent
@@ -2337,7 +2337,7 @@ int NetworkOut::sendBytesNow(CClient* client, const byte* data, dword length)
 			// send failed but it is safe to ignore and try again later
 			ret = 0;
 		}
-#ifdef _WIN32
+#ifdef _WINDOWS
 		else if (errCode == WSAECONNRESET || errCode == WSAECONNABORTED)
 #else
 		else if (errCode == ECONNRESET || errCode == ECONNABORTED)
@@ -2353,7 +2353,7 @@ int NetworkOut::sendBytesNow(CClient* client, const byte* data, dword length)
 			if (state->isClosing() == false)
 				g_Log.Event(LOGM_CLIENTS_LOG|LOGL_WARN, "%x:TX Error %d\n", state->id(), errCode);
 
-#ifndef _WIN32
+#ifndef _WINDOWS
 			return INT32_MIN;
 #else
 			ret = 0;
@@ -2384,7 +2384,7 @@ int NetworkOut::sendBytesNow(CClient* client, const byte* data, dword length)
  ***************************************************************************/
 inline void AddSocketToSet(fd_set& fds, SOCKET socket, int& count)
 {
-#ifdef _WIN32
+#ifdef _WINDOWS
 	UNREFERENCED_PARAMETER(count);
 	FD_SET(socket, &fds);
 #else
@@ -2408,7 +2408,7 @@ const char * GenerateNetworkThreadName(size_t id)
 	return name;
 }
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 
 /***************************************************************************
  *
@@ -4040,7 +4040,7 @@ size_t NetworkOutput::sendData(NetState* state, const byte* data, size_t length)
 
 	EXC_SET("sending");
 
-#if defined(_WIN32) && !defined(_LIBEV)
+#if defined(_WINDOWS) && !defined(_LIBEV)
 	if (state->isAsyncMode())
 	{
 		// send via async winsock
@@ -4077,7 +4077,7 @@ size_t NetworkOutput::sendData(NetState* state, const byte* data, size_t length)
 		EXC_SET("error parse");
 		int errorCode = CGSocket::GetLastError(true);
 
-#ifdef _WIN32
+#ifdef _WINDOWS
 		if (state->isAsyncMode() && errorCode == WSA_IO_PENDING)
 		{
 			// safe to ignore this, data has actually been sent (or will be)
@@ -4091,7 +4091,7 @@ size_t NetworkOutput::sendData(NetState* state, const byte* data, size_t length)
 			// send failed but it is safe to ignore and try again later
 			result = 0;
 		}
-#ifdef _WIN32
+#ifdef _WINDOWS
 		else if (errorCode == WSAECONNRESET || errorCode == WSAECONNABORTED)
 #else
 		else if (errorCode == ECONNRESET || errorCode == ECONNABORTED)

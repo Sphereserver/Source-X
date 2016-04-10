@@ -70,7 +70,7 @@ typedef	uint32_t		uint32;
 typedef	uint64_t		uint64;
 
 
-#ifndef _WIN32			//	assume unix if !_WIN32
+#ifndef _WINDOWS			//	assume unix if !_WINDOWS
 	#include <wchar.h>
 	#ifdef UNICODE
 		typedef	wchar_t			tchar;
@@ -94,6 +94,6 @@ typedef	uint64_t		uint64;
 		#define PRIu64 "I64u"
 		#define PRIx64 "I64x"
 	#endif
-#endif // !_WIN32
+#endif // !_WINDOWS
 
 #endif // _INC_DATATYPES_H

@@ -580,7 +580,7 @@ bool CCrypt::Init( dword dwIP, byte * pEvent, size_t iLen, bool isclientKr )
 	bool bReturn = true;
 
 #ifdef DEBUG_CRYPT_MSGS
-#ifndef _WIN32
+#ifndef _WINDOWS
 		fprintf(stderr, "Called Init Seed(0x%x)\n", dwIP);
 #else
 		DEBUG_ERR(("Called Init Seed(0x%x)\n", dwIP));
@@ -684,7 +684,7 @@ void CCrypt::LoginCryptStart( dword dwIP, byte * pEvent, size_t iLen )
 		Decrypt( m_Raw, pEvent, iLen );
 
 #ifdef DEBUG_CRYPT_MSGS
-#ifndef _WIN32
+#ifndef _WINDOWS
 		fprintf(stderr, "LoginCrypt %u (%x) type %x-%x\n", i, GetClientVer(), m_Raw[0], pEvent[0]);
 #else
 		DEBUG_ERR(("LoginCrypt %u (%x) type %x-%x\n", i, GetClientVer(), m_Raw[0], pEvent[0]));
@@ -769,7 +769,7 @@ void CCrypt::GameCryptStart( dword dwIP, byte * pEvent, size_t iLen )
 		Decrypt( m_Raw, pEvent, iLen );
 		
 #ifdef DEBUG_CRYPT_MSGS
-#ifndef _WIN32
+#ifndef _WINDOWS
 		fprintf(stderr, "GameCrypt %u (%x) type %x-%x\n", i, GetClientVer(), m_Raw[0], pEvent[0]);
 #else
 		DEBUG_ERR(("GameCrypt %u (%x) type %x-%x\n", i, GetClientVer(), m_Raw[0], pEvent[0]));
