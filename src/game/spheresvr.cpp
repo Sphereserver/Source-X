@@ -22,6 +22,7 @@
 #include "clients/CAccount.h"
 #include "items/CItemMap.h"
 #include "items/CItemMessage.h"
+#include "CLog.h"
 #include "CScriptProfiler.h"
 #include "CServer.h"
 #include "CWorld.h"

@@ -7,6 +7,7 @@
 #ifndef _INC_NETWORK_H
 #define _INC_NETWORK_H
 
+#include <deque>
 #include "packet.h"
 #include "../common/common.h"
 #include "../sphere/containers.h"

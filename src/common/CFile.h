@@ -22,7 +22,7 @@
 	#define OF_SHARE_DENY_NONE	0x00
 	#define OF_SHARE_DENY_WRITE	0x00	// not defined in LINUX
 	#define OF_CREATE			O_CREAT
-#endif
+#endif //OF_WRITE
 
 #define OF_NONCRIT			0x40000000	// just a test.
 #define OF_TEXT				0x20000000
@@ -48,7 +48,6 @@
 
 
 class CSphereError;
-#define CFileException CSphereError
 
 /**
 * @brief Class that dupes the MFC functionality we need
@@ -56,22 +55,40 @@ class CSphereError;
 class CFile
 {
 public:
-	static const char *m_sClassName;
-	OSFILE_TYPE m_hFile;	///< File type.
+	static const char * m_sClassName;
 
-protected:
-	CGString m_strFileName;	///< File name (with path).
-
+	/** @name Constructors, Destructor, Asign operator:
+	 */
+	///@{
+	CFile();
+	virtual ~CFile();
+private:
+	/**
+	* @brief No copy on construction allowed.
+	*/
+	CFile(const CFile& copy);
+	/**
+	* @brief No copy allowed.
+	*/
+	CFile& operator=(const CFile& other);
+	///@}
 public:
+	/** @name File Management:
+	 */
+	///@{
+	/**
+	* @brief Closes the file if is open.
+	*/
+	virtual void Close();
 	/**
 	* @brief Get file name and path (for compatibility with MFC)
 	* @return file name and path.
 	*/
-	const CGString & GetFilePath() const { return( m_strFileName); }
+	const CGString & GetFilePath() const;
 	/**
 	* @brief Sets a new file path.
 	*
-	* If CFile has already have a file path, close it if is opened and open new 
+	* If CFile has already have a file path, close it if is opened and open new
 	* file.
 	* @param pszName new file path.
 	* @return true if new file name is setted, false otherwise.
@@ -82,6 +99,13 @@ public:
 	* @return the basename of the file (name withouth paths).
 	*/
 	lpctstr GetFileTitle() const;
+#ifdef _WINDOWS
+	/**
+	* @brief Notify a file input / output error (win32 only).
+	* @param szMessage error to notify.
+	*/
+	void NotifyIOError( lpctstr szMessage ) const;
+#endif
 	/**
 	* @brief Open a file in a specified mode.
 	* @param pszName file to open.
@@ -89,20 +113,11 @@ public:
 	* @param e TODOC.
 	* @return true if file is open, false otherwise.
 	*/
-	virtual bool Open( lpctstr pszName = NULL, uint uMode = OF_READ | OF_SHARE_DENY_NONE, CFileException * e = NULL );
-	/**
-	* @brief Closes the file if is open.
-	*/
-	virtual void Close();
-	/**
-	* @brief Sets the position indicator at the begin of the file.
-	*/
-	void SeekToBegin() { Seek( 0, SEEK_SET ); }
-	/**
-	* @brief Sets the position indicator at the end of the file.
-	* @return The length of the file on success, -1 on error.
-	*/
-	dword SeekToEnd() { return( Seek( 0, SEEK_END )); }
+	virtual bool Open( lpctstr pszName = NULL, uint uMode = OF_READ | OF_SHARE_DENY_NONE, CSphereError * e = NULL );
+	///@}
+	/** @name Content Management:
+	 */
+	///@{
 	/**
 	* @brief Get the length of the file.
 	* @return the length of the file.
@@ -114,13 +129,6 @@ public:
 	*/
 	virtual dword GetPosition() const;
 	/**
-	* @brief Set the position indicator.
-	* @param lOffset position to set.
-	* @param iOrigin origin (current position or init of the file).
-	* @return position where the position indicator is set on success, -1 on error.
-	*/
-	virtual dword Seek( int lOffset = 0, uint iOrigin = SEEK_SET );
-	/**
 	* @brief Reads data from the file.
 	* @param pData buffer where store the readed data.
 	* @param dwLength count of bytes to read.
@@ -128,32 +136,34 @@ public:
 	*/
 	virtual dword Read( void * pData, dword dwLength ) const;
 	/**
+	* @brief Set the position indicator.
+	* @param lOffset position to set.
+	* @param iOrigin origin (current position or init of the file).
+	* @return position where the position indicator is set on success, -1 on error.
+	*/
+	virtual dword Seek( int lOffset = 0, uint iOrigin = SEEK_SET );
+	/**
+	* @brief Sets the position indicator at the begin of the file.
+	*/
+	void SeekToBegin();
+	/**
+	* @brief Sets the position indicator at the end of the file.
+	* @return The length of the file on success, -1 on error.
+	*/
+	dword SeekToEnd();
+	/**
 	* @brief writes supplied data into file.
 	* @param pData data to write.
 	* @param dwLength lenght of the data to write.
 	* @return true is success, false otherwise.
 	*/
 	virtual bool Write( const void * pData, dword dwLength ) const;
-#ifdef _WINDOWS
-	/**
-	* @brief Notify a file input / output error (win32 only).
-	* @param szMessage error to notify.
-	*/
-	void NotifyIOError( lpctstr szMessage ) const;
-#endif
+	///@}
 
 public:
-	CFile() { m_hFile = NOFILE_HANDLE; }
-	virtual ~CFile() { Close(); }
-private:
-	/**
-	* @brief No copy on construction allowed.
-	*/
-	CFile(const CFile& copy);
-	/**
-	* @brief No copy allowed.
-	*/
-	CFile& operator=(const CFile& other);
+	OSFILE_TYPE m_hFile;	///< File type.
+protected:
+	CGString m_strFileName;	///< File name (with path).
 };
 
 
@@ -162,10 +172,47 @@ private:
 */
 class CGFile : public CFile
 {
-private:
-	uint m_uMode;	///< MMSYSTEM may use 32 bit flags.
 public:
-	static const char *m_sClassName;
+	static const char * m_sClassName;
+
+	/** @name Constructors, Destructor, Asign operator:
+	 */
+	///@{
+public:
+	CGFile() { m_uMode = 0; }
+	virtual ~CGFile();
+private:
+	/**
+	* @brief No copy on construction allowed.
+	*/
+	CGFile(const CGFile& copy);
+	/**
+	* @brief No copy allowed.
+	*/
+	CGFile& operator=(const CGFile& other);
+	///@}
+public:
+	/** @name File Management:
+	 */
+	///@{
+	/**
+	* @brief Closes the file if is open.
+	*/
+	virtual void Close();
+	/**
+	* @brief Check if file is open.
+	* @return true if file is open, false otherwise.
+	*/
+	virtual bool IsFileOpen() const { return ( m_hFile != NOFILE_HANDLE ); }
+	/**
+	* @brief Open a file in a specified mode.
+	* @param pszName file to open.
+	* @param uMode open mode.
+	* @param pExtra TODOC.
+	* @return true if file is open, false otherwise.
+	*/ // TODO: HERE!
+	virtual bool Open( lpctstr pszName = NULL, uint uMode = OF_READ | OF_SHARE_DENY_NONE, void * pExtra = NULL );
+	///@}
 private:
 	/**
 	* @brief Open file with CFile method.
@@ -230,38 +277,10 @@ public:
 	*/
 	bool IsWriteMode() const { return ( m_uMode & OF_WRITE ); }
 
-	/**
-	* @brief Check if file is open.
-	* @return true if file is open, false otherwise.
-	*/
-	virtual bool IsFileOpen() const { return ( m_hFile != NOFILE_HANDLE ); }
-	/**
-	* @brief Open a file in a specified mode.
-	* @param pszName file to open.
-	* @param uMode open mode.
-	* @param pExtra TODOC.
-	* @return true if file is open, false otherwise.
-	*/
-	virtual bool Open( lpctstr pszName = NULL, uint uMode = OF_READ | OF_SHARE_DENY_NONE, void * pExtra = NULL );
-	/**
-	* @brief Closes the file if is open.
-	*/
-	virtual void Close();
-	
-	// File Access
-public:
-	CGFile() { m_uMode = 0; }
-	virtual ~CGFile() { Close(); }
+
 
 private:
-	/**
-	* @brief No copy on construction allowed.
-	*/
-	CGFile(const CGFile& copy);
-	/**
-	* @brief No copy allowed.
-	*/
-	CGFile& operator=(const CGFile& other);
+	uint m_uMode;	///< MMSYSTEM may use 32 bit flags.
 };
 
 

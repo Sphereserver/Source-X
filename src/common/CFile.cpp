@@ -7,6 +7,38 @@
 #include "CFile.h"
 #include "spherecom.h"
 
+// CFile:: Constructors, Destructor, Asign operator.
+
+CFile::CFile()
+{
+	m_hFile = NOFILE_HANDLE;
+}
+
+CFile::~CFile()
+{
+	Close();
+}
+
+// CFile:: File Management.
+
+void CFile::Close()
+{
+	if ( m_hFile != NOFILE_HANDLE )
+	{
+#ifdef _WIN32
+		CloseHandle( m_hFile );
+#else
+		close( m_hFile );
+#endif
+		m_hFile = NOFILE_HANDLE;
+	}
+}
+
+const CGString & CFile::GetFilePath() const
+{
+	return( m_strFileName);
+}
+
 bool CFile::SetFilePath( lpctstr pszName )
 {
 	ADDTOCALLSTACK("CFile::SetFilePath");
@@ -33,7 +65,18 @@ lpctstr CFile::GetFileTitle() const
 	return( CGFile::GetFilesTitle( GetFilePath()));
 }
 
-bool CFile::Open( lpctstr pszName, uint uMode, CFileException * e )
+#ifdef _WINDOWS
+void CFile::NotifyIOError( lpctstr szMessage ) const
+{
+	LPVOID lpMsgBuf;
+	FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, GetLastError(), 0, reinterpret_cast<lptstr>(&lpMsgBuf), 0, NULL );
+	DEBUG_ERR(( "File I/O \"%s\" failed on file \"%s\" (%d): %s\n", szMessage, static_cast<lpctstr>(GetFilePath()), GetLastError(), static_cast<lptstr>(lpMsgBuf) ));
+
+	LocalFree( lpMsgBuf );
+}
+#endif
+
+bool CFile::Open( lpctstr pszName, uint uMode, CSphereError * e )
 {
 	UNREFERENCED_PARAMETER(e);
 	ASSERT( m_hFile == NOFILE_HANDLE );
@@ -73,18 +116,7 @@ bool CFile::Open( lpctstr pszName, uint uMode, CFileException * e )
 	return (m_hFile != NOFILE_HANDLE);
 }
 
-void CFile::Close()
-{
-	if ( m_hFile != NOFILE_HANDLE )
-	{
-#ifdef _WINDOWS
-		CloseHandle( m_hFile );
-#else
-		close( m_hFile );
-#endif
-		m_hFile = NOFILE_HANDLE;
-	}
-}
+// CFile:: Content management.
 
 dword CFile::GetLength()
 {
@@ -104,17 +136,6 @@ dword CFile::GetPosition() const
 #endif
 }
 
-dword CFile::Seek( int lOffset, uint iOrigin )
-{
-#ifdef _WINDOWS
-	return SetFilePointer( m_hFile, lOffset, NULL, iOrigin );
-#else
-	if ( m_hFile <= 0 )
-		return -1;
-	return lseek( m_hFile, lOffset, iOrigin );
-#endif
-}
-
 dword CFile::Read( void * pData, dword dwLength ) const
 {
 #ifdef _WINDOWS
@@ -128,6 +149,27 @@ dword CFile::Read( void * pData, dword dwLength ) const
 #else
 	return read( m_hFile, pData, (int) dwLength );
 #endif
+}
+
+dword CFile::Seek( int lOffset, uint iOrigin )
+{
+#ifdef _WINDOWS
+	return SetFilePointer( m_hFile, lOffset, NULL, iOrigin );
+#else
+	if ( m_hFile <= 0 )
+		return -1;
+	return lseek( m_hFile, lOffset, iOrigin );
+#endif
+}
+
+void CFile::SeekToBegin()
+{
+	Seek( 0, SEEK_SET );
+}
+
+dword CFile::SeekToEnd()
+{
+	return( Seek( 0, SEEK_END ));
 }
 
 bool CFile::Write( const void * pData, dword dwLength ) const
@@ -149,13 +191,16 @@ bool CFile::Write( const void * pData, dword dwLength ) const
 #ifdef _WINDOWS
 void CFile::NotifyIOError( lpctstr szMessage ) const
 {
-	LPVOID lpMsgBuf;
-	FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, GetLastError(), 0, reinterpret_cast<lptstr>(&lpMsgBuf), 0, NULL );
-	DEBUG_ERR(( "File I/O \"%s\" failed on file \"%s\" (%d): %s\n", szMessage, static_cast<lpctstr>(GetFilePath()), GetLastError(), static_cast<lptstr>(lpMsgBuf) ));
-
-	LocalFree( lpMsgBuf );
+	m_uMode = 0;
 }
 #endif
+
+CGFile::~CGFile()
+{
+	Close();
+}
+
+
 
 
 //***************************************************************************

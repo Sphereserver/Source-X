@@ -3,6 +3,7 @@
 
 #include "../common/CException.h"
 #include "../common/CRect.h"
+#include "../common/CUIDExtra.h"
 #include "../sphere/threads.h"
 #include "chars/CChar.h"
 #include "items/CItem.h"

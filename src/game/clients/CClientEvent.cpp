@@ -1623,14 +1623,14 @@ void CClient::Event_PromptResp( lpctstr pszText, size_t len, dword context1, dwo
 
 
 
-void CClient::Event_Talk_Common(TCHAR *szText)	// PC speech
+void CClient::Event_Talk_Common(tchar *szText)	// PC speech
 {
 	ADDTOCALLSTACK("CClient::Event_Talk_Common");
 	if ( !m_pChar || !m_pChar->m_pPlayer || !m_pChar->m_pArea )
 		return;
 
 	// Guards are special
-	LPCTSTR pszMsgGuards = g_Exp.m_VarDefs.GetKeyStr("guardcall");
+	lpctstr pszMsgGuards = g_Exp.m_VarDefs.GetKeyStr("guardcall");
 	if ( !strnicmp(pszMsgGuards, "", 0) )
 		pszMsgGuards = "GUARD,GUARDS";
 	if ( FindStrWord(szText, pszMsgGuards) > 0 )

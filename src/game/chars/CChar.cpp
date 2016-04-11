@@ -15,6 +15,7 @@
 #include "../items/CItemShip.h"
 #include "../items/CItemSpawn.h"
 #include "../CContainer.h"
+#include "../CLog.h"
 #include "../CServer.h"
 #include "../CServTime.h"
 #include "../CWorld.h"
