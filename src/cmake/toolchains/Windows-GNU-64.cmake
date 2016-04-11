@@ -13,10 +13,31 @@ SET (CXX_SPECIAL "-fexceptions -fnon-call-exceptions")
 SET (CMAKE_C_FLAGS "${C_WARNING_FLAGS} ${C_ARCH_OPTS} ${C_OPTS} ${C_SPECIAL} -std=c11")
 SET (CMAKE_CXX_FLAGS "${CXX_WARNING_FLAGS} ${CXX_ARCH_OPTS} ${CXX_OPTS} ${CXX_SPECIAL} -std=c++11")
 
-# Optimization flags set to max.
-SET_TARGET_PROPERTIES (spheresvr		PROPERTIES	COMPILE_FLAGS -O3 )
-#SET_TARGET_PROPERTIES (spheresvrNightly	 PROPERTIES	COMPILE_FLAGS -O3 )
 # Force dynamic linking.
 SET (CMAKE_EXE_LINKER_FLAGS "-dynamic -static-libstdc++ -static-libgcc")
 
 LINK_DIRECTORIES ("common/mysql/lib/x86_64")
+
+function (toolchain_exe_stuff)
+	## Optimization flags set to max.	# redundant
+	#SET_TARGET_PROPERTIES (spheresvr		PROPERTIES	COMPILE_FLAGS -O3 )
+	##SET_TARGET_PROPERTIES (spheresvrNightly	PROPERTIES	COMPILE_FLAGS -O3 )
+
+	# Architecture defines
+	TARGET_COMPILE_DEFINITIONS ( spheresvr 		PUBLIC _64B )
+	#TARGET_COMPILE_DEFINITIONS ( spheresvrNightly	PUBLIC _64B )
+
+	# Linux (MinGW) libs.
+	TARGET_LINK_LIBRARIES ( spheresvr
+		pthread
+		libmysql
+		ws2_32
+		wsock32
+	)
+	#TARGET_LINK_LIBRARIES ( spheresvrNightly
+	#	pthread
+	#	libmysql
+	#	ws2_32
+	#	wsock32
+	#)
+endfunction()

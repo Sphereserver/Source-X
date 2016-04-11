@@ -1092,7 +1092,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 	bool boIncludeGrid = (target->GetNetState()->isClientVersion(MINCLIVER_ITEMGRID) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced());
 	bool boIsLayerSent[LAYER_HORSE];
 	memset(boIsLayerSent, 0, sizeof(boIsLayerSent));
-	word count = 0;
+	word wCount = 0;
 
 	const CChar* viewer = target->GetChar();
 	const CItemBase* itemDefinition;
@@ -1121,7 +1121,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 				continue;
 
 			wAmount = minimum((word)g_Cfg.m_iVendorMaxSell, wAmount);
-			pos.m_x = (short)(count + 1);
+			pos.m_x = (short)(wCount + 1);
 			pos.m_y = 1;
 		}
 		else
@@ -1176,14 +1176,14 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 		// include tooltip
 		target->addAOSTooltip(item, false, boIsShop);
 
-		if ( ++count >= MAX_ITEMS_CONT )
+		if ( ++wCount >= MAX_ITEMS_CONT )
 			break;
 	}
 
 	// write item count
 	size_t l = getPosition();
 	seek(3);
-	writeInt16(count);
+	writeInt16(wCount);
 	seek(l);
 
 	push(target);

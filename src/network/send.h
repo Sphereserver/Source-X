@@ -14,7 +14,7 @@
 #include "network.h"
 #include "../common/sphereproto.h"
 #include "../common/CUID.h"
-#include "../game/enums.h"
+#include "../game/common_enums.h"
 #include "../game/CResource.h"
 
 

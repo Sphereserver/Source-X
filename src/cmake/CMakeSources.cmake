@@ -30,7 +30,7 @@ game/CWorld.cpp
 game/CWorld.h
 game/CWorldImport.cpp
 game/CWorldMap.cpp
-game/enums.h
+game/common_enums.h
 game/spheresvr.cpp
 game/spheresvr.h
 game/Triggers.h
