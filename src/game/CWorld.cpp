@@ -14,8 +14,8 @@
 #include "CServTime.h"
 #include "CScriptProfiler.h"
 
-#if !defined( _WINDOWS )
-#include <time.h>
+#ifndef _WINDOWS
+	#include <time.h>
 #endif
 
 static const SOUND_TYPE sm_Sounds_Ghost[] =

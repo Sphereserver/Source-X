@@ -280,8 +280,8 @@ bool IsValidGameObjDef( lpctstr pszTest )
 int Calc_GetLog2( uint iVal )
 {
 	// This is really log2 + 1
-	int i=0;
-	for ( ; iVal; i++ )
+	int i = 0;
+	for ( ; iVal ; i++ )
 	{
 		ASSERT( i < 32 );
 		iVal >>= 1 ;
@@ -289,18 +289,16 @@ int Calc_GetLog2( uint iVal )
 	return i;
 }
 
-int Calc_GetRandVal( int iqty )
+int32 Calc_GetRandVal( int32 iQty )
 {
-	if ( iqty <= 0 )
+	if ( iQty <= 0 )
 		return 0;
-	if ( iqty >= INT32_MAX )
-	{
-		return( IMULDIV( g_World.m_Rand.randInt(), (dword) iqty, INT32_MAX )) ;
-	}
-	return( g_World.m_Rand.randInt() % iqty );
+	if ( iQty >= INT32_MAX )
+		return ( IMULDIV(CRand::genRandInt32(0, iQty), (uint)iQty, INT32_MAX ) );
+	return CRand::genRandInt32(0, iQty);
 }
 
-int Calc_GetRandVal2( int iMin, int iMax )
+int32 Calc_GetRandVal2( int32 iMin, int32 iMax )
 {
 	if ( iMin > iMax )
 	{
@@ -308,18 +306,16 @@ int Calc_GetRandVal2( int iMin, int iMax )
 		iMin = iMax;
 		iMax = tmp;
 	}
-	return(iMin + g_World.m_Rand.randInt() % ((iMax - iMin) + 1) );
+	return CRand::genRandInt32(iMin, iMax);
 }
 
-int64 Calc_GetRandLLVal( int64 iqty )
+int64 Calc_GetRandLLVal( int64 iQty )
 {
-	if ( iqty <= 0 )
-		return( 0 );
-	if ( iqty >= INT64_MAX )
-	{
-		return( IMULDIV( g_World.m_Rand.genrand64_int64(), (dword) iqty, INT64_MAX )) ;
-	}
-	return( g_World.m_Rand.genrand64_int64() % iqty );
+	if ( iQty <= 0 )
+		return 0;
+	if ( iQty >= INT64_MAX )
+		return ( IMULDIV(CRand::genRandInt64(0, iQty), (uint64) iQty, INT64_MAX ) );
+	return CRand::genRandInt64(0, iQty);
 }
 
 int64 Calc_GetRandLLVal2( int64 iMin, int64 iMax )
@@ -330,7 +326,7 @@ int64 Calc_GetRandLLVal2( int64 iMin, int64 iMax )
 		iMin = iMax;
 		iMax = tmp;
 	}
-	return(iMin + g_World.m_Rand.genrand64_int64() % ((iMax - iMin) + 1) );
+	return CRand::genRandInt64(iMin, iMax);
 }
 
 int Calc_GetBellCurve( int iValDiff, int iVariance )
@@ -361,7 +357,7 @@ int Calc_GetBellCurve( int iValDiff, int iVariance )
 	//
 
 	if ( iVariance <= 0 )	// this really should not happen but just in case.
-		return( 500 );
+		return 500;
 	if ( iValDiff < 0 ) iValDiff = -iValDiff;
 
 	int iChance = 500;
@@ -371,7 +367,7 @@ int Calc_GetBellCurve( int iValDiff, int iVariance )
 		iChance /= 2;	// chance is halved for each Variance period.
 	}
 
-	return( iChance - IMULDIV( iChance/2, iValDiff, iVariance ));
+	return ( iChance - IMULDIV( iChance/2, iValDiff, iVariance ) );
 }
 
 int Calc_GetSCurve( int iValDiff, int iVariance )
@@ -388,8 +384,8 @@ int Calc_GetSCurve( int iValDiff, int iVariance )
 	//
 	int iChance = Calc_GetBellCurve( iValDiff, iVariance );
 	if ( iValDiff > 0 )
-		return( 1000 - iChance );
-	return( iChance );
+		return ( 1000 - iChance );
+	return iChance;
 }
 
 CExpression::CExpression()

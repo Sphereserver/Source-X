@@ -14,6 +14,7 @@
 #include "spherecom.h"
 #include "CVarDefMap.h"
 #include "ListDefContMap.h"
+#include "sphere_library/CRand.h"
 
 #define _ISCSYMF(ch) ( IsAlpha(ch) || (ch)=='_')	// __iscsym or __iscsymf
 #define _ISCSYM(ch) ( isalnum(ch) || (ch)=='_')		// __iscsym or __iscsymf
@@ -153,8 +154,8 @@ inline extern bool IsCharNumeric( char & Test );
 // Numeric formulas
 int64 Calc_GetRandLLVal( int64 iqty );
 int64 Calc_GetRandLLVal2( int64 iMin, int64 iMax );
-int Calc_GetRandVal( int iqty );
-int Calc_GetRandVal2( int iMin, int iMax );
+int32 Calc_GetRandVal( int32 iQty );
+int32 Calc_GetRandVal2( int32 iMin, int32 iMax );
 int Calc_GetLog2( uint iVal );
 int Calc_GetSCurve( int iValDiff, int iVariance );
 int Calc_GetBellCurve( int iValDiff, int iVariance );

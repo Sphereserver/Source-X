@@ -200,7 +200,6 @@ common/ListDefContMap.h
 common/os_unix.h
 common/os_windows.h
 common/twofish/twofish2.cpp
-common/mtrand/mtrand.h
 common/regex/deelx.h
 )
 SOURCE_GROUP (common FILES ${common_SRCS})
@@ -240,10 +239,12 @@ common/sphere_library/CArray.cpp
 common/sphere_library/CArray.h
 common/sphere_library/CMemBlock.cpp
 common/sphere_library/CMemBlock.h
-common/sphere_library/CQueue.cpp
-common/sphere_library/CQueue.h
+common/sphere_library/CRand.cpp
+common/sphere_library/CRand.h
 common/sphere_library/CString.cpp
 common/sphere_library/CString.h
+common/sphere_library/CQueue.cpp
+common/sphere_library/CQueue.h
 )
 SOURCE_GROUP (common\\sphere_library FILES ${spherelibrary_SRCS})
 

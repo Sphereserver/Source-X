@@ -10,7 +10,6 @@
 #include "CScriptObj.h"
 #include "CVarFloat.h"
 
-typedef double RealType;
 #define VARDEF_FLOAT_MAXBUFFERSIZE 82
 
 CVarFloat::CVarFloat()
@@ -714,12 +713,10 @@ RealType CVarFloat::GetRandVal( RealType dQty )
 {
 	ADDTOCALLSTACK("CVarFloat::GetRandVal");
 	if ( dQty <= 0 )
-		return( 0 );
-	if ( dQty >= INT32_MAX )
-	{
-		return( static_cast<RealType>(IMULDIV( g_World.m_Rand.randDblExc(), dQty, INT32_MAX)) );
-	}
-	return g_World.m_Rand.randDblExc(dQty);
+		return 0;
+	if ( dQty >= INT64_MAX )
+		return (RealType)(IMULDIV( CRand::genRandReal64(0,dQty), dQty, INT64_MAX ));
+	return CRand::genRandReal64(0, dQty);
 }
 
 RealType CVarFloat::GetRandVal2( RealType dMin, RealType dMax )
@@ -731,8 +728,7 @@ RealType CVarFloat::GetRandVal2( RealType dMin, RealType dMax )
 		dMin = dMax;
 		dMax = tmp;
 	}
-	//DEBUG_ERR(("GetRandVal2\n"));
-	return ( dMin + g_World.m_Rand.randDblExc(dMax) ); //These weird numbers are taken from mtrand.cpp (cause calling that function from here spits out some weird external errors)
+	return CRand::genRandReal64(dMin, dMax);
 }
 
 //Does not work as it should, would be too slow, and nobody needs that

@@ -39,6 +39,8 @@
 	all the others
 */
 
+typedef double RealType;
+
 typedef unsigned char			uchar;
 typedef unsigned short			ushort;
 typedef unsigned int			uint;
@@ -84,16 +86,6 @@ typedef	uint64_t		uint64;
 	typedef	const char *		lpcstr;
 	typedef	tchar *				lptstr;
 	typedef const tchar *		lpctstr;
-
-	#ifdef __MINGW32__
-		// default cinttypes macros still throw warnings... weird
-		#undef PRId64
-		#undef PRIu64
-		#undef PRIx64
-		#define PRId64 "I64d"
-		#define PRIu64 "I64u"
-		#define PRIx64 "I64x"
-	#endif
 #endif // !_WINDOWS
 
 #endif // _INC_DATATYPES_H

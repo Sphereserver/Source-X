@@ -10,12 +10,10 @@
 #include "../common/sphere_library/CArray.h"
 #include "../common/CScript.h"
 #include "../common/CScriptObj.h"
-#include "../common/mtrand/mtrand.h"
 #include "../common/CUID.h"
 #include "items/CItemBase.h"
 #include "CServTime.h"
 #include "CSector.h"
-
 
 class CObjBase;
 class CItemStone;
@@ -66,7 +64,6 @@ public:
 	CScript m_FilePlayers;		// Save of the players chars.
 	CScript m_FileMultis;		// Save of the custom multis.
 	bool	m_fSaveParity;		// has the sector been saved relative to the char entering it ?
-	MTRand	m_Rand;
 
 public:
 	// Backgound Save
@@ -100,10 +97,10 @@ private:
 class CWorldClock
 {
 #ifndef _WINDOWS
-#ifdef CLOCKS_PER_SEC
-#undef CLOCKS_PER_SEC
-#endif	// CLOCKS_PER_SEC
-#define CLOCKS_PER_SEC 1000	// must be converted from some internal clock.
+	#ifdef CLOCKS_PER_SEC
+	#undef CLOCKS_PER_SEC
+	#endif	// CLOCKS_PER_SEC
+	#define CLOCKS_PER_SEC 1000	// must be converted from some internal clock.
 #endif
 
 private:
@@ -126,7 +123,7 @@ public:
 	bool Advance();
 	CServTime GetCurrentTime() const	// TICK_PER_SEC
 	{
-		return( m_timeClock );
+		return m_timeClock;
 	}
 	static int64 GetSystemClock();		// CLOCKS_PER_SEC
 };
@@ -361,7 +358,7 @@ public:
 
 inline CServTime CServTime::GetCurrentTime()	// static
 {
-	return( g_World.GetCurrentTime());
+	return g_World.GetCurrentTime();
 }
 
 #endif // _INC_CWORLD_H

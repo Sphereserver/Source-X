@@ -8,7 +8,8 @@
 #define _INC_CVARFLOAT_H
 
 #include <map>
-#include "./sphere_library/CString.h"
+#include "sphere_library/CRand.h"
+#include "sphere_library/CString.h"
 
 
 struct LexNoCaseLess {
@@ -35,7 +36,6 @@ struct LexNoCaseLess {
 class CVarFloat
 {
 public:
-	typedef double RealType;
 	typedef std::map<CGString, RealType, LexNoCaseLess> MapType;
 
 public: //vars
