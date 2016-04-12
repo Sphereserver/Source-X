@@ -49,8 +49,19 @@ public:
 	tchar * GetArgRaw() const;				// Not need to parse at all.
 	tchar * GetArgStr( bool * fQuoted );	// this could be a quoted string ?
 	tchar * GetArgStr();
-	llong GetArgLLVal();
+
+	char GetArgCVal();
+	uchar GetArgUCVal();
+	short GetArgSVal();
+	ushort GetArgUSVal();
 	int GetArgVal();
+	uint GetArgUVal();
+	llong GetArgLLVal();
+	ullong GetArgULLVal();
+	byte GetArgBVal();
+	word GetArgWVal();
+	dword GetArgDWVal();
+
 	int64 GetArgLLRange();
 	int GetArgRange();
 	dword GetArgFlag( dword dwStart, dword dwMask );

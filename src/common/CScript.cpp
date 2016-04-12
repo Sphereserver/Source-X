@@ -117,12 +117,35 @@ dword CScriptKey::GetArgFlag( dword dwStart, dword dwMask )
 		return ( dwStart &~ dwMask );
 }
 
-llong CScriptKey::GetArgLLVal()
+char CScriptKey::GetArgCVal()
 {
-	ADDTOCALLSTACK("CScriptKey::GetArgLLVal");
+	ADDTOCALLSTACK("CScriptKey::GetArgCVal");
 	ASSERT(m_pszKey);
 	ASSERT(m_pszArg);
-	return Exp_GetLLVal( m_pszArg );
+	return Exp_GetCVal( m_pszArg );
+}
+uchar CScriptKey::GetArgUCVal()
+{
+	ADDTOCALLSTACK("CScriptKey::GetArgUCVal");
+	ASSERT(m_pszKey);
+	ASSERT(m_pszArg);
+	return Exp_GetUCVal( m_pszArg );
+}
+
+short CScriptKey::GetArgSVal()
+{
+	ADDTOCALLSTACK("CScriptKey::GetArgSVal");
+	ASSERT(m_pszKey);
+	ASSERT(m_pszArg);
+	return Exp_GetSVal( m_pszArg );
+}
+
+ushort CScriptKey::GetArgUSVal()
+{
+	ADDTOCALLSTACK("CScriptKey::GetArgUSVal");
+	ASSERT(m_pszKey);
+	ASSERT(m_pszArg);
+	return Exp_GetUSVal( m_pszArg );
 }
 
 int CScriptKey::GetArgVal()
@@ -132,6 +155,55 @@ int CScriptKey::GetArgVal()
 	ASSERT(m_pszArg);
 	return Exp_GetVal( m_pszArg );
 }
+
+uint CScriptKey::GetArgUVal()
+{
+	ADDTOCALLSTACK("CScriptKey::GetArgUVal");
+	ASSERT(m_pszKey);
+	ASSERT(m_pszArg);
+	return Exp_GetUVal( m_pszArg );
+}
+
+llong CScriptKey::GetArgLLVal()
+{
+	ADDTOCALLSTACK("CScriptKey::GetArgLLVal");
+	ASSERT(m_pszKey);
+	ASSERT(m_pszArg);
+	return Exp_GetLLVal( m_pszArg );
+}
+
+ullong CScriptKey::GetArgULLVal()
+{
+	ADDTOCALLSTACK("CScriptKey::GetArgULLVal");
+	ASSERT(m_pszKey);
+	ASSERT(m_pszArg);
+	return Exp_GetULLVal( m_pszArg );
+}
+
+byte CScriptKey::GetArgBVal()
+{
+	ADDTOCALLSTACK("CScriptKey::GetArgBVal");
+	ASSERT(m_pszKey);
+	ASSERT(m_pszArg);
+	return Exp_GetBVal( m_pszArg );
+}
+
+word CScriptKey::GetArgWVal()
+{
+	ADDTOCALLSTACK("CScriptKey::GetArgWVal");
+	ASSERT(m_pszKey);
+	ASSERT(m_pszArg);
+	return Exp_GetWVal( m_pszArg );
+}
+
+dword CScriptKey::GetArgDWVal()
+{
+	ADDTOCALLSTACK("CScriptKey::GetArgDWVal");
+	ASSERT(m_pszKey);
+	ASSERT(m_pszArg);
+	return Exp_GetDWVal( m_pszArg );
+}
+
 
 llong CScriptKey::GetArgLLRange()
 {
