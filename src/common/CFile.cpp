@@ -188,13 +188,6 @@ bool CFile::Write( const void * pData, dword dwLength ) const
 #endif
 }
 
-#ifdef _WINDOWS
-void CFile::NotifyIOError( lpctstr szMessage ) const
-{
-	m_uMode = 0;
-}
-#endif
-
 CGFile::~CGFile()
 {
 	Close();

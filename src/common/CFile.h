@@ -164,9 +164,7 @@ public:
 	OSFILE_TYPE m_hFile;	///< File type.
 protected:
 	CGString m_strFileName;	///< File name (with path).
-private:
-        uint m_uMode;   ///< MMSYSTEM may use 32 bit flags.
-
+	uint m_uMode;   ///< MMSYSTEM may use 32 bit flags.
 };
 
 
