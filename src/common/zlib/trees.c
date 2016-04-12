@@ -36,6 +36,7 @@
 
 /* #define GEN_TREES_H */
 
+#pragma warning(disable:4244)
 #include "deflate.h"
 
 #ifdef DEBUG

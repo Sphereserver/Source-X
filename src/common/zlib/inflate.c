@@ -82,6 +82,7 @@
  * The history for versions after 1.2.0 are in ChangeLog in zlib distribution.
  */
 
+#pragma warning(disable:4244)
 #include "zutil.h"
 #include "inftrees.h"
 #include "inflate.h"

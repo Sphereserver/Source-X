@@ -50,7 +50,7 @@
  */
 
 /* @(#) $Id$ */
-
+#pragma warning(disable:4244)
 #include "deflate.h"
 
 const char deflate_copyright[] =

@@ -157,345 +157,380 @@ echo #define __GITREVISION__ %gitver% &gt;&gt; src/common/version/GitRevision.h<
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\common\CacheableScriptFile.cpp" />
-    <ClCompile Include="src\common\CEncrypt.cpp" />
-    <ClCompile Include="src\common\CGrayUID.cpp" />
-    <ClCompile Include="src\common\CObjBaseTemplate.cpp" />
-    <ClCompile Include="src\common\crashdump\crashdump.cpp" />
-    <ClCompile Include="src\common\CsvFile.cpp" />
-    <ClCompile Include="src\common\CVarFloat.cpp" />
-    <ClCompile Include="src\common\sqlite\SQLite.cpp" />
-    <ClCompile Include="src\common\sqlite\sqlite3.c" />
-    <ClCompile Include="src\common\zlib\adler32.c" />
-    <ClCompile Include="src\common\zlib\compress.c" />
-    <ClCompile Include="src\common\zlib\crc32.c" />
-    <ClCompile Include="src\common\zlib\deflate.c">
-      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4702;4127</DisableSpecificWarnings>
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\CBase.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\CContainer.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\CLog.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\CObjBase.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\CPathFinder.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\CResource.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\CScriptProfiler.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\CSector.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\CSectorEnviron.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\CServer.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\CServRef.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\CServTime.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\CWorld.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\enums.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\spheresvr.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\Triggers.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\items\CItem.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\items\CItemBase.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\items\CItemCommCrystal.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\items\CItemContainer.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\items\CItemCorpse.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\items\CItemMap.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\items\CItemMemory.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\items\CItemMessage.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\items\CItemMulti.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\items\CItemMultiCustom.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\items\CItemScript.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\items\CItemShip.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\items\CItemSpawn.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\items\CItemStone.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\items\CItemVendable.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\chars\CChar.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\chars\CCharBase.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\chars\CCharNPC.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\chars\CCharPlayer.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\chars\CCharRefArray.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\clients\CAccount.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\clients\CChat.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\clients\CChatChannel.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\clients\CChatChanMember.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\clients\CClient.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\clients\CClientTooltip.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\clients\CGMPage.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\game\clients\CParty.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CacheableScriptFile.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CAssoc.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CDataBase.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CEncrypt.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CException.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CExpression.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CFile.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CFileList.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CSphereMap.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CUID.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CUIDExtra.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CMD5.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CObjBaseTemplate.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\common.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CRect.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CRegion.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CResourceBase.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CScript.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CScriptObj.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CSectorTemplate.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CSocket.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CsvFile.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CTextConsole.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CTime.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CUOInstall.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CVarDefMap.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CVarFloat.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\CWindow.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\datatypes.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\spherecom.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\spheremul.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\sphereproto.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\sphereversion.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\ListDefContMap.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\os_unix.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\os_windows.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\mtrand\mtrand.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\regex\deelx.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\network\network.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\network\packet.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\network\receive.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\network\send.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\network\PingServer.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\sphere\asyncdb.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\sphere\containers.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\sphere\linuxev.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\sphere\mutex.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\sphere\ProfileData.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\sphere\ProfileTask.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\sphere\strings.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\sphere\threads.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\sphere\ntservice.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\sphere\UnixTerminal.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\crashdump\crashdump.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\crashdump\mingwdbghelp.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\libev\wrapper_ev.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\sphere_library\CArray.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\sphere_library\CMemBlock.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\sphere_library\CQueue.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\sphere_library\CString.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\sqlite\sqlite3.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\sqlite\SQLite.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\zlib\crc32.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\zlib\deflate.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\zlib\gzguts.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\zlib\inffast.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\zlib\inffixed.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\zlib\inflate.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\zlib\inftrees.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\zlib\trees.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\zlib\zconf.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\zlib\zlib.h" />
+    <ClInclude Include="E:\Mis Documentos\UO\fork\src\common\zlib\zutil.h" />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\CBase.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\CContainer.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\CLog.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\CObjBase.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\CPathFinder.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\CResourceCalc.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\CResource.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\CResourceDef.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\CSector.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\CSectorEnviron.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\CServer.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\CServRef.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\CServTime.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\CWebPage.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\CWorld.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\CWorldImport.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\CWorldMap.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\spheresvr.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\Triggers.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\items\CItem.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\items\CItemBase.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\items\CItemCommCrystal.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\items\CItemContainer.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\items\CItemCorpse.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\items\CItemMap.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\items\CItemMemory.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\items\CItemMessage.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\items\CItemMulti.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\items\CItemMultiCustom.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\items\CItemPlant.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\items\CItemScript.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\items\CItemShip.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\items\CItemSpawn.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\items\CItemStone.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\items\CItemVendable.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\chars\CCharact.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\chars\CCharBase.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\chars\CChar.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\chars\CCharAttacker.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\chars\CCharFight.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\chars\CCharMemory.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\chars\CCharNotoriety.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\chars\CCharNPC.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\chars\CCharNPCAct.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\chars\CCharNPCAct_Fight.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\chars\CCharNPCAct_Magic.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\chars\CCharNPCAct_Vendor.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\chars\CCharNPCPet.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\chars\CCharNPCStatus.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\chars\CCharPlayer.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\chars\CCharRefArray.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\chars\CCharSkill.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\chars\CCharSpell.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\chars\CCharStat.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\chars\CCharStatus.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\chars\CCharUse.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\clients\CAccount.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\clients\CChat.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\clients\CChatChannel.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\clients\CChatChanMember.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\clients\CClient.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\clients\CClientDialog.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\clients\CClientEvent.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\clients\CClientGMPage.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\clients\CClientLog.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\clients\CClientMsg.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\clients\CClientTarg.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\clients\CClientTooltip.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\clients\CClientUse.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\clients\CGMPage.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\game\clients\CParty.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CacheableScriptFile.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CAssoc.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CDataBase.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CEncrypt.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CException.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CExpression.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CFile.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CFileList.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CSphereData.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CSphereMap.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CUID.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CMD5.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CObjBaseTemplate.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CRect.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CRegion.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CResourceBase.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CScript.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CScriptObj.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CSectorTemplate.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CSocket.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CsvFile.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CTextConsole.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CTime.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CUOInstall.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CVarDefMap.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CVarFloat.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\CWindow.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\spherecom.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\ListDefContMap.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\twofish\twofish2.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\network\network.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\network\packet.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\network\receive.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\network\send.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\network\PingServer.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\sphere\asyncdb.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\sphere\linuxev.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\sphere\mutex.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\sphere\ProfileData.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\sphere\ProfileTask.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\sphere\strings.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\sphere\threads.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\sphere\ntservice.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\sphere\ntwindow.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\sphere\UnixTerminal.cpp"  />
+    <ResourceCompile Include="E:\Mis Documentos\UO\fork\src\sphere\SphereSvr.rc"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\crashdump\crashdump.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\libev\wrapper_ev.c" >
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">CompileAsC</CompileAs>
     </ClCompile>
-    <ClCompile Include="src\common\zlib\gzclose.c" />
-    <ClCompile Include="src\common\zlib\gzlib.c" />
-    <ClCompile Include="src\common\zlib\gzread.c" />
-    <ClCompile Include="src\common\zlib\gzwrite.c" />
-    <ClCompile Include="src\common\zlib\infback.c" />
-    <ClCompile Include="src\common\zlib\inffast.c" />
-    <ClCompile Include="src\common\zlib\inflate.c" />
-    <ClCompile Include="src\common\zlib\inftrees.c" />
-    <ClCompile Include="src\common\zlib\trees.c" />
-    <ClCompile Include="src\common\zlib\uncompr.c" />
-    <ClCompile Include="src\common\zlib\zutil.c" />
-    <ClCompile Include="src\graysvr\CCharAttacker.cpp" />
-    <ClCompile Include="src\graysvr\CCharMemory.cpp" />
-    <ClCompile Include="src\graysvr\CCharNotoriety.cpp" />
-    <ClCompile Include="src\graysvr\CCharNPC.cpp" />
-    <ClCompile Include="src\graysvr\CCharNPCAct_Fight.cpp" />
-    <ClCompile Include="src\graysvr\CCharNPCAct_Magic.cpp" />
-    <ClCompile Include="src\graysvr\CCharNPCAct_Vendor.cpp" />
-    <ClCompile Include="src\graysvr\CCharRefArray.cpp" />
-    <ClCompile Include="src\graysvr\CCharStat.cpp" />
-    <ClCompile Include="src\graysvr\CChatChanMember.cpp" />
-    <ClCompile Include="src\graysvr\CChatChannel.cpp" />
-    <ClCompile Include="src\graysvr\CClientTooltip.cpp" />
-    <ClCompile Include="src\graysvr\CItemCommCrystal.cpp" />
-    <ClCompile Include="src\graysvr\CItemContainer.cpp" />
-    <ClCompile Include="src\graysvr\CItemCorpse.cpp" />
-    <ClCompile Include="src\graysvr\CItemMap.cpp" />
-    <ClCompile Include="src\graysvr\CItemMemory.cpp" />
-    <ClCompile Include="src\graysvr\CItemMessage.cpp" />
-    <ClCompile Include="src\graysvr\CItemPlant.cpp" />
-    <ClCompile Include="src\graysvr\CItemScript.cpp" />
-    <ClCompile Include="src\graysvr\CSectorEnviron.cpp" />
-    <ClCompile Include="src\graysvr\CServTime.cpp" />
-    <ClCompile Include="src\graysvr\Triggers.cpp" />
-    <ClCompile Include="src\network\network.cpp" />
-    <ClCompile Include="src\network\packet.cpp" />
-    <ClCompile Include="src\network\PingServer.cpp" />
-    <ClCompile Include="src\network\receive.cpp" />
-    <ClCompile Include="src\network\send.cpp" />
-    <ClCompile Include="src\sphere\asyncdb.cpp" />
-    <ClCompile Include="src\sphere\linuxev.cpp" />
-    <ClCompile Include="src\sphere\mutex.cpp" />
-    <ClCompile Include="src\sphere\ntservice.cpp" />
-    <ClCompile Include="src\sphere\ntwindow.cpp" />
-    <ClCompile Include="src\sphere\ProfileData.cpp" />
-    <ClCompile Include="src\sphere\ProfileTask.cpp" />
-    <ClCompile Include="src\sphere\strings.cpp" />
-    <ClCompile Include="src\sphere\threads.cpp" />
-    <ClCompile Include="src\graysvr\CAccount.cpp" />
-    <ClCompile Include="src\graysvr\CBase.cpp" />
-    <ClCompile Include="src\graysvr\CChar.cpp" />
-    <ClCompile Include="src\graysvr\CCharact.cpp" />
-    <ClCompile Include="src\graysvr\CCharBase.cpp" />
-    <ClCompile Include="src\graysvr\CCharFight.cpp" />
-    <ClCompile Include="src\graysvr\CCharPlayer.cpp" />
-    <ClCompile Include="src\graysvr\CCharNPCAct.cpp" />
-    <ClCompile Include="src\graysvr\CCharNPCPet.cpp" />
-    <ClCompile Include="src\graysvr\CCharNPCStatus.cpp" />
-    <ClCompile Include="src\graysvr\CCharSkill.cpp" />
-    <ClCompile Include="src\graysvr\CCharSpell.cpp" />
-    <ClCompile Include="src\graysvr\CCharStatus.cpp" />
-    <ClCompile Include="src\graysvr\CCharUse.cpp" />
-    <ClCompile Include="src\graysvr\CChat.cpp" />
-    <ClCompile Include="src\graysvr\CClient.cpp" />
-    <ClCompile Include="src\graysvr\CClientDialog.cpp" />
-    <ClCompile Include="src\graysvr\CClientEvent.cpp" />
-    <ClCompile Include="src\graysvr\CClientGMPage.cpp" />
-    <ClCompile Include="src\graysvr\CClientLog.cpp" />
-    <ClCompile Include="src\graysvr\CClientMsg.cpp" />
-    <ClCompile Include="src\graysvr\CClientTarg.cpp" />
-    <ClCompile Include="src\graysvr\CClientUse.cpp" />
-    <ClCompile Include="src\graysvr\CContainer.cpp" />
-    <ClCompile Include="src\graysvr\CGMPage.cpp" />
-    <ClCompile Include="src\graysvr\CItem.cpp" />
-    <ClCompile Include="src\graysvr\CItemBase.cpp" />
-    <ClCompile Include="src\graysvr\CItemMulti.cpp" />
-    <ClCompile Include="src\graysvr\CItemMultiCustom.cpp" />
-    <ClCompile Include="src\graysvr\CItemShip.cpp" />
-    <ClCompile Include="src\common\twofish\twofish2.cpp" />
-    <ClCompile Include="src\common\CArray.cpp" />
-    <ClCompile Include="src\common\CAssoc.cpp" />
-    <ClCompile Include="src\common\CDataBase.cpp" />
-    <ClCompile Include="src\common\CException.cpp" />
-    <ClCompile Include="src\common\CExpression.cpp" />
-    <ClCompile Include="src\common\CFile.cpp" />
-    <ClCompile Include="src\common\CFileList.cpp" />
-    <ClCompile Include="src\common\CGrayData.cpp" />
-    <ClCompile Include="src\common\CGrayInst.cpp" />
-    <ClCompile Include="src\common\CGrayMap.cpp" />
-    <ClCompile Include="src\common\CMD5.cpp" />
-    <ClCompile Include="src\common\CQueue.cpp" />
-    <ClCompile Include="src\common\CRect.cpp" />
-    <ClCompile Include="src\common\CRegion.cpp" />
-    <ClCompile Include="src\common\CResourceBase.cpp" />
-    <ClCompile Include="src\common\CScript.cpp" />
-    <ClCompile Include="src\common\CScriptObj.cpp" />
-    <ClCompile Include="src\common\CSectorTemplate.cpp" />
-    <ClCompile Include="src\common\CSocket.cpp" />
-    <ClCompile Include="src\common\CString.cpp" />
-    <ClCompile Include="src\common\CTime.cpp" />
-    <ClCompile Include="src\common\CVarDefMap.cpp" />
-    <ClCompile Include="src\common\ListDefContMap.cpp" />
-    <ClCompile Include="src\common\CWindow.cpp" />
-    <ClCompile Include="src\common\graycom.cpp" />
-    <ClCompile Include="src\graysvr\CItemSpawn.cpp" />
-    <ClCompile Include="src\graysvr\CItemStone.cpp" />
-    <ClCompile Include="src\graysvr\CItemVendable.cpp" />
-    <ClCompile Include="src\graysvr\CLog.cpp" />
-    <ClCompile Include="src\graysvr\CObjBase.cpp" />
-    <ClCompile Include="src\graysvr\CParty.cpp" />
-    <ClCompile Include="src\graysvr\CPathFinder.cpp" />
-    <ClCompile Include="src\graysvr\CResource.cpp" />
-    <ClCompile Include="src\graysvr\CResourceCalc.cpp" />
-    <ClCompile Include="src\graysvr\CResourceDef.cpp" />
-    <ClCompile Include="src\graysvr\CSector.cpp" />
-    <ClCompile Include="src\graysvr\CServer.cpp" />
-    <ClCompile Include="src\graysvr\CServRef.cpp" />
-    <ClCompile Include="src\graysvr\CWebPage.cpp" />
-    <ClCompile Include="src\graysvr\CWorld.cpp" />
-    <ClCompile Include="src\graysvr\CWorldImport.cpp" />
-    <ClCompile Include="src\graysvr\CWorldMap.cpp" />
-    <ClCompile Include="src\graysvr\graysvr.cpp" />
-    <ClCompile Include="src\sphere\UnixTerminal.cpp" />
-    <ClInclude Include="src\common\CacheableScriptFile.h" />
-    <ClInclude Include="src\common\CEncrypt.h" />
-    <ClInclude Include="src\common\CGrayUID.h" />
-    <ClInclude Include="src\common\CGrayUIDextra.h" />
-    <ClInclude Include="src\common\CMD5.h" />
-    <ClInclude Include="src\common\CObjBaseTemplate.h" />
-    <ClInclude Include="src\common\crashdump\crashdump.h" />
-    <ClInclude Include="src\common\CsvFile.h" />
-    <ClInclude Include="src\common\CTextConsole.h" />
-    <ClInclude Include="src\common\CVarFloat.h" />
-    <ClInclude Include="src\common\CWindow.h" />
-    <ClInclude Include="src\common\mtrand\mtrand.h" />
-    <ClInclude Include="src\common\sqlite\SQLite.h" />
-    <ClInclude Include="src\common\sqlite\sqlite3.h" />
-    <ClInclude Include="src\common\zlib\crc32.h" />
-    <ClInclude Include="src\common\zlib\deflate.h" />
-    <ClInclude Include="src\common\zlib\gzguts.h" />
-    <ClInclude Include="src\common\zlib\inffast.h" />
-    <ClInclude Include="src\common\zlib\inffixed.h" />
-    <ClInclude Include="src\common\zlib\inflate.h" />
-    <ClInclude Include="src\common\zlib\inftrees.h" />
-    <ClInclude Include="src\common\zlib\trees.h" />
-    <ClInclude Include="src\common\zlib\zutil.h" />
-    <ClInclude Include="src\graysvr\CChar.h" />
-    <ClInclude Include="src\graysvr\CCharBase.h" />
-    <ClInclude Include="src\graysvr\CCharNPC.h" />
-    <ClInclude Include="src\graysvr\CCharPlayer.h" />
-    <ClInclude Include="src\graysvr\CCharRefArray.h" />
-    <ClInclude Include="src\graysvr\CChat.h" />
-    <ClInclude Include="src\graysvr\CChatChanMember.h" />
-    <ClInclude Include="src\graysvr\CChatChannel.h" />
-    <ClInclude Include="src\graysvr\CClientTooltip.h" />
-    <ClInclude Include="src\graysvr\CContainer.h" />
-    <ClInclude Include="src\graysvr\CGMPage.h" />
-    <ClInclude Include="src\graysvr\CItem.h" />
-    <ClInclude Include="src\graysvr\CItemBase.h" />
-    <ClInclude Include="src\graysvr\CItemCommCrystal.h" />
-    <ClInclude Include="src\graysvr\CItemContainer.h" />
-    <ClInclude Include="src\graysvr\CItemCorpse.h" />
-    <ClInclude Include="src\graysvr\CItemMap.h" />
-    <ClInclude Include="src\graysvr\CItemMemory.h" />
-    <ClInclude Include="src\graysvr\CItemMessage.h" />
-    <ClInclude Include="src\graysvr\CItemMulti.h" />
-    <ClInclude Include="src\graysvr\CItemMultiCustom.h" />
-    <ClInclude Include="src\graysvr\CItemScript.h" />
-    <ClInclude Include="src\graysvr\CItemShip.h" />
-    <ClInclude Include="src\graysvr\CItemSpawn.h" />
-    <ClInclude Include="src\graysvr\CItemStone.h" />
-    <ClInclude Include="src\graysvr\CItemVendable.h" />
-    <ClInclude Include="src\graysvr\CLog.h" />
-    <ClInclude Include="src\graysvr\CParty.h" />
-    <ClInclude Include="src\graysvr\CSector.h" />
-    <ClInclude Include="src\graysvr\CSectorEnviron.h" />
-    <ClInclude Include="src\graysvr\CServer.h" />
-    <ClInclude Include="src\graysvr\CServTime.h" />
-    <ClInclude Include="src\graysvr\enums.h" />
-    <ClInclude Include="src\graysvr\Triggers.h" />
-    <ClInclude Include="src\network\network.h" />
-    <ClInclude Include="src\network\packet.h" />
-    <ClInclude Include="src\network\PingServer.h" />
-    <ClInclude Include="src\network\receive.h" />
-    <ClInclude Include="src\network\send.h" />
-    <ClInclude Include="src\sphere\asyncdb.h" />
-    <ClInclude Include="src\sphere\containers.h" />
-    <ClInclude Include="src\sphere\linuxev.h" />
-    <ClInclude Include="src\sphere\mutex.h" />
-    <ClInclude Include="src\sphere\ProfileData.h" />
-    <ClInclude Include="src\sphere\ProfileTask.h" />
-    <ClInclude Include="src\sphere\resource.h" />
-    <ClInclude Include="src\sphere\strings.h" />
-    <ClInclude Include="src\sphere\threads.h" />
-    <ClInclude Include="src\graysvr\CAccount.h" />
-    <ClInclude Include="src\graysvr\CBase.h" />
-    <ClInclude Include="src\graysvr\CClient.h" />
-    <ClInclude Include="src\graysvr\CObjBase.h" />
-    <ClInclude Include="src\graysvr\CPathFinder.h" />
-    <ClInclude Include="src\graysvr\CResource.h" />
-    <ClInclude Include="src\graysvr\CServRef.h" />
-    <ClInclude Include="src\graysvr\CWorld.h" />
-    <ClInclude Include="src\graysvr\graysvr.h" />
-    <ClInclude Include="src\graysvr\ntservice.h" />
-    <ClInclude Include="src\common\zlib\zconf.h" />
-    <ClInclude Include="src\common\zlib\zlib.h" />
-    <ClInclude Include="src\common\twofish\aes.h" />
-    <ClInclude Include="src\common\twofish\debug.h" />
-    <ClInclude Include="src\common\twofish\platform.h" />
-    <ClInclude Include="src\common\twofish\table.h" />
-    <ClInclude Include="src\common\regex\deelx.h" />
-    <ClInclude Include="src\common\carray.h" />
-    <ClInclude Include="src\common\CAssoc.h" />
-    <ClInclude Include="src\common\CDataBase.h" />
-    <ClInclude Include="src\common\CException.h" />
-    <ClInclude Include="src\common\CExpression.h" />
-    <ClInclude Include="src\common\CFile.h" />
-    <ClInclude Include="src\common\CFileList.h" />
-    <ClInclude Include="src\common\cgrayinst.h" />
-    <ClInclude Include="src\common\CGrayMap.h" />
-    <ClInclude Include="src\common\CMemBlock.h" />
-    <ClInclude Include="src\common\common.h" />
-    <ClInclude Include="src\common\CQueue.h" />
-    <ClInclude Include="src\common\crect.h" />
-    <ClInclude Include="src\common\cregion.h" />
-    <ClInclude Include="src\common\CResourceBase.h" />
-    <ClInclude Include="src\common\cscript.h" />
-    <ClInclude Include="src\common\CScriptObj.h" />
-    <ClInclude Include="src\common\cSectorTemplate.h" />
-    <ClInclude Include="src\common\CSocket.h" />
-    <ClInclude Include="src\common\cstring.h" />
-    <ClInclude Include="src\common\CTime.h" />
-    <ClInclude Include="src\common\CVarDefMap.h" />
-    <ClInclude Include="src\common\ListDefContMap.h" />
-    <ClInclude Include="src\common\graycom.h" />
-    <ClInclude Include="src\common\graymul.h" />
-    <ClInclude Include="src\common\grayproto.h" />
-    <ClInclude Include="src\common\grayver.h" />
-    <ClInclude Include="src\common\os_unix.h" />
-    <ClInclude Include="src\common\os_windows.h" />
-    <ClInclude Include="src\graysvr\UnixTerminal.h" />
-    <CustomBuild Include="src\tables\CBaseBaseDef_props.tbl">
-      <FileType>Document</FileType>
-    </CustomBuild>
-    <CustomBuild Include="src\tables\CChar_functions.tbl">
-      <FileType>Document</FileType>
-    </CustomBuild>
-    <CustomBuild Include="src\tables\CChar_props.tbl">
-      <FileType>Document</FileType>
-    </CustomBuild>
-    <CustomBuild Include="src\tables\CCharBase_props.tbl">
-      <FileType>Document</FileType>
-    </CustomBuild>
-    <CustomBuild Include="src\tables\CCharNpc_props.tbl">
-      <FileType>Document</FileType>
-    </CustomBuild>
-    <CustomBuild Include="src\tables\CCharPlayer_props.tbl">
-      <FileType>Document</FileType>
-    </CustomBuild>
-    <CustomBuild Include="src\tables\CClient_functions.tbl">
-      <FileType>Document</FileType>
-    </CustomBuild>
-    <CustomBuild Include="src\tables\CClient_props.tbl">
-      <FileType>Document</FileType>
-    </CustomBuild>
-    <CustomBuild Include="src\tables\CFile_functions.tbl">
-      <FileType>Document</FileType>
-    </CustomBuild>
-    <CustomBuild Include="src\tables\CFile_props.tbl">
-      <FileType>Document</FileType>
-    </CustomBuild>
-    <CustomBuild Include="src\tables\CFileObjContainer_functions.tbl">
-      <FileType>Document</FileType>
-    </CustomBuild>
-    <CustomBuild Include="src\tables\CFileObjContainer_props.tbl">
-      <FileType>Document</FileType>
-    </CustomBuild>
-    <CustomBuild Include="src\tables\classnames.tbl">
-      <FileType>Document</FileType>
-    </CustomBuild>
-    <CustomBuild Include="src\tables\CObjBase_functions.tbl">
-      <FileType>Document</FileType>
-    </CustomBuild>
-    <CustomBuild Include="src\tables\CObjBase_props.tbl">
-      <FileType>Document</FileType>
-    </CustomBuild>
-    <CustomBuild Include="src\tables\CParty_functions.tbl">
-      <FileType>Document</FileType>
-    </CustomBuild>
-    <CustomBuild Include="src\tables\CParty_props.tbl">
-      <FileType>Document</FileType>
-    </CustomBuild>
-    <CustomBuild Include="src\tables\CScriptObj_functions.tbl">
-      <FileType>Document</FileType>
-    </CustomBuild>
-    <CustomBuild Include="src\tables\CSector_functions.tbl">
-      <FileType>Document</FileType>
-    </CustomBuild>
-    <CustomBuild Include="src\tables\defmessages.tbl">
-      <FileType>Document</FileType>
-    </CustomBuild>
-    <CustomBuild Include="src\Sphere.ini">
-      <FileType>Document</FileType>
-    </CustomBuild>
-    <None Include="src\common\twofish\Makefile" />
-    <None Include="src\common\zlib\ChangeLog" />
-    <None Include="src\common\zlib\FAQ" />
-    <None Include="src\common\zlib\INDEX" />
-    <None Include="src\common\zlib\README" />
-    <None Include="src\sphereCrypt.ini" />
-    <None Include="src\tables\CCharPlayer_functions.tbl" />
-    <None Include="src\tables\CItemBase_props.tbl" />
-    <None Include="src\tables\CItemStone_functions.tbl" />
-    <None Include="src\tables\CItemStone_props.tbl" />
-    <None Include="src\tables\CItem_functions.tbl" />
-    <None Include="src\tables\CItem_props.tbl" />
-    <None Include="src\tables\CStoneMember_functions.tbl" />
-    <None Include="src\tables\CStoneMember_props.tbl" />
-    <None Include="src\tables\triggers.tbl" />
-    <Text Include="docs\REVISIONS-51-54-SERIES.TXT" />
-    <Text Include="docs\REVISIONS-55-SERIES.TXT" />
-    <Text Include="docs\REVISIONS-56-Pre_release.TXT" />
-    <Text Include="docs\REVISIONS-56-SERIES.TXT" />
-    <Text Include="src\common\zlib\algorithm.txt" />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\sphere_library\CArray.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\sphere_library\CMemBlock.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\sphere_library\CQueue.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\sphere_library\CString.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\sqlite\sqlite3.c" >
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">CompileAsC</CompileAs>
+    </ClCompile>
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\sqlite\SQLite.cpp"  />
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\zlib\adler32.c" >
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">CompileAsC</CompileAs>
+    </ClCompile>
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\zlib\compress.c" >
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">CompileAsC</CompileAs>
+    </ClCompile>
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\zlib\crc32.c" >
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">CompileAsC</CompileAs>
+    </ClCompile>
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\zlib\deflate.c" >
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">CompileAsC</CompileAs>
+    </ClCompile>
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\zlib\gzclose.c" >
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">CompileAsC</CompileAs>
+    </ClCompile>
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\zlib\gzlib.c" >
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">CompileAsC</CompileAs>
+    </ClCompile>
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\zlib\gzread.c" >
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">CompileAsC</CompileAs>
+    </ClCompile>
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\zlib\gzwrite.c" >
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">CompileAsC</CompileAs>
+    </ClCompile>
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\zlib\infback.c" >
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">CompileAsC</CompileAs>
+    </ClCompile>
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\zlib\inffast.c" >
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">CompileAsC</CompileAs>
+    </ClCompile>
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\zlib\inflate.c" >
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">CompileAsC</CompileAs>
+    </ClCompile>
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\zlib\inftrees.c" >
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">CompileAsC</CompileAs>
+    </ClCompile>
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\zlib\trees.c" >
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">CompileAsC</CompileAs>
+    </ClCompile>
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\zlib\uncompr.c" >
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">CompileAsC</CompileAs>
+    </ClCompile>
+    <ClCompile Include="E:\Mis Documentos\UO\fork\src\common\zlib\zutil.c" >
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">CompileAsC</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">CompileAsC</CompileAs>
+    </ClCompile>
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\CBaseBaseDef_props.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\CChar_functions.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\CChar_props.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\CCharBase_props.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\CCharNpc_props.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\CCharPlayer_functions.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\CCharPlayer_props.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\CClient_functions.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\CClient_props.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\CFile_functions.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\CFile_props.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\CFileObjContainer_functions.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\CFileObjContainer_props.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\CItem_functions.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\CItem_props.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\CItemBase_props.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\CItemStone_functions.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\CItemStone_props.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\classnames.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\CObjBase_functions.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\CObjBase_props.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\CParty_functions.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\CParty_props.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\CScriptObj_functions.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\CSector_functions.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\CStoneMember_functions.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\CStoneMember_props.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\defmessages.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\src\tables\triggers.tbl" />
+    <None Include="E:\Mis Documentos\UO\fork\docs\REVISIONS-56-SERIES.TXT" />
+    <None Include="E:\Mis Documentos\UO\fork\src\Sphere.ini" />
+    <None Include="E:\Mis Documentos\UO\fork\src\sphereCrypt.ini" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\sphere\GraySvr.rc" />

@@ -5,7 +5,7 @@
 // libev produces many warnings which isn't really appropriate for us to
 // address since it is 3rd party code that could be overwritten at any time
 // with a new version
-#pragma warning(disable:4100 4101 4127 4189 4245 4706 4996 4068)
+#pragma warning(disable:4068 4100 4101 4127 4189 4244 4245 4457 4706 4996)
 #pragma GCC diagnostic ignored "-Wcomment"
 #pragma GCC diagnostic ignored "-Wold-style-declaration"
 #pragma GCC diagnostic ignored "-Wparentheses"
@@ -26,4 +26,4 @@ struct timespec
 };
 #endif  // __MINGW32__
 
-#include "ev.c"
+#include "ev.h"
