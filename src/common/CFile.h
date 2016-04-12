@@ -164,6 +164,9 @@ public:
 	OSFILE_TYPE m_hFile;	///< File type.
 protected:
 	CGString m_strFileName;	///< File name (with path).
+private:
+        uint m_uMode;   ///< MMSYSTEM may use 32 bit flags.
+
 };
 
 
@@ -276,11 +279,6 @@ public:
 	* @return true if file is open for write, false otherwise.
 	*/
 	bool IsWriteMode() const { return ( m_uMode & OF_WRITE ); }
-
-
-
-private:
-	uint m_uMode;	///< MMSYSTEM may use 32 bit flags.
 };
 
 
