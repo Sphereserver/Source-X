@@ -1,4 +1,5 @@
 
+
 #include "../game/items/CItem.h"
 #include "../game/items/CItemBase.h"
 #include "../game/CLog.h"
@@ -6,6 +7,7 @@
 #include "../game/CServer.h"
 #include "../game/CWorld.h"
 #include "CRect.h"
+#include "CUIDExtra.h"
 
 
 //*************************************************************************

@@ -8,6 +8,7 @@
 #include "CException.h"
 #include "CRect.h"
 #include "CSectorTemplate.h"
+#include "CUIDExtra.h"
 
 
 CCharsDisconnectList::CCharsDisconnectList()

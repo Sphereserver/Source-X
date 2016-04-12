@@ -8,6 +8,7 @@
 #include "CException.h"
 #include "CScriptObj.h"
 #include "CTextConsole.h"
+#include "CUIDExtra.h"
 
 //************************************************************************
 // -CTeleport

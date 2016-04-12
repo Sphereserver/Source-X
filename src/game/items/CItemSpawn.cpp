@@ -1,7 +1,8 @@
 
-#include "../common/CObjBaseTemplate.h"
-#include "../common/CRegion.h"
-#include "../common/CException.h"
+#include "../../common/CException.h"
+#include "../../common/CObjBaseTemplate.h"
+#include "../../common/CRegion.h"
+#include "../../common/CUIDExtra.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
 #include "../CLog.h"

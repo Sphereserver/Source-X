@@ -1,5 +1,6 @@
 
-#include "../network/send.h"
+#include "../../common/CUIDExtra.h"
+#include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../items/CItemMap.h"
 #include "../items/CItemSpawn.h"

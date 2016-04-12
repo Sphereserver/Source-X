@@ -1,7 +1,8 @@
 // Actions specific to an NPC.
 
-#include "../game/CPathFinder.h"
-#include "../network/receive.h"
+#include "../../common/CUIDExtra.h"
+#include "../../network/receive.h"
+#include "../CPathFinder.h"
 #include "../CServTime.h"
 #include "../Triggers.h"
 #include "CChar.h"

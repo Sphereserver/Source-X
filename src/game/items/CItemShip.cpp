@@ -2,8 +2,9 @@
 // CItemShip.cpp
 //
 
-#include "../common/CException.h"
-#include "../network/send.h"
+#include "../../common/CException.h"
+#include "../../common/CUIDExtra.h"
+#include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../clients/CClient.h"
 #include "../CServTime.h"

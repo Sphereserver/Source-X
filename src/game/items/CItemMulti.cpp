@@ -1,6 +1,7 @@
 
-#include "../common/CException.h"
-#include "../common/sphereproto.h"
+#include "../../common/CException.h"
+#include "../../common/CUIDExtra.h"
+#include "../../common/sphereproto.h"
 #include "../chars/CChar.h"
 #include "../CWorld.h"
 #include "CItemMulti.h"

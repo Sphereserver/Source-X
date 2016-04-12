@@ -1,4 +1,5 @@
 
+#include "../../common/CUIDExtra.h"
 #include "CItemCommCrystal.h"
 #include "CItemVendable.h"
 
