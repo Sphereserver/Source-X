@@ -1,4 +1,5 @@
 
+#include <deque>
 #include "../common/CException.h"
 #include "../game/clients/CClient.h"
 #include "../game/CLog.h"
@@ -540,12 +541,19 @@ HistoryIP& IPHistoryManager::getHistoryForIP(const CSocketAddressIP& ip)
 {
 	// get history for an ip
 	ADDTOCALLSTACK("IPHistoryManager::getHistoryForIP");
-
-	// find existing entry
-	for (IPHistoryList::iterator it = m_ips.begin(); it != m_ips.end(); ++it)
+	if (&ip)	//Temporal code until I find out the cause of an error produced here crashing the server.
 	{
-		if ((*it).m_ip == ip)
-			return *it;
+		// find existing entry
+		for (IPHistoryList::iterator it = m_ips.begin(); it != m_ips.end(); ++it)
+		{
+			if (( *it ).m_ip == ip)
+				return *it;
+		}
+	}
+	else
+	{
+		g_Log.EventDebug("No IP on getHistoryForIP, stack trace:\n" );
+		ASSERT(&ip);
 	}
 
 	// create a new entry
