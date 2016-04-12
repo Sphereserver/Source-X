@@ -188,6 +188,48 @@ public:
 	*/
 	void FormatLLHex(ullong dwVal);
 	/**
+	* @brief Join a formated string (printf like) with values and copy into this.
+	* @param pStr formated string.
+	* @param args list of values.
+	*/
+	void FormatV(lpctstr pStr, va_list args);
+	/**
+	* @brief Print a char value into the string.
+	* @see Format()
+	* @param iVal value to print.
+	*/
+	void FormatCVal(char iVal);
+	/**
+	* @brief Print a unsigned char value into the string.
+	* @see Format()
+	* @param iVal value to print.
+	*/
+	void FormatUCVal(uchar iVal);
+	/**
+	* @brief Print a short value into the string.
+	* @see Format()
+	* @param iVal value to print.
+	*/
+	void FormatSVal(short iVal);
+	/**
+	* @brief Print a unsigned short value into the string.
+	* @see Format()
+	* @param iVal value to print.
+	*/
+	void FormatUSVal(ushort iVal);
+	/**
+	* @brief Print a long value into the string.
+	* @see Format()
+	* @param iVal value to print.
+	*/
+	void FormatVal(int iVal);
+	/**
+	* @brief Print a unsigned long value into the string.
+	* @see Format()
+	* @param iVal value to print.
+	*/
+	void FormatUVal(uint iVal);
+	/**
 	* @brief Print a llong value into the string.
 	* @see Format()
 	* @param iVal value to print.
@@ -200,23 +242,17 @@ public:
 	*/
 	void FormatULLVal(ullong iVal);
 	/**
-	* @brief Print a unsigned long value into the string.
+	* @brief Print a word value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	void FormatUVal(uint iVal);
+	void FormatWVal(word iVal);
 	/**
-	* @brief Join a formated string (printf like) with values and copy into this.
-	* @param pStr formated string.
-	* @param args list of values.
-	*/
-	void FormatV(lpctstr pStr, va_list args);
-	/**
-	* @brief Print a long value into the string.
+	* @brief Print a dword value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	void FormatVal(int iVal);
+	void FormatDWVal(dword iVal);
 	/**
 	* @brief Changes the capitalization of CGString to upper.
 	*/

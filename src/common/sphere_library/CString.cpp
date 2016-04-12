@@ -240,12 +240,42 @@ void CGString::FormatHex(dword dwVal)
 	// script WILL completely mess up
 	if (dwVal > (dword)INT_MIN)			// if negative (remember two's complement)
 		return FormatLLHex(dwVal);
-	Format("0%x", dwVal);
+	Format("0%" PRIx32, dwVal);
 }
 
 void CGString::FormatLLHex(ullong dwVal)
 {
 	Format("0%" PRIx64 , dwVal);
+}
+
+void CGString::FormatCVal(char iVal)
+{
+	Format("%" PRId8, iVal);
+}
+
+void CGString::FormatUCVal(uchar iVal)
+{
+	Format("%" PRIu8, iVal);
+}
+
+void CGString::FormatSVal(short iVal)
+{
+	Format("%" PRId16, iVal);
+}
+
+void CGString::FormatUSVal(ushort iVal)
+{
+	Format("%" PRIu16, iVal);
+}
+
+void CGString::FormatVal(int iVal)
+{
+	Format("%" PRId32, iVal);
+}
+
+void CGString::FormatUVal(uint iVal)
+{
+	Format("%" PRIu32, iVal);
 }
 
 void CGString::FormatLLVal(llong iVal)
@@ -258,9 +288,14 @@ void CGString::FormatULLVal(ullong iVal)
 	Format("%" PRIu64 , iVal);
 }
 
-void CGString::FormatUVal(uint iVal)
+void CGString::FormatWVal(word iVal)
 {
-	Format("%u", iVal);
+	Format("0%" PRIx16, iVal);
+}
+
+void CGString::FormatDWVal(dword iVal)
+{
+	Format("0%" PRIx32, iVal);
 }
 
 void CGString::FormatV(lpctstr pszFormat, va_list args)
@@ -268,11 +303,6 @@ void CGString::FormatV(lpctstr pszFormat, va_list args)
 	TemporaryString pszTemp;
 	_vsnprintf(static_cast<char *>(pszTemp), pszTemp.realLength(), pszFormat, args);
 	Copy(pszTemp);
-}
-
-void CGString::FormatVal(int iVal)
-{
-	Format("%d", iVal);
 }
 
 void CGString::MakeUpper()
