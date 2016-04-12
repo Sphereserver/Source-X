@@ -14,6 +14,7 @@
 #include "CBase.h"
 #include "CResource.h"
 #include "CWorld.h"
+#include "Properties.h"
 
 
 class CBaseBase;
@@ -55,7 +56,7 @@ enum NPC_MEM_ACT_TYPE	// A simgle primary memory about the object.
 class PacketSend;
 class PacketPropertyList;
 
-class CObjBase : public CObjBaseTemplate, public CScriptObj
+class CObjBase : public CObjBaseTemplate, public CScriptObj, public NewProperties
 {
 	// All Instances of CItem or CChar have these base attributes.
 	static lpctstr const sm_szLoadKeys[];

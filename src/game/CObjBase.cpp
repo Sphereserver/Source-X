@@ -858,12 +858,8 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 		case OC_REGENVALHITS:
 		case OC_REGENVALMANA:
 		case OC_REGENVALSTAM:
-		case OC_RESCOLD:
-		case OC_RESFIRE:
 		case OC_COMBATBONUSSTAT:
 		case OC_COMBATBONUSPERCENT:
-		case OC_RESENERGY:
-		case OC_RESPOISON:
 		case OC_RESCOLDMAX:
 		case OC_RESFIREMAX:
 		case OC_RESENERGYMAX:
@@ -886,12 +882,26 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 		case OC_SPLINTERINGWEAPON:
 		case OC_VELOCITY:
 		case OC_WEIGHTREDUCTION:
-		case OC_RESPHYSICAL:
 			{
 				CVarDefCont * pVar = GetDefKey(pszKey, true);
 				sVal.FormatLLVal(pVar ? pVar->GetValNum() : 0);
 			}	
 			break;
+		case OC_RESCOLD:
+			sVal.FormatCVal(GetResCold());
+			return true;
+		case OC_RESFIRE:
+			sVal.FormatCVal(GetResFire());
+			return true;
+		case OC_RESENERGY:
+			sVal.FormatCVal(GetResEnergy());
+			return true;
+		case OC_RESPOISON:
+			sVal.FormatCVal(GetResPoison());
+			return true;
+		case OC_RESPHYSICAL:
+			sVal.FormatCVal(GetResPhysical());
+			return true;
 			
 		case OC_ARMOR:
 			{
@@ -1700,12 +1710,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 		case OC_RESFIREMAX:
 		case OC_RESENERGYMAX:
 		case OC_RESPOISONMAX:
-		case OC_RESPHYSICAL:
 		case OC_RESPHYSICALMAX:
-		case OC_RESFIRE:
-		case OC_RESCOLD:
-		case OC_RESPOISON:
-		case OC_RESENERGY:
 		case OC_LUCK:		
 		case OC_REGENFOOD:
 		case OC_REGENHITS:
@@ -1730,6 +1735,21 @@ bool CObjBase::r_LoadVal( CScript & s )
 				}
 				break;
 			}
+		case OC_RESPHYSICAL:
+			SetResPhysical(s.GetArgCVal());
+			break;
+		case OC_RESFIRE:
+			SetResFire(s.GetArgCVal());
+			break;
+		case OC_RESCOLD:
+			SetResCold(s.GetArgCVal());
+			break;
+		case OC_RESPOISON:
+			SetResPoison(s.GetArgCVal());
+			break;
+		case OC_RESENERGY:
+			SetResEnergy(s.GetArgCVal());
+			break;
 		case OC_ARMOR:
 			{
 				if ( IsChar() )
