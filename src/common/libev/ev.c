@@ -323,6 +323,11 @@
 # endif
 #endif
 
+#if EV_USE_INOTIFY && __linux
+#include <linux/limits.h>
+#include <bits/sigaction.h>
+#endif
+
 #ifndef EV_PID_HASHSIZE
 # define EV_PID_HASHSIZE EV_FEATURE_DATA ? 16 : 1
 #endif

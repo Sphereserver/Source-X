@@ -1,0 +1,16 @@
+diff --git a/src/common/libev/ev.c b/src/common/libev/ev.c
+index cf55835..6812c31 100644
+--- a/src/common/libev/ev.c
++++ b/src/common/libev/ev.c
+@@ -323,6 +323,11 @@
+ # endif
+ #endif
+ 
++#if EV_USE_INOTIFY && __linux
++#include <linux/limits.h>
++#include <bits/sigaction.h>
++#endif
++
+ #ifndef EV_PID_HASHSIZE
+ # define EV_PID_HASHSIZE EV_FEATURE_DATA ? 16 : 1
+ #endif
