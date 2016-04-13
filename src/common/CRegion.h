@@ -3,6 +3,7 @@
 #ifndef _INC_CREGION_H
 #define _INC_CREGION_H
 
+#include "../game/CLog.h"
 #include "spheremul.h"
 #include "CRect.h"
 #include "CResourceBase.h"

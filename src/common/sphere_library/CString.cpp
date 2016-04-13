@@ -7,8 +7,8 @@
 #include "../sphere/strings.h"
 #include "regex/deelx.h"
 #include "CExpression.h"
+#include "CScript.h"
 #include "CString.h"
-#include "spherecom.h"
 
 
 /**

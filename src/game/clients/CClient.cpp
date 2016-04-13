@@ -971,7 +971,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 						if ( !pSector ) continue;
 
 						CItem	*pNext;
-						CItem	*pItem = STATIC_CAST <CItem*>(pSector->m_Items_Inert.GetHead());
+						CItem	*pItem = static_cast <CItem*>(pSector->m_Items_Inert.GetHead());
 						for ( ; pItem != NULL && !fFound; pItem = pNext )
 						{
 							pNext = pItem->GetNext();

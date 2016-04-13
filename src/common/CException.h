@@ -8,6 +8,7 @@
 #define _INC_CEXCEPTION_H
 
 #include <stack>
+#include "../game/CLog.h"
 #include "../sphere/threads.h"
 
 

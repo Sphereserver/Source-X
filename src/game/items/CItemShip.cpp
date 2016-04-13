@@ -410,7 +410,7 @@ bool CItemShip::Ship_Face( DIR_TYPE dir )
 		pt.m_y = (short)(GetTopPoint().m_y + yd);
 		if( pObj->IsItem() )
 		{
-			CItem * pItem = STATIC_CAST<CItem*>(pObj);
+			CItem * pItem = static_cast<CItem*>(pObj);
 			if ( pItem == this )
 			{
 				m_pRegion->UnRealizeRegion();
@@ -440,7 +440,7 @@ bool CItemShip::Ship_Face( DIR_TYPE dir )
 		}
 		else if( pObj->IsChar() )
 		{
-			CChar *pChar = STATIC_CAST<CChar*>(pObj);
+			CChar *pChar = static_cast<CChar*>(pObj);
 			pChar->m_dirFace = GetDirTurn(pChar->m_dirFace, iTurn);
 			pChar->RemoveFromView();
 		}

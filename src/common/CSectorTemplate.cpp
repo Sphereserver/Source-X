@@ -29,7 +29,7 @@ void CCharsActiveList::OnRemoveOb( CGObListRec * pObRec )
 {
 	ADDTOCALLSTACK("CCharsActiveList::OnRemoveOb");
 	// Override this = called when removed from group.
-	CChar * pChar = STATIC_CAST <CChar*>(pObRec);
+	CChar * pChar = static_cast <CChar*>(pObRec);
 	ASSERT( pChar );
 	if ( pChar->IsClient())
 	{
@@ -78,7 +78,7 @@ void CItemsList::OnRemoveOb( CGObListRec * pObRec )
 {
 	ADDTOCALLSTACK("CItemsList::OnRemoveOb");
 	// Item is picked up off the ground. (may be put right back down though)
-	CItem * pItem = STATIC_CAST <CItem*>(pObRec);
+	CItem * pItem = static_cast <CItem*>(pObRec);
 	ASSERT( pItem );
 
 	if ( ! sm_fNotAMove )

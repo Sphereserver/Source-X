@@ -520,7 +520,7 @@ bool CScriptObj::r_Call( lpctstr pszFunction, CTextConsole * pSrc, CScriptTrigge
 	if ( index == g_Cfg.m_Functions.BadIndex() )
 		return false;
 
-	CResourceNamed * pFunction = STATIC_CAST <CResourceNamed *>( g_Cfg.m_Functions[index] );
+	CResourceNamed * pFunction = static_cast <CResourceNamed *>( g_Cfg.m_Functions[index] );
 	ASSERT(pFunction);
 	CResourceLock sFunction;
 	if ( pFunction->ResourceLock(sFunction) )
@@ -3437,7 +3437,7 @@ bool CFileObjContainer::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole
 
 		if ( pFirstUsed != NULL ) 
 		{ 
-			return STATIC_CAST<CScriptObj *>(pFirstUsed)->r_WriteVal(pszKey, sVal, pSrc);
+			return static_cast<CScriptObj *>(pFirstUsed)->r_WriteVal(pszKey, sVal, pSrc);
 		}
 
 		return( false );
@@ -3512,7 +3512,7 @@ bool CFileObjContainer::r_Verb( CScript & s, CTextConsole * pSrc )
 
 		if ( pFirstUsed != NULL )
 		{
-			return STATIC_CAST<CScriptObj *>(pFirstUsed)->r_Verb(s,pSrc);
+			return static_cast<CScriptObj *>(pFirstUsed)->r_Verb(s,pSrc);
 		}
 
 		return( false );

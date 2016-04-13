@@ -399,7 +399,7 @@ public:
 
 	CClient* GetNext() const
 	{
-		return( STATIC_CAST <CClient*>( CGObListRec::GetNext()));
+		return( static_cast <CClient*>( CGObListRec::GetNext()));
 	}
 
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute script type command on me

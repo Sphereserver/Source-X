@@ -52,7 +52,7 @@ void CClient::Cmd_GM_Page( lpctstr pszReason ) // Help button (Calls GM Call Men
 
 	// Already have a message in the queue ?
 	// Find an existing GM page for this account.
-	CGMPage * pPage = STATIC_CAST <CGMPage*>(g_World.m_GMPages.GetHead());
+	CGMPage * pPage = static_cast <CGMPage*>(g_World.m_GMPages.GetHead());
 	for ( ; pPage != NULL; pPage = pPage->GetNext())
 	{
 		if (strcmpi( pPage->GetName(), GetAccount()->GetName()) == 0)
@@ -98,7 +98,7 @@ void CClient::Cmd_GM_PageMenu( uint iEntryStart )
 
 	dword entry = 0;
 	word count = 0;
-	CGMPage * pPage = STATIC_CAST <CGMPage*>( g_World.m_GMPages.GetHead());
+	CGMPage * pPage = static_cast <CGMPage*>( g_World.m_GMPages.GetHead());
 	for ( ; pPage!= NULL; pPage = pPage->GetNext(), entry++ )
 	{
 		if ( entry < iEntryStart )
@@ -356,7 +356,7 @@ void CClient::Cmd_GM_PageSelect( size_t iSelect )
 		return;
 	}
 
-	CGMPage * pPage = STATIC_CAST <CGMPage*>( g_World.m_GMPages.GetAt( m_tmMenu.m_Item[iSelect] ));
+	CGMPage * pPage = static_cast <CGMPage*>( g_World.m_GMPages.GetAt( m_tmMenu.m_Item[iSelect] ));
 	if ( pPage != NULL )
 	{
 		if ( pPage->FindGMHandler())

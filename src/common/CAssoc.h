@@ -10,7 +10,6 @@
 // #include <shellapi.h>
 #include "./sphere_library/CArray.h"
 #include "CFile.h"
-#include "spherecom.h"
 
 #ifndef PT_REG_STRMAX
 	#define PT_REG_STRMAX		128
@@ -22,6 +21,29 @@
 	#define OFFSETOF(s,m)   	(int)( (byte *)&(((s *)0)->m) - (byte *)0 )
 #endif
 
+// -----------------------------
+//	CValStr
+// -----------------------------
+
+struct CValStr
+{
+	// Associate a val with a string.
+	// Assume sorted values from min to max.
+public:
+	lpctstr m_pszName;
+	int m_iVal;
+public:
+	void SetValues( int iVal, lpctstr pszName )
+	{
+		m_iVal = iVal;
+		m_pszName = pszName;
+	}
+	lpctstr FindName( int iVal ) const;
+	void SetValue( int iVal )
+	{
+		m_iVal = iVal;
+	}
+};
 
 enum ELEM_TYPE	// define types of structure/record elements.
 {
@@ -101,7 +123,7 @@ private:
 public:
 	CGStringListRec * GetNext() const
 	{
-		return STATIC_CAST<CGStringListRec *>( CGObListRec::GetNext() );
+		return static_cast<CGStringListRec *>( CGObListRec::GetNext() );
 	}
 };
 
@@ -117,7 +139,7 @@ private:
 public:
 	CGStringListRec * GetHead() const
 	{
-		return STATIC_CAST<CGStringListRec *>( CGObList::GetHead() );
+		return static_cast<CGStringListRec *>( CGObList::GetHead() );
 	}
 	void AddHead( lpctstr pszVal )
 	{

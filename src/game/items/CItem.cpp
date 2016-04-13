@@ -1909,7 +1909,7 @@ void CItem::OnHear( lpctstr pszCmd, CChar * pSrc )
 
 CItemBase * CItem::Item_GetDef() const
 {
-	return( STATIC_CAST <CItemBase*>( Base_GetDef()));
+	return( static_cast <CItemBase*>( Base_GetDef()));
 }
 
 ITEMID_TYPE CItem::GetID() const
@@ -3586,12 +3586,12 @@ void CItem::SetAnim( ITEMID_TYPE id, int iTime )
 
 CItem* CItem::GetNext() const
 {
-	return( STATIC_CAST <CItem*>( CObjBase::GetNext()));
+	return( static_cast <CItem*>( CObjBase::GetNext()));
 }
 
 CItem* CItem::GetPrev() const
 {
-	return( STATIC_CAST <CItem*>( CObjBase::GetPrev()));
+	return( static_cast <CItem*>( CObjBase::GetPrev()));
 }
 
 CObjBase * CItem::GetContainer() const

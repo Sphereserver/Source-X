@@ -224,12 +224,12 @@ void CObjBase::SetUID( dword dwIndex, bool fItem )
 
 CObjBase* CObjBase::GetNext() const
 {
-	return( STATIC_CAST <CObjBase*>( CGObListRec::GetNext()));
+	return( static_cast <CObjBase*>( CGObListRec::GetNext()));
 }
 
 CObjBase* CObjBase::GetPrev() const
 {
-	return( STATIC_CAST <CObjBase*>( CGObListRec::GetPrev()));
+	return( static_cast <CObjBase*>( CGObListRec::GetPrev()));
 }
 
 lpctstr CObjBase::GetName() const	// resolve ambiguity w/CScriptObj
@@ -2936,13 +2936,13 @@ CVarDefCont * CObjBase::GetDefKey( lpctstr pszKey, bool fDef ) const
 	if ( !fDef || pVar )	return pVar;
 	if (IsItem())
 	{
-		CItemBase * pItemDef = STATIC_CAST <CItemBase*>( Base_GetDef());
+		CItemBase * pItemDef = static_cast <CItemBase*>( Base_GetDef());
 		ASSERT(pItemDef);
 		return pItemDef-> m_BaseDefs.GetKey( pszKey );
 	}
 	else
 	{
-		CCharBase * pCharDef = STATIC_CAST <CCharBase*>( Base_GetDef());
+		CCharBase * pCharDef = static_cast <CCharBase*>( Base_GetDef());
 		ASSERT(pCharDef);
 		return pCharDef-> m_BaseDefs.GetKey( pszKey );
 	}
@@ -2970,13 +2970,13 @@ CVarDefCont * CObjBase::GetKey( lpctstr pszKey, bool fDef ) const
 	if ( !fDef || pVar )	return pVar;
 	if (IsItem())
 	{
-		CItemBase * pItemDef = STATIC_CAST <CItemBase*>( Base_GetDef());
+		CItemBase * pItemDef = static_cast <CItemBase*>( Base_GetDef());
 		ASSERT(pItemDef);
 		return pItemDef-> m_TagDefs.GetKey( pszKey );
 	}
 	else
 	{
-		CCharBase * pCharDef = STATIC_CAST <CCharBase*>( Base_GetDef());
+		CCharBase * pCharDef = static_cast <CCharBase*>( Base_GetDef());
 		ASSERT(pCharDef);
 		return pCharDef-> m_TagDefs.GetKey( pszKey );
 	}
@@ -3008,7 +3008,7 @@ void CObjBase::DupeCopy( const CObjBase * pObj )
 
 CBaseBaseDef * CObjBase::Base_GetDef() const
 {
-	return( STATIC_CAST <CBaseBaseDef *>( m_BaseRef.GetRef() ));
+	return( static_cast <CBaseBaseDef *>( m_BaseRef.GetRef() ));
 }
 
 void CObjBase::Delete(bool bforce)

@@ -378,7 +378,7 @@ CCharBase * CCharBase::FindCharBase( CREID_TYPE baseID ) // static
 	if ( index == g_Cfg.m_ResHash.BadIndex() )
 		return NULL;
 
-	CResourceLink * pBaseLink = STATIC_CAST <CResourceLink *> ( g_Cfg.m_ResHash.GetAt(rid,index));
+	CResourceLink * pBaseLink = static_cast <CResourceLink *> ( g_Cfg.m_ResHash.GetAt(rid,index));
 	ASSERT(pBaseLink);
 	CCharBase * pBase = dynamic_cast <CCharBase *> (pBaseLink);
 	if ( pBase )

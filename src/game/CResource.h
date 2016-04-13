@@ -1142,7 +1142,7 @@ public:
 		size_t i = m_SkillNameDefs.FindKey( pszKey );
 		if ( i == m_SkillNameDefs.BadIndex() )
 			return( NULL );
-		return( STATIC_CAST <const CSkillDef*>(m_SkillNameDefs[i]));
+		return( static_cast <const CSkillDef*>(m_SkillNameDefs[i]));
 	}
 	const CSkillDef* SkillLookup( lpctstr pszKey );
 	SKILL_TYPE FindSkillKey( lpctstr pszKey ) const;

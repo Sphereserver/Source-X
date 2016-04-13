@@ -3,6 +3,7 @@
 	#include <errno.h>	// errno
 #endif
 
+#include "../game/CLog.h"
 #include "../sphere/threads.h"
 #include "CFile.h"
 #include "spherecom.h"

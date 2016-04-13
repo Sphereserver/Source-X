@@ -183,5 +183,5 @@ lpctstr CGMPage::GetAccountStatus() const
 
 CGMPage * CGMPage::GetNext() const
 {
-	return( STATIC_CAST <CGMPage*>( CGObListRec::GetNext()));
+	return( static_cast <CGMPage*>( CGObListRec::GetNext()));
 }

@@ -32,12 +32,12 @@ int	CContainer::GetTotalWeight() const
 
 CItem* CContainer::GetContentHead() const
 {
-	return( STATIC_CAST <CItem*>( GetHead()));
+	return( static_cast <CItem*>( GetHead()));
 }
 
 CItem* CContainer::GetContentTail() const
 {
-	return( STATIC_CAST <CItem*>( GetTail()));
+	return( static_cast <CItem*>( GetTail()));
 }
 
 int CContainer::FixWeight()

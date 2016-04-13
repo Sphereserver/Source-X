@@ -15,6 +15,18 @@
 
 #define SCRIPT_MAX_SECTION_LEN 128
 
+#define ISWHITESPACE(ch)			(IsSpace(ch)||((uchar)ch)==0xa0)	// IsSpace
+#define GETNONWHITESPACE( pStr )	while ( ISWHITESPACE( (pStr)[0] )) { (pStr)++; }
+#define _IS_SWITCH(c)				((c) == '-' || (c) == '/' )	// command line switch.
+
+#define REMOVE_QUOTES( x )			\
+{									\
+	GETNONWHITESPACE( x );			\
+	if ( *x == '"' )	++x;				\
+		tchar * psX	= const_cast<tchar*>(strchr( x, '"' ));	\
+	if ( psX )						\
+		*psX	= '\0';				\
+}
 
 struct CScriptLineContext
 {

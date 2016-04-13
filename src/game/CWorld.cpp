@@ -605,7 +605,7 @@ CItem * CWorldSearch::GetItem()
 		if ( m_pObj == NULL )
 		{
 			m_fInertToggle = false;
-			m_pObj = STATIC_CAST <CObjBase*> ( m_pSector->m_Items_Inert.GetHead());
+			m_pObj = static_cast <CObjBase*> ( m_pSector->m_Items_Inert.GetHead());
 		}
 		else
 		{
@@ -616,7 +616,7 @@ CItem * CWorldSearch::GetItem()
 			if ( ! m_fInertToggle )
 			{
 				m_fInertToggle = true;
-				m_pObj = STATIC_CAST <CObjBase*> ( m_pSector->m_Items_Timer.GetHead());
+				m_pObj = static_cast <CObjBase*> ( m_pSector->m_Items_Timer.GetHead());
 				if ( m_pObj != NULL )
 					goto jumpover;
 			}
@@ -632,12 +632,12 @@ jumpover:
 			if ( m_fAllShow )
 			{
 				if ( m_pt.GetDistSightBase( m_pObj->GetTopPoint()) <= m_iDist )
-					return( STATIC_CAST <CItem *> ( m_pObj ));
+					return( static_cast <CItem *> ( m_pObj ));
 			}
 			else
 			{
 				if ( m_pt.GetDistSight( m_pObj->GetTopPoint()) <= m_iDist )
-					return( STATIC_CAST <CItem *> ( m_pObj ));
+					return( static_cast <CItem *> ( m_pObj ));
 			}
 		}
 		else
@@ -645,12 +645,12 @@ jumpover:
 			if ( m_fAllShow )
 			{
 				if ( m_pt.GetDistBase( m_pObj->GetTopPoint()) <= m_iDist )
-					return( STATIC_CAST <CItem *> ( m_pObj ));
+					return( static_cast <CItem *> ( m_pObj ));
 			}
 			else
 			{
 				if ( m_pt.GetDist( m_pObj->GetTopPoint()) <= m_iDist )
-					return( STATIC_CAST <CItem *> ( m_pObj ));
+					return( static_cast <CItem *> ( m_pObj ));
 			}
 		}
 	}
@@ -682,7 +682,7 @@ CChar * CWorldSearch::GetChar()
 		if ( m_pObj == NULL )
 		{
 			m_fInertToggle = false;
-			m_pObj = STATIC_CAST <CObjBase*> ( m_pSector->m_Chars_Active.GetHead());
+			m_pObj = static_cast <CObjBase*> ( m_pSector->m_Chars_Active.GetHead());
 		}
 		else
 		{
@@ -693,7 +693,7 @@ CChar * CWorldSearch::GetChar()
 			if ( ! m_fInertToggle && m_fAllShow )
 			{
 				m_fInertToggle = true;
-				m_pObj = STATIC_CAST <CObjBase*> ( m_pSector->m_Chars_Disconnect.GetHead());
+				m_pObj = static_cast <CObjBase*> ( m_pSector->m_Chars_Disconnect.GetHead());
 				if ( m_pObj != NULL )
 					goto jumpover;
 			}
@@ -709,12 +709,12 @@ jumpover:
 			if ( m_fAllShow )
 			{
 				if ( m_pt.GetDistSightBase( m_pObj->GetTopPoint()) <= m_iDist )
-					return( STATIC_CAST <CChar *> ( m_pObj ));
+					return( static_cast <CChar *> ( m_pObj ));
 			}
 			else
 			{
 				if ( m_pt.GetDistSight( m_pObj->GetTopPoint()) <= m_iDist )
-					return( STATIC_CAST <CChar *> ( m_pObj ));
+					return( static_cast <CChar *> ( m_pObj ));
 			}
 		}
 		else
@@ -722,12 +722,12 @@ jumpover:
 			if ( m_fAllShow )
 			{
 				if ( m_pt.GetDistBase( m_pObj->GetTopPoint()) <= m_iDist )
-					return( STATIC_CAST <CChar *> ( m_pObj ));
+					return( static_cast <CChar *> ( m_pObj ));
 			}
 			else
 			{
 				if ( m_pt.GetDist( m_pObj->GetTopPoint()) <= m_iDist )
-					return( STATIC_CAST <CChar *> ( m_pObj ));
+					return( static_cast <CChar *> ( m_pObj ));
 			}
 		}
 	}
@@ -1346,7 +1346,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		}
 
 		// GM_Pages.
-		CGMPage *pPage = STATIC_CAST <CGMPage*>(m_GMPages.GetHead());
+		CGMPage *pPage = static_cast <CGMPage*>(m_GMPages.GetHead());
 		for ( ; pPage != NULL; pPage = pPage->GetNext())
 		{
 			pPage->r_Write(m_FileData);
@@ -1664,7 +1664,7 @@ void CWorld::SaveStatics()
 
 				if ( !pSector ) continue;
 
-				pItem = STATIC_CAST <CItem*>(pSector->m_Items_Inert.GetHead());
+				pItem = static_cast <CItem*>(pSector->m_Items_Inert.GetHead());
 				for ( ; pItem != NULL; pItem = pNext )
 				{
 					pNext = pItem->GetNext();
@@ -1676,7 +1676,7 @@ void CWorld::SaveStatics()
 					pItem->r_WriteSafe(m_FileStatics);
 				}
 
-				pItem = STATIC_CAST <CItem*>(pSector->m_Items_Timer.GetHead());
+				pItem = static_cast <CItem*>(pSector->m_Items_Timer.GetHead());
 				for ( ; pItem != NULL; pItem = pNext )
 				{
 					pNext = pItem->GetNext();
@@ -1994,7 +1994,7 @@ bool CWorld::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 				return false;
 
 			SKIP_SEPARATORS(pszKey);
-			CGMPage* pPage = STATIC_CAST <CGMPage*> (m_GMPages.GetAt(index));
+			CGMPage* pPage = static_cast <CGMPage*> (m_GMPages.GetAt(index));
 			if ( pPage == NULL )
 				return false;
 

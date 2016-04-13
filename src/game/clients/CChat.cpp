@@ -738,7 +738,7 @@ CChat::CChat()
 
 CChatChannel * CChat::GetFirstChannel() const
 {
-	return STATIC_CAST <CChatChannel *>(m_Channels.GetHead());
+	return static_cast <CChatChannel *>(m_Channels.GetHead());
 }
 
 bool CChat::IsDuplicateChannelName(const char * pszName) const
