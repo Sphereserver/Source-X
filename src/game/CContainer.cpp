@@ -406,7 +406,7 @@ size_t CContainer::ResourceConsumePart( const CResourceQtyArray *pResources, int
 		int iQtyTotal = (iResQty * iReplicationQty);
 		if ( iQtyTotal <= 0 )
 			continue;
-		iQtyTotal = IMULDIV(iQtyTotal, iDamagePercent, 100);
+		iQtyTotal = MulDivLL(iQtyTotal, iDamagePercent, 100);
 		if ( iQtyTotal <= 0 )
 			continue;
 

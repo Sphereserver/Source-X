@@ -408,7 +408,7 @@ bool CChar::Spell_Resurrection(CItemCorpse * pCorpse, CChar * pCharSrc, bool bNo
 		return false;
 	}
 
-	short hits = IMULDIV(Stat_GetMax(STAT_STR), (short)(g_Cfg.m_iHitpointPercentOnRez), 100);
+	short hits = (short)MulDivLL(Stat_GetMax(STAT_STR), g_Cfg.m_iHitpointPercentOnRez, 100);
 	if (!pCorpse)
 		pCorpse = FindMyCorpse();
 
@@ -1593,7 +1593,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 				{
 					default:
 					case 0:	//Lesser
-						iDmg = IMULDIV(Stat_GetVal(STAT_STR), Calc_GetRandVal2(4, 7), 100);	// damage is different for lesser: it gets value from current hp
+						iDmg = (int)MulDivLL(Stat_GetVal(STAT_STR), Calc_GetRandVal2(4, 7), 100);	// damage is different for lesser: it gets value from current hp
 						pItem->SetTimeout(20);
 						break;
 					case 1:	//Standard
@@ -1645,7 +1645,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 					iLevel = 3;
 
 				pItem->m_itSpell.m_spelllevel -= 50;	// gets weaker too.	Only on old formulas
-				iDmg = IMULDIV(Stat_GetMax(STAT_STR), iLevel * 2, 100);
+				iDmg = MulDivLL(Stat_GetMax(STAT_STR), iLevel * 2, 100);
 				pItem->SetTimeout((5 + Calc_GetRandLLVal(4)) * TICK_PER_SEC);
 
 				static lpctstr const sm_Poison_Message[] =

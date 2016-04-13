@@ -11,18 +11,22 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <signal.h>
-#include <exception>
 #include <setjmp.h>
 #include <dlfcn.h>
 #include <errno.h>
 #include <aio.h>
+#include <exception>
 #include <cctype>
+#include "CTime.h"
 
+
+#define SLASH_PATH	"/"
 
 #ifndef _MAX_PATH			// stdlib.h ?
 	#define _MAX_PATH   260 	// max. length of full pathname
 #endif
 
+/*	thread-specific definitions  */
 #ifndef STDFUNC_FILENO
 	#define STDFUNC_FILENO fileno
 #endif
@@ -34,6 +38,7 @@
 #ifndef STDFUNC_UNLINK
 	#define STDFUNC_UNLINK unlink
 #endif
+/*  */
 
 #ifndef ERROR_SUCCESS
 	#define ERROR_SUCCESS	0
@@ -60,23 +65,18 @@
 #endif
 
 #define _cdecl
-#define true	1
-#define false	0
-#define MulDiv	IMULDIV
+//#define true	1
+//#define false	0
 
-// unix flushing works perfectly, so we do not need disabling bufer
+// unix flushing works perfectly, so we do not need disabling buffer
 #define	FILE_SETNOCACHE(_x_)
 #define FILE_FLUSH(_x_)			fflush(_x_)
 
 //	thread-specific definitions
-#include "CTime.h"
 #define THREAD_ENTRY_RET void *
 #define CRITICAL_SECTION pthread_mutex_t
-#define Sleep(mSec)	usleep(mSec*1000)	// arg is microseconds = 1/1000000
+#define Sleep(mSec)	usleep(mSec*1000)					// arg is microseconds = 1/1000000
 #define SleepEx(mSec, unused)		usleep(mSec*1000)	// arg is microseconds = 1/1000000
-
-// printf format identifiers
-#define FMTSIZE_T "zu" // linux uses %zu to format size_t
 
 
 inline void _strupr( tchar * pszStr )

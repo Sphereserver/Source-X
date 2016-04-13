@@ -159,10 +159,10 @@ ushort CChar::Skill_GetAdjusted( SKILL_TYPE skill ) const
 						 ( pSkillDef->m_StatBonus[STAT_INT] * maximum(0,Stat_GetAdjusted( STAT_INT )) ) +
 						 ( pSkillDef->m_StatBonus[STAT_DEX] * maximum(0,Stat_GetAdjusted( STAT_DEX )) );
 
-		iAdjSkill = (ushort)(IMULDIV( pSkillDef->m_StatPercent, iPureBonus, 10000 ));
+		iAdjSkill = (ushort)MulDivLL( pSkillDef->m_StatPercent, iPureBonus, 10000 );
 	}
 
-	return( Skill_GetBase(skill) + iAdjSkill );
+	return ( Skill_GetBase(skill) + iAdjSkill );
 }
 
 void CChar::Skill_SetBase( SKILL_TYPE skill, int iValue )
@@ -439,7 +439,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 			continue;		// you've got higher stats than this skill is good for
 
 		// Adjust the chance by the percent of this that the skill uses
-		difficulty = IMULDIV( iStatVal, 1000, iStatTarg );
+		difficulty = MulDivLL( iStatVal, 1000, iStatTarg );
 		iChance = g_Cfg.m_StatAdv[i].GetChancePercent( difficulty );
 		if ( pSkillDef->m_StatPercent )
 			iChance = ( iChance * pSkillDef->m_StatBonus[i] * pSkillDef->m_StatPercent ) / 10000;
@@ -678,7 +678,7 @@ bool CChar::Skill_MakeItem_Success()
 			variance = -variance;		// worse than I can normally make
 
 		// Determine which range I'm in
-		quality = IMULDIV(iSkillLevel, 2, 10);	// default value for quality
+		quality = MulDivLL(iSkillLevel, 2, 10);	// default value for quality
 		int qualityBase;
 		if ( quality < 25 )			// 1 - 25		Shoddy
 			qualityBase = 0;

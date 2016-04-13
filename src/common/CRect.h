@@ -1,5 +1,6 @@
 /**
 * @file CRect.h
+* @brief Coordinates storage and operations.
 */
 
 #pragma once
@@ -21,10 +22,11 @@ public:
 	static const int sm_Moves[DIR_QTY+1][2];
 	static lpctstr sm_szDirs[DIR_QTY+1];
 public:
-	short m_x;	// equipped items dont need x,y
+	// Do NOT change these datatypes: they seem to not have much sense, but are stored this way inside the mul files.
+	short m_x;		// equipped items dont need x,y
 	short m_y;
-	char m_z;	// This might be layer if equipped ? or equipped on corpse. Not used if in other container.
-	byte m_map;			// another map? (only if top level.)
+	char m_z;		// this might be layer if equipped ? or equipped on corpse. Not used if in other container.
+	byte m_map;		// another map? (only if top level.)
 
 public:
 	bool operator == ( const CPointBase & pt ) const;
@@ -36,11 +38,11 @@ public:
 	void ZeroPoint();
 	int GetDistZ( const CPointBase & pt ) const;
 	int GetDistZAdj( const CPointBase & pt ) const;
-	int GetDistBase( const CPointBase & pt ) const; // Distance between points
-	int GetDist( const CPointBase & pt ) const; // Distance between points
-	int GetDistSightBase( const CPointBase & pt ) const; // Distance between points based on UO sight
-	int GetDistSight( const CPointBase & pt ) const; // Distance between points based on UO sight
-	int GetDist3D( const CPointBase & pt ) const; // 3D Distance between points
+	int GetDistBase( const CPointBase & pt ) const;			// Distance between points
+	int GetDist( const CPointBase & pt ) const;				// Distance between points
+	int GetDistSightBase( const CPointBase & pt ) const;	// Distance between points based on UO sight
+	int GetDistSight( const CPointBase & pt ) const;		// Distance between points based on UO sight
+	int GetDist3D( const CPointBase & pt ) const;			// 3D Distance between points
 
 	bool IsValidZ() const;
 	bool IsValidXY() const;
@@ -100,5 +102,5 @@ struct CPointSort : public CPointMap
 	virtual ~CPointSort(); // just to make this dynamic
 };
 
-#endif	// _INC_CRECT_H
 
+#endif	// _INC_CRECT_H

@@ -36,7 +36,7 @@ struct LexNoCaseLess {
 class CVarFloat
 {
 public:
-	typedef std::map<CGString, RealType, LexNoCaseLess> MapType;
+	typedef std::map<CGString, realtype, LexNoCaseLess> MapType;
 
 public: //vars
 	CVarFloat();
@@ -51,22 +51,22 @@ private: //vars
 
 private: //setting, getting
 	inline bool Set( const char* VarName, const char* VarValue );
-	RealType GetVal( const char* VarName );
+	realtype GetVal( const char* VarName );
 public: //setting, getting
 	bool Insert( const char* VarName, const char* VarValue, bool ForceSet = false);
 	CGString Get( const char* VarName );
 
 public: //parsing
 	static CGString FloatMath( lpctstr & Expr );
-	static RealType MakeFloatMath( lpctstr & Expr );
-	static RealType GetRandVal( RealType dQty );
-	static RealType GetRandVal2( RealType dMin, RealType dMax );
+	static realtype MakeFloatMath( lpctstr & Expr );
+	static realtype GetRandVal( realtype dQty );
+	static realtype GetRandVal2( realtype dMin, realtype dMax );
 	//Does not work as it should, would be too slow, and nobody needs that
-	/*static RealType GetRange( lpctstr & pExpr );
-	static int GetRangeVals( lpctstr & pExpr, RealType * piVals, short int iMaxQty );*/
+	/*static realtype GetRange( lpctstr & pExpr );
+	static int GetRangeVals( lpctstr & pExpr, realtype * piVals, short int iMaxQty );*/
 private: //parsing
-	static RealType GetValMath( RealType dVal, lpctstr & pExpr );
-	static RealType GetSingle( lpctstr & pArgs );
+	static realtype GetValMath( realtype dVal, lpctstr & pExpr );
+	static realtype GetSingle( lpctstr & pArgs );
 };
 
 class CObjBase;

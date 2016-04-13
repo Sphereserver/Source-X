@@ -2456,16 +2456,12 @@ uint CWorld::GetMoonPhase (bool bMoonIndex) const
 
 	dword dwCurrentTime = GetGameWorldTime();	// game world time in minutes
 
-	if (!bMoonIndex)
-	{
-		// Trammel
-		return( IMULDIV( dwCurrentTime % TRAMMEL_SYNODIC_PERIOD, 8, TRAMMEL_SYNODIC_PERIOD ));
-	}
-	else
-	{
-		// Luna2
-		return( IMULDIV( dwCurrentTime % FELUCCA_SYNODIC_PERIOD, 8, FELUCCA_SYNODIC_PERIOD ));
-	}
+	if (!bMoonIndex)	// Trammel
+		
+		return MulDivLL( dwCurrentTime % TRAMMEL_SYNODIC_PERIOD, 8, TRAMMEL_SYNODIC_PERIOD );
+	else	// Luna2
+		
+		return MulDivLL( dwCurrentTime % FELUCCA_SYNODIC_PERIOD, 8, FELUCCA_SYNODIC_PERIOD );
 }
 
 void CWorld::OnTick()

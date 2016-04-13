@@ -264,19 +264,15 @@ int CChar::NPC_GetTrainMax( const CChar * pStudent, SKILL_TYPE Skill ) const
 
 	CVarDefCont * pValue = GetKey("OVERRIDE.TRAINSKILLMAXPERCENT",true);
 	if ( pValue ) 
-	{
-		iMax = (int)(IMULDIV( pValue->GetValNum(), Skill_GetBase(Skill), 100 ));
-	} else {
-		iMax = IMULDIV( g_Cfg.m_iTrainSkillPercent, Skill_GetBase(Skill), 100 );
-	}
+		iMax = (int)MulDivLL( pValue->GetValNum(), Skill_GetBase(Skill), 100 );
+	else
+		iMax = (int)MulDivLL( g_Cfg.m_iTrainSkillPercent, Skill_GetBase(Skill), 100 );
 
 	pValue = GetKey("OVERRIDE.TRAINSKILLMAX",true);
 	if ( pValue ) 
-	{
 		iMaxAllowed = (int)(pValue->GetValNum());
-	} else {
+	else
 		iMaxAllowed = g_Cfg.m_iTrainSkillMax;
-	}
 	
 	if ( iMax > iMaxAllowed )
 		return minimum(iMaxAllowed, pStudent->Skill_GetMax(Skill));

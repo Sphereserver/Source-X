@@ -944,7 +944,7 @@ int CClient::OnSkill_EvalInt( CUID uid, int iSkillLevel, bool fTest )
 
 		int iManaEntry = 0;
 		if ( iIntVal )
-			iManaEntry = IMULDIV( pChar->Stat_GetVal(STAT_INT), COUNTOF(sm_szManaDesc)-1, iIntVal );
+			iManaEntry = (int)MulDivLL( pChar->Stat_GetVal(STAT_INT), COUNTOF(sm_szManaDesc)-1, iIntVal );
 
 		if ( iManaEntry < 0 )
 			iManaEntry = 0;
@@ -1051,7 +1051,7 @@ int CClient::OnSkill_ArmsLore( CUID uid, int iSkillLevel, bool fTest )
 	// Poisoned ?
 	if ( fWeapon && pItem->m_itWeapon.m_poison_skill )
 	{
-		uint iLevel = IMULDIV( pItem->m_itWeapon.m_poison_skill, COUNTOF(sm_szPoisonMessages), 100 );
+		uint iLevel = (uint)MulDivLL( pItem->m_itWeapon.m_poison_skill, COUNTOF(sm_szPoisonMessages), 100 );
 		if ( iLevel >= COUNTOF(sm_szPoisonMessages))
 			iLevel = COUNTOF(sm_szPoisonMessages) - 1;
 		len += sprintf( pszTemp+len, " %s", sm_szPoisonMessages[iLevel] );
@@ -1245,21 +1245,17 @@ int CClient::OnSkill_TasteID( CUID uid, int iSkillLevel, bool fTest )
 	}
 
 	if ( fTest )
-	{
 		return Calc_GetRandVal(60);
-	}
 
 	if ( iPoisonLevel )
 	{
-		uint iLevel = IMULDIV( iPoisonLevel, COUNTOF(sm_szPoisonMessages), 1000 );
+		uint iLevel = (uint)MulDivLL( iPoisonLevel, COUNTOF(sm_szPoisonMessages), 1000 );
 		if ( iLevel >= COUNTOF(sm_szPoisonMessages))
 			iLevel = COUNTOF(sm_szPoisonMessages) - 1;
 		SysMessage( sm_szPoisonMessages[iLevel] );
 	}
 	else
-	{
 		SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_TASTEID_RESULT ), static_cast<lpctstr>(pItem->GetNameFull(false)));
-	}
 
 	return iSkillLevel;
 }

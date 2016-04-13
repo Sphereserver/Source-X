@@ -38,12 +38,12 @@ bool CVarFloat::Insert( const char* VarName, const char* VarValue, bool ForceSet
 	SKIP_ARGSEP(VarValue);
 	SKIP_ARGSEP(VarName);
 	char* pEnd;
-	RealType Real = strtod(VarValue,&pEnd);
+	realtype Real = strtod(VarValue,&pEnd);
 	m_VarMap[CGString(VarName)] = Real;
 	return true;
 }
 
-RealType CVarFloat::GetVal( const char* VarName ) 
+realtype CVarFloat::GetVal( const char* VarName ) 
 {
 	ADDTOCALLSTACK("CVarFloat::GetVal");
 	if ( !VarName )
@@ -51,9 +51,7 @@ RealType CVarFloat::GetVal( const char* VarName )
 	SKIP_ARGSEP(VarName);
 	MapType::iterator i = m_VarMap.find(VarName);
 	if ( i == m_VarMap.end())
-	{
 		return 0.0;
-	}
 	return i->second;
 }
 
@@ -66,7 +64,7 @@ CGString CVarFloat::Get( const char* VarName )
 	if ( strlen(VarName) > VARDEF_FLOAT_MAXBUFFERSIZE )
 		return CGString();
 
-	RealType Real = GetVal(VarName);
+	realtype Real = GetVal(VarName);
 	char szReal[VARDEF_FLOAT_MAXBUFFERSIZE];
 	sprintf(szReal, "%f", Real);
 
@@ -85,7 +83,7 @@ CGString CVarFloat::FloatMath( lpctstr & Expr )
 	return CGString( szReal );
 }
 
-RealType CVarFloat::MakeFloatMath( lpctstr & Expr )
+realtype CVarFloat::MakeFloatMath( lpctstr & Expr )
 {
 	ADDTOCALLSTACK("CVarFloat::MakeFloatMath");
 	//DEBUG_ERR(("MakeFloatMath\n"));
@@ -102,12 +100,12 @@ RealType CVarFloat::MakeFloatMath( lpctstr & Expr )
 		return( 0 );
 	}
 	//DEBUG_ERR(("Expr: '%s' GetSingle(Expr) '%f' GetValMath(GetSingle(Expr), Expr) '%f'\n",Expr,GetSingle(Expr),GetValMath(GetSingle(Expr), Expr)));
-	RealType dVal = GetValMath(GetSingle(Expr), Expr);
+	realtype dVal = GetValMath(GetSingle(Expr), Expr);
 	--Reentrant_Count;
 	return dVal;
 }
 
-RealType CVarFloat::GetValMath( RealType dVal, lpctstr & pExpr )
+realtype CVarFloat::GetValMath( realtype dVal, lpctstr & pExpr )
 {
 	ADDTOCALLSTACK("CVarFloat::GetValMath");
 	//DEBUG_ERR(("GetValMath  dVal %f  pExpr %s\n",dVal,pExpr));
@@ -138,7 +136,7 @@ RealType CVarFloat::GetValMath( RealType dVal, lpctstr & pExpr )
 		case '/':
 			++pExpr;
 			{
-				RealType dTempVal = MakeFloatMath( pExpr );
+				realtype dTempVal = MakeFloatMath( pExpr );
 				if ( ! dTempVal )
 				{
 					DEBUG_ERR(( "Float_MakeFloatMath: Divide by 0\n" ));
@@ -162,7 +160,7 @@ RealType CVarFloat::GetValMath( RealType dVal, lpctstr & pExpr )
 		case '@':
 			++pExpr;
 			{
-				RealType dTempVal = MakeFloatMath( pExpr );
+				realtype dTempVal = MakeFloatMath( pExpr );
 				if ( (dVal == 0) && (dTempVal < 0) )
 				{
 					DEBUG_ERR(( "Float_MakeFloatMath: Power of zero with negative exponent is undefined\n" ));
@@ -239,7 +237,7 @@ RealType CVarFloat::GetValMath( RealType dVal, lpctstr & pExpr )
 	return dVal;
 }
 
-RealType CVarFloat::GetSingle( lpctstr & pArgs )
+realtype CVarFloat::GetSingle( lpctstr & pArgs )
 {
 	ADDTOCALLSTACK("CVarFloat::GetSingle");
 	//DEBUG_ERR(("GetSingle  pArgs %s\n",pArgs));
@@ -277,7 +275,7 @@ RealType CVarFloat::GetSingle( lpctstr & pArgs )
 	if ( IsNum )
 	{
 		char * pEnd;
-		RealType ret = strtod(pArgsCopy,&pEnd);
+		realtype ret = strtod(pArgsCopy,&pEnd);
 		//DEBUG_ERR(("IsNum: '%d' pArgsCopy '%s' Ret: '%f'\n",IsNum,pArgsCopy,strtod(pArgsCopy,&pEnd)));
 		delete[] pArgsCopy;
 		return( ret );
@@ -326,7 +324,7 @@ RealType CVarFloat::GetSingle( lpctstr & pArgs )
 			Str_Parse( const_cast<tchar*>(pArgs), &(pArgsNext), ")" );
 
 			tchar * ppCmd[5];
-			RealType dResult;
+			realtype dResult;
 			size_t iCount;
 			const char * cparg1 = NULL; //some functions need a const char instead of a char and GCC cannot bear it :)
 			const char * cparg2 = NULL; //some functions need a const char instead of a char and GCC cannot bear it :)
@@ -358,7 +356,7 @@ RealType CVarFloat::GetSingle( lpctstr & pArgs )
 					} 
 
 					lpctstr tCmd = ppCmd[0];
-					RealType dArgument = MakeFloatMath( tCmd );
+					realtype dArgument = MakeFloatMath( tCmd );
 
 					if ( iCount < 2 )
 					{
@@ -377,7 +375,7 @@ RealType CVarFloat::GetSingle( lpctstr & pArgs )
 						else
 						{
 							tCmd = ppCmd[1];
-							RealType dBase = MakeFloatMath( tCmd );
+							realtype dBase = MakeFloatMath( tCmd );
 							if ( dBase <= 0 )
 							{
 								DEBUG_ERR(( "Float_MakeFloatMath: (%f)Log(%f) is %s\n", dBase, dArgument, (!dBase) ? "infinite" : "undefined" ));
@@ -413,7 +411,7 @@ RealType CVarFloat::GetSingle( lpctstr & pArgs )
 
 					if ( pArgs && *pArgs )
 					{
-						RealType dTosquare = MakeFloatMath(pArgs);
+						realtype dTosquare = MakeFloatMath(pArgs);
 
 						if (dTosquare >= 0)
 						{
@@ -438,7 +436,7 @@ RealType CVarFloat::GetSingle( lpctstr & pArgs )
 					if ( pArgs && *pArgs )
 					{
 						iCount = 1;
-						RealType dArgument = MakeFloatMath(pArgs);
+						realtype dArgument = MakeFloatMath(pArgs);
 						dResult = sin(dArgument * M_PI / 180);
 					}
 					else
@@ -454,7 +452,7 @@ RealType CVarFloat::GetSingle( lpctstr & pArgs )
 					if ( pArgs && *pArgs )
 					{
 						iCount = 1;
-						RealType dArgument = MakeFloatMath(pArgs);
+						realtype dArgument = MakeFloatMath(pArgs);
 						dResult = asin(dArgument) * 180 / M_PI;
 					}
 					else
@@ -470,7 +468,7 @@ RealType CVarFloat::GetSingle( lpctstr & pArgs )
 					if ( pArgs && *pArgs )
 					{
 						iCount = 1;
-						RealType dArgument = MakeFloatMath(pArgs);
+						realtype dArgument = MakeFloatMath(pArgs);
 						dResult = cos(dArgument * M_PI / 180);
 					}
 					else
@@ -486,7 +484,7 @@ RealType CVarFloat::GetSingle( lpctstr & pArgs )
 					if ( pArgs && *pArgs )
 					{
 						iCount = 1;
-						RealType dArgument = MakeFloatMath(pArgs);
+						realtype dArgument = MakeFloatMath(pArgs);
 						dResult = acos(dArgument) * 180 / M_PI;
 					}
 					else
@@ -502,7 +500,7 @@ RealType CVarFloat::GetSingle( lpctstr & pArgs )
 					if ( pArgs && *pArgs )
 					{
 						iCount = 1;
-						RealType dArgument = MakeFloatMath(pArgs);
+						realtype dArgument = MakeFloatMath(pArgs);
 						dResult = tan(dArgument * M_PI / 180);
 					}
 					else
@@ -518,7 +516,7 @@ RealType CVarFloat::GetSingle( lpctstr & pArgs )
 					if ( pArgs && *pArgs )
 					{
 						iCount = 1;
-						RealType dArgument = MakeFloatMath(pArgs);
+						realtype dArgument = MakeFloatMath(pArgs);
 						dResult = atan(dArgument) * 180 / M_PI;
 					}
 					else
@@ -602,11 +600,11 @@ RealType CVarFloat::GetSingle( lpctstr & pArgs )
 					else
 					{
 						cparg1 = ppCmd[0];
-						RealType val1 = MakeFloatMath( cparg1 );
+						realtype val1 = MakeFloatMath( cparg1 );
 						if ( iCount >= 2 )
 						{
 							cparg2 = ppCmd[1];
-							RealType val2 = MakeFloatMath( cparg2 );
+							realtype val2 = MakeFloatMath( cparg2 );
 							dResult = GetRandVal2( val1, val2 );
 						}
 						else
@@ -662,8 +660,8 @@ RealType CVarFloat::GetSingle( lpctstr & pArgs )
 					{
 						cparg1 = ppCmd[0];
 						cparg2 = ppCmd[1];
-						RealType a1 = GetSingle(cparg1);
-						RealType a2 = GetSingle(cparg2);
+						realtype a1 = GetSingle(cparg1);
+						realtype a2 = GetSingle(cparg2);
 						if ( a1 < a2 )
 						{
 							cparg1 = ppCmd[2];
@@ -709,22 +707,22 @@ RealType CVarFloat::GetSingle( lpctstr & pArgs )
 	return 0;
 }
 
-RealType CVarFloat::GetRandVal( RealType dQty )
+realtype CVarFloat::GetRandVal( realtype dQty )
 {
 	ADDTOCALLSTACK("CVarFloat::GetRandVal");
 	if ( dQty <= 0 )
 		return 0;
 	if ( dQty >= INT64_MAX )
-		return (RealType)(IMULDIV( CRand::genRandReal64(0,dQty), dQty, INT64_MAX ));
+		return (realtype)(MulDivLL( CRand::genRandReal64(0,dQty), dQty, INT64_MAX ));
 	return CRand::genRandReal64(0, dQty);
 }
 
-RealType CVarFloat::GetRandVal2( RealType dMin, RealType dMax )
+realtype CVarFloat::GetRandVal2( realtype dMin, realtype dMax )
 {
 	ADDTOCALLSTACK("CVarFloat::GetRandVal2");
 	if ( dMin > dMax )
 	{
-		RealType tmp = dMin;
+		realtype tmp = dMin;
 		dMin = dMax;
 		dMax = tmp;
 	}
@@ -732,9 +730,9 @@ RealType CVarFloat::GetRandVal2( RealType dMin, RealType dMax )
 }
 
 //Does not work as it should, would be too slow, and nobody needs that
-/*RealType CVarFloat::GetRange( lpctstr & pExpr )
+/*realtype CVarFloat::GetRange( lpctstr & pExpr )
 {
-	RealType dVals[256];		// Maximum elements in a list
+	realtype dVals[256];		// Maximum elements in a list
 
 	short int iQty = GetRangeVals( pExpr, dVals, COUNTOF(dVals));
 
@@ -757,7 +755,7 @@ RealType CVarFloat::GetRandVal2( RealType dMin, RealType dMax )
 	// I guess it's weighted values
 	// First get the total of the weights
 
-	RealType dTotalWeight = 0;
+	realtype dTotalWeight = 0;
 	int i = 1;
 	for ( ; i < iQty; i+=2 )
 	{
@@ -782,7 +780,7 @@ RealType CVarFloat::GetRandVal2( RealType dMin, RealType dMax )
 	return( dVals[i-1] );
 }
 
-int CVarFloat::GetRangeVals( lpctstr & pExpr, RealType * piVals, short int iMaxQty )
+int CVarFloat::GetRangeVals( lpctstr & pExpr, realtype * piVals, short int iMaxQty )
 {
 	ADDTOCALLSTACK("CVarFloat::GetRangeVals");
 	// Get a list of values.

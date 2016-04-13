@@ -30,9 +30,9 @@ int64 CRand::genRandInt64(int64 min, int64 max)
 	return distr(rand_engine);
 }*/
 
-RealType CRand::genRandReal64(RealType min, RealType max)
+realtype CRand::genRandReal64(realtype min, realtype max)
 {
-	std::uniform_real_distribution<RealType> distr(min, max);
+	std::uniform_real_distribution<realtype> distr(min, max);
 	std::random_device rd;
 	std::mt19937 rand_engine(rd());
 	return distr(rand_engine);

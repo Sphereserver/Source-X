@@ -294,7 +294,7 @@ int32 Calc_GetRandVal( int32 iQty )
 	if ( iQty <= 0 )
 		return 0;
 	if ( iQty >= INT32_MAX )
-		return ( IMULDIV(CRand::genRandInt32(0, iQty), (uint)iQty, INT32_MAX ) );
+		return ( MulDivLL(CRand::genRandInt32(0, iQty), (uint)iQty, INT32_MAX ) );
 	return CRand::genRandInt32(0, iQty);
 }
 
@@ -314,7 +314,7 @@ int64 Calc_GetRandLLVal( int64 iQty )
 	if ( iQty <= 0 )
 		return 0;
 	if ( iQty >= INT64_MAX )
-		return ( IMULDIV(CRand::genRandInt64(0, iQty), (uint64) iQty, INT64_MAX ) );
+		return ( MulDivLL(CRand::genRandInt64(0, iQty), (uint64) iQty, INT64_MAX ) );
 	return CRand::genRandInt64(0, iQty);
 }
 
@@ -367,7 +367,7 @@ int Calc_GetBellCurve( int iValDiff, int iVariance )
 		iChance /= 2;	// chance is halved for each Variance period.
 	}
 
-	return ( iChance - IMULDIV( iChance/2, iValDiff, iVariance ) );
+	return ( iChance - MulDivLL( iChance/2, iValDiff, iVariance ) );
 }
 
 int Calc_GetSCurve( int iValDiff, int iVariance )

@@ -1800,7 +1800,7 @@ int CItem::GetWeight(word amount) const
 	CVarDefCont * pReduction = GetDefKey("WEIGHTREDUCTION", true);
 	if (pReduction)
 	{
-		iWeight -= (int)(IMULDIV( iWeight, pReduction->GetValNum(), 100 ));
+		iWeight -= (int)MulDivLL( iWeight, pReduction->GetValNum(), 100 );
 		if ( iWeight < 0)
 			iWeight = 0;
 	}
@@ -4316,7 +4316,7 @@ int CItem::Armor_GetDefense() const
 	if ( IsSetOF(OF_ScaleDamageByDurability) && m_itArmor.m_Hits_Max > 0 && m_itArmor.m_Hits_Cur < m_itArmor.m_Hits_Max )
 	{
 		int iRepairPercent = 50 + ((50 * m_itArmor.m_Hits_Cur) / m_itArmor.m_Hits_Max);
-		iVal = IMULDIV( iVal, iRepairPercent, 100 );
+		iVal = (int)MulDivLL( iVal, iRepairPercent, 100 );
 	}
 	if ( IsAttr(ATTR_MAGIC) )
 		iVal += g_Cfg.GetSpellEffect( SPELL_Enchant, m_itArmor.m_spelllevel );
@@ -4340,7 +4340,7 @@ int CItem::Weapon_GetAttack(bool bGetRange) const
 	if ( IsSetOF(OF_ScaleDamageByDurability) && m_itArmor.m_Hits_Max > 0 && m_itArmor.m_Hits_Cur < m_itArmor.m_Hits_Max )
 	{
 		int iRepairPercent = 50 + ((50 * m_itArmor.m_Hits_Cur) / m_itArmor.m_Hits_Max);
-		iVal = IMULDIV( iVal, iRepairPercent, 100 );
+		iVal = (int)MulDivLL( iVal, iRepairPercent, 100 );
 	}
 	if ( IsAttr(ATTR_MAGIC) && ! IsType(IT_WAND))
 		iVal += g_Cfg.GetSpellEffect( SPELL_Enchant, m_itArmor.m_spelllevel );
@@ -5025,7 +5025,7 @@ int CItem::Armor_GetRepairPercent() const
 
 	if ( !m_itArmor.m_Hits_Max || ( m_itArmor.m_Hits_Max < m_itArmor.m_Hits_Cur ))
 		return( 100 );
- 	return( IMULDIV( m_itArmor.m_Hits_Cur, 100, m_itArmor.m_Hits_Max ));
+ 	return( MulDivLL( m_itArmor.m_Hits_Cur, 100, m_itArmor.m_Hits_Max ));
 }
 
 lpctstr CItem::Armor_GetRepairDesc() const

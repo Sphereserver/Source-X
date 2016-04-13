@@ -59,7 +59,7 @@ int CResource::Calc_CombatAttackSpeed( CChar * pChar, CItem * pWeapon )
 				return iSwingSpeed;
 			}
 
-			int iSwingSpeed = IMULDIV(100 - pChar->Stat_GetAdjusted(STAT_DEX), 40, 100);	// base speed is just the char DEX range (0 ~ 40)
+			int iSwingSpeed = MulDivLL(100 - pChar->Stat_GetAdjusted(STAT_DEX), 40, 100);	// base speed is just the char DEX range (0 ~ 40)
 			if ( iSwingSpeed < 5 )
 				iSwingSpeed = 5;
 			else
@@ -255,9 +255,9 @@ int CResource::Calc_StealingItem( CChar * pCharThief, CItem * pItem, CChar * pCh
 	int iSkillMark = pCharMark->Skill_GetAdjusted( SKILL_STEALING );
 	int iWeightItem = pItem->GetWeight();
 	
-	// int iDifficulty = iDexMark/2 + (iSkillMark/5) + Calc_GetRandVal(iDexMark/2) + IMULDIV( iWeightItem, 4, WEIGHT_UNITS );
+	// int iDifficulty = iDexMark/2 + (iSkillMark/5) + Calc_GetRandVal(iDexMark/2) + MulDivLL( iWeightItem, 4, WEIGHT_UNITS );
 	// Melt mod:
-    int iDifficulty = (iSkillMark/5) + Calc_GetRandVal(iDexMark/2) + IMULDIV( iWeightItem, 4, WEIGHT_UNITS );
+    int iDifficulty = (iSkillMark/5) + Calc_GetRandVal(iDexMark/2) + MulDivLL( iWeightItem, 4, WEIGHT_UNITS );
 	
 	if ( pItem->IsItemEquipped())
 		iDifficulty += iDexMark/2 + pCharMark->Stat_GetAdjusted(STAT_INT);		// This is REALLY HARD to do.

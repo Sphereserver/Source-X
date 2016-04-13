@@ -185,12 +185,10 @@ void CServer::PrintStr( lpctstr pszMsg ) const
 int CServer::PrintPercent( int iCount, int iTotal )
 {
 	ADDTOCALLSTACK("CServer::PrintPercent");
-	// These vals can get very large. so use MulDiv to prevent overflow. (not IMULDIV)
 	if ( iTotal <= 0 )
 		return 100;
 
-    //int iPercent = MulDiv( iCount, 100, iTotal );
-	int iPercent = IMULDIV( iCount, 100, iTotal );
+	int iPercent = MulDivLL( iCount, 100, iTotal );
 	tchar *pszTemp = Str_GetTemp();
 	sprintf(pszTemp, "%d%%", iPercent);
 	size_t len = strlen(pszTemp);
@@ -202,7 +200,7 @@ int CServer::PrintPercent( int iCount, int iTotal )
 	{
 		SysMessage(pszTemp);
 #endif
-		while ( len > 0) // backspace it
+		while ( len > 0)	// backspace it
 		{
 			PrintTelnet("\x08");
 #ifndef _WINDOWS
@@ -266,7 +264,7 @@ lpctstr CServer::GetStatusString( byte iIndex ) const
 			break;
 	}
 
-	return( pTemp );
+	return pTemp;
 }
 
 //*********************************************************

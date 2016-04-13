@@ -609,7 +609,7 @@ bool CChar::NPC_CheckHirelingStatus()
 		return( true );
 
 	// I am hired for money not for food.
-	uint iPeriodWage = IMULDIV( iWage, iFoodConsumeRate, 24 * 60 * g_Cfg.m_iGameMinuteLength );
+	uint iPeriodWage = (uint)MulDivLL( iWage, iFoodConsumeRate, 24 * 60 * g_Cfg.m_iGameMinuteLength );
 	if ( iPeriodWage <= 0 )
 		iPeriodWage = 1;
 

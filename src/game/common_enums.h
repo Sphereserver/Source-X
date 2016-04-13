@@ -7,37 +7,37 @@
 enum CLIMODE_TYPE	// What mode is the client to server connection in ? (waiting for input ?)
 {
     // Setup events ------------------------------------------------------------------
-            CLIMODE_SETUP_CONNECTING,
+	CLIMODE_SETUP_CONNECTING,
     CLIMODE_SETUP_SERVERS,			// client has received the servers list
     CLIMODE_SETUP_RELAY,			// client has been relayed to the game server. wait for new login
     CLIMODE_SETUP_CHARLIST,			// client has the char list and may (select char, delete char, create new char)
 
     // Capture the user input for this mode  -----------------------------------------
-            CLIMODE_NORMAL,					// No targeting going on, we are just walking around, etc
+	CLIMODE_NORMAL,					// No targeting going on, we are just walking around, etc
 
     // Asyc events enum here  --------------------------------------------------------
-            CLIMODE_DRAG,					// I'm dragging something (not quite a targeting but similar)
+	CLIMODE_DRAG,					// I'm dragging something (not quite a targeting but similar)
     CLIMODE_DYE,					// the dye dialog is up and I'm targeting something to dye
     CLIMODE_INPVAL,					// special text input dialog (for setting item attrib)
 
     // Some sort of general gump dialog ----------------------------------------------
-            CLIMODE_DIALOG,					// from RES_DIALOG
+	CLIMODE_DIALOG,					// from RES_DIALOG
 
     // Hard-coded (internal) dialogs
-            CLIMODE_DIALOG_VIRTUE = 0x1CD,
+	CLIMODE_DIALOG_VIRTUE = 0x1CD,
 
     // Making a selection from a menu  -----------------------------------------------
-            CLIMODE_MENU,					// from RES_MENU
+	CLIMODE_MENU,					// from RES_MENU
 
     // Hard-coded (internal) menus
-            CLIMODE_MENU_SKILL,				// result of some skill (tracking, tinkering, blacksmith, etc)
+	CLIMODE_MENU_SKILL,				// result of some skill (tracking, tinkering, blacksmith, etc)
     CLIMODE_MENU_SKILL_TRACK_SETUP,
     CLIMODE_MENU_SKILL_TRACK,
     CLIMODE_MENU_GM_PAGES,			// open gm pages list
     CLIMODE_MENU_EDIT,				// edit the contents of a container
 
     // Prompting for text input ------------------------------------------------------
-            CLIMODE_PROMPT_NAME_RUNE,
+	CLIMODE_PROMPT_NAME_RUNE,
     CLIMODE_PROMPT_NAME_KEY,		// naming a key
     CLIMODE_PROMPT_NAME_SIGN,		// naming a house sign
     CLIMODE_PROMPT_NAME_SHIP,
@@ -48,10 +48,10 @@ enum CLIMODE_TYPE	// What mode is the client to server connection in ? (waiting 
     CLIMODE_PROMPT_STONE_NAME,		// prompt for text
 
     // Targeting mouse cursor  -------------------------------------------------------
-            CLIMODE_MOUSE_TYPE,				// greater than this = mouse type targeting
+	CLIMODE_MOUSE_TYPE,				// greater than this = mouse type targeting
 
     // GM targeting command stuff
-            CLIMODE_TARG_OBJ_SET,			// set some attribute of the item I will show
+	CLIMODE_TARG_OBJ_SET,			// set some attribute of the item I will show
     CLIMODE_TARG_OBJ_INFO,			// what item do I want props for?
     CLIMODE_TARG_OBJ_FUNC,
 
@@ -62,7 +62,7 @@ enum CLIMODE_TYPE	// What mode is the client to server connection in ? (waiting 
     CLIMODE_TARG_TILE,				// "TILE" command
 
     // Normal user stuff  (mouse targeting)
-            CLIMODE_TARG_SKILL,				// targeting a skill or spell
+	CLIMODE_TARG_SKILL,				// targeting a skill or spell
     CLIMODE_TARG_SKILL_MAGERY,
     CLIMODE_TARG_SKILL_HERD_DEST,
     CLIMODE_TARG_SKILL_POISON,

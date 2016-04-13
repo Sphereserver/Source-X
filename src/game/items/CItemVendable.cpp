@@ -177,8 +177,8 @@ dword CItemVendable::GetVendorPrice( int iConvertFactor )
 	//    0 = base price
 	// +100 = increase price by 100% (vendor selling to player?)
 
-	dword lPrice = m_price;
-	if ( lPrice <= 0 )	// set on player vendor.
+	ullong llPrice = m_price;
+	if ( llPrice <= 0 )		// set on player vendor.
 	{
 		CItemBase *pItemDef;
 		if ( IsType(IT_DEED) )
@@ -189,40 +189,38 @@ dword CItemVendable::GetVendorPrice( int iConvertFactor )
 				return 1;
 		}
 		else
-		{
 			pItemDef = Item_GetDef();
-		}
-		lPrice = pItemDef->GetMakeValue(GetQuality());
+		llPrice = pItemDef->GetMakeValue(GetQuality());
 	}
 
-	lPrice += IMULDIV(lPrice, maximum(iConvertFactor, -100), 100);
-	if ( lPrice > UINT32_MAX )
+	llPrice += (ullong)MulDivLL(llPrice, maximum(iConvertFactor, -100), 100);
+	if ( llPrice > UINT32_MAX )
 		return UINT32_MAX;
 	
-	return lPrice;
+	return llPrice;
 }
 
 bool CItemVendable::IsValidSaleItem( bool fBuyFromVendor ) const
 {
 	ADDTOCALLSTACK("CItemVendable::IsValidSaleItem");
 	// Can this individual item be sold or bought ?
-	if ( ! IsMovableType())
+	if ( !IsMovableType() )
 	{
 		if ( fBuyFromVendor )
 		{
 			DEBUG_ERR(( "Vendor uid=0%x selling unmovable item %s='%s'\n", (dword)(GetTopLevelObj()->GetUID()), GetResourceName(), GetName()));
 		}
-		return( false );
+		return false;
 	}
-	if ( ! fBuyFromVendor )
+	if ( !fBuyFromVendor )
 	{
 		// cannot sell these to a vendor.
 		if ( IsAttr(ATTR_NEWBIE|ATTR_MOVE_NEVER))
-			return( false );	// spellbooks !
+			return false;	// spellbooks !
 	}
-	if ( IsType(IT_COIN))
-		return( false );
-	return( true );
+	if ( IsType(IT_COIN) )
+		return false;
+	return true;
 }
 
 bool CItemVendable::IsValidNPCSaleItem() const
@@ -236,14 +234,14 @@ bool CItemVendable::IsValidNPCSaleItem() const
 	if ( m_price <= 0 && pItemDef->GetMakeValue(0) <= 0 )
 	{
 		DEBUG_ERR(( "Vendor uid=0%x selling unpriced item %s='%s'\n", (dword)(GetTopLevelObj()->GetUID()), GetResourceName(), GetName()));
-		return( false );
+		return false;
 	}
 
-	if ( ! IsValidSaleItem( true ))
+	if ( !IsValidSaleItem(true) )
 	{
 		DEBUG_ERR(( "Vendor uid=0%x selling bad item %s='%s'\n", (dword)(GetTopLevelObj()->GetUID()), GetResourceName(), GetName()));
-		return( false );
+		return false;
 	}
 
-	return( true );
+	return true;
 }

@@ -1959,7 +1959,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 				iManaDrain += 5 + (15 * Skill_GetBase(SKILL_SPIRITSPEAK) / 1000);
 		}
 		if ( GetDefNum("HitManaDrain", true) > Calc_GetRandLLVal(100) )
-			iManaDrain += IMULDIV((short)(iDmg), 20, 100);	// leech 20% of damage value
+			iManaDrain += (short)MulDivLL(iDmg, 20, 100);		// leech 20% of damage value
 
 		short iTargMana = pCharTarg->Stat_GetVal(STAT_INT);
 		if ( iManaDrain > iTargMana )

@@ -25,7 +25,7 @@
 #include "datatypes.h"
 #ifndef _WINDOWS
 	#include "os_unix.h"
-#endif // _WINDOWS
+#endif
 
 // use to indicate that a function uses printf-style arguments, allowing GCC
 // to validate the format string and arguments:
@@ -48,13 +48,13 @@ typedef THREAD_ENTRY_RET ( _cdecl * PTHREAD_ENTRY_PROC )(void *);
 
 #define SPHERE_DEF_PORT	2593
 #define SPHERE_FILE		"sphere"	// file name prefix
-#define SPHERE_TITLE		"Sphere"
-#define SPHERE_SCRIPT		".scp"
+#define SPHERE_TITLE	"Sphere"
+#define SPHERE_SCRIPT	".scp"
 
 #define SCRIPT_MAX_LINE_LEN 4096	// default size.
 
 #define IMULDIVDOWN(a,b,c)	(((a)*(b))/(c))
-#define IMULDIV(a,b,c)		(((((llong)(a)*(llong)(b))+(c / 2))/(c))-(IsNegative((llong)(a)*(llong)(b))))
+#define MulDivLL(a,b,c)		(((((llong)(a)*(llong)(b))+(c / 2))/(c))-(IsNegative((llong)(a)*(llong)(b))))
 
 #ifndef MAKEDWORD
 	#define MAKEDWORD(low, high) ((dword)(((word)(low)) | (((dword)((word)(high))) << 16)))
@@ -68,7 +68,7 @@ typedef uint	ERROR_CODE;
 
 #define ISWHITESPACE(ch)			(IsSpace(ch)||((uchar)ch)==0xa0)	// IsSpace
 #define GETNONWHITESPACE( pStr )	while ( ISWHITESPACE( (pStr)[0] )) { (pStr)++; }
-#define _IS_SWITCH(c)				((c) == '-' || (c) == '/' )	// command line switch.
+#define _IS_SWITCH(c)				((c) == '-' || (c) == '/' )			// command line switch.
 
 #define REMOVE_QUOTES( x )			\
 {									\

@@ -7,21 +7,21 @@
 #ifndef _INC_OS_WINDOWS_H
 #define _INC_OS_WINDOWS_H
 
-
+#define SLASH_PATH	"\\"
 #define _WIN32_DCOM
-
 #ifndef _WIN32_WINNT
 	#define _WIN32_WINNT 0x0501
 #endif
 
 #undef FD_SETSIZE
-#define FD_SETSIZE 1024 // for max of n users ! default = 64
+#define FD_SETSIZE 1024		// for max of n users ! default = 64
 
+#define NOMINMAX			// we don't want to have windows min and max macros, we have our minimum and maximum
 #include <winsock2.h>
 #include <windows.h>
 #include <process.h>
 
-//	thread-specific definitions
+/*	thread-specific definitions  */
 #define THREAD_ENTRY_RET void
 
 #pragma warning(disable:4786)
@@ -37,14 +37,12 @@
 #ifndef STDFUNC_UNLINK
 	#define STDFUNC_UNLINK _unlink
 #endif
+/* */
 
 // since the only way to make windows not to buffer file is to remove buffer, we
 // use this instead flushing
 #define	FILE_SETNOCACHE(_x_)	setvbuf(_x_, NULL, _IONBF, 0)
 #define FILE_FLUSH(_x_)
-
-// printf format identifiers
-#define FMTSIZE_T "Iu" // windows uses %Iu to format size_t
 
 
 #ifdef __MINGW32__

@@ -766,7 +766,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 	// Use up some raw materials to repair.
 	int iTotalHits = pItemArmor->m_itArmor.m_Hits_Max;
 	int iDamageHits = pItemArmor->m_itArmor.m_Hits_Max - pItemArmor->m_itArmor.m_Hits_Cur;
-	int iDamagePercent = IMULDIV(100, iDamageHits, iTotalHits);
+	int iDamagePercent = (int)MulDivLL(100, iDamageHits, iTotalHits);
 
 	size_t iMissing = ResourceConsumePart(&(pItemDef->m_BaseResources), 1, iDamagePercent / 2, true);
 	if ( iMissing != pItemDef->m_BaseResources.BadIndex() )
@@ -790,7 +790,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 
 	CResourceQty RetMainSkill = pItemDef->m_SkillMake[iRes];
 	int iSkillLevel = (int)(RetMainSkill.GetResQty()) / 10;
-	int iDifficulty = IMULDIV(iSkillLevel, iDamagePercent, 100);
+	int iDifficulty = MulDivLL(iSkillLevel, iDamagePercent, 100);
 	if ( iDifficulty < iSkillLevel / 4 )
 		iDifficulty = iSkillLevel / 4;
 
@@ -924,7 +924,7 @@ bool CChar::Use_Eat( CItem * pItemFood, short iQty )
 	Use_EatQty(pItemFood, iQty);
 
 	lpctstr pMsg;
-	int index = IMULDIV(Stat_GetVal(STAT_FOOD), 5, Stat_GetMax(STAT_FOOD));
+	int index = MulDivLL(Stat_GetVal(STAT_FOOD), 5, Stat_GetMax(STAT_FOOD));
 	switch ( index )
 	{
 		case 0:
@@ -1010,7 +1010,7 @@ void CChar::Use_Drink( CItem * pItem )
 		{
 			int iEnhance = (int)(GetDefNum("EnhancePotions", false));
 			if ( iEnhance )
-				iSkillQuality += IMULDIV(iSkillQuality, iEnhance, 100);
+				iSkillQuality += MulDivLL(iSkillQuality, iEnhance, 100);
 		}
 
 		OnSpellEffect(static_cast<SPELL_TYPE>(RES_GET_INDEX(pItem->m_itPotion.m_Type)), this, iSkillQuality, pItem);

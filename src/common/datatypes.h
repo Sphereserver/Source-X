@@ -39,7 +39,7 @@
 	all the others
 */
 
-typedef double RealType;
+typedef double					realtype;
 
 typedef unsigned char			uchar;
 typedef unsigned short			ushort;
@@ -73,6 +73,10 @@ typedef	uint64_t		uint64;
 
 
 #ifndef _WINDOWS			//	assume unix if !_WINDOWS
+
+	// printf format identifiers
+	#define FMTSIZE_T "zu"		// linux uses %zu to format size_t
+
 	#include <wchar.h>
 	#ifdef UNICODE
 		typedef	wchar_t			tchar;
@@ -86,6 +90,13 @@ typedef	uint64_t		uint64;
 	typedef	const char *		lpcstr;
 	typedef	tchar *				lptstr;
 	typedef const tchar *		lpctstr;
+
+#else	// _WINDOWS
+
+	// printf format identifiers
+	#define FMTSIZE_T "Iu"		// windows uses %Iu to format size_t
+
 #endif // !_WINDOWS
+
 
 #endif // _INC_DATATYPES_H

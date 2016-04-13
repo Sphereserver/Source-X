@@ -2603,30 +2603,30 @@ bool CChar::SetPoison( int iSkill, int iTicks, CChar * pCharSrc )
 			if ( GetDist(pCharSrc) < 3 && Calc_GetRandVal(10) == 1 )
 			{
 				// Lethal poison
-				pPoison->m_itSpell.m_pattern = (byte)(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(16, 33), 100));
+				pPoison->m_itSpell.m_pattern = (byte)MulDivLL(Stat_GetMax(STAT_STR), Calc_GetRandVal2(16, 33), 100);
 				pPoison->m_itSpell.m_spelllevel = 4;
 				pPoison->m_itSpell.m_spellcharges = 80;		//1 min, 20 sec
 		}
 			else
 		{
 				// Deadly poison
-				pPoison->m_itSpell.m_pattern = (byte)(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(15, 30), 100));
+				pPoison->m_itSpell.m_pattern = (byte)MulDivLL(Stat_GetMax(STAT_STR), Calc_GetRandVal2(15, 30), 100);
 				pPoison->m_itSpell.m_spelllevel = 3;
 				pPoison->m_itSpell.m_spellcharges = 60;
 		}
 		}
 		else if ( iSkill >= 851 )
 		{
-			pPoison->m_itSpell.m_pattern = (uchar)(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(7, 15), 100));
+			pPoison->m_itSpell.m_pattern = (uchar)MulDivLL(Stat_GetMax(STAT_STR), Calc_GetRandVal2(7, 15), 100);
 			// Greater poison
-			pPoison->m_itSpell.m_pattern = (byte)(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(7, 15), 100));
+			pPoison->m_itSpell.m_pattern = (byte)MulDivLL(Stat_GetMax(STAT_STR), Calc_GetRandVal2(7, 15), 100);
 			pPoison->m_itSpell.m_spelllevel = 2;
 			pPoison->m_itSpell.m_spellcharges = 60;
 		}
 		else if ( iSkill >= 600 )
 		{
 			// Poison
-			pPoison->m_itSpell.m_pattern = (byte)(IMULDIV(Stat_GetMax(STAT_STR), Calc_GetRandVal2(5, 10), 100));
+			pPoison->m_itSpell.m_pattern = (byte)MulDivLL(Stat_GetMax(STAT_STR), Calc_GetRandVal2(5, 10), 100);
 			pPoison->m_itSpell.m_spelllevel = 1;
 			pPoison->m_itSpell.m_spellcharges = 30;		}
 		else

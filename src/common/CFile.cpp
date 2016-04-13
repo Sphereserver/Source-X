@@ -226,22 +226,15 @@ CGString CGFile::GetMergedFileName( lpctstr pszBase, lpctstr pszName ) // static
 		strcpy( szFilePath, pszBase );
 		int len = (int)(strlen( szFilePath ));
 		if (len && szFilePath[len - 1] != '\\' && szFilePath[len - 1] != '/')
-		{
-#ifdef _WINDOWS
-			strcat(szFilePath, "\\");
-#else
-			strcat(szFilePath, "/");
-#endif
-		}
+			strcat(szFilePath, SLASH_PATH);
 	}
 	else
 	{
 		szFilePath[0] = '\0';
 	}
 	if ( pszName )
-	{
 		strcat( szFilePath, pszName );
-	}
+
 	return static_cast<CGString>(szFilePath);
 }
 
