@@ -18,10 +18,6 @@
 #include <assert.h>
 
 #ifdef _WINDOWS
-// NOTE: If we want a max number of sockets we must compile for it !
-	#undef FD_SETSIZE
-	#define FD_SETSIZE 1024 // for max of n users ! default = 64
-
 	#ifndef STRICT
 		#define STRICT			// strict conversion of handles and pointers.
 	#endif	// STRICT
@@ -72,27 +68,15 @@
 		#define ASSERT(exp)			(void)( (exp) || (Assert_CheckFail(#exp, __FILE__, __LINE__), 0) )
 	#endif	// ASSERT
 
-	#ifndef STATIC_CAST
-		#define STATIC_CAST dynamic_cast
+	#ifndef static_cast
+		#define static_cast dynamic_cast
 	#endif
 
 #else	// _DEBUG
 
 	#ifndef ASSERT
-		/*#ifndef _WINDOWS
-			// In linux, if we get an access violation, an exception isn't thrown.  Instead, we get
-			// a SIG_SEGV, and the process cores. The following code takes care of this for us.
-			extern void Assert_CheckFail( const char * pExp, const char *pFile, long lLine );
-			//matex3: is this still necessary? We have a SIG_SEGV handler nowaways.
-			#define ASSERT(exp)			(void)( (exp) || (Assert_CheckFail(#exp, __FILE__, __LINE__), 0) )
-		#else*/
-			#define ASSERT(exp)
-		/*#endif*/
+		#define ASSERT(exp)
 	#endif	// ASSERT
-
-	#ifndef STATIC_CAST
-		#define STATIC_CAST static_cast
-	#endif
 
 #endif	// ! _DEBUG
 
@@ -141,6 +125,12 @@
 #define FEATURE_EXTRA_RUSTIC		0x04	// 0x80000 feature (unlock SA rustic items on house design)
 #define FEATURE_EXTRA_JUNGLE		0x08	// 0x100000 feature (unlock TOL jungle items on house design)
 #define FEATURE_EXTRA_SHADOWGUARD	0x10	// 0x200000 feature (unlock TOL shadowguard items on house design)
+
+
+#define SPHERE_DEF_PORT	2593
+#define SPHERE_FILE		"sphere"	// file name prefix
+#define SPHERE_TITLE	"Sphere"
+#define SPHERE_SCRIPT	".scp"
 
 
 #endif	// _INC_SPHERECOM_H

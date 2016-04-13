@@ -825,7 +825,7 @@ Packet* PacketManager::getEncodedHandler(uint id) const
 ClientIterator::ClientIterator(const NetworkIn* network)
 {
 	m_network = (network == NULL? &g_NetworkIn : network);
-	m_nextClient = STATIC_CAST <CClient*> (m_network->m_clients.GetHead());
+	m_nextClient = static_cast <CClient*> (m_network->m_clients.GetHead());
 }
 #else
 ClientIterator::ClientIterator(const NetworkManager* network)

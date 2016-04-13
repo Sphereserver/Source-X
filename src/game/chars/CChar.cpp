@@ -617,7 +617,7 @@ PLEVEL_TYPE CChar::GetPrivLevel() const
 
 CCharBase * CChar::Char_GetDef() const
 {
-	return( STATIC_CAST <CCharBase*>( Base_GetDef()));
+	return( static_cast <CCharBase*>( Base_GetDef()));
 }
 
 CRegionWorld * CChar::GetRegion() const

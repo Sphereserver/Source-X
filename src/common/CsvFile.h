@@ -7,9 +7,10 @@
 #ifndef _INC_CSVFILE_H
 #define _INC_CSVFILE_H
 
-#include "CFile.h"
-#include "CacheableScriptFile.h"
 #include <map>
+
+#include "./sphere_library/CFile.h"
+#include "CacheableScriptFile.h"
 
 #define MAX_COLUMNS	64	// maximum number of columns in a file
 

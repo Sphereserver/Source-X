@@ -7,7 +7,7 @@
 #ifndef _INC_CACHEABLESCRIPTFILE_H
 #define _INC_CACHEABLESCRIPTFILE_H
 
-#include "CFile.h"
+#include "./sphere_library/CFile.h"
 #include <string>
 
 

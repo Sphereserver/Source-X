@@ -19,15 +19,15 @@
 
 		LPCVOID lpSource = NULL;
 		va_list* Arguments = NULL;
-		dword nChars = ::FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+		DWORD nChars = ::FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 			lpSource,
 			dwError, LANG_NEUTRAL, 
 			lpszError, nMaxError, Arguments );
 
 		if (nChars > 0)
 		{     // successful translation -- trim any trailing junk
-			dword index = nChars - 1;      // index of last character
-			while ((index >= 0) && ((lpszError[index] == '\n') || (lpszError[index] == '\r')))
+			DWORD index = nChars - 1;      // index of last character
+			while ( (index >= 0) && ((lpszError[index] == '\n') || (lpszError[index] == '\r')) )
 				lpszError[index--] = '\0';
 			nChars = index + 1;
 		}
@@ -186,9 +186,9 @@ void Assert_CheckFail( lpctstr pExp, lpctstr pFile, long lLine )
 			}
 #endif
 			// WIN32 gets an exception.
-			dword dwCodeStart = (dword)(byte *) &globalstartsymbol;	// sync up to my MAP file.
+			DWORD dwCodeStart = (DWORD)(byte *) &globalstartsymbol;	// sync up to my MAP file.
 
-			dword dwAddr = (dword)(pData->ExceptionRecord->ExceptionAddress);
+			DWORD dwAddr = (DWORD)(pData->ExceptionRecord->ExceptionAddress);
 			dwAddr -= dwCodeStart;
 
 			throw CException(id, dwAddr);

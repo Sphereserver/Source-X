@@ -2,6 +2,7 @@
 // CEncrypt.cpp
 //
 
+#include "../game/CLog.h"
 #include "../sphere/threads.h"
 #include "CEncrypt.h"
 #include "CExpression.h"

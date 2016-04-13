@@ -1087,7 +1087,7 @@ bool CResource::r_LoadVal( CScript &s )
 				size_t threadCount = ThreadHolder::getActiveThreads();
 				for (size_t j = 0; j < threadCount; j++)
 				{
-					AbstractSphereThread* thread = STATIC_CAST<AbstractSphereThread*>(ThreadHolder::getThreadAt(j));
+					AbstractSphereThread* thread = static_cast<AbstractSphereThread*>(ThreadHolder::getThreadAt(j));
 					if (thread != NULL)
 						thread->m_profile.SetActive(seconds);
 				}
@@ -1235,7 +1235,7 @@ const CSkillDef * CResource::SkillLookup( lpctstr pszKey )
     const CSkillDef * pDef;
 	for ( size_t i = 0; i < m_SkillIndexDefs.GetCount(); ++i )
 	{
-		pDef = STATIC_CAST<const CSkillDef *>(m_SkillIndexDefs[i]);
+		pDef = static_cast<const CSkillDef *>(m_SkillIndexDefs[i]);
 		if ( pDef->m_sName.IsEmpty() ?
 				!strnicmp( pszKey, pDef->GetKey(), iLen )
 			:	!strnicmp( pszKey, pDef->m_sName, iLen ) )
@@ -1858,7 +1858,7 @@ CServerRef CResource::Server_GetDef( size_t index )
 	ADDTOCALLSTACK("CResource::Server_GetDef");
 	if ( ! m_Servers.IsValidIndex(index))
 		return( NULL );
-	return( CServerRef( STATIC_CAST <CServerDef*>( m_Servers[index] )));
+	return( CServerRef( static_cast <CServerDef*>( m_Servers[index] )));
 }
 
 CWebPageDef * CResource::FindWebPage( lpctstr pszPath ) const
@@ -1869,7 +1869,7 @@ CWebPageDef * CResource::FindWebPage( lpctstr pszPath ) const
 		if ( m_WebPages.GetCount() <= 0 )
 			return( NULL );
 		// Take this as the default page.
-		return( STATIC_CAST <CWebPageDef*>( m_WebPages[0] ));
+		return( static_cast <CWebPageDef*>( m_WebPages[0] ));
 	}
 
 	lpctstr pszTitle = CGFile::GetFilesTitle(pszPath);
@@ -1880,14 +1880,14 @@ CWebPageDef * CResource::FindWebPage( lpctstr pszPath ) const
 		if ( m_WebPages.GetCount() <= 0 )
 			return( NULL );
 		// Take this as the default page.
-		return( STATIC_CAST <CWebPageDef*>( m_WebPages[0] ));
+		return( static_cast <CWebPageDef*>( m_WebPages[0] ));
 	}
 
 	for ( size_t i = 0; i < m_WebPages.GetCount(); i++ )
 	{
 		if ( m_WebPages[i] == NULL )	// not sure why this would happen
 			continue;
-		CWebPageDef * pWeb = STATIC_CAST <CWebPageDef*>(m_WebPages[i] );
+		CWebPageDef * pWeb = static_cast <CWebPageDef*>(m_WebPages[i] );
 		ASSERT(pWeb);
 		if ( pWeb->IsMatch(pszTitle))
 			return( pWeb );
@@ -3686,7 +3686,7 @@ void CResource::OnTick( bool fNow )
 			EXC_TRY("WebTick");
 			if ( !m_WebPages[i] )
 				continue;
-			CWebPageDef * pWeb = STATIC_CAST <CWebPageDef *>(m_WebPages[i]);
+			CWebPageDef * pWeb = static_cast <CWebPageDef *>(m_WebPages[i]);
 			if ( pWeb )
 			{
 				pWeb->WebPageUpdate(fNow, NULL, &g_Serv);
@@ -3695,7 +3695,7 @@ void CResource::OnTick( bool fNow )
 			EXC_CATCH;
 
 			EXC_DEBUG_START;
-			CWebPageDef * pWeb = STATIC_CAST <CWebPageDef *>(m_WebPages[i]);
+			CWebPageDef * pWeb = static_cast <CWebPageDef *>(m_WebPages[i]);
 			g_Log.EventDebug("web '%s' dest '%s' now '%d' index '%" FMTSIZE_T "'/'%" FMTSIZE_T "'\n",
 				pWeb ? pWeb->GetName() : "", pWeb ? pWeb->GetDstName() : "",
 				fNow? 1 : 0, i, m_WebPages.GetCount());

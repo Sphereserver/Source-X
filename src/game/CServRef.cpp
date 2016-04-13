@@ -45,7 +45,7 @@ CServerDef::CServerDef( lpctstr pszName, CSocketAddressIP dwIP ) :
 	m_ip( dwIP, SPHERE_DEF_PORT )	// SOCKET_LOCAL_ADDRESS
 {
 	// Statistics.
-	memset( m_dwStat, 0, sizeof( m_dwStat ));	// THIS MUST BE FIRST !
+	memset( m_dwStat, 0, sizeof( m_dwStat ) );	// THIS MUST BE FIRST !
 
 	SetName( pszName );
 	m_timeLastValid.Init();
@@ -78,18 +78,19 @@ dword CServerDef::StatGet(SERV_STAT_TYPE i) const
 					g_Log.EventError(("Unable to load process information PSAPI.DLL library. Memory information will be not available.\n"));
 				}
 				else
-				{
 					m_GetProcessMemoryInfo = reinterpret_cast<pGetProcessMemoryInfo>(::GetProcAddress(m_hmPsapiDll,"GetProcessMemoryInfo"));
-				}
 			}
 
-			if ( m_GetProcessMemoryInfo ) {
+			if ( m_GetProcessMemoryInfo )
+			{
 				EXC_SET("open process");
 				HANDLE hProcess = GetCurrentProcess();
-				if ( hProcess ) {
+				if ( hProcess )
+				{
 					ASSERT( hProcess == (HANDLE)-1 );
 					EXC_SET("get memory info");
-					if ( m_GetProcessMemoryInfo(hProcess, &pcnt, sizeof(pcnt)) ) {
+					if ( m_GetProcessMemoryInfo(hProcess, &pcnt, sizeof(pcnt)) )
+					{
 						EXC_SET("read memory info");
 						d = pcnt.WorkingSetSize;
 					}
@@ -160,7 +161,7 @@ void CServerDef::SetName( lpctstr pszName )
 		return;
 
 	// allow just basic chars. No spaces, only numbers, letters and underbar.
-	if ( g_Cfg.IsObscene( szName ))
+	if ( g_Cfg.IsObscene( szName ) )
 	{
 		DEBUG_ERR(( "Obscene server '%s' ignored.\n", szName ));
 		return;
@@ -178,7 +179,7 @@ void CServerDef::SetValidTime()
 int64 CServerDef::GetTimeSinceLastValid() const
 {
 	ADDTOCALLSTACK("CServerDef::GetTimeSinceLastValid");
-	return( - g_World.GetTimeDiff( m_timeLastValid ));
+	return ( - g_World.GetTimeDiff( m_timeLastValid ) );
 }
 
 enum SC_TYPE
@@ -252,15 +253,13 @@ bool CServerDef::r_LoadVal( CScript & s )
 {
 	ADDTOCALLSTACK("CServerDef::r_LoadVal");
 	EXC_TRY("LoadVal");
-	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ) )
 	{
 		case SC_ACCAPP:
 		case SC_ACCAPPS:
 			// Treat it as a value or a string.
 			if ( IsDigit( s.GetArgStr()[0] ))
-			{
-				m_eAccApp = static_cast<ACCAPP_TYPE>(s.GetArgVal());
-			}
+				m_eAccApp = static_cast<ACCAPP_TYPE>(s.GetArgVal() );
 			else
 			{
 				// Treat it as a string. "Manual","Automatic","Guest"
@@ -291,13 +290,13 @@ bool CServerDef::r_LoadVal( CScript & s )
 			{
 				tchar szLang[ 32 ];
 				Str_GetBare( szLang, s.GetArgStr(), sizeof(szLang), "<>/\"\\" );
-				if ( g_Cfg.IsObscene(szLang))	// Is the name unacceptable?
-					return( false );
+				if ( g_Cfg.IsObscene(szLang) )	// Is the name unacceptable?
+					return false;
 				m_sLang = szLang;
 			}
 			break;
 		case SC_LASTVALIDDATE:
-			m_dateLastValid.Read( s.GetArgStr());
+			m_dateLastValid.Read( s.GetArgStr() );
 			break;
 		case SC_LASTVALIDTIME:
 			{
@@ -309,39 +308,39 @@ bool CServerDef::r_LoadVal( CScript & s )
 			}
 			break;
 		case SC_SERVIP:
-			m_ip.SetHostPortStr( s.GetArgStr());
+			m_ip.SetHostPortStr( s.GetArgStr() );
 			break;
 
 		case SC_NAME:
 		case SC_SERVNAME:
-			SetName( s.GetArgStr());
+			SetName( s.GetArgStr() );
 			break;
 		case SC_SERVPORT:
-			m_ip.SetPort( (word)(s.GetArgVal()));
+			m_ip.SetPort( (word)s.GetArgVal() );
 			break;
 
 		case SC_ACCOUNTS:
-			SetStat( SERV_STAT_ACCOUNTS, s.GetArgVal());
+			SetStat( SERV_STAT_ACCOUNTS, s.GetArgVal() );
 			break;
 
 		case SC_CLIENTS:
 			{
 				int iClients = s.GetArgVal();
 				if ( iClients < 0 )
-					return( false );	// invalid
+					return false;				// invalid
 				if ( iClients > FD_SETSIZE )	// Number is bugged !
-					return( false );
+					return false;
 				SetStat( SERV_STAT_CLIENTS, iClients );
 			}
 			break;
 		case SC_ITEMS:
-			SetStat( SERV_STAT_ITEMS, s.GetArgVal());
+			SetStat( SERV_STAT_ITEMS, s.GetArgVal() );
 			break;
 		case SC_CHARS:
-			SetStat( SERV_STAT_CHARS, s.GetArgVal());
+			SetStat( SERV_STAT_CHARS, s.GetArgVal() );
 			break;
 		case SC_TIMEZONE:
-			m_TimeZone = (char)(s.GetArgVal());
+			m_TimeZone = (char)s.GetArgVal();
 			break;
 		case SC_URL:
 		case SC_URLLINK:
@@ -353,12 +352,12 @@ bool CServerDef::r_LoadVal( CScript & s )
 			}
 			if ( !strchr(s.GetArgStr(), '.' ) )
 				return false;
-			if ( g_Cfg.IsObscene(s.GetArgStr()) )	// Is the name unacceptable?
+			if ( g_Cfg.IsObscene( s.GetArgStr()) )	// Is the name unacceptable?
 				return false;
 			m_sURL = s.GetArgStr();
 			break;
 		default:
-			return ( CScriptObj::r_LoadVal(s));
+			return CScriptObj::r_LoadVal(s);
 	}
 	return true;
 	EXC_CATCH;
@@ -373,7 +372,7 @@ bool CServerDef::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc
 {
 	ADDTOCALLSTACK("CServerDef::r_WriteVal");
 	EXC_TRY("WriteVal");
-	switch ( FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ) )
 	{
 	case SC_ACCAPP:
 		sVal.FormatVal( m_eAccApp );
@@ -397,7 +396,7 @@ bool CServerDef::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc
 		}
 		break;
 	case SC_CREATE:
-		sVal.FormatLLVal( -( g_World.GetTimeDiff(m_timeCreate) / TICK_PER_SEC ));
+		sVal.FormatLLVal( -( g_World.GetTimeDiff(m_timeCreate) / TICK_PER_SEC ) );
 		break;
 	case SC_LANG:
 		sVal = m_sLang;
@@ -405,7 +404,7 @@ bool CServerDef::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc
 
 	case SC_LASTVALIDDATE:
 		if ( m_timeLastValid.IsTimeValid() )
-			sVal.FormatLLVal( GetTimeSinceLastValid() / ( TICK_PER_SEC * 60 ));
+			sVal.FormatLLVal( GetTimeSinceLastValid() / ( TICK_PER_SEC * 60 ) );
 		else
 			sVal = "NA";
 		break;
@@ -421,22 +420,22 @@ bool CServerDef::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc
 		sVal = GetName();	// What the name should be. Fill in from ping.
 		break;
 	case SC_SERVPORT:
-		sVal.FormatVal( m_ip.GetPort());
+		sVal.FormatVal( m_ip.GetPort() );
 		break;
 	case SC_ACCOUNTS:
-		sVal.FormatVal( StatGet( SERV_STAT_ACCOUNTS ));
+		sVal.FormatVal( StatGet( SERV_STAT_ACCOUNTS ) );
 		break;
 	case SC_CLIENTS:
-		sVal.FormatVal( StatGet( SERV_STAT_CLIENTS ));
+		sVal.FormatVal( StatGet( SERV_STAT_CLIENTS ) );
 		break;
 	case SC_ITEMS:
-		sVal.FormatVal( StatGet( SERV_STAT_ITEMS ));
+		sVal.FormatVal( StatGet( SERV_STAT_ITEMS ) );
 		break;
 	case SC_MEM:
 		sVal.FormatVal( StatGet( SERV_STAT_MEM ) );
 		break;
 	case SC_CHARS:
-		sVal.FormatVal( StatGet( SERV_STAT_CHARS ));
+		sVal.FormatVal( StatGet( SERV_STAT_CHARS ) );
 		break;
 	case SC_TIMEZONE:
 		sVal.FormatVal( m_TimeZone );
@@ -446,7 +445,7 @@ bool CServerDef::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc
 		break;
 	case SC_URLLINK:
 		// try to make a link of it.
-		if ( m_sURL.IsEmpty())
+		if ( m_sURL.IsEmpty() )
 		{
 			sVal = GetName();
 			break;
@@ -466,7 +465,7 @@ bool CServerDef::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc
 			if ( r_Call( pszKey, pSrc, &Args, &sVal ) )
 				return true;
 
-			return( CScriptObj::r_WriteVal( pszKey, sVal, pSrc ));
+			return CScriptObj::r_WriteVal( pszKey, sVal, pSrc );
 		}
 	}
 	return true;
@@ -482,5 +481,5 @@ int64 CServerDef::GetAgeHours() const
 {
 	ADDTOCALLSTACK("CServerDef::GetAgeHours");
 	// This is just the amount of time it has been listed.
-	return(( - g_World.GetTimeDiff( m_timeCreate )) / ( TICK_PER_SEC * 60 * 60 ));
+	return (( - g_World.GetTimeDiff( m_timeCreate )) / ( TICK_PER_SEC * 60 * 60 ));
 }

@@ -1909,7 +1909,7 @@ void CItem::OnHear( lpctstr pszCmd, CChar * pSrc )
 
 CItemBase * CItem::Item_GetDef() const
 {
-	return( STATIC_CAST <CItemBase*>( Base_GetDef()));
+	return static_cast <CItemBase*>( Base_GetDef() );
 }
 
 ITEMID_TYPE CItem::GetID() const
@@ -1946,7 +1946,7 @@ bool CItem::IsSameDispID( ITEMID_TYPE id ) const	// account for flipped types ?
 {
 	const CItemBase * pItemDef = Item_GetDef();
 	ASSERT(pItemDef);
-	return( pItemDef->IsSameDispID( id ));
+	return( pItemDef->IsSameDispID( id ) );
 }
 
 bool CItem::SetDispID( ITEMID_TYPE id )
@@ -1955,7 +1955,7 @@ bool CItem::SetDispID( ITEMID_TYPE id )
 	// Just change what this item looks like.
 	// do not change it's basic type.
 
-	if ( id == GetDispID())
+	if ( id == GetDispID() )
 		return true;	// no need to do this again or overwrite user created item types.
 
 	if ( CItemBase::IsValidDispID(id) && id < ITEMID_MULTI )
@@ -1969,7 +1969,7 @@ bool CItem::SetDispID( ITEMID_TYPE id )
 		m_dwDispIndex = pItemDef->GetDispID();
 		ASSERT( CItemBase::IsValidDispID(static_cast<ITEMID_TYPE>(m_dwDispIndex)));
 	}
-	return( true );
+	return true;
 }
 
 void CItem::SetAmount( uint amount )
@@ -1984,7 +1984,7 @@ void CItem::SetAmount( uint amount )
 
 	m_amount = (word)(amount);
 	// sometimes the diff graphics for the types are not in the client.
-	if ( IsType(IT_ORE))
+	if ( IsType(IT_ORE) )
 	{
 		static const ITEMID_TYPE sm_Item_Ore[] =
 		{
@@ -2010,7 +2010,7 @@ void CItem::SetAmount( uint amount )
 word CItem::GetMaxAmount()
 {
 	ADDTOCALLSTACK("CItem::GetMaxAmount");
-	if (!IsStackableType())
+	if ( !IsStackableType() )
 		return 0;
 
 	CVarDefCont * pMax = GetDefKey("MaxAmount", false);
@@ -2066,7 +2066,7 @@ void CItem::r_WriteMore1( CGString & sVal )
 {
 	ADDTOCALLSTACK_INTENSIVE("CItem::r_WriteMore1");
 	// do special processing to represent this.
-	switch ( GetType())
+	switch ( GetType() )
 	{
 		case IT_SPAWN_CHAR:
 			sVal = g_Cfg.ResourceGetName( m_itSpawnChar.m_CharID );
@@ -2222,7 +2222,7 @@ bool CItem::LoadSetContainer( CUID uid, LAYER_TYPE layer )
 	if ( pObjCont == NULL )
 	{
 		DEBUG_ERR(( "Invalid container 0%x\n", (dword) uid ));
-		return( false );	// not valid object.
+		return false;	// not valid object.
 	}
 
 
@@ -2232,7 +2232,7 @@ bool CItem::LoadSetContainer( CUID uid, LAYER_TYPE layer )
 		if (pChar->m_pNPC)
 			pChar->NPC_AddSpellsFromBook(this);
 	}
-	if ( pObjCont->IsItem())
+	if ( pObjCont->IsItem() )
 	{
 		// layer is not used here of course.
 
@@ -2254,12 +2254,12 @@ bool CItem::LoadSetContainer( CUID uid, LAYER_TYPE layer )
 			if ( ! layer ) layer = pItemDef->GetEquipLayer();
 
 			pChar->LayerAdd( this, layer );
-			return( true );
+			return true;
 		}
 	}
 
 	DEBUG_ERR(( "Non container uid=0%x,id=0%x\n", (dword) uid, pObjCont->GetBaseID() ));
-	return( false );	// not a container.
+	return false;		// not a container.
 }
 
 enum ICR_TYPE
@@ -2292,19 +2292,19 @@ bool CItem::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 				if ( pszKey[-1] != '.' )
 					break;
 				pRef = GetContainer();
-				return( true );
+				return true;
 			case ICR_LINK:
 				if ( pszKey[-1] != '.' )
 					break;
 				pRef = m_uidLink.ObjFind();
-				return( true );
+				return true;
 			case ICR_REGION:
 				pRef = GetTopLevelObj()->GetTopPoint().GetRegion(REGION_TYPE_MULTI |REGION_TYPE_AREA);
-				return( true );
+				return true;
 		}
 	}
 
-	return( CObjBase::r_GetRef( pszKey, pRef ));
+	return CObjBase::r_GetRef( pszKey, pRef );
 }
 
 enum IC_TYPE
@@ -3586,12 +3586,12 @@ void CItem::SetAnim( ITEMID_TYPE id, int iTime )
 
 CItem* CItem::GetNext() const
 {
-	return( STATIC_CAST <CItem*>( CObjBase::GetNext()));
+	return( static_cast <CItem*>( CObjBase::GetNext()));
 }
 
 CItem* CItem::GetPrev() const
 {
-	return( STATIC_CAST <CItem*>( CObjBase::GetPrev()));
+	return( static_cast <CItem*>( CObjBase::GetPrev()));
 }
 
 CObjBase * CItem::GetContainer() const

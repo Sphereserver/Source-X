@@ -3,10 +3,10 @@
 #ifndef _INC_CUOINSTALL_H
 #define _INC_CUOINSTALL_H
 
-#include "../common/spheremul.h"
-#include "../common/CFile.h"
-#include "../common/sphere_library/CArray.h"
-#include "../common/CsvFile.h"
+#include "./sphere_library/CArray.h"
+#include "./sphere_library/CFile.h"
+#include "CsvFile.h"
+#include "spheremul.h"
 
 
 ////////////////////////////////////////////////////////

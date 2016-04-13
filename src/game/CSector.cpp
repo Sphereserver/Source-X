@@ -353,7 +353,7 @@ bool CSector::v_AllChars( CScript & s, CTextConsole * pSrc )
 	size_t i = m_Chars_Active.GetCount();
 	while ( i > 0 )
 	{
-		pChar = STATIC_CAST <CChar*>(m_Chars_Active.GetAt(--i));
+		pChar = static_cast <CChar*>(m_Chars_Active.GetAt(--i));
 
 		// Check that a character was returned and keep looking if not.
 		if (pChar == NULL)
@@ -377,7 +377,7 @@ bool CSector::v_AllCharsIdle( CScript & s, CTextConsole * pSrc )
 	size_t i = m_Chars_Disconnect.GetCount();
 	while ( i > 0 )
 	{
-		pChar = STATIC_CAST <CChar*>(m_Chars_Disconnect.GetAt(--i));
+		pChar = static_cast <CChar*>(m_Chars_Disconnect.GetAt(--i));
 
 		// Check that a character was returned and keep looking if not.
 		if (pChar == NULL)
@@ -402,7 +402,7 @@ bool CSector::v_AllItems( CScript & s, CTextConsole * pSrc )
 	while ( i > 0 )
 	{
 		// Get the next item
-		pItem = STATIC_CAST <CItem*>(m_Items_Timer.GetAt(--i));
+		pItem = static_cast <CItem*>(m_Items_Timer.GetAt(--i));
 
 		// Check that an item was returned and keep looking if not.
 		if (pItem == NULL)
@@ -418,7 +418,7 @@ bool CSector::v_AllItems( CScript & s, CTextConsole * pSrc )
 	while ( i > 0 )
 	{
 		// Get the next item.
-		pItem = STATIC_CAST <CItem*>(m_Items_Inert.GetAt(--i));
+		pItem = static_cast <CItem*>(m_Items_Inert.GetAt(--i));
 
 		// Check that an item was returned and keep looking if not.
 		if (pItem == NULL)
@@ -442,7 +442,7 @@ bool CSector::v_AllClients( CScript & s, CTextConsole * pSrc )
 	size_t i = m_Chars_Active.GetCount();
 	while ( i > 0 )
 	{
-		pChar = STATIC_CAST <CChar*>(m_Chars_Active.GetAt(--i));
+		pChar = static_cast <CChar*>(m_Chars_Active.GetAt(--i));
 
 		// Check that a character was returned and keep looking if not.
 		if (pChar == NULL)
@@ -631,7 +631,7 @@ void CSector::SetLightNow( bool fFlash )
 	ADDTOCALLSTACK("CSector::SetLightNow");
 	// Set the light level for all the CClients here.
 
-	CChar * pChar = STATIC_CAST <CChar*>( m_Chars_Active.GetHead());
+	CChar * pChar = static_cast <CChar*>( m_Chars_Active.GetHead());
 	for ( ; pChar != NULL; pChar = pChar->GetNext())
 	{
 		if ( pChar->IsStatFlag( STATF_DEAD | STATF_NightSight ))
@@ -732,7 +732,7 @@ void CSector::SetWeather( WEATHER_TYPE w )
 
 	m_Env.m_Weather = w;
 
-	CChar * pChar = STATIC_CAST <CChar*>( m_Chars_Active.GetHead());
+	CChar * pChar = static_cast <CChar*>( m_Chars_Active.GetHead());
 	for ( ; pChar != NULL; pChar = pChar->GetNext())
 	{
 		if ( pChar->IsClient())
@@ -753,7 +753,7 @@ void CSector::SetSeason( SEASON_TYPE season )
 
 	m_Env.m_Season = season;
 
-	CChar * pChar = STATIC_CAST <CChar*>( m_Chars_Active.GetHead());
+	CChar * pChar = static_cast <CChar*>( m_Chars_Active.GetHead());
 	for ( ; pChar != NULL; pChar = pChar->GetNext())
 	{
 		if ( pChar->IsClient() )
@@ -798,13 +798,13 @@ void CSector::OnHearItem( CChar * pChar, tchar * szText )
 	ASSERT(m_ListenItems);
 
 	CItem * pItemNext;
-	CItem * pItem = STATIC_CAST <CItem*>( m_Items_Timer.GetHead());
+	CItem * pItem = static_cast <CItem*>( m_Items_Timer.GetHead());
 	for ( ; pItem != NULL; pItem = pItemNext )
 	{
 		pItemNext = pItem->GetNext();
 		pItem->OnHear( szText, pChar );
 	}
-	pItem = STATIC_CAST <CItem*>( m_Items_Inert.GetHead());
+	pItem = static_cast <CItem*>( m_Items_Inert.GetHead());
 	for ( ; pItem != NULL; pItem = pItemNext )
 	{
 		pItemNext = pItem->GetNext();
@@ -909,7 +909,7 @@ void CSector::RespawnDeadNPCs()
 
 	// Respawn dead NPC's
 	CChar * pCharNext;
-	CChar * pChar = STATIC_CAST <CChar *>( m_Chars_Disconnect.GetHead());
+	CChar * pChar = static_cast <CChar *>( m_Chars_Disconnect.GetHead());
 	for ( ; pChar != NULL; pChar = pCharNext )
 	{
 		pCharNext = pChar->GetNext();
@@ -1070,7 +1070,7 @@ void CSector::OnTick(int iPulseCount)
 
 	ProfileTask charactersTask(PROFILE_CHARS);
 
-	//pChar = STATIC_CAST <CChar*>( m_Chars_Active.GetHead());
+	//pChar = static_cast <CChar*>( m_Chars_Active.GetHead());
 	CChar * pCharNext = NULL;
 	CChar * pChar = dynamic_cast <CChar*>( m_Chars_Active.GetHead());
 	for ( ; pChar != NULL; pChar = pCharNext )

@@ -9,6 +9,7 @@
 #else	// LINUX
 	#include <dirent.h>
 #endif
+#include "../game/CLog.h"
 #include "../sphere/threads.h"
 #include "CFileList.h"
 #include "spherecom.h"

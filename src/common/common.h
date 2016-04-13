@@ -39,21 +39,15 @@
 	#define __printfargs(a,b)
 #endif
 
-#define IsDigit(c) isdigit((uchar)c)
-#define IsSpace(c) isspace((uchar)c)
-#define IsAlpha(c) isalpha((uchar)c)
-#define IsNegative(c) ((c < 0)?1:0)
-
 typedef THREAD_ENTRY_RET ( _cdecl * PTHREAD_ENTRY_PROC )(void *);
-
-#define SPHERE_DEF_PORT	2593
-#define SPHERE_FILE		"sphere"	// file name prefix
-#define SPHERE_TITLE	"Sphere"
-#define SPHERE_SCRIPT	".scp"
 
 #define SCRIPT_MAX_LINE_LEN 4096	// default size.
 
-#define IMULDIVDOWN(a,b,c)	(((a)*(b))/(c))
+#define IsDigit(c)			isdigit((uchar)c)
+#define IsSpace(c)			isspace((uchar)c)
+#define IsAlpha(c)			isalpha((uchar)c)
+#define IsNegative(c)		((c < 0)?1:0)
+#define MulMulDiv(a,b,c)	(((a)*(b))/(c))
 #define MulDivLL(a,b,c)		(((((llong)(a)*(llong)(b))+(c / 2))/(c))-(IsNegative((llong)(a)*(llong)(b))))
 
 #ifndef MAKEDWORD
@@ -66,19 +60,6 @@ typedef THREAD_ENTRY_RET ( _cdecl * PTHREAD_ENTRY_PROC )(void *);
 
 typedef uint	ERROR_CODE;
 
-#define ISWHITESPACE(ch)			(IsSpace(ch)||((uchar)ch)==0xa0)	// IsSpace
-#define GETNONWHITESPACE( pStr )	while ( ISWHITESPACE( (pStr)[0] )) { (pStr)++; }
-#define _IS_SWITCH(c)				((c) == '-' || (c) == '/' )			// command line switch.
-
-#define REMOVE_QUOTES( x )			\
-{									\
-	GETNONWHITESPACE( x );			\
-	if ( *x == '"' )	++x;				\
-		tchar * psX	= const_cast<tchar*>(strchr( x, '"' ));	\
-	if ( psX )						\
-		*psX	= '\0';				\
-}
-
 #ifndef minimum
 	#define minimum(x,y)	((x)<(y)?(x):(y))
 #endif
@@ -87,129 +68,5 @@ typedef uint	ERROR_CODE;
 #endif
 
 #define medium(x,y,z)		((x)>(y)?(x):((z)<(y)?(z):(y)))
-
-// -----------------------------
-//	CEventLog
-// -----------------------------
-
-enum LOGL_TYPE
-{
-	// critical level.
-	LOGL_FATAL	= 1, 	// fatal error ! cannot continue.
-	LOGL_CRIT	= 2, 	// critical. might not continue.
-	LOGL_ERROR	= 3, 	// non-fatal errors. can continue.
-	LOGL_WARN	= 4,	// strange.
-	LOGL_EVENT	= 5,	// Misc major events.
-	// subject matter. (severity level is first 4 bits, LOGL_EVENT)
-	LOGM_INIT = 0x00100,		// start up messages.
-	LOGM_NOCONTEXT = 0x20000,	// do not include context information
-	LOGM_DEBUG = 0x40000		// debug kind of message with DEBUG: prefix
-};
-
-extern class CEventLog
-{
-	// Any text event stream. (destination is independant)
-	// May include __LINE__ or __FILE__ macro as well ?
-
-protected:
-	virtual int EventStr(dword wMask, lpctstr pszMsg)
-	{
-		UNREFERENCED_PARAMETER(wMask);
-		UNREFERENCED_PARAMETER(pszMsg);
-		return 0;
-	}
-	virtual int VEvent(dword wMask, lpctstr pszFormat, va_list args);
-
-public:
-	int _cdecl Event( dword wMask, lpctstr pszFormat, ... ) __printfargs(3,4)
-	{
-		va_list vargs;
-		va_start( vargs, pszFormat );
-		int iret = VEvent( wMask, pszFormat, vargs );
-		va_end( vargs );
-		return( iret );
-	}
-
-	int _cdecl EventDebug(lpctstr pszFormat, ...) __printfargs(2,3)
-	{
-		va_list vargs;
-		va_start(vargs, pszFormat);
-		int iret = VEvent(LOGM_NOCONTEXT|LOGM_DEBUG, pszFormat, vargs);
-		va_end(vargs);
-		return iret;
-	}
-
-	int _cdecl EventError(lpctstr pszFormat, ...) __printfargs(2,3)
-	{
-		va_list vargs;
-		va_start(vargs, pszFormat);
-		int iret = VEvent(LOGL_ERROR, pszFormat, vargs);
-		va_end(vargs);
-		return iret;
-	}
-
-	int _cdecl EventWarn(lpctstr pszFormat, ...) __printfargs(2,3)
-	{
-		va_list vargs;
-		va_start(vargs, pszFormat);
-		int iret = VEvent(LOGL_WARN, pszFormat, vargs);
-		va_end(vargs);
-		return iret;
-	}
-
-#ifdef _DEBUG
-	int _cdecl EventEvent( lpctstr pszFormat, ... ) __printfargs(2,3)
-	{
-		va_list vargs;
-		va_start( vargs, pszFormat );
-		int iret = VEvent( LOGL_EVENT, pszFormat, vargs );
-		va_end( vargs );
-		return( iret );
-	}
-#endif //_DEBUG
-
-	#define DEBUG_ERR(_x_)	g_pLog->EventError _x_
-
-	#ifdef _DEBUG
-		#define DEBUG_WARN(_x_)	g_pLog->EventWarn _x_
-		#define DEBUG_MSG(_x_)	g_pLog->EventEvent _x_
-		#define DEBUG_MYFLAG(_x_) g_pLog->Event _x_
-	#else
-		#define DEBUG_WARN(_x_)
-		#define DEBUG_MSG(_x_)
-		#define DEBUG_MYFLAG(_x_)
-	#endif
-
-public:
-	CEventLog() { };
-
-private:
-	CEventLog(const CEventLog& copy);
-	CEventLog& operator=(const CEventLog& other);
-} * g_pLog;
-
-// -----------------------------
-//	CValStr
-// -----------------------------
-
-struct CValStr
-{
-	// Associate a val with a string.
-	// Assume sorted values from min to max.
-public:
-	lpctstr m_pszName;
-	int m_iVal;
-public:
-	void SetValues( int iVal, lpctstr pszName )
-	{
-		m_iVal = iVal;
-		m_pszName = pszName;
-	}
-	lpctstr FindName( int iVal ) const;
-	void SetValue( int iVal )
-	{
-		m_iVal = iVal;
-	}
-};
 
 #endif	// _INC_COMMON_H

@@ -7,7 +7,7 @@
 #ifndef _INC_OS_WINDOWS_H
 #define _INC_OS_WINDOWS_H
 
-#define SLASH_PATH	"\\"
+//#define SLASH_PATH	"\\"
 #define _WIN32_DCOM
 #ifndef _WIN32_WINNT
 	#define _WIN32_WINNT 0x0501
@@ -22,9 +22,7 @@
 #include <process.h>
 
 /*	thread-specific definitions  */
-#define THREAD_ENTRY_RET void
-
-#pragma warning(disable:4786)
+#define THREAD_ENTRY_RET	void
 
 #ifndef STDFUNC_FILENO
 	#define STDFUNC_FILENO _fileno
@@ -52,7 +50,7 @@
 	operator= is on many clases private and the UNREFERENCED_PARAMETER macro from mingw is (P)=(P),
 	so we have a compilation error here.
 	*/
-	#undef UNREFERENCED_PARAMETER
+	#undef  UNREFERENCED_PARAMETER
 	#define UNREFERENCED_PARAMETER(P)	(void)(P)
 	// Not defined for mingw.
 	#define LSTATUS int

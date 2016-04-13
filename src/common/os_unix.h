@@ -20,7 +20,7 @@
 #include "CTime.h"
 
 
-#define SLASH_PATH	"/"
+//#define SLASH_PATH	"/"
 
 #ifndef _MAX_PATH			// stdlib.h ?
 	#define _MAX_PATH   260 	// max. length of full pathname

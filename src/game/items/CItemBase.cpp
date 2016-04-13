@@ -962,8 +962,8 @@ int CItemBase::GetMakeValue( int iQualityLevel )
 	if ( m_values.m_iLo == INT64_MIN || m_values.m_iHi == INT64_MIN )
 	{
 		values.m_iLo = CalculateMakeValue(0);		// low quality specimen
-		m_values.m_iLo = -values.m_iLo;			// negative means they will float.
-		values.m_iHi = CalculateMakeValue(100); 		// Top quality specimen
+		m_values.m_iLo = -values.m_iLo;				// negative means they will float.
+		values.m_iHi = CalculateMakeValue(100); 	// top quality specimen
 		m_values.m_iHi = -values.m_iHi;
 	}
 	else

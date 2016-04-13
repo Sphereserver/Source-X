@@ -1,7 +1,7 @@
 
 #include "../sphere/threads.h"
+#include "./sphere_library/CFile.h"
 #include "CException.h"
-#include "CFile.h"
 #include "CUOInstall.h"
 #include "CSphereMap.h"
 #include "common.h"

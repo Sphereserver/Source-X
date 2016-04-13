@@ -260,7 +260,7 @@ void CNTWindow::CStatusWnd::FillStats()
 		if (thrCurrent == NULL)
 			continue;
 
-		const ProfileData& profile = STATIC_CAST<AbstractSphereThread*>(thrCurrent)->m_profile;
+		const ProfileData& profile = static_cast<AbstractSphereThread*>(thrCurrent)->m_profile;
 		if (profile.IsEnabled() == false)
 			continue;
 

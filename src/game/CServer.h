@@ -3,10 +3,10 @@
 #ifndef _INC_CSERVER_H
 #define _INC_CSERVER_H
 
+#include "../common/sphere_library/CFile.h"
 #include "../common/common.h"
 #include "../common/CTextConsole.h"
 #include "../common/CSocket.h"
-#include "../common/CFile.h"
 #include "../common/CDataBase.h"
 #include "../common/sqlite/SQLite.h"
 #include "clients/CChat.h"

@@ -50,7 +50,7 @@ CItemMulti::~CItemMulti()
 
 const CItemBaseMulti * CItemMulti::Multi_GetDef() const
 {
-	return( STATIC_CAST <const CItemBaseMulti *>( Base_GetDef()));
+	return( static_cast <const CItemBaseMulti *>( Base_GetDef()));
 }
 
 int CItemMulti::Multi_GetMaxDist() const

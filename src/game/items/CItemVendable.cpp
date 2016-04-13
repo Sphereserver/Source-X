@@ -190,14 +190,15 @@ dword CItemVendable::GetVendorPrice( int iConvertFactor )
 		}
 		else
 			pItemDef = Item_GetDef();
+
 		llPrice = pItemDef->GetMakeValue(GetQuality());
 	}
 
 	llPrice += (ullong)MulDivLL(llPrice, maximum(iConvertFactor, -100), 100);
 	if ( llPrice > UINT32_MAX )
 		return UINT32_MAX;
-	
-	return llPrice;
+	else
+		return (dword)llPrice;
 }
 
 bool CItemVendable::IsValidSaleItem( bool fBuyFromVendor ) const

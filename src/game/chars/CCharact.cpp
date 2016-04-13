@@ -374,7 +374,7 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 void CChar::OnRemoveOb( CGObListRec* pObRec )	// Override this = called when removed from list.
 {
 	ADDTOCALLSTACK("CChar::OnRemoveOb");
-	CItem * pItem = STATIC_CAST <CItem*>(pObRec);
+	CItem * pItem = static_cast <CItem*>(pObRec);
 	if ( !pItem )
 		return;
 

@@ -116,10 +116,10 @@ void CImportFile::ImportFix()
 	int iRemoved = 0;
 
 	CImportSer * pSerNext;
-	m_pCurSer = STATIC_CAST <CImportSer*> ( m_ListSer.GetHead());
+	m_pCurSer = static_cast <CImportSer*> ( m_ListSer.GetHead());
 	for ( ; m_pCurSer != NULL; m_pCurSer = pSerNext )
 	{
-		pSerNext = STATIC_CAST <CImportSer*> ( m_pCurSer->GetNext());
+		pSerNext = static_cast <CImportSer*> ( m_pCurSer->GetNext());
 		if ( m_pCurSer->m_pObj == NULL )		// NEver created correctly
 		{
 			delete m_pCurSer;
@@ -175,9 +175,9 @@ void CImportFile::ImportFix()
 		}
 
 		// Find it's container.
-		CImportSer* pSerCont = STATIC_CAST <CImportSer*> ( m_ListSer.GetHead());
+		CImportSer* pSerCont = static_cast <CImportSer*> ( m_ListSer.GetHead());
 		CObjBase * pObjCont = NULL;
-		for ( ; pSerCont != NULL; pSerCont = STATIC_CAST <CImportSer*> ( pSerCont->GetNext()))
+		for ( ; pSerCont != NULL; pSerCont = static_cast <CImportSer*> ( pSerCont->GetNext()))
 		{
 			if ( pSerCont->m_pObj == NULL )
 				continue;

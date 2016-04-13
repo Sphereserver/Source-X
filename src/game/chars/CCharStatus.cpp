@@ -464,7 +464,7 @@ int CChar::GetHealthPercent() const
 
 CChar* CChar::GetNext() const
 {
-	return( STATIC_CAST <CChar*>( CObjBase::GetNext()));
+	return( static_cast <CChar*>( CObjBase::GetNext()));
 }
 
 CObjBaseTemplate * CChar::GetTopLevelObj() const

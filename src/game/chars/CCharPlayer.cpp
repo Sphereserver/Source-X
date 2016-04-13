@@ -146,7 +146,7 @@ bool CCharPlayer::SetSkillClass( CChar * pChar, RESOURCE_ID rid )
 	if ( !pDef )
 		return false;
 
-	CSkillClassDef* pLink = STATIC_CAST <CSkillClassDef*>(pDef);
+	CSkillClassDef* pLink = static_cast <CSkillClassDef*>(pDef);
 	if ( !pLink )
 		return false;
 	if ( pLink == GetSkillClass() )
@@ -172,7 +172,7 @@ CSkillClassDef * CCharPlayer::GetSkillClass() const
 	CResourceLink * pLink = m_SkillClass.GetRef();
 	if ( pLink == NULL )
 		return( NULL );
-	return( STATIC_CAST <CSkillClassDef *>(pLink));	
+	return( static_cast <CSkillClassDef *>(pLink));	
 }
 
 // only players can have skill locks.
@@ -380,7 +380,7 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 			if ( index >= g_World.m_GMPages.GetCount() )
 				return false;
 
-			CGMPage* pPage = STATIC_CAST <CGMPage*> (g_World.m_GMPages.GetAt(index));
+			CGMPage* pPage = static_cast <CGMPage*> (g_World.m_GMPages.GetAt(index));
 			if ( pPage == NULL )
 				return false;
 
