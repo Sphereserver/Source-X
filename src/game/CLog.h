@@ -3,8 +3,8 @@
 #ifndef _INC_CLOG_H
 #define _INC_CLOG_H
 
+#include "../common/sphere_library/CFile.h"
 #include "../common/spherecom.h"
-#include "../common/CFile.h"
 #include "../common/common.h"
 #include "../common/CTime.h"
 #include "../common/CScriptObj.h"
