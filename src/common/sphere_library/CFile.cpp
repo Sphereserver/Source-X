@@ -188,18 +188,37 @@ bool CFile::Write( const void * pData, dword dwLength ) const
 #endif
 }
 
-CGFile::~CGFile()
+// CGFile:: Constructors, Destructor, Asign operator.
+
+CGFile::CGFile()
 {
-	Close();
+m_uMode = 0;
 }
 
+CGFile::~CGFile()
+{
+Close();
+}
 
+// CGFile:: File Management.
 
+void CGFile::Close()
+{
+	ADDTOCALLSTACK("CGFile::Close");
+	if ( ! IsFileOpen())
+		return;
 
-//***************************************************************************
-// -CGFile
+	CloseBase();
+	m_hFile = NOFILE_HANDLE;
+}
 
-int CGFile::GetLastError()	// static
+void CGFile::CloseBase()
+{
+	ADDTOCALLSTACK("CGFile::CloseBase");
+	CFile::Close();
+}
+
+int CGFile::GetLastError()
 {
 #ifdef _WINDOWS
 	return ::GetLastError();
@@ -208,93 +227,9 @@ int CGFile::GetLastError()	// static
 #endif
 }
 
-CGString CGFile::GetMergedFileName( lpctstr pszBase, lpctstr pszName ) // static
+bool CGFile::IsFileOpen() const
 {
-	ADDTOCALLSTACK("CGFile::GetMergedFileName");
-	// Merge path and file name.
-
-	tchar szFilePath[ _MAX_PATH ];
-	if ( pszBase && pszBase[0] )
-	{
-		strcpy( szFilePath, pszBase );
-		int len = (int)(strlen( szFilePath ));
-		if (len && szFilePath[len - 1] != '\\' && szFilePath[len - 1] != '/')
-		{
-#ifdef _WINDOWS
-			strcat(szFilePath, "\\");
-#else
-			strcat(szFilePath, "/");
-#endif
-		}
-	}
-	else
-	{
-		szFilePath[0] = '\0';
-	}
-	if ( pszName )
-	{
-		strcat( szFilePath, pszName );
-	}
-	return static_cast<CGString>(szFilePath);
-}
-
-lpctstr CGFile::GetFilesTitle( lpctstr pszPath )	// static
-{
-	ADDTOCALLSTACK("CGFile::GetFilesTitle");
-	// Just use COMMDLG.H GetFileTitle(lpctstr, lptstr, word) instead ?
-	// strrchr
-	size_t len = strlen(pszPath);
-	while ( len > 0 )
-	{
-		len--;
-		if ( pszPath[len] == '\\' || pszPath[len] == '/' )
-		{
-			len++;
-			break;
-		}
-	}
-	return (pszPath + len);
-}
-
-lpctstr CGFile::GetFilesExt( lpctstr pszName )	// static
-{
-	ADDTOCALLSTACK("CGFile::GetFilesExt");
-	// get the EXTension including the .
-	size_t lenall = strlen( pszName );
-	size_t len = lenall;
-	while ( len > 0 )
-	{
-		len--;
-		if ( pszName[len] == '\\' || pszName[len] == '/' )
-			break;
-		if ( pszName[len] == '.' )
-		{
-			return( pszName + len );
-		}
-	}
-	return NULL;	// has no ext.
-}
-
-lpctstr CGFile::GetFileExt() const
-{
-	ADDTOCALLSTACK("CGFile::GetFileExt");
-	// get the EXTension including the .
-	return GetFilesExt( GetFilePath() );
-}
-
-
-bool CGFile::OpenBase( void * pExtra )
-{
-	ADDTOCALLSTACK("CGFile::OpenBase");
-	UNREFERENCED_PARAMETER(pExtra);
-
-	return static_cast<CFile *>(this)->Open(GetFilePath(), GetMode());
-}
-
-void CGFile::CloseBase()
-{
-	ADDTOCALLSTACK("CGFile::CloseBase");
-	CFile::Close();
+	return ( m_hFile != NOFILE_HANDLE );
 }
 
 bool CGFile::Open( lpctstr pszFilename, uint uModeFlags, void FAR * pExtra )
@@ -327,46 +262,131 @@ bool CGFile::Open( lpctstr pszFilename, uint uModeFlags, void FAR * pExtra )
 	return true;
 }
 
-void CGFile::Close()
+bool CGFile::OpenBase( void * pExtra )
 {
-	ADDTOCALLSTACK("CGFile::Close");
-	if ( ! IsFileOpen())
-		return;
-
-	CloseBase();
-	m_hFile = NOFILE_HANDLE;
+	ADDTOCALLSTACK("CGFile::OpenBase");
+	UNREFERENCED_PARAMETER(pExtra);
+	return static_cast<CFile *>(this)->Open(GetFilePath(), GetMode());
 }
 
-//***************************************************************************
-// -CFileText
+// CGFile:: File name operations.
 
-lpctstr CFileText::GetModeStr() const
+lpctstr CGFile::GetFilesTitle( lpctstr pszPath )
 {
-	ADDTOCALLSTACK("CFileText::GetModeStr");
-	// end of line translation is crap. ftell and fseek don't work correctly when you use it.
-	// fopen() args
-	if ( IsBinaryMode())
-		return ( IsWriteMode() ? "wb" : "rb" );
-	if ( GetMode() & OF_READWRITE )
-		return "a+b";
-	if ( GetMode() & OF_CREATE )
-		return "w";
-	if ( IsWriteMode() )
-		return "w";
-	else
-		return "rb";	// don't parse out the \n\r
-}
-
-void CFileText::CloseBase()
-{
-	ADDTOCALLSTACK("CFileText::CloseBase");
-	if ( IsWriteMode() )
+	ADDTOCALLSTACK("CGFile::GetFilesTitle");
+	// Just use COMMDLG.H GetFileTitle(lpctstr, lptstr, word) instead ?
+	// strrchr
+	size_t len = strlen(pszPath);
+	while ( len > 0 )
 	{
-		fflush(m_pStream);
+		len--;
+		if ( pszPath[len] == '\\' || pszPath[len] == '/' )
+		{
+			len++;
+			break;
+		}
 	}
-	
-	fclose(m_pStream);
+	return (pszPath + len);
+}
+
+lpctstr CGFile::GetFileExt() const
+{
+	ADDTOCALLSTACK("CGFile::GetFileExt");
+	// get the EXTension including the .
+	return GetFilesExt( GetFilePath() );
+}
+
+lpctstr CGFile::GetFilesExt( lpctstr pszName )	// static
+{
+	ADDTOCALLSTACK("CGFile::GetFilesExt");
+// get the EXTension including the .
+	size_t lenall = strlen( pszName );
+	size_t len = lenall;
+	while ( len > 0 )
+	{
+		len--;
+		if ( pszName[len] == '\\' || pszName[len] == '/' )
+			break;
+		if ( pszName[len] == '.' )
+		{
+			return( pszName + len );
+		}
+	}
+	return NULL;	// has no ext.
+}
+
+CGString CGFile::GetMergedFileName( lpctstr pszBase, lpctstr pszName ) // static
+{
+	ADDTOCALLSTACK("CGFile::GetMergedFileName");
+// Merge path and file name.
+
+	tchar szFilePath[ _MAX_PATH ];
+	if ( pszBase && pszBase[0] )
+	{
+		strcpy( szFilePath, pszBase );
+		int len = (int)(strlen( szFilePath ));
+		if (len && szFilePath[len - 1] != '\\' && szFilePath[len - 1] != '/')
+		{
+#ifdef _WINDOWS
+			strcat(szFilePath, "\\");
+#else
+			strcat(szFilePath, "/");
+#endif
+		}
+	}
+	else
+	{
+		szFilePath[0] = '\0';
+	}
+	if ( pszName )
+	{
+		strcat( szFilePath, pszName );
+	}
+	return static_cast<CGString>(szFilePath);
+}
+
+// CGFile:: Mode operations.
+
+uint CGFile::GetFullMode() const
+{
+	return m_uMode;
+}
+
+uint CGFile::GetMode() const
+{
+	return( m_uMode & 0x0FFFFFFF );
+}
+
+bool CGFile::IsBinaryMode() const
+{
+	return true;
+}
+
+bool CGFile::IsWriteMode() const
+{
+	return ( m_uMode & OF_WRITE );
+}
+
+// CFileText:: Constructors, Destructor, Asign operator.
+
+CFileText::CFileText()
+{
 	m_pStream = NULL;
+#ifdef _WINDOWS
+	bNoBuffer = false;
+#endif
+}
+
+CFileText::~CFileText()
+{
+	Close();
+}
+
+// CFileText:: File management.
+
+bool CFileText::IsFileOpen() const
+{
+	return( m_pStream != NULL );
 }
 
 bool CFileText::OpenBase( void FAR * pszExtra )
@@ -386,6 +406,72 @@ bool CFileText::OpenBase( void FAR * pszExtra )
 	return( true );
 }
 
+void CFileText::CloseBase()
+{
+	ADDTOCALLSTACK("CFileText::CloseBase");
+	if ( IsWriteMode() )
+	{
+		fflush(m_pStream);
+	}
+
+	fclose(m_pStream);
+	m_pStream = NULL;
+}
+
+// CFileText:: Content management.
+
+void CFileText::Flush() const
+{
+	if ( !IsFileOpen() )
+		return;
+	ASSERT(m_pStream);
+	fflush(m_pStream);
+}
+
+bool CFileText::IsEOF() const
+{
+	if ( !IsFileOpen() )
+		return true;
+	return feof(m_pStream) ? true : false;
+}
+
+dword CFileText::GetPosition() const
+{
+	// RETURN: -1 = error.
+	if ( !IsFileOpen() )
+		return (dword)(-1);
+	return ftell(m_pStream);
+}
+
+size_t _cdecl CFileText::Printf( lpctstr pFormat, ... )
+{
+	ASSERT(pFormat);
+	va_list vargs;
+	va_start( vargs, pFormat );
+	size_t iRet = VPrintf( pFormat, vargs );
+	va_end( vargs );
+	return iRet;
+}
+
+dword CFileText::Read( void * pBuffer, size_t sizemax ) const
+{
+	// This can return: EOF(-1) constant.
+	// returns the number of full items actually read
+	ASSERT(pBuffer);
+	if ( IsEOF())
+		return( 0 );	// LINUX will ASSERT if we read past end.
+	return (dword)(fread( pBuffer, 1, sizemax, m_pStream ));
+}
+
+tchar * CFileText::ReadString( tchar * pBuffer, size_t sizemax ) const
+{
+// Read a line of text. NULL = EOF
+	ASSERT(pBuffer);
+	if ( IsEOF() )
+		return NULL;	// LINUX will ASSERT if we read past end.
+	return fgets( pBuffer, (int)(sizemax), m_pStream );
+}
+
 dword CFileText::Seek(int offset, uint origin )
 {
 	// true = success
@@ -401,79 +487,6 @@ dword CFileText::Seek(int offset, uint origin )
 	return position;
 }
 
-void CFileText::Flush() const
-{
-	if ( !IsFileOpen() )
-		return;
-	ASSERT(m_pStream);
-	fflush(m_pStream);
-}
-
-dword CFileText::GetPosition() const
-{
-	// RETURN: -1 = error.
-	if ( !IsFileOpen() )
-		return (dword)(-1);
-	return ftell(m_pStream);
-}
-
-dword CFileText::Read( void * pBuffer, size_t sizemax ) const
-{
-	// This can return: EOF(-1) constant.
-	// returns the number of full items actually read
-	ASSERT(pBuffer);
-	if ( IsEOF())
-		return( 0 );	// LINUX will ASSERT if we read past end.
-	return (dword)(fread( pBuffer, 1, sizemax, m_pStream ));
-}
-
-tchar * CFileText::ReadString( tchar * pBuffer, size_t sizemax ) const
-{
-	// Read a line of text. NULL = EOF
-	ASSERT(pBuffer);
-	if ( IsEOF() )
-		return NULL;	// LINUX will ASSERT if we read past end.
-	return fgets( pBuffer, (int)(sizemax), m_pStream );
-}
-
-#ifndef _WINDOWS
-	bool CFileText::Write( const void * pData, dword iLen ) const
-#else
-	bool CFileText::Write( const void * pData, dword iLen )
-#endif
-{
-	// RETURN: 1 = success else fail.
-	ASSERT(pData);
-	if ( !IsFileOpen() )
-		return false;
-#ifdef _WINDOWS //	Windows flushing, the only safe mode to cancel it ;)
-	if ( !bNoBuffer )
-	{
-		setvbuf(m_pStream, NULL, _IONBF, 0);
-		bNoBuffer = true;
-	}
-#endif
-	size_t iStatus = fwrite( pData, iLen, 1, m_pStream );
-#ifndef _WINDOWS	// However, in unix, it works
-	fflush( m_pStream );
-#endif
-	return ( iStatus == 1 );
-}
-
-bool CFileText::WriteString( lpctstr pStr )
-{
-	// RETURN: < 0 = failed.
-	ASSERT(pStr);
-	return Write( pStr, (dword)(strlen( pStr )) );
-}
-
-bool CFileText::IsEOF() const
-{
-	if ( !IsFileOpen() )
-		return true;
-	return ( feof( m_pStream ) ? true : false );
-}
-
 size_t CFileText::VPrintf( lpctstr pFormat, va_list args )
 {
 	ASSERT(pFormat);
@@ -484,12 +497,58 @@ size_t CFileText::VPrintf( lpctstr pFormat, va_list args )
 	return lenret;
 }
 
-size_t _cdecl CFileText::Printf( lpctstr pFormat, ... )
+#ifndef _WINDOWS
+bool CFileText::Write( const void * pData, dword iLen ) const
+#else
+bool CFileText::Write( const void * pData, dword iLen )
+#endif
 {
-	ASSERT(pFormat);
-	va_list vargs;
-	va_start( vargs, pFormat );
-	size_t iRet = VPrintf( pFormat, vargs );
-	va_end( vargs );
-	return iRet;
+// RETURN: 1 = success else fail.
+	ASSERT(pData);
+	if ( !IsFileOpen() )
+		return false;
+#ifdef _WINDOWS //	Windows flushing, the only safe mode to cancel it ;)
+	if ( !bNoBuffer )
+{
+    setvbuf(m_pStream, NULL, _IONBF, 0);
+    bNoBuffer = true;
 }
+#endif
+	size_t iStatus = fwrite( pData, iLen, 1, m_pStream );
+#ifndef _WINDOWS	// However, in unix, it works
+	fflush( m_pStream );
+#endif
+	return ( iStatus == 1 );
+}
+
+bool CFileText::WriteString( lpctstr pStr )
+{
+// RETURN: < 0 = failed.
+	ASSERT(pStr);
+	return Write( pStr, (dword)(strlen( pStr )) );
+}
+
+// CFileText:: Mode operations.
+
+lpctstr CFileText::GetModeStr() const
+{
+	ADDTOCALLSTACK("CFileText::GetModeStr");
+// end of line translation is crap. ftell and fseek don't work correctly when you use it.
+// fopen() args
+	if ( IsBinaryMode())
+		return ( IsWriteMode() ? "wb" : "rb" );
+	if ( GetMode() & OF_READWRITE )
+		return "a+b";
+	if ( GetMode() & OF_CREATE )
+		return "w";
+	if ( IsWriteMode() )
+		return "w";
+	else
+		return "rb";	// don't parse out the \n\r
+}
+
+bool CFileText::IsBinaryMode() const
+{
+	return false;
+}
+

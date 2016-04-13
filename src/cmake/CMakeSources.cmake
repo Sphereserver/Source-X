@@ -146,8 +146,6 @@ common/CException.cpp
 common/CException.h
 common/CExpression.cpp
 common/CExpression.h
-common/CFile.cpp
-common/CFile.h
 common/CFileList.cpp
 common/CFileList.h
 common/CSphereData.cpp
@@ -239,6 +237,8 @@ common/sphere_library/CArray.cpp
 common/sphere_library/CArray.h
 common/sphere_library/CMemBlock.cpp
 common/sphere_library/CMemBlock.h
+common/sphere_library/CFile.cpp
+common/sphere_library/CFile.h
 common/sphere_library/CRand.cpp
 common/sphere_library/CRand.h
 common/sphere_library/CString.cpp

@@ -9,7 +9,7 @@
 
 // #include <shellapi.h>
 #include "./sphere_library/CArray.h"
-#include "CFile.h"
+#include "./sphere_library/CFile.h"
 #include "spherecom.h"
 
 #ifndef PT_REG_STRMAX

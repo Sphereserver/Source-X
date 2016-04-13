@@ -180,7 +180,7 @@ public:
 	 */
 	///@{
 public:
-	CGFile() { m_uMode = 0; }
+	CGFile();
 	virtual ~CGFile();
 private:
 	/**
@@ -200,20 +200,30 @@ public:
 	* @brief Closes the file if is open.
 	*/
 	virtual void Close();
+private:
+	/**
+	* @brief Closes the file if is open.
+	*/
+	virtual void CloseBase();
+public:
+	/**
+	* @brief Return the last IO error code.
+	* @return IO error code.
+	*/
+	static int GetLastError();
 	/**
 	* @brief Check if file is open.
 	* @return true if file is open, false otherwise.
 	*/
-	virtual bool IsFileOpen() const { return ( m_hFile != NOFILE_HANDLE ); }
+	virtual bool IsFileOpen() const;
 	/**
 	* @brief Open a file in a specified mode.
 	* @param pszName file to open.
 	* @param uMode open mode.
 	* @param pExtra TODOC.
 	* @return true if file is open, false otherwise.
-	*/ // TODO: HERE!
+	*/
 	virtual bool Open( lpctstr pszName = NULL, uint uMode = OF_READ | OF_SHARE_DENY_NONE, void * pExtra = NULL );
-	///@}
 private:
 	/**
 	* @brief Open file with CFile method.
@@ -221,17 +231,22 @@ private:
 	* @return true if file is open, false otherwise.
 	*/
 	virtual bool OpenBase( void * pExtra );
-	/**	
-	* @brief Closes the file if is open.
-	*/
-	virtual void CloseBase();
+	///@}
 public:
+	/** @name File name operations:
+	 */
+	///@{
 	/**
 	* @brief Gets the basename of the file.
 	* @param pszPath file path.
 	* @return the basename of the file (name withouth paths).
 	*/
 	static lpctstr GetFilesTitle( lpctstr pszPath );
+	/**
+	* @brief Gets the file extension, if any.
+	* @return The extension of the file or NULL if the file has no extension.
+	*/
+	lpctstr GetFileExt() const;
 	/**
 	* @brief Gets the file extension, if any.
 	* @param pszName file path where get the extension.
@@ -245,38 +260,33 @@ public:
 	* @return merged path.
 	*/
 	static CGString GetMergedFileName( lpctstr pszBase, lpctstr pszName );
+	///@}
+	/** @name Mode operations:
+	 */
+	///@{
 	/**
-	* @brief Return the last IO error code.
-	* @return IO error code.
+	* @brief Get open mode (full).
+	* @return full mode flags.
 	*/
-	static int GetLastError();
-	/**
-	* @brief Gets the file extension, if any.
-	* @return The extension of the file or NULL if the file has no extension.
-	*/
-	lpctstr GetFileExt() const;
-	/**
-	* @brief Check if file es in binary mode.
-	* @return Always true (this method is virtual).
-	*/
-	virtual bool IsBinaryMode() const { return true; }
+	uint GetFullMode() const;
 	/**
 	 * @brief Get open mode (OF_NONCRIT, OF_TEXT, OF_BINARY, OF_DEFAULTMODE)
 	 *
 	 * Get rid of OF_NONCRIT type flags
 	 * @return mode flags.
 	*/
-	uint GetMode() const { return( m_uMode & 0x0FFFFFFF ); }
+	uint GetMode() const;
 	/**
-	* @brief Get open mode (full).
-	* @return full mode flags.
+	* @brief Check if file es in binary mode.
+	* @return Always true (this method is virtual).
 	*/
-	uint GetFullMode() const { return m_uMode; }
+	virtual bool IsBinaryMode() const;
 	/**
 	* @brief Check if file is open for write.
 	* @return true if file is open for write, false otherwise.
 	*/
-	bool IsWriteMode() const { return ( m_uMode & OF_WRITE ); }
+	bool IsWriteMode() const;
+	///@}
 };
 
 
@@ -287,34 +297,13 @@ class CFileText : public CGFile
 {
 public:
 	static const char *m_sClassName;
-	FILE * m_pStream;		///< The current open script type file.
-protected:
-	/**
-	* @brief Get open mode in string format.
-	*
-	* Formats:
-	* - "rb"
-	* - "w"
-	* - "wb"
-	* - "a+b"
-	* @return string that describes the open mode.
-	*/
-	lpctstr GetModeStr() const;
-#ifdef _WINDOWS
-	bool	bNoBuffer;	///< TODOC.
-#endif
-protected:
-	virtual bool OpenBase( void * pExtra );
-	virtual void CloseBase();
+
+	/** @name Constructors, Destructor, Asign operator:
+	 */
+	///@{
 public:
-	CFileText()
-	{
-		m_pStream = NULL;
-#ifdef _WINDOWS
-		bNoBuffer = false;
-#endif
-	}
-	virtual ~CFileText() { Close(); }
+	CFileText();
+	virtual ~CFileText();
 private:
 	/**
 	* @brief No copy on construction allowed.
@@ -324,23 +313,45 @@ private:
 	* @brief No copy allowed.
 	*/
 	CFileText& operator=(const CFileText& other);
+	///@}
+	/** @name File management:
+	 */
+	///@{
 public:
 	/**
-	* @brief Set the position indicator.
-	* @param offset position to set.
-	* @param origin origin (current position or init of the file).
-	* @return position where the position indicator is set on success, 0 on error.
+	* @brief Check if file is open.
+	* @return true if is open, false otherwise.
 	*/
-	virtual dword Seek( int offset = 0, uint origin = SEEK_SET );
+	bool IsFileOpen() const;
+protected:
+	virtual bool OpenBase( void * pExtra );
+	virtual void CloseBase();
+	///@}
+	/** @name Content management:
+	 */
+	///@{
+public:
 	/**
 	* @brief Write changes to disk.
 	*/
 	void Flush() const;
 	/**
+	* @brief Check if EOF is reached.
+	* @return true if EOF is reached, false otherwise.
+	*/
+	bool IsEOF() const;
+	/**
 	* @brief Get position indicator position.
 	* @return The position indicator if file is opened, -1 otherwise.
 	*/
 	dword GetPosition() const;
+	/**
+	* @brief print in file a string with arguments (printf like).
+	* @param pFormat string in "printf like" format.
+	* @param ... argument list.
+	* @return total chars of the output.
+	*/
+	size_t _cdecl Printf( lpctstr pFormat, ... ) __printfargs(2,3);
 	/**
 	* @brief Reads data from the file.
 	* @param pBuffer buffer where store the readed data.
@@ -355,6 +366,20 @@ public:
 	* @return the str readed if success, NULL on errors.
 	*/
 	tchar * ReadString( tchar * pBuffer, size_t sizemax ) const;
+	/**
+	* @brief Set the position indicator.
+	* @param offset position to set.
+	* @param origin origin (current position or init of the file).
+	* @return position where the position indicator is set on success, 0 on error.
+	*/
+	virtual dword Seek( int offset = 0, uint origin = SEEK_SET );
+	/**
+	* @brief print in file a string with arguments (printf like).
+	* @param pFormat string in "printf like" format.
+	* @param args argument list.
+	* @return total chars of the output.
+	*/
+	size_t VPrintf( lpctstr pFormat, va_list args );
 	/**
 	* @brief writes supplied data into file.
 	* @param pData data to write.
@@ -371,35 +396,35 @@ public:
 	* @return true is success, false otherwise.
 	*/
 	bool WriteString( lpctstr pStr );
+	///@}
+	/** @name Mode operations:
+	 */
+	///@{
+protected:
 	/**
-	* @brief Check if file is open.
-	* @return true if is open, false otherwise.
+	* @brief Get open mode in string format.
+	*
+	* Formats:
+	* - "rb"
+	* - "w"
+	* - "wb"
+	* - "a+b"
+	* @return string that describes the open mode.
 	*/
-	bool IsFileOpen() const { return( m_pStream != NULL ); }
+	lpctstr GetModeStr() const;
+public:
 	/**
 	* @brief Check if file is open in binary mode.
 	* @return false always.
 	*/
-	bool IsBinaryMode() const { return false; }
-	/**
-	* @brief Check if EOF is reached.
-	* @return true if EOF is reached, false otherwise.
-	*/
-	bool IsEOF() const;
-	/**
-	* @brief print in file a string with arguments (printf like).
-	* @param pFormat string in "printf like" format.
-	* @param args argument list.
-	* @return total chars of the output.
-	*/
-	size_t VPrintf( lpctstr pFormat, va_list args );
-	/**
-	* @brief print in file a string with arguments (printf like).
-	* @param pFormat string in "printf like" format.
-	* @param ... argument list.
-	* @return total chars of the output.
-	*/
-	size_t _cdecl Printf( lpctstr pFormat, ... ) __printfargs(2,3);
+	bool IsBinaryMode() const;
+	///@}
+public:
+	FILE * m_pStream;		///< The current open script type file.
+protected:
+#ifdef _WINDOWS
+	bool	bNoBuffer;	///< TODOC.
+#endif
 };
 
 #endif // _INC_CFILE_H
