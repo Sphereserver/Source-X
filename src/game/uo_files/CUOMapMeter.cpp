@@ -1,6 +1,6 @@
 #include "CUOMapMeter.h"
 
-static bool CUOMapMeter::IsTerrainNull( word wTerrainIndex )
+bool CUOMapMeter::IsTerrainNull( word wTerrainIndex )
 {
     switch ( wTerrainIndex )
     {
