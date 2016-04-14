@@ -14,7 +14,7 @@
 #include "CServTime.h"
 #include "CScriptProfiler.h"
 
-#ifndef _WINDOWS
+#ifndef _WIN32
 	#include <time.h>
 #endif
 
@@ -1081,7 +1081,7 @@ int64 CWorldClock::GetSystemClock()
 {
 	ADDTOCALLSTACK("CWorldClock::GetSystemClock");
 	// Return system wall-clock using high resolution value (milliseconds)
-#ifdef _WINDOWS
+#ifdef _WIN32
 	FILETIME ft;
 	GetSystemTimeAsFileTime(&ft);
 	return (((int64)(ft.dwHighDateTime) << 32) + ft.dwLowDateTime) / 10000;

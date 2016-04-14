@@ -124,7 +124,7 @@ void CLog::SetColor(Color color)
 {
 	switch (color)
 	{
-#ifdef _WINDOWS
+#ifdef _WIN32
         case YELLOW:
             NTWindow_PostMsgColor(RGB(127,127,0));
             break;
@@ -179,7 +179,7 @@ int CLog::EventStr( dword wMask, lpctstr pszMsg )
 		}
 		else
 		{
-#ifndef _WINDOWS
+#ifndef _WIN32
 			uint	mode = OF_READWRITE|OF_TEXT;
 			mode |= OF_SHARE_DENY_WRITE;
 			Open(NULL, mode);	// LINUX needs to close and re-open for each log line !
@@ -259,7 +259,7 @@ int CLog::EventStr( dword wMask, lpctstr pszMsg )
 
 		iRet = 1;
 
-#ifndef _WINDOWS
+#ifndef _WIN32
 		Close();
 #endif
 	}

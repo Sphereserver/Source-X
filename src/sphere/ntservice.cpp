@@ -1,6 +1,6 @@
 // Stuff for making this application run as an NT service
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 
 #include <direct.h>
 #include "../common/CException.h"
@@ -515,5 +515,5 @@ do_not_nt_service:
 	return -1;
 }
 
-#endif //_WINDOWS
+#endif //_WIN32
 

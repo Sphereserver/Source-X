@@ -3,7 +3,7 @@
 */
 
 
-#if defined(_WINDOWS)
+#if defined(_WIN32)
 	#include <io.h> 		// findfirst
 	#include "../sphere/threads.h"
 #else	// LINUX
@@ -18,7 +18,7 @@
 bool CFileList::ReadFileInfo( lpctstr pszFilePath, time_t & dwDateChange, dword & dwSize ) // static
 {
 	ADDTOCALLSTACK("CFileList::ReadFileInfo");
-#ifdef _WINDOWS
+#ifdef _WIN32
 	// WIN32
 	struct _finddata_t fileinfo;
 	fileinfo.attrib = _A_NORMAL;
@@ -35,7 +35,7 @@ bool CFileList::ReadFileInfo( lpctstr pszFilePath, time_t & dwDateChange, dword 
 		return( false );
 	}
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	// WIN32
 	dwDateChange = fileinfo.time_write;
 	dwSize = fileinfo.size;
@@ -55,7 +55,7 @@ int CFileList::ReadDir( lpctstr pszFileDir, bool bShowError )
 	// NOTE: It seems NOT to like the trailing \ alone
 	tchar szFileDir[_MAX_PATH];
 	size_t len = strcpylen(szFileDir, pszFileDir);
-#ifdef _WINDOWS
+#ifdef _WIN32
 	if ( len > 0 )
 	{
 		len--;
@@ -64,7 +64,7 @@ int CFileList::ReadDir( lpctstr pszFileDir, bool bShowError )
 	}
 #endif
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	struct _finddata_t fileinfo;
 	intptr_t lFind = _findfirst(szFileDir, &fileinfo);
 
@@ -96,7 +96,7 @@ int CFileList::ReadDir( lpctstr pszFileDir, bool bShowError )
 
 	do
 	{
-#if defined(_WINDOWS)
+#if defined(_WIN32)
 		if ( fileinfo.name[0] == '.' )
 			continue;
 		AddHead(fileinfo.name);
@@ -113,7 +113,7 @@ int CFileList::ReadDir( lpctstr pszFileDir, bool bShowError )
 			AddHead(fileinfo->d_name);
 #endif
 	}
-#if defined(_WINDOWS)
+#if defined(_WIN32)
 	while ( !_findnext(lFind, &fileinfo));
 
 	_findclose(lFind);

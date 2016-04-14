@@ -7,7 +7,7 @@
 
 SimpleMutex::SimpleMutex()
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	InitializeCriticalSectionAndSpinCount(&m_criticalSection, 0x80000020);
 #else
 	pthread_mutexattr_init(&m_criticalSectionAttr);
@@ -18,7 +18,7 @@ SimpleMutex::SimpleMutex()
 
 SimpleMutex::~SimpleMutex()
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	DeleteCriticalSection(&m_criticalSection);
 #else
 	pthread_mutexattr_destroy(&m_criticalSectionAttr);
@@ -29,7 +29,7 @@ SimpleMutex::~SimpleMutex()
 //lock
 void SimpleMutex::lock()
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	EnterCriticalSection(&m_criticalSection);
 #else
 	pthread_mutex_lock(&m_criticalSection);
@@ -39,7 +39,7 @@ void SimpleMutex::lock()
 //try lock
 bool SimpleMutex::tryLock()
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	return TryEnterCriticalSection(&m_criticalSection) == TRUE;
 #else
 	return pthread_mutex_trylock(&m_criticalSection) == 0;
@@ -49,7 +49,7 @@ bool SimpleMutex::tryLock()
 //unlock
 void SimpleMutex::unlock()
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	LeaveCriticalSection(&m_criticalSection);
 #else
 	pthread_mutex_unlock(&m_criticalSection);
@@ -135,7 +135,7 @@ void ManualThreadLock::doUnlock()
 
 AutoResetEvent::AutoResetEvent()
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	m_handle = CreateEvent(NULL, FALSE, FALSE, NULL);
 #else
 	pthread_mutexattr_init(&m_criticalSectionAttr);
@@ -149,7 +149,7 @@ AutoResetEvent::AutoResetEvent()
 
 AutoResetEvent::~AutoResetEvent()
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	CloseHandle(m_handle);
 #else
 	pthread_condattr_destroy(&m_conditionAttr);
@@ -170,7 +170,7 @@ void AutoResetEvent::wait(uint timeout)
 		return;
 	}
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	// it's possible for WaitForSingleObjectEx to exit before the timeout and without
 	// the signal. due to bAlertable=TRUE other events (e.g. async i/o) can cancel the
 	// waiting period early.
@@ -203,7 +203,7 @@ void AutoResetEvent::wait(uint timeout)
 
 void AutoResetEvent::signal()
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	SetEvent(m_handle);
 #else
 	pthread_mutex_lock(&m_criticalSection);
@@ -218,7 +218,7 @@ void AutoResetEvent::signal()
 
 ManualResetEvent::ManualResetEvent()
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	m_handle = CreateEvent(NULL, TRUE, FALSE, NULL);
 #else
 	m_value = false;
@@ -233,7 +233,7 @@ ManualResetEvent::ManualResetEvent()
 
 ManualResetEvent::~ManualResetEvent()
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	CloseHandle(m_handle);
 #else
 	pthread_condattr_destroy(&m_conditionAttr);
@@ -245,7 +245,7 @@ ManualResetEvent::~ManualResetEvent()
 
 void ManualResetEvent::wait(uint timeout)
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	WaitForSingleObjectEx(m_handle, timeout, FALSE);
 #else
 	pthread_mutex_lock(&m_criticalSection);
@@ -277,7 +277,7 @@ void ManualResetEvent::wait(uint timeout)
 
 void ManualResetEvent::set()
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	SetEvent(m_handle);
 #else
 	pthread_mutex_lock(&m_criticalSection);
@@ -289,7 +289,7 @@ void ManualResetEvent::set()
 
 void ManualResetEvent::reset()
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	ResetEvent(m_handle);
 #else
 	m_value = false;

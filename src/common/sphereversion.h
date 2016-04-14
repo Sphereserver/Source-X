@@ -32,7 +32,7 @@
 	#define SPHERE_VER_FILEFLAGS			0x0L
 #endif
 
-#if defined(_WINDOWS)
+#if defined(_WIN32)
 	#define SPHERE_VER_FILEOS			0x4L	// VOS__WINDOWS32
 	#define SPHERE_VER_FILEOS_STR		"[WIN32]"
 #elif defined(_BSD)

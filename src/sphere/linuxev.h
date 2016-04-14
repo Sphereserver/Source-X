@@ -3,7 +3,7 @@
 #ifndef _INC_LINUXEV_H
 #define _INC_LINUXEV_H
 
-#if !defined(_WINDOWS) || defined(_LIBEV)
+#if !defined(_WIN32) || defined(_LIBEV)
 
 	#include "../common/libev/wrapper_ev.h"
 	#include "../common/libev/ev.h"

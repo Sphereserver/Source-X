@@ -6,7 +6,7 @@
 #ifndef _INC_CFILE_H
 #define _INC_CFILE_H
 
-#ifndef _WINDOWS
+#ifndef _WIN32
 	#include <sys/types.h>
 	#include <sys/stat.h>
 	#include <fcntl.h>
@@ -34,11 +34,11 @@
 	#define HFILE int
 #endif // HFILE_ERROR
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#define INVALID_HANDLE ((HANDLE) -1)
 #endif
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#define OSFILE_TYPE		HANDLE
 	#define NOFILE_HANDLE	INVALID_HANDLE
 #else
@@ -99,7 +99,7 @@ public:
 	* @return the basename of the file (name withouth paths).
 	*/
 	lpctstr GetFileTitle() const;
-#ifdef _WINDOWS
+#ifdef _WIN32
 	/**
 	* @brief Notify a file input / output error (win32 only).
 	* @param szMessage error to notify.
@@ -386,7 +386,7 @@ public:
 	* @param iLen lenght of the data to write.
 	* @return true is success, false otherwise.
 	*/
-#ifndef _WINDOWS
+#ifndef _WIN32
 	bool Write( const void * pData, dword iLen ) const;
 #else
 	bool Write( const void * pData, dword iLen );
@@ -422,7 +422,7 @@ public:
 public:
 	FILE * m_pStream;		///< The current open script type file.
 protected:
-#ifdef _WINDOWS
+#ifdef _WIN32
 	bool	bNoBuffer;	///< TODOC.
 #endif
 };

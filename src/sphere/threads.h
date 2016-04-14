@@ -12,7 +12,7 @@
 
 // keep track of callstack on windows release builds
 // (linux does this via makefile)
-#ifdef _WINDOWS
+#ifdef _WIN32
 #	ifndef _DEBUG
 #		define THREAD_TRACK_CALLSTACK
 #	endif
@@ -26,7 +26,7 @@
 **/
 
 // Types definition for different platforms
-#ifdef _WINDOWS
+#ifdef _WIN32
 	typedef HANDLE spherethread_t;
 	#define SPHERE_THREADENTRY_RETNTYPE unsigned
 	#define SPHERE_THREADENTRY_CALLTYPE __stdcall
@@ -247,7 +247,7 @@ template<class T>
 class TlsValue
 {
 private:
-#ifdef _WINDOWS
+#ifdef _WIN32
 	dword _key;
 #else
 	pthread_key_t _key;
@@ -282,7 +282,7 @@ template<class T>
 TlsValue<T>::TlsValue()
 {
 	// allocate thread storage
-#ifdef _WINDOWS
+#ifdef _WIN32
 	_key = TlsAlloc();
 	_ready = (_key != TLS_OUT_OF_INDEXES);
 #else
@@ -295,7 +295,7 @@ TlsValue<T>::~TlsValue()
 {
 	// free the thread storage
 	if (_ready)
-#ifdef _WINDOWS
+#ifdef _WIN32
 		TlsFree(_key);
 #else
 		pthread_key_delete(_key);
@@ -307,7 +307,7 @@ template<class T>
 void TlsValue<T>::set(const T value)
 {
 	ASSERT(_ready);
-#ifdef _WINDOWS
+#ifdef _WIN32
 	TlsSetValue(_key, value);
 #else
 	pthread_setspecific(_key, value);
@@ -319,7 +319,7 @@ T TlsValue<T>::get() const
 {
 	if (_ready == false)
 		return NULL;
-#ifdef _WINDOWS
+#ifdef _WIN32
 	return reinterpret_cast<T>(TlsGetValue(_key));
 #else
 	return reinterpret_cast<T>(pthread_getspecific(_key));
@@ -362,7 +362,7 @@ public:
 #define ADDTOCALLSTACK(_function_)	StackDebugInformation debugStack(_function_)
 #define PAUSECALLSTACK static_cast<AbstractSphereThread *>(ThreadHolder::current())->freezeCallStack(true)
 #define UNPAUSECALLSTACK static_cast<AbstractSphereThread *>(ThreadHolder::current())->freezeCallStack(false)
-#ifdef _WINDOWS
+#ifdef _WIN32
 	// gcc doesn't seem to optimise addtocallstack very well and cpu usage is maxed out with methods are
 	// called extremely often. the _INTENSIVE macro can be used to disable these particular methods from
 	// being recorded under linux to regain cpu (at the cost of stack accuracy)

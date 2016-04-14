@@ -11,7 +11,7 @@ extern int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const NCHAR * p
 // of utf16)
 // win32 api seems to fail to convert a lot of characters properly, so it is
 // better to leave this #define disabled.
-#ifdef _WINDOWS
+#ifdef _WIN32
 //#define USE_UNICODE_LIB
 #else
 #undef USE_UNICODE_LIB

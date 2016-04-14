@@ -6,7 +6,7 @@
 #include <time.h>
 #include "common.h"
 
-#ifndef _WINDOWS
+#ifndef _WIN32
 	llong GetTickCount();
 #endif
 

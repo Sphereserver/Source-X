@@ -31,11 +31,11 @@
 #endif
 #include <fcntl.h>
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 #  include <stddef.h>
 #endif
 
-#if defined(__TURBOC__) || defined(_MSC_VER) || defined(_WINDOWS)
+#if defined(__TURBOC__) || defined(_MSC_VER) || defined(_WIN32)
 #  include <io.h>
 #endif
 

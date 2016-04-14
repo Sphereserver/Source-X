@@ -1,5 +1,5 @@
 
-#if !defined(_WINDOWS) || defined(_LIBEV)
+#if !defined(_WIN32) || defined(_LIBEV)
 	#include "../sphere/linuxev.h"
 	#include "../sphere/UnixTerminal.h"
 #endif
@@ -8,7 +8,7 @@
 	#define pid_t int
 #endif
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#include "../sphere/ntservice.h"	// g_Service
 	#include <process.h>	// getpid()
 #endif
@@ -283,7 +283,7 @@ bool Main::shouldExit()
 Main g_Main;
 extern PingServer g_PingServer;
 extern CDataBaseAsyncHelper g_asyncHdb;
-#if !defined(_WINDOWS) || defined(_LIBEV)
+#if !defined(_WIN32) || defined(_LIBEV)
 	extern LinuxEv g_NetworkEvent;
 #endif
 
@@ -304,13 +304,13 @@ int Sphere_InitServer( int argc, char *argv[] )
 	ASSERT(sizeof(CUOItemTypeRec) == 37 ); // byte pack working ?
 	ASSERT((std::numeric_limits<size_t>::min)() == 0); // ensure unsigned
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	if ( !QueryPerformanceFrequency(reinterpret_cast<LARGE_INTEGER *>(&llTimeProfileFrequency)))
 		llTimeProfileFrequency = 1000;
 
 	EXC_SET("setting exception catcher");
 	SetExceptionTranslator();
-#endif // _WINDOWS
+#endif // _WIN32
 
 	EXC_SET("loading");
 	if ( !g_Serv.Load() )
@@ -373,7 +373,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 	g_Log.Event(LOGM_INIT, "%s", g_Serv.GetStatusString(0x24));
 	g_Log.Event(LOGM_INIT, "Startup complete. items=%u, chars=%u\n", g_Serv.StatGet(SERV_STAT_ITEMS), g_Serv.StatGet(SERV_STAT_CHARS));
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	g_Log.Event(LOGM_INIT, "Press '?' for console commands\n");
 #endif
 
@@ -404,7 +404,7 @@ void Sphere_ExitServer()
 	g_Main.waitForClose();
 	g_PingServer.waitForClose();
 	g_asyncHdb.waitForClose();
-#if !defined(_WINDOWS) || defined(_LIBEV)
+#if !defined(_WIN32) || defined(_LIBEV)
 	if ( g_Cfg.m_fUseAsyncNetwork != 0 )
 		g_NetworkEvent.waitForClose();
 #endif
@@ -420,7 +420,7 @@ void Sphere_ExitServer()
 		case -8:	Reason = "Failed to load worldsave files";		break;
 		case -3:	Reason = "Failed to load server settings";		break;
 		case -1:	Reason = "Shutdown via commandline";			break;
-#ifdef _WINDOWS
+#ifdef _WIN32
 		case 1:		Reason = "X command on console";				break;
 #else
 		case 1:		Reason = "Terminal closed by SIGHUP signal";	break;
@@ -441,7 +441,7 @@ int Sphere_OnTick()
 	// Give the world (CMainTask) a single tick. RETURN: 0 = everything is fine.
 	const char *m_sClassName = "Sphere";
 	EXC_TRY("Tick");
-#ifdef _WINDOWS
+#ifdef _WIN32
 	EXC_SET("service");
 	g_Service.OnTick();
 #endif
@@ -505,7 +505,7 @@ static void Sphere_MainMonitorLoop()
 			if ( g_Serv.m_iExitFlag )
 				break;
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 			NTWindow_OnTick(1000);
 #else
 			Sleep(1000);
@@ -813,13 +813,13 @@ void defragSphere(char *path)
 	g_Log.Event(LOGM_INIT,	"Defragmentation complete.\n");
 }
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 int Sphere_MainEntryPoint( int argc, char *argv[] )
 #else
 int _cdecl main( int argc, char * argv[] )
 #endif
 {
-#ifndef _WINDOWS
+#ifndef _WIN32
 	// Initialize nonblocking IO and disable readline on linux
 	g_UnixTerminal.prepare();
 #endif
@@ -833,7 +833,7 @@ int _cdecl main( int argc, char * argv[] )
 		if ( IsSetEF( EF_UsePingServer ) )
 			g_PingServer.start();
 		
-#if !defined(_WINDOWS) || defined(_LIBEV)
+#if !defined(_WIN32) || defined(_LIBEV)
 		if ( g_Cfg.m_fUseAsyncNetwork != 0 )
 			g_NetworkEvent.start();
 #endif
@@ -862,7 +862,7 @@ int _cdecl main( int argc, char * argv[] )
 		}
 	}
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	NTWindow_DeleteIcon();
 #endif
 

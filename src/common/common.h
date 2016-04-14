@@ -1,8 +1,8 @@
 // always for __cplusplus
 // I try to compile in several different environments.
-// 1. DOS command line or windows (_WINDOWS	by compiler or _INC_WINDOWS in windows.h)
+// 1. DOS command line or windows (_WIN32	by compiler or _INC_WINDOWS in windows.h)
 // 2. MFC or not MFC  (__AFX_H__ in afx.h or _MFC_VER by compiler)
-// 3. 16 bit or 32 bit (_WINDOWS defined by compiler)
+// 3. 16 bit or 32 bit (_WIN32 defined by compiler)
 // 4. LINUX 32 bit
 
 #pragma once
@@ -19,11 +19,11 @@
 #include <vector>
 #include <stack>
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#include "os_windows.h"
 #endif
 #include "datatypes.h"
-#ifndef _WINDOWS
+#ifndef _WIN32
 	#include "os_unix.h"
 #endif
 

@@ -1,5 +1,5 @@
 
-#ifndef _WINDOWS
+#ifndef _WIN32
 	#include <errno.h>	// errno
 #endif
 
@@ -66,7 +66,7 @@ lpctstr CFile::GetFileTitle() const
 	return( CGFile::GetFilesTitle( GetFilePath()));
 }
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 void CFile::NotifyIOError( lpctstr szMessage ) const
 {
 	LPVOID lpMsgBuf;
@@ -83,7 +83,7 @@ bool CFile::Open( lpctstr pszName, uint uMode, CSphereError * e )
 	ASSERT( m_hFile == NOFILE_HANDLE );
 	SetFilePath( pszName );
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	DWORD dwShareMode, dwCreationDisposition, dwDesiredAccess;
 
 	dwDesiredAccess = GENERIC_READ;
@@ -113,7 +113,7 @@ bool CFile::Open( lpctstr pszName, uint uMode, CSphereError * e )
 	m_hFile = CreateFile( GetFilePath(), dwDesiredAccess, dwShareMode, NULL, dwCreationDisposition, FILE_ATTRIBUTE_NORMAL, NULL );
 #else
 	m_hFile = open( GetFilePath(), uMode );
-#endif // _WINDOWS
+#endif // _WIN32
 	return (m_hFile != NOFILE_HANDLE);
 }
 
@@ -130,7 +130,7 @@ dword CFile::GetLength()
 
 dword CFile::GetPosition() const
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	return SetFilePointer( m_hFile, 0, NULL, FILE_CURRENT );
 #else
 	return( lseek( m_hFile, 0, SEEK_CUR ) );
@@ -139,7 +139,7 @@ dword CFile::GetPosition() const
 
 dword CFile::Read( void * pData, dword dwLength ) const
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	DWORD dwRead;
 	if ( !ReadFile( m_hFile, pData, (DWORD)dwLength, &dwRead, NULL ) )
 	{
@@ -154,7 +154,7 @@ dword CFile::Read( void * pData, dword dwLength ) const
 
 dword CFile::Seek( int lOffset, uint iOrigin )
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	return SetFilePointer( m_hFile, lOffset, NULL, iOrigin );
 #else
 	if ( m_hFile <= 0 )
@@ -175,7 +175,7 @@ dword CFile::SeekToEnd()
 
 bool CFile::Write( const void * pData, dword dwLength ) const
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	DWORD dwWritten;
 	BOOL ret = ::WriteFile( m_hFile, pData, (DWORD)dwLength, &dwWritten, NULL );
 	if ( ret == FALSE )
@@ -221,7 +221,7 @@ void CGFile::CloseBase()
 
 int CGFile::GetLastError()
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	return ::GetLastError();
 #else
 	return errno;
@@ -328,7 +328,7 @@ CGString CGFile::GetMergedFileName( lpctstr pszBase, lpctstr pszName ) // static
 		int len = (int)(strlen( szFilePath ));
 		if (len && szFilePath[len - 1] != '\\' && szFilePath[len - 1] != '/')
 		{
-#ifdef _WINDOWS
+#ifdef _WIN32
 			strcat(szFilePath, "\\");
 #else
 			strcat(szFilePath, "/");
@@ -373,7 +373,7 @@ bool CGFile::IsWriteMode() const
 CFileText::CFileText()
 {
 	m_pStream = NULL;
-#ifdef _WINDOWS
+#ifdef _WIN32
 	bNoBuffer = false;
 #endif
 }
@@ -498,7 +498,7 @@ size_t CFileText::VPrintf( lpctstr pFormat, va_list args )
 	return lenret;
 }
 
-#ifndef _WINDOWS
+#ifndef _WIN32
 bool CFileText::Write( const void * pData, dword iLen ) const
 #else
 bool CFileText::Write( const void * pData, dword iLen )
@@ -508,7 +508,7 @@ bool CFileText::Write( const void * pData, dword iLen )
 	ASSERT(pData);
 	if ( !IsFileOpen() )
 		return false;
-#ifdef _WINDOWS //	Windows flushing, the only safe mode to cancel it ;)
+#ifdef _WIN32 //	Windows flushing, the only safe mode to cancel it ;)
 	if ( !bNoBuffer )
 {
     setvbuf(m_pStream, NULL, _IONBF, 0);
@@ -516,7 +516,7 @@ bool CFileText::Write( const void * pData, dword iLen )
 }
 #endif
 	size_t iStatus = fwrite( pData, iLen, 1, m_pStream );
-#ifndef _WINDOWS	// However, in unix, it works
+#ifndef _WIN32	// However, in unix, it works
 	fflush( m_pStream );
 #endif
 	return ( iStatus == 1 );

@@ -13,7 +13,7 @@
 #include "../common/CScriptObj.h"
 #include "../sphere/mutex.h"
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#pragma comment(lib, "libmySQL")
 #else
 	#pragma comment(lib, "libmysqlclient")

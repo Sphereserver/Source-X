@@ -72,7 +72,7 @@ typedef	uint32_t		uint32;
 typedef	uint64_t		uint64;
 
 
-#ifndef _WINDOWS			//	assume unix if !_WINDOWS
+#ifndef _WIN32			//	assume unix if !_WIN32
 
 	// printf format identifiers
 	#define FMTSIZE_T "zu"		// linux uses %zu to format size_t
@@ -91,12 +91,12 @@ typedef	uint64_t		uint64;
 	typedef	tchar *				lptstr;
 	typedef const tchar *		lpctstr;
 
-#else	// _WINDOWS
+#else	// _WIN32
 
 	// printf format identifiers
 	#define FMTSIZE_T "Iu"		// windows uses %Iu to format size_t
 
-#endif // !_WINDOWS
+#endif // !_WIN32
 
 
 #endif // _INC_DATATYPES_H

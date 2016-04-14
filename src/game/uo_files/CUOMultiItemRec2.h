@@ -6,7 +6,7 @@
 #include "enums.h"
 
 // All these structures must be byte packed.
-#if defined _WINDOWS && (!__MINGW32__)
+#if defined _WIN32 && (!__MINGW32__)
 // Microsoft dependant pragma
 #pragma pack(1)
 #define PACK_NEEDED
@@ -30,7 +30,7 @@ struct CUOMultiItemRec2 // (Multi.mul, High Seas+)
 } PACK_NEEDED;
 
 // Turn off structure packing.
-#if defined _WINDOWS && (!__MINGW32__)
+#if defined _WIN32 && (!__MINGW32__)
 #pragma pack()
 #else
 #undef PACK_NEEDED

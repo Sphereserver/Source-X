@@ -5,7 +5,7 @@
 #include "../../common/common.h"
 
 // All these structures must be byte packed.
-#if defined _WINDOWS && (!__MINGW32__)
+#if defined _WIN32 && (!__MINGW32__)
 // Microsoft dependant pragma
 #pragma pack(1)
 #define PACK_NEEDED
@@ -29,7 +29,7 @@ struct CUOTerrainTypeRec
 #define UOTILE_TERRAIN_SIZE ((( TERRAIN_QTY / UOTILE_BLOCK_QTY ) * 4 ) + ( TERRAIN_QTY * sizeof( CUOTerrainTypeRec )))
 
 // Turn off structure packing.
-#if defined _WINDOWS && (!__MINGW32__)
+#if defined _WIN32 && (!__MINGW32__)
 #pragma pack()
 #else
 #undef PACK_NEEDED

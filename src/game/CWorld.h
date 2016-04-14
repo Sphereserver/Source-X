@@ -96,7 +96,7 @@ private:
 
 class CWorldClock
 {
-#ifndef _WINDOWS
+#ifndef _WIN32
 	#ifdef CLOCKS_PER_SEC
 	#undef CLOCKS_PER_SEC
 	#endif	// CLOCKS_PER_SEC

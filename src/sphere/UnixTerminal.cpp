@@ -1,4 +1,4 @@
-#ifndef _WINDOWS
+#ifndef _WIN32
 //#include "spheresvr.h" Removed to test. 	// predef header
 #include "../common/CException.h"
 #include "threads.h"

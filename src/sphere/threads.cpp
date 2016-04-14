@@ -1,7 +1,7 @@
 // this thing is somehow required to be able to initialise OLE
 #define _WIN32_DCOM
 
-#if !defined(_WINDOWS) && !defined(_BSD)
+#if !defined(_WIN32) && !defined(_BSD)
 	#include <sys/prctl.h>
 #endif
 
@@ -53,7 +53,7 @@ IThread *ThreadHolder::current()
 	if (thread == NULL)
 		return DummySphereThread::getInstance();
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	ASSERT(thread->getId() == ::GetCurrentThreadId());
 #else
 	ASSERT(thread->getId() == (unsigned)pthread_self());
@@ -126,7 +126,7 @@ AbstractThread::AbstractThread(const char *name, IThread::Priority priority)
 	if( AbstractThread::m_threadsAvailable == 0 )
 	{
 		// no threads were started before - initialise thread subsystem
-#ifdef _WINDOWS
+#ifdef _WIN32
 		if( CoInitializeEx(NULL, COINIT_MULTITHREADED) != S_OK )
 		{
 			throw CSphereError(LOGL_FATAL, 0, "OLE is not available, threading model unimplementable");
@@ -149,7 +149,7 @@ AbstractThread::~AbstractThread()
 	if( AbstractThread::m_threadsAvailable == 0 )
 	{
 		// all running threads have gone, the thread subsystem is no longer needed
-#ifdef _WINDOWS
+#ifdef _WIN32
 		CoUninitialize();
 #else
 		// No pthread equivalent
@@ -159,7 +159,7 @@ AbstractThread::~AbstractThread()
 
 void AbstractThread::start()
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	m_handle = reinterpret_cast<spherethread_t>(_beginthreadex(NULL, 0, &runner, this, 0, NULL));
 #else
 	pthread_attr_t threadAttr;
@@ -191,7 +191,7 @@ void AbstractThread::terminate(bool ended)
 			// if the thread is current then terminating here will prevent cleanup from occurring
 			if (wasCurrentThread == false)
 			{
-#ifdef _WINDOWS
+#ifdef _WIN32
 				TerminateThread(m_handle, 0);
 				CloseHandle(m_handle);
 #else
@@ -211,7 +211,7 @@ void AbstractThread::terminate(bool ended)
 		// current thread can be terminated now
 		if (ended == false && wasCurrentThread)
 		{
-#ifdef _WINDOWS
+#ifdef _WIN32
 			_endthreadex(0);
 #else
 			pthread_exit(0);
@@ -338,7 +338,7 @@ void AbstractThread::awaken()
 
 bool AbstractThread::isCurrentThread() const
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	return (getId() == ::GetCurrentThreadId());
 #else
 	return pthread_equal(m_handle,pthread_self());
@@ -378,7 +378,7 @@ bool AbstractThread::checkStuck()
 	return false;
 }
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 #pragma pack(push, 8)
 typedef struct tagTHREADNAME_INFO
 {
@@ -401,7 +401,7 @@ void AbstractThread::onStart()
 	// we set the id here to ensure it is available before the first tick, otherwise there's
 	// a small delay when setting it from AbstractThread::start and it's possible for the id
 	// to not be set fast enough (particular when using pthreads)
-#ifdef _WINDOWS
+#ifdef _WIN32
 	m_id = ::GetCurrentThreadId();
 #else
 	m_id = pthread_self();
@@ -409,7 +409,7 @@ void AbstractThread::onStart()
 	ThreadHolder::m_currentThread = this;
 
 	// register the thread name
-#ifdef _WINDOWS
+#ifdef _WIN32
 	// Windows uses THREADNAME_INFO structure to set thread name
 	THREADNAME_INFO info;
 	info.dwType = 0x1000;

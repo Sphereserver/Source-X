@@ -5,7 +5,7 @@
 #include "../game/CWorld.h"
 #include "CException.h"
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	int CSphereError::GetSystemErrorMessage( dword dwError, lptstr lpszError, uint nMaxError ) // static
 	{
 		//	PURPOSE:  copies error message text to a string
@@ -41,7 +41,7 @@ bool CSphereError::GetErrorMessage( lptstr lpszError, uint nMaxError,	uint * pnH
 	UNREFERENCED_PARAMETER(nMaxError);
 	UNREFERENCED_PARAMETER(pnHelpContext);
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	// Compatible with CException and CFileException
 	if ( m_hError )
 	{
@@ -121,7 +121,7 @@ const unsigned CAssert::GetAssertLine()
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 
 CException::CException(uint uCode, dword dwAddress) :
 	m_dwAddress(dwAddress), CSphereError(LOGL_CRIT, uCode, "Exception")
@@ -165,7 +165,7 @@ void Assert_CheckFail( lpctstr pExp, lpctstr pFile, long lLine )
 	throw CAssert(LOGL_CRIT, pExp, pFile, lLine);
 }
 
-#if defined(_WINDOWS) && !defined(_DEBUG)
+#if defined(_WIN32) && !defined(_DEBUG)
 	#include "./crashdump/crashdump.h"
 	
 	extern "C"
@@ -198,12 +198,12 @@ void Assert_CheckFail( lpctstr pExp, lpctstr pFile, long lLine )
 
 void SetExceptionTranslator()
 {
-#if defined(_WINDOWS) && !defined(__MINGW32__) && !defined(_DEBUG)
+#if defined(_WIN32) && !defined(__MINGW32__) && !defined(_DEBUG)
 	_set_se_translator( Sphere_Exception_Win32 );
 #endif
 }
 
-#ifndef _WINDOWS
+#ifndef _WIN32
 	void _cdecl Signal_Hangup( int sig = 0 ) // If shutdown is initialized
 	{
 		UNREFERENCED_PARAMETER(sig);
@@ -277,7 +277,7 @@ void SetExceptionTranslator()
 
 void SetUnixSignals( bool bSet )
 {
-#ifndef _WINDOWS
+#ifndef _WIN32
 	signal( SIGHUP,		bSet ? &Signal_Hangup : SIG_DFL );
 	signal( SIGTERM,	bSet ? &Signal_Terminate : SIG_DFL );
 	signal( SIGQUIT,	bSet ? &Signal_Terminate : SIG_DFL );

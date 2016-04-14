@@ -9,7 +9,7 @@
 
 #include "common.h"
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#undef FD_SETSIZE
 	#define FD_SETSIZE 1024 // for max of n users ! default = 64
 
@@ -31,7 +31,7 @@
 	#define SOCKET			int
 	#define TCP_NODELAY		0x0001
 
-#endif	// _WINDOWS
+#endif	// _WIN32
 
 
 struct CSocketAddressIP : public in_addr
@@ -142,7 +142,7 @@ public:
 
 	int SetSockOpt( int nOptionName, const void* optval, int optlen, int nLevel = SOL_SOCKET ) const;
 	int GetSockOpt( int nOptionName, void* optval, int * poptlen, int nLevel = SOL_SOCKET ) const;
-#ifdef _WINDOWS
+#ifdef _WIN32
 	int IOCtlSocket(int icmd, dword * pdwArgs );
 	int SendAsync( LPWSABUF lpBuffers, dword dwBufferCount, LPDWORD lpNumberOfBytesSent, dword dwFlags, LPWSAOVERLAPPED lpOverlapped, LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine ) const;
 	void ClearAsync();

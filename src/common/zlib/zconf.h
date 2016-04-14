@@ -78,7 +78,7 @@
 #    define gzoffset64            z_gzoffset64
 #    define gzopen                z_gzopen
 #    define gzopen64              z_gzopen64
-#    ifdef _WINDOWS
+#    ifdef _WIN32
 #      define gzopen_w              z_gzopen_w
 #    endif
 #    define gzprintf              z_gzprintf
@@ -162,10 +162,10 @@
 #if (defined(OS_2) || defined(__OS2__)) && !defined(OS2)
 #  define OS2
 #endif
-#if defined(_WINDOWS) && !defined(WINDOWS)
+#if defined(_WIN32) && !defined(WINDOWS)
 #  define WINDOWS
 #endif
-#if defined(_WINDOWS) || defined(_WIN32_WCE) || defined(__WIN32__)
+#if defined(_WIN32) || defined(_WIN32_WCE) || defined(__WIN32__)
 #  ifndef WIN32
 #    define WIN32
 #  endif
@@ -432,7 +432,7 @@ typedef uLong FAR uLongf;
 #  endif
 #endif
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 #  ifndef Z_SOLO
 #    include <stddef.h>         /* for wchar_t */
 #  endif
@@ -485,10 +485,10 @@ typedef uLong FAR uLongf;
 #  define z_off_t long
 #endif
 
-#if !defined(_WINDOWS) && defined(Z_LARGE64)
+#if !defined(_WIN32) && defined(Z_LARGE64)
 #  define z_off64_t off64_t
 #else
-#  if defined(_WINDOWS) && !defined(__GNUC__) && !defined(Z_SOLO)
+#  if defined(_WIN32) && !defined(__GNUC__) && !defined(Z_SOLO)
 #    define z_off64_t __int64
 #  else
 #    define z_off64_t z_off_t

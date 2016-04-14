@@ -25,7 +25,7 @@ CGString CUOInstall::GetFullCDPath( lpctstr pszName ) const
 
 bool CUOInstall::FindInstall()
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
 	// Get the install path from the registry.
 
 	static lpctstr m_szKeys[] =

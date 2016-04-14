@@ -7,7 +7,7 @@
 #include "types.h"
 
 // All these structures must be byte packed.
-#if defined _WINDOWS && (!__MINGW32__)
+#if defined _WIN32 && (!__MINGW32__)
 // Microsoft dependant pragma
 #pragma pack(1)
 #define PACK_NEEDED
@@ -22,7 +22,7 @@ struct CSphereTerrainInfo : public CUOTerrainTypeRec2
 };
 
 // Turn off structure packing.
-#if defined _WINDOWS && (!__MINGW32__)
+#if defined _WIN32 && (!__MINGW32__)
 #pragma pack()
 #else
 #undef PACK_NEEDED

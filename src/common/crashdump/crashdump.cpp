@@ -1,4 +1,4 @@
-#if defined(_WINDOWS) && !defined(_DEBUG) && !defined(_NO_CRASHDUMP)
+#if defined(_WIN32) && !defined(_DEBUG) && !defined(_NO_CRASHDUMP)
 
 #include "crashdump.h"
 

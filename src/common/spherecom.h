@@ -17,7 +17,7 @@
 #include <ctype.h>
 #include <assert.h>
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#ifndef STRICT
 		#define STRICT			// strict conversion of handles and pointers.
 	#endif	// STRICT
@@ -33,7 +33,7 @@
 	#define strnicmp	_strnicmp
 
 	extern const OSVERSIONINFO * Sphere_GetOSInfo();
-#else	// _WINDOWS else assume LINUX
+#else	// _WIN32 else assume LINUX
 
 	#include <sys/types.h>
 	#include <sys/timeb.h>
@@ -60,7 +60,7 @@
 	#define strcmpi		strcasecmp
 	#define strnicmp	strncasecmp
 	#define _vsnprintf	vsnprintf
-#endif // !_WINDOWS
+#endif // !_WIN32
 
 #ifdef _DEBUG
 	#ifndef ASSERT
@@ -80,7 +80,7 @@
 
 #endif	// ! _DEBUG
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#define ATOI atoi
 	#define ITOA _itoa
 	#define LTOA _ltoa

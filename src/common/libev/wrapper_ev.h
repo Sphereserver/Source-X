@@ -3,7 +3,7 @@
 #ifndef _INC_WRAPPER_EV_H
 #define _INC_WRAPPER_EV_H
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#undef FD_SETSIZE
 	#define FD_SETSIZE 1024
 	#define EV_SELECT_IS_WINSOCKET 1

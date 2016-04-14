@@ -24,7 +24,7 @@
 #include <cinttypes>
 #include <stdio.h>
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 	#define DEELEX_CALLTYPE __cdecl
 #else
 	#define DEELEX_CALLTYPE

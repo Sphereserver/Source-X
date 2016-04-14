@@ -17,7 +17,7 @@
 #include "../common/sphere_library/CArray.h"
 #include "../common/sphere_library/CQueue.h"
 
-#if !defined(_WINDOWS) || defined(_LIBEV)
+#if !defined(_WIN32) || defined(_LIBEV)
 	#include "../sphere/linuxev.h"
 #endif
 
@@ -96,10 +96,10 @@ protected:
 
 	bool m_useAsync; // is this socket using asynchronous sends
 	volatile bool m_isSendingAsync; // is a packet currently being sent asynchronously?
-#if !defined(_WINDOWS) || defined(_LIBEV)
+#if !defined(_WIN32) || defined(_LIBEV)
 	// non-windows uses ev_io for async operations
 	struct ev_io m_eventWatcher;
-#elif defined(_WINDOWS)
+#elif defined(_WIN32)
 	// windows uses winsock for async operations
 	WSABUF m_bufferWSA; // Winsock Async Buffer
 	WSAOVERLAPPED m_overlapped; // Winsock Overlapped structure
@@ -158,7 +158,7 @@ public:
 	void detectAsyncMode(void);
 	void setAsyncMode(bool isAsync) { m_useAsync = isAsync; }; // set asynchronous mode
 	bool isAsyncMode(void) const { return m_useAsync; }; // get asyncronous mode
-#if !defined(_WINDOWS) || defined(_LIBEV)
+#if !defined(_WIN32) || defined(_LIBEV)
 	struct ev_io* iocb(void) { return &m_eventWatcher; }; // get io callback
 #endif
 	bool isSendingAsync(void) const volatile { return m_isSendingAsync; }; // get if async packeet is being sent
@@ -210,7 +210,7 @@ public:
 	friend class CClient;
 	friend class ClientIterator;
 	friend class SafeClientIterator;
-#if !defined(_WINDOWS) || defined(_LIBEV)
+#if !defined(_WIN32) || defined(_LIBEV)
 	friend class LinuxEv;
 #endif
 };

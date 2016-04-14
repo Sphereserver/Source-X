@@ -1,5 +1,5 @@
 // Put up a window for data (other than the console)
-#ifdef _WINDOWS
+#ifdef _WIN32
 
 #include "../common/CException.h"
 #include "../common/CResourceBase.h"
@@ -1250,4 +1250,4 @@ bool NTWindow_OnTick( int iWaitmSec )
 	}
 }
 
-#endif // _WINDOWS
+#endif // _WIN32

@@ -18,12 +18,13 @@
 #pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
 
 #ifdef __MINGW32__
-#include <time.h>
-struct timespec
-{
-    time_t tv_sec;
-    long int tv_nsec;
-};
+	#include <time.h>
+	struct timespec
+	{
+		time_t tv_sec;
+		long int tv_nsec;
+	};
 #endif  // __MINGW32__
 
+#include "ev.h"
 #include "ev.c"
