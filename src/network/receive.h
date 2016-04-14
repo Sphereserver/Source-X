@@ -8,8 +8,9 @@
 #define _INC_RECEIVE_H
 
 #include "../common/CUID.h"
-#include "../common/spheremul.h"
 #include "../common/sphereproto.h"
+#include "../game/uo_files/enums.h"
+#include "../game/uo_files/types.h"
 #include "packet.h"
 
 

@@ -26,4 +26,4 @@ struct timespec
 };
 #endif  // __MINGW32__
 
-#include "ev.h"
+#include "ev.c"

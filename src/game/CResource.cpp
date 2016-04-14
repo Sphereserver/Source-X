@@ -10,6 +10,7 @@
 #include "clients/CClient.h"
 #include "items/CItemBase.h"
 #include "items/CItemStone.h"
+#include "uo_files/CSphereItemInfo.h"
 #include "CLog.h"
 #include "CResource.h"
 #include "CServTime.h"

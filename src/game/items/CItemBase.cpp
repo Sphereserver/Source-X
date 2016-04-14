@@ -2,6 +2,7 @@
 
 #include "../common/CException.h"
 #include "../sphere/ProfileTask.h"
+#include "../uo_files/CSphereItemInfo.h"
 #include "../CLog.h"
 #include "CItemBase.h"
 

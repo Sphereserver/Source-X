@@ -4,6 +4,7 @@
 #include "../../common/CUIDExtra.h"
 #include "../../network/network.h"
 #include "../clients/CClient.h"
+#include "../uo_files/CUOTerrainInfo.h"
 #include "../CLog.h"
 #include "../spheresvr.h"
 #include "../Triggers.h"

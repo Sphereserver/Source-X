@@ -7,6 +7,7 @@
 #include "../sphere/threads.h"
 #include "chars/CChar.h"
 #include "items/CItem.h"
+#include "uo_files/CUOTerrainInfo.h"
 #include "CLog.h"
 #include "Triggers.h"
 

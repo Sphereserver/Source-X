@@ -1,4 +1,5 @@
 
+#include "../game/uo_files/macros.h"
 #include "CObjBaseTemplate.h"
 
 void CObjBaseTemplate::DupeCopy( const CObjBaseTemplate * pObj )

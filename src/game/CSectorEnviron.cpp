@@ -1,5 +1,6 @@
-#include "../common/spheremul.h"
+#include "uo_files/macros.h"
 #include "CSectorEnviron.h"
+
 
 
 CSectorEnviron::CSectorEnviron()

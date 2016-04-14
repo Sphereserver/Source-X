@@ -1,0 +1,43 @@
+#pragma once
+#ifndef _INC_UOFILES_CUOSTATICITEMREC_H
+#define _INC_UOFILES_CUOSTATICITEMREC_H
+
+#include "../../common/common.h"
+#include "enums.h"
+
+// All these structures must be byte packed.
+#if defined _WINDOWS && (!__MINGW32__)
+// Microsoft dependant pragma
+#pragma pack(1)
+#define PACK_NEEDED
+#else
+// GCC based compiler you can add:
+#define PACK_NEEDED __attribute__ ((packed))
+#endif
+
+/**
+* 7 byte block = static items on the map (statics0.mul)
+*/
+struct CUOStaticItemRec
+{
+    word m_wTileID;  ///< ITEMID_TYPE = Index to tile CUOItemTypeRec/CUOItemTypeRec2
+    byte m_x;  ///< x <= 7 = offset from block.
+    byte m_y;  ///< y <= 7
+    char m_z;  ///<
+    word m_wHue;  ///< HUE_TYPE modifier for the item
+
+    // For internal caching purposes only. overload this.
+    // LOBYTE(m_wColor) = Blocking flags for this item. (CAN_I_BLOCK)
+    // HIBYTE(m_wColor) = Height of this object.
+    ITEMID_TYPE GetDispID() const;
+} PACK_NEEDED;
+
+
+// Turn off structure packing.
+#if defined _WINDOWS && (!__MINGW32__)
+#pragma pack()
+#else
+#undef PACK_NEEDED
+#endif
+
+#endif //_INC_UOFILES_CUOSTATICITEMREC_H

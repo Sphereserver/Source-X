@@ -3,7 +3,6 @@
 #ifndef _INC_CITEM_H
 #define _INC_CITEM_H
 
-#include "../common/spheremul.h"
 #include "../common/CRect.h"
 #include "../common/CResourceBase.h"
 #include "../common/CObjBaseTemplate.h"

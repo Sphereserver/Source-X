@@ -7,7 +7,6 @@
 #include "CEncrypt.h"
 #include "CExpression.h"
 #include "spherecom.h"
-#include "spheremul.h"
 #include "sphereproto.h"
 
 // #define DEBUG_CRYPT_MSGS 1

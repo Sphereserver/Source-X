@@ -1,6 +1,5 @@
 
 #include "spherecom.h"
-#include "spheremul.h"
 #include "sphereproto.h"
 
 #ifdef _BSD

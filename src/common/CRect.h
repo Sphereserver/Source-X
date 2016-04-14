@@ -7,8 +7,8 @@
 #ifndef _INC_CRECT_H
 #define _INC_CRECT_H
 
+#include "../game/uo_files/enums.h"
 #include "./sphere_library/CString.h"
-#include "spheremul.h"
 
 
 class CRegionBase;

@@ -5,6 +5,7 @@
 
 #include "../common/CResourceBase.h"
 #include "../common/sphere_library/CArray.h"
+#include "../uo_files/CUOItemTypeRec2.h"
 #include "../CBase.h"
 #include "../CResource.h"
 

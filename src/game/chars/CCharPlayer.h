@@ -8,7 +8,6 @@
 #define CCHARPLAYER_H
 
 #include "../clients/CAccount.h"
-#include "../common/spheremul.h"
 #include "../common/CResourceBase.h"
 #include "../common/sphereproto.h"
 #include "../CResource.h"

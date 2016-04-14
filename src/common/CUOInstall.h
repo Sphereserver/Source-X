@@ -6,7 +6,8 @@
 #include "./sphere_library/CArray.h"
 #include "./sphere_library/CFile.h"
 #include "CsvFile.h"
-#include "spheremul.h"
+#include "../game/uo_files/CUOIndexRec.h"
+#include "../game/uo_files/enums.h"
 
 
 ////////////////////////////////////////////////////////

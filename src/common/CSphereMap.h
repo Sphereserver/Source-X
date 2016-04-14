@@ -6,11 +6,14 @@
 #ifndef _INC_CSphereMap_H
 #define _INC_CSphereMap_H
 
+#include "../game/uo_files/CUOMapBlock.h"
+#include "../game/uo_files/CUOMultiItemRec2.h"
+#include "../game/uo_files/CUOStaticItemRec.h"
+#include "../game/uo_files/macros.h"
+#include "../game/uo_files/types.h"
 #include "../game/CServTime.h"
 #include "./sphere_library/CArray.h"
-#include "spheremul.h"
 #include "CRect.h"
-
 
 class CSphereCachedMulItem
 {

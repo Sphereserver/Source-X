@@ -132,6 +132,38 @@ game/clients/CParty.h
 )
 SOURCE_GROUP (game\\clients FILES ${clients_SRCS})
 
+SET (uofiles_SRCS
+game/uo_files/CMapList.h
+game/uo_files/CMapList.cpp
+game/uo_files/CSphereItemInfo.h
+game/uo_files/CSphereItemInfo.cpp
+game/uo_files/CUOHuesRec.h
+game/uo_files/CUOHuesRec.cpp
+game/uo_files/CUOIndexRec.h
+game/uo_files/CUOIndexRec.cpp
+game/uo_files/CUOItemTypeRec1.h
+game/uo_files/CUOItemTypeRec2.h
+game/uo_files/CUOMapBlock.h
+game/uo_files/CUOMapMeter.h
+game/uo_files/CUOMapMeter.cpp
+game/uo_files/CUOMultiItemRec.h
+game/uo_files/CUOMultiItemRec.cpp
+game/uo_files/CUOMultiItemRec2.h
+game/uo_files/CUOMultiItemRec2.cpp
+game/uo_files/CUOStaticItemRec.h
+game/uo_files/CUOStaticItemRec.cpp
+game/uo_files/CUOTerrainInfo.h
+game/uo_files/CUOTerrainInfo.cpp
+game/uo_files/CUOTerrainTypeRec1.h
+game/uo_files/CUOTerrainTypeRec2.h
+game/uo_files/CUOVersionBlock.h
+game/uo_files/CUOVersionBlock.cpp
+game/uo_files/enums.h
+game/uo_files/macros.h
+game/uo_files/types.h
+)
+SOURCE_GROUP (game\\uo_files FILES ${uofiles_SRCS})
+
 # Files containing 'background work'
 SET (common_SRCS
 common/CacheableScriptFile.cpp
@@ -190,7 +222,6 @@ common/CWindow.h
 common/datatypes.h
 common/spherecom.cpp
 common/spherecom.h
-common/spheremul.h
 common/sphereproto.h
 common/sphereversion.h
 common/ListDefContMap.cpp

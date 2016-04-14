@@ -8,7 +8,6 @@
 #define _INC_CCHARBASE_H
 
 #include "../common/sphere_library/CString.h"
-#include "../common/spheremul.h"
 #include "../common/CResourceBase.h"
 #include "../common/sphereproto.h"
 #include "../common/CScript.h"
