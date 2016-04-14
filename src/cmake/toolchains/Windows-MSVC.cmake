@@ -45,8 +45,13 @@ function (toolchain_exe_stuff)
 
 	IF (CMAKE_CL_64)
 		# Architecture defines
-		TARGET_COMPILE_DEFINITIONS ( spheresvr 		PUBLIC _64B )
-		#TARGET_COMPILE_DEFINITIONS ( spheresvrNightly	PUBLIC _64B )
+		# Architecture defines
+		TARGET_COMPILE_DEFINITIONS ( spheresvr 	
+			PUBLIC _64B
+			PUBLIC _WIN64	)
+		#TARGET_COMPILE_DEFINITIONS ( spheresvrNightly
+		#	PUBLIC _64B
+		#	PUBLIC _WIN64	)
 	ELSE (CMAKE_CL_64)
 		# Architecture defines
 		TARGET_COMPILE_DEFINITIONS ( spheresvr 		PUBLIC _32B )

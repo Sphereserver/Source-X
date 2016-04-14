@@ -4,7 +4,7 @@ TARGET_COMPILE_DEFINITIONS ( spheresvr
 	# GIT defs
         PUBLIC _GITVERSION
 	# Defines
-        PUBLIC _WINDOWS
+        PUBLIC _WIN32	# _WIN32 is always defined, even on 64 bits. Keeping it for compatibility with external code and libraries.
 	# Temporary setting _CRT_SECURE_NO_WARNINGS to do not spamm so much in the buil proccess while we get rid of -W4 warnings and, after it, -Wall.
         PUBLIC _CRT_SECURE_NO_WARNINGS
 	# Enable advanced exceptions catching. Consumes some more resources, but is very useful for debug
