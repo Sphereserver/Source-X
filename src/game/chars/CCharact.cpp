@@ -103,9 +103,9 @@ bool CChar::TeleportToObj( int iType, tchar * pszArgs )
 
 		m_Act_Targ = pObj->GetUID();
 		Spell_Teleport( pObjTop->GetTopPoint(), true, false );
-		return( true );
+		return true;
 	}
-	return( false );
+	return false;
 }
 
 // GoCli
@@ -133,9 +133,9 @@ bool CChar::TeleportToCli( int iType, int iArgs )
 		}
 		m_Act_Targ = pChar->GetUID();
 		Spell_Teleport( pChar->GetTopPoint(), true, false );
-		return( true );
+		return true;
 	}
-	return( false );
+	return false;
 }
 
 void CChar::Jail( CTextConsole * pSrc, bool fSet, int iCell )
@@ -1727,7 +1727,7 @@ int CChar::ItemPickup(CItem * pItem, int amount)
 		{
 			CScriptTriggerArgs Args( amount );
 			if ( pItem->OnTrigger( trigger, this, &Args ) == TRIGRET_RET_TRUE )
-				return( -1 );
+				return -1;
 		}
 		if (( trigger == ITRIG_PICKUP_PACK ) && (( IsTrigUsed(TRIGGER_PICKUP_SELF) ) || ( IsTrigUsed(TRIGGER_ITEMPICKUP_SELF) )))
 		{
@@ -1860,7 +1860,7 @@ bool CChar::ItemDrop( CItem * pItem, const CPointMap & pt )
 {
 	ADDTOCALLSTACK("CChar::ItemDrop");
 	if ( pItem == NULL )
-		return( false );
+		return false;
 
 	if ( IsSetEF( EF_ItemStacking ) )
 	{
@@ -2460,7 +2460,7 @@ bool CChar::OnTickEquip( CItem * pItem )
 		case LAYER_FLAG_ClientLinger:
 			// remove me from other clients screens.
 			SetDisconnected();
-			return( false );
+			return false;
 
 		case LAYER_SPECIAL:
 			switch ( pItem->GetType())
@@ -2497,13 +2497,13 @@ bool CChar::OnTickEquip( CItem * pItem )
 			// update char notoriety when criminal timer goes off
 			StatFlag_Clear( STATF_Criminal );
 			NotoSave_Update();
-			return( false );
+			return false;
 
 		case LAYER_FLAG_Murders:
 			// decay the murder count.
 			{
 				if ( ! m_pPlayer || m_pPlayer->m_wMurders <= 0  )
-					return( false );
+					return false;
 
 				CScriptTriggerArgs	args;
 				args.m_iN1 = m_pPlayer->m_wMurders-1;
@@ -2518,9 +2518,9 @@ bool CChar::OnTickEquip( CItem * pItem )
 
 				m_pPlayer->m_wMurders = (word)(args.m_iN1);
 				NotoSave_Update();
-				if ( m_pPlayer->m_wMurders == 0 ) return( false );
+				if ( m_pPlayer->m_wMurders == 0 ) return false;
 				pItem->SetTimeout(args.m_iN2);	// update it's decay time.
-				return( true );
+				return true;
 			}
 
 		default:

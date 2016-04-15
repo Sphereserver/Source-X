@@ -100,7 +100,7 @@ bool CScriptTriggerArgs::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 		if ( *pszKey == '1' )
 			++pszKey;
 		pRef = m_pO1;
-		return( true );
+		return true;
 	}
 	else if ( !strnicmp(pszKey, "REF", 3) )	// REF[1-65535].NAME
 	{
@@ -175,7 +175,7 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
 	{
 		bool fQuoted = false;
 		m_VarsLocal.SetStr( s.GetKey()+6, fQuoted, s.GetArgStr( &fQuoted ), false );
-		return( true );
+		return true;
 	}
 	else if ( !strnicmp( "REF", pszKey, 3 ) )
 	{
@@ -194,7 +194,7 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
 					CObjBase * pObj = uid.ObjFind();
 					m_VarObjs.Insert( number, pObj, true );
 					pszKey = pszTemp;
-					return( true );
+					return true;
 				}
 				else if ( *pszTemp == '.' ) // accessing REFx object
 				{
@@ -222,7 +222,7 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
 				m_pO1 = NULL;	// no pObj = cleaning argo
 			else
 				m_pO1 = pObj;
-			return( true );
+			return true;
 		}
 	}
 	else
@@ -301,7 +301,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsol
 		EXC_SET("local");
 		pszKey	+= 6;
 		sVal	= m_VarsLocal.GetKeyStr(pszKey, true);
-		return( true );
+		return true;
 	}
 
 	if ( !strnicmp( "FLOAT.", pszKey, 6 ) )
@@ -309,7 +309,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsol
 		EXC_SET("float");
 		pszKey += 6;
 		sVal = m_VarsFloat.Get( pszKey );
-		return( true );
+		return true;
 	}
 	else if ( !strnicmp(pszKey, "ARGV", 4) )
 	{
@@ -377,7 +377,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsol
 		if ( *pszKey == '\0' )
 		{
 			sVal.FormatVal((int)(iQty));
-			return( true );
+			return true;
 		}
 
 		size_t iNum = static_cast<size_t>(Exp_GetSingle(pszKey));
@@ -586,7 +586,7 @@ bool CScriptObj::r_Call( lpctstr pszFunction, CTextConsole * pSrc, CScriptTrigge
 		if ( piRet )
 			*piRet	= iRet;
 	}
-	return( true );
+	return true;
 }
 
 bool CScriptObj::r_SetVal( lpctstr pszKey, lpctstr pszVal )
@@ -624,13 +624,13 @@ bool CScriptObj::r_LoadVal( CScript & s )
 			{
 				bool fQuoted = false;
 				g_Exp.m_VarGlobals.SetStr( pszKey+4, fQuoted, s.GetArgStr( &fQuoted ), false );
-				return( true );
+				return true;
 			}
 		case  SSC_VAR0:
 			{
 				bool fQuoted = false;
 				g_Exp.m_VarGlobals.SetStr( pszKey+5, fQuoted, s.GetArgStr( &fQuoted ), true );
-				return( true );
+				return true;
 			}
 
 		case  SSC_LIST:
@@ -780,7 +780,7 @@ bool CScriptObj::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc
 				sVal.FormatHex( (dword) pObj->GetUID() );
 			else
 				sVal.FormatVal( 1 );
-			return( true );
+			return true;
 		}
 		return pRef->r_WriteVal( pszKey, sVal, pSrc );
 	}
@@ -870,7 +870,7 @@ badcmd:
 		case SSC_LISTCOL:
 			// Set the alternating color.
 			sVal = (CWebPageDef::sm_iListIndex&1) ? "bgcolor=\"#E8E8E8\"" : "";
-			return( true );
+			return true;
 		case SSC_OBJ:
 			if ( !g_World.m_uidObj.ObjFind() ) g_World.m_uidObj = 0;
 			sVal.FormatHex((dword)g_World.m_uidObj);
@@ -932,16 +932,16 @@ badcmd:
 				else if ( fZero )
 					sVal	= "0";
 			}
-			return( true );
+			return true;
 		case SSC_DEFMSG:
 			sVal = g_Cfg.GetDefaultMsg(pszKey);
 			return(true);
 		case SSC_EVAL:
 			sVal.FormatLLVal( Exp_GetLLVal( pszKey ));
-			return( true );
+			return true;
 		case SSC_UVAL:
 			sVal.FormatULLVal((ullong)(Exp_GetLLVal(pszKey)));
-			return( true );
+			return true;
 		case SSC_FVAL:
 			{
 				int64 iVal = Exp_GetLLVal(pszKey);
@@ -950,7 +950,7 @@ badcmd:
 			}
 		case SSC_HVAL:
 			sVal.FormatLLHex(Exp_GetLLVal(pszKey));
-			return( true );
+			return true;
 //FLOAT STUFF BEGINS HERE
 		case SSC_FEVAL: //Float EVAL
 			sVal.FormatVal( ATOI( pszKey ) );
@@ -974,7 +974,7 @@ badcmd:
 				if ( sVal.IsEmpty())
 					sVal = "";
 			}
-			return( true );
+			return true;
 		case SSC_ISBIT:
 		case SSC_SETBIT:
 		case SSC_CLRBIT:
@@ -1169,7 +1169,7 @@ badcmd:
 				if ( child_pid < 0 )
 				{
 					g_Log.EventError("SYSSPAWN failed when executing %s.\n", pszKey);
-					return( false );
+					return false;
 				}
 				else if ( child_pid == 0 )
 				{
@@ -1482,7 +1482,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 			{
 				CGString sVal;
 				if ( ! r_WriteVal( s.GetArgStr(), sVal, pSrc ))
-					return( false );
+					return false;
 				tchar * pszMsg = Str_GetTemp();
 				sprintf(pszMsg, "'%s' for '%s' is '%s'\n", static_cast<lpctstr>(s.GetArgStr()), GetName(), static_cast<lpctstr>(sVal));
 				pSrc->SysMessage(pszMsg);
@@ -1509,7 +1509,7 @@ bool CScriptObj::r_Load( CScript & s )
 			break;
 		r_LoadVal(s);
 	}
-	return( true );
+	return true;
 }
 
 size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFlags, CScriptTriggerArgs * pArgs )
@@ -2780,11 +2780,11 @@ bool CFileObj::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
 	UNREFERENCED_PARAMETER(pszKey);
 	UNREFERENCED_PARAMETER(pRef);
-	return( false );
+	return false;
 }
 
-bool CFileObj::OnTick(){ return( true ); }
-int CFileObj::FixWeirdness(){ return( 0 ); }
+bool CFileObj::OnTick(){ return true; }
+int CFileObj::FixWeirdness(){ return 0; }
 
 bool CFileObj::r_LoadVal( CScript & s )
 {	
@@ -2814,15 +2814,15 @@ bool CFileObj::r_LoadVal( CScript & s )
 			else if ( !strnicmp("SETDEFAULT",pszKey,7) )
 				SetDefaultMode();
 			else
-				return( false );
+				return false;
 
-			return( true );
+			return true;
 		}
 		else
 		{
 			g_Log.Event(LOGL_ERROR, "FILE (%s): Cannot set mode after file opening\n", static_cast<lpctstr>(sWrite->GetFilePath()));
 		}	
-		return( false );
+		return false;
 	}
 
 	int index = FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 );
@@ -2909,9 +2909,9 @@ bool CFileObj::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 		else if ( !strnicmp("WRITEFLAG",pszKey,9) )
 			sVal.FormatVal( bWrite );
 		else
-			return( false );
+			return false;
 
-		return( true );
+		return true;
 	}
 
 	int index = FindTableHeadSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 );
@@ -2925,7 +2925,7 @@ bool CFileObj::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 
 				tchar * ppCmd = Str_TrimWhitespace(const_cast<tchar *>(pszKey));
 				if ( !( ppCmd && strlen(ppCmd) ))
-					return( false );
+					return false;
 
 				CFile * pFileTest = new CFile();
 				sVal.FormatVal(pFileTest->Open(ppCmd));
@@ -2940,13 +2940,13 @@ bool CFileObj::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 				
 				tchar * ppCmd = Str_TrimWhitespace(const_cast<tchar *>(pszKey));
 				if ( !( ppCmd && strlen(ppCmd) ))
-					return( false );
+					return false;
 
 				CFileText * sFileLine = new CFileText();
 				if ( !sFileLine->Open(ppCmd, OF_READ|OF_TEXT) )
 				{
 					delete sFileLine;
-					return( false );
+					return false;
 				}
 
 				tchar * ppArg = this->GetReadBuffer();
@@ -2987,12 +2987,12 @@ bool CFileObj::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 
 				tchar * ppCmd = Str_TrimWhitespace(const_cast<tchar *>(pszKey));
 				if ( !( ppCmd && strlen(ppCmd) ))
-					return( false );
+					return false;
 
 				if ( sWrite->IsFileOpen() )
 				{
 					g_Log.Event(LOGL_ERROR, "FILE: Cannot open file (%s). First close \"%s\".\n", ppCmd, static_cast<lpctstr>(sWrite->GetFilePath()));
-					return( false );
+					return false;
 				}
 
 				sVal.FormatVal( FileOpen(ppCmd) );
@@ -3015,13 +3015,13 @@ bool CFileObj::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 
 					iRead = Exp_GetVal(pszKey);
 					if ( iRead <= 0 || iRead >= SCRIPT_MAX_LINE_LEN)
-						return( false );
+						return false;
 				}
 
 				if ( ( ( sWrite->GetPosition() + iRead ) > sWrite->GetLength() ) || ( sWrite->IsEOF() ) )
 				{
 					g_Log.Event(LOGL_ERROR, "FILE: Failed reading %" FMTSIZE_T " byte from \"%s\". Too near to EOF.\n", iRead, static_cast<lpctstr>(sWrite->GetFilePath()));
-					return( false );
+					return false;
 				}
 
 				tchar * ppArg = this->GetReadBuffer(true);
@@ -3029,7 +3029,7 @@ bool CFileObj::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 				if ( iRead != sWrite->Read(ppArg, iRead) )
 				{
 					g_Log.Event(LOGL_ERROR, "FILE: Failed reading %" FMTSIZE_T " byte from \"%s\".\n", iRead, static_cast<lpctstr>(sWrite->GetFilePath()));
-					return( false );
+					return false;
 				}
 
 				if ( bChr )
@@ -3048,7 +3048,7 @@ bool CFileObj::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 
 				int64 iLines = Exp_GetVal(pszKey);
 				if ( iLines < 0 )
-					return( false );
+					return false;
 
 				uint uiSeek = sWrite->GetPosition();
 				sWrite->SeekToBegin();
@@ -3095,7 +3095,7 @@ bool CFileObj::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 				GETNONWHITESPACE(pszKey);
 
 				if (pszKey[0] == '\0')
-					return( false );
+					return false;
 
 				if (strcmpi("BEGIN", pszKey) == 0)
 				{
@@ -3149,10 +3149,10 @@ bool CFileObj::r_Verb( CScript & s, CTextConsole * pSrc )
 		case FOV_DELETEFILE:
 			{
 				if ( !s.GetArgStr() )
-					return( false );
+					return false;
 
 				if ( sWrite->IsFileOpen() && !strcmp(s.GetArgStr(),sWrite->GetFileTitle()) )
-					return( false );
+					return false;
 
 				STDFUNC_UNLINK(s.GetArgRaw());
 			} break;
@@ -3163,10 +3163,10 @@ bool CFileObj::r_Verb( CScript & s, CTextConsole * pSrc )
 			break;
 
 		default:
-			return( false );
+			return false;
 	}
 
-	return( true );
+	return true;
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
@@ -3179,7 +3179,7 @@ bool CFileObj::FileOpen( lpctstr sPath )
 {
 	ADDTOCALLSTACK("CFileObj::FileOpen");
 	if ( sWrite->IsFileOpen() )
-		return( false );
+		return false;
 
 	uint uMode = OF_SHARE_DENY_NONE | OF_TEXT;
 
@@ -3362,7 +3362,7 @@ bool CFileObjContainer::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 		if ( pFirstUsed != NULL ) 
 		{ 
 			pRef = pFirstUsed; 
-			return( true ); 
+			return true; 
 		}
 	}
 	else
@@ -3371,18 +3371,18 @@ bool CFileObjContainer::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 		SKIP_SEPARATORS(pszKey);
 
 		if ( nNumber >= sFileList.size() )
-			return( false );
+			return false;
 
 		CFileObj * pFile = sFileList.at(nNumber);
 
 		if ( pFile != NULL ) 
 		{ 
 			pRef = pFile; 
-			return( true ); 
+			return true; 
 		}
 	}
 
-	return( false );
+	return false;
 }
 
 bool CFileObjContainer::r_LoadVal( CScript & s )
@@ -3440,7 +3440,7 @@ bool CFileObjContainer::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole
 			return static_cast<CScriptObj *>(pFirstUsed)->r_WriteVal(pszKey, sVal, pSrc);
 		}
 
-		return( false );
+		return false;
 	}
 
 	int iIndex = FindTableHeadSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 );
@@ -3451,7 +3451,7 @@ bool CFileObjContainer::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole
 		SKIP_SEPARATORS(pszKey);
 
 		if ( nNumber >= sFileList.size() )
-			return( false );
+			return false;
 
 		CFileObj * pFile = sFileList.at(nNumber);
 
@@ -3462,7 +3462,7 @@ bool CFileObjContainer::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole
 				return pObj->r_WriteVal(pszKey, sVal, pSrc);
 		}
 
-		return( false );
+		return false;
 	}
 
 	switch ( iIndex )
@@ -3479,7 +3479,7 @@ bool CFileObjContainer::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole
 			return false;
 	}
 
-	return( true );
+	return true;
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
@@ -3515,7 +3515,7 @@ bool CFileObjContainer::r_Verb( CScript & s, CTextConsole * pSrc )
 			return static_cast<CScriptObj *>(pFirstUsed)->r_Verb(s,pSrc);
 		}
 
-		return( false );
+		return false;
 	}
 
 	int index = FindTableSorted( pszKey, sm_szVerbKeys, COUNTOF( sm_szVerbKeys )-1 );
@@ -3542,7 +3542,7 @@ bool CFileObjContainer::r_Verb( CScript & s, CTextConsole * pSrc )
 					}
 				}
 
-				return( false );
+				return false;
 			}
 		}
 
@@ -3559,7 +3559,7 @@ bool CFileObjContainer::r_Verb( CScript & s, CTextConsole * pSrc )
 			{
 				size_t nNumber = static_cast<size_t>( s.GetArgVal() );
 				if ( nNumber >= sFileList.size() )
-					return( false );
+					return false;
 
 				CFileObj * pObjVerb = sFileList.at(nNumber);
 				if ( bResetObject )
@@ -3575,10 +3575,10 @@ bool CFileObjContainer::r_Verb( CScript & s, CTextConsole * pSrc )
 		} break;
 
 		default:
-			return( false );
+			return false;
 	}
 
-	return( true );
+	return true;
 	EXC_CATCH;
 
 	EXC_DEBUG_START;

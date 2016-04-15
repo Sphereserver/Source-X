@@ -105,14 +105,14 @@ public:
 		// ASSUME: Normalized rect
 		if ( rect.m_map != m_map ) return false;
 		if ( rect.m_left	< m_left	) 
-			return( false );
+			return false;
 		if ( rect.m_top		< m_top		)
-			return( false );
+			return false;
 		if ( rect.m_right	> m_right	)
-			return( false );
+			return false;
 		if ( rect.m_bottom	> m_bottom	)
-			return( false );
-		return( true );
+			return false;
+		return true;
 	}
 	bool IsOverlapped( const CGRect & rect ) const
 	{
@@ -121,14 +121,14 @@ public:
 		// ASSUME: Normalized rect
 //		if ( rect.m_map != m_map ) return false;
 		if ( rect.m_left	>= m_right	) 
-			return( false );
+			return false;
 		if ( rect.m_top		>= m_bottom	)
-			return( false );
+			return false;
 		if ( rect.m_right	<= m_left	)
-			return( false );
+			return false;
 		if ( rect.m_bottom	<= m_top	)
-			return( false );
-		return( true );
+			return false;
+		return true;
 	}
 	bool IsEqual( const CGRect & rect ) const
 	{
@@ -208,11 +208,11 @@ public:
 	{
 		int iSizeX = GetWidth();
 		if ( iSizeX < 0 || iSizeX > g_MapList.GetX(m_map) )
-			return( false );
+			return false;
 		int iSizeY = GetHeight();
 		if ( iSizeY < 0 || iSizeY > g_MapList.GetY(m_map) )
-			return( false );
-		return( true );
+			return false;
+		return true;
 	}
 
 	void NormalizeRect();

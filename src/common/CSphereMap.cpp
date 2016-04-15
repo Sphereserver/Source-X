@@ -135,7 +135,7 @@ bool CSphereMapBlockState::CheckTile( dword wItemBlockFlags, char zBottom, heigh
 		wItemBlockFlags &= ~CAN_I_HOVER;
 
 	if ( ! wItemBlockFlags )	// no effect.
-		return( true );
+		return true;
 
 	// If this item does not block me at all then i guess it just does not count.
 	if ( ! ( wItemBlockFlags &~ m_dwBlockFlags ))
@@ -169,9 +169,9 @@ bool CSphereMapBlockState::CheckTile( dword wItemBlockFlags, char zBottom, heigh
 			if ( zTop == m_Bottom.m_z )
 			{
 				if ( m_Bottom.m_dwBlockFlags & CAN_I_PLATFORM )
-					return( true );
+					return true;
 				else if ( (m_Bottom.m_dwBlockFlags & CAN_I_WATER) && !(wItemBlockFlags & CAN_I_PLATFORM))
-					return( true );
+					return true;
 			}
 			m_Bottom.m_dwBlockFlags = wItemBlockFlags;
 			m_Bottom.m_dwTile = dwID;
@@ -195,11 +195,11 @@ bool CSphereMapBlockState::CheckTile( dword wItemBlockFlags, char zBottom, heigh
 bool CSphereMapBlockState::IsUsableZ( char zBottom, height_t zHeightEstimate ) const
 {
 	if ( zBottom > m_Top.m_z )	// above something that is already over my head.
-		return( false );
+		return false;
 	// NOTE: Assume multi overlapping items are not normal. so estimates are safe
 	if ( zBottom + zHeightEstimate < m_Bottom.m_z )	// way below my feet
-		return( false );
-	return( true );	
+		return false;
+	return true;	
 }
 
 bool CSphereMapBlockState::CheckTile_Item( dword wItemBlockFlags, char zBottom, height_t zHeight, dword dwID )
@@ -213,7 +213,7 @@ bool CSphereMapBlockState::CheckTile_Item( dword wItemBlockFlags, char zBottom, 
 		wItemBlockFlags &= ~CAN_I_HOVER;
 
 	if ( ! wItemBlockFlags )	// no effect.
-		return( true );
+		return true;
 
 	char zTop = zBottom;
 	
@@ -306,7 +306,7 @@ bool CSphereMapBlockState::CheckTile_Terrain( dword wItemBlockFlags, char z, dwo
 	//  true = continue processing
 
 	if ( ! wItemBlockFlags )	// no effect.
-		return( true );
+		return true;
 
 	if ( z < m_Bottom.m_z )	// below something i can already step on.
 	{

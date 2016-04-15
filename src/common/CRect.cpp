@@ -191,10 +191,10 @@ bool CPointBase::IsValidZ() const
 bool CPointBase::IsValidXY() const
 {
 	if ( m_x < 0 || m_x >= g_MapList.GetX(m_map) )
-		return( false );
+		return false;
 	if ( m_y < 0 || m_y >= g_MapList.GetY(m_map) )
-		return( false );
-	return( true );
+		return false;
+	return true;
 }
 
 bool CPointBase::IsValidPoint() const
@@ -205,12 +205,12 @@ bool CPointBase::IsValidPoint() const
 bool CPointBase::IsCharValid() const
 {
 	if ( m_z <= -UO_SIZE_Z || m_z >= UO_SIZE_Z )
-		return( false );
+		return false;
 	if (m_x <= 0 || m_x >= (short)(g_MapList.GetX(m_map)))
-		return( false );
+		return false;
 	if (m_y <= 0 || m_y >= (short)(g_MapList.GetY(m_map)))
-		return( false );
-	return( true );
+		return false;
+	return true;
 }
 
 void CPointBase::ValidatePoint()
@@ -691,10 +691,10 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CGString & sVal ) const
 								if ( !strnicmp( pszKey, "Z", 1 ))
 								{
 									sVal.FormatVal( pMeter->m_z );
-									return( true );
+									return true;
 								}
 								
-								return( false );
+								return false;
 							}
 							else
 							{
@@ -716,7 +716,7 @@ bool CPointBase::r_LoadVal( lpctstr pszKey, lpctstr pszArgs )
 	int index = FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF(sm_szLoadKeys)-1 );
 	if ( index <= 0 )
 	{
-		return( false );
+		return false;
 	}
 	int iVal = Exp_GetVal(pszArgs);
 	switch (index)
@@ -726,7 +726,7 @@ bool CPointBase::r_LoadVal( lpctstr pszKey, lpctstr pszArgs )
 		case 2: m_y = (short)(iVal); break;
 		case 3: m_z = (char)(iVal); break;
 	}
-	return( true );
+	return true;
 }
 
 

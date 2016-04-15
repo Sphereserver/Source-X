@@ -194,7 +194,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 			// serv a web page to the pSrc
 				CClient * pClient = dynamic_cast <CClient *>(pSrc);
 				if ( pClient == NULL )
-					return( false );
+					return false;
 				return ServPage( pClient, s.GetArgStr(), NULL );
 			}
 	
@@ -247,7 +247,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 		case WV_GMPAGELIST:
 			{
 				if ( ! s.HasArgs())
-					return( false );
+					return false;
 				CGMPage * pPage = static_cast <CGMPage*>( g_World.m_GMPages.GetHead());
 				for ( ; pPage!=NULL; pPage = pPage->GetNext())
 				{
@@ -373,7 +373,7 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 		FileOut.SysMessage( pszHead );
 	}
 
-	return( true );
+	return true;
 }
 
 void CWebPageDef::WebPageLog()
@@ -438,11 +438,11 @@ bool CWebPageDef::SetSourceFile( lpctstr pszName, CClient * pClient )
 	// test if it exists.
 	size_t iLen = strlen( pszName );
 	if ( iLen <= 3 )
-		return( false );
+		return false;
 
 	lpctstr pszExt = CGFile::GetFilesExt( pszName );
 	if ( pszExt == NULL || pszExt[0] == '\0' )
-		return( false );
+		return false;
 
 	int iType = FindTableSorted( pszExt, sm_szPageExt, COUNTOF( sm_szPageExt ));
 	if ( iType < 0 )
@@ -457,7 +457,7 @@ bool CWebPageDef::SetSourceFile( lpctstr pszName, CClient * pClient )
 		if ( ! g_Cfg.OpenResourceFind( FileRead, pszName ))
 		{
 			DEBUG_ERR(( "Can't open web page input '%s'\n", static_cast<lpctstr>(m_sSrcFilePath) ));
-			return( false );
+			return false;
 		}
 		m_sSrcFilePath = FileRead.GetFilePath();
 	}
@@ -466,22 +466,22 @@ bool CWebPageDef::SetSourceFile( lpctstr pszName, CClient * pClient )
 		if ( *pszName == '/' )
 			pszName ++;
 		if ( strstr( pszName, ".." ))	// this sort of access is not allowed.
-			return( false );
+			return false;
 		if ( strstr( pszName, "\\\\" ))	// this sort of access is not allowed.
-			return( false );
+			return false;
 		if ( strstr( pszName, "//" ))	// this sort of access is not allowed.
-			return( false );
+			return false;
 		m_sSrcFilePath = CGFile::GetMergedFileName( g_Cfg.m_sSCPBaseDir, pszName );
 	}
 
-	return( true );
+	return true;
 }
 
 bool CWebPageDef::IsMatch( lpctstr pszMatch ) const
 {
 	ADDTOCALLSTACK("CWebPageDef::IsMatch");
 	if ( pszMatch == NULL )	// match all.
-		return( true );
+		return true;
 
 	lpctstr pszDstName = GetDstName();
 	lpctstr pszTry;
@@ -535,7 +535,7 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CGTime 
 		if ( ResourceLock(s))
 		{
 			if (CScriptObj::OnTriggerScript( s, sm_szTrigName[WTRIG_Load], pClient, NULL ) == TRIGRET_RET_TRUE)
-				return( 0 );	// Block further action.
+				return 0;	// Block further action.
 		}
 	}
 
@@ -648,7 +648,7 @@ static int GetHexDigit( tchar ch )
 
 	ch = static_cast<tchar>(toupper(ch));
 	if ( ch > 'F' || ch <'A' )
-		return( -1 );
+		return -1;
 
 	return( ch - ( 'A' - 10 ));
 }
@@ -695,9 +695,9 @@ bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * p
 	ASSERT(pClient);
 
 	if ( pContentData == NULL || iContentLength <= 0 )
-		return( false );
+		return false;
 	if ( ! HasTrigger(XTRIG_UNKNOWN))	// this form has no triggers.
-		return( false );
+		return false;
 
 	// Parse the data.
 	pContentData[iContentLength] = 0;
@@ -768,7 +768,7 @@ bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * p
 
 	// Put up some sort of failure page ?
 
-	return( false );
+	return false;
 }
 
 bool CWebPageDef::ServPage( CClient * pClient, tchar * pszPage, CGTime * pdateIfModifiedSince )	// static

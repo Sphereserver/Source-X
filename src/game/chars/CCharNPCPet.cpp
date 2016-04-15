@@ -599,14 +599,14 @@ bool CChar::NPC_CheckHirelingStatus()
 	//  true = happy.
 
 	if ( ! IsStatFlag( STATF_Pet ))
-		return( true );
+		return true;
 
 	CCharBase * pCharDef = Char_GetDef();
 	int iFoodConsumeRate = g_Cfg.m_iRegenRate[STAT_FOOD];
 
 	uint iWage = pCharDef->GetHireDayWage();
 	if ( ! iWage || ! iFoodConsumeRate )
-		return( true );
+		return true;
 
 	// I am hired for money not for food.
 	uint iPeriodWage = (uint)MulDivLL( iWage, iFoodConsumeRate, 24 * 60 * g_Cfg.m_iGameMinuteLength );
@@ -642,7 +642,7 @@ bool CChar::NPC_CheckHirelingStatus()
 		StatFlag_Clear( STATF_Pet );
 	}
 
-	return( true );
+	return true;
 }
 
 void CChar::NPC_OnHirePayMore( CItem * pGold, bool fHire )
@@ -778,32 +778,32 @@ bool CChar::NPC_SetVendorPrice( CItem * pItem, int iPrice )
 	// This does not check who is setting the price if if it is valid for them to do so.
 
 	if ( ! NPC_IsVendor())
-		return( false );
+		return false;
 
 	if ( pItem == NULL ||
 		pItem->GetTopLevelObj() != this ||
 		pItem->GetParent() == this )
 	{
 		Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_INV_ONLY ) );
-		return( false );
+		return false;
 	}
 
 	CItemVendable * pVendItem = dynamic_cast <CItemVendable *> (pItem);
 	if ( pVendItem == NULL )
 	{
 		Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_CANTSELL ) );
-		return( false );
+		return false;
 	}
 
 	if ( iPrice < 0 )	// just a test.
-		return( true );
+		return true;
 
 	tchar *pszMsg = Str_GetTemp();
 	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_SETPRICE_1), pVendItem->GetName(), iPrice);
 	Speak(pszMsg);
 
 	pVendItem->SetPlayerVendorPrice( iPrice );
-	return( true );
+	return true;
 }
 
 void CChar::NPC_PetDesert()

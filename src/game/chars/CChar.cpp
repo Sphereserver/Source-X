@@ -521,7 +521,7 @@ int CChar::IsWeird() const
 		return iResultCode;
 	}
 
-	return( 0 );
+	return 0;
 }
 
 // Get the Z we should be at
@@ -603,7 +603,7 @@ void CChar::StatFlag_Mod( dword dwStatFlag, bool fMod )
 bool CChar::IsPriv( word flag ) const
 {	// PRIV_GM flags
 	if ( m_pPlayer == NULL )
-		return( false );	// NPC's have no privs.
+		return false;	// NPC's have no privs.
 	return( m_pPlayer->GetAccount()->IsPriv( flag ));
 }
 
@@ -1152,7 +1152,7 @@ bool CChar::ReadScript(CResourceLock &s, bool bVendor)
 		}
 	}
 
-	return( true );
+	return true;
 }
 
 void CChar::OnWeightChange( int iChange )
@@ -1762,36 +1762,36 @@ bool CChar::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 				if ( pszKey[-1] != '.' )	// only used as a ref !
 					break;
 				pRef = m_Act_Targ.ObjFind();
-				return( true );
+				return true;
 			case CHR_FINDLAYER:	// Find equipped layers.
 				pRef = LayerFind( (LAYER_TYPE) Exp_GetSingle( pszKey ));
 				SKIP_SEPARATORS(pszKey);
-				return( true );
+				return true;
 			case CHR_MEMORYFINDTYPE:	// FInd a type of memory.
 				pRef = Memory_FindTypes((word)(Exp_GetSingle(pszKey)));
 				SKIP_SEPARATORS(pszKey);
-				return( true );
+				return true;
 			case CHR_MEMORYFIND:	// Find a memory of a UID
 				pRef = Memory_FindObj( (CUID) Exp_GetSingle( pszKey ));
 				SKIP_SEPARATORS(pszKey);
-				return( true );
+				return true;
 			case CHR_OWNER:
 				pRef	= NPC_PetGetOwner();
-				return( true );
+				return true;
 			case CHR_WEAPON:
 				{
 					pRef	= m_uidWeapon.ObjFind();
-					return( true );
+					return true;
 				}
 			case CHR_REGION:
 				pRef = m_pArea;
-				return( true );
+				return true;
 		}
 	}
 
 	if ( r_GetRefContainer( pszKey, pRef ))
 	{
-		return( true );
+		return true;
 	}
 
 	return( CObjBase::r_GetRef( pszKey, pRef ));
@@ -1833,17 +1833,17 @@ do_default:
 		if ( m_pPlayer )
 		{
 			if ( m_pPlayer->r_WriteVal( this, pszKey, sVal ))
-				return( true );
+				return true;
 		}
 		if ( m_pNPC )
 		{
 			if ( m_pNPC->r_WriteVal( this, pszKey, sVal ))
-				return( true );
+				return true;
 		}
 
 		if ( r_WriteValContainer(pszKey, sVal, pSrc))
 		{
-			return( true );
+			return true;
 		}
 
 		// special write values
@@ -1854,7 +1854,7 @@ do_default:
 		if ( i >= 0 )
 		{
 			sVal.FormatVal(Stat_GetAdjusted(static_cast<STAT_TYPE>(i)));
-			return( true );
+			return true;
 		}
 
 		if ( !strnicmp( pszKey, "O", 1 ) )
@@ -1863,7 +1863,7 @@ do_default:
 			if ( i >= 0 )
 			{
 				sVal.FormatVal(Stat_GetBase(static_cast<STAT_TYPE>(i)));
-				return( true );
+				return true;
 			}
 		}
 
@@ -1873,7 +1873,7 @@ do_default:
 			if ( i >= 0 )
 			{
 				sVal.FormatVal(Stat_GetMod(static_cast<STAT_TYPE>(i)));
-				return( true );
+				return true;
 			}
 		}
 
@@ -1883,7 +1883,7 @@ do_default:
 			// Check some skill name.
 			ushort iVal = Skill_GetBase( static_cast<SKILL_TYPE>(i) );
 			sVal.Format( "%i.%i", iVal/10, iVal%10 );
-			return( true );
+			return true;
 		}
 
 		return( CObjBase::r_WriteVal( pszKey, sVal, pSrc ));
@@ -2128,7 +2128,7 @@ do_default:
 				{
 					DEBUG_ERR(("FAME ranges have not been defined.\n"));
 					sVal.FormatVal( 0 );
-					return( true );
+					return true;
 				}
 
 				tchar * ppLevel_sep[100];
@@ -2149,7 +2149,7 @@ do_default:
 					{
 						sVal = ( ! g_Cfg.m_Fame.GetAt(i + 1)->CompareNoCase( pszKey + 5 )) ? "1" : "0";
 						delete[] pszFameAt0;
-						return( true );
+						return true;
 					}
 
 					if ( i == 0 )
@@ -2160,7 +2160,7 @@ do_default:
 
 				sVal = 0;
 				delete[] pszFameAt0;
-				return( true );
+				return true;
 			}
 		case CHC_SKILLCHECK:	// odd way to get skills checking into the triggers.
 			pszKey += 10;
@@ -2170,10 +2170,10 @@ do_default:
 				Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, COUNTOF( ppArgs ));
 				SKILL_TYPE iSkill = g_Cfg.FindSkillKey( ppArgs[0] );
 				if ( iSkill == SKILL_NONE )
-					return( false );
+					return false;
 				sVal.FormatVal( Skill_CheckSuccess( iSkill, Exp_GetVal( ppArgs[1] )));
 			}
-			return( true );
+			return true;
 		case CHC_SKILLBEST:
 			// Get the top skill.
 			pszKey += 9;
@@ -2195,7 +2195,7 @@ do_default:
 				Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, COUNTOF(ppArgs), ":,/" );
 				sVal = ( pCharDef->IsFemale()) ? ppArgs[1] : ppArgs[0];
 			}
-			return( true );
+			return true;
 		case CHC_KARMA:
 			// What do i think of this person.
 			{
@@ -2206,7 +2206,7 @@ do_default:
 				{
 					DEBUG_ERR(("KARMA ranges have not been defined.\n"));
 					sVal.FormatVal( 0 );
-					return( true );
+					return true;
 				}
 
 				tchar * ppLevel_sep[100];
@@ -2228,7 +2228,7 @@ do_default:
 					{
 						sVal = ( ! g_Cfg.m_Karma.GetAt(i + 1)->CompareNoCase( pszKey + 6 )) ? "1" : "0";
 						delete[] pszKarmaAt0;
-						return( true );
+						return true;
 					}
 
 					if ( i == 0 )
@@ -2238,15 +2238,15 @@ do_default:
 
 				sVal = 0;
 				delete[] pszKarmaAt0;
-				return( true );
+				return true;
 			}
 		case CHC_AR:
 		case CHC_AC:
 			sVal.FormatVal( m_defense + pCharDef->m_defense );
-			return( true );
+			return true;
 		case CHC_AGE:
 			sVal.FormatLLVal( -( g_World.GetTimeDiff(m_timeCreate) / ( TICK_PER_SEC * 60 * 60 *24 ) )); //displayed in days
-			return( true );
+			return true;
 		case CHC_BANKBALANCE:
 			sVal.FormatVal( GetBank()->ContentCount( RESOURCE_ID(RES_TYPEDEF,IT_GOLD)));
 			return true;
@@ -2301,7 +2301,7 @@ do_default:
 					{
 						SKILL_TYPE iSkill = g_Cfg.FindSkillKey( ppArgs[0] );
 						if ( iSkill == SKILL_NONE )
-							return( false );
+							return false;
 
 						sVal.FormatVal( Skill_UseQuick( iSkill, Exp_GetVal( ppArgs[1] )));
 						return true;
@@ -2385,16 +2385,16 @@ do_default:
 			return true;
 		case CHC_ISGM:
 			sVal.FormatVal( IsPriv(PRIV_GM));
-			return( true );
+			return true;
 		case CHC_ISINPARTY:
 			if ( m_pPlayer != NULL )
 				sVal = ( m_pParty != NULL ) ? "1" : "0";
 			else
 				sVal = "0";
-			return( true );
+			return true;
 		case CHC_ISMYPET:
 			sVal = NPC_IsOwnedBy( pCharSrc, true ) ? "1" : "0";
-			return( true );
+			return true;
 		case CHC_ISONLINE:
 			if ( m_pPlayer != NULL )
 			{
@@ -2407,7 +2407,7 @@ do_default:
 				return ( true );
 			}
 			sVal = 0;
-			return( true );
+			return true;
 		case CHC_ISSTUCK:
 			{
 				CPointBase	pt = GetTopPoint();
@@ -2461,7 +2461,7 @@ do_default:
 				}
 				sVal.FormatHex( dwFlags );
 			}
-			return( true );
+			return true;
 		case CHC_NAME:
 			sVal = GetName(false);
 			break;
@@ -2487,7 +2487,7 @@ do_default:
 
 				sVal.FormatVal( GetSkillTotal(iVal,fComp) );
 			}
-			return( true );
+			return true;
 		case CHC_SWING:
 			sVal.FormatVal( m_atFight.m_War_Swing_State );
 			break;
@@ -2499,10 +2499,10 @@ do_default:
 			return true;
 		case CHC_MAXWEIGHT:
 			sVal.FormatVal( g_Cfg.Calc_MaxCarryWeight(this));
-			return( true );
+			return true;
 		case CHC_MODMAXWEIGHT:
 			sVal.FormatVal( m_ModMaxWeight );
-			return( true );
+			return true;
 		case CHC_ACCOUNT:
 			if ( pszKey[7] == '.' )	// used as a ref ?
 			{
@@ -2713,12 +2713,12 @@ do_default:
 		if ( m_pPlayer )
 		{
 			if ( m_pPlayer->r_LoadVal( this, s ))
-				return( true );
+				return true;
 		}
 		if ( m_pNPC )
 		{
 			if ( m_pNPC->r_LoadVal( this, s ))
-				return( true );
+				return true;
 		}
 
 		{
@@ -3081,7 +3081,7 @@ do_default:
 					args.m_s1 = s.GetArgStr();
 					args.m_pO1 = this;
 					if ( this->OnTrigger(CTRIG_Rename, this, &args) == TRIGRET_RET_TRUE )
-						return( false );
+						return false;
 
 					SetName( args.m_s1 );
 				}
@@ -3103,7 +3103,7 @@ do_default:
 					{
 						SKILL_TYPE iSkill = g_Cfg.FindSkillKey( ppArgs[0] );
 						if ( iSkill == SKILL_NONE )
-							return( false );
+							return false;
 
 						 Skill_UseQuick( iSkill, Exp_GetVal( ppArgs[1] ));
 						return true;
@@ -3115,7 +3115,7 @@ do_default:
 				int64 piCmd[2];
 				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, COUNTOF(piCmd) );
 				if ( iArgQty < 2 )
-					return( false );
+					return false;
 
 				CUID	uid		= (uint)(piCmd[0]);
 				dword		dwFlags	= (uint)(piCmd[1]);
@@ -3146,7 +3146,7 @@ do_default:
 				if ( ! CCharBase::FindCharBase( id ))
 				{
 					DEBUG_ERR(( "OBODY Invalid Char 0%x\n", id ));
-					return( false );
+					return false;
 				}
 				m_prev_id = id;
 			}
@@ -3368,7 +3368,7 @@ bool CChar::r_Load( CScript & s ) // Load a character from script
 		Delete();
 	}
 
-	return( true );
+	return true;
 }
 
 enum CHV_TYPE
@@ -3465,7 +3465,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_BANK:
 			// Open the bank box for this person
 			if ( pCharSrc == NULL || ! pCharSrc->IsClient() )
-				return( false );
+				return false;
 			pCharSrc->GetClient()->addBankOpen( this, ((s.HasArgs()) ? static_cast<LAYER_TYPE>(s.GetArgVal()) : LAYER_BANKBOX ));
 			break;
 		case CHV_BARK:
@@ -3481,7 +3481,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		}
 		case CHV_CONTROL: // Possess
 			if ( pCharSrc == NULL || ! pCharSrc->IsClient())
-				return( false );
+				return false;
 			return( pCharSrc->GetClient()->Cmd_Control( this ));
 
 		case CHV_CONSUME:
@@ -3535,7 +3535,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				pItem->SetAttr(ATTR_MOVE_NEVER);
 				LayerAdd( pItem, LAYER_NEWLIGHT );
 			}
-			return( true );
+			return true;
 		case CHV_EQUIPARMOR:
 			return ItemEquipArmor(false);
 		case CHV_EQUIPWEAPON:
@@ -3574,12 +3574,12 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				CUID uid( s.GetArgVal());
 				CObjBaseTemplate * pObj = uid.ObjFind();
 				if ( pObj == NULL )
-					return( false );
+					return false;
 				pObj = pObj->GetTopLevelObj();
 				Spell_Teleport( pObj->GetTopPoint(), true, false );
-				return( true );
+				return true;
 			}
-			return( false );
+			return false;
 		case CHV_HEAR:
 			// NPC will hear this command but no-one else.
 			if ( m_pPlayer )
@@ -3719,7 +3719,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 
 		case CHV_PACK:
 			if ( pCharSrc == NULL || ! pCharSrc->IsClient())
-				return( false );
+				return false;
 			pCharSrc->m_pClient->addBankOpen( this, LAYER_PACK ); // Send Backpack (with items)
 			break;
 
@@ -3765,14 +3765,14 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			Skill_Start( SKILL_NONE );
 			NPC_PetClearOwners();
 			SoundChar( CRESND_RAND2 );	// No noise
-			return( true );
+			return true;
 		case CHV_REMOVE:	// remove this char from the world instantly.
 			if ( m_pPlayer )
 			{
 				if ( s.GetArgRaw()[0] != '1' || pSrc->GetPrivLevel() < PLEVEL_Admin )
 				{
 					pSrc->SysMessage( g_Cfg.GetDefaultMsg(DEFMSG_CMD_REMOVE_PLAYER) );
-					return( false );
+					return false;
 				}
 				if ( IsClient() )
 					GetClient()->addObjectRemove(this);
@@ -3785,7 +3785,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				if ( s.GetArgRaw()[0] != '1' || pSrc->GetPrivLevel() < PLEVEL_Admin )
 				{
 					pSrc->SysMessage( g_Cfg.GetDefaultMsg(DEFMSG_CMD_REMOVE_PLAYER) );
-					return( false );
+					return false;
 				}
 				if ( IsClient() )
 					GetClient()->addObjectRemove(this);
@@ -3820,12 +3820,12 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 					{
 						SKILL_TYPE iSkill = g_Cfg.FindSkillKey( ppArgs[0] );
 						if ( iSkill == SKILL_NONE )
-							return( false );
+							return false;
 						Skill_Experience( iSkill, Exp_GetVal( ppArgs[1] ));
 					}
 				}
 			}
-			return( true );
+			return true;
 		case CHV_SLEEP:
 			SleepStart( s.GetArgVal() != 0 );
 			break;
@@ -3840,10 +3840,10 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				// Let's make a cage to put the player in
 				ITEMID_TYPE id = static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, "i_multi_cage" ));
 				if ( id < 0 )
-					return( false );
+					return false;
 				CItemMulti * pItem = dynamic_cast <CItemMulti*>( CItem::CreateBase( id ));
 				if ( pItem == NULL )
-					return( false );
+					return false;
 				CPointMap pt = pCharSrc->GetTopPoint();
 				pt.MoveN( pCharSrc->m_dirFace, 3 );
 				pItem->MoveToDecay( pt, 10*60*TICK_PER_SEC );	// make the cage vanish after 10 minutes.
@@ -3851,7 +3851,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				Spell_Teleport( pt, true, false );
 				break;
 			}
-			return( false );
+			return false;
 		case CHV_SUMMONTO:	// i just got summoned
 			if ( pCharSrc != NULL )
 			{
@@ -3874,7 +3874,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			break;
 		case CHV_UNDERWEAR:
 			if ( ! IsPlayableCharacter())
-				return( false );
+				return false;
 			SetHue( GetHue() ^ HUE_UNDERWEAR /*, false, pSrc*/ ); //call @Dye on underwear?
 			UpdateMode();
 			break;

@@ -530,7 +530,7 @@ int CTimedFunctionHandler::Load( const char *pszName, bool fQuoted, const char *
 		}
 	}
 
-	return( 0 );
+	return 0;
 }
 
 void CTimedFunctionHandler::r_Write( CScript & s )
@@ -583,17 +583,17 @@ bool CWorldSearch::GetNextSector()
 	// Move search into nearby CSector(s) if necessary
 
 	if ( ! m_iDist )
-		return( false );
+		return false;
 
 	for (;;)
 	{
 		m_pSector = m_rectSector.GetSector(m_iSectorCur++);
 		if ( m_pSector == NULL )
-			return( false );	// done searching.
+			return false;	// done searching.
 		if ( m_pSectorBase == m_pSector )
 			continue;	// same as base.
 		m_pObj = NULL;	// start at head of next Sector.
-		return( true );
+		return true;
 	}
 }
 
@@ -1257,10 +1257,10 @@ bool CWorld::OpenScriptBackup( CScript & s, lpctstr pszBaseDir, lpctstr pszBaseN
 	if ( ! s.Open( sSaveName, OF_WRITE|OF_TEXT|OF_DEFAULTMODE ))
 	{
 		g_Log.Event(LOGM_SAVE|LOGL_CRIT, "Save '%s' FAILED\n", static_cast<lpctstr>(sSaveName));
-		return( false );
+		return false;
 	}
 
-	return( true );
+	return true;
 }
 
 bool CWorld::SaveStage() // Save world state in stages.
@@ -1717,7 +1717,7 @@ bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from scr
 			g_Log.Event(LOGM_INIT|LOGL_ERROR, "Can't Load %s\n", static_cast<lpctstr>(pszLoadName));
 		else
 			g_Log.Event(LOGM_INIT|LOGL_WARN, "Can't Load %s\n", static_cast<lpctstr>(pszLoadName));
-		return( false );
+		return false;
 	}
 
 	g_Log.Event(LOGM_INIT, "Loading %s...\n", static_cast<lpctstr>(pszLoadName));
@@ -1758,11 +1758,11 @@ bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from scr
 	{
 		// The only valid way to end.
 		s.Close();
-		return( true );
+		return true;
 	}
 
 	g_Log.Event( LOGM_INIT|LOGL_CRIT, "No [EOF] marker. '%s' is corrupt!\n", static_cast<lpctstr>(s.GetFilePath()));
-	return( false );
+	return false;
 }
 
 
@@ -1937,17 +1937,17 @@ bool CWorld::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 			pszKey += 11;
 			SKIP_SEPARATORS(pszKey);
 			pRef = m_uidLastNewItem.ItemFind();
-			return( true );
+			return true;
 		}
 		if ( ! strnicmp( pszKey+7, "CHAR", 4 ))
 		{
 			pszKey += 11;
 			SKIP_SEPARATORS(pszKey);
 			pRef = m_uidLastNewChar.CharFind();
-			return( true );
+			return true;
 		}
 	}
-	return( false );
+	return false;
 }
 
 enum WC_TYPE
@@ -2033,7 +2033,7 @@ bool CWorld::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 			sVal = SPHERE_VERSION;
 			break;
 		default:
-			return( false );
+			return false;
 	}
 	return true;
 	EXC_CATCH;

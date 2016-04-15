@@ -33,17 +33,17 @@ bool CItem::Ship_Plank( bool fOpen )
 	CItemBase * pItemDef = Item_GetDef();
 	ITEMID_TYPE idState = static_cast<ITEMID_TYPE>(RES_GET_INDEX(pItemDef->m_ttShipPlank.m_idState));
 	if ( !idState )
-		return( false );
+		return false;
 
 	if ( IsType(IT_SHIP_PLANK))
 	{
 		if ( fOpen )
-			return( true );
+			return true;
 	}
 	else
 	{
 		if ( ! fOpen )
-			return( true );
+			return true;
 	}
 
 	IT_TYPE oldType = GetType();
@@ -64,7 +64,7 @@ bool CItem::Ship_Plank( bool fOpen )
 	}
 
 	Update();
-	return( true );
+	return true;
 }
 
 void CItemShip::Ship_Stop()
@@ -108,7 +108,7 @@ bool CItemShip::Ship_SetMoveDir(DIR_TYPE dir, byte speed, bool bWheelMove)
 		m_NextMove = CServTime::GetCurrentTime() + maximum(1, (m_itShip.m_fSail == 1) ? pItemMulti->m_shipSpeed.period * 2 : (pItemMulti->m_shipSpeed.period));
 	else
 		m_NextMove = CServTime::GetCurrentTime() + maximum(1, (m_itShip.m_fSail == 1) ? pItemMulti->m_shipSpeed.period : (pItemMulti->m_shipSpeed.period / 2));
-	return( true );
+	return true;
 }
 
 
@@ -290,7 +290,7 @@ bool CItemShip::Ship_MoveDelta(CPointBase pdelta)
 		}
 	}
 
-	return( true );
+	return true;
 }
 
 bool CItemShip::Ship_CanMoveTo( const CPointMap & pt ) const
@@ -298,7 +298,7 @@ bool CItemShip::Ship_CanMoveTo( const CPointMap & pt ) const
 	ADDTOCALLSTACK("CItemShip::Ship_CanMoveTo");
 	// Can we move to the new location ? all water type ?
 	if ( IsAttr(ATTR_MAGIC ))
-		return( true );
+		return true;
 
 	dword wBlockFlags = CAN_I_WATER;
 
@@ -330,7 +330,7 @@ bool CItemShip::Ship_Face( DIR_TYPE dir )
 	for ( ; ; ++iDirection )
 	{
 		if ( iDirection >= COUNTOF(sm_Ship_FaceDir))
-			return( false );
+			return false;
 		if ( dir == sm_Ship_FaceDir[iDirection] )
 			break;
 	}
@@ -461,7 +461,7 @@ bool CItemShip::Ship_Move( DIR_TYPE dir, int distance )
 {
 	ADDTOCALLSTACK("CItemShip::Ship_Move");
 	if ( dir >= DIR_QTY )
-		return( false );
+		return false;
 
 	if ( m_pRegion == NULL )
 	{
@@ -628,7 +628,7 @@ bool CItemShip::Ship_OnMoveTick()
 	// RETURN: false = delete the boat.
 
 	if ( m_itShip.m_fSail == 0 )	// decay the ship instead ???
-		return( true );
+		return true;
 
 	// Calculate the leading point.
 	DIR_TYPE dir = static_cast<DIR_TYPE>(m_itShip.m_DirMove);
@@ -637,7 +637,7 @@ bool CItemShip::Ship_OnMoveTick()
 	if (!Ship_Move(dir, pItemMulti->m_shipSpeed.tiles))
 	{
 		Ship_Stop();
-		return( true );
+		return true;
 	}
 	if (IsSetOF(OF_NoSmoothSailing))
 		m_NextMove = CServTime::GetCurrentTime() + maximum(1, (m_itShip.m_fSail == 1) ? pItemMulti->m_shipSpeed.period * 2 : (pItemMulti->m_shipSpeed.period));
@@ -750,7 +750,7 @@ bool CItemShip::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fr
 	}
 
 	if ( ! pSrc )
-		return( false );
+		return false;
 
 	if ( IsAttr(ATTR_MOVE_NEVER|ATTR_LOCKEDDOWN) || ! IsTopLevel() )
 		return false;
@@ -776,7 +776,7 @@ bool CItemShip::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fr
 			// "Furl sail"
 			// "Stop" Stops current ship movement.
 			if ( m_itShip.m_fSail == 0 )
-				return( false );
+				return false;
 			Ship_Stop();
 			break;
 		}
@@ -785,7 +785,7 @@ bool CItemShip::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fr
 		{
 			// Face this direction. do not change the direction of movement.
 			if ( ! s.HasArgs())
-				return( false );
+				return false;
 			return Ship_Face( GetDirStr( s.GetArgStr()));
 		}
 
@@ -794,7 +794,7 @@ bool CItemShip::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fr
 			// Move one space in this direction.
 			// Does NOT protect against exploits !
 			if ( ! s.HasArgs())
-				return( false );
+				return false;
 			m_itShip.m_DirMove = (uchar)(GetDirStr(s.GetArgStr()));
 			CItemMulti * pItemMulti = dynamic_cast<CItemMulti*>(this);
 			return Ship_Move(static_cast<DIR_TYPE>(m_itShip.m_DirMove), pItemMulti->m_shipSpeed.tiles);
@@ -804,11 +804,11 @@ bool CItemShip::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fr
 		{
 			// Move the whole ship and contents to another place.
 			if ( ! s.HasArgs())
-				return( false );
+				return false;
 
 			CPointMap ptdelta = g_Cfg.GetRegionPoint( s.GetArgStr());
 			if ( ! ptdelta.IsValidPoint())
-				return( false );
+				return false;
 			ptdelta -= GetTopPoint();
 			return Ship_MoveDelta( ptdelta );
 		}
@@ -852,7 +852,7 @@ dodirmovechange:
 			if ( m_itShip.m_fAnchored != 0 )
 				goto anchored;
 			if ( ! Ship_SetMoveDir( GetDirTurn( DirFace, DirMoveChange )))
-				return( false );
+				return false;
 			break;
 		}
 
@@ -944,7 +944,7 @@ dodirmovechange:
 		case SHV_SHIPUP: // "Up"
 		{
 			if ( ! IsAttr(ATTR_MAGIC ))
-				return( false );
+				return false;
 
 			CPointMap pt;
 			pt.m_z = PLAYER_HEIGHT;
@@ -962,7 +962,7 @@ dodirmovechange:
 		case SHV_SHIPDOWN: // "Down"
 		{
 			if ( ! IsAttr(ATTR_MAGIC ))
-				return( false );
+				return false;
 			CPointMap pt;
 			pt.m_z = -PLAYER_HEIGHT;
 			if ( Ship_MoveDelta( pt ))
@@ -979,7 +979,7 @@ dodirmovechange:
 		case SHV_SHIPLAND: // "Land"
 		{
 			if ( ! IsAttr(ATTR_MAGIC ))
-				return( false );
+				return false;
 			char zold = GetTopZ();
 			CPointMap pt = GetTopPoint();
 			pt.m_z = zold;

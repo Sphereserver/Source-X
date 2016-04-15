@@ -49,7 +49,7 @@ bool CUOInstall::FindInstall()
 	}
 	if ( lRet != ERROR_SUCCESS )
 	{
-		return( false );
+		return false;
 	}
 
 	tchar szValue[ _MAX_PATH ];

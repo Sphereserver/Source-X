@@ -390,7 +390,7 @@ bool CSectorBase::LinkRegion( CRegionBase * pRegionNew )
 			if ( pRegion->IsEqualRegion( pRegionNew ))
 			{
 				DEBUG_ERR(( "Conflicting region!\n" ));
-				return( false );
+				return false;
 			}
 
 			// it is accurate in the TRUE case.
@@ -403,12 +403,12 @@ bool CSectorBase::LinkRegion( CRegionBase * pRegionNew )
 
 			// must insert before this.
 			m_RegionLinks.InsertAt( i, pRegionNew );
-			return( true );
+			return true;
 		}
 	}
 
 	m_RegionLinks.Add( pRegionNew );
-	return( true );
+	return true;
 }
 
 CTeleport * CSectorBase::GetTeleport( const CPointMap & pt ) const
@@ -439,10 +439,10 @@ bool CSectorBase::AddTeleport( CTeleport * pTeleport )
 	if ( i != m_Teleports.BadIndex() )
 	{
 		DEBUG_ERR(( "Conflicting teleport %s!\n", pTeleport->WriteUsed() ));
-		return( false );
+		return false;
 	}
 	m_Teleports.AddSortKey( pTeleport, pTeleport->GetPointSortIndex());
-	return( true );
+	return true;
 }
 
 bool CSectorBase::IsFlagSet( dword dwFlag ) const

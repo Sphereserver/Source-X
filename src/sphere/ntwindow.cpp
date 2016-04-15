@@ -173,7 +173,7 @@ bool CNTWindow::CAboutDlg::OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCt
 			EndDialog( m_hWnd, wID );
 			break;
 	}
-	return( TRUE );
+	return true;
 }
 
 BOOL CNTWindow::CAboutDlg::DefDialogProc( UINT message, WPARAM wParam, LPARAM lParam )
@@ -186,9 +186,9 @@ BOOL CNTWindow::CAboutDlg::DefDialogProc( UINT message, WPARAM wParam, LPARAM lP
 		return( OnCommand(  HIWORD(wParam), LOWORD(wParam), (HWND) lParam ));
 	case WM_DESTROY:
 		OnDestroy();
-		return( TRUE );
+		return true;
 	}
-	return( FALSE );
+	return false;
 }
 
 //************************************
@@ -196,7 +196,7 @@ BOOL CNTWindow::CAboutDlg::DefDialogProc( UINT message, WPARAM wParam, LPARAM lP
 
 bool CNTWindow::COptionsDlg::OnInitDialog()
 {
-	return( false );
+	return false;
 }
 
 bool CNTWindow::COptionsDlg::OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCtl)
@@ -212,7 +212,7 @@ bool CNTWindow::COptionsDlg::OnCommand( word wNotifyCode, INT_PTR wID, HWND hwnd
 			DestroyWindow();
 			break;
 	}
-	return( FALSE );
+	return false;
 }
 
 BOOL CNTWindow::COptionsDlg::DefDialogProc( UINT message, WPARAM wParam, LPARAM lParam )
@@ -225,9 +225,9 @@ BOOL CNTWindow::COptionsDlg::DefDialogProc( UINT message, WPARAM wParam, LPARAM 
 		return( OnCommand(  HIWORD(wParam), LOWORD(wParam), (HWND) lParam ));
 	case WM_DESTROY:
 		OnDestroy();
-		return( TRUE );
+		return true;
 	}
-	return( FALSE );
+	return false;
 }
 
 //************************************
@@ -282,7 +282,7 @@ bool CNTWindow::CStatusWnd::OnInitDialog()
 	FillClients();
 	m_wndListStats.m_hWnd = GetDlgItem(IDC_STAT_STATS);
 	FillStats();
-	return( false );
+	return false;
 }
 
 bool CNTWindow::CStatusWnd::OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCtl )
@@ -298,7 +298,7 @@ bool CNTWindow::CStatusWnd::OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndC
 			DestroyWindow();
 			break;
 	}
-	return( FALSE );
+	return false;
 }
 
 BOOL CNTWindow::CStatusWnd::DefDialogProc( UINT message, WPARAM wParam, LPARAM lParam )
@@ -314,9 +314,9 @@ BOOL CNTWindow::CStatusWnd::DefDialogProc( UINT message, WPARAM wParam, LPARAM l
 		m_wndListClients.OnDestroy();
 		m_wndListStats.OnDestroy();
 		OnDestroy();
-		return( TRUE );
+		return true;
 	}
-	return( FALSE );
+	return false;
 }
 
 CNTWindow::CNTWindow()
@@ -402,7 +402,7 @@ bool CNTWindow::RegisterClass(char *className)	// static
 	ATOM frc = ::RegisterClass( &wc );
 	if ( !frc )
 	{
-		return( false );
+		return false;
 	}
 
     LoadLibrary("Riched20.dll"); // Load the RichEdit DLL to activate the class
@@ -459,7 +459,7 @@ int CNTWindow::OnCreate( HWND hWnd, LPCREATESTRUCT lParam )
 
 	NTWindow_SetWindowTitle();
 
-	return( 0 );
+	return 0;
 }
 
 void CNTWindow::OnDestroy()
@@ -558,12 +558,12 @@ bool CNTWindow::OnClose()
 		int iRet = theApp.m_wndMain.MessageBox("Are you sure you want to close the server?",
 			theApp.m_pszAppName, MB_YESNO|MB_ICONQUESTION );
 		if ( iRet == IDNO )
-			return( false );
+			return false;
 	}
 
 	PostQuitMessage(0);
 	g_Serv.SetExitFlag( 5 );
-	return( true );	// ok to close.
+	return true;	// ok to close.
 }
 
 bool CNTWindow::OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCtl )
@@ -619,9 +619,9 @@ bool CNTWindow::OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCtl )
 		{
 			g_Serv.m_sConsoleText = "R";
 			g_Serv.m_fConsoleTextReadyFlag = true;
-			return( true );
+			return true;
 		}
-		return( false );
+		return false;
 
 	case IDM_EDIT_COPY:
 		m_wndLog.SendMessage( WM_COPY );
@@ -642,11 +642,11 @@ bool CNTWindow::OnCommand( word wNotifyCode, INT_PTR wID, HWND hwndCtl )
 			m_wndInput.SetWindowText("");
 			g_Serv.m_sConsoleText = szTmp;
 			g_Serv.m_fConsoleTextReadyFlag = true;
-			return( true );
+			return true;
 		}
-		return( false );
+		return false;
 	}
-	return( true );
+	return true;
 }
 
 bool CNTWindow::OnSysCommand( WPARAM uCmdType, int xPos, int yPos )
@@ -662,11 +662,11 @@ bool CNTWindow::OnSysCommand( WPARAM uCmdType, int xPos, int yPos )
 			if ( Sphere_GetOSInfo()->dwPlatformId > VER_PLATFORM_WIN32s )
 			{
 				ShowWindow(SW_HIDE);
-				return( true );
+				return true;
 			}
 			break;
 	}
-	return( false );
+	return false;
 }
 
 void	CNTWindow::SetLogFont( const char * pszFont )
@@ -852,15 +852,15 @@ LRESULT WINAPI CNTWindow::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LP
 			return( theApp.m_wndMain.OnCreate( hWnd, (LPCREATESTRUCT) lParam ));
 		case WM_SYSCOMMAND:
 			if ( theApp.m_wndMain.OnSysCommand( wParam &~ 0x0f, LOWORD(lParam), HIWORD(lParam)))
-				return( 0 );
+				return 0;
 			break;
 		case WM_COMMAND:
 			if ( theApp.m_wndMain.OnCommand( HIWORD(wParam), LOWORD(wParam), (HWND) lParam ))
-				return( 0 );
+				return 0;
 			break;
 		case WM_CLOSE:
 			if ( ! theApp.m_wndMain.OnClose())
-				return( false );
+				return false;
 			break;
 		case WM_ERASEBKGND:	// don't bother with this.
 			return 1;
@@ -1012,7 +1012,7 @@ bool NTWindow_PostMsgColor( COLORREF color )
 {
 	// Set the color for the next text.
 	if ( theApp.m_wndMain.m_hWnd == NULL )
-		return( false );
+		return false;
 
 	if ( ! color )
 	{
@@ -1021,7 +1021,7 @@ bool NTWindow_PostMsgColor( COLORREF color )
 	}
 
 	theApp.m_wndMain.m_dwColorNew = color;
-	return( true );
+	return true;
 }
 
 bool NTWindow_PostMsg( LPCTSTR pszMsg )
@@ -1032,7 +1032,7 @@ bool NTWindow_PostMsg( LPCTSTR pszMsg )
 	//  false = post did not work.
 
 	if ( theApp.m_wndMain.m_hWnd == NULL )
-		return( false );
+		return false;
 
 	COLORREF color = theApp.m_wndMain.m_dwColorNew;
 
@@ -1044,7 +1044,7 @@ bool NTWindow_PostMsg( LPCTSTR pszMsg )
 //		if ( ! theApp.m_wndMain.PostMessage( WM_USER_POST_MSG, (WPARAM) color, (LPARAM)psMsg ))
 //		{
 //			delete psMsg;
-//			return( false );
+//			return false;
 //		}
 //	}
 //	else
@@ -1053,7 +1053,7 @@ bool NTWindow_PostMsg( LPCTSTR pszMsg )
 		theApp.m_wndMain.List_Add( color, pszMsg );
 //	}
 
-	return( true );
+	return true;
 }
 
 bool NTWindow_OnTick( int iWaitmSec )
@@ -1082,7 +1082,7 @@ bool NTWindow_OnTick( int iWaitmSec )
 			if ( ! GetMessage( &msg, NULL, 0, 0 ))
 			{
 				g_Serv.SetExitFlag( 5 );
-				return( false );
+				return false;
 			}
 
 			if ( (msg.hwnd == theApp.m_wndMain.m_hWnd) && (msg.message == WM_TIMER) && (msg.wParam == IDT_ONTICK) )
@@ -1102,7 +1102,7 @@ bool NTWindow_OnTick( int iWaitmSec )
 			if ( msg.message == WM_QUIT )
 			{
 				g_Serv.SetExitFlag( 5 );
-				return( false );
+				return false;
 			}
 		}
 
@@ -1240,7 +1240,7 @@ bool NTWindow_OnTick( int iWaitmSec )
 		}
 		if ( theApp.m_dlgOptions.m_hWnd && IsDialogMessage( theApp.m_dlgOptions.m_hWnd, &msg ))
 		{
-			return( true );
+			return true;
 		}
 
 		TranslateMessage(&msg);

@@ -36,7 +36,7 @@ bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
 	tchar * ppCmd[3];
 	size_t iQty = Str_ParseCmds( pszDir, ppCmd, COUNTOF(ppCmd));
 	if (iQty <= 0)
-		return( false );
+		return false;
 
 	tchar chDir = static_cast<tchar>(toupper(ppCmd[0][0]));
 	int iTmp = Exp_GetVal( ppCmd[1] );
@@ -53,11 +53,11 @@ bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
 			iTmp = 1;
 		DIR_TYPE eDir = GetDirStr( ppCmd[0] );
 		if ( eDir >= DIR_QTY )
-			return( false );
+			return false;
 		pt.MoveN( eDir, iTmp );
 	}
 
-	return( true );
+	return true;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -194,7 +194,7 @@ int CObjBase::IsWeird() const
 			return( 0x3201 );
 		}
 	}
-	return( 0 );
+	return 0;
 }
 
 void CObjBase::SetUID( dword dwIndex, bool fItem )
@@ -382,10 +382,10 @@ int64 CObjBase::GetTimerAdjusted() const
 {
 	// RETURN: time in seconds from now.
 	if ( ! IsTimerSet())
-		return( -1 );
+		return -1;
 	int64 iDiffInTicks = GetTimerDiff();
 	if ( iDiffInTicks < 0 )
-		return( 0 );
+		return 0;
 	return( iDiffInTicks / TICK_PER_SEC );
 }
 
@@ -393,10 +393,10 @@ int64 CObjBase::GetTimerDAdjusted() const
 {
 	// RETURN: time in seconds from now.
 	if ( ! IsTimerSet())
-		return( -1 );
+		return -1;
 	int64 iDiffInTicks = GetTimerDiff();
 	if ( iDiffInTicks < 0 )
-		return( 0 );
+		return 0;
 	return( iDiffInTicks );
 }
 
@@ -693,10 +693,10 @@ bool CObjBase::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 		{
 			case OBR_ROOM:
 				pRef = GetTopLevelObj()->GetTopPoint().GetRegion( REGION_TYPE_ROOM );
-				return( true );
+				return true;
 			case OBR_SECTOR:
 				pRef = GetTopLevelObj()->GetTopSector();
-				return( true );
+				return true;
 			case OBR_SPAWNITEM:
 				pRef = (m_uidSpawnItem != static_cast<CUID>(UID_UNUSED)) ? m_uidSpawnItem.ItemFind() : NULL;
 				return true;
@@ -704,10 +704,10 @@ bool CObjBase::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 				if ( pszKey[-1] != '.' )	// only used as a ref !
 					break;
 				pRef = dynamic_cast <CObjBase*>(GetTopLevelObj());
-				return( true );
+				return true;
 			case OBR_TYPEDEF:
 				pRef = Base_GetDef();
-				return( true );
+				return true;
 		}
 
 	}
@@ -757,12 +757,12 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 
 		// WORLD. ?
 		if ( g_World.r_WriteVal( pszKey, sVal, pSrc ))
-			return( true );
+			return true;
 
 
 		// TYPEDEF. ?
 		if ( Base_GetDef()->r_WriteVal( pszKey, sVal, pSrc ))
-			return( true );
+			return true;
 
 		return(	CScriptObj::r_WriteVal( pszKey, sVal, pSrc ));
 	}
@@ -1100,10 +1100,10 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 						DEBUG_ERR(( "DIALOGLIST called on non-client object.\n" ));
 					}
 
-					return( true );
+					return true;
 				}
 				else
-					return( false );
+					return false;
 			}
 			break; 
 		case OC_DISTANCE:
@@ -1192,13 +1192,13 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 			break;
 		case OC_ISEVENT:
 			if ( pszKey[7] != '.' )
-				return( false );
+				return false;
 			pszKey += 8;
 			sVal = m_OEvents.ContainsResourceName(RES_EVENTS, pszKey) ? "1" : "0";
 			return true;
 		case OC_ISTEVENT:
 			if ( pszKey[8] != '.' )
-				return( false );
+				return false;
 			pszKey += 9;
 			sVal = Base_GetDef()->m_TEvents.ContainsResourceName(RES_EVENTS, pszKey) ? "1" : "0";
 			return true;
@@ -1265,7 +1265,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 					sVal.FormatVal( (pChar->m_pPlayer == NULL) ? 0 : 1 );
 				else
 					sVal.FormatVal( 0 );
-				return( true );
+				return true;
 			}
 		case OC_ISDIALOGOPEN:
 			{
@@ -1305,7 +1305,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 					sVal.FormatVal( 0 );
 				}
 
-				return( true );
+				return true;
 			}
 		case OC_ISARMOR:
 			{
@@ -1340,11 +1340,11 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 		case OC_ISTIMERF:
 			{
 				if ( pszKey[8] != '.' )
-					return( false );
+					return false;
 				pszKey += 9;
 				//sVal.FormatVal( (g_World.m_TimedFunctions.IsTimer(GetUID(),pszKey)) ? 1 : 0 );
 				sVal.FormatVal( g_World.m_TimedFunctions.IsTimer(GetUID(),pszKey) );
-				return( true );
+				return true;
 			}
 			break;
 		case OC_ISWEAPON:
@@ -1400,7 +1400,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 		case OC_TAG:			// "TAG" = get/set a local tag.
 			{
 				if ( pszKey[3] != '.' )
-					return( false );
+					return false;
 				pszKey += 4;
 
 				CVarDefCont *	pVarKey	= m_TagDefs.GetKey( pszKey );
@@ -1409,7 +1409,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 				else
 					sVal = pVarKey->GetValStr();
 			}
-			return( true );
+			return true;
 		case OC_TIMER:
 			sVal.FormatLLVal( GetTimerAdjusted());
 			break;
@@ -1459,7 +1459,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 					pt = this->GetUnkPoint();
 
 				if ( !pt.IsValidPoint() )
-					return( false );
+					return false;
 
 				sVal = g_Cfg.Calc_MaptoSextant(pt);
 		} break;
@@ -1490,31 +1490,31 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
  					SKIP_SEPARATORS( pszKey );
  					size_t iQty = static_cast<size_t>( Exp_GetVal( pszKey ) );
 					if ( iQty >= m_TagDefs.GetCount() )
- 						return( false ); // trying to get non-existant tag
+ 						return false; // trying to get non-existant tag
 
  					const CVarDefCont * pTagAt = m_TagDefs.GetAt( iQty );
  					if ( !pTagAt )
- 						return( false ); // trying to get non-existant tag
+ 						return false; // trying to get non-existant tag
 
  					SKIP_SEPARATORS( pszKey );
  					if ( ! *pszKey )
  					{
  						sVal.Format("%s=%s", static_cast<lpctstr>(pTagAt->GetKey()), static_cast<lpctstr>(pTagAt->GetValStr()));
- 						return( true );
+ 						return true;
  					}
  					else if ( !strnicmp( pszKey, "KEY", 3 )) // key?
  					{
  						sVal = static_cast<lpctstr>(pTagAt->GetKey());
- 						return( true );
+ 						return true;
  					}
  					else if ( !strnicmp( pszKey, "VAL", 3 )) // val?
  					{
  						sVal = pTagAt->GetValStr();
- 						return( true );
+ 						return true;
  					}
  				}
 
-			return( false );
+			return false;
 			}
 			break;
 		case OC_TAGCOUNT:
@@ -1528,31 +1528,31 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
  					SKIP_SEPARATORS( pszKey );
  					size_t iQty = static_cast<size_t>( Exp_GetVal( pszKey ) );
 					if ( iQty >= m_BaseDefs.GetCount() )
- 						return( false ); // trying to get non-existant tag
+ 						return false; // trying to get non-existant tag
 
  					const CVarDefCont * pTagAt = m_BaseDefs.GetAt( iQty );
  					if ( !pTagAt )
- 						return( false ); // trying to get non-existant tag
+ 						return false; // trying to get non-existant tag
 
  					SKIP_SEPARATORS( pszKey );
  					if ( ! *pszKey )
  					{
  						sVal.Format("%s=%s", static_cast<lpctstr>(pTagAt->GetKey()), static_cast<lpctstr>(pTagAt->GetValStr()));
- 						return( true );
+ 						return true;
  					}
  					else if ( !strnicmp( pszKey, "KEY", 3 )) // key?
  					{
  						sVal = static_cast<lpctstr>(pTagAt->GetKey());
- 						return( true );
+ 						return true;
  					}
  					else if ( !strnicmp( pszKey, "VAL", 3 )) // val?
  					{
  						sVal = pTagAt->GetValStr();
- 						return( true );
+ 						return true;
  					}
  				}
 
-			return( false );
+			return false;
 			}
 			break;
 		case OC_PROPSCOUNT:
@@ -1583,7 +1583,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 	{
 		bool fQuoted = false;
 		m_TagDefs.SetStr(s.GetKey()+4, fQuoted, s.GetArgStr(&fQuoted), false);
-		return( true );
+		return true;
 	}
 	else if ( s.IsKeyHead("TAG0.", 5) )
 	{
@@ -1819,7 +1819,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 		case OC_MAP:
 			// Move to another map
 			if ( ! IsTopLevel())
-				return( false );
+				return false;
 			{
 				CPointMap pt = GetTopPoint();
 				pt.m_map = (uchar)(s.GetArgVal());
@@ -1971,7 +1971,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				int64 piCmd[8];
 				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, COUNTOF(piCmd));
 				if ( iArgQty < 1 )
-					return( false );
+					return false;
 				if ( iArgQty > 2 )	// Give it a new source char UID
 				{
 					CObjBaseTemplate * pObj = CUID( (dword)(piCmd[2]) ).ObjFind();
@@ -2005,7 +2005,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				EXC_SET("EDIT");
 				// Put up a list of items in the container. (if it is a container)
 				if ( pClientSrc == NULL )
-					return( false );
+					return false;
 				pClientSrc->m_Targ_Text = s.GetArgStr();
 				pClientSrc->Cmd_EditItem( this, -1 );
 			}
@@ -2016,7 +2016,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				int64 piCmd[12];
 				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, COUNTOF(piCmd));
 				if ( iArgQty < 2 )
-					return( false );
+					return false;
 				CObjBase *	pThis	= this;
 				//DEBUG_ERR(("this->GetUID() 0%x \n", (dword)this->GetUID()));
 				if ( piCmd[0] == -1 )
@@ -2059,7 +2059,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			{
 				EXC_SET("INPDLG");
 				if ( pClientSrc == NULL )
-					return( false );
+					return false;
 
 				tchar *Arg_ppCmd[2];		// Maximum parameters in one line
 				size_t iQty = Str_ParseCmds( s.GetArgStr(), Arg_ppCmd, COUNTOF( Arg_ppCmd ));
@@ -2082,7 +2082,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			{
 				EXC_SET("MENU");
 				if ( pClientSrc == NULL )
-					return( false );
+					return false;
 				pClientSrc->Menu_Setup( g_Cfg.ResourceGetIDType( RES_MENU, s.GetArgStr()), this );
 			}
 			break;
@@ -2100,7 +2100,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			{
 				EXC_SET("MESSAGEUA");
 				if ( pClientSrc == NULL )
-					return( false );
+					return false;
 
 				tchar * pszArgs[5];
 				NCHAR ncBuffer[ MAX_TALK_BUFFER ];
@@ -2124,7 +2124,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			{
 				CPointMap pt = GetTopPoint();
 				if ( ! GetDeltaStr( pt, s.GetArgStr()))
-					return( false );
+					return false;
 				MoveTo( pt );
 				Update();
 			}
@@ -2182,7 +2182,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			{
 				EXC_SET("PROMPTCONSOLE/U");
 				if ( pClientSrc == NULL )
-					return( false );
+					return false;
 
 				tchar * pszArgs[2];
 
@@ -2196,16 +2196,16 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		case OV_INFO:
 			EXC_SET("INFO");
 			if ( ! pClientSrc )
-				return( false );
+				return false;
 			return pClientSrc->addGumpDialogProps( GetUID());
 		case OV_REMOVE:	//remove this object now.
 			EXC_SET("REMOVE");
 			Delete();
-			return( true );
+			return true;
 		case OV_REMOVEFROMVIEW:
 			EXC_SET("REMOVEFROMVIEW");
 			RemoveFromView( NULL, false );	// remove this item from all clients.
-			return( true );
+			return true;
 		case OV_RESENDTOOLTIP:
 			{
 				EXC_SET("RESENDTOOLTIP");
@@ -2222,7 +2222,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					bUseCache = (piCmd[1] != 0);
 
 				ResendTooltip(bSendFull, bUseCache);
-				return( true );
+				return true;
 			}
 		case OV_SAY: //speak so everyone can here
 			EXC_SET("SAY");
@@ -2310,7 +2310,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			{
 				EXC_SET("TARGET");
 				if ( pClientSrc == NULL )
-					return( false );
+					return false;
 				pszKey	+= 6;
 				bool		fGround		= false;
 				bool		fCrim		= false;
@@ -2416,12 +2416,12 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			{
 				EXC_SET("DIALOG or SDIALOG");
 				if ( pClientSrc == NULL )
-					return( false );
+					return false;
 
 				tchar *	Arg_ppCmd[3];		// Maximum parameters in one line
 				size_t iQty = Str_ParseCmds( s.GetArgStr(), Arg_ppCmd, COUNTOF( Arg_ppCmd ));
 				if ( iQty < 1 )
-					return( false );
+					return false;
 
 				if ( index == OV_SDIALOG )
 				{
@@ -2450,7 +2450,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			{
 				EXC_SET("DIALOGCLOSE");
 				if ( pClientSrc == NULL )
-					return( false );
+					return false;
 
 				tchar *	Arg_ppCmd[2];		// Maximum parameters in one line
 				size_t iQty = Str_ParseCmds( s.GetArgStr(), Arg_ppCmd, COUNTOF( Arg_ppCmd ));
@@ -2501,10 +2501,10 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				if ( !r_Verb(script, pSrc) )
 				{
 					DEBUG_ERR(( "Can't try %s object %s (0%x)\n", pszVerb, GetName(), (dword)(GetUID())));
-					return( false );
+					return false;
 				}
 			}
-			return( true );
+			return true;
 		case OV_TRYSRC:
 		case OV_TRYSRV:
 			{
@@ -2560,7 +2560,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			{
 				pSrc->SysMessage( "Setting the UID this way is not allowed" );
 			}
-			return( false );
+			return false;
 
 		case OV_UPDATE:
 			EXC_SET("UPDATE");
@@ -2614,13 +2614,13 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		case OV_USEITEM:
 			EXC_SET("USEITEM");
 			if ( ! pCharSrc )
-				return( false );
+				return false;
 			if ( s.HasArgs() )
 			{
 				CUID uid = s.GetArgVal();
 
 				if (( ! uid.ObjFind()) || ( ! this->IsChar() ))
-					return( false );
+					return false;
 
 				CChar *pChar = dynamic_cast <CChar *> (this);
 
@@ -2634,7 +2634,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		case OV_Z:	//	ussually in "SETZ" form
 			EXC_SET("FIX or Z");
 			if ( IsItemEquipped())
-				return( false );
+				return false;
 			if ( s.HasArgs())
 			{
 				SetUnkZ( (char)(s.GetArgVal()));
@@ -2657,7 +2657,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			break;
 
 		default:
-			return( false );
+			return false;
 	}
 	return true;
 	EXC_CATCH;

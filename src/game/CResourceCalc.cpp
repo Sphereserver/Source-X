@@ -279,7 +279,7 @@ bool CResource::Calc_CrimeSeen( CChar * pCharThief, CChar * pCharViewer, SKILL_T
 	//  viewers skill
 
 	if ( SkillToSee == SKILL_NONE )	// takes no skill.
-		return( true );
+		return true;
 
 	ASSERT(pCharViewer);
 	ASSERT(pCharThief);
@@ -287,9 +287,9 @@ bool CResource::Calc_CrimeSeen( CChar * pCharThief, CChar * pCharViewer, SKILL_T
 	if ( pCharViewer->IsPriv(PRIV_GM) || pCharThief->IsPriv(PRIV_GM))
 	{
 		if ( pCharViewer->GetPrivLevel() < pCharThief->GetPrivLevel())
-			return( false );	// never seen
+			return false;	// never seen
 		if ( pCharViewer->GetPrivLevel() > pCharThief->GetPrivLevel())
-			return( true );		// always seen.
+			return true;		// always seen.
 	}
 
 	int iChanceToSee = ( pCharViewer->Stat_GetAdjusted(STAT_DEX) + pCharViewer->Stat_GetAdjusted(STAT_INT)) * 50;
@@ -314,9 +314,9 @@ bool CResource::Calc_CrimeSeen( CChar * pCharThief, CChar * pCharViewer, SKILL_T
 	}
 
 	if ( Calc_GetRandVal(1000) > iChanceToSee )
-		return( false );
+		return false;
 
-	return( true );
+	return true;
 }
 
 lpctstr CResource::Calc_MaptoSextant( CPointMap pntCoords )

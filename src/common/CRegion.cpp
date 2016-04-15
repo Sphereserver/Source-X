@@ -99,7 +99,7 @@ bool CGRegion::IsInside2d( const CPointBase & pt ) const
 {
 	ADDTOCALLSTACK("CGRegion::IsInside2d");
 	if ( ! m_rectUnion.IsInside2d( pt ))
-		return( false );
+		return false;
 
 	size_t iQty = m_Rects.GetCount();
 	if ( iQty > 0 )
@@ -107,9 +107,9 @@ bool CGRegion::IsInside2d( const CPointBase & pt ) const
 		for ( size_t i = 0; i < iQty; i++ )
 		{
 			if ( m_Rects[i].IsInside2d( pt ))
-				return( true );
+				return true;
 		}
-		return( false );
+		return false;
 	}
 	return true;
 }
@@ -137,20 +137,20 @@ bool CGRegion::AddRegionRect( const CGRect & rect )
 		for ( size_t j = 0; j < iQty; j++ )
 		{
 			if ( rect.IsInside( m_Rects[j] ))
-				return( true );
+				return true;
 		}
 
 		if ( iQty <= 0 )
 		{
 			if ( rect.IsInside( m_rectUnion ))
-				return( true );
+				return true;
 			m_Rects.Add( m_rectUnion );
 		}
 
 		m_Rects.Add( rect );
 		m_rectUnion.UnionRect( rect );
 	}
-	return( true );
+	return true;
 }
 
 bool CGRegion::IsOverlapped( const CGRect & rect ) const
@@ -177,19 +177,19 @@ bool CGRegion::IsInside( const CGRect & rect ) const
 	// NOTE: This is NOT 100% true !!
 
 	if ( ! m_rectUnion.IsInside( rect ))
-		return( false );
+		return false;
 
 	size_t iQty = m_Rects.GetCount();
 	if ( iQty <= 0 )
-		return( true );
+		return true;
 
 	for ( size_t i = 0; i < iQty; i++ )
 	{
 		if ( m_Rects[i].IsInside( rect ))
-			return( true );
+			return true;
 	}
 
-	return( false );
+	return false;
 }
 
 bool CGRegion::IsInside( const CGRegion * pRegionTest ) const
@@ -199,16 +199,16 @@ bool CGRegion::IsInside( const CGRegion * pRegionTest ) const
 	// Is the pRegionTest completely inside this region ?
 
 	if ( ! m_rectUnion.IsInside( pRegionTest->m_rectUnion ))
-		return( false );
+		return false;
 
 	size_t iQtyTest = pRegionTest->m_Rects.GetCount();
 	for ( size_t j = 0; j < iQtyTest; j++ )
 	{
 		if ( ! IsInside( pRegionTest->m_Rects[j] ))
-			return( false );
+			return false;
 	}
 
-	return( true );
+	return true;
 }
 
 bool CGRegion::IsOverlapped( const CGRegion * pRegionTest ) const
@@ -216,13 +216,13 @@ bool CGRegion::IsOverlapped( const CGRegion * pRegionTest ) const
 	ADDTOCALLSTACK("CGRegion::IsOverlapped");
 	// Does the region overlap this rectangle.
 	if ( ! m_rectUnion.IsOverlapped( pRegionTest->m_rectUnion ))
-		return( false );
+		return false;
 	size_t iQty = m_Rects.GetCount();
 	size_t iQtyTest = pRegionTest->m_Rects.GetCount();
 	if ( iQty == 0 )
 	{
 		if ( iQtyTest == 0 )
-			return( true );
+			return true;
 		return( pRegionTest->IsOverlapped(m_rectUnion));
 	}
 	if ( iQtyTest == 0 )
@@ -234,10 +234,10 @@ bool CGRegion::IsOverlapped( const CGRegion * pRegionTest ) const
 		for ( size_t i = 0; i < iQtyTest; i++ )
 		{
 			if ( m_Rects[j].IsOverlapped( pRegionTest->m_Rects[i] ))
-				return( true );
+				return true;
 		}
 	}
-	return( false );
+	return false;
 }
 
 bool CGRegion::IsEqualRegion( const CGRegion * pRegionTest ) const
@@ -245,24 +245,24 @@ bool CGRegion::IsEqualRegion( const CGRegion * pRegionTest ) const
 	ADDTOCALLSTACK("CGRegion::IsEqualRegion");
 	// Find dupe rectangles.
 	if ( ! m_rectUnion.IsEqual( pRegionTest->m_rectUnion ))
-		return( false );
+		return false;
 
 	size_t iQty = m_Rects.GetCount();
 	size_t iQtyTest = pRegionTest->m_Rects.GetCount();
 	if ( iQty != iQtyTest )
-		return( false );
+		return false;
 
 	for ( size_t j = 0; j < iQty; j++ )
 	{
 		for ( size_t i = 0; ; i++ )
 		{
 			if ( i >= iQtyTest )
-				return( false );
+				return false;
 			if ( m_Rects[j].IsEqual( pRegionTest->m_Rects[i] ))
 				break;
 		}
 	}
-	return( true );
+	return true;
 }
 
 //*************************************************************************
@@ -346,13 +346,13 @@ bool CRegionBase::AddRegionRect( const CRectMap & rect )
 	// Add an included rectangle to this region.
 	if ( ! rect.IsValid())
 	{
-		return( false );
+		return false;
 	}
 	if ( ! CGRegion::AddRegionRect( rect ))
-		return( false );
+		return false;
 
 	// Need to call RealizeRegion now.?
-	return( true );
+	return true;
 }
 
 void CRegionBase::SetName( lpctstr pszName )
@@ -482,10 +482,10 @@ bool CRegionBase::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pS
 			break;
 		case RC_ISEVENT:
 			if ( pszKey[7] != '.' )
-				return( false );
+				return false;
 			pszKey += 8;
 			sVal = m_Events.ContainsResourceName(RES_EVENTS, pszKey) ? "1" : "0";
-			return( true );
+			return true;
 		case RC_FLAGS:
 			sVal.FormatHex( GetRegionFlags() );
 			break;
@@ -552,7 +552,7 @@ bool CRegionBase::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pS
 					return true;
 				}
 				sVal = m_Rects[iRect].Write();
-				return( true );
+				return true;
 			}
 		case RC_SAFE:
 			sVal.FormatVal( IsFlag(REGION_FLAG_SAFE));
@@ -568,31 +568,31 @@ bool CRegionBase::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pS
 					SKIP_SEPARATORS( pszKey );
 					size_t iQty = static_cast<size_t>( Exp_GetVal( pszKey ) ); 
 					if ( iQty >= m_TagDefs.GetCount() )
-						return( false ); // trying to get non-existant tag
+						return false; // trying to get non-existant tag
 						
 					CVarDefCont * pTagAt = m_TagDefs.GetAt( iQty );
 					if ( !pTagAt )
-						return( false ); // trying to get non-existant tag
+						return false; // trying to get non-existant tag
 						
 					SKIP_SEPARATORS( pszKey );
 					if ( ! *pszKey )
 					{
 						sVal.Format("%s=%s", static_cast<lpctstr>(pTagAt->GetKey()), static_cast<lpctstr>(pTagAt->GetValStr()));
-						return( true );
+						return true;
 					}
 					else if ( !strnicmp( pszKey, "KEY", 3 )) // key?
 					{
 						sVal = static_cast<lpctstr>(pTagAt->GetKey());
-						return( true );
+						return true;
 					}
 					else if ( !strnicmp( pszKey, "VAL", 3 )) // val?
 					{
 						sVal = pTagAt->GetValStr();
-						return( true );
+						return true;
 					}
 				}
 					
-				return( false );
+				return false;
 			} 
 			break;
 		case RC_TAG0:
@@ -601,10 +601,10 @@ bool CRegionBase::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pS
 		case RC_TAG:	// "TAG" = get/set a local tag.
 			{	
 				if ( pszKey[3] != '.' )
-					return( false );
+					return false;
 				pszKey += 4;
 				sVal = m_TagDefs.GetKeyStr( pszKey, fZero );
-				return( true );
+				return true;
 			}
 		case RC_TYPEREGION:
 			{
@@ -650,19 +650,19 @@ bool CRegionBase::r_LoadVal( CScript & s )
 		SetModified( REGMOD_TAGS );
 		bool fQuoted = false; 
 		m_TagDefs.SetStr( s.GetKey()+ 4, fQuoted, s.GetArgStr( &fQuoted ), false );
-		return( true );
+		return true;
 	}
 	if ( s.IsKeyHead( "TAG0.", 5 ))
 	{
 		SetModified( REGMOD_TAGS );
 		bool fQuoted = false; 
 		m_TagDefs.SetStr( s.GetKey()+ 5, fQuoted, s.GetArgStr( &fQuoted ), false );
-		return( true );
+		return true;
 	}
 
 	RC_TYPE index = (RC_TYPE) FindTableSorted( s.GetKey(), sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 );
 	if ( index < 0 )
-		return( false );
+		return false;
 
 	switch ( index )
 	{
@@ -855,39 +855,39 @@ bool CRegionBase::CheckAntiMagic( SPELL_TYPE spell ) const
 		REGION_ANTIMAGIC_GATE |
 		REGION_ANTIMAGIC_TELEPORT |
 		REGION_ANTIMAGIC_DAMAGE ))	// no effects on magic anyhow.
-		return( false );
+		return false;
 
 	if ( IsFlag( REGION_ANTIMAGIC_ALL ))
-		return( true );
+		return true;
 
 	if ( IsFlag( REGION_ANTIMAGIC_RECALL_IN | REGION_FLAG_SHIP ))
 	{
 		if ( spell == SPELL_Mark || spell == SPELL_Gate_Travel )
-			return( true );
+			return true;
 	}
 	if ( IsFlag( REGION_ANTIMAGIC_RECALL_OUT ))
 	{
 		if ( spell == SPELL_Recall || spell == SPELL_Gate_Travel || spell == SPELL_Mark )
-			return( true );
+			return true;
 	}
 	if ( IsFlag( REGION_ANTIMAGIC_GATE ))
 	{
 		if ( spell == SPELL_Gate_Travel )
-			return( true );
+			return true;
 	}
 	if ( IsFlag( REGION_ANTIMAGIC_TELEPORT ))
 	{
 		if ( spell == SPELL_Teleport )
-			return( true );
+			return true;
 	}
 	if ( IsFlag( REGION_ANTIMAGIC_DAMAGE ))
 	{
 		const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
 		ASSERT(pSpellDef);
 		if ( pSpellDef->IsSpellType( SPELLFLAG_HARM ))
-			return( true );
+			return true;
 	}
-	return( false );
+	return false;
 }
 
 enum RV_TYPE

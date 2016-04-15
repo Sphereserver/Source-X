@@ -88,7 +88,7 @@ realtype CVarFloat::MakeFloatMath( lpctstr & Expr )
 	ADDTOCALLSTACK("CVarFloat::MakeFloatMath");
 	//DEBUG_ERR(("MakeFloatMath\n"));
 	if ( ! Expr )
-		return( 0 );
+		return 0;
 
 	GETNONWHITESPACE( Expr );
 
@@ -97,7 +97,7 @@ realtype CVarFloat::MakeFloatMath( lpctstr & Expr )
 	{
 		DEBUG_WARN(( "Deadlock detected while parsing '%s'. Fix the error in your scripts.\n", Expr ));
 		--Reentrant_Count;
-		return( 0 );
+		return 0;
 	}
 	//DEBUG_ERR(("Expr: '%s' GetSingle(Expr) '%f' GetValMath(GetSingle(Expr), Expr) '%f'\n",Expr,GetSingle(Expr),GetValMath(GetSingle(Expr), Expr)));
 	realtype dVal = GetValMath(GetSingle(Expr), Expr);
@@ -299,7 +299,7 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 		case '~':	// Bitwise not.
 			++pArgs;
 			DEBUG_ERR(("Operator '~' is not allowed with floats.\n"));
-			return( 0 );
+			return 0;
 		case '!':	// boolean not.
 			++pArgs;
 			if ( pArgs[0] == '=' )  // odd condition such as (!=x) which is always true of course.
@@ -311,7 +311,7 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 		case ';':	// seperate field.
 		case ',':	// seperate field.
 		case '\0':
-			return( 0 );
+			return 0;
 	}
 	INTRINSIC_TYPE iIntrinsic = (INTRINSIC_TYPE) FindTableHeadSorted( pArgs, sm_IntrinsicFunctions, COUNTOF(sm_IntrinsicFunctions)-1 );
 	if ( iIntrinsic >= 0 )
@@ -739,7 +739,7 @@ realtype CVarFloat::GetRandVal2( realtype dMin, realtype dMax )
 	if (iQty == 0)
 	{
 		DEBUG_ERR(("1"));
-		return( 0 );
+		return 0;
 	}
 	if (iQty == 1) // It's just a simple value
 	{
@@ -785,7 +785,7 @@ int CVarFloat::GetRangeVals( lpctstr & pExpr, realtype * piVals, short int iMaxQ
 	ADDTOCALLSTACK("CVarFloat::GetRangeVals");
 	// Get a list of values.
 	if ( pExpr == NULL )
-		return( 0 );
+		return 0;
 
 	ASSERT(piVals);
 

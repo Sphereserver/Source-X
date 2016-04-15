@@ -94,43 +94,43 @@ bool CSector::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
 			return true;
 		case SC_COLDCHANCE:
 			sVal.FormatVal( GetColdChance());
-			return( true );
+			return true;
 		case SC_COMPLEXITY:
 			if ( pszKey[10] == '.' )
 			{
 				pszKey += 11;
 				sVal = ( ! strcmpi( pszKey, sm_ComplexityTitles->FindName( GetCharComplexity()))) ? "1" : "0";
-				return( true );
+				return true;
 			}
 			sVal.FormatVal( GetCharComplexity());
-			return( true );
+			return true;
 		case SC_FLAGS:
 			sVal.FormatHex(m_dwFlags);
-			return( true );
+			return true;
 		case SC_LIGHT:
 			sVal.FormatVal(GetLight());
 			return true;
 		case SC_LOCALTIME:
 			sVal = GetLocalGameTime();
-			return( true );
+			return true;
 		case SC_LOCALTOD:
 			sVal.FormatVal( GetLocalTime());
-			return( true );
+			return true;
 		case SC_NUMBER:
 			sVal.FormatVal(m_index);
-			return( true );
+			return true;
 		case SC_ISDARK:
 			sVal.FormatVal( IsDark() );
-			return( true );
+			return true;
 		case SC_ISNIGHTTIME:
 			{
 				int iMinutes = GetLocalTime();
 				sVal = ( iMinutes < 7*60 || iMinutes > (9+12)*60 ) ? "1" : "0";
 			}
-			return( true );
+			return true;
 		case SC_RAINCHANCE:
 			sVal.FormatVal( GetRainChance());
-			return( true );
+			return true;
 		case SC_ITEMCOUNT:
 			sVal.FormatVal(GetItemComplexity());
 			return true;
@@ -157,7 +157,7 @@ bool CSector::r_LoadVal( CScript &s )
 	{
 		case SC_COLDCHANCE:
 			SetWeatherChance( false, s.HasArgs() ? s.GetArgVal() : -1 );
-			return( true );
+			return true;
 		case SC_FLAGS:
 			m_dwFlags = s.GetArgVal();
 			return true;
@@ -167,13 +167,13 @@ bool CSector::r_LoadVal( CScript &s )
 			return true;
 		case SC_RAINCHANCE:
 			SetWeatherChance( true, s.HasArgs() ? s.GetArgVal() : -1 );
-			return( true );
+			return true;
 		case SC_SEASON:
 			SetSeason(s.HasArgs() ? static_cast<SEASON_TYPE>(s.GetArgVal()) : SEASON_Summer);
 			return (true);
 		case SC_WEATHER:
 			SetWeather(s.HasArgs() ? static_cast<WEATHER_TYPE>(s.GetArgVal()) : WEATHER_DRY);
-			return( true );
+			return true;
 	}
 	EXC_CATCH;
 

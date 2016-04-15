@@ -45,7 +45,7 @@ public:
 	{
 		UNREFERENCED_PARAMETER(lpCreateStruct);
 		m_hWnd = hwnd;
-		return( TRUE );
+		return true;
 	}
 	void OnDestroy()
 	{
@@ -61,9 +61,9 @@ public:
 	BOOL IsWindow() const
 	{
 		if ( this == NULL )
-			return( false );
+			return false;
 		if ( m_hWnd == NULL )
-			return( false );
+			return false;
 		return( ::IsWindow( m_hWnd ));
 	}
 	HWND GetParent() const

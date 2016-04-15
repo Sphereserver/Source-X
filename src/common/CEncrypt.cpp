@@ -150,7 +150,7 @@ const word CCrypt::packet_size[0xde] = {
 int CCrypt::GetPacketSize(byte packet) // static
 {
 	if ( packet >= 0xde )
-		return( -1 );
+		return -1;
 
 	return( packet_size[packet] );
 }
@@ -547,10 +547,10 @@ bool CCrypt::SetClientVer( lpctstr pszVersion )
 	if ( ! SetClientVerEnum( iVer ) )
 	{
 		DEBUG_ERR(( "Unsupported ClientVersion '%s'/'0x%x'. Use Ignition?\n", pszVersion, iVer ));
-		return( false );
+		return false;
 	}
 
-	return( true );
+	return true;
 }
 
 // ---------------------------------------------------------------------------------------------------------------

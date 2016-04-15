@@ -136,7 +136,7 @@ public:
 			// not valid !
 		}
 		m_codes[0] = 0;
-		return( false );
+		return false;
 	}
 };
 

@@ -183,7 +183,7 @@ size_t CChar::NPC_OnHearName( lpctstr pszText ) const
 			break;
 	}
 
-	return( 0 );
+	return 0;
 }
 
 bool CChar::NPC_CanSpeak() const
@@ -223,19 +223,19 @@ bool CChar::NPC_IsOwnedBy( const CChar * pChar, bool fAllowGM ) const
 	// fAllowGM = consider GM's to be owners of all NPC's
 
 	if ( pChar == NULL )
-		return( false );
+		return false;
 	if ( this == pChar )
-		return( true );
+		return true;
 
 	if ( fAllowGM && pChar->IsPriv( PRIV_GM ))
 		return( pChar->GetPrivLevel() > GetPrivLevel());
 
 	if ( ! IsStatFlag( STATF_Pet ) || m_pPlayer )	// shortcut - i'm not a pet.
-		return( false );
+		return false;
 	if ( m_pNPC == NULL )
-		return( false );
+		return false;
 	if ( m_pNPC->m_Brain == NPCBRAIN_BERSERK )	// i cannot be commanded.
-		return( false );
+		return false;
 
 	return( Memory_FindObjTypes( pChar, MEMORY_IPET ) != NULL );
 }
@@ -416,11 +416,11 @@ int CChar::NPC_GetWeaponUseScore( CItem * pWeapon )
 		// Is it a weapon ?
 		skill = pWeapon->Weapon_GetSkill();
 		if ( skill == SKILL_WRESTLING )
-			return( 0 );
+			return 0;
 
 		// I can't equip this anyhow.
 		if ( CanEquipLayer( pWeapon, LAYER_QTY, NULL, true ) == LAYER_NONE )
-			return( 0 );
+			return 0;
 		// How much damage could i do with this ?
 	}
 

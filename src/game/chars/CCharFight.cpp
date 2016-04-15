@@ -147,7 +147,7 @@ bool CChar::CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObj
 			pChar->OnNoticeCrime( this, pCharMark );
 		}
 	}
-	return( fSeen );
+	return fSeen;
 }
 
 // Assume the container is not locked.
@@ -158,18 +158,18 @@ bool CChar::Skill_Snoop_Check( const CItemContainer * pItem )
 	ADDTOCALLSTACK("CChar::Skill_Snoop_Check");
 
 	if ( pItem == NULL )
-		return( true );
+		return true;
 
-	ASSERT( pItem->IsItem());
+	ASSERT( pItem->IsItem() );
 	if ( pItem->IsContainer() )
 	{
 		CItemContainer * pItemCont = dynamic_cast <CItemContainer *> (pItem->GetContainer());
 			if  ( ( pItemCont->IsItemInTrade() == true )  && ( g_Cfg.m_iTradeWindowSnooping == false ) )
-				return( false );
+				return false;
 	}
 
-	if ( ! IsPriv(PRIV_GM))
-	switch ( pItem->GetType())
+	if ( !IsPriv(PRIV_GM) )
+	switch ( pItem->GetType() )
 	{
 		case IT_SHIP_HOLD_LOCK:
 		case IT_SHIP_HOLD:
@@ -178,26 +178,26 @@ bool CChar::Skill_Snoop_Check( const CItemContainer * pItem )
 			if ( m_pArea->GetResourceID() != pItem->m_uidLink )
 			{
 				SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_HATCH_FAIL));
-				return( true );
+				return true;
 			}
 			break;
 		case IT_EQ_BANK_BOX:
 			// Some sort of cheater.
-			return( false );
+			return false;
 		default:
 			break;
 	}
 
 	CChar * pCharMark;
-	if ( ! IsTakeCrime( pItem, &pCharMark ) || pCharMark == NULL )
-		return( false );
+	if ( !IsTakeCrime( pItem, &pCharMark ) || pCharMark == NULL )
+		return false;
 
-	if ( Skill_Wait(SKILL_SNOOPING))
-		return( true );
+	if ( Skill_Wait(SKILL_SNOOPING) )
+		return true;
 
 	m_Act_Targ = pItem->GetUID();
 	Skill_Start( SKILL_SNOOPING );
-	return( true );
+	return true;
 }
 
 // SKILL_SNOOPING
@@ -211,27 +211,27 @@ int CChar::Skill_Snooping( SKTRIG_TYPE stage )
 	ADDTOCALLSTACK("CChar::Skill_Snooping");
 
 	if ( stage == SKTRIG_STROKE )
-		return( 0 );
+		return 0;
 
 	// Assume the container is not locked.
 	CItemContainer * pCont = dynamic_cast <CItemContainer *>(m_Act_Targ.ItemFind());
 	if ( pCont == NULL )
-		return( -SKTRIG_QTY );
+		return ( -SKTRIG_QTY );
 
 	CChar * pCharMark;
 	if ( ! IsTakeCrime( pCont, &pCharMark ) || pCharMark == NULL )
-		return( 0 );	// Not a crime really.
+		return 0;	// Not a crime really.
 
 	if ( GetTopDist3D( pCharMark ) > 1 )
 	{
 		SysMessageDefault( DEFMSG_SNOOPING_REACH );
-		return( -SKTRIG_QTY );
+		return ( -SKTRIG_QTY );
 	}
 
 	if ( !CanTouch( pCont ))
 	{
 		SysMessageDefault( DEFMSG_SNOOPING_CANT );
-		return( -SKTRIG_QTY );
+		return ( -SKTRIG_QTY );
 	}
 
 	if ( stage == SKTRIG_START )
@@ -240,11 +240,11 @@ int CChar::Skill_Snooping( SKTRIG_TYPE stage )
 		if ( plevel < pCharMark->GetPrivLevel())
 		{
 			SysMessageDefault( DEFMSG_SNOOPING_CANT );
-			return( -SKTRIG_QTY );
+			return -SKTRIG_QTY;
 		}
 
 		// return the difficulty.
-		return( (Skill_GetAdjusted(SKILL_SNOOPING) < Calc_GetRandVal(1000))? 100 : 0 );
+		return ( (Skill_GetAdjusted(SKILL_SNOOPING) < Calc_GetRandVal(1000))? 100 : 0 );
 	}
 
 	// did anyone see this ?
@@ -260,10 +260,10 @@ int CChar::Skill_Snooping( SKTRIG_TYPE stage )
 
 	if ( stage == SKTRIG_SUCCESS )
 	{
-		if ( IsClient())
+		if ( IsClient() )
 			m_pClient->addContainerSetup( pCont );	// open the container
 	}
-	return( 0 );
+	return 0;
 }
 
 // m_Act_Targ = object to steal.
@@ -275,7 +275,7 @@ int CChar::Skill_Stealing( SKTRIG_TYPE stage )
 {
 	ADDTOCALLSTACK("CChar::Skill_Stealing");
 	if ( stage == SKTRIG_STROKE )
-		return( 0 );
+		return 0;
 
 	CItem * pItem = m_Act_Targ.ItemFind();
 	CChar * pCharMark = NULL;
@@ -285,14 +285,14 @@ int CChar::Skill_Stealing( SKTRIG_TYPE stage )
 		if ( pCharMark == NULL )
 		{
 			SysMessageDefault( DEFMSG_STEALING_NOTHING );
-			return( -SKTRIG_QTY );
+			return ( -SKTRIG_QTY );
 		}
 		CItemContainer * pPack = pCharMark->GetPack();
 		if ( pPack == NULL )
 		{
 cantsteal:
 			SysMessageDefault( DEFMSG_STEALING_EMPTY );
-			return( -SKTRIG_QTY );
+			return ( -SKTRIG_QTY );
 		}
 		pItem = pPack->ContentFindRandom();
 		if ( pItem == NULL )
@@ -310,7 +310,7 @@ cantsteal:
 		if ( pCorpse )
 		{
 			SysMessageDefault( DEFMSG_STEALING_CORPSE );
-			return( -SKTRIG_ABORT );
+			return -SKTRIG_ABORT;
 		}
 	}
    CItem * pCItem = dynamic_cast <CItem *> (pItem->GetContainer());
@@ -319,19 +319,19 @@ cantsteal:
 	   if ( pCItem->GetType() == IT_GAME_BOARD )
 	   {
 		   SysMessageDefault( DEFMSG_STEALING_GAMEBOARD );
-		   return( -SKTRIG_ABORT );
+		   return -SKTRIG_ABORT;
 	   }
 	   if ( pCItem->GetType() == IT_EQ_TRADE_WINDOW )
 	   {
 		   SysMessageDefault( DEFMSG_STEALING_TRADE );
-		   return( -SKTRIG_ABORT );
+		   return -SKTRIG_ABORT;
 	   }
    }
 	CItemCorpse * pCorpse = dynamic_cast <CItemCorpse *> (pItem);
 	if ( pCorpse )
 	{
 		SysMessageDefault( DEFMSG_STEALING_CORPSE );
-		return( -SKTRIG_ABORT );
+		return -SKTRIG_ABORT;
 	}
 	if ( pItem->IsType(IT_TRAIN_PICKPOCKET))
 	{
@@ -345,24 +345,24 @@ cantsteal:
 	if ( ! CanTouch( pItem ))
 	{
 		SysMessageDefault( DEFMSG_STEALING_REACH );
-		return( -SKTRIG_ABORT );
+		return -SKTRIG_ABORT;
 	}
 	if ( ! CanMove( pItem ) || ! CanCarry( pItem ))
 	{
 		SysMessageDefault( DEFMSG_STEALING_HEAVY );
-		return( -SKTRIG_ABORT );
+		return -SKTRIG_ABORT;
 	}
 	if ( ! IsTakeCrime( pItem, & pCharMark ))
 	{
 		SysMessageDefault( DEFMSG_STEALING_NONEED );
 
 		// Just pick it up ?
-		return( -SKTRIG_QTY );
+		return -SKTRIG_QTY;
 	}
 	if ( m_pArea->IsFlag(REGION_FLAG_SAFE))
 	{
 		SysMessageDefault( DEFMSG_STEALING_STOP );
-		return( -SKTRIG_QTY );
+		return -SKTRIG_QTY;
 	}
 
 	Reveal();	// If we take an item off the ground we are revealed.
@@ -378,7 +378,7 @@ cantsteal:
 		if ( m_pArea->IsFlag(REGION_FLAG_NO_PVP) && pCharMark->m_pPlayer && ! IsPriv(PRIV_GM))
 		{
 			SysMessageDefault( DEFMSG_STEALING_SAFE );
-			return( -1 );
+			return -1;
 		}
 		if ( GetPrivLevel() < pCharMark->GetPrivLevel())
 		{
@@ -394,7 +394,7 @@ cantsteal:
 		// stealing off the ground should always succeed.
 		// it's just a matter of getting caught.
 		if ( stage == SKTRIG_START )
-			return( 1 );	// town stuff on the ground is too easy.
+			return 1;	// town stuff on the ground is too easy.
 
 		fGround = true;
 	}
@@ -414,13 +414,13 @@ cantsteal:
 	}
 
 	if ( m_Act_Difficulty == 0 )
-		return( 0 );	// Too easy to be bad. hehe
+		return 0;	// Too easy to be bad. hehe
 
 	// You should only be able to go down to -1000 karma by stealing.
 	if ( CheckCrimeSeen( SKILL_STEALING, pCharMark, pItem, (stage == SKTRIG_FAIL)? g_Cfg.GetDefaultMsg( DEFMSG_STEALING_YOUR ) : g_Cfg.GetDefaultMsg( DEFMSG_STEALING_SOMEONE ) ))
 		Noto_Karma( -100, -1000, true );
 
-	return( 0 );
+	return 0;
 }
 
 // I just yelled for guards.
@@ -629,7 +629,7 @@ bool CChar::OnAttackedBy( CChar * pCharSrc, int iHarmQty, bool fCommandPet, bool
 		OnHarmedBy( pCharSrc );
 	}
 
-	return( true );
+	return true;
 }
 
 // Armor layers that can be damaged on combat
@@ -813,14 +813,14 @@ int CChar::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType, int iDmgPhys
 		pSrc = this;
 
 	if ( IsStatFlag(STATF_DEAD) )	// already dead
-		return( -1 );
+		return -1;
 	if ( !(uType & DAMAGE_GOD) )
 	{
 		if ( IsStatFlag(STATF_INVUL|STATF_Stone) )
 		{
 effect_bounce:
 			Effect( EFFECT_OBJ, ITEMID_FX_GLOW, this, 10, 16 );
-			return( 0 );
+			return 0;
 		}
 		if ( (uType & DAMAGE_FIRE) && Can(CAN_C_FIRE_IMMUNE) )
 			goto effect_bounce;
@@ -836,7 +836,7 @@ effect_bounce:
 	// Make some notoriety checks
 	// Don't reveal attacker if the damage has DAMAGE_NOREVEAL flag set (this is set by default for poison and spell damage)
 	if ( !OnAttackedBy(pSrc, iDmg, false, !(uType & DAMAGE_NOREVEAL)) )
-		return( 0 );
+		return 0;
 
 	// Apply Necromancy cursed effects
 	if ( IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) )
@@ -903,7 +903,7 @@ effect_bounce:
 	if ( IsTrigUsed(TRIGGER_GETHIT) )
 	{
 		if ( OnTrigger( CTRIG_GetHit, pSrc, &Args ) == TRIGRET_RET_TRUE )
-			return( 0 );
+			return 0;
 		iDmg = (int)(Args.m_iN1);
 		uType = static_cast<DAMAGE_TYPE>(Args.m_iN2);
 	}
@@ -1068,7 +1068,7 @@ bool CChar::Fight_IsActive() const
 {
 	ADDTOCALLSTACK("CChar::Fight_IsActive");
 	if ( ! IsStatFlag(STATF_War))
-		return( false );
+		return false;
 
 	SKILL_TYPE iSkillActive = Skill_GetActive();
 	switch ( iSkillActive )
@@ -1079,7 +1079,7 @@ bool CChar::Fight_IsActive() const
 		case SKILL_SWORDSMANSHIP:
 		case SKILL_WRESTLING:
 		case SKILL_THROWING:
-			return( true );
+			return true;
 
 		default:
 			break;

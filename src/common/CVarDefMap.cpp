@@ -93,7 +93,7 @@ inline lpctstr CVarDefContNum::GetValStr() const
 bool CVarDefContNum::r_LoadVal( CScript & s )
 {
 	SetValNum( s.GetArgVal());
-	return( true );
+	return true;
 }
 
 bool CVarDefContNum::r_WriteVal( lpctstr pKey, CGString & sVal, CTextConsole * pSrc = NULL )
@@ -101,7 +101,7 @@ bool CVarDefContNum::r_WriteVal( lpctstr pKey, CGString & sVal, CTextConsole * p
 	UNREFERENCED_PARAMETER(pKey);
 	UNREFERENCED_PARAMETER(pSrc);
 	sVal.FormatLLVal( GetValNum() );
-	return( true );
+	return true;
 }
 
 CVarDefCont * CVarDefContNum::CopySelf() const
@@ -152,7 +152,7 @@ void CVarDefContStr::SetValStr( lpctstr pszVal )
 bool CVarDefContStr::r_LoadVal( CScript & s )
 {
 	SetValStr( s.GetArgStr());
-	return( true );
+	return true;
 }
 
 bool CVarDefContStr::r_WriteVal( lpctstr pKey, CGString & sVal, CTextConsole * pSrc = NULL )
@@ -160,7 +160,7 @@ bool CVarDefContStr::r_WriteVal( lpctstr pKey, CGString & sVal, CTextConsole * p
 	UNREFERENCED_PARAMETER(pKey);
 	UNREFERENCED_PARAMETER(pSrc);
 	sVal = GetValStr();
-	return( true );
+	return true;
 }
 
 CVarDefCont * CVarDefContStr::CopySelf() const 
@@ -474,7 +474,7 @@ int CVarDefMap::SetNumNew( lpctstr pszName, int64 iVal )
 	ADDTOCALLSTACK("CVarDefMap::SetNumNew");
 	CVarDefCont * pVarNum = new CVarDefContNum( pszName, iVal );
 	if ( !pVarNum )
-		return( -1 );
+		return -1;
 
 	DefPairResult res = m_Container.insert(pVarNum);
 	if ( res.second )
@@ -496,12 +496,12 @@ int CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fZero )
 	ASSERT(pszName);
 
 	if ( pszName[0] == '\0' )
-		return( -1 );
+		return -1;
 
 	if ( fZero && (iVal == 0) )
 	{
 		DeleteAtKey(pszName);
-		return( -1 );
+		return -1;
 	}
 
 	CVarDefContTest * pVarSearch = new CVarDefContTest(pszName);
@@ -539,7 +539,7 @@ int CVarDefMap::SetStrNew( lpctstr pszName, lpctstr pszVal )
 	ADDTOCALLSTACK("CVarDefMap::SetStrNew");
 	CVarDefCont * pVarStr = new CVarDefContStr( pszName, pszVal );
 	if ( !pVarStr )
-		return( -1 );
+		return -1;
 
 	DefPairResult res = m_Container.insert(pVarStr);
 	if ( res.second )
@@ -565,7 +565,7 @@ int CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, bool fZer
 	if ( pszVal == NULL || pszVal[0] == '\0' )	// but not if empty
 	{
 		DeleteAtKey(pszName);
-		return( -1 );
+		return -1;
 	}
 
 	if ( !fQuoted && IsSimpleNumberString(pszVal))
@@ -674,9 +674,9 @@ bool CVarDefMap::GetParseVal( lpctstr & pszArgs, long long * plVal ) const
 	ADDTOCALLSTACK("CVarDefMap::GetParseVal");
 	CVarDefCont * pVarBase = GetParseKey( pszArgs );
 	if ( pVarBase == NULL )
-		return( false );
+		return false;
 	*plVal = pVarBase->GetValNum();
-	return( true );
+	return true;
 }
 
 void CVarDefMap::DumpKeys( CTextConsole * pSrc, lpctstr pszPrefix ) const

@@ -567,7 +567,7 @@ bool CDialogDef::GumpSetup( int iPage, CClient * pClient, CObjBase * pObjSrc, lp
 	if ( !ResourceLock( s ) )
 		return false;
 	if ( !s.ReadKey() )		// read the size.
-		return( false );
+		return false;
 
 	// starting x,y location.
 	int64 iSizes[2];
@@ -589,7 +589,7 @@ bool CClient::Dialog_Setup( CLIMODE_TYPE mode, RESOURCE_ID_BASE rid, int iPage, 
 {
 	ADDTOCALLSTACK("CClient::Dialog_Setup");
 	if ( pObj == NULL )
-		return( false );
+		return false;
 
 	CResourceDef *	pRes	= g_Cfg.ResourceGetDef( rid );
 	CDialogDef *	pDlg	= dynamic_cast <CDialogDef*>(pRes);
@@ -617,7 +617,7 @@ bool CClient::Dialog_Setup( CLIMODE_TYPE mode, RESOURCE_ID_BASE rid, int iPage, 
 	}
 
 	addGumpDialog( mode, pDlg->m_sControls, pDlg->m_iControls, pDlg->m_sText, pDlg->m_iTexts, pDlg->m_x, pDlg->m_y, pObj, context );
-	return( true );
+	return true;
 }
 
 
@@ -689,9 +689,9 @@ bool CClient::addGumpDialogProps( CUID uid )
 	if ( pObj == NULL )
 		return false;
 	if ( m_pChar == NULL )
-		return( false );
+		return false;
 	if ( ! m_pChar->CanTouch( pObj ))	// probably a security issue.
-		return( false );
+		return false;
 
 	m_Prop_UID = m_Targ_UID = uid;
 	if ( uid.IsChar() )
@@ -705,7 +705,7 @@ bool CClient::addGumpDialogProps( CUID uid )
 		return false;
 
 	Dialog_Setup( CLIMODE_DIALOG, rid, 0, pObj );
-	return( true );
+	return true;
 }
 
 TRIGRET_TYPE CClient::Dialog_OnButton( RESOURCE_ID_BASE rid, dword dwButtonID, CObjBase * pObj, CDialogResponseArgs * pArgs )
@@ -879,7 +879,7 @@ bool CMenuItem::ParseLine( tchar * pszArgs, CScriptObj * pObjBase, CTextConsole 
 		else
 		{
 			DEBUG_ERR(( "Bad MENU item id '%s'\n", pszArgStart ));
-			return( false );	// skip this.
+			return false;	// skip this.
 		}
 	}
 	else
@@ -918,7 +918,7 @@ bool CMenuItem::ParseLine( tchar * pszArgs, CScriptObj * pObjBase, CTextConsole 
 		{
 			m_sText = pObjBase->GetName();	
 			if ( ! m_sText.IsEmpty())
-				return( true );
+				return true;
 		}
 		DEBUG_ERR(( "Bad MENU item text '%s'\n", pszArgStart ));
 	}

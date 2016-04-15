@@ -290,7 +290,7 @@ bool CResource::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	{
 		pszSep = const_cast<tchar*>(strchr( pszKey, '.' ));
 		if ( pszSep == NULL )
-			return( false );
+			return false;
 	}
 
 	char oldChar = *pszSep;
@@ -309,7 +309,7 @@ bool CResource::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 		else
 		{
 			*pszSep = oldChar;
-			return( false );
+			return false;
 		}
 	}
 
@@ -318,7 +318,7 @@ bool CResource::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	// Now get the index.
 	pszKey = pszSep + 1;
 	if ( pszKey[0] == '\0' )
-		return( false );
+		return false;
 
 	pszSep = const_cast<tchar*>(strchr( pszKey, '.' ));
 	if ( pszSep != NULL )
@@ -371,7 +371,7 @@ bool CResource::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	{
 		pszKey += strlen(pszKey);
 	}
-	return( true );
+	return true;
 }
 
 
@@ -1396,7 +1396,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc
 			if ( !strnicmp( pszCmd, "COUNT", 5 ))
 			{
 				sVal.FormatVal(static_cast<size_t>(m_Functions.GetCount()));
-				return( true );
+				return true;
 			}
 			else if ( m_Functions.ContainsKey(pszCmd) )
 			{
@@ -1448,7 +1448,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc
 				}
 
 				sVal.FormatVal(x);
-				return( true );
+				return true;
 			}
 
 			size_t iNumber = Exp_GetVal(pszCmd);
@@ -1479,7 +1479,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc
 				}
 			}
 
-			return( true );
+			return true;
 		}
 
 		if ( !strnicmp( pszKey, "CLIENT.",7))
@@ -1511,7 +1511,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc
 			}
 			return true;
 		}
-		return( false );
+		return false;
 	}
 
 	switch (index)
@@ -1693,10 +1693,10 @@ bool CResource::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc
 			break;
 		case RC_GUILDS:
 			sVal.FormatVal( g_World.m_Stones.GetCount());
-			return( true );
+			return true;
 		case RC_TIMEUP:
 			sVal.FormatLLVal( ( - g_World.GetTimeDiff( g_World.m_timeStartup )) / TICK_PER_SEC );
-			return( true );
+			return true;
 		case RC_TIMERCALL:
 			sVal.FormatVal(m_iTimerCall / TICK_PER_SEC);
 			break;
@@ -1795,7 +1795,7 @@ int CResource::GetSpellEffect( SPELL_TYPE spell, int iSkillVal ) const
 		return 0;
 	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef( spell );
 	if ( pSpellDef == NULL )
-		return( 0 );
+		return 0;
 	return( pSpellDef->m_Effect.GetLinear( iSkillVal ));
 }
 
@@ -1834,24 +1834,24 @@ bool CResource::IsValidEmailAddressFormat( lpctstr pszEmail ) // static
 
 	size_t len1 = strlen( pszEmail );
 	if ( len1 <= 0 || len1 > 128 )
-		return( false );
+		return false;
 
 	tchar szEmailStrip[256];
 	size_t len2 = Str_GetBare( szEmailStrip, pszEmail,
 		sizeof(szEmailStrip),
 		" !\"#%&()*,/:;<=>?[\\]^{|}'`+" );
 	if ( len2 != len1 )
-		return( false );
+		return false;
 
 	tchar * pszAt = const_cast<tchar*>(strchr( pszEmail, '@' ));
 	if ( ! pszAt )
-		return( false );
+		return false;
 	if ( pszAt == pszEmail )
-		return( false );
+		return false;
 	if ( ! strchr( pszAt, '.' ))
-		return( false );
+		return false;
 
-	return( true );
+	return true;
 }
 
 CServerRef CResource::Server_GetDef( size_t index )
@@ -1911,9 +1911,9 @@ bool CResource::IsObscene( lpctstr pszText ) const
 		delete[] match;
 
 		if ( ematch == MATCH_VALID )
-			return( true );
+			return true;
 	}
-	return( false );
+	return false;
 }
 
 bool CResource::SetKRDialogMap(dword rid, dword idKRDialog)
@@ -2046,7 +2046,7 @@ bool CResource::CanUsePrivVerb( const CScriptObj * pObjTarg, lpctstr pszCmd, CTe
 	if ( pChar )
 	{
 		if ( pSrc->GetChar() == pChar )
-			return( true );
+			return true;
 		if ( pSrc->GetPrivLevel() < pChar->GetPrivLevel())
 		{
 			pSrc->SysMessage( "Target is more privileged than you\n" );
@@ -2068,8 +2068,8 @@ bool CResource::CanUsePrivVerb( const CScriptObj * pObjTarg, lpctstr pszCmd, CTe
 				// must be a console or web page ?
 				// I guess we can just login !
 				if ( ! strnicmp( pszCmd, "LOGIN", 5 ))
-					return( true );
-				return( false );
+					return true;
+				return false;
 			}
 		}
 		else
@@ -2091,16 +2091,16 @@ bool CResource::CanUsePrivVerb( const CScriptObj * pObjTarg, lpctstr pszCmd, CTe
 	{
 		ilevel = GetPrivCommandLevel( myCmd );
 		if ( ilevel > pSrc->GetPrivLevel())
-			return( false );
+			return false;
         myCmd=pOd+1; //skip dot
 	}
 
 
 	ilevel = GetPrivCommandLevel( myCmd );
 	if ( ilevel > pSrc->GetPrivLevel())
-		return( false );
+		return false;
 
-	return( true );
+	return true;
 }
 
 //*************************************************************
@@ -2471,7 +2471,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 	if ( !rid.IsValidUID() )
 	{
 		DEBUG_ERR(( "Invalid %s block index '%s'\n", pszSection, static_cast<lpctstr>(pScript->GetArgStr())));
-		return( false );
+		return false;
 	}
 
 	EXC_TRY("LoadResourceSection");
@@ -2498,11 +2498,11 @@ bool CResource::LoadResourceSection( CScript * pScript )
 	case RES_SPHERE:
 		// Define main global config info.
 		g_Serv.r_Load(*pScript);
-		return( true );
+		return true;
 
 	case RES_SPHERECRYPT:
 		CCrypt::LoadKeyTable(*pScript);
-		return( true );
+		return true;
 
 	case RES_ACCOUNT:	// NOTE: ArgStr is not the DEFNAME
 		// Load the account now. Not normal method !
@@ -2517,7 +2517,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 				continue;
 			m_StatAdv[i].Load( pScript->GetArgStr());
 		}
-		return( true );
+		return true;
 
 	case RES_BLOCKIP:
 		{
@@ -2533,11 +2533,11 @@ bool CResource::LoadResourceSection( CScript * pScript )
 				history.setBlocked(true);
 			}
 		}
-		return( true );
+		return true;
 
 	case RES_COMMENT:
 		// Just toss this.
-		return( true );
+		return true;
 
 	case RES_DEFNAME:
 		// just get a block of defs.
@@ -2565,7 +2565,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 				g_Exp.m_VarDefs.SetStr(pszKey, false, pScript->GetArgStr());
 			}
 		}
-		return( true );
+		return true;
 	case RES_RESOURCELIST:
 		{
 			while ( pScript->ReadKey())
@@ -2574,7 +2574,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 				m_ResourceList.AddSortString( pName );
 			}
 		}
-		return( true );
+		return true;
 	case RES_FAME:
 		{
 			size_t i = 0;
@@ -2588,7 +2588,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 				++i;
 			}
 		}
-		return( true );
+		return true;
 	case RES_KARMA:
 		{
 			size_t i = 0;
@@ -2602,7 +2602,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 				++i;
 			}
 		}
-		return( true );
+		return true;
 	case RES_NOTOTITLES:
 		{
 			if (pScript->ReadKey() == false)
@@ -2649,13 +2649,13 @@ bool CResource::LoadResourceSection( CScript * pScript )
 			if (m_NotoTitles.GetCount() != ((m_NotoKarmaLevels.GetCount() + 1) * (m_NotoFameLevels.GetCount() + 1)))
 				g_Log.Event(LOGM_INIT|LOGL_WARN, "Expected %" FMTSIZE_T " titles in NOTOTITLES section but found %" FMTSIZE_T ".\n", (m_NotoKarmaLevels.GetCount() + 1) * (m_NotoFameLevels.GetCount() + 1), m_NotoTitles.GetCount());
 		}
-		return( true );
+		return true;
 	case RES_OBSCENE:
 		while ( pScript->ReadKey())
 		{
 			m_Obscene.AddSortString( pScript->GetKey() );
 		}
-		return( true );
+		return true;
 	case RES_PLEVEL:
 		{
 			int index = rid.GetResIndex();
@@ -2674,7 +2674,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		{
 			AddResourceFile( pScript->GetKey());
 		}
-		return( true );
+		return true;
 	case RES_RUNES:
 		// The full names of the magic runes.
 		m_Runes.RemoveAll();
@@ -2682,7 +2682,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		{
 			m_Runes.Add( new CGString(pScript->GetKey()) );
 		}
-		return( true );
+		return true;
 	case RES_SECTOR: // saved in world file.
 		{
 			CPointMap pt = GetRegionPoint( pScript->GetArgStr() ); // Decode a teleport location number into X/Y/Z
@@ -3056,7 +3056,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 				}
 			}
 		}
-		return( true );
+		return true;
 
 	case RES_TYPEDEFS:
 		// just get a block of defs.
@@ -3076,7 +3076,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 				m_ResHash.AddSortKey( ridnew, pResDef );
 			}
 		}
-		return( true );
+		return true;
 
 	case RES_STARTS:
 		{
@@ -3100,7 +3100,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 				m_StartDefs.Add( pStart );
 			}
 
-			return( true );
+			return true;
 		}
 	case RES_MOONGATES:
 		m_MoonGates.RemoveAll();
@@ -3109,7 +3109,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 			CPointMap pt = GetRegionPoint( pScript->GetKey());
 			m_MoonGates.Add( pt );
 		}
-		return( true );
+		return true;
 	case RES_WORLDVARS:
 		while ( pScript->ReadKeyParse() )
 		{
@@ -3158,7 +3158,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 				delete pTeleport;
 			}
 		}
-		return( true );
+		return true;
 	case RES_KRDIALOGLIST:
 		while ( pScript->ReadKeyParse())
 		{
@@ -3186,7 +3186,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		if ( ! rid.IsValidUID())
 		{
 			g_Log.Event(LOGL_ERROR|LOGM_INIT, "Undefined char type '%s'\n", static_cast<lpctstr>(pScript->GetArgStr()));
-			return( false );
+			return false;
 		}
 		return( CChar::CreateBasic(static_cast<CREID_TYPE>(rid.GetResIndex()))->r_Load(*pScript));
 	case RES_WI:
@@ -3194,7 +3194,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		if ( ! rid.IsValidUID())
 		{
 			g_Log.Event(LOGL_ERROR|LOGM_INIT, "Undefined item type '%s'\n", static_cast<lpctstr>(pScript->GetArgStr()));
-			return( false );
+			return false;
 		}
 		return( CItem::CreateBase(static_cast<ITEMID_TYPE>(rid.GetResIndex()))->r_Load(*pScript));
 
@@ -3211,7 +3211,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		if ( pResScript == NULL )	// can only link to it if it's a CResourceScript !
 		{
 			DEBUG_ERR(( "Can't link resources in the world save file\n" ));
-			return( false );
+			return false;
 		}
 		// Now scan it for DEFNAME= or DEFNAME2= stuff ?
 		pNewLink->SetLink(pResScript);
@@ -3222,7 +3222,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		// Not linked but still may have a var name
 		pNewDef->SetResourceVar( pVarNum );
 	}
-	return( true );
+	return true;
 
 	EXC_CATCH;
 
@@ -3784,7 +3784,7 @@ bool CResource::LoadIni( bool fTest )
 			g_Log.Event(LOGL_FATAL|LOGM_INIT, SPHERE_FILE ".ini has not been found, server probably would be not usable.\n");
 			g_Log.Event(LOGL_FATAL|LOGM_INIT, "Navigate to http://prerelease.sphereserver.net/ to download sample config.\n");
 		}
-		return( false );
+		return false;
 	}
 
 	LoadResourcesOpen(&m_scpIni);
@@ -3801,7 +3801,7 @@ bool CResource::LoadCryptIni( void )
 	{
 		g_Log.Event( LOGL_WARN|LOGM_INIT, "Could not open " SPHERE_FILE "Crypt.ini, encryption might not be available\n");
 
-		return( false );
+		return false;
 	}
 
 	LoadResourcesOpen(&m_scpCryptIni);
@@ -3810,7 +3810,7 @@ bool CResource::LoadCryptIni( void )
 
 	g_Log.Event( LOGM_INIT, "Loaded %" FMTSIZE_T " client encryption keys.\n", CCrypt::client_keys.size() );
 
-	return( true );
+	return true;
 }
 
 void CResource::Unload( bool fResync )
@@ -3892,7 +3892,7 @@ bool CResource::Load( bool fResync )
 	{
 		g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".INI file is corrupt or missing\n" );
 		g_Log.Event( LOGL_FATAL|LOGM_INIT, "MUL File '%s' not found...\n", static_cast<lpctstr>(g_Install.GetBaseFileName(i)));
-		return( false );
+		return false;
 	}
 
 	// Load the optional verdata cache. (modifies MUL stuff)
@@ -3905,14 +3905,14 @@ bool CResource::Load( bool fResync )
 		g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".INI file is corrupt or missing\n" );
 		g_Log.CatchEvent( &e, "g_VerData.Load" );
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
-		return( false );
+		return false;
 	}
 	catch(...)
 	{
 		g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".INI file is corrupt or missing\n" );
 		g_Log.CatchEvent( NULL, "g_VerData.Load" );
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
-		return( false );
+		return false;
 	}
 
 	// Now load the *TABLES.SCP file.

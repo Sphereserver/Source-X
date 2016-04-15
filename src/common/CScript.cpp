@@ -282,7 +282,7 @@ bool CScriptKeyAlloc::ParseKey( lpctstr pszKey )
 	pBuffer[iLen] = '\0';
 
 	Str_Parse( pBuffer, &m_pszArg );
-	return( true );
+	return true;
 }
 
 bool CScriptKeyAlloc::ParseKey( lpctstr pszKey, lpctstr pszVal )
@@ -316,7 +316,7 @@ bool CScriptKeyAlloc::ParseKey( lpctstr pszKey, lpctstr pszVal )
 		strcpylen( m_pszArg, pszVal, ( lenval - lenkey ) + 1 );	// strcpylen
 	}
 
-	return( true );
+	return true;
 }
 
 size_t CScriptKeyAlloc::ParseKeyEnd()
@@ -407,7 +407,7 @@ bool CScript::Open( lpctstr pszFilename, uint wFlags )
 
 	lpctstr pszTitle = GetFileTitle();
 	if ( pszTitle == NULL || pszTitle[0] == '\0' )
-		return( false );
+		return false;
 
 	lpctstr pszExt = GetFilesExt( GetFilePath() ); 
 	if ( pszExt == NULL )
@@ -425,10 +425,10 @@ bool CScript::Open( lpctstr pszFilename, uint wFlags )
 		{
 			g_Log.Event(LOGL_WARN, "'%s' not found...\n", static_cast<lpctstr>(GetFilePath()));
 		}
-		return( false );
+		return false;
 	}
 
-	return( true );
+	return true;
 }
 
 bool CScript::ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
@@ -446,11 +446,11 @@ bool CScript::ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened 
 			if ( ParseKeyEnd() <= 0 )
 				continue;
 		}
-		return( true );
+		return true;
 	}
 
 	m_pszKey[0] = '\0';
-	return( false );
+	return false;
 }
 
 bool CScript::FindTextHeader( lpctstr pszName ) // Find a section in the current script
@@ -468,15 +468,15 @@ bool CScript::FindTextHeader( lpctstr pszName ) // Find a section in the current
 	{
 		if ( ! ReadTextLine(false))
 		{
-			return( false );
+			return false;
 		}
 		if ( IsKeyHead( "[EOF]", 5 ))
 		{
-			return( false );
+			return false;
 		}
 	}
 	while ( ! IsKeyHead( pszName, len ));
-	return( true );
+	return true;
 }
 
 dword CScript::Seek( int offset, uint origin )
@@ -514,7 +514,7 @@ bool CScript::FindNextSection()
 		if ( !ReadTextLine(true) )
 		{
 			m_lSectionData = GetPosition();
-			return( false );
+			return false;
 		}
 		if ( m_pszKey[0] == '[' )
 			break;
@@ -535,7 +535,7 @@ foundit:
 
 	m_lSectionData = GetPosition();
 	if ( IsSectionType( "EOF" ))
-		return( false );
+		return false;
 
 	Str_Parse( m_pszKey, &m_pszArg );
 	return true;
@@ -553,16 +553,16 @@ bool CScript::FindSection( lpctstr pszName, uint uModeFlags )
 	if ( strlen( pszName ) > 32 )
 	{
 		DEBUG_ERR(( "Bad script section name\n" ));
-		return( false );
+		return false;
 	}
 
 	TemporaryString pszSec;
 	sprintf(static_cast<tchar *>(pszSec), "[%s]", pszName);
-	if ( FindTextHeader(pszSec))
+	if ( FindTextHeader(pszSec) )
 	{
 		// Success
 		m_lSectionData = GetPosition();
-		return( true );
+		return true;
 	}
 
 	// Failure Error display. (default)
@@ -571,32 +571,32 @@ bool CScript::FindSection( lpctstr pszName, uint uModeFlags )
 	{
 		g_Log.Event(LOGL_WARN, "Did not find '%s' section '%s'\n", static_cast<lpctstr>(GetFileTitle()), static_cast<lpctstr>(pszName));
 	}
-	return( false );
+	return false;
 }
 
 lpctstr CScript::GetSection() const
 {
 	ASSERT(m_pszKey);
-	return( m_pszKey );
+	return m_pszKey;
 }
 
 bool CScript::IsSectionType( lpctstr pszName ) //const
 {
 	// Only valid after FindNextSection()
-	return( ! strcmpi( GetKey(), pszName ));
+	return( ! strcmpi( GetKey(), pszName ) );
 }
 
 bool CScript::ReadKey( bool fRemoveBlanks )
 {
 	ADDTOCALLSTACK("CScript::ReadKey");
 	if ( ! ReadTextLine(fRemoveBlanks))
-		return( false );
+		return false;
 	if ( m_pszKey[0] == '[' )	// hit the end of our section.
 	{
 		m_fSectionHead = true;
-		return( false );
+		return false;
 	}
-	return( true );
+	return true;
 }
 
 bool CScript::ReadKeyParse() // Read line from script
@@ -676,7 +676,7 @@ bool CScript::FindKey( lpctstr pszName ) // Find a key in the current section
 	if ( strlen( pszName ) > SCRIPT_MAX_SECTION_LEN )
 	{
 		DEBUG_ERR(( "Bad script key name\n" ));
-		return( false );
+		return false;
 	}
 	Seek( m_lSectionData );
 	while ( ReadKeyParse())
@@ -687,7 +687,7 @@ bool CScript::FindKey( lpctstr pszName ) // Find a key in the current section
 			return true;
 		}
 	}
-	return( false );
+	return false;
 }
 
 void CScript::Close()
@@ -729,7 +729,7 @@ bool _cdecl CScript::WriteSection( lpctstr pszSection, ... )
 	Printf( "]\n" );
 	va_end( vargs );
 
-	return( true );
+	return true;
 }
 
 bool CScript::WriteKey( lpctstr pszKey, lpctstr pszVal )
@@ -780,7 +780,7 @@ bool CScript::WriteKey( lpctstr pszKey, lpctstr pszVal )
 			*pszSep	= ch;
 	}
 
-	return( true );
+	return true;
 }
 
 //void _cdecl CScript::WriteKeyFormat( lpctstr pszKey, lpctstr pszVal, ... )

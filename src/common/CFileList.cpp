@@ -32,7 +32,7 @@ bool CFileList::ReadFileInfo( lpctstr pszFilePath, time_t & dwDateChange, dword 
 #endif
 	{
 		DEBUG_ERR(( "Can't open input dir [%s]\n", pszFilePath ));
-		return( false );
+		return false;
 	}
 
 #ifdef _WIN32
@@ -46,7 +46,7 @@ bool CFileList::ReadFileInfo( lpctstr pszFilePath, time_t & dwDateChange, dword 
 	dwSize = fileStat.st_size;
 #endif
 
-	return( true );
+	return true;
 }
 
 int CFileList::ReadDir( lpctstr pszFileDir, bool bShowError )

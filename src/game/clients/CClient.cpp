@@ -119,27 +119,27 @@ bool CClient::CanInstantLogOut() const
 {
 	ADDTOCALLSTACK("CClient::CanInstantLogOut");
 	if ( g_Serv.IsLoading())	// or exiting.
-		return( true );
+		return true;
 	if ( ! g_Cfg.m_iClientLingerTime )
 		return true;
 	if ( IsPriv( PRIV_GM ))
 		return true;
 	if ( m_pChar == NULL )
-		return( true );
+		return true;
 	if ( m_pChar->IsStatFlag(STATF_DEAD))
-		return( true );
+		return true;
 
 	const CRegionWorld * pArea = m_pChar->GetRegion();
 	if ( pArea == NULL )
-		return( true );
+		return true;
 	if ( pArea->IsFlag( REGION_FLAG_INSTA_LOGOUT ))
-		return( true );
+		return true;
 
 	const CRegionBase * pRoom = m_pChar->GetRoom(); //Allows Room flag to work!
 	if ( pRoom != NULL && pRoom->IsFlag( REGION_FLAG_INSTA_LOGOUT )) //sanity check for null rooms // Can C++ guarantee short-circuit evaluation for CRegionBase ?
-		return( true );
+		return true;
 
-	return( false );
+	return false;
 }
 
 void CClient::CharDisconnect()
@@ -322,11 +322,11 @@ bool CClient::CanHear( const CObjBaseTemplate * pSrc, TALKMODE_TYPE mode ) const
 	// can we hear this text or sound.
 
 	if ( !IsConnectTypePacket() )
-		return( false );
+		return false;
 	if ( mode == TALKMODE_BROADCAST || pSrc == NULL )
-		return( true );
+		return true;
 	if ( m_pChar == NULL )
-		return( false );
+		return false;
 
 	if ( IsPriv( PRIV_HEARALL ) &&
 		pSrc->IsChar()&&
@@ -338,7 +338,7 @@ bool CClient::CanHear( const CObjBaseTemplate * pSrc, TALKMODE_TYPE mode ) const
 		{
 			if ( pCharSrc->GetPrivLevel() <= GetPrivLevel())
 			{
-				return( true );
+				return true;
 			}
 		}
 	}
@@ -457,13 +457,13 @@ bool CClient::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 				if ( pszKey[-1] != '.' )	// only used as a ref !
 					break;
 				pRef = GetAccount();
-				return( true );
+				return true;
 			case CLIR_GMPAGEP:
 				pRef = m_pGMPage;
-				return( true );
+				return true;
 			case CLIR_HOUSEDESIGN:
 				pRef = m_pHouseDesign;
-				return( true );
+				return true;
 			case CLIR_PARTY:
 				if ( !this->m_pChar->m_pParty )
 				{
@@ -486,13 +486,13 @@ bool CClient::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 				return true;
 			case CLIR_TARG:
 				pRef = m_Targ_UID.ObjFind();
-				return( true );
+				return true;
 			case CLIR_TARGPRV:
 				pRef = m_Targ_PrvUID.ObjFind();
-				return( true );
+				return true;
 			case CLIR_TARGPROP:
 				pRef = m_Prop_UID.ObjFind();
-				return( true );
+				return true;
 		}
 	}
 	return( CScriptObj::r_GetRef( pszKey, pRef ));
@@ -523,7 +523,7 @@ bool CClient::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
 	if ( !strnicmp("CTAG.", pszKey, 5) )		//	CTAG.xxx - client tag
 	{
 		if ( pszKey[4] != '.' )
-			return( false );
+			return false;
 		pszKey += 5;
 		CVarDefCont *vardef = m_TagDefs.GetKey(pszKey);
 		sVal = vardef ? vardef->GetValStr() : "";
@@ -533,7 +533,7 @@ bool CClient::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
 	if ( !strnicmp("CTAG0.", pszKey, 6) )		//	CTAG0.xxx - client tag
 	{
 		if ( pszKey[5] != '.' )
-			return( false );
+			return false;
 		pszKey += 6;
 		CVarDefCont *vardef = m_TagDefs.GetKey(pszKey);
 		sVal = vardef ? vardef->GetValStr() : "0";
@@ -622,7 +622,7 @@ bool CClient::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
 					else if ( !strnicmp("Y", pszKey, 1) )
 						sVal.Format( "%u", m_ScreenSize.y );
 					else
-						return( false );
+						return false;
 				}
 				else
 					sVal.Format( "%u,%u", m_ScreenSize.x, m_ScreenSize.y );
@@ -663,7 +663,7 @@ bool CClient::r_LoadVal( CScript & s )
 	ADDTOCALLSTACK("CClient::r_LoadVal");
 	EXC_TRY("LoadVal");
 	if ( GetAccount() == NULL )
-		return( false );
+		return false;
 
 	lpctstr pszKey = s.GetKey();
 
@@ -674,7 +674,7 @@ bool CClient::r_LoadVal( CScript & s )
 
 		pszKey = pszKey + (fZero ? 6 : 5);
 		m_TagDefs.SetStr( pszKey, fQuoted, s.GetArgStr( &fQuoted ), fZero );
-		return( true );
+		return true;
 	}
 
 	switch ( FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF(sm_szLoadKeys)-1 ))
@@ -759,7 +759,7 @@ bool CClient::r_LoadVal( CScript & s )
 			m_Targ_PrvUID = s.GetArgVal();
 			break;
 		default:
-			return( false );
+			return false;
 	}
 	return true;
 	EXC_CATCH;
@@ -787,23 +787,23 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 	{
 		PLEVEL_TYPE ilevel = g_Cfg.GetPrivCommandLevel( "SET" );
 		if ( ilevel > GetPrivLevel() )
-			return( false );
+			return false;
 
 		ASSERT( m_pChar );
 		addTargetVerb( pszKey+3, s.GetArgRaw());
-		return( true );
+		return true;
 	}
 
 	if ( toupper( pszKey[0] ) == 'X' && ( g_Cfg.m_Functions.ContainsKey( pszKey ) == false ) )
 	{
 		PLEVEL_TYPE ilevel = g_Cfg.GetPrivCommandLevel( "SET" );
 		if ( ilevel > GetPrivLevel() )
-			return( false );
+			return false;
 
 		// Target this command verb on some other object.
 		ASSERT( m_pChar );
 		addTargetVerb( pszKey+1, s.GetArgRaw());
-		return( true );
+		return true;
 	}
 
 	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, COUNTOF(sm_szVerbKeys)-1 );
@@ -1208,7 +1208,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				}
 				break;
 			}
-			return( false );
+			return false;
 		case CV_LINK:	// link doors
 			m_Targ_UID.InitUID();
 			addTarget( CLIMODE_TARG_LINK, g_Cfg.GetDefaultMsg( DEFMSG_SELECT_LINK_ITEM ) );
@@ -1324,7 +1324,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				addTargetCancel();
 				break;
 			}
-			return( false );
+			return false;
 		case CV_SHOWSKILLS:
 			addSkillWindow(static_cast<SKILL_TYPE>(g_Cfg.m_iMaxSkill)); // Reload the real skills
 			break;
@@ -1514,7 +1514,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					// if ( !s.IsKeyHead( "CTAG.", 5 ) && !s.IsKeyHead( "CTAG0.", 6 ) ) // We don't want output related to ctag
 					//	SysMessagef( "%s = %s", (lpctstr) s.GetKey(), (lpctstr) sVal );	// feedback on what we just did.
 
-					return( true );
+					return true;
 				}
 			}
 			return( CScriptObj::r_Verb( s, pSrc ));	// used in the case of web pages to access server level things..

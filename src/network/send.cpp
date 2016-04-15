@@ -1082,17 +1082,17 @@ PacketCloseVendor::PacketCloseVendor(const CClient* target, const CChar* vendor)
 *
 *
 ***************************************************************************/
-PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* container, bool boIsShop, bool boFilterLayers) : PacketSend(XCMD_Content, 5, PRI_NORMAL), m_container(container->GetUID())
+PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* container, bool boIsShop, bool boFilterLayers) : PacketSend(XCMD_Content, 5, PRI_NORMAL),
+	m_container(container->GetUID()), m_count(0)
 {
 	ADDTOCALLSTACK("PacketItemContents::PacketItemContents");
 
 	initLength();
 	skip(2);
 
-	bool boIncludeGrid = (target->GetNetState()->isClientVersion(MINCLIVER_ITEMGRID) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced());
+	bool boIncludeGrid = ( target->GetNetState()->isClientVersion(MINCLIVER_ITEMGRID) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced() );
 	bool boIsLayerSent[LAYER_HORSE];
-	memset(boIsLayerSent, 0, sizeof(boIsLayerSent));
-	word wCount = 0;
+	memset( boIsLayerSent, 0, sizeof(boIsLayerSent) );
 
 	const CChar* viewer = target->GetChar();
 	const CItemBase* itemDefinition;
@@ -1104,7 +1104,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 
 	// Classic Client wants the container items sent with order a->z, Enhanced Client with order z->a;
 	// Classic client wants the prices sent (in PacketVendorBuyList::fillBuyData) with order a->z, Enhanced Client with order a->z.
-	for ( CItem* item = (target->GetNetState()->isClientEnhanced() ? container->GetContentTail() : container->GetContentHead());
+	for ( CItem* item = ( target->GetNetState()->isClientEnhanced() ? container->GetContentTail() : container->GetContentHead() );
 		item != NULL && m_count < MAX_ITEMS_CONT;
 		item = (target->GetNetState()->isClientEnhanced() ? item->GetPrev() : item->GetNext()) )
 	{
@@ -1121,7 +1121,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 				continue;
 
 			wAmount = minimum((word)g_Cfg.m_iVendorMaxSell, wAmount);
-			pos.m_x = (short)(wCount + 1);
+			pos.m_x = (short)(m_count + 1);
 			pos.m_y = 1;
 		}
 		else
@@ -1161,7 +1161,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 		if ( hue > HUE_QTY )
 			hue &= HUE_MASK_LO;		// restrict colors
 
-									// write item data
+		// write item data
 		writeInt32(item->GetUID());
 		writeInt16((word)id);
 		writeByte(0);
@@ -1176,29 +1176,29 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 		// include tooltip
 		target->addAOSTooltip(item, false, boIsShop);
 
-		if ( ++wCount >= MAX_ITEMS_CONT )
+		if ( ++m_count >= MAX_ITEMS_CONT )
 			break;
 	}
 
 	// write item count
 	size_t l = getPosition();
 	seek(3);
-	writeInt16(wCount);
+	writeInt16(m_count);
 	seek(l);
 
 	push(target);
 }
 
-PacketItemContents::PacketItemContents(const CClient* target, const CItem* spellbook) : PacketSend(XCMD_Content, 5, PRI_NORMAL), m_container(spellbook->GetUID())
+PacketItemContents::PacketItemContents(const CClient* target, const CItem* spellbook) : PacketSend(XCMD_Content, 5, PRI_NORMAL),
+	m_container(spellbook->GetUID()), m_count(0)
 {
 	ADDTOCALLSTACK("PacketItemContents::PacketItemContents(2)");
 
-	bool includeGrid = (target->GetNetState()->isClientVersion(MINCLIVER_ITEMGRID) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced());
+	bool includeGrid = ( target->GetNetState()->isClientVersion(MINCLIVER_ITEMGRID) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced()) ;
 
 	initLength();
 	skip(2);
 
-	word count = 0;
 	for (int i = SPELL_Clumsy; i <= SPELL_MAGERY_QTY; i++)
 	{
 		if (spellbook->IsSpellInBook(static_cast<SPELL_TYPE>(i)) == false)
@@ -1207,37 +1207,37 @@ PacketItemContents::PacketItemContents(const CClient* target, const CItem* spell
 		writeInt32(UID_F_ITEM + UID_O_INDEX_FREE + i);
 		writeInt16(0x1F2E);
 		writeByte(0);
-		writeInt16((word)(i));
+		writeInt16((word)i);
 		writeInt16(0);
 		writeInt16(0);
 		if (includeGrid)
-			writeByte((byte)(count));
+			writeByte((byte)m_count);
 		writeInt32(spellbook->GetUID());
 		writeInt16(HUE_DEFAULT);
 
-		count++;
+		m_count++;
 	}
 
 	// write item count
 	size_t l = getPosition();
 	seek(3);
-	writeInt16(count);
+	writeInt16(m_count);
 	seek(l);
 
 	push(target);
 }
 
-PacketItemContents::PacketItemContents(const CClient* target, const CItemContainer* spellbook) : PacketSend(XCMD_Content, 5, PRI_NORMAL), m_container(spellbook->GetUID())
+PacketItemContents::PacketItemContents(const CClient* target, const CItemContainer* spellbook) : PacketSend(XCMD_Content, 5, PRI_NORMAL),
+	m_container(spellbook->GetUID()), m_count(0)
 {
 	ADDTOCALLSTACK("PacketItemContents::PacketItemContents(3)");
 
-	bool includeGrid = (target->GetNetState()->isClientVersion(MINCLIVER_ITEMGRID) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced());
+	bool includeGrid = ( target->GetNetState()->isClientVersion(MINCLIVER_ITEMGRID) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced() );
 	const CSpellDef* spellDefinition;
 
 	initLength();
 	skip(2);
 
-	word count = 0;
 	for (CItem* item = spellbook->GetContentHead(); item != NULL; item = item->GetNext())
 	{
 		if (item->IsType(IT_SCROLL) == false)
@@ -1248,23 +1248,23 @@ PacketItemContents::PacketItemContents(const CClient* target, const CItemContain
 			continue;
 
 		writeInt32(item->GetUID());
-		writeInt16((word)(spellDefinition->m_idScroll));
+		writeInt16((word)spellDefinition->m_idScroll);
 		writeByte(0);
 		writeInt16(item->m_itSpell.m_spell);
 		writeInt16(0);
 		writeInt16(0);
 		if (includeGrid)
-			writeByte((byte)(count));
+			writeByte((byte)m_count);
 		writeInt32(spellbook->GetUID());
-		writeInt16((word)(HUE_DEFAULT));
+		writeInt16((word)HUE_DEFAULT);
 
-		count++;
+		m_count++;
 	}
 
 	// write item count
 	size_t l = getPosition();
 	seek(3);
-	writeInt16(count);
+	writeInt16(m_count);
 	seek(l);
 
 	push(target);

@@ -2004,13 +2004,13 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 	// ARGS:
 	//  pSrc = possible scroll or wand source.
 	if ( spell <= SPELL_NONE || pSrc == NULL )
-		return( false );
+		return false;
 
 	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
 	if ( pSpellDef == NULL )
-		return( false );
+		return false;
 	if ( pSpellDef->IsSpellType( SPELLFLAG_DISABLED ))
-		return( false );
+		return false;
 
 	int skill = SKILL_NONE;
 	int iSkillTest = 0;
@@ -2077,7 +2077,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 	{
 		pSpellDef = g_Cfg.GetSpellDef(spell);
 		if ( pSpellDef == NULL )
-			return( false );
+			return false;
 		spell = static_cast<SPELL_TYPE>(Args.m_iN1);
 	}
 	wManaUse = (short)(Args.m_iN2);
@@ -2093,14 +2093,14 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 		{
 			if ( fFailMsg )
 				SysMessageDefault( DEFMSG_SPELL_ENCHANT_LACK );
-			return( false );
+			return false;
 		}
 		CObjBaseTemplate * pObjTop = pSrc->GetTopLevelObj();
 		if ( pObjTop != this )		// magic items must be on your person to use.
 		{
 			if ( fFailMsg )
 				SysMessageDefault( DEFMSG_SPELL_ENCHANT_ACTIVATE );
-			return( false );
+			return false;
 		}
 		if ( pItem->IsType(IT_WAND))
 		{
@@ -2131,7 +2131,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 	{
 		// Raw cast from spellbook.
 		if ( IsPriv( PRIV_GM ))
-			return( true );
+			return true;
 
 		if ( m_pPlayer )
 		{
@@ -2139,7 +2139,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 			{
 				if ( fFailMsg )
 					SysMessageDefault( DEFMSG_SPELL_TRY_DEAD );
-				return( false );
+				return false;
 			}
 
 			// check the spellbook for it.
@@ -2148,13 +2148,13 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 			{
 				if ( fFailMsg )
 					SysMessageDefault( DEFMSG_SPELL_TRY_NOBOOK );
-				return( false );
+				return false;
 			}
 			if ( ! pBook->IsSpellInBook( spell ))
 			{
 				if ( fFailMsg )
 					SysMessageDefault( DEFMSG_SPELL_TRY_NOTYOURBOOK );
-				return( false );
+				return false;
 			}
 
 			// check for reagents
@@ -2172,7 +2172,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 							CResourceDef * pReagDef = g_Cfg.ResourceGetDef( pRegs->GetAt(iMissing).GetResourceID() );
 							SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_SPELL_TRY_NOREGS ), pReagDef ? pReagDef->GetName() : g_Cfg.GetDefaultMsg( DEFMSG_SPELL_TRY_THEREG ) );
 						}
-						return( false );
+						return false;
 					}
 				}
 			}
@@ -2186,7 +2186,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 			if ( fFailMsg )
 				SysMessageDefault( DEFMSG_MAGERY_6 ); // An anti-magic field disturbs the spells.
 			m_Act_Difficulty = -1;	// Give very little credit for failure !
-			return( false );
+			return false;
 		}
 	}
 
@@ -2225,7 +2225,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 		SetDefNum("Tithing", wTithing - wTithingUse);
 	}
 
-	return( true );
+	return true;
 }
 
 bool CChar::Spell_TargCheck_Face()
@@ -2240,9 +2240,9 @@ bool CChar::Spell_TargCheck_Face()
 	{
 		SysMessageDefault( DEFMSG_SPELL_TRY_AM );
 		m_Act_Difficulty = -1;	// Give very little credit for failure !
-		return( false );
+		return false;
 	}
-	return( true );
+	return true;
 }
 
 bool CChar::Spell_TargCheck()
@@ -2254,7 +2254,7 @@ bool CChar::Spell_TargCheck()
 	if ( pSpellDef == NULL )
 	{
 		DEBUG_ERR(( "Bad Spell %d, uid 0%0lx\n", m_atMagery.m_Spell, (dword) GetUID()));
-		return( false );
+		return false;
 	}
 
 	CObjBase * pObj = m_Act_Targ.ObjFind();
@@ -2280,7 +2280,7 @@ bool CChar::Spell_TargCheck()
 		if ( pObj == NULL || pObjTop == NULL )
 		{
 			SysMessageDefault( DEFMSG_SPELL_TARG_OBJ );
-			return( false );
+			return false;
 		}
 		if ( !CanSee(pObj) || !CanSeeLOS(pObj, LOS_NB_WINDOWS) ) //we should be able to cast through a window
 		{
@@ -2290,13 +2290,13 @@ bool CChar::Spell_TargCheck()
 		if ( !IsPriv(PRIV_GM) && pObjTop != this && pObjTop != pObj && pObjTop->IsChar() )
 		{
 			SysMessageDefault( DEFMSG_SPELL_TARG_CONT );
-			return( false );
+			return false;
 		}
 
 		m_Act_p = pObjTop->GetTopPoint();
 
 		if ( ! Spell_TargCheck_Face() )
-			return( false );
+			return false;
 
 	}
 	else if ( pSpellDef->IsSpellType( SPELLFLAG_TARG_XYZ ))
@@ -2308,13 +2308,13 @@ bool CChar::Spell_TargCheck()
 		if ( ! CanSeeLOS( m_Act_p, NULL, UO_MAP_VIEW_SIGHT, LOS_NB_WINDOWS )) //we should be able to cast through a window
 		{
 			SysMessageDefault( DEFMSG_SPELL_TARG_LOS );
-			return( false );
+			return false;
 		}
 		if ( ! Spell_TargCheck_Face() )
-			return( false );
+			return false;
 	}
 
-	return( true );
+	return true;
 }
 
 bool CChar::Spell_Unequip( LAYER_TYPE layer )
@@ -2326,27 +2326,27 @@ bool CChar::Spell_Unequip( LAYER_TYPE layer )
 		if ( IsSetMagicFlags(MAGICF_NOCASTFROZENHANDS) && IsStatFlag( STATF_Freeze ))
 		{
 			SysMessageDefault( DEFMSG_SPELL_TRY_FROZENHANDS );
-			return( false );
+			return false;
 		}
 		else if ( ! CanMove( pItemPrev ))
 		{
-			return( false );
+			return false;
 		}
 		else if ( ! pItemPrev->IsTypeSpellbook() && ! pItemPrev->IsType(IT_WAND) && ! pItemPrev->GetDefKey("SPELLCHANNELING",true))
 		{
 			ItemBounce( pItemPrev );
 		}
 	}
-	return( true );
+	return true;
 }
 
 inline bool CChar::Spell_SimpleEffect( CObjBase * pObj, CObjBase * pObjSrc, SPELL_TYPE &spell, int &iSkillLevel )
 {
 	ADDTOCALLSTACK("CChar::Spell_SimpleEffect");
 	if ( pObj == NULL )
-		return( false );
+		return false;
 	pObj->OnSpellEffect( spell, this, iSkillLevel, dynamic_cast <CItem*>( pObjSrc ));
-	return( true );
+	return true;
 }
 
 bool CChar::Spell_CastDone()

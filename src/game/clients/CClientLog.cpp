@@ -71,7 +71,7 @@ bool CClient::addLoginErr(byte code)
 	// LOGIN_ERR_OTHER
 
 	if (code == PacketLoginError::Success)
-		return( true );
+		return true;
 
 	// console message to display for each login error code
 	static lpctstr const sm_Login_ErrMsg[] =
@@ -142,7 +142,7 @@ bool CClient::addLoginErr(byte code)
 
 	new PacketLoginError(this, static_cast<PacketLoginError::Reason>(code));
 	GetNetState()->markReadClosed();
-	return( false );
+	return false;
 }
 
 
@@ -221,13 +221,13 @@ bool CClient::addRelay( const CServerDef * pServ )
 	new PacketServerRelay(this, dwAddr, pServ->m_ip.GetPort(), dwCustomerId);
 	
 	m_Targ_Mode = CLIMODE_SETUP_RELAY;
-	return( true );
+	return true;
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
 	g_Log.EventDebug("account '%s'\n", GetAccount() ? GetAccount()->GetName() : "");
 	EXC_DEBUG_END;
-	return( false );
+	return false;
 }
 
 bool CClient::Login_Relay( uint iRelay ) // Relay player to a selected IP
@@ -258,7 +258,7 @@ bool CClient::Login_Relay( uint iRelay ) // Relay player to a selected IP
 		if ( pServ == NULL )
 		{
 			DEBUG_ERR(( "%x:Login_Relay BAD index! %u\n", GetSocketID(), iRelay ));
-			return( false );
+			return false;
 		}
 	}
 
@@ -341,7 +341,7 @@ bool CClient::OnRxConsole( const byte * pData, size_t iLen )
 	{
 		int iRet = OnConsoleKey( m_Targ_Text, *pData++, GetAccount() != NULL );
 		if ( ! iRet )
-			return( false );
+			return false;
 		if ( iRet == 2 )
 		{
 			if ( GetAccount() == NULL )
@@ -406,7 +406,7 @@ bool CClient::OnRxAxis( const byte * pData, size_t iLen )
 	{
 		int iRet = OnConsoleKey( m_Targ_Text, *pData++, GetAccount() != NULL );
 		if ( ! iRet )
-			return( false );
+			return false;
 		if ( iRet == 2 )
 		{
 			if ( GetAccount() == NULL )
@@ -543,7 +543,7 @@ bool CClient::OnRxPing( const byte * pData, size_t iLen )
 						{
 							if ( lErr != PacketLoginError::Invalid )
 								SysMessage( sMsg );
-							return( false );
+							return false;
 						}
 						return OnRxConsoleLoginComplete();
 					}
@@ -802,7 +802,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
 		xRecordPacketData(this, (const byte *)pEvent, iLen, "client->server");
 #endif
 		addLoginErr( PacketLoginError::BadEncLength );
-		return( false );
+		return false;
 	}
 	
 	GetNetState()->detectAsyncMode();
@@ -811,12 +811,12 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
 	if ( !xCanEncLogin() )
 	{
 		addLoginErr((uchar)((m_Crypt.GetEncryptionType() == ENC_NONE? PacketLoginError::EncNoCrypt : PacketLoginError::EncCrypt) ));
-		return( false );
+		return false;
 	}
 	else if ( m_Crypt.GetConnectType() == CONNECT_LOGIN && !xCanEncLogin(true) )
 	{
 		addLoginErr( PacketLoginError::BadVersion );
-		return( false );
+		return false;
 	}
 	
 	byte lErr = PacketLoginError::EncUnknown;
@@ -946,11 +946,11 @@ bool CClient::xCanEncLogin(bool bCheckCliver)
 	else
 	{
 		if ( !g_Serv.m_ClientVersion.GetClientVer() ) // Any Client allowed
-			return( true );
+			return true;
 		
 		if ( m_Crypt.GetEncryptionType() != ENC_NONE )
 			return( m_Crypt.GetClientVer() == g_Serv.m_ClientVersion.GetClientVer() );
 		else
-			return( true );	// if unencrypted we check that later
+			return true;	// if unencrypted we check that later
 	}
 }

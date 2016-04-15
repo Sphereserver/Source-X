@@ -131,7 +131,7 @@ bool CChar::Memory_UpdateFlags( CItemMemory * pMemory )
 	else
 		iCheckTime = 20*60*TICK_PER_SEC;
 	pMemory->SetTimeout( iCheckTime );	// update it's decay time.
-	return( true );
+	return true;
 }
 
 // Just clear these flags but do not delete the memory.
@@ -356,7 +356,7 @@ bool CChar::Memory_OnTick( CItemMemory * pMemory )
 
 	CObjBase * pObj = pMemory->m_uidLink.ObjFind();
 	if ( pObj == NULL )
-		return( false );
+		return false;
 
 	if ( pMemory->IsMemoryTypes( MEMORY_FIGHT ))
 	{
@@ -365,9 +365,9 @@ bool CChar::Memory_OnTick( CItemMemory * pMemory )
 	}
 
 	if ( pMemory->IsMemoryTypes( MEMORY_IPET | MEMORY_GUARD | MEMORY_GUILD | MEMORY_TOWN ))
-		return( true );	// never go away.
+		return true;	// never go away.
 
-	return( false );	// kill it?.
+	return false;	// kill it?.
 }
 
 // The fight is over because somebody ran away.
@@ -407,7 +407,7 @@ bool CChar::Memory_Fight_OnTick( CItemMemory * pMemory )
 	ASSERT(pMemory);
 	CChar * pTarg = pMemory->m_uidLink.CharFind();
 	if ( pTarg == NULL )
-		return( false );	// They are gone for some reason ?
+		return false;	// They are gone for some reason ?
 
 	int64 elapsed = Attacker_GetElapsed(Attacker_GetID(pTarg));
 	// Attacker.Elapsed = -1 means no combat end for this attacker.
@@ -418,7 +418,7 @@ bool CChar::Memory_Fight_OnTick( CItemMemory * pMemory )
 		Memory_Fight_Retreat( pTarg, pMemory );
 	clearit:
 		Memory_ClearTypes( pMemory, MEMORY_FIGHT|MEMORY_IAGGRESSOR|MEMORY_AGGREIVED );
-		return( true );
+		return true;
 	}
 
 	int64 iTimeDiff = - g_World.GetTimeDiff( pMemory->GetTimeStamp() );
@@ -430,7 +430,7 @@ bool CChar::Memory_Fight_OnTick( CItemMemory * pMemory )
 		goto clearit;
 
 	pMemory->SetTimeout(20*TICK_PER_SEC);
-	return( true );	// reschedule it.
+	return true;	// reschedule it.
 }
 
 void CChar::Memory_Fight_Start( const CChar * pTarg )

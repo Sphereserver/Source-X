@@ -147,7 +147,7 @@ bool CVerDataMul::FindVerDataBlock( VERFILE_TYPE type, dword id, CUOIndexRec & I
 	int iHigh = (int)(GetCount())-1;
 	if ( iHigh < 0 )
 	{
-		return( false );
+		return false;
 	}
 
 	dword dwIndex = VERDATA_MAKE_INDEX(type,id);
@@ -161,7 +161,7 @@ bool CVerDataMul::FindVerDataBlock( VERFILE_TYPE type, dword id, CUOIndexRec & I
 		if ( iCompare == 0 )
 		{
 			Index.CopyIndex( &(pArray[i]));
-			return( true );
+			return true;
 		}
 		if ( iCompare > 0 )
 		{
@@ -172,7 +172,7 @@ bool CVerDataMul::FindVerDataBlock( VERFILE_TYPE type, dword id, CUOIndexRec & I
 			iHigh = i-1;
 		}
 	}
-	return( false );
+	return false;
 }
 
 
@@ -188,7 +188,7 @@ size_t CSphereMulti::Load( MULTI_TYPE id )
 	InitCacheTime();		// This is invalid !
 
 	if ( id < 0 || id >= MULTI_QTY )
-		return( 0 );
+		return 0;
 	m_id = id;
 
 	CUOIndexRec Index;

@@ -53,7 +53,7 @@ bool CElementDef::SetValStr( void * pBase, lpctstr pszVal ) const
 			return false;
 		case ELEM_STRING:
 			strcpylen(static_cast<tchar *>(pValPtr), pszVal, GetValLength() - 1);
-			return( true );
+			return true;
 		case ELEM_CSTRING:
 			*static_cast<CGString *>(pValPtr) = pszVal;
 			return true;
@@ -105,7 +105,7 @@ bool CElementDef::GetValStr( const void * pBase, CGString & sVal ) const
 			return false;
 		case ELEM_STRING:
 			sVal = static_cast<tchar *>(pValPtr);
-			return( true );
+			return true;
 		case ELEM_CSTRING:
 			sVal = *static_cast<CGString *>(pValPtr);
 			return true;

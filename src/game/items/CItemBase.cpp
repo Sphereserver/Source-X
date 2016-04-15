@@ -255,10 +255,10 @@ bool CItemBase::IsTypeArmor( IT_TYPE type )  // static
 		case IT_ARMOR:
 		case IT_ARMOR_LEATHER:
 		case IT_SHIELD:
-			return( true );
+			return true;
 
 		default:
-			return( false );
+			return false;
 	}
 }
 bool CItemBase::IsTypeWeapon( IT_TYPE type )  // static
@@ -278,10 +278,10 @@ bool CItemBase::IsTypeWeapon( IT_TYPE type )  // static
 		case IT_WEAPON_FENCE:
 		case IT_WEAPON_BOW:
 		case IT_WAND:
-			return( true );
+			return true;
 
 		default:
-			return( false );
+			return false;
 	}
 }
 
@@ -322,9 +322,9 @@ bool CItemBase::IsTypeSpellbook( IT_TYPE type )  // static
 		case IT_SPELLBOOK_ARCANIST:
 		case IT_SPELLBOOK_MYSTIC:
 		case IT_SPELLBOOK_BARD:
-			return( true );
+			return true;
 		default:
-			return( false );
+			return false;
 	}
 }
 
@@ -335,10 +335,10 @@ bool CItemBase::IsTypeMulti( IT_TYPE type )	// static
 		case IT_MULTI:
 		case IT_MULTI_CUSTOM:
 		case IT_SHIP:
-			return( true );
+			return true;
 
 		default:
-			return( false );
+			return false;
 	}
 }
 
@@ -356,16 +356,16 @@ bool CItemBase::IsTypeEquippable() const
 		case IT_BEARD:
 		case IT_JEWELRY:
 		case IT_EQ_HORSE:
-			return( true );
+			return true;
 		default:
 			break;
 	}
 	if ( IsTypeSpellbook( m_type ))
-		return( true );
+		return true;
 	if ( IsTypeArmor( m_type ))
-		return( true );
+		return true;
 	if ( IsTypeWeapon( m_type ))
-		return( true );
+		return true;
 
 	// Even not visible things.
 	switch ( m_type )
@@ -379,13 +379,13 @@ bool CItemBase::IsTypeEquippable() const
 		case IT_EQ_MEMORY_OBJ:
 		case IT_EQ_SCRIPT:
 			if ( IsVisibleLayer( static_cast<LAYER_TYPE>(m_layer)))
-				return( false );
-			return( true );
+				return false;
+			return true;
 		default:
 			break;
 	}
 
-	return( false );
+	return false;
 }
 
 bool CItemBase::IsID_Multi( ITEMID_TYPE id ) // static
@@ -435,7 +435,7 @@ int CItemBase::IsID_Door( ITEMID_TYPE id ) // static
 	if ( id == 0x190e )
 	{
 		// anomoly door. bar door just has 2 pieces.
-		return( 1 );
+		return 1;
 	}
 	if ( id == 0x190f )
 	{
@@ -449,7 +449,7 @@ int CItemBase::IsID_Door( ITEMID_TYPE id ) // static
 		if ( did >= 0 && did <= 15 )
 			return( did+1 );
 	}
-	return( 0 );
+	return 0;
 }
 
 bool CItemBase::IsID_DoorOpen( ITEMID_TYPE id ) // static
@@ -460,7 +460,7 @@ bool CItemBase::IsID_DoorOpen( ITEMID_TYPE id ) // static
 		return false;
     if ( doordir & DOOR_OPENED )
 		return true;
-	return( false );
+	return false;
 }
 
 bool IsID_Ship( ITEMID_TYPE id )
@@ -485,17 +485,17 @@ bool IsID_WaterFish( ITEMID_TYPE id ) // static
 	// Assume this means water we can fish in.
 	// Not water we can wash in.
 	if ( id >= 0x1796 && id <= 0x17b2 )
-		return( true );
+		return true;
 	if ( id == 0x1559 )
-		return( true );
-	return( false );
+		return true;
+	return false;
 }
 
 bool IsID_WaterWash( ITEMID_TYPE id ) // static
 {
 	// IT_WATER_WASH
 	if ( id >= ITEMID_WATER_TROUGH_1 && id <= ITEMID_WATER_TROUGH_2	)
-		return( true );
+		return true;
 	return( IsID_WaterFish( id ));
 }
 
@@ -595,10 +595,10 @@ bool IsID_Chair( ITEMID_TYPE id ) // static
 		case 0x1e78: // 'chair'
 		case 0x3dff: // 'bench'
 		case 0x3e00: // 'bench'
-			return( true );
+			return true;
 
 		default:
-			return( false );
+			return false;
 	}
 }
 
@@ -611,7 +611,7 @@ bool CItemBase::GetItemData( ITEMID_TYPE id, CUOItemTypeRec2 * pData ) // static
 	// NOTE: This data should already be read into the m_ItemBase table ???
 
 	if ( ! IsValidDispID(id))
-		return( false );
+		return false;
 
 	try
 	{
@@ -622,13 +622,13 @@ bool CItemBase::GetItemData( ITEMID_TYPE id, CUOItemTypeRec2 * pData ) // static
 	{
 		g_Log.CatchEvent( &e, "GetItemData" );
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
-		return( false );
+		return false;
 	}
 	catch (...)
 	{
 		g_Log.CatchEvent(NULL, "GetItemData" );
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
-		return( false );
+		return false;
 	}
 
 	// Unused tiledata I guess. Don't create it.
@@ -644,14 +644,14 @@ bool CItemBase::GetItemData( ITEMID_TYPE id, CUOItemTypeRec2 * pData ) // static
 	{
 		// What are the exceptions to the rule ?
 		if ( id == ITEMID_BBOARD_MSG ) // special
-			return( true );
+			return true;
 		if ( IsID_GamePiece( id ))
-			return( true );
+			return true;
 		if ( IsID_Track(id))	// preserve these
-			return( true );
-		return( false );
+			return true;
+		return false;
 	}
-	return( true );
+	return true;
 }
 
 inline void CItemBase::GetItemSpecificFlags( const CUOItemTypeRec2 & tiledata, dword & wBlockThis, IT_TYPE type, ITEMID_TYPE id ) // static
@@ -869,14 +869,14 @@ bool CItemBase::IsSameDispID( ITEMID_TYPE id ) const
 	}
 
 	if ( id == GetDispID())
-		return( true );
+		return true;
 
 	for ( size_t i = 0; i < m_flip_id.GetCount(); i ++ )
 	{
 		if ( m_flip_id[i] == id )
-			return( true );
+			return true;
 	}
-	return( false );
+	return false;
 }
 
 void CItemBase::Restock()
@@ -901,7 +901,7 @@ int CItemBase::CalculateMakeValue( int iQualityLevel ) const
 	if ( sm_iReentrantCount > 32 )
 	{
 		DEBUG_ERR(( "Too many RESOURCES at item '%s' to calculate a value with (circular resource list?).\n", GetResourceName() ));
-		return( 0 );
+		return 0;
 	}
 
 	sm_iReentrantCount++;
@@ -1289,7 +1289,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pCha
 			break;
 		case IBC_TWOHANDS:
 			if ( ! IsTypeEquippable())
-				return( false );
+				return false;
 
 			if ( ! IsTypeWeapon(GetType()) && ! IsType(IT_FISH_POLE))
 				sVal.FormatVal(0);
@@ -1459,17 +1459,17 @@ bool CItemBase::r_LoadVal( CScript &s )
 			break;
 		case IBC_DISPID:
 			// Can't set this.
-			return( false );
+			return false;
 		case IBC_DUPEITEM:
 			// Just ignore these.
-			return( true );
+			return true;
 
 		case IBC_DUPELIST:
 			{
 				tchar * ppArgs[512];
 				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), ppArgs, COUNTOF(ppArgs));
 				if ( iArgQty <= 0 )
-					return( false );
+					return false;
 				m_flip_id.Empty();
 				for ( size_t i = 0; i < iArgQty; i++ )
 				{
@@ -1586,21 +1586,21 @@ bool CItemBase::r_LoadVal( CScript &s )
 				if ( GetID() < ITEMID_MULTI )
 				{
 					DEBUG_ERR(( "Setting new id for base type %s not allowed\n", GetResourceName()));
-					return( false );
+					return false;
 				}
 
 				ITEMID_TYPE id = static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
 				if ( ! IsValidDispID(id))
 				{
 					DEBUG_ERR(( "Setting invalid id=%s for base type %s\n", s.GetArgStr(), GetResourceName()));
-					return( false );
+					return false;
 				}
 
 				CItemBase * pItemDef = FindItemBase( id );	// make sure the base is loaded.
 				if ( ! pItemDef )
 				{
 					DEBUG_ERR(( "Setting unknown base id=0%x for %s\n", id, GetResourceName()));
-					return( false );
+					return false;
 				}
 
 				CopyBasic( pItemDef );
@@ -1615,7 +1615,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 			break;
 		case IBC_REQSTR:
 			if ( ! IsTypeEquippable())
-				return( false );
+				return false;
 			m_ttEquippable.m_StrReq = s.GetArgVal();
 			break;
 		
@@ -1817,7 +1817,7 @@ bool CItemBaseMulti::AddComponent( ITEMID_TYPE id, short dx, short dy, char dz )
 		m_Components.Add( comp );
 	}
 
-	return( true );
+	return true;
 }
 
 //	TODO: (Vjaka) do i really need map plane here?
@@ -1894,7 +1894,7 @@ bool CItemBaseMulti::r_LoadVal( CScript &s )
 		break;
 	case MLC_REGIONFLAGS:
 		m_dwRegionFlags = s.GetArgVal();
-		return( true );
+		return true;
 	case MLC_SHIPSPEED:
 	{
 		if (!IsType(IT_SHIP))	// only valid for ships
@@ -1995,14 +1995,14 @@ bool CItemBaseMulti::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole *
 		}
 	case MLC_MULTIREGION:
 		sVal.Format( "%d,%d,%d,%d", m_rect.m_left, m_rect.m_top, m_rect.m_right-1, m_rect.m_bottom-1 );
-		return( true );
+		return true;
 	case MLC_REGIONFLAGS:
 		sVal.FormatHex( m_dwRegionFlags );
-		return( true );
+		return true;
 	case MLC_SHIPSPEED:
 	{
 		if (!IsType(IT_SHIP))
-			return( false );
+			return false;
 
 		pszKey += 9;
 		if (*pszKey == '.')

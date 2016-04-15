@@ -270,7 +270,7 @@ bool CImportFile::ImportSCP( CScript & s, word wModeFlags )
 			if ( s.IsKey( "SERIAL"))
 			{
 				if ( m_pCurSer != NULL )
-					return( false );
+					return false;
 				m_pCurSer = new CImportSer( s.GetArgVal());
 				m_pCurSer->m_pObj = m_pCurObj;
 				m_ListSer.InsertHead( m_pCurSer );
@@ -295,7 +295,7 @@ bool CImportFile::ImportSCP( CScript & s, word wModeFlags )
 		}
 	}
 
-	return( true );
+	return true;
 }
 
 bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
@@ -356,7 +356,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 		if ( s.IsKey("SERIAL" ))
 		{
 			if ( m_pCurSer != NULL )
-				return( false );
+				return false;
 
 			dword dwSerial = ATOI( pArg );
 			if ( dwSerial == UID_UNUSED )
@@ -385,7 +385,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			if ( s.IsKey("ID" ))
 			{
 				if ( m_pCurObj != NULL )
-					return( false );
+					return false;
 				pItem = CItem::CreateTemplate(static_cast<ITEMID_TYPE>(ATOI(pArg)));
 				pItem->SetName( sName );
 				m_pCurObj = pItem;
@@ -491,7 +491,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			if ( s.IsKey("NAME" ))
 			{
 				if ( m_pCurObj != NULL )
-					return( false );
+					return false;
 				pChar = CChar::CreateBasic( CREID_MAN );
 				pChar->SetName( sName );
 				m_pCurObj = pChar;
@@ -635,7 +635,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			continue;
 		}
 	}
-	return( true );
+	return true;
 }
 
 bool CWorld::Import( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, int iDist, tchar * pszArg1, tchar * pszArg2 )
@@ -653,10 +653,10 @@ bool CWorld::Import( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, i
 	// ??? What if i want to just import into the local area ?
 	size_t iLen = strlen( pszFilename );
 	if ( iLen <= 4 )
-		return( false );
+		return false;
 	CScript s;
 	if ( ! s.Open( pszFilename ))
-		return( false );
+		return false;
 
 	CPointMap ptCenter;
 	if ( pSrc )
@@ -678,20 +678,20 @@ bool CWorld::Import( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, i
 	if ( ! strcmpi( pszFilename + (iLen - 4), ".WSC" ))
 	{
 		if ( ! fImport.ImportWSC(s, wModeFlags ))
-			return( false );
+			return false;
 	}
 	else
 	{
 		// This is one of our files. ".SCP"
 		if ( ! fImport.ImportSCP(s, wModeFlags ))
-			return( false );
+			return false;
 	}
 
 	// now fix the contained items.
 	fImport.ImportFix();
 
 	GarbageCollection();
-	return( true );
+	return true;
 }
 
 
@@ -700,16 +700,16 @@ bool CWorld::DumpAreas( CTextConsole * pSrc, lpctstr pszFilename )
 {
 	ADDTOCALLSTACK("CWorld::DumpAreas");
 	if ( pSrc == NULL )
-		return( false );
+		return false;
 
 	if ( pszFilename == NULL || *pszFilename == '\0' )
 		pszFilename	= "map_all" SPHERE_SCRIPT;
 	else if ( strlen( pszFilename ) <= 4 )
-		return( false );
+		return false;
 
 	CScript s;
 	if ( ! s.Open( pszFilename, OF_WRITE|OF_TEXT|OF_DEFAULTMODE ))
-		return( false );
+		return false;
 
 	size_t iMax = g_Cfg.m_RegionDefs.GetCount();
 	for ( size_t i = 0; i < iMax; i++ )
@@ -735,15 +735,15 @@ bool CWorld::Export( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, i
 	// dy = change in y
 
 	if ( pSrc == NULL )
-		return( false );
+		return false;
 
 	size_t iLen = strlen( pszFilename );
 	if ( iLen <= 4 )
-		return( false );
+		return false;
 
 	CScript s;
 	if ( ! s.Open( pszFilename, OF_WRITE|OF_TEXT|OF_DEFAULTMODE ))
-		return( false );
+		return false;
 
 	if ( wModeFlags & IMPFLAGS_RELATIVE )
 	{
@@ -764,7 +764,7 @@ bool CWorld::Export( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, i
 				break;
 			pItem->WriteUOX( s, index++ );
 		}
-		return( true );
+		return true;
 	}
 
 	// (???NPC) Chars and the stuff they are carrying.
@@ -797,6 +797,6 @@ bool CWorld::Export( lpctstr pszFilename, const CChar * pSrc, word wModeFlags, i
 		}
 	}
 
-	return( true );
+	return true;
 }
 

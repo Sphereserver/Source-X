@@ -34,7 +34,7 @@ bool CValueRangeDef::Load( tchar * pszDef )
 	{
 		m_iHi = m_iLo;
 	}
-	return( true );
+	return true;
 }
 
 const tchar * CValueRangeDef::Write() const
@@ -72,13 +72,13 @@ bool CValueCurveDef::Load( tchar * pszDef )
 	m_aiValues.SetCount( iQty );
 	if ( iQty == 0 )
 	{
-		return( false );
+		return false;
 	}
 	for ( size_t i = 0; i < iQty; i++ )
 	{
 		m_aiValues[i] = (int)(Arg_piCmd[i]);
 	}
-	return( true );
+	return true;
 }
 
 int CValueCurveDef::GetLinear( int iSkillPercent ) const
@@ -99,7 +99,7 @@ int CValueCurveDef::GetLinear( int iSkillPercent ) const
 	switch (iQty)
 	{
 	case 0:
-		return( 0 );	// no values defined !
+		return 0;	// no values defined !
 	case 1:
 		return( m_aiValues[0] );
 	case 2:

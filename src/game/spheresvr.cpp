@@ -221,7 +221,7 @@ size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord )
 				j = 0;
 			}
 			else
-			return( 0 );
+			return 0;
 		}
 		if ( j == 0 && i > 0 )
 		{

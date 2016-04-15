@@ -514,7 +514,7 @@ bool CChat::IsValidName( lpctstr pszName, bool fPlayer ) // static
 			continue;
 		}
 		if ( ! isalnum(pszName[i]))
-			return( false );
+			return false;
 	}
 	return true;
 }

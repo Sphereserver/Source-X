@@ -557,29 +557,29 @@ bool CItem::IsTopLevelMultiLocked() const
 	// Is this item locked to the structure ?
 	ASSERT( IsTopLevel());
 	if ( ! m_uidLink.IsValidUID())	// linked to something.
-		return( false );
+		return false;
 	if ( IsType(IT_KEY))	// keys cannot be locked down. 
-		return( false );
+		return false;
 	const CRegionBase * pArea = GetTopPoint().GetRegion( REGION_TYPE_MULTI );
 	if ( pArea == NULL )
-		return( false );
+		return false;
 	if ( pArea->GetResourceID() == m_uidLink )
-		return( true );
-	return( false );
+		return true;
+	return false;
 }
 
 bool CItem::IsMovableType() const
 {
 	ADDTOCALLSTACK("CItem::IsMovableType");
 	if ( IsAttr( ATTR_MOVE_ALWAYS ))	// this overrides other flags.
-		return( true );
+		return true;
 	if ( IsAttr( ATTR_MOVE_NEVER | ATTR_STATIC | ATTR_INVIS | ATTR_LOCKEDDOWN ))
-		return( false );
+		return false;
 	const CItemBase * pItemDef = Item_GetDef();
 	ASSERT(pItemDef);
 	if ( ! pItemDef->IsMovableType())
-		return( false );
-	return( true );
+		return false;
+	return true;
 }
 
 bool CItem::IsMovable() const
@@ -588,7 +588,7 @@ bool CItem::IsMovable() const
 	if ( ! IsTopLevel() && ! IsAttr( ATTR_MOVE_NEVER | ATTR_LOCKEDDOWN ))
 	{
 		// If it's in my pack (event though not normally movable) thats ok.
-		return( true );
+		return true;
 	}
 	return( IsMovableType());
 }
@@ -678,7 +678,7 @@ int CItem::IsWeird() const
 			iResultCode = 0x2105;
 			return( iResultCode );
 		}
-		return( 0 );
+		return 0;
 	}
 
 	// The container must be valid.
@@ -1115,25 +1115,25 @@ bool CItem::IsSameType( const CObjBase * pObj ) const
 	ADDTOCALLSTACK("CItem::IsSameType");
 	const CItem * pItem = dynamic_cast <const CItem*> ( pObj );
 	if ( pItem == NULL )
-		return( false );
+		return false;
 
 	if ( GetID() != pItem->GetID() )
-		return( false );
+		return false;
 	if ( GetHue() != pItem->GetHue())
-		return( false );
+		return false;
 	if ( m_type != pItem->m_type )
-		return( false );
+		return false;
 	if ( m_uidLink != pItem->m_uidLink )
-		return( false );
+		return false;
 
 	if ( m_itNormal.m_more1 != pItem->m_itNormal.m_more1 )
-		return( false );
+		return false;
 	if ( m_itNormal.m_more2 != pItem->m_itNormal.m_more2 )
-		return( false );
+		return false;
 	if ( m_itNormal.m_morep != pItem->m_itNormal.m_morep )
-		return( false );
+		return false;
 
-	return( true );
+	return true;
 }
 
 bool CItem::IsStackableException() const
@@ -1143,15 +1143,15 @@ bool CItem::IsStackableException() const
 	// NOTE: This means the m_amount can be = 0
 
 	if ( IsTopLevel() && IsAttr( ATTR_INVIS ))
-		return( true );	// resource tracker.
+		return true;	// resource tracker.
 
 	// In a vendors box ?
 	const CItemContainer * pCont = dynamic_cast <const CItemContainer*>( GetParent());
 	if ( pCont == NULL )
-		return( false );
+		return false;
 	if ( ! pCont->IsType(IT_EQ_VENDOR_BOX) && ! pCont->IsAttr(ATTR_MAGIC))
-		return( false );
-	return( true );
+		return false;
+	return true;
 }
 
 bool CItem::IsStackable( const CItem * pItem ) const
@@ -1164,7 +1164,7 @@ bool CItem::IsStackable( const CItem * pItem ) const
 	{
 		// Vendor boxes can stack normally un-stackable stuff.
 		if ( ! pItem->IsStackableException())
-			return( false );
+			return false;
 	}
 
 	// try object rotations ex. left and right hand hides ?
@@ -1417,7 +1417,7 @@ bool CItem::MoveTo(CPointMap pt, bool bForceFix) // Put item on the ground here.
 	if ( bForceFix )
 		SetTopZ(GetFixZ(GetTopPoint()));
 
-	return( true );
+	return true;
 }
 
 bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
@@ -1880,7 +1880,7 @@ bool CItem::SetBase( CItemBase * pItemDef )
 
 	m_type = pItemDef->GetType();	// might change the type.
 	m_Can = pItemDef->m_Can;
-	return( true );
+	return true;
 }
 
 bool CItem::SetBaseID( ITEMID_TYPE id )
@@ -1897,7 +1897,7 @@ bool CItem::SetBaseID( ITEMID_TYPE id )
 		return false;
 	}
 	SetBase( pItemDef );	// set new m_type etc
-	return( true );
+	return true;
 }
 
 void CItem::OnHear( lpctstr pszCmd, CChar * pSrc )
@@ -1930,10 +1930,10 @@ bool CItem::SetID( ITEMID_TYPE id )
 	if ( ! IsSameDispID( id ))
 	{
 		if ( ! SetBaseID( id ))
-			return( false );
+			return false;
 	}
 	SetDispID( id );
-	return( true );
+	return true;
 }
 
 ITEMID_TYPE CItem::GetDispID() const
@@ -2240,7 +2240,7 @@ bool CItem::LoadSetContainer( CUID uid, LAYER_TYPE layer )
 		if ( pCont != NULL )
 		{
 			pCont->ContentAdd( this );
-			return( true );
+			return true;
 		}
 	}
 	else
@@ -2835,7 +2835,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			// used only during load.
 			if ( ! IsDisconnected() && ! IsItemInContainer() && ! IsItemEquipped())
 			{
-				return( false );
+				return false;
 			}
 			SetUnkZ( (char)(s.GetArgVal())); // GetEquipLayer()
 			return true;
@@ -2985,10 +2985,10 @@ bool CItem::r_Load( CScript & s ) // Load an item from script
 		DEBUG_ERR(( "Item 0%x Invalid, id=%s, code=0%x\n",
 		(dword) GetUID(), GetResourceName(), iResultCode ));
 		Delete();
-		return( true );
+		return true;
 	}
 
-	return( true );
+	return true;
 }
 
 enum CIV_TYPE
@@ -3025,7 +3025,7 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 	{
 		case CIV_BOUNCE:
 			if ( ! pCharSrc )
-				return( false );
+				return false;
 			pCharSrc->ItemBounce( this );
 			break;
 		case CIV_CONSUME:
@@ -3057,7 +3057,7 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 				CObjBaseTemplate * pObjTop = GetTopLevelObj();
 				MoveToCheck( pObjTop->GetTopPoint(), pSrc->GetChar());
 			}
-			return( true );
+			return true;
 		case CIV_DUPE:
 			{
 				int iCount = s.GetArgVal();
@@ -3073,17 +3073,17 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 			break;
 		case CIV_EQUIP:
 			if ( ! pCharSrc )
-				return( false );
+				return false;
 			return pCharSrc->ItemEquip( this );
 		case CIV_UNEQUIP:
 			if ( ! pCharSrc )
-				return( false );
+				return false;
 			RemoveSelf();
 			pCharSrc->ItemBounce(this);
 			break;
 		case CIV_USE:
 			if ( pCharSrc == NULL )
-				return( false );
+				return false;
 			pCharSrc->Use_Obj( this, s.HasArgs() ? (s.GetArgVal() != 0) : true, true );
 			break;
 		case CIV_REPAIR:
@@ -3460,9 +3460,9 @@ bool CItem::IsTypeLit() const
 		case IT_CAMPFIRE:
 		case IT_LAVA:
 		case IT_WINDOW:
-			return( true );
+			return true;
 		default:
-			return( false );
+			return false;
 	}
 }
 
@@ -3472,9 +3472,9 @@ bool CItem::IsTypeBook() const
 	{
 		case IT_BOOK:
 		case IT_MESSAGE:
-			return( true );
+			return true;
 		default:
-			return( false );
+			return false;
 	}
 }
 
@@ -3512,9 +3512,9 @@ bool CItem::IsTypeLocked() const
 		case IT_CONTAINER_LOCKED:
 		case IT_SHIP_HOLD_LOCK:
 		case IT_DOOR_LOCKED:
-			return( true );
+			return true;
 		default:
-			return( false );
+			return false;
 	}
 }
 bool CItem::IsTypeLockable() const
@@ -3528,7 +3528,7 @@ bool CItem::IsTypeLockable() const
 		case IT_SHIP_PLANK:
 		case IT_SHIP_HOLD:
 			//case IT_ROPE:
-			return( true );
+			return true;
 		default:
 			return( IsTypeLocked() );
 	}
@@ -3541,7 +3541,7 @@ bool CItem::IsTypeSpellable() const
 		case IT_SCROLL:
 		case IT_SPELL:
 		case IT_FIRE:
-			return( true );
+			return true;
 		default:
 			return( IsTypeArmorWeapon() );
 	}
@@ -3666,7 +3666,7 @@ bool CItem::IsValidLockLink( CItem * pItemLock ) const
 	// IT_KEY
 	if ( pItemLock == NULL )
 	{
-		return( false );
+		return false;
 	}
 	if ( pItemLock->IsTypeLockable())
 	{
@@ -3677,10 +3677,10 @@ bool CItem::IsValidLockLink( CItem * pItemLock ) const
 		// Is it linked to the item it is locking. (should be)
 		// We can't match the lock uid this way tho.
 		// Houses may have multiple doors. and multiple locks
-		return( true );
+		return true;
 	}
 	// not connected to anything i recognize.
-	return( false );
+	return false;
 }
 
 bool CItem::IsValidLockUID() const
@@ -3692,16 +3692,16 @@ bool CItem::IsValidLockUID() const
 	//  2. m_uidLink == UID of the multi.
 
 	if ( ! m_itKey.m_lockUID.IsValidUID() )	// blank
-		return( false );
+		return false;
 
 	// or we are a key to a multi.
 	// we can be linked to the multi.
 	if ( IsValidLockLink( m_itKey.m_lockUID.ItemFind()))
-		return( true );
+		return true;
 	if ( IsValidLockLink( m_uidLink.ItemFind()))
-		return( true );
+		return true;
 
-	return( false );
+	return false;
 }
 
 bool CItem::IsKeyLockFit( dword dwLockUID ) const
@@ -3959,7 +3959,7 @@ int CItem::AddSpellbookScroll( CItem * pScroll )
 	if ( iRet )
 		return( iRet );
 	pScroll->ConsumeAmount(1);	// we only need 1 scroll.
-	return( 0 );
+	return 0;
 }
 
 void CItem::Flip()
@@ -4040,7 +4040,7 @@ bool CItem::Use_Portculis()
 
 	Sound( iSnd );
 
-	return( true );
+	return true;
 }
 
 SOUND_TYPE CItem::Use_Music( bool fWell ) const
@@ -4061,11 +4061,11 @@ bool CItem::Use_DoorNew( bool bJustOpen )
 	ADDTOCALLSTACK("CItem::Use_DoorNew");
 
 	if (! IsTopLevel())
-		return( false );
+		return false;
 
 	bool bClosing = IsAttr(ATTR_OPENED);
 	if ( bJustOpen && bClosing )
-		return( true );	// links just open
+		return true;	// links just open
 
 	CItemBase * pItemDef = Item_GetDef();
 
@@ -4122,14 +4122,14 @@ bool CItem::Use_Door( bool fJustOpen )
 	ITEMID_TYPE id = GetDispID();
 	int doordir = CItemBase::IsID_Door( id )-1;
 	if ( doordir < 0 || ! IsTopLevel())
-		return( false );
+		return false;
 
 	id = static_cast<ITEMID_TYPE>(id - doordir);
 	// IT_TYPE typelock = m_type;
 
 	bool fClosing = ( doordir & DOOR_OPENED );	// currently open
 	if ( fJustOpen && fClosing )
-		return( true );	// links just open
+		return true;	// links just open
 
 	CPointMap pt = GetTopPoint();
 	switch ( doordir )
@@ -4270,13 +4270,13 @@ bool CItem::Armor_IsRepairable() const
 	//
 
 	if ( Can( CAN_I_REPAIR ))
-		return( true );
+		return true;
 
 	switch ( m_type )
 	{
 		case IT_CLOTHING:
 		case IT_ARMOR_LEATHER:
-			return( false );	// Not this way anyhow.
+			return false;	// Not this way anyhow.
 		case IT_SHIELD:
 		case IT_ARMOR:				// some type of armor. (no real action)
 			// ??? Bone armor etc is not !
@@ -4294,14 +4294,14 @@ bool CItem::Armor_IsRepairable() const
 
 		case IT_WEAPON_BOW:
 			// wood Bows are not repairable !
-			return( false );
+			return false;
 		case IT_WEAPON_XBOW:
-			return( true );
+			return true;
 		default:
-			return( false );
+			return false;
 	}
 
-	return( true );
+	return true;
 }
 
 int CItem::Armor_GetDefense() const
@@ -4393,7 +4393,7 @@ bool CItem::IsMemoryTypes( word wType ) const
 {
 	// MEMORY_FIGHT
 	if ( ! IsType( IT_EQ_MEMORY_OBJ ))
-		return( false );
+		return false;
 	return(( GetHueAlt() & wType ) ? true : false );
 }
 
@@ -4677,7 +4677,7 @@ int CItem::Use_LockPick( CChar * pCharSrc, bool fTest, bool fFail )
 		if ( !fTest )
 			pCharSrc->SysMessage( g_Cfg.GetDefaultMsg( DEFMSG_LOCK_HAS_KEY ) );
 
-		return( 0 );
+		return 0;
 	}
 
 	if ( IsType(IT_DOOR_LOCKED) && g_Cfg.m_iMagicUnlockDoor != -1 )
@@ -4714,7 +4714,7 @@ int CItem::Use_LockPick( CChar * pCharSrc, bool fTest, bool fFail )
 			{
 				pCharSrc->SysMessage( g_Cfg.GetDefaultMsg( DEFMSG_UNLOCK_FAIL_CONT ) );
 			}
-			return( -1 );
+			return -1;
 		}
 
 		// unlock it.
@@ -4867,7 +4867,7 @@ bool CItem::SetMagicLock( CChar * pCharSrc, int iSkillLevel )
 			return false;
 	}
 
-	return( true );
+	return true;
 }
 
 bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool bReflecting )
@@ -4966,7 +4966,7 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 		case SPELL_Magic_Lock:
 			if ( !SetMagicLock( pCharSrc, iSkillLevel ) )
-				return( false );
+				return false;
 			break;
 
 		case SPELL_Unlock:
@@ -4976,7 +4976,7 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 			int iDifficulty = Use_LockPick( pCharSrc, true, false );
 			if ( iDifficulty < 0 )
-				return( false );
+				return false;
 			bool fSuccess = pCharSrc->Skill_CheckSuccess( SKILL_MAGERY, iDifficulty );
 			Use_LockPick( pCharSrc, false, ! fSuccess );
 			return fSuccess;
@@ -5059,7 +5059,7 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 	//  -1 = invalid target ?
 
 	if ( iDmg <= 0 )
-		return( 0 );
+		return 0;
 
 	int64 iSelfRepair = GetDefNum("SELFREPAIR", true, true);
 	if ( iSelfRepair > Calc_GetRandVal(10) )
@@ -5068,14 +5068,14 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 		if ( m_itArmor.m_Hits_Cur > m_itArmor.m_Hits_Max )
 			m_itArmor.m_Hits_Cur = m_itArmor.m_Hits_Max;
 
-		return( 0 );
+		return 0;
 	}
 
 	if (( IsTrigUsed(TRIGGER_DAMAGE) ) || ( IsTrigUsed(TRIGGER_ITEMDAMAGE) ))
 	{
 		CScriptTriggerArgs Args(iDmg, (int)(uType));
 		if ( OnTrigger( ITRIG_DAMAGE, pSrc, &Args ) == TRIGRET_RET_TRUE )
-			return( 0 );
+			return 0;
 	}
 
 	switch ( GetType())
@@ -5094,13 +5094,13 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 		{
 			// Miss - They will usually survive.
 			if ( Calc_GetRandVal(5))
-				return( 0 );
+				return 0;
 		}
 		else
 		{
 			// Must have hit.
 			if ( ! Calc_GetRandVal(3))
-				return( 1 );
+				return 1;
 		}
 		Delete();
 		return INT32_MAX;
@@ -5111,7 +5111,7 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 			CSpellDef *pSpell = g_Cfg.GetSpellDef(SPELL_Explosion);
 			CItem *pItem = CItem::CreateBase(ITEMID_FX_EXPLODE_3);
 			if ( !pItem )
-				return( 0 );
+				return 0;
 
 			if ( pSrc )
 				pItem->m_uidLink = pSrc->GetUID();
@@ -5125,14 +5125,14 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 			ConsumeAmount();
 			return( INT32_MAX );
 		}
-		return( 1 );
+		return 1;
 
 	case IT_WEB:
 		if ( ! ( uType & (DAMAGE_FIRE|DAMAGE_HIT_BLUNT|DAMAGE_HIT_SLASH|DAMAGE_GOD)))
 		{
 			if ( pSrc )
 				pSrc->SysMessage( g_Cfg.GetDefaultMsg( DEFMSG_WEB_NOEFFECT ) );
-			return( 0 );
+			return 0;
 		}
 
 		if ( (dword)(iDmg) > m_itWeb.m_Hits_Cur || ( uType & DAMAGE_FIRE ))
@@ -5146,7 +5146,7 @@ int CItem::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType )
 		if ( pSrc )
 			pSrc->SysMessage( g_Cfg.GetDefaultMsg( DEFMSG_WEB_WEAKEN ) );
 		m_itWeb.m_Hits_Cur -= iDmg;
-		return( 1 );
+		return 1;
 
 	default:
 		break;
@@ -5219,7 +5219,7 @@ forcedamage:
 	}
 
 	// don't know how to calc damage for this.
-	return( 0 );
+	return 0;
 }
 
 void CItem::OnExplosion()
@@ -5565,7 +5565,7 @@ bool CItem::OnTick()
 	EXC_DEBUG_END;
 #endif //_WIN32
 
-	return( true );
+	return true;
 }
 
 int CItem::GetAbilityFlags() const

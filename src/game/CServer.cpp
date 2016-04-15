@@ -107,11 +107,11 @@ bool CServer::IsValidBusy() const
 			break;
 		case SERVMODE_Loading:
 		case SERVMODE_RestockAll:	// these may look stuck but are not.
-			return( true );
+			return true;
 		default:
-			return( false );
+			return false;
 	}
-	return( false );
+	return false;
 }
 
 void CServer::SetExitFlag( int iFlag )
@@ -648,7 +648,7 @@ longcommand:
 			if ( g_Cfg.m_sStripPath.IsEmpty() )
 			{
 				pSrc->SysMessage("StripPath not defined, function aborted.\n");
-				return( false );
+				return false;
 			}
 
 			dirname = g_Cfg.m_sStripPath;
@@ -665,7 +665,7 @@ longcommand:
 				if ( !f1 )
 				{
 					pSrc->SysMessagef("Cannot open file %s for writing.\n", z);
-					return( false );
+					return false;
 				}
 
 				while ( (script = g_Cfg.GetResourceFile(i++)) != NULL )
@@ -706,7 +706,7 @@ longcommand:
 				}
 				fclose(f1);
 				pSrc->SysMessagef("Scripts have just been stripped.\n");
-				return( true );
+				return true;
 			}
 			else if ( !strnicmp(pszText, "strip axis", 10) || !strnicmp(pszText, "strip", 5) )
 			{
@@ -719,7 +719,7 @@ longcommand:
 				if ( !f1 )
 				{
 					pSrc->SysMessagef("Cannot open file %s for writing.\n", z);
-					return( false );
+					return false;
 				}
 
 				while ( (script = g_Cfg.GetResourceFile(i++)) != NULL )
@@ -760,7 +760,7 @@ longcommand:
 				}
 				fclose(f1);
 				pSrc->SysMessagef("Scripts have just been stripped.\n");
-				return( true );
+				return true;
 			}
 		}
 
@@ -967,16 +967,16 @@ bool CServer::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 			size_t index = ATOI( pszKey );	// must use this to stop at .
 			pRef = g_Cfg.Server_GetDef(index);
 			pszKey += i + 1;
-			return( true );
+			return true;
 		}
 	}
 	if ( g_Cfg.r_GetRef( pszKey, pRef ))
 	{
-		return( true );
+		return true;
 	}
 	if ( g_World.r_GetRef( pszKey, pRef ))
 	{
-		return( true );
+		return true;
 	}
 	return( CScriptObj::r_GetRef( pszKey, pRef ));
 }
@@ -1253,7 +1253,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 
 		case SV_EXPORT: // "EXPORT" name [chars] [area distance]
 			if ( pSrc->GetPrivLevel() < PLEVEL_Admin )
-				return( false );
+				return false;
 			if ( s.HasArgs())
 			{
 				tchar * Arg_ppCmd[5];
@@ -1300,7 +1300,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 
 		case SV_IMPORT: // "IMPORT" name [flags] [area distance]
 			if ( pSrc->GetPrivLevel() < PLEVEL_Admin )
-				return( false );
+				return false;
 			if (s.HasArgs())
 			{
 				tchar * Arg_ppCmd[5];
@@ -1323,8 +1323,8 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 		case SV_LOAD:
 			// Load a resource file.
 			if ( g_Cfg.LoadResourcesAdd( s.GetArgStr()) == NULL )
-				return( false );
-			return( true );
+				return false;
+			return true;
 
 		case SV_LOG:
 			{
@@ -1352,7 +1352,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 
 		case SV_RESTORE:	// "RESTORE" backupfile.SCP Account CharName
 			if ( pSrc->GetPrivLevel() < PLEVEL_Admin )
-				return( false );
+				return false;
 			if (s.HasArgs())
 			{
 				tchar * Arg_ppCmd[4];
@@ -1399,7 +1399,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 				if ( Sphere_GetOSInfo()->dwPlatformId != 2 )
 				{
 					g_Log.EventError( "Command not avaible on Windows 95/98/ME.\n" );
-					return( false );
+					return false;
 				}
 
 				if ( !SetProcessWorkingSetSize(GetCurrentProcess(), static_cast<SIZE_T>(-1), static_cast<SIZE_T>(-1)) )
@@ -1507,7 +1507,7 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 					"-Ofilename Output console to this file name\n"
 					"-Q Quit when finished.\n"
 					);
-				return( false );
+				return false;
 #ifdef _WIN32
 			case 'C':
 			case 'K':
@@ -1530,7 +1530,7 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 				{
 					CFileText File;
 					if ( ! File.Open( "defs.txt", OF_WRITE|OF_TEXT ))
-						return( false );
+						return false;
 
 					for ( size_t i = 0; i < g_Exp.m_VarDefs.GetCount(); i++ )
 					{
@@ -1569,7 +1569,7 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 		}
 	}
 
-	return( true );
+	return true;
 }
 
 void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool bMessage)
@@ -1786,7 +1786,7 @@ bool CServer::Load()
 			else
 			{
 nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
-				return( false );
+				return false;
 			}
 			sprintf(wSockInfo, "Using WinSock ver %d.%d (%s)\n", HIBYTE(wsaData.wVersion), LOBYTE(wsaData.wVersion), wsaData.szDescription);
 		}
@@ -1834,7 +1834,7 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 	EXC_SET("loading scripts");
 	TriglistInit();
 	if ( !g_Cfg.Load(false) )
-		return( false );
+		return false;
 
 	EXC_SET("init encryption");
 	if ( m_ClientVersion.GetClientVer() )

@@ -1148,7 +1148,7 @@ void PacketSend::initLength(void)
 //	DEBUGNETWORK(("Packet %x starts dynamic with pos %d.\n", m_buffer[0], m_position));
 
 	m_lengthPosition = m_position;
-	writeInt16((word)(m_lengthPosition));
+	writeInt16((word)m_lengthPosition);
 }
 
 void PacketSend::fixLength()
@@ -1159,7 +1159,7 @@ void PacketSend::fixLength()
 
 		size_t oldPosition = m_position;
 		m_position = m_lengthPosition;
-		writeInt16((word)(oldPosition));
+		writeInt16((word)oldPosition);
 		m_position = oldPosition;
 		m_lengthPosition = 0;
 		m_length = m_position;

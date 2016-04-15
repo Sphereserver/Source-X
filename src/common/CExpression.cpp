@@ -1075,7 +1075,7 @@ int CExpression::GetRangeVals(lpctstr & pExpr, int64 * piVals, int iMaxQty)
 	ADDTOCALLSTACK("CExpression::GetRangeVals");
 	// Get a list of values.
 	if ( pExpr == NULL )
-		return( 0 );
+		return 0;
 
 	ASSERT(piVals);
 

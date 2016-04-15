@@ -103,11 +103,11 @@ static int CvtSystemToUNICODE( wchar & wChar, lpctstr pInp, int iSizeInBytes )
 	}
 	else 
 	{
-		return( -1 );	// invalid format !
+		return -1;	// invalid format !
 	}
 
 	if ( iBytes > iSizeInBytes )	// not big enough to hold it.
-		return( 0 );
+		return 0;
 
 	wchar wCharTmp = ch & ((1<<iStartBits)-1);
 	int iInp = 1;
@@ -115,7 +115,7 @@ static int CvtSystemToUNICODE( wchar & wChar, lpctstr pInp, int iSizeInBytes )
 	{
 		ch = pInp[iInp];
 		if (( ch & 0xc0 ) != 0x80 )	// bad coding.
-			return( -1 );
+			return -1;
 		wCharTmp <<= 6;
 		wCharTmp |= ch & 0x3f;
 	}
@@ -156,11 +156,11 @@ static int CvtUNICODEToSystem( tchar * pOut, int iSizeOutBytes, wchar wChar )
 	}
 	else
 	{
-		return( -1 );	// not valid UNICODE char.
+		return -1;	// not valid UNICODE char.
 	}
 
 	if ( iBytes > iSizeOutBytes )	// not big enough to hold it.
-		return( 0 );
+		return 0;
 
 	int iOut = iBytes-1;
 	for ( ; iOut > 0; iOut-- )
@@ -199,7 +199,7 @@ int CvtSystemToNUNICODE( NCHAR * pOut, int iSizeOutChars, lpctstr pInp, int iSiz
 	if ( iSizeInBytes <= 0 )
 	{
 		pOut[0] = 0;
-		return( 0 );
+		return 0;
 	}
 
 	iSizeOutChars--;
@@ -222,12 +222,12 @@ int CvtSystemToNUNICODE( NCHAR * pOut, int iSizeOutChars, lpctstr pInp, int iSiz
 		if ( iOutTmp <= 0 )
 		{
 			pOut[0] = 0;
-			return( 0 );
+			return 0;
 		}
 		if ( iOutTmp > iSizeOutChars )	// this should never happen !
 		{
 			pOut[0] = 0;
-			return( 0 );
+			return 0;
 		}
 
 		// flip all the words to network order .
@@ -289,7 +289,7 @@ int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const NCHAR * pInp, in
 	if ( iSizeInChars <= 0 )
 	{
 		pOut[0] = 0;
-		return( 0 );
+		return 0;
 	}
 
 	iSizeOutBytes--;
@@ -326,7 +326,7 @@ int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const NCHAR * pInp, in
 		if ( iOut < 0 )
 		{
 			pOut[0] = 0;	// make sure it's null terminated
-			return( 0 );
+			return 0;
 		}
 	}
 	else

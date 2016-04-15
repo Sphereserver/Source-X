@@ -431,7 +431,7 @@ bool CStoneMember::SetLoyalTo( const CChar * pCharLoyal )
 
 	// new vote tally
 	pStone->ElectMaster();
-	return( true );
+	return true;
 }
 
 //////////
@@ -743,21 +743,21 @@ bool CItemStone::r_LoadVal( CScript & s ) // Load an item Script
 					if ( !pChar )
 					{
 						DEBUG_ERR(( "MASTERUID called on non char 0%x uid.\n", (dword)pNewMasterUid ));
-						return( false );
+						return false;
 					}
 
 					CStoneMember * pNewMaster = GetMember( pChar );
 					if ( !pNewMaster )
 					{
 						DEBUG_ERR(( "MASTERUID called on char 0%x (%s) that is not a valid member of stone with 0x%x uid.\n", (dword)pNewMasterUid, pChar->GetName(), (dword)GetUID() ));
-						return( false );
+						return false;
 					}
 
 					CStoneMember * pMaster = GetMasterMember();
 					if ( pMaster )
 					{
 						if ( pMaster->GetLinkUID() == pNewMasterUid )
-							return( true );
+							return true;
 
 						pMaster->SetPriv(STONEPRIV_MEMBER);
 						//pMaster->SetLoyalTo(pChar);
@@ -769,10 +769,10 @@ bool CItemStone::r_LoadVal( CScript & s ) // Load an item Script
 				else
 				{
 					DEBUG_ERR(( "MASTERUID called without arguments.\n" ));
-					return( false );
+					return false;
 				}
 			}
-			return( true );
+			return true;
 		case STC_MEMBER: // "MEMBER"
 			{
 			tchar *Arg_ppCmd[8];		// Maximum parameters in one line
@@ -800,9 +800,9 @@ bool CItemStone::r_LoadVal( CScript & s ) // Load an item Script
 	{
 		uint i = ATOI(s.GetKey() + 7);
 		if ( i >= COUNTOF(m_sCharter))
-			return( false );
+			return false;
 		m_sCharter[i] = s.GetArgStr();
-		return( true );
+		return true;
 	}
 	
 	return CItem::r_LoadVal(s);
@@ -1007,7 +1007,7 @@ bool CItemStone::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSr
 		else
 			sVal = m_sCharter[i];
 
-		return( true );
+		return true;
 	}
 
 
@@ -1071,14 +1071,14 @@ bool CItemStone::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSr
 
 				sVal = pResult ? pResult->GetValStr() : "";
 			}
-			return( true );
+			return true;
 	
 		case STC_Master:
 			{
 				CChar * pMaster = GetMaster();
 				sVal = (pMaster) ? pMaster->GetName() : g_Exp.m_VarDefs.GetKeyStr("STONECONFIG_VARIOUSNAME_PENDVOTE");
 			}
-			return( true );
+			return true;
 	
 		case STC_MasterGenderTitle:
 			{
@@ -1090,14 +1090,14 @@ bool CItemStone::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSr
 				else
 					sVal = g_Exp.m_VarDefs.GetKeyStr("STONECONFIG_VARIOUSNAME_MASTERGENDERMALE");
 			}
-			return( true );
+			return true;
 	
 		case STC_MasterTitle:
 			{
 				CStoneMember * pMember = GetMasterMember();
 				sVal = (pMember) ? pMember->GetTitle() : "";
 			}
-			return( true );
+			return true;
 	
 		case STC_MasterUid:
 			{
@@ -1107,7 +1107,7 @@ bool CItemStone::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSr
 				else
 					sVal.FormatHex( (dword) 0 );
 			}
-			return( true );
+			return true;
 			
 		default:
 			return( CItem::r_WriteVal( pszKey, sVal, pSrc ));
@@ -1357,7 +1357,7 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 			}
 			break;
 		default:
-			return( false );
+			return false;
 	}
 	return true;
 	EXC_CATCH;
@@ -1385,7 +1385,7 @@ bool CItemStone::IsPrivMember( const CChar * pChar ) const
 	ADDTOCALLSTACK("CItemStone::IsPrivMember");
 	const CStoneMember * pMember = GetMember(pChar);
 	if ( pMember == NULL )
-		return( false );
+		return false;
 	return( pMember->IsPrivMember());
 }
 
@@ -1606,7 +1606,7 @@ bool CItemStone::CheckValidMember( CStoneMember * pMember )
 	ASSERT( pMember->GetParent() == this );
 
 	if ( GetAmount()==0 || g_Serv.m_iExitFlag )	// no reason to elect new if the stone is dead.
-		return( true );	// we are deleting anyhow.
+		return true;	// we are deleting anyhow.
 
 	switch ( pMember->GetPriv())
 	{
@@ -1623,7 +1623,7 @@ bool CItemStone::CheckValidMember( CStoneMember * pMember )
 				if ( pChar->Guild_Find( GetMemoryType()) != this )
 					break;
 			}
-			return( true );
+			return true;
 		case STONEPRIV_ENEMY:
 			{
 				CItemStone * pEnemyStone = dynamic_cast <CItemStone *>( pMember->GetLinkUID().ItemFind());
@@ -1637,7 +1637,7 @@ bool CItemStone::CheckValidMember( CStoneMember * pMember )
 				if ( pMember->GetTheyDeclared() && ! pEnemyMember->GetWeDeclared())
 					break;
 			}
-			return( true );
+			return true;
 
 		default:
 			break;
@@ -1646,7 +1646,7 @@ bool CItemStone::CheckValidMember( CStoneMember * pMember )
 	// just delete this member. (it is mislinked)
 	DEBUG_ERR(( "Stone UID=0%x has mislinked member uid=0%x\n", 
 		(dword) GetUID(), (dword) pMember->GetLinkUID()));
-	return( false );
+	return false;
 }
 
 int CItemStone::FixWeirdness()
@@ -1681,14 +1681,14 @@ int CItemStone::FixWeirdness()
 	{
 		ElectMaster();	// May have changed the vote count.
 	}
-	return( 0 );
+	return 0;
 }
 
 bool CItemStone::IsAlliedWith( const CItemStone * pStone) const
 {
 	ADDTOCALLSTACK("CItemStone::IsAlliedWith");
 	if ( pStone == NULL )
-		return( false );
+		return false;
 
 	CScriptTriggerArgs Args;
 	Args.m_pO1 = const_cast<CItemStone *>(pStone);
@@ -1716,7 +1716,7 @@ bool CItemStone::IsAtWarWith( const CItemStone * pEnemyStone ) const
 	// Boths guild shave declared war on each other.
 
 	if ( pEnemyStone == NULL )
-		return( false );
+		return false;
 
 	CScriptTriggerArgs Args;
 	Args.m_pO1 = const_cast<CItemStone *>(pEnemyStone);
@@ -1820,7 +1820,7 @@ bool CItemStone::WeDeclareWar(CItemStone * pEnemyStone)
 		pEnemyMember = new CStoneMember( pEnemyStone, GetUID(), STONEPRIV_ENEMY );
 
 	pEnemyMember->SetTheyDeclared(true);
-	return( true );
+	return true;
 }
 
 void CItemStone::TheyDeclarePeace( CItemStone* pEnemyStone, bool fForcePeace )

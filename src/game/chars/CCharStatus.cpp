@@ -88,9 +88,9 @@ bool CChar::CanUnderstandGhost() const
 {
 	// Can i understand player ghost speak ?
 	if ( m_pNPC && m_pNPC->m_Brain == NPCBRAIN_HEALER )
-		return( true );
+		return true;
 	if ( Skill_GetBase( SKILL_SPIRITSPEAK ) >= g_Cfg.m_iMediumCanHearGhosts )
-		return( true );
+		return true;
 	return( IsStatFlag( STATF_SpiritSpeak|STATF_DEAD ) || IsPriv( PRIV_GM|PRIV_HEARALL ));
 }
 
@@ -1821,7 +1821,7 @@ bool CChar::CanSeeItem( const CItem * pItem ) const
 		if (!pItem->m_TagDefs.GetKeyNum(uidCheck, false))
 			return false;
 	}
-	return( true );
+	return true;
 }
 
 bool CChar::CanTouch( const CPointMap &pt ) const

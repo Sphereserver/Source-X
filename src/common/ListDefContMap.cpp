@@ -76,7 +76,7 @@ inline lpctstr CListDefContNum::GetValStr() const
 bool CListDefContNum::r_LoadVal( CScript & s )
 {
 	SetValNum( s.GetArgVal() );
-	return( true );
+	return true;
 }
 
 bool CListDefContNum::r_WriteVal( lpctstr pKey, CGString & sVal, CTextConsole * pSrc = NULL )
@@ -84,7 +84,7 @@ bool CListDefContNum::r_WriteVal( lpctstr pKey, CGString & sVal, CTextConsole * 
 	UNREFERENCED_PARAMETER(pKey);
 	UNREFERENCED_PARAMETER(pSrc);
 	sVal.FormatLLVal( GetValNum() );
-	return( true );
+	return true;
 }
 
 CListDefContElem * CListDefContNum::CopySelf() const
@@ -131,7 +131,7 @@ void CListDefContStr::SetValStr( lpctstr pszVal )
 bool CListDefContStr::r_LoadVal( CScript & s )
 {
 	SetValStr( s.GetArgStr());
-	return( true );
+	return true;
 }
 
 bool CListDefContStr::r_WriteVal( lpctstr pKey, CGString & sVal, CTextConsole * pSrc = NULL )
@@ -139,7 +139,7 @@ bool CListDefContStr::r_WriteVal( lpctstr pKey, CGString & sVal, CTextConsole * 
 	UNREFERENCED_PARAMETER(pKey);
 	UNREFERENCED_PARAMETER(pSrc);
 	sVal = GetValStr();
-	return( true );
+	return true;
 }
 
 CListDefContElem * CListDefContStr::CopySelf() const 

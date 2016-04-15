@@ -58,7 +58,7 @@ int CItemMulti::Multi_GetMaxDist() const
 	ADDTOCALLSTACK("CItemMulti::Multi_GetMaxDist");
 	const CItemBaseMulti * pMultiDef = Multi_GetDef();
 	if ( pMultiDef == NULL )
-		return( 0 );
+		return 0;
 	return( pMultiDef->GetMaxDist());
 }
 
@@ -338,7 +338,7 @@ bool CItemMulti::MoveTo(CPointMap pt, bool bForceFix) // Put item on the ground 
 	// Multis need special region info to track when u are inside them.
 	// Add new region info.
 	MultiRealizeRegion();
-	return( true );
+	return true;
 }
 
 CItem * CItemMulti::Multi_GetSign()
@@ -403,14 +403,14 @@ bool CItemMulti::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 		int i = Exp_GetVal(pszKey);
 		SKIP_SEPARATORS(pszKey);
 		pRef = Multi_FindItemComponent(i);
-		return( true );
+		return true;
 	}
 	if ( ! strnicmp( pszKey, "REGION", 6 ))
 	{
 		pszKey += 6;
 		SKIP_SEPARATORS(pszKey);
 		pRef = m_pRegion;
-		return( true );
+		return true;
 	}
 
 	return( CItem::r_GetRef( pszKey, pRef ));

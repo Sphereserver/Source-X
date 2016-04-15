@@ -603,7 +603,7 @@ public:
 	bool IsPriv( word flag ) const
 	{	// PRIV_GM
 		if ( GetAccount() == NULL )
-			return( false );
+			return false;
 		return( GetAccount()->IsPriv( flag ));
 	}
 	void SetPrivFlags( word wPrivFlags )
@@ -623,7 +623,7 @@ public:
 	bool IsResDisp( byte flag ) const
 	{
 		if ( GetAccount() == NULL )
-			return( false );
+			return false;
 		return( GetAccount()->IsResDisp( flag ) );
 	}
 	byte GetResDisp() const
@@ -635,13 +635,13 @@ public:
 	bool SetResDisp( byte res )
 	{
 		if ( GetAccount() == NULL )
-			return( false );
+			return false;
 		return ( GetAccount()->SetResDisp( res ) );
 	}
 	bool SetGreaterResDisp( byte res )
 	{
 		if ( GetAccount() == NULL )
-			return( false );
+			return false;
 		return( GetAccount()->SetGreaterResDisp( res ) );
 	}
 	// ------------------------------------------------

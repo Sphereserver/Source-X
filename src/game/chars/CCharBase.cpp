@@ -96,11 +96,11 @@ bool CCharBase::SetDispID( CREID_TYPE id )
 	if ( pCharDef == NULL )
 	{
 		DEBUG_ERR(( "Creating char SetDispID(0%x) BAD\n", id ));
-		return( false );
+		return false;
 	}
 
 	CopyBasic( pCharDef );
-	return( true );
+	return true;
 }
 
 // Setting what do I eat
@@ -246,7 +246,7 @@ bool CCharBase::r_LoadVal( CScript & s )
 	ADDTOCALLSTACK("CCharBase::r_LoadVal");
 	EXC_TRY("LoadVal");
 	if ( ! s.HasArgs())
-		return( false );
+		return false;
 	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
 	{
 		//Set as Strings
@@ -291,7 +291,7 @@ bool CCharBase::r_LoadVal( CScript & s )
 			m_Dex = (short)(s.GetArgVal());
 			break;
 		case CBC_DISPID:
-			return( false );
+			return false;
 		case CBC_FOODTYPE:
 			SetFoodType( s.GetArgStr());
 			break;
@@ -303,7 +303,7 @@ bool CCharBase::r_LoadVal( CScript & s )
 				ITEMID_TYPE id = static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
 				if ( id < 0 || id >= ITEMID_MULTI )
 				{
-					return( false );
+					return false;
 				}
 				m_trackID = id;
 			}

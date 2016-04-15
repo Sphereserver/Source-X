@@ -624,7 +624,7 @@ public:
 	{
 		// do the guards hate me ?
 		if ( IsStatFlag( STATF_Criminal ))
-			return( true );
+			return true;
 		return Noto_IsEvil();
 	}
 

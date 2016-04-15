@@ -399,12 +399,12 @@ bool CFileText::OpenBase( void FAR * pszExtra )
 	m_pStream = fopen( GetFilePath(), GetModeStr() );
 	if ( m_pStream == NULL )
 	{
-		return( false );
+		return false;
 	}
 	// Get the low level handle for it.
 	m_hFile = (OSFILE_TYPE)STDFUNC_FILENO(m_pStream);
 
-	return( true );
+	return true;
 }
 
 void CFileText::CloseBase()
@@ -460,7 +460,7 @@ dword CFileText::Read( void * pBuffer, size_t sizemax ) const
 	// returns the number of full items actually read
 	ASSERT(pBuffer);
 	if ( IsEOF())
-		return( 0 );	// LINUX will ASSERT if we read past end.
+		return 0;	// LINUX will ASSERT if we read past end.
 	return (dword)(fread( pBuffer, 1, sizemax, m_pStream ));
 }
 

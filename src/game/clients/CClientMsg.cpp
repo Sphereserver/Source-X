@@ -466,7 +466,7 @@ bool CClient::addContainerSetup( const CItemContainer * pContainer ) // Send Bac
 {
 	ADDTOCALLSTACK("CClient::addContainerSetup");
 	ASSERT(pContainer);
-	ASSERT( pContainer->IsItem());
+	ASSERT( pContainer->IsItem() );
 
 	// open the container with the proper GUMP.
 	CItemBase * pItemDef = pContainer->Item_GetDef();
@@ -593,11 +593,11 @@ bool CClient::addKick( CTextConsole * pSrc, bool fBlock )
 	if ( GetAccount() == NULL )
 	{
 		GetNetState()->markReadClosed();
-		return( true );
+		return true;
 	}
 
 	if ( ! GetAccount()->Kick( pSrc, fBlock ))
-		return( false );
+		return false;
 
 	lpctstr pszAction = fBlock ? "KICK" : "DISCONNECT";
 	SysMessagef("You have been %sed by '%s'", pszAction, pSrc->GetName());
@@ -608,7 +608,7 @@ bool CClient::addKick( CTextConsole * pSrc, bool fBlock )
 	}
 
 	GetNetState()->markReadClosed();
-	return( true );
+	return true;
 }
 
 void CClient::addSound( SOUND_TYPE id, const CObjBaseTemplate * pBase, int iOnce )
@@ -1422,7 +1422,7 @@ bool CClient::addBookOpen( CItem * pBook )
 	if (iPagesNow > 0)
 		addBookPage(pBook, 1, iPagesNow);
 
-	return( true );
+	return true;
 }
 
 void CClient::addBookPage( const CItem * pBook, size_t iPage, size_t iCount )
@@ -1674,7 +1674,7 @@ bool CClient::addTargetChars( CLIMODE_TYPE mode, CREID_TYPE baseID, bool fNotoCh
 	ADDTOCALLSTACK("CClient::addTargetChars");
 	CCharBase * pBase = CCharBase::FindCharBase( baseID );
 	if ( pBase == NULL )
-		return( false );
+		return false;
 
 	tchar * pszTemp = Str_GetTemp();
 	sprintf(pszTemp, "%s '%s'?", g_Cfg.GetDefaultMsg(DEFMSG_WHERE_TO_SUMMON), pBase->GetTradeName());
@@ -2267,9 +2267,9 @@ blank_map:
 		pMap->m_itMap.m_bottom,
 		g_MapList.m_mapid[pMap->m_itMap.m_map]);
 
-	if ( ! rect.IsValid())
+	if ( !rect.IsValid() )
 		goto blank_map;
-	if ( rect.IsRectEmpty())
+	if ( rect.IsRectEmpty() )
 		goto blank_map;
 
 	if ( PacketDisplayMapNew::CanSendTo(GetNetState()))
@@ -2325,18 +2325,18 @@ bool CClient::addBBoardMessage( const CItemContainer * pBoard, BBOARDF_TYPE flag
 
 	CItemMessage *pMsgItem = static_cast<CItemMessage *>(uidMsg.ItemFind());
 	if (pBoard->IsItemInside( pMsgItem ) == false)
-		return( false );
+		return false;
 
 	// check author is properly linked
 	if (pMsgItem->m_sAuthor.IsEmpty() == false && pMsgItem->m_uidLink.CharFind() == NULL)
 	{
 		pMsgItem->Delete();
-		return( false );
+		return false;
 	}
 
 	// Send back the message header and/or body.
 	new PacketBulletinBoard(this, flag, pBoard, pMsgItem);
-	return( true );
+	return true;
 }
 
 void CClient::addLoginComplete()

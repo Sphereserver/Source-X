@@ -87,7 +87,7 @@ bool CSocketAddressIP::SetHostStruct( const struct hostent * pHost )
 		pHost->h_addr_list == NULL ||
 		pHost->h_addr == NULL )	// can't resolve the address.
 	{
-		return( false );
+		return false;
 	}
 	SetAddrIP( *((dword*)( pHost->h_addr ))); // 0.1.2.3
 	return true;
@@ -97,11 +97,11 @@ bool CSocketAddressIP::SetHostStr( lpctstr pszHostName )
 {
 	// try to resolve the host name with DNS for the true ip address.
 	if ( pszHostName[0] == '\0' )
-		return( false );
+		return false;
 	if ( IsDigit( pszHostName[0] ))
 	{
 		SetAddrStr( pszHostName ); // 0.1.2.3
-		return( true );
+		return true;
 	}
 	// NOTE: This is a blocking call !!!!
 	return SetHostStruct( gethostbyname( pszHostName ));
@@ -181,12 +181,12 @@ bool CSocketAddress::SetPortExtStr( tchar * pszIP )
 	{
 		pszPort = strchr( pszIP, ':' );
 		if ( pszPort == NULL )
-			return( false );
+			return false;
 	}
 
 	SetPortStr( pszPort + 1 );
 	*pszPort = '\0';
-	return( true );
+	return true;
 }
 
 // Port and address together.

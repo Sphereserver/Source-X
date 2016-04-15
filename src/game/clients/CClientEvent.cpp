@@ -1964,7 +1964,7 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConso
 		if ( pszKey[0] == '\0' )
 		{
 			sVal.FormatVal(iQty);
-			return( true );
+			return true;
 		}
 		else if ( ! strnicmp( pszKey, "ID", 2) )
 		{
@@ -1975,7 +1975,7 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConso
 			else
 				sVal.FormatVal( -1 );
 
-			return( true );
+			return true;
 		}
 
 		int iNum = Exp_GetSingle( pszKey );
@@ -1985,11 +1985,11 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConso
 			if ( (dword)iNum == m_CheckArray[i] )
 			{
 				sVal = "1";
-				return( true );
+				return true;
 			}
 		}
 		sVal = "0";
-		return( true );
+		return true;
 	}
 	if ( ! strnicmp( pszKey, "ARGTXT", 6 ))
 	{
@@ -2000,7 +2000,7 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConso
 		if ( pszKey[0] == '\0' )
 		{
 			sVal.FormatVal(iQty);
-			return( true );
+			return true;
 		}
 
 		int iNum = Exp_GetSingle( pszKey );
@@ -2011,11 +2011,11 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConso
 			if ( iNum == m_TextArray[i]->m_ID )
 			{
 				sVal = m_TextArray[i]->m_sText;
-				return( true );
+				return true;
 			}
 		}
 		sVal.Empty();
-		return( false );
+		return false;
 	}
 	return CScriptTriggerArgs::r_WriteVal( pszKey, sVal, pSrc);
 	EXC_CATCH;

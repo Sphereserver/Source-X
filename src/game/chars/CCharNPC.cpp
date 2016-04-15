@@ -132,7 +132,7 @@ bool CCharNPC::r_LoadVal( CChar * pChar, CScript &s )
 		default:
 			// Just ignore any player type stuff.
 			if ( FindTableHeadSorted( s.GetKey(), CCharPlayer::sm_szLoadKeys, CPC_QTY ) >= 0 )
-				return( true );
+				return true;
 			return(false );
 	}
 	return true;
@@ -209,12 +209,12 @@ bool CCharNPC::r_WriteVal( CChar * pChar, lpctstr pszKey, CGString & sVal )
 			if ( FindTableHeadSorted( pszKey, CCharPlayer::sm_szLoadKeys, CPC_QTY ) >= 0 )
 			{
 				sVal = "0";
-				return( true );
+				return true;
 			}
 			if ( FindTableSorted( pszKey, CClient::sm_szLoadKeys, CC_QTY ) >= 0 )
 			{
 				sVal = "0";
-				return( true );
+				return true;
 			}
 			return(false );
 	}

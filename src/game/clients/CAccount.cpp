@@ -390,7 +390,7 @@ bool CAccounts::Account_OnCmd( tchar * pszArgs, CTextConsole * pSrc )
 	ASSERT( pSrc );
 
 	if ( pSrc->GetPrivLevel() < PLEVEL_Admin )
-		return( false );
+		return false;
 
 	tchar * ppCmd[5];
 	size_t iQty = Str_ParseCmds( pszArgs, ppCmd, COUNTOF( ppCmd ));
@@ -633,9 +633,9 @@ bool CAccount::IsMyAccountChar( const CChar * pChar ) const
 {
 	ADDTOCALLSTACK("CAccount::IsMyAccountChar");
 	if ( pChar == NULL )
-		return( false );
+		return false;
 	if ( pChar->m_pPlayer == NULL )
-		return( false );
+		return false;
 	return(	pChar->m_pPlayer->GetAccount() == this );
 }
 
@@ -751,7 +751,7 @@ bool CAccount::Kick( CTextConsole * pSrc, bool fBlock )
 	if (( GetPrivLevel() >= pSrc->GetPrivLevel()) &&  ( pSrc->GetChar() ) )
 	{
 		pSrc->SysMessageDefault(DEFMSG_MSG_ACC_PRIV);
-		return( false );
+		return false;
 	}
 
 	if ( fBlock )
@@ -870,10 +870,10 @@ bool CAccount::CheckPassword( lpctstr pszPassword )
 		// First guy in sets the password.
 		// check the account in use first.
 		if ( *pszPassword == '\0' )
-			return( false );
+			return false;
 
 		SetPassword( pszPassword );
-		return( true );
+		return true;
 	}
 	
 	CScriptTriggerArgs Args;
@@ -894,12 +894,12 @@ bool CAccount::CheckPassword( lpctstr pszPassword )
 		CMD5::fastDigest( digest, pszPassword );
 
 		if( !strcmpi( digest, GetPassword() ) )
-			return( true );
+			return true;
 	}
 	else
 	{
 		if ( ! strcmpi( GetPassword(), pszPassword ) )
-			return( true );
+			return true;
 	}
 
 	if ( ! m_sNewPassword.IsEmpty() && ! strcmpi( GetNewPassword(), pszPassword ))
@@ -908,10 +908,10 @@ bool CAccount::CheckPassword( lpctstr pszPassword )
 		// kill the old password.
 		SetPassword( m_sNewPassword );
 		m_sNewPassword.Empty();
-		return( true );
+		return true;
 	}
 
-	return( false );	// failure.
+	return false;	// failure.
 }
 
 bool CAccount::SetPassword( lpctstr pszPassword, bool isMD5Hash )
@@ -1112,7 +1112,7 @@ bool CAccount::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 			pRef = m_Chars.GetChar(i).CharFind();
 		}
 		SKIP_SEPARATORS(pszKey);
-		return( true );
+		return true;
 	}
 	return( CScriptObj::r_GetRef( pszKey, pRef ));
 }
@@ -1181,7 +1181,7 @@ bool CAccount::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 			if ( pSrc->GetPrivLevel() < PLEVEL_Admin ||
 				pSrc->GetPrivLevel() < GetPrivLevel())	// can't see accounts higher than you
 			{
-				return( false );
+				return false;
 			}
 			sVal = GetNewPassword();
 			break;
@@ -1190,7 +1190,7 @@ bool CAccount::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 			if ( pSrc->GetPrivLevel() < PLEVEL_Admin ||
 				pSrc->GetPrivLevel() < GetPrivLevel())	// can't see accounts higher than you
 			{
-				return( false );
+				return false;
 			}
 			sVal = GetPassword();
 			break;
@@ -1206,10 +1206,10 @@ bool CAccount::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
 		case AC_TAG:			// "TAG" = get/set a local tag.
 			{
 				if ( pszKey[3] != '.' )
-					return( false );
+					return false;
 				pszKey += 4;
 				sVal = m_TagDefs.GetKeyStr(pszKey, fZero );
-				return( true );
+				return true;
 			}
 		case AC_TOTALCONNECTTIME:
 			sVal.FormatLLVal( m_Total_Connect_Time );
@@ -1235,7 +1235,7 @@ bool CAccount::r_LoadVal( CScript & s )
 	int i = FindTableHeadSorted( s.GetKey(), sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 );
 	if ( i < 0 )
 	{
-		return( false );
+		return false;
 	}
 
 	switch ( i )
@@ -1259,12 +1259,12 @@ bool CAccount::r_LoadVal( CScript & s )
 				if (pChar == NULL)
 				{
 					DEBUG_ERR(( "Invalid CHARUID 0%x for account '%s'\n", (dword)(uid), GetName()));
-					return( false );
+					return false;
 				}
 				if ( ! IsMyAccountChar( pChar ))
 				{
 					DEBUG_ERR(( "CHARUID 0%x (%s) not attached to account '%s'\n", (dword)(uid), pChar->GetName(), GetName()));
-					return( false );
+					return false;
 				}
 				AttachChar(pChar);
 			}
@@ -1346,13 +1346,13 @@ bool CAccount::r_LoadVal( CScript & s )
 				bool fQuoted = false;
 				m_TagDefs.SetStr( s.GetKey()+ 5, fQuoted, s.GetArgStr( &fQuoted ), true );
 			}
-			return( true );
+			return true;
 		case AC_TAG:
 			{
 				bool fQuoted = false;
 				m_TagDefs.SetStr( s.GetKey()+ 4, fQuoted, s.GetArgStr( &fQuoted ));
 			}
-			return( true );
+			return true;
 
 		case AC_TOTALCONNECTTIME:
 			// Previous total amount of time in game
@@ -1555,11 +1555,11 @@ bool CAccount::r_Verb( CScript &s, CTextConsole * pSrc )
 					Kick( pSrc, i == AV_BLOCK );
 				}
 			}
-			return( true );
+			return true;
 
 		case AV_TAGLIST:
 			m_TagDefs.DumpKeys( pSrc, "TAG." );
-			return( true );
+			return true;
 
 		default:
 			break;

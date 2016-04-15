@@ -15,7 +15,7 @@ bool CChar::NPC_FightArchery( CChar * pChar )
 {
 	ADDTOCALLSTACK("CChar::NPC_FightArchery");
 	if ( !g_Cfg.IsSkillFlag(Skill_GetActive(), SKF_RANGED) )
-		return( false );
+		return false;
 
 	int iMinDist = 0;
 	int iMaxDist = 0;
@@ -36,20 +36,20 @@ bool CChar::NPC_FightArchery( CChar * pChar )
 
 	int iDist = GetTopDist3D( pChar );
 	if ( iDist > iMaxDist )	// way too far away . close in.
-		return( false );
+		return false;
 
 	if ( iDist > iMinDist )
-		return( true );		// always use archery if distant enough
+		return true;		// always use archery if distant enough
 
 	if ( !Calc_GetRandVal( 2 ) )	// move away
 	{
 		// Move away
 		NPC_Act_Follow( false, iMaxDist, true );
-		return( true );
+		return true;
 	}
 
 	// Fine here.
-	return( true );
+	return true;
 }
 
 CChar * CChar::NPC_FightFindBestTarget()

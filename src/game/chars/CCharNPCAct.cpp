@@ -178,7 +178,7 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 		{
 			// we must own it.
 			if ( ! NPC_IsOwnedBy( pCharSrc ))
-				return( false );
+				return false;
 			CItem * pItem = NPC_Shrink(); // this delete's the char !!!
 			if ( pItem )
 				pCharSrc->m_Act_Targ = pItem->GetUID();
@@ -461,7 +461,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 			if ( bUsePathfinding == true )
 			{
 				SetTimeout( TICK_PER_SEC ); // wait a moment before finding a new route
-				return( 1 );
+				return 1;
 			}
 			return( 2 );
 		}
@@ -624,7 +624,7 @@ bool CChar::NPC_LookAtCharGuard( CChar * pChar, bool bFromTrigger )
 	{
 		// At least jeer at the criminal.
 		if ( Calc_GetRandVal(10))
-			return( false );
+			return false;
 
 		tchar *pszMsg = Str_GetTemp();
 		sprintf(pszMsg, g_Cfg.GetDefaultMsg(sm_szSpeakGuardJeer[ Calc_GetRandVal( COUNTOF( sm_szSpeakGuardJeer )) ]), pChar->GetName());
@@ -688,11 +688,11 @@ bool CChar::NPC_LookAtCharMonster( CChar * pChar )
 	// or i'm just stupid.
 	int iActMotivation = NPC_GetAttackMotivation( pChar );
 	if ( iActMotivation <= 0 )
-		return( false );
+		return false;
 	if ( Fight_IsActive() && m_Act_Targ == pChar->GetUID())	// same targ.
-		return( false );
+		return false;
 	if ( iActMotivation < m_pNPC->m_Act_Motivation )
-		return( false );
+		return false;
 
 	int iDist = GetTopDist3D( pChar );
 	if ( IsStatFlag( STATF_Hidden ) &&
@@ -719,7 +719,7 @@ bool CChar::NPC_LookAtCharHuman( CChar * pChar )
 	}
 
 	if (( ! pChar->Noto_IsEvil() &&  g_Cfg.m_fGuardsOnMurderers) && (! pChar->IsStatFlag( STATF_Criminal ))) 	// not interesting.
-		return( false );
+		return false;
 
 	// Yell for guard if we see someone evil.
 	if ( NPC_CanSpeak() &&
@@ -736,7 +736,7 @@ bool CChar::NPC_LookAtCharHuman( CChar * pChar )
 		// Find a guard.
 		CallGuards( pChar );
 		if ( IsStatFlag( STATF_War ))
-			return( false );
+			return false;
 
 		// run away like a coward.
 		m_Act_Targ = pChar->GetUID();
@@ -749,7 +749,7 @@ bool CChar::NPC_LookAtCharHuman( CChar * pChar )
 
 	// Attack an evil creature ?
 
-	return( false );
+	return false;
 }
 
 bool CChar::NPC_LookAtCharHealer( CChar * pChar )
@@ -804,7 +804,7 @@ bool CChar::NPC_LookAtCharHealer( CChar * pChar )
 		if ( Calc_GetRandVal(5))
 			return false;
 		Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_HEALER_RANGE ) );
-		return( true );
+		return true;
 	}
 
 	// What noto is this char to me ?
@@ -983,7 +983,7 @@ bool CChar::NPC_LookAtChar( CChar * pChar, int iDist )
 		case NPCBRAIN_MONSTER:
 		case NPCBRAIN_DRAGON:
 			if ( NPC_LookAtCharMonster( pChar ))
-				return( true );
+				return true;
 			break;
 
 		case NPCBRAIN_BERSERK:
@@ -1009,9 +1009,9 @@ bool CChar::NPC_LookAtChar( CChar * pChar, int iDist )
 		case NPCBRAIN_HEALER:
 			// Healers should look around for ghosts.
 			if ( NPC_LookAtCharHealer( pChar ))
-				return( true );
+				return true;
 			if ( NPC_LookAtCharHuman( pChar ))
-				return( true );
+				return true;
 			break;
 
 		case NPCBRAIN_BANKER:
@@ -1027,7 +1027,7 @@ bool CChar::NPC_LookAtChar( CChar * pChar, int iDist )
 			break;
 	}
 
-	return( false );
+	return false;
 }
 
 bool CChar::NPC_LookAround( bool fForceCheckItems )
@@ -1200,7 +1200,7 @@ bool CChar::NPC_Act_Follow( bool fFlee, int maxDistance, bool forceDistance )
 	{
 		// free to do as i wish !
 		Skill_Start( SKILL_NONE );
-		return( false );
+		return false;
 	}
 
 	EXC_SET("Trigger");
@@ -1230,13 +1230,13 @@ bool CChar::NPC_Act_Follow( bool fFlee, int maxDistance, bool forceDistance )
 		// Monster may get confused because he can't see you.
 		// There is a chance they could forget about you if hidden for a while.
 		if ( fFlee || !Calc_GetRandVal( 1 + (( 100 - Stat_GetAdjusted(STAT_INT)) / 20 )))
-			return( false );
+			return false;
 	}
 
 	EXC_SET("Distance checks");
 	int dist = GetTopPoint().GetDist( m_Act_p );
 	if ( dist > UO_MAP_VIEW_RADAR )		// too far away ?
-		return( false );
+		return false;
 
 	if ( forceDistance )
 	{
@@ -1248,10 +1248,10 @@ bool CChar::NPC_Act_Follow( bool fFlee, int maxDistance, bool forceDistance )
 		if ( fFlee )
 		{
 			if ( dist >= maxDistance )
-				return( false );
+				return false;
 		}
 		else if ( dist <= maxDistance )
-			return( true );
+			return true;
 	}
 
 	EXC_SET("Fleeing");
@@ -1262,15 +1262,15 @@ bool CChar::NPC_Act_Follow( bool fFlee, int maxDistance, bool forceDistance )
 		m_Act_p.Move( GetDirTurn( m_Act_p.GetDir( ptOld ), 4 + 1 - Calc_GetRandVal(3)));
 		NPC_WalkToPoint( dist > 3 );
 		m_Act_p = ptOld;	// last known point of the enemy.
-		return( true );
+		return true;
 	}
 
 	EXC_SET("WalkToPoint 1");
 	NPC_WalkToPoint( IsStatFlag( STATF_War ) ? true : ( dist > 3 ));
-	return( true );
+	return true;
 
 	EXC_CATCH;
-	return( false );
+	return false;
 }
 
 bool CChar::NPC_Act_Talk()
@@ -1284,22 +1284,22 @@ bool CChar::NPC_Act_Talk()
 
 	CChar * pChar = m_Act_Targ.CharFind();
 	if ( pChar == NULL )	// they are gone ?
-		return( false );
+		return false;
 
 	// too far away.
 	int iDist = GetTopDist3D( pChar );
 	if (( iDist >= UO_MAP_VIEW_SIGHT ) || ( m_ptHome.GetDist3D( pChar->GetTopPoint() ) > m_pNPC->m_Home_Dist_Wander ))	// give up.
-		return( false );
+		return false;
 
 	// can't see them
 	if ( !CanSee( pChar ) )
-		return( false );
+		return false;
 
 	if ( Skill_GetActive() == NPCACT_TALK_FOLLOW && iDist > 3 )
 	{
 		// try to move closer.
 		if ( ! NPC_Act_Follow( false, 4, false ))
-			return( false );
+			return false;
 	}
 
 	if ( m_atTalk.m_WaitCount <= 1 )
@@ -1315,11 +1315,11 @@ bool CChar::NPC_Act_Talk()
 			sprintf(pszMsg, sm_szText[ Calc_GetRandVal( COUNTOF( sm_szText )) ], pChar->GetName());
 			Speak(pszMsg);
 		}
-		return( false );
+		return false;
 	}
 
 	m_atTalk.m_WaitCount--;
-	return( true );	// just keep waiting.
+	return true;	// just keep waiting.
 }
 
 void CChar::NPC_Act_GoHome()

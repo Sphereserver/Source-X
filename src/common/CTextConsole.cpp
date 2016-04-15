@@ -29,7 +29,7 @@ int CTextConsole::OnConsoleKey( CGString & sText, tchar nChar, bool fEcho )
         SysMessage( "Command too long\n" );
 
         sText.Empty();
-        return( 0 );
+        return 0;
     }
 
     if ( nChar == '\r' || nChar == '\n' )

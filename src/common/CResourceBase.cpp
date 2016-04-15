@@ -267,12 +267,12 @@ bool CResourceBase::LoadResources( CResourceScript * pScript )
 	ADDTOCALLSTACK("CResourceBase::LoadResources");
 	// Open the file then load it.
 	if ( pScript == NULL )
-		return( false );
+		return false;
 
 	if ( ! pScript->Open())
 	{
 		g_Log.Event(LOGL_CRIT|LOGM_INIT, "[RESOURCES] '%s' not found...\n", static_cast<lpctstr>(pScript->GetFilePath()));
-		return( false );
+		return false;
 	}
 
 	g_Log.Event(LOGM_INIT, "Loading %s\n", static_cast<lpctstr>(pScript->GetFilePath()));
@@ -280,7 +280,7 @@ bool CResourceBase::LoadResources( CResourceScript * pScript )
 	LoadResourcesOpen( pScript );
 	pScript->Close();
 	pScript->CloseForce();
-	return( true );
+	return true;
 }
 
 CResourceScript * CResourceBase::LoadResourcesAdd( lpctstr pszNewFileName )
@@ -308,13 +308,13 @@ bool CResourceBase::OpenResourceFind( CScript &s, lpctstr pszFilename, bool bCri
 
 	// search the local dir or full path first.
 	if ( s.Open(pszFilename, OF_READ | OF_NONCRIT ))
-		return( true );
+		return true;
 	if ( !bCritical ) return false;
 
 	// next, check the script file path
 	CGString sPathName = CGFile::GetMergedFileName( m_sSCPBaseDir, pszFilename );
 	if ( s.Open(sPathName, OF_READ | OF_NONCRIT ))
-		return( true );
+		return true;
 
 	// finally, strip the directory and re-check script file path
 	lpctstr pszTitle = CGFile::GetFilesTitle(pszFilename);
@@ -327,7 +327,7 @@ bool CResourceBase::LoadResourceSection( CScript * pScript )
 	ADDTOCALLSTACK("CResourceBase::LoadResourceSection");
 	UNREFERENCED_PARAMETER(pScript);
 	// Just stub this out for others for now.
-	return( false );
+	return false;
 }
 
 //*********************************************************
@@ -427,7 +427,7 @@ int CResourceBase::ResourceGetIndexType( RES_TYPE restype, lpctstr pszName )
 	// Get a resource of just this index type.
 	RESOURCE_ID rid = ResourceGetID( restype, pszName );
 	if ( rid.GetResType() != restype )
-		return( -1 );
+		return -1;
 	return( rid.GetResIndex());
 }
 
@@ -457,13 +457,13 @@ bool CResourceBase::ResourceLock( CResourceLock & s, RESOURCE_ID_BASE rid )
 	ADDTOCALLSTACK("CResourceBase::ResourceLock");
 	// Lock a referenced resource object.
 	if ( ! rid.IsValidUID())
-		return( false );
+		return false;
 	CResourceLink * pResourceLink = dynamic_cast <CResourceLink *>( ResourceGetDef( rid ));
 	if ( pResourceLink )
 	{
 		return( pResourceLink->ResourceLock(s));
 	}
-	return( false );
+	return false;
 }
 
 bool CResourceBase::ResourceLock( CResourceLock & s, RES_TYPE restype, lpctstr pszName )
@@ -500,12 +500,12 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
 		if ( i >= EXPRESSION_MAX_KEY_LEN )
 		{
 			DEBUG_ERR(( "Too long DEFNAME=%s\n", pszName ));
-			return( false );
+			return false;
 		}
 		if ( ! _ISCSYM(pszName[i]))
 		{
 			DEBUG_ERR(( "Bad chars in DEFNAME=%s\n", pszName ));
-			return( false );
+			return false;
 		}
 	}
 
@@ -516,7 +516,7 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
 	{
 		if ( (dword)pVarKey->GetValNum() == GetResourceID().GetPrivateUID() )
 		{
-			return( true );
+			return true;
 		}
 
 		if ( RES_GET_INDEX(pVarKey->GetValNum()) == GetResourceID().GetResIndex())
@@ -536,10 +536,10 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
 	}
 
 	if ( iVarNum < 0 )
-		return( false );
+		return false;
 
 	SetResourceVar( dynamic_cast <const CVarDefContNum*>( g_Exp.m_VarDefs.GetAt( iVarNum )));
-	return( true );
+	return true;
 }
 
 void CResourceDef::SetResourceVar( const CVarDefContNum* pVarNum )
@@ -840,7 +840,7 @@ bool CResourceScript::Open( lpctstr pszFilename, uint wFlags )
 		mode |= OF_SHARE_DENY_WRITE;
 
 		if ( ! CScript::Open( pszFilename, wFlags|mode))	// OF_READ
-			return( false );
+			return false;
 		if ( ! ( wFlags & OF_READWRITE ) && CheckForChange())
 		{
 			//  what should we do about it ? reload it of course !
@@ -850,7 +850,7 @@ bool CResourceScript::Open( lpctstr pszFilename, uint wFlags )
 
 	m_iOpenCount++;
 	ASSERT( IsFileOpen());
-	return( true );
+	return true;
 }
 
 void CResourceScript::CloseForce()
@@ -897,7 +897,7 @@ bool CResourceLock::OpenBase( void * pExtra )
 		m_PrvLockContext = m_pLock->GetContext();
 
 	if ( ! m_pLock->Open())	// make sure the original is open.
-		return( false );
+		return false;
 
 	// Open a seperate copy of an already opend file.
 	m_pStream = m_pLock->m_pStream;
@@ -909,7 +909,7 @@ bool CResourceLock::OpenBase( void * pExtra )
 #endif
 	// Assume this is the new error context !
 	m_PrvScriptContext.OpenScript( this );
-	return( true );
+	return true;
 }
 
 void CResourceLock::CloseBase()
@@ -952,11 +952,11 @@ bool CResourceLock::ReadTextLine( bool fRemoveBlanks ) // Read a line from the o
 			if ( ParseKeyEnd() <= 0 )
 				continue;
 		}
-		return( true );
+		return true;
 	}
 
 	m_pszKey[0] = '\0';
-	return( false );
+	return false;
 }
 
 CResourceLock::CResourceLock()
@@ -986,7 +986,7 @@ int CResourceLock::OpenLock( CResourceScript * pLock, CScriptLineContext context
 		return( -3 );
 	}
 
-	return( 0 );
+	return 0;
 }
 
 void CResourceLock::AttachObj( const CScriptObj * pObj )
@@ -1869,10 +1869,10 @@ bool CResourceQtyArray::IsResourceMatchAll( CChar * pChar ) const
 		RESOURCE_ID ridtest = GetAt(i).GetResourceID();
 
 		if ( ! pChar->IsResourceMatch( ridtest, (uint)(GetAt(i).GetResQty()) ))
-			return( false );
+			return false;
 	}
 
-	return( true );
+	return true;
 }
 
 size_t CResourceQtyArray::Load(lpctstr pszCmds)
@@ -1982,14 +1982,14 @@ bool CResourceQtyArray::operator == ( const CResourceQtyArray & array ) const
 {
 	ADDTOCALLSTACK("CResourceQtyArray::operator == ");
 	if ( GetCount() != array.GetCount())
-		return( false );
+		return false;
 
 	for ( size_t i = 0; i < GetCount(); i++ )
 	{
 		for ( size_t j = 0; ; j++ )
 		{
 			if ( j >= array.GetCount())
-				return( false );
+				return false;
 			if ( ! ( GetAt(i).GetResourceID() == array[j].GetResourceID() ))
 				continue;
 			if ( GetAt(i).GetResQty() != array[j].GetResQty() )
@@ -1997,5 +1997,5 @@ bool CResourceQtyArray::operator == ( const CResourceQtyArray & array ) const
 			break;
 		}
 	}
-	return( true );
+	return true;
 }

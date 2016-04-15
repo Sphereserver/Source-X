@@ -330,7 +330,7 @@ bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * p
 			pszKey++;
 		case OBC_TAG:			// "TAG" = get/set a local tag.
 			if ( pszKey[3] != '.' )
-				return( false );
+				return false;
 			pszKey += 4;
 			sVal = m_TagDefs.GetKeyStr(pszKey, fZero );
 			break;
@@ -357,13 +357,13 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 	{
 		bool fQuoted = false;
 		m_TagDefs.SetStr( s.GetKey()+4, fQuoted, s.GetArgStr( &fQuoted ), false );
-		return( true );
+		return true;
 	}
 	if ( s.IsKeyHead( "TAG0.", 5 ))
 	{
 		bool fQuoted = false;
 		m_TagDefs.SetStr( s.GetKey()+5, fQuoted, s.GetArgStr( &fQuoted ), true );
-		return( true );
+		return true;
 	}
 
 	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
@@ -511,7 +511,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 					m_defenseRange = 0;
 				}
 			}
-			return( true );
+			return true;
 		case OBC_DAM:
 			{
 				int64 piVal[2];
@@ -526,24 +526,24 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 					m_attackRange = 0;
 				}
 			}
-			return( true );
+			return true;
 		case OBC_BASEID:
-			return( false );
+			return false;
 		case OBC_CAN:
 			m_Can = s.GetArgVal();// | ( m_Can & ( CAN_C_INDOORS|CAN_C_EQUIP|CAN_C_USEHANDS|CAN_C_NONHUMANOID )); //Fixed #2326 ?
-			return( true );
+			return true;
 
 		case OBC_DEFNAME:
 		case OBC_DEFNAME2:
 			return SetResourceName( s.GetArgStr());
 		case OBC_HEIGHT:
 			m_Height = static_cast<height_t>(s.GetArgVal());
-			return( true );
+			return true;
 		case OBC_INSTANCES:
-			return( false );
+			return false;
 		case OBC_NAME:
 			SetTypeName( s.GetArgStr());
-			return( true );
+			return true;
 		case OBC_RANGE:
 			{
 				int64 piVal[2];
@@ -562,15 +562,15 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 					//m_range	= (word)(piVal[0]);
 				}
 			}
-			return( true );
+			return true;
 		case OBC_RESOURCES:
 			m_BaseResources.Load( s.GetArgStr());
-			return( true );
+			return true;
 		case OBC_RESLEVEL:
 			return( SetResLevel((uchar)(s.GetArgVal())) );
 		case OBC_RESDISPDNHUE:
 			SetResDispDnHue(static_cast<HUE_TYPE>(s.GetArgVal()));
-			return( true );
+			return true;
 		case OBC_TEVENTS:
 			return( m_TEvents.r_LoadVal( s, RES_EVENTS ));
 	}

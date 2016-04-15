@@ -194,7 +194,7 @@ bool CMapList::DetectMapSize(int map)
 
 bool CMapList::IsMapSupported(int map)
 {
-    if (( map < 0 ) || ( map > 255 )) return( false );
+    if (( map < 0 ) || ( map > 255 )) return false;
     return( m_maps[map] );
 }
 

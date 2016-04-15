@@ -287,73 +287,73 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr pszKey, CGString & sVal )
 	{
 		case CPC_ACCOUNT:
 			sVal = GetAccount()->GetName();
-			return( true );
+			return true;
 		case CPC_DEATHS:
 			sVal.FormatVal( m_wDeaths );
-			return( true );
+			return true;
 		case CPC_DSPEECH:
 			m_Speech.WriteResourceRefList( sVal );
-			return( true );
+			return true;
 		case CPC_KILLS:
 			sVal.FormatVal( m_wMurders );
-			return( true );
+			return true;
 		case CPC_KRTOOLBARSTATUS:
 			sVal.FormatVal( m_bKrToolbarEnabled );
 			return true;
 		case CPC_ISDSPEECH:
 			if ( pszKey[9] != '.' )
-				return( false );
+				return false;
 			pszKey += 10;
 			sVal = m_Speech.ContainsResourceName(RES_SPEECH, pszKey) ? "1" : "0";
-			return( true );
+			return true;
 		case CPC_LASTUSED:
 			sVal.FormatLLVal( - g_World.GetTimeDiff( m_timeLastUsed ) / TICK_PER_SEC );
-			return( true );
+			return true;
 		case CPC_PFLAG:
 			sVal.FormatVal(m_pflag);
-			return( true );
+			return true;
 		case CPC_PROFILE:
 			{
 				tchar szLine[SCRIPT_MAX_LINE_LEN-16];
 				Str_MakeUnFiltered( szLine, m_sProfile, sizeof(szLine));
 				sVal = szLine;
 			}
-			return( true );
+			return true;
 		case CPC_REFUSETRADES:
 			{
 				CVarDefCont * pVar = pChar->GetDefKey(pszKey, true);
 				sVal.FormatLLVal(pVar ? pVar->GetValNum() : 0);
 			}
-			return( true );
+			return true;
 		case CPC_SKILLCLASS:
 			sVal = GetSkillClass()->GetResourceName();
-			return( true );
+			return true;
 		case CPC_SKILLLOCK:
 			{
 				// "SkillLock[alchemy]"
 				SKILL_TYPE skill = Skill_GetLockType( pszKey );
 				if ( skill <= SKILL_NONE )
-					return( false );
+					return false;
 				sVal.FormatVal( Skill_GetLock( skill ));
-			} return( true );
+			} return true;
 		case CPC_SPEEDMODE:
 			sVal.FormatVal( m_speedMode );
-			return( true );
+			return true;
 		case CPC_STATLOCK:
 			{
 				// "StatLock[str]"
 				STAT_TYPE stat = Stat_GetLockType( pszKey );
 				if (( stat <= STAT_NONE ) || ( stat >= STAT_BASE_QTY ))
-					return( false );
+					return false;
 				sVal.FormatVal( Stat_GetLock( stat ));
-			} return( true );
+			} return true;
 		default:
 			if ( FindTableSorted( pszKey, CCharNPC::sm_szLoadKeys, CNC_QTY ) >= 0 )
 			{
 				sVal = "0";
-				return( true );
+				return true;
 			}
-			return( false );
+			return false;
 	}
 	EXC_CATCH;
 
@@ -451,17 +451,17 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 			return true;
 		case CPC_LASTUSED:
 			m_timeLastUsed = CServTime::GetCurrentTime() - ( s.GetArgVal() * TICK_PER_SEC );
-			return( true );
+			return true;
 		case CPC_PFLAG:
 			{
 				m_pflag = s.GetArgVal();
-			} return( true );
+			} return true;
 		case CPC_PROFILE:
 			m_sProfile = Str_MakeFiltered( s.GetArgStr());
-			return( true );
+			return true;
 		case CPC_REFUSETRADES:
 			pChar->SetDefNum(s.GetKey(), s.GetArgVal() > 0 ? 1 : 0, false);
-			return( true );
+			return true;
 		case CPC_SKILLCLASS:
 			return SetSkillClass( pChar, g_Cfg.ResourceGetIDType( RES_SKILLCLASS, s.GetArgStr()));
 		case CPC_SKILLLOCK:
@@ -494,9 +494,9 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 			// Just ignore any NPC type stuff.
 			if ( FindTableSorted( s.GetKey(), CCharNPC::sm_szLoadKeys, CNC_QTY ) >= 0 )
 			{
-				return( true );
+				return true;
 			}
-			return( false );
+			return false;
 	}
 	EXC_CATCH;
 

@@ -109,9 +109,9 @@ bool CChar::NPC_StablePetSelect( CChar * pCharPlayer )
 	// I will stable a pet for the player.
 
 	if ( pCharPlayer == NULL )
-		return( false );
+		return false;
 	if ( ! pCharPlayer->IsClient())
-		return( false );
+		return false;
 
 	// Might have too many pets already ?
 	int iCount = 0;
@@ -119,7 +119,7 @@ bool CChar::NPC_StablePetSelect( CChar * pCharPlayer )
 	if ( pBank->GetCount() >= MAX_ITEMS_CONT )
 	{
 		Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_STABLEMASTER_FULL ) );
-		return( false );
+		return false;
 	}
 
 	// Calculate the max limit of pets that the NPC can hold for the player
@@ -158,12 +158,12 @@ bool CChar::NPC_StablePetSelect( CChar * pCharPlayer )
 	if ( iCount >= iPetMax )
 	{
 		Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_STABLEMASTER_TOOMANY ) );
-		return( false );
+		return false;
 	}
 
 	pCharPlayer->m_pClient->m_Targ_PrvUID = GetUID();
 	pCharPlayer->m_pClient->addTarget( CLIMODE_TARG_PET_STABLE, g_Cfg.GetDefaultMsg( DEFMSG_NPC_STABLEMASTER_TARG ) );
-	return( true );
+	return true;
 }
 
 bool CChar::NPC_StablePetRetrieve( CChar * pCharPlayer )
@@ -301,7 +301,7 @@ bool CChar::NPC_OnTrainPay(CChar *pCharSrc, CItemMemory *pMemory, CItem * pGold)
 
 	// Give credit for training.
 	NPC_TrainSkill( pCharSrc, skill, iTrainCost );
-	return( true );
+	return true;
 }
 
 bool CChar::NPC_TrainSkill( CChar * pCharSrc, SKILL_TYPE skill, int toTrain )
@@ -350,11 +350,11 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 	// We are asking for training ?
 
 	if ( ! m_pNPC )
-		return( false );
+		return false;
 
 	// Check the NPC is capable of teaching
 	if ( (m_pNPC->m_Brain < NPCBRAIN_HUMAN) || (m_pNPC->m_Brain > NPCBRAIN_STABLE) || (m_pNPC->m_Brain == NPCBRAIN_GUARD) )
-		return( false );
+		return false;
 
 	// Check the NPC isn't busy fighting
 	if ( Memory_FindObjTypes( pCharSrc, MEMORY_FIGHT|MEMORY_HARMEDBY|MEMORY_IRRITATEDBY|MEMORY_AGGREIVED ))
@@ -438,5 +438,5 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 	strcat( pszMsg, pPrvSkill );
 	strcat( pszMsg, "." );
 	Speak( pszMsg );
-	return( true );
+	return true;
 }
