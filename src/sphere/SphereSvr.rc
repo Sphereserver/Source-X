@@ -125,8 +125,8 @@ BEGIN
     LTEXT           "This software makes use of:",7,10,42,100,8
     LTEXT           "DEELX Regular Expression Engine (v1.2)\nCopyright (C) 2006 RegExLab.com",8,21,56,300,16
     LTEXT           "Libev library (v4.22)\nGeneral Public License v2 (GPLv2) 2007-2013 Marc Alexander Lehmann",9,21,80,300,16
-    LTEXT           "MySQL Connector (v5.7)\nGeneral Public License v2 (GPLv2) 2000-2016 Oracle",11,21,104,300,16
-    LTEXT           "SQLite library (v3.8.11)\nPublic Domain 2000-2015",12,21,128,300,16
+    LTEXT           "MySQL library (v5.7)\nGeneral Public License v2 (GPLv2) 2000-2016 Oracle",11,21,104,300,16
+    LTEXT           "SQLite library (v3.12.1)\nPublic Domain 2000-2016",12,21,128,300,16
     LTEXT           "Twofish encryption library (v1.0)\nCopyright (C) 1998 Bruce Schneier, Doug Whiting, John Kelsey, Chris Hall, David Wagner",14,21,152,300,16
     LTEXT           "Zlib data compression library (v1.2.8)\nZlib license 1995-2013 Jean-loup Gailly, Mark Adler",15,21,176,300,16
 END
