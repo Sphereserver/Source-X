@@ -48,7 +48,7 @@ bool CItemMap::r_LoadVal(CScript & s)	// load an item script
     return false;
 }
 
-bool CItemMap::r_WriteVal(lpctstr pszKey, CGString &sVal, CTextConsole *pSrc)
+bool CItemMap::r_WriteVal(lpctstr pszKey, CString &sVal, CTextConsole *pSrc)
 {
     ADDTOCALLSTACK("CItemMap::r_WriteVal");
     EXC_TRY("WriteVal");

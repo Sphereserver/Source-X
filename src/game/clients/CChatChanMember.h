@@ -20,7 +20,7 @@ private:
     CChatChannel * m_pChannel;	// I can only be a member of one chan at a time.
 public:
     static const char *m_sClassName;
-    CGObArray< CGString * > m_IgnoredMembers;	// Player's list of ignored members
+    CGObArray< CString * > m_IgnoredMembers;	// Player's list of ignored members
 private:
     friend class CChatChannel;
     friend class CChat;

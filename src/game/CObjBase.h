@@ -168,7 +168,7 @@ public:
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 	virtual void r_Write( CScript & s );
 	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );	// some command on this object as a target
 
 	void Emote(lpctstr pText, CClient * pClientExclude = NULL, bool fPossessive = false);

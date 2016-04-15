@@ -38,7 +38,7 @@ public:
 
 	CServTime m_timeLastUsed;	// Time the player char was last used.
 
-	CGString m_sProfile;	// limited to SCRIPT_MAX_LINE_LEN-16
+	CString m_sProfile;	// limited to SCRIPT_MAX_LINE_LEN-16
 
 	word m_wMurders;		// Murder count.
 	word m_wDeaths;			// How many times have i died ?
@@ -59,7 +59,7 @@ public:
 	void Stat_SetLock( STAT_TYPE stat, SKILLLOCK_TYPE state );
 
 	void r_WriteChar( CChar * pChar, CScript & s );
-	bool r_WriteVal( CChar * pChar, lpctstr pszKey, CGString & s );
+	bool r_WriteVal( CChar * pChar, lpctstr pszKey, CString & s );
 	bool r_LoadVal( CChar * pChar, CScript & s );
 
 	bool SetSkillClass( CChar * pChar, RESOURCE_ID rid );

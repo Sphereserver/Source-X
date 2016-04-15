@@ -1076,7 +1076,7 @@ lpctstr const CItemShip::sm_szLoadKeys[IMCS_QTY + 1] = // static
 	NULL
 };
 
-bool CItemShip::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CItemShip::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CItemShip::r_WriteVal");
 	EXC_TRY("WriteVal");

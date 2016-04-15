@@ -97,7 +97,7 @@ public:
 	CVarDefMap		m_VarGlobals;	// Global variables
 	CListDefMap		m_ListGlobals; // Global lists
 	CListDefMap		m_ListInternals; // Internal lists
-	CGString		m_sTmp;
+	CString		m_sTmp;
 
 								//	defined default messages
 	static tchar sm_szMessages[DEFMSG_QTY][128];			// like: "You put %s to %s"

@@ -218,8 +218,8 @@ public:
 	HINSTANCE 	m_hInstance;	// Identifies the current instance of the application.
 	lptstr 		m_lpCmdLine;	// Points to a null-terminated string that specifies the command line for the application.
 	CWindow *	m_pMainWnd;		// Holds a pointer to the application's main window. For an example of how to initialize m_pMainWnd, see InitInstance.
-	CGString	m_pszExeName;	// The module name of the application.
-	CGString	m_pszProfileName;	// the path to the profile.
+	CString	m_pszExeName;	// The module name of the application.
+	CString	m_pszProfileName;	// the path to the profile.
 
 public:
 	CWinApp()

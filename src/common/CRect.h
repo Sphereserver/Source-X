@@ -80,7 +80,7 @@ public:
 
 	int GetPointSortIndex() const;
 
-	bool r_WriteVal( lpctstr pszKey, CGString & sVal ) const;
+	bool r_WriteVal( lpctstr pszKey, CString & sVal ) const;
 	bool r_LoadVal( lpctstr pszKey, lpctstr pszArgs );
 };
 

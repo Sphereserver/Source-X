@@ -45,7 +45,7 @@ public:
 
 							// admin console.
 	int m_iAdminClients;		// how many of my clients are admin consoles ?
-	CGString m_sConsoleText;
+	CString m_sConsoleText;
 	bool m_fConsoleTextReadyFlag;	// interlocking flag for moving between tasks.
 
 	CServTime m_timeShutdown;	// When to perform the shutdowm (g_World.clock)
@@ -98,14 +98,14 @@ public:
 	int  PrintPercent( int iCount, int iTotal );
 
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
-	virtual bool r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc = NULL );
+	virtual bool r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc = NULL );
 	virtual bool r_LoadVal( CScript & s );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
 
 	lpctstr GetStatusString( byte iIndex = 0 ) const;
 	int64 GetAgeHours() const;
 
-	bool OnConsoleCmd( CGString & sText, CTextConsole * pSrc );
+	bool OnConsoleCmd( CString & sText, CTextConsole * pSrc );
 
 	void OnTick();
 

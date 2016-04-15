@@ -331,7 +331,7 @@ void CChat::DoCommand(CChatChanMember * pBy, lpctstr szMsg)
 		}
 	}
 
-	CGString sFrom;
+	CString sFrom;
 	CChatChannel * pChannel = pBy->GetChannel();
 	CClient * pByClient = pBy->GetClient();
 	ASSERT(pByClient != NULL);
@@ -465,7 +465,7 @@ void CChat::WhereIs(CChatChanMember * pBy, lpctstr pszName ) const
 			sprintf(pszMsg, "%s is not currently in a conference.", pszName);
 		else
 			sprintf(pszMsg, "%s is in conference '%s'.", pszName, pClient->GetChannel()->GetName());
-		CGString sFrom;
+		CString sFrom;
 		DecorateName(sFrom, NULL, true);
 		pBy->SendChatMsg(CHATMSG_PlayerTalk, sFrom, pszMsg);
 		return;
@@ -532,7 +532,7 @@ void CChat::SendNewChannel(CChatChannel * pNewChannel)
 	}
 }
 
-void CChat::DecorateName(CGString &sName, const CChatChanMember * pMember, bool fSystem) // static
+void CChat::DecorateName(CString &sName, const CChatChanMember * pMember, bool fSystem) // static
 {
 	ADDTOCALLSTACK("CChat::DecorateName");
 	CChatChannel * pChannel = NULL;
@@ -563,7 +563,7 @@ void CChat::DecorateName(CGString &sName, const CChatChanMember * pMember, bool 
 		sName.Format("%i%s", iResult, static_cast<lpctstr>(pMember->GetChatName()));
 }
 
-void CChat::GenerateChatName(CGString &sName, const CClient * pClient) // static
+void CChat::GenerateChatName(CString &sName, const CClient * pClient) // static
 {
 	if (pClient == NULL)
 		return;
@@ -579,7 +579,7 @@ void CChat::GenerateChatName(CGString &sName, const CClient * pClient) // static
 		return;
 
 	// try the base name
-	CGString sTempName(pszName);
+	CString sTempName(pszName);
 	if (g_Accounts.Account_FindChat(sTempName.GetPtr()) != NULL)
 	{
 		sTempName.Empty();
@@ -609,7 +609,7 @@ void CChat::Broadcast(CChatChanMember *pFrom, lpctstr pszText, CLanguageID lang,
 			continue;
 		if (fOverride || pClient->IsReceivingAllowed())
 		{
-			CGString sName;
+			CString sName;
 			DecorateName(sName, pFrom, fOverride);
 			pClient->SendChatMsg(CHATMSG_PlayerTalk, sName, pszText, lang);
 		}
@@ -639,7 +639,7 @@ bool CChat::CreateChannel(lpctstr pszName, lpctstr pszPassword, CChatChanMember 
 	ADDTOCALLSTACK("CChat::CreateChannel");
 	if (!m_fChatsOK)
 	{
-		CGString sName;
+		CString sName;
 		DecorateName(sName, NULL, true);
 		pMember->SendChatMsg(CHATMSG_PlayerTalk, sName, "Conference creation is disabled.");
 		return false;

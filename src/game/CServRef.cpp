@@ -368,7 +368,7 @@ bool CServerDef::r_LoadVal( CScript & s )
 	return false;
 }
 
-bool CServerDef::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
+bool CServerDef::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CServerDef::r_WriteVal");
 	EXC_TRY("WriteVal");

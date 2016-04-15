@@ -80,7 +80,7 @@ void xRecordPacket(const CClient* client, Packet* packet, lpctstr heading)
 
 	strcat(fname, ".log");
 
-	CGString sFullFileName = CGFile::GetMergedFileName(g_Log.GetLogDir(), fname);
+	CString sFullFileName = CGFile::GetMergedFileName(g_Log.GetLogDir(), fname);
 	
 	// write to file
 	CFileText out;

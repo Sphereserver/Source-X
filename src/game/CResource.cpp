@@ -1247,7 +1247,7 @@ const CSkillDef * CResource::SkillLookup( lpctstr pszKey )
 
 
 
-bool CResource::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CResource::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CResource::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -2584,7 +2584,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 				if ( *pName == '<' )
 					pName = "";
 				
-				m_Fame.SetAtGrow( i, new CGString(pName) );
+				m_Fame.SetAtGrow( i, new CString(pName) );
 				++i;
 			}
 		}
@@ -2598,7 +2598,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 				if ( *pName == '<' )
 					pName = "";
 				
-				m_Karma.SetAtGrow( i, new CGString(pName) );
+				m_Karma.SetAtGrow( i, new CString(pName) );
 				++i;
 			}
 		}
@@ -2642,7 +2642,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 				if ( *pName == '<' )
 					pName = "";
 
-				m_NotoTitles.SetAtGrow( i, new CGString(pName) );
+				m_NotoTitles.SetAtGrow( i, new CString(pName) );
 				++i;
 			}
 
@@ -2680,7 +2680,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		m_Runes.RemoveAll();
 		while ( pScript->ReadKey())
 		{
-			m_Runes.Add( new CGString(pScript->GetKey()) );
+			m_Runes.Add( new CString(pScript->GetKey()) );
 		}
 		return true;
 	case RES_SECTOR: // saved in world file.

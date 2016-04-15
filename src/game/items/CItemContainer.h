@@ -38,7 +38,7 @@ public:
 
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
 	virtual void  r_Write( CScript & s );
-	virtual bool r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc );
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 
 	virtual int GetWeight(word amount = 0) const;

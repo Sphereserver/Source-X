@@ -64,7 +64,7 @@ public:
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
 
 	virtual void  r_Write( CScript & s );
-	virtual bool r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc );
 	virtual bool  r_LoadVal( CScript & s  );
 	virtual void DupeCopy( const CItem * pItem );
 };

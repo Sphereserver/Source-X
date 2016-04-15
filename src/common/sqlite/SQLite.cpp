@@ -328,7 +328,7 @@ bool CSQLite::r_LoadVal(CScript & s)
 	return false;
 }
 
-bool CSQLite::r_WriteVal(lpctstr pszKey, CGString &sVal, CTextConsole *pSrc)
+bool CSQLite::r_WriteVal(lpctstr pszKey, CString &sVal, CTextConsole *pSrc)
 {
 	ADDTOCALLSTACK("CSQLite::r_WriteVal");
 	EXC_TRY("WriteVal");

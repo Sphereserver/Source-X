@@ -57,7 +57,7 @@ public:
 
 public:
 	void r_WriteChar( CChar * pChar, CScript & s );
-	bool r_WriteVal( CChar * pChar, lpctstr pszKey, CGString & s );
+	bool r_WriteVal( CChar * pChar, lpctstr pszKey, CString & s );
 	bool r_LoadVal( CChar * pChar, CScript & s );
 
 	bool IsVendor() const;

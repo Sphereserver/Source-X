@@ -130,7 +130,7 @@ void CChatChannel::SendPrivateMessage(CChatChanMember * pFrom, lpctstr pszTo, lp
         return;
     }
 
-    CGString sName;
+    CString sName;
     g_Serv.m_Chats.DecorateName(sName, pFrom);
     // Echo to the sending client so they know the message went out
     pFrom->SendChatMsg(CHATMSG_PlayerPrivate, sName, pszMsg);
@@ -266,7 +266,7 @@ void CChatChannel::SetModerator(lpctstr pszMember, bool fFlag)
     }
     if (fFlag)
     {
-        m_Moderators.Add( new CGString(pszMember) );
+        m_Moderators.Add( new CString(pszMember) );
     }
 }
 
@@ -333,7 +333,7 @@ void CChatChannel::SendMembers(CChatChanMember * pMember)
     ADDTOCALLSTACK("CChatChannel::SendMembers");
     for (size_t i = 0; i < m_Members.GetCount(); i++)
     {
-        CGString sName;
+        CString sName;
         g_Serv.m_Chats.DecorateName(sName, m_Members[i]);
         pMember->SendChatMsg(CHATMSG_SendPlayerName, sName);
     }
@@ -379,7 +379,7 @@ void CChatChannel::SetVoice(lpctstr pszName, bool fFlag)
     }
     if (fFlag == false)
     {
-        m_NoVoices.Add( new CGString(pszName) );
+        m_NoVoices.Add( new CString(pszName) );
         return;
     }
 }
@@ -414,7 +414,7 @@ void CChatChannel::ChangePassword(CChatChanMember * pByMember, lpctstr pszPasswo
 void CChatChannel::Broadcast(CHATMSG_TYPE iType, lpctstr pszName, lpctstr pszText, CLanguageID lang, bool fOverride )
 {
     ADDTOCALLSTACK("CChatChannel::Broadcast");
-    CGString sName;
+    CString sName;
     CChatChanMember *pSendingMember = FindMember(pszName);
 
     if (iType >= CHATMSG_PlayerTalk && iType <= CHATMSG_PlayerPrivate) // Only chat, emote, and privates get a color status number

@@ -23,10 +23,10 @@ class CItemMessage : public CItemVendable	// A message for a bboard or book text
 protected:
     static lpctstr const sm_szVerbKeys[];
 private:
-    CGObArray<CGString*> m_sBodyLines;	// The main body of the text for bboard message or book.
+    CGObArray<CString*> m_sBodyLines;	// The main body of the text for bboard message or book.
 public:
     static const char *m_sClassName;
-    CGString m_sAuthor;					// Should just have author name !
+    CString m_sAuthor;					// Should just have author name !
     static lpctstr const sm_szLoadKeys[CIC_QTY+1];
 
 public:
@@ -39,7 +39,7 @@ private:
 
 public:
     virtual void r_Write( CScript & s );
-    virtual bool r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc );
+    virtual bool r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc );
     virtual bool r_LoadVal( CScript & s );
     virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
 

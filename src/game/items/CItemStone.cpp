@@ -226,7 +226,7 @@ bool CStoneMember::r_LoadVal( CScript & s ) // Load an item Script
 }
 
 
-bool CStoneMember::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CStoneMember::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CStoneMember::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -814,7 +814,7 @@ bool CItemStone::r_LoadVal( CScript & s ) // Load an item Script
 	return false;
 }
 
-bool CItemStone::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CItemStone::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CItemStone::r_WriteVal");
 	EXC_TRY("WriteVal");

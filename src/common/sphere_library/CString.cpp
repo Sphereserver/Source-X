@@ -1,5 +1,5 @@
 /**
-* @file CGString.cpp
+* @file CString.cpp
 */
 
 #include <climits>
@@ -12,7 +12,7 @@
 
 
 /**
-* @brief Default memory alloc size for CGString.
+* @brief Default memory alloc size for CString.
 *
 * - Empty World! (total strings on start =480,154)
 *  - 16 bytes : memory:  8,265,143 [Mem=42,516 K] [reallocations=12,853]
@@ -38,16 +38,16 @@
 
 //#define DEBUG_STRINGS
 #ifdef DEBUG_STRINGS
-int gAmount = 0;  ///< Current amount of CGString.
+int gAmount = 0;  ///< Current amount of CString.
 uint gMemAmount = 0; ///< Total mem allocated by CGStrings.
-int gReallocs = 0; ///< Total reallocs caused by CGString resizing.
+int gReallocs = 0; ///< Total reallocs caused by CString resizing.
 #endif
 
 #define TOLOWER tolower
 
-// CGString:: Constructors, Destructor, Asign operator.
+// CString:: Constructors, Destructor, Asign operator.
 
-CGString::CGString()
+CString::CString()
 {
 #ifdef DEBUG_STRINGS
 	gAmount++;
@@ -55,7 +55,7 @@ CGString::CGString()
 	Init();
 }
 
-CGString::~CGString()
+CString::~CString()
 {
 #ifdef DEBUG_STRINGS
 	gAmount--;
@@ -63,35 +63,35 @@ CGString::~CGString()
 	Empty(true);
 }
 
-CGString::CGString(lpctstr pStr)
+CString::CString(lpctstr pStr)
 {
 	m_iMaxLength = m_iLength = 0;
 	m_pchData = NULL;
 	Copy(pStr);
 }
 
-CGString::CGString(const CGString &s)
+CString::CString(const CString &s)
 {
 	m_iMaxLength = m_iLength = 0;
 	m_pchData = NULL;
 	Copy(s.GetPtr());
 }
 
-const CGString& CGString::operator=(lpctstr pStr)
+const CString& CString::operator=(lpctstr pStr)
 {
 	Copy(pStr);
 	return(*this);
 }
 
-const CGString& CGString::operator=(const CGString &s)
+const CString& CString::operator=(const CString &s)
 {
 	Copy(s.GetPtr());
 	return(*this);
 }
 
-// CGString:: Capacity
+// CString:: Capacity
 
-void CGString::Empty(bool bTotal)
+void CString::Empty(bool bTotal)
 {
 	if (bTotal)
 	{
@@ -108,18 +108,18 @@ void CGString::Empty(bool bTotal)
 	else m_iLength = 0;
 }
 
-bool CGString::IsEmpty() const
+bool CString::IsEmpty() const
 {
 	return(!m_iLength);
 }
 
-bool CGString::IsValid() const
+bool CString::IsValid() const
 {
 	if (!m_iMaxLength) return false;
 	return (m_pchData[m_iLength] == '\0');
 }
 
-int CGString::SetLength(int iNewLength)
+int CString::SetLength(int iNewLength)
 {
 	if (iNewLength >= m_iMaxLength)
 	{
@@ -146,64 +146,64 @@ int CGString::SetLength(int iNewLength)
 	return m_iLength;
 }
 
-int CGString::GetLength() const
+int CString::GetLength() const
 {
 	return m_iLength;
 }
 
-// CGString:: Element access
+// CString:: Element access
 
-tchar CGString::operator[](int nIndex) const
+tchar CString::operator[](int nIndex) const
 {
 	return GetAt(nIndex);
 }
 
-tchar & CGString::operator[](int nIndex)
+tchar & CString::operator[](int nIndex)
 {
 	return ReferenceAt(nIndex);
 }
 
-tchar CGString::GetAt(int nIndex) const
+tchar CString::GetAt(int nIndex) const
 {
 	ASSERT(nIndex <= m_iLength);  // Allow to get the null char.
 	return m_pchData[nIndex];
 }
 
-tchar & CGString::ReferenceAt(int nIndex)
+tchar & CString::ReferenceAt(int nIndex)
 {
 	ASSERT(nIndex < m_iLength);
 	return m_pchData[nIndex];
 }
 
-void CGString::SetAt(int nIndex, tchar ch)
+void CString::SetAt(int nIndex, tchar ch)
 {
 	ASSERT(nIndex < m_iLength);
 	m_pchData[nIndex] = ch;
 	if (!ch) m_iLength = strlen(m_pchData);	// \0 inserted. line truncated
 }
 
-// CGString:: Modifiers
+// CString:: Modifiers
 
-const CGString& CGString::operator+=(lpctstr psz)
+const CString& CString::operator+=(lpctstr psz)
 {
 	Add(psz);
 	return(*this);
 }
 
-const CGString& CGString::operator+=(tchar ch)
+const CString& CString::operator+=(tchar ch)
 {
 	Add(ch);
 	return(*this);
 }
 
-void CGString::Add(tchar ch)
+void CString::Add(tchar ch)
 {
 	int iLen = m_iLength;
 	SetLength(iLen + 1);
 	SetAt(iLen, ch);
 }
 
-void CGString::Add(lpctstr pszStr)
+void CString::Add(lpctstr pszStr)
 {
 	int iLenCat = strlen(pszStr);
 	if (iLenCat)
@@ -214,7 +214,7 @@ void CGString::Add(lpctstr pszStr)
 	}
 }
 
-void CGString::Copy(lpctstr pszStr)
+void CString::Copy(lpctstr pszStr)
 {
 	if ((pszStr != m_pchData) && pszStr)
 	{
@@ -223,7 +223,7 @@ void CGString::Copy(lpctstr pszStr)
 	}
 }
 
-void _cdecl CGString::Format(lpctstr pStr, ...)
+void _cdecl CString::Format(lpctstr pStr, ...)
 {
 	va_list vargs;
 	va_start(vargs, pStr);
@@ -231,7 +231,7 @@ void _cdecl CGString::Format(lpctstr pStr, ...)
 	va_end(vargs);
 }
 
-void CGString::FormatHex(dword dwVal)
+void CString::FormatHex(dword dwVal)
 {
 	// In principle, all values in sphere logic are signed...
 	// dwVal may contain a (signed) number "big" as the numeric representation of an unsigned ( +(INT_MAX*2) ),
@@ -243,111 +243,111 @@ void CGString::FormatHex(dword dwVal)
 	Format("0%" PRIx32, dwVal);
 }
 
-void CGString::FormatLLHex(ullong dwVal)
+void CString::FormatLLHex(ullong dwVal)
 {
 	Format("0%" PRIx64 , dwVal);
 }
 
-void CGString::FormatCVal(char iVal)
+void CString::FormatCVal(char iVal)
 {
 	Format("%" PRId8, iVal);
 }
 
-void CGString::FormatUCVal(uchar iVal)
+void CString::FormatUCVal(uchar iVal)
 {
 	Format("%" PRIu8, iVal);
 }
 
-void CGString::FormatSVal(short iVal)
+void CString::FormatSVal(short iVal)
 {
 	Format("%" PRId16, iVal);
 }
 
-void CGString::FormatUSVal(ushort iVal)
+void CString::FormatUSVal(ushort iVal)
 {
 	Format("%" PRIu16, iVal);
 }
 
-void CGString::FormatVal(int iVal)
+void CString::FormatVal(int iVal)
 {
 	Format("%" PRId32, iVal);
 }
 
-void CGString::FormatUVal(uint iVal)
+void CString::FormatUVal(uint iVal)
 {
 	Format("%" PRIu32, iVal);
 }
 
-void CGString::FormatLLVal(llong iVal)
+void CString::FormatLLVal(llong iVal)
 {
 	Format("%" PRId64 , iVal);
 }
 
-void CGString::FormatULLVal(ullong iVal)
+void CString::FormatULLVal(ullong iVal)
 {
 	Format("%" PRIu64 , iVal);
 }
 
-void CGString::FormatWVal(word iVal)
+void CString::FormatWVal(word iVal)
 {
 	Format("0%" PRIx16, iVal);
 }
 
-void CGString::FormatDWVal(dword iVal)
+void CString::FormatDWVal(dword iVal)
 {
 	Format("0%" PRIx32, iVal);
 }
 
-void CGString::FormatV(lpctstr pszFormat, va_list args)
+void CString::FormatV(lpctstr pszFormat, va_list args)
 {
 	TemporaryString pszTemp;
 	_vsnprintf(static_cast<char *>(pszTemp), pszTemp.realLength(), pszFormat, args);
 	Copy(pszTemp);
 }
 
-void CGString::MakeUpper()
+void CString::MakeUpper()
 {
 	_strupr(m_pchData);
 }
 
-void CGString::MakeLower()
+void CString::MakeLower()
 {
 	_strlwr(m_pchData);
 }
 
-void CGString::Reverse()
+void CString::Reverse()
 {
 	STRREV(m_pchData);
 }
 
-// CGString:: String operations
+// CString:: String operations
 
-CGString::operator lpctstr() const
+CString::operator lpctstr() const
 {
 	return(GetPtr());
 }
 
-int CGString::Compare(lpctstr pStr) const
+int CString::Compare(lpctstr pStr) const
 {
 	return strcmp(m_pchData, pStr);
 }
 
-int CGString::CompareNoCase(lpctstr pStr) const
+int CString::CompareNoCase(lpctstr pStr) const
 {
 	return strcmpi(m_pchData, pStr);
 }
 
-lpctstr CGString::GetPtr() const
+lpctstr CString::GetPtr() const
 {
 	return m_pchData;
 }
 
-int CGString::indexOf(tchar c)
+int CString::indexOf(tchar c)
 {
 	return indexOf(c, 0);
 }
 
-int CGString::indexOf(tchar c, int offset)
+int CString::indexOf(tchar c, int offset)
 {
 	if (offset < 0)
 		return -1;
@@ -366,12 +366,12 @@ int CGString::indexOf(tchar c, int offset)
 	return -1;
 }
 
-int CGString::indexOf(CGString str)
+int CString::indexOf(CString str)
 {
 	return indexOf(str, 0);
 }
 
-int CGString::indexOf(CGString str, int offset)
+int CString::indexOf(CString str, int offset)
 {
 	if (offset < 0)
 		return -1;
@@ -421,12 +421,12 @@ int CGString::indexOf(CGString str, int offset)
 	return -1;
 }
 
-int CGString::lastIndexOf(tchar c)
+int CString::lastIndexOf(tchar c)
 {
 	return lastIndexOf(c, 0);
 }
 
-int CGString::lastIndexOf(tchar c, int from)
+int CString::lastIndexOf(tchar c, int from)
 {
 	if (from < 0)
 		return -1;
@@ -445,12 +445,12 @@ int CGString::lastIndexOf(tchar c, int from)
 	return -1;
 }
 
-int CGString::lastIndexOf(CGString str)
+int CString::lastIndexOf(CString str)
 {
 	return lastIndexOf(str, 0);
 }
 
-int CGString::lastIndexOf(CGString str, int from)
+int CString::lastIndexOf(CString str, int from)
 {
 	if (from < 0)
 		return -1;
@@ -498,9 +498,9 @@ int CGString::lastIndexOf(CGString str, int from)
 	return -1;
 }
 
-// CGString:: private
+// CString:: private
 
-void CGString::Init()
+void CString::Init()
 {
 	m_iMaxLength = STRING_DEFAULT_SIZE;
 #ifdef DEBUG_STRINGS

@@ -28,7 +28,7 @@ class CTextConsole
 	// A base class for any class that can act like a console and issue commands.
 	// CClient, CChar, CServer, CFileConsole
 protected:
-	int OnConsoleKey( CGString & sText, tchar nChar, bool fEcho );
+	int OnConsoleKey( CString & sText, tchar nChar, bool fEcho );
 public:
 	static const char *m_sClassName;
 	// What privs do i have ?

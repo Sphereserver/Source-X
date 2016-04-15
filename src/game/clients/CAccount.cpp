@@ -475,7 +475,7 @@ bool CAccounts::Account_OnCmd( tchar * pszArgs, CTextConsole * pSrc )
 	}
 	else
 	{
-		CGString cmdArgs;
+		CString cmdArgs;
 		if (ppCmd[4] && ppCmd[4][0])
 			cmdArgs.Format("%s %s %s", ppCmd[2], ppCmd[3], ppCmd[4]);
 		else if (ppCmd[3] && ppCmd[3][0])
@@ -1117,7 +1117,7 @@ bool CAccount::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	return( CScriptObj::r_GetRef( pszKey, pRef ));
 }
 
-bool CAccount::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
+bool CAccount::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CAccount::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -1501,7 +1501,7 @@ bool CAccount::r_Verb( CScript &s, CTextConsole * pSrc )
 		bool bLoad = CScriptObj::r_Verb( s, pSrc );
 		if ( !bLoad ) //try calling custom functions
 		{
-			CGString sVal;
+			CString sVal;
 			CScriptTriggerArgs Args( s.GetArgRaw() );
 			bLoad = r_Call( pszKey, pSrc, &Args, &sVal );
 		}

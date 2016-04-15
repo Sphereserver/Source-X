@@ -442,7 +442,7 @@ lpctstr const CRegionBase::sm_szLoadKeys[RC_QTY+1] =	// static (Sorted)
 	NULL
 };
 
-bool CRegionBase::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CRegionBase::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CRegionBase::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -767,7 +767,7 @@ void CRegionBase::r_WriteBody( CScript & s, lpctstr pszPrefix )
 
 	if ( m_Events.GetCount() > 0 )
 	{
-		CGString sVal;
+		CString sVal;
 		m_Events.WriteResourceRefList( sVal );
 		sprintf(z, "%sEVENTS", pszPrefix);
 		s.WriteKey(z, sVal);
@@ -798,7 +798,7 @@ void CRegionBase::r_WriteModified( CScript &s )
 
 	if ( m_iModified & REGMOD_EVENTS )
 	{
-		CGString sVal;
+		CString sVal;
 		m_Events.WriteResourceRefList( sVal );
 		s.WriteKey( "EVENTS", sVal );
 	}
@@ -1074,7 +1074,7 @@ bool CRegionWorld::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	return( CRegionBase::r_GetRef( pszKey, pRef ));
 }
 
-bool CRegionWorld::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CRegionWorld::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CRegionWorld::r_WriteVal");
 	EXC_TRY("WriteVal");

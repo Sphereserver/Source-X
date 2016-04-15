@@ -206,7 +206,7 @@ bool CClient::addRelay( const CServerDef * pServ )
 	dword dwCustomerId = 0x7f000001;
 	if ( g_Cfg.m_fUseAuthID )
 	{
-		CGString sCustomerID(pServ->GetName());
+		CString sCustomerID(pServ->GetName());
 		sCustomerID.Add(GetAccount()->GetName());
 
 		dwCustomerId = z_crc32(0L, Z_NULL, 0);
@@ -290,7 +290,7 @@ byte CClient::Login_ServerList( const char * pszAccount, const char * pszPasswor
 	// Give the server list to everyone.
 	// if ( LogIn( pszAccount, pszPassword ) )
 	//   return( PacketLoginError::BadPass );
-	CGString sMsg;
+	CString sMsg;
 	byte lErr = LogIn( pszAccount, pszPassword, sMsg );
 	if ( lErr != PacketLoginError::Success )
 	{
@@ -361,7 +361,7 @@ bool CClient::OnRxConsole( const byte * pData, size_t iLen )
 				}
 				else
 				{
-					CGString sMsg;
+					CString sMsg;
 
 					CAccountRef pAccount = g_Accounts.Account_Find(m_zLogin);
 					if (( pAccount == NULL ) || ( pAccount->GetPrivLevel() < PLEVEL_Admin ))
@@ -419,7 +419,7 @@ bool CClient::OnRxAxis( const byte * pData, size_t iLen )
 				}
 				else
 				{
-					CGString sMsg;
+					CString sMsg;
 
 					CAccountRef pAccount = g_Accounts.Account_Find(m_zLogin);
 					if (( pAccount == NULL ) || ( pAccount->GetPrivLevel() < PLEVEL_Counsel ))
@@ -537,7 +537,7 @@ bool CClient::OnRxPing( const byte * pData, size_t iLen )
 						pAccount = g_Accounts.Account_Find("RemoteAdmin");
 					if ( pAccount )
 					{
-						CGString sMsg;
+						CString sMsg;
 						byte lErr = LogIn( pAccount, sMsg );
 						if ( lErr != PacketLoginError::Success )
 						{

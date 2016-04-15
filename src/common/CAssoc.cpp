@@ -55,7 +55,7 @@ bool CElementDef::SetValStr( void * pBase, lpctstr pszVal ) const
 			strcpylen(static_cast<tchar *>(pValPtr), pszVal, GetValLength() - 1);
 			return true;
 		case ELEM_CSTRING:
-			*static_cast<CGString *>(pValPtr) = pszVal;
+			*static_cast<CString *>(pValPtr) = pszVal;
 			return true;
 		case ELEM_BOOL:
 		case ELEM_BYTE:
@@ -91,7 +91,7 @@ int CElementDef::GetValLength() const
 	return( sm_Lengths[m_type] );
 }
 
-bool CElementDef::GetValStr( const void * pBase, CGString & sVal ) const
+bool CElementDef::GetValStr( const void * pBase, CString & sVal ) const
 {
 	ADDTOCALLSTACK("CElementDef::GetValStr");
 	// Get the element value as a string.
@@ -107,7 +107,7 @@ bool CElementDef::GetValStr( const void * pBase, CGString & sVal ) const
 			sVal = static_cast<tchar *>(pValPtr);
 			return true;
 		case ELEM_CSTRING:
-			sVal = *static_cast<CGString *>(pValPtr);
+			sVal = *static_cast<CString *>(pValPtr);
 			return true;
 		case ELEM_BOOL:
 		case ELEM_BYTE:

@@ -20,7 +20,7 @@ public:
 
 	void r_WriteContent( CScript & s ) const;
 
-	bool r_WriteValContainer(lpctstr pszKey, CGString &sVal, CTextConsole *pSrc);
+	bool r_WriteValContainer(lpctstr pszKey, CString &sVal, CTextConsole *pSrc);
 	bool r_GetRefContainer( lpctstr & pszKey, CScriptObj * & pRef );
 
 public:
@@ -50,8 +50,8 @@ public:
 
 	// For resource usage and gold.
 	CItem * ContentFind( RESOURCE_ID_BASE rid, dword dwArg = 0, int iDecendLevels = 255 ) const;
-	TRIGRET_TYPE OnContTriggerForLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pResult, CScriptLineContext & StartContext, CScriptLineContext & EndContext, RESOURCE_ID_BASE rid, dword dwArg = 0, int iDecendLevels = 255 );
-	TRIGRET_TYPE OnGenericContTriggerForLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pResult, CScriptLineContext & StartContext, CScriptLineContext & EndContext, int iDecendLevels = 255 );
+	TRIGRET_TYPE OnContTriggerForLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CString * pResult, CScriptLineContext & StartContext, CScriptLineContext & EndContext, RESOURCE_ID_BASE rid, dword dwArg = 0, int iDecendLevels = 255 );
+	TRIGRET_TYPE OnGenericContTriggerForLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CString * pResult, CScriptLineContext & StartContext, CScriptLineContext & EndContext, int iDecendLevels = 255 );
 	int ContentCount( RESOURCE_ID_BASE rid, dword dwArg = 0 );
 	int ContentCountAll() const;
 	int ContentConsume( RESOURCE_ID_BASE rid, int iQty = 1, bool fTest = false, dword dwArg = 0 );

@@ -7,14 +7,13 @@
 #ifndef _INC_CSTRING_H
 #define _INC_CSTRING_H
 
-#include <cinttypes>
 #include "common.h"
 
 
 /**
 * @brief Custom String implementation.
 */
-class CGString
+class CString
 {
 public:
 	static const char *m_sClassName;
@@ -25,42 +24,42 @@ public:
 	/**
 	* @brief Default constructor.
 	*
-	* Initializes string. If DEBUG_STRINGS setted, update statistical information (total CGString instantiated).
+	* Initializes string. If DEBUG_STRINGS setted, update statistical information (total CString instantiated).
 	* @see Init()
 	*/
-	CGString();
+	CString();
 	/**
-	* @brief CGString destructor.
+	* @brief CString destructor.
 	*
-	* If DEBUG_STRINGS setted, updates statistical information (total CGString instantiated).
+	* If DEBUG_STRINGS setted, updates statistical information (total CString instantiated).
 	*/
-	~CGString();
+	~CString();
 	/**
 	* @brief Copy constructor.
 	*
 	* @see Copy()
 	* @param pStr string to copy.
 	*/
-	CGString(lpctstr pStr);
+	CString(lpctstr pStr);
 	/**
 	* @brief Copy constructor.
 	*
 	* @see Copy()
 	* @param pStr string to copy.
 	*/
-	CGString(const CGString &s);
+	CString(const CString &s);
 	/**
-	* @brief Copy supplied string into the CGString.
+	* @brief Copy supplied string into the CString.
 	* @param pStr string to copy.
-	* @return the CGString.
+	* @return the CString.
 	*/
-	const CGString& operator=(lpctstr pStr);
+	const CString& operator=(lpctstr pStr);
 	/**
-	* @brief Copy supplied CGString into the CGString.
-	* @param s CGString to copy.
-	* @return the CGString.
+	* @brief Copy supplied CString into the CString.
+	* @param s CString to copy.
+	* @return the CString.
 	*/
-	const CGString& operator=(const CGString &s);
+	const CString& operator=(const CString &s);
 	///@}
 	/** @name Capacity:
 	 */
@@ -73,7 +72,7 @@ public:
 	*/
 	void Empty(bool bTotal = false);
 	/**
-	* @brief Check the length of the CGString.
+	* @brief Check the length of the CString.
 	* @return true if length is 0, false otherwise.
 	*/
 	bool IsEmpty() const;
@@ -83,18 +82,18 @@ public:
 	*/
 	bool IsValid() const;
 	/**
-	* @brief Change the length of the CGString.
+	* @brief Change the length of the CString.
 	*
 	* If the new length is lesser than the current lenght, only set a zero at the end of the string.
 	* If the new length is bigger than the current length, alloc memory for the string and copy.
 	* If DEBUG_STRINGS setted, update statistical information (reallocs count, total memory allocated).
 	* @param iLen new length of the string.
-	* @return the new length of the CGString.
+	* @return the new length of the CString.
 	*/
 	int SetLength(int iLen);
 	/**
-	* @brief Get the length of the CGString.
-	* @return the length of the CGString.
+	* @brief Get the length of the CString.
+	* @return the length of the CString.
 	*/
 	int GetLength() const;
 	///@}
@@ -140,29 +139,29 @@ public:
 	 */
 	///@{
 	/**
-	* @brief Concatenate CGString with a string.
+	* @brief Concatenate CString with a string.
 	* @param psz string to concatenate with.
-	* @return The result of concatenate the CGString with psz.
+	* @return The result of concatenate the CString with psz.
 	*/
-	const CGString& operator+=(lpctstr psz);
+	const CString& operator+=(lpctstr psz);
 	/**
-	* @brief Concatenate CGString with a character.
+	* @brief Concatenate CString with a character.
 	* @param ch character to concatenate with.
-	* @return The result of concatenate the CGString with ch.
+	* @return The result of concatenate the CString with ch.
 	*/
-	const CGString& operator+=(tchar ch);
+	const CString& operator+=(tchar ch);
 	/**
-	* @brief Adds a char at the end of the CGString.
+	* @brief Adds a char at the end of the CString.
 	* @param ch character to add.
 	*/
 	void Add(tchar ch);
 	/**
-	* @brief Adds a string at the end of the CGString.
+	* @brief Adds a string at the end of the CString.
 	* @parampszStrh string to add.
 	*/
 	void Add(lpctstr pszStr);
 	/**
-	* @brief Copy a string into the CGString.
+	* @brief Copy a string into the CString.
 	* @see SetLength()
 	* @see strcpylen()
 	* @param pStr string to copy.
@@ -254,15 +253,15 @@ public:
 	*/
 	void FormatDWVal(dword iVal);
 	/**
-	* @brief Changes the capitalization of CGString to upper.
+	* @brief Changes the capitalization of CString to upper.
 	*/
 	void MakeUpper();
 	/**
-	* @brief Changes the capitalization of CGString to lower.
+	* @brief Changes the capitalization of CString to lower.
 	*/
 	void MakeLower();
 	/**
-	* @brief Reverses the CGString.
+	* @brief Reverses the CString.
 	*/
 	void Reverse();
 	///@}
@@ -275,25 +274,25 @@ public:
 	*/
 	operator lpctstr() const;
 	/**
-	* @brief Compares the CGString to string pStr (strcmp wrapper).
+	* @brief Compares the CString to string pStr (strcmp wrapper).
 	*
-	* This function starts comparing the first character of CGString and the string.
+	* This function starts comparing the first character of CString and the string.
 	* If they are equal to each other, it continues with the following
 	* pairs until the characters differ or until a terminating null-character
 	* is reached. This function performs a binary comparison of the characters.
 	* @param pStr string to compare.
-	* @return <0 if te first character that not match has lower value in CGString than in pStr. 0 if hte contents of both are equal. >0 if the first character that does not match has greater value in CGString than pStr.
+	* @return <0 if te first character that not match has lower value in CString than in pStr. 0 if hte contents of both are equal. >0 if the first character that does not match has greater value in CString than pStr.
 	*/
 	int Compare(lpctstr pStr) const;
 	/**
-	* @brief Compares the CGString to string pStr (case insensitive) (_strcmpi wrapper).
+	* @brief Compares the CString to string pStr (case insensitive) (_strcmpi wrapper).
 	*
-	* This function starts comparing the first character of CGString and the string.
+	* This function starts comparing the first character of CString and the string.
 	* If they are equal to each other, it continues with the following
 	* pairs until the characters differ or until a terminating null-character
 	* is reached. This function performs a case insensitive comparison of the characters.
 	* @param pStr string to compare.
-	* @return <0 if te first character that not match has lower value in CGString than in pStr. 0 if hte contents of both are equal. >0 if the first character that does not match has greater value in CGString than pStr.
+	* @return <0 if te first character that not match has lower value in CString than in pStr. 0 if hte contents of both are equal. >0 if the first character that does not match has greater value in CString than pStr.
 	*/
 	int CompareNoCase(lpctstr pStr) const;
 	/**
@@ -302,57 +301,57 @@ public:
 	*/
 	lpctstr GetPtr() const;
 	/**
-	* @brief Look for the first occurence of c in CGString.
+	* @brief Look for the first occurence of c in CString.
 	* @param c character to look for.
-	* @return position of the character in CGString if any, -1 otherwise.
+	* @return position of the character in CString if any, -1 otherwise.
 	*/
 	int indexOf(tchar c);
 	/**
-	* @brief Look for the first occurence of c in CGString from a position.
+	* @brief Look for the first occurence of c in CString from a position.
 	* @param c character to look for.
 	* @param offset position from start the search.
-	* @return position of the character in CGString if any, -1 otherwise.
+	* @return position of the character in CString if any, -1 otherwise.
 	*/
 	int indexOf(tchar c, int offset);
 	/**
-	* @brief Look for the first occurence of a substring in CGString.
+	* @brief Look for the first occurence of a substring in CString.
 	* @param str substring to look for.
-	* @return position of the substring in CGString if any, -1 otherwise.
+	* @return position of the substring in CString if any, -1 otherwise.
 	*/
-	int indexOf(CGString str);
+	int indexOf(CString str);
 	/**
-	* @brief Look for the first occurence of a substring in CGString from a position.
+	* @brief Look for the first occurence of a substring in CString from a position.
 	* @param str substring to look for.
 	* @param offset position from start the search.
-	* @return position of the substring in CGString if any, -1 otherwise.
+	* @return position of the substring in CString if any, -1 otherwise.
 	*/
-	int indexOf(CGString str, int offset);
+	int indexOf(CString str, int offset);
 	/**
-	* @brief Look for the last occurence of c in CGString.
+	* @brief Look for the last occurence of c in CString.
 	* @param c character to look for.
-	* @return position of the character in CGString if any, -1 otherwise.
+	* @return position of the character in CString if any, -1 otherwise.
 	*/
 	int lastIndexOf(tchar c);
 	/**
-	* @brief Look for the last occurence of c in CGString from a position to the end.
+	* @brief Look for the last occurence of c in CString from a position to the end.
 	* @param c character to look for.
 	* @param from position where stop the search.
-	* @return position of the character in CGString if any, -1 otherwise.
+	* @return position of the character in CString if any, -1 otherwise.
 	*/
 	int lastIndexOf(tchar c, int from);
 	/**
-	* @brief Look for the last occurence of a substring in CGString.
+	* @brief Look for the last occurence of a substring in CString.
 	* @param str substring to look for.
-	* @return position of the substring in CGString if any, -1 otherwise.
+	* @return position of the substring in CString if any, -1 otherwise.
 	*/
-	int lastIndexOf(CGString str);
+	int lastIndexOf(CString str);
 	/**
-	* @brief Look for the last occurence of a substring in CGString from a position to the end.
+	* @brief Look for the last occurence of a substring in CString from a position to the end.
 	* @param str substring to look for.
 	* @param from position where stop the search.
-	* @return position of the substring in CGString if any, -1 otherwise.
+	* @return position of the substring in CString if any, -1 otherwise.
 	*/
-	int lastIndexOf(CGString str, int from);
+	int lastIndexOf(CString str, int from);
 	///@}
 
 private:

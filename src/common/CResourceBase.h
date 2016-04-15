@@ -397,7 +397,7 @@ class CResourceNamed : public CResourceLink
 	// Private name pool. (does not use DEFNAME) RES_FUNCTION
 public:
 	static const char *m_sClassName;
-	const CGString m_sName;
+	const CString m_sName;
 public:
 	CResourceNamed( RESOURCE_ID rid, lpctstr pszName );
 	virtual ~CResourceNamed();
@@ -448,7 +448,7 @@ public:
 	size_t FindResourceID( RESOURCE_ID_BASE rid ) const;
 	size_t FindResourceName( RES_TYPE restype, lpctstr pszKey ) const;
 
-	void WriteResourceRefList( CGString & sVal ) const;
+	void WriteResourceRefList( CString & sVal ) const;
 	bool r_LoadVal( CScript & s, RES_TYPE restype );
 	void r_Write( CScript & s, lpctstr pszKey ) const;
 
@@ -545,7 +545,7 @@ public:
 	CResourceHash m_ResHash;		// All script linked resources RES_QTY
 
 	// INI File options.
-	CGString m_sSCPBaseDir;		// if we want to get *.SCP files from elsewhere.
+	CString m_sSCPBaseDir;		// if we want to get *.SCP files from elsewhere.
 
 protected:
 	CResourceScript * AddResourceFile( lpctstr pszName );

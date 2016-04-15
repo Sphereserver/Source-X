@@ -134,7 +134,7 @@ lpctstr const CCharBase::sm_szLoadKeys[CBC_QTY+1] =
 	NULL
 };
 
-bool CCharBase::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CCharBase::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
 {
 	UNREFERENCED_PARAMETER(pSrc);
 	ADDTOCALLSTACK("CCharBase::r_WriteVal");

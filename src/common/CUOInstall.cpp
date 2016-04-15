@@ -13,12 +13,12 @@ CUOInstall::CUOInstall()
 	memset(m_UopMapAddress, 0, sizeof(m_UopMapAddress));
 };
 
-CGString CUOInstall::GetFullExePath( lpctstr pszName ) const
+CString CUOInstall::GetFullExePath( lpctstr pszName ) const
 {
 	return( CGFile::GetMergedFileName( m_sExePath, pszName ));
 }
 
-CGString CUOInstall::GetFullCDPath( lpctstr pszName ) const
+CString CUOInstall::GetFullCDPath( lpctstr pszName ) const
 {
 	return( CGFile::GetMergedFileName( m_sCDPath, pszName ));
 }
@@ -189,7 +189,7 @@ void CUOInstall::SetPreferPath( lpctstr pszName )
 	m_sPreferPath = pszName;
 }
 
-CGString CUOInstall::GetPreferPath( lpctstr pszName ) const
+CString CUOInstall::GetPreferPath( lpctstr pszName ) const
 {
 	return CGFile::GetMergedFileName(m_sPreferPath, pszName);
 }
@@ -537,7 +537,7 @@ bool CUOInstall::ReadMulData(VERFILE_TYPE filedata, const CUOIndexRec & Index, v
 
 
 //UOP Filename Hash function
-ullong HashFileName(CGString csFile)
+ullong HashFileName(CString csFile)
 {
 	uint eax, ecx, edx, ebx, esi, edi;
 

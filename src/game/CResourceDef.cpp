@@ -255,7 +255,7 @@ CSkillDef::CSkillDef( SKILL_TYPE skill ) :
 	m_AdvRate.Init();
 }
 
-bool CSkillDef::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CSkillDef::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CSkillDef::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -448,7 +448,7 @@ void CSkillClassDef::Init()
 	}
 }
 
-bool CSkillClassDef::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CSkillClassDef::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CSkillClassDef::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -621,7 +621,7 @@ CSpellDef::CSpellDef( SPELL_TYPE id ) :
 
 
 
-bool CSpellDef::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CSpellDef::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CSpellDef::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -940,7 +940,7 @@ bool CRandGroupDef::r_LoadVal( CScript &s )
 	return false;
 }
 
-bool CRandGroupDef::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
+bool CRandGroupDef::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CRandGroupDef::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -1191,7 +1191,7 @@ bool CRegionResourceDef::r_LoadVal( CScript & s )
 	return false;
 }
 
-bool CRegionResourceDef::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CRegionResourceDef::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CRegionResourceDef::r_WriteVal");
 	EXC_TRY("r_WriteVal");

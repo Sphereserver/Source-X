@@ -288,7 +288,7 @@ CItemMemory * CChar::Memory_AddObj( const CObjBase * pObj, word MemTypes )
 }
 
 // Looping through all memories ( ForCharMemoryType ).
-TRIGRET_TYPE CChar::OnCharTrigForMemTypeLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pResult, word wMemType )
+TRIGRET_TYPE CChar::OnCharTrigForMemTypeLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CString * pResult, word wMemType )
 {
 	ADDTOCALLSTACK("CChar::OnCharTrigForMemTypeLoop");
 	CScriptLineContext StartContext = s.GetContext();

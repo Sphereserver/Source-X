@@ -287,7 +287,7 @@ private:
 
 public:
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc = NULL );
+	bool r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc = NULL );
 	TRIGRET_TYPE OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
 };
 
@@ -319,12 +319,12 @@ class CWebPageDef : public CResourceLink
 	static lpctstr const sm_szPageExt[];
 private:
 	WEBPAGE_TYPE m_type;				// What basic format of file is this ? 0=text
-	CGString m_sSrcFilePath;	// source template for the generated web page.
+	CString m_sSrcFilePath;	// source template for the generated web page.
 private:
 	PLEVEL_TYPE m_privlevel;	// What priv level to see this page ?
 
 	// For files that are being translated and updated.
-	CGString m_sDstFilePath;	// where is the page served from ?
+	CString m_sDstFilePath;	// where is the page served from ?
 	int  m_iUpdatePeriod;	// How often to update the web page. 0 = never.
 	int  m_iUpdateLog;		// create a daily log of the page.
 	CServTime  m_timeNextUpdate;
@@ -350,7 +350,7 @@ public:
 	bool ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * pPostData, int iContentLength );
 
 	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc = NULL );
+	virtual bool r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc = NULL );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );	// some command on this object as a target
 
 	void WebPageLog();
@@ -416,15 +416,15 @@ private:
 #define SPELLFLAG_CURSE				0x20000000	//Curses just like Weaken,Purge Magic,Curse,etc.
 #define SPELLFLAG_HEAL				0x40000000	// Healing spell
 
-	CGString m_sName;	// spell name
+	CString m_sName;	// spell name
 
 public:
 	static const char *m_sClassName;
 	static lpctstr const sm_szTrigName[SPTRIG_QTY+1];
 	static lpctstr const sm_szLoadKeys[];
-	CGString m_sTargetPrompt;	// targetting prompt. (if needed)
+	CString m_sTargetPrompt;	// targetting prompt. (if needed)
 	SOUND_TYPE m_sound;			// What noise does it make when done.
-	CGString m_sRunes;			// Letter Runes for Words of power.
+	CString m_sRunes;			// Letter Runes for Words of power.
 	CResourceQtyArray m_Reags;	// What reagents does it take ?
 	CResourceQtyArray m_SkillReq;	// What skills/unused reagents does it need to cast.
 	ITEMID_TYPE m_idSpell;		// The rune graphic for this.
@@ -458,7 +458,7 @@ private:
 public:
 	lpctstr GetName() const { return( m_sName ); }
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc );
 
 	bool GetPrimarySkill( int * piSkill = NULL, int * piQty = NULL ) const;
 };
@@ -483,9 +483,9 @@ public:
 	{
 	}
 
-	CGString	m_sCategory;
-	CGString	m_sSubsection;
-	CGString	m_sDescription;
+	CString	m_sCategory;
+	CString	m_sSubsection;
+	CString	m_sDescription;
 
 private:
 	CRandGroupDef(const CRandGroupDef& copy);
@@ -493,7 +493,7 @@ private:
 
 public:
 	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( lpctstr pKey, CGString &sVal, CTextConsole * pSrc = NULL );
+	virtual bool r_WriteVal( lpctstr pKey, CString &sVal, CTextConsole * pSrc = NULL );
 	size_t GetRandMemberIndex( CChar * pCharSrc = NULL, bool bTrigger = true ) const;
 	CResourceQty GetMember( size_t i ) const
 	{
@@ -531,7 +531,7 @@ class CSkillClassDef : public CResourceLink // For skill def table
 	static lpctstr const sm_szLoadKeys[];
 public:
 	static const char *m_sClassName;
-	CGString m_sName;	// The name of this skill class.
+	CString m_sName;	// The name of this skill class.
 
 	word m_StatSumMax;
 	dword m_SkillSumMax;
@@ -559,7 +559,7 @@ private:
 public:
 	lpctstr GetName() const { return( m_sName ); }
 
-	bool r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc );
 	bool r_LoadVal( CScript & s );
 };
 
@@ -604,11 +604,11 @@ struct CSkillDef : public CResourceLink // For skill def table
 	static lpctstr const sm_szTrigName[SKTRIG_QTY+1];
 	static lpctstr const sm_szLoadKeys[];
 private:
-	CGString m_sKey;	// script key word for skill.
+	CString m_sKey;	// script key word for skill.
 public:
-	CGString m_sTitle;	// title one gets if it's your specialty.
-	CGString m_sName;	// fancy skill name
-	CGString m_sTargetPrompt;	// targetting prompt. (if needed)
+	CString m_sTitle;	// title one gets if it's your specialty.
+	CString m_sName;	// fancy skill name
+	CString m_sTargetPrompt;	// targetting prompt. (if needed)
 
 	CValueCurveDef m_Delay;	//	The base delay for the skill. (tenth of seconds)
 	CValueCurveDef m_Effect;	// depends on skill
@@ -644,7 +644,7 @@ public:
 
 	lpctstr GetName() const { return( GetKey()); }
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc );
 };
 
 class CSkillKeySortArray : public CGObSortArray< CValStr*, lpctstr >
@@ -695,8 +695,8 @@ public:
 	int	 m_iSectorSleepMask;	// The mask for how long sectors will sleep.
 	bool m_fUseMapDiffs;			// Whether or not to use map diff files.
 
-	CGString m_sWorldBaseDir;	// save\" = world files go here.
-	CGString m_sAcctBaseDir;	// Where do the account files go/come from ?
+	CString m_sWorldBaseDir;	// save\" = world files go here.
+	CString m_sAcctBaseDir;	// Where do the account files go/come from ?
 
 	bool m_fSecure;				// Secure mode. (will trap exceptions)
 	int  m_iFreezeRestartTime;	// # seconds before restarting.
@@ -838,29 +838,29 @@ public:
 	int		m_iDistanceWhisper;
 	int		m_iDistanceTalk;
 
-	CGString	m_sSpeechSelf;
-	CGString	m_sSpeechPet;
-	CGString	m_sSpeechOther;
-	CGString	m_sCommandTrigger;
+	CString	m_sSpeechSelf;
+	CString	m_sSpeechPet;
+	CString	m_sSpeechOther;
+	CString	m_sCommandTrigger;
 
 #ifdef _DUMPSUPPORT
-	CGString	m_sDumpAccPackets;
+	CString	m_sDumpAccPackets;
 #endif
 
-	CGString	m_sEventsPet;
+	CString	m_sEventsPet;
 	CResourceRefArray m_pEventsPetLink;
 
-	CGString	m_sEventsPlayer;
+	CString	m_sEventsPlayer;
 	CResourceRefArray m_pEventsPlayerLink;
 
-	CGString	m_sEventsRegion;
+	CString	m_sEventsRegion;
 	CResourceRefArray m_pEventsRegionLink;
 
-	CGString	m_sEventsItem;
+	CString	m_sEventsItem;
 	CResourceRefArray m_iEventsItemLink;
 
 	// Third Party Tools
-	CGString	m_sStripPath;
+	CString	m_sStripPath;
 	bool	m_fCUOStatus;
 	bool	m_fUOGStatus;
 
@@ -961,10 +961,10 @@ public:
 
 	//	MySQL features
 	bool		m_bMySql;
-	CGString	m_sMySqlHost;
-	CGString	m_sMySqlUser;
-	CGString	m_sMySqlPass;
-	CGString	m_sMySqlDB;
+	CString	m_sMySqlHost;
+	CString	m_sMySqlUser;
+	CString	m_sMySqlPass;
+	CString	m_sMySqlDB;
 
 	// network settings
 #ifdef _MTNETWORK
@@ -995,7 +995,7 @@ public:
 	int			m_iRegenRate[STAT_QTY];
 	int			m_iTimerCall;
 	bool		m_bAllowLightOverride;
-	CGString	m_sZeroPoint;
+	CString	m_sZeroPoint;
 	bool		m_bAllowBuySellAgent;
 
 	bool		m_bAllowNewbTransfer;
@@ -1016,13 +1016,13 @@ public:
 	CStringSortArray m_ResourceList;	// Sections lists
 
 	CStringSortArray m_Obscene;	// Bad Names/Words etc.
-	CGObArray< CGString* > m_Fame;	// fame titles (fame.famous)
-	CGObArray< CGString* > m_Karma;	// karma titles (karma.wicked)
-	CGObArray< CGString* > m_Runes;	// Words of power. (A-Z)
+	CGObArray< CString* > m_Fame;	// fame titles (fame.famous)
+	CGObArray< CString* > m_Karma;	// karma titles (karma.wicked)
+	CGObArray< CString* > m_Runes;	// Words of power. (A-Z)
 
 	CGTypedArray< int, int > m_NotoKarmaLevels; // karma levels for noto titles
 	CGTypedArray< int, int > m_NotoFameLevels; // fame levels for noto titles
-	CGObArray< CGString* > m_NotoTitles;	// Noto titles.
+	CGObArray< CString* > m_NotoTitles;	// Noto titles.
 
 	CMultiDefArray m_MultiDefs;	// read from the MUL files. Cached here on demand.
 
@@ -1058,7 +1058,7 @@ private:
 
 public:
 	bool r_LoadVal( CScript &s );
-	bool r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc );
 	bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 
 	bool LoadIni( bool fTest );
@@ -1203,7 +1203,7 @@ public:
 	size_t GumpAddText( lpctstr pszText );		// add text to the text section, return insertion index
 	bool r_Verb( CScript &s, CTextConsole * pSrc );
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc );
 
 public:
 	explicit CDialogDef( RESOURCE_ID rid );
@@ -1216,8 +1216,8 @@ private:
 public:	
 	// temporary placeholders - valid only during dialog setup
 	CObjBase *	m_pObj;
-	CGString	m_sControls[1024];
-	CGString	m_sText[512];
+	CString	m_sControls[1024];
+	CString	m_sText[512];
 	size_t		m_iTexts;
 	size_t		m_iControls;
 	int			m_x;

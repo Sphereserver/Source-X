@@ -14,7 +14,7 @@ CChar * CTextConsole::GetChar() const
     return( const_cast <CChar *>( dynamic_cast <const CChar *>( this )));
 }
 
-int CTextConsole::OnConsoleKey( CGString & sText, tchar nChar, bool fEcho )
+int CTextConsole::OnConsoleKey( CString & sText, tchar nChar, bool fEcho )
 {
     ADDTOCALLSTACK("CTextConsole::OnConsoleKey");
     // eventaully we should call OnConsoleCmd

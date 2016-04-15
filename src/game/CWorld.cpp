@@ -384,7 +384,7 @@ void CTimedFunctionHandler::Stop( CUID uid, lpctstr funcname )
 	}
 }
 
-TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext, CScriptLineContext EndContext, CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pResult)
+TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext, CScriptLineContext EndContext, CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CString * pResult)
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::Loop");
 	bool endLooping = false;
@@ -1215,7 +1215,7 @@ CWorld::~CWorld()
 ///////////////////////////////////////////////
 // Loading and Saving.
 
-void CWorld::GetBackupName( CGString & sArchive, lpctstr pszBaseDir, tchar chType, int iSaveCount ) // static
+void CWorld::GetBackupName( CString & sArchive, lpctstr pszBaseDir, tchar chType, int iSaveCount ) // static
 {
 	ADDTOCALLSTACK("CWorld::GetBackupName");
 	int iCount = iSaveCount;
@@ -1238,14 +1238,14 @@ bool CWorld::OpenScriptBackup( CScript & s, lpctstr pszBaseDir, lpctstr pszBaseN
 	ADDTOCALLSTACK("CWorld::OpenScriptBackup");
 	ASSERT(pszBaseName);
 
-	CGString sArchive;
+	CString sArchive;
 	GetBackupName( sArchive, pszBaseDir, pszBaseName[0], iSaveCount );
 
 	// remove possible previous archive of same name
 	remove( sArchive );
 
 	// rename previous save to archive name.
-	CGString sSaveName;
+	CString sSaveName;
 	sSaveName.Format( "%s" SPHERE_FILE "%s%s", pszBaseDir, pszBaseName, SPHERE_SCRIPT );
 
 	if ( rename( sSaveName, sArchive ))
@@ -1773,19 +1773,19 @@ bool CWorld::LoadWorld() // Load world from script
 	// Try to load a backup file instead ?
 	// NOTE: WE MUST Sync these files ! CHAR and WORLD !!!
 
-	CGString sStaticsName;
+	CString sStaticsName;
 	sStaticsName.Format("%s" SPHERE_FILE "statics", static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
-	CGString sWorldName;
+	CString sWorldName;
 	sWorldName.Format("%s" SPHERE_FILE "world", static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
-	CGString sMultisName;
+	CString sMultisName;
 	sMultisName.Format("%s" SPHERE_FILE "multis", static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
-	CGString sCharsName;
+	CString sCharsName;
 	sCharsName.Format("%s" SPHERE_FILE "chars", static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
-	CGString sDataName;
+	CString sDataName;
 	sDataName.Format("%s" SPHERE_FILE "data",	static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
 	int iPrevSaveCount = m_iSaveCountID;
@@ -1823,7 +1823,7 @@ bool CWorld::LoadWorld() // Load world from script
 		m_UIDs.SetCount(8 * 1024);
 
 		// Get the name of the previous backups.
-		CGString sArchive;
+		CString sArchive;
 		GetBackupName( sArchive, g_Cfg.m_sWorldBaseDir, 'w', m_iSaveCountID );
 		if ( ! sArchive.CompareNoCase( sWorldName ))	// ! same file ? break endless loop.
 		{
@@ -1970,7 +1970,7 @@ lpctstr const CWorld::sm_szLoadKeys[WC_QTY+1] =	// static
 	NULL
 };
 
-bool CWorld::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
+bool CWorld::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CWorld::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -2214,9 +2214,9 @@ void CWorld::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE wHu
 	else
 		mode = TALKMODE_BROADCAST;
 
-	//CGString sTextUID;
-	//CGString sTextName;	// name labelled text.
-	CGString sTextGhost; // ghost speak.
+	//CString sTextUID;
+	//CString sTextName;	// name labelled text.
+	CString sTextGhost; // ghost speak.
 
 						 // For things
 	bool fCanSee = false;
@@ -2346,7 +2346,7 @@ void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const NCHAR * pwText, 
 			{
 				if ( wTextName[0] == '\0' )
 				{
-					CGString sTextName;
+					CString sTextName;
 					sTextName.Format("<%s>", pSrc->GetName());
 					int iLen = CvtSystemToNUNICODE( wTextName, COUNTOF(wTextName), sTextName, -1 );
 					if ( wTextGhost[0] != '\0' )

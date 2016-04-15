@@ -77,7 +77,7 @@ void CItemCommCrystal::r_Write(CScript & s)
     m_Speech.r_Write(s, "SPEECH");
 }
 
-bool CItemCommCrystal::r_WriteVal(lpctstr pszKey, CGString & sVal, CTextConsole *pSrc)
+bool CItemCommCrystal::r_WriteVal(lpctstr pszKey, CString & sVal, CTextConsole *pSrc)
 {
     ADDTOCALLSTACK("CItemCommCrystal::r_WriteVal");
     switch ( FindTableSorted(pszKey, sm_szLoadKeys, COUNTOF(sm_szLoadKeys) - 1) )

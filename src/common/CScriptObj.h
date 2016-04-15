@@ -56,13 +56,13 @@ class CScriptObj
 	static lpctstr const sm_szVerbKeys[];
 
 private:
-	TRIGRET_TYPE OnTriggerForLoop( CScript &s, int iType, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pResult );
+	TRIGRET_TYPE OnTriggerForLoop( CScript &s, int iType, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CString * pResult );
 public:
 	static const char *m_sClassName;
 	TRIGRET_TYPE OnTriggerScript( CScript &s, lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = NULL );
 	virtual TRIGRET_TYPE OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = NULL );
 	bool OnTriggerFind( CScript & s, lpctstr pszTrigName );
-	TRIGRET_TYPE OnTriggerRun( CScript &s, TRIGRUN_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pReturn );
+	TRIGRET_TYPE OnTriggerRun( CScript &s, TRIGRUN_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CString * pReturn );
 	TRIGRET_TYPE OnTriggerRunVal( CScript &s, TRIGRUN_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
 
 	virtual lpctstr GetName() const = 0;	// ( every object must have at least a type name )
@@ -71,9 +71,9 @@ public:
 	size_t ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFlags = 0, CScriptTriggerArgs * pArgs = NULL );
 
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
-	virtual bool r_WriteVal( lpctstr pKey, CGString & sVal, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pKey, CString & sVal, CTextConsole * pSrc );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
-	bool r_Call( lpctstr pszFunction, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * psVal = NULL, TRIGRET_TYPE * piRet = NULL );
+	bool r_Call( lpctstr pszFunction, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CString * psVal = NULL, TRIGRET_TYPE * piRet = NULL );
 
 	bool r_SetVal( lpctstr pszKey, lpctstr pszVal );
 	virtual bool r_LoadVal( CScript & s );
@@ -101,8 +101,8 @@ public:
 	CScriptObj *				m_pO1;		// "ARGO" or "ARGO1" = object 1
 											// these can go out of date ! get deleted etc.
 
-	CGString					m_s1;		// ""ARGS" or "ARGS1" = string 1
-	CGString					m_s1_raw;	// RAW, used to build argv in runtime
+	CString					m_s1;		// ""ARGS" or "ARGS1" = string 1
+	CString					m_s1_raw;	// RAW, used to build argv in runtime
 
 	CGPtrTypeArray	<lpctstr>	m_v;
 
@@ -166,7 +166,7 @@ public:
 	bool r_Verb( CScript & s, CTextConsole * pSrc );
 	bool r_LoadVal( CScript & s );
 	bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
-	bool r_WriteVal( lpctstr pKey, CGString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pKey, CString & sVal, CTextConsole * pSrc );
 	bool r_Copy( CTextConsole * pSrc );
 	lpctstr GetName() const
 	{
@@ -183,7 +183,7 @@ class CFileObj : public CScriptObj
 			bool bRead;
 			bool bWrite;
 			tchar * tBuffer;
-			CGString * cgWriteBuffer;
+			CString * cgWriteBuffer;
 			// ----------- //
 			static lpctstr const sm_szLoadKeys[];
 			static lpctstr const sm_szVerbKeys[];
@@ -192,7 +192,7 @@ class CFileObj : public CScriptObj
 			void SetDefaultMode(void);
 			bool FileOpen( lpctstr sPath );
 			tchar * GetReadBuffer(bool);
-			CGString * GetWriteBuffer(void);
+			CString * GetWriteBuffer(void);
 
 	public:
 			static const char *m_sClassName;
@@ -211,7 +211,7 @@ class CFileObj : public CScriptObj
 
 			virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 			virtual bool r_LoadVal( CScript & s );
-			virtual bool r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc );
+			virtual bool r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc );
 			virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
 
 			lpctstr GetName() const
@@ -253,7 +253,7 @@ class CFileObjContainer : public CScriptObj
 
 		virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 		virtual bool r_LoadVal( CScript & s );
-		virtual bool r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc );
+		virtual bool r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc );
 		virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
 
 		lpctstr GetName() const

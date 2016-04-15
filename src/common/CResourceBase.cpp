@@ -211,7 +211,7 @@ void CResourceBase::AddResourceDir( lpctstr pszDirName )
 	if ( pszDirName[0] == '\0' )
 		return;
 
-	CGString sFilePath = CGFile::GetMergedFileName( pszDirName, "*" SPHERE_SCRIPT );
+	CString sFilePath = CGFile::GetMergedFileName( pszDirName, "*" SPHERE_SCRIPT );
 
 	CFileList filelist;
 	int iRet = filelist.ReadDir( sFilePath, false );
@@ -312,7 +312,7 @@ bool CResourceBase::OpenResourceFind( CScript &s, lpctstr pszFilename, bool bCri
 	if ( !bCritical ) return false;
 
 	// next, check the script file path
-	CGString sPathName = CGFile::GetMergedFileName( m_sSCPBaseDir, pszFilename );
+	CString sPathName = CGFile::GetMergedFileName( m_sSCPBaseDir, pszFilename );
 	if ( s.Open(sPathName, OF_READ | OF_NONCRIT ))
 		return true;
 
@@ -1481,7 +1481,7 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
 	return false;
 }
 
-void CResourceRefArray::WriteResourceRefList( CGString & sVal ) const
+void CResourceRefArray::WriteResourceRefList( CString & sVal ) const
 {
 	ADDTOCALLSTACK("CResourceRefArray::WriteResourceRefList");
 	TemporaryString tsVal;

@@ -74,7 +74,7 @@ lpctstr const CSector::sm_szLoadKeys[SC_QTY+1] =
 	NULL
 };
 
-bool CSector::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CSector::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CSector::r_WriteVal");
 	EXC_TRY("WriteVal");

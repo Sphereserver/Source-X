@@ -49,8 +49,8 @@ public:
 	void Broadcast(CChatChanMember * pFrom, lpctstr pszText, CLanguageID lang = 0, bool fOverride = false);
 	void QuitChat(CChatChanMember * pClient);
 
-	static void DecorateName(CGString & sName, const CChatChanMember * pMember = NULL, bool fSystem = false);
-	static void GenerateChatName(CGString & sName, const CClient * pClient);
+	static void DecorateName(CString & sName, const CChatChanMember * pMember = NULL, bool fSystem = false);
+	static void GenerateChatName(CString & sName, const CClient * pClient);
 };
 
 #endif // _INC_CCHAT_H

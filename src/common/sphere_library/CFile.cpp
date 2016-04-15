@@ -35,7 +35,7 @@ void CFile::Close()
 	}
 }
 
-const CGString & CFile::GetFilePath() const
+const CString & CFile::GetFilePath() const
 {
 	return( m_strFileName);
 }
@@ -316,7 +316,7 @@ lpctstr CGFile::GetFilesExt( lpctstr pszName )	// static
 	return NULL;	// has no ext.
 }
 
-CGString CGFile::GetMergedFileName( lpctstr pszBase, lpctstr pszName ) // static
+CString CGFile::GetMergedFileName( lpctstr pszBase, lpctstr pszName ) // static
 {
 	ADDTOCALLSTACK("CGFile::GetMergedFileName");
 // Merge path and file name.
@@ -343,7 +343,7 @@ CGString CGFile::GetMergedFileName( lpctstr pszBase, lpctstr pszName ) // static
 	{
 		strcat( szFilePath, pszName );
 	}
-	return static_cast<CGString>(szFilePath);
+	return static_cast<CString>(szFilePath);
 }
 
 // CGFile:: Mode operations.

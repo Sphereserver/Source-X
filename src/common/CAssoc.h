@@ -81,7 +81,7 @@ public:
 	void * GetValPtr( const void * pBaseInst ) const;
 	int GetValLength() const;
 
-	bool GetValStr( const void * pBase, CGString & sVal ) const;
+	bool GetValStr( const void * pBase, CString & sVal ) const;
 	bool SetValStr( void * pBase, lpctstr pszVal ) const;
 };
 
@@ -109,12 +109,12 @@ public:
 
 ////////////////////////////////////////////////////////////////////////
 
-class CGStringListRec : public CGObListRec, public CGString
+class CGStringListRec : public CGObListRec, public CString
 {
 	friend class CGStringList;
 public:
 	static const char *m_sClassName;
-	explicit CGStringListRec( lpctstr pszVal ) : CGString( pszVal )
+	explicit CGStringListRec( lpctstr pszVal ) : CString( pszVal )
 	{
 	}
 private:

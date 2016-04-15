@@ -114,7 +114,7 @@ public:
 
 	CItemSpawn(ITEMID_TYPE id , CItemBase * pItemDef);
 	virtual ~CItemSpawn();
-	virtual bool r_WriteVal(lpctstr pszKey, CGString & sVal, CTextConsole * pSrc);
+	virtual bool r_WriteVal(lpctstr pszKey, CString & sVal, CTextConsole * pSrc);
 	virtual bool  r_LoadVal(CScript & s);
 	virtual void  r_Write(CScript & s);
 };

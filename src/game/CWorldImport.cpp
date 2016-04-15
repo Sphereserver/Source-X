@@ -304,7 +304,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 	// This file is a WSC or UOX world script file.
 
 	IMPFLAGS_TYPE mode = IMPFLAGS_NOTHING;
-	CGString sName;
+	CString sName;
 	CItem * pItem = NULL;
 	CChar * pChar = NULL;
 

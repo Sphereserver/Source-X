@@ -56,7 +56,7 @@ public:
 	{
 	public:
 		const word m_ID;
-		CGString const m_sText;
+		CString const m_sText;
 
 		TResponseString( word id, lpctstr pszText ) : m_ID( id ), m_sText( pszText )
 		{
@@ -72,7 +72,7 @@ public:
 public:
 	void AddText( word id, lpctstr pszText );
 	lpctstr GetName() const;
-	bool r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc );
 
 public:
 	CDialogResponseArgs()
@@ -91,7 +91,7 @@ class CMenuItem 	// describe a menu item.
 public:
 	word m_id;			// ITEMID_TYPE in base set.
 	word m_color;
-	CGString m_sText;
+	CString m_sText;
 public:
 	bool ParseLine( tchar * pszArgs, CScriptObj * pObjBase, CTextConsole * pSrc );
 };
@@ -139,7 +139,7 @@ private:
 	// Promptconsole
 	CLIMODE_TYPE m_Prompt_Mode;	// type of prompt
 	CUID m_Prompt_Uid;		// context uid
-	CGString m_Prompt_Text;		// text (i.e. callback function)
+	CString m_Prompt_Text;		// text (i.e. callback function)
 
 public:
 	CONNECT_TYPE	m_iConnectType;	// what sort of a connection is this ?
@@ -165,7 +165,7 @@ public:
 	CUID m_Targ_Last;	// The last object targeted by the client
 	CUID m_Targ_UID;			// The object of interest to apply to the target.
 	CUID m_Targ_PrvUID;		// The object of interest before this.
-	CGString m_Targ_Text;		// Text transfered up from client.
+	CString m_Targ_Text;		// Text transfered up from client.
 	CPointMap  m_Targ_p;			// For script targeting,
 	CServTime m_Targ_Timeout;	// timeout time for targeting
 
@@ -264,8 +264,8 @@ private:
 	bool OnRxPing( const byte * pData, size_t len );
 	bool OnRxWebPageRequest( byte * pRequest, size_t len );
 
-	byte LogIn( CAccountRef pAccount, CGString & sMsg );
-	byte LogIn( lpctstr pszName, lpctstr pPassword, CGString & sMsg );
+	byte LogIn( CAccountRef pAccount, CString & sMsg );
+	byte LogIn( lpctstr pszName, lpctstr pPassword, CString & sMsg );
 
 	bool CanInstantLogOut() const;
 	void Cmd_GM_PageClear();
@@ -403,7 +403,7 @@ public:
 	}
 
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute script type command on me
-	virtual bool r_WriteVal( lpctstr pszKey, CGString & s, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pszKey, CString & s, CTextConsole * pSrc );
 	virtual bool r_LoadVal( CScript & s );
 
 	// Low level message traffic.
@@ -538,7 +538,7 @@ public:
 	void addGumpInpVal( bool fcancel, INPVAL_STYLE style, dword dwmask, lpctstr ptext1, lpctstr ptext2, CObjBase * pObj );
 
 	void addItemMenu( CLIMODE_TYPE mode, const CMenuItem * item, size_t count, CObjBase * pObj = NULL );
-	void addGumpDialog( CLIMODE_TYPE mode, const CGString * sControls, size_t iControls, const CGString * psText, size_t iTexts, int x, int y, CObjBase * pObj = NULL, dword rid = 0 );
+	void addGumpDialog( CLIMODE_TYPE mode, const CString * sControls, size_t iControls, const CString * psText, size_t iTexts, int x, int y, CObjBase * pObj = NULL, dword rid = 0 );
 
 	bool addGumpDialogProps( CUID uid );
 
@@ -714,7 +714,7 @@ public:
 	NetState* GetNetState(void) const { return m_net; };
 
 private:
-	CGString	m_BarkBuffer;
+	CString	m_BarkBuffer;
 
 public:
 	char		m_zLastMessage[SCRIPT_MAX_LINE_LEN];	// last sysmessage

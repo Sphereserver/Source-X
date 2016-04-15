@@ -109,7 +109,7 @@ bool CLog::OpenLog( lpctstr pszBaseDirName )	// name set previously.
 	tchar *pszTemp = Str_GetTemp();
 	sprintf(pszTemp, SPHERE_FILE "%d-%02d-%02d.log",
 		m_dateStamp.GetYear(), m_dateStamp.GetMonth(), m_dateStamp.GetDay());
-	CGString sFileName = GetMergedFileName(m_sBaseDir, pszTemp);
+	CString sFileName = GetMergedFileName(m_sBaseDir, pszTemp);
 
 	// Use the OF_READWRITE to append to an existing file.
 	if ( CFileText::Open( sFileName, OF_SHARE_DENY_NONE|OF_READWRITE|OF_TEXT ) )

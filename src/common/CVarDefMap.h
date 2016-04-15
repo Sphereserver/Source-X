@@ -14,7 +14,7 @@ class CScript;
 class CVarDefCont
 {
 private:
-	CGString m_Key;	// reference to map key
+	CString m_Key;	// reference to map key
 
 public:
 	static const char *m_sClassName;
@@ -57,7 +57,7 @@ public:
 	lpctstr GetValStr() const;
 
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pKey, CGString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pKey, CString & sVal, CTextConsole * pSrc );
 
 	virtual CVarDefCont * CopySelf() const;
 };
@@ -65,7 +65,7 @@ public:
 class CVarDefContStr : public CVarDefCont
 {
 private:
-	CGString m_sVal;	// the assigned value. (What if numeric?)
+	CString m_sVal;	// the assigned value. (What if numeric?)
 
 public:
 	static const char *m_sClassName;
@@ -84,7 +84,7 @@ public:
 	int64 GetValNum() const;
 
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pKey, CGString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pKey, CString & sVal, CTextConsole * pSrc );
 
 	virtual CVarDefCont * CopySelf() const;
 };

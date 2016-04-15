@@ -16,13 +16,13 @@ class CChatChannel : public CGObListRec
 private:
     friend class CChatChanMember;
     friend class CChat;
-    CGString m_sName;
-    CGString m_sPassword;
+    CString m_sName;
+    CString m_sPassword;
     bool m_fVoiceDefault;	// give others voice by default.
 public:
     static const char *m_sClassName;
-    CGObArray< CGString * > m_NoVoices;// Current list of channel members with no voice
-    CGObArray< CGString * > m_Moderators;// Current list of channel's moderators (may or may not be currently in the channel)
+    CGObArray< CString * > m_NoVoices;// Current list of channel members with no voice
+    CGObArray< CString * > m_Moderators;// Current list of channel's moderators (may or may not be currently in the channel)
     CGPtrTypeArray< CChatChanMember* > m_Members;	// Current list of members in this channel
 private:
     void SetModerator(lpctstr pszName, bool fFlag = true);

@@ -1000,7 +1000,7 @@ lpctstr const CItemBase::sm_szLoadKeys[IBC_QTY+1] =
 	NULL
 };
 
-bool CItemBase::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pChar )
+bool CItemBase::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pChar )
 {
 	UNREFERENCED_PARAMETER(pChar);
 	ADDTOCALLSTACK("CItemBase::r_WriteVal");
@@ -1925,7 +1925,7 @@ bool CItemBaseMulti::r_LoadVal( CScript &s )
 	return false;
 }
 
-bool CItemBaseMulti::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pChar )
+bool CItemBaseMulti::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pChar )
 {
 	ADDTOCALLSTACK("CItemBaseMulti::r_WriteVal");
 	EXC_TRY("WriteVal");

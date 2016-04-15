@@ -112,7 +112,7 @@ private:
 	void OnDestroy();
 	void OnSetFocus( HWND hWndLoss );
 	bool OnClose();
-	void OnUserPostMessage( COLORREF color, CGString * psMsg );
+	void OnUserPostMessage( COLORREF color, CString * psMsg );
 	LRESULT OnUserTrayNotify( WPARAM wID, LPARAM lEvent );
 	LRESULT OnNotify( int idCtrl, NMHDR * pnmh );
 	void	SetLogFont( const char * pszFont );
@@ -515,7 +515,7 @@ LRESULT CNTWindow::OnUserTrayNotify( WPARAM wID, LPARAM lEvent )
 	return 0;	// not handled.
 }
 
-void CNTWindow::OnUserPostMessage( COLORREF color, CGString * psMsg )
+void CNTWindow::OnUserPostMessage( COLORREF color, CString * psMsg )
 {
 	// WM_USER_POST_MSG
 	if ( psMsg )
@@ -877,7 +877,7 @@ LRESULT WINAPI CNTWindow::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LP
 			theApp.m_wndMain.OnNotify( (int) wParam, (NMHDR *) lParam );
 			return 0;
 		case WM_USER_POST_MSG:
-			theApp.m_wndMain.OnUserPostMessage( (COLORREF) wParam, reinterpret_cast<CGString*>(lParam) );
+			theApp.m_wndMain.OnUserPostMessage( (COLORREF) wParam, reinterpret_cast<CString*>(lParam) );
 			return 1;
 		case WM_USER_TRAY_NOTIFY:
 			return theApp.m_wndMain.OnUserTrayNotify( wParam, lParam );
@@ -1039,7 +1039,7 @@ bool NTWindow_PostMsg( LPCTSTR pszMsg )
 //	if ( g_Serv.m_dwParentThread != CThread::GetCurrentThreadId())
 //	{
 //		// A thread safe way to do text.
-//		CGString * psMsg = new CGString( pszMsg );
+//		CString * psMsg = new CString( pszMsg );
 //		ASSERT(psMsg);
 //		if ( ! theApp.m_wndMain.PostMessage( WM_USER_POST_MSG, (WPARAM) color, (LPARAM)psMsg ))
 //		{

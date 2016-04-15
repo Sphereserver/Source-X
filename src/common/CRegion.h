@@ -292,8 +292,8 @@ class CRegionBase : public CResourceDef, public CGRegion
 	// made of (possibly multiple) rectangles.
 	// RES_ROOM or base for RES_AREA
 private:
-	CGString	m_sName;	// Name of the region.
-	CGString	m_sGroup;
+	CString	m_sName;	// Name of the region.
+	CString	m_sGroup;
 
 #define REGION_ANTIMAGIC_ALL		0x000001	// All magic banned here.
 #define REGION_ANTIMAGIC_RECALL_IN	0x000002	// Teleport,recall in to this, and mark
@@ -377,7 +377,7 @@ public:
 	{
 		return( m_sName );
 	}
-	const CGString & GetNameStr() const
+	const CString & GetNameStr() const
 	{
 		return( m_sName );
 	}
@@ -385,7 +385,7 @@ public:
 	void r_WriteBase( CScript & s );
 
 	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( lpctstr pKey, CGString & sVal, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pKey, CString & sVal, CTextConsole * pSrc );
 	virtual void r_WriteBody( CScript & s, lpctstr pszPrefix );
 	virtual void r_WriteModified( CScript & s );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
@@ -453,7 +453,7 @@ public:
 public:
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( lpctstr pKey, CGString & sVal, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pKey, CString & sVal, CTextConsole * pSrc );
 	virtual void r_WriteBody( CScript &s, lpctstr pszPrefix );
 	virtual void r_WriteModified( CScript &s );
 	virtual void r_Write( CScript & s );
@@ -502,8 +502,8 @@ class CStartLoc		// The start locations for creating a new char.
 {
 public:
 	static const char *m_sClassName;
-	CGString m_sArea;	// Area/City Name = Britain or Occlo
-	CGString m_sName;	// Place name = Castle Britannia or Docks
+	CString m_sArea;	// Area/City Name = Britain or Occlo
+	CString m_sName;	// Place name = Castle Britannia or Docks
 	CPointMap m_pt;
 	int iClilocDescription; //Only for clients 7.00.13 +
 

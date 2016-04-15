@@ -109,7 +109,7 @@ lpctstr const CWebPageDef::sm_szLoadKeys[WC_QTY+1] =
 	NULL
 };
 
-bool CWebPageDef::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CWebPageDef::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CWebPageDef::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -829,8 +829,8 @@ bool CWebPageDef::ServPage( CClient * pClient, tchar * pszPage, CGTime * pdateIf
 
 	CGTime datetime = CGTime::GetCurrentTime();
 	const char *sDate = datetime.FormatGmt(NULL);
-	CGString sMsgHead;
-	CGString sText;
+	CString sMsgHead;
+	CString sText;
 
 	sText.Format(
 		"<html><head><title>Error %d</title>"

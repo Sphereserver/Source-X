@@ -103,7 +103,7 @@ lpctstr const CGMPage::sm_szLoadKeys[GC_QTY+1] =
 	NULL
 };
 
-bool CGMPage::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
+bool CGMPage::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CGMPage::r_WriteVal");
 	EXC_TRY("WriteVal");

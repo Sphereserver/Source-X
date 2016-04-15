@@ -57,8 +57,5 @@ extern int Sphere_OnTick();
 extern void Sphere_ExitServer();
 extern int Sphere_MainEntryPoint( int argc, char *argv[] );
 
-// ---------------------------------------------------------------------------------------------
-
-
 
 #endif // _INC_SPHERESVR_H

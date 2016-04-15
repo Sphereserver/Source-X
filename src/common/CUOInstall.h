@@ -21,16 +21,16 @@ public:
 	int64 qwAdress;
 };
 
-ullong HashFileName(CGString csFile);
+ullong HashFileName(CString csFile);
 
 extern struct CUOInstall
 {
 	// "Software\\Origin Worlds Online\\Ultima Online\\1.0"
 	// bool m_fFullInstall;	// Are all files avail ?
 private:
-	CGString m_sPreferPath;	// Prefer path in which to choose the files. (look here FIRST)
-	CGString m_sExePath;		// Files that are installed. "ExePath"
-	CGString m_sCDPath;		// For files that may still be on the CD. "InstCDPath"
+	CString m_sPreferPath;	// Prefer path in which to choose the files. (look here FIRST)
+	CString m_sExePath;		// Files that are installed. "ExePath"
+	CString m_sCDPath;		// For files that may still be on the CD. "InstCDPath"
 public:
 	CGFile m_File[ VERFILE_QTY ];	// Get our list of files we need to access.
 	VERFILE_FORMAT m_FileFormat[ VERFILE_QTY ]; // File format versions
@@ -49,8 +49,8 @@ public:
 	CSVFile m_CsvFiles[8];		// doors.txt, stairs.txt (x2), roof.txt, misc.txt, teleprts.txt, floors.txt, walls.txt
 
 public:
-	CGString GetFullExePath( lpctstr pszName = NULL ) const;
-	CGString GetFullCDPath( lpctstr pszName = NULL ) const;
+	CString GetFullExePath( lpctstr pszName = NULL ) const;
+	CString GetFullCDPath( lpctstr pszName = NULL ) const;
 
 public:
 	bool FindInstall();
@@ -65,7 +65,7 @@ public:
 	VERFILE_FORMAT GetMulFormat( VERFILE_TYPE i );
 
 	void SetPreferPath( lpctstr pszName );
-	CGString GetPreferPath( lpctstr pszName = NULL ) const;
+	CString GetPreferPath( lpctstr pszName = NULL ) const;
 
 	bool ReadMulIndex( VERFILE_TYPE fileindex, VERFILE_TYPE filedata, dword id, CUOIndexRec & Index );
 	bool ReadMulData( VERFILE_TYPE filedata, const CUOIndexRec & Index, void * pData );

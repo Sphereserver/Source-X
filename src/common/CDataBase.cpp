@@ -241,7 +241,7 @@ bool CDataBase::addQuery(bool isQuery, lpctstr theFunction, lpctstr theQuery)
 	}
 }
 
-void CDataBase::addQueryResult(CGString & theFunction, CScriptTriggerArgs * theResult)
+void CDataBase::addQueryResult(CString & theFunction, CScriptTriggerArgs * theResult)
 {
 	SimpleThreadLock stlThelock(m_resultMutex);
 
@@ -377,7 +377,7 @@ bool CDataBase::r_LoadVal(CScript & s)
 */
 }
 
-bool CDataBase::r_WriteVal(lpctstr pszKey, CGString &sVal, CTextConsole *pSrc)
+bool CDataBase::r_WriteVal(lpctstr pszKey, CString &sVal, CTextConsole *pSrc)
 {
 	ADDTOCALLSTACK("CDataBase::r_WriteVal");
 	EXC_TRY("WriteVal");

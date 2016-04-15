@@ -142,7 +142,7 @@ CItem *CContainer::ContentFind( RESOURCE_ID_BASE rid, dword dwArg, int iDecendLe
 	return pItem;
 }
 
-TRIGRET_TYPE CContainer::OnContTriggerForLoop( CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs, CGString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext, RESOURCE_ID_BASE rid, dword dwArg, int iDecendLevels )
+TRIGRET_TYPE CContainer::OnContTriggerForLoop( CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs, CString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext, RESOURCE_ID_BASE rid, dword dwArg, int iDecendLevels )
 {
 	ADDTOCALLSTACK("CContainer::OnContTriggerForLoop");
 	if ( rid.GetResIndex() != 0 )
@@ -198,7 +198,7 @@ TRIGRET_TYPE CContainer::OnContTriggerForLoop( CScript &s, CTextConsole *pSrc, C
 	return TRIGRET_ENDIF;
 }
 
-TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop( CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs, CGString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext, int iDecendLevels )
+TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop( CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs, CString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext, int iDecendLevels )
 {
 	ADDTOCALLSTACK("CContainer::OnGenericContTriggerForLoop");
 	CItem *pItemNext = NULL;
@@ -539,7 +539,7 @@ CContainer::~CContainer()
 	DeleteAll(); // call this early so the virtuals will work.
 }
 
-bool CContainer::r_WriteValContainer( lpctstr pszKey, CGString &sVal, CTextConsole *pSrc )
+bool CContainer::r_WriteValContainer( lpctstr pszKey, CString &sVal, CTextConsole *pSrc )
 {
 	UNREFERENCED_PARAMETER(pSrc);
 	ADDTOCALLSTACK("CContainer::r_WriteValContainer");

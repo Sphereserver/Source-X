@@ -144,7 +144,7 @@ bool CCharNPC::r_LoadVal( CChar * pChar, CScript &s )
 	return false;
 }
 
-bool CCharNPC::r_WriteVal( CChar * pChar, lpctstr pszKey, CGString & sVal )
+bool CCharNPC::r_WriteVal( CChar * pChar, lpctstr pszKey, CString & sVal )
 {
 	EXC_TRY("WriteVal");
 	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CNC_QTY ))

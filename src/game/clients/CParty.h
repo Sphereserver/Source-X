@@ -27,10 +27,10 @@ public:
 	static lpctstr const sm_szLoadKeysM[];
 private:
 	CCharRefArray m_Chars;
-	CGString m_sName;
+	CString m_sName;
 	CVarDefMap m_TagDefs;
 	CVarDefMap m_BaseDefs;		// New Variable storage system
-	CGString m_pSpeechFunction;
+	CString m_pSpeechFunction;
 
 public:
 	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false ) const;
@@ -87,7 +87,7 @@ public:
 
 	lpctstr GetName() const { return static_cast<lpctstr>(m_sName); }
 	bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
-	bool r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc );
 	bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
 	bool r_LoadVal( CScript & s );
 	bool r_Load( CScript & s );

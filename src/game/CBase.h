@@ -23,7 +23,7 @@ struct CBaseBaseDef : public CResourceLink
 	// Base type of both CItemBase and CCharBase
 protected:
 	dword m_dwDispIndex;	// The base artwork id. (may be the same as GetResourceID() in base set.) but can also be "flipped"
-	CGString m_sName;		// default type name. (ei, "human" vs specific "Dennis")
+	CString m_sName;		// default type name. (ei, "human" vs specific "Dennis")
 private:
 	height_t	m_Height;
 	// -------------- ResLevel -------------
@@ -153,7 +153,7 @@ public:
 	bool Can( word wCan ) const;
 	virtual void UnLink();
 
-	virtual bool r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc = NULL );
+	virtual bool r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc = NULL );
 	virtual bool r_LoadVal( CScript & s );
 
 	bool IsValid() const;

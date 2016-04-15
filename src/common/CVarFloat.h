@@ -13,7 +13,7 @@
 
 
 struct LexNoCaseLess {
-	bool operator()(const CGString& CGStr, const char* pBeg2) const
+	bool operator()(const CString& CGStr, const char* pBeg2) const
 	{
 		const char* pBeg1 = CGStr.GetPtr();
 		const char* pEnd1 = pBeg1;
@@ -36,7 +36,7 @@ struct LexNoCaseLess {
 class CVarFloat
 {
 public:
-	typedef std::map<CGString, realtype, LexNoCaseLess> MapType;
+	typedef std::map<CString, realtype, LexNoCaseLess> MapType;
 
 public: //vars
 	CVarFloat();
@@ -54,10 +54,10 @@ private: //setting, getting
 	realtype GetVal( const char* VarName );
 public: //setting, getting
 	bool Insert( const char* VarName, const char* VarValue, bool ForceSet = false);
-	CGString Get( const char* VarName );
+	CString Get( const char* VarName );
 
 public: //parsing
-	static CGString FloatMath( lpctstr & Expr );
+	static CString FloatMath( lpctstr & Expr );
 	static realtype MakeFloatMath( lpctstr & Expr );
 	static realtype GetRandVal( realtype dQty );
 	static realtype GetRandVal2( realtype dMin, realtype dMax );

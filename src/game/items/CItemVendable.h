@@ -4,7 +4,6 @@
 #define _INC_CITEMVENDABLE_H
 
 #include "CItem.h"
-#include "CItemBase.h"
 
 
 class CItemVendable : public CItem
@@ -27,7 +26,7 @@ private:
 public:
 
 	word GetQuality() const;
-	void SetQuality(word quality = 0);
+	void SetQuality( word quality = 0 );
 
 	void SetPlayerVendorPrice( dword dwVal );
 	dword GetBasePrice() const;
@@ -39,9 +38,9 @@ public:
 	virtual void DupeCopy( const CItem * pItem );
 
 	void Restock( bool fSellToPlayers );
-	virtual void  r_Write( CScript & s );
-	virtual bool r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc );
-	virtual bool  r_LoadVal( CScript & s  );
+	virtual void r_Write( CScript & s );
+	virtual bool r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc );
+	virtual bool r_LoadVal( CScript & s );
 };
 
 

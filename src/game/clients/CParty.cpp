@@ -567,7 +567,7 @@ bool CPartyDef::r_LoadVal( CScript &s )
 	return false;
 }
 
-bool CPartyDef::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole *pSrc )
+bool CPartyDef::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole *pSrc )
 {
 	ADDTOCALLSTACK("CPartyDef::r_WriteVal");
 	EXC_TRY("WriteVal");

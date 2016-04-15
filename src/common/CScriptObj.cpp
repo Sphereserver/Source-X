@@ -281,7 +281,7 @@ bool CScriptTriggerArgs::r_LoadVal( CScript & s )
 	return false;
 }
 
-bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
+bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CScriptTriggerArgs::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -505,7 +505,7 @@ lpctstr const CScriptObj::sm_szLoadKeys[SSC_QTY+1] =
 	NULL
 };
 
-bool CScriptObj::r_Call( lpctstr pszFunction, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * psVal, TRIGRET_TYPE * piRet )
+bool CScriptObj::r_Call( lpctstr pszFunction, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CString * psVal, TRIGRET_TYPE * piRet )
 {
 	ADDTOCALLSTACK("CScriptObj::r_Call");
 	GETNONWHITESPACE( pszFunction );
@@ -668,7 +668,7 @@ bool CScriptObj::r_LoadVal( CScript & s )
 	return false;
 }
 
-static void StringFunction( int iFunc, lpctstr pszKey, CGString &sVal )
+static void StringFunction( int iFunc, lpctstr pszKey, CString &sVal )
 {
 	GETNONWHITESPACE(pszKey);
 	if ( *pszKey == '(' )
@@ -702,7 +702,7 @@ static void StringFunction( int iFunc, lpctstr pszKey, CGString &sVal )
 	}
 }
 
-bool CScriptObj::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
+bool CScriptObj::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CScriptObj::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -1480,7 +1480,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 
 		case SSV_SHOW:
 			{
-				CGString sVal;
+				CString sVal;
 				if ( ! r_WriteVal( s.GetArgStr(), sVal, pSrc ))
 					return false;
 				tchar * pszMsg = Str_GetTemp();
@@ -1601,7 +1601,7 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 			sm_fBrackets = false;
 			pszResponse[i] = '\0';
 
-			CGString sVal;
+			CString sVal;
 			pszKey = static_cast<lpctstr>(pszResponse) + iBegin + 1;
 
 			EXC_SET("writeval");
@@ -1646,7 +1646,7 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 }
 
 
-TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pResult )
+TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CString * pResult )
 {
 	ADDTOCALLSTACK("CScriptObj::OnTriggerForLoop");
 	// loop from start here to the ENDFOR
@@ -1659,7 +1659,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 	if ( iType & 8 )		// WHILE
 	{
 		tchar * pszCond;
-		CGString pszOrig;
+		CString pszOrig;
 		TemporaryString pszTemp;
 		int iWhile	= 0;
 
@@ -1705,7 +1705,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 		int i;
 		tchar * ppArgs[3];
 		size_t iQty = Str_ParseCmds( s.GetArgStr(), ppArgs, COUNTOF(ppArgs), ", " );
-		CGString sLoopVar = "_FOR";
+		CString sLoopVar = "_FOR";
 		
 		switch( iQty )
 		{
@@ -2151,7 +2151,7 @@ lpctstr const CScriptObj::sm_szScriptKeys[SK_QTY+1] =
 
 
 
-TRIGRET_TYPE CScriptObj::OnTriggerRun( CScript &s, TRIGRUN_TYPE trigrun, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pResult )
+TRIGRET_TYPE CScriptObj::OnTriggerRun( CScript &s, TRIGRUN_TYPE trigrun, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CString * pResult )
 {
 	ADDTOCALLSTACK("CScriptObj::OnTriggerRun");
 	// ARGS:
@@ -2504,7 +2504,7 @@ jump_in:
 					if ( !strcmpi(s.GetKey(), "call" ) )
 					{
 						EXC_SET("call");
-						CGString sVal;
+						CString sVal;
 						tchar * argRaw = s.GetArgRaw();
 						CScriptObj *pRef = this;
 
@@ -2536,8 +2536,8 @@ jump_in:
 								int64 iN2 = pArgs->m_iN2;
 								int64 iN3 = pArgs->m_iN3;
 								CScriptObj *pO1 = pArgs->m_pO1;
-								CGString s1 = pArgs->m_s1;
-								CGString s1_raw = pArgs->m_s1;
+								CString s1 = pArgs->m_s1;
+								CString s1_raw = pArgs->m_s1;
 								pArgs->m_v.SetCount(0);
 								pArgs->Init(z);
 
@@ -2563,7 +2563,7 @@ jump_in:
 					} else if ( !strcmpi(s.GetKey(), "FullTrigger" ) )
 					{
 						EXC_SET("FullTrigger");
-						CGString sVal;
+						CString sVal;
 						tchar * piCmd[7];
 						tchar *psTmp = Str_GetTemp();
 						strcpy( psTmp, s.GetArgRaw() );
@@ -2605,8 +2605,8 @@ jump_in:
 								int64 iN2 = pArgs->m_iN2;
 								int64 iN3 = pArgs->m_iN3;
 								CScriptObj *pO1 = pArgs->m_pO1;
-								CGString s1 = pArgs->m_s1;
-								CGString s1_raw = pArgs->m_s1;
+								CString s1 = pArgs->m_s1;
+								CString s1_raw = pArgs->m_s1;
 								pArgs->m_v.SetCount(0);
 								pArgs->Init(z);
 
@@ -2664,7 +2664,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerRunVal( CScript &s, TRIGRUN_TYPE trigrun, CTex
 	// This should be used instead of OnTriggerRun() when pReturn is not used
 	ADDTOCALLSTACK("CScriptObj::OnTriggerRunVal");
 
-	CGString sVal;
+	CString sVal;
 	TRIGRET_TYPE tr = TRIGRET_RET_DEFAULT;
 
 	OnTriggerRun( s, trigrun, pSrc, pArgs, &sVal );
@@ -2717,7 +2717,7 @@ CFileObj::CFileObj()
 {
 	sWrite = new CFileText();
 	tBuffer = new tchar [SCRIPT_MAX_LINE_LEN];
-	cgWriteBuffer = new CGString();
+	cgWriteBuffer = new CString();
 	SetDefaultMode();
 }
 
@@ -2749,11 +2749,11 @@ tchar * CFileObj::GetReadBuffer(bool bDelete = false)
 	return tBuffer;
 }
 
-CGString * CFileObj::GetWriteBuffer(void)
+CString * CFileObj::GetWriteBuffer(void)
 {
 	ADDTOCALLSTACK("CFileObj::GetWriteBuffer");
 	if ( !cgWriteBuffer )
-		cgWriteBuffer = new CGString();
+		cgWriteBuffer = new CString();
 
 	cgWriteBuffer->Empty( ( cgWriteBuffer->GetLength() > (SCRIPT_MAX_LINE_LEN/4) ) );
 
@@ -2845,7 +2845,7 @@ bool CFileObj::r_LoadVal( CScript & s )
 				if ( !s.HasArgs() )
 					return false;
 					
-				CGString * ppArgs = this->GetWriteBuffer();
+				CString * ppArgs = this->GetWriteBuffer();
 				
 				if ( bLine )
 				{
@@ -2890,7 +2890,7 @@ bool CFileObj::r_LoadVal( CScript & s )
 	return false;
 }
 
-bool CFileObj::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
+bool CFileObj::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 {
 	UNREFERENCED_PARAMETER(pSrc);
 	ADDTOCALLSTACK("CFileObj::r_WriteVal");
@@ -3416,7 +3416,7 @@ bool CFileObjContainer::r_LoadVal( CScript & s )
 	return false;
 }
 
-bool CFileObjContainer::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
+bool CFileObjContainer::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CFileObjContainer::r_WriteVal");
 	EXC_TRY("WriteVal");

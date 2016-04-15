@@ -133,7 +133,7 @@ public:
 
 								// Saved stuff.
 	DIR_TYPE m_dirFace;			// facing this dir.
-	CGString m_sTitle;			// Special title such as "the guard" (replaces the normal skill title).
+	CString m_sTitle;			// Special title such as "the guard" (replaces the normal skill title).
 	CPointMap m_ptHome;			// What is our "home" region. (towns and bounding of NPC's)
 	int64 m_virtualGold;		// Virtual gold used by TOL clients
 
@@ -353,8 +353,6 @@ public:
 #define LOS_FISHING				0x00800 // Do not allow LOS path checking to go through objects or terrain which do not represent water
 #define LOS_NC_WATER			0x01000	// Water does not block LOS at all.
 
-
-
 	bool CanHear( const CObjBaseTemplate * pSrc, TALKMODE_TYPE mode ) const;
 	bool CanSeeItem( const CItem * pItem ) const;
 	bool CanTouch( const CPointMap & pt ) const;
@@ -482,8 +480,8 @@ public:
 	CItem * LayerFind( LAYER_TYPE layer ) const;
 	void LayerAdd( CItem * pItem, LAYER_TYPE layer = LAYER_QTY );
 
-	TRIGRET_TYPE OnCharTrigForLayerLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pResult, LAYER_TYPE layer );
-	TRIGRET_TYPE OnCharTrigForMemTypeLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pResult, word wMemType );
+	TRIGRET_TYPE OnCharTrigForLayerLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CString * pResult, LAYER_TYPE layer );
+	TRIGRET_TYPE OnCharTrigForMemTypeLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CString * pResult, word wMemType );
 
 	void OnWeightChange( int iChange );
 	int GetWeight(word amount = 0) const;
@@ -509,7 +507,7 @@ public:
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
 	virtual bool r_LoadVal( CScript & s );
 	virtual bool r_Load( CScript & s );  // Load a character from Script
-	virtual bool r_WriteVal( lpctstr pszKey, CGString & s, CTextConsole * pSrc = NULL );
+	virtual bool r_WriteVal( lpctstr pszKey, CString & s, CTextConsole * pSrc = NULL );
 	virtual void r_Write( CScript & s );
 
 	void r_WriteParity( CScript & s );	

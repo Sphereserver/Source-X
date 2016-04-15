@@ -39,7 +39,7 @@ bool CVarFloat::Insert( const char* VarName, const char* VarValue, bool ForceSet
 	SKIP_ARGSEP(VarName);
 	char* pEnd;
 	realtype Real = strtod(VarValue,&pEnd);
-	m_VarMap[CGString(VarName)] = Real;
+	m_VarMap[CString(VarName)] = Real;
 	return true;
 }
 
@@ -55,32 +55,32 @@ realtype CVarFloat::GetVal( const char* VarName )
 	return i->second;
 }
 
-CGString CVarFloat::Get( const char* VarName ) 
+CString CVarFloat::Get( const char* VarName ) 
 {
 	ADDTOCALLSTACK("CVarFloat::Get");
 	if ( !VarName )
-		return CGString();
+		return CString();
 	SKIP_ARGSEP(VarName);
 	if ( strlen(VarName) > VARDEF_FLOAT_MAXBUFFERSIZE )
-		return CGString();
+		return CString();
 
 	realtype Real = GetVal(VarName);
 	char szReal[VARDEF_FLOAT_MAXBUFFERSIZE];
 	sprintf(szReal, "%f", Real);
 
-	return CGString(szReal);
+	return CString(szReal);
 }
 
 short int Reentrant_Count = 0;
 
-CGString CVarFloat::FloatMath( lpctstr & Expr )
+CString CVarFloat::FloatMath( lpctstr & Expr )
 {
 	ADDTOCALLSTACK("CVarFloat::FloatMath");
 	//DEBUG_ERR(("FloatMath\n"));
 	//DEBUG_ERR(("Expr: '%s'\n",Expr));
 	char szReal[VARDEF_FLOAT_MAXBUFFERSIZE];
 	sprintf(szReal, "%f", MakeFloatMath(Expr));
-	return CGString( szReal );
+	return CString( szReal );
 }
 
 realtype CVarFloat::MakeFloatMath( lpctstr & Expr )

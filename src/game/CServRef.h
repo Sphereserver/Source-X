@@ -44,14 +44,14 @@ class CServerDef : public CScriptObj
 	static lpctstr const sm_szLoadKeys[];
 
 private:
-	CGString m_sName;	// What the name should be. Fill in from ping.
+	CString m_sName;	// What the name should be. Fill in from ping.
 	CServTime  m_timeLastValid;	// Last valid poll time in CServTime::GetCurrentTime()
 	CGTime	m_dateLastValid;
 
 	CServTime  m_timeCreate;	// When added to the list ? 0 = at start up.
 
 	// Status read from returned string.
-	CGString m_sStatus;	// last returned status string.
+	CString m_sStatus;	// last returned status string.
 
 	// statistics
 	dword m_dwStat[ SERV_STAT_QTY ];
@@ -59,14 +59,14 @@ private:
 public:
 	static const char *m_sClassName;
 	CSocketAddress m_ip;	// socket and port.
-	CGString m_sClientVersion;
+	CString m_sClientVersion;
 	CCrypt m_ClientVersion;
 
 	// Breakdown the string. or filled in locally.
 	char m_TimeZone;	// Hours from GMT. +5=EST
-	CGString m_sEMail;		// Admin email address.
-	CGString m_sURL;			// URL for the server.
-	CGString m_sLang;
+	CString m_sEMail;		// Admin email address.
+	CString m_sURL;			// URL for the server.
+	CString m_sLang;
 	ACCAPP_TYPE m_eAccApp;	// types of new account applications.
 
 public:
@@ -115,7 +115,7 @@ public:
 	int64 GetTimeSinceLastValid() const;
 
 	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( lpctstr pKey, CGString &sVal, CTextConsole * pSrc = NULL );
+	virtual bool r_WriteVal( lpctstr pKey, CString &sVal, CTextConsole * pSrc = NULL );
 
 	bool IsConnected() const
 	{

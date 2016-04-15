@@ -45,9 +45,9 @@ class CAccount : public CScriptObj
 	static lpctstr const sm_szLoadKeys[]; ///< Script fields.
 private:
 	PLEVEL_TYPE m_PrivLevel; ///< Privileges level of the CAccount.
-	CGString m_sName; ///< Name = no spaces. case independant.
-	CGString m_sCurPassword; ///< Accounts auto-generated but never used should not last long !
-	CGString m_sNewPassword; ///< The new password will be transfered when they use it.
+	CString m_sName; ///< Name = no spaces. case independant.
+	CString m_sCurPassword; ///< Accounts auto-generated but never used should not last long !
+	CString m_sNewPassword; ///< The new password will be transfered when they use it.
 
 
 	word m_PrivFlags; ///< optional privileges for char (bit-mapped)
@@ -64,7 +64,7 @@ public:
 	static const char *m_sClassName;
 
 	CLanguageID m_lang;			///< UNICODE language preference (ENU=english).
-	CGString m_sChatName;		///< Chat System Name
+	CString m_sChatName;		///< Chat System Name
 
 	int64 m_Total_Connect_Time;	///< Previous total amount of time in game (minutes). "TOTALCONNECTTIME"
 
@@ -119,7 +119,7 @@ public:
 	************************************************************************/
 
 	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc );
 	virtual bool r_Verb( CScript &s, CTextConsole * pSrc );
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 	void r_Write(CScript & s);

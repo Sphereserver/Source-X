@@ -412,7 +412,7 @@ lpctstr const CItemSpawn::sm_szLoadKeys[ISPW_QTY + 1] =
 	NULL
 };
 
-bool CItemSpawn::r_WriteVal(lpctstr pszKey, CGString & sVal, CTextConsole *pSrc)
+bool CItemSpawn::r_WriteVal(lpctstr pszKey, CString & sVal, CTextConsole *pSrc)
 {
 	ADDTOCALLSTACK("CitemSpawn:r_WriteVal");
 	EXC_TRY("WriteVal");

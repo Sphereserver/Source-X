@@ -130,7 +130,7 @@ extern struct CLog : public CFileText, public CEventLog
 private:
 	dword m_dwMsgMask;			// Level of log detail messages. IsLogMsg()
 	CGTime m_dateStamp;			// last real time stamp.
-	CGString m_sBaseDir;
+	CString m_sBaseDir;
 
 	const CScript * m_pScriptContext;	// The current context.
 	const CScriptObj * m_pObjectContext;	// The current context.

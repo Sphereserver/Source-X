@@ -84,7 +84,7 @@ public:
 	* @brief Get file name and path (for compatibility with MFC)
 	* @return file name and path.
 	*/
-	const CGString & GetFilePath() const;
+	const CString & GetFilePath() const;
 	/**
 	* @brief Sets a new file path.
 	*
@@ -163,7 +163,7 @@ public:
 public:
 	OSFILE_TYPE m_hFile;	///< File type.
 protected:
-	CGString m_strFileName;	///< File name (with path).
+	CString m_strFileName;	///< File name (with path).
 	uint m_uMode;   ///< MMSYSTEM may use 32 bit flags.
 };
 
@@ -259,7 +259,7 @@ public:
 	* @param pszName filename.
 	* @return merged path.
 	*/
-	static CGString GetMergedFileName( lpctstr pszBase, lpctstr pszName );
+	static CString GetMergedFileName( lpctstr pszBase, lpctstr pszName );
 	///@}
 	/** @name Mode operations:
 	 */

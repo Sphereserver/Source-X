@@ -26,7 +26,7 @@ private:
 
 									// Only apply to members.
 	CUID m_uidLoyalTo;	// Who am i loyal to? invalid value = myself.
-	CGString m_sTitle;		// What is my title in the guild?
+	CString m_sTitle;		// What is my title in the guild?
 
 	union	// Depends on m_iPriv
 	{
@@ -96,7 +96,7 @@ public:
 
 	lpctstr GetName() const { return m_sClassName; }
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
-	virtual bool r_WriteVal( lpctstr pKey, CGString & sVal, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pKey, CString & sVal, CTextConsole * pSrc );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
 	virtual bool r_LoadVal( CScript & s );
 };
@@ -133,9 +133,9 @@ class CItemStone : public CItem, public CGObList
 	static lpctstr const sm_szLoadKeysM[];
 	static lpctstr const sm_szLoadKeysG[];
 private:
-	CGString m_sCharter[6];
-	CGString m_sWebPageURL;
-	CGString m_sAbbrev;
+	CString m_sCharter[6];
+	CString m_sWebPageURL;
+	CString m_sAbbrev;
 
 private:
 
@@ -177,7 +177,7 @@ private:
 
 public:
 	virtual void r_Write( CScript & s );
-	virtual bool r_WriteVal( lpctstr pszKey, CGString & s, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pszKey, CString & s, CTextConsole * pSrc );
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 	virtual bool r_LoadVal( CScript & s );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script

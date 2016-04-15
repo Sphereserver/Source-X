@@ -731,7 +731,7 @@ lpctstr const CObjBase::sm_szLoadKeys[OC_QTY+1] =
 	NULL
 };
 
-bool CObjBase::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
+bool CObjBase::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CObjBase::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -1947,7 +1947,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		return true;
 	}
 	
-	CGString sVal;
+	CString sVal;
 	CScriptTriggerArgs Args( s.GetArgRaw() );
 	if ( r_Call( pszKey, pSrc, &Args, &sVal ) )
 		return true;
@@ -2064,7 +2064,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				tchar *Arg_ppCmd[2];		// Maximum parameters in one line
 				size_t iQty = Str_ParseCmds( s.GetArgStr(), Arg_ppCmd, COUNTOF( Arg_ppCmd ));
 
-				CGString sOrgValue;
+				CString sOrgValue;
 				if ( ! r_WriteVal( Arg_ppCmd[0], sOrgValue, pSrc ))
 					sOrgValue = ".";
 
@@ -2072,7 +2072,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 				int iMaxLength = iQty > 1 ? ATOI(Arg_ppCmd[1]) : 1;
 
-				CGString sPrompt;
+				CString sPrompt;
 				sPrompt.Format("%s (# = default)", static_cast<lpctstr>(Arg_ppCmd[0]));
 				pClientSrc->addGumpInpVal( true, INPVAL_STYLE_TEXTEDIT,
 					iMaxLength,	sPrompt, sOrgValue, this );

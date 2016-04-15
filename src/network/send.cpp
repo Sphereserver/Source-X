@@ -1467,8 +1467,8 @@ void PacketMapPlot::setPin(int x, int y)
 	ADDTOCALLSTACK("PacketMapPlot::PacketMapPlot");
 
 	seek(7);
-	writeInt16((word)(x));
-	writeInt16((word)(y));
+	writeInt16((word)x);
+	writeInt16((word)y);
 }
 
 
@@ -1483,9 +1483,9 @@ PacketGameTime::PacketGameTime(const CClient* target, int hours, int minutes, in
 {
 	ADDTOCALLSTACK("PacketGameTime::PacketGameTime");
 
-	writeByte((byte)(hours));
-	writeByte((byte)(minutes));
-	writeByte((byte)(seconds));
+	writeByte((byte)hours);
+	writeByte((byte)minutes);
+	writeByte((byte)seconds);
 	push(target);
 }
 
@@ -1501,9 +1501,9 @@ PacketWeather::PacketWeather(const CClient* target, WEATHER_TYPE weather, int se
 {
 	ADDTOCALLSTACK("PacketWeather::PacketWeather");
 
-	writeByte((byte)(weather));
-	writeByte((byte)(severity));
-	writeByte((byte)(temperature));
+	writeByte((byte)weather);
+	writeByte((byte)severity);
+	writeByte((byte)temperature);
 	push(target);
 }
 
@@ -1588,11 +1588,11 @@ void PacketBookPageContent::addPage(const CItem* book, size_t page)
 
 	// seek back to write line count
 	seek(linesPos);
-	writeInt16((word)(lines));
+	writeInt16((word)lines);
 
 	// seek further back to increment page count
 	seek(7);
-	writeInt16((word)(++m_pages));
+	writeInt16((word)++m_pages);
 
 	// return to end
 	seek(endPos);
@@ -1611,9 +1611,9 @@ PacketAddTarget::PacketAddTarget(const CClient* target, PacketAddTarget::TargetT
 {
 	ADDTOCALLSTACK("PacketAddTarget::PacketAddTarget");
 
-	writeByte((byte)(type));
+	writeByte((byte)type);
 	writeInt32(context);
-	writeByte((byte)(flags));
+	writeByte((byte)flags);
 
 	// unused data
 	writeInt32(0);
@@ -1639,9 +1639,9 @@ PacketAddTarget::PacketAddTarget(const CClient* target, PacketAddTarget::TargetT
 	if ( pMultiDef && pMultiDef->m_rect.m_bottom > 0 && (pMultiDef->IsType(IT_MULTI) || pMultiDef->IsType(IT_MULTI_CUSTOM)) )
 		y = (word)(pMultiDef->m_rect.m_bottom - 1);
 
-	writeByte((byte)(type));
+	writeByte((byte)type);
 	writeInt32(context);
-	writeByte((byte)(flags));
+	writeByte((byte)flags);
 	
 	writeInt32(0);
 	writeInt32(0);
@@ -1690,7 +1690,7 @@ PacketAction::PacketAction(const CChar* character, ANIM_TYPE action, word repeat
 	ADDTOCALLSTACK("PacketAction::PacketAction");
 
 	writeInt32(character->GetUID());
-	writeInt16((word)(action));
+	writeInt16((word)action);
 	writeInt16(len);
 	writeInt16(repeat);
 	writeBool(backward);
@@ -1703,8 +1703,8 @@ PacketActionBasic::PacketActionBasic(const CChar* character, ANIM_TYPE_NEW actio
 	ADDTOCALLSTACK("PacketActionBasic::PacketActionBasic");
 
 	writeInt32(character->GetUID());
-	writeInt16((word)(action));
-	writeInt16((word)(subaction));
+	writeInt16((word)action);
+	writeInt16((word)subaction);
 	writeByte(variation);
 }
 
@@ -1720,7 +1720,7 @@ PacketTradeAction::PacketTradeAction(SECURE_TRADE_TYPE action) : PacketSend(XCMD
 	ADDTOCALLSTACK("PacketTradeAction::PacketTradeAction");
 
 	initLength();
-	writeByte((byte)(action));
+	writeByte((byte)action);
 }
 
 void PacketTradeAction::prepareContainerOpen(const CChar *character, const CItem *container1, const CItem *container2)
@@ -1815,7 +1815,7 @@ PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYP
 	writeHuedEffect(hue, render);
 
 	writeInt16(effectid);
-	writeInt16((word)(explodeid));
+	writeInt16((word)explodeid);
 	writeInt16(explodesound);
 	writeInt32(effectuid);
 	writeByte(type == 0 ? 0xFF : 0x03 );	// (0xFF or 0x03)
@@ -1841,7 +1841,7 @@ void PacketEffect::writeBasicEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CO
 		srcpos = dstpos;
 
 
-	writeByte((byte)(motion));
+	writeByte((byte)motion);
 
 	switch (motion)
 	{
@@ -1869,7 +1869,7 @@ void PacketEffect::writeBasicEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CO
 			break;
 	}
 
-	writeInt16((word)(id));
+	writeInt16((word)id);
 	writeInt16(srcpos.m_x);
 	writeInt16(srcpos.m_y);
 	writeByte(srcpos.m_z);
@@ -1938,24 +1938,26 @@ PacketBulletinBoard::PacketBulletinBoard(const CClient* target, BBOARDF_TYPE act
 		lpctstr author = message->m_sAuthor;
 
 		lenstr = strlen(author) + 1;
-		if (lenstr > 255) lenstr = 255;
+		if (lenstr > 255)
+			lenstr = 255;
 
-		writeByte((byte)(lenstr));
+		writeByte((byte)lenstr);
 		writeStringFixedASCII(author, lenstr);
 	}
 
 	// message title
 	lenstr = strlen(message->GetName()) + 1;
-	if (lenstr > 255) lenstr = 255;
+	if (lenstr > 255)
+		lenstr = 255;
 
-	writeByte((byte)(lenstr));
+	writeByte((byte)lenstr);
 	writeStringFixedASCII(message->GetName(), lenstr);
 
 	// message time
 	sprintf(tempstr, "Day %u", (g_World.GetGameWorldTime(message->GetTimeStamp()) / (24 * 60)) % 365);
 	lenstr = strlen(tempstr) + 1;
 
-	writeByte((byte)(lenstr));
+	writeByte((byte)lenstr);
 	writeStringFixedASCII(tempstr, lenstr);
 
 	if (action == BBOARDF_REQ_FULL)
@@ -1964,7 +1966,7 @@ PacketBulletinBoard::PacketBulletinBoard(const CClient* target, BBOARDF_TYPE act
 		writeInt32(0);
 
 		size_t lines = message->GetPageCount();
-		writeInt16((word)(lines));
+		writeInt16((word)lines);
 
 		for (size_t i = 0; i < lines; i++)
 		{
@@ -1973,9 +1975,10 @@ PacketBulletinBoard::PacketBulletinBoard(const CClient* target, BBOARDF_TYPE act
 				continue;
 
 			lenstr = strlen(text) + 2;
-			if (lenstr > 255) lenstr = 255;
+			if (lenstr > 255)
+				lenstr = 255;
 
-			writeByte((byte)(lenstr));
+			writeByte((byte)lenstr);
 			writeStringFixedASCII(text, lenstr);
 		}
 	}
@@ -2614,8 +2617,8 @@ PacketDisplayBook::PacketDisplayBook(const CClient* target, CItem* book) : Packe
 
 	bool isWritable = false;
 	int pages = 0;
-	CGString title;
-	CGString author;
+	CString title;
+	CString author;
 
 	if (book->IsBookSystem())
 	{
@@ -3305,7 +3308,7 @@ PacketGumpDialog::PacketGumpDialog(int x, int y, CObjBase* object, dword context
 	writeInt32(y);
 }
 
-void PacketGumpDialog::writeControls(const CClient* target, const CGString* controls, size_t controlCount, const CGString* texts, size_t textCount)
+void PacketGumpDialog::writeControls(const CClient* target, const CString* controls, size_t controlCount, const CString* texts, size_t textCount)
 {	
 	ADDTOCALLSTACK("PacketGumpDialog::writeControls");
 
@@ -3316,7 +3319,7 @@ void PacketGumpDialog::writeControls(const CClient* target, const CGString* cont
 		writeStandardControls(controls, controlCount, texts, textCount);
 }
 
-void PacketGumpDialog::writeCompressedControls(const CGString* controls, size_t controlCount, const CGString* texts, size_t textCount)
+void PacketGumpDialog::writeCompressedControls(const CString* controls, size_t controlCount, const CString* texts, size_t textCount)
 {
 	ADDTOCALLSTACK("PacketGumpDialog::writeCompressedControls");
 
@@ -3398,7 +3401,7 @@ void PacketGumpDialog::writeCompressedControls(const CGString* controls, size_t 
 	}
 }
 
-void PacketGumpDialog::writeStandardControls(const CGString* controls, size_t controlCount, const CGString* texts, size_t textCount)
+void PacketGumpDialog::writeStandardControls(const CString* controls, size_t controlCount, const CString* texts, size_t textCount)
 {
 	ADDTOCALLSTACK("PacketGumpDialog::writeStandardControls");
 
@@ -3504,7 +3507,7 @@ PacketProfile::PacketProfile(const CClient* target, const CChar* character) : Pa
 
 	if (isIncognito == false)
 	{
-		CGString sConstText;
+		CString sConstText;
 		sConstText.Format("%s, %s", character->Noto_GetTitle(), character->GetTradeTitle());
 
 		writeStringNUNICODE(static_cast<lpctstr>(sConstText));
@@ -4260,8 +4263,8 @@ PacketDisplayBookNew::PacketDisplayBookNew(const CClient* target, CItem* book) :
 
 	bool isWritable = false;
 	int pages = 0;
-	CGString title;
-	CGString author;
+	CString title;
+	CString author;
 
 	if (book->IsBookSystem())
 	{

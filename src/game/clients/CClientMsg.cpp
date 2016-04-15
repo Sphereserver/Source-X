@@ -803,7 +803,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 			size_t iQty = Str_ParseCmds(const_cast<tchar *>(m_BarkBuffer.GetPtr()), ppArgs, COUNTOF(ppArgs), "," );
 			int iClilocId = Exp_GetVal( ppArgs[0] );
 			int iAffixType = Exp_GetVal( ppArgs[1] );
-			CGString CArgs;
+			CString CArgs;
 			for ( size_t i = 3; i < iQty; i++ )
 			{
 				if ( CArgs.GetLength() )
@@ -820,7 +820,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
             tchar * ppArgs[256];
 			size_t iQty = Str_ParseCmds(const_cast<tchar *>(m_BarkBuffer.GetPtr()), ppArgs, COUNTOF(ppArgs), "," );
 			int iClilocId = Exp_GetVal( ppArgs[0] );
-			CGString CArgs;
+			CString CArgs;
 			for ( size_t i = 1; i < iQty; i++ )
 			{
 				if ( CArgs.GetLength() )
@@ -3623,7 +3623,7 @@ byte CClient::Setup_ListReq( const char * pszAccName, const char * pszPassword, 
 			break;
 	}
 
-	CGString sMsg;
+	CString sMsg;
 	byte lErr = LogIn( pszAccName, pszPassword, sMsg );
 
 	if ( lErr != PacketLoginError::Success )
@@ -3658,7 +3658,7 @@ byte CClient::Setup_ListReq( const char * pszAccName, const char * pszPassword, 
 	return PacketLoginError::Success;
 }
 
-byte CClient::LogIn( CAccountRef pAccount, CGString & sMsg )
+byte CClient::LogIn( CAccountRef pAccount, CString & sMsg )
 {
 	ADDTOCALLSTACK("CClient::LogIn");
 	if ( pAccount == NULL )
@@ -3760,7 +3760,7 @@ byte CClient::LogIn( CAccountRef pAccount, CGString & sMsg )
 	return( PacketLoginError::Success );
 }
 
-byte CClient::LogIn( lpctstr pszAccName, lpctstr pszPassword, CGString & sMsg )
+byte CClient::LogIn( lpctstr pszAccName, lpctstr pszPassword, CString & sMsg )
 {
 	ADDTOCALLSTACK("CClient::LogIn");
 	// Try to validate this account.

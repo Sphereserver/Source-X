@@ -343,7 +343,7 @@ void CServer::ListClients( CTextConsole *pConsole ) const
 	pConsole->SysMessage(tmpMsg);
 }
 
-bool CServer::OnConsoleCmd( CGString & sText, CTextConsole * pSrc )
+bool CServer::OnConsoleCmd( CString & sText, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CServer::OnConsoleCmd");
 	// RETURN: false = unsuccessful command.
@@ -992,7 +992,7 @@ bool CServer::r_LoadVal( CScript &s )
 	return CServerDef::r_LoadVal(s);
 }
 
-bool CServer::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CServer::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CServer::r_WriteVal");
 	if ( !strnicmp(pszKey, "ACCOUNT.", 8) )
@@ -1139,7 +1139,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 
 	if ( index < 0 )
 	{
-		CGString sVal;
+		CString sVal;
 		CScriptTriggerArgs Args( s.GetArgRaw() );
 		if ( r_Call( pszKey, pSrc, &Args, &sVal ) )
 			return true;
@@ -1237,7 +1237,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 
 		case SV_CONSOLE:
 			{
-				CGString z = s.GetArgRaw();
+				CString z = s.GetArgRaw();
 				OnConsoleCmd(z, pSrc);
 			}
 			break;
@@ -1729,7 +1729,7 @@ void CServer::OnTick()
 	if ( m_fConsoleTextReadyFlag )
 	{
 		EXC_SET("console input");
-		CGString sText = m_sConsoleText;	// make a copy.
+		CString sText = m_sConsoleText;	// make a copy.
 		m_sConsoleText.Empty();	// done using this.
 		m_fConsoleTextReadyFlag = false; // rady to use again
 		OnConsoleCmd( sText, this );

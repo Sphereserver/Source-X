@@ -19,9 +19,9 @@ class CGMPage : public CGObListRec, public CScriptObj
 	// ONly one page allowed per account at a time.
 	static lpctstr const sm_szLoadKeys[];
 private:
-	CGString m_sAccount;	// The account that paged me.
+	CString m_sAccount;	// The account that paged me.
 	CClient * m_pGMClient;	// assigned to a GM
-	CGString m_sReason;		// Players Description of reason for call.
+	CString m_sReason;		// Players Description of reason for call.
 
 public:
 	static const char *m_sClassName;
@@ -48,7 +48,7 @@ public:
 	void SetGMHandler( CClient * pClient );
 	int64 GetAge() const;
 
-	bool r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc );
 	void r_Write( CScript & s ) const;
 	bool r_LoadVal( CScript & s );
 

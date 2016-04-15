@@ -161,7 +161,7 @@ class CTimedFunctionHandler
 		void Add( CUID uid, int numSeconds, lpctstr funcname );
 		void Erase( CUID uid );
 		void Stop( CUID uid, lpctstr funcname );
-		TRIGRET_TYPE Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext, CScriptLineContext EndContext, CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CGString * pResult);
+		TRIGRET_TYPE Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext, CScriptLineContext EndContext, CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CString * pResult);
 		int IsTimer( CUID uid, lpctstr funcname );
 };
 
@@ -219,7 +219,7 @@ private:
 
 	bool SaveTry(bool fForceImmediate); // Save world state
 	bool SaveStage();
-	static void GetBackupName( CGString & sArchive, lpctstr pszBaseDir, tchar chType, int savecount );
+	static void GetBackupName( CString & sArchive, lpctstr pszBaseDir, tchar chType, int savecount );
 	bool SaveForce(); // Save world state
 
 public:
@@ -295,7 +295,7 @@ public:
 	static bool OpenScriptBackup( CScript & s, lpctstr pszBaseDir, lpctstr pszBaseName, int savecount );
 
 	void r_Write( CScript & s );
-	bool r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc );
 	bool r_LoadVal( CScript & s ) ;
 	bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 

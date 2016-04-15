@@ -142,7 +142,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 	int index = FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF(sm_szLoadKeys)-1 );
 	if ( index < 0 )
 	{
-		CGString sVal;
+		CString sVal;
 		CScriptTriggerArgs Args(s.GetArgRaw());
 		if ( r_Call(s.GetKey(), pSrc, &Args, &sVal) )
 			return true;
@@ -511,7 +511,7 @@ CDialogDef::CDialogDef( RESOURCE_ID rid ) :
 }
 
 
-bool	CDialogDef::r_WriteVal( lpctstr pszKey, CGString &sVal, CTextConsole * pSrc )
+bool	CDialogDef::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CDialogDef::r_WriteVal");
 	if ( !m_pObj )
@@ -654,7 +654,7 @@ void CClient::addGumpInpVal( bool fCancel, INPVAL_STYLE style,
 }
 
 
-void CClient::addGumpDialog( CLIMODE_TYPE mode, const CGString * psControls, size_t iControls, const CGString * psText, size_t iTexts, int x, int y, CObjBase * pObj, dword rid )
+void CClient::addGumpDialog( CLIMODE_TYPE mode, const CString * psControls, size_t iControls, const CString * psText, size_t iTexts, int x, int y, CObjBase * pObj, dword rid )
 {
 	ADDTOCALLSTACK("CClient::addGumpDialog");
 	// Add a generic GUMP menu.

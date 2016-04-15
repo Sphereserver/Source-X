@@ -2062,7 +2062,7 @@ void CItem::WriteUOX( CScript & s, int index )
 	s.Printf( "}\n\n" );
 }
 
-void CItem::r_WriteMore1( CGString & sVal )
+void CItem::r_WriteMore1( CString & sVal )
 {
 	ADDTOCALLSTACK_INTENSIVE("CItem::r_WriteMore1");
 	// do special processing to represent this.
@@ -2115,7 +2115,7 @@ void CItem::r_WriteMore1( CGString & sVal )
 	}
 }
 
-void CItem::r_WriteMore2( CGString & sVal )
+void CItem::r_WriteMore2( CString & sVal )
 {
 	ADDTOCALLSTACK_INTENSIVE("CItem::r_WriteMore2");
 	// do special processing to represent this.
@@ -2177,13 +2177,13 @@ void CItem::r_Write( CScript & s )
 
 	if ( m_itNormal.m_more1 )
 	{
-		CGString sVal;
+		CString sVal;
 		r_WriteMore1(sVal);
 		s.WriteKey("MORE1", sVal);
 	}
 	if ( m_itNormal.m_more2 )
 	{
-		CGString sVal;
+		CString sVal;
 		r_WriteMore2(sVal);
 		s.WriteKey("MORE2", sVal);
 	}
@@ -2324,7 +2324,7 @@ lpctstr const CItem::sm_szLoadKeys[IC_QTY+1] =
 };
 
 
-bool CItem::r_WriteVal( lpctstr pszKey, CGString & sVal, CTextConsole * pSrc )
+bool CItem::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CItem::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -4408,7 +4408,7 @@ lpctstr CItem::Use_SpyGlass( CChar * pUser ) const
 #define BASE_SIGHT 26 // 32 (UO_MAP_VIEW_RADAR) is the edge of the radar circle (for the most part)
 	WEATHER_TYPE wtWeather = ptCoords.GetSector()->GetWeather();
 	byte iLight = ptCoords.GetSector()->GetLight();
-	CGString sSearch;
+	CString sSearch;
 	tchar	*pResult = Str_GetTemp();
 
 	// Weather bonus
