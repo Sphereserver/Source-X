@@ -4,7 +4,7 @@
 
 #ifdef _BSD
 	#include <time.h>
-	#include <sys/types.h>
+	#include <sys/uofiles_types.h>
 	int getTimezone()
 	{
 		tm tp;

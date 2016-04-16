@@ -24,7 +24,7 @@
 #include "CLog.h"
 #include "CServTime.h"
 #include "spheresvr.h"
-#include "Triggers.h"
+#include "triggers.h"
 #include "CScriptProfiler.h"
 
 #if !defined(_WIN32) || defined(_LIBEV)

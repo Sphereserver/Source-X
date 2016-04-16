@@ -8,7 +8,7 @@
 #include "CsvFile.h"
 #include "../game/uo_files/CUOIndexRec.h"
 #include "../game/uo_files/CUOVersionBlock.h"
-#include "../game/uo_files/enums.h"
+#include "../game/uo_files/uofiles_enums.h"
 
 
 ////////////////////////////////////////////////////////

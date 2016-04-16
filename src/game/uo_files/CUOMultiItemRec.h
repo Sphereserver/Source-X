@@ -1,19 +1,25 @@
+/**
+* @file CUOMultiItemRec.h
+*
+*/
+
 #pragma once
-#ifndef _INC_UOFILES_CUOMULTIITEMREC_H
-#define _INC_UOFILES_CUOMULTIITEMREC_H
+#ifndef _INC_CUOMULTIITEMREC_H
+#define _INC_CUOMULTIITEMREC_H
 
 #include "../../common/common.h"
-#include "enums.h"
+#include "uofiles_enums.h"
 
 // All these structures must be byte packed.
 #if defined _WIN32 && (!__MINGW32__)
-// Microsoft dependant pragma
-#pragma pack(1)
-#define PACK_NEEDED
+	// Microsoft dependant pragma
+	#pragma pack(1)
+	#define PACK_NEEDED
 #else
-// GCC based compiler you can add:
-#define PACK_NEEDED __attribute__ ((packed))
+	// GCC based compiler you can add:
+	#define PACK_NEEDED __attribute__ ((packed))
 #endif
+
 
 /**
 * (Multi.mul)
@@ -22,19 +28,20 @@
 */
 struct CUOMultiItemRec
 {
-    word  m_wTileID;  ///< ITEMID_TYPE = Index to tile CUOItemTypeRec/CUOItemTypeRec2
-    short m_dx;	 ///< signed delta.
+    word  m_wTileID;	///< ITEMID_TYPE = Index to tile CUOItemTypeRec/CUOItemTypeRec2
+    short m_dx;			///< signed delta.
     short m_dy;
     short m_dz;
-    dword m_visible;  ///< 0 or 1 (non-visible items are things like doors and signs)
+    dword m_visible;	///< 0 or 1 (non-visible items are things like doors and signs)
     ITEMID_TYPE GetDispID() const;
 } PACK_NEEDED;
 
+
 // Turn off structure packing.
 #if defined _WIN32 && (!__MINGW32__)
-#pragma pack()
+	#pragma pack()
 #else
-#undef PACK_NEEDED
+	#undef PACK_NEEDED
 #endif
 
-#endif //_INC_UOFILES_CUOMULTIITEMREC_H
+#endif //_INC_CUOMULTIITEMREC_H

@@ -5,7 +5,7 @@
 #include "../items/CItemMap.h"
 #include "../items/CItemSpawn.h"
 #include "../CLog.h"
-#include "../Triggers.h"
+#include "../triggers.h"
 #include "CClient.h"
 
 bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )

@@ -9,8 +9,8 @@
 
 #include "../common/CUID.h"
 #include "../common/sphereproto.h"
-#include "../game/uo_files/enums.h"
-#include "../game/uo_files/types.h"
+#include "../game/uo_files/uofiles_enums.h"
+#include "../game/uo_files/uofiles_types.h"
 #include "packet.h"
 
 

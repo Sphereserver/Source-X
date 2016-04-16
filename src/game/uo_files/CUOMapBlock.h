@@ -1,19 +1,26 @@
-#ifndef _INC_UOFILES_CUOMAPBLOCK_H
-#define _INC_UOFILES_CUOMAPBLOCK_H
+/**
+* @file CUOMultiItemRec2.h
+*
+*/
+
+#pragma once
+#ifndef _INC_CUOMAPBLOCK_H
+#define _INC_CUOMAPBLOCK_H
 
 #include "../../common/common.h"
 #include "CUOMapMeter.h"
-#include "macros.h"
+#include "uofiles_macros.h"
 
 // All these structures must be byte packed.
 #if defined _WIN32 && (!__MINGW32__)
-// Microsoft dependant pragma
-#pragma pack(1)
-#define PACK_NEEDED
+	// Microsoft dependant pragma
+	#pragma pack(1)
+	#define PACK_NEEDED
 #else
-// GCC based compiler you can add:
-#define PACK_NEEDED __attribute__ ((packed))
+	// GCC based compiler you can add:
+	#define PACK_NEEDED __attribute__ ((packed))
 #endif
+
 
 /**
 * 196 byte block = 8x8 meters, (map0.mul)
@@ -25,11 +32,12 @@ struct CUOMapBlock
     CUOMapMeter m_Meter[UO_BLOCK_SIZE * UO_BLOCK_SIZE];
 } PACK_NEEDED;
 
+
 // Turn off structure packing.
 #if defined _WIN32 && (!__MINGW32__)
-#pragma pack()
+	#pragma pack()
 #else
-#undef PACK_NEEDED
+	#undef PACK_NEEDED
 #endif
 
-#endif //_INC_UOFILES_CUOMAPBLOCK_H
+#endif //_INC_CUOMAPBLOCK_H

@@ -8,7 +8,7 @@
 #include "items/CItemContainer.h"
 #include "items/CItemVendable.h"
 #include "CContainer.h"
-#include "Triggers.h"
+#include "triggers.h"
 
 //***************************************************************************
 // -CContainer

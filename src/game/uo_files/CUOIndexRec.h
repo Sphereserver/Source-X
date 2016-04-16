@@ -1,19 +1,25 @@
+/**
+* @file CUOIndexRec.h
+*
+*/
+
 #pragma once
-#ifndef _INC_UOFILES_CUOINDEXREC_H
-#define _INC_UOFILES_CUOINDEXREC_H
+#ifndef _INC_CUOINDEXREC_H
+#define _INC_CUOINDEXREC_H
 
 #include "../../common/common.h"
 #include "CUOVersionBlock.h"
 
 // All these structures must be byte packed.
 #if defined _WIN32 && (!__MINGW32__)
-// Microsoft dependant pragma
-#pragma pack(1)
-#define PACK_NEEDED
+	// Microsoft dependant pragma
+	#pragma pack(1)
+	#define PACK_NEEDED
 #else
-// GCC based compiler you can add:
-#define PACK_NEEDED __attribute__ ((packed))
+	// GCC based compiler you can add:
+	#define PACK_NEEDED __attribute__ ((packed))
 #endif
+
 
 /**
 * 12 byte block = used for table indexes. (staidx0.mul,multi.idx,anim.idx)
@@ -48,10 +54,10 @@ public:
 
 // Turn off structure packing.
 #if defined _WIN32 && (!__MINGW32__)
-#pragma pack()
+	#pragma pack()
 #else
-#undef PACK_NEEDED
+	#undef PACK_NEEDED
 #endif
 
-#endif //_INC_UOFILES_CUOINDEXREC_H
+#endif //_INC_CUOINDEXREC_H
 

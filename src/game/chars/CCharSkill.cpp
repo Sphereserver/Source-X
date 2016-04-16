@@ -5,7 +5,7 @@
 #include "../common/CUIDExtra.h"
 #include "../items/CItemVendable.h"
 #include "../CLog.h"
-#include "../Triggers.h"
+#include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 

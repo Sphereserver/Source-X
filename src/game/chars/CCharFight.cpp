@@ -3,7 +3,7 @@
 #include "../common/CUIDExtra.h"
 #include "../network/send.h"
 #include "../CServTime.h"
-#include "../Triggers.h"
+#include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 

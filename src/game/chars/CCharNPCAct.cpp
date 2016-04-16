@@ -7,7 +7,7 @@
 #include "../CLog.h"
 #include "../CPathFinder.h"
 #include "../CServTime.h"
-#include "../Triggers.h"
+#include "../triggers.h"
 #include "CCharNPC.h"
 
 //////////////////////////

@@ -6,7 +6,7 @@
 #include "CUOItemTypeRec1.h"
 #include "CUOTerrainTypeRec2.h"
 #include "CUOTerrainTypeRec1.h"
-#include "macros.h"
+#include "uofiles_macros.h"
 
 CSphereItemInfo::CSphereItemInfo( ITEMID_TYPE id )
 {

@@ -30,11 +30,11 @@ game/CWorld.cpp
 game/CWorld.h
 game/CWorldImport.cpp
 game/CWorldMap.cpp
-game/common_enums.h
+game/game_enums.h
 game/spheresvr.cpp
 game/spheresvr.h
-game/Triggers.h
-game/Triggers.cpp
+game/triggers.h
+game/triggers.cpp
 )
 SOURCE_GROUP (game FILES ${game_SRCS})
 
@@ -158,9 +158,9 @@ game/uo_files/CUOTerrainTypeRec1.h
 game/uo_files/CUOTerrainTypeRec2.h
 game/uo_files/CUOVersionBlock.h
 game/uo_files/CUOVersionBlock.cpp
-game/uo_files/enums.h
-game/uo_files/macros.h
-game/uo_files/types.h
+game/uo_files/uofiles_enums.h
+game/uo_files/uofiles_macros.h
+game/uo_files/uofiles_types.h
 )
 SOURCE_GROUP (game\\uo_files FILES ${uofiles_SRCS})
 

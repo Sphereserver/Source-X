@@ -17,7 +17,7 @@
 #include "../items/CItemContainer.h"
 #include "../items/CItemMultiCustom.h"
 #include "../CSectorEnviron.h"
-#include "../common_enums.h"
+#include "../game_enums.h"
 #include "CAccount.h"
 #include "CChat.h"
 #include "CChatChanMember.h"

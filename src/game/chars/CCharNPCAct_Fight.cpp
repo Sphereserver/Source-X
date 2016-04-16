@@ -4,7 +4,7 @@
 #include "../../network/receive.h"
 #include "../CPathFinder.h"
 #include "../CServTime.h"
-#include "../Triggers.h"
+#include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 

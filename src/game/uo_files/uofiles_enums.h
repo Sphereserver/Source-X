@@ -1,6 +1,12 @@
+/**
+* @file uofiles_enums.h
+*
+*/
+
 #pragma once
 #ifndef _INC_UOFILES_ENUMS_H
 #define _INC_UOFILES_ENUMS_H
+
 
 // 20 colors of 10 hues and 5 brightnesses, which gives us 1000 colors.
 //  plus black, and default.
@@ -54,9 +60,9 @@ enum HUE_CODE
     HUE_UNDERWEAR		= 0x8000	// Only can be used on humans.
 };
 
+
 enum SOUND_CODE
 {
-
     SOUND_NONE			= 0,
     SOUND_ANVIL			= 0x02a,
 
@@ -97,10 +103,9 @@ enum SOUND_CODE
 };
 
 
-
 enum ITEMID_TYPE	// InsideUO is great for this stuff.
 {
-    ITEMID_NOTHING		= 0x0000,	// Used for lightning.
+    ITEMID_NOTHING				= 0x0000,	// Used for lightning.
     ITEMID_NODRAW = 1,
     ITEMID_ANKH_S,
     ITEMID_ANKH_N,
@@ -135,35 +140,35 @@ enum ITEMID_TYPE	// InsideUO is great for this stuff.
     ITEMID_DOOR_IRONGATE_2		= 0x084C,
     ITEMID_DOOR_WOODENGATE_2	= 0x0866,
 
-    ITEMID_ROCK_1_LO		= 0x8e0,
-    ITEMID_ROCK_1_HI		= 0x8ea,
+    ITEMID_ROCK_1_LO			= 0x8e0,
+    ITEMID_ROCK_1_HI			= 0x8ea,
 
-    ITEMID_BEEHIVE			= 0x091a,
+    ITEMID_BEEHIVE				= 0x091a,
 
-    ITEMID_FOOD_BACON	 = 0x0976,
-    ITEMID_FOOD_FISH_RAW = 0x97a,
-    ITEMID_FOOD_FISH	= 0x097b,
+    ITEMID_FOOD_BACON			= 0x0976,
+    ITEMID_FOOD_FISH_RAW		= 0x97a,
+    ITEMID_FOOD_FISH			= 0x097b,
 
-    ITEMID_RBASKET		= 0x0990,	//0x0E78,
+    ITEMID_RBASKET				= 0x0990,	//0x0E78,
 
-    ITEMID_BOOZE_LIQU_B1 = 0x099b,
-    ITEMID_BOOZE_LIQU_B2 = 0x099c,
-    ITEMID_BOOZE_LIQU_B3 = 0x099d,
-    ITEMID_BOOZE_LIQU_B4 = 0x099e,
-    ITEMID_BOOZE_ALE_B1 = 0x099f,
-    ITEMID_BOOZE_ALE_B2 = 0x09a0,
-    ITEMID_BOOZE_ALE_B3 = 0x09a1,
-    ITEMID_BOOZE_ALE_B4 = 0x09a2,
+    ITEMID_BOOZE_LIQU_B1		= 0x099b,
+    ITEMID_BOOZE_LIQU_B2		= 0x099c,
+    ITEMID_BOOZE_LIQU_B3		= 0x099d,
+    ITEMID_BOOZE_LIQU_B4		= 0x099e,
+    ITEMID_BOOZE_ALE_B1			= 0x099f,
+    ITEMID_BOOZE_ALE_B2			= 0x09a0,
+    ITEMID_BOOZE_ALE_B3			= 0x09a1,
+    ITEMID_BOOZE_ALE_B4			= 0x09a2,
 
-    ITEMID_PITCHER		= 0x09a7,	// empty.
-    ITEMID_BOX_METAL    = 0x09a8,
-    ITEMID_CRATE7		= 0x09a9,
-    ITEMID_BOX_WOOD1	= 0x09aa,
-    ITEMID_CHEST_SILVER2= 0x09ab,
-    ITEMID_BASKET		= 0x09ac,
-    ITEMID_POUCH2		= 0x09b0,
-    ITEMID_BASKET2		= 0x09b1,
-    ITEMID_BANK_BOX		= 0x09b2, // another pack really but used as bank box.
+    ITEMID_PITCHER				= 0x09a7,	// empty.
+    ITEMID_BOX_METAL			= 0x09a8,
+    ITEMID_CRATE7				= 0x09a9,
+    ITEMID_BOX_WOOD1			= 0x09aa,
+    ITEMID_CHEST_SILVER2		= 0x09ab,
+    ITEMID_BASKET				= 0x09ac,
+    ITEMID_POUCH2				= 0x09b0,
+    ITEMID_BASKET2				= 0x09b1,
+    ITEMID_BANK_BOX				= 0x09b2, // another pack really but used as bank box.
 
     ITEMID_FOOD_EGGS_RAW	= 0x09b5,
     ITEMID_FOOD_EGGS		= 0x09b6,
@@ -172,22 +177,22 @@ enum ITEMID_TYPE	// InsideUO is great for this stuff.
     ITEMID_FOOD_BIRD1_RAW	= 0x09b9,
     ITEMID_FOOD_BIRD2_RAW	= 0x09ba,
 
-    ITEMID_FOOD_SAUSAGE = 0x09c0,
+    ITEMID_FOOD_SAUSAGE		= 0x09c0,
     ITEMID_BOOZE_WINE_B1	= 0x09c4,
     ITEMID_BOOZE_WINE_B2	= 0x09c5,
     ITEMID_BOOZE_WINE_B3	= 0x09c6,
     ITEMID_BOOZE_WINE_B4	= 0x09c7,
 
-    ITEMID_FOOD_HAM		= 0x09C9,
+    ITEMID_FOOD_HAM			= 0x09C9,
 
-    ITEMID_FISH_1		= 0x09CC,
-    ITEMID_FISH_2		= 0x09CD,
-    ITEMID_FISH_3		= 0x09CE,
-    ITEMID_FISH_4		= 0x09CF,
+    ITEMID_FISH_1			= 0x09CC,
+    ITEMID_FISH_2			= 0x09CD,
+    ITEMID_FISH_3			= 0x09CE,
+    ITEMID_FISH_4			= 0x09CF,
 
-    ITEMID_FRUIT_APPLE	= 0x09d0,
-    ITEMID_FRUIT_PEACH1	= 0x09d2,
-    ITEMID_FRUIT_GRAPE	= 0x09d7,
+    ITEMID_FRUIT_APPLE		= 0x09d0,
+    ITEMID_FRUIT_PEACH1		= 0x09d2,
+    ITEMID_FRUIT_GRAPE		= 0x09d7,
 
     ITEMID_FOOD_CAKE		= 0x09e9,
 
@@ -200,15 +205,15 @@ enum ITEMID_TYPE	// InsideUO is great for this stuff.
 
     ITEMID_LANTERN			= 0x0A25,
 
-    ITEMID_BEDROLL_O_EW	= 0x0a55,
+    ITEMID_BEDROLL_O_EW		= 0x0a55,
     ITEMID_BEDROLL_O_NS,
     ITEMID_BEDROLL_C,
     ITEMID_BEDROLL_C_NS,
-    ITEMID_BEDROLL_C_EW	= 0x0a59,
+    ITEMID_BEDROLL_C_EW		= 0x0a59,
 
     ITEMID_BED1_1			= 0x0a5a,
     // some things in here are not bed but sheets and blankets.
-            ITEMID_BED1_X			= 0x0a91,
+    ITEMID_BED1_X			= 0x0a91,
 
     ITEMID_BOOKSHELF1		= 0x0a97, // book shelf
     ITEMID_BOOKSHELF2		= 0x0a98, // book shelf
@@ -223,67 +228,67 @@ enum ITEMID_TYPE	// InsideUO is great for this stuff.
     ITEMID_WATER_TROUGH_2	= 0x0B44,
 
     ITEMID_PLANT_COTTON1	= 0x0c4f,// old
-            ITEMID_PLANT_COTTON2	= 0x0c50,
+    ITEMID_PLANT_COTTON2	= 0x0c50,
     ITEMID_PLANT_COTTON3	= 0x0c51,
     ITEMID_PLANT_COTTON4	= 0x0c52,
     ITEMID_PLANT_COTTON5	= 0x0c53,
     ITEMID_PLANT_COTTON6	= 0x0c54,// young
-            ITEMID_PLANT_WHEAT1	= 0x0c55,
-    ITEMID_PLANT_WHEAT2	= 0x0c56,
-    ITEMID_PLANT_WHEAT3	= 0x0c57,
-    ITEMID_PLANT_WHEAT4	= 0x0c58,
-    ITEMID_PLANT_WHEAT5	= 0x0c59,
-    ITEMID_PLANT_WHEAT6	= 0x0c5a,
-    ITEMID_PLANT_WHEAT7	= 0x0c5b,
+    ITEMID_PLANT_WHEAT1		= 0x0c55,
+    ITEMID_PLANT_WHEAT2		= 0x0c56,
+    ITEMID_PLANT_WHEAT3		= 0x0c57,
+    ITEMID_PLANT_WHEAT4		= 0x0c58,
+    ITEMID_PLANT_WHEAT5		= 0x0c59,
+    ITEMID_PLANT_WHEAT6		= 0x0c5a,
+    ITEMID_PLANT_WHEAT7		= 0x0c5b,
 
-    ITEMID_PLANT_VINE1	= 0x0c5e,
-    ITEMID_PLANT_VINE2	= 0x0c5f,
-    ITEMID_PLANT_VINE3	= 0x0c60,
+    ITEMID_PLANT_VINE1		= 0x0c5e,
+    ITEMID_PLANT_VINE2		= 0x0c5f,
+    ITEMID_PLANT_VINE3		= 0x0c60,
 
     ITEMID_PLANT_TURNIP1	= 0x0c61,
     ITEMID_PLANT_TURNIP2	= 0x0c62,
     ITEMID_PLANT_TURNIP3	= 0x0c63,
     ITEMID_SPROUT_NORMAL	= 0x0c68,
-    ITEMID_PLANT_ONION	= 0x0c6f,
-    ITEMID_PLANT_CARROT	= 0x0c76,
-    ITEMID_PLANT_CORN1	= 0x0c7d,
-    ITEMID_PLANT_CORN2	= 0x0c7e,
+    ITEMID_PLANT_ONION		= 0x0c6f,
+    ITEMID_PLANT_CARROT		= 0x0c76,
+    ITEMID_PLANT_CORN1		= 0x0c7d,
+    ITEMID_PLANT_CORN2		= 0x0c7e,
 
     ITEMID_FRUIT_WATERMELLON1		= 0x0c5c,
     ITEMID_FRUIT_WATERMELLON2		= 0x0c5d,
-    ITEMID_FRUIT_GOURD1	= 0x0c64,
-    ITEMID_FRUIT_GOURD2	= 0x0c65,
-    ITEMID_FRUIT_GOURD3	= 0x0c66,
-    ITEMID_FRUIT_GOURD4	= 0x0c67,
-    ITEMID_SPROUT_NORMAL2= 0x0c69,
-    ITEMID_FRUIT_ONIONS1	= 0x0c6d,
-    ITEMID_FRUIT_ONIONS2	= 0x0c6e,
-    ITEMID_FRUIT_PUMPKIN1= 0x0c6a,
-    ITEMID_FRUIT_PUMPKIN2= 0x0c6b,
-    ITEMID_FRUIT_PUMPKIN3= 0x0c6c,
-    ITEMID_FRUIT_LETTUCE1= 0x0c70,
-    ITEMID_FRUIT_LETTUCE2= 0x0c71,
-    ITEMID_FRUIT_SQUASH1	= 0x0c72,
-    ITEMID_FRUIT_SQUASH2	= 0x0c73,
+    ITEMID_FRUIT_GOURD1				= 0x0c64,
+    ITEMID_FRUIT_GOURD2				= 0x0c65,
+    ITEMID_FRUIT_GOURD3				= 0x0c66,
+    ITEMID_FRUIT_GOURD4				= 0x0c67,
+    ITEMID_SPROUT_NORMAL2			= 0x0c69,
+    ITEMID_FRUIT_ONIONS1			= 0x0c6d,
+    ITEMID_FRUIT_ONIONS2			= 0x0c6e,
+    ITEMID_FRUIT_PUMPKIN1			= 0x0c6a,
+    ITEMID_FRUIT_PUMPKIN2			= 0x0c6b,
+    ITEMID_FRUIT_PUMPKIN3			= 0x0c6c,
+    ITEMID_FRUIT_LETTUCE1			= 0x0c70,
+    ITEMID_FRUIT_LETTUCE2			= 0x0c71,
+    ITEMID_FRUIT_SQUASH1			= 0x0c72,
+    ITEMID_FRUIT_SQUASH2			= 0x0c73,
     ITEMID_FRUIT_HONEYDEW_MELLON1	= 0x0c74,
     ITEMID_FRUIT_HONEYDEW_MELLON2	= 0x0c75,
-    ITEMID_FRUIT_CARROT1	= 0x0c77,
-    ITEMID_FRUIT_CARROT2	= 0x0c78,
+    ITEMID_FRUIT_CARROT1			= 0x0c77,
+    ITEMID_FRUIT_CARROT2			= 0x0c78,
     ITEMID_FRUIT_CANTALOPE1			= 0x0c79,
     ITEMID_FRUIT_CANTALOPE2			= 0x0c7a,
-    ITEMID_FRUIT_CABBAGE1= 0x0c7b,
-    ITEMID_FRUIT_CABBAGE2= 0x0c7c,
-    ITEMID_FRUIT_CORN1	= 0x0c7f,
-    ITEMID_FRUIT_CORN2	= 0x0c80,
-    ITEMID_FRUIT_CORN3	= 0x0c81,
-    ITEMID_FRUIT_CORN4	= 0x0c82,
+    ITEMID_FRUIT_CABBAGE1			= 0x0c7b,
+    ITEMID_FRUIT_CABBAGE2			= 0x0c7c,
+    ITEMID_FRUIT_CORN1				= 0x0c7f,
+    ITEMID_FRUIT_CORN2				= 0x0c80,
+    ITEMID_FRUIT_CORN3				= 0x0c81,
+    ITEMID_FRUIT_CORN4				= 0x0c82,
 
-    ITEMID_TREE_COCONUT	= 0x0c95,
-    ITEMID_TREE_DATE		= 0x0c96,
+    ITEMID_TREE_COCONUT				= 0x0c95,
+    ITEMID_TREE_DATE				= 0x0c96,
 
-    ITEMID_TREE_BANANA1	= 0x0ca8,
-    ITEMID_TREE_BANANA2	= 0x0caa,
-    ITEMID_TREE_BANANA3	= 0x0cab,
+    ITEMID_TREE_BANANA1				= 0x0ca8,
+    ITEMID_TREE_BANANA2				= 0x0caa,
+    ITEMID_TREE_BANANA3				= 0x0cab,
 
     ITEMID_TREE_LO			= 0x0cca,
     ITEMID_TREE_HI			= 0x0ce8,
@@ -1246,10 +1251,10 @@ enum ITEMID_TYPE	// InsideUO is great for this stuff.
 
     // These overlap for now damnit !!! fix this.
     // Special scriptable objects defined after this.
-            ITEMID_QTY			= 0x10000,
+    ITEMID_QTY			= 0x10000,
 
     // Put named items here.
-            ITEMID_SCRIPT2		= ITEMID_QTY,	// Safe area for server admins.
+    ITEMID_SCRIPT2		= ITEMID_QTY,				// Safe area for server admins.
     ITEMID_TEMPLATE		= ITEMID_SCRIPT2 + 0x9FFF	// container item templates are beyond here.
 };
 
@@ -1400,17 +1405,17 @@ enum CREID_TYPE		// enum the creature art work. (dont allow any others !) also k
     CREID_GARGGHOSTWOMAN	= 0x02B7,
 
     //	new monsters lies between this range
-            CREID_IRON_GOLEM		= 0x02f0,		// LBR
+    CREID_IRON_GOLEM		= 0x02f0,		// LBR
     //..
-            CREID_GIANT_BEETLE		= 0x0317,
+	CREID_GIANT_BEETLE		= 0x0317,
     CREID_SWAMP_DRAGON1		= 0x031a,		// LBR
     CREID_REPTILE_LORD		= 0x031d,		// LBR
     CREID_ANCIENT_WYRM		= 0x031e,		// LBR
     CREID_SWAMP_DRAGON2		= 0x031f,		// LBR
     //..
-            CREID_EQUIP_GM_ROBE		= 0x03db,
+    CREID_EQUIP_GM_ROBE		= 0x03db,
     //..
-            CREID_MULTICOLORED_HORDE_DAEMON = 0x03e7,		// LBR
+    CREID_MULTICOLORED_HORDE_DAEMON = 0x03e7,		// LBR
 
     CREID_Revenant			= 0x2ee,
     CREID_Horrific_Beast	= 0x2ea,
@@ -1421,10 +1426,10 @@ enum CREID_TYPE		// enum the creature art work. (dont allow any others !) also k
     CREID_QTY				= 0x0800,	// Max number of base character types, based on art work.
 
     // re-use artwork to make other types on NPC's
-            NPCID_SCRIPT			= 0x801,
+    NPCID_SCRIPT			= 0x801,
 
     NPCID_SCRIPT2			= 0x4000,	// Safe area for server specific NPC defintions.
-    NPCID_Qty				= 0x8000,		// Spawn types start here.
+    NPCID_Qty				= 0x8000,	// Spawn types start here.
 
     SPAWNTYPE_START			= 0x8001
 };
@@ -1434,7 +1439,7 @@ enum ANIM_TYPE	// not all creatures animate the same for some reason.
     ANIM_WALK_UNARM		= 0x00,	// Walk (unarmed)
 
     // human anim. (supported by all humans)
-            ANIM_WALK_ARM		= 0x01,	// Walk (armed) (but not war mode)
+    ANIM_WALK_ARM		= 0x01,	// Walk (armed) (but not war mode)
 
     ANIM_RUN_UNARM		= 0x02,	// Run (unarmed)
     ANIM_RUN_ARMED		= 0x03,	// Run (armed)
@@ -1477,7 +1482,7 @@ enum ANIM_TYPE	// not all creatures animate the same for some reason.
 
     // don't use these directly these are just for translation.
     // Human on horseback
-            ANIM_HORSE_RIDE_SLOW	= 0x17,
+    ANIM_HORSE_RIDE_SLOW	= 0x17,
     ANIM_HORSE_RIDE_FAST	= 0x18,
     ANIM_HORSE_STAND		= 0x19,
     ANIM_HORSE_ATTACK		= 0x1a,
@@ -1490,7 +1495,7 @@ enum ANIM_TYPE	// not all creatures animate the same for some reason.
     ANIM_MAN_SIT = 35,
 
     // monster anim	- (not all anims are supported for each creature)
-            ANIM_MON_WALK 		= 0x00,
+    ANIM_MON_WALK 		= 0x00,
     ANIM_MON_STAND		= 0x01,
     ANIM_MON_DIE1		= 0x02,	// back
     ANIM_MON_DIE2		= 0x03, // fore or side.
@@ -1516,7 +1521,7 @@ enum ANIM_TYPE	// not all creatures animate the same for some reason.
     ANIM_QTY_MON = 22,
 
     // animals. (Most All animals have all anims)
-            ANIM_ANI_WALK		= 0x00,
+    ANIM_ANI_WALK		= 0x00,
     ANIM_ANI_RUN		= 0x01,
     ANIM_ANI_STAND		= 0x02,
     ANIM_ANI_EAT		= 0x03,
@@ -1534,6 +1539,8 @@ enum ANIM_TYPE	// not all creatures animate the same for some reason.
 
     ANIM_QTY = 0x32
 };
+
+
 enum ANIM_TYPE_NEW	// not all creatures animate the same for some reason. http://img546.imageshack.us/img546/5439/uonewanimstable2.png
 {
     NANIM_ATTACK		= 0x00,	// 8 SUB ANIMATIONS, VARIATION 0-*
@@ -1580,6 +1587,7 @@ enum ANIM_TYPE_NEW	// not all creatures animate the same for some reason. http:/
 
 };
 
+
 enum CRESND_TYPE	// Creature sound offset types.
 {	// Some creatures have no random sounds. others (humans,birds) have many sounds.
     CRESND_RAND1 = 0,	// just random noise. or "yes"
@@ -1588,6 +1596,7 @@ enum CRESND_TYPE	// Creature sound offset types.
     CRESND_GETHIT,
     CRESND_DIE
 };
+
 
 enum FONT_TYPE
 {
@@ -1604,12 +1613,14 @@ enum FONT_TYPE
     FONT_QTY
 };
 
+
 enum AFFIX_TYPE
 {
     AFFIX_APPEND  = 0x0,	// 0 - Append affix to end of message
     AFFIX_PREPEND = 0x1,	// 1 - Prepend affix to front of message
     AFFIX_SYSTEM  = 0x2		// 2 - Message is displayed as a system message
 };
+
 
 enum DIR_TYPE	// Walking directions. m_dir
 {
@@ -1627,6 +1638,7 @@ enum DIR_TYPE	// Walking directions. m_dir
 
     DIR_ANIM_QTY = 5	// Seems we only need 5 pics for an anim, assume ALL bi-symetrical creatures
 };
+
 
 enum SKILL_TYPE	// List of skill numbers (things that can be done at a given time)
 {
@@ -1682,26 +1694,26 @@ enum SKILL_TYPE	// List of skill numbers (things that can be done at a given tim
     SKILL_STEALTH,
     SKILL_REMOVETRAP,
     //AOS
-            SKILL_NECROMANCY,
+    SKILL_NECROMANCY,
     SKILL_FOCUS,
     SKILL_CHIVALRY,
     //SE
-            SKILL_BUSHIDO,
+    SKILL_BUSHIDO,
     SKILL_NINJITSU,
     //ML
-            SKILL_SPELLWEAVING,
+    SKILL_SPELLWEAVING,
     //SA
-            SKILL_MYSTICISM,
+    SKILL_MYSTICISM,
     SKILL_IMBUING,
     SKILL_THROWING,
 
     /**
      * Skill level limit. Should not used directly, most cases are covered by g_Cfg.m_iMaxSkill instead
-     */
-            SKILL_QTY = 99,
+    */
+    SKILL_QTY = 99,
 
     // Actions a npc will perform. (no need to track skill level for these)
-            NPCACT_FOLLOW_TARG = 100,	// 100 = following a char.
+    NPCACT_FOLLOW_TARG = 100,	// 100 = following a char.
     NPCACT_STAY,				// 101
     NPCACT_GOTO,				// 102 = Go to a location x,y. Pet command
     NPCACT_WANDER,				// 103 = Wander aimlessly.
@@ -1721,6 +1733,7 @@ enum SKILL_TYPE	// List of skill numbers (things that can be done at a given tim
     NPCACT_QTY
 };
 
+
 enum LAYER_TYPE		// defined by UO. Only one item can be in a slot.
 {
     LAYER_NONE = 0,	// spells that are layed on the CChar ?
@@ -1736,7 +1749,7 @@ enum LAYER_TYPE		// defined by UO. Only one item can be in a slot.
     LAYER_COLLAR,	// 10 = gorget or necklace.
     LAYER_HAIR,		// 11 = 0x0b =
     LAYER_HALF_APRON,// 12 = 0x0c =
-            LAYER_CHEST,	// 13 = 0x0d = armor chest
+    LAYER_CHEST,	// 13 = 0x0d = armor chest
     LAYER_WRIST,	// 14 = 0x0e = watch
     LAYER_NEWLIGHT,	// 15 = Unused (use it for: a ITEMID_LIGHT_SRC equip item can be put here.)
     LAYER_BEARD,	// 16 = try to have only men have this.
@@ -1750,18 +1763,18 @@ enum LAYER_TYPE		// defined by UO. Only one item can be in a slot.
     LAYER_LEGS,		// 24= 0x18 = plate legs.
 
     // These are not part of the paper doll (but get sent to the client)
-            LAYER_HORSE,		// 25 = 0x19 = ride this object. (horse objects are strange?)
+    LAYER_HORSE,		// 25 = 0x19 = ride this object. (horse objects are strange?)
     LAYER_VENDOR_STOCK,	// 26 = 0x1a = the stuff the vendor will restock and sell to the players
     LAYER_VENDOR_EXTRA,	// 27 = 0x1b = the stuff the vendor will resell to players but is not restocked. (bought from players)
     LAYER_VENDOR_BUYS,	// 28 = 0x1c = the stuff the vendor can buy from players but does not stock.
     LAYER_BANKBOX,		// 29 = 0x1d = contents of my bank box.
 
     // Internally used layers - Don't bother sending these to client.
-            LAYER_SPECIAL,		// 30 =	Can be multiple of these. memories
+    LAYER_SPECIAL,		// 30 =	Can be multiple of these. memories
     LAYER_DRAGGING,
 
     // Spells that are effecting us go here.
-            LAYER_SPELL_STATS,			// 32 = Stats effecting spell. These cancel each other out.
+    LAYER_SPELL_STATS,			// 32 = Stats effecting spell. These cancel each other out.
     LAYER_SPELL_Reactive,		// 33 =
     LAYER_SPELL_Night_Sight,
     LAYER_SPELL_Protection,		// 35
@@ -1788,7 +1801,7 @@ enum LAYER_TYPE		// defined by UO. Only one item can be in a slot.
     LAYER_AUCTION,				// Auction layer
 
     //Necro
-            LAYER_SPELL_Blood_Oath,
+    LAYER_SPELL_Blood_Oath,
     LAYER_SPELL_Curse_Weapon,
     LAYER_SPELL_Corpse_Skin,
     LAYER_SPELL_Evil_Omen,
@@ -1800,12 +1813,12 @@ enum LAYER_TYPE		// defined by UO. Only one item can be in a slot.
     //LAYER_SPELL_Surprise_Attack,
 
     //Chivalry
-            LAYER_SPELL_Consecrate_Weapon,
+    LAYER_SPELL_Consecrate_Weapon,
     LAYER_SPELL_Divine_Fury,
     LAYER_SPELL_Enemy_Of_One,
 
     //SpellWeaving
-            LAYER_SPELL_Attunement,
+    LAYER_SPELL_Attunement,
     LAYER_SPELL_Gift_Of_Renewal,
     LAYER_SPELL_Immolating_Weapon,
     LAYER_SPELL_Thunderstorm,
@@ -1816,7 +1829,7 @@ enum LAYER_TYPE		// defined by UO. Only one item can be in a slot.
     LAYER_SPELL_Essence_Of_Wind,
 
     //Mysticism
-            LAYER_SPELL_Sleep,
+    LAYER_SPELL_Sleep,
     LAYER_SPELL_Bombard,
     LAYER_SPELL_Spell_Plague,
     LAYER_SPELL_Nether_Cyclone,
@@ -1824,12 +1837,13 @@ enum LAYER_TYPE		// defined by UO. Only one item can be in a slot.
     LAYER_QTY
 };
 
+
 enum SPELL_TYPE	// List of spell numbers in spell book.
 {
     SPELL_NONE = 0,
 
     // Magery
-            SPELL_Clumsy = 1,		// 1st circle
+    SPELL_Clumsy = 1,		// 1st circle
     SPELL_Create_Food,
     SPELL_Feeblemind,
     SPELL_Heal,
@@ -1896,7 +1910,7 @@ enum SPELL_TYPE	// List of spell numbers in spell book.
     SPELL_MAGERY_QTY = SPELL_Water_Elem,
 
     // Necromancy (AOS)
-            SPELL_Animate_Dead_AOS = 101,
+    SPELL_Animate_Dead_AOS = 101,
     SPELL_Blood_Oath,
     SPELL_Corpse_Skin,
     SPELL_Curse_Weapon,
@@ -1916,7 +1930,7 @@ enum SPELL_TYPE	// List of spell numbers in spell book.
     SPELL_NECROMANCY_QTY = SPELL_Exorcism,
 
     // Chivalry (AOS)
-            SPELL_Cleanse_by_Fire = 201,
+    SPELL_Cleanse_by_Fire = 201,
     SPELL_Close_Wounds,
     SPELL_Consecrate_Weapon,
     SPELL_Dispel_Evil,
@@ -1929,7 +1943,7 @@ enum SPELL_TYPE	// List of spell numbers in spell book.
     SPELL_CHIVALRY_QTY = SPELL_Sacred_Journey,
 
     // Bushido (SE)
-            SPELL_Honorable_Execution = 401,
+    SPELL_Honorable_Execution = 401,
     SPELL_Confidence,
     SPELL_Evasion,
     SPELL_Counter_Attack,
@@ -1938,7 +1952,7 @@ enum SPELL_TYPE	// List of spell numbers in spell book.
     SPELL_BUSHIDO_QTY = SPELL_Momentum_Strike,
 
     // Ninjitsu (SE)
-            SPELL_Focus_Attack = 501,
+    SPELL_Focus_Attack = 501,
     SPELL_Death_Strike,
     SPELL_Animal_Form,
     SPELL_Ki_Attack,
@@ -1949,7 +1963,7 @@ enum SPELL_TYPE	// List of spell numbers in spell book.
     SPELL_NINJITSU_QTY = SPELL_Mirror_Image,
 
     // Spellweaving (ML)
-            SPELL_Arcane_Circle = 601,
+    SPELL_Arcane_Circle = 601,
     SPELL_Gift_of_Renewal,
     SPELL_Immolating_Weapon,
     SPELL_Attunement,
@@ -1968,7 +1982,7 @@ enum SPELL_TYPE	// List of spell numbers in spell book.
     SPELL_SPELLWEAVING_QTY = SPELL_Arcane_Empowerment,
 
     // Mysticism (SA)
-            SPELL_Nether_Bolt = 678,
+    SPELL_Nether_Bolt = 678,
     SPELL_Healing_Stone,
     SPELL_Enchant_Weapon,
     SPELL_Sleep,
@@ -1986,7 +2000,7 @@ enum SPELL_TYPE	// List of spell numbers in spell book.
     SPELL_MYSTICISM_QTY = SPELL_Rising_Collossus,
 
     // Bard (SA)
-            SPELL_Inspire = 701,
+    SPELL_Inspire = 701,
     SPELL_Invigorate,
     SPELL_Resilience,
     SPELL_Perseverance,
@@ -1995,7 +2009,7 @@ enum SPELL_TYPE	// List of spell numbers in spell book.
     SPELL_BARD_QTY = SPELL_Despair,
 
     // Custom Sphere spells (used by some monsters)
-            SPELL_Summon_Undead = 1000,
+    SPELL_Summon_Undead = 1000,
     SPELL_Animate_Dead,
     SPELL_Bone_Armor,
     SPELL_Light,
@@ -2004,7 +2018,7 @@ enum SPELL_TYPE	// List of spell numbers in spell book.
     SPELL_CUSTOM_QTY = SPELL_Hallucination,
 
     // Custom extra special spells (can be used as potion effects as well). Commented value = old index.
-            SPELL_Stone,			// 71 = Turn to stone (permanent).
+    SPELL_Stone,			// 71 = Turn to stone (permanent).
     SPELL_Shrink,			// 72 = turn pet into icon.
     SPELL_Refresh,			// 73 = stamina
     SPELL_Restore,			// 74 = This potion increases both your hit points and your stamina.
@@ -2028,13 +2042,15 @@ enum SPELL_TYPE	// List of spell numbers in spell book.
     SPELL_QTY = SPELL_Liquor
 };
 
+
 enum LIGHT_PATTERN	// What pattern (m_light_pattern) does the light source (CAN_LIGHT) take.
 {
     LIGHT_LARGE = 1,
     // ... etc
     // Colored light is in here some place as well.
-            LIGHT_QTY = 56	// This makes it go black.
+    LIGHT_QTY = 56	// This makes it go black.
 };
+
 
 enum GUMP_TYPE	// The gumps. (most of these are not useful to the server.)
 {
@@ -2090,7 +2106,7 @@ enum GUMP_TYPE	// The gumps. (most of these are not useful to the server.)
 enum
 {
     // Terrain samples
-            TERRAIN_HOLE	= 0x0002,	// "NODRAW" we can pas thru this.
+    TERRAIN_HOLE	= 0x0002,	// "NODRAW" we can pas thru this.
 
     TERRAIN_WATER1	= 0x00a8,
     TERRAIN_WATER2	= 0x00a9,
@@ -2103,6 +2119,7 @@ enum
 
     TERRAIN_QTY     = 0x4000	// Terrain tile qyt
 };
+
 
 /////////////////////////////////////////////////////////////////
 // File blocks
@@ -2147,11 +2164,13 @@ enum VERFILE_TYPE		// skew list. (verdata.mul)
     VERFILE_QTY					// NOTE: 021 is used for something ?!
 };
 
+
 enum VERFILE_FORMAT	// mul formats
 {
     VERFORMAT_ORIGINAL = 0x01,	// original mul format
     VERFORMAT_HIGHSEAS = 0x02,	// high seas mul format
     VERFORMAT_QTY
 };
+
 
 #endif //_INC_UOFILES_ENUMS_H

@@ -2,7 +2,7 @@
 #include "../common/CUIDExtra.h"
 #include "../clients/CClient.h"
 #include "../CServTime.h"
-#include "../Triggers.h"
+#include "../triggers.h"
 #include "CChar.h"
 
 

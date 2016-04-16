@@ -5,7 +5,7 @@
 #include "chars/CChar.h"
 #include "items/CItemBase.h"
 #include "CResource.h"
-#include "Triggers.h"
+#include "triggers.h"
 
 //*******************************************
 // -CValueRangeDef

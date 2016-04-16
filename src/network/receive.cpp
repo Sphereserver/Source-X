@@ -10,7 +10,7 @@
 #include "../game/items/CItemVendable.h"
 #include "../game/CLog.h"
 #include "../game/CServTime.h"
-#include "../game/Triggers.h"
+#include "../game/triggers.h"
 #include "network.h"
 #include "receive.h"
 #include "send.h"

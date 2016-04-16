@@ -5,8 +5,8 @@
 #include "CUOIndexRec.h"
 #include "CUOTerrainInfo.h"
 #include "CUOTerrainTypeRec1.h"
-#include "enums.h"
-#include "macros.h"
+#include "uofiles_enums.h"
+#include "uofiles_macros.h"
 
 CSphereTerrainInfo::CSphereTerrainInfo( TERRAIN_TYPE id )
 {

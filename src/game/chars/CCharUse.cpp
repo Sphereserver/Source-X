@@ -5,7 +5,7 @@
 #include "../items/CItem.h"
 #include "../items/CItemCorpse.h"
 #include "../items/CItemSpawn.h"
-#include "../Triggers.h"
+#include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 

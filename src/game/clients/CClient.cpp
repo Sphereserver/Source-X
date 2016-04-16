@@ -10,7 +10,7 @@
 #include "../CLog.h"
 #include "../CServTime.h"
 #include "../spheresvr.h"
-#include "../Triggers.h"
+#include "../triggers.h"
 #include "CClient.h"
 #include "CParty.h"
 

@@ -78,6 +78,7 @@ ADD_EXECUTABLE (spheresvr
 #		${items_SRCS}
 #		${chars_SRCS}
 #		${clients_SRCS}
+#		${uofiles_SRCS}
 #		${common_SRCS}
 #		${network_SRCS}
 #		${sphere_SRCS}

@@ -10,7 +10,7 @@
 #include "../common/CResourceBase.h"
 #include "../common/CVarDefMap.h"
 #include "../common/sphere_library/CString.h"
-#include "uo_files/types.h"
+#include "uo_files/uofiles_types.h"
 
 
 struct CBaseBaseDef : public CResourceLink

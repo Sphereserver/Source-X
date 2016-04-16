@@ -5,7 +5,7 @@
 #include <vector>
 #include "../common/sphereproto.h"
 #include "CServer.h"
-#include "Triggers.h"
+#include "triggers.h"
 
 //Trigger function start
 

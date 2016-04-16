@@ -7,7 +7,7 @@
 #define _INC_CFILE_H
 
 #ifndef _WIN32
-	#include <sys/types.h>
+	#include <sys/uofiles_types.h>
 	#include <sys/stat.h>
 	#include <fcntl.h>
 	#include <unistd.h>

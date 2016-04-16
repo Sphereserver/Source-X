@@ -2,7 +2,7 @@
 #include "../common/CScriptObj.h"
 #include "../common/spherecom.h"
 #include "../game/CServer.h"
-#include "../game/Triggers.h"
+#include "../game/triggers.h"
 #include "asyncdb.h"
 
 CDataBaseAsyncHelper g_asyncHdb;

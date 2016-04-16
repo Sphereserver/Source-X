@@ -9,7 +9,7 @@
 #include "../chars/CChar.h"
 #include "../clients/CClient.h"
 #include "../CLog.h"
-#include "../Triggers.h"
+#include "../triggers.h"
 #include "CItemMultiCustom.h"
 
 /////////////////////////////////////////////////////////////////////////////

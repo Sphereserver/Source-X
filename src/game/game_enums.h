@@ -1,7 +1,7 @@
 
 #pragma once
-#ifndef _INC_ENUMS_H
-#define _INC_ENUMS_H
+#ifndef _INC_GAME_ENUMS_H
+#define _INC_GAME_ENUMS_H
 
 
 enum CLIMODE_TYPE	// What mode is the client to server connection in ? (waiting for input ?)

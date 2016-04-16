@@ -4,7 +4,7 @@
 #include "../clients/CClient.h"
 #include "../items/CItemSpawn.h"
 #include "../items/CItemVendable.h"
-#include "../Triggers.h"
+#include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 

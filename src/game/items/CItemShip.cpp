@@ -8,7 +8,7 @@
 #include "../chars/CChar.h"
 #include "../clients/CClient.h"
 #include "../CServTime.h"
-#include "../Triggers.h"
+#include "../triggers.h"
 #include "CItemContainer.h"
 #include "CItemShip.h"
 

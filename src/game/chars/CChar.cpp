@@ -20,7 +20,7 @@
 #include "../CServTime.h"
 #include "../CWorld.h"
 #include "../spheresvr.h"
-#include "../Triggers.h"
+#include "../triggers.h"
 #include "CChar.h"
 #include "CCharBase.h"
 #include "CCharNPC.h"

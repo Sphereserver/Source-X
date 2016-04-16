@@ -3,7 +3,6 @@
 // Utilizzato da SphereSvr.rc
 //
 #define IDC_STATIC                      0
-#define SPHERE_VER_BUILD                0
 #define IDR_MAINFRAME                   100
 #define IDR_ABOUT_BOX                   101
 #define IDM_POP_TRAY                    102

@@ -16,7 +16,7 @@
 #include "CServTime.h"
 #include "CWorld.h"
 #include "spheresvr.h"
-#include "Triggers.h"
+#include "triggers.h"
 
 CResource::CResource()
 {

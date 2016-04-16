@@ -1,33 +1,38 @@
+/**
+* @file uofiles_macros.h
+*
+*/
+
 #pragma once
 #ifndef _INC_UOFILES_MACROS_H
 #define _INC_UOFILES_MACROS_H
 
-#include "enums.h"
+#include "uofiles_enums.h"
+
 
 // Door ID Attribute flags.
 #define DOOR_OPENED			0x00000001  ///< set is open
 #define DOOR_RIGHTLEFT		0x00000002
 #define DOOR_INOUT			0x00000004
 #define DOOR_NORTHSOUTH		0x00000008
-#define LAYER_IS_VISIBLE(layer) ((layer)> LAYER_NONE && (layer) <= LAYER_HORSE )
-#define VERDATA_MAKE_INDEX( f, i ) ((f+1)<< 26 | (i))
-#define UO_MAP_VIEW_SIGHT 14 ///< True max sight distance of creatures is 14
-#define UO_MAP_VIEW_SIZE 18  ///< Visibility for normal items
-#define UO_MAP_VIEW_RADAR 31  ///< Visibility for castles, keeps and boats
+#define LAYER_IS_VISIBLE(layer)		((layer)> LAYER_NONE && (layer) <= LAYER_HORSE )
+#define VERDATA_MAKE_INDEX( f, i )	((f+1)<< 26 | (i))
+#define UO_MAP_VIEW_SIGHT	14 ///< True max sight distance of creatures is 14
+#define UO_MAP_VIEW_SIZE	18  ///< Visibility for normal items
+#define UO_MAP_VIEW_RADAR	31  ///< Visibility for castles, keeps and boats
 
 // Map definition.
-#define UO_BLOCK_SIZE 8  ///< Base width/height size of a block.
-#define UO_BLOCK_ALIGN(i) ((i) &~ 7 )
-#define UO_BLOCK_OFFSET(i) ((i) & 7 )  ///< i%UO_BLOCK_SIZE
-#define UO_SIZE_Z 127
-#define UO_SIZE_MIN_Z -127
+#define UO_BLOCK_SIZE		8  ///< Base width/height size of a block.
+#define UO_BLOCK_ALIGN(i)	((i) &~ 7 )
+#define UO_BLOCK_OFFSET(i)	((i) & 7 )  ///< i%UO_BLOCK_SIZE
+#define UO_SIZE_Z			127
+#define UO_SIZE_MIN_Z		-127
 
-#define UO_SIZE_X_REAL 0x1400  ///< 640*UO_BLOCK_SIZE = 5120 = The actual world is only this big
+#define UO_SIZE_X_REAL		0x1400  ///< 640*UO_BLOCK_SIZE = 5120 = The actual world is only this big
 // This should depend on height of players char.
-#define PLAYER_HEIGHT 15  ///< We need x units of room to walk under something. (human) ??? this should vary based on creature type.
+#define PLAYER_HEIGHT		15  ///< We need x units of room to walk under something. (human) ??? this should vary based on creature type.
 
-#define UOTILE_BLOCK_QTY 32  ///< Come in blocks of 32.
-
+#define UOTILE_BLOCK_QTY	32  ///< Come in blocks of 32.
 
 
 #define UFLAG1_FLOOR		0x00000001  ///< 0= floor (Walkable at base position)
@@ -66,5 +71,6 @@
 #define LIGHT_BRIGHT	0
 #define LIGHT_DARK		30
 #define LIGHT_BLACK		32
+
 
 #endif //_INC_UOFILES_MACROS_H

@@ -4,7 +4,7 @@
 #include "../game/CLog.h"
 #include "../game/CObjBase.h"
 #include "../game/CResource.h"
-#include "../game/Triggers.h"
+#include "../game/triggers.h"
 #include "CException.h"
 #include "CExpression.h"
 #include "CFileList.h"

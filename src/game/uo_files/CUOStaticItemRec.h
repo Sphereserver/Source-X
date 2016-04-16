@@ -1,19 +1,25 @@
+/**
+* @file CUOStaticItemRec.h
+*
+*/
+
 #pragma once
-#ifndef _INC_UOFILES_CUOSTATICITEMREC_H
-#define _INC_UOFILES_CUOSTATICITEMREC_H
+#ifndef _INC_CUOSTATICITEMREC_H
+#define _INC_CUOSTATICITEMREC_H
 
 #include "../../common/common.h"
-#include "enums.h"
+#include "uofiles_enums.h"
 
 // All these structures must be byte packed.
 #if defined _WIN32 && (!__MINGW32__)
-// Microsoft dependant pragma
-#pragma pack(1)
-#define PACK_NEEDED
+	// Microsoft dependant pragma
+	#pragma pack(1)
+	#define PACK_NEEDED
 #else
-// GCC based compiler you can add:
-#define PACK_NEEDED __attribute__ ((packed))
+	// GCC based compiler you can add:
+	#define PACK_NEEDED __attribute__ ((packed))
 #endif
+
 
 /**
 * 7 byte block = static items on the map (statics0.mul)
@@ -35,9 +41,9 @@ struct CUOStaticItemRec
 
 // Turn off structure packing.
 #if defined _WIN32 && (!__MINGW32__)
-#pragma pack()
+	#pragma pack()
 #else
-#undef PACK_NEEDED
+	#undef PACK_NEEDED
 #endif
 
-#endif //_INC_UOFILES_CUOSTATICITEMREC_H
+#endif //_INC_CUOSTATICITEMREC_H

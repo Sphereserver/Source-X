@@ -8,7 +8,7 @@
 #include "../chars/CCharNPC.h"
 #include "../clients/CClient.h"
 #include "../CLog.h"
-#include "../Triggers.h"
+#include "../triggers.h"
 #include "CItem.h"
 #include "CItemCommCrystal.h"
 #include "CItemContainer.h"

@@ -6,7 +6,7 @@
 #include "../chars/CChar.h"
 #include "../CLog.h"
 #include "../CServer.h"
-#include "../Triggers.h"
+#include "../triggers.h"
 #include "CClient.h"
 #include "CParty.h"
 

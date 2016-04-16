@@ -7,7 +7,7 @@
 #include "../uo_files/CUOTerrainInfo.h"
 #include "../CLog.h"
 #include "../spheresvr.h"
-#include "../Triggers.h"
+#include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 

@@ -35,7 +35,7 @@
 	extern const OSVERSIONINFO * Sphere_GetOSInfo();
 #else	// _WIN32 else assume LINUX
 
-	#include <sys/types.h>
+	#include <sys/uofiles_types.h>
 	#include <sys/timeb.h>
 
 	#define HANDLE			dword

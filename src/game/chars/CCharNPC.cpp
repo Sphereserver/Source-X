@@ -3,7 +3,7 @@
 #include "../clients/CClient.h"
 #include "../common/CException.h"
 #include "../CServTime.h"
-#include "../Triggers.h"
+#include "../triggers.h"
 #include "CCharNPC.h"
 
 

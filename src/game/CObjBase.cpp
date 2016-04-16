@@ -11,7 +11,7 @@
 #include "CLog.h"
 #include "CObjBase.h"
 #include "spheresvr.h"
-#include "Triggers.h"
+#include "triggers.h"
 
 bool CObjBaseTemplate::IsDeleted() const
 {
