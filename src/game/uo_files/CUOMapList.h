@@ -1,11 +1,11 @@
 /**
-* @file CMapList.h
+* @file CUOMapList.h
 *
 */
 
 #pragma once
-#ifndef _INC_CMAPLIST_H
-#define _INC_CMAPLIST_H
+#ifndef _INC_CUOMAPLIST_H
+#define _INC_CUOMAPLIST_H
 
 #include "../../common/common.h"
 
@@ -22,7 +22,7 @@
 
 class CMapDiffCollection;
 
-extern class CMapList
+extern class CUOMapList
 {
 public:
     int m_sizex[256];
@@ -41,10 +41,10 @@ public:
     /** @name Constructors, Destructor, Asign operator:
      */
     ///@{
-    CMapList();
+    CUOMapList();
 private:
-    CMapList(const CMapList& copy);
-    CMapList& operator=(const CMapList& other);
+    CUOMapList(const CUOMapList& copy);
+    CUOMapList& operator=(const CUOMapList& other);
     ///@}
 public:
     /** @name Modifiers:
@@ -81,4 +81,4 @@ public:
 	#undef PACK_NEEDED
 #endif
 
-#endif //_INC_CMAPLIST_H
+#endif //_INC_CUOMAPLIST_H

@@ -258,8 +258,8 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 	if ( iRegionQty > 0 )
 	{
 		CRegionBase *pRegion = NULL;
-		const CSphereMulti *pMulti = NULL;			// Multi Def (multi check)
-		const CUOMultiItemRec2 *pMultiItem = NULL;	// Multi item iterator
+		const CSphereMulti *pMulti = NULL;				// Multi Def (multi check)
+		const CUOMultiItemRec_HS *pMultiItem = NULL;	// Multi item iterator
 		for ( size_t iRegion = 0; iRegion < iRegionQty; pMulti = NULL, ++iRegion )
 		{
 			pRegion = rlinks.GetAt(iRegion);
@@ -653,7 +653,7 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 						size_t iItemQty = pMulti->GetItemCount();
 						for (size_t iItem = 0; iItem < iItemQty; iItem++)
 						{
-							const CUOMultiItemRec2* pMultiItem = pMulti->GetItem(iItem);
+							const CUOMultiItemRec_HS* pMultiItem = pMulti->GetItem(iItem);
 							ASSERT(pMultiItem);
 
 							if ( !pMultiItem->m_visible )
@@ -790,7 +790,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CSphereMapBlockState & block)
 		//  ------------ For variables --------------------
 		CRegionBase * pRegion = NULL;
 		const CSphereMulti * pMulti = NULL;
-		const CUOMultiItemRec2 * pMultiItem = NULL;
+		const CUOMultiItemRec_HS * pMultiItem = NULL;
 		x2 = 0;
 		y2 = 0;
 		//  ------------ For variables --------------------
@@ -1087,7 +1087,7 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CSphereMapBlockState & block,
 			//  ------------ For variables --------------------
 			CRegionBase * pRegion = NULL;
 			const CSphereMulti * pMulti = NULL;
-			const CUOMultiItemRec2 * pMultiItem = NULL;
+			const CUOMultiItemRec_HS * pMultiItem = NULL;
 			x2 = 0;
 			y2 = 0;
 			//  ------------ For variables --------------------
@@ -1353,7 +1353,7 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CSphereMapBlockState & block
 						size_t iMultiQty = pMulti->GetItemCount();
 						for ( size_t j = 0; j < iMultiQty; j++ )
 						{
-							const CUOMultiItemRec2 * pMultiItem = pMulti->GetItem(j);
+							const CUOMultiItemRec_HS * pMultiItem = pMulti->GetItem(j);
 							ASSERT(pMultiItem);
 
 							if ( ! pMultiItem->m_visible )

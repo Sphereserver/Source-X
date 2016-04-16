@@ -1365,11 +1365,11 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 	// If something is in the way and it has the wrong flags LOS return false
 	
 	const CSphereMapBlock *pBlock			= NULL;		// Block of the map (for statics)
-	const CUOStaticItemRec *pStatic		= NULL;		// Statics iterator (based on SphereMapBlock)
-	const CSphereMulti *pMulti 			= NULL;		// Multi Def (multi check)
-	const CUOMultiItemRec2 *pMultiItem	= NULL;		// Multi item iterator
-	CRegionBase *pRegion				= NULL;		// Nulti regions
-	CRegionLinks rlinks;							// Links to multi regions
+	const CUOStaticItemRec *pStatic			= NULL;		// Statics iterator (based on SphereMapBlock)
+	const CSphereMulti *pMulti 				= NULL;		// Multi Def (multi check)
+	const CUOMultiItemRec_HS *pMultiItem	= NULL;		// Multi item iterator
+	CRegionBase *pRegion					= NULL;		// Nulti regions
+	CRegionLinks rlinks;								// Links to multi regions
 	CItem *pItem						= NULL;
 	CItemBase *pItemDef 				= NULL;
 	CItemBaseDupe *pDupeDef				= NULL;

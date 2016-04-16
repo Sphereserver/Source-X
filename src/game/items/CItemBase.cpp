@@ -2,7 +2,7 @@
 
 #include "../common/CException.h"
 #include "../sphere/ProfileTask.h"
-#include "../uo_files/CSphereItemInfo.h"
+#include "../uo_files/CUOItemInfo.h"
 #include "../CLog.h"
 #include "CItemBase.h"
 
@@ -39,7 +39,7 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 	// I have it indexed but it needs to be loaded.
 	// read it in from the script and *.mul files.
 
-	CUOItemTypeRec2 tiledata;
+	CUOItemTypeRec_HS tiledata;
 	memset( &tiledata, 0, sizeof(tiledata));
 	if ( id < ITEMID_MULTI )
 	{
@@ -602,7 +602,7 @@ bool IsID_Chair( ITEMID_TYPE id ) // static
 	}
 }
 
-bool CItemBase::GetItemData( ITEMID_TYPE id, CUOItemTypeRec2 * pData ) // static
+bool CItemBase::GetItemData( ITEMID_TYPE id, CUOItemTypeRec_HS * pData ) // static
 {
 	ADDTOCALLSTACK("CItemBase::GetItemData");
 	// Read from g_Install.m_fTileData
@@ -615,8 +615,8 @@ bool CItemBase::GetItemData( ITEMID_TYPE id, CUOItemTypeRec2 * pData ) // static
 
 	try
 	{
-		CSphereItemInfo info( id );
-		*pData = *( static_cast <CUOItemTypeRec2 *>( & info ));
+		CUOItemInfo info( id );
+		*pData = *( static_cast <CUOItemTypeRec_HS *>( & info ));
 	}
 	catch ( const CSphereError& e )
 	{
@@ -654,7 +654,7 @@ bool CItemBase::GetItemData( ITEMID_TYPE id, CUOItemTypeRec2 * pData ) // static
 	return true;
 }
 
-inline void CItemBase::GetItemSpecificFlags( const CUOItemTypeRec2 & tiledata, dword & wBlockThis, IT_TYPE type, ITEMID_TYPE id ) // static
+inline void CItemBase::GetItemSpecificFlags( const CUOItemTypeRec_HS & tiledata, dword & wBlockThis, IT_TYPE type, ITEMID_TYPE id ) // static
 {
 	ADDTOCALLSTACK("CItemBase::GetItemSpecificFlags");
 	if ( type == IT_DOOR )
@@ -686,7 +686,7 @@ void CItemBase::GetItemTiledataFlags( dword & wBlockThis, ITEMID_TYPE id ) // st
 {
 	ADDTOCALLSTACK("CItemBase::GetItemTiledataFlags");
 
-	CUOItemTypeRec2 tiledata;
+	CUOItemTypeRec_HS tiledata;
 	memset( &tiledata, 0, sizeof(tiledata));
 	if ( ! CItemBase::GetItemData( id, &tiledata ))
 	{
@@ -712,7 +712,7 @@ void CItemBase::GetItemTiledataFlags( dword & wBlockThis, ITEMID_TYPE id ) // st
 		wBlockThis |= CAN_I_HOVER;
 }
 
-inline height_t CItemBase::GetItemHeightFlags( const CUOItemTypeRec2 & tiledata, dword & wBlockThis ) // static
+inline height_t CItemBase::GetItemHeightFlags( const CUOItemTypeRec_HS & tiledata, dword & wBlockThis ) // static
 {
 	ADDTOCALLSTACK("CItemBase::GetItemHeightFlags");
 	// Chairs are marked as blocking for some reason ?
@@ -781,7 +781,7 @@ height_t CItemBase::GetItemHeight( ITEMID_TYPE id, dword & wBlockThis ) // stati
 	
 	// Not already loaded.
 
-	CUOItemTypeRec2 tiledata;
+	CUOItemTypeRec_HS tiledata;
 	if ( ! GetItemData( id, &tiledata ))
 	{
 		wBlockThis = CAN_I_MOVEMASK;
@@ -795,7 +795,7 @@ height_t CItemBase::GetItemHeight( ITEMID_TYPE id, dword & wBlockThis ) // stati
 	return( GetItemHeightFlags( tiledata, wBlockThis ));
 }
 
-IT_TYPE CItemBase::GetTypeBase( ITEMID_TYPE id, const CUOItemTypeRec2 &tiledata ) // static
+IT_TYPE CItemBase::GetTypeBase( ITEMID_TYPE id, const CUOItemTypeRec_HS &tiledata ) // static
 {
 	ADDTOCALLSTACK("CItemBase::GetTypeBase");
 	if ( IsID_Ship( id ))
@@ -1731,7 +1731,7 @@ CItemBase * CItemBase::MakeDupeReplacement( CItemBase * pBase, ITEMID_TYPE idmas
 	}
 
 	// create the dupe stub.
-	CUOItemTypeRec2 tiledata;
+	CUOItemTypeRec_HS tiledata;
 	CItemBaseDupe * pBaseDupe = NULL;
 
 	memset( &tiledata, 0, sizeof(tiledata));
@@ -1949,7 +1949,7 @@ bool CItemBaseMulti::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * 
 			if (index >= pMulti->GetItemCount())
 				return false;
 			SKIP_SEPARATORS( pszKey );
-			const CUOMultiItemRec2* item = pMulti->GetItem(index);
+			const CUOMultiItemRec_HS* item = pMulti->GetItem(index);
 
 			if ( *pszKey == '\0' )						sVal.Format("%u,%i,%i,%i", item->m_wTileID, item->m_dx, item->m_dy, item->m_dz);
 			else if ( !strnicmp(pszKey, "ID", 2) )		sVal.FormatVal(item->m_wTileID);

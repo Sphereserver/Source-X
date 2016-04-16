@@ -8,7 +8,7 @@
 #define _INC_CUOTERRAININFO_H
 
 #include "../../common/common.h"
-#include "CUOTerrainTypeRec2.h"
+#include "CUOTerrainTypeRec.h"
 #include "uofiles_types.h"
 
 // All these structures must be byte packed.
@@ -22,7 +22,7 @@
 #endif
 
 
-struct CSphereTerrainInfo : public CUOTerrainTypeRec2
+struct CSphereTerrainInfo : public CUOTerrainTypeRec_HS
 {
     CSphereTerrainInfo( TERRAIN_TYPE id );
 };

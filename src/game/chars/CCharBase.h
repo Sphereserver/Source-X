@@ -14,6 +14,7 @@
 #include "../common/CScriptObj.h"
 #include "../common/CTextConsole.h"
 #include "../CBase.h"
+#include "../uo_files/uofiles_enums_creid.h"
 
 
 class CCharBase : public CBaseBaseDef // define basic info about each "TYPE" of monster/creature.
@@ -25,14 +26,14 @@ public:
 	SOUND_TYPE m_soundbase;	// sounds ( typically 5 sounds per creature, humans and birds have more.)
 
 	CResourceQtyArray m_FoodType; // FOODTYPE=MEAT 15 (3)
-	short m_MaxFood;	// Derived from foodtype...this is the max amount of food we can eat. (based on str ?)
+	short m_MaxFood;		// Derived from foodtype...this is the max amount of food we can eat. (based on str ?)
 
-	word  m_defense;	// base defense. (basic to body type) can be modified by armor.
-	dword m_Anims;	// Bitmask of animations available for monsters. ANIM_TYPE
+	word  m_defense;		// base defense. (basic to body type) can be modified by armor.
+	dword m_Anims;			// Bitmask of animations available for monsters. ANIM_TYPE
 	HUE_TYPE m_wBloodHue;	// when damaged , what color is the blood (-1) = no blood
 	HUE_TYPE m_wColor;
 
-	short m_Str;	// Base Str for type. (in case of polymorph)
+	short m_Str;		// Base Str for type. (in case of polymorph)
 	short m_Dex;
 	short m_Int;
 	short m_iMoveRate;	// move rate percent

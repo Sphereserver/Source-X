@@ -1,11 +1,11 @@
 #include "../../common/CSphereMap.h"
 #include "../../common/CUOInstall.h"
 #include "../CResource.h"
-#include "CMapList.h"
+#include "CUOMapList.h"
 
-// CMapList:: Constructors, Destructor, Asign operator.
+// CUOMapList:: Constructors, Destructor, Asign operator.
 
-CMapList::CMapList()
+CUOMapList::CUOMapList()
 {
     memset(m_mapsinitalized, 0, sizeof(m_mapsinitalized));
     memset(m_sizex, 0, sizeof(m_sizex));
@@ -21,9 +21,9 @@ CMapList::CMapList()
     m_pMapDiffCollection = NULL;
 }
 
-// CMapList:: Modifiers.
+// CUOMapList:: Modifiers.
 
-void CMapList::Init()
+void CUOMapList::Init()
 {
     for ( int i = 0; i < 256; i++ )
     {
@@ -41,7 +41,7 @@ void CMapList::Init()
         m_pMapDiffCollection = new CMapDiffCollection();
 }
 
-bool CMapList::Load(int map, char *args)
+bool CUOMapList::Load(int map, char *args)
 {
     if (( map < 0 ) || ( map > 255 ))
     {
@@ -107,7 +107,7 @@ bool CMapList::Load(int map, char *args)
     return true;
 }
 
-bool CMapList::Load(int map, int maxx, int maxy, int sectorsize, int realmapnum, int mapid)
+bool CUOMapList::Load(int map, int maxx, int maxy, int sectorsize, int realmapnum, int mapid)
 {
     m_sizex[map] = maxx;
     m_sizey[map] = maxy;
@@ -117,9 +117,9 @@ bool CMapList::Load(int map, int maxx, int maxy, int sectorsize, int realmapnum,
     return true;
 }
 
-// CMapList:: Operations.
+// CUOMapList:: Operations.
 
-bool CMapList::DetectMapSize(int map)
+bool CUOMapList::DetectMapSize(int map)
 {
     if ( m_maps[map] == false )
         return false;
@@ -192,60 +192,60 @@ bool CMapList::DetectMapSize(int map)
     return (m_sizex[map] > 0 && m_sizey[map] > 0 && m_sectorsize[map] > 0);
 }
 
-bool CMapList::IsMapSupported(int map)
+bool CUOMapList::IsMapSupported(int map)
 {
     if (( map < 0 ) || ( map > 255 )) return false;
     return( m_maps[map] );
 }
 
-int CMapList::GetCenterX(int map)
+int CUOMapList::GetCenterX(int map)
 {
     if (( map < 0 ) || ( map > 255 )) return 0;
     return (m_sizex[map]/2);
 }
 
-int CMapList::GetCenterY(int map)
+int CUOMapList::GetCenterY(int map)
 {
     if (( map < 0 ) || ( map > 255 )) return 0;
     return (m_sizey[map]/2);
 }
 
-int CMapList::GetSectorCols(int map)
+int CUOMapList::GetSectorCols(int map)
 {
     if (( map < 0 ) || ( map > 255 )) return 0;
     return (m_sizex[map] / GetSectorSize(map));
 }
 
-int CMapList::GetSectorQty(int map)
+int CUOMapList::GetSectorQty(int map)
 {
     return ( GetSectorCols(map) * GetSectorRows(map) );
 }
 
-int CMapList::GetX(int map)
+int CUOMapList::GetX(int map)
 {
     if (( map < 0 ) || ( map > 255 )) return 0;
     return m_sizex[map];
 }
 
-int CMapList::GetSectorRows(int map)
+int CUOMapList::GetSectorRows(int map)
 {
     if (( map < 0 ) || ( map > 255 )) return 0;
     return (m_sizey[map] / GetSectorSize(map));
 }
 
-int CMapList::GetSectorSize(int map)
+int CUOMapList::GetSectorSize(int map)
 {
     if (( map < 0 ) || ( map > 255 )) return 0;
     return m_sectorsize[map];
 }
 
-int CMapList::GetY(int map)
+int CUOMapList::GetY(int map)
 {
     if (( map < 0 ) || ( map > 255 )) return 0;
     return m_sizey[map];
 }
 
-bool CMapList::IsInitialized(int map)
+bool CUOMapList::IsInitialized(int map)
 {
     return (m_mapsinitalized[map]);
 }

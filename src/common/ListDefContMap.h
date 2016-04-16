@@ -4,8 +4,8 @@
 */
 
 #pragma once
-#ifndef _INC_CLISTDEFMAP_H
-#define _INC_CLISTDEFMAP_H
+#ifndef _INC_LISTDEFCONTMAP_H
+#define _INC_LISTDEFCONTMAP_H
 
 #include <list>
 #include <set>
@@ -41,6 +41,7 @@ public:
 	virtual CListDefContElem * CopySelf() const = 0;
 };
 
+
 class CListDefContNum: public CListDefContElem
 {
 private:
@@ -68,6 +69,7 @@ public:
 	virtual CListDefContElem * CopySelf() const;
 };
 
+
 class CListDefContStr: public CListDefContElem
 {
 private:
@@ -94,6 +96,7 @@ public:
 
 	virtual CListDefContElem * CopySelf() const;
 };
+
 
 class CListDefCont
 {
@@ -152,6 +155,7 @@ public:
 	bool r_LoadVal( lpctstr pszArg );
 };
 
+
 class CListDefMap
 {
 private:
@@ -203,4 +207,4 @@ public:
 	void r_WriteSave( CScript& s );
 };
 
-#endif // _INC_CLISTDEFMAP_H
+#endif // _INC_LISTDEFCONTMAP_H

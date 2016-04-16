@@ -106,7 +106,7 @@ void CUOInstall::DetectMulVersions()
 	// so far seems to be to check the size of the first entry to see if its length is divisible by the new
 	// format length (risky if the first entry is custom and happens to be be divisible by both lengths)
 	CUOIndexRec index;
-	if (ReadMulIndex( VERFILE_MULTIIDX, VERFILE_MULTI, 0x00, index) && (index.GetBlockLength() % sizeof(CUOMultiItemRec2)) == 0)
+	if (ReadMulIndex( VERFILE_MULTIIDX, VERFILE_MULTI, 0x00, index) && (index.GetBlockLength() % sizeof(CUOMultiItemRec_HS)) == 0)
 		m_FileFormat[VERFILE_MULTIIDX] = VERFORMAT_HIGHSEAS;
 }
 

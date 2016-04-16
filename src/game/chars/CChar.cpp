@@ -3408,7 +3408,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_AFK:
 			// toggle ?
 			{
-				bool fAFK = ( Skill_GetActive() == NPCACT_Napping );
+				bool fAFK = ( Skill_GetActive() == NPCACT_NAPPING );
 				bool fMode;
 				if ( s.HasArgs())
 				{
@@ -3424,7 +3424,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 					{
 						SysMessageDefault(DEFMSG_CMDAFK_ENTER);
 						m_Act_p = GetTopPoint();
-						Skill_Start( NPCACT_Napping );
+						Skill_Start( NPCACT_NAPPING );
 					}
 					else
 					{

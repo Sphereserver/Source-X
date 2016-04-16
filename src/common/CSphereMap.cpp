@@ -7,7 +7,7 @@
 #include "CSphereMap.h"
 #include "CRect.h"
 #include "../game/uo_files/CUOTerrainInfo.h"
-#include "../game/uo_files/CSphereItemInfo.h"
+#include "../game/uo_files/CUOItemInfo.h"
 #include "../game/CBase.h"
 #include "../game/CLog.h"
 #include "../game/CObjBase.h"
@@ -109,7 +109,7 @@ lpctstr CSphereMapBlockState::GetTileName( dword dwID )	// static
 	else
 	{
 		dwID -= TERRAIN_QTY;
-		CSphereItemInfo item(static_cast<ITEMID_TYPE>(dwID));
+		CUOItemInfo item(static_cast<ITEMID_TYPE>(dwID));
 		strcpy( pStr, item.m_name );
 	}
 	return( pStr );
@@ -685,7 +685,7 @@ size_t CSphereMulti::GetItemCount() const
 {
 	return( m_iItemQty );
 }
-const CUOMultiItemRec2 * CSphereMulti::GetItem( size_t i ) const
+const CUOMultiItemRec_HS * CSphereMulti::GetItem( size_t i ) const
 {
 	ASSERT( i<m_iItemQty );
 	return( &(m_pItems[i]) );

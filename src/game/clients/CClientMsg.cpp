@@ -1284,7 +1284,7 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 				sprintf(pszTemp+strlen(pszTemp), " [0%x]", (dword) pChar->GetUID());
 		}
 	}
-	if ( ! fAllShow && pChar->Skill_GetActive() == NPCACT_Napping )
+	if ( ! fAllShow && pChar->Skill_GetActive() == NPCACT_NAPPING )
 		strcat( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_AFK) );
 	if ( pChar->GetPrivLevel() <= PLEVEL_Guest )
 		strcat( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_GUEST) );

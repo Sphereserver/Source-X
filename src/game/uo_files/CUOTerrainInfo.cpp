@@ -4,7 +4,7 @@
 #include "../CLog.h"
 #include "CUOIndexRec.h"
 #include "CUOTerrainInfo.h"
-#include "CUOTerrainTypeRec1.h"
+#include "CUOTerrainTypeRec.h"
 #include "uofiles_enums.h"
 #include "uofiles_macros.h"
 
@@ -30,8 +30,8 @@ CSphereTerrainInfo::CSphereTerrainInfo( TERRAIN_TYPE id )
 
         switch (format)
         {
-            case VERFORMAT_HIGHSEAS: // high seas format (CUOTerrainTypeRec2)
-                offset = (id == 0? 0 : 4) + (( id / UOTILE_BLOCK_QTY ) * 4 ) + ( id * sizeof( CUOTerrainTypeRec2 ));
+            case VERFORMAT_HIGHSEAS: // high seas format (CUOTerrainTypeRec_HS)
+                offset = (id == 0? 0 : 4) + (( id / UOTILE_BLOCK_QTY ) * 4 ) + ( id * sizeof( CUOTerrainTypeRec_HS ));
                 break;
 
             case VERFORMAT_ORIGINAL: // original format (CUOTerrainTypeRec)
@@ -48,8 +48,8 @@ CSphereTerrainInfo::CSphereTerrainInfo( TERRAIN_TYPE id )
 
     switch (format)
     {
-        case VERFORMAT_HIGHSEAS: // high seas format (CUOTerrainTypeRec2)
-            if ( g_Install.m_File[filedata].Read(static_cast <CUOTerrainTypeRec2 *>(this), sizeof(CUOTerrainTypeRec2)) <= 0 )
+        case VERFORMAT_HIGHSEAS: // high seas format (CUOTerrainTypeRec_HS)
+            if ( g_Install.m_File[filedata].Read(static_cast <CUOTerrainTypeRec_HS *>(this), sizeof(CUOTerrainTypeRec_HS)) <= 0 )
                 throw CSphereError(LOGL_CRIT, CGFile::GetLastError(), "CTileTerrainType.ReadInfo: TileData Read");
             break;
 

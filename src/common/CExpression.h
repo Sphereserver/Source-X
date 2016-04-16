@@ -99,8 +99,8 @@ public:
 	CListDefMap		m_ListInternals; // Internal lists
 	CString		m_sTmp;
 
-								//	defined default messages
-	static tchar sm_szMessages[DEFMSG_QTY][128];			// like: "You put %s to %s"
+	//	defined default messages
+	static tchar sm_szMessages[DEFMSG_QTY][128];		// like: "You put %s to %s"
 	static lpctstr const sm_szMsgNames[DEFMSG_QTY];		// like: "put_it"
 
 public:

@@ -110,7 +110,7 @@ CEventLog * g_pLog = &g_Log;
 CAccounts	g_Accounts;	// All the player accounts. name sorted CAccount
 CGStringList	g_AutoComplete;	// auto-complete list
 CScriptProfiler g_profiler;		// script profiler
-CMapList	g_MapList;			// global maps information
+CUOMapList	g_MapList;			// global maps information
 
 
 lpctstr GetTimeMinDesc( int minutes )

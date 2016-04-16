@@ -1,14 +1,13 @@
 #include "../../common/CException.h"
 #include "../../common/CUOInstall.h"
 #include "../CLog.h"
-#include "CSphereItemInfo.h"
+#include "CUOItemInfo.h"
 #include "CUOIndexRec.h"
-#include "CUOItemTypeRec1.h"
-#include "CUOTerrainTypeRec2.h"
-#include "CUOTerrainTypeRec1.h"
+#include "CUOItemTypeRec.h"
+#include "CUOTerrainTypeRec.h"
 #include "uofiles_macros.h"
 
-CSphereItemInfo::CSphereItemInfo( ITEMID_TYPE id )
+CUOItemInfo::CUOItemInfo( ITEMID_TYPE id )
 {
     if ( id >= ITEMID_MULTI )
     {
@@ -26,12 +25,12 @@ CSphereItemInfo::CSphereItemInfo( ITEMID_TYPE id )
     dword offset;
     CUOIndexRec Index;
     VERFILE_FORMAT format;
-    if ( g_VerData.FindVerDataBlock( VERFILE_TILEDATA, (id + TERRAIN_QTY) / UOTILE_BLOCK_QTY, Index ))
+    if ( g_VerData.FindVerDataBlock( VERFILE_TILEDATA, (id + TERRAIN_QTY) / UOTILE_BLOCK_QTY, Index ) )
     {
         filedata = VERFILE_VERDATA;
         format = VERFORMAT_ORIGINAL;
         offset = Index.GetFileOffset() + 4 + (sizeof(CUOItemTypeRec) * (id % UOTILE_BLOCK_QTY));
-        ASSERT( Index.GetBlockLength() >= sizeof( CUOItemTypeRec ));
+        ASSERT( Index.GetBlockLength() >= sizeof(CUOItemTypeRec) );
     }
     else
     {
@@ -40,13 +39,13 @@ CSphereItemInfo::CSphereItemInfo( ITEMID_TYPE id )
 
         switch (format)
         {
-            case VERFORMAT_HIGHSEAS: // high seas format (CUOItemTypeRec2)
-                offset = UOTILE_TERRAIN_SIZE2 + 4 + (( id / UOTILE_BLOCK_QTY ) * 4 ) + ( id * sizeof( CUOItemTypeRec2 ));
+            case VERFORMAT_HIGHSEAS: // high seas format (CUOItemTypeRec_HS)
+                offset = UOTILE_TERRAIN_SIZE2 + 4 + (( id / UOTILE_BLOCK_QTY ) * 4 ) + ( id * sizeof(CUOItemTypeRec_HS));
                 break;
 
             case VERFORMAT_ORIGINAL: // original format (CUOItemTypeRec)
             default:
-                offset = UOTILE_TERRAIN_SIZE + 4 + (( id / UOTILE_BLOCK_QTY ) * 4 ) + ( id * sizeof( CUOItemTypeRec ));
+                offset = UOTILE_TERRAIN_SIZE + 4 + (( id / UOTILE_BLOCK_QTY ) * 4 ) + ( id * sizeof(CUOItemTypeRec));
                 break;
         }
     }
@@ -58,8 +57,8 @@ CSphereItemInfo::CSphereItemInfo( ITEMID_TYPE id )
 
     switch (format)
     {
-        case VERFORMAT_HIGHSEAS: // high seas format (CUOItemTypeRec2)
-            if ( g_Install.m_File[filedata].Read( static_cast <CUOItemTypeRec2 *>(this), sizeof(CUOItemTypeRec2)) <= 0 )
+        case VERFORMAT_HIGHSEAS: // high seas format (CUOItemTypeRec_HS)
+            if ( g_Install.m_File[filedata].Read( static_cast <CUOItemTypeRec_HS *>(this), sizeof(CUOItemTypeRec_HS)) <= 0 )
                 throw CSphereError(LOGL_CRIT, CGFile::GetLastError(), "CTileItemType.ReadInfo: TileData Read");
             break;
 
@@ -84,9 +83,9 @@ CSphereItemInfo::CSphereItemInfo( ITEMID_TYPE id )
     }
 }
 
-ITEMID_TYPE CSphereItemInfo::GetMaxTileDataItem()
+ITEMID_TYPE CUOItemInfo::GetMaxTileDataItem()
 {
-    ADDTOCALLSTACK("CSphereItemInfo::GetMaxTileDataItem");
+    ADDTOCALLSTACK("CUOItemInfo::GetMaxTileDataItem");
 
     CGFile* pTileData = g_Install.GetMulFile(VERFILE_TILEDATA);
     ASSERT(pTileData != NULL);
@@ -98,8 +97,8 @@ ITEMID_TYPE CSphereItemInfo::GetMaxTileDataItem()
     VERFILE_FORMAT format = g_Install.GetMulFormat(VERFILE_TILEDATA);
     switch (format)
     {
-        case VERFORMAT_HIGHSEAS: // high seas format (CUOItemTypeRec2)
-            dwEntrySize = sizeof(CUOItemTypeRec2);
+        case VERFORMAT_HIGHSEAS: // high seas format (CUOItemTypeRec_HS)
+            dwEntrySize = sizeof(CUOItemTypeRec_HS);
             dwOffset = UOTILE_TERRAIN_SIZE2 + 4;
             break;
 

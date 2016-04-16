@@ -9,6 +9,7 @@
 
 #include "../../common/common.h"
 #include "uofiles_enums.h"
+#include "uofiles_enums_itemid.h"
 
 // All these structures must be byte packed.
 #if defined _WIN32 && (!__MINGW32__)
@@ -28,12 +29,25 @@
 */
 struct CUOMultiItemRec
 {
-    word  m_wTileID;	///< ITEMID_TYPE = Index to tile CUOItemTypeRec/CUOItemTypeRec2
+    word  m_wTileID;	///< ITEMID_TYPE = Index to tile CUOItemTypeRec/CUOItemTypeRec_HS
     short m_dx;			///< signed delta.
     short m_dy;
     short m_dz;
     dword m_visible;	///< 0 or 1 (non-visible items are things like doors and signs)
     ITEMID_TYPE GetDispID() const;
+} PACK_NEEDED;
+
+
+struct CUOMultiItemRec_HS // (Multi.mul, High Seas+)
+{
+	word  m_wTileID;	// ITEMID_TYPE = Index to tile CUOItemTypeRec/CUOItemTypeRec_HS
+	short m_dx;			// signed delta.
+	short m_dy;
+	short m_dz;
+	dword m_visible;	// 0 or 1 (non-visible items are things like doors and signs)
+	dword m_unknown;	// unknown data
+
+	ITEMID_TYPE GetDispID() const;
 } PACK_NEEDED;
 
 

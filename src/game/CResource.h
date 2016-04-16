@@ -1,6 +1,7 @@
-//
-// CResource.h
-//
+/**
+* @file CResource.h
+*
+*/
 
 #pragma once
 #ifndef _INC_CRESOURCE_H
@@ -13,7 +14,6 @@
 #include "../common/CRegion.h"
 #include "../common/sphereproto.h"
 #include "../common/sphere_library/CArray.h"
-//#include "spheresvr.h" Removed to test.
 
 
 class CAccount;

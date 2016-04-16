@@ -581,7 +581,7 @@ lpctstr CChar::Skill_GetName( bool fUse ) const
 		case NPCACT_THROWING:		return( g_Cfg.GetDefaultMsg(DEFMSG_SKILLACT_THROWING) );
 		case NPCACT_LOOKING:		return( g_Cfg.GetDefaultMsg(DEFMSG_SKILLACT_LOOKING) );
 		case NPCACT_TRAINING:		return( g_Cfg.GetDefaultMsg(DEFMSG_SKILLACT_TRAINING) );
-		case NPCACT_Napping:		return( g_Cfg.GetDefaultMsg(DEFMSG_SKILLACT_NAPPING) );
+		case NPCACT_NAPPING:		return( g_Cfg.GetDefaultMsg(DEFMSG_SKILLACT_NAPPING) );
 		case NPCACT_FOOD:			return( g_Cfg.GetDefaultMsg(DEFMSG_SKILLACT_SEARCHINGFOOD) );
 		case NPCACT_RUNTO:			return( g_Cfg.GetDefaultMsg(DEFMSG_SKILLACT_RUNNINGTO) );
 		default:					return( g_Cfg.GetDefaultMsg(DEFMSG_SKILLACT_THINKING) );
@@ -2756,7 +2756,7 @@ int CChar::Skill_Information( SKTRIG_TYPE stage )
 int CChar::Skill_Act_Napping( SKTRIG_TYPE stage )
 {
 	ADDTOCALLSTACK("CChar::Skill_Act_Napping");
-	// NPCACT_Napping:
+	// NPCACT_NAPPING:
 	// we are taking a small nap. keep napping til we wake. (or move)
 	// AFK command
 
@@ -3211,7 +3211,7 @@ int CChar::Skill_Stage( SKTRIG_TYPE stage )
 			return Skill_Act_Throwing(stage);
 		case NPCACT_TRAINING:
 			return Skill_Act_Training(stage);
-		case NPCACT_Napping:
+		case NPCACT_NAPPING:
 			return Skill_Act_Napping(stage);
 
 		default:

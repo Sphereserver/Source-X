@@ -197,20 +197,20 @@ size_t CSphereMulti::Load( MULTI_TYPE id )
 
 	switch ( g_Install.GetMulFormat( VERFILE_MULTIIDX ) )
 	{
-		case VERFORMAT_HIGHSEAS: // high seas multi format (CUOMultiItemRec2)
-			m_iItemQty = Index.GetBlockLength() / sizeof(CUOMultiItemRec2);
-			m_pItems = new CUOMultiItemRec2 [ m_iItemQty ];
+		case VERFORMAT_HIGHSEAS: // high seas multi format (CUOMultiItemRec_HS)
+			m_iItemQty = Index.GetBlockLength() / sizeof(CUOMultiItemRec_HS);
+			m_pItems = new CUOMultiItemRec_HS [ m_iItemQty ];
 			ASSERT( m_pItems );
 
 			ASSERT( (sizeof(m_pItems[0]) * m_iItemQty) >= Index.GetBlockLength() );
-			if ( ! g_Install.ReadMulData( VERFILE_MULTI, Index, static_cast <CUOMultiItemRec2 *>(m_pItems) ))
+			if ( ! g_Install.ReadMulData( VERFILE_MULTI, Index, static_cast <CUOMultiItemRec_HS *>(m_pItems) ))
 				return 0;
 			break;
 
 		case VERFORMAT_ORIGINAL: // old format (CUOMultiItemRec)
 		default:
 			m_iItemQty = Index.GetBlockLength() / sizeof(CUOMultiItemRec);
-			m_pItems = new CUOMultiItemRec2 [ m_iItemQty ];
+			m_pItems = new CUOMultiItemRec_HS [ m_iItemQty ];
 			ASSERT( m_pItems );
 
 			CUOMultiItemRec* pItems = new CUOMultiItemRec[m_iItemQty];

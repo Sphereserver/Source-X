@@ -10,6 +10,7 @@
 #include "../common/CUID.h"
 #include "../common/sphereproto.h"
 #include "../game/uo_files/uofiles_enums.h"
+#include "../game/uo_files/uofiles_enums_itemid.h"
 #include "../game/uo_files/uofiles_types.h"
 #include "packet.h"
 

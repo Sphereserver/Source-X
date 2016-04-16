@@ -1,17 +1,11 @@
 /**
-* @file CBase.h
+* @file CUOTerrainTypeRec.h
 *
 */
 
 #pragma once
-/**
-* @file CUOTerrainTypeRec1.h
-*
-*/
-
-#pragma once
-#ifndef _INC_CUOTERRAINTYPEREC1_H
-#define _INC_CUOTERRAINTYPEREC1_H
+#ifndef _INC_CUOTERRAINTYPEREC_H
+#define _INC_CUOTERRAINTYPEREC_H
 
 #include "../../common/common.h"
 
@@ -39,6 +33,22 @@ struct CUOTerrainTypeRec
 
 // 0x68800 = (( 0x4000 / 32 ) * 4 ) + ( 0x4000 * 26 )
 #define UOTILE_TERRAIN_SIZE ((( TERRAIN_QTY / UOTILE_BLOCK_QTY ) * 4 ) + ( TERRAIN_QTY * sizeof( CUOTerrainTypeRec )))
+
+
+/**
+* size = 0x1e = 30 (tiledata.mul, High Seas+)
+* First half of tiledata.mul file is for terrain tiles.
+*/
+struct CUOTerrainTypeRec_HS
+{
+	dword m_flags;		///< 0xc0=water, 0x40=dirt or rock, 0x60=lava, 0x50=cave, 0=floor
+	dword m_unknown;
+	word m_index;		///< just counts up.  0 = unused.
+	char m_name[20];
+} PACK_NEEDED;
+
+// 0x78800 = (( 0x4000 / 32 ) * 4 ) + ( 0x4000 * 30 )
+#define UOTILE_TERRAIN_SIZE2 ((( TERRAIN_QTY / UOTILE_BLOCK_QTY ) * 4 ) + ( TERRAIN_QTY * sizeof( CUOTerrainTypeRec_HS )))
 
 
 // Turn off structure packing.

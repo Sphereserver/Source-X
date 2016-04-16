@@ -499,7 +499,7 @@ void CItemMultiCustom::AddStairs(CClient * pClientSrc, ITEMID_TYPE id, short x, 
 	size_t iQty = pMulti->GetItemCount();
 	for ( size_t i = 0; i < iQty; i++ )
 	{
-		const CUOMultiItemRec2 * pMultiItem = pMulti->GetItem(i);
+		const CUOMultiItemRec_HS * pMultiItem = pMulti->GetItem(i);
 		if ( pMultiItem == NULL )
 			continue;
 
@@ -884,7 +884,7 @@ void CItemMultiCustom::ResetStructure( CClient * pClientSrc )
 		size_t iQty = pMulti->GetItemCount();
 		for (size_t i = 0; i < iQty; i++)
 		{
-			const CUOMultiItemRec2 * pMultiItem = pMulti->GetItem(i);
+			const CUOMultiItemRec_HS * pMultiItem = pMulti->GetItem(i);
 			if ( pMultiItem == NULL )
 				continue;
 
@@ -1034,7 +1034,7 @@ const CGRect CItemMultiCustom::GetDesignArea()
 			size_t iQty = pMulti->GetItemCount();
 			for ( size_t i = 0; i < iQty; i++ )
 			{
-				const CUOMultiItemRec2 * pMultiItem = pMulti->GetItem(i);
+				const CUOMultiItemRec_HS * pMultiItem = pMulti->GetItem(i);
 				if ( pMultiItem == NULL )
 					continue;
 
@@ -1345,7 +1345,7 @@ bool CItemMultiCustom::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole 
 					return false;
 
 				SKIP_SEPARATORS(pszKey);
-				CUOMultiItemRec2 item = m_designMain.m_vectorComponents.at(iQty)->m_item;
+				CUOMultiItemRec_HS item = m_designMain.m_vectorComponents.at(iQty)->m_item;
 
 				if ( !strcmpi(pszKey, "ID") ) sVal.FormatVal(item.GetDispID());
 				else if ( !strcmpi(pszKey, "DX") ) sVal.FormatVal(item.m_dx);
@@ -1587,7 +1587,7 @@ void CItemMultiCustom::CSphereMultiCustom::LoadFrom( CItemMultiCustom::DesignDet
 {
 	m_iItemQty = pDesign->m_vectorComponents.size();
 
-	m_pItems = new CUOMultiItemRec2[m_iItemQty];
+	m_pItems = new CUOMultiItemRec_HS[m_iItemQty];
 	for ( size_t i = 0; i < m_iItemQty; i++ )
-		memcpy(&m_pItems[i], &pDesign->m_vectorComponents.at(i)->m_item, sizeof(CUOMultiItemRec2));
+		memcpy(&m_pItems[i], &pDesign->m_vectorComponents.at(i)->m_item, sizeof(CUOMultiItemRec_HS));
 }

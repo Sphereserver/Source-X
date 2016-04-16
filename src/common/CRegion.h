@@ -4,7 +4,7 @@
 #define _INC_CREGION_H
 
 #include "../game/CLog.h"
-#include "../game/uo_files/CMapList.h"
+#include "../game/uo_files/CUOMapList.h"
 #include "CRect.h"
 #include "CResourceBase.h"
 

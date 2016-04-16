@@ -1,15 +1,15 @@
 /**
-* @file CSphereItemInfo.h
+* @file CUOItemInfo.h
 *
 */
 
 #pragma once
-#ifndef _INC_CSPHEREITEMINFO_H
-#define _INC_CSPHEREITEMINFO_H
+#ifndef _INC_CUOITEMINFO_H
+#define _INC_CUOITEMINFO_H
 
 #include "../../common/common.h"
-#include "CUOItemTypeRec2.h"
-#include "uofiles_enums.h"
+#include "CUOItemTypeRec.h"
+#include "uofiles_enums_itemid.h"
 
 // All these structures must be byte packed.
 #if defined _WIN32 && (!__MINGW32__)
@@ -22,9 +22,9 @@
 #endif
 
 
-struct CSphereItemInfo : public CUOItemTypeRec2
+struct CUOItemInfo : public CUOItemTypeRec_HS
 {
-    explicit CSphereItemInfo( ITEMID_TYPE id );
+    explicit CUOItemInfo( ITEMID_TYPE id );
     static ITEMID_TYPE GetMaxTileDataItem();
 };
 
@@ -36,4 +36,4 @@ struct CSphereItemInfo : public CUOItemTypeRec2
 	#undef PACK_NEEDED
 #endif
 
-#endif //_INC_CSPHEREITEMINFO_H
+#endif //_INC_CUOITEMINFO_H

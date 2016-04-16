@@ -8,7 +8,7 @@
 #define _INC_CUOSTATICITEMREC_H
 
 #include "../../common/common.h"
-#include "uofiles_enums.h"
+#include "uofiles_enums_itemid.h"
 
 // All these structures must be byte packed.
 #if defined _WIN32 && (!__MINGW32__)
@@ -26,7 +26,7 @@
 */
 struct CUOStaticItemRec
 {
-    word m_wTileID;  ///< ITEMID_TYPE = Index to tile CUOItemTypeRec/CUOItemTypeRec2
+    word m_wTileID;  ///< ITEMID_TYPE = Index to tile CUOItemTypeRec/CUOItemTypeRec_HS
     byte m_x;  ///< x <= 7 = offset from block.
     byte m_y;  ///< y <= 7
     char m_z;  ///<

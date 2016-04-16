@@ -3,12 +3,12 @@
 */
 
 #pragma once
-#ifndef _INC_CSphereMap_H
-#define _INC_CSphereMap_H
+#ifndef _INC_CSPHEREMAP_H
+#define _INC_CSPHEREMAP_H
 
 #include "../game/uo_files/CUOMapBlock.h"
-#include "../game/uo_files/CUOMultiItemRec2.h"
 #include "../game/uo_files/CUOStaticItemRec.h"
+#include "../game/uo_files/CUOMultiItemRec.h"
 #include "../game/uo_files/uofiles_macros.h"
 #include "../game/uo_files/uofiles_types.h"
 #include "../game/CServTime.h"
@@ -113,7 +113,7 @@ struct CMapDiffBlock
 	int m_iStaticsCount;					// Patched statics count
 	CUOMapBlock * m_pTerrainBlock;			// Patched terrain
 	dword m_BlockId;						// Block represented
-	int m_map;								// Map this block is from
+	int m_map;	// Map this block is from
 
 	CMapDiffBlock(dword dwBlockId, int map);
 
@@ -204,7 +204,7 @@ class CSphereMulti : public CSphereCachedMulItem
 private:
 	MULTI_TYPE m_id;
 protected:
-	CUOMultiItemRec2 * m_pItems;
+	CUOMultiItemRec_HS * m_pItems;
 	size_t m_iItemQty;
 private:
 	void Init();
@@ -224,7 +224,7 @@ public:
 
 	MULTI_TYPE GetMultiID() const;
 	size_t GetItemCount() const;
-	const CUOMultiItemRec2 * GetItem( size_t i ) const;
+	const CUOMultiItemRec_HS * GetItem( size_t i ) const;
 };
 
 #endif // _INC_CSphereMap_H

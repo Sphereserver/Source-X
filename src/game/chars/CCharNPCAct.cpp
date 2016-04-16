@@ -1675,7 +1675,7 @@ bool CChar::NPC_Act_Food()
 				case NPCACT_WANDER:
 				case NPCACT_LOOKING:
 				case NPCACT_GO_HOME:
-				case NPCACT_Napping:
+				case NPCACT_NAPPING:
 				case NPCACT_FLEE:
 					{
 						CPointMap pt = pClosestFood->GetTopPoint();
@@ -2315,7 +2315,7 @@ void CChar::NPC_Food()
 				case NPCACT_WANDER:
 				case NPCACT_LOOKING:
 				case NPCACT_GO_HOME:
-				case NPCACT_Napping:
+				case NPCACT_NAPPING:
 				case NPCACT_FLEE:
 					{
 						EXC_SET("walking to desired");
@@ -2372,7 +2372,7 @@ void CChar::NPC_Food()
 					case NPCACT_WANDER:
 					case NPCACT_LOOKING:
 					case NPCACT_GO_HOME:
-					case NPCACT_Napping:
+					case NPCACT_NAPPING:
 					case NPCACT_FLEE:
 						{
 							EXC_SET("searching grass nearby");
