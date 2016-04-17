@@ -34,7 +34,7 @@ int CObjBaseTemplate::IsWeird() const
 bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
 {
 	tchar * ppCmd[3];
-	size_t iQty = Str_ParseCmds( pszDir, ppCmd, COUNTOF(ppCmd));
+	size_t iQty = Str_ParseCmds( pszDir, ppCmd, CountOf(ppCmd));
 	if (iQty <= 0)
 		return false;
 
@@ -262,7 +262,7 @@ bool CObjBase::SetNamePool( lpctstr pszName )
 		strcpy( pszTmp, pszName );
 
 		tchar * ppTitles[2];
-		Str_ParseCmds( pszTmp, ppTitles, COUNTOF(ppTitles));
+		Str_ParseCmds( pszTmp, ppTitles, CountOf(ppTitles));
 
 		CResourceLock s;
 		if ( ! g_Cfg.ResourceLock( s, RES_NAMES, ppTitles[0] ))
@@ -538,7 +538,7 @@ void CObjBase::SpeakUTF8( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT
 	ADDTOCALLSTACK("CObjBase::SpeakUTF8");
 	// convert UTF8 to UNICODE.
 	NCHAR szBuffer[ MAX_TALK_BUFFER ];
-	CvtSystemToNUNICODE( szBuffer, COUNTOF(szBuffer), pText, -1 );
+	CvtSystemToNUNICODE( szBuffer, CountOf(szBuffer), pText, -1 );
 	g_World.SpeakUNICODE( this, szBuffer, wHue, mode, font, lang );
 }
 
@@ -684,7 +684,7 @@ lpctstr const CObjBase::sm_szRefKeys[OBR_QTY+1] =
 bool CObjBase::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CObjBase::r_GetRef");
-	int i = FindTableHeadSorted( pszKey, sm_szRefKeys, COUNTOF(sm_szRefKeys)-1 );
+	int i = FindTableHeadSorted( pszKey, sm_szRefKeys, CountOf(sm_szRefKeys)-1 );
 	if ( i >= 0 )
 	{
 		pszKey += strlen( sm_szRefKeys[i] );
@@ -736,7 +736,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 	ADDTOCALLSTACK("CObjBase::r_WriteVal");
 	EXC_TRY("WriteVal");
 
-	int index = FindTableHeadSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 );
+	int index = FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( index < 0 )
 	{
 		// RES_FUNCTION call
@@ -1020,7 +1020,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 			{
 				CChar * pChar = dynamic_cast<CChar*>(this);
 				if ( !pChar ) sVal.FormatVal( 0 );
-				else sVal.FormatVal( pChar->IsClient() ? (pChar->GetClient()->m_TagDefs.GetCount()) : 0 );
+				else sVal.FormatSTVal( pChar->IsClient() ? (pChar->GetClient()->m_TagDefs.GetCount()) : 0 );
 			}
 			break;
 		case OC_TEXTF:
@@ -1028,7 +1028,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 				tchar * key = const_cast<tchar*>(pszKey);
 				key += 5;
 				tchar * pszArg[4];
-				size_t iArgQty = Str_ParseCmds(key , pszArg, COUNTOF(pszArg));
+				size_t iArgQty = Str_ParseCmds(key , pszArg, CountOf(pszArg));
 				if (iArgQty < 2)
 				{
 					g_Log.EventError("SysMessagef with less than 1 args for the given text\n");
@@ -1070,12 +1070,12 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 					{
 						if( !strnicmp(pszKey, "COUNT", 5) )
 						{
-							sVal.FormatVal( pThisClient->m_mapOpenedGumps.size() );
+							sVal.FormatSTVal( pThisClient->m_mapOpenedGumps.size() );
 						}
 						else
 						{
 							CClient::OpenedGumpsMap_t * ourMap = &(pThisClient->m_mapOpenedGumps);
-							size_t iDialogIndex = static_cast<size_t>( Exp_GetVal(pszKey) );
+							size_t iDialogIndex = (size_t)( Exp_GetVal(pszKey) );
 							SKIP_SEPARATORS(pszKey);
 
 							if ( iDialogIndex <= ourMap->size() )
@@ -1488,7 +1488,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
  				if ( *pszKey == '.' )	// do we have an argument?
  				{
  					SKIP_SEPARATORS( pszKey );
- 					size_t iQty = static_cast<size_t>( Exp_GetVal( pszKey ) );
+ 					size_t iQty = (size_t)( Exp_GetVal( pszKey ) );
 					if ( iQty >= m_TagDefs.GetCount() )
  						return false; // trying to get non-existant tag
 
@@ -1518,7 +1518,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 			}
 			break;
 		case OC_TAGCOUNT:
-			sVal.FormatVal( m_TagDefs.GetCount() );
+			sVal.FormatSTVal( m_TagDefs.GetCount() );
 			break;
 		case OC_PROPSAT:
 			{
@@ -1526,7 +1526,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
  				if ( *pszKey == '.' )	// do we have an argument?
  				{
  					SKIP_SEPARATORS( pszKey );
- 					size_t iQty = static_cast<size_t>( Exp_GetVal( pszKey ) );
+ 					size_t iQty = (size_t)( Exp_GetVal( pszKey ) );
 					if ( iQty >= m_BaseDefs.GetCount() )
  						return false; // trying to get non-existant tag
 
@@ -1556,7 +1556,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 			}
 			break;
 		case OC_PROPSCOUNT:
-			sVal.FormatVal( m_BaseDefs.GetCount() );
+			sVal.FormatSTVal( m_BaseDefs.GetCount() );
 			break;
 		default:
 			return false;
@@ -1592,7 +1592,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 		return true;
 	}
 
-	int index = FindTableSorted( s.GetKey(), sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 );
+	int index = FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( index < 0 )
 	{
 		return( CScriptObj::r_LoadVal(s));
@@ -1736,7 +1736,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 					return false;
 
 				int64 piVal[2];
-				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, COUNTOF(piVal));
+				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, CountOf(piVal));
 				m_defenseBase = (uchar)(piVal[0]);
 				if ( iQty > 1 )
 					m_defenseRange = (uchar)(piVal[1]) - m_defenseBase;
@@ -1750,7 +1750,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 		case OC_DAM:
 			{
 				int64 piVal[2];
-				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, COUNTOF(piVal));
+				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, CountOf(piVal));
 				m_attackBase = (uchar)(piVal[0]);
 				if ( iQty > 1 )
 					m_attackRange = (uchar)(piVal[1]) - m_attackBase;
@@ -1777,7 +1777,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 		case OC_RANGE:
 			{
 				int64 piVal[2];
-				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, COUNTOF(piVal));
+				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, CountOf(piVal));
 				if ( iQty > 1 )
 				{
 					int64 iRange = ((piVal[0] & 0xff) << 8) & 0xff00;
@@ -1955,7 +1955,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 	if ( !strnicmp( pszKey, "TARGET", 6 ) )
 		index = OV_TARGET;
 	else
-		index = FindTableSorted( pszKey, sm_szVerbKeys, COUNTOF(sm_szVerbKeys)-1 );
+		index = FindTableSorted( pszKey, sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
 
 	if ( index < 0 )
 		return CScriptObj::r_Verb(s, pSrc);
@@ -1969,7 +1969,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			{
 				EXC_SET("DAMAGE");
 				int64 piCmd[8];
-				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, COUNTOF(piCmd));
+				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd));
 				if ( iArgQty < 1 )
 					return false;
 				if ( iArgQty > 2 )	// Give it a new source char UID
@@ -2014,7 +2014,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			{
 				EXC_SET("EFFECT");
 				int64 piCmd[12];
-				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, COUNTOF(piCmd));
+				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd));
 				if ( iArgQty < 2 )
 					return false;
 				CObjBase *	pThis	= this;
@@ -2062,7 +2062,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					return false;
 
 				tchar *Arg_ppCmd[2];		// Maximum parameters in one line
-				size_t iQty = Str_ParseCmds( s.GetArgStr(), Arg_ppCmd, COUNTOF( Arg_ppCmd ));
+				size_t iQty = Str_ParseCmds( s.GetArgStr(), Arg_ppCmd, CountOf( Arg_ppCmd ));
 
 				CString sOrgValue;
 				if ( ! r_WriteVal( Arg_ppCmd[0], sOrgValue, pSrc ))
@@ -2105,11 +2105,11 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				tchar * pszArgs[5];
 				NCHAR ncBuffer[ MAX_TALK_BUFFER ];
 
-				size_t iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, COUNTOF(pszArgs) );
+				size_t iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, CountOf(pszArgs) );
 				if ( iArgQty < 5 )
 					break;
 
-				CvtSystemToNUNICODE( ncBuffer, COUNTOF( ncBuffer ), pszArgs[4], -1 );
+				CvtSystemToNUNICODE( ncBuffer, CountOf( ncBuffer ), pszArgs[4], -1 );
 				pClientSrc->addBarkUNICODE( ncBuffer, this,
 					static_cast<HUE_TYPE>( pszArgs[0][0] ? Exp_GetVal(pszArgs[0]) : HUE_TEXT_DEF ),
 					static_cast<TALKMODE_TYPE>( pszArgs[1][0] ? Exp_GetVal(pszArgs[1]) : TALKMODE_SAY ),
@@ -2135,7 +2135,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				CObjBase *	pObjNear;
 				int64 piCmd[4];
 
-				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, COUNTOF(piCmd) );
+				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd) );
 				if ( iArgQty <= 0 )
 					return false;
 				if ( iArgQty < 3 )
@@ -2186,7 +2186,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 				tchar * pszArgs[2];
 
-				size_t iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, COUNTOF(pszArgs) );
+				size_t iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, CountOf(pszArgs) );
 				if ( iArgQty == 0 )
 					break;
 					
@@ -2211,7 +2211,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				EXC_SET("RESENDTOOLTIP");
 			
 				int64 piCmd[2];
-				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, COUNTOF(piCmd) );
+				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd) );
 
 				bool bSendFull = false;
 				bool bUseCache = false;
@@ -2240,7 +2240,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			{
 				EXC_SET("SAYUA");
 				tchar * pszArgs[5];
-				size_t iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, COUNTOF(pszArgs) );
+				size_t iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, CountOf(pszArgs) );
 				if ( iArgQty < 5 )
 					break;
 
@@ -2256,7 +2256,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			{
 				EXC_SET("SOUND");
 				int64 piCmd[2];
-				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, COUNTOF(piCmd));
+				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd));
 				Sound( static_cast<SOUND_TYPE>(piCmd[0]), ( iArgQty > 1 ) ? (int)(piCmd[1]) : 1 );
 			}
 			break;
@@ -2264,7 +2264,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			{
 				EXC_SET("SPELLEFFECT");
 				int64 piCmd[4];
-				size_t iArgs = Str_ParseCmds( s.GetArgStr(), piCmd, COUNTOF(piCmd));
+				size_t iArgs = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd));
 				CItem * pItemSrc = NULL;
 				switch( iArgs )
 				{
@@ -2342,7 +2342,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 						if ( IsStrEmpty(s.GetArgStr()) )
 							break;
 						char * ppArg[2];
-						Str_ParseCmds( s.GetArgStr(), ppArg, COUNTOF(ppArg), "," );
+						Str_ParseCmds( s.GetArgStr(), ppArg, CountOf(ppArg), "," );
 						if ( !IsStrNumeric( ppArg[1] ))
 							DEBUG_ERR(("Invalid argument in Target Multi\n"));
 						ITEMID_TYPE itemid = static_cast<ITEMID_TYPE>(Exp_GetVal(ppArg[1]));
@@ -2419,7 +2419,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					return false;
 
 				tchar *	Arg_ppCmd[3];		// Maximum parameters in one line
-				size_t iQty = Str_ParseCmds( s.GetArgStr(), Arg_ppCmd, COUNTOF( Arg_ppCmd ));
+				size_t iQty = Str_ParseCmds( s.GetArgStr(), Arg_ppCmd, CountOf( Arg_ppCmd ));
 				if ( iQty < 1 )
 					return false;
 
@@ -2453,7 +2453,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					return false;
 
 				tchar *	Arg_ppCmd[2];		// Maximum parameters in one line
-				size_t iQty = Str_ParseCmds( s.GetArgStr(), Arg_ppCmd, COUNTOF( Arg_ppCmd ));
+				size_t iQty = Str_ParseCmds( s.GetArgStr(), Arg_ppCmd, CountOf( Arg_ppCmd ));
 				if ( iQty < 1 )
 					return false;
 
@@ -3048,7 +3048,7 @@ inline bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TR
 	ADDTOCALLSTACK("CObjBase::CallPersonalTrigger");
 	UNREFERENCED_PARAMETER(bFull);
 	tchar * ppCmdTrigger[3];
-	size_t iResultArgs = Str_ParseCmds(pArgs, ppCmdTrigger, COUNTOF(ppCmdTrigger), ",");
+	size_t iResultArgs = Str_ParseCmds(pArgs, ppCmdTrigger, CountOf(ppCmdTrigger), ",");
 	
 	if ( iResultArgs > 0 )
 	{
@@ -3062,7 +3062,7 @@ inline bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TR
 			if ( iTriggerArgType == 1 ) // 3 ARGNs
 			{
 				int64 Arg_piCmd[3];
-				iResultArgs = Str_ParseCmds(ppCmdTrigger[2], Arg_piCmd, COUNTOF(Arg_piCmd), ",");
+				iResultArgs = Str_ParseCmds(ppCmdTrigger[2], Arg_piCmd, CountOf(Arg_piCmd), ",");
 
 				if ( iResultArgs == 3 )
 				{
@@ -3096,7 +3096,7 @@ inline bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TR
 			else if ( iTriggerArgType == 4 ) // FULL TRIGGER
 			{
 				tchar * Arg_ppCmd[5];
-				iResultArgs = Str_ParseCmds(ppCmdTrigger[2], Arg_ppCmd, COUNTOF(Arg_ppCmd), ",");
+				iResultArgs = Str_ParseCmds(ppCmdTrigger[2], Arg_ppCmd, CountOf(Arg_ppCmd), ",");
 				
 				// ARGS
 				if ( iResultArgs == 5 )

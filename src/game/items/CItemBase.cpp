@@ -443,7 +443,7 @@ int CItemBase::IsID_Door( ITEMID_TYPE id ) // static
 		return( 2 );
 	}
 
-	for ( size_t i = 0; i < COUNTOF(sm_Item_DoorBase); i++)
+	for ( size_t i = 0; i < CountOf(sm_Item_DoorBase); i++)
 	{
 		int did = id - sm_Item_DoorBase[i];
 		if ( did >= 0 && did <= 15 )
@@ -1005,7 +1005,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pChar
 	UNREFERENCED_PARAMETER(pChar);
 	ADDTOCALLSTACK("CItemBase::r_WriteVal");
 	EXC_TRY("WriteVal");
-	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		//return as string or hex number or NULL if not set
 		case IBC_AMMOANIM:
@@ -1334,7 +1334,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 	ADDTOCALLSTACK("CItemBase::r_LoadVal");
 	EXC_TRY("LoadVal");
 	lpctstr	pszKey = s.GetKey();
-	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		//Set as Strings
 		case IBC_AMMOANIM:
@@ -1443,7 +1443,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 					return true;
 				}
 				int64 piVal[2];
-				size_t iQty = Str_ParseCmds(s.GetArgStr(), piVal, COUNTOF(piVal));
+				size_t iQty = Str_ParseCmds(s.GetArgStr(), piVal, CountOf(piVal));
 				if (iQty == 2)
 				{
 					pItemMulti->m_shipSpeed.period = (uchar)(piVal[0]);
@@ -1467,7 +1467,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 		case IBC_DUPELIST:
 			{
 				tchar * ppArgs[512];
-				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), ppArgs, COUNTOF(ppArgs));
+				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), ppArgs, CountOf(ppArgs));
 				if ( iArgQty <= 0 )
 					return false;
 				m_flip_id.Empty();
@@ -1826,7 +1826,7 @@ void CItemBaseMulti::SetMultiRegion( tchar * pArgs )
 	ADDTOCALLSTACK("CItemBaseMulti::SetMultiRegion");
 	// inclusive region.
 	int64 piArgs[5];
-	size_t iQty = Str_ParseCmds( pArgs, piArgs, COUNTOF(piArgs));
+	size_t iQty = Str_ParseCmds( pArgs, piArgs, CountOf(piArgs));
 	if ( iQty <= 1 )
 		return;
 	m_Components.Empty();	// might be after a resync
@@ -1837,7 +1837,7 @@ bool CItemBaseMulti::AddComponent( tchar * pArgs )
 {
 	ADDTOCALLSTACK("CItemBaseMulti::AddComponent");
 	int64 piArgs[4];
-	size_t iQty = Str_ParseCmds( pArgs, piArgs, COUNTOF(piArgs));
+	size_t iQty = Str_ParseCmds( pArgs, piArgs, CountOf(piArgs));
 	if ( iQty <= 1 )
 		return false;
 	return AddComponent(static_cast<ITEMID_TYPE>(RES_GET_INDEX(piArgs[0])), (short)(piArgs[1]), (short)(piArgs[2]), (char)(piArgs[3]) );
@@ -1885,7 +1885,7 @@ bool CItemBaseMulti::r_LoadVal( CScript &s )
 {
 	ADDTOCALLSTACK("CItemBaseMulti::r_LoadVal");
 	EXC_TRY("LoadVal");
-	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 	case MLC_COMPONENT:
 		return AddComponent( s.GetArgStr());
@@ -1902,7 +1902,7 @@ bool CItemBaseMulti::r_LoadVal( CScript &s )
 
 		// SHIPSPEED x[,y]
 		int64 ppArgs[2];
-		size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, COUNTOF(ppArgs));
+		size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, CountOf(ppArgs));
 		if (iQty < 1)
 			return false;
 
@@ -1929,7 +1929,7 @@ bool CItemBaseMulti::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * 
 {
 	ADDTOCALLSTACK("CItemBaseMulti::r_WriteVal");
 	EXC_TRY("WriteVal");
-	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ) )
+	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ) )
 	{
 	case MLC_BASECOMPONENT:
 	{
@@ -1940,7 +1940,7 @@ bool CItemBaseMulti::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * 
 
 		if (*pszKey == '\0')
 		{
-			sVal.FormatVal(pMulti->GetItemCount());
+			sVal.FormatSTVal(pMulti->GetItemCount());
 		}
 		else if (*pszKey == '.')
 		{
@@ -1970,7 +1970,7 @@ bool CItemBaseMulti::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * 
 			pszKey += 9;
 			if ( *pszKey == '\0' )
 			{
-				sVal.FormatVal( m_Components.GetCount() );
+				sVal.FormatSTVal( m_Components.GetCount() );
 			}
 			else if ( *pszKey == '.' )
 			{

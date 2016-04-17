@@ -377,7 +377,7 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 	uint i = 0;
 	for ( ; ; i++ )
 	{
-		if ( i >= COUNTOF(sm_ContSize) )
+		if ( i >= CountOf(sm_ContSize) )
 		{
 			i = 0;	// set to default
 			DEBUG_WARN(("Unknown container gump id %d for 0%x\n", gump, GetDispID()));
@@ -659,8 +659,8 @@ void CItemContainer::SetKeyRing()
 	};
 
 	size_t iQty = GetCount();
-	if ( iQty >= COUNTOF(sm_Item_Keyrings) )
-		iQty = COUNTOF(sm_Item_Keyrings) - 1;
+	if ( iQty >= CountOf(sm_Item_Keyrings) )
+		iQty = CountOf(sm_Item_Keyrings) - 1;
 
 	ITEMID_TYPE id = sm_Item_Keyrings[iQty];
 	if ( id != GetID() )
@@ -685,7 +685,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 		return false;
 	}
 
-	size_t pTagTmp = static_cast<size_t>(GetKeyNum("OVERRIDE.MAXITEMS", true));
+	size_t pTagTmp = (size_t)(GetKeyNum("OVERRIDE.MAXITEMS", true));
 	size_t tMaxItemsCont = pTagTmp ? pTagTmp : MAX_ITEMS_CONT;
 	if ( GetCount() >= tMaxItemsCont )
 	{
@@ -693,7 +693,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 		return false;
 	}
 
-	pTagTmp = static_cast<size_t>(GetKeyNum("OVERRIDE.MAXWEIGHT", true));
+	pTagTmp = (size_t)(GetKeyNum("OVERRIDE.MAXWEIGHT", true));
 	if ( pTagTmp )	// weightcheck does ALSO apply on backpack if tag is set!
 	{
 		if ( (GetWeight() + pItem->GetWeight()) > ((int)(pTagTmp) * WEIGHT_UNITS) )
@@ -1024,7 +1024,7 @@ void CItemContainer::Game_Create()
 
 	if ( m_itGameBoard.m_GameType == 0 )	// Chess
 	{
-		for ( size_t i = 0; i < COUNTOF(sm_Item_ChessPieces); i++ )
+		for ( size_t i = 0; i < CountOf(sm_Item_ChessPieces); i++ )
 		{
 			// Add all it's pieces. (if not already added)
 			CItem *pPiece = CItem::CreateBase(sm_Item_ChessPieces[i]);
@@ -1122,7 +1122,7 @@ bool CItemContainer::r_Verb( CScript &s, CTextConsole *pSrc )
 	ADDTOCALLSTACK("CItemContainer::r_Verb");
 	EXC_TRY("Verb");
 	ASSERT(pSrc);
-	switch ( FindTableSorted(s.GetKey(), sm_szVerbKeys, COUNTOF(sm_szVerbKeys) - 1) )
+	switch ( FindTableSorted(s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys) - 1) )
 	{
 		case ICV_DELETE:
 			if ( s.HasArgs() )

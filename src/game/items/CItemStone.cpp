@@ -124,7 +124,7 @@ bool CStoneMember::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command
 	ASSERT(pSrc);
 	
 	lpctstr pszKey = s.GetKey();
-	int index = FindTableSorted( pszKey, sm_szVerbKeys, COUNTOF(sm_szVerbKeys)-1 );
+	int index = FindTableSorted( pszKey, sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
 	if ( index < 0 )
 	{
 		if ( r_LoadVal(s) ) // if it's successful all ok, else go on verb.
@@ -159,7 +159,7 @@ bool CStoneMember::r_LoadVal( CScript & s ) // Load an item Script
 	ADDTOCALLSTACK("CStoneMember::r_LoadVal");
 	EXC_TRY("LoadVal");
 
-	STMM_TYPE iIndex = (STMM_TYPE) FindTableSorted( s.GetKey(), sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 );
+	STMM_TYPE iIndex = (STMM_TYPE) FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 
 	if ( GetLinkUID().IsChar() )
 	{
@@ -231,7 +231,7 @@ bool CStoneMember::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pS
 	ADDTOCALLSTACK("CStoneMember::r_WriteVal");
 	EXC_TRY("WriteVal");
 
-	STMM_TYPE iIndex = (STMM_TYPE) FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 );
+	STMM_TYPE iIndex = (STMM_TYPE) FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 
 	if ( GetLinkUID().IsChar() )
 	{
@@ -468,13 +468,13 @@ MEMORY_TYPE CItemStone::GetMemoryType() const
 
 lpctstr CItemStone::GetCharter(uint iLine) const
 {
-	ASSERT(iLine<COUNTOF(m_sCharter));
+	ASSERT(iLine<CountOf(m_sCharter));
 	return(  m_sCharter[iLine] );
 }
 
 void CItemStone::SetCharter( uint iLine, lpctstr pCharter )
 {
-	ASSERT(iLine<COUNTOF(m_sCharter));
+	ASSERT(iLine<CountOf(m_sCharter));
 	m_sCharter[iLine] = pCharter;
 }
 
@@ -541,7 +541,7 @@ void CItemStone::r_Write( CScript & s )
 	}
 
 	TemporaryString pszTemp;
-	for ( uint i = 0; i < COUNTOF(m_sCharter); i++ )
+	for ( uint i = 0; i < CountOf(m_sCharter); i++ )
 	{
 		if ( ! m_sCharter[i].IsEmpty())
 		{
@@ -726,7 +726,7 @@ bool CItemStone::r_LoadVal( CScript & s ) // Load an item Script
 	ADDTOCALLSTACK("CItemStone::r_LoadVal");
 	EXC_TRY("LoadVal");
 
-	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		case STC_ABBREV: // "ABBREV"
 			m_sAbbrev = s.GetArgStr();
@@ -776,7 +776,7 @@ bool CItemStone::r_LoadVal( CScript & s ) // Load an item Script
 		case STC_MEMBER: // "MEMBER"
 			{
 			tchar *Arg_ppCmd[8];		// Maximum parameters in one line
-			size_t Arg_Qty = Str_ParseCmds( s.GetArgStr(), Arg_ppCmd, COUNTOF( Arg_ppCmd ), "," );
+			size_t Arg_Qty = Str_ParseCmds( s.GetArgStr(), Arg_ppCmd, CountOf( Arg_ppCmd ), "," );
 			if (Arg_Qty < 1) // must at least provide the member uid
 				return false;
 
@@ -799,7 +799,7 @@ bool CItemStone::r_LoadVal( CScript & s ) // Load an item Script
 	if ( s.IsKeyHead( sm_szLoadKeys[STC_CHARTER], 7 ))
 	{
 		uint i = ATOI(s.GetKey() + 7);
-		if ( i >= COUNTOF(m_sCharter))
+		if ( i >= CountOf(m_sCharter))
 			return false;
 		m_sCharter[i] = s.GetArgStr();
 		return true;
@@ -1002,7 +1002,7 @@ bool CItemStone::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc
 	{
 		lpctstr pszCmd = pszKey + 7;
 		uint i = ATOI(pszCmd);
-		if ( i >= COUNTOF(m_sCharter))
+		if ( i >= CountOf(m_sCharter))
 			sVal = "";
 		else
 			sVal = m_sCharter[i];
@@ -1011,7 +1011,7 @@ bool CItemStone::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc
 	}
 
 
-	STC_TYPE iIndex = (STC_TYPE) FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 );
+	STC_TYPE iIndex = (STC_TYPE) FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 
 	switch ( iIndex )
 	{
@@ -1130,7 +1130,7 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 
 	ASSERT(pSrc);
 
-	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, COUNTOF(sm_szVerbKeys)-1 );
+	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
 	if ( index < 0 )
 	{
 		return( CItem::r_Verb( s, pSrc ));
@@ -1288,7 +1288,7 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 				if ( s.HasArgs() )
 				{
 					int64 piCmd[2];
-					size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, COUNTOF(piCmd));
+					size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd));
 					if ( iArgQty == 2 )
 					{
 						CUID pGuildUid = (uint)(piCmd[0]);

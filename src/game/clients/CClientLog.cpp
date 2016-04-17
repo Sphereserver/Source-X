@@ -99,10 +99,10 @@ bool CClient::addLoginErr(byte code)
 		"The maximum number of password tries has been reached"
 	};
 
-	if (code >= COUNTOF(sm_Login_ErrMsg))
+	if (code >= CountOf(sm_Login_ErrMsg))
 		code = PacketLoginError::Other;
 	
-	g_Log.EventWarn( "%x:Bad Login %d (%s)\n", GetSocketID(), code, sm_Login_ErrMsg[static_cast<size_t>(code)] );
+	g_Log.EventWarn( "%x:Bad Login %d (%s)\n", GetSocketID(), code, sm_Login_ErrMsg[(size_t)(code)] );
 
 	// translate the code into a code the client will understand
 	switch (code)
@@ -210,7 +210,7 @@ bool CClient::addRelay( const CServerDef * pServ )
 		sCustomerID.Add(GetAccount()->GetName());
 
 		dwCustomerId = z_crc32(0L, Z_NULL, 0);
-		dwCustomerId = z_crc32(dwCustomerId, reinterpret_cast<const z_Bytef *>(sCustomerID.GetPtr()), sCustomerID.GetLength());
+		dwCustomerId = z_crc32(dwCustomerId, reinterpret_cast<const z_Bytef *>(sCustomerID.GetPtr()), (z_uInt)sCustomerID.GetLength());
 
 		GetAccount()->m_TagDefs.SetNum("customerid", dwCustomerId);
 	}
@@ -348,7 +348,7 @@ bool CClient::OnRxConsole( const byte * pData, size_t iLen )
 			{
 				if ( !m_zLogin[0] )
 				{
-					if ( (uint)(m_Targ_Text.GetLength()) > (COUNTOF(m_zLogin) - 1) )
+					if ( (uint)(m_Targ_Text.GetLength()) > (CountOf(m_zLogin) - 1) )
 					{
 						SysMessage("Login:\n");
 					}
@@ -413,7 +413,7 @@ bool CClient::OnRxAxis( const byte * pData, size_t iLen )
 			{
 				if ( !m_zLogin[0] )
 				{
-					if ( (uint)(m_Targ_Text.GetLength()) <= (COUNTOF(m_zLogin) - 1) )
+					if ( (uint)(m_Targ_Text.GetLength()) <= (CountOf(m_zLogin) - 1) )
 						strcpy(m_zLogin, m_Targ_Text);
 					m_Targ_Text.Empty();
 				}
@@ -636,7 +636,7 @@ bool CClient::OnRxPing( const byte * pData, size_t iLen )
 		}
 	}
 
-	g_Log.Event( LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Unknown/invalid ping data '0x%x' from %s (Len: %" FMTSIZE_T ")\n", GetSocketID(), pData[0], GetPeerStr(), iLen);
+	g_Log.Event( LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Unknown/invalid ping data '0x%x' from %s (Len: %" PRIuSIZE_T ")\n", GetSocketID(), pData[0], GetPeerStr(), iLen);
 	return false;
 }
 
@@ -657,7 +657,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t iLen )
 		return false;
 
 	tchar * ppLines[16];
-	size_t iQtyLines = Str_ParseCmds(reinterpret_cast<char *>(pRequest), ppLines, COUNTOF(ppLines), "\r\n");
+	size_t iQtyLines = Str_ParseCmds(reinterpret_cast<char *>(pRequest), ppLines, CountOf(ppLines), "\r\n");
 	if (( iQtyLines < 1 ) || ( iQtyLines >= 15 ))	// too long request
 		return false;
 
@@ -665,7 +665,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t iLen )
 	bool fKeepAlive = false;
 	CGTime dateIfModifiedSince;
 	tchar * pszReferer = NULL;
-	size_t iContentLength = 0;
+	size_t stContentLength = 0;
 	for ( size_t j = 1; j < iQtyLines; j++ )
 	{
 		tchar	*pszArgs = Str_TrimWhitespace(ppLines[j]);
@@ -684,7 +684,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t iLen )
 		{
 			pszArgs += 15;
 			GETNONWHITESPACE(pszArgs);
-			iContentLength = strtoul(pszArgs, NULL, 10);
+			stContentLength = strtoul(pszArgs, NULL, 10);
 		}
 		else if ( ! strnicmp( pszArgs, "If-Modified-Since:", 18 ))
 		{
@@ -695,7 +695,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t iLen )
 	}
 
 	tchar * ppRequest[4];
-	size_t iQtyArgs = Str_ParseCmds(ppLines[0], ppRequest, COUNTOF(ppRequest), " ");
+	size_t iQtyArgs = Str_ParseCmds(ppLines[0], ppRequest, CountOf(ppRequest), " ");
 	if (( iQtyArgs < 2 ) || ( strlen(ppRequest[1]) >= _MAX_PATH ))
 		return false;
 
@@ -728,7 +728,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t iLen )
 	
 	if ( memcmp(ppLines[0], "POST", 4) == 0 )
 	{
-		if ( iContentLength > strlen(ppLines[iQtyLines-1]) )
+		if ( stContentLength > strlen(ppLines[iQtyLines-1]) )
 			return false;
 
 		// POST /--WEBBOT-SELF-- HTTP/1.1
@@ -745,7 +745,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t iLen )
 			pWebPage = g_Cfg.FindWebPage(pszReferer);
 		if ( pWebPage )
 		{
-			if ( pWebPage->ServPagePost(this, ppRequest[1], ppLines[iQtyLines-1], iContentLength) )
+			if ( pWebPage->ServPagePost(this, ppRequest[1], ppLines[iQtyLines-1], stContentLength) )
 			{
 				if ( fKeepAlive )
 					return true;
@@ -797,7 +797,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
 
 	if ( !m_Crypt.Init( m_net->m_seed, bincopy.m_Raw, iLen, GetNetState()->isClientKR() ) )
 	{
-		DEBUG_MSG(( "%x:Odd login message length %" FMTSIZE_T "?\n", GetSocketID(), iLen ));
+		DEBUG_MSG(( "%x:Odd login message length %" PRIuSIZE_T "?\n", GetSocketID(), iLen ));
 #ifdef _DEBUG
 		xRecordPacketData(this, (const byte *)pEvent, iLen, "client->server");
 #endif

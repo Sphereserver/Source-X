@@ -54,7 +54,7 @@ bool CItemMap::r_WriteVal(lpctstr pszKey, CString &sVal, CTextConsole *pSrc)
     EXC_TRY("WriteVal");
         if ( !strnicmp(pszKey, "PINS", 4) )
         {
-            sVal.FormatVal(m_Pins.GetCount());
+            sVal.FormatSTVal(m_Pins.GetCount());
             return true;
         }
         if ( !strnicmp(pszKey, "PIN.", 4) )

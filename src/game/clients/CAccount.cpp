@@ -365,7 +365,7 @@ bool CAccounts::Cmd_ListUnused(CTextConsole * pSrc, lpctstr pszDays, lpctstr psz
 		}
 	}
 
-	pSrc->SysMessagef( "Matched %" FMTSIZE_T " of %" FMTSIZE_T " accounts unused for %d days\n",
+	pSrc->SysMessagef( "Matched %" PRIuSIZE_T " of %" PRIuSIZE_T " accounts unused for %d days\n",
 		iCount, iCountOrig, iDaysTest );
 
 	if ( pszVerb && ! strcmpi(pszVerb, "DELETE") )
@@ -373,10 +373,10 @@ bool CAccounts::Cmd_ListUnused(CTextConsole * pSrc, lpctstr pszDays, lpctstr psz
 		size_t iDeleted = iCountOrig - Account_GetCount();
 
 		if ( iDeleted < iCount )
-			pSrc->SysMessagef("%" FMTSIZE_T " deleted, %" FMTSIZE_T " cleared of characters (must try to delete again)\n",
+			pSrc->SysMessagef("%" PRIuSIZE_T " deleted, %" PRIuSIZE_T " cleared of characters (must try to delete again)\n",
 				iDeleted, iCount - iDeleted );
 		else if ( iDeleted > 0 )
-			pSrc->SysMessagef("All %" FMTSIZE_T " unused accounts deleted.\n", iDeleted);
+			pSrc->SysMessagef("All %" PRIuSIZE_T " unused accounts deleted.\n", iDeleted);
 		else
 			pSrc->SysMessagef("No accounts deleted.\n");
 	}
@@ -393,7 +393,7 @@ bool CAccounts::Account_OnCmd( tchar * pszArgs, CTextConsole * pSrc )
 		return false;
 
 	tchar * ppCmd[5];
-	size_t iQty = Str_ParseCmds( pszArgs, ppCmd, COUNTOF( ppCmd ));
+	size_t iQty = Str_ParseCmds( pszArgs, ppCmd, CountOf( ppCmd ));
 
 	VACS_TYPE index;
 	if ( iQty <= 0 ||
@@ -404,7 +404,7 @@ bool CAccounts::Account_OnCmd( tchar * pszArgs, CTextConsole * pSrc )
 	}
 	else
 	{
-		index = (VACS_TYPE) FindTableSorted( ppCmd[0], sm_szVerbKeys, COUNTOF( sm_szVerbKeys )-1 );
+		index = (VACS_TYPE) FindTableSorted( ppCmd[0], sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 	}
 
 	static lpctstr const sm_pszCmds[] =
@@ -433,7 +433,7 @@ bool CAccounts::Account_OnCmd( tchar * pszArgs, CTextConsole * pSrc )
 
 		case VACS_HELP:
 			{
-				for ( size_t i = 0; i < COUNTOF(sm_pszCmds); i++ )
+				for ( size_t i = 0; i < CountOf(sm_pszCmds); i++ )
 					pSrc->SysMessage( sm_pszCmds[i] );
 			}
 			return true;
@@ -507,7 +507,7 @@ bool CAccount::NameStrip( tchar * pszNameOut, lpctstr pszNameInp )
 	if ( !strcmpi(pszNameOut, "EOF") || !strcmpi(pszNameOut, "ACCOUNT") )
 		return false;
 	// Check for name already used.
-	if ( FindTableSorted(pszNameOut, CAccounts::sm_szVerbKeys, COUNTOF(CAccounts::sm_szVerbKeys)-1) >= 0 )
+	if ( FindTableSorted(pszNameOut, CAccounts::sm_szVerbKeys, CountOf(CAccounts::sm_szVerbKeys)-1) >= 0 )
 		return false;
 	if ( g_Cfg.IsObscene(pszNameOut) )
 		return false;
@@ -531,7 +531,7 @@ static lpctstr const sm_szPrivLevels[ PLEVEL_QTY+1 ] =
 PLEVEL_TYPE CAccount::GetPrivLevelText( lpctstr pszFlags ) // static
 {
 	ADDTOCALLSTACK("CAccount::GetPrivLevelText");
-	int level = FindTable( pszFlags, sm_szPrivLevels, COUNTOF(sm_szPrivLevels)-1 );
+	int level = FindTable( pszFlags, sm_szPrivLevels, CountOf(sm_szPrivLevels)-1 );
 	if ( level >= 0 )
 		return static_cast<PLEVEL_TYPE>(level);
 
@@ -666,7 +666,7 @@ size_t CAccount::AttachChar( CChar * pChar )
 		size_t iQty = m_Chars.GetCharCount();
 		if ( iQty > MAX_CHARS_PER_ACCT )
 		{
-			g_Log.Event( LOGM_ACCOUNTS|LOGL_ERROR, "Account '%s' has %" FMTSIZE_T " characters\n", GetName(), iQty );
+			g_Log.Event( LOGM_ACCOUNTS|LOGL_ERROR, "Account '%s' has %" PRIuSIZE_T " characters\n", GetName(), iQty );
 		}
 	}
 
@@ -1126,23 +1126,23 @@ bool CAccount::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 
 	bool	fZero	= false;
 
-	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		case AC_NAME:
 		case AC_ACCOUNT:
 			sVal = m_sName;
 			break;
 		case AC_CHARS:
-			sVal.FormatVal( m_Chars.GetCharCount());
+			sVal.FormatSTVal( m_Chars.GetCharCount() );
 			break;
 		case AC_BLOCK:
-			sVal.FormatVal( IsPriv( PRIV_BLOCKED ));
+			sVal.FormatVal( IsPriv(PRIV_BLOCKED) );
 			break;
 		case AC_CHATNAME:
 			sVal = m_sChatName;
 			break;
 		case AC_TAGCOUNT:
-			sVal.FormatVal( m_TagDefs.GetCount() );
+			sVal.FormatSTVal( m_TagDefs.GetCount() );
 			break;
 		case AC_FIRSTCONNECTDATE:
 			sVal = m_dateFirstConnect.Format(NULL);
@@ -1154,7 +1154,7 @@ bool CAccount::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 			sVal.FormatVal( GetPrivLevel() == PLEVEL_Guest );
 			break;
 		case AC_JAIL:
-			sVal.FormatVal( IsPriv( PRIV_JAILED ));
+			sVal.FormatVal( IsPriv(PRIV_JAILED) );
 			break;
 		case AC_LANG:
 			sVal = m_lang.GetStr();
@@ -1232,7 +1232,7 @@ bool CAccount::r_LoadVal( CScript & s )
 	ADDTOCALLSTACK("CAccount::r_LoadVal");
 	EXC_TRY("LoadVal");
 
-	int i = FindTableHeadSorted( s.GetKey(), sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 );
+	int i = FindTableHeadSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( i < 0 )
 	{
 		return false;
@@ -1495,7 +1495,7 @@ bool CAccount::r_Verb( CScript &s, CTextConsole * pSrc )
 		return true;
 	}
 
-	int i = FindTableSorted( s.GetKey(), sm_szVerbKeys, COUNTOF( sm_szVerbKeys )-1 );
+	int i = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 	if ( i < 0 )
 	{
 		bool bLoad = CScriptObj::r_Verb( s, pSrc );

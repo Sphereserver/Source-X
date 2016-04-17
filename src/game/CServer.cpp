@@ -182,13 +182,13 @@ void CServer::PrintStr( lpctstr pszMsg ) const
 	PrintTelnet( pszMsg );
 }
 
-int CServer::PrintPercent( int iCount, int iTotal )
+ssize_t CServer::PrintPercent( ssize_t iCount, ssize_t iTotal )
 {
 	ADDTOCALLSTACK("CServer::PrintPercent");
 	if ( iTotal <= 0 )
 		return 100;
 
-	int iPercent = MulDivLL( iCount, 100, iTotal );
+	int iPercent = MulDiv( iCount, 100, iTotal );
 	tchar *pszTemp = Str_GetTemp();
 	sprintf(pszTemp, "%d%%", iPercent);
 	size_t len = strlen(pszTemp);
@@ -200,7 +200,7 @@ int CServer::PrintPercent( int iCount, int iTotal )
 	{
 		SysMessage(pszTemp);
 #endif
-		while ( len > 0)	// backspace it
+		while ( len > 0 )	// backspace it
 		{
 			PrintTelnet("\x08");
 #ifndef _WIN32
@@ -337,7 +337,7 @@ void CServer::ListClients( CTextConsole *pConsole ) const
 	else if ( numClients == 1 )
 		sprintf(tmpMsg, "%s\n", g_Cfg.GetDefaultMsg(DEFMSG_HL_ONE_CLIENT));
 	else
-		sprintf(tmpMsg, "%s %" FMTSIZE_T "\n", g_Cfg.GetDefaultMsg(DEFMSG_HL_MANY_CLIENTS), numClients);
+		sprintf(tmpMsg, "%s %" PRIuSIZE_T "\n", g_Cfg.GetDefaultMsg(DEFMSG_HL_MANY_CLIENTS), numClients);
 
 	pConsole->SysMessage(pszMsg);
 	pConsole->SysMessage(tmpMsg);
@@ -539,7 +539,7 @@ bool CServer::OnConsoleCmd( CString & sText, CTextConsole * pSrc )
 				{
 					IThread * thrCurrent = ThreadHolder::getThreadAt(iThreads);
 					if ( thrCurrent != NULL )
-						pSrc->SysMessagef("%" FMTSIZE_T " - Id: %u, Priority: %d, Name: %s.\n", iThreads + 1, thrCurrent->getId(), 
+						pSrc->SysMessagef("%" PRIuSIZE_T " - Id: %u, Priority: %d, Name: %s.\n", iThreads + 1, thrCurrent->getId(), 
 											thrCurrent->getPriority(), thrCurrent->getName() );
 				}
 			} break;
@@ -1135,7 +1135,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 	lpctstr pszKey = s.GetKey();
 	tchar *pszMsg = NULL;
 
-	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, COUNTOF( sm_szVerbKeys )-1 );
+	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 
 	if ( index < 0 )
 	{
@@ -1214,7 +1214,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 				int iTimeDecay(-1);
 
 				tchar* ppArgs[2];
-				if (Str_ParseCmds(s.GetArgRaw(), ppArgs, COUNTOF(ppArgs), ", ") == false)
+				if (Str_ParseCmds(s.GetArgRaw(), ppArgs, CountOf(ppArgs), ", ") == false)
 					return false;
 
 				if (ppArgs[1])
@@ -1257,7 +1257,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			if ( s.HasArgs())
 			{
 				tchar * Arg_ppCmd[5];
-				size_t Arg_Qty = Str_ParseCmds( s.GetArgRaw(), Arg_ppCmd, COUNTOF( Arg_ppCmd ));
+				size_t Arg_Qty = Str_ParseCmds( s.GetArgRaw(), Arg_ppCmd, CountOf( Arg_ppCmd ));
 				if ( Arg_Qty <= 0 )
 					break;
 				// IMPFLAGS_ITEMS
@@ -1304,7 +1304,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			if (s.HasArgs())
 			{
 				tchar * Arg_ppCmd[5];
-				size_t Arg_Qty = Str_ParseCmds( s.GetArgRaw(), Arg_ppCmd, COUNTOF( Arg_ppCmd ));
+				size_t Arg_Qty = Str_ParseCmds( s.GetArgRaw(), Arg_ppCmd, CountOf( Arg_ppCmd ));
 				if ( Arg_Qty <= 0 )
 				{
 					break;
@@ -1356,7 +1356,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			if (s.HasArgs())
 			{
 				tchar * Arg_ppCmd[4];
-				size_t Arg_Qty = Str_ParseCmds( s.GetArgRaw(), Arg_ppCmd, COUNTOF( Arg_ppCmd ));
+				size_t Arg_Qty = Str_ParseCmds( s.GetArgRaw(), Arg_ppCmd, CountOf( Arg_ppCmd ));
 				if ( Arg_Qty <= 0 )
 				{
 					break;
@@ -1535,7 +1535,7 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 					for ( size_t i = 0; i < g_Exp.m_VarDefs.GetCount(); i++ )
 					{
 						if ( ( i % 0x1ff ) == 0 )
-							PrintPercent( i, g_Exp.m_VarDefs.GetCount());
+							PrintPercent( (ssize_t)i, (ssize_t)g_Exp.m_VarDefs.GetCount() );
 
 						CVarDefCont * pCont = g_Exp.m_VarDefs.GetAt(i);
 						if ( pCont != NULL )

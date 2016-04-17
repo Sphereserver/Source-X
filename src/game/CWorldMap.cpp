@@ -460,7 +460,7 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 	else
 		iRetElem = 4;*/
 
-	ASSERT(iRetElem < COUNTOF(ptElem));
+	ASSERT(iRetElem < CountOf(ptElem));
 	if ( 0 != iRetElem && ptElem[0].m_z > ptElem[iRetElem].m_z )
 			 iRetElem = 4;
 	else if ( 1 != iRetElem && ptElem[1].m_z > ptElem[iRetElem].m_z )

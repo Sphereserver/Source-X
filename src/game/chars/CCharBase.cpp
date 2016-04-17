@@ -139,7 +139,7 @@ bool CCharBase::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc 
 	UNREFERENCED_PARAMETER(pSrc);
 	ADDTOCALLSTACK("CCharBase::r_WriteVal");
 	EXC_TRY("WriteVal");
-	switch ( FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		//return as string or hex number or NULL if not set
 		case CBC_THROWDAM:
@@ -247,7 +247,7 @@ bool CCharBase::r_LoadVal( CScript & s )
 	EXC_TRY("LoadVal");
 	if ( ! s.HasArgs())
 		return false;
-	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		//Set as Strings
 		case CBC_THROWDAM:

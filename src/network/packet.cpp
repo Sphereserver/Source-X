@@ -133,10 +133,10 @@ void Packet::seek(size_t pos)
 	m_position = pos;
 }
 
-void Packet::skip(int count)
+void Packet::skip(size_t count)
 {
 	// ensure we can't go lower than 0
-	if (count < 0 && static_cast<size_t>(labs(count)) > m_position)
+	if (count < 0 && (size_t)(labs(count)) > m_position)
 		m_position = 0;
 	else
 		m_position += count;
@@ -992,7 +992,7 @@ void Packet::dump(AbstractString& output) const
 
 	TemporaryString z;
 
-	sprintf(z, "Packet len=%" FMTSIZE_T " id=0x%02x [%s]\n", m_length, m_buffer[0], CGTime::GetCurrentTime().Format(NULL));
+	sprintf(z, "Packet len=%" PRIuSIZE_T " id=0x%02x [%s]\n", m_length, m_buffer[0], CGTime::GetCurrentTime().Format(NULL));
 	output.append(z);
 	output.append("        0  1  2  3  4  5  6  7   8  9  A  B  C  D  E  F\n");
 	output.append("       -- -- -- -- -- -- -- --  -- -- -- -- -- -- -- --\n");
@@ -1212,7 +1212,7 @@ void PacketSend::push(const CClient *client, bool appendTransaction)
 	{
 		// since we are pushing this packet, we should clear the memory
 		// instantly if this packet will never be sent
-		DEBUGNETWORK(("Packet deleted due to exceeding maximum packet size (%" FMTSIZE_T "/%u).\n", m_length, NETWORK_MAXPACKETLEN));
+		DEBUGNETWORK(("Packet deleted due to exceeding maximum packet size (%" PRIuSIZE_T "/%u).\n", m_length, NETWORK_MAXPACKETLEN));
 		delete this;
 		return;
 	}

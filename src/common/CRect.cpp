@@ -577,7 +577,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CString & sVal ) const
 		return pItemDef->r_WriteVal( pszKey, sVal, &g_Serv );
 	}
 	
-	int index = FindTableHeadSorted( pszKey, sm_szLoadKeys, COUNTOF(sm_szLoadKeys)-1 );
+	int index = FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
 	if ( index < 0 )
 		return false;
 
@@ -713,7 +713,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CString & sVal ) const
 bool CPointBase::r_LoadVal( lpctstr pszKey, lpctstr pszArgs )
 {
 	ADDTOCALLSTACK("CPointBase::r_LoadVal");
-	int index = FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF(sm_szLoadKeys)-1 );
+	int index = FindTableSorted( pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
 	if ( index <= 0 )
 	{
 		return false;
@@ -820,7 +820,7 @@ size_t CPointBase::Read( tchar * pszVal )
 	m_z = 0;
 	m_map = 0;
 	tchar * ppVal[4];
-	size_t iArgs = Str_ParseCmds( pszVal, ppVal, COUNTOF( ppVal ), " ,\t" );
+	size_t iArgs = Str_ParseCmds( pszVal, ppVal, CountOf( ppVal ), " ,\t" );
 	switch ( iArgs )
 	{
 		default:
@@ -906,7 +906,7 @@ size_t CGRect::Read( lpctstr pszVal )
 	tchar *pszTemp = Str_GetTemp();
 	strcpy( pszTemp, pszVal );
 	tchar * ppVal[5];
-	size_t i = Str_ParseCmds( pszTemp, ppVal, COUNTOF( ppVal ), " ,\t");
+	size_t i = Str_ParseCmds( pszTemp, ppVal, CountOf( ppVal ), " ,\t");
 	switch (i)
 	{
 		case 5:

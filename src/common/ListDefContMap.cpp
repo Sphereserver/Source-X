@@ -1103,7 +1103,7 @@ bool CListDefMap::r_Write( CTextConsole *pSrc, lpctstr pszString, CString& strVa
 	}
 	else if ( strcmpi(ppCmds[1], "count") == 0 )
 	{
-		strVal.Format("%" FMTSIZE_T, pListBase->GetCount());
+		strVal.Format("%" PRIuSIZE_T, pListBase->GetCount());
 
 		return true;
 	}

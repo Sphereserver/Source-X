@@ -70,7 +70,7 @@ public:
 				return;
 
 			TCHAR * ppMessages[255];
-			size_t iQty = Str_ParseCmds( const_cast<TCHAR*>(pszMessage), ppMessages, COUNTOF(ppMessages), "\n" );
+			size_t iQty = Str_ParseCmds( const_cast<TCHAR*>(pszMessage), ppMessages, CountOf(ppMessages), "\n" );
 			for ( size_t i = 0; i < iQty; ++i )
 			{
 				if ( *ppMessages[i] )
@@ -453,7 +453,7 @@ int CNTWindow::OnCreate( HWND hWnd, LPCREATESTRUCT lParam )
 		pnid.uFlags = NIF_TIP | NIF_ICON | NIF_MESSAGE;
 		pnid.uCallbackMessage = WM_USER_TRAY_NOTIFY;
 		pnid.hIcon  = theApp.LoadIcon( IDR_MAINFRAME );
-		strcpylen(pnid.szTip, theApp.m_pszAppName, COUNTOF(pnid.szTip)-1);
+		strcpylen(pnid.szTip, theApp.m_pszAppName, CountOf(pnid.szTip)-1);
 		Shell_NotifyIcon(NIM_ADD, &pnid);
 	}
 
@@ -906,7 +906,7 @@ bool NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLine, int nCmdShow)
 	char	className[32] = SPHERE_TITLE "Svr";
 	TCHAR	*argv[32];
 	argv[0] = NULL;
-	size_t argc = Str_ParseCmds(lpCmdLine, &argv[1], COUNTOF(argv)-1, " \t") + 1;
+	size_t argc = Str_ParseCmds(lpCmdLine, &argv[1], CountOf(argv)-1, " \t") + 1;
 	if (( argc > 1 ) && _IS_SWITCH(*argv[1]) )
 	{
 		if ( argv[1][1] == 'c' )
@@ -1003,7 +1003,7 @@ void NTWindow_SetWindowTitle( LPCTSTR pszText )
 	if ( Sphere_GetOSInfo()->dwPlatformId > VER_PLATFORM_WIN32s )
 	{
 		theApp.m_wndMain.pnid.uFlags = NIF_TIP;
-		strcpylen(theApp.m_wndMain.pnid.szTip, psTitle, COUNTOF(theApp.m_wndMain.pnid.szTip)-1);
+		strcpylen(theApp.m_wndMain.pnid.szTip, psTitle, CountOf(theApp.m_wndMain.pnid.szTip)-1);
 		Shell_NotifyIcon(NIM_MODIFY, &theApp.m_wndMain.pnid);
 	}
 }

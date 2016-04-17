@@ -53,7 +53,7 @@ public:
 	TRIGRET_TYPE OnContTriggerForLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CString * pResult, CScriptLineContext & StartContext, CScriptLineContext & EndContext, RESOURCE_ID_BASE rid, dword dwArg = 0, int iDecendLevels = 255 );
 	TRIGRET_TYPE OnGenericContTriggerForLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CString * pResult, CScriptLineContext & StartContext, CScriptLineContext & EndContext, int iDecendLevels = 255 );
 	int ContentCount( RESOURCE_ID_BASE rid, dword dwArg = 0 );
-	int ContentCountAll() const;
+	size_t ContentCountAll() const;
 	int ContentConsume( RESOURCE_ID_BASE rid, int iQty = 1, bool fTest = false, dword dwArg = 0 );
 
 	int ResourceConsume( const CResourceQtyArray * pResources, int iReplicationQty, bool fTest = false, dword dwArg = 0 );

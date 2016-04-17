@@ -527,7 +527,7 @@ bool CPartyDef::r_LoadVal( CScript &s )
 	EXC_TRY("LoadVal");
 	lpctstr pszKey = s.GetKey();
 
-	int index = FindTableHeadSorted(pszKey, sm_szLoadKeys, COUNTOF(sm_szLoadKeys) - 1);
+	int index = FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
 	switch ( index )
 	{
 		case PDC_SPEECHFILTER:
@@ -593,7 +593,7 @@ bool CPartyDef::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole *pSrc )
 	}
 
 	bool fZero = false;
-	switch ( FindTableHeadSorted(pszKey, sm_szLoadKeys, COUNTOF(sm_szLoadKeys) - 1) )
+	switch ( FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1) )
 	{
 		case PDC_ISSAMEPARTYOF:
 		{
@@ -611,7 +611,7 @@ bool CPartyDef::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole *pSrc )
 		} break;
 
 		case PDC_MEMBERS:
-			sVal.FormatVal(m_Chars.GetCharCount());
+			sVal.FormatSTVal(m_Chars.GetCharCount());
 			break;
 
 		case PDC_SPEECHFILTER:
@@ -635,7 +635,7 @@ bool CPartyDef::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole *pSrc )
 			if ( *pszKey == '.' )	// do we have an argument?
 			{
 				SKIP_SEPARATORS(pszKey);
-				size_t iQty = static_cast<size_t>(Exp_GetVal(pszKey));
+				size_t iQty = (size_t)(Exp_GetVal(pszKey));
 				if ( iQty >= m_TagDefs.GetCount() )
 					return false;	// trying to get non-existant tag
 
@@ -664,7 +664,7 @@ bool CPartyDef::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole *pSrc )
 		}
 
 		case PDC_TAGCOUNT:
-			sVal.FormatVal(m_TagDefs.GetCount());
+			sVal.FormatSTVal(m_TagDefs.GetCount());
 			break;
 
 		default:
@@ -699,7 +699,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 		}
 	}
 
-	int iIndex = FindTableSorted(pszKey, sm_szVerbKeys, COUNTOF(sm_szVerbKeys) - 1);
+	int iIndex = FindTableSorted(pszKey, sm_szVerbKeys, CountOf(sm_szVerbKeys) - 1);
 	switch ( iIndex )
 	{
 		case PDV_ADDMEMBER:

@@ -95,7 +95,7 @@ public:
 	void SysMessage( lpctstr pMsg ) const;
 	void PrintTelnet( lpctstr pszMsg ) const;
 	void PrintStr( lpctstr pMsg ) const;
-	int  PrintPercent( int iCount, int iTotal );
+	ssize_t  PrintPercent( ssize_t iCount, ssize_t iTotal );
 
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 	virtual bool r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc = NULL );

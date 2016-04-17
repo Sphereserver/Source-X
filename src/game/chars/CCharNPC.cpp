@@ -122,7 +122,7 @@ bool CCharNPC::r_LoadVal( CChar * pChar, CScript &s )
 		case CNC_SPELLADD:
 		{
 			int64 ppCmd[255];
-			size_t count = Str_ParseCmds(s.GetArgStr(), ppCmd, COUNTOF(ppCmd));
+			size_t count = Str_ParseCmds(s.GetArgStr(), ppCmd, CountOf(ppCmd));
 			if (count < 1)
 				return false;
 			for (size_t i = 0; i < count; i++)
@@ -303,7 +303,7 @@ void CChar::NPC_CreateTrigger()
 	CCharBase *pCharDef = Char_GetDef();
 	TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
 	lpctstr pszTrigName = "@Create";
-	CTRIG_TYPE iAction = (CTRIG_TYPE)FindTableSorted(pszTrigName, sm_szTrigName, COUNTOF(sm_szTrigName) - 1);
+	CTRIG_TYPE iAction = (CTRIG_TYPE)FindTableSorted(pszTrigName, sm_szTrigName, CountOf(sm_szTrigName) - 1);
 
 	// 2) TEVENTS
 	for (size_t i = 0; i < pCharDef->m_TEvents.GetCount(); ++i)

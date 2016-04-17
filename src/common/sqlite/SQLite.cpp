@@ -333,7 +333,7 @@ bool CSQLite::r_WriteVal(lpctstr pszKey, CString &sVal, CTextConsole *pSrc)
 	ADDTOCALLSTACK("CSQLite::r_WriteVal");
 	EXC_TRY("WriteVal");
 
-	int index = FindTableHeadSorted(pszKey, sm_szLoadKeys, COUNTOF(sm_szLoadKeys)-1);
+	int index = FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1);
 	switch ( index )
 	{
 		case LDBO_CONNECTED:
@@ -365,7 +365,7 @@ bool CSQLite::r_Verb(CScript & s, CTextConsole * pSrc)
 	ADDTOCALLSTACK("CSQLite::r_Verb");
 	EXC_TRY("Verb");
 
-	int index = FindTableSorted(s.GetKey(), sm_szVerbKeys, COUNTOF(sm_szVerbKeys)-1);
+	int index = FindTableSorted(s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys)-1);
 	switch ( index )
 	{
 		case LDBOV_CLOSE:

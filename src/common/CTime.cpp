@@ -168,7 +168,7 @@ bool CGTime::Read(tchar *pszVal)
 	// Read the full date format.
 
 	tchar *ppCmds[10];
-	size_t iQty = Str_ParseCmds( pszVal, ppCmds, COUNTOF(ppCmds), "/,: \t");
+	size_t iQty = Str_ParseCmds( pszVal, ppCmds, CountOf(ppCmds), "/,: \t");
 	if ( iQty < 6 )
 		return false;
 

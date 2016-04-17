@@ -445,7 +445,7 @@ bool CItemSpawn::r_LoadVal(CScript & s)
 	ADDTOCALLSTACK("CitemSpawn:r_LoadVal");
 	EXC_TRY("LoadVal");
 
-	int iCmd = FindTableSorted(s.GetKey(), sm_szLoadKeys, COUNTOF(sm_szLoadKeys) - 1);
+	int iCmd = FindTableSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
 	if ( iCmd < 0 )
 		return CItem::r_LoadVal(s);
 

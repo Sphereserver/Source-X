@@ -122,26 +122,26 @@ public:
 	* @brief Get the length of the file.
 	* @return the length of the file.
 	*/
-	dword GetLength();
+	size_t GetLength();
 	/**
 	* @brief Gets the position indicator of the file.
 	* @return The position indicator of the file.
 	*/
-	virtual dword GetPosition() const;
+	virtual size_t GetPosition() const;
 	/**
 	* @brief Reads data from the file.
 	* @param pData buffer where store the readed data.
-	* @param dwLength count of bytes to read.
+	* @param stLength count of bytes to read.
 	* @return count of bytes readed.
 	*/
-	virtual dword Read( void * pData, dword dwLength ) const;
+	virtual size_t Read( void * pData, size_t stLength ) const;
 	/**
 	* @brief Set the position indicator.
-	* @param lOffset position to set.
-	* @param iOrigin origin (current position or init of the file).
+	* @param stOffset position to set.
+	* @param stOrigin origin (current position or init of the file).
 	* @return position where the position indicator is set on success, -1 on error.
 	*/
-	virtual dword Seek( int lOffset = 0, uint iOrigin = SEEK_SET );
+	virtual size_t Seek( size_t stOffset = 0, int iOrigin = SEEK_SET );
 	/**
 	* @brief Sets the position indicator at the begin of the file.
 	*/
@@ -150,18 +150,19 @@ public:
 	* @brief Sets the position indicator at the end of the file.
 	* @return The length of the file on success, -1 on error.
 	*/
-	dword SeekToEnd();
+	size_t SeekToEnd();
 	/**
 	* @brief writes supplied data into file.
 	* @param pData data to write.
 	* @param dwLength lenght of the data to write.
 	* @return true is success, false otherwise.
 	*/
-	virtual bool Write( const void * pData, dword dwLength ) const;
+	virtual bool Write( const void * pData, size_t stLength ) const;
 	///@}
 
 public:
-	OSFILE_TYPE m_hFile;	///< File type.
+	llong m_llFile;			/// File descriptor (POSIX, int) or HANDLE (Windows, size of a pointer).
+
 protected:
 	CString m_strFileName;	///< File name (with path).
 	uint m_uMode;   ///< MMSYSTEM may use 32 bit flags.
@@ -341,11 +342,6 @@ public:
 	*/
 	bool IsEOF() const;
 	/**
-	* @brief Get position indicator position.
-	* @return The position indicator if file is opened, -1 otherwise.
-	*/
-	dword GetPosition() const;
-	/**
 	* @brief print in file a string with arguments (printf like).
 	* @param pFormat string in "printf like" format.
 	* @param ... argument list.
@@ -358,7 +354,7 @@ public:
 	* @param sizemax count of bytes to read.
 	* @return count of bytes readed.
 	*/
-	dword Read( void * pBuffer, size_t sizemax ) const;
+	size_t Read( void * pBuffer, size_t sizemax ) const;
 	/**
 	* @brief Reads from a file a line (up to sizemax - 1 characters).
 	* @param pBuffer buffer where store the readed data.
@@ -366,13 +362,6 @@ public:
 	* @return the str readed if success, NULL on errors.
 	*/
 	tchar * ReadString( tchar * pBuffer, size_t sizemax ) const;
-	/**
-	* @brief Set the position indicator.
-	* @param offset position to set.
-	* @param origin origin (current position or init of the file).
-	* @return position where the position indicator is set on success, 0 on error.
-	*/
-	virtual dword Seek( int offset = 0, uint origin = SEEK_SET );
 	/**
 	* @brief print in file a string with arguments (printf like).
 	* @param pFormat string in "printf like" format.
@@ -387,9 +376,9 @@ public:
 	* @return true is success, false otherwise.
 	*/
 #ifndef _WIN32
-	bool Write( const void * pData, dword iLen ) const;
+	bool Write( const void * pData, size_t stLen ) const;
 #else
-	bool Write( const void * pData, dword iLen );
+	bool Write( const void * pData, size_t stLen );
 #endif
 	/**
 	* @brief write string into file.

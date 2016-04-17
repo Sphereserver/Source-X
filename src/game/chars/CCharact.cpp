@@ -1439,10 +1439,10 @@ void CChar::SoundChar( CRESND_TYPE type )
 				switch ( type )
 				{
 					case CRESND_GETHIT:
-						id = sm_Snd_Wom_Omf[ Calc_GetRandVal( COUNTOF(sm_Snd_Wom_Omf)) ];
+						id = sm_Snd_Wom_Omf[ Calc_GetRandVal( CountOf(sm_Snd_Wom_Omf)) ];
 						break;
 					case CRESND_DIE:
-						id = sm_Snd_Wom_Die[ Calc_GetRandVal( COUNTOF(sm_Snd_Wom_Die)) ];
+						id = sm_Snd_Wom_Die[ Calc_GetRandVal( CountOf(sm_Snd_Wom_Die)) ];
 						break;
 					default:
 						break;
@@ -1453,10 +1453,10 @@ void CChar::SoundChar( CRESND_TYPE type )
 				switch ( type )
 				{
 					case CRESND_GETHIT:
-						id = sm_Snd_Man_Omf[ Calc_GetRandVal( COUNTOF(sm_Snd_Man_Omf)) ];
+						id = sm_Snd_Man_Omf[ Calc_GetRandVal( CountOf(sm_Snd_Man_Omf)) ];
 						break;
 					case CRESND_DIE:
-						id = sm_Snd_Man_Die[ Calc_GetRandVal( COUNTOF(sm_Snd_Man_Die)) ];
+						id = sm_Snd_Man_Die[ Calc_GetRandVal( CountOf(sm_Snd_Man_Die)) ];
 						break;
 					default:
 						break;
@@ -1553,7 +1553,7 @@ void CChar::SoundChar( CRESND_TYPE type )
 				0x137,	//= hit03 = (hit sand)
 				0x13b	//= hit07 = (hit slap)
 			};
-			id = sm_Snd_Hit[ Calc_GetRandVal( COUNTOF( sm_Snd_Hit )) ];
+			id = sm_Snd_Hit[ Calc_GetRandVal( CountOf( sm_Snd_Hit )) ];
 		}
 	}
 
@@ -2076,7 +2076,7 @@ void CChar::EatAnim( lpctstr pszName, short iQty )
 {
 	ADDTOCALLSTACK("CChar::EatAnim");
 	static const SOUND_TYPE sm_EatSounds[] = { 0x03a, 0x03b, 0x03c };
-	Sound(sm_EatSounds[Calc_GetRandVal(COUNTOF(sm_EatSounds))]);
+	Sound(sm_EatSounds[Calc_GetRandVal(CountOf(sm_EatSounds))]);
 
 	if ( !IsStatFlag(STATF_OnHorse) )
 		UpdateAnimate(ANIM_EAT);
@@ -3656,7 +3656,7 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 	}
 	else
 	{
-		iAction = (CTRIG_TYPE) FindTableSorted( pszTrigName, sm_szTrigName, COUNTOF(sm_szTrigName)-1 );
+		iAction = (CTRIG_TYPE) FindTableSorted( pszTrigName, sm_szTrigName, CountOf(sm_szTrigName)-1 );
 	}
 	SetTriggerActive( pszTrigName );
 
@@ -3665,7 +3665,7 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 	TemporaryString sCharTrigName;
 	sprintf(sCharTrigName, "@char%s", pszTrigName+1);
 
-	int iCharAction = (CTRIG_TYPE) FindTableSorted( sCharTrigName, sm_szTrigName, COUNTOF(sm_szTrigName)-1 );
+	int iCharAction = (CTRIG_TYPE) FindTableSorted( sCharTrigName, sm_szTrigName, CountOf(sm_szTrigName)-1 );
 
 	EXC_TRY("Trigger");
 

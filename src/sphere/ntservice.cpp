@@ -316,7 +316,7 @@ bailout1:
 	sfaFailure.dwResetPeriod = (1 * 60 * 60); // reset failure count after an hour passes with no fails
 	sfaFailure.lpRebootMsg = NULL;	// no reboot message
 	sfaFailure.lpCommand = NULL;	// no command executed
-	sfaFailure.cActions = COUNTOF(scAction);		// number of actions
+	sfaFailure.cActions = CountOf(scAction);		// number of actions
 	sfaFailure.lpsaActions = scAction;	// 
 	if ( !ChangeServiceConfig2(schService, SERVICE_CONFIG_FAILURE_ACTIONS, &sfaFailure) )
 	{
@@ -452,7 +452,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	TCHAR	*argv[32];
 	argv[0] = NULL;
-	int argc = (int)Str_ParseCmds(lpCmdLine, &argv[1], COUNTOF(argv)-1, " \t") + 1;
+	int argc = (int)Str_ParseCmds(lpCmdLine, &argv[1], CountOf(argv)-1, " \t") + 1;
 
 	if ( Sphere_GetOSInfo()->dwPlatformId != VER_PLATFORM_WIN32_NT )
 	{

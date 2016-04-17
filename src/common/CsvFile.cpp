@@ -82,7 +82,7 @@ size_t CSVFile::ReadRowContent(tchar ** ppOutput, size_t rowIndex, size_t column
 	ADDTOCALLSTACK("CSVFile::ReadRowContent");
 	ASSERT(columns > 0 && columns <= MAX_COLUMNS);
 	if ( GetPosition() != rowIndex )
-		Seek((int)(rowIndex), SEEK_SET);
+		Seek(rowIndex, SEEK_SET);
 
 	tchar * pszLine = Str_GetTemp();
 	if ( ReadString(pszLine, THREAD_STRING_LENGTH) == NULL )

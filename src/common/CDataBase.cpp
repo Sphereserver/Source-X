@@ -359,7 +359,7 @@ bool CDataBase::r_LoadVal(CScript & s)
 	lpctstr pszKey = s.GetKey();
 	EXC_TRY("LoadVal");
 
-	int index = FindTableHeadSorted(pszKey, sm_szLoadKeys, COUNTOF(sm_szLoadKeys)-1);
+	int index = FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1);
 
 	switch ( index )
 	{
@@ -389,7 +389,7 @@ bool CDataBase::r_WriteVal(lpctstr pszKey, CString &sVal, CTextConsole *pSrc)
 		return true;
 	}
 
-	int index = FindTableHeadSorted(pszKey, sm_szLoadKeys, COUNTOF(sm_szLoadKeys)-1);
+	int index = FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1);
 	switch ( index )
 	{
 		case DBO_AEXECUTE:
@@ -402,7 +402,7 @@ bool CDataBase::r_WriteVal(lpctstr pszKey, CString &sVal, CTextConsole *pSrc)
 				if ( pszKey[0] != '\0' )
 				{
 					tchar * ppArgs[2];
-					if ( Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, COUNTOF( ppArgs )) != 2) 
+					if ( Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf( ppArgs )) != 2) 
 					{
 						DEBUG_ERR(("Not enough arguments for %s\n", CDataBase::sm_szLoadKeys[index]));
 					}
@@ -468,7 +468,7 @@ bool CDataBase::r_Verb(CScript & s, CTextConsole * pSrc)
 	if (!g_Cfg.m_bMySql)
 		return true;
 
-	int index = FindTableSorted(s.GetKey(), sm_szVerbKeys, COUNTOF(sm_szVerbKeys)-1);
+	int index = FindTableSorted(s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys)-1);
 	switch ( index )
 	{
 		case DBOV_CLOSE:

@@ -19,6 +19,8 @@ Notes:
 
 ***************************************************************************/
 
+#include "../datatypes.h"
+
 /* use intrinsic rotate if possible */
 #define ROL( x, y ) ( ( (x) << (y) ) | ( (x) >> ( 32 - (y) ) ) )
 #define ROR( x, y ) ( ( (x) >> (y) ) | ( (x) << ( 32 - (y) ) ) )
@@ -34,11 +36,11 @@ Notes:
 
 // Change this to compile on a BigEndian machine
 #if !defined(Q_OS_MAC)
-#define LittleEndian 1
+	#define IsLittleEndian 1	// Renamed it since it conflicted with windows.h
 #endif
 #define ALIGN32 1
 
-#if LittleEndian
+#if IsLittleEndian
 #define		Bswap(x)			(x)		/* NOP for little-endian machines */
 #define		ADDR_XOR			0		/* NOP for little-endian machines */
 #else

@@ -60,7 +60,7 @@ public:
 	void expand(size_t size = 0); // expand packet (resize whilst maintaining position)
 	void resize(size_t newsize); // resize packet
 	void seek(size_t pos = 0); // seek to position
-	void skip(int count = 1); // skip count bytes
+	void skip(size_t count = 1); // skip count bytes
 
 	byte &operator[](size_t index);
 	const byte &operator[](size_t index) const;

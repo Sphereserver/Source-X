@@ -18,21 +18,17 @@ CacheableScriptFile::~CacheableScriptFile()
 
 bool CacheableScriptFile::OpenBase(void *pExtra) 
 {
-	if( useDefaultFile() ) 
-	{
+	if ( useDefaultFile() ) 
 		return CFileText::OpenBase(pExtra);
-	}
 
 	ADDTOCALLSTACK("CacheableScriptFile::OpenBase");
 
 	m_pStream = fopen(GetFilePath(), GetModeStr());
-	if( m_pStream == NULL ) 
-	{
+	if ( m_pStream == NULL ) 
 		return false;
-	}
 
 	m_fileContent = new std::vector<std::string>();
-	m_hFile = (OSFILE_TYPE)STDFUNC_FILENO(m_pStream);
+	m_llFile = STDFUNC_FILENO(m_pStream);
 	m_closed = false;
 	TemporaryString buf;
 	size_t nStrLen;
@@ -59,7 +55,7 @@ bool CacheableScriptFile::OpenBase(void *pExtra)
 
 	fclose(m_pStream);
 	m_pStream = NULL;
-	m_hFile = 0;
+	m_llFile = 0;
 	m_currentLine = 0;
 	m_realFile = true;
 
@@ -135,41 +131,6 @@ tchar * CacheableScriptFile::ReadString(tchar *pBuffer, size_t sizemax)
 	}
 
 	return pBuffer;
-}
-
-dword CacheableScriptFile::Seek(int offset, uint origin) 
-{
-	if( useDefaultFile() ) 
-	{
-		return CFileText::Seek(offset, origin);
-	}
-
-	ADDTOCALLSTACK("CacheableScriptFile::Seek");
-	size_t linenum = offset;
-
-	if( origin != SEEK_SET ) 
-	{
-		linenum = 0;	//	do not support not SEEK_SET rotation
-	}
-	
-	if ( linenum <= m_fileContent->size() )
-	{
-		m_currentLine = linenum;
-		return (dword)(linenum);
-	}
-
-	return 0;
-}
-
-dword CacheableScriptFile::GetPosition() const 
-{
-	if( useDefaultFile() ) 
-	{
-		return CFileText::GetPosition();
-	}
-
-	ADDTOCALLSTACK("CacheableScriptFile::GetPosition");
-	return (dword)(m_currentLine);
 }
 
 void CacheableScriptFile::dupeFrom(CacheableScriptFile *other) 

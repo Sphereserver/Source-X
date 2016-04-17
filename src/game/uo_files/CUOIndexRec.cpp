@@ -29,12 +29,12 @@ void CUOIndexRec::SetupIndex( dword dwOffset, dword dwLength )
 
 dword CUOIndexRec::GetFileOffset() const
 {
-    return( m_dwOffset );
+    return ( m_dwOffset );
 }
 
 dword CUOIndexRec::GetBlockLength() const
 {
-    return( m_dwLength &~ 0x80000000 );
+    return ( m_dwLength &~ 0x80000000 );
 }
 
 bool CUOIndexRec::IsVerData() const
@@ -44,5 +44,5 @@ bool CUOIndexRec::IsVerData() const
 
 bool CUOIndexRec::HasData() const
 {
-    return( m_dwOffset != 0xFFFFFFFF && m_dwLength != 0 );
+    return ( m_dwOffset != 0xFFFFFFFF && m_dwLength != 0 );
 }

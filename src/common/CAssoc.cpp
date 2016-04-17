@@ -17,7 +17,7 @@ lpctstr CValStr::FindName( int iVal ) const
 		if ( iVal < this[i + 1].m_iVal )
 			return( this[i].m_pszName );
 	}
-	return( this[i - 1].m_pszName );
+	return this[i - 1].m_pszName;
 }
 
 //***************************************************************************

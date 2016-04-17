@@ -1153,7 +1153,7 @@ bool CItemMultiCustom::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute com
 	// Speaking in this multis region.
 	// return: true = command for the multi.
 
-	int iCmd = FindTableSorted( s.GetKey(), sm_szVerbKeys, COUNTOF( sm_szVerbKeys )-1 );
+	int iCmd = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 	if ( iCmd < 0 )
 	{
 		return( CItemMulti::r_Verb( s, pSrc ));
@@ -1166,7 +1166,7 @@ bool CItemMultiCustom::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute com
 		case IMCV_ADDITEM:
 		{
 			tchar * ppArgs[4];
-			size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, COUNTOF(ppArgs), ",");
+			size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, CountOf(ppArgs), ",");
 			if ( iQty != 4 )
 				return false;
 
@@ -1180,7 +1180,7 @@ bool CItemMultiCustom::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute com
 		case IMCV_ADDMULTI:
 		{
 			tchar * ppArgs[4];
-			size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, COUNTOF(ppArgs), ",");
+			size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, CountOf(ppArgs), ",");
 			if ( iQty != 4 )
 				return false;
 
@@ -1228,7 +1228,7 @@ bool CItemMultiCustom::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute com
 		case IMCV_REMOVEITEM:
 		{
 			tchar * ppArgs[4];
-			size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, COUNTOF(ppArgs), ",");
+			size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, CountOf(ppArgs), ",");
 			if ( iQty != 4 )
 				return false;
 
@@ -1318,7 +1318,7 @@ bool CItemMultiCustom::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole 
 	ADDTOCALLSTACK("CItemMultiCustom::r_WriteVal");
 	EXC_TRY("WriteVal");
 
-	int index = FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF(sm_szLoadKeys)-1 );
+	int index = FindTableSorted( pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
 	if ( index == -1 )
 	{
 		if ( !strnicmp(pszKey, "DESIGN.", 5) )
@@ -1329,18 +1329,18 @@ bool CItemMultiCustom::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole 
 	{
 		case IMCC_COMPONENTS:
 			pszKey += 10;
-			sVal.FormatVal(m_designMain.m_vectorComponents.size());
+			sVal.FormatSTVal(m_designMain.m_vectorComponents.size());
 			break;
 
 		case IMCC_DESIGN:
 		{
 			pszKey += 6;
 			if ( !*pszKey )
-				sVal.FormatVal(m_designMain.m_vectorComponents.size());
+				sVal.FormatSTVal(m_designMain.m_vectorComponents.size());
 			else if ( *pszKey == '.' )
 			{
 				SKIP_SEPARATORS(pszKey);
-				size_t iQty = static_cast<size_t>( Exp_GetVal(pszKey) );
+				size_t iQty = (size_t)( Exp_GetVal(pszKey) );
 				if ( iQty >= m_designMain.m_vectorComponents.size() )
 					return false;
 
@@ -1381,7 +1381,7 @@ bool CItemMultiCustom::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole 
 
 		case IMCC_FIXTURES:
 			pszKey += 8;
-			sVal.FormatVal(GetFixtureCount());
+			sVal.FormatSTVal(GetFixtureCount());
 			break;
 
 		case IMCC_REVISION:
@@ -1412,7 +1412,7 @@ bool CItemMultiCustom::r_LoadVal( CScript & s  )
 		if ( s.IsKey("COMP") )
 		{
 			tchar * ppArgs[5];
-			size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, COUNTOF(ppArgs), ",");
+			size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, CountOf(ppArgs), ",");
 			if ( iQty != 5 )
 				return false;
 
@@ -1577,8 +1577,8 @@ bool CItemMultiCustom::LoadValidItems()
 		strcat(pszRowFull, itCsv->second.c_str());
 	}
 
-	g_Log.EventDebug("header count '%" FMTSIZE_T "', header text '%s'\n", csvDataRow.size(), pszRowFull);
-	g_Log.EventDebug("column count '%" FMTSIZE_T "', row text '%s'\n", csvDataRow.size(), pszHeaderFull);
+	g_Log.EventDebug("header count '%" PRIuSIZE_T "', header text '%s'\n", csvDataRow.size(), pszRowFull);
+	g_Log.EventDebug("column count '%" PRIuSIZE_T "', row text '%s'\n", csvDataRow.size(), pszHeaderFull);
 	EXC_DEBUG_END;
 	return false;
 }

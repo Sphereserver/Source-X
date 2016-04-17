@@ -142,7 +142,8 @@ CItem *CContainer::ContentFind( RESOURCE_ID_BASE rid, dword dwArg, int iDecendLe
 	return pItem;
 }
 
-TRIGRET_TYPE CContainer::OnContTriggerForLoop( CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs, CString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext, RESOURCE_ID_BASE rid, dword dwArg, int iDecendLevels )
+TRIGRET_TYPE CContainer::OnContTriggerForLoop( CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs,
+	CString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext, RESOURCE_ID_BASE rid, dword dwArg, int iDecendLevels )
 {
 	ADDTOCALLSTACK("CContainer::OnContTriggerForLoop");
 	if ( rid.GetResIndex() != 0 )
@@ -186,7 +187,7 @@ TRIGRET_TYPE CContainer::OnContTriggerForLoop( CScript &s, CTextConsole *pSrc, C
 			}
 		}
 	}
-	if ( EndContext.m_lOffset <= StartContext.m_lOffset )
+	if ( EndContext.m_pOffset <= StartContext.m_pOffset )
 	{
 		CScriptObj *pScript = dynamic_cast<CScriptObj *>(this);
 		TRIGRET_TYPE iRet = pScript->OnTriggerRun(s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult);
@@ -198,7 +199,8 @@ TRIGRET_TYPE CContainer::OnContTriggerForLoop( CScript &s, CTextConsole *pSrc, C
 	return TRIGRET_ENDIF;
 }
 
-TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop( CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs, CString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext, int iDecendLevels )
+TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop( CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs,
+	CString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext, int iDecendLevels )
 {
 	ADDTOCALLSTACK("CContainer::OnGenericContTriggerForLoop");
 	CItem *pItemNext = NULL;
@@ -233,7 +235,7 @@ TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop( CScript &s, CTextConsole *
 			EndContext = s.GetContext();
 		}
 	}
-	if ( EndContext.m_lOffset <= StartContext.m_lOffset )
+	if ( EndContext.m_pOffset <= StartContext.m_pOffset )
 	{
 		CScriptObj *pScript = dynamic_cast<CScriptObj *>(this);
 		TRIGRET_TYPE iRet = pScript->OnTriggerRun(s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult);
@@ -256,7 +258,7 @@ CItem *CContainer::ContentFindRandom() const
 {
 	ADDTOCALLSTACK("CContainer::ContentFindRandom");
 	// returns Pointer of random item, NULL if player carrying none
-	return dynamic_cast<CItem *>(GetAt(Calc_GetRandVal(GetCount())));
+	return dynamic_cast<CItem *>(GetAt(Calc_GetRandVal((int32)GetCount())));
 }
 
 int CContainer::ContentConsume( RESOURCE_ID_BASE rid, int amount, bool fTest, dword dwArg )
@@ -476,12 +478,12 @@ int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iRepli
 	return iQtyMin;
 }
 
-int CContainer::ContentCountAll() const
+size_t CContainer::ContentCountAll() const
 {
 	ADDTOCALLSTACK("CContainer::ContentCountAll");
 	// RETURN:
 	//  A count of all the items in this container and sub contianers.
-	int iTotal = 0;
+	size_t iTotal = 0;
 	for ( CItem *pItem = GetContentHead(); pItem != NULL; pItem = pItem->GetNext() )
 	{
 		iTotal++;
@@ -553,7 +555,7 @@ bool CContainer::r_WriteValContainer( lpctstr pszKey, CString &sVal, CTextConsol
 		"restest"
 	};
 
-	int i = FindTableHeadSorted(pszKey, sm_szParams, COUNTOF(sm_szParams));
+	int i = FindTableHeadSorted(pszKey, sm_szParams, CountOf(sm_szParams));
 	if ( i < 0 )
 		return false;
 
@@ -572,17 +574,17 @@ bool CContainer::r_WriteValContainer( lpctstr pszKey, CString &sVal, CTextConsol
 		}
 
 		case 1:			//	fcount
-			sVal.FormatVal(ContentCountAll());
+			sVal.FormatSTVal(ContentCountAll());
 			break;
 
 		case 2:			//	rescount
-			sVal.FormatVal(*pKey ? ContentCount(g_Cfg.ResourceGetID(RES_ITEMDEF, pKey)) : GetCount());
+			sVal.FormatSTVal(*pKey ? ContentCount(g_Cfg.ResourceGetID(RES_ITEMDEF, pKey)) : GetCount());
 			break;
 
 		case 3:			//	restest
 		{
 			CResourceQtyArray Resources;
-			sVal.FormatVal(Resources.Load(pKey) ? ResourceConsume(&Resources, 1, true) : 0);
+			sVal.FormatSTVal(Resources.Load(pKey) ? ResourceConsume(&Resources, 1, true) : 0);
 			break;
 		}
 

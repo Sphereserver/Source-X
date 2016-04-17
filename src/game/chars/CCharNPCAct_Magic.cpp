@@ -186,9 +186,9 @@ bool CChar::NPC_FightMagery(CChar * pChar)
 	}
 	uchar i = 0;
 	if (pWand)
-		i = (uchar)(Calc_GetRandVal2(0, count));	//chance between all spells + wand
+		i = (uchar)(Calc_GetRandVal2(0, (int32)count));	//chance between all spells + wand
 	else
-		i = (uchar)(Calc_GetRandVal2(0, count-1));
+		i = (uchar)(Calc_GetRandVal2(0, (int32)(count-1)));
 
 	if (i > count)	// if i > count then we use wand to cast.
 	{

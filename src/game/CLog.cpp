@@ -287,7 +287,7 @@ void _cdecl CLog::CatchEvent( const CSphereError * pErr, lpctstr pszCatchContext
 	{
 		tchar szMsg[512];
 		LOGL_TYPE eSeverity;
-		int iLen = 0;
+		size_t stLen = 0;
 		if ( pErr != NULL )
 		{
 			eSeverity = pErr->m_eSeverity;
@@ -296,22 +296,22 @@ void _cdecl CLog::CatchEvent( const CSphereError * pErr, lpctstr pszCatchContext
 				pAssertErr->GetErrorMessage(szMsg, sizeof(szMsg), 0);
 			else
 				pErr->GetErrorMessage(szMsg, sizeof(szMsg));
-			iLen = strlen(szMsg);
+			stLen = strlen(szMsg);
 		}
 		else
 		{
 			eSeverity = LOGL_CRIT;
 			strcpy(szMsg, "Exception");
-			iLen = (int)strlen(szMsg);
+			stLen = strlen(szMsg);
 		}
 
-		iLen += sprintf( szMsg+iLen, ", in " );
+		stLen += sprintf( szMsg+stLen, ", in " );
 
 		va_list vargs;
 		va_start(vargs, pszCatchContext);
 
-		iLen += vsprintf(szMsg+iLen, pszCatchContext, vargs);
-		iLen += sprintf(szMsg+iLen, "\n");
+		stLen += vsprintf(szMsg+stLen, pszCatchContext, vargs);
+		stLen += sprintf(szMsg+stLen, "\n");
 
 		EventStr(eSeverity, szMsg);
 		va_end(vargs);

@@ -19,7 +19,6 @@
 	typedef LPCTSTR		lpctstr;
 #endif
 
-
 // no #pragma once
 #ifndef _INC_DATATYPES_H
 #define _INC_DATATYPES_H
@@ -74,15 +73,12 @@ typedef	uint64_t		uint64;
 
 #ifdef _32B
 	#define POINTER_MAX		UINT32_MAX
-#else //!_32B
+#else // !_32B
 	#define POINTER_MAX		UINT64_MAX
 #endif // _32B
 
 
 #ifndef _WIN32			//	assume unix if !_WIN32
-
-	// printf format identifiers
-	#define FMTSIZE_T "zu"		// linux uses %zu to format size_t
 
 	#include <wchar.h>
 	#ifdef UNICODE
@@ -98,10 +94,20 @@ typedef	uint64_t		uint64;
 	typedef	tchar *				lptstr;
 	typedef const tchar *		lpctstr;
 
-#else	// _WIN32
-
 	// printf format identifiers
-	#define FMTSIZE_T "Iu"		// windows uses %Iu to format size_t
+	#define PRIuSIZE_T			"zu"		// linux uses %zu to format size_t
+	#define PRIxSIZE_T			"zx"
+	#define PRIdSSIZE_T			"zd"
+
+#else	// _WIN32
+	
+	#include <basetsd.h>
+	typedef SSIZE_T		ssize_t;
+	
+	// printf format identifiers
+	#define PRIuSIZE_T			"Iu"		// windows uses %Iu to format size_t
+	#define PRIxSIZE_T			"Ix"
+	#define PRIdSSIZE_T			"Id"
 
 #endif // !_WIN32
 

@@ -594,15 +594,15 @@ PacketManager::PacketManager(void)
 PacketManager::~PacketManager(void)
 {
 	// delete standard packet handlers
-	for (size_t i = 0; i < COUNTOF(m_handlers); ++i)
+	for (size_t i = 0; i < CountOf(m_handlers); ++i)
 		unregisterPacket((uint)(i));
 
 	// delete extended packet handlers
-	for (size_t i = 0; i < COUNTOF(m_extended); ++i)
+	for (size_t i = 0; i < CountOf(m_extended); ++i)
 		unregisterExtended((uint)(i));
 
 	// delete encoded packet handlers
-	for (size_t i = 0; i < COUNTOF(m_encoded); ++i)
+	for (size_t i = 0; i < CountOf(m_encoded); ++i)
 		unregisterEncoded((uint)(i));
 }
 
@@ -726,7 +726,7 @@ void PacketManager::registerPacket(uint id, Packet* handler)
 {
 	// assign standard packet handler
 	ADDTOCALLSTACK("PacketManager::registerPacket");
-	ASSERT(id < COUNTOF(m_handlers));
+	ASSERT(id < CountOf(m_handlers));
 	unregisterPacket(id);
 	m_handlers[id] = handler;
 }
@@ -735,7 +735,7 @@ void PacketManager::registerExtended(uint id, Packet* handler)
 {
 	// assign extended packet handler
 	ADDTOCALLSTACK("PacketManager::registerExtended");
-	ASSERT(id < COUNTOF(m_extended));
+	ASSERT(id < CountOf(m_extended));
 	unregisterExtended(id);
 	m_extended[id] = handler;
 }
@@ -744,7 +744,7 @@ void PacketManager::registerEncoded(uint id, Packet* handler)
 {
 	// assign encoded packet handler
 	ADDTOCALLSTACK("PacketManager::registerEncoded");
-	ASSERT(id < COUNTOF(m_encoded));
+	ASSERT(id < CountOf(m_encoded));
 	unregisterEncoded(id);
 	m_encoded[id] = handler;
 }
@@ -753,7 +753,7 @@ void PacketManager::unregisterPacket(uint id)
 {
 	// delete standard packet handler
 	ADDTOCALLSTACK("PacketManager::unregisterPacket");
-	ASSERT(id < COUNTOF(m_handlers));
+	ASSERT(id < CountOf(m_handlers));
 	if (m_handlers[id] == NULL)
 		return;
 
@@ -765,7 +765,7 @@ void PacketManager::unregisterExtended(uint id)
 {
 	// delete extended packet handler
 	ADDTOCALLSTACK("PacketManager::unregisterExtended");
-	ASSERT(id < COUNTOF(m_extended));
+	ASSERT(id < CountOf(m_extended));
 	if (m_extended[id] == NULL)
 		return;
 
@@ -777,7 +777,7 @@ void PacketManager::unregisterEncoded(uint id)
 {
 	// delete encoded packet handler
 	ADDTOCALLSTACK("PacketManager::unregisterEncoded");
-	ASSERT(id < COUNTOF(m_encoded));
+	ASSERT(id < CountOf(m_encoded));
 	if (m_encoded[id] == NULL)
 		return;
 
@@ -788,7 +788,7 @@ void PacketManager::unregisterEncoded(uint id)
 Packet* PacketManager::getHandler(uint id) const
 {
 	// get standard packet handler
-	if (id >= COUNTOF(m_handlers))
+	if (id >= CountOf(m_handlers))
 		return NULL;
 
 	return m_handlers[id];
@@ -797,7 +797,7 @@ Packet* PacketManager::getHandler(uint id) const
 Packet* PacketManager::getExtendedHandler(uint id) const
 {
 	// get extended packet handler
-	if (id >= COUNTOF(m_extended))
+	if (id >= CountOf(m_extended))
 		return NULL;
 
 	return m_extended[id];
@@ -806,7 +806,7 @@ Packet* PacketManager::getExtendedHandler(uint id) const
 Packet* PacketManager::getEncodedHandler(uint id) const
 {
 	// get encoded packet handler
-	if (id >= COUNTOF(m_encoded))
+	if (id >= CountOf(m_encoded))
 		return NULL;
 
 	return m_encoded[id];
@@ -1104,7 +1104,7 @@ void NetworkIn::tick(void)
 						}
 						else
 						{
-							DEBUGNETWORK(("%x:Not enough data received to be a valid handshake (%" FMTSIZE_T ").\n", client->id(), received));
+							DEBUGNETWORK(("%x:Not enough data received to be a valid handshake (%" PRIuSIZE_T ").\n", client->id(), received));
 						}
 					}
 					else
@@ -1116,7 +1116,7 @@ void NetworkIn::tick(void)
 						iSeedLen = NETWORK_SEEDLEN_OLD;
 					}
 
-					DEBUGNETWORK(("%x:Client connected with a seed of 0x%x (new handshake=%d, seed length=%" FMTSIZE_T ", received=%" FMTSIZE_T ", version=%u).\n", client->id(), seed, client->m_newseed? 1 : 0, iSeedLen, received, client->m_reportedVersion));
+					DEBUGNETWORK(("%x:Client connected with a seed of 0x%x (new handshake=%d, seed length=%" PRIuSIZE_T ", received=%" PRIuSIZE_T ", version=%u).\n", client->id(), seed, client->m_newseed? 1 : 0, iSeedLen, received, client->m_reportedVersion));
 
 					if ( !seed || iSeedLen > received )
 					{
@@ -2281,7 +2281,7 @@ bool NetworkOut::sendPacketNow(CClient* client, PacketSend* packet)
 
 	EXC_CATCH;
 	EXC_DEBUG_START;
-	g_Log.EventDebug("id='%x', packet '0x%x', length '%" FMTSIZE_T "'\n",
+	g_Log.EventDebug("id='%x', packet '0x%x', length '%" PRIuSIZE_T "'\n",
 		state->id(), *packet->getData(), packet->getLength());
 	EXC_DEBUG_END;
 	return false;
@@ -2412,7 +2412,7 @@ inline void AddSocketToSet(fd_set& fds, SOCKET socket, int& count)
 const char * GenerateNetworkThreadName(size_t id)
 {
 	char * name = new char[25];
-	sprintf(name, "NetworkThread #%" FMTSIZE_T, id);
+	sprintf(name, "NetworkThread #%" PRIuSIZE_T, id);
 	return name;
 }
 
@@ -2499,7 +2499,7 @@ void NetworkManager::createNetworkThreads(size_t count)
 	if (count > maxThreads)
 	{
 		count = maxThreads;
-		g_Log.Event(LOGL_WARN|LOGM_INIT, "Too many network threads requested. Reducing number to %" FMTSIZE_T ".\n", count);
+		g_Log.Event(LOGL_WARN|LOGM_INIT, "Too many network threads requested. Reducing number to %" PRIuSIZE_T ".\n", count);
 	}
 
 	ASSERT(m_threads.empty());
@@ -2528,7 +2528,7 @@ NetworkThread* NetworkManager::selectBestThread(void)
 	}
 
 	ASSERT(bestThread != NULL);
-	DEBUGNETWORK(("Selected thread #%" FMTSIZE_T ".\n", bestThread->id()));
+	DEBUGNETWORK(("Selected thread #%" PRIuSIZE_T ".\n", bestThread->id()));
 	return bestThread;
 }
 
@@ -2692,7 +2692,7 @@ void NetworkManager::start(void)
 		m_states[l] = new NetState((int)(l));
 	m_stateCount = g_Cfg.m_iClientsMax;
 
-	DEBUGNETWORK(("Created %" FMTSIZE_T " network slots (system limit of %d clients)\n", m_stateCount, FD_SETSIZE));
+	DEBUGNETWORK(("Created %" PRIuSIZE_T " network slots (system limit of %d clients)\n", m_stateCount, FD_SETSIZE));
 
 	// create network threads
 	createNetworkThreads(g_Cfg.m_iNetworkThreads);
@@ -2704,7 +2704,7 @@ void NetworkManager::start(void)
 		for (NetworkThreadList::iterator it = m_threads.begin(); it != m_threads.end(); ++it)
 			(*it)->start();
 
-		DEBUGNETWORK(("Started %" FMTSIZE_T " network threads.\n", m_threads.size()));
+		DEBUGNETWORK(("Started %" PRIuSIZE_T " network threads.\n", m_threads.size()));
 	}
 	else
 	{
@@ -3503,7 +3503,7 @@ bool NetworkInput::processUnknownClientData(NetState* state, Packet* buffer)
 		EXC_SET("game client seed");
 		dword seed = 0;
 
-		DEBUGNETWORK(("%x:Client connected with a seed length of %" FMTSIZE_T " ([0]=0x%x)\n", state->id(), buffer->getRemainingLength(), (int)(buffer->getRemainingData()[0])));
+		DEBUGNETWORK(("%x:Client connected with a seed length of %" PRIuSIZE_T " ([0]=0x%x)\n", state->id(), buffer->getRemainingLength(), (int)(buffer->getRemainingData()[0])));
 		if (state->m_newseed || (buffer->getRemainingData()[0] == XCMD_NewSeed && buffer->getRemainingLength() >= NETWORK_SEEDLEN_NEW))
 		{
 			DEBUGNETWORK(("%x:Receiving new client login handshake.\n", state->id()));
@@ -3528,7 +3528,7 @@ bool NetworkInput::processUnknownClientData(NetState* state, Packet* buffer)
 			}
 			else
 			{
-				DEBUGNETWORK(("%x:Not enough data received to be a valid handshake (%" FMTSIZE_T ").\n", state->id(), buffer->getRemainingLength()));
+				DEBUGNETWORK(("%x:Not enough data received to be a valid handshake (%" PRIuSIZE_T ").\n", state->id(), buffer->getRemainingLength()));
 			}
 		}
 		else if(buffer->getRemainingData()[0] == XCMD_UOGRequest && buffer->getRemainingLength() == 8)
@@ -3829,18 +3829,18 @@ size_t NetworkOutput::processPacketQueue(NetState* state, uint priority)
 
 		EXC_CATCH;
 		EXC_DEBUG_START;
-		g_Log.EventDebug("id='%x', pri='%u', packet '%" FMTSIZE_T "' of '%" FMTSIZE_T "' to send, length '%" FMTSIZE_T "' of '%" FMTSIZE_T "'\n",
+		g_Log.EventDebug("id='%x', pri='%u', packet '%" PRIuSIZE_T "' of '%" PRIuSIZE_T "' to send, length '%" PRIuSIZE_T "' of '%" PRIuSIZE_T "'\n",
 			state->id(), priority, packetsProcessed, maxPacketsToProcess, lengthProcessed, maxLengthToProcess);
 		EXC_DEBUG_END;
 	}
 
 	if (packetsProcessed >= maxPacketsToProcess)
 	{
-		DEBUGNETWORK(("Reached maximum packet count limit for this tick (%" FMTSIZE_T "/%" FMTSIZE_T ").\n", packetsProcessed, maxPacketsToProcess));
+		DEBUGNETWORK(("Reached maximum packet count limit for this tick (%" PRIuSIZE_T "/%" PRIuSIZE_T ").\n", packetsProcessed, maxPacketsToProcess));
 	}
 	if (lengthProcessed >= maxLengthToProcess)
 	{
-		DEBUGNETWORK(("Reached maximum packet length limit for this tick (%" FMTSIZE_T "/%" FMTSIZE_T ").\n", lengthProcessed, maxLengthToProcess));
+		DEBUGNETWORK(("Reached maximum packet length limit for this tick (%" PRIuSIZE_T "/%" PRIuSIZE_T ").\n", lengthProcessed, maxLengthToProcess));
 	}
 
 	return packetsProcessed;
@@ -4025,7 +4025,7 @@ bool NetworkOutput::sendPacketData(NetState* state, PacketSend* packet)
 
 	EXC_CATCH;
 	EXC_DEBUG_START;
-	g_Log.EventDebug("id='%x', packet '0x%x', length '%" FMTSIZE_T "'\n",
+	g_Log.EventDebug("id='%x', packet '0x%x', length '%" PRIuSIZE_T "'\n",
 		state->id(), *packet->getData(), packet->getLength());
 	EXC_DEBUG_END;
 	return false;
@@ -4074,7 +4074,7 @@ size_t NetworkOutput::sendData(NetState* state, const byte* data, size_t length)
 		// send via standard api
 		int sent = state->m_socket.Send(data, (int)(length));
 		if (sent > 0)
-			result = static_cast<size_t>(sent);
+			result = (size_t)(sent);
 		else
 			result = 0;
 	}
@@ -4125,7 +4125,7 @@ size_t NetworkOutput::sendData(NetState* state, const byte* data, size_t length)
 	return result;
 	EXC_CATCH;
 	EXC_DEBUG_START;
-	g_Log.EventDebug("id='%x', packet '0x%x', length '%" FMTSIZE_T "'\n", state->id(), *data, length);
+	g_Log.EventDebug("id='%x', packet '0x%x', length '%" PRIuSIZE_T "'\n", state->id(), *data, length);
 	EXC_DEBUG_END;
 	return _failed_result();
 }

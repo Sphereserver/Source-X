@@ -13,7 +13,7 @@ CSphereTerrainInfo::CSphereTerrainInfo( TERRAIN_TYPE id )
     ASSERT( id < TERRAIN_QTY );
 
     VERFILE_TYPE filedata;
-    dword offset;
+    size_t offset;
     CUOIndexRec Index;
     VERFILE_FORMAT format;
     if ( g_VerData.FindVerDataBlock( VERFILE_TILEDATA, id/UOTILE_BLOCK_QTY, Index ))
@@ -63,7 +63,7 @@ CSphereTerrainInfo::CSphereTerrainInfo( TERRAIN_TYPE id )
             m_flags = record.m_flags;
             m_unknown = 0;
             m_index = record.m_index;
-            strcpylen(m_name, record.m_name, COUNTOF(m_name));
+            strcpylen(m_name, record.m_name, CountOf(m_name));
             break;
         }
     }

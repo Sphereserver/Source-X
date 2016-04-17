@@ -289,7 +289,7 @@ bool CClient::OnTarg_UnExtract( CObjBase * pObj, const CPointMap & pt )
 			return false; // this has the item count
 
 		int64 piCmd[4];		// Maximum parameters in one line
-		Str_ParseCmds( s.GetArgStr(), piCmd, COUNTOF(piCmd));
+		Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd));
 
 		CItem * pItem = CItem::CreateTemplate(static_cast<ITEMID_TYPE>(ATOI(s.GetKey())), NULL, m_pChar);
 		if ( pItem == NULL )
@@ -585,10 +585,10 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 	case CV_NUDGE:
 		{
 			tchar szTmp[512];
-			strcpylen( szTmp, m_Targ_Text, COUNTOF(szTmp));
+			strcpylen( szTmp, m_Targ_Text, CountOf(szTmp));
 
 			int64 piArgs[3];		// Maximum parameters in one line
-			Str_ParseCmds( szTmp, piArgs, COUNTOF( piArgs ));
+			Str_ParseCmds( szTmp, piArgs, CountOf( piArgs ));
 
 			CPointMap ptNudge((word)(piArgs[0]),(word)(piArgs[1]),(char)(piArgs[2]) );
 
@@ -690,10 +690,10 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 	case CV_TILE:
 		{
 			tchar szTmp[256];
-			strcpylen( szTmp, m_Targ_Text, COUNTOF(szTmp));
+			strcpylen( szTmp, m_Targ_Text, CountOf(szTmp));
 
 			int64 piArgs[16];		// Maximum parameters in one line
-			size_t iArgQty = Str_ParseCmds( szTmp, piArgs, COUNTOF( piArgs ));
+			size_t iArgQty = Str_ParseCmds( szTmp, piArgs, CountOf( piArgs ));
 
 			char z = (char)(piArgs[0]);	// z height is the first arg.
 			size_t iArg = 0;
@@ -905,8 +905,8 @@ int CClient::OnSkill_EvalInt( CUID uid, int iSkillLevel, bool fTest )
 	int iIntEntry = (iIntVal-1) / 10;
 	if ( iIntEntry < 0 )
 		iIntEntry = 0;
-	if ( (uint)(iIntEntry) >= COUNTOF( sm_szIntDesc ))
-		iIntEntry = COUNTOF( sm_szIntDesc )-1;
+	if ( (uint)(iIntEntry) >= CountOf( sm_szIntDesc ))
+		iIntEntry = CountOf( sm_szIntDesc )-1;
 
 	SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_EVALINT_RESULT ), pChar->GetName(), sm_szIntDesc[iIntEntry]);
 
@@ -939,17 +939,17 @@ int CClient::OnSkill_EvalInt( CUID uid, int iSkillLevel, bool fTest )
 		int iMagicEntry = iMagicSkill / 200;
 		if ( iMagicEntry < 0 )
 			iMagicEntry = 0;
-		if ( (uint)(iMagicEntry) >= COUNTOF(sm_szMagicDesc))
-			iMagicEntry = COUNTOF(sm_szMagicDesc)-1;
+		if ( (uint)(iMagicEntry) >= CountOf(sm_szMagicDesc))
+			iMagicEntry = CountOf(sm_szMagicDesc)-1;
 
 		int iManaEntry = 0;
 		if ( iIntVal )
-			iManaEntry = (int)MulDivLL( pChar->Stat_GetVal(STAT_INT), COUNTOF(sm_szManaDesc)-1, iIntVal );
+			iManaEntry = (int)MulDivLL( pChar->Stat_GetVal(STAT_INT), CountOf(sm_szManaDesc)-1, iIntVal );
 
 		if ( iManaEntry < 0 )
 			iManaEntry = 0;
-		if ( (uint)(iManaEntry) >= COUNTOF(sm_szManaDesc))
-			iManaEntry = COUNTOF(sm_szManaDesc)-1;
+		if ( (uint)(iManaEntry) >= CountOf(sm_szManaDesc))
+			iManaEntry = CountOf(sm_szManaDesc)-1;
 
 		SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_EVALINT_RESULT_2 ), static_cast<lpctstr>(sm_szMagicDesc[iMagicEntry]), static_cast<lpctstr>(sm_szManaDesc[iManaEntry]));
 	}
@@ -1051,9 +1051,9 @@ int CClient::OnSkill_ArmsLore( CUID uid, int iSkillLevel, bool fTest )
 	// Poisoned ?
 	if ( fWeapon && pItem->m_itWeapon.m_poison_skill )
 	{
-		uint iLevel = (uint)MulDivLL( pItem->m_itWeapon.m_poison_skill, COUNTOF(sm_szPoisonMessages), 100 );
-		if ( iLevel >= COUNTOF(sm_szPoisonMessages))
-			iLevel = COUNTOF(sm_szPoisonMessages) - 1;
+		uint iLevel = (uint)MulDivLL( pItem->m_itWeapon.m_poison_skill, CountOf(sm_szPoisonMessages), 100 );
+		if ( iLevel >= CountOf(sm_szPoisonMessages))
+			iLevel = CountOf(sm_szPoisonMessages) - 1;
 		len += sprintf( pszTemp+len, " %s", sm_szPoisonMessages[iLevel] );
 	}
 
@@ -1113,15 +1113,15 @@ int CClient::OnSkill_Anatomy( CUID uid, int iSkillLevel, bool fTest )
 	int iStrEntry = (iStrVal-1)/10;
 	if ( iStrEntry < 0 )
 		iStrEntry = 0;
-	if ( (uint)(iStrEntry) >= COUNTOF( sm_szStrEval ))
-		iStrEntry = COUNTOF( sm_szStrEval )-1;
+	if ( (uint)(iStrEntry) >= CountOf( sm_szStrEval ))
+		iStrEntry = CountOf( sm_szStrEval )-1;
 
 	int iDexVal = pChar->Stat_GetAdjusted(STAT_DEX);
 	int iDexEntry = (iDexVal-1)/10;
 	if ( iDexEntry < 0 )
 		iDexEntry = 0;
-	if ( (uint)(iDexEntry) >= COUNTOF( sm_szDexEval ))
-		iDexEntry = COUNTOF( sm_szDexEval )-1;
+	if ( (uint)(iDexEntry) >= CountOf( sm_szDexEval ))
+		iDexEntry = CountOf( sm_szDexEval )-1;
 
 	tchar * pszTemp = Str_GetTemp();
 	sprintf(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_ANATOMY_RESULT), pChar->GetName(), sm_szStrEval[iStrEntry], sm_szDexEval[iDexEntry]);
@@ -1249,9 +1249,9 @@ int CClient::OnSkill_TasteID( CUID uid, int iSkillLevel, bool fTest )
 
 	if ( iPoisonLevel )
 	{
-		uint iLevel = (uint)MulDivLL( iPoisonLevel, COUNTOF(sm_szPoisonMessages), 1000 );
-		if ( iLevel >= COUNTOF(sm_szPoisonMessages))
-			iLevel = COUNTOF(sm_szPoisonMessages) - 1;
+		uint iLevel = (uint)MulDivLL( iPoisonLevel, CountOf(sm_szPoisonMessages), 1000 );
+		if ( iLevel >= CountOf(sm_szPoisonMessages))
+			iLevel = CountOf(sm_szPoisonMessages) - 1;
 		SysMessage( sm_szPoisonMessages[iLevel] );
 	}
 	else
@@ -2253,7 +2253,7 @@ static lpctstr const sm_Txt_LoomUse[] =
 		pItemTarg->m_itLoom.m_ClothID = pItemUse->GetDispID();
 
 		int iUsed = 0;
-		int iNeed = COUNTOF( sm_Txt_LoomUse ) - 1;
+		int iNeed = CountOf( sm_Txt_LoomUse ) - 1;
 		int iHave = pItemTarg->m_itLoom.m_ClothQty;
 		if ( iHave < iNeed )
 		{
@@ -2261,14 +2261,14 @@ static lpctstr const sm_Txt_LoomUse[] =
 			iUsed = pItemUse->ConsumeAmount( iNeed );
 		}
 
-		if ( (uint)(iHave  + iUsed) < (COUNTOF( sm_Txt_LoomUse ) - 1) )
+		if ( (uint)(iHave  + iUsed) < (CountOf( sm_Txt_LoomUse ) - 1) )
 		{
 			pItemTarg->m_itLoom.m_ClothQty += iUsed;
 			SysMessage( sm_Txt_LoomUse[ pItemTarg->m_itLoom.m_ClothQty ] );
 		}
 		else
 		{
-			SysMessage( sm_Txt_LoomUse[ COUNTOF( sm_Txt_LoomUse ) - 1 ] );
+			SysMessage( sm_Txt_LoomUse[ CountOf( sm_Txt_LoomUse ) - 1 ] );
 			pItemTarg->m_itLoom.m_ClothQty = 0;
 			pItemTarg->m_itLoom.m_ClothID = ITEMID_NOTHING;
 

@@ -613,17 +613,17 @@ void CClient::Cmd_EditItem( CObjBase *pObj, int iSelect )
 
 	if ( iSelect > 0 )		// we selected an item
 	{
-		if ( static_cast<size_t>(iSelect) >= COUNTOF(m_tmMenu.m_Item) )
+		if ( (size_t)(iSelect) >= CountOf(m_tmMenu.m_Item) )
 			return;
 
 		if ( m_Targ_Text.IsEmpty() )
-			addGumpDialogProps(m_tmMenu.m_Item[static_cast<size_t>(iSelect)]);
+			addGumpDialogProps(m_tmMenu.m_Item[(size_t)(iSelect)]);
 		else
-			OnTarg_Obj_Set(CUID(m_tmMenu.m_Item[static_cast<size_t>(iSelect)]).ObjFind());
+			OnTarg_Obj_Set(CUID(m_tmMenu.m_Item[(size_t)(iSelect)]).ObjFind());
 		return;
 	}
 	
-	CMenuItem item[minimum(COUNTOF(m_tmMenu.m_Item), MAX_MENU_ITEMS)];	// Most as we want to display at one time.
+	CMenuItem item[minimum(CountOf(m_tmMenu.m_Item), MAX_MENU_ITEMS)];	// Most as we want to display at one time.
 	item[0].m_sText.Format("Contents of %s", pObj->GetName());
 
 	size_t count = 0;
@@ -646,11 +646,11 @@ void CClient::Cmd_EditItem( CObjBase *pObj, int iSelect )
 			}
 		}
 
-		if ( count >= (COUNTOF(item) - 1) )
+		if ( count >= (CountOf(item) - 1) )
 			break;
 	}
 	
-	ASSERT(count < COUNTOF(item));
+	ASSERT(count < CountOf(item));
 	addItemMenu(CLIMODE_MENU_EDIT, item, count, pObj);
 }
 
@@ -697,8 +697,8 @@ bool CClient::Cmd_Skill_Menu( RESOURCE_ID_BASE rid, int iSelect )
 	if ( iSelect == 0 )		// menu cancelled
 		return (Cmd_Skill_Menu_Build(rid, iSelect, NULL, 0, fShowMenu, fLimitReached) > 0);
 
-	CMenuItem item[minimum(COUNTOF(m_tmMenu.m_Item), MAX_MENU_ITEMS)];
-	size_t iShowCount = Cmd_Skill_Menu_Build(rid, iSelect, item, COUNTOF(item), fShowMenu, fLimitReached);
+	CMenuItem item[minimum(CountOf(m_tmMenu.m_Item), MAX_MENU_ITEMS)];
+	size_t iShowCount = Cmd_Skill_Menu_Build(rid, iSelect, item, CountOf(item), fShowMenu, fLimitReached);
 
 	if ( iSelect < -1 )		// just a test
 		return iShowCount ? true : false;
@@ -734,7 +734,7 @@ bool CClient::Cmd_Skill_Menu( RESOURCE_ID_BASE rid, int iSelect )
 			g_Log.EventDebug("SCRIPT: Too many empty skill menus to continue seeking through menu '%s'\n", g_Cfg.ResourceGetDef(rid)->GetResourceName());
 	}
 	
-	ASSERT(iShowCount < COUNTOF(item));
+	ASSERT(iShowCount < CountOf(item));
 	addItemMenu(CLIMODE_MENU_SKILL, item, iShowCount);
 	return true;
 }
@@ -1071,7 +1071,7 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 
 	if ( track_sel > 0 ) // Not Cancelled
 	{
-		ASSERT(track_sel < COUNTOF(m_tmMenu.m_Item));
+		ASSERT(track_sel < CountOf(m_tmMenu.m_Item));
 		if ( fExec )
 		{
 			// Tracking menu got us here. Start tracking the selected creature.
@@ -1090,11 +1090,11 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 			NPCBRAIN_NONE	// players
 		};
 
-		if ( track_sel >= COUNTOF(sm_Track_Brain) )
-			track_sel = COUNTOF(sm_Track_Brain) - 1;
+		if ( track_sel >= CountOf(sm_Track_Brain) )
+			track_sel = CountOf(sm_Track_Brain) - 1;
 
 		NPCBRAIN_TYPE track_type = sm_Track_Brain[track_sel];
-		CMenuItem item[minimum(MAX_MENU_ITEMS, COUNTOF(m_tmMenu.m_Item))];
+		CMenuItem item[minimum(MAX_MENU_ITEMS, CountOf(m_tmMenu.m_Item))];
 		size_t count = 0;
 
 		item[0].m_sText = g_Cfg.GetDefaultMsg(DEFMSG_TRACKING_SKILLMENU_TITLE);
@@ -1152,7 +1152,7 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 			item[count].m_sText = pChar->GetName();
 			m_tmMenu.m_Item[count] = pChar->GetUID();
 
-			if ( count >= (COUNTOF(item) - 1) )
+			if ( count >= (CountOf(item) - 1) )
 				break;
 		}
 
@@ -1160,7 +1160,7 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 		if ( count > 0 )
 		{
 			m_pChar->Skill_UseQuick(SKILL_TRACKING, 20 + Calc_GetRandLLVal(30));
-			ASSERT(count < COUNTOF(item));
+			ASSERT(count < CountOf(item));
 			addItemMenu(CLIMODE_MENU_SKILL_TRACK, item, count);
 			return true;
 		}
@@ -1180,8 +1180,8 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 		g_Cfg.GetDefaultMsg( DEFMSG_TRACKING_FAIL_HUMAN )
 	};
 
-	if ( track_sel >= COUNTOF(sm_Track_FailMsg) )
-		track_sel = COUNTOF(sm_Track_FailMsg) - 1;
+	if ( track_sel >= CountOf(sm_Track_FailMsg) )
+		track_sel = CountOf(sm_Track_FailMsg) - 1;
 
 	SysMessage(sm_Track_FailMsg[track_sel]);
 	return false;

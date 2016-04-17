@@ -315,7 +315,7 @@ void CChat::DoCommand(CChatChanMember * pBy, lpctstr szMsg)
 	ASSERT(szMsg != NULL);
 
 	tchar buffer[2048];
-	ASSERT(strlen(szMsg) < COUNTOF(buffer));
+	ASSERT(strlen(szMsg) < CountOf(buffer));
 	strcpy(buffer, szMsg);
 
 	tchar * pszCommand = buffer;
@@ -323,7 +323,7 @@ void CChat::DoCommand(CChatChanMember * pBy, lpctstr szMsg)
 	size_t iCommandLength = strlen(pszCommand);
 	for (size_t i = 0; i < iCommandLength; i++)
 	{
-		ASSERT( i<COUNTOF(buffer));
+		ASSERT( i<CountOf(buffer));
 		if (pszCommand[i] == ' ')
 		{
 			pszCommand[i] = 0;
@@ -336,7 +336,7 @@ void CChat::DoCommand(CChatChanMember * pBy, lpctstr szMsg)
 	CClient * pByClient = pBy->GetClient();
 	ASSERT(pByClient != NULL);
 
-	switch ( FindTableSorted( pszCommand, sm_szCmd_Chat, COUNTOF(sm_szCmd_Chat)))
+	switch ( FindTableSorted( pszCommand, sm_szCmd_Chat, CountOf(sm_szCmd_Chat)))
 	{
 		case 0: // "ALLKICK"
 		{

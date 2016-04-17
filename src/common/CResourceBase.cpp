@@ -162,7 +162,7 @@ CResourceScript * CResourceBase::AddResourceFile( lpctstr pszName )
 	// Is this really just a dir name ?
 
 	tchar szName[_MAX_PATH];
-	ASSERT(strlen(pszName) < COUNTOF(szName));
+	ASSERT(strlen(pszName) < CountOf(szName));
 	strcpy(szName, pszName);
 
 	tchar szTitle[_MAX_PATH];
@@ -901,7 +901,7 @@ bool CResourceLock::OpenBase( void * pExtra )
 
 	// Open a seperate copy of an already opend file.
 	m_pStream = m_pLock->m_pStream;
-	m_hFile = m_pLock->m_hFile;
+	m_llFile = m_pLock->m_llFile;
 #ifndef _NOSCRIPTCACHE
 	PhysicalScriptFile::dupeFrom(m_pLock);
 //#else
@@ -1125,10 +1125,10 @@ CResourceScript *CResourceLink::GetLinkFile() const
 	return m_pScript;
 }
 
-int CResourceLink::GetLinkOffset() const
+size_t CResourceLink::GetLinkOffset() const
 {
 	ADDTOCALLSTACK("CResourceLink::GetLinkOffset");
-	return m_Context.m_lOffset;
+	return m_Context.m_pOffset;
 }
 
 void CResourceLink::SetLink(CResourceScript *pScript)
@@ -1213,7 +1213,7 @@ bool CResourceLink::ResourceLock( CResourceLock &s )
 
 	// ret = -2 or -3
 	lpctstr pszName = GetResourceName();
-	DEBUG_ERR(("ResourceLock '%s':%d id=%s FAILED\n", static_cast<lpctstr>(s.GetFilePath()), m_Context.m_lOffset, pszName));
+	DEBUG_ERR(("ResourceLock '%s':%d id=%s FAILED\n", static_cast<lpctstr>(s.GetFilePath()), m_Context.m_pOffset, pszName));
 
 	return false;
 }
@@ -1401,7 +1401,7 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
 	tchar * pszCmd = s.GetArgStr();
 
 	tchar * ppBlocks[128];	// max is arbitrary
-	size_t iArgCount = Str_ParseCmds( pszCmd, ppBlocks, COUNTOF(ppBlocks));
+	size_t iArgCount = Str_ParseCmds( pszCmd, ppBlocks, CountOf(ppBlocks));
 
 	for ( size_t i = 0; i < iArgCount; i++ )
 	{

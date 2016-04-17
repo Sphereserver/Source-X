@@ -31,7 +31,7 @@
 struct CScriptLineContext
 {
 public:
-	int m_lOffset;
+	size_t m_pOffset;
 	int m_iLineNum;		// for debug purposes if there is an error.
 public:
 	void Init();
@@ -132,7 +132,7 @@ public:
 protected:
 	void InitBase();
 
-	virtual dword Seek( int offset = 0, uint origin = SEEK_SET );
+	virtual size_t Seek( size_t offset = 0, size_t origin = SEEK_SET );
 
 public:
 	// text only functions:

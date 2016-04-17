@@ -143,7 +143,7 @@ public:
 	HICON SetIcon( HICON hIcon, BOOL fType = false )
 	{
 		// ICON_BIG vs ICON_SMALL
-		return( (HICON)(dword) SendMessage( WM_SETICON, (WPARAM)fType, (LPARAM) hIcon ));
+		return (HICON) SendMessage( WM_SETICON, (WPARAM)fType, (LPARAM) hIcon );
 	}
 
 	UINT_PTR SetTimer( UINT_PTR uTimerID, UINT uWaitmSec )
@@ -331,7 +331,7 @@ public:
 	size_t GetSel() const
 	{
 		ASSERT(IsWindow());
-		return static_cast<size_t>(SendMessage( EM_GETSEL ));
+		return (size_t)(SendMessage( EM_GETSEL ));
 	}
 	void GetSel(size_t& nStartChar, size_t& nEndChar) const
 	{

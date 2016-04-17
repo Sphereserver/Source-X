@@ -39,7 +39,7 @@ bool CUOInstall::FindInstall()
 	
 	HKEY hKey = NULL;
 	LSTATUS lRet = 0;
-	for ( size_t i = 0; i < COUNTOF(m_szKeys); i++ )
+	for ( size_t i = 0; i < CountOf(m_szKeys); i++ )
 	{
 		lRet = RegOpenKeyEx( HKEY_LOCAL_MACHINE,
 			m_szKeys[i], // address of name of subkey to query
@@ -93,7 +93,7 @@ void CUOInstall::DetectMulVersions()
 	ADDTOCALLSTACK("CUOInstall::DetectMulVersions");
 
 	// assume all formats are original to start with
-	for (size_t i = 0; i < COUNTOF(m_FileFormat); i++)
+	for (size_t i = 0; i < CountOf(m_FileFormat); i++)
 		m_FileFormat[i] = VERFORMAT_ORIGINAL;
 
 	// check for High Seas tiledata format
@@ -281,45 +281,45 @@ VERFILE_TYPE CUOInstall::OpenFiles( dword dwMask )
 								{
 									m_IsMapUopFormat[index] = true;
 
-									uint dwHashLo, dwHashHi, dwCompressedSize, dwHeaderLenght, dwFilesInBlock, dwTotalFiles, dwLoop;
-									ullong qwUOPPtr;
+									dword dwHashLo, dwHashHi, dwCompressedSize, dwHeaderLenght, dwFilesInBlock, dwTotalFiles, dwLoop;
+									uint64 qwUOPPtr;
 
 									m_Maps[index].Seek( sizeof(dword)*3, SEEK_SET );
-									m_Maps[index].Read( &dwHashLo, sizeof(dword));
-									m_Maps[index].Read( &dwHashHi, sizeof(dword));
-									qwUOPPtr = ((int64)dwHashHi << 32) + dwHashLo;
+									m_Maps[index].Read( &dwHashLo, sizeof(dword) );
+									m_Maps[index].Read( &dwHashHi, sizeof(dword) );
+									qwUOPPtr = ((uint64)dwHashHi << 32) + dwHashLo;
 									m_Maps[index].Seek( sizeof(dword), SEEK_CUR );
-									m_Maps[index].Read( &dwTotalFiles, sizeof(dword));
-									m_Maps[index].Seek( (int)(qwUOPPtr), SEEK_SET );
+									m_Maps[index].Read( &dwTotalFiles, sizeof(dword) );
+									m_Maps[index].Seek( qwUOPPtr, SEEK_SET );
 									dwLoop = dwTotalFiles;
 
 									while (qwUOPPtr > 0)
 									{
-										m_Maps[index].Read( &dwFilesInBlock, sizeof(dword));
-										m_Maps[index].Read( &dwHashLo, sizeof(dword));
-										m_Maps[index].Read( &dwHashHi, sizeof(dword));
-										qwUOPPtr = ((int64)dwHashHi << 32) + dwHashLo;
+										m_Maps[index].Read( &dwFilesInBlock, sizeof(dword) );
+										m_Maps[index].Read( &dwHashLo, sizeof(dword) );
+										m_Maps[index].Read( &dwHashHi, sizeof(dword) );
+										qwUOPPtr = ((uint64)dwHashHi << 32) + dwHashLo;
 
 										while ((dwFilesInBlock > 0)&&(dwTotalFiles > 0))
 										{
 											dwTotalFiles--;
 											dwFilesInBlock--;
 
-											m_Maps[index].Read( &dwHashLo, sizeof(dword));
-											m_Maps[index].Read( &dwHashHi, sizeof(dword));
-											m_Maps[index].Read( &dwHeaderLenght, sizeof(dword));
-											m_Maps[index].Read( &dwCompressedSize, sizeof(dword));
+											m_Maps[index].Read( &dwHashLo, sizeof(dword) );
+											m_Maps[index].Read( &dwHashHi, sizeof(dword) );
+											m_Maps[index].Read( &dwHeaderLenght, sizeof(dword) );
+											m_Maps[index].Read( &dwCompressedSize, sizeof(dword) );
 
 											MapAddress pMapAddress;
-											pMapAddress.qwAdress = (((int64)dwHashHi << 32) + dwHashLo) + dwHeaderLenght;
+											pMapAddress.qwAdress = (((uint64)dwHashHi << 32) + dwHashLo) + dwHeaderLenght;
 
 											m_Maps[index].Seek( sizeof(dword), SEEK_CUR );
-											m_Maps[index].Read( &dwHashLo, sizeof(dword));
-											m_Maps[index].Read( &dwHashHi, sizeof(dword));
-											ullong qwHash = ((int64)dwHashHi << 32) + dwHashLo;
+											m_Maps[index].Read( &dwHashLo, sizeof(dword) );
+											m_Maps[index].Read( &dwHashHi, sizeof(dword) );
+											uint64 qwHash = ((uint64)dwHashHi << 32) + dwHashLo;
 											m_Maps[index].Seek( sizeof(dword)+sizeof(word), SEEK_CUR );
 					
-											for (uint x = 0; x < dwLoop; x++)
+											for (dword x = 0; x < dwLoop; x++)
 											{
 												sprintf(z, "build/map%dlegacymul/%.8u.dat", index, x);
 												if (HashFileName(z) == qwHash)
@@ -332,7 +332,7 @@ VERFILE_TYPE CUOInstall::OpenFiles( dword dwMask )
 											}
 										}
 
-										m_Maps[index].Seek( (int)(qwUOPPtr), SEEK_SET );
+										m_Maps[index].Seek( qwUOPPtr, SEEK_SET );
 									}
 								}//End of UOP Map parsing
 								else if (index == 0) // neither file exists, map0 is required
@@ -488,9 +488,9 @@ void CUOInstall::CloseFiles()
 bool CUOInstall::ReadMulIndex(CGFile &file, dword id, CUOIndexRec &Index)
 {
 	ADDTOCALLSTACK("CUOInstall::ReadMulIndex");
-	dword lOffset = id * sizeof(CUOIndexRec);
+	size_t stOffset = id * sizeof(CUOIndexRec);
 
-	if ( file.Seek(lOffset, SEEK_SET) != lOffset )
+	if ( file.Seek(stOffset, SEEK_SET) != stOffset )
 		return false;
 
 	if ( file.Read(static_cast<void *>(&Index), sizeof(CUOIndexRec)) != sizeof(CUOIndexRec) )

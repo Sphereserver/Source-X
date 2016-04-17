@@ -265,7 +265,7 @@ CResource::CResource()
 
 CResource::~CResource()
 {
-	for ( size_t i = 0; i < COUNTOF(m_ResHash.m_Array); i++ )
+	for ( size_t i = 0; i < CountOf(m_ResHash.m_Array); i++ )
 	{
 		for ( size_t j = 0; j < m_ResHash.m_Array[i].GetCount(); j++ )
 		{
@@ -837,7 +837,7 @@ bool CResource::r_LoadVal( CScript &s )
 	ADDTOCALLSTACK("CResource::r_LoadVal");
 	EXC_TRY("LoadVal");
 
-	int i = FindTableHeadSorted( s.GetKey(), reinterpret_cast<lpctstr const *>(sm_szLoadKeys), COUNTOF( sm_szLoadKeys )-1, sizeof(sm_szLoadKeys[0]));
+	int i = FindTableHeadSorted( s.GetKey(), reinterpret_cast<lpctstr const *>(sm_szLoadKeys), CountOf( sm_szLoadKeys )-1, sizeof(sm_szLoadKeys[0]));
 	if ( i < 0 )
 	{
 		if ( s.IsKeyHead( "REGEN", 5 ))			//	REGENx=<stat regeneration rate>
@@ -1252,7 +1252,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc 
 	ADDTOCALLSTACK("CResource::r_WriteVal");
 	EXC_TRY("WriteVal");
 	// Just do stats values for now.
-	int index = FindTableHeadSorted( pszKey, reinterpret_cast<lpctstr const *>(sm_szLoadKeys), COUNTOF(sm_szLoadKeys) - 1, sizeof(sm_szLoadKeys[0]) );
+	int index = FindTableHeadSorted( pszKey, reinterpret_cast<lpctstr const *>(sm_szLoadKeys), CountOf(sm_szLoadKeys) - 1, sizeof(sm_szLoadKeys[0]) );
 	if ( index < 0 )
 	{
 		if ( !strnicmp( pszKey, "REGEN", 5 ))
@@ -1290,7 +1290,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc 
 			{
 				pt.m_map = 0; pt.m_z = 0;
 				tchar * ppVal[4];
-				size_t iArgs = Str_ParseCmds( const_cast<tchar*>(pszKey), ppVal, COUNTOF( ppVal ), "," );
+				size_t iArgs = Str_ParseCmds( const_cast<tchar*>(pszKey), ppVal, CountOf( ppVal ), "," );
 
 				switch ( iArgs )
 				{
@@ -1395,7 +1395,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc 
 
 			if ( !strnicmp( pszCmd, "COUNT", 5 ))
 			{
-				sVal.FormatVal(static_cast<size_t>(m_Functions.GetCount()));
+				sVal.FormatSTVal((size_t)(m_Functions.GetCount()));
 				return true;
 			}
 			else if ( m_Functions.ContainsKey(pszCmd) )
@@ -1447,7 +1447,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc 
 						x++;
 				}
 
-				sVal.FormatVal(x);
+				sVal.FormatSTVal(x);
 				return true;
 			}
 
@@ -1622,7 +1622,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc 
 						int64 piVal[6];
 
 						// year, month, day, hour, minute, second
-						size_t iQty = Str_ParseCmds(const_cast<tchar*>(pszKey), piVal, COUNTOF(piVal));
+						size_t iQty = Str_ParseCmds(const_cast<tchar*>(pszKey), piVal, CountOf(piVal));
 						if ( iQty != 6 )
 							return false;
 
@@ -1639,7 +1639,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc 
 						tchar *ppVal[2];
 
 						// timestamp, formatstr
-						size_t iQty = Str_ParseCmds(const_cast<tchar*>(pszKey), ppVal, COUNTOF(ppVal));
+						size_t iQty = Str_ParseCmds(const_cast<tchar*>(pszKey), ppVal, CountOf(ppVal));
 						if ( iQty < 1 )
 							return false;
 
@@ -1692,7 +1692,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc 
 			sVal.FormatVal(m_iSpellTimeout / TICK_PER_SEC);
 			break;
 		case RC_GUILDS:
-			sVal.FormatVal( g_World.m_Stones.GetCount());
+			sVal.FormatSTVal( g_World.m_Stones.GetCount());
 			return true;
 		case RC_TIMEUP:
 			sVal.FormatLLVal( ( - g_World.GetTimeDiff( g_World.m_timeStartup )) / TICK_PER_SEC );
@@ -1783,7 +1783,7 @@ SKILL_TYPE CResource::FindSkillKey( lpctstr pszKey ) const
 STAT_TYPE CResource::FindStatKey( lpctstr pszKey ) // static
 {
 	ADDTOCALLSTACK("CResource::FindStatKey");
-	return (STAT_TYPE) FindTable( pszKey, g_Stat_Name, COUNTOF( g_Stat_Name ));
+	return (STAT_TYPE) FindTable( pszKey, g_Stat_Name, CountOf( g_Stat_Name ));
 }
 
 int CResource::GetSpellEffect( SPELL_TYPE spell, int iSkillVal ) const
@@ -2018,7 +2018,7 @@ PLEVEL_TYPE CResource::GetPrivCommandLevel( lpctstr pszCmd ) const
 		--ilevel;
 		lpctstr const * pszTable = m_PrivCommands[ilevel].GetBasePtr();
 		size_t iCount = m_PrivCommands[ilevel].GetCount();
-		if ( FindTableHeadSorted( pszCmd, pszTable, iCount ) >= 0 )
+		if ( FindTableHeadSorted( pszCmd, pszTable, (int)iCount ) >= 0 )
 			return( static_cast<PLEVEL_TYPE>(ilevel) );
 	}
 
@@ -2155,7 +2155,7 @@ CRegionBase * CResource::GetRegion( lpctstr pKey ) const
 	// get a region from a name or areadef.
 
 	GETNONWHITESPACE( pKey );
-	for ( size_t i = 0; i < COUNTOF(m_ResHash.m_Array); i++ )
+	for ( size_t i = 0; i < CountOf(m_ResHash.m_Array); i++ )
 	{
 		for ( size_t j = 0; j < m_ResHash.m_Array[i].GetCount(); j++ )
 		{
@@ -2421,7 +2421,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		fNewStyleDef	= true;
 	}
 	else
-		restype	= (RES_TYPE) FindTableSorted( pszSection, sm_szResourceBlocks, COUNTOF( sm_szResourceBlocks ));
+		restype	= (RES_TYPE) FindTableSorted( pszSection, sm_szResourceBlocks, CountOf( sm_szResourceBlocks ));
 
 
 	if (( restype == RES_WORLDSCRIPT ) || ( restype == RES_WS ))
@@ -2615,7 +2615,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 			size_t i = 0, iQty = 0;
 
 			// read karma levels
-			iQty = Str_ParseCmds(pScript->GetKeyBuffer(), piNotoLevels, COUNTOF(piNotoLevels));
+			iQty = Str_ParseCmds(pScript->GetKeyBuffer(), piNotoLevels, CountOf(piNotoLevels));
 			for (i = 0; i < iQty; i++)
 				m_NotoKarmaLevels.SetAtGrow(i, (int)(piNotoLevels[i]));
 
@@ -2628,7 +2628,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 			}
 
 			// read fame levels
-			iQty = Str_ParseCmds(pScript->GetKeyBuffer(), piNotoLevels, COUNTOF(piNotoLevels));
+			iQty = Str_ParseCmds(pScript->GetKeyBuffer(), piNotoLevels, CountOf(piNotoLevels));
 			for (i = 0; i < iQty; i++)
 				m_NotoFameLevels.SetAtGrow(i, (int)(piNotoLevels[i]));
 
@@ -2647,7 +2647,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 			}
 
 			if (m_NotoTitles.GetCount() != ((m_NotoKarmaLevels.GetCount() + 1) * (m_NotoFameLevels.GetCount() + 1)))
-				g_Log.Event(LOGM_INIT|LOGL_WARN, "Expected %" FMTSIZE_T " titles in NOTOTITLES section but found %" FMTSIZE_T ".\n", (m_NotoKarmaLevels.GetCount() + 1) * (m_NotoFameLevels.GetCount() + 1), m_NotoTitles.GetCount());
+				g_Log.Event(LOGM_INIT|LOGL_WARN, "Expected %" PRIuSIZE_T " titles in NOTOTITLES section but found %" PRIuSIZE_T ".\n", (m_NotoKarmaLevels.GetCount() + 1) * (m_NotoFameLevels.GetCount() + 1), m_NotoTitles.GetCount());
 		}
 		return true;
 	case RES_OBSCENE:
@@ -2659,7 +2659,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 	case RES_PLEVEL:
 		{
 			int index = rid.GetResIndex();
-			if ( index < 0 || (uint)(index) >= COUNTOF(m_PrivCommands) )
+			if ( index < 0 || (uint)(index) >= CountOf(m_PrivCommands) )
 				return false;
 			while ( pScript->ReadKey() )
 			{
@@ -3697,7 +3697,7 @@ void CResource::OnTick( bool fNow )
 
 			EXC_DEBUG_START;
 			CWebPageDef * pWeb = static_cast <CWebPageDef *>(m_WebPages[i]);
-			g_Log.EventDebug("web '%s' dest '%s' now '%d' index '%" FMTSIZE_T "'/'%" FMTSIZE_T "'\n",
+			g_Log.EventDebug("web '%s' dest '%s' now '%d' index '%" PRIuSIZE_T "'/'%" PRIuSIZE_T "'\n",
 				pWeb ? pWeb->GetName() : "", pWeb ? pWeb->GetDstName() : "",
 				fNow? 1 : 0, i, m_WebPages.GetCount());
 			EXC_DEBUG_END;
@@ -3808,7 +3808,7 @@ bool CResource::LoadCryptIni( void )
 	m_scpCryptIni.Close();
 	m_scpCryptIni.CloseForce();
 
-	g_Log.Event( LOGM_INIT, "Loaded %" FMTSIZE_T " client encryption keys.\n", CCrypt::client_keys.size() );
+	g_Log.Event( LOGM_INIT, "Loaded %" PRIuSIZE_T " client encryption keys.\n", CCrypt::client_keys.size() );
 
 	return true;
 }
@@ -3941,7 +3941,7 @@ bool CResource::Load( bool fResync )
 	AddResourceDir( m_sSCPBaseDir );		// if we want to get *.SCP files from elsewhere.
 
 	size_t count = m_ResourceFiles.GetCount();
-	g_Log.Event(LOGM_INIT, "Indexing %" FMTSIZE_T " scripts...\n", count);
+	g_Log.Event(LOGM_INIT, "Indexing %" PRIuSIZE_T " scripts...\n", count);
 
 	for ( size_t j = 0; ; j++ )
 	{
@@ -3957,7 +3957,7 @@ bool CResource::Load( bool fResync )
 #ifdef _WIN32
 		NTWindow_OnTick(0);
 #endif
-		g_Serv.PrintPercent(j + 1, count);
+		g_Serv.PrintPercent( (size_t)(j + 1), count);
 	}
 
 	// Make sure we have the basics.
@@ -4212,10 +4212,10 @@ bool CResource::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilename )
 			 continue;
 
 		s.WriteSection("ITEMDEF 0%04x", i);
-		strcpylen(sItemName, tiledata.m_name, COUNTOF(sItemName));
+		strcpylen(sItemName, tiledata.m_name, CountOf(sItemName));
 
 		// generate a suitable defname
-		if (GenerateDefname(sItemName, COUNTOF(sItemName), "i_", pDefnameBuffer, true, &defnames))
+		if (GenerateDefname(sItemName, CountOf(sItemName), "i_", pDefnameBuffer, true, &defnames))
 		{
 			s.Printf("// %s\n", sItemName);
 			s.WriteKey("DEFNAME", pDefnameBuffer);

@@ -1041,7 +1041,7 @@ bool CChar::ReadScript(CResourceLock &s, bool bVendor)
 		if ( s.IsKeyHead("ON", 2) )
 			break;
 
-		int iCmd = FindTableSorted(s.GetKey(), CItem::sm_szTemplateTable, COUNTOF(CItem::sm_szTemplateTable)-1);
+		int iCmd = FindTableSorted(s.GetKey(), CItem::sm_szTemplateTable, CountOf(CItem::sm_szTemplateTable)-1);
 
 		if ( bVendor )
 		{
@@ -1444,7 +1444,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 		case RACETYPE_ELF:
 		{
 			static const int sm_ElfSkinHues[] = { 0x0BF, 0x24D, 0x24E, 0x24F, 0x353, 0x361, 0x367, 0x374, 0x375, 0x376, 0x381, 0x382, 0x383, 0x384, 0x385, 0x389, 0x3DE, 0x3E5, 0x3E6, 0x3E8, 0x3E9, 0x430, 0x4A7, 0x4DE, 0x51D, 0x53F, 0x579, 0x76B, 0x76C, 0x76D, 0x835, 0x903 };
-			int iMax = COUNTOF(sm_ElfSkinHues);
+			int iMax = CountOf(sm_ElfSkinHues);
 			bool isValid = 0;
 			for ( int i = 0; i < iMax; i++ )
 			{
@@ -1521,7 +1521,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 				case RACETYPE_ELF:
 				{
 					static const int sm_ElfHairHues[] = { 0x034, 0x035, 0x036, 0x037, 0x038, 0x039, 0x058, 0x08E, 0x08F, 0x090, 0x091, 0x092, 0x101, 0x159, 0x15A, 0x15B, 0x15C, 0x15D, 0x15E, 0x128, 0x12F, 0x1BD, 0x1E4, 0x1F3, 0x207, 0x211, 0x239, 0x251, 0x26C, 0x2C3, 0x2C9, 0x31D, 0x31E, 0x31F, 0x320, 0x321, 0x322, 0x323, 0x324, 0x325, 0x326, 0x369, 0x386, 0x387, 0x388, 0x389, 0x38A, 0x59D, 0x6B8, 0x725, 0x853 };
-					int iMax = COUNTOF(sm_ElfHairHues);
+					int iMax = CountOf(sm_ElfHairHues);
 					bool isValid = 0;
 					for ( int i = 0; i < iMax; i++ )
 					{
@@ -1539,7 +1539,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 				case RACETYPE_GARGOYLE:
 				{
 					static const int sm_GargoyleHornHues[] = { 0x709, 0x70B, 0x70D, 0x70F, 0x711, 0x763, 0x765, 0x768, 0x76B, 0x6F3, 0x6F1, 0x6EF, 0x6E4, 0x6E2, 0x6E0, 0x709, 0x70B, 0x70D };
-					int iMax = COUNTOF(sm_GargoyleHornHues);
+					int iMax = CountOf(sm_GargoyleHornHues);
 					bool isValid = 0;
 					for ( int i = 0; i < iMax; i++ )
 					{
@@ -1598,7 +1598,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 				case RACETYPE_GARGOYLE:
 				{
 					static const int sm_GargoyleBeardHues[] = { 0x709, 0x70B, 0x70D, 0x70F, 0x711, 0x763, 0x765, 0x768, 0x76B, 0x6F3, 0x6F1, 0x6EF, 0x6E4, 0x6E2, 0x6E0, 0x709, 0x70B, 0x70D };
-					int iMax = COUNTOF(sm_GargoyleBeardHues);
+					int iMax = CountOf(sm_GargoyleBeardHues);
 					bool isValid = 0;
 					for ( int i = 0; i < iMax; i++ )
 					{
@@ -1746,7 +1746,7 @@ lpctstr const CChar::sm_szRefKeys[CHR_QTY+1] =
 bool CChar::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CChar::r_GetRef");
-	int i = FindTableHeadSorted( pszKey, sm_szRefKeys, COUNTOF(sm_szRefKeys)-1 );
+	int i = FindTableHeadSorted( pszKey, sm_szRefKeys, CountOf(sm_szRefKeys)-1 );
 	if ( i >= 0 )
 	{
 		pszKey += strlen( sm_szRefKeys[i] );
@@ -1826,7 +1826,7 @@ bool CChar::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
 	ASSERT(pCharDef);
 	CChar * pCharSrc = pSrc->GetChar();
 
-	CHC_TYPE iKeyNum = (CHC_TYPE) FindTableHeadSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 );
+	CHC_TYPE iKeyNum = (CHC_TYPE) FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( iKeyNum < 0 )
 	{
 do_default:
@@ -1934,7 +1934,7 @@ do_default:
 			{
 				if ( strlen( pszKey ) == 8 )
 				{
-					sVal.FormatVal(m_lastAttackers.size());
+					sVal.FormatSTVal(m_lastAttackers.size());
 					return true;
 				}
 
@@ -2054,7 +2054,7 @@ do_default:
 			{
 				if ( strlen( pszKey ) == 8 )
 				{
-					sVal.FormatVal(m_notoSaves.size());
+					sVal.FormatSTVal(m_notoSaves.size());
 					return true;
 				}
 
@@ -2138,7 +2138,7 @@ do_default:
 				strcpylen(pszFameAt0, pFameAt0->GetPtr());
 
 				int iFame = Stat_GetAdjusted(STAT_FAME);
-				size_t i = Str_ParseCmds( pszFameAt0, ppLevel_sep, COUNTOF(ppLevel_sep), "," ) - 1; //range
+				size_t i = Str_ParseCmds( pszFameAt0, ppLevel_sep, CountOf(ppLevel_sep), "," ) - 1; //range
 				for (;;)
 				{
 					if ( !IsStrNumeric( ppLevel_sep[i] ) )
@@ -2167,7 +2167,7 @@ do_default:
 			SKIP_SEPARATORS(pszKey);
 			{
 				tchar * ppArgs[2];
-				Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, COUNTOF( ppArgs ));
+				Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf( ppArgs ));
 				SKILL_TYPE iSkill = g_Cfg.FindSkillKey( ppArgs[0] );
 				if ( iSkill == SKILL_NONE )
 					return false;
@@ -2192,7 +2192,7 @@ do_default:
 			SKIP_SEPARATORS(pszKey);
 			{
 				tchar * ppArgs[2];
-				Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, COUNTOF(ppArgs), ":,/" );
+				Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf(ppArgs), ":,/" );
 				sVal = ( pCharDef->IsFemale()) ? ppArgs[1] : ppArgs[0];
 			}
 			return true;
@@ -2217,7 +2217,7 @@ do_default:
 
 				int iKarma = Stat_GetAdjusted(STAT_KARMA);
 
-				size_t i = Str_ParseCmds( pszKarmaAt0, ppLevel_sep, COUNTOF(ppLevel_sep), "," ) - 1; //range
+				size_t i = Str_ParseCmds( pszKarmaAt0, ppLevel_sep, CountOf(ppLevel_sep), "," ) - 1; //range
 				for (;;)
 				{
 					if ( ppLevel_sep[i][0] != '-' && !IsStrNumeric( ppLevel_sep[i] ) )
@@ -2256,7 +2256,7 @@ do_default:
 				GETNONWHITESPACE(pszKey);
 
 				tchar * ppArgs[2];
-				size_t iQty = Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, COUNTOF( ppArgs ));
+				size_t iQty = Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf( ppArgs ));
 
 				// Check that we have at least the first argument
 				if ( iQty <= 0 )
@@ -2296,7 +2296,7 @@ do_default:
 				if ( *pszKey )
 				{
 					tchar * ppArgs[2];
-					size_t iQty = Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, COUNTOF( ppArgs ));
+					size_t iQty = Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf( ppArgs ));
 					if ( iQty == 2 )
 					{
 						SKILL_TYPE iSkill = g_Cfg.FindSkillKey( ppArgs[0] );
@@ -2706,7 +2706,7 @@ bool CChar::r_LoadVal( CScript & s )
 	ADDTOCALLSTACK("CChar::r_LoadVal");
 	EXC_TRY("LoadVal");
 	lpctstr	pszKey	=  s.GetKey();
-	CHC_TYPE iKeyNum = (CHC_TYPE) FindTableHeadSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 );
+	CHC_TYPE iKeyNum = (CHC_TYPE) FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( iKeyNum < 0 )
 	{
 do_default:
@@ -3098,7 +3098,7 @@ do_default:
 				if ( s.GetArgStr() )
 				{
 					tchar * ppArgs[2];
-					size_t iQty = Str_ParseCmds(const_cast<tchar *>(s.GetArgStr()), ppArgs, COUNTOF( ppArgs ));
+					size_t iQty = Str_ParseCmds(const_cast<tchar *>(s.GetArgStr()), ppArgs, CountOf( ppArgs ));
 					if ( iQty == 2 )
 					{
 						SKILL_TYPE iSkill = g_Cfg.FindSkillKey( ppArgs[0] );
@@ -3113,7 +3113,7 @@ do_default:
 		case CHC_MEMORY:
 			{
 				int64 piCmd[2];
-				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, COUNTOF(piCmd) );
+				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd) );
 				if ( iArgQty < 2 )
 					return false;
 
@@ -3397,7 +3397,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 
 	EXC_TRY("Verb");
 
-	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, COUNTOF(sm_szVerbKeys)-1 );
+	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
 	if ( index < 0 )
 		return ( NPC_OnVerb(s, pSrc) || Player_OnVerb(s, pSrc) || CObjBase::r_Verb(s, pSrc) );
 
@@ -3451,7 +3451,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			// ANIM, ANIM_TYPE action, bool fBackward = false, byte iFrameDelay = 1
 			{
 				int64 Arg_piCmd[3];		// Maximum parameters in one line
-				size_t Arg_Qty = Str_ParseCmds(s.GetArgRaw(), Arg_piCmd, COUNTOF(Arg_piCmd));
+				size_t Arg_Qty = Str_ParseCmds(s.GetArgRaw(), Arg_piCmd, CountOf(Arg_piCmd));
 				return UpdateAnimate(static_cast<ANIM_TYPE>(Arg_piCmd[0]), true, false,
 					(Arg_Qty > 1) ? (uchar)(Arg_piCmd[1]) : 1,
 					(Arg_Qty > 2) ? (uchar)(Arg_piCmd[2]) : 1);
@@ -3646,7 +3646,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			GETNONWHITESPACE( psTmp );
 			tchar * ttVal[2];
 			int iTmp = 1;
-			size_t iArg = Str_ParseCmds( psTmp, ttVal, COUNTOF( ttVal ), " ,\t" );
+			size_t iArg = Str_ParseCmds( psTmp, ttVal, CountOf( ttVal ), " ,\t" );
 			if ( iArg == 2 )
 			{
 				if ( IsDigit( ttVal[1][0] ) )
@@ -3728,7 +3728,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			int iSkill = s.GetArgVal();
 			int iTicks = iSkill / 50; 
 			int64		piCmd[2];
-			if (Str_ParseCmds(s.GetArgRaw(), piCmd, COUNTOF(piCmd)) > 1)
+			if (Str_ParseCmds(s.GetArgRaw(), piCmd, CountOf(piCmd)) > 1)
 				iTicks = (int)(piCmd[1]);
 
 			SetPoison(iSkill, iTicks, pSrc->GetChar());
@@ -3816,7 +3816,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				if ( s.HasArgs() )
 				{
 					tchar * ppArgs[2];
-					if ( Str_ParseCmds( s.GetArgRaw(), ppArgs, COUNTOF( ppArgs )) > 0 )
+					if ( Str_ParseCmds( s.GetArgRaw(), ppArgs, CountOf( ppArgs )) > 0 )
 					{
 						SKILL_TYPE iSkill = g_Cfg.FindSkillKey( ppArgs[0] );
 						if ( iSkill == SKILL_NONE )

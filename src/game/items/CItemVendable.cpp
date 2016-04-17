@@ -46,7 +46,7 @@ bool CItemVendable::r_WriteVal(lpctstr pszKey, CString &sVal, CTextConsole *pSrc
 {
 	ADDTOCALLSTACK("CItemVendable::r_WriteVal");
 	EXC_TRY("WriteVal");
-	switch ( FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 	case IVC_PRICE:	// PRICE
 		sVal.FormatVal( m_price );
@@ -69,7 +69,7 @@ bool CItemVendable::r_LoadVal(CScript &s)
 {
 	ADDTOCALLSTACK("CItemVendable::r_LoadVal");
 	EXC_TRY("LoadVal");
-	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 	case IVC_PRICE:	// PRICE
 		m_price = s.GetArgVal();

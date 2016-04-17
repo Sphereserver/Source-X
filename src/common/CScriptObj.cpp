@@ -226,7 +226,7 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
 		}
 	}
 	else
-		index = FindTableSorted( s.GetKey(), sm_szLoadKeys, COUNTOF(sm_szLoadKeys)-1 );
+		index = FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
 
 	switch (index)
 	{
@@ -380,7 +380,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole
 			return true;
 		}
 
-		size_t iNum = static_cast<size_t>(Exp_GetSingle(pszKey));
+		size_t iNum = (size_t)(Exp_GetSingle(pszKey));
 		SKIP_SEPARATORS(pszKey);
 		if ( !m_v.IsValidIndex(iNum) )
 		{
@@ -392,7 +392,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole
 	}
 
 	EXC_SET("generic");
-	int index = FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 );
+	int index = FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	switch (index)
 	{
 		case AGC_N:
@@ -611,7 +611,7 @@ bool CScriptObj::r_LoadVal( CScript & s )
 	}
 
 	// ignore these.
-	int index = FindTableHeadSorted(pszKey, sm_szLoadKeys, COUNTOF(sm_szLoadKeys)-1);
+	int index = FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1);
 	if ( index < 0 )
 	{
 		DEBUG_ERR(("Undefined keyword '%s'\n", s.GetKey()));
@@ -675,7 +675,7 @@ static void StringFunction( int iFunc, lpctstr pszKey, CString &sVal )
 		++pszKey;
 
 	tchar * ppCmd[4];
-	size_t iCount = Str_ParseCmds( const_cast<tchar *>(pszKey), ppCmd, COUNTOF(ppCmd), ")" );
+	size_t iCount = Str_ParseCmds( const_cast<tchar *>(pszKey), ppCmd, CountOf(ppCmd), ")" );
 	if ( iCount <= 0 )
 	{
 		DEBUG_ERR(( "Bad string function usage. missing )\n" ));
@@ -785,7 +785,7 @@ bool CScriptObj::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc 
 		return pRef->r_WriteVal( pszKey, sVal, pSrc );
 	}
 
-	int index = FindTableHeadSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 );
+	int index = FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( index < 0 )
 	{
 		// <dSOMEVAL> same as <eval <SOMEVAL>> to get dec from the val
@@ -1032,7 +1032,7 @@ badcmd:
 		case SSC_StrSub:
 			{
 				tchar * ppArgs[3];
-				size_t iQty = Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, COUNTOF(ppArgs));
+				size_t iQty = Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf(ppArgs));
 				if ( iQty < 3 )
 					return false;
 
@@ -1049,7 +1049,7 @@ badcmd:
 					iCnt = iLen - iPos;
 
 				tchar *buf = Str_GetTemp();
-				strncpy( buf, ppArgs[2] + iPos, static_cast<size_t>(iCnt) );
+				strncpy( buf, ppArgs[2] + iPos, (size_t)(iCnt) );
 				buf[iCnt] = '\0';
 
 				if ( g_Cfg.m_wDebugFlags & DEBUGF_SCRIPTS )
@@ -1113,7 +1113,7 @@ badcmd:
 		case SSC_ASCPAD:
 			{
 				tchar * ppArgs[2];
-				size_t iQty = Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, COUNTOF(ppArgs));
+				size_t iQty = Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf(ppArgs));
 				if ( iQty < 2 )
 					return false;
 
@@ -1151,7 +1151,7 @@ badcmd:
 				tchar	*buf = Str_GetTemp();
 				tchar	*Arg_ppCmd[10];		// limit to 9 arguments
 				strcpy(buf, pszKey);
-				size_t iQty = Str_ParseCmds(buf, Arg_ppCmd, COUNTOF(Arg_ppCmd));
+				size_t iQty = Str_ParseCmds(buf, Arg_ppCmd, CountOf(Arg_ppCmd));
 				if ( iQty < 1 )
 					return false;
 				
@@ -1219,7 +1219,7 @@ badcmd:
 					tchar *ppCmd[255];
 					tchar * z = Str_GetTemp();
 					strcpy(z, p);
-					size_t count = Str_ParseCmds(z, ppCmd, COUNTOF(ppCmd), separators); 
+					size_t count = Str_ParseCmds(z, ppCmd, CountOf(ppCmd), separators); 
 					if (count > 0)
 					{
 						sVal.Add(ppCmd[0]);
@@ -1354,7 +1354,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 		return pRef->r_Verb(script, pSrc);
 	}
 
-	index = FindTableSorted( s.GetKey(), sm_szVerbKeys, COUNTOF( sm_szVerbKeys )-1 );
+	index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 
 	switch (index)
 	{
@@ -1402,7 +1402,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 		case SSV_NEWITEM:	// just add an item but don't put it anyplace yet..
 			{
 				tchar * ppCmd[4];
-				size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppCmd, COUNTOF(ppCmd), ",");
+				size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppCmd, CountOf(ppCmd), ",");
 				if ( iQty <= 0 )
 					return false;
 
@@ -1704,7 +1704,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 		int iMax = 0;
 		int i;
 		tchar * ppArgs[3];
-		size_t iQty = Str_ParseCmds( s.GetArgStr(), ppArgs, COUNTOF(ppArgs), ", " );
+		size_t iQty = Str_ParseCmds( s.GetArgStr(), ppArgs, CountOf(ppArgs), ", " );
 		CString sLoopVar = "_FOR";
 		
 		switch( iQty )
@@ -1872,7 +1872,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 		RESOURCE_ID rid;
 		tchar * ppArgs[1];
 
-		if (Str_ParseCmds( s.GetArgStr(), ppArgs, COUNTOF( ppArgs ), " \t," ) >= 1)
+		if (Str_ParseCmds( s.GetArgStr(), ppArgs, CountOf( ppArgs ), " \t," ) >= 1)
 		{
 			rid = g_Cfg.ResourceGetID(RES_UNKNOWN, const_cast<lpctstr &>(static_cast<lptstr &>(ppArgs[0])));
 		}
@@ -1946,7 +1946,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 	{
 		tchar * ppArgs[1];
 
-		if (Str_ParseCmds(s.GetArgStr(), ppArgs, COUNTOF(ppArgs), " \t,") >= 1)
+		if (Str_ParseCmds(s.GetArgStr(), ppArgs, CountOf(ppArgs), " \t,") >= 1)
 		{			
 			char funcname[1024];
 			strcpy(funcname, ppArgs[0]);
@@ -1964,7 +1964,7 @@ toomanyloops:
 			g_Log.EventError("Terminating loop cycle since it seems being dead-locked (%d iterations already passed)\n", LoopsMade);
 	}
 
-	if ( EndContext.m_lOffset <= StartContext.m_lOffset )
+	if ( EndContext.m_pOffset <= StartContext.m_pOffset )
 	{
 		// just skip to the end.
 		TRIGRET_TYPE iRet = OnTriggerRun( s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult );
@@ -2184,7 +2184,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerRun( CScript &s, TRIGRUN_TYPE trigrun, CTextCo
 			break;
 
 jump_in:
-		SK_TYPE iCmd = (SK_TYPE) FindTableSorted( s.GetKey(), sm_szScriptKeys, COUNTOF( sm_szScriptKeys )-1 );
+		SK_TYPE iCmd = (SK_TYPE) FindTableSorted( s.GetKey(), sm_szScriptKeys, CountOf( sm_szScriptKeys )-1 );
 		TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
 
 		switch ( iCmd )
@@ -2299,7 +2299,7 @@ jump_in:
 					if ( s.HasArgs() )
 					{
 						tchar * ppArgs[2];
-						size_t iArgQty = Str_ParseCmds(const_cast<tchar *>(s.GetArgRaw()), ppArgs, COUNTOF(ppArgs), " \t,");
+						size_t iArgQty = Str_ParseCmds(const_cast<tchar *>(s.GetArgRaw()), ppArgs, CountOf(ppArgs), " \t,");
 						
 						if ( iArgQty >= 1 )
 						{
@@ -2360,7 +2360,7 @@ jump_in:
 							tchar * ppArgs[2];
 							TemporaryString ppParsed;
 
-							if ( Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, COUNTOF(ppArgs), " \t," ) >= 1 )
+							if ( Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf(ppArgs), " \t," ) >= 1 )
 							{
 								strcpy(ppParsed, ppArgs[0]);
 								if ( ParseText( ppParsed, pSrc, 0, pArgs ) > 0 )
@@ -2567,7 +2567,7 @@ jump_in:
 						tchar * piCmd[7];
 						tchar *psTmp = Str_GetTemp();
 						strcpy( psTmp, s.GetArgRaw() );
-						size_t iArgQty = Str_ParseCmds( psTmp, piCmd, COUNTOF( piCmd ), " ,\t" );
+						size_t iArgQty = Str_ParseCmds( psTmp, piCmd, CountOf( piCmd ), " ,\t" );
 						CScriptObj *pRef = this;
 						if ( iArgQty == 2 )
 						{
@@ -2825,7 +2825,7 @@ bool CFileObj::r_LoadVal( CScript & s )
 		return false;
 	}
 
-	int index = FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 );
+	int index = FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 
 	switch ( index )
 	{
@@ -2914,7 +2914,7 @@ bool CFileObj::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 		return true;
 	}
 
-	int index = FindTableHeadSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 );
+	int index = FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 
 	switch ( index )
 	{
@@ -2977,7 +2977,7 @@ bool CFileObj::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 			break;
 
 		case FO_LENGTH:
-			sVal.FormatVal( sWrite->IsFileOpen() ? sWrite->GetLength() : -1 );
+			sVal.FormatSTVal( sWrite->IsFileOpen() ? sWrite->GetLength() : -1 );
 			break;
 
 		case FO_OPEN:
@@ -2999,7 +2999,7 @@ bool CFileObj::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 			} break;
 
 		case FO_POSITION:
-			sVal.FormatVal( sWrite->GetPosition() );
+			sVal.FormatSTVal( sWrite->GetPosition() );
 			break;
 
 		case FO_READBYTE:
@@ -3020,7 +3020,7 @@ bool CFileObj::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 
 				if ( ( ( sWrite->GetPosition() + iRead ) > sWrite->GetLength() ) || ( sWrite->IsEOF() ) )
 				{
-					g_Log.Event(LOGL_ERROR, "FILE: Failed reading %" FMTSIZE_T " byte from \"%s\". Too near to EOF.\n", iRead, static_cast<lpctstr>(sWrite->GetFilePath()));
+					g_Log.Event(LOGL_ERROR, "FILE: Failed reading %" PRIuSIZE_T " byte from \"%s\". Too near to EOF.\n", iRead, static_cast<lpctstr>(sWrite->GetFilePath()));
 					return false;
 				}
 
@@ -3028,7 +3028,7 @@ bool CFileObj::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 
 				if ( iRead != sWrite->Read(ppArg, iRead) )
 				{
-					g_Log.Event(LOGL_ERROR, "FILE: Failed reading %" FMTSIZE_T " byte from \"%s\".\n", iRead, static_cast<lpctstr>(sWrite->GetFilePath()));
+					g_Log.Event(LOGL_ERROR, "FILE: Failed reading %" PRIuSIZE_T " byte from \"%s\".\n", iRead, static_cast<lpctstr>(sWrite->GetFilePath()));
 					return false;
 				}
 
@@ -3050,7 +3050,7 @@ bool CFileObj::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 				if ( iLines < 0 )
 					return false;
 
-				uint uiSeek = sWrite->GetPosition();
+				size_t stSeek = sWrite->GetPosition();
 				sWrite->SeekToBegin();
 
 				if ( iLines == 0 )
@@ -3070,7 +3070,7 @@ bool CFileObj::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 					}
 				}
 
-				sWrite->Seek(uiSeek);
+				sWrite->Seek(stSeek);
 
 				if ( size_t iLinelen = strlen(ppArg) )
 				{
@@ -3099,15 +3099,15 @@ bool CFileObj::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 
 				if (strcmpi("BEGIN", pszKey) == 0)
 				{
-					sVal.FormatVal( sWrite->Seek(0, SEEK_SET) );
+					sVal.FormatSTVal( sWrite->Seek(0, SEEK_SET) );
 				}
 				else if (strcmpi("END", pszKey) == 0)
 				{
-					sVal.FormatVal( sWrite->Seek(0, SEEK_END) );
+					sVal.FormatSTVal( sWrite->Seek(0, SEEK_END) );
 				}
 				else
 				{
-					sVal.FormatVal( sWrite->Seek(Exp_GetVal(pszKey), SEEK_SET) );
+					sVal.FormatSTVal( sWrite->Seek(Exp_GetLLVal(pszKey), SEEK_SET) );
 				}
 			} break;
 
@@ -3134,7 +3134,7 @@ bool CFileObj::r_Verb( CScript & s, CTextConsole * pSrc )
 
 	lpctstr pszKey = s.GetKey();
 
-	int index = FindTableSorted( pszKey, sm_szVerbKeys, COUNTOF( sm_szVerbKeys )-1 );
+	int index = FindTableSorted( pszKey, sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 
 	if ( index < 0 )
 		return( this->r_LoadVal( s ) );
@@ -3367,7 +3367,7 @@ bool CFileObjContainer::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	}
 	else
 	{
-		size_t nNumber = static_cast<size_t>( Exp_GetVal(pszKey) );
+		size_t nNumber = (size_t)( Exp_GetVal(pszKey) );
 		SKIP_SEPARATORS(pszKey);
 
 		if ( nNumber >= sFileList.size() )
@@ -3391,7 +3391,7 @@ bool CFileObjContainer::r_LoadVal( CScript & s )
 	EXC_TRY("LoadVal");
 	lpctstr pszKey = s.GetKey();
 
-	int index = FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 );
+	int index = FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 
 	switch ( index )
 	{
@@ -3443,11 +3443,11 @@ bool CFileObjContainer::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole 
 		return false;
 	}
 
-	int iIndex = FindTableHeadSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 );
+	int iIndex = FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 
 	if ( iIndex < 0 )
 	{
-		size_t nNumber = static_cast<size_t>( Exp_GetVal(pszKey) );
+		size_t nNumber = (size_t)( Exp_GetVal(pszKey) );
 		SKIP_SEPARATORS(pszKey);
 
 		if ( nNumber >= sFileList.size() )
@@ -3518,13 +3518,13 @@ bool CFileObjContainer::r_Verb( CScript & s, CTextConsole * pSrc )
 		return false;
 	}
 
-	int index = FindTableSorted( pszKey, sm_szVerbKeys, COUNTOF( sm_szVerbKeys )-1 );
+	int index = FindTableSorted( pszKey, sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 
 	if ( index < 0 )
 	{
 		if ( strchr( pszKey, '.') ) // 0.blah format
 		{
-			size_t nNumber = static_cast<size_t>( Exp_GetVal(pszKey) );
+			size_t nNumber = (size_t)( Exp_GetVal(pszKey) );
 
 			if ( nNumber < sFileList.size() )
 			{
@@ -3557,7 +3557,7 @@ bool CFileObjContainer::r_Verb( CScript & s, CTextConsole * pSrc )
 			bool bResetObject = ( index == CFOV_RESETOBJECT );
 			if ( s.HasArgs() )
 			{
-				size_t nNumber = static_cast<size_t>( s.GetArgVal() );
+				size_t nNumber = (size_t)( s.GetArgVal() );
 				if ( nNumber >= sFileList.size() )
 					return false;
 

@@ -139,7 +139,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 	// The first part of the key is GUMPCTL_TYPE
 	lpctstr pszKey = s.GetKey();
 
-	int index = FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF(sm_szLoadKeys)-1 );
+	int index = FindTableSorted( pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
 	if ( index < 0 )
 	{
 		CString sVal;
@@ -157,7 +157,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 	{
 		case GUMPCTL_PAGE:
 		{
-			if ( m_iControls >= (COUNTOF(m_sControls) - 1) )
+			if ( m_iControls >= (CountOf(m_sControls) - 1) )
 				return false;
 
 			GET_ABSOLUTE( page );
@@ -179,7 +179,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 		case GUMPCTL_BUTTON:			// 7 = X,Y,Down gump,Up gump,pressable(1/0),page,id
 		case GUMPCTL_BUTTONTILEART:		// 11 = X,Y,Down gump,Up gump,pressable(1/0),page,id,tileart,hue,X,Y
 		{
-			if ( m_iControls >= (COUNTOF(m_sControls) - 1) )
+			if ( m_iControls >= (CountOf(m_sControls) - 1) )
 				return false;
 
 			GET_RELATIVE( x, m_iOriginX );
@@ -267,9 +267,9 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 		}
 		case GUMPCTL_DTEXT:
 		{
-			if ( m_iControls >= (COUNTOF(m_sControls) - 1) )
+			if ( m_iControls >= (CountOf(m_sControls) - 1) )
 				return false;
-			if ( m_iTexts >= (COUNTOF(m_sText) - 1) )
+			if ( m_iTexts >= (CountOf(m_sText) - 1) )
 				return false;
 
 			GET_RELATIVE( x, m_iOriginX );
@@ -279,15 +279,15 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 			if ( *pszArgs == '.' )			pszArgs++;
 
 			size_t iText = GumpAddText( *pszArgs ? pszArgs : "" );
-			m_sControls[m_iControls].Format( "text %d %d %d %" FMTSIZE_T, x, y, hue, iText );
+			m_sControls[m_iControls].Format( "text %d %d %d %" PRIuSIZE_T, x, y, hue, iText );
 			m_iControls++;
 			return true;
 		}
 		case GUMPCTL_DCROPPEDTEXT:
 		{
-			if ( m_iControls >= (COUNTOF(m_sControls) - 1) )
+			if ( m_iControls >= (CountOf(m_sControls) - 1) )
 				return false;
-			if ( m_iTexts >= (COUNTOF(m_sText) - 1) )
+			if ( m_iTexts >= (CountOf(m_sText) - 1) )
 				return false;
 			
 			GET_RELATIVE( x, m_iOriginX );
@@ -299,15 +299,15 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 			if ( *pszArgs == '.' )			pszArgs++;
 
 			size_t iText = GumpAddText( *pszArgs ? pszArgs : "" );
-			m_sControls[m_iControls].Format( "croppedtext %d %d %d %d %d %" FMTSIZE_T, x, y, w, h, hue, iText );
+			m_sControls[m_iControls].Format( "croppedtext %d %d %d %d %d %" PRIuSIZE_T, x, y, w, h, hue, iText );
 			m_iControls++;
 			return true;
 		}
 		case GUMPCTL_DHTMLGUMP:
 		{
-			if ( m_iControls >= (COUNTOF(m_sControls) - 1) )
+			if ( m_iControls >= (CountOf(m_sControls) - 1) )
 				return false;
-			if ( m_iTexts >= (COUNTOF(m_sText) - 1) )
+			if ( m_iTexts >= (CountOf(m_sText) - 1) )
 				return false;
 
 			GET_RELATIVE( x, m_iOriginX );
@@ -319,15 +319,15 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 			SKIP_ALL( pszArgs )
 
 			size_t iText = GumpAddText( *pszArgs ? pszArgs : "" );
-			m_sControls[m_iControls].Format( "htmlgump %d %d %d %d %" FMTSIZE_T " %d %d", x, y, w, h, iText, bck, options );
+			m_sControls[m_iControls].Format( "htmlgump %d %d %d %d %" PRIuSIZE_T " %d %d", x, y, w, h, iText, bck, options );
 			m_iControls++;
 			return true;
 		}
 		case GUMPCTL_DTEXTENTRY:
 		{
-			if ( m_iControls >= (COUNTOF(m_sControls) - 1) )
+			if ( m_iControls >= (CountOf(m_sControls) - 1) )
 				return false;
-			if ( m_iTexts >= (COUNTOF(m_sText) - 1) )
+			if ( m_iTexts >= (CountOf(m_sText) - 1) )
 				return false;
 
 			GET_RELATIVE( x, m_iOriginX );
@@ -339,15 +339,15 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 			SKIP_ALL( pszArgs )
 
 			size_t iText = GumpAddText( *pszArgs ? pszArgs : "" );
-			m_sControls[m_iControls].Format( "textentry %d %d %d %d %d %d %" FMTSIZE_T, x, y, w, h, hue, id, iText );
+			m_sControls[m_iControls].Format( "textentry %d %d %d %d %d %d %" PRIuSIZE_T, x, y, w, h, hue, id, iText );
 			m_iControls++;
 			return true;
 		}
 		case GUMPCTL_DTEXTENTRYLIMITED:
 		{
-			if ( m_iControls >= (COUNTOF(m_sControls) - 1) )
+			if ( m_iControls >= (CountOf(m_sControls) - 1) )
 				return false;
-			if ( m_iTexts >= (COUNTOF(m_sText) - 1) )
+			if ( m_iTexts >= (CountOf(m_sText) - 1) )
 				return false;
 
 			GET_RELATIVE( x, m_iOriginX );
@@ -360,13 +360,13 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 			SKIP_ALL( pszArgs )
 
 			size_t iText = GumpAddText( *pszArgs ? pszArgs : "" );
-			m_sControls[m_iControls].Format( "textentrylimited %d %d %d %d %d %d %" FMTSIZE_T " %d", x, y, w, h, hue, id, iText, charLimit );
+			m_sControls[m_iControls].Format( "textentrylimited %d %d %d %d %d %d %" PRIuSIZE_T " %d", x, y, w, h, hue, id, iText, charLimit );
 			m_iControls++;
 			return true;
 		}
 		case GUMPCTL_CHECKBOX:
 		{
-			if ( m_iControls >= (COUNTOF(m_sControls) - 1) )
+			if ( m_iControls >= (CountOf(m_sControls) - 1) )
 				return false;
 
 			GET_RELATIVE( x, m_iOriginX );
@@ -383,7 +383,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 		}
 		case GUMPCTL_RADIO:
 		{
-			if ( m_iControls >= (COUNTOF(m_sControls) - 1) )
+			if ( m_iControls >= (CountOf(m_sControls) - 1) )
 				return false;
 
 			GET_RELATIVE( x, m_iOriginX );
@@ -400,7 +400,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 		}
 		case GUMPCTL_CHECKERTRANS:
 		{
-			if ( m_iControls >= (COUNTOF(m_sControls) - 1) )
+			if ( m_iControls >= (CountOf(m_sControls) - 1) )
 				return false;
 
 			GET_RELATIVE( x, m_iOriginX );
@@ -481,7 +481,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 			break;
 	}
 
-	if ( m_iControls >= (COUNTOF(m_sControls) - 1) )
+	if ( m_iControls >= (CountOf(m_sControls) - 1) )
 		return false;
 
 	m_sControls[m_iControls].Format("%s %s", pszKey, pszArgs);
@@ -551,7 +551,7 @@ bool CDialogDef::GumpSetup( int iPage, CClient * pClient, CObjBase * pObjSrc, lp
 	{
 		while ( s.ReadKey())
 		{
-			if ( m_iTexts >= (COUNTOF(m_sText) - 1) )
+			if ( m_iTexts >= (CountOf(m_sText) - 1) )
 				break;
 			m_pObj->ParseText( s.GetKeyBuffer(), pClient->GetChar() );
 			m_sText[m_iTexts] = s.GetKey();
@@ -574,7 +574,7 @@ bool CDialogDef::GumpSetup( int iPage, CClient * pClient, CObjBase * pObjSrc, lp
 	tchar * pszBuf = s.GetKeyBuffer();
 	m_pObj->ParseText( pszBuf, pClient->GetChar() );
 
-	Str_ParseCmds( pszBuf, iSizes, COUNTOF(iSizes) );
+	Str_ParseCmds( pszBuf, iSizes, CountOf(iSizes) );
 	m_x		= (int)(iSizes[0]);
 	m_y		= (int)(iSizes[1]);
 
@@ -731,7 +731,7 @@ TRIGRET_TYPE CClient::Dialog_OnButton( RESOURCE_ID_BASE rid, dword dwButtonID, C
 		if ( ! s.IsKeyHead( "ON", 2 ))
 			continue;
 
-		size_t iArgs = Str_ParseCmds( s.GetArgStr(), piCmd, COUNTOF(piCmd) );
+		size_t iArgs = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd) );
 		if ( iArgs == 0 )
 			continue;
 
@@ -960,13 +960,13 @@ void CClient::Menu_Setup( RESOURCE_ID_BASE rid, CObjBase * pObj )
 		if ( ! item[i].ParseLine( s.GetArgRaw(), pObj, m_pChar ))
 			i--;
 
-		if ( i >= (COUNTOF( item ) - 1))
+		if ( i >= (CountOf( item ) - 1))
 			break;
 	}
 
 	m_tmMenu.m_ResourceID = rid;
 
-	ASSERT(i < COUNTOF(item));
+	ASSERT(i < CountOf(item));
 	addItemMenu( CLIMODE_MENU, item, i, pObj );
 }
 

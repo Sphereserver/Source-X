@@ -113,7 +113,7 @@ bool CWebPageDef::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSr
 {
 	ADDTOCALLSTACK("CWebPageDef::r_WriteVal");
 	EXC_TRY("WriteVal");
-	switch ( FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		case WC_PLEVEL:
 			sVal.FormatVal( m_privlevel );
@@ -146,7 +146,7 @@ bool CWebPageDef::r_LoadVal( CScript & s ) // Load an item Script
 {
 	ADDTOCALLSTACK("CWebPageDef::r_LoadVal");
 	EXC_TRY("LoadVal");
-	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		case WC_PLEVEL:
 			m_privlevel = static_cast<PLEVEL_TYPE>(s.GetArgVal());
@@ -186,7 +186,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 	sm_iListIndex = 0;
 	tchar *pszTmp2 = Str_GetTemp();
 
-	WV_TYPE iHeadKey = (WV_TYPE) FindTableSorted( s.GetKey(), sm_szVerbKeys, COUNTOF(sm_szVerbKeys)-1 );
+	WV_TYPE iHeadKey = (WV_TYPE) FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
 	switch ( iHeadKey )
 	{
 		case WV_WEBPAGE:
@@ -444,7 +444,7 @@ bool CWebPageDef::SetSourceFile( lpctstr pszName, CClient * pClient )
 	if ( pszExt == NULL || pszExt[0] == '\0' )
 		return false;
 
-	int iType = FindTableSorted( pszExt, sm_szPageExt, COUNTOF( sm_szPageExt ));
+	int iType = FindTableSorted( pszExt, sm_szPageExt, CountOf( sm_szPageExt ));
 	if ( iType < 0 )
 		return false;
 	m_type = sm_szPageExtType[iType];
@@ -686,7 +686,7 @@ static int HtmlDeCode( tchar * pszDst, lpctstr pszSrc )
 	return( i );
 }
 
-bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * pContentData, int iContentLength )
+bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * pContentData, size_t stContentLength )
 {
 	ADDTOCALLSTACK("CWebPageDef::ServPagePost");
 	UNREFERENCED_PARAMETER(pszURLArgs);
@@ -694,15 +694,15 @@ bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * p
 
 	ASSERT(pClient);
 
-	if ( pContentData == NULL || iContentLength <= 0 )
+	if ( pContentData == NULL || stContentLength <= 0 )
 		return false;
 	if ( ! HasTrigger(XTRIG_UNKNOWN))	// this form has no triggers.
 		return false;
 
 	// Parse the data.
-	pContentData[iContentLength] = 0;
+	pContentData[stContentLength] = 0;
 	tchar * ppArgs[64];
-	size_t iArgs = Str_ParseCmds(pContentData, ppArgs, COUNTOF(ppArgs), "&");
+	size_t iArgs = Str_ParseCmds(pContentData, ppArgs, CountOf(ppArgs), "&");
 	if (( iArgs <= 0 ) || ( iArgs >= 63 ))
 		return false;
 

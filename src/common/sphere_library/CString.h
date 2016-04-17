@@ -223,7 +223,7 @@ public:
 	*/
 	void FormatVal(int iVal);
 	/**
-	* @brief Print a unsigned long value into the string.
+	* @brief Print a unsigned int value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
@@ -240,6 +240,12 @@ public:
 	* @param iVal value to print.
 	*/
 	void FormatULLVal(ullong iVal);
+	/**
+	* @brief Print a size_t (unsigned) value into the string.
+	* @see Format()
+	* @param iVal value to print.
+	*/
+	void FormatSTVal(size_t iVal);
 	/**
 	* @brief Print a word value into the string.
 	* @see Format()
@@ -305,53 +311,53 @@ public:
 	* @param c character to look for.
 	* @return position of the character in CString if any, -1 otherwise.
 	*/
-	size_t indexOf(tchar c);
+	ssize_t indexOf(tchar c);
 	/**
 	* @brief Look for the first occurence of c in CString from a position.
 	* @param c character to look for.
 	* @param offset position from start the search.
 	* @return position of the character in CString if any, -1 otherwise.
 	*/
-	size_t indexOf(tchar c, size_t offset);
+	ssize_t indexOf(tchar c, size_t offset);
 	/**
 	* @brief Look for the first occurence of a substring in CString.
 	* @param str substring to look for.
 	* @return position of the substring in CString if any, -1 otherwise.
 	*/
-	size_t indexOf(CString str);
+	ssize_t indexOf(CString str);
 	/**
 	* @brief Look for the first occurence of a substring in CString from a position.
 	* @param str substring to look for.
 	* @param offset position from start the search.
 	* @return position of the substring in CString if any, -1 otherwise.
 	*/
-	size_t indexOf(CString str, size_t offset);
+	ssize_t indexOf(CString str, size_t offset);
 	/**
 	* @brief Look for the last occurence of c in CString.
 	* @param c character to look for.
 	* @return position of the character in CString if any, -1 otherwise.
 	*/
-	size_t lastIndexOf(tchar c);
+	ssize_t lastIndexOf(tchar c);
 	/**
 	* @brief Look for the last occurence of c in CString from a position to the end.
 	* @param c character to look for.
 	* @param from position where stop the search.
 	* @return position of the character in CString if any, -1 otherwise.
 	*/
-	size_t lastIndexOf(tchar c, size_t from);
+	ssize_t lastIndexOf(tchar c, size_t from);
 	/**
 	* @brief Look for the last occurence of a substring in CString.
 	* @param str substring to look for.
 	* @return position of the substring in CString if any, -1 otherwise.
 	*/
-	size_t lastIndexOf(CString str);
+	ssize_t lastIndexOf(CString str);
 	/**
 	* @brief Look for the last occurence of a substring in CString from a position to the end.
 	* @param str substring to look for.
 	* @param from position where stop the search.
 	* @return position of the substring in CString if any, -1 otherwise.
 	*/
-	size_t lastIndexOf(CString str, size_t from);
+	ssize_t lastIndexOf(CString str, size_t from);
 	///@}
 
 private:

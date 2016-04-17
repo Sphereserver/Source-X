@@ -800,7 +800,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		case 3:	// Extended localized message (with affixed ASCII text)
 		{
             tchar * ppArgs[256];
-			size_t iQty = Str_ParseCmds(const_cast<tchar *>(m_BarkBuffer.GetPtr()), ppArgs, COUNTOF(ppArgs), "," );
+			size_t iQty = Str_ParseCmds(const_cast<tchar *>(m_BarkBuffer.GetPtr()), ppArgs, CountOf(ppArgs), "," );
 			int iClilocId = Exp_GetVal( ppArgs[0] );
 			int iAffixType = Exp_GetVal( ppArgs[1] );
 			CString CArgs;
@@ -818,7 +818,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		case 2:	// Localized
 		{
             tchar * ppArgs[256];
-			size_t iQty = Str_ParseCmds(const_cast<tchar *>(m_BarkBuffer.GetPtr()), ppArgs, COUNTOF(ppArgs), "," );
+			size_t iQty = Str_ParseCmds(const_cast<tchar *>(m_BarkBuffer.GetPtr()), ppArgs, CountOf(ppArgs), "," );
 			int iClilocId = Exp_GetVal( ppArgs[0] );
 			CString CArgs;
 			for ( size_t i = 1; i < iQty; i++ )
@@ -835,7 +835,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		case 1:	// Unicode
 		{
 			NCHAR szBuffer[ MAX_TALK_BUFFER ];
-			CvtSystemToNUNICODE( szBuffer, COUNTOF(szBuffer), m_BarkBuffer.GetPtr(), -1 );
+			CvtSystemToNUNICODE( szBuffer, CountOf(szBuffer), m_BarkBuffer.GetPtr(), -1 );
 			addBarkUNICODE( szBuffer, pSrc, static_cast<HUE_TYPE>(Args[0]), mode, static_cast<FONT_TYPE>(Args[1]), 0 );
 			break;
 		}
@@ -1099,7 +1099,7 @@ void CClient::addItemName( const CItem * pItem )
 	lpctstr pszNameFull = pItem->GetNameFull( fIdentified );
 
 	tchar szName[ MAX_ITEM_NAME_SIZE + 256 ];
-	size_t len = strcpylen( szName, pszNameFull, COUNTOF(szName) );
+	size_t len = strcpylen( szName, pszNameFull, CountOf(szName) );
 
 	const CContainer* pCont = dynamic_cast<const CContainer*>(pItem);
 	if ( pCont != NULL )
@@ -1195,7 +1195,7 @@ void CClient::addItemName( const CItem * pItem )
 		lpctstr pNewStr = Args.m_VarsLocal.GetKeyStr("ClickMsgText");
 
 		if ( pNewStr != NULL )
-			strcpylen(szName, pNewStr, COUNTOF(szName));
+			strcpylen(szName, pNewStr, CountOf(szName));
 
 		wHue = static_cast<HUE_TYPE>(Args.m_VarsLocal.GetKeyNum("ClickMsgHue", true));
 	}
@@ -2833,7 +2833,7 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 							{
 								const CContainer * pContainer = dynamic_cast <const CContainer *> ( pItem );
 								this->m_TooltipData.Add( t = new CClientTooltip( 1050044 ) );
-								t->FormatArgs( "%" FMTSIZE_T "\t%d", pContainer->GetCount(), pContainer->GetTotalWeight() / WEIGHT_UNITS ); // ~1_COUNT~ items, ~2_WEIGHT~ stones
+								t->FormatArgs( "%" PRIuSIZE_T "\t%d", pContainer->GetCount(), pContainer->GetTotalWeight() / WEIGHT_UNITS ); // ~1_COUNT~ items, ~2_WEIGHT~ stones
 							}
 							break;
 
@@ -3533,7 +3533,7 @@ byte CClient::Setup_Play( uint iSlot ) // After hitting "Play Character" button
 
 	if ( ! GetAccount())
 		return( PacketLoginError::Invalid );
-	if ( iSlot >= COUNTOF(m_tmSetupCharList))
+	if ( iSlot >= CountOf(m_tmSetupCharList))
 		return( PacketLoginError::BadCharacter );
 
 	CChar * pChar = m_tmSetupCharList[ iSlot ].CharFind();
@@ -3561,7 +3561,7 @@ byte CClient::Setup_Delete( dword iSlot ) // Deletion of character
 	ADDTOCALLSTACK("CClient::Setup_Delete");
 	ASSERT( GetAccount() );
 	DEBUG_MSG(( "%x:Setup_Delete slot=%u\n", GetSocketID(), iSlot ));
-	if ( iSlot >= COUNTOF(m_tmSetupCharList))
+	if ( iSlot >= CountOf(m_tmSetupCharList))
 		return PacketDeleteError::NotExist;
 
 	CChar * pChar = m_tmSetupCharList[iSlot].CharFind();

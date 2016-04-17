@@ -181,10 +181,10 @@ SKILL_TYPE CCharPlayer::Skill_GetLockType( lpctstr pszKey ) const
 	ADDTOCALLSTACK("CCharPlayer::Skill_GetLockType");
 
 	tchar szTmpKey[128];
-	strcpylen( szTmpKey, pszKey, COUNTOF(szTmpKey) );
+	strcpylen( szTmpKey, pszKey, CountOf(szTmpKey) );
 
 	tchar * ppArgs[3];
-	size_t i = Str_ParseCmds( szTmpKey, ppArgs, COUNTOF(ppArgs), ".[]" );
+	size_t i = Str_ParseCmds( szTmpKey, ppArgs, CountOf(ppArgs), ".[]" );
 	if ( i <= 1 )
 		return( SKILL_NONE );
 
@@ -203,13 +203,13 @@ SKILL_TYPE CCharPlayer::Skill_GetLockType( lpctstr pszKey ) const
 
 SKILLLOCK_TYPE CCharPlayer::Skill_GetLock( SKILL_TYPE skill ) const
 {
-	ASSERT( skill >= 0 && static_cast<size_t>(skill) < COUNTOF(m_SkillLock));
+	ASSERT( skill >= 0 && (size_t)(skill) < CountOf(m_SkillLock));
 	return static_cast<SKILLLOCK_TYPE>(m_SkillLock[skill]);
 }
 
 void CCharPlayer::Skill_SetLock( SKILL_TYPE skill, SKILLLOCK_TYPE state )
 {
-	ASSERT( skill >= 0 && static_cast<size_t>(skill) < COUNTOF(m_SkillLock));
+	ASSERT( skill >= 0 && (size_t)(skill) < CountOf(m_SkillLock));
 	m_SkillLock[skill] = (uchar)(state);
 }
 
@@ -219,10 +219,10 @@ STAT_TYPE CCharPlayer::Stat_GetLockType( lpctstr pszKey ) const
 	ADDTOCALLSTACK("CCharPlayer::Stat_GetLockType");
 
 	tchar szTmpKey[128];
-	strcpylen( szTmpKey, pszKey, COUNTOF(szTmpKey) );
+	strcpylen( szTmpKey, pszKey, CountOf(szTmpKey) );
 
 	tchar * ppArgs[3];
-	size_t i = Str_ParseCmds( szTmpKey, ppArgs, COUNTOF(ppArgs), ".[]" );
+	size_t i = Str_ParseCmds( szTmpKey, ppArgs, CountOf(ppArgs), ".[]" );
 	if ( i <= 1 )
 		return( STAT_NONE );
 
@@ -241,13 +241,13 @@ STAT_TYPE CCharPlayer::Stat_GetLockType( lpctstr pszKey ) const
 
 SKILLLOCK_TYPE CCharPlayer::Stat_GetLock( STAT_TYPE stat ) const
 {
-	ASSERT( stat >= 0 && static_cast<size_t>(stat) < COUNTOF(m_StatLock));
+	ASSERT( stat >= 0 && (size_t)(stat) < CountOf(m_StatLock));
 	return static_cast<SKILLLOCK_TYPE>(m_StatLock[stat]);
 }
 
 void CCharPlayer::Stat_SetLock( STAT_TYPE stat, SKILLLOCK_TYPE state )
 {
-	ASSERT( stat >= 0 && static_cast<size_t>(stat) < COUNTOF(m_StatLock));
+	ASSERT( stat >= 0 && (size_t)(stat) < CountOf(m_StatLock));
 	m_StatLock[stat] = (uchar)(state);
 }
 
@@ -556,11 +556,11 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 	EXC_SET("saving skill locks");
 	for ( size_t j = 0; j < g_Cfg.m_iMaxSkill; j++ )	// Don't write all lock states!
 	{
-		ASSERT(j < COUNTOF(m_SkillLock));
+		ASSERT(j < CountOf(m_SkillLock));
 		if ( ! m_SkillLock[j] )
 			continue;
 		tchar szTemp[128];
-		sprintf( szTemp, "SkillLock[%" FMTSIZE_T "]", j );	// smaller storage space.
+		sprintf( szTemp, "SkillLock[%" PRIuSIZE_T "]", j );	// smaller storage space.
 		s.WriteKeyVal( szTemp, m_SkillLock[j] );
 	}
 	EXC_CATCH;
@@ -590,7 +590,7 @@ bool CChar::Player_OnVerb( CScript &s, CTextConsole * pSrc )
 		return false;
 
 	lpctstr pszKey = s.GetKey();
-	int cpVerb = FindTableSorted( pszKey, CCharPlayer::sm_szVerbKeys, COUNTOF(CCharPlayer::sm_szVerbKeys)-1 );
+	int cpVerb = FindTableSorted( pszKey, CCharPlayer::sm_szVerbKeys, CountOf(CCharPlayer::sm_szVerbKeys)-1 );
 
 	if ( cpVerb <= -1 )
 	{

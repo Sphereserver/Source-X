@@ -360,7 +360,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 					}
 				}
 			}
-			g_Log.Event(LOGM_INIT, "Auto-complete dictionary loaded (contains %" FMTSIZE_T " words).\n", count);
+			g_Log.Event(LOGM_INIT, "Auto-complete dictionary loaded (contains %" PRIuSIZE_T " words).\n", count);
 			dict.Close();
 		}
 	}
@@ -660,8 +660,8 @@ void defragSphere(char *path)
 		while ( inf.ReadString(buf, sizeof(buf)) )
 		{
 			uid = strlen(buf);
-			if (uid > (COUNTOF(buf) - 3))
-				uid = COUNTOF(buf) - 3;
+			if (uid > (CountOf(buf) - 3))
+				uid = CountOf(buf) - 3;
 
 			buf[uid] = buf[uid+1] = buf[uid+2] = 0;	// just to be sure to be in line always
 							// NOTE: it is much faster than to use memcpy to clear before reading

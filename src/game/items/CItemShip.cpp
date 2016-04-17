@@ -329,7 +329,7 @@ bool CItemShip::Ship_Face( DIR_TYPE dir )
 	uint iDirection = 0;
 	for ( ; ; ++iDirection )
 	{
-		if ( iDirection >= COUNTOF(sm_Ship_FaceDir))
+		if ( iDirection >= CountOf(sm_Ship_FaceDir))
 			return false;
 		if ( dir == sm_Ship_FaceDir[iDirection] )
 			break;
@@ -743,7 +743,7 @@ bool CItemShip::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fr
 	//"One (direction*)", " (Direction*), one" Moves ship one tile in desired direction and stops.
 	//"Slow (direction*)" Moves ship slowly in desired direction (see below for possible directions).
 
-	int iCmd = FindTableSorted( s.GetKey(), sm_szVerbKeys, COUNTOF( sm_szVerbKeys )-1 );
+	int iCmd = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 	if ( iCmd < 0 )
 	{
 		return( CItemMulti::r_Verb( s, pSrc ));
@@ -1081,7 +1081,7 @@ bool CItemShip::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc 
 	ADDTOCALLSTACK("CItemShip::r_WriteVal");
 	EXC_TRY("WriteVal");
 
-	int index = FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF(sm_szLoadKeys)-1 );
+	int index = FindTableSorted( pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
 	if ( index == -1 )
 	{
 		if ( !strnicmp(pszKey, "SHIPSPEED.", 10) )
@@ -1111,7 +1111,7 @@ bool CItemShip::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc 
 		case IMCS_PLANKS:
 		{
 			pszKey += 6;
-			sVal.FormatVal( GetShipPlankCount() );
+			sVal.FormatSTVal( GetShipPlankCount() );
 		} break;
 
 		case IMCS_SHIPSPEED:
@@ -1189,7 +1189,7 @@ bool CItemShip::r_LoadVal( CScript & s  )
 	ADDTOCALLSTACK("CItemShip::r_LoadVal");
 	EXC_TRY("LoadVal");
 	lpctstr	pszKey = s.GetKey();
-	IMCS_TYPE index = (IMCS_TYPE)FindTableHeadSorted(pszKey, sm_szLoadKeys, COUNTOF(sm_szLoadKeys) - 1);
+	IMCS_TYPE index = (IMCS_TYPE)FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
 	if (g_Serv.IsLoading())
 	{
 		if ( s.IsKey("HATCH") )
@@ -1246,7 +1246,7 @@ bool CItemShip::r_LoadVal( CScript & s  )
 					return true;
 				}
 				int64 piVal[2];
-				size_t iQty = Str_ParseCmds(s.GetArgStr(), piVal, COUNTOF(piVal));
+				size_t iQty = Str_ParseCmds(s.GetArgStr(), piVal, CountOf(piVal));
 				if (iQty == 2)
 				{
 					pItemMulti->m_shipSpeed.period = (uchar)(piVal[0]);

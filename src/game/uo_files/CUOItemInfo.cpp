@@ -77,7 +77,7 @@ CUOItemInfo::CUOItemInfo( ITEMID_TYPE id )
             m_wUnk19 = record.m_wUnk14;
             m_dwUnk11 = record.m_dwUnk6;
             m_dwUnk5 = 0;
-            strcpylen(m_name, record.m_name, COUNTOF(m_name));
+            strcpylen(m_name, record.m_name, CountOf(m_name));
             break;
         }
     }
@@ -90,9 +90,9 @@ ITEMID_TYPE CUOItemInfo::GetMaxTileDataItem()
     CGFile* pTileData = g_Install.GetMulFile(VERFILE_TILEDATA);
     ASSERT(pTileData != NULL);
 
-    dword dwLength = pTileData->GetLength();	// length of file
-    dword dwEntrySize = 0;						// size of tiledata entry
-    dword dwOffset = 0;							// offset to tiledata items
+    dword dwLength = (dword)pTileData->GetLength();	// length of file
+    dword dwEntrySize = 0;							// size of tiledata entry
+    dword dwOffset = 0;								// offset to tiledata items
 
     VERFILE_FORMAT format = g_Install.GetMulFormat(VERFILE_TILEDATA);
     switch (format)

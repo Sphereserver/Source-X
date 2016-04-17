@@ -479,7 +479,7 @@ CItem * CItem::ReadTemplate( CResourceLock & s, CObjBase * pCont ) // static
 		if ( s.IsKeyHead( "ON", 2 ))
 			break;
 
-		int index = FindTableSorted( s.GetKey(), sm_szTemplateTable, COUNTOF( sm_szTemplateTable )-1 );
+		int index = FindTableSorted( s.GetKey(), sm_szTemplateTable, CountOf( sm_szTemplateTable )-1 );
 		switch (index)
 		{
 			case ITC_BUY: // "BUY"
@@ -1717,7 +1717,7 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 			{
 				const CItemStone * pStone = dynamic_cast <const CItemStone*>(this);
 				ASSERT(pStone);
-				len += sprintf( pTemp+len, " (pop:%" FMTSIZE_T ")", pStone->GetCount());
+				len += sprintf( pTemp+len, " (pop:%" PRIuSIZE_T ")", pStone->GetCount());
 			}
 			break;
 
@@ -1993,7 +1993,7 @@ void CItem::SetAmount( uint amount )
 			ITEMID_ORE_2,
 			ITEMID_ORE_3
 		};
-		SetDispID( ( GetAmount() >= COUNTOF(sm_Item_Ore)) ? ITEMID_ORE_4 : sm_Item_Ore[GetAmount()] );
+		SetDispID( ( GetAmount() >= CountOf(sm_Item_Ore)) ? ITEMID_ORE_4 : sm_Item_Ore[GetAmount()] );
 	}
 
 	CContainer * pParentCont = dynamic_cast <CContainer*> (GetParent());
@@ -2281,7 +2281,7 @@ lpctstr const CItem::sm_szRefKeys[ICR_QTY+1] =
 bool CItem::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CItem::r_GetRef");
-	int i = FindTableHeadSorted( pszKey, sm_szRefKeys, COUNTOF(sm_szRefKeys)-1 );
+	int i = FindTableHeadSorted( pszKey, sm_szRefKeys, CountOf(sm_szRefKeys)-1 );
 	if ( i >= 0 )
 	{
 		pszKey += strlen( sm_szRefKeys[i] );
@@ -2332,7 +2332,7 @@ bool CItem::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
 	if ( !strnicmp( CItem::sm_szLoadKeys[IC_ADDSPELL], pszKey, 8 ) )
 		index	= IC_ADDSPELL;
 	else
-		index	= FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 );
+		index	= FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 
 	bool fDoDefault = false;
 
@@ -2610,7 +2610,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 {
 	ADDTOCALLSTACK("CItem::r_LoadVal");
 	EXC_TRY("LoadVal");
-	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		//Set as Strings
 		case IC_CRAFTEDBY:
@@ -2708,7 +2708,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 		case IC_ADDCIRCLE:
 			{
 				tchar	*ppVal[2];
-				size_t amount = Str_ParseCmds(s.GetArgStr(), ppVal, COUNTOF(ppVal), " ,\t");
+				size_t amount = Str_ParseCmds(s.GetArgStr(), ppVal, CountOf(ppVal), " ,\t");
 				bool includeLower = 0;
 				int addCircle = 0;
 
@@ -2776,7 +2776,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				{
 					pt.m_map = 0; pt.m_z = 0;
 					tchar * ppVal[2];
-					size_t iArgs = Str_ParseCmds( pszTemp, ppVal, COUNTOF( ppVal ), " ,\t" );
+					size_t iArgs = Str_ParseCmds( pszTemp, ppVal, CountOf( ppVal ), " ,\t" );
 					if ( iArgs < 2 ) 
 					{
 						DEBUG_ERR(( "Bad CONTP usage (not enough parameters)\n" ));
@@ -2896,7 +2896,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				{
 					pt.m_map = 0; pt.m_z = 0;
 					tchar * ppVal[4];
-					iArgs = Str_ParseCmds( pszTemp, ppVal, COUNTOF( ppVal ), " ,\t" );
+					iArgs = Str_ParseCmds( pszTemp, ppVal, CountOf( ppVal ), " ,\t" );
 					switch ( iArgs )
 					{
 						default:
@@ -3013,7 +3013,7 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 	EXC_TRY("Verb");
 	ASSERT(pSrc);
 
-	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, COUNTOF( sm_szVerbKeys )-1 );
+	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 	if ( index < 0 )
 	{
 		return( CObjBase::r_Verb( s, pSrc ));
@@ -3128,7 +3128,7 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 	}
 	else
 	{
-		iAction = (ITRIG_TYPE) FindTableSorted( pszTrigName, sm_szTrigName, COUNTOF(sm_szTrigName)-1 );
+		iAction = (ITRIG_TYPE) FindTableSorted( pszTrigName, sm_szTrigName, CountOf(sm_szTrigName)-1 );
 	}
 	SetTriggerActive(pszTrigName);
 
@@ -3147,7 +3147,7 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 	TemporaryString sCharTrigName;
 	sprintf(sCharTrigName, "@item%s", pszTrigName+1);
 
-	int iCharAction = (CTRIG_TYPE) FindTableSorted( sCharTrigName, CChar::sm_szTrigName, COUNTOF(CChar::sm_szTrigName)-1 );
+	int iCharAction = (CTRIG_TYPE) FindTableSorted( sCharTrigName, CChar::sm_szTrigName, CountOf(CChar::sm_szTrigName)-1 );
 
 	// 1) Triggers installed on character, sensitive to actions on all items
 	if (( IsTrigUsed(sCharTrigName) ) && ( iCharAction > XTRIG_UNKNOWN ))
@@ -3300,7 +3300,7 @@ TRIGRET_TYPE CItem::OnTriggerCreate( CTextConsole * pSrc, CScriptTriggerArgs * p
 	}
 	else
 	{
-		iAction = (ITRIG_TYPE) FindTableSorted( pszTrigName, sm_szTrigName, COUNTOF(sm_szTrigName)-1 );
+		iAction = (ITRIG_TYPE) FindTableSorted( pszTrigName, sm_szTrigName, CountOf(sm_szTrigName)-1 );
 	}
 
 	TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
@@ -3318,7 +3318,7 @@ TRIGRET_TYPE CItem::OnTriggerCreate( CTextConsole * pSrc, CScriptTriggerArgs * p
 	TemporaryString sCharTrigName;
 	sprintf(sCharTrigName, "@item%s", pszTrigName+1);
 
-	int iCharAction = (CTRIG_TYPE) FindTableSorted( sCharTrigName, CChar::sm_szTrigName, COUNTOF(CChar::sm_szTrigName)-1 );
+	int iCharAction = (CTRIG_TYPE) FindTableSorted( sCharTrigName, CChar::sm_szTrigName, CountOf(CChar::sm_szTrigName)-1 );
 
 	// 1) Look up the trigger in the RES_ITEMDEF. (default)
 	EXC_SET("itemdef");

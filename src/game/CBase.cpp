@@ -81,7 +81,7 @@ bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pS
 	ADDTOCALLSTACK("CBaseBaseDef::r_WriteVal");
 	EXC_TRY("WriteVal");
 	bool	fZero	= false;
-	int index = FindTableHeadSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 );
+	int index = FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 
 	switch ( index )
 	{
@@ -289,7 +289,7 @@ bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pS
 
 					if ( !strnicmp( pszKey, "COUNT", 5 ))
 					{
-						sVal.FormatVal(m_BaseResources.GetCount());
+						sVal.FormatSTVal(m_BaseResources.GetCount());
 					}
 					else
 					{
@@ -366,7 +366,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 		return true;
 	}
 
-	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		//Set as Strings
 		case OBC_HITSPELL:
@@ -500,7 +500,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 		case OBC_ARMOR:
 			{
 				int64 piVal[2];
-				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, COUNTOF(piVal));
+				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, CountOf(piVal));
 				m_defenseBase = (uchar)(piVal[0]);
 				if ( iQty > 1 )
 				{
@@ -515,7 +515,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 		case OBC_DAM:
 			{
 				int64 piVal[2];
-				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, COUNTOF(piVal));
+				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, CountOf(piVal));
 				m_attackBase = (uchar)(piVal[0]);
 				if ( iQty > 1 )
 				{
@@ -547,7 +547,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 		case OBC_RANGE:
 			{
 				int64 piVal[2];
-				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, COUNTOF(piVal));
+				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, CountOf(piVal));
 				if ( iQty > 1 )
 				{
 					int64 iRange = ((piVal[0] & 0xff) << 8) & 0xff00;

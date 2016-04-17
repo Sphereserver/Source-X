@@ -201,12 +201,12 @@ public:
 	}
 	int GetRange() const
 	{
-		return( (int)(m_iHi - m_iLo) );
+		return (int)(m_iHi - m_iLo);
 	}
 	int GetLinear( int iPercent ) const
 	{	
 		// ARGS: iPercent = 0-1000
-		return( (int)(m_iLo) + MulDivLL( GetRange(), iPercent, 1000 ));
+		return (int)(m_iLo) + MulDiv( GetRange(), iPercent, 1000 );
 	}
 	int GetRandom() const
 	{	
@@ -347,7 +347,7 @@ public:
 	bool IsMatch( lpctstr IsMatchPage ) const;
 
 	bool SetSourceFile( lpctstr pszName, CClient * pClient );
-	bool ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * pPostData, int iContentLength );
+	bool ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * pPostData, size_t stContentLength );
 
 	virtual bool r_LoadVal( CScript & s );
 	virtual bool r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc = NULL );
@@ -1094,25 +1094,25 @@ public:
 	const CSpellDef * GetSpellDef( SPELL_TYPE index ) const
 	{
 		// future: underlying type for SPELL_TYPE to avoid casts
-		if (index == SPELL_NONE || m_SpellDefs.IsValidIndex(static_cast<size_t>(index)) == false)
+		if (index == SPELL_NONE || m_SpellDefs.IsValidIndex((size_t)(index)) == false)
 			return NULL;
-		return m_SpellDefs[static_cast<size_t>(index)];
+		return m_SpellDefs[(size_t)(index)];
 	}
 
 	CSpellDef * GetSpellDef( SPELL_TYPE index ) 
 	{
 		// future: underlying type for SPELL_TYPE to avoid casts
-		if (index == SPELL_NONE || m_SpellDefs.IsValidIndex(static_cast<size_t>(index)) == false)
+		if (index == SPELL_NONE || m_SpellDefs.IsValidIndex((size_t)(index)) == false)
 			return NULL;
-		return m_SpellDefs[static_cast<size_t>(index)];
+		return m_SpellDefs[(size_t)(index)];
 	}
 
 	lpctstr GetSkillKey( SKILL_TYPE index ) const
 	{
 		// future: underlying type for SPELL_TYPE to avoid casts
-		if (m_SkillIndexDefs.IsValidIndex(static_cast<size_t>(index)) == false)
+		if (m_SkillIndexDefs.IsValidIndex((size_t)(index)) == false)
 			return NULL;
-		return( m_SkillIndexDefs[static_cast<size_t>(index)]->GetKey());
+		return( m_SkillIndexDefs[(size_t)(index)]->GetKey());
 	}
 
 	bool IsSkillFlag( SKILL_TYPE index, SKF_TYPE skf ) const
@@ -1123,16 +1123,16 @@ public:
 
 	const CSkillDef* GetSkillDef( SKILL_TYPE index ) const
 	{
-		if (m_SkillIndexDefs.IsValidIndex(static_cast<size_t>(index)) == false)
+		if (m_SkillIndexDefs.IsValidIndex((size_t)(index)) == false)
 			return NULL;
-		return( m_SkillIndexDefs[static_cast<size_t>(index)] );
+		return( m_SkillIndexDefs[(size_t)(index)] );
 	}
 	
 	CSkillDef* GetSkillDef( SKILL_TYPE index )
 	{
-		if (m_SkillIndexDefs.IsValidIndex(static_cast<size_t>(index)) == false )
+		if (m_SkillIndexDefs.IsValidIndex((size_t)(index)) == false )
 			return NULL;
-		return( m_SkillIndexDefs[static_cast<size_t>(index)] );
+		return( m_SkillIndexDefs[(size_t)(index)] );
 	}
 
 	const CSkillDef* FindSkillDef( lpctstr pszKey ) const
@@ -1151,7 +1151,7 @@ public:
 
 	lpctstr GetRune( tchar ch ) const
 	{
-		size_t index = static_cast<size_t>(toupper(ch) - 'A');
+		size_t index = (size_t)(toupper(ch) - 'A');
 		if ( ! m_Runes.IsValidIndex(index))
 			return "?";
 		return( m_Runes[index]->GetPtr() );

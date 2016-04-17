@@ -290,6 +290,11 @@ void CString::FormatULLVal(ullong iVal)
 	Format("%" PRIu64 , iVal);
 }
 
+void CString::FormatSTVal(ullong iVal)
+{
+	Format("%" PRIuSIZE_T, iVal);
+}
+
 void CString::FormatWVal(word iVal)
 {
 	Format("0%" PRIx16, iVal);
@@ -344,19 +349,19 @@ lpctstr CString::GetPtr() const
 	return m_pchData;
 }
 
-size_t CString::indexOf(tchar c)
+ssize_t CString::indexOf(tchar c)
 {
 	return indexOf(c, 0);
 }
 
-size_t CString::indexOf(tchar c, size_t offset)
+ssize_t CString::indexOf(tchar c, size_t offset)
 {
 	if (offset < 0)
-		return (size_t)-1;	//std::string::npos;
+		return -1;	//std::string::npos;
 
 	size_t len = strlen(m_pchData);
 	if (offset >= len)
-		return (size_t)-1;
+		return -1;
 
 	for (size_t i = offset; i<len; i++)
 	{
@@ -368,23 +373,23 @@ size_t CString::indexOf(tchar c, size_t offset)
 	return (size_t)-1;
 }
 
-size_t CString::indexOf(CString str)
+ssize_t CString::indexOf(CString str)
 {
 	return indexOf(str, 0);
 }
 
-size_t CString::indexOf(CString str, size_t offset)
+ssize_t CString::indexOf(CString str, size_t offset)
 {
 	if (offset < 0)
-		return (size_t)-1;
+		return -1;
 
 	size_t len = strlen(m_pchData);
 	if (offset >= len)
-		return (size_t)-1;
+		return -1;
 
 	size_t slen = str.GetLength();
 	if (slen > len)
-		return (size_t)-1;
+		return -1;
 
 	tchar * str_value = new tchar[slen + 1];
 	strcpy(str_value, str.GetPtr());
@@ -423,19 +428,19 @@ size_t CString::indexOf(CString str, size_t offset)
 	return (size_t)-1;
 }
 
-size_t CString::lastIndexOf(tchar c)
+ssize_t CString::lastIndexOf(tchar c)
 {
 	return lastIndexOf(c, 0);
 }
 
-size_t CString::lastIndexOf(tchar c, size_t from)
+ssize_t CString::lastIndexOf(tchar c, size_t from)
 {
 	if (from < 0)
-		return (size_t)-1;
+		return -1;
 
 	size_t len = strlen(m_pchData);
 	if (from > len)
-		return (size_t)-1;
+		return -1;
 
 	for (size_t i = (len - 1); i >= from; i--)
 	{
@@ -444,25 +449,25 @@ size_t CString::lastIndexOf(tchar c, size_t from)
 			return i;
 		}
 	}
-	return (size_t)-1;
+	return -1;
 }
 
-size_t CString::lastIndexOf(CString str)
+ssize_t CString::lastIndexOf(CString str)
 {
 	return lastIndexOf(str, 0);
 }
 
-size_t CString::lastIndexOf(CString str, size_t from)
+ssize_t CString::lastIndexOf(CString str, size_t from)
 {
 	if (from < 0)
-		return (size_t)-1;
+		return -1;
 
 	size_t len = strlen(m_pchData);
 	if (from >= len)
-		return (size_t)-1;
+		return -1;
 	size_t slen = str.GetLength();
 	if (slen > len)
-		return (size_t)-1;
+		return -1;
 
 	tchar * str_value = new tchar[slen + 1];
 	strcpy(str_value, str.GetPtr());
@@ -497,7 +502,7 @@ size_t CString::lastIndexOf(CString str, size_t from)
 	}
 
 	delete[] str_value;
-	return (size_t)-1;
+	return -1;
 }
 
 // CString:: private
@@ -543,7 +548,7 @@ lpctstr Str_GetArticleAndSpace(lpctstr pszWord)
 	{
 		static const tchar sm_Vowels[] = { 'A', 'E', 'I', 'O', 'U' };
 		tchar chName = static_cast<tchar>(toupper(pszWord[0]));
-		for (size_t x = 0; x < COUNTOF(sm_Vowels); x++)
+		for (size_t x = 0; x < CountOf(sm_Vowels); x++)
 		{
 			if (chName == sm_Vowels[x])
 				return "an ";
@@ -1106,8 +1111,8 @@ size_t Str_ParseCmds(tchar * pszCmdLine, tchar ** ppCmd, size_t iMax, lpctstr ps
 size_t Str_ParseCmds(tchar * pszCmdLine, int64_t * piCmd, size_t iMax, lpctstr pszSep)
 {
 	tchar * ppTmp[256];
-	if (iMax > COUNTOF(ppTmp))
-		iMax = COUNTOF(ppTmp);
+	if (iMax > CountOf(ppTmp))
+		iMax = CountOf(ppTmp);
 
 	size_t iQty = Str_ParseCmds(pszCmdLine, ppTmp, iMax, pszSep);
 	size_t i;

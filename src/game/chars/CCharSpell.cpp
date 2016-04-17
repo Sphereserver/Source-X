@@ -115,7 +115,7 @@ bool CChar::Spell_Teleport( CPointMap ptNew, bool bTakePets, bool bCheckAntiMagi
 				g_Cfg.GetDefaultMsg(DEFMSG_SPELL_TELE_JAILED_1),
 				g_Cfg.GetDefaultMsg(DEFMSG_SPELL_TELE_JAILED_2)
 			};
-			SysMessage(sm_szPunishMsg[Calc_GetRandVal(COUNTOF(sm_szPunishMsg))]);
+			SysMessage(sm_szPunishMsg[Calc_GetRandVal(CountOf(sm_szPunishMsg))]);
 
 			int iCell = 0;
 			if ( m_pPlayer && m_pPlayer->GetAccount() )
@@ -1565,7 +1565,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 			if (IsClient())
 			{
 				static const SOUND_TYPE sm_sounds[] = { 0x243, 0x244 };
-				m_pClient->addSound(sm_sounds[Calc_GetRandVal(COUNTOF(sm_sounds))]);
+				m_pClient->addSound(sm_sounds[Calc_GetRandVal(CountOf(sm_sounds))]);
 				m_pClient->addChar(this);
 				m_pClient->addPlayerSee(NULL);
 			}
@@ -2769,7 +2769,7 @@ bool CChar::Spell_CastDone()
 				};
 
 				int iGet = 0;
-				for (size_t i = 0; i < COUNTOF(sm_Item_Bone); i++)
+				for (size_t i = 0; i < CountOf(sm_Item_Bone); i++)
 				{
 					if (!Calc_GetRandVal(2 + iGet))
 						break;
@@ -3034,7 +3034,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	if ( fPotion )
 	{
 		static const SOUND_TYPE sm_DrinkSounds[] = { 0x030, 0x031 };
-		iSound = sm_DrinkSounds[Calc_GetRandVal(COUNTOF(sm_DrinkSounds))];
+		iSound = sm_DrinkSounds[Calc_GetRandVal(CountOf(sm_DrinkSounds))];
 	}
 
 

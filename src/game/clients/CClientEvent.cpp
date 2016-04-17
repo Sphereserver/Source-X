@@ -969,7 +969,7 @@ bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 		m_bAllowSay = false;
 
 		// Assume you don't mean yourself !
-		if ( FindTableHeadSorted( pszCommand, sm_szCmd_Redirect, COUNTOF(sm_szCmd_Redirect)) >= 0 )
+		if ( FindTableHeadSorted( pszCommand, sm_szCmd_Redirect, CountOf(sm_szCmd_Redirect)) >= 0 )
 		{
 			// targetted verbs are logged once the target is selected.
 			addTargetVerb(pszCommand, "");
@@ -1511,11 +1511,11 @@ void CClient::Event_PromptResp( lpctstr pszText, size_t len, dword context1, dwo
 	else
 	{
 		if ( bNoStrip )	// Str_GetBare will eat unicode characters
-			len = strcpylen( szText, pszText, COUNTOF(szText) );
+			len = strcpylen( szText, pszText, CountOf(szText) );
 		else if ( promptMode == CLIMODE_PROMPT_SCRIPT_VERB )
-			len = Str_GetBare( szText, pszText, COUNTOF(szText), "|~=[]{|}~" );
+			len = Str_GetBare( szText, pszText, CountOf(szText), "|~=[]{|}~" );
 		else
-			len = Str_GetBare( szText, pszText, COUNTOF(szText), "|~,=[]{|}~" );
+			len = Str_GetBare( szText, pszText, CountOf(szText), "|~,=[]{|}~" );
 	}
 
 	lpctstr pszReName = NULL;
@@ -1895,7 +1895,7 @@ void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TA
 					if (( szText[i] >= 'A' ) && ( szText[i] <= 'Z' ))
 						szText[i] += 0x20;
 
-				iLen = CvtSystemToNUNICODE(wszText, iTextLen, szText, chars);
+				iLen = CvtSystemToNUNICODE(wszText, iTextLen, szText, (int)chars);
 			}
 		}
 
@@ -1921,7 +1921,7 @@ void CClient::Event_SetName( CUID uid, const char * pszCharName )
 	// Do we have the right to do this ?
 	if ( m_pChar == pChar || ! pChar->NPC_IsOwnedBy( m_pChar, true ))
 		return;
-	if ( FindTableSorted( pszCharName, sm_szCmd_Redirect, COUNTOF(sm_szCmd_Redirect) ) >= 0 )
+	if ( FindTableSorted( pszCharName, sm_szCmd_Redirect, CountOf(sm_szCmd_Redirect) ) >= 0 )
 		return;
 	if ( FindTableSorted( pszCharName, CCharNPC::sm_szVerbKeys, 14 ) >= 0 )
 		return;
@@ -1963,7 +1963,7 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsol
 		size_t iQty = m_CheckArray.GetCount();
 		if ( pszKey[0] == '\0' )
 		{
-			sVal.FormatVal(iQty);
+			sVal.FormatSTVal(iQty);
 			return true;
 		}
 		else if ( ! strnicmp( pszKey, "ID", 2) )
@@ -1999,7 +1999,7 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsol
 		size_t iQty = m_TextArray.GetCount();
 		if ( pszKey[0] == '\0' )
 		{
-			sVal.FormatVal(iQty);
+			sVal.FormatSTVal(iQty);
 			return true;
 		}
 
@@ -2620,7 +2620,7 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 	}
 
 	tchar *ppArgs[2];
-	Str_ParseCmds(pszName, ppArgs, COUNTOF(ppArgs), " ");
+	Str_ParseCmds(pszName, ppArgs, CountOf(ppArgs), " ");
 
 	switch ( type )
 	{
@@ -2785,7 +2785,7 @@ bool CClient::xPacketFilter( const byte * pData, size_t iLen )
 		//	Fill locals [0..X] to the first X bytes of the packet
 		for ( size_t i = 0; i < bytes; ++i )
 		{
-			sprintf(idx, "%" FMTSIZE_T, i);
+			sprintf(idx, "%" PRIuSIZE_T, i);
 			Args.m_VarsLocal.SetNum(idx, (int)(pData[i]));
 		}
 
@@ -2834,7 +2834,7 @@ bool CClient::xOutPacketFilter( const byte * pData, size_t iLen )
 		//	Fill locals [0..X] to the first X bytes of the packet
 		for ( size_t i = 0; i < bytes; ++i )
 		{
-			sprintf(idx, "%" FMTSIZE_T, i);
+			sprintf(idx, "%" PRIuSIZE_T, i);
 			Args.m_VarsLocal.SetNum(idx, (int)(pData[i]));
 		}
 

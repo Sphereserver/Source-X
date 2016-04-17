@@ -313,7 +313,7 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 		case '\0':
 			return 0;
 	}
-	INTRINSIC_TYPE iIntrinsic = (INTRINSIC_TYPE) FindTableHeadSorted( pArgs, sm_IntrinsicFunctions, COUNTOF(sm_IntrinsicFunctions)-1 );
+	INTRINSIC_TYPE iIntrinsic = (INTRINSIC_TYPE) FindTableHeadSorted( pArgs, sm_IntrinsicFunctions, CountOf(sm_IntrinsicFunctions)-1 );
 	if ( iIntrinsic >= 0 )
 	{
 		size_t iLen = strlen(sm_IntrinsicFunctions[iIntrinsic]);
@@ -734,7 +734,7 @@ realtype CVarFloat::GetRandVal2( realtype dMin, realtype dMax )
 {
 	realtype dVals[256];		// Maximum elements in a list
 
-	short int iQty = GetRangeVals( pExpr, dVals, COUNTOF(dVals));
+	short int iQty = GetRangeVals( pExpr, dVals, CountOf(dVals));
 
 	if (iQty == 0)
 	{

@@ -248,7 +248,7 @@ void CChar::NPC_Act_Fight()
 		if (pRange)
 		{
 			int64 RVal[2];
-			size_t iQty = Str_ParseCmds( const_cast<tchar*>(pRange->GetValStr()), RVal, COUNTOF(RVal));
+			size_t iQty = Str_ParseCmds( const_cast<tchar*>(pRange->GetValStr()), RVal, CountOf(RVal));
 			switch(iQty)
 			{
 				case 1:

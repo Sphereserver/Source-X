@@ -21,7 +21,7 @@ bool CValueRangeDef::Load( tchar * pszDef )
 	ADDTOCALLSTACK("CValueRangeDef::Load");
 	// Typically in {lo# hi#} format. is hi#,lo# is ok too ???
 	int64 piVal[2];
-	int iQty = g_Exp.GetRangeVals( pszDef, piVal, COUNTOF(piVal));
+	int iQty = g_Exp.GetRangeVals( pszDef, piVal, CountOf(piVal));
 	if ( iQty< 0 ) 
 		return false;
 
@@ -68,7 +68,7 @@ bool CValueCurveDef::Load( tchar * pszDef )
 	ADDTOCALLSTACK("CValueCurveDef::Load");
 	// ADV_RATE = Chance at 0, to 100.0
 	int64 Arg_piCmd[101];
-	size_t iQty = Str_ParseCmds( pszDef, Arg_piCmd, COUNTOF(Arg_piCmd));
+	size_t iQty = Str_ParseCmds( pszDef, Arg_piCmd, CountOf(Arg_piCmd));
 	m_aiValues.SetCount( iQty );
 	if ( iQty == 0 )
 	{
@@ -259,7 +259,7 @@ bool CSkillDef::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc 
 {
 	ADDTOCALLSTACK("CSkillDef::r_WriteVal");
 	EXC_TRY("WriteVal");
-	switch ( FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 	case SKC_ADV_RATE:	// ADV_RATE=Chance at 100, Chance at 50, chance at 0
 		sVal = m_AdvRate.Write();
@@ -335,7 +335,7 @@ bool CSkillDef::r_LoadVal( CScript &s )
 {
 	ADDTOCALLSTACK("CSkillDef::r_LoadVal");
 	EXC_TRY("LoadVal");
-	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 	case SKC_ADV_RATE:	// ADV_RATE=Chance at 100, Chance at 50, chance at 0
 		m_AdvRate.Load( s.GetArgStr());
@@ -438,11 +438,11 @@ void CSkillClassDef::Init()
 	m_SkillSumMax = 10*1000;
 	m_StatSumMax = 300;
 	size_t i;
-	for ( i = 0; i < COUNTOF(m_SkillLevelMax); i++ )
+	for ( i = 0; i < CountOf(m_SkillLevelMax); i++ )
 	{
 		m_SkillLevelMax[i] = 1000;
 	}
-	for ( i = 0; i < COUNTOF(m_StatMax); i++ )
+	for ( i = 0; i < CountOf(m_StatMax); i++ )
 	{
 		m_StatMax[i] = 100;
 	}
@@ -452,7 +452,7 @@ bool CSkillClassDef::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * 
 {
 	ADDTOCALLSTACK("CSkillClassDef::r_WriteVal");
 	EXC_TRY("WriteVal");
-	switch ( FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 	case SCC_NAME: // "NAME"
 		sVal = m_sName;
@@ -468,14 +468,14 @@ bool CSkillClassDef::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * 
 			int i = g_Cfg.FindSkillKey( pszKey);
 			if ( i != SKILL_NONE )
 			{
-				ASSERT( i >= 0 && static_cast<size_t>(i) < COUNTOF(m_SkillLevelMax));
+				ASSERT( i >= 0 && (size_t)(i) < CountOf(m_SkillLevelMax));
 				sVal.FormatVal( m_SkillLevelMax[i] );
 				break;
 			}
 			i = g_Cfg.FindStatKey( pszKey);
 			if ( i >= 0 )
 			{
-				ASSERT( static_cast<size_t>(i) < COUNTOF(m_StatMax));
+				ASSERT( (size_t)(i) < CountOf(m_StatMax));
 				sVal.FormatVal( m_StatMax[i] );
 				break;
 			}
@@ -496,7 +496,7 @@ bool CSkillClassDef::r_LoadVal( CScript &s )
 {
 	ADDTOCALLSTACK("CSkillClassDef::r_LoadVal");
 	EXC_TRY("LoadVal");
-	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 	case SCC_DEFNAME:
 		return SetResourceName( s.GetArgStr());
@@ -514,14 +514,14 @@ bool CSkillClassDef::r_LoadVal( CScript &s )
 			int i = g_Cfg.FindSkillKey( s.GetKey());
 			if ( i != SKILL_NONE )
 			{
-				ASSERT( i >= 0 && static_cast<size_t>(i) < COUNTOF(m_SkillLevelMax));
+				ASSERT( i >= 0 && (size_t)(i) < CountOf(m_SkillLevelMax));
 				m_SkillLevelMax[i] = (word)(s.GetArgVal());
 				break;
 			}
 			i = g_Cfg.FindStatKey( s.GetKey());
 			if ( i >= 0 )
 			{
-				ASSERT( static_cast<size_t>(i) < COUNTOF(m_StatMax));
+				ASSERT( (size_t)(i) < CountOf(m_StatMax));
 				m_StatMax[i] = (word)(s.GetArgVal());
 				break;
 			}
@@ -625,7 +625,7 @@ bool CSpellDef::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc 
 {
 	ADDTOCALLSTACK("CSpellDef::r_WriteVal");
 	EXC_TRY("WriteVal");
-	int index = FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 );
+	int index = FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if (index < 0)
 	{
 		if (!strnicmp( "RESOURCES.", pszKey, 10 ))
@@ -746,7 +746,7 @@ bool CSpellDef::r_LoadVal( CScript &s )
 	ADDTOCALLSTACK("CSpellDef::r_LoadVal");
 	EXC_TRY("LoadVal");
 	// RES_SPELL
-	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		case SPC_CAST_TIME:
 			m_CastTime.Load( s.GetArgRaw());
@@ -881,7 +881,7 @@ bool CRandGroupDef::r_LoadVal( CScript &s )
 	ADDTOCALLSTACK("CRandGroupDef::r_LoadVal");
 	EXC_TRY("LoadVal");
 	// RES_SPAWN or RES_REGIONTYPE
-	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		case RGC_CATEGORY:
 			m_sCategory = s.GetArgStr();
@@ -902,7 +902,7 @@ bool CRandGroupDef::r_LoadVal( CScript &s )
 		case RGC_CONTAINER:
 			{
 				tchar	*ppCmd[2];
-				size_t iArgs = Str_ParseCmds(s.GetArgStr(), ppCmd, COUNTOF(ppCmd));
+				size_t iArgs = Str_ParseCmds(s.GetArgStr(), ppCmd, CountOf(ppCmd));
 				CResourceQty rec;
 
 				rec.SetResourceID(
@@ -945,7 +945,7 @@ bool CRandGroupDef::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pS
 	ADDTOCALLSTACK("CRandGroupDef::r_WriteVal");
 	EXC_TRY("WriteVal");
 
-	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		case RGC_CATEGORY:
 			sVal = m_sCategory;
@@ -970,14 +970,14 @@ bool CRandGroupDef::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pS
 			GETNONWHITESPACE( pszKey );
 
 			if ( pszKey[0] == '\0' )
-				sVal.FormatVal( GetRandMemberIndex(NULL, false) );
+				sVal.FormatSTVal( GetRandMemberIndex(NULL, false) );
 			else
 			{
 				CUID uidTofind = Exp_GetDWVal(pszKey);
 				CChar * pSend = uidTofind.CharFind();
 
 				if ( pSend )
-					sVal.FormatVal( GetRandMemberIndex(pSend, false) );
+					sVal.FormatSTVal( GetRandMemberIndex(pSend, false) );
 				else
 					return false;
 			}
@@ -997,7 +997,7 @@ bool CRandGroupDef::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pS
 
 				if ( !strnicmp( pszKey, "COUNT", 5 ))
 				{
-					sVal.FormatVal(m_Members.GetCount());
+					sVal.FormatSTVal(m_Members.GetCount());
 				}
 				else
 				{
@@ -1160,7 +1160,7 @@ bool CRegionResourceDef::r_LoadVal( CScript & s )
 	ADDTOCALLSTACK("CRegionResourceDef::r_LoadVal");
 	EXC_TRY("LoadVal");
 	// RES_REGIONRESOURCE
-	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		case RMC_AMOUNT: // AMOUNT
 			m_Amount.Load( s.GetArgRaw() );
@@ -1196,7 +1196,7 @@ bool CRegionResourceDef::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsol
 	ADDTOCALLSTACK("CRegionResourceDef::r_WriteVal");
 	EXC_TRY("r_WriteVal");
 	// RES_REGIONRESOURCE
-	switch ( FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		case RMC_AMOUNT:
 			sVal = m_Amount.Write();

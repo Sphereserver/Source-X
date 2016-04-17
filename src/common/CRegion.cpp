@@ -19,7 +19,7 @@ CTeleport::CTeleport( tchar * pszArgs )
 	// Assume valid iArgs >= 5
 
 	tchar * ppCmds[4];
-	size_t iArgs = Str_ParseCmds( pszArgs, ppCmds, COUNTOF( ppCmds ), "=" );
+	size_t iArgs = Str_ParseCmds( pszArgs, ppCmds, CountOf( ppCmds ), "=" );
 	if ( iArgs < 2 )
 	{
 		DEBUG_ERR(( "Bad CTeleport Def\n" ));
@@ -447,7 +447,7 @@ bool CRegionBase::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSr
 	ADDTOCALLSTACK("CRegionBase::r_WriteVal");
 	EXC_TRY("WriteVal");
 	bool	fZero	= false;
-	RC_TYPE index = (RC_TYPE) FindTableHeadSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 );
+	RC_TYPE index = (RC_TYPE) FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( index < 0 )
 	{
 		return( CScriptObj::r_WriteVal( pszKey, sVal, pSrc ));
@@ -566,7 +566,7 @@ bool CRegionBase::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSr
 				if ( *pszKey == '.' ) // do we have an argument?
 				{
 					SKIP_SEPARATORS( pszKey );
-					size_t iQty = static_cast<size_t>( Exp_GetVal( pszKey ) ); 
+					size_t iQty = (size_t)( Exp_GetVal( pszKey ) ); 
 					if ( iQty >= m_TagDefs.GetCount() )
 						return false; // trying to get non-existant tag
 						
@@ -660,7 +660,7 @@ bool CRegionBase::r_LoadVal( CScript & s )
 		return true;
 	}
 
-	RC_TYPE index = (RC_TYPE) FindTableSorted( s.GetKey(), sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 );
+	RC_TYPE index = (RC_TYPE) FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( index < 0 )
 		return false;
 
@@ -927,7 +927,7 @@ bool CRegionBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command 
 		return true;
 	}	
 
-	int index = FindTableSorted( pszKey, sm_szVerbKeys, COUNTOF( sm_szVerbKeys )-1 );
+	int index = FindTableSorted( pszKey, sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 	switch (index)
 	{
 		case RV_ALLCLIENTS:
@@ -1079,7 +1079,7 @@ bool CRegionWorld::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pS
 	ADDTOCALLSTACK("CRegionWorld::r_WriteVal");
 	EXC_TRY("WriteVal");
 	//bool	fZero	= false;
-	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		case RWC_DEFNAME: // "DEFNAME" = for the speech system.
 			sVal = GetResourceName();
@@ -1127,7 +1127,7 @@ bool CRegionWorld::r_LoadVal( CScript &s )
 	EXC_TRY("LoadVal");
 
 	// Load the values for the region from script.
-	switch ( FindTableHeadSorted( s.GetKey(), sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableHeadSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		case RWC_DEFNAME: // "DEFNAME" = for the speech system.
 			return SetResourceName( s.GetArgStr());
@@ -1201,7 +1201,7 @@ bool CRegionWorld::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command
 		return true;
 	}	
 	
-	int index = FindTableSorted( pszKey, sm_szVerbKeys, COUNTOF( sm_szVerbKeys )-1 );
+	int index = FindTableSorted( pszKey, sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 	switch(index)
 	{
 		case RWV_TAGLIST:

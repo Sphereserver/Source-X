@@ -87,10 +87,10 @@ bool CSector::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
 		{ NULL, INT32_MAX }
 	};
 
-	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		case SC_CLIENTS:
-			sVal.FormatVal(m_Chars_Active.HasClients());
+			sVal.FormatSTVal(m_Chars_Active.HasClients());
 			return true;
 		case SC_COLDCHANCE:
 			sVal.FormatVal( GetColdChance());
@@ -99,10 +99,10 @@ bool CSector::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
 			if ( pszKey[10] == '.' )
 			{
 				pszKey += 11;
-				sVal = ( ! strcmpi( pszKey, sm_ComplexityTitles->FindName( GetCharComplexity()))) ? "1" : "0";
+				sVal = ( ! strcmpi( pszKey, sm_ComplexityTitles->FindName( (int)GetCharComplexity() ))) ? "1" : "0";
 				return true;
 			}
-			sVal.FormatVal( GetCharComplexity());
+			sVal.FormatSTVal( GetCharComplexity() );
 			return true;
 		case SC_FLAGS:
 			sVal.FormatHex(m_dwFlags);
@@ -132,13 +132,13 @@ bool CSector::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
 			sVal.FormatVal( GetRainChance());
 			return true;
 		case SC_ITEMCOUNT:
-			sVal.FormatVal(GetItemComplexity());
+			sVal.FormatSTVal(GetItemComplexity());
 			return true;
 		case SC_SEASON:
-			sVal.FormatVal((int)(GetSeason()));
+			sVal.FormatVal((int)GetSeason());
 			return true;
 		case SC_WEATHER:
-			sVal.FormatVal((int)(GetWeather()));
+			sVal.FormatVal((int)GetWeather());
 			return true;
 	}
 	EXC_CATCH;
@@ -153,7 +153,7 @@ bool CSector::r_LoadVal( CScript &s )
 {
 	ADDTOCALLSTACK("CSector::r_LoadVal");
 	EXC_TRY("LoadVal");
-	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, COUNTOF( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		case SC_COLDCHANCE:
 			SetWeatherChance( false, s.HasArgs() ? s.GetArgVal() : -1 );
@@ -204,7 +204,7 @@ bool CSector::r_Verb( CScript & s, CTextConsole * pSrc )
 	ADDTOCALLSTACK("CSector::r_Verb");
 	EXC_TRY("Verb");
 	ASSERT(pSrc);
-	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, COUNTOF(sm_szVerbKeys)-1 );
+	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
 	switch (index)
 	{
 		case SEV_ALLCHARS:		// "ALLCHARS"
@@ -589,7 +589,7 @@ static const byte sm_TrammelPhaseBrightness[] =
 	TRAMMEL_FULL_BRIGHTNESS / 2, 	// Quarter Moon
 	TRAMMEL_FULL_BRIGHTNESS / 4		// Crescent Moon
 };
-			ASSERT( iTrammelPhase < COUNTOF(sm_TrammelPhaseBrightness));
+			ASSERT( iTrammelPhase < CountOf(sm_TrammelPhaseBrightness));
 			iTargLight -= sm_TrammelPhaseBrightness[iTrammelPhase];
 		}
 
@@ -608,7 +608,7 @@ static const byte sm_FeluccaPhaseBrightness[] =
 	FELUCCA_FULL_BRIGHTNESS / 2, 	// Quarter Moon
 	FELUCCA_FULL_BRIGHTNESS / 4		// Crescent Moon
 };
-			ASSERT( iFeluccaPhase < COUNTOF(sm_FeluccaPhaseBrightness));
+			ASSERT( iFeluccaPhase < CountOf(sm_FeluccaPhaseBrightness));
 			iTargLight -= sm_FeluccaPhaseBrightness[iFeluccaPhase];
 		}
 	}
@@ -1041,7 +1041,7 @@ void CSector::OnTick(int iPulseCount)
 
 				case WEATHER_SNOW:
 					if ( ! Calc_GetRandVal(5) )
-						sound = sm_SfxWind[ Calc_GetRandVal( COUNTOF( sm_SfxWind )) ];
+						sound = sm_SfxWind[ Calc_GetRandVal( CountOf( sm_SfxWind )) ];
 					break;
 
 				case WEATHER_RAIN:
@@ -1051,12 +1051,12 @@ void CSector::OnTick(int iPulseCount)
 						{
 							// Mess up the light levels for a sec..
 							LightFlash();
-							sound = sm_SfxThunder[ Calc_GetRandVal( COUNTOF( sm_SfxThunder )) ];
+							sound = sm_SfxThunder[ Calc_GetRandVal( CountOf( sm_SfxThunder )) ];
 						}
 						else if ( iVal < 10 )
-							sound = sm_SfxRain[ Calc_GetRandVal( COUNTOF( sm_SfxRain )) ];
+							sound = sm_SfxRain[ Calc_GetRandVal( CountOf( sm_SfxRain )) ];
 						else if ( iVal < 15 )
-							sound = sm_SfxWind[ Calc_GetRandVal( COUNTOF( sm_SfxWind )) ];
+							sound = sm_SfxWind[ Calc_GetRandVal( CountOf( sm_SfxWind )) ];
 					}
 					break;
 

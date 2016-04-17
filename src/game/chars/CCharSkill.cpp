@@ -1163,7 +1163,7 @@ bool CChar::Skill_Tracking( CUID uidTarg, DIR_TYPE & dirPrv, int iDistMax )
 	}
 
 	DIR_TYPE dir = GetDir(pObjTop);
-	ASSERT(dir >= 0 && (uint)(dir) < COUNTOF(CPointBase::sm_szDirs));
+	ASSERT(dir >= 0 && (uint)(dir) < CountOf(CPointBase::sm_szDirs));
 
 	// Select tracking message based on distance
 	lpctstr pszDef;
@@ -1996,7 +1996,7 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 			return 0;
 
 		tchar * pszMsg = Str_GetTemp();
-		sprintf(pszMsg, sm_szTameSpeak[ Calc_GetRandVal( COUNTOF( sm_szTameSpeak )) ], pChar->GetName());
+		sprintf(pszMsg, sm_szTameSpeak[ Calc_GetRandVal( CountOf( sm_szTameSpeak )) ], pChar->GetName());
 		Speak(pszMsg);
 
 		// Keep trying and updating the animation
@@ -2881,7 +2881,7 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 	if ( pDam )
 	{
 		int64 DVal[2];
-		size_t iQty = Str_ParseCmds( const_cast<tchar *>(pDam->GetValStr()), DVal, COUNTOF(DVal));
+		size_t iQty = Str_ParseCmds( const_cast<tchar *>(pDam->GetValStr()), DVal, CountOf(DVal));
 		switch(iQty)
 		{
 			case 1:

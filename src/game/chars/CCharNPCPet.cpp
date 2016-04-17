@@ -111,7 +111,7 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 		"UNFRIEND"
 	};
 
-	PC_TYPE iCmd = static_cast<PC_TYPE>(FindTableSorted(pszCmd, sm_Pet_table, COUNTOF(sm_Pet_table)));
+	PC_TYPE iCmd = static_cast<PC_TYPE>(FindTableSorted(pszCmd, sm_Pet_table, CountOf(sm_Pet_table)));
 	if ( iCmd < 0 )
 	{
 		if ( !strnicmp(pszCmd, sm_Pet_table[PC_PRICE], 5) )
@@ -528,7 +528,7 @@ void CChar::NPC_PetClearOwners()
 			pOwner->AddGoldToPack( pBankVendor->m_itEqBankBox.m_Check_Amount, pBankOwner );
 			pBankVendor->m_itEqBankBox.m_Check_Amount = 0;
 
-			for ( size_t i = 0; i < COUNTOF(sm_VendorLayers); i++ )
+			for ( size_t i = 0; i < CountOf(sm_VendorLayers); i++ )
 			{
 				CItemContainer * pCont = GetBank( sm_VendorLayers[i] );
 				if ( !pCont )

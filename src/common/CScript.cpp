@@ -11,13 +11,13 @@
 
 void CScriptLineContext::Init()
 {
-	m_lOffset = -1;
+	m_pOffset = -1;
 	m_iLineNum = -1;
 }
 
 bool CScriptLineContext::IsValid() const
 {
-	return( m_lOffset >= 0 );
+	return( m_pOffset >= 0 );
 }
 
 CScriptLineContext::CScriptLineContext()
@@ -479,7 +479,7 @@ bool CScript::FindTextHeader( lpctstr pszName ) // Find a section in the current
 	return true;
 }
 
-dword CScript::Seek( int offset, uint origin )
+size_t CScript::Seek( size_t offset, size_t origin )
 {
 	ADDTOCALLSTACK("CScript::Seek");
 	// Go to the start of a new section.
@@ -490,7 +490,7 @@ dword CScript::Seek( int offset, uint origin )
 	}
 	m_fSectionHead = false;		// unknown , so start at the beginning.
 	m_lSectionData = offset;
-	return( PhysicalScriptFile::Seek(offset,origin));
+	return( PhysicalScriptFile::Seek(offset,origin) );
 }
 
 bool CScript::FindNextSection()
@@ -679,9 +679,9 @@ bool CScript::FindKey( lpctstr pszName ) // Find a key in the current section
 		return false;
 	}
 	Seek( m_lSectionData );
-	while ( ReadKeyParse())
+	while ( ReadKeyParse() )
 	{
-		if ( IsKey( pszName ))
+		if ( IsKey( pszName ) )
 		{
 			m_pszArg = Str_TrimWhitespace( m_pszArg );
 			return true;
@@ -705,15 +705,15 @@ void CScript::CloseForce()
 bool CScript::SeekContext( CScriptLineContext LineContext )
 {
 	m_iLineNum = LineContext.m_iLineNum;
-	return Seek( LineContext.m_lOffset, SEEK_SET ) == (dword)(LineContext.m_lOffset);
+	return Seek( LineContext.m_pOffset, SEEK_SET ) == (size_t)(LineContext.m_pOffset);
 }
 
 CScriptLineContext CScript::GetContext() const
 {
 	CScriptLineContext LineContext;
 	LineContext.m_iLineNum = m_iLineNum;
-	LineContext.m_lOffset = GetPosition();
-	return( LineContext );
+	LineContext.m_pOffset = GetPosition();
+	return ( LineContext );
 }
 
 bool _cdecl CScript::WriteSection( lpctstr pszSection, ... )

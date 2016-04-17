@@ -423,7 +423,7 @@ bool CItemMulti::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 	// Speaking in this multis region.
 	// return: true = command for the multi.
 
-	int iCmd = FindTableSorted( s.GetKey(), sm_szVerbKeys, COUNTOF( sm_szVerbKeys )-1 );
+	int iCmd = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 	switch ( iCmd )
 	{
 		case SHV_MULTICREATE:
@@ -469,7 +469,7 @@ bool CItemMulti::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc
 		// no component uid
 		if ( *pszKey == '\0' )
 		{
-			sVal.FormatVal(pMultiDef->m_Components.GetCount());
+			sVal.FormatSTVal(pMultiDef->m_Components.GetCount());
 		}
 		else if ( *pszKey == '.' )
 		{

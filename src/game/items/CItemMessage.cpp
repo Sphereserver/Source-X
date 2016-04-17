@@ -29,7 +29,7 @@ void CItemMessage::r_Write(CScript & s)
     TemporaryString pszTemp;
     for ( size_t i = 0; i < GetPageCount(); ++i )
     {
-        sprintf(pszTemp, "BODY.%" FMTSIZE_T, i);
+        sprintf(pszTemp, "BODY.%" PRIuSIZE_T, i);
         lpctstr pszText = GetPageText(i);
         s.WriteKey(pszTemp, pszText != NULL ? pszText : "");
     }
@@ -46,7 +46,7 @@ bool CItemMessage::r_LoadVal(CScript &s)
             return true;
         }
 
-        switch ( FindTableSorted(s.GetKey(), sm_szLoadKeys, COUNTOF(sm_szLoadKeys) - 1) )
+        switch ( FindTableSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1) )
         {
             case CIC_AUTHOR:
                 if ( s.GetArgStr()[0] != '0' )
@@ -84,7 +84,7 @@ bool CItemMessage::r_WriteVal(lpctstr pszKey, CString &sVal, CTextConsole *pSrc)
             return true;
         }
 
-        switch ( FindTableSorted(pszKey, sm_szLoadKeys, COUNTOF(sm_szLoadKeys) - 1) )
+        switch ( FindTableSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1) )
         {
             case CIC_AUTHOR:
                 sVal = m_sAuthor;
@@ -92,7 +92,7 @@ bool CItemMessage::r_WriteVal(lpctstr pszKey, CString &sVal, CTextConsole *pSrc)
             case CIC_BODY:		// handled above
                 return false;
             case CIC_PAGES:		// not settable (used for resource stuff)
-                sVal.FormatVal(m_sBodyLines.GetCount());
+                sVal.FormatSTVal(m_sBodyLines.GetCount());
                 return true;
             case CIC_TITLE:
                 sVal = GetName();

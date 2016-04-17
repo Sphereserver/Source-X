@@ -146,11 +146,11 @@ bool CException::GetErrorMessage(lptstr lpszError, uint nMaxError, uint * pnHelp
 		case STATUS_INTEGER_DIVIDE_BY_ZERO:	zMsg = "Integer: Divide by Zero";	break;
 		case STATUS_STACK_OVERFLOW:			zMsg = "Stack Overflow";			break;
 		default:
-			sprintf(lpszError, "code=0x%x, (0x%x)", m_hError, m_pAddress);
+			sprintf(lpszError, "code=0x%x, (0x%" PRIxSIZE_T ")", m_hError, m_pAddress);
 			return true;
 	}
 
-	sprintf(lpszError, "\"%s\" (0x%x)", zMsg, m_pAddress);
+	sprintf(lpszError, "\"%s\" (0x%" PRIxSIZE_T ")", zMsg, m_pAddress);
 	return true;
 }
 
@@ -186,9 +186,9 @@ void Assert_CheckFail( lpctstr pExp, lpctstr pFile, long lLine )
 			}
 #endif
 			// WIN32 gets an exception.
-			size_t pCodeStart = (dword)(byte *) &globalstartsymbol;	// sync up to my MAP file.
+			size_t pCodeStart = (size_t)(byte *) &globalstartsymbol;	// sync up to my MAP file.
 
-			size_t pAddr = (dword)(pData->ExceptionRecord->ExceptionAddress);
+			size_t pAddr = (size_t)pData->ExceptionRecord->ExceptionAddress;
 			pAddr -= pCodeStart;
 
 			throw CException(id, pAddr);

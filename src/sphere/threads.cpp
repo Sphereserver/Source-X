@@ -428,7 +428,7 @@ void AbstractThread::onStart()
 	// Unix uses prctl to set thread name
 	// thread name must be 16 bytes, zero-padded if shorter
 	char name[16] = { '\0' };
-	strcpylen(name, m_name, COUNTOF(name));
+	strcpylen(name, m_name, CountOf(name));
 	prctl(PR_SET_NAME, name, 0, 0, 0);
 #endif
 }

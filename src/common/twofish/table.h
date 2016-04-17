@@ -21,8 +21,6 @@ versions to insure consistency.
 
 ***************************************************************************/
 
-#include "../datatypes.h"
-
 /* for computing subkeys */
 #define	SK_STEP			0x02020202u
 #define	SK_BUMP			0x01010101u
@@ -33,7 +31,7 @@ g(x) = x**4 + (a + 1/a) x**3 + a x**2 + (a + 1/a) x + 1
 where a = primitive root of field generator 0x14D */
 #define	RS_GF_FDBK		0x14D		/* field generator */
 #define	RS_rem(x)		\
-		{ byte  b  = (byte) (x >> 24);											 \
+	  { byte  b  = (byte) (x >> 24);										 \
 	  dword g2 = ((b << 1) ^ ((b & 0x80) ? RS_GF_FDBK : 0 )) & 0xFF;		 \
 	  dword g3 = ((b >> 1) & 0x7F) ^ ((b & 1) ? RS_GF_FDBK >> 1 : 0 ) ^ g2 ; \
 	  x = (x << 8) ^ (g3 << 24) ^ (g2 << 16) ^ (g3 << 8) ^ b;				 \

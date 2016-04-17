@@ -92,7 +92,7 @@ void CClient::Cmd_GM_PageMenu( uint iEntryStart )
 	Cmd_GM_PageClear();
 
 	CMenuItem item[10];	// only display x at a time.
-	ASSERT( COUNTOF(item)<=COUNTOF(m_tmMenu.m_Item));
+	ASSERT( CountOf(item)<=CountOf(m_tmMenu.m_Item));
 
 	item[0].m_sText = "GM Page Menu";
 
@@ -108,12 +108,12 @@ void CClient::Cmd_GM_PageMenu( uint iEntryStart )
 		if ( pGM != NULL )
 			continue;
 
-		if ( ++count >= (COUNTOF( item )-1) )
+		if ( ++count >= (CountOf( item )-1) )
 		{
 			// Add the "MORE" option if there is more than 1 more.
 			if ( pPage->GetNext() != NULL )
 			{
-				ASSERT(count < COUNTOF(item));
+				ASSERT(count < CountOf(item));
 				item[count].m_id = count-1;
 				item[count].m_sText.Format( "MORE" );
 				item[count].m_color = 0;
@@ -124,7 +124,7 @@ void CClient::Cmd_GM_PageMenu( uint iEntryStart )
 
 		const CClient * pClient = pPage->FindAccount()->FindClient(); // logged in ?
 
-		ASSERT(count < COUNTOF(item));
+		ASSERT(count < CountOf(item));
 		item[count].m_id = count-1;
 		item[count].m_color = 0;
 		item[count].m_sText.Format("%s %s %s", pPage->GetName(), pClient ? "ON " : "OFF", pPage->GetReason());
@@ -137,7 +137,7 @@ void CClient::Cmd_GM_PageMenu( uint iEntryStart )
 		return;
 	}
 
-	ASSERT(count < COUNTOF(item));
+	ASSERT(count < CountOf(item));
 	addItemMenu( CLIMODE_MENU_GM_PAGES, item, count );
 }
 
@@ -209,7 +209,7 @@ void CClient::Cmd_GM_PageCmd( lpctstr pszCmd )
 
 	if ( pszCmd == NULL || pszCmd[0] == '?' )
 	{
-		for ( size_t i = 0; i < COUNTOF(sm_pszGMPageVerbsHelp); i++ )
+		for ( size_t i = 0; i < CountOf(sm_pszGMPageVerbsHelp); i++ )
 		{
 			SysMessage( sm_pszGMPageVerbsHelp[i] );
 		}
@@ -224,7 +224,7 @@ void CClient::Cmd_GM_PageCmd( lpctstr pszCmd )
 		return;
 	}
 
-	int index = FindTableHeadSorted( pszCmd, sm_pszGMPageVerbs, COUNTOF(sm_pszGMPageVerbs) );
+	int index = FindTableHeadSorted( pszCmd, sm_pszGMPageVerbs, CountOf(sm_pszGMPageVerbs) );
 	if ( index < 0 )
 	{
 		Cmd_GM_PageCmd(NULL);
@@ -344,7 +344,7 @@ void CClient::Cmd_GM_PageSelect( size_t iSelect )
 		Cmd_GM_PageClear();
 	}
 
-	if ( iSelect <= 0 || iSelect >= COUNTOF(m_tmMenu.m_Item))
+	if ( iSelect <= 0 || iSelect >= CountOf(m_tmMenu.m_Item))
 	{
 		return;
 	}

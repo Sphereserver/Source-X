@@ -540,7 +540,7 @@ void CSphereMapBlock::Load( int bx, int by )
 		CUOIndexRec index;
 		index.SetupIndex( ulBlockIndex * sizeof(CUOMapBlock), sizeof(CUOMapBlock));
 
-		uint fileOffset = index.GetFileOffset();
+		dword fileOffset = index.GetFileOffset();
 		if (g_Install.m_IsMapUopFormat[mapNumber])
 		{
 			for ( int i = 0; i < 256; i++ )
@@ -548,7 +548,7 @@ void CSphereMapBlock::Load( int bx, int by )
 				MapAddress pMapAddress = g_Install.m_UopMapAddress[mapNumber][i];
 				if (( ulBlockIndex <= pMapAddress.dwLastBlock ) && ( ulBlockIndex >= pMapAddress.dwFirstBlock ))
 				{
-					fileOffset = (uint)(pMapAddress.qwAdress + ((ulBlockIndex - pMapAddress.dwFirstBlock)*196));
+					fileOffset = (dword)(pMapAddress.qwAdress + ((ulBlockIndex - pMapAddress.dwFirstBlock)*196));
 					break;
 				}
 			}

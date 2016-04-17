@@ -41,22 +41,32 @@
 
 #define SCRIPT_MAX_LINE_LEN 4096	// default size.
 
-#define IsDigit(c)			isdigit((uchar)c)
-#define IsSpace(c)			isspace((uchar)c)
-#define IsAlpha(c)			isalpha((uchar)c)
+#ifdef UNICODE
+	#define IsDigit(c)			iswdigit(c) // If doesn't work, try with argument (wint_t)c
+	#define IsSpace(c)			iswspace(c)
+	#define IsAlpha(c)			iswalpha(c)
+	#define IsAlnum(c)			iswalnum(c)
+#else
+	#define IsDigit(c)			isdigit(c)	// It was: (uchar)c
+	#define IsSpace(c)			isspace(c)
+	#define IsAlpha(c)			isalpha(c)
+	#define IsAlnum(c)			isalnum(c)
+#endif
+
 #define IsNegative(c)		((c < 0)?1:0)
+#define MulDiv(a,b,c)		(((((int)a*(int)b) + ((int)c / 2)) / (int)c) - (IsNegative((int)a*(int)b)))
+#define MulDivLL(a,b,c)		(((((llong)a*(llong)b) + (llong)(c / 2)) / (llong)c) - (IsNegative((llong)a*(llong)b)))
 #define MulMulDiv(a,b,c)	(((a)*(b))/(c))
-#define MulDivLL(a,b,c)		(((((llong)(a)*(llong)(b))+(c / 2))/(c))-(IsNegative((llong)(a)*(llong)(b))))
-#ifndef minimum
+//#ifndef minimum
 	#define minimum(x,y)	((x)<(y)?(x):(y))
-#endif
-#ifndef maximum
+//#endif
+//#ifndef maximum
 	#define maximum(x,y)	((x)>(y)?(x):(y))
-#endif
+//#endif
 #define medium(x,y,z)		((x)>(y)?(x):((z)<(y)?(z):(y)))
-#ifndef COUNTOF
-	#define COUNTOF(a)		(sizeof(a)/sizeof((a)[0]))
-#endif
+//#ifndef CountOf
+	#define CountOf(a)		(sizeof(a)/sizeof((a)[0]))
+//#endif
 
 
 /* These macros are uppercase for conformity to windows.h macros */

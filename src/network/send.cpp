@@ -2303,7 +2303,7 @@ PacketChangeCharacter::PacketChangeCharacter(CClient* target) : PacketSend(XCMD_
 	size_t count = target->Setup_FillCharList(this, target->GetChar());
 
 	seek(countPos);
-	writeByte((byte)(count));
+	writeByte((byte)count);
 	skip((count * 60) + 1);
 
 	push(target);
@@ -2631,7 +2631,7 @@ PacketDisplayBook::PacketDisplayBook(const CClient* target, CItem* book) : Packe
 		{
 			while (s.ReadKeyParse())
 			{
-				switch (FindTableSorted(s.GetKey(), CItemMessage::sm_szLoadKeys, COUNTOF(CItemMessage::sm_szLoadKeys )-1))
+				switch (FindTableSorted(s.GetKey(), CItemMessage::sm_szLoadKeys, CountOf(CItemMessage::sm_szLoadKeys )-1))
 				{
 					case CIC_AUTHOR:
 						author = s.GetArgStr();
@@ -3382,7 +3382,7 @@ void PacketGumpDialog::writeCompressedControls(const CString* controls, size_t c
 		z_uLong compressLength = z_compressBound((z_uLong)textsLength);
 		byte* compressBuffer = new byte[compressLength];
 
-		int error = z_compress2(compressBuffer, &compressLength, &m_buffer[textsPosition], textsLength, Z_DEFAULT_COMPRESSION);
+		int error = z_compress2(compressBuffer, &compressLength, &m_buffer[textsPosition], (z_uLong)textsLength, Z_DEFAULT_COMPRESSION);
 		if (error != Z_OK || compressLength <= 0)
 		{
 			delete[] compressBuffer;
@@ -4277,7 +4277,7 @@ PacketDisplayBookNew::PacketDisplayBookNew(const CClient* target, CItem* book) :
 		{
 			while (s.ReadKeyParse())
 			{
-				switch (FindTableSorted(s.GetKey(), CItemMessage::sm_szLoadKeys, COUNTOF(CItemMessage::sm_szLoadKeys )-1))
+				switch (FindTableSorted(s.GetKey(), CItemMessage::sm_szLoadKeys, CountOf(CItemMessage::sm_szLoadKeys )-1))
 				{
 					case CIC_AUTHOR:
 						author = s.GetArgStr();

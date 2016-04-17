@@ -482,7 +482,7 @@ int CTimedFunctionHandler::Load( const char *pszName, bool fQuoted, const char *
 	{
 		tchar * ppVal[4];
 		strcpy( tempBuffer, pszVal );	//because pszVal is constant and Str_ParseCmds wants a non-constant string
-		size_t iArgs = Str_ParseCmds( tempBuffer, ppVal, COUNTOF( ppVal ), " ,\t" );
+		size_t iArgs = Str_ParseCmds( tempBuffer, ppVal, CountOf( ppVal ), " ,\t" );
 		if ( iArgs == 3 )
 		{
 			if ( IsDigit( ppVal[0][0] ) && IsDigit( ppVal[1][0] ) && IsDigit( ppVal[2][0] ) )
@@ -966,7 +966,7 @@ void CWorldThread::GarbageCollection_New()
 	// Clean up new objects that are never placed.
 	if ( m_ObjNew.GetCount() > 0 )
 	{
-		g_Log.Event( LOGL_ERROR, "GC: %" FMTSIZE_T " unplaced object deleted\n", m_ObjNew.GetCount());
+		g_Log.Event( LOGL_ERROR, "GC: %" PRIuSIZE_T " unplaced object deleted\n", m_ObjNew.GetCount());
 
 		for (size_t i = 0; i < m_ObjNew.GetCount(); ++i)
 		{
@@ -1046,11 +1046,11 @@ void CWorldThread::GarbageCollection_UIDs()
 
 	if ( iCount != CObjBase::sm_iCount )	// All objects must be accounted for.
 	{
-		g_Log.Event(LOGL_ERROR, "GC: Object memory leak %" FMTSIZE_T "!=%" FMTSIZE_T "\n", iCount, CObjBase::sm_iCount);
+		g_Log.Event(LOGL_ERROR, "GC: Object memory leak %" PRIuSIZE_T "!=%" PRIuSIZE_T "\n", iCount, CObjBase::sm_iCount);
 	}
 	else
 	{
-		g_Log.Event(LOGL_EVENT, "GC: %" FMTSIZE_T " Objects accounted for\n", iCount);
+		g_Log.Event(LOGL_EVENT, "GC: %" PRIuSIZE_T " Objects accounted for\n", iCount);
 	}
 
 	if ( m_FreeUIDs != NULL )	// new UID engine - search for empty holes and store it in a huge array
@@ -1723,7 +1723,7 @@ bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from scr
 	g_Log.Event(LOGM_INIT, "Loading %s...\n", static_cast<lpctstr>(pszLoadName));
 
 	// Find the size of the file.
-	dword lLoadSize = s.GetLength();
+	size_t stLoadSize = s.GetLength();
 	int iLoadStage = 0;
 
 	CScriptFileContext ScriptContext( &s );
@@ -1735,7 +1735,7 @@ bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from scr
 	{
 		if (! ( ++iLoadStage & 0x1FF ))	// don't update too often
 		{
-			g_Serv.PrintPercent( s.GetPosition(), lLoadSize );
+			g_Serv.PrintPercent( s.GetPosition(), stLoadSize );
 		}
 
 		try
@@ -1984,7 +1984,7 @@ bool CWorld::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 			if ( *pszKey != '\0' )
 				return false;
 
-			sVal.FormatVal(m_GMPages.GetCount());
+			sVal.FormatSTVal(m_GMPages.GetCount());
 		}
 		else if ( *pszKey == '.' )						//	SERV.GMPAGE.*
 		{
@@ -2015,7 +2015,7 @@ bool CWorld::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 		return true;
 	}
 
-	switch ( FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF(sm_szLoadKeys)-1 ))
+	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 ))
 	{
 		case WC_PREVBUILD:
 			sVal.FormatVal(m_iPrevBuild);
@@ -2050,7 +2050,7 @@ bool CWorld::r_LoadVal( CScript &s )
 	EXC_TRY("LoadVal");
 
 	lpctstr	pszKey = s.GetKey();
-	switch ( FindTableSorted( pszKey, sm_szLoadKeys, COUNTOF(sm_szLoadKeys)-1 ))
+	switch ( FindTableSorted( pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 ))
 	{
 		case WC_PREVBUILD:
 			m_iPrevBuild = s.GetArgVal();
@@ -2106,7 +2106,7 @@ void CWorld::Restock()
 	// Recalc all the base items as well.
 	g_Serv.SetServerMode(SERVMODE_RestockAll);
 
-	for ( size_t i = 0; i < COUNTOF(g_Cfg.m_ResHash.m_Array); ++i )
+	for ( size_t i = 0; i < CountOf(g_Cfg.m_ResHash.m_Array); ++i )
 	{
 		for ( size_t j = 0; j < g_Cfg.m_ResHash.m_Array[i].GetCount(); ++j )
 		{
@@ -2249,7 +2249,7 @@ void CWorld::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE wHu
 					}
 				}
 				pszSpeak = sTextGhost;
-				pClient->addSound( sm_Sounds_Ghost[ Calc_GetRandVal( COUNTOF( sm_Sounds_Ghost )) ], pSrc );
+				pClient->addSound( sm_Sounds_Ghost[ Calc_GetRandVal( CountOf( sm_Sounds_Ghost )) ], pSrc );
 			}
 
 			if ( !fCanSee && pSrc )
@@ -2338,7 +2338,7 @@ void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const NCHAR * pwText, 
 					wTextGhost[i] = '\0';
 				}
 				pwSpeak = wTextGhost;
-				pClient->addSound( sm_Sounds_Ghost[ Calc_GetRandVal( COUNTOF( sm_Sounds_Ghost )) ], pSrc );
+				pClient->addSound( sm_Sounds_Ghost[ Calc_GetRandVal( CountOf( sm_Sounds_Ghost )) ], pSrc );
 			}
 			
 			// Must label the text.
@@ -2348,7 +2348,7 @@ void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const NCHAR * pwText, 
 				{
 					CString sTextName;
 					sTextName.Format("<%s>", pSrc->GetName());
-					int iLen = CvtSystemToNUNICODE( wTextName, COUNTOF(wTextName), sTextName, -1 );
+					int iLen = CvtSystemToNUNICODE( wTextName, CountOf(wTextName), sTextName, -1 );
 					if ( wTextGhost[0] != '\0' )
 					{
 						for ( size_t i = 0; wTextGhost[i] != '\0' && iLen < MAX_TALK_BUFFER; i++, iLen++ )
@@ -2375,7 +2375,7 @@ void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const NCHAR * pwText, 
 			{
 				tchar * pszMsg = Str_GetTemp();
 				sprintf(pszMsg, "<%s [%x]>", pSrc->GetName(), (dword)(pSrc->GetUID()));
-				int iLen = CvtSystemToNUNICODE( wTextUID, COUNTOF(wTextUID), pszMsg, -1 );
+				int iLen = CvtSystemToNUNICODE( wTextUID, CountOf(wTextUID), pszMsg, -1 );
 				for ( size_t i = 0; pwText[i] && iLen < MAX_TALK_BUFFER - 1; i++, iLen++ )
 				{
 					wTextUID[iLen] = pwText[i];
