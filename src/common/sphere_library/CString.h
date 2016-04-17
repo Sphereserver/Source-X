@@ -106,26 +106,26 @@ public:
 	* @param nIndex position of the character.
 	* @return character in position nIndex.
 	*/
-	tchar operator[](size_t nIndex) const;
+	tchar operator[](int nIndex) const;
 	/**
 	* @brief Gets the reference to character a specified position (0 based).
 	* @see ReferenceAt()
 	* @param nIndex position of the character.
 	* @return reference to character in position nIndex.
 	*/
-	tchar & operator[](size_t nIndex);
+	tchar & operator[](int nIndex);
 	/**
 	* @brief Gets the caracter in a specified position (0 based).
 	* @param nIndex position of the character.
 	* @return character in position nIndex.
 	*/
-	tchar GetAt(size_t nIndex) const;
+	tchar GetAt(int nIndex) const;
 	/**
 	* @brief Gets the reference to character a specified position (0 based).
 	* @param nIndex position of the character.
 	* @return reference to character in position nIndex.
 	*/
-	tchar & ReferenceAt(size_t nIndex);
+	tchar & ReferenceAt(int nIndex);
 	/**
 	* @brief Puts a character in a specified position (0 based).
 	*
@@ -133,7 +133,7 @@ public:
 	* @param nIndex position to put the character.
 	* @param ch character to put.
 	*/
-	void SetAt(size_t nIndex, tchar ch);
+	void SetAt(int nIndex, tchar ch);
 	///@}
 	/** @name Modifiers:
 	 */

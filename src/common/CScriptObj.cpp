@@ -3107,7 +3107,7 @@ bool CFileObj::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 				}
 				else
 				{
-					sVal.FormatSTVal( sWrite->Seek(Exp_GetLLVal(pszKey), SEEK_SET) );
+					sVal.FormatSTVal( sWrite->Seek(Exp_GetSTVal(pszKey), SEEK_SET) );
 				}
 			} break;
 

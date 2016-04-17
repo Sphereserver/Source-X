@@ -290,7 +290,7 @@ VERFILE_TYPE CUOInstall::OpenFiles( dword dwMask )
 									qwUOPPtr = ((uint64)dwHashHi << 32) + dwHashLo;
 									m_Maps[index].Seek( sizeof(dword), SEEK_CUR );
 									m_Maps[index].Read( &dwTotalFiles, sizeof(dword) );
-									m_Maps[index].Seek( qwUOPPtr, SEEK_SET );
+									m_Maps[index].Seek( (size_t)qwUOPPtr, SEEK_SET );
 									dwLoop = dwTotalFiles;
 
 									while (qwUOPPtr > 0)
@@ -332,7 +332,7 @@ VERFILE_TYPE CUOInstall::OpenFiles( dword dwMask )
 											}
 										}
 
-										m_Maps[index].Seek( qwUOPPtr, SEEK_SET );
+										m_Maps[index].Seek( (size_t)qwUOPPtr, SEEK_SET );
 									}
 								}//End of UOP Map parsing
 								else if (index == 0) // neither file exists, map0 is required
@@ -544,9 +544,9 @@ ullong HashFileName(CString csFile)
 	eax = ecx = edx = 0;
 	ebx = edi = esi = (int32) csFile.GetLength() + 0xDEADBEEF;
 
-	int i = 0;
+	size_t i = 0;
 
-	for ( i = 0; i + 12 < csFile.GetLength(); i += 12 )
+	for ( ; i + 12 < csFile.GetLength(); i += 12 )
 	{
 		edi = (int32) ( ( csFile[ i + 7 ] << 24 ) | ( csFile[ i + 6 ] << 16 ) | ( csFile[ i + 5 ] << 8 ) | csFile[ i + 4 ] ) + edi;
 		esi = (int32) ( ( csFile[ i + 11 ] << 24 ) | ( csFile[ i + 10 ] << 16 ) | ( csFile[ i + 9 ] << 8 ) | csFile[ i + 8 ] ) + esi;

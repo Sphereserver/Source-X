@@ -154,29 +154,29 @@ size_t CString::GetLength() const
 
 // CString:: Element access
 
-tchar CString::operator[](size_t nIndex) const
+tchar CString::operator[](int nIndex) const
 {
 	return GetAt(nIndex);
 }
 
-tchar & CString::operator[](size_t nIndex)
+tchar & CString::operator[](int nIndex)
 {
 	return ReferenceAt(nIndex);
 }
 
-tchar CString::GetAt(size_t nIndex) const
+tchar CString::GetAt(int nIndex) const
 {
 	ASSERT(nIndex <= m_iLength);  // Allow to get the null char.
 	return m_pchData[nIndex];
 }
 
-tchar & CString::ReferenceAt(size_t nIndex)
+tchar & CString::ReferenceAt(int nIndex)
 {
 	ASSERT(nIndex < m_iLength);
 	return m_pchData[nIndex];
 }
 
-void CString::SetAt(size_t nIndex, tchar ch)
+void CString::SetAt(int nIndex, tchar ch)
 {
 	ASSERT(nIndex < m_iLength);
 	m_pchData[nIndex] = ch;
@@ -290,7 +290,7 @@ void CString::FormatULLVal(ullong iVal)
 	Format("%" PRIu64 , iVal);
 }
 
-void CString::FormatSTVal(ullong iVal)
+void CString::FormatSTVal(size_t iVal)
 {
 	Format("%" PRIuSIZE_T, iVal);
 }

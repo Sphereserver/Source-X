@@ -735,7 +735,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 
 				// Check the total number of items in the bankbox and the ev.
 				// container put into it.
-				if ( (ContentCountAll() + iItemsInContainer) > iBankIMax )
+				if ( (ContentCountAll() + iItemsInContainer) > (size_t)iBankIMax )
 				{
 					pCharMsg->SysMessageDefault(DEFMSG_BVBOX_FULL_ITEMS);
 					return false;
