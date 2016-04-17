@@ -959,7 +959,7 @@ bool CResource::r_LoadVal( CScript &s )
 				g_Log.EventError("Outgoing packet filtering index %d out of range [0..254]\n", index);
 		}
 
-		return(false);
+		return false;
 	}
 
 	switch (i)

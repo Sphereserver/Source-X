@@ -90,12 +90,12 @@ public:
 	* @param iLen new length of the string.
 	* @return the new length of the CString.
 	*/
-	int SetLength(int iLen);
+	size_t SetLength(size_t iLen);
 	/**
 	* @brief Get the length of the CString.
 	* @return the length of the CString.
 	*/
-	int GetLength() const;
+	size_t GetLength() const;
 	///@}
 	/** @name Element access:
 	 */
@@ -106,26 +106,26 @@ public:
 	* @param nIndex position of the character.
 	* @return character in position nIndex.
 	*/
-	tchar operator[](int nIndex) const;
+	tchar operator[](size_t nIndex) const;
 	/**
 	* @brief Gets the reference to character a specified position (0 based).
 	* @see ReferenceAt()
 	* @param nIndex position of the character.
 	* @return reference to character in position nIndex.
 	*/
-	tchar & operator[](int nIndex);
+	tchar & operator[](size_t nIndex);
 	/**
 	* @brief Gets the caracter in a specified position (0 based).
 	* @param nIndex position of the character.
 	* @return character in position nIndex.
 	*/
-	tchar GetAt(int nIndex) const;
+	tchar GetAt(size_t nIndex) const;
 	/**
 	* @brief Gets the reference to character a specified position (0 based).
 	* @param nIndex position of the character.
 	* @return reference to character in position nIndex.
 	*/
-	tchar & ReferenceAt(int nIndex);
+	tchar & ReferenceAt(size_t nIndex);
 	/**
 	* @brief Puts a character in a specified position (0 based).
 	*
@@ -133,7 +133,7 @@ public:
 	* @param nIndex position to put the character.
 	* @param ch character to put.
 	*/
-	void SetAt(int nIndex, tchar ch);
+	void SetAt(size_t nIndex, tchar ch);
 	///@}
 	/** @name Modifiers:
 	 */
@@ -305,53 +305,53 @@ public:
 	* @param c character to look for.
 	* @return position of the character in CString if any, -1 otherwise.
 	*/
-	int indexOf(tchar c);
+	size_t indexOf(tchar c);
 	/**
 	* @brief Look for the first occurence of c in CString from a position.
 	* @param c character to look for.
 	* @param offset position from start the search.
 	* @return position of the character in CString if any, -1 otherwise.
 	*/
-	int indexOf(tchar c, int offset);
+	size_t indexOf(tchar c, size_t offset);
 	/**
 	* @brief Look for the first occurence of a substring in CString.
 	* @param str substring to look for.
 	* @return position of the substring in CString if any, -1 otherwise.
 	*/
-	int indexOf(CString str);
+	size_t indexOf(CString str);
 	/**
 	* @brief Look for the first occurence of a substring in CString from a position.
 	* @param str substring to look for.
 	* @param offset position from start the search.
 	* @return position of the substring in CString if any, -1 otherwise.
 	*/
-	int indexOf(CString str, int offset);
+	size_t indexOf(CString str, size_t offset);
 	/**
 	* @brief Look for the last occurence of c in CString.
 	* @param c character to look for.
 	* @return position of the character in CString if any, -1 otherwise.
 	*/
-	int lastIndexOf(tchar c);
+	size_t lastIndexOf(tchar c);
 	/**
 	* @brief Look for the last occurence of c in CString from a position to the end.
 	* @param c character to look for.
 	* @param from position where stop the search.
 	* @return position of the character in CString if any, -1 otherwise.
 	*/
-	int lastIndexOf(tchar c, int from);
+	size_t lastIndexOf(tchar c, size_t from);
 	/**
 	* @brief Look for the last occurence of a substring in CString.
 	* @param str substring to look for.
 	* @return position of the substring in CString if any, -1 otherwise.
 	*/
-	int lastIndexOf(CString str);
+	size_t lastIndexOf(CString str);
 	/**
 	* @brief Look for the last occurence of a substring in CString from a position to the end.
 	* @param str substring to look for.
 	* @param from position where stop the search.
 	* @return position of the substring in CString if any, -1 otherwise.
 	*/
-	int lastIndexOf(CString str, int from);
+	size_t lastIndexOf(CString str, size_t from);
 	///@}
 
 private:
@@ -362,9 +362,9 @@ private:
 	*/
 	void Init();
 
-	tchar	*m_pchData; ///< Data pointer.
-	int		m_iLength; ///< Length of string.
-	int		m_iMaxLength; ///< Size of memory allocated pointed by m_pchData.
+	tchar	*m_pchData;		///< Data pointer.
+	size_t	m_iLength;		///< Length of string.
+	size_t	m_iMaxLength;	///< Size of memory allocated pointed by m_pchData.
 };
 
 /**
@@ -534,7 +534,7 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg = NULL, lpctstr pSep = NULL);
 /**
 * @brief Parse a list of arguments.
 * @param pCmdLine list of arguments to parse.
-* @param ppCmd where to store de parsed arguments.
+* @param ppCmd where to store the parsed arguments.
 * @param iMax max count of arguments to parse.
 * @param pSep the list of separators (by default "=, \t").
 * @return count of arguments parsed.

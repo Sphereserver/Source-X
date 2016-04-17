@@ -353,7 +353,7 @@ public:
 	byte Login_ServerList( const char * pszAccount, const char * pszPassword ); // Initial login (Login on "loginserver", new format)
 
 	byte Setup_Delete( dword iSlot ); // Deletion of character
-	int Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst); // Write character list to packet
+	size_t Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst); // Write character list to packet
 	byte Setup_ListReq( const char * pszAccount, const char * pszPassword, bool fTest ); // Gameserver login and character listing
 	byte Setup_Play( uint iSlot ); // After hitting "Play Character" button
 	byte Setup_Start( CChar * pChar ); // Send character startup stuff to player

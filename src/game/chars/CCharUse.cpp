@@ -515,7 +515,7 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 		if ( iFound )
 		{
 			SysMessageDefault(DEFMSG_ITEMUSE_ARCHB_NOAMMO);
-			return(true);
+			return true;
 		}
 	}
 
@@ -1319,7 +1319,7 @@ bool CChar::Use_Seed( CItem * pSeed, CPointMap * pPoint )
 	if ( !IsPriv(PRIV_GM) && !g_World.IsItemTypeNear(pt, IT_DIRT, 0, false) )
 	{
 		SysMessageDefault(DEFMSG_MSG_SEED_TARGSOIL);
-		return(false);
+		return false;
 	}
 
 	const CItemBase *pItemDef = pSeed->Item_GetDef();

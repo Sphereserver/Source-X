@@ -8,11 +8,12 @@ int CCharNPC::Spells_GetCount()
 	ADDTOCALLSTACK("CCharNPC::Spells_GetAll");
 	if (m_spells.empty())
 		return -1;
-	return m_spells.size();
+	return (int)m_spells.size();
 
 	// This code was meant to check if found spells does really exist
+	/*
 	int total = 0;
-	for (uint count = 0; count < m_spells.size() ; count++)
+	for (int count = 0; count < m_spells.size() ; count++)
 	{
 		Spells refSpell = m_spells.at(count);
 		if (!refSpell.id)
@@ -20,6 +21,7 @@ int CCharNPC::Spells_GetCount()
 		total++;
 	}
 	return total;
+	*/
 }
 
 // Retrieve the spell stored at index = n
@@ -137,9 +139,9 @@ bool CChar::NPC_FightMagery(CChar * pChar)
 {
 	ADDTOCALLSTACK("CChar::NPC_FightMagery");
 	if (!NPC_FightMayCast(false))	// not checking skill here since it will do a search later and it's an expensive function.
-		return(false);
+		return false;
 
-	int count = m_pNPC->Spells_GetCount();
+	size_t count = m_pNPC->Spells_GetCount();
 	CItem * pWand = LayerFind(LAYER_HAND1);		//Try to get a working wand.
 	CObjBase * pTarg = pChar;
 	if (pWand)
@@ -152,7 +154,7 @@ bool CChar::NPC_FightMagery(CChar * pChar)
 
 	int iDist = GetTopDist3D(pChar);
 	if (iDist >((UO_MAP_VIEW_SIGHT * 3) / 4))	// way too far away . close in.
-		return(false);
+		return false;
 
 	if (iDist <= 1 &&
 		Skill_GetBase(SKILL_TACTICS) > 200 &&
@@ -160,7 +162,7 @@ bool CChar::NPC_FightMagery(CChar * pChar)
 	{
 		// Within striking distance.
 		// Stand and fight for a bit.
-		return(false);
+		return false;
 	}
 	int skill = SKILL_NONE;
 	int iStatInt = Stat_GetBase(STAT_INT);
@@ -178,9 +180,9 @@ bool CChar::NPC_FightMagery(CChar * pChar)
 			{
 				NPC_Act_Follow(false, Calc_GetRandVal(3) + 2, true);
 			}
-			return(true);
+			return true;
 		}
-		return(false);
+		return false;
 	}
 	uchar i = 0;
 	if (pWand)

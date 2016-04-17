@@ -652,11 +652,11 @@ bool CScriptObj::r_LoadVal( CScript & s )
 						bool fQuoted = false;
 						tchar * args = s.GetArgStr(&fQuoted);
 						strcpy(g_Exp.sm_szMessages[l], args);
-						return(true);
+						return true;
 					}
 				}
 				g_Log.Event(LOGM_INIT|LOGL_ERROR, "Setting not used message override named '%s'\n", pszKey);
-				return(false);
+				return false;
 			}
 	}
 	return true;
@@ -935,7 +935,7 @@ badcmd:
 			return true;
 		case SSC_DEFMSG:
 			sVal = g_Cfg.GetDefaultMsg(pszKey);
-			return(true);
+			return true;
 		case SSC_EVAL:
 			sVal.FormatLLVal( Exp_GetLLVal( pszKey ));
 			return true;
@@ -1625,7 +1625,7 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 				sVal = "&nbsp";
 			}
 
-			int len = sVal.GetLength();
+			size_t len = sVal.GetLength();
 
 			EXC_SET("mem shifting");
 
@@ -2571,7 +2571,7 @@ jump_in:
 						CScriptObj *pRef = this;
 						if ( iArgQty == 2 )
 						{
-							CUID uid = (int)piCmd[1];
+							CUID uid = ATOI(piCmd[1]);
 							if ( uid.ObjFind() )
 								pRef = uid.ObjFind();
 						}
@@ -2647,7 +2647,7 @@ jump_in:
 		}
 
 		if ( trigrun >= TRIGRUN_SINGLE_EXEC )
-			return( TRIGRET_RET_DEFAULT );
+			return TRIGRET_RET_DEFAULT;
 	}
 	EXC_CATCH;
 

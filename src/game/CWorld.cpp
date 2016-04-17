@@ -772,7 +772,7 @@ bool CWorldThread::IsSaving() const
 
 dword CWorldThread::GetUIDCount() const
 {
-	return m_UIDs.GetCount();
+	return (dword)m_UIDs.GetCount();
 }
 
 CObjBase *CWorldThread::FindUID(dword dwIndex) const
@@ -787,7 +787,7 @@ CObjBase *CWorldThread::FindUID(dword dwIndex) const
 void CWorldThread::FreeUID(dword dwIndex)
 {
 	// Can't free up the UID til after the save !
-	m_UIDs[dwIndex] = ( IsSaving()) ? UID_PLACE_HOLDER : NULL;
+	m_UIDs[dwIndex] = IsSaving() ? UID_PLACE_HOLDER : NULL;
 }
 
 dword CWorldThread::AllocUID( dword dwIndex, CObjBase * pObj )

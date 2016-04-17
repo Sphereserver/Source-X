@@ -1849,7 +1849,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 			SetName( s.GetArgStr());
 			break;
 		case OC_P:	// Must set the point via the CItem or CChar methods.
-			return(false);
+			return false;
 		case OC_SPEED:
 		{
 			if (!this->IsItem())
@@ -2186,7 +2186,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 				tchar * pszArgs[2];
 
-				int iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, COUNTOF(pszArgs) );
+				size_t iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, COUNTOF(pszArgs) );
 				if ( iArgQty == 0 )
 					break;
 					
@@ -2577,7 +2577,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			EXC_SET("CLICK");
 
 			if (!pCharSrc)
-				return(false);
+				return false;
 
 			if (!pCharSrc->IsClient())
 				return false;
@@ -2586,7 +2586,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			{
 				CUID uid = s.GetArgVal();
 				if ((!uid.ObjFind()) || (!this->IsChar()))
-					return(false);
+					return false;
 				pCharSrc->GetClient()->Event_SingleClick(uid);
 			}
 			else
@@ -2596,13 +2596,13 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		case OV_DCLICK:
 			EXC_SET("DCLICK");
 			if (!pCharSrc)
-				return(false);
+				return false;
 			if (s.HasArgs())
 			{
 				CUID uid = s.GetArgVal();
 
 				if ((!uid.ObjFind()) || (!this->IsChar()))
-					return(false);
+					return false;
 
 				CChar *pChar = dynamic_cast <CChar *> (this);
 

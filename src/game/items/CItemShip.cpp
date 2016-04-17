@@ -90,7 +90,7 @@ bool CItemShip::Ship_SetMoveDir(DIR_TYPE dir, byte speed, bool bWheelMove)
 		if ( m_itShip.m_DirFace == m_itShip.m_DirMove && m_itShip.m_fSail == 1 )
 			iSpeed = 2;
 		/*else
-			return(false); */ // no need to return, pSpeed different than 1 or 2 is managed in m_SpeedMode to be 3 or 4, so it's safe to let it pass.
+			return false; */ // no need to return, pSpeed different than 1 or 2 is managed in m_SpeedMode to be 3 or 4, so it's safe to let it pass.
 	}
 
 	if ( ! IsAttr(ATTR_MAGIC ))	// make sound.
@@ -188,12 +188,12 @@ bool CItemShip::Ship_MoveDelta(CPointBase pdelta)
 	if (pdelta.m_z > 0)
 	{
 		if (znew >= (UO_SIZE_Z - PLAYER_HEIGHT) - 1)
-			return(false);
+			return false;
 	}
 	else if (pdelta.m_z < 0)
 	{
 		if (znew <= (UO_SIZE_MIN_Z + 3))
-			return(false);
+			return false;
 	}
 
 	// Move the ship and everything on the deck
@@ -643,7 +643,7 @@ bool CItemShip::Ship_OnMoveTick()
 		m_NextMove = CServTime::GetCurrentTime() + maximum(1, (m_itShip.m_fSail == 1) ? pItemMulti->m_shipSpeed.period * 2 : (pItemMulti->m_shipSpeed.period));
 	else
 		m_NextMove = CServTime::GetCurrentTime() + maximum(1, (m_itShip.m_fSail == 1) ? pItemMulti->m_shipSpeed.period : (pItemMulti->m_shipSpeed.period / 2));
-	return(true);
+	return true;
 }
 
 bool CItemShip::OnTick()

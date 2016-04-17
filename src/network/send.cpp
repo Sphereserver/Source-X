@@ -2260,20 +2260,22 @@ PacketDisplayMenu::PacketDisplayMenu(const CClient* target, CLIMODE_TYPE mode, c
 	writeInt32(object->GetUID());
 	writeInt16((word)(mode));
 
-	int len = items[0].m_sText.GetLength();
-	if (len > 255) len = 255;
-	writeByte((byte)(len));
+	size_t len = items[0].m_sText.GetLength();
+	if (len > 255)
+		len = 255;
+	writeByte((byte)len);
 	writeStringFixedASCII(static_cast<lpctstr>(items[0].m_sText), len);
 
-	writeByte((byte)(count));
+	writeByte((byte)count);
 	for (size_t i = 1; i <= count; i++)
 	{
 		writeInt16(items[i].m_id);
 		writeInt16(items[i].m_color);
 
 		len = items[i].m_sText.GetLength();
-		if (len > 255) len = 255;
-		writeByte((byte)(len));
+		if (len > 255)
+			len = 255;
+		writeByte((byte)len);
 		writeStringFixedASCII(static_cast<lpctstr>(items[i].m_sText), len);
 	}
 
@@ -3189,7 +3191,7 @@ PacketGumpValueInput::PacketGumpValueInput(const CClient* target, bool cancel, I
 	writeInt32(object->GetUID());
 	writeInt16(CLIMODE_INPVAL);
 
-	int len = strlen(text) + 1;
+	int len = (int)strlen(text) + 1;
 	if (len > 255) len = 255;
 
 	writeInt16((word)(len));
@@ -3377,7 +3379,7 @@ void PacketGumpDialog::writeCompressedControls(const CString* controls, size_t c
 
 		size_t textsLength = getPosition() - textsPosition;
 		
-		z_uLong compressLength = z_compressBound(textsLength);
+		z_uLong compressLength = z_compressBound((z_uLong)textsLength);
 		byte* compressBuffer = new byte[compressLength];
 
 		int error = z_compress2(compressBuffer, &compressLength, &m_buffer[textsPosition], textsLength, Z_DEFAULT_COMPRESSION);

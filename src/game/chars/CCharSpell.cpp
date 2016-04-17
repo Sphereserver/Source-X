@@ -323,31 +323,31 @@ bool CChar::Spell_Recall(CItem * pRune, bool fGate)
 	if (pRune == NULL || (!pRune->IsType(IT_RUNE) && !pRune->IsType(IT_TELEPAD)))
 	{
 		SysMessageDefault(DEFMSG_SPELL_RECALL_NOTRUNE);
-		return(false);
+		return false;
 	}
 	if (!pRune->m_itRune.m_pntMark.IsValidPoint())
 	{
 		SysMessageDefault(DEFMSG_SPELL_RECALL_BLANK);
-		return(false);
+		return false;
 	}
 	if (pRune->IsType(IT_RUNE) && pRune->m_itRune.m_Strength <= 0)
 	{
 		SysMessageDefault(DEFMSG_SPELL_RECALL_FADED);
 		if (!IsPriv(PRIV_GM))
-			return(false);
+			return false;
 	}
 
 	if (fGate)
 	{
 		CRegionBase * pArea = pRune->m_itRune.m_pntMark.GetRegion(REGION_TYPE_AREA | REGION_TYPE_MULTI | REGION_TYPE_ROOM);
 		if (pArea == NULL)
-			return(false);
+			return false;
 
 		if (pArea->IsFlag(REGION_ANTIMAGIC_ALL | REGION_ANTIMAGIC_GATE | REGION_ANTIMAGIC_RECALL_IN | REGION_ANTIMAGIC_RECALL_OUT | REGION_ANTIMAGIC_RECALL_IN))	//anti-magic
 		{
 			SysMessageDefault(DEFMSG_SPELL_GATE_AM);
 			if (!IsPriv(PRIV_GM))
-				return(false);
+				return false;
 		}
 
 		const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(SPELL_Gate_Travel);
@@ -377,7 +377,7 @@ bool CChar::Spell_Recall(CItem * pRune, bool fGate)
 	else
 	{
 		if (!Spell_Teleport(pRune->m_itRune.m_pntMark, true, true))
-			return(false);
+			return false;
 	}
 
 	if (pRune->IsType(IT_RUNE))	// wear out the rune
@@ -390,7 +390,7 @@ bool CChar::Spell_Recall(CItem * pRune, bool fGate)
 			SysMessageDefault(DEFMSG_SPELL_RECALL_FADEC);
 	}
 
-	return(true);
+	return true;
 }
 
 bool CChar::Spell_Resurrection(CItemCorpse * pCorpse, CChar * pCharSrc, bool bNoFail)
@@ -2195,7 +2195,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 	{
 		if (fFailMsg)
 			SysMessageDefault(DEFMSG_SPELL_TRY_NOMANA);
-		return(false);
+		return false;
 	}
 	if (!fTest && wManaUse)
 	{
@@ -2213,7 +2213,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 	{
 		if (fFailMsg)
 			SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_SPELL_TRY_NOTITHING),wTithingUse);
-		return(false);
+		return false;
 	}
 	if (!fTest && wTithingUse)
 	{
@@ -2361,7 +2361,7 @@ bool CChar::Spell_CastDone()
 	//
 
 	if (!Spell_TargCheck())
-		return(false);
+		return false;
 
 	CObjBase * pObj = m_Act_Targ.ObjFind();	// dont always need a target.
 	CObjBase * pObjSrc = m_Act_TargPrv.ObjFind();
@@ -2377,13 +2377,13 @@ bool CChar::Spell_CastDone()
 	SPELL_TYPE spell = m_atMagery.m_Spell;
 	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
 	if (pSpellDef == NULL)
-		return(false);
+		return false;
 
 	bool bIsSpellField = pSpellDef->IsSpellType(SPELLFLAG_FIELD);
 
 	int iSkill, iDifficulty;
 	if (!pSpellDef->GetPrimarySkill(&iSkill, &iDifficulty))
-		return(false);
+		return false;
 
 	int iSkillLevel;
 	if (pObjSrc != this)
@@ -2391,7 +2391,7 @@ bool CChar::Spell_CastDone()
 		// Get the strength of the item. IT_SCROLL or IT_WAND
 		CItem * pItem = dynamic_cast <CItem*>(pObjSrc);
 		if (pItem == NULL)
-			return(false);
+			return false;
 		if (!pItem->m_itWeapon.m_spelllevel)
 			iSkillLevel = Calc_GetRandVal(500);
 		else
@@ -2462,7 +2462,7 @@ bool CChar::Spell_CastDone()
 
 	// Consume the reagents/mana/scroll/charge
 	if (!Spell_CanCast(spell, false, pObjSrc, true))
-		return(false);
+		return false;
 
 	if (pSpellDef->IsSpellType(SPELLFLAG_SCRIPTED))
 	{
@@ -2497,7 +2497,7 @@ bool CChar::Spell_CastDone()
 				Spell_Area(m_Act_p, areaRadius, iSkillLevel);
 		}
 		else if (pSpellDef->IsSpellType(SPELLFLAG_POLY))
-			return(false);
+			return false;
 		else
 		{
 			if (pObj)
@@ -2629,7 +2629,7 @@ bool CChar::Spell_CastDone()
 
 			case SPELL_Recall:
 				if (!Spell_Recall(dynamic_cast <CItem*> (pObj), false))
-					return(false);
+					return false;
 				break;
 
 			case SPELL_Dispel_Field:
@@ -2638,7 +2638,7 @@ bool CChar::Spell_CastDone()
 				if ( pItem == NULL || pItem->IsAttr(ATTR_MOVE_NEVER) || !pItem->IsType(IT_SPELL) )
 				{
 					SysMessageDefault(DEFMSG_SPELL_DISPELLF_WT);
-					return(false);
+					return false;
 				}
 				pItem->OnSpellEffect(SPELL_Dispel_Field, this, iSkillLevel, NULL);
 				break;
@@ -2679,14 +2679,14 @@ bool CChar::Spell_CastDone()
 					// Burn person at location.
 					//pObj->Effect(EFFECT_OBJ, iT1, pObj, 10, 30, false, iColor, iRender);
 					if (!Spell_SimpleEffect(pObj, pObjSrc, spell, iSkillLevel))
-						return(false);
+						return false;
 				}
 				break;
 			}
 
 			case SPELL_Gate_Travel:
 				if (!Spell_Recall(dynamic_cast <CItem*> (pObj), true))
-					return(false);
+					return false;
 				break;
 
 			case SPELL_Polymorph:
@@ -2700,10 +2700,10 @@ bool CChar::Spell_CastDone()
 				if (GetPrivLevel() < PLEVEL_Seer)
 				{
 					if (pObj != this)
-						return(false);
+						return false;
 				}
 				if (!Spell_SimpleEffect(pObj, pObjSrc, spell, iSkillLevel))
-					return(false);
+					return false;
 				break;
 
 			case SPELL_Animate_Dead:
@@ -2712,7 +2712,7 @@ bool CChar::Spell_CastDone()
 				if (pCorpse == NULL)
 				{
 					SysMessageDefault(DEFMSG_SPELL_ANIMDEAD_NC);
-					return(false);
+					return false;
 				}
 				if (IsPriv(PRIV_GM))
 				{
@@ -2729,7 +2729,7 @@ bool CChar::Spell_CastDone()
 
 				if (!pCorpse->IsTopLevel())
 				{
-					return(false);
+					return false;
 				}
 				CChar *pChar = Spell_Summon(m_atMagery.m_SummonID, pCorpse->GetTopPoint());
 				ASSERT(pChar);
@@ -2747,13 +2747,13 @@ bool CChar::Spell_CastDone()
 				if (pCorpse == NULL)
 				{
 					SysMessage("That is not a corpse!");
-					return(false);
+					return false;
 				}
 				if (!pCorpse->IsTopLevel() ||
 					pCorpse->GetCorpseType() != CREID_SKELETON) 	// Must be a skeleton corpse
 				{
 					SysMessage("The body stirs for a moment");
-					return(false);
+					return false;
 				}
 				// Dump any stuff on corpse
 				pCorpse->ContentsDump(pCorpse->GetTopPoint());
@@ -2787,7 +2787,7 @@ bool CChar::Spell_CastDone()
 
 			default:
 				if (!Spell_SimpleEffect(pObj, pObjSrc, spell, iSkillLevel))
-					return(false);
+					return false;
 				break;
 		}
 	}
@@ -2819,7 +2819,7 @@ bool CChar::Spell_CastDone()
 		iDifficulty /= 10;
 		Skill_Experience(static_cast<SKILL_TYPE>(iSkill), iDifficulty);
 	}
-	return(true);
+	return true;
 }
 
 void CChar::Spell_CastFail()

@@ -49,7 +49,7 @@ public:
 	}
 	virtual void SysMessage( lpctstr pszMessage ) const
 	{
-		if ( pszMessage == NULL || ISINTRESOURCE(pszMessage))
+		if ( pszMessage == NULL || ISINTRESOURCE(pszMessage) )
 			return;
 		(const_cast <CFileConsole*>(this))->m_FileOut.WriteString(pszMessage);
 	}

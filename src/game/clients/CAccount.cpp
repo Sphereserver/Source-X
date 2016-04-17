@@ -993,13 +993,13 @@ void CAccount::SetNewPassword( lpctstr pszPassword )
 	if ( !pszPassword || !pszPassword[0] )		// no password given, auto-generate password
 	{
 		static tchar const passwdChars[] = "ABCDEFGHJKLMNPQRTUVWXYZ2346789";
-		size_t len = strlen(passwdChars);
-		size_t charsCnt = Calc_GetRandVal(4) + 6;	// 6 - 10 chars
+		int len = (int)strlen(passwdChars);
+		int charsCnt = Calc_GetRandVal(4) + 6;	// 6 - 10 chars
 		if ( charsCnt > (MAX_ACCOUNT_PASSWORD_ENTER - 1) )
 			charsCnt = MAX_ACCOUNT_PASSWORD_ENTER - 1;
 
 		tchar szTmp[MAX_ACCOUNT_PASSWORD_ENTER + 1];
-		for ( size_t i = 0; i < charsCnt; ++i )
+		for ( int i = 0; i < charsCnt; ++i )
 			szTmp[i] = passwdChars[Calc_GetRandVal(len)];
 
 		szTmp[charsCnt] = '\0';

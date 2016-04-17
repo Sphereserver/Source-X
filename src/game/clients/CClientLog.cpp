@@ -830,7 +830,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
 		case XCMD_ServersReq:
 		{
 			if ( iLen < sizeof( pEvent->ServersReq ))
-				return(false);
+				return false;
 
 			lErr = Login_ServerList( pEvent->ServersReq.m_acctname, pEvent->ServersReq.m_acctpass );
 			if ( lErr == PacketLoginError::Success )
@@ -855,7 +855,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
 		case XCMD_CharListReq:
 		{
 			if ( iLen < sizeof( pEvent->CharListReq ))
-				return(false);
+				return false;
 
 			lErr = Setup_ListReq( pEvent->CharListReq.m_acctname, pEvent->CharListReq.m_acctpass, true );
 			if ( lErr == PacketLoginError::Success )

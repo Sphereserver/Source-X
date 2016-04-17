@@ -1220,10 +1220,10 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		case CV_MIDILIST:
 			{
 				int64 piMidi[64];
-				size_t iQty = Str_ParseCmds( s.GetArgStr(), piMidi, COUNTOF(piMidi));
+				int64 iQty = Str_ParseCmds( s.GetArgStr(), piMidi, COUNTOF(piMidi) );
 				if ( iQty > 0 )
 				{
-					addMusic( static_cast<MIDI_TYPE>(piMidi[ Calc_GetRandVal( iQty ) ]) );
+					addMusic( static_cast<MIDI_TYPE>(piMidi[ Calc_GetRandLLVal( iQty ) ]) );
 				}
 			}
 			break;

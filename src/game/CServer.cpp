@@ -347,7 +347,7 @@ bool CServer::OnConsoleCmd( CString & sText, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CServer::OnConsoleCmd");
 	// RETURN: false = unsuccessful command.
-	int	len = sText.GetLength();
+	size_t len = sText.GetLength();
 
 	// We can't have a command with no length
 	if ( len <= 0 )

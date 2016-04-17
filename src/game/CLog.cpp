@@ -302,7 +302,7 @@ void _cdecl CLog::CatchEvent( const CSphereError * pErr, lpctstr pszCatchContext
 		{
 			eSeverity = LOGL_CRIT;
 			strcpy(szMsg, "Exception");
-			iLen = strlen(szMsg);
+			iLen = (int)strlen(szMsg);
 		}
 
 		iLen += sprintf( szMsg+iLen, ", in " );

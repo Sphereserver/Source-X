@@ -1801,7 +1801,7 @@ void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 
 		if ( g_Cfg.m_fSuppressCapitals )
 		{
-			int chars = strlen(z);
+			int chars = (int)strlen(z);
 			int capitals = 0;
 			int i = 0;
 			for ( i = 0; i < chars; i++ )

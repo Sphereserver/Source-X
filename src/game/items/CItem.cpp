@@ -2732,8 +2732,8 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			{
 				SPELL_TYPE spell = static_cast<SPELL_TYPE>(RES_GET_INDEX(s.GetArgVal()));
 				if (AddSpellbookSpell(spell, false))
-					return(false);
-				return(true);
+					return false;
+				return true;
 			}
 		case IC_AMOUNT:
 			SetAmountUpdate( s.GetArgVal());
@@ -3050,7 +3050,7 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 			if (s.GetArgVal())
 				Emote(g_Cfg.GetDefaultMsg(DEFMSG_ITEM_DMG_DESTROYED));
 			Delete(true);
-			return(true);
+			return true;
 		}
 		case CIV_DROP:
 			{

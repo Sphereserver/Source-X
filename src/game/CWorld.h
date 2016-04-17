@@ -42,7 +42,7 @@ class CWorldThread
 
 protected:
 	CGObArray<CObjBase*> m_UIDs;	// all the UID's in the World. CChar and CItem.
-	int m_iUIDIndexLast;	// remeber the last index allocated so we have more even usage.
+	int m_iUIDIndexLast;		// remeber the last index allocated so we have more even usage.
 
 	dword	*m_FreeUIDs;		//	list of free uids available
 	dword	m_FreeOffset;		//	offset of the first free element
@@ -71,7 +71,7 @@ public:
 
 	// UID Managenent
 	dword GetUIDCount() const;
-#define UID_PLACE_HOLDER (reinterpret_cast<CObjBase*>(0xFFFFFFFF))
+#define UID_PLACE_HOLDER (reinterpret_cast<CObjBase*>(POINTER_MAX))
 	CObjBase * FindUID(dword dwIndex) const;
 	void FreeUID(dword dwIndex);
 	dword AllocUID( dword dwIndex, CObjBase * pObj );
@@ -98,7 +98,7 @@ class CWorldClock
 {
 #ifndef _WIN32
 	#ifdef CLOCKS_PER_SEC
-	#undef CLOCKS_PER_SEC
+		#undef CLOCKS_PER_SEC
 	#endif	// CLOCKS_PER_SEC
 	#define CLOCKS_PER_SEC 1000	// must be converted from some internal clock.
 #endif

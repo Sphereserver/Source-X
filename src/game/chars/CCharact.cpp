@@ -2486,7 +2486,7 @@ bool CChar::OnTickEquip( CItem * pItem )
 			{
 				CChar * pHorse = pItem->m_itFigurine.m_UID.CharFind();
 				if ( pHorse == NULL )
-					return(false);
+					return false;
 				if ( pHorse != this )				//Some scripts can force mounts to have as 'mount' the rider itself (like old ethereal scripts)
 					return pHorse->OnTick();	// if we call OnTick again on them we'll have an infinite loop.
 				pItem->SetTimeout( TICK_PER_SEC );

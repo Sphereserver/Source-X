@@ -123,8 +123,8 @@ const unsigned CAssert::GetAssertLine()
 
 #ifdef _WIN32
 
-CException::CException(uint uCode, dword dwAddress) :
-	m_dwAddress(dwAddress), CSphereError(LOGL_CRIT, uCode, "Exception")
+CException::CException(uint uCode, size_t pAddress) :
+	m_pAddress(pAddress), CSphereError(LOGL_CRIT, uCode, "Exception")
 {
 }
 
@@ -146,11 +146,11 @@ bool CException::GetErrorMessage(lptstr lpszError, uint nMaxError, uint * pnHelp
 		case STATUS_INTEGER_DIVIDE_BY_ZERO:	zMsg = "Integer: Divide by Zero";	break;
 		case STATUS_STACK_OVERFLOW:			zMsg = "Stack Overflow";			break;
 		default:
-			sprintf(lpszError, "code=0x%x, (0x%x)", m_hError, m_dwAddress);
+			sprintf(lpszError, "code=0x%x, (0x%x)", m_hError, m_pAddress);
 			return true;
 	}
 
-	sprintf(lpszError, "\"%s\" (0x%x)", zMsg, m_dwAddress);
+	sprintf(lpszError, "\"%s\" (0x%x)", zMsg, m_pAddress);
 	return true;
 }
 
@@ -186,12 +186,12 @@ void Assert_CheckFail( lpctstr pExp, lpctstr pFile, long lLine )
 			}
 #endif
 			// WIN32 gets an exception.
-			DWORD dwCodeStart = (DWORD)(byte *) &globalstartsymbol;	// sync up to my MAP file.
+			size_t pCodeStart = (dword)(byte *) &globalstartsymbol;	// sync up to my MAP file.
 
-			DWORD dwAddr = (DWORD)(pData->ExceptionRecord->ExceptionAddress);
-			dwAddr -= dwCodeStart;
+			size_t pAddr = (dword)(pData->ExceptionRecord->ExceptionAddress);
+			pAddr -= pCodeStart;
 
-			throw CException(id, dwAddr);
+			throw CException(id, pAddr);
 		}
 	}
 #endif

@@ -2572,7 +2572,7 @@ bool PacketPartyMessage::onReceive(NetState* net)
 
 			CUID serial(readInt32());
 			nword * text = reinterpret_cast<nword *>(Str_GetTemp());
-			int length = readStringNullUNICODE(reinterpret_cast<wchar *>(text), MAX_TALK_BUFFER);
+			int length = (int)readStringNullUNICODE(reinterpret_cast<wchar *>(text), MAX_TALK_BUFFER);
 			character->m_pParty->MessageEvent(serial, character->GetUID(), text, length);
 		} break;
 
@@ -2583,7 +2583,7 @@ bool PacketPartyMessage::onReceive(NetState* net)
 				return false;
 
 			nword * text = reinterpret_cast<nword *>(Str_GetTemp());
-			int length = readStringNullUNICODE(reinterpret_cast<wchar *>(text), MAX_TALK_BUFFER);
+			int length = (int)readStringNullUNICODE(reinterpret_cast<wchar *>(text), MAX_TALK_BUFFER);
 			character->m_pParty->MessageEvent(CUID(0), character->GetUID(), text, length);
 		} break;
 
@@ -4044,7 +4044,7 @@ bool PacketBugReport::onReceive(NetState* net)
 	BUGREPORT_TYPE type = static_cast<BUGREPORT_TYPE>(readInt16());
 
 	tchar text[MAX_TALK_BUFFER];
-	int textLength = readStringNullNUNICODE(text, MAX_TALK_BUFFER, MAX_TALK_BUFFER-1);
+	int textLength = (int)readStringNullNUNICODE(text, MAX_TALK_BUFFER, MAX_TALK_BUFFER-1);
 
 	net->getClient()->Event_BugReport(text, textLength, type, CLanguageID(language));
 	return true;

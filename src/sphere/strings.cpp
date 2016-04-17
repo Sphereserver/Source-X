@@ -72,9 +72,9 @@ void AbstractString::append(const char *s)
 
 void AbstractString::replace(char what, char toWhat)
 {
-	for( int i = 0; i < m_length; i++ )
+	for ( int i = 0; i < m_length; i++ )
 	{
-		if( m_buf[i] == what )
+		if ( m_buf[i] == what )
 		{
 			m_buf[i] = toWhat;
 		}
@@ -108,41 +108,37 @@ bool AbstractString::startsWith(const char *s)
 
 bool AbstractString::startsWithHead(const char *s)
 {
-	for( int i = 0; ; i++ )
+	for ( int i = 0; ; i++ )
 	{
 		char ch1 = (uchar)(tolower(m_buf[0]));
 		char ch2 = (uchar)(tolower(s[0]));
 		if( ch2 == '\0' )
 		{
 			if( !isalnum(ch1) )
-			{
 				return true;
-			}
 			return false;
 		}
-		if( ch1 != ch2 )
-		{
+		if ( ch1 != ch2 )
 			return false;
-		}
 	}
 }
 
 int AbstractString::indexOf(char c)
 {
 	char *pos = strchr(m_buf, c);
-	return ( pos == NULL ) ? -1 : pos - m_buf;
+	return (int)(( pos == NULL ) ? -1 : pos - m_buf);
 }
 
 int AbstractString::indexOf(const char *s)
 {
 	char *pos = strstr(m_buf, s);
-	return ( pos == NULL ) ? -1 : pos - m_buf;
+	return (int)((pos == NULL) ? -1 : pos - m_buf);
 }
 
 int AbstractString::lastIndexOf(char c)
 {
 	char *pos = strrchr(m_buf, c);
-	return ( pos == NULL ) ? -1 : pos - m_buf;
+	return (int)((pos == NULL) ? -1 : pos - m_buf);
 }
 
 AbstractString::operator lpctstr() const
@@ -170,7 +166,7 @@ String::String()
 
 void String::destroy()
 {
-	if( m_realLength && ( m_buf != NULL ))
+	if ( m_realLength && ( m_buf != NULL ))
 	{
 		delete[] m_buf;
 		m_buf = NULL;
@@ -181,18 +177,18 @@ void String::destroy()
 
 void String::ensureLength(int newLength)
 {
-	if( newLength >= m_realLength )
+	if ( newLength >= m_realLength )
 	{
 		// always grow with 20% extra space to decrease number of future grows
 		m_realLength = newLength + newLength/5;
 		char *newBuf = new char[m_realLength+1];
 
-		if( newBuf == NULL )
+		if ( newBuf == NULL )
 		{
 			throw CSphereError(LOGL_FATAL, 0, "Run out of memory while allocating memory for string");
 		}
 
-		if( m_buf != NULL )
+		if ( m_buf != NULL )
 		{
 			strncpy(newBuf, m_buf, m_length);
 			delete[] m_buf;
@@ -215,7 +211,7 @@ TemporaryString::TemporaryString()
 {
 	m_useHeap = true;
 	AbstractSphereThread *current = static_cast<AbstractSphereThread*> (ThreadHolder::current());
-	if( current != NULL )
+	if ( current != NULL )
 	{
 		// allocate from thread context
 		current->allocateString(*this);
@@ -300,7 +296,7 @@ void TemporaryString::ensureLength(int newLength)
 			newBuf[m_length] = '\0';
 			
 			m_buf = newBuf;
-			if( m_state != NULL )
+			if ( m_state != NULL )
 			{
 				*m_state = '\0';
 				m_state = NULL;

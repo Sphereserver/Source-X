@@ -123,13 +123,6 @@ struct RESOURCE_ID : public RESOURCE_ID_BASE
 	RESOURCE_ID_BASE & operator = ( const RESOURCE_ID_BASE & rid );
 };
 
-// Desguise an id as a pointer.
-#ifndef MAKEINTRESOURCE
-#define MAKEINTRESOURCE(id) ((lpctstr)((dword)((word)(id))))
-#endif
-#define ISINTRESOURCE(p)	(!(((dword)p)&0xFFFFF000))
-#define GETINTRESOURCE(p)	(((dword)p)&0x0FFF)
-
 //*********************************************************
 
 struct CResourceQty

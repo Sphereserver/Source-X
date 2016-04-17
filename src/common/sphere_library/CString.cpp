@@ -38,12 +38,11 @@
 
 //#define DEBUG_STRINGS
 #ifdef DEBUG_STRINGS
-int gAmount = 0;  ///< Current amount of CString.
-uint gMemAmount = 0; ///< Total mem allocated by CGStrings.
-int gReallocs = 0; ///< Total reallocs caused by CString resizing.
+	uint	gAmount		= 0;		///< Current amount of CString.
+	size_t	gMemAmount	= 0;		///< Total mem allocated by CGStrings.
+	uint	gReallocs	= 0;		///< Total reallocs caused by CString resizing.
 #endif
 
-#define TOLOWER tolower
 
 // CString:: Constructors, Destructor, Asign operator.
 
@@ -80,13 +79,13 @@ CString::CString(const CString &s)
 const CString& CString::operator=(lpctstr pStr)
 {
 	Copy(pStr);
-	return(*this);
+	return *this;
 }
 
 const CString& CString::operator=(const CString &s)
 {
 	Copy(s.GetPtr());
-	return(*this);
+	return *this;
 }
 
 // CString:: Capacity
@@ -110,16 +109,17 @@ void CString::Empty(bool bTotal)
 
 bool CString::IsEmpty() const
 {
-	return(!m_iLength);
+	return (!m_iLength);
 }
 
 bool CString::IsValid() const
 {
-	if (!m_iMaxLength) return false;
+	if (!m_iMaxLength)
+		return false;
 	return (m_pchData[m_iLength] == '\0');
 }
 
-int CString::SetLength(int iNewLength)
+size_t CString::SetLength(size_t iNewLength)
 {
 	if (iNewLength >= m_iMaxLength)
 	{
@@ -134,11 +134,12 @@ int CString::SetLength(int iNewLength)
 		tchar	*pNewData = new tchar[m_iMaxLength + 1];
 		ASSERT(pNewData);
 
-		int iMinLength = minimum(iNewLength, m_iLength);
+		size_t iMinLength = minimum(iNewLength, m_iLength);
 		strncpy(pNewData, m_pchData, iMinLength);
 		pNewData[m_iLength] = 0;
 
-		if (m_pchData) delete[] m_pchData;
+		if (m_pchData)
+			delete[] m_pchData;
 		m_pchData = pNewData;
 	}
 	m_iLength = iNewLength;
@@ -146,40 +147,41 @@ int CString::SetLength(int iNewLength)
 	return m_iLength;
 }
 
-int CString::GetLength() const
+size_t CString::GetLength() const
 {
 	return m_iLength;
 }
 
 // CString:: Element access
 
-tchar CString::operator[](int nIndex) const
+tchar CString::operator[](size_t nIndex) const
 {
 	return GetAt(nIndex);
 }
 
-tchar & CString::operator[](int nIndex)
+tchar & CString::operator[](size_t nIndex)
 {
 	return ReferenceAt(nIndex);
 }
 
-tchar CString::GetAt(int nIndex) const
+tchar CString::GetAt(size_t nIndex) const
 {
 	ASSERT(nIndex <= m_iLength);  // Allow to get the null char.
 	return m_pchData[nIndex];
 }
 
-tchar & CString::ReferenceAt(int nIndex)
+tchar & CString::ReferenceAt(size_t nIndex)
 {
 	ASSERT(nIndex < m_iLength);
 	return m_pchData[nIndex];
 }
 
-void CString::SetAt(int nIndex, tchar ch)
+void CString::SetAt(size_t nIndex, tchar ch)
 {
 	ASSERT(nIndex < m_iLength);
 	m_pchData[nIndex] = ch;
-	if (!ch) m_iLength = strlen(m_pchData);	// \0 inserted. line truncated
+	if (!ch)
+		m_iLength = strlen(m_pchData);	// \0 inserted. line truncated
 }
 
 // CString:: Modifiers
@@ -198,14 +200,14 @@ const CString& CString::operator+=(tchar ch)
 
 void CString::Add(tchar ch)
 {
-	int iLen = m_iLength;
+	size_t iLen = m_iLength;
 	SetLength(iLen + 1);
 	SetAt(iLen, ch);
 }
 
 void CString::Add(lpctstr pszStr)
 {
-	int iLenCat = strlen(pszStr);
+	size_t iLenCat = strlen(pszStr);
 	if (iLenCat)
 	{
 		SetLength(iLenCat + m_iLength);
@@ -324,7 +326,7 @@ void CString::Reverse()
 
 CString::operator lpctstr() const
 {
-	return(GetPtr());
+	return GetPtr();
 }
 
 int CString::Compare(lpctstr pStr) const
@@ -342,62 +344,62 @@ lpctstr CString::GetPtr() const
 	return m_pchData;
 }
 
-int CString::indexOf(tchar c)
+size_t CString::indexOf(tchar c)
 {
 	return indexOf(c, 0);
 }
 
-int CString::indexOf(tchar c, int offset)
+size_t CString::indexOf(tchar c, size_t offset)
 {
 	if (offset < 0)
-		return -1;
+		return (size_t)-1;	//std::string::npos;
 
-	int len = strlen(m_pchData);
+	size_t len = strlen(m_pchData);
 	if (offset >= len)
-		return -1;
+		return (size_t)-1;
 
-	for (int i = offset; i<len; i++)
+	for (size_t i = offset; i<len; i++)
 	{
 		if (m_pchData[i] == c)
 		{
 			return i;
 		}
 	}
-	return -1;
+	return (size_t)-1;
 }
 
-int CString::indexOf(CString str)
+size_t CString::indexOf(CString str)
 {
 	return indexOf(str, 0);
 }
 
-int CString::indexOf(CString str, int offset)
+size_t CString::indexOf(CString str, size_t offset)
 {
 	if (offset < 0)
-		return -1;
+		return (size_t)-1;
 
-	int len = strlen(m_pchData);
+	size_t len = strlen(m_pchData);
 	if (offset >= len)
-		return -1;
+		return (size_t)-1;
 
-	int slen = str.GetLength();
+	size_t slen = str.GetLength();
 	if (slen > len)
-		return -1;
+		return (size_t)-1;
 
 	tchar * str_value = new tchar[slen + 1];
 	strcpy(str_value, str.GetPtr());
 	tchar firstChar = str_value[0];
 
-	for (int i = offset; i < len; i++)
+	for (size_t i = offset; i < len; i++)
 	{
 		tchar c = m_pchData[i];
 		if (c == firstChar)
 		{
-			int rem = len - i;
+			size_t rem = len - i;
 			if (rem >= slen)
 			{
-				int j = i;
-				int k = 0;
+				size_t j = i;
+				size_t k = 0;
 				bool found = true;
 				while (k < slen)
 				{
@@ -418,63 +420,63 @@ int CString::indexOf(CString str, int offset)
 	}
 
 	delete[] str_value;
-	return -1;
+	return (size_t)-1;
 }
 
-int CString::lastIndexOf(tchar c)
+size_t CString::lastIndexOf(tchar c)
 {
 	return lastIndexOf(c, 0);
 }
 
-int CString::lastIndexOf(tchar c, int from)
+size_t CString::lastIndexOf(tchar c, size_t from)
 {
 	if (from < 0)
-		return -1;
+		return (size_t)-1;
 
-	int len = strlen(m_pchData);
+	size_t len = strlen(m_pchData);
 	if (from > len)
-		return -1;
+		return (size_t)-1;
 
-	for (int i = (len - 1); i >= from; i--)
+	for (size_t i = (len - 1); i >= from; i--)
 	{
 		if (m_pchData[i] == c)
 		{
 			return i;
 		}
 	}
-	return -1;
+	return (size_t)-1;
 }
 
-int CString::lastIndexOf(CString str)
+size_t CString::lastIndexOf(CString str)
 {
 	return lastIndexOf(str, 0);
 }
 
-int CString::lastIndexOf(CString str, int from)
+size_t CString::lastIndexOf(CString str, size_t from)
 {
 	if (from < 0)
-		return -1;
+		return (size_t)-1;
 
-	int len = strlen(m_pchData);
+	size_t len = strlen(m_pchData);
 	if (from >= len)
-		return -1;
-	int slen = str.GetLength();
+		return (size_t)-1;
+	size_t slen = str.GetLength();
 	if (slen > len)
-		return -1;
+		return (size_t)-1;
 
 	tchar * str_value = new tchar[slen + 1];
 	strcpy(str_value, str.GetPtr());
 	tchar firstChar = str_value[0];
-	for (int i = (len - 1); i >= from; i--)
+	for (size_t i = (len - 1); i >= from; i--)
 	{
 		tchar c = m_pchData[i];
 		if (c == firstChar)
 		{
-			int rem = i;
+			size_t rem = i;
 			if (rem >= slen)
 			{
-				int j = i;
-				int k = 0;
+				size_t j = i;
+				size_t k = 0;
 				bool found = true;
 				while (k < slen)
 				{
@@ -495,7 +497,7 @@ int CString::lastIndexOf(CString str, int from)
 	}
 
 	delete[] str_value;
-	return -1;
+	return (size_t)-1;
 }
 
 // CString:: private
@@ -588,7 +590,7 @@ size_t Str_GetBare(tchar * pszOut, lpctstr pszInp, size_t iMaxOutSize, lpctstr p
 
 tchar * Str_MakeFiltered(tchar * pStr)
 {
-	int len = strlen(pStr);
+	int len = (int)strlen(pStr);
 	for (int i = 0; len; i++, len--)
 	{
 		if (pStr[i] == '\\')
@@ -605,12 +607,12 @@ tchar * Str_MakeFiltered(tchar * pStr)
 			memmove(pStr + i + 1, pStr + i + 2, len);
 		}
 	}
-	return(pStr);
+	return pStr;
 }
 
 void Str_MakeUnFiltered(tchar * pStrOut, lpctstr pStrIn, int iSizeMax)
 {
-	int len = strlen(pStrIn);
+	int len = (int)strlen(pStrIn);
 	int iIn = 0;
 	int iOut = 0;
 	for (; iOut < iSizeMax && iIn <= len; iIn++, iOut++)
@@ -796,11 +798,11 @@ int Str_IndexOf(tchar * pStr1, tchar * pStr2, int offset)
 	if (offset < 0)
 		return -1;
 
-	int len = strlen(pStr1);
+	int len = (int)strlen(pStr1);
 	if (offset >= len)
 		return -1;
 
-	int slen = strlen(pStr2);
+	int slen = (int)strlen(pStr2);
 	if (slen > len)
 		return -1;
 
@@ -853,7 +855,7 @@ static MATCH_TYPE Str_Match_After_Star(lpctstr pPattern, lpctstr pText)
 		return MATCH_VALID;
 
 	// get the next character to match which must be a literal or '['
-	tchar nextp = static_cast<tchar>(TOLOWER(*pPattern));
+	tchar nextp = static_cast<tchar>(tolower(*pPattern));
 	MATCH_TYPE match = MATCH_INVALID;
 
 	// Continue until we run out of text or definite result seen
@@ -863,7 +865,7 @@ static MATCH_TYPE Str_Match_After_Star(lpctstr pPattern, lpctstr pText)
 		// in the pattern match the next character in the text or that
 		// the next pattern char is the beginning of a range.  Increment
 		// text pointer as we go here
-		if (nextp == TOLOWER(*pText) || nextp == '[')
+		if (nextp == tolower(*pText) || nextp == '[')
 		{
 			match = Str_Match(pPattern, pText);
 			if (match == MATCH_VALID)
@@ -933,9 +935,9 @@ MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText)
 
 					// matching a '!', '^', '-', '\' or a ']'
 					if (*pPattern == '\\')
-						range_start = range_end = static_cast<tchar>(TOLOWER(*++pPattern));
+						range_start = range_end = static_cast<tchar>(tolower(*++pPattern));
 					else
-						range_start = range_end = static_cast<tchar>(TOLOWER(*pPattern));
+						range_start = range_end = static_cast<tchar>(tolower(*pPattern));
 
 					// if end of pattern then bad pattern (Missing ']')
 					if (!*pPattern)
@@ -945,14 +947,14 @@ MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText)
 					if (*++pPattern == '-')
 					{
 						// get the range end
-						range_end = static_cast<tchar>(TOLOWER(*++pPattern));
+						range_end = static_cast<tchar>(tolower(*++pPattern));
 						// if end of pattern or construct then bad pattern
 						if (range_end == '\0' || range_end == ']')
 							return MATCH_PATTERN;
 						// special character range end
 						if (range_end == '\\')
 						{
-							range_end = static_cast<tchar>(TOLOWER(*++pPattern));
+							range_end = static_cast<tchar>(tolower(*++pPattern));
 							// if end of text then we have a bad pattern
 							if (!range_end)
 								return MATCH_PATTERN;
@@ -964,7 +966,7 @@ MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText)
 					// if the text character is in range then match found.
 					// make sure the range letters have the proper
 					// relationship to one another before comparison
-					tchar chText = static_cast<tchar>(TOLOWER(*pText));
+					tchar chText = static_cast<tchar>(tolower(*pText));
 					if (range_start < range_end)
 					{
 						if (chText >= range_start && chText <= range_end)
@@ -1015,7 +1017,7 @@ MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText)
 
 				// must match this character (case independant) ?exactly
 			default:
-				if (TOLOWER(*pPattern) != TOLOWER(*pText))
+				if (tolower(*pPattern) != tolower(*pText))
 					return MATCH_LITERAL;
 		}
 	}

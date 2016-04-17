@@ -1438,7 +1438,7 @@ void CClient::addBookPage( const CItem * pBook, size_t iPage, size_t iCount )
 	new PacketBookPageContent(this, pBook, iPage, iCount );
 }
 
-int CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
+size_t CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
 {
 	ADDTOCALLSTACK("CClient::Setup_FillCharList");
 	// list available chars for your account that are idle.

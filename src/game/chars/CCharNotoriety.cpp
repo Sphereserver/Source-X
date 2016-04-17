@@ -293,16 +293,16 @@ int CChar::Noto_GetLevel() const
 	ADDTOCALLSTACK("CChar::Noto_GetLevel");
 
 	size_t i = 0;
-	int iKarma = Stat_GetAdjusted(STAT_KARMA);
+	short iKarma = Stat_GetAdjusted(STAT_KARMA);
 	for ( ; i < g_Cfg.m_NotoKarmaLevels.GetCount() && iKarma < g_Cfg.m_NotoKarmaLevels.GetAt(i); i++ )
 		;
 
 	size_t j = 0;
-	int iFame = Stat_GetAdjusted(STAT_FAME);
+	short iFame = Stat_GetAdjusted(STAT_FAME);
 	for ( ; j < g_Cfg.m_NotoFameLevels.GetCount() && iFame > g_Cfg.m_NotoFameLevels.GetAt(j); j++ )
 		;
 
-	return( ( i * (g_Cfg.m_NotoFameLevels.GetCount() + 1) ) + j );
+	return (int)( ( i * (g_Cfg.m_NotoFameLevels.GetCount() + 1) ) + j );
 }
 
 lpctstr CChar::Noto_GetTitle() const

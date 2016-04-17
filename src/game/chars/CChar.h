@@ -621,7 +621,7 @@ public:
 	bool Noto_IsCriminal() const
 	{
 		// do the guards hate me ?
-		if ( IsStatFlag( STATF_Criminal ))
+		if ( IsStatFlag( STATF_Criminal ) )
 			return true;
 		return Noto_IsEvil();
 	}

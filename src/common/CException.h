@@ -77,9 +77,9 @@ public:
 	{
 	public:
 		static const char *m_sClassName;
-		const dword m_dwAddress;
+		const size_t m_pAddress;
 
-		CException(uint uCode, dword dwAddress);
+		CException(uint uCode, size_t pAddress);
 		virtual ~CException();
 	private:
 		CException& operator=(const CException& other);

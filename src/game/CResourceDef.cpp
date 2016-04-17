@@ -23,7 +23,7 @@ bool CValueRangeDef::Load( tchar * pszDef )
 	int64 piVal[2];
 	int iQty = g_Exp.GetRangeVals( pszDef, piVal, COUNTOF(piVal));
 	if ( iQty< 0 ) 
-		return(false);
+		return false;
 
 	m_iLo = piVal[0];
 	if ( iQty > 1 )

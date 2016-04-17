@@ -344,7 +344,7 @@ void CNTWindow::List_Clear()
 
 void CNTWindow::List_Add( COLORREF color, LPCTSTR pszText )
 {
-	int iTextLen = strlen( pszText );
+	int iTextLen = (int)strlen( pszText );
 	int iNewLen = m_iLogTextLen + iTextLen;
 
 	if ( iNewLen > (32*1024) )
@@ -1115,7 +1115,7 @@ bool NTWindow_OnTick( int iWaitmSec )
 				{
 					if ( theApp.m_wndMain.OnCommand( 0, IDOK, msg.hwnd ))
 					{
-						return(true);
+						return true;
 					}
 				}
 			}

@@ -39,8 +39,6 @@
 	#define __printfargs(a,b)
 #endif
 
-typedef THREAD_ENTRY_RET ( _cdecl * PTHREAD_ENTRY_PROC )(void *);
-
 #define SCRIPT_MAX_LINE_LEN 4096	// default size.
 
 #define IsDigit(c)			isdigit((uchar)c)
@@ -49,24 +47,42 @@ typedef THREAD_ENTRY_RET ( _cdecl * PTHREAD_ENTRY_PROC )(void *);
 #define IsNegative(c)		((c < 0)?1:0)
 #define MulMulDiv(a,b,c)	(((a)*(b))/(c))
 #define MulDivLL(a,b,c)		(((((llong)(a)*(llong)(b))+(c / 2))/(c))-(IsNegative((llong)(a)*(llong)(b))))
-
-#ifndef MAKEDWORD
-	#define MAKEDWORD(low, high) ((dword)(((word)(low)) | (((dword)((word)(high))) << 16)))
-#endif
-
-#ifndef COUNTOF
-	#define COUNTOF(a)	(sizeof(a)/sizeof((a)[0]))
-#endif
-
-typedef uint	ERROR_CODE;
-
 #ifndef minimum
 	#define minimum(x,y)	((x)<(y)?(x):(y))
 #endif
 #ifndef maximum
 	#define maximum(x,y)	((x)>(y)?(x):(y))
 #endif
-
 #define medium(x,y,z)		((x)>(y)?(x):((z)<(y)?(z):(y)))
+#ifndef COUNTOF
+	#define COUNTOF(a)		(sizeof(a)/sizeof((a)[0]))
+#endif
+
+
+/* These macros are uppercase for conformity to windows.h macros */
+
+#ifndef MAKEDWORD
+	#define MAKEDWORD(low, high) ((dword)(((word)low) | (((dword)((word)high)) << 16)))
+#endif
+
+// Desguise an id as a pointer.
+#ifndef MAKEINTRESOURCE
+	#define MAKEINTRESOURCEA(i) ((lpstr)((size_t)((word)i)))
+	#define MAKEINTRESOURCEW(i) ((lpwstr)((size_t)((word)i)))
+	#ifdef UNICODE
+		#define MAKEINTRESOURCE  MAKEINTRESOURCEW
+	#else
+		#define MAKEINTRESOURCE  MAKEINTRESOURCEA
+	#endif
+#endif
+#define ISINTRESOURCE(r)	((((size_t)r) >> 16) == 0)
+#define GETINTRESOURCE(r)	(((size_t)r)&0xFFFF)
+
+
+/* End of macros section */
+
+typedef uint	ERROR_CODE;
+typedef THREAD_ENTRY_RET(_cdecl * PTHREAD_ENTRY_PROC)(void *);
+
 
 #endif	// _INC_COMMON_H

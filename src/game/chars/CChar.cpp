@@ -2870,13 +2870,13 @@ do_default:
 			m_atUnk.m_Arg3 = s.GetArgVal();
 			break;
 		case CHC_ACTION:
-			return Skill_Start( g_Cfg.FindSkillKey( s.GetArgStr()));
+			return Skill_Start( g_Cfg.FindSkillKey( s.GetArgStr()) );
 		case CHC_ATTACKER:
 		{
 			if ( strlen(pszKey) > 8 )
 			{
 				pszKey += 8;
-				int attackerIndex = m_lastAttackers.size();
+				int attackerIndex = (int)m_lastAttackers.size();
 				if ( *pszKey == '.' )
 				{
 					pszKey++;

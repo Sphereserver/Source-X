@@ -93,12 +93,12 @@ void CCharRefArray::WritePartyChars( CScript &s )
 
 size_t CCharRefArray::GetCharCount() const
 {
-    return( m_uidCharArray.GetCount());
+    return m_uidCharArray.GetCount();
 }
 
 CUID CCharRefArray::GetChar( size_t i ) const
 {
-    return( m_uidCharArray[i] );
+    return m_uidCharArray[i];
 }
 
 bool CCharRefArray::IsValidIndex( size_t i ) const

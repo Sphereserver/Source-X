@@ -72,6 +72,13 @@ typedef	uint32_t		uint32;
 typedef	uint64_t		uint64;
 
 
+#ifdef _32B
+	#define POINTER_MAX		UINT32_MAX
+#else //!_32B
+	#define POINTER_MAX		UINT64_MAX
+#endif // _32B
+
+
 #ifndef _WIN32			//	assume unix if !_WIN32
 
 	// printf format identifiers

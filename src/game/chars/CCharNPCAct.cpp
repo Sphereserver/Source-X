@@ -1443,7 +1443,7 @@ void CChar::NPC_Act_Looting()
 
 	CItemCorpse * pCorpse = dynamic_cast<CItemCorpse *>(pItem);
 	if ( pCorpse && pCorpse->GetCount() > 0 )
-		pItem = pCorpse->GetAt(Calc_GetRandVal(pCorpse->GetCount()));
+		pItem = pCorpse->GetAt(Calc_GetRandVal((int)pCorpse->GetCount()));
 
 	if ( !CanTouch(pItem) || !CanMove(pItem) || !CanCarry(pItem) )
 	{
