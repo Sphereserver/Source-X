@@ -876,7 +876,8 @@ void CWorld::GetFixPoint( const CPointMap & pt, CSphereMapBlockState & block)
 	pDupeDef = NULL;
 	pItem = NULL;
 	wBlockThis = 0;
-	x2 = y2 = iQty = 0;
+	x2 = y2 = 0;
+	iQty = 0;
 	z = 0;
 
 	// Any dynamic items here ?
@@ -1163,7 +1164,8 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CSphereMapBlockState & block,
 	pDupeDef = NULL;
 	pItem = NULL;
 	wBlockThis = 0;
-	x2 = y2 = iQty = 0;
+	x2 = y2 = 0;
+	iQty = 0;
 	zHeight = 0;
 	z = 0;
 

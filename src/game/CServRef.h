@@ -54,7 +54,7 @@ private:
 	CString m_sStatus;	// last returned status string.
 
 	// statistics
-	dword m_dwStat[ SERV_STAT_QTY ];
+	size_t m_stStat[ SERV_STAT_QTY ];
 
 public:
 	static const char *m_sClassName;
@@ -82,22 +82,22 @@ public:
 		return(m_sStatus);
 	}
 
-	dword StatGet( SERV_STAT_TYPE i ) const;
+	size_t StatGet( SERV_STAT_TYPE i ) const;
 
 	void StatInc( SERV_STAT_TYPE i )
 	{
 		ASSERT( i>=0 && i<SERV_STAT_QTY );
-		m_dwStat[i]++;
+		m_stStat[i]++;
 	}
 	void StatDec( SERV_STAT_TYPE i )
 	{
 		ASSERT( i>=0 && i<SERV_STAT_QTY );
-		m_dwStat[i]--;
+		m_stStat[i]--;
 	}
 	void SetStat( SERV_STAT_TYPE i, dword dwVal )
 	{
 		ASSERT( i>=0 && i<SERV_STAT_QTY );
-		m_dwStat[i] = dwVal;
+		m_stStat[i] = dwVal;
 	}
 
 	lpctstr GetName() const { return( m_sName ); }

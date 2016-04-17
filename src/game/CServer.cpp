@@ -233,7 +233,7 @@ lpctstr CServer::GetStatusString( byte iIndex ) const
 	// 0 or 0x21 = main status.
 
 	tchar * pTemp = Str_GetTemp();
-	dword iClients = StatGet(SERV_STAT_CLIENTS);
+	size_t iClients = StatGet(SERV_STAT_CLIENTS);
 	int64 iHours = GetAgeHours() / 24;
 
 	switch ( iIndex )
@@ -250,17 +250,19 @@ lpctstr CServer::GetStatusString( byte iIndex ) const
 		case 0x22: // '"'
 			{
 			// shown in the INFO page in game.
-			sprintf(pTemp, SPHERE_TITLE ", Name=%s, Age=%" PRId64 ", Clients=%u, Items=%u, Chars=%u, Mem=%uK\n",
+			sprintf(pTemp, SPHERE_TITLE ", Name=%s, Age=%" PRId64 ", Clients=%" PRIuSIZE_T ", Items=%" PRIuSIZE_T ", Chars=%" PRIuSIZE_T ", Mem=%" PRIuSIZE_T "K\n",
 				GetName(), iHours, iClients, StatGet(SERV_STAT_ITEMS), StatGet(SERV_STAT_CHARS), StatGet(SERV_STAT_MEM));
 			}
 			break;
 		case 0x24: // '$'
 			// show at startup.
-			sprintf(pTemp, "Admin=%s, URL=%s, Lang=%s, TZ=%d\n", static_cast<lpctstr>(m_sEMail), static_cast<lpctstr>(m_sURL), static_cast<lpctstr>(m_sLang), m_TimeZone);
+			sprintf(pTemp, "Admin=%s, URL=%s, Lang=%s, TZ=%d\n",
+				static_cast<lpctstr>(m_sEMail), static_cast<lpctstr>(m_sURL), static_cast<lpctstr>(m_sLang), m_TimeZone);
 			break;
 		case 0x25: // '%'
 			// ConnectUO Status string
-			sprintf(pTemp, SPHERE_TITLE " Items=%u, Mobiles=%u, Clients=%u, Mem=%u", StatGet(SERV_STAT_ITEMS), StatGet(SERV_STAT_CHARS), iClients, StatGet(SERV_STAT_MEM));
+			sprintf(pTemp, SPHERE_TITLE " Items=%" PRIuSIZE_T ", Mobiles=%" PRIuSIZE_T ", Clients=%" PRIuSIZE_T ", Mem=%" PRIuSIZE_T,
+				StatGet(SERV_STAT_ITEMS), StatGet(SERV_STAT_CHARS), iClients, StatGet(SERV_STAT_MEM));
 			break;
 	}
 

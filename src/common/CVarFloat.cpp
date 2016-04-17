@@ -633,7 +633,7 @@ realtype CVarFloat::GetSingle( lpctstr & pArgs )
 				case INTRINSIC_STRLEN:
 				{
 					iCount = 1;
-					dResult = strlen(pArgs);
+					dResult = (realtype)strlen(pArgs);
 				} break;
 
 				case INTRINSIC_ISOBSCENE:

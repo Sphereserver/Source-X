@@ -338,7 +338,7 @@ bailout1:
 	{
 		// Try to create the registry key containing the name of the EventMessageFile
 		//  Replace the name of the exe with the name of the dll in the szPath variable
-		if (RegSetValueEx(hKey, "EventMessageFile", 0, REG_EXPAND_SZ, (LPBYTE) szPath, strlen(szPath) + 1))
+		if (RegSetValueEx(hKey, "EventMessageFile", 0, REG_EXPAND_SZ, (LPBYTE) szPath, (DWORD)strlen(szPath) + 1))
 			ReportEvent(EVENTLOG_ERROR_TYPE, 0, "Install RegSetValueEx", GetLastErrorText(szErr, sizeof(szErr)));
 		else
 		{
@@ -361,7 +361,7 @@ bailout2:
 	}
 	ExtractPath(szPath);
 
-	if ( RegSetValueEx(hKey, "WorkingPath", 0, REG_SZ, (const unsigned char *) &szPath[0], strlen(szPath)) )
+	if ( RegSetValueEx(hKey, "WorkingPath", 0, REG_SZ, (const unsigned char *) &szPath[0], (DWORD)strlen(szPath)) )
 		ReportEvent(EVENTLOG_ERROR_TYPE, 0, "Install RegSetValueEx", GetLastErrorText(szErr, sizeof(szErr)));
 
 	ReportEvent(EVENTLOG_INFORMATION_TYPE, 0, "Install OK", g_Serv.GetName());

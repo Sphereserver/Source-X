@@ -475,7 +475,7 @@ bool CClient::OnRxAxis( const byte * pData, size_t iLen )
 									break;
 								packet.setData((byte*)szTmp, iLength);
 								packet.send(this);
-								dwSize -= iLength;
+								dwSize -= (dword)iLength;
 								if ( dwSize <= 0 )
 									break;
 							}

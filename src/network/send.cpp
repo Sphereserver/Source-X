@@ -2657,7 +2657,7 @@ PacketDisplayBook::PacketDisplayBook(const CClient* target, CItem* book) : Packe
 		if (message != NULL)
 		{
 			isWritable = message->IsBookWritable();
-			pages = isWritable? MAX_BOOK_PAGES : message->GetPageCount();
+			pages = isWritable ? MAX_BOOK_PAGES : (int)message->GetPageCount();
 			title = message->GetName();
 			author = message->m_sAuthor.IsEmpty()? g_Cfg.GetDefaultMsg(DEFMSG_BOOK_AUTHOR_UNKNOWN) : static_cast<lpctstr>(message->m_sAuthor);
 		}
@@ -3046,9 +3046,9 @@ void PacketServerList::writeServerEntry(const CServerRef& server, int index, boo
 
 	int percentFull;
 	if (server == &g_Serv)
-		percentFull = maximum(0, minimum((server->StatGet(SERV_STAT_CLIENTS) * 100) / maximum(1, g_Cfg.m_iClientsMax), 100));
+		percentFull = (int)maximum(0, minimum((server->StatGet(SERV_STAT_CLIENTS) * 100) / maximum(1, g_Cfg.m_iClientsMax), 100));
 	else
-		percentFull = minimum(server->StatGet(SERV_STAT_CLIENTS), 100);
+		percentFull = (int)minimum(server->StatGet(SERV_STAT_CLIENTS), 100);
 
 	dword ip = server->m_ip.GetAddrIP();
 
@@ -3334,7 +3334,7 @@ void PacketGumpDialog::writeCompressedControls(const CString* controls, size_t c
 		// compress and write controls
 		int controlLength = 1;
 		for (size_t i = 0; i < controlCount; i++)
-			controlLength += controls[i].GetLength() + 2;
+			controlLength += (int)controls[i].GetLength() + 2;
 
 		char* toCompress = new char[controlLength];
 
@@ -3394,9 +3394,9 @@ void PacketGumpDialog::writeCompressedControls(const CString* controls, size_t c
 		}
 
 		seek(textsPosition);
-		writeInt32(textCount);
+		writeInt32((dword)textCount);
 		writeInt32(compressLength + 4);
-		writeInt32(textsLength);
+		writeInt32((dword)textsLength);
 		writeData(compressBuffer, compressLength);
 
 		delete[] compressBuffer;
@@ -3934,12 +3934,12 @@ PacketEnableMapDiffs::PacketEnableMapDiffs(const CClient* target) : PacketExtend
 		if (g_Cfg.m_fUseMapDiffs && g_MapList.m_maps[map])
 		{
 			if (g_Install.m_Mapdifl[map].IsFileOpen())
-				writeInt32(g_Install.m_Mapdifl[map].GetLength() / 4);
+				writeInt32((dword)g_Install.m_Mapdifl[map].GetLength() / 4);
 			else
 				writeInt32(0);
 
 			if (g_Install.m_Stadifl[map].IsFileOpen())
-				writeInt32(g_Install.m_Stadifl[map].GetLength() / 4);
+				writeInt32((dword)g_Install.m_Stadifl[map].GetLength() / 4);
 			else
 				writeInt32(0);
 		}
@@ -4303,7 +4303,7 @@ PacketDisplayBookNew::PacketDisplayBookNew(const CClient* target, CItem* book) :
 		if (message != NULL)
 		{
 			isWritable = message->IsBookWritable();
-			pages = isWritable? MAX_BOOK_PAGES : message->GetPageCount();
+			pages = isWritable ? MAX_BOOK_PAGES : (int)message->GetPageCount();
 			title = message->GetName();
 			author = message->m_sAuthor.IsEmpty()? g_Cfg.GetDefaultMsg(DEFMSG_BOOK_AUTHOR_UNKNOWN) : static_cast<lpctstr>(message->m_sAuthor);
 		}
@@ -4338,7 +4338,7 @@ PacketPropertyList::PacketPropertyList(const CObjBase* object, dword version, co
 	m_time = g_World.GetCurrentTime().GetTimeRaw();
 	m_object = object->GetUID();
 	m_version = version;
-	m_entryCount = data->GetCount();
+	m_entryCount = (int)data->GetCount();
 
 	initLength();
 	writeInt16(1);

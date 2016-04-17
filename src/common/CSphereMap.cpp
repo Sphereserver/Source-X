@@ -741,12 +741,12 @@ void CMapDiffCollection::LoadMapDiffs()
 				pFileMapdif->SeekToBegin();
 				pFileMapdifl->SeekToBegin();
 
-				dwLength = pFileMapdifl->GetLength();
+				dwLength = (dword)pFileMapdifl->GetLength();
 				dwRead = dwOffset = 0;
 
 				for ( ; dwRead < dwLength; dwOffset += sizeof(CUOMapBlock) )
 				{
-					dwRead += pFileMapdifl->Read( &dwBlockId, sizeof(dwBlockId) );
+					dwRead += (dword)pFileMapdifl->Read( &dwBlockId, sizeof(dwBlockId) );
 					pMapDiffBlock = GetNewBlock( dwBlockId, map );
 
 					if ( pMapDiffBlock->m_pTerrainBlock )
@@ -786,12 +786,12 @@ void CMapDiffCollection::LoadMapDiffs()
 			pFileStadifl->SeekToBegin();
 			pFileStadifi->SeekToBegin();
 
-			dwLength = pFileStadifl->GetLength();
+			dwLength = (dword)pFileStadifl->GetLength();
 			dwRead = dwOffset = 0;
 	
 			for ( ; dwRead < dwLength; dwOffset += sizeof(CUOIndexRec) )
 			{
-				dwRead += pFileStadifl->Read( &dwBlockId, sizeof(dwBlockId) );
+				dwRead += (dword)pFileStadifl->Read( &dwBlockId, sizeof(dwBlockId) );
 				
 				pMapDiffBlock = GetNewBlock( dwBlockId, map );
 				if ( pMapDiffBlock->m_pStaticsBlock )

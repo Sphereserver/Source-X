@@ -11,13 +11,13 @@
 
 void CScriptLineContext::Init()
 {
-	m_pOffset = -1;
+	m_pOffset = (size_t)-1;
 	m_iLineNum = -1;
 }
 
 bool CScriptLineContext::IsValid() const
 {
-	return( m_pOffset >= 0 );
+	return ( m_pOffset >= 0 );
 }
 
 CScriptLineContext::CScriptLineContext()
@@ -383,7 +383,7 @@ void CScript::InitBase()
 	ADDTOCALLSTACK("CScript::InitBase");
 	m_iLineNum		= 0;
 	m_fSectionHead	= false;
-	m_lSectionData	= 0;
+	m_pSectionData	= 0;
 	InitKey();
 }
 
@@ -479,18 +479,16 @@ bool CScript::FindTextHeader( lpctstr pszName ) // Find a section in the current
 	return true;
 }
 
-size_t CScript::Seek( size_t offset, size_t origin )
+size_t CScript::Seek( size_t offset, int iOrigin )
 {
 	ADDTOCALLSTACK("CScript::Seek");
 	// Go to the start of a new section.
 	// RETURN: the new offset in bytes from start of file.
-	if ( offset == 0 && origin == SEEK_SET )
-	{
+	if ( offset == 0 && iOrigin == SEEK_SET )
 		m_iLineNum = 0;	// so we don't have to override SeekToBegin
-	}
 	m_fSectionHead = false;		// unknown , so start at the beginning.
-	m_lSectionData = offset;
-	return( PhysicalScriptFile::Seek(offset,origin) );
+	m_pSectionData = offset;
+	return ( PhysicalScriptFile::Seek(offset,iOrigin) );
 }
 
 bool CScript::FindNextSection()
@@ -513,7 +511,7 @@ bool CScript::FindNextSection()
 	{
 		if ( !ReadTextLine(true) )
 		{
-			m_lSectionData = GetPosition();
+			m_pSectionData = GetPosition();
 			return false;
 		}
 		if ( m_pszKey[0] == '[' )
@@ -533,7 +531,7 @@ foundit:
 		}
 	}
 
-	m_lSectionData = GetPosition();
+	m_pSectionData = GetPosition();
 	if ( IsSectionType( "EOF" ))
 		return false;
 
@@ -561,7 +559,7 @@ bool CScript::FindSection( lpctstr pszName, uint uModeFlags )
 	if ( FindTextHeader(pszSec) )
 	{
 		// Success
-		m_lSectionData = GetPosition();
+		m_pSectionData = GetPosition();
 		return true;
 	}
 
@@ -678,7 +676,7 @@ bool CScript::FindKey( lpctstr pszName ) // Find a key in the current section
 		DEBUG_ERR(( "Bad script key name\n" ));
 		return false;
 	}
-	Seek( m_lSectionData );
+	Seek( m_pSectionData );
 	while ( ReadKeyParse() )
 	{
 		if ( IsKey( pszName ) )

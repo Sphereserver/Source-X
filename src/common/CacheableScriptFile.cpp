@@ -154,3 +154,32 @@ bool CacheableScriptFile::useDefaultFile() const
 
 	return false;
 }
+
+size_t CacheableScriptFile::Seek(size_t offset, int origin)
+{
+	//ADDTOCALLSTACK("CacheableScriptFile::Seek");
+	if (useDefaultFile())
+		return CFileText::Seek(offset, origin);
+
+	size_t linenum = offset;
+
+	if (origin != SEEK_SET)
+		linenum = 0;	//	do not support not SEEK_SET rotation
+
+	if (linenum <= m_fileContent->size())
+	{
+		m_currentLine = linenum;
+		return linenum;
+	}
+
+	return 0;
+}
+
+size_t CacheableScriptFile::GetPosition() const
+{
+	//ADDTOCALLSTACK("CacheableScriptFile::GetPosition");
+	if (useDefaultFile())
+		return CFileText::GetPosition();
+
+	return m_currentLine;
+}

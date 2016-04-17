@@ -23,7 +23,7 @@
 	#define M_PI 3.14159265358979323846
 #endif
 
-#define EXPRESSION_MAX_KEY_LEN SCRIPT_MAX_SECTION_LEN
+#define EXPRESSION_MAX_KEY_LEN	SCRIPT_MAX_SECTION_LEN
 
 
 enum DEFMSG_TYPE
@@ -152,6 +152,10 @@ bool IsStrEmpty( lpctstr pszTest );
 inline extern bool IsCharNumeric( char & Test );
 
 // Numeric formulas
+template<typename T> inline const T SphereAbs(T const & x)
+{	// TODO: we can do some specialization
+	return (x<0) ? -x : x;
+}
 int64 Calc_GetRandLLVal( int64 iqty );
 int64 Calc_GetRandLLVal2( int64 iMin, int64 iMax );
 int32 Calc_GetRandVal( int32 iQty );
@@ -160,8 +164,8 @@ int Calc_GetLog2( uint iVal );
 int Calc_GetSCurve( int iValDiff, int iVariance );
 int Calc_GetBellCurve( int iValDiff, int iVariance );
 
-dword ahextoi( lpctstr pArgs ); // Convert hex string to integer
-int64 ahextoi64( lpctstr pArgs ); // Convert hex string to int64
+dword ahextoi( lpctstr pArgs );		// Convert hex string to integer
+int64 ahextoi64( lpctstr pArgs );	// Convert hex string to int64
 
 #define Exp_GetSingle( pa )		(int)	g_Exp.GetSingle( pa )
 #define Exp_GetLLSingle( pa )			g_Exp.GetSingle( pa )

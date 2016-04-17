@@ -194,7 +194,7 @@ int CvtSystemToNUNICODE( NCHAR * pOut, int iSizeOutChars, lpctstr pInp, int iSiz
 
 	if ( iSizeInBytes <= -1 )
 	{
-		iSizeInBytes = strlen(pInp);
+		iSizeInBytes = (int)strlen(pInp);
 	}
 	if ( iSizeInBytes <= 0 )
 	{
@@ -212,12 +212,12 @@ int CvtSystemToNUNICODE( NCHAR * pOut, int iSizeOutChars, lpctstr pInp, int iSiz
 		posInfo->dwMajorVersion > 4 )
 	{
 		int iOutTmp = MultiByteToWideChar(
-			CP_UTF8,         // code page
-			0,         // character-type options
-			pInp, // address of string to map
-			iSizeInBytes,      // number of bytes in string
+			CP_UTF8,			// code page
+			0,					// character-type options
+			pInp,				// address of string to map
+			iSizeInBytes,		// number of bytes in string
 			reinterpret_cast<lpwstr>(pOut),  // address of wide-character buffer
-			iSizeOutChars        // size of buffer
+			iSizeOutChars		// size of buffer
 			);
 		if ( iOutTmp <= 0 )
 		{
@@ -272,7 +272,7 @@ int CvtSystemToNUNICODE( NCHAR * pOut, int iSizeOutChars, lpctstr pInp, int iSiz
 	}
 
 	pOut[iOut] = 0;
-	return( iOut );
+	return iOut;
 }
 
 int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const NCHAR * pInp, int iSizeInChars )

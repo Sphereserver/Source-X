@@ -404,7 +404,8 @@ llong CExpression::GetSingle( lpctstr & pszArgs )
 	GETNONWHITESPACE( pszArgs );
 
 	lpctstr orig = pszArgs;
-	if (pszArgs[0]=='.') pszArgs++;
+	if (pszArgs[0]=='.')
+		pszArgs++;
 
 	if ( pszArgs[0] == '0' )	// leading '0' = hex value.
 	{
@@ -522,7 +523,7 @@ try_dec:
 						if ( pszArgs && *pszArgs )
 						{
 							iCount = 1;
-							iResult = RES_GET_INDEX( GetVal( pszArgs )); // RES_GET_INDEX
+							iResult = RES_GET_INDEX( GetVal(pszArgs) ); // RES_GET_INDEX
 						}
 						else
 						{

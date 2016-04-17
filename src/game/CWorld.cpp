@@ -1005,8 +1005,8 @@ void CWorldThread::GarbageCollection_UIDs()
 
 	GarbageCollection_New();
 
-	size_t iCount = 0;
-	for ( size_t i = 1; i < GetUIDCount(); i++ )
+	dword iCount = 0;
+	for (dword i = 1; i < GetUIDCount(); i++ )
 	{
 		try
 		{
@@ -1284,7 +1284,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		// Sector lighting info.
 		if(IsSetEF(EF_Dynamic_Backsave))
 		{
-			uint szComplexity = 0;
+			size_t szComplexity = 0;
 
 			CSector *s = m_Sectors[m_iSaveStage];
 			if( s )

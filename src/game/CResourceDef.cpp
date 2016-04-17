@@ -126,18 +126,18 @@ int CValueCurveDef::GetLinear( int iSkillPercent ) const
 		if ( iLoIdx >= iQty )
 			iLoIdx = iQty - 1;
 		iSegSize = 1000 / iQty;
-		iSkillPercent -= ( iLoIdx * iSegSize );
+		iSkillPercent -= (int)( iLoIdx * iSegSize );
 		break;
 	}
 
 	int iLoVal = m_aiValues[iLoIdx];
 	int iHiVal = m_aiValues[iLoIdx + 1];
-	int iChance = iLoVal + MulDivLL( iHiVal - iLoVal, (int)(iSkillPercent), (int)(iSegSize) );
+	int iChance = iLoVal + (int)MulDivLL( iHiVal - iLoVal, iSkillPercent, iSegSize );
 
 	if ( iChance <= 0 )
 		return 0; // less than no chance ?
 
-	return( iChance );
+	return iChance;
 }
 
 int CValueCurveDef::GetRandom( ) const

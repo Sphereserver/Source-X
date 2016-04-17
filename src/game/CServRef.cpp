@@ -45,7 +45,7 @@ CServerDef::CServerDef( lpctstr pszName, CSocketAddressIP dwIP ) :
 	m_ip( dwIP, SPHERE_DEF_PORT )	// SOCKET_LOCAL_ADDRESS
 {
 	// Statistics.
-	memset( m_dwStat, 0, sizeof( m_dwStat ) );	// THIS MUST BE FIRST !
+	memset( m_stStat, 0, sizeof( m_stStat ) );	// THIS MUST BE FIRST !
 
 	SetName( pszName );
 	m_timeLastValid.Init();
@@ -56,11 +56,11 @@ CServerDef::CServerDef( lpctstr pszName, CSocketAddressIP dwIP ) :
 	m_eAccApp = ACCAPP_Unspecified;
 }
 
-dword CServerDef::StatGet(SERV_STAT_TYPE i) const
+size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 {
 	ADDTOCALLSTACK("CServerDef::StatGet");
 	ASSERT( i >= 0 && i <= SERV_STAT_QTY );
-	dword	d = m_dwStat[i];
+	size_t	d = m_stStat[i];
 	EXC_TRY("StatGet");
 	if ( i == SERV_STAT_MEM )	// memory information
 	{
@@ -423,19 +423,19 @@ bool CServerDef::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc 
 		sVal.FormatVal( m_ip.GetPort() );
 		break;
 	case SC_ACCOUNTS:
-		sVal.FormatVal( StatGet( SERV_STAT_ACCOUNTS ) );
+		sVal.FormatSTVal( StatGet( SERV_STAT_ACCOUNTS ) );
 		break;
 	case SC_CLIENTS:
-		sVal.FormatVal( StatGet( SERV_STAT_CLIENTS ) );
+		sVal.FormatSTVal( StatGet( SERV_STAT_CLIENTS ) );
 		break;
 	case SC_ITEMS:
-		sVal.FormatVal( StatGet( SERV_STAT_ITEMS ) );
+		sVal.FormatSTVal( StatGet( SERV_STAT_ITEMS ) );
 		break;
 	case SC_MEM:
-		sVal.FormatVal( StatGet( SERV_STAT_MEM ) );
+		sVal.FormatSTVal( StatGet( SERV_STAT_MEM ) );
 		break;
 	case SC_CHARS:
-		sVal.FormatVal( StatGet( SERV_STAT_CHARS ) );
+		sVal.FormatSTVal( StatGet( SERV_STAT_CHARS ) );
 		break;
 	case SC_TIMEZONE:
 		sVal.FormatVal( m_TimeZone );

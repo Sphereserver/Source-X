@@ -728,7 +728,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 			{
 				// Check if the item dropped in the bank is a container. If it is
 				// we need to calculate the number of items in that too.
-				int iItemsInContainer = 0;
+				size_t iItemsInContainer = 0;
 				const CItemContainer *pContItem = dynamic_cast<const CItemContainer *>(pItem);
 				if ( pContItem )
 					iItemsInContainer = pContItem->ContentCountAll();

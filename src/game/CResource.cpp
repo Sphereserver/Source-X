@@ -3363,7 +3363,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 	}
 
 
-	int index;
+	dword index;
 	if ( pszName )
 	{
 		if ( pszName[0] == '\0' )	// absense of resourceid = index 0
@@ -3560,7 +3560,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 		index = SPAWNTYPE_START + 100000;
 		break;
 	case RES_WEBPAGE:		// Define a web page template.
-		index = m_WebPages.GetCount() + 1;
+		index = (dword)m_WebPages.GetCount() + 1;
 		break;
 
 	default:

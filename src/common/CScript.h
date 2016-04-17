@@ -124,7 +124,7 @@ class CScript : public PhysicalScriptFile, public CScriptKeyAlloc
 {
 private:
 	bool m_fSectionHead;	// File Offset to current section header. [HEADER]
-	int  m_lSectionData;	// File Offset to current section data, under section header.
+	size_t  m_pSectionData;	// File Offset to current section data, under section header.
 
 public:
 	static const char *m_sClassName;
@@ -132,7 +132,7 @@ public:
 protected:
 	void InitBase();
 
-	virtual size_t Seek( size_t offset = 0, size_t origin = SEEK_SET );
+	virtual size_t Seek( size_t offset = 0, int iOrigin = SEEK_SET );
 
 public:
 	// text only functions:

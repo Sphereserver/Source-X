@@ -133,13 +133,13 @@ void Packet::seek(size_t pos)
 	m_position = pos;
 }
 
-void Packet::skip(size_t count)
+void Packet::skip(ssize_t count)
 {
 	// ensure we can't go lower than 0
-	if (count < 0 && (size_t)(labs(count)) > m_position)
+	if (count < 0 && (size_t)SphereAbs(count) > m_position)
 		m_position = 0;
 	else
-		m_position += count;
+		m_position += (size_t)count;
 }
 
 byte &Packet::operator[](size_t index)

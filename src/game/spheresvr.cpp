@@ -568,10 +568,10 @@ void defragSphere(char *path)
 	size_t i;
 	dword uid(0);
 	char *p(NULL), *p1(NULL);
-	dword dBytesRead;
-	dword dTotalMb;
-	dword mb10(10*1024*1024);
-	dword mb5(5*1024*1024);
+	size_t dBytesRead;
+	size_t dTotalMb;
+	size_t mb10(10*1024*1024);
+	size_t mb5(5*1024*1024);
 	bool bSpecial;
 	dword dTotalUIDs;
 
@@ -659,7 +659,7 @@ void defragSphere(char *path)
 		dBytesRead = dTotalMb = 0;
 		while ( inf.ReadString(buf, sizeof(buf)) )
 		{
-			uid = strlen(buf);
+			uid = (dword)strlen(buf);
 			if (uid > (CountOf(buf) - 3))
 				uid = CountOf(buf) - 3;
 
