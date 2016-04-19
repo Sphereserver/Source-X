@@ -205,9 +205,9 @@ dword CScriptKey::GetArgDWVal()
 }
 
 
-llong CScriptKey::GetArgLLRange()
+int64 CScriptKey::GetArgLLRange()
 {
-	ADDTOCALLSTACK("CScriptKey::GetArgRange");
+	ADDTOCALLSTACK("CScriptKey::GetArgLLRange");
 	ASSERT(m_pszKey);
 	ASSERT(m_pszArg);
 	return Exp_GetLLRange(m_pszArg);

@@ -394,10 +394,7 @@ SOURCE_GROUP (tables FILES ${tables_SRCS})
 
 # Misc doc and *.ini files
 SET (docs_TEXT
-#../docs/REVISIONS-51-54-SERIES.TXT
-#../docs/REVISIONS-55-SERIES.TXT
-#../docs/REVISIONS-56-Pre_release.TXT
-../docs/REVISIONS-56-SERIES.TXT
+../REVISIONS-56d-CURRENT-changelog.txt
 sphere.ini
 sphereCrypt.ini
 )

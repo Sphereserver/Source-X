@@ -1,33 +1,27 @@
-TARGET_COMPILE_DEFINITIONS ( spheresvr
-	# Extra defs
-        PUBLIC _MTNETWORK
-	# GIT defs
-        PUBLIC _GITVERSION
-	# Defines
-        PUBLIC _CONSOLE
-        PUBLIC _LINUX
-        PUBLIC _REENTRANT
-)
+# Define macro declarations
 
-#TARGET_COMPILE_DEFINITIONS ( spheresvrNightly
-#	# Nighly defs
-#	PUBLIC _NIGHTLYBUILD
-#	PUBLIC THREAD_TRACK_CALLSTACK
-#	# Debug defs
-#       PUBLIC _DEBUG
-#       PUBLIC _EXCEPTIONS_DEBUG
-#       PUBLIC _PACKETDUMP
-#       PUBLIC _TESTEXCEPTION
-#       PUBLIC DEBUG_CRYPT_MSGS
-#	# Extra defs
-#       PUBLIC _MTNETWORK
-#	# GIT defs
-#       PUBLIC _GITVERSION
-#	# Defines
-#       PUBLIC _CONSOLE
-#       PUBLIC _LINUX
-#       PUBLIC _REENTRANT
-# )
+TARGET_COMPILE_DEFINITIONS ( spheresvr
+
+	PUBLIC	_MTNETWORK
+# GIT defs
+	PUBLIC	_GITVERSION
+# Enable advanced exceptions catching. Consumes some more resources, but is very useful for debug
+#  on a running environment. Also it makes sphere more stable since exceptions are local.
+	PUBLIC	_EXCEPTIONS_DEBUG
+# Others
+	PUBLIC	_LINUX
+	PUBLIC	_CONSOLE
+	PUBLIC	_REENTRANT
+
+	PUBLIC $<$<OR:$<CONFIG:Release>,$<CONFIG:Nightly>>:	THREAD_TRACK_CALLSTACK>
+
+	PUBLIC $<$<CONFIG:Debug>:	_DEBUG>
+	PUBLIC $<$<CONFIG:Debug>:	_PACKETDUMP>
+	PUBLIC $<$<CONFIG:Debug>:	_TESTEXCEPTION>
+	PUBLIC $<$<CONFIG:Debug>:	DEBUG_CRYPT_MSGS>
+
+	PUBLIC $<$<CONFIG:Nightly>:	_NIGHTLYBUILD>
+)
 
 # Linux libs.
 TARGET_LINK_LIBRARIES ( spheresvr
@@ -36,9 +30,3 @@ TARGET_LINK_LIBRARIES ( spheresvr
         rt
         dl
 )
-#TARGET_LINK_LIBRARIES ( spheresvrNightly
-#       pthread
-#       mysqlclient
-#       rt
-#       dl
-#)

@@ -10,14 +10,6 @@
 #include <list>
 
 
-// keep track of callstack on windows release builds
-// (linux does this via makefile)
-#ifdef _WIN32
-#	ifndef _DEBUG
-#		define THREAD_TRACK_CALLSTACK
-#	endif
-#endif
-
 /**
  * Sphere threading system
  * Threads should be inherited from AbstractThread with overridden tick() method

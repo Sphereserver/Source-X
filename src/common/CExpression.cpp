@@ -1134,17 +1134,11 @@ int64 CExpression::GetRange(lpctstr & pExpr)
 	int iQty = GetRangeVals( pExpr, lVals, CountOf(lVals));
 
 	if (iQty == 0)
-	{
 		return 0;
-	}
 	if (iQty == 1) // It's just a simple value
-	{
 		return lVals[0];
-	}
 	if (iQty == 2) // It's just a simple range....pick one in range at random
-	{
 		return Calc_GetRandLLVal2( minimum(lVals[0],lVals[1]), maximum(lVals[0],lVals[1]) );
-	}
 
 	// I guess it's weighted values
 	// First get the total of the weights
