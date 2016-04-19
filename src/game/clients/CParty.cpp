@@ -783,7 +783,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 			CUID toSysmessage;
 			lpctstr pszArg = s.GetArgStr();
 			tchar *pUid = Str_GetTemp();
-			size_t x = 0;
+			int x = 0;
 
 			if ( *pszArg == '@' )
 			{
@@ -798,7 +798,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 					}
 					strcpylen(pUid, __pszArg, ++x);
 
-					size_t nMember = Exp_GetVal(pUid);
+					int nMember = Exp_GetVal(pUid);
 					if ( !m_Chars.IsValidIndex(nMember) )
 						return false;
 

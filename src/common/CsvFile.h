@@ -22,8 +22,8 @@ class CSVFile : public CacheableScriptFile
 private:
 	tchar * m_pszColumnTypes[MAX_COLUMNS];
 	tchar * m_pszColumnNames[MAX_COLUMNS];
-	size_t m_iColumnCount;
-	size_t m_iCurrentRow;
+	int m_iColumnCount;
+	int m_iCurrentRow;
 
 private:
 	virtual bool OpenBase(void *pExtra);
@@ -37,14 +37,14 @@ private:
 	CSVFile& operator=(const CSVFile& other);
 
 public:
-	size_t GetColumnCount() const { return m_iColumnCount; }
-	size_t GetCurrentRow() const { return m_iCurrentRow; }
+	int GetColumnCount() const { return m_iColumnCount; }
+	int GetCurrentRow() const { return m_iCurrentRow; }
 
 public:
-	size_t ReadRowContent(tchar ** ppOutput, size_t row, size_t columns = MAX_COLUMNS);
-	bool ReadRowContent(size_t row, CSVRowData& target);
+	int ReadRowContent(tchar ** ppOutput, int row, int columns = MAX_COLUMNS);
+	bool ReadRowContent(int row, CSVRowData& target);
 
-	size_t ReadNextRowContent(tchar ** ppOutput);
+	int ReadNextRowContent(tchar ** ppOutput);
 	bool ReadNextRowContent(CSVRowData& target);
 };
 

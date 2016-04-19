@@ -1316,7 +1316,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 			if ( *pszKey )
 			{
 				tchar * pszArg = Str_GetTemp();
-				strcpylen( pszArg, pszKey, strlen( pszKey ) + 1 );
+				strcpylen( pszArg, pszKey, (int)strlen( pszKey ) + 1 );
 
 				CUID uid = Exp_GetVal( pszKey );
 				pItem = dynamic_cast<CItem*> (uid.ObjFind());
@@ -1356,7 +1356,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 			if ( *pszKey )
 			{
 				tchar * pszArg = Str_GetTemp();
-				strcpylen( pszArg, pszKey, strlen( pszKey ) + 1 );
+				strcpylen( pszArg, pszKey, (int)strlen( pszKey ) + 1 );
 
 				CUID uid = Exp_GetVal( pszKey );
 				pItem = dynamic_cast<CItem*> (uid.ObjFind());

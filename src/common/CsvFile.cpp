@@ -15,10 +15,10 @@ CSVFile::CSVFile()
 
 CSVFile::~CSVFile()
 {
-	for (size_t i = 0; m_pszColumnTypes[i] != NULL; i++)
+	for (int i = 0; m_pszColumnTypes[i] != NULL; i++)
 		delete[] m_pszColumnTypes[i];
 
-	for (size_t i = 0; m_pszColumnNames[i] != NULL; i++)
+	for (int i = 0; m_pszColumnNames[i] != NULL; i++)
 		delete[] m_pszColumnNames[i];
 }
 
@@ -63,7 +63,7 @@ bool CSVFile::OpenBase(void * pExtra)
 	}
 
 	// copy the names
-	for (size_t i = 0; i < m_iColumnCount; i++)
+	for (int i = 0; i < m_iColumnCount; i++)
 	{
 		m_pszColumnTypes[i] = new tchar[128];
 		strcpy(m_pszColumnTypes[i], ppColumnTypes[i]);
@@ -77,11 +77,11 @@ bool CSVFile::OpenBase(void * pExtra)
 	return true;
 }
 
-size_t CSVFile::ReadRowContent(tchar ** ppOutput, size_t rowIndex, size_t columns)
+int CSVFile::ReadRowContent(tchar ** ppOutput, int rowIndex, int columns)
 {
 	ADDTOCALLSTACK("CSVFile::ReadRowContent");
 	ASSERT(columns > 0 && columns <= MAX_COLUMNS);
-	if ( GetPosition() != rowIndex )
+	if ( (int)GetPosition() != rowIndex )
 		Seek(rowIndex, SEEK_SET);
 
 	tchar * pszLine = Str_GetTemp();
@@ -91,25 +91,25 @@ size_t CSVFile::ReadRowContent(tchar ** ppOutput, size_t rowIndex, size_t column
 	return Str_ParseCmds(pszLine, ppOutput, columns, "\t");
 }
 
-size_t CSVFile::ReadNextRowContent(tchar ** ppOutput)
+int CSVFile::ReadNextRowContent(tchar ** ppOutput)
 {
 	ADDTOCALLSTACK("CSVFile::ReadNextRowContent");
 	++m_iCurrentRow;
 	return ReadRowContent(ppOutput, m_iCurrentRow);
 }
 
-bool CSVFile::ReadRowContent(size_t rowIndex, CSVRowData& target)
+bool CSVFile::ReadRowContent(int rowIndex, CSVRowData& target)
 {
 	ADDTOCALLSTACK("CSVFile::ReadRowContent");
 	// get row data
 	tchar * ppRowContent[MAX_COLUMNS];
-	size_t columns = ReadRowContent(ppRowContent, rowIndex);
+	int columns = ReadRowContent(ppRowContent, rowIndex);
 	if ( columns != m_iColumnCount )
 		return false;
 
 	// copy to target
 	target.clear();
-	for (size_t i = 0; i < columns; i++)
+	for (int i = 0; i < columns; i++)
 		target[m_pszColumnNames[i]] = ppRowContent[i];
 
 	return ! target.empty();

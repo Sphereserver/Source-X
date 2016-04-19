@@ -1821,7 +1821,7 @@ lpctstr CResource::GetNotoTitle( int iLevel, bool bFemale ) const
 		
 		// copy string so that it can be null-terminated without modifying m_NotoTitles
 		tchar* pTitle = Str_GetTemp();
-		strcpylen(pTitle, m_NotoTitles[iLevel]->GetPtr(), m_NotoTitles[iLevel]->GetLength() - strlen(pFemaleTitle));
+		strcpylen(pTitle, m_NotoTitles[iLevel]->GetPtr(), (int)(m_NotoTitles[iLevel]->GetLength() - strlen(pFemaleTitle)));
 		return pTitle;
 	}
 }

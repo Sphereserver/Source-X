@@ -1264,7 +1264,7 @@ badcmd:
 
 		case SSC_StrRegexNew:
 			{
-				size_t iLenString = Exp_GetVal( pszKey );
+				int iLenString = Exp_GetVal( pszKey );
 				tchar * sToMatch = Str_GetTemp();
 				if ( iLenString > 0 )
 				{

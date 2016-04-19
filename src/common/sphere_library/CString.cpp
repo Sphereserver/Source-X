@@ -119,7 +119,7 @@ bool CString::IsValid() const
 	return (m_pchData[m_iLength] == '\0');
 }
 
-size_t CString::SetLength(size_t iNewLength)
+int CString::SetLength(int iNewLength)
 {
 	if (iNewLength >= m_iMaxLength)
 	{
@@ -134,7 +134,7 @@ size_t CString::SetLength(size_t iNewLength)
 		tchar	*pNewData = new tchar[m_iMaxLength + 1];
 		ASSERT(pNewData);
 
-		size_t iMinLength = minimum(iNewLength, m_iLength);
+		int iMinLength = minimum(iNewLength, m_iLength);
 		strncpy(pNewData, m_pchData, iMinLength);
 		pNewData[m_iLength] = 0;
 
@@ -147,7 +147,7 @@ size_t CString::SetLength(size_t iNewLength)
 	return m_iLength;
 }
 
-size_t CString::GetLength() const
+int CString::GetLength() const
 {
 	return m_iLength;
 }
@@ -181,7 +181,7 @@ void CString::SetAt(int nIndex, tchar ch)
 	ASSERT(nIndex < m_iLength);
 	m_pchData[nIndex] = ch;
 	if (!ch)
-		m_iLength = strlen(m_pchData);	// \0 inserted. line truncated
+		m_iLength = (int)strlen(m_pchData);	// \0 inserted. line truncated
 }
 
 // CString:: Modifiers
@@ -200,19 +200,19 @@ const CString& CString::operator+=(tchar ch)
 
 void CString::Add(tchar ch)
 {
-	size_t iLen = m_iLength;
+	int iLen = m_iLength;
 	SetLength(iLen + 1);
 	SetAt(iLen, ch);
 }
 
 void CString::Add(lpctstr pszStr)
 {
-	size_t iLenCat = strlen(pszStr);
+	int iLenCat = (int)strlen(pszStr);
 	if (iLenCat)
 	{
 		SetLength(iLenCat + m_iLength);
 		strcat(m_pchData, pszStr);
-		m_iLength = strlen(m_pchData);
+		m_iLength = (int)strlen(m_pchData);
 	}
 }
 
@@ -220,7 +220,7 @@ void CString::Copy(lpctstr pszStr)
 {
 	if ((pszStr != m_pchData) && pszStr)
 	{
-		SetLength(strlen(pszStr));
+		SetLength((int)strlen(pszStr));
 		strcpy(m_pchData, pszStr);
 	}
 }
@@ -349,45 +349,43 @@ lpctstr CString::GetPtr() const
 	return m_pchData;
 }
 
-ssize_t CString::indexOf(tchar c)
+int CString::indexOf(tchar c)
 {
 	return indexOf(c, 0);
 }
 
-ssize_t CString::indexOf(tchar c, size_t offset)
+int CString::indexOf(tchar c, int offset)
 {
 	if (offset < 0)
-		return -1;	//std::string::npos;
+		return -1;
 
-	size_t len = strlen(m_pchData);
+	int len = (int)strlen(m_pchData);
 	if (offset >= len)
 		return -1;
 
-	for (size_t i = offset; i<len; i++)
+	for (int i = offset; i<len; i++)
 	{
 		if (m_pchData[i] == c)
-		{
 			return i;
-		}
 	}
-	return (size_t)-1;
+	return -1;
 }
 
-ssize_t CString::indexOf(CString str)
+int CString::indexOf(CString str)
 {
 	return indexOf(str, 0);
 }
 
-ssize_t CString::indexOf(CString str, size_t offset)
+int CString::indexOf(CString str, int offset)
 {
 	if (offset < 0)
 		return -1;
 
-	size_t len = strlen(m_pchData);
+	int len = (int)strlen(m_pchData);
 	if (offset >= len)
 		return -1;
 
-	size_t slen = str.GetLength();
+	int slen = str.GetLength();
 	if (slen > len)
 		return -1;
 
@@ -395,16 +393,16 @@ ssize_t CString::indexOf(CString str, size_t offset)
 	strcpy(str_value, str.GetPtr());
 	tchar firstChar = str_value[0];
 
-	for (size_t i = offset; i < len; i++)
+	for (int i = offset; i < len; i++)
 	{
 		tchar c = m_pchData[i];
 		if (c == firstChar)
 		{
-			size_t rem = len - i;
+			int rem = len - i;
 			if (rem >= slen)
 			{
-				size_t j = i;
-				size_t k = 0;
+				int j = i;
+				int k = 0;
 				bool found = true;
 				while (k < slen)
 				{
@@ -425,63 +423,62 @@ ssize_t CString::indexOf(CString str, size_t offset)
 	}
 
 	delete[] str_value;
-	return (size_t)-1;
+	return -1;
 }
 
-ssize_t CString::lastIndexOf(tchar c)
+int CString::lastIndexOf(tchar c)
 {
 	return lastIndexOf(c, 0);
 }
 
-ssize_t CString::lastIndexOf(tchar c, size_t from)
+int CString::lastIndexOf(tchar c, int from)
 {
 	if (from < 0)
 		return -1;
 
-	size_t len = strlen(m_pchData);
+	int len = (int)strlen(m_pchData);
 	if (from > len)
 		return -1;
 
-	for (size_t i = (len - 1); i >= from; i--)
+	for (int i = (len - 1); i >= from; i--)
 	{
 		if (m_pchData[i] == c)
-		{
 			return i;
-		}
 	}
 	return -1;
 }
 
-ssize_t CString::lastIndexOf(CString str)
+int CString::lastIndexOf(CString str)
 {
 	return lastIndexOf(str, 0);
 }
 
-ssize_t CString::lastIndexOf(CString str, size_t from)
+int CString::lastIndexOf(CString str, int from)
 {
 	if (from < 0)
 		return -1;
 
-	size_t len = strlen(m_pchData);
+	int len = (int)strlen(m_pchData);
 	if (from >= len)
 		return -1;
-	size_t slen = str.GetLength();
+
+	int slen = str.GetLength();
 	if (slen > len)
 		return -1;
 
 	tchar * str_value = new tchar[slen + 1];
 	strcpy(str_value, str.GetPtr());
 	tchar firstChar = str_value[0];
-	for (size_t i = (len - 1); i >= from; i--)
+	for (int i = (len - 1); i >= from; i--)
 	{
 		tchar c = m_pchData[i];
 		if (c == firstChar)
 		{
-			size_t rem = i;
+			int rem = i;
 			if (rem >= slen)
 			{
-				size_t j = i;
-				size_t k = 0;
+				int j = i;
+				int k = 0;
 				bool found = true;
 				while (k < slen)
 				{
@@ -520,21 +517,21 @@ void CString::Init()
 
 // String utilities: Modifiers
 
-size_t strcpylen(tchar * pDst, lpctstr pSrc)
+int strcpylen(tchar * pDst, lpctstr pSrc)
 {
 	strcpy(pDst, pSrc);
-	return strlen(pDst);
+	return (int)strlen(pDst);
 }
 
 
-size_t strcpylen(tchar * pDst, lpctstr pSrc, size_t iMaxSize)
+int strcpylen(tchar * pDst, lpctstr pSrc, int iMaxSize)
 {
 	// it does NOT include the iMaxSize element! (just like memcpy)
 	// so iMaxSize=sizeof() is ok !
 	ASSERT(iMaxSize);
 	strncpy(pDst, pSrc, iMaxSize - 1);
 	pDst[iMaxSize - 1] = '\0';	// always terminate.
-	return strlen(pDst);
+	return (int)strlen(pDst);
 }
 
 lpctstr Str_GetArticleAndSpace(lpctstr pszWord)
@@ -548,7 +545,7 @@ lpctstr Str_GetArticleAndSpace(lpctstr pszWord)
 	{
 		static const tchar sm_Vowels[] = { 'A', 'E', 'I', 'O', 'U' };
 		tchar chName = static_cast<tchar>(toupper(pszWord[0]));
-		for (size_t x = 0; x < CountOf(sm_Vowels); x++)
+		for (int x = 0; x < CountOf(sm_Vowels); x++)
 		{
 			if (chName == sm_Vowels[x])
 				return "an ";
@@ -557,7 +554,7 @@ lpctstr Str_GetArticleAndSpace(lpctstr pszWord)
 	return "a ";
 }
 
-size_t Str_GetBare(tchar * pszOut, lpctstr pszInp, size_t iMaxOutSize, lpctstr pszStrip)
+int Str_GetBare(tchar * pszOut, lpctstr pszInp, int iMaxOutSize, lpctstr pszStrip)
 {
 	// That the client can deal with. Basic punctuation and alpha and numbers.
 	// RETURN: Output length.
@@ -567,8 +564,8 @@ size_t Str_GetBare(tchar * pszOut, lpctstr pszInp, size_t iMaxOutSize, lpctstr p
 
 	//GETNONWHITESPACE( pszInp );	// kill leading white space.
 
-	size_t j = 0;
-	for (size_t i = 0; ; i++)
+	int j = 0;
+	for (int i = 0; ; i++)
 	{
 		tchar ch = pszInp[i];
 		if (ch)
@@ -576,7 +573,7 @@ size_t Str_GetBare(tchar * pszOut, lpctstr pszInp, size_t iMaxOutSize, lpctstr p
 			if (ch < ' ' || ch >= 127)
 				continue;	// Special format chars.
 
-			size_t k = 0;
+			int k = 0;
 			while (pszStrip[k] && pszStrip[k] != ch)
 				k++;
 
@@ -640,7 +637,7 @@ void Str_MakeUnFiltered(tchar * pStrOut, lpctstr pStrIn, int iSizeMax)
 	}
 }
 
-size_t Str_TrimEndWhitespace(tchar * pStr, size_t len)
+int Str_TrimEndWhitespace(tchar * pStr, int len)
 {
 	while (len > 0)
 	{
@@ -659,7 +656,7 @@ tchar * Str_TrimWhitespace(tchar * pStr)
 {
 	// TODO: WARNING! Possible Memory Lake here!
 	GETNONWHITESPACE(pStr);
-	Str_TrimEndWhitespace(pStr, strlen(pStr));
+	Str_TrimEndWhitespace(pStr, (int)strlen(pStr));
 	return pStr;
 }
 
@@ -672,7 +669,7 @@ int FindTable(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemS
 	{
 		if (!strcmpi(*ppszTable, pszFind))
 			return i;
-		ppszTable = (lpctstr const *)(((const byte*)ppszTable) + iElemSize);
+		ppszTable = (lpctstr const *)((const byte*)ppszTable + iElemSize);
 	}
 	return -1;
 }
@@ -690,18 +687,14 @@ int FindTableSorted(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int 
 	while (iLow <= iHigh)
 	{
 		int i = (iHigh + iLow) / 2;
-		lpctstr pszName = *((lpctstr const *)(((const byte*)ppszTable) + (i*iElemSize)));
+		lpctstr pszName = *((lpctstr const *)((const byte*)ppszTable + (i*iElemSize)));
 		int iCompare = strcmpi(pszFind, pszName);
 		if (iCompare == 0)
 			return i;
 		if (iCompare > 0)
-		{
 			iLow = i + 1;
-		}
 		else
-		{
 			iHigh = i - 1;
-		}
 	}
 	return -1;
 }
@@ -709,7 +702,7 @@ int FindTableSorted(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int 
 static int Str_CmpHeadI(lpctstr pszFind, lpctstr pszTable)
 {
 	tchar ch0 = '_';
-	for (size_t i = 0; ; i++)
+	for (int i = 0; ; i++)
 	{
 		//	we should always use same case as in other places. since strcmpi lowers,
 		//	we should lower here as well. fucking shit!
@@ -717,14 +710,12 @@ static int Str_CmpHeadI(lpctstr pszFind, lpctstr pszTable)
 		tchar ch2 = static_cast<tchar>(tolower(pszTable[i]));
 		if (ch2 == 0)
 		{
-			if ((!isalnum(ch1)) && (ch1 != ch0))
+			if ( (!isalnum(ch1)) && (ch1 != ch0) )
 				return 0;
 			return(ch1 - ch2);
 		}
 		if (ch1 != ch2)
-		{
 			return (ch1 - ch2);
-		}
 	}
 }
 
@@ -753,18 +744,14 @@ int FindTableHeadSorted(lpctstr pszFind, lpctstr const * ppszTable, int iCount, 
 	while (iLow <= iHigh)
 	{
 		int i = (iHigh + iLow) / 2;
-		lpctstr pszName = *((lpctstr const *)(((const byte*)ppszTable) + (i*iElemSize)));
+		lpctstr pszName = *((lpctstr const *)((const byte*)ppszTable + (i*iElemSize)));
 		int iCompare = Str_CmpHeadI(pszFind, pszName);
 		if (iCompare == 0)
 			return i;
 		if (iCompare > 0)
-		{
 			iLow = i + 1;
-		}
 		else
-		{
 			iHigh = i - 1;
-		}
 	}
 	return -1;
 }
@@ -798,6 +785,7 @@ bool Str_CheckName(lpctstr pszIn)
 
 	return (*p != '\0');
 }
+
 int Str_IndexOf(tchar * pStr1, tchar * pStr2, int offset)
 {
 	if (offset < 0)
@@ -834,9 +822,7 @@ int Str_IndexOf(tchar * pStr1, tchar * pStr2, int offset)
 					j++; k++;
 				}
 				if (found)
-				{
 					return i;
-				}
 			}
 		}
 	}
@@ -1090,9 +1076,9 @@ bool Str_Parse(tchar * pLine, tchar ** ppLine2, lpctstr pszSep)
 	return true;
 }
 
-size_t Str_ParseCmds(tchar * pszCmdLine, tchar ** ppCmd, size_t iMax, lpctstr pszSep)
+int Str_ParseCmds(tchar * pszCmdLine, tchar ** ppCmd, int iMax, lpctstr pszSep)
 {
-	size_t iQty = 0;
+	int iQty = 0;
 	if (pszCmdLine != NULL && pszCmdLine[0] != '\0')
 	{
 		ppCmd[0] = pszCmdLine;
@@ -1103,19 +1089,19 @@ size_t Str_ParseCmds(tchar * pszCmdLine, tchar ** ppCmd, size_t iMax, lpctstr ps
 				break;
 		}
 	}
-	for (size_t j = iQty; j < iMax; j++)
+	for (int j = iQty; j < iMax; j++)
 		ppCmd[j] = NULL;	// terminate if possible.
 	return iQty;
 }
 
-size_t Str_ParseCmds(tchar * pszCmdLine, int64_t * piCmd, size_t iMax, lpctstr pszSep)
+int Str_ParseCmds(tchar * pszCmdLine, int64 * piCmd, int iMax, lpctstr pszSep)
 {
 	tchar * ppTmp[256];
 	if (iMax > CountOf(ppTmp))
 		iMax = CountOf(ppTmp);
 
-	size_t iQty = Str_ParseCmds(pszCmdLine, ppTmp, iMax, pszSep);
-	size_t i;
+	int iQty = Str_ParseCmds(pszCmdLine, ppTmp, iMax, pszSep);
+	int i;
 	for (i = 0; i < iQty; i++)
 	{
 		piCmd[i] = Exp_GetVal(ppTmp[i]);
@@ -1152,8 +1138,8 @@ int Str_RegExMatch(lpctstr pPattern, lpctstr pText, tchar * lastError)
 	}
 }
 
-void CharToMultiByteNonNull(byte * Dest, const char * Src, size_t MBytes) {
-	for (size_t idx = 0; idx != MBytes * 2; idx += 2) {
+void CharToMultiByteNonNull(byte * Dest, const char * Src, int MBytes) {
+	for (int idx = 0; idx != MBytes * 2; idx += 2) {
 		if (Src[idx / 2] == '\0')
 			break;
 		Dest[idx] = (byte)(Src[idx / 2]);

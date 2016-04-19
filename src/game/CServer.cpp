@@ -624,7 +624,7 @@ bool CServer::OnConsoleCmd( CString & sText, CTextConsole * pSrc )
 			}
 		case '*':	// throw custom exception
 			{
-				throw CSphereError(LOGL_CRIT, E_FAIL, "Test Exception");
+				throw CSphereError(LOGL_CRIT, (dword)E_FAIL, "Test Exception");
 			}
 #endif
 		default:

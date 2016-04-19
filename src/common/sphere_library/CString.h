@@ -90,12 +90,12 @@ public:
 	* @param iLen new length of the string.
 	* @return the new length of the CString.
 	*/
-	size_t SetLength(size_t iLen);
+	int SetLength(int iLen);
 	/**
 	* @brief Get the length of the CString.
 	* @return the length of the CString.
 	*/
-	size_t GetLength() const;
+	int GetLength() const;
 	///@}
 	/** @name Element access:
 	 */
@@ -311,53 +311,53 @@ public:
 	* @param c character to look for.
 	* @return position of the character in CString if any, -1 otherwise.
 	*/
-	ssize_t indexOf(tchar c);
+	int indexOf(tchar c);
 	/**
 	* @brief Look for the first occurence of c in CString from a position.
 	* @param c character to look for.
 	* @param offset position from start the search.
 	* @return position of the character in CString if any, -1 otherwise.
 	*/
-	ssize_t indexOf(tchar c, size_t offset);
+	int indexOf(tchar c, int offset);
 	/**
 	* @brief Look for the first occurence of a substring in CString.
 	* @param str substring to look for.
 	* @return position of the substring in CString if any, -1 otherwise.
 	*/
-	ssize_t indexOf(CString str);
+	int indexOf(CString str);
 	/**
 	* @brief Look for the first occurence of a substring in CString from a position.
 	* @param str substring to look for.
 	* @param offset position from start the search.
 	* @return position of the substring in CString if any, -1 otherwise.
 	*/
-	ssize_t indexOf(CString str, size_t offset);
+	int indexOf(CString str, int offset);
 	/**
 	* @brief Look for the last occurence of c in CString.
 	* @param c character to look for.
 	* @return position of the character in CString if any, -1 otherwise.
 	*/
-	ssize_t lastIndexOf(tchar c);
+	int lastIndexOf(tchar c);
 	/**
 	* @brief Look for the last occurence of c in CString from a position to the end.
 	* @param c character to look for.
 	* @param from position where stop the search.
 	* @return position of the character in CString if any, -1 otherwise.
 	*/
-	ssize_t lastIndexOf(tchar c, size_t from);
+	int lastIndexOf(tchar c, int from);
 	/**
 	* @brief Look for the last occurence of a substring in CString.
 	* @param str substring to look for.
 	* @return position of the substring in CString if any, -1 otherwise.
 	*/
-	ssize_t lastIndexOf(CString str);
+	int lastIndexOf(CString str);
 	/**
 	* @brief Look for the last occurence of a substring in CString from a position to the end.
 	* @param str substring to look for.
 	* @param from position where stop the search.
 	* @return position of the substring in CString if any, -1 otherwise.
 	*/
-	ssize_t lastIndexOf(CString str, size_t from);
+	int lastIndexOf(CString str, int from);
 	///@}
 
 private:
@@ -369,8 +369,8 @@ private:
 	void Init();
 
 	tchar	*m_pchData;		///< Data pointer.
-	size_t	m_iLength;		///< Length of string.
-	size_t	m_iMaxLength;	///< Size of memory allocated pointed by m_pchData.
+	int	m_iLength;		///< Length of string.
+	int	m_iMaxLength;	///< Size of memory allocated pointed by m_pchData.
 };
 
 /**
@@ -397,7 +397,7 @@ enum MATCH_TYPE
 * @param pSrc source data.
 * @return length of the string copied.
 */
-size_t strcpylen(tchar * pDst, lpctstr pSrc);
+int strcpylen(tchar * pDst, lpctstr pSrc);
 /**
 * @brief Wrapper to cstring strncpy, but returns the length of string copied.
 * @param pDst dest memory space.
@@ -405,7 +405,7 @@ size_t strcpylen(tchar * pDst, lpctstr pSrc);
 * @param iMaxSize max data to be coppied.
 * @return length of the string copied.
 */
-size_t strcpylen(tchar * pDst, lpctstr pSrc, size_t imaxlen);
+int strcpylen(tchar * pDst, lpctstr pSrc, int imaxlen);
 /**
 * @brief Give the article and space to a word. For example, for "boot" will return "a ".
 * @param pszWords word to add the article.
@@ -420,7 +420,7 @@ lpctstr Str_GetArticleAndSpace(lpctstr pszWords);
 * @param pszStrip characters to strip (default "{|}~", non printable characters for client).
 * @return size of the filtered string.
 */
-size_t Str_GetBare(tchar * pszOut, lpctstr pszInp, size_t iMaxSize, lpctstr pszStrip = NULL);
+int Str_GetBare(tchar * pszOut, lpctstr pszInp, int iMaxSize, lpctstr pszStrip = NULL);
 /**
 * @brief replace string representation of special characters by special characters.
 *
@@ -454,7 +454,7 @@ void Str_MakeUnFiltered(tchar * pStrOut, lpctstr pStrIn, int iSizeMax);
 * @param len length of the string.
 * @return new lenght of the string.
 */
-size_t Str_TrimEndWhitespace(tchar * pStr, size_t len);
+int Str_TrimEndWhitespace(tchar * pStr, int len);
 /**
 * @brief Removes heading and trailing white spaces of a string.
 * @param pStr string where remove the white spaces.
@@ -545,7 +545,7 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg = NULL, lpctstr pSep = NULL);
 * @param pSep the list of separators (by default "=, \t").
 * @return count of arguments parsed.
 */
-size_t Str_ParseCmds(tchar * pCmdLine, tchar ** ppCmd, size_t iMax, lpctstr pSep = NULL);
+int Str_ParseCmds(tchar * pCmdLine, tchar ** ppCmd, int iMax, lpctstr pSep = NULL);
 /**
 * @brief Parse a list of arguments (integer version).
 * @param pCmdLine list of arguments to parse.
@@ -554,7 +554,7 @@ size_t Str_ParseCmds(tchar * pCmdLine, tchar ** ppCmd, size_t iMax, lpctstr pSep
 * @param pSep the list of separators (by default "=, \t").
 * @return count of arguments parsed.
 */
-size_t Str_ParseCmds(tchar * pCmdLine, int64_t * piCmd, size_t iMax, lpctstr pSep = NULL);
+int Str_ParseCmds(tchar * pCmdLine, int64 * piCmd, int iMax, lpctstr pSep = NULL);
 /**
 * @brief check if a string matches a regex.
 * @param pPattern regex to match.

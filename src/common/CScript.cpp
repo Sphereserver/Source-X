@@ -300,9 +300,7 @@ bool CScriptKeyAlloc::ParseKey( lpctstr pszKey, lpctstr pszVal )
 
 	size_t lenval = 0;
 	if ( pszVal )
-	{
 		lenval = strlen( pszVal );
-	}
 
 	m_pszKey = GetKeyBufferRaw( lenkey + lenval + 1 );
 
@@ -313,7 +311,7 @@ bool CScriptKeyAlloc::ParseKey( lpctstr pszKey, lpctstr pszVal )
 	{
 		m_pszArg ++;
 		lenval = m_Mem.GetDataLength() - 2;
-		strcpylen( m_pszArg, pszVal, ( lenval - lenkey ) + 1 );	// strcpylen
+		strcpylen( m_pszArg, pszVal, (int)( lenval - lenkey ) + 1 );	// strcpylen
 	}
 
 	return true;
@@ -327,7 +325,7 @@ size_t CScriptKeyAlloc::ParseKeyEnd()
 
 	ASSERT(m_pszKey);
 
-	size_t len = 0;
+	int len = 0;
 	for ( ; len < SCRIPT_MAX_LINE_LEN; len++ )
 	{
 		tchar ch = m_pszKey[len];
@@ -346,7 +344,7 @@ size_t CScriptKeyAlloc::ParseKeyEnd()
 		return 0;
 
 	m_pszKey[len] = '\0';
-	return( len );
+	return len;
 }
 
 void CScriptKeyAlloc::ParseKeyLate()

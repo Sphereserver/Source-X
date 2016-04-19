@@ -115,7 +115,7 @@ void CVerDataMul::Load( CGFile & file )
 		if ( dwIndex1 > dwIndex2 )
 		{
 			DEBUG_ERR(( "VerData Array is NOT sorted !\n" ));
-			throw CSphereError( LOGL_CRIT, -1, "VerData: NOT Sorted!");
+			throw CSphereError( LOGL_CRIT, (dword)-1, "VerData: NOT Sorted!");
 		}
 	}
 #endif

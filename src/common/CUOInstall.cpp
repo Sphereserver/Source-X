@@ -544,7 +544,7 @@ ullong HashFileName(CString csFile)
 	eax = ecx = edx = 0;
 	ebx = edi = esi = (int32) csFile.GetLength() + 0xDEADBEEF;
 
-	size_t i = 0;
+	int i = 0;
 
 	for ( ; i + 12 < csFile.GetLength(); i += 12 )
 	{

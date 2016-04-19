@@ -944,7 +944,7 @@ bool CAccount::SetPassword( lpctstr pszPassword, bool isMD5Hash )
 		return true;
 	}
 	
-	size_t actualPasswordBufferSize = minimum(MAX_ACCOUNT_PASSWORD_ENTER, enteredPasswordLength) + 1;
+	int actualPasswordBufferSize = minimum(MAX_ACCOUNT_PASSWORD_ENTER, (int)enteredPasswordLength) + 1;
 	char * actualPassword = new char[actualPasswordBufferSize];
 	strcpylen(actualPassword, pszPassword, actualPasswordBufferSize);
 

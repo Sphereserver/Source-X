@@ -2408,11 +2408,11 @@ bool PacketClientVersion::onReceive(NetState* net)
 	if (net->getReportedVersion())
 		return true;
 
-	size_t length = readInt16();
+	word length = readInt16();
 	if (length < getPosition())
 		return false;
 
-	length -= getPosition();
+	length -= (word)getPosition();
 	if (length > 20)
 		length = 20;
 
@@ -2425,7 +2425,7 @@ bool PacketClientVersion::onReceive(NetState* net)
 	if (strstr(versionStr, "UO:3D") != NULL)
 		net->m_clientType = CLIENTTYPE_3D;
 
-	length = Str_GetBare(versionStr, versionStr, length, " '`-+!\"#$%&()*,/:;<=>?@[\\]^{|}~");
+	length = (word)Str_GetBare(versionStr, versionStr, (int)length, " '`-+!\"#$%&()*,/:;<=>?@[\\]^{|}~");
 	if (length > 0)
 	{
 		CClient* client = net->getClient();

@@ -68,17 +68,13 @@
 		#define ASSERT(exp)			(void)( (exp) || (Assert_CheckFail(#exp, __FILE__, __LINE__), 0) )
 	#endif	// ASSERT
 
-	#ifndef static_cast
-		#define static_cast dynamic_cast
-	#endif
-
-#else	// _DEBUG
+#else	// !_DEBUG
 
 	#ifndef ASSERT
 		#define ASSERT(exp)
 	#endif	// ASSERT
 
-#endif	// ! _DEBUG
+#endif	// _DEBUG
 
 #ifdef _WIN32
 	#define ATOI atoi
