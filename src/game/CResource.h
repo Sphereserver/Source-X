@@ -566,36 +566,36 @@ public:
 enum SKTRIG_TYPE
 {
 	// All skills may be scripted.
-	// XTRIG_UNKNOWN	= some named trigger not on this list.
-	SKTRIG_ABORT=1,		// Some odd thing went wrong.
-	SKTRIG_FAIL,		// we failed the skill check.
-	SKTRIG_GAIN,		// called when there is a chance to gain skill
-	SKTRIG_PRESTART,	// called before any hardcoded messages
-	SKTRIG_SELECT,		// just selecting params for the skill
-	SKTRIG_START,		// params for skill are done. (stroke)
-	SKTRIG_STROKE,		// Not really a trigger! Just a stage.
-	SKTRIG_SUCCESS,		// we passed the skill check
+	// XTRIG_UNKNOWN    = some named trigger not on this list.
+	SKTRIG_ABORT=1,     // Some odd thing went wrong.
+	SKTRIG_FAIL,        // we failed the skill check.
+	SKTRIG_GAIN,        // called when there is a chance to gain skill
+	SKTRIG_PRESTART,    // called before any hardcoded messages
+	SKTRIG_SELECT,      // just selecting params for the skill
+	SKTRIG_START,       // params for skill are done. (stroke)
+	SKTRIG_STROKE,      // Not really a trigger! Just a stage.
+	SKTRIG_SUCCESS,     // we passed the skill check
 	SKTRIG_TARGETCANCEL,// called when a target cursor is cancelled
-	SKTRIG_USEQUICK,	// called when a 'quick' usage of the skill is made
-	SKTRIG_WAIT,		// called when a test is made to see if the character must wait before starting
+	SKTRIG_USEQUICK,    // called when a 'quick' usage of the skill is made
+	SKTRIG_WAIT,        // called when a test is made to see if the character must wait before starting
 	SKTRIG_QTY
 };
 
 
 enum SKF_TYPE
 {
-	SKF_SCRIPTED		= 0x0001,		// fully scripted, no hardcoded behaviour
-	SKF_FIGHT			= 0x0002,		// considered a fight skill, maintains fight active
-	SKF_MAGIC			= 0x0004,		// considered a magic skill
-	SKF_CRAFT			= 0x0008,		// considered a crafting skill, compatible with MAKEITEM function
-	SKF_IMMOBILE		= 0x0010,		// fails skill if character moves
-	SKF_SELECTABLE		= 0x0020,		// allows skill to be selected from the skill menu
-	SKF_NOMINDIST		= 0x0040,		// you can mine, fish, chop, hack on the same point you are standing on
-	SKF_NOANIM			= 0x0080,		// prevents hardcoded animation from playing
-	SKF_NOSFX			= 0x0100,		// prevents hardcoded sound from playing
-	SKF_RANGED			= 0x0200,		// Considered a ranged skill (combine with SKF_FIGHT)
-	SKF_GATHER			= 0x0400,		// Considered a gathering skill, using SkillStrokes as SKF_CRAFT
-	SKF_DISABLED		= 0x0800		// Disabled skill, can't be used.
+	SKF_SCRIPTED        = 0x0001,       // fully scripted, no hardcoded behaviour
+	SKF_FIGHT           = 0x0002,       // considered a fight skill, maintains fight active
+	SKF_MAGIC           = 0x0004,       // considered a magic skill
+	SKF_CRAFT           = 0x0008,       // considered a crafting skill, compatible with MAKEITEM function
+	SKF_IMMOBILE        = 0x0010,       // fails skill if character moves
+	SKF_SELECTABLE      = 0x0020,       // allows skill to be selected from the skill menu
+	SKF_NOMINDIST       = 0x0040,       // you can mine, fish, chop, hack on the same point you are standing on
+	SKF_NOANIM          = 0x0080,       // prevents hardcoded animation from playing
+	SKF_NOSFX           = 0x0100,       // prevents hardcoded sound from playing
+	SKF_RANGED          = 0x0200,       // Considered a ranged skill (combine with SKF_FIGHT)
+	SKF_GATHER          = 0x0400,       // Considered a gathering skill, using SkillStrokes as SKF_CRAFT
+	SKF_DISABLED        = 0x0800        // Disabled skill, can't be used.
 };
 
 struct CSkillDef : public CResourceLink // For skill def table
@@ -606,12 +606,12 @@ struct CSkillDef : public CResourceLink // For skill def table
 private:
 	CString m_sKey;	// script key word for skill.
 public:
-	CString m_sTitle;	// title one gets if it's your specialty.
-	CString m_sName;	// fancy skill name
-	CString m_sTargetPrompt;	// targetting prompt. (if needed)
+	CString m_sTitle;   // title one gets if it's your specialty.
+	CString m_sName;    // fancy skill name
+	CString m_sTargetPrompt;    // targetting prompt. (if needed)
 
-	CValueCurveDef m_Delay;	//	The base delay for the skill. (tenth of seconds)
-	CValueCurveDef m_Effect;	// depends on skill
+	CValueCurveDef m_Delay;     //	The base delay for the skill. (tenth of seconds)
+	CValueCurveDef m_Effect;    // depends on skill
 
 	// Stat effects.
 	// You will tend toward these stat vals if you use this skill a lot.
@@ -619,9 +619,9 @@ public:
 	byte m_StatPercent; // BONUS_STATS = % of success depending on stats
 	byte m_StatBonus[STAT_BASE_QTY]; // % of each stat toward success at skill, total 100
 
-	CValueCurveDef	m_AdvRate;		// ADV_RATE defined "skill curve" 0 to 100 skill levels.
-	CValueCurveDef	m_Values;	// VALUES= influence for items made with 0 to 100 skill levels.
-	int			m_GainRadius; // GAINRADIUS= max. amount of skill above the necessary skill for a task to gain from it
+	CValueCurveDef	m_AdvRate;  // ADV_RATE defined "skill curve" 0 to 100 skill levels.
+	CValueCurveDef	m_Values;   // VALUES= influence for items made with 0 to 100 skill levels.
+	int			m_GainRadius;   // GAINRADIUS= max. amount of skill above the necessary skill for a task to gain from it
 	int			m_Range;
 
 	dword			m_dwFlags;
@@ -702,141 +702,141 @@ public:
 	int  m_iFreezeRestartTime;	// # seconds before restarting.
 #define DEBUGF_NPC_EMOTE		0x0001
 #define DEBUGF_ADVANCE_STATS	0x0002
-#define DEBUGF_EXP				0x0200	// experience gain/loss
-#define DEBUGF_LEVEL			0x0400	// experience level changes
-#define	DEBUGF_SCRIPTS			0x0800	// debug flags for scripts
-#define DEBUGF_LOS				0x1000	// debug flags for AdvancedLOS
-#define DEBUGF_WALK				0x2000	// debug flags for Walking stuff
-#define DEBUGF_PACKETS			0x4000	// log packets to file
-#define DEBUGF_NETWORK			0x8000	// debug flags for networking
-	word m_wDebugFlags;			// DEBUG In game effects to turn on and off.
+#define DEBUGF_EXP				0x0200  // experience gain/loss
+#define DEBUGF_LEVEL			0x0400  // experience level changes
+#define	DEBUGF_SCRIPTS			0x0800  // debug flags for scripts
+#define DEBUGF_LOS				0x1000  // debug flags for AdvancedLOS
+#define DEBUGF_WALK				0x2000  // debug flags for Walking stuff
+#define DEBUGF_PACKETS			0x4000  // log packets to file
+#define DEBUGF_NETWORK			0x8000  // debug flags for networking
+	word m_wDebugFlags;         // DEBUG In game effects to turn on and off.
 
 	// Decay
-	int  m_iDecay_Item;			// Base decay time in minutes.
-	int  m_iDecay_CorpsePlayer;	// Time for a playercorpse to decay (mins).
-	int  m_iDecay_CorpseNPC;	// Time for a NPC corpse to decay.
+	int  m_iDecay_Item;         // Base decay time in minutes.
+	int  m_iDecay_CorpsePlayer; // Time for a playercorpse to decay (mins).
+	int  m_iDecay_CorpseNPC;    // Time for a NPC corpse to decay.
 
 	// Save
-	int  m_iSaveNPCSkills;		// Only save NPC skills above this
-	int  m_iSavePeriod;			// Minutes between saves.
-	int  m_iSaveBackupLevels;	// How many backup levels.
+	int  m_iSaveNPCSkills;      // Only save NPC skills above this
+	int  m_iSavePeriod;         // Minutes between saves.
+	int  m_iSaveBackupLevels;   // How many backup levels.
 	int  m_iSaveBackgroundTime;	// Speed of the background save in minutes.
-	uint m_iSaveSectorsPerTick;     // max number of sectors per dynamic background save step
-	uint m_iSaveStepMaxComplexity;  // maximum "number of items+characters" saved at once during dynamic background save
+	uint m_iSaveSectorsPerTick; // max number of sectors per dynamic background save step
+	uint m_iSaveStepMaxComplexity;// maximum "number of items+characters" saved at once during dynamic background save
 	bool m_fSaveGarbageCollect;	// Always force a full garbage collection.
 
 	// Account
 	int  m_iDeadSocketTime;
-	int	 m_iArriveDepartMsg;		// General switch to turn on/off arrival/depart messages.
-	uint m_iClientsMax;	// Maximum (FD_SETSIZE) open connections to server
-	int  m_iClientsMaxIP;			// Maximum (FD_SETSIZE) open connections to server per IP
-	int  m_iConnectingMax;			// max clients connecting
-	int  m_iConnectingMaxIP;		// max clients connecting
+	int	 m_iArriveDepartMsg;    // General switch to turn on/off arrival/depart messages.
+	uint m_iClientsMax;         // Maximum (FD_SETSIZE) open connections to server
+	int  m_iClientsMaxIP;       // Maximum (FD_SETSIZE) open connections to server per IP
+	int  m_iConnectingMax;      // max clients connecting
+	int  m_iConnectingMaxIP;    // max clients connecting
 
-	int  m_iGuestsMax;				// Allow guests who have no accounts ?
-	int  m_iClientLingerTime;		// How long logged out clients linger in seconds.
-	int  m_iMinCharDeleteTime;		// How old must a char be ? (minutes)
-	byte m_iMaxCharsPerAccount;	// Maximum characters allowed on an account.
-	bool m_fLocalIPAdmin;			// The local ip is the admin ?
-	bool m_fMd5Passwords;			// Should MD5 hashed passwords be used?
+	int  m_iGuestsMax;          // Allow guests who have no accounts ?
+	int  m_iClientLingerTime;   // How long logged out clients linger in seconds.
+	int  m_iMinCharDeleteTime;  // How old must a char be ? (minutes)
+	byte m_iMaxCharsPerAccount; // Maximum characters allowed on an account.
+	bool m_fLocalIPAdmin;       // The local ip is the admin ?
+	bool m_fMd5Passwords;       // Should MD5 hashed passwords be used?
 
 	// Magic
-	bool		m_fReagentsRequired;
-	int			m_iWordsOfPowerColor;
-	int			m_iWordsOfPowerFont;
-	bool		m_fWordsOfPowerPlayer; // Words of Power for players
-	bool		m_fWordsOfPowerStaff;	// Words of Power for staff
-	bool		m_fEquippedCast;		// Allow casting while equipped.
-	bool		m_fReagentLossFail;	// ??? Lose reags when failed.
-	int			m_iMagicUnlockDoor;  // 1 in N chance of magic unlock working on doors -- 0 means never
+	bool m_fReagentsRequired;
+	int  m_iWordsOfPowerColor;
+	int  m_iWordsOfPowerFont;
+	bool m_fWordsOfPowerPlayer; // Words of Power for players
+	bool m_fWordsOfPowerStaff;  // Words of Power for staff
+	bool m_fEquippedCast;       // Allow casting while equipped.
+	bool m_fReagentLossFail;    // ??? Lose reags when failed.
+	int  m_iMagicUnlockDoor;    // 1 in N chance of magic unlock working on doors -- 0 means never
 	ITEMID_TYPE m_iSpell_Teleport_Effect_NPC;
-	SOUND_TYPE	m_iSpell_Teleport_Sound_NPC;
+	SOUND_TYPE  m_iSpell_Teleport_Sound_NPC;
 	ITEMID_TYPE m_iSpell_Teleport_Effect_Players;
-	SOUND_TYPE	m_iSpell_Teleport_Sound_Players;
+	SOUND_TYPE  m_iSpell_Teleport_Sound_Players;
 	ITEMID_TYPE m_iSpell_Teleport_Effect_Staff;
-	SOUND_TYPE	m_iSpell_Teleport_Sound_Staff;
-	int			m_iSpellTimeout; // Timeout for spell targeting
+	SOUND_TYPE  m_iSpell_Teleport_Sound_Staff;
+	int m_iSpellTimeout; // Timeout for spell targeting
 
 	// In Game Effects
 	int	 m_iLightDungeon;
-	int  m_iLightDay;		// Outdoor light level.
-	int  m_iLightNight;		// Outdoor light level.
-	int  m_iGameMinuteLength;	// Length of the game world minute in real world (TICK_PER_SEC) seconds.
-	bool m_fNoWeather;			// Turn off all weather.
-	bool m_fCharTags;			// Show [NPC] tags over chars.
-	bool m_fVendorTradeTitle;	// Show job title on vendor names.
-	bool m_fFlipDroppedItems;	// Flip dropped items.
-	int  m_iItemsMaxAmount;		// Max amount allowed for stackable items.
-	bool m_fCanUndressPets;		// Can players undress their pets?
-	bool m_fMonsterFight;		// Will creatures fight amoung themselves.
-	bool m_fMonsterFear;		// will they run away if hurt ?
-	int	 m_iBankIMax;			// Maximum number of items allowed in bank.
-	int  m_iBankWMax;			// Maximum weight in WEIGHT_UNITS stones allowed in bank.
-	int  m_iVendorMaxSell;		// Max things a vendor will sell in one shot.
-	uint m_iMaxCharComplexity;		// How many chars per sector.
-	uint m_iMaxItemComplexity;		// How many items per meter.
-	uint m_iMaxSectorComplexity;	// How many items per sector.
-	bool m_fGenericSounds;		// Do players receive generic (not them-devoted) sounds
-	bool m_fAutoNewbieKeys;		// Are house and boat keys newbied automatically?
-	int  m_iStamRunningPenalty;		// Weight penalty for running (+N% of max carry weight)
-	int  m_iStaminaLossAtWeight;	// %Weight at which characters begin to lose stamina
-	int  m_iHitpointPercentOnRez;	// How many hitpoints do they get when they are rez'd?
-	int  m_iHitsHungerLoss;		// How many % of HP will loose char on starving
-	int  m_iMaxBaseSkill;		// Maximum value for base skills at char creation
+	int  m_iLightDay;           // Outdoor light level.
+	int  m_iLightNight;         // Outdoor light level.
+	int  m_iGameMinuteLength;   // Length of the game world minute in real world (TICK_PER_SEC) seconds.
+	bool m_fNoWeather;          // Turn off all weather.
+	bool m_fCharTags;           // Show [NPC] tags over chars.
+	bool m_fVendorTradeTitle;   // Show job title on vendor names.
+	bool m_fFlipDroppedItems;   // Flip dropped items.
+	int  m_iItemsMaxAmount;     // Max amount allowed for stackable items.
+	bool m_fCanUndressPets;     // Can players undress their pets?
+	bool m_fMonsterFight;       // Will creatures fight amoung themselves.
+	bool m_fMonsterFear;        // will they run away if hurt ?
+	int	 m_iBankIMax;           // Maximum number of items allowed in bank.
+	int  m_iBankWMax;           // Maximum weight in WEIGHT_UNITS stones allowed in bank.
+	int  m_iVendorMaxSell;      // Max things a vendor will sell in one shot.
+	uint m_iMaxCharComplexity;  // How many chars per sector.
+	uint m_iMaxItemComplexity;  // How many items per meter.
+	uint m_iMaxSectorComplexity;// How many items per sector.
+	bool m_fGenericSounds;      // Do players receive generic (not them-devoted) sounds
+	bool m_fAutoNewbieKeys;     // Are house and boat keys newbied automatically?
+	int  m_iStamRunningPenalty; // Weight penalty for running (+N% of max carry weight)
+	int  m_iStaminaLossAtWeight;// %Weight at which characters begin to lose stamina
+	int  m_iHitpointPercentOnRez;// How many hitpoints do they get when they are rez'd?
+	int  m_iHitsHungerLoss;     // How many % of HP will loose char on starving
+	int  m_iMaxBaseSkill;       // Maximum value for base skills at char creation
 	int	 m_iTrainSkillCost;
 	int	 m_iTrainSkillMax;
 	int  m_iTrainSkillPercent;	// How much can NPC's train up to ?
 	int  m_fDeadCannotSeeLiving;
-	int  m_iMediumCanHearGhosts;	// At this Spirit Speak skill level players can understand ghosts speech instead hear 'oOOoO ooO'
-	bool m_iMountHeight;		// Do not allow entering under roof being on horse?
-	int	 m_iMoveRate;			// The percent rate of NPC movement
+	int  m_iMediumCanHearGhosts;// At this Spirit Speak skill level players can understand ghosts speech instead hear 'oOOoO ooO'
+	bool m_iMountHeight;        // Do not allow entering under roof being on horse?
+	int	 m_iMoveRate;           // The percent rate of NPC movement
 	int  m_iArcheryMaxDist;
 	int  m_iArcheryMinDist;
-	int  m_iHitsUpdateRate;		// how often send my hits updates to visible clients
-	int  m_iSpeedScaleFactor;	// fight skill delay = m_iSpeedScaleFactor / ( (dex + 100) * Weapon Speed )
-	int  m_iCombatDamageEra;	// define damage formula to use on physical combat
-	int  m_iCombatSpeedEra;		// define swing speed formula to use on physical combat
-	int  m_iSkillPracticeMax;	// max skill level a player can practice on dummies/targets upto
-	bool m_iPacketDeathAnimation;	// packet 02c
+	int  m_iHitsUpdateRate;     // how often send my hits updates to visible clients
+	int  m_iSpeedScaleFactor;   // fight skill delay = m_iSpeedScaleFactor / ( (dex + 100) * Weapon Speed )
+	int  m_iCombatDamageEra;    // define damage formula to use on physical combat
+	int  m_iCombatSpeedEra;     // define swing speed formula to use on physical combat
+	int  m_iSkillPracticeMax;   // max skill level a player can practice on dummies/targets upto
+	bool m_iPacketDeathAnimation;// packet 02c
 
 	// Flags for controlling pvp/pvm behaviour of players
-	int		m_iCombatFlags;		// combat flags
-	int		m_iMagicFlags;			// magic flags
-	int		m_iRacialFlags;		// racial traits flags
-	uchar	m_iSkillFlags;// Skill flags (expansion checks, etc)
-	int		m_iRevealFlags;		///* reveal flags used for SPELL_REVEAL (mostly for backwards).
+	int   m_iCombatFlags;   // combat flags
+	int   m_iMagicFlags;    // magic flags
+	int   m_iRacialFlags;   // racial traits flags
+	uchar m_iSkillFlags;    // Skill flags (expansion checks, etc)
+	int   m_iRevealFlags;   ///* reveal flags used for SPELL_REVEAL (mostly for backwards).
 
 	// Criminal/Karma
-	bool	m_fAttackingIsACrime;		// Is attacking (even before hitting) a crime?
-	bool	m_fGuardsInstantKill;	// Will guards kill instantly or follow normal combat rules?
-	bool	m_fGuardsOnMurderers;	// should guards be only called on criminals ?
-	int		m_iGuardLingerTime;	// How long do guards linger about.
-	int		m_iSnoopCriminal;		// 1 in # chance of getting criminalflagged when succesfully snooping.
-	bool	m_iTradeWindowSnooping;// 1 means opening a container in trade window needs to use snooping, 0 direct open.
-	int		m_iMurderMinCount;		// amount of murders before we get title.
-	int		m_iMurderDecayTime;	// (minutes) Roll murder counts off this often.
-	bool	m_fHelpingCriminalsIsACrime;// If I help (rez, heal, etc) a criminal, do I become one too?
-	bool	m_fLootingIsACrime;	// Looting a blue corpse is bad.
-	int		m_iCriminalTimer;		// How many minutes are criminals flagged for?
-	int		m_iPlayerKarmaNeutral;	// How much bad karma makes a player neutral?
-	int		m_iPlayerKarmaEvil;	// How much bad karma makes a player evil?
-	int		m_iMinKarma;			// Minimum karma level
-	int		m_iMaxKarma;			// Maximum karma level
-	int		m_iMaxFame;				// Maximum fame level
+	bool m_fAttackingIsACrime;  // Is attacking (even before hitting) a crime?
+	bool m_fGuardsInstantKill;  // Will guards kill instantly or follow normal combat rules?
+	bool m_fGuardsOnMurderers;  // should guards be only called on criminals ?
+	int	 m_iGuardLingerTime;    // How long do guards linger about.
+	int  m_iSnoopCriminal;      // 1 in # chance of getting criminalflagged when succesfully snooping.
+	bool m_iTradeWindowSnooping;// 1 means opening a container in trade window needs to use snooping, 0 direct open.
+	int  m_iMurderMinCount;     // amount of murders before we get title.
+	int	 m_iMurderDecayTime;    // (minutes) Roll murder counts off this often.
+	bool m_fHelpingCriminalsIsACrime;// If I help (rez, heal, etc) a criminal, do I become one too?
+	bool m_fLootingIsACrime;    // Looting a blue corpse is bad.
+	int  m_iCriminalTimer;      // How many minutes are criminals flagged for?
+	int	 m_iPlayerKarmaNeutral; // How much bad karma makes a player neutral?
+	int	 m_iPlayerKarmaEvil;    // How much bad karma makes a player evil?
+	int  m_iMinKarma;           // Minimum karma level
+	int  m_iMaxKarma;           // Maximum karma level
+	int  m_iMaxFame;            // Maximum fame level
 
 	// other
-	bool	m_fNoResRobe;
-	int		m_iLostNPCTeleport;
-	int		m_iExperimental;
-	int		m_iOptionFlags;
-	int		m_iWoolGrowthTime;	// how long till wool grows back on sheared sheep, in minutes
-	uint	m_iAttackerTimeout;	// Timeout for attacker.*
-	uint	m_iNotoTimeout;	// Timeout for NOTOriety checks.*
-	uint	m_iMaxSkill;
+	bool m_fNoResRobe;
+	int	 m_iLostNPCTeleport;
+	int	 m_iExperimental;
+	int	 m_iOptionFlags;
+	int	 m_iWoolGrowthTime;     // how long till wool grows back on sheared sheep, in minutes
+	uint m_iAttackerTimeout;    // Timeout for attacker.*
+	uint m_iNotoTimeout;        // Timeout for NOTOriety checks.*
+	uint m_iMaxSkill;
 
-	int		m_iDistanceYell;
-	int		m_iDistanceWhisper;
-	int		m_iDistanceTalk;
+	int	m_iDistanceYell;
+	int	m_iDistanceWhisper;
+	int m_iDistanceTalk;
 
 	CString	m_sSpeechSelf;
 	CString	m_sSpeechPet;
@@ -847,95 +847,95 @@ public:
 	CString	m_sDumpAccPackets;
 #endif
 
-	CString				m_sEventsPet;
-	CResourceRefArray	m_pEventsPetLink;
+	CString             m_sEventsPet;
+	CResourceRefArray   m_pEventsPetLink;
 
-	CString				m_sEventsPlayer;
-	CResourceRefArray	m_pEventsPlayerLink;
+	CString             m_sEventsPlayer;
+	CResourceRefArray   m_pEventsPlayerLink;
 
-	CString				m_sEventsRegion;
-	CResourceRefArray	m_pEventsRegionLink;
+	CString             m_sEventsRegion;
+	CResourceRefArray   m_pEventsRegionLink;
 
-	CString				m_sEventsItem;
-	CResourceRefArray	m_iEventsItemLink;
+	CString             m_sEventsItem;
+	CResourceRefArray   m_iEventsItemLink;
 
 	// Third Party Tools
 	CString	m_sStripPath;
-	bool	m_fCUOStatus;
-	bool	m_fUOGStatus;
+	bool    m_fCUOStatus;
+	bool    m_fUOGStatus;
 
-	int		m_iWalkBuffer;
-	int		m_iWalkRegen;
+	int  m_iWalkBuffer;
+	int  m_iWalkRegen;
 
-	int		m_iCommandLog;
-	bool	m_fTelnetLog;
+	int  m_iCommandLog;
+	bool m_fTelnetLog;
 	
-	bool 	m_fUsecrypt;
-	bool 	m_fUsenocrypt;
+	bool m_fUsecrypt;
+	bool m_fUsenocrypt;
 
-	bool	m_fPayFromPackOnly;	// Pay only from main pack?
-	int		m_iOverSkillMultiply;	// multiplyer to get over skillclass
-	bool	m_fSuppressCapitals;	// Enable/Disable capital letters suppression
+	bool m_fPayFromPackOnly;    // Pay only from main pack?
+	int  m_iOverSkillMultiply;  // multiplyer to get over skillclass
+	bool m_fSuppressCapitals;   // Enable/Disable capital letters suppression
 
 #define ADVANCEDLOS_DISABLED		0x00
 #define	ADVANCEDLOS_PLAYER			0x01
 #define	ADVANCEDLOS_NPC				0x02
-	int		m_iAdvancedLos;		// AdvancedLOS
+	int	m_iAdvancedLos;     // AdvancedLOS
 
 	// New ones
-	int		m_iFeatureT2A;
-	int		m_iFeatureLBR;
-	int		m_iFeatureAOS;
-	int		m_iFeatureSE;
-	int		m_iFeatureML;
-	int		m_iFeatureKR;
-	int		m_iFeatureSA;
-	int		m_iFeatureTOL;
-	int		m_iFeatureExtra;
+	int	m_iFeatureT2A;
+	int	m_iFeatureLBR;
+	int	m_iFeatureAOS;
+	int	m_iFeatureSE;
+	int	m_iFeatureML;
+	int	m_iFeatureKR;
+	int	m_iFeatureSA;
+	int	m_iFeatureTOL;
+	int	m_iFeatureExtra;
 	
-	int		m_iMaxLoopTimes;
-#define	STAT_FLAG_NORMAL	0x00	//	MAX* status allowed (default)
-#define STAT_FLAG_DENYMAX	0x01	//	MAX* denied
-#define STAT_FLAG_DENYMAXP	0x02	//		.. for players
-#define STAT_FLAG_DENYMAXN	0x04	//		.. for npcs
-	int		m_iStatFlag;
+	int	m_iMaxLoopTimes;
+#define	STAT_FLAG_NORMAL	0x00    //	MAX* status allowed (default)
+#define STAT_FLAG_DENYMAX	0x01    //	MAX* denied
+#define STAT_FLAG_DENYMAXP	0x02    //		.. for players
+#define STAT_FLAG_DENYMAXN	0x04    //		.. for npcs
+	int	m_iStatFlag;
 
-#define NPC_AI_PATH				0x00001		//	NPC pathfinding
-#define	NPC_AI_FOOD				0x00002		//	NPC food search (objects + grass)
-#define	NPC_AI_EXTRA			0x00004		//	NPC magics, combat, etc
-#define NPC_AI_ALWAYSINT		0x00008		//	NPC pathfinding does not check int, always smart
-#define NPC_AI_INTFOOD			0x00010		//  NPC food search (more intelligent and trusworthy)
+#define NPC_AI_PATH				0x00001     //	NPC pathfinding
+#define	NPC_AI_FOOD				0x00002     //	NPC food search (objects + grass)
+#define	NPC_AI_EXTRA			0x00004     //	NPC magics, combat, etc
+#define NPC_AI_ALWAYSINT		0x00008     //	NPC pathfinding does not check int, always smart
+#define NPC_AI_INTFOOD			0x00010     //  NPC food search (more intelligent and trusworthy)
 #define NPC_AI_COMBAT			0x00040
 #define NPC_AI_VEND_TIME		0x00080
 #define NPC_AI_LOOTING			0x00100
 #define	NPC_AI_MOVEOBSTACLES	0x00200
 #define NPC_AI_PERSISTENTPATH	0x00400
 #define NPC_AI_THREAT			0x00800
-#define NPC_AI_OLDSPEED			0x01000		// Enable backwards MoveSpeed formula ()
-	int		m_iNpcAi;
+#define NPC_AI_OLDSPEED			0x01000     // Enable backwards MoveSpeed formula ()
+	int  m_iNpcAi;
 
 	//	Experience system
-	bool	m_bExperienceSystem;
+	bool m_bExperienceSystem;
 #define EXP_MODE_RAISE_COMBAT	0x0001
 #define	EXP_MODE_RAISE_CRAFT	0x0002
 #define	EXP_MODE_ALLOW_DOWN		0x0004
 #define	EXP_MODE_DOWN_NOLEVEL	0x0008
 #define	EXP_MODE_AUTOSET_EXP	0x0010
-	int		m_iExperienceMode;
-	int		m_iExperienceKoefPVM;
-	int		m_iExperienceKoefPVP;
-	bool	m_bLevelSystem;
+	int  m_iExperienceMode;
+	int  m_iExperienceKoefPVM;
+	int  m_iExperienceKoefPVP;
+	bool m_bLevelSystem;
 #define LEVEL_MODE_LINEAR		0
 #define	LEVEL_MODE_DOUBLE		1
-	int		m_iLevelMode;
-	uint	m_iLevelNextAt;
+	int  m_iLevelMode;
+	uint m_iLevelNextAt;
 
-	bool	m_bAutoResDisp;
-	int		m_iAutoPrivFlags;
+	bool m_bAutoResDisp;
+	int  m_iAutoPrivFlags;
 
-	char	m_cCommandPrefix;
+	char m_cCommandPrefix;
 
-	int		m_iDefaultCommandLevel;
+	int m_iDefaultCommandLevel;
 
 	//	color noto flag
 	HUE_TYPE m_iColorNotoGood;
@@ -960,8 +960,8 @@ public:
 	int m_iMaxShipPlankTeleport;
 
 	//	MySQL features
-	bool	m_bMySql;
-	bool	m_bMySqlTicks;
+	bool    m_bMySql;
+	bool    m_bMySqlTicks;
 	CString	m_sMySqlHost;
 	CString	m_sMySqlUser;
 	CString	m_sMySqlPass;
@@ -969,22 +969,21 @@ public:
 
 	// network settings
 #ifdef _MTNETWORK
-	uint m_iNetworkThreads;			// number of network threads to create
-	uint m_iNetworkThreadPriority;	// priority of network threads
+	uint m_iNetworkThreads;         // number of network threads to create
+	uint m_iNetworkThreadPriority;  // priority of network threads
 #endif
-	int		m_fUseAsyncNetwork;			// 0=normal send, 1=async send, 2=async send for 4.0.0+ only
-	int		m_iNetMaxPings;				// max pings before blocking an ip
-	int		m_iNetHistoryTTL;			// time to remember an ip
-	int		m_iNetMaxPacketsPerTick;	// max packets to send per tick (per queue)
-	uint	m_iNetMaxLengthPerTick;		// max packet length to send per tick (per queue) (also max length of individual packets)
-	int		m_iNetMaxQueueSize;			// max packets to hold per queue (comment out for unlimited)
-	bool	m_fUsePacketPriorities;		// true to prioritise sending packets
-	bool	m_fUseExtraBuffer;			// true to queue packet data in an extra buffer
+	int	 m_fUseAsyncNetwork;        // 0=normal send, 1=async send, 2=async send for 4.0.0+ only
+	int	 m_iNetMaxPings;            // max pings before blocking an ip
+	int	 m_iNetHistoryTTL;          // time to remember an ip
+	int	 m_iNetMaxPacketsPerTick;   // max packets to send per tick (per queue)
+	uint m_iNetMaxLengthPerTick;    // max packet length to send per tick (per queue) (also max length of individual packets)
+	int	 m_iNetMaxQueueSize;        // max packets to hold per queue (comment out for unlimited)
+	bool m_fUsePacketPriorities;    // true to prioritise sending packets
+	bool m_fUseExtraBuffer;         // true to queue packet data in an extra buffer
 
-	int	m_iTooltipCache;			// time to cache tooltip for
-	int	m_iTooltipMode;				// tooltip mode (TOOLTIP_TYPE)
-	int	m_iContextMenuLimit;		// max amount of options per context menu
-	int	m_iAutoTooltipResend;		// automatically resend tooltip
+	int	m_iTooltipCache;            // time to cache tooltip for
+	int	m_iTooltipMode;             // tooltip mode (TOOLTIP_TYPE)
+	int	m_iContextMenuLimit;        // max amount of options per context menu
 #define AUTOTOOLTIP_FLAG_NAME          0x0001
 #define AUTOTOOLTIP_FLAG_AMOUNT        0x0002
 #define AUTOTOOLTIP_FLAG_WEIGHT        0x0004
@@ -992,57 +991,58 @@ public:
 #define AUTOTOOLTIP_FLAG_POISON        0x0010
 #define AUTOTOOLTIP_FLAG_WANDCHARGES   0x0020
 #define AUTOTOOLTIP_FLAG_SPELLBOOK     0x0040
+	int	m_iAutoTooltipResend;       // automatically resend tooltip
 
-	int		m_iRegenRate[STAT_QTY];
-	int		m_iTimerCall;
-	bool	m_bAllowLightOverride;
-	CString	m_sZeroPoint;
-	bool	m_bAllowBuySellAgent;
+	int     m_iRegenRate[STAT_QTY];
+	int     m_iTimerCall;
+	bool    m_bAllowLightOverride;
+	CString m_sZeroPoint;
+	bool    m_bAllowBuySellAgent;
 
-	bool	m_bAllowNewbTransfer;
+	bool    m_bAllowNewbTransfer;
 
-	bool	m_NPCNoFameTitle;
+	bool    m_NPCNoFameTitle;
 
-	bool	m_bAgree;
-	int		m_iMaxPolyStats;
+	bool    m_bAgree;
+	int     m_iMaxPolyStats;
 
 	// End INI file options.
 	
-	CResourceScript m_scpIni;	// Keep this around so we can link to it.
-	CResourceScript m_scpCryptIni; // Encryption keys are in here
+	CResourceScript m_scpIni;       // Keep this around so we can link to it.
+	CResourceScript m_scpCryptIni;  // Encryption keys are in here
 
 public:
 	CResourceScript m_scpTables;
 
-	CStringSortArray m_ResourceList;	// Sections lists
+	CStringSortArray m_ResourceList;    // Sections lists
 
-	CStringSortArray		m_Obscene;	// Bad Names/Words etc.
-	CGObArray< CString* >	m_Fame;	// fame titles (fame.famous)
-	CGObArray< CString* >	m_Karma;	// karma titles (karma.wicked)
-	CGObArray< CString* >	m_Runes;	// Words of power. (A-Z)
+	CStringSortArray      m_Obscene;    // Bad Names/Words etc.
+	CGObArray< CString* > m_Fame;       // fame titles (fame.famous)
+	CGObArray< CString* > m_Karma;      // karma titles (karma.wicked)
+	CGObArray< CString* > m_Runes;      // Words of power. (A-Z)
 
 	CGTypedArray< int, int > m_NotoKarmaLevels; // karma levels for noto titles
-	CGTypedArray< int, int > m_NotoFameLevels; // fame levels for noto titles
-	CGObArray< CString* >	 m_NotoTitles;	// Noto titles.
+	CGTypedArray< int, int > m_NotoFameLevels;  // fame levels for noto titles
+	CGObArray< CString* >    m_NotoTitles;      // Noto titles.
 
-	CMultiDefArray	m_MultiDefs;	// read from the MUL files. Cached here on demand.
+	CMultiDefArray m_MultiDefs;	// read from the MUL files. Cached here on demand.
 
-	CObNameSortArray			m_SkillNameDefs;	// const CSkillDef* Name sorted
-	CGPtrTypeArray< CSkillDef* > m_SkillIndexDefs;	// Defined Skills indexed by number
-	CGObArray< CSpellDef* >		 m_SpellDefs;	// Defined Spells
+	CObNameSortArray             m_SkillNameDefs;   // const CSkillDef* Name sorted
+	CGPtrTypeArray< CSkillDef* > m_SkillIndexDefs;	 // Defined Skills indexed by number
+	CGObArray< CSpellDef* >      m_SpellDefs;	     // Defined Spells
 	CGPtrTypeArray< CSpellDef* > m_SpellDefs_Sorted; // Defined Spells, in skill order
 
-	CStringSortArray	m_PrivCommands[PLEVEL_QTY];	// what command are allowed for a priv level?
+	CStringSortArray m_PrivCommands[PLEVEL_QTY];     // what command are allowed for a priv level?
 
 public:
-	CObNameSortArray	m_Servers;		// Servers list. we act like the login server with this.
-	CObNameSortArray	m_Functions;	// subroutines that can be used in scripts.
-	CRegionLinks		m_RegionDefs;
+	CObNameSortArray m_Servers;     // Servers list. we act like the login server with this.
+	CObNameSortArray m_Functions;   // subroutines that can be used in scripts.
+	CRegionLinks m_RegionDefs;
 
 	// static definition stuff from *TABLE.SCP mostly.
-	CGObArray< const CStartLoc* > m_StartDefs; // Start points list
-	CValueCurveDef m_StatAdv[STAT_BASE_QTY]; // "skill curve"
-	CGTypedArray<CPointBase,CPointBase&> m_MoonGates;	// The array of moongates.
+	CGObArray< const CStartLoc* > m_StartDefs;  // Start points list
+	CValueCurveDef m_StatAdv[STAT_BASE_QTY];    // "skill curve"
+	CGTypedArray<CPointBase,CPointBase&> m_MoonGates;// The array of moongates.
 
 	CResourceHashArray m_WebPages;	// These can be linked back to the script.
 
