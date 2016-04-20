@@ -173,12 +173,13 @@ private:
 	CWorldClock m_Clock;		// the current relative tick time  (in TICK_PER_SEC)
 
 	// Special purpose timers.
-	CServTime	m_timeSector;		// next time to do sector stuff.
-	CServTime	m_timeSave;		// when to auto save ?
-	bool		m_bSaveNotificationSent;	// has notification been sent?
-	CServTime	m_timeRespawn;	// when to res dead NPC's ?
-	CServTime	m_timeCallUserFunc;	// when to call next user func
-	uint m_Sector_Pulse;		// Slow some stuff down that doesn't need constant processing.
+	CServTime	m_nextTickTime;			// next time to do sector stuff.
+	CServTime	m_timeSave;				// when to auto save ?
+	bool		m_bSaveNotificationSent;// has notification been sent?
+	CServTime	m_timeRespawn;			// when to res dead NPC's ?
+	CServTime	m_timeCallUserFunc;		// when to call next user func
+	uint		m_Sector_Pulse;			// Slow some stuff down that doesn't need constant processing.
+	ullong		m_ticksWithoutMySQL;	// MySQL should be running constantly if MySQLTicks is true, keep here record of how much ticks since Sphere is not connected.
 
 	int m_iSaveStage;	// Current stage of the background save.
 	llong	m_savetimer; // Time it takes to save
@@ -300,6 +301,7 @@ public:
 	bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 
 	void OnTick();
+	void OnTickMySQL();
 
 	void GarbageCollection();
 	void Restock();

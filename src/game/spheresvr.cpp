@@ -449,7 +449,10 @@ int Sphere_OnTick()
 	g_Serv.ShipTimers_Tick();
 
 	EXC_SET("world");
-	g_World.OnTick();
+	if (g_Cfg.m_bMySql && g_Cfg.m_bMySqlTicks)
+		g_World.OnTickMySQL();
+	else
+		g_World.OnTick();
 
 	// process incoming data
 	EXC_SET("network-in");

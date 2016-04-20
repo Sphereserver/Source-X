@@ -721,14 +721,14 @@ public:
 	int  m_iSavePeriod;			// Minutes between saves.
 	int  m_iSaveBackupLevels;	// How many backup levels.
 	int  m_iSaveBackgroundTime;	// Speed of the background save in minutes.
-	uint  m_iSaveSectorsPerTick;     // max number of sectors per dynamic background save step
-	uint  m_iSaveStepMaxComplexity;  // maximum "number of items+characters" saved at once during dynamic background save
+	uint m_iSaveSectorsPerTick;     // max number of sectors per dynamic background save step
+	uint m_iSaveStepMaxComplexity;  // maximum "number of items+characters" saved at once during dynamic background save
 	bool m_fSaveGarbageCollect;	// Always force a full garbage collection.
 
 	// Account
 	int  m_iDeadSocketTime;
 	int	 m_iArriveDepartMsg;		// General switch to turn on/off arrival/depart messages.
-	uint  m_iClientsMax;	// Maximum (FD_SETSIZE) open connections to server
+	uint m_iClientsMax;	// Maximum (FD_SETSIZE) open connections to server
 	int  m_iClientsMaxIP;			// Maximum (FD_SETSIZE) open connections to server per IP
 	int  m_iConnectingMax;			// max clients connecting
 	int  m_iConnectingMaxIP;		// max clients connecting
@@ -736,26 +736,26 @@ public:
 	int  m_iGuestsMax;				// Allow guests who have no accounts ?
 	int  m_iClientLingerTime;		// How long logged out clients linger in seconds.
 	int  m_iMinCharDeleteTime;		// How old must a char be ? (minutes)
-	byte  m_iMaxCharsPerAccount;	// Maximum characters allowed on an account.
+	byte m_iMaxCharsPerAccount;	// Maximum characters allowed on an account.
 	bool m_fLocalIPAdmin;			// The local ip is the admin ?
 	bool m_fMd5Passwords;			// Should MD5 hashed passwords be used?
 
 	// Magic
-	bool m_fReagentsRequired;
-	int m_iWordsOfPowerColor;
-	int m_iWordsOfPowerFont;
-	bool m_fWordsOfPowerPlayer; // Words of Power for players
-	bool m_fWordsOfPowerStaff;	// Words of Power for staff
-	bool m_fEquippedCast;		// Allow casting while equipped.
-	bool m_fReagentLossFail;	// ??? Lose reags when failed.
-	int m_iMagicUnlockDoor;  // 1 in N chance of magic unlock working on doors -- 0 means never
+	bool		m_fReagentsRequired;
+	int			m_iWordsOfPowerColor;
+	int			m_iWordsOfPowerFont;
+	bool		m_fWordsOfPowerPlayer; // Words of Power for players
+	bool		m_fWordsOfPowerStaff;	// Words of Power for staff
+	bool		m_fEquippedCast;		// Allow casting while equipped.
+	bool		m_fReagentLossFail;	// ??? Lose reags when failed.
+	int			m_iMagicUnlockDoor;  // 1 in N chance of magic unlock working on doors -- 0 means never
 	ITEMID_TYPE m_iSpell_Teleport_Effect_NPC;
-	SOUND_TYPE m_iSpell_Teleport_Sound_NPC;
+	SOUND_TYPE	m_iSpell_Teleport_Sound_NPC;
 	ITEMID_TYPE m_iSpell_Teleport_Effect_Players;
-	SOUND_TYPE m_iSpell_Teleport_Sound_Players;
+	SOUND_TYPE	m_iSpell_Teleport_Sound_Players;
 	ITEMID_TYPE m_iSpell_Teleport_Effect_Staff;
-	SOUND_TYPE m_iSpell_Teleport_Sound_Staff;
-	int m_iSpellTimeout; // Timeout for spell targeting
+	SOUND_TYPE	m_iSpell_Teleport_Sound_Staff;
+	int			m_iSpellTimeout; // Timeout for spell targeting
 
 	// In Game Effects
 	int	 m_iLightDungeon;
@@ -773,9 +773,9 @@ public:
 	int	 m_iBankIMax;			// Maximum number of items allowed in bank.
 	int  m_iBankWMax;			// Maximum weight in WEIGHT_UNITS stones allowed in bank.
 	int  m_iVendorMaxSell;		// Max things a vendor will sell in one shot.
-	uint  m_iMaxCharComplexity;		// How many chars per sector.
-	uint  m_iMaxItemComplexity;		// How many items per meter.
-	uint  m_iMaxSectorComplexity;	// How many items per sector.
+	uint m_iMaxCharComplexity;		// How many chars per sector.
+	uint m_iMaxItemComplexity;		// How many items per meter.
+	uint m_iMaxSectorComplexity;	// How many items per sector.
 	bool m_fGenericSounds;		// Do players receive generic (not them-devoted) sounds
 	bool m_fAutoNewbieKeys;		// Are house and boat keys newbied automatically?
 	int  m_iStamRunningPenalty;		// Weight penalty for running (+N% of max carry weight)
@@ -800,29 +800,29 @@ public:
 	bool m_iPacketDeathAnimation;	// packet 02c
 
 	// Flags for controlling pvp/pvm behaviour of players
-	int  m_iCombatFlags;		// combat flags
-	int  m_iMagicFlags;			// magic flags
-	int  m_iRacialFlags;		// racial traits flags
-	uchar m_iSkillFlags;// Skill flags (expansion checks, etc)
-	int  m_iRevealFlags;		///* reveal flags used for SPELL_REVEAL (mostly for backwards).
+	int		m_iCombatFlags;		// combat flags
+	int		m_iMagicFlags;			// magic flags
+	int		m_iRacialFlags;		// racial traits flags
+	uchar	m_iSkillFlags;// Skill flags (expansion checks, etc)
+	int		m_iRevealFlags;		///* reveal flags used for SPELL_REVEAL (mostly for backwards).
 
 	// Criminal/Karma
-	bool m_fAttackingIsACrime;		// Is attacking (even before hitting) a crime?
-	bool m_fGuardsInstantKill;	// Will guards kill instantly or follow normal combat rules?
-	bool m_fGuardsOnMurderers;	// should guards be only called on criminals ?
-	int	 m_iGuardLingerTime;	// How long do guards linger about.
-	int  m_iSnoopCriminal;		// 1 in # chance of getting criminalflagged when succesfully snooping.
-	bool m_iTradeWindowSnooping;// 1 means opening a container in trade window needs to use snooping, 0 direct open.
-	int  m_iMurderMinCount;		// amount of murders before we get title.
-	int	 m_iMurderDecayTime;	// (minutes) Roll murder counts off this often.
-	bool m_fHelpingCriminalsIsACrime;// If I help (rez, heal, etc) a criminal, do I become one too?
-	bool m_fLootingIsACrime;	// Looting a blue corpse is bad.
-	int  m_iCriminalTimer;		// How many minutes are criminals flagged for?
-	int	 m_iPlayerKarmaNeutral;	// How much bad karma makes a player neutral?
-	int	 m_iPlayerKarmaEvil;	// How much bad karma makes a player evil?
-	int m_iMinKarma;			// Minimum karma level
-	int m_iMaxKarma;			// Maximum karma level
-	int m_iMaxFame;				// Maximum fame level
+	bool	m_fAttackingIsACrime;		// Is attacking (even before hitting) a crime?
+	bool	m_fGuardsInstantKill;	// Will guards kill instantly or follow normal combat rules?
+	bool	m_fGuardsOnMurderers;	// should guards be only called on criminals ?
+	int		m_iGuardLingerTime;	// How long do guards linger about.
+	int		m_iSnoopCriminal;		// 1 in # chance of getting criminalflagged when succesfully snooping.
+	bool	m_iTradeWindowSnooping;// 1 means opening a container in trade window needs to use snooping, 0 direct open.
+	int		m_iMurderMinCount;		// amount of murders before we get title.
+	int		m_iMurderDecayTime;	// (minutes) Roll murder counts off this often.
+	bool	m_fHelpingCriminalsIsACrime;// If I help (rez, heal, etc) a criminal, do I become one too?
+	bool	m_fLootingIsACrime;	// Looting a blue corpse is bad.
+	int		m_iCriminalTimer;		// How many minutes are criminals flagged for?
+	int		m_iPlayerKarmaNeutral;	// How much bad karma makes a player neutral?
+	int		m_iPlayerKarmaEvil;	// How much bad karma makes a player evil?
+	int		m_iMinKarma;			// Minimum karma level
+	int		m_iMaxKarma;			// Maximum karma level
+	int		m_iMaxFame;				// Maximum fame level
 
 	// other
 	bool	m_fNoResRobe;
@@ -830,9 +830,9 @@ public:
 	int		m_iExperimental;
 	int		m_iOptionFlags;
 	int		m_iWoolGrowthTime;	// how long till wool grows back on sheared sheep, in minutes
-	uint m_iAttackerTimeout;	// Timeout for attacker.*
-	uint m_iNotoTimeout;	// Timeout for NOTOriety checks.*
-	uint m_iMaxSkill;
+	uint	m_iAttackerTimeout;	// Timeout for attacker.*
+	uint	m_iNotoTimeout;	// Timeout for NOTOriety checks.*
+	uint	m_iMaxSkill;
 
 	int		m_iDistanceYell;
 	int		m_iDistanceWhisper;
@@ -847,17 +847,17 @@ public:
 	CString	m_sDumpAccPackets;
 #endif
 
-	CString	m_sEventsPet;
-	CResourceRefArray m_pEventsPetLink;
+	CString				m_sEventsPet;
+	CResourceRefArray	m_pEventsPetLink;
 
-	CString	m_sEventsPlayer;
-	CResourceRefArray m_pEventsPlayerLink;
+	CString				m_sEventsPlayer;
+	CResourceRefArray	m_pEventsPlayerLink;
 
-	CString	m_sEventsRegion;
-	CResourceRefArray m_pEventsRegionLink;
+	CString				m_sEventsRegion;
+	CResourceRefArray	m_pEventsRegionLink;
 
-	CString	m_sEventsItem;
-	CResourceRefArray m_iEventsItemLink;
+	CString				m_sEventsItem;
+	CResourceRefArray	m_iEventsItemLink;
 
 	// Third Party Tools
 	CString	m_sStripPath;
@@ -870,10 +870,10 @@ public:
 	int		m_iCommandLog;
 	bool	m_fTelnetLog;
 	
-	bool 		m_fUsecrypt;
-	bool 		m_fUsenocrypt;
+	bool 	m_fUsecrypt;
+	bool 	m_fUsenocrypt;
 
-	bool		m_fPayFromPackOnly;	// Pay only from main pack?
+	bool	m_fPayFromPackOnly;	// Pay only from main pack?
 	int		m_iOverSkillMultiply;	// multiplyer to get over skillclass
 	bool	m_fSuppressCapitals;	// Enable/Disable capital letters suppression
 
@@ -928,7 +928,7 @@ public:
 #define LEVEL_MODE_LINEAR		0
 #define	LEVEL_MODE_DOUBLE		1
 	int		m_iLevelMode;
-	uint m_iLevelNextAt;
+	uint	m_iLevelNextAt;
 
 	bool	m_bAutoResDisp;
 	int		m_iAutoPrivFlags;
@@ -938,29 +938,30 @@ public:
 	int		m_iDefaultCommandLevel;
 
 	//	color noto flag
-	HUE_TYPE	m_iColorNotoGood;
-	HUE_TYPE	m_iColorNotoGuildSame;
-	HUE_TYPE	m_iColorNotoNeutral;
-	HUE_TYPE	m_iColorNotoCriminal;
-	HUE_TYPE	m_iColorNotoGuildWar;
-	HUE_TYPE	m_iColorNotoEvil;
-	HUE_TYPE	m_iColorNotoInvul;
-	HUE_TYPE	m_iColorNotoInvulGameMaster;
-	HUE_TYPE	m_iColorNotoDefault;
+	HUE_TYPE m_iColorNotoGood;
+	HUE_TYPE m_iColorNotoGuildSame;
+	HUE_TYPE m_iColorNotoNeutral;
+	HUE_TYPE m_iColorNotoCriminal;
+	HUE_TYPE m_iColorNotoGuildWar;
+	HUE_TYPE m_iColorNotoEvil;
+	HUE_TYPE m_iColorNotoInvul;
+	HUE_TYPE m_iColorNotoInvulGameMaster;
+	HUE_TYPE m_iColorNotoDefault;
 	
-	HUE_TYPE	m_iColorInvis;
-	HUE_TYPE	m_iColorInvisSpell;
-	HUE_TYPE	m_iColorHidden;
+	HUE_TYPE m_iColorInvis;
+	HUE_TYPE m_iColorInvisSpell;
+	HUE_TYPE m_iColorHidden;
 
 	// notoriety inheritance
-	int     m_iPetsInheritNotoriety;
+	int m_iPetsInheritNotoriety;
 
-	int		m_iClientLoginMaxTries;
-	int		m_iClientLoginTempBan;
-	int		m_iMaxShipPlankTeleport;
+	int m_iClientLoginMaxTries;
+	int m_iClientLoginTempBan;
+	int m_iMaxShipPlankTeleport;
 
 	//	MySQL features
-	bool		m_bMySql;
+	bool	m_bMySql;
+	bool	m_bMySqlTicks;
 	CString	m_sMySqlHost;
 	CString	m_sMySqlUser;
 	CString	m_sMySqlPass;
@@ -971,18 +972,19 @@ public:
 	uint m_iNetworkThreads;			// number of network threads to create
 	uint m_iNetworkThreadPriority;	// priority of network threads
 #endif
-	int			m_fUseAsyncNetwork;			// 0=normal send, 1=async send, 2=async send for 4.0.0+ only
-	int			m_iNetMaxPings;				// max pings before blocking an ip
-	int			m_iNetHistoryTTL;			// time to remember an ip
-	int			m_iNetMaxPacketsPerTick;	// max packets to send per tick (per queue)
-	uint m_iNetMaxLengthPerTick;		// max packet length to send per tick (per queue) (also max length of individual packets)
-	int			m_iNetMaxQueueSize;			// max packets to hold per queue (comment out for unlimited)
-	bool		m_fUsePacketPriorities;		// true to prioritise sending packets
-	bool		m_fUseExtraBuffer;			// true to queue packet data in an extra buffer
+	int		m_fUseAsyncNetwork;			// 0=normal send, 1=async send, 2=async send for 4.0.0+ only
+	int		m_iNetMaxPings;				// max pings before blocking an ip
+	int		m_iNetHistoryTTL;			// time to remember an ip
+	int		m_iNetMaxPacketsPerTick;	// max packets to send per tick (per queue)
+	uint	m_iNetMaxLengthPerTick;		// max packet length to send per tick (per queue) (also max length of individual packets)
+	int		m_iNetMaxQueueSize;			// max packets to hold per queue (comment out for unlimited)
+	bool	m_fUsePacketPriorities;		// true to prioritise sending packets
+	bool	m_fUseExtraBuffer;			// true to queue packet data in an extra buffer
 
-	int			m_iTooltipCache;			// time to cache tooltip for
-	int			m_iTooltipMode;				// tooltip mode (TOOLTIP_TYPE)
-	int			m_iContextMenuLimit;		// max amount of options per context menu
+	int	m_iTooltipCache;			// time to cache tooltip for
+	int	m_iTooltipMode;				// tooltip mode (TOOLTIP_TYPE)
+	int	m_iContextMenuLimit;		// max amount of options per context menu
+	int	m_iAutoTooltipResend;		// automatically resend tooltip
 #define AUTOTOOLTIP_FLAG_NAME          0x0001
 #define AUTOTOOLTIP_FLAG_AMOUNT        0x0002
 #define AUTOTOOLTIP_FLAG_WEIGHT        0x0004
@@ -990,20 +992,19 @@ public:
 #define AUTOTOOLTIP_FLAG_POISON        0x0010
 #define AUTOTOOLTIP_FLAG_WANDCHARGES   0x0020
 #define AUTOTOOLTIP_FLAG_SPELLBOOK     0x0040
-	int			m_iAutoTooltipResend;		// automatically resend tooltip
 
-	int			m_iRegenRate[STAT_QTY];
-	int			m_iTimerCall;
-	bool		m_bAllowLightOverride;
+	int		m_iRegenRate[STAT_QTY];
+	int		m_iTimerCall;
+	bool	m_bAllowLightOverride;
 	CString	m_sZeroPoint;
-	bool		m_bAllowBuySellAgent;
+	bool	m_bAllowBuySellAgent;
 
-	bool		m_bAllowNewbTransfer;
+	bool	m_bAllowNewbTransfer;
 
-	bool		m_NPCNoFameTitle;
+	bool	m_NPCNoFameTitle;
 
-	bool		m_bAgree;
-	int			m_iMaxPolyStats;
+	bool	m_bAgree;
+	int		m_iMaxPolyStats;
 
 	// End INI file options.
 	
@@ -1015,28 +1016,28 @@ public:
 
 	CStringSortArray m_ResourceList;	// Sections lists
 
-	CStringSortArray m_Obscene;	// Bad Names/Words etc.
-	CGObArray< CString* > m_Fame;	// fame titles (fame.famous)
-	CGObArray< CString* > m_Karma;	// karma titles (karma.wicked)
-	CGObArray< CString* > m_Runes;	// Words of power. (A-Z)
+	CStringSortArray		m_Obscene;	// Bad Names/Words etc.
+	CGObArray< CString* >	m_Fame;	// fame titles (fame.famous)
+	CGObArray< CString* >	m_Karma;	// karma titles (karma.wicked)
+	CGObArray< CString* >	m_Runes;	// Words of power. (A-Z)
 
 	CGTypedArray< int, int > m_NotoKarmaLevels; // karma levels for noto titles
 	CGTypedArray< int, int > m_NotoFameLevels; // fame levels for noto titles
-	CGObArray< CString* > m_NotoTitles;	// Noto titles.
+	CGObArray< CString* >	 m_NotoTitles;	// Noto titles.
 
-	CMultiDefArray m_MultiDefs;	// read from the MUL files. Cached here on demand.
+	CMultiDefArray	m_MultiDefs;	// read from the MUL files. Cached here on demand.
 
-	CObNameSortArray m_SkillNameDefs;	// const CSkillDef* Name sorted
+	CObNameSortArray			m_SkillNameDefs;	// const CSkillDef* Name sorted
 	CGPtrTypeArray< CSkillDef* > m_SkillIndexDefs;	// Defined Skills indexed by number
-	CGObArray< CSpellDef* > m_SpellDefs;	// Defined Spells
+	CGObArray< CSpellDef* >		 m_SpellDefs;	// Defined Spells
 	CGPtrTypeArray< CSpellDef* > m_SpellDefs_Sorted; // Defined Spells, in skill order
 
-	CStringSortArray m_PrivCommands[PLEVEL_QTY];	// what command are allowed for a priv level?
+	CStringSortArray	m_PrivCommands[PLEVEL_QTY];	// what command are allowed for a priv level?
 
 public:
-	CObNameSortArray m_Servers;		// Servers list. we act like the login server with this.
-	CObNameSortArray m_Functions;	// subroutines that can be used in scripts.
-	CRegionLinks m_RegionDefs;
+	CObNameSortArray	m_Servers;		// Servers list. we act like the login server with this.
+	CObNameSortArray	m_Functions;	// subroutines that can be used in scripts.
+	CRegionLinks		m_RegionDefs;
 
 	// static definition stuff from *TABLE.SCP mostly.
 	CGObArray< const CStartLoc* > m_StartDefs; // Start points list
