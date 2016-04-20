@@ -1797,6 +1797,18 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 
 	EXC_SET("loading ini");
 	g_Cfg.LoadIni(false);
+	
+	if (g_Cfg.m_bMySql)
+	{
+		EXC_SET( "Connecting to MySQL server" );
+		if (m_hdb.Connect())
+			g_Log.Event( LOGM_NOCONTEXT, "MySQL connected to server: '%s'.\n", g_Cfg.m_sMySqlHost );
+		else
+		{
+			g_Log.EventError( "Can't connect to MySQL DataBase. Check your ini settings or if the server is working.\n" );
+			return false;
+		}
+	}
 
 	EXC_SET("log write");
 	g_Log.WriteString("\n");
