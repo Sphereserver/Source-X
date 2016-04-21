@@ -1,4 +1,5 @@
 
+#include "../common/CDatabase.h"
 #include "../common/CException.h"
 #include "../common/CUIDExtra.h"
 #include "../common/sphereversion.h"
@@ -11,6 +12,7 @@
 #include "items/CItem.h"
 #include "CLog.h"
 #include "CObjBase.h"
+#include "CServer.h"
 #include "CServTime.h"
 #include "CScriptProfiler.h"
 
@@ -1138,18 +1140,18 @@ bool CWorldClock::Advance()
 
 CWorld::CWorld()
 {
+	m_ticksWithoutMySQL = 0;
 	m_savetimer = 0;
 	m_iSaveCountID = 0;
 	m_iSaveStage = 0;
 	m_iPrevBuild = 0;
 	m_iLoadVersion = 0;
 	m_bSaveNotificationSent = false;
-	m_timeSector.Init();
+	m_nextTickTime.Init();
 	m_timeSave.Init();
 	m_timeRespawn.Init();
 	m_timeStartup.Init();
 	m_timeCallUserFunc.Init();
-
 	m_Sectors = NULL;
 	m_SectorsQty = 0;
 	m_Sector_Pulse = 0;
@@ -2455,7 +2457,6 @@ uint CWorld::GetMoonPhase (bool bMoonIndex) const
 		
 		return MulDivLL( dwCurrentTime % FELUCCA_SYNODIC_PERIOD, 8, FELUCCA_SYNODIC_PERIOD );
 }
-
 void CWorld::OnTick()
 {
 	ADDTOCALLSTACK_INTENSIVE("CWorld::OnTick");
@@ -2465,10 +2466,121 @@ void CWorld::OnTick()
 	if ( g_Serv.IsLoading() || !m_Clock.Advance() )
 		return;
 
-	if ( m_timeSector <= GetCurrentTime())
+	if ( m_nextTickTime <= GetCurrentTime())
 	{
 		// Only need a SECTOR_TICK_PERIOD tick to do world stuff.
-		m_timeSector = GetCurrentTime() + SECTOR_TICK_PERIOD;	// Next hit time.
+		m_nextTickTime = GetCurrentTime() + SECTOR_TICK_PERIOD;	// Next hit time.
+		m_Sector_Pulse ++;
+		int	m, s;
+
+		for ( m = 0; m < 256; m++ )
+		{
+			if ( !g_MapList.m_maps[m] ) continue;
+
+			for ( s = 0; s < g_MapList.GetSectorQty(m); s++ )
+			{
+				EXC_TRYSUB("Tick");
+
+				CSector	*pSector = GetSector(m, s);
+				if ( !pSector )
+					g_Log.EventError("Ticking NULL sector %d on map %d.\n", s, m);
+				else
+					pSector->OnTick( m_Sector_Pulse );
+
+				EXC_CATCHSUB("Sector");
+			}
+		}
+
+		// process objects that need status updates
+		// these objects will normally be in containers which don't have any period OnTick method
+		// called (whereas other items can receive the OnTickStatusUpdate() call via their normal
+		// tick method).
+		// note: ideally, a better solution to accomplish this should be found if possible
+		if (m_ObjStatusUpdates.GetCount() > 0)
+		{
+			EXC_TRYSUB("Tick");
+
+			// loop backwards to avoid possible infinite loop if a status update is triggered
+			// as part of the status update (e.g. property changed under tooltip trigger)
+			size_t i = m_ObjStatusUpdates.GetCount();
+			while ( i > 0 )
+			{
+				CObjBase * pObj = m_ObjStatusUpdates.GetAt(--i);
+				if (pObj != NULL)
+					pObj->OnTickStatusUpdate();
+			}
+
+			m_ObjStatusUpdates.RemoveAll();
+
+			EXC_CATCHSUB("StatusUpdates");
+		}
+
+		m_ObjDelete.DeleteAll();	// clean up our delete list.
+	}
+
+	EXC_TRYSUB("Tick");
+	m_TimedFunctions.OnTick();
+	EXC_CATCHSUB("TimerFunction");
+
+	if ( (m_bSaveNotificationSent == false) && ((m_timeSave - (10 * TICK_PER_SEC)) <= GetCurrentTime()) )
+	{
+		Broadcast( g_Cfg.GetDefaultMsg( DEFMSG_SERVER_WORLDSAVE_NOTIFY ) );
+		m_bSaveNotificationSent = true;
+	}
+
+	if ( m_timeSave <= GetCurrentTime())
+	{
+		// Auto save world
+		m_timeSave = GetCurrentTime() + g_Cfg.m_iSavePeriod;
+		g_Log.Flush();
+		Save( false );
+	}
+	if ( m_timeRespawn <= GetCurrentTime())
+	{
+		// Time to regen all the dead NPC's in the world.
+		m_timeRespawn = GetCurrentTime() + (20*60*TICK_PER_SEC);
+		RespawnDeadNPCs();
+	}
+	if ( m_timeCallUserFunc < GetCurrentTime() )
+	{
+		if ( g_Cfg.m_iTimerCall )
+		{
+			m_timeCallUserFunc = GetCurrentTime() + g_Cfg.m_iTimerCall*60*TICK_PER_SEC;
+			CScriptTriggerArgs args(g_Cfg.m_iTimerCall);
+			g_Serv.r_Call("f_onserver_timer", &g_Serv, &args);
+		}
+	}
+}
+
+void CWorld::OnTickMySQL()
+{
+	ADDTOCALLSTACK_INTENSIVE("CWorld::OnTick");
+
+	if ( g_Serv.IsLoading() || !m_Clock.Advance() )
+		return;
+
+	if (!g_Serv.m_hdb.isConnected())
+	{		
+		if (!g_Serv.m_hdb.Connect())
+		{
+			if (m_ticksWithoutMySQL == TICK_PER_SEC)	// a second has passed, let's save and log it incase something goes wrong.
+			{
+				g_Log.EventError( "MySQL Connection lost, saving the current world progress.\n" );
+				g_World.Save( true );
+				g_World.SaveStatics();
+			}
+			m_ticksWithoutMySQL++;
+			return;
+		}
+	}
+
+	if (m_ticksWithoutMySQL > 0)
+		m_ticksWithoutMySQL = 0;
+
+	if (m_nextTickTime <= GetCurrentTime())
+	{
+		// Only need a SECTOR_TICK_PERIOD tick to do world stuff.
+		m_nextTickTime = GetCurrentTime() + SECTOR_TICK_PERIOD;	// Next hit time.
 		m_Sector_Pulse ++;
 		int	m, s;
 

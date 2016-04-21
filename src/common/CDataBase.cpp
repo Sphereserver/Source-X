@@ -10,7 +10,7 @@ extern CDataBaseAsyncHelper g_asyncHdb;
 
 CDataBase::CDataBase()
 {
-	_bConnected = false;
+	m_bConnected = false;
 	_myData = NULL;
 }
 
@@ -25,7 +25,7 @@ bool CDataBase::Connect(const char *user, const char *password, const char *base
 	ADDTOCALLSTACK("CDataBase::Connect");
 	SimpleThreadLock lock(m_connectionMutex);
 
-	_bConnected = false;
+	m_bConnected = false;
 
 	long ver = mysql_get_client_version();
 	if ( ver < MIN_MYSQL_VERSION_ALLOW )
@@ -60,7 +60,7 @@ bool CDataBase::Connect(const char *user, const char *password, const char *base
 		return false;
 	}
 
-	return (_bConnected = true);
+	return (m_bConnected = true);
 }
 
 bool CDataBase::Connect()
@@ -72,7 +72,7 @@ bool CDataBase::Connect()
 bool CDataBase::isConnected()
 {
 	ADDTOCALLSTACK("CDataBase::isConnected");
-	return _bConnected;
+	return m_bConnected;
 }
 
 void CDataBase::Close()
@@ -81,7 +81,7 @@ void CDataBase::Close()
 	SimpleThreadLock lock(m_connectionMutex);
 	mysql_close(_myData);
 	_myData = NULL;
-	_bConnected = false;
+	m_bConnected = false;
 }
 
 bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)

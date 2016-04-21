@@ -204,6 +204,7 @@ CResource::CResource()
 
 	//	MySQL support
 	m_bMySql = false;
+	m_bMySqlTicks = false;
 
 	m_cCommandPrefix = '.';
 
@@ -518,6 +519,7 @@ enum RC_TYPE
 	RC_MYSQLDB,					// m_sMySqlDatabase
 	RC_MYSQLHOST,				// m_sMySqlHost
 	RC_MYSQLPASS,				// m_sMySqlPassword
+	RC_MYSQLTICKS,				// m_bMySqlTicks
 	RC_MYSQLUSER,				// m_sMySqlUser
 	RC_NETTTL,					// m_iNetHistoryTTL
 #ifdef _MTNETWORK
@@ -747,6 +749,7 @@ const CAssocReg CResource::sm_szLoadKeys[RC_QTY+1] =
 	{ "MYSQLDATABASE",			{ ELEM_CSTRING,	OFFSETOF(CResource,m_sMySqlDB),				0 }},
 	{ "MYSQLHOST",				{ ELEM_CSTRING, OFFSETOF(CResource,m_sMySqlHost),			0 }},
 	{ "MYSQLPASSWORD",			{ ELEM_CSTRING,	OFFSETOF(CResource,m_sMySqlPass),			0 }},
+	{ "MYSQLTICKS",				{ ELEM_BOOL,	OFFSETOF(CResource,m_bMySqlTicks),			0 }},
 	{ "MYSQLUSER",				{ ELEM_CSTRING,	OFFSETOF(CResource,m_sMySqlUser),			0 }},
 	{ "NETTTL",					{ ELEM_INT,		OFFSETOF(CResource,m_iNetHistoryTTL),		0 }},
 #ifdef _MTNETWORK
