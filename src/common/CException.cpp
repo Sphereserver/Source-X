@@ -166,39 +166,39 @@ void Assert_CheckFail( lpctstr pExp, lpctstr pFile, long lLine )
 }
 
 #if defined(_WIN32) && !defined(_DEBUG)
-	#include "./crashdump/crashdump.h"
+
+#include "./crashdump/crashdump.h"
 	
-	extern "C"
-	{
-		int _cdecl _purecall()
-		{
-			// catch this special type of C++ exception as well.
-			Assert_CheckFail( "purecall", "unknown", 1 );
-			return 0;
-		}
+int _cdecl _purecall()
+{
+	// catch this special type of C++ exception as well.
+	Assert_CheckFail( "purecall", "unknown", 1 );
+	return 0;
+}
 
-		void _cdecl Sphere_Exception_Win32( uint id, struct _EXCEPTION_POINTERS* pData )
-		{
+void _cdecl Sphere_Exception_Win32( uint id, struct _EXCEPTION_POINTERS* pData )
+{
 #ifndef _NO_CRASHDUMP
-			if ( CrashDump::IsEnabled() )
-			{
-				CrashDump::StartCrashDump(GetCurrentProcessId(), GetCurrentThreadId(), pData);
-			}
-#endif
-			// WIN32 gets an exception.
-			size_t pCodeStart = (size_t)(byte *) &globalstartsymbol;	// sync up to my MAP file.
-
-			size_t pAddr = (size_t)pData->ExceptionRecord->ExceptionAddress;
-			pAddr -= pCodeStart;
-
-			throw CException(id, pAddr);
-		}
+	if ( CrashDump::IsEnabled() )
+	{
+		CrashDump::StartCrashDump(GetCurrentProcessId(), GetCurrentThreadId(), pData);
 	}
+
+#endif
+	// WIN32 gets an exception.
+	size_t pCodeStart = (size_t)(byte *) &globalstartsymbol;	// sync up to my MAP file.
+
+	size_t pAddr = (size_t)pData->ExceptionRecord->ExceptionAddress;
+	pAddr -= pCodeStart;
+
+	throw CException(id, pAddr);
+}
+
 #endif
 
 void SetExceptionTranslator()
 {
-#if defined(_WIN32) && !defined(__MINGW32__) && !defined(_DEBUG)
+#if defined(_WIN32) && defined(_MSC_VER) && defined(_NIGHTLYBUILD)
 	_set_se_translator( Sphere_Exception_Win32 );
 #endif
 }

@@ -928,7 +928,7 @@ bool CClient::Event_Command(lpctstr pszCommand, TALKMODE_TYPE mode)
 	else
 		return false;
 
-	if ( !strcmpi(pszCommand, "q") && ( GetPrivLevel() > PLEVEL_Player ))
+	if ( !strnicmp(pszCommand, "q", 1) && ( GetPrivLevel() > PLEVEL_Player ) )
 	{
 		SysMessage("Probably you forgot about Ctrl?");
 		return true;

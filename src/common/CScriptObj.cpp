@@ -2501,7 +2501,7 @@ jump_in:
 				if ( !pArgs->r_Verb(s, pSrc) )
 				{
 					bool	fRes;
-					if ( !strcmpi(s.GetKey(), "call" ) )
+					if ( !strnicmp(s.GetKey(), "call", 4 ) )
 					{
 						EXC_SET("call");
 						CString sVal;
@@ -2560,7 +2560,8 @@ jump_in:
 						{
 							fRes = false;
 						}
-					} else if ( !strcmpi(s.GetKey(), "FullTrigger" ) )
+					} 
+					else if ( !strnicmp(s.GetKey(), "FullTrigger", 11 ) )
 					{
 						EXC_SET("FullTrigger");
 						CString sVal;
@@ -3097,11 +3098,11 @@ bool CFileObj::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 				if (pszKey[0] == '\0')
 					return false;
 
-				if (strcmpi("BEGIN", pszKey) == 0)
+				if ( !strnicmp("BEGIN", pszKey, 5) )
 				{
 					sVal.FormatSTVal( sWrite->Seek(0, SEEK_SET) );
 				}
-				else if (strcmpi("END", pszKey) == 0)
+				else if ( !strnicmp("END", pszKey, 3) )
 				{
 					sVal.FormatSTVal( sWrite->Seek(0, SEEK_END) );
 				}

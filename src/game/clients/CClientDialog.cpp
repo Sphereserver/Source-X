@@ -818,7 +818,7 @@ TRIGRET_TYPE CClient::Menu_OnSelect( RESOURCE_ID_BASE rid, int iSelect, CObjBase
 			if ( !s.IsKey( "ON" ) || ( *s.GetArgStr() != '@' ) )
 				continue;
 
-			if ( strcmpi( s.GetArgStr(), "@cancel" ) )
+			if (strnicmp( s.GetArgStr(), "@cancel", 7 ) )
 				continue;
 
 			return pObj->OnTriggerRunVal( s, TRIGRUN_SECTION_TRUE, m_pChar, NULL );

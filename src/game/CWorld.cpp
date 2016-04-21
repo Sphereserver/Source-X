@@ -463,22 +463,16 @@ int CTimedFunctionHandler::Load( const char *pszName, bool fQuoted, const char *
 	static TimedFunction *tf = NULL;
 
 	if ( !pszName )
-	{
 		return -1;
-	}
 
-	if ( strcmpi( pszName, "CurTick" ) == 0 )
+	if ( !strnicmp( pszName, "CurTick", 7 ) )
 	{
 		if ( IsDigit(pszVal[0] ) )
-		{
 			m_curTick = ATOI(pszVal);
-		}
 		else
-		{
 			g_Log.Event( LOGM_INIT|LOGL_ERROR,	"Invalid NextTick line in save file: %s=%s\n", pszName, pszVal );
-		}
 	}
-	else if ( strcmpi( pszName, "TimerFNumbers" ) == 0 )
+	else if ( !strnicmp( pszName, "TimerFNumbers", 13 ) )
 	{
 		tchar * ppVal[4];
 		strcpy( tempBuffer, pszVal );	//because pszVal is constant and Str_ParseCmds wants a non-constant string
@@ -515,7 +509,7 @@ int CTimedFunctionHandler::Load( const char *pszName, bool fQuoted, const char *
 			}
 		}
 	}
-	else if ( strcmpi( pszName, "TimerFCall" ) == 0 )
+	else if ( !strnicmp( pszName, "TimerFCall", 11 ) )
 	{
 		int isNew = 0;
 		if ( tf == NULL )
@@ -525,9 +519,7 @@ int CTimedFunctionHandler::Load( const char *pszName, bool fQuoted, const char *
 		}
 		strcpy( tf->funcname, pszVal );
 		if ( !isNew )
-		{
 			g_Log.Event( LOGM_INIT|LOGL_ERROR, "Invalid Timerf in %sdata.scp. Each TimerFCall and TimerFNumbers pair must be in that order.\n", SPHERE_FILE );
-		}
 	}
 
 	return 0;
@@ -1998,7 +1990,7 @@ bool CWorld::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 			if ( pPage == NULL )
 				return false;
 
-			if ( !strcmpi(pszKey, "HANDLED") )
+			if ( !strnicmp(pszKey, "HANDLED", 7) )
 			{
 				CClient *pClient = pPage->FindGMHandler();
 				if ( pClient != NULL && pClient->GetChar() != NULL )

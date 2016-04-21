@@ -893,7 +893,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				{
 					if ( LocArgs.GetLength() )
 						LocArgs += "\t";
-					LocArgs += ( !strcmp(ppLocArgs[y], "NULL") ? " " : ppLocArgs[y] );
+					LocArgs += ( !strncmp(ppLocArgs[y], "NULL", 4) ? " " : ppLocArgs[y] );
 				}
 
 				if ( g_Cfg.m_wDebugFlags & DEBUGF_SCRIPTS )
@@ -1047,7 +1047,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			break;
 
 		case CV_CTAGLIST:
-			if ( ! strcmpi( s.GetArgStr(), "log" ))
+			if ( !strnicmp( s.GetArgStr(), "log", 3 ) )
 				pSrc = &g_Serv;
 			m_TagDefs.DumpKeys(pSrc, "CTAG.");
 			break;
@@ -1447,7 +1447,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					{
 						if ( CArgs.GetLength() )
 							CArgs += "\t";
-						CArgs += ( !strcmp(ppArgs[i], "NULL") ? " " : ppArgs[i] );
+						CArgs += ( !strncmp(ppArgs[i], "NULL", 4) ? " " : ppArgs[i] );
 					}
 
 					addBarkLocalized(iClilocId, NULL, static_cast<HUE_TYPE>(hue), TALKMODE_SYSTEM, FONT_NORMAL, CArgs.GetPtr());
@@ -1476,7 +1476,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					{
 						if ( CArgs.GetLength() )
 							CArgs += "\t";
-						CArgs += ( !strcmp(ppArgs[i], "NULL") ? " " : ppArgs[i] );
+						CArgs += ( !strncmp(ppArgs[i], "NULL", 4) ? " " : ppArgs[i] );
 					}
 
 					addBarkLocalizedEx( iClilocId, NULL, static_cast<HUE_TYPE>(hue), TALKMODE_SYSTEM, FONT_NORMAL, static_cast<AFFIX_TYPE>(affix), ppArgs[3], CArgs.GetPtr() );

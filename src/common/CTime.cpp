@@ -95,9 +95,9 @@ void FormatDateTime(tchar * pszTemp, lpctstr pszFormat, const struct tm * ptmTem
 	// on windows we need to set the invalid parameter handler, or else the program will terminate when a bad format is encountered
 	_invalid_parameter_handler oldHandler, newHandler;
 	newHandler = static_cast<_invalid_parameter_handler>(invalidParameterHandler);
-#ifndef __MINGW32__
+#ifdef _MSC_VER
 	oldHandler = _set_invalid_parameter_handler(newHandler);
-#endif  // __MINGW32__
+#endif  // _MSC_VER
 	try
 	{
 #endif
@@ -115,9 +115,9 @@ void FormatDateTime(tchar * pszTemp, lpctstr pszFormat, const struct tm * ptmTem
 
 	// restore previous parameter handler
 
-#ifndef __MINGW32__
+#ifdef _MSC_VER
 	_set_invalid_parameter_handler(oldHandler);
-#endif  // __MINGW32__
+#endif  // _MSC_VER
 #endif
 }
 

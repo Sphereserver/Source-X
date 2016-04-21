@@ -1,5 +1,5 @@
 /*
-* @file CAssoc.H
+* @file CAssoc.h
 * @brief Simple shared useful base classes.
 */
 

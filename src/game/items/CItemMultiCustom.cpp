@@ -1136,14 +1136,14 @@ lpctstr const CItemMultiCustom::sm_szVerbKeys[IMCV_QTY+1] =
 bool CItemMultiCustom::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CItemMultiCustom::r_GetRef");
-	if (!strcmpi("DESIGNER.", pszKey))
+	if (!strnicmp("DESIGNER.", pszKey, 9) )
 	{
 		pszKey += 9;
 		pRef = (m_pArchitect? m_pArchitect->GetChar() : NULL);
 		return true;
 	}
 
-	return( CItemMulti::r_GetRef( pszKey, pRef ));
+	return CItemMulti::r_GetRef( pszKey, pRef );
 }
 
 bool CItemMultiCustom::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from script
@@ -1156,7 +1156,7 @@ bool CItemMultiCustom::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute com
 	int iCmd = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 	if ( iCmd < 0 )
 	{
-		return( CItemMulti::r_Verb( s, pSrc ));
+		return CItemMulti::r_Verb( s, pSrc );
 	}
 
 	CChar * pChar = (pSrc != NULL? pSrc->GetChar() : NULL);
@@ -1340,21 +1340,21 @@ bool CItemMultiCustom::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole 
 			else if ( *pszKey == '.' )
 			{
 				SKIP_SEPARATORS(pszKey);
-				size_t iQty = (size_t)( Exp_GetVal(pszKey) );
+				size_t iQty = Exp_GetSTVal(pszKey);
 				if ( iQty >= m_designMain.m_vectorComponents.size() )
 					return false;
 
 				SKIP_SEPARATORS(pszKey);
 				CUOMultiItemRec_HS item = m_designMain.m_vectorComponents.at(iQty)->m_item;
 
-				if ( !strcmpi(pszKey, "ID") ) sVal.FormatVal(item.GetDispID());
-				else if ( !strcmpi(pszKey, "DX") ) sVal.FormatVal(item.m_dx);
-				else if ( !strcmpi(pszKey, "DY") ) sVal.FormatVal(item.m_dy);
-				else if ( !strcmpi(pszKey, "DZ") ) sVal.FormatVal(item.m_dz);
-				else if ( !strcmpi(pszKey, "D") ) sVal.Format("%i,%i,%i", item.m_dx, item.m_dy, item.m_dz);
-				else if ( !strcmpi(pszKey, "FIXTURE") ) sVal.FormatVal(item.m_visible? 0:1);
-				else if ( !*pszKey ) sVal.Format("%u,%i,%i,%i", item.GetDispID(), item.m_dx, item.m_dy, item.m_dz);
-				else return false;
+				if ( !strnicmp(pszKey, "ID", 2) )		sVal.FormatVal(item.GetDispID());
+				else if ( !strnicmp(pszKey, "DX", 2) )	sVal.FormatVal(item.m_dx);
+				else if ( !strnicmp(pszKey, "DY", 2) )	sVal.FormatVal(item.m_dy);
+				else if ( !strnicmp(pszKey, "DZ", 2) )	sVal.FormatVal(item.m_dz);
+				else if ( !strnicmp(pszKey, "D", 1) )	sVal.Format("%i,%i,%i", item.m_dx, item.m_dy, item.m_dz);
+				else if ( !strnicmp(pszKey, "FIXTURE", 7) )		sVal.FormatVal(item.m_visible? 0:1);
+				else if ( !*pszKey )				sVal.Format("%u,%i,%i,%i", item.GetDispID(), item.m_dx, item.m_dy, item.m_dz);
+				else								return false;
 			}
 			else
 				return false;

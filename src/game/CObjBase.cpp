@@ -1795,12 +1795,12 @@ bool CObjBase::r_LoadVal( CScript & s )
 			m_Can = s.GetArgVal();
 			break;
 		case OC_COLOR:
-			if ( ! strcmpi( s.GetArgStr(), "match_shirt" ) || ! strcmpi( s.GetArgStr(), "match_hair" ))
+			if ( !strnicmp( s.GetArgStr(), "match_shirt", 11 ) || !strnicmp( s.GetArgStr(), "match_hair", 10 ))
 			{
 				CChar * pChar = dynamic_cast <CChar*>(GetTopLevelObj());
 				if ( pChar )
 				{
-					CItem * pHair = pChar->LayerFind( ! strcmpi( s.GetArgStr()+6, "shirt" ) ? LAYER_SHIRT : LAYER_HAIR );
+					CItem * pHair = pChar->LayerFind( !strnicmp( s.GetArgStr()+6, "shirt",5 ) ? LAYER_SHIRT : LAYER_HAIR );
 					if ( pHair )
 					{
 						m_wHue = pHair->GetHue();

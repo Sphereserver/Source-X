@@ -893,14 +893,14 @@ bool CListDefMap::r_LoadVal( lpctstr pszKey, CScript & s )
 
 		if ( !IsSimpleNumberString(ppCmds[1]) )
 		{
-			if ( strcmpi(ppCmds[1], "clear") == 0 )
+			if ( !strnicmp(ppCmds[1], "clear", 5) )
 			{
 				if ( pListBase )
 					DeleteKey(ppCmds[0]);
 
 				return true;
 			}
-			else if ( strcmpi(ppCmds[1], "add") == 0 )
+			else if ( !strnicmp(ppCmds[1], "add", 3) )
 			{
 				if ( !pszArg || !(*pszArg) )
 					return false;
@@ -916,12 +916,12 @@ bool CListDefMap::r_LoadVal( lpctstr pszKey, CScript & s )
 				else
 					return pListBase->AddElementStr(pszArg);
 			}
-			else if (( strcmpi(ppCmds[1], "set") == 0 ) || ( strcmpi(ppCmds[1], "append") == 0 ))
+			else if ( (!strnicmp(ppCmds[1], "set", 3)) || (!strnicmp(ppCmds[1], "append", 6)) )
 			{
 				if ( !pszArg || !(*pszArg) )
 					return false;
 
-				if (( pListBase ) && ( strcmpi(ppCmds[1], "set") == 0 ))
+				if (( pListBase ) && ( !strnicmp(ppCmds[1], "set", 3) ))
 				{
 					DeleteKey(ppCmds[0]);
 					pListBase = NULL;
@@ -949,20 +949,20 @@ bool CListDefMap::r_LoadVal( lpctstr pszKey, CScript & s )
 				else
 					return pListBase->AddElementStr(ppCmd[0]);
 			}
-			else if ( strcmpi(ppCmds[1], "sort") == 0 )
+			else if ( !strnicmp(ppCmds[1], "sort", 4) )
 			{
 				if ( !pListBase )
 					return false;
 
 				if ( pszArg && *pszArg )
 				{
-					if ( strcmpi(pszArg, "asc") == 0 )
+					if ( !strnicmp(pszArg, "asc", 3) )
 						pListBase->Sort();
-					else if (( strcmpi(pszArg, "i") == 0 ) || ( strcmpi(pszArg, "iasc") == 0 ))
+					else if ( (!strnicmp(pszArg, "i", 1) ) || (!strnicmp(pszArg, "iasc", 4)) )
 						pListBase->Sort(false, true);
-					else if ( strcmpi(pszArg, "desc") == 0 )
+					else if ( !strnicmp(pszArg, "desc", 4) )
 						pListBase->Sort(true);
-					else if ( strcmpi(pszArg, "idesc") == 0 )
+					else if ( !strnicmp(pszArg, "idesc", 5) )
 						pListBase->Sort(true, true);
 					else
 						return false;
@@ -979,9 +979,9 @@ bool CListDefMap::r_LoadVal( lpctstr pszKey, CScript & s )
 
 			if ( ppCmds[2] && *(ppCmds[2]) )
 			{
-				if ( strcmpi(ppCmds[2], "remove") == 0 )
+				if ( !strnicmp(ppCmds[2], "remove", 6) )
 					return pListBase->RemoveElement(nIndex);
-				else if ( strcmpi(ppCmds[2], "insert") == 0 && pszArg && *pszArg )
+				else if ( !strnicmp(ppCmds[2], "insert", 6) && pszArg && *pszArg )
 				{
 					bool bIsNum = ( IsSimpleNumberString(pszArg) );
 
@@ -1021,7 +1021,7 @@ bool CListDefMap::r_LoadVal( lpctstr pszKey, CScript & s )
 		{
 			if ( ppCmds[2] && *(ppCmds[2]) )
 			{
-				if ( strcmpi(ppCmds[2], "insert") == 0 && pszArg && *pszArg )
+				if ( !strnicmp(ppCmds[2], "insert", 6) && pszArg && *pszArg )
 				{
 					if ( IsSimpleNumberString(pszArg) )
 						return pListBase->AddElementNum(Exp_GetVal(pszArg));
@@ -1101,7 +1101,7 @@ bool CListDefMap::r_Write( CTextConsole *pSrc, lpctstr pszString, CString& strVa
 		else
 			return false;
 	}
-	else if ( strcmpi(ppCmds[1], "count") == 0 )
+	else if ( !strnicmp(ppCmds[1], "count", 5) )
 	{
 		strVal.Format("%" PRIuSIZE_T, pListBase->GetCount());
 
@@ -1111,7 +1111,7 @@ bool CListDefMap::r_Write( CTextConsole *pSrc, lpctstr pszString, CString& strVa
 	CScript s(nStartIndex == -1 ? ppCmds[1]:ppCmds[2]);
 	nStartIndex = maximum(0, nStartIndex);
 
-	if ( strcmpi(s.GetKey(), "findelem") == 0 )
+	if ( !strnicmp(s.GetKey(), "findelem", 8) )
 	{
 		bool fQuoted = false;
 		lpctstr pszArg = s.GetArgStr(&fQuoted);

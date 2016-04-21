@@ -501,7 +501,7 @@ bool CChat::IsValidName( lpctstr pszName, bool fPlayer ) // static
 	// Channels can have spaces, but not player names
 	if (strlen(pszName) < 1)
 		return false;
-	if (strcmp(pszName, "SYSTEM") == 0)
+	if (!strncmp(pszName, "SYSTEM",6))
 		return false;
 
 	size_t length = strlen(pszName);

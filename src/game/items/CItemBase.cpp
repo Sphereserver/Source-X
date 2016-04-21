@@ -123,7 +123,7 @@ void CItemBase::SetTypeName( lpctstr pszName )
 {
 	ADDTOCALLSTACK("CItemBase::SetTypeName");
 	ASSERT(pszName);
-	if ( ! strcmp( pszName, GetTypeName()))
+	if ( ! strcmp( pszName, GetTypeName()) )
 		return;
 	m_dwFlags |= UFLAG2_ZERO1;	// we override the name
 	CBaseBaseDef::SetTypeName( pszName );
@@ -1100,12 +1100,12 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pChar
 			if (*pszKey == '.')
 			{
 				pszKey++;
-				if (!strcmpi(pszKey, "TILES"))
+				if (!strnicmp(pszKey, "TILES", 5))
 				{
 					sVal.FormatVal(pItemMulti->m_shipSpeed.tiles);
 					break;
 				}
-				else if (!strcmpi(pszKey, "PERIOD"))
+				else if (!strnicmp(pszKey, "PERIOD", 6))
 				{
 					sVal.FormatVal(pItemMulti->m_shipSpeed.period);
 					break;
@@ -1432,12 +1432,12 @@ bool CItemBase::r_LoadVal( CScript &s )
 			{
 				pszKey++;
 				CItemBaseMulti *pItemMulti = dynamic_cast<CItemBaseMulti*>(dynamic_cast<CItemBase*>(this));
-				if (!strcmpi(pszKey, "TILES"))
+				if (!strnicmp(pszKey, "TILES", 5))
 				{
 					pItemMulti->m_shipSpeed.tiles = (uchar)(s.GetArgVal());
 					return true;
 				}
-				else if (!strcmpi(pszKey, "PERIOD"))
+				else if (!strnicmp(pszKey, "PERIOD", 6))
 				{
 					pItemMulti->m_shipSpeed.tiles = (uchar)(s.GetArgVal());
 					return true;
@@ -2008,12 +2008,12 @@ bool CItemBaseMulti::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * 
 		if (*pszKey == '.')
 		{
 			pszKey++;
-			if ( !strcmpi(pszKey, "TILES"))
+			if ( !strnicmp(pszKey, "TILES", 5) )
 			{
 				sVal.FormatVal(m_shipSpeed.tiles);
 				break;
 			}
-			else if (!strcmpi(pszKey, "PERIOD"))
+			else if (!strnicmp(pszKey, "PERIOD", 6) )
 			{
 				sVal.FormatVal(m_shipSpeed.period);
 				break;

@@ -15,7 +15,7 @@
 //---------------------------PROTOCOL DEFS---------------------------
 
 // All these structures must be byte packed.
-#if defined _WIN32 && (!__MINGW32__)
+#if defined(_WIN32) && defined(_MSC_VER)
 	// Microsoft dependant pragma
 	#pragma pack(1)
 	#define PACK_NEEDED
@@ -3357,8 +3357,8 @@ struct CCommand	// command buffer from server to client.
 } PACK_NEEDED;
 
 // Turn off structure packing.
-#if defined _WIN32 && (!__MINGW32__)
-#pragma pack()
+#if defined(_WIN32) && defined(_MSC_VER)
+	#pragma pack()
 #endif
 
 #endif // _INC_SPHEREPROTO_H

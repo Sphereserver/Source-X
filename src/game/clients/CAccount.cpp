@@ -26,7 +26,7 @@ bool CAccounts::Account_Load( lpctstr pszNameRaw, CScript & s, bool fChanges )
 	ADDTOCALLSTACK("CAccounts::Account_Load");
 
 	// Only read as "[ACCOUNT name]" format if arguments exist.
-	if ( s.HasArgs() && !strcmpi(pszNameRaw, "ACCOUNT") )
+	if ( s.HasArgs() && !strnicmp(pszNameRaw, "ACCOUNT", 7) )
 	{
 		pszNameRaw = s.GetArgStr();
 	}
@@ -504,7 +504,7 @@ bool CAccount::NameStrip( tchar * pszNameOut, lpctstr pszNameInp )
 	// Check for newline characters.
 	if ( strchr(pszNameOut, 0x0A) || strchr(pszNameOut, 0x0C) || strchr(pszNameOut, 0x0D) )
 		return false;
-	if ( !strcmpi(pszNameOut, "EOF") || !strcmpi(pszNameOut, "ACCOUNT") )
+	if ( !strnicmp(pszNameOut, "EOF", 3) || !strnicmp(pszNameOut, "ACCOUNT", 7) )
 		return false;
 	// Check for name already used.
 	if ( FindTableSorted(pszNameOut, CAccounts::sm_szVerbKeys, CountOf(CAccounts::sm_szVerbKeys)-1) >= 0 )

@@ -17,6 +17,7 @@ TARGET_COMPILE_DEFINITIONS ( spheresvr
 
 # Others
 	PUBLIC $<$<OR:$<CONFIG:Release>,$<CONFIG:Nightly>>:	THREAD_TRACK_CALLSTACK>
+	PUBLIC $<$<OR:$<CONFIG:Release>,$<CONFIG:Nightly>>:	NDEBUG>
 
 	PUBLIC $<$<CONFIG:Debug>:	_DEBUG>
 	PUBLIC $<$<CONFIG:Debug>:	_PACKETDUMP>

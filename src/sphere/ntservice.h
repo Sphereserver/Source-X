@@ -9,11 +9,11 @@
 #ifdef _WIN32
 
 
-#ifdef __MINGW32__
+#ifndef _MSC_VER
 	#include <excpt.h>
 #else
 	#include <eh.h>			// exception handling info.
-#endif // __MINGW32__
+#endif // _MSC_VER
 
 #include "../common/spherecom.h"
 

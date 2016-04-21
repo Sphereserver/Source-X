@@ -10,7 +10,7 @@
 #include "../../common/common.h"
 
 // All these structures must be byte packed.
-#if defined _WIN32 && (!__MINGW32__)
+#if defined(_WIN32) && defined(_MSC_VER)
 	// Microsoft dependant pragma
 	#pragma pack(1)
 	#define PACK_NEEDED
@@ -32,7 +32,7 @@ struct CUOMapMeter
 
 
 // Turn off structure packing.
-#if defined _WIN32 && (!__MINGW32__)
+#if defined(_WIN32) && defined(_MSC_VER)
 	#pragma pack()
 #else
 	#undef PACK_NEEDED

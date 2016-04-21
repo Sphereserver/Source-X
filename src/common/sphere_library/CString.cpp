@@ -680,9 +680,7 @@ int FindTableSorted(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int 
 	// RETURN: -1 = not found
 	int iHigh = iCount - 1;
 	if (iHigh < 0)
-	{
 		return -1;
-	}
 	int iLow = 0;
 	while (iLow <= iHigh)
 	{

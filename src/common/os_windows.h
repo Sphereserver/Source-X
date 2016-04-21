@@ -43,7 +43,7 @@
 #define FILE_FLUSH(_x_)
 
 
-#ifdef __MINGW32__
+#ifndef _MSC_VER
 	#define _cdecl __cdecl
 	/*
 	There is a problem with the UNREFERENCED_PARAMETER macro from mingw and sphereserver.
@@ -57,7 +57,7 @@
 	typedef void (__cdecl *_invalid_parameter_handler)(const wchar_t *,const wchar_t *,const wchar_t *,unsigned int,uintptr_t);
 	// Stuctured exception handling windows api not implemented on mingw.
 	#define __except(P)		catch(int)
-#endif  // __MINGW32__
+#endif  // _MSC_VER
 
 
 extern bool NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLinel, int nCmdShow);

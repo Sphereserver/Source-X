@@ -301,7 +301,7 @@ bool CResource::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 
 	if ( iResType < 0 )
 	{
-		if (strcmpi(pszKey, "MULTIDEF") == 0)
+		if ( !strnicmp(pszKey, "MULTIDEF", 8) )
 		{
 			iResType = RES_ITEMDEF;
 			fNewStyleDef = true;
@@ -869,7 +869,7 @@ bool CResource::r_LoadVal( CScript &s )
 			{
 				size_t length = str.size();
 
-				if ( length >= 2/*at least .X*/ && str[0] == '.' && isdigit(str[1]) )
+				if ( length >= 2 /*at least .X*/ && str[0] == '.' && isdigit(str[1]) )
 				{
 					lpctstr pszStr = &(str[1]);
 					int nMapNumber = Exp_GetVal(pszStr);
@@ -878,7 +878,7 @@ bool CResource::r_LoadVal( CScript &s )
 					{
 						SKIP_SEPARATORS(pszStr);
 
-						if ( strcmpi(pszStr, "ALLSECTORS") == 0 )
+						if ( !strnicmp(pszStr, "ALLSECTORS", 10) )
 						{
 							int nSectors = g_MapList.GetSectorQty(nMapNumber);
 							pszStr = s.GetArgRaw();
@@ -917,7 +917,6 @@ bool CResource::r_LoadVal( CScript &s )
 						}
 					}
 				}
-	
 				DEBUG_ERR(("Bad usage of MAPx. Check your sphere.ini or scripts (SERV.MAP is a read only property)\n"));
 				return false;
 			}
@@ -1297,17 +1296,13 @@ bool CResource::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc 
 					default:
 					case 4:
 						if ( IsDigit(ppVal[3][0]) )
-						{
-							pt.m_map = (uchar)(ATOI(ppVal[3]));
-						}
+							pt.m_map = (byte)(ATOI(ppVal[3]));
 					case 3:
 						if ( IsDigit(ppVal[2][0]) || (( iArgs == 4 ) && ( ppVal[2][0] == '-' )) )
 						{
 							pt.m_z = (char)(( iArgs == 4 ) ? ATOI(ppVal[2]) : 0);
 							if ( iArgs == 3 )
-							{
-								pt.m_map = (uchar)(ATOI(ppVal[2]));
-							}
+								pt.m_map = (byte)(ATOI(ppVal[2]));
 						}
 					case 2:
 						pt.m_y = (short)(ATOI(ppVal[1]));
@@ -1323,7 +1318,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc 
 			return pt.r_WriteVal(pszKey, sVal);
 		} 
 
-		if ( !strnicmp( pszKey, "MAPLIST.",8) )
+		if ( !strnicmp( pszKey, "MAPLIST.", 8) )
 		{
 			lpctstr pszCmd = pszKey + 8;
 			int iNumber = Exp_GetVal(pszCmd);
@@ -1331,29 +1326,31 @@ bool CResource::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc 
 			sVal.FormatVal(0);
 
 			if ( !*pszCmd )
-			{
 				sVal.FormatVal( g_MapList.IsMapSupported(iNumber) );
-			}
 			else
 			{
 				if ( g_MapList.IsMapSupported(iNumber) )
 				{
-					if (!strcmpi(pszCmd,"BOUND.X"))
+					if (!strnicmp(pszCmd,"BOUND.X", 7))
 						sVal.FormatVal( g_MapList.GetX(iNumber) );
-					else if (!strcmpi(pszCmd,"BOUND.Y"))
+					else if (!strnicmp(pszCmd,"BOUND.Y", 7))
 						sVal.FormatVal( g_MapList.GetY(iNumber) );
-					else if (!strcmpi(pszCmd,"CENTER.X"))
+					else if (!strnicmp(pszCmd,"CENTER.X", 8))
 						sVal.FormatVal( g_MapList.GetCenterX(iNumber) );
-					else if (!strcmpi(pszCmd,"CENTER.Y"))
+					else if (!strnicmp(pszCmd,"CENTER.Y", 8))
 						sVal.FormatVal( g_MapList.GetCenterY(iNumber) );
-					else if (!strcmpi(pszCmd,"SECTOR.SIZE"))
-						sVal.FormatVal( g_MapList.GetSectorSize(iNumber) );
-					else if (!strcmpi(pszCmd,"SECTOR.ROWS"))
-						sVal.FormatVal( g_MapList.GetSectorRows(iNumber) );
-					else if (!strcmpi(pszCmd,"SECTOR.COLS"))
-						sVal.FormatVal( g_MapList.GetSectorCols(iNumber) );
-					else if (!strcmpi(pszCmd,"SECTOR.QTY"))
-						sVal.FormatVal( g_MapList.GetSectorQty(iNumber) );
+					else if (!strnicmp(pszCmd, "SECTOR.", 7))
+					{
+						pszCmd += 7;
+						if (!strnicmp(pszCmd, "SIZE", 4))
+							sVal.FormatVal(g_MapList.GetSectorSize(iNumber));
+						else if (!strnicmp(pszCmd, "ROWS", 4))
+							sVal.FormatVal(g_MapList.GetSectorRows(iNumber));
+						else if (!strnicmp(pszCmd, "COLS", 4))
+							sVal.FormatVal(g_MapList.GetSectorCols(iNumber));
+						else if (!strnicmp(pszCmd, "QTY", 3))
+							sVal.FormatVal(g_MapList.GetSectorQty(iNumber));
+					}
 				}
 			}
 
@@ -1433,7 +1430,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc 
 			CItemStone * pStone = NULL;
 			size_t x = 0;
 
-			if (!strcmpi(pszCmd,"COUNT"))
+			if (!strnicmp(pszCmd,"COUNT", 5))
 			{
 				for ( size_t i = 0; i < g_World.m_Stones.GetCount(); i++ )
 				{
@@ -3296,12 +3293,12 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 			pszName = pArg1;
 			tchar * pArg2;
 			Str_Parse( pArg1, &pArg2 );
-			if ( ! strcmpi( pArg2, "TEXT" ))
+			if ( !strnicmp( pArg2, "TEXT", 4 ) )
 				iPage = RES_DIALOG_TEXT;
-			else if ( ! strcmpi( pArg2, "BUTTON" ))
+			else if ( !strnicmp( pArg2, "BUTTON",6 ) )
 				iPage = RES_DIALOG_BUTTON;
 			else
-				iPage = RES_GET_INDEX( Exp_GetVal( pArg2 ));
+				iPage = RES_GET_INDEX( Exp_GetVal(pArg2) );
 			if ( iPage > 255 )
 			{
 				DEBUG_ERR(( "Bad resource index page %d\n", iPage ));

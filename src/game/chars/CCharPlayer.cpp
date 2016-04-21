@@ -385,7 +385,7 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 				return false;
 
 			SKIP_SEPARATORS(pszKey);
-			if ( !strcmpi(pszKey, "HANDLE") )
+			if ( !strnicmp(pszKey, "HANDLE", 6) )
 			{
 				CChar *ppChar = pChar;
 				lpctstr pszArgs = s.GetArgStr(); //Moved here because of error with quoted strings!?!?
@@ -401,7 +401,7 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 
 				pPage->SetGMHandler(pClient);
 			}
-			else if ( !strcmpi(pszKey, "DELETE") )
+			else if ( !strnicmp(pszKey, "DELETE", 6) )
 			{
 				delete pPage;
 			}

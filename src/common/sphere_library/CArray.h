@@ -13,17 +13,16 @@
 #include "../common.h"
 #include "../spherecom.h"
 
-#if _MSC_VER
+#ifdef _MSC_VER
 	#define STANDARD_CPLUSPLUS_THIS(_x_) _x_
 	#pragma warning(disable:4505)
-#endif // _MSC_VER
-#ifdef __MINGW32__
+#else
 	#define STANDARD_CPLUSPLUS_THIS(_x_) this->_x_
 	#include <cstddef>
-#endif  // __MINGW32__
+#endif
 #ifdef __linux
 	#define STANDARD_CPLUSPLUS_THIS(_x_) this->_x_
-#endif  // __linux
+#endif
 
 
 class CGObList;
