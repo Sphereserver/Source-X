@@ -458,7 +458,7 @@ void CItemMulti::r_Write( CScript & s )
 	}
 }
 
-bool CItemMulti::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
+bool CItemMulti::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CItemMulti::r_WriteVal");
 	if ( !strnicmp(pszKey, "COMP", 4) )

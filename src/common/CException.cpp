@@ -6,7 +6,7 @@
 #include "CException.h"
 
 #ifdef _WIN32
-	int CSphereError::GetSystemErrorMessage( dword dwError, lptstr lpszError, uint nMaxError ) // static
+	int CSError::GetSystemErrorMessage( dword dwError, lptstr lpszError, uint nMaxError ) // static
 	{
 		//	PURPOSE:  copies error message text to a string
 		//
@@ -36,13 +36,13 @@
 	}
 #endif
 
-bool CSphereError::GetErrorMessage( lptstr lpszError, uint nMaxError,	uint * pnHelpContext ) const
+bool CSError::GetErrorMessage( lptstr lpszError, uint nMaxError,	uint * pnHelpContext ) const
 {
 	UNREFERENCED_PARAMETER(nMaxError);
 	UNREFERENCED_PARAMETER(pnHelpContext);
 
 #ifdef _WIN32
-	// Compatible with CException and CFileException
+	// Compatible with CException and CSFileException
 	if ( m_hError )
 	{
 		// return the message defined by the system for the error code
@@ -66,21 +66,21 @@ bool CSphereError::GetErrorMessage( lptstr lpszError, uint nMaxError,	uint * pnH
 	return true;
 }
 
-CSphereError::CSphereError( const CSphereError &e ) :
+CSError::CSError( const CSError &e ) :
 	m_eSeverity( e.m_eSeverity ),
 	m_hError( e.m_hError ),
 	m_pszDescription( e.m_pszDescription )
 {
 }
 
-CSphereError::CSphereError( LOGL_TYPE eSev, dword hErr, lpctstr pszDescription ) :
+CSError::CSError( LOGL_TYPE eSev, dword hErr, lpctstr pszDescription ) :
 	m_eSeverity( eSev ),
 	m_hError( hErr ),
 	m_pszDescription( pszDescription )
 {
 }
 
-CSphereError::~CSphereError() 
+CSError::~CSError() 
 {
 }
 
@@ -89,7 +89,7 @@ CSphereError::~CSphereError()
 // --------------------------------------------------------------------------------
 
 CAssert::CAssert(LOGL_TYPE eSeverity, lpctstr pExp, lpctstr pFile, long lLine) :
-	CSphereError(eSeverity, 0, "Assert"), m_pExp(pExp), m_pFile(pFile), m_lLine(lLine)
+	CSError(eSeverity, 0, "Assert"), m_pExp(pExp), m_pFile(pFile), m_lLine(lLine)
 {
 }
 
@@ -124,7 +124,7 @@ const unsigned CAssert::GetAssertLine()
 #ifdef _WIN32
 
 CException::CException(uint uCode, size_t pAddress) :
-	m_pAddress(pAddress), CSphereError(LOGL_CRIT, uCode, "Exception")
+	m_pAddress(pAddress), CSError(LOGL_CRIT, uCode, "Exception")
 {
 }
 
@@ -265,7 +265,7 @@ void SetExceptionTranslator()
 		}
 
 		UNPAUSECALLSTACK;
-		throw CSphereError( LOGL_FATAL, sig, strsignal(sig) );
+		throw CSError( LOGL_FATAL, sig, strsignal(sig) );
 	}
 
 	void _cdecl Signal_Children(int sig = 0)

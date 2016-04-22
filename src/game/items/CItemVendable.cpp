@@ -42,7 +42,7 @@ lpctstr const CItemVendable::sm_szLoadKeys[IVC_QTY+1] =
 	NULL
 };
 
-bool CItemVendable::r_WriteVal(lpctstr pszKey, CString &sVal, CTextConsole *pSrc)
+bool CItemVendable::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc)
 {
 	ADDTOCALLSTACK("CItemVendable::r_WriteVal");
 	EXC_TRY("WriteVal");

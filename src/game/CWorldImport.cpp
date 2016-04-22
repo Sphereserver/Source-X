@@ -1,11 +1,11 @@
 
 
-#include "../common/sphere_library/CArray.h"
+#include "../common/sphere_library/CSArray.h"
 #include "chars/CChar.h"
 #include "items/CItem.h"
 #include "CObjBase.h"
 
-struct CImportSer : public CGObListRec
+struct CImportSer : public CSObjListRec
 {
 	// Temporary holding structure for new objects being impoted.
 public:
@@ -40,7 +40,7 @@ struct CImportFile
 	CObjBase * m_pCurObj;		// current entry.
 	CImportSer * m_pCurSer;	// current entry.
 
-	CGObList m_ListSer;	// list of imported objects i'm working on.
+	CSObjList m_ListSer;	// list of imported objects i'm working on.
 
 	const word m_wModeFlags;	// IMPFLAGS_TYPE
 	const CPointMap m_ptCenter;
@@ -304,7 +304,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 	// This file is a WSC or UOX world script file.
 
 	IMPFLAGS_TYPE mode = IMPFLAGS_NOTHING;
-	CString sName;
+	CSString sName;
 	CItem * pItem = NULL;
 	CChar * pChar = NULL;
 

@@ -386,7 +386,7 @@ void CTimedFunctionHandler::Stop( CUID uid, lpctstr funcname )
 	}
 }
 
-TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext, CScriptLineContext EndContext, CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CString * pResult)
+TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext, CScriptLineContext EndContext, CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult)
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::Loop");
 	bool endLooping = false;
@@ -898,7 +898,7 @@ int CWorldThread::FixObj( CObjBase * pObj, dword dwUID )
 	{
 		iResultCode = FixObjTry(pObj, dwUID);
 	}
-	catch ( const CSphereError& e ) // catch all
+	catch ( const CSError& e ) // catch all
 	{
 		g_Log.CatchEvent( &e, "FixObj" );
 		iResultCode = 0xFFFF;	// bad mem ?
@@ -940,7 +940,7 @@ int CWorldThread::FixObj( CObjBase * pObj, dword dwUID )
 		else
 			pObj->Delete();
 	}
-	catch ( const CSphereError& e )	// catch all
+	catch ( const CSError& e )	// catch all
 	{
 		g_Log.CatchEvent( &e, "UID=0%x, Asserted cleanup", dwUID );
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
@@ -1024,7 +1024,7 @@ void CWorldThread::GarbageCollection_UIDs()
 			}
 			iCount ++;
 		}
-		catch ( const CSphereError& e )
+		catch ( const CSError& e )
 		{
 			g_Log.CatchEvent(&e, "GarbageCollection_UIDs");
 			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
@@ -1209,7 +1209,7 @@ CWorld::~CWorld()
 ///////////////////////////////////////////////
 // Loading and Saving.
 
-void CWorld::GetBackupName( CString & sArchive, lpctstr pszBaseDir, tchar chType, int iSaveCount ) // static
+void CWorld::GetBackupName( CSString & sArchive, lpctstr pszBaseDir, tchar chType, int iSaveCount ) // static
 {
 	ADDTOCALLSTACK("CWorld::GetBackupName");
 	int iCount = iSaveCount;
@@ -1232,20 +1232,20 @@ bool CWorld::OpenScriptBackup( CScript & s, lpctstr pszBaseDir, lpctstr pszBaseN
 	ADDTOCALLSTACK("CWorld::OpenScriptBackup");
 	ASSERT(pszBaseName);
 
-	CString sArchive;
+	CSString sArchive;
 	GetBackupName( sArchive, pszBaseDir, pszBaseName[0], iSaveCount );
 
 	// remove possible previous archive of same name
 	remove( sArchive );
 
 	// rename previous save to archive name.
-	CString sSaveName;
+	CSString sSaveName;
 	sSaveName.Format( "%s" SPHERE_FILE "%s%s", pszBaseDir, pszBaseName, SPHERE_SCRIPT );
 
 	if ( rename( sSaveName, sArchive ))
 	{
 		// May not exist if this is the first time.
-		g_Log.Event(LOGM_SAVE|LOGL_WARN, "Rename %s to '%s' FAILED code %d?\n", static_cast<lpctstr>(sSaveName), static_cast<lpctstr>(sArchive), CGFile::GetLastError() );
+		g_Log.Event(LOGM_SAVE|LOGL_WARN, "Rename %s to '%s' FAILED code %d?\n", static_cast<lpctstr>(sSaveName), static_cast<lpctstr>(sArchive), CSFile::GetLastError() );
 	}
 
 	if ( ! s.Open( sSaveName, OF_WRITE|OF_TEXT|OF_DEFAULTMODE ))
@@ -1460,7 +1460,7 @@ bool CWorld::SaveForce() // Save world state
 			if ( !bSave && ( pCurBlock != msgs[5] ))
 				goto failedstage;
 		}
-		catch ( const CSphereError& e )
+		catch ( const CSError& e )
 		{
 			g_Log.CatchEvent(&e, "Save FAILED for stage %u (%s).", m_iSaveStage, pCurBlock);
 			bSuccess = false;
@@ -1598,7 +1598,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 		fForceImmediate = (Args.m_iN1 != 0);
 		bSaved = SaveTry(fForceImmediate);
 	}
-	catch ( const CSphereError& e )
+	catch ( const CSError& e )
 	{
 		g_Log.CatchEvent( &e, "Save FAILED." );
 		Broadcast("Save FAILED. " SPHERE_TITLE " is UNSTABLE!");
@@ -1688,7 +1688,7 @@ void CWorld::SaveStatics()
 		m_FileStatics.Close();
 		g_Log.Event(LOGM_SAVE, "Statics data saved (%s).\n", static_cast<lpctstr>(m_FileStatics.GetFilePath()));
 	}
-	catch (const CSphereError& e)
+	catch (const CSError& e)
 	{
 		g_Log.CatchEvent(&e, "Statics Save FAILED.");
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
@@ -1736,7 +1736,7 @@ bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from scr
 		{
 			g_Cfg.LoadResourceSection(&s);
 		}
-		catch ( const CSphereError& e )
+		catch ( const CSError& e )
 		{
 			g_Log.CatchEvent(&e, "Load Exception line %d " SPHERE_TITLE " is UNSTABLE!\n", s.GetContext().m_iLineNum);
 			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
@@ -1767,19 +1767,19 @@ bool CWorld::LoadWorld() // Load world from script
 	// Try to load a backup file instead ?
 	// NOTE: WE MUST Sync these files ! CHAR and WORLD !!!
 
-	CString sStaticsName;
+	CSString sStaticsName;
 	sStaticsName.Format("%s" SPHERE_FILE "statics", static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
-	CString sWorldName;
+	CSString sWorldName;
 	sWorldName.Format("%s" SPHERE_FILE "world", static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
-	CString sMultisName;
+	CSString sMultisName;
 	sMultisName.Format("%s" SPHERE_FILE "multis", static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
-	CString sCharsName;
+	CSString sCharsName;
 	sCharsName.Format("%s" SPHERE_FILE "chars", static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
-	CString sDataName;
+	CSString sDataName;
 	sDataName.Format("%s" SPHERE_FILE "data",	static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
 	int iPrevSaveCount = m_iSaveCountID;
@@ -1817,7 +1817,7 @@ bool CWorld::LoadWorld() // Load world from script
 		m_UIDs.SetCount(8 * 1024);
 
 		// Get the name of the previous backups.
-		CString sArchive;
+		CSString sArchive;
 		GetBackupName( sArchive, g_Cfg.m_sWorldBaseDir, 'w', m_iSaveCountID );
 		if ( ! sArchive.CompareNoCase( sWorldName ))	// ! same file ? break endless loop.
 		{
@@ -1964,7 +1964,7 @@ lpctstr const CWorld::sm_szLoadKeys[WC_QTY+1] =	// static
 	NULL
 };
 
-bool CWorld::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
+bool CWorld::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CWorld::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -2208,9 +2208,9 @@ void CWorld::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE wHu
 	else
 		mode = TALKMODE_BROADCAST;
 
-	//CString sTextUID;
-	//CString sTextName;	// name labelled text.
-	CString sTextGhost; // ghost speak.
+	//CSString sTextUID;
+	//CSString sTextName;	// name labelled text.
+	CSString sTextGhost; // ghost speak.
 
 						 // For things
 	bool fCanSee = false;
@@ -2340,7 +2340,7 @@ void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const NCHAR * pwText, 
 			{
 				if ( wTextName[0] == '\0' )
 				{
-					CString sTextName;
+					CSString sTextName;
 					sTextName.Format("<%s>", pSrc->GetName());
 					int iLen = CvtSystemToNUNICODE( wTextName, CountOf(wTextName), sTextName, -1 );
 					if ( wTextGhost[0] != '\0' )

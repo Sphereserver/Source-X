@@ -13,14 +13,14 @@ CUOInstall::CUOInstall()
 	memset(m_UopMapAddress, 0, sizeof(m_UopMapAddress));
 };
 
-CString CUOInstall::GetFullExePath( lpctstr pszName ) const
+CSString CUOInstall::GetFullExePath( lpctstr pszName ) const
 {
-	return( CGFile::GetMergedFileName( m_sExePath, pszName ));
+	return( CSFile::GetMergedFileName( m_sExePath, pszName ));
 }
 
-CString CUOInstall::GetFullCDPath( lpctstr pszName ) const
+CSString CUOInstall::GetFullCDPath( lpctstr pszName ) const
 {
-	return( CGFile::GetMergedFileName( m_sCDPath, pszName ));
+	return( CSFile::GetMergedFileName( m_sCDPath, pszName ));
 }
 
 bool CUOInstall::FindInstall()
@@ -110,7 +110,7 @@ void CUOInstall::DetectMulVersions()
 		m_FileFormat[VERFILE_MULTIIDX] = VERFORMAT_HIGHSEAS;
 }
 
-bool CUOInstall::OpenFile( CGFile & file, lpctstr pszName, word wFlags )
+bool CUOInstall::OpenFile( CSFile & file, lpctstr pszName, word wFlags )
 {
 	ADDTOCALLSTACK("CUOInstall::OpenFile");
 	ASSERT(pszName);
@@ -172,7 +172,7 @@ lpctstr CUOInstall::GetBaseFileName( VERFILE_TYPE i ) // static
 	return ( i<0 || i>=VERFILE_QTY ) ? NULL : sm_szFileNames[i];
 }
 
-CGFile * CUOInstall::GetMulFile( VERFILE_TYPE i )
+CSFile * CUOInstall::GetMulFile( VERFILE_TYPE i )
 {
 	ASSERT( i<VERFILE_QTY );
 	return( &(m_File[i]));
@@ -189,15 +189,15 @@ void CUOInstall::SetPreferPath( lpctstr pszName )
 	m_sPreferPath = pszName;
 }
 
-CString CUOInstall::GetPreferPath( lpctstr pszName ) const
+CSString CUOInstall::GetPreferPath( lpctstr pszName ) const
 {
-	return CGFile::GetMergedFileName(m_sPreferPath, pszName);
+	return CSFile::GetMergedFileName(m_sPreferPath, pszName);
 }
 
 bool CUOInstall::OpenFile( VERFILE_TYPE i )
 {
 	ADDTOCALLSTACK("CUOInstall::OpenFile");
-	CGFile	*pFile = GetMulFile(i);
+	CSFile	*pFile = GetMulFile(i);
 	if ( !pFile )
 		return false;
 	if ( pFile->IsFileOpen())
@@ -485,7 +485,7 @@ void CUOInstall::CloseFiles()
 	}
 }
 
-bool CUOInstall::ReadMulIndex(CGFile &file, dword id, CUOIndexRec &Index)
+bool CUOInstall::ReadMulIndex(CSFile &file, dword id, CUOIndexRec &Index)
 {
 	ADDTOCALLSTACK("CUOInstall::ReadMulIndex");
 	size_t stOffset = id * sizeof(CUOIndexRec);
@@ -499,7 +499,7 @@ bool CUOInstall::ReadMulIndex(CGFile &file, dword id, CUOIndexRec &Index)
 	return Index.HasData();
 }
 
-bool CUOInstall::ReadMulData(CGFile &file, const CUOIndexRec &Index, void * pData)
+bool CUOInstall::ReadMulData(CSFile &file, const CUOIndexRec &Index, void * pData)
 {
 	ADDTOCALLSTACK("CUOInstall::ReadMulData");
 	if ( file.Seek(Index.GetFileOffset(), SEEK_SET) != Index.GetFileOffset() )
@@ -529,7 +529,7 @@ bool CUOInstall::ReadMulIndex(VERFILE_TYPE fileindex, VERFILE_TYPE filedata, dwo
 bool CUOInstall::ReadMulData(VERFILE_TYPE filedata, const CUOIndexRec & Index, void * pData)
 {
 	ADDTOCALLSTACK("CUOInstall::ReadMulData");
-	// Use CGFile::GetLastError() for error.
+	// Use CSFile::GetLastError() for error.
 	if ( Index.IsVerData() ) filedata = VERFILE_VERDATA;
 
 	return ReadMulData(m_File[filedata], Index, pData);
@@ -537,7 +537,7 @@ bool CUOInstall::ReadMulData(VERFILE_TYPE filedata, const CUOIndexRec & Index, v
 
 
 //UOP Filename Hash function
-ullong HashFileName(CString csFile)
+ullong HashFileName(CSString csFile)
 {
 	uint eax, ecx, edx, ebx, esi, edi;
 

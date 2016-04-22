@@ -29,7 +29,7 @@ void SetUnixSignals( bool );
 // -------------------------------------------------------------------
 // -------------------------------------------------------------------
 
-class CSphereError
+class CSError
 {
 	// we can throw this structure to produce an error.
 	// similar to CFileException and CException
@@ -38,11 +38,11 @@ public:
 	dword m_hError;	// HRESULT S_OK, "winerror.h" code. 0x20000000 = start of custom codes.
 	lpctstr m_pszDescription;
 public:
-	CSphereError( LOGL_TYPE eSev, dword hErr, lpctstr pszDescription );
-	CSphereError( const CSphereError& e );	// copy contstructor needed.
-	virtual ~CSphereError();
+	CSError( LOGL_TYPE eSev, dword hErr, lpctstr pszDescription );
+	CSError( const CSError& e );	// copy contstructor needed.
+	virtual ~CSError();
 public:
-	CSphereError& operator=(const CSphereError& other);
+	CSError& operator=(const CSError& other);
 public:
 #ifdef _WIN32
 	static int GetSystemErrorMessage( dword dwError, lptstr lpszError, uint nMaxError );
@@ -50,7 +50,7 @@ public:
 	virtual bool GetErrorMessage( lptstr lpszError, uint nMaxError,	uint * pnHelpContext = NULL ) const;
 };
 
-class CAssert : public CSphereError
+class CAssert : public CSError
 {
 protected:
 	lpctstr const m_pExp;
@@ -73,7 +73,7 @@ public:
 
 #ifdef _WIN32
 	// Catch and get details on the system exceptions.
-	class CException : public CSphereError
+	class CException : public CSError
 	{
 	public:
 		static const char *m_sClassName;
@@ -129,7 +129,7 @@ public:
 	#endif
 
 	#define EXC_CATCH	}	\
-		catch ( const CSphereError& e )	{ EXC_CATCH_EXCEPTION(&e); CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); } \
+		catch ( const CSError& e )	{ EXC_CATCH_EXCEPTION(&e); CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); } \
 		catch (...) { EXC_CATCH_EXCEPTION(NULL); CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); }
 
 	#define EXC_DEBUG_START if ( bCATCHExcept ) { try {
@@ -171,7 +171,7 @@ public:
 	#endif
 
 	#define EXC_CATCHSUB(a)	}	\
-		catch ( const CSphereError& e )	\
+		catch ( const CSError& e )	\
 						{ \
 						EXC_CATCH_SUB(&e, a); \
 						CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
@@ -215,5 +215,6 @@ public:
 	#define EXC_CATCH_EXCEPTION(a)
 
 #endif //_EXCEPTIONS_DEBUG
+
 
 #endif // _INC_CEXCEPTION_H

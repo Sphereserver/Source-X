@@ -1,6 +1,6 @@
 
 #include "../common/CException.h"
-#include "../common/CFileList.h"
+#include "../common/sphere_library/CSFileList.h"
 #include "../common/sphereversion.h"
 #include "../network/network.h"
 #include "../network/send.h"
@@ -30,13 +30,13 @@ lpctstr const CWebPageDef::sm_szVerbKeys[WV_QTY+1] =
 };
 
 //********************************************************
-// -CFileConsole
+// -CSFileConsole
 
-class CFileConsole : public CTextConsole
+class CSFileConsole : public CTextConsole
 {
 public:
 	static const char *m_sClassName;
-	CFileText m_FileOut;
+	CSFileText m_FileOut;
 
 public:
 	virtual PLEVEL_TYPE GetPrivLevel() const
@@ -51,15 +51,15 @@ public:
 	{
 		if ( pszMessage == NULL || ISINTRESOURCE(pszMessage) )
 			return;
-		(const_cast <CFileConsole*>(this))->m_FileOut.WriteString(pszMessage);
+		(const_cast <CSFileConsole*>(this))->m_FileOut.WriteString(pszMessage);
 	}
 
 public:
-	CFileConsole() { };
+	CSFileConsole() { };
 
 private:
-	CFileConsole(const CFileConsole& copy);
-	CFileConsole& operator=(const CFileConsole& other);
+	CSFileConsole(const CSFileConsole& copy);
+	CSFileConsole& operator=(const CSFileConsole& other);
 };
 
 //********************************************************
@@ -109,7 +109,7 @@ lpctstr const CWebPageDef::sm_szLoadKeys[WC_QTY+1] =
 	NULL
 };
 
-bool CWebPageDef::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
+bool CWebPageDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CWebPageDef::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -310,7 +310,7 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 
 	CScriptFileContext context( &FileRead );	// set this as the context.
 
-	CFileConsole FileOut;
+	CSFileConsole FileOut;
 	if ( ! FileOut.m_FileOut.Open( pszDstName, OF_WRITE|OF_TEXT ))
 	{
 		DEBUG_ERR(( "Can't open web page output '%s'\n", static_cast<lpctstr>(pszDstName) ));
@@ -384,7 +384,7 @@ void CWebPageDef::WebPageLog()
 	if ( m_type != WEBPAGE_TEMPLATE )
 		return;
 
-	CFileText FileRead;
+	CSFileText FileRead;
 	if ( ! FileRead.Open( m_sDstFilePath, OF_READ|OF_TEXT ))
 		return;
 
@@ -394,12 +394,12 @@ void CWebPageDef::WebPageLog()
 	strcpy( szName, m_sDstFilePath );
 	szName[ m_sDstFilePath.GetLength() - strlen(pszExt) ] = '\0';
 
-	CGTime datetime = CGTime::GetCurrentTime();
+	CSTime datetime = CSTime::GetCurrentTime();
 
 	tchar *pszTemp = Str_GetTemp();
 	sprintf(pszTemp, "%s%d%02d%02d%s", szName, datetime.GetYear()%100, datetime.GetMonth(), datetime.GetDay(), pszExt);
 
-	CFileText FileTest;
+	CSFileText FileTest;
 	if ( FileTest.Open(pszTemp, OF_READ|OF_TEXT) )
 		return;
 
@@ -440,7 +440,7 @@ bool CWebPageDef::SetSourceFile( lpctstr pszName, CClient * pClient )
 	if ( iLen <= 3 )
 		return false;
 
-	lpctstr pszExt = CGFile::GetFilesExt( pszName );
+	lpctstr pszExt = CSFile::GetFilesExt( pszName );
 	if ( pszExt == NULL || pszExt[0] == '\0' )
 		return false;
 
@@ -471,7 +471,7 @@ bool CWebPageDef::SetSourceFile( lpctstr pszName, CClient * pClient )
 			return false;
 		if ( strstr( pszName, "//" ))	// this sort of access is not allowed.
 			return false;
-		m_sSrcFilePath = CGFile::GetMergedFileName( g_Cfg.m_sSCPBaseDir, pszName );
+		m_sSrcFilePath = CSFile::GetMergedFileName( g_Cfg.m_sSCPBaseDir, pszName );
 	}
 
 	return true;
@@ -517,7 +517,7 @@ lpctstr const CWebPageDef::sm_szTrigName[WTRIG_QTY+1] =	// static
 	NULL,
 };
 
-int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CGTime * pdateIfModifiedSince )
+int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime * pdateIfModifiedSince )
 {
 	ADDTOCALLSTACK("CWebPageDef::ServPageRequest");
 	UNREFERENCED_PARAMETER(pszURLArgs);
@@ -547,7 +547,7 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CGTime 
 			return 403;	// Forbidden
 	}
 
-	CGTime datetime = CGTime::GetCurrentTime();
+	CSTime datetime = CSTime::GetCurrentTime();
 
 	lpctstr pszName;
 	bool fGenerate = false;
@@ -577,7 +577,7 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CGTime 
 	// Get proper Last-Modified: time.
 	time_t dateChange;
 	dword dwSize;
-	if ( ! CFileList::ReadFileInfo( pszName, dateChange, dwSize ))
+	if ( ! CSFileList::ReadFileInfo( pszName, dateChange, dwSize ))
 	{
 		return 500;
 	}
@@ -593,7 +593,7 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CGTime 
 	}
 
 	// Now serve up the page.
-	CGFile FileRead;
+	CSFile FileRead;
 	if ( ! FileRead.Open( pszName, OF_READ|OF_BINARY ))
 		return 500;
 
@@ -612,7 +612,7 @@ int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CGTime 
 	if ( m_type == WEBPAGE_TEMPLATE )
 		iLen += sprintf(szTmp + iLen, "Expires: 0\r\n");
 	else
-		iLen += sprintf(szTmp + iLen, "Last-Modified: %s\r\n",  CGTime(dateChange).FormatGmt(NULL));
+		iLen += sprintf(szTmp + iLen, "Last-Modified: %s\r\n",  CSTime(dateChange).FormatGmt(NULL));
 
 	iLen += sprintf( szTmp + iLen,
 		"Content-Length: %u\r\n"
@@ -771,7 +771,7 @@ bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * p
 	return false;
 }
 
-bool CWebPageDef::ServPage( CClient * pClient, tchar * pszPage, CGTime * pdateIfModifiedSince )	// static
+bool CWebPageDef::ServPage( CClient * pClient, tchar * pszPage, CSTime * pdateIfModifiedSince )	// static
 {
 	ADDTOCALLSTACK("CWebPageDef::ServPage");
 	// make sure this is a valid format for the request.
@@ -827,10 +827,10 @@ bool CWebPageDef::ServPage( CClient * pClient, tchar * pszPage, CGTime * pdateIf
 		default: pszErrText = "Unknown Error"; break;
 	}
 
-	CGTime datetime = CGTime::GetCurrentTime();
+	CSTime datetime = CSTime::GetCurrentTime();
 	const char *sDate = datetime.FormatGmt(NULL);
-	CString sMsgHead;
-	CString sText;
+	CSString sMsgHead;
+	CSString sText;
 
 	sText.Format(
 		"<html><head><title>Error %d</title>"

@@ -79,7 +79,7 @@ bool CListDefContNum::r_LoadVal( CScript & s )
 	return true;
 }
 
-bool CListDefContNum::r_WriteVal( lpctstr pKey, CString & sVal, CTextConsole * pSrc = NULL )
+bool CListDefContNum::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = NULL )
 {
 	UNREFERENCED_PARAMETER(pKey);
 	UNREFERENCED_PARAMETER(pSrc);
@@ -134,7 +134,7 @@ bool CListDefContStr::r_LoadVal( CScript & s )
 	return true;
 }
 
-bool CListDefContStr::r_WriteVal( lpctstr pKey, CString & sVal, CTextConsole * pSrc = NULL )
+bool CListDefContStr::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = NULL )
 {
 	UNREFERENCED_PARAMETER(pKey);
 	UNREFERENCED_PARAMETER(pSrc);
@@ -541,7 +541,7 @@ CListDefCont* CListDefCont::CopySelf()
 	return pNewList;
 }
 
-void CListDefCont::PrintElements(CString& strElements) const
+void CListDefCont::PrintElements(CSString& strElements) const
 {
 	ADDTOCALLSTACK("CListDefCont::PrintElements");
 	if ( !m_listElements.size() )
@@ -578,7 +578,7 @@ void CListDefCont::PrintElements(CString& strElements) const
 void CListDefCont::DumpElements( CTextConsole * pSrc, lpctstr pszPrefix /* = NULL */ ) const
 {
 	ADDTOCALLSTACK("CListDefCont::DumpElements");
-	CString strResult;
+	CSString strResult;
 
 	PrintElements(strResult);
 	pSrc->SysMessagef("%s%s=%s\n", static_cast<lpctstr>(pszPrefix), static_cast<lpctstr>(m_Key.GetPtr()), static_cast<lpctstr>(strResult));
@@ -597,7 +597,7 @@ void CListDefCont::r_WriteSave( CScript& s )
 
 	CListDefContElem *pListElem;
 	CListDefContStr *pListElemStr;
-	CString strElement;
+	CSString strElement;
 
 	s.WriteSection("LIST %s", m_Key.GetPtr());
 
@@ -850,7 +850,7 @@ void CListDefMap::ClearKeys(lpctstr mask)
 		if ( !m_Container.size() )
 			return;
 
-		CString sMask(mask);
+		CSString sMask(mask);
 		sMask.MakeLower();
 
 		DefSet::iterator i = m_Container.begin();
@@ -1056,7 +1056,7 @@ bool CListDefMap::r_LoadVal( lpctstr pszKey, CScript & s )
 	return false;
 }
 
-bool CListDefMap::r_Write( CTextConsole *pSrc, lpctstr pszString, CString& strVal )
+bool CListDefMap::r_Write( CTextConsole *pSrc, lpctstr pszString, CSString& strVal )
 {
 	ADDTOCALLSTACK("CListDefMap::r_Write");
 	UNREFERENCED_PARAMETER(pSrc);

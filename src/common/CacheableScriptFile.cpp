@@ -19,7 +19,7 @@ CacheableScriptFile::~CacheableScriptFile()
 bool CacheableScriptFile::OpenBase(void *pExtra) 
 {
 	if ( useDefaultFile() ) 
-		return CFileText::OpenBase(pExtra);
+		return CSFileText::OpenBase(pExtra);
 
 	ADDTOCALLSTACK("CacheableScriptFile::OpenBase");
 
@@ -66,7 +66,7 @@ void CacheableScriptFile::CloseBase()
 {
 	if( useDefaultFile() ) 
 	{
-		CFileText::CloseBase();
+		CSFileText::CloseBase();
 	}
 	else 
 	{
@@ -92,7 +92,7 @@ bool CacheableScriptFile::IsFileOpen() const
 {
 	if( useDefaultFile() ) 
 	{
-		return CFileText::IsFileOpen();
+		return CSFileText::IsFileOpen();
 	}
 
 	ADDTOCALLSTACK("CacheableScriptFile::IsFileOpen");
@@ -103,7 +103,7 @@ bool CacheableScriptFile::IsEOF() const
 {
 	if( useDefaultFile() ) 
 	{
-		return CFileText::IsEOF();
+		return CSFileText::IsEOF();
 	}
 
 	ADDTOCALLSTACK("CacheableScriptFile::IsEOF");
@@ -114,7 +114,7 @@ tchar * CacheableScriptFile::ReadString(tchar *pBuffer, size_t sizemax)
 {
 	if( useDefaultFile() ) 
 	{
-		return CFileText::ReadString(pBuffer, sizemax);
+		return CSFileText::ReadString(pBuffer, sizemax);
 	}
 
 	ADDTOCALLSTACK("CacheableScriptFile::ReadString");
@@ -159,7 +159,7 @@ size_t CacheableScriptFile::Seek(size_t offset, int origin)
 {
 	//ADDTOCALLSTACK("CacheableScriptFile::Seek");
 	if (useDefaultFile())
-		return CFileText::Seek(offset, origin);
+		return CSFileText::Seek(offset, origin);
 
 	size_t linenum = offset;
 
@@ -179,7 +179,7 @@ size_t CacheableScriptFile::GetPosition() const
 {
 	//ADDTOCALLSTACK("CacheableScriptFile::GetPosition");
 	if (useDefaultFile())
-		return CFileText::GetPosition();
+		return CSFileText::GetPosition();
 
 	return m_currentLine;
 }

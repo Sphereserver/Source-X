@@ -8,7 +8,7 @@
 #define _INC_CRECT_H
 
 #include "../game/uo_files/uofiles_enums.h"
-#include "./sphere_library/CString.h"
+#include "./sphere_library/CSString.h"
 
 
 class CRegionBase;
@@ -80,7 +80,7 @@ public:
 
 	int GetPointSortIndex() const;
 
-	bool r_WriteVal( lpctstr pszKey, CString & sVal ) const;
+	bool r_WriteVal( lpctstr pszKey, CSString & sVal ) const;
 	bool r_LoadVal( lpctstr pszKey, lpctstr pszArgs );
 };
 

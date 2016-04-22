@@ -27,7 +27,7 @@ void CItemScript::r_Write(CScript & s)
     CItemVendable::r_Write(s);
 }
 
-bool CItemScript::r_WriteVal(lpctstr pszKey, CString & sVal, CTextConsole *pSrc)
+bool CItemScript::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole *pSrc)
 {
     ADDTOCALLSTACK("CItemScript::r_WriteVal");
     return CItemVendable::r_WriteVal(pszKey, sVal, pSrc);

@@ -11,7 +11,7 @@
 #include <set>
 
 #include "spherecom.h"
-#include "./sphere_library/CString.h"
+#include "./sphere_library/CSString.h"
 
 
 class CTextConsole;
@@ -20,7 +20,7 @@ class CScript;
 class CListDefContElem
 {
 private:
-	CString m_Key;	// reference to map key
+	CSString m_Key;	// reference to map key
 
 public:
 	static const char *m_sClassName;
@@ -64,7 +64,7 @@ public:
 	lpctstr GetValStr() const;
 
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pKey, CString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc );
 
 	virtual CListDefContElem * CopySelf() const;
 };
@@ -73,7 +73,7 @@ public:
 class CListDefContStr: public CListDefContElem
 {
 private:
-	CString m_sVal;	// the assigned value. (What if numeric?)
+	CSString m_sVal;	// the assigned value. (What if numeric?)
 
 public:
 	static const char *m_sClassName;
@@ -92,7 +92,7 @@ public:
 	int64 GetValNum() const;
 
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pKey, CString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc );
 
 	virtual CListDefContElem * CopySelf() const;
 };
@@ -101,7 +101,7 @@ public:
 class CListDefCont
 {
 private:
-	CString m_Key;	// reference to map key
+	CSString m_Key;	// reference to map key
 
 	typedef std::list<CListDefContElem *> DefList;
 
@@ -148,7 +148,7 @@ public:
 	bool InsertElementStr(size_t nIndex, lpctstr pszKey);
 
 	CListDefCont * CopySelf();
-	void PrintElements(CString& strElements) const;
+	void PrintElements(CSString& strElements) const;
 	void DumpElements( CTextConsole * pSrc, lpctstr pszPrefix = NULL ) const;
 	void r_WriteSave( CScript& s );
 	bool r_LoadVal( CScript& s );
@@ -203,7 +203,7 @@ public:
 	void DeleteKey( lpctstr key );
 
 	bool r_LoadVal( lpctstr pszKey, CScript & s );
-	bool r_Write( CTextConsole *pSrc, lpctstr pszString, CString& strVal );
+	bool r_Write( CTextConsole *pSrc, lpctstr pszString, CSString& strVal );
 	void r_WriteSave( CScript& s );
 };
 

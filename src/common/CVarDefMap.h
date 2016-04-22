@@ -4,7 +4,7 @@
 #define _INC_CVARDEFMAP_H
 
 #include <set>
-#include "./sphere_library/CString.h"
+#include "./sphere_library/CSString.h"
 #include "spherecom.h"
 
 
@@ -14,7 +14,7 @@ class CScript;
 class CVarDefCont
 {
 private:
-	CString m_Key;	// reference to map key
+	CSString m_Key;	// reference to map key
 
 public:
 	static const char *m_sClassName;
@@ -57,7 +57,7 @@ public:
 	lpctstr GetValStr() const;
 
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pKey, CString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc );
 
 	virtual CVarDefCont * CopySelf() const;
 };
@@ -65,7 +65,7 @@ public:
 class CVarDefContStr : public CVarDefCont
 {
 private:
-	CString m_sVal;	// the assigned value. (What if numeric?)
+	CSString m_sVal;	// the assigned value. (What if numeric?)
 
 public:
 	static const char *m_sClassName;
@@ -84,7 +84,7 @@ public:
 	int64 GetValNum() const;
 
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pKey, CString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc );
 
 	virtual CVarDefCont * CopySelf() const;
 };

@@ -16,7 +16,7 @@ enum STONEPRIV_TYPE // Priv level for this char
 	STONEPRIV_ENEMY = 100	// this is an enemy town/guild.
 };
 
-class CStoneMember : public CGObListRec, public CScriptObj	// Members for various stones, and links to stones at war with
+class CStoneMember : public CSObjListRec, public CScriptObj	// Members for various stones, and links to stones at war with
 {
 	// NOTE: Chars are linked to the CItemStone via a memory object.
 	friend class CItemStone;
@@ -26,7 +26,7 @@ private:
 
 									// Only apply to members.
 	CUID m_uidLoyalTo;	// Who am i loyal to? invalid value = myself.
-	CString m_sTitle;		// What is my title in the guild?
+	CSString m_sTitle;		// What is my title in the guild?
 
 	union	// Depends on m_iPriv
 	{
@@ -96,7 +96,7 @@ public:
 
 	lpctstr GetName() const { return m_sClassName; }
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
-	virtual bool r_WriteVal( lpctstr pKey, CString & sVal, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
 	virtual bool r_LoadVal( CScript & s );
 };
@@ -121,7 +121,7 @@ enum STONEDISP_TYPE	// Hard coded Menus
 	STONEDISP_BANISHMEMBER
 };
 
-class CItemStone : public CItem, public CGObList
+class CItemStone : public CItem, public CSObjList
 {
 	// IT_STONE_GUILD
 	// IT_STONE_TOWN
@@ -133,9 +133,9 @@ class CItemStone : public CItem, public CGObList
 	static lpctstr const sm_szLoadKeysM[];
 	static lpctstr const sm_szLoadKeysG[];
 private:
-	CString m_sCharter[6];
-	CString m_sWebPageURL;
-	CString m_sAbbrev;
+	CSString m_sCharter[6];
+	CSString m_sWebPageURL;
+	CSString m_sAbbrev;
 
 private:
 
@@ -177,7 +177,7 @@ private:
 
 public:
 	virtual void r_Write( CScript & s );
-	virtual bool r_WriteVal( lpctstr pszKey, CString & s, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pszKey, CSString & s, CTextConsole * pSrc );
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 	virtual bool r_LoadVal( CScript & s );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script

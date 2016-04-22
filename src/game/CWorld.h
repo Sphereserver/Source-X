@@ -7,7 +7,7 @@
 #define _INC_CWORLD_H
 
 #include "../common/common.h"
-#include "../common/sphere_library/CArray.h"
+#include "../common/sphere_library/CSArray.h"
 #include "../common/CScript.h"
 #include "../common/CScriptObj.h"
 #include "../common/CUID.h"
@@ -41,7 +41,7 @@ class CWorldThread
 	// as well as those just created here. (but may not be here anymore)
 
 protected:
-	CGObArray<CObjBase*> m_UIDs;	// all the UID's in the World. CChar and CItem.
+	CSObjArray<CObjBase*> m_UIDs;	// all the UID's in the World. CChar and CItem.
 	int m_iUIDIndexLast;		// remeber the last index allocated so we have more even usage.
 
 	dword	*m_FreeUIDs;		//	list of free uids available
@@ -55,8 +55,8 @@ public:
 	//int m_iUIDIndexBase;		// The start of the uid range that i will allocate from.
 	//int m_iUIDIndexMaxQty;	// The max qty of UIDs i can allocate.
 
-	CGObList m_ObjNew;			// Obj created but not yet placed in the world.
-	CGObList m_ObjDelete;		// Objects to be deleted.
+	CSObjList m_ObjNew;			// Obj created but not yet placed in the world.
+	CSObjList m_ObjDelete;		// Objects to be deleted.
 
 	// Background save. Does this belong here ?
 	CScript m_FileData;			// Save or Load file.
@@ -161,7 +161,7 @@ class CTimedFunctionHandler
 		void Add( CUID uid, int numSeconds, lpctstr funcname );
 		void Erase( CUID uid );
 		void Stop( CUID uid, lpctstr funcname );
-		TRIGRET_TYPE Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext, CScriptLineContext EndContext, CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CString * pResult);
+		TRIGRET_TYPE Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext, CScriptLineContext EndContext, CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult);
 		int IsTimer( CUID uid, lpctstr funcname );
 };
 
@@ -201,18 +201,18 @@ public:
 	CUID m_uidObj;			// for script access - auxiliary obj
 	CUID m_uidNew;			// for script access - auxiliary obj
 
-	CGObList m_GMPages;		// Current outstanding GM pages. (CGMPage)
+	CSObjList m_GMPages;		// Current outstanding GM pages. (CGMPage)
 
 	
-	CGPtrTypeArray<CItemStone*> m_Stones;	// links to leige/town stones. (not saved array)
-	CGObList m_Parties;	// links to all active parties. CPartyDef
+	CSPtrTypeArray<CItemStone*> m_Stones;	// links to leige/town stones. (not saved array)
+	CSObjList m_Parties;	// links to all active parties. CPartyDef
 
 	static lpctstr const sm_szLoadKeys[];
-	CGPtrTypeArray <CItemTypeDef *> m_TileTypes;
+	CSPtrTypeArray <CItemTypeDef *> m_TileTypes;
 
 	// TimedFunction Container/Wrapper
 	CTimedFunctionHandler m_TimedFunctions;
-	CGPtrTypeArray<CObjBase*> m_ObjStatusUpdates; // objects that need OnTickStatusUpdate called
+	CSPtrTypeArray<CObjBase*> m_ObjStatusUpdates; // objects that need OnTickStatusUpdate called
 
 private:
 	bool LoadFile( lpctstr pszName, bool fError = true );
@@ -220,7 +220,7 @@ private:
 
 	bool SaveTry(bool fForceImmediate); // Save world state
 	bool SaveStage();
-	static void GetBackupName( CString & sArchive, lpctstr pszBaseDir, tchar chType, int savecount );
+	static void GetBackupName( CSString & sArchive, lpctstr pszBaseDir, tchar chType, int savecount );
 	bool SaveForce(); // Save world state
 
 public:
@@ -296,7 +296,7 @@ public:
 	static bool OpenScriptBackup( CScript & s, lpctstr pszBaseDir, lpctstr pszBaseName, int savecount );
 
 	void r_Write( CScript & s );
-	bool r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc );
 	bool r_LoadVal( CScript & s ) ;
 	bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 

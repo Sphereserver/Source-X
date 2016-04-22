@@ -25,7 +25,7 @@ CCharsActiveList::CCharsActiveList()
 	m_iClients = 0;
 }
 
-void CCharsActiveList::OnRemoveOb( CGObListRec * pObRec )
+void CCharsActiveList::OnRemoveOb( CSObjListRec * pObRec )
 {
 	ADDTOCALLSTACK("CCharsActiveList::OnRemoveOb");
 	// Override this = called when removed from group.
@@ -36,7 +36,7 @@ void CCharsActiveList::OnRemoveOb( CGObListRec * pObRec )
 		ClientDetach();
 		m_timeLastClient = CServTime::GetCurrentTime();	// mark time in case it's the last client
 	}
-	CGObList::OnRemoveOb(pObRec);
+	CSObjList::OnRemoveOb(pObRec);
 	pChar->SetContainerFlags(UID_O_DISCONNECT);
 }
 
@@ -54,7 +54,7 @@ void CCharsActiveList::AddCharToSector( CChar * pChar )
 	{
 		ClientAttach();
 	}
-	CGObList::InsertHead(pChar);
+	CSObjList::InsertHead(pChar);
 }
 
 void CCharsActiveList::ClientAttach()
@@ -74,7 +74,7 @@ void CCharsActiveList::ClientDetach()
 
 bool CItemsList::sm_fNotAMove = false;
 
-void CItemsList::OnRemoveOb( CGObListRec * pObRec )
+void CItemsList::OnRemoveOb( CSObjListRec * pObRec )
 {
 	ADDTOCALLSTACK("CItemsList::OnRemoveOb");
 	// Item is picked up off the ground. (may be put right back down though)
@@ -86,7 +86,7 @@ void CItemsList::OnRemoveOb( CGObListRec * pObRec )
 		pItem->OnMoveFrom();	// IT_MULTI, IT_SHIP and IT_COMM_CRYSTAL
 	}
 
-	CGObList::OnRemoveOb(pObRec);
+	CSObjList::OnRemoveOb(pObRec);
 	pItem->SetContainerFlags(UID_O_DISCONNECT);	// It is no place for the moment.
 }
 
@@ -96,7 +96,7 @@ void CItemsList::AddItemToSector( CItem * pItem )
 	// Add to top level.
 	// Either MoveTo() or SetTimeout is being called.
 	ASSERT( pItem );
-	CGObList::InsertHead( pItem );
+	CSObjList::InsertHead( pItem );
 }
 
 CItemsList::CItemsList()
@@ -236,7 +236,7 @@ const CSphereMapBlock * CSectorBase::GetMapBlock( const CPointMap & pt )
 		pMapBlock = new CSphereMapBlock(pntBlock);
 		ASSERT(pMapBlock != NULL);
 	}
-	catch ( const CSphereError& e )
+	catch ( const CSError& e )
 	{
 		g_Log.EventError("Exception creating new memory block at %s. (%s)\n", pntBlock.WriteUsed(), e.m_pszDescription);
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);

@@ -3,7 +3,7 @@
 #ifndef _INC_CSERVER_H
 #define _INC_CSERVER_H
 
-#include "../common/sphere_library/CFile.h"
+#include "../common/sphere_library/CSFile.h"
 #include "../common/common.h"
 #include "../common/CTextConsole.h"
 #include "../common/CSocket.h"
@@ -45,7 +45,7 @@ public:
 
 							// admin console.
 	int m_iAdminClients;		// how many of my clients are admin consoles ?
-	CString m_sConsoleText;
+	CSString m_sConsoleText;
 	bool m_fConsoleTextReadyFlag;	// interlocking flag for moving between tasks.
 
 	CServTime m_timeShutdown;	// When to perform the shutdowm (g_World.clock)
@@ -59,7 +59,7 @@ public:
 	char	m_PacketFilter[255][32];	// list of packet filtering functions
 	char	m_OutPacketFilter[255][32];	// list of outgoing packet filtering functions
 
-	CFileObj	fhFile;			//	file script object
+	CSFileObj	fhFile;			//	file script object
 	CDataBase	m_hdb;			//	SQL data base
 	CSQLite		m_hldb;			//	Local database
 
@@ -98,14 +98,14 @@ public:
 	ssize_t  PrintPercent( ssize_t iCount, ssize_t iTotal );
 
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
-	virtual bool r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc = NULL );
+	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = NULL );
 	virtual bool r_LoadVal( CScript & s );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
 
 	lpctstr GetStatusString( byte iIndex = 0 ) const;
 	int64 GetAgeHours() const;
 
-	bool OnConsoleCmd( CString & sText, CTextConsole * pSrc );
+	bool OnConsoleCmd( CSString & sText, CTextConsole * pSrc );
 
 	void OnTick();
 

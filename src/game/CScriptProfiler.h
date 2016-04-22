@@ -1,8 +1,8 @@
 #ifndef _INC_CSCRIPTPROFILER_H
 #define _INC_CSCRIPTPROFILER_H
 
+#include "../common/sphere_library/CSTime.h"
 #include "../common/common.h"
-#include "../common/CTime.h"
 
 extern struct CScriptProfiler
 {

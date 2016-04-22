@@ -52,14 +52,14 @@ CUOItemInfo::CUOItemInfo( ITEMID_TYPE id )
 
     if ( g_Install.m_File[filedata].Seek( offset, SEEK_SET ) != offset )
     {
-        throw CSphereError(LOGL_CRIT, CGFile::GetLastError(), "CTileItemType.ReadInfo: TileData Seek");
+        throw CSError(LOGL_CRIT, CSFile::GetLastError(), "CTileItemType.ReadInfo: TileData Seek");
     }
 
     switch (format)
     {
         case VERFORMAT_HIGHSEAS: // high seas format (CUOItemTypeRec_HS)
             if ( g_Install.m_File[filedata].Read( static_cast <CUOItemTypeRec_HS *>(this), sizeof(CUOItemTypeRec_HS)) <= 0 )
-                throw CSphereError(LOGL_CRIT, CGFile::GetLastError(), "CTileItemType.ReadInfo: TileData Read");
+                throw CSError(LOGL_CRIT, CSFile::GetLastError(), "CTileItemType.ReadInfo: TileData Read");
             break;
 
         case VERFORMAT_ORIGINAL: // old format (CUOItemTypeRec)
@@ -67,7 +67,7 @@ CUOItemInfo::CUOItemInfo( ITEMID_TYPE id )
         {
             CUOItemTypeRec record;
             if ( g_Install.m_File[filedata].Read( static_cast <CUOItemTypeRec *>(&record), sizeof(CUOItemTypeRec)) <= 0 )
-                throw CSphereError(LOGL_CRIT, CGFile::GetLastError(), "CTileTerrainType.ReadInfo: TileData Read");
+                throw CSError(LOGL_CRIT, CSFile::GetLastError(), "CTileTerrainType.ReadInfo: TileData Read");
 
             m_flags = record.m_flags;
             m_weight = record.m_weight;
@@ -87,7 +87,7 @@ ITEMID_TYPE CUOItemInfo::GetMaxTileDataItem()
 {
     ADDTOCALLSTACK("CUOItemInfo::GetMaxTileDataItem");
 
-    CGFile* pTileData = g_Install.GetMulFile(VERFILE_TILEDATA);
+    CSFile* pTileData = g_Install.GetMulFile(VERFILE_TILEDATA);
     ASSERT(pTileData != NULL);
 
     dword dwLength = (dword)pTileData->GetLength();	// length of file

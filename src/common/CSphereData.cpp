@@ -2,7 +2,7 @@
 #include "../sphere/threads.h"
 #include "../game/uo_files/CUOMultiItemRec.h"
 #include "../game/uo_files/CUOVersionBlock.h"
-#include "./sphere_library/CFile.h"
+#include "./sphere_library/CSFile.h"
 #include "CException.h"
 #include "CUOInstall.h"
 #include "CSphereMap.h"
@@ -71,7 +71,7 @@ void CVerDataMul::QSort( size_t left, size_t right )
 	iReentrant--;
 }
 
-void CVerDataMul::Load( CGFile & file )
+void CVerDataMul::Load( CSFile & file )
 {
 	ADDTOCALLSTACK("CVerDataMul::Load");
 	// assume it is in sorted order.
@@ -89,7 +89,7 @@ void CVerDataMul::Load( CGFile & file )
 	dword dwQty;
 	if ( file.Read(static_cast<void *>(&dwQty), sizeof(dwQty)) <= 0 )
 	{
-		throw CSphereError( LOGL_CRIT, CGFile::GetLastError(), "VerData: Read Qty");
+		throw CSError( LOGL_CRIT, CSFile::GetLastError(), "VerData: Read Qty");
 	}
 
 	Unload();
@@ -97,7 +97,7 @@ void CVerDataMul::Load( CGFile & file )
 
 	if ( file.Read(static_cast<void *>(m_Data.GetBasePtr()), dwQty * sizeof( CUOVersionBlock )) <= 0 )
 	{
-		throw CSphereError( LOGL_CRIT, CGFile::GetLastError(), "VerData: Read");
+		throw CSError( LOGL_CRIT, CSFile::GetLastError(), "VerData: Read");
 	}
 
 	if ( dwQty <= 0 )
@@ -115,7 +115,7 @@ void CVerDataMul::Load( CGFile & file )
 		if ( dwIndex1 > dwIndex2 )
 		{
 			DEBUG_ERR(( "VerData Array is NOT sorted !\n" ));
-			throw CSphereError( LOGL_CRIT, (dword)-1, "VerData: NOT Sorted!");
+			throw CSError( LOGL_CRIT, (dword)-1, "VerData: NOT Sorted!");
 		}
 	}
 #endif

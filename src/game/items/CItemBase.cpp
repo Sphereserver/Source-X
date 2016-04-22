@@ -618,7 +618,7 @@ bool CItemBase::GetItemData( ITEMID_TYPE id, CUOItemTypeRec_HS * pData ) // stat
 		CUOItemInfo info( id );
 		*pData = *( static_cast <CUOItemTypeRec_HS *>( & info ));
 	}
-	catch ( const CSphereError& e )
+	catch ( const CSError& e )
 	{
 		g_Log.CatchEvent( &e, "GetItemData" );
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
@@ -1000,7 +1000,7 @@ lpctstr const CItemBase::sm_szLoadKeys[IBC_QTY+1] =
 	NULL
 };
 
-bool CItemBase::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pChar )
+bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pChar )
 {
 	UNREFERENCED_PARAMETER(pChar);
 	ADDTOCALLSTACK("CItemBase::r_WriteVal");
@@ -1925,7 +1925,7 @@ bool CItemBaseMulti::r_LoadVal( CScript &s )
 	return false;
 }
 
-bool CItemBaseMulti::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pChar )
+bool CItemBaseMulti::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pChar )
 {
 	ADDTOCALLSTACK("CItemBaseMulti::r_WriteVal");
 	EXC_TRY("WriteVal");

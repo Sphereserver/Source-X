@@ -276,7 +276,7 @@ bool CAccounts::Cmd_AddNew( CTextConsole * pSrc, lpctstr pszName, lpctstr pszArg
 
 	pAccount = new CAccount(szName);
 	ASSERT(pAccount);
-	pAccount->m_dateFirstConnect = pAccount->m_dateLastConnect = CGTime::GetCurrentTime();
+	pAccount->m_dateFirstConnect = pAccount->m_dateLastConnect = CSTime::GetCurrentTime();
 
 	pAccount->SetPassword(pszArg, md5);
 	return true;
@@ -315,7 +315,7 @@ bool CAccounts::Cmd_ListUnused(CTextConsole * pSrc, lpctstr pszDays, lpctstr psz
 	ADDTOCALLSTACK("CAccounts::Cmd_ListUnused");
 	int iDaysTest = Exp_GetVal(pszDays);
 
-	CGTime datetime = CGTime::GetCurrentTime();
+	CSTime datetime = CSTime::GetCurrentTime();
 	int iDaysCur = datetime.GetDaysTotal();
 
 	size_t iCountOrig = Account_GetCount();
@@ -475,7 +475,7 @@ bool CAccounts::Account_OnCmd( tchar * pszArgs, CTextConsole * pSrc )
 	}
 	else
 	{
-		CString cmdArgs;
+		CSString cmdArgs;
 		if (ppCmd[4] && ppCmd[4][0])
 			cmdArgs.Format("%s %s %s", ppCmd[2], ppCmd[3], ppCmd[4]);
 		else if (ppCmd[3] && ppCmd[3][0])
@@ -704,7 +704,7 @@ void CAccount::OnLogin( CClient * pClient )
 	}
 
 	// Get the real world time/date.
-	CGTime datetime = CGTime::GetCurrentTime();
+	CSTime datetime = CSTime::GetCurrentTime();
 
 	if ( !m_Total_Connect_Time )	// first time - save first ip and timestamp
 	{
@@ -1117,7 +1117,7 @@ bool CAccount::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	return( CScriptObj::r_GetRef( pszKey, pRef ));
 }
 
-bool CAccount::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
+bool CAccount::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CAccount::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -1501,7 +1501,7 @@ bool CAccount::r_Verb( CScript &s, CTextConsole * pSrc )
 		bool bLoad = CScriptObj::r_Verb( s, pSrc );
 		if ( !bLoad ) //try calling custom functions
 		{
-			CString sVal;
+			CSString sVal;
 			CScriptTriggerArgs Args( s.GetArgRaw() );
 			bLoad = r_Call( pszKey, pSrc, &Args, &sVal );
 		}

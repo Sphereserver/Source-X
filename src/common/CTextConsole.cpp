@@ -2,11 +2,11 @@
 
 #include "../game/chars/CChar.h"
 #include "../sphere/threads.h"
-#include "CAssoc.h"
+#include "./sphere_library/CSAssoc.h"
 #include "CTextConsole.h"
 
 
-extern CGStringList g_AutoComplete;
+extern CSStringList g_AutoComplete;
 
 CChar * CTextConsole::GetChar() const
 {
@@ -14,7 +14,7 @@ CChar * CTextConsole::GetChar() const
     return( const_cast <CChar *>( dynamic_cast <const CChar *>( this )));
 }
 
-int CTextConsole::OnConsoleKey( CString & sText, tchar nChar, bool fEcho )
+int CTextConsole::OnConsoleKey( CSString & sText, tchar nChar, bool fEcho )
 {
     ADDTOCALLSTACK("CTextConsole::OnConsoleKey");
     // eventaully we should call OnConsoleCmd
@@ -58,9 +58,9 @@ int CTextConsole::OnConsoleKey( CString & sText, tchar nChar, bool fEcho )
         inputLen = strlen(p);
 
         // search in the auto-complete list for starting on P, and save coords of 1st and Last matched
-        CGStringListRec	*firstmatch = NULL;
-        CGStringListRec	*lastmatch = NULL;
-        CGStringListRec	*curmatch = NULL;	// the one that should be set
+        CSStringListRec	*firstmatch = NULL;
+        CSStringListRec	*lastmatch = NULL;
+        CSStringListRec	*curmatch = NULL;	// the one that should be set
         for ( curmatch = g_AutoComplete.GetHead(); curmatch != NULL; curmatch = curmatch->GetNext() )
         {
             if ( !strnicmp(curmatch->GetPtr(), p, inputLen) )	// matched

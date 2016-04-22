@@ -30,7 +30,7 @@ public:
     };
 
     bool m_fPlotMode;	// should really be per-client based but oh well.
-    CGTypedArray<CMapPinRec,CMapPinRec&> m_Pins;
+    CSTypedArray<CMapPinRec,CMapPinRec&> m_Pins;
 
 public:
     CItemMap( ITEMID_TYPE id, CItemBase * pItemDef );
@@ -43,7 +43,7 @@ private:
 public:
     virtual bool IsSameType( const CObjBase * pObj ) const;
     virtual void r_Write( CScript & s );
-    virtual bool r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc = NULL );
+    virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = NULL );
     virtual bool r_LoadVal( CScript & s );
     virtual void DupeCopy( const CItem * pItem );
 };

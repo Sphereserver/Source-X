@@ -1813,7 +1813,7 @@ lpctstr const CChar::sm_szLoadKeys[CHC_QTY+1] =
 	NULL
 };
 
-bool CChar::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
+bool CChar::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CChar::r_WriteVal");
 
@@ -2132,7 +2132,7 @@ do_default:
 				}
 
 				tchar * ppLevel_sep[100];
-				const CString* pFameAt0 = g_Cfg.m_Fame.GetAt(0);
+				const CSString* pFameAt0 = g_Cfg.m_Fame.GetAt(0);
 
 				tchar * pszFameAt0 = new tchar[pFameAt0->GetLength() + 1];
 				strcpylen(pszFameAt0, pFameAt0->GetPtr());
@@ -2210,7 +2210,7 @@ do_default:
 				}
 
 				tchar * ppLevel_sep[100];
-				const CString* pKarmaAt0 = g_Cfg.m_Karma.GetAt(0);
+				const CSString* pKarmaAt0 = g_Cfg.m_Karma.GetAt(0);
 
 				tchar * pszKarmaAt0 = new tchar[pKarmaAt0->GetLength() + 1];
 				strcpylen(pszKarmaAt0, pKarmaAt0->GetPtr());

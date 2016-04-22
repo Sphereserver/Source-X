@@ -3,19 +3,19 @@
 #ifndef _INC_COBJBASETEMPLATE_H
 #define _INC_COBJBASETEMPLATE_H
 
-#include "./sphere_library/CArray.h"
-#include "./sphere_library/CString.h"
+#include "./sphere_library/CSArray.h"
+#include "./sphere_library/CSString.h"
 //#include "spherecom.h"
 #include "CRect.h"
 #include "CUID.h"
 
 
-class CObjBaseTemplate : public CGObListRec
+class CObjBaseTemplate : public CSObjListRec
 {
 	// A dynamic object of some sort.
 private:
 	CUID	m_UID;		// How the server will refer to this. 0 = static item
-	CString	m_sName;	// unique name for the individual object.
+	CSString	m_sName;	// unique name for the individual object.
 	CPointMap	m_pt;		// List is sorted by m_z_sort.
 protected:
 	void DupeCopy( const CObjBaseTemplate * pObj );

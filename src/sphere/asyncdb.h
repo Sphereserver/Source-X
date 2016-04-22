@@ -15,7 +15,7 @@
 class CDataBaseAsyncHelper : public AbstractSphereThread
 {
 private:
-	typedef std::pair<CString, CString> FunctionQueryPair_t;
+	typedef std::pair<CSString, CSString> FunctionQueryPair_t;
 	typedef std::pair<bool, FunctionQueryPair_t> QueryBlob_t;
 	typedef std::deque<QueryBlob_t> QueueQuery_t;
 

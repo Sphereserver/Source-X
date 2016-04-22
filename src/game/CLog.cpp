@@ -35,7 +35,7 @@ const CScriptObj * CLog::SetObjectContext( const CScriptObj * pObjectContext )
 bool CLog::SetFilePath( lpctstr pszName )
 {
 	ASSERT( ! IsFileOpen());
-	return CFileText::SetFilePath( pszName );
+	return CSFileText::SetFilePath( pszName );
 }
 
 lpctstr CLog::GetLogDir() const
@@ -105,14 +105,14 @@ bool CLog::OpenLog( lpctstr pszBaseDirName )	// name set previously.
 	}
 
 	// Get the new name based on date.
-	m_dateStamp = CGTime::GetCurrentTime();
+	m_dateStamp = CSTime::GetCurrentTime();
 	tchar *pszTemp = Str_GetTemp();
 	sprintf(pszTemp, SPHERE_FILE "%d-%02d-%02d.log",
 		m_dateStamp.GetYear(), m_dateStamp.GetMonth(), m_dateStamp.GetDay());
-	CString sFileName = GetMergedFileName(m_sBaseDir, pszTemp);
+	CSString sFileName = GetMergedFileName(m_sBaseDir, pszTemp);
 
 	// Use the OF_READWRITE to append to an existing file.
-	if ( CFileText::Open( sFileName, OF_SHARE_DENY_NONE|OF_READWRITE|OF_TEXT ) )
+	if ( CSFileText::Open( sFileName, OF_SHARE_DENY_NONE|OF_READWRITE|OF_TEXT ) )
 	{
 		setvbuf(m_pStream, NULL, _IONBF, 0);
 		return true;
@@ -167,7 +167,7 @@ int CLog::EventStr( dword wMask, lpctstr pszMsg )
 	{
 
 		// Put up the date/time.
-		CGTime datetime = CGTime::GetCurrentTime();	// last real time stamp.
+		CSTime datetime = CSTime::GetCurrentTime();	// last real time stamp.
 
 		if ( datetime.GetDaysTotal() != m_dateStamp.GetDaysTotal())
 		{
@@ -275,11 +275,11 @@ int CLog::EventStr( dword wMask, lpctstr pszMsg )
 	return( iRet );
 }
 
-CGTime CLog::sm_prevCatchTick;
+CSTime CLog::sm_prevCatchTick;
 
-void _cdecl CLog::CatchEvent( const CSphereError * pErr, lpctstr pszCatchContext, ... )
+void _cdecl CLog::CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ... )
 {
-	CGTime timeCurrent = CGTime::GetCurrentTime();
+	CSTime timeCurrent = CSTime::GetCurrentTime();
 	if ( sm_prevCatchTick.GetTime() == timeCurrent.GetTime() )	// prevent message floods.
 		return;
 	// Keep a record of what we catch.

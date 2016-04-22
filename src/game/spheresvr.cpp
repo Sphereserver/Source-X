@@ -108,7 +108,7 @@ CExpression g_Exp;		// Global script variables.
 CLog		g_Log;
 CEventLog * g_pLog = &g_Log;
 CAccounts	g_Accounts;	// All the player accounts. name sorted CAccount
-CGStringList	g_AutoComplete;	// auto-complete list
+CSStringList	g_AutoComplete;	// auto-complete list
 CScriptProfiler g_profiler;		// script profiler
 CUOMapList	g_MapList;			// global maps information
 
@@ -335,7 +335,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 	//	load auto-complete dictionary
 	EXC_SET("auto-complete");
 	{
-		CFileText	dict;
+		CSFileText	dict;
 		if ( dict.Open(SPHERE_FILE ".dic", OF_READ|OF_TEXT|OF_DEFAULTMODE) )
 		{
 			tchar * pszTemp = Str_GetTemp();
@@ -565,8 +565,8 @@ void defragSphere(char *path)
 {
 	ASSERT(path != NULL);
 
-	CFileText inf;
-	CGFile ouf;
+	CSFileText inf;
+	CSFile ouf;
 	char z[256], z1[256], buf[1024];
 	size_t i;
 	dword uid(0);

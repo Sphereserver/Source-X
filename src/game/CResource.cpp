@@ -1,5 +1,5 @@
 ﻿#include "../common/CException.h"
-#include "../common/CFileList.h"
+#include "../common/sphere_library/CSFileList.h"
 #include "../common/CUOInstall.h"
 #include "../common/sphereversion.h"
 #include "../network/network.h"
@@ -970,7 +970,7 @@ bool CResource::r_LoadVal( CScript &s )
 			m_bAgree = (s.GetArgVal() != 0);
 			break;
 		case RC_ACCTFILES:	// Put acct files here.
-			m_sAcctBaseDir = CGFile::GetMergedFileName( s.GetArgStr(), "" );
+			m_sAcctBaseDir = CSFile::GetMergedFileName( s.GetArgStr(), "" );
 			break;
 		case RC_ATTACKERTIMEOUT:
 			m_iAttackerTimeout = s.GetArgVal() * TICK_PER_SEC;
@@ -1017,7 +1017,7 @@ bool CResource::r_LoadVal( CScript &s )
 			m_iCriminalTimer = s.GetArgVal() * 60 * TICK_PER_SEC;
 			break;
 		case RC_STRIPPATH:	// Put TNG stripped files here.
-			m_sStripPath = CGFile::GetMergedFileName( s.GetArgStr(), "" );
+			m_sStripPath = CSFile::GetMergedFileName( s.GetArgStr(), "" );
 			break;
 		case RC_DEADSOCKETTIME:
 			m_iDeadSocketTime = s.GetArgVal()*60*TICK_PER_SEC;
@@ -1047,7 +1047,7 @@ bool CResource::r_LoadVal( CScript &s )
 			g_Log.SetLogMask( s.GetArgVal());
 			break;
 		case RC_MULFILES:
-			g_Install.SetPreferPath( CGFile::GetMergedFileName( s.GetArgStr(), "" ));
+			g_Install.SetPreferPath( CSFile::GetMergedFileName( s.GetArgStr(), "" ));
 			break;
 		case RC_MAPCACHETIME:
 			m_iMapCacheTime = s.GetArgVal() * TICK_PER_SEC;
@@ -1122,7 +1122,7 @@ bool CResource::r_LoadVal( CScript &s )
 			break;
 
 		case RC_SCPFILES: // Get SCP files from here.
-			m_sSCPBaseDir = CGFile::GetMergedFileName( s.GetArgStr(), "" );
+			m_sSCPBaseDir = CSFile::GetMergedFileName( s.GetArgStr(), "" );
 			break;
 
 		case RC_SECURE:
@@ -1168,7 +1168,7 @@ bool CResource::r_LoadVal( CScript &s )
 
 
 		case RC_WORLDSAVE: // Put save files here.
-			m_sWorldBaseDir = CGFile::GetMergedFileName( s.GetArgStr(), "" );
+			m_sWorldBaseDir = CSFile::GetMergedFileName( s.GetArgStr(), "" );
 			break;
 
 		case RC_COMMANDPREFIX:
@@ -1249,7 +1249,7 @@ const CSkillDef * CResource::SkillLookup( lpctstr pszKey )
 
 
 
-bool CResource::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
+bool CResource::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CResource::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -1610,7 +1610,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc 
 		case RC_RTICKS:
 			{
 				if ( pszKey[6] != '.' )
-					sVal.FormatUVal((uint)(CGTime::GetCurrentTime().GetTime()));
+					sVal.FormatUVal((uint)(CSTime::GetCurrentTime().GetTime()));
 				else
 				{
 					pszKey += 6;
@@ -1626,7 +1626,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc 
 						if ( iQty != 6 )
 							return false;
 
-						CGTime datetime((int)(piVal[0]), (int)(piVal[1]), (int)(piVal[2]), (int)(piVal[3]), (int)(piVal[4]), (int)(piVal[5]));
+						CSTime datetime((int)(piVal[0]), (int)(piVal[1]), (int)(piVal[2]), (int)(piVal[3]), (int)(piVal[4]), (int)(piVal[5]));
 						if ( datetime.GetTime() == -1 )
 							sVal.FormatVal(-1);
 						else
@@ -1645,7 +1645,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc 
 
 						time_t lTime = Exp_GetVal(ppVal[0]);
 
-						CGTime datetime(lTime);
+						CSTime datetime(lTime);
 						sVal = datetime.Format(iQty > 1? ppVal[1]: NULL);
 					}
 				}
@@ -1654,7 +1654,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc 
 		case RC_RTIME:
 			{
 				if ( pszKey[5] != '.' )
-					sVal = CGTime::GetCurrentTime().Format(NULL);
+					sVal = CSTime::GetCurrentTime().Format(NULL);
 				else
 				{
 					pszKey += 5;
@@ -1663,13 +1663,13 @@ bool CResource::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc 
 					{
 						pszKey += 9;
 						GETNONWHITESPACE( pszKey );
-						sVal = CGTime::GetCurrentTime().FormatGmt(pszKey);
+						sVal = CSTime::GetCurrentTime().FormatGmt(pszKey);
 					}
 					if (!strnicmp("FORMAT",pszKey,6))
 					{
 						pszKey += 6;
 						GETNONWHITESPACE( pszKey );
-						sVal = CGTime::GetCurrentTime().Format(pszKey);
+						sVal = CSTime::GetCurrentTime().Format(pszKey);
 					}
 				}
 			} break;
@@ -1873,7 +1873,7 @@ CWebPageDef * CResource::FindWebPage( lpctstr pszPath ) const
 		return( static_cast <CWebPageDef*>( m_WebPages[0] ));
 	}
 
-	lpctstr pszTitle = CGFile::GetFilesTitle(pszPath);
+	lpctstr pszTitle = CSFile::GetFilesTitle(pszPath);
 
 	if ( pszTitle == NULL || pszTitle[0] == '\0' )
 	{
@@ -2584,7 +2584,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 				if ( *pName == '<' )
 					pName = "";
 				
-				m_Fame.SetAtGrow( i, new CString(pName) );
+				m_Fame.SetAtGrow( i, new CSString(pName) );
 				++i;
 			}
 		}
@@ -2598,7 +2598,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 				if ( *pName == '<' )
 					pName = "";
 				
-				m_Karma.SetAtGrow( i, new CString(pName) );
+				m_Karma.SetAtGrow( i, new CSString(pName) );
 				++i;
 			}
 		}
@@ -2642,7 +2642,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 				if ( *pName == '<' )
 					pName = "";
 
-				m_NotoTitles.SetAtGrow( i, new CString(pName) );
+				m_NotoTitles.SetAtGrow( i, new CSString(pName) );
 				++i;
 			}
 
@@ -2680,7 +2680,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		m_Runes.RemoveAll();
 		while ( pScript->ReadKey())
 		{
-			m_Runes.Add( new CString(pScript->GetKey()) );
+			m_Runes.Add( new CSString(pScript->GetKey()) );
 		}
 		return true;
 	case RES_SECTOR: // saved in world file.
@@ -2910,12 +2910,12 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		pPrvDef = ResourceGetDef( rid );
 		if ( pPrvDef )
 		{
-			pNewLink = dynamic_cast <CRandGroupDef*>(pPrvDef);
+			pNewLink = dynamic_cast <CSRandGroupDef*>(pPrvDef);
 			ASSERT(pNewLink);
 		}
 		else
 		{
-			pNewLink = new CRandGroupDef( rid );
+			pNewLink = new CSRandGroupDef( rid );
 			ASSERT(pNewLink);
 			m_ResHash.AddSortKey( rid, pNewLink );
 		}
@@ -3900,7 +3900,7 @@ bool CResource::Load( bool fResync )
 	{
 		g_VerData.Load( g_Install.m_File[VERFILE_VERDATA] );
 	}
-	catch ( const CSphereError& e )
+	catch ( const CSError& e )
 	{
 		g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".INI file is corrupt or missing\n" );
 		g_Log.CatchEvent( &e, "g_VerData.Load" );
@@ -4184,7 +4184,7 @@ bool CResource::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilename )
 	tchar * pDefnameBuffer = static_cast<tchar *>(sDefnameBuffer);
 	CVarDefMap defnames;
 
-	s.Printf("// Unscripted items, generated by " SPHERE_TITLE " at %s\n", CGTime::GetCurrentTime().Format(NULL));
+	s.Printf("// Unscripted items, generated by " SPHERE_TITLE " at %s\n", CSTime::GetCurrentTime().Format(NULL));
 
 	ITEMID_TYPE idMaxItem = CUOItemInfo::GetMaxTileDataItem();
 	if (idMaxItem > ITEMID_MULTI)

@@ -29,7 +29,7 @@ static void ExtractPath(LPTSTR szPath)
 
 static LPTSTR GetLastErrorText(LPTSTR lpszBuf, DWORD dwSize)
 {
-	// Check CSphereError.
+	// Check CSError.
 	//	PURPOSE:  copies error message text to a string
 	//
 	//	PARAMETERS:
@@ -39,7 +39,7 @@ static LPTSTR GetLastErrorText(LPTSTR lpszBuf, DWORD dwSize)
 	//	RETURN VALUE:
 	//		destination buffer
 
-	int nChars = CSphereError::GetSystemErrorMessage( GetLastError(), lpszBuf, dwSize );
+	int nChars = CSError::GetSystemErrorMessage( GetLastError(), lpszBuf, dwSize );
 	sprintf( lpszBuf+nChars, " (0x%x)", GetLastError());
 	return lpszBuf;
 }

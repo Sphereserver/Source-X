@@ -6,7 +6,7 @@
 #define _INC_CCLIENT_H
 #pragma once
 
-#include "../common/sphere_library/CArray.h"
+#include "../common/sphere_library/CSArray.h"
 #include "../common/CEncrypt.h"
 #include "../common/CScriptObj.h"
 #include "../common/CTextConsole.h"
@@ -56,7 +56,7 @@ public:
 	{
 	public:
 		const word m_ID;
-		CString const m_sText;
+		CSString const m_sText;
 
 		TResponseString( word id, lpctstr pszText ) : m_ID( id ), m_sText( pszText )
 		{
@@ -67,12 +67,12 @@ public:
 		TResponseString& operator=( const TResponseString& other );
 	};
 
-	CGTypedArray<dword, dword>		m_CheckArray;
-	CGObArray<TResponseString *>	m_TextArray;
+	CSTypedArray<dword, dword>		m_CheckArray;
+	CSObjArray<TResponseString *>	m_TextArray;
 public:
 	void AddText( word id, lpctstr pszText );
 	lpctstr GetName() const;
-	bool r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc );
 
 public:
 	CDialogResponseArgs()
@@ -91,13 +91,13 @@ class CMenuItem 	// describe a menu item.
 public:
 	word m_id;			// ITEMID_TYPE in base set.
 	word m_color;
-	CString m_sText;
+	CSString m_sText;
 public:
 	bool ParseLine( tchar * pszArgs, CScriptObj * pObjBase, CTextConsole * pSrc );
 };
 
 
-class CClient : public CGObListRec, public CScriptObj, public CChatChanMember, public CTextConsole
+class CClient : public CSObjListRec, public CScriptObj, public CChatChanMember, public CTextConsole
 {
 	// TCP/IP connection to the player or console.
 private:
@@ -139,7 +139,7 @@ private:
 	// Promptconsole
 	CLIMODE_TYPE m_Prompt_Mode;	// type of prompt
 	CUID m_Prompt_Uid;		// context uid
-	CString m_Prompt_Text;		// text (i.e. callback function)
+	CSString m_Prompt_Text;		// text (i.e. callback function)
 
 public:
 	CONNECT_TYPE	m_iConnectType;	// what sort of a connection is this ?
@@ -165,7 +165,7 @@ public:
 	CUID m_Targ_Last;	// The last object targeted by the client
 	CUID m_Targ_UID;			// The object of interest to apply to the target.
 	CUID m_Targ_PrvUID;		// The object of interest before this.
-	CString m_Targ_Text;		// Text transfered up from client.
+	CSString m_Targ_Text;		// Text transfered up from client.
 	CPointMap  m_Targ_p;			// For script targeting,
 	CServTime m_Targ_Timeout;	// timeout time for targeting
 
@@ -246,7 +246,7 @@ public:
 		// CLIMODE_TARG_USE_ITEM
 		struct
 		{
-			CGObList * m_pParent;	// the parent of the item being targetted .
+			CSObjList * m_pParent;	// the parent of the item being targetted .
 		} m_tmUseItem;
 	};
 
@@ -264,8 +264,8 @@ private:
 	bool OnRxPing( const byte * pData, size_t len );
 	bool OnRxWebPageRequest( byte * pRequest, size_t len );
 
-	byte LogIn( CAccountRef pAccount, CString & sMsg );
-	byte LogIn( lpctstr pszName, lpctstr pPassword, CString & sMsg );
+	byte LogIn( CAccountRef pAccount, CSString & sMsg );
+	byte LogIn( lpctstr pszName, lpctstr pPassword, CSString & sMsg );
 
 	bool CanInstantLogOut() const;
 	void Cmd_GM_PageClear();
@@ -399,11 +399,11 @@ public:
 
 	CClient* GetNext() const
 	{
-		return( static_cast <CClient*>( CGObListRec::GetNext()));
+		return( static_cast <CClient*>( CSObjListRec::GetNext()));
 	}
 
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute script type command on me
-	virtual bool r_WriteVal( lpctstr pszKey, CString & s, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pszKey, CSString & s, CTextConsole * pSrc );
 	virtual bool r_LoadVal( CScript & s );
 
 	// Low level message traffic.
@@ -538,7 +538,7 @@ public:
 	void addGumpInpVal( bool fcancel, INPVAL_STYLE style, dword dwmask, lpctstr ptext1, lpctstr ptext2, CObjBase * pObj );
 
 	void addItemMenu( CLIMODE_TYPE mode, const CMenuItem * item, size_t count, CObjBase * pObj = NULL );
-	void addGumpDialog( CLIMODE_TYPE mode, const CString * sControls, size_t iControls, const CString * psText, size_t iTexts, int x, int y, CObjBase * pObj = NULL, dword rid = 0 );
+	void addGumpDialog( CLIMODE_TYPE mode, const CSString * sControls, size_t iControls, const CSString * psText, size_t iTexts, int x, int y, CObjBase * pObj = NULL, dword rid = 0 );
 
 	bool addGumpDialogProps( CUID uid );
 
@@ -714,7 +714,7 @@ public:
 	NetState* GetNetState(void) const { return m_net; };
 
 private:
-	CString	m_BarkBuffer;
+	CSString	m_BarkBuffer;
 
 public:
 	char		m_zLastMessage[SCRIPT_MAX_LINE_LEN];	// last sysmessage
@@ -726,7 +726,7 @@ public:
 	typedef std::map<dword, std::pair<std::pair<dword,dword>, CPointMap> > OpenedContainerMap_t;
 	OpenedContainerMap_t m_openedContainers;	// list of UIDs of all opened containers by the client
 
-	CGObArray<CClientTooltip *> m_TooltipData; // Storage for tooltip data while in trigger
+	CSObjArray<CClientTooltip *> m_TooltipData; // Storage for tooltip data while in trigger
 
 	CItemMultiCustom * m_pHouseDesign; // The building this client is designing
 

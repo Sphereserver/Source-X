@@ -4,11 +4,11 @@
 #include "../game/CResource.h"
 #include "../game/CWorld.h"
 #include "../sphere/threads.h"
-#include "CExpression.h"
-#include "common.h"
-#include "CResourceBase.h"
-#include "CScriptObj.h"
-#include "CVarFloat.h"
+#include "./CExpression.h"
+#include "./common.h"
+#include "./CResourceBase.h"
+#include "./CScriptObj.h"
+#include "./CVarFloat.h"
 
 #define VARDEF_FLOAT_MAXBUFFERSIZE 82
 
@@ -39,7 +39,7 @@ bool CVarFloat::Insert( const char* VarName, const char* VarValue, bool ForceSet
 	SKIP_ARGSEP(VarName);
 	char* pEnd;
 	realtype Real = strtod(VarValue,&pEnd);
-	m_VarMap[CString(VarName)] = Real;
+	m_VarMap[CSString(VarName)] = Real;
 	return true;
 }
 
@@ -55,32 +55,32 @@ realtype CVarFloat::GetVal( const char* VarName )
 	return i->second;
 }
 
-CString CVarFloat::Get( const char* VarName ) 
+CSString CVarFloat::Get( const char* VarName ) 
 {
 	ADDTOCALLSTACK("CVarFloat::Get");
 	if ( !VarName )
-		return CString();
+		return CSString();
 	SKIP_ARGSEP(VarName);
 	if ( strlen(VarName) > VARDEF_FLOAT_MAXBUFFERSIZE )
-		return CString();
+		return CSString();
 
 	realtype Real = GetVal(VarName);
 	char szReal[VARDEF_FLOAT_MAXBUFFERSIZE];
 	sprintf(szReal, "%f", Real);
 
-	return CString(szReal);
+	return CSString(szReal);
 }
 
 short int Reentrant_Count = 0;
 
-CString CVarFloat::FloatMath( lpctstr & Expr )
+CSString CVarFloat::FloatMath( lpctstr & Expr )
 {
 	ADDTOCALLSTACK("CVarFloat::FloatMath");
 	//DEBUG_ERR(("FloatMath\n"));
 	//DEBUG_ERR(("Expr: '%s'\n",Expr));
 	char szReal[VARDEF_FLOAT_MAXBUFFERSIZE];
 	sprintf(szReal, "%f", MakeFloatMath(Expr));
-	return CString( szReal );
+	return CSString( szReal );
 }
 
 realtype CVarFloat::MakeFloatMath( lpctstr & Expr )
@@ -713,8 +713,8 @@ realtype CVarFloat::GetRandVal( realtype dQty )
 	if ( dQty <= 0 )
 		return 0;
 	if ( dQty >= INT64_MAX )
-		return (realtype)(MulDivLL( CRand::genRandReal64(0,dQty), dQty, INT64_MAX ));
-	return CRand::genRandReal64(0, dQty);
+		return (realtype)(MulDivLL( CSRand::genRandReal64(0,dQty), dQty, INT64_MAX ));
+	return CSRand::genRandReal64(0, dQty);
 }
 
 realtype CVarFloat::GetRandVal2( realtype dMin, realtype dMax )
@@ -726,7 +726,7 @@ realtype CVarFloat::GetRandVal2( realtype dMin, realtype dMax )
 		dMin = dMax;
 		dMax = tmp;
 	}
-	return CRand::genRandReal64(dMin, dMax);
+	return CSRand::genRandReal64(dMin, dMax);
 }
 
 //Does not work as it should, would be too slow, and nobody needs that

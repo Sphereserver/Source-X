@@ -225,7 +225,7 @@ class CGRegion
 public:
 	static const char *m_sClassName;
 	CGRect m_rectUnion;	// The union rectangle.
-	CGTypedArray<CGRect, const CGRect&> m_Rects;
+	CSTypedArray<CGRect, const CGRect&> m_Rects;
 	bool IsRegionEmpty() const
 	{
 		return( m_rectUnion.IsRectEmpty());
@@ -264,7 +264,7 @@ private:
 	CGRegion& operator=(const CGRegion& other);
 };
 
-class CRegionLinks : public CGPtrTypeArray<CRegionBase*>
+class CRegionLinks : public CSPtrTypeArray<CRegionBase*>
 {
 	//just named class for this, maybe something here later
 public:
@@ -292,8 +292,8 @@ class CRegionBase : public CResourceDef, public CGRegion
 	// made of (possibly multiple) rectangles.
 	// RES_ROOM or base for RES_AREA
 private:
-	CString	m_sName;	// Name of the region.
-	CString	m_sGroup;
+	CSString	m_sName;	// Name of the region.
+	CSString	m_sGroup;
 
 #define REGION_ANTIMAGIC_ALL		0x000001	// All magic banned here.
 #define REGION_ANTIMAGIC_RECALL_IN	0x000002	// Teleport,recall in to this, and mark
@@ -377,7 +377,7 @@ public:
 	{
 		return( m_sName );
 	}
-	const CString & GetNameStr() const
+	const CSString & GetNameStr() const
 	{
 		return( m_sName );
 	}
@@ -385,7 +385,7 @@ public:
 	void r_WriteBase( CScript & s );
 
 	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( lpctstr pKey, CString & sVal, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc );
 	virtual void r_WriteBody( CScript & s, lpctstr pszPrefix );
 	virtual void r_WriteModified( CScript & s );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
@@ -436,7 +436,7 @@ private:
 	CRegionBase& operator=(const CRegionBase& other);
 };
 
-class CRandGroupDef;
+class CSRandGroupDef;
 
 class CRegionWorld : public CRegionBase
 {
@@ -448,12 +448,12 @@ public:
 	static lpctstr const sm_szVerbKeys[];
 
 public:
-	const CRandGroupDef * FindNaturalResource( int /* IT_TYPE */ type ) const;
+	const CSRandGroupDef * FindNaturalResource( int /* IT_TYPE */ type ) const;
 
 public:
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( lpctstr pKey, CString & sVal, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc );
 	virtual void r_WriteBody( CScript &s, lpctstr pszPrefix );
 	virtual void r_WriteModified( CScript &s );
 	virtual void r_Write( CScript & s );
@@ -502,8 +502,8 @@ class CStartLoc		// The start locations for creating a new char.
 {
 public:
 	static const char *m_sClassName;
-	CString m_sArea;	// Area/City Name = Britain or Occlo
-	CString m_sName;	// Place name = Castle Britannia or Docks
+	CSString m_sArea;	// Area/City Name = Britain or Occlo
+	CSString m_sName;	// Place name = Castle Britannia or Docks
 	CPointMap m_pt;
 	int iClilocDescription; //Only for clients 7.00.13 +
 

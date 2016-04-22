@@ -146,7 +146,7 @@ public:
 	// Timer
 	virtual void SetTimeout( int64 iDelayInTicks );
 	bool IsTimerSet() const;
-	int64 GetTimerDiff() const;	// return: < 0 = in the past ( m_timeout - CServTime::GetCurrentTime() )
+	int64 GetTimerDiff() const;
 	bool IsTimerExpired() const;
 	int64 GetTimerAdjusted() const;
 	int64 GetTimerDAdjusted() const;
@@ -168,7 +168,7 @@ public:
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 	virtual void r_Write( CScript & s );
 	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );	// some command on this object as a target
 
 	void Emote(lpctstr pText, CClient * pClientExclude = NULL, bool fPossessive = false);
@@ -475,11 +475,37 @@ enum CTRIG_TYPE
 
 DIR_TYPE GetDirStr( lpctstr pszDir );
 
+extern void DeleteKey(lpctstr pszKey);
+
+
+/* inline functions */
+
+inline CObjBase* CObjBase::GetPrev() const
+{
+	return static_cast <CObjBase*>(CSObjListRec::GetPrev());
+}
+
+inline CObjBase* CObjBase::GetNext() const
+{
+	return static_cast <CObjBase*>(CSObjListRec::GetNext());
+}
+
 inline int64 CObjBase::GetTimerDiff() const
 {
 	// How long till this will expire ?
-	return( g_World.GetTimeDiff( m_timeout ) );
+	return g_World.GetTimeDiff( m_timeout );
+	// return: < 0 = in the past ( m_timeout - CServTime::GetCurrentTime() )
 }
 
-extern void DeleteKey( lpctstr pszKey );
+inline bool CObjBase::IsTimerSet() const
+{
+	return m_timeout.IsTimeValid();
+}
+
+inline bool CObjBase::IsTimerExpired() const
+{
+	return (GetTimerDiff() <= 0);
+}
+
+
 #endif // _INC_COBJBASE_H

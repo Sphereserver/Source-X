@@ -3,12 +3,12 @@
 #ifndef _INC_CRESOURCEBASE_H
 #define _INC_CRESOURCEBASE_H
 
-#include "./sphere_library/CArray.h"
+#include "./sphere_library/CSArray.h"
 #include "common.h"
 #include "CUID.h"
 #include "CScript.h"
 #include "CScriptObj.h"
-#include "CTime.h"
+#include "./sphere_library/CSTime.h"
 #include "../game/CServTime.h"
 
 
@@ -148,7 +148,7 @@ public:
 	CResourceQty() : m_iQty(0) { };
 };
 
-class CResourceQtyArray : public CGTypedArray<CResourceQty, CResourceQty&>
+class CResourceQtyArray : public CSTypedArray<CResourceQty, CResourceQty&>
 {
 	// Define a list of index id's (not references) to resource objects. (Not owned by the list)
 public:
@@ -244,7 +244,7 @@ private:
 
 	// Last time it was closed. What did the file params look like ?
 	dword m_dwSize;			// Compare to see if this has changed.
-	CGTime m_dateChange;	// real world time/date of last change.
+	CSTime m_dateChange;	// real world time/date of last change.
 
 private:
 	void Init();
@@ -390,7 +390,7 @@ class CResourceNamed : public CResourceLink
 	// Private name pool. (does not use DEFNAME) RES_FUNCTION
 public:
 	static const char *m_sClassName;
-	const CString m_sName;
+	const CSString m_sName;
 public:
 	CResourceNamed( RESOURCE_ID rid, lpctstr pszName );
 	virtual ~CResourceNamed();
@@ -423,7 +423,7 @@ public:
 	operator CResourceLink*() const;
 };
 
-class CResourceRefArray : public CGPtrTypeArray<CResourceRef>
+class CResourceRefArray : public CSPtrTypeArray<CResourceRef>
 {
 	// Define a list of pointer references to resource. (Not owned by the list)
 	// An indexed list of CResourceLink s.
@@ -441,7 +441,7 @@ public:
 	size_t FindResourceID( RESOURCE_ID_BASE rid ) const;
 	size_t FindResourceName( RES_TYPE restype, lpctstr pszKey ) const;
 
-	void WriteResourceRefList( CString & sVal ) const;
+	void WriteResourceRefList( CSString & sVal ) const;
 	bool r_LoadVal( CScript & s, RES_TYPE restype );
 	void r_Write( CScript & s, lpctstr pszKey ) const;
 
@@ -457,7 +457,7 @@ public:
 
 //*********************************************************
 
-class CResourceHashArray : public CGObSortArray< CResourceDef*, RESOURCE_ID_BASE >
+class CResourceHashArray : public CSObjSortArray< CResourceDef*, RESOURCE_ID_BASE >
 {
 	// This list OWNS the CResourceDef and CResourceLink objects.
 	// Sorted array of RESOURCE_ID
@@ -496,13 +496,13 @@ public:
 
 //*************************************************
 
-struct CStringSortArray : public CGObSortArray< tchar*, tchar* >
+struct CSStringSortArray : public CSObjSortArray< tchar*, tchar* >
 {
 public:
-	CStringSortArray();
+	CSStringSortArray();
 private:
-	CStringSortArray(const CStringSortArray& copy);
-	CStringSortArray& operator=(const CStringSortArray& other);
+	CSStringSortArray(const CSStringSortArray& copy);
+	CSStringSortArray& operator=(const CSStringSortArray& other);
 public:
 	virtual void DestructElements( tchar** pElements, size_t nCount );
 	// Sorted array of strings
@@ -510,7 +510,7 @@ public:
 	void AddSortString( lpctstr pszText );
 };
 
-class CObNameSortArray : public CGObSortArray< CScriptObj*, lpctstr >
+class CObNameSortArray : public CSObjSortArray< CScriptObj*, lpctstr >
 {
 public:
 	static const char *m_sClassName;
@@ -531,14 +531,14 @@ class CResourceBase : public CScriptObj
 protected:
 	static lpctstr const sm_szResourceBlocks[RES_QTY];
 
-	CGObArray< CResourceScript* > m_ResourceFiles;	// All resource files we need to get blocks from later.
+	CSObjArray< CResourceScript* > m_ResourceFiles;	// All resource files we need to get blocks from later.
 
 public:
 	static const char *m_sClassName;
 	CResourceHash m_ResHash;		// All script linked resources RES_QTY
 
 	// INI File options.
-	CString m_sSCPBaseDir;		// if we want to get *.SCP files from elsewhere.
+	CSString m_sSCPBaseDir;		// if we want to get *.SCP files from elsewhere.
 
 protected:
 	CResourceScript * AddResourceFile( lpctstr pszName );

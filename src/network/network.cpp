@@ -80,10 +80,10 @@ void xRecordPacket(const CClient* client, Packet* packet, lpctstr heading)
 
 	strcat(fname, ".log");
 
-	CString sFullFileName = CGFile::GetMergedFileName(g_Log.GetLogDir(), fname);
+	CSString sFullFileName = CSFile::GetMergedFileName(g_Log.GetLogDir(), fname);
 	
 	// write to file
-	CFileText out;
+	CSFileText out;
 	if (out.Open(sFullFileName, OF_READWRITE|OF_TEXT))
 	{
 		out.Printf("%s %s\n\n", heading, (lpctstr)dump);
@@ -885,7 +885,7 @@ SafeClientIterator::~SafeClientIterator(void)
 CClient* SafeClientIterator::next(bool includeClosing)
 {
 	// this method should be thread-safe, but does not loop through clients in the order that they have
-	// connected -- ideally CGObList (or a similar container for clients) should be traversed from
+	// connected -- ideally CSObjList (or a similar container for clients) should be traversed from
 	// newest client to oldest and be thread-safe)
 	while (++m_id < m_max)
 	{

@@ -8,12 +8,13 @@
 #define _INC_CVARFLOAT_H
 
 #include <map>
-#include "sphere_library/CRand.h"
-#include "sphere_library/CString.h"
+#include "./sphere_library/CSRand.h"
+#include "./sphere_library/CSString.h"
 
 
-struct LexNoCaseLess {
-	bool operator()(const CString& CGStr, const char* pBeg2) const
+struct LexNoCaseLess
+{
+	bool operator()(const CSString& CGStr, const char* pBeg2) const
 	{
 		const char* pBeg1 = CGStr.GetPtr();
 		const char* pEnd1 = pBeg1;
@@ -26,9 +27,9 @@ struct LexNoCaseLess {
 
   		for (; pBeg1 != pEnd1 && pBeg2 != pEnd2; ++pBeg1, ++pBeg2)
 			if (tolower(*pBeg1) < tolower(*pBeg2))
-				return (true);
+				return true;
 			else if (tolower(*pBeg2) < tolower(*pBeg1))
-				return (false);
+				return false;
 		return (pBeg1 == pEnd1 && pBeg2 != pEnd2);
 	}
 };
@@ -36,7 +37,7 @@ struct LexNoCaseLess {
 class CVarFloat
 {
 public:
-	typedef std::map<CString, realtype, LexNoCaseLess> MapType;
+	typedef std::map<CSString, realtype, LexNoCaseLess> MapType;
 
 public: //vars
 	CVarFloat();
@@ -54,10 +55,10 @@ private: //setting, getting
 	realtype GetVal( const char* VarName );
 public: //setting, getting
 	bool Insert( const char* VarName, const char* VarValue, bool ForceSet = false);
-	CString Get( const char* VarName );
+	CSString Get( const char* VarName );
 
 public: //parsing
-	static CString FloatMath( lpctstr & Expr );
+	static CSString FloatMath( lpctstr & Expr );
 	static realtype MakeFloatMath( lpctstr & Expr );
 	static realtype GetRandVal( realtype dQty );
 	static realtype GetRandVal2( realtype dMin, realtype dMax );

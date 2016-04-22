@@ -415,7 +415,7 @@ void CSphereStaticsBlock::LoadStatics( dword ulBlockIndex, int map )
 		{
 			tchar *pszTemp = Str_GetTemp();
 			sprintf(pszTemp, "CGrapMapBlock: Read Statics - Block Length of %u", index.GetBlockLength());
-			throw CSphereError(LOGL_CRIT, CGFile::GetLastError(), pszTemp);
+			throw CSError(LOGL_CRIT, CSFile::GetLastError(), pszTemp);
 		}
 		m_iStatics = index.GetBlockLength()/sizeof(CUOStaticItemRec);
 		ASSERT(m_iStatics);
@@ -423,7 +423,7 @@ void CSphereStaticsBlock::LoadStatics( dword ulBlockIndex, int map )
 		ASSERT(m_pStatics);
 		if ( ! g_Install.ReadMulData(g_Install.m_Statics[g_MapList.m_mapnum[map]], index, m_pStatics) )
 		{
-			throw CSphereError(LOGL_CRIT, CGFile::GetLastError(), "CSphereMapBlock: Read Statics");
+			throw CSError(LOGL_CRIT, CSFile::GetLastError(), "CSphereMapBlock: Read Statics");
 		}
 	}
 }
@@ -503,7 +503,7 @@ void CSphereMapBlock::Load( int bx, int by )
 	if ( !g_MapList.m_maps[m_map] )
 	{
 		memset( &m_Terrain, 0, sizeof( m_Terrain ));
-		throw CSphereError(LOGL_CRIT, 0, "CSphereMapBlock: Map is not supported since MUL files for it not available.");
+		throw CSError(LOGL_CRIT, 0, "CSphereMapBlock: Map is not supported since MUL files for it not available.");
 	}
 
 	bool bPatchedTerrain = false, bPatchedStatics = false;
@@ -532,7 +532,7 @@ void CSphereMapBlock::Load( int bx, int by )
 	if ( ! bPatchedTerrain )
 	{
 		int mapNumber = g_MapList.m_mapnum[m_map];
-		CGFile * pFile = &(g_Install.m_Maps[mapNumber]);
+		CSFile * pFile = &(g_Install.m_Maps[mapNumber]);
 		ASSERT(pFile != NULL);
 		ASSERT(pFile->IsFileOpen());
 		
@@ -579,14 +579,14 @@ void CSphereMapBlock::Load( int bx, int by )
 		if ( pFile->Seek( fileOffset, SEEK_SET ) != fileOffset )
 		{
 			memset( &m_Terrain, 0, sizeof(m_Terrain));
-			throw CSphereError(LOGL_CRIT, CGFile::GetLastError(), "CSphereMapBlock: Seek Ver");
+			throw CSError(LOGL_CRIT, CSFile::GetLastError(), "CSphereMapBlock: Seek Ver");
 		}
 
 		// read terrain data
 		if ( pFile->Read( &m_Terrain, sizeof(CUOMapBlock)) <= 0 )
 		{
 			memset( &m_Terrain, 0, sizeof( m_Terrain ));
-			throw CSphereError(LOGL_CRIT, CGFile::GetLastError(), "CSphereMapBlock: Read");
+			throw CSError(LOGL_CRIT, CSFile::GetLastError(), "CSphereMapBlock: Read");
 		}
 	}
 
@@ -731,8 +731,8 @@ void CMapDiffCollection::LoadMapDiffs()
 
 		// Load Mapdif Files
 		{
-			CGFile * pFileMapdif	= &(g_Install.m_Mapdif[map]);
-			CGFile * pFileMapdifl	= &(g_Install.m_Mapdifl[map]);
+			CSFile * pFileMapdif	= &(g_Install.m_Mapdif[map]);
+			CSFile * pFileMapdifl	= &(g_Install.m_Mapdifl[map]);
 
 			// Check that the relevant dif files are available
 			if ( pFileMapdif->IsFileOpen() && pFileMapdifl->IsFileOpen() )
@@ -773,9 +773,9 @@ void CMapDiffCollection::LoadMapDiffs()
 
 		// Load Stadif Files
 		{
-			CGFile * pFileStadif	= &(g_Install.m_Stadif[map]);
-			CGFile * pFileStadifl	= &(g_Install.m_Stadifl[map]);
-			CGFile * pFileStadifi	= &(g_Install.m_Stadifi[map]);
+			CSFile * pFileStadif	= &(g_Install.m_Stadif[map]);
+			CSFile * pFileStadifl	= &(g_Install.m_Stadifl[map]);
+			CSFile * pFileStadifi	= &(g_Install.m_Stadifi[map]);
 
 			// Check that the relevant dif files are available
 			if ( !pFileStadif->IsFileOpen() || !pFileStadifl->IsFileOpen() || !pFileStadifi->IsFileOpen() )

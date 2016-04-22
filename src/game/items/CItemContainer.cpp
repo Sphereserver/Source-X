@@ -56,7 +56,7 @@ bool CItemContainer::r_GetRef( lpctstr &pszKey, CScriptObj *&pRef )
 	return CItemVendable::r_GetRef(pszKey, pRef);
 }
 
-bool CItemContainer::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole *pSrc )
+bool CItemContainer::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole *pSrc )
 {
 	ADDTOCALLSTACK("CItemContainer::r_WriteVal");
 	if ( r_WriteValContainer(pszKey, sVal, pSrc) )
@@ -592,7 +592,7 @@ bool CItemContainer::IsItemInside( const CItem *pItem ) const
 	}
 }
 
-void CItemContainer::OnRemoveOb( CGObListRec *pObRec )	// Override this = called when removed from list.
+void CItemContainer::OnRemoveOb( CSObjListRec *pObRec )	// Override this = called when removed from list.
 {
 	ADDTOCALLSTACK("CItemContainer::OnRemoveOb");
 	// remove this object from the container list.

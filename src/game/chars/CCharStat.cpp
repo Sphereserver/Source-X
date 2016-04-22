@@ -262,7 +262,7 @@ void CChar::Stat_SetBase( STAT_TYPE i, short iVal )
 			iVal = (short)(maximum(0, minimum(g_Cfg.m_iMaxFame, iVal)));
 			break;
 		default:
-			throw CSphereError(LOGL_CRIT, 0, "Stat_SetBase: index out of range");
+			throw CSError(LOGL_CRIT, 0, "Stat_SetBase: index out of range");
 	}
 	
 	m_Stat[i].m_base = iVal;

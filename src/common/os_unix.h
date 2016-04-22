@@ -17,7 +17,7 @@
 #include <aio.h>
 #include <exception>
 #include <cctype>
-#include "CTime.h"
+#include "CSTime.h"
 
 
 //#define SLASH_PATH	"/"

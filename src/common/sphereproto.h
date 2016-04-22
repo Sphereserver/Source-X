@@ -7,7 +7,7 @@
 #ifndef _INC_SPHEREPROTO_H
 #define _INC_SPHEREPROTO_H
 
-#include "./sphere_library/CString.h"
+#include "./sphere_library/CSString.h"
 #include "spherecom.h"
 #include "../sphere/threads.h"
 

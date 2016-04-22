@@ -3,10 +3,10 @@
 #ifndef _INC_CLOG_H
 #define _INC_CLOG_H
 
-#include "../common/sphere_library/CFile.h"
+#include "../common/sphere_library/CSFile.h"
+#include "../common/sphere_library/CSTime.h"
 #include "../common/spherecom.h"
 #include "../common/common.h"
-#include "../common/CTime.h"
 #include "../common/CScriptObj.h"
 #include "../common/CScript.h"
 #include "../sphere/mutex.h"
@@ -50,7 +50,7 @@ public:
 		va_start( vargs, pszFormat );
 		int iret = VEvent( wMask, pszFormat, vargs );
 		va_end( vargs );
-		return( iret );
+		return iret;
 	}
 
 	int _cdecl EventDebug(lpctstr pszFormat, ...) __printfargs(2,3)
@@ -94,13 +94,13 @@ public:
 #define DEBUG_ERR(_x_)	g_pLog->EventError _x_
 
 #ifdef _DEBUG
-#define DEBUG_WARN(_x_)	g_pLog->EventWarn _x_
-#define DEBUG_MSG(_x_)	g_pLog->EventEvent _x_
-#define DEBUG_MYFLAG(_x_) g_pLog->Event _x_
+	#define DEBUG_WARN(_x_)	g_pLog->EventWarn _x_
+	#define DEBUG_MSG(_x_)	g_pLog->EventEvent _x_
+	#define DEBUG_MYFLAG(_x_) g_pLog->Event _x_
 #else
-#define DEBUG_WARN(_x_)
-#define DEBUG_MSG(_x_)
-#define DEBUG_MYFLAG(_x_)
+	#define DEBUG_WARN(_x_)
+	#define DEBUG_MSG(_x_)
+	#define DEBUG_MYFLAG(_x_)
 #endif
 
 public:
@@ -111,7 +111,7 @@ private:
 	CEventLog& operator=(const CEventLog& other);
 } * g_pLog;
 
-extern struct CLog : public CFileText, public CEventLog
+extern struct CLog : public CSFileText, public CEventLog
 {
 	// subject matter. (severity level is first 4 bits, LOGL_EVENT)
 	#define LOGM_ACCOUNTS		0x00080
@@ -129,13 +129,13 @@ extern struct CLog : public CFileText, public CEventLog
 
 private:
 	dword m_dwMsgMask;			// Level of log detail messages. IsLogMsg()
-	CGTime m_dateStamp;			// last real time stamp.
-	CString m_sBaseDir;
+	CSTime m_dateStamp;			// last real time stamp.
+	CSString m_sBaseDir;
 
 	const CScript * m_pScriptContext;	// The current context.
 	const CScriptObj * m_pObjectContext;	// The current context.
 
-	static CGTime sm_prevCatchTick;	// don't flood with these.
+	static CSTime sm_prevCatchTick;	// don't flood with these.
 public:
 	bool m_fLockOpen;
 	SimpleMutex m_mutex;
@@ -156,7 +156,7 @@ public:
 	bool IsLogged( dword wMask ) const;
 
 	virtual int EventStr( dword wMask, lpctstr pszMsg );
-	void _cdecl CatchEvent( const CSphereError * pErr, lpctstr pszCatchContext, ...  ) __printfargs(3,4);
+	void _cdecl CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ...  ) __printfargs(3,4);
 
 public:
 	CLog();

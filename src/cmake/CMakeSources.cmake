@@ -166,8 +166,6 @@ SOURCE_GROUP (game\\uo_files FILES ${uofiles_SRCS})
 SET (common_SRCS
 common/CacheableScriptFile.cpp
 common/CacheableScriptFile.h
-common/CAssoc.cpp
-common/CAssoc.h
 common/CDataBase.cpp
 common/CDataBase.h
 common/CEncrypt.cpp
@@ -176,8 +174,6 @@ common/CException.cpp
 common/CException.h
 common/CExpression.cpp
 common/CExpression.h
-common/CFileList.cpp
-common/CFileList.h
 common/CSphereData.cpp
 common/CSphereMap.cpp
 common/CSphereMap.h
@@ -207,16 +203,12 @@ common/CsvFile.cpp
 common/CsvFile.h
 common/CTextConsole.cpp
 common/CTextConsole.h
-common/CTime.cpp
-common/CTime.h
 common/CUOInstall.cpp
 common/CUOInstall.h
 common/CVarDefMap.cpp
 common/CVarDefMap.h
 common/CVarFloat.cpp
 common/CVarFloat.h
-common/CWindow.cpp
-common/CWindow.h
 common/datatypes.h
 common/spherecom.cpp
 common/spherecom.h
@@ -262,18 +254,26 @@ SOURCE_GROUP (common\\libev FILES ${libev_SRCS})
 
 # Sphere library files
 SET (spherelibrary_SRCS
-common/sphere_library/CArray.cpp
-common/sphere_library/CArray.h
-common/sphere_library/CMemBlock.cpp
-common/sphere_library/CMemBlock.h
-common/sphere_library/CFile.cpp
-common/sphere_library/CFile.h
-common/sphere_library/CRand.cpp
-common/sphere_library/CRand.h
-common/sphere_library/CString.cpp
-common/sphere_library/CString.h
-common/sphere_library/CQueue.cpp
-common/sphere_library/CQueue.h
+common/sphere_library/CSArray.cpp
+common/sphere_library/CSArray.h
+common/sphere_library/CSAssoc.cpp
+common/sphere_library/CSAssoc.h
+common/sphere_library/CSFile.cpp
+common/sphere_library/CSFile.h
+common/sphere_library/CSFileList.cpp
+common/sphere_library/CSFileList.h
+common/sphere_library/CSMemBlock.cpp
+common/sphere_library/CSMemBlock.h
+common/sphere_library/CSQueue.cpp
+common/sphere_library/CSQueue.h
+common/sphere_library/CSRand.cpp
+common/sphere_library/CSRand.h
+common/sphere_library/CSString.cpp
+common/sphere_library/CSString.h
+common/sphere_library/CSTime.cpp
+common/sphere_library/CSTime.h
+common/sphere_library/CSWindow.cpp
+common/sphere_library/CSWindow.h
 )
 SOURCE_GROUP (common\\sphere_library FILES ${spherelibrary_SRCS})
 
@@ -369,10 +369,10 @@ tables/CCharPlayer_functions.tbl
 tables/CCharPlayer_props.tbl
 tables/CClient_functions.tbl
 tables/CClient_props.tbl
-tables/CFile_functions.tbl
-tables/CFile_props.tbl
-tables/CFileObjContainer_functions.tbl
-tables/CFileObjContainer_props.tbl
+tables/CSFile_functions.tbl
+tables/CSFile_props.tbl
+tables/CSFileObjContainer_functions.tbl
+tables/CSFileObjContainer_props.tbl
 tables/CItem_functions.tbl
 tables/CItem_props.tbl
 tables/CItemBase_props.tbl

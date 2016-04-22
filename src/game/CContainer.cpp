@@ -22,7 +22,7 @@ void CContainer::OnWeightChange( int iChange )
 
 CItem * CContainer::GetAt( size_t index ) const
 {
-	return( dynamic_cast <CItem*>( CGObList::GetAt( index )));
+	return( dynamic_cast <CItem*>( CSObjList::GetAt( index )));
 }
 
 int	CContainer::GetTotalWeight() const
@@ -68,8 +68,8 @@ void CContainer::ContentAddPrivate( CItem *pItem )
 	ASSERT(pItem->IsValidUID());	// it should be valid at this point.
 	if ( pItem->GetParent() == this )
 		return;
-	if ( !CGObList::GetCount() )
-		CGObList::InsertHead(pItem);
+	if ( !CSObjList::GetCount() )
+		CSObjList::InsertHead(pItem);
 	else
 	{
 		CItem *pTest = GetContentHead();
@@ -79,13 +79,13 @@ void CContainer::ContentAddPrivate( CItem *pItem )
 			if ( pTest->GetUID() < pPrevItem->GetUID() )
 				pPrevItem = pTest;
 		}
-		CGObList::InsertAfter(pItem, pPrevItem);
+		CSObjList::InsertAfter(pItem, pPrevItem);
 	}
-	//CGObList::InsertTail( pItem );//Reversing the order in which things are added into a container
+	//CSObjList::InsertTail( pItem );//Reversing the order in which things are added into a container
 	OnWeightChange(pItem->GetWeight());
 }
 
-void CContainer::OnRemoveOb( CGObListRec *pObRec )	// Override this = called when removed from list.
+void CContainer::OnRemoveOb( CSObjListRec *pObRec )	// Override this = called when removed from list.
 {
 	ADDTOCALLSTACK("CContainer::OnRemoveOb");
 	// remove this object from the container list.
@@ -93,7 +93,7 @@ void CContainer::OnRemoveOb( CGObListRec *pObRec )	// Override this = called whe
 	CItem *pItem = static_cast<CItem *>(pObRec);
 	ASSERT(pItem);
 
-	CGObList::OnRemoveOb(pItem);
+	CSObjList::OnRemoveOb(pItem);
 	ASSERT(pItem->GetParent() == NULL);
 
 	pItem->SetContainerFlags(UID_O_DISCONNECT);		// It is no place for the moment.
@@ -103,7 +103,7 @@ void CContainer::OnRemoveOb( CGObListRec *pObRec )	// Override this = called whe
 void CContainer::r_WriteContent( CScript &s ) const
 {
 	ADDTOCALLSTACK("CContainer::r_WriteContent");
-	ASSERT(dynamic_cast<const CGObList *>(this) != NULL);
+	ASSERT(dynamic_cast<const CSObjList *>(this) != NULL);
 
 	// Write out all the items in me.
 	for ( CItem *pItem = GetContentHead(); pItem != NULL; pItem = pItem->GetNext() )
@@ -143,7 +143,7 @@ CItem *CContainer::ContentFind( RESOURCE_ID_BASE rid, dword dwArg, int iDecendLe
 }
 
 TRIGRET_TYPE CContainer::OnContTriggerForLoop( CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs,
-	CString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext, RESOURCE_ID_BASE rid, dword dwArg, int iDecendLevels )
+	CSString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext, RESOURCE_ID_BASE rid, dword dwArg, int iDecendLevels )
 {
 	ADDTOCALLSTACK("CContainer::OnContTriggerForLoop");
 	if ( rid.GetResIndex() != 0 )
@@ -200,7 +200,7 @@ TRIGRET_TYPE CContainer::OnContTriggerForLoop( CScript &s, CTextConsole *pSrc, C
 }
 
 TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop( CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs,
-	CString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext, int iDecendLevels )
+	CSString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext, int iDecendLevels )
 {
 	ADDTOCALLSTACK("CContainer::OnGenericContTriggerForLoop");
 	CItem *pItemNext = NULL;
@@ -541,7 +541,7 @@ CContainer::~CContainer()
 	DeleteAll(); // call this early so the virtuals will work.
 }
 
-bool CContainer::r_WriteValContainer( lpctstr pszKey, CString &sVal, CTextConsole *pSrc )
+bool CContainer::r_WriteValContainer( lpctstr pszKey, CSString &sVal, CTextConsole *pSrc )
 {
 	UNREFERENCED_PARAMETER(pSrc);
 	ADDTOCALLSTACK("CContainer::r_WriteValContainer");

@@ -38,7 +38,7 @@ public:
 
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
 	virtual void  r_Write( CScript & s );
-	virtual bool r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc );
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 
 	virtual int GetWeight(word amount = 0) const;
@@ -47,7 +47,7 @@ public:
 	void ContentAdd( CItem * pItem );
 	void ContentAdd( CItem * pItem, CPointMap pt, uchar gridIndex = 0 );
 protected:
-	void OnRemoveOb( CGObListRec* pObRec );	// Override this = called when removed from list.
+	void OnRemoveOb( CSObjListRec* pObRec );	// Override this = called when removed from list.
 public:
 	bool IsItemInTrade();
 	void Trade_Status( bool bCheck );

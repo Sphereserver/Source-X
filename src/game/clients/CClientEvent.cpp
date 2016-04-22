@@ -1598,7 +1598,7 @@ void CClient::Event_PromptResp( lpctstr pszText, size_t len, dword context1, dwo
 
 	ASSERT(pszReName);
 
-	CString sMsg;
+	CSString sMsg;
 
 	CItem * pItem = m_Prompt_Uid.ItemFind();
 	if ( pItem == NULL || type == 0 || szText[0] == '\0' )
@@ -1950,13 +1950,13 @@ lpctstr CDialogResponseArgs::GetName() const
 	return "ARGD";
 }
 
-bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
+bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CDialogResponseArgs::r_WriteVal");
 	EXC_TRY("WriteVal");
 	if ( ! strnicmp( pszKey, "ARGCHK", 6 ))
 	{
-		// CGTypedArray <dword,dword> m_CheckArray;
+		// CSTypedArray <dword,dword> m_CheckArray;
 		pszKey += 6;
 		SKIP_SEPARATORS(pszKey);
 

@@ -43,14 +43,14 @@ CSphereTerrainInfo::CSphereTerrainInfo( TERRAIN_TYPE id )
 
     if ( g_Install.m_File[filedata].Seek( offset, SEEK_SET ) != offset )
     {
-        throw CSphereError(LOGL_CRIT, CGFile::GetLastError(), "CTileTerrainType.ReadInfo: TileData Seek");
+        throw CSError(LOGL_CRIT, CSFile::GetLastError(), "CTileTerrainType.ReadInfo: TileData Seek");
     }
 
     switch (format)
     {
         case VERFORMAT_HIGHSEAS: // high seas format (CUOTerrainTypeRec_HS)
             if ( g_Install.m_File[filedata].Read(static_cast <CUOTerrainTypeRec_HS *>(this), sizeof(CUOTerrainTypeRec_HS)) <= 0 )
-                throw CSphereError(LOGL_CRIT, CGFile::GetLastError(), "CTileTerrainType.ReadInfo: TileData Read");
+                throw CSError(LOGL_CRIT, CSFile::GetLastError(), "CTileTerrainType.ReadInfo: TileData Read");
             break;
 
         case VERFORMAT_ORIGINAL: // old format (CUOTerrainTypeRec)
@@ -58,7 +58,7 @@ CSphereTerrainInfo::CSphereTerrainInfo( TERRAIN_TYPE id )
         {
             CUOTerrainTypeRec record;
             if ( g_Install.m_File[filedata].Read(static_cast <CUOTerrainTypeRec *>(&record), sizeof(CUOTerrainTypeRec)) <= 0 )
-                throw CSphereError(LOGL_CRIT, CGFile::GetLastError(), "CTileTerrainType.ReadInfo: TileData Read");
+                throw CSError(LOGL_CRIT, CSFile::GetLastError(), "CTileTerrainType.ReadInfo: TileData Read");
 
             m_flags = record.m_flags;
             m_unknown = 0;

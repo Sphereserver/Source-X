@@ -103,7 +103,7 @@ lpctstr const CGMPage::sm_szLoadKeys[GC_QTY+1] =
 	NULL
 };
 
-bool CGMPage::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
+bool CGMPage::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CGMPage::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -183,5 +183,5 @@ lpctstr CGMPage::GetAccountStatus() const
 
 CGMPage * CGMPage::GetNext() const
 {
-	return( static_cast <CGMPage*>( CGObListRec::GetNext()));
+	return( static_cast <CGMPage*>( CSObjListRec::GetNext()));
 }

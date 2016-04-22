@@ -29,7 +29,7 @@ public:
 
     virtual void OnHear( lpctstr pszCmd, CChar * pSrc );
     virtual void  r_Write( CScript & s );
-    virtual bool r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc );
+    virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc );
     virtual bool  r_LoadVal( CScript & s  );
     virtual void DupeCopy( const CItem * pItem );
 };

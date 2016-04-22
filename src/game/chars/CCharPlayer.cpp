@@ -251,7 +251,7 @@ void CCharPlayer::Stat_SetLock( STAT_TYPE stat, SKILLLOCK_TYPE state )
 	m_StatLock[stat] = (uchar)(state);
 }
 
-bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr pszKey, CString & sVal )
+bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr pszKey, CSString & sVal )
 {
 	ADDTOCALLSTACK("CCharPlayer::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -530,7 +530,7 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 	EXC_SET("saving dynamic speech");
 	if ( m_Speech.GetCount() > 0 )
 	{
-		CString sVal;
+		CSString sVal;
 		m_Speech.WriteResourceRefList( sVal );
 		s.WriteKey("DSPEECH", sVal);
 	}

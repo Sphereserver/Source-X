@@ -992,7 +992,7 @@ void Packet::dump(AbstractString& output) const
 
 	TemporaryString z;
 
-	sprintf(z, "Packet len=%" PRIuSIZE_T " id=0x%02x [%s]\n", m_length, m_buffer[0], CGTime::GetCurrentTime().Format(NULL));
+	sprintf(z, "Packet len=%" PRIuSIZE_T " id=0x%02x [%s]\n", m_length, m_buffer[0], CSTime::GetCurrentTime().Format(NULL));
 	output.append(z);
 	output.append("        0  1  2  3  4  5  6  7   8  9  A  B  C  D  E  F\n");
 	output.append("       -- -- -- -- -- -- -- --  -- -- -- -- -- -- -- --\n");

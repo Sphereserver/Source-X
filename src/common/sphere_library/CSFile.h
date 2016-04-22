@@ -1,10 +1,10 @@
 /**
-* @file CFile.h
+* @file CSFile.h
 */
 
 #pragma once
-#ifndef _INC_CFILE_H
-#define _INC_CFILE_H
+#ifndef _INC_CSFILE_H
+#define _INC_CSFILE_H
 
 #ifndef _WIN32
 	#include <sys/types.h>
@@ -13,7 +13,7 @@
 	#include <unistd.h>
 #endif
 
-#include "./sphere_library/CString.h"
+#include "./CSString.h"
 
 #ifndef OF_WRITE
 	#define OF_READ             O_RDONLY
@@ -47,7 +47,7 @@
 #endif
 
 
-class CSphereError;
+class CSError;
 
 /**
 * @brief Class that dupes the MFC functionality we need
@@ -84,7 +84,7 @@ public:
 	* @brief Get file name and path (for compatibility with MFC)
 	* @return file name and path.
 	*/
-	const CString & GetFilePath() const;
+	const CSString & GetFilePath() const;
 	/**
 	* @brief Sets a new file path.
 	*
@@ -113,7 +113,7 @@ public:
 	* @param e TODOC.
 	* @return true if file is open, false otherwise.
 	*/
-	virtual bool Open( lpctstr pszName = NULL, uint uMode = OF_READ | OF_SHARE_DENY_NONE, CSphereError * e = NULL );
+	virtual bool Open( lpctstr pszName = NULL, uint uMode = OF_READ | OF_SHARE_DENY_NONE, CSError * e = NULL );
 	///@}
 	/** @name Content Management:
 	 */
@@ -164,7 +164,7 @@ public:
 	llong m_llFile;			/// File descriptor (POSIX, int) or HANDLE (Windows, size of a pointer).
 
 protected:
-	CString m_strFileName;	///< File name (with path).
+	CSString m_strFileName;	///< File name (with path).
 	uint m_uMode;   ///< MMSYSTEM may use 32 bit flags.
 };
 
@@ -172,7 +172,7 @@ protected:
 /**
 * Try to be compatible with MFC CFile class.
 */
-class CGFile : public CFile
+class CSFile : public CFile
 {
 public:
 	static const char * m_sClassName;
@@ -181,17 +181,17 @@ public:
 	 */
 	///@{
 public:
-	CGFile();
-	virtual ~CGFile();
+	CSFile();
+	virtual ~CSFile();
 private:
 	/**
 	* @brief No copy on construction allowed.
 	*/
-	CGFile(const CGFile& copy);
+	CSFile(const CSFile& copy);
 	/**
 	* @brief No copy allowed.
 	*/
-	CGFile& operator=(const CGFile& other);
+	CSFile& operator=(const CSFile& other);
 	///@}
 public:
 	/** @name File Management:
@@ -260,7 +260,7 @@ public:
 	* @param pszName filename.
 	* @return merged path.
 	*/
-	static CString GetMergedFileName( lpctstr pszBase, lpctstr pszName );
+	static CSString GetMergedFileName( lpctstr pszBase, lpctstr pszName );
 	///@}
 	/** @name Mode operations:
 	 */
@@ -294,7 +294,7 @@ public:
 /**
 * @brief Text files. Try to be compatible with MFC CFile class.
 */
-class CFileText : public CGFile
+class CSFileText : public CSFile
 {
 public:
 	static const char *m_sClassName;
@@ -303,17 +303,17 @@ public:
 	 */
 	///@{
 public:
-	CFileText();
-	virtual ~CFileText();
+	CSFileText();
+	virtual ~CSFileText();
 private:
 	/**
 	* @brief No copy on construction allowed.
 	*/
-	CFileText(const CFileText& copy);
+	CSFileText(const CSFileText& copy);
 	/**
 	* @brief No copy allowed.
 	*/
-	CFileText& operator=(const CFileText& other);
+	CSFileText& operator=(const CSFileText& other);
 	///@}
 	/** @name File management:
 	 */
@@ -416,4 +416,4 @@ protected:
 #endif
 };
 
-#endif // _INC_CFILE_H
+#endif // _INC_CSFILE_H

@@ -4,9 +4,9 @@
 #include "../common/CException.h"
 #include "../common/CResourceBase.h"
 #include "../common/CTextConsole.h"
-#include "../common/cwindow.h"
+#include "../common/sphere_library/CSWindow.h"
 #include "../common/sphereversion.h"	// sphere version
-#include "../common/sphere_library/CString.h"
+#include "../common/sphere_library/CSString.h"
 #include "../game/CLog.h"
 #include "../game/CObjBase.h"
 #include "../game/CResource.h"
@@ -22,7 +22,7 @@
 #define IDC_M_INPUT 11
 #define IDT_ONTICK	1
 
-class CNTWindow : public CWindow						//	CNTWindow
+class CNTWindow : public CSWindow						//	CNTWindow
 {
 public:
 	static const char *m_sClassName;
@@ -112,7 +112,7 @@ private:
 	void OnDestroy();
 	void OnSetFocus( HWND hWndLoss );
 	bool OnClose();
-	void OnUserPostMessage( COLORREF color, CString * psMsg );
+	void OnUserPostMessage( COLORREF color, CSString * psMsg );
 	LRESULT OnUserTrayNotify( WPARAM wID, LPARAM lEvent );
 	LRESULT OnNotify( int idCtrl, NMHDR * pnmh );
 	void	SetLogFont( const char * pszFont );
@@ -412,7 +412,7 @@ bool CNTWindow::RegisterClass(char *className)	// static
 int CNTWindow::OnCreate( HWND hWnd, LPCREATESTRUCT lParam )
 {
 	UNREFERENCED_PARAMETER(lParam);
-	CWindow::OnCreate(hWnd);
+	CSWindow::OnCreate(hWnd);
 
 	m_wndLog.m_hWnd = ::CreateWindow( RICHEDIT_CLASS, NULL,
 		ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_READONLY | /* ES_OEMCONVERT | */
@@ -466,7 +466,7 @@ void CNTWindow::OnDestroy()
 {
 	m_wndLog.OnDestroy();	// these are automatic.
 	m_wndInput.OnDestroy();
-	CWindow::OnDestroy();
+	CSWindow::OnDestroy();
 }
 
 void CNTWindow::OnSetFocus( HWND hWndLoss )
@@ -515,7 +515,7 @@ LRESULT CNTWindow::OnUserTrayNotify( WPARAM wID, LPARAM lEvent )
 	return 0;	// not handled.
 }
 
-void CNTWindow::OnUserPostMessage( COLORREF color, CString * psMsg )
+void CNTWindow::OnUserPostMessage( COLORREF color, CSString * psMsg )
 {
 	// WM_USER_POST_MSG
 	if ( psMsg )
@@ -813,8 +813,8 @@ LRESULT CNTWindow::OnNotify( int idCtrl, NMHDR * pnmh )
 								}
 
 								// failure occurred
-								int errorCode = CGFile::GetLastError();
-								if (CSphereError::GetSystemErrorMessage(errorCode, z, THREAD_STRING_LENGTH) > 0)
+								int errorCode = CSFile::GetLastError();
+								if (CSError::GetSystemErrorMessage(errorCode, z, THREAD_STRING_LENGTH) > 0)
 									g_Log.Event(LOGL_WARN, "Failed to open '%s' code=%d (%s).\n", filePath, errorCode, z);
 								else
 									g_Log.Event(LOGL_WARN, "Failed to open '%s' code=%d.\n", filePath, errorCode);
@@ -877,13 +877,13 @@ LRESULT WINAPI CNTWindow::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LP
 			theApp.m_wndMain.OnNotify( (int) wParam, (NMHDR *) lParam );
 			return 0;
 		case WM_USER_POST_MSG:
-			theApp.m_wndMain.OnUserPostMessage( (COLORREF) wParam, reinterpret_cast<CString*>(lParam) );
+			theApp.m_wndMain.OnUserPostMessage( (COLORREF) wParam, reinterpret_cast<CSString*>(lParam) );
 			return 1;
 		case WM_USER_TRAY_NOTIFY:
 			return theApp.m_wndMain.OnUserTrayNotify( wParam, lParam );
 		}
 	}
-	catch (const CSphereError& e)
+	catch (const CSError& e)
 	{
 		g_Log.CatchEvent(&e, "Window");
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
@@ -1039,7 +1039,7 @@ bool NTWindow_PostMsg( LPCTSTR pszMsg )
 //	if ( g_Serv.m_dwParentThread != CThread::GetCurrentThreadId())
 //	{
 //		// A thread safe way to do text.
-//		CString * psMsg = new CString( pszMsg );
+//		CSString * psMsg = new CSString( pszMsg );
 //		ASSERT(psMsg);
 //		if ( ! theApp.m_wndMain.PostMessage( WM_USER_POST_MSG, (WPARAM) color, (LPARAM)psMsg ))
 //		{
@@ -1171,9 +1171,9 @@ bool NTWindow_OnTick( int iWaitmSec )
 						inputLen = strlen(p);
 
 						// search in the auto-complete list for starting on P, and save coords of 1st and Last matched
-						CGStringListRec	*firstmatch = NULL;
-						CGStringListRec	*lastmatch = NULL;
-						CGStringListRec	*curmatch = NULL;	// the one that should be set
+						CSStringListRec	*firstmatch = NULL;
+						CSStringListRec	*lastmatch = NULL;
+						CSStringListRec	*curmatch = NULL;	// the one that should be set
 
 						for ( curmatch = g_AutoComplete.GetHead(); curmatch != NULL; curmatch = curmatch->GetNext() )
 						{

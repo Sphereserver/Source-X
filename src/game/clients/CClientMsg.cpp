@@ -803,7 +803,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 			size_t iQty = Str_ParseCmds(const_cast<tchar *>(m_BarkBuffer.GetPtr()), ppArgs, CountOf(ppArgs), "," );
 			int iClilocId = Exp_GetVal( ppArgs[0] );
 			int iAffixType = Exp_GetVal( ppArgs[1] );
-			CString CArgs;
+			CSString CArgs;
 			for ( size_t i = 3; i < iQty; i++ )
 			{
 				if ( CArgs.GetLength() )
@@ -820,7 +820,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
             tchar * ppArgs[256];
 			size_t iQty = Str_ParseCmds(const_cast<tchar *>(m_BarkBuffer.GetPtr()), ppArgs, CountOf(ppArgs), "," );
 			int iClilocId = Exp_GetVal( ppArgs[0] );
-			CString CArgs;
+			CSString CArgs;
 			for ( size_t i = 1; i < iQty; i++ )
 			{
 				if ( CArgs.GetLength() )
@@ -3549,7 +3549,7 @@ byte CClient::Setup_Play( uint iSlot ) // After hitting "Play Character" button
 	}
 
 	// LastLogged update
-	CGTime datetime = CGTime::GetCurrentTime();
+	CSTime datetime = CSTime::GetCurrentTime();
 	GetAccount()->m_TagDefs.SetStr("LastLogged", false, GetAccount()->m_dateLastConnect.Format(NULL));
 	GetAccount()->m_dateLastConnect = datetime;
 
@@ -3623,7 +3623,7 @@ byte CClient::Setup_ListReq( const char * pszAccName, const char * pszPassword, 
 			break;
 	}
 
-	CString sMsg;
+	CSString sMsg;
 	byte lErr = LogIn( pszAccName, pszPassword, sMsg );
 
 	if ( lErr != PacketLoginError::Success )
@@ -3658,7 +3658,7 @@ byte CClient::Setup_ListReq( const char * pszAccName, const char * pszPassword, 
 	return PacketLoginError::Success;
 }
 
-byte CClient::LogIn( CAccountRef pAccount, CString & sMsg )
+byte CClient::LogIn( CAccountRef pAccount, CSString & sMsg )
 {
 	ADDTOCALLSTACK("CClient::LogIn");
 	if ( pAccount == NULL )
@@ -3760,7 +3760,7 @@ byte CClient::LogIn( CAccountRef pAccount, CString & sMsg )
 	return( PacketLoginError::Success );
 }
 
-byte CClient::LogIn( lpctstr pszAccName, lpctstr pszPassword, CString & sMsg )
+byte CClient::LogIn( lpctstr pszAccName, lpctstr pszPassword, CSString & sMsg )
 {
 	ADDTOCALLSTACK("CClient::LogIn");
 	// Try to validate this account.

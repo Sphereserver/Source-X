@@ -612,12 +612,12 @@ public:
 
 	void WriteUOX( CScript & s, int index );
 
-	void r_WriteMore1( CString & sVal );
-	void r_WriteMore2( CString & sVal );
+	void r_WriteMore1( CSString & sVal );
+	void r_WriteMore2( CSString & sVal );
 
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 	virtual void  r_Write( CScript & s );
-	virtual bool r_WriteVal( lpctstr pszKey, CString & s, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pszKey, CSString & s, CTextConsole * pSrc );
 	virtual bool  r_LoadVal( CScript & s  );
 	virtual bool  r_Load( CScript & s ); // Load an item from script
 	virtual bool  r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script

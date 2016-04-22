@@ -8,7 +8,7 @@
 #define _INC_CCHARREFARRAY_H
 
 #include "../common/CScript.h"
-#include "../common/sphere_library/CArray.h"
+#include "../common/sphere_library/CSArray.h"
 #include "../common/CUID.h"
 
 
@@ -18,7 +18,7 @@ class CCharRefArray
 {
 private:
 	// List of Players and NPC's involved in the quest/party/account etc..
-	CGTypedArray< CUID, CUID> m_uidCharArray;
+	CSTypedArray< CUID, CUID> m_uidCharArray;
 
 public:
 	static const char *m_sClassName;

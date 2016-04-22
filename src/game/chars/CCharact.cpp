@@ -1,6 +1,6 @@
 
 #include "../clients/CClient.h"
-#include "../common/sphere_library/CArray.h"
+#include "../common/sphere_library/CSArray.h"
 #include "../common/CException.h"
 #include "../common/CUIDExtra.h"
 #include "../network/network.h"
@@ -371,7 +371,7 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 // Unequip the item.
 // This may be a delete etc. It can not FAIL !
 // Removing 'Equip beneficts' from this item
-void CChar::OnRemoveOb( CGObListRec* pObRec )	// Override this = called when removed from list.
+void CChar::OnRemoveOb( CSObjListRec* pObRec )	// Override this = called when removed from list.
 {
 	ADDTOCALLSTACK("CChar::OnRemoveOb");
 	CItem * pItem = static_cast <CItem*>(pObRec);

@@ -8,14 +8,14 @@
 #define _INC_NETWORK_H
 
 #include <deque>
-#include "packet.h"
 #include "../common/common.h"
+#include "../common/sphere_library/CSArray.h"
+#include "../common/sphere_library/CSQueue.h"
+#include "packet.h"
 #include "../sphere/containers.h"
 #include "../common/CSocket.h"
 #include "../common/sphereproto.h"
 #include "../game/CServTime.h"
-#include "../common/sphere_library/CArray.h"
-#include "../common/sphere_library/CQueue.h"
 
 #if !defined(_WIN32) || defined(_LIBEV)
 	#include "../sphere/linuxev.h"
@@ -113,7 +113,7 @@ protected:
 	{
 		PacketTransactionQueue queue[PacketSend::PRI_QTY];	// packet queue
 		PacketSendQueue asyncQueue; // async packet queue
-		CQueueBytes bytes; // byte queue
+		CSQueueBytes bytes; // byte queue
 
 		PacketTransaction* currentTransaction; // transaction currently being processed
 		ExtendedPacketTransaction* pendingTransaction; // transaction being built
@@ -390,7 +390,7 @@ private:
 protected:
 	NetState** m_states;	// client state pool
 	int m_stateCount;		// client state count
-	CGObList m_clients;		// current list of clients (CClient)
+	CSObjList m_clients;		// current list of clients (CClient)
 
 public:
 	static const char* m_sClassName;
@@ -584,7 +584,7 @@ private:
 	size_t m_lastGivenSlot;			// last slot index assigned
 	bool m_isThreaded;
 
-	CGObList m_clients;				// current list of clients (CClient)
+	CSObjList m_clients;				// current list of clients (CClient)
 	NetworkThreadList m_threads;	// list of network threads
 	IPHistoryManager m_ips;			// ip history
 	PacketManager m_packets;		// packet handlers

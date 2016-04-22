@@ -3,8 +3,8 @@
 #ifndef _INC_CCHAT_H
 #define _INC_CCHAT_H
 
-#include "../common/sphere_library/CString.h"
-#include "../common/sphere_library/CArray.h"
+#include "../common/sphere_library/CSString.h"
+#include "../common/sphere_library/CSArray.h"
 #include "../common/sphereproto.h"
 
 
@@ -17,7 +17,7 @@ class CChat
 	// All the chat channels.
 private:
 	bool m_fChatsOK;	// allowed to create new chats ?
-	CGObList m_Channels;		// CChatChannel // List of chat channels.
+	CSObjList m_Channels;		// CChatChannel // List of chat channels.
 private:
 	void DoCommand(CChatChanMember * pBy, lpctstr szMsg);
 	void DeleteChannel(CChatChannel * pChannel);
@@ -49,8 +49,8 @@ public:
 	void Broadcast(CChatChanMember * pFrom, lpctstr pszText, CLanguageID lang = 0, bool fOverride = false);
 	void QuitChat(CChatChanMember * pClient);
 
-	static void DecorateName(CString & sName, const CChatChanMember * pMember = NULL, bool fSystem = false);
-	static void GenerateChatName(CString & sName, const CClient * pClient);
+	static void DecorateName(CSString & sName, const CChatChanMember * pMember = NULL, bool fSystem = false);
+	static void GenerateChatName(CSString & sName, const CClient * pClient);
 };
 
 #endif // _INC_CCHAT_H

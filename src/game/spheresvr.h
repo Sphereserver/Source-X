@@ -50,7 +50,7 @@ protected:
 extern lpctstr g_szServerDescription;
 extern int g_szServerBuild;
 extern lpctstr const g_Stat_Name[STAT_QTY];
-extern CGStringList g_AutoComplete;
+extern CSStringList g_AutoComplete;
 
 extern int Sphere_InitServer( int argc, char *argv[] );
 extern int Sphere_OnTick();

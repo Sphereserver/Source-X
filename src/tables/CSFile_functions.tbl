@@ -1,0 +1,9 @@
+//
+//	Class:	CSFileObj
+//	Set:	functions
+//	Prefix:	FOV_
+//
+
+ADD(CLOSE,		"CLOSE")
+ADD(DELETEFILE,	"DELETEFILE")
+ADD(FLUSH,		"FLUSH")

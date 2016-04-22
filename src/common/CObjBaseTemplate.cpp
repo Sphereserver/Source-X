@@ -31,11 +31,11 @@ CObjBaseTemplate::~CObjBaseTemplate()
 
 CObjBaseTemplate * CObjBaseTemplate::GetNext() const
 {
-	return( static_cast <CObjBaseTemplate*> ( CGObListRec::GetNext()));
+	return( static_cast <CObjBaseTemplate*> ( CSObjListRec::GetNext()));
 }
 CObjBaseTemplate * CObjBaseTemplate::GetPrev() const
 {
-	return( static_cast <CObjBaseTemplate*> ( CGObListRec::GetPrev()));
+	return( static_cast <CObjBaseTemplate*> ( CSObjListRec::GetPrev()));
 }
 
 CUID CObjBaseTemplate::GetUID() const

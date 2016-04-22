@@ -3,7 +3,7 @@
 #ifndef _INC_CITEMMESSAGE_H
 #define _INC_CITEMMESSAGE_H
 
-#include "../common/sphere_library/CString.h"
+#include "../common/sphere_library/CSString.h"
 #include "CItemVendable.h"
 
 
@@ -23,10 +23,10 @@ class CItemMessage : public CItemVendable	// A message for a bboard or book text
 protected:
     static lpctstr const sm_szVerbKeys[];
 private:
-    CGObArray<CString*> m_sBodyLines;	// The main body of the text for bboard message or book.
+    CSObjArray<CSString*> m_sBodyLines;	// The main body of the text for bboard message or book.
 public:
     static const char *m_sClassName;
-    CString m_sAuthor;					// Should just have author name !
+    CSString m_sAuthor;					// Should just have author name !
     static lpctstr const sm_szLoadKeys[CIC_QTY+1];
 
 public:
@@ -39,7 +39,7 @@ private:
 
 public:
     virtual void r_Write( CScript & s );
-    virtual bool r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc );
+    virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc );
     virtual bool r_LoadVal( CScript & s );
     virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
 

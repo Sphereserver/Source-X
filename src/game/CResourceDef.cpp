@@ -1,6 +1,6 @@
 // A variety of resource blocks.
 
-#include "../common/CAssoc.h"
+#include "../common/sphere_library/CSAssoc.h"
 #include "../common/CException.h"
 #include "chars/CChar.h"
 #include "items/CItemBase.h"
@@ -255,7 +255,7 @@ CSkillDef::CSkillDef( SKILL_TYPE skill ) :
 	m_AdvRate.Init();
 }
 
-bool CSkillDef::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
+bool CSkillDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CSkillDef::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -448,7 +448,7 @@ void CSkillClassDef::Init()
 	}
 }
 
-bool CSkillClassDef::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
+bool CSkillClassDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CSkillClassDef::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -621,7 +621,7 @@ CSpellDef::CSpellDef( SPELL_TYPE id ) :
 
 
 
-bool CSpellDef::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
+bool CSpellDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CSpellDef::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -834,7 +834,7 @@ bool CSpellDef::GetPrimarySkill( int * piSkill, int * piQty ) const
 }
 
 //*******************************************
-// -CRandGroupDef
+// -CSRandGroupDef
 
 enum RGC_TYPE
 {
@@ -850,7 +850,7 @@ enum RGC_TYPE
 	RGC_QTY
 };
 
-lpctstr const CRandGroupDef::sm_szLoadKeys[RGC_QTY+1] =
+lpctstr const CSRandGroupDef::sm_szLoadKeys[RGC_QTY+1] =
 {
 	"CALCMEMBERINDEX",
 	"CATEGORY",
@@ -864,9 +864,9 @@ lpctstr const CRandGroupDef::sm_szLoadKeys[RGC_QTY+1] =
 	NULL
 };
 
-int CRandGroupDef::CalcTotalWeight()
+int CSRandGroupDef::CalcTotalWeight()
 {
-	ADDTOCALLSTACK("CRandGroupDef::CalcTotalWeight");
+	ADDTOCALLSTACK("CSRandGroupDef::CalcTotalWeight");
 	int iTotal = 0;
 	size_t iQty = m_Members.GetCount();
 	for ( size_t i = 0; i < iQty; i++ )
@@ -876,9 +876,9 @@ int CRandGroupDef::CalcTotalWeight()
 	return( m_iTotalWeight = iTotal );
 }
 
-bool CRandGroupDef::r_LoadVal( CScript &s )
+bool CSRandGroupDef::r_LoadVal( CScript &s )
 {
-	ADDTOCALLSTACK("CRandGroupDef::r_LoadVal");
+	ADDTOCALLSTACK("CSRandGroupDef::r_LoadVal");
 	EXC_TRY("LoadVal");
 	// RES_SPAWN or RES_REGIONTYPE
 	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
@@ -940,9 +940,9 @@ bool CRandGroupDef::r_LoadVal( CScript &s )
 	return false;
 }
 
-bool CRandGroupDef::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
+bool CSRandGroupDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 {
-	ADDTOCALLSTACK("CRandGroupDef::r_WriteVal");
+	ADDTOCALLSTACK("CSRandGroupDef::r_WriteVal");
 	EXC_TRY("WriteVal");
 
 	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
@@ -1040,9 +1040,9 @@ bool CRandGroupDef::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pS
 	return false;
 }
 
-size_t CRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool bTrigger ) const
+size_t CSRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool bTrigger ) const
 {
-	ADDTOCALLSTACK("CRandGroupDef::GetRandMemberIndex");
+	ADDTOCALLSTACK("CSRandGroupDef::GetRandMemberIndex");
 	int rid;
 	size_t iCount = m_Members.GetCount();
 	if ( iCount <= 0 )
@@ -1065,7 +1065,7 @@ size_t CRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool bTrigger ) cons
 		return( i - 1 );
 	}
 
-	CGPtrTypeArray<size_t> members;
+	CSPtrTypeArray<size_t> members;
 
 	// calculate weight only of items pCharSrc can get
 	int iTotalWeight = 0;
@@ -1191,7 +1191,7 @@ bool CRegionResourceDef::r_LoadVal( CScript & s )
 	return false;
 }
 
-bool CRegionResourceDef::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
+bool CRegionResourceDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CRegionResourceDef::r_WriteVal");
 	EXC_TRY("r_WriteVal");

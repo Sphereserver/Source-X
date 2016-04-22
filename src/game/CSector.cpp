@@ -74,7 +74,7 @@ lpctstr const CSector::sm_szLoadKeys[SC_QTY+1] =
 	NULL
 };
 
-bool CSector::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
+bool CSector::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CSector::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -1165,11 +1165,11 @@ void CSector::OnTick(int iPulseCount)
 #else
 		}
 #ifdef _EXCEPTIONS_DEBUG
-		catch ( const CSphereError& e )
+		catch ( const CSError& e )
 		{
 			PAUSECALLSTACK;
 			CPointMap pt = GetBasePoint();
-			g_Log.EventError("#2 CSphereError: item 0%x '%s' [timer=%" PRId64 ", type=%d]\n", (dword)(pItem->GetUID()), pItem->GetName(), pItem->GetTimerAdjusted(), (int)(pItem->GetType()));
+			g_Log.EventError("#2 CSError: item 0%x '%s' [timer=%" PRId64 ", type=%d]\n", (dword)(pItem->GetUID()), pItem->GetName(), pItem->GetTimerAdjusted(), (int)(pItem->GetType()));
 			g_Log.EventError("#2 sector #%d [%d,%d,%d,%d]\n", GetIndex(),  pt.m_x, pt.m_y, pt.m_z, pt.m_map);
 			UNPAUSECALLSTACK;
 			EXC_CATCH_SUB(&e, "Sector");

@@ -2619,8 +2619,8 @@ PacketDisplayBook::PacketDisplayBook(const CClient* target, CItem* book) : Packe
 
 	bool isWritable = false;
 	int pages = 0;
-	CString title;
-	CString author;
+	CSString title;
+	CSString author;
 
 	if (book->IsBookSystem())
 	{
@@ -3310,7 +3310,7 @@ PacketGumpDialog::PacketGumpDialog(int x, int y, CObjBase* object, dword context
 	writeInt32(y);
 }
 
-void PacketGumpDialog::writeControls(const CClient* target, const CString* controls, size_t controlCount, const CString* texts, size_t textCount)
+void PacketGumpDialog::writeControls(const CClient* target, const CSString* controls, size_t controlCount, const CSString* texts, size_t textCount)
 {	
 	ADDTOCALLSTACK("PacketGumpDialog::writeControls");
 
@@ -3321,7 +3321,7 @@ void PacketGumpDialog::writeControls(const CClient* target, const CString* contr
 		writeStandardControls(controls, controlCount, texts, textCount);
 }
 
-void PacketGumpDialog::writeCompressedControls(const CString* controls, size_t controlCount, const CString* texts, size_t textCount)
+void PacketGumpDialog::writeCompressedControls(const CSString* controls, size_t controlCount, const CSString* texts, size_t textCount)
 {
 	ADDTOCALLSTACK("PacketGumpDialog::writeCompressedControls");
 
@@ -3403,7 +3403,7 @@ void PacketGumpDialog::writeCompressedControls(const CString* controls, size_t c
 	}
 }
 
-void PacketGumpDialog::writeStandardControls(const CString* controls, size_t controlCount, const CString* texts, size_t textCount)
+void PacketGumpDialog::writeStandardControls(const CSString* controls, size_t controlCount, const CSString* texts, size_t textCount)
 {
 	ADDTOCALLSTACK("PacketGumpDialog::writeStandardControls");
 
@@ -3509,7 +3509,7 @@ PacketProfile::PacketProfile(const CClient* target, const CChar* character) : Pa
 
 	if (isIncognito == false)
 	{
-		CString sConstText;
+		CSString sConstText;
 		sConstText.Format("%s, %s", character->Noto_GetTitle(), character->GetTradeTitle());
 
 		writeStringNUNICODE(static_cast<lpctstr>(sConstText));
@@ -4265,8 +4265,8 @@ PacketDisplayBookNew::PacketDisplayBookNew(const CClient* target, CItem* book) :
 
 	bool isWritable = false;
 	int pages = 0;
-	CString title;
-	CString author;
+	CSString title;
+	CSString author;
 
 	if (book->IsBookSystem())
 	{
@@ -4331,7 +4331,7 @@ PacketDisplayBookNew::PacketDisplayBookNew(const CClient* target, CItem* book) :
  *
  *
  ***************************************************************************/
-PacketPropertyList::PacketPropertyList(const CObjBase* object, dword version, const CGObArray<CClientTooltip*>* data) : PacketSend(XCMD_AOSTooltip, 48, PRI_IDLE)
+PacketPropertyList::PacketPropertyList(const CObjBase* object, dword version, const CSObjArray<CClientTooltip*>* data) : PacketSend(XCMD_AOSTooltip, 48, PRI_IDLE)
 {
 	ADDTOCALLSTACK("PacketPropertyList::PacketPropertyList");
 

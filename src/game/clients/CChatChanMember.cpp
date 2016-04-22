@@ -121,7 +121,7 @@ void CChatChanMember::ToggleIgnore(lpctstr pszName)
     }
     else
     {
-        CString * name = new CString(pszName);
+        CSString * name = new CSString(pszName);
         m_IgnoredMembers.Add( name );
         SendChatMsg(CHATMSG_NowIgnoring, pszName); // This message also takes the ignored person off the clients local list of channel members
     }

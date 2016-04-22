@@ -168,7 +168,7 @@ void CItemSpawn::GenerateChar(CResourceDef *pDef)
 	RESOURCE_ID_BASE rid = pDef->GetResourceID();
 	if ( rid.GetResType() == RES_SPAWN )
 	{
-		const CRandGroupDef *pSpawnGroup = static_cast<const CRandGroupDef *>(pDef);
+		const CSRandGroupDef *pSpawnGroup = static_cast<const CSRandGroupDef *>(pDef);
 		ASSERT(pSpawnGroup);
 		size_t i = pSpawnGroup->GetRandMemberIndex();
 		if ( i != pSpawnGroup->BadMemberIndex() )
@@ -412,7 +412,7 @@ lpctstr const CItemSpawn::sm_szLoadKeys[ISPW_QTY + 1] =
 	NULL
 };
 
-bool CItemSpawn::r_WriteVal(lpctstr pszKey, CString & sVal, CTextConsole *pSrc)
+bool CItemSpawn::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole *pSrc)
 {
 	ADDTOCALLSTACK("CitemSpawn:r_WriteVal");
 	EXC_TRY("WriteVal");

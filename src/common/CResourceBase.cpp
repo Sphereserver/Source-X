@@ -7,7 +7,7 @@
 #include "../game/triggers.h"
 #include "CException.h"
 #include "CExpression.h"
-#include "CFileList.h"
+#include "./sphere_library/CSFileList.h"
 #include "CResourceBase.h"
 
 
@@ -211,14 +211,14 @@ void CResourceBase::AddResourceDir( lpctstr pszDirName )
 	if ( pszDirName[0] == '\0' )
 		return;
 
-	CString sFilePath = CGFile::GetMergedFileName( pszDirName, "*" SPHERE_SCRIPT );
+	CSString sFilePath = CSFile::GetMergedFileName( pszDirName, "*" SPHERE_SCRIPT );
 
-	CFileList filelist;
+	CSFileList filelist;
 	int iRet = filelist.ReadDir( sFilePath, false );
 	if ( iRet < 0 )
 	{
 		// also check script file path
-		sFilePath = CGFile::GetMergedFileName(m_sSCPBaseDir, sFilePath.GetPtr());
+		sFilePath = CSFile::GetMergedFileName(m_sSCPBaseDir, sFilePath.GetPtr());
 
 		iRet = filelist.ReadDir( sFilePath, true );
 		if ( iRet < 0 )
@@ -233,10 +233,10 @@ void CResourceBase::AddResourceDir( lpctstr pszDirName )
 		return;
 	}
 
-	CGStringListRec * psFile = filelist.GetHead();
+	CSStringListRec * psFile = filelist.GetHead();
 	for ( ; psFile; psFile = psFile->GetNext())
 	{
-		sFilePath = CGFile::GetMergedFileName( pszDirName, *psFile );
+		sFilePath = CSFile::GetMergedFileName( pszDirName, *psFile );
 		AddResourceFile( sFilePath );
 	}
 }
@@ -312,13 +312,13 @@ bool CResourceBase::OpenResourceFind( CScript &s, lpctstr pszFilename, bool bCri
 	if ( !bCritical ) return false;
 
 	// next, check the script file path
-	CString sPathName = CGFile::GetMergedFileName( m_sSCPBaseDir, pszFilename );
+	CSString sPathName = CSFile::GetMergedFileName( m_sSCPBaseDir, pszFilename );
 	if ( s.Open(sPathName, OF_READ | OF_NONCRIT ))
 		return true;
 
 	// finally, strip the directory and re-check script file path
-	lpctstr pszTitle = CGFile::GetFilesTitle(pszFilename);
-	sPathName = CGFile::GetMergedFileName( m_sSCPBaseDir, pszTitle );
+	lpctstr pszTitle = CSFile::GetFilesTitle(pszFilename);
+	sPathName = CSFile::GetMergedFileName( m_sSCPBaseDir, pszTitle );
 	return( s.Open( sPathName, OF_READ ));
 }
 
@@ -775,7 +775,7 @@ bool CResourceScript::CheckForChange()
 	time_t dateChange;
 	dword dwSize;
 
-	if ( ! CFileList::ReadFileInfo( GetFilePath(), dateChange, dwSize ))
+	if ( ! CSFileList::ReadFileInfo( GetFilePath(), dateChange, dwSize ))
 	{
 		DEBUG_ERR(( "Can't get stats info for file '%s'\n", static_cast<lpctstr>(GetFilePath()) ));
 		return false;
@@ -1481,7 +1481,7 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
 	return false;
 }
 
-void CResourceRefArray::WriteResourceRefList( CString & sVal ) const
+void CResourceRefArray::WriteResourceRefList( CSString & sVal ) const
 {
 	ADDTOCALLSTACK("CResourceRefArray::WriteResourceRefList");
 	TemporaryString tsVal;
@@ -1595,12 +1595,12 @@ void CResourceHash::SetAt( RESOURCE_ID_BASE rid, size_t index, CResourceDef* pNe
 	m_Array[ GetHashArray( rid ) ].SetAt( index, pNew );
 }
 
-CStringSortArray::CStringSortArray()
+CSStringSortArray::CSStringSortArray()
 {
 
 }
 
-void CStringSortArray::DestructElements( tchar** pElements, size_t nCount )
+void CSStringSortArray::DestructElements( tchar** pElements, size_t nCount )
 {
 	// delete the objects that we own.
 	for ( size_t i = 0; i < nCount; i++ )
@@ -1612,18 +1612,18 @@ void CStringSortArray::DestructElements( tchar** pElements, size_t nCount )
 		}
 	}
 
-	CGObSortArray<tchar*, tchar*>::DestructElements(pElements, nCount);
+	CSObjSortArray<tchar*, tchar*>::DestructElements(pElements, nCount);
 }
 
 // Sorted array of strings
-int CStringSortArray::CompareKey( tchar* pszID1, tchar* pszID2, bool fNoSpaces ) const
+int CSStringSortArray::CompareKey( tchar* pszID1, tchar* pszID2, bool fNoSpaces ) const
 {
 	UNREFERENCED_PARAMETER(fNoSpaces);
 	ASSERT( pszID2 );
 	return( strcmpi( pszID1, pszID2));
 }
 
-void CStringSortArray::AddSortString( lpctstr pszText )
+void CSStringSortArray::AddSortString( lpctstr pszText )
 {
 	ASSERT(pszText);
 	size_t len = strlen( pszText );

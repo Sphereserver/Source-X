@@ -514,7 +514,7 @@ lpctstr const CClient::sm_szVerbKeys[CV_QTY+1] =	// static
 	NULL,
 };
 
-bool CClient::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
+bool CClient::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CClient::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -888,7 +888,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				size_t qty = Str_ParseCmds(s.GetArgRaw(), ppLocArgs, CountOf(ppLocArgs), ",");
 				dword clilocid = Exp_GetVal(ppLocArgs[0]);
 
-				CString LocArgs;
+				CSString LocArgs;
 				for ( size_t y = 1 ; y < qty; y++ )
 				{
 					if ( LocArgs.GetLength() )
@@ -1442,7 +1442,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 
 					if ( hue == -1 )	hue = HUE_TEXT_DEF;
 
-					CString CArgs;
+					CSString CArgs;
 					for ( size_t i = 2; i < iArgQty; i++ )
 					{
 						if ( CArgs.GetLength() )
@@ -1471,7 +1471,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 
 					if ( hue == -1 )	hue = HUE_TEXT_DEF;
 
-					CString CArgs;
+					CSString CArgs;
 					for ( size_t i = 4; i < iArgQty; i++ )
 					{
 						if ( CArgs.GetLength() )
@@ -1508,7 +1508,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		default:
 			if ( r_LoadVal( s ))
 			{
-				CString sVal;
+				CSString sVal;
 				if ( r_WriteVal( s.GetKey(), sVal, pSrc ))
 				{
 					// if ( !s.IsKeyHead( "CTAG.", 5 ) && !s.IsKeyHead( "CTAG0.", 6 ) ) // We don't want output related to ctag

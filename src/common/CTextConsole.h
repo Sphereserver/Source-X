@@ -4,7 +4,7 @@
 #define _INC_CTEXTCONSOLE_H
 
 #include "../sphere/strings.h"
-#include "./sphere_library/CString.h"
+#include "./sphere_library/CSString.h"
 #include "spherecom.h"
 
 
@@ -26,9 +26,9 @@ enum PLEVEL_TYPE		// Priv levels.
 class CTextConsole
 {
 	// A base class for any class that can act like a console and issue commands.
-	// CClient, CChar, CServer, CFileConsole
+	// CClient, CChar, CServer, CSFileConsole
 protected:
-	int OnConsoleKey( CString & sText, tchar nChar, bool fEcho );
+	int OnConsoleKey( CSString & sText, tchar nChar, bool fEcho );
 public:
 	static const char *m_sClassName;
 	// What privs do i have ?

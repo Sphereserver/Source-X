@@ -2,7 +2,7 @@
 
 #include "../common/CEncrypt.h"
 #include "../common/CException.h"
-#include "../common/CFileList.h"
+#include "../common/sphere_library/CSFileList.h"
 #include "../common/zlib/zlib.h"
 #include "../network/network.h"
 #include "../network/send.h"
@@ -206,7 +206,7 @@ bool CClient::addRelay( const CServerDef * pServ )
 	dword dwCustomerId = 0x7f000001;
 	if ( g_Cfg.m_fUseAuthID )
 	{
-		CString sCustomerID(pServ->GetName());
+		CSString sCustomerID(pServ->GetName());
 		sCustomerID.Add(GetAccount()->GetName());
 
 		dwCustomerId = z_crc32(0L, Z_NULL, 0);
@@ -290,7 +290,7 @@ byte CClient::Login_ServerList( const char * pszAccount, const char * pszPasswor
 	// Give the server list to everyone.
 	// if ( LogIn( pszAccount, pszPassword ) )
 	//   return( PacketLoginError::BadPass );
-	CString sMsg;
+	CSString sMsg;
 	byte lErr = LogIn( pszAccount, pszPassword, sMsg );
 	if ( lErr != PacketLoginError::Success )
 	{
@@ -361,7 +361,7 @@ bool CClient::OnRxConsole( const byte * pData, size_t iLen )
 				}
 				else
 				{
-					CString sMsg;
+					CSString sMsg;
 
 					CAccountRef pAccount = g_Accounts.Account_Find(m_zLogin);
 					if (( pAccount == NULL ) || ( pAccount->GetPrivLevel() < PLEVEL_Admin ))
@@ -419,7 +419,7 @@ bool CClient::OnRxAxis( const byte * pData, size_t iLen )
 				}
 				else
 				{
-					CString sMsg;
+					CSString sMsg;
 
 					CAccountRef pAccount = g_Accounts.Account_Find(m_zLogin);
 					if (( pAccount == NULL ) || ( pAccount->GetPrivLevel() < PLEVEL_Counsel ))
@@ -453,13 +453,13 @@ bool CClient::OnRxAxis( const byte * pData, size_t iLen )
 
 							time_t dateChange;
 							dword dwSize;
-							if ( ! CFileList::ReadFileInfo( "Axis.db", dateChange, dwSize ))
+							if ( ! CSFileList::ReadFileInfo( "Axis.db", dateChange, dwSize ))
 							{
 								SysMessagef("\"MSG:%s\"", g_Cfg.GetDefaultMsg(DEFMSG_AXIS_INFO_ERROR));
 								return false;
 							}
 
-							CGFile FileRead;
+							CSFile FileRead;
 							if ( ! FileRead.Open( "Axis.db", OF_READ|OF_BINARY ))
 							{
 								SysMessagef("\"MSG:%s\"", g_Cfg.GetDefaultMsg(DEFMSG_AXIS_FILE_ERROR));
@@ -537,7 +537,7 @@ bool CClient::OnRxPing( const byte * pData, size_t iLen )
 						pAccount = g_Accounts.Account_Find("RemoteAdmin");
 					if ( pAccount )
 					{
-						CString sMsg;
+						CSString sMsg;
 						byte lErr = LogIn( pAccount, sMsg );
 						if ( lErr != PacketLoginError::Success )
 						{
@@ -569,7 +569,7 @@ bool CClient::OnRxPing( const byte * pData, size_t iLen )
 
 			time_t dateChange;
 			dword dwSize = 0;
-			CFileList::ReadFileInfo( "Axis.db", dateChange, dwSize );
+			CSFileList::ReadFileInfo( "Axis.db", dateChange, dwSize );
 			SysMessagef("%u",dwSize);
 			return true;
 		}
@@ -663,7 +663,7 @@ bool CClient::OnRxWebPageRequest( byte * pRequest, size_t iLen )
 
 	// Look for what they want to do with the connection.
 	bool fKeepAlive = false;
-	CGTime dateIfModifiedSince;
+	CSTime dateIfModifiedSince;
 	tchar * pszReferer = NULL;
 	size_t stContentLength = 0;
 	for ( size_t j = 1; j < iQtyLines; j++ )

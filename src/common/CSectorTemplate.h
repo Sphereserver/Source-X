@@ -15,7 +15,7 @@
 class CItem;
 class CSphereMapBlock;
 
-class CCharsDisconnectList : public CGObList
+class CCharsDisconnectList : public CSObjList
 {
 public:
 	static const char *m_sClassName;
@@ -26,7 +26,7 @@ private:
 	CCharsDisconnectList& operator=(const CCharsDisconnectList& other);
 };
 
-class CCharsActiveList : public CGObList
+class CCharsActiveList : public CSObjList
 {
 private:
 	size_t m_iClients; // How many clients in this sector now?
@@ -35,7 +35,7 @@ public:
 	CServTime m_timeLastClient;	// age the sector based on last client here.
 
 protected:
-	void OnRemoveOb( CGObListRec* pObRec );	// Override this = called when removed from list.
+	void OnRemoveOb( CSObjListRec* pObRec );	// Override this = called when removed from list.
 
 public:
 	size_t HasClients() const;
@@ -51,14 +51,14 @@ private:
 	CCharsActiveList& operator=(const CCharsActiveList& other);
 };
 
-class CItemsList : public CGObList
+class CItemsList : public CSObjList
 {
 	// Top level list of items.
 public:
 	static bool sm_fNotAMove;	// hack flag to prevent items from bouncing around too much.
 
 protected:
-	void OnRemoveOb( CGObListRec* pObRec );	// Override this = called when removed from list.
+	void OnRemoveOb( CSObjListRec* pObRec );	// Override this = called when removed from list.
 
 public:
 	static const char *m_sClassName;
@@ -72,7 +72,7 @@ private:
 	CItemsList& operator=(const CItemsList& other);
 };
 
-class CObPointSortArray : public CGObSortArray< CPointSort*, int >
+class CObPointSortArray : public CSObjSortArray< CPointSort*, int >
 {
 public:
 	static const char *m_sClassName;

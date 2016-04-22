@@ -74,7 +74,7 @@ void ThreadHolder::pop(IThread *thread)
 {
 	init();
 	if( m_threadCount <= 0 )
-		throw CSphereError(LOGL_ERROR, 0, "Trying to dequeue thread while no threads are active");
+		throw CSError(LOGL_ERROR, 0, "Trying to dequeue thread while no threads are active");
 
 	SimpleThreadLock lock(m_mutex);
 	spherethreadlist_t::iterator it = std::find(m_threads.begin(), m_threads.end(), thread);
@@ -85,7 +85,7 @@ void ThreadHolder::pop(IThread *thread)
 		return;
 	}
 
-	throw CSphereError(LOGL_ERROR, 0, "Unable to dequeue a thread (not registered)");
+	throw CSError(LOGL_ERROR, 0, "Unable to dequeue a thread (not registered)");
 }
 
 IThread * ThreadHolder::getThreadAt(size_t at)
@@ -129,7 +129,7 @@ AbstractThread::AbstractThread(const char *name, IThread::Priority priority)
 #ifdef _WIN32
 		if( CoInitializeEx(NULL, COINIT_MULTITHREADED) != S_OK )
 		{
-			throw CSphereError(LOGL_FATAL, 0, "OLE is not available, threading model unimplementable");
+			throw CSError(LOGL_FATAL, 0, "OLE is not available, threading model unimplementable");
 		}
 #endif
 		AbstractThread::m_threadsAvailable++;
@@ -171,7 +171,7 @@ void AbstractThread::start()
 	if (result != 0)
 	{
 		m_handle = 0;
-		throw CSphereError(LOGL_FATAL, 0, "Unable to spawn a new thread");
+		throw CSError(LOGL_FATAL, 0, "Unable to spawn a new thread");
 	}
 #endif
 	
@@ -247,7 +247,7 @@ void AbstractThread::run()
 			// be in tick() but we cannot guarantee it to be called there
 			CurrentProfileData.Start(PROFILE_IDLE);
 		}
-		catch( const CSphereError& e )
+		catch( const CSError& e )
 		{
 			gotException = true;
 			g_Log.CatchEvent(&e, "%s::tick", getName());
@@ -462,7 +462,7 @@ void AbstractThread::setPriority(IThread::Priority pri)
 			m_tickPeriod = AutoResetEvent::_infinite;
 			break;
 		default:
-			throw CSphereError(LOGL_FATAL, 0, "Unable to determine thread priority");
+			throw CSError(LOGL_FATAL, 0, "Unable to determine thread priority");
 	}
 }
 
@@ -537,7 +537,7 @@ TemporaryStringStorage *AbstractSphereThread::allocateStringBuffer()
 			// but the best is to throw an exception to give better formed information for end users
 			// rather than access violations
 			DEBUG_WARN(( "Thread temporary string buffer is full.\n" ));
-			throw CSphereError(LOGL_FATAL, 0, "Thread temporary string buffer is full");
+			throw CSError(LOGL_FATAL, 0, "Thread temporary string buffer is full");
 		}
 	}
 }

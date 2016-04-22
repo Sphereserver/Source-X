@@ -96,7 +96,7 @@ bool CVarDefContNum::r_LoadVal( CScript & s )
 	return true;
 }
 
-bool CVarDefContNum::r_WriteVal( lpctstr pKey, CString & sVal, CTextConsole * pSrc = NULL )
+bool CVarDefContNum::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = NULL )
 {
 	UNREFERENCED_PARAMETER(pKey);
 	UNREFERENCED_PARAMETER(pSrc);
@@ -155,7 +155,7 @@ bool CVarDefContStr::r_LoadVal( CScript & s )
 	return true;
 }
 
-bool CVarDefContStr::r_WriteVal( lpctstr pKey, CString & sVal, CTextConsole * pSrc = NULL )
+bool CVarDefContStr::r_WriteVal( lpctstr pKey, CSString & sVal, CTextConsole * pSrc = NULL )
 {
 	UNREFERENCED_PARAMETER(pKey);
 	UNREFERENCED_PARAMETER(pSrc);
@@ -702,7 +702,7 @@ void CVarDefMap::ClearKeys(lpctstr mask)
 		if ( !m_Container.size() )
 			return;
 
-		CString sMask(mask);
+		CSString sMask(mask);
 		sMask.MakeLower();
 
 		DefSet::iterator i = m_Container.begin();

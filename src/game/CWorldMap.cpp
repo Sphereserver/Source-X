@@ -93,7 +93,7 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fT
 
 	// Find RES_REGIONTYPE
 	EXC_SET("resource group");
-	const CRandGroupDef * pResGroup = pRegion->FindNaturalResource(Type);
+	const CSRandGroupDef * pResGroup = pRegion->FindNaturalResource(Type);
 	if ( !pResGroup )
 		return NULL;
 

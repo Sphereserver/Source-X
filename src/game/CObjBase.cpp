@@ -222,15 +222,6 @@ void CObjBase::SetUID( dword dwIndex, bool fItem )
 	CObjBaseTemplate::SetUID( dwIndex );
 }
 
-CObjBase* CObjBase::GetNext() const
-{
-	return( static_cast <CObjBase*>( CGObListRec::GetNext()));
-}
-
-CObjBase* CObjBase::GetPrev() const
-{
-	return( static_cast <CObjBase*>( CGObListRec::GetPrev()));
-}
 
 lpctstr CObjBase::GetName() const	// resolve ambiguity w/CScriptObj
 {
@@ -346,7 +337,7 @@ void CObjBase::r_WriteSafe( CScript & s )
 		}
 		r_Write(s);
 	}
-	catch ( const CSphereError& e )
+	catch ( const CSError& e )
 	{
 		g_Log.CatchEvent(&e, "Write Object 0%x", uid);
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
@@ -366,16 +357,6 @@ void CObjBase::SetTimeout( int64 iDelayInTicks )
 		m_timeout.Init();
 	else
 		m_timeout = CServTime::GetCurrentTime() + iDelayInTicks;
-}
-
-bool CObjBase::IsTimerSet() const
-{
-	return( m_timeout.IsTimeValid());
-}
-
-bool CObjBase::IsTimerExpired() const
-{
-	return( GetTimerDiff() <= 0 );
 }
 
 int64 CObjBase::GetTimerAdjusted() const
@@ -731,7 +712,7 @@ lpctstr const CObjBase::sm_szLoadKeys[OC_QTY+1] =
 	NULL
 };
 
-bool CObjBase::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
+bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CObjBase::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -1947,7 +1928,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		return true;
 	}
 	
-	CString sVal;
+	CSString sVal;
 	CScriptTriggerArgs Args( s.GetArgRaw() );
 	if ( r_Call( pszKey, pSrc, &Args, &sVal ) )
 		return true;
@@ -2064,7 +2045,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				tchar *Arg_ppCmd[2];		// Maximum parameters in one line
 				size_t iQty = Str_ParseCmds( s.GetArgStr(), Arg_ppCmd, CountOf( Arg_ppCmd ));
 
-				CString sOrgValue;
+				CSString sOrgValue;
 				if ( ! r_WriteVal( Arg_ppCmd[0], sOrgValue, pSrc ))
 					sOrgValue = ".";
 
@@ -2072,7 +2053,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 				int iMaxLength = iQty > 1 ? ATOI(Arg_ppCmd[1]) : 1;
 
-				CString sPrompt;
+				CSString sPrompt;
 				sPrompt.Format("%s (# = default)", static_cast<lpctstr>(Arg_ppCmd[0]));
 				pClientSrc->addGumpInpVal( true, INPVAL_STYLE_TEXTEDIT,
 					iMaxLength,	sPrompt, sOrgValue, this );

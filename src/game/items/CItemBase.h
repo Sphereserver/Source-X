@@ -4,7 +4,7 @@
 #define _INC_CITEMBASE_H
 
 #include "../common/CResourceBase.h"
-#include "../common/sphere_library/CArray.h"
+#include "../common/sphere_library/CSArray.h"
 #include "../CBase.h"
 #include "../CResource.h"
 #include "../uo_files/uofiles_enums_itemid.h"
@@ -228,7 +228,7 @@ class CItemBase : public CBaseBaseDef
 	// Partly based on CUOItemTypeRec/CUOItemTypeRec_HS
 private:
 	word	m_weight;		// weight in WEIGHT_UNITS (UINT16_MAX=not movable) defaults from the .MUL file.
-	CGTypedArray<ITEMID_TYPE,ITEMID_TYPE> m_flip_id;	//  can be flipped to make these display ids.
+	CSTypedArray<ITEMID_TYPE,ITEMID_TYPE> m_flip_id;	//  can be flipped to make these display ids.
 	IT_TYPE	m_type;			// default double click action type. (if any)
 	CValueRangeDef m_values;		// range of values given a quality skill
 	byte    m_layer;		// Is this item equippable on paperdoll? LAYER=LAYER_TYPE defaults from the .MUL file.
@@ -470,7 +470,7 @@ public:
 	ITEMID_TYPE GetNextFlipID( ITEMID_TYPE id ) const;
 
 	virtual bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc = NULL );
+	bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = NULL );
 
 	bool IsMovableType() const
 	{
@@ -597,7 +597,7 @@ public:
 		uchar tiles;	// distance to move
 	};
 
-	CGTypedArray<CMultiComponentItem,CMultiComponentItem&> m_Components;
+	CSTypedArray<CMultiComponentItem,CMultiComponentItem&> m_Components;
 	CGRect m_rect;		// my region.
 	dword m_dwRegionFlags;	// Base region flags (REGION_FLAG_GUARDED etc)
 	CResourceRefArray m_Speech;	// Speech fragment list (other stuff we know)
@@ -621,7 +621,7 @@ public:
 	bool AddComponent( tchar * pArgs );
 	void SetMultiRegion( tchar * pArgs );
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pChar );
+	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pChar );
 
 	static CItemBase * MakeMultiRegion( CItemBase * pBase, CScript & s );
 };

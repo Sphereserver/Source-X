@@ -7,7 +7,7 @@
 #ifndef _INC_CCHARBASE_H
 #define _INC_CCHARBASE_H
 
-#include "../common/sphere_library/CString.h"
+#include "../common/sphere_library/CSString.h"
 #include "../common/CResourceBase.h"
 #include "../common/sphereproto.h"
 #include "../common/CScript.h"
@@ -101,7 +101,7 @@ public:
 	lpctstr GetTradeName() const;
 
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc = NULL );
+	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = NULL );
 	bool r_Load( CScript & s );
 };
 

@@ -31,10 +31,13 @@
 
 	#define strcmpi		_strcmpi	// Non ANSI equiv functions ?
 	#define strnicmp	_strnicmp
+	#define ATOI		atoi
+	#define ITOA		_itoa
+	#define LTOA		_ltoa
+	#define STRREV		_strrev
 
 	extern const OSVERSIONINFO * Sphere_GetOSInfo();
 #else	// _WIN32 else assume LINUX
-
 	#include <sys/types.h>
 	#include <sys/timeb.h>
 
@@ -60,32 +63,19 @@
 	#define strcmpi		strcasecmp
 	#define strnicmp	strncasecmp
 	#define _vsnprintf	vsnprintf
-#endif // !_WIN32
-
-#ifdef _DEBUG
-	#ifndef ASSERT
-		extern void Assert_CheckFail( const char * pExp, const char *pFile, long lLine );
-		#define ASSERT(exp)			(void)( (exp) || (Assert_CheckFail(#exp, __FILE__, __LINE__), 0) )
-	#endif	// ASSERT
-
-#else	// !_DEBUG
-
-	#ifndef ASSERT
-		#define ASSERT(exp)
-	#endif	// ASSERT
-
-#endif	// _DEBUG
-
-#ifdef _WIN32
-	#define ATOI atoi
-	#define ITOA _itoa
-	#define LTOA _ltoa
-	#define STRREV _strrev
-#else
-	int ATOI( const char * str );
+	#define ATOI		atoi
 	char * ITOA(int value, char *string, int radix);
 	char * LTOA(long value, char *string, int radix);
-	void STRREV( char* string );
+	void STRREV(char* string);
+#endif // !_WIN32
+
+#ifndef ASSERT
+	#ifdef _DEBUG
+			extern void Assert_CheckFail( const char * pExp, const char *pFile, long lLine );
+			#define ASSERT(exp)			(void)( (exp) || (Assert_CheckFail(#exp, __FILE__, __LINE__), 0) )
+	#else
+			#define ASSERT(exp)
+	#endif
 #endif
 
 // Macro for fast NoCrypt Client version check

@@ -11,7 +11,7 @@
 #include "../common/sphereproto.h"
 #include "../common/CScriptObj.h"
 #include "../common/CSocket.h"
-#include "../common/sphere_library/CString.h"
+#include "../common/sphere_library/CSString.h"
 #include "../CResource.h"
 
 #define PRIV_UNUSED0		0x0001
@@ -45,9 +45,9 @@ class CAccount : public CScriptObj
 	static lpctstr const sm_szLoadKeys[]; ///< Script fields.
 private:
 	PLEVEL_TYPE m_PrivLevel; ///< Privileges level of the CAccount.
-	CString m_sName; ///< Name = no spaces. case independant.
-	CString m_sCurPassword; ///< Accounts auto-generated but never used should not last long !
-	CString m_sNewPassword; ///< The new password will be transfered when they use it.
+	CSString m_sName; ///< Name = no spaces. case independant.
+	CSString m_sCurPassword; ///< Accounts auto-generated but never used should not last long !
+	CSString m_sNewPassword; ///< The new password will be transfered when they use it.
 
 
 	word m_PrivFlags; ///< optional privileges for char (bit-mapped)
@@ -64,16 +64,16 @@ public:
 	static const char *m_sClassName;
 
 	CLanguageID m_lang;			///< UNICODE language preference (ENU=english).
-	CString m_sChatName;		///< Chat System Name
+	CSString m_sChatName;		///< Chat System Name
 
 	int64 m_Total_Connect_Time;	///< Previous total amount of time in game (minutes). "TOTALCONNECTTIME"
 
 	CSocketAddressIP m_Last_IP;	///< last ip logged in from.
-	CGTime m_dateLastConnect;	///< Last logged in date (use localtime()).
+	CSTime m_dateLastConnect;	///< Last logged in date (use localtime()).
 	int64  m_Last_Connect_Time;	///< Amount of time spent online last time (in minutes).
 
 	CSocketAddressIP m_First_IP;	///< First ip logged in from.
-	CGTime m_dateFirstConnect;	///< First date logged in (use localtime()).
+	CSTime m_dateFirstConnect;	///< First date logged in (use localtime()).
 
 	CUID m_uidLastChar;		///< Last CChar logged with this CAccount.
 	CCharRefArray m_Chars;		///< CChars attached to this CAccount.
@@ -119,7 +119,7 @@ public:
 	************************************************************************/
 
 	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc );
 	virtual bool r_Verb( CScript &s, CTextConsole * pSrc );
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 	void r_Write(CScript & s);

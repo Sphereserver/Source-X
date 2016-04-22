@@ -14,7 +14,7 @@
 #include "spherecom.h"
 #include "CVarDefMap.h"
 #include "ListDefContMap.h"
-#include "sphere_library/CRand.h"
+#include "sphere_library/CSRand.h"
 
 #define _ISCSYMF(ch) ( IsAlpha(ch) || (ch)=='_')	// __iscsym or __iscsymf
 #define _ISCSYM(ch) ( isalnum(ch) || (ch)=='_')		// __iscsym or __iscsymf
@@ -97,7 +97,7 @@ public:
 	CVarDefMap		m_VarGlobals;	// Global variables
 	CListDefMap		m_ListGlobals; // Global lists
 	CListDefMap		m_ListInternals; // Internal lists
-	CString		m_sTmp;
+	CSString		m_sTmp;
 
 	//	defined default messages
 	static tchar sm_szMessages[DEFMSG_QTY][128];		// like: "You put %s to %s"

@@ -12,7 +12,7 @@
 #include "../game/uo_files/uofiles_macros.h"
 #include "../game/uo_files/uofiles_types.h"
 #include "../game/CServTime.h"
-#include "./sphere_library/CArray.h"
+#include "./sphere_library/CSArray.h"
 #include "CRect.h"
 
 class CSphereCachedMulItem
@@ -124,7 +124,7 @@ private:
 	CMapDiffBlock& operator=(const CMapDiffBlock& other);
 };
 
-class CMapDiffBlockArray : public CGObSortArray< CMapDiffBlock*, dword >
+class CMapDiffBlockArray : public CSObjSortArray< CMapDiffBlock*, dword >
 {
 public:
 	int CompareKey( dword id, CMapDiffBlock* pBase, bool fNoSpaces ) const;

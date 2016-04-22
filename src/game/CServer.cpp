@@ -9,9 +9,9 @@
 	#include "../common/crashdump/crashdump.h"
 #endif
 
-#include "../common/CAssoc.h"
+#include "../common/sphere_library/CSAssoc.h"
 #include "../common/CException.h"
-#include "../common/CFileList.h"
+#include "../common/sphere_library/CSFileList.h"
 #include "../common/CTextConsole.h"
 #include "../common/sphereversion.h"	// sphere version
 #include "../network/network.h"
@@ -345,7 +345,7 @@ void CServer::ListClients( CTextConsole *pConsole ) const
 	pConsole->SysMessage(tmpMsg);
 }
 
-bool CServer::OnConsoleCmd( CString & sText, CTextConsole * pSrc )
+bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CServer::OnConsoleCmd");
 	// RETURN: false = unsuccessful command.
@@ -578,12 +578,12 @@ bool CServer::OnConsoleCmd( CString & sText, CTextConsole * pSrc )
 				{ // test without PAUSECALLSTACK
 					EXC_TRY("Test1");
 					ADDTOCALLSTACK("CServer::TestException1");
-					throw CSphereError( LOGM_DEBUG, 0, "Test Exception #1");
+					throw CSError( LOGM_DEBUG, 0, "Test Exception #1");
 					}
-					catch (const CSphereError& e)
+					catch (const CSError& e)
 					{
 						// the following call will destroy the stack trace on linux due to
-						// a call to CGFile::Close fromn CLog::EventStr.
+						// a call to CSFile::Close fromn CLog::EventStr.
 						g_Log.Event( LOGM_DEBUG, "Caught exception\n" );
 						EXC_CATCH_EXCEPTION(&e);
 					}
@@ -592,9 +592,9 @@ bool CServer::OnConsoleCmd( CString & sText, CTextConsole * pSrc )
 				{ // test with PAUSECALLSTACK
 					EXC_TRY("Test2");
 					ADDTOCALLSTACK("CServer::TestException2");
-					throw CSphereError( LOGM_DEBUG, 0, "Test Exception #2");
+					throw CSError( LOGM_DEBUG, 0, "Test Exception #2");
 					}
-					catch (const CSphereError& e)
+					catch (const CSError& e)
 					{
 						PAUSECALLSTACK;
 						// with pausecallstack, the following call won't be recorded
@@ -604,7 +604,7 @@ bool CServer::OnConsoleCmd( CString & sText, CTextConsole * pSrc )
 					}
 				}
 #else
-				throw CSphereError(LOGL_CRIT, E_FAIL, "This test requires exception debugging enabled");
+				throw CSError(LOGL_CRIT, E_FAIL, "This test requires exception debugging enabled");
 #endif
 			} break;
 		case '%':	// throw simple exception
@@ -624,7 +624,7 @@ bool CServer::OnConsoleCmd( CString & sText, CTextConsole * pSrc )
 			}
 		case '*':	// throw custom exception
 			{
-				throw CSphereError(LOGL_CRIT, (dword)E_FAIL, "Test Exception");
+				throw CSError(LOGL_CRIT, (dword)E_FAIL, "Test Exception");
 			}
 #endif
 		default:
@@ -804,11 +804,11 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 	if ( !pSrc )
 		return;
 
-	CFileText * ftDump = NULL;
+	CSFileText * ftDump = NULL;
 
 	if ( bDump )
 	{
-		ftDump = new CFileText();
+		ftDump = new CSFileText();
 		if ( ! ftDump->Open("profiler_dump.txt", OF_CREATE|OF_TEXT) )
 		{
 			delete ftDump;
@@ -994,7 +994,7 @@ bool CServer::r_LoadVal( CScript &s )
 	return CServerDef::r_LoadVal(s);
 }
 
-bool CServer::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
+bool CServer::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CServer::r_WriteVal");
 	if ( !strnicmp(pszKey, "ACCOUNT.", 8) )
@@ -1141,7 +1141,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 
 	if ( index < 0 )
 	{
-		CString sVal;
+		CSString sVal;
 		CScriptTriggerArgs Args( s.GetArgRaw() );
 		if ( r_Call( pszKey, pSrc, &Args, &sVal ) )
 			return true;
@@ -1239,7 +1239,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 
 		case SV_CONSOLE:
 			{
-				CString z = s.GetArgRaw();
+				CSString z = s.GetArgRaw();
 				OnConsoleCmd(z, pSrc);
 			}
 			break;
@@ -1530,7 +1530,7 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 			case 'D':
 				// dump all the defines to a file.
 				{
-					CFileText File;
+					CSFileText File;
 					if ( ! File.Open( "defs.txt", OF_WRITE|OF_TEXT ))
 						return false;
 
@@ -1731,7 +1731,7 @@ void CServer::OnTick()
 	if ( m_fConsoleTextReadyFlag )
 	{
 		EXC_SET("console input");
-		CString sText = m_sConsoleText;	// make a copy.
+		CSString sText = m_sConsoleText;	// make a copy.
 		m_sConsoleText.Empty();	// done using this.
 		m_fConsoleTextReadyFlag = false; // rady to use again
 		OnConsoleCmd( sText, this );
@@ -1802,7 +1802,7 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 	{
 		EXC_SET( "Connecting to MySQL server" );
 		if (m_hdb.Connect())
-			g_Log.Event( LOGM_NOCONTEXT, "MySQL connected to server: '%s'.\n", g_Cfg.m_sMySqlHost );
+			g_Log.Event( LOGM_NOCONTEXT, "MySQL connected to server: '%s'.\n", g_Cfg.m_sMySqlHost.GetPtr() );
 		else
 		{
 			g_Log.EventError( "Can't connect to MySQL DataBase. Check your ini settings or if the server is working.\n" );

@@ -1,16 +1,16 @@
 /**
-* @file CRand.h
+* @file CSRand.h
 * @brief Wrapper for C++ Mersenne Twister pseudo-random number generator
 */
 
 #pragma once
-#ifndef _INC_CRAND_H
+#ifndef _INC_CSRAND_H
 
 #include <random>
 #include "../datatypes.h"
 
 
-class CRand
+class CSRand
 {
 public:
 	static	int32 genRandInt32(int32 min, int32 max);			// integer number
@@ -19,4 +19,4 @@ public:
 	static	realtype genRandReal64(realtype min, realtype max);
 };
 
-#endif // !_INC_CRAND_H
+#endif // !_INC_CSRAND_H

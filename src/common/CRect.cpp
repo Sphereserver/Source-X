@@ -258,7 +258,7 @@ void CPointBase::MoveN( DIR_TYPE dir, int amount )
 	m_y += (short)(sm_Moves[dir][1] * amount);
 }
 
-bool CPointBase::r_WriteVal( lpctstr pszKey, CString & sVal ) const
+bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 {
 	ADDTOCALLSTACK("CPointBase::r_WriteVal");
 	if ( !strnicmp( pszKey, "STATICS", 7 ) )

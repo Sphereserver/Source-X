@@ -18,7 +18,7 @@
 #include "../game/CScriptProfiler.h"
 #include "../game/CWorld.h"
 #include "../sphere/ProfileTask.h"
-#include "./sphere_library/CString.h"
+#include "./sphere_library/CSString.h"
 #include "CException.h"
 #include "CExpression.h"
 #include "CUID.h"
@@ -281,7 +281,7 @@ bool CScriptTriggerArgs::r_LoadVal( CScript & s )
 	return false;
 }
 
-bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
+bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CScriptTriggerArgs::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -505,7 +505,7 @@ lpctstr const CScriptObj::sm_szLoadKeys[SSC_QTY+1] =
 	NULL
 };
 
-bool CScriptObj::r_Call( lpctstr pszFunction, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CString * psVal, TRIGRET_TYPE * piRet )
+bool CScriptObj::r_Call( lpctstr pszFunction, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * psVal, TRIGRET_TYPE * piRet )
 {
 	ADDTOCALLSTACK("CScriptObj::r_Call");
 	GETNONWHITESPACE( pszFunction );
@@ -668,7 +668,7 @@ bool CScriptObj::r_LoadVal( CScript & s )
 	return false;
 }
 
-static void StringFunction( int iFunc, lpctstr pszKey, CString &sVal )
+static void StringFunction( int iFunc, lpctstr pszKey, CSString &sVal )
 {
 	GETNONWHITESPACE(pszKey);
 	if ( *pszKey == '(' )
@@ -702,7 +702,7 @@ static void StringFunction( int iFunc, lpctstr pszKey, CString &sVal )
 	}
 }
 
-bool CScriptObj::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
+bool CScriptObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CScriptObj::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -730,9 +730,9 @@ bool CScriptObj::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc 
 			sVal.FormatHex( 0x00020 );
 		else if ( dynamic_cast<CScriptTriggerArgs*>(pTmpRef) )
 			sVal.FormatHex( 0x00040 );
-		else if ( dynamic_cast<CFileObj*>(pTmpRef) )
+		else if ( dynamic_cast<CSFileObj*>(pTmpRef) )
 			sVal.FormatHex( 0x00080 );
-		else if ( dynamic_cast<CFileObjContainer*>(pTmpRef) )
+		else if ( dynamic_cast<CSFileObjContainer*>(pTmpRef) )
 			sVal.FormatHex( 0x00100 );
 		else if ( dynamic_cast<CAccount*>(pTmpRef) )
 			sVal.FormatHex( 0x00200 );
@@ -1480,7 +1480,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 
 		case SSV_SHOW:
 			{
-				CString sVal;
+				CSString sVal;
 				if ( ! r_WriteVal( s.GetArgStr(), sVal, pSrc ))
 					return false;
 				tchar * pszMsg = Str_GetTemp();
@@ -1601,7 +1601,7 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 			sm_fBrackets = false;
 			pszResponse[i] = '\0';
 
-			CString sVal;
+			CSString sVal;
 			pszKey = static_cast<lpctstr>(pszResponse) + iBegin + 1;
 
 			EXC_SET("writeval");
@@ -1646,7 +1646,7 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 }
 
 
-TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CString * pResult )
+TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult )
 {
 	ADDTOCALLSTACK("CScriptObj::OnTriggerForLoop");
 	// loop from start here to the ENDFOR
@@ -1659,7 +1659,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 	if ( iType & 8 )		// WHILE
 	{
 		tchar * pszCond;
-		CString pszOrig;
+		CSString pszOrig;
 		TemporaryString pszTemp;
 		int iWhile	= 0;
 
@@ -1705,7 +1705,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 		int i;
 		tchar * ppArgs[3];
 		size_t iQty = Str_ParseCmds( s.GetArgStr(), ppArgs, CountOf(ppArgs), ", " );
-		CString sLoopVar = "_FOR";
+		CSString sLoopVar = "_FOR";
 		
 		switch( iQty )
 		{
@@ -2151,7 +2151,7 @@ lpctstr const CScriptObj::sm_szScriptKeys[SK_QTY+1] =
 
 
 
-TRIGRET_TYPE CScriptObj::OnTriggerRun( CScript &s, TRIGRUN_TYPE trigrun, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CString * pResult )
+TRIGRET_TYPE CScriptObj::OnTriggerRun( CScript &s, TRIGRUN_TYPE trigrun, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult )
 {
 	ADDTOCALLSTACK("CScriptObj::OnTriggerRun");
 	// ARGS:
@@ -2504,7 +2504,7 @@ jump_in:
 					if ( !strnicmp(s.GetKey(), "call", 4 ) )
 					{
 						EXC_SET("call");
-						CString sVal;
+						CSString sVal;
 						tchar * argRaw = s.GetArgRaw();
 						CScriptObj *pRef = this;
 
@@ -2536,8 +2536,8 @@ jump_in:
 								int64 iN2 = pArgs->m_iN2;
 								int64 iN3 = pArgs->m_iN3;
 								CScriptObj *pO1 = pArgs->m_pO1;
-								CString s1 = pArgs->m_s1;
-								CString s1_raw = pArgs->m_s1;
+								CSString s1 = pArgs->m_s1;
+								CSString s1_raw = pArgs->m_s1;
 								pArgs->m_v.SetCount(0);
 								pArgs->Init(z);
 
@@ -2564,7 +2564,7 @@ jump_in:
 					else if ( !strnicmp(s.GetKey(), "FullTrigger", 11 ) )
 					{
 						EXC_SET("FullTrigger");
-						CString sVal;
+						CSString sVal;
 						tchar * piCmd[7];
 						tchar *psTmp = Str_GetTemp();
 						strcpy( psTmp, s.GetArgRaw() );
@@ -2606,8 +2606,8 @@ jump_in:
 								int64 iN2 = pArgs->m_iN2;
 								int64 iN3 = pArgs->m_iN3;
 								CScriptObj *pO1 = pArgs->m_pO1;
-								CString s1 = pArgs->m_s1;
-								CString s1_raw = pArgs->m_s1;
+								CSString s1 = pArgs->m_s1;
+								CSString s1_raw = pArgs->m_s1;
 								pArgs->m_v.SetCount(0);
 								pArgs->Init(z);
 
@@ -2665,7 +2665,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerRunVal( CScript &s, TRIGRUN_TYPE trigrun, CTex
 	// This should be used instead of OnTriggerRun() when pReturn is not used
 	ADDTOCALLSTACK("CScriptObj::OnTriggerRunVal");
 
-	CString sVal;
+	CSString sVal;
 	TRIGRET_TYPE tr = TRIGRET_RET_DEFAULT;
 
 	OnTriggerRun( s, trigrun, pSrc, pArgs, &sVal );
@@ -2680,20 +2680,20 @@ TRIGRET_TYPE CScriptObj::OnTriggerRunVal( CScript &s, TRIGRUN_TYPE trigrun, CTex
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// -CFileObj
+// -CSFileObj
 
 enum FO_TYPE
 {
 	#define ADD(a,b) FO_##a,
-	#include "../tables/CFile_props.tbl"
+	#include "../tables/CSFile_props.tbl"
 	#undef ADD
 	FO_QTY
 };
 
-lpctstr const CFileObj::sm_szLoadKeys[FO_QTY+1] =
+lpctstr const CSFileObj::sm_szLoadKeys[FO_QTY+1] =
 {
 	#define ADD(a,b) b,
-	#include "../tables/CFile_props.tbl"
+	#include "../tables/CSFile_props.tbl"
 	#undef ADD
 	NULL
 };
@@ -2701,28 +2701,28 @@ lpctstr const CFileObj::sm_szLoadKeys[FO_QTY+1] =
 enum FOV_TYPE
 {
 	#define ADD(a,b) FOV_##a,
-	#include "../tables/CFile_functions.tbl"
+	#include "../tables/CSFile_functions.tbl"
 	#undef ADD
 	FOV_QTY
 };
 
-lpctstr const CFileObj::sm_szVerbKeys[FOV_QTY+1] =
+lpctstr const CSFileObj::sm_szVerbKeys[FOV_QTY+1] =
 {
 	#define ADD(a,b) b,
-	#include "../tables/CFile_functions.tbl"
+	#include "../tables/CSFile_functions.tbl"
 	#undef ADD
 	NULL
 };
 
-CFileObj::CFileObj()
+CSFileObj::CSFileObj()
 {
-	sWrite = new CFileText();
+	sWrite = new CSFileText();
 	tBuffer = new tchar [SCRIPT_MAX_LINE_LEN];
-	cgWriteBuffer = new CString();
+	cgWriteBuffer = new CSString();
 	SetDefaultMode();
 }
 
-CFileObj::~CFileObj()
+CSFileObj::~CSFileObj()
 {
 	if (sWrite->IsFileOpen())
 		sWrite->Close();
@@ -2732,16 +2732,16 @@ CFileObj::~CFileObj()
 	delete sWrite;
 }
 
-void CFileObj::SetDefaultMode(void)
+void CSFileObj::SetDefaultMode(void)
 { 
-	ADDTOCALLSTACK("CFileObj::SetDefaultMode");
+	ADDTOCALLSTACK("CSFileObj::SetDefaultMode");
 	bAppend = true; bCreate = false; 
 	bRead = true; bWrite = true; 
 }
 
-tchar * CFileObj::GetReadBuffer(bool bDelete = false)
+tchar * CSFileObj::GetReadBuffer(bool bDelete = false)
 {
-	ADDTOCALLSTACK("CFileObj::GetReadBuffer");
+	ADDTOCALLSTACK("CSFileObj::GetReadBuffer");
 	if ( bDelete )
 		memset(this->tBuffer, 0, SCRIPT_MAX_LINE_LEN);
 	else
@@ -2750,26 +2750,26 @@ tchar * CFileObj::GetReadBuffer(bool bDelete = false)
 	return tBuffer;
 }
 
-CString * CFileObj::GetWriteBuffer(void)
+CSString * CSFileObj::GetWriteBuffer(void)
 {
-	ADDTOCALLSTACK("CFileObj::GetWriteBuffer");
+	ADDTOCALLSTACK("CSFileObj::GetWriteBuffer");
 	if ( !cgWriteBuffer )
-		cgWriteBuffer = new CString();
+		cgWriteBuffer = new CSString();
 
 	cgWriteBuffer->Empty( ( cgWriteBuffer->GetLength() > (SCRIPT_MAX_LINE_LEN/4) ) );
 
 	return cgWriteBuffer;
 }
 
-bool CFileObj::IsInUse()
+bool CSFileObj::IsInUse()
 {
-	ADDTOCALLSTACK("CFileObj::IsInUse");
+	ADDTOCALLSTACK("CSFileObj::IsInUse");
 	return sWrite->IsFileOpen();
 }
 
-void CFileObj::FlushAndClose()
+void CSFileObj::FlushAndClose()
 {
-	ADDTOCALLSTACK("CFileObj::FlushAndClose");
+	ADDTOCALLSTACK("CSFileObj::FlushAndClose");
 	if ( sWrite->IsFileOpen() )
 	{
 		sWrite->Flush();
@@ -2777,19 +2777,19 @@ void CFileObj::FlushAndClose()
 	}
 }
 
-bool CFileObj::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
+bool CSFileObj::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
 	UNREFERENCED_PARAMETER(pszKey);
 	UNREFERENCED_PARAMETER(pRef);
 	return false;
 }
 
-bool CFileObj::OnTick(){ return true; }
-int CFileObj::FixWeirdness(){ return 0; }
+bool CSFileObj::OnTick(){ return true; }
+int CSFileObj::FixWeirdness(){ return 0; }
 
-bool CFileObj::r_LoadVal( CScript & s )
+bool CSFileObj::r_LoadVal( CScript & s )
 {	
-	ADDTOCALLSTACK("CFileObj::r_LoadVal");
+	ADDTOCALLSTACK("CSFileObj::r_LoadVal");
 	EXC_TRY("LoadVal");
 	lpctstr pszKey = s.GetKey();
 
@@ -2846,7 +2846,7 @@ bool CFileObj::r_LoadVal( CScript & s )
 				if ( !s.HasArgs() )
 					return false;
 					
-				CString * ppArgs = this->GetWriteBuffer();
+				CSString * ppArgs = this->GetWriteBuffer();
 				
 				if ( bLine )
 				{
@@ -2891,10 +2891,10 @@ bool CFileObj::r_LoadVal( CScript & s )
 	return false;
 }
 
-bool CFileObj::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
+bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 {
 	UNREFERENCED_PARAMETER(pSrc);
-	ADDTOCALLSTACK("CFileObj::r_WriteVal");
+	ADDTOCALLSTACK("CSFileObj::r_WriteVal");
 	EXC_TRY("WriteVal");
 	ASSERT(pszKey != NULL);
 
@@ -2928,7 +2928,7 @@ bool CFileObj::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 				if ( !( ppCmd && strlen(ppCmd) ))
 					return false;
 
-				CFile * pFileTest = new CFile();
+				CSFile * pFileTest = new CSFile();
 				sVal.FormatVal(pFileTest->Open(ppCmd));
 
 				delete pFileTest;
@@ -2943,7 +2943,7 @@ bool CFileObj::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 				if ( !( ppCmd && strlen(ppCmd) ))
 					return false;
 
-				CFileText * sFileLine = new CFileText();
+				CSFileText * sFileLine = new CSFileText();
 				if ( !sFileLine->Open(ppCmd, OF_READ|OF_TEXT) )
 				{
 					delete sFileLine;
@@ -3126,10 +3126,10 @@ bool CFileObj::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
 }
 
 
-bool CFileObj::r_Verb( CScript & s, CTextConsole * pSrc )
+bool CSFileObj::r_Verb( CScript & s, CTextConsole * pSrc )
 {
 	UNREFERENCED_PARAMETER(pSrc);
-	ADDTOCALLSTACK("CFileObj::r_Verb");
+	ADDTOCALLSTACK("CSFileObj::r_Verb");
 	EXC_TRY("Verb");
 	ASSERT(pSrc);
 
@@ -3176,9 +3176,9 @@ bool CFileObj::r_Verb( CScript & s, CTextConsole * pSrc )
 	return false;
 }
 
-bool CFileObj::FileOpen( lpctstr sPath )
+bool CSFileObj::FileOpen( lpctstr sPath )
 {
-	ADDTOCALLSTACK("CFileObj::FileOpen");
+	ADDTOCALLSTACK("CSFileObj::FileOpen");
 	if ( sWrite->IsFileOpen() )
 		return false;
 
@@ -3203,20 +3203,20 @@ bool CFileObj::FileOpen( lpctstr sPath )
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
-// -CFileObjCollection
+// -CSFileObjCollection
 
 enum CFO_TYPE
 {
 #define ADD(a,b) CFO_##a,
-#include "../tables/CFileObjContainer_props.tbl"
+#include "../tables/CSFileObjContainer_props.tbl"
 #undef ADD
 	CFO_QTY
 };
 
-lpctstr const CFileObjContainer::sm_szLoadKeys[CFO_QTY+1] =
+lpctstr const CSFileObjContainer::sm_szLoadKeys[CFO_QTY+1] =
 {
 #define ADD(a,b) b,
-#include "../tables/CFileObjContainer_props.tbl"
+#include "../tables/CSFileObjContainer_props.tbl"
 #undef ADD
 	NULL
 };
@@ -3224,22 +3224,22 @@ lpctstr const CFileObjContainer::sm_szLoadKeys[CFO_QTY+1] =
 enum CFOV_TYPE
 {
 #define ADD(a,b) CFOV_##a,
-#include "../tables/CFileObjContainer_functions.tbl"
+#include "../tables/CSFileObjContainer_functions.tbl"
 #undef ADD
 	CFOV_QTY
 };
 
-lpctstr const CFileObjContainer::sm_szVerbKeys[CFOV_QTY+1] =
+lpctstr const CSFileObjContainer::sm_szVerbKeys[CFOV_QTY+1] =
 {
 #define ADD(a,b) b,
-#include "../tables/CFileObjContainer_functions.tbl"
+#include "../tables/CSFileObjContainer_functions.tbl"
 #undef ADD
 	NULL
 };
 
-void CFileObjContainer::ResizeContainer( size_t iNewRange )
+void CSFileObjContainer::ResizeContainer( size_t iNewRange )
 {
-	ADDTOCALLSTACK("CFileObjContainer::ResizeContainer");
+	ADDTOCALLSTACK("CSFileObjContainer::ResizeContainer");
 	if ( iNewRange == sFileList.size() )
 	{
 		return;
@@ -3259,7 +3259,7 @@ void CFileObjContainer::ResizeContainer( size_t iNewRange )
 			return;
 		}
 
-		CFileObj * pObjHolder = NULL;
+		CSFileObj * pObjHolder = NULL;
 
 		for ( size_t i = (sFileList.size() - 1); howMuch > 0; --howMuch, --i )
 		{
@@ -3276,39 +3276,39 @@ void CFileObjContainer::ResizeContainer( size_t iNewRange )
 	{
 		for ( int i = 0; i < howMuch; ++i )
 		{
-			sFileList.push_back(new CFileObj());
+			sFileList.push_back(new CSFileObj());
 		}
 	}
 }
 
-CFileObjContainer::CFileObjContainer()
+CSFileObjContainer::CSFileObjContainer()
 {
 	iGlobalTimeout = iCurrentTick = 0;
 	SetFilenumber(0);
 }
 
-CFileObjContainer::~CFileObjContainer()
+CSFileObjContainer::~CSFileObjContainer()
 {
 	ResizeContainer(0);
 	sFileList.clear();
 }
 
-int CFileObjContainer::GetFilenumber()
+int CSFileObjContainer::GetFilenumber()
 {
-	ADDTOCALLSTACK("CFileObjContainer::GetFilenumber");
+	ADDTOCALLSTACK("CSFileObjContainer::GetFilenumber");
 	return iFilenumber;
 }
 
-void CFileObjContainer::SetFilenumber( int iHowMuch )
+void CSFileObjContainer::SetFilenumber( int iHowMuch )
 {
-	ADDTOCALLSTACK("CFileObjContainer::SetFilenumber");
+	ADDTOCALLSTACK("CSFileObjContainer::SetFilenumber");
 	ResizeContainer(iHowMuch);
 	iFilenumber = iHowMuch;
 }
 
-bool CFileObjContainer::OnTick()
+bool CSFileObjContainer::OnTick()
 {
-	ADDTOCALLSTACK("CFileObjContainer::OnTick");
+	ADDTOCALLSTACK("CSFileObjContainer::OnTick");
 	EXC_TRY("Tick");
 
 	if ( !iGlobalTimeout )
@@ -3320,7 +3320,7 @@ bool CFileObjContainer::OnTick()
 	{
 		iCurrentTick = 0;
 
-		for ( std::vector<CFileObj *>::iterator i = sFileList.begin(); i != sFileList.end(); ++i )
+		for ( std::vector<CSFileObj *>::iterator i = sFileList.begin(); i != sFileList.end(); ++i )
 		{
 			if ( !(*i)->OnTick() )
 			{
@@ -3337,21 +3337,21 @@ bool CFileObjContainer::OnTick()
 	return false;
 }
 
-int CFileObjContainer::FixWeirdness()
+int CSFileObjContainer::FixWeirdness()
 {
-	ADDTOCALLSTACK("CFileObjContainer::FixWeirdness");
+	ADDTOCALLSTACK("CSFileObjContainer::FixWeirdness");
 	return 0;
 }
 
-bool CFileObjContainer::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
+bool CSFileObjContainer::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
-	ADDTOCALLSTACK("CFileObjContainer::r_GetRef");
+	ADDTOCALLSTACK("CSFileObjContainer::r_GetRef");
 	if ( !strnicmp("FIRSTUSED.",pszKey,10) )
 	{
 		pszKey += 10; 
 
-		CFileObj * pFirstUsed = NULL;
-		for ( std::vector<CFileObj *>::iterator i = sFileList.begin(); i != sFileList.end(); ++i )
+		CSFileObj * pFirstUsed = NULL;
+		for ( std::vector<CSFileObj *>::iterator i = sFileList.begin(); i != sFileList.end(); ++i )
 		{
 			if ( (*i)->IsInUse() )
 			{
@@ -3374,7 +3374,7 @@ bool CFileObjContainer::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 		if ( nNumber >= sFileList.size() )
 			return false;
 
-		CFileObj * pFile = sFileList.at(nNumber);
+		CSFileObj * pFile = sFileList.at(nNumber);
 
 		if ( pFile != NULL ) 
 		{ 
@@ -3386,9 +3386,9 @@ bool CFileObjContainer::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	return false;
 }
 
-bool CFileObjContainer::r_LoadVal( CScript & s )
+bool CSFileObjContainer::r_LoadVal( CScript & s )
 {
-	ADDTOCALLSTACK("CFileObjContainer::r_LoadVal");
+	ADDTOCALLSTACK("CSFileObjContainer::r_LoadVal");
 	EXC_TRY("LoadVal");
 	lpctstr pszKey = s.GetKey();
 
@@ -3417,17 +3417,17 @@ bool CFileObjContainer::r_LoadVal( CScript & s )
 	return false;
 }
 
-bool CFileObjContainer::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
+bool CSFileObjContainer::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 {
-	ADDTOCALLSTACK("CFileObjContainer::r_WriteVal");
+	ADDTOCALLSTACK("CSFileObjContainer::r_WriteVal");
 	EXC_TRY("WriteVal");
 
 	if ( !strnicmp("FIRSTUSED.",pszKey,10) )
 	{
 		pszKey += 10; 
 
-		CFileObj * pFirstUsed = NULL;
-		for ( std::vector<CFileObj *>::iterator i = sFileList.begin(); i != sFileList.end(); ++i )
+		CSFileObj * pFirstUsed = NULL;
+		for ( std::vector<CSFileObj *>::iterator i = sFileList.begin(); i != sFileList.end(); ++i )
 		{
 			if ( (*i)->IsInUse() )
 			{
@@ -3454,7 +3454,7 @@ bool CFileObjContainer::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole 
 		if ( nNumber >= sFileList.size() )
 			return false;
 
-		CFileObj * pFile = sFileList.at(nNumber);
+		CSFileObj * pFile = sFileList.at(nNumber);
 
 		if ( pFile != NULL ) 
 		{
@@ -3489,9 +3489,9 @@ bool CFileObjContainer::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole 
 	return false;
 }
 
-bool CFileObjContainer::r_Verb( CScript & s, CTextConsole * pSrc )
+bool CSFileObjContainer::r_Verb( CScript & s, CTextConsole * pSrc )
 {
-	ADDTOCALLSTACK("CFileObjContainer::r_Verb");
+	ADDTOCALLSTACK("CSFileObjContainer::r_Verb");
 	EXC_TRY("Verb");
 	ASSERT(pSrc);
 
@@ -3501,8 +3501,8 @@ bool CFileObjContainer::r_Verb( CScript & s, CTextConsole * pSrc )
 	{
 		pszKey += 10; 
 
-		CFileObj * pFirstUsed = NULL;
-		for ( std::vector<CFileObj *>::iterator i = sFileList.begin(); i != sFileList.end(); ++i )
+		CSFileObj * pFirstUsed = NULL;
+		for ( std::vector<CSFileObj *>::iterator i = sFileList.begin(); i != sFileList.end(); ++i )
 		{
 			if ( (*i)->IsInUse() )
 			{
@@ -3531,7 +3531,7 @@ bool CFileObjContainer::r_Verb( CScript & s, CTextConsole * pSrc )
 			{
 				SKIP_SEPARATORS(pszKey);
 
-				CFileObj * pFile = sFileList.at(nNumber);
+				CSFileObj * pFile = sFileList.at(nNumber);
 
 				if ( pFile != NULL ) 
 				{ 
@@ -3562,11 +3562,11 @@ bool CFileObjContainer::r_Verb( CScript & s, CTextConsole * pSrc )
 				if ( nNumber >= sFileList.size() )
 					return false;
 
-				CFileObj * pObjVerb = sFileList.at(nNumber);
+				CSFileObj * pObjVerb = sFileList.at(nNumber);
 				if ( bResetObject )
 				{
 					delete pObjVerb;
-					sFileList.at(nNumber) = new CFileObj();
+					sFileList.at(nNumber) = new CSFileObj();
 				} 
 				else
 				{

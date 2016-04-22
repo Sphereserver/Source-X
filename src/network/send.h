@@ -1175,11 +1175,11 @@ class PacketGumpDialog : public PacketSend
 {
 public:
 	PacketGumpDialog(int x, int y, CObjBase* object, dword context);
-	void writeControls(const CClient* target, const CString* controls, size_t controlCount, const CString* texts, size_t textCount);
+	void writeControls(const CClient* target, const CSString* controls, size_t controlCount, const CSString* texts, size_t textCount);
 
 protected:
-	void writeCompressedControls(const CString* controls, size_t controlCount, const CString* texts, size_t textCount);
-	void writeStandardControls(const CString* controls, size_t controlCount, const CString* texts, size_t textCount);
+	void writeCompressedControls(const CSString* controls, size_t controlCount, const CSString* texts, size_t textCount);
+	void writeStandardControls(const CSString* controls, size_t controlCount, const CSString* texts, size_t textCount);
 };
 
 /***************************************************************************
@@ -1679,7 +1679,7 @@ protected:
 	int m_entryCount;
 
 public:
-	PacketPropertyList(const CObjBase* object, dword version, const CGObArray<CClientTooltip*>* data);
+	PacketPropertyList(const CObjBase* object, dword version, const CSObjArray<CClientTooltip*>* data);
 	PacketPropertyList(const CClient* target, const PacketPropertyList* other);
 	virtual bool onSend(const CClient* client);
 

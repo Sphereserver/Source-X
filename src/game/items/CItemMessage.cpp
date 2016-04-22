@@ -69,7 +69,7 @@ bool CItemMessage::r_LoadVal(CScript &s)
     return false;
 }
 
-bool CItemMessage::r_WriteVal(lpctstr pszKey, CString &sVal, CTextConsole *pSrc)
+bool CItemMessage::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc)
 {
     ADDTOCALLSTACK("CItemMessage::r_WriteVal");
     EXC_TRY("WriteVal");
@@ -184,11 +184,11 @@ void CItemMessage::SetPageText( size_t iPage, lpctstr pszText )
 {
     if ( pszText == NULL )
         return;
-    m_sBodyLines.SetAtGrow( iPage, new CString( pszText ));
+    m_sBodyLines.SetAtGrow( iPage, new CSString( pszText ));
 }
 void CItemMessage::AddPageText( lpctstr pszText )
 {
-    m_sBodyLines.Add( new CString( pszText ));
+    m_sBodyLines.Add( new CSString( pszText ));
 }
 
 void CItemMessage::UnLoadSystemPages()

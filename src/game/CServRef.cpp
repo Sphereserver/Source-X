@@ -105,7 +105,7 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 				d = usage.ru_idrss;
 			else
 			{
-				CFileText inf;
+				CSFileText inf;
 				tchar * buf = Str_GetTemp(), * head;
 
 				sprintf(buf, "/proc/%d/status", getpid());
@@ -368,7 +368,7 @@ bool CServerDef::r_LoadVal( CScript & s )
 	return false;
 }
 
-bool CServerDef::r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc )
+bool CServerDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CServerDef::r_WriteVal");
 	EXC_TRY("WriteVal");

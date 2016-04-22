@@ -7,11 +7,11 @@
 #ifndef _INC_CACHEABLESCRIPTFILE_H
 #define _INC_CACHEABLESCRIPTFILE_H
 
-#include "./sphere_library/CFile.h"
+#include "./sphere_library/CSFile.h"
 #include <string>
 
 
-class CacheableScriptFile : public CFileText
+class CacheableScriptFile : public CSFileText
 {
 protected:
 	virtual bool OpenBase(void *pExtra);

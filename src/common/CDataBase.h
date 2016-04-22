@@ -44,7 +44,7 @@ public:
 	bool __cdecl queryf(CVarDefMap & mapQueryResult, char *fmt, ...) __printfargs(3,4);
 	bool exec(const char *query);			//	executes query (pretty faster) for ALTER, UPDATE, INSERT, DELETE, ...
 	bool __cdecl execf(char *fmt, ...) __printfargs(2,3);
-	void addQueryResult(CString & theFunction, CScriptTriggerArgs * theResult);
+	void addQueryResult(CSString & theFunction, CScriptTriggerArgs * theResult);
 
 	//	set / get / info methods
 	bool isConnected();
@@ -52,7 +52,7 @@ public:
 
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc );
+	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
 
 	lpctstr GetName() const
@@ -66,7 +66,7 @@ public:
 	static lpctstr const sm_szVerbKeys[];
 
 private:
-	typedef std::pair<CString, CScriptTriggerArgs *> FunctionArgsPair_t;
+	typedef std::pair<CSString, CScriptTriggerArgs *> FunctionArgsPair_t;
 	typedef std::queue<FunctionArgsPair_t> QueueFunction_t;
 
 protected:

@@ -1,5 +1,5 @@
 
-#include "../common/sphere_library/CString.h"
+#include "../common/sphere_library/CSString.h"
 #include "../common/spherecom.h"
 #include "../game/CScriptProfiler.h"
 #include "ProfileData.h"

@@ -3,8 +3,8 @@
 #ifndef _INC_CGMPAGE_H
 #define _INC_CGMPAGE_H
 
-#include "../common/sphere_library/CArray.h"
-#include "../common/sphere_library/CString.h"
+#include "../common/sphere_library/CSArray.h"
+#include "../common/sphere_library/CSString.h"
 #include "../common/CScriptObj.h"
 #include "../common/CRect.h"
 #include "../CServTime.h"
@@ -13,15 +13,15 @@
 
 class CClient;	//fixme
 //class CAccountRef;
-class CGMPage : public CGObListRec, public CScriptObj
+class CGMPage : public CSObjListRec, public CScriptObj
 {
 	// RES_GMPAGE
 	// ONly one page allowed per account at a time.
 	static lpctstr const sm_szLoadKeys[];
 private:
-	CString m_sAccount;	// The account that paged me.
+	CSString m_sAccount;	// The account that paged me.
 	CClient * m_pGMClient;	// assigned to a GM
-	CString m_sReason;		// Players Description of reason for call.
+	CSString m_sReason;		// Players Description of reason for call.
 
 public:
 	static const char *m_sClassName;
@@ -48,7 +48,7 @@ public:
 	void SetGMHandler( CClient * pClient );
 	int64 GetAge() const;
 
-	bool r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc );
 	void r_Write( CScript & s ) const;
 	bool r_LoadVal( CScript & s );
 

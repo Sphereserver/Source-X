@@ -4,26 +4,26 @@
 #define _INC_CCHATCHANNEL_H
 
 #include "../common/sphereproto.h"
-#include "../common/sphere_library/CArray.h"
-#include "../common/sphere_library/CString.h"
+#include "../common/sphere_library/CSArray.h"
+#include "../common/sphere_library/CSString.h"
 
 
 class CChatChanMember;
 
-class CChatChannel : public CGObListRec
+class CChatChannel : public CSObjListRec
 {
     // a number of clients can be attached to this chat channel.
 private:
     friend class CChatChanMember;
     friend class CChat;
-    CString m_sName;
-    CString m_sPassword;
+    CSString m_sName;
+    CSString m_sPassword;
     bool m_fVoiceDefault;	// give others voice by default.
 public:
     static const char *m_sClassName;
-    CGObArray< CString * > m_NoVoices;// Current list of channel members with no voice
-    CGObArray< CString * > m_Moderators;// Current list of channel's moderators (may or may not be currently in the channel)
-    CGPtrTypeArray< CChatChanMember* > m_Members;	// Current list of members in this channel
+    CSObjArray< CSString * > m_NoVoices;// Current list of channel members with no voice
+    CSObjArray< CSString * > m_Moderators;// Current list of channel's moderators (may or may not be currently in the channel)
+    CSPtrTypeArray< CChatChanMember* > m_Members;	// Current list of members in this channel
 private:
     void SetModerator(lpctstr pszName, bool fFlag = true);
     void SetVoice(lpctstr pszName, bool fFlag = true);

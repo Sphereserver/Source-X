@@ -75,7 +75,7 @@ void CBaseBaseDef::UnLink()
 	CResourceLink::UnLink();
 }
 
-bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
+bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 {
 	UNREFERENCED_PARAMETER(pSrc);
 	ADDTOCALLSTACK("CBaseBaseDef::r_WriteVal");

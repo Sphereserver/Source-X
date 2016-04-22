@@ -3,8 +3,8 @@
 #ifndef _INC_CPARTY_H
 #define _INC_CPARTY_H
 
-#include "../common/sphere_library/CString.h"
-#include "../common/sphere_library/CArray.h"
+#include "../common/sphere_library/CSString.h"
+#include "../common/sphere_library/CSArray.h"
 #include "../common/CRect.h"
 #include "../common/CScriptObj.h"
 #include "../common/CVarDefMap.h"
@@ -15,7 +15,7 @@
 
 class PacketSend;
 
-class CPartyDef : public CGObListRec, public CScriptObj
+class CPartyDef : public CSObjListRec, public CScriptObj
 {
 	// a list of characters in the party.
 #define MAX_CHAR_IN_PARTY 10
@@ -27,10 +27,10 @@ public:
 	static lpctstr const sm_szLoadKeysM[];
 private:
 	CCharRefArray m_Chars;
-	CString m_sName;
+	CSString m_sName;
 	CVarDefMap m_TagDefs;
 	CVarDefMap m_BaseDefs;		// New Variable storage system
-	CString m_pSpeechFunction;
+	CSString m_pSpeechFunction;
 
 public:
 	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false ) const;
@@ -87,7 +87,7 @@ public:
 
 	lpctstr GetName() const { return static_cast<lpctstr>(m_sName); }
 	bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
-	bool r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc );
 	bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
 	bool r_LoadVal( CScript & s );
 	bool r_Load( CScript & s );

@@ -8,7 +8,7 @@
 #define _INC_CSCRIPT_H
 
 #include "common.h"
-#include "./sphere_library/CMemBlock.h"
+#include "./sphere_library/CSMemBlock.h"
 #include "CacheableScriptFile.h"
 
 #define SPHERE_SCRIPT		".scp"
@@ -91,7 +91,7 @@ class CScriptKeyAlloc : public CScriptKey
 {
 	// Dynamic allocated script key.
 protected:
-	CMemLenBlock m_Mem;	// the buffer to hold data read.
+	CSMemLenBlock m_Mem;	// the buffer to hold data read.
 
 protected:
 	tchar * GetKeyBufferRaw( size_t iSize );
@@ -115,7 +115,7 @@ private:
 };
 
 #ifdef _NOSCRIPTCACHE
- #define PhysicalScriptFile CFileText
+ #define PhysicalScriptFile CSFileText
 #else
  #define PhysicalScriptFile CacheableScriptFile
 #endif

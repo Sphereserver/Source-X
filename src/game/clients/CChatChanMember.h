@@ -3,8 +3,8 @@
 #ifndef _INC_CCHATCHANMEMBER_H
 #define _INC_CCHATCHANMEMBER_H
 
-#include "../common/sphere_library/CArray.h"
-#include "../common/sphere_library/CString.h"
+#include "../common/sphere_library/CSArray.h"
+#include "../common/sphere_library/CSString.h"
 #include "../common/sphereproto.h"
 
 
@@ -20,7 +20,7 @@ private:
     CChatChannel * m_pChannel;	// I can only be a member of one chan at a time.
 public:
     static const char *m_sClassName;
-    CGObArray< CString * > m_IgnoredMembers;	// Player's list of ignored members
+    CSObjArray< CSString * > m_IgnoredMembers;	// Player's list of ignored members
 private:
     friend class CChatChannel;
     friend class CChat;

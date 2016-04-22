@@ -7,13 +7,13 @@
 #ifndef _INC_CRESOURCE_H
 #define _INC_CRESOURCE_H
 
-#include "../common/CAssoc.h"
+#include "../common/sphere_library/CSAssoc.h"
+#include "../common/sphere_library/CSArray.h"
 #include "../common/CExpression.h"
 #include "../common/CSphereMap.h"
 #include "../common/CResourceBase.h"
 #include "../common/CRegion.h"
 #include "../common/sphereproto.h"
-#include "../common/sphere_library/CArray.h"
 
 
 class CAccount;
@@ -229,7 +229,7 @@ struct CValueCurveDef
 	// for a range from 0.0 to 100.0 (1000)
 	// May be a list of probabilties from 0 skill to 100.0% skill.
 public:
-	CGTypedArray<int,int> m_aiValues;		// 0 to 100.0 skill levels
+	CSTypedArray<int,int> m_aiValues;		// 0 to 100.0 skill levels
 
 public:
 	void Init()
@@ -287,7 +287,7 @@ private:
 
 public:
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc = NULL );
+	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = NULL );
 	TRIGRET_TYPE OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
 };
 
@@ -319,12 +319,12 @@ class CWebPageDef : public CResourceLink
 	static lpctstr const sm_szPageExt[];
 private:
 	WEBPAGE_TYPE m_type;				// What basic format of file is this ? 0=text
-	CString m_sSrcFilePath;	// source template for the generated web page.
+	CSString m_sSrcFilePath;	// source template for the generated web page.
 private:
 	PLEVEL_TYPE m_privlevel;	// What priv level to see this page ?
 
 	// For files that are being translated and updated.
-	CString m_sDstFilePath;	// where is the page served from ?
+	CSString m_sDstFilePath;	// where is the page served from ?
 	int  m_iUpdatePeriod;	// How often to update the web page. 0 = never.
 	int  m_iUpdateLog;		// create a daily log of the page.
 	CServTime  m_timeNextUpdate;
@@ -334,7 +334,7 @@ public:
 	static int sm_iListIndex;
 	static lpctstr const sm_szTrigName[WTRIG_QTY+1];
 private:
-	int ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CGTime * pdateLastMod );
+	int ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime * pdateLastMod );
 public:
 	lpctstr GetName() const
 	{
@@ -350,13 +350,13 @@ public:
 	bool ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * pPostData, size_t stContentLength );
 
 	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc = NULL );
+	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = NULL );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );	// some command on this object as a target
 
 	void WebPageLog();
 	bool WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * pSrc );
 
-	static bool ServPage( CClient * pClient, tchar * pszPage, CGTime * pdateLastMod );
+	static bool ServPage( CClient * pClient, tchar * pszPage, CSTime * pdateLastMod );
 
 public:
 	explicit CWebPageDef( RESOURCE_ID id );
@@ -416,15 +416,15 @@ private:
 #define SPELLFLAG_CURSE				0x20000000	//Curses just like Weaken,Purge Magic,Curse,etc.
 #define SPELLFLAG_HEAL				0x40000000	// Healing spell
 
-	CString m_sName;	// spell name
+	CSString m_sName;	// spell name
 
 public:
 	static const char *m_sClassName;
 	static lpctstr const sm_szTrigName[SPTRIG_QTY+1];
 	static lpctstr const sm_szLoadKeys[];
-	CString m_sTargetPrompt;	// targetting prompt. (if needed)
+	CSString m_sTargetPrompt;	// targetting prompt. (if needed)
 	SOUND_TYPE m_sound;			// What noise does it make when done.
-	CString m_sRunes;			// Letter Runes for Words of power.
+	CSString m_sRunes;			// Letter Runes for Words of power.
 	CResourceQtyArray m_Reags;	// What reagents does it take ?
 	CResourceQtyArray m_SkillReq;	// What skills/unused reagents does it need to cast.
 	ITEMID_TYPE m_idSpell;		// The rune graphic for this.
@@ -458,12 +458,12 @@ private:
 public:
 	lpctstr GetName() const { return( m_sName ); }
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc );
 
 	bool GetPrimarySkill( int * piSkill = NULL, int * piQty = NULL ) const;
 };
 
-class CRandGroupDef	: public CResourceLink // A spawn group.
+class CSRandGroupDef	: public CResourceLink // A spawn group.
 {
 	// RES_SPAWN or RES_REGIONTYPE
 private:
@@ -474,26 +474,26 @@ private:
 	int CalcTotalWeight();
 public:
 	static const char *m_sClassName;
-	explicit CRandGroupDef( RESOURCE_ID rid ) :
+	explicit CSRandGroupDef( RESOURCE_ID rid ) :
 		CResourceLink( rid )
 	{
 		m_iTotalWeight = 0;
 	}
-	virtual ~CRandGroupDef()
+	virtual ~CSRandGroupDef()
 	{
 	}
 
-	CString	m_sCategory;
-	CString	m_sSubsection;
-	CString	m_sDescription;
+	CSString	m_sCategory;
+	CSString	m_sSubsection;
+	CSString	m_sDescription;
 
 private:
-	CRandGroupDef(const CRandGroupDef& copy);
-	CRandGroupDef& operator=(const CRandGroupDef& other);
+	CSRandGroupDef(const CSRandGroupDef& copy);
+	CSRandGroupDef& operator=(const CSRandGroupDef& other);
 
 public:
 	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( lpctstr pKey, CString &sVal, CTextConsole * pSrc = NULL );
+	virtual bool r_WriteVal( lpctstr pKey, CSString &sVal, CTextConsole * pSrc = NULL );
 	size_t GetRandMemberIndex( CChar * pCharSrc = NULL, bool bTrigger = true ) const;
 	CResourceQty GetMember( size_t i ) const
 	{
@@ -531,7 +531,7 @@ class CSkillClassDef : public CResourceLink // For skill def table
 	static lpctstr const sm_szLoadKeys[];
 public:
 	static const char *m_sClassName;
-	CString m_sName;	// The name of this skill class.
+	CSString m_sName;	// The name of this skill class.
 
 	word m_StatSumMax;
 	dword m_SkillSumMax;
@@ -559,7 +559,7 @@ private:
 public:
 	lpctstr GetName() const { return( m_sName ); }
 
-	bool r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc );
 	bool r_LoadVal( CScript & s );
 };
 
@@ -604,11 +604,11 @@ struct CSkillDef : public CResourceLink // For skill def table
 	static lpctstr const sm_szTrigName[SKTRIG_QTY+1];
 	static lpctstr const sm_szLoadKeys[];
 private:
-	CString m_sKey;	// script key word for skill.
+	CSString m_sKey;	// script key word for skill.
 public:
-	CString m_sTitle;   // title one gets if it's your specialty.
-	CString m_sName;    // fancy skill name
-	CString m_sTargetPrompt;    // targetting prompt. (if needed)
+	CSString m_sTitle;   // title one gets if it's your specialty.
+	CSString m_sName;    // fancy skill name
+	CSString m_sTargetPrompt;    // targetting prompt. (if needed)
 
 	CValueCurveDef m_Delay;     //	The base delay for the skill. (tenth of seconds)
 	CValueCurveDef m_Effect;    // depends on skill
@@ -644,10 +644,10 @@ public:
 
 	lpctstr GetName() const { return( GetKey()); }
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc );
 };
 
-class CSkillKeySortArray : public CGObSortArray< CValStr*, lpctstr >
+class CSkillKeySortArray : public CSObjSortArray< CValStr*, lpctstr >
 {
 public:
 	int CompareKey( lpctstr pszKey, CValStr * pVal, bool fNoSpaces ) const
@@ -666,7 +666,7 @@ private:
 	CSkillKeySortArray& operator=(const CSkillKeySortArray& other);
 };
 
-struct CMultiDefArray : public CGObSortArray< CSphereMulti*, MULTI_TYPE >
+struct CMultiDefArray : public CSObjSortArray< CSphereMulti*, MULTI_TYPE >
 {
 	// store the static components of a IT_MULTI
 	// Sorted array
@@ -695,8 +695,8 @@ public:
 	int	 m_iSectorSleepMask;	// The mask for how long sectors will sleep.
 	bool m_fUseMapDiffs;			// Whether or not to use map diff files.
 
-	CString m_sWorldBaseDir;	// save\" = world files go here.
-	CString m_sAcctBaseDir;	// Where do the account files go/come from ?
+	CSString m_sWorldBaseDir;	// save\" = world files go here.
+	CSString m_sAcctBaseDir;	// Where do the account files go/come from ?
 
 	bool m_fSecure;				// Secure mode. (will trap exceptions)
 	int  m_iFreezeRestartTime;	// # seconds before restarting.
@@ -838,29 +838,29 @@ public:
 	int	m_iDistanceWhisper;
 	int m_iDistanceTalk;
 
-	CString	m_sSpeechSelf;
-	CString	m_sSpeechPet;
-	CString	m_sSpeechOther;
-	CString	m_sCommandTrigger;
+	CSString	m_sSpeechSelf;
+	CSString	m_sSpeechPet;
+	CSString	m_sSpeechOther;
+	CSString	m_sCommandTrigger;
 
 #ifdef _DUMPSUPPORT
-	CString	m_sDumpAccPackets;
+	CSString	m_sDumpAccPackets;
 #endif
 
-	CString             m_sEventsPet;
+	CSString             m_sEventsPet;
 	CResourceRefArray   m_pEventsPetLink;
 
-	CString             m_sEventsPlayer;
+	CSString             m_sEventsPlayer;
 	CResourceRefArray   m_pEventsPlayerLink;
 
-	CString             m_sEventsRegion;
+	CSString             m_sEventsRegion;
 	CResourceRefArray   m_pEventsRegionLink;
 
-	CString             m_sEventsItem;
+	CSString             m_sEventsItem;
 	CResourceRefArray   m_iEventsItemLink;
 
 	// Third Party Tools
-	CString	m_sStripPath;
+	CSString	m_sStripPath;
 	bool    m_fCUOStatus;
 	bool    m_fUOGStatus;
 
@@ -962,10 +962,10 @@ public:
 	//	MySQL features
 	bool    m_bMySql;
 	bool    m_bMySqlTicks;
-	CString	m_sMySqlHost;
-	CString	m_sMySqlUser;
-	CString	m_sMySqlPass;
-	CString	m_sMySqlDB;
+	CSString	m_sMySqlHost;
+	CSString	m_sMySqlUser;
+	CSString	m_sMySqlPass;
+	CSString	m_sMySqlDB;
 
 	// network settings
 #ifdef _MTNETWORK
@@ -996,7 +996,7 @@ public:
 	int     m_iRegenRate[STAT_QTY];
 	int     m_iTimerCall;
 	bool    m_bAllowLightOverride;
-	CString m_sZeroPoint;
+	CSString m_sZeroPoint;
 	bool    m_bAllowBuySellAgent;
 
 	bool    m_bAllowNewbTransfer;
@@ -1014,25 +1014,25 @@ public:
 public:
 	CResourceScript m_scpTables;
 
-	CStringSortArray m_ResourceList;    // Sections lists
+	CSStringSortArray m_ResourceList;    // Sections lists
 
-	CStringSortArray      m_Obscene;    // Bad Names/Words etc.
-	CGObArray< CString* > m_Fame;       // fame titles (fame.famous)
-	CGObArray< CString* > m_Karma;      // karma titles (karma.wicked)
-	CGObArray< CString* > m_Runes;      // Words of power. (A-Z)
+	CSStringSortArray      m_Obscene;    // Bad Names/Words etc.
+	CSObjArray< CSString* > m_Fame;       // fame titles (fame.famous)
+	CSObjArray< CSString* > m_Karma;      // karma titles (karma.wicked)
+	CSObjArray< CSString* > m_Runes;      // Words of power. (A-Z)
 
-	CGTypedArray< int, int > m_NotoKarmaLevels; // karma levels for noto titles
-	CGTypedArray< int, int > m_NotoFameLevels;  // fame levels for noto titles
-	CGObArray< CString* >    m_NotoTitles;      // Noto titles.
+	CSTypedArray< int, int > m_NotoKarmaLevels; // karma levels for noto titles
+	CSTypedArray< int, int > m_NotoFameLevels;  // fame levels for noto titles
+	CSObjArray< CSString* >    m_NotoTitles;      // Noto titles.
 
 	CMultiDefArray m_MultiDefs;	// read from the MUL files. Cached here on demand.
 
 	CObNameSortArray             m_SkillNameDefs;   // const CSkillDef* Name sorted
-	CGPtrTypeArray< CSkillDef* > m_SkillIndexDefs;	 // Defined Skills indexed by number
-	CGObArray< CSpellDef* >      m_SpellDefs;	     // Defined Spells
-	CGPtrTypeArray< CSpellDef* > m_SpellDefs_Sorted; // Defined Spells, in skill order
+	CSPtrTypeArray< CSkillDef* > m_SkillIndexDefs;	 // Defined Skills indexed by number
+	CSObjArray< CSpellDef* >      m_SpellDefs;	     // Defined Spells
+	CSPtrTypeArray< CSpellDef* > m_SpellDefs_Sorted; // Defined Spells, in skill order
 
-	CStringSortArray m_PrivCommands[PLEVEL_QTY];     // what command are allowed for a priv level?
+	CSStringSortArray m_PrivCommands[PLEVEL_QTY];     // what command are allowed for a priv level?
 
 public:
 	CObNameSortArray m_Servers;     // Servers list. we act like the login server with this.
@@ -1040,9 +1040,9 @@ public:
 	CRegionLinks m_RegionDefs;
 
 	// static definition stuff from *TABLE.SCP mostly.
-	CGObArray< const CStartLoc* > m_StartDefs;  // Start points list
+	CSObjArray< const CStartLoc* > m_StartDefs;  // Start points list
 	CValueCurveDef m_StatAdv[STAT_BASE_QTY];    // "skill curve"
-	CGTypedArray<CPointBase,CPointBase&> m_MoonGates;// The array of moongates.
+	CSTypedArray<CPointBase,CPointBase&> m_MoonGates;// The array of moongates.
 
 	CResourceHashArray m_WebPages;	// These can be linked back to the script.
 
@@ -1059,7 +1059,7 @@ private:
 
 public:
 	bool r_LoadVal( CScript &s );
-	bool r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc );
 	bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 
 	bool LoadIni( bool fTest );
@@ -1204,7 +1204,7 @@ public:
 	size_t GumpAddText( lpctstr pszText );		// add text to the text section, return insertion index
 	bool r_Verb( CScript &s, CTextConsole * pSrc );
 	bool r_LoadVal( CScript & s );
-	bool r_WriteVal( lpctstr pszKey, CString &sVal, CTextConsole * pSrc );
+	bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc );
 
 public:
 	explicit CDialogDef( RESOURCE_ID rid );
@@ -1217,8 +1217,8 @@ private:
 public:	
 	// temporary placeholders - valid only during dialog setup
 	CObjBase *	m_pObj;
-	CString	m_sControls[1024];
-	CString	m_sText[512];
+	CSString	m_sControls[1024];
+	CSString	m_sText[512];
 	size_t		m_iTexts;
 	size_t		m_iControls;
 	int			m_x;

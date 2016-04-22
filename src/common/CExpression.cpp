@@ -294,8 +294,8 @@ int32 Calc_GetRandVal( int32 iQty )
 	if ( iQty <= 0 )
 		return 0;
 	if ( iQty >= INT32_MAX )
-		return ( MulDivLL(CRand::genRandInt32(0, iQty), (uint)iQty, INT32_MAX ) );
-	return CRand::genRandInt32(0, iQty);
+		return ( MulDivLL(CSRand::genRandInt32(0, iQty), (uint)iQty, INT32_MAX ) );
+	return CSRand::genRandInt32(0, iQty);
 }
 
 int32 Calc_GetRandVal2( int32 iMin, int32 iMax )
@@ -306,7 +306,7 @@ int32 Calc_GetRandVal2( int32 iMin, int32 iMax )
 		iMin = iMax;
 		iMax = tmp;
 	}
-	return CRand::genRandInt32(iMin, iMax);
+	return CSRand::genRandInt32(iMin, iMax);
 }
 
 int64 Calc_GetRandLLVal( int64 iQty )
@@ -314,8 +314,8 @@ int64 Calc_GetRandLLVal( int64 iQty )
 	if ( iQty <= 0 )
 		return 0;
 	if ( iQty >= INT64_MAX )
-		return ( MulDivLL(CRand::genRandInt64(0, iQty), (uint64) iQty, INT64_MAX ) );
-	return CRand::genRandInt64(0, iQty);
+		return ( MulDivLL(CSRand::genRandInt64(0, iQty), (uint64) iQty, INT64_MAX ) );
+	return CSRand::genRandInt64(0, iQty);
 }
 
 int64 Calc_GetRandLLVal2( int64 iMin, int64 iMax )
@@ -326,7 +326,7 @@ int64 Calc_GetRandLLVal2( int64 iMin, int64 iMax )
 		iMin = iMax;
 		iMax = tmp;
 	}
-	return CRand::genRandInt64(iMin, iMax);
+	return CSRand::genRandInt64(iMin, iMax);
 }
 
 int Calc_GetBellCurve( int iValDiff, int iVariance )

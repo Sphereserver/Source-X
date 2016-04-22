@@ -6,10 +6,10 @@
 #ifndef _INC_CSERVERDEF_H
 #define _INC_CSERVERDEF_H
 
+#include "./sphere_library/CSTime.h"
 #include "../common/CEncrypt.h"
 #include "../common/CScriptObj.h"
 #include "../common/CSocket.h"
-#include "CTime.h"
 #include "CServTime.h"
 
 
@@ -44,14 +44,14 @@ class CServerDef : public CScriptObj
 	static lpctstr const sm_szLoadKeys[];
 
 private:
-	CString m_sName;	// What the name should be. Fill in from ping.
+	CSString m_sName;	// What the name should be. Fill in from ping.
 	CServTime  m_timeLastValid;	// Last valid poll time in CServTime::GetCurrentTime()
-	CGTime	m_dateLastValid;
+	CSTime	m_dateLastValid;
 
 	CServTime  m_timeCreate;	// When added to the list ? 0 = at start up.
 
 	// Status read from returned string.
-	CString m_sStatus;	// last returned status string.
+	CSString m_sStatus;	// last returned status string.
 
 	// statistics
 	size_t m_stStat[ SERV_STAT_QTY ];
@@ -59,14 +59,14 @@ private:
 public:
 	static const char *m_sClassName;
 	CSocketAddress m_ip;	// socket and port.
-	CString m_sClientVersion;
+	CSString m_sClientVersion;
 	CCrypt m_ClientVersion;
 
 	// Breakdown the string. or filled in locally.
 	char m_TimeZone;	// Hours from GMT. +5=EST
-	CString m_sEMail;		// Admin email address.
-	CString m_sURL;			// URL for the server.
-	CString m_sLang;
+	CSString m_sEMail;		// Admin email address.
+	CSString m_sURL;			// URL for the server.
+	CSString m_sLang;
 	ACCAPP_TYPE m_eAccApp;	// types of new account applications.
 
 public:
@@ -115,7 +115,7 @@ public:
 	int64 GetTimeSinceLastValid() const;
 
 	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( lpctstr pKey, CString &sVal, CTextConsole * pSrc = NULL );
+	virtual bool r_WriteVal( lpctstr pKey, CSString &sVal, CTextConsole * pSrc = NULL );
 
 	bool IsConnected() const
 	{

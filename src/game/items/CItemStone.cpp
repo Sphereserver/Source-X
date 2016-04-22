@@ -44,7 +44,7 @@ lpctstr const CStoneMember::sm_szVerbKeys[STMMV_QTY+1] =
 CStoneMember* CStoneMember::GetNext() const
 {
 	ADDTOCALLSTACK("CStoneMember::GetNext");
-	return( static_cast <CStoneMember *>( CGObListRec::GetNext()));
+	return( static_cast <CStoneMember *>( CSObjListRec::GetNext()));
 }
 
 CUID CStoneMember::GetLinkUID() const { return m_uidLinkTo; }
@@ -226,7 +226,7 @@ bool CStoneMember::r_LoadVal( CScript & s ) // Load an item Script
 }
 
 
-bool CStoneMember::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
+bool CStoneMember::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CStoneMember::r_WriteVal");
 	EXC_TRY("WriteVal");
@@ -814,7 +814,7 @@ bool CItemStone::r_LoadVal( CScript & s ) // Load an item Script
 	return false;
 }
 
-bool CItemStone::r_WriteVal( lpctstr pszKey, CString & sVal, CTextConsole * pSrc )
+bool CItemStone::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CItemStone::r_WriteVal");
 	EXC_TRY("WriteVal");

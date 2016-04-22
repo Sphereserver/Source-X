@@ -1,20 +1,20 @@
-#include "CMemBlock.h"
+#include "CSMemBlock.h"
 
-// CMemBlock:: Constructors, Destructor, Asign operator.
+// CSMemBlock:: Constructors, Destructor, Asign operator.
 
-CMemBlock::CMemBlock()
+CSMemBlock::CSMemBlock()
 {
     m_pData = NULL;
 }
 
-CMemBlock::~CMemBlock()
+CSMemBlock::~CSMemBlock()
 {
     Free();
 }
 
-// CMemBlock:: Modifiers.
+// CSMemBlock:: Modifiers.
 
-void CMemBlock::Alloc( size_t dwSize )
+void CSMemBlock::Alloc( size_t dwSize )
 {
     Free();
     if ( dwSize > 0 )
@@ -23,7 +23,7 @@ void CMemBlock::Alloc( size_t dwSize )
     }
 }
 
-byte * CMemBlock::AllocBase( size_t dwSize )
+byte * CSMemBlock::AllocBase( size_t dwSize )
 {
     ASSERT(dwSize > 0);
     byte * pData = new byte[ dwSize ];
@@ -31,7 +31,7 @@ byte * CMemBlock::AllocBase( size_t dwSize )
     return( pData );
 }
 
-void CMemBlock::Free()
+void CSMemBlock::Free()
 {
     if ( m_pData != NULL )
     {
@@ -40,41 +40,41 @@ void CMemBlock::Free()
     }
 }
 
-void CMemBlock::MemLink( byte * pData )
+void CSMemBlock::MemLink( byte * pData )
 {
     ASSERT( m_pData == NULL );
     m_pData = pData;
 }
 
-// CMemBlock:: Operations.
+// CSMemBlock:: Operations.
 
-byte * CMemBlock::GetData() const
+byte * CSMemBlock::GetData() const
 {
     return( m_pData );
 }
 
-// CMemLenBlock:: Constructors, Destructor, Asign operator.
+// CSMemLenBlock:: Constructors, Destructor, Asign operator.
 
-CMemLenBlock::CMemLenBlock()
+CSMemLenBlock::CSMemLenBlock()
 {
     m_dwLength = 0;
 }
 
-// CMemLenBlock:: Modifiers.
+// CSMemLenBlock:: Modifiers.
 
-void CMemLenBlock::Alloc( size_t dwSize )
+void CSMemLenBlock::Alloc( size_t dwSize )
 {
     m_dwLength = dwSize;
-    CMemBlock::Alloc(dwSize);
+    CSMemBlock::Alloc(dwSize);
 }
 
-void CMemLenBlock::Free()
+void CSMemLenBlock::Free()
 {
     m_dwLength = 0;
-    CMemBlock::Free();
+    CSMemBlock::Free();
 }
 
-void CMemLenBlock::Resize( size_t dwSizeNew )
+void CSMemLenBlock::Resize( size_t dwSizeNew )
 {
     ASSERT( dwSizeNew != m_dwLength );
     byte * pDataNew = AllocBase( dwSizeNew );
@@ -84,7 +84,7 @@ void CMemLenBlock::Resize( size_t dwSizeNew )
         // move any existing data.
         ASSERT(m_dwLength);
         memcpy( pDataNew, GetData(), minimum( dwSizeNew, m_dwLength ));
-        CMemBlock::Free();
+        CSMemBlock::Free();
     }
     else
     {
@@ -94,9 +94,9 @@ void CMemLenBlock::Resize( size_t dwSizeNew )
     MemLink( pDataNew );
 }
 
-// CMemLenBlock:: Operations.
+// CSMemLenBlock:: Operations.
 
-size_t CMemLenBlock::GetDataLength() const
+size_t CSMemLenBlock::GetDataLength() const
 {
     return( m_dwLength );
 }
