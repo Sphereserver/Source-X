@@ -17,7 +17,7 @@
 class PingServer : public AbstractSphereThread
 {
 private:
-	CSSocket m_socket;
+	CSocket m_socket;
 
 public:
 	PingServer(void);

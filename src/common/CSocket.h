@@ -95,7 +95,7 @@ public:
 	bool SetHostPortStr( lpctstr pszIP );
 };
 
-class CSSocket
+class CSocket
 {
 private:
 	SOCKET  m_hSocket;	// socket connect handle
@@ -105,13 +105,13 @@ private:
 public:
 	static const char *m_sClassName;
 
-	CSSocket();
-	explicit CSSocket( SOCKET socket );
-	~CSSocket();
+	CSocket();
+	explicit CSocket( SOCKET socket );
+	~CSocket();
 
 private:
-	CSSocket(const CSSocket& copy);
-	CSSocket& operator=(const CSSocket& other);
+	CSocket(const CSocket& copy);
+	CSocket& operator=(const CSocket& other);
 
 public:
 	static int GetLastError(bool bUseErrno = false);

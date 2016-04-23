@@ -44,8 +44,8 @@ public:
 	bool m_fResyncPause;		// Server is temporarily halted so files can be updated.
 	CTextConsole * m_fResyncRequested;		// A resync pause has been requested by this source.
 
-	CSSocket m_SocketMain;	// This is the incoming monitor socket.(might be multiple ports?)
-	CSSocket m_SocketGod;	// This is for god clients.
+	CSocket m_SocketMain;	// This is the incoming monitor socket.(might be multiple ports?)
+	CSocket m_SocketGod;	// This is for god clients.
 
 							// admin console.
 	int m_iAdminClients;		// how many of my clients are admin consoles ?
@@ -91,7 +91,7 @@ public:
 	void SetSignals( bool fMsg = true );
 
 	bool SocketsInit(); // Initialize sockets
-	bool SocketsInit( CSSocket & socket );
+	bool SocketsInit( CSocket & socket );
 	void SocketsClose();
 
 	bool Load();

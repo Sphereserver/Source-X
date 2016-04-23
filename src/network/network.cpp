@@ -2329,7 +2329,7 @@ int NetworkOut::sendBytesNow(CClient* client, const byte* data, dword length)
 	if (ret <= 0)
 	{
 		EXC_SET("error parse");
-		int errCode = CSSocket::GetLastError(true);
+		int errCode = CSocket::GetLastError(true);
 
 #ifdef _WIN32
 		if (state->isAsyncMode() && errCode == WSA_IO_PENDING)
@@ -4083,7 +4083,7 @@ size_t NetworkOutput::sendData(NetState* state, const byte* data, size_t length)
 	if (result <= 0)
 	{
 		EXC_SET("error parse");
-		int errorCode = CSSocket::GetLastError(true);
+		int errorCode = CSocket::GetLastError(true);
 
 #ifdef _WIN32
 		if (state->isAsyncMode() && errorCode == WSA_IO_PENDING)

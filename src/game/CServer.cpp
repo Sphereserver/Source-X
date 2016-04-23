@@ -1619,7 +1619,7 @@ void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool bMessage)
 
 //*********************************************************
 
-bool CServer::SocketsInit( CSSocket & socket )
+bool CServer::SocketsInit( CSocket & socket )
 {
 	ADDTOCALLSTACK("CServer::SocketsInit");
 	// Initialize socket

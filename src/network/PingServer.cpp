@@ -29,7 +29,7 @@ void PingServer::onStart()
 		m_socket.Close();
 	}
 
-	if ( ! m_socket.Create(PF_INET, SOCK_DGRAM, CSSocket::GetProtocolIdByName("udp")) )
+	if ( ! m_socket.Create(PF_INET, SOCK_DGRAM, CSocket::GetProtocolIdByName("udp")) )
 	{
 		m_socket.Close();
 		return;
