@@ -1,3 +1,7 @@
+/**
+* @file CServer.h
+*
+*/
 
 #pragma once
 #ifndef _INC_CSERVER_H
@@ -40,8 +44,8 @@ public:
 	bool m_fResyncPause;		// Server is temporarily halted so files can be updated.
 	CTextConsole * m_fResyncRequested;		// A resync pause has been requested by this source.
 
-	CGSocket m_SocketMain;	// This is the incoming monitor socket.(might be multiple ports?)
-	CGSocket m_SocketGod;	// This is for god clients.
+	CSSocket m_SocketMain;	// This is the incoming monitor socket.(might be multiple ports?)
+	CSSocket m_SocketGod;	// This is for god clients.
 
 							// admin console.
 	int m_iAdminClients;		// how many of my clients are admin consoles ?
@@ -87,7 +91,7 @@ public:
 	void SetSignals( bool fMsg = true );
 
 	bool SocketsInit(); // Initialize sockets
-	bool SocketsInit( CGSocket & socket );
+	bool SocketsInit( CSSocket & socket );
 	void SocketsClose();
 
 	bool Load();
@@ -117,5 +121,6 @@ public:
 	lpctstr GetName() const { return( CServerDef::GetName()); }
 	PLEVEL_TYPE GetPrivLevel() const;
 } g_Serv;	// current state stuff not saved.
+
 
 #endif // _INC_CSERVER_H

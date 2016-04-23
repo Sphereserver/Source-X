@@ -1,3 +1,7 @@
+/**
+* @file CSectorEnviron.h
+*
+*/
 
 #pragma once
 #ifndef _INC_CSECTORENVIRON_H

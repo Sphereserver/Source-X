@@ -11,7 +11,6 @@
 //#include "../game/spheresvr.h" Removed to test.
 #include <deque>
 #include <list>
-#include <algorithm>
 #include "../common/CRect.h"
 
 

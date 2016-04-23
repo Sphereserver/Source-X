@@ -1,3 +1,7 @@
+/**
+* @file CContainer.h
+*
+*/
 
 #pragma once
 #ifndef _INC_CCONTAINER_H
@@ -62,4 +66,6 @@ public:
 	virtual void OnWeightChange( int iChange );
 	virtual void ContentAdd( CItem * pItem ) = 0;
 };
+
+
 #endif // _INC_CCONTAINER_H

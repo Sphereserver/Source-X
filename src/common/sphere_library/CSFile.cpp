@@ -1,8 +1,11 @@
 
 #ifndef _WIN32
 	#include <errno.h>	// errno
+	#include <sys/types.h>
+	#include <sys/stat.h>
+	#include <fcntl.h>
+	#include <unistd.h>
 #endif
-
 #include "../game/CLog.h"
 #include "../sphere/threads.h"
 #include "CSFile.h"

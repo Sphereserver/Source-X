@@ -421,7 +421,7 @@ llong CExpression::GetSingle( lpctstr & pszArgs )
 		for (;;)
 		{
 			tchar ch = *pszArgs;
-			if ( IsDigit( ch ))
+			if ( IsDigit(ch) )
 				ch -= '0';
 			else
 			{
@@ -452,7 +452,7 @@ try_dec:
 		{
 			if ( *pszArgs == '.' )
 				continue;	// just skip this.
-			if ( ! IsDigit( *pszArgs ))
+			if ( ! IsDigit(*pszArgs) )
 				break;
 			iVal *= 10;
 			iVal += *pszArgs - '0';
@@ -558,7 +558,7 @@ try_dec:
 									}
 									else if ( !strcmpi(pszArgs, "pi") )
 									{
-										iResult = (llong)(log( (double)iArgument ) / log( M_PI ));
+										iResult = (llong)(log( (double)iArgument ) / log( M_PI ) );
 									}
 									else
 									{
@@ -569,15 +569,11 @@ try_dec:
 											iCount = 0;
 										}
 										else
-										{
 											iResult = (llong)(log( (double)iArgument ) / log( (double)iBase ));
-										}
 									}
 								}
 								else
-								{
 									iResult = (llong)log10( (double)iArgument );
-								}							
 							}
 						}
 
@@ -613,9 +609,7 @@ try_dec:
 								iResult = (llong)sqrt( (double)iTosquare );
 							}
 							else
-							{
 								DEBUG_ERR(( "Exp_GetVal: Sqrt of negative number (%d) is impossible\n", iTosquare ));
-							}
 						}
 
 					} break;
@@ -833,9 +827,9 @@ try_dec:
 						{
 							llong a1 = GetSingle(ppCmd[0]);
 							llong a2 = GetSingle(ppCmd[1]);
-							if ( a1 < a2 ) iResult = GetSingle(ppCmd[2]);
-							else if ( a1 == a2 ) iResult = ( iCount < 4 ) ? 0 : GetSingle(ppCmd[3]);
-							else iResult = ( iCount < 5 ) ? 0 : GetSingle(ppCmd[4]);
+							if ( a1 < a2 )			iResult = GetSingle(ppCmd[2]);
+							else if ( a1 == a2 )	iResult = ( iCount < 4 ) ? 0 : GetSingle(ppCmd[3]);
+							else					iResult = ( iCount < 5 ) ? 0 : GetSingle(ppCmd[4]);
 						}
 					} break;
 
@@ -853,15 +847,13 @@ try_dec:
 
 				pszArgs = pszArgsNext;
 
-				if ( ! iCount )
+				if ( !iCount )
 				{
 					DEBUG_ERR(( "Bad intrinsic function usage: Missing arguments\n" ));
 					return 0;
 				}
 				else
-				{
 					return iResult;
-				}
 			}
 		}
 
@@ -920,9 +912,7 @@ llong CExpression::GetValMath( llong lVal, lpctstr & pExpr )
 				lVal = ( GetVal( pExpr ) || lVal );
 			}
 			else	// bitwise
-			{
 				lVal |= GetVal( pExpr );
-			}
 			break;
 		case '&':
 			pExpr++;
@@ -932,9 +922,7 @@ llong CExpression::GetValMath( llong lVal, lpctstr & pExpr )
 				lVal = ( GetVal( pExpr ) && lVal );	// tricky stuff here. logical ops must come first or possibly not get processed.
 			}
 			else	// bitwise
-			{
 				lVal &= GetVal( pExpr );
-			}
 			break;
 		case '/':
 			pExpr++;
@@ -977,9 +965,7 @@ llong CExpression::GetValMath( llong lVal, lpctstr & pExpr )
 				lVal >>= GetVal( pExpr );
 			}
 			else
-			{
 				lVal = ( lVal > GetVal( pExpr ) );
-			}
 			break;
 		case '<': // boolean
 			pExpr++;
@@ -994,9 +980,7 @@ llong CExpression::GetValMath( llong lVal, lpctstr & pExpr )
 				lVal <<= GetVal( pExpr );
 			}
 			else
-			{
 				lVal = ( lVal < GetVal( pExpr ) );
-			}
 			break;
 		case '!':
 			pExpr ++;
@@ -1131,7 +1115,7 @@ int64 CExpression::GetRange(lpctstr & pExpr)
 	ADDTOCALLSTACK("CExpression::GetRange");
 	int64 lVals[256];		// Maximum elements in a list
 
-	int iQty = GetRangeVals( pExpr, lVals, CountOf(lVals));
+	int iQty = GetRangeVals( pExpr, lVals, CountOf(lVals) );
 
 	if (iQty == 0)
 		return 0;
@@ -1148,9 +1132,7 @@ int64 CExpression::GetRange(lpctstr & pExpr)
 	for ( ; i < iQty; i+=2 )
 	{
 		if ( ! lVals[i] )	// having a weight of 0 is very strange !
-		{
 			DEBUG_ERR(( "Weight of 0 in random set?\n" ));	// the whole table should really just be invalid here !
-		}
 		iTotalWeight += lVals[i];
 	}
 

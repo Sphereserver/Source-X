@@ -1,3 +1,9 @@
+/**
+* @file CScriptProfiler.h
+*
+*/
+
+#pragma once
 #ifndef _INC_CSCRIPTPROFILER_H
 #define _INC_CSCRIPTPROFILER_H
 
@@ -54,5 +60,6 @@ extern llong llTimeProfileFrequency;
 
 #define TIME_PROFILE_GET_HI	((llTicksEnd - llTicks)/(llTimeProfileFrequency/1000))
 #define	TIME_PROFILE_GET_LO	((((llTicksEnd - llTicks)*10000)/(llTimeProfileFrequency/1000))%10000)
+
 
 #endif //_INC_CSCRIPTPROFILER_H

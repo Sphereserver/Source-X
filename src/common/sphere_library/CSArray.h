@@ -7,8 +7,6 @@
 #ifndef _INC_CSARRAY_H
 #define _INC_CSARRAY_H
 
-#include <climits>
-
 #include "../common.h"
 #include "../spherecom.h"
 
@@ -62,17 +60,17 @@ public:
     * @brief get the CSObjList propietary of this record.
     * @return CSObjList propietary of this record.
     */
-	CSObjList * GetParent() const;
+	inline CSObjList * GetParent() const;
 	/**
     * @brief get the next record of the parent list.
     * @return the next record of the parent list.
     */
-	CSObjListRec * GetNext() const;
+	inline CSObjListRec * GetNext() const;
 	/**
     * @brief get the previous record of the parent list.
     * @return the previous record of the parent list.
     */
-	CSObjListRec * GetPrev() const;
+	inline CSObjListRec * GetPrev() const;
 	///@}
 	/** @name Capacity:
 	 */
@@ -608,7 +606,7 @@ public:
 
 
 
-/* Template methods are defined here to avoid linker errors */
+/* Template methods (inlined or not) are defined here to avoid linker errors */
 
 // CSObjListRec:: Capacity.
 
@@ -852,7 +850,6 @@ void CSTypedArray<TYPE, ARG_TYPE>::SetCount( size_t nNewCount )
 */
 }
 
-
 // CSTypedArray:: Operations.
 
 template<class TYPE, class ARG_TYPE>
@@ -1091,6 +1088,27 @@ size_t CSObjSortArray<TYPE, KEY_TYPE>::FindKeyNear( KEY_TYPE key, int & iCompare
 	}
 	return i;
 }
+
+
+/* Inline Methods Definitions */
+
+// CObjListRec:: Iterators.
+
+CSObjList * CSObjListRec::GetParent() const
+{
+	return m_pParent;
+}
+
+CSObjListRec * CSObjListRec::GetNext() const
+{
+	return m_pNext;
+}
+
+CSObjListRec * CSObjListRec::GetPrev() const
+{
+	return m_pPrev;
+}
+
 
 #undef STANDARD_CPLUSPLUS_THIS
 

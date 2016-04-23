@@ -1,3 +1,7 @@
+/**
+* @file triggers.h
+*
+*/
 
 #pragma once
 #ifndef _INC_TRIGGERS_H

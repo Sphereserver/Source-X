@@ -9,9 +9,8 @@
 
 #include <list>
 #include <set>
-
 #include "spherecom.h"
-#include "./sphere_library/CSString.h"
+#include "sphere_library/CSString.h"
 
 
 class CTextConsole;

@@ -1,3 +1,7 @@
+/**
+* @file CItemMultiCustom.h
+*
+*/
 
 #pragma once
 #ifndef _INC_CITEMMULTICUSTOM_H
@@ -110,4 +114,6 @@ public:
 	static char GetPlaneZ( uchar plane );
 	static bool IsValidItem( ITEMID_TYPE id, CClient * pClientSrc, bool bMulti );
 };
+
+
 #endif // _INC_CITEMMULTICUSTOM_H

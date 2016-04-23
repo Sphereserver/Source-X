@@ -1,3 +1,7 @@
+/**
+* @file CParty.h
+*
+*/
 
 #pragma once
 #ifndef _INC_CPARTY_H

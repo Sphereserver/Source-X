@@ -4,7 +4,7 @@
 #define _INC_CVARDEFMAP_H
 
 #include <set>
-#include "./sphere_library/CSString.h"
+#include "sphere_library/CSString.h"
 #include "spherecom.h"
 
 

@@ -1,10 +1,11 @@
-//
-// CClient.h
-//
+/**
+* @file CClient.h
+*
+*/
 
+#pragma once
 #ifndef _INC_CCLIENT_H
 #define _INC_CCLIENT_H
-#pragma once
 
 #include "../common/sphere_library/CSArray.h"
 #include "../common/CEncrypt.h"
@@ -766,5 +767,6 @@ public:
 	friend class PacketCreate;
 	friend class PacketServerRelay;
 };
+
 
 #endif	// _INC_CCLIENT_H

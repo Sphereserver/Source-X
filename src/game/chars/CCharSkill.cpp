@@ -482,7 +482,7 @@ bool CChar::Skill_CheckSuccess( SKILL_TYPE skill, int difficulty, bool bUseBellC
 	if ( bUseBellCurve )
 		iSuccessChance = Calc_GetSCurve( Skill_GetAdjusted(skill) - difficulty, SKILL_VARIANCE );
 
-	return( iSuccessChance >= Calc_GetRandVal(1000) );
+	return ( iSuccessChance >= Calc_GetRandVal(1000) );
 }
 
 bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain, bool bUseBellCurve )

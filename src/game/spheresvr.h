@@ -1,3 +1,7 @@
+/**
+* @file spheresvr.h
+*
+*/
 
 #pragma once
 #ifndef _INC_SPHERESVR_H
@@ -5,6 +9,7 @@
 
 #include "../common/common.h"
 #include "../sphere/threads.h"
+
 
 #if defined(_WIN32) && !defined(_MTNETWORK)
 	// _MTNETWORK enabled via makefile for other systems

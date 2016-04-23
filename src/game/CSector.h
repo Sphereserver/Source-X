@@ -1,4 +1,7 @@
-
+/**
+* @file CSector.h
+*
+*/
 #pragma once
 #ifndef _INC_CSECTOR_H
 #define _INC_CSECTOR_H
@@ -114,5 +117,6 @@ public:
 	void Close();
 	lpctstr GetName() const { return( "Sector" ); }
 };
+
 
 #endif // _INC_CSECTOR_H

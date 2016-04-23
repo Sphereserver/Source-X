@@ -1,3 +1,7 @@
+/**
+* @file CItemStone.h
+*
+*/
 
 #pragma once
 #ifndef _INC_CITEMSTONE_H
@@ -197,5 +201,6 @@ public:
 	lpctstr GetAbbrev() const;
 	void SetAbbrev( lpctstr pAbbrev );
 };
+
 
 #endif // _INC_CITEMSTONE_H

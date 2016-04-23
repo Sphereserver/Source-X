@@ -1,6 +1,7 @@
-//
-// CWorld.h
-//
+/**
+* @file CWorld.h
+*
+*/
 
 #pragma once
 #ifndef _INC_CWORLD_H
@@ -362,5 +363,6 @@ inline CServTime CServTime::GetCurrentTime()	// static
 {
 	return g_World.GetCurrentTime();
 }
+
 
 #endif // _INC_CWORLD_H

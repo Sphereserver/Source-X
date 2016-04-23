@@ -1,3 +1,7 @@
+/**
+* @file CChat.h
+*
+*/
 
 #pragma once
 #ifndef _INC_CCHAT_H
@@ -52,5 +56,6 @@ public:
 	static void DecorateName(CSString & sName, const CChatChanMember * pMember = NULL, bool fSystem = false);
 	static void GenerateChatName(CSString & sName, const CClient * pClient);
 };
+
 
 #endif // _INC_CCHAT_H

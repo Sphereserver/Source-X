@@ -1256,4 +1256,5 @@ public:
 #define IsSetCombatFlags(of)	((g_Cfg.m_iCombatFlags & of) != 0)
 #define IsSetMagicFlags(of)		((g_Cfg.m_iMagicFlags & of) != 0)
 
+
 #endif	// _INC_CRESOURCE_H

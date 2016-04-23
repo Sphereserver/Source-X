@@ -3,9 +3,8 @@
 #ifndef _INC_COBJBASETEMPLATE_H
 #define _INC_COBJBASETEMPLATE_H
 
-#include "./sphere_library/CSArray.h"
-#include "./sphere_library/CSString.h"
-//#include "spherecom.h"
+#include "sphere_library/CSArray.h"
+#include "sphere_library/CSString.h"
 #include "CRect.h"
 #include "CUID.h"
 

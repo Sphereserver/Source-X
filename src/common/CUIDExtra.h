@@ -12,8 +12,8 @@
 inline CObjBase * CUIDBase::ObjFind() const
 {
 	if ( IsResource() )
-		return( NULL );
-	return ( g_World.FindUID( m_dwInternalVal & UID_O_INDEX_MASK ) );
+		return NULL;
+	return g_World.FindUID( m_dwInternalVal & UID_O_INDEX_MASK );
 }
 
 inline CItem * CUIDBase::ItemFind() const // Does item still exist or has it been deleted

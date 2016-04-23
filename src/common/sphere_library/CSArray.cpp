@@ -1,4 +1,5 @@
 
+#include <climits>
 #include "../../../sphere/threads.h"
 #include "./CSArray.h"
 
@@ -13,23 +14,6 @@ CSObjListRec::CSObjListRec()
 CSObjListRec::~CSObjListRec()
 {
 	RemoveSelf();
-}
-
-// CObListRec:: Iterators.
-
-CSObjList * CSObjListRec::GetParent() const
-{
-	return m_pParent;
-}
-
-CSObjListRec * CSObjListRec::GetNext() const
-{
-	return m_pNext;
-}
-
-CSObjListRec * CSObjListRec::GetPrev() const
-{
-	return m_pPrev;
 }
 
 // CSObjList:: Constructors, Destructor, Asign operator.

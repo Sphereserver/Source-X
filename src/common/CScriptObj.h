@@ -7,11 +7,11 @@
 #ifndef _INC_CSCRIPTOBJ_H
 #define _INC_CSCRIPTOBJ_H
 
-#include "./sphere_library/CSArray.h"
+#include "sphere_library/CSArray.h"
 #include "CScript.h"
 #include "../sphere/threads.h"
 #include "CVarDefMap.h"
-#include "./CVarFloat.h"
+#include "CVarFloat.h"
 #include "CTextConsole.h"
 
 

@@ -1,3 +1,7 @@
+/**
+* @file game_enums.h
+* @brief Enums commonly used in the "game" folder. 
+*/
 
 #pragma once
 #ifndef _INC_GAME_ENUMS_H
@@ -214,5 +218,6 @@ enum BUFF_ICONS
 	BI_CITYTRADEDEAL = 1126,
 	BI_QTY = 1126
 };
+
 
 #endif // _INC_ENUMS_H

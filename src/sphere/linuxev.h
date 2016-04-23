@@ -16,7 +16,7 @@
 		#define EV_BACKEND_LIST (EVBACKEND_SELECT | EVBACKEND_POLL | EVBACKEND_EPOLL)
 	#endif
 	
-	class CGSocket;
+	class CSSocket;
 	class CClient;
 	class NetState;
 		

@@ -53,7 +53,7 @@ void CSphereCachedMulItem::HitCacheTime()
 int64 CSphereCachedMulItem::GetCacheAge() const
 {
 	// In TICK_PER_SEC or milliseconds
-	return( CServTime::GetCurrentTime() - m_timeRef );
+	return ( CServTime::GetCurrentTime() - m_timeRef );
 }
 
 CSphereMapBlockState::CSphereMapBlockState( dword dwBlockFlags, char z, int iHeight, height_t zHeight ) :

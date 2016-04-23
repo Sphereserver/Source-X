@@ -1,3 +1,7 @@
+/**
+* @file CLog.h
+*
+*/
 
 #pragma once
 #ifndef _INC_CLOG_H
@@ -110,6 +114,7 @@ private:
 	CEventLog(const CEventLog& copy);
 	CEventLog& operator=(const CEventLog& other);
 } * g_pLog;
+
 
 extern struct CLog : public CSFileText, public CEventLog
 {

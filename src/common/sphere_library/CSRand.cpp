@@ -3,6 +3,7 @@
 * @brief Wrapper for C++ Mersenne Twister pseudo-random number generator
 */
 
+#include <random>
 #include "CSRand.h"
 
 

@@ -9,7 +9,7 @@
 
 #include <map>
 
-#include "./sphere_library/CSFile.h"
+#include "sphere_library/CSFile.h"
 #include "CacheableScriptFile.h"
 
 #define MAX_COLUMNS	64	// maximum number of columns in a file

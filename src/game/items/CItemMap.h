@@ -1,3 +1,7 @@
+/**
+* @file CItemMap.h
+*
+*/
 
 #pragma once
 #ifndef _INC_CITEMMAP_H

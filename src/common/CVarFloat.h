@@ -8,8 +8,8 @@
 #define _INC_CVARFLOAT_H
 
 #include <map>
-#include "./sphere_library/CSRand.h"
-#include "./sphere_library/CSString.h"
+#include "sphere_library/CSRand.h"
+#include "sphere_library/CSString.h"
 
 
 struct LexNoCaseLess

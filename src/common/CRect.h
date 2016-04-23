@@ -8,7 +8,7 @@
 #define _INC_CRECT_H
 
 #include "../game/uo_files/uofiles_enums.h"
-#include "./sphere_library/CSString.h"
+#include "sphere_library/CSString.h"
 
 
 class CRegionBase;

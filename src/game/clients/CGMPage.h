@@ -1,3 +1,7 @@
+/**
+* @file CGMPage.h
+*
+*/
 
 #pragma once
 #ifndef _INC_CGMPAGE_H
@@ -54,5 +58,6 @@ public:
 
 	CGMPage * GetNext() const;
 };
+
 
 #endif // _INC_CGMPAGE_H

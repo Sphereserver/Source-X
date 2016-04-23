@@ -1,3 +1,7 @@
+/**
+* @file CItemMemory.h
+*
+*/
 
 #pragma once
 #ifndef _INC_CITEMMEMORY_H

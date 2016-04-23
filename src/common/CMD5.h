@@ -12,7 +12,6 @@
 #ifndef _INC_CMD5_H 
 #define _INC_CMD5_H
 
-#include <string.h>
 #include "datatypes.h"
 
 class CMD5

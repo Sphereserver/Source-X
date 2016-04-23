@@ -7,8 +7,8 @@
 #ifndef _INC_CSASSOC_H
 #define _INC_CSASSOC_H
 
-#include "./CSArray.h"
-#include "./CSFile.h"
+#include "CSArray.h"
+#include "CSFile.h"
 
 #ifndef PT_REG_STRMAX
 	#define PT_REG_STRMAX		128

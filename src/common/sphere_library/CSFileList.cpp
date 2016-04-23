@@ -2,14 +2,14 @@
 * @file CSFileList.cpp
 */
 
-
+#include <time.h>
 #if defined(_WIN32)
 	#include <io.h> 		// findfirst
 	#include "../../sphere/threads.h"
 #else	// LINUX
 	#include <dirent.h>
 #endif
-#include "CSFileList.h"
+#include "./CSFileList.h"
 #include "../../game/CLog.h"
 #include "../../sphere/threads.h"
 #include "../spherecom.h"

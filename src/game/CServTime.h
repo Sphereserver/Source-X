@@ -1,3 +1,7 @@
+/**
+* @file CServTime.h
+*
+*/
 
 #pragma once
 #ifndef _INC_CSERVTIME_H
@@ -25,16 +29,52 @@ public:
 	bool IsTimeValid() const;
 	CServTime operator+( int64 iTimeDiff ) const;
 	CServTime operator-( int64 iTimeDiff ) const;
-	int64 operator-( CServTime time ) const;
-	bool operator==(CServTime time) const;
-	bool operator!=(CServTime time) const;
-	bool operator<(CServTime time) const;
-	bool operator>(CServTime time) const;
-	bool operator<=(CServTime time) const;
-	bool operator>=(CServTime time) const;
-	void SetCurrentTime();
+	inline int64 operator-( CServTime time ) const;
+	inline bool operator==(CServTime time) const;
+	inline bool operator!=(CServTime time) const;
+	inline bool operator<(CServTime time) const;
+	inline bool operator>(CServTime time) const;
+	inline bool operator<=(CServTime time) const;
+	inline bool operator>=(CServTime time) const;
+	inline void SetCurrentTime();
 	static CServTime GetCurrentTime();
 };
+
+
+/* Inline Methods Definitions */
+
+int64 CServTime::operator-(CServTime time) const
+{
+	return (m_lPrivateTime - time.m_lPrivateTime);
+}
+bool CServTime::operator==(CServTime time) const
+{
+	return (m_lPrivateTime == time.m_lPrivateTime);
+}
+bool CServTime::operator!=(CServTime time) const
+{
+	return (m_lPrivateTime != time.m_lPrivateTime);
+}
+bool CServTime::operator<(CServTime time) const
+{
+	return (m_lPrivateTime<time.m_lPrivateTime);
+}
+bool CServTime::operator>(CServTime time) const
+{
+	return (m_lPrivateTime>time.m_lPrivateTime);
+}
+bool CServTime::operator<=(CServTime time) const
+{
+	return (m_lPrivateTime <= time.m_lPrivateTime);
+}
+bool CServTime::operator>=(CServTime time) const
+{
+	return (m_lPrivateTime >= time.m_lPrivateTime);
+}
+void CServTime::SetCurrentTime()
+{
+	m_lPrivateTime = GetCurrentTime().m_lPrivateTime;
+}
 
 
 #endif // _INC_CSERVTIME_H

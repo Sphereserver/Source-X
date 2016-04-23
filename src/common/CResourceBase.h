@@ -3,14 +3,13 @@
 #ifndef _INC_CRESOURCEBASE_H
 #define _INC_CRESOURCEBASE_H
 
-#include "./sphere_library/CSArray.h"
+#include "sphere_library/CSArray.h"
+#include "sphere_library/CSTime.h"
+#include "../game/CServTime.h"
 #include "common.h"
 #include "CUID.h"
 #include "CScript.h"
 #include "CScriptObj.h"
-#include "./sphere_library/CSTime.h"
-#include "../game/CServTime.h"
-
 
 class CVarDefContNum;
 

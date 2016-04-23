@@ -4,7 +4,6 @@
 #define _INC_CTEXTCONSOLE_H
 
 #include "../sphere/strings.h"
-#include "./sphere_library/CSString.h"
 #include "spherecom.h"
 
 
@@ -48,4 +47,6 @@ private:
 	CTextConsole(const CTextConsole& copy);
 	CTextConsole& operator=(const CTextConsole& other);
 };
+
+
 #endif // _INC_CTEXTCONSOLE_H

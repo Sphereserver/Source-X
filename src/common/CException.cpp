@@ -1,4 +1,5 @@
 
+#include <stack>
 #include "../game/CLog.h"
 #include "../game/CObjBase.h"
 #include "../game/CServer.h"

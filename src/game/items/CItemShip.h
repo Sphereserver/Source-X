@@ -1,3 +1,7 @@
+/**
+* @file CItemShip.h
+*
+*/
 
 #pragma once
 #ifndef _INC_CITEMSHIP_H
@@ -21,7 +25,7 @@ private:
 
 	int Ship_GetFaceOffset() const
 	{
-		return( GetID() & 3 );
+		return ( GetID() & 3 );
 	}
 	size_t  Ship_ListObjs( CObjBase ** ppObjList );
 	bool Ship_CanMoveTo( const CPointMap & pt ) const;
@@ -56,5 +60,6 @@ public:
 	CItem * GetShipPlank(size_t index);
 	//CItemBaseMulti::ShipSpeed GetShipSpeed();
 };
+
 
 #endif // _INC_CITEMSHIP_H

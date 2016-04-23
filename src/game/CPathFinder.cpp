@@ -3,6 +3,8 @@
 #include "../sphere/threads.h"
 #include "chars/CChar.h"
 #include "CPathFinder.h"
+#include <algorithm>
+
 
 uint CPathFinder::Heuristic(CPathFinderPointRef& Pt1,CPathFinderPointRef& Pt2)
 {

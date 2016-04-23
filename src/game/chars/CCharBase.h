@@ -105,6 +105,9 @@ public:
 	bool r_Load( CScript & s );
 };
 
+
+/* Inline Methods Definitions */
+
 inline bool CCharBase::IsValidDispID( CREID_TYPE id ) //  static
 {
 	return( id > 0 && id < CREID_QTY );

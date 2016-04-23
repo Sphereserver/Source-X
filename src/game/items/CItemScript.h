@@ -1,10 +1,13 @@
+/**
+* @file CItemScript.h
+*
+*/
 
 #pragma once
 #ifndef _INC_CITEMSCRIPT_H
 #define _INC_CITEMSCRIPT_H
 
 #include "CItemVendable.h"
-//#include "spheresvr.h" Removed to test.
 
 
 class CItemScript : public CItemVendable	// A message for a bboard or book text.

@@ -1,3 +1,7 @@
+/**
+* @file CItemBase.h
+*
+*/
 
 #pragma once
 #ifndef _INC_CITEMBASE_H
@@ -626,15 +630,18 @@ public:
 	static CItemBase * MakeMultiRegion( CItemBase * pBase, CScript & s );
 };
 
+
+/* Inline Methods Definitions */
+
 inline bool CItemBase::IsVisibleLayer( LAYER_TYPE layer ) // static
 {
-	return( LAYER_IS_VISIBLE( layer ));
+	return LAYER_IS_VISIBLE( layer );
 }
 
 inline bool CItemBase::IsValidDispID( ITEMID_TYPE id ) // static
 {
 	// Is this id in the base artwork set ? tile or multi.
-	return( id > ITEMID_NOTHING && id < ITEMID_MULTI_MAX );
+	return ( id > ITEMID_NOTHING && id < ITEMID_MULTI_MAX );
 }
 
 

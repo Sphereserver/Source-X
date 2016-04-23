@@ -1,3 +1,7 @@
+/**
+* @file CItemMessage.h
+*
+*/
 
 #pragma once
 #ifndef _INC_CITEMMESSAGE_H

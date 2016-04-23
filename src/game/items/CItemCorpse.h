@@ -1,3 +1,7 @@
+/**
+* @file CItemCorpse.h
+*
+*/
 
 #pragma once
 #ifndef _INC_CITEMCORPSE_H

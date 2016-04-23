@@ -8,6 +8,7 @@
 #define _INC_CSSTRING_H
 
 #include "../common.h"
+#include "../spherecom.h"
 
 
 /**
@@ -53,13 +54,13 @@ public:
 	* @param pStr string to copy.
 	* @return the CSString.
 	*/
-	const CSString& operator=(lpctstr pStr);
+	inline const CSString& operator=(lpctstr pStr);
 	/**
 	* @brief Copy supplied CSString into the CSString.
 	* @param s CSString to copy.
 	* @return the CSString.
 	*/
-	const CSString& operator=(const CSString &s);
+	inline const CSString& operator=(const CSString &s);
 	///@}
 	/** @name Capacity:
 	 */
@@ -75,7 +76,7 @@ public:
 	* @brief Check the length of the CSString.
 	* @return true if length is 0, false otherwise.
 	*/
-	bool IsEmpty() const;
+	inline bool IsEmpty() const;
 	/**
 	* @brief Check if there is data allocated and if has zero length.
 	* @return false if no data or zero length, true otherwise.
@@ -95,7 +96,7 @@ public:
 	* @brief Get the length of the CSString.
 	* @return the length of the CSString.
 	*/
-	int GetLength() const;
+	inline int GetLength() const;
 	///@}
 	/** @name Element access:
 	 */
@@ -106,26 +107,26 @@ public:
 	* @param nIndex position of the character.
 	* @return character in position nIndex.
 	*/
-	tchar operator[](int nIndex) const;
+	inline tchar operator[](int nIndex) const;
 	/**
 	* @brief Gets the reference to character a specified position (0 based).
 	* @see ReferenceAt()
 	* @param nIndex position of the character.
 	* @return reference to character in position nIndex.
 	*/
-	tchar & operator[](int nIndex);
+	inline tchar & operator[](int nIndex);
 	/**
 	* @brief Gets the caracter in a specified position (0 based).
 	* @param nIndex position of the character.
 	* @return character in position nIndex.
 	*/
-	tchar GetAt(int nIndex) const;
+	inline tchar GetAt(int nIndex) const;
 	/**
 	* @brief Gets the reference to character a specified position (0 based).
 	* @param nIndex position of the character.
 	* @return reference to character in position nIndex.
 	*/
-	tchar & ReferenceAt(int nIndex);
+	inline tchar & ReferenceAt(int nIndex);
 	/**
 	* @brief Puts a character in a specified position (0 based).
 	*
@@ -143,13 +144,13 @@ public:
 	* @param psz string to concatenate with.
 	* @return The result of concatenate the CSString with psz.
 	*/
-	const CSString& operator+=(lpctstr psz);
+	inline const CSString& operator+=(lpctstr psz);
 	/**
 	* @brief Concatenate CSString with a character.
 	* @param ch character to concatenate with.
 	* @return The result of concatenate the CSString with ch.
 	*/
-	const CSString& operator+=(tchar ch);
+	inline const CSString& operator+=(tchar ch);
 	/**
 	* @brief Adds a char at the end of the CSString.
 	* @param ch character to add.
@@ -168,6 +169,22 @@ public:
 	*/
 	void Copy(lpctstr pStr);
 	/**
+	* @brief Changes the capitalization of CSString to upper.
+	*/
+	inline void MakeUpper();
+	/**
+	* @brief Changes the capitalization of CSString to lower.
+	*/
+	inline void MakeLower();
+	/**
+	* @brief Reverses the CSString.
+	*/
+	inline void Reverse();
+	///@}
+	/** @name String formatting:
+	*/
+	///@{
+	/**
 	* @brief Join a formated string (printf like) with values and copy into this.
 	* @see FormatV()
 	* @param pStr formated string.
@@ -179,97 +196,85 @@ public:
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	void FormatHex(dword dwVal);
+	inline void FormatHex(dword dwVal);
 	/**
 	* @brief Print a ullong value into the string (hex format).
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	void FormatLLHex(ullong dwVal);
+	inline void FormatLLHex(ullong dwVal);
 	/**
 	* @brief Join a formated string (printf like) with values and copy into this.
 	* @param pStr formated string.
 	* @param args list of values.
 	*/
-	void FormatV(lpctstr pStr, va_list args);
+	inline void FormatV(lpctstr pStr, va_list args);
 	/**
 	* @brief Print a char value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	void FormatCVal(char iVal);
+	inline void FormatCVal(char iVal);
 	/**
 	* @brief Print a unsigned char value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	void FormatUCVal(uchar iVal);
+	inline void FormatUCVal(uchar iVal);
 	/**
 	* @brief Print a short value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	void FormatSVal(short iVal);
+	inline void FormatSVal(short iVal);
 	/**
 	* @brief Print a unsigned short value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	void FormatUSVal(ushort iVal);
+	inline void FormatUSVal(ushort iVal);
 	/**
 	* @brief Print a long value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	void FormatVal(int iVal);
+	inline void FormatVal(int iVal);
 	/**
 	* @brief Print a unsigned int value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	void FormatUVal(uint iVal);
+	inline void FormatUVal(uint iVal);
 	/**
 	* @brief Print a llong value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	void FormatLLVal(llong iVal);
+	inline void FormatLLVal(llong iVal);
 	/**
 	* @brief Print a ullong value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	void FormatULLVal(ullong iVal);
+	inline void FormatULLVal(ullong iVal);
 	/**
 	* @brief Print a size_t (unsigned) value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	void FormatSTVal(size_t iVal);
+	inline void FormatSTVal(size_t iVal);
 	/**
 	* @brief Print a word value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	void FormatWVal(word iVal);
+	inline void FormatWVal(word iVal);
 	/**
 	* @brief Print a dword value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	void FormatDWVal(dword iVal);
-	/**
-	* @brief Changes the capitalization of CSString to upper.
-	*/
-	void MakeUpper();
-	/**
-	* @brief Changes the capitalization of CSString to lower.
-	*/
-	void MakeLower();
-	/**
-	* @brief Reverses the CSString.
-	*/
-	void Reverse();
+	inline void FormatDWVal(dword iVal);
 	///@}
 	/** @name String operations:
 	 */
@@ -278,7 +283,7 @@ public:
 	* @brief cast as const lpcstr.
 	* @return internal data pointer.
 	*/
-	operator lpctstr() const;
+	inline operator lpctstr() const;
 	/**
 	* @brief Compares the CSString to string pStr (strcmp wrapper).
 	*
@@ -289,7 +294,7 @@ public:
 	* @param pStr string to compare.
 	* @return <0 if te first character that not match has lower value in CSString than in pStr. 0 if hte contents of both are equal. >0 if the first character that does not match has greater value in CSString than pStr.
 	*/
-	int Compare(lpctstr pStr) const;
+	inline int Compare(lpctstr pStr) const;
 	/**
 	* @brief Compares the CSString to string pStr (case insensitive) (_strcmpi wrapper).
 	*
@@ -300,18 +305,18 @@ public:
 	* @param pStr string to compare.
 	* @return <0 if te first character that not match has lower value in CSString than in pStr. 0 if hte contents of both are equal. >0 if the first character that does not match has greater value in CSString than pStr.
 	*/
-	int CompareNoCase(lpctstr pStr) const;
+	inline int CompareNoCase(lpctstr pStr) const;
 	/**
 	* @brief Gets the internal pointer.
 	* @return Pointer to internal data.
 	*/
-	lpctstr GetPtr() const;
+	inline lpctstr GetPtr() const;
 	/**
 	* @brief Look for the first occurence of c in CSString.
 	* @param c character to look for.
 	* @return position of the character in CSString if any, -1 otherwise.
 	*/
-	int indexOf(tchar c);
+	inline int indexOf(tchar c);
 	/**
 	* @brief Look for the first occurence of c in CSString from a position.
 	* @param c character to look for.
@@ -324,7 +329,7 @@ public:
 	* @param str substring to look for.
 	* @return position of the substring in CSString if any, -1 otherwise.
 	*/
-	int indexOf(CSString str);
+	inline int indexOf(CSString str);
 	/**
 	* @brief Look for the first occurence of a substring in CSString from a position.
 	* @param str substring to look for.
@@ -337,7 +342,7 @@ public:
 	* @param c character to look for.
 	* @return position of the character in CSString if any, -1 otherwise.
 	*/
-	int lastIndexOf(tchar c);
+	inline int lastIndexOf(tchar c);
 	/**
 	* @brief Look for the last occurence of c in CSString from a position to the end.
 	* @param c character to look for.
@@ -350,7 +355,7 @@ public:
 	* @param str substring to look for.
 	* @return position of the substring in CSString if any, -1 otherwise.
 	*/
-	int lastIndexOf(CSString str);
+	inline int lastIndexOf(CSString str);
 	/**
 	* @brief Look for the last occurence of a substring in CSString from a position to the end.
 	* @param str substring to look for.
@@ -565,9 +570,208 @@ int Str_ParseCmds(tchar * pCmdLine, int64 * piCmd, int iMax, lpctstr pSep = NULL
 int Str_RegExMatch(lpctstr pPattern, lpctstr pText, tchar * lastError);
 ///@}
 
-void CharToMultiByteNonNull(byte*, const char* , size_t);
+void CharToMultiByteNonNull(byte * Dest, const char * Src, int MBytes);
 
 // extern tchar * Str_GetTemporary(int amount = 1);
 #define Str_GetTemp static_cast<AbstractSphereThread *>(ThreadHolder::current())->allocateBuffer
+
+
+/* Inline Methods Definitions */
+
+// CSString:: Constructors, Destructor, Asign operator.
+
+const CSString& CSString::operator=(lpctstr pStr)
+{
+	Copy(pStr);
+	return *this;
+}
+
+const CSString& CSString::operator=(const CSString &s)
+{
+	Copy(s.GetPtr());
+	return *this;
+}
+
+// CSString:: Capacity
+
+bool CSString::IsEmpty() const
+{
+	return (!m_iLength);
+}
+
+int CSString::GetLength() const
+{
+	return m_iLength;
+}
+
+// CSString:: Element access
+
+tchar CSString::operator[](int nIndex) const
+{
+	return GetAt(nIndex);
+}
+
+tchar & CSString::operator[](int nIndex)
+{
+	return ReferenceAt(nIndex);
+}
+
+tchar CSString::GetAt(int nIndex) const
+{
+	ASSERT(nIndex <= m_iLength);  // Allow to get the null char.
+	return m_pchData[nIndex];
+}
+
+tchar & CSString::ReferenceAt(int nIndex)
+{
+	ASSERT(nIndex < m_iLength);
+	return m_pchData[nIndex];
+}
+
+// CSString:: Modifiers
+
+const CSString& CSString::operator+=(lpctstr psz)
+{
+	Add(psz);
+	return(*this);
+}
+
+const CSString& CSString::operator+=(tchar ch)
+{
+	Add(ch);
+	return(*this);
+}
+
+void CSString::MakeUpper()
+{
+	_strupr(m_pchData);
+}
+
+void CSString::MakeLower()
+{
+	_strlwr(m_pchData);
+}
+
+void CSString::Reverse()
+{
+	STRREV(m_pchData);
+}
+
+// CSString:: Formatting
+
+void CSString::FormatHex(dword dwVal)
+{
+	// In principle, all values in sphere logic are signed...
+	// dwVal may contain a (signed) number "big" as the numeric representation of an unsigned ( +(INT_MAX*2) ),
+	// but in this case its bit representation would be considered as negative, yet we know it's a positive number.
+	// So if it's negative we MUST hexformat it as 64 bit int or reinterpreting it in a
+	// script WILL completely mess up
+	if (dwVal > (dword)INT_MIN)			// if negative (remember two's complement)
+		return FormatLLHex(dwVal);
+	Format("0%" PRIx32, dwVal);
+}
+
+void CSString::FormatLLHex(ullong dwVal)
+{
+	Format("0%" PRIx64, dwVal);
+}
+
+void CSString::FormatCVal(char iVal)
+{
+	Format("%" PRId8, iVal);
+}
+
+void CSString::FormatUCVal(uchar iVal)
+{
+	Format("%" PRIu8, iVal);
+}
+
+void CSString::FormatSVal(short iVal)
+{
+	Format("%" PRId16, iVal);
+}
+
+void CSString::FormatUSVal(ushort iVal)
+{
+	Format("%" PRIu16, iVal);
+}
+
+void CSString::FormatVal(int iVal)
+{
+	Format("%" PRId32, iVal);
+}
+
+void CSString::FormatUVal(uint iVal)
+{
+	Format("%" PRIu32, iVal);
+}
+
+void CSString::FormatLLVal(llong iVal)
+{
+	Format("%" PRId64, iVal);
+}
+
+void CSString::FormatULLVal(ullong iVal)
+{
+	Format("%" PRIu64, iVal);
+}
+
+void CSString::FormatSTVal(size_t iVal)
+{
+	Format("%" PRIuSIZE_T, iVal);
+}
+
+void CSString::FormatWVal(word iVal)
+{
+	Format("0%" PRIx16, iVal);
+}
+
+void CSString::FormatDWVal(dword iVal)
+{
+	Format("0%" PRIx32, iVal);
+}
+
+// CSString:: String operations
+
+CSString::operator lpctstr() const
+{
+	return GetPtr();
+}
+
+int CSString::Compare(lpctstr pStr) const
+{
+	return strcmp(m_pchData, pStr);
+}
+
+int CSString::CompareNoCase(lpctstr pStr) const
+{
+	return strcmpi(m_pchData, pStr);
+}
+
+lpctstr CSString::GetPtr() const
+{
+	return m_pchData;
+}
+
+int CSString::indexOf(tchar c)
+{
+	return indexOf(c, 0);
+}
+
+int CSString::indexOf(CSString str)
+{
+	return indexOf(str, 0);
+}
+
+int CSString::lastIndexOf(tchar c)
+{
+	return lastIndexOf(c, 0);
+}
+
+int CSString::lastIndexOf(CSString str)
+{
+	return lastIndexOf(str, 0);
+}
+
 
 #endif // _INC_CSSTRING_H

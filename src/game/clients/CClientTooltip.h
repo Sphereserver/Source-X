@@ -1,3 +1,7 @@
+/**
+* @file CClientTooltip.h
+*
+*/
 
 #pragma once
 #ifndef _INC_CCLIENTTOOLTIP_H
@@ -25,5 +29,6 @@ private:
 public:
     void __cdecl FormatArgs(lpctstr format, ...) __printfargs(2,3);
 };
+
 
 #endif // _INC_CCLIENTTOOLTIP_H

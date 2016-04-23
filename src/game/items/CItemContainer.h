@@ -1,3 +1,7 @@
+/**
+* @file CItemContainer.h
+*
+*/
 
 #pragma once
 #ifndef _INC_CITEMCONTAINER_H

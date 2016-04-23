@@ -78,7 +78,7 @@ class NetState
 {
 protected:
 	int m_id; // net id
-	CGSocket m_socket; // socket
+	CSSocket m_socket; // socket
 	CClient* m_client; // client
 	CSocketAddress m_peerAddress; // client address
 #ifdef _MTNETWORK

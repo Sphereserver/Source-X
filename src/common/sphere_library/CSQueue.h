@@ -6,7 +6,7 @@
 #ifndef _INC_CSQUEUE_H
 #define _INC_CSQUEUE_H
 
-#include "./CSMemBlock.h"
+#include "CSMemBlock.h"
 
 /**
 * @brief FIFO data buffer

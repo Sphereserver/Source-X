@@ -6,14 +6,7 @@
 #ifndef _INC_CSFILE_H
 #define _INC_CSFILE_H
 
-#ifndef _WIN32
-	#include <sys/types.h>
-	#include <sys/stat.h>
-	#include <fcntl.h>
-	#include <unistd.h>
-#endif
-
-#include "./CSString.h"
+#include "CSString.h"
 
 #ifndef OF_WRITE
 	#define OF_READ             O_RDONLY
@@ -412,7 +405,7 @@ public:
 	FILE * m_pStream;		///< The current open script type file.
 protected:
 #ifdef _WIN32
-	bool	bNoBuffer;	///< TODOC.
+	bool	bNoBuffer;		///< TODOC.
 #endif
 };
 

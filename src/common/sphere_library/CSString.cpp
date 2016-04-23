@@ -76,18 +76,6 @@ CSString::CSString(const CSString &s)
 	Copy(s.GetPtr());
 }
 
-const CSString& CSString::operator=(lpctstr pStr)
-{
-	Copy(pStr);
-	return *this;
-}
-
-const CSString& CSString::operator=(const CSString &s)
-{
-	Copy(s.GetPtr());
-	return *this;
-}
-
 // CSString:: Capacity
 
 void CSString::Empty(bool bTotal)
@@ -105,11 +93,6 @@ void CSString::Empty(bool bTotal)
 		}
 	}
 	else m_iLength = 0;
-}
-
-bool CSString::IsEmpty() const
-{
-	return (!m_iLength);
 }
 
 bool CSString::IsValid() const
@@ -147,34 +130,7 @@ int CSString::SetLength(int iNewLength)
 	return m_iLength;
 }
 
-int CSString::GetLength() const
-{
-	return m_iLength;
-}
-
 // CSString:: Element access
-
-tchar CSString::operator[](int nIndex) const
-{
-	return GetAt(nIndex);
-}
-
-tchar & CSString::operator[](int nIndex)
-{
-	return ReferenceAt(nIndex);
-}
-
-tchar CSString::GetAt(int nIndex) const
-{
-	ASSERT(nIndex <= m_iLength);  // Allow to get the null char.
-	return m_pchData[nIndex];
-}
-
-tchar & CSString::ReferenceAt(int nIndex)
-{
-	ASSERT(nIndex < m_iLength);
-	return m_pchData[nIndex];
-}
 
 void CSString::SetAt(int nIndex, tchar ch)
 {
@@ -185,18 +141,6 @@ void CSString::SetAt(int nIndex, tchar ch)
 }
 
 // CSString:: Modifiers
-
-const CSString& CSString::operator+=(lpctstr psz)
-{
-	Add(psz);
-	return(*this);
-}
-
-const CSString& CSString::operator+=(tchar ch)
-{
-	Add(ch);
-	return(*this);
-}
 
 void CSString::Add(tchar ch)
 {
@@ -225,84 +169,14 @@ void CSString::Copy(lpctstr pszStr)
 	}
 }
 
+// CSString:: Formatting
+
 void _cdecl CSString::Format(lpctstr pStr, ...)
 {
 	va_list vargs;
 	va_start(vargs, pStr);
 	FormatV(pStr, vargs);
 	va_end(vargs);
-}
-
-void CSString::FormatHex(dword dwVal)
-{
-	// In principle, all values in sphere logic are signed...
-	// dwVal may contain a (signed) number "big" as the numeric representation of an unsigned ( +(INT_MAX*2) ),
-	// but in this case its bit representation would be considered as negative, yet we know it's a positive number.
-	// So if it's negative we MUST hexformat it as 64 bit int or reinterpreting it in a
-	// script WILL completely mess up
-	if (dwVal > (dword)INT_MIN)			// if negative (remember two's complement)
-		return FormatLLHex(dwVal);
-	Format("0%" PRIx32, dwVal);
-}
-
-void CSString::FormatLLHex(ullong dwVal)
-{
-	Format("0%" PRIx64 , dwVal);
-}
-
-void CSString::FormatCVal(char iVal)
-{
-	Format("%" PRId8, iVal);
-}
-
-void CSString::FormatUCVal(uchar iVal)
-{
-	Format("%" PRIu8, iVal);
-}
-
-void CSString::FormatSVal(short iVal)
-{
-	Format("%" PRId16, iVal);
-}
-
-void CSString::FormatUSVal(ushort iVal)
-{
-	Format("%" PRIu16, iVal);
-}
-
-void CSString::FormatVal(int iVal)
-{
-	Format("%" PRId32, iVal);
-}
-
-void CSString::FormatUVal(uint iVal)
-{
-	Format("%" PRIu32, iVal);
-}
-
-void CSString::FormatLLVal(llong iVal)
-{
-	Format("%" PRId64 , iVal);
-}
-
-void CSString::FormatULLVal(ullong iVal)
-{
-	Format("%" PRIu64 , iVal);
-}
-
-void CSString::FormatSTVal(size_t iVal)
-{
-	Format("%" PRIuSIZE_T, iVal);
-}
-
-void CSString::FormatWVal(word iVal)
-{
-	Format("0%" PRIx16, iVal);
-}
-
-void CSString::FormatDWVal(dword iVal)
-{
-	Format("0%" PRIx32, iVal);
 }
 
 void CSString::FormatV(lpctstr pszFormat, va_list args)
@@ -312,47 +186,7 @@ void CSString::FormatV(lpctstr pszFormat, va_list args)
 	Copy(pszTemp);
 }
 
-void CSString::MakeUpper()
-{
-	_strupr(m_pchData);
-}
-
-void CSString::MakeLower()
-{
-	_strlwr(m_pchData);
-}
-
-void CSString::Reverse()
-{
-	STRREV(m_pchData);
-}
-
 // CSString:: String operations
-
-CSString::operator lpctstr() const
-{
-	return GetPtr();
-}
-
-int CSString::Compare(lpctstr pStr) const
-{
-	return strcmp(m_pchData, pStr);
-}
-
-int CSString::CompareNoCase(lpctstr pStr) const
-{
-	return strcmpi(m_pchData, pStr);
-}
-
-lpctstr CSString::GetPtr() const
-{
-	return m_pchData;
-}
-
-int CSString::indexOf(tchar c)
-{
-	return indexOf(c, 0);
-}
 
 int CSString::indexOf(tchar c, int offset)
 {
@@ -369,11 +203,6 @@ int CSString::indexOf(tchar c, int offset)
 			return i;
 	}
 	return -1;
-}
-
-int CSString::indexOf(CSString str)
-{
-	return indexOf(str, 0);
 }
 
 int CSString::indexOf(CSString str, int offset)
@@ -426,11 +255,6 @@ int CSString::indexOf(CSString str, int offset)
 	return -1;
 }
 
-int CSString::lastIndexOf(tchar c)
-{
-	return lastIndexOf(c, 0);
-}
-
 int CSString::lastIndexOf(tchar c, int from)
 {
 	if (from < 0)
@@ -446,11 +270,6 @@ int CSString::lastIndexOf(tchar c, int from)
 			return i;
 	}
 	return -1;
-}
-
-int CSString::lastIndexOf(CSString str)
-{
-	return lastIndexOf(str, 0);
 }
 
 int CSString::lastIndexOf(CSString str, int from)
@@ -883,10 +702,8 @@ MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText)
 	{
 		// if this is the end of the text then this is the end of the match
 		if (!*pText)
-		{
-			return (*pPattern == '*' && *++pPattern == '\0') ?
-				   MATCH_VALID : MATCH_ABORT;
-		}
+			return (*pPattern == '*' && *++pPattern == '\0') ? MATCH_VALID : MATCH_ABORT;
+
 		// determine and react to pattern type
 		switch (*pPattern)
 		{
@@ -918,9 +735,7 @@ MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText)
 				{
 					// if end of construct then fLoop is done
 					if (*pPattern == ']')
-					{
 						break;
-					}
 
 					// matching a '!', '^', '-', '\' or a ']'
 					if (*pPattern == '\\')
@@ -1136,7 +951,8 @@ int Str_RegExMatch(lpctstr pPattern, lpctstr pText, tchar * lastError)
 	}
 }
 
-void CharToMultiByteNonNull(byte * Dest, const char * Src, int MBytes) {
+void CharToMultiByteNonNull(byte * Dest, const char * Src, int MBytes)
+{
 	for (int idx = 0; idx != MBytes * 2; idx += 2) {
 		if (Src[idx / 2] == '\0')
 			break;

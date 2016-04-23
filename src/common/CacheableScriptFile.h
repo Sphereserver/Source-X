@@ -7,8 +7,8 @@
 #ifndef _INC_CACHEABLESCRIPTFILE_H
 #define _INC_CACHEABLESCRIPTFILE_H
 
-#include "./sphere_library/CSFile.h"
 #include <string>
+#include "sphere_library/CSFile.h"
 
 
 class CacheableScriptFile : public CSFileText

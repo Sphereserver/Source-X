@@ -7,6 +7,7 @@
 #include "CResource.h"
 #include "triggers.h"
 
+
 //*******************************************
 // -CValueRangeDef
 

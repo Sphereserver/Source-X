@@ -1,6 +1,8 @@
-//
-// CObjBase.h
-//
+/**
+* @file CObjBase.h
+*
+*/
+
 
 #pragma once
 #ifndef _INC_COBJBASE_H
@@ -478,7 +480,7 @@ DIR_TYPE GetDirStr( lpctstr pszDir );
 extern void DeleteKey(lpctstr pszKey);
 
 
-/* inline functions */
+/* Inline Methods Definitions */
 
 inline CObjBase* CObjBase::GetPrev() const
 {

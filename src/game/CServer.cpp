@@ -1619,7 +1619,7 @@ void CServer::SetResyncPause(bool fPause, CTextConsole * pSrc, bool bMessage)
 
 //*********************************************************
 
-bool CServer::SocketsInit( CGSocket & socket )
+bool CServer::SocketsInit( CSSocket & socket )
 {
 	ADDTOCALLSTACK("CServer::SocketsInit");
 	// Initialize socket
@@ -1862,7 +1862,7 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 		}
 	}
 
-	EXC_SET("finilizing");
+	EXC_SET("finalizing");
 #ifdef _WIN32
 	char *pszTemp = Str_GetTemp();
 	sprintf(pszTemp, SPHERE_TITLE " V" SPHERE_VERSION " - %s", GetName());
