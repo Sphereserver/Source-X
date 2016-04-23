@@ -70,13 +70,14 @@ typedef	uint16_t		uint16;
 typedef	uint32_t		uint32;
 typedef	uint64_t		uint64;
 
-
+// We have INTPTR_MAX and INTPTR_MIN
+/*
 #ifdef _32B
 	#define POINTER_MAX		UINT32_MAX
 #else // !_32B
 	#define POINTER_MAX		UINT64_MAX
 #endif // _32B
-
+*/
 
 #ifndef _WIN32			//	assume unix if !_WIN32
 
@@ -102,7 +103,7 @@ typedef	uint64_t		uint64;
 #else	// _WIN32
 	
 	#include <basetsd.h>
-	typedef SSIZE_T		ssize_t;
+	typedef SSIZE_T				ssize_t;
 	
 	// printf format identifiers
 	#define PRIuSIZE_T			"Iu"		// windows uses %Iu to format size_t

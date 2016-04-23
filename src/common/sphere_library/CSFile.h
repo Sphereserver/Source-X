@@ -8,6 +8,10 @@
 
 #include "CSString.h"
 
+#ifndef _WIN32
+	 #include <fcntl.h>
+#endif
+
 #ifndef OF_WRITE
 	#define OF_READ             O_RDONLY
 	#define OF_WRITE            O_WRONLY

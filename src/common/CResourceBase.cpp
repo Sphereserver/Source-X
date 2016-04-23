@@ -7,7 +7,7 @@
 #include "../game/triggers.h"
 #include "CException.h"
 #include "CExpression.h"
-#include "./sphere_library/CSFileList.h"
+#include "sphere_library/CSFileList.h"
 #include "CResourceBase.h"
 
 
@@ -765,7 +765,7 @@ void CResourceScript::Init()
 {
 	m_iOpenCount = 0;
 	m_timeLastAccess.Init();
-	m_dwSize = (std::numeric_limits<dword>::max)();			// Compare to see if this has changed.
+	m_dwSize = UINT32_MAX;		// Compare to see if this has changed.
 }
 
 bool CResourceScript::CheckForChange()
@@ -812,7 +812,7 @@ CResourceScript::CResourceScript()
 
 bool CResourceScript::IsFirstCheck() const
 {
-	return( m_dwSize == (std::numeric_limits<dword>::max)() && ! m_dateChange.IsTimeValid());
+	return( m_dwSize == UINT32_MAX && ! m_dateChange.IsTimeValid());
 }
 
 void CResourceScript::ReSync()

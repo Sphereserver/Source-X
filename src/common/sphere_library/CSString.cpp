@@ -2,8 +2,7 @@
 * @file CSString.cpp
 */
 
-#include <climits>
-#include "./CSString.h"
+#include "CSString.h"
 #include "../../sphere/ProfileTask.h"
 #include "../../sphere/strings.h"
 #include "../regex/deelx.h"

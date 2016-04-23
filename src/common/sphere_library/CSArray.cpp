@@ -1,7 +1,6 @@
 
-#include <climits>
 #include "../../../sphere/threads.h"
-#include "./CSArray.h"
+#include "CSArray.h"
 
 // CObListRec:: Constructors, Destructor, Asign operator.
 

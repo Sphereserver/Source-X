@@ -2,7 +2,7 @@
 * @file CQueue.cpp
 */
 
-#include "./CSQueue.h"
+#include "CSQueue.h"
 #include "../../sphere/threads.h"
 
 // CSQueueBytes:: Constructors, Destructor, Asign operator.

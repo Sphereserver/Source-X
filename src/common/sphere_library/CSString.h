@@ -666,7 +666,7 @@ void CSString::FormatHex(dword dwVal)
 	// but in this case its bit representation would be considered as negative, yet we know it's a positive number.
 	// So if it's negative we MUST hexformat it as 64 bit int or reinterpreting it in a
 	// script WILL completely mess up
-	if (dwVal > (dword)INT_MIN)			// if negative (remember two's complement)
+	if (dwVal > (dword)INT32_MIN)			// if negative (remember two's complement)
 		return FormatLLHex(dwVal);
 	Format("0%" PRIx32, dwVal);
 }

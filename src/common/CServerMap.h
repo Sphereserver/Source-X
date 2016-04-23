@@ -12,7 +12,7 @@
 #include "../game/uo_files/uofiles_macros.h"
 #include "../game/uo_files/uofiles_types.h"
 #include "../game/CServerTime.h"
-#include "./sphere_library/CSArray.h"
+#include "sphere_library/CSArray.h"
 #include "CRect.h"
 
 class CCachedMulItem

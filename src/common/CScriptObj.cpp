@@ -18,7 +18,7 @@
 #include "../game/CScriptProfiler.h"
 #include "../game/CWorld.h"
 #include "../sphere/ProfileTask.h"
-#include "./sphere_library/CSString.h"
+#include "sphere_library/CSString.h"
 #include "CException.h"
 #include "CExpression.h"
 #include "CUID.h"

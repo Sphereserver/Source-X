@@ -855,7 +855,7 @@ void CSTypedArray<TYPE, ARG_TYPE>::SetCount( size_t nNewCount )
 template<class TYPE, class ARG_TYPE>
 inline size_t CSTypedArray<TYPE, ARG_TYPE>::BadIndex() const
 {
-	return (std::numeric_limits<size_t>::max)();
+	return INTPTR_MAX;
 }
 
 template<class TYPE, class ARG_TYPE>

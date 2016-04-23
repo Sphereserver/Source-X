@@ -9,8 +9,8 @@
 
 #ifdef _WIN32
 
-#include "./CSString.h"
-#include "./spherecom.h"
+#include "CSString.h"
+#include "spherecom.h"
 #include <RICHEDIT.H>	// CRichEditCtrl
 
 

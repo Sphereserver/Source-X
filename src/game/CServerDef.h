@@ -6,7 +6,7 @@
 #ifndef _INC_CSERVERDEF_H
 #define _INC_CSERVERDEF_H
 
-#include "./sphere_library/CSTime.h"
+#include "sphere_library/CSTime.h"
 #include "../common/CEncrypt.h"
 #include "../common/CScriptObj.h"
 #include "../common/CSocket.h"

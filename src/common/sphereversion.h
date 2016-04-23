@@ -8,7 +8,7 @@
 #define _INC_SPHEREVERSION_H
 
 #ifdef _GITVERSION
-	#include "./version/GitRevision.h"
+	#include "version/GitRevision.h"
 	#define SPHERE_VER_BUILD			__GITREVISION__
 #else
 	#define SPHERE_VER_BUILD			0

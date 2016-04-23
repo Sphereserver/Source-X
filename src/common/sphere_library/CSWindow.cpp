@@ -2,7 +2,7 @@
 // CSWindow.cpp
 //
 
-#include "./CSWindow.h"
+#include "CSWindow.h"
 
 #ifdef _WIN32
 

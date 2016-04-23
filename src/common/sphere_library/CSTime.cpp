@@ -4,8 +4,8 @@
 // Replace the MFC CTime function. Must be usable with file system.
 //
 
-#include "./CSTime.h"
-#include "./CSString.h"
+#include "CSTime.h"
+#include "CSString.h"
 #include "../../game/CLog.h"
 #include "../../sphere/threads.h"
 #include "../spherecom.h"

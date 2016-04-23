@@ -3,8 +3,8 @@
 #ifndef _INC_CUOINSTALL_H
 #define _INC_CUOINSTALL_H
 
-#include "./sphere_library/CSArray.h"
-#include "./sphere_library/CSFile.h"
+#include "sphere_library/CSArray.h"
+#include "sphere_library/CSFile.h"
 #include "CsvFile.h"
 #include "../game/uo_files/CUOIndexRec.h"
 #include "../game/uo_files/CUOVersionBlock.h"

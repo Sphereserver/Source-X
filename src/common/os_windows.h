@@ -22,20 +22,10 @@
 #include <process.h>
 
 /*	thread-specific definitions  */
-#define THREAD_ENTRY_RET	void
-
-#ifndef STDFUNC_FILENO
-	#define STDFUNC_FILENO _fileno
-#endif
-
-#ifndef STDFUNC_GETPID
-	#define STDFUNC_GETPID _getpid
-#endif
-
-#ifndef STDFUNC_UNLINK
-	#define STDFUNC_UNLINK _unlink
-#endif
-/* */
+#define THREAD_ENTRY_RET		void
+#define STDFUNC_FILENO			_fileno
+#define STDFUNC_GETPID			_getpid
+#define STDFUNC_UNLINK			_unlink
 
 // since the only way to make windows not to buffer file is to remove buffer, we
 // use this instead flushing
@@ -43,8 +33,8 @@
 #define FILE_FLUSH(_x_)
 
 
-#ifndef _MSC_VER
-	#define _cdecl __cdecl
+#ifndef _MSC_VER	// No Microsoft compiler
+	#define _cdecl	__cdecl
 	/*
 	There is a problem with the UNREFERENCED_PARAMETER macro from mingw and sphereserver.
 	operator= is on many clases private and the UNREFERENCED_PARAMETER macro from mingw is (P)=(P),

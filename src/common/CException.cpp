@@ -168,7 +168,7 @@ void Assert_CheckFail( lpctstr pExp, lpctstr pFile, long lLine )
 
 #if defined(_WIN32) && !defined(_DEBUG)
 
-#include "./crashdump/crashdump.h"
+#include "crashdump/crashdump.h"
 	
 int _cdecl _purecall()
 {

@@ -17,7 +17,7 @@
 #include <aio.h>
 #include <exception>
 #include <cctype>
-#include "CSTime.h"
+#include "sphere_library/CSTime.h"
 
 
 //#define SLASH_PATH	"/"
@@ -26,31 +26,21 @@
 	#define _MAX_PATH   260 	// max. length of full pathname
 #endif
 
+#define _cdecl
+
 /*	thread-specific definitions  */
-#ifndef STDFUNC_FILENO
-	#define STDFUNC_FILENO fileno
-#endif
-
-#ifndef STDFUNC_GETPID
-	#define STDFUNC_GETPID getpid
-#endif
-
-#ifndef STDFUNC_UNLINK
-	#define STDFUNC_UNLINK unlink
-#endif
+#define THREAD_ENTRY_RET		void *
+#define STDFUNC_FILENO			fileno
+#define STDFUNC_GETPID			getpid
+#define STDFUNC_UNLINK			unlink
+#define CRITICAL_SECTION		pthread_mutex_t
+#define Sleep(mSec)				usleep(mSec*1000)	// arg is microseconds = 1/1000000
+#define SleepEx(mSec, unused)	usleep(mSec*1000)	// arg is microseconds = 1/1000000
 /*  */
 
-#ifndef ERROR_SUCCESS
-	#define ERROR_SUCCESS	0
-#endif
-
-#ifndef UNREFERENCED_PARAMETER
-	#define UNREFERENCED_PARAMETER(P)	(void)(P)
-#endif
-
-#ifndef HKEY_LOCAL_MACHINE
-	#define HKEY_LOCAL_MACHINE	(( HKEY ) 0x80000002 )
-#endif
+#define ERROR_SUCCESS	0
+#define UNREFERENCED_PARAMETER(P)	(void)(P)
+#define HKEY_LOCAL_MACHINE			(( HKEY ) 0x80000002 )
 
 #define MAKEWORD(low,high)	((word)(((byte)(low))|(((word)((byte)(high)))<<8)))
 //#define MAKELONG(low,high)	((long)(((word)(low))|(((dword)((word)(high)))<<16)))
@@ -59,24 +49,12 @@
 #define LOBYTE(w)	((byte)((dword)(w) &  0xff))
 #define HIBYTE(w)	((byte)((dword)(w) >> 8))
 
-#ifndef sign
-	#define sign(n) (((n) < 0) ? -1 : (((n) > 0) ? 1 : 0))
-	//#define abs(n) (((n) < 0) ? (-(n)) : (n))
-#endif
-
-#define _cdecl
-//#define true	1
-//#define false	0
+#define sign(n) (((n) < 0) ? -1 : (((n) > 0) ? 1 : 0))
+//#define abs(n) (((n) < 0) ? (-(n)) : (n))
 
 // unix flushing works perfectly, so we do not need disabling buffer
 #define	FILE_SETNOCACHE(_x_)
 #define FILE_FLUSH(_x_)			fflush(_x_)
-
-//	thread-specific definitions
-#define THREAD_ENTRY_RET void *
-#define CRITICAL_SECTION pthread_mutex_t
-#define Sleep(mSec)	usleep(mSec*1000)					// arg is microseconds = 1/1000000
-#define SleepEx(mSec, unused)		usleep(mSec*1000)	// arg is microseconds = 1/1000000
 
 
 inline void _strupr( tchar * pszStr )

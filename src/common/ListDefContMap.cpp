@@ -1,5 +1,3 @@
-#include <climits>
-#include <limits>
 
 #include "../sphere/strings.h"
 #include "../sphere/threads.h"
@@ -327,9 +325,8 @@ int CListDefCont::FindValNum( int64 iVal, size_t nStartIndex /* = 0 */ ) const
 
 bool CListDefCont::AddElementNum(int64 iVal)
 {
-#undef max
 	ADDTOCALLSTACK("CListDefCont::AddElementNum");
-	if ( (m_listElements.size() + 1) >= std::numeric_limits<size_t>::max() )
+	if ( (m_listElements.size() + 1) >= INTPTR_MAX )
 		return false;
 
 	m_listElements.push_back( new CListDefContNum(m_Key.GetPtr(), iVal) );
@@ -340,9 +337,8 @@ bool CListDefCont::AddElementNum(int64 iVal)
 bool CListDefCont::AddElementStr(lpctstr pszKey)
 {
 	ADDTOCALLSTACK("CListDefCont::AddElementStr");
-	if ( (m_listElements.size() + 1) >= std::numeric_limits<size_t>::max() )
+	if ( (m_listElements.size() + 1) >= INTPTR_MAX )
 		return false;
-#define max maximum
 
 	REMOVE_QUOTES( pszKey );
 
