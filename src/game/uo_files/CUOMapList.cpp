@@ -1,4 +1,4 @@
-#include "../../common/CSphereMap.h"
+#include "../../common/CServerMap.h"
 #include "../../common/CUOInstall.h"
 #include "../CResource.h"
 #include "CUOMapList.h"
@@ -38,7 +38,7 @@ void CUOMapList::Init()
     }
 
     if ( g_Cfg.m_fUseMapDiffs && !m_pMapDiffCollection )
-        m_pMapDiffCollection = new CMapDiffCollection();
+        m_pMapDiffCollection = new CServerMapDiffCollection();
 }
 
 bool CUOMapList::Load(int map, char *args)

@@ -10,7 +10,7 @@
 #include "../common/sphere_library/CSAssoc.h"
 #include "../common/sphere_library/CSArray.h"
 #include "../common/CExpression.h"
-#include "../common/CSphereMap.h"
+#include "../common/CServerMap.h"
 #include "../common/CResourceBase.h"
 #include "../common/CRegion.h"
 #include "../common/sphereproto.h"

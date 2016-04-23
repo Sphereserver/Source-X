@@ -203,7 +203,7 @@ void CSectorBase::CheckMapBlockCache()
 }
 
 
-const CSphereMapBlock * CSectorBase::GetMapBlock( const CPointMap & pt )
+const CServerMapBlock * CSectorBase::GetMapBlock( const CPointMap & pt )
 {
 	ADDTOCALLSTACK("CSectorBase::GetMapBlock");
 	// Get a map block from the cache. load it if not.
@@ -219,7 +219,7 @@ const CSphereMapBlock * CSectorBase::GetMapBlock( const CPointMap & pt )
 		return NULL;
 	}
 
-	CSphereMapBlock * pMapBlock;
+	CServerMapBlock * pMapBlock;
 
 	// Find it in cache.
 	int iBlock = pntBlock.GetPointSortIndex();
@@ -233,7 +233,7 @@ const CSphereMapBlock * CSectorBase::GetMapBlock( const CPointMap & pt )
 	// else load it.
 	try
 	{
-		pMapBlock = new CSphereMapBlock(pntBlock);
+		pMapBlock = new CServerMapBlock(pntBlock);
 		ASSERT(pMapBlock != NULL);
 	}
 	catch ( const CSError& e )

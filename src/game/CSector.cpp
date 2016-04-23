@@ -1192,7 +1192,7 @@ void CSector::OnTick(int iPulseCount)
 	EXC_SET("check map cache");
 	if ( fSleeping || ! ( iPulseCount & 0x7f ))	// 30 seconds or so.
 	{
-		// delete the static CSphereMapBlock items that have not been used recently.
+		// delete the static CServerMapBlock items that have not been used recently.
 		m_iMapBlockCacheTime = ( fSleeping ? 0 : g_Cfg.m_iMapCacheTime );
 		CheckMapBlockCache();
 	}

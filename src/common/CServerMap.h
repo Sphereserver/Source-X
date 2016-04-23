@@ -1,5 +1,5 @@
 /**
-* @file CSphereMap.h
+* @file CServerMap.h
 */
 
 #pragma once
@@ -15,18 +15,18 @@
 #include "./sphere_library/CSArray.h"
 #include "CRect.h"
 
-class CSphereCachedMulItem
+class CCachedMulItem
 {
 private:
 	CServerTime m_timeRef;		// When in world.GetTime() was this last referenced.
 public:
 	static const char *m_sClassName;
-	CSphereCachedMulItem();
-	virtual ~CSphereCachedMulItem();
+	CCachedMulItem();
+	virtual ~CCachedMulItem();
 
 private:
-	CSphereCachedMulItem(const CSphereCachedMulItem& copy);
-	CSphereCachedMulItem& operator=(const CSphereCachedMulItem& other);
+	CCachedMulItem(const CCachedMulItem& copy);
+	CCachedMulItem& operator=(const CCachedMulItem& other);
 
 public:
 	void InitCacheTime();
@@ -35,7 +35,7 @@ public:
 	int64 GetCacheAge() const;
 };
 
-class CSphereStaticsBlock
+class CServerStaticsBlock
 {
 private:
 	size_t m_iStatics;
@@ -45,12 +45,12 @@ public:
 	void LoadStatics(size_t iCount, CUOStaticItemRec * pStatics);
 public:
 	static const char *m_sClassName;
-	CSphereStaticsBlock();
-	~CSphereStaticsBlock();
+	CServerStaticsBlock();
+	~CServerStaticsBlock();
 
 private:
-	CSphereStaticsBlock(const CSphereStaticsBlock& copy);
-	CSphereStaticsBlock& operator=(const CSphereStaticsBlock& other);
+	CServerStaticsBlock(const CServerStaticsBlock& copy);
+	CServerStaticsBlock& operator=(const CServerStaticsBlock& other);
 
 public:
 	size_t GetStaticQty() const;
@@ -58,14 +58,14 @@ public:
 	bool IsStaticPoint( size_t i, int xo, int yo ) const;
 };
 
-struct CSphereMapBlocker
+struct CServerMapBlocker
 {
 	dword m_dwBlockFlags;	// How does this item block ? CAN_I_PLATFORM
 	dword m_dwTile;			// TERRAIN_QTY + id.
-	char m_z;		// Top of a solid object. or bottom of non blocking one.
+	char m_z;				// Top of a solid object. or bottom of non blocking one.
 };
 
-struct CSphereMapBlockState
+struct CServerMapBlockState
 {
 	// Go through the list of stuff at this location to decide what is  blocking us and what is not.
 	//  dwBlockFlags = what we can pass thru. doors, water, walls ?
@@ -85,17 +85,17 @@ struct CSphereMapBlockState
 	
 	height_t m_zClimbHeight;	// return item climb height here
 	
-	CSphereMapBlocker m_Top;
-	CSphereMapBlocker m_Bottom;	// What i would be standing on.
-	CSphereMapBlocker m_Lowest;	// the lowest item we have found.	
+	CServerMapBlocker m_Top;
+	CServerMapBlocker m_Bottom;	// What i would be standing on.
+	CServerMapBlocker m_Lowest;	// the lowest item we have found.	
 
 public:
-	CSphereMapBlockState( dword dwBlockFlags, char m_z, int iHeight = PLAYER_HEIGHT, height_t zHeight = PLAYER_HEIGHT );
-	CSphereMapBlockState( dword dwBlockFlags, char m_z, int iHeight, char zClimb, height_t zHeight = PLAYER_HEIGHT );
+	CServerMapBlockState( dword dwBlockFlags, char m_z, int iHeight = PLAYER_HEIGHT, height_t zHeight = PLAYER_HEIGHT );
+	CServerMapBlockState( dword dwBlockFlags, char m_z, int iHeight, char zClimb, height_t zHeight = PLAYER_HEIGHT );
 
 private:
-	CSphereMapBlockState(const CSphereMapBlockState& copy);
-	CSphereMapBlockState& operator=(const CSphereMapBlockState& other);
+	CServerMapBlockState(const CServerMapBlockState& copy);
+	CServerMapBlockState& operator=(const CServerMapBlockState& other);
 
 public:
 	bool IsUsableZ( char zBottom, height_t zHeightEstimate ) const;
@@ -106,7 +106,7 @@ public:
 	static lpctstr GetTileName( dword dwID );
 };
 
-struct CMapDiffBlock
+struct CServerMapDiffBlock
 {
 	// A patched map block
 	CUOStaticItemRec * m_pStaticsBlock;		// Patched statics
@@ -115,52 +115,52 @@ struct CMapDiffBlock
 	dword m_BlockId;						// Block represented
 	int m_map;	// Map this block is from
 
-	CMapDiffBlock(dword dwBlockId, int map);
+	CServerMapDiffBlock(dword dwBlockId, int map);
 
-	~CMapDiffBlock();
+	~CServerMapDiffBlock();
 
 private:
-	CMapDiffBlock(const CMapDiffBlock& copy);
-	CMapDiffBlock& operator=(const CMapDiffBlock& other);
+	CServerMapDiffBlock(const CServerMapDiffBlock& copy);
+	CServerMapDiffBlock& operator=(const CServerMapDiffBlock& other);
 };
 
-class CMapDiffBlockArray : public CSObjSortArray< CMapDiffBlock*, dword >
+class CServerMapDiffBlockArray : public CSObjSortArray< CServerMapDiffBlock*, dword >
 {
 public:
-	int CompareKey( dword id, CMapDiffBlock* pBase, bool fNoSpaces ) const;
+	int CompareKey( dword id, CServerMapDiffBlock* pBase, bool fNoSpaces ) const;
 
 public:
-	CMapDiffBlockArray() { };
+	CServerMapDiffBlockArray() { };
 private:
-	CMapDiffBlockArray(const CMapDiffBlockArray& copy);
-	CMapDiffBlockArray& operator=(const CMapDiffBlockArray& other);
+	CServerMapDiffBlockArray(const CServerMapDiffBlockArray& copy);
+	CServerMapDiffBlockArray& operator=(const CServerMapDiffBlockArray& other);
 };
 
-class CMapDiffCollection
+class CServerMapDiffCollection
 {
 	// This class will be used to access mapdiff data
 private:
 	bool m_bLoaded;
 
-	CMapDiffBlockArray m_pMapDiffBlocks[256];
-	CMapDiffBlock * GetNewBlock( dword dwBlockId, int map );
+	CServerMapDiffBlockArray m_pMapDiffBlocks[256];
+	CServerMapDiffBlock * GetNewBlock( dword dwBlockId, int map );
 	void LoadMapDiffs();
 
 public:
-	CMapDiffCollection();
-	~CMapDiffCollection();
+	CServerMapDiffCollection();
+	~CServerMapDiffCollection();
 
 private:
-	CMapDiffCollection(const CMapDiffCollection& copy);
-	CMapDiffCollection& operator=(const CMapDiffCollection& other);
+	CServerMapDiffCollection(const CServerMapDiffCollection& copy);
+	CServerMapDiffCollection& operator=(const CServerMapDiffCollection& other);
 
 public:
 	void Init();
-	CMapDiffBlock * GetAtBlock( int bx, int by, int map );
-	CMapDiffBlock * GetAtBlock( dword dwBlockId, int map );
+	CServerMapDiffBlock * GetAtBlock( int bx, int by, int map );
+	CServerMapDiffBlock * GetAtBlock( dword dwBlockId, int map );
 };
 
-class CSphereMapBlock :	// Cache this from the MUL files. 8x8 block of the world.
+class CServerMapBlock :	// Cache this from the MUL files. 8x8 block of the world.
 	public CPointSort	// The upper left corner. (ignore z) sort by this
 {
 protected:
@@ -173,22 +173,22 @@ private:
 
 public:
 	static const char *m_sClassName;
-	CSphereStaticsBlock m_Statics;
-	CSphereCachedMulItem m_CacheTime;	// keep track of the use time of this item. (client does not care about this)
+	CServerStaticsBlock m_Statics;
+	CCachedMulItem m_CacheTime;	// keep track of the use time of this item. (client does not care about this)
 private:
 	void Load(int bx, int by);	// NOTE: This will "throw" on failure !
 	void LoadDiffs(dword dwBlockIndex, int map);
 
 public:
-	explicit CSphereMapBlock( const CPointMap & pt );
+	explicit CServerMapBlock( const CPointMap & pt );
 
-	CSphereMapBlock(int bx, int by, int map);
+	CServerMapBlock(int bx, int by, int map);
 
-	virtual ~CSphereMapBlock();
+	virtual ~CServerMapBlock();
 
 private:
-	CSphereMapBlock(const CSphereMapBlock& copy);
-	CSphereMapBlock& operator=(const CSphereMapBlock& other);
+	CServerMapBlock(const CServerMapBlock& copy);
+	CServerMapBlock& operator=(const CServerMapBlock& other);
 
 public:
 	int GetOffsetX( int x ) const;
@@ -198,7 +198,7 @@ public:
 	const CUOMapBlock * GetTerrainBlock() const;
 };
 
-class CSphereMulti : public CSphereCachedMulItem
+class CSphereMulti : public CCachedMulItem
 {
 	// Load all the relivant info for the
 private:
@@ -227,4 +227,4 @@ public:
 	const CUOMultiItemRec_HS * GetItem( size_t i ) const;
 };
 
-#endif // _INC_CSphereMap_H
+#endif // _INC_CServerMap_H

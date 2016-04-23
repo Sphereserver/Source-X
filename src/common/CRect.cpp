@@ -264,7 +264,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 	if ( !strnicmp( pszKey, "STATICS", 7 ) )
 	{
 		pszKey	+= 7;
-		const CSphereMapBlock * pBlock = g_World.GetMapBlock( *(this) );
+		const CServerMapBlock * pBlock = g_World.GetMapBlock( *(this) );
 		if ( !pBlock ) return false;
 
 		if ( *pszKey == '\0' )

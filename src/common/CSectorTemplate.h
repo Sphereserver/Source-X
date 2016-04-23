@@ -13,7 +13,7 @@
 
 
 class CItem;
-class CSphereMapBlock;
+class CServerMapBlock;
 
 class CCharsDisconnectList : public CSObjList
 {
@@ -91,7 +91,7 @@ protected:
 	int	m_index;		// sector index
 	int m_map;			// sector map
 private:
-	typedef std::map<int, CSphereMapBlock*>	MapBlockCache;
+	typedef std::map<int, CServerMapBlock*>	MapBlockCache;
 	MapBlockCache							m_MapBlockCache;
 public:
 	static const char *m_sClassName;
@@ -125,7 +125,7 @@ public:
 	void ClearMapBlockCache();
 	void CheckMapBlockCache();
 	static int m_iMapBlockCacheTime;
-	const CSphereMapBlock * GetMapBlock( const CPointMap & pt );
+	const CServerMapBlock * GetMapBlock( const CPointMap & pt );
 
 	// CRegionBase
 	CRegionBase * GetRegion( const CPointBase & pt, dword dwType ) const;

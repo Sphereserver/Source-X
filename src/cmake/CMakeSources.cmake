@@ -174,8 +174,8 @@ common/CException.cpp
 common/CException.h
 common/CExpression.cpp
 common/CExpression.h
-common/CSphereMap.cpp
-common/CSphereMap.h
+common/CServerMap.cpp
+common/CServerMap.h
 common/CUID.cpp
 common/CUID.h
 common/CUIDExtra.h

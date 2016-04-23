@@ -332,7 +332,7 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 	}
 
 	// STATIC - checks one 8x8 block
-	const CSphereMapBlock * pMapBlock = GetMapBlock( pt );
+	const CServerMapBlock * pMapBlock = GetMapBlock( pt );
 	ASSERT( pMapBlock );
 
 	size_t iStaticQty = pMapBlock->m_Statics.GetStaticQty();
@@ -565,7 +565,7 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 		pt.m_x + iDistance + 1, pt.m_y + iDistance + 1,
 		pt.m_map);
 
-	const CSphereMapBlock * pMapBlock = NULL;
+	const CServerMapBlock * pMapBlock = NULL;
 	const CUOStaticItemRec * pStatic = NULL;
 	const CItemBase * pItemDef = NULL;
 
@@ -694,7 +694,7 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 
 //****************************************************
 
-void CWorld::GetFixPoint( const CPointMap & pt, CSphereMapBlockState & block)
+void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 {
 	//Will get the highest CAN_I_PLATFORM|CAN_I_CLIMB and places it into block.Bottom
 	ADDTOCALLSTACK("CWorld::GetFixPoint");
@@ -707,7 +707,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CSphereMapBlockState & block)
 
 	// Height of statics at/above given coordinates
 	// do gravity here for the z.
-	const CSphereMapBlock * pMapBlock = GetMapBlock( pt );
+	const CServerMapBlock * pMapBlock = GetMapBlock( pt );
 	if (pMapBlock == NULL)
 		return;
 
@@ -995,7 +995,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CSphereMapBlockState & block)
 	}
 }
 
-void CWorld::GetHeightPoint( const CPointMap & pt, CSphereMapBlockState & block, bool fHouseCheck )
+void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block, bool fHouseCheck )
 {
 	ADDTOCALLSTACK("CWorld::GetHeightPoint");
 	CItemBase * pItemDef = NULL;
@@ -1008,7 +1008,7 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CSphereMapBlockState & block,
 
 	// Height of statics at/above given coordinates
 	// do gravity here for the z.
-	const CSphereMapBlock * pMapBlock = GetMapBlock( pt );
+	const CServerMapBlock * pMapBlock = GetMapBlock( pt );
 	if (pMapBlock == NULL)
 		return;
 
@@ -1265,7 +1265,7 @@ char CWorld::GetHeightPoint( const CPointBase & pt, dword & wBlockFlags, bool fH
 {
 	ADDTOCALLSTACK("CWorld::GetHeightPoint");
 	dword dwCan = wBlockFlags;
-	CSphereMapBlockState block( wBlockFlags, pt.m_z + (PLAYER_HEIGHT / 2), pt.m_z + PLAYER_HEIGHT );
+	CServerMapBlockState block( wBlockFlags, pt.m_z + (PLAYER_HEIGHT / 2), pt.m_z + PLAYER_HEIGHT );
 
 	GetHeightPoint( pt, block, fHouseCheck );
 
@@ -1295,14 +1295,14 @@ char CWorld::GetHeightPoint( const CPointBase & pt, dword & wBlockFlags, bool fH
 	return( block.m_Bottom.m_z );
 }
 
-void CWorld::GetHeightPoint2( const CPointMap & pt, CSphereMapBlockState & block, bool fHouseCheck )
+void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block, bool fHouseCheck )
 {
 	ADDTOCALLSTACK("CWorld::GetHeightPoint2");
 	// Height of statics at/above given coordinates
 	// do gravity here for the z.
 
 	dword wBlockThis = 0;
-	const CSphereMapBlock * pMapBlock = GetMapBlock( pt );
+	const CServerMapBlock * pMapBlock = GetMapBlock( pt );
 	if ( !pMapBlock )
 	{
 		g_Log.EventWarn("GetMapBlock failed at %s.\n", pt.WriteUsed());
@@ -1478,7 +1478,7 @@ char CWorld::GetHeightPoint2( const CPointBase & pt, dword & wBlockFlags, bool f
 	// ??? NOTE: some creatures should be taller than others !!!
 
 	dword dwCan = wBlockFlags;
-	CSphereMapBlockState block(wBlockFlags, pt.m_z, PLAYER_HEIGHT);
+	CServerMapBlockState block(wBlockFlags, pt.m_z, PLAYER_HEIGHT);
 
 	GetHeightPoint2( pt, block, fHouseCheck );
 

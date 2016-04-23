@@ -10,7 +10,7 @@
 #include "../common/CRect.h"
 #include "../common/CResourceBase.h"
 #include "../common/CObjBaseTemplate.h"
-#include "../common/CSphereMap.h"
+#include "../common/CServerMap.h"
 #include "../common/CUID.h"
 #include "../CBase.h"
 #include "../CResource.h"

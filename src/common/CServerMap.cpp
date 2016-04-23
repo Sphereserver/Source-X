@@ -1,10 +1,10 @@
 //
-// CSphereMap.cpp
+// CServerMap.cpp
 //
 
 #include "CException.h"
 #include "CUOInstall.h"
-#include "CSphereMap.h"
+#include "CServerMap.h"
 #include "CRect.h"
 #include "../game/uo_files/CUOTerrainInfo.h"
 #include "../game/uo_files/CUOItemInfo.h"
@@ -15,8 +15,9 @@
 #include "../game/CWorld.h"
 #include "../sphere/threads.h"
 
+
 //////////////////////////////////////////////////////////////////
-// -CSphereMapBlockState
+// -CServerMapBlockState
 
 #ifndef CAN_I_BLOCK
 #define CAN_I_BLOCK		UFLAG1_BLOCK
@@ -25,38 +26,38 @@
 #define CAN_I_DOOR		UFLAG4_DOOR
 #endif
 
-CSphereCachedMulItem::CSphereCachedMulItem()
+CCachedMulItem::CCachedMulItem()
 {
 	InitCacheTime();
 }
 
-CSphereCachedMulItem::~CSphereCachedMulItem()
+CCachedMulItem::~CCachedMulItem()
 {
 }
 
-void CSphereCachedMulItem::InitCacheTime()
+void CCachedMulItem::InitCacheTime()
 {
 	m_timeRef.Init();
 }
 
-bool CSphereCachedMulItem::IsTimeValid() const
+bool CCachedMulItem::IsTimeValid() const
 {
-	return( m_timeRef.IsTimeValid());
+	return m_timeRef.IsTimeValid();
 }
 
-void CSphereCachedMulItem::HitCacheTime()
+void CCachedMulItem::HitCacheTime()
 {
 	// When in g_World.GetTime() was this last referenced.
 	m_timeRef = CServerTime::GetCurrentTime();
 }
 
-int64 CSphereCachedMulItem::GetCacheAge() const
+int64 CCachedMulItem::GetCacheAge() const
 {
 	// In TICK_PER_SEC or milliseconds
 	return ( CServerTime::GetCurrentTime() - m_timeRef );
 }
 
-CSphereMapBlockState::CSphereMapBlockState( dword dwBlockFlags, char z, int iHeight, height_t zHeight ) :
+CServerMapBlockState::CServerMapBlockState( dword dwBlockFlags, char z, int iHeight, height_t zHeight ) :
 	m_dwBlockFlags(dwBlockFlags),	m_z(z), m_iHeight(iHeight), m_zClimb(0), m_zHeight(zHeight)
 {
 	// m_z = PLAYER_HEIGHT
@@ -75,7 +76,7 @@ CSphereMapBlockState::CSphereMapBlockState( dword dwBlockFlags, char z, int iHei
 	m_zClimbHeight = 0;
 }
 
-CSphereMapBlockState::CSphereMapBlockState( dword dwBlockFlags, char z, int iHeight, char zClimb, height_t zHeight ) :
+CServerMapBlockState::CServerMapBlockState( dword dwBlockFlags, char z, int iHeight, char zClimb, height_t zHeight ) :
 	m_dwBlockFlags(dwBlockFlags),	m_z(z), m_iHeight(iHeight), m_zClimb(zClimb), m_zHeight(zHeight)
 {
 	m_Top.m_dwBlockFlags = 0;
@@ -93,9 +94,9 @@ CSphereMapBlockState::CSphereMapBlockState( dword dwBlockFlags, char z, int iHei
 	m_zClimbHeight = 0;
 }
 
-lpctstr CSphereMapBlockState::GetTileName( dword dwID )	// static
+lpctstr CServerMapBlockState::GetTileName( dword dwID )	// static
 {
-	ADDTOCALLSTACK("CSphereMapBlockState::GetTileName");
+	ADDTOCALLSTACK("CServerMapBlockState::GetTileName");
 	if ( dwID == 0 )
 	{
 		return( "<null>" );
@@ -115,9 +116,9 @@ lpctstr CSphereMapBlockState::GetTileName( dword dwID )	// static
 	return( pStr );
 }
 
-bool CSphereMapBlockState::CheckTile( dword wItemBlockFlags, char zBottom, height_t zHeight, dword dwID )
+bool CServerMapBlockState::CheckTile( dword wItemBlockFlags, char zBottom, height_t zHeight, dword dwID )
 {
-	ADDTOCALLSTACK("CSphereMapBlockState::CheckTile");
+	ADDTOCALLSTACK("CServerMapBlockState::CheckTile");
 	// RETURN:
 	//  true = continue processing
 
@@ -192,7 +193,7 @@ bool CSphereMapBlockState::CheckTile( dword wItemBlockFlags, char zBottom, heigh
 	return true;
 }
 
-bool CSphereMapBlockState::IsUsableZ( char zBottom, height_t zHeightEstimate ) const
+bool CServerMapBlockState::IsUsableZ( char zBottom, height_t zHeightEstimate ) const
 {
 	if ( zBottom > m_Top.m_z )	// above something that is already over my head.
 		return false;
@@ -202,9 +203,9 @@ bool CSphereMapBlockState::IsUsableZ( char zBottom, height_t zHeightEstimate ) c
 	return true;	
 }
 
-bool CSphereMapBlockState::CheckTile_Item( dword wItemBlockFlags, char zBottom, height_t zHeight, dword dwID )
+bool CServerMapBlockState::CheckTile_Item( dword wItemBlockFlags, char zBottom, height_t zHeight, dword dwID )
 {
-	ADDTOCALLSTACK("CSphereMapBlockState::CheckTile_Item");
+	ADDTOCALLSTACK("CServerMapBlockState::CheckTile_Item");
 	// RETURN:
 	//  true = continue processing
 
@@ -288,9 +289,9 @@ bool CSphereMapBlockState::CheckTile_Item( dword wItemBlockFlags, char zBottom, 
 
 }
 
-inline void CSphereMapBlockState::SetTop( dword &wItemBlockFlags, char &z, dword &dwID )
+inline void CServerMapBlockState::SetTop( dword &wItemBlockFlags, char &z, dword &dwID )
 {
-	ADDTOCALLSTACK("CSphereMapBlockState::SetTop");
+	ADDTOCALLSTACK("CServerMapBlockState::SetTop");
 	if ( z < m_Top.m_z )
 	{
 		m_Top.m_dwBlockFlags = wItemBlockFlags;
@@ -299,9 +300,9 @@ inline void CSphereMapBlockState::SetTop( dword &wItemBlockFlags, char &z, dword
 	}
 }
 
-bool CSphereMapBlockState::CheckTile_Terrain( dword wItemBlockFlags, char z, dword dwID )
+bool CServerMapBlockState::CheckTile_Terrain( dword wItemBlockFlags, char z, dword dwID )
 {
-	ADDTOCALLSTACK("CSphereMapBlockState::CheckTile_Terrain");
+	ADDTOCALLSTACK("CServerMapBlockState::CheckTile_Terrain");
 	// RETURN:
 	//  true = continue processing
 
@@ -366,9 +367,9 @@ bool CSphereMapBlockState::CheckTile_Terrain( dword wItemBlockFlags, char z, dwo
 
 
 //////////////////////////////////////////////////////////////////
-// -CMapDiffblock
+// -CServerMapDiffblock
 
-CMapDiffBlock::CMapDiffBlock(dword dwBlockId, int map)
+CServerMapDiffBlock::CServerMapDiffBlock(dword dwBlockId, int map)
 {
 	m_BlockId = dwBlockId;
 	m_map = map;
@@ -377,7 +378,7 @@ CMapDiffBlock::CMapDiffBlock(dword dwBlockId, int map)
 	m_pTerrainBlock = NULL;
 };
 
-CMapDiffBlock::~CMapDiffBlock()
+CServerMapDiffBlock::~CServerMapDiffBlock()
 {
 	if ( m_pStaticsBlock != NULL )
 		delete[] m_pStaticsBlock;
@@ -388,9 +389,9 @@ CMapDiffBlock::~CMapDiffBlock()
 };
 
 //////////////////////////////////////////////////////////////////
-// -CMapDiffblockArray
+// -CServerMapDiffblockArray
 
-int CMapDiffBlockArray::CompareKey( dword id, CMapDiffBlock* pBase, bool fNoSpaces ) const
+int CServerMapDiffBlockArray::CompareKey( dword id, CServerMapDiffBlock* pBase, bool fNoSpaces ) const
 {
 	UNREFERENCED_PARAMETER(fNoSpaces);
 	ASSERT( pBase );
@@ -398,11 +399,11 @@ int CMapDiffBlockArray::CompareKey( dword id, CMapDiffBlock* pBase, bool fNoSpac
 }
 
 //////////////////////////////////////////////////////////////////
-// -CSphereStaticsBlock
+// -CServerStaticsBlock
 
-void CSphereStaticsBlock::LoadStatics( dword ulBlockIndex, int map )
+void CServerStaticsBlock::LoadStatics( dword ulBlockIndex, int map )
 {
-	ADDTOCALLSTACK("CSphereStaticsBlock::LoadStatics");
+	ADDTOCALLSTACK("CServerStaticsBlock::LoadStatics");
 	// long ulBlockIndex = (bx*(UO_SIZE_Y/UO_BLOCK_SIZE) + by);
 	// NOTE: What is index.m_wVal3 and index.m_wVal4 in VERFILE_STAIDX ?
 	ASSERT( m_iStatics <= 0 );
@@ -423,14 +424,14 @@ void CSphereStaticsBlock::LoadStatics( dword ulBlockIndex, int map )
 		ASSERT(m_pStatics);
 		if ( ! g_Install.ReadMulData(g_Install.m_Statics[g_MapList.m_mapnum[map]], index, m_pStatics) )
 		{
-			throw CSError(LOGL_CRIT, CSFile::GetLastError(), "CSphereMapBlock: Read Statics");
+			throw CSError(LOGL_CRIT, CSFile::GetLastError(), "CServerMapBlock: Read Statics");
 		}
 	}
 }
 
-void CSphereStaticsBlock::LoadStatics( size_t iCount, CUOStaticItemRec * pStatics )
+void CServerStaticsBlock::LoadStatics( size_t iCount, CUOStaticItemRec * pStatics )
 {
-	ADDTOCALLSTACK("CSphereStaticsBlock::LoadStatics2");
+	ADDTOCALLSTACK("CServerStaticsBlock::LoadStatics2");
 	// Load statics information directly (normally from difs)
 	m_iStatics = iCount;
 	if ( m_iStatics > 0 )
@@ -446,32 +447,32 @@ void CSphereStaticsBlock::LoadStatics( size_t iCount, CUOStaticItemRec * pStatic
 	}
 }
 
-CSphereStaticsBlock::CSphereStaticsBlock()
+CServerStaticsBlock::CServerStaticsBlock()
 {
 	m_iStatics = 0;
 	m_pStatics = NULL;
 }
 
-CSphereStaticsBlock::~CSphereStaticsBlock()
+CServerStaticsBlock::~CServerStaticsBlock()
 {
 	if ( m_pStatics != NULL )
 		delete[] m_pStatics;
 }
 
-size_t CSphereStaticsBlock::GetStaticQty() const
+size_t CServerStaticsBlock::GetStaticQty() const
 {
 	return( m_iStatics );
 }
 
-const CUOStaticItemRec * CSphereStaticsBlock::GetStatic( size_t i ) const
+const CUOStaticItemRec * CServerStaticsBlock::GetStatic( size_t i ) const
 {
 	ASSERT( i < m_iStatics );
 	return( &m_pStatics[i] );
 }
 
-bool CSphereStaticsBlock::IsStaticPoint( size_t i, int xo, int yo ) const
+bool CServerStaticsBlock::IsStaticPoint( size_t i, int xo, int yo ) const
 {
-	ADDTOCALLSTACK("CSphereStaticsBlock::IsStaticPoint");
+	ADDTOCALLSTACK("CServerStaticsBlock::IsStaticPoint");
 	ASSERT( xo >= 0 && xo < UO_BLOCK_SIZE );
 	ASSERT( yo >= 0 && yo < UO_BLOCK_SIZE );
 	ASSERT( i < m_iStatics );
@@ -479,13 +480,13 @@ bool CSphereStaticsBlock::IsStaticPoint( size_t i, int xo, int yo ) const
 }
 
 //////////////////////////////////////////////////////////////////
-// -CSphereMapBlock
+// -CServerMapBlock
 
-size_t CSphereMapBlock::sm_iCount = 0;
+size_t CServerMapBlock::sm_iCount = 0;
 
-void CSphereMapBlock::Load( int bx, int by )
+void CServerMapBlock::Load( int bx, int by )
 {
-	ADDTOCALLSTACK("CSphereMapBlock::Load");
+	ADDTOCALLSTACK("CServerMapBlock::Load");
 	// Read in all the statics data for this block.
 	m_CacheTime.InitCacheTime();		// This is invalid !
 
@@ -503,7 +504,7 @@ void CSphereMapBlock::Load( int bx, int by )
 	if ( !g_MapList.m_maps[m_map] )
 	{
 		memset( &m_Terrain, 0, sizeof( m_Terrain ));
-		throw CSError(LOGL_CRIT, 0, "CSphereMapBlock: Map is not supported since MUL files for it not available.");
+		throw CSError(LOGL_CRIT, 0, "CServerMapBlock: Map is not supported since MUL files for it not available.");
 	}
 
 	bool bPatchedTerrain = false, bPatchedStatics = false;
@@ -511,7 +512,7 @@ void CSphereMapBlock::Load( int bx, int by )
 	if ( g_Cfg.m_fUseMapDiffs && g_MapList.m_pMapDiffCollection )
 	{
 		// Check to see if the terrain or statics in this block is patched
-		CMapDiffBlock * pDiffBlock = g_MapList.m_pMapDiffCollection->GetAtBlock( ulBlockIndex, g_MapList.m_mapid[m_map] );
+		CServerMapDiffBlock * pDiffBlock = g_MapList.m_pMapDiffCollection->GetAtBlock( ulBlockIndex, g_MapList.m_mapid[m_map] );
 		if ( pDiffBlock )
 		{
 			if ( pDiffBlock->m_pTerrainBlock )
@@ -579,14 +580,14 @@ void CSphereMapBlock::Load( int bx, int by )
 		if ( pFile->Seek( fileOffset, SEEK_SET ) != fileOffset )
 		{
 			memset( &m_Terrain, 0, sizeof(m_Terrain));
-			throw CSError(LOGL_CRIT, CSFile::GetLastError(), "CSphereMapBlock: Seek Ver");
+			throw CSError(LOGL_CRIT, CSFile::GetLastError(), "CServerMapBlock: Seek Ver");
 		}
 
 		// read terrain data
 		if ( pFile->Read( &m_Terrain, sizeof(CUOMapBlock)) <= 0 )
 		{
 			memset( &m_Terrain, 0, sizeof( m_Terrain ));
-			throw CSError(LOGL_CRIT, CSFile::GetLastError(), "CSphereMapBlock: Read");
+			throw CSError(LOGL_CRIT, CSFile::GetLastError(), "CServerMapBlock: Read");
 		}
 	}
 
@@ -599,7 +600,7 @@ void CSphereMapBlock::Load( int bx, int by )
 	m_CacheTime.HitCacheTime();		// validate.
 }
 
-CSphereMapBlock::CSphereMapBlock( const CPointMap & pt ) :
+CServerMapBlock::CServerMapBlock( const CPointMap & pt ) :
 		CPointSort( pt )	// The upper left corner.
 {
 	sm_iCount++;
@@ -607,7 +608,7 @@ CSphereMapBlock::CSphereMapBlock( const CPointMap & pt ) :
 	Load(pt.m_x/UO_BLOCK_SIZE, pt.m_y/UO_BLOCK_SIZE);
 }
 
-CSphereMapBlock::CSphereMapBlock(int bx, int by, int map) :
+CServerMapBlock::CServerMapBlock(int bx, int by, int map) :
 		CPointSort((word)(bx)* UO_BLOCK_SIZE, (word)(by) * UO_BLOCK_SIZE)
 {
 	sm_iCount++;
@@ -615,31 +616,31 @@ CSphereMapBlock::CSphereMapBlock(int bx, int by, int map) :
 	Load( bx, by );
 }
 
-CSphereMapBlock::~CSphereMapBlock()
+CServerMapBlock::~CServerMapBlock()
 {
 	sm_iCount--;
 }
 
-int CSphereMapBlock::GetOffsetX( int x ) const
+int CServerMapBlock::GetOffsetX( int x ) const
 {
 	// Allow this to go out of bounds.
 	// ASSERT( ( x-m_pt.m_x) == UO_BLOCK_OFFSET(x));
 	return( x - m_x );
 }
 
-int CSphereMapBlock::GetOffsetY( int y ) const
+int CServerMapBlock::GetOffsetY( int y ) const
 {
 	return( y - m_y );
 }
 
-const CUOMapMeter * CSphereMapBlock::GetTerrain( int xo, int yo ) const
+const CUOMapMeter * CServerMapBlock::GetTerrain( int xo, int yo ) const
 {
 	ASSERT( xo >= 0 && xo < UO_BLOCK_SIZE );
 	ASSERT( yo >= 0 && yo < UO_BLOCK_SIZE );
 	return( &( m_Terrain.m_Meter[ yo*UO_BLOCK_SIZE + xo ] ));
 }
 
-const CUOMapBlock * CSphereMapBlock::GetTerrainBlock() const
+const CUOMapBlock * CServerMapBlock::GetTerrainBlock() const
 {
 	return( &m_Terrain );
 }
@@ -753,14 +754,14 @@ size_t CSphereMulti::Load(MULTI_TYPE id)
 }
 
 //////////////////////////////////////////////////////////////////
-// -CMapDiffCollection
+// -CServerMapDiffCollection
 
-CMapDiffCollection::CMapDiffCollection()
+CServerMapDiffCollection::CServerMapDiffCollection()
 {
 	m_bLoaded = false;
 }
 
-CMapDiffCollection::~CMapDiffCollection()
+CServerMapDiffCollection::~CServerMapDiffCollection()
 {
 	// Remove all of the loaded dif data
 	for ( uint m = 0; m < 256; m++ )
@@ -772,16 +773,16 @@ CMapDiffCollection::~CMapDiffCollection()
 	}
 }
 
-void CMapDiffCollection::LoadMapDiffs()
+void CServerMapDiffCollection::LoadMapDiffs()
 {
 	// Load mapdif* and stadif* Files
-	ADDTOCALLSTACK("CMapDiffCollection::LoadMapDiffs");
+	ADDTOCALLSTACK("CServerMapDiffCollection::LoadMapDiffs");
 	if ( m_bLoaded ) // already loaded
 		return;
 
 	dword dwLength = 0, dwBlockId = 0;
 	dword dwOffset = 0, dwRead = 0;
-	CMapDiffBlock * pMapDiffBlock = NULL;
+	CServerMapDiffBlock * pMapDiffBlock = NULL;
 
 	for ( int m = 0; m < 256; ++m )
 	{
@@ -902,39 +903,39 @@ void CMapDiffCollection::LoadMapDiffs()
 	m_bLoaded = true;
 }
 
-void CMapDiffCollection::Init()
+void CServerMapDiffCollection::Init()
 {
 	// Initialise class (load diffs)
-	ADDTOCALLSTACK("CMapDiffCollection::Init");
+	ADDTOCALLSTACK("CServerMapDiffCollection::Init");
 	LoadMapDiffs();
 }
 
-CMapDiffBlock * CMapDiffCollection::GetNewBlock(dword dwBlockId, int map)
+CServerMapDiffBlock * CServerMapDiffCollection::GetNewBlock(dword dwBlockId, int map)
 {
 	// Retrieve a MapDiff block for the specified block id, or
 	// allocate a new MapDiff block if one doesn't exist already.
-	ADDTOCALLSTACK("CMapDiffCollection::GetNewBlock");
+	ADDTOCALLSTACK("CServerMapDiffCollection::GetNewBlock");
 
-	CMapDiffBlock * pMapDiffBlock = GetAtBlock( dwBlockId, map );
+	CServerMapDiffBlock * pMapDiffBlock = GetAtBlock( dwBlockId, map );
 	if ( pMapDiffBlock )
 		return pMapDiffBlock;
 
-	pMapDiffBlock = new CMapDiffBlock(dwBlockId, map);
+	pMapDiffBlock = new CServerMapDiffBlock(dwBlockId, map);
 	m_pMapDiffBlocks[map].AddSortKey( pMapDiffBlock, dwBlockId );
 	return pMapDiffBlock;
 }
 
-CMapDiffBlock * CMapDiffCollection::GetAtBlock(int bx, int by, int map)
+CServerMapDiffBlock * CServerMapDiffCollection::GetAtBlock(int bx, int by, int map)
 {
 	// See GetAtBlock(dword,int)
 	dword dwBlockId = (bx * (g_MapList.GetY( map ) / UO_BLOCK_SIZE)) + by;
 	return GetAtBlock( dwBlockId, map );
 }
 
-CMapDiffBlock * CMapDiffCollection::GetAtBlock(dword dwBlockId, int map)
+CServerMapDiffBlock * CServerMapDiffCollection::GetAtBlock(dword dwBlockId, int map)
 {
 	// Retrieve a MapDiff block for the specified block id
-	ADDTOCALLSTACK("CMapDiffCollection::GetAtBlock");
+	ADDTOCALLSTACK("CServerMapDiffCollection::GetAtBlock");
 	if ( !g_MapList.IsMapSupported( map ) )
 		return NULL;
 

@@ -533,7 +533,7 @@ char CChar::GetFixZ( CPointMap pt, uint wBlockFlags)
 	if ( dwCan & CAN_C_WALK )
 		wBlockFlags |= CAN_I_CLIMB; // If we can walk than we can climb. Ignore CAN_C_FLY at all here
 
-	CSphereMapBlockState block( wBlockFlags, pt.m_z, pt.m_z + m_zClimbHeight + GetHeightMount( false ), pt.m_z + m_zClimbHeight + 2, GetHeightMount( false ) );
+	CServerMapBlockState block( wBlockFlags, pt.m_z, pt.m_z + m_zClimbHeight + GetHeightMount( false ), pt.m_z + m_zClimbHeight + 2, GetHeightMount( false ) );
 	g_World.GetFixPoint( pt, block );
 
 	wBlockFlags = block.m_Bottom.m_dwBlockFlags;

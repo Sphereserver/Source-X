@@ -1364,7 +1364,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 	// Ok now we should loop through all the points and checking for maptile, staticx, items, multis.
 	// If something is in the way and it has the wrong flags LOS return false
 	
-	const CSphereMapBlock *pBlock			= NULL;		// Block of the map (for statics)
+	const CServerMapBlock *pBlock			= NULL;		// Block of the map (for statics)
 	const CUOStaticItemRec *pStatic			= NULL;		// Statics iterator (based on SphereMapBlock)
 	const CSphereMulti *pMulti 				= NULL;		// Multi Def (multi check)
 	const CUOMultiItemRec_HS *pMultiItem	= NULL;		// Multi item iterator
@@ -1971,7 +1971,7 @@ IT_TYPE CChar::CanTouchStatic( CPointMap &pt, ITEMID_TYPE id, CItem *pItem )
 		return IT_JUNK;
 
 	// Is this static really here ?
-	const CSphereMapBlock *pMapBlock = g_World.GetMapBlock(pt);
+	const CServerMapBlock *pMapBlock = g_World.GetMapBlock(pt);
 	if ( !pMapBlock )
 		return IT_JUNK;
 
@@ -2277,7 +2277,7 @@ bool CChar::IsVerticalSpace( CPointMap ptDest, bool fForceMount )
 	if ( wBlockFlags & CAN_C_WALK )
 		wBlockFlags |= CAN_I_CLIMB;
 
-	CSphereMapBlockState block(wBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 2, GetHeightMount());
+	CServerMapBlockState block(wBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 2, GetHeightMount());
 	g_World.GetHeightPoint(ptDest, block, true);
 
 	if ( GetHeightMount() + ptDest.m_z + (fForceMount ? 4 : 0) >= block.m_Top.m_z )		// 4 is the mount height
@@ -2334,8 +2334,8 @@ CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, word *pwBlockFlags, DIR_
 		WARNWALK(("wBlockFlags (0%x) wCan(0%x)\n", wBlockFlags, wCan));
 	}
 
-	CSphereMapBlockState block(wBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 3, GetHeightMount());
-	WARNWALK(("\t\tCSphereMapBlockState block( 0%x, %d, %d, %d );ptDest.m_z(%d) m_zClimbHeight(%d)\n", wBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 2, ptDest.m_z, m_zClimbHeight));
+	CServerMapBlockState block(wBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 3, GetHeightMount());
+	WARNWALK(("\t\tCServerMapBlockState block( 0%x, %d, %d, %d );ptDest.m_z(%d) m_zClimbHeight(%d)\n", wBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 2, ptDest.m_z, m_zClimbHeight));
 
 	if ( !ptDest.IsValidPoint() )
 	{
@@ -2429,7 +2429,7 @@ void CChar::FixClimbHeight()
 {
 	ADDTOCALLSTACK("CChar::FixClimbHeight");
 	CPointBase pt = GetTopPoint();
-	CSphereMapBlockState block(CAN_I_CLIMB, pt.m_z, pt.m_z + GetHeightMount() + 3, pt.m_z + 2, GetHeightMount());
+	CServerMapBlockState block(CAN_I_CLIMB, pt.m_z, pt.m_z + GetHeightMount() + 3, pt.m_z + 2, GetHeightMount());
 	g_World.GetHeightPoint(pt, block, true);
 
 	if ( (block.m_Bottom.m_z == pt.m_z) && (block.m_dwBlockFlags & CAN_I_CLIMB) )	// we are standing on stairs
