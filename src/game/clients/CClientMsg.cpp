@@ -14,7 +14,7 @@
 #include "../items/CItemSpawn.h"
 #include "../items/CItemVendable.h"
 #include "../CLog.h"
-#include "../CServTime.h"
+#include "../CServerTime.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CClient.h"
@@ -262,7 +262,7 @@ void CClient::addTime( bool bCurrent )
 
 	if ( bCurrent )
 	{
-		llong lCurrentTime = (CServTime::GetCurrentTime()).GetTimeRaw();
+		llong lCurrentTime = (CServerTime::GetCurrentTime()).GetTimeRaw();
 		new PacketGameTime(this, 
 								( lCurrentTime / ( 60*60*TICK_PER_SEC )) % 24,
 								( lCurrentTime / ( 60*TICK_PER_SEC )) % 60,
@@ -1601,7 +1601,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int iTimeout 
 
 	// determine timeout time
 	if (iTimeout > 0)
-		m_Targ_Timeout = CServTime::GetCurrentTime() + iTimeout;
+		m_Targ_Timeout = CServerTime::GetCurrentTime() + iTimeout;
 	else
 		m_Targ_Timeout.Init();
 

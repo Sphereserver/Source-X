@@ -13,7 +13,7 @@
 #include "CLog.h"
 #include "CObjBase.h"
 #include "CServer.h"
-#include "CServTime.h"
+#include "CServerTime.h"
 #include "CScriptProfiler.h"
 
 #ifndef _WIN32
@@ -1119,9 +1119,9 @@ bool CWorldClock::Advance()
 	}
 
 	m_Clock_SysPrev = Clock_Sys;
-	CServTime Clock_New = m_timeClock + iTimeDiff;
+	CServerTime Clock_New = m_timeClock + iTimeDiff;
 
-	// CServTime is signed !
+	// CServerTime is signed !
 	// NOTE: This will overflow after 7 or so years of run time !
 	if ( Clock_New < m_timeClock )
 	{
@@ -2403,7 +2403,7 @@ void __cdecl CWorld::Broadcastf(lpctstr pMsg, ...) // System broadcast in bold t
 //////////////////////////////////////////////////////////////////
 // Game time.
 
-dword CWorld::GetGameWorldTime( CServTime basetime ) const
+dword CWorld::GetGameWorldTime( CServerTime basetime ) const
 {
 	ADDTOCALLSTACK("CWorld::GetGameWorldTime");
 	// basetime = TICK_PER_SEC time.
@@ -2414,7 +2414,7 @@ dword CWorld::GetGameWorldTime( CServTime basetime ) const
 	return( (uint)(basetime.GetTimeRaw() / g_Cfg.m_iGameMinuteLength) );
 }
 
-CServTime CWorld::GetNextNewMoon( bool bMoonIndex ) const
+CServerTime CWorld::GetNextNewMoon( bool bMoonIndex ) const
 {
 	ADDTOCALLSTACK("CWorld::GetNextNewMoon");
 	// "Predict" the next new moon for this moon
@@ -2428,7 +2428,7 @@ CServTime CWorld::GetNextNewMoon( bool bMoonIndex ) const
 	dword iNewStart = (dword)(iNextMonth - static_cast<double>(iNextMonth % iSynodic));
 
 	// Convert to TICK_PER_SEC ticks
-	CServTime time;
+	CServerTime time;
 	time.InitTime( iNewStart * g_Cfg.m_iGameMinuteLength );
 	return(time);
 }

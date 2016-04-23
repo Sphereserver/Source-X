@@ -9,7 +9,7 @@
 #include "CLog.h"
 #include "CObjBase.h"
 #include "CSector.h"
-#include "CServTime.h"
+#include "CServerTime.h"
 #include "CWorld.h"
 #include "spheresvr.h"
 #include "triggers.h"
@@ -884,7 +884,7 @@ void CSector::SetSectorWakeStatus()
 {
 	ADDTOCALLSTACK("CSector::SetSectorWakeStatus");
 	// Ships may enter a sector before it's riders ! ships need working timers to move !
-	m_Chars_Active.m_timeLastClient = CServTime::GetCurrentTime();
+	m_Chars_Active.m_timeLastClient = CServerTime::GetCurrentTime();
 }
 
 void CSector::Close()
@@ -1319,7 +1319,7 @@ size_t CSector::HasClients() const
 	return( m_Chars_Active.HasClients());
 }
 
-CServTime CSector::GetLastClientTime() const
+CServerTime CSector::GetLastClientTime() const
 {
 	return( m_Chars_Active.m_timeLastClient );
 }

@@ -91,7 +91,7 @@ public:
 	size_t GetCharComplexity() const;
 	size_t GetInactiveChars() const;
 	size_t HasClients() const;
-	CServTime GetLastClientTime() const;
+	CServerTime GetLastClientTime() const;
 	bool IsSectorSleeping() const;
 	void SetSectorWakeStatus();	// Ships may enter a sector before it's riders !
 	void ClientAttach( CChar * pChar );

@@ -5,7 +5,7 @@
 
 #include "sphere_library/CSArray.h"
 #include "sphere_library/CSTime.h"
-#include "../game/CServTime.h"
+#include "../game/CServerTime.h"
 #include "common.h"
 #include "CUID.h"
 #include "CScript.h"
@@ -239,7 +239,7 @@ class CResourceScript : public CScript
 	// NOTE: we should check periodically if this file has been altered externally ?
 private:
 	int		m_iOpenCount;		// How many CResourceLock(s) have this open ?
-	CServTime m_timeLastAccess;	// CWorld time of last access/Open.
+	CServerTime m_timeLastAccess;	// CWorld time of last access/Open.
 
 	// Last time it was closed. What did the file params look like ?
 	dword m_dwSize;			// Compare to see if this has changed.

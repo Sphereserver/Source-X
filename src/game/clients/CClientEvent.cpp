@@ -10,7 +10,7 @@
 #include "../items/CItemMessage.h"
 #include "../items/CItemMulti.h"
 #include "../items/CItemVendable.h"
-#include "../CServTime.h"
+#include "../CServerTime.h"
 #include "../CLog.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
@@ -853,7 +853,7 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 			addPlayerSee(ptOld);				// What new stuff do I now see ?
 		}
 
-		m_timeLastEventWalk = CServTime::GetCurrentTime();
+		m_timeLastEventWalk = CServerTime::GetCurrentTime();
 		m_iWalkStepCount++;					// Increase step count to use on walk buffer checks
 	}
 	else

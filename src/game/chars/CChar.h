@@ -163,10 +163,10 @@ public:
 		ushort m_regen;	// Tick time since last regen.
 	} m_Stat[STAT_QTY];
 
-	CServTime m_timeLastRegen;	// When did i get my last regen tick ?
-	CServTime m_timeCreate;		// When was i created ?
+	CServerTime m_timeLastRegen;	// When did i get my last regen tick ?
+	CServerTime m_timeCreate;		// When was i created ?
 
-	CServTime m_timeLastHitsUpdate;
+	CServerTime m_timeLastHitsUpdate;
 
 	// Some character action in progress.
 	SKILL_TYPE	m_Act_SkillCurrent;	// Currently using a skill. Could be combat skill.
@@ -240,7 +240,7 @@ public:
 		struct
 		{
 			WAR_SWING_TYPE m_War_Swing_State;		// ACTARG1 = We are in the war mode swing.
-			CServTime m_timeNextCombatSwing;		// ACTARG2 = Time to wait before start another combat swing.
+			CServerTime m_timeNextCombatSwing;		// ACTARG2 = Time to wait before start another combat swing.
 		} m_atFight;
 
 		// SKILL_TRACKING

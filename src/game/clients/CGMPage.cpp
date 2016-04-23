@@ -1,7 +1,7 @@
 
 #include "../common/CException.h"
 #include "../chars/CChar.h"
-#include "../CServTime.h"
+#include "../CServerTime.h"
 #include "../CWorld.h"
 #include "CClient.h"
 #include "CGMPage.h"
@@ -13,7 +13,7 @@ CGMPage::CGMPage( lpctstr pszAccount ) :
 	m_sAccount( pszAccount )
 {
 	m_pGMClient = NULL;
-	m_timePage = CServTime::GetCurrentTime();
+	m_timePage = CServerTime::GetCurrentTime();
 	// Put at the end of the list.
 	g_World.m_GMPages.InsertTail( this );
 }
@@ -149,7 +149,7 @@ bool CGMPage::r_LoadVal( CScript & s )
 		SetReason( s.GetArgStr());
 		break;
 	case GC_TIME:	// "TIME"
-		m_timePage = CServTime::GetCurrentTime() - ( s.GetArgVal() * TICK_PER_SEC );
+		m_timePage = CServerTime::GetCurrentTime() - ( s.GetArgVal() * TICK_PER_SEC );
 		break;
 	default:
 		return( CScriptObj::r_LoadVal( s ));

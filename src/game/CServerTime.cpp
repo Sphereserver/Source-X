@@ -1,10 +1,10 @@
 
 #include "CObjBase.h"
-#include "CServTime.h"
+#include "CServerTime.h"
 #include "CWorld.h"
 
 
-int64 CServTime::GetTimeRaw() const
+int64 CServerTime::GetTimeRaw() const
 {
 	if ( m_lPrivateTime < 0 )
 		return 0;
@@ -12,17 +12,17 @@ int64 CServTime::GetTimeRaw() const
 	return m_lPrivateTime;
 }
 
-int64 CServTime::GetTimeDiff( const CServTime & time ) const
+int64 CServerTime::GetTimeDiff( const CServerTime & time ) const
 {
 	return ( m_lPrivateTime - time.m_lPrivateTime );
 }
 
-void CServTime::Init()
+void CServerTime::Init()
 {
 	m_lPrivateTime = 0;
 }
 
-void CServTime::InitTime( int64 lTimeBase )
+void CServerTime::InitTime( int64 lTimeBase )
 {
 	if ( lTimeBase < 0 )
 		lTimeBase = 0;
@@ -30,14 +30,14 @@ void CServTime::InitTime( int64 lTimeBase )
 	m_lPrivateTime = lTimeBase;
 }
 
-bool CServTime::IsTimeValid() const
+bool CServerTime::IsTimeValid() const
 {
 	return ( m_lPrivateTime > 0 ? true : false );
 }
 
-CServTime CServTime::operator+( int64 iTimeDiff ) const
+CServerTime CServerTime::operator+( int64 iTimeDiff ) const
 {
-	CServTime time;
+	CServerTime time;
 	time.m_lPrivateTime = m_lPrivateTime + iTimeDiff;
 	if ( time.m_lPrivateTime < 0 )
 		time.m_lPrivateTime = 0;
@@ -45,9 +45,9 @@ CServTime CServTime::operator+( int64 iTimeDiff ) const
 	return time;
 }
 
-CServTime CServTime::operator-( int64 iTimeDiff ) const
+CServerTime CServerTime::operator-( int64 iTimeDiff ) const
 {
-	CServTime time;
+	CServerTime time;
 	time.m_lPrivateTime = m_lPrivateTime - iTimeDiff;
 	if ( time.m_lPrivateTime < 0 )
 		time.m_lPrivateTime = 0;
@@ -55,7 +55,7 @@ CServTime CServTime::operator-( int64 iTimeDiff ) const
 	return time;
 }
 
-static CServTime GetCurrentTime()
+static CServerTime GetCurrentTime()
 {
 	return g_World.GetCurrentTime();
 }//inlined in CWorld.h

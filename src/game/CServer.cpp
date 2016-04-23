@@ -22,7 +22,7 @@
 #include "items/CItemShip.h"
 #include "CServer.h"
 #include "CLog.h"
-#include "CServTime.h"
+#include "CServerTime.h"
 #include "spheresvr.h"
 #include "triggers.h"
 #include "CScriptProfiler.h"
@@ -140,7 +140,7 @@ void CServer::Shutdown( int64 iMinutes ) // If shutdown is initialized
 	}
 	else
 	{
-		m_timeShutdown = CServTime::GetCurrentTime() + ( iMinutes * 60 * TICK_PER_SEC );
+		m_timeShutdown = CServerTime::GetCurrentTime() + ( iMinutes * 60 * TICK_PER_SEC );
 	}
 
 	g_World.Broadcastf(g_Cfg.GetDefaultMsg( DEFMSG_MSG_SERV_SHUTDOWN ), iMinutes);
@@ -222,7 +222,7 @@ ssize_t CServer::PrintPercent( ssize_t iCount, ssize_t iTotal )
 int64 CServer::GetAgeHours() const
 {
 	ADDTOCALLSTACK("CServer::GetAgeHours");
-	return( CServTime::GetCurrentTime().GetTimeRaw() / (60*60*TICK_PER_SEC));
+	return( CServerTime::GetCurrentTime().GetTimeRaw() / (60*60*TICK_PER_SEC));
 }
 
 lpctstr CServer::GetStatusString( byte iIndex ) const

@@ -10,7 +10,7 @@
 #include "../common/CEncrypt.h"
 #include "../common/CScriptObj.h"
 #include "../common/CSocket.h"
-#include "CServTime.h"
+#include "CServerTime.h"
 
 
 class CTextConsole;
@@ -45,10 +45,10 @@ class CServerDef : public CScriptObj
 
 private:
 	CSString m_sName;	// What the name should be. Fill in from ping.
-	CServTime  m_timeLastValid;	// Last valid poll time in CServTime::GetCurrentTime()
+	CServerTime  m_timeLastValid;	// Last valid poll time in CServerTime::GetCurrentTime()
 	CSTime	m_dateLastValid;
 
-	CServTime  m_timeCreate;	// When added to the list ? 0 = at start up.
+	CServerTime  m_timeCreate;	// When added to the list ? 0 = at start up.
 
 	// Status read from returned string.
 	CSString m_sStatus;	// last returned status string.

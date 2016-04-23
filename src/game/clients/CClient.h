@@ -146,9 +146,9 @@ public:
 	CONNECT_TYPE	m_iConnectType;	// what sort of a connection is this ?
 	CAccount * m_pAccount;		// The account name. we logged in on
 
-	CServTime m_timeLogin;			// World clock of login time. "LASTCONNECTTIME"
-	CServTime m_timeLastEvent;		// Last time we got event from client.
-	CServTime m_timeLastEventWalk;	// Last time we got a walk event from client (only used to handle STATF_Fly char flag)
+	CServerTime m_timeLogin;			// World clock of login time. "LASTCONNECTTIME"
+	CServerTime m_timeLastEvent;		// Last time we got event from client.
+	CServerTime m_timeLastEventWalk;	// Last time we got a walk event from client (only used to handle STATF_Fly char flag)
 	int64 m_timeNextEventWalk;		// Fastwalk prevention: only allow more walk requests after this timer
 
 									// GM only stuff.
@@ -168,7 +168,7 @@ public:
 	CUID m_Targ_PrvUID;		// The object of interest before this.
 	CSString m_Targ_Text;		// Text transfered up from client.
 	CPointMap  m_Targ_p;			// For script targeting,
-	CServTime m_Targ_Timeout;	// timeout time for targeting
+	CServerTime m_Targ_Timeout;	// timeout time for targeting
 
 								// Context of the targetting setup. depends on CLIMODE_TYPE m_Targ_Mode
 	union
@@ -721,7 +721,7 @@ public:
 	char		m_zLastMessage[SCRIPT_MAX_LINE_LEN];	// last sysmessage
 	char		m_zLastObjMessage[SCRIPT_MAX_LINE_LEN];	// last message
 	char		m_zLogin[64];
-	CServTime	m_tNextPickup;
+	CServerTime	m_tNextPickup;
 	CVarDefMap	m_TagDefs;
 	CVarDefMap	m_BaseDefs;		// New Variable storage system
 	typedef std::map<dword, std::pair<std::pair<dword,dword>, CPointMap> > OpenedContainerMap_t;

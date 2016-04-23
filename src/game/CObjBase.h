@@ -11,7 +11,7 @@
 #include "../common/CObjBaseTemplate.h"
 #include "../common/CScriptObj.h"
 #include "../common/CResourceBase.h"
-#include "CServTime.h"
+#include "CServerTime.h"
 #include "CContainer.h"
 #include "CBase.h"
 #include "CResource.h"
@@ -65,8 +65,8 @@ class CObjBase : public CObjBaseTemplate, public CScriptObj
 	static lpctstr const sm_szRefKeys[];
 
 private:
-	CServTime m_timeout;		// when does this rot away ? or other action. 0 = never, else system time
-	CServTime m_timestamp;
+	CServerTime m_timeout;		// when does this rot away ? or other action. 0 = never, else system time
+	CServerTime m_timestamp;
 	HUE_TYPE m_wHue;			// Hue or skin color. (CItems must be < 0x4ff or so)
 	lpctstr m_RunningTrigger;
 
@@ -97,7 +97,7 @@ public:
 public:
 	byte	RangeL() const;
 	byte	RangeH() const;
-	CServTime GetTimeStamp() const;
+	CServerTime GetTimeStamp() const;
 	void SetTimeStamp( int64 t_time);
 	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
 	int64 GetDefNum( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
@@ -496,7 +496,7 @@ inline int64 CObjBase::GetTimerDiff() const
 {
 	// How long till this will expire ?
 	return g_World.GetTimeDiff( m_timeout );
-	// return: < 0 = in the past ( m_timeout - CServTime::GetCurrentTime() )
+	// return: < 0 = in the past ( m_timeout - CServerTime::GetCurrentTime() )
 }
 
 inline bool CObjBase::IsTimerSet() const

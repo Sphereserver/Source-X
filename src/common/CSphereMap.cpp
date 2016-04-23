@@ -47,13 +47,13 @@ bool CSphereCachedMulItem::IsTimeValid() const
 void CSphereCachedMulItem::HitCacheTime()
 {
 	// When in g_World.GetTime() was this last referenced.
-	m_timeRef = CServTime::GetCurrentTime();
+	m_timeRef = CServerTime::GetCurrentTime();
 }
 
 int64 CSphereCachedMulItem::GetCacheAge() const
 {
 	// In TICK_PER_SEC or milliseconds
-	return ( CServTime::GetCurrentTime() - m_timeRef );
+	return ( CServerTime::GetCurrentTime() - m_timeRef );
 }
 
 CSphereMapBlockState::CSphereMapBlockState( dword dwBlockFlags, char z, int iHeight, height_t zHeight ) :
@@ -679,16 +679,77 @@ CSphereMulti::~CSphereMulti()
 
 MULTI_TYPE CSphereMulti::GetMultiID() const
 {
-	return( m_id );
+	return m_id;
 }
 size_t CSphereMulti::GetItemCount() const
 {
-	return( m_iItemQty );
+	return m_iItemQty;
 }
 const CUOMultiItemRec_HS * CSphereMulti::GetItem( size_t i ) const
 {
 	ASSERT( i<m_iItemQty );
-	return( &(m_pItems[i]) );
+	return &m_pItems[i];
+}
+
+size_t CSphereMulti::Load(MULTI_TYPE id)
+{
+	ADDTOCALLSTACK("CSphereMulti::Load");
+	// Just load the whole thing.
+
+	Release();
+	InitCacheTime();		// This is invalid !
+
+	if (id < 0 || id >= MULTI_QTY)
+		return 0;
+	m_id = id;
+
+	CUOIndexRec Index;
+	if (!g_Install.ReadMulIndex(VERFILE_MULTIIDX, VERFILE_MULTI, id, Index))
+		return 0;
+
+	switch (g_Install.GetMulFormat(VERFILE_MULTIIDX))
+	{
+	case VERFORMAT_HIGHSEAS: // high seas multi format (CUOMultiItemRec_HS)
+		m_iItemQty = Index.GetBlockLength() / sizeof(CUOMultiItemRec_HS);
+		m_pItems = new CUOMultiItemRec_HS[m_iItemQty];
+		ASSERT(m_pItems);
+
+		ASSERT((sizeof(m_pItems[0]) * m_iItemQty) >= Index.GetBlockLength());
+		if (!g_Install.ReadMulData(VERFILE_MULTI, Index, static_cast <CUOMultiItemRec_HS *>(m_pItems)))
+			return 0;
+		break;
+
+	case VERFORMAT_ORIGINAL: // old format (CUOMultiItemRec)
+	default:
+		m_iItemQty = Index.GetBlockLength() / sizeof(CUOMultiItemRec);
+		m_pItems = new CUOMultiItemRec_HS[m_iItemQty];
+		ASSERT(m_pItems);
+
+		CUOMultiItemRec* pItems = new CUOMultiItemRec[m_iItemQty];
+		ASSERT((sizeof(pItems[0]) * m_iItemQty) >= Index.GetBlockLength());
+		if (!g_Install.ReadMulData(VERFILE_MULTI, Index, static_cast <CUOMultiItemRec *>(pItems)))
+		{
+			delete[] pItems;
+			return 0;
+		}
+
+		// copy to new format
+		for (size_t i = 0; i < m_iItemQty; i++)
+		{
+			m_pItems[i].m_wTileID = pItems[i].m_wTileID;
+			m_pItems[i].m_dx = pItems[i].m_dx;
+			m_pItems[i].m_dy = pItems[i].m_dy;
+			m_pItems[i].m_dz = pItems[i].m_dz;
+			m_pItems[i].m_visible = pItems[i].m_visible;
+			m_pItems[i].m_unknown = 0;
+		}
+
+		delete[] pItems;
+		break;
+	}
+
+	HitCacheTime();
+	return m_iItemQty;
 }
 
 //////////////////////////////////////////////////////////////////

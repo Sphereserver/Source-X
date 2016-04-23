@@ -20,7 +20,7 @@ private:
 
 	CUID m_uidHold;
 	std::vector<CUID> m_uidPlanks;
-	CServTime m_NextMove;
+	CServerTime m_NextMove;
 
 
 	int Ship_GetFaceOffset() const

@@ -6,7 +6,7 @@
 #include "../network/receive.h"
 #include "../CLog.h"
 #include "../CPathFinder.h"
-#include "../CServTime.h"
+#include "../CServerTime.h"
 #include "../triggers.h"
 #include "CCharNPC.h"
 

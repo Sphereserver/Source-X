@@ -21,10 +21,10 @@ game/CSectorEnviron.h
 game/CSectorEnviron.cpp
 game/CServer.cpp
 game/CServer.h
-game/CServRef.cpp
-game/CServRef.h
-game/CServTime.cpp
-game/CServTime.h
+game/CServerDef.cpp
+game/CServerDef.h
+game/CServerTime.cpp
+game/CServerTime.h
 game/CWebPage.cpp
 game/CWorld.cpp
 game/CWorld.h
@@ -174,7 +174,6 @@ common/CException.cpp
 common/CException.h
 common/CExpression.cpp
 common/CExpression.h
-common/CSphereData.cpp
 common/CSphereMap.cpp
 common/CSphereMap.h
 common/CUID.cpp

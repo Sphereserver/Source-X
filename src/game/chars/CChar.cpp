@@ -17,7 +17,7 @@
 #include "../CContainer.h"
 #include "../CLog.h"
 #include "../CServer.h"
-#include "../CServTime.h"
+#include "../CServerTime.h"
 #include "../CWorld.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
@@ -258,7 +258,7 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false )
 	m_atUnk.m_Arg2 = 0;
 	m_atUnk.m_Arg3 = 0;
 
-	m_timeLastRegen = m_timeCreate = CServTime::GetCurrentTime();
+	m_timeLastRegen = m_timeCreate = CServerTime::GetCurrentTime();
 	m_timeLastHitsUpdate = m_timeLastRegen;
 
 	m_prev_Hue = HUE_DEFAULT;
@@ -385,7 +385,7 @@ void CChar::ClientAttach( CClient * pClient )
 		return;
 
 	ASSERT(m_pPlayer);
-	m_pPlayer->m_timeLastUsed = CServTime::GetCurrentTime();
+	m_pPlayer->m_timeLastUsed = CServerTime::GetCurrentTime();
 
 	m_pClient = pClient;
 	GetTopSector()->ClientAttach( this );
@@ -2967,7 +2967,7 @@ do_default:
 				return false;
 			}break;
 		case CHC_CREATE:
-			m_timeCreate = CServTime::GetCurrentTime() - ( s.GetArgLLVal() * TICK_PER_SEC );
+			m_timeCreate = CServerTime::GetCurrentTime() - ( s.GetArgLLVal() * TICK_PER_SEC );
 			break;
 		case CHC_DIR:
 			{

@@ -9,7 +9,7 @@
 #include "../game/items/CItemShip.h"
 #include "../game/items/CItemVendable.h"
 #include "../game/CLog.h"
-#include "../game/CServTime.h"
+#include "../game/CServerTime.h"
 #include "../game/triggers.h"
 #include "network.h"
 #include "receive.h"
@@ -756,7 +756,7 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 	const CVarDefCont* vardef = g_Cfg.m_bAllowBuySellAgent ? NULL : client->m_TagDefs.GetKey("BUYSELLTIME");
 	if (vardef != NULL)
 	{
-		CServTime allowsell;
+		CServerTime allowsell;
 		allowsell.InitTime(vardef->GetValNum() + (itemCount * 3));
 		if (g_World.GetCurrentTime() < allowsell)
 		{
@@ -1242,7 +1242,7 @@ bool PacketBulletinBoardReq::onReceive(NetState* net)
 
 			newMessage->SetAttr(ATTR_MOVE_NEVER);
 			newMessage->SetName(str);
-			newMessage->SetTimeStamp(CServTime::GetCurrentTime().GetTimeRaw());
+			newMessage->SetTimeStamp(CServerTime::GetCurrentTime().GetTimeRaw());
 			newMessage->m_sAuthor = character->GetName();
 			newMessage->m_uidLink = character->GetUID();
 
@@ -1878,7 +1878,7 @@ bool PacketVendorSellReq::onReceive(NetState* net)
 	const CVarDefCont* vardef = g_Cfg.m_bAllowBuySellAgent ? NULL : client->m_TagDefs.GetKey("BUYSELLTIME");
 	if (vardef != NULL)
 	{
-		CServTime allowsell;
+		CServerTime allowsell;
 		allowsell.InitTime(vardef->GetValNum() + (itemCount * 3));
 		if (g_World.GetCurrentTime() < allowsell)
 		{

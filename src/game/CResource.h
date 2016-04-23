@@ -327,7 +327,7 @@ private:
 	CSString m_sDstFilePath;	// where is the page served from ?
 	int  m_iUpdatePeriod;	// How often to update the web page. 0 = never.
 	int  m_iUpdateLog;		// create a daily log of the page.
-	CServTime  m_timeNextUpdate;
+	CServerTime  m_timeNextUpdate;
 
 public:
 	static const char *m_sClassName;
@@ -685,7 +685,7 @@ extern class CResource : public CResourceBase
 
 public:
 	static const char *m_sClassName;
-	CServTime m_timePeriodic;	// When to perform the next periodic update
+	CServerTime m_timePeriodic;	// When to perform the next periodic update
 
 	// Begin INI file options.
 	bool m_fUseNTService;

@@ -2,7 +2,7 @@
 #include "../clients/CClient.h"
 #include "../common/CUIDExtra.h"
 #include "../network/send.h"
-#include "../CServTime.h"
+#include "../CServerTime.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
@@ -1698,7 +1698,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		}
 
 		m_atFight.m_War_Swing_State = WAR_SWING_SWINGING;
-		m_atFight.m_timeNextCombatSwing = CServTime::GetCurrentTime() + iSwingDelay;
+		m_atFight.m_timeNextCombatSwing = CServerTime::GetCurrentTime() + iSwingDelay;
 
 		if ( IsSetCombatFlags(COMBAT_PREHIT) )
 		{

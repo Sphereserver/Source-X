@@ -4,7 +4,7 @@
 #include "../game/clients/CClient.h"
 #include "../game/CLog.h"
 #include "../game/CServer.h"
-#include "../game/CServTime.h"
+#include "../game/CServerTime.h"
 #include "../game/CWorld.h"
 #include "../sphere/containers.h"
 #include "../sphere/ProfileTask.h"
@@ -468,7 +468,7 @@ void HistoryIP::setBlocked(bool isBlocked, int timeout)
 	m_blocked = isBlocked;
 
 	if (isBlocked && timeout >= 0)
-		m_blockExpire = CServTime::GetCurrentTime() + (timeout * TICK_PER_SEC);
+		m_blockExpire = CServerTime::GetCurrentTime() + (timeout * TICK_PER_SEC);
 	else
 		m_blockExpire.Init();
 }
@@ -498,14 +498,14 @@ void IPHistoryManager::tick(void)
 	// check if ttl should decay (only do this once every second)
 	bool decayTTL = ( !m_lastDecayTime.IsTimeValid() || (-g_World.GetTimeDiff(m_lastDecayTime)) >= TICK_PER_SEC );
 	if (decayTTL)
-		m_lastDecayTime = CServTime::GetCurrentTime();
+		m_lastDecayTime = CServerTime::GetCurrentTime();
 
 	for (IPHistoryList::iterator it = m_ips.begin(); it != m_ips.end(); ++it)
 	{
 		if (it->m_blocked)
 		{
 			// blocked ips don't decay, but check if the ban has expired
-			if (it->m_blockExpire.IsTimeValid() && CServTime::GetCurrentTime() > it->m_blockExpire)
+			if (it->m_blockExpire.IsTimeValid() && CServerTime::GetCurrentTime() > it->m_blockExpire)
 				it->setBlocked(false);
 		}
 		else if (decayTTL)
@@ -1178,7 +1178,7 @@ void NetworkIn::tick(void)
 			continue;
 		}
 
-		client->m_client->m_timeLastEvent = CServTime::GetCurrentTime();
+		client->m_client->m_timeLastEvent = CServerTime::GetCurrentTime();
 
 		// first data on a new connection - find out what should come next
 		if ( client->m_client->m_Crypt.IsInit() == false )
@@ -1960,7 +1960,7 @@ int NetworkOut::proceedQueue(CClient* client, int priority)
 
 	int maxClientPackets = NETWORK_MAXPACKETS;
 	int maxClientLength = NETWORK_MAXPACKETLEN;
-	CServTime time = CServTime::GetCurrentTime();
+	CServerTime time = CServerTime::GetCurrentTime();
 
 	NetState* state = client->GetNetState();
 	ASSERT(state != NULL);
@@ -3243,7 +3243,7 @@ bool NetworkInput::processData(NetState* state, Packet* buffer)
 	if (client->GetConnectType() == CONNECT_UNK)
 		return processUnknownClientData(state, buffer);
 		
-	client->m_timeLastEvent = CServTime::GetCurrentTime();
+	client->m_timeLastEvent = CServerTime::GetCurrentTime();
 
 	if ( client->m_Crypt.IsInit() == false )
 		return processOtherClientData(state, buffer);
@@ -3772,7 +3772,7 @@ size_t NetworkOutput::processPacketQueue(NetState* state, uint priority)
 	CClient* client = state->getClient();
 	ASSERT(client != NULL);
 
-	CServTime time = CServTime::GetCurrentTime();
+	CServerTime time = CServerTime::GetCurrentTime();
 	UNREFERENCED_PARAMETER(time);
 
 	size_t maxPacketsToProcess = NETWORK_MAXPACKETS;

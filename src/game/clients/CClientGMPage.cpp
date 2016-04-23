@@ -2,7 +2,7 @@
 #include "../network/network.h"
 #include "../chars/CChar.h"
 #include "../CLog.h"
-#include "../CServTime.h"
+#include "../CServerTime.h"
 #include "CClient.h"
 
 /////////////////////////////////////////////
@@ -63,7 +63,7 @@ void CClient::Cmd_GM_Page( lpctstr pszReason ) // Help button (Calls GM Call Men
 	{
 		SysMessageDefault( DEFMSG_MSG_GMPAGE_UPDATE );
 		pPage->SetReason( pszReason );
-		pPage->m_timePage = CServTime::GetCurrentTime();
+		pPage->m_timePage = CServerTime::GetCurrentTime();
 	}
 	else
 	{

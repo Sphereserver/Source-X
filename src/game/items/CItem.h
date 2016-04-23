@@ -313,7 +313,7 @@ public:
 		struct
 		{
 			RESOURCE_ID_BASE m_ResID;	// more1 = preconfigured book id from RES_BOOK or Time date stamp for the book/message creation. (if |0x80000000)
-										//CServTime   	 m_Time;	// more2= Time date stamp for the book/message creation. (Now Placed inside TIMESTAMP for int64 support)
+										//CServerTime   	 m_Time;	// more2= Time date stamp for the book/message creation. (Now Placed inside TIMESTAMP for int64 support)
 		} m_itBook;
 
 		// IT_DEED

@@ -13,7 +13,7 @@
 #include "../common/CScriptObj.h"
 #include "../common/CUID.h"
 #include "items/CItemBase.h"
-#include "CServTime.h"
+#include "CServerTime.h"
 #include "CSector.h"
 
 class CObjBase;
@@ -105,7 +105,7 @@ class CWorldClock
 #endif
 
 private:
-	CServTime m_timeClock;		// the current relative tick time (in TICK_PER_SEC)
+	CServerTime m_timeClock;		// the current relative tick time (in TICK_PER_SEC)
 	int64 m_Clock_SysPrev;		// System time of the last OnTick() (in CLOCKS_PER_SEC)
 public:
 	static const char *m_sClassName;
@@ -122,7 +122,7 @@ public:
 	void Init();
 	void InitTime( int64 lTimeBase );
 	bool Advance();
-	CServTime GetCurrentTime() const	// TICK_PER_SEC
+	CServerTime GetCurrentTime() const	// TICK_PER_SEC
 	{
 		return m_timeClock;
 	}
@@ -174,11 +174,11 @@ private:
 	CWorldClock m_Clock;		// the current relative tick time  (in TICK_PER_SEC)
 
 	// Special purpose timers.
-	CServTime	m_nextTickTime;			// next time to do sector stuff.
-	CServTime	m_timeSave;				// when to auto save ?
+	CServerTime	m_nextTickTime;			// next time to do sector stuff.
+	CServerTime	m_timeSave;				// when to auto save ?
 	bool		m_bSaveNotificationSent;// has notification been sent?
-	CServTime	m_timeRespawn;			// when to res dead NPC's ?
-	CServTime	m_timeCallUserFunc;		// when to call next user func
+	CServerTime	m_timeRespawn;			// when to res dead NPC's ?
+	CServerTime	m_timeCallUserFunc;		// when to call next user func
 	uint		m_Sector_Pulse;			// Slow some stuff down that doesn't need constant processing.
 	ullong		m_ticksWithoutMySQL;	// MySQL should be running constantly if MySQLTicks is true, keep here record of how much ticks since Sphere is not connected.
 
@@ -195,7 +195,7 @@ public:
 	int m_iSaveCountID;			// Current archival backup id. Whole World must have this same stage id
 	int m_iLoadVersion;			// Previous load version. (only used during load of course)
 	int m_iPrevBuild;			// Previous __GITREVISION__
-	CServTime m_timeStartup;	// When did the system restore load/save ?
+	CServerTime m_timeStartup;	// When did the system restore load/save ?
 
 	CUID m_uidLastNewItem;	// for script access.
 	CUID m_uidLastNewChar;	// for script access.
@@ -239,11 +239,11 @@ public:
 
 	// Time
 
-	CServTime GetCurrentTime() const
+	CServerTime GetCurrentTime() const
 	{
 		return m_Clock.GetCurrentTime();  // Time in TICK_PER_SEC
 	}
-	int64 GetTimeDiff( CServTime time ) const
+	int64 GetTimeDiff( CServerTime time ) const
 	{
 		// How long till this event
 		// negative = in the past.
@@ -255,9 +255,9 @@ public:
 #define TRAMMEL_FULL_BRIGHTNESS 2 // light units LIGHT_BRIGHT
 #define FELUCCA_FULL_BRIGHTNESS 6 // light units LIGHT_BRIGHT
 	uint GetMoonPhase( bool bMoonIndex = false ) const;
-	CServTime GetNextNewMoon( bool bMoonIndex ) const;
+	CServerTime GetNextNewMoon( bool bMoonIndex ) const;
 
-	dword GetGameWorldTime( CServTime basetime ) const;
+	dword GetGameWorldTime( CServerTime basetime ) const;
 	dword GetGameWorldTime() const	// return game world minutes
 	{
 		return( GetGameWorldTime( GetCurrentTime()));
@@ -359,7 +359,7 @@ public:
 	CItem * GetItem();
 };
 
-inline CServTime CServTime::GetCurrentTime()	// static
+inline CServerTime CServerTime::GetCurrentTime()	// static
 {
 	return g_World.GetCurrentTime();
 }

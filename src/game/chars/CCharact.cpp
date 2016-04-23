@@ -10,7 +10,7 @@
 #include "../items/CItemSpawn.h"
 #include "../CContainer.h"
 #include "../CLog.h"
-#include "../CServTime.h"
+#include "../CServerTime.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CChar.h"
@@ -3822,7 +3822,7 @@ void CChar::OnTickStatusUpdate()
 			UpdateCanSee(cmd, m_pClient);		// send hits update to all nearby clients
 			m_fStatusUpdate &= ~SU_UPDATE_HITS;
 		}
-		m_timeLastHitsUpdate = CServTime::GetCurrentTime();
+		m_timeLastHitsUpdate = CServerTime::GetCurrentTime();
 	}
 
 	if ( m_fStatusUpdate & SU_UPDATE_MODE )
@@ -3926,7 +3926,7 @@ bool CChar::OnTick()
 
 	if ( iTimeDiff >= TICK_PER_SEC )		// don't bother with < 1 sec timers on the checks below
 	{
-		m_timeLastRegen = CServTime::GetCurrentTime();
+		m_timeLastRegen = CServerTime::GetCurrentTime();
 
 		EXC_SET("last attackers");
 		Attacker_CheckTimeout();

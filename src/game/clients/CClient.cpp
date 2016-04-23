@@ -8,7 +8,7 @@
 #include "../chars/CChar.h"
 #include "../items/CItemSpawn.h"
 #include "../CLog.h"
-#include "../CServTime.h"
+#include "../CServerTime.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CClient.h"
@@ -43,8 +43,8 @@ CClient::CClient(NetState* state)
 	m_pGMPage = NULL;
 
 	m_timeLogin.Init();
-	m_timeLastEvent = CServTime::GetCurrentTime();
-	m_timeLastEventWalk = CServTime::GetCurrentTime();
+	m_timeLastEvent = CServerTime::GetCurrentTime();
+	m_timeLastEventWalk = CServerTime::GetCurrentTime();
 	m_timeNextEventWalk = 0;
 
 	m_iWalkStepCount = 0;

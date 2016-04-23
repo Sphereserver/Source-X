@@ -1,7 +1,7 @@
 // Actions specific to an NPC.
 #include "../common/CUIDExtra.h"
 #include "../clients/CClient.h"
-#include "../CServTime.h"
+#include "../CServerTime.h"
 #include "../triggers.h"
 #include "CChar.h"
 

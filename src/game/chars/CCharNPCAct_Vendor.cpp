@@ -2,7 +2,7 @@
 
 #include "../../network/receive.h"
 #include "../clients/CClient.h"
-#include "../CServTime.h"
+#include "../CServerTime.h"
 #include "../CPathFinder.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
@@ -62,7 +62,7 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 			bRestockNow = false;
 		
 		if (bRestockNow)
-			bRestockNow = ( CServTime::GetCurrentTime().GetTimeDiff(m_pNPC->m_timeRestock) > restockIn );
+			bRestockNow = ( CServerTime::GetCurrentTime().GetTimeDiff(m_pNPC->m_timeRestock) > restockIn );
 	}
 
 	// At restock the containers are actually emptied

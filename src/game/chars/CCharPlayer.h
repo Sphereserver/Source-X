@@ -11,7 +11,7 @@
 #include "../common/CResourceBase.h"
 #include "../common/sphereproto.h"
 #include "../CResource.h"
-#include "../CServTime.h"
+#include "../CServerTime.h"
 
 
 enum CPC_TYPE	// Player char.
@@ -36,7 +36,7 @@ public:
 	CAccount * m_pAccount;	// The account index. (for idle players mostly)
 	static lpctstr const sm_szVerbKeys[];
 
-	CServTime m_timeLastUsed;	// Time the player char was last used.
+	CServerTime m_timeLastUsed;	// Time the player char was last used.
 
 	CSString m_sProfile;	// limited to SCRIPT_MAX_LINE_LEN-16
 

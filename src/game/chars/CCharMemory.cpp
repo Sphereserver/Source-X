@@ -2,7 +2,7 @@
 #include "../clients/CClient.h"
 #include "../common/CUIDExtra.h"
 #include "../network/send.h"
-#include "../CServTime.h"
+#include "../CServerTime.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 
@@ -166,7 +166,7 @@ void CChar::Memory_AddTypes( CItemMemory * pMemory, word MemTypes )
 	{
 		pMemory->SetMemoryTypes( pMemory->GetMemoryTypes() | MemTypes );
 		pMemory->m_itEqMemory.m_pt = GetTopPoint();	// Where did the fight start ?
-		pMemory->SetTimeStamp(CServTime::GetCurrentTime().GetTimeRaw());
+		pMemory->SetTimeStamp(CServerTime::GetCurrentTime().GetTimeRaw());
 		Memory_UpdateFlags( pMemory );
 	}
 }

@@ -6,8 +6,8 @@
 #include "CLog.h"
 #include "CObjBase.h"
 #include "CResource.h"
-#include "CServRef.h"
-#include "CServTime.h"
+#include "CServerDef.h"
+#include "CServerTime.h"
 #include "CWorld.h"
 
 //	Memory profiling
@@ -49,7 +49,7 @@ CServerDef::CServerDef( lpctstr pszName, CSocketAddressIP dwIP ) :
 
 	SetName( pszName );
 	m_timeLastValid.Init();
-	m_timeCreate = CServTime::GetCurrentTime();
+	m_timeCreate = CServerTime::GetCurrentTime();
 
 	// Set default time zone from UTC
 	m_TimeZone = (char)( _timezone / (60 * 60) );	// Greenwich mean time.
@@ -173,7 +173,7 @@ void CServerDef::SetName( lpctstr pszName )
 void CServerDef::SetValidTime()
 {
 	ADDTOCALLSTACK("CServerDef::SetValidTime");
-	m_timeLastValid = CServTime::GetCurrentTime();
+	m_timeLastValid = CServerTime::GetCurrentTime();
 }
 
 int64 CServerDef::GetTimeSinceLastValid() const
@@ -275,7 +275,7 @@ bool CServerDef::r_LoadVal( CScript & s )
 			// m_ClientVersion.SetClientVer( s.GetArgRaw());
 			break;
 		case SC_CREATE:
-			m_timeCreate = CServTime::GetCurrentTime() - ( s.GetArgLLVal() * TICK_PER_SEC );
+			m_timeCreate = CServerTime::GetCurrentTime() - ( s.GetArgLLVal() * TICK_PER_SEC );
 			break;
 		case SC_ADMINEMAIL:
 			if ( this != &g_Serv && !g_Serv.m_sEMail.IsEmpty() && strstr(s.GetArgStr(), g_Serv.m_sEMail) )
@@ -302,9 +302,9 @@ bool CServerDef::r_LoadVal( CScript & s )
 			{
 				int iVal = s.GetArgVal() * TICK_PER_SEC;
 				if ( iVal < 0 )
-					m_timeLastValid = CServTime::GetCurrentTime() + iVal;
+					m_timeLastValid = CServerTime::GetCurrentTime() + iVal;
 				else
-					m_timeLastValid = CServTime::GetCurrentTime() - iVal;
+					m_timeLastValid = CServerTime::GetCurrentTime() - iVal;
 			}
 			break;
 		case SC_SERVIP:

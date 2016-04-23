@@ -7,7 +7,7 @@
 #include "chars/CChar.h"
 #include "clients/CClient.h"
 #include "CServer.h"
-#include "CServTime.h"
+#include "CServerTime.h"
 
 enum WV_TYPE
 {
@@ -286,12 +286,12 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 	{
 		if ( m_iUpdatePeriod <= 0 )
 			return false;
-		if ( CServTime::GetCurrentTime() < m_timeNextUpdate )
+		if ( CServerTime::GetCurrentTime() < m_timeNextUpdate )
 			return true;	// should stilll be valid
 	}
 
 	ASSERT(pSrc);
-	m_timeNextUpdate = CServTime::GetCurrentTime() + m_iUpdatePeriod;
+	m_timeNextUpdate = CServerTime::GetCurrentTime() + m_iUpdatePeriod;
 	if ( pszDstName == NULL )
 	{
 		pszDstName = m_sDstFilePath;

@@ -356,7 +356,7 @@ void CObjBase::SetTimeout( int64 iDelayInTicks )
 	if ( iDelayInTicks < 0 )
 		m_timeout.Init();
 	else
-		m_timeout = CServTime::GetCurrentTime() + iDelayInTicks;
+		m_timeout = CServerTime::GetCurrentTime() + iDelayInTicks;
 }
 
 int64 CObjBase::GetTimerAdjusted() const
@@ -2859,7 +2859,7 @@ byte CObjBase::RangeH() const
 	return (byte)(((pRange ? pRange->GetValNum() : 0)>>8) & 0xff);
 }
 
-CServTime CObjBase::GetTimeStamp() const
+CServerTime CObjBase::GetTimeStamp() const
 {
 	return m_timestamp;
 }

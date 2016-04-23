@@ -13,7 +13,7 @@
 #include "uo_files/CUOItemInfo.h"
 #include "CLog.h"
 #include "CResource.h"
-#include "CServTime.h"
+#include "CServerTime.h"
 #include "CWorld.h"
 #include "spheresvr.h"
 #include "triggers.h"
@@ -3676,7 +3676,7 @@ void CResource::OnTick( bool fNow )
 {
 	ADDTOCALLSTACK("CResource::OnTick");
 	// Give a tick to the less critical stuff.
-	if ( !fNow && ( g_Serv.IsLoading() || ( m_timePeriodic > CServTime::GetCurrentTime() )))
+	if ( !fNow && ( g_Serv.IsLoading() || ( m_timePeriodic > CServerTime::GetCurrentTime() )))
 		return;
 
 	if ( this->m_fUseHTTP )
@@ -3704,7 +3704,7 @@ void CResource::OnTick( bool fNow )
 		}
 	}
 
-	m_timePeriodic = CServTime::GetCurrentTime() + ( 60 * TICK_PER_SEC );
+	m_timePeriodic = CServerTime::GetCurrentTime() + ( 60 * TICK_PER_SEC );
 }
 
 #define catresname(a,b)	\
