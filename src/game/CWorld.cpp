@@ -1,5 +1,5 @@
 
-#include "../common/CDatabase.h"
+#include "../common/CDataBase.h"
 #include "../common/CException.h"
 #include "../common/CUIDExtra.h"
 #include "../common/sphereversion.h"

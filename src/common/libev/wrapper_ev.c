@@ -17,14 +17,14 @@
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
 
-#ifndef _MSC_VER
+#ifdef __MINGW__
 	#include <time.h>
 	struct timespec
 	{
 		time_t tv_sec;
 		long int tv_nsec;
 	};
-#endif  // _MSC_VER
+#endif  // __MINGW__
 
 #include "ev.h"
 #include "ev.c"

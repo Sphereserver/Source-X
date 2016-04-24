@@ -440,7 +440,7 @@ int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iRepli
 	}
 
 	CChar *pChar = dynamic_cast<CChar *>(this);
-	int iQtyMin = INT_MAX;
+	int iQtyMin = INT32_MAX;
 	for ( size_t i = 0; i < pResources->GetCount(); i++ )
 	{
 		int iResQty = (int)(pResources->GetAt(i).GetResQty());
@@ -472,7 +472,7 @@ int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iRepli
 			iQtyMin = iQtyCur;
 	}
 
-	if ( iQtyMin == INT_MAX )	// it has no resources ? So i guess we can make it from nothing ?
+	if ( iQtyMin == INT32_MAX )	// it has no resources ? So i guess we can make it from nothing ?
 		return iReplicationQty;
 
 	return iQtyMin;
