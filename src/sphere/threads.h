@@ -4,7 +4,7 @@
 
 #include "../common/common.h"
 #include "../common/spherecom.h"
-#include "../sphere/mutex.h"
+#include "../common/sphere_library/mutex.h"
 #include "../sphere/strings.h"
 #include "../sphere/ProfileData.h"
 #include <list>

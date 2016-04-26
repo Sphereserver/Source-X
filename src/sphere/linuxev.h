@@ -7,8 +7,8 @@
 
 	#include "../common/libev/wrapper_ev.h"
 	#include "../common/libev/ev.h"
+	#include "../common/sphere_library/mutex.h"
 	#include "threads.h"
-	#include "mutex.h"
 
 	#ifdef _BSD
 		#define EV_BACKEND_LIST (EVBACKEND_SELECT | EVBACKEND_POLL | EVBACKEND_KQUEUE)

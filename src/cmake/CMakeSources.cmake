@@ -273,6 +273,8 @@ common/sphere_library/CSTime.cpp
 common/sphere_library/CSTime.h
 common/sphere_library/CSWindow.cpp
 common/sphere_library/CSWindow.h
+common/sphere_library/mutex.h
+common/sphere_library/mutex.cpp
 )
 SOURCE_GROUP (common\\sphere_library FILES ${spherelibrary_SRCS})
 
@@ -338,8 +340,6 @@ sphere/asyncdb.h
 sphere/containers.h
 sphere/linuxev.cpp
 sphere/linuxev.h
-sphere/mutex.cpp
-sphere/mutex.h
 sphere/ProfileData.cpp
 sphere/ProfileData.h
 sphere/ProfileTask.cpp

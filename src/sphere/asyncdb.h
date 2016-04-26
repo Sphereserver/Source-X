@@ -7,9 +7,8 @@
 #ifndef _INC_ASYNCDB_H
 #define _INC_ASYNCDB_H
 
+#include "../common/sphere_library/mutex.h"
 #include "threads.h"
-#include "mutex.h"
-//#include "../game/spheresvr.h" Removed to test.
 
 
 class CDataBaseAsyncHelper : public AbstractSphereThread

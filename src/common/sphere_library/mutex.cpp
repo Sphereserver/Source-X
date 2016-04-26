@@ -1,9 +1,7 @@
 #define _WIN32_DCOM
 #include "mutex.h"
 
-// *************************
-//		SimpleMutex
-// *************************
+// SimpleMutex:: Constructors, Destructor, Asign operator.
 
 SimpleMutex::SimpleMutex()
 {
@@ -26,7 +24,8 @@ SimpleMutex::~SimpleMutex()
 #endif
 }
 
-//lock
+// SimpleMutex:: Interaction.
+
 void SimpleMutex::lock()
 {
 #ifdef _WIN32
@@ -36,7 +35,6 @@ void SimpleMutex::lock()
 #endif
 }
 
-//try lock
 bool SimpleMutex::tryLock()
 {
 #ifdef _WIN32
@@ -46,7 +44,6 @@ bool SimpleMutex::tryLock()
 #endif
 }
 
-//unlock
 void SimpleMutex::unlock()
 {
 #ifdef _WIN32
@@ -56,30 +53,26 @@ void SimpleMutex::unlock()
 #endif
 }
 
-// ****************************
-//		SimpleThreadLock
-// ****************************
+// SimpleThreadLock:: Constructors, Destructor, Asign operator.
 
 SimpleThreadLock::SimpleThreadLock(SimpleMutex &mutex) : m_mutex(mutex), m_locked(true)
 {
 	mutex.lock();
 }
 
-//the destructor
 SimpleThreadLock::~SimpleThreadLock()
 {
 	m_mutex.unlock();
 }
 
-//report the state of locking when used as a boolean
+// SimpleThreadLock:: Operators.
+
 SimpleThreadLock::operator bool() const
 {
 	return m_locked;
 }
 
-// ****************************
-//		ManualThreadLock
-// ****************************
+// ManualThreadLock:: Constructors, Destructor, Asign operator.
 
 ManualThreadLock::ManualThreadLock() : m_mutex(NULL), m_locked(false)
 {
@@ -90,23 +83,27 @@ ManualThreadLock::ManualThreadLock(SimpleMutex * mutex) : m_locked(false)
 	setMutex(mutex);
 }
 
-//the destructor
 ManualThreadLock::~ManualThreadLock()
 {
 	if (m_mutex != NULL)
 		doUnlock();
 }
 
+// ManualThreadLock:: Modifiers.
+
 void ManualThreadLock::setMutex(SimpleMutex * mutex)
 {
 	m_mutex = mutex;
 }
 
-//report the state of locking when used as a boolean
+// ManualThreadLock:: Operators.
+
 ManualThreadLock::operator bool() const
 {
 	return m_locked;
 }
+
+// ManualThreadLock:: Interaction.
 
 void ManualThreadLock::doLock()
 {
@@ -129,9 +126,7 @@ void ManualThreadLock::doUnlock()
 	m_mutex->unlock();
 }
 
-// ****************************
-//		AutoResetEvent
-// ****************************
+// AutoResetEvent:: Constructors, Destructor, Asign operator.
 
 AutoResetEvent::AutoResetEvent()
 {
@@ -158,6 +153,8 @@ AutoResetEvent::~AutoResetEvent()
 	pthread_mutex_destroy(&m_criticalSection);
 #endif
 }
+
+// AutoResetEvent:: Interaction.
 
 void AutoResetEvent::wait(uint timeout)
 {
@@ -212,9 +209,7 @@ void AutoResetEvent::signal()
 #endif
 }
 
-// ****************************
-//		ManualResetEvent
-// ****************************
+// ManualResetEvent:: Constructors, Destructor, Asign operator.
 
 ManualResetEvent::ManualResetEvent()
 {
@@ -242,6 +237,8 @@ ManualResetEvent::~ManualResetEvent()
 	pthread_mutex_destroy(&m_criticalSection);
 #endif
 }
+
+// ManualResetEvent:: Interaction.
 
 void ManualResetEvent::wait(uint timeout)
 {

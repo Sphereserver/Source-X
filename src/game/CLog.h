@@ -9,11 +9,11 @@
 
 #include "../common/sphere_library/CSFile.h"
 #include "../common/sphere_library/CSTime.h"
+#include "../common/sphere_library/mutex.h"
 #include "../common/spherecom.h"
 #include "../common/common.h"
 #include "../common/CScriptObj.h"
 #include "../common/CScript.h"
-#include "../sphere/mutex.h"
 
 // -----------------------------
 //	CEventLog

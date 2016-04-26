@@ -7,11 +7,11 @@
 #ifndef _INC_CDATABASE_H
 #define	_INC_CDATABASE_H
 
-#include "../common/spherecom.h"
 #include <mysql.h>
 #include <errmsg.h>	// mysql standard include
-#include "../common/CScriptObj.h"
-#include "../sphere/mutex.h"
+#include "sphere_library/mutex.h"
+#include "CScriptObj.h"
+#include "spherecom.h"
 
 #ifdef _WIN32
 	#pragma comment(lib, "libmySQL")
