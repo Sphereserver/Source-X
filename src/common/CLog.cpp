@@ -2,13 +2,9 @@
 #include "CException.h"
 #include "common.h"
 #include "../sphere/ProfileTask.h"
-#include "../sphere/UnixTerminal.h"
 #include "CLog.h"
 #include "../game/CServer.h"
 
-
-///////////////////////////////////////////////////////////////
-// -CLog
 
 CLog::CLog()
 {
@@ -31,7 +27,7 @@ const CScriptObj * CLog::SetObjectContext( const CScriptObj * pObjectContext )
 {
 	const CScriptObj * pOldObject = m_pObjectContext;
 	m_pObjectContext = pObjectContext;
-	return( pOldObject );
+	return pOldObject;
 }
 bool CLog::SetFilePath( lpctstr pszName )
 {
@@ -41,12 +37,12 @@ bool CLog::SetFilePath( lpctstr pszName )
 
 lpctstr CLog::GetLogDir() const
 {
-	return( m_sBaseDir );
+	return m_sBaseDir;
 }
 
 dword CLog::GetLogMask() const
 {
-	return( m_dwMsgMask &~ 0x0f ) ;
+	return ( m_dwMsgMask &~ 0x0f );
 }
 
 void CLog::SetLogMask( dword dwMask )
@@ -56,8 +52,8 @@ void CLog::SetLogMask( dword dwMask )
 
 bool CLog::IsLoggedMask( dword dwMask ) const
 {
-	return( ((dwMask &~ (0x0f | LOGM_NOCONTEXT | LOGM_DEBUG)) == 0) ||
-			(( GetLogMask() & ( dwMask &~ 0x0f )) != 0) );
+	return ( ((dwMask &~ (0x0f | LOGM_NOCONTEXT | LOGM_DEBUG)) == 0) ||
+			 (( GetLogMask() & ( dwMask &~ 0x0f )) != 0) );
 }
 
 LOGL_TYPE CLog::GetLogLevel() const
@@ -100,9 +96,7 @@ bool CLog::OpenLog( lpctstr pszBaseDirName )	// name set previously.
 			}
 		}
 		else
-		{
 			m_sBaseDir = pszBaseDirName;
-		}
 	}
 
 	// Get the new name based on date.
@@ -121,34 +115,36 @@ bool CLog::OpenLog( lpctstr pszBaseDirName )	// name set previously.
 	return false;
 }
 
-void CLog::SetColor(Color color)
+void CLog::SetColor(ConsoleTextColor color)
 {
 	switch (color)
 	{
 #ifdef _WIN32
-        case YELLOW:
-            NTWindow_PostMsgColor(RGB(127,127,0));
-            break;
-        case RED:
-            NTWindow_PostMsgColor(RGB(255,0,0));
-            break;
-        case CYAN:
-            NTWindow_PostMsgColor(RGB(0,127,255));
-            break;
+		case CTCOL_RED:
+			NTWindow_PostMsgColor(RGB(255, 0, 0));
+			break;
+		case CTCOL_GREEN:
+			NTWindow_PostMsgColor(RGB(0, 255, 0));
+			break;
+		case CTCOL_YELLOW:
+			NTWindow_PostMsgColor(RGB(127, 127, 0));
+			break;
+		case CTCOL_BLUE:
+			NTWindow_PostMsgColor(RGB(0, 0, 255));
+			break;
+		case CTCOL_MAGENTA:
+			NTWindow_PostMsgColor(RGB(255, 0, 255));
+			break;
+		case CTCOL_CYAN:
+			NTWindow_PostMsgColor(RGB(0, 127, 255));
+			break;
+		case CTCOL_WHITE:
+			NTWindow_PostMsgColor(RGB(255, 255, 255));
+			break;        
         default:
             NTWindow_PostMsgColor(0);
 #else
-		case YELLOW:
-			g_UnixTerminal.setColor(UnixTerminal::COL_YELLOW);
-			break;
-		case RED:
-			g_UnixTerminal.setColor(UnixTerminal::COL_RED);
-			break;
-		case CYAN:
-			g_UnixTerminal.setColor(UnixTerminal::COL_CYAN);
-			break;
-		default:
-			g_UnixTerminal.setColor(UnixTerminal::COL_DEFAULT);
+		g_UnixTerminal.setColor(color);
 #endif
 	}
 }
@@ -166,7 +162,6 @@ int CLog::EventStr( dword wMask, lpctstr pszMsg )
 
 	try
 	{
-
 		// Put up the date/time.
 		CSTime datetime = CSTime::GetCurrentTime();	// last real time stamp.
 
@@ -198,7 +193,7 @@ int CLog::EventStr( dword wMask, lpctstr pszMsg )
 			case LOGL_FATAL:	// fatal error !
 				pszLabel = "FATAL:";
 				break;
-			case LOGL_CRIT:	// critical.
+			case LOGL_CRIT:		// critical.
 				pszLabel = "CRITICAL:";
 				break;
 			case LOGL_ERROR:	// non-fatal errors.
@@ -208,8 +203,6 @@ int CLog::EventStr( dword wMask, lpctstr pszMsg )
 				pszLabel = "WARNING:";
 				break;
 		}
-		if ( !pszLabel && ( wMask & LOGM_DEBUG ) && !( wMask & LOGM_INIT ))
-			pszLabel = "DEBUG:";
 
 		// Get the script context. (if there is one)
 		tchar szScriptContext[ _MAX_PATH + 16 ];
@@ -219,43 +212,50 @@ int CLog::EventStr( dword wMask, lpctstr pszMsg )
 			sprintf( szScriptContext, "(%s,%d)", m_pScriptContext->GetFileTitle(), LineContext.m_iLineNum );
 		}
 		else
-		{
 			szScriptContext[0] = '\0';
-		}
 
 		// Print to screen.
-		if ( ! ( wMask & LOGM_INIT ) && ! g_Serv.IsLoading())
+		if ( ! ( wMask & LOGM_INIT ) && ! g_Serv.IsLoading() )
 		{
-			SetColor(YELLOW);
+			SetColor(CTCOL_YELLOW);
 			g_Serv.PrintStr( szTime );
-			SetColor(DEFAULT);
+			SetColor(CTCOL_DEFAULT);
 		}
 
 		if ( pszLabel )	// some sort of error
 		{
-			SetColor(RED);
+			SetColor(CTCOL_RED);
 			g_Serv.PrintStr( pszLabel );
-			SetColor(DEFAULT);
+			if ( (wMask & 0x07) == LOGL_WARN )
+				SetColor(CTCOL_DEFAULT);
+			else
+				SetColor(CTCOL_WHITE);
+		}
+		else if ((wMask & LOGM_DEBUG) && !(wMask & LOGM_INIT))	// debug log
+		{
+			SetColor(CTCOL_MAGENTA);
+			g_Serv.PrintStr("DEBUG:");
+			SetColor(CTCOL_DEFAULT);
 		}
 
 		if ( szScriptContext[0] )
 		{
-			SetColor(CYAN);
+			SetColor(CTCOL_CYAN);
 			g_Serv.PrintStr( szScriptContext );
-			SetColor(DEFAULT);
+			SetColor(CTCOL_DEFAULT);
 		}
 		g_Serv.PrintStr( pszMsg );
 
 		// Back to normal color.
-		SetColor(DEFAULT);
+		SetColor(CTCOL_DEFAULT);
 
 		// Print to log file.
 		WriteString( szTime );
-		if ( pszLabel )	WriteString( pszLabel );
+		if ( pszLabel )
+			WriteString( pszLabel );
 		if ( szScriptContext[0] )
-		{
 			WriteString( szScriptContext );
-		}
+
 		WriteString( pszMsg );
 
 		iRet = 1;
@@ -273,7 +273,7 @@ int CLog::EventStr( dword wMask, lpctstr pszMsg )
 
 	m_mutex.unlock();
 
-	return( iRet );
+	return iRet;
 }
 
 CSTime CLog::sm_prevCatchTick;

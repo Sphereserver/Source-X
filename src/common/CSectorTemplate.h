@@ -35,7 +35,7 @@ public:
 	CServerTime m_timeLastClient;	// age the sector based on last client here.
 
 protected:
-	void OnRemoveOb( CSObjListRec* pObRec );	// Override this = called when removed from list.
+	void OnRemoveObj( CSObjListRec* pObRec );	// Override this = called when removed from list.
 
 public:
 	size_t HasClients() const;
@@ -58,7 +58,7 @@ public:
 	static bool sm_fNotAMove;	// hack flag to prevent items from bouncing around too much.
 
 protected:
-	void OnRemoveOb( CSObjListRec* pObRec );	// Override this = called when removed from list.
+	void OnRemoveObj( CSObjListRec* pObRec );	// Override this = called when removed from list.
 
 public:
 	static const char *m_sClassName;
@@ -72,17 +72,17 @@ private:
 	CItemsList& operator=(const CItemsList& other);
 };
 
-class CObPointSortArray : public CSObjSortArray< CPointSort*, int >
+class CObjPointSortArray : public CSObjSortArray< CPointSort*, int >
 {
 public:
 	static const char *m_sClassName;
 	// Find a point fast.
 	int CompareKey( int id, CPointSort* pBase, bool fNoSpaces ) const;
 public:
-	CObPointSortArray();
+	CObjPointSortArray();
 private:
-	CObPointSortArray(const CObPointSortArray& copy);
-	CObPointSortArray& operator=(const CObPointSortArray& other);
+	CObjPointSortArray(const CObjPointSortArray& copy);
+	CObjPointSortArray& operator=(const CObjPointSortArray& other);
 };
 
 class CSectorBase		// world sector
@@ -95,7 +95,7 @@ private:
 	MapBlockCache							m_MapBlockCache;
 public:
 	static const char *m_sClassName;
-	CObPointSortArray	m_Teleports;		//	CTeleport array
+	CObjPointSortArray	m_Teleports;		//	CTeleport array
 	CRegionLinks		m_RegionLinks;		//	CRegionBase(s) in this CSector
 	dword			m_dwFlags;
 public:

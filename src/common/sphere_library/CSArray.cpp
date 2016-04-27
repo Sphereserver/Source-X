@@ -145,9 +145,9 @@ void CSObjList::InsertTail( CSObjListRec * pNewRec )
 	InsertAfter(pNewRec, GetTail());
 }
 
-void CSObjList::OnRemoveOb( CSObjListRec* pObRec )	// Override this = called when removed from list.
+void CSObjList::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when removed from list.
 {
-	ADDTOCALLSTACK("CSObjList::OnRemoveOb");
+	ADDTOCALLSTACK("CSObjList::OnRemoveObj");
 	// just remove from list. DON'T delete !
 	if ( pObRec == NULL )
 		return;
@@ -175,5 +175,5 @@ void CSObjList::RemoveAtSpecial( CSObjListRec * pObRec )
 {
 	ADDTOCALLSTACK("CSObjList::RemoveAtSpecial");
 	// only called by pObRec->RemoveSelf()
-	OnRemoveOb(pObRec);	// call any approriate virtuals.
+	OnRemoveObj(pObRec);	// call any approriate virtuals.
 }

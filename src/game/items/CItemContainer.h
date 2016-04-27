@@ -51,7 +51,7 @@ public:
 	void ContentAdd( CItem * pItem );
 	void ContentAdd( CItem * pItem, CPointMap pt, uchar gridIndex = 0 );
 protected:
-	void OnRemoveOb( CSObjListRec* pObRec );	// Override this = called when removed from list.
+	void OnRemoveObj( CSObjListRec* pObRec );	// Override this = called when removed from list.
 public:
 	bool IsItemInTrade();
 	void Trade_Status( bool bCheck );

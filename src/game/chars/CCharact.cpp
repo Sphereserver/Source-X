@@ -371,9 +371,9 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 // Unequip the item.
 // This may be a delete etc. It can not FAIL !
 // Removing 'Equip beneficts' from this item
-void CChar::OnRemoveOb( CSObjListRec* pObRec )	// Override this = called when removed from list.
+void CChar::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when removed from list.
 {
-	ADDTOCALLSTACK("CChar::OnRemoveOb");
+	ADDTOCALLSTACK("CChar::OnRemoveObj");
 	CItem * pItem = static_cast <CItem*>(pObRec);
 	if ( !pItem )
 		return;
@@ -385,7 +385,7 @@ void CChar::OnRemoveOb( CSObjListRec* pObRec )	// Override this = called when re
 			pItem->OnTrigger( ITRIG_UNEQUIP, this );
 	}
 
-	CContainer::OnRemoveOb( pObRec );
+	CContainer::OnRemoveObj( pObRec );
 
 	// remove equipped items effects
 	switch ( layer )

@@ -189,13 +189,13 @@ protected:
     * @see CSObjListRec::RemoveSelf()
     * @param pObRec removed record.
     */
-	virtual void OnRemoveOb( CSObjListRec* pObRec );
+	virtual void OnRemoveObj( CSObjListRec* pObRec );
 private:
 	/**
-    * @brief Call the trigger OnRemoveOb.
+    * @brief Call the trigger OnRemoveObj.
     *
     * Only called by CSObjListRec::RemoveSelf()
-    * @see OnRemoveOb()
+    * @see OnRemoveObj()
     * @param pObRec record to remove.
     */
 	void RemoveAtSpecial( CSObjListRec * pObRec );

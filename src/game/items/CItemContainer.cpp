@@ -592,9 +592,9 @@ bool CItemContainer::IsItemInside( const CItem *pItem ) const
 	}
 }
 
-void CItemContainer::OnRemoveOb( CSObjListRec *pObRec )	// Override this = called when removed from list.
+void CItemContainer::OnRemoveObj( CSObjListRec *pObRec )	// Override this = called when removed from list.
 {
-	ADDTOCALLSTACK("CItemContainer::OnRemoveOb");
+	ADDTOCALLSTACK("CItemContainer::OnRemoveObj");
 	// remove this object from the container list.
 	CItem *pItem = static_cast<CItem *>(pObRec);
 	ASSERT(pItem);
@@ -611,7 +611,7 @@ void CItemContainer::OnRemoveOb( CSObjListRec *pObRec )	// Override this = calle
 			pItemVend->SetPlayerVendorPrice(0);
 	}
 
-	CContainer::OnRemoveOb(pObRec);
+	CContainer::OnRemoveObj(pObRec);
 	if ( IsType(IT_KEYRING) )	// key ring.
 		SetKeyRing();
 }

@@ -19,7 +19,7 @@ class CContainer : public CSObjList	// This class contains a list of items but m
 {
 public:
 	int	m_totalweight;	// weight of all the items it has. (1/WEIGHT_UNITS pound)
-	virtual void OnRemoveOb( CSObjListRec* pObRec );	// Override this = called when removed from list.
+	virtual void OnRemoveObj( CSObjListRec* pObRec );	// Override this = called when removed from list.
 	void ContentAddPrivate( CItem * pItem );
 
 	void r_WriteContent( CScript & s ) const;

@@ -472,7 +472,7 @@ private:
 	// Contents/Carry stuff. ---------------------------------
 	void ContentAdd( CItem * pItem );
 protected:
-	void OnRemoveOb( CSObjListRec* pObRec );	// Override this = called when removed from list.
+	void OnRemoveObj( CSObjListRec* pObRec );	// Override this = called when removed from list.
 public:
 	bool CanCarry( const CItem * pItem ) const;
 	bool CanEquipStr( CItem * pItem ) const;

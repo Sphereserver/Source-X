@@ -85,15 +85,15 @@ void CContainer::ContentAddPrivate( CItem *pItem )
 	OnWeightChange(pItem->GetWeight());
 }
 
-void CContainer::OnRemoveOb( CSObjListRec *pObRec )	// Override this = called when removed from list.
+void CContainer::OnRemoveObj( CSObjListRec *pObRec )	// Override this = called when removed from list.
 {
-	ADDTOCALLSTACK("CContainer::OnRemoveOb");
+	ADDTOCALLSTACK("CContainer::OnRemoveObj");
 	// remove this object from the container list.
 	// Overload the RemoveAt for general lists to come here.
 	CItem *pItem = static_cast<CItem *>(pObRec);
 	ASSERT(pItem);
 
-	CSObjList::OnRemoveOb(pItem);
+	CSObjList::OnRemoveObj(pItem);
 	ASSERT(pItem->GetParent() == NULL);
 
 	pItem->SetContainerFlags(UID_O_DISCONNECT);		// It is no place for the moment.

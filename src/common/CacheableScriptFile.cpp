@@ -65,9 +65,7 @@ bool CacheableScriptFile::OpenBase(void *pExtra)
 void CacheableScriptFile::CloseBase() 
 {
 	if( useDefaultFile() ) 
-	{
 		CSFileText::CloseBase();
-	}
 	else 
 	{
 		ADDTOCALLSTACK("CacheableScriptFile::CloseBase");
@@ -91,9 +89,7 @@ void CacheableScriptFile::CloseBase()
 bool CacheableScriptFile::IsFileOpen() const 
 {
 	if( useDefaultFile() ) 
-	{
 		return CSFileText::IsFileOpen();
-	}
 
 	ADDTOCALLSTACK("CacheableScriptFile::IsFileOpen");
 	return !m_closed;
@@ -102,9 +98,7 @@ bool CacheableScriptFile::IsFileOpen() const
 bool CacheableScriptFile::IsEOF() const 
 {
 	if( useDefaultFile() ) 
-	{
 		return CSFileText::IsEOF();
-	}
 
 	ADDTOCALLSTACK("CacheableScriptFile::IsEOF");
 	return ( m_fileContent == NULL || m_currentLine == m_fileContent->size() );
@@ -113,9 +107,7 @@ bool CacheableScriptFile::IsEOF() const
 tchar * CacheableScriptFile::ReadString(tchar *pBuffer, size_t sizemax) 
 {
 	if( useDefaultFile() ) 
-	{
 		return CSFileText::ReadString(pBuffer, sizemax);
-	}
 
 	ADDTOCALLSTACK("CacheableScriptFile::ReadString");
 	*pBuffer = '\0';
@@ -126,9 +118,7 @@ tchar * CacheableScriptFile::ReadString(tchar *pBuffer, size_t sizemax)
 		m_currentLine++;
 	}
 	else 
-	{
 		return NULL;
-	}
 
 	return pBuffer;
 }
@@ -136,9 +126,7 @@ tchar * CacheableScriptFile::ReadString(tchar *pBuffer, size_t sizemax)
 void CacheableScriptFile::dupeFrom(CacheableScriptFile *other) 
 {
 	if( useDefaultFile() ) 
-	{
 		return;
-	}
 
 	m_closed = other->m_closed;
 	m_realFile = false;
@@ -148,9 +136,7 @@ void CacheableScriptFile::dupeFrom(CacheableScriptFile *other)
 bool CacheableScriptFile::useDefaultFile() const 
 {
 	if( IsWriteMode() || ( GetFullMode() & OF_DEFAULTMODE )) 
-	{
 		return true;
-	}
 
 	return false;
 }

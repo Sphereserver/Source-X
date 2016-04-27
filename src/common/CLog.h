@@ -11,9 +11,10 @@
 #include "../common/sphere_library/CSTime.h"
 #include "../common/sphere_library/mutex.h"
 #include "../common/common.h"
-#include "../common/common.h"
+#include "../sphere/UnixTerminal.h"
 #include "../common/CScriptObj.h"
 #include "../common/CScript.h"
+
 
 // -----------------------------
 //	CEventLog
@@ -170,18 +171,11 @@ private:
 	CLog(const CLog& copy);
 	CLog& operator=(const CLog& other);
 
-	enum Color
-	{
-		DEFAULT,
-		YELLOW,
-		RED,
-		CYAN
-	};
-
 	/**
-	* Changes current console color to the specified one. Note, that the color should be reset after being set
+	* @name SetColor
+	* @brief Changes current console text color to the specified one. Note, that the color should be reset after being set
 	*/
-	void SetColor(Color color);
+	void SetColor(ConsoleTextColor color);
 } g_Log;		// Log file
 
 

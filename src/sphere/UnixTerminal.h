@@ -1,9 +1,30 @@
+/**
+* @file UnixTerminal.h
+* @brief Unix terminal utilities (set colors, read text...)
+*/
+
 
 #pragma once
 #ifndef _INC_UNIXTERMINAL_H
 #define _INC_UNIXTERMINAL_H
 
+enum ConsoleTextColor			// needed by both windows and unix
+{
+	// these are the basic colors supported by all unix terminals
+	CTCOL_DEFAULT = 0,
+	CTCOL_RED,
+	CTCOL_GREEN,
+	CTCOL_YELLOW,
+	CTCOL_BLUE,
+	CTCOL_MAGENTA,
+	CTCOL_CYAN,
+	CTCOL_WHITE,
+	CTCOL_QTY
+};
+
+
 #ifndef _WIN32
+
 
 #include "../common/common.h"
 
@@ -17,58 +38,45 @@
 
 class UnixTerminal
 {
-private:
-#ifdef _USECURSES
-	WINDOW * m_window;
-#else
-	termios m_original;
-#endif
-	tchar m_nextChar;
-	bool m_isColorEnabled;
-	bool m_prepared;
+	private:
+	#ifdef _USECURSES
+		WINDOW * m_window;
+	#else
+		termios m_original;
+	#endif
+		tchar m_nextChar;
+		bool m_isColorEnabled;
+		bool m_prepared;
 
-public:
-	enum COLOR_TYPE
-	{
-		COL_DEFAULT = 0,
-		COL_RED,
-		COL_GREEN,
-		COL_YELLOW,
-		COL_BLUE,
-		COL_MAGENTA,
-		COL_CYAN,
-		COL_WHITE,
-		COL_QTY
-	};
+	public:
+		UnixTerminal();
+		~UnixTerminal();
 
-public:
-	UnixTerminal();
-	~UnixTerminal();
+	protected:
+		UnixTerminal(const UnixTerminal & copy);
+		UnixTerminal & operator=(const UnixTerminal & other);
 
-protected:
-	UnixTerminal(const UnixTerminal & copy);
-	UnixTerminal & operator=(const UnixTerminal & other);
+	public:
+		bool isReady();
+		tchar read();
+		void prepare();
+		void print(lpctstr message);
+		void setColor(ConsoleTextColor color);
+		void setColorEnabled(bool enable);
 
-public:
-	bool isReady();
-	tchar read();
-	void prepare();
-	void print(lpctstr message);
-	void setColor(COLOR_TYPE color);
-	void setColorEnabled(bool enable);
+	private:
+		void prepareColor();
+		void restore();
 
-private:
-	void prepareColor();
-	void restore();
-
-public:
-	bool isColorEnabled() const
-	{
-		return m_isColorEnabled;
-	}
+	public:
+		bool isColorEnabled() const
+		{
+			return m_isColorEnabled;
+		}
 };
 
 extern UnixTerminal g_UnixTerminal;
+
 
 #endif // !_WIN32
 #endif // _INC_UNIXTERMINAL_H

@@ -15,7 +15,7 @@ UnixTerminal g_UnixTerminal;
 
 UnixTerminal::UnixTerminal() :
 #ifdef _USECURSES
- m_window(NULL),
+	m_window(NULL),
 #endif
  m_nextChar('\0'), m_isColorEnabled(false), m_prepared(false)
 {
@@ -102,13 +102,13 @@ tchar UnixTerminal::read()
 	return c;
 }
 
-void UnixTerminal::setColor(COLOR_TYPE color)
+void UnixTerminal::setColor(ConsoleTextColor color)
 {
 	if (m_isColorEnabled == false)
 		return;
 
-	if (color <= COL_DEFAULT || color >= COL_QTY)
-		color = COL_DEFAULT;
+	if (color <= CTCOL_DEFAULT || color >= CTCOL_QTY)
+		color = CTCOL_DEFAULT;
 
 #ifdef _USECURSES
 	wattrset(m_window, COLOR_PAIR(color));
@@ -116,7 +116,7 @@ void UnixTerminal::setColor(COLOR_TYPE color)
 	if (color == COL_DEFAULT)
 		fprintf(stdout, "\033[0m");
 	else
-		fprintf(stdout, "\033[0;%dm", 30 + (int)(color));
+		fprintf(stdout, "\033[0;%dm", 30 + (int)color);
 #endif
 }
 
@@ -181,15 +181,17 @@ void UnixTerminal::prepareColor()
 	m_isColorEnabled = has_colors();
 	if (m_isColorEnabled)
 	{
-		// initialise colours, and map our enum to the actual colour codes
+		// initialize colors, and map our enum to the actual colour codes
 		start_color();
-		init_pair(COL_RED,		COLOR_RED,		COLOR_BLACK);
-		init_pair(COL_GREEN,	COLOR_GREEN,	COLOR_BLACK);
-		init_pair(COL_YELLOW,	COLOR_YELLOW,	COLOR_BLACK);
-		init_pair(COL_BLUE,		COLOR_BLUE,		COLOR_BLACK);
-		init_pair(COL_CYAN,		COLOR_CYAN,		COLOR_BLACK);
-		init_pair(COL_MAGENTA,	COLOR_MAGENTA,	COLOR_BLACK);
-		init_pair(COL_WHITE,	COLOR_WHITE,	COLOR_BLACK);
+		// init_pair (pair_id, curses foreground color id, curses background color id);
+		// can define a max of 7 pairs? (for compatibility with 8-color terminals?)
+		init_pair(CTCOL_RED,		COLOR_RED,		COLOR_BLACK);
+		init_pair(CTCOL_GREEN,		COLOR_GREEN,	COLOR_BLACK);
+		init_pair(CTCOL_YELLOW,		COLOR_YELLOW,	COLOR_BLACK);
+		init_pair(CTCOL_BLUE,		COLOR_BLUE,		COLOR_BLACK);
+		init_pair(CTCOL_CYAN,		COLOR_CYAN,		COLOR_BLACK);
+		init_pair(CTCOL_MAGENTA,	COLOR_MAGENTA,	COLOR_BLACK);
+		init_pair(CTCOL_WHITE,		COLOR_WHITE,	COLOR_BLACK);
 	}
 
 #else

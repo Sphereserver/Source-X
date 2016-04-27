@@ -25,9 +25,9 @@ CCharsActiveList::CCharsActiveList()
 	m_iClients = 0;
 }
 
-void CCharsActiveList::OnRemoveOb( CSObjListRec * pObRec )
+void CCharsActiveList::OnRemoveObj( CSObjListRec * pObRec )
 {
-	ADDTOCALLSTACK("CCharsActiveList::OnRemoveOb");
+	ADDTOCALLSTACK("CCharsActiveList::OnRemoveObj");
 	// Override this = called when removed from group.
 	CChar * pChar = static_cast <CChar*>(pObRec);
 	ASSERT( pChar );
@@ -36,7 +36,7 @@ void CCharsActiveList::OnRemoveOb( CSObjListRec * pObRec )
 		ClientDetach();
 		m_timeLastClient = CServerTime::GetCurrentTime();	// mark time in case it's the last client
 	}
-	CSObjList::OnRemoveOb(pObRec);
+	CSObjList::OnRemoveObj(pObRec);
 	pChar->SetContainerFlags(UID_O_DISCONNECT);
 }
 
@@ -74,9 +74,9 @@ void CCharsActiveList::ClientDetach()
 
 bool CItemsList::sm_fNotAMove = false;
 
-void CItemsList::OnRemoveOb( CSObjListRec * pObRec )
+void CItemsList::OnRemoveObj( CSObjListRec * pObRec )
 {
-	ADDTOCALLSTACK("CItemsList::OnRemoveOb");
+	ADDTOCALLSTACK("CItemsList::OnRemoveObj");
 	// Item is picked up off the ground. (may be put right back down though)
 	CItem * pItem = static_cast <CItem*>(pObRec);
 	ASSERT( pItem );
@@ -86,7 +86,7 @@ void CItemsList::OnRemoveOb( CSObjListRec * pObRec )
 		pItem->OnMoveFrom();	// IT_MULTI, IT_SHIP and IT_COMM_CRYSTAL
 	}
 
-	CSObjList::OnRemoveOb(pObRec);
+	CSObjList::OnRemoveObj(pObRec);
 	pItem->SetContainerFlags(UID_O_DISCONNECT);	// It is no place for the moment.
 }
 
@@ -104,7 +104,7 @@ CItemsList::CItemsList()
 
 }
 
-int CObPointSortArray::CompareKey( int id, CPointSort* pBase, bool fNoSpaces ) const
+int CObjPointSortArray::CompareKey( int id, CPointSort* pBase, bool fNoSpaces ) const
 {
 	UNREFERENCED_PARAMETER(fNoSpaces);
 	ASSERT( pBase );
@@ -112,7 +112,7 @@ int CObPointSortArray::CompareKey( int id, CPointSort* pBase, bool fNoSpaces ) c
 }
 
 
-CObPointSortArray::CObPointSortArray()
+CObjPointSortArray::CObjPointSortArray()
 {
 
 }

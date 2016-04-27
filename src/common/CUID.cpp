@@ -1,6 +1,9 @@
 
 #include "CUID.h"
 
+// -----------------------------
+//	CUIDBase
+// -----------------------------
 
 bool CUIDBase::IsValidUID() const
 {
@@ -106,6 +109,11 @@ CUIDBase::operator dword () const
 {
 	return GetObjUID();
 }
+
+
+// -----------------------------
+//	CUID
+// -----------------------------
 
 CUID::CUID()
 {
