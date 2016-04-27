@@ -3,7 +3,7 @@
 #ifndef _INC_SQLITE_H
 #define _INC_SQLITE_H
 
-#include "../spherecom.h"
+#include "../common.h"
 #include "sqlite3.h"
 #include "../CScriptObj.h"
 

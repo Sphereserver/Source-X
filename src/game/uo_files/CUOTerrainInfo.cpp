@@ -1,7 +1,7 @@
 
 #include "../../common/CException.h"
 #include "../../common/CUOInstall.h"
-#include "../CLog.h"
+#include "../../common/CLog.h"
 #include "CUOIndexRec.h"
 #include "CUOTerrainInfo.h"
 #include "CUOTerrainTypeRec.h"

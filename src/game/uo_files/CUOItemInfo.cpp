@@ -1,6 +1,6 @@
 #include "../../common/CException.h"
 #include "../../common/CUOInstall.h"
-#include "../CLog.h"
+#include "../../common/CLog.h"
 #include "CUOItemInfo.h"
 #include "CUOIndexRec.h"
 #include "CUOItemTypeRec.h"

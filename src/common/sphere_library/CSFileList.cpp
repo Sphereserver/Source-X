@@ -1,18 +1,19 @@
 /**
 * @file CSFileList.cpp
 */
-#include <sys/stat.h>
+
 #include <time.h>
 #if defined(_WIN32)
 	#include <io.h> 		// findfirst
 	#include "../../sphere/threads.h"
 #else	// LINUX
+	#include <sys/stat.h>
 	#include <dirent.h>
 #endif
 #include "CSFileList.h"
-#include "../../game/CLog.h"
+#include "../../common/CLog.h"
 #include "../../sphere/threads.h"
-#include "../spherecom.h"
+#include "../common.h"
 
 // Similar to the MFC CFileFind
 bool CSFileList::ReadFileInfo( lpctstr pszFilePath, time_t & dwDateChange, dword & dwSize ) // static

@@ -5,7 +5,7 @@
 #include "../../common/CUIDExtra.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
-#include "../CLog.h"
+#include "../../common/CLog.h"
 #include "../CContainer.h"
 #include "CItemSpawn.h"
 

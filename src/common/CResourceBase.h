@@ -10,6 +10,9 @@
 #include "CUID.h"
 #include "CScript.h"
 #include "CScriptObj.h"
+#include "../game/game_enums.h"
+#include "../game/game_macros.h"
+
 
 class CVarDefContNum;
 

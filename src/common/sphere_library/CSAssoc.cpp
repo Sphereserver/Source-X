@@ -2,7 +2,7 @@
 #include "CSAssoc.h"
 #include "../../sphere/threads.h"
 #include "../CExpression.h"
-#include "../spherecom.h"
+#include "../common.h"
 
 //***************************************************************************
 // -CValStr

@@ -7,7 +7,7 @@
 #ifndef _INC_CEXCEPTION_H
 #define _INC_CEXCEPTION_H
 
-#include "../game/CLog.h"
+#include "../common/CLog.h"
 #include "../sphere/threads.h"
 
 
@@ -96,7 +96,7 @@ public:
 #ifdef _EXCEPTIONS_DEBUG
 
 
-#include "../game/CLog.h"
+#include "../common/CLog.h"
 #include "../sphere/ProfileTask.h"
 
 #define EXC_TRY(a) \

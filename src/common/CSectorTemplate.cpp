@@ -2,7 +2,7 @@
 #include <algorithm>
 #include "../game/chars/CChar.h"
 #include "../game/items/CItemShip.h"
-#include "../game/CLog.h"
+#include "../common/CLog.h"
 #include "../game/CServerTime.h"
 #include "../sphere/ProfileTask.h"
 #include "CException.h"

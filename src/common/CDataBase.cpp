@@ -1,6 +1,6 @@
 
 #include "../common/CDataBase.h"
-#include "../game/CLog.h"
+#include "../common/CLog.h"
 #include "../game/CResource.h"
 #include "../game/CServer.h"
 #include "../sphere/asyncdb.h"
@@ -299,8 +299,8 @@ bool CDataBase::OnTick()
 	return true;
 	EXC_CATCH;
 
-	EXC_DEBUG_START;
-	EXC_DEBUG_END;
+	//EXC_DEBUG_START;
+	//EXC_DEBUG_END;
 	return false;
 }
 

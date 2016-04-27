@@ -5,7 +5,7 @@
 #include "../network/receive.h"
 #include "../network/send.h"
 #include "../chars/CChar.h"
-#include "../CLog.h"
+#include "../../common/CLog.h"
 #include "CClient.h"
 
 // endgroup, master, hue ????

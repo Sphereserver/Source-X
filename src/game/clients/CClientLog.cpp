@@ -3,12 +3,12 @@
 #include "../common/CEncrypt.h"
 #include "../common/CException.h"
 #include "../common/sphere_library/CSFileList.h"
-#include "../common/zlib/zlib.h"
 #include "../network/network.h"
 #include "../network/send.h"
-#include "../CLog.h"
+#include "../../common/CLog.h"
 #include "../CServer.h"
 #include "CClient.h"
+#include "../common/zlib/zlib.h"
 
 CHuffman CClient::m_Comp;
 #if !defined(_WIN32) || defined(_LIBEV)

@@ -2,7 +2,7 @@
 #include "../../common/CException.h"
 #include "../../common/CUIDExtra.h"
 #include "../chars/CChar.h"
-#include "../CLog.h"
+#include "../../common/CLog.h"
 #include "../CWorld.h"
 #include "CItemStone.h"
 

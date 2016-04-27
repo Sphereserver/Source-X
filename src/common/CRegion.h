@@ -3,7 +3,7 @@
 #ifndef _INC_CREGION_H
 #define _INC_CREGION_H
 
-#include "../game/CLog.h"
+#include "../common/CLog.h"
 #include "../game/uo_files/CUOMapList.h"
 #include "CRect.h"
 #include "CResourceBase.h"

@@ -3,7 +3,6 @@
 #define _INC_THREADS_H
 
 #include "../common/common.h"
-#include "../common/spherecom.h"
 #include "../common/sphere_library/mutex.h"
 #include "../sphere/strings.h"
 #include "../sphere/ProfileData.h"

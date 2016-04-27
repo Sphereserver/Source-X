@@ -14,12 +14,24 @@
 #endif
 
 #undef FD_SETSIZE
-#define FD_SETSIZE 1024		// for max of n users ! default = 64
+#define FD_SETSIZE 1024		// for max of n users ! default = 64	(FD: file descriptor)
 
 #define NOMINMAX			// we don't want to have windows min and max macros, we have our minimum and maximum
-#include <winsock2.h>
+#ifndef WIN32_LEAN_AND_MEAN
+	#define WIN32_LEAN_AND_MEAN	// include just windows.h without the other winapi headers, we'll add them manually when needed
+#endif
+#include <winsock2.h>		// this needs to be included BEFORE windows.h, since windows.h by default includes winsock.h version 1.1 (if the macro above is not set).
 #include <windows.h>
 #include <process.h>
+
+
+/*  cross-platform functions macros  */
+#define strcmpi		_strcmpi	// Non ANSI equiv functions ?
+#define strnicmp	_strnicmp
+#define ATOI		atoi
+#define ITOA		_itoa
+#define LTOA		_ltoa
+#define STRREV		_strrev
 
 /*	thread-specific definitions  */
 #define THREAD_ENTRY_RET		void
@@ -32,6 +44,9 @@
 #define	FILE_SETNOCACHE(_x_)	setvbuf(_x_, NULL, _IONBF, 0)
 #define FILE_FLUSH(_x_)
 
+#ifndef STRICT
+	#define STRICT			// strict conversion of handles and pointers.
+#endif
 
 #ifndef _MSC_VER	// No Microsoft compiler
 	#define _cdecl	__cdecl
@@ -50,6 +65,7 @@
 #endif  // _MSC_VER
 
 
+const OSVERSIONINFO * Sphere_GetOSInfo();
 extern bool NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLinel, int nCmdShow);
 extern void NTWindow_Exit();
 extern void NTWindow_DeleteIcon();

@@ -6,6 +6,7 @@
 #ifndef _INC_CSFILE_H
 #define _INC_CSFILE_H
 
+#include <stdio.h>
 #include "CSString.h"
 
 #ifndef _WIN32
@@ -33,9 +34,6 @@
 
 #ifdef _WIN32
 	#define INVALID_HANDLE ((HANDLE) -1)
-#endif
-
-#ifdef _WIN32
 	#define OSFILE_TYPE		HANDLE
 	#define NOFILE_HANDLE	INVALID_HANDLE
 #else

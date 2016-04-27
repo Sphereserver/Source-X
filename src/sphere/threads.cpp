@@ -1,23 +1,26 @@
 // this thing is somehow required to be able to initialise OLE
 #define _WIN32_DCOM
 
-#if !defined(_WIN32) && !defined(_BSD)
-	#include <sys/prctl.h>
-#endif
-
 #include <algorithm>
 #include "../common/CException.h"
-#include "../common/spherecom.h"
-#include "../game/CLog.h"
+#include "../common/common.h"
+#include "../common/CLog.h"
 #include "../game/CServer.h"
 #include "ProfileTask.h"
 #include "threads.h"
+
+#if defined(_WIN32)
+	#include <objbase.h>
+#elif !defined(_BSD)
+	#include <sys/prctl.h>
+#endif
 
 // number of exceptions after which we restart thread and think that the thread have gone in exceptioning loops
 #define EXCEPTIONS_ALLOWED	10
 
 // number of milliseconds to wait for a thread to close
 #define THREADJOIN_TIMEOUT	60000
+
 
 // Normal Buffer
 SimpleMutex g_tmpStringMutex;

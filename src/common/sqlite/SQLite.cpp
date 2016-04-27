@@ -1,6 +1,6 @@
 #include "SQLite.h"
 #include "../CException.h"
-#include "../../game/CLog.h"
+#include "../../common/CLog.h"
 
 
 CSQLite::CSQLite()

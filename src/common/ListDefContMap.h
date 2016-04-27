@@ -9,7 +9,7 @@
 
 #include <list>
 #include <set>
-#include "spherecom.h"
+#include "common.h"
 #include "sphere_library/CSString.h"
 
 

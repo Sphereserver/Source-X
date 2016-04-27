@@ -2,11 +2,11 @@
 // CEncrypt.cpp
 //
 
-#include "../game/CLog.h"
+#include "../common/CLog.h"
 #include "../sphere/threads.h"
 #include "CEncrypt.h"
 #include "CExpression.h"
-#include "spherecom.h"
+#include "common.h"
 #include "sphereproto.h"
 
 // #define DEBUG_CRYPT_MSGS 1

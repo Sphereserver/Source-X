@@ -2,7 +2,7 @@
 
 #include "../game/chars/CChar.h"
 #include "../game/clients/CClient.h"
-#include "../game/CLog.h"
+#include "../common/CLog.h"
 #include "../network/network.h"
 #include "../sphere/threads.h"
 #include "CException.h"

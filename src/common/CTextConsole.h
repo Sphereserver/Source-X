@@ -4,7 +4,7 @@
 #define _INC_CTEXTCONSOLE_H
 
 #include "../sphere/strings.h"
-#include "spherecom.h"
+#include "common.h"
 
 
 class CChar;

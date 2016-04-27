@@ -2,7 +2,7 @@
 
 #include "../common/CException.h"
 #include "../clients/CClient.h"
-#include "../CLog.h"
+#include "../../common/CLog.h"
 #include "../CServerTime.h"
 #include "CChar.h"
 #include "CCharNPC.h"

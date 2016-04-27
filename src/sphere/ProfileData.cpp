@@ -1,6 +1,6 @@
 
 #include "../common/sphere_library/CSString.h"
-#include "../common/spherecom.h"
+#include "../common/common.h"
 #include "../game/CScriptProfiler.h"
 #include "ProfileData.h"
 #include "strings.h"

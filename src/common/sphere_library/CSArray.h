@@ -8,7 +8,6 @@
 #define _INC_CSARRAY_H
 
 #include "../common.h"
-#include "../spherecom.h"
 
 #ifdef _MSC_VER
 	#define STANDARD_CPLUSPLUS_THIS(_x_) _x_

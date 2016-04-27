@@ -1,13 +1,14 @@
+
 #ifndef _WIN32
-//#include "spheresvr.h" Removed to test. 	// predef header
+
 #include "../common/CException.h"
 #include "threads.h"
 #include "UnixTerminal.h"
 
 #ifndef _USECURSES
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/time.h>
+	#include <stdio.h>
+	#include <unistd.h>
+	#include <sys/time.h>
 #endif
 
 UnixTerminal g_UnixTerminal;
@@ -244,5 +245,6 @@ void UnixTerminal::setColorEnabled(bool enable)
 	m_isColorEnabled = enable;
 }
 
-#endif
+
+#endif // !_WIN32
 

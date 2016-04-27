@@ -8,7 +8,7 @@
 #include "chars/CChar.h"
 #include "clients/CClient.h"
 #include "items/CItemSpawn.h"
-#include "CLog.h"
+#include "../common/CLog.h"
 #include "CObjBase.h"
 #include "spheresvr.h"
 #include "triggers.h"

@@ -4,7 +4,7 @@
 #include "CExpression.h"
 #include "CScript.h"
 #include "CTextConsole.h"
-#include "spherecom.h"
+#include "common.h"
 #include "ListDefContMap.h"
 
 /***************************************************************************

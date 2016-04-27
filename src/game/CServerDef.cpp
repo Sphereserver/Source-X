@@ -3,7 +3,7 @@
 #include "../common/sphereproto.h"
 #include "../common/sphereversion.h"
 #include "../sphere/threads.h"
-#include "CLog.h"
+#include "../common/CLog.h"
 #include "CObjBase.h"
 #include "CResource.h"
 #include "CServerDef.h"

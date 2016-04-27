@@ -13,7 +13,7 @@
 #include "../game/chars/CChar.h"
 #include "../game/clients/CClient.h"
 #include "../game/items/CItemStone.h"
-#include "../game/CLog.h"
+#include "../common/CLog.h"
 #include "../game/spheresvr.h"
 #include "../game/CScriptProfiler.h"
 #include "../game/CWorld.h"
@@ -3312,9 +3312,7 @@ bool CSFileObjContainer::OnTick()
 	EXC_TRY("Tick");
 
 	if ( !iGlobalTimeout )
-	{
 		return true;
-	}
 
 	if ( ++iCurrentTick >= iGlobalTimeout )
 	{
@@ -3332,9 +3330,9 @@ bool CSFileObjContainer::OnTick()
 	return true;
 	EXC_CATCH;
 
-	EXC_DEBUG_START;
-	EXC_DEBUG_END;
-	return false;
+	//EXC_DEBUG_START;
+	//EXC_DEBUG_END;
+	//return false;
 }
 
 int CSFileObjContainer::FixWeirdness()

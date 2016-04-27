@@ -7,17 +7,20 @@
 #ifndef _INC_CDATABASE_H
 #define	_INC_CDATABASE_H
 
-#include <mysql.h>
-#include <errmsg.h>	// mysql standard include
+#include <vector>
+#include <queue>
+#include "common.h"
 #include "sphere_library/mutex.h"
 #include "CScriptObj.h"
-#include "spherecom.h"
+#include <errmsg.h>	// mysql standard include
+#include <mysql.h>	//this needs to be defined AFTER common.h
 
 #ifdef _WIN32
 	#pragma comment(lib, "libmySQL")
 #else
 	#pragma comment(lib, "libmysqlclient")
 #endif
+
 
 #define	MIN_MYSQL_VERSION_ALLOW	40115
 

@@ -13,7 +13,7 @@
 #include "../items/CItemMultiCustom.h"
 #include "../items/CItemSpawn.h"
 #include "../items/CItemVendable.h"
-#include "../CLog.h"
+#include "../../common/CLog.h"
 #include "../CServerTime.h"
 #include "../spheresvr.h"
 #include "../triggers.h"

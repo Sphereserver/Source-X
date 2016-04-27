@@ -1,5 +1,5 @@
 #include "CSocket.h"
-#include "spherecom.h"
+#include "common.h"
 
 //		***		***			***
 //

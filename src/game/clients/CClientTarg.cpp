@@ -5,7 +5,7 @@
 #include "../chars/CChar.h"
 #include "../items/CItemMulti.h"
 #include "../items/CItemVendable.h"
-#include "../CLog.h"
+#include "../../common/CLog.h"
 #include "../triggers.h"
 #include "CClient.h"
 

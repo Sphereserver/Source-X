@@ -1,4 +1,5 @@
 
+#include <stdio.h>
 #include "../common/sphere_library/CSString.h"
 #include "CClientTooltip.h"
 

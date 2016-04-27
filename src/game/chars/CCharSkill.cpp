@@ -4,7 +4,7 @@
 #include "../clients/CClient.h"
 #include "../common/CUIDExtra.h"
 #include "../items/CItemVendable.h"
-#include "../CLog.h"
+#include "../../common/CLog.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"

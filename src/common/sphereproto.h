@@ -1,5 +1,5 @@
 /**
-* @file CAcount.h
+* @file sphereproto.h
 * @brief Protocol formats. Define all the data passed from Client to Server.
 */
 
@@ -8,7 +8,7 @@
 #define _INC_SPHEREPROTO_H
 
 #include "sphere_library/CSString.h"
-#include "spherecom.h"
+#include "common.h"
 #include "../sphere/threads.h"
 
 
@@ -24,9 +24,7 @@
 	#define PACK_NEEDED __attribute__ ((packed))
 #endif
 
-#ifdef _WIN32
-	//#include "os_windows.h"
-#else
+#ifndef _WIN32
 	#include <netinet/in.h>
 #endif
 
@@ -51,6 +49,7 @@ struct nword
 #define UNPACKWORD(p)	MAKEWORD((p)[1],(p)[0])	// low,high
 
 } PACK_NEEDED;
+
 struct ndword
 {
 	dword m_val;

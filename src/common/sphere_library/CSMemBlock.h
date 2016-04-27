@@ -7,7 +7,6 @@
 #define _INC_CSMEMBLOCK_H
 
 #include "../common.h"
-#include "../spherecom.h"
 
 /**
 * @brief Data buffer with no length info.

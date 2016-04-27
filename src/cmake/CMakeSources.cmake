@@ -4,8 +4,6 @@ game/CBase.cpp
 game/CBase.h
 game/CContainer.cpp
 game/CContainer.h
-game/CLog.cpp
-game/CLog.h
 game/CObjBase.cpp
 game/CObjBase.h
 game/CPathFinder.cpp
@@ -31,6 +29,7 @@ game/CWorld.h
 game/CWorldImport.cpp
 game/CWorldMap.cpp
 game/game_enums.h
+game/game_macros.h
 game/spheresvr.cpp
 game/spheresvr.h
 game/triggers.h
@@ -174,6 +173,8 @@ common/CException.cpp
 common/CException.h
 common/CExpression.cpp
 common/CExpression.h
+common/CLog.cpp
+common/CLog.h
 common/CServerMap.cpp
 common/CServerMap.h
 common/CUID.cpp
@@ -183,6 +184,7 @@ common/CMD5.cpp
 common/CMD5.h
 common/CObjBaseTemplate.cpp
 common/CObjBaseTemplate.h
+common/common.cpp
 common/common.h
 common/CRect.cpp
 common/CRect.h
@@ -209,8 +211,6 @@ common/CVarDefMap.h
 common/CVarFloat.cpp
 common/CVarFloat.h
 common/datatypes.h
-common/spherecom.cpp
-common/spherecom.h
 common/sphereproto.h
 common/sphereversion.h
 common/ListDefContMap.cpp

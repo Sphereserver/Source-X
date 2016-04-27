@@ -6,7 +6,7 @@
 #include "clients/CClient.h"
 #include "items/CItem.h"
 #include "items/CItemSpawn.h"
-#include "CLog.h"
+#include "../common/CLog.h"
 #include "CObjBase.h"
 #include "CSector.h"
 #include "CServerTime.h"

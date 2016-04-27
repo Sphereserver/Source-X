@@ -10,7 +10,7 @@
 #include "clients/CClient.h"
 #include "clients/CGMPage.h"
 #include "items/CItem.h"
-#include "CLog.h"
+#include "../common/CLog.h"
 #include "CObjBase.h"
 #include "CServer.h"
 #include "CServerTime.h"

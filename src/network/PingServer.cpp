@@ -1,5 +1,5 @@
 
-#include "../common/spherecom.h"
+#include "../common/common.h"
 #include "../sphere/ProfileTask.h"
 #include "PingServer.h"
 

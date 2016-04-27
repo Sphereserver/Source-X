@@ -3,7 +3,7 @@
 #include "../common/CException.h"
 #include "../sphere/ProfileTask.h"
 #include "../uo_files/CUOItemInfo.h"
-#include "../CLog.h"
+#include "../../common/CLog.h"
 #include "CItemBase.h"
 
 /////////////////////////////////////////////////////////////////

@@ -11,7 +11,7 @@
 #include "../items/CItemMulti.h"
 #include "../items/CItemVendable.h"
 #include "../CServerTime.h"
-#include "../CLog.h"
+#include "../../common/CLog.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CClient.h"

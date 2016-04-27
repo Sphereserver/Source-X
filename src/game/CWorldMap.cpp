@@ -8,7 +8,7 @@
 #include "chars/CChar.h"
 #include "items/CItem.h"
 #include "uo_files/CUOTerrainInfo.h"
-#include "CLog.h"
+#include "../common/CLog.h"
 #include "triggers.h"
 
 CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fTest, CChar * pCharSrc )

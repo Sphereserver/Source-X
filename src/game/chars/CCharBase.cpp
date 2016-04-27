@@ -1,6 +1,6 @@
 
 #include "../common/CException.h"
-#include "../CLog.h"
+#include "../../common/CLog.h"
 #include "../CResource.h"
 #include "CCharBase.h"
 

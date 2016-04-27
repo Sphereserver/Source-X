@@ -15,7 +15,7 @@
 	#include <eh.h>			// exception handling info.
 #endif // _MSC_VER
 
-#include "../common/spherecom.h"
+#include "../common/common.h"
 
 
 extern class CNTService

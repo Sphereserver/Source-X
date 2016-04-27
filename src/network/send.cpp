@@ -6,7 +6,6 @@
 #include "../common/CUOInstall.h"
 #include "../common/CUIDExtra.h"
 #include "../common/CObjBaseTemplate.h"
-#include "../common/zlib/zlib.h"
 #include "../game/chars/CChar.h"
 #include "../game/clients/CClient.h"
 #include "../game/clients/CClientTooltip.h"
@@ -17,12 +16,13 @@
 #include "../game/items/CItemMultiCustom.h"
 #include "../game/items/CItemShip.h"
 #include "../game/items/CItemVendable.h"
-#include "../game/CLog.h"
+#include "../common/CLog.h"
 #include "../game/CObjBase.h"
 #include "../game/CWorld.h"
 #include "network.h"
 #include "packet.h"
 #include "send.h"
+#include "../common/zlib/zlib.h"
 
 
 /***************************************************************************

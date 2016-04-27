@@ -6,9 +6,9 @@
 
 #include "CSTime.h"
 #include "CSString.h"
-#include "../../game/CLog.h"
+#include "../../common/CLog.h"
 #include "../../sphere/threads.h"
-#include "../spherecom.h"
+#include "../common.h"
 
 #ifndef _WIN32
 #include <sys/time.h>
@@ -97,10 +97,10 @@ void FormatDateTime(tchar * pszTemp, lpctstr pszFormat, const struct tm * ptmTem
 	newHandler = static_cast<_invalid_parameter_handler>(invalidParameterHandler);
 #ifdef _MSC_VER
 	oldHandler = _set_invalid_parameter_handler(newHandler);
-#endif  // _MSC_VER
+#endif // _MSC_VER
 	try
 	{
-#endif
+#endif // _WIN32
 
 	if (strftime( pszTemp, maxTimeBufferSize, pszFormat, ptmTemp) == 0)
 		pszTemp[0] = '\0';
@@ -117,8 +117,8 @@ void FormatDateTime(tchar * pszTemp, lpctstr pszFormat, const struct tm * ptmTem
 
 #ifdef _MSC_VER
 	_set_invalid_parameter_handler(oldHandler);
-#endif  // _MSC_VER
-#endif
+#endif // _MSC_VER
+#endif // _WIN32
 }
 
 lpctstr CSTime::Format(lpctstr pszFormat) const
@@ -126,9 +126,7 @@ lpctstr CSTime::Format(lpctstr pszFormat) const
 	tchar * pszTemp = Str_GetTemp();
 
 	if ( pszFormat == NULL )
-	{
 		pszFormat = "%Y/%m/%d %H:%M:%S";
-	}
 
 	struct tm* ptmTemp = localtime(&m_time);
 	if (ptmTemp == NULL )
@@ -145,9 +143,7 @@ lpctstr CSTime::FormatGmt(lpctstr pszFormat) const
 {
 	tchar * pszTemp = Str_GetTemp();
 	if ( pszFormat == NULL )
-	{
 		pszFormat = "%a, %d %b %Y %H:%M:%S GMT";
-	}
 
 	struct tm* ptmTemp = gmtime(&m_time);
 	if (ptmTemp == NULL )

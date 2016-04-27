@@ -4,7 +4,7 @@
 #include "../chars/CChar.h"
 #include "../items/CItemMap.h"
 #include "../items/CItemSpawn.h"
-#include "../CLog.h"
+#include "../../common/CLog.h"
 #include "../triggers.h"
 #include "CClient.h"
 

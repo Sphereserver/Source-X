@@ -5,7 +5,7 @@
 #include <direct.h>
 #include "../common/CException.h"
 #include "../common/sphereversion.h"
-#include "../game/CLog.h"
+#include "../common/CLog.h"
 #include "../game/CObjBase.h"
 #include "../game/CServer.h"
 #include "../game/spheresvr.h"

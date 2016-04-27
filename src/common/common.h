@@ -1,23 +1,22 @@
-// always for __cplusplus
-// I try to compile in several different environments.
-// 1. DOS command line or windows (_WIN32	by compiler or _INC_WINDOWS in windows.h)
-// 2. MFC or not MFC  (__AFX_H__ in afx.h or _MFC_VER by compiler)
-// 3. 16 bit or 32 bit (_WIN32 defined by compiler)
-// 4. LINUX 32 bit
+/**
+* @file common.h
+* @brief Header that should be included by every file.
+*/
 
 #pragma once
 #ifndef _INC_COMMON_H
 #define _INC_COMMON_H
 
-#include <stdio.h>
+
+#define SPHERE_DEF_PORT			2593
+#define SPHERE_FILE				"sphere"	// file name prefix
+#define SPHERE_TITLE			"Sphere"
+#define SPHERE_SCRIPT			".scp"
+#define SCRIPT_MAX_LINE_LEN		4096	// default size.
+
+
 #include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
-#include <assert.h>
-#include <queue>
-#include <deque>
-#include <vector>
-#include <stack>
+//#include <assert.h>
 
 #ifdef _WIN32
 	#include "os_windows.h"
@@ -39,8 +38,6 @@
 	#define __printfargs(a,b)
 #endif
 
-#define SCRIPT_MAX_LINE_LEN 4096	// default size.
-
 #ifdef UNICODE
 	#define IsDigit(c)			iswdigit(c) // If doesn't work, try with argument (wint_t)c
 	#define IsSpace(c)			iswspace(c)
@@ -57,26 +54,19 @@
 #define MulDiv(a,b,c)		(((((int)a*(int)b) + ((int)c / 2)) / (int)c) - (IsNegative((int)a*(int)b)))
 #define MulDivLL(a,b,c)		(((((llong)a*(llong)b) + (llong)(c / 2)) / (llong)c) - (IsNegative((llong)a*(llong)b)))
 #define MulMulDiv(a,b,c)	(((a)*(b))/(c))
-//#ifndef minimum
-	#define minimum(x,y)	((x)<(y)?(x):(y))
-//#endif
-//#ifndef maximum
-	#define maximum(x,y)	((x)>(y)?(x):(y))
-//#endif
+#define minimum(x,y)		((x)<(y)?(x):(y))
+#define maximum(x,y)		((x)>(y)?(x):(y))
 #define medium(x,y,z)		((x)>(y)?(x):((z)<(y)?(z):(y)))
-//#ifndef CountOf
-	#define CountOf(a)		(sizeof(a)/sizeof((a)[0]))
-//#endif
+#define CountOf(a)			(sizeof(a)/sizeof((a)[0]))
+#define sign(n) (((n) < 0) ? -1 : (((n) > 0) ? 1 : 0))
+//#define abs(n) (((n) < 0) ? (-(n)) : (n))
 
 
 /* These macros are uppercase for conformity to windows.h macros */
-
-#ifndef MAKEDWORD
-	#define MAKEDWORD(low, high) ((dword)(((word)low) | (((dword)((word)high)) << 16)))
-#endif
+#define MAKEDWORD(low, high) ((dword)(((word)low) | (((dword)((word)high)) << 16)))
 
 // Desguise an id as a pointer.
-#ifndef MAKEINTRESOURCE
+#ifndef MAKEINTRESOURCE			// typically on unix
 	#define MAKEINTRESOURCEA(i) ((lpstr)((size_t)((word)i)))
 	#define MAKEINTRESOURCEW(i) ((lpwstr)((size_t)((word)i)))
 	#ifdef UNICODE
@@ -88,7 +78,14 @@
 #define ISINTRESOURCE(r)	((((size_t)r) >> 16) == 0)
 #define GETINTRESOURCE(r)	(((size_t)r)&0xFFFF)
 
-
+#ifndef ASSERT
+	#ifdef _DEBUG
+		extern void Assert_CheckFail(const char * pExp, const char *pFile, long lLine);
+		#define ASSERT(exp)			(void)( (exp) || (Assert_CheckFail(#exp, __FILE__, __LINE__), 0) )
+	#else
+		#define ASSERT(exp)
+	#endif
+#endif
 /* End of macros section */
 
 typedef uint	ERROR_CODE;

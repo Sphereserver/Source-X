@@ -2,7 +2,7 @@
 #include <deque>
 #include "../common/CException.h"
 #include "../game/clients/CClient.h"
-#include "../game/CLog.h"
+#include "../common/CLog.h"
 #include "../game/CServer.h"
 #include "../game/CServerTime.h"
 #include "../game/CWorld.h"
@@ -144,8 +144,8 @@ void NetState::clear(void)
 		m_client = NULL;
 
 		g_Serv.StatDec(SERV_STAT_CLIENTS);
-		g_Log.Event(LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Client disconnected [Total:%u] ('%s')\n",
-			m_id, g_Serv.StatGet(SERV_STAT_CLIENTS), m_peerAddress.GetAddrStr());
+		g_Log.Event(LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Client disconnected [Total:%" PRIuSIZE_T "]. Account: %s. Address: %s\n",
+			m_id, g_Serv.StatGet(SERV_STAT_CLIENTS), client->GetAccount()->GetName(), m_peerAddress.GetAddrStr());
 		
 #if !defined(_WIN32) || defined(_LIBEV)
 		if (m_socket.IsOpen() && g_Cfg.m_fUseAsyncNetwork != 0)
@@ -161,7 +161,6 @@ void NetState::clear(void)
 		m_socket.ClearAsync();
 #endif
 
-
 	m_socket.Close();
 	m_client = NULL;
 
@@ -169,7 +168,7 @@ void NetState::clear(void)
 	clearQueues();
 
 	// clean junk queue entries
-	for (size_t i = 0; i < PacketSend::PRI_QTY; i++)
+	for (int i = 0; i < PacketSend::PRI_QTY; i++)
 		m_outgoing.queue[i].clean();
 	m_outgoing.asyncQueue.clean();
 #ifdef _MTNETWORK
@@ -2796,8 +2795,8 @@ void NetworkManager::tick(void)
 	}
 
 	EXC_CATCH;
-	EXC_DEBUG_START;
-	EXC_DEBUG_END;
+	//EXC_DEBUG_START;
+	//EXC_DEBUG_END;
 }
 
 void NetworkManager::processAllInput(void)

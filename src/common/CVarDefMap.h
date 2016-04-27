@@ -5,7 +5,7 @@
 
 #include <set>
 #include "sphere_library/CSString.h"
-#include "spherecom.h"
+#include "common.h"
 
 
 class CTextConsole;

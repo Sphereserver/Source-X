@@ -11,7 +11,6 @@
 #define _INC_CEXPRSSION_H
 
 #include "common.h"
-#include "spherecom.h"
 #include "CVarDefMap.h"
 #include "ListDefContMap.h"
 #include "sphere_library/CSRand.h"

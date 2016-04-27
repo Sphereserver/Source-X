@@ -8,6 +8,7 @@
 #define _INC_CACHEABLESCRIPTFILE_H
 
 #include <string>
+#include <vector>
 #include "sphere_library/CSFile.h"
 
 

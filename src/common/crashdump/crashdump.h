@@ -3,12 +3,17 @@
 #define _INC_CRASHDUMP_H
 
 #include <stdio.h>
+
+#ifndef WIN32_LEAN_AND_MEAN
+	#define WIN32_LEAN_AND_MEAN	// include just windows.h without the other winapi headers, we'll add them manually when needed
+#endif
 #include <windows.h>
+
 #ifdef __MINGW32__
 	#include "mingwdbghelp.h"
 #else  // !__MINGW32__
 	#pragma warning(disable:4091)
-	#include <Dbghelp.h>
+	#include <dbghelp.h>
 	#pragma warning(default:4091)
 #endif  // __MINGW32__
 

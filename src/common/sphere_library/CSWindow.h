@@ -10,8 +10,9 @@
 #ifdef _WIN32
 
 #include "CSString.h"
-#include "spherecom.h"
-#include <RICHEDIT.H>	// CRichEditCtrl
+#include "common.h"
+#include <richedit.h>	// CRichEditCtrl
+#include <shellapi.h>
 
 
 class CSWindow    // similar to Std MFC class CWnd

@@ -1,9 +1,9 @@
 
-#include "../game/CLog.h"
+#include "../common/CLog.h"
 #include "../game/CResource.h"
 #include "../sphere/threads.h"
 #include "CUOInstall.h"
-#include "spherecom.h"
+#include "common.h"
 #include "CException.h"
 
 

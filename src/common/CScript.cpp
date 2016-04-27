@@ -1,12 +1,12 @@
 // NOTE: all scripts should be encoded in UTF-8.
 // So they may have full unicode chars inside.
 
-#include "../game/CLog.h"
+#include "../common/CLog.h"
 #include "../sphere/threads.h"
 #include "CException.h"
 #include "CExpression.h"
 #include "CScript.h"
-#include "spherecom.h"
+#include "common.h"
 
 
 void CScriptLineContext::Init()

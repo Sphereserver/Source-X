@@ -1,10 +1,11 @@
 
-#include "../common/CException.h"
-#include "../common/spherecom.h"
+#include "CException.h"
+#include "common.h"
 #include "../sphere/ProfileTask.h"
 #include "../sphere/UnixTerminal.h"
 #include "CLog.h"
-#include "CServer.h"
+#include "../game/CServer.h"
+
 
 ///////////////////////////////////////////////////////////////
 // -CLog

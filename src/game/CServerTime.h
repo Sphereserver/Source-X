@@ -7,7 +7,7 @@
 #ifndef _INC_CSERVTIME_H
 #define _INC_CSERVTIME_H
 
-#include "../common/spherecom.h"
+#include "../common/common.h"
 
 
 class CServerTime

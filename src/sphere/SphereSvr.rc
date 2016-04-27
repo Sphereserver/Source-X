@@ -8,7 +8,10 @@
 // Generated from the TEXTINCLUDE 2 resource.
 //
 #ifdef _WIN32
- #include "windows.h"
+	#ifndef WIN32_LEAN_AND_MEAN
+		#define WIN32_LEAN_AND_MEAN	// include just windows.h without the other winapi headers, we'll add them manually when needed
+	#endif
+	#include <windows.h>
 #endif
 
 /////////////////////////////////////////////////////////////////////////////

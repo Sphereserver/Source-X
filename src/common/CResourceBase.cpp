@@ -1,7 +1,7 @@
 
 #include "../game/chars/CChar.h"
 #include "../game/items/CItem.h"
-#include "../game/CLog.h"
+#include "../common/CLog.h"
 #include "../game/CObjBase.h"
 #include "../game/CResource.h"
 #include "../game/triggers.h"

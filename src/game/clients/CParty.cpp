@@ -4,7 +4,7 @@
 #include "../network/send.h"
 #include "../sphere/ProfileTask.h"
 #include "../chars/CChar.h"
-#include "../CLog.h"
+#include "../../common/CLog.h"
 #include "../CServer.h"
 #include "../triggers.h"
 #include "CClient.h"

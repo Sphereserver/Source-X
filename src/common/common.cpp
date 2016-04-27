@@ -1,20 +1,26 @@
 
-#include "spherecom.h"
+// contains also some methods/functions declared in os_windows.h and os_unix.h
+
+#include "common.h"
 #include "sphereproto.h"
 
-#ifdef _BSD
-	#include <time.h>
-	#include <sys/uofiles_types.h>
-	int getTimezone()
-	{
-		tm tp;
-		memset(&tp, 0x00, sizeof(tp));
-		mktime(&tp);
-		return (int) tp.tm_zone;
-	}
-#endif
-
 #ifndef _WIN32
+
+	#include <stdio.h>
+	#include <string.h>
+
+	#ifdef _BSD
+		#include <time.h>
+		#include <sys/types.h>
+		int getTimezone()
+		{
+			tm tp;
+			memset(&tp, 0x00, sizeof(tp));
+			mktime(&tp);
+			return (int)tp.tm_zone;
+			}
+	#endif // _BSD
+
 	int	ATOI( const char * str )
 	{
 		int	res;
@@ -48,7 +54,8 @@
 		}
 	}
 
-#else
+#else // _WIN32
+
 	const OSVERSIONINFO * Sphere_GetOSInfo()
 	{
 		// NEVER return NULL !
@@ -64,9 +71,9 @@
 				g_osInfo.dwPlatformId = VER_PLATFORM_WIN32s;	// probably not right.
 			}
 		}
-		return( &g_osInfo );
+		return &g_osInfo;
 	}
-#endif
+#endif // !_WIN32
 
 
 #ifdef NCHAR
@@ -121,7 +128,7 @@ static int CvtSystemToUNICODE( wchar & wChar, lpctstr pInp, int iSizeInBytes )
 	}
 
 	wChar = wCharTmp;
-	return( iBytes );
+	return iBytes;
 }
 
 static int CvtUNICODEToSystem( tchar * pOut, int iSizeOutBytes, wchar wChar )
@@ -155,9 +162,7 @@ static int CvtUNICODEToSystem( tchar * pOut, int iSizeOutBytes, wchar wChar )
 		iStartBits = 3;
 	}
 	else
-	{
 		return -1;	// not valid UNICODE char.
-	}
 
 	if ( iBytes > iSizeOutBytes )	// not big enough to hold it.
 		return 0;
@@ -172,7 +177,7 @@ static int CvtUNICODEToSystem( tchar * pOut, int iSizeOutBytes, wchar wChar )
 	ASSERT( wChar < (1<<iStartBits));
 	pOut[0] = static_cast<tchar>( ( 0xfe << iStartBits ) | wChar );
 
-	return( iBytes );
+	return iBytes;
 }
 
 int CvtSystemToNUNICODE( NCHAR * pOut, int iSizeOutChars, lpctstr pInp, int iSizeInBytes )
@@ -237,7 +242,7 @@ int CvtSystemToNUNICODE( NCHAR * pOut, int iSizeOutChars, lpctstr pInp, int iSiz
 		}
 	}
 	else
-#endif
+#endif // _WIN32
 	{
 		// Win95 or Linux
 		int iInp=0;
@@ -330,7 +335,7 @@ int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const NCHAR * pInp, in
 		}
 	}
 	else
-#endif
+#endif // _WIN32
 	{
 		// Win95 or linux = just assume its really ASCII
 		for ( ; iInp < iSizeInChars; iInp++ )
@@ -363,7 +368,7 @@ int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const NCHAR * pInp, in
 	return( iOut );
 }
 
-#endif
+#endif // NCHAR
 
 extern "C"
 {

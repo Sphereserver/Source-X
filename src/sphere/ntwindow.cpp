@@ -7,7 +7,7 @@
 #include "../common/sphere_library/CSWindow.h"
 #include "../common/sphereversion.h"	// sphere version
 #include "../common/sphere_library/CSString.h"
-#include "../game/CLog.h"
+#include "../common/CLog.h"
 #include "../game/CObjBase.h"
 #include "../game/CResource.h"
 #include "../game/CServer.h"

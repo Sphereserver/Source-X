@@ -5,7 +5,7 @@
 #include "../../network/network.h"
 #include "../clients/CClient.h"
 #include "../uo_files/CUOTerrainInfo.h"
-#include "../CLog.h"
+#include "../../common/CLog.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CChar.h"

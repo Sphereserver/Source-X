@@ -8,10 +8,8 @@
 #define _INC_PACKET_H
 
 #include <list>
-
 #include "../common/common.h"
-#include "../common/spherecom.h"
-//#include "../game/spheresvr.h" Removed to test.
+#include "../game/game_macros.h"
 
 #define PACKET_BUFFERDEFAULT 4
 #define PACKET_BUFFERGROWTH 4

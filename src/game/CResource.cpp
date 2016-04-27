@@ -11,7 +11,7 @@
 #include "items/CItemBase.h"
 #include "items/CItemStone.h"
 #include "uo_files/CUOItemInfo.h"
-#include "CLog.h"
+#include "../common/CLog.h"
 #include "CResource.h"
 #include "CServerTime.h"
 #include "CWorld.h"

@@ -8,6 +8,162 @@
 #define _INC_GAME_ENUMS_H
 
 
+enum RESDISPLAY_VERSION
+{
+	RDS_T2A = 1,
+	RDS_LBR,
+	RDS_AOS,
+	RDS_SE,
+	RDS_ML,
+	RDS_KR,
+	RDS_SA,
+	RDS_HS,
+	RDS_TOL,
+	RDS_QTY
+};
+
+
+enum TOOLTIPMODE_TYPE
+{
+	TOOLTIPMODE_SENDFULL = 0x00,	// always send full tooltip packet
+	TOOLTIPMODE_SENDVERSION = 0x01	// send version packet and wait for client to request full tooltip
+};
+
+enum RACIALFLAGS_TYPE
+{
+	RACIALF_HUMAN_STRONGBACK = 0x0001,		// Increase carrying capacity (+60 stones of weight)
+	RACIALF_HUMAN_TOUGH = 0x0002,		// Regenerate hitpoints faster (+2 Hit Point Regeneration)
+	RACIALF_HUMAN_WORKHORSE = 0x0004,		// Find more resources while gathering hides, ore and lumber
+	RACIALF_HUMAN_JACKOFTRADES = 0x0008,		// Skill calculations always consider 20.0 minimum ability on untrained skills
+	RACIALF_ELF_NIGHTSIGHT = 0x0010,		// Permanent night sight effect
+	RACIALF_ELF_DIFFTRACK = 0x0020,		// Increase difficulty to be tracked while hidden/invisible
+	RACIALF_ELF_WISDOM = 0x0040,		// Permanent max mana bonus (+20 Mana Increase)
+	RACIALF_GARG_FLY = 0x0080,		// Enable gargoyle fly ability (FEATURE_AOS_UPDATE_B is required to enable gargoyle ability book)
+	RACIALF_GARG_BERSERK = 0x0100,		// Increase ferocity in situations of danger (15% Damage Increase + 3% Spell Damage Increase for each 20hp lost)
+	RACIALF_GARG_DEADLYAIM = 0x0200,		// Throwing calculations always consider 20.0 minimum ability when untrained
+	RACIALF_GARG_MYSTICINSIGHT = 0x0400		// Mysticism calculations always consider 30.0 minimum ability when untrained
+};
+
+
+
+//////////////////////////////////////////////////////////////////////////
+// Skills
+
+enum SKTRIG_TYPE
+{
+	// All skills may be scripted.
+	// XTRIG_UNKNOWN    = some named trigger not on this list.
+	SKTRIG_ABORT = 1,     // Some odd thing went wrong.
+	SKTRIG_FAIL,        // we failed the skill check.
+	SKTRIG_GAIN,        // called when there is a chance to gain skill
+	SKTRIG_PRESTART,    // called before any hardcoded messages
+	SKTRIG_SELECT,      // just selecting params for the skill
+	SKTRIG_START,       // params for skill are done. (stroke)
+	SKTRIG_STROKE,      // Not really a trigger! Just a stage.
+	SKTRIG_SUCCESS,     // we passed the skill check
+	SKTRIG_TARGETCANCEL,// called when a target cursor is cancelled
+	SKTRIG_USEQUICK,    // called when a 'quick' usage of the skill is made
+	SKTRIG_WAIT,        // called when a test is made to see if the character must wait before starting
+	SKTRIG_QTY
+};
+
+
+enum SKF_TYPE
+{
+	SKF_SCRIPTED = 0x0001,       // fully scripted, no hardcoded behaviour
+	SKF_FIGHT = 0x0002,       // considered a fight skill, maintains fight active
+	SKF_MAGIC = 0x0004,       // considered a magic skill
+	SKF_CRAFT = 0x0008,       // considered a crafting skill, compatible with MAKEITEM function
+	SKF_IMMOBILE = 0x0010,       // fails skill if character moves
+	SKF_SELECTABLE = 0x0020,       // allows skill to be selected from the skill menu
+	SKF_NOMINDIST = 0x0040,       // you can mine, fish, chop, hack on the same point you are standing on
+	SKF_NOANIM = 0x0080,       // prevents hardcoded animation from playing
+	SKF_NOSFX = 0x0100,       // prevents hardcoded sound from playing
+	SKF_RANGED = 0x0200,       // Considered a ranged skill (combine with SKF_FIGHT)
+	SKF_GATHER = 0x0400,       // Considered a gathering skill, using SkillStrokes as SKF_CRAFT
+	SKF_DISABLED = 0x0800        // Disabled skill, can't be used.
+};
+
+
+//////////////////////////////////////////////////////////////////////////
+// Combat
+
+enum BODYPART_TYPE
+{
+	ARMOR_HEAD = 0,
+	ARMOR_NECK,
+	ARMOR_BACK,
+	ARMOR_CHEST,	// or thorax
+	ARMOR_ARMS,
+	ARMOR_HANDS,
+	ARMOR_LEGS,
+	ARMOR_FEET,
+	ARMOR_QTY,		// All the parts that armor will cover.
+
+	BODYPART_LEGS2,	// Alternate set of legs (spider)
+	BODYPART_TAIL,	// Dragon, Snake, Alligator, etc. (tail attack?)
+	BODYPART_WINGS,	// Dragon, Mongbat, Gargoyle
+	BODYPART_CLAWS,	// can't wear any gloves here!
+	BODYPART_HOOVES,	// No shoes
+	BODYPART_HORNS,	// Bull, Daemon
+
+	BODYPART_STALKS,		// Gazer or Corpser
+	BODYPART_BRANCHES,	// Reaper.
+	BODYPART_TRUNK,		// Reaper.
+	BODYPART_PSEUDOPOD,	// Slime
+	BODYPART_ABDOMEN,		// Spider or insect. asusme throax and chest are the same.
+
+	BODYPART_QTY
+};
+
+enum COMBATFLAGS_TYPE
+{
+	COMBAT_NODIRCHANGE = 0x0000001,	// not rotate player when fighting
+	COMBAT_FACECOMBAT = 0x0000002,	// allow faced combat only
+	COMBAT_PREHIT = 0x0000004,	// allow prehit for close combat. first hit is instant (delay 0.1sec)
+	COMBAT_ELEMENTAL_ENGINE = 0x0000008,	// use DAM*/RES* to split damage/resist into Physical/Fire/Cold/Poison/Energy (AOS) instead use old AR (pre-AOS)
+	COMBAT_DCLICKSELF_UNMOUNTS = 0x0000020,	// unmount horse when dclicking self while in warmode
+	COMBAT_ALLOWHITFROMSHIP = 0x0000040,	// allow attacking opponents from ships
+	COMBAT_ARCHERYCANMOVE = 0x0000100,	// allow firing bow while moving
+	COMBAT_STAYINRANGE = 0x0000200,	// must be in range at the end of the swing or the hit will miss
+	COMBAT_STACKARMOR = 0x0001000,	// if a region is covered by more than one armor part, all AR will count
+	COMBAT_NOPOISONHIT = 0x0002000		// Uses old (55i like) poisoning style: Poisoning > 30.0 && (RAND(100.0)> Poisoning) for monsters OR weapon.morez && (RAND(100) < weapon.morez ) for poisoned weapons.
+};
+
+
+//////////////////////////////////////////////////////////////////////////
+//Magic
+
+enum MAGICFLAGS_TYPE
+{
+	MAGICF_NODIRCHANGE = 0x0000001,	// not rotate player when casting/targeting
+	MAGICF_PRECAST = 0x0000002,	// use precasting (cast spell before targeting)
+	MAGICF_IGNOREAR = 0x0000004,	// magic ignore ar
+	MAGICF_CANHARMSELF = 0x0000008,	// i can do damage on self
+	MAGICF_STACKSTATS = 0x0000010,	// allow multiple stat spells at once
+	MAGICF_FREEZEONCAST = 0x0000020,	// disallow movement whilst casting
+	MAGICF_SUMMONWALKCHECK = 0x0000040,	// disallow summoning creatures to places they can't normally step
+	MAGICF_NOFIELDSOVERWALLS = 0x0000080,	// prevent fields from being formed over blocking objects.
+	MAGICF_NOANIM = 0x0000100,	// auto spellflag_no_anim on all spells
+	MAGICF_OSIFORMULAS = 0x0000200,	// calculated damage and duration based on OSI formulas
+	MAGICF_NOCASTFROZENHANDS = 0x0000400,	// can't cast spells if got paralyzed holding something on hands
+	MAGICF_POLYMORPHSTATS = 0x0000800,	// Polymorph spells give out stats based on base chars (old behaviour backwards).
+	MAGICF_OVERRIDEFIELDS = 0x0001000,	// Prevent cast multiple field spells on the same tile, making the new field tile remove the previous field
+};
+
+enum REVEALFLAGS_TYPE
+{
+	REVEALF_DETECTINGHIDDEN = 0x001,		///* Reveal Spell with Detecting Hidden Skill.
+	REVEALF_LOOTINGSELF = 0x002,		///* Reveal when looting self bodies.
+	REVEALF_LOOTINGOTHERS = 0x004,		///* Reveal when looting bodies of other Players or NPCs.
+	REVEALF_SPEAK = 0x008,		///* Reveal when speaking.
+	REVEALF_SPELLCAST = 0x010			///* Reveal when starting to cast a Spell.
+};
+
+
+//////////////////////////////////////////////////////////////////////////
+// Climodes
+
 enum CLIMODE_TYPE	// What mode is the client to server connection in ? (waiting for input ?)
 {
     // Setup events ------------------------------------------------------------------
@@ -82,7 +238,6 @@ enum CLIMODE_TYPE	// What mode is the client to server connection in ? (waiting 
 
     CLIMODE_TARG_QTY
 };
-
 
 
 

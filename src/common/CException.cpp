@@ -1,6 +1,6 @@
 
 #include <stack>
-#include "../game/CLog.h"
+#include "../common/CLog.h"
 #include "../game/CObjBase.h"
 #include "../game/CServer.h"
 #include "../game/CWorld.h"
