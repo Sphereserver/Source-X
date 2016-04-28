@@ -113,7 +113,7 @@ void UnixTerminal::setColor(ConsoleTextColor color)
 #ifdef _USECURSES
 	wattrset(m_window, COLOR_PAIR(color));
 #else
-	if (color == COL_DEFAULT)
+	if (color == CTCOL_DEFAULT)
 		fprintf(stdout, "\033[0m");
 	else
 		fprintf(stdout, "\033[0;%dm", 30 + (int)color);

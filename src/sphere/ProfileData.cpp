@@ -1,4 +1,5 @@
 
+#include <cstdio>
 #include "../common/sphere_library/CSString.h"
 #include "../common/common.h"
 #include "../game/CScriptProfiler.h"

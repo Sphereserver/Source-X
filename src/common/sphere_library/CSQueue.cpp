@@ -2,6 +2,7 @@
 * @file CQueue.cpp
 */
 
+#include <cstring>
 #include "CSQueue.h"
 #include "../../sphere/threads.h"
 

@@ -1,3 +1,4 @@
+#include <cstring>
 #include "CSMemBlock.h"
 
 // CSMemBlock:: Constructors, Destructor, Asign operator.

@@ -7,7 +7,8 @@
 #ifndef _INC_CSSTRING_H
 #define _INC_CSSTRING_H
 
-#include <stdarg.h>		// needed for va_list
+#include <cstdarg>		// needed for va_list
+#include <cstring>
 #include "../common.h"
 
 

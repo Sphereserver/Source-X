@@ -7,6 +7,7 @@
 #ifndef _INC_CSARRAY_H
 #define _INC_CSARRAY_H
 
+#include <cstring>
 #include "../common.h"
 
 #ifdef _MSC_VER
