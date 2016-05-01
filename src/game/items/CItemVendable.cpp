@@ -118,7 +118,7 @@ void CItemVendable::Restock( bool fSellToPlayers )
 	{
 		// restock to my full amount.
 
-		int iAmountRestock = GetContainedLayer();
+		word iAmountRestock = GetContainedLayer();
 		if ( ! iAmountRestock )
 		{
 			SetContainedLayer(1);

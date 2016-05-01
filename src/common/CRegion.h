@@ -20,7 +20,7 @@ inline DIR_TYPE GetDirTurn( DIR_TYPE dir, int offset )
 	return static_cast<DIR_TYPE>(offset);
 }
 
-struct CGRect			// Basic rectangle. (May not be on the map)
+struct CRect			// Basic rectangle. (May not be on the map)
 {						// Similar to _WIN32 RECT
 public:
 	int m_left;		// West	 x=0
@@ -79,7 +79,7 @@ public:
 		return( IsInside( pt.m_x, pt.m_y, pt.m_map ) );
 	}
 
-	void UnionRect( const CGRect & rect )
+	void UnionRect( const CRect & rect )
 	{
 		// Inflate this rect to include both rectangles.
 		// ASSUME: Normalized rect
@@ -99,7 +99,7 @@ public:
 			DEBUG_ERR(("Uniting regions from different maps!\n"));
 		}
 	}
-	bool IsInside( const CGRect & rect ) const
+	bool IsInside( const CRect & rect ) const
 	{
 		// Is &rect inside me ?
 		// ASSUME: Normalized rect
@@ -114,7 +114,7 @@ public:
 			return false;
 		return true;
 	}
-	bool IsOverlapped( const CGRect & rect ) const
+	bool IsOverlapped( const CRect & rect ) const
 	{
 		// are the 2 rects overlapped at all ?
 		// NON inclusive rect.
@@ -130,7 +130,7 @@ public:
 			return false;
 		return true;
 	}
-	bool IsEqual( const CGRect & rect ) const
+	bool IsEqual( const CRect & rect ) const
 	{
 		return m_left == rect.m_left &&
 			   m_top == rect.m_top &&
@@ -200,7 +200,7 @@ public:
 	CSector * GetSector( int i ) const;	// ge all the sectors that make up this rect.
 };
 
-struct CRectMap : public CGRect
+struct CRectMap : public CRect
 {
 public:
 
@@ -224,8 +224,8 @@ class CGRegion
 	// A bunch of rectangles forming an area.
 public:
 	static const char *m_sClassName;
-	CGRect m_rectUnion;	// The union rectangle.
-	CSTypedArray<CGRect, const CGRect&> m_Rects;
+	CRect m_rectUnion;	// The union rectangle.
+	CSTypedArray<CRect, const CRect&> m_Rects;
 	bool IsRegionEmpty() const
 	{
 		return( m_rectUnion.IsRectEmpty());
@@ -236,15 +236,15 @@ public:
 		m_Rects.Empty();
 	}
 	size_t GetRegionRectCount() const;
-	CGRect & GetRegionRect(size_t i);
-	const CGRect & GetRegionRect(size_t i) const;
-	virtual bool AddRegionRect( const CGRect & rect );
+	CRect & GetRegionRect(size_t i);
+	const CRect & GetRegionRect(size_t i) const;
+	virtual bool AddRegionRect( const CRect & rect );
 
 	CPointBase GetRegionCorner( DIR_TYPE dir = DIR_QTY ) const;
 	bool IsInside2d( const CPointBase & pt ) const;
 
-	bool IsOverlapped( const CGRect & rect ) const;
-	bool IsInside( const CGRect & rect ) const;
+	bool IsOverlapped( const CRect & rect ) const;
+	bool IsInside( const CRect & rect ) const;
 
 	bool IsInside( const CGRegion * pRegionIsSmaller ) const;
 	bool IsOverlapped( const CGRegion * pRegionTest ) const;

@@ -194,7 +194,7 @@ void CClient::Event_Book_Title( CUID uid, lpctstr pszTitle, lpctstr pszAuthor )
 	pBook->m_sAuthor = pszAuthor;
 }
 
-void CClient::Event_Item_Pickup(CUID uid, int amount) // Client grabs an item
+void CClient::Event_Item_Pickup(CUID uid, word amount) // Client grabs an item
 {
 	ADDTOCALLSTACK("CClient::Event_Item_Pickup");
 	EXC_TRY("CClient::Event_Item_Pickup");
@@ -230,7 +230,7 @@ void CClient::Event_Item_Pickup(CUID uid, int amount) // Client grabs an item
 	m_Targ_p = pItem->GetUnkPoint();
 
 	EXC_SET("ItemPickup");
-	amount = m_pChar->ItemPickup(pItem, amount);
+	amount = (word)m_pChar->ItemPickup(pItem, amount);
 	if ( amount < 0 )
 	{
 		EXC_SET("ItemPickup - addItemDragCancel(0)");
@@ -1317,7 +1317,7 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, size_t i
 		if ( pItemSell == NULL )
 			continue;
 
-		int amount = items[i].m_amount;
+		word amount = items[i].m_amount;
 
 		// Now how much did i say i wanted to sell ?
 		if ( pItem->GetAmount() < amount )	// Selling more than i have ?

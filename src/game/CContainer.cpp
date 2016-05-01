@@ -279,7 +279,7 @@ int CContainer::ContentConsume( RESOURCE_ID_BASE rid, int amount, bool fTest, dw
 		pItemNext = pItem->GetNext();
 		if ( pItem->IsResourceMatch(rid, dwArg) )
 		{
-			amount -= pItem->ConsumeAmount(amount, fTest);
+			amount -= pItem->ConsumeAmount( (word)minimum(amount,UINT16_MAX), fTest);
 			if ( amount <= 0 )
 				break;
 		}

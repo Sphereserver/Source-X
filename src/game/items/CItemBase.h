@@ -270,8 +270,8 @@ public:
 		// Container pack is the only exception here. IT_CONTAINER
 		struct	// ALL equippable items ex. Weapons and armor
 		{
-			int	m_junk1;
-			int		   m_StrReq;	// REQSTR= Strength required to weild weapons/armor.
+			int		m_junk1;
+			int		m_StrReq;	// REQSTR= Strength required to weild weapons/armor.
 			RESOURCE_ID_BASE m_Light_ID;	// TDATA3=Change light state to on/off
 		} m_ttEquippable;
 
@@ -309,7 +309,7 @@ public:
 		struct
 		{
 			int	m_junk1;
-			int		   m_StrReq;	// REQSTR= Strength required to mount
+			int m_StrReq;		// REQSTR= Strength required to mount
 			RESOURCE_ID_BASE m_charid;	// TDATA3= (CREID_TYPE)
 		} m_ttFigurine;
 
@@ -330,7 +330,7 @@ public:
 		struct
 		{
 			int m_iSkillMin;	// tdata1= what is the lowest skill
-			int m_iSkillMax;	// tdata1= what is the highest skill for max yield
+			int m_iSkillMax;	// tdata2= what is the highest skill for max yield
 		} m_ttIngot;
 
 		// IT_DOOR
@@ -602,7 +602,7 @@ public:
 	};
 
 	CSTypedArray<CMultiComponentItem,CMultiComponentItem&> m_Components;
-	CGRect m_rect;		// my region.
+	CRect m_rect;		// my region.
 	dword m_dwRegionFlags;	// Base region flags (REGION_FLAG_GUARDED etc)
 	CResourceRefArray m_Speech;	// Speech fragment list (other stuff we know)
 	ShipSpeed m_shipSpeed; // Speed of ships (IT_SHIP)

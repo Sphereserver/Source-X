@@ -846,7 +846,7 @@ size_t CPointBase::Read( tchar * pszVal )
 		case 0:
 			break;
 	}
-	return( iArgs );
+	return iArgs;
 }
 
 CSector * CPointBase::GetSector() const
@@ -868,7 +868,7 @@ CRegionBase * CPointBase::GetRegion( dword dwType ) const
 	// What region in the current CSector am i in ?
 	// We only need to update this every 8 or so steps ?
 	// REGION_TYPE_AREA
-	if ( ! IsValidPoint())
+	if ( ! IsValidPoint() )
 		return NULL;
 
 	CSector *pSector = GetSector();
@@ -897,11 +897,11 @@ int CPointBase::GetPointSortIndex() const
 }
 
 //*************************************************************************
-// -CGRect
+// -CRect
 
-size_t CGRect::Read( lpctstr pszVal )
+size_t CRect::Read( lpctstr pszVal )
 {
-	ADDTOCALLSTACK("CGRect::Read");
+	ADDTOCALLSTACK("CRect::Read");
 	// parse reading the rectangle
 	tchar *pszTemp = Str_GetTemp();
 	strcpy( pszTemp, pszVal );
@@ -951,55 +951,55 @@ size_t CGRect::Read( lpctstr pszVal )
 			break;
 	}
 	NormalizeRect();
-	return( i );
+	return i;
 }
 
-lpctstr CGRect::Write() const
+lpctstr CRect::Write() const
 {
-	ADDTOCALLSTACK("CGRect::Write");
-	return( Write( Str_GetTemp()));
+	ADDTOCALLSTACK("CRect::Write");
+	return Write( Str_GetTemp() );
 }
 
-CPointBase CGRect::GetRectCorner( DIR_TYPE dir ) const
+CPointBase CRect::GetRectCorner( DIR_TYPE dir ) const
 {
-	ADDTOCALLSTACK("CGRect::GetRectCorner");
+	ADDTOCALLSTACK("CRect::GetRectCorner");
 	// Get the point if a directional corner of the CRectMap.
 	CPointBase pt;
 	pt.m_z = 0;	// NOTE: remember this is a nonsense value.
-	pt.m_map = (uchar)(m_map);
+	pt.m_map = (uchar)m_map;
 	switch ( dir )
 	{
 		case DIR_N:
 			pt.m_x = (short)((m_left + m_right) / 2);
-			pt.m_y = (short)(m_top);
+			pt.m_y = (short)m_top;
 			break;
 		case DIR_NE:
-			pt.m_x = (short)(m_right);
-			pt.m_y = (short)(m_top);
+			pt.m_x = (short)m_right;
+			pt.m_y = (short)m_top;
 			break;
 		case DIR_E:
-			pt.m_x = (short)(m_right);
+			pt.m_x = (short)m_right;
 			pt.m_y = (short)((m_top + m_bottom) / 2);
 			break;
 		case DIR_SE:
-			pt.m_x = (short)(m_right);
-			pt.m_y = (short)(m_bottom);
+			pt.m_x = (short)m_right;
+			pt.m_y = (short)m_bottom;
 			break;
 		case DIR_S:
 			pt.m_x = (short)((m_left + m_right) / 2);
-			pt.m_y = (short)(m_bottom);
+			pt.m_y = (short)m_bottom;
 			break;
 		case DIR_SW:
-			pt.m_x = (short)(m_left);
-			pt.m_y = (short)(m_bottom);
+			pt.m_x = (short)m_left;
+			pt.m_y = (short)m_bottom;
 			break;
 		case DIR_W:
-			pt.m_x = (short)(m_left);
+			pt.m_x = (short)m_left;
 			pt.m_y = (short)((m_top + m_bottom) / 2);
 			break;
 		case DIR_NW:
-			pt.m_x = (short)(m_left);
-			pt.m_y = (short)(m_top);
+			pt.m_x = (short)m_left;
+			pt.m_y = (short)m_top;
 			break;
 		case DIR_QTY:
 			pt = GetCenter();
@@ -1010,9 +1010,9 @@ CPointBase CGRect::GetRectCorner( DIR_TYPE dir ) const
 	return( pt );
 }
 
-CSector * CGRect::GetSector( int i ) const	// ge all the sectors that make up this rect.
+CSector * CRect::GetSector( int i ) const	// ge all the sectors that make up this rect.
 {
-	ADDTOCALLSTACK("CGRect::GetSector");
+	ADDTOCALLSTACK("CRect::GetSector");
 	// get all the CSector(s) that overlap this rect.
 	// RETURN: NULL = no more
 
@@ -1035,10 +1035,8 @@ CSector * CGRect::GetSector( int i ) const	// ge all the sectors that make up th
 	if ( i >= ( height * width ))
 	{
 		if ( ! i )
-		{
-			return( g_World.GetSector(m_map, iBase) );
-		}
-		return( NULL );
+			return g_World.GetSector(m_map, iBase);
+		return NULL;
 	}
 
 	int indexoffset = (( i / width ) * g_MapList.GetSectorCols(m_map)) + ( i % width );
@@ -1063,7 +1061,7 @@ CPointMap::CPointMap( word x, word y, char z, uchar map )
 CPointMap & CPointMap::operator= ( const CPointBase & pt )
 {
 	Set( pt );
-	return( * this );
+	return ( * this );
 }
 
 CPointMap::CPointMap( const CPointBase & pt )
@@ -1104,12 +1102,12 @@ CPointSort::~CPointSort()	// just to make this dynamic
 void CRectMap::NormalizeRect()
 {
 	ADDTOCALLSTACK("CRectMap::NormalizeRect");
-	CGRect::NormalizeRect();
+	CRect::NormalizeRect();
 	NormalizeRectMax();
 }
 
 void CRectMap::NormalizeRectMax()
 {
 	ADDTOCALLSTACK("CRectMap::NormalizeRectMax");
-	CGRect::NormalizeRectMax( g_MapList.GetX(m_map), g_MapList.GetY(m_map));
+	CRect::NormalizeRectMax( g_MapList.GetX(m_map), g_MapList.GetY(m_map));
 }

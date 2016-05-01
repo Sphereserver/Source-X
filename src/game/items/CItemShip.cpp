@@ -348,7 +348,7 @@ bool CItemShip::Ship_Face( DIR_TYPE dir )
 
 	// Acquire the CRectMap for the new direction of the ship
 	CRectMap rect;
-	reinterpret_cast<CGRect&>(rect) = pMultiNew->m_rect;
+	reinterpret_cast<CRect&>(rect) = pMultiNew->m_rect;
 	rect.m_map = GetTopPoint().m_map;
 	rect.OffsetRect( GetTopPoint().m_x, GetTopPoint().m_y );
 

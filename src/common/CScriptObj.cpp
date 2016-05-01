@@ -1414,7 +1414,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 				}
 				
 				if ( ppCmd[1] )
-					pItem->SetAmount(Exp_GetVal(ppCmd[1]));
+					pItem->SetAmount(Exp_GetWVal(ppCmd[1]));
 				
 				if ( ppCmd[2] )
 				{

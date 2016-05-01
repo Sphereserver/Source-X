@@ -93,16 +93,16 @@ int CValueCurveDef::GetLinear( int iSkillPercent ) const
 	// RETURN:
 	//  raw chance value.
 
-	size_t iSegSize;
-	size_t iLoIdx;
+	int iSegSize;
+	int iLoIdx;
 
-	size_t iQty = m_aiValues.GetCount();
+	int iQty = (int)m_aiValues.GetCount();
 	switch (iQty)
 	{
 	case 0:
 		return 0;	// no values defined !
 	case 1:
-		return( m_aiValues[0] );
+		return m_aiValues[0];
 	case 2:
 		iLoIdx = 0;
 		iSegSize = 1000;

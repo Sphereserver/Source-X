@@ -328,7 +328,7 @@ public:
 	void Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gridIndex = 0 ); // Item is dropped on ground
 	void Event_Item_Drop_Fail( CItem *pItem );
 	void Event_Item_Dye( CUID uid, HUE_TYPE wHue );	// Rehue an item
-	void Event_Item_Pickup( CUID uid, int amount ); // Client grabs an item
+	void Event_Item_Pickup( CUID uid, word amount ); // Client grabs an item
 	void Event_MailMsg( CUID uid1, CUID uid2 );
 	void Event_Profile( byte fWriteMode, CUID uid, lpctstr pszProfile, int iProfileLen );
 	void Event_PromptResp( lpctstr pszText, size_t len, dword context1, dword context2, dword type, bool bNoStrip = false );

@@ -269,7 +269,7 @@ bool CChar::NPC_OnTrainPay(CChar *pCharSrc, CItemMemory *pMemory, CItem * pGold)
 		return false;
 	}
 
-	int iTrainCost = static_cast<int>(GetKeyNum("OVERRIDE.TRAINSKILLCOST", true));
+	int iTrainCost = (int)GetKeyNum("OVERRIDE.TRAINSKILLCOST", true);
 	if ( !iTrainCost )
 		iTrainCost = g_Cfg.m_iTrainSkillCost;
 
@@ -279,12 +279,15 @@ bool CChar::NPC_OnTrainPay(CChar *pCharSrc, CItemMemory *pMemory, CItem * pGold)
 
 	Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_SUCCESS ) );
 
+	// Can't ask for more gold than the maximum amount of the gold stack i am giving to the npc
+	word iTrainCostFinal = (word)minimum(UINT16_MAX, iTrainCost);
+
 	// Consume as much money as we can train for.
 	if ( pGold->GetAmount() < iTrainCost )
 	{
-		iTrainCost = pGold->GetAmount();
+		iTrainCostFinal = pGold->GetAmount();
 	}
-	else if ( pGold->GetAmount() == iTrainCost )
+	else if ( pGold->GetAmount() == iTrainCostFinal)
 	{
 		Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_THATSALL_1 ) );
 		pMemory->m_itEqMemory.m_Action = NPC_MEM_ACT_NONE;
@@ -295,7 +298,7 @@ bool CChar::NPC_OnTrainPay(CChar *pCharSrc, CItemMemory *pMemory, CItem * pGold)
 		pMemory->m_itEqMemory.m_Action = NPC_MEM_ACT_NONE;
 
 		// Give change back.
-		pGold->UnStackSplit( iTrainCost, pCharSrc );
+		pGold->UnStackSplit( iTrainCostFinal, pCharSrc );
 	}
 	GetPackSafe()->ContentAdd( pGold );	// take my cash.
 

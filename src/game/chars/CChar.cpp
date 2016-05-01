@@ -3014,8 +3014,8 @@ do_default:
 			break;
 		case CHC_GOLD:
 		{
-			int currentGold = ContentCount(RESOURCE_ID(RES_TYPEDEF, IT_GOLD));
-			int newGold = (int)(s.GetArgVal());
+			word currentGold = (word)ContentCount(RESOURCE_ID(RES_TYPEDEF, IT_GOLD));
+			word newGold = (word)(s.GetArgVal());
 
 			if ( newGold >= 0 )
 			{
@@ -3030,7 +3030,7 @@ do_default:
 					if ( !pBank )
 						return false;
 
-					int amount = newGold - currentGold;
+					word amount = newGold - currentGold;
 					while ( amount > 0 )
 					{
 						pGold = CItem::CreateBase(ITEMID_GOLD_C1);
@@ -3689,7 +3689,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				while ( amount > 0 )
 				{
 					CItem *pItem = CItem::CreateScript(ITEMID_GOLD_C1, this);
-					pItem->SetAmount( minimum(amount, pItem->GetMaxAmount()) );
+					pItem->SetAmount( (word)minimum(amount, (int)pItem->GetMaxAmount()) );
 					amount -= pItem->GetAmount();
 					GetPackSafe()->ContentAdd(pItem);
 				}

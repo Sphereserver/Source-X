@@ -69,7 +69,7 @@ size_t CGRegion::GetRegionRectCount() const
 	return( iQty );
 }
 
-CGRect & CGRegion::GetRegionRect(size_t i)
+CRect & CGRegion::GetRegionRect(size_t i)
 {
 	ADDTOCALLSTACK("CGRegion::GetRegionRect");
 	// Get a particular rectangle.
@@ -79,7 +79,7 @@ CGRect & CGRegion::GetRegionRect(size_t i)
 	return( m_Rects.ElementAt(i));
 }
 
-const CGRect & CGRegion::GetRegionRect(size_t i) const
+const CRect & CGRegion::GetRegionRect(size_t i) const
 {
 	ADDTOCALLSTACK("CGRegion::GetRegionRect");
 	size_t iQty = m_Rects.GetCount();
@@ -114,7 +114,7 @@ bool CGRegion::IsInside2d( const CPointBase & pt ) const
 	return true;
 }
 
-bool CGRegion::AddRegionRect( const CGRect & rect )
+bool CGRegion::AddRegionRect( const CRect & rect )
 {
 	ADDTOCALLSTACK("CGRegion::AddRegionRect");
 	if ( rect.IsRectEmpty() )
@@ -153,7 +153,7 @@ bool CGRegion::AddRegionRect( const CGRect & rect )
 	return true;
 }
 
-bool CGRegion::IsOverlapped( const CGRect & rect ) const
+bool CGRegion::IsOverlapped( const CRect & rect ) const
 {
 	ADDTOCALLSTACK("CGRegion::IsOverlapped");
 	// Does the region overlap this rectangle.
@@ -171,7 +171,7 @@ bool CGRegion::IsOverlapped( const CGRect & rect ) const
 	return false;
 }
 
-bool CGRegion::IsInside( const CGRect & rect ) const
+bool CGRegion::IsInside( const CRect & rect ) const
 {
 	ADDTOCALLSTACK("CGRegion::IsInside");
 	// NOTE: This is NOT 100% true !!

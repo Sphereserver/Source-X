@@ -340,7 +340,7 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
 		// so the region boundaries need to be stretched to fit all the components
 		g_Log.EventWarn("Building design for 0%x does not fit inside the MULTIREGION boundaries (design boundaries: %s). Attempting to resize region...\n", (dword)GetUID(), rectNew.Write());
 
-		CGRect rect = m_pRegion->GetRegionRect(0);
+		CRect rect = m_pRegion->GetRegionRect(0);
 		rectNew.UnionRect(rect);
 		
 		m_pRegion->SetRegionRect(rectNew);
@@ -404,7 +404,7 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, sh
 		{
 			// if a client is placing the item, make sure that
 			// it is within the design area
-			CGRect rectDesign = GetDesignArea();
+			CRect rectDesign = GetDesignArea();
 			if ( !rectDesign.IsInside2d( pt ) )
 			{
 				if ( !rectDesign.IsInsideX( pt.m_x ) || !rectDesign.IsInsideY( pt.m_y - 1 ) )
@@ -556,7 +556,7 @@ void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x,
 	ADDTOCALLSTACK("CItemMultiCustom::RemoveItem");
 	// remove the item that's found at given location
 	// ITEMID_NOTHING means we should remove any items found
-	CGRect rectDesign = GetDesignArea();
+	CRect rectDesign = GetDesignArea();
 	CPointMap pt(GetTopPoint());
 	pt.m_x += x;
 	pt.m_y += y;
@@ -729,7 +729,7 @@ void CItemMultiCustom::SendStructureTo(CClient * pClientSrc)
 	if ( pDesign->m_vectorComponents.size() )
 	{
 		// determine the dimensions of the building
-		const CGRect rectDesign = GetDesignArea();
+		const CRect rectDesign = GetDesignArea();
 		int iMinX = rectDesign.m_left, iMinY = rectDesign.m_top;
 		int iWidth = rectDesign.GetWidth();
 		int iHeight = rectDesign.GetHeight();
@@ -915,7 +915,7 @@ uchar CItemMultiCustom::GetLevelCount()
 	ADDTOCALLSTACK("CItemMultiCustom::GetLevelCount");
 	// return how many levels (including the roof) there are
 	// client decides this based on the size of the foundation
-	const CGRect rectDesign = GetDesignArea();
+	const CRect rectDesign = GetDesignArea();
 	if (rectDesign.GetWidth() >= 14 || rectDesign.GetHeight() >= 14)
 		return 4;
 
@@ -1016,7 +1016,7 @@ const CItemMultiCustom::CSphereMultiCustom * CItemMultiCustom::GetMultiItemDefs(
 	return m_pSphereMulti;
 }
 
-const CGRect CItemMultiCustom::GetDesignArea()
+const CRect CItemMultiCustom::GetDesignArea()
 {
 	ADDTOCALLSTACK("CItemMultiCustom::GetDesignArea");
 	// return the foundation dimensions, which is the design
@@ -1048,7 +1048,7 @@ const CGRect CItemMultiCustom::GetDesignArea()
 		{
 			// multi data is not available, so assume the region boundaries
 			// are correct
-			CGRect rectRegion = m_pRegion->GetRegionRect(0);
+			CRect rectRegion = m_pRegion->GetRegionRect(0);
 			m_rectDesignArea.SetRect(rectRegion.m_left, rectRegion.m_top, rectRegion.m_right, rectRegion.m_top, rectRegion.m_map);
 
 			const CPointMap pt = GetTopPoint();
@@ -1058,7 +1058,7 @@ const CGRect CItemMultiCustom::GetDesignArea()
 		}
 	}
 
-	CGRect rect;
+	CRect rect;
 	const CPointMap pt = GetTopPoint();
 	
 	rect.SetRect(m_rectDesignArea.m_left, m_rectDesignArea.m_top, m_rectDesignArea.m_right, m_rectDesignArea.m_bottom, GetTopMap());
@@ -1375,7 +1375,7 @@ bool CItemMultiCustom::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole
 		case IMCC_EDITAREA:
 		{
 			pszKey += 8;
-			CGRect rectDesign = GetDesignArea();
+			CRect rectDesign = GetDesignArea();
 			sVal.Format("%d,%d,%d,%d", rectDesign.m_left, rectDesign.m_top, rectDesign.m_right, rectDesign.m_bottom);
 		} break;
 

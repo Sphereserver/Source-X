@@ -106,7 +106,7 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 		}
 
 		if ( iQty > 1 )
-			pPart->SetAmount((uint)(iQty));
+			pPart->SetAmount((word)iQty);
 
 		if ( pChar && pChar->m_pPlayer )
 		{
@@ -395,7 +395,7 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 
 			CItem *pRemovedAmmo = CItem::CreateBase(AmmoID);
 			ASSERT(pRemovedAmmo);
-			pRemovedAmmo->SetAmount(pButte->m_itArcheryButte.m_AmmoCount);
+			pRemovedAmmo->SetAmount((word)pButte->m_itArcheryButte.m_AmmoCount);
 			ItemBounce(pRemovedAmmo);
 		}
 

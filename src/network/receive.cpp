@@ -372,7 +372,7 @@ bool PacketItemPickupReq::onReceive(NetState* net)
 	ADDTOCALLSTACK("PacketItemPickupReq::onReceive");
 
 	CUID serial(readInt32());
-	int amount = readInt16();
+	word amount = readInt16();
 	
 	CClient* client = net->getClient();
 	ASSERT(client);

@@ -124,7 +124,7 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fT
 	pResBit->m_itResource.m_rid_res = pOreDef->GetResourceID();
 
 	// Total amount of ore here.
-	int amount = pOreDef->m_Amount.GetRandom();
+	word amount = (word)pOreDef->m_Amount.GetRandom();
 	if ( (g_Cfg.m_iRacialFlags & RACIALF_HUMAN_WORKHORSE) && pCharSrc->IsHuman() )
 	{
 		if ( (Type == IT_ROCK) && (pCharSrc->GetTopMap() == 0) )

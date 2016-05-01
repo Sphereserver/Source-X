@@ -934,18 +934,18 @@ CItem * CChar::Skill_NaturalResource_Create( CItem * pResBit, SKILL_TYPE skill )
 	// Find the ore type located here based on color.
 	CRegionResourceDef * pOreDef = dynamic_cast<CRegionResourceDef *>(g_Cfg.ResourceGetDef(pResBit->m_itResource.m_rid_res));
 	if ( pOreDef == NULL )
-		return( NULL );
+		return NULL;
 
 	// Skill effects how much of the ore i can get all at once.
 	if ( pOreDef->m_ReapItem == ITEMID_NOTHING )
-		return( NULL );		// I intended for there to be nothing here
+		return NULL;		// I intended for there to be nothing here
 
 	// Reap amount is semi-random
-	int iAmount = pOreDef->m_ReapAmount.GetRandomLinear( Skill_GetBase(skill) );
+	word iAmount = (word)pOreDef->m_ReapAmount.GetRandomLinear( Skill_GetBase(skill) );
 	if ( !iAmount )		// if REAPAMOUNT wasn't defined
 	{
-		iAmount = pOreDef->m_Amount.GetRandomLinear( Skill_GetBase(skill) ) / 2;
-		int	maxAmount = pResBit->GetAmount();
+		iAmount = (word)pOreDef->m_Amount.GetRandomLinear( Skill_GetBase(skill) ) / 2;
+		word	maxAmount = pResBit->GetAmount();
 		if ( iAmount < 1 )
 			iAmount = 1;
 		if ( iAmount > maxAmount )
@@ -963,20 +963,20 @@ CItem * CChar::Skill_NaturalResource_Create( CItem * pResBit, SKILL_TYPE skill )
 		tRet = pOreDef->OnTrigger("@ResourceGather", this, &Args);
 	
 	if ( tRet == TRIGRET_RET_TRUE )
-		return( NULL );
+		return NULL;
 
 	//Creating the 'id' variable with the local given through->by the trigger(s) instead on top of method
 	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(RES_GET_INDEX( Args.m_VarsLocal.GetKeyNum("ResourceID")));
 
-	iAmount = pResBit->ConsumeAmount( (int)(Args.m_iN1) );	// amount i used up.
+	iAmount = pResBit->ConsumeAmount( (word)(Args.m_iN1) );	// amount i used up.
 	if ( iAmount <= 0 )
-		return( NULL );
+		return NULL;
 
 	CItem * pItem = CItem::CreateScript( id, this );
 	ASSERT(pItem);
 
 	pItem->SetAmount( iAmount );
-	return( pItem );
+	return pItem;
 }
 
 bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
@@ -1049,9 +1049,9 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	sprintf(pszMsg, "%s %s", g_Cfg.GetDefaultMsg( DEFMSG_MINING_SMELT ), pItemOre->GetName());
 	Emote(pszMsg);
 
-	int iMiningSkill = Skill_GetAdjusted(SKILL_MINING);
-	int iOreQty = pItemOre->GetAmount();
-	int iIngotQty = 0;
+	ushort iMiningSkill = Skill_GetAdjusted(SKILL_MINING);
+	word iOreQty = pItemOre->GetAmount();
+	word iIngotQty = 0;
 	const CItemBase * pIngotDef = NULL;
 
 	if ( pOreDef->IsType( IT_ORE ))
@@ -1080,7 +1080,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 				CItem * pGem = CItem::CreateScript(pBaseDef->GetID(), this);
 				if ( pGem )
 				{
-					pGem->SetAmount((uint)(iOreQty * pBaseDef->m_BaseResources[i].GetResQty()));
+					pGem->SetAmount((word)(iOreQty * pBaseDef->m_BaseResources[i].GetResQty()));
 					ItemBounce(pGem);
 				}
 				continue;
@@ -1093,7 +1093,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 					continue;
 				}
 				pIngotDef = pBaseDef;
-				iIngotQty = (int)(pOreDef->m_BaseResources[i].GetResQty());
+				iIngotQty = (word)(pOreDef->m_BaseResources[i].GetResQty());
 			}
 		}
 	}
@@ -1114,7 +1114,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	if ( !iIngotQty || !Skill_UseQuick( SKILL_MINING, iDifficulty ))
 	{
 		SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_MINING_NOTHING ), pItemOre->GetName());
-		pItemOre->ConsumeAmount( Calc_GetRandVal( pItemOre->GetAmount() / 2 ) + 1 );	// lose up to half the resources.
+		pItemOre->ConsumeAmount( (word)(Calc_GetRandVal( pItemOre->GetAmount() / 2 ) + 1) );	// lose up to half the resources.
 		return false;
 	}
 

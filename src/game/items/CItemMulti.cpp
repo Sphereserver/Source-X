@@ -99,7 +99,7 @@ bool CItemMulti::MultiRealizeRegion()
 
 	// Create the new region rectangle.
 	CRectMap rect;
-	reinterpret_cast<CGRect&>(rect) = pMultiDef->m_rect;
+	reinterpret_cast<CRect&>(rect) = pMultiDef->m_rect;
 	rect.m_map = pt.m_map;
 	rect.OffsetRect( pt.m_x, pt.m_y );
 	m_pRegion->SetRegionRect( rect );

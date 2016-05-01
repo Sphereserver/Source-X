@@ -102,7 +102,7 @@ public:
 	void ResetStructure( CClient * pClientSrc = NULL );
 
 	const CSphereMultiCustom * GetMultiItemDefs();
-	const CGRect GetDesignArea();
+	const CRect GetDesignArea();
 	size_t GetFixtureCount(DesignDetails * pDesign = NULL);
 	size_t GetComponentsAt(short dx, short dy, char dz, Component ** pComponents, DesignDetails * pDesign = NULL);
 	int GetRevision(const CClient * pClientSrc = NULL) const;

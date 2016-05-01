@@ -349,24 +349,24 @@ CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CC
 	if ( rid.GetResIndex() == 0 )
 		return( NULL );
 
-	int amount = 1;
+	word amount = 1;
 	if ( Str_Parse( pArg, &pArg ))
 	{
 		if ( pArg[0] != 'R' )
 		{
-			amount = Exp_GetVal( pArg );
+			amount = Exp_GetWVal( pArg );
 			Str_Parse( pArg, &pArg );
 		}
 		if ( pArg[0] == 'R' )
 		{
 			// 1 in x chance of creating this.
 			if ( Calc_GetRandVal( ATOI( pArg+1 )))
-				return( NULL );	// don't create it
+				return NULL;	// don't create it
 		}
 	}
 
 	if ( amount == 0 )
-		return( NULL );
+		return NULL;
 
 	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(rid.GetResIndex());
 
@@ -391,13 +391,11 @@ CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CC
 		{
 			DEBUG_ERR(( "Script Error: 0%x item is not movable type, cont=0%x\n", id, (dword)(pCont->GetUID()) ));
 			pItem->Delete();
-			return( NULL );
+			return NULL;
 		}
 
 		if ( amount != 1 )
-		{
 			pItem->SetAmount( amount );
-		}
 
 		// Items should have their container set after their amount to
 		// avoid stacking issues.
@@ -1075,7 +1073,7 @@ int CItem::FixWeirdness()
 	return( IsWeird());
 }
 
-CItem * CItem::UnStackSplit( int amount, CChar * pCharSrc )
+CItem * CItem::UnStackSplit( word amount, CChar * pCharSrc )
 {
 	ADDTOCALLSTACK("CItem::UnStackSplit");
 	// Set this item to have this amount.
@@ -1087,7 +1085,7 @@ CItem * CItem::UnStackSplit( int amount, CChar * pCharSrc )
 	//  The newly created item.
 
 	if ( amount >= GetAmount() )
-		return( NULL );
+		return NULL;
 
 	ASSERT( amount <= GetAmount());
 	CItem * pItemNew = CreateDupeItem( this );
@@ -1097,9 +1095,7 @@ CItem * CItem::UnStackSplit( int amount, CChar * pCharSrc )
 	if ( ! pItemNew->MoveNearObj( this ))
 	{
 		if ( pCharSrc )
-		{
 			pCharSrc->ItemBounce( pItemNew );
-		}
 		else
 		{
 			// No place to put this item !
@@ -1107,7 +1103,7 @@ CItem * CItem::UnStackSplit( int amount, CChar * pCharSrc )
 		}
 	}
 
-	return( pItemNew );
+	return pItemNew;
 }
 
 bool CItem::IsSameType( const CObjBase * pObj ) const
@@ -1218,7 +1214,7 @@ bool CItem::Stack( CItem * pItem )
 	if ( IsAttr(ATTR_LOCKEDDOWN) != pItem->IsAttr(ATTR_LOCKEDDOWN) )
 		return false;
 
-	int amount = pItem->GetAmount() + GetAmount();
+	word amount = pItem->GetAmount() + GetAmount();
 	if ( amount > pItem->GetMaxAmount() )
 	{
 		amount = pItem->GetMaxAmount() - pItem->GetAmount();
@@ -1972,17 +1968,17 @@ bool CItem::SetDispID( ITEMID_TYPE id )
 	return true;
 }
 
-void CItem::SetAmount( uint amount )
+void CItem::SetAmount(word amount )
 {
 	ADDTOCALLSTACK("CItem::SetAmount");
 	// propagate the weight change.
 	// Setting to 0 might be legal if we are deleteing it ?
 
-	uint oldamount = GetAmount();
+	word oldamount = GetAmount();
 	if ( oldamount == amount )
 		return;
 
-	m_amount = (word)(amount);
+	m_amount = amount;
 	// sometimes the diff graphics for the types are not in the client.
 	if ( IsType(IT_ORE) )
 	{
@@ -2000,7 +1996,7 @@ void CItem::SetAmount( uint amount )
 	if (pParentCont)
 	{
 		ASSERT( IsItemEquipped() || IsItemInContainer());
-		pParentCont->OnWeightChange(GetWeight((word)(amount)) - GetWeight((word)(oldamount)));
+		pParentCont->OnWeightChange(GetWeight(amount) - GetWeight(oldamount));
 	}
 	
 	UpdatePropertyFlag(AUTOTOOLTIP_FLAG_AMOUNT);
@@ -2029,7 +2025,7 @@ bool CItem::SetMaxAmount(word amount)
 	return true;
 }
 
-void CItem::SetAmountUpdate( uint amount )
+void CItem::SetAmountUpdate(word amount )
 {
 	ADDTOCALLSTACK("CItem::SetAmountUpdate");
 	uint oldamount = GetAmount();
@@ -2736,7 +2732,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				return true;
 			}
 		case IC_AMOUNT:
-			SetAmountUpdate( s.GetArgVal());
+			SetAmountUpdate( (word)s.GetArgVal() );
 			return true;
 		case IC_ATTR:
 			m_Attr = s.GetArgVal();
@@ -3029,7 +3025,7 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 			pCharSrc->ItemBounce( this );
 			break;
 		case CIV_CONSUME:
-			ConsumeAmount( s.HasArgs() ? s.GetArgVal() : 1 );
+			ConsumeAmount( s.HasArgs() ? (word)s.GetArgVal() : 1 );
 			break;
 		case CIV_CONTCONSUME:
 			{
@@ -3045,7 +3041,7 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 		case CIV_DECAY:
 			SetDecayTime( s.GetArgVal());
 			break;
-		case CIV_DESTROY:	//remove this object now.
+		case CIV_DESTROY:	// remove this object now.
 		{
 			if (s.GetArgVal())
 				Emote(g_Cfg.GetDefaultMsg(DEFMSG_ITEM_DMG_DESTROYED));
@@ -3729,7 +3725,7 @@ void CItem::ConvertBolttoCloth()
 		return;
 
 	// Start the conversion
-	int iOutAmount = GetAmount();
+	word iOutAmount = GetAmount();
 	CItemContainer * pCont = dynamic_cast <CItemContainer*> ( GetContainer() );
 	Delete();
 
@@ -3745,7 +3741,7 @@ void CItem::ConvertBolttoCloth()
 
 		CItem * pItemNew = CItem::CreateTemplate( pBaseDef->GetID() );
 		ASSERT(pItemNew);
-		pItemNew->SetAmount( iOutAmount * (int)(pDefCloth->m_BaseResources[i].GetResQty()) );
+		pItemNew->SetAmount( iOutAmount * (word)(pDefCloth->m_BaseResources[i].GetResQty()) );
 		if ( pItemNew->IsType( IT_CLOTH ))
 			pItemNew->SetHue( GetHue() );
 		if ( pCont )
@@ -3759,7 +3755,7 @@ void CItem::ConvertBolttoCloth()
 	}
 }
 
-int CItem::ConsumeAmount( int iQty, bool fTest )
+word CItem::ConsumeAmount( word iQty, bool fTest )
 {
 	ADDTOCALLSTACK("CItem::ConsumeAmount");
 	// Eat or drink specific item. delete it when gone.
@@ -3767,26 +3763,22 @@ int CItem::ConsumeAmount( int iQty, bool fTest )
 	if ( this == NULL )	// can use none if there is nothing? or can we use all?
 		return iQty;
 
-	int iQtyMax = GetAmount();
+	word iQtyMax = GetAmount();
 	if ( iQty < iQtyMax )
 	{
 		if ( ! fTest )
-		{
 			SetAmountUpdate( iQtyMax - iQty );
-		}
-		return( iQty );
+		return iQty;
 	}
 
 	if ( ! fTest )
 	{
 		SetAmount( 0 );	// let there be 0 amount here til decay.
 		if ( ! IsTopLevel() || ! IsAttr( ATTR_INVIS ))	// don't delete resource locators.
-		{
 			Delete();
-		}
 	}
 
-	return( iQtyMax );
+	return iQtyMax;
 }
 
 

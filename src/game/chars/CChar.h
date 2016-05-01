@@ -1004,7 +1004,7 @@ public:
 	CItem * NPC_Shrink();
 	bool FollowersUpdate( CChar * pChar, short iFollowerSlots = 0, bool bCheckOnly = false );
 
-	int  ItemPickup( CItem * pItem, int amount );
+	int  ItemPickup( CItem * pItem, word amount );
 	bool ItemEquip( CItem * pItem, CChar * pCharMsg = NULL, bool fFromDClick = false );
 	bool ItemEquipWeapon( bool fForce );
 	bool ItemEquipArmor( bool fForce );

@@ -1613,7 +1613,7 @@ CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, d
 
 		// Check for items in the way and bumpy terrain.
 
-		CGRect rect = pMultiDef->m_rect;
+		CRect rect = pMultiDef->m_rect;
 		rect.m_map = pt.m_map;
 		rect.OffsetRect( pt.m_x, pt.m_y );
 		CPointMap ptn = pt;
@@ -2168,7 +2168,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 				return false;
 
 			// Cut up cloth.
-			int iOutQty = 0;
+			word iOutQty = 0;
 			ITEMID_TYPE iOutID = ITEMID_BANDAGES1;
 
 			switch ( pItemTarg->GetType())
@@ -2183,7 +2183,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 					break;
 				case IT_CLOTHING:
 					// Cut up for bandages.
-					iOutQty = pItemTarg->GetWeight()/WEIGHT_UNITS;
+					iOutQty = (word)(pItemTarg->GetWeight()/WEIGHT_UNITS);
 					break;
 				case IT_HIDE:
 					// IT_LEATHER
@@ -2243,7 +2243,7 @@ static lpctstr const sm_Txt_LoomUse[] =
 			// throw away what was on here before
 			SysMessageDefault( DEFMSG_ITEMUSE_LOOM_REMOVE );
 			CItem * pItemCloth = CItem::CreateTemplate( pItemTarg->m_itLoom.m_ClothID, NULL, m_pChar );
-			pItemCloth->SetAmount( pItemTarg->m_itLoom.m_ClothQty );
+			pItemCloth->SetAmount( (word)pItemTarg->m_itLoom.m_ClothQty );
 			pItemTarg->m_itLoom.m_ClothQty = 0;
 			pItemTarg->m_itLoom.m_ClothID = ITEMID_NOTHING;
 			m_pChar->ItemBounce( pItemCloth );
@@ -2258,7 +2258,7 @@ static lpctstr const sm_Txt_LoomUse[] =
 		if ( iHave < iNeed )
 		{
 			iNeed -= iHave;
-			iUsed = pItemUse->ConsumeAmount( iNeed );
+			iUsed = pItemUse->ConsumeAmount( (word)iNeed );
 		}
 
 		if ( (uint)(iHave  + iUsed) < (CountOf( sm_Txt_LoomUse ) - 1) )

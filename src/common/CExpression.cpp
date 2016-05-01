@@ -294,7 +294,7 @@ int32 Calc_GetRandVal( int32 iQty )
 	if ( iQty <= 0 )
 		return 0;
 	if ( iQty >= INT32_MAX )
-		return ( MulDivLL(CSRand::genRandInt32(0, iQty), (uint)iQty, INT32_MAX ) );
+		return ( MulDivLL(CSRand::genRandInt32(0, iQty), iQty, INT32_MAX ) );
 	return CSRand::genRandInt32(0, iQty);
 }
 

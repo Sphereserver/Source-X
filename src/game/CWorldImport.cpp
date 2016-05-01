@@ -441,7 +441,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			}
 			else if ( s.IsKey("AMOUNT" ))
 			{
-				pItem->SetAmount( ATOI(pArg));
+				pItem->SetAmount( (word)ATOI(pArg) );
 				continue;
 			}
 			else if ( s.IsKey("MOREX" ))

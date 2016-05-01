@@ -215,7 +215,7 @@ void CChar::AddGoldToPack( int iAmount, CItemContainer * pPack )
 	{
 		CItem * pGold = CItem::CreateScript( ITEMID_GOLD_C1, this );
 
-		int iGoldStack = minimum( iAmount, UINT16_MAX );
+		word iGoldStack = (word)minimum( iAmount, UINT16_MAX );
 		pGold->SetAmount( iGoldStack );
 
 		Sound( pGold->GetDropSound( pPack ));
@@ -1565,7 +1565,7 @@ void CChar::SoundChar( CRESND_TYPE type )
 // RETURN:
 //  amount we can pick up.
 //	-1 = we cannot pick this up.
-int CChar::ItemPickup(CItem * pItem, int amount)
+int CChar::ItemPickup(CItem * pItem, word amount)
 {
 	ADDTOCALLSTACK("CChar::ItemPickup");
 
@@ -1666,7 +1666,7 @@ int CChar::ItemPickup(CItem * pItem, int amount)
 			Reveal();
 	}
 
-	int iAmountMax = pItem->GetAmount();
+	word iAmountMax = pItem->GetAmount();
 	if ( iAmountMax <= 0 )
 		return -1;
 
@@ -1676,7 +1676,7 @@ int CChar::ItemPickup(CItem * pItem, int amount)
 		amount = maximum(1, minimum(amount, iAmountMax));
 
 	//int iItemWeight = ( amount == iAmountMax ) ? pItem->GetWeight() : pItem->Item_GetDef()->GetWeight() * amount;
-	int iItemWeight = pItem->GetWeight((word)(amount));
+	int iItemWeight = pItem->GetWeight(amount);
 
 	// Is it too heavy to even drag ?
 	bool fDrop = false;
