@@ -6,7 +6,7 @@
 #ifndef _INC_CSFILE_H
 #define _INC_CSFILE_H
 
-#include <stdio.h>
+#include <cstdio>
 #include "CSString.h"
 
 #ifndef _WIN32

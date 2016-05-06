@@ -56,7 +56,7 @@ void CScriptTriggerArgs::Init( lpctstr pszStr )
 		if ( str != NULL )
 			*str	= '\0';
 	}
-	
+
 	m_iN1	= 0;
 	m_iN2	= 0;
 	m_iN3	= 0;
@@ -289,7 +289,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
 	{
 		EXC_SET("intrinsic");
 		CVarDefCont *	pVar	= m_VarsLocal.GetKey( pszKey );
-		
+
 		if ( pVar )
 		{
 			sVal	= pVar->GetValStr();
@@ -316,7 +316,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
 		EXC_SET("argv");
 		pszKey += 4;
 		SKIP_SEPARATORS(pszKey);
-		
+
 		size_t iQty = m_v.GetCount();
 		if ( iQty <= 0 )
 		{
@@ -341,7 +341,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
 					++s;
 					continue;
 				}
-				
+
 				// check to see if the argument is quoted (incase it contains commas)
 				if ( *s == '"' )
 				{
@@ -372,8 +372,8 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
 				m_v.Add( pszArg );
 			}
 			iQty = m_v.GetCount();
-		}	
-		
+		}
+
 		if ( *pszKey == '\0' )
 		{
 			sVal.FormatVal((int)(iQty));
@@ -858,7 +858,7 @@ badcmd:
 				{
 					iCurrent = iAbsMax - iCurrent;
 				}
-				
+
 				if (( iMin >= iMax ) || ( iAbsMax <= 0 ) || ( iCurrent <= 0 ) )
 					sVal.FormatLLVal(iMin);
 				else if ( iCurrent >= iAbsMax )
@@ -914,7 +914,7 @@ badcmd:
 			return true;
 		case SSC_DEFLIST:
 			{
-				g_Exp.m_ListInternals.r_Write(pSrc, pszKey, sVal);	
+				g_Exp.m_ListInternals.r_Write(pSrc, pszKey, sVal);
 			}
 			return true;
 		case SSC_LIST:
@@ -1012,7 +1012,7 @@ badcmd:
 					ch = *pszKey;
 					++pszKey;
 				}
-				
+
 				GETNONWHITESPACE( pszKey );
 				int64	iLen	= strlen( pszKey );
 				if ( iPos < 0 )
@@ -1154,7 +1154,7 @@ badcmd:
 				size_t iQty = Str_ParseCmds(buf, Arg_ppCmd, CountOf(Arg_ppCmd));
 				if ( iQty < 1 )
 					return false;
-				
+
 				bool bWait = (index == SSC_SYSCMD);
 
 #ifdef _WIN32
@@ -1177,7 +1177,7 @@ badcmd:
 					execlp( Arg_ppCmd[0], Arg_ppCmd[0], Arg_ppCmd[1], Arg_ppCmd[2],
 										Arg_ppCmd[3], Arg_ppCmd[4], Arg_ppCmd[5], Arg_ppCmd[6],
 										Arg_ppCmd[7], Arg_ppCmd[8], Arg_ppCmd[9], NULL );
-					
+
 					g_Log.EventError("SYSSPAWN failed with error %d (\"%s\") when executing %s.\n", errno, strerror(errno), pszKey);
 					raise(SIGKILL);
 					g_Log.EventError("Failed errorhandling in SYSSPAWN. Server is UNSTABLE.\n");
@@ -1214,12 +1214,12 @@ badcmd:
 
 				const char *p = pszKey + strlen(separators) + 1;
 				sVal = "";
-				if (( p > pszKey ) && *p )		//	we have list of accessible separators 
+				if (( p > pszKey ) && *p )		//	we have list of accessible separators
 				{
 					tchar *ppCmd[255];
 					tchar * z = Str_GetTemp();
 					strcpy(z, p);
-					size_t count = Str_ParseCmds(z, ppCmd, CountOf(ppCmd), separators); 
+					size_t count = Str_ParseCmds(z, ppCmd, CountOf(ppCmd), separators);
 					if (count > 0)
 					{
 						sVal.Add(ppCmd[0]);
@@ -1232,7 +1232,7 @@ badcmd:
 				}
 				return true;
 			}
-	
+
 		case SSC_MD5HASH:
 			{
 				char digest[33];
@@ -1277,7 +1277,7 @@ badcmd:
 				tchar * tLastError = Str_GetTemp();
 				int iDataResult = Str_RegExMatch( pszKey, sToMatch, tLastError );
 				sVal.FormatVal(iDataResult);
-				
+
 				if ( iDataResult == -1 )
 				{
 					DEBUG_ERR(( "STRREGEX bad function usage. Error: %s\n", tLastError ));
@@ -1326,7 +1326,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 	EXC_TRY("Verb");
 	int	index;
 	lpctstr pszKey = s.GetKey();
-	
+
 	ASSERT( pSrc );
 	CScriptObj * pRef = NULL;
 	if ( r_GetRef( pszKey, pRef ))
@@ -1412,10 +1412,10 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 					g_World.m_uidNew = (dword)0;
 					return false;
 				}
-				
+
 				if ( ppCmd[1] )
 					pItem->SetAmount(Exp_GetWVal(ppCmd[1]));
-				
+
 				if ( ppCmd[2] )
 				{
 					CUID uidEquipper = Exp_GetVal(ppCmd[2]);
@@ -1569,10 +1569,10 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 		}
 
 		if ( ch == '<' )	// recursive brackets
-		{			
+		{
 			if ( !( isalnum( pszResponse[i + 1] ) || pszResponse[i + 1] == '<' ) ) // ignore this.
 				continue;
-			
+
 			if (sm_iReentrant > 32 )
 			{
 				EXC_SET("reentrant limit");
@@ -1696,9 +1696,9 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 		ParseText( s.GetArgStr(), pSrc, 0, pArgs );
 
 
-	
+
 	if ( iType & 4 )		// FOR
-	{ 
+	{
 		int fCountDown = FALSE;
 		int iMin = 0;
 		int iMax = 0;
@@ -1706,7 +1706,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 		tchar * ppArgs[3];
 		size_t iQty = Str_ParseCmds( s.GetArgStr(), ppArgs, CountOf(ppArgs), ", " );
 		CSString sLoopVar = "_FOR";
-		
+
 		switch( iQty )
 		{
 		case 1:		// FOR x
@@ -1775,7 +1775,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 				{
 					EndContext = StartContext;
 					break;
-				} 
+				}
 				if (( iRet != TRIGRET_ENDIF ) && ( iRet != TRIGRET_CONTINUE ))
 					return( iRet );
 
@@ -1784,7 +1784,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 				else
 					EndContext = s.GetContext();
 				s.SeekContext( StartContext );
-			} 
+			}
 	}
 
 	if ( (iType & 1) || (iType & 2) )
@@ -1947,7 +1947,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 		tchar * ppArgs[1];
 
 		if (Str_ParseCmds(s.GetArgStr(), ppArgs, CountOf(ppArgs), " \t,") >= 1)
-		{			
+		{
 			char funcname[1024];
 			strcpy(funcname, ppArgs[0]);
 
@@ -1964,7 +1964,7 @@ toomanyloops:
 			g_Log.EventError("Terminating loop cycle since it seems being dead-locked (%d iterations already passed)\n", LoopsMade);
 	}
 
-	if ( EndContext.m_pOffset <= StartContext.m_pOffset )
+	if ( EndContext.m_stOffset <= StartContext.m_stOffset )
 	{
 		// just skip to the end.
 		TRIGRET_TYPE iRet = OnTriggerRun( s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult );
@@ -2300,14 +2300,14 @@ jump_in:
 					{
 						tchar * ppArgs[2];
 						size_t iArgQty = Str_ParseCmds(const_cast<tchar *>(s.GetArgRaw()), ppArgs, CountOf(ppArgs), " \t,");
-						
+
 						if ( iArgQty >= 1 )
 						{
 							TemporaryString porigValue;
 							strcpy(porigValue, ppArgs[0]);
 							tchar *tempPoint = porigValue;
 							ParseText( tempPoint, pSrc, 0, pArgs );
-							
+
 							CUID pCurUid = Exp_GetDWVal(tempPoint);
 							if ( pCurUid.IsValidUID() )
 							{
@@ -2315,7 +2315,7 @@ jump_in:
 								if ( pObj && pObj->IsContainer() )
 								{
 									CContainer * pContThis = dynamic_cast<CContainer *>(pObj);
-									
+
 									CScriptLineContext StartContext = s.GetContext();
 									CScriptLineContext EndContext = StartContext;
 									iRet = pContThis->OnGenericContTriggerForLoop(s, pSrc, pArgs, pResult, StartContext, EndContext, ppArgs[1] != NULL ? Exp_GetVal(ppArgs[1]) : 255);
@@ -2356,7 +2356,7 @@ jump_in:
 						{
 							lpctstr pszKey = s.GetArgRaw();
 							SKIP_SEPARATORS(pszKey);
-						
+
 							tchar * ppArgs[2];
 							TemporaryString ppParsed;
 
@@ -2397,7 +2397,7 @@ jump_in:
 				{
 					// Parse out any variables in it. (may act like a verb sometimes?)
 					EXC_SET("parsing");
-					if( strchr(s.GetKey(), '<') ) 
+					if( strchr(s.GetKey(), '<') )
 					{
 						EXC_SET("parsing <> in a key");
 						TemporaryString buf;
@@ -2560,7 +2560,7 @@ jump_in:
 						{
 							fRes = false;
 						}
-					} 
+					}
 					else if ( !strnicmp(s.GetKey(), "FullTrigger", 11 ) )
 					{
 						EXC_SET("FullTrigger");
@@ -2733,10 +2733,10 @@ CSFileObj::~CSFileObj()
 }
 
 void CSFileObj::SetDefaultMode(void)
-{ 
+{
 	ADDTOCALLSTACK("CSFileObj::SetDefaultMode");
-	bAppend = true; bCreate = false; 
-	bRead = true; bWrite = true; 
+	bAppend = true; bCreate = false;
+	bRead = true; bWrite = true;
 }
 
 tchar * CSFileObj::GetReadBuffer(bool bDelete = false)
@@ -2788,7 +2788,7 @@ bool CSFileObj::OnTick(){ return true; }
 int CSFileObj::FixWeirdness(){ return 0; }
 
 bool CSFileObj::r_LoadVal( CScript & s )
-{	
+{
 	ADDTOCALLSTACK("CSFileObj::r_LoadVal");
 	EXC_TRY("LoadVal");
 	lpctstr pszKey = s.GetKey();
@@ -2822,7 +2822,7 @@ bool CSFileObj::r_LoadVal( CScript & s )
 		else
 		{
 			g_Log.Event(LOGL_ERROR, "FILE (%s): Cannot set mode after file opening\n", static_cast<lpctstr>(sWrite->GetFilePath()));
-		}	
+		}
 		return false;
 	}
 
@@ -2845,9 +2845,9 @@ bool CSFileObj::r_LoadVal( CScript & s )
 
 				if ( !s.HasArgs() )
 					return false;
-					
+
 				CSString * ppArgs = this->GetWriteBuffer();
-				
+
 				if ( bLine )
 				{
 					ppArgs->Copy( s.GetArgStr() );
@@ -2870,7 +2870,7 @@ bool CSFileObj::r_LoadVal( CScript & s )
 					bSuccess = sWrite->Write(ppArgs->GetPtr(), 1);
 				else
 					bSuccess = sWrite->WriteString( ppArgs->GetPtr() );
-		
+
 				if ( !bSuccess )
 				{
 					g_Log.Event(LOGL_ERROR, "FILE: Failed writing to \"%s\".\n", static_cast<lpctstr>(sWrite->GetFilePath()));
@@ -2938,7 +2938,7 @@ bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc 
 			{
 				pszKey += strlen(sm_szLoadKeys[index]);
 				GETNONWHITESPACE( pszKey );
-				
+
 				tchar * ppCmd = Str_TrimWhitespace(const_cast<tchar *>(pszKey));
 				if ( !( ppCmd && strlen(ppCmd) ))
 					return false;
@@ -2961,7 +2961,7 @@ bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc 
 				sFileLine->Close();
 
 				sVal.FormatVal( iLines );
-				
+
 				delete sFileLine;
 			} break;
 
@@ -3057,7 +3057,7 @@ bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc 
 				if ( iLines == 0 )
 				{
 					while ( ! sWrite->IsEOF() )
-						sWrite->ReadString( ppArg, SCRIPT_MAX_LINE_LEN );	
+						sWrite->ReadString( ppArg, SCRIPT_MAX_LINE_LEN );
 				}
 				else
 				{
@@ -3271,7 +3271,7 @@ void CSFileObjContainer::ResizeContainer( size_t iNewRange )
 				delete pObjHolder;
 			}
 		}
-	} 
+	}
 	else
 	{
 		for ( int i = 0; i < howMuch; ++i )
@@ -3346,7 +3346,7 @@ bool CSFileObjContainer::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	ADDTOCALLSTACK("CSFileObjContainer::r_GetRef");
 	if ( !strnicmp("FIRSTUSED.",pszKey,10) )
 	{
-		pszKey += 10; 
+		pszKey += 10;
 
 		CSFileObj * pFirstUsed = NULL;
 		for ( std::vector<CSFileObj *>::iterator i = sFileList.begin(); i != sFileList.end(); ++i )
@@ -3358,10 +3358,10 @@ bool CSFileObjContainer::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 			}
 		}
 
-		if ( pFirstUsed != NULL ) 
-		{ 
-			pRef = pFirstUsed; 
-			return true; 
+		if ( pFirstUsed != NULL )
+		{
+			pRef = pFirstUsed;
+			return true;
 		}
 	}
 	else
@@ -3374,10 +3374,10 @@ bool CSFileObjContainer::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 
 		CSFileObj * pFile = sFileList.at(nNumber);
 
-		if ( pFile != NULL ) 
-		{ 
-			pRef = pFile; 
-			return true; 
+		if ( pFile != NULL )
+		{
+			pRef = pFile;
+			return true;
 		}
 	}
 
@@ -3422,7 +3422,7 @@ bool CSFileObjContainer::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
 
 	if ( !strnicmp("FIRSTUSED.",pszKey,10) )
 	{
-		pszKey += 10; 
+		pszKey += 10;
 
 		CSFileObj * pFirstUsed = NULL;
 		for ( std::vector<CSFileObj *>::iterator i = sFileList.begin(); i != sFileList.end(); ++i )
@@ -3434,8 +3434,8 @@ bool CSFileObjContainer::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
 			}
 		}
 
-		if ( pFirstUsed != NULL ) 
-		{ 
+		if ( pFirstUsed != NULL )
+		{
 			return static_cast<CScriptObj *>(pFirstUsed)->r_WriteVal(pszKey, sVal, pSrc);
 		}
 
@@ -3454,7 +3454,7 @@ bool CSFileObjContainer::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
 
 		CSFileObj * pFile = sFileList.at(nNumber);
 
-		if ( pFile != NULL ) 
+		if ( pFile != NULL )
 		{
 			CScriptObj * pObj = dynamic_cast<CScriptObj*>( pFile );
 			if (pObj != NULL)
@@ -3497,7 +3497,7 @@ bool CSFileObjContainer::r_Verb( CScript & s, CTextConsole * pSrc )
 
 	if ( !strnicmp("FIRSTUSED.",pszKey,10) )
 	{
-		pszKey += 10; 
+		pszKey += 10;
 
 		CSFileObj * pFirstUsed = NULL;
 		for ( std::vector<CSFileObj *>::iterator i = sFileList.begin(); i != sFileList.end(); ++i )
@@ -3531,8 +3531,8 @@ bool CSFileObjContainer::r_Verb( CScript & s, CTextConsole * pSrc )
 
 				CSFileObj * pFile = sFileList.at(nNumber);
 
-				if ( pFile != NULL ) 
-				{ 
+				if ( pFile != NULL )
+				{
 					CScriptObj* pObj = dynamic_cast<CScriptObj*>(pFile);
 					if (pObj != NULL)
 					{
@@ -3546,7 +3546,7 @@ bool CSFileObjContainer::r_Verb( CScript & s, CTextConsole * pSrc )
 		}
 
 		return( this->r_LoadVal( s ) );
-	}	
+	}
 
 	switch ( index )
 	{
@@ -3565,7 +3565,7 @@ bool CSFileObjContainer::r_Verb( CScript & s, CTextConsole * pSrc )
 				{
 					delete pObjVerb;
 					sFileList.at(nNumber) = new CSFileObj();
-				} 
+				}
 				else
 				{
 					pObjVerb->FlushAndClose();

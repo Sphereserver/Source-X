@@ -134,7 +134,7 @@ lpctstr const CResourceBase::sm_szResourceBlocks[RES_QTY] =	// static
 
 
 //*********************************************************
-// Resource Files 
+// Resource Files
 
 CResourceScript * CResourceBase::FindResourceFile( lpctstr pszPath )
 {
@@ -376,7 +376,7 @@ RESOURCE_ID CResourceBase::ResourceGetID( RES_TYPE restype, lpctstr & pszName )
 	// We are NOT creating a new resource. just looking up an existing one
 	// NOTE: Do not enforce the restype.
 	//		Just fill it in if we are not sure what the type is.
-	// NOTE: 
+	// NOTE:
 	//  Some restype's have private name spaces. (ie. RES_AREA)
 	// RETURN:
 	//  pszName is now set to be after the expression.
@@ -635,7 +635,7 @@ bool	CResourceDef::MakeResourceName()
 	*pszDef	= '_';
 	*(++pszDef)	= '\0';
 
-	
+
 	size_t iMax = g_Exp.m_VarDefs.GetCount();
 	int iVar = 1;
 	size_t iLen = strlen( pbuf );
@@ -717,7 +717,7 @@ bool	CRegionBase::MakeRegionName()
 	*pszDef	= '_';
 	*(++pszDef)	= '\0';
 
-	
+
 	size_t iMax = g_Cfg.m_RegionDefs.GetCount();
 	int iVar = 1;
 	size_t iLen = strlen( pbuf );
@@ -1072,10 +1072,10 @@ void CResourceLink::ScanSection( RES_TYPE restype )
 			{
 				m_pScript->ParseKeyLate();
 				iTrigger = FindTableSorted( m_pScript->GetArgRaw(), ppTable, iQty );
-	
+
 				if ( iTrigger < 0 )	// unknown triggers ?
 					iTrigger = XTRIG_UNKNOWN;
-				else 
+				else
 				{
 					TriglistAdd(m_pScript->GetArgRaw());
 					if ( HasTrigger(iTrigger))
@@ -1088,7 +1088,7 @@ void CResourceLink::ScanSection( RES_TYPE restype )
 			else
 				iTrigger = XTRIG_UNKNOWN;
 
-			SetTrigger(iTrigger); 
+			SetTrigger(iTrigger);
 		}
 	}
 }
@@ -1128,7 +1128,7 @@ CResourceScript *CResourceLink::GetLinkFile() const
 size_t CResourceLink::GetLinkOffset() const
 {
 	ADDTOCALLSTACK("CResourceLink::GetLinkOffset");
-	return m_Context.m_pOffset;
+	return m_Context.m_stOffset;
 }
 
 void CResourceLink::SetLink(CResourceScript *pScript)
@@ -1213,7 +1213,7 @@ bool CResourceLink::ResourceLock( CResourceLock &s )
 
 	// ret = -2 or -3
 	lpctstr pszName = GetResourceName();
-	DEBUG_ERR(("ResourceLock '%s':%d id=%s FAILED\n", static_cast<lpctstr>(s.GetFilePath()), m_Context.m_pOffset, pszName));
+	DEBUG_ERR(("ResourceLock '%s':%d id=%s FAILED\n", static_cast<lpctstr>(s.GetFilePath()), m_Context.m_stOffset, pszName));
 
 	return false;
 }
@@ -1259,15 +1259,13 @@ CResourceRef::~CResourceRef()
 CResourceRef& CResourceRef::operator=(const CResourceRef& other)
 {
 	if (this != &other)
-	{
 		SetRef(other.m_pLink);
-	}
 	return *this;
 }
 
 CResourceLink* CResourceRef::GetRef() const
 {
-	return(m_pLink);
+	return m_pLink;
 }
 
 void CResourceRef::SetRef( CResourceLink* pLink )
@@ -1283,7 +1281,7 @@ void CResourceRef::SetRef( CResourceLink* pLink )
 
 CResourceRef::operator CResourceLink*() const
 {
-	return( GetRef());
+	return GetRef();
 }
 
 //***************************************************************************
@@ -1384,7 +1382,7 @@ lpctstr CResourceRefArray::GetResourceName( size_t iIndex ) const
 	// look up the name of the fragment given it's index.
 	CResourceLink * pResourceLink = GetAt( iIndex );
 	ASSERT(pResourceLink);
-	return( pResourceLink->GetResourceName());
+	return pResourceLink->GetResourceName();
 }
 
 bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
@@ -1797,7 +1795,7 @@ CResourceQtyArray::CResourceQtyArray(lpctstr pszCmds)
 	m_mergeOnLoad = true;
 	Load(pszCmds);
 }
-	
+
 CResourceQtyArray& CResourceQtyArray::operator=(const CResourceQtyArray& other)
 {
 	if (this != &other)
@@ -1889,7 +1887,7 @@ size_t CResourceQtyArray::Load(lpctstr pszCmds)
 	ASSERT(pszCmds);
 	while ( *pszCmds )
 	{
-		if ( *pszCmds == '0' && 
+		if ( *pszCmds == '0' &&
 			( pszCmds[1] == '\0' || pszCmds[1] == ',' ))
 		{
 			RemoveAll();	// clear any previous stuff.
@@ -1907,7 +1905,7 @@ size_t CResourceQtyArray::Load(lpctstr pszCmds)
 				size_t i = FindResourceID( res.GetResourceID() );
 				if ( i != BadIndex() )
 				{
-					SetAt(i, res); 
+					SetAt(i, res);
 				}
 				else
 				{

@@ -7,6 +7,10 @@
 #ifndef _INC_CSSTRING_H
 #define _INC_CSSTRING_H
 
+#ifdef __MINGW32__
+	#include <cstdio>
+#endif // __MINGW32__
+
 #include <cstdarg>		// needed for va_list
 #include <cstring>
 #include "../common.h"

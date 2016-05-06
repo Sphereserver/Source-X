@@ -315,7 +315,7 @@ TRIGRET_TYPE CChar::OnCharTrigForMemTypeLoop( CScript &s, CTextConsole * pSrc, C
 			s.SeekContext( StartContext );
 		}
 	}
-	if ( EndContext.m_pOffset <= StartContext.m_pOffset )
+	if ( EndContext.m_stOffset <= StartContext.m_stOffset )
 	{
 		// just skip to the end.
 		TRIGRET_TYPE iRet = OnTriggerRun( s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult );

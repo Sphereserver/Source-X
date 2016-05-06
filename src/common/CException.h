@@ -184,7 +184,7 @@ public:
 	}
 
 #define EXC_DEBUGSUB_START if ( bCATCHExceptSub ) { try {
-	
+
 #define EXC_DEBUGSUB_END \
 	/*StackDebugInformation::printStackTrace();*/ \
 	} catch ( ... ) { g_Log.EventError("Exception adding debug message on the exception.\n"); CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); }}
@@ -203,15 +203,15 @@ public:
 	#define EXC_CATCH }
 	#define EXC_TRYSUB(a) {
 	#define EXC_CATCHSUB(a) }
-	
-	#define EXC_DEBUG_START goto ENDEXCEPTIONSDEBUGBLOCK; \
+
+	#define EXC_DEBUG_START if (0) \
 	{
-	#define EXC_DEBUG_END } \
-	ENDEXCEPTIONSDEBUGBLOCK:
-	#define EXC_DEBUGSUB_START	goto ENDEXCEPTIONSDEBUGSUBBLOCK; \
+	#define EXC_DEBUG_END }
+
+	#define EXC_DEBUGSUB_START	if (0) \
 	{
-	#define EXC_DEBUGSUB_END } \
-	ENDEXCEPTIONSDEBUGSUBBLOCK:
+	#define EXC_DEBUGSUB_END }
+
 	#define EXC_ADD_SCRIPT
 	#define EXC_ADD_SCRIPTSRC
 	#define EXC_ADD_KEYRET(a)

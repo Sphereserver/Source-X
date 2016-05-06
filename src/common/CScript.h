@@ -31,7 +31,7 @@
 struct CScriptLineContext
 {
 public:
-	size_t m_pOffset;
+	size_t m_stOffset;
 	int m_iLineNum;		// for debug purposes if there is an error.
 public:
 	void Init();

@@ -32,10 +32,14 @@
 // b = 1-based index of arguments
 // (note: add 1 to index for non-static class methods because 'this' argument
 // is inserted in position 1)
-#ifdef __GNUC__
-	#define __printfargs(a,b) __attribute__ ((format(printf, a, b)))
-#else
+#ifdef _MSC_VER
 	#define __printfargs(a,b)
+#else
+	#ifdef _WIN32
+		#define __printfargs(a,b) __attribute__ ((format(gnu_printf, a, b)))
+	#else
+		#define __printfargs(a,b) __attribute__ ((format(printf, a, b)))
+	#endif
 #endif
 
 #ifdef UNICODE

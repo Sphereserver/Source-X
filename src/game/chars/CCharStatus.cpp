@@ -226,7 +226,7 @@ TRIGRET_TYPE CChar::OnCharTrigForLayerLoop( CScript &s, CTextConsole *pSrc, CScr
 			s.SeekContext(StartContext);
 		}
 	}
-	if ( EndContext.m_pOffset <= StartContext.m_pOffset )
+	if ( EndContext.m_stOffset <= StartContext.m_stOffset )
 	{
 		// just skip to the end.
 		TRIGRET_TYPE iRet = OnTriggerRun(s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult);
@@ -244,7 +244,7 @@ int CChar::GetWeightLoadPercent( int iWeight ) const
 	// Get a percent of load.
 	if ( IsPriv(PRIV_GM) )
 		return 1;
-	
+
 	int	MaxCarry = g_Cfg.Calc_MaxCarryWeight(this);
 	if ( !MaxCarry )
 		return 1000;	// suppose self extra-overloaded
@@ -720,7 +720,7 @@ CItem *CChar::GetSpellbook(SPELL_TYPE iSpell) const	// Retrieves a spellbook fro
 		if ( (iSpell > pBook->m_itSpellbook.m_baseid) && (iSpell - (pBook->m_itSpellbook.m_baseid + 1) < 96) )
 		{
 			if ( pBook->IsSpellInBook(iSpell) )	//We found a book with this same spell, nothing more to do.
-				return pBook;	
+				return pBook;
 			else
 				pReturn = pBook;	// We did not find the spell, but this book is of the same school ... we'll return this book if none better is found (NOTE: some book must be returned or the code will think that we don't have a book).
 		}
@@ -737,7 +737,7 @@ CItem *CChar::GetSpellbook(SPELL_TYPE iSpell) const	// Retrieves a spellbook fro
 			if ( (iSpell > pBook->m_itSpellbook.m_baseid) && (iSpell - (pBook->m_itSpellbook.m_baseid + 1) < 96) )
 			{
 				if ( pBook->IsSpellInBook(iSpell) )	//We found a book with this same spell, nothing more to do.
-					return pBook;	
+					return pBook;
 				else
 					pReturn = pBook;	// We did not find the spell, but this book is of the same school ... we'll return this book if none better is found (NOTE: some book must be returned or the code will think that we don't have a book).
 			}
@@ -793,7 +793,7 @@ CItem *CChar::GetSpellbookRandom(SPELL_TYPE iSpell) const	// Retrieves a spellbo
 				pBooks[++count] = pBook;
 		}
 	}
-	GetSpellbookExtra(pBooks, count);	// add extra spellbooks to the list 
+	GetSpellbookExtra(pBooks, count);	// add extra spellbooks to the list
 	if ( count > 0 )
 	{
 		int rand = Calc_GetRandVal2(1, count);
@@ -1177,7 +1177,7 @@ bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist
 	ADDTOCALLSTACK("CChar::CanSeeLOS");
 	if ( (m_pPlayer && (g_Cfg.m_iAdvancedLos & ADVANCEDLOS_PLAYER)) || (m_pNPC && (g_Cfg.m_iAdvancedLos & ADVANCEDLOS_NPC)) )
 		return CanSeeLOS_New(ptDst, pptBlock, iMaxDist, wFlags);
-	
+
 	// Max distance of iMaxDist
 	// Line of sight check
 	// NOTE: if not blocked. pptBlock is undefined.
@@ -1278,13 +1278,13 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 		WARNLOS(("GM Pass\n"));
 		return true;
 	}
-		
+
 	CPointMap ptSrc = GetTopPoint();
 	CPointMap ptNow(ptSrc);
 
 	if ( ptSrc.m_map != ptDst.m_map )	// Different map
 		return this->CanSeeLOS_New_Failed(pptBlock, ptNow);
-		
+
 	if ( ptSrc == ptDst )	// Same point ^^
 		return true;
 
@@ -1302,23 +1302,23 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 		dist3d = sqrt(static_cast<double>(dist2d*dist2d + dz*dz));
 	else
 		dist3d = dist2d;
-	
+
 	if ( APPROX(dist2d) > static_cast<double>(iMaxDist) )
 	{
 		WARNLOS(("( APPROX(dist2d)(%f) > ((double)iMaxDist)(%f) ) --> NOLOS\n", APPROX(dist2d), (double)iMaxDist));
 		return CanSeeLOS_New_Failed(pptBlock, ptNow);
 	}
-	
+
 	double dFactorX, dFactorY, dFactorZ;
 	dFactorX = dx / dist3d;
 	dFactorY = dy / dist3d;
 	dFactorZ = dz / dist3d;
-	
+
 	double nPx, nPy, nPz;
 	nPx = ptSrc.m_x;
 	nPy = ptSrc.m_y;
 	nPz = ptSrc.m_z;
-	
+
 	std::vector<CPointMap> path;
 	for (;;)
 	{
@@ -1348,7 +1348,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 		else
 			break;
 	}
-	
+
 	if ( path.size() )
 	{
 		if ( path.at(path.size() - 1) != ptDst )
@@ -1359,11 +1359,11 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 		path.clear();
 		return CanSeeLOS_New_Failed(pptBlock, ptNow);
 	}
-	
+
 	WARNLOS(("Path calculated %d\n", path.size()));
 	// Ok now we should loop through all the points and checking for maptile, staticx, items, multis.
 	// If something is in the way and it has the wrong flags LOS return false
-	
+
 	const CServerMapBlock *pBlock			= NULL;		// Block of the map (for statics)
 	const CUOStaticItemRec *pStatic			= NULL;		// Statics iterator (based on SphereMapBlock)
 	const CSphereMulti *pMulti 				= NULL;		// Multi Def (multi check)
@@ -1382,10 +1382,10 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 
 	CRegionBase *pSrcRegion = ptSrc.GetRegion(REGION_TYPE_AREA|REGION_TYPE_ROOM|REGION_TYPE_MULTI);
 	CRegionBase *pNowRegion = NULL;
-	
-	int lp_x = 0, lp_y = 0; 
+
+	int lp_x = 0, lp_y = 0;
 	char min_z = 0, max_z = 0;
-	
+
 	for (size_t i = 0; i < path.size(); lp_x = ptNow.m_x, lp_y = ptNow.m_y, pItemDef = NULL, pStatic = NULL, pMulti = NULL, pMultiItem = NULL, min_z = 0, max_z = 0, ++i )
 	{
 		ptNow = path.at(i);
@@ -1565,10 +1565,10 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 				}
 			}
 		}
-		
+
 		if ( !bPath )
 			break;
-		
+
 		// --------- In game items ----------
 		if ( !(flags & LOS_NB_DYNAMIC) )
 		{
@@ -1659,9 +1659,9 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 
 		if ( !bPath )
 			break;
-		
+
 		// ----------- Multis ---------------
-		
+
 		if ( !(flags & LOS_NB_MULTI) )
 		{
 			if ( !((flags & LOS_NB_LOCAL_MULTI) && (pSrcRegion == pNowRegion)) )

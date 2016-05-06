@@ -143,7 +143,7 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 
 	EXC_CATCH;
 	EXC_DEBUG_START;
-	g_Log.EventDebug("stat '%d', val '%u'\n", i, d);
+	g_Log.EventDebug("stat '%d', val '" PRIuSIZE_T "'\n", i, d);
 	EXC_DEBUG_END;
 	return 0;
 }

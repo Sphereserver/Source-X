@@ -44,7 +44,6 @@ function (toolchain_exe_stuff)
 	TARGET_LINK_LIBRARIES ( spheresvr
 		libmysql
 		ws2_32
-		wsock32
 	)
 
 	IF (CMAKE_CL_64)
@@ -56,4 +55,46 @@ function (toolchain_exe_stuff)
 		# Architecture defines
 		TARGET_COMPILE_DEFINITIONS ( spheresvr 		PUBLIC _32B )
 	ENDIF (CMAKE_CL_64)
+
+
+	TARGET_COMPILE_DEFINITIONS ( spheresvr
+
+		PUBLIC	_MTNETWORK
+	# GIT defs
+		PUBLIC	_GITVERSION
+	# Temporary setting _CRT_SECURE_NO_WARNINGS to do not spamm so much in the build proccess while we get rid of -W4 warnings and, after it, -Wall.
+		PUBLIC	_CRT_SECURE_NO_WARNINGS
+	# Enable advanced exceptions catching. Consumes some more resources, but is very useful for debug
+	#  on a running environment. Also it makes sphere more stable since exceptions are local.
+		PUBLIC	_EXCEPTIONS_DEBUG
+	# _WIN32 is always defined, even on 64 bits. Keeping it for compatibility with external code and libraries.
+		PUBLIC	_WIN32
+	# Removing WINSOCK warnings until the code gets updated or reviewed.
+		PUBLIC	_WINSOCK_DEPRECATED_NO_WARNINGS
+
+	# Others
+		PUBLIC $<$<OR:$<CONFIG:Release>,$<CONFIG:Nightly>>:	THREAD_TRACK_CALLSTACK>
+		PUBLIC $<$<OR:$<CONFIG:Release>,$<CONFIG:Nightly>>:	NDEBUG>
+
+		PUBLIC $<$<CONFIG:Debug>:	_DEBUG>
+		PUBLIC $<$<CONFIG:Debug>:	_PACKETDUMP>
+		PUBLIC $<$<CONFIG:Debug>:	_TESTEXCEPTION>
+		PUBLIC $<$<CONFIG:Debug>:	DEBUG_CRYPT_MSGS>
+
+		PUBLIC $<$<CONFIG:Nightly>:	_NIGHTLYBUILD>
+	)
+
+	# Custom output directory
+	IF (CMAKE_CL_64)
+		SET(OUTDIR "${CMAKE_BINARY_DIR}/bin64/")
+	ELSE (CMAKE_CL_64)
+		SET(OUTDIR "${CMAKE_BINARY_DIR}/bin/")
+	ENDIF (CMAKE_CL_64)
+	SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${OUTDIR})
+	SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_RELEASE "${OUTDIR}/Release")
+	SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_DEBUG "${OUTDIR}/Debug")
+	SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_NIGHTLY "${OUTDIR}/Nightly")
+
+	# Custom .vcxproj settings
+	CONFIGURE_FILE("cmake/spheresvr.vcxproj.user.in" "${CMAKE_BINARY_DIR}/spheresvr.vcxproj.user" @ONLY)
 endfunction()

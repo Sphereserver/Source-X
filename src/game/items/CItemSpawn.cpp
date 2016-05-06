@@ -192,7 +192,7 @@ void CItemSpawn::GenerateChar(CResourceDef *pDef)
 		// If this fails, try placing the char ON the spawn
 		if (!pChar->MoveTo(pt))
 		{
-			DEBUG_ERR(("Spawner UID:0%lx is unable to place a character inside the world, deleted the character", (dword)(this->GetUID())));
+			DEBUG_ERR(("Spawner UID:0%" PRIx32 " is unable to place a character inside the world, deleted the character", (dword)this->GetUID()));
 			pChar->Delete();
 			return;
 		}
@@ -382,7 +382,7 @@ CCharBase *CItemSpawn::SetTrackID()
 	}
 	if ( pCharDef )		// They must want it to look like this.
 		SetDispID(pCharDef ? pCharDef->m_trackID : ITEMID_TRACK_WISP);
-		
+
 	return pCharDef;
 }
 

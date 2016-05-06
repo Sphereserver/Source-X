@@ -187,7 +187,7 @@ TRIGRET_TYPE CContainer::OnContTriggerForLoop( CScript &s, CTextConsole *pSrc, C
 			}
 		}
 	}
-	if ( EndContext.m_pOffset <= StartContext.m_pOffset )
+	if ( EndContext.m_stOffset <= StartContext.m_stOffset )
 	{
 		CScriptObj *pScript = dynamic_cast<CScriptObj *>(this);
 		TRIGRET_TYPE iRet = pScript->OnTriggerRun(s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult);
@@ -235,7 +235,7 @@ TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop( CScript &s, CTextConsole *
 			EndContext = s.GetContext();
 		}
 	}
-	if ( EndContext.m_pOffset <= StartContext.m_pOffset )
+	if ( EndContext.m_stOffset <= StartContext.m_stOffset )
 	{
 		CScriptObj *pScript = dynamic_cast<CScriptObj *>(this);
 		TRIGRET_TYPE iRet = pScript->OnTriggerRun(s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult);

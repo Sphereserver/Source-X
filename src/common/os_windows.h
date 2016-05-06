@@ -16,7 +16,9 @@
 #undef FD_SETSIZE
 #define FD_SETSIZE 1024		// for max of n users ! default = 64	(FD: file descriptor)
 
-#define NOMINMAX			// we don't want to have windows min and max macros, we have our minimum and maximum
+#ifndef NOMINMAX
+	#define NOMINMAX			// we don't want to have windows min and max macros, we have our minimum and maximum
+#endif
 #ifndef WIN32_LEAN_AND_MEAN
 	#define WIN32_LEAN_AND_MEAN	// include just windows.h without the other winapi headers, we'll add them manually when needed
 #endif

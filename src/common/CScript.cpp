@@ -11,13 +11,13 @@
 
 void CScriptLineContext::Init()
 {
-	m_pOffset = (size_t)-1;
+	m_stOffset = (size_t)-1;
 	m_iLineNum = -1;
 }
 
 bool CScriptLineContext::IsValid() const
 {
-	return ( m_pOffset >= 0 );
+	return ( m_stOffset >= 0 );
 }
 
 CScriptLineContext::CScriptLineContext()
@@ -265,7 +265,7 @@ tchar * CScriptKeyAlloc::GetKeyBuffer()
 bool CScriptKeyAlloc::ParseKey( lpctstr pszKey )
 {
 	ADDTOCALLSTACK("CScriptKeyAlloc::ParseKey");
-	// Skip leading white space 
+	// Skip leading white space
 	if ( ! pszKey )
 	{
 		GetKeyBufferRaw(0);
@@ -407,7 +407,7 @@ bool CScript::Open( lpctstr pszFilename, uint wFlags )
 	if ( pszTitle == NULL || pszTitle[0] == '\0' )
 		return false;
 
-	lpctstr pszExt = GetFilesExt( GetFilePath() ); 
+	lpctstr pszExt = GetFilesExt( GetFilePath() );
 	if ( pszExt == NULL )
 	{
 		tchar szTemp[ _MAX_PATH ];
@@ -701,14 +701,14 @@ void CScript::CloseForce()
 bool CScript::SeekContext( CScriptLineContext LineContext )
 {
 	m_iLineNum = LineContext.m_iLineNum;
-	return Seek( LineContext.m_pOffset, SEEK_SET ) == (size_t)(LineContext.m_pOffset);
+	return Seek( LineContext.m_stOffset, SEEK_SET ) == (size_t)(LineContext.m_stOffset);
 }
 
 CScriptLineContext CScript::GetContext() const
 {
 	CScriptLineContext LineContext;
 	LineContext.m_iLineNum = m_iLineNum;
-	LineContext.m_pOffset = GetPosition();
+	LineContext.m_stOffset = GetPosition();
 	return ( LineContext );
 }
 

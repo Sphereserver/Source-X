@@ -6,7 +6,7 @@
 #include "UnixTerminal.h"
 
 #ifndef _USECURSES
-	#include <stdio.h>
+	#include <cstdio>
 	#include <unistd.h>
 	#include <sys/time.h>
 #endif

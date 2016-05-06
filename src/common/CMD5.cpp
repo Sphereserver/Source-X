@@ -1,7 +1,7 @@
 
 #include <algorithm>
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include "CMD5.h"
 
 CMD5::CMD5()
@@ -169,7 +169,7 @@ void CMD5::update( const uchar *data, uint length )
 		}
 
 		// We have enough data to clear our temporary buffer
-		memcpy( ptrInput, data, temp );		
+		memcpy( ptrInput, data, temp );
 		byteReverse( m_input, 16 );
 		update();
 
@@ -200,7 +200,7 @@ void CMD5::finalize()
 	uint count = ( m_bits[0] >> 3 ) & 0x3F;
 
 	uchar *ptrInput = &m_input[count];
-	
+
 	// Set the first byte of the padding to 0x80
 	*ptrInput++ = 0x80;
 

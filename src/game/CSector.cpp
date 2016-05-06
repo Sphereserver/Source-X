@@ -347,7 +347,7 @@ bool CSector::v_AllChars( CScript & s, CTextConsole * pSrc )
 	CScript	script(s.GetArgStr());
 	CChar * pChar = NULL;
 	bool fRet = false;
-	
+
 	// Loop through all the characters in m_Chars_Active.
 	// We should start at the end incase some are removed during the loop.
 	size_t i = m_Chars_Active.GetCount();
@@ -371,7 +371,7 @@ bool CSector::v_AllCharsIdle( CScript & s, CTextConsole * pSrc )
 	CScript	script(s.GetArgStr());
 	CChar * pChar = NULL;
 	bool fRet = false;
-	
+
 	// Loop through all the characters in m_Chars_Disconnect.
 	// We should start at the end incase some are removed during the loop.
 	size_t i = m_Chars_Disconnect.GetCount();
@@ -411,7 +411,7 @@ bool CSector::v_AllItems( CScript & s, CTextConsole * pSrc )
 		// Execute the verb on the item
 		fRet |= pItem->r_Verb(script, pSrc);
 	}
-	
+
 	// Loop through all the items in m_Items_Inert.
 	// We should start at the end incase items are removed during the loop.
 	i = m_Items_Inert.GetCount();
@@ -1158,9 +1158,9 @@ void CSector::OnTick(int iPulseCount)
 
 		EXC_DEBUGSUB_START;
 		CPointMap pt = GetBasePoint();
-		g_Log.EventError("#1 item 0%x '%s' [timer=%" PRId64 ", type=%" PRId64 "]\n", (dword)(pItem->GetUID()), pItem->GetName(), pItem->GetTimerAdjusted(), (int)(pItem->GetType()));
+		g_Log.EventError("#1 item 0%x '%s' [timer=%" PRId64 ", type=%" PRId32 "]\n", (dword)pItem->GetUID(), pItem->GetName(), pItem->GetTimerAdjusted(), (int)pItem->GetType());
 		g_Log.EventError("#1 sector #%d [%d,%d,%d,%d]\n", GetIndex(),  pt.m_x, pt.m_y, pt.m_z, pt.m_map);
-		
+
 		EXC_DEBUGSUB_END;
 #else
 		}

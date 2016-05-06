@@ -185,7 +185,7 @@ PacketCharacterStatus::PacketCharacterStatus(const CClient* target, CChar* other
 			writeInt32(other->GetPackSafe()->ContentCount(RESOURCE_ID(RES_TYPEDEF,IT_GOLD)));
 		else
 			writeInt32(other->ContentCount(RESOURCE_ID(RES_TYPEDEF,IT_GOLD)));
-		
+
 		if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 			writeInt16((word)(other->GetDefNum("RESPHYSICAL", true, true)));
 		else
@@ -225,7 +225,7 @@ PacketCharacterStatus::PacketCharacterStatus(const CClient* target, CChar* other
 
 		if (version >= 2) // T2A attributes
 		{
-			ushort statcap = other->Stat_GetLimit(STAT_QTY);
+			short statcap = other->Stat_GetLimit(STAT_QTY);
 			if (statcap < 0) statcap = 0;
 
 			writeInt16(statcap);
@@ -459,7 +459,7 @@ void PacketItemWorld::adjustItemData(const CClient* target, CItem* item, ITEMID_
 			if (charDefinition->GetResDispDnHue() != HUE_DEFAULT)
 				hue = charDefinition->GetResDispDnHue();
 		}
-		
+
 		// allow HUE_UNDERWEAR colours only on corpses
 		if ((hue & HUE_MASK_HI) > HUE_QTY)
 			hue &= HUE_MASK_LO | HUE_UNDERWEAR | HUE_TRANSLUCENT;
@@ -520,7 +520,7 @@ PacketPlayerStart::PacketPlayerStart(const CClient* target) : PacketSend(XCMD_St
 
 	const CChar* character = target->GetChar();
 	const CPointMap& pt = character->GetTopPoint();
-	
+
 	writeInt32(character->GetUID());
 	writeInt32(0);
 	writeInt16((word)(character->GetDispID()));
@@ -558,7 +558,7 @@ PacketMessageASCII::PacketMessageASCII(const CClient* target, lpctstr pszText, c
 		writeInt32(0xFFFFFFFF);
 	else
 		writeInt32(source->GetUID());
-	
+
 	if (source == NULL || source->IsChar() == false)
 	{
 		writeInt16(0xFFFF);
@@ -569,7 +569,7 @@ PacketMessageASCII::PacketMessageASCII(const CClient* target, lpctstr pszText, c
 		ASSERT(sourceCharacter);
 		writeInt16((word)(sourceCharacter->GetDispID()));
 	}
-	
+
 	writeByte((byte)(mode));
 	writeInt16((word)(hue));
 	writeInt16((word)(font));
@@ -849,7 +849,7 @@ PacketItemContainer::PacketItemContainer(const CItem* spellbook, const CSpellDef
 void PacketItemContainer::completeForTarget(const CClient* target, const CItem* spellbook)
 {
 	ADDTOCALLSTACK("PacketItemContainer::completeForTarget");
-	
+
 	bool shouldIncludeGrid = (target->GetNetState()->isClientVersion(MINCLIVER_ITEMGRID) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced());
 
 	if (getLength() >= 20)
@@ -1306,7 +1306,7 @@ PacketQueryClient::PacketQueryClient(CClient* target, byte bCmd) : PacketSend(XC
             if (length - (count * 7) > 0)
             {
                 count++;
-                padding = (count * 7) - length; 
+                padding = (count * 7) - length;
             }
 
 			writeInt32(0);
@@ -1326,7 +1326,7 @@ PacketQueryClient::PacketQueryClient(CClient* target, byte bCmd) : PacketSend(XC
 
             for (int i = 0; i < padding; i++)
                 writeByte(0);
-			
+
 		}
 		case 0x02:
 		{
@@ -1642,7 +1642,7 @@ PacketAddTarget::PacketAddTarget(const CClient* target, PacketAddTarget::TargetT
 	writeByte((byte)type);
 	writeInt32(context);
 	writeByte((byte)flags);
-	
+
 	writeInt32(0);
 	writeInt32(0);
 	writeInt16(0);
@@ -1734,7 +1734,7 @@ void PacketTradeAction::prepareContainerOpen(const CChar *character, const CItem
 	writeBool(true);
 	writeStringFixedASCII(character->GetName(), 30);
 }
-	
+
 void PacketTradeAction::prepareReadyChange(const CItemContainer *container1, const CItemContainer *container2)
 {
 	ADDTOCALLSTACK("PacketTradeAction::prepareReadyChange");
@@ -2406,7 +2406,7 @@ PacketPaperdoll::PacketPaperdoll(const CClient* target, const CChar* character) 
 			len = sprintf(text, "%s [%s], %s", character->Noto_GetTitle(), guildMember->GetParentStone()->GetAbbrev(),
 							guildMember->GetTitle()[0]? guildMember->GetTitle() : character->GetTradeTitle());
 		}
-		
+
 		if (len <= 0)
 		{
 			const char *title = character->GetTradeTitle();
@@ -3245,7 +3245,7 @@ PacketMessageUNICODE::PacketMessageUNICODE(const CClient* target, const nword* p
 		writeInt32(0xFFFFFFFF);
 	else
 		writeInt32(source->GetUID());
-	
+
 	if (source == NULL || source->IsChar() == false)
 	{
 		writeInt16(0xFFFF);
@@ -3256,7 +3256,7 @@ PacketMessageUNICODE::PacketMessageUNICODE(const CClient* target, const nword* p
 		ASSERT(sourceCharacter);
 		writeInt16((word)(sourceCharacter->GetDispID()));
 	}
-	
+
 	writeByte((byte)(mode));
 	writeInt16((word)(hue));
 	writeInt16((word)(font));
@@ -3311,7 +3311,7 @@ PacketGumpDialog::PacketGumpDialog(int x, int y, CObjBase* object, dword context
 }
 
 void PacketGumpDialog::writeControls(const CClient* target, const CSString* controls, size_t controlCount, const CSString* texts, size_t textCount)
-{	
+{
 	ADDTOCALLSTACK("PacketGumpDialog::writeControls");
 
 	const NetState* net = target->GetNetState();
@@ -3378,7 +3378,7 @@ void PacketGumpDialog::writeCompressedControls(const CSString* controls, size_t 
 		}
 
 		size_t textsLength = getPosition() - textsPosition;
-		
+
 		z_uLong compressLength = z_compressBound((z_uLong)textsLength);
 		byte* compressBuffer = new byte[compressLength];
 
@@ -3544,7 +3544,7 @@ PacketEnableFeatures::PacketEnableFeatures(const CClient* target, dword flags) :
 	ASSERT(account != NULL);
 	dword tmVer = (dword)(account->m_TagDefs.GetKeyNum("clientversion"));
 	dword tmVerReported = (dword)(account->m_TagDefs.GetKeyNum("reportedcliver"));
-	
+
 	// since 6.0.14.2, feature flags are 4 bytes instead of 2.
 	if (tmVer >= MINCLIVER_EXTRAFEATURES || tmVerReported >= MINCLIVER_EXTRAFEATURES)
 		writeInt32(flags);
@@ -3573,7 +3573,7 @@ PacketArrowQuest::PacketArrowQuest(const CClient* target, int x, int y, int id) 
 
 	if (target->GetNetState()->isClientVersion(MINCLIVER_HS) || target->GetNetState()->isClientEnhanced())
 		writeInt32(id);
-	
+
 	trim();
 	push(target);
 }
@@ -3734,7 +3734,7 @@ PacketPartyInvite::PacketPartyInvite(const CClient* target, const CChar* inviter
 	ADDTOCALLSTACK("PacketPartyInvite::PacketPartyInvite");
 
 	writeInt32(inviter->GetUID());
-	
+
 	push(target);
 }
 
@@ -4345,12 +4345,12 @@ PacketPropertyList::PacketPropertyList(const CObjBase* object, dword version, co
 	writeInt32(object->GetUID());
 	writeInt16(0);
 	writeInt32(version);
-	
+
 	for (size_t x = 0; x < data->GetCount(); x++)
 	{
 		const CClientTooltip* tipEntry = data->GetAt(x);
 		size_t tipLength = strlen(tipEntry->m_args);
-		
+
 		writeInt32(tipEntry->m_clilocid);
 		writeInt16((word)(tipLength * sizeof(wchar)));
 		writeStringFixedUNICODE(tipEntry->m_args, tipLength);
@@ -4909,7 +4909,7 @@ PacketMoveShip::PacketMoveShip(const CClient* target, const CItemShip* ship, COb
 	{
 		const CObjBase* object = objects[i];
 		const CPointMap& objectLocation = object->GetTopPoint();
-		
+
 		writeInt32(object->GetUID());
 		writeInt16(objectLocation.m_x);
 		writeInt16(objectLocation.m_y);

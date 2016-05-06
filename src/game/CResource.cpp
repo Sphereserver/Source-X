@@ -1395,20 +1395,20 @@ bool CResource::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 
 			if ( !strnicmp( pszCmd, "COUNT", 5 ))
 			{
-				sVal.FormatSTVal((size_t)(m_Functions.GetCount()));
+				sVal.FormatSTVal(m_Functions.GetCount());
 				return true;
 			}
 			else if ( m_Functions.ContainsKey(pszCmd) )
 			{
-				sVal.FormatVal((int)(GetPrivCommandLevel(pszCmd)));
+				sVal.FormatVal((int)GetPrivCommandLevel(pszCmd));
 				return true;
 			}
 
-			size_t iNumber = Exp_GetVal(pszCmd);
+			int iNumber = Exp_GetVal(pszCmd);
 			SKIP_SEPARATORS(pszCmd);
 			sVal.FormatVal(0);
 
-			if (iNumber < 0 || iNumber >= m_Functions.GetCount()) //invalid index can potentially crash the server, this check is strongly needed
+			if (iNumber < 0 || iNumber >= (int)m_Functions.GetCount()) //invalid index can potentially crash the server, this check is strongly needed
 			{
 				g_Log.EventError("Invalid command index %d\n",iNumber);
 				return false;
@@ -1465,7 +1465,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 				{
 					if ( iNumber == x )
 					{
-						return( pStone->r_WriteVal(pszCmd, sVal, pSrc) );
+						return pStone->r_WriteVal(pszCmd, sVal, pSrc);
 					}
 					x++;
 				}
@@ -1473,7 +1473,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 				{
 					if ( iNumber == x )
 					{
-						return( pStone->r_WriteVal(pszCmd, sVal, pSrc) );
+						return pStone->r_WriteVal(pszCmd, sVal, pSrc) ;
 					}
 					x++;
 				}

@@ -301,7 +301,7 @@ void CServer::ListClients( CTextConsole *pConsole ) const
 			if ( pCharCmd && !pCharCmd->CanDisturb(pChar) )
 				continue;
 
-			sprintf(tmpMsg, "%lx:Acc%c'%s', Char='%s' (IP: %s)\n", pClient->GetSocketID(), chRank, pAcc->GetName(), pChar->GetName(), pClient->GetPeerStr());
+			sprintf(tmpMsg, "%" PRIx32 ":Acc%c'%s', Char='%s' (IP: %s)\n", pClient->GetSocketID(), chRank, pAcc->GetName(), pChar->GetName(), pClient->GetPeerStr());
 		}
 		else
 		{
@@ -321,7 +321,7 @@ void CServer::ListClients( CTextConsole *pConsole ) const
 					break;
 			}
 
-			sprintf(tmpMsg, "%lx:Acc%c'%s' (IP: %s) %s\n", pClient->GetSocketID(), chRank, pAcc ? pAcc->GetName() : "<NA>", pClient->GetPeerStr(), pszState);
+			sprintf(tmpMsg, "%" PRIx32 ":Acc%c'%s' (IP: %s) %s\n", pClient->GetSocketID(), chRank, pAcc ? pAcc->GetName() : "<NA>", pClient->GetPeerStr(), pszState);
 		}
 
 		// If we have many clients, SCRIPT_MAX_LINE_LEN may be too short ;) (matex)
@@ -370,7 +370,7 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 				"# = Immediate Save world (## to save both world and statics)\n"
 				"A = Accounts file update\n"
 				"B message = Broadcast a message\n"
-				"C = Clients List (%u)\n"
+				"C = Clients List (%" PRIuSIZE_T ")\n"
 				"D = Dump data to external file (DA to dump areas)\n"
 				"E = Clear internal variables (like script profile)\n"
 				"G = Garbage collection\n"
@@ -520,8 +520,8 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 				if ( pSrc != this ) // not from console
 				{
 					pSrc->SysMessage("Not allowed to use 'r' command via telnet. Use 'resync' instead.\n");
-				} 
-				else 
+				}
+				else
 				{
 					if ( !m_fResyncPause && g_World.IsSaving() )
 						goto do_saving;
@@ -541,7 +541,7 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 				{
 					IThread * thrCurrent = ThreadHolder::getThreadAt(iThreads);
 					if ( thrCurrent != NULL )
-						pSrc->SysMessagef("%" PRIuSIZE_T " - Id: %u, Priority: %d, Name: %s.\n", iThreads + 1, thrCurrent->getId(), 
+						pSrc->SysMessagef("%" PRIuSIZE_T " - Id: %u, Priority: %" PRIuSIZE_T ", Name: %s.\n", iThreads + 1, thrCurrent->getId(),
 											thrCurrent->getPriority(), thrCurrent->getName() );
 				}
 			} break;
@@ -636,7 +636,7 @@ longcommand:
 	if ((( len > 1 ) && ( sText[1] != ' ' )) || ( low == 'b' ))
 	{
 		lpctstr	pszText = sText;
-		
+
 		if ( !strnicmp(pszText, "strip", 5) || !strnicmp(pszText, "tngstrip", 8))
 		{
 			size_t			i = 0;
@@ -661,9 +661,9 @@ longcommand:
 				strcpy(z, dirname);
 				strcat(z, "sphere_strip_tng" SPHERE_SCRIPT);
 				pSrc->SysMessagef("StripFile is %s.\n", z);
-			
+
 				f1 = fopen(z, "w");
-			
+
 				if ( !f1 )
 				{
 					pSrc->SysMessagef("Cannot open file %s for writing.\n", z);
@@ -715,9 +715,9 @@ longcommand:
 				strcpy(z, dirname);
 				strcat(z, "sphere_strip_axis" SPHERE_SCRIPT);
 				pSrc->SysMessagef("StripFile is %s.\n", z);
-			
+
 				f1 = fopen(z, "w");
-			
+
 				if ( !f1 )
 				{
 					pSrc->SysMessagef("Cannot open file %s for writing.\n", z);
@@ -1001,7 +1001,7 @@ bool CServer::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 	{
 		pszKey += 8;
 		CAccountRef pAccount = NULL;
-		
+
 		// extract account name/index to a temporary buffer
 		tchar * pszTemp = Str_GetTemp();
 		tchar * pszTempStart = pszTemp;
@@ -1221,7 +1221,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 
 				if (ppArgs[1])
 					iTimeDecay = Exp_GetVal(ppArgs[1]);
-				
+
 #ifndef _MTNETWORK
 				HistoryIP& history = g_NetworkIn.getIPHistoryManager().getHistoryForIP(ppArgs[0]);
 #else
@@ -1653,14 +1653,14 @@ bool CServer::SocketsInit( CSocket & socket )
 		return false;
 	}
 	socket.Listen();
-	
+
 #if !defined(_WIN32) || defined(_LIBEV)
 #ifdef LIBEV_REGISTERMAIN
 	if ( g_Cfg.m_fUseAsyncNetwork != 0 )
 		g_NetworkEvent.registerMainsocket();
 #endif
 #endif
-		
+
 	return true;
 }
 
@@ -1797,7 +1797,7 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 
 	EXC_SET("loading ini");
 	g_Cfg.LoadIni(false);
-	
+
 	if (g_Cfg.m_bMySql && g_Cfg.m_bMySqlTicks)
 	{
 		EXC_SET( "Connecting to MySQL server" );
@@ -1879,7 +1879,7 @@ void CServer::ShipTimers_Tick()
 {
 	ADDTOCALLSTACK("CServer::ShipTimers_Tick");
 	std::vector<CItemShip *>::iterator it;
-	for ( it = m_ShipTimers.begin(); it != m_ShipTimers.end(); ) 
+	for ( it = m_ShipTimers.begin(); it != m_ShipTimers.end(); )
 	{
 		CItemShip * pShip = *it;
 		if (pShip && pShip->m_itShip.m_fSail != 0)
@@ -1909,11 +1909,11 @@ void CServer::ShipTimers_Delete(CItemShip * ship)
 {
 	ADDTOCALLSTACK("CServer::ShipTimers_Delete");
 	std::vector<CItemShip *>::iterator it;
-	for ( it = m_ShipTimers.begin(); it != m_ShipTimers.end(); ) 
+	for ( it = m_ShipTimers.begin(); it != m_ShipTimers.end(); )
 	{
 		CItemShip * pShip = *it;
 		if (pShip == ship)
-		{	
+		{
 			if ( m_ShipTimers.size() == 1 )
 			{
 				m_ShipTimers.pop_back();

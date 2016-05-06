@@ -2,7 +2,7 @@
 #if !defined(_INC_CRASHDUMP_H) && defined(_WIN32) && !defined(_DEBUG) && !defined(_NO_CRASHDUMP)
 #define _INC_CRASHDUMP_H
 
-#include <stdio.h>
+#include <cstdio>
 
 #ifndef WIN32_LEAN_AND_MEAN
 	#define WIN32_LEAN_AND_MEAN	// include just windows.h without the other winapi headers, we'll add them manually when needed

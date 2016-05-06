@@ -6,8 +6,8 @@
 
 #ifndef _WIN32
 
-	#include <stdio.h>
-	#include <string.h>
+	#include <cstdio>
+	#include <cstring>
 
 	#ifdef _BSD
 		#include <time.h>
@@ -43,14 +43,14 @@
 	void STRREV( char* string )
 	{
 		char *pEnd = string;
-		char temp;     
-		while (*pEnd) pEnd++;  
-		pEnd--;                         
-		while (string < pEnd) 
+		char temp;
+		while (*pEnd) pEnd++;
+		pEnd--;
+		while (string < pEnd)
 		{
-			temp = *pEnd;            
+			temp = *pEnd;
 			*pEnd-- = *string;
-			*string++ = temp;       
+			*string++ = temp;
 		}
 	}
 
@@ -82,11 +82,11 @@ static int CvtSystemToUNICODE( wchar & wChar, lpctstr pInp, int iSizeInBytes )
 	// Convert a UTF8 encoded string to a single unicode char.
 	// RETURN: The length used from input string. < iSizeInBytes
 
-	// bytes bits representation 
-	// 1 7	0bbbbbbb 
-	// 2 11 110bbbbb 10bbbbbb 
-	// 3 16 1110bbbb 10bbbbbb 10bbbbbb 
-	// 4 21 11110bbb 10bbbbbb 10bbbbbb 10bbbbbb 
+	// bytes bits representation
+	// 1 7	0bbbbbbb
+	// 2 11 110bbbbb 10bbbbbb
+	// 3 16 1110bbbb 10bbbbbb 10bbbbbb
+	// 4 21 11110bbb 10bbbbbb 10bbbbbb 10bbbbbb
 
 	byte ch = *pInp;
 	ASSERT( ch >= 0x80 );	// needs special UTF8 decoding.
@@ -103,12 +103,12 @@ static int CvtSystemToUNICODE( wchar & wChar, lpctstr pInp, int iSizeInBytes )
 		iBytes = 3;
 		iStartBits = 4;
 	}
-	else if (( ch & 0xf8 ) == 0x0f0 ) // 3 bytes 
+	else if (( ch & 0xf8 ) == 0x0f0 ) // 3 bytes
 	{
 		iBytes = 4;
 		iStartBits = 3;
 	}
-	else 
+	else
 	{
 		return -1;	// invalid format !
 	}
@@ -136,11 +136,11 @@ static int CvtUNICODEToSystem( tchar * pOut, int iSizeOutBytes, wchar wChar )
 	// Convert a single unicode char to system string.
 	// RETURN: The length < iSizeOutBytes
 
-	// bytes bits representation 
-	// 1 7	0bbbbbbb 
-	// 2 11 110bbbbb 10bbbbbb 
-	// 3 16 1110bbbb 10bbbbbb 10bbbbbb 
-	// 4 21 11110bbb 10bbbbbb 10bbbbbb 10bbbbbb 
+	// bytes bits representation
+	// 1 7	0bbbbbbb
+	// 2 11 110bbbbb 10bbbbbb
+	// 3 16 1110bbbb 10bbbbbb 10bbbbbb
+	// 4 21 11110bbb 10bbbbbb 10bbbbbb 10bbbbbb
 
 	ASSERT( wChar >= 0x80 );	// needs special UTF8 encoding.
 
