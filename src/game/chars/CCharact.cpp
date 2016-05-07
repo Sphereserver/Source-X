@@ -112,7 +112,7 @@ bool CChar::TeleportToObj( int iType, tchar * pszArgs )
 bool CChar::TeleportToCli( int iType, int iArgs )
 {
 	ADDTOCALLSTACK("CChar::TeleportToCli");
-	
+
 	ClientIterator it;
 	for (CClient* pClient = it.next(); pClient != NULL; pClient = it.next())
 	{
@@ -258,7 +258,7 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 			return;
 		}
 
-		if (!pItem->IsTypeSpellable() && !pItem->m_itSpell.m_spell && !pItem->IsType(IT_WAND))	// can this item have a spell effect ? If so we do not send 
+		if (!pItem->IsTypeSpellable() && !pItem->m_itSpell.m_spell && !pItem->IsType(IT_WAND))	// can this item have a spell effect ? If so we do not send
 		{
 			if ((IsTrigUsed(TRIGGER_MEMORYEQUIP)) || (IsTrigUsed(TRIGGER_ITEMMEMORYEQUIP)))
 			{
@@ -362,7 +362,7 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 				break;
 		}
 
-		
+
 	}
 
 	pItem->Update();
@@ -1215,7 +1215,7 @@ bool CChar::UpdateAnimate(ANIM_TYPE action, bool fTranslate, bool fBackward , by
 			cmd->send(pClient);
 	}
 	delete cmdnew;
-	delete cmd;	
+	delete cmd;
 	return true;
 }
 
@@ -1367,7 +1367,7 @@ void CChar::UpdateDir( const CObjBaseTemplate * pObj )
 // If character status has been changed (Polymorph), resend him
 // Or I changed looks.
 // I moved or somebody moved me  ?
-void CChar::Update(const CClient * pClientExclude ) 
+void CChar::Update(const CClient * pClientExclude )
 {
 	ADDTOCALLSTACK("CChar::Update");
 
@@ -1569,7 +1569,7 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 {
 	ADDTOCALLSTACK("CChar::ItemPickup");
 
-	if (( amount < 0 ) || !pItem )
+	if ( !pItem )
 		return -1;
 	if ( pItem->GetParent() == this && pItem->GetEquipLayer() == LAYER_HORSE )
 		return -1;
@@ -1584,7 +1584,7 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 	{
 		CClient * client = GetClient();
 		const CItem * pItemCont	= dynamic_cast <const CItem*> (pItem->GetParent());
-		
+
 		if ( pItemCont != NULL )
 		{
 			// Don't allow taking items from the bank unless we opened it here
@@ -1659,7 +1659,7 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 		if ( g_Cfg.m_iRevealFlags & REVEALF_LOOTINGSELF )
 			Reveal();
 	}
-	else 
+	else
 	{
 		CheckCorpseCrime(pCorpse, true, false);
 		if ( g_Cfg.m_iRevealFlags & REVEALF_LOOTINGOTHERS )
@@ -2140,7 +2140,7 @@ bool CChar::Reveal( dword dwFlags )
 
 	if ( (dwFlags & STATF_Sleeping) && IsStatFlag(STATF_Sleeping) )
 		Wake();
-	
+
 	if ( (dwFlags & STATF_Invisible) && IsStatFlag(STATF_Invisible) )
 	{
 		CItem * pSpell = LayerFind(LAYER_SPELL_Invis);
@@ -2343,7 +2343,7 @@ CChar * CChar::Horse_GetMountChar() const
 // RETURN:
 //  true = done mounting
 //  false = we can't mount this
-bool CChar::Horse_Mount(CChar *pHorse) 
+bool CChar::Horse_Mount(CChar *pHorse)
 {
 	ADDTOCALLSTACK("CChar::Horse_Mount");
 
@@ -2409,7 +2409,7 @@ bool CChar::Horse_Mount(CChar *pHorse)
 }
 
 // Get off a horse (Remove horse item and spawn new horse)
-bool CChar::Horse_UnMount() 
+bool CChar::Horse_UnMount()
 {
 	ADDTOCALLSTACK("CChar::Horse_UnMount");
 	if ( !IsStatFlag(STATF_OnHorse) || (IsStatFlag(STATF_Stone) && !IsPriv(PRIV_GM)) )
@@ -2714,7 +2714,7 @@ void CChar::SleepStart( bool fFrontFall )
 // Cleaning myself (dispel, cure, dismounting ...).
 // Creating the corpse ( MakeCorpse() ).
 // Removing myself from view, generating Death packets.
-// RETURN: 
+// RETURN:
 //		true = successfully died
 //		false = something went wrong? i'm an NPC, just delete (excepting BONDED ones).
 bool CChar::Death()
@@ -2884,7 +2884,7 @@ bool CChar::Death()
 				if ( !pChar )
 					break;
 				if ( !CanSeeAsDead(pChar) )
-					pClient->addObjectRemove(pChar);						
+					pClient->addObjectRemove(pChar);
 			}
 		}
 	}
@@ -3181,7 +3181,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 						iSkillLevel /= 2;
 
 					OnTakeDamage( g_Cfg.GetSpellEffect(SPELL_Fire_Field, iSkillLevel), NULL, DAMAGE_FIRE|DAMAGE_GENERAL, 0, 100, 0, 0, 0 );
-					Sound(0x15f);	// fire noise					
+					Sound(0x15f);	// fire noise
 					if ( m_pNPC && fStanding )
 					{
 						m_Act_p.Move(static_cast<DIR_TYPE>(Calc_GetRandVal(DIR_QTY)));

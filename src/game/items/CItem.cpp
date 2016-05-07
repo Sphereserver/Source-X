@@ -497,7 +497,7 @@ CItem * CItem::ReadTemplate( CResourceLock & s, CObjBase * pCont ) // static
 					}
 				}
 				continue;
-	
+
 			case ITC_CONTAINER:
 				fItemAttrib = false;
 				{
@@ -519,7 +519,7 @@ CItem * CItem::ReadTemplate( CResourceLock & s, CObjBase * pCont ) // static
 					}
 				}
 				continue;
-	
+
 			case ITC_ITEM:
 			case ITC_ITEMNEWBIE:
 				fItemAttrib = false;
@@ -556,7 +556,7 @@ bool CItem::IsTopLevelMultiLocked() const
 	ASSERT( IsTopLevel());
 	if ( ! m_uidLink.IsValidUID())	// linked to something.
 		return false;
-	if ( IsType(IT_KEY))	// keys cannot be locked down. 
+	if ( IsType(IT_KEY))	// keys cannot be locked down.
 		return false;
 	const CRegionBase * pArea = GetTopPoint().GetRegion( REGION_TYPE_MULTI );
 	if ( pArea == NULL )
@@ -680,7 +680,7 @@ int CItem::IsWeird() const
 	}
 
 	// The container must be valid.
-	CObjBase * ptCont = GetContainer(); 
+	CObjBase * ptCont = GetContainer();
 	return( ( ptCont == NULL ) ? 0x2106 : ptCont->IsWeird() );
 }
 
@@ -781,7 +781,7 @@ int CItem::FixWeirdness()
 		case ITEMID_SPELLBOOK2:	// weird client bug with these.
 			SetDispID( ITEMID_SPELLBOOK );
 			break;
-	
+
 		case ITEMID_DEATHSHROUD:	// be on a dead person only.
 		case ITEMID_GM_ROBE:
 			{
@@ -813,7 +813,7 @@ int CItem::FixWeirdness()
 				}
 			}
 			break;
-	
+
 		case ITEMID_VENDOR_BOX:
 			if ( ! IsItemEquipped())
 			{
@@ -828,7 +828,7 @@ int CItem::FixWeirdness()
 				SetType(IT_EQ_VENDOR_BOX);
 			}
 			break;
-	
+
 		case ITEMID_BANK_BOX:
 			// These should only be bank boxes and that is it !
 			if ( ! IsItemEquipped())
@@ -844,7 +844,7 @@ int CItem::FixWeirdness()
 				SetType( IT_EQ_BANK_BOX );
 			}
 			break;
-	
+
 		case ITEMID_MEMORY:
 			// Memory or other flag in my head.
 			// Should not exist except equipped.
@@ -869,7 +869,7 @@ int CItem::FixWeirdness()
 				return( iResultCode );	// get rid of it.
 			}
 			break;
-	
+
 		case IT_EQ_CLIENT_LINGER:
 			// Should not exist except equipped.
 			if ( !IsItemEquipped() || GetEquipLayer() != LAYER_FLAG_ClientLinger || !pChar || !pChar->m_pPlayer )
@@ -878,7 +878,7 @@ int CItem::FixWeirdness()
 				return( iResultCode );	// get rid of it.
 			}
 			break;
-	
+
 		case IT_EQ_MEMORY_OBJ:
 			{
 				// Should not exist except equipped.
@@ -890,7 +890,7 @@ int CItem::FixWeirdness()
 				}
 			}
 			break;
-	
+
 		case IT_EQ_HORSE:
 			// These should only exist eqipped.
 			if ( !IsItemEquipped() || GetEquipLayer() != LAYER_HORSE )
@@ -899,7 +899,7 @@ int CItem::FixWeirdness()
 				return( iResultCode );	// get rid of it.
 			}
 			break;
-	
+
 		case IT_HAIR:
 		case IT_BEARD:	// 62 = just for grouping purposes.
 			// Hair should only be on person or equipped. (can get lost in pack)
@@ -923,7 +923,7 @@ int CItem::FixWeirdness()
 				}
 			}
 			break;
-	
+
 		case IT_GAME_PIECE:
 			// This should only be in a game.
 			if ( ! IsItemInContainer())
@@ -932,7 +932,7 @@ int CItem::FixWeirdness()
 				return( iResultCode );	// get rid of it.
 			}
 			break;
-	
+
 		case IT_KEY:
 			// blank unlinked keys.
 			if ( m_itKey.m_lockUID && ! IsValidUID())
@@ -941,7 +941,7 @@ int CItem::FixWeirdness()
 				m_itKey.m_lockUID.ClearUID();
 			}
 			break;
-	
+
 		case IT_SPAWN_CHAR:
 		case IT_SPAWN_ITEM:
 			{
@@ -953,7 +953,7 @@ int CItem::FixWeirdness()
 				}
 			}
 			break;
-	
+
 		case IT_CONTAINER_LOCKED:
 		case IT_SHIP_HOLD_LOCK:
 		case IT_DOOR_LOCKED:
@@ -963,7 +963,7 @@ int CItem::FixWeirdness()
 				m_itContainer.m_lock_complexity = 500 + Calc_GetRandVal( 600 );
 			}
 			break;
-	
+
 		case IT_POTION:
 			if ( m_itPotion.m_skillquality == 0 ) // store bought ?
 			{
@@ -976,7 +976,7 @@ int CItem::FixWeirdness()
 				SetType( IT_MAP );
 			}
 			break;
-	
+
 		default:
 			if ( GetType() > IT_QTY )
 			{
@@ -1019,12 +1019,12 @@ int CItem::FixWeirdness()
 					return 0;
 				SetAttr(ATTR_MOVE_NEVER);
 				break;
-	
+
 			case LAYER_PACK:
 			case LAYER_BANKBOX:
 				SetAttr(ATTR_MOVE_NEVER);
 				break;
-	
+
 			case LAYER_HORSE:
 				if ( m_type != IT_EQ_HORSE )
 				{
@@ -1041,7 +1041,7 @@ int CItem::FixWeirdness()
 					return( iResultCode );	// get rid of it.
 				}
 				break;
-	
+
 			case LAYER_FLAG_Murders:
 				if ( ! pChar->m_pPlayer ||
 					pChar->m_pPlayer->m_wMurders <= 0 )
@@ -1081,7 +1081,7 @@ CItem * CItem::UnStackSplit( word amount, CChar * pCharSrc )
 	// can be 0 size if on vendor.
 	// ARGS:
 	//  amount = the amount that i want to set this pile to
-	// RETURN: 
+	// RETURN:
 	//  The newly created item.
 
 	if ( amount >= GetAmount() )
@@ -1406,7 +1406,7 @@ bool CItem::MoveTo(CPointMap pt, bool bForceFix) // Put item on the ground here.
 	{
 		size_t iCount = pSector->GetItemComplexity();
 		if ( iCount > g_Cfg.m_iMaxSectorComplexity )
-			g_Log.Event(LOGL_WARN, "%d items at %s. Sector too complex!\n", iCount, pt.WriteUsed());
+			g_Log.Event(LOGL_WARN, "%" PRIuSIZE_T " items at %s. Sector too complex!\n", iCount, pt.WriteUsed());
 	}
 
 	SetTopPoint( pt );
@@ -1496,7 +1496,7 @@ bool CItem::MoveNearObj( const CObjBaseTemplate *pObj, word iSteps )
 		pPack->ContentAdd(this, pObj->GetContainedPoint());
 		return true;
 	}
-	else 
+	else
 	{
 		// Equipped or on the ground so put on ground nearby.
 		return CObjBase::MoveNearObj(pObj, iSteps);
@@ -1610,7 +1610,7 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 		}
 		if ( fTitleSet )
 		{
-			if ( fSingular && !IsSetOF(OF_NoPrefix) ) 
+			if ( fSingular && !IsSetOF(OF_NoPrefix) )
 				len = strcpylen( pTemp, Str_GetArticleAndSpace(pszTitle));
 			len += strcpylen( pTemp+len, pszTitle );
 		}
@@ -1750,7 +1750,7 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 			break;
 	}
 
-	
+
 	if ( IsAttr(ATTR_STOLEN))
 	{
 		// Who is it stolen from ?
@@ -1791,7 +1791,7 @@ bool CItem::SetName( lpctstr pszName )
 }
 
 int CItem::GetWeight(word amount) const
-{		
+{
 	int iWeight = m_weight * (amount ? amount : GetAmount());
 	CVarDefCont * pReduction = GetDefKey("WEIGHTREDUCTION", true);
 	if (pReduction)
@@ -1861,7 +1861,7 @@ bool CItem::SetBase( CItemBase * pItemDef )
 
 	m_BaseRef.SetRef(pItemDef);
 	m_weight = pItemDef->GetWeight();
-	
+
 	// matex (moved here from constructor so armor/dam is copied too when baseid changes!)
 	m_attackBase = pItemDef->m_attackBase;
 	m_attackRange = pItemDef->m_attackRange;
@@ -1998,7 +1998,7 @@ void CItem::SetAmount(word amount )
 		ASSERT( IsItemEquipped() || IsItemInContainer());
 		pParentCont->OnWeightChange(GetWeight(amount) - GetWeight(oldamount));
 	}
-	
+
 	UpdatePropertyFlag(AUTOTOOLTIP_FLAG_AMOUNT);
 }
 
@@ -2019,8 +2019,6 @@ bool CItem::SetMaxAmount(word amount)
 	if (!IsStackableType())
 		return false;
 
-	if (amount > UINT16_MAX)
-		amount = UINT16_MAX;
 	SetDefNum("MaxAmount", amount);
 	return true;
 }
@@ -2241,7 +2239,7 @@ bool CItem::LoadSetContainer( CUID uid, LAYER_TYPE layer )
 	}
 	else
 	{
-		CChar * pChar = dynamic_cast <CChar *> (pObjCont); 
+		CChar * pChar = dynamic_cast <CChar *> (pObjCont);
 		if ( pChar != NULL )
 		{
 			// equip the item
@@ -2422,7 +2420,7 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			{
 				CVarDefCont * pVar = GetDefKey(pszKey, true);
 				sVal.FormatLLVal(pVar ? pVar->GetValNum() : 0);
-			}	
+			}
 			break;
 		case IC_MAXAMOUNT:
 			{
@@ -2749,7 +2747,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 		case IC_CONT:	// needs special processing.
 			{
 				bool normcont = LoadSetContainer(s.GetArgVal(), static_cast<LAYER_TYPE>(GetUnkZ()));
-				if ( !normcont && ( g_Serv.m_iModeCode == SERVMODE_Loading ))
+				if ( !normcont && ((g_Serv.m_iModeCode == SERVMODE_Loading) || (g_Serv.m_iModeCode == SERVMODE_GarbageCollection)) )
 				{
 					//	since the item is no longer in container, it should be deleted
 					Delete();
@@ -2773,7 +2771,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 					pt.m_map = 0; pt.m_z = 0;
 					tchar * ppVal[2];
 					size_t iArgs = Str_ParseCmds( pszTemp, ppVal, CountOf( ppVal ), " ,\t" );
-					if ( iArgs < 2 ) 
+					if ( iArgs < 2 )
 					{
 						DEBUG_ERR(( "Bad CONTP usage (not enough parameters)\n" ));
 						return false;
@@ -2914,11 +2912,11 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 							break;
 					}
 				}
-				if ( iArgs < 2 ) 
+				if ( iArgs < 2 )
 				{
 					pt.InitPoint();
 				}
-				
+
 				m_itNormal.m_morep = pt;
 				// m_itNormal.m_morep = g_Cfg.GetRegionPoint( s.GetArgStr() );
 			}
@@ -3057,7 +3055,7 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 		case CIV_DUPE:
 			{
 				int iCount = s.GetArgVal();
-				if ( iCount <= 0 ) 
+				if ( iCount <= 0 )
 					iCount = 1;
 				if ( !GetContainer() && ( (uint)(iCount) > g_Cfg.m_iMaxItemComplexity ))	// if top-level, obey the complexity
 					iCount = g_Cfg.m_iMaxItemComplexity;
@@ -3561,7 +3559,7 @@ void CItem::DupeCopy( const CItem * pItem )
 	m_itNormal.m_more1 = pItem->m_itNormal.m_more1;
 	m_itNormal.m_more2 = pItem->m_itNormal.m_more2;
 	m_itNormal.m_morep = pItem->m_itNormal.m_morep;
-	
+
 	m_TagDefs.Copy(&(pItem->m_TagDefs));
 	m_BaseDefs.Copy(&(pItem->m_BaseDefs));
 	m_OEvents.Copy(&(pItem->m_OEvents));
@@ -4019,7 +4017,7 @@ bool CItem::Use_Portculis()
 	SOUND_TYPE iSnd = 0x21d;
 	if (GetDefNum("PORTCULISSOUND"))
 		iSnd = static_cast<SOUND_TYPE>(GetDefNum("PORTCULISSOUND"));
-	/*CVarDefCont * pTagStorage = NULL; 
+	/*CVarDefCont * pTagStorage = NULL;
 	pTagStorage = GetKey("OVERRIDE.PORTCULISSOUND", true);
 	if ( pTagStorage )
 	{
@@ -4027,7 +4025,7 @@ bool CItem::Use_Portculis()
 			iSnd = static_cast<SOUND_TYPE>(pTagStorage->GetValNum());
 		else
 			iSnd = 0x21d;
-	} else 
+	} else
 		iSnd = 0x21d;*/
 
 	Sound( iSnd );
@@ -4070,7 +4068,7 @@ bool CItem::Use_DoorNew( bool bJustOpen )
 	short sDifX = m_itNormal.m_morep.m_x ? m_itNormal.m_morep.m_x : (short)(pItemDef->m_ttDoor.m_iXChange);
 	short sDifY = m_itNormal.m_morep.m_y ? m_itNormal.m_morep.m_y : (short)(pItemDef->m_ttDoor.m_iYChange);
 
-	
+
 	//default sounds
 	SOUND_TYPE iCloseSnd = pItemDef->m_ttDoor.m_iSoundClose ? pItemDef->m_ttDoor.m_iSoundClose : 0x00f1;
 	SOUND_TYPE iOpenSnd = pItemDef->m_ttDoor.m_iSoundOpen ? pItemDef->m_ttDoor.m_iSoundOpen : 0x00ea;
@@ -4204,7 +4202,7 @@ bool CItem::Use_Door( bool fJustOpen )
 	// SetType( typelock );	// preserve the fact that it was locked.
 	MoveToUpdate(pt);
 
-	//CVarDefCont * pTagStorage = NULL; 
+	//CVarDefCont * pTagStorage = NULL;
 	SOUND_TYPE iCloseSnd = 0x00f1;
 	SOUND_TYPE iOpenSnd = 0x00ea;
 
@@ -5550,7 +5548,7 @@ bool CItem::OnTick()
 #endif //_EXCEPTIONS_DEBUG
 #else //_WIN32
 	EXC_CATCH;
-	
+
 	EXC_DEBUG_START;
 	g_Log.EventDebug("CItem::OnTick: '%s' item [0%x]\n", GetName(), (dword)GetUID());
 	//g_Log.EventError("'%s' item [0%x]\n", GetName(), GetUID());

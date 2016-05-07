@@ -17,7 +17,7 @@ void __cdecl CClientTooltip::FormatArgs(lpctstr format, ...)
     va_list vargs;
     va_start( vargs, format );
 
-    if ( ! _vsnprintf( m_args, SCRIPT_MAX_LINE_LEN, format, vargs ) )
+    if ( ! vsnprintf( m_args, SCRIPT_MAX_LINE_LEN, format, vargs ) )
         strcpylen( m_args, format, SCRIPT_MAX_LINE_LEN );
 
     va_end( vargs );

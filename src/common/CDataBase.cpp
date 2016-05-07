@@ -27,10 +27,10 @@ bool CDataBase::Connect(const char *user, const char *password, const char *base
 
 	m_bConnected = false;
 
-	long ver = mysql_get_client_version();
+	unsigned long ver = mysql_get_client_version();
 	if ( ver < MIN_MYSQL_VERSION_ALLOW )
 	{
-		g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "Your MySQL client library is too old (version %d). Minimal allowed version is %d. MySQL support disabled.\n", ver, MIN_MYSQL_VERSION_ALLOW);
+		g_Log.Event(LOGM_NOCONTEXT|LOGL_ERROR, "Your MySQL client library is too old (version %lu). Minimal allowed version is %d. MySQL support disabled.\n", ver, MIN_MYSQL_VERSION_ALLOW);
 		g_Cfg.m_bMySql = false;
 		return false;
 	}
@@ -169,7 +169,7 @@ bool __cdecl CDataBase::queryf(CVarDefMap & mapQueryResult, char *fmt, ...)
 	va_list	marker;
 
 	va_start(marker, fmt);
-	_vsnprintf(buf, buf.realLength(), fmt, marker);
+	vsnprintf(buf, buf.realLength(), fmt, marker);
 	va_end(marker);
 
 	return this->query(buf, mapQueryResult);
@@ -204,7 +204,7 @@ bool CDataBase::exec(const char *query)
 				query, ( *myErr ? myErr : "unknown reason"));
 		}
 	}
-	
+
 	if (( result == CR_SERVER_GONE_ERROR ) || ( result == CR_SERVER_LOST ))
 		Close();
 
@@ -218,7 +218,7 @@ bool __cdecl CDataBase::execf(char *fmt, ...)
 	va_list	marker;
 
 	va_start(marker, fmt);
-	_vsnprintf(buf, buf.realLength(), fmt, marker);
+	vsnprintf(buf, buf.realLength(), fmt, marker);
 	va_end(marker);
 
 	return this->exec(buf);
@@ -286,12 +286,12 @@ bool CDataBase::OnTick()
 			currentPair = m_QueryArgs.front();
 			m_QueryArgs.pop();
 		}
-		
+
 		if ( !g_Serv.r_Call(currentPair.first, &g_Serv, currentPair.second) )
 		{
 			// error
 		}
-		
+
 		ASSERT(currentPair.second != NULL);
 		delete currentPair.second;
 	}
@@ -402,7 +402,7 @@ bool CDataBase::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc)
 				if ( pszKey[0] != '\0' )
 				{
 					tchar * ppArgs[2];
-					if ( Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf( ppArgs )) != 2) 
+					if ( Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf( ppArgs )) != 2)
 					{
 						DEBUG_ERR(("Not enough arguments for %s\n", CDataBase::sm_szLoadKeys[index]));
 					}
@@ -430,7 +430,7 @@ bool CDataBase::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc)
 			if ( pszKey[0] != '\0' )
 			{
 				tchar * escapedString = Str_GetTemp();
-				
+
 				SimpleThreadLock lock(m_connectionMutex);
 				if ( isConnected() && mysql_real_escape_string(_myData, escapedString, pszKey, (uint)(strlen(pszKey))) )
 				{

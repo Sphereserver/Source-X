@@ -11,62 +11,6 @@
 #include "CResourceBase.h"
 
 
-RES_TYPE RESOURCE_ID_BASE::GetResType() const
-{
-	dword dwVal = RES_GET_TYPE(m_dwInternalVal);
-	return static_cast<RES_TYPE>(dwVal);
-}
-
-int RESOURCE_ID_BASE::GetResIndex() const
-{
-	return ( RES_GET_INDEX(m_dwInternalVal) );
-}
-
-int RESOURCE_ID_BASE::GetResPage() const
-{
-	dword dwVal = m_dwInternalVal >> RES_PAGE_SHIFT;
-	dwVal &= RES_PAGE_MASK;
-	return(dwVal);
-}
-
-bool RESOURCE_ID_BASE::operator == ( const RESOURCE_ID_BASE & rid ) const
-{
-	return( rid.m_dwInternalVal == m_dwInternalVal );
-}
-
-RESOURCE_ID::RESOURCE_ID()
-{
-	InitUID();
-}
-
-RESOURCE_ID::RESOURCE_ID( RES_TYPE restype )
-{
-	// single instance type.
-	m_dwInternalVal = UID_F_RESOURCE|((restype)<<RES_TYPE_SHIFT);
-}
-
-RESOURCE_ID::RESOURCE_ID( RES_TYPE restype, dword index )
-{
-	ASSERT( index < RES_INDEX_MASK );
-	m_dwInternalVal = UID_F_RESOURCE|((restype)<<RES_TYPE_SHIFT)|(index);
-}
-
-RESOURCE_ID::RESOURCE_ID( RES_TYPE restype, dword index, int iPage )
-{
-	ASSERT( index < RES_INDEX_MASK );
-	ASSERT( iPage < RES_PAGE_MASK );
-	m_dwInternalVal = UID_F_RESOURCE|((restype)<<RES_TYPE_SHIFT)|((iPage)<<RES_PAGE_SHIFT)|(index);
-}
-
-RESOURCE_ID_BASE & RESOURCE_ID::operator= ( const RESOURCE_ID_BASE & rid )
-{
-	ASSERT( rid.IsValidUID());
-	ASSERT( rid.IsResource());
-	m_dwInternalVal = rid.GetPrivateUID();
-	return( *this );
-}
-
-
 //***************************************************
 // CResourceBase
 
@@ -466,11 +410,6 @@ bool CResourceBase::ResourceLock( CResourceLock & s, RESOURCE_ID_BASE rid )
 	return false;
 }
 
-bool CResourceBase::ResourceLock( CResourceLock & s, RES_TYPE restype, lpctstr pszName )
-{
-	return ResourceLock( s, ResourceGetIDType( restype, pszName ));
-}
-
 
 /////////////////////////////////////////////////
 // -CResourceDef
@@ -515,9 +454,7 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
 	if ( pVarKey )
 	{
 		if ( (dword)pVarKey->GetValNum() == GetResourceID().GetPrivateUID() )
-		{
 			return true;
-		}
 
 		if ( RES_GET_INDEX(pVarKey->GetValNum()) == GetResourceID().GetResIndex())
 		{
@@ -556,26 +493,6 @@ void CResourceDef::UnLink()
 	// This does nothing in the CResourceDef case, Only in the CResourceLink case.
 }
 
-RESOURCE_ID CResourceDef::GetResourceID() const
-{
-	return( m_rid );
-}
-
-RES_TYPE CResourceDef::GetResType() const
-{
-	return( m_rid.GetResType() );
-}
-
-int CResourceDef::GetResPage() const
-{
-	return( m_rid.GetResPage());
-}
-
-void CResourceDef::CopyDef( const CResourceDef * pLink )
-{
-	m_pDefName = pLink->m_pDefName;
-}
-
 
 lpctstr CResourceDef::GetResourceName() const
 {
@@ -586,11 +503,6 @@ lpctstr CResourceDef::GetResourceName() const
 	TemporaryString pszTmp;
 	sprintf(pszTmp, "0%x", GetResourceID().GetResIndex());
 	return pszTmp;
-}
-
-lpctstr CResourceDef::GetName() const	// default to same as the DEFNAME name.
-{
-	return( GetResourceName());
 }
 
 bool CResourceDef::HasResourceName()
@@ -761,13 +673,6 @@ bool	CRegionBase::MakeRegionName()
 //***************************************************************************
 // -CResourceScript
 
-void CResourceScript::Init()
-{
-	m_iOpenCount = 0;
-	m_timeLastAccess.Init();
-	m_dwSize = UINT32_MAX;		// Compare to see if this has changed.
-}
-
 bool CResourceScript::CheckForChange()
 {
 	ADDTOCALLSTACK("CResourceScript::CheckForChange");
@@ -799,20 +704,9 @@ bool CResourceScript::CheckForChange()
 	return( fChange );
 }
 
-CResourceScript::CResourceScript( lpctstr pszFileName )
-{
-	Init();
-	SetFilePath( pszFileName );
-}
-
-CResourceScript::CResourceScript()
-{
-	Init();
-}
-
 bool CResourceScript::IsFirstCheck() const
 {
-	return( m_dwSize == UINT32_MAX && ! m_dateChange.IsTimeValid());
+	return ( m_dwSize == UINT32_MAX && ! m_dateChange.IsTimeValid() );
 }
 
 void CResourceScript::ReSync()
@@ -849,7 +743,7 @@ bool CResourceScript::Open( lpctstr pszFilename, uint wFlags )
 	}
 
 	m_iOpenCount++;
-	ASSERT( IsFileOpen());
+	ASSERT( IsFileOpen() );
 	return true;
 }
 
@@ -1063,7 +957,7 @@ void CResourceLink::ScanSection( RES_TYPE restype )
 		if ( m_pScript->IsKeyHead( "DEFNAME", 7 ))
 		{
 			m_pScript->ParseKeyLate();
-			SetResourceName( m_pScript->GetArgRaw());
+			SetResourceName( m_pScript->GetArgRaw() );
 		}
 		if ( m_pScript->IsKeyHead( "ON", 2 ))
 		{
@@ -1093,23 +987,6 @@ void CResourceLink::ScanSection( RES_TYPE restype )
 	}
 }
 
-void CResourceLink::AddRefInstance()
-{
-	m_lRefInstances ++;
-}
-
-void CResourceLink::DelRefInstance()
-{
-#ifdef _DEBUG
-	ASSERT(m_lRefInstances > 0);
-#endif
-	m_lRefInstances --;
-}
-
-dword CResourceLink::GetRefInstances() const
-{
-	return( m_lRefInstances );
-}
 
 bool CResourceLink::IsLinked() const
 {
@@ -1213,84 +1090,13 @@ bool CResourceLink::ResourceLock( CResourceLock &s )
 
 	// ret = -2 or -3
 	lpctstr pszName = GetResourceName();
-	DEBUG_ERR(("ResourceLock '%s':%d id=%s FAILED\n", static_cast<lpctstr>(s.GetFilePath()), m_Context.m_stOffset, pszName));
+	DEBUG_ERR(("ResourceLock '%s':%" PRIuSIZE_T " id=%s FAILED\n", static_cast<lpctstr>(s.GetFilePath()), m_Context.m_stOffset, pszName));
 
 	return false;
 }
 
-CResourceNamed::CResourceNamed( RESOURCE_ID rid, lpctstr pszName ) : CResourceLink( rid ), m_sName( pszName )
-{
-}
-
-CResourceNamed::~CResourceNamed()
-{
-}
-
-
-lpctstr CResourceNamed::GetName() const
-{
-	return( m_sName );
-}
-
-CResourceRef::CResourceRef()
-{
-	m_pLink = NULL;
-}
-
-CResourceRef::CResourceRef( CResourceLink* pLink ) : m_pLink(pLink)
-{
-	ASSERT(pLink);
-	pLink->AddRefInstance();
-}
-
-CResourceRef::CResourceRef(const CResourceRef& copy)
-{
-	m_pLink = copy.m_pLink;
-	if (m_pLink != NULL)
-		m_pLink->AddRefInstance();
-}
-
-CResourceRef::~CResourceRef()
-{
-	if (m_pLink != NULL)
-		m_pLink->DelRefInstance();
-}
-
-CResourceRef& CResourceRef::operator=(const CResourceRef& other)
-{
-	if (this != &other)
-		SetRef(other.m_pLink);
-	return *this;
-}
-
-CResourceLink* CResourceRef::GetRef() const
-{
-	return m_pLink;
-}
-
-void CResourceRef::SetRef( CResourceLink* pLink )
-{
-	if ( m_pLink != NULL )
-		m_pLink->DelRefInstance();
-
-	m_pLink = pLink;
-
-	if ( pLink != NULL )
-		pLink->AddRefInstance();
-}
-
-CResourceRef::operator CResourceLink*() const
-{
-	return GetRef();
-}
-
 //***************************************************************************
 //	CScriptFileContext
-
-void CScriptFileContext::Init()
-{
-	m_fOpenScript = false;
-}
 
 void CScriptFileContext::OpenScript( const CScript * pScriptContext )
 {
@@ -1310,30 +1116,9 @@ void CScriptFileContext::Close()
 	}
 }
 
-CScriptFileContext::CScriptFileContext() : m_pPrvScriptContext(NULL)
-{
-	Init();
-}
-
-CScriptFileContext::CScriptFileContext( const CScript * pScriptContext )
-{
-	Init();
-	OpenScript( pScriptContext );
-}
-
-CScriptFileContext::~CScriptFileContext()
-{
-	Close();
-}
-
 
 //***************************************************************************
 //	CScriptObjectContext
-
-void CScriptObjectContext::Init()
-{
-	m_fOpenObject = false;
-}
 
 void CScriptObjectContext::OpenObject( const CScriptObj * pObjectContext )
 {
@@ -1351,22 +1136,6 @@ void CScriptObjectContext::Close()
 		m_fOpenObject = false;
 		g_Log.SetObjectContext( m_pPrvObjectContext );
 	}
-}
-
-CScriptObjectContext::CScriptObjectContext() : m_pPrvObjectContext(NULL)
-{
-	Init();
-}
-
-CScriptObjectContext::CScriptObjectContext( const CScriptObj * pObjectContext )
-{
-	Init();
-	OpenObject( pObjectContext );
-}
-
-CScriptObjectContext::~CScriptObjectContext()
-{
-	Close();
 }
 
 /////////////////////////////////////////////////
@@ -1545,11 +1314,6 @@ void CResourceRefArray::r_Write( CScript & s, lpctstr pszKey ) const
 	}
 }
 
-CResourceHashArray::CResourceHashArray()
-{
-
-}
-
 int CResourceHashArray::CompareKey( RESOURCE_ID_BASE rid, CResourceDef * pBase, bool fNoSpaces ) const
 {
 	UNREFERENCED_PARAMETER(fNoSpaces);
@@ -1557,45 +1321,10 @@ int CResourceHashArray::CompareKey( RESOURCE_ID_BASE rid, CResourceDef * pBase, 
 	ASSERT( pBase );
 	dword dwID2 = pBase->GetResourceID().GetPrivateUID();
 	if (dwID1 > dwID2 )
-		return(1);
+		return 1;
 	if (dwID1 == dwID2 )
-		return(0);
-	return(-1);
-}
-
-CResourceHash::CResourceHash()
-{
-
-}
-
-int CResourceHash::GetHashArray( RESOURCE_ID_BASE rid ) const
-{
-	return( rid.GetResIndex() & 0x0F );
-}
-
-size_t CResourceHash::FindKey( RESOURCE_ID_BASE rid ) const
-{
-	return( m_Array[ GetHashArray( rid ) ].FindKey(rid));
-}
-
-CResourceDef* CResourceHash::GetAt( RESOURCE_ID_BASE rid, size_t index ) const
-{
-	return( m_Array[ GetHashArray( rid ) ].GetAt(index));
-}
-
-size_t CResourceHash::AddSortKey( RESOURCE_ID_BASE rid, CResourceDef* pNew )
-{
-	return( m_Array[ GetHashArray( rid ) ].AddSortKey( pNew, rid ));
-}
-
-void CResourceHash::SetAt( RESOURCE_ID_BASE rid, size_t index, CResourceDef* pNew )
-{
-	m_Array[ GetHashArray( rid ) ].SetAt( index, pNew );
-}
-
-CSStringSortArray::CSStringSortArray()
-{
-
+		return 0;
+	return -1;
 }
 
 void CSStringSortArray::DestructElements( tchar** pElements, size_t nCount )
@@ -1678,37 +1407,6 @@ int CObNameSortArray::CompareKey( lpctstr pszID, CScriptObj* pObj, bool fNoSpace
 
 //**********************************************
 // -CResourceQty
-
-RESOURCE_ID CResourceQty::GetResourceID() const
-{
-	return( m_rid );
-}
-
-void CResourceQty::SetResourceID( RESOURCE_ID rid, int iQty )
-{
-	m_rid = rid;
-	m_iQty = iQty;
-}
-
-RES_TYPE CResourceQty::GetResType() const
-{
-	return( m_rid.GetResType());
-}
-
-int CResourceQty::GetResIndex() const
-{
-	return( m_rid.GetResIndex());
-}
-
-int64 CResourceQty::GetResQty() const
-{
-	return( m_iQty );
-}
-
-void CResourceQty::SetResQty( int64 wQty )
-{
-	m_iQty = wQty;
-}
 
 size_t CResourceQty::WriteKey( tchar * pszArgs, bool fQtyOnly, bool fKeyOnly ) const
 {

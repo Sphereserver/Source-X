@@ -22,14 +22,15 @@ class CItemShip;
 
 enum SERVMODE_TYPE
 {
-	SERVMODE_RestockAll,	// Major event.
-	SERVMODE_Saving,		// Forced save freezes the system.
-	SERVMODE_Run,			// Game is up and running
-	SERVMODE_ResyncPause,	// paused during resync
+	SERVMODE_RestockAll,		// Major event, potentially slow.
+	SERVMODE_GarbageCollection,	// Executing the garbage collection, potentially demanding.
+	SERVMODE_Saving,			// Forced save freezes the system.
+	SERVMODE_Run,				// Game is up and running.
+	SERVMODE_ResyncPause,		// Server paused during resync.
 
-	SERVMODE_Loading,		// Initial load.
-	SERVMODE_ResyncLoad,	// Loading after resync
-	SERVMODE_Exiting		// Closing down
+	SERVMODE_Loading,			// Initial load.
+	SERVMODE_ResyncLoad,		// Loading after resync.
+	SERVMODE_Exiting			// Closing down.
 };
 
 
@@ -86,7 +87,7 @@ public:
 	void Shutdown( int64 iMinutes );
 	bool IsLoading() const
 	{
-		return( m_iModeCode > SERVMODE_Run || m_fResyncPause );
+		return ( m_iModeCode > SERVMODE_Run || m_fResyncPause );
 	}
 	void SetSignals( bool fMsg = true );
 

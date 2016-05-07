@@ -44,7 +44,6 @@
 #define HIBYTE(w)		((byte)((dword)(w) >> 8))
 #define strcmpi			strcasecmp
 #define strnicmp		strncasecmp
-#define _vsnprintf		vsnprintf
 #define ATOI			atoi
 char * ITOA(int value, char *string, int radix);
 char * LTOA(long value, char *string, int radix);

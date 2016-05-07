@@ -47,16 +47,16 @@ lpctstr GetReasonForGarbageCode(int iCode = -1)
 		case 0x1203:
 			pStr = "Ridden NPC not acting as such";
 			break;
-			
+
 		case 0x1104:
 		case 0x1204:
 			pStr = "Ridden NPC without a mount item";
 			break;
-			
+
 		case 0x1105:
 			pStr = "Ridden NPC with a mislinked mount item";
 			break;
-			
+
 		case 0x1106:
 			pStr = "Disconnected NPC neither dead nor ridden";
 			break;
@@ -65,11 +65,11 @@ lpctstr GetReasonForGarbageCode(int iCode = -1)
 		case 0x1205:
 			pStr = "In game char that is neither a player nor an NPC";
 			break;
-			
+
 		case 0x1108:
 			pStr = "Char not on a valid position";
 			break;
-			
+
 		case 0x2102:
 			pStr = "Item without ITEMDEF";
 			break;
@@ -77,39 +77,39 @@ lpctstr GetReasonForGarbageCode(int iCode = -1)
 		case 0x2103:
 			pStr = "Item ITEMDEF with ID = 0";
 			break;
-			
+
 		case 0x2104:
 			pStr = "Disconnected item";
 			break;
-			
+
 		case 0x2105:
 			pStr = "Item not on a valid position";
 			break;
-			
+
 		case 0x2106:
 			pStr = "Item flagged as being in a container but it isn't";
 			break;
-			
+
 		case 0x2202:
 			pStr = "Item flagged as equipped but it isn't";
 			break;
-			
+
 		case 0x2205:
 			pStr = "Mislinked item";
 			break;
-			
+
 		case 0x2206:
 			pStr = "Gm Robe / Deathshroud not on a char";
 			break;
-			
+
 		case 0x2207:
 			pStr = "Deathshroud not on a dead char";
 			break;
-			
+
 		case 0x2208:
 			pStr = "Gm Robe on a char without privilege";
 			break;
-	
+
 		case 0x2220:
 			pStr = "Trade window memory not equipped in the correct layer or equipped on disconnected char";
 			break;
@@ -117,40 +117,40 @@ lpctstr GetReasonForGarbageCode(int iCode = -1)
 		case 0x2221:
 			pStr = "Client linger memory not equipped in the correct layer";
 			break;
-			
+
 		case 0x2226:
 			pStr = "Mount memory not equipped in the correct layer";
 			break;
-			
+
 		case 0x2227:
 		case 0x2228:
 			pStr = "Hair/Beard item not equipped / not in a corpse / not in a vendor box";
 			break;
-			
+
 		case 0x2229:
 			pStr = "Game piece not in a game board";
 			break;
-			
+
 		case 0x2230:
 			pStr = "Item equipped in the trade window layer but it isn't a trade window";
 			break;
-			
+
 		case 0x2231:
 			pStr = "Item equipped in the memory layer but it isn't a memory";
 			break;
-			
+
 		case 0x2233:
 			pStr = "Item equipped in the mount memory layer but it isn't a mount memory";
 			break;
-			
+
 		case 0x2234:
 			pStr = "Item equipped in the client linger layer but it isn't a client linger memory";
 			break;
-			
+
 		case 0x2235:
 			pStr = "Item equipped in the murder memory layer but it isn't a murder memory";
 			break;
-			
+
 		case 0x2236:
 			pStr = "Item flagged as decay but without timer set";
 			break;
@@ -170,29 +170,29 @@ lpctstr GetReasonForGarbageCode(int iCode = -1)
 		case 0x3202:
 			pStr = "Object not placed in the world";
 			break;
-			
-		case 0x2222:	
+
+		case 0x2222:
 		case 0x4222:
 			pStr = "Memory not equipped / not in the memory layer / without color";
 			break;
-		
+
 		case 0x4223:
 			pStr = "Memory not on a char";
 			break;
-			
+
 		case 0x4224:
 			pStr = "Stone/Guild memory mislinked";
 			break;
-			
+
 		case 0x4225:
 			pStr = "Stone/Guild memory linked to the wrong stone";
 			break;
-			
+
 		case 0xFFFF:
 			pStr = "Bad memory allocation";
 			break;
 	}
-	
+
 	return pStr;
 }
 
@@ -200,8 +200,8 @@ void ReportGarbageCollection(CObjBase * pObj, int iResultCode)
 {
 	ASSERT(pObj != NULL);
 
-	DEBUG_ERR(("UID=0%x, id=0%x '%s', Invalid code=%0x (%s)\n",
-		(dword)pObj->GetUID(), pObj->GetBaseID(), pObj->GetName(), iResultCode, GetReasonForGarbageCode(iResultCode)));
+	DEBUG_ERR(("GC: UID=0%x, Defname='%s', Name='%s'. Invalid code=%0x (%s)\n",
+		(dword)pObj->GetUID(), pObj->Base_GetDef()->GetResourceName(), pObj->GetName(), iResultCode, GetReasonForGarbageCode(iResultCode)));
 }
 
 //////////////////////////////////////////////////////////////////
@@ -231,26 +231,26 @@ void CTimedFunctionHandler::OnTick()
 
 	if ( m_timedFunctions[tick].size() > 0 )
 	{
-		for ( it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); ) 
+		for ( it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); )
 		{
 			TimedFunction* tf = *it;
 			tf->elapsed -= 1;
-			if ( tf->elapsed <= 0 ) 
+			if ( tf->elapsed <= 0 )
 			{
 				CScript s(tf->funcname);
 				CObjBase * obj = tf->uid.ObjFind();
 				int theEnd = 0;
 
 				if ( obj != NULL ) //just in case
-				{	
+				{
 					CObjBaseTemplate * topobj = obj->GetTopLevelObj();
 					CTextConsole* src;
 
-					if ( topobj->IsChar() ) 
+					if ( topobj->IsChar() )
 					{
 						src = dynamic_cast <CTextConsole*> ( topobj );
-					} 
-					else 
+					}
+					else
 					{
 						src = &g_Serv;
 					}
@@ -268,8 +268,8 @@ void CTimedFunctionHandler::OnTick()
 					}
 
 					obj->r_Verb( s, src );
-				} 
-				else 
+				}
+				else
 				{
 					m_tFrecycled.push_back( tf );
 					//vector::erase crashes if the iterator is pointing at the only thing left in the list. So, we check if size is 1 and do pop_back instead if that's the case. -SL
@@ -284,7 +284,7 @@ void CTimedFunctionHandler::OnTick()
 					}
 				}
 
-				if (theEnd) 
+				if (theEnd)
 				{
 					break;
 				}
@@ -295,7 +295,7 @@ void CTimedFunctionHandler::OnTick()
 			}
 		}
 	}
-	
+
 	m_isBeingProcessed = false;
 
 	while ( m_tFqueuedToBeAdded.size() > 0 )
@@ -312,10 +312,10 @@ void CTimedFunctionHandler::Erase( CUID uid )
 	for ( int tick = 0; tick < TICK_PER_SEC; tick++ )
 	{
 		std::vector<TimedFunction *>::iterator it;
-		for ( it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); ) 
+		for ( it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); )
 		{
 			TimedFunction* tf = *it;
-			if ( tf->uid == uid) 
+			if ( tf->uid == uid)
 			{
 				m_tFrecycled.push_back( tf );
 				//vector::erase crashes if the iterator is pointing at the only thing left in the list. So, we check if size is 1 and do pop_back instead if that's the case. -SL
@@ -343,7 +343,7 @@ int CTimedFunctionHandler::IsTimer( CUID uid, lpctstr funcname )
 	for ( int tick = 0; tick < TICK_PER_SEC; tick++ )
 	{
 		std::vector<TimedFunction *>::iterator it;
-		for ( it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); ) 
+		for ( it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); )
 		{
 			TimedFunction* tf = *it;
 			if (( tf->uid == uid) && (!strcmpi( tf->funcname, funcname)))
@@ -361,7 +361,7 @@ void CTimedFunctionHandler::Stop( CUID uid, lpctstr funcname )
 	for ( int tick = 0; tick < TICK_PER_SEC; tick++ )
 	{
 		std::vector<TimedFunction *>::iterator it;
-		for ( it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); ) 
+		for ( it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); )
 		{
 			TimedFunction* tf = *it;
 			if (( tf->uid == uid) && (!strcmpi( tf->funcname, funcname)))
@@ -560,7 +560,7 @@ CWorldSearch::CWorldSearch( const CPointMap & pt, int iDist ) :
 
 	m_pSectorBase = m_pSector = pt.GetSector();
 
-	m_rectSector.SetRect( 
+	m_rectSector.SetRect(
 		pt.m_x - iDist,
 		pt.m_y - iDist,
 		pt.m_x + iDist + 1,
@@ -651,21 +651,21 @@ jumpover:
 }
 
 void CWorldSearch::SetAllShow( bool fView )
-{ 
+{
 	ADDTOCALLSTACK("CWorldSearch::SetAllShow");
 	m_fAllShow = fView;
 }
 
-void CWorldSearch::SetSearchSquare( bool fSquareSearch ) 
+void CWorldSearch::SetSearchSquare( bool fSquareSearch )
 {
 	ADDTOCALLSTACK("CWorldSearch::SetSearchSquare");
-	m_fSearchSquare = fSquareSearch; 
+	m_fSearchSquare = fSquareSearch;
 }
 
-void CWorldSearch::RestartSearch() 
+void CWorldSearch::RestartSearch()
 {
 	ADDTOCALLSTACK("CWorldSearch::RestartSearch");
-	m_pObj = NULL; 
+	m_pObj = NULL;
 }
 
 CChar * CWorldSearch::GetChar()
@@ -1019,9 +1019,7 @@ void CWorldThread::GarbageCollection_UIDs()
 			}
 
 			if ((iCount & 0x1FF ) == 0)
-			{
 				g_Serv.PrintPercent(iCount, GetUIDCount());
-			}
 			iCount ++;
 		}
 		catch ( const CSError& e )
@@ -1029,7 +1027,7 @@ void CWorldThread::GarbageCollection_UIDs()
 			g_Log.CatchEvent(&e, "GarbageCollection_UIDs");
 			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 		}
-		catch(...)
+		catch (...)
 		{
 			g_Log.CatchEvent(NULL, "GarbageCollection_UIDs");
 			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
@@ -1039,13 +1037,9 @@ void CWorldThread::GarbageCollection_UIDs()
 	GarbageCollection_New();
 
 	if ( iCount != CObjBase::sm_iCount )	// All objects must be accounted for.
-	{
-		g_Log.Event(LOGL_ERROR, "GC: Object memory leak %" PRIuSIZE_T "!=%" PRIuSIZE_T "\n", iCount, CObjBase::sm_iCount);
-	}
+		g_Log.Event(LOGL_ERROR, "Garbage Collection: done. Object memory leak %" PRIu32 "!=%" PRIuSIZE_T ".\n", iCount, CObjBase::sm_iCount);
 	else
-	{
-		g_Log.Event(LOGL_EVENT, "GC: %" PRIuSIZE_T " Objects accounted for\n", iCount);
-	}
+		g_Log.Event(LOGL_EVENT, "Garbage Collection: done. %" PRIu32 " Objects accounted for.\n", iCount);
 
 	if ( m_FreeUIDs != NULL )	// new UID engine - search for empty holes and store it in a huge array
 	{							// the size of the array should be enough even for huge shards
@@ -1265,7 +1259,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 	EXC_TRY("SaveStage");
 	bool bRc = true;
 
-	if ( m_iSaveStage == -1 ) 
+	if ( m_iSaveStage == -1 )
 	{
 		if ( !g_Cfg.m_fSaveGarbageCollect )
 		{
@@ -1422,7 +1416,7 @@ bool CWorld::SaveForce() // Save world state
 		g_NetworkManager.flushAllClients();
 #endif
 
-	g_Serv.SetServerMode( SERVMODE_Saving );	// Forced save freezes the system.
+	g_Serv.SetServerMode(SERVMODE_Saving);	// Forced save freezes the system.
 	bool	bSave = true;
 	bool	bSuccess = true;
 
@@ -1513,24 +1507,16 @@ bool CWorld::SaveTry( bool fForceImmediate ) // Save world state
 	// Determine the save name based on the time.
 	// exponentially degrade the saves over time.
 	if ( ! OpenScriptBackup( m_FileData, g_Cfg.m_sWorldBaseDir, "data", m_iSaveCountID ))
-	{
 		return false;
-	}
 
 	if ( ! OpenScriptBackup( m_FileWorld, g_Cfg.m_sWorldBaseDir, "world", m_iSaveCountID ))
-	{
 		return false;
-	}
 
 	if ( ! OpenScriptBackup( m_FilePlayers, g_Cfg.m_sWorldBaseDir, "chars", m_iSaveCountID ))
-	{
 		return false;
-	}
 
 	if ( ! OpenScriptBackup( m_FileMultis, g_Cfg.m_sWorldBaseDir, "multis", m_iSaveCountID ))
-	{
 		return false;
-	}
 
 	m_fSaveParity = ! m_fSaveParity; // Flip the parity of the save.
 	m_iSaveStage = -1;
@@ -1566,12 +1552,12 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 		enum TRIGRET_TYPE tr;
 
 		if ( g_Serv.r_Call("f_onserver_save", &g_Serv, &Args, NULL, &tr) )
-			if ( tr == TRIGRET_RET_TRUE ) 
+			if ( tr == TRIGRET_RET_TRUE )
 				return false;
 		//Fushing before the server should fix #2306
 		//The scripts fills the clients buffer and the server flush
 		//the data during the save.
-		//Should we flush only non threaded output or force it 
+		//Should we flush only non threaded output or force it
 		//to flush on any conditions?
 
 #ifndef _MTNETWORK
@@ -1580,8 +1566,8 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 		if (g_NetworkManager.isOutputThreaded() == false) {
 #endif
 
-#ifdef _DEBUG 
-			g_Log.EventDebug("Flushing %u client(s) output data...\n", g_Serv.StatGet(SERV_STAT_CLIENTS));
+#ifdef _DEBUG
+			g_Log.EventDebug("Flushing %" PRIuSIZE_T " client(s) output data...\n", g_Serv.StatGet(SERV_STAT_CLIENTS));
 #endif
 
 #ifndef _MTNETWORK
@@ -1594,7 +1580,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 			g_Log.EventDebug("Done flushing clients output data\n");
 #endif
 		}
-			
+
 		fForceImmediate = (Args.m_iN1 != 0);
 		bSaved = SaveTry(fForceImmediate);
 	}
@@ -1678,7 +1664,7 @@ void CWorld::SaveStatics()
 						continue;
 					if ( !pItem->IsAttr(ATTR_STATIC) )
 						continue;
-					
+
 					pItem->r_WriteSafe(m_FileStatics);
 				}
 			}
@@ -1886,11 +1872,11 @@ bool CWorld::LoadAll() // Load world from script
 			// Is this area too complex ?
 			iCount = pSector->GetItemComplexity();
 			if ( iCount > g_Cfg.m_iMaxSectorComplexity )
-				g_Log.Event(LOGL_WARN, "%d items at %s. Sector too complex!\n", iCount, pSector->GetBasePoint().WriteUsed());
+				g_Log.Event(LOGL_WARN, "%" PRIuSIZE_T " items at %s. Sector too complex!\n", iCount, pSector->GetBasePoint().WriteUsed());
 
 			iCount = pSector->GetCharComplexity();
 			if ( iCount > g_Cfg.m_iMaxCharComplexity )
-				g_Log.Event(LOGL_WARN, "%d chars at %s. Sector too complex!\n", iCount, pSector->GetBasePoint().WriteUsed());
+				g_Log.Event(LOGL_WARN, "%" PRIuSIZE_T " chars at %s. Sector too complex!\n", iCount, pSector->GetBasePoint().WriteUsed());
 		}
 		EXC_CATCHSUB("Sector light levels");
 	}
@@ -2098,6 +2084,7 @@ void CWorld::Restock()
 {
 	ADDTOCALLSTACK("CWorld::Restock");
 	// Recalc all the base items as well.
+	g_Log.Event(LOGL_EVENT, "World Restock: started.\n");
 	g_Serv.SetServerMode(SERVMODE_RestockAll);
 
 	for ( size_t i = 0; i < CountOf(g_Cfg.m_ResHash.m_Array); ++i )
@@ -2128,6 +2115,7 @@ void CWorld::Restock()
 	}
 
 	g_Serv.SetServerMode(SERVMODE_Run);
+	g_Log.Event(LOGL_EVENT, "World Restock: done.\n");
 }
 
 void CWorld::Close()
@@ -2149,7 +2137,7 @@ void CWorld::Close()
 			// delete everything in sector
 			m_Sectors[s]->Close();
 		}
-		// do this in two loops because destructors of items 
+		// do this in two loops because destructors of items
 		// may access server sectors
 		for ( uint s = 0; s < m_SectorsQty; s++ )
 		{
@@ -2180,7 +2168,8 @@ void CWorld::GarbageCollection()
 {
 	ADDTOCALLSTACK("CWorld::GarbageCollection");
 	g_Log.Flush();
-	g_Serv.SetServerMode(SERVMODE_Loading);
+	g_Serv.SetServerMode(SERVMODE_GarbageCollection);
+	g_Log.Event(LOGL_EVENT, "Garbage Collection: started.\n");
 	GarbageCollection_UIDs();
 	g_Serv.SetServerMode(SERVMODE_Run);
 	g_Log.Flush();
@@ -2311,7 +2300,7 @@ void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const NCHAR * pwText, 
 
 		const NCHAR * pwSpeak = pwText;
 		pChar = pClient->GetChar();
-		
+
 		if ( pChar != NULL )
 		{
 			// Cansee?
@@ -2334,7 +2323,7 @@ void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const NCHAR * pwText, 
 				pwSpeak = wTextGhost;
 				pClient->addSound( sm_Sounds_Ghost[ Calc_GetRandVal( CountOf( sm_Sounds_Ghost )) ], pSrc );
 			}
-			
+
 			// Must label the text.
 			if ( ! fCanSee && pSrc )
 			{
@@ -2395,7 +2384,7 @@ void __cdecl CWorld::Broadcastf(lpctstr pMsg, ...) // System broadcast in bold t
 	TemporaryString sTemp;
 	va_list vargs;
 	va_start(vargs, pMsg);
-	_vsnprintf(sTemp, sTemp.realLength(), pMsg, vargs);
+	vsnprintf(sTemp, sTemp.realLength(), pMsg, vargs);
 	va_end(vargs);
 	Broadcast(sTemp);
 }
@@ -2451,10 +2440,10 @@ uint CWorld::GetMoonPhase (bool bMoonIndex) const
 	dword dwCurrentTime = GetGameWorldTime();	// game world time in minutes
 
 	if (!bMoonIndex)	// Trammel
-		
+
 		return MulDivLL( dwCurrentTime % TRAMMEL_SYNODIC_PERIOD, 8, TRAMMEL_SYNODIC_PERIOD );
 	else	// Luna2
-		
+
 		return MulDivLL( dwCurrentTime % FELUCCA_SYNODIC_PERIOD, 8, FELUCCA_SYNODIC_PERIOD );
 }
 void CWorld::OnTick()
@@ -2560,7 +2549,7 @@ void CWorld::OnTickMySQL()
 		return;
 
 	if (!g_Serv.m_hdb.isConnected())
-	{		
+	{
 		if (!g_Serv.m_hdb.Connect())
 		{
 			if (m_ticksWithoutMySQL == TICK_PER_SEC)	// a second has passed, let's save and log it incase something goes wrong.

@@ -131,7 +131,7 @@ CVarDefContStr::~CVarDefContStr()
 
 lpctstr CVarDefContStr::GetValStr() const 
 { 
-	return( m_sVal ); 
+	return m_sVal; 
 }
 
 inline int64 CVarDefContStr::GetValNum() const

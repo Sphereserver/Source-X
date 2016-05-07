@@ -122,7 +122,7 @@ bool PacketCreate::onReceive(NetState* net, bool hasExtraSkill)
 				break;
 		}
 	}
-	else 
+	else
 	{
 		/*
 			m_sex values from clients pre-7.0.0.0
@@ -147,7 +147,7 @@ bool PacketCreate::onReceive(NetState* net, bool hasExtraSkill)
 		if (rtRace >= RACETYPE_GARGOYLE)
 			rtRace = RACETYPE_HUMAN;
 	}
-	
+
 	return doCreate(net, charname, isFemale, rtRace,
 		strength, dexterity, intelligence, prof,
 		skill1, skillval1, skill2, skillval2, skill3, skillval3, skill4, skillval4,
@@ -193,7 +193,7 @@ bool PacketCreate::doCreate(NetState* net, lpctstr charname, bool bFemale, RACE_
 			return false;
 		}
 	}
-	
+
 
 	CChar* pChar = CChar::CreateBasic(CREID_MAN);
 	ASSERT(pChar != NULL);
@@ -206,13 +206,13 @@ bool PacketCreate::doCreate(NetState* net, lpctstr charname, bool bFemale, RACE_
 	createArgs.m_VarsLocal.SetNum("PORTRAIT", iPortrait);
 	createArgs.m_s1 = account->GetName();
 	createArgs.m_pO1 = client;
-	
+
 	//Creating the pChar
 	pChar->InitPlayer(client, charname, bFemale, rtRace, wStr, wDex, wInt, prProf, skSkill1, iSkillVal1, skSkill2, iSkillVal2, skSkill3, iSkillVal3, skSkill4, iSkillVal4, wSkinHue, idHair, wHairHue, idBeard, wBeardHue, wShirtHue, wPantsHue, iStartLoc);
 
 	//Calling the function after the char creation, it can't be done before or the function won't have SRC
 	client->r_Call("f_onchar_create", pChar, &createArgs, NULL, &tr);
-	
+
 	if ( tr == 1 )
 	{
 		client->addLoginErr(PacketLoginError::CreationBlocked);
@@ -373,7 +373,7 @@ bool PacketItemPickupReq::onReceive(NetState* net)
 
 	CUID serial(readInt32());
 	word amount = readInt16();
-	
+
 	CClient* client = net->getClient();
 	ASSERT(client);
 	client->Event_Item_Pickup(serial, amount);
@@ -479,7 +479,7 @@ bool PacketTextCommand::onReceive(NetState* net)
 
 	CClient* client = net->getClient();
 	ASSERT(client);
-	
+
 	word packetLength = readInt16();
 	if (packetLength < 5)
 		return false;
@@ -602,7 +602,7 @@ size_t PacketDeathStatus::getExpectedLength(NetState* net, Packet* packet)
 
 bool PacketDeathStatus::onReceive(NetState* net)
 {
-	ADDTOCALLSTACK("PacketDeathStatus::onReceive");  
+	ADDTOCALLSTACK("PacketDeathStatus::onReceive");
 
 	CClient* client = net->getClient();
 	ASSERT(client);
@@ -694,7 +694,7 @@ bool PacketSkillLockChange::onReceive(NetState* net)
 		SKILL_TYPE index = static_cast<SKILL_TYPE>(readInt16());
 		SKILLLOCK_TYPE state = static_cast<SKILLLOCK_TYPE>(readByte());
 		len -= 3;
-		
+
 		if (index <= SKILL_NONE || index >= SKILL_QTY ||
 			state < SKILLLOCK_UP || state > SKILLLOCK_LOCK)
 			continue;
@@ -1232,7 +1232,7 @@ bool PacketBulletinBoardReq::onReceive(NetState* net)
 			if (Str_Check(str))
 				return true;
 
-			// if 
+			// if
 			CItemMessage* newMessage = dynamic_cast<CItemMessage*>( CItem::CreateBase(ITEMID_BBOARD_MSG) );
 			if (newMessage == NULL)
 			{
@@ -1533,7 +1533,7 @@ bool PacketCreateNew::onReceive(NetState* net)
 	skip(1);
 	HUE_TYPE beardhue = static_cast<HUE_TYPE>(readInt16());
 	ITEMID_TYPE beardid = static_cast<ITEMID_TYPE>(readInt16());
-	
+
 	// Since client 7.0.16.0 the new creation packet does not contain skills and values if
 	// a profession is selected, so here we must translate the selected profession -> skills
 	switch (profession)
@@ -1856,7 +1856,7 @@ bool PacketVendorSellReq::onReceive(NetState* net)
 		client->Event_VendorBuy_Cheater(0x1);
 		return true;
 	}
-	
+
 	if (seller->CanTouch(vendor) == false)
 	{
 		client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CANTREACH));
@@ -2176,14 +2176,14 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 	{
 		const CResourceDef* resource = g_Cfg.ResourceGetDef(RESOURCE_ID(RES_DIALOG, context));
 		if (resource == NULL)
-			g_Log.Event(LOGL_EVENT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, "undef", (dword)serial, button);
+			g_Log.Event(LOGM_DEBUG|LOGL_EVENT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, "undef", (dword)serial, button);
 		else
 		{
 			const CDialogDef* dialog = dynamic_cast<const CDialogDef*>(resource);
 			if (dialog == NULL)
-				g_Log.Event(LOGL_EVENT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, "undef", (dword)serial, button);
+				g_Log.Event(LOGM_DEBUG | LOGL_EVENT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, "undef", (dword)serial, button);
 			else
-				g_Log.Event(LOGL_EVENT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, (lpctstr)dialog->GetName(), (dword)serial, button);
+				g_Log.Event(LOGM_DEBUG | LOGL_EVENT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, (lpctstr)dialog->GetName(), (dword)serial, button);
 		}
 	}
 #endif
@@ -2192,7 +2192,7 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 	CClient::OpenedGumpsMap_t::iterator itGumpFound = client->m_mapOpenedGumps.find((int)(context));
 	if ((itGumpFound == client->m_mapOpenedGumps.end()) || ((*itGumpFound).second <= 0))
 		return true;
-	
+
 	// Decrement, if <= 0, delete entry.
 	(*itGumpFound).second--;
 	if ((*itGumpFound).second <= 0)
@@ -2510,7 +2510,7 @@ bool PacketScreenSize::onReceive(NetState* net)
 
 	dword x = readInt32();
 	dword y = readInt32();
-	
+
 	DEBUG_MSG(("0x%x - 0x%x (%d-%d)\n", x, y, x, y));
 
 	client->SetScreenSize(x, y);
@@ -2829,7 +2829,7 @@ PacketAosTooltipInfo::PacketAosTooltipInfo() : Packet(0)
 bool PacketAosTooltipInfo::onReceive(NetState* net)
 {
 	ADDTOCALLSTACK("PacketAosTooltipInfo::onReceive");
-	
+
 	CClient* client = net->getClient();
 	ASSERT(client);
 	const CChar* character = client->GetChar();
@@ -3159,7 +3159,7 @@ bool PacketGargoyleFly::onReceive(NetState* net)
 	// The client always send these 2 values to server, but they're not really used
 	//word one = readInt16();
 	//dword zero = readInt32();
-	
+
 	if ( IsTrigUsed(TRIGGER_TOGGLEFLYING) )
 	{
 		if ( character->OnTrigger(CTRIG_ToggleFlying,character,0) == TRIGRET_RET_TRUE )
@@ -3283,7 +3283,7 @@ bool PacketPromptResponseUnicode::onReceive(NetState* net)
 	dword type = readInt32();
 	tchar language[4];
 	readStringASCII(language, CountOf(language));
-	
+
 	if (length < getPosition())
 		return false;
 
@@ -3447,7 +3447,7 @@ bool PacketEncodedCommand::onReceive(NetState* net)
 
 	EXTAOS_TYPE type = static_cast<EXTAOS_TYPE>(readInt16());
 	seek();
-	
+
 
 #ifndef _MTNETWORK
 	Packet* handler = g_NetworkIn.getPacketManager().getEncodedHandler(type);
@@ -4351,7 +4351,7 @@ bool PacketCrashReport::onReceive(NetState* net)
 	skip(1); // zero
 	dword errorOffset = readInt32();
 
-	g_Log.Event(LOGM_CLIENTS_LOG|LOGL_WARN, "%x:Client crashed at %d,%d,%d,%d: 0x%08lX %s @ 0x%08lX (%s, %d.%d.%d.%d)\n", net->id(),
+	g_Log.Event(LOGM_CLIENTS_LOG|LOGL_WARN, "%x:Client crashed at %d,%d,%d,%d: 0x%08X %s @ 0x%08X (%s, %d.%d.%d.%d)\n", net->id(),
 					x, y, z, map,
 					errorCode, description, errorOffset, executable,
 					versionMaj, versionMin, versionRev, versionPat);

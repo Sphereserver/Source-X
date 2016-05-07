@@ -818,7 +818,7 @@ lpctstr CChar::Food_GetLevelMessage(bool fPet, bool fHappy) const
 	if ( max == 0 )
 		return g_Cfg.GetDefaultMsg(DEFMSG_PET_HAPPY_UNAFFECTED);
 
-	int index = MulDivLL(Stat_GetVal(STAT_FOOD), 8, max);
+	uint index = MulDiv(Stat_GetVal(STAT_FOOD), 8, max);
 
 	if ( fPet )
 	{
@@ -1360,7 +1360,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 		return CanSeeLOS_New_Failed(pptBlock, ptNow);
 	}
 
-	WARNLOS(("Path calculated %d\n", path.size()));
+	WARNLOS(("Path calculated %" PRIuSIZE_T "\n", path.size()));
 	// Ok now we should loop through all the points and checking for maptile, staticx, items, multis.
 	// If something is in the way and it has the wrong flags LOS return false
 
@@ -1636,12 +1636,12 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 
 						if ( ((wTFlags & (UFLAG1_WALL|UFLAG1_BLOCK|UFLAG2_PLATFORM)) || pItemDef->m_Can & CAN_I_BLOCKLOS) && !((wTFlags & UFLAG2_WINDOW) && (flags & LOS_NB_WINDOWS)) )
 						{
-							WARNLOS(("pItem %0lx(%0x) %d,%d,%d - %d\n", (dword)pItem->GetUID(), pItem->GetDispID(), pItem->GetUnkPoint().m_x, pItem->GetUnkPoint().m_y, pItem->GetUnkPoint().m_z, Height));
+							WARNLOS(("pItem %0x(%0x) %d,%d,%d - %d\n", (dword)pItem->GetUID(), pItem->GetDispID(), pItem->GetUnkPoint().m_x, pItem->GetUnkPoint().m_y, pItem->GetUnkPoint().m_z, Height));
 							min_z = pItem->GetUnkPoint().m_z;
 							max_z = minimum(Height + min_z, UO_SIZE_Z);
 							WARNLOS(("wTFlags(0%x)\n", wTFlags));
 
-							WARNLOS(("pItem %0lx(%0x) Z check: %d,%d (Now: %d) (Dest: %d).\n", (dword)pItem->GetUID(), pItem->GetDispID(), min_z, max_z, ptNow.m_z, ptDst.m_z));
+							WARNLOS(("pItem %0x(%0x) Z check: %d,%d (Now: %d) (Dest: %d).\n", (dword)pItem->GetUID(), pItem->GetDispID(), min_z, max_z, ptNow.m_z, ptDst.m_z));
 							if ( min_z <= ptNow.m_z && max_z >= ptNow.m_z )
 							{
 								if ( ptNow.m_x != ptDst.m_x || ptNow.m_y != ptDst.m_y || min_z > ptDst.m_z || max_z < ptDst.m_z )

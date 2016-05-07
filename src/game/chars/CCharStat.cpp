@@ -264,7 +264,7 @@ void CChar::Stat_SetBase( STAT_TYPE i, short iVal )
 		default:
 			throw CSError(LOGL_CRIT, 0, "Stat_SetBase: index out of range");
 	}
-	
+
 	m_Stat[i].m_base = iVal;
 
 	if ( i == STAT_STR && iVal < iStatVal )
@@ -355,8 +355,6 @@ bool CChar::Stats_Regen(int64 iTimeDiff)
 			continue;
 
 		ushort iRate = Stats_GetRegenVal(i, true);
-		if (iRate < 0)
-			iRate = 0;
 
 		m_Stat[i].m_regen += (short)(iTimeDiff);
 		if ( m_Stat[i].m_regen < iRate )
@@ -439,7 +437,7 @@ ushort CChar::Stats_GetRegenVal(STAT_TYPE iStat, bool bGetTicks)
 			sprintf(sRegen, "REGEN%s", stat);
 			ushort iRate = (ushort)( GetDefNum(sRegen, true) ) * TICK_PER_SEC;
 			if ( iRate )
-				return maximum(0, iRate);
+				return iRate; //maximum(0, iRate);
 
 			return (ushort)(maximum(0, g_Cfg.m_iRegenRate[iStat]));
 		}

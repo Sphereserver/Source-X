@@ -40,7 +40,7 @@ static LPTSTR GetLastErrorText(LPTSTR lpszBuf, DWORD dwSize)
 	//		destination buffer
 
 	int nChars = CSError::GetSystemErrorMessage( GetLastError(), lpszBuf, dwSize );
-	sprintf( lpszBuf+nChars, " (0x%x)", GetLastError());
+	sprintf( lpszBuf+nChars, " (0x%lX)", GetLastError());
 	return lpszBuf;
 }
 
@@ -307,8 +307,8 @@ bailout1:
 	SC_ACTION scAction[3];
 	scAction[0].Type = SC_ACTION_RESTART;	// restart process on failure
 	scAction[0].Delay = 10000;				// wait 10 seconds before restarting
-	scAction[1].Type = SC_ACTION_RESTART;	
-	scAction[1].Delay = 10000;				
+	scAction[1].Type = SC_ACTION_RESTART;
+	scAction[1].Delay = 10000;
 	scAction[2].Type = SC_ACTION_RESTART;	// wait 2 minutes before restarting the third time
 	scAction[2].Delay = 120000;
 
@@ -317,7 +317,7 @@ bailout1:
 	sfaFailure.lpRebootMsg = NULL;	// no reboot message
 	sfaFailure.lpCommand = NULL;	// no command executed
 	sfaFailure.cActions = CountOf(scAction);		// number of actions
-	sfaFailure.lpsaActions = scAction;	// 
+	sfaFailure.lpsaActions = scAction;	//
 	if ( !ChangeServiceConfig2(schService, SERVICE_CONFIG_FAILURE_ACTIONS, &sfaFailure) )
 	{
 		// not critical, so no need to abort the service creation

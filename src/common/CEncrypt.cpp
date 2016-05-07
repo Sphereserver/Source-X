@@ -54,7 +54,7 @@ bool CCrypt::SetEncryptionType( ENCRYPTION_TYPE etWho )
 
 dword CCrypt::GetClientVer() const
 {
-	return( m_iClientVersion );
+	return m_iClientVersion;
 }
 
 bool CCrypt::IsValid() const
@@ -64,23 +64,23 @@ bool CCrypt::IsValid() const
 
 bool CCrypt::IsInit() const
 {
-	return( m_fInit );
+	return m_fInit;
 }
 
 CONNECT_TYPE CCrypt::GetConnectType() const
 {
-	return( m_ConnectType );
+	return m_ConnectType;
 }
 
 ENCRYPTION_TYPE CCrypt::GetEncryptionType() const
 {
-	return( m_GameEnc );
+	return m_GameEnc;
 }
 
 void CCrypt::ClearKeyTable(void)
 {
 	ADDTOCALLSTACK("CCrypt::ClearKeyTable");
-	
+
 	for ( size_t i = 0; i < client_keys.size(); i++ )
 	{
 		CCryptClientKey* key = client_keys.at(i);
@@ -107,7 +107,7 @@ void CCrypt::LoadKeyTable(CScript & s)
 		c->m_key_1 = s.GetArgVal();
 		c->m_key_2 = s.GetArgVal();
 		c->m_EncType = static_cast<ENCRYPTION_TYPE>(s.GetArgVal());
-		
+
 		client_keys.push_back(c);
 	}
 }
@@ -119,7 +119,7 @@ void CCrypt::addNoCryptKey(void)
 	c->m_client = 0;
 	c->m_key_1 = 0;
 	c->m_key_2 = 0;
-	c->m_EncType = ENC_NONE;	
+	c->m_EncType = ENC_NONE;
 	client_keys.push_back(c);
 }
 
@@ -131,20 +131,20 @@ void CCrypt::addNoCryptKey(void)
 // ===============================================================================================================
 
 const word CCrypt::packet_size[0xde] = {
-		0x0068, 0x0005, 0x0007, 0x8000, 0x0002, 0x0005, 0x0005, 0x0007, 0x000e, 0x0005, 0x000b, 0x0007, 0x8000, 0x0003, 0x8000, 0x003d, 
-		0x00d7, 0x8000, 0x8000, 0x000a, 0x0006, 0x0009, 0x8000, 0x8000, 0x8000, 0x8000, 0x8000, 0x0025, 0x8000, 0x0005, 0x0004, 0x0008, 
-		0x0013, 0x0008, 0x0003, 0x001a, 0x0007, 0x0014, 0x0005, 0x0002, 0x0005, 0x0001, 0x0005, 0x0002, 0x0002, 0x0011, 0x000f, 0x000a, 
-		0x0005, 0x8000, 0x0002, 0x0002, 0x000a, 0x028d, 0x8000, 0x0008, 0x0007, 0x0009, 0x8000, 0x8000, 0x8000, 0x0002, 0x0025, 0x8000, 
-		0x00c9, 0x8000, 0x8000, 0x0229, 0x02c9, 0x0005, 0x8000, 0x000b, 0x0049, 0x005d, 0x0005, 0x0009, 0x8000, 0x8000, 0x0006, 0x0002, 
-		0x8000, 0x8000, 0x8000, 0x0002, 0x000c, 0x0001, 0x000b, 0x006e, 0x006a, 0x8000, 0x8000, 0x0004, 0x0002, 0x0049, 0x8000, 0x0031, 
-		0x0005, 0x0009, 0x000f, 0x000d, 0x0001, 0x0004, 0x8000, 0x0015, 0x8000, 0x8000, 0x0003, 0x0009, 0x0013, 0x0003, 0x000e, 0x8000, 
-		0x001c, 0x8000, 0x0005, 0x0002, 0x8000, 0x0023, 0x0010, 0x0011, 0x8000, 0x0009, 0x8000, 0x0002, 0x8000, 0x000d, 0x0002, 0x8000, 
-		0x003e, 0x8000, 0x0002, 0x0027, 0x0045, 0x0002, 0x8000, 0x8000, 0x0042, 0x8000, 0x8000, 0x8000, 0x000b, 0x8000, 0x8000, 0x8000, 
-		0x0013, 0x0041, 0x8000, 0x0063, 0x8000, 0x0009, 0x8000, 0x0002, 0x8000, 0x001a, 0x8000, 0x0102, 0x0135, 0x0033, 0x8000, 0x8000, 
-		0x0003, 0x0009, 0x0009, 0x0009, 0x0095, 0x8000, 0x8000, 0x0004, 0x8000, 0x8000, 0x0005, 0x8000, 0x8000, 0x8000, 0x8000, 0x000d, 
-		0x8000, 0x8000, 0x8000, 0x8000, 0x8000, 0x0040, 0x0009, 0x8000, 0x8000, 0x0003, 0x0006, 0x0009, 0x0003, 0x8000, 0x8000, 0x8000, 
-		0x0024, 0x8000, 0x8000, 0x8000, 0x0006, 0x00cb, 0x0001, 0x0031, 0x0002, 0x0006, 0x0006, 0x0007, 0x8000, 0x0001, 0x8000, 0x004e, 
-		0x8000, 0x0002, 0x0019, 0x8000, 0x8000, 0x8000, 0x8000, 0x8000, 0x8000, 0x010c, 0x8000, 0x8000, 0x0009, 0x8000 
+		0x0068, 0x0005, 0x0007, 0x8000, 0x0002, 0x0005, 0x0005, 0x0007, 0x000e, 0x0005, 0x000b, 0x0007, 0x8000, 0x0003, 0x8000, 0x003d,
+		0x00d7, 0x8000, 0x8000, 0x000a, 0x0006, 0x0009, 0x8000, 0x8000, 0x8000, 0x8000, 0x8000, 0x0025, 0x8000, 0x0005, 0x0004, 0x0008,
+		0x0013, 0x0008, 0x0003, 0x001a, 0x0007, 0x0014, 0x0005, 0x0002, 0x0005, 0x0001, 0x0005, 0x0002, 0x0002, 0x0011, 0x000f, 0x000a,
+		0x0005, 0x8000, 0x0002, 0x0002, 0x000a, 0x028d, 0x8000, 0x0008, 0x0007, 0x0009, 0x8000, 0x8000, 0x8000, 0x0002, 0x0025, 0x8000,
+		0x00c9, 0x8000, 0x8000, 0x0229, 0x02c9, 0x0005, 0x8000, 0x000b, 0x0049, 0x005d, 0x0005, 0x0009, 0x8000, 0x8000, 0x0006, 0x0002,
+		0x8000, 0x8000, 0x8000, 0x0002, 0x000c, 0x0001, 0x000b, 0x006e, 0x006a, 0x8000, 0x8000, 0x0004, 0x0002, 0x0049, 0x8000, 0x0031,
+		0x0005, 0x0009, 0x000f, 0x000d, 0x0001, 0x0004, 0x8000, 0x0015, 0x8000, 0x8000, 0x0003, 0x0009, 0x0013, 0x0003, 0x000e, 0x8000,
+		0x001c, 0x8000, 0x0005, 0x0002, 0x8000, 0x0023, 0x0010, 0x0011, 0x8000, 0x0009, 0x8000, 0x0002, 0x8000, 0x000d, 0x0002, 0x8000,
+		0x003e, 0x8000, 0x0002, 0x0027, 0x0045, 0x0002, 0x8000, 0x8000, 0x0042, 0x8000, 0x8000, 0x8000, 0x000b, 0x8000, 0x8000, 0x8000,
+		0x0013, 0x0041, 0x8000, 0x0063, 0x8000, 0x0009, 0x8000, 0x0002, 0x8000, 0x001a, 0x8000, 0x0102, 0x0135, 0x0033, 0x8000, 0x8000,
+		0x0003, 0x0009, 0x0009, 0x0009, 0x0095, 0x8000, 0x8000, 0x0004, 0x8000, 0x8000, 0x0005, 0x8000, 0x8000, 0x8000, 0x8000, 0x000d,
+		0x8000, 0x8000, 0x8000, 0x8000, 0x8000, 0x0040, 0x0009, 0x8000, 0x8000, 0x0003, 0x0006, 0x0009, 0x0003, 0x8000, 0x8000, 0x8000,
+		0x0024, 0x8000, 0x8000, 0x8000, 0x0006, 0x00cb, 0x0001, 0x0031, 0x0002, 0x0006, 0x0006, 0x0007, 0x8000, 0x0001, 0x8000, 0x004e,
+		0x8000, 0x0002, 0x0019, 0x8000, 0x8000, 0x8000, 0x8000, 0x8000, 0x8000, 0x010c, 0x8000, 0x8000, 0x0009, 0x8000
 };
 
 int CCrypt::GetPacketSize(byte packet) // static
@@ -539,7 +539,7 @@ bool CCrypt::SetClientVer( lpctstr pszVersion )
 {
 	ADDTOCALLSTACK("CCrypt::SetClientVer");
 	int iVer = 0;
-	
+
 	iVer = GetVersionFromString(pszVersion);
 
 	m_fInit = false;
@@ -580,13 +580,9 @@ bool CCrypt::Init( dword dwIP, byte * pEvent, size_t iLen, bool isclientKr )
 	bool bReturn = true;
 
 #ifdef DEBUG_CRYPT_MSGS
-#ifndef _WIN32
-		fprintf(stderr, "Called Init Seed(0x%x)\n", dwIP);
-#else
-		DEBUG_ERR(("Called Init Seed(0x%x)\n", dwIP));
+		DEBUG_MSG(("Called Init Seed(0x%x)\n", dwIP));
 #endif
-#endif
-	
+
 	if ( iLen == 62 ) // SERVER_Login 1.26.0
 	{
 		LoginCryptStart( dwIP, pEvent, iLen );
@@ -605,12 +601,12 @@ bool CCrypt::Init( dword dwIP, byte * pEvent, size_t iLen, bool isclientKr )
 		else
 		{
 #ifdef DEBUG_CRYPT_MSGS
-			DEBUG_MSG(("Odd login message length %d? [CCrypt::Init()]\n", iLen));
+			DEBUG_MSG(("Odd login message length %" PRIuSIZE_T "? [CCrypt::Init()]\n", iLen));
 #endif
 			bReturn = false;
 		}
 	}
-	
+
 	m_fRelayPacket = false;
 	return bReturn;
 }
@@ -624,7 +620,6 @@ void CCrypt::InitFast( dword dwIP, CONNECT_TYPE ctInit, bool fRelay)
 	 *  fRelay = Switched via relay packet (server selection) / Expect next game packet to be encrypted twice
 	 **/
 	ADDTOCALLSTACK("CCrypt::InitFast");
-	// fprintf( stderr, "Called FastInit\n" );
 
 	SetConnectType( ctInit );
 	m_seed = dwIP;
@@ -652,16 +647,16 @@ void CCrypt::LoginCryptStart( dword dwIP, byte * pEvent, size_t iLen )
 	char pszAccountNameCheck[ MAX_ACCOUNT_NAME_SIZE ];
 
 	ASSERT( iLen <= sizeof(m_Raw) );
-	memcpy( m_Raw, pEvent, iLen );	
+	memcpy( m_Raw, pEvent, iLen );
 	m_seed = dwIP;
 	SetConnectType( CONNECT_LOGIN );
-	
+
 	dword m_tmp_CryptMaskLo = (((~m_seed) ^ 0x00001357) << 16) | ((( m_seed) ^ 0xffffaaaa) & 0x0000ffff);
 	dword m_tmp_CryptMaskHi = ((( m_seed) ^ 0x43210000) >> 16) | (((~m_seed) ^ 0xabcdffff) & 0xffff0000);
-	
+
 	SetClientVerIndex(0);
 	SetCryptMask(m_tmp_CryptMaskHi, m_tmp_CryptMaskLo);
-	
+
 	size_t i = 0, iAccountNameLen = 0;
 	for (;;)
 	{
@@ -669,26 +664,22 @@ void CCrypt::LoginCryptStart( dword dwIP, byte * pEvent, size_t iLen )
 		{
 			// Unknown client !!! Set as unencrypted and let Sphere do the rest.
 #ifdef DEBUG_CRYPT_MSGS
-			DEBUG_ERR(("Unknown client, i = %u\n", i));
+			DEBUG_ERR(("Unknown client, i = %" PRIuSIZE_T "\n", i));
 #endif
 			SetClientVerIndex(0);
 			SetCryptMask(m_tmp_CryptMaskHi, m_tmp_CryptMaskLo); // Hi - Lo
 			break;
 		}
-		
+
 		SetCryptMask(m_tmp_CryptMaskHi, m_tmp_CryptMaskLo);
 		// Set client version properties
 		SetClientVerIndex(i);
-		
+
 		// Test Decrypt
 		Decrypt( m_Raw, pEvent, iLen );
 
 #ifdef DEBUG_CRYPT_MSGS
-#ifndef _WIN32
-		fprintf(stderr, "LoginCrypt %u (%x) type %x-%x\n", i, GetClientVer(), m_Raw[0], pEvent[0]);
-#else
-		DEBUG_ERR(("LoginCrypt %u (%x) type %x-%x\n", i, GetClientVer(), m_Raw[0], pEvent[0]));
-#endif
+		DEBUG_MSG(("LoginCrypt %" PRIuSIZE_T " (%" PRIu32 ") type %" PRIx8 "-%" PRIx8 "\n", i, GetClientVer(), m_Raw[0], pEvent[0]));
 #endif
 		bool isValid = ( m_Raw[0] == 0x80 && m_Raw[30] == 0x00 && m_Raw[60] == 0x00 );
 		if ( isValid )
@@ -715,7 +706,7 @@ void CCrypt::LoginCryptStart( dword dwIP, byte * pEvent, size_t iLen )
 			if ( isValid == true )
 			{
 				lpctstr sRawAccountName = reinterpret_cast<lpctstr>( m_Raw + 1 );
-				iAccountNameLen = Str_GetBare(pszAccountNameCheck, sRawAccountName, MAX_ACCOUNT_NAME_SIZE, ACCOUNT_NAME_VALID_CHAR);
+				iAccountNameLen = (size_t)Str_GetBare(pszAccountNameCheck, sRawAccountName, MAX_ACCOUNT_NAME_SIZE, ACCOUNT_NAME_VALID_CHAR);
 
 				// (matex) TODO: What for? We do not really need pszAccountNameCheck here do we?!
 				if (iAccountNameLen > 0)
@@ -727,7 +718,7 @@ void CCrypt::LoginCryptStart( dword dwIP, byte * pEvent, size_t iLen )
 
 					continue;
 				}
-				
+
 				// set seed, clientversion, cryptmask
 				SetClientVerIndex(i);
 				SetCryptMask(m_tmp_CryptMaskHi, m_tmp_CryptMaskLo);
@@ -750,7 +741,7 @@ void CCrypt::GameCryptStart( dword dwIP, byte * pEvent, size_t iLen )
 	byte m_Raw[ MAX_BUFFER ];
 	ASSERT( iLen <= sizeof(m_Raw) );
 	memcpy( m_Raw, pEvent, iLen );
-	
+
 	m_seed = dwIP;
 	SetConnectType( CONNECT_GAME );
 
@@ -762,20 +753,16 @@ void CCrypt::GameCryptStart( dword dwIP, byte * pEvent, size_t iLen )
 
 		if ( GetEncryptionType() == ENC_TFISH || GetEncryptionType() == ENC_BTFISH )
 			InitTwoFish();
-		
+
 		if ( GetEncryptionType() == ENC_BFISH || GetEncryptionType() == ENC_BTFISH )
 			InitBlowFish();
-	
+
 		Decrypt( m_Raw, pEvent, iLen );
-		
+
 #ifdef DEBUG_CRYPT_MSGS
-#ifndef _WIN32
-		fprintf(stderr, "GameCrypt %u (%x) type %x-%x\n", i, GetClientVer(), m_Raw[0], pEvent[0]);
-#else
-		DEBUG_ERR(("GameCrypt %u (%x) type %x-%x\n", i, GetClientVer(), m_Raw[0], pEvent[0]));
+		DEBUG_MSG(("GameCrypt %" PRIuSIZE_T " (%" PRIu32 ") type %" PRIx8 "-%" PRIx8 "\n", i, GetClientVer(), m_Raw[0], pEvent[0]));
 #endif
-#endif
-		
+
 		if ( m_Raw[0] == 0x91 && m_Raw[34] == 0x00 && m_Raw[64] == 0x00 )
 		{
 			// Ok the new detected encryption is ok
@@ -783,7 +770,7 @@ void CCrypt::GameCryptStart( dword dwIP, byte * pEvent, size_t iLen )
 			break;
 		}
 	}
-	
+
 	// Well no ecryption guessed, set it to none and let Sphere do the dirty job :P
 	if ( !bOut )
 	{
@@ -793,11 +780,11 @@ void CCrypt::GameCryptStart( dword dwIP, byte * pEvent, size_t iLen )
 	{
 		if ( GetEncryptionType() == ENC_TFISH || GetEncryptionType() == ENC_BTFISH )
 			InitTwoFish();
-		
+
 		if ( GetEncryptionType() == ENC_BFISH || GetEncryptionType() == ENC_BTFISH )
 			InitBlowFish();
 	}
-		
+
 	m_fInit = true;
 }
 
@@ -832,7 +819,7 @@ void CCrypt::RelayGameCryptStart( byte * pOutput, const byte * pInput, size_t iL
 	dword dwNewSeed = m_MasterHi ^ m_MasterLo;
 	dwNewSeed = ((dwNewSeed >> 24) & 0xFF) | ((dwNewSeed >> 8) & 0xFF00) | ((dwNewSeed << 8) & 0xFF0000) | ((dwNewSeed << 24) & 0xFF000000);
 	dwNewSeed ^= m_seed;
-	
+
 	// set seed
 	m_seed = dwNewSeed;
 
@@ -887,7 +874,7 @@ void CCrypt::Encrypt( byte * pOutput, const byte * pInput, size_t iLen )
 	{
 		return;
 	}
-	
+
 	if ( GetEncryptionType() == ENC_TFISH )
 	{
 		EncryptMD5( pOutput, pInput, iLen );
@@ -915,7 +902,7 @@ void CCrypt::Decrypt( byte * pOutput, const byte * pInput, size_t iLen  )
 		RelayGameCryptStart(pOutput, pInput, iLen );
 		return;
 	}
-	
+
 	if ( GetEncryptionType() == ENC_NONE )
 	{
 		memcpy( pOutput, pInput, iLen );
@@ -926,10 +913,10 @@ void CCrypt::Decrypt( byte * pOutput, const byte * pInput, size_t iLen  )
 	{
 		DecryptTwoFish( pOutput, pInput, iLen );
 	}
-	
+
 	if ( GetEncryptionType() == ENC_BFISH || GetEncryptionType() == ENC_BTFISH )
 	{
-		
+
 		if ( GetEncryptionType() == ENC_BTFISH )
 		{
 			DecryptBlowFish( pOutput, pOutput, iLen );
@@ -955,7 +942,7 @@ void CCrypt::EncryptMD5( byte * pOutput, const byte * pInput, size_t iLen )
 void CCrypt::DecryptBlowFish( byte * pOutput, const byte * pInput, size_t iLen )
 {
 	ADDTOCALLSTACK("CCrypt::DecryptBlowFish");
-	while ( (m_gameStreamPos + iLen) > CRYPT_GAMETABLE_TRIGGER) 
+	while ( (m_gameStreamPos + iLen) > CRYPT_GAMETABLE_TRIGGER)
 	{
 		size_t lenOld = CRYPT_GAMETABLE_TRIGGER - m_gameStreamPos;
 
@@ -981,7 +968,7 @@ void CCrypt::DecryptTwoFish( byte * pOutput, const byte * pInput, size_t iLen )
 {
 	ADDTOCALLSTACK("CCrypt::DecryptTwoFish");
 	byte tmpBuff[TFISH_RESET];
-	
+
 	for ( size_t i = 0; i < iLen; i++ )
 	{
 		if ( tf_position >= TFISH_RESET )
@@ -1005,12 +992,12 @@ byte CCrypt::DecryptBFByte( byte bEnc )
 	m_gameBlockPos--;
 	byte result = bEnc ^ m_Key.u_cKey[m_gameBlockPos];
 	m_Key.u_cKey[m_gameBlockPos] = bEnc;
-	
+
 	return result;
 }
 
 void CCrypt::DecryptOld( byte * pOutput, const byte * pInput, size_t iLen  )
-{	
+{
 	ADDTOCALLSTACK("CCrypt::DecryptOld");
 	if ( GetClientVer() >= 0x125370 )
 	{
@@ -1046,7 +1033,7 @@ void CCrypt::DecryptOld( byte * pOutput, const byte * pInput, size_t iLen  )
 		}
 		return;
 	}
-		
+
 	if ( GetClientVer() ) // CLIENT_VER <= 0x125350
 	{
 		for ( size_t i = 0; i < iLen; i++ )
@@ -1059,7 +1046,7 @@ void CCrypt::DecryptOld( byte * pOutput, const byte * pInput, size_t iLen  )
 		}
 		return;
 	}
-	
+
 	if ( pOutput != pInput )
 	{
 		memcpy( pOutput, pInput, iLen );
@@ -1070,7 +1057,7 @@ void CCrypt::InitMD5(byte * ucInitialize)
 {
 	ADDTOCALLSTACK("CCrypt::InitMD5");
 	md5_position = 0;
-	
+
 	md5_engine.update( ucInitialize, TFISH_RESET );
 	md5_engine.finalize();
 	md5_engine.numericDigest( &md5_digest[0] );
@@ -1080,17 +1067,19 @@ void CCrypt::InitTwoFish()
 {
 	ADDTOCALLSTACK("CCrypt::InitTwoFish");
 	// Taken from t2tfish.cpp / CCryptNew.cpp
-	
+
 	dword dwIP = UNPACKDWORD( ((byte*) & m_seed ) );
-	
-	// fprintf( stderr, "GameCrypt Seed (%x)(%i-%x)\n", m_seed, dwIP, dwIP );
-	
+
+#ifdef DEBUG_CRYPT_MSGS
+	DEBUG_MSG(("GameCrypt Seed (%x)(%i-%x)\n", m_seed, dwIP, dwIP));
+#endif
+
 	// ---------------------------------------------
 	memset(&tf_key, 0, sizeof(keyInstance));
 	memset(&tf_cipher, 0, sizeof(cipherInstance));
 	tf_position = 0;
 	// ---------------------------------------------
-	
+
 	makeKey( &tf_key, 1 /*DIR_DECRYPT*/, 0x80, NULL );
 	cipherInit( &tf_cipher, 1/*MODE_ECB*/, NULL );
 

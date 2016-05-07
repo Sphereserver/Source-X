@@ -988,11 +988,11 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 		}
 		case LAYER_FLAG_Poison:
 			StatFlag_Set(STATF_Poisoned);
-			UpdateModeFlag();		
-			if (pClient && IsSetOF(OF_Buffs))		
-			{		
-				pClient->removeBuff(BI_POISON);		
-				pClient->addBuff(BI_POISON, 1017383, 1070722, 2);		
+			UpdateModeFlag();
+			if (pClient && IsSetOF(OF_Buffs))
+			{
+				pClient->removeBuff(BI_POISON);
+				pClient->addBuff(BI_POISON, 1017383, 1070722, 2);
 			}
 			return;
 		case LAYER_SPELL_Night_Sight:
@@ -1403,9 +1403,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 				if ( pCaster != NULL )
 				{
 					iStatEffect = (400 + pCaster->Skill_GetBase(SKILL_EVALINT) - Skill_GetBase(SKILL_MAGICRESISTANCE)) / 10;
-					if ( iStatEffect < 0 )
-						iStatEffect = 0;
-					else if ( iStatEffect > Stat_GetVal(STAT_INT) )
+					if ( iStatEffect > Stat_GetVal(STAT_INT) )
 						iStatEffect = (short)(Stat_GetVal(STAT_INT));
 
 					pSpell->m_itSpell.m_spelllevel = iStatEffect;
@@ -1491,8 +1489,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					}
 				}
 			}
-			return; 
-		
+			return;
+
 
 		case SPELL_Trance:			// 111 // temporarily increases your meditation skill.
 			Skill_SetBase( SKILL_MEDITATION, Skill_GetBase( SKILL_MEDITATION ) + iStatEffect );
@@ -1742,7 +1740,7 @@ CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iSki
 	//   ATTR_MAGIC without ATTR_MOVE_NEVER is dispellable !
 
 
-	// Check if there's any previous effect to clear before apply the new effect	
+	// Check if there's any previous effect to clear before apply the new effect
 	for ( CItem *pSpellPrev = GetContentHead(); pSpellPrev != NULL; pSpellPrev = pSpellPrev->GetNext() )
 	{
 		if ( layer != pSpellPrev->GetEquipLayer() )
@@ -1916,7 +1914,7 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 
 	for ( int ix = minX; ix <= maxX; ix++ )
 	{
-		for ( int iy = minY; iy <= maxY; iy++) 
+		for ( int iy = minY; iy <= maxY; iy++)
 		{
 			bool fGoodLoc = true;
 
@@ -2253,7 +2251,7 @@ bool CChar::Spell_TargCheck()
 	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
 	if ( pSpellDef == NULL )
 	{
-		DEBUG_ERR(( "Bad Spell %d, uid 0%0lx\n", m_atMagery.m_Spell, (dword) GetUID()));
+		DEBUG_ERR(( "Bad Spell %d, uid 0%0x\n", m_atMagery.m_Spell, (dword)GetUID()));
 		return false;
 	}
 
@@ -2812,7 +2810,7 @@ bool CChar::Spell_CastDone()
 	// If we are visible, play sound.
 	if ( !IsStatFlag( STATF_Insubstantial) )
 		Sound( pSpellDef->m_sound );
-	
+
 	// At this point we should gain skill if precasting is enabled
 	if ( IsClient() && IsSetMagicFlags(MAGICF_PRECAST) && !pSpellDef->IsSpellType(SPELLFLAG_NOPRECAST) )
 	{

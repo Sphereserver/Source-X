@@ -271,8 +271,8 @@ bool CItemBase::IsTypeWeapon( IT_TYPE type )  // static
 		case IT_WEAPON_MACE_PICK:
 		case IT_WEAPON_AXE:
 		case IT_WEAPON_XBOW:
-		case IT_WEAPON_THROWING:	
-		case IT_WEAPON_MACE_SMITH:	
+		case IT_WEAPON_THROWING:
+		case IT_WEAPON_MACE_SMITH:
 		case IT_WEAPON_MACE_SHARP:
 		case IT_WEAPON_SWORD:
 		case IT_WEAPON_FENCE:
@@ -778,7 +778,7 @@ height_t CItemBase::GetItemHeight( ITEMID_TYPE id, dword & wBlockThis ) // stati
 			return( pBase->GetHeight() );
 		}
 	}
-	
+
 	// Not already loaded.
 
 	CUOItemTypeRec_HS tiledata;
@@ -1305,7 +1305,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 					sVal.FormatVal( m_type );
 				else
 					sVal = pRes->GetResourceName();
-				
+
 			}
 			break;
 		case IBC_VALUE:
@@ -1618,7 +1618,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 				return false;
 			m_ttEquippable.m_StrReq = s.GetArgVal();
 			break;
-		
+
 		case IBC_RESDISPDNID:
 			SetResDispDnId((word)(g_Cfg.ResourceGetIndexType(RES_ITEMDEF, s.GetArgStr())));
 			break;
@@ -1859,7 +1859,7 @@ int CItemBaseMulti::GetMaxDist() const
 	return( iDist+1 );
 }
 
-enum MLC_TYPE 
+enum MLC_TYPE
 {
 	MLC_BASECOMPONENT,
 	MLC_COMPONENT,
@@ -2173,8 +2173,6 @@ bool CItemBase::SetMaxAmount(word amount)
 	if (!IsStackableType())
 		return false;
 
-	if (amount > UINT16_MAX)
-		amount = UINT16_MAX;
 	SetDefNum("MaxAmount", amount, false);
 	return true;
 }

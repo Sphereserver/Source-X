@@ -110,19 +110,56 @@ struct RESOURCE_ID_BASE : public CUIDBase
 #define RES_GET_INDEX(dw)	((dw)&RES_INDEX_MASK)
 
 public:
-	RES_TYPE GetResType() const;
-	int GetResIndex() const;
-	int GetResPage() const;
-	bool operator== ( const RESOURCE_ID_BASE & rid ) const;
+	RES_TYPE GetResType() const
+	{
+		dword dwVal = RES_GET_TYPE(m_dwInternalVal);
+		return static_cast<RES_TYPE>(dwVal);
+	}
+	int GetResIndex() const
+	{
+		return RES_GET_INDEX(m_dwInternalVal);
+	}
+	int GetResPage() const
+	{
+		dword dwVal = m_dwInternalVal >> RES_PAGE_SHIFT;
+		dwVal &= RES_PAGE_MASK;
+		return(dwVal);
+	}
+	bool operator == (const RESOURCE_ID_BASE & rid) const
+	{
+		return(rid.m_dwInternalVal == m_dwInternalVal);
+	}
 };
 
 struct RESOURCE_ID : public RESOURCE_ID_BASE
 {
-	RESOURCE_ID();
-	RESOURCE_ID( RES_TYPE restype );
-	RESOURCE_ID( RES_TYPE restype, dword index );
-	RESOURCE_ID( RES_TYPE restype, dword index, int iPage );
-	RESOURCE_ID_BASE & operator = ( const RESOURCE_ID_BASE & rid );
+	RESOURCE_ID()
+	{
+		InitUID();
+	}
+	RESOURCE_ID(RES_TYPE restype)
+	{
+		// single instance type.
+		m_dwInternalVal = UID_F_RESOURCE | ((restype) << RES_TYPE_SHIFT);
+	}
+	RESOURCE_ID(RES_TYPE restype, int index)
+	{
+		ASSERT(index < RES_INDEX_MASK);
+		m_dwInternalVal = UID_F_RESOURCE | ((restype) << RES_TYPE_SHIFT) | (index);
+	}
+	RESOURCE_ID(RES_TYPE restype, int index, int iPage)
+	{
+		ASSERT(index < RES_INDEX_MASK);
+		ASSERT(iPage < RES_PAGE_MASK);
+		m_dwInternalVal = UID_F_RESOURCE | ((restype) << RES_TYPE_SHIFT) | ((iPage) << RES_PAGE_SHIFT) | (index);
+	}
+	RESOURCE_ID_BASE & operator = (const RESOURCE_ID_BASE & rid)
+	{
+		ASSERT(rid.IsValidUID());
+		ASSERT(rid.IsResource());
+		m_dwInternalVal = rid.GetPrivateUID();
+		return *this;
+	}
 };
 
 //*********************************************************
@@ -133,12 +170,31 @@ private:
 	RESOURCE_ID m_rid;	// A RES_SKILL, RES_ITEMDEF, or RES_TYPEDEF
 	int64 m_iQty;			// How much of this ?
 public:
-	RESOURCE_ID GetResourceID() const;
-	void SetResourceID( RESOURCE_ID rid, int iQty );
-	RES_TYPE GetResType() const;
-	int GetResIndex() const;
-	int64 GetResQty() const;
-	void SetResQty( int64 wQty );
+	RESOURCE_ID GetResourceID() const
+	{
+		return m_rid;
+	}
+	void SetResourceID(RESOURCE_ID rid, int iQty)
+	{
+		m_rid = rid;
+		m_iQty = iQty;
+	}
+	RES_TYPE GetResType() const
+	{
+		return m_rid.GetResType();
+	}
+	int GetResIndex() const
+	{
+		return m_rid.GetResIndex();
+	}
+	int64 GetResQty() const
+	{
+		return m_iQty;
+	}
+	void SetResQty(int64 wQty)
+	{
+		m_iQty = wQty;
+	}
 	inline bool Load( lptstr & arg )
 	{
 		return Load( const_cast<lpctstr&>(arg) );
@@ -198,14 +254,28 @@ private:
 	bool m_fOpenScript;	// NULL context may be legit.
 	const CScript * m_pPrvScriptContext;	// previous general context before this was opened.
 private:
-	void Init();
+	void Init()
+	{
+		m_fOpenScript = false;
+	}
+
 public:
 	static const char *m_sClassName;
 	void OpenScript( const CScript * pScriptContext );
 	void Close();
-	CScriptFileContext();
-	explicit CScriptFileContext( const CScript * pScriptContext );
-	~CScriptFileContext();
+	CScriptFileContext() : m_pPrvScriptContext(NULL)
+	{
+		Init();
+	}
+	explicit CScriptFileContext(const CScript * pScriptContext)
+	{
+		Init();
+		OpenScript(pScriptContext);
+	}
+	~CScriptFileContext()
+	{
+		Close();
+	}
 
 private:
 	CScriptFileContext(const CScriptFileContext& copy);
@@ -220,14 +290,27 @@ private:
 	bool m_fOpenObject;	// NULL context may be legit.
 	const CScriptObj * m_pPrvObjectContext;	// previous general context before this was opened.
 private:
-	void Init();
+	void Init()
+	{
+		m_fOpenObject = false;
+	}
 public:
 	static const char *m_sClassName;
 	void OpenObject( const CScriptObj * pObjectContext );
 	void Close();
-	CScriptObjectContext();
-	explicit CScriptObjectContext( const CScriptObj * pObjectContext );
-	~CScriptObjectContext();
+	CScriptObjectContext() : m_pPrvObjectContext(NULL)
+	{
+		Init();
+	}
+	explicit CScriptObjectContext(const CScriptObj * pObjectContext)
+	{
+		Init();
+		OpenObject(pObjectContext);
+	}
+	~CScriptObjectContext()
+	{
+		Close();
+	}
 
 private:
 	CScriptObjectContext(const CScriptObjectContext& copy);
@@ -249,13 +332,25 @@ private:
 	CSTime m_dateChange;	// real world time/date of last change.
 
 private:
-	void Init();
+	void Init()
+	{
+		m_iOpenCount = 0;
+		m_timeLastAccess.Init();
+		m_dwSize = UINT32_MAX;			// Compare to see if this has changed.
+	}
 	bool CheckForChange();
 
 public:
 	static const char *m_sClassName;
-	explicit CResourceScript( lpctstr pszFileName );
-	CResourceScript();
+	explicit CResourceScript(LPCTSTR pszFileName)
+	{
+		Init();
+		SetFilePath(pszFileName);
+	}
+	CResourceScript()
+	{
+		Init();
+	}
 
 private:
 	CResourceScript(const CResourceScript& copy);
@@ -322,14 +417,30 @@ private:
 	CResourceDef& operator=(const CResourceDef& other);
 
 public:
-	RESOURCE_ID GetResourceID() const;
-	RES_TYPE GetResType() const;
-	int GetResPage() const;
-	void CopyDef( const CResourceDef * pLink );
+	RESOURCE_ID GetResourceID() const
+	{
+		return m_rid;
+	}
+	RES_TYPE GetResType() const
+	{
+		return m_rid.GetResType();
+	}
+	int GetResPage() const
+	{
+		return m_rid.GetResPage();
+	}
+
+	void CopyDef(const CResourceDef * pLink)
+	{
+		m_pDefName = pLink->m_pDefName;
+	}
 
 	// Get the name of the resource item. (Used for saving) may be number or name
 	lpctstr GetResourceName() const;
-	virtual lpctstr GetName() const;	// default to same as the DEFNAME name.
+	virtual lpctstr GetName() const	// default to same as the DEFNAME name.
+	{
+		return GetResourceName();
+	}
 
 	// Give it another DEFNAME= even if it already has one. it's ok to have multiple names.
 	bool SetResourceName( lpctstr pszName );
@@ -363,9 +474,21 @@ public:
 
 public:
 
-	void AddRefInstance();
-	void DelRefInstance();
-	dword GetRefInstances() const;
+	void AddRefInstance()
+	{
+		m_lRefInstances++;
+	}
+	void DelRefInstance()
+	{
+#ifdef _DEBUG
+		ASSERT(m_lRefInstances > 0);
+#endif
+		m_lRefInstances--;
+	}
+	dword GetRefInstances() const
+	{
+		return m_lRefInstances;
+	}
 
 	bool IsLinked() const;	// been loaded from the scripts ?
 	CResourceScript * GetLinkFile() const;
@@ -394,15 +517,24 @@ public:
 	static const char *m_sClassName;
 	const CSString m_sName;
 public:
-	CResourceNamed( RESOURCE_ID rid, lpctstr pszName );
-	virtual ~CResourceNamed();
+	CResourceNamed(RESOURCE_ID rid, LPCTSTR pszName) :
+		CResourceLink(rid),
+		m_sName(pszName)
+	{
+	}
+	virtual ~CResourceNamed()
+	{
+	}
 
 private:
 	CResourceNamed(const CResourceNamed& copy);
 	CResourceNamed& operator=(const CResourceNamed& other);
 
 public:
-	lpctstr GetName() const;
+	lpctstr GetName() const
+	{
+		return m_sName;
+	}
 };
 
 //***********************************************************
@@ -413,18 +545,53 @@ private:
 	CResourceLink* m_pLink;
 public:
 	static const char *m_sClassName;
-	CResourceRef();
-	CResourceRef( CResourceLink* pLink );
-	CResourceRef(const CResourceRef& copy);
-	~CResourceRef();
-	CResourceRef& operator=(const CResourceRef& other);
+	CResourceRef()
+	{
+		m_pLink = NULL;
+	}
+	CResourceRef(CResourceLink* pLink) : m_pLink(pLink)
+	{
+		ASSERT(pLink);
+		pLink->AddRefInstance();
+	}
+	CResourceRef(const CResourceRef& copy)
+	{
+		m_pLink = copy.m_pLink;
+		if (m_pLink != NULL)
+			m_pLink->AddRefInstance();
+	}
+	~CResourceRef()
+	{
+		if (m_pLink != NULL)
+			m_pLink->DelRefInstance();
+	}
+	CResourceRef& operator=(const CResourceRef& other)
+	{
+		if (this != &other)
+			SetRef(other.m_pLink);
+		return *this;
+	}
 
 public:
-	CResourceLink* GetRef() const;
-	void SetRef( CResourceLink* pLink );
-	operator CResourceLink*() const;
-};
+	CResourceLink* GetRef() const
+	{
+		return m_pLink;
+	}
+	void SetRef(CResourceLink* pLink)
+	{
+		if (m_pLink != NULL)
+			m_pLink->DelRefInstance();
 
+		m_pLink = pLink;
+
+		if (pLink != NULL)
+			pLink->AddRefInstance();
+	}
+	operator CResourceLink*() const
+	{
+		return GetRef();
+	}
+};
 class CResourceRefArray : public CSPtrTypeArray<CResourceRef>
 {
 	// Define a list of pointer references to resource. (Not owned by the list)
@@ -465,7 +632,7 @@ class CResourceHashArray : public CSObjSortArray< CResourceDef*, RESOURCE_ID_BAS
 	// Sorted array of RESOURCE_ID
 public:
 	static const char *m_sClassName;
-	CResourceHashArray();
+	CResourceHashArray() { }
 private:
 	CResourceHashArray(const CResourceHashArray& copy);
 	CResourceHashArray& operator=(const CResourceHashArray& other);
@@ -479,21 +646,36 @@ public:
 	static const char *m_sClassName;
 	CResourceHashArray m_Array[16];
 public:
-	CResourceHash();
+	CResourceHash() { }
 private:
 	CResourceHash(const CResourceHash& copy);
 	CResourceHash& operator=(const CResourceHash& other);
 private:
-	int GetHashArray( RESOURCE_ID_BASE rid ) const;
+	int GetHashArray(RESOURCE_ID_BASE rid) const
+	{
+		return (rid.GetResIndex() & 0x0F);
+	}
 public:
 	inline size_t BadIndex() const
 	{
-		return( m_Array[0].BadIndex() );
+		return m_Array[0].BadIndex();
 	}
-	size_t FindKey( RESOURCE_ID_BASE rid ) const;
-	CResourceDef* GetAt( RESOURCE_ID_BASE rid, size_t index ) const;
-	size_t AddSortKey( RESOURCE_ID_BASE rid, CResourceDef* pNew );
-	void SetAt( RESOURCE_ID_BASE rid, size_t index, CResourceDef* pNew );
+	size_t FindKey(RESOURCE_ID_BASE rid) const
+	{
+		return m_Array[GetHashArray(rid)].FindKey(rid);
+	}
+	CResourceDef* GetAt(RESOURCE_ID_BASE rid, size_t index) const
+	{
+		return m_Array[GetHashArray(rid)].GetAt(index);
+	}
+	size_t AddSortKey(RESOURCE_ID_BASE rid, CResourceDef* pNew)
+	{
+		return m_Array[GetHashArray(rid)].AddSortKey(pNew, rid);
+	}
+	void SetAt(RESOURCE_ID_BASE rid, size_t index, CResourceDef* pNew)
+	{
+		m_Array[GetHashArray(rid)].SetAt(index, pNew);
+	}
 };
 
 //*************************************************
@@ -501,7 +683,7 @@ public:
 struct CSStringSortArray : public CSObjSortArray< tchar*, tchar* >
 {
 public:
-	CSStringSortArray();
+	CSStringSortArray() { }
 private:
 	CSStringSortArray(const CSStringSortArray& copy);
 	CSStringSortArray& operator=(const CSStringSortArray& other);
@@ -558,7 +740,10 @@ public:
 	lpctstr ResourceGetName( RESOURCE_ID_BASE rid ) const;
 	CScriptObj * ResourceGetDefByName( RES_TYPE restype, lpctstr pszName );
 	bool ResourceLock( CResourceLock & s, RESOURCE_ID_BASE rid );
-	bool ResourceLock( CResourceLock & s, RES_TYPE restype, lpctstr pszName );
+	bool ResourceLock( CResourceLock & s, RES_TYPE restype, lpctstr pszName )
+	{
+		return ResourceLock(s, ResourceGetIDType(restype, pszName));
+	}
 
 	CResourceScript * FindResourceFile( lpctstr pszTitle );
 	CResourceScript * LoadResourcesAdd( lpctstr pszNewName );

@@ -187,7 +187,7 @@ void CItemMultiCustom::EndCustomize(bool bForced)
 				return;
 			}
 		}
-		
+
 		// make sure scripts don't try and force the client back into design mode when
 		// they're trying to log out
 		if ( m_pArchitect && bForced )
@@ -227,9 +227,7 @@ void CItemMultiCustom::SwitchToLevel( CClient * pClientSrc, uchar iLevel )
 		return;
 
 	uchar iMaxLevel = GetLevelCount();
-	if ( iLevel < 0 )
-		iLevel = 0;
-	else if ( iLevel > iMaxLevel )
+	if ( iLevel > iMaxLevel )
 		iLevel = iMaxLevel;
 
 	CPointMap pt = GetTopPoint();
@@ -342,7 +340,7 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
 
 		CRect rect = m_pRegion->GetRegionRect(0);
 		rectNew.UnionRect(rect);
-		
+
 		m_pRegion->SetRegionRect(rectNew);
 		m_pRegion->UnRealizeRegion();
 		m_pRegion->RealizeRegion();
@@ -477,7 +475,7 @@ void CItemMultiCustom::AddStairs(CClient * pClientSrc, ITEMID_TYPE id, short x, 
 		SendStructureTo(pClientSrc);
 		return;
 	}
-	
+
 	if ( !IsValidItem(id, pClientSrc, true) )
 	{
 		g_Log.EventWarn("Invalid multi 0%x being added to building 0%x by 0%x.\n", id, (dword)GetUID(), pCharSrc != NULL? (dword)pCharSrc->GetUID() : 0);
@@ -613,7 +611,7 @@ void CItemMultiCustom::RemoveItem(CClient * pClientSrc, ITEMID_TYPE id, short x,
 			break;
 		}
 	}
-	
+
 	if ( pClientSrc != NULL && bReplaceDirt )
 	{
 		// make sure that the location is within the proper boundaries
@@ -668,7 +666,7 @@ bool CItemMultiCustom::RemoveStairs(Component * pStairComponent)
 void CItemMultiCustom::RemoveRoof(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z)
 {
 	ADDTOCALLSTACK("CItemMultiCustom::RemoveRoof");
-	
+
 	CItemBase * pItemBase = CItemBase::FindItemBase(id);
 	if ( pItemBase == NULL )
 		return;
@@ -851,7 +849,7 @@ void CItemMultiCustom::RestoreStructure(CClient * pClientSrc)
 		return;
 
 	CopyDesign(&m_designBackup, &m_designWorking);
-	
+
 	if ( pClientSrc != NULL )
 		pClientSrc->addItem(this);
 }
@@ -1060,7 +1058,7 @@ const CRect CItemMultiCustom::GetDesignArea()
 
 	CRect rect;
 	const CPointMap pt = GetTopPoint();
-	
+
 	rect.SetRect(m_rectDesignArea.m_left, m_rectDesignArea.m_top, m_rectDesignArea.m_right, m_rectDesignArea.m_bottom, GetTopMap());
 	rect.OffsetRect(pt.m_x, pt.m_y);
 

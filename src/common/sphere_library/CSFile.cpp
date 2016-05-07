@@ -70,7 +70,7 @@ void CFile::NotifyIOError( lpctstr szMessage ) const
 {
 	LPVOID lpMsgBuf;
 	FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, GetLastError(), 0, reinterpret_cast<lptstr>(&lpMsgBuf), 0, NULL );
-	DEBUG_ERR(( "File I/O \"%s\" failed on file \"%s\" (%d): %s\n", szMessage, static_cast<lpctstr>(GetFilePath()), GetLastError(), static_cast<lptstr>(lpMsgBuf) ));
+	DEBUG_ERR(( "File I/O \"%s\" failed on file \"%s\" (%lX): %s\n", szMessage, static_cast<lpctstr>(GetFilePath()), GetLastError(), static_cast<lptstr>(lpMsgBuf) ));
 
 	LocalFree( lpMsgBuf );
 }

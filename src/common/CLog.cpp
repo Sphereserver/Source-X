@@ -20,7 +20,7 @@ const CScript * CLog::SetScriptContext( const CScript * pScriptContext )
 {
 	const CScript * pOldScript = m_pScriptContext;
 	m_pScriptContext = pScriptContext;
-	return( pOldScript );
+	return pOldScript;
 }
 
 const CScriptObj * CLog::SetObjectContext( const CScriptObj * pObjectContext )
@@ -171,7 +171,7 @@ int CLog::EventStr( dword wMask, lpctstr pszMsg )
 			Close();	// LINUX should alrady be closed.
 
 			OpenLog( NULL );
-			Printf( "%s", datetime.Format(NULL));
+			Printf( "%s", datetime.Format(NULL) );
 		}
 		else
 		{
@@ -215,7 +215,7 @@ int CLog::EventStr( dword wMask, lpctstr pszMsg )
 			szScriptContext[0] = '\0';
 
 		// Print to screen.
-		if ( ! ( wMask & LOGM_INIT ) && ! g_Serv.IsLoading() )
+		if ( !(wMask & LOGM_INIT) && !g_Serv.IsLoading() )
 		{
 			SetColor(CTCOL_YELLOW);
 			g_Serv.PrintStr( szTime );
@@ -317,7 +317,7 @@ void _cdecl CLog::CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ...
 		EventStr(eSeverity, szMsg);
 		va_end(vargs);
 	}
-	catch(...)
+	catch (...)
 	{
 		// Not much we can do about this.
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);

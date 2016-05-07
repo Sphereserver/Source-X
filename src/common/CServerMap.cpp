@@ -69,7 +69,7 @@ CServerMapBlockState::CServerMapBlockState( dword dwBlockFlags, char z, int iHei
 	m_Bottom.m_dwTile = 0;
 	m_Bottom.m_z = UO_SIZE_MIN_Z;	// the z we would stand on,
 
-	m_Lowest.m_dwBlockFlags = CAN_I_BLOCK; 
+	m_Lowest.m_dwBlockFlags = CAN_I_BLOCK;
 	m_Lowest.m_dwTile = 0;
 	m_Lowest.m_z = UO_SIZE_Z;
 
@@ -87,7 +87,7 @@ CServerMapBlockState::CServerMapBlockState( dword dwBlockFlags, char z, int iHei
 	m_Bottom.m_dwTile = 0;
 	m_Bottom.m_z = UO_SIZE_MIN_Z;	// the z we would stand on,
 
-	m_Lowest.m_dwBlockFlags = CAN_I_BLOCK; 
+	m_Lowest.m_dwBlockFlags = CAN_I_BLOCK;
 	m_Lowest.m_dwTile = 0;
 	m_Lowest.m_z = UO_SIZE_Z;
 
@@ -130,7 +130,7 @@ bool CServerMapBlockState::CheckTile( dword wItemBlockFlags, char zBottom, heigh
 
 	if ( zTop < m_Bottom.m_z )	// below something i can already step on.
 		return true;
-	
+
 	// hover flag has no effect for non-hovering entities
 	if ( (wItemBlockFlags & CAN_I_HOVER) && !(m_dwBlockFlags & CAN_C_HOVER) )
 		wItemBlockFlags &= ~CAN_I_HOVER;
@@ -200,7 +200,7 @@ bool CServerMapBlockState::IsUsableZ( char zBottom, height_t zHeightEstimate ) c
 	// NOTE: Assume multi overlapping items are not normal. so estimates are safe
 	if ( zBottom + zHeightEstimate < m_Bottom.m_z )	// way below my feet
 		return false;
-	return true;	
+	return true;
 }
 
 bool CServerMapBlockState::CheckTile_Item( dword wItemBlockFlags, char zBottom, height_t zHeight, dword dwID )
@@ -217,7 +217,7 @@ bool CServerMapBlockState::CheckTile_Item( dword wItemBlockFlags, char zBottom, 
 		return true;
 
 	char zTop = zBottom;
-	
+
 	if ( (wItemBlockFlags & CAN_I_CLIMB) && (wItemBlockFlags & CAN_I_PLATFORM) )
 		zTop = minimum(zTop + ( zHeight / 2 ), UO_SIZE_Z);	// standing position is half way up climbable items (except platforms).
 	else
@@ -338,16 +338,16 @@ bool CServerMapBlockState::CheckTile_Terrain( dword wItemBlockFlags, char z, dwo
 					return ( true );
 				}
 			}
-			else if ( z > m_z + PLAYER_HEIGHT/2  ) 
-			{ 
+			else if ( z > m_z + PLAYER_HEIGHT/2  )
+			{
 				if ( (m_Bottom.m_dwBlockFlags & (CAN_I_PLATFORM|CAN_I_CLIMB)) && (z >= m_Bottom.m_z + PLAYER_HEIGHT/2) ) // we can walk under it
 				{
 					SetTop( wItemBlockFlags, z, dwID );
 					return true;
 				}
 			}
-			else if ( z == m_z ) 
-			{ 
+			else if ( z == m_z )
+			{
 				if ( (m_Bottom.m_dwBlockFlags & (CAN_I_PLATFORM|CAN_I_CLIMB)) && (z - m_Bottom.m_z <= 4) )
 					return true;
 			}
@@ -536,7 +536,7 @@ void CServerMapBlock::Load( int bx, int by )
 		CSFile * pFile = &(g_Install.m_Maps[mapNumber]);
 		ASSERT(pFile != NULL);
 		ASSERT(pFile->IsFileOpen());
-		
+
 		// determine the location in the file where the data needs to be read from
 		CUOIndexRec index;
 		index.SetupIndex( ulBlockIndex * sizeof(CUOMapBlock), sizeof(CUOMapBlock));
@@ -700,7 +700,7 @@ size_t CSphereMulti::Load(MULTI_TYPE id)
 	Release();
 	InitCacheTime();		// This is invalid !
 
-	if (id < 0 || id >= MULTI_QTY)
+	if (id >= MULTI_QTY)
 		return 0;
 	m_id = id;
 
@@ -850,11 +850,11 @@ void CServerMapDiffCollection::LoadMapDiffs()
 
 			dwLength = (dword)pFileStadifl->GetLength();
 			dwRead = dwOffset = 0;
-	
+
 			for ( ; dwRead < dwLength; dwOffset += sizeof(CUOIndexRec) )
 			{
 				dwRead += (dword)pFileStadifl->Read( &dwBlockId, sizeof(dwBlockId) );
-				
+
 				pMapDiffBlock = GetNewBlock( dwBlockId, map );
 				if ( pMapDiffBlock->m_pStaticsBlock )
 					delete[] pMapDiffBlock->m_pStaticsBlock;
@@ -987,7 +987,7 @@ void MapsPrivate::loadDiffs( const QString& basePath, uint id )
 
 	QFile mapdiflist( basePath + mapDiffListName );
 	mapdifdata.setName( basePath + mapDiffFileName );
-	
+
 	// Try to read a list of ids
 	if ( mapdifdata.open( IO_ReadOnly ) && mapdiflist.open( IO_ReadOnly ) )
 	{

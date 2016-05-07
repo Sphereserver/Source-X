@@ -92,19 +92,21 @@ public:
 		va_start( vargs, pszFormat );
 		int iret = VEvent( LOGL_EVENT, pszFormat, vargs );
 		va_end( vargs );
-		return( iret );
+		return iret;
 	}
 #endif //_DEBUG
 
 #define DEBUG_ERR(_x_)	g_pLog->EventError _x_
 
 #ifdef _DEBUG
-	#define DEBUG_WARN(_x_)	g_pLog->EventWarn _x_
-	#define DEBUG_MSG(_x_)	g_pLog->EventEvent _x_
-	#define DEBUG_MYFLAG(_x_) g_pLog->Event _x_
+	#define DEBUG_WARN(_x_)		g_pLog->EventWarn _x_
+	#define DEBUG_MSG(_x_)		g_pLog->EventDebug _x_
+	#define DEBUG_EVENT(_x_)	g_pLog->EventEvent _x_
+	#define DEBUG_MYFLAG(_x_)	g_pLog->Event _x_
 #else
 	#define DEBUG_WARN(_x_)
 	#define DEBUG_MSG(_x_)
+	#define DEBUG_EVENT(_x_)
 	#define DEBUG_MYFLAG(_x_)
 #endif
 

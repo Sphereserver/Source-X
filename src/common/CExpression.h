@@ -184,7 +184,7 @@ int64 ahextoi64( lpctstr pArgs );	// Convert hex string to int64
 #define Exp_GetWVal( pa )		(word)	g_Exp.GetVal( pa )
 #define Exp_GetDWVal( pa )		(dword)	g_Exp.GetVal( pa )
 
-#ifdef _32B
+#ifdef _32BITS
 	#define Exp_GetSTVal		Exp_GetUVal
 #else
 	#define Exp_GetSTVal		Exp_GetULLVal

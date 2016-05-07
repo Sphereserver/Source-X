@@ -55,7 +55,12 @@ bool WritePidFile(int iMode = 0)
 		{
 			pid_t spherepid = STDFUNC_GETPID();
 
-			fprintf(pidFile,"%d\n", spherepid);
+			// pid_t is always an int, except on MinGW, where it is int on 32 bits and long long on 64 bits.
+			#if defined(_WIN32) && !defined(_MSC_VER)
+				fprintf(pidFile, "%" PRIdSSIZE_T "\n", spherepid);
+			#else
+				fprintf(pidFile, "%d\n", spherepid);
+			#endif
 			fclose(pidFile);
 			return true;
 		}
@@ -70,7 +75,7 @@ int CEventLog::VEvent( dword wMask, lpctstr pszFormat, va_list args )
 		return 0;
 
 	TemporaryString pszTemp;
-	size_t len = _vsnprintf(pszTemp, (SCRIPT_MAX_LINE_LEN - 1), pszFormat, args);
+	size_t len = vsnprintf(pszTemp, (SCRIPT_MAX_LINE_LEN - 1), pszFormat, args);
 	if ( ! len ) strncpy(pszTemp, pszFormat, (SCRIPT_MAX_LINE_LEN - 1));
 
 	// This get rids of exploits done sending 0x0C to the log subsytem.
@@ -370,7 +375,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 
 	EXC_SET("finilizing");
 	g_Log.Event(LOGM_INIT, "%s", g_Serv.GetStatusString(0x24));
-	g_Log.Event(LOGM_INIT, "Startup complete. items=%u, chars=%u\n", g_Serv.StatGet(SERV_STAT_ITEMS), g_Serv.StatGet(SERV_STAT_CHARS));
+	g_Log.Event(LOGM_INIT, "Startup complete. items=%" PRIuSIZE_T ", chars=%" PRIuSIZE_T "\n", g_Serv.StatGet(SERV_STAT_ITEMS), g_Serv.StatGet(SERV_STAT_CHARS));
 
 #ifdef _WIN32
 	g_Log.Event(LOGM_INIT, "Press '?' for console commands\n");
@@ -407,7 +412,7 @@ void Sphere_ExitServer()
 	if ( g_Cfg.m_fUseAsyncNetwork != 0 )
 		g_NetworkEvent.waitForClose();
 #endif
-		
+
 	g_Serv.SocketsClose();
 	g_World.Close();
 
@@ -613,7 +618,7 @@ void defragSphere(char *path)
 			{
 				dBytesRead -= mb10;
 				dTotalMb += 10;
-				g_Log.Event(LOGM_INIT, "Total read %u Mb\n", dTotalMb);
+				g_Log.Event(LOGM_INIT, "Total read %" PRIuSIZE_T " Mb\n", dTotalMb);
 			}
 			if (( buf[0] == 'S' ) && ( strstr(buf, "SERIAL=") == buf ))
 			{
@@ -673,7 +678,7 @@ void defragSphere(char *path)
 			{
 				dBytesRead -= mb5;
 				dTotalMb += 5;
-				g_Log.Event(LOGM_INIT, "Total processed %u Mb\n", dTotalMb);
+				g_Log.Event(LOGM_INIT, "Total processed %" PRIuSIZE_T " Mb\n", dTotalMb);
 			}
 			p = buf;
 
@@ -834,7 +839,7 @@ int _cdecl main( int argc, char * argv[] )
 		// Start the ping server, this can only be ran in a separate thread
 		if ( IsSetEF( EF_UsePingServer ) )
 			g_PingServer.start();
-		
+
 #if !defined(_WIN32) || defined(_LIBEV)
 		if ( g_Cfg.m_fUseAsyncNetwork != 0 )
 			g_NetworkEvent.start();
@@ -847,7 +852,7 @@ int _cdecl main( int argc, char * argv[] )
 #else
 		g_NetworkManager.start();
 #endif
-			
+
 		bool shouldRunInThread = ( g_Cfg.m_iFreezeRestartTime > 0 );
 
 		if( shouldRunInThread )

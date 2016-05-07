@@ -4479,7 +4479,7 @@ bool PacketHouseDesign::writePlaneData(int plane, int itemCount, byte* data, int
 	{
 		// too much data, but we should be able to continue to the next floor without problems
 		delete[] compressBuffer;
-		g_Log.EventWarn("Floor %d on building 0%x too large with compressed length of %u.\n", plane, (dword)m_house->GetUID(), compressLength);
+		g_Log.EventWarn("Floor %d on building 0%x too large with compressed length of %lu.\n", plane, (dword)m_house->GetUID(), compressLength);
 		return false;
 	}
 
@@ -4540,7 +4540,7 @@ void PacketHouseDesign::flushStairData(void)
 	{
 		// too much data, but we should be able to continue to the next block without problems
 		delete[] compressBuffer;
-		g_Log.EventWarn("Building 0%x too large with compressed length of %u.\n", (dword)m_house->GetUID(), compressLength);
+		g_Log.EventWarn("Building 0%x too large with compressed length of %lu.\n", (dword)m_house->GetUID(), compressLength);
 		return;
 	}
 

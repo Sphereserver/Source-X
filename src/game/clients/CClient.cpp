@@ -61,7 +61,7 @@ CClient::CClient(NetState* state)
 
 	m_Env.SetInvalid();
 
-	g_Log.Event(LOGM_CLIENTS_LOG, "%x:Client connected [Total:%u] ('%s' %d/%d)\n",
+	g_Log.Event(LOGM_CLIENTS_LOG, "%x:Client connected [Total:%" PRIuSIZE_T "] ('%s' %d/%d)\n",
 		GetSocketID(), g_Serv.StatGet(SERV_STAT_CLIENTS), GetPeerStr(), history.m_connecting, history.m_connected);
 
 	m_zLastMessage[0] = 0;
@@ -836,7 +836,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				if ( IsValidDef( "d_add" ) )
 					Dialog_Setup( CLIMODE_DIALOG, g_Cfg.ResourceGetIDType(RES_DIALOG, "d_add"), 0, this->GetChar() );
 				else
-					Menu_Setup( g_Cfg.ResourceGetIDType( RES_MENU, "MENU_ADDITEM"));	
+					Menu_Setup( g_Cfg.ResourceGetIDType( RES_MENU, "MENU_ADDITEM"));
 			}
 			break;
 		case CV_ADDBUFF:

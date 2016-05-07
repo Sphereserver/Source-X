@@ -134,7 +134,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@NPCRestock",			// (NPC only)
 	"@NPCSeeNewPlayer",		//+(NPC only) i see u for the first time. (in 20 minutes) (check memory time)
 	"@NPCSeeWantItem",		// (NPC only) i see something good.
-	"@NPCSpecialAction",	// Idle 
+	"@NPCSpecialAction",	// Idle
 
 	"@PartyDisband",		//I just disbanded my party
 	"@PartyInvite",			//SRC invited me to join a party, so I may chose
@@ -302,7 +302,7 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false )
 }
 
 // Delete character
-CChar::~CChar() 
+CChar::~CChar()
 {
 	DeletePrepare();	// remove me early so virtuals will work.
 	if ( IsStatFlag( STATF_Ridden ))
@@ -341,7 +341,7 @@ CChar::~CChar()
 void CChar::ClientDetach()
 {
 	ADDTOCALLSTACK("CChar::ClientDetach");
-	
+
 	// remove all trade windows.
 	CItem *pItemNext = NULL;
 	for ( CItem *pItem = GetContentHead(); pItem != NULL; pItem = pItemNext )
@@ -393,8 +393,8 @@ void CChar::ClientAttach( CClient * pClient )
 }
 
 bool CChar::IsClient() const
-{ 
-	return( m_pClient != NULL ); 
+{
+	return( m_pClient != NULL );
 }
 
 CClient * CChar::GetClient() const
@@ -873,7 +873,7 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 
 	m_height = pChar->m_height;
 	m_ModMaxWeight = pChar->m_ModMaxWeight;
-	
+
 	m_StepStealth = pChar->m_StepStealth;
 	m_iVisualRange = pChar->m_iVisualRange;
 	m_virtualGold = pChar->m_virtualGold;
@@ -930,7 +930,7 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 		else
 			m_pPlayer->m_Speech.Copy(&(pChar->m_pPlayer->m_Speech));
 	}*/
-	
+
 	FixWeirdness();
 	SetName( pChar->GetName());	// SetName after FixWeirdness, otherwise it can be replaced again.
 	// We copy tags,etc first and place it because of NPC_LoadScript and @Create trigger, so it have information before calling it
@@ -1007,7 +1007,7 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 		CChar * pTest3 = static_cast<CChar*>(static_cast<CUID>(pItem->m_uidLink).CharFind());
 		if ( pTest3 && pTest3 == pChar)
 			pItem->m_uidLink = this->GetUID();
-		
+
 	}
 	// End copying items.
 	FixWeight();
@@ -2809,7 +2809,7 @@ do_default:
 		case CHC_RESENERGYMAX:
 		case CHC_LUCK:
 		case CHC_CURFOLLOWER:
-		case CHC_MAXFOLLOWER:		
+		case CHC_MAXFOLLOWER:
 		case CHC_REGENFOOD:
 		case CHC_REGENVALFOOD:
 		case CHC_REGENVALHITS:
@@ -2827,7 +2827,7 @@ do_default:
 				SetDefNum(s.GetKey(), s.GetArgVal(), false);
 			}
 			break;
-			
+
 		case CHC_BLOODCOLOR:
 			m_wBloodHue = static_cast<HUE_TYPE>(s.GetArgVal());
 			break;
@@ -2958,7 +2958,7 @@ do_default:
 			SetID(static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType( RES_CHARDEF, s.GetArgStr())));
 			break;
 		case CHC_BREATH:
-			{				
+			{
 				if ( !strnicmp(pszKey, "BREATH.DAM", 10) || !strnicmp(pszKey, "BREATH.HUE", 10) || !strnicmp(pszKey, "BREATH.ANIM", 11) || !strnicmp(pszKey, "BREATH.TYPE", 11) )
 				{
 					SetDefNum(s.GetKey(), s.GetArgLLVal());
@@ -3017,30 +3017,25 @@ do_default:
 			word currentGold = (word)ContentCount(RESOURCE_ID(RES_TYPEDEF, IT_GOLD));
 			word newGold = (word)(s.GetArgVal());
 
-			if ( newGold >= 0 )
+			if ( newGold < currentGold )
+				ContentConsume(RESOURCE_ID(RES_TYPEDEF, IT_GOLD), currentGold - newGold);
+			else if ( newGold > currentGold )
 			{
-				if ( newGold < currentGold )
-				{
-					ContentConsume(RESOURCE_ID(RES_TYPEDEF, IT_GOLD), currentGold - newGold);
-				}
-				else if ( newGold > currentGold )
-				{
-					CItem *pGold = NULL;
-					CItemContainer *pBank = GetBank();
-					if ( !pBank )
-						return false;
+				CItem *pGold = NULL;
+				CItemContainer *pBank = GetBank();
+				if ( !pBank )
+					return false;
 
-					word amount = newGold - currentGold;
-					while ( amount > 0 )
-					{
-						pGold = CItem::CreateBase(ITEMID_GOLD_C1);
-						pGold->SetAmount(minimum(amount, pGold->GetMaxAmount()));
-						amount -= pGold->GetAmount();
-						pBank->ContentAdd(pGold);
-					}
+				word amount = newGold - currentGold;
+				while ( amount > 0 )
+				{
+					pGold = CItem::CreateBase(ITEMID_GOLD_C1);
+					pGold->SetAmount(minimum(amount, pGold->GetMaxAmount()));
+					amount -= pGold->GetAmount();
+					pBank->ContentAdd(pGold);
 				}
-				UpdateStatsFlag();
 			}
+			UpdateStatsFlag();
 			break;
 		}
 		case CHC_HITPOINTS:
@@ -3655,7 +3650,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				}
 			}
 			//DEBUG_ERR(( "CHV_MAKEITEM iTmp is %d, arg was %s\n",iTmp,psTmp ));
- 
+
 			if ( IsClient() )
 			{
 				m_Act_Targ = m_pClient->m_Targ_UID;
@@ -3724,9 +3719,9 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			break;
 
 		case CHV_POISON:
-		{		
+		{
 			int iSkill = s.GetArgVal();
-			int iTicks = iSkill / 50; 
+			int iTicks = iSkill / 50;
 			int64		piCmd[2];
 			if (Str_ParseCmds(s.GetArgRaw(), piCmd, CountOf(piCmd)) > 1)
 				iTicks = (int)(piCmd[1]);
@@ -3924,7 +3919,7 @@ bool CChar::OnTriggerSpeech( bool bIsPet, lpctstr pszText, CChar * pSrc, TALKMOD
 	ADDTOCALLSTACK("CChar::OnTriggerSpeech");
 
 	lpctstr pszName;
-	
+
 	if ( bIsPet && !g_Cfg.m_sSpeechPet.IsEmpty() )
 	{
 		pszName = static_cast<lpctstr>(g_Cfg.m_sSpeechPet);
@@ -4108,7 +4103,7 @@ void CChar::ChangeExperience(int delta, CChar *pCharDead)
 			m_exp = 0;
 		else
 			m_exp += delta;
-		
+
 		if (m_pClient && bShowMsg && delta)
 		{
 			int iWord = 0;

@@ -185,7 +185,7 @@ bool CUOMapList::DetectMapSize(int map)
             break;
 
         default:
-            DEBUG_ERR(("Unknown map index %d with file size of %u bytes. Please specify the correct size manually.\n", index, g_Install.m_Maps[index].GetLength()));
+            DEBUG_ERR(("Unknown map index %d with file size of %" PRIuSIZE_T " bytes. Please specify the correct size manually.\n", index, g_Install.m_Maps[index].GetLength()));
             break;
     }
 

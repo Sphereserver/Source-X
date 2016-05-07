@@ -39,7 +39,7 @@ public:
 public:
 	CSError( LOGL_TYPE eSev, dword hErr, lpctstr pszDescription );
 	CSError( const CSError& e );	// copy contstructor needed.
-	virtual ~CSError();
+	virtual ~CSError() {}
 public:
 	CSError& operator=(const CSError& other);
 public:
@@ -61,8 +61,14 @@ public:
 	const unsigned GetAssertLine();
 	*/
 	static const char *m_sClassName;
-	CAssert(LOGL_TYPE eSeverity, lpctstr pExp, lpctstr pFile, long lLine);
-	virtual ~CAssert();
+	CAssert(LOGL_TYPE eSeverity, lpctstr pExp, lpctstr pFile, long lLine) :
+		CSError(eSeverity, 0, "Assert"), m_pExp(pExp), m_pFile(pFile), m_lLine(lLine)
+	{
+	}
+	virtual ~CAssert()
+	{
+	}
+
 private:
 	CAssert& operator=(const CAssert& other);
 

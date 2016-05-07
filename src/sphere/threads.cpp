@@ -95,7 +95,7 @@ IThread * ThreadHolder::getThreadAt(size_t at)
 {
 	if ( at > getActiveThreads() )
 		return NULL;
-	
+
 	SimpleThreadLock lock(m_mutex);
 	for ( spherethreadlist_t::const_iterator it = m_threads.begin(); it != m_threads.end(); ++it )
 	{
@@ -177,7 +177,7 @@ void AbstractThread::start()
 		throw CSError(LOGL_FATAL, 0, "Unable to spawn a new thread");
 	}
 #endif
-	
+
 	m_terminateEvent.reset();
 	ThreadHolder::push(this);
 }
@@ -385,10 +385,10 @@ bool AbstractThread::checkStuck()
 #pragma pack(push, 8)
 typedef struct tagTHREADNAME_INFO
 {
-	dword dwType;
-	lpctstr szName;
-	dword dwThreadID;
-	dword dwFlags;
+	DWORD dwType;
+	LPCSTR szName;
+	DWORD dwThreadID;
+	DWORD dwFlags;
 } THREADNAME_INFO;
 #pragma pack(pop)
 
@@ -412,21 +412,23 @@ void AbstractThread::onStart()
 	ThreadHolder::m_currentThread = this;
 
 	// register the thread name
-#ifdef _WIN32
-	// Windows uses THREADNAME_INFO structure to set thread name
-	THREADNAME_INFO info;
-	info.dwType = 0x1000;
-	info.szName = getName();
-	info.dwThreadID = (dword)(-1);
-	info.dwFlags = 0;
+#if defined(_WIN32)
+	#if defined(_MSC_VER)	// TODO: support thread naming when compiling with compilers other than Microsoft
+		// Windows uses THREADNAME_INFO structure to set thread name
+		THREADNAME_INFO info;
+		info.dwType = 0x1000;
+		info.szName = getName();
+		info.dwThreadID = (DWORD)(-1);
+		info.dwFlags = 0;
 
-	__try
-	{
-		RaiseException(MS_VC_EXCEPTION, 0, sizeof(info) / sizeof(ULONG_PTR), reinterpret_cast<ULONG_PTR*>(&info));
-	}
-	__except(EXCEPTION_EXECUTE_HANDLER)
-	{
-	}
+		__try
+		{
+			RaiseException(MS_VC_EXCEPTION, 0, sizeof(info) / sizeof(ULONG_PTR), (ULONG_PTR*)&info);
+		}
+		__except(EXCEPTION_EXECUTE_HANDLER)
+		{
+		}
+	#endif
 #elif !defined(_BSD)
 	// Unix uses prctl to set thread name
 	// thread name must be 16 bytes, zero-padded if shorter
@@ -498,7 +500,7 @@ char *AbstractSphereThread::allocateBuffer()
 {
 	SimpleThreadLock stlBuffer(g_tmpStringMutex);
 
-	char * buffer = NULL; 
+	char * buffer = NULL;
 	g_tmpStringIndex++;
 
 	if( g_tmpStringIndex >= THREAD_TSTRING_STORAGE )
@@ -548,7 +550,7 @@ TemporaryStringStorage *AbstractSphereThread::allocateStringBuffer()
 void AbstractSphereThread::allocateString(TemporaryString &string)
 {
 	SimpleThreadLock stlBuffer(g_tmpTemporaryStringMutex);
-    
+
 	TemporaryStringStorage * store = allocateStringBuffer();
 	string.init(store->m_buffer, &store->m_state);
 }

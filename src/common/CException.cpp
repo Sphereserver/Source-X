@@ -22,13 +22,13 @@
 		va_list* Arguments = NULL;
 		DWORD nChars = ::FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 			lpSource,
-			dwError, LANG_NEUTRAL, 
+			dwError, LANG_NEUTRAL,
 			lpszError, nMaxError, Arguments );
 
-		if (nChars > 0)
+		if (nChars > (DWORD)0)
 		{     // successful translation -- trim any trailing junk
 			DWORD index = nChars - 1;      // index of last character
-			while ( (index >= 0) && ((lpszError[index] == '\n') || (lpszError[index] == '\r')) )
+			while ( (lpszError[index] == '\n') || (lpszError[index] == '\r') )
 				lpszError[index--] = '\0';
 			nChars = index + 1;
 		}
@@ -81,28 +81,17 @@ CSError::CSError( LOGL_TYPE eSev, dword hErr, lpctstr pszDescription ) :
 {
 }
 
-CSError::~CSError() 
-{
-}
 
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-CAssert::CAssert(LOGL_TYPE eSeverity, lpctstr pExp, lpctstr pFile, long lLine) :
-	CSError(eSeverity, 0, "Assert"), m_pExp(pExp), m_pFile(pFile), m_lLine(lLine)
-{
-}
-
-CAssert::~CAssert()
-{
-}
 
 bool CAssert::GetErrorMessage(lptstr lpszError, uint nMaxError, uint * pnHelpContext) const
 {
 	UNREFERENCED_PARAMETER(nMaxError);
 	UNREFERENCED_PARAMETER(pnHelpContext);
-	sprintf(lpszError, "Assert pri=%d:'%s' file '%s', line %d", m_eSeverity, m_pExp, m_pFile, m_lLine);
+	sprintf(lpszError, "Assert severity=%d: '%s' file '%s', line %ld", m_eSeverity, m_pExp, m_pFile, m_lLine);
 	return true;
 }
 
@@ -169,7 +158,7 @@ void Assert_CheckFail( lpctstr pExp, lpctstr pFile, long lLine )
 #if defined(_WIN32) && !defined(_DEBUG)
 
 #include "crashdump/crashdump.h"
-	
+
 int _cdecl _purecall()
 {
 	// catch this special type of C++ exception as well.

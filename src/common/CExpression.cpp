@@ -113,7 +113,7 @@ inline bool IsCharNumeric( char & Test )
 {
 	if ( !Test )
 		return false;
-	
+
 	if ( IsDigit( Test ) )
 		return true;
 	if ( tolower(Test) >= 'a' && tolower(Test) <= 'f' )
@@ -511,11 +511,11 @@ try_dec:
 				pszArgs += (iLen + 1);
 				tchar * pszArgsNext;
 				Str_Parse( const_cast<tchar*>(pszArgs), &(pszArgsNext), ")" );
-	
+
 				tchar * ppCmd[5];
 				llong iResult;
 				size_t iCount = 0;
-	
+
 				switch ( iIntrinsic )
 				{
 					case INTRINSIC_ID:
@@ -565,7 +565,7 @@ try_dec:
 										llong iBase = GetVal(pszArgs);
 										if ( iBase <= 0 )
 										{
-											DEBUG_ERR(( "Exp_GetVal: (%" PRId64 ")Log(%d) is %s\n", iBase, iArgument, (!iBase ? "infinite" : "undefined") ));
+											DEBUG_ERR(( "Exp_GetVal: (%" PRId64 ")Log(%" PRId64 ") is %s\n", iBase, iArgument, (!iBase ? "infinite" : "undefined") ));
 											iCount = 0;
 										}
 										else
@@ -609,7 +609,7 @@ try_dec:
 								iResult = (llong)sqrt( (double)iTosquare );
 							}
 							else
-								DEBUG_ERR(( "Exp_GetVal: Sqrt of negative number (%d) is impossible\n", iTosquare ));
+								DEBUG_ERR(( "Exp_GetVal: Sqrt of negative number (%" PRId64 ") is impossible\n", iTosquare ));
 						}
 
 					} break;
@@ -1092,7 +1092,7 @@ int CExpression::GetRangeVals(lpctstr & pExpr, int64 * piVals, int iMaxQty)
 			case ']':
 				pExpr++;	// consume this and end.
 				return iQty;
-	
+
 			case '+':
 			case '*':
 			case '/':

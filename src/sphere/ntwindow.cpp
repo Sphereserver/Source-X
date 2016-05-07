@@ -971,6 +971,9 @@ void NTWindow_SetWindowTitle( LPCTSTR pszText )
 	case SERVMODE_RestockAll:	// Major event.
 		pszMode = "Restocking";
 		break;
+	case SERVMODE_GarbageCollection:	// Major event.
+		pszMode = "Collecting Garbage";
+		break;
 	case SERVMODE_Saving:		// Forced save freezes the system.
 		pszMode = "Saving";
 		break;

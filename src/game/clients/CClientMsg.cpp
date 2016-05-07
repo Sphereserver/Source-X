@@ -263,7 +263,7 @@ void CClient::addTime( bool bCurrent )
 	if ( bCurrent )
 	{
 		llong lCurrentTime = (CServerTime::GetCurrentTime()).GetTimeRaw();
-		new PacketGameTime(this, 
+		new PacketGameTime(this,
 								( lCurrentTime / ( 60*60*TICK_PER_SEC )) % 24,
 								( lCurrentTime / ( 60*TICK_PER_SEC )) % 60,
 								( lCurrentTime / ( TICK_PER_SEC )) % 60);
@@ -347,7 +347,7 @@ void CClient::addItem_OnGround( CItem * pItem ) // Send items (on ground)
 	ADDTOCALLSTACK("CClient::addItem_OnGround");
 	if ( !pItem )
 		return;
-	
+
 	if ( PacketItemWorldNew::CanSendTo(GetNetState()) )
 		new PacketItemWorldNew(this, pItem);
 	else
@@ -411,7 +411,7 @@ void CClient::addItem_InContainer( const CItem * pItem )
 		return;
 
 	new PacketItemContainer(this, pItem);
-	
+
 	if ( PacketDropAccepted::CanSendTo(GetNetState()) )
 		new PacketDropAccepted(this);
 
@@ -497,7 +497,7 @@ void CClient::LogOpenedContainer(const CItemContainer* pContainer) // record a c
 
 	dword dwTopMostContainerUID = pTopMostContainer->GetUID().GetPrivateUID();
 	dword dwTopContainerUID = 0;
-	
+
 	if ( pTopContainer != NULL )
 		dwTopContainerUID = pTopContainer->GetUID().GetPrivateUID();
 	else
@@ -557,11 +557,11 @@ void CClient::addLight()
 
 	if ( iLight == UINT8_MAX )
 		iLight = m_pChar->GetLightLevel();
-		
+
 	// Scale light level for non-t2a.
-	if ( iLight < LIGHT_BRIGHT )
-		iLight = LIGHT_BRIGHT;
-	else if ( iLight > LIGHT_DARK )
+	//if ( iLight < LIGHT_BRIGHT )
+	//	iLight = LIGHT_BRIGHT;
+	if ( iLight > LIGHT_DARK )
 		iLight = LIGHT_DARK;
 
 	if ( iLight == m_Env.m_Light )
@@ -1457,7 +1457,7 @@ size_t CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
 		count++;
 	}
 
-	
+
 	size_t iMax = minimum(maximum(pAccount->m_Chars.GetCharCount(), pAccount->GetMaxChars()), MAX_CHARS_PER_ACCT);
 
 	size_t iQty = pAccount->m_Chars.GetCharCount();
@@ -3248,7 +3248,7 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 				}
 			}
 		}
-	
+
 #define DOHASH( value ) hash ^= ((value) & 0x3FFFFFF); \
 						hash ^= ((value) >> 26) & 0x3F;
 
@@ -3324,7 +3324,7 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 			}
 		}
 	}
-	
+
 	// delete the original packet, as long as it doesn't belong
 	// to the object (i.e. wasn't cached)
 	if (propertyList != pObj->GetPropertyList())

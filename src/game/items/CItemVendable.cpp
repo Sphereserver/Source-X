@@ -111,8 +111,6 @@ void CItemVendable::Restock( bool fSellToPlayers )
 	// allow prices to fluctuate randomly (per vendor) but hold the values for a bit.
 
 	ASSERT( IsItemInContainer());
-	if ( m_price < 0 )
-		m_price = 0;	// signal to recalc this later.
 
 	if ( fSellToPlayers )
 	{

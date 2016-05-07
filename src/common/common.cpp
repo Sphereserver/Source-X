@@ -311,7 +311,7 @@ int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const NCHAR * pInp, in
 
 		// Flip all from network order.
 		wchar szBuffer[ 1024*8 ];
-		for ( ; iInp < CountOf(szBuffer) - 1 && iInp < iSizeInChars && pInp[iInp]; iInp++ )
+		for ( ; iInp < (int)CountOf(szBuffer) - 1 && iInp < iSizeInChars && pInp[iInp]; iInp++ )
 		{
 			szBuffer[iInp] = pInp[iInp];
 		}

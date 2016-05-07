@@ -230,14 +230,14 @@ void CClient::Event_Item_Pickup(CUID uid, word amount) // Client grabs an item
 	m_Targ_p = pItem->GetUnkPoint();
 
 	EXC_SET("ItemPickup");
-	amount = (word)m_pChar->ItemPickup(pItem, amount);
-	if ( amount < 0 )
+	int tempamount = m_pChar->ItemPickup(pItem, amount);
+	if ( tempamount < 0 )
 	{
 		EXC_SET("ItemPickup - addItemDragCancel(0)");
 		new PacketDragCancel(this, PacketDragCancel::CannotLift);
 		return;
 	}
-	else if ( amount > 1 )
+	else if ( tempamount > 1 )
 		m_tNextPickup = m_tNextPickup + 2;	// +100 msec if amount should slow down the client
 
 	EXC_SET("TargMode");
@@ -527,7 +527,7 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 			if ( pObjOn->IsChar() )
 			{
 				CChar* pChar = dynamic_cast <CChar*>(pObjOn);
-				
+
 				if ( pChar )
 					pContOn = pChar->GetBank( LAYER_PACK );
 			}
@@ -901,10 +901,10 @@ void CClient::Event_CombatMode( bool fWar ) // Only for switching to combat mode
 
 	if ( m_pChar->IsStatFlag( STATF_DEAD ))
 		m_pChar->StatFlag_Mod( STATF_Insubstantial, !fWar );	// manifest the ghost
-	
+
 	if ( fCleanSkill )
 	{
-		m_pChar->Skill_Fail( true );	
+		m_pChar->Skill_Fail( true );
 		DEBUG_WARN(("UserWarMode - Cleaning Skill Action\n"));
 	}
 
@@ -1846,7 +1846,7 @@ void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TA
 	if ( mMode == 1 || mMode == 3 || mMode == 4 || mMode == 5 || mMode == 6 || mMode == 7 || mMode == 10 || mMode == 11 || mMode == 12 )
 		return;
 
-	if ( (wHue < 0) || (wHue > HUE_DYE_HIGH) )
+	if ( wHue > HUE_DYE_HIGH )
 		wHue = HUE_TEXT_DEF;
 
 	pAccount->m_lang.Set(pszLang);
@@ -2389,7 +2389,7 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 			pChar->OnTrigger(CTRIG_ContextMenuRequest, GetChar(), &Args);
 		}
 	}
-	
+
 	if ( m_pPopupPacket->getOptionCount() <= 0 )
 	{
 		delete m_pPopupPacket;
@@ -2753,7 +2753,7 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 bool CClient::xPacketFilter( const byte * pData, size_t iLen )
 {
 	ADDTOCALLSTACK("CClient::xPacketFilter");
-	
+
 	EXC_TRY("packet filter");
 	if ( iLen > 0 && g_Serv.m_PacketFilter[pData[0]][0] )
 	{

@@ -181,7 +181,7 @@ void _cdecl CSString::Format(lpctstr pStr, ...)
 void CSString::FormatV(lpctstr pszFormat, va_list args)
 {
 	TemporaryString pszTemp;
-	_vsnprintf(static_cast<char *>(pszTemp), pszTemp.realLength(), pszFormat, args);
+	vsnprintf(static_cast<char *>(pszTemp), pszTemp.realLength(), pszFormat, args);
 	Copy(pszTemp);
 }
 
@@ -363,7 +363,7 @@ lpctstr Str_GetArticleAndSpace(lpctstr pszWord)
 	{
 		static const tchar sm_Vowels[] = { 'A', 'E', 'I', 'O', 'U' };
 		tchar chName = static_cast<tchar>(toupper(pszWord[0]));
-		for (int x = 0; x < CountOf(sm_Vowels); x++)
+		for (uint x = 0; x < CountOf(sm_Vowels); x++)
 		{
 			if (chName == sm_Vowels[x])
 				return "an ";
@@ -909,8 +909,8 @@ int Str_ParseCmds(tchar * pszCmdLine, tchar ** ppCmd, int iMax, lpctstr pszSep)
 int Str_ParseCmds(tchar * pszCmdLine, int64 * piCmd, int iMax, lpctstr pszSep)
 {
 	tchar * ppTmp[256];
-	if (iMax > CountOf(ppTmp))
-		iMax = CountOf(ppTmp);
+	if (iMax > (int)CountOf(ppTmp))
+		iMax = (int)CountOf(ppTmp);
 
 	int iQty = Str_ParseCmds(pszCmdLine, ppTmp, iMax, pszSep);
 	int i;

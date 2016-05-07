@@ -129,7 +129,7 @@ int CTextConsole::OnConsoleKey( CSString & sText, tchar nChar, bool fEcho )
 void CTextConsole::VSysMessage( lpctstr pszFormat, va_list args ) const
 {
     TemporaryString pszTemp;
-    _vsnprintf( pszTemp, pszTemp.realLength(), pszFormat, args );
+    vsnprintf( pszTemp, pszTemp.realLength(), pszFormat, args );
     SysMessage( pszTemp );
 }
 

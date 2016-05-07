@@ -102,10 +102,11 @@ bool CServer::IsValidBusy() const
 	switch ( m_iModeCode )
 	{
 		case SERVMODE_Saving:
-			if ( g_World.IsSaving())
+			if ( g_World.IsSaving() )
 				return true;
 			break;
 		case SERVMODE_Loading:
+		case SERVMODE_GarbageCollection:
 		case SERVMODE_RestockAll:	// these may look stuck but are not.
 			return true;
 		default:
@@ -284,7 +285,7 @@ void CServer::ListClients( CTextConsole *pConsole ) const
 	const CAccount *pAcc = NULL;
 	tchar *pszMsg = Str_GetTemp();
 	tchar *tmpMsg = Str_GetTemp();
-	tchar chRank = NULL;
+	tchar chRank = 0;
 	lpcstr pszState = NULL;
 	size_t numClients = 0;
 
@@ -535,13 +536,13 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 			} break;
 		case 't':
 			{
-				pSrc->SysMessagef("Current active threads: %d.\n", ThreadHolder::getActiveThreads());
+				pSrc->SysMessagef("Current active threads: %" PRIuSIZE_T ".\n", ThreadHolder::getActiveThreads());
 				size_t iThreadCount = ThreadHolder::getActiveThreads();
 				for ( size_t iThreads = 0; iThreads < iThreadCount; ++iThreads )
 				{
 					IThread * thrCurrent = ThreadHolder::getThreadAt(iThreads);
 					if ( thrCurrent != NULL )
-						pSrc->SysMessagef("%" PRIuSIZE_T " - Id: %u, Priority: %" PRIuSIZE_T ", Name: %s.\n", iThreads + 1, thrCurrent->getId(),
+						pSrc->SysMessagef("%" PRIuSIZE_T " - Id: %u, Priority: %d, Name: %s.\n", (iThreads + 1), thrCurrent->getId(),
 											thrCurrent->getPriority(), thrCurrent->getName() );
 				}
 			} break;
@@ -1259,12 +1260,12 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			if ( s.HasArgs())
 			{
 				tchar * Arg_ppCmd[5];
-				size_t Arg_Qty = Str_ParseCmds( s.GetArgRaw(), Arg_ppCmd, CountOf( Arg_ppCmd ));
+				int Arg_Qty = Str_ParseCmds( s.GetArgRaw(), Arg_ppCmd, CountOf( Arg_ppCmd ) );
 				if ( Arg_Qty <= 0 )
 					break;
 				// IMPFLAGS_ITEMS
 				if ( ! g_World.Export( Arg_ppCmd[0], pSrc->GetChar(),
-					(Arg_Qty >= 2) ? (word)(ATOI(Arg_ppCmd[1])) : IMPFLAGS_ITEMS,
+					(Arg_Qty >= 2) ? (word)ATOI(Arg_ppCmd[1]) : (word)IMPFLAGS_ITEMS,
 					(Arg_Qty >= 3)? ATOI(Arg_ppCmd[2]) : INT16_MAX ))
 				{
 					pSrc->SysMessage( "Export failed\n" );
@@ -1306,14 +1307,14 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			if (s.HasArgs())
 			{
 				tchar * Arg_ppCmd[5];
-				size_t Arg_Qty = Str_ParseCmds( s.GetArgRaw(), Arg_ppCmd, CountOf( Arg_ppCmd ));
+				int Arg_Qty = Str_ParseCmds( s.GetArgRaw(), Arg_ppCmd, CountOf( Arg_ppCmd ));
 				if ( Arg_Qty <= 0 )
 				{
 					break;
 				}
 				// IMPFLAGS_ITEMS
 				if ( ! g_World.Import( Arg_ppCmd[0], pSrc->GetChar(),
-					(Arg_Qty >= 2) ? (word)(ATOI(Arg_ppCmd[1])) : IMPFLAGS_BOTH,
+					(Arg_Qty >= 2) ? (word)(ATOI(Arg_ppCmd[1])) : (word)IMPFLAGS_BOTH,
 					(Arg_Qty>=3)?ATOI(Arg_ppCmd[2]) : INT16_MAX ))
 					pSrc->SysMessage( "Import failed\n" );
 			}

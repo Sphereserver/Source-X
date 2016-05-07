@@ -45,7 +45,7 @@ bool CElementDef::SetValStr( void * pBase, lpctstr pszVal ) const
 	ADDTOCALLSTACK("CElementDef::SetValStr");
 	// Set the element value as a string.
 	dword dwVal = 0;
-	ASSERT(m_offset>=0);
+	//ASSERT(m_offset>=0);
 	void * pValPtr = GetValPtr(pBase);
 	switch ( m_type )
 	{
@@ -74,7 +74,7 @@ bool CElementDef::SetValStr( void * pBase, lpctstr pszVal ) const
 			break;
 	}
 	return false;
-}	
+}
 
 void * CElementDef::GetValPtr( const void * pBaseInst ) const
 {
@@ -95,7 +95,7 @@ bool CElementDef::GetValStr( const void * pBase, CSString & sVal ) const
 	// Get the element value as a string.
 
 	dword dwVal = 0;
-	ASSERT(m_offset>=0);
+	//ASSERT(m_offset>=0);
 	void * pValPtr = GetValPtr(pBase);
 	switch ( m_type )
 	{
