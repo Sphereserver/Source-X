@@ -2,7 +2,7 @@ SET (TOOLCHAIN 1)
 
 function (toolchain_after_project)
 	MESSAGE (STATUS "Toolchain: Windows-GNU-32.cmake.")
-	SET(CMAKE_SYSTEM_NAME Windows)
+	SET(CMAKE_SYSTEM_NAME	"Windows"	PARENT_SCOPE)
 	ENABLE_LANGUAGE(RC)
 
 	SET (C_WARNING_OPTS "-Wall -Wextra -Wno-unknown-pragmas -Wno-switch  -Wno-error=unused-but-set-variable")

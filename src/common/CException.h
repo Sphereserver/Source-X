@@ -33,11 +33,11 @@ class CSError
 	// we can throw this structure to produce an error.
 	// similar to CFileException and CException
 public:
-	LOGL_TYPE m_eSeverity;	// const
+	LOG_TYPE m_eSeverity;	// const
 	dword m_hError;	// HRESULT S_OK, "winerror.h" code. 0x20000000 = start of custom codes.
 	lpctstr m_pszDescription;
 public:
-	CSError( LOGL_TYPE eSev, dword hErr, lpctstr pszDescription );
+	CSError( LOG_TYPE eSev, dword hErr, lpctstr pszDescription );
 	CSError( const CSError& e );	// copy contstructor needed.
 	virtual ~CSError() {}
 public:
@@ -61,7 +61,7 @@ public:
 	const unsigned GetAssertLine();
 	*/
 	static const char *m_sClassName;
-	CAssert(LOGL_TYPE eSeverity, lpctstr pExp, lpctstr pFile, long lLine) :
+	CAssert(LOG_TYPE eSeverity, lpctstr pExp, lpctstr pFile, long lLine) :
 		CSError(eSeverity, 0, "Assert"), m_pExp(pExp), m_pFile(pFile), m_lLine(lLine)
 	{
 	}

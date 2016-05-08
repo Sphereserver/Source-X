@@ -56,17 +56,17 @@ bool CLog::IsLoggedMask( dword dwMask ) const
 			 (( GetLogMask() & ( dwMask &~ 0x0f )) != 0) );
 }
 
-LOGL_TYPE CLog::GetLogLevel() const
+LOG_TYPE CLog::GetLogLevel() const
 {
-	return static_cast<LOGL_TYPE>(m_dwMsgMask & 0x0f);
+	return static_cast<LOG_TYPE>(m_dwMsgMask & 0x0f);
 }
 
-void CLog::SetLogLevel( LOGL_TYPE level )
+void CLog::SetLogLevel( LOG_TYPE level )
 {
 	m_dwMsgMask = GetLogMask() | ( level & 0x0f );
 }
 
-bool CLog::IsLoggedLevel( LOGL_TYPE level ) const
+bool CLog::IsLoggedLevel( LOG_TYPE level ) const
 {
 	return ( ((level & 0x0f) != 0) &&
 			 (GetLogLevel() >= ( level & 0x0f ) ) );
@@ -74,7 +74,7 @@ bool CLog::IsLoggedLevel( LOGL_TYPE level ) const
 
 bool CLog::IsLogged( dword wMask ) const
 {
-	return IsLoggedMask(wMask) || IsLoggedLevel(static_cast<LOGL_TYPE>(wMask));
+	return IsLoggedMask(wMask) || IsLoggedLevel(static_cast<LOG_TYPE>(wMask));
 }
 
 bool CLog::OpenLog( lpctstr pszBaseDirName )	// name set previously.
@@ -287,7 +287,7 @@ void _cdecl CLog::CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ...
 	try
 	{
 		tchar szMsg[512];
-		LOGL_TYPE eSeverity;
+		LOG_TYPE eSeverity;
 		size_t stLen = 0;
 		if ( pErr != NULL )
 		{

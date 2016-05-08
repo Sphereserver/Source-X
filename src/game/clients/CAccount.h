@@ -51,10 +51,10 @@ private:
 
 
 	word m_PrivFlags; ///< optional privileges for char (bit-mapped)
-	
+
 	byte m_ResDisp; ///< current CAccount resdisp.
 	byte m_MaxChars; ///< Max chars allowed for this CAccount.
-	
+
 	typedef struct { llong m_First; llong m_Last; llong m_Delay; } TimeTriesStruct_t;
 	typedef std::pair<TimeTriesStruct_t, int> BlockLocalTimePair_t;
 	typedef std::map<dword,BlockLocalTimePair_t> BlockLocalTime_t;
@@ -96,8 +96,8 @@ public:
 
 	lpctstr GetDefStr( lpctstr pszKey, bool fZero = false ) const { return m_BaseDefs.GetKeyStr( pszKey, fZero ); }
 	int64 GetDefNum( lpctstr pszKey, bool fZero = false ) const	{ return m_BaseDefs.GetKeyNum( pszKey, fZero );	}
-	void SetDefNum(lpctstr pszKey, int64 iVal, bool fZero = true) 
-	{ 
+	void SetDefNum(lpctstr pszKey, int64 iVal, bool fZero = true)
+	{
 		m_BaseDefs.SetNum(pszKey, iVal, fZero);
 	}
 	void SetDefStr(lpctstr pszKey, lpctstr pszVal, bool fQuoted = false, bool fZero = true)
@@ -106,7 +106,7 @@ public:
 	}
 	void DeleteDef(lpctstr pszKey) { m_BaseDefs.DeleteKey(pszKey); }
 
-	
+
 	/**
 	* @brief Remove a CAccount.
 	* We should go track down and delete all the chars and clients that use this account !
@@ -219,7 +219,7 @@ public:
 	bool SetGreaterResDisp(byte what)
 	{
 		if ( what > m_ResDisp )
-			return SetResDisp( what );	
+			return SetResDisp( what );
 		return false;
 	}
 	/**
@@ -257,7 +257,7 @@ public:
 	/**
 	* @brief Check CAccount for a specified privilege flags.
 	* @param wPrivFlags Privilege flags to test.
-	* @return true if all the flags are set, false otherwise. 
+	* @return true if all the flags are set, false otherwise.
 	*/
 	bool IsPriv( word wPrivFlags ) const { return (m_PrivFlags & wPrivFlags) != 0; }
 	/**
@@ -411,7 +411,7 @@ public:
 	*/
 	bool Account_SaveAll();
 	/**
-	* @brief Load a single account. 
+	* @brief Load a single account.
 	* @see Account_LoadAll()
 	* @param pszNameRaw header of ACCOUNT section.
 	* @param s Arguments for account.

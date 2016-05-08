@@ -265,7 +265,7 @@ bool CAccounts::Cmd_AddNew( CTextConsole * pSrc, lpctstr pszName, lpctstr pszArg
 		pSrc->SysMessagef( "Account '%s' already exists\n", pszName );
 		return false;
 	}
-	
+
 	tchar szName[ MAX_ACCOUNT_NAME_SIZE ];
 
 	if ( !CAccount::NameStrip(szName, pszName) )
@@ -482,9 +482,9 @@ bool CAccounts::Account_OnCmd( tchar * pszArgs, CTextConsole * pSrc )
 			cmdArgs.Format("%s %s", ppCmd[2], ppCmd[3]);
 		else if (ppCmd[2] && ppCmd[2][0])
 			cmdArgs.Format("%s", ppCmd[2]);
-		
+
 		CScript script( ppCmd[1], cmdArgs.GetPtr() );
-		
+
 		return pAccount->r_Verb( script, pSrc );
 	}
 }
@@ -616,7 +616,7 @@ CClient * CAccount::FindClient( const CClient * pExclude ) const
 	ADDTOCALLSTACK("CAccount::FindClient");
 	if ( this == NULL )
 		return( NULL );	// this might be possible.
-	
+
 	CClient* pClient = NULL;
 	ClientIterator it;
 	for (pClient = it.next(); pClient != NULL; pClient = it.next())
@@ -765,7 +765,7 @@ bool CAccount::Kick( CTextConsole * pSrc, bool fBlock )
 	tchar * z = Str_GetTemp();
 	sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_ACC_KICK), GetName(), pszAction, pSrc->GetName());
 	g_Log.Event(LOGL_EVENT|LOGM_GM_CMDS, "%s\n", z);
-	
+
 	return true;
 }
 
@@ -875,7 +875,7 @@ bool CAccount::CheckPassword( lpctstr pszPassword )
 		SetPassword( pszPassword );
 		return true;
 	}
-	
+
 	CScriptTriggerArgs Args;
 	Args.m_VarsLocal.SetStrNew("Account",GetName());
 	Args.m_VarsLocal.SetStrNew("Password",pszPassword);
@@ -918,10 +918,10 @@ bool CAccount::SetPassword( lpctstr pszPassword, bool isMD5Hash )
 {
 	ADDTOCALLSTACK("CAccount::SetPassword");
 	bool useMD5 = g_Cfg.m_fMd5Passwords;
-	
+
 	if ( Str_Check( pszPassword ) )	// Prevents exploits
 		return false;
-	
+
 	//Accounts are 'created' in server startup so we don't fire the function.
 	if ( !g_Serv.IsLoading() )
 	{
@@ -943,7 +943,7 @@ bool CAccount::SetPassword( lpctstr pszPassword, bool isMD5Hash )
 
 		return true;
 	}
-	
+
 	int actualPasswordBufferSize = minimum(MAX_ACCOUNT_PASSWORD_ENTER, (int)enteredPasswordLength) + 1;
 	char * actualPassword = new char[actualPasswordBufferSize];
 	strcpylen(actualPassword, pszPassword, actualPasswordBufferSize);

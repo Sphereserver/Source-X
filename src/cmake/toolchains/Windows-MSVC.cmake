@@ -2,29 +2,29 @@ SET (TOOLCHAIN 1)
 
 function (toolchain_after_project)
 	MESSAGE (STATUS "Toolchain: Windows-MSVC.cmake.")
-	SET(CMAKE_SYSTEM_NAME Windows)
+	SET(CMAKE_SYSTEM_NAME	"Windows"	PARENT_SCOPE)
 
 	# Base compiler and linker flags are the same for every build type
-	SET (CMAKE_C_FLAGS		"/Ox /W4 /MP 
+	SET (CMAKE_C_FLAGS		"/W4 /MP /Ox
 					/wd4127 /wd4131 /wd4310 /wd4996"			PARENT_SCOPE)
 		# Setting the exe to be a windows application and not a console one.
 	SET (CMAKE_EXE_LINKER_FLAGS	"${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS"		PARENT_SCOPE)
 
 	# Release compiler and linker flags
 		# Setting the Visual Studio warning level to 4 and forcing MultiProccessor compilation
-	SET (CMAKE_CXX_FLAGS_RELEASE		"/Ox /W4 /MP
+	SET (CMAKE_CXX_FLAGS_RELEASE		"/W4 /MP /GR /Ox
 						/wd4127 /wd4131 /wd4310 /wd4996"		PARENT_SCOPE)
 	SET (CMAKE_EXE_LINKER_FLAGS_RELEASE	"${CMAKE_EXE_LINKER_FLAGS} /INCREMENTAL:NO"	PARENT_SCOPE)
 
 	# Debug compiler and linker flags
-	SET (CMAKE_CXX_FLAGS_DEBUG		"/W4 /MP /GR 
+	SET (CMAKE_CXX_FLAGS_DEBUG		"/W4 /MP /GR /Od
 						 /wd4127 /wd4131 /wd4310 /wd4996
-						 /D_DEBUG /MDd /Zi /ob0 /Od"			PARENT_SCOPE)
+						 /D_DEBUG /MDd /Zi /ob0"			PARENT_SCOPE)
 	SET (CMAKE_EXE_LINKER_FLAGS_DEBUG	"${CMAKE_EXE_LINKER_FLAGS} /INCREMENTAL:YES
 						/DEBUG"						PARENT_SCOPE)
 
 	# Nightly compiler and linker flags
-	SET (CMAKE_CXX_FLAGS_NIGHTLY		"/Ox /W4 /MP /GR /EHa
+	SET (CMAKE_CXX_FLAGS_NIGHTLY		"/W4 /MP /GR /Ox /EHa
 						/wd4127 /wd4131 /wd4310 /wd4996"		PARENT_SCOPE)
 	SET (CMAKE_EXE_LINKER_FLAGS_NIGHTLY	"${CMAKE_EXE_LINKER_FLAGS} /INCREMENTAL:NO"	PARENT_SCOPE)
 

@@ -61,7 +61,7 @@ CClient::CClient(NetState* state)
 
 	m_Env.SetInvalid();
 
-	g_Log.Event(LOGM_CLIENTS_LOG, "%x:Client connected [Total:%" PRIuSIZE_T "] ('%s' %d/%d)\n",
+	g_Log.Event(LOGM_CLIENTS_LOG, "%x:Client connected [Total:%" PRIuSIZE_T "]. Address: '%s'. (Connecting/Connected: %d/%d).\n",
 		GetSocketID(), g_Serv.StatGet(SERV_STAT_CLIENTS), GetPeerStr(), history.m_connecting, history.m_connected);
 
 	m_zLastMessage[0] = 0;

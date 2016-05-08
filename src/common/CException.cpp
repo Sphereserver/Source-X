@@ -74,7 +74,7 @@ CSError::CSError( const CSError &e ) :
 {
 }
 
-CSError::CSError( LOGL_TYPE eSev, dword hErr, lpctstr pszDescription ) :
+CSError::CSError( LOG_TYPE eSev, dword hErr, lpctstr pszDescription ) :
 	m_eSeverity( eSev ),
 	m_hError( hErr ),
 	m_pszDescription( pszDescription )

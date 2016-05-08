@@ -3332,7 +3332,7 @@ bool CSFileObjContainer::OnTick()
 
 	//EXC_DEBUG_START;
 	//EXC_DEBUG_END;
-	//return false;
+	return false;
 }
 
 int CSFileObjContainer::FixWeirdness()

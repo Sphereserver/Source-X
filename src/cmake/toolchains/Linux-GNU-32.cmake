@@ -2,7 +2,7 @@ SET (TOOLCHAIN 1)
 
 function (toolchain_after_project)
 	MESSAGE (STATUS "Toolchain: Linux-GNU-32.cmake.")
-	SET(CMAKE_SYSTEM_NAME Linux)
+	SET(CMAKE_SYSTEM_NAME	"Linux"		PARENT_SCOPE)
 
 	SET (C_WARNING_OPTS "-Wall -Wextra -Wno-unknown-pragmas -Wno-switch  -Wno-error=unused-but-set-variable")
 	SET (CXX_WARNING_OPTS "-Wall -Wextra -Wno-unknown-pragmas -Wno-invalid-offsetof -Wno-switch")

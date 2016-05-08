@@ -81,7 +81,7 @@ void xRecordPacket(const CClient* client, Packet* packet, lpctstr heading)
 	strcat(fname, ".log");
 
 	CSString sFullFileName = CSFile::GetMergedFileName(g_Log.GetLogDir(), fname);
-	
+
 	// write to file
 	CSFileText out;
 	if (out.Open(sFullFileName, OF_READWRITE|OF_TEXT))
@@ -144,9 +144,17 @@ void NetState::clear(void)
 		m_client = NULL;
 
 		g_Serv.StatDec(SERV_STAT_CLIENTS);
-		g_Log.Event(LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Client disconnected [Total:%" PRIuSIZE_T "]. Account: %s. Address: %s\n",
-			m_id, g_Serv.StatGet(SERV_STAT_CLIENTS), client->GetAccount()->GetName(), m_peerAddress.GetAddrStr());
-		
+		if ( client->GetConnectType() == CONNECT_LOGIN )
+		{	// if account name is retrieved when a connection is refused (ie. wrong password), sphere will crash (at least on MinGW)
+			g_Log.Event(LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Client disconnected [Total:%" PRIuSIZE_T "]. Address: %s\n",
+				m_id, g_Serv.StatGet(SERV_STAT_CLIENTS), m_peerAddress.GetAddrStr());
+		}
+		else
+		{
+			g_Log.Event(LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Client disconnected [Total:%" PRIuSIZE_T "]. Account: %s. Address: %s\n",
+				m_id, g_Serv.StatGet(SERV_STAT_CLIENTS), client->GetAccount()->GetName(), m_peerAddress.GetAddrStr());
+		}
+
 #if !defined(_WIN32) || defined(_LIBEV)
 		if (m_socket.IsOpen() && g_Cfg.m_fUseAsyncNetwork != 0)
 			g_NetworkEvent.unregisterClient(this);
@@ -155,7 +163,7 @@ void NetState::clear(void)
 		//	record the client reference to the garbage collection to be deleted on it's time
 		g_World.m_ObjDelete.InsertHead(client);
 	}
-	
+
 #ifdef _WIN32
 	if (m_socket.IsOpen() && isAsyncMode())
 		m_socket.ClearAsync();
@@ -192,7 +200,7 @@ void NetState::clear(void)
 		delete m_incoming.buffer;
 		m_incoming.buffer = NULL;
 	}
-	
+
 #ifdef _MTNETWORK
 	if (m_incoming.rawBuffer != NULL)
 	{
@@ -236,7 +244,7 @@ void NetState::clearQueues(void)
 
 	// clear byte queue
 	m_outgoing.bytes.Empty();
-	
+
 #ifdef _MTNETWORK
 	// clear received queue
 	while (m_incoming.rawPackets.empty() == false)
@@ -266,7 +274,7 @@ void NetState::init(SOCKET socket, CSocketAddress addr)
 	g_Serv.StatInc(SERV_STAT_CLIENTS);
 	CClient* client = new CClient(this);
 	m_client = client;
-	
+
 #if !defined(_WIN32) || defined(_LIBEV)
 	if (g_Cfg.m_fUseAsyncNetwork != 0)
 	{
@@ -274,7 +282,7 @@ void NetState::init(SOCKET socket, CSocketAddress addr)
 		g_NetworkEvent.registerClient(this, LinuxEv::Write);
 	}
 #endif
-	
+
 	DEBUGNETWORK(("%x:Opening network state\n", id()));
 	m_isWriteClosed = false;
 	m_isReadClosed = false;
@@ -471,7 +479,7 @@ void HistoryIP::setBlocked(bool isBlocked, int timeout)
 	else
 		m_blockExpire.Init();
 }
-	
+
 /***************************************************************************
  *
  *
@@ -757,7 +765,7 @@ void PacketManager::unregisterPacket(uint id)
 		return;
 
 	delete m_handlers[id];
-	m_handlers[id] = NULL;	
+	m_handlers[id] = NULL;
 }
 
 void PacketManager::unregisterExtended(uint id)
@@ -769,7 +777,7 @@ void PacketManager::unregisterExtended(uint id)
 		return;
 
 	delete m_extended[id];
-	m_extended[id] = NULL;	
+	m_extended[id] = NULL;
 }
 
 void PacketManager::unregisterEncoded(uint id)
@@ -781,7 +789,7 @@ void PacketManager::unregisterEncoded(uint id)
 		return;
 
 	delete m_encoded[id];
-	m_encoded[id] = NULL;	
+	m_encoded[id] = NULL;
 }
 
 Packet* PacketManager::getHandler(uint id) const
@@ -1228,16 +1236,16 @@ void NetworkIn::tick(void)
 						}
 					}
 					break;
-					
+
 				case CONNECT_HTTP:
 					EXC_SET("http message");
-					if ( !client->m_client->OnRxWebPageRequest(evt.m_Raw, received) )	
+					if ( !client->m_client->OnRxWebPageRequest(evt.m_Raw, received) )
 					{
 						client->markReadClosed();
 						continue;
 					}
 					break;
-					
+
 				case CONNECT_TELNET:
 					EXC_SET("telnet message");
 					if ( !client->m_client->OnRxConsole(evt.m_Raw, received) )
@@ -1254,7 +1262,7 @@ void NetworkIn::tick(void)
 						continue;
 					}
 					break;
-					
+
 				default:
 					g_Log.Event(LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Junk messages with no crypt\n", client->m_id);
 					client->markReadClosed();
@@ -1267,7 +1275,7 @@ void NetworkIn::tick(void)
 		// decrypt the client data and add it to queue
 		EXC_SET("decrypt messages");
 		client->m_client->m_Crypt.Decrypt(m_decryptBuffer, buffer, received);
-		
+
 		if (client->m_incoming.buffer == NULL)
 		{
 			// create new buffer
@@ -1378,7 +1386,7 @@ void NetworkIn::tick(void)
 
 	EXC_CATCH;
 	EXC_DEBUG_START;
-	
+
 	EXC_DEBUG_END;
 }
 
@@ -1443,7 +1451,7 @@ int NetworkIn::checkForData(fd_set* storage)
 					}
 					continue;
 				}
-			
+
 				EXC_SET("mark closed");
 				state->markReadClosed();
 				if (g_NetworkOut.isActive() == false)
@@ -1478,7 +1486,7 @@ int NetworkIn::checkForData(fd_set* storage)
 
 	EXC_CATCH;
 	EXC_DEBUG_START;
-	
+
 	EXC_DEBUG_END;
 	return 0;
 
@@ -1499,13 +1507,13 @@ void NetworkIn::acceptConnection(void)
 	if (( h >= 0 ) && ( h != INVALID_SOCKET ))
 	{
 		EXC_SET("ip history");
-		
+
 		DEBUGNETWORK(("Retrieving IP history for '%s'.\n", client_addr.GetAddrStr()));
 		HistoryIP& ip = m_ips.getHistoryForIP(client_addr);
 		int maxIp = g_Cfg.m_iConnectingMaxIP;
 		int climaxIp = g_Cfg.m_iClientsMaxIP;
 
-		DEBUGNETWORK(("Incoming connection from '%s' [blocked=%d, ttl=%d, pings=%d, connecting=%d, connected=%d]\n", 
+		DEBUGNETWORK(("Incoming connection from '%s' [blocked=%d, ttl=%d, pings=%d, connecting=%d, connected=%d]\n",
 			ip.m_ip.GetAddrStr(), ip.m_blocked, ip.m_ttl, ip.m_pings, ip.m_connecting, ip.m_connected));
 
 		//	ip is blocked
@@ -1639,7 +1647,7 @@ void NetworkIn::periodic(void)
 		memcpy(newStates, prevStates, m_stateCount * sizeof(NetState*));
 		for (int i = prevCount; i < max; i++)
 			newStates[i] = new NetState(i);
-		
+
 		m_states = newStates;
 		m_stateCount = max;
 
@@ -1775,7 +1783,7 @@ void NetworkOut::tick(void)
 	}
 
 	int packetsSent = 0;
-	
+
 	SafeClientIterator clients;
 	while (CClient* client = clients.next())
 	{
@@ -1905,7 +1913,7 @@ void NetworkOut::flush(CClient* client)
 	ADDTOCALLSTACK("NetworkOut::flush");
 
 	ASSERT(client != NULL);
-	
+
 	NetState* state = client->GetNetState();
 	ASSERT(state != NULL);
 	if (state->isInUse(client) == false)
@@ -2049,7 +2057,7 @@ int NetworkOut::proceedQueueAsync(CClient* client)
 
 	// get next packet
 	PacketSend* packet = NULL;
-	
+
 	while (state->m_outgoing.asyncQueue.empty() == false)
 	{
 		packet = state->m_outgoing.asyncQueue.front();
@@ -2090,7 +2098,7 @@ void NetworkOut::proceedQueueBytes(CClient* client)
 
 	NetState* state = client->GetNetState();
 	ASSERT(state != NULL);
-	
+
 	if (state->isWriteClosed() || state->m_outgoing.bytes.GetDataQty() <= 0)
 		return;
 
@@ -2227,7 +2235,7 @@ bool NetworkOut::sendPacketNow(CClient* client, PacketSend* packet)
 				sendBufferLength = packet->getLength();
 			}
 		}
-		
+
 		if ( g_Cfg.m_fUseExtraBuffer )
 		{
 			// queue packet data
@@ -2768,7 +2776,7 @@ void NetworkManager::tick(void)
 				}
 				continue;
 			}
-			
+
 			// state is finished with as far as we're concerned
 			EXC_SET("mark closed");
 			state->markReadClosed();
@@ -2785,7 +2793,7 @@ void NetworkManager::tick(void)
 
 	// tick ip history
 	m_ips.tick();
-	
+
 	// tick child threads, if single-threaded mode
 	for (NetworkThreadList::iterator it = m_threads.begin(); it != m_threads.end(); ++it)
 	{
@@ -3049,7 +3057,7 @@ void NetworkInput::receiveData()
 			state->m_incoming.rawPackets.clean();
 			continue;
 		}
-			
+
 		// receive data
 		EXC_SET("messages - receive");
 		int received = state->m_socket.Receive(m_receiveBuffer, NETWORK_BUFFERSIZE, 0);
@@ -3218,7 +3226,7 @@ bool NetworkInput::checkForData(fd_set& fds)
 
 		AddSocketToSet(fds, state->m_socket.GetSocket(), count);
 	}
-		
+
 	EXC_SET("prepare timeout");
 	timeval timeout; // time to wait for data.
 	timeout.tv_sec = 0;
@@ -3241,7 +3249,7 @@ bool NetworkInput::processData(NetState* state, Packet* buffer)
 
 	if (client->GetConnectType() == CONNECT_UNK)
 		return processUnknownClientData(state, buffer);
-		
+
 	client->m_timeLastEvent = CServerTime::GetCurrentTime();
 
 	if ( client->m_Crypt.IsInit() == false )
@@ -3342,7 +3350,7 @@ bool NetworkInput::processGameClientData(NetState* state, Packet* buffer)
 			remainingLength = 0;
 		}
 	}
-		
+
 	EXC_CATCHSUB("Message");
 	EXC_DEBUGSUB_START;
 	TemporaryString dump;
@@ -3492,7 +3500,7 @@ bool NetworkInput::processUnknownClientData(NetState* state, Packet* buffer)
 			EXC_SET("ping #1");
 			if (client->OnRxPing(buffer->getRemainingData(), buffer->getRemainingLength()) == false)
 				state->markReadClosed();
-			
+
 			buffer->seek(buffer->getLength());
 			return true;
 		}
@@ -3513,7 +3521,7 @@ bool NetworkInput::processUnknownClientData(NetState* state, Packet* buffer)
 				state->m_newseed = true;
 				buffer->skip(1);
 			}
-			
+
 			if (buffer->getRemainingLength() >= (NETWORK_SEEDLEN_NEW - 1))
 			{
 				seed = buffer->readInt32();
@@ -3555,7 +3563,7 @@ bool NetworkInput::processUnknownClientData(NetState* state, Packet* buffer)
 
 		state->m_seeded = true;
 		state->m_seed = seed;
-			
+
 		if (buffer->getRemainingLength() <= 0 && state->m_seed == 0xFFFFFFFF)
 		{
 			// UO:KR Client opens connection with 255.255.255.255 and waits for the
@@ -3594,8 +3602,8 @@ bool NetworkInput::processUnknownClientData(NetState* state, Packet* buffer)
 	EXC_CATCH;
 	return false;
 }
-	
-	
+
+
 /***************************************************************************
  *
  *
@@ -3623,7 +3631,7 @@ bool NetworkOutput::processOutput()
 #endif
 
 	ProfileTask networkTask(PROFILE_NETWORK_TX);
-		
+
 	static uchar tick = 0;
 	EXC_TRY("NetworkOutput");
 	tick++;
@@ -3701,7 +3709,7 @@ void NetworkOutput::checkFlushRequests(void)
 #ifdef MTNETWORK_OUTPUT
 	ASSERT(!m_thread->isActive() || m_thread->isCurrentThread());
 #endif
-	
+
 	NetworkThreadStateIterator states(m_thread);
 	while (NetState* state = states.next())
 	{
@@ -3735,7 +3743,7 @@ size_t NetworkOutput::flush(NetState* state)
 
 		return 0;
 	}
-	
+
 	ASSERT(!m_thread->isActive() || m_thread->isCurrentThread());
 	size_t packetsSent = 0;
 	for (int priority = PacketSend::PRI_HIGHEST; priority >= 0; --priority)
@@ -3786,7 +3794,7 @@ size_t NetworkOutput::processPacketQueue(NetState* state, uint priority)
 		{
 			if (state->m_outgoing.queue[priority].empty())
 				break;
-				
+
 			state->m_outgoing.currentTransaction = state->m_outgoing.queue[priority].front();
 			state->m_outgoing.queue[priority].pop();
 		}
@@ -3915,7 +3923,7 @@ bool NetworkOutput::processByteQueue(NetState* state)
 		state->markWriteClosed();
 		return false;
 	}
-		
+
 	if (result > 0)
 		state->m_outgoing.bytes.RemoveDataAmount(result);
 
@@ -4016,7 +4024,7 @@ bool NetworkOutput::sendPacketData(NetState* state, PacketSend* packet)
 		EXC_SET("send data");
 		processByteQueue(state);
 	}
-		
+
 	EXC_SET("sent trigger");
 	packet->onSent(client);
 	delete packet;
@@ -4137,7 +4145,7 @@ void NetworkOutput::onAsyncSendComplete(NetState* state, bool success)
 	state->setSendingAsync(false);
 	if (success == false)
 		return;
-		
+
 #ifdef MTNETWORK_OUTPUT
 	// we could process another batch of async data right now, but only if we
 	// are in the output thread

@@ -20,19 +20,30 @@
 //	CEventLog
 // -----------------------------
 
-enum LOGL_TYPE
+enum LOG_TYPE
 {
-	// critical level.
+	// --critical Level.
 	LOGL_FATAL	= 1, 	// fatal error ! cannot continue.
 	LOGL_CRIT	= 2, 	// critical. might not continue.
 	LOGL_ERROR	= 3, 	// non-fatal errors. can continue.
 	LOGL_WARN	= 4,	// strange.
 	LOGL_EVENT	= 5,	// Misc major events.
-	// subject matter. (severity level is first 4 bits, LOGL_EVENT)
-	LOGM_INIT = 0x00100,		// start up messages.
-	LOGM_NOCONTEXT = 0x20000,	// do not include context information
-	LOGM_DEBUG = 0x40000		// debug kind of message with DEBUG: prefix
+
+	// --subject Matter. (severity level is first 4 bits, LOGL_EVENT)
+	LOGM_ACCOUNTS		= 0x00080,
+	LOGM_INIT			= 0x00100,	// start up messages.
+	LOGM_SAVE			= 0x00200,	// world save status.
+	LOGM_CLIENTS_LOG	= 0x00400,	// all clients as they log in and out.
+	LOGM_GM_PAGE		= 0x00800,	// player gm pages.
+	LOGM_PLAYER_SPEAK	= 0x01000,	// All that the players say.
+	LOGM_GM_CMDS		= 0x02000,	// Log all GM commands.
+	LOGM_CHEAT			= 0x04000,	// Probably an exploit !
+	LOGM_KILLS			= 0x08000,	// Log player combat results.
+	LOGM_HTTP			= 0x10000,
+	LOGM_NOCONTEXT		= 0x20000,	// do not include context information
+	LOGM_DEBUG			= 0x40000	// debug kind of message with DEBUG: prefix
 };
+
 
 extern class CEventLog
 {
@@ -121,26 +132,12 @@ private:
 
 extern struct CLog : public CSFileText, public CEventLog
 {
-	// subject matter. (severity level is first 4 bits, LOGL_EVENT)
-	#define LOGM_ACCOUNTS		0x00080
-	//#define LOGM_INIT			0x00100	// start up messages.
-	#define LOGM_SAVE			0x00200	// world save status.
-	#define LOGM_CLIENTS_LOG	0x00400	// all clients as they log in and out.
-	#define LOGM_GM_PAGE		0x00800	// player gm pages.
-	#define LOGM_PLAYER_SPEAK	0x01000	// All that the players say.
-	#define LOGM_GM_CMDS		0x02000	// Log all GM commands.
-	#define LOGM_CHEAT			0x04000	// Probably an exploit !
-	#define LOGM_KILLS			0x08000	// Log player combat results.
-	#define LOGM_HTTP			0x10000
-	//#define	LOGM_NOCONTEXT		0x20000	// do not include context information
-	//#define LOGM_DEBUG			0x40000	// debug kind of message with DEBUG: prefix
-
 private:
 	dword m_dwMsgMask;			// Level of log detail messages. IsLogMsg()
 	CSTime m_dateStamp;			// last real time stamp.
 	CSString m_sBaseDir;
 
-	const CScript * m_pScriptContext;	// The current context.
+	const CScript * m_pScriptContext;		// The current context.
 	const CScriptObj * m_pObjectContext;	// The current context.
 
 	static CSTime sm_prevCatchTick;	// don't flood with these.
@@ -158,9 +155,9 @@ public:
 	dword GetLogMask() const;
 	void SetLogMask( dword dwMask );
 	bool IsLoggedMask( dword dwMask ) const;
-	LOGL_TYPE GetLogLevel() const;
-	void SetLogLevel( LOGL_TYPE level );
-	bool IsLoggedLevel( LOGL_TYPE level ) const;
+	LOG_TYPE GetLogLevel() const;
+	void SetLogLevel( LOG_TYPE level );
+	bool IsLoggedLevel( LOG_TYPE level ) const;
 	bool IsLogged( dword wMask ) const;
 
 	virtual int EventStr( dword wMask, lpctstr pszMsg );
