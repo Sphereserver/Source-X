@@ -940,7 +940,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 
 	wBlockThis = 0;
 	// Terrain height is screwed. Since it is related to all the terrain around it.
-	const CUOMapMeter * pMeter = pMapBlock->GetTerrain( UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y));
+	const CUOMapMeter * pMeter = pMapBlock->GetTerrain( UO_BLOCK_OFFSET(pt.m_x), UO_BLOCK_OFFSET(pt.m_y) );
 	if ( ! pMeter )
 		return;
 
@@ -1287,12 +1287,12 @@ char CWorld::GetHeightPoint( const CPointBase & pt, dword & wBlockFlags, bool fH
 		wBlockFlags &= ~CAN_I_CLIMB;
 		wBlockFlags |= CAN_I_PLATFORM;	// not really true but hack it anyhow.
 		//DEBUG_MSG(("block.m_Bottom.m_z (%d)\n",block.m_Bottom.m_z));
-		return( block.m_Bottom.m_z );
+		return block.m_Bottom.m_z;
 	}
 	if ( dwCan & CAN_C_FLY )
-		return( pt.m_z );
+		return pt.m_z;
 
-	return( block.m_Bottom.m_z );
+	return block.m_Bottom.m_z;
 }
 
 void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block, bool fHouseCheck )

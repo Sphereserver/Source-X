@@ -391,7 +391,6 @@ void CClient::addTargetFunctionMulti( lpctstr pszFunction, ITEMID_TYPE itemid, b
 	if ( CItemBase::IsID_Multi( itemid ))	// a multi we get from Multi.mul
 	{
 		SetTargMode(CLIMODE_TARG_OBJ_FUNC, "");
-
 		new PacketAddTarget(this, fGround? PacketAddTarget::Ground : PacketAddTarget::Object, CLIMODE_TARG_OBJ_FUNC, PacketAddTarget::None, itemid);
 	}
 	addTargetFunction( pszFunction, fGround, false );

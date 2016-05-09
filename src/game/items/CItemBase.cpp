@@ -1840,7 +1840,7 @@ bool CItemBaseMulti::AddComponent( tchar * pArgs )
 	size_t iQty = Str_ParseCmds( pArgs, piArgs, CountOf(piArgs));
 	if ( iQty <= 1 )
 		return false;
-	return AddComponent(static_cast<ITEMID_TYPE>(RES_GET_INDEX(piArgs[0])), (short)(piArgs[1]), (short)(piArgs[2]), (char)(piArgs[3]) );
+	return AddComponent(static_cast<ITEMID_TYPE>(RES_GET_INDEX(piArgs[0])), (short)piArgs[1], (short)piArgs[2], (char)piArgs[3] );
 }
 
 int CItemBaseMulti::GetMaxDist() const

@@ -1706,7 +1706,7 @@ bool CClient::addTargetItems( CLIMODE_TYPE targmode, ITEMID_TYPE id, bool fGroun
 			CItemStone * pStone = m_pChar->Guild_Find(MEMORY_GUILD);
 			if (pStone)
 			{
-				addSysMessage( g_Cfg.GetDefaultMsg(DEFMSG_GUILD_ALREADY_MEMBER));
+				addSysMessage( g_Cfg.GetDefaultMsg(DEFMSG_GUILD_ALREADY_MEMBER) );
 				return false;
 			}
 		}
@@ -1720,10 +1720,9 @@ bool CClient::addTargetItems( CLIMODE_TYPE targmode, ITEMID_TYPE id, bool fGroun
 	tchar *pszTemp = Str_GetTemp();
 	sprintf(pszTemp, "%s %s?", g_Cfg.GetDefaultMsg(DEFMSG_WHERE_TO_PLACE), pszName);
 
-	if ( CItemBase::IsID_Multi( id ))	// a multi we get from Multi.mul
+	if ( CItemBase::IsID_Multi( id ) )	// a multi we get from Multi.mul
 	{
 		SetTargMode(targmode, pszTemp);
-
 		new PacketAddTarget(this, fGround? PacketAddTarget::Ground : PacketAddTarget::Object, targmode, PacketAddTarget::None, id);
 		return true;
 	}

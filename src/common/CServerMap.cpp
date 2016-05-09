@@ -98,13 +98,11 @@ lpctstr CServerMapBlockState::GetTileName( dword dwID )	// static
 {
 	ADDTOCALLSTACK("CServerMapBlockState::GetTileName");
 	if ( dwID == 0 )
-	{
-		return( "<null>" );
-	}
+		return "<null>";
 	tchar * pStr = Str_GetTemp();
 	if ( dwID < TERRAIN_QTY )
 	{
-		CSphereTerrainInfo land( (word)(dwID) );
+		CSphereTerrainInfo land( (word)dwID );
 		strcpy( pStr, land.m_name );
 	}
 	else
@@ -113,7 +111,7 @@ lpctstr CServerMapBlockState::GetTileName( dword dwID )	// static
 		CUOItemInfo item(static_cast<ITEMID_TYPE>(dwID));
 		strcpy( pStr, item.m_name );
 	}
-	return( pStr );
+	return pStr;
 }
 
 bool CServerMapBlockState::CheckTile( dword wItemBlockFlags, char zBottom, height_t zHeight, dword dwID )
@@ -614,35 +612,6 @@ CServerMapBlock::CServerMapBlock(int bx, int by, int map) :
 	sm_iCount++;
 	m_map = map;
 	Load( bx, by );
-}
-
-CServerMapBlock::~CServerMapBlock()
-{
-	sm_iCount--;
-}
-
-int CServerMapBlock::GetOffsetX( int x ) const
-{
-	// Allow this to go out of bounds.
-	// ASSERT( ( x-m_pt.m_x) == UO_BLOCK_OFFSET(x));
-	return( x - m_x );
-}
-
-int CServerMapBlock::GetOffsetY( int y ) const
-{
-	return( y - m_y );
-}
-
-const CUOMapMeter * CServerMapBlock::GetTerrain( int xo, int yo ) const
-{
-	ASSERT( xo >= 0 && xo < UO_BLOCK_SIZE );
-	ASSERT( yo >= 0 && yo < UO_BLOCK_SIZE );
-	return( &( m_Terrain.m_Meter[ yo*UO_BLOCK_SIZE + xo ] ));
-}
-
-const CUOMapBlock * CServerMapBlock::GetTerrainBlock() const
-{
-	return( &m_Terrain );
 }
 
 

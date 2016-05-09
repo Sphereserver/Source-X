@@ -8,23 +8,23 @@
 #define _INC_NETWORK_H
 
 #include <deque>
+#include "packet.h"
 #include "../common/common.h"
 #include "../common/sphere_library/CSArray.h"
 #include "../common/sphere_library/CSQueue.h"
-#include "packet.h"
-#include "../sphere/containers.h"
 #include "../common/CSocket.h"
 #include "../common/sphereproto.h"
+#include "../sphere/containers.h"
 #include "../game/CServerTime.h"
 
 #if !defined(_WIN32) || defined(_LIBEV)
 	#include "../sphere/linuxev.h"
 #endif
 
-#define NETWORK_PACKETCOUNT 0x100	// number of unique packets
-#define NETWORK_BUFFERSIZE 0xF000	// size of receive buffer
-#define NETWORK_SEEDLEN_OLD (sizeof( dword ))
-#define NETWORK_SEEDLEN_NEW (1 + (sizeof( dword ) * 5))
+#define NETWORK_PACKETCOUNT		0x100	// number of unique packets
+#define NETWORK_BUFFERSIZE		0xF000	// size of receive buffer
+#define NETWORK_SEEDLEN_OLD		(sizeof( dword ))
+#define NETWORK_SEEDLEN_NEW		(1 + (sizeof( dword ) * 5))
 
 #define NETWORK_MAXPACKETS		g_Cfg.m_iNetMaxPacketsPerTick	// max packets to send per tick (per queue)
 #define NETWORK_MAXPACKETLEN	g_Cfg.m_iNetMaxLengthPerTick	// max packet length to send per tick (per queue)
@@ -41,9 +41,9 @@
 #define NETWORK_DISCONNECTPRI	PacketSend::PRI_HIGHEST			// packet priorty to continue sending before closing sockets
 
 #ifdef DEBUGPACKETS
-	#define DEBUGNETWORK(_x_)		g_pLog->EventDebug _x_;
+	#define DEBUGNETWORK(_x_)	g_pLog->EventDebug _x_;
 #else
-	#define DEBUGNETWORK(_x_)		if ( g_Cfg.m_wDebugFlags & DEBUGF_NETWORK ) { g_pLog->EventDebug _x_; }
+	#define DEBUGNETWORK(_x_)	if ( g_Cfg.m_wDebugFlags & DEBUGF_NETWORK ) { g_pLog->EventDebug _x_; }
 #endif
 
 class CClient;
@@ -85,23 +85,23 @@ protected:
 	NetworkThread* m_parent;
 #endif
 
-	volatile bool m_isInUse; // is currently in use
-	volatile bool m_isReadClosed; // is closed by read thread
-	volatile bool m_isWriteClosed; // is closed by write thread
-	volatile bool m_needsFlush; // does data need to be flushed
+	volatile bool m_isInUse;		// is currently in use
+	volatile bool m_isReadClosed;	// is closed by read thread
+	volatile bool m_isWriteClosed;	// is closed by write thread
+	volatile bool m_needsFlush;		// does data need to be flushed
 
-	bool m_seeded; // is seed received
-	dword m_seed; // client seed
+	bool m_seeded;	// is seed received
+	dword m_seed;	// client seed
 	bool m_newseed; // is the client using new seed
 
-	bool m_useAsync; // is this socket using asynchronous sends
+	bool m_useAsync;				// is this socket using asynchronous sends
 	volatile bool m_isSendingAsync; // is a packet currently being sent asynchronously?
 #if !defined(_WIN32) || defined(_LIBEV)
 	// non-windows uses ev_io for async operations
 	struct ev_io m_eventWatcher;
 #elif defined(_WIN32)
 	// windows uses winsock for async operations
-	WSABUF m_bufferWSA; // Winsock Async Buffer
+	WSABUF m_bufferWSA;			// Winsock Async Buffer
 	WSAOVERLAPPED m_overlapped; // Winsock Overlapped structure
 #endif
 
@@ -112,11 +112,11 @@ protected:
 	struct
 	{
 		PacketTransactionQueue queue[PacketSend::PRI_QTY];	// packet queue
-		PacketSendQueue asyncQueue; // async packet queue
-		CSQueueBytes bytes; // byte queue
+		PacketSendQueue asyncQueue;		// async packet queue
+		CSQueueBytes bytes;				// byte queue
 
-		PacketTransaction* currentTransaction; // transaction currently being processed
-		ExtendedPacketTransaction* pendingTransaction; // transaction being built
+		PacketTransaction* currentTransaction;			// transaction currently being processed
+		ExtendedPacketTransaction* pendingTransaction;	// transaction being built
 	} m_outgoing; // outgoing data
 
 	struct
@@ -124,17 +124,17 @@ protected:
 		Packet* buffer; // received data
 #ifdef _MTNETWORK
 		PacketQueue rawPackets; // raw data packets
-		Packet* rawBuffer; // received data
+		Packet* rawBuffer;		// received data
 #endif
 	} m_incoming; // incoming data
 
 	int m_packetExceptions; // number of packet exceptions
 
 public:
-	GAMECLIENT_TYPE m_clientType; // type of client
-	dword m_clientVersion; // client version (encryption)
-	dword m_reportedVersion; // client version (reported)
-	byte m_sequence; // movement sequence
+	GAMECLIENT_TYPE m_clientType;	// type of client
+	dword m_clientVersion;			// client version (encryption)
+	dword m_reportedVersion;		// client version (reported)
+	byte m_sequence;				// movement sequence
 
 public:
 	explicit NetState(int id);
@@ -145,33 +145,33 @@ private:
 	NetState& operator=(const NetState& other);
 
 public:
-	int id(void) const { return m_id; }; // returns ID of the client
-	void setId(int id) { m_id = id; }; // changes ID of the client
-	void clear(void); // clears state
-	void clearQueues(void); // clears outgoing data queues
+	int id(void) const { return m_id; };	// returns ID of the client
+	void setId(int id) { m_id = id; };		// changes ID of the client
+	void clear(void);						// clears state
+	void clearQueues(void);					// clears outgoing data queues
 
-	void init(SOCKET socket, CSocketAddress addr); // initialized socket
+	void init(SOCKET socket, CSocketAddress addr);		// initialized socket
 	bool isInUse(const CClient* client = NULL) const volatile; // does this socket still belong to this/a client?
-	bool hasPendingData(void) const; // is there any data waiting to be sent?
-	bool canReceive(PacketSend* packet) const; // can the state receive the given packet?
+	bool hasPendingData(void) const;			// is there any data waiting to be sent?
+	bool canReceive(PacketSend* packet) const;	// can the state receive the given packet?
 
 	void detectAsyncMode(void);
-	void setAsyncMode(bool isAsync) { m_useAsync = isAsync; }; // set asynchronous mode
-	bool isAsyncMode(void) const { return m_useAsync; }; // get asyncronous mode
+	void setAsyncMode(bool isAsync) { m_useAsync = isAsync; };	// set asynchronous mode
+	bool isAsyncMode(void) const { return m_useAsync; };		// get asyncronous mode
 #if !defined(_WIN32) || defined(_LIBEV)
-	struct ev_io* iocb(void) { return &m_eventWatcher; }; // get io callback
+	struct ev_io* iocb(void) { return &m_eventWatcher; };		// get io callback
 #endif
-	bool isSendingAsync(void) const volatile { return m_isSendingAsync; }; // get if async packeet is being sent
-	void setSendingAsync(bool isSending) volatile { m_isSendingAsync = isSending; }; // set if async packet is being sent
+	bool isSendingAsync(void) const volatile { return m_isSendingAsync; };				// get if async packeet is being sent
+	void setSendingAsync(bool isSending) volatile { m_isSendingAsync = isSending; };	// set if async packet is being sent
 
-	GAMECLIENT_TYPE getClientType(void) const { return m_clientType; }; // determined client type
-	dword getCryptVersion(void) const { return m_clientVersion; }; // version as determined by encryption
+	GAMECLIENT_TYPE getClientType(void) const { return m_clientType; };	// determined client type
+	dword getCryptVersion(void) const { return m_clientVersion; };		// version as determined by encryption
 	dword getReportedVersion(void) const { return m_reportedVersion; }; // version as reported by client
 
-	void markReadClosed(void) volatile; // mark socket as closed by read thread
-	void markWriteClosed(void) volatile; // mark socket as closed by write thread
-	bool isClosing(void) const volatile { return m_isReadClosed || m_isWriteClosed; } // is the socket closing?
-	bool isClosed(void) const volatile { return m_isReadClosed && m_isWriteClosed; } // is the socket closed?
+	void markReadClosed(void) volatile;		// mark socket as closed by read thread
+	void markWriteClosed(void) volatile;	// mark socket as closed by write thread
+	bool isClosing(void) const volatile { return m_isReadClosed || m_isWriteClosed; }	// is the socket closing?
+	bool isClosed(void) const volatile { return m_isReadClosed && m_isWriteClosed; }	// is the socket closed?
 	bool isReadClosed(void) const volatile { return m_isReadClosed; }	// is the socket closed by read-thread?
 	bool isWriteClosed(void) const volatile { return m_isWriteClosed; }	// is the socket closed by write-thread?
 
@@ -182,17 +182,17 @@ public:
 
 	bool isClient3D(void) const { return m_clientType == CLIENTTYPE_3D; }; // is this a 3D client?
 	bool isClientKR(void) const { return m_clientType == CLIENTTYPE_KR; }; // is this a KR client?
-	bool isClientEnhanced(void) const { return m_clientType == CLIENTTYPE_EC; }; // is this a Enhanced client?
+	bool isClientEnhanced(void) const { return m_clientType == CLIENTTYPE_EC; }; // is this an Enhanced client?
 
-	bool isCryptVersion(dword version) const { return m_clientVersion && m_clientVersion >= version; }; // check the minimum crypt version
-	bool isReportedVersion(dword version) const { return m_reportedVersion && m_reportedVersion >= version; }; // check the minimum reported verson
+	bool isCryptVersion(dword version) const { return m_clientVersion && m_clientVersion >= version; };			// check the minimum crypt version
+	bool isReportedVersion(dword version) const { return m_reportedVersion && m_reportedVersion >= version; };	// check the minimum reported verson
 	bool isClientVersion(dword version) const { return isCryptVersion(version) || isReportedVersion(version); } // check the minimum client version
-	bool isCryptLessVersion(dword version) const { return m_clientVersion && m_clientVersion < version; }; // check the maximum crypt version
-	bool isReportedLessVersion(dword version) const { return m_reportedVersion && m_reportedVersion < version; }; // check the maximum reported version
+	bool isCryptLessVersion(dword version) const { return m_clientVersion && m_clientVersion < version; };		// check the maximum crypt version
+	bool isReportedLessVersion(dword version) const { return m_reportedVersion && m_reportedVersion < version; };	// check the maximum reported version
 	bool isClientLessVersion(dword version) const { return isCryptLessVersion(version) || isReportedLessVersion(version); } // check the maximum client version
 
-	void beginTransaction(int priority); // begin a transaction for grouping packets
-	void endTransaction(void); // end transaction
+	void beginTransaction(int priority);	// begin a transaction for grouping packets
+	void endTransaction(void);				// end transaction
 	
 #ifndef _MTNETWORK
 	friend class NetworkIn;

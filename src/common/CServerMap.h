@@ -184,18 +184,35 @@ public:
 
 	CServerMapBlock(int bx, int by, int map);
 
-	virtual ~CServerMapBlock();
+	virtual ~CServerMapBlock()
+	{ 
+		sm_iCount--;
+	}
 
 private:
 	CServerMapBlock(const CServerMapBlock& copy);
 	CServerMapBlock& operator=(const CServerMapBlock& other);
 
 public:
-	int GetOffsetX( int x ) const;
-	int GetOffsetY( int y ) const;
+	int GetOffsetX(int x) const
+	{
+		return (x - m_x);
+	}
+	int GetOffsetY( int y ) const
+	{
+		return (y - m_y);
+	}
 
-	const CUOMapMeter * GetTerrain( int xo, int yo ) const;
-	const CUOMapBlock * GetTerrainBlock() const;
+	const CUOMapMeter * GetTerrain( int xo, int yo ) const
+	{
+		ASSERT(xo >= 0 && xo < UO_BLOCK_SIZE);
+		ASSERT(yo >= 0 && yo < UO_BLOCK_SIZE);
+		return &(m_Terrain.m_Meter[yo*UO_BLOCK_SIZE + xo]);
+	}
+	const CUOMapBlock * GetTerrainBlock() const
+	{
+		return &m_Terrain;
+	}
 };
 
 class CSphereMulti : public CCachedMulItem
