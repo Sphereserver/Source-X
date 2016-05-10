@@ -3,11 +3,13 @@ SET (TOOLCHAIN 1)
 function (toolchain_after_project)
 	MESSAGE (STATUS "Toolchain: Windows-GNU-64.cmake.")
 	SET(CMAKE_SYSTEM_NAME	"Windows"	PARENT_SCOPE)
+	#SET(ARCH_BITS		64		PARENT_SCOPE)
 	ENABLE_LANGUAGE(RC)
 
 	LINK_DIRECTORIES ("${CMAKE_SOURCE_DIR}/common/mysql/lib/x86_64")
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY	"${CMAKE_BINARY_DIR}/bin64"	PARENT_SCOPE)
 endfunction()
+
 
 function (toolchain_exe_stuff)
 	#-- Setting compiler flags common to all builds.
@@ -19,10 +21,9 @@ function (toolchain_exe_stuff)
 	SET (C_OPTS		"-std=c11   -pthread -fno-omit-frame-pointer -fexceptions -fnon-call-exceptions")
 	SET (CXX_OPTS		"-std=c++11 -pthread -fno-omit-frame-pointer -fexceptions -fnon-call-exceptions -mno-ms-bitfields")
 	 # -mno-ms-bitfields is needed to fix structure packing;
-	 # -s: strips debug info (remove it when debugging); -g: adds debug informations;
 	 # -mwindows: specify the subsystem, avoiding the opening of a console when launching the application.
-	SET (C_SPECIAL		"-fno-expensive-optimizations -pipe -mwindows")
-	SET (CXX_SPECIAL	"-ffast-math -pipe -mwindows")
+	SET (C_SPECIAL		"-pipe -mwindows -fno-expensive-optimizations")
+	SET (CXX_SPECIAL	"-pipe -mwindows -ffast-math ")
 
 	SET (CMAKE_RC_FLAGS	"--target=pe-x86-64"							PARENT_SCOPE)
 	SET (CMAKE_C_FLAGS	"${C_WARNING_OPTS} ${C_ARCH_OPTS} ${C_OPTS} ${C_SPECIAL}"		PARENT_SCOPE)
@@ -40,9 +41,11 @@ function (toolchain_exe_stuff)
 
 	 # (note: since cmake 3.3 the generator $<COMPILE_LANGUAGE> exists).
 	 # do not use " " to delimitate these flags!
-	TARGET_COMPILE_OPTIONS ( spheresvr_release	PUBLIC -s -O3 	)
-	TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -g -O3	)
-	TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -s -O3 	)
+	 # -s: strips debug info (remove it when debugging); -g: adds debug informations;
+	 # -fno-omit-frame-pointer disables a good optimization which may corrupt the debugger stack trace.
+	TARGET_COMPILE_OPTIONS ( spheresvr_release	PUBLIC -s -O3 				)
+	TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -g -O3 -fno-omit-frame-pointer	)
+	TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -s -O3 				)
 
 
 	#-- Setting per-build linker flags.

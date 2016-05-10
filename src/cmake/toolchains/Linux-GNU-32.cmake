@@ -2,11 +2,13 @@ SET (TOOLCHAIN 1)
 
 function (toolchain_after_project)
 	MESSAGE (STATUS "Toolchain: Linux-GNU-32.cmake.")
-	SET(CMAKE_SYSTEM_NAME	"Linux"	PARENT_SCOPE)
+	SET(CMAKE_SYSTEM_NAME	"Linux"		PARENT_SCOPE)
+	#SET(ARCH_BITS		32		PARENT_SCOPE)
 
 	LINK_DIRECTORIES ("/usr/lib")
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY	"${CMAKE_BINARY_DIR}/bin"	PARENT_SCOPE)
 endfunction()
+
 
 function (toolchain_exe_stuff)
 	#-- Setting compiler flags common to all builds.
@@ -17,9 +19,8 @@ function (toolchain_exe_stuff)
 	SET (CXX_ARCH_OPTS	"-march=i686 -m32")
 	SET (C_OPTS		"-std=c11   -pthread -fno-omit-frame-pointer -fexceptions -fnon-call-exceptions")
 	SET (CXX_OPTS		"-std=c++11 -pthread -fno-omit-frame-pointer -fexceptions -fnon-call-exceptions")
-	 # -s: strips debug info (remove it when debugging); -g: adds debug informations.
-	SET (C_SPECIAL		"-fno-expensive-optimizations -pipe")
-	SET (CXX_SPECIAL	"-ffast-math -pipe")
+	SET (C_SPECIAL		"-pipe -fno-expensive-optimizations")
+	SET (CXX_SPECIAL	"-pipe -ffast-math")
 
 	SET (CMAKE_C_FLAGS	"${C_WARNING_OPTS} ${C_ARCH_OPTS} ${C_OPTS} ${C_SPECIAL}"		PARENT_SCOPE)
 	SET (CMAKE_CXX_FLAGS	"${CXX_WARNING_OPTS} ${CXX_ARCH_OPTS} ${CXX_OPTS} ${CXX_SPECIAL}"	PARENT_SCOPE)
@@ -29,21 +30,23 @@ function (toolchain_exe_stuff)
 
 	 # Force dynamic linking.
 	 # -pthread, -s and -g need to be added/removed also to/from linker flags!
-	SET (CMAKE_EXE_LINKER_FLAGS		"-s -dynamic"			PARENT_SCOPE)
+	SET (CMAKE_EXE_LINKER_FLAGS		"-pthread -dynamic"			PARENT_SCOPE)
 
 
 	#-- Adding compiler flags per build.
 
 	 # (note: since cmake 3.3 the generator $<COMPILE_LANGUAGE> exists).
 	 # do not use " " to delimitate these flags!
-	TARGET_COMPILE_OPTIONS ( spheresvr_release	PUBLIC -s -O3 )
-	TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -g -O3 )
-	TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -s -O3 )
+	 # -s: strips debug info (remove it when debugging); -g: adds debug informations;
+	 # -fno-omit-frame-pointer disables a good optimization which may corrupt the debugger stack trace.
+	TARGET_COMPILE_OPTIONS ( spheresvr_release	PUBLIC -s -O3 				)
+	TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -g -O3 -fno-omit-frame-pointer	)
+	TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -s -O3 				)
 
 
 	#-- Setting per-build linker flags.
 
-	 # Linking Unix (MinGW) libs.
+	 # Linking Unix libs.
 	 # same here, do not use " " to delimitate these flags!
 	TARGET_LINK_LIBRARIES ( spheresvr_release	mysqlclient rt dl	-s )
 	TARGET_LINK_LIBRARIES ( spheresvr_debug		mysqlclient rt dl	-g )
