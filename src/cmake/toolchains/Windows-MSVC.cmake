@@ -8,30 +8,42 @@ function (toolchain_after_project)
 	#-- Base compiler and linker flags are the same for every build type.
 
 	 # Setting the Visual Studio warning level to 4 and forcing MultiProccessor compilation
-	SET (CMAKE_C_FLAGS		"/W4 /MP /Ox
-					/wd4127 /wd4131 /wd4310 /wd4996"		PARENT_SCOPE)
-	SET (CXX_FLAGS_COMMON		"/W4 /MP /GR
-					/wd4127 /wd4131 /wd4310 /wd4996"		)
-	 # Setting the exe to be a windows application and not a console one.
+	SET (C_FLAGS_COMMON		"/W4 /MP /GR /fp:fast
+					/wd4127 /wd4131 /wd4310 /wd4996 /wd4701 /wd4703"		)
+	 #				# Disable warnings caused by external c libraries.
+
+	SET (CXX_FLAGS_COMMON		"/W4 /MP /GR /fp:fast /wd4701 /wd4703
+					/wd4127 /wd4131 /wd4310 /wd4996 /wd4701 /wd4703"		)
+
+	 # Setting the exe to be a GUI application and not a console one.
 	SET (LINKER_FLAGS_COMMON	"/SUBSYSTEM:WINDOWS"				)
+
+	IF (CMAKE_CL_64)	# 64 bits
+		SET(LINKER_FLAGS_COMMON "${LINKER_FLAGS_COMMON} /OPT:REF,ICF"		)
+	ELSE (CMAKE_CL_64)	# 32 bits
+		SET(LINKER_FLAGS_COMMON "${LINKER_FLAGS_COMMON} /OPT:REF"		)
+	ENDIF (CMAKE_CL_64)
 
 
 	#-- Release compiler and linker flags.
-	 
-	SET (CMAKE_CXX_FLAGS_RELEASE		"${CXX_FLAGS_COMMON} /Ox /EHsc"				PARENT_SCOPE)
-	SET (CMAKE_EXE_LINKER_FLAGS_RELEASE	"${LINKER_FLAGS_COMMON} /INCREMENTAL:NO"		PARENT_SCOPE)
+	
+	SET (CMAKE_C_FLAGS_RELEASE		"${C_FLAGS_COMMON}   /O2 /EHsc /GL /GA /Gw"		PARENT_SCOPE)
+	SET (CMAKE_CXX_FLAGS_RELEASE		"${CXX_FLAGS_COMMON} /O2 /EHsc /GL /GA /Gw /Gy"		PARENT_SCOPE)
+	SET (CMAKE_EXE_LINKER_FLAGS_RELEASE	"${LINKER_FLAGS_COMMON} /INCREMENTAL:NO /LTCG"		PARENT_SCOPE)
 
 
 	#-- Debug compiler and linker flags.
 
-	SET (CMAKE_CXX_FLAGS_DEBUG		"${CXX_FLAGS_COMMON} /Od /EHsc /MDd /Zi /ob0"		PARENT_SCOPE)
+	SET (CMAKE_C_FLAGS_DEBUG		"${C_FLAGS_COMMON}   /Od /EHsc"				PARENT_SCOPE)
+	SET (CMAKE_CXX_FLAGS_DEBUG		"${CXX_FLAGS_COMMON} /Od /EHsc /MDd /ZI /ob0"		PARENT_SCOPE)
 	SET (CMAKE_EXE_LINKER_FLAGS_DEBUG	"${LINKER_FLAGS_COMMON} /INCREMENTAL:YES /DEBUG"	PARENT_SCOPE)
 
 
 	#-- Nightly compiler and linker flags.
 
-	SET (CMAKE_CXX_FLAGS_NIGHTLY		"${CXX_FLAGS_COMMON} /Ox /EHa"				PARENT_SCOPE)
-	SET (CMAKE_EXE_LINKER_FLAGS_NIGHTLY	"${LINKER_FLAGS_COMMON} /INCREMENTAL:NO"		PARENT_SCOPE)
+	SET (CMAKE_C_FLAGS_NIGHTLY		"${C_FLAGS_COMMON}   /O2 /EHa /GL /GA /Gw /Gy"		PARENT_SCOPE)
+	SET (CMAKE_CXX_FLAGS_NIGHTLY		"${CXX_FLAGS_COMMON} /O2 /EHa /GL /GA /Gw /Gy"		PARENT_SCOPE)
+	SET (CMAKE_EXE_LINKER_FLAGS_NIGHTLY	"${LINKER_FLAGS_COMMON} /INCREMENTAL:NO /LTCG"		PARENT_SCOPE)
 
 
 	#-- Set mysql .lib directory for the linker.

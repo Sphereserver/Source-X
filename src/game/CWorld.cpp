@@ -1372,7 +1372,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		tchar * time = Str_GetTemp();
 		sprintf(time, "%" PRId64 ".%04lld", (int64)(TIME_PROFILE_GET_HI/1000), (int64)(TIME_PROFILE_GET_LO));
 
-		g_Log.Event(LOGM_SAVE, "World save completed, took %s seconds\n", time);
+		g_Log.Event(LOGM_SAVE, "World save completed, took %s seconds.\n", time);
 
 		CScriptTriggerArgs Args;
 		Args.Init(time);

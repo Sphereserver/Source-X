@@ -712,16 +712,18 @@ void CAccount::OnLogin( CClient * pClient )
 		m_dateFirstConnect = datetime;
 	}
 
-	m_Last_IP = pClient->GetPeer();
-	//m_TagDefs.SetStr("LastLogged", false, m_dateLastConnect.Format(NULL));
-	//m_dateLastConnect = datetime;
-
 	if ( pClient->GetConnectType() == CONNECT_TELNET )
 	{
 		// link the admin client.
 		g_Serv.m_iAdminClients++;
 	}
-	g_Log.Event( LOGM_CLIENTS_LOG, "%x:Login '%s'\n", pClient->GetSocketID(), GetName());
+
+	g_Log.Event( LOGM_CLIENTS_LOG, "%x:Login for account '%s'. IP='%s'. ConnectionType: %s.\n",
+		pClient->GetSocketID(), GetName(), pClient->GetPeerStr(), pClient->GetConnectTypeStr(pClient->GetConnectType()) );
+
+	m_Last_IP = pClient->GetPeer();
+	//m_TagDefs.SetStr("LastLogged", false, m_dateLastConnect.Format(NULL));
+	//m_dateLastConnect = datetime;
 }
 
 void CAccount::OnLogout(CClient *pClient, bool bWasChar)
@@ -729,7 +731,7 @@ void CAccount::OnLogout(CClient *pClient, bool bWasChar)
 	ADDTOCALLSTACK("CAccount::OnLogout");
 	ASSERT(pClient);
 
-	if ( pClient->GetConnectType() == CONNECT_TELNET )// unlink the admin client.
+	if ( pClient->GetConnectType() == CONNECT_TELNET ) // unlink the admin client.
 		g_Serv.m_iAdminClients --;
 
 	// calculate total game time. skip this calculation in
@@ -764,7 +766,7 @@ bool CAccount::Kick( CTextConsole * pSrc, bool fBlock )
 
 	tchar * z = Str_GetTemp();
 	sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_ACC_KICK), GetName(), pszAction, pSrc->GetName());
-	g_Log.Event(LOGL_EVENT|LOGM_GM_CMDS, "%s\n", z);
+	g_Log.Event(LOGL_EVENT|LOGM_GM_CMDS, "%s.\n", z);
 
 	return true;
 }

@@ -687,20 +687,21 @@ public:
 	{
 		// This is a game or login server.
 		// m_Crypt.IsInit()
-		return( m_iConnectType == CONNECT_CRYPT || m_iConnectType == CONNECT_LOGIN || m_iConnectType == CONNECT_GAME );
+		return ( m_iConnectType == CONNECT_CRYPT || m_iConnectType == CONNECT_LOGIN || m_iConnectType == CONNECT_GAME );
 	}
 
-	CONNECT_TYPE	GetConnectType() const
+	CONNECT_TYPE GetConnectType() const
 	{
 		return m_iConnectType;
 	}
+	lpctstr GetConnectTypeStr( CONNECT_TYPE iType );
 
 	void SetConnectType( CONNECT_TYPE iType );
 
 	// Stuff I am doing. Started by a command
 	CLIMODE_TYPE GetTargMode() const
 	{
-		return( m_Targ_Mode );
+		return m_Targ_Mode ;
 	}
 	void SetTargMode( CLIMODE_TYPE targmode = CLIMODE_NORMAL, lpctstr pszPrompt = NULL, int iTimeout = 0 );
 	void ClearTargMode()

@@ -41,6 +41,22 @@ bool CClient::IsConnecting() const
 	}
 }
 
+lpctstr CClient::GetConnectTypeStr(CONNECT_TYPE iType)
+{
+	switch (iType)
+	{
+		case CONNECT_NONE:		return "No connection";
+		case CONNECT_UNK:		return "Just connected";
+		case CONNECT_CRYPT:		return "ServerList or CharList?";
+		case CONNECT_LOGIN:		return "ServerList";
+		case CONNECT_GAME:		return "CharList/Game";
+		case CONNECT_HTTP:		return "HTTP";
+		case CONNECT_TELNET:	return "Telnet";
+		case CONNECT_UOG:		return "UOG";
+		case CONNECT_AXIS:		return "Axis";
+		default:				return "Unknown";
+	}
+}
 
 void CClient::SetConnectType( CONNECT_TYPE iType )
 {

@@ -1,4 +1,5 @@
 
+#include "../../common/CLog.h"
 #include "../common/CException.h"
 #include "../common/CUIDExtra.h"
 #include "../network/network.h"
@@ -7,7 +8,6 @@
 #include "../sphere/ProfileTask.h"
 #include "../chars/CChar.h"
 #include "../items/CItemSpawn.h"
-#include "../../common/CLog.h"
 #include "../CServerTime.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
@@ -17,6 +17,7 @@
 #if !defined(_WIN32) || defined(_LIBEV)
 	extern LinuxEv g_NetworkEvent;
 #endif
+
 
 /////////////////////////////////////////////////////////////////
 // -CClient stuff.
@@ -61,7 +62,7 @@ CClient::CClient(NetState* state)
 
 	m_Env.SetInvalid();
 
-	g_Log.Event(LOGM_CLIENTS_LOG, "%x:Client connected [Total:%" PRIuSIZE_T "]. Address: '%s'. (Connecting/Connected: %d/%d).\n",
+	g_Log.Event(LOGM_CLIENTS_LOG, "%x:Client connected [Total:%" PRIuSIZE_T "]. IP='%s'. (Connecting/Connected: %d/%d).\n",
 		GetSocketID(), g_Serv.StatGet(SERV_STAT_CLIENTS), GetPeerStr(), history.m_connecting, history.m_connected);
 
 	m_zLastMessage[0] = 0;

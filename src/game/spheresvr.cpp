@@ -378,7 +378,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 	g_Log.Event(LOGM_INIT, "Startup complete. items=%" PRIuSIZE_T ", chars=%" PRIuSIZE_T "\n", g_Serv.StatGet(SERV_STAT_ITEMS), g_Serv.StatGet(SERV_STAT_CHARS));
 
 #ifdef _WIN32
-	g_Log.Event(LOGM_INIT, "Press '?' for console commands\n");
+	g_Log.Event(LOGM_INIT, "Press '?' for console commands.\n");
 #endif
 
 	// Trigger server start

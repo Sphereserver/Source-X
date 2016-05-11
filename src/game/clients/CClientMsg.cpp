@@ -3435,7 +3435,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 	CharDisconnect();	// I'm already logged in as someone else ?
 	m_pAccount->m_uidLastChar = pChar->GetUID();
 
-	g_Log.Event( LOGM_CLIENTS_LOG, "%x:Setup_Start acct='%s', char='%s', IP='%s'\n", GetSocketID(), GetAccount()->GetName(), pChar->GetName(), GetPeerStr() );
+	g_Log.Event( LOGM_CLIENTS_LOG, "%x:Character startup for account '%s', char '%s'. IP='%s'.\n", GetSocketID(), GetAccount()->GetName(), pChar->GetName(), GetPeerStr() );
 
 	if ( GetPrivLevel() > PLEVEL_Player )		// GMs should login with invul and without allshow flag set
 	{

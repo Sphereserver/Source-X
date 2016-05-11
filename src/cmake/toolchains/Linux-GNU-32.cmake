@@ -17,8 +17,8 @@ function (toolchain_exe_stuff)
 	SET (CXX_WARNING_OPTS	"-Wall -Wextra -Wno-unknown-pragmas -Wno-switch -Wno-invalid-offsetof")
 	SET (C_ARCH_OPTS	"-march=i686 -m32")
 	SET (CXX_ARCH_OPTS	"-march=i686 -m32")
-	SET (C_OPTS		"-std=c11   -pthread -fno-omit-frame-pointer -fexceptions -fnon-call-exceptions")
-	SET (CXX_OPTS		"-std=c++11 -pthread -fno-omit-frame-pointer -fexceptions -fnon-call-exceptions")
+	SET (C_OPTS		"-std=c11   -pthread -fexceptions -fnon-call-exceptions")
+	SET (CXX_OPTS		"-std=c++11 -pthread -fexceptions -fnon-call-exceptions")
 	SET (C_SPECIAL		"-pipe -fno-expensive-optimizations")
 	SET (CXX_SPECIAL	"-pipe -ffast-math")
 
@@ -40,7 +40,7 @@ function (toolchain_exe_stuff)
 	 # -s: strips debug info (remove it when debugging); -g: adds debug informations;
 	 # -fno-omit-frame-pointer disables a good optimization which may corrupt the debugger stack trace.
 	TARGET_COMPILE_OPTIONS ( spheresvr_release	PUBLIC -s -O3 				)
-	TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -g -O3 -fno-omit-frame-pointer	)
+	TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -g -Og -fno-omit-frame-pointer	)
 	TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -s -O3 				)
 
 

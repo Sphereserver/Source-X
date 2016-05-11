@@ -146,12 +146,12 @@ void NetState::clear(void)
 		g_Serv.StatDec(SERV_STAT_CLIENTS);
 		if ( client->GetConnectType() == CONNECT_LOGIN )
 		{	// if account name is retrieved when a connection is refused (ie. wrong password), sphere will crash (at least on MinGW)
-			g_Log.Event(LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Client disconnected [Total:%" PRIuSIZE_T "]. Address: %s\n",
+			g_Log.Event(LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Client disconnected [Total:%" PRIuSIZE_T "]. IP='%s'.\n",
 				m_id, g_Serv.StatGet(SERV_STAT_CLIENTS), m_peerAddress.GetAddrStr());
 		}
 		else
 		{
-			g_Log.Event(LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Client disconnected [Total:%" PRIuSIZE_T "]. Account: %s. Address: %s\n",
+			g_Log.Event(LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Client disconnected [Total:%" PRIuSIZE_T "]. Account: '%s'. IP='%s'.\n",
 				m_id, g_Serv.StatGet(SERV_STAT_CLIENTS), pAccount ? pAccount->GetName() : "No Account", m_peerAddress.GetAddrStr());
 		}
 
