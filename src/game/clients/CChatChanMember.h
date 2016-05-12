@@ -3,9 +3,9 @@
 #ifndef _INC_CCHATCHANMEMBER_H
 #define _INC_CCHATCHANMEMBER_H
 
-#include "../common/sphere_library/CSArray.h"
-#include "../common/sphere_library/CSString.h"
-#include "../common/sphereproto.h"
+#include "../../common/sphere_library/CSArray.h"
+#include "../../common/sphere_library/CSString.h"
+#include "../../common/sphereproto.h"
 
 
 class CClient;

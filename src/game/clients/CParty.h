@@ -7,12 +7,12 @@
 #ifndef _INC_CPARTY_H
 #define _INC_CPARTY_H
 
-#include "../common/sphere_library/CSString.h"
-#include "../common/sphere_library/CSArray.h"
-#include "../common/CRect.h"
-#include "../common/CScriptObj.h"
-#include "../common/CVarDefMap.h"
-#include "../common/sphereproto.h"
+#include "../../common/sphere_library/CSString.h"
+#include "../../common/sphere_library/CSArray.h"
+#include "../../common/CRect.h"
+#include "../../common/CScriptObj.h"
+#include "../../common/CVarDefMap.h"
+#include "../../common/sphereproto.h"
 #include "../chars/CCharRefArray.h"
 #include "../CServerTime.h"
 

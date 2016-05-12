@@ -7,9 +7,9 @@
 #ifndef _INC_CCHARREFARRAY_H
 #define _INC_CCHARREFARRAY_H
 
-#include "../common/CScript.h"
-#include "../common/sphere_library/CSArray.h"
-#include "../common/CUID.h"
+#include "../../common/CScript.h"
+#include "../../common/sphere_library/CSArray.h"
+#include "../../common/CUID.h"
 
 
 class CChar;

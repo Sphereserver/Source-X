@@ -1,8 +1,9 @@
+
 // Actions specific to an NPC.
 
-#include "../common/CException.h"
-#include "../clients/CClient.h"
 #include "../../common/CLog.h"
+#include "../../common/CException.h"
+#include "../clients/CClient.h"
 #include "../CServerTime.h"
 #include "CChar.h"
 #include "CCharNPC.h"
@@ -12,7 +13,7 @@
 lpctstr const CCharPlayer::sm_szLoadKeys[CPC_QTY+1] =
 {
 #define ADD(a,b) b,
-#include "../tables/CCharPlayer_props.tbl"
+#include "../../tables/CCharPlayer_props.tbl"
 #undef ADD
 	NULL
 };
@@ -569,7 +570,7 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 enum CPV_TYPE	// Player char.
 {
 	#define ADD(a,b) CPV_##a,
-	#include "../tables/CCharPlayer_functions.tbl"
+	#include "../../tables/CCharPlayer_functions.tbl"
 	#undef ADD
 	CPV_QTY
 };
@@ -577,7 +578,7 @@ enum CPV_TYPE	// Player char.
 lpctstr const CCharPlayer::sm_szVerbKeys[CPV_QTY+1] =
 {
 	#define ADD(a,b) b,
-	#include "../tables/CCharPlayer_functions.tbl"
+	#include "../../tables/CCharPlayer_functions.tbl"
 	#undef ADD
 	NULL
 };

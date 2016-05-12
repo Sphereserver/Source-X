@@ -13,7 +13,7 @@
 enum CNC_TYPE
 {
 #define ADD(a,b) CNC_##a,
-#include "../tables/CCharNpc_props.tbl"
+#include "../../tables/CCharNpc_props.tbl"
 #undef ADD
 	CNC_QTY
 };

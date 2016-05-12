@@ -1,10 +1,11 @@
+
 // Game server messages. (No login stuff)
 
-#include "../common/CException.h"
-#include "../common/CUIDExtra.h"
-#include "../network/network.h"
-#include "../network/send.h"
-#include "../sphere/ProfileTask.h"
+#include "../../common/CException.h"
+#include "../../common/CUIDExtra.h"
+#include "../../network/network.h"
+#include "../../network/send.h"
+#include "../../sphere/ProfileTask.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
 #include "../items/CItemMap.h"
@@ -13,11 +14,11 @@
 #include "../items/CItemMultiCustom.h"
 #include "../items/CItemSpawn.h"
 #include "../items/CItemVendable.h"
-#include "../../common/CLog.h"
 #include "../CServerTime.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CClient.h"
+
 
 // Simple string hashing algorithm function
 // Founded by D. J. Bernstein
@@ -30,6 +31,7 @@ uint HashString(lpctstr str, size_t length)
 
     return hash;
 }
+
 
 /////////////////////////////////////////////////////////////////
 // -CClient stuff.

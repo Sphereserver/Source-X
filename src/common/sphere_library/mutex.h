@@ -3,7 +3,7 @@
 #ifndef _INC_MUTEX_H
 #define _INC_MUTEX_H
 
-#include "../common/common.h"
+#include "../../common/common.h"
 
 #ifdef _BSD
 	#define PTHREAD_MUTEX_RECURSIVE_NP PTHREAD_MUTEX_RECURSIVE

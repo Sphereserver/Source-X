@@ -3,9 +3,9 @@
 #ifndef _INC_CCHATCHANNEL_H
 #define _INC_CCHATCHANNEL_H
 
-#include "../common/sphereproto.h"
-#include "../common/sphere_library/CSArray.h"
-#include "../common/sphere_library/CSString.h"
+#include "../../common/sphere_library/CSArray.h"
+#include "../../common/sphere_library/CSString.h"
+#include "../../common/sphereproto.h"
 
 
 class CChatChanMember;

@@ -2,13 +2,13 @@
 // CItemMultiCustom.cpp
 //
 
-#include "../common/CException.h"
-#include "../common/CUOInstall.h"
-#include "../network/network.h"
-#include "../network/send.h"
+#include "../../common/CLog.h"
+#include "../../common/CException.h"
+#include "../../common/CUOInstall.h"
+#include "../../network/network.h"
+#include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../clients/CClient.h"
-#include "../../common/CLog.h"
 #include "../triggers.h"
 #include "CItemMultiCustom.h"
 

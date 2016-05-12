@@ -6,6 +6,8 @@ function (toolchain_after_project)
 
 
 	#-- Base compiler and linker flags are the same for every build type.
+	 # For vcxproj structure or for cmake generator's fault, CXX flags will be used also for C sources;
+	 # until this gets fixed, CXX and C compiler and linker flags should be the same.
 
 	 # Setting the Visual Studio warning level to 4 and forcing MultiProccessor compilation
 	SET (C_FLAGS_COMMON		"/W4 /MP /GR /fp:fast
@@ -41,7 +43,7 @@ function (toolchain_after_project)
 
 	#-- Nightly compiler and linker flags.
 
-	SET (CMAKE_C_FLAGS_NIGHTLY		"${C_FLAGS_COMMON}   /O2 /EHa /GL /GA /Gw /Gy"		PARENT_SCOPE)
+	SET (CMAKE_C_FLAGS_NIGHTLY		"${C_FLAGS_COMMON}   /O2 /EHa /GL /GA /Gw"		PARENT_SCOPE)
 	SET (CMAKE_CXX_FLAGS_NIGHTLY		"${CXX_FLAGS_COMMON} /O2 /EHa /GL /GA /Gw /Gy"		PARENT_SCOPE)
 	SET (CMAKE_EXE_LINKER_FLAGS_NIGHTLY	"${LINKER_FLAGS_COMMON} /INCREMENTAL:NO /LTCG"		PARENT_SCOPE)
 

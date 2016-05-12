@@ -10,7 +10,7 @@
 #ifdef _WIN32
 
 #include "CSString.h"
-#include "common.h"
+#include "../common.h"
 #include <richedit.h>	// CRichEditCtrl
 #include <shellapi.h>
 

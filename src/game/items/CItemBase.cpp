@@ -1,9 +1,9 @@
 // define the base types of an item (rather than the instance)
 
-#include "../common/CException.h"
-#include "../sphere/ProfileTask.h"
-#include "../uo_files/CUOItemInfo.h"
 #include "../../common/CLog.h"
+#include "../../common/CException.h"
+#include "../../sphere/ProfileTask.h"
+#include "../uo_files/CUOItemInfo.h"
 #include "CItemBase.h"
 
 /////////////////////////////////////////////////////////////////
@@ -987,7 +987,7 @@ void CItemBase::ResetMakeValue()
 enum IBC_TYPE
 {
 	#define ADD(a,b) IBC_##a,
-	#include "../tables/CItemBase_props.tbl"
+	#include "../../tables/CItemBase_props.tbl"
 	#undef ADD
 	IBC_QTY
 };
@@ -995,7 +995,7 @@ enum IBC_TYPE
 lpctstr const CItemBase::sm_szLoadKeys[IBC_QTY+1] =
 {
 	#define ADD(a,b) b,
-	#include "../tables/CItemBase_props.tbl"
+	#include "../../tables/CItemBase_props.tbl"
 	#undef ADD
 	NULL
 };

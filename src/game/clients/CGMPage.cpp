@@ -1,5 +1,5 @@
 
-#include "../common/CException.h"
+#include "../../common/CException.h"
 #include "../chars/CChar.h"
 #include "../CServerTime.h"
 #include "../CWorld.h"

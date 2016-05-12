@@ -1,10 +1,10 @@
 
-#include "../common/CScriptObj.h"
-#include "../common/CException.h"
-#include "../network/send.h"
-#include "../sphere/ProfileTask.h"
-#include "../chars/CChar.h"
 #include "../../common/CLog.h"
+#include "../../common/CScriptObj.h"
+#include "../../common/CException.h"
+#include "../../network/send.h"
+#include "../../sphere/ProfileTask.h"
+#include "../chars/CChar.h"
 #include "../CServer.h"
 #include "../triggers.h"
 #include "CClient.h"
@@ -461,7 +461,7 @@ bool CPartyDef::AcceptEvent( CChar *pCharAccept, CUID uidInviter, bool bForced )
 enum PDV_TYPE
 {
 	#define ADD(a,b) PDV_##a,
-	#include "../tables/CParty_functions.tbl"
+	#include "../../tables/CParty_functions.tbl"
 	#undef ADD
 	PDV_QTY
 };
@@ -469,7 +469,7 @@ enum PDV_TYPE
 lpctstr const CPartyDef::sm_szVerbKeys[PDV_QTY+1] =
 {
 	#define ADD(a,b) b,
-	#include "../tables/CParty_functions.tbl"
+	#include "../../tables/CParty_functions.tbl"
 	#undef ADD
 	NULL
 };
@@ -477,7 +477,7 @@ lpctstr const CPartyDef::sm_szVerbKeys[PDV_QTY+1] =
 enum PDC_TYPE
 {
 	#define ADD(a,b) PDC_##a,
-	#include "../tables/CParty_props.tbl"
+	#include "../../tables/CParty_props.tbl"
 	#undef ADD
 	PDC_QTY
 };
@@ -485,7 +485,7 @@ enum PDC_TYPE
 lpctstr const CPartyDef::sm_szLoadKeys[PDC_QTY+1] =
 {
 	#define ADD(a,b) b,
-	#include "../tables/CParty_props.tbl"
+	#include "../../tables/CParty_props.tbl"
 	#undef ADD
 	NULL
 };

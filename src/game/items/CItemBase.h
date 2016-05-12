@@ -7,13 +7,13 @@
 #ifndef _INC_CITEMBASE_H
 #define _INC_CITEMBASE_H
 
-#include "../common/CResourceBase.h"
-#include "../common/sphere_library/CSArray.h"
-#include "../CBase.h"
-#include "../CResource.h"
+#include "../../common/CResourceBase.h"
+#include "../../common/sphere_library/CSArray.h"
 #include "../uo_files/uofiles_enums_itemid.h"
 #include "../uo_files/uofiles_enums_creid.h"
 #include "../uo_files/CUOItemTypeRec.h"
+#include "../CBase.h"
+#include "../CResource.h"
 
 
 enum IT_TYPE		// double click type action.

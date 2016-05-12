@@ -1,5 +1,5 @@
 
-#include "../common/CException.h"
+#include "../../common/CException.h"
 #include "../../common/CLog.h"
 #include "../CResource.h"
 #include "CCharBase.h"
@@ -121,7 +121,7 @@ void CCharBase::SetFoodType( lpctstr pszFood )
 enum CBC_TYPE
 {
 	#define ADD(a,b) CBC_##a,
-	#include "../tables/CCharBase_props.tbl"
+	#include "../../tables/CCharBase_props.tbl"
 	#undef ADD
 	CBC_QTY
 };
@@ -129,7 +129,7 @@ enum CBC_TYPE
 lpctstr const CCharBase::sm_szLoadKeys[CBC_QTY+1] =
 {
 	#define ADD(a,b) b,
-	#include "../tables/CCharBase_props.tbl"
+	#include "../../tables/CCharBase_props.tbl"
 	#undef ADD
 	NULL
 };

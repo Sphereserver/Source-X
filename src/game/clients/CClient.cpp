@@ -1,11 +1,11 @@
 
 #include "../../common/CLog.h"
-#include "../common/CException.h"
-#include "../common/CUIDExtra.h"
-#include "../network/network.h"
-#include "../network/send.h"
-#include "../network/packet.h"
-#include "../sphere/ProfileTask.h"
+#include "../../common/CException.h"
+#include "../../common/CUIDExtra.h"
+#include "../../network/network.h"
+#include "../../network/send.h"
+#include "../../network/packet.h"
+#include "../../sphere/ProfileTask.h"
 #include "../chars/CChar.h"
 #include "../items/CItemSpawn.h"
 #include "../CServerTime.h"
@@ -501,7 +501,7 @@ bool CClient::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 lpctstr const CClient::sm_szLoadKeys[CC_QTY+1] = // static
 {
 	#define ADD(a,b) b,
-	#include "../tables/CClient_props.tbl"
+	#include "../../tables/CClient_props.tbl"
 	#undef ADD
 	NULL,
 };
@@ -509,7 +509,7 @@ lpctstr const CClient::sm_szLoadKeys[CC_QTY+1] = // static
 lpctstr const CClient::sm_szVerbKeys[CV_QTY+1] =	// static
 {
 	#define ADD(a,b) b,
-	#include "../tables/CClient_functions.tbl"
+	#include "../../tables/CClient_functions.tbl"
 	#undef ADD
 	NULL,
 };

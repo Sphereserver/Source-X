@@ -7,13 +7,13 @@
 #ifndef _INC_CCLIENT_H
 #define _INC_CCLIENT_H
 
-#include "../common/sphere_library/CSArray.h"
-#include "../common/CEncrypt.h"
-#include "../common/CScriptObj.h"
-#include "../common/CTextConsole.h"
-#include "../network/network.h"
-#include "../network/receive.h"
-#include "../network/send.h"
+#include "../../common/sphere_library/CSArray.h"
+#include "../../common/CEncrypt.h"
+#include "../../common/CScriptObj.h"
+#include "../../common/CTextConsole.h"
+#include "../../network/network.h"
+#include "../../network/receive.h"
+#include "../../network/send.h"
 #include "../items/CItemBase.h"
 #include "../items/CItemContainer.h"
 #include "../items/CItemMultiCustom.h"
@@ -31,7 +31,7 @@ class CItemMap;
 enum CV_TYPE
 {
 	#define ADD(a,b) CV_##a,
-	#include "../tables/CClient_functions.tbl"
+	#include "../../tables/CClient_functions.tbl"
 	#undef ADD
 	CV_QTY
 };
@@ -39,12 +39,10 @@ enum CV_TYPE
 enum CC_TYPE
 {
 	#define ADD(a,b) CC_##a,
-	#include "../tables/CClient_props.tbl"
+	#include "../../tables/CClient_props.tbl"
 	#undef ADD
 	CC_QTY
 };
-
-
 
 
 class CDialogResponseArgs : public CScriptTriggerArgs

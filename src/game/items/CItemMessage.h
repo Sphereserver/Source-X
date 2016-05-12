@@ -7,7 +7,7 @@
 #ifndef _INC_CITEMMESSAGE_H
 #define _INC_CITEMMESSAGE_H
 
-#include "../common/sphere_library/CSString.h"
+#include "../../common/sphere_library/CSString.h"
 #include "CItemVendable.h"
 
 

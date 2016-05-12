@@ -7,8 +7,8 @@
 #ifndef _INC_CCHAR_H
 #define _INC_CCHAR_H
 
+#include "../../common/sphereproto.h"
 #include "../clients/CParty.h"
-#include "../common/sphereproto.h"
 #include "../items/CItemContainer.h"
 #include "../items/CItemCorpse.h"
 #include "../items/CItemMemory.h"

@@ -1,13 +1,13 @@
 //  CChar is either an NPC or a Player.
 
-#include "../common/CException.h"
-#include "../common/CUID.h"
-#include "../common/CUIDExtra.h"
-#include "../common/CObjBaseTemplate.h"
-#include "../common/CRect.h"
+#include "../../common/CException.h"
+#include "../../common/CUID.h"
+#include "../../common/CUIDExtra.h"
+#include "../../common/CObjBaseTemplate.h"
+#include "../../common/CRect.h"
 #include "../../common/CLog.h"
-#include "../network/network.h"
-#include "../sphere/ProfileTask.h"
+#include "../../network/network.h"
+#include "../../sphere/ProfileTask.h"
 #include "../clients/CAccount.h"
 #include "../clients/CClient.h"
 #include "../items/CItem.h"
@@ -1800,7 +1800,7 @@ bool CChar::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 enum CHC_TYPE
 {
 	#define ADD(a,b) CHC_##a,
-	#include "../tables/CChar_props.tbl"
+	#include "../../tables/CChar_props.tbl"
 	#undef ADD
 	CHC_QTY
 };
@@ -1808,7 +1808,7 @@ enum CHC_TYPE
 lpctstr const CChar::sm_szLoadKeys[CHC_QTY+1] =
 {
 	#define ADD(a,b) b,
-	#include "../tables/CChar_props.tbl"
+	#include "../../tables/CChar_props.tbl"
 	#undef ADD
 	NULL
 };
@@ -3369,7 +3369,7 @@ bool CChar::r_Load( CScript & s ) // Load a character from script
 enum CHV_TYPE
 {
 	#define ADD(a,b) CHV_##a,
-	#include "../tables/CChar_functions.tbl"
+	#include "../../tables/CChar_functions.tbl"
 	#undef ADD
 	CHV_QTY
 };
@@ -3377,7 +3377,7 @@ enum CHV_TYPE
 lpctstr const CChar::sm_szVerbKeys[CHV_QTY+1] =
 {
 	#define ADD(a,b) b,
-	#include "../tables/CChar_functions.tbl"
+	#include "../../tables/CChar_functions.tbl"
 	#undef ADD
 	NULL
 };

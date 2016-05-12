@@ -1,13 +1,12 @@
 
-#include "../common/CException.h"
-#include "../common/CUIDExtra.h"
-#include "../network/network.h"
-#include "../network/send.h"
-#include "../sphere/ProfileTask.h"
+#include "../../common/CException.h"
+#include "../../common/CUIDExtra.h"
+#include "../../network/network.h"
+#include "../../network/send.h"
+#include "../../sphere/ProfileTask.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
 #include "../clients/CClient.h"
-#include "../../common/CLog.h"
 #include "../triggers.h"
 #include "CItem.h"
 #include "CItemCommCrystal.h"
@@ -2304,7 +2303,7 @@ bool CItem::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 enum IC_TYPE
 {
 	#define ADD(a,b) IC_##a,
-	#include "../tables/CItem_props.tbl"
+	#include "../../tables/CItem_props.tbl"
 	#undef ADD
 	IC_QTY
 };
@@ -2312,7 +2311,7 @@ enum IC_TYPE
 lpctstr const CItem::sm_szLoadKeys[IC_QTY+1] =
 {
 	#define ADD(a,b) b,
-	#include "../tables/CItem_props.tbl"
+	#include "../../tables/CItem_props.tbl"
 	#undef ADD
 	NULL
 };
@@ -2988,7 +2987,7 @@ bool CItem::r_Load( CScript & s ) // Load an item from script
 enum CIV_TYPE
 {
 	#define ADD(a,b) CIV_##a,
-	#include "../tables/CItem_functions.tbl"
+	#include "../../tables/CItem_functions.tbl"
 	#undef ADD
 	CIV_QTY
 };
@@ -2996,7 +2995,7 @@ enum CIV_TYPE
 lpctstr const CItem::sm_szVerbKeys[CIV_QTY+1] =
 {
 	#define ADD(a,b) b,
-	#include "../tables/CItem_functions.tbl"
+	#include "../../tables/CItem_functions.tbl"
 	#undef ADD
 	NULL
 };

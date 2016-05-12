@@ -7,9 +7,9 @@
 #ifndef _INC_CCHARPLAYER_H
 #define CCHARPLAYER_H
 
+#include "../../common/CResourceBase.h"
+#include "../../common/sphereproto.h"
 #include "../clients/CAccount.h"
-#include "../common/CResourceBase.h"
-#include "../common/sphereproto.h"
 #include "../CResource.h"
 #include "../CServerTime.h"
 
@@ -17,7 +17,7 @@
 enum CPC_TYPE	// Player char.
 {
 #define ADD(a,b) CPC_##a,
-#include "../tables/CCharPlayer_props.tbl"
+#include "../../tables/CCharPlayer_props.tbl"
 #undef ADD
 	CPC_QTY
 };

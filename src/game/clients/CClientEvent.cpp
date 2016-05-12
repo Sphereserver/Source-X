@@ -1,20 +1,20 @@
 
-#include "../common/CException.h"
-#include "../common/CUIDExtra.h"
-#include "../network/network.h"
-#include "../network/receive.h"
-#include "../network/send.h"
-#include "../sphere/ProfileTask.h"
+#include "../../common/CException.h"
+#include "../../common/CUIDExtra.h"
+#include "../../network/network.h"
+#include "../../network/receive.h"
+#include "../../network/send.h"
+#include "../../sphere/ProfileTask.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
 #include "../items/CItemMessage.h"
 #include "../items/CItemMulti.h"
 #include "../items/CItemVendable.h"
 #include "../CServerTime.h"
-#include "../../common/CLog.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CClient.h"
+
 
 /////////////////////////////////
 // Events from the Client.

@@ -393,12 +393,11 @@ SOURCE_GROUP (tables FILES ${tables_SRCS})
 
 # Misc doc and *.ini files
 SET (docs_TEXT
-../REVISIONS-56d-CURRENT-changelog.txt
+../Changelog-56d-Nightlies.txt
 sphere.ini
 sphereCrypt.ini
 )
 
 INCLUDE_DIRECTORIES (
 common/mysql/include/
-common/
 )

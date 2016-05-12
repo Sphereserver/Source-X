@@ -1,10 +1,11 @@
+
 // Actions specific to an NPC.
 
-#include "../clients/CClient.h"
-#include "../common/CException.h"
-#include "../common/CUIDExtra.h"
-#include "../network/receive.h"
 #include "../../common/CLog.h"
+#include "../../common/CException.h"
+#include "../../common/CUIDExtra.h"
+#include "../../network/receive.h"
+#include "../clients/CClient.h"
 #include "../CPathFinder.h"
 #include "../CServerTime.h"
 #include "../triggers.h"

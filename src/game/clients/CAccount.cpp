@@ -1,16 +1,18 @@
 
-#include "../common/CException.h"
-#include "../common/CUIDExtra.h"
-#include "../chars/CChar.h"
 #include "../../common/CLog.h"
+#include "../../common/CException.h"
+#include "../../common/CUIDExtra.h"
+#include "../chars/CChar.h"
 #include "CAccount.h"
 #include "CClient.h"
+
 
 extern "C"
 {
 	void globalstartsymbol() {}	// put this here as just the starting offset.
 	const int globalstartdata = 0xffffffff;
 }
+
 
 //**********************************************************************
 // -CAccounts

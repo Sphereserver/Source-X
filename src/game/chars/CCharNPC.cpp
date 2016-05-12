@@ -1,7 +1,8 @@
+
 // Actions specific to an NPC.
 
+#include "../../common/CException.h"
 #include "../clients/CClient.h"
-#include "../common/CException.h"
 #include "../CServerTime.h"
 #include "../triggers.h"
 #include "CCharNPC.h"
@@ -10,7 +11,7 @@
 lpctstr const CCharNPC::sm_szLoadKeys[CNC_QTY+1] =
 {
 #define ADD(a,b) b,
-#include "../tables/CCharNpc_props.tbl"
+#include "../../tables/CCharNpc_props.tbl"
 #undef ADD
 	NULL
 };

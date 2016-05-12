@@ -7,11 +7,11 @@
 #ifndef _INC_CITEM_H
 #define _INC_CITEM_H
 
-#include "../common/CRect.h"
-#include "../common/CResourceBase.h"
-#include "../common/CObjBaseTemplate.h"
-#include "../common/CServerMap.h"
-#include "../common/CUID.h"
+#include "../../common/CRect.h"
+#include "../../common/CResourceBase.h"
+#include "../../common/CObjBaseTemplate.h"
+#include "../../common/CServerMap.h"
+#include "../../common/CUID.h"
 #include "../CBase.h"
 #include "../CResource.h"
 #include "../CObjBase.h"

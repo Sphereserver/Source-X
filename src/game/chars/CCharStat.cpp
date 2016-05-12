@@ -1,6 +1,6 @@
 //  CChar is either an NPC or a Player.
 
-#include "../common/CException.h"
+#include "../../common/CException.h"
 #include "../triggers.h"
 #include "CChar.h"
 

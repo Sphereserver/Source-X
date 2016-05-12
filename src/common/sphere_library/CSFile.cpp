@@ -4,10 +4,9 @@
 	#include <sys/types.h>
 	#include <sys/stat.h>
 #endif
-#include "../common/CLog.h"
-#include "../sphere/threads.h"
+#include "../../common/CLog.h"
+#include "../../sphere/threads.h"
 #include "CSFile.h"
-#include "common.h"
 
 
 // CFile:: Constructors, Destructor, Asign operator.

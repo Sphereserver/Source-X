@@ -7,7 +7,7 @@
 #ifndef _INC_CCLIENTTOOLTIP_H
 #define _INC_CCLIENTTOOLTIP_H
 
-#include "../common/common.h"
+#include "../../common/common.h"
 
 
 // Storage for Tooltip data while in trigger on an item

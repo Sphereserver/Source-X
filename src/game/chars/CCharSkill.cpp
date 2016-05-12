@@ -1,13 +1,16 @@
+
 //  CChar is either an NPC or a Player.
 
 #include <cmath>
-#include "../clients/CClient.h"
-#include "../common/CUIDExtra.h"
-#include "../items/CItemVendable.h"
+
 #include "../../common/CLog.h"
+#include "../../common/CUIDExtra.h"
+#include "../clients/CClient.h"
+#include "../items/CItemVendable.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
+
 
 //----------------------------------------------------------------------
 // Skills

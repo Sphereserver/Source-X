@@ -1,7 +1,7 @@
 
-#include "../network/network.h"
-#include "../chars/CChar.h"
 #include "../../common/CLog.h"
+#include "../../network/network.h"
+#include "../chars/CChar.h"
 #include "../CServerTime.h"
 #include "CClient.h"
 

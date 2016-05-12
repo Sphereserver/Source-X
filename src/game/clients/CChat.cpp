@@ -1,5 +1,5 @@
 
-#include "../network/network.h"
+#include "../../network/network.h"
 #include "../chars/CChar.h"
 #include "CChat.h"
 #include "CChatChannel.h"

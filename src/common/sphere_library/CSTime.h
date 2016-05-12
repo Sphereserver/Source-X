@@ -8,7 +8,7 @@
 #define _INC_CSTIME_H
 
 #include <time.h>
-#include "common.h"
+#include "../common.h"
 
 #ifndef _WIN32
 	llong GetTickCount();

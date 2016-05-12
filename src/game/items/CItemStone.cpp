@@ -12,7 +12,7 @@
 enum STMM_TYPE
 {
 #define ADD(a,b) STMM_##a,
-#include "../tables/CStoneMember_props.tbl"
+#include "../../tables/CStoneMember_props.tbl"
 #undef ADD
 	STMM_QTY
 };
@@ -20,7 +20,7 @@ enum STMM_TYPE
 lpctstr const CStoneMember::sm_szLoadKeys[STMM_QTY+1] =
 {
 #define ADD(a,b) b,
-#include "../tables/CStoneMember_props.tbl"
+#include "../../tables/CStoneMember_props.tbl"
 #undef ADD
 	NULL
 };
@@ -28,7 +28,7 @@ lpctstr const CStoneMember::sm_szLoadKeys[STMM_QTY+1] =
 enum STMMV_TYPE
 {
 #define ADD(a,b) STMMV_##a,
-#include "../tables/CStoneMember_functions.tbl"
+#include "../../tables/CStoneMember_functions.tbl"
 #undef ADD
 	STMMV_QTY
 };
@@ -36,7 +36,7 @@ enum STMMV_TYPE
 lpctstr const CStoneMember::sm_szVerbKeys[STMMV_QTY+1] =
 {
 #define ADD(a,b) b,
-#include "../tables/CStoneMember_functions.tbl"
+#include "../../tables/CStoneMember_functions.tbl"
 #undef ADD
 	NULL
 };
@@ -44,7 +44,7 @@ lpctstr const CStoneMember::sm_szVerbKeys[STMMV_QTY+1] =
 CStoneMember* CStoneMember::GetNext() const
 {
 	ADDTOCALLSTACK("CStoneMember::GetNext");
-	return( static_cast <CStoneMember *>( CSObjListRec::GetNext()));
+	return static_cast <CStoneMember *>( CSObjListRec::GetNext());
 }
 
 CUID CStoneMember::GetLinkUID() const { return m_uidLinkTo; }
@@ -595,7 +595,7 @@ lpctstr CItemStone::GetAlignName() const
 enum STC_TYPE
 {
 #define ADD(a,b) STC_##a,
-#include "../tables/CItemStone_props.tbl"
+#include "../../tables/CItemStone_props.tbl"
 #undef ADD
 	STC_QTY
 };
@@ -603,7 +603,7 @@ enum STC_TYPE
 lpctstr const CItemStone::sm_szLoadKeys[STC_QTY+1] =
 {
 #define ADD(a,b) b,
-#include "../tables/CItemStone_props.tbl"
+#include "../../tables/CItemStone_props.tbl"
 #undef ADD
 	NULL
 };
@@ -611,7 +611,7 @@ lpctstr const CItemStone::sm_szLoadKeys[STC_QTY+1] =
 enum ISV_TYPE
 {
 #define ADD(a,b) ISV_##a,
-#include "../tables/CItemStone_functions.tbl"
+#include "../../tables/CItemStone_functions.tbl"
 #undef ADD
 	ISV_QTY
 };
@@ -619,7 +619,7 @@ enum ISV_TYPE
 lpctstr const CItemStone::sm_szVerbKeys[ISV_QTY+1] =
 {
 #define ADD(a,b) b,
-#include "../tables/CItemStone_functions.tbl"
+#include "../../tables/CItemStone_functions.tbl"
 #undef ADD
 	NULL
 };
