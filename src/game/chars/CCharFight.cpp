@@ -1496,19 +1496,21 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	}
 
 	// Very basic check on possibility to hit
-	if ( IsStatFlag(STATF_DEAD|STATF_Sleeping|STATF_Freeze|STATF_Stone) || pCharTarg->IsStatFlag(STATF_DEAD|STATF_INVUL|STATF_Stone|STATF_Ridden) )
-		return WAR_SWING_INVALID;
-	if ( pCharTarg->m_pArea && pCharTarg->m_pArea->IsFlag(REGION_FLAG_SAFE) )
-		return WAR_SWING_INVALID;
+    if (IsStatFlag(STATF_DEAD | STATF_Sleeping | STATF_Freeze | STATF_Stone) || pCharTarg->IsStatFlag(STATF_DEAD | STATF_INVUL | STATF_Stone | STATF_Ridden))
+        return WAR_SWING_INVALID;
+    if (pCharTarg->m_pArea && pCharTarg->m_pArea->IsFlag(REGION_FLAG_SAFE))
+        return WAR_SWING_INVALID;
 
 	int dist = GetTopDist3D(pCharTarg);
 	if ( dist > UO_MAP_VIEW_RADAR )
 	{
-		if ( IsSetCombatFlags(COMBAT_STAYINRANGE) )
-			return WAR_SWING_EQUIPPING;
+        if (!IsSetCombatFlags(COMBAT_STAYINRANGE))
+            return WAR_SWING_EQUIPPING;
 
 		return WAR_SWING_INVALID;
 	}
+    if (!CanSeeLOS(pCharTarg))
+        return WAR_SWING_EQUIPPING;
 
 	// I am on ship. Should be able to combat only inside the ship to avoid free sea and ground characters hunting
 	if ( (m_pArea != pCharTarg->m_pArea) && !IsSetCombatFlags(COMBAT_ALLOWHITFROMSHIP) )
@@ -1673,8 +1675,6 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	// Start the swing
 	if ( m_atFight.m_War_Swing_State == WAR_SWING_READY )
 	{
-		if ( !CanSeeLOS(pCharTarg) )
-			return WAR_SWING_EQUIPPING;
 
 		ANIM_TYPE anim = GenerateAnimate(ANIM_ATTACK_WEAPON);
 		int animDelay = 7;		// attack speed is always 7ms and then the char keep waiting the remaining time
@@ -1702,11 +1702,11 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 		if ( IsSetCombatFlags(COMBAT_PREHIT) )
 		{
-			SetKeyNum("LastHit", g_World.GetCurrentTime().GetTimeRaw() + iSwingDelay);
+			SetKeyNum("LastHit", m_atFight.m_timeNextCombatSwing.GetTimeRaw());
 			SetTimeout(0);
 		}
 		else
-			SetTimeout(animDelay);
+			SetTimeout(iSwingDelay);
 
 		Reveal();
 		if ( !IsSetCombatFlags(COMBAT_NODIRCHANGE) )

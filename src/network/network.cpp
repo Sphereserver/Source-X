@@ -3728,7 +3728,8 @@ size_t NetworkOutput::flush(NetState* state)
 {
 	// process all queues for a client
 	ADDTOCALLSTACK("NetworkOutput::flush");
-	ASSERT(state != NULL);
+	ASSERT(state);
+    ASSERT(m_thread);
 
 	if (state->isInUse() == false || state->isClosed())
 		return 0;

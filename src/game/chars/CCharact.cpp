@@ -3886,100 +3886,151 @@ void CChar::OnTickFood(short iVal, int HitsHungerLoss)
 // RETURN: false = delete this.
 bool CChar::OnTick()
 {
-	ADDTOCALLSTACK("CChar::OnTick");
+    ADDTOCALLSTACK("CChar::OnTick");
 
-	EXC_TRY("Tick");
-	int64 iTimeDiff = -g_World.GetTimeDiff(m_timeLastRegen);
-	if ( !iTimeDiff )
-		return true;
+    // Assume this is only called 1 time per sec.
+    // Get a timer tick when our timer expires.
+    // RETURN: false = delete this.
+    EXC_TRY("Tick");
 
-	if ( iTimeDiff >= TICK_PER_SEC )		// don't bother with < 1 sec timers on the checks below
-	{
-		// Decay equipped items (memories/spells)
-		CItem *pItemNext = NULL;
-		for ( CItem *pItem = GetContentHead(); pItem != NULL; pItem = pItemNext )
-		{
-			EXC_TRYSUB("Ticking items");
-			pItemNext = pItem->GetNext();
-			if ( !pItem->IsTimerSet() || !pItem->IsTimerExpired() )
-				continue;
-			if ( !OnTickEquip(pItem) )
-				pItem->Delete();
-			EXC_CATCHSUB("Char");
-		}
-	}
+    INT64 iTimeDiff = -g_World.GetTimeDiff(m_timeLastRegen);
+    if (!iTimeDiff)
+        return true;
 
-	if ( IsDisconnected() )
-		return true;
+    if (iTimeDiff >= TICK_PER_SEC)	// don't bother with < 1 sec times.
+    {
+        // decay equipped items (spells)
+        CItem* pItem = GetContentHead();
+        int iCount = 0;
 
-	CClient *pClient = GetClient();
-	if ( pClient )
-	{
-		// Clear 'running' flag when the client stop running
-		if ( -g_World.GetTimeDiff(pClient->m_timeLastEventWalk) > 2 )
-			StatFlag_Clear(STATF_Fly);
+        for (; pItem != NULL; pItem = GetAt(++iCount))
+        {
+            EXC_TRYSUB("Ticking items");
 
-		// Check targeting timeout, if set
-		if ( pClient->m_Targ_Timeout.IsTimeValid() && g_World.GetTimeDiff(pClient->m_Targ_Timeout) <= 0 )
-			pClient->addTargetCancel();
-	}
+            // always check the validity of the memory objects
+            if (pItem->IsType(IT_EQ_MEMORY_OBJ) && !pItem->m_uidLink.ObjFind())
+            {
+                pItem->Delete();
+                continue;
+            }
 
-	if ( iTimeDiff >= TICK_PER_SEC )		// don't bother with < 1 sec timers on the checks below
-	{
-		m_timeLastRegen = CServerTime::GetCurrentTime();
+            pItem->OnTickStatusUpdate();
+            if (!pItem->IsTimerSet() || !pItem->IsTimerExpired())
+                continue;
+            else if (!OnTickEquip(pItem))
+                pItem->Delete();
+            EXC_CATCHSUB("Char");
+        }
 
-		EXC_SET("last attackers");
-		Attacker_CheckTimeout();
+        EXC_SET("last attackers");
+        Attacker_CheckTimeout();
 
-		EXC_SET("NOTO timeout");
-		NotoSave_CheckTimeout();
+        EXC_SET("NOTO timeout");
+        NotoSave_CheckTimeout();
 
-		if ( !IsStatFlag(STATF_DEAD) )
-		{
-			EXC_SET("check location");
-			CheckLocation(true);	// check location periodically for standing in fire fields, traps, etc
+        if (IsClient())
+        {
+            // Players have a silly "always run" flag that gets stuck on.
+            if (-g_World.GetTimeDiff(GetClient()->m_timeLastEventWalk) > TICK_PER_SEC)
+                StatFlag_Clear(STATF_Fly);
 
-			EXC_SET("regen stats");
-			Stats_Regen(iTimeDiff);
-		}
-	}
+            // Check targeting timeout, if set
+            if (GetClient()->m_Targ_Timeout.IsTimeValid() && g_World.GetTimeDiff(GetClient()->m_Targ_Timeout) <= 0)
+                GetClient()->addTargetCancel();
+        }
 
-	EXC_SET("update stats");
-	OnTickStatusUpdate();
+        // NOTE: Summon flags can kill our hp here. check again.
+        if (Stat_GetVal(STAT_STR) <= 0)	// We can only die on our own tick.
+        {
+            m_timeLastRegen = g_World.GetCurrentTime();
+            EXC_SET("death");
+            return Death();
+        }
+        if (IsStatFlag(STATF_DEAD))	// We are dead, don't update anything.
+        {
+            m_timeLastRegen = g_World.GetCurrentTime();
+            return true;
+        }
+        Stats_Regen(iTimeDiff);
+    }
+    else
+    {
+        // Check this all the time.
+        if (Stat_GetVal(STAT_STR) <= 0)	// We can only die on our own tick.
+        {
+            EXC_SET("death");
+            return Death();
+        }
+    }
 
-	if ( !IsStatFlag(STATF_DEAD) && Stat_GetVal(STAT_STR) <= 0 )
-	{
-		EXC_SET("death");
-		return Death();
-	}
+    if (IsStatFlag(STATF_DEAD))
+        return true;
+    if (IsDisconnected())		// mounted horses can still get a tick.
+    {
+        m_timeLastRegen = g_World.GetCurrentTime();
+        return true;
+    }
 
-	if ( IsTimerSet() && IsTimerExpired() )
-	{
-		EXC_SET("timer expired");
-		switch ( Skill_Done() )
-		{
-			case -SKTRIG_ABORT:	EXC_SET("skill abort");		Skill_Fail(true);	break;	// fail with no message or credit
-			case -SKTRIG_FAIL:	EXC_SET("skill fail");		Skill_Fail(false);	break;
-			case -SKTRIG_QTY:	EXC_SET("skill cleanup");	Skill_Cleanup();	break;
-		}
+    if (IsTimerExpired() && IsTimerSet())
+    {
+        EXC_SET("timer expired");
+        // My turn to do some action.
+        switch (Skill_Done())
+        {
+        case -SKTRIG_ABORT:	EXC_SET("skill abort"); Skill_Fail(true); break;	// fail with no message or credit.
+        case -SKTRIG_FAIL:	EXC_SET("skill fail"); Skill_Fail(false); break;
+        case -SKTRIG_QTY:	EXC_SET("skill cleanup"); Skill_Cleanup(); break;
+        }
 
-		if ( m_pNPC )	// do some AI action
-		{
-			ProfileTask aiTask(PROFILE_NPC_AI);
-			EXC_SET("NPC action");
-			NPC_OnTickAction();
+        if (m_pNPC)		// What to do next ?
+        {
+            ProfileTask aiTask(PROFILE_NPC_AI);
+            EXC_SET("NPC action");
+            NPC_OnTickAction();
 
-			if ( !IsStatFlag(STATF_DEAD) )
-			{
-				int iAiFlags = NPC_GetAiFlags();
-				if ( (iAiFlags & NPC_AI_FOOD) && !(iAiFlags & NPC_AI_INTFOOD) )
-					NPC_Food();
-				if ( iAiFlags & NPC_AI_EXTRA )
-					NPC_ExtraAI();
-			}
-		}
-	}
+            //	Some NPC AI actions
+            if ((g_Cfg.m_iNpcAi&NPC_AI_FOOD) && !(g_Cfg.m_iNpcAi&NPC_AI_INTFOOD))
+                NPC_Food();
+            if (g_Cfg.m_iNpcAi&NPC_AI_EXTRA)
+                NPC_ExtraAI();
+        }
+    }
+    else
+    {
+        // Hit my current target. (if i'm ready)
+        EXC_SET("combat hit try");
+        if (IsStatFlag(STATF_War))
+        {
+            if (Fight_IsActive())
+            {
+                if (m_atFight.m_War_Swing_State == WAR_SWING_READY)
+                    Fight_HitTry();
+            }
+            else if (Skill_GetActive() == SKILL_NONE)
+                //m_Act_Targ = Fight_AttackNext();	//m_Act_Targ = bool?
+                Fight_Attack(m_Fight_Targ.CharFind());
+        }
+    }
 
-	EXC_CATCH;
-	return true;
+    if (iTimeDiff >= TICK_PER_SEC)
+    {
+        // Check location periodically for standing in fire fields, traps, etc.
+        EXC_SET("check location");
+        CheckLocation(true);
+        m_timeLastRegen = g_World.GetCurrentTime();
+    }
+
+    EXC_SET("update stats");
+    OnTickStatusUpdate();
+
+    EXC_CATCH;
+
+#ifdef _DEBUG
+    EXC_DEBUG_START;
+    g_Log.EventDebug("'%s' npc '%d' player '%d' client '%d' [0%lx]\n",
+        GetName(), (int)(m_pNPC ? m_pNPC->m_Brain : 0), (int)(m_pPlayer != 0), (int)IsClient(), (DWORD)GetUID());
+    EXC_DEBUG_END;
+#endif
+
+    return true;
 }

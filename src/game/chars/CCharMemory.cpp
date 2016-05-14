@@ -413,7 +413,7 @@ bool CChar::Memory_Fight_OnTick( CItemMemory * pMemory )
 	// Attacker.Elapsed = -1 means no combat end for this attacker.
 	// g_Cfg.m_iAttackerTimeout = 0 means attackers doesnt decay. (but cleared when the attacker is killed or the char dies)
 
-	if ( GetDist(pTarg) > UO_MAP_VIEW_RADAR || ( g_Cfg.m_iAttackerTimeout != 0 && elapsed > (int64)(g_Cfg.m_iAttackerTimeout) && elapsed >= 0 ) )
+	if ( GetDist(pTarg) > UO_MAP_VIEW_RADAR && !IsSetCombatFlags(COMBAT_STAYINRANGE) || ( g_Cfg.m_iAttackerTimeout != 0 && elapsed > (int64)(g_Cfg.m_iAttackerTimeout) && elapsed >= 0 ) )
 	{
 		Memory_Fight_Retreat( pTarg, pMemory );
 	clearit:

@@ -17,3 +17,12 @@ Updated checks on @NotoSend trigger: it will not check anymore if ARGN1 > NOTO_I
 
 19-04-2016, Coruja
 Fixed: Protection spell not working correctly if COMBAT_ELEMENTAL_ENGINE combat flag is disabled.
+
+14-05-2016, XuN
+Fixed: Pets not gaining Karma (it can be blocked through @KarmaChange trigger, no reason to stop it from the source).
+Fixed: Killing pets and/or bonded pets not giving karma (same reason as above).
+Fixed: Hits being canceled when going out of range and COMBAT_STAYINRANGE was enabled, it should happen when it is disabled.
+Fixed: Attack delay broken when COMBAT_PREHIT is disabled because of using as SetTimeOut animDelay instead of iSwingDelay.
+Fixed: Weird crash related to a change on CChar:OnTick() (Not really fixed, just reverted the code because I couldn't track what is exactly causing it and seems to happen when there are ~100 clients online, so I'm not going to mess a lot with it, it's not cool to use 100 players to do tests :) ).
+Attempt to log and stop a crash related to the NetworkOutput.
+Fixed NPC_FightMagery not correctly checking if the NPC can use magic skills and creating some infinite loops under certain circumstances.

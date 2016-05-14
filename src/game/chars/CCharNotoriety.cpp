@@ -506,14 +506,15 @@ void CChar::Noto_Kill(CChar * pKill, bool fPetKill, int iTotalKillers)
 	{
 		if ( pKill->m_pNPC )
 		{
-			if ( m_pNPC->m_Brain == NPCBRAIN_GUARD )	// don't create corpse if NPC got killed by a guard
-				pKill->StatFlag_Set(STATF_Conjured);
-			return;
+            if (m_pNPC->m_Brain == NPCBRAIN_GUARD)	// don't create corpse if NPC got killed by a guard
+            {
+                pKill->StatFlag_Set(STATF_Conjured);
+                return;
+            }
 		}
 	}
 	else if ( NotoThem < NOTO_GUILD_SAME )
 	{
-		ASSERT(m_pPlayer);
 		// I'm a murderer !
 		if ( !IsPriv(PRIV_GM) )
 		{
@@ -538,7 +539,7 @@ void CChar::Noto_Kill(CChar * pKill, bool fPetKill, int iTotalKillers)
 	}
 
 	// No fame/karma/exp gain on these conditions
-	if ( fPetKill || NotoThem == NOTO_GUILD_SAME || pKill->IsStatFlag(STATF_Conjured) || (pKill->m_pNPC && pKill->m_pNPC->m_bonded) )
+	if ( NotoThem == NOTO_GUILD_SAME || pKill->IsStatFlag(STATF_Conjured) )
 		return;
 
 	int iPrvLevel = Noto_GetLevel();	// store title before fame/karma changes to check if it got changed

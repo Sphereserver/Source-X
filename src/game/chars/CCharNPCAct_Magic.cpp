@@ -138,10 +138,13 @@ bool CChar::NPC_AddSpellsFromBook(CItem * pBook)
 bool CChar::NPC_FightMagery(CChar * pChar)
 {
 	ADDTOCALLSTACK("CChar::NPC_FightMagery");
-	if (!NPC_FightMayCast(false))	// not checking skill here since it will do a search later and it's an expensive function.
-		return false;
-
 	size_t count = m_pNPC->Spells_GetCount();
+    if (count == -1)
+        return false;
+
+    if (!NPC_FightMayCast(false))	// not checking skill here since it will do a search later and it's an expensive function.
+        return false;
+
 	CItem * pWand = LayerFind(LAYER_HAND1);		//Try to get a working wand.
 	CObjBase * pTarg = pChar;
 	if (pWand)
@@ -204,6 +207,8 @@ bool CChar::NPC_FightMagery(CChar * pChar)
 	for (; i < count; i++)
 	{
 		SPELL_TYPE spell = m_pNPC->Spells_GetAt(i);
+        if (spell == SPELL_NONE)
+            continue;
 		const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
 		if (!pSpellDef)	//If it reached here it should exist, checking anyway.
 			continue;
