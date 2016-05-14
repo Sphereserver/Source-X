@@ -415,7 +415,8 @@ bool CChar::Memory_Fight_OnTick( CItemMemory * pMemory )
 	// Attacker.Elapsed = -1 means no combat end for this attacker.
 	// g_Cfg.m_iAttackerTimeout = 0 means attackers doesnt decay. (but cleared when the attacker is killed or the char dies)
 
-	if ( GetDist(pTarg) > UO_MAP_VIEW_RADAR && !IsSetCombatFlags(COMBAT_STAYINRANGE) || ( g_Cfg.m_iAttackerTimeout != 0 && elapsed > (int64)(g_Cfg.m_iAttackerTimeout) && elapsed >= 0 ) )
+	if ( (GetDist(pTarg) > UO_MAP_VIEW_RADAR) &&
+		( !IsSetCombatFlags(COMBAT_STAYINRANGE) || ((g_Cfg.m_iAttackerTimeout != 0) && (elapsed > (int64)g_Cfg.m_iAttackerTimeout) && (elapsed >= 0)) ) )
 	{
 		Memory_Fight_Retreat( pTarg, pMemory );
 	clearit:
@@ -428,7 +429,7 @@ bool CChar::Memory_Fight_OnTick( CItemMemory * pMemory )
 	// If am fully healthy then it's not much of a fight.
 	if ( iTimeDiff > 60*60*TICK_PER_SEC )
 		goto clearit;
-	if ( pTarg->GetHealthPercent() >= 100 && iTimeDiff > 2*60*TICK_PER_SEC )
+	if ( (pTarg->GetHealthPercent() >= 100) && (iTimeDiff > 2*60*TICK_PER_SEC) )
 		goto clearit;
 
 	pMemory->SetTimeout(20*TICK_PER_SEC);

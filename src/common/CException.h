@@ -22,6 +22,7 @@ extern "C"
 	extern const int globalenddata;
 }
 
+void SetPurecallHandler();
 void SetExceptionTranslator();
 void SetUnixSignals( bool );
 
@@ -210,17 +211,17 @@ public:
 	#define EXC_TRYSUB(a) {
 	#define EXC_CATCHSUB(a) }
 
-	#define EXC_DEBUG_START if (0) \
+	#define EXC_DEBUG_START if (false) \
 	{
 	#define EXC_DEBUG_END }
 
-	#define EXC_DEBUGSUB_START	if (0) \
+	#define EXC_DEBUGSUB_START	if (false) \
 	{
 	#define EXC_DEBUGSUB_END }
 
-	#define EXC_ADD_SCRIPT
-	#define EXC_ADD_SCRIPTSRC
-	#define EXC_ADD_KEYRET(a)
+	#define EXC_ADD_SCRIPT		(void)0
+	#define EXC_ADD_SCRIPTSRC	(void)0
+	#define EXC_ADD_KEYRET(a)	(void)0
 	#define EXC_CATCH_EXCEPTION(a)
 
 

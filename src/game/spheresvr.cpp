@@ -306,15 +306,26 @@ int Sphere_InitServer( int argc, char *argv[] )
 	ASSERT(sizeof(dword) == 4 );
 	ASSERT(sizeof(nword) == 2 );
 	ASSERT(sizeof(ndword) == 4 );
-	ASSERT(sizeof(CUOItemTypeRec) == 37 ); // byte pack working ?
+	ASSERT(sizeof(CUOItemTypeRec) == 37 );	// is byte packing working ?
 
 #ifdef _WIN32
-	if ( !QueryPerformanceFrequency(reinterpret_cast<LARGE_INTEGER *>(&llTimeProfileFrequency)))
+	if ( ! QueryPerformanceFrequency(reinterpret_cast<LARGE_INTEGER *>(&llTimeProfileFrequency)) )
 		llTimeProfileFrequency = 1000;
 
+#if defined(_MSC_VER) && !defined(_NIGHTLYBUILD)
+	// We don't need an exception translator for the Debug build, since that build would, generally, be used with a debugger.
+	// We don't want that for Release build either because, in order to call _set_se_translator, we should set the /EHa
+	//	compiler flag, which slows down code a bit.
 	EXC_SET("setting exception catcher");
 	SetExceptionTranslator();
+#endif
 #endif // _WIN32
+
+#ifndef _DEBUG
+	// Same as for SetExceptionTranslator, Debug build doesn't need a purecall handler.
+	EXC_SET("setting purecall handler");
+	SetPurecallHandler();
+#endif
 
 	EXC_SET("loading");
 	if ( !g_Serv.Load() )

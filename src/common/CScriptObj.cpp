@@ -94,7 +94,7 @@ bool CScriptTriggerArgs::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CScriptTriggerArgs::r_GetRef");
 
-	if ( !strnicmp(pszKey, "ARGO.", 5) )	// ARGO.NAME
+	if ( !strnicmp(pszKey, "ARGO.", 5) )		// ARGO.NAME
 	{
 		pszKey += 5;
 		if ( *pszKey == '1' )
@@ -102,21 +102,22 @@ bool CScriptTriggerArgs::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 		pRef = m_pO1;
 		return true;
 	}
-	else if ( !strnicmp(pszKey, "REF", 3) )	// REF[1-65535].NAME
+	else if ( !strnicmp(pszKey, "REF", 3) )		// REF[1-65535].NAME
 	{
 		lpctstr pszTemp = pszKey;
 		pszTemp += 3;
 		if (*pszTemp && IsDigit( *pszTemp ))
 		{
 			char * pEnd;
-			ushort number = (ushort)(strtol( pszTemp, &pEnd, 10 ));
+			ushort number = (ushort)strtol( pszTemp, &pEnd, 10 );
 			if ( number > 0 ) // Can only use 1 to 65535 as REFs
 			{
 				pszTemp = pEnd;
 				// Make sure REFx or REFx.KEY is being used
 				if (( !*pszTemp ) || ( *pszTemp == '.' ))
 				{
-					if ( *pszTemp == '.' ) pszTemp++;
+					if ( *pszTemp == '.' )
+						pszTemp++;
 
 					pRef = m_VarObjs.Get( number );
 					pszKey = pszTemp;

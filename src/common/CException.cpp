@@ -155,24 +155,33 @@ void Assert_CheckFail( lpctstr pExp, lpctstr pFile, long lLine )
 	throw CAssert(LOGL_CRIT, pExp, pFile, lLine);
 }
 
+void _cdecl Sphere_Purecall_Handler()
+{
+	// catch this special type of C++ exception as well.
+	Assert_CheckFail("purecall", "unknown", 1);
+}
+
+void SetPurecallHandler()
+{
+	// We don't want sphere to immediately exit if a pure call is done.
+#ifdef _MSC_VER
+	_set_purecall_handler(Sphere_Purecall_Handler);
+#else
+	// GCC handler for pure calls is __cxxabiv1::__cxa_pure_virtual.
+	// Its code calls std::terminate(), which then calls abort(), so we set the terminate handler to redefine this behaviour.
+	std::set_terminate(Sphere_Purecall_Handler);
+#endif
+}
+
 #if defined(_WIN32) && !defined(_DEBUG)
 
 #include "crashdump/crashdump.h"
 
-int _cdecl _purecall()
-{
-	// catch this special type of C++ exception as well.
-	Assert_CheckFail( "purecall", "unknown", 1 );
-	return 0;
-}
-
-void _cdecl Sphere_Exception_Win32( uint id, struct _EXCEPTION_POINTERS* pData )
+void _cdecl Sphere_Exception_Windows( unsigned int id, struct _EXCEPTION_POINTERS* pData )
 {
 #ifndef _NO_CRASHDUMP
 	if ( CrashDump::IsEnabled() )
-	{
 		CrashDump::StartCrashDump(GetCurrentProcessId(), GetCurrentThreadId(), pData);
-	}
 
 #endif
 	// WIN32 gets an exception.
@@ -184,12 +193,12 @@ void _cdecl Sphere_Exception_Win32( uint id, struct _EXCEPTION_POINTERS* pData )
 	throw CException(id, pAddr);
 }
 
-#endif
+#endif // _WIN32 && !_DEBUG
 
 void SetExceptionTranslator()
 {
 #if defined(_WIN32) && defined(_MSC_VER) && defined(_NIGHTLYBUILD)
-	_set_se_translator( Sphere_Exception_Win32 );
+	_set_se_translator( Sphere_Exception_Windows );
 #endif
 }
 

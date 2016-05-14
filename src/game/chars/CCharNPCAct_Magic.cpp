@@ -138,7 +138,7 @@ bool CChar::NPC_AddSpellsFromBook(CItem * pBook)
 bool CChar::NPC_FightMagery(CChar * pChar)
 {
 	ADDTOCALLSTACK("CChar::NPC_FightMagery");
-	size_t count = m_pNPC->Spells_GetCount();
+	int count = m_pNPC->Spells_GetCount();
     if (count == -1)
         return false;
 
@@ -149,19 +149,18 @@ bool CChar::NPC_FightMagery(CChar * pChar)
 	CObjBase * pTarg = pChar;
 	if (pWand)
 	{
-		if (pWand->GetType() != IT_WAND || pWand->m_itWeapon.m_spellcharges <= 0)// If the item is really a wand and have it charges it's a valid wand, if not ... we get rid of it.
+		// If the item is really a wand and have it charges it's a valid wand, if not ... we get rid of it.
+		if ( (pWand->GetType() != IT_WAND) || (pWand->m_itWeapon.m_spellcharges <= 0) )
 			pWand = NULL;
 	}
-	if (count < 1 && !pWand)
+	if ( (count < 1) && !pWand )
 		return false;
 
 	int iDist = GetTopDist3D(pChar);
-	if (iDist >((UO_MAP_VIEW_SIGHT * 3) / 4))	// way too far away . close in.
+	if (iDist > ((UO_MAP_VIEW_SIGHT * 3) / 4))	// way too far away . close in.
 		return false;
 
-	if (iDist <= 1 &&
-		Skill_GetBase(SKILL_TACTICS) > 200 &&
-		!Calc_GetRandVal(2))
+	if ( (iDist <= 1) && (Skill_GetBase(SKILL_TACTICS) > 200) && !Calc_GetRandVal(2) )
 	{
 		// Within striking distance.
 		// Stand and fight for a bit.
@@ -180,18 +179,16 @@ bool CChar::NPC_FightMagery(CChar * pChar)
 		if (mana > (iStatInt / 3) && Calc_GetRandVal(iStatInt))
 		{
 			if (iDist < 4 || iDist > 8)	// Here is fine?
-			{
 				NPC_Act_Follow(false, Calc_GetRandVal(3) + 2, true);
-			}
 			return true;
 		}
 		return false;
 	}
 	uchar i = 0;
 	if (pWand)
-		i = (uchar)(Calc_GetRandVal2(0, (int32)count));	//chance between all spells + wand
+		i = (uchar)Calc_GetRandVal2(0, (int32)count);	//chance between all spells + wand
 	else
-		i = (uchar)(Calc_GetRandVal2(0, (int32)(count-1)));
+		i = (uchar)Calc_GetRandVal2(0, (int32)(count-1));
 
 	if (i > count)	// if i > count then we use wand to cast.
 	{
@@ -231,11 +228,10 @@ BeginCast:	//Start casting
 	if (mana > iStatInt / 3 && Calc_GetRandVal(iStatInt << 1))
 	{
 		if (iDist < 4 || iDist > 8)	// Here is fine?
-		{
 			NPC_Act_Follow(false, 5, true);
-		}
 	}
-	else NPC_Act_Follow();
+	else
+		NPC_Act_Follow();
 
 	Reveal();
 
@@ -244,7 +240,7 @@ BeginCast:	//Start casting
 	m_Act_p = pTarg->GetTopPoint();
 
 	// Calculate the difficulty
-	return Skill_Start(static_cast<SKILL_TYPE>(skill)); 
+	return Skill_Start(static_cast<SKILL_TYPE>(skill));
 }
 
 // I'm able to use magery
@@ -312,7 +308,7 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
 				for (iFriendIndex = 0; iFriendIndex < 4; iFriendIndex++)
 				{
 					pTarget = pFriend[iFriendIndex];
-					if (!pTarget) 
+					if (!pTarget)
 						break;
 					//	check if the target need that
 					switch (spell)
@@ -411,7 +407,7 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
 						break;
 				}
 
-				if (!bSpellSuits) 
+				if (!bSpellSuits)
 					return false;
 				pTarg = this;
 				m_atMagery.m_Spell = spell;

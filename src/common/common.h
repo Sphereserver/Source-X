@@ -43,15 +43,15 @@
 #endif
 
 #ifdef UNICODE
-	#define IsDigit(c)			iswdigit(c) // If doesn't work, try with argument (wint_t)c
-	#define IsSpace(c)			iswspace(c)
-	#define IsAlpha(c)			iswalpha(c)
-	#define IsAlnum(c)			iswalnum(c)
+	#define IsDigit(c)			iswdigit((wint_t)c)
+	#define IsSpace(c)			iswspace((wint_t)c)
+	#define IsAlpha(c)			iswalpha((wint_t)c)
+	#define IsAlnum(c)			iswalnum((wint_t)c)
 #else
-	#define IsDigit(c)			isdigit(c)	// It was: (uchar)c
-	#define IsSpace(c)			isspace(c)
-	#define IsAlpha(c)			isalpha(c)
-	#define IsAlnum(c)			isalnum(c)
+	#define IsDigit(c)			isdigit((int)c)	// It was: (uchar)c
+	#define IsSpace(c)			isspace((int)c)
+	#define IsAlpha(c)			isalpha((int)c)
+	#define IsAlnum(c)			isalnum((int)c)
 #endif
 
 #define IsNegative(c)		((c < 0)?1:0)
@@ -87,7 +87,7 @@
 		extern void Assert_CheckFail(const char * pExp, const char *pFile, long lLine);
 		#define ASSERT(exp)			(void)( (exp) || (Assert_CheckFail(#exp, __FILE__, __LINE__), 0) )
 	#else
-		#define ASSERT(exp)
+		#define ASSERT(exp)			(void)0
 	#endif
 #endif
 /* End of macros section */

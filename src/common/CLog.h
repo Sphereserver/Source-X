@@ -115,14 +115,18 @@ public:
 	#define DEBUG_EVENT(_x_)	g_pLog->EventEvent _x_
 	#define DEBUG_MYFLAG(_x_)	g_pLog->Event _x_
 #else
-	#define DEBUG_WARN(_x_)
-	#define DEBUG_MSG(_x_)
-	#define DEBUG_EVENT(_x_)
-	#define DEBUG_MYFLAG(_x_)
+	// Better use placeholders than leaving it empty, because unwanted behaviours may occur.
+	//  example: an else clause without brackets will include next line instead of DEBUG_WARN, because the macro is empty.
+	#define DEBUG_WARN(_x_)		(void)0
+	#define DEBUG_MSG(_x_)		(void)0
+	#define DEBUG_EVENT(_x_)	(void)0
+	#define DEBUG_MYFLAG(_x_)	(void)0
 #endif
 
 public:
-	CEventLog() { };
+	CEventLog()
+	{
+	}
 
 private:
 	CEventLog(const CEventLog& copy);
