@@ -104,16 +104,16 @@ CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 
 	word wFlags = (word)(m_TagDefs.GetKeyNum("DEATHFLAGS", true));
 	if (wFlags & DEATH_NOCORPSE)
-		return( NULL );
+		return NULL;
 	if (IsStatFlag(STATF_Conjured) && !(wFlags & (DEATH_NOCONJUREDEFFECT|DEATH_HASCORPSE)))
 	{
 		Effect(EFFECT_XYZ, ITEMID_FX_SPELL_FAIL, this, 1, 30);
-		return( NULL );
+		return NULL;
 	}
 
 	CItemCorpse *pCorpse = dynamic_cast<CItemCorpse *>(CItem::CreateScript(ITEMID_CORPSE, this));
 	if (pCorpse == NULL)	// weird internal error
-		return( NULL );
+		return NULL;
 
 	tchar *pszMsg = Str_GetTemp();
 	sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MSG_CORPSE_OF), GetName());

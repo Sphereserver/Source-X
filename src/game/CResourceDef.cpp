@@ -41,7 +41,7 @@ bool CValueRangeDef::Load( tchar * pszDef )
 const tchar * CValueRangeDef::Write() const
 {
 	ADDTOCALLSTACK("CValueRangeDef::Write");
-	return( NULL );
+	return NULL;
 }
 
 //*******************************************

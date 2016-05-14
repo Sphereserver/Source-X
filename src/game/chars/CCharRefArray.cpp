@@ -91,17 +91,3 @@ void CCharRefArray::WritePartyChars( CScript &s )
         s.WriteKeyHex("CHARUID", m_uidCharArray[j]);
 }
 
-size_t CCharRefArray::GetCharCount() const
-{
-    return m_uidCharArray.GetCount();
-}
-
-CUID CCharRefArray::GetChar( size_t i ) const
-{
-    return m_uidCharArray[i];
-}
-
-bool CCharRefArray::IsValidIndex( size_t i ) const
-{
-    return m_uidCharArray.IsValidIndex( i );
-}

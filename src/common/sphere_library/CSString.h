@@ -33,27 +33,49 @@ public:
 	* Initializes string. If DEBUG_STRINGS setted, update statistical information (total CSString instantiated).
 	* @see Init()
 	*/
-	CSString();
+	CSString()
+	{
+#ifdef DEBUG_STRINGS
+		gAmount++;
+#endif
+		Init();
+	}
 	/**
 	* @brief CSString destructor.
 	*
 	* If DEBUG_STRINGS setted, updates statistical information (total CSString instantiated).
 	*/
-	~CSString();
+	~CSString()
+	{
+#ifdef DEBUG_STRINGS
+		gAmount--;
+#endif
+		Empty(true);
+	}
 	/**
 	* @brief Copy constructor.
 	*
 	* @see Copy()
 	* @param pStr string to copy.
 	*/
-	CSString(lpctstr pStr);
+	CSString(lpctstr pStr)
+	{
+		m_iMaxLength = m_iLength = 0;
+		m_pchData = NULL;
+		Copy(pStr);
+	}
 	/**
 	* @brief Copy constructor.
 	*
 	* @see Copy()
 	* @param pStr string to copy.
 	*/
-	CSString(const CSString &s);
+	CSString(const CSString &s)
+	{
+		m_iMaxLength = m_iLength = 0;
+		m_pchData = NULL;
+		Copy(s.GetPtr());
+	}
 	/**
 	* @brief Copy supplied string into the CSString.
 	* @param pStr string to copy.

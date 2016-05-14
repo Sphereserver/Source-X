@@ -395,9 +395,9 @@ CCharBase * CCharBase::FindCharBase( CREID_TYPE baseID ) // static
 	// load it's data on demand.
 	CResourceLock s;
 	if ( !pBase->ResourceLock(s))
-		return( NULL );
+		return NULL;
 	if ( !pBase->r_Load(s))
-		return( NULL );
+		return NULL;
 
 	return pBase;
 }

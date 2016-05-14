@@ -1,3 +1,4 @@
+
 // define the base types of an item (rather than the instance)
 
 #include "../../common/CLog.h"
@@ -6,19 +7,20 @@
 #include "../uo_files/CUOItemInfo.h"
 #include "CItemBase.h"
 
+
 /////////////////////////////////////////////////////////////////
 // -CItemBase
 
 CItemBase::CItemBase( ITEMID_TYPE id ) :
 	CBaseBaseDef( RESOURCE_ID( RES_ITEMDEF, id ))
 {
-	m_weight = 0;
-	m_speed = 0;
-	m_iSkill = SKILL_NONE;
-	SetDefNum("RANGE",1); //m_range = 1;
-	m_type = IT_NORMAL;
-	m_layer = LAYER_NONE;
-	m_CanUse = 0;
+	m_weight		= 0;
+	m_speed			= 0;
+	m_iSkill		= SKILL_NONE;
+	SetDefNum("RANGE",1);			//m_range = 1;
+	m_type			= IT_NORMAL;
+	m_layer			= LAYER_NONE;
+	m_CanUse		= 0;
 
 	// Just applies to equippable weapons/armor.
 	m_ttNormal.m_tData1 = 0;
@@ -26,7 +28,7 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 	m_ttNormal.m_tData3 = 0;
 	m_ttNormal.m_tData4 = 0;
 
-	if ( ! IsValidDispID( id ))
+	if ( ! IsValidDispID( id ) )
 	{
 		// There should be an ID= in the scripts later.
 		m_dwDispIndex = ITEMID_GOLD_C1; // until i hear otherwise from the script file.
@@ -40,12 +42,12 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 	// read it in from the script and *.mul files.
 
 	CUOItemTypeRec_HS tiledata;
-	memset( &tiledata, 0, sizeof(tiledata));
+	memset( &tiledata, 0, sizeof(tiledata) );
 	if ( id < ITEMID_MULTI )
 	{
-		if ( ! CItemBase::GetItemData( id, &tiledata ))	// some valid items don't show up here !
+		if ( ! CItemBase::GetItemData( id, &tiledata ) )	// some valid items don't show up here !
 		{
-			// return( NULL );
+			// return NULL;
 		}
 	}
 	else
@@ -133,22 +135,14 @@ lpctstr CItemBase::GetArticleAndSpace() const
 {
 	ADDTOCALLSTACK("CItemBase::GetArticleAndSpace");
 	if ( IsSetOF(OF_NoPrefix) )
-	{
-		return( "" );
-	}
+		return "";
 	if ( m_dwFlags & UFLAG2_ZERO1 )	// Name has been changed from TILEDATA.MUL
-	{
-		return( Str_GetArticleAndSpace( GetTypeName() ));
-	}
+		return Str_GetArticleAndSpace( GetTypeName() );
 	if ( m_dwFlags & UFLAG2_AN )
-	{
-		return( "an " );
-	}
+		return "an ";
 	if ( m_dwFlags & UFLAG2_A )
-	{
-		return( "a " );
-	}
-	return( "" );
+		return "a ";
+	return "";
 }
 
 void CItemBase::CopyBasic( const CItemBase * pBase )
@@ -159,7 +153,7 @@ void CItemBase::CopyBasic( const CItemBase * pBase )
 	m_flip_id	= pBase->m_flip_id;
 	m_type		= pBase->m_type;
 	m_layer		= pBase->m_layer;
-	SetDefNum("RANGE",pBase->GetDefNum("RANGE",true)); //m_range		= pBase->m_range;
+	SetDefNum("RANGE",pBase->GetDefNum("RANGE",true));	//m_range	= pBase->m_range;
 
 	// Just applies to weapons/armor.
 	m_ttNormal.m_tData1 = pBase->m_ttNormal.m_tData1;
@@ -185,7 +179,7 @@ lpctstr CItemBase::GetName() const
 {
 	ADDTOCALLSTACK("CItemBase::GetName");
 	// Get rid of the strange %s type stuff for pluralize rules of names.
-	return( GetNamePluralize( GetTypeName(), false ));
+	return GetNamePluralize( GetTypeName(), false );
 }
 
 tchar * CItemBase::GetNamePluralize( lpctstr pszNameBase, bool fPluralize )	// static
@@ -224,7 +218,7 @@ tchar * CItemBase::GetNamePluralize( lpctstr pszNameBase, bool fPluralize )	// s
 		pszName[j++] = pszNameBase[i];
 	}
 	pszName[j] = '\0';
-	return( pszName );
+	return pszName;
 }
 
 CREID_TYPE CItemBase::FindCharTrack( ITEMID_TYPE trackID )	// static
@@ -236,13 +230,9 @@ CREID_TYPE CItemBase::FindCharTrack( ITEMID_TYPE trackID )	// static
 
 	CItemBase * pItemDef = CItemBase::FindItemBase( trackID );
 	if ( pItemDef == NULL )
-	{
-		return( CREID_INVALID );
-	}
+		return CREID_INVALID;
 	if ( ! pItemDef->IsType(IT_EQ_HORSE) && ! pItemDef->IsType(IT_FIGURINE) )
-	{
-		return( CREID_INVALID );
-	}
+		return CREID_INVALID;
 
 	return static_cast<CREID_TYPE>(pItemDef->m_ttFigurine.m_charid.GetResIndex());
 }
@@ -303,9 +293,9 @@ GUMP_TYPE CItemBase::IsTypeContainer() const
 		case IT_EQ_BANK_BOX:
 		case IT_EQ_VENDOR_BOX:
 		case IT_KEYRING:
-			return(	m_ttContainer.m_gumpid );
+			return	m_ttContainer.m_gumpid;
 		default:
-			return( GUMP_NONE );
+			return GUMP_NONE;
 	}
 }
 
@@ -360,11 +350,11 @@ bool CItemBase::IsTypeEquippable() const
 		default:
 			break;
 	}
-	if ( IsTypeSpellbook( m_type ))
+	if ( IsTypeSpellbook( m_type ) )
 		return true;
-	if ( IsTypeArmor( m_type ))
+	if ( IsTypeArmor( m_type ) )
 		return true;
-	if ( IsTypeWeapon( m_type ))
+	if ( IsTypeWeapon( m_type ) )
 		return true;
 
 	// Even not visible things.
@@ -391,7 +381,7 @@ bool CItemBase::IsTypeEquippable() const
 bool CItemBase::IsID_Multi( ITEMID_TYPE id ) // static
 {
 	// NOTE: Ships are also multi's
-	return( id >= ITEMID_MULTI && id < ITEMID_MULTI_MAX );
+	return ( id >= ITEMID_MULTI && id < ITEMID_MULTI_MAX );
 }
 
 int CItemBase::IsID_Door( ITEMID_TYPE id ) // static
@@ -466,17 +456,17 @@ bool CItemBase::IsID_DoorOpen( ITEMID_TYPE id ) // static
 bool IsID_Ship( ITEMID_TYPE id )
 {
 	// IT_SHIP
-	return( id >= ITEMID_MULTI && id <= ITEMID_SHIP6_W );
+	return ( id >= ITEMID_MULTI && id <= ITEMID_SHIP6_W );
 }
 
 bool IsID_GamePiece( ITEMID_TYPE id ) // static
 {
-	return( id >= ITEMID_GAME1_CHECKER && id <= ITEMID_GAME_HI );
+	return ( id >= ITEMID_GAME1_CHECKER && id <= ITEMID_GAME_HI );
 }
 
 bool IsID_Track( ITEMID_TYPE id ) // static
 {
-	return( id >= ITEMID_TRACK_BEGIN && id <= ITEMID_TRACK_END );
+	return ( id >= ITEMID_TRACK_BEGIN && id <= ITEMID_TRACK_END );
 }
 
 bool IsID_WaterFish( ITEMID_TYPE id ) // static
@@ -661,25 +651,16 @@ inline void CItemBase::GetItemSpecificFlags( const CUOItemTypeRec_HS & tiledata,
 	{
 		wBlockThis &= ~CAN_I_BLOCK;
 		if ( IsID_DoorOpen(id))
-		{
 			wBlockThis &= ~CAN_I_DOOR;
-		}
 		else
-		{
 			wBlockThis |= CAN_I_DOOR;
-		}
 	}
 
 	if ( tiledata.m_flags & UFLAG3_LIGHT )	// this may actually be a moon gate or fire ?
-	{
 		wBlockThis |= CAN_I_LIGHT;	// normally of type IT_LIGHT_LIT;
-	}
 
-	if (( tiledata.m_flags & UFLAG2_STACKABLE ) || type == IT_REAGENT ||
-		id == ITEMID_EMPTY_BOTTLE )
-	{
+	if ( (tiledata.m_flags & UFLAG2_STACKABLE) || type == IT_REAGENT || id == ITEMID_EMPTY_BOTTLE )
 		wBlockThis |= CAN_I_PILE;
-	}
 }
 
 void CItemBase::GetItemTiledataFlags( dword & wBlockThis, ITEMID_TYPE id ) // static
@@ -719,7 +700,7 @@ inline height_t CItemBase::GetItemHeightFlags( const CUOItemTypeRec_HS & tiledat
 	if ( tiledata.m_flags & UFLAG4_DOOR ) // door
 	{
 		wBlockThis = CAN_I_DOOR;
-		return( tiledata.m_height );
+		return tiledata.m_height;
 	}
 
 	if ( tiledata.m_flags & UFLAG1_BLOCK )
@@ -727,7 +708,7 @@ inline height_t CItemBase::GetItemHeightFlags( const CUOItemTypeRec_HS & tiledat
 		if ( tiledata.m_flags & UFLAG1_WATER )	// water
 		{
 			wBlockThis = CAN_I_WATER;
-			return( tiledata.m_height );
+			return tiledata.m_height;
 		}
 		wBlockThis = CAN_I_BLOCK;
 	}
@@ -740,13 +721,9 @@ inline height_t CItemBase::GetItemHeightFlags( const CUOItemTypeRec_HS & tiledat
 	}
 
 	if ( tiledata.m_flags & UFLAG4_ROOF)
-	{
 		wBlockThis |= CAN_I_ROOF;
-	}
 	else if ( tiledata.m_flags & UFLAG2_PLATFORM )
-	{
 		wBlockThis |= CAN_I_PLATFORM;
-	}
 
 	if ( tiledata.m_flags & UFLAG2_CLIMBABLE )
 	{
@@ -756,7 +733,7 @@ inline height_t CItemBase::GetItemHeightFlags( const CUOItemTypeRec_HS & tiledat
 	if ( tiledata.m_flags & UFLAG4_HOVEROVER )
 		wBlockThis |= CAN_I_HOVER;
 	//DEBUG_WARN(("tiledata.m_height(%d)\n",tiledata.m_height));
-	return( tiledata.m_height );
+	return tiledata.m_height;
 }
 
 height_t CItemBase::GetItemHeight( ITEMID_TYPE id, dword & wBlockThis ) // static
@@ -775,7 +752,7 @@ height_t CItemBase::GetItemHeight( ITEMID_TYPE id, dword & wBlockThis ) // stati
 		if ( pBase )
 		{
 			wBlockThis = pBase->m_Can & CAN_I_MOVEMASK;
-			return( pBase->GetHeight() );
+			return pBase->GetHeight();
 		}
 	}
 
@@ -785,32 +762,32 @@ height_t CItemBase::GetItemHeight( ITEMID_TYPE id, dword & wBlockThis ) // stati
 	if ( ! GetItemData( id, &tiledata ))
 	{
 		wBlockThis = CAN_I_MOVEMASK;
-		return( UO_SIZE_Z );
+		return UO_SIZE_Z;
 	}
-	if ( IsID_Chair( id ))
+	if ( IsID_Chair( id ) )
 	{
 		wBlockThis = 0;
 		return 0;	// have no effective height if they don't block.
 	}
-	return( GetItemHeightFlags( tiledata, wBlockThis ));
+	return GetItemHeightFlags( tiledata, wBlockThis );
 }
 
 IT_TYPE CItemBase::GetTypeBase( ITEMID_TYPE id, const CUOItemTypeRec_HS &tiledata ) // static
 {
 	ADDTOCALLSTACK("CItemBase::GetTypeBase");
-	if ( IsID_Ship( id ))
+	if ( IsID_Ship( id ) )
 		return IT_SHIP;
-	if ( IsID_Multi( id ))
+	if ( IsID_Multi( id ) )
 		return IT_MULTI;
 
 	if (( tiledata.m_flags & UFLAG1_BLOCK ) && (tiledata.m_flags & UFLAG1_WATER))
 		return IT_WATER;
-	if ( IsID_WaterFish( id )) // UFLAG1_WATER
+	if ( IsID_WaterFish( id ) ) // UFLAG1_WATER
 		return IT_WATER;
 
 	if (( tiledata.m_flags & UFLAG4_DOOR ) || IsID_Door( id ))
 	{
-		if ( IsID_DoorOpen( id ))	// currently open
+		if ( IsID_DoorOpen( id ) )	// currently open
 			return IT_DOOR_OPEN;
 		return IT_DOOR;
 	}
@@ -818,13 +795,13 @@ IT_TYPE CItemBase::GetTypeBase( ITEMID_TYPE id, const CUOItemTypeRec_HS &tiledat
 	if ( tiledata.m_flags & UFLAG3_CONTAINER )
 		return IT_CONTAINER;
 
-	if ( IsID_WaterWash( id ))
+	if ( IsID_WaterWash( id ) )
 		return IT_WATER_WASH;
-	else if ( IsID_Chair( id ))
+	else if ( IsID_Chair( id ) )
 		return IT_CHAIR;
-	else if ( IsID_Track( id ))
+	else if ( IsID_Track( id ) )
 		return IT_FIGURINE;
-	else if ( IsID_GamePiece( id ))
+	else if ( IsID_GamePiece( id ) )
 		return IT_GAME_PIECE;
 
 	// Get rid of the stuff below here !
@@ -833,9 +810,7 @@ IT_TYPE CItemBase::GetTypeBase( ITEMID_TYPE id, const CUOItemTypeRec_HS &tiledat
 		return IT_TRAP_ACTIVE;
 
 	if ( tiledata.m_flags & UFLAG3_LIGHT )	// this may actually be a moon gate or fire ?
-	{
 		return IT_LIGHT_LIT;
-	}
 
 	return IT_NORMAL;	// Get from script i guess.
 }
@@ -850,11 +825,11 @@ ITEMID_TYPE CItemBase::GetNextFlipID( ITEMID_TYPE id ) const
 		{
 			ITEMID_TYPE idnext = m_flip_id[i];
 			if ( idprev == id )
-				return( idnext );
+				return idnext;
 			idprev = idnext;
 		}
 	}
-	return( GetDispID());
+	return GetDispID();
 }
 
 bool CItemBase::IsSameDispID( ITEMID_TYPE id ) const
@@ -864,9 +839,7 @@ bool CItemBase::IsSameDispID( ITEMID_TYPE id ) const
 	// Take into account flipped items.
 
 	if ( ! IsValidDispID( id ))	// this should really not be here but handle it anyhow.
-	{
-		return( GetID() == id );
-	}
+		return ( GetID() == id );
 
 	if ( id == GetDispID())
 		return true;
@@ -884,9 +857,7 @@ void CItemBase::Restock()
 	ADDTOCALLSTACK("CItemBase::Restock");
 	// Re-evaluate the base random value rate some time in the future.
 	if ( m_values.m_iLo < 0 || m_values.m_iHi < 0 )
-	{
 		m_values.Init();
-	}
 }
 
 int CItemBase::CalculateMakeValue( int iQualityLevel ) const
@@ -941,7 +912,7 @@ int CItemBase::CalculateMakeValue( int iQualityLevel ) const
 	}
 
 	sm_iReentrantCount--;
-	return( lValue );
+	return lValue;
 }
 
 byte CItemBase::GetSpeed() const
@@ -1288,7 +1259,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 			sVal.FormatHex( GetTFlags() );
 			break;
 		case IBC_TWOHANDS:
-			if ( ! IsTypeEquippable())
+			if ( ! IsTypeEquippable() )
 				return false;
 
 			if ( ! IsTypeWeapon(GetType()) && ! IsType(IT_FISH_POLE))
@@ -1309,7 +1280,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 			}
 			break;
 		case IBC_VALUE:
-			if ( m_values.GetRange())
+			if ( m_values.GetRange() )
 				sVal.Format( "%d,%d", GetMakeValue(0), GetMakeValue(100) );
 			else
 				sVal.Format( "%d", GetMakeValue(0));
@@ -1334,7 +1305,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 	ADDTOCALLSTACK("CItemBase::r_LoadVal");
 	EXC_TRY("LoadVal");
 	lpctstr	pszKey = s.GetKey();
-	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ) )
 	{
 		//Set as Strings
 		case IBC_AMMOANIM:
@@ -1483,7 +1454,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 			}
 			break;
 		case IBC_DYE:
-			if ( ! s.HasArgs())
+			if ( !s.HasArgs() )
 				m_Can |= CAN_I_DYE;
 			else
 				if ( s.GetArgVal() )
@@ -1492,7 +1463,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 					m_Can &= ~CAN_I_DYE;
 			break;
 		case IBC_FLIP:
-			if ( ! s.HasArgs())
+			if ( !s.HasArgs() )
 				m_Can |= CAN_I_FLIP;
 			else
 				if ( s.GetArgVal() )
@@ -1501,7 +1472,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 					m_Can &= ~CAN_I_FLIP;
 			break;
 		case IBC_ENCHANT:
-			if ( ! s.HasArgs())
+			if ( !s.HasArgs() )
 				m_Can |= CAN_I_ENCHANT;
 			else
 				if ( s.GetArgVal() )
@@ -1510,7 +1481,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 					m_Can &= ~CAN_I_ENCHANT;
 			break;
 		case IBC_EXCEPTIONAL:
-			if ( ! s.HasArgs())
+			if ( !s.HasArgs() )
 				m_Can |= CAN_I_EXCEPTIONAL;
 			else
 				if ( s.GetArgVal() )
@@ -1519,7 +1490,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 					m_Can &= ~CAN_I_EXCEPTIONAL;
 			break;
 		case IBC_IMBUE:
-			if ( ! s.HasArgs())
+			if ( !s.HasArgs() )
 				m_Can |= CAN_I_IMBUE;
 			else
 				if ( s.GetArgVal() )
@@ -1528,7 +1499,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 					m_Can &= ~CAN_I_IMBUE;
 			break;
 		case IBC_REFORGE:
-			if ( ! s.HasArgs())
+			if ( !s.HasArgs() )
 				m_Can |= CAN_I_REFORGE;
 			else
 				if ( s.GetArgVal() )
@@ -1537,7 +1508,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 					m_Can &= ~CAN_I_REFORGE;
 			break;
 		case IBC_RETAINCOLOR:
-			if ( ! s.HasArgs())
+			if ( !s.HasArgs() )
 				m_Can |= CAN_I_RETAINCOLOR;
 			else
 				if ( s.GetArgVal() )
@@ -1546,7 +1517,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 					m_Can &= ~CAN_I_RETAINCOLOR;
 			break;
 		case IBC_MAKERSMARK:
-			if ( ! s.HasArgs())
+			if ( !s.HasArgs() )
 				m_Can |= CAN_I_MAKERSMARK;
 			else
 				if ( s.GetArgVal() )
@@ -1555,7 +1526,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 					m_Can &= ~CAN_I_MAKERSMARK;
 			break;
 		case IBC_RECYCLE:
-			if ( ! s.HasArgs())
+			if ( !s.HasArgs() )
 				m_Can |= CAN_I_RECYCLE;
 			else
 				if ( s.GetArgVal() )
@@ -1564,7 +1535,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 					m_Can &= ~CAN_I_RECYCLE;
 			break;
 		case IBC_REPAIR:
-			if ( ! s.HasArgs())
+			if ( !s.HasArgs() )
 				m_Can |= CAN_I_REPAIR;
 			else
 				if ( s.GetArgVal() )
@@ -1573,7 +1544,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 					m_Can &= ~CAN_I_REPAIR;
 			break;
 		case IBC_REPLICATE:
-			if ( ! s.HasArgs())
+			if ( !s.HasArgs() )
 				m_Can |= CAN_I_REPLICATE;
 			else
 				if ( s.GetArgVal() )
@@ -1609,7 +1580,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 			break;
 
 		case IBC_LAYER:
-			m_layer = (uchar)(s.GetArgVal());
+			m_layer = (uchar)s.GetArgVal();
 			break;
 		case IBC_PILE:
 			break;
@@ -1624,7 +1595,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 			break;
 
 		case IBC_SPEED:
-			m_speed = (uchar)(s.GetArgVal());
+			m_speed = (uchar)s.GetArgVal();
 			break;
 
 		case IBC_SKILL:		// Skill to use.
@@ -1633,7 +1604,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 
 		case IBC_SKILLMAKE:
 			// Skill required to make this.
-			m_SkillMake.Load( s.GetArgStr());
+			m_SkillMake.Load( s.GetArgStr() );
 			break;
 
 		case IBC_TDATA1:
@@ -1680,7 +1651,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 			}
 			break;
 		default:
-			return( CBaseBaseDef::r_LoadVal( s ));
+			return CBaseBaseDef::r_LoadVal( s );
 	}
 	return true;
 	EXC_CATCH;
@@ -1709,26 +1680,24 @@ CItemBase * CItemBase::MakeDupeReplacement( CItemBase * pBase, ITEMID_TYPE idmas
 	if ( idmaster == id || ! IsValidDispID( idmaster ))
 	{
 		DEBUG_ERR(( "CItemBase:DUPEITEM weirdness 0%x==0%x\n", id, idmaster ));
-		return( pBase );
+		return pBase;
 	}
 
 	CItemBase * pBaseNew = FindItemBase( idmaster );
 	if ( pBaseNew == NULL )
 	{
 		DEBUG_ERR(( "CItemBase:DUPEITEM not exist 0%x==0%x\n", id, idmaster ));
-		return( pBase );
+		return pBase;
 	}
 
 	if ( pBaseNew->GetID() != idmaster )
 	{
 		DEBUG_ERR(( "CItemBase:DUPEITEM circle 0%x==0%x\n", id, idmaster ));
-		return( pBase );
+		return pBase;
 	}
 
 	if ( ! pBaseNew->IsSameDispID(id))	// already here ?!
-	{
 		pBaseNew->m_flip_id.Add(id);
-	}
 
 	// create the dupe stub.
 	CUOItemTypeRec_HS tiledata;
@@ -1746,8 +1715,9 @@ CItemBase * CItemBase::MakeDupeReplacement( CItemBase * pBase, ITEMID_TYPE idmas
 	}
 	ReplaceItemBase( pBase, pBaseDupe );
 
-	return( pBaseNew );
+	return pBaseNew;
 }
+
 
 //**************************************************
 // -CItemBaseMulti
@@ -1781,11 +1751,11 @@ CItemBase * CItemBaseMulti::MakeMultiRegion( CItemBase * pBase, CScript & s ) //
 	}
 
 	pMultiBase->SetMultiRegion( s.GetArgStr());
-	return( pMultiBase );
+	return pMultiBase;
 }
 
 CItemBaseMulti::CItemBaseMulti( CItemBase* pBase ) :
-	CItemBase( pBase->GetID())
+	CItemBase( pBase->GetID() )
 {
 	m_dwRegionFlags = REGION_FLAG_NODECAY | REGION_ANTIMAGIC_TELEPORT | REGION_ANTIMAGIC_RECALL_IN | REGION_FLAG_NOBUILDING;
 	m_rect.SetRectEmpty();
@@ -2025,7 +1995,7 @@ bool CItemBaseMulti::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole *
 		break;
 	}
 	default:
-		return( CItemBase::r_WriteVal( pszKey, sVal, pChar ));
+		return CItemBase::r_WriteVal( pszKey, sVal, pChar );
 	}
 	return true;
 	EXC_CATCH;
@@ -2045,31 +2015,23 @@ CItemBase * CItemBase::FindItemBase( ITEMID_TYPE id ) // static
 	// is a like item already loaded.
 
 	if ( id <= 0 )
-	{
-		return( NULL );
-	}
+		return NULL;
 
 	RESOURCE_ID rid = RESOURCE_ID( RES_ITEMDEF, id );
 	size_t index = g_Cfg.m_ResHash.FindKey(rid);
 	if ( index == g_Cfg.m_ResHash.BadIndex() )
-	{
-		return( NULL );
-	}
+		return NULL;
 
 	CResourceDef * pBaseStub = g_Cfg.m_ResHash.GetAt( rid, index );
 	ASSERT(pBaseStub);
 
 	CItemBase * pBase = dynamic_cast <CItemBase *>(pBaseStub);
 	if ( pBase )
-	{
-		return( pBase );	// already loaded all base info.
-	}
+		return pBase;	// already loaded all base info.
 
 	const CItemBaseDupe * pBaseDupe = dynamic_cast <const CItemBaseDupe *>(pBaseStub);
 	if ( pBaseDupe )
-	{
 		return( pBaseDupe->GetItemDef() );	// this is just a dupeitem
-	}
 
 	CResourceLink * pBaseLink = dynamic_cast <CResourceLink *>(pBaseStub);
 	ASSERT(pBaseLink);
@@ -2086,7 +2048,7 @@ CItemBase * CItemBase::FindItemBase( ITEMID_TYPE id ) // static
 	{
 		// must be scripted. not in the artwork set.
 		g_Log.Event( LOGL_ERROR, "UN-scripted item 0%0x NOT allowed.\n", id );
-		return( NULL );
+		return NULL;
 	}
 
 	// Scan the item definition for keywords such as DUPEITEM and
@@ -2096,7 +2058,7 @@ CItemBase * CItemBase::FindItemBase( ITEMID_TYPE id ) // static
 	{
 		if ( s.IsKey( "DUPEITEM" ))
 		{
-			return( MakeDupeReplacement( pBase, static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()))));
+			return MakeDupeReplacement( pBase, static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr() )) );
 		}
 		if ( s.IsKey( "MULTIREGION" ))
 		{
@@ -2118,7 +2080,7 @@ CItemBase * CItemBase::FindItemBase( ITEMID_TYPE id ) // static
 	s.SeekContext(scriptStartContext);
 
 	// Read the Script file preliminary.
-	while ( s.ReadKeyParse())
+	while ( s.ReadKeyParse() )
 	{
 		if ( s.IsKey( "DUPEITEM" ) || s.IsKey( "MULTIREGION" ))
 			continue;
@@ -2128,7 +2090,7 @@ CItemBase * CItemBase::FindItemBase( ITEMID_TYPE id ) // static
 		pBase->r_LoadVal( s );
 	}
 
-	return( pBase );
+	return pBase;
 }
 
 //**************************************************
@@ -2136,24 +2098,24 @@ CItemBaseDupe * CItemBaseDupe::GetDupeRef( ITEMID_TYPE id ) // static
 {
 	ADDTOCALLSTACK("CItemBaseDupe::GetDupeRef");
 	if ( id <= 0 )
-		return( NULL );
+		return NULL;
 
 	RESOURCE_ID rid = RESOURCE_ID( RES_ITEMDEF, id );
 	size_t index = g_Cfg.m_ResHash.FindKey(rid);
 	if ( index == g_Cfg.m_ResHash.BadIndex() )
-		return( NULL );
+		return NULL;
 
 	CResourceDef * pBaseStub = g_Cfg.m_ResHash.GetAt( rid, index );
 
 	CItemBase * pBase = dynamic_cast <CItemBase *>(pBaseStub);
 	if ( pBase )
-		return( NULL ); //We want to return Dupeitem, not Baseitem
+		return NULL; //We want to return Dupeitem, not Baseitem
 
 	CItemBaseDupe * pBaseDupe = dynamic_cast <CItemBaseDupe *>(pBaseStub);
 	if ( pBaseDupe )
-		return( pBaseDupe );	// this is just a dupeitem
+		return pBaseDupe;	// this is just a dupeitem
 
-	return( NULL); //we suspect item is loaded
+	return NULL; //we suspect item is loaded
 }
 
 

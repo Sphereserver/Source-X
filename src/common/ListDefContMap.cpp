@@ -671,7 +671,7 @@ CListDefCont * CListDefMap::GetAt( size_t at )
 	ADDTOCALLSTACK("CListDefMap::GetAt");
 
 	if ( at > m_Container.size() )
-		return( NULL );
+		return NULL;
 
 	DefSet::iterator i = m_Container.begin();
 	while ( at-- )
@@ -680,7 +680,7 @@ CListDefCont * CListDefMap::GetAt( size_t at )
 	if ( i != m_Container.end() )
 		return( (*i) );
 	else
-		return( NULL );
+		return NULL;
 }
 
 CListDefCont * CListDefMap::GetAtKey( lpctstr at )
@@ -694,7 +694,7 @@ CListDefCont * CListDefMap::GetAtKey( lpctstr at )
 	if ( i != m_Container.end() )
 		return( (*i) );
 	else
-		return( NULL );
+		return NULL;
 }
 
 inline void CListDefMap::DeleteAt( size_t at )

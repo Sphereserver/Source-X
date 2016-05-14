@@ -121,7 +121,7 @@ public:
 	int GetLinear( int iPercent ) const
 	{	
 		// ARGS: iPercent = 0-1000
-		return (int)(m_iLo) + MulDiv( GetRange(), iPercent, 1000 );
+		return (int)m_iLo + MulDiv( GetRange(), iPercent, 1000 );
 	}
 
     /**
@@ -133,7 +133,7 @@ public:
      */
 	int GetRandom() const
 	{	
-		return( (int)(m_iLo) + Calc_GetRandVal( GetRange()));
+		return ( (int)m_iLo + Calc_GetRandVal(GetRange()) );
 	}
 
     /**
@@ -311,6 +311,14 @@ public:
 	TRIGRET_TYPE OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
 };
 
+
+enum WTRIG_TYPE
+{
+	// XTRIG_UNKNOWN	= some named trigger not on this list.
+	WTRIG_Load = 1,
+	WTRIG_QTY
+};
+
 enum WEBPAGE_TYPE
 {
 	WEBPAGE_TEMPLATE,
@@ -319,13 +327,6 @@ enum WEBPAGE_TYPE
 	WEBPAGE_GIF,
 	WEBPAGE_JPG,
 	WEBPAGE_QTY
-};
-
-enum WTRIG_TYPE
-{
-	// XTRIG_UNKNOWN	= some named trigger not on this list.
-	WTRIG_Load=1,
-	WTRIG_QTY
 };
 
 class CWebPageDef : public CResourceLink
@@ -343,140 +344,143 @@ private:
 private:
 	PLEVEL_TYPE m_privlevel;    ///< What priv level to see this page ?
 
-	// For files that are being translated and updated.
-	CSString m_sDstFilePath;    ///< where is the page served from ?
-	int  m_iUpdatePeriod;       ///< How often to update the web page. 0 = never.
-	int  m_iUpdateLog;          ///< create a daily log of the page.
-	CServerTime  m_timeNextUpdate;///< The time at will be done the next web update.
+								// For files that are being translated and updated.
+	CSString m_sDstFilePath;		///< where is the page served from ?
+	int m_iUpdatePeriod;			///< How often to update the web page. 0 = never.
+	int m_iUpdateLog;				///< create a daily log of the page.
+	CServerTime  m_timeNextUpdate;	///< The time at will be done the next web update.
 
 public:
 	static const char *m_sClassName;
 	static int sm_iListIndex;
-	static lpctstr const sm_szTrigName[WTRIG_QTY+1];
+	static lpctstr const sm_szTrigName[WTRIG_QTY + 1];
 private:
 
-    /**
-     * @fn  int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime * pdateLastMod );
-     *
-     * @brief   Serv page requested.
-     *
-     * @param [in,out]  pClient         If non-null, the client.
-     * @param   pszURLArgs              The URL arguments.
-     * @param [in,out]  pdateLastMod    If non-null, the pdate last modifier.
-     *
-     * @return  An int.
-     */
-	int ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime * pdateLastMod );
+	/**
+	* @fn  int CWebPageDef::ServPageRequest( CClient * pClient, lpctstr pszURLArgs, CSTime * pdateLastMod );
+	*
+	* @brief   Serv page requested.
+	*
+	* @param [in,out]  pClient         If non-null, the client.
+	* @param   pszURLArgs              The URL arguments.
+	* @param [in,out]  pdateLastMod    If non-null, the pdate last modifier.
+	*
+	* @return  An int.
+	*/
+	int ServPageRequest(CClient * pClient, lpctstr pszURLArgs, CSTime * pdateLastMod);
 public:
 
-    /**
-     * @fn  lpctstr CWebPageDef::GetName() const
-     *
-     * @brief   Gets the source template for the generated web page (m_sSrcFilePath).
-     *
-     * @return  m_sSrcFilePath.
-     */
+	/**
+	* @fn  lpctstr CWebPageDef::GetName() const
+	*
+	* @brief   Gets the source template for the generated web page (m_sSrcFilePath).
+	*
+	* @return  m_sSrcFilePath.
+	*/
 	lpctstr GetName() const
 	{
-		return( m_sSrcFilePath );
+		return m_sSrcFilePath;
 	}
 
-    /**
-     * @fn  lpctstr CWebPageDef::GetDstName() const
-     *
-     * @brief   Gets where is the page served from.
-     *
-     * @return  m_sDstFilePath.
-     */
+	/**
+	* @fn  lpctstr CWebPageDef::GetDstName() const
+	*
+	* @brief   Gets where is the page served from.
+	*
+	* @return  m_sDstFilePath.
+	*/
 	lpctstr GetDstName() const
 	{
-		return( m_sDstFilePath );
+		return m_sDstFilePath;
 	}
 
-    /**
-     * @fn  bool CWebPageDef::IsMatch( lpctstr IsMatchPage ) const;
-     *
-     * @brief   Query if the requested page exists..
-     *
-     * @param   IsMatchPage The is match page.
-     *
-     * @return  true if match, false if not.
-     */
-	bool IsMatch( lpctstr IsMatchPage ) const;
+	/**
+	* @fn  bool CWebPageDef::IsMatch( lpctstr IsMatchPage ) const;
+	*
+	* @brief   Query if the requested page exists..
+	*
+	* @param   IsMatchPage The is match page.
+	*
+	* @return  true if match, false if not.
+	*/
+	bool IsMatch(lpctstr IsMatchPage) const;
 
-    /**
-     * @fn  bool CWebPageDef::SetSourceFile( lpctstr pszName, CClient * pClient );
-     *
-     * @brief   Sets source file to be given.
-     *
-     * @param   pszName         The name.
-     * @param [in,out]  pClient If non-null, the client.
-     *
-     * @return  true if it succeeds, false if it fails.
-     */
-	bool SetSourceFile( lpctstr pszName, CClient * pClient );
+	/**
+	* @fn  bool CWebPageDef::SetSourceFile( lpctstr pszName, CClient * pClient );
+	*
+	* @brief   Sets source file to be given.
+	*
+	* @param   pszName         The name.
+	* @param [in,out]  pClient If non-null, the client.
+	*
+	* @return  true if it succeeds, false if it fails.
+	*/
+	bool SetSourceFile(lpctstr pszName, CClient * pClient);
 
-    /**
-     * @fn  bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * pPostData, size_t stContentLength );
-     *
-     * @brief   Translate scripted content.
-     *
-     * @param [in,out]  pClient     If non-null, the client.
-     * @param   pszURLArgs          The URL arguments.
-     * @param [in,out]  pPostData   If non-null, information describing the post.
-     * @param   stContentLength     Length of the content.
-     *
-     * @return  true if it succeeds, false if it fails.
-     */
-	bool ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * pPostData, size_t stContentLength );
+	/**
+	* @fn  bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * pPostData, size_t stContentLength );
+	*
+	* @brief   Translate scripted content.
+	*
+	* @param [in,out]  pClient     If non-null, the client.
+	* @param   pszURLArgs          The URL arguments.
+	* @param [in,out]  pPostData   If non-null, information describing the post.
+	* @param   stContentLength     Length of the content.
+	*
+	* @return  true if it succeeds, false if it fails.
+	*/
+	bool ServPagePost(CClient * pClient, lpctstr pszURLArgs, tchar * pPostData, size_t stContentLength);
 
-	virtual bool r_LoadVal( CScript & s );
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = NULL );
-	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );	// some command on this object as a target
+	virtual bool r_LoadVal(CScript & s);
+	virtual bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = NULL);
+	virtual bool r_Verb(CScript & s, CTextConsole * pSrc);	// some command on this object as a target
 
-    /**
-     * @fn  void CWebPageDef::WebPageLog();
-     *
-     * @brief   Web page log.
-     *
-     */
+															/**
+															* @fn  void CWebPageDef::WebPageLog();
+															*
+															* @brief   Web page log.
+															*
+															*/
 	void WebPageLog();
 
-    /**
-     * @fn  bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * pSrc );
-     *
-     * @brief   Web page update proccess.
-     *
-     * @param   fNow            true to now.
-     * @param   pszDstName      Name of the destination.
-     * @param [in,out]  pSrc    If non-null, source for the.
-     *
-     * @return  true if it succeeds, false if it fails.
-     */
-	bool WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * pSrc );
+	/**
+	* @fn  bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * pSrc );
+	*
+	* @brief   Web page update proccess.
+	*
+	* @param   fNow            true to now.
+	* @param   pszDstName      Name of the destination.
+	* @param [in,out]  pSrc    If non-null, source for the.
+	*
+	* @return  true if it succeeds, false if it fails.
+	*/
+	bool WebPageUpdate(bool fNow, lpctstr pszDstName, CTextConsole * pSrc);
 
-    /**
-     * @fn  static bool CWebPageDef::ServPage( CClient * pClient, tchar * pszPage, CSTime * pdateLastMod );
-     *
-     * @brief   Final checks: Control if page can be sent and does it (sends also 404 if not, and some other fails).
-     *
-     * @param [in,out]  pClient         If non-null, the client.
-     * @param [in,out]  pszPage         If non-null, the page.
-     * @param [in,out]  pdateLastMod    If non-null, the pdate last modifier.
-     *
-     * @return  true if it succeeds, false if it fails.
-     */
+	/**
+	* @fn  static bool CWebPageDef::ServPage( CClient * pClient, tchar * pszPage, CSTime * pdateLastMod );
+	*
+	* @brief   Final checks: Control if page can be sent and does it (sends also 404 if not, and some other fails).
+	*
+	* @param [in,out]  pClient         If non-null, the client.
+	* @param [in,out]  pszPage         If non-null, the page.
+	* @param [in,out]  pdateLastMod    If non-null, the pdate last modifier.
+	*
+	* @return  true if it succeeds, false if it fails.
+	*/
 
-	static bool ServPage( CClient * pClient, tchar * pszPage, CSTime * pdateLastMod );
+	static bool ServPage(CClient * pClient, tchar * pszPage, CSTime * pdateLastMod);
 
 public:
-	explicit CWebPageDef( RESOURCE_ID id );
-	virtual ~CWebPageDef() { };
+	explicit CWebPageDef(RESOURCE_ID id);
+	virtual ~CWebPageDef()
+	{
+	}
 
 private:
 	CWebPageDef(const CWebPageDef& copy);
 	CWebPageDef& operator=(const CWebPageDef& other);
 };
+
 
 /**
  * @enum    SPTRIG_TYPE
@@ -583,8 +587,7 @@ private:
 	int CalcTotalWeight();
 public:
 	static const char *m_sClassName;
-	explicit CSRandGroupDef( RESOURCE_ID rid ) :
-		CResourceLink( rid )
+	explicit CSRandGroupDef( RESOURCE_ID rid ) : CResourceLink( rid )
 	{
 		m_iTotalWeight = 0;
 	}
@@ -661,8 +664,7 @@ public:
 private:
 	void Init();
 public:
-	explicit CSkillClassDef( RESOURCE_ID rid ) :
-		CResourceLink( rid )
+	explicit CSkillClassDef( RESOURCE_ID rid ) : CResourceLink( rid )
 	{
 		// If there was none defined in scripts.
 		Init();
@@ -737,10 +739,13 @@ public:
      */
 	lpctstr GetKey() const
 	{
-		return( m_sKey );
+		return m_sKey;
 	}
 
-	lpctstr GetName() const { return( GetKey()); }
+	lpctstr GetName() const
+	{
+		return GetKey();
+	}
 	bool r_LoadVal( CScript & s );
 	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc );
 };
@@ -753,11 +758,13 @@ public:
 		UNREFERENCED_PARAMETER(fNoSpaces);
 		ASSERT( pszKey );
 		ASSERT( pVal->m_pszName );
-		return( strcmpi( pszKey, pVal->m_pszName ));
+		return strcmpi( pszKey, pVal->m_pszName );
 	}
 
 public:
-	CSkillKeySortArray() { };
+	CSkillKeySortArray()
+	{
+	}
 
 private:
 	CSkillKeySortArray(const CSkillKeySortArray& copy);
@@ -772,7 +779,7 @@ struct CMultiDefArray : public CSObjSortArray< CSphereMulti*, MULTI_TYPE >
 	{
 		UNREFERENCED_PARAMETER(fNoSpaces);
 		ASSERT( pBase );
-		return( id - pBase->GetMultiID());
+		return ( id - pBase->GetMultiID() );
 	}
 };
 
@@ -820,13 +827,13 @@ public:
 	int  m_iDecay_CorpseNPC;    ///< Time for a NPC corpse to decay.
 
 	// Save
-	int  m_iSaveNPCSkills;      ///< Only save NPC skills above this
-	int  m_iSavePeriod;         ///< Minutes between saves.
-	int  m_iSaveBackupLevels;   ///< How many backup levels.
-	int  m_iSaveBackgroundTime; ///< Speed of the background save in minutes.
-	uint m_iSaveSectorsPerTick; ///< max number of sectors per dynamic background save step
-	uint m_iSaveStepMaxComplexity;///< maximum "number of items+characters" saved at once during dynamic background save
-	bool m_fSaveGarbageCollect; ///< Always force a full garbage collection.
+	int  m_iSaveNPCSkills;			///< Only save NPC skills above this
+	int  m_iSavePeriod;				///< Minutes between saves.
+	int  m_iSaveBackupLevels;		///< How many backup levels.
+	int  m_iSaveBackgroundTime;		///< Speed of the background save in minutes.
+	uint m_iSaveSectorsPerTick;		///< max number of sectors per dynamic background save step
+	uint m_iSaveStepMaxComplexity;	///< maximum "number of items+characters" saved at once during dynamic background save
+	bool m_fSaveGarbageCollect;		///< Always force a full garbage collection.
 
 	// Account
 	int  m_iDeadSocketTime;     ///< Disconnect inactive socket in x min
@@ -861,46 +868,46 @@ public:
 	int m_iSpellTimeout; ///< Timeout for spell targeting
 
 	///< In Game Effects
-	int	 m_iLightDungeon;       ///< InDungeon light level.
-	int  m_iLightDay;           ///< Outdoor light level.
-	int  m_iLightNight;         ///< Outdoor light level.
-	int  m_iGameMinuteLength;   ///< Length of the game world minute in real world (TICK_PER_SEC) seconds.
-	bool m_fNoWeather;          ///< Turn off all weather.
-	bool m_fCharTags;           ///< Show [NPC] tags over chars.
-	bool m_fVendorTradeTitle;   ///< Show job title on vendor names.
-	bool m_fFlipDroppedItems;   ///< Flip dropped items.
-	int  m_iItemsMaxAmount;     ///< Max amount allowed for stackable items.
-	bool m_fCanUndressPets;     ///< Can players undress their pets?
-	bool m_fMonsterFight;       ///< Will creatures fight amoung themselves.
-	bool m_fMonsterFear;        ///< will they run away if hurt ?
-	int	 m_iBankIMax;           ///< Maximum number of items allowed in bank.
-	int  m_iBankWMax;           ///< Maximum weight in WEIGHT_UNITS stones allowed in bank.
-	int  m_iVendorMaxSell;      ///< Max things a vendor will sell in one shot.
-	uint m_iMaxCharComplexity;  ///< How many chars per sector.
-	uint m_iMaxItemComplexity;  ///< How many items per meter.
-	uint m_iMaxSectorComplexity;///< How many items per sector.
-	bool m_fGenericSounds;      ///< Do players receive generic (not them-devoted) sounds.
-	bool m_fAutoNewbieKeys;     ///< Are house and boat keys newbied automatically?
-	int  m_iStamRunningPenalty; ///< Weight penalty for running (+N% of max carry weight)
-	int  m_iStaminaLossAtWeight;///< %Weight at which characters begin to lose stamina.
-	int  m_iHitpointPercentOnRez;///< How many hitpoints do they get when they are rez'd?
-	int  m_iHitsHungerLoss;     ///< How many % of HP will loose char on starving.
-	int  m_iMaxBaseSkill;       ///< Maximum value for base skills at char creation.
-	int	 m_iTrainSkillCost;     ///< GP cost of each 0.1 skill trained.
-	int	 m_iTrainSkillMax;      ///< Max skill value that can be reached from training.
-	int  m_iTrainSkillPercent;	///< How much can NPC's train up to ?
-	int  m_fDeadCannotSeeLiving;///< Can dead Players see living beins?
-	int  m_iMediumCanHearGhosts;///< At this Spirit Speak skill level players can understand ghosts speech instead hear 'oOOoO ooO'
-	bool m_iMountHeight;        ///< Do not allow entering under roof being on horse?
-	int	 m_iMoveRate;           ///< The percent rate of NPC movement.
-	int  m_iArcheryMaxDist;     ///< Max distance allowed for archery.
-	int  m_iArcheryMinDist;     ///< Min distance required for archery.
-	int  m_iHitsUpdateRate;     ///< how often send my hits updates to visible clients.
-	int  m_iSpeedScaleFactor;   ///< fight skill delay = m_iSpeedScaleFactor / ( (dex + 100) * Weapon Speed )
-	int  m_iCombatDamageEra;    ///< define damage formula to use on physical combat
-	int  m_iCombatSpeedEra;     ///< define swing speed formula to use on physical combat
-	int  m_iSkillPracticeMax;   ///< max skill level a player can practice on dummies/targets upto
-	bool m_iPacketDeathAnimation;///< packet 02c
+	int	 m_iLightDungeon;			///< InDungeon light level.
+	int  m_iLightDay;				///< Outdoor light level.
+	int  m_iLightNight;				///< Outdoor light level.
+	int  m_iGameMinuteLength;		///< Length of the game world minute in real world (TICK_PER_SEC) seconds.
+	bool m_fNoWeather;				///< Turn off all weather.
+	bool m_fCharTags;				///< Show [NPC] tags over chars.
+	bool m_fVendorTradeTitle;		///< Show job title on vendor names.
+	bool m_fFlipDroppedItems;		///< Flip dropped items.
+	int  m_iItemsMaxAmount;			///< Max amount allowed for stackable items.
+	bool m_fCanUndressPets;			///< Can players undress their pets?
+	bool m_fMonsterFight;			///< Will creatures fight amoung themselves.
+	bool m_fMonsterFear;			///< will they run away if hurt ?
+	int	 m_iBankIMax;				///< Maximum number of items allowed in bank.
+	int  m_iBankWMax;				///< Maximum weight in WEIGHT_UNITS stones allowed in bank.
+	int  m_iVendorMaxSell;			///< Max things a vendor will sell in one shot.
+	uint m_iMaxCharComplexity;		///< How many chars per sector.
+	uint m_iMaxItemComplexity;		///< How many items per meter.
+	uint m_iMaxSectorComplexity;	///< How many items per sector.
+	bool m_fGenericSounds;			///< Do players receive generic (not them-devoted) sounds.
+	bool m_fAutoNewbieKeys;			///< Are house and boat keys newbied automatically?
+	int  m_iStamRunningPenalty;		///< Weight penalty for running (+N% of max carry weight)
+	int  m_iStaminaLossAtWeight;	///< %Weight at which characters begin to lose stamina.
+	int  m_iHitpointPercentOnRez;	///< How many hitpoints do they get when they are rez'd?
+	int  m_iHitsHungerLoss;			///< How many % of HP will loose char on starving.
+	int  m_iMaxBaseSkill;			///< Maximum value for base skills at char creation.
+	int	 m_iTrainSkillCost;			///< GP cost of each 0.1 skill trained.
+	int	 m_iTrainSkillMax;			///< Max skill value that can be reached from training.
+	int  m_iTrainSkillPercent;		///< How much can NPC's train up to ?
+	int  m_fDeadCannotSeeLiving;	///< Can dead Players see living beins?
+	int  m_iMediumCanHearGhosts;	///< At this Spirit Speak skill level players can understand ghosts speech instead hear 'oOOoO ooO'
+	bool m_iMountHeight;			///< Do not allow entering under roof being on horse?
+	int	 m_iMoveRate;				///< The percent rate of NPC movement.
+	int  m_iArcheryMaxDist;			///< Max distance allowed for archery.
+	int  m_iArcheryMinDist;			///< Min distance required for archery.
+	int  m_iHitsUpdateRate;			///< how often send my hits updates to visible clients.
+	int  m_iSpeedScaleFactor;		///< fight skill delay = m_iSpeedScaleFactor / ( (dex + 100) * Weapon Speed )
+	int  m_iCombatDamageEra;		///< define damage formula to use on physical combat
+	int  m_iCombatSpeedEra;			///< define swing speed formula to use on physical combat
+	int  m_iSkillPracticeMax;		///< max skill level a player can practice on dummies/targets upto
+	bool m_iPacketDeathAnimation;	///< packet 02c
 
 	///< Flags for controlling pvp/pvm behaviour of players
 	int   m_iCombatFlags;   ///< combat flags
@@ -910,22 +917,22 @@ public:
 	int   m_iRevealFlags;   ///</* reveal flags used for SPELL_REVEAL (mostly for backwards).
 
 	///< Criminal/Karma
-	bool m_fAttackingIsACrime;  ///< Is attacking (even before hitting) a crime?
-	bool m_fGuardsInstantKill;  ///< Will guards kill instantly or follow normal combat rules?
-	bool m_fGuardsOnMurderers;  ///< should guards be only called on criminals ?
-	int	 m_iGuardLingerTime;    ///< How long do guards linger about.
-	int  m_iSnoopCriminal;      ///< 1 in # chance of getting criminalflagged when succesfully snooping.
-	bool m_iTradeWindowSnooping;///< 1 means opening a container in trade window needs to use snooping, 0 direct open.
-	int  m_iMurderMinCount;     ///< amount of murders before we get title.
-	int	 m_iMurderDecayTime;    ///< (minutes) Roll murder counts off this often.
+	bool m_fAttackingIsACrime;		///< Is attacking (even before hitting) a crime?
+	bool m_fGuardsInstantKill;		///< Will guards kill instantly or follow normal combat rules?
+	bool m_fGuardsOnMurderers;		///< should guards be only called on criminals ?
+	int	 m_iGuardLingerTime;		///< How long do guards linger about.
+	int  m_iSnoopCriminal;			///< 1 in # chance of getting criminalflagged when succesfully snooping.
+	bool m_iTradeWindowSnooping;	///< 1 means opening a container in trade window needs to use snooping, 0 direct open.
+	int  m_iMurderMinCount;			///< amount of murders before we get title.
+	int	 m_iMurderDecayTime;		///< (minutes) Roll murder counts off this often.
 	bool m_fHelpingCriminalsIsACrime;///< If I help (rez, heal, etc) a criminal, do I become one too?
-	bool m_fLootingIsACrime;    ///< Looting a blue corpse is bad.
-	int  m_iCriminalTimer;      ///< How many minutes are criminals flagged for?
-	int	 m_iPlayerKarmaNeutral; ///< How much bad karma makes a player neutral?
-	int	 m_iPlayerKarmaEvil;    ///< How much bad karma makes a player evil?
-	int  m_iMinKarma;           ///< Minimum karma level
-	int  m_iMaxKarma;           ///< Maximum karma level
-	int  m_iMaxFame;            ///< Maximum fame level
+	bool m_fLootingIsACrime;		///< Looting a blue corpse is bad.
+	int  m_iCriminalTimer;			///< How many minutes are criminals flagged for?
+	int	 m_iPlayerKarmaNeutral;		///< How much bad karma makes a player neutral?
+	int	 m_iPlayerKarmaEvil;		///< How much bad karma makes a player evil?
+	int  m_iMinKarma;				///< Minimum karma level
+	int  m_iMaxKarma;				///< Maximum karma level
+	int  m_iMaxFame;				///< Maximum fame level
 
 	///< other
 	bool m_fNoResRobe;          ///< Adding resurrection robe to resurrected players or not.
@@ -950,31 +957,31 @@ public:
 	CSString	m_sDumpAccPackets;
 #endif
 
-	CSString            m_sEventsPet;       ///< Key to add Events to all pets.
-	CResourceRefArray   m_pEventsPetLink;   ///< EventsPet.
+	CSString            m_sEventsPet;			///< Key to add Events to all pets.
+	CResourceRefArray   m_pEventsPetLink;		///< EventsPet.
 
-	CSString            m_sEventsPlayer;    ///< Key to add Events to all players.
-	CResourceRefArray   m_pEventsPlayerLink;///< EventsPlayer.
+	CSString            m_sEventsPlayer;		///< Key to add Events to all players.
+	CResourceRefArray   m_pEventsPlayerLink;	///< EventsPlayer.
 
-	CSString            m_sEventsRegion;    ///< Key to add Events to all regions.
-	CResourceRefArray   m_pEventsRegionLink;///< EventsRegion.
+	CSString            m_sEventsRegion;		///< Key to add Events to all regions.
+	CResourceRefArray   m_pEventsRegionLink;	///< EventsRegion.
 
-	CSString            m_sEventsItem;      ///< Key to add Events to all items.
-	CResourceRefArray   m_iEventsItemLink;  ///< EventsItem.
+	CSString            m_sEventsItem;			///< Key to add Events to all items.
+	CResourceRefArray   m_iEventsItemLink;		///< EventsItem.
 
 	///< Third Party Tools
-	CSString m_sStripPath;      ///< Strip Path for TNG.
-	bool m_fCUOStatus;          ///< Enable or disable the response to ConnectUO pings
-	bool m_fUOGStatus;          ///< Enable or disable the response to UOGateway pings
+	CSString m_sStripPath;	///< Strip Path for TNG.
+	bool m_fCUOStatus;      ///< Enable or disable the response to ConnectUO pings
+	bool m_fUOGStatus;      ///< Enable or disable the response to UOGateway pings
 
-	int m_iWalkBuffer;  ///< Walk limiting code: buffer size (in tenths of second)
-	int m_iWalkRegen;   ///< Walk limiting code: regen speed (%)
+	int m_iWalkBuffer;		///< Walk limiting code: buffer size (in tenths of second)
+	int m_iWalkRegen;		///< Walk limiting code: regen speed (%)
 
-	int m_iCommandLog;  ///< Only commands issued by this plevel and higher will be logged
-	bool m_fTelnetLog;  ///< Set to 1 to enable logging of commands issued via telnet
+	int m_iCommandLog;		///< Only commands issued by this plevel and higher will be logged
+	bool m_fTelnetLog;		///< Set to 1 to enable logging of commands issued via telnet
 	
-	bool m_fUsecrypt;   ///< Set this to 1 to allow login to encrypted clients
-	bool m_fUsenocrypt; ///< Set this to 1 to allow login to unencrypted clients
+	bool m_fUsecrypt;		///< Set this to 1 to allow login to encrypted clients
+	bool m_fUsenocrypt;		///< Set this to 1 to allow login to unencrypted clients
 
 	bool m_fPayFromPackOnly;    ///< Pay only from main pack?
 	int  m_iOverSkillMultiply;  ///< multiplyer to get over skillclass
@@ -986,15 +993,15 @@ public:
 	int	m_iAdvancedLos;     ///< AdvancedLOS
 
 	///< New ones
-	int	m_iFeatureT2A;  ///< T2A features.
-	int	m_iFeatureLBR;  ///< LBR features.
-	int	m_iFeatureAOS;  ///< AOS features.
-	int	m_iFeatureSE;   ///< SE features.
-	int	m_iFeatureML;   ///< ML features.
-	int	m_iFeatureKR;   ///< KR features.
-	int	m_iFeatureSA;   ///< SA features.
-	int	m_iFeatureTOL;  ///< TOL features.
-	int	m_iFeatureExtra;///< Extra features.
+	int	m_iFeatureT2A;		///< T2A features.
+	int	m_iFeatureLBR;		///< LBR features.
+	int	m_iFeatureAOS;		///< AOS features.
+	int	m_iFeatureSE;		///< SE features.
+	int	m_iFeatureML;		///< ML features.
+	int	m_iFeatureKR;		///< KR features.
+	int	m_iFeatureSA;		///< SA features.
+	int	m_iFeatureTOL;		///< TOL features.
+	int	m_iFeatureExtra;	///< Extra features.
 	
 	int	m_iMaxLoopTimes;
 #define	STAT_FLAG_NORMAL    0x00    ///<    MAX* status allowed (default)
@@ -1123,30 +1130,30 @@ public:
 	CSObjArray< CSString* > m_Karma;    ///< karma titles (karma.wicked).
 	CSObjArray< CSString* > m_Runes;    ///< Words of power (A-Z).
 
-	CSTypedArray< int, int > m_NotoKarmaLevels; ///< karma levels for noto titles.
-	CSTypedArray< int, int > m_NotoFameLevels;  ///< fame levels for noto titles.
-	CSObjArray< CSString* >  m_NotoTitles;      ///< Noto titles.
+	CSTypedArray< int, int > m_NotoKarmaLevels;		///< karma levels for noto titles.
+	CSTypedArray< int, int > m_NotoFameLevels;		///< fame levels for noto titles.
+	CSObjArray< CSString* >  m_NotoTitles;			///< Noto titles.
 
-	CMultiDefArray m_MultiDefs; ///< read from the MUL files. Cached here on demand.
+	CMultiDefArray m_MultiDefs;		///< read from the MUL files. Cached here on demand.
 
-	CObNameSortArray             m_SkillNameDefs;   ///< const CSkillDef* Name sorted.
-	CSPtrTypeArray< CSkillDef* > m_SkillIndexDefs;  ///< Defined Skills indexed by number.
-	CSObjArray< CSpellDef* >     m_SpellDefs;       ///< Defined Spells.
-	CSPtrTypeArray< CSpellDef* > m_SpellDefs_Sorted;///< Defined Spells, in skill order.
+	CObjNameSortArray             m_SkillNameDefs;		///< const CSkillDef* Name sorted.
+	CSPtrTypeArray< CSkillDef* > m_SkillIndexDefs;		///< Defined Skills indexed by number.
+	CSObjArray< CSpellDef* >     m_SpellDefs;			///< Defined Spells.
+	CSPtrTypeArray< CSpellDef* > m_SpellDefs_Sorted;	///< Defined Spells, in skill order.
 
-	CSStringSortArray m_PrivCommands[PLEVEL_QTY];   ///< what command are allowed for a priv level?
+	CSStringSortArray m_PrivCommands[PLEVEL_QTY];		///< what command are allowed for a priv level?
 
 public:
-	CObNameSortArray m_Servers;     ///< Servers list. we act like the login server with this.
-	CObNameSortArray m_Functions;   ///< Subroutines that can be used in scripts.
-	CRegionLinks m_RegionDefs;      ///< All [REGION ] stored inside.
+	CObjNameSortArray m_Servers;	///< Servers list. we act like the login server with this.
+	CObjNameSortArray m_Functions;	///< Subroutines that can be used in scripts.
+	CRegionLinks m_RegionDefs;		///< All [REGION ] stored inside.
 
 	// static definition stuff from *TABLE.SCP mostly.
-	CSObjArray< const CStartLoc* > m_StartDefs; ///< Start points list
-	CValueCurveDef m_StatAdv[STAT_BASE_QTY];    ///< "skill curve"
-	CSTypedArray<CPointBase,CPointBase&> m_MoonGates;///< The array of moongates.
+	CSObjArray< const CStartLoc* > m_StartDefs;			///< Start points list
+	CValueCurveDef m_StatAdv[STAT_BASE_QTY];			///< "skill curve"
+	CSTypedArray<CPointBase,CPointBase&> m_MoonGates;	///< The array of moongates.
 
-	CResourceHashArray m_WebPages;	///< These can be linked back to the script.
+	CResourceHashArray m_WebPages;		///< These can be linked back to the script.
 
 private:
 	RESOURCE_ID ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVarDefContNum ** ppVarNum, bool fNewStyleDef );
@@ -1311,6 +1318,15 @@ public:
      */
 	CWebPageDef * FindWebPage( lpctstr pszPath ) const;
 
+	/**
+	* @fn  CServerRef CResource::Server_GetDef( size_t index );
+	*
+	* @brief   Get the def for the server in position 'index' in servers list.
+	*
+	* @param   pszText The server index.
+	*
+	* @return  CServerRef of the server.
+	*/
 	CServerRef Server_GetDef( size_t index );
 
     /**
@@ -1361,7 +1377,7 @@ public:
 		///< future: underlying type for SPELL_TYPE to avoid casts
 		if (m_SkillIndexDefs.IsValidIndex((size_t)(index)) == false)
 			return NULL;
-		return( m_SkillIndexDefs[(size_t)(index)]->GetKey());
+		return ( m_SkillIndexDefs[(size_t)(index)]->GetKey());
 	}
 
     /**
@@ -1393,7 +1409,7 @@ public:
 	{
 		if (m_SkillIndexDefs.IsValidIndex((size_t)(index)) == false)
 			return NULL;
-		return( m_SkillIndexDefs[(size_t)(index)] );
+		return m_SkillIndexDefs[(size_t)(index)];
 	}
 
     /**
@@ -1407,9 +1423,9 @@ public:
     */
 	CSkillDef* GetSkillDef( SKILL_TYPE index )
 	{
-		if (m_SkillIndexDefs.IsValidIndex((size_t)(index)) == false )
+		if (m_SkillIndexDefs.IsValidIndex((size_t)index) == false )
 			return NULL;
-		return( m_SkillIndexDefs[(size_t)(index)] );
+		return m_SkillIndexDefs[(size_t)(index)];
 	}
 
     /**
@@ -1427,8 +1443,8 @@ public:
 		///< RETURN: SKILL_NONE = error.
 		size_t i = m_SkillNameDefs.FindKey( pszKey );
 		if ( i == m_SkillNameDefs.BadIndex() )
-			return( NULL );
-		return( static_cast <const CSkillDef*>(m_SkillNameDefs[i]));
+			return NULL;
+		return static_cast <const CSkillDef*>(m_SkillNameDefs[i]);
 	}
 
     /**

@@ -1,6 +1,6 @@
 
-#include "../common/CException.h"
 #include "../common/sphere_library/CSFileList.h"
+#include "../common/CException.h"
 #include "../common/sphereversion.h"
 #include "../network/network.h"
 #include "../network/send.h"
@@ -8,6 +8,7 @@
 #include "clients/CClient.h"
 #include "CServer.h"
 #include "CServerTime.h"
+
 
 enum WV_TYPE
 {
@@ -28,6 +29,7 @@ lpctstr const CWebPageDef::sm_szVerbKeys[WV_QTY+1] =
 	"WEBPAGE",		// feed a web page to the source caller
 	NULL
 };
+
 
 //********************************************************
 // -CSFileConsole
@@ -55,38 +57,36 @@ public:
 	}
 
 public:
-	CSFileConsole() { };
+	CSFileConsole()
+	{
+	}
 
 private:
 	CSFileConsole(const CSFileConsole& copy);
 	CSFileConsole& operator=(const CSFileConsole& other);
 };
 
+
 //********************************************************
 // -CWebPageDef
 
 int CWebPageDef::sm_iListIndex;
 
-CWebPageDef::CWebPageDef( RESOURCE_ID rid ) :
-	CResourceLink( rid )
+CWebPageDef::CWebPageDef( RESOURCE_ID rid ) : CResourceLink( rid )
 {
 	// Web page m_sWebPageFilePath
 	m_type = WEBPAGE_TEMPLATE;
 	m_privlevel=PLEVEL_Guest;
 
 	m_timeNextUpdate.Init();
-	m_iUpdatePeriod = 2*60*TICK_PER_SEC;
+	m_iUpdatePeriod = 2*60 * TICK_PER_SEC;
 	m_iUpdateLog = 0;
 
 	// default source name
-	if ( rid.GetResIndex())
-	{
+	if ( rid.GetResIndex() )
 		m_sSrcFilePath.Format( SPHERE_FILE "statusbase%d.htm", rid.GetResIndex());
-	}
 	else
-	{
 		m_sSrcFilePath = SPHERE_FILE "statusbase.htm";
-	}
 }
 
 enum WC_TYPE

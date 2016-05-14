@@ -1630,14 +1630,14 @@ CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, d
 				if ( !ptn.IsValidPoint() )
 				{
 					SysMessageDefault( DEFMSG_ITEMUSE_MULTI_FAIL );
-					return( NULL );
+					return NULL;
 				}
 
 				CRegionBase * pRegion = ptn.GetRegion( REGION_TYPE_MULTI | REGION_TYPE_AREA | REGION_TYPE_ROOM );
 				if ( pRegion == NULL || ( pRegion->IsFlag(REGION_FLAG_NOBUILDING|REGION_FLAG_UNDERGROUND|REGION_FLAG_GUARDED|REGION_FLAG_SAFE) && ! fShip ))
 				{
 					SysMessageDefault( DEFMSG_ITEMUSE_MULTI_FAIL );
-					if ( ! IsPriv( PRIV_GM )) return( NULL );
+					if ( ! IsPriv( PRIV_GM )) return NULL;
 				}
 
 				dword wBlockFlags = ( fShip ) ? CAN_C_SWIM : CAN_C_WALK;
@@ -1645,20 +1645,20 @@ CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, d
 				if ( abs( ptn.m_z - pt.m_z ) > 4 )
 				{
 					SysMessageDefault( DEFMSG_ITEMUSE_MULTI_BUMP );
-					if ( ! IsPriv( PRIV_GM )) return( NULL );
+					if ( ! IsPriv( PRIV_GM )) return NULL;
 				}
 				if ( fShip )
 				{
 					if ( ! ( wBlockFlags & CAN_I_WATER ))
 					{
 						SysMessageDefault( DEFMSG_ITEMUSE_MULTI_SHIPW );
-						if ( ! IsPriv( PRIV_GM )) return( NULL );
+						if ( ! IsPriv( PRIV_GM )) return NULL;
 					}
 				}
 				else if ( wBlockFlags & ( CAN_I_WATER | CAN_I_BLOCK | CAN_I_CLIMB ))
 				{
 					SysMessageDefault( DEFMSG_ITEMUSE_MULTI_BLOCKED );
-					if ( ! IsPriv( PRIV_GM )) return( NULL );
+					if ( ! IsPriv( PRIV_GM )) return NULL;
 				}
 			}
 		}
@@ -1689,7 +1689,8 @@ CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, d
 				//	Teleport the char to self. At least I will be able to move him to someplace
 				pChar->Spell_Teleport(m_pChar->GetTopPoint(), false, false);
 			}
-			else return( NULL );
+			else
+				return NULL;
 		}
 	}
 
@@ -1697,7 +1698,7 @@ CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, d
 	if ( pItemNew == NULL )
 	{
 		SysMessageDefault( DEFMSG_ITEMUSE_MULTI_COLLAPSE );
-		return( NULL );
+		return NULL;
 	}
 
 	pItemNew->SetAttr( dwAttr & ( ATTR_MAGIC | ATTR_INVIS ));

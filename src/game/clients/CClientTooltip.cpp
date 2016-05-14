@@ -1,7 +1,9 @@
 
 #include <cstdio>
-#include "../common/sphere_library/CSString.h"
+
+#include "../../common/sphere_library/CSString.h"
 #include "CClientTooltip.h"
+
 
 CClientTooltip::CClientTooltip(dword clilocid, lpctstr args)
 {

@@ -43,38 +43,6 @@
 #endif
 
 
-// CSString:: Constructors, Destructor, Asign operator.
-
-CSString::CSString()
-{
-#ifdef DEBUG_STRINGS
-	gAmount++;
-#endif
-	Init();
-}
-
-CSString::~CSString()
-{
-#ifdef DEBUG_STRINGS
-	gAmount--;
-#endif
-	Empty(true);
-}
-
-CSString::CSString(lpctstr pStr)
-{
-	m_iMaxLength = m_iLength = 0;
-	m_pchData = NULL;
-	Copy(pStr);
-}
-
-CSString::CSString(const CSString &s)
-{
-	m_iMaxLength = m_iLength = 0;
-	m_pchData = NULL;
-	Copy(s.GetPtr());
-}
-
 // CSString:: Capacity
 
 void CSString::Empty(bool bTotal)
@@ -340,7 +308,6 @@ int strcpylen(tchar * pDst, lpctstr pSrc)
 	strcpy(pDst, pSrc);
 	return (int)strlen(pDst);
 }
-
 
 int strcpylen(tchar * pDst, lpctstr pSrc, int iMaxSize)
 {
@@ -830,6 +797,7 @@ MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText)
 	else
 		return MATCH_VALID;
 }
+
 bool Str_Parse(tchar * pLine, tchar ** ppLine2, lpctstr pszSep)
 {
 	// Parse a list of args. Just get the next arg.
@@ -843,9 +811,7 @@ bool Str_Parse(tchar * pLine, tchar ** ppLine2, lpctstr pszSep)
 	tchar * pNonWhite = pLine;
 	GETNONWHITESPACE(pNonWhite);
 	if (pNonWhite != pLine)
-	{
 		memmove(pLine, pNonWhite, strlen(pNonWhite) + 1);
-	}
 
 	tchar ch;
 	bool bQuotes = false;
@@ -860,9 +826,7 @@ bool Str_Parse(tchar * pLine, tchar ** ppLine2, lpctstr pszSep)
 		if (ch == '\0')	// no args i guess.
 		{
 			if (ppLine2 != NULL)
-			{
 				*ppLine2 = pLine;
-			}
 			return false;
 		}
 		if (strchr(pszSep, ch) && (bQuotes == false))
@@ -875,16 +839,12 @@ bool Str_Parse(tchar * pLine, tchar ** ppLine2, lpctstr pszSep)
 		GETNONWHITESPACE(pLine);
 		ch = *pLine;
 		if (ch && strchr(pszSep, ch))
-		{
 			pLine++;
-		}
 	}
 
 	// skip leading white space on args as well.
 	if (ppLine2 != NULL)
-	{
 		*ppLine2 = Str_TrimWhitespace(pLine);
-	}
 	return true;
 }
 

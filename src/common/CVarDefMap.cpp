@@ -247,7 +247,7 @@ lpctstr CVarDefMap::FindValStr( lpctstr pVal ) const
 			return( pVarBase->GetKey() );
 	}
 
-	return( NULL );
+	return NULL;
 }
 
 lpctstr CVarDefMap::FindValNum( int64 iVal ) const
@@ -266,14 +266,14 @@ lpctstr CVarDefMap::FindValNum( int64 iVal ) const
 			return( pVarBase->GetKey() );
 	}
 
-	return( NULL );
+	return NULL;
 }
 
 CVarDefCont * CVarDefMap::GetAt( size_t at ) const
 {
 	ADDTOCALLSTACK("CVarDefMap::GetAt");
 	if ( at > m_Container.size() )
-		return( NULL );
+		return NULL;
 
 	DefSet::iterator i = m_Container.begin();
 	while ( at-- )
@@ -282,7 +282,7 @@ CVarDefCont * CVarDefMap::GetAt( size_t at ) const
 	if ( i != m_Container.end() )
 		return( (*i) );
 	else
-		return( NULL );
+		return NULL;
 }
 
 CVarDefCont * CVarDefMap::GetAtKey( lpctstr at ) const
@@ -295,7 +295,7 @@ CVarDefCont * CVarDefMap::GetAtKey( lpctstr at ) const
 	if ( i != m_Container.end() )
 		return( (*i) );
 	else
-		return( NULL );
+		return NULL;
 }
 
 void CVarDefMap::DeleteAt( size_t at )

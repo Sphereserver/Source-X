@@ -527,13 +527,13 @@ class CItemBaseDupe : public CResourceDef
 public:
 	CResourceRef m_MasterItem;	// What is the "master" item ?
 private:
-	dword   m_dwFlags;		//  UFLAG4_DOOR from CUOItemTypeRec/CUOItemTypeRec_HS
+	dword		m_dwFlags;		//  UFLAG4_DOOR from CUOItemTypeRec/CUOItemTypeRec_HS
 	height_t	m_Height;
 public:
-	dword	m_Can;
+	dword		m_Can;
 	static const char *m_sClassName;
 	CItemBaseDupe( ITEMID_TYPE id, CItemBase * pMasterItem ) :
-		CResourceDef( RESOURCE_ID( RES_ITEMDEF, id )),
+		CResourceDef( RESOURCE_ID( RES_ITEMDEF, id ) ),
 		m_MasterItem( pMasterItem ),
 		m_dwFlags(0), m_Height(0), m_Can(0)
 	{

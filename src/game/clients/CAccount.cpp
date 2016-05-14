@@ -173,7 +173,7 @@ CAccountRef CAccounts::Account_Find( lpctstr pszName )
 	tchar szName[ MAX_ACCOUNT_NAME_SIZE ];
 
 	if ( !CAccount::NameStrip(szName, pszName) )
-		return( NULL );
+		return NULL;
 
 	size_t i = m_Accounts.FindKey(szName);
 	if ( i != m_Accounts.BadIndex() )
@@ -248,7 +248,7 @@ CAccountRef CAccounts::Account_Get( size_t index )
 {
 	ADDTOCALLSTACK("CAccounts::Account_Get");
 	if ( ! m_Accounts.IsValidIndex(index))
-		return( NULL );
+		return NULL;
 	return( CAccountRef( static_cast <CAccount *>( m_Accounts[index])));
 }
 
@@ -617,7 +617,7 @@ CClient * CAccount::FindClient( const CClient * pExclude ) const
 {
 	ADDTOCALLSTACK("CAccount::FindClient");
 	if ( this == NULL )
-		return( NULL );	// this might be possible.
+		return NULL;	// this might be possible.
 
 	CClient* pClient = NULL;
 	ClientIterator it;

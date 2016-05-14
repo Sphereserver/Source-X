@@ -11,52 +11,52 @@
 #include "items/CItemBase.h"
 #include "items/CItemStone.h"
 #include "uo_files/CUOItemInfo.h"
-#include "../common/CLog.h"
 #include "CResource.h"
 #include "CServerTime.h"
 #include "CWorld.h"
 #include "spheresvr.h"
 #include "triggers.h"
 
+
 CResource::CResource()
 {
 	m_timePeriodic.Init();
 
-	m_fUseNTService = false;
-	m_fUseHTTP		= 2;
-	m_fUseAuthID	= true;
-	m_iMapCacheTime = 2*60*TICK_PER_SEC;
-	m_iSectorSleepMask = (1<<10)-1;
-	m_fUseMapDiffs = false;
+	m_fUseNTService		= false;
+	m_fUseHTTP			= 2;
+	m_fUseAuthID		= true;
+	m_iMapCacheTime		= 2*60 * TICK_PER_SEC;
+	m_iSectorSleepMask	= (1 << 10) - 1;
+	m_fUseMapDiffs		= false;
 
-	m_wDebugFlags = 0; //DEBUGF_NPC_EMOTE
-	m_fSecure = true;
-	m_iFreezeRestartTime = 60;
-	m_bAgree = false;
-	m_fMd5Passwords = false;
+	m_wDebugFlags			= 0;	//DEBUGF_NPC_EMOTE
+	m_fSecure				= true;
+	m_iFreezeRestartTime	= 60;
+	m_bAgree				= false;
+	m_fMd5Passwords			= false;
 
 	//Magic
-	m_fReagentsRequired = false;
-	m_fReagentLossFail = false;
-	m_iWordsOfPowerColor = HUE_TEXT_DEF;
-	m_iWordsOfPowerFont = FONT_NORMAL;
-	m_fWordsOfPowerPlayer = true;
-	m_fWordsOfPowerStaff = false;
-	m_fEquippedCast = true;
-	m_iMagicUnlockDoor = 900;
-	m_iSpellTimeout = 0;
+	m_fReagentsRequired		= false;
+	m_fReagentLossFail		= false;
+	m_iWordsOfPowerColor	= HUE_TEXT_DEF;
+	m_iWordsOfPowerFont		= FONT_NORMAL;
+	m_fWordsOfPowerPlayer	= true;
+	m_fWordsOfPowerStaff	= false;
+	m_fEquippedCast			= true;
+	m_iMagicUnlockDoor		= 900;
+	m_iSpellTimeout			= 0;
 
-	m_iSpell_Teleport_Effect_Staff = ITEMID_FX_FLAMESTRIKE;	// drama
-	m_iSpell_Teleport_Sound_Staff = 0x1f3;
-	m_iSpell_Teleport_Effect_Players = ITEMID_FX_TELE_VANISH;
-	m_iSpell_Teleport_Sound_Players = 0x01fe;
-	m_iSpell_Teleport_Effect_NPC = ITEMID_FX_HEAL_EFFECT;
-	m_iSpell_Teleport_Sound_NPC = 0x01fe;
+	m_iSpell_Teleport_Effect_Staff		= ITEMID_FX_FLAMESTRIKE;	// drama
+	m_iSpell_Teleport_Sound_Staff		= 0x1f3;
+	m_iSpell_Teleport_Effect_Players	= ITEMID_FX_TELE_VANISH;
+	m_iSpell_Teleport_Sound_Players		= 0x01fe;
+	m_iSpell_Teleport_Effect_NPC		= ITEMID_FX_HEAL_EFFECT;
+	m_iSpell_Teleport_Sound_NPC			= 0x01fe;
 
 	// Decay
-	m_iDecay_Item = 30*60*TICK_PER_SEC;
-	m_iDecay_CorpsePlayer = 7*60*TICK_PER_SEC;
-	m_iDecay_CorpseNPC = 7*60*TICK_PER_SEC;
+	m_iDecay_Item			= 30*60 * TICK_PER_SEC;
+	m_iDecay_CorpsePlayer	= 7*60 * TICK_PER_SEC;
+	m_iDecay_CorpseNPC		= 7*60 * TICK_PER_SEC;
 
 	// Accounts
 	m_iClientsMax		= FD_SETSIZE-1;
@@ -64,85 +64,85 @@ CResource::CResource()
 	m_iConnectingMax	= 32;
 	m_iConnectingMaxIP	= 8;
 
-	m_iGuestsMax = 0;
-	m_iArriveDepartMsg = 1;
-	m_iClientLingerTime = 10*60*TICK_PER_SEC;
-	m_iDeadSocketTime = 5*60*TICK_PER_SEC;
-	m_iMinCharDeleteTime = 7*24*60*60*TICK_PER_SEC;
-	m_iMaxCharsPerAccount = 5;
-	m_fLocalIPAdmin = true;
+	m_iGuestsMax			= 0;
+	m_iArriveDepartMsg		= 1;
+	m_iClientLingerTime		= 10*60 * TICK_PER_SEC;
+	m_iDeadSocketTime		= 5*60 * TICK_PER_SEC;
+	m_iMinCharDeleteTime	= 7*24*60*60 * TICK_PER_SEC;
+	m_iMaxCharsPerAccount	= 5;
+	m_fLocalIPAdmin			= true;
 
 	// Save
-	m_iSaveNPCSkills = 10;
-	m_iSaveBackupLevels = 10;
-	m_iSaveBackgroundTime = 0;		// Use the new background save.
-	m_fSaveGarbageCollect = true;	// Always force a full garbage collection.
-	m_iSavePeriod = 20*60*TICK_PER_SEC;
-	m_iSaveSectorsPerTick = 1;
-	m_iSaveStepMaxComplexity = 500;
+	m_iSaveNPCSkills			= 10;
+	m_iSaveBackupLevels			= 10;
+	m_iSaveBackgroundTime		= 0;		// Use the new background save.
+	m_fSaveGarbageCollect		= true;		// Always force a full garbage collection.
+	m_iSavePeriod				= 20*60 * TICK_PER_SEC;
+	m_iSaveSectorsPerTick		= 1;
+	m_iSaveStepMaxComplexity	= 500;
 
 	// In game effects.
-	m_fCanUndressPets   = true;
-	m_fMonsterFight		= false;
-	m_fMonsterFear		= false;
-	m_iLightDungeon		= 27;
-	m_iLightNight		= 25;	// dark before t2a.
-	m_iLightDay		= LIGHT_BRIGHT;
-	m_iBankIMax		= 1000;
-	m_iBankWMax		= 1000 * WEIGHT_UNITS;
+	m_fCanUndressPets		= true;
+	m_fMonsterFight			= false;
+	m_fMonsterFear			= false;
+	m_iLightDungeon			= 27;
+	m_iLightNight			= 25;	// dark before t2a.
+	m_iLightDay				= LIGHT_BRIGHT;
+	m_iBankIMax				= 1000;
+	m_iBankWMax				= 1000 * WEIGHT_UNITS;
 	m_fAttackingIsACrime	= true;
 	m_fGuardsInstantKill	= true;
 	m_fGuardsOnMurderers	= true;
-	m_iSnoopCriminal	= 100;
-	m_iTradeWindowSnooping = true;
-	m_iTrainSkillCost = 1;
-	m_iTrainSkillMax = 420;
-	m_iTrainSkillPercent = 30;
-	m_fDeadCannotSeeLiving = 0;
+	m_iSnoopCriminal		= 100;
+	m_iTradeWindowSnooping	= true;
+	m_iTrainSkillCost		= 1;
+	m_iTrainSkillMax		= 420;
+	m_iTrainSkillPercent	= 30;
+	m_fDeadCannotSeeLiving	= 0;
 	m_iMediumCanHearGhosts	= 1000;
-	m_iSkillPracticeMax	= 300;
+	m_iSkillPracticeMax		= 300;
 	m_iPacketDeathAnimation = true;
-	m_fCharTags			= false;
-	m_fVendorTradeTitle	= true;
-	m_iVendorMaxSell	= 255;
-	m_iGameMinuteLength	= 20*TICK_PER_SEC;
-	m_fNoWeather		= true;
-	m_fFlipDroppedItems	= true;
-	m_iItemsMaxAmount	= 60000;
-	m_iMurderMinCount	= 5;
-	m_iMurderDecayTime	= 8*60*60*TICK_PER_SEC;
+	m_fCharTags				= false;
+	m_fVendorTradeTitle		= true;
+	m_iVendorMaxSell		= 255;
+	m_iGameMinuteLength		= 20 * TICK_PER_SEC;
+	m_fNoWeather			= true;
+	m_fFlipDroppedItems		= true;
+	m_iItemsMaxAmount		= 60000;
+	m_iMurderMinCount		= 5;
+	m_iMurderDecayTime		= 8*60*60 * TICK_PER_SEC;
 	m_iMaxCharComplexity	= 32;
 	m_iMaxItemComplexity	= 25;
 	m_iMaxSectorComplexity	= 1024;
 	m_iPlayerKarmaNeutral	= -2000; // How much bad karma makes a player neutral?
-	m_iPlayerKarmaEvil	= -8000;
-	m_iMinKarma = -10000;
-	m_iMaxKarma = 10000;
-	m_iMaxFame = 10000;
-	m_iGuardLingerTime	= 3*60*TICK_PER_SEC;
-	m_iCriminalTimer	= 3*60*TICK_PER_SEC;
+	m_iPlayerKarmaEvil		= -8000;
+	m_iMinKarma				= -10000;
+	m_iMaxKarma				= 10000;
+	m_iMaxFame				= 10000;
+	m_iGuardLingerTime		= 3*60 * TICK_PER_SEC;
+	m_iCriminalTimer		= 3*60 * TICK_PER_SEC;
 	m_iHitpointPercentOnRez	= 10;
-	m_iHitsHungerLoss	= 0;
-	m_fLootingIsACrime	= true;
-	m_fHelpingCriminalsIsACrime = true;
-	m_fGenericSounds	= true;
-	m_fAutoNewbieKeys 	= true;
-	m_iMaxBaseSkill		= 200;
+	m_iHitsHungerLoss		= 0;
+	m_fLootingIsACrime		= true;
+	m_fHelpingCriminalsIsACrime	= true;
+	m_fGenericSounds		= true;
+	m_fAutoNewbieKeys 		= true;
+	m_iMaxBaseSkill			= 200;
 	m_iStamRunningPenalty 	= 50;
 	m_iStaminaLossAtWeight 	= 150;
-	m_iMountHeight		= false;
-	m_iMoveRate			= 100;
-	m_iArcheryMinDist	= 2;
-	m_iArcheryMaxDist	= 15;
-	m_iHitsUpdateRate	= TICK_PER_SEC;
-	m_iSpeedScaleFactor	= 80000;
-	m_iCombatFlags		= 0;
-	m_iCombatDamageEra	= 0;
-	m_iCombatSpeedEra	= 3;
-	m_iMagicFlags		= 0;
-	m_iMaxPolyStats		= 150;
-	m_iRacialFlags		= 0;
-	m_iRevealFlags		= (REVEALF_DETECTINGHIDDEN|REVEALF_LOOTINGSELF|REVEALF_LOOTINGOTHERS|REVEALF_SPEAK|REVEALF_SPELLCAST);
+	m_iMountHeight			= false;
+	m_iMoveRate				= 100;
+	m_iArcheryMinDist		= 2;
+	m_iArcheryMaxDist		= 15;
+	m_iHitsUpdateRate		= TICK_PER_SEC;
+	m_iSpeedScaleFactor		= 80000;
+	m_iCombatFlags			= 0;
+	m_iCombatDamageEra		= 0;
+	m_iCombatSpeedEra		= 3;
+	m_iMagicFlags			= 0;
+	m_iMaxPolyStats			= 150;
+	m_iRacialFlags			= 0;
+	m_iRevealFlags			= (REVEALF_DETECTINGHIDDEN|REVEALF_LOOTINGSELF|REVEALF_LOOTINGOTHERS|REVEALF_SPEAK|REVEALF_SPELLCAST);
 
 	m_fNoResRobe		= 0;
 	m_iLostNPCTeleport	= 50;
@@ -155,18 +155,18 @@ CResource::CResource()
 	m_iMaxSkill			= SKILL_QTY;
 	m_iWalkBuffer		= 75;
 	m_iWalkRegen		= 25;
-	m_iWoolGrowthTime	= 30*60*TICK_PER_SEC;
+	m_iWoolGrowthTime	= 30*60 * TICK_PER_SEC;
 	m_iAttackerTimeout	= 300;
 
 	m_iCommandLog		= 0;
 	m_fTelnetLog		= true;
 
-	m_fUsecrypt 		= true; // Server want crypt client ?
-	m_fUsenocrypt		= false; // Server want un-crypt client ? (version guessed by cliver)
-	m_fPayFromPackOnly	= false; // pay vendors from packs only
+	m_fUsecrypt 		= true;		// Server wants crypted client?
+	m_fUsenocrypt		= false;	// Server wants unencrypted client? (version guessed by cliver)
+	m_fPayFromPackOnly	= false;	// pay vendors from packs only
 
-	m_iOverSkillMultiply = 2;
-	m_fSuppressCapitals = false;
+	m_iOverSkillMultiply	= 2;
+	m_fSuppressCapitals		= false;
 
 	m_iAdvancedLos		= 0;
 
@@ -181,84 +181,85 @@ CResource::CResource()
 	m_iFeatureTOL		= 0;
 	m_iFeatureExtra		= 0;
 
-	m_iStatFlag = 0;
+	m_iStatFlag			= 0;
 
-	m_iNpcAi = 0;
-	m_iMaxLoopTimes = 100000;
+	m_iNpcAi			= 0;
+	m_iMaxLoopTimes		= 100000;
 
-	m_bAutoResDisp = true;
-	m_iAutoPrivFlags = PRIV_DETAIL;
+	m_bAutoResDisp		= true;
+	m_iAutoPrivFlags	= PRIV_DETAIL;
 
 	// Third Party Tools
-	m_fCUOStatus = true;
-	m_fUOGStatus = true;
+	m_fCUOStatus		= true;
+	m_fUOGStatus		= true;
 
 	//	Experience
-	m_bExperienceSystem = false;
-	m_iExperienceMode = 0;
-	m_iExperienceKoefPVP = 100;
-	m_iExperienceKoefPVM = 100;
-	m_bLevelSystem = false;
-	m_iLevelMode = LEVEL_MODE_DOUBLE;
-	m_iLevelNextAt = 0;
+	m_bExperienceSystem		= false;
+	m_iExperienceMode		= 0;
+	m_iExperienceKoefPVP	= 100;
+	m_iExperienceKoefPVM	= 100;
+	m_bLevelSystem			= false;
+	m_iLevelMode			= LEVEL_MODE_DOUBLE;
+	m_iLevelNextAt			= 0;
 
 	//	MySQL support
-	m_bMySql = false;
-	m_bMySqlTicks = false;
+	m_bMySql				= false;
+	m_bMySqlTicks			= false;
 
-	m_cCommandPrefix = '.';
+	m_cCommandPrefix		= '.';
 
-	m_iDefaultCommandLevel = 7;	//PLevel 7 default for command levels.
+	m_iDefaultCommandLevel	= 7;	// PLevel 7 default for command levels.
 
-	m_iRegenRate[STAT_STR] = 40*TICK_PER_SEC;		// Seconds to heal ONE hp (before stam/food adjust)
-	m_iRegenRate[STAT_INT] = 20*TICK_PER_SEC;		// Seconds to heal ONE mn
-	m_iRegenRate[STAT_DEX] = 10*TICK_PER_SEC;		// Seconds to heal ONE stm
-	m_iRegenRate[STAT_FOOD] = 60*60*TICK_PER_SEC;	// Food usage (1 time per 60 minutes)
+	m_iRegenRate[STAT_STR]	= 40 * TICK_PER_SEC;		// Seconds to heal ONE hp (before stam/food adjust)
+	m_iRegenRate[STAT_INT]	= 20 * TICK_PER_SEC;		// Seconds to heal ONE mn
+	m_iRegenRate[STAT_DEX]	= 10 * TICK_PER_SEC;		// Seconds to heal ONE stm
+	m_iRegenRate[STAT_FOOD] = 60*60 * TICK_PER_SEC;		// Food usage (1 time per 60 minutes)
 
-	m_iTimerCall = 0;
-	m_bAllowLightOverride = true;
-	m_bAllowNewbTransfer = false;
-	m_sZeroPoint= "1323,1624,0";
-	m_bAllowBuySellAgent = false;
+	m_iTimerCall			= 0;
+	m_bAllowLightOverride	= true;
+	m_bAllowNewbTransfer	= false;
+	m_sZeroPoint			= "1323,1624,0";
+	m_bAllowBuySellAgent	= false;
 
-	m_iColorNotoGood = 0x59;				// blue
-	m_iColorNotoGuildSame = 0x3f;			// green
-	m_iColorNotoNeutral = 0x3b2;			// grey (can be attacked)
-	m_iColorNotoCriminal = 0x3b2;			// grey (criminal)
-	m_iColorNotoGuildWar = 0x90;			// orange (enemy guild)
-	m_iColorNotoEvil = 0x22;				// red
-	m_iColorNotoInvul = 0x35;				// yellow
+	m_iColorNotoGood			= 0x59;		// blue
+	m_iColorNotoGuildSame		= 0x3f;		// green
+	m_iColorNotoNeutral			= 0x3b2;	// grey (can be attacked)
+	m_iColorNotoCriminal		= 0x3b2;	// grey (criminal)
+	m_iColorNotoGuildWar		= 0x90;		// orange (enemy guild)
+	m_iColorNotoEvil			= 0x22;		// red
+	m_iColorNotoInvul			= 0x35;		// yellow
 	m_iColorNotoInvulGameMaster = 0x0b;		// purple
-	m_iColorNotoDefault = 0x3b2;			// grey (if not any other)
+	m_iColorNotoDefault			= 0x3b2;	// grey (if not any other)
 	
-	m_iColorInvis = 0;
-	m_iColorInvisSpell = 0;
-	m_iColorHidden = 0;
+	m_iColorInvis		= 0;
+	m_iColorInvisSpell	= 0;
+	m_iColorHidden		= 0;
 	
-	m_iNotoTimeout = 30;					// seconds to remove this character from notoriety list.
+	m_iNotoTimeout		= 30;					// seconds to remove this character from notoriety list.
 
 	m_iPetsInheritNotoriety = 0;
 
 #ifdef _MTNETWORK
-	m_iNetworkThreads = 0;
-	m_iNetworkThreadPriority = IThread::Disabled;
+	m_iNetworkThreads			= 0;
+	m_iNetworkThreadPriority	= IThread::Disabled;
 #endif
-	m_fUseAsyncNetwork = 0;
-	m_iNetMaxPings = 15;
-	m_iNetHistoryTTL = 300;
+	m_fUseAsyncNetwork		= 0;
+	m_iNetMaxPings			= 15;
+	m_iNetHistoryTTL		= 300;
 	m_iNetMaxPacketsPerTick = 50;
-	m_iNetMaxLengthPerTick = 18000;
-	m_iNetMaxQueueSize = 75;
-	m_fUsePacketPriorities = false;
-	m_fUseExtraBuffer = true;
+	m_iNetMaxLengthPerTick	= 18000;
+	m_iNetMaxQueueSize		= 75;
+	m_fUsePacketPriorities	= false;
+	m_fUseExtraBuffer		= true;
 
-	m_iTooltipCache = 30*TICK_PER_SEC;
-	m_iTooltipMode = TOOLTIPMODE_SENDVERSION;
-	m_iAutoTooltipResend = (AUTOTOOLTIP_FLAG_NAME|AUTOTOOLTIP_FLAG_AMOUNT|AUTOTOOLTIP_FLAG_WEIGHT|AUTOTOOLTIP_FLAG_DURABILITY|AUTOTOOLTIP_FLAG_POISON|AUTOTOOLTIP_FLAG_WANDCHARGES|AUTOTOOLTIP_FLAG_SPELLBOOK);
-	m_iContextMenuLimit = 15;
+	m_iTooltipCache			= 30 * TICK_PER_SEC;
+	m_iTooltipMode			= TOOLTIPMODE_SENDVERSION;
+	m_iAutoTooltipResend	= (AUTOTOOLTIP_FLAG_NAME|AUTOTOOLTIP_FLAG_AMOUNT|AUTOTOOLTIP_FLAG_WEIGHT|AUTOTOOLTIP_FLAG_DURABILITY|
+								AUTOTOOLTIP_FLAG_POISON|AUTOTOOLTIP_FLAG_WANDCHARGES|AUTOTOOLTIP_FLAG_SPELLBOOK);
+	m_iContextMenuLimit		= 15;
 
-	m_iClientLoginMaxTries = 0;		// maximum bad password tries before a temp ip ban
-	m_iClientLoginTempBan = 3*60*TICK_PER_SEC;
+	m_iClientLoginMaxTries	= 0;		// maximum bad password tries before a temp ip ban
+	m_iClientLoginTempBan	= 3*60 * TICK_PER_SEC;
 	m_iMaxShipPlankTeleport = UO_MAP_VIEW_SIZE;
 
 	m_NPCNoFameTitle = false;
@@ -272,9 +273,7 @@ CResource::~CResource()
 		{
 			CResourceDef* pResDef = m_ResHash.m_Array[i][j];
 			if ( pResDef != NULL )
-			{
 				pResDef->UnLink();
-			}
 		}
 	}
 
@@ -323,9 +322,7 @@ bool CResource::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 
 	pszSep = const_cast<tchar*>(strchr( pszKey, '.' ));
 	if ( pszSep != NULL )
-	{
 		*pszSep = '\0';
-	}
 
 	if ( iResType == RES_SERVERS )
 	{
@@ -358,9 +355,7 @@ bool CResource::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 
 		// check the found resource type matches what we searched for
 		if ( rid.GetResType() == iResType )
-		{
 			pRef = ResourceGetDef( rid );
-		}
 	}
 
 	if ( pszSep != NULL )
@@ -1248,7 +1243,6 @@ const CSkillDef * CResource::SkillLookup( lpctstr pszKey )
 }
 
 
-
 bool CResource::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CResource::r_WriteVal");
@@ -1749,6 +1743,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 	return false;
 }
 
+
 //*************************************************************
 
 bool CResource::IsConsoleCmd( tchar ch ) const
@@ -1769,14 +1764,14 @@ SKILL_TYPE CResource::FindSkillKey( lpctstr pszKey ) const
 		if ( (!CChar::IsSkillBase(skill) || !g_Cfg.m_SkillIndexDefs.IsValidIndex(skill)) &&
 			! CChar::IsSkillNPC(skill))
 		{
-			return( SKILL_NONE );
+			return SKILL_NONE;
 		}
-		return( skill );
+		return skill;
 	}
 
 	const CSkillDef * pSkillDef = FindSkillDef( pszKey );
 	if ( pSkillDef == NULL )
-		return( SKILL_NONE );
+		return SKILL_NONE;
 	return static_cast<SKILL_TYPE>(pSkillDef->GetResourceID().GetResIndex());
 }
 
@@ -1796,7 +1791,7 @@ int CResource::GetSpellEffect( SPELL_TYPE spell, int iSkillVal ) const
 	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef( spell );
 	if ( pSpellDef == NULL )
 		return 0;
-	return( pSpellDef->m_Effect.GetLinear( iSkillVal ));
+	return pSpellDef->m_Effect.GetLinear( iSkillVal );
 }
 
 lpctstr CResource::GetNotoTitle( int iLevel, bool bFemale ) const
@@ -1848,7 +1843,7 @@ bool CResource::IsValidEmailAddressFormat( lpctstr pszEmail ) // static
 		return false;
 	if ( pszAt == pszEmail )
 		return false;
-	if ( ! strchr( pszAt, '.' ))
+	if ( ! strchr( pszAt, '.' ) )
 		return false;
 
 	return true;
@@ -1858,8 +1853,8 @@ CServerRef CResource::Server_GetDef( size_t index )
 {
 	ADDTOCALLSTACK("CResource::Server_GetDef");
 	if ( ! m_Servers.IsValidIndex(index))
-		return( NULL );
-	return( CServerRef( static_cast <CServerDef*>( m_Servers[index] )));
+		return NULL;
+	return CServerRef( static_cast <CServerDef*>( m_Servers[index] ));
 }
 
 CWebPageDef * CResource::FindWebPage( lpctstr pszPath ) const
@@ -1868,9 +1863,9 @@ CWebPageDef * CResource::FindWebPage( lpctstr pszPath ) const
 	if ( pszPath == NULL )
 	{
 		if ( m_WebPages.GetCount() <= 0 )
-			return( NULL );
+			return NULL;
 		// Take this as the default page.
-		return( static_cast <CWebPageDef*>( m_WebPages[0] ));
+		return static_cast <CWebPageDef*>( m_WebPages[0] );
 	}
 
 	lpctstr pszTitle = CSFile::GetFilesTitle(pszPath);
@@ -1879,9 +1874,9 @@ CWebPageDef * CResource::FindWebPage( lpctstr pszPath ) const
 	{
 		// This is just the root index.
 		if ( m_WebPages.GetCount() <= 0 )
-			return( NULL );
+			return NULL;
 		// Take this as the default page.
-		return( static_cast <CWebPageDef*>( m_WebPages[0] ));
+		return static_cast <CWebPageDef*>( m_WebPages[0] );
 	}
 
 	for ( size_t i = 0; i < m_WebPages.GetCount(); i++ )
@@ -1891,10 +1886,10 @@ CWebPageDef * CResource::FindWebPage( lpctstr pszPath ) const
 		CWebPageDef * pWeb = static_cast <CWebPageDef*>(m_WebPages[i] );
 		ASSERT(pWeb);
 		if ( pWeb->IsMatch(pszTitle))
-			return( pWeb );
+			return pWeb;
 	}
 
-	return( NULL );
+	return NULL;
 }
 
 bool CResource::IsObscene( lpctstr pszText ) const
@@ -2103,6 +2098,7 @@ bool CResource::CanUsePrivVerb( const CScriptObj * pObjTarg, lpctstr pszCmd, CTe
 	return true;
 }
 
+
 //*************************************************************
 
 CPointMap CResource::GetRegionPoint( lpctstr pCmd ) const // Decode a teleport location number into X/Y/Z
@@ -2122,7 +2118,7 @@ CPointMap CResource::GetRegionPoint( lpctstr pCmd ) const // Decode a teleport l
 
 			i = 0;
 		}
-		return( m_StartDefs[i]->m_pt );
+		return m_StartDefs[i]->m_pt;
 	}
 
 	CPointMap pt;	// invalid point
@@ -2132,9 +2128,7 @@ CPointMap CResource::GetRegionPoint( lpctstr pCmd ) const // Decode a teleport l
 		strcpy( pszTemp, pCmd );
 		size_t iCount = pt.Read( pszTemp );
 		if ( iCount >= 2 )
-		{
-			return( pt );
-		}
+			return pt;
 	}
 	else
 	{
@@ -2142,11 +2136,11 @@ CPointMap CResource::GetRegionPoint( lpctstr pCmd ) const // Decode a teleport l
 		CRegionBase * pRegion = GetRegion(pCmd);
 		if ( pRegion != NULL )
 		{
-			return( pRegion->m_pt );
+			return pRegion->m_pt;
 		}
 	}
 	// no match.
-	return( pt );
+	return pt;
 }
 
 CRegionBase * CResource::GetRegion( lpctstr pKey ) const
@@ -2169,13 +2163,13 @@ CRegionBase * CResource::GetRegion( lpctstr pKey ) const
 			if ( ! pRegion->GetNameStr().CompareNoCase( pKey ) ||
 				! strcmpi( pRegion->GetResourceName(), pKey ))
 			{
-				return( pRegion );
+				return pRegion;
 			}
 		}
 	}
 
 	// no match.
-	return( NULL );
+	return NULL;
 }
 
 void CResource::LoadSortSpells()
@@ -2323,33 +2317,23 @@ int CResource::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar char
 
 		bResOk = ( res >= RDS_AOS );
 		if ( bResOk )
-		{
 			retValue |= ( m_iFeatureAOS & FEATURE_AOS_UPDATE_A ) ? 0x08010 : 0x00;
-		}
 
 		bResOk = ( res >= RDS_SE );
 		if ( bResOk )
-		{
 			retValue |= ( m_iFeatureSE & FEATURE_SE_NINJASAM ) ? 0x040 : 0x00;
-		}
 
 		bResOk = ( res >= RDS_ML );
 		if ( bResOk )
-		{
 			retValue |= ( m_iFeatureML & FEATURE_ML_UPDATE ) ? 0x080 : 0x00;
-		}
 
 		bResOk = ( res >= RDS_SA );
 		if ( bResOk )
-		{
 			retValue |= ( m_iFeatureSA & FEATURE_SA_UPDATE ) ? 0x10000 : 0x00;
-		}
 
 		bResOk = ( res >= RDS_TOL );
 		if ( bResOk )
-		{
 			retValue |= ( m_iFeatureTOL & FEATURE_TOL_UPDATE ) ? 0x400000 : 0x00;
-		}
 
 		retValue |= ( m_iFeatureExtra & FEATURE_EXTRA_CRYSTAL ) ? 0x0200 : 0x00;
 		retValue |= ( m_iFeatureExtra & FEATURE_EXTRA_GOTHIC ) ? 0x40000 : 0x00;
@@ -2361,7 +2345,7 @@ int CResource::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar char
 		retValue |= ( chars >= 7 ) ? 0x1000 : 0x00;
 	}
 
-	return( retValue );
+	return retValue;
 }
 
 
@@ -2541,7 +2525,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 
 	case RES_DEFNAME:
 		// just get a block of defs.
-		while ( pScript->ReadKeyParse())
+		while ( pScript->ReadKeyParse() )
 		{
 			lpctstr	pszKey = pScript->GetKey();
 			if ( fNewStyleDef )
@@ -2568,7 +2552,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		return true;
 	case RES_RESOURCELIST:
 		{
-			while ( pScript->ReadKey())
+			while ( pScript->ReadKey() )
 			{
 				lpctstr pName = pScript->GetKeyBuffer();	
 				m_ResourceList.AddSortString( pName );
@@ -2670,15 +2654,15 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		return true;
 	case RES_RESOURCES:
 		// Add these all to the list of files we need to include.
-		while ( pScript->ReadKey())
+		while ( pScript->ReadKey() )
 		{
-			AddResourceFile( pScript->GetKey());
+			AddResourceFile( pScript->GetKey() );
 		}
 		return true;
 	case RES_RUNES:
 		// The full names of the magic runes.
 		m_Runes.RemoveAll();
-		while ( pScript->ReadKey())
+		while ( pScript->ReadKey() )
 		{
 			m_Runes.Add( new CSString(pScript->GetKey()) );
 		}
@@ -2686,20 +2670,16 @@ bool CResource::LoadResourceSection( CScript * pScript )
 	case RES_SECTOR: // saved in world file.
 		{
 			CPointMap pt = GetRegionPoint( pScript->GetArgStr() ); // Decode a teleport location number into X/Y/Z
-			return( pt.GetSector()->r_Load(*pScript));
+			return pt.GetSector()->r_Load(*pScript);
 		}
 	case RES_SPELL:
 		{
 			CSpellDef * pSpell;
 			pPrvDef = ResourceGetDef( rid );
 			if ( pPrvDef )
-			{
 				pSpell = dynamic_cast<CSpellDef*>(pPrvDef);
-			}
 			else
-			{
 				pSpell = new CSpellDef(static_cast<SPELL_TYPE>(rid.GetResIndex()));
-			}
 			ASSERT(pSpell);
 			pNewLink = pSpell;
 
@@ -2708,9 +2688,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 			pScript->SeekContext( LineContext );
 
 			if ( !pPrvDef )
-			{
 				m_SpellDefs.SetAtGrow( rid.GetResIndex(), pSpell );
-			}
 		}
 		break;
 
@@ -3153,24 +3131,18 @@ bool CResource::LoadResourceSection( CScript * pScript )
 			CTeleport * pTeleport = new CTeleport( pScript->GetKeyBuffer());
 			ASSERT(pTeleport);
 			// make sure this is not a dupe.
-			if ( ! pTeleport->RealizeTeleport())
-			{
+			if ( ! pTeleport->RealizeTeleport() )
 				delete pTeleport;
-			}
 		}
 		return true;
 	case RES_KRDIALOGLIST:
-		while ( pScript->ReadKeyParse())
+		while ( pScript->ReadKeyParse() )
 		{
 			CDialogDef *pDef = dynamic_cast<CDialogDef *>( g_Cfg.ResourceGetDefByName(RES_DIALOG, pScript->GetKey()) );
 			if ( pDef != NULL )
-			{
 				g_Cfg.SetKRDialogMap( (dword)pDef->GetResourceID(), pScript->GetArgVal());
-			}
 			else
-			{
 				DEBUG_ERR(("Dialog '%s' not found...\n", pScript->GetKey()));
-			}
 		}
 		return true;
 
@@ -3179,7 +3151,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 	case RES_GMPAGE:	// saved in world file. (Name is NOT DEFNAME)
 		{
 			CGMPage * pGMPage = new CGMPage( pScript->GetArgStr());
-			return( pGMPage->r_Load( *pScript ));
+			return pGMPage->r_Load( *pScript );
 		}
 	case RES_WC:
 	case RES_WORLDCHAR:	// saved in world file.
@@ -3188,7 +3160,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 			g_Log.Event(LOGL_ERROR|LOGM_INIT, "Undefined char type '%s'\n", static_cast<lpctstr>(pScript->GetArgStr()));
 			return false;
 		}
-		return( CChar::CreateBasic(static_cast<CREID_TYPE>(rid.GetResIndex()))->r_Load(*pScript));
+		return CChar::CreateBasic(static_cast<CREID_TYPE>(rid.GetResIndex()))->r_Load(*pScript);
 	case RES_WI:
 	case RES_WORLDITEM:	// saved in world file.
 		if ( ! rid.IsValidUID())
@@ -3196,7 +3168,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 			g_Log.Event(LOGL_ERROR|LOGM_INIT, "Undefined item type '%s'\n", static_cast<lpctstr>(pScript->GetArgStr()));
 			return false;
 		}
-		return( CItem::CreateBase(static_cast<ITEMID_TYPE>(rid.GetResIndex()))->r_Load(*pScript));
+		return CItem::CreateBase(static_cast<ITEMID_TYPE>(rid.GetResIndex()))->r_Load(*pScript);
 
 	default:
 		break;
@@ -3282,7 +3254,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 		// These must have a resource name but do not use true RESOURCE_ID format.
 		// These are multiple instance but name is not a RESOURCE_ID
 		if ( pszName[0] == '\0' )
-			return( ridinvalid );	// invalid
+			return ridinvalid;	// invalid
 		return( RESOURCE_ID( restype ));
 	// Extra args are allowed.
 	case RES_BOOK:	// BOOK BookName page
@@ -3290,7 +3262,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 	case RES_REGIONTYPE:
 		{
 			if ( pszName[0] == '\0' )
-				return( ridinvalid );
+				return ridinvalid;
 			tchar * pArg1 = Str_GetTemp();
 			strcpy( pArg1, pszName );
 			pszName = pArg1;
@@ -3311,7 +3283,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 	case RES_NEWBIE:	// MALE_DEFAULT, FEMALE_DEFAULT, Skill
 		{
 			if ( pszName[0] == '\0' )
-				return( ridinvalid );
+				return ridinvalid;
 			tchar * pArg1 = Str_GetTemp();
 			strcpy( pArg1, pszName );
 			pszName = pArg1;
@@ -3371,7 +3343,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 			// This might be ok.
 			return( RESOURCE_ID( restype, 0, iPage ) );
 		}
-		if ( IsDigit(pszName[0]))	// Its just an index.
+		if ( IsDigit(pszName[0]) )	// Its just an index.
 		{
 			index = Exp_GetVal(pszName);
 			rid = RESOURCE_ID( restype, index );
@@ -3398,7 +3370,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 					rid = RESOURCE_ID( restype, index + ITEMID_MULTI);
 				break;
 			default:
-				return( rid );
+				return rid;
 			}
 #ifdef _DEBUG
 			if ( g_Serv.m_iModeCode != SERVMODE_ResyncLoad )	// this really is ok.
@@ -3409,7 +3381,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 					ASSERT(m_ResHash.GetAt(rid, duplicateIndex));
 			}
 #endif
-			return( rid );
+			return rid;
 		}
 
 
@@ -3437,7 +3409,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 					}
 					default:
 						DEBUG_ERR(( "Re-Using name '%s' to define block\n", static_cast<lpctstr>(pszName) ));
-						return( ridinvalid );
+						return ridinvalid;
 				}
 			}
 			rid.SetPrivateUID( (uint)(pVarNum->GetValNum()));
@@ -3455,7 +3427,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 						break;
 					default:
 						DEBUG_ERR(( "Redefined name '%s' from %s to %s\n", static_cast<lpctstr>(pszName), static_cast<lpctstr>(GetResourceBlockName(rid.GetResType())), static_cast<lpctstr>(GetResourceBlockName(restype)) ));
-						return( ridinvalid );
+						return ridinvalid;
 				}
 			}
 			else if ( fNewStyleDef && (dword)(pVarNum->GetValNum()) != rid.GetPrivateUID() )
@@ -3480,7 +3452,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 			}
 			rid = RESOURCE_ID( restype, rid.GetResIndex(), iPage );
 			*ppVarNum = pVarNum;
-			return( rid );
+			return rid;
 		}
 	}
 
@@ -3498,19 +3470,19 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 		// rid = m_SkillDefs.GetCount();
 	case RES_SPELL:			// Define a magic spell. (0-64 are reserved)
 		// rid = m_SpellDefs.GetCount();
-		return( ridinvalid );
+		return ridinvalid;
 
 	// These MUST exist !
 
 	case RES_NEWBIE:	// MALE_DEFAULT, FEMALE_DEFAULT, Skill
-		return( ridinvalid );
+		return ridinvalid;
 	case RES_PLEVEL:	// 0-7
-		return( ridinvalid );
+		return ridinvalid;
 	case RES_WC:
 	case RES_WI:
 	case RES_WORLDCHAR:
 	case RES_WORLDITEM:
-		return( ridinvalid );
+		return ridinvalid;
 
 	// Just find a free entry in proper range.
 
@@ -3530,7 +3502,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 	case RES_BOOK:			// A book or a page from a book.
 	case RES_DIALOG:			// A scriptable gump dialog: text or handler block.
 		if ( iPage )	// We MUST define the main section FIRST !
-			return( ridinvalid );
+			return ridinvalid;
 
 	case RES_REGIONTYPE:	// Triggers etc. that can be assinged to a RES_AREA
 		iHashRange = 100;
@@ -3565,17 +3537,13 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 
 	default:
 		ASSERT(0);
-		return( ridinvalid );
+		return ridinvalid;
 	}
 
 	if ( iPage )
-	{
 		rid = RESOURCE_ID( restype, index, iPage );
-	}
 	else
-	{
 		rid = RESOURCE_ID( restype, index );
-	}
 
 	if ( iHashRange )
 	{
@@ -3592,21 +3560,17 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 	{
 		// find a new FREE entry starting here
 		if ( ! index )
-		{
 			rid.SetPrivateUID( rid.GetPrivateUID()+1 );
-		}
 	}
 
 	if ( pszName )
 	{
 		int iVarNum = g_Exp.m_VarDefs.SetNum( pszName, rid.GetPrivateUID() );
 		if ( iVarNum >= 0 )
-		{
 			*ppVarNum = dynamic_cast <CVarDefContNum*>( g_Exp.m_VarDefs.GetAt(iVarNum));
-		}
 	}
 
-	return( rid );
+	return rid;
 }
 
 CResourceDef * CResource::ResourceGetDef( RESOURCE_ID_BASE rid ) const
@@ -3616,8 +3580,8 @@ CResourceDef * CResource::ResourceGetDef( RESOURCE_ID_BASE rid ) const
 	// ARGS:
 	//	restype = id must be this type.
 
-	if ( ! rid.IsValidUID())
-		return( NULL );
+	if ( ! rid.IsValidUID() )
+		return NULL;
 
 	size_t index = rid.GetResIndex();
 	switch ( rid.GetResType() )
@@ -3625,39 +3589,39 @@ CResourceDef * CResource::ResourceGetDef( RESOURCE_ID_BASE rid ) const
 		case RES_WEBPAGE:
 			index = m_WebPages.FindKey( rid );
 			if ( ! m_WebPages.IsValidIndex(index))
-				return( NULL );
-			return( m_WebPages.GetAt( index ));
+				return NULL;
+			return m_WebPages.GetAt( index );
 
 		case RES_SKILL:
 			if ( ! m_SkillIndexDefs.IsValidIndex(index))
-				return( NULL );
-			return( m_SkillIndexDefs[ index ] );
+				return NULL;
+			return m_SkillIndexDefs[ index ];
 
 		case RES_SPELL:
 			if ( ! m_SpellDefs.IsValidIndex(index))
-				return( NULL );
-			return( m_SpellDefs[ index ] );
+				return NULL;
+			return m_SpellDefs[ index ];
 
 		case RES_UNKNOWN:	// legal to use this as a ref but it is unknown
-			return( NULL );
+			return NULL;
 
-		case RES_BOOK:			// A book or a page from a book.
+		case RES_BOOK:				// A book or a page from a book.
 		case RES_EVENTS:
 		case RES_DIALOG:			// A scriptable gump dialog: text or handler block.
 		case RES_MENU:
-		case RES_NAMES:			// A block of possible names for a NPC type. (read as needed)
-		case RES_NEWBIE:	// MALE_DEFAULT, FEMALE_DEFAULT, Skill
+		case RES_NAMES:				// A block of possible names for a NPC type. (read as needed)
+		case RES_NEWBIE:			// MALE_DEFAULT, FEMALE_DEFAULT, Skill
 		case RES_REGIONRESOURCE:
 		case RES_REGIONTYPE:		// Triggers etc. that can be assinged to a RES_AREA
-		case RES_SCROLL:		// SCROLL_GUEST=message scroll sent to player at guest login. SCROLL_MOTD: SCROLL_NEWBIE
+		case RES_SCROLL:			// SCROLL_GUEST=message scroll sent to player at guest login. SCROLL_MOTD: SCROLL_NEWBIE
 		case RES_SPEECH:
-		case RES_TIP:			// Tips (similar to RES_SCROLL) that can come up at startup.
+		case RES_TIP:				// Tips (similar to RES_SCROLL) that can come up at startup.
 		case RES_TYPEDEF:			// Define a trigger block for a RES_WORLDITEM m_type.
 		case RES_TEMPLATE:
 		case RES_SKILLMENU:
 		case RES_ITEMDEF:
 		case RES_CHARDEF:
-		case RES_SPAWN:	// the char spawn tables
+		case RES_SPAWN:				// the char spawn tables
 		case RES_SKILLCLASS:
 		case RES_AREA:
 		case RES_ROOM:
@@ -3722,28 +3686,30 @@ void CResource::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
 		tchar zOptionFlags[512];
 		zOptionFlags[0] = '\0';
 
-		if ( IsSetOF(OF_NoDClickTarget) ) catresname(zOptionFlags, "NoDClickTarget");
-		if ( IsSetOF(OF_NoSmoothSailing) ) catresname(zOptionFlags, "NoSmoothSailing");
-		if ( IsSetOF(OF_ScaleDamageByDurability) ) catresname(zOptionFlags, "ScaleDamageByDurability");
-		if ( IsSetOF(OF_Command_Sysmsgs) ) catresname(zOptionFlags, "CommandSysmessages");
-		if ( IsSetEF(OF_PetSlots) ) catresname(zOptionFlags, "PetSlots");
-		if ( IsSetOF(OF_OSIMultiSight) ) catresname(zOptionFlags, "OSIMultiSight");
-		if ( IsSetOF(OF_Items_AutoName) ) catresname(zOptionFlags, "ItemsAutoName");
-		if ( IsSetOF(OF_FileCommands) ) catresname(zOptionFlags, "FileCommands");
-		if ( IsSetOF(OF_NoItemNaming) ) catresname(zOptionFlags, "NoItemNaming");
-		if ( IsSetOF(OF_NoHouseMuteSpeech) ) catresname(zOptionFlags, "NoHouseMuteSpeech");
-		if ( IsSetOF(OF_NoContextMenuLOS) ) catresname(zOptionFlags, "NoContextMenuLOS");
-		if ( IsSetOF(OF_Flood_Protection) ) catresname(zOptionFlags, "FloodProtection");
-		if ( IsSetOF(OF_Buffs) ) catresname(zOptionFlags, "Buffs");
-		if ( IsSetOF(OF_NoPrefix) ) catresname(zOptionFlags, "NoPrefix");
-		if ( IsSetOF(OF_DyeType) ) catresname(zOptionFlags, "DyeType");
-		if ( IsSetOF(OF_DrinkIsFood) ) catresname(zOptionFlags, "DrinkIsFood");
-		if ( IsSetOF(OF_DClickNoTurn) ) catresname(zOptionFlags, "DClickNoTurn");
+		if ( IsSetOF(OF_NoDClickTarget) )			catresname(zOptionFlags, "NoDClickTarget");
+		if ( IsSetOF(OF_NoSmoothSailing) )			catresname(zOptionFlags, "NoSmoothSailing");
+		if ( IsSetOF(OF_ScaleDamageByDurability) )	catresname(zOptionFlags, "ScaleDamageByDurability");
+		if ( IsSetOF(OF_Command_Sysmsgs) )			catresname(zOptionFlags, "CommandSysmessages");
+		if ( IsSetEF(OF_PetSlots) )					catresname(zOptionFlags, "PetSlots");
+		if ( IsSetOF(OF_OSIMultiSight) )			catresname(zOptionFlags, "OSIMultiSight");
+		if ( IsSetOF(OF_Items_AutoName) )			catresname(zOptionFlags, "ItemsAutoName");
+		if ( IsSetOF(OF_FileCommands) )				catresname(zOptionFlags, "FileCommands");
+		if ( IsSetOF(OF_NoItemNaming) )				catresname(zOptionFlags, "NoItemNaming");
+		if ( IsSetOF(OF_NoHouseMuteSpeech) )		catresname(zOptionFlags, "NoHouseMuteSpeech");
+		if ( IsSetOF(OF_NoContextMenuLOS) )			catresname(zOptionFlags, "NoContextMenuLOS");
+		if ( IsSetOF(OF_Flood_Protection) )			catresname(zOptionFlags, "FloodProtection");
+		if ( IsSetOF(OF_Buffs) )					catresname(zOptionFlags, "Buffs");
+		if ( IsSetOF(OF_NoPrefix) )					catresname(zOptionFlags, "NoPrefix");
+		if ( IsSetOF(OF_DyeType) )					catresname(zOptionFlags, "DyeType");
+		if ( IsSetOF(OF_DrinkIsFood) )				catresname(zOptionFlags, "DrinkIsFood");
+		if ( IsSetOF(OF_DClickNoTurn) )				catresname(zOptionFlags, "DClickNoTurn");
 
 		if ( zOptionFlags[0] != '\0' )
 		{
-			if ( pSrc ) pSrc->SysMessagef("Option flags: %s\n", zOptionFlags);
-			else g_Log.Event(LOGM_INIT, "Option flags: %s\n", zOptionFlags);
+			if ( pSrc )
+				pSrc->SysMessagef("Option flags: %s\n", zOptionFlags);
+			else
+				g_Log.Event(LOGM_INIT, "Option flags: %s\n", zOptionFlags);
 		}
 	}
 	if ( bEF )
@@ -3751,24 +3717,26 @@ void CResource::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
 		tchar zExperimentalFlags[512];
 		zExperimentalFlags[0] = '\0';
 
-		if ( IsSetEF(EF_NoDiagonalCheckLOS) ) catresname(zExperimentalFlags, "NoDiagonalCheckLOS");
-		if ( IsSetEF(EF_ItemStacking) ) catresname(zExperimentalFlags, "ItemStacking");
-		if ( IsSetEF(EF_ItemStackDrop) ) catresname(zExperimentalFlags, "ItemStackDrop");
-		if ( IsSetEF(EF_Intrinsic_Locals) ) catresname(zExperimentalFlags, "IntrinsicLocals");
-		if ( IsSetEF(EF_Item_Strict_Comparison) ) catresname(zExperimentalFlags, "ItemStrictComparison");
-		if ( IsSetEF(EF_AllowTelnetPacketFilter) ) catresname(zExperimentalFlags, "TelnetPacketFilter");
-		if ( IsSetEF(EF_Script_Profiler) ) catresname(zExperimentalFlags, "ScriptProfiler");
-		if ( IsSetEF(EF_DamageTools) ) catresname(zExperimentalFlags, "DamageTools");
-		if ( IsSetEF(EF_UsePingServer) ) catresname(zExperimentalFlags, "UsePingServer");
-		if ( IsSetEF(EF_FixCanSeeInClosedConts) ) catresname(zExperimentalFlags, "FixCanSeeInClosedConts");
+		if ( IsSetEF(EF_NoDiagonalCheckLOS) )		catresname(zExperimentalFlags, "NoDiagonalCheckLOS");
+		if ( IsSetEF(EF_ItemStacking) )				catresname(zExperimentalFlags, "ItemStacking");
+		if ( IsSetEF(EF_ItemStackDrop) )			catresname(zExperimentalFlags, "ItemStackDrop");
+		if ( IsSetEF(EF_Intrinsic_Locals) )			catresname(zExperimentalFlags, "IntrinsicLocals");
+		if ( IsSetEF(EF_Item_Strict_Comparison) )	catresname(zExperimentalFlags, "ItemStrictComparison");
+		if ( IsSetEF(EF_AllowTelnetPacketFilter) )	catresname(zExperimentalFlags, "TelnetPacketFilter");
+		if ( IsSetEF(EF_Script_Profiler) )			catresname(zExperimentalFlags, "ScriptProfiler");
+		if ( IsSetEF(EF_DamageTools) )				catresname(zExperimentalFlags, "DamageTools");
+		if ( IsSetEF(EF_UsePingServer) )			catresname(zExperimentalFlags, "UsePingServer");
+		if ( IsSetEF(EF_FixCanSeeInClosedConts) )	catresname(zExperimentalFlags, "FixCanSeeInClosedConts");
 #ifndef _MTNETWORK
 		if ( IsSetEF(EF_NetworkOutThread) ) catresname(zExperimentalFlags, "NetworkOutThread");
 #endif
 
 		if ( zExperimentalFlags[0] != '\0' )
 		{
-			if ( pSrc ) pSrc->SysMessagef("Experimental flags: %s\n", zExperimentalFlags);
-			else g_Log.Event(LOGM_INIT, "Experimental flags: %s\n", zExperimentalFlags);
+			if ( pSrc )
+				pSrc->SysMessagef("Experimental flags: %s\n", zExperimentalFlags);
+			else
+				g_Log.Event(LOGM_INIT, "Experimental flags: %s\n", zExperimentalFlags);
 		}
 	}
 }
@@ -3797,10 +3765,9 @@ bool CResource::LoadIni( bool fTest )
 bool CResource::LoadCryptIni( void )
 {
 	ADDTOCALLSTACK("CResource::LoadCryptIni");
-	if ( ! OpenResourceFind( m_scpCryptIni, SPHERE_FILE "Crypt.ini", false ))
+	if ( ! OpenResourceFind( m_scpCryptIni, SPHERE_FILE "Crypt.ini", false ) )
 	{
 		g_Log.Event( LOGL_WARN|LOGM_INIT, "Could not open " SPHERE_FILE "Crypt.ini, encryption might not be available\n");
-
 		return false;
 	}
 
@@ -3907,7 +3874,7 @@ bool CResource::Load( bool fResync )
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 		return false;
 	}
-	catch(...)
+	catch (...)
 	{
 		g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".INI file is corrupt or missing\n" );
 		g_Log.CatchEvent( NULL, "g_VerData.Load" );

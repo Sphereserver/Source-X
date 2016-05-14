@@ -1394,7 +1394,7 @@ CChar * CItemStone::GetMaster() const
 	ADDTOCALLSTACK("CItemStone::GetMaster");
 	CStoneMember * pMember = GetMasterMember();
 	if ( pMember == NULL )
-		return( NULL );
+		return NULL;
 	return pMember->GetLinkUID().CharFind();
 }
 

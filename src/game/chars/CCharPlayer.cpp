@@ -172,7 +172,7 @@ CSkillClassDef * CCharPlayer::GetSkillClass() const
 
 	CResourceLink * pLink = m_SkillClass.GetRef();
 	if ( pLink == NULL )
-		return( NULL );
+		return NULL;
 	return( static_cast <CSkillClassDef *>(pLink));	
 }
 

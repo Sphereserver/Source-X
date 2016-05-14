@@ -370,7 +370,7 @@ class CAccounts
 protected:
 	static const char *m_sClassName; ///< TODOC.
 	static lpctstr const sm_szVerbKeys[]; ///< ACCOUNT action list.
-	CObNameSortArray m_Accounts; ///< Sorted CAccount list.
+	CObjNameSortArray m_Accounts; ///< Sorted CAccount list.
 public:
 	/**
 	* CAccount needs CAccounts methods.

@@ -6,12 +6,12 @@
 #include "sphere_library/CSArray.h"
 #include "sphere_library/CSTime.h"
 #include "../game/CServerTime.h"
+#include "../game/game_enums.h"
+#include "../game/game_macros.h"
 #include "common.h"
 #include "CUID.h"
 #include "CScript.h"
 #include "CScriptObj.h"
-#include "../game/game_enums.h"
-#include "../game/game_macros.h"
 
 
 class CVarDefContNum;
@@ -123,11 +123,11 @@ public:
 	{
 		dword dwVal = m_dwInternalVal >> RES_PAGE_SHIFT;
 		dwVal &= RES_PAGE_MASK;
-		return(dwVal);
+		return dwVal;
 	}
 	bool operator == (const RESOURCE_ID_BASE & rid) const
 	{
-		return(rid.m_dwInternalVal == m_dwInternalVal);
+		return (rid.m_dwInternalVal == m_dwInternalVal);
 	}
 };
 
@@ -162,12 +162,13 @@ struct RESOURCE_ID : public RESOURCE_ID_BASE
 	}
 };
 
+
 //*********************************************************
 
 struct CResourceQty
 {
 private:
-	RESOURCE_ID m_rid;	// A RES_SKILL, RES_ITEMDEF, or RES_TYPEDEF
+	RESOURCE_ID m_rid;		// A RES_SKILL, RES_ITEMDEF, or RES_TYPEDEF
 	int64 m_iQty;			// How much of this ?
 public:
 	RESOURCE_ID GetResourceID() const
@@ -357,7 +358,10 @@ private:
 	CResourceScript& operator=(const CResourceScript& other);
 
 public:
-	bool IsFirstCheck() const;
+	bool IsFirstCheck() const
+	{
+		return (m_dwSize == UINT32_MAX && !m_dateChange.IsTimeValid());
+	}
 	void ReSync();
 	bool Open( lpctstr pszFilename = NULL, uint wFlags = OF_READ );
 	virtual void Close();
@@ -371,12 +375,16 @@ class CResourceLock : public CScript
 	// preserve the previous openers offset in the script.
 private:
 	CResourceScript * m_pLock;
-	CScriptLineContext m_PrvLockContext;	// i must return the locked file back here.	
+	CScriptLineContext m_PrvLockContext;		// i must return the locked file back here.	
 
-	CScriptFileContext m_PrvScriptContext;	// where was i before (context wise) opening this. (for error tracking)
-	CScriptObjectContext m_PrvObjectContext; // object context (for error tracking)
+	CScriptFileContext m_PrvScriptContext;		// where was i before (context wise) opening this. (for error tracking)
+	CScriptObjectContext m_PrvObjectContext;	// object context (for error tracking)
 private:
-	void Init();
+	void Init()
+	{
+		m_pLock = NULL;
+		m_PrvLockContext.Init();	// means the script was NOT open when we started.
+	}
 
 protected:
 	virtual bool OpenBase( void * pExtra );
@@ -385,8 +393,14 @@ protected:
 
 public:
 	static const char *m_sClassName;
-	CResourceLock();
-	~CResourceLock();
+	CResourceLock()
+	{
+		Init();
+	}
+	~CResourceLock()
+	{
+		Close();
+	}
 
 private:
 	CResourceLock(const CResourceLock& copy);
@@ -408,9 +422,17 @@ protected:
 	const CVarDefContNum * m_pDefName;	// The name of the resource. (optional)
 public:
 	static const char *m_sClassName;
-	CResourceDef( RESOURCE_ID rid, lpctstr pszDefName );
-	CResourceDef( RESOURCE_ID rid, const CVarDefContNum * pDefName = NULL );
-	virtual ~CResourceDef();
+	CResourceDef(RESOURCE_ID rid, lpctstr pszDefName) : m_rid(rid), m_pDefName(NULL)
+	{
+		SetResourceName(pszDefName);
+	}
+	CResourceDef(RESOURCE_ID rid, const CVarDefContNum * pDefName = NULL) : m_rid(rid), m_pDefName(pDefName)
+	{
+	}
+	virtual ~CResourceDef()
+	{// need a virtual for the dynamic_cast to work.
+		// ?? Attempt to remove m_pDefName ?
+	}
 
 private:
 	CResourceDef(const CResourceDef& copy);
@@ -444,13 +466,20 @@ public:
 
 	// Give it another DEFNAME= even if it already has one. it's ok to have multiple names.
 	bool SetResourceName( lpctstr pszName );
-	void SetResourceVar( const CVarDefContNum* pVarNum );
+	void SetResourceVar( const CVarDefContNum* pVarNum )
+	{
+		if (pVarNum != NULL && m_pDefName == NULL)
+			m_pDefName = pVarNum;
+	}
 
 	// unlink all this data. (tho don't delete the def as the pointer might still be used !)
-	virtual void UnLink();
+	virtual void UnLink()
+	{
+		// This does nothing in the CResourceDef case, Only in the CResourceLink case.
+	}
 
-	bool	HasResourceName();
-	bool	MakeResourceName();
+	bool HasResourceName();
+	bool MakeResourceName();
 };
 
 #define MAX_TRIGGERS_ARRAY	5
@@ -468,12 +497,11 @@ private:
 	dword m_lRefInstances;	// How many CResourceRef objects refer to this ?
 public:
 	static const char *m_sClassName;
-	dword	m_dwOnTriggers[MAX_TRIGGERS_ARRAY];
+	dword m_dwOnTriggers[MAX_TRIGGERS_ARRAY];
 
 #define XTRIG_UNKNOWN 0	// bit 0 is reserved to say there are triggers here that do not conform.
 
 public:
-
 	void AddRefInstance()
 	{
 		m_lRefInstances++;
@@ -517,9 +545,7 @@ public:
 	static const char *m_sClassName;
 	const CSString m_sName;
 public:
-	CResourceNamed(RESOURCE_ID rid, LPCTSTR pszName) :
-		CResourceLink(rid),
-		m_sName(pszName)
+	CResourceNamed(RESOURCE_ID rid, LPCTSTR pszName) : CResourceLink(rid), m_sName(pszName)
 	{
 	}
 	virtual ~CResourceNamed()
@@ -592,6 +618,7 @@ public:
 		return GetRef();
 	}
 };
+
 class CResourceRefArray : public CSPtrTypeArray<CResourceRef>
 {
 	// Define a list of pointer references to resource. (Not owned by the list)
@@ -600,7 +627,9 @@ private:
 	lpctstr GetResourceName( size_t iIndex ) const;
 public:
 	static const char *m_sClassName;
-	CResourceRefArray();
+	CResourceRefArray()
+	{
+	}
 private:
 	CResourceRefArray(const CResourceRefArray& copy);
 	CResourceRefArray& operator=(const CResourceRefArray& other);
@@ -646,7 +675,9 @@ public:
 	static const char *m_sClassName;
 	CResourceHashArray m_Array[16];
 public:
-	CResourceHash() { }
+	CResourceHash()
+	{
+	}
 private:
 	CResourceHash(const CResourceHash& copy);
 	CResourceHash& operator=(const CResourceHash& other);
@@ -694,14 +725,14 @@ public:
 	void AddSortString( lpctstr pszText );
 };
 
-class CObNameSortArray : public CSObjSortArray< CScriptObj*, lpctstr >
+class CObjNameSortArray : public CSObjSortArray< CScriptObj*, lpctstr >
 {
 public:
 	static const char *m_sClassName;
-	CObNameSortArray();
+	CObjNameSortArray();
 private:
-	CObNameSortArray(const CObNameSortArray& copy);
-	CObNameSortArray& operator=(const CObNameSortArray& other);
+	CObjNameSortArray(const CObjNameSortArray& copy);
+	CObjNameSortArray& operator=(const CObjNameSortArray& other);
 
 public:
 	// Array of CScriptObj. name sorted.
@@ -733,12 +764,16 @@ public:
 	bool LoadResources( CResourceScript * pScript );
 	static lpctstr GetResourceBlockName( RES_TYPE restype );
 	lpctstr GetName() const;
-	CResourceScript* GetResourceFile( size_t i );
+	CResourceScript * GetResourceFile( size_t i );
 	RESOURCE_ID ResourceGetID( RES_TYPE restype, lpctstr & pszName );
 	RESOURCE_ID ResourceGetIDType( RES_TYPE restype, lpctstr pszName );
 	int ResourceGetIndexType( RES_TYPE restype, lpctstr pszName );
 	lpctstr ResourceGetName( RESOURCE_ID_BASE rid ) const;
-	CScriptObj * ResourceGetDefByName( RES_TYPE restype, lpctstr pszName );
+	CScriptObj * ResourceGetDefByName( RES_TYPE restype, lpctstr pszName )
+	{
+		// resolve a name to the actual resource def.
+		return ResourceGetDef(ResourceGetID(restype, pszName));
+	}
 	bool ResourceLock( CResourceLock & s, RESOURCE_ID_BASE rid );
 	bool ResourceLock( CResourceLock & s, RES_TYPE restype, lpctstr pszName )
 	{
@@ -753,8 +788,12 @@ public:
 	virtual bool LoadResourceSection( CScript * pScript ) = 0;
 
 public:
-	CResourceBase() { };
-	virtual ~CResourceBase() { };
+	CResourceBase()
+	{
+	}
+	virtual ~CResourceBase()
+	{
+	}
 
 private:
 	CResourceBase(const CResourceBase& copy);

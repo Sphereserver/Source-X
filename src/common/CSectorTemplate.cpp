@@ -310,7 +310,7 @@ CRegionBase * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) cons
 			continue;
 		return( pRegion );
 	}
-	return( NULL );
+	return NULL;
 }
 
 // Balkon: get regions list (to cicle through intercepted house regions)

@@ -7,9 +7,9 @@
 #ifndef _INC_CCHAT_H
 #define _INC_CCHAT_H
 
-#include "../common/sphere_library/CSString.h"
-#include "../common/sphere_library/CSArray.h"
-#include "../common/sphereproto.h"
+#include "../../common/sphere_library/CSString.h"
+#include "../../common/sphere_library/CSArray.h"
+#include "../../common/sphereproto.h"
 
 
 class CClient;

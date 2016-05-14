@@ -29,17 +29,28 @@ public:
 	void DetachChar( size_t i );
 	size_t DetachChar( const CChar * pChar );
 	void DeleteChars();
-	size_t GetCharCount() const;
-	CUID GetChar( size_t i ) const;
-	bool IsValidIndex( size_t i ) const;
-	inline size_t BadIndex() const
+	size_t GetCharCount() const
+	{
+		return m_uidCharArray.GetCount();
+	}
+	CUID GetChar( size_t i ) const
+	{
+		return m_uidCharArray[i];
+	}
+	bool IsValidIndex( size_t i ) const
+	{
+		return m_uidCharArray.IsValidIndex(i);
+	}
+	size_t BadIndex() const
 	{
 		return m_uidCharArray.BadIndex();
 	}
 	void WritePartyChars( CScript & s );
 
 public:
-	CCharRefArray() { };
+	CCharRefArray()
+	{
+	}
 
 private:
 	CCharRefArray(const CCharRefArray& copy);

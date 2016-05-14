@@ -2293,7 +2293,7 @@ CItem * CChar::Horse_GetMountItem() const
 	ADDTOCALLSTACK("CChar::Horse_GetMountItem");
 
 	if ( ! IsStatFlag( STATF_Ridden ))
-		return( NULL );
+		return NULL;
 
 	CItem * pItem = m_atRidden.m_FigurineUID.ItemFind();
 
@@ -2324,7 +2324,7 @@ CItem * CChar::Horse_GetMountItem() const
 	if ( pItem == NULL ||
 		( ! pItem->IsType( IT_FIGURINE ) && ! pItem->IsType( IT_EQ_HORSE )))
 	{
-		return( NULL );
+		return NULL;
 	}
 	return( pItem );
 }
@@ -2335,7 +2335,7 @@ CChar * CChar::Horse_GetMountChar() const
 	ADDTOCALLSTACK("CChar::Horse_GetMountChar");
 	CItem * pItem = Horse_GetMountItem();
 	if ( pItem == NULL )
-		return( NULL );
+		return NULL;
 	return( dynamic_cast <CChar*>( pItem->GetTopLevelObj()));
 }
 

@@ -15,16 +15,16 @@ CItemStone * CChar::Guild_Find( MEMORY_TYPE MemType ) const
 {
 	ADDTOCALLSTACK("CChar::Guild_Find");
 	if ( ! m_pPlayer )
-		return( NULL );
+		return NULL;
 	CItemMemory * pMyGMem = Memory_FindTypes((word)(MemType));
 	if ( ! pMyGMem )
-		return( NULL );
+		return NULL;
 	CItemStone * pMyStone = dynamic_cast <CItemStone*>( pMyGMem->m_uidLink.ItemFind());
 	if ( pMyStone == NULL )
 	{
 		// Some sort of mislink ! fix it.
 		const_cast <CChar*>(this)->Memory_ClearTypes((word)(MemType)); 	// Make them forget they were ever in this guild....again!
-		return( NULL );
+		return NULL;
 	}
 	return( pMyStone );
 }
@@ -35,13 +35,13 @@ CStoneMember * CChar::Guild_FindMember( MEMORY_TYPE MemType ) const
 	ADDTOCALLSTACK("CChar::Guild_FindMember");
 	CItemStone * pMyStone = Guild_Find(MemType);
 	if ( pMyStone == NULL )
-		return( NULL );
+		return NULL;
 	CStoneMember * pMember = pMyStone->GetMember( this );
 	if ( pMember == NULL )
 	{
 		// Some sort of mislink ! fix it.
 		const_cast <CChar*>(this)->Memory_ClearTypes((word)(MemType)); 	// Make them forget they were ever in this guild....again!
-		return( NULL );
+		return NULL;
 	}
 	return( pMember );
 }
@@ -79,13 +79,13 @@ lpctstr CChar::Guild_Abbrev( MEMORY_TYPE MemType ) const
 	ADDTOCALLSTACK("CChar::Guild_Abbrev");
 	CStoneMember * pMember = Guild_FindMember(MemType);
 	if ( pMember == NULL )
-		return( NULL );
+		return NULL;
 	if ( ! pMember->IsAbbrevOn())
-		return( NULL );
+		return NULL;
 	CItemStone * pMyStone = pMember->GetParentStone();
 	if ( pMyStone == NULL ||
 		! pMyStone->GetAbbrev()[0] )
-		return( NULL );
+		return NULL;
 	return( pMyStone->GetAbbrev());
 }
 
@@ -95,7 +95,7 @@ lpctstr CChar::Guild_AbbrevBracket( MEMORY_TYPE MemType ) const
 	ADDTOCALLSTACK("CChar::Guild_AbbrevBracket");
 	lpctstr pszAbbrev = Guild_Abbrev(MemType);
 	if ( pszAbbrev == NULL )
-		return( NULL );
+		return NULL;
 	tchar * pszTemp = Str_GetTemp();
 	sprintf( pszTemp, " [%s]", pszAbbrev );
 	return( pszTemp );
@@ -195,7 +195,7 @@ CItemMemory * CChar::Memory_CreateObj( CUID uid, word MemTypes )
 
 	CItemMemory * pMemory = dynamic_cast <CItemMemory *>(CItem::CreateBase( ITEMID_MEMORY ));
 	if ( pMemory == NULL )
-		return( NULL );
+		return NULL;
 
 	pMemory->SetType(IT_EQ_MEMORY_OBJ);
 	pMemory->SetAttr(ATTR_NEWBIE);
@@ -248,7 +248,7 @@ CItemMemory * CChar::Memory_FindObj( CUID uid ) const
 CItemMemory * CChar::Memory_FindObj( const CObjBase * pObj ) const
 {
 	if ( pObj == NULL )
-		return( NULL );
+		return NULL;
 	return Memory_FindObj( pObj->GetUID());
 }
 
@@ -273,9 +273,9 @@ CItemMemory * CChar::Memory_FindObjTypes( const CObjBase * pObj, word MemTypes )
 {
 	CItemMemory * pMemory = Memory_FindObj(pObj);
 	if ( pMemory == NULL )
-		return( NULL );
+		return NULL;
 	if ( ! pMemory->IsMemoryTypes( MemTypes ))
-		return( NULL );
+		return NULL;
 	return( pMemory );
 }
 

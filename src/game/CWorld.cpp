@@ -616,7 +616,7 @@ CItem * CWorldSearch::GetItem()
 			}
 			if ( GetNextSector())
 				continue;
-			return( NULL );
+			return NULL;
 		}
 
 jumpover:
@@ -693,7 +693,7 @@ CChar * CWorldSearch::GetChar()
 			}
 			if ( GetNextSector())
 				continue;
-			return( NULL );
+			return NULL;
 		}
 
 jumpover:

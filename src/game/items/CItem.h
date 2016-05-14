@@ -554,12 +554,30 @@ public:
 	int IsWeird() const;
 	char GetFixZ(CPointMap pt, dword wBlockFlags = 0 );
 	byte GetSpeed() const;
-	void SetAttr( dword dwAttr );
-	void ClrAttr( dword dwAttr );
-	bool IsAttr( dword dwAttr ) const;
-	void SetCanUse( dword dwCanUse );
-	void ClrCanUse( dword dwCanUse );
-	bool IsCanUse( dword dwCanUse ) const;
+	void SetAttr(dword dwAttr)
+	{
+		m_Attr |= dwAttr;
+	}
+	void ClrAttr(dword dwAttr)
+	{
+		m_Attr &= ~dwAttr;
+	}
+	bool IsAttr(dword dwAttr) const	// ATTR_DECAY
+	{
+		return((m_Attr & dwAttr) ? true : false);
+	}
+	void SetCanUse(dword dwCanUse)
+	{
+		m_CanUse |= dwCanUse;
+	}
+	void ClrCanUse(dword dwCanUse)
+	{
+		m_CanUse &= ~dwCanUse;
+	}
+	bool IsCanUse(dword dwCanUse) const	// CanUse_None
+	{
+		return ((m_CanUse & dwCanUse) ? true : false);
+	}
 
 	height_t GetHeight() const;
 	int64  GetDecayTime() const;
@@ -572,11 +590,17 @@ public:
 
 	bool  IsStackableException() const;
 	bool  IsStackable( const CItem * pItem ) const;
-	bool  IsStackableType() const;
+	bool IsStackableType() const
+	{
+		return Can(CAN_I_PILE);
+	}
 
-	bool Can(word wCan) const;
+	bool Can(word wCan) const
+	{
+		return ((m_Can & wCan) ? true : false);
+	}
 	virtual bool  IsSameType( const CObjBase * pObj ) const;
-	bool  Stack( CItem * pItem );
+	bool Stack( CItem * pItem );
 	word ConsumeAmount( word iQty = 1, bool fTest = false );
 
 	CREID_TYPE GetCorpseType() const;
@@ -603,8 +627,15 @@ public:
 	bool MoveToCheck( const CPointMap & pt, CChar * pCharMover = NULL );
 	virtual bool MoveNearObj( const CObjBaseTemplate *pItem, word iSteps = 0 );
 
-	CItem* GetNext() const;
-	CItem* GetPrev() const;
+	CItem* GetNext() const
+	{
+		return static_cast <CItem*>(CObjBase::GetNext());
+	}
+	CItem* GetPrev() const
+	{
+		return static_cast <CItem*>(CObjBase::GetPrev());
+	}
+
 	CObjBase * GetContainer() const;
 	CObjBaseTemplate * GetTopLevelObj() const;
 	uchar GetContainedGridIndex() const;

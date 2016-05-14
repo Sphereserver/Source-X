@@ -286,9 +286,9 @@ CItem * CItemMulti::Multi_FindItemComponent( int iComp ) const
 	UNREFERENCED_PARAMETER(iComp);
 	const CItemBaseMulti * pMultiDef = Multi_GetDef();
 	if ( pMultiDef == NULL )
-		return( NULL );
+		return NULL;
 
-	return( NULL );
+	return NULL;
 }
 
 CItem * CItemMulti::Multi_FindItemType( IT_TYPE type ) const
@@ -296,7 +296,7 @@ CItem * CItemMulti::Multi_FindItemType( IT_TYPE type ) const
 	ADDTOCALLSTACK("CItemMulti::Multi_FindItemType");
 	// Find a part of this multi nearby.
 	if ( ! IsTopLevel())
-		return( NULL );
+		return NULL;
 
 	CWorldSearch Area( GetTopPoint(), Multi_GetMaxDist() );
 	Area.SetSearchSquare(true);
@@ -304,7 +304,7 @@ CItem * CItemMulti::Multi_FindItemType( IT_TYPE type ) const
 	{
 		CItem * pItem = Area.GetItem();
 		if ( pItem == NULL )
-			return( NULL );
+			return NULL;
 		if ( ! Multi_IsPartOf( pItem ))
 			continue;
 		if ( pItem->IsType( type ))
