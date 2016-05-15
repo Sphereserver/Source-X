@@ -3893,7 +3893,7 @@ bool CChar::OnTick()
     // RETURN: false = delete this.
     EXC_TRY("Tick");
 
-    INT64 iTimeDiff = -g_World.GetTimeDiff(m_timeLastRegen);
+    int64 iTimeDiff = -g_World.GetTimeDiff(m_timeLastRegen);
     if (!iTimeDiff)
         return true;
 
@@ -3927,48 +3927,28 @@ bool CChar::OnTick()
 
         EXC_SET("NOTO timeout");
         NotoSave_CheckTimeout();
-
-        if (IsClient())
-        {
-            // Players have a silly "always run" flag that gets stuck on.
-            if (-g_World.GetTimeDiff(GetClient()->m_timeLastEventWalk) > TICK_PER_SEC)
-                StatFlag_Clear(STATF_Fly);
-
-            // Check targeting timeout, if set
-            if (GetClient()->m_Targ_Timeout.IsTimeValid() && g_World.GetTimeDiff(GetClient()->m_Targ_Timeout) <= 0)
-                GetClient()->addTargetCancel();
-        }
-
-        // NOTE: Summon flags can kill our hp here. check again.
-        if (Stat_GetVal(STAT_STR) <= 0)	// We can only die on our own tick.
-        {
-            m_timeLastRegen = g_World.GetCurrentTime();
-            EXC_SET("death");
-            return Death();
-        }
-        if (IsStatFlag(STATF_DEAD))	// We are dead, don't update anything.
-        {
-            m_timeLastRegen = g_World.GetCurrentTime();
-            return true;
-        }
-        Stats_Regen(iTimeDiff);
-    }
-    else
-    {
-        // Check this all the time.
-        if (Stat_GetVal(STAT_STR) <= 0)	// We can only die on our own tick.
-        {
-            EXC_SET("death");
-            return Death();
-        }
     }
 
-    if (IsStatFlag(STATF_DEAD))
-        return true;
     if (IsDisconnected())		// mounted horses can still get a tick.
+        return true;
+
+    // NOTE: Summon flags can kill our hp here. check again.
+    if (!IsStatFlag(STATF_DEAD) && Stat_GetVal(STAT_STR) <= 0)	// We can only die on our own tick.
     {
         m_timeLastRegen = g_World.GetCurrentTime();
-        return true;
+        EXC_SET("death");
+        return Death();
+    }
+
+    if (IsClient())
+    {
+        // Players have a silly "always run" flag that gets stuck on.
+        if (-g_World.GetTimeDiff(GetClient()->m_timeLastEventWalk) > 2)
+            StatFlag_Clear(STATF_Fly);
+
+        // Check targeting timeout, if set
+        if (GetClient()->m_Targ_Timeout.IsTimeValid() && g_World.GetTimeDiff(GetClient()->m_Targ_Timeout) <= 0)
+            GetClient()->addTargetCancel();
     }
 
     if (IsTimerExpired() && IsTimerSet())
@@ -3995,28 +3975,13 @@ bool CChar::OnTick()
                 NPC_ExtraAI();
         }
     }
-    else
-    {
-        // Hit my current target. (if i'm ready)
-        EXC_SET("combat hit try");
-        if (IsStatFlag(STATF_War))
-        {
-            if (Fight_IsActive())
-            {
-                if (m_atFight.m_War_Swing_State == WAR_SWING_READY)
-                    Fight_HitTry();
-            }
-            else if (Skill_GetActive() == SKILL_NONE)
-                //m_Act_Targ = Fight_AttackNext();	//m_Act_Targ = bool?
-                Fight_Attack(m_Fight_Targ.CharFind());
-        }
-    }
 
     if (iTimeDiff >= TICK_PER_SEC)
     {
         // Check location periodically for standing in fire fields, traps, etc.
         EXC_SET("check location");
         CheckLocation(true);
+        Stats_Regen(iTimeDiff);
         m_timeLastRegen = g_World.GetCurrentTime();
     }
 

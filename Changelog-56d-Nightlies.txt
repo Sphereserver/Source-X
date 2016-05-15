@@ -26,3 +26,10 @@ Fixed: Attack delay broken when COMBAT_PREHIT is disabled because of using as Se
 Fixed: Weird crash related to a change on CChar:OnTick() (Not really fixed, just reverted the code because I couldn't track what is exactly causing it and seems to happen when there are ~100 clients online, so I'm not going to mess a lot with it, it's not cool to use 100 players to do tests :) ).
 Attempt to log and stop a crash related to the NetworkOutput.
 Fixed NPC_FightMagery not correctly checking if the NPC can use magic skills and creating some infinite loops under certain circumstances.
+
+15-05-2016, XuN
+Updated Fight_IsActive function with NPC's skills and one Attacker's check.
+Fixed NPCs not ending combat when their target is far away from them and calling Attacker_Delete() @CombatDelete with argn=2 (Distance) to give control over it.
+Fixed GUARD ME making pet following you instead of guarding you (Thanks Shamino).
+Fixed NPCs being dumb before they reach their target.
+Updated a bit CChar::OnTick.

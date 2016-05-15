@@ -1082,6 +1082,8 @@ bool CChar::Fight_IsActive() const
 		case SKILL_SWORDSMANSHIP:
 		case SKILL_WRESTLING:
 		case SKILL_THROWING:
+        case NPCACT_BREATH:
+        case NPCACT_THROWING:
 			return true;
 
 		default:
@@ -1090,6 +1092,9 @@ bool CChar::Fight_IsActive() const
 
 	if ( iSkillActive == Fight_GetWeaponSkill() )
 		return true;
+
+    if (m_lastAttackers.size() > 0)
+        return true;
 
 	return g_Cfg.IsSkillFlag( iSkillActive, SKF_FIGHT );
 }

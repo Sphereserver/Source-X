@@ -102,8 +102,12 @@ CChar * CChar::NPC_FightFindBestTarget()
 				pClosest = pChar;
 
 			int iDist = GetDist(pChar);
-			if ( iDist > UO_MAP_VIEW_SIGHT )
-				continue;
+            if (iDist > UO_MAP_VIEW_SIGHT)
+            {
+                Attacker_Delete(pChar, false, ATTACKER_CLEAR_DISTANCE);
+                it--;
+                continue;
+            }
 			if ( g_Cfg.IsSkillFlag(skillWeapon, SKF_RANGED) && (iDist < g_Cfg.m_iArcheryMinDist || iDist > g_Cfg.m_iArcheryMaxDist) )
 				continue;
 			if ( !CanSeeLOS(pChar) )
@@ -146,8 +150,11 @@ void CChar::NPC_Act_Fight()
 		int iObservant = ( 130 - Stat_GetAdjusted(STAT_INT)) / 20;
 		if ( ! Calc_GetRandVal( 2 + maximum( 0, iObservant )))
 		{
-			if ( NPC_LookAround())
-				return;
+            if (NPC_LookAround())
+            {
+                SetTimeout(1);
+                return;
+            }
 		}
 	}
 
@@ -298,7 +305,6 @@ void CChar::NPC_Act_Fight()
 
 	if ( NPC_FightArchery( pChar ))
 		return;
-
 	// Move in for melee type combat.
 	NPC_Act_Follow( false, CalcFightRange( m_uidWeapon.ItemFind() ), false );
 }

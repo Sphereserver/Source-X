@@ -159,8 +159,12 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 			bCheckCrime = true;
 			break;
 
+        case PC_GUARD_ME:
+            m_Act_Targ = pSrc->GetUID();
+            Skill_Start(NPCACT_GUARD_TARG);
+            break;
+
 		case PC_COME:
-		case PC_GUARD_ME:
 		case PC_FOLLOW_ME:
 			m_Act_Targ = pSrc->GetUID();
 			Skill_Start(NPCACT_FOLLOW_TARG);

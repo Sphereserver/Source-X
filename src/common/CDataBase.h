@@ -15,12 +15,6 @@
 #include <errmsg.h>	// mysql standard include
 #include <mysql.h>	//this needs to be defined AFTER common.h
 
-#ifdef _WIN32
-	#pragma comment(lib, "libmySQL")
-#else
-	#pragma comment(lib, "libmysqlclient")
-#endif
-
 
 #define	MIN_MYSQL_VERSION_ALLOW	40115
 

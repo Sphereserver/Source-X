@@ -18,6 +18,11 @@ Install mysql library:
 If you want to compile to a 64 bits architecture, you'll need also:
 * sudo apt-get install libmysqlclient-dev:x86_64
 
+## Running
+Required libraries:
+	dbghelp.dll Newer OS have it by default on system folders so don't mess with it, but for some old OS you may need it, there is an old one placed on /required libraries/dbghelp.dll.
+	libmysql.dll placed on /required libraries/x86/libmysql.dll for 32 bits builds or in /required libraries/x86_64/libmysql.dll for 64 bits builds.
+
 ## Coding Notes (add as you wish to standardize the coding for new contributors)
 
 * Make sure you can compile and run the program before pushing a commit.
