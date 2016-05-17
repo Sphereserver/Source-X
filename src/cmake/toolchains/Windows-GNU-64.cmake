@@ -23,7 +23,7 @@ function (toolchain_exe_stuff)
 	 # -mno-ms-bitfields is needed to fix structure packing;
 	 # -mwindows: specify the subsystem, avoiding the opening of a console when launching the application.
 	SET (C_SPECIAL		"-pipe -mwindows -fno-expensive-optimizations")
-	SET (CXX_SPECIAL	"-pipe -mwindows -ffast-math ")
+	SET (CXX_SPECIAL	"-pipe -mwindows -ffast-math")
 
 	SET (CMAKE_RC_FLAGS	"--target=pe-x86-64"							PARENT_SCOPE)
 	SET (CMAKE_C_FLAGS	"${C_WARNING_OPTS} ${C_ARCH_OPTS} ${C_OPTS} ${C_SPECIAL}"		PARENT_SCOPE)

@@ -14,7 +14,7 @@ function (toolchain_after_project)
 					/wd4127 /wd4131 /wd4310 /wd4996 /wd4701 /wd4703"		)
 	 #				# Disable warnings caused by external c libraries.
 
-	SET (CXX_FLAGS_COMMON		"/W4 /MP /GR /fp:fast /wd4701 /wd4703
+	SET (CXX_FLAGS_COMMON		"/W4 /MP /GR /fp:fast
 					/wd4127 /wd4131 /wd4310 /wd4996 /wd4701 /wd4703"		)
 
 	 # Setting the exe to be a GUI application and not a console one.
