@@ -602,15 +602,15 @@ PacketManager::~PacketManager(void)
 {
 	// delete standard packet handlers
 	for (size_t i = 0; i < CountOf(m_handlers); ++i)
-		unregisterPacket((uint)(i));
+		unregisterPacket((uint)i);
 
 	// delete extended packet handlers
 	for (size_t i = 0; i < CountOf(m_extended); ++i)
-		unregisterExtended((uint)(i));
+		unregisterExtended((uint)i);
 
 	// delete encoded packet handlers
 	for (size_t i = 0; i < CountOf(m_encoded); ++i)
-		unregisterEncoded((uint)(i));
+		unregisterEncoded((uint)i);
 }
 
 void PacketManager::registerStandardPackets(void)

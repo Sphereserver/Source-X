@@ -1758,14 +1758,11 @@ SKILL_TYPE CResource::FindSkillKey( lpctstr pszKey ) const
 	// Find the skill name in the alpha sorted list.
 	// RETURN: SKILL_NONE = error.
 
-	if ( IsDigit( pszKey[0] ))
+	if ( IsDigit( pszKey[0] ) )
 	{
 		SKILL_TYPE skill = static_cast<SKILL_TYPE>(Exp_GetVal(pszKey));
-		if ( (!CChar::IsSkillBase(skill) || !g_Cfg.m_SkillIndexDefs.IsValidIndex(skill)) &&
-			! CChar::IsSkillNPC(skill))
-		{
+		if ( ( !CChar::IsSkillBase(skill) || !g_Cfg.m_SkillIndexDefs.IsValidIndex(skill) ) && !CChar::IsSkillNPC(skill) )
 			return SKILL_NONE;
-		}
 		return skill;
 	}
 

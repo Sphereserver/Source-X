@@ -1388,7 +1388,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		case CV_SYSMESSAGEF: //There is still an issue with numbers not resolving properly when %i,%d,or other numeric format code is in use
 			{
 				tchar * pszArgs[4];
-				size_t iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, CountOf(pszArgs) );
+				int iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, CountOf(pszArgs) );
 				if ( iArgQty < 2 )
 				{
 					g_Log.EventError("SysMessagef with less than 1 args for the given text\n");
@@ -1416,14 +1416,13 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		case CV_SYSMESSAGEUA:
 			{
 				tchar * pszArgs[5];
-				size_t iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, CountOf(pszArgs) );
+				int iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, CountOf(pszArgs) );
 				if ( iArgQty > 4 )
 				{
 					// Font and mode are actually ignored here, but they never made a difference
 					// anyway.. I'd like to keep the syntax similar to SAYUA
-			 		NCHAR szBuffer[ MAX_TALK_BUFFER ];
+			 		nchar szBuffer[ MAX_TALK_BUFFER ];
 					CvtSystemToNUNICODE( szBuffer, CountOf(szBuffer), pszArgs[4], -1 );
-
 					addBarkUNICODE( szBuffer, NULL, static_cast<HUE_TYPE>(Exp_GetVal(pszArgs[0])), TALKMODE_SYSTEM, FONT_NORMAL, pszArgs[3] );
 				}
 			}
@@ -1432,7 +1431,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		case CV_SYSMESSAGELOC:
 			{
 				tchar * ppArgs[256];
-				size_t iArgQty = Str_ParseCmds( s.GetArgRaw(), ppArgs, CountOf(ppArgs), "," );
+				int iArgQty = Str_ParseCmds( s.GetArgRaw(), ppArgs, CountOf(ppArgs), "," );
 				if ( iArgQty > 1 )
 				{
 					int hue = -1;
@@ -1440,10 +1439,11 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 						hue = Exp_GetVal( ppArgs[0] );
 					int iClilocId = Exp_GetVal( ppArgs[1] );
 
-					if ( hue == -1 )	hue = HUE_TEXT_DEF;
+					if ( hue == -1 )
+						hue = HUE_TEXT_DEF;
 
 					CSString CArgs;
-					for ( size_t i = 2; i < iArgQty; i++ )
+					for (int i = 2; i < iArgQty; i++ )
 					{
 						if ( CArgs.GetLength() )
 							CArgs += "\t";
@@ -1458,7 +1458,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		case CV_SYSMESSAGELOCEX:
 			{
 				tchar * ppArgs[256];
-				size_t iArgQty = Str_ParseCmds( s.GetArgRaw(), ppArgs, CountOf(ppArgs), "," );
+				int iArgQty = Str_ParseCmds( s.GetArgRaw(), ppArgs, CountOf(ppArgs), "," );
 				if ( iArgQty > 2 )
 				{
 					int hue = -1;
@@ -1472,7 +1472,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					if ( hue == -1 )	hue = HUE_TEXT_DEF;
 
 					CSString CArgs;
-					for ( size_t i = 4; i < iArgQty; i++ )
+					for (int i = 4; i < iArgQty; i++ )
 					{
 						if ( CArgs.GetLength() )
 							CArgs += "\t";
@@ -1487,7 +1487,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			Cmd_Skill_Magery(SPELL_Teleport, dynamic_cast<CObjBase *>(pSrc));
 			break;
 		case CV_TILE:
-			if ( ! s.HasArgs())
+			if ( ! s.HasArgs() )
 			{
 				SysMessage( "Usage: TILE z-height item1 item2 itemX" );
 			}
@@ -1503,10 +1503,10 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			SysMessage(g_szServerDescription);
 			break;
 		case CV_WEBLINK:
-			addWebLaunch( s.GetArgStr());
+			addWebLaunch( s.GetArgStr() );
 			break;
 		default:
-			if ( r_LoadVal( s ))
+			if ( r_LoadVal( s ) )
 			{
 				CSString sVal;
 				if ( r_WriteVal( s.GetKey(), sVal, pSrc ))
@@ -1517,7 +1517,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					return true;
 				}
 			}
-			return( CScriptObj::r_Verb( s, pSrc ));	// used in the case of web pages to access server level things..
+			return CScriptObj::r_Verb( s, pSrc );	// used in the case of web pages to access server level things..
 	}
 	return true;
 	EXC_CATCH;

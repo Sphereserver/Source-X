@@ -85,7 +85,8 @@ private:
 	CClient * m_pClient;	// is the char a logged in m_pPlayer ?
 
 public:
-	struct LastAttackers {
+	struct LastAttackers
+	{
 		int64	elapsed;
 		dword	charUID;
 		int64	amountDone;
@@ -94,7 +95,8 @@ public:
 	};
 	std::vector<LastAttackers> m_lastAttackers;
 
-	struct NotoSaves {
+	struct NotoSaves
+	{
 		dword		charUID;	// Character viewing me
 		NOTO_TYPE	color;		// Color sent on movement packets
 		int64		time;		// Update timer
@@ -116,30 +118,31 @@ public:
 	static const LAYER_TYPE sm_VendorLayers[3];
 
 	// Combat stuff. cached data. (not saved)
-	CUID m_uidWeapon;		// current Wielded weapon.	(could just get rid of this ?)
+	CUID m_uidWeapon;			// current Wielded weapon.	(could just get rid of this ?)
 	word m_defense;				// calculated armor worn (NOT intrinsic armor)
 
 	height_t m_height;			// Height set in-game or under some trigger (height=) - for both items and chars
 
 	int m_ModMaxWeight;
-	CUID m_UIDLastNewItem;	///< Last item created, used to store on this CChar the UID of the last created item via ITEM or ITEMNEWBIe in @Create and @Restock to prevent COLOR, etc properties to be called with no reference when the item was not really created, ie: ITEM=i_dagger,R5
-	uint m_exp;			// character experience
-	uint m_level;		// character experience level
+	CUID m_UIDLastNewItem;		///< Last item created, used to store on this CChar the UID of the last created item via ITEM or ITEMNEWBIe in @Create and @Restock to prevent COLOR, etc properties to be called with no reference when the item was not really created, ie: ITEM=i_dagger,R5
+	uint m_exp;					// character experience
+	uint m_level;				// character experience level
 	byte m_iVisualRange;		// Visual Range
-								//DIR_TYPE m_dirClimb;		// we are standing on a CAN_I_CLIMB or UFLAG2_CLIMBABLE, DIR_QTY = not on climbable
+	//DIR_TYPE m_dirClimb;		// we are standing on a CAN_I_CLIMB or UFLAG2_CLIMBABLE, DIR_QTY = not on climbable
 	bool m_fClimbUpdated;		// FixClimbHeight() called?
 	bool m_fIgnoreNextPetCmd;	// return 1 in speech block for this pet will make it ignore target petcmds while allowing the rest to perform them
 	height_t m_zClimbHeight;	// The height at the end of the climbable.
 
 								// Saved stuff.
 	DIR_TYPE m_dirFace;			// facing this dir.
-	CSString m_sTitle;			// Special title such as "the guard" (replaces the normal skill title).
+	CSString m_sTitle;			// Special title such as "the guard" (replaces the normal skill title)
 	CPointMap m_ptHome;			// What is our "home" region. (towns and bounding of NPC's)
 	int64 m_virtualGold;		// Virtual gold used by TOL clients
 
 	// Speech
-	FONT_TYPE m_fonttype;		// speech font to use (client send this to server, but it's not used)
-	HUE_TYPE m_SpeechHue;		// speech hue to use
+	FONT_TYPE m_fonttype;			// speech font to use (client send this to server, but it's not used)
+	HUE_TYPE m_SpeechHue;			// speech hue to use (sent by client)
+	HUE_TYPE m_SpeechHueOverride;	// speech hue to use (ignore the one sent by the client and use this)
 
 	// In order to revert to original Hue and body.
 	CREID_TYPE m_prev_id;		// Backup of body type for ghosts and poly
@@ -170,9 +173,9 @@ public:
 
 	// Some character action in progress.
 	SKILL_TYPE	m_Act_SkillCurrent;	// Currently using a skill. Could be combat skill.
-	CUID	m_Act_Targ;			// Current caction target
-	CUID	m_Fight_Targ;		// Current combat target
-	CUID	m_Act_TargPrv;		// Previous target.
+	CUID	m_Act_Targ;				// Current caction target
+	CUID	m_Fight_Targ;			// Current combat target
+	CUID	m_Act_TargPrv;			// Previous target.
 	int			m_Act_Difficulty;	// -1 = fail skill. (0-100) for skill advance calc.
 	CPointBase  m_Act_p;			// Moving to this location. or location of forge we are working on.
 	int			m_StepStealth;		// Max steps allowed to walk invisible while using Stealth skill
@@ -771,7 +774,10 @@ public:
 	static bool IsSkillNPC( SKILL_TYPE skill );
 
 	SKILL_TYPE Skill_GetBest( uint iRank = 0 ) const; // Which skill is the highest for character p
-	SKILL_TYPE Skill_GetActive() const;
+	SKILL_TYPE Skill_GetActive() const
+	{
+		return m_Act_SkillCurrent;
+	}
 	lpctstr Skill_GetName( bool fUse = false ) const;
 	ushort Skill_GetBase( SKILL_TYPE skill ) const;
 	int Skill_GetMax( SKILL_TYPE skill, bool ignoreLock = false ) const;

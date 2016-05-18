@@ -50,11 +50,6 @@ SKILL_TYPE CChar::Skill_GetBest( uint iRank ) const
 	return static_cast<SKILL_TYPE>(LOWORD( dwSkillTmp ));
 }
 
-SKILL_TYPE CChar::Skill_GetActive() const
-{
-	return( m_Act_SkillCurrent );
-}
-
 // Retrieves a random magic skill, if iVal is set it will only select from the ones with value > iVal
 SKILL_TYPE CChar::Skill_GetMagicRandom(ushort iVal)
 {
@@ -3497,7 +3492,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficulty )
 	{
 		if ( skill != SKILL_NONE && !IsSkillBase(skill) && !IsSkillNPC(skill) )
 		{
-			DEBUG_ERR(("UID:0%x Bad Skill %d for '%s'\n", (dword)(GetUID()), skill, GetName()));
+			DEBUG_ERR(("UID:0%x Bad Skill %d for '%s'\n", (dword)GetUID(), skill, GetName()));
 			return false;
 		}
 		m_Act_SkillCurrent = skill;

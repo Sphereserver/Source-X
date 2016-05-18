@@ -508,24 +508,31 @@ void CObjBase::Emote2(lpctstr pText, lpctstr pText1, CClient * pClientExclude, b
 	pObjTop->UpdateObjMessage(pszThem, pszYou, pClientExclude, HUE_TEXT_DEF, TALKMODE_EMOTE);
 }
 
+// Speak to all clients in the area.
+// ASCII packet
 void CObjBase::Speak( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font )
 {
-	ADDTOCALLSTACK("CObjBase::Speak");
+	ADDTOCALLSTACK_INTENSIVE("CObjBase::Speak");
 	g_World.Speak( this, pText, wHue, mode, font );
 }
 
+// Speak to all clients in the area.
+// Unicode packet
 void CObjBase::SpeakUTF8( lpctstr pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
 {
-	ADDTOCALLSTACK("CObjBase::SpeakUTF8");
+	ADDTOCALLSTACK_INTENSIVE("CObjBase::SpeakUTF8");
 	// convert UTF8 to UNICODE.
-	NCHAR szBuffer[ MAX_TALK_BUFFER ];
+	nchar szBuffer[ MAX_TALK_BUFFER ];
 	CvtSystemToNUNICODE( szBuffer, CountOf(szBuffer), pText, -1 );
 	g_World.SpeakUNICODE( this, szBuffer, wHue, mode, font, lang );
 }
 
+// Speak to all clients in the area.
+// Unicode packet
+// Difference with SpeakUTF8: this method accepts as text input an nword, which is unicode if sphere is compiled with UNICODE macro)
 void CObjBase::SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
 {
-	ADDTOCALLSTACK("CObjBase::SpeakUTF8Ex");
+	ADDTOCALLSTACK_INTENSIVE("CObjBase::SpeakUTF8Ex");
 	g_World.SpeakUNICODE( this, pText, wHue, mode, font, lang );
 }
 
@@ -539,8 +546,8 @@ bool CObjBase::MoveNear( CPointMap pt, word iSteps )
 	for ( int i = 0; i < iSteps; i++ )
 	{
 		pt = ptOld;
-		pt.m_x += (short)(Calc_GetRandVal2(-iSteps, iSteps));
-		pt.m_y += (short)(Calc_GetRandVal2(-iSteps, iSteps));
+		pt.m_x += (short)Calc_GetRandVal2(-iSteps, iSteps);
+		pt.m_y += (short)Calc_GetRandVal2(-iSteps, iSteps);
 
 		if ( !pt.IsValidPoint() )	// hit the edge of the world, so go back to the previous valid position
 		{
@@ -1009,7 +1016,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 				tchar * key = const_cast<tchar*>(pszKey);
 				key += 5;
 				tchar * pszArg[4];
-				size_t iArgQty = Str_ParseCmds(key , pszArg, CountOf(pszArg));
+				int iArgQty = Str_ParseCmds(key , pszArg, CountOf(pszArg));
 				if (iArgQty < 2)
 				{
 					g_Log.EventError("SysMessagef with less than 1 args for the given text\n");
@@ -1950,7 +1957,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			{
 				EXC_SET("DAMAGE");
 				int64 piCmd[8];
-				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd));
+				int iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd));
 				if ( iArgQty < 1 )
 					return false;
 				if ( iArgQty > 2 )	// Give it a new source char UID
@@ -1995,7 +2002,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			{
 				EXC_SET("EFFECT");
 				int64 piCmd[12];
-				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd));
+				int iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd));
 				if ( iArgQty < 2 )
 					return false;
 				CObjBase *	pThis	= this;
@@ -2084,9 +2091,9 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					return false;
 
 				tchar * pszArgs[5];
-				NCHAR ncBuffer[ MAX_TALK_BUFFER ];
+				nchar ncBuffer[ MAX_TALK_BUFFER ];
 
-				size_t iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, CountOf(pszArgs) );
+				int iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, CountOf(pszArgs) );
 				if ( iArgQty < 5 )
 					break;
 
@@ -2116,7 +2123,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				CObjBase *	pObjNear;
 				int64 piCmd[4];
 
-				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd) );
+				int iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd) );
 				if ( iArgQty <= 0 )
 					return false;
 				if ( iArgQty < 3 )
@@ -2167,7 +2174,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 				tchar * pszArgs[2];
 
-				size_t iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, CountOf(pszArgs) );
+				int iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, CountOf(pszArgs) );
 				if ( iArgQty == 0 )
 					break;
 					
@@ -2192,7 +2199,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				EXC_SET("RESENDTOOLTIP");
 			
 				int64 piCmd[2];
-				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd) );
+				int iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd) );
 
 				bool bSendFull = false;
 				bool bUseCache = false;
@@ -2207,7 +2214,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			}
 		case OV_SAY: //speak so everyone can here
 			EXC_SET("SAY");
-			Speak( s.GetArgStr());
+			Speak( s.GetArgStr() );
 			break;
 
 		case OV_SAYU:
@@ -2221,7 +2228,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			{
 				EXC_SET("SAYUA");
 				tchar * pszArgs[5];
-				size_t iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, CountOf(pszArgs) );
+				int iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, CountOf(pszArgs) );
 				if ( iArgQty < 5 )
 					break;
 
@@ -2237,7 +2244,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			{
 				EXC_SET("SOUND");
 				int64 piCmd[2];
-				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd));
+				int iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd));
 				Sound( static_cast<SOUND_TYPE>(piCmd[0]), ( iArgQty > 1 ) ? (int)(piCmd[1]) : 1 );
 			}
 			break;

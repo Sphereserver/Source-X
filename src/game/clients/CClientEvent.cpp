@@ -36,7 +36,7 @@ lpctstr const CClient::sm_szCmd_Redirect[13] =
 	"SHRINK",
 };
 
-void CClient::Event_ChatButton(const NCHAR * pszName) // Client's chat button was pressed
+void CClient::Event_ChatButton(const nchar * pszName) // Client's chat button was pressed
 {
 	ADDTOCALLSTACK("CClient::Event_ChatButton");
 	// See if they've made a chatname yet
@@ -100,7 +100,7 @@ void CClient::Event_ChatButton(const NCHAR * pszName) // Client's chat button wa
 	this->GetChar()->SetTriggerActive("");
 }
 
-void CClient::Event_ChatText( const NCHAR * pszText, int len, CLanguageID lang ) // Text from a client
+void CClient::Event_ChatText( const nchar * pszText, int len, CLanguageID lang ) // Text from a client
 {
 	ADDTOCALLSTACK("CClient::Event_ChatText");
 	// Just send it all to the chat system
@@ -1733,7 +1733,8 @@ void CClient::Event_Talk_Common(tchar *szText)	// PC speech
 	pChar->NPC_OnHear(&szText[i], m_pChar);
 }
 
-void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bool bNoStrip) // PC speech
+// PC speech: response to ASCII speech request
+void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bool bNoStrip)
 {
 	ADDTOCALLSTACK("CClient::Event_Talk");
 
@@ -1748,13 +1749,13 @@ void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 		return;
 
 	if ( (wHue < 2) || (wHue > HUE_DYE_HIGH) )
-		wHue = HUE_TEXT_DEF;
+		wHue = HUE_SAY_DEF;
 
-	pAccount->m_lang.Set( NULL );	// default.
-	if ( mode == TALKMODE_SYSTEM )
+	pAccount->m_lang.Set( NULL );	// default
+	if ( (mode == TALKMODE_SYSTEM) && (m_pChar->m_SpeechHueOverride == HUE_SAY_DEF) )
 		m_pChar->m_SpeechHue = wHue;
 
-	// Rip out the unprintables first.
+	// Rip out the unprintables first
 	tchar szText[MAX_TALK_BUFFER];
 	size_t len;
 
@@ -1793,7 +1794,7 @@ void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 				GetSocketID(), m_pChar->GetName(), pszText, mode, fCancelSpeech ? " (muted)" : "");
 		}
 
-		// Guild and Alliance mode will not pass this.
+		// Guild and Alliance mode will not pass this
 		if ( mode == 13 || mode == 14 )
 			return;
 
@@ -1818,12 +1819,14 @@ void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 
 		if ( !fCancelSpeech && ( len <= 128 ) ) // From this point max 128 chars
 		{
+			// For both client ASCII and Unicode speech requests, Sphere sends a Unicode speech.
 			m_pChar->SpeakUTF8(z, wHue, static_cast<TALKMODE_TYPE>(mode), m_pChar->m_fonttype, GetAccount()->m_lang);
 			Event_Talk_Common(static_cast<tchar*>(z));
 		}
 	}
 }
 
+// PC speech: response to Unicode speech request
 void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TALKMODE_TYPE mMode, FONT_TYPE font, lpctstr pszLang )
 {
 	ADDTOCALLSTACK("CClient::Event_TalkUNICODE");
@@ -1846,11 +1849,11 @@ void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TA
 	if ( mMode == 1 || mMode == 3 || mMode == 4 || mMode == 5 || mMode == 6 || mMode == 7 || mMode == 10 || mMode == 11 || mMode == 12 )
 		return;
 
-	if ( wHue > HUE_DYE_HIGH )
-		wHue = HUE_TEXT_DEF;
+	if ((wHue < 2) || (wHue > HUE_DYE_HIGH))
+		wHue = HUE_SAY_DEF;
 
 	pAccount->m_lang.Set(pszLang);
-	if ( mMode == TALKMODE_SYSTEM )
+	if ( (mMode == TALKMODE_SYSTEM) && (m_pChar->m_SpeechHueOverride == HUE_SAY_DEF) )
 		m_pChar->m_SpeechHue = wHue;
 
 	tchar szText[MAX_TALK_BUFFER];
@@ -1865,7 +1868,7 @@ void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TA
 
 	if ( !Event_Command(pszText, mMode) )
 	{
-		bool	fCancelSpeech	= false;
+		bool fCancelSpeech	= false;
 
 		if ( m_pChar->OnTriggerSpeech( false, pszText, m_pChar, mMode, wHue) )
 			fCancelSpeech	= true;
@@ -1882,9 +1885,9 @@ void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TA
 
 		if ( g_Cfg.m_fSuppressCapitals )
 		{
-			size_t chars = strlen(szText);
-			size_t capitals = 0;
-			size_t i = 0;
+			int chars = (int)strlen(szText);
+			int capitals = 0;
+			int i = 0;
 			for ( i = 0; i < chars; i++ )
 				if (( szText[i] >= 'A' ) && ( szText[i] <= 'Z' ))
 					capitals++;
@@ -1919,13 +1922,13 @@ void CClient::Event_SetName( CUID uid, const char * pszCharName )
 		return;
 
 	// Do we have the right to do this ?
-	if ( m_pChar == pChar || ! pChar->NPC_IsOwnedBy( m_pChar, true ))
+	if ( m_pChar == pChar || ! pChar->NPC_IsOwnedBy( m_pChar, true ) )
 		return;
 	if ( FindTableSorted( pszCharName, sm_szCmd_Redirect, CountOf(sm_szCmd_Redirect) ) >= 0 )
 		return;
 	if ( FindTableSorted( pszCharName, CCharNPC::sm_szVerbKeys, 14 ) >= 0 )
 		return;
-	if ( g_Cfg.IsObscene(pszCharName))
+	if ( g_Cfg.IsObscene(pszCharName) )
 		return;
 
 	if ( IsTrigUsed(TRIGGER_RENAME) )

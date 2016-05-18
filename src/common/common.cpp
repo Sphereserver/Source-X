@@ -76,7 +76,7 @@
 #endif // !_WIN32
 
 
-#ifdef NCHAR
+#ifdef nchar
 static int CvtSystemToUNICODE( wchar & wChar, lpctstr pInp, int iSizeInBytes )
 {
 	// Convert a UTF8 encoded string to a single unicode char.
@@ -180,7 +180,7 @@ static int CvtUNICODEToSystem( tchar * pOut, int iSizeOutBytes, wchar wChar )
 	return iBytes;
 }
 
-int CvtSystemToNUNICODE( NCHAR * pOut, int iSizeOutChars, lpctstr pInp, int iSizeInBytes )
+int CvtSystemToNUNICODE( nchar * pOut, int iSizeOutChars, lpctstr pInp, int iSizeInBytes )
 {
 	//
 	// Convert the system default text format UTF8 to UNICODE
@@ -280,7 +280,7 @@ int CvtSystemToNUNICODE( NCHAR * pOut, int iSizeOutChars, lpctstr pInp, int iSiz
 	return iOut;
 }
 
-int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const NCHAR * pInp, int iSizeInChars )
+int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const nchar * pInp, int iSizeInChars )
 {
 	// ARGS:
 	//  iSizeInBytes = space we have (included null char)
@@ -368,7 +368,7 @@ int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const NCHAR * pInp, in
 	return( iOut );
 }
 
-#endif // NCHAR
+#endif // nchar
 
 extern "C"
 {

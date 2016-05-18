@@ -309,7 +309,7 @@ public:
 	void RespawnDeadNPCs();
 
 	void Speak( const CObjBaseTemplate * pSrc, lpctstr pText, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD );
-	void SpeakUNICODE( const CObjBaseTemplate * pSrc, const NCHAR * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang );
+	void SpeakUNICODE( const CObjBaseTemplate * pSrc, const nchar * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang );
 
 	void Broadcast( lpctstr pMsg );
 	void __cdecl Broadcastf( lpctstr pMsg, ...) __printfargs(2,3);

@@ -2109,7 +2109,7 @@ bool PacketSpeakReqUNICODE::onReceive(NetState* net)
 	}
 	else
 	{
-		NCHAR text[MAX_TALK_BUFFER];
+		nchar text[MAX_TALK_BUFFER];
 		readStringUNICODE(reinterpret_cast<wchar *>(text), packetLength, false);
 		client->Event_TalkUNICODE(text, (int)(packetLength), hue, mode, font, language);
 	}
@@ -2266,7 +2266,7 @@ bool PacketChatCommand::onReceive(NetState* net)
 	if (textLength >= MAX_TALK_BUFFER)
 		textLength = MAX_TALK_BUFFER - 1;
 
-	NCHAR text[MAX_TALK_BUFFER];
+	nchar text[MAX_TALK_BUFFER];
 	readStringUNICODE(reinterpret_cast<wchar *>(text), textLength, false);
 
 	client->Event_ChatText(text, (int)(textLength), CLanguageID(language));
@@ -2293,7 +2293,7 @@ bool PacketChatButton::onReceive(NetState* net)
 	ASSERT(client);
 
 	skip(1); // 0x00
-	NCHAR name[MAX_NAME_SIZE+1];
+	nchar name[MAX_NAME_SIZE+1];
 	readStringUNICODE(reinterpret_cast<wchar *>(name), CountOf(name));
 
 	client->Event_ChatButton(name);

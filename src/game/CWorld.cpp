@@ -2181,17 +2181,16 @@ void CWorld::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE wHu
 	if ( !pszText || !pszText[0] )
 		return;
 
-	bool fSpeakAsGhost = false;	// I am a ghost ?
+	bool fSpeakAsGhost = false;
 	if ( pSrc )
 	{
 		if ( pSrc->IsChar() )
 		{
-			const CChar *pCharSrc = static_cast<const CChar *>(pSrc);
-			ASSERT(pCharSrc);
-			fSpeakAsGhost = pCharSrc->IsSpeakAsGhost();
+			const CChar *pSrcChar = static_cast<const CChar *>(pSrc);
+			ASSERT(pSrcChar);
 
-			if ( wHue == HUE_TEXT_DEF && pCharSrc->m_pNPC )
-				wHue = pCharSrc->m_SpeechHue;
+			// Are they dead? Garble the text. unless we have SpiritSpeak
+			fSpeakAsGhost = pSrcChar->IsSpeakAsGhost();
 		}
 	}
 	else
@@ -2199,16 +2198,16 @@ void CWorld::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE wHu
 
 	//CSString sTextUID;
 	//CSString sTextName;	// name labelled text.
-	CSString sTextGhost; // ghost speak.
+	CSString sTextGhost;	// ghost speak.
 
-						 // For things
+	// For things
 	bool fCanSee = false;
 	CChar * pChar = NULL;
 
 	ClientIterator it;
 	for (CClient* pClient = it.next(); pClient != NULL; pClient = it.next(), fCanSee = false, pChar = NULL)
 	{
-		if ( ! pClient->CanHear( pSrc, mode ))
+		if ( ! pClient->CanHear( pSrc, mode ) )
 			continue;
 
 		tchar * myName = Str_GetTemp();
@@ -2257,6 +2256,12 @@ void CWorld::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE wHu
 			if ( !*myName )
 				sprintf(myName, "<%s [%x]>", pSrc->GetName(), (dword)pSrc->GetUID());
 		}
+
+		// Changing talkmode from say to system on EC, because system is the only talkmode to allow a custom (non client defined) hue.
+		// Also, this trick will work only with the Unicode packet, so MSG_DEF_UNICODE in sphere_msgs.scp must be set to 1.
+		if (pClient->GetNetState()->isClientEnhanced() && (mode == TALKMODE_SAY))
+			mode = TALKMODE_SYSTEM;
+
 		if (*myName)
 			pClient->addBarkParse( pszSpeak, pSrc, wHue, mode, font, false, myName );
 		else
@@ -2264,28 +2269,44 @@ void CWorld::Speak( const CObjBaseTemplate * pSrc, lpctstr pszText, HUE_TYPE wHu
 	}
 }
 
-void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const NCHAR * pwText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
+void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const nchar * pwText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
 {
 	ADDTOCALLSTACK("CWorld::SpeakUNICODE");
 	bool fSpeakAsGhost = false;
-	if ( pSrc && pSrc->IsChar() )
-	{
-		// Are they dead ? Garble the text. unless we have SpiritSpeak
-		const CChar * pCharSrc = dynamic_cast <const CChar*> (pSrc);
-		if ( pCharSrc )
-			fSpeakAsGhost = pCharSrc->IsSpeakAsGhost();
-		else
-			pSrc = NULL;
-	}
+	const CChar * pSrcChar = NULL;
 
-	if ( !pSrc )
+	if ( pSrc )
+	{
+		if ( pSrc->IsChar() )
+		{
+			pSrcChar = static_cast<const CChar *>(pSrc);
+			ASSERT(pSrcChar);
+
+			// Are they dead? Garble the text. unless we have SpiritSpeak
+			fSpeakAsGhost = pSrcChar->IsSpeakAsGhost();
+		}
+	}
+	else
 		mode = TALKMODE_BROADCAST;
 
-	NCHAR wTextUID[MAX_TALK_BUFFER];	// uid labelled text.
+	if (mode != TALKMODE_SPELL)
+	{
+		if (pSrcChar)
+		{
+			// This hue overwriting part for ASCII text isn't done in CWorld::Speak but in CClient::AddBarkParse.
+			// If a specific hue is not given, use SpeechHue (NPC) or SpeechHueOverride (PG).
+			if (pSrcChar->m_pNPC && (pSrcChar->m_SpeechHue != HUE_TEXT_DEF))
+				wHue = pSrcChar->m_SpeechHue;
+			else if (!pSrcChar->m_pNPC && (pSrcChar->m_SpeechHueOverride != HUE_SAY_DEF))
+					wHue = pSrcChar->m_SpeechHueOverride;
+		}
+	}
+
+	nchar wTextUID[MAX_TALK_BUFFER];	// uid labelled text.
 	wTextUID[0] = '\0';
-	NCHAR wTextName[MAX_TALK_BUFFER];	// name labelled text.
+	nchar wTextName[MAX_TALK_BUFFER];	// name labelled text.
 	wTextName[0] = '\0';
-	NCHAR wTextGhost[MAX_TALK_BUFFER]; // ghost speak.
+	nchar wTextGhost[MAX_TALK_BUFFER];	// ghost speak.
 	wTextGhost[0] = '\0';
 
 	// For things
@@ -2295,10 +2316,10 @@ void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const NCHAR * pwText, 
 	ClientIterator it;
 	for (CClient* pClient = it.next(); pClient != NULL; pClient = it.next(), fCanSee = false, pChar = NULL)
 	{
-		if ( ! pClient->CanHear( pSrc, mode ))
+		if ( ! pClient->CanHear( pSrc, mode ) )
 			continue;
 
-		const NCHAR * pwSpeak = pwText;
+		const nchar * pwSpeak = pwText;
 		pChar = pClient->GetChar();
 
 		if ( pChar != NULL )
@@ -2306,7 +2327,7 @@ void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const NCHAR * pwText, 
 			// Cansee?
 			fCanSee = pChar->CanSee( pSrc );
 
-			if ( fSpeakAsGhost && ! pChar->CanUnderstandGhost())
+			if ( fSpeakAsGhost && ! pChar->CanUnderstandGhost() )
 			{
 				if ( wTextGhost[0] == '\0' )	// Garble ghost.
 				{
@@ -2334,17 +2355,13 @@ void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const NCHAR * pwText, 
 					int iLen = CvtSystemToNUNICODE( wTextName, CountOf(wTextName), sTextName, -1 );
 					if ( wTextGhost[0] != '\0' )
 					{
-						for ( size_t i = 0; wTextGhost[i] != '\0' && iLen < MAX_TALK_BUFFER; i++, iLen++ )
-						{
+						for ( int i = 0; wTextGhost[i] != '\0' && iLen < MAX_TALK_BUFFER; i++, iLen++ )
 							wTextName[iLen] = wTextGhost[i];
-						}
 					}
 					else
 					{
-						for ( size_t i = 0; pwText[i] != 0 && iLen < MAX_TALK_BUFFER - 1; i++, iLen++ )
-						{
+						for ( int i = 0; pwText[i] != 0 && iLen < MAX_TALK_BUFFER - 1; i++, iLen++ )
 							wTextName[iLen] = pwText[i];
-						}
 					}
 					wTextName[iLen] = '\0';
 				}
@@ -2357,12 +2374,10 @@ void CWorld::SpeakUNICODE( const CObjBaseTemplate * pSrc, const NCHAR * pwText, 
 			if ( wTextUID[0] == '\0' )
 			{
 				tchar * pszMsg = Str_GetTemp();
-				sprintf(pszMsg, "<%s [%x]>", pSrc->GetName(), (dword)(pSrc->GetUID()));
+				sprintf(pszMsg, "<%s [%x]>", pSrc->GetName(), (dword)pSrc->GetUID());
 				int iLen = CvtSystemToNUNICODE( wTextUID, CountOf(wTextUID), pszMsg, -1 );
-				for ( size_t i = 0; pwText[i] && iLen < MAX_TALK_BUFFER - 1; i++, iLen++ )
-				{
+				for ( int i = 0; pwText[i] && iLen < MAX_TALK_BUFFER - 1; i++, iLen++ )
 					wTextUID[iLen] = pwText[i];
-				}
 				wTextUID[iLen] = '\0';
 			}
 			pwSpeak = wTextUID;

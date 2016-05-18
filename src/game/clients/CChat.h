@@ -42,7 +42,7 @@ private:
 public:
 	CChatChannel * GetFirstChannel() const;
 
-	void EventMsg( CClient * pClient, const NCHAR * pszText, int len, CLanguageID lang ); // Text from a client
+	void EventMsg( CClient * pClient, const nchar * pszText, int len, CLanguageID lang ); // Text from a client
 
 	static bool IsValidName(lpctstr pszName, bool fPlayer);
 

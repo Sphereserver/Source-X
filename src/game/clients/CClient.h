@@ -318,8 +318,8 @@ public:
 	void Event_Attack(CUID uid);
 	void Event_Book_Title( CUID uid, lpctstr pszTitle, lpctstr pszAuthor );
 	void Event_BugReport( const tchar * pszText, int len, BUGREPORT_TYPE type, CLanguageID lang = 0 );
-	void Event_ChatButton(const NCHAR * pszName); // Client's chat button was pressed
-	void Event_ChatText( const NCHAR * pszText, int len, CLanguageID lang = 0 ); // Text from a client
+	void Event_ChatButton(const nchar * pszName); // Client's chat button was pressed
+	void Event_ChatText( const nchar * pszText, int len, CLanguageID lang = 0 ); // Text from a client
 	void Event_CombatMode( bool fWar ); // Only for switching to combat mode
 	bool Event_DoubleClick( CUID uid, bool fMacro, bool fTestTouch, bool fScript = false );
 	void Event_ExtCmd( EXTCMD_TYPE type, tchar * pszName );
@@ -486,7 +486,7 @@ public:
 	void addPlayerUpdate();
 
 	void addBark( lpctstr pText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_DEFAULT, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD );
-	void addBarkUNICODE( const NCHAR * pText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang = 0 );
+	void addBarkUNICODE( const nchar * pText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang = 0 );
 	void addBarkLocalized( int iClilocId, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_DEFAULT, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD, lpctstr pArgs = NULL );
 	void addBarkLocalizedEx( int iClilocId, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_DEFAULT, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD, AFFIX_TYPE affix = AFFIX_APPEND, lpctstr pAffix = NULL, lpctstr pArgs = NULL );
 	void addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font = FONT_NORMAL, bool bUnicode = false, lpctstr name = "" );
@@ -685,7 +685,7 @@ public:
 	{
 		// This is a game or login server.
 		// m_Crypt.IsInit()
-		return ( m_iConnectType == CONNECT_CRYPT || m_iConnectType == CONNECT_LOGIN || m_iConnectType == CONNECT_GAME );
+		return ( (m_iConnectType == CONNECT_CRYPT) || (m_iConnectType == CONNECT_LOGIN) || (m_iConnectType == CONNECT_GAME) );
 	}
 
 	CONNECT_TYPE GetConnectType() const

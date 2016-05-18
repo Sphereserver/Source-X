@@ -693,10 +693,10 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 			strcpylen( szTmp, m_Targ_Text, CountOf(szTmp));
 
 			int64 piArgs[16];		// Maximum parameters in one line
-			size_t iArgQty = Str_ParseCmds( szTmp, piArgs, CountOf( piArgs ));
+			int iArgQty = Str_ParseCmds( szTmp, piArgs, CountOf( piArgs ));
 
 			char z = (char)(piArgs[0]);	// z height is the first arg.
-			size_t iArg = 0;
+			int iArg = 0;
 			for ( int mx = rect.m_left; mx <= rect.m_right; mx++)
 			{
 				for (int my = rect.m_top; my <= rect.m_bottom; my++)
@@ -706,7 +706,7 @@ bool CClient::OnTarg_Tile( CObjBase * pObj, const CPointMap & pt )
 					CItem * pItem = CItem::CreateTemplate(static_cast<ITEMID_TYPE>(RES_GET_INDEX(piArgs[iArg])), NULL, m_pChar);
 					ASSERT(pItem);
 					pItem->SetAttr( ATTR_MOVE_NEVER );
-					CPointMap ptCur((word)(mx), (word)(my), z, pt.m_map);
+					CPointMap ptCur((word)mx, (word)my, z, pt.m_map);
 					pItem->MoveToUpdate( ptCur );
 					iCount++;
 				}

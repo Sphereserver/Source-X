@@ -1348,7 +1348,7 @@ public:
 class PacketPartyChat : public PacketParty
 {
 public:
-	PacketPartyChat(const CChar* source, const NCHAR* text);
+	PacketPartyChat(const CChar* source, const nchar* text);
 };
 
 /***************************************************************************

@@ -3,8 +3,8 @@
 #include "network.h"
 #include "packet.h"
 
-extern int CvtSystemToNUNICODE( NCHAR * pOut, int iSizeOutChars, lpctstr pInp, int iSizeInBytes );
-extern int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const NCHAR * pInp, int iSizeInChars );
+extern int CvtSystemToNUNICODE( nchar * pOut, int iSizeOutChars, lpctstr pInp, int iSizeInBytes );
+extern int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const nchar * pInp, int iSizeInChars );
 
 // on windows we can use the win32 api for converting between unicode<->ascii,
 // otherwise we need to convert with our own functions (gcc uses utf32 instead
@@ -706,6 +706,7 @@ int64 Packet::readInt64(void)
 	int64 qw = ((int64)dwHigh << 32) + dwLow;
 	return qw;
 }
+
 void Packet::readStringASCII(char* buffer, size_t length, bool includeNull)
 {
 	ASSERT(buffer != NULL);

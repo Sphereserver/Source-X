@@ -1288,7 +1288,7 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 				if ( s.HasArgs() )
 				{
 					int64 piCmd[2];
-					size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd));
+					int iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd));
 					if ( iArgQty == 2 )
 					{
 						CUID pGuildUid = (uint)(piCmd[0]);

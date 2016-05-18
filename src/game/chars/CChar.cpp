@@ -33,7 +33,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@Attack",				// I am attacking someone (SRC)
 	"@CallGuards",
 
-	"@charAttack",		// Here starts @charXXX section
+	"@charAttack",			// Here starts @charXXX section
 	"@charClick",
 	"@charClientTooltip",
 	"@charContextMenuRequest",
@@ -42,7 +42,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@charTradeAccepted",
 
 	"@Click",				// I got clicked on by someone.
-	"@ClientTooltip", // Sending tooltips to someone
+	"@ClientTooltip", 		// Sending tooltips to someone
 	"@CombatAdd",
 	"@CombatDelete",
 	"@CombatEnd",
@@ -79,7 +79,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@itemAfterClick",
 	"@itemBuy",
 	"@itemClick",			// I clicked on an item
-	"@itemClientTooltip", // Receiving tooltip for something
+	"@itemClientTooltip", 	// Receiving tooltip for something
 	"@itemContextMenuRequest",
 	"@itemContextMenuSelect",
 	"@itemCreate",			//?
@@ -123,7 +123,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 
 	"@NPCAcceptItem",		// (NPC only) i've been given an item i like (according to DESIRES)
 	"@NPCActFight",
-	"@NPCActFollow",			// (NPC only) following someone right now
+	"@NPCActFollow",		// (NPC only) following someone right now
 	"@NPCAction",
 	"@NPCHearGreeting",		// (NPC only) i have been spoken to for the first time. (no memory of previous hearing)
 	"@NPCHearUnknown",		//+(NPC only) I heard something i don't understand.
@@ -141,11 +141,11 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@PartyLeave",
 	"@PartyRemove",			//I have ben removed from the party by SRC
 
-	"@PersonalSpace",	//+i just got stepped on.
-	"@PetDesert",		// I just went wild again
-	"@Profile",			// someone hit the profile button for me.
-	"@ReceiveItem",		// I was just handed an item (Not yet checked if i want it)
-	"@RegenStat",		//Regenerating any stat
+	"@PersonalSpace",		// +i just got stepped on.
+	"@PetDesert",			// I just went wild again
+	"@Profile",				// someone hit the profile button for me.
+	"@ReceiveItem",			// I was just handed an item (Not yet checked if i want it)
+	"@RegenStat",			// Regenerating any stat
 
 	"@RegionEnter",
 	"@RegionLeave",
@@ -154,7 +154,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 
 	"@Rename",
 	"@Resurrect",
-	"@SeeCrime",		// I saw a crime
+	"@SeeCrime",			// I saw a crime
 	"@SeeHidden",			// Can I see hidden chars?
 	"@SeeSnoop",
 
@@ -175,18 +175,18 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@SkillWait",
 
 	"@SpellBook",
-	"@SpellCast",		//+Char is casting a spell.
-	"@SpellEffect",		//+A spell just hit me.
-	"@SpellFail",		// The spell failed
-	"@SpellSelect",		// Selected a spell
-	"@SpellSuccess",	// The spell succeeded
+	"@SpellCast",			//+Char is casting a spell.
+	"@SpellEffect",			//+A spell just hit me.
+	"@SpellFail",			// The spell failed
+	"@SpellSelect",			// Selected a spell
+	"@SpellSuccess",		// The spell succeeded
 	"@SpellTargetCancel",	// cancelled spell target
 	"@StatChange",
-	"@StepStealth",		//+Made a step in stealth mode
-	"@Targon_Cancel",	//closing target from TARGETF*
-	"@ToggleFlying",	//Flying On/Off
-	"@ToolTip",			// someone did tool tips on me.
-	"@TradeAccepted",	// Everything went well, and we are about to exchange trade items
+	"@StepStealth",			//+Made a step in stealth mode
+	"@Targon_Cancel",		//closing target from TARGETF*
+	"@ToggleFlying",		//Flying On/Off
+	"@ToolTip",				// someone did tool tips on me.
+	"@TradeAccepted",		// Everything went well, and we are about to exchange trade items
 	"@TradeClose",
 	"@TradeCreate",
 
@@ -234,7 +234,6 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false )
 	m_pRoom = NULL;
 	m_StatFlag = 0;
 
-
 	if ( g_World.m_fSaveParity )
 	{
 		StatFlag_Set(STATF_SaveParity);	// It will get saved next time.
@@ -243,6 +242,7 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false )
 	m_dirFace = DIR_SE;
 	m_fonttype = FONT_NORMAL;
 	m_SpeechHue = HUE_TEXT_DEF;
+	m_SpeechHueOverride = HUE_SAY_DEF;
 
 	m_height = 0;
 	m_ModMaxWeight = 0;
@@ -611,13 +611,13 @@ PLEVEL_TYPE CChar::GetPrivLevel() const
 {
 	// The higher the better. // PLEVEL_Counsel
 	if ( ! m_pPlayer )
-		return( PLEVEL_Player );
-	return( m_pPlayer->GetAccount()->GetPrivLevel());
+		return PLEVEL_Player;
+	return m_pPlayer->GetAccount()->GetPrivLevel();
 }
 
 CCharBase * CChar::Char_GetDef() const
 {
-	return( static_cast <CCharBase*>( Base_GetDef()));
+	return static_cast <CCharBase*>( Base_GetDef() );
 }
 
 CRegionWorld * CChar::GetRegion() const
@@ -632,7 +632,7 @@ CRegionBase * CChar::GetRoom() const
 
 int CChar::GetSight() const
 {
-	return (int)(m_iVisualRange);
+	return (int)m_iVisualRange;
 }
 
 void CChar::SetSight(byte newSight)
@@ -644,12 +644,12 @@ void CChar::SetSight(byte newSight)
 
 bool CChar::Can( word wCan ) const
 {
-	return(( m_Can & wCan ) ? true : false );
+	return (( m_Can & wCan ) ? true : false );
 }
 
 bool CChar::Can( int wCan ) const
 {
-	return( ( m_Can & static_cast< dword >( wCan ) ) ? true : false );
+	return ( ( m_Can & static_cast< dword >( wCan ) ) ? true : false );
 }
 
 // Clean up weird flags.
@@ -665,7 +665,7 @@ int CChar::FixWeirdness()
 	int iResultCode = CObjBase::IsWeird();
 	if ( iResultCode )
 		// Not recoverable - must try to delete the object.
-		return( iResultCode );
+		return iResultCode;
 
 	// NOTE: Stats and skills may go negative temporarily.
 
@@ -870,6 +870,7 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 	m_dirFace = pChar->m_dirFace;
 	m_fonttype = pChar->m_fonttype;
 	m_SpeechHue = pChar->m_SpeechHue;
+	m_SpeechHueOverride = pChar->m_SpeechHueOverride;
 
 	m_height = pChar->m_height;
 	m_ModMaxWeight = pChar->m_ModMaxWeight;
@@ -1423,9 +1424,10 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 			Skill_SetBase(skSkill4, iSkillVal4 * 10);
 	}
 
-	m_fonttype = FONT_NORMAL;		// Set speech font type
-	m_SpeechHue = HUE_TEXT_DEF;		// Set speech color
-	m_sTitle.Empty();				// Set title
+	m_fonttype			= FONT_NORMAL;		// Set speech font type
+	m_SpeechHue			= HUE_TEXT_DEF;		// Set default client-sent speech color
+	m_SpeechHueOverride = HUE_SAY_DEF;		// Set no server-side speech color override
+	m_sTitle.Empty();						// Set title
 
 	GetBank(LAYER_BANKBOX);			// Create bankbox
 	GetPackSafe();					// Create backpack
@@ -2528,19 +2530,19 @@ do_default:
 		case CHC_ACT:
 			if ( pszKey[3] == '.' )	// used as a ref ?
 				goto do_default;
-			sVal.FormatHex( m_Act_Targ.GetObjUID());	// uid
+			sVal.FormatHex( m_Act_Targ.GetObjUID() );	// uid
 			break;
 		case CHC_ACTP:
 			sVal = m_Act_p.WriteUsed();
 			break;
 		case CHC_ACTPRV:
-			sVal.FormatHex( m_Act_TargPrv.GetObjUID());
+			sVal.FormatHex( m_Act_TargPrv.GetObjUID() );
 			break;
 		case CHC_ACTDIFF:
 			sVal.FormatVal( m_Act_Difficulty * 10 );
 			break;
 		case CHC_ACTARG1:
-			sVal.FormatHex( m_atUnk.m_Arg1);
+			sVal.FormatHex( m_atUnk.m_Arg1 );
 			break;
 		case CHC_ACTARG2:
 			sVal.FormatHex( m_atUnk.m_Arg2 );
@@ -2549,10 +2551,10 @@ do_default:
 			sVal.FormatHex( m_atUnk.m_Arg3 );
 			break;
 		case CHC_ACTION:
-			sVal = g_Cfg.ResourceGetName( RESOURCE_ID( RES_SKILL, Skill_GetActive()));
+			sVal = g_Cfg.ResourceGetName( RESOURCE_ID( RES_SKILL, Skill_GetActive()) );
 			break;
 		case CHC_BODY:
-			sVal = g_Cfg.ResourceGetName( RESOURCE_ID( RES_CHARDEF, GetDispID()));
+			sVal = g_Cfg.ResourceGetName( RESOURCE_ID( RES_CHARDEF, GetDispID()) );
 			break;
 		case CHC_CREATE:
 			sVal.FormatLLVal( -( g_World.GetTimeDiff(m_timeCreate) / TICK_PER_SEC ));
@@ -2562,12 +2564,12 @@ do_default:
 				pszKey +=3;
 				CChar * pChar = static_cast<CChar*>(static_cast<CUID>(Exp_GetSingle(pszKey)).CharFind());
 				if ( pChar )
-					sVal.FormatVal( GetDir(pChar));
+					sVal.FormatVal( GetDir(pChar) );
 				else
 					sVal.FormatVal( m_dirFace );
 			}break;
 		case CHC_EMOTEACT:
-			sVal.FormatVal( IsStatFlag( STATF_EmoteAction ));
+			sVal.FormatVal( IsStatFlag(STATF_EmoteAction) );
 			break;
 		case CHC_FLAGS:
 			sVal.FormatHex( m_StatFlag );
@@ -2576,39 +2578,42 @@ do_default:
 			sVal.FormatVal( m_fonttype );
 			break;
 		case CHC_SPEECHCOLOR:
-			sVal.FormatVal( m_SpeechHue );
+			sVal.FormatWVal( m_SpeechHue );
+			break;
+		case CHC_SPEECHCOLOROVERRIDE:
+			sVal.FormatWVal( m_SpeechHueOverride );
 			break;
 		case CHC_FOOD:
-			sVal.FormatVal( Stat_GetVal( STAT_FOOD ) );
+			sVal.FormatSVal( Stat_GetVal(STAT_FOOD) );
 			break;
 		case CHC_HEIGHT:
-			sVal.FormatVal( GetHeight() );
+			sVal.FormatUCVal( GetHeight() );
 			break;
 		case CHC_HITPOINTS:
 		case CHC_HITS:
-			sVal.FormatVal( Stat_GetVal(STAT_STR) );
+			sVal.FormatSVal( Stat_GetVal(STAT_STR) );
 			break;
 		case CHC_STAM:
 		case CHC_STAMINA:
-			sVal.FormatVal( Stat_GetVal(STAT_DEX) );
+			sVal.FormatSVal( Stat_GetVal(STAT_DEX) );
 			break;
 		case CHC_STEPSTEALTH:
 			sVal.FormatVal( m_StepStealth );
 			break;
 		case CHC_MANA:
-			sVal.FormatVal( Stat_GetVal(STAT_INT) );
+			sVal.FormatSVal( Stat_GetVal(STAT_INT) );
 			break;
 		case CHC_MAXFOOD:
-			sVal.FormatVal( Stat_GetMax( STAT_FOOD ) );
+			sVal.FormatSVal( Stat_GetMax(STAT_FOOD) );
 			break;
 		case CHC_MAXHITS:
-			sVal.FormatVal( Stat_GetMax(STAT_STR) );
+			sVal.FormatSVal( Stat_GetMax(STAT_STR) );
 			break;
 		case CHC_MAXMANA:
-			sVal.FormatVal( Stat_GetMax(STAT_INT) );
+			sVal.FormatSVal( Stat_GetMax(STAT_INT) );
 			break;
 		case CHC_MAXSTAM:
-			sVal.FormatVal( Stat_GetMax(STAT_DEX) );
+			sVal.FormatSVal( Stat_GetMax(STAT_DEX) );
 			break;
 		case CHC_HIT:
 			{
@@ -2739,7 +2744,7 @@ do_default:
 				else if (iVal < INT16_MIN)
 					iVal = INT16_MIN;
 
-				Stat_SetBase(static_cast<STAT_TYPE>(i), (short)(iVal));
+				Stat_SetBase(static_cast<STAT_TYPE>(i), (short)iVal);
 				return true;
 			}
 
@@ -2748,7 +2753,7 @@ do_default:
 				i = g_Cfg.FindStatKey( pszKey+1 );
 				if ( i >= 0 )
 				{
-					Stat_SetBase(static_cast<STAT_TYPE>(i), (short)(s.GetArgVal()));
+					Stat_SetBase(static_cast<STAT_TYPE>(i), s.GetArgSVal());
 					return true;
 				}
 			}
@@ -2757,13 +2762,13 @@ do_default:
 				i = g_Cfg.FindStatKey( pszKey+3 );
 				if ( i >= 0 )
 				{
-					Stat_SetMod(static_cast<STAT_TYPE>(i), (short)(s.GetArgVal()));
+					Stat_SetMod(static_cast<STAT_TYPE>(i), s.GetArgSVal());
 					return true;
 				}
 			}
 		}
 
-		return( CObjBase::r_LoadVal( s ));
+		return CObjBase::r_LoadVal( s );
 	}
 
 	switch (iKeyNum)
@@ -2772,19 +2777,19 @@ do_default:
 		case CHC_REGENHITS:
 			{
 				SetDefNum(s.GetKey(), s.GetArgVal(), false);
-				UpdateRegenTimers(STAT_STR, (short)(s.GetArgVal()));
+				UpdateRegenTimers(STAT_STR, s.GetArgSVal());
 			}
 			break;
 		case CHC_REGENSTAM:
 			{
 				SetDefNum(s.GetKey(), s.GetArgVal(), false);
-				UpdateRegenTimers(STAT_DEX, (short)(s.GetArgVal()));
+				UpdateRegenTimers(STAT_DEX, s.GetArgSVal());
 			}
 			break;
 		case CHC_REGENMANA:
 			{
 				SetDefNum(s.GetKey(), s.GetArgVal(), false);
-				UpdateRegenTimers(STAT_INT, (short)(s.GetArgVal()));
+				UpdateRegenTimers(STAT_INT, s.GetArgSVal());
 			}
 			break;
 		case CHC_INCREASEHITCHANCE:
@@ -2832,27 +2837,27 @@ do_default:
 			m_wBloodHue = static_cast<HUE_TYPE>(s.GetArgVal());
 			break;
 		case CHC_MAXFOOD:
-			Stat_SetMax(STAT_FOOD, (short)(s.GetArgVal()));
+			Stat_SetMax(STAT_FOOD, s.GetArgSVal());
 			break;
 		case CHC_MAXHITS:
-			Stat_SetMax(STAT_STR, (short)(s.GetArgVal()));
+			Stat_SetMax(STAT_STR, s.GetArgSVal());
 			break;
 		case CHC_MAXMANA:
-			Stat_SetMax(STAT_INT, (short)(s.GetArgVal()));
+			Stat_SetMax(STAT_INT, s.GetArgSVal());
 			break;
 		case CHC_MAXSTAM:
-			Stat_SetMax(STAT_DEX, (short)(s.GetArgVal()));
+			Stat_SetMax(STAT_DEX, s.GetArgSVal());
 			break;
 		case CHC_ACCOUNT:
-			return SetPlayerAccount( s.GetArgStr());
+			return SetPlayerAccount( s.GetArgStr() );
 		case CHC_ACT:
 			m_Act_Targ = s.GetArgVal();
 			break;
 		case CHC_ACTP:
-			if ( ! s.HasArgs())
+			if ( ! s.HasArgs() )
 				m_Act_p = GetTopPoint();
 			else
-				m_Act_p.Read( s.GetArgStr());
+				m_Act_p.Read( s.GetArgStr() );
 			break;
 		case CHC_ACTPRV:
 			m_Act_TargPrv = s.GetArgVal();
@@ -2870,7 +2875,7 @@ do_default:
 			m_atUnk.m_Arg3 = s.GetArgVal();
 			break;
 		case CHC_ACTION:
-			return Skill_Start( g_Cfg.FindSkillKey( s.GetArgStr()) );
+			return Skill_Start( g_Cfg.FindSkillKey( s.GetArgStr() ) );
 		case CHC_ATTACKER:
 		{
 			if ( strlen(pszKey) > 8 )
@@ -2984,19 +2989,15 @@ do_default:
 		case CHC_EMOTEACT:
 			{
 				bool fSet = IsStatFlag(STATF_EmoteAction);
-				if ( s.HasArgs())
-				{
+				if ( s.HasArgs() )
 					fSet = s.GetArgVal() ? true : false;
-				}
 				else
-				{
 					fSet = ! fSet;
-				}
 				StatFlag_Mod(STATF_EmoteAction,fSet);
 			}
 			break;
 		case CHC_FLAGS:		// DO NOT MODIFY STATF_SaveParity, STATF_Spawned, STATF_Pet
-			m_StatFlag = ( s.GetArgVal() &~ (STATF_SaveParity|STATF_Pet|STATF_Spawned)) | ( m_StatFlag & (STATF_SaveParity|STATF_Pet|STATF_Spawned) );
+			m_StatFlag = ( s.GetArgDWVal() &~ (STATF_SaveParity|STATF_Pet|STATF_Spawned)) | ( m_StatFlag & (STATF_SaveParity|STATF_Pet|STATF_Spawned) );
 			NotoSave_Update();
 			break;
 		case CHC_FONT:
@@ -3005,17 +3006,22 @@ do_default:
 				m_fonttype = FONT_NORMAL;
 			break;
 		case CHC_SPEECHCOLOR:
-			if ( m_pPlayer )	// read-only on players
+			if ( m_pPlayer )	// read-only on players, set SPEECHCOLOROVERRIDE instead
 				return false;
-			m_SpeechHue = static_cast<HUE_TYPE>(s.GetArgVal());
+			m_SpeechHue = static_cast<HUE_TYPE>(s.GetArgWVal());
+			break;
+		case CHC_SPEECHCOLOROVERRIDE:
+			if ( !m_pPlayer )	// valid only for players
+				return false;
+			m_SpeechHueOverride = static_cast<HUE_TYPE>(s.GetArgWVal());
 			break;
 		case CHC_FOOD:
-			Stat_SetVal(STAT_FOOD, (short)(s.GetArgVal()));
+			Stat_SetVal(STAT_FOOD, (short)s.GetArgVal());
 			break;
 		case CHC_GOLD:
 		{
 			word currentGold = (word)ContentCount(RESOURCE_ID(RES_TYPEDEF, IT_GOLD));
-			word newGold = (word)(s.GetArgVal());
+			word newGold = s.GetArgWVal();
 
 			if ( newGold < currentGold )
 				ContentConsume(RESOURCE_ID(RES_TYPEDEF, IT_GOLD), currentGold - newGold);
@@ -3040,33 +3046,33 @@ do_default:
 		}
 		case CHC_HITPOINTS:
 		case CHC_HITS:
-			Stat_SetVal(STAT_STR, (short)(s.GetArgVal()));
+			Stat_SetVal(STAT_STR, s.GetArgSVal());
 			UpdateHitsFlag();
 			break;
 		case CHC_MANA:
-			Stat_SetVal(STAT_INT, (short)(s.GetArgVal()));
+			Stat_SetVal(STAT_INT, s.GetArgSVal());
 			UpdateManaFlag();
 			break;
 		case CHC_MODMAXWEIGHT:
-			m_ModMaxWeight = (int)(s.GetArgVal());
+			m_ModMaxWeight = s.GetArgVal();
 			UpdateStatsFlag();
 			break;
 		case CHC_STAM:
 		case CHC_STAMINA:
-			Stat_SetVal(STAT_DEX, (short)(s.GetArgVal()));
+			Stat_SetVal(STAT_DEX, s.GetArgSVal());
 			UpdateStamFlag();
 			break;
 		case CHC_STEPSTEALTH:
-			m_StepStealth =  (int)(s.GetArgVal());
+			m_StepStealth = s.GetArgVal();
 			break;
 		case CHC_HEIGHT:
 			m_height = static_cast<height_t>(s.GetArgVal());
 			break;
 		case CHC_HOME:
-			if ( ! s.HasArgs())
+			if ( ! s.HasArgs() )
 				m_ptHome = GetTopPoint();
 			else
-				m_ptHome.Read( s.GetArgStr());
+				m_ptHome.Read( s.GetArgStr() );
 			break;
 		case CHC_NAME:
 			{
@@ -3089,7 +3095,6 @@ do_default:
 			goto do_default;
 		case CHC_SKILLUSEQUICK:
 			{
-
 				if ( s.GetArgStr() )
 				{
 					tchar * ppArgs[2];
@@ -3108,12 +3113,12 @@ do_default:
 		case CHC_MEMORY:
 			{
 				int64 piCmd[2];
-				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd) );
+				int iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd) );
 				if ( iArgQty < 2 )
 					return false;
 
-				CUID	uid		= (uint)(piCmd[0]);
-				dword		dwFlags	= (uint)(piCmd[1]);
+				CUID	uid		= (uint)piCmd[0];
+				dword	dwFlags	= (uint)piCmd[1];
 
 				CItemMemory * pMemory = Memory_FindObj( uid );
 				if ( pMemory != NULL )
@@ -3138,7 +3143,7 @@ do_default:
 		case CHC_OBODY:
 			{
 				CREID_TYPE id = static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType( RES_CHARDEF, s.GetArgStr()));
-				if ( ! CCharBase::FindCharBase( id ))
+				if ( ! CCharBase::FindCharBase( id ) )
 				{
 					DEBUG_ERR(( "OBODY Invalid Char 0%x\n", id ));
 					return false;
@@ -3152,7 +3157,7 @@ do_default:
 		case CHC_P:
 			{
 				CPointMap pt;
-				pt.Read(s.GetArgStr());
+				pt.Read( s.GetArgStr() );
 				MoveTo(pt);
 			}
 			break;
@@ -3160,7 +3165,7 @@ do_default:
 			{
 				bool fSet;
 				bool fChange = IsStatFlag(STATF_Stone);
-				if ( s.HasArgs())
+				if ( s.HasArgs() )
 				{
 					fSet = s.GetArgVal() ? true : false;
 					fChange = ( fSet != fChange );
@@ -3181,7 +3186,7 @@ do_default:
 			break;
 		case CHC_SWING:
 			{
-				if ( s.GetArgVal() && (s.GetArgVal() < -1 || s.GetArgVal() > WAR_SWING_SWINGING ))
+				if ( s.GetArgVal() && ((s.GetArgVal() < -1) || (s.GetArgVal() > WAR_SWING_SWINGING) ) )
 					return false;
 				m_atFight.m_War_Swing_State = (WAR_SWING_TYPE)s.GetArgVal();
 			}
@@ -3190,7 +3195,7 @@ do_default:
 			m_sTitle = s.GetArgStr();
 			break;
 		case CHC_LIGHT:
-			m_LocalLight = (uchar)(s.GetArgVal());
+			m_LocalLight = s.GetArgBVal();
 			break;
 		case CHC_EXP:
 			m_exp = s.GetArgVal();
@@ -3205,7 +3210,7 @@ do_default:
 			UpdateStatsFlag();
 			break;
 		case CHC_VISUALRANGE:
-			SetSight((byte)(s.GetArgVal()));
+			SetSight(s.GetArgBVal());
 			break;
 		default:
 			return false;
@@ -3241,6 +3246,8 @@ void CChar::r_Write( CScript & s )
 		s.WriteKeyVal("FONT", m_fonttype);
 	if ( m_SpeechHue != HUE_TEXT_DEF )
 		s.WriteKeyVal("SPEECHCOLOR", m_SpeechHue);
+	if (m_SpeechHueOverride != HUE_SAY_DEF)
+		s.WriteKeyVal("SPEECHCOLOROVERRIDE", m_SpeechHueOverride);
 	if ( m_dirFace != DIR_SE )
 		s.WriteKeyVal("DIR", m_dirFace);
 	if ( m_prev_id != GetID() )

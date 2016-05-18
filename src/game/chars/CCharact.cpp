@@ -2176,59 +2176,66 @@ bool CChar::Reveal( dword dwFlags )
 	return true;
 }
 
+// Player: Speak to all clients in the area.
 // Ignore the font argument here !
+// ASCII packet
+void CChar::Speak(lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font)
+{
+	ADDTOCALLSTACK("CChar::Speak");
+
+	if (IsStatFlag(STATF_Stone))
+		return;
+	if ((mode == TALKMODE_YELL) && (GetPrivLevel() >= PLEVEL_Counsel))
+		mode = TALKMODE_BROADCAST;					// GM Broadcast (done if a GM yells something)
+
+	if (mode != TALKMODE_SPELL)
+	{
+		if (g_Cfg.m_iRevealFlags & REVEALF_SPEAK)	// spell's reveal is handled in Spell_CastStart
+			Reveal();
+	}
+
+	CObjBase::Speak(pszText, wHue, mode, font);
+}
+
+// Player: Speak to all clients in the area.
+// Ignore the font argument here !
+// Unicode packet
 void CChar::SpeakUTF8( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
 {
 	ADDTOCALLSTACK("CChar::SpeakUTF8");
 
 	if ( IsStatFlag(STATF_Stone) )
 		return;
-	if ( mode == TALKMODE_YELL && GetPrivLevel() >= PLEVEL_Counsel )
-		mode = TALKMODE_BROADCAST;		// GM Broadcast (done if a GM yells something)
+	if ((mode == TALKMODE_YELL) && (GetPrivLevel() >= PLEVEL_Counsel))
+		mode = TALKMODE_BROADCAST;					// GM Broadcast (done if a GM yells something)
 
-	if ( mode != TALKMODE_SPELL )		// spell's reveal is handled in Spell_CastStart
+	if ( mode != TALKMODE_SPELL )
 	{
-		if ( g_Cfg.m_iRevealFlags & REVEALF_SPEAK )
+		if ( g_Cfg.m_iRevealFlags & REVEALF_SPEAK )	// spell's reveal is handled in Spell_CastStart
 			Reveal();
 	}
 	CObjBase::SpeakUTF8(pszText, wHue, mode, font, lang);
 }
 
+// Player: Speak to all clients in the area.
 // Ignore the font argument here !
+// Unicode packet
+// Difference with SpeakUTF8: this method accepts as text input an nword, which is a unicode character if sphere is compiled with UNICODE macro)
 void CChar::SpeakUTF8Ex( const nword * pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
 {
 	ADDTOCALLSTACK("CChar::SpeakUTF8Ex");
 
 	if ( IsStatFlag(STATF_Stone) )
 		return;
-	if ( mode == TALKMODE_YELL && GetPrivLevel() >= PLEVEL_Counsel )
-		mode = TALKMODE_BROADCAST;		// GM Broadcast (done if a GM yells something)
+	if ((mode == TALKMODE_YELL) && (GetPrivLevel() >= PLEVEL_Counsel))
+		mode = TALKMODE_BROADCAST;
 
-	if ( mode != TALKMODE_SPELL )		// spell's reveal is handled in Spell_CastStart
+	if ( mode != TALKMODE_SPELL )
 	{
-		if ( g_Cfg.m_iRevealFlags & REVEALF_SPEAK )
+		if ( g_Cfg.m_iRevealFlags & REVEALF_SPEAK )	// spell's reveal is handled in Spell_CastStart
 			Reveal();
 	}
 	CObjBase::SpeakUTF8Ex(pszText, wHue, mode, font, lang);
-}
-
-// Speak to all clients in the area.
-// Ignore the font argument here !
-void CChar::Speak( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font )
-{
-	ADDTOCALLSTACK("CChar::Speak");
-
-	if ( IsStatFlag(STATF_Stone) )
-		return;
-	if ( mode == TALKMODE_YELL && GetPrivLevel() >= PLEVEL_Counsel )
-		mode = TALKMODE_BROADCAST;		// GM Broadcast (done if a GM yells something)
-
-	if ( mode != TALKMODE_SPELL )		// spell's reveal is handled in Spell_CastStart
-	{
-		if ( g_Cfg.m_iRevealFlags & REVEALF_SPEAK )
-			Reveal();
-	}
-	CObjBase::Speak(pszText, wHue, mode, font);
 }
 
 // Convert me into a figurine

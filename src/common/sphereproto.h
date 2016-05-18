@@ -37,12 +37,12 @@ struct nword
 	word m_val;
 	operator word () const
 	{
-		return( ntohs( m_val ));
+		return ntohs( m_val );
 	}
 	nword & operator = ( word val )
 	{
 		m_val = htons( val );
-		return( * this );
+		return (* this);
 	}
 
 #define PACKWORD(p,w)	(p)[0]=HIBYTE(w);(p)[1]=LOBYTE(w)
@@ -55,12 +55,12 @@ struct ndword
 	dword m_val;
 	operator dword () const
 	{
-		return( ntohl( m_val ));
+		return ntohl( m_val );
 	}
 	ndword & operator = ( dword val )
 	{
 		m_val = htonl( val );
-		return( * this );
+		return (* this);
 	}
 
 #define PACKDWORD(p,d)	(p)[0]=((d)>>24)&0xFF;(p)[1]=((d)>>16)&0xFF;(p)[2]=HIBYTE(d);(p)[3]=LOBYTE(d)
@@ -68,10 +68,10 @@ struct ndword
 
 } PACK_NEEDED;
 
-#define	NCHAR	nword			// a UNICODE text char on the network.
+#define	nchar	nword			// a UNICODE text char on the network.
 
-extern int CvtSystemToNUNICODE( NCHAR * pOut, int iSizeOutChars, lpctstr pInp, int iSizeInBytes );
-extern int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const NCHAR * pInp, int iSizeInChars );
+extern int CvtSystemToNUNICODE( nchar * pOut, int iSizeOutChars, lpctstr pInp, int iSizeInBytes );
+extern int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const nchar * pInp, int iSizeInChars );
 
 class CLanguageID
 {
@@ -466,7 +466,7 @@ union CExtData
 	{
 		byte m_code;	// PARTYMSG_TYPE
 		ndword m_UID;		// source/dest uid.
-		NCHAR m_msg[MAX_TALK_BUFFER];	// text of the msg. var len
+		nchar m_msg[MAX_TALK_BUFFER];	// text of the msg. var len
 	} Party_Msg_Rsp;	// from server.
 
 	struct
@@ -1612,7 +1612,7 @@ struct CEvent	// event buffer from client to server..
 			nword m_wHue;	// HUE_TYPE
 			nword m_font;	// FONT_TYPE
 			char m_lang[4];	// lang (null terminated, "ENU" for US english.) CLanguageID
-			NCHAR m_utext[1];	// NCHAR[?] text (null terminated, ?=(msgsize-12)/2) MAX_TALK_BUFFER
+			nchar m_utext[1];	// nchar[?] text (null terminated, ?=(msgsize-12)/2) MAX_TALK_BUFFER
 		} TalkUNICODE;
 
 		struct // size = var // Get gump button change
@@ -1629,7 +1629,7 @@ struct CEvent	// event buffer from client to server..
 			{
 				nword m_id;		// id specified in the gump definition file
 				nword m_len;		// length of the string (in unicode so multiply by 2!)
-				NCHAR m_utext[1];	// character data (in unicode!):
+				nchar m_utext[1];	// character data (in unicode!):
 			} m_texts[1];
 		} GumpDialogRet;
 
@@ -1646,14 +1646,14 @@ struct CEvent	// event buffer from client to server..
 			byte m_Cmd;		//	0   = 0xb3
 			nword m_len;	//  1-2 = packet length
 			char m_lang[4];	//	3-6 = unicode language code CLanguageID
-			NCHAR m_utext[1];	//	7-? = text from client
+			nchar m_utext[1];	//	7-? = text from client
 		} ChatText;
 
 		struct // size = 64	// response to pressing the chat button
 		{
 			byte m_Cmd;		// 0 = 0xb5
 			byte m_unk1;	// 1 = ???
-			NCHAR m_uname[MAX_NAME_SIZE+1];	// 2-63 - unicode name
+			nchar m_uname[MAX_NAME_SIZE+1];	// 2-63 - unicode name
 		} Chat;
 
 		struct // size = 9	// request for tooltip
@@ -1673,7 +1673,7 @@ struct CEvent	// event buffer from client to server..
 			byte m_unk1;	// 8
 			byte m_retcode; // ????? 0=canceled, 1=okayed or something similar???
 			nword m_textlen; // length of text entered
-			NCHAR m_utext[1]; // Text, unicode!
+			nchar m_utext[1]; // Text, unicode!
 		} CharProfile;
 
 		struct	// size = 9 // mail msg. get primed with itself at start.
@@ -1837,7 +1837,7 @@ struct CEvent	// event buffer from client to server..
 			nword m_len;		// 1 - 2 (len = )
 			char m_Language[4];	// 3 - 6 (lang, ENU)
 			nword m_type;		// 7 - 8 (bug type)
-			NCHAR m_utext[1];	// 9 - ? (NCHAR[?] text)
+			nchar m_utext[1];	// 9 - ? (nchar[?] text)
 		} BugReport;
 
 		struct // XCMD_KRClientType
@@ -2925,7 +2925,7 @@ struct CCommand	// command buffer from server to client.
 			nword m_font;		// 12-13 = FONT_TYPE
 			char m_lang[4];		// language (same as before) CLanguageID
 			char m_charname[MAX_NAME_SIZE];	//
-			NCHAR m_utext[1];		// text (null terminated, ?=(msgsize-48)/2 MAX_TALK_BUFFER
+			nchar m_utext[1];		// text (null terminated, ?=(msgsize-48)/2 MAX_TALK_BUFFER
 		} SpeakUNICODE;
 
 		struct // size = 13	// Death anim of a creature
@@ -2952,7 +2952,7 @@ struct CCommand	// command buffer from server to client.
 			struct
 			{
 				nword m_len;	// len of this line.
-				NCHAR m_utext[1];	// UNICODE text. (not null term)
+				nchar m_utext[1];	// UNICODE text. (not null term)
 			} m_texts[1];
 		} GumpDialog;
 
@@ -2962,8 +2962,8 @@ struct CCommand	// command buffer from server to client.
 			nword m_len;		// 1-2 = length of packet
 			nword m_subcmd;		// 3-4 = 0x001a - already in this channel
 			char m_lang[4];// 5-8 = unicode language code (null term....default = 'enu' (english?) CLanguageID
-			NCHAR m_uname[1];		// 9-? = name in unicode (zero terminated) (may have  prefix, moderator, etc)
-			NCHAR m_uname2[1];	// ?-? = name in unicode (also used for other things (passworded, etc)
+			nchar m_uname[1];		// 9-? = name in unicode (zero terminated) (may have  prefix, moderator, etc)
+			nchar m_uname2[1];	// ?-? = name in unicode (also used for other things (passworded, etc)
 		} ChatReq;
 
 		struct
@@ -2992,7 +2992,7 @@ struct CCommand	// command buffer from server to client.
 		{
 			byte m_Cmd;		// 0 = 0xb5
 			byte unk1;		// 1 = 0 (???)
-			NCHAR m_uname[MAX_NAME_SIZE+1];// 2-63 - unicode name
+			nchar m_uname[MAX_NAME_SIZE+1];// 2-63 - unicode name
 		} Chat;
 
 		struct // size = variable	// Put up a tooltip
@@ -3000,7 +3000,7 @@ struct CCommand	// command buffer from server to client.
 			byte m_Cmd;				// 0 = 0xb7
 			nword m_len;			// 1-2
 			ndword m_UID;			// 3-6
-			NCHAR m_utext[1];		// zero terminated UNICODE string
+			nchar m_utext[1];		// zero terminated UNICODE string
 		} ToolTip;
 
 		struct	// size = 8 // Show Character Profile.
@@ -3009,8 +3009,8 @@ struct CCommand	// command buffer from server to client.
 			nword m_len;	// 1 - 2
 			ndword m_UID;	// 3-6=uid
 			char m_title[1];	// Description 1 (not unicode!, name, zero terminated)
-			NCHAR m_utext1[1];	// Static Description 2 (unicode!, zero terminated)
-			NCHAR m_utext2[1];	// Player Description 3 (unicode!, zero terminated)
+			nchar m_utext1[1];	// Static Description 2 (unicode!, zero terminated)
+			nchar m_utext2[1];	// Player Description 3 (unicode!, zero terminated)
 		} CharProfile;
 
 		struct // size = 3	// enable features on client
@@ -3142,7 +3142,7 @@ struct CCommand	// command buffer from server to client.
 			{
 				ndword m_LocID;
 				nword m_textlen;
-				tchar m_utext[1]; // this is NCHAR !!!
+				tchar m_utext[1]; // this is nchar !!!
 			} m_list[1];
 		} AOSTooltip;
 		
@@ -3273,7 +3273,7 @@ struct CCommand	// command buffer from server to client.
 			nword m_Wpnt_type;		// 14 - 15 = object type (??)
 			nword m_ignoreUid;		// 16 - 17 = don't use the uid (0/1)
 			ndword m_ClilocId;		// 18 - 22 = clilocId
-			NCHAR m_ClilocArgs[1];	// 23 - ? = clilocArgs
+			nchar m_ClilocArgs[1];	// 23 - ? = clilocArgs
 			nword m_zero;			// ? - ?+1 = zero
 		} WaypointShow;
 

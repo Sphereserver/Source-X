@@ -6,15 +6,16 @@
 CItemCommCrystal::CItemCommCrystal( ITEMID_TYPE id, CItemBase * pItemDef ) : CItemVendable( id, pItemDef ) {
 }
 
-CItemCommCrystal::~CItemCommCrystal() {
+CItemCommCrystal::~CItemCommCrystal()
+{
     DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
 }
 
 lpctstr const CItemCommCrystal::sm_szLoadKeys[] =
-        {
-                "SPEECH",
-                NULL,
-        };
+{
+	"SPEECH",
+	NULL,
+};
 
 void CItemCommCrystal::OnMoveFrom()
 {

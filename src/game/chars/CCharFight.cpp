@@ -58,7 +58,7 @@ void CChar::OnNoticeCrime( CChar * pCriminal, const CChar * pCharMark )
 		OnHarmedBy( pCriminal );
 	}
 
-	if ( ! NPC_CanSpeak())
+	if ( ! NPC_CanSpeak() )
 		return;	// I can't talk anyhow.
 
 	if (GetNPCBrain() != NPCBRAIN_HUMAN)

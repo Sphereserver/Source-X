@@ -7,11 +7,11 @@
 #include "CClient.h"
 
 
-void CChat::EventMsg( CClient * pClient, const NCHAR * pszText, int len, CLanguageID lang ) // Text from a client
+void CChat::EventMsg( CClient * pClient, const nchar * pszText, int len, CLanguageID lang ) // Text from a client
 {
 	ADDTOCALLSTACK("CChat::EventMsg");
 	// ARGS:
-	//  len = length of the pszText string in NCHAR's.
+	//  len = length of the pszText string in nchar's.
 	//
 
 	CChatChanMember * pMe = pClient;

@@ -3714,7 +3714,7 @@ PacketPartyRemoveMember::PacketPartyRemoveMember(const CChar* member, const CCha
  *
  *
  ***************************************************************************/
-PacketPartyChat::PacketPartyChat(const CChar* source, const NCHAR* text) : PacketParty(PARTYMSG_Msg, 11, PRI_NORMAL)
+PacketPartyChat::PacketPartyChat(const CChar* source, const nchar* text) : PacketParty(PARTYMSG_Msg, 11, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketPartyChat::PacketPartyChat");
 

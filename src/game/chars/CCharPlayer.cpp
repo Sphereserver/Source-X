@@ -132,7 +132,7 @@ CCharPlayer::~CCharPlayer()
 CAccountRef CCharPlayer::GetAccount() const
 {
 	ASSERT( m_pAccount );
-	return( m_pAccount );
+	return m_pAccount;
 }
 
 bool CCharPlayer::getKrToolbarStatus()

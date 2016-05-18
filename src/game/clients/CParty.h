@@ -73,9 +73,9 @@ public:
 	bool SendRemoveList( CChar * pCharRemove, bool bFor );
 	bool SendAddList( CChar * pCharDest );
 	// Party message sending wrappers
-	bool MessageEvent( CUID uidDst, CUID uidSrc, const NCHAR * pText, int ilenmsg );
-	// void MessageAll( CUID uidSrc, const NCHAR * pText, int ilenmsg );
-	// bool MessageMember( CUID uidDst, CUID uidSrc, const NCHAR * pText, int ilenmsg );
+	bool MessageEvent( CUID uidDst, CUID uidSrc, const nchar * pText, int ilenmsg );
+	// void MessageAll( CUID uidSrc, const nchar * pText, int ilenmsg );
+	// bool MessageMember( CUID uidDst, CUID uidSrc, const nchar * pText, int ilenmsg );
 	// Sysmessage sending wrappers
 	void SysMessageAll( lpctstr pText );
 

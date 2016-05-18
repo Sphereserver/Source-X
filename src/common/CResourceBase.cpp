@@ -288,8 +288,8 @@ lpctstr CResourceBase::ResourceGetName( RESOURCE_ID_BASE rid ) const
 
 	tchar * pszTmp = Str_GetTemp();
 	ASSERT(pszTmp);
-	if ( ! rid.IsValidUID() )
-		sprintf( pszTmp, "%" PRIu32, rid.GetPrivateUID() );
+	if ( !rid.IsValidUID() )
+		sprintf( pszTmp, "%" PRId32, (int)rid.GetPrivateUID() );	// casting to int: it's not an UID, so it's not unsigned
 	else
 		sprintf( pszTmp, "0%" PRIx32, rid.GetResIndex() );
 	return pszTmp;

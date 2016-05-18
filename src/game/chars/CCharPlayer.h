@@ -28,12 +28,12 @@ struct CCharPlayer
 private:
 	byte m_SkillLock[SKILL_QTY];	// SKILLLOCK_TYPE List of skill lock states for this player character
 	byte m_StatLock[STAT_BASE_QTY]; // SKILLLOCK_TYPE Applied to stats
-	CResourceRef m_SkillClass;	// RES_SKILLCLASS CSkillClassDef What skill class group have we selected.
+	CResourceRef m_SkillClass;		// RES_SKILLCLASS CSkillClassDef What skill class group have we selected.
 	bool m_bKrToolbarEnabled;
 
 public:
 	static const char *m_sClassName;
-	CAccount * m_pAccount;	// The account index. (for idle players mostly)
+	CAccount * m_pAccount;		// The account index. (for idle players mostly)
 	static lpctstr const sm_szVerbKeys[];
 
 	CServerTime m_timeLastUsed;	// Time the player char was last used.

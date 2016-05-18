@@ -1438,11 +1438,11 @@ bool CItemBase::r_LoadVal( CScript &s )
 		case IBC_DUPELIST:
 			{
 				tchar * ppArgs[512];
-				size_t iArgQty = Str_ParseCmds( s.GetArgStr(), ppArgs, CountOf(ppArgs));
+				int iArgQty = Str_ParseCmds( s.GetArgStr(), ppArgs, CountOf(ppArgs));
 				if ( iArgQty <= 0 )
 					return false;
 				m_flip_id.Empty();
-				for ( size_t i = 0; i < iArgQty; i++ )
+				for ( int i = 0; i < iArgQty; i++ )
 				{
 					ITEMID_TYPE id = static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, ppArgs[i] ));
 					if ( ! IsValidDispID( id ))

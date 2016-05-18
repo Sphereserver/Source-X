@@ -634,13 +634,13 @@ void CClient::addSound( SOUND_TYPE id, const CObjBaseTemplate * pBase, int iOnce
 	new PacketPlaySound(this, id, iOnce, 0, pt);
 }
 
-void CClient::addBarkUNICODE( const NCHAR * pwText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
+void CClient::addBarkUNICODE( const nchar * pwText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
 {
 	ADDTOCALLSTACK("CClient::addBarkUNICODE");
 	if ( pwText == NULL )
 		return;
 
-	if ( ! IsConnectTypePacket())
+	if ( ! IsConnectTypePacket() )
 	{
 		// Need to convert back from unicode !
 		//SysMessage(pwText);
@@ -701,11 +701,20 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 	HUE_TYPE defaultHue = HUE_TEXT_DEF;
 	FONT_TYPE defaultFont = FONT_NORMAL;
 	bool defaultUnicode = false;
+	const CChar * pSrcChar = NULL;
+	if (pSrc)
+		if (pSrc->IsChar())
+			pSrcChar = static_cast<const CChar *>(pSrc);
 
 	switch ( mode )
 	{
 		case TALKMODE_SYSTEM:
 		{
+			// If the Client is Enhanced, we have forced the NPC speech to SYSTEM talkmode, since
+			//	this is the only one to allow a custom hue
+			if (pSrcChar)
+				if (GetNetState()->isClientEnhanced() && pSrcChar->m_pNPC)
+					goto forcesay;
 			defaultHue = static_cast<HUE_TYPE>(g_Exp.m_VarDefs.GetKeyNum("SMSG_DEF_COLOR"));
 			defaultFont = static_cast<FONT_TYPE>(g_Exp.m_VarDefs.GetKeyNum("SMSG_DEF_FONT"));
 			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("SMSG_DEF_UNICODE", true) > 0 ? true : false;
@@ -720,6 +729,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		}
 		case TALKMODE_SAY:
 		{
+			forcesay:
 			defaultHue = static_cast<HUE_TYPE>(g_Exp.m_VarDefs.GetKeyNum("SAY_DEF_COLOR"));
 			defaultFont = static_cast<FONT_TYPE>(g_Exp.m_VarDefs.GetKeyNum("SAY_DEF_FONT"));
 			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("SAY_DEF_UNICODE", true) > 0 ? true : false;
@@ -750,7 +760,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 			break;
 	}
 
-	word Args[] = { (word)(wHue), (word)(font), (word)(bUnicode) };
+	word Args[] = { (word)wHue, (word)font, (word)bUnicode };
 
 	if ( *pszText == '@' )
 	{
@@ -782,20 +792,40 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		}
 		pszText++;
 		if ( Args[1] > FONT_QTY )
-			Args[1] = (word)(FONT_NORMAL);
+			Args[1] = (word)FONT_NORMAL;
 	}
 
-	if ( Args[0] == HUE_TEXT_DEF )
-		Args[0] = (word)(defaultHue);
-	if ( Args[1] == FONT_NORMAL )
-		Args[1] = (word)(defaultFont);
-	if ( Args[2] == 0 )
-		Args[2] = (word)(defaultUnicode);
-
-	if ( m_BarkBuffer.IsEmpty())
+	if (mode != TALKMODE_SPELL)
 	{
-		m_BarkBuffer.Format( "%s%s", name, pszText);
+		if ( pSrcChar )
+		{
+			// If a specific hue is not given, use SpeechHue (NPC) or SpeechHueOverride (PG);
+			//	if they aren't enabled (default value), use the defaultHue got from the defname.
+			if (pSrcChar->m_pNPC)
+			{
+				if (pSrcChar->m_SpeechHue != HUE_TEXT_DEF)
+					Args[0] = pSrcChar->m_SpeechHue;
+				else if (Args[0] == HUE_TEXT_DEF)
+					Args[0] = (word)defaultHue;
+			}
+			else if (!pSrcChar->m_pNPC)
+			{
+				if (pSrcChar->m_SpeechHueOverride != HUE_SAY_DEF)
+					Args[0] = pSrcChar->m_SpeechHueOverride;
+				else if (Args[0] == HUE_SAY_DEF)
+					Args[0] = (word)defaultHue;
+			}
+		}
+
+		if ( Args[1] == FONT_NORMAL )
+			Args[1] = (word)defaultFont;
 	}
+
+	if ( Args[2] == 0 )
+		Args[2] = (word)defaultUnicode;
+
+	if ( m_BarkBuffer.IsEmpty() )
+		m_BarkBuffer.Format( "%s%s", name, pszText);
 
 	switch ( Args[2] )
 	{
@@ -836,7 +866,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 
 		case 1:	// Unicode
 		{
-			NCHAR szBuffer[ MAX_TALK_BUFFER ];
+			nchar szBuffer[ MAX_TALK_BUFFER ];
 			CvtSystemToNUNICODE( szBuffer, CountOf(szBuffer), m_BarkBuffer.GetPtr(), -1 );
 			addBarkUNICODE( szBuffer, pSrc, static_cast<HUE_TYPE>(Args[0]), mode, static_cast<FONT_TYPE>(Args[1]), 0 );
 			break;
@@ -866,7 +896,7 @@ void CClient::addBark( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_TYPE 
 	if ( pszText == NULL )
 		return;
 
-	if ( ! IsConnectTypePacket())
+	if ( ! IsConnectTypePacket() )
 	{
 		SysMessage(pszText);
 		return;

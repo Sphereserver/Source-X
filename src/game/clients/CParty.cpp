@@ -210,7 +210,7 @@ bool CPartyDef::SendRemoveList( CChar *pCharRemove, bool bFor )
 }
 
 // ---------------------------------------------------------
-bool CPartyDef::MessageEvent( CUID uidDst, CUID uidSrc, const NCHAR *pText, int ilenmsg )
+bool CPartyDef::MessageEvent( CUID uidDst, CUID uidSrc, const nchar *pText, int ilenmsg )
 {
 	ADDTOCALLSTACK("CPartyDef::MessageEvent");
 	UNREFERENCED_PARAMETER(ilenmsg);

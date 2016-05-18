@@ -2300,7 +2300,7 @@ jump_in:
 					if ( s.HasArgs() )
 					{
 						tchar * ppArgs[2];
-						size_t iArgQty = Str_ParseCmds(const_cast<tchar *>(s.GetArgRaw()), ppArgs, CountOf(ppArgs), " \t,");
+						int iArgQty = Str_ParseCmds(const_cast<tchar *>(s.GetArgRaw()), ppArgs, CountOf(ppArgs), " \t,");
 
 						if ( iArgQty >= 1 )
 						{
@@ -2569,7 +2569,7 @@ jump_in:
 						tchar * piCmd[7];
 						tchar *psTmp = Str_GetTemp();
 						strcpy( psTmp, s.GetArgRaw() );
-						size_t iArgQty = Str_ParseCmds( psTmp, piCmd, CountOf( piCmd ), " ,\t" );
+						int iArgQty = Str_ParseCmds( psTmp, piCmd, CountOf( piCmd ), " ,\t" );
 						CScriptObj *pRef = this;
 						if ( iArgQty == 2 )
 						{
