@@ -98,7 +98,7 @@ public:
 	}
 	bool IsDef() const
 	{
-		return( m_codes[0] != 0 );
+		return ( m_codes[0] != 0 );
 	}
 	void GetStrDef( tchar * pszLang )
 	{
@@ -121,7 +121,7 @@ public:
 	{
 		tchar * pszTmp = Str_GetTemp();
 		GetStr( pszTmp );
-		return( pszTmp );
+		return pszTmp;
 	}
 	bool Set( lpctstr pszLang )
 	{
@@ -1158,7 +1158,7 @@ struct CEvent	// event buffer from client to server..
 #define MAX_MENU_ITEMS		64		// number of items in a menu. (arbitrary)
 #define MAX_CHARS_PER_ACCT	7
 
-	// Some messages are bydirectional.
+	// Some messages are bidirectional.
 
 	union
 	{

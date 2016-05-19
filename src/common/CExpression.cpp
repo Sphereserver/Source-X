@@ -109,7 +109,7 @@ llong power(llong base, llong level)
 	return (llong)rc;
 }
 
-inline bool IsCharNumeric( char & Test )
+bool IsCharNumeric( char & Test )
 {
 	if ( !Test )
 		return false;

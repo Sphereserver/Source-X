@@ -3281,7 +3281,7 @@ bool PacketPromptResponseUnicode::onReceive(NetState* net)
 	dword context1 = readInt32();
 	dword context2 = readInt32();
 	dword type = readInt32();
-	tchar language[4];
+	char language[4];
 	readStringASCII(language, CountOf(language));
 
 	if (length < getPosition())

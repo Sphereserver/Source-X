@@ -854,7 +854,8 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					}
 					iArgs[idx] = Exp_GetVal( ppArgs[idx] );
 				}
-				if (iArgs[0] < BI_START || iArgs[0] > BI_QTY/* || iArgs[0] == 0x3EB || iArgs[0] == 0x3EC*/) {	// 0x3eb and 0x3ec among some others does not exists now, which doesn't mean they won't fill them and, since nothing happens when wrong id is sent, we can let them be sent.
+				if (iArgs[0] < BI_START || iArgs[0] > BI_QTY/* || iArgs[0] == 0x3EB || iArgs[0] == 0x3EC*/)
+				{	// 0x3eb and 0x3ec among some others does not exists now, which doesn't mean they won't fill them and, since nothing happens when wrong id is sent, we can let them be sent.
 					DEBUG_ERR(("Invalid AddBuff icon ID\n"));
 					break;
 				}
@@ -874,7 +875,8 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		case CV_REMOVEBUFF:
 			{
 				BUFF_ICONS IconId = static_cast<BUFF_ICONS>(s.GetArgVal());
-				if (IconId < BI_START || IconId > BI_QTY/* || IconId == 0x3EB || IconId == 0x3EC*/) {
+				if (IconId < BI_START || IconId > BI_QTY/* || IconId == 0x3EB || IconId == 0x3EC*/)
+				{
 					DEBUG_ERR(("Invalid RemoveBuff icon ID\n"));
 					break;
 				}

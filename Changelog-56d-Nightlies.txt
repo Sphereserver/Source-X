@@ -46,3 +46,6 @@ Fixed: SpeechColor not overriding the speech hue for NPCs. SpeechColor = 946 (or
 Changed: If a hue is not specified, SAY and MSG will use SpeechColor or, if set, SpeechColorOverride.
 
 TODO: add default npc and player speech color as a def to sphere_defs.scp
+
+19-05-2016, Nolok
+Fixed: wrong parsing when an unicode prompt response packet is received.

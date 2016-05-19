@@ -2747,7 +2747,7 @@ PacketAddPrompt::PacketAddPrompt(const CClient* target, CUID context1, CUID cont
 	writeInt32(context2);
 	writeInt32(0);
 
-	if (useUnicode == true)
+	if (useUnicode)
 	{
 		writeStringFixedASCII("", 4);
 		writeCharUNICODE('\0');

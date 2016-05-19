@@ -105,22 +105,19 @@ public:
 public:
 	// Strict G++ Prototyping produces an error when not casting char*& to const char*&
 	// So this is a rather lazy workaround
-	inline llong GetSingle( lptstr &pArgs )
+	llong GetSingle( lptstr &pArgs )
 	{
 		return GetSingle(const_cast<lpctstr &>(pArgs));
 	}
-
-	inline int64 GetRange( lptstr &pArgs )
+	int64 GetRange( lptstr &pArgs )
 	{
 		return GetRange(const_cast<lpctstr &>(pArgs));
 	}
-
-	inline int GetRangeVals( lptstr &pExpr, int64 * piVals, int iMaxQty )
+	int GetRangeVals( lptstr &pExpr, int64 * piVals, int iMaxQty )
 	{
 		return GetRangeVals(const_cast<lpctstr &>(pExpr), piVals, iMaxQty );
 	}
-
-	inline llong GetVal( lptstr &pArgs )
+	llong GetVal( lptstr &pArgs )
 	{
 		return GetVal(const_cast<lpctstr &>(pArgs));
 	}
@@ -148,7 +145,7 @@ bool IsSimpleNumberString( lpctstr pszTest );
 bool IsStrNumericDec( lpctstr pszTest );
 bool IsStrNumeric( lpctstr pszTest );
 bool IsStrEmpty( lpctstr pszTest );
-inline extern bool IsCharNumeric( char & Test );
+bool IsCharNumeric( char & Test );
 
 // Numeric formulas
 template<typename T> inline const T SphereAbs(T const & x)

@@ -1650,9 +1650,7 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int iTimeout 
 			m_pChar->ItemBounce(pItem);
 			// Just clear the old target mode
 			if (bSuppressCancelMessage == false)
-			{
 				addSysMessage(g_Cfg.GetDefaultMsg(DEFMSG_TARGET_CANCEL_2));
-			}
 		}
 	}
 
@@ -1670,7 +1668,8 @@ void CClient::addPromptConsole( CLIMODE_TYPE mode, lpctstr pPrompt, CUID context
 	m_Prompt_Uid = context1;
 	m_Prompt_Mode = mode;
 
-	if ( pPrompt && *pPrompt ) // Check that the message is not blank.
+	// Check that the message is not blank.
+	if ( pPrompt && *pPrompt )
 		addSysMessage( pPrompt );
 
 	new PacketAddPrompt(this, context1, context2, bUnicode);
