@@ -567,7 +567,7 @@ void CChar::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when r
 }
 
 // shrunk or died. (or sleeping)
-void CChar::DropAll( CItemContainer * pCorpse, dword dwAttr )
+void CChar::DropAll( CItemContainer * pCorpse, uint64 iAttr )
 {
 	ADDTOCALLSTACK("CChar::DropAll");
 	if ( IsStatFlag( STATF_Conjured ))
@@ -578,7 +578,7 @@ void CChar::DropAll( CItemContainer * pCorpse, dword dwAttr )
 	{
 		if ( pCorpse == NULL )
 		{
-			pPack->ContentsDump( GetTopPoint(), dwAttr );
+			pPack->ContentsDump( GetTopPoint(), iAttr );
 		}
 		else
 		{
@@ -2120,13 +2120,13 @@ void CChar::EatAnim( lpctstr pszName, short iQty )
 
 // Some outside influence may be revealing us.
 // -1 = reveal everything, also invisible GMs
-bool CChar::Reveal( dword dwFlags )
+bool CChar::Reveal( uint64 iFlags )
 {
 	ADDTOCALLSTACK("CChar::Reveal");
 
-	if ( !dwFlags )
-		dwFlags = STATF_Invisible|STATF_Hidden|STATF_Sleeping;
-	if ( !IsStatFlag(dwFlags) )
+	if ( !iFlags)
+        iFlags = STATF_Invisible|STATF_Hidden|STATF_Sleeping;
+	if ( !IsStatFlag(iFlags) )
 		return false;
 
 	if ( IsClient() && GetClient()->m_pHouseDesign )
@@ -2138,10 +2138,10 @@ bool CChar::Reveal( dword dwFlags )
 		GetClient()->m_pHouseDesign->EndCustomize(true);
 	}
 
-	if ( (dwFlags & STATF_Sleeping) && IsStatFlag(STATF_Sleeping) )
+	if ( (iFlags & STATF_Sleeping) && IsStatFlag(STATF_Sleeping) )
 		Wake();
 
-	if ( (dwFlags & STATF_Invisible) && IsStatFlag(STATF_Invisible) )
+	if ( (iFlags & STATF_Invisible) && IsStatFlag(STATF_Invisible) )
 	{
 		CItem * pSpell = LayerFind(LAYER_SPELL_Invis);
 		if ( pSpell && pSpell->IsType(IT_SPELL) && (pSpell->m_itSpell.m_spell == SPELL_Invis) )
@@ -2157,7 +2157,7 @@ bool CChar::Reveal( dword dwFlags )
 		}
 	}
 
-	StatFlag_Clear(dwFlags);
+	StatFlag_Clear(iFlags);
 	CClient *pClient = GetClient();
 	if ( pClient )
 	{

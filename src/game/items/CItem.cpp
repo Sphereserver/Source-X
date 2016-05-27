@@ -2370,13 +2370,13 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			sVal.FormatVal(m_weight);
 			break;
 		case IC_CAN:
-			sVal.FormatHex( m_Can ) ;
+			sVal.FormatLLHex( m_Can ) ;
 			break;
 		case IC_ATTR:
-			sVal.FormatHex( m_Attr );
+			sVal.FormatLLHex( m_Attr );
 			break;
 		case IC_CANUSE:
-			sVal.FormatHex( m_CanUse );
+			sVal.FormatLLHex( m_CanUse );
 			break;
 		case IC_CONT:
 			{

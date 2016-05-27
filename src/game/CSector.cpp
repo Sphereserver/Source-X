@@ -1138,6 +1138,7 @@ void CSector::OnTick(int iPulseCount)
 			{
 				EXC_SETSUB("ItemDelete");
 				pItem->Delete();
+                continue;
 			}
 			else
 			{

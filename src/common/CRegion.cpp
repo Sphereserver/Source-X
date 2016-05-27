@@ -682,7 +682,7 @@ bool CRegionBase::r_LoadVal( CScript & s )
 			SetModified( REGMOD_EVENTS );
 			return( m_Events.r_LoadVal( s, RES_REGIONTYPE ));
 		case RC_FLAGS:
-			m_dwFlags = ( s.GetArgVal() &~REGION_FLAG_SHIP ) | ( m_dwFlags & REGION_FLAG_SHIP );
+			m_dwFlags = ( s.GetArgDWVal() &~REGION_FLAG_SHIP ) | ( m_dwFlags & REGION_FLAG_SHIP );
 			SetModified( REGMOD_FLAGS );
 			break;
 		case RC_GATE:
@@ -699,7 +699,7 @@ bool CRegionBase::r_LoadVal( CScript & s )
 			TogRegionFlags( REGION_ANTIMAGIC_ALL, ! s.GetArgVal());
 			break;
 		case RC_MAP:
-			m_pt.m_map = (uchar)(s.GetArgVal());
+			m_pt.m_map = s.GetArgUCVal();
 			break;
 		case RC_MARK:
 		case RC_RECALLIN:

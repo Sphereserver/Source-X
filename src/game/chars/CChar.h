@@ -75,7 +75,7 @@ private:
 #define STATF_Ridden		0x40000000	// This is the horse. (don't display me) I am being ridden
 #define STATF_OnHorse		0x80000000	// Mounted on horseback.
 
-	dword m_StatFlag;		// Flags above
+	uint64 m_StatFlag;		// Flags above
 
 #define SKILL_VARIANCE 100		// Difficulty modifier for determining success. 10.0 %
 	ushort m_Skill[SKILL_QTY];	// List of skills ( skill * 10 )
@@ -291,10 +291,10 @@ public:
 	char GetFixZ( CPointMap pt, uint wBlockFlags = 0);
 	virtual void Delete(bool bforce = false);
 	virtual bool NotifyDelete();
-	bool IsStatFlag( dword dwStatFlag ) const;
-	void StatFlag_Set( dword dwStatFlag );
-	void StatFlag_Clear( dword dwStatFlag );
-	void StatFlag_Mod( dword dwStatFlag, bool fMod );
+	bool IsStatFlag( uint64 iStatFlag ) const;
+	void StatFlag_Set(uint64 iStatFlag);
+	void StatFlag_Clear(uint64 iStatFlag);
+	void StatFlag_Mod(uint64 iStatFlagStatFlag, bool fMod );
 	bool IsPriv( word flag ) const;
 	PLEVEL_TYPE GetPrivLevel() const;
 
@@ -1025,7 +1025,7 @@ public:
 	CItemCorpse * MakeCorpse( bool fFrontFall );
 	bool RaiseCorpse( CItemCorpse * pCorpse );
 	bool Death();
-	bool Reveal( dword dwFlags = 0 );
+	bool Reveal( uint64 iFlags = 0 );
 	void Jail( CTextConsole * pSrc, bool fSet, int iCell );
 	void EatAnim( lpctstr pszName, short iQty );
 	void CallGuards( CChar * pCriminal );
@@ -1041,7 +1041,7 @@ public:
 	virtual void SpeakUTF8Ex( const nword * pText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang );
 
 	bool OnFreezeCheck();
-	void DropAll( CItemContainer * pCorpse = NULL, dword dwAttr = 0 );
+	void DropAll( CItemContainer * pCorpse = NULL, uint64 dwAttr = 0 );
 	void UnEquipAllItems( CItemContainer * pCorpse = NULL, bool bLeaveHands = false );
 	void Wake();
 	void SleepStart( bool fFrontFall );

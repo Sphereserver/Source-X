@@ -472,7 +472,6 @@ bool CDataBase::r_Verb(CScript & s, CTextConsole * pSrc)
 	switch ( index )
 	{
 		case DBOV_CLOSE:
-			break;	//Commented ATM, should be completely disabled? So soon to determinate that.
 			if ( isConnected() )
 				Close();
 			break;

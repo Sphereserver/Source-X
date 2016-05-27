@@ -117,6 +117,24 @@ dword CScriptKey::GetArgFlag( dword dwStart, dword dwMask )
 		return ( dwStart &~ dwMask );
 }
 
+int64 CScriptKey::GetArgLLFlag(uint64 iStart, uint64 iMask)
+{
+    ADDTOCALLSTACK("CScriptKey::GetArgFlag");
+    // No args = toggle the flag.
+    // 1 = set the flag.
+    // 0 = clear the flag.
+
+    ASSERT(m_pszKey);
+    ASSERT(m_pszArg);
+
+    if (!HasArgs())
+        return (iStart ^ iMask);
+    else if (GetArgLLVal())
+        return (iStart | iMask);
+    else
+        return (iStart &~iMask);
+}
+
 char CScriptKey::GetArgCVal()
 {
 	ADDTOCALLSTACK("CScriptKey::GetArgCVal");

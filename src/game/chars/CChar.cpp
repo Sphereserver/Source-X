@@ -577,27 +577,27 @@ char CChar::GetFixZ( CPointMap pt, uint wBlockFlags)
 }
 
 
-bool CChar::IsStatFlag( dword dwStatFlag ) const
+bool CChar::IsStatFlag( uint64 iStatFlagStatFlag ) const
 {
-	return(( m_StatFlag & dwStatFlag) ? true : false );
+	return(( m_StatFlag & iStatFlagStatFlag) ? true : false );
 }
 
-void CChar::StatFlag_Set( dword dwStatFlag )
+void CChar::StatFlag_Set( uint64 iStatFlagStatFlag )
 {
-	m_StatFlag |= dwStatFlag;
+	m_StatFlag |= iStatFlagStatFlag;
 }
 
-void CChar::StatFlag_Clear( dword dwStatFlag )
+void CChar::StatFlag_Clear( uint64 iStatFlagStatFlag )
 {
-	m_StatFlag &= ~dwStatFlag;
+	m_StatFlag &= ~iStatFlagStatFlag;
 }
 
-void CChar::StatFlag_Mod( dword dwStatFlag, bool fMod )
+void CChar::StatFlag_Mod(uint64 iStatFlagStatFlag, bool fMod )
 {
 	if ( fMod )
-		m_StatFlag |= dwStatFlag;
+		m_StatFlag |= iStatFlagStatFlag;
 	else
-		m_StatFlag &= ~dwStatFlag;
+		m_StatFlag &= ~iStatFlagStatFlag;
 }
 
 bool CChar::IsPriv( word flag ) const
@@ -2446,7 +2446,7 @@ do_default:
 		case CHC_MEMORY:
 			// What is our memory flags about this pSrc person.
 			{
-				dword dwFlags	= 0;
+				uint64 iFlags	= 0;
 				CItemMemory *	pMemory;
 				pszKey += 6;
 				if ( *pszKey == '.' )
@@ -2459,9 +2459,9 @@ do_default:
 					pMemory	= Memory_FindObj( pCharSrc );
 				if ( pMemory != NULL )
 				{
-					dwFlags = pMemory->GetMemoryTypes();
+					iFlags = pMemory->GetMemoryTypes();
 				}
-				sVal.FormatHex( dwFlags );
+				sVal.FormatLLHex( iFlags );
 			}
 			return true;
 		case CHC_NAME:
@@ -2572,7 +2572,7 @@ do_default:
 			sVal.FormatVal( IsStatFlag(STATF_EmoteAction) );
 			break;
 		case CHC_FLAGS:
-			sVal.FormatHex( m_StatFlag );
+			sVal.FormatLLHex( m_StatFlag );
 			break;
 		case CHC_FONT:
 			sVal.FormatVal( m_fonttype );
@@ -2997,8 +2997,7 @@ do_default:
 			}
 			break;
 		case CHC_FLAGS:		// DO NOT MODIFY STATF_SaveParity, STATF_Spawned, STATF_Pet
-			m_StatFlag = ( s.GetArgDWVal() &~ (STATF_SaveParity|STATF_Pet|STATF_Spawned)) | ( m_StatFlag & (STATF_SaveParity|STATF_Pet|STATF_Spawned) );
-			NotoSave_Update();
+			m_StatFlag = ( s.GetArgLLVal() &~ (STATF_SaveParity|STATF_Pet|STATF_Spawned)) | ( m_StatFlag & (STATF_SaveParity|STATF_Pet|STATF_Spawned) );			NotoSave_Update();
 			break;
 		case CHC_FONT:
 			m_fonttype = static_cast<FONT_TYPE>(s.GetArgVal());
@@ -3603,7 +3602,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_INVIS:
 			if ( pSrc )
 			{
-				m_StatFlag = s.GetArgFlag( m_StatFlag, STATF_Insubstantial );
+				m_StatFlag = s.GetArgLLFlag( m_StatFlag, STATF_Insubstantial );
 				UpdateMode(NULL, true);
 				if ( IsStatFlag(STATF_Insubstantial) )
 				{
@@ -3624,7 +3623,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_INVUL:
 			if ( pSrc )
 			{
-				m_StatFlag = s.GetArgFlag( m_StatFlag, STATF_INVUL );
+				m_StatFlag = s.GetArgLLFlag( m_StatFlag, STATF_INVUL );
 				NotoSave_Update();
 				if ( IsSetOF( OF_Command_Sysmsgs ) )
 					pSrc->SysMessage( IsStatFlag( STATF_INVUL )? g_Cfg.GetDefaultMsg(DEFMSG_MSG_INVUL_ON) : g_Cfg.GetDefaultMsg(DEFMSG_MSG_INVUL_OFF) );

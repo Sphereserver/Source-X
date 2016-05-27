@@ -80,7 +80,7 @@ public:
 #define ATTR_SECURE			0x1000000	// Is Secure
 #define ATTR_REFORGED		0x2000000	// Is Runic Reforged.
 #define ATTR_OPENED			0x4000000	// Is Door Opened.
-	dword	m_Attr;
+	uint64	m_Attr;
 	// NOTE: If this link is set but not valid -> then delete the whole object !
 	CUID m_uidLink;		// Linked to this other object in the world. (owned, key, etc)
 
@@ -554,29 +554,29 @@ public:
 	int IsWeird() const;
 	char GetFixZ(CPointMap pt, dword wBlockFlags = 0 );
 	byte GetSpeed() const;
-	void SetAttr(dword dwAttr)
+	void SetAttr(uint64 iAttr)
 	{
-		m_Attr |= dwAttr;
+		m_Attr |= iAttr;
 	}
-	void ClrAttr(dword dwAttr)
+	void ClrAttr(uint64 iAttr)
 	{
-		m_Attr &= ~dwAttr;
+		m_Attr &= ~iAttr;
 	}
-	bool IsAttr(dword dwAttr) const	// ATTR_DECAY
+	bool IsAttr(uint64 iAttr) const	// ATTR_DECAY
 	{
-		return((m_Attr & dwAttr) ? true : false);
+		return((m_Attr & iAttr) ? true : false);
 	}
-	void SetCanUse(dword dwCanUse)
+	void SetCanUse(uint64 iCanUse)
 	{
-		m_CanUse |= dwCanUse;
+		m_CanUse |= iCanUse;
 	}
-	void ClrCanUse(dword dwCanUse)
+	void ClrCanUse(uint64 iCanUse)
 	{
-		m_CanUse &= ~dwCanUse;
+		m_CanUse &= ~iCanUse;
 	}
-	bool IsCanUse(dword dwCanUse) const	// CanUse_None
+	bool IsCanUse(uint64 iCanUse) const	// CanUse_None
 	{
-		return ((m_CanUse & dwCanUse) ? true : false);
+		return ((m_CanUse & iCanUse) ? true : false);
 	}
 
 	height_t GetHeight() const;

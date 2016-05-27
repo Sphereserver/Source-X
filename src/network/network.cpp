@@ -2154,9 +2154,9 @@ bool NetworkOut::sendPacket(CClient* client, PacketSend* packet)
 
 #ifdef _WIN32
 
-void CALLBACK SendCompleted(dword dwError, dword cbTransferred, LPWSAOVERLAPPED lpOverlapped, dword dwFlags)
+void CALLBACK SendCompleted(dword dwError, dword cbTransferred, LPWSAOVERLAPPED lpOverlapped, uint64 iFlags)
 {
-	UNREFERENCED_PARAMETER(dwFlags);
+	UNREFERENCED_PARAMETER(iFlags);
 	ADDTOCALLSTACK("SendCompleted");
 
 	NetState* state = reinterpret_cast<NetState *>(lpOverlapped->hEvent);
@@ -2432,9 +2432,9 @@ const char * GenerateNetworkThreadName(size_t id)
  *
  *
  ***************************************************************************/
-void CALLBACK SendCompleted(dword dwError, dword cbTransferred, LPWSAOVERLAPPED lpOverlapped, dword dwFlags)
+void CALLBACK SendCompleted(dword dwError, dword cbTransferred, LPWSAOVERLAPPED lpOverlapped, uint64 iFlags)
 {
-	UNREFERENCED_PARAMETER(dwFlags);
+	UNREFERENCED_PARAMETER(iFlags);
 	ADDTOCALLSTACK("SendCompleted");
 
 	NetState* state = reinterpret_cast<NetState*>(lpOverlapped->hEvent);

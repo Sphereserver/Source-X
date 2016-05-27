@@ -124,14 +124,14 @@ public:
 	CItem * ContentFindRandom() const;
 
     /**
-     * @fn  void CContainer::ContentsDump( const CPointMap & pt, dword dwAttr = 0 );
+     * @fn  void CContainer::ContentsDump( const CPointMap & pt, uint64 iAttr = 0 );
      *
      * @brief   Contents dump.
      *
      * @param   pt      The point.
      * @param   dwAttr  The attribute.
      */
-	void ContentsDump( const CPointMap & pt, dword dwAttr = 0 );
+	void ContentsDump( const CPointMap & pt, uint64 iAttr = 0 );
 
     /**
      * @fn  void CContainer::ContentsTransfer( CItemContainer * pCont, bool fNoNewbie );
@@ -144,14 +144,14 @@ public:
 	void ContentsTransfer( CItemContainer * pCont, bool fNoNewbie );
 
     /**
-     * @fn  void CContainer::ContentAttrMod( dword dwAttr, bool fSet );
+     * @fn  void CContainer::ContentAttrMod( uint64 iAttr, bool fSet );
      *
      * @brief   Content attribute modifier.
      *
      * @param   dwAttr  The attribute.
      * @param   fSet    true to set.
      */
-	void ContentAttrMod( dword dwAttr, bool fSet );
+	void ContentAttrMod( uint64 iAttr, bool fSet );
 
     /**
      * @fn  void CContainer::ContentNotifyDelete();

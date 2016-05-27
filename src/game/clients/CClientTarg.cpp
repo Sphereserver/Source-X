@@ -1593,7 +1593,7 @@ bool CClient::OnTarg_Use_Deed( CItem * pDeed, CPointMap & pt )
 	return true;
 }
 
-CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, dword dwAttr, HUE_TYPE wHue )
+CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, uint64 iAttr, HUE_TYPE wHue )
 {
 	ADDTOCALLSTACK("CClient::OnTarg_Use_Multi");
 	// Might be a IT_MULTI or it might not. place it anyhow.
@@ -1606,7 +1606,7 @@ CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, d
 	const CItemBaseMulti * pMultiDef = dynamic_cast <const CItemBaseMulti *> ( pItemDef );
 
 	// Check water/mountains/etc.
-	if ( pMultiDef != NULL && ! (dwAttr&ATTR_MAGIC))
+	if ( pMultiDef != NULL && ! (iAttr&ATTR_MAGIC))
 	{
 		if ( pMultiDef->m_rect.m_bottom > 0 && (pMultiDef->IsType(IT_MULTI) || pMultiDef->IsType(IT_MULTI_CUSTOM)) )
 			pt.m_y -= (short)(pMultiDef->m_rect.m_bottom - 1);
@@ -1701,7 +1701,7 @@ CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, d
 		return NULL;
 	}
 
-	pItemNew->SetAttr( dwAttr & ( ATTR_MAGIC | ATTR_INVIS ));
+	pItemNew->SetAttr(iAttr & ( ATTR_MAGIC | ATTR_INVIS ));
 	pItemNew->SetHue( wHue );
 	pItemNew->MoveToUpdate( pt );
 

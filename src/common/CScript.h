@@ -77,6 +77,7 @@ public:
 	int64 GetArgLLRange();
 	int GetArgRange();
 	dword GetArgFlag( dword dwStart, dword dwMask );
+    int64 GetArgLLFlag( uint64 dwStart, uint64 dwMask );
 
 public:
 	CScriptKey();
