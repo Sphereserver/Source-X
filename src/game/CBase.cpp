@@ -100,10 +100,7 @@ bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 			sVal = GetDefStr(pszKey, false);
 			break;
 		//return as decimal number or 0 if not set
-		case OBC_BALANCED:
 		case OBC_BANE:
-		case OBC_BATTLELUST:
-		case OBC_BLOODDRINKER:
 		case OBC_CASTINGFOCUS:
 		case OBC_DAMCHAOS:
 		case OBC_DAMCOLD:
@@ -383,10 +380,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 			}
 			break;
 		//Set as number only
-		case OBC_BALANCED:
 		case OBC_BANE:
-		case OBC_BATTLELUST:
-		case OBC_BLOODDRINKER:
 		case OBC_CASTINGFOCUS:
 		case OBC_DAMCHAOS:
 		case OBC_DAMCOLD:

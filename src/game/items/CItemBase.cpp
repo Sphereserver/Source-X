@@ -979,6 +979,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
 	{
 		//return as string or hex number or NULL if not set
+		case IBC_ALTERITEM:
 		case IBC_AMMOANIM:
 		case IBC_AMMOANIMHUE:
 		case IBC_AMMOANIMRENDER:
@@ -1006,8 +1007,6 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 			sVal = GetDefStr(pszKey);
 			break;
 		//return as decimal number or 0 if not set
-		case IBC_SEARINGWEAPON:
-		case IBC_USEBESTWEAPONSKILL:
 		case IBC_BONUSSKILL1AMT:
 		case IBC_BONUSSKILL2AMT:
 		case IBC_BONUSSKILL3AMT:
@@ -1018,13 +1017,9 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 		case IBC_ITEMSETCOLOR:
 		case IBC_RARITY:
 		case IBC_LIFESPAN:
-		case IBC_BRITTLE:
-		case IBC_EPHEMERAL:
-		case IBC_MAGEARMOR:
 		case IBC_MAGEWEAPON:
 		case IBC_SELFREPAIR:
 		case IBC_DURABILITY:
-		case IBC_NODROPTRADE:
 		case IBC_CHARGESCUR:
 		case IBC_CHARGESMAX:
 		case IBC_USESCUR:
@@ -1034,7 +1029,6 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 		case IBC_RECHARGERATE:
 		case IBC_BONUSCRAFTINGAMT:
 		case IBC_BONUSCRAFTINGEXCEPAMT:
-		case IBC_MANAPHASE:
 		case IBC_NPCKILLERAMT:
 		case IBC_NPCPROTECTIONAMT:
 		case IBC_BONUSSTR:
@@ -1109,22 +1103,22 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 			sVal.FormatHex( m_CanUse );
 			break;
 		case IBC_DYE:
-			sVal.FormatVal(( m_Can & CAN_I_DYE ) ? true : false );
+			sVal.FormatVal( m_Can & CAN_I_DYE );
 			break;
 		case IBC_ENCHANT:
-			sVal.FormatVal(( m_Can & CAN_I_ENCHANT ) ? true : false );
+			sVal.FormatVal( m_Can & CAN_I_ENCHANT );
 			break;
 		case IBC_EXCEPTIONAL:
-			sVal.FormatVal(( m_Can & CAN_I_EXCEPTIONAL ) ? true : false );
+			sVal.FormatVal( m_Can & CAN_I_EXCEPTIONAL );
 			break;
 		case IBC_FLIP:
-			sVal.FormatHex(( m_Can & CAN_I_FLIP ) ? true : false );
+			sVal.FormatHex( m_Can & CAN_I_FLIP );
 			break;
 		case IBC_ID:
 			sVal.FormatHex( GetDispID() );
 			break;
 		case IBC_IMBUE:
-			sVal.FormatVal(( m_Can & CAN_I_IMBUE ) ? true : false );
+			sVal.FormatVal( m_Can & CAN_I_IMBUE );
 			break;
 		case IBC_ISARMOR:
 			sVal.FormatVal( IsTypeArmor( m_type ) );
@@ -1133,16 +1127,16 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 			sVal.FormatVal( IsTypeWeapon( m_type ) );
 			break;
 		case IBC_MAKERSMARK:
-			sVal.FormatVal(( m_Can & CAN_I_MAKERSMARK ) ? true : false );
+			sVal.FormatVal( m_Can & CAN_I_MAKERSMARK );
 			break;
 		case IBC_RECYCLE:
-			sVal.FormatVal(( m_Can & CAN_I_RECYCLE ) ? true : false );
+			sVal.FormatVal( m_Can & CAN_I_RECYCLE );
 			break;
 		case IBC_REFORGE:
-			sVal.FormatVal(( m_Can & CAN_I_REFORGE ) ? true : false );
+			sVal.FormatVal( m_Can & CAN_I_REFORGE );
 			break;
 		case IBC_RETAINCOLOR:
-			sVal.FormatVal(( m_Can & CAN_I_RETAINCOLOR ) ? true : false );
+			sVal.FormatVal( m_Can & CAN_I_RETAINCOLOR );
 			break;
 		case IBC_SKILL:		// Skill to use.
 			{
@@ -1187,10 +1181,10 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 			sVal.FormatVal( m_layer );
 			break;
 		case IBC_REPAIR:
-			sVal.FormatHex(( m_Can & CAN_I_REPAIR ) ? true : false );
+			sVal.FormatHex( m_Can & CAN_I_REPAIR );
 			break;
 		case IBC_REPLICATE:
-			sVal.FormatHex(( m_Can & CAN_I_REPLICATE ) ? true : false );
+			sVal.FormatHex( m_Can & CAN_I_REPLICATE );
 			break;
 		case IBC_REQSTR:
 			// IsTypeEquippable()
@@ -1308,6 +1302,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ) )
 	{
 		//Set as Strings
+		case IBC_ALTERITEM:
 		case IBC_AMMOANIM:
 		case IBC_AMMOANIMHUE:
 		case IBC_AMMOANIMRENDER:
@@ -1338,8 +1333,6 @@ bool CItemBase::r_LoadVal( CScript &s )
 			}
 			break;
 		//Set as number only
-		case IBC_SEARINGWEAPON:
-		case IBC_USEBESTWEAPONSKILL:
 		case IBC_BONUSSKILL1AMT:
 		case IBC_BONUSSKILL2AMT:
 		case IBC_BONUSSKILL3AMT:
@@ -1350,13 +1343,9 @@ bool CItemBase::r_LoadVal( CScript &s )
 		case IBC_ITEMSETCOLOR:
 		case IBC_RARITY:
 		case IBC_LIFESPAN:
-		case IBC_BRITTLE:
-		case IBC_EPHEMERAL:
-		case IBC_MAGEARMOR:
 		case IBC_MAGEWEAPON:
 		case IBC_SELFREPAIR:
 		case IBC_DURABILITY:
-		case IBC_NODROPTRADE:
 		case IBC_CHARGESCUR:
 		case IBC_CHARGESMAX:
 		case IBC_USESCUR:
@@ -1366,7 +1355,6 @@ bool CItemBase::r_LoadVal( CScript &s )
 		case IBC_RECHARGERATE:
 		case IBC_BONUSCRAFTINGAMT:
 		case IBC_BONUSCRAFTINGEXCEPAMT:
-		case IBC_MANAPHASE:
 		case IBC_NPCKILLERAMT:
 		case IBC_NPCPROTECTIONAMT:
 		case IBC_BONUSSTR:

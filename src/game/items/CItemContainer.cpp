@@ -334,6 +334,8 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 		{ GUMP_CABINET_LT, 24, 96, 91, 143 },
 		{ GUMP_DRAWER_LT, 16, 17, 110, 85 },
 		{ GUMP_GIFT_BOX, 35, 10, 155, 85 },
+		{ GUMP_STOCKING, 0, 0, 0, 0 },
+		{ GUMP_ARMOIRE_ELVEN, 10, 10, 160, 105 },
 		{ GUMP_ARMOIRE_RED, 10, 10, 150, 95 },
 		{ GUMP_ARMOIRE_MAPLE, 10, 10, 150, 95 },
 		{ GUMP_ARMOIRE_CHERRY, 10, 10, 150, 95 },
@@ -343,15 +345,27 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 		{ GUMP_CHEST_WOOD_ORNATE, 10, 10, 150, 95 },
 		{ GUMP_TALL_CABINET, 10, 10, 150, 95 },
 		{ GUMP_CHEST_WOOD_FINISH, 10, 10, 150, 95 },
+		{ GUMP_BLESSED_STATUE, 0, 0, 0, 0 },
+		{ GUMP_MAIL_BOX, 0, 0, 0, 0 },
 		{ GUMP_GIFT_BOX_CUBE, 23, 51, 140, 100 },
-		{ GUMP_GIFT_BOX_CILINDER, 16, 51, 140, 115 },
+		{ GUMP_GIFT_BOX_CYLINDER, 16, 51, 140, 115 },
 		{ GUMP_GIFT_BOX_OCTOGON, 25, 51, 140, 115 },
 		{ GUMP_GIFT_BOX_RECTANGLE, 16, 51, 140, 100 },
 		{ GUMP_GIFT_BOX_ANGEL, 21, 51, 140, 100 },
 		{ GUMP_HEART_SHAPED, 56, 30, 102, 74 },
+		{ GUMP_GIFT_BOX_TALL, 0, 0, 0, 0 },
+		{ GUMP_TREASURE_CHEST, 21, 51, 140, 100 },
+		{ GUMP_FOUNTAIN_OF_LIFE, 0, 0, 0, 0 },
+		{ GUMP_COMBINATION_CHEST, 0, 0, 0, 0 },
 		{ GUMP_SECURE_TRADE, 1, 1, 66, 26 },
+		{ GUMP_SECURE_TRADE_NEW, 0, 0, 0, 0 },
 		{ GUMP_GAME_BOARD,	 4, 10, 220, 185 },		// Chess or checker board.
 		{ GUMP_GAME_BACKGAM, 4, 10, 220, 185 },
+		{ GUMP_PLAGUE_BEAST_CORE, 60, 33, 400, 411 },
+		{ GUMP_REGAL_CASE, 0, 0, 0, 0 },
+		{ GUMP_GIFT_BOX_CHRISTMAS, 0, 0, 0, 0 },
+		{ GUMP_WALL_SAFE, 0, 0, 0, 0 },
+		{ GUMP_FLETCHING_STATION, 0, 0, 0, 0 },	// Presumably a container.
 	};
 
 	// ??? pItemDef->m_ttContainer.m_dwMinXY to m_dwMaxXY

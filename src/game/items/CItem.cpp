@@ -2266,6 +2266,7 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		//return as string or hex number or NULL if not set
 		case IC_CRAFTEDBY:
 		case IC_MAKERSNAME:
+		case IC_OWNEDBY:
 			sVal = GetDefStr(pszKey);
 			break;
 		//On these ones, check BaseDef if not found on dynamic
@@ -2288,7 +2289,6 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		case IC_NPCKILLER:
 		case IC_NPCPROTECTION:
 		case IC_OCOLOR:
-		case IC_OWNEDBY:
 		case IC_BONUSCRAFTING:
 		case IC_BONUSCRAFTINGEXCEP:
 		case IC_REMOVALTYPE:
@@ -2314,33 +2314,25 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		case IC_BONUSSKILL3AMT:
 		case IC_BONUSSKILL4AMT:
 		case IC_BONUSSKILL5AMT:
-		case IC_BRITTLE:
 		case IC_CHARGESCUR:
 		case IC_CHARGESMAX:
 		case IC_DURABILITY:
-		case IC_EPHEMERAL:
 		case IC_ITEMSETAMTCUR:
 		case IC_ITEMSETAMTMAX:
 		case IC_ITEMSETCOLOR:
 		case IC_LIFESPAN:
-		case IC_MAGEARMOR:
 		case IC_MAGEWEAPON:
-		case IC_MANAPHASE:
-		case IC_NODROPTRADE:
 		case IC_RARITY:
 		case IC_RECHARGE:
 		case IC_RECHARGEAMT:
 		case IC_RECHARGERATE:
-		case IC_SEARINGWEAPON:
 		case IC_SELFREPAIR:
 		case IC_USESCUR:
 		case IC_USESMAX:
-		case IC_USEBESTWEAPONSKILL:
 		case IC_BONUSCRAFTINGAMT:
 		case IC_BONUSCRAFTINGEXCEPAMT:
 		case IC_NPCKILLERAMT:
 		case IC_NPCPROTECTIONAMT:
-		case IC_QUESTITEM:
 			{
 				CVarDefCont * pVar = GetDefKey(pszKey, true);
 				sVal.FormatLLVal(pVar ? pVar->GetValNum() : 0);
@@ -2377,6 +2369,42 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			break;
 		case IC_CANUSE:
 			sVal.FormatLLHex( m_CanUse );
+			break;
+		case IC_BALANCED:
+			sVal.FormatVal( m_Attr & ATTR_BALANCED );
+			break;
+		case IC_BATTLELUST:
+			sVal.FormatVal( m_Attr & ATTR_BATTLELUST );
+			break;
+		case IC_BLOODDRINKER:
+			sVal.FormatVal( m_Attr & ATTR_BLOODDRINKER );
+			break;
+		case IC_BRITTLE:
+			sVal.FormatVal( m_Attr & ATTR_BRITTLE );
+			break;
+		case IC_EPHEMERAL:
+			sVal.FormatVal( m_Attr & ATTR_EPHEMERAL );
+			break;
+		case IC_MAGEARMOR:
+			sVal.FormatVal( m_Attr & ATTR_MAGEARMOR );
+			break;
+		case IC_MANAPHASE:
+			sVal.FormatVal( m_Attr & ATTR_MANAPHASE );
+			break;
+		case IC_NODROP:
+			sVal.FormatVal( m_Attr & ATTR_NODROP );
+			break;
+		case IC_NOTRADE:
+			sVal.FormatVal( m_Attr & ATTR_NOTRADE );
+			break;
+		case IC_QUESTITEM:
+			sVal.FormatVal( m_Attr & ATTR_QUESTITEM );
+			break;
+		case IC_SEARING:
+			sVal.FormatVal( m_Attr & ATTR_SEARING );
+			break;
+		case IC_USEBESTWEAPONSKILL:
+			sVal.FormatVal( m_Attr & ATTR_USEBESTWEAPONSKILL );
 			break;
 		case IC_CONT:
 			{
@@ -2568,26 +2596,20 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 		case IC_BONUSSKILL3AMT:
 		case IC_BONUSSKILL4AMT:
 		case IC_BONUSSKILL5AMT:
-		case IC_BRITTLE:
 		case IC_CHARGESCUR:
 		case IC_CHARGESMAX:
 		case IC_DURABILITY:
-		case IC_EPHEMERAL:
 		case IC_ITEMSETAMTCUR:
 		case IC_ITEMSETAMTMAX:
 		case IC_ITEMSETCOLOR:
 		case IC_LIFESPAN:
-		case IC_MAGEARMOR:
 		case IC_MAGEWEAPON:
-		case IC_NODROPTRADE:
 		case IC_RARITY:
 		case IC_RECHARGE:
 		case IC_RECHARGEAMT:
 		case IC_RECHARGERATE:
-		case IC_SEARINGWEAPON:
 		case IC_SELFREPAIR:
 		case IC_USESCUR:
-		case IC_USEBESTWEAPONSKILL:
 		case IC_BONUSSTR:
 		case IC_BONUSDEX:
 		case IC_BONUSINT:
@@ -2599,17 +2621,123 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 		case IC_BONUSMANAMAX:
 		case IC_BONUSCRAFTINGAMT:
 		case IC_BONUSCRAFTINGEXCEPAMT:
-		case IC_MANAPHASE:
 		case IC_NPCKILLERAMT:
 		case IC_NPCPROTECTIONAMT:
 		case IC_DOORCLOSESOUND:
 		case IC_DOOROPENSOUND:
 		case IC_PORTCULISSOUND:
 		case IC_DOOROPENID:
-		case IC_QUESTITEM:
 			SetDefNum(s.GetKey(),s.GetArgVal(), false);
 			break;
 
+		case IC_BALANCED:
+			if ( !s.HasArgs() )
+				m_Attr |= ATTR_BALANCED;
+			else
+				if ( s.GetArgVal() )
+					m_Attr |= ATTR_BALANCED;
+				else
+					m_Attr &= ~ATTR_BALANCED;
+			break;
+		case IC_BATTLELUST:
+			if ( !s.HasArgs() )
+				m_Attr |= ATTR_BATTLELUST;
+			else
+				if ( s.GetArgVal() )
+					m_Attr |= ATTR_BATTLELUST;
+				else
+					m_Attr &= ~ATTR_BATTLELUST;
+			break;
+		case IC_BLOODDRINKER:
+			if ( !s.HasArgs() )
+				m_Attr |= ATTR_BLOODDRINKER;
+			else
+				if ( s.GetArgVal() )
+					m_Attr |= ATTR_BLOODDRINKER;
+				else
+					m_Attr &= ~ATTR_BLOODDRINKER;
+			break;
+		case IC_BRITTLE:
+			if ( !s.HasArgs() )
+				m_Attr |= ATTR_BRITTLE;
+			else
+				if ( s.GetArgVal() )
+					m_Attr |= ATTR_BRITTLE;
+				else
+					m_Attr &= ~ATTR_BRITTLE;
+			break;
+		case IC_EPHEMERAL:
+			if ( !s.HasArgs() )
+				m_Attr |= ATTR_EPHEMERAL;
+			else
+				if ( s.GetArgVal() )
+					m_Attr |= ATTR_EPHEMERAL;
+				else
+					m_Attr &= ~ATTR_EPHEMERAL;
+			break;
+		case IC_MAGEARMOR:
+			if ( !s.HasArgs() )
+				m_Attr |= ATTR_MAGEARMOR;
+			else
+				if ( s.GetArgVal() )
+					m_Attr |= ATTR_MAGEARMOR;
+				else
+					m_Attr &= ~ATTR_MAGEARMOR;
+			break;
+		case IC_MANAPHASE:
+			if ( !s.HasArgs() )
+				m_Attr |= ATTR_MANAPHASE;
+			else
+				if ( s.GetArgVal() )
+					m_Attr |= ATTR_MANAPHASE;
+				else
+					m_Attr &= ~ATTR_MANAPHASE;
+			break;
+		case IC_NODROP:
+			if ( !s.HasArgs() )
+				m_Attr |= ATTR_NODROP;
+			else
+				if ( s.GetArgVal() )
+					m_Attr |= ATTR_NODROP;
+				else
+					m_Attr &= ~ATTR_NODROP;
+			break;
+		case IC_NOTRADE:
+			if ( !s.HasArgs() )
+				m_Attr |= ATTR_NOTRADE;
+			else
+				if ( s.GetArgVal() )
+					m_Attr |= ATTR_NOTRADE;
+				else
+					m_Attr &= ~ATTR_NOTRADE;
+			break;
+		case IC_QUESTITEM:
+			if ( !s.HasArgs() )
+				m_Attr |= ATTR_QUESTITEM;
+			else
+				if ( s.GetArgVal() )
+					m_Attr |= ATTR_QUESTITEM;
+				else
+					m_Attr &= ~ATTR_QUESTITEM;
+			break;
+		case IC_SEARING:
+			if ( !s.HasArgs() )
+				m_Attr |= ATTR_SEARING;
+			else
+				if ( s.GetArgVal() )
+					m_Attr |= ATTR_SEARING;
+				else
+					m_Attr &= ~ATTR_SEARING;
+			break;
+		case IC_USEBESTWEAPONSKILL:
+			if ( !s.HasArgs() )
+				m_Attr |= ATTR_USEBESTWEAPONSKILL;
+			else
+				if ( s.GetArgVal() )
+					m_Attr |= ATTR_USEBESTWEAPONSKILL;
+				else
+					m_Attr &= ~ATTR_USEBESTWEAPONSKILL;
+			break;
 		case IC_USESMAX:
 		{
 			int64 amount = s.GetArgLLVal();
@@ -2618,7 +2746,6 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			if (!pVar)
 				SetDefNum("UsesCur", amount, false);
 		}	break;
-
 		case IC_MAXAMOUNT:
 			if (!SetMaxAmount((ushort)(s.GetArgVal())))
 				return false;

@@ -776,10 +776,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			break;
 		//return as decimal number or 0 if not set
 		//On these ones, check BaseDef if not found on dynamic
-		case OC_BALANCED:
 		case OC_BANE:
-		case OC_BATTLELUST:
-		case OC_BLOODDRINKER:
 		case OC_CASTINGFOCUS:
 		case OC_DAMCHAOS:
 		case OC_DAMCOLD:
@@ -1604,10 +1601,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 			break;
 		//Set as number only
 		case OC_INCREASEHITCHANCE:
-		case OC_BALANCED:
 		case OC_BANE:
-		case OC_BATTLELUST:
-		case OC_BLOODDRINKER:
 		case OC_CASTINGFOCUS:
 		case OC_DAMCHAOS:
 		case OC_DAMCOLD:
