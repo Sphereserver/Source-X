@@ -269,25 +269,28 @@ bool CChar::NPC_OnTrainPay(CChar *pCharSrc, CItemMemory *pMemory, CItem * pGold)
 		return false;
 	}
 
-	int iTrainCost = (int)GetKeyNum("OVERRIDE.TRAINSKILLCOST", true);
-	if ( !iTrainCost )
-		iTrainCost = g_Cfg.m_iTrainSkillCost;
+    int iTrainVal = NPC_OnTrainCheck(pCharSrc, skill);
+    int iTrainMult = (int)GetKeyNum("OVERRIDE.TRAINSKILLCOST", true);
+	if ( !iTrainMult)
+        iTrainMult = g_Cfg.m_iTrainSkillCost;
 
-	iTrainCost *= NPC_OnTrainCheck(pCharSrc, skill);
+    word iTrainCost = (word)pCharSrc->PayGold(this, (word)minimum(UINT16_MAX, iTrainVal * iTrainMult), pGold, PAYGOLD_TRAIN);
+
 	if ( (iTrainCost <= 0) || !pGold )
 		return false;
 
 	Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_SUCCESS ) );
 
 	// Can't ask for more gold than the maximum amount of the gold stack i am giving to the npc
-	word iTrainCostFinal = (word)pCharSrc->PayGold(this, (word)minimum(UINT16_MAX, iTrainCost), NULL, PAYGOLD_TRAIN);
 
 	// Consume as much money as we can train for.
-	if ( pGold->GetAmount() < iTrainCostFinal )
+	if ( pGold->GetAmount() < iTrainCost )
 	{
-		iTrainCostFinal = pGold->GetAmount();
+        int iDiffPercent = MulDiv(iTrainCost, 100, pGold->GetAmount());
+		iTrainVal = MulDiv(iTrainVal,100,iDiffPercent);
+        iTrainCost = (word)pCharSrc->PayGold(this, (word)minimum(UINT16_MAX, iTrainVal * iTrainMult), pGold, PAYGOLD_TRAIN);
 	}
-	else if ( pGold->GetAmount() == iTrainCostFinal)
+	else if ( pGold->GetAmount() == iTrainCost)
 	{
 		Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_THATSALL_1 ) );
 		pMemory->m_itEqMemory.m_Action = NPC_MEM_ACT_NONE;
@@ -298,12 +301,12 @@ bool CChar::NPC_OnTrainPay(CChar *pCharSrc, CItemMemory *pMemory, CItem * pGold)
 		pMemory->m_itEqMemory.m_Action = NPC_MEM_ACT_NONE;
 
 		// Give change back.
-		pGold->UnStackSplit( iTrainCostFinal, pCharSrc );
+		pGold->UnStackSplit( iTrainCost, pCharSrc );
 	}
 	GetPackSafe()->ContentAdd( pGold );	// take my cash.
 
 	// Give credit for training.
-	NPC_TrainSkill( pCharSrc, skill, iTrainCostFinal);
+	NPC_TrainSkill( pCharSrc, skill, iTrainVal);
 	return true;
 }
 

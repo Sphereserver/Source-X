@@ -1303,7 +1303,8 @@ enum SSV_TYPE
 	SSV_NEW,
 	SSV_NEWDUPE,
 	SSV_NEWITEM,
-	SSV_NEWNPC,
+    SSV_NEWNPC,
+    SSV_NEWSUMMON,
 	SSV_OBJ,
 	SSV_SHOW,
 	SSV_QTY
@@ -1315,6 +1316,7 @@ lpctstr const CScriptObj::sm_szVerbKeys[SSV_QTY+1] =
 	"NEWDUPE",
 	"NEWITEM",
 	"NEWNPC",
+    "NEWSUMMON",
 	"OBJ",
 	"SHOW",
 	NULL
@@ -1478,6 +1480,43 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 				}
 			}
 			break;
+        case SSV_NEWSUMMON:
+        {
+            tchar * ppCmd[2];
+            size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppCmd, CountOf(ppCmd), ",");
+            if (iQty <= 0)
+                return false;
+            CREID_TYPE id = static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType(RES_CHARDEF, ppCmd[0]));
+            CChar * pChar = CChar::CreateNPC(id);
+            CChar * pCharSrc = NULL;
+            if (!pChar)
+            {
+                g_World.m_uidNew = (dword)0;
+                return false;
+            }
+
+            if (this != &g_Serv)
+            {
+                pCharSrc = pSrc->GetChar();
+                if (pCharSrc)
+                    pCharSrc->m_Act_Targ = g_World.m_uidNew;
+                else
+                {
+                    const CClient *pClient = dynamic_cast<CClient *>(this);
+                    if (pClient && pClient->GetChar())
+                        pClient->GetChar()->m_Act_Targ = g_World.m_uidNew;
+                }
+            }
+            pChar->OnSpellEffect(SPELL_Summon, pCharSrc, pCharSrc->Skill_GetAdjusted(SKILL_MAGERY), NULL, false);
+            g_World.m_uidNew = pChar->GetUID();
+            int iDuration = Exp_GetVal(ppCmd[1]);
+            if (iDuration)
+            {
+                CItem * pItemRune = pChar->LayerFind(LAYER_SPELL_Summon);
+                if (pItemRune)
+                    pItemRune->SetTimeout(iDuration * TICK_PER_SEC);
+            }
+        }break;
 
 		case SSV_SHOW:
 			{

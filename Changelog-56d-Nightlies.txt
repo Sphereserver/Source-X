@@ -76,3 +76,8 @@ ON=@PayGold:
 	Argn2 = Payment type ( 0 = Train, 1 = Buy , 2 = Hire).
 	src = The NPC receiving the money.
 	argo(if any) = The stack of gold used to pay (ie: training)
+
+OWNER is now RW, it can be used to set NPC's owner directly without the need of custom functions.
+Added NEWSUMMON, working as NEWNPC and NEWITEM, eg:
+	serv.newsummon=c_ogre,15
+	new.p=<p>	// Will summon an ogre for 15 seconds on your position, not giving the second param will result in default timer according to your magery skill.
