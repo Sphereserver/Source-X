@@ -2371,40 +2371,40 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			sVal.FormatLLHex( m_CanUse );
 			break;
 		case IC_BALANCED:
-			sVal.FormatVal( m_Attr & ATTR_BALANCED );
+			sVal.FormatLLVal( m_Attr & ATTR_BALANCED );
 			break;
 		case IC_BATTLELUST:
-			sVal.FormatVal( m_Attr & ATTR_BATTLELUST );
+			sVal.FormatLLVal( m_Attr & ATTR_BATTLELUST );
 			break;
 		case IC_BLOODDRINKER:
-			sVal.FormatVal( m_Attr & ATTR_BLOODDRINKER );
+			sVal.FormatLLVal( m_Attr & ATTR_BLOODDRINKER );
 			break;
 		case IC_BRITTLE:
-			sVal.FormatVal( m_Attr & ATTR_BRITTLE );
+			sVal.FormatLLVal( m_Attr & ATTR_BRITTLE );
 			break;
 		case IC_EPHEMERAL:
-			sVal.FormatVal( m_Attr & ATTR_EPHEMERAL );
+			sVal.FormatLLVal( m_Attr & ATTR_EPHEMERAL );
 			break;
 		case IC_MAGEARMOR:
-			sVal.FormatVal( m_Attr & ATTR_MAGEARMOR );
+			sVal.FormatLLVal( m_Attr & ATTR_MAGEARMOR );
 			break;
 		case IC_MANAPHASE:
-			sVal.FormatVal( m_Attr & ATTR_MANAPHASE );
+			sVal.FormatLLVal( m_Attr & ATTR_MANAPHASE );
 			break;
 		case IC_NODROP:
-			sVal.FormatVal( m_Attr & ATTR_NODROP );
+			sVal.FormatLLVal( m_Attr & ATTR_NODROP );
 			break;
 		case IC_NOTRADE:
-			sVal.FormatVal( m_Attr & ATTR_NOTRADE );
+			sVal.FormatLLVal( m_Attr & ATTR_NOTRADE );
 			break;
 		case IC_QUESTITEM:
-			sVal.FormatVal( m_Attr & ATTR_QUESTITEM );
+			sVal.FormatLLVal( m_Attr & ATTR_QUESTITEM );
 			break;
-		case IC_SEARING:
-			sVal.FormatVal( m_Attr & ATTR_SEARING );
+		case IC_SEARINGWEAPON:
+			sVal.FormatLLVal( m_Attr & ATTR_SEARINGWEAPON );
 			break;
 		case IC_USEBESTWEAPONSKILL:
-			sVal.FormatVal( m_Attr & ATTR_USEBESTWEAPONSKILL );
+			sVal.FormatLLVal( m_Attr & ATTR_USEBESTWEAPONSKILL );
 			break;
 		case IC_CONT:
 			{
@@ -2720,14 +2720,14 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				else
 					m_Attr &= ~ATTR_QUESTITEM;
 			break;
-		case IC_SEARING:
+		case IC_SEARINGWEAPON:
 			if ( !s.HasArgs() )
-				m_Attr |= ATTR_SEARING;
+				m_Attr |= ATTR_SEARINGWEAPON;
 			else
 				if ( s.GetArgVal() )
-					m_Attr |= ATTR_SEARING;
+					m_Attr |= ATTR_SEARINGWEAPON;
 				else
-					m_Attr &= ~ATTR_SEARING;
+					m_Attr &= ~ATTR_SEARINGWEAPON;
 			break;
 		case IC_USEBESTWEAPONSKILL:
 			if ( !s.HasArgs() )

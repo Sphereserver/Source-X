@@ -1881,7 +1881,10 @@ bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
 			if ( pItem->IsType(IT_GOLD) )
 			{
 				Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_MONEY));
-				NPC_OnHirePayMore(pItem);
+                CCharBase * pCharDef = Char_GetDef();
+                int iWage = pCharDef->GetHireDayWage();
+                iWage = pCharSrc->PayGold(this, iWage, NULL, PAYGOLD_HIRE);
+				NPC_OnHirePayMore(pItem,iWage);
 			}
 			else
 			{

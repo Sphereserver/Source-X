@@ -75,13 +75,11 @@ private:
 #define STATF_Ridden		0x40000000	// This is the horse. (don't display me) I am being ridden
 #define STATF_OnHorse		0x80000000	// Mounted on horseback.
 
-	uint64 m_StatFlag;		// Flags above
+	uint64 m_iStatFlag;		// Flags above
 
 #define SKILL_VARIANCE 100		// Difficulty modifier for determining success. 10.0 %
 	ushort m_Skill[SKILL_QTY];	// List of skills ( skill * 10 )
 
-										// This is a character that can either be NPC or PC.
-										// Player vs NPC Stuff
 	CClient * m_pClient;	// is the char a logged in m_pPlayer ?
 
 public:
@@ -1098,7 +1096,7 @@ private:
 	int  NPC_GetTrainMax( const CChar * pStudent, SKILL_TYPE Skill ) const;
 
 	bool NPC_OnVerb( CScript &s, CTextConsole * pSrc = NULL );
-	void NPC_OnHirePayMore( CItem * pGold, bool fHire = false );
+	void NPC_OnHirePayMore( CItem * pGold, int iWage, bool fHire = false );
 public:
 	bool NPC_OnHirePay( CChar * pCharSrc, CItemMemory * pMemory, CItem * pGold );
 	bool NPC_OnHireHear( CChar * pCharSrc );
@@ -1106,6 +1104,7 @@ public:
 	bool NPC_OnTrainPay( CChar * pCharSrc, CItemMemory * pMemory, CItem * pGold );
 	bool NPC_OnTrainHear( CChar * pCharSrc, lpctstr pCmd );
 	bool NPC_TrainSkill( CChar * pCharSrc, SKILL_TYPE skill, int toTrain );
+    int PayGold(CChar * pCharSrc, int iGold, CItem * pGold, ePayGold iReason);
 private:
 	bool NPC_CheckWalkHere( const CPointBase & pt, const CRegionBase * pArea, word wBlockFlags ) const;
 	void NPC_OnNoticeSnoop( CChar * pCharThief, CChar * pCharMark );

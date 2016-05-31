@@ -81,8 +81,8 @@ public:
 #define ATTR_SECURE				0x2000000			// Is Secure
 #define ATTR_REFORGED			0x4000000			// Is Runic Reforged.
 #define ATTR_OPENED				0x8000000			// Is Door Opened.
-#define ATTR_LOCKEDDOWN			0x10000000
-#define ATTR_SHARDBOUND			0x20000000
+#define ATTR_SHARDBOUND			0x10000000
+#define ATTR_ACCOUNTBOUND  		0x20000000
 #define ATTR_CHARACTERBOUND		0x40000000
 #define ATTR_BALANCED			0x80000000
 #define ATTR_USEBESTWEAPONSKILL	0x100000000
@@ -114,8 +114,8 @@ public:
 	// NOTE: If this link is set but not valid -> then delete the whole object !
 	CUID m_uidLink;		// Linked to this other object in the world. (owned, key, etc)
 
-	bool IsTriggerActive(lpctstr trig) { return static_cast<CObjBase*>(const_cast<CItem*>(this))->IsTriggerActive(trig); }
-	void SetTriggerActive(lpctstr trig = NULL) { static_cast<CObjBase*>(const_cast<CItem*>(this))->SetTriggerActive(trig); }
+	bool IsTriggerActive(lpctstr trig) { return static_cast<CObjBase*>(this)->IsTriggerActive(trig); }
+	void SetTriggerActive(lpctstr trig = NULL) { static_cast<CObjBase*>(this)->SetTriggerActive(trig); }
 
 	// Type specific info. IT_TYPE
 	union // 4(more1) + 4(more2) + 6(morep: (2 morex) (2 morey) (1 morez) (1morem) ) = 14 bytes

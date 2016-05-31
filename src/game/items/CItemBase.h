@@ -603,7 +603,7 @@ public:
 
 	CSTypedArray<CMultiComponentItem,CMultiComponentItem&> m_Components;
 	CRect m_rect;		// my region.
-	uint64 m_iRegionFlags;	// Base region flags (REGION_FLAG_GUARDED etc)
+	dword m_dwRegionFlags;	// Base region flags (REGION_FLAG_GUARDED etc)
 	CResourceRefArray m_Speech;	// Speech fragment list (other stuff we know)
 	ShipSpeed m_shipSpeed; // Speed of ships (IT_SHIP)
 	byte m_SpeedMode;

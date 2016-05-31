@@ -141,6 +141,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@PartyLeave",
 	"@PartyRemove",			//I have ben removed from the party by SRC
 
+    "@PayGold",             // I'm going to give out money for a service (Skill Training, hiring...).
 	"@PersonalSpace",		// +i just got stepped on.
 	"@PetDesert",			// I just went wild again
 	"@Profile",				// someone hit the profile button for me.
@@ -232,7 +233,7 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false )
 	m_pPlayer = NULL;	// May even be an off-line player!
 	m_pNPC	  = NULL;
 	m_pRoom = NULL;
-	m_StatFlag = 0;
+	m_iStatFlag = 0;
 
 	if ( g_World.m_fSaveParity )
 	{
@@ -577,27 +578,27 @@ char CChar::GetFixZ( CPointMap pt, uint wBlockFlags)
 }
 
 
-bool CChar::IsStatFlag( uint64 iStatFlagStatFlag ) const
+bool CChar::IsStatFlag( uint64 iStatFlag ) const
 {
-	return(( m_StatFlag & iStatFlagStatFlag) ? true : false );
+	return((m_iStatFlag & iStatFlag) ? true : false );
 }
 
-void CChar::StatFlag_Set( uint64 iStatFlagStatFlag )
+void CChar::StatFlag_Set( uint64 iStatFlag)
 {
-	m_StatFlag |= iStatFlagStatFlag;
+    m_iStatFlag |= iStatFlag;
 }
 
-void CChar::StatFlag_Clear( uint64 iStatFlagStatFlag )
+void CChar::StatFlag_Clear( uint64 iStatFlag)
 {
-	m_StatFlag &= ~iStatFlagStatFlag;
+    m_iStatFlag &= ~iStatFlag;
 }
 
-void CChar::StatFlag_Mod(uint64 iStatFlagStatFlag, bool fMod )
+void CChar::StatFlag_Mod(uint64 iStatFlag, bool fMod )
 {
 	if ( fMod )
-		m_StatFlag |= iStatFlagStatFlag;
+        m_iStatFlag |= iStatFlag;
 	else
-		m_StatFlag &= ~iStatFlagStatFlag;
+        m_iStatFlag &= ~iStatFlag;
 }
 
 bool CChar::IsPriv( word flag ) const
@@ -862,7 +863,7 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 
 	m_pArea = pChar->m_pArea;
 	m_pRoom = pChar->m_pRoom;
-	m_StatFlag = pChar->m_StatFlag;
+    m_iStatFlag = pChar->m_iStatFlag;
 
 	if ( g_World.m_fSaveParity )
 		StatFlag_Set(STATF_SaveParity);	// It will get saved next time.
@@ -2572,7 +2573,7 @@ do_default:
 			sVal.FormatVal( IsStatFlag(STATF_EmoteAction) );
 			break;
 		case CHC_FLAGS:
-			sVal.FormatLLHex( m_StatFlag );
+			sVal.FormatLLHex(m_iStatFlag);
 			break;
 		case CHC_FONT:
 			sVal.FormatVal( m_fonttype );
@@ -2997,7 +2998,7 @@ do_default:
 			}
 			break;
 		case CHC_FLAGS:		// DO NOT MODIFY STATF_SaveParity, STATF_Spawned, STATF_Pet
-			m_StatFlag = ( s.GetArgLLVal() &~ (STATF_SaveParity|STATF_Pet|STATF_Spawned)) | ( m_StatFlag & (STATF_SaveParity|STATF_Pet|STATF_Spawned) );			NotoSave_Update();
+            m_iStatFlag = ( s.GetArgLLVal() &~ (STATF_SaveParity|STATF_Pet|STATF_Spawned)) | ( m_iStatFlag & (STATF_SaveParity|STATF_Pet|STATF_Spawned) );			NotoSave_Update();
 			break;
 		case CHC_FONT:
 			m_fonttype = static_cast<FONT_TYPE>(s.GetArgVal());
@@ -3253,8 +3254,8 @@ void CChar::r_Write( CScript & s )
 		s.WriteKey("OBODY", g_Cfg.ResourceGetName(RESOURCE_ID(RES_CHARDEF, m_prev_id)));
 	if ( m_prev_Hue != HUE_DEFAULT )
 		s.WriteKeyHex("OSKIN", m_prev_Hue);
-	if ( m_StatFlag )
-		s.WriteKeyHex("FLAGS", m_StatFlag);
+	if ( m_iStatFlag )
+		s.WriteKeyHex("FLAGS", m_iStatFlag);
 	if ( m_LocalLight )
 		s.WriteKeyHex("LIGHT", m_LocalLight);
 
@@ -3602,7 +3603,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_INVIS:
 			if ( pSrc )
 			{
-				m_StatFlag = s.GetArgLLFlag( m_StatFlag, STATF_Insubstantial );
+                m_iStatFlag = s.GetArgLLFlag( m_iStatFlag, STATF_Insubstantial );
 				UpdateMode(NULL, true);
 				if ( IsStatFlag(STATF_Insubstantial) )
 				{
@@ -3623,7 +3624,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_INVUL:
 			if ( pSrc )
 			{
-				m_StatFlag = s.GetArgLLFlag( m_StatFlag, STATF_INVUL );
+                m_iStatFlag = s.GetArgLLFlag( m_iStatFlag, STATF_INVUL );
 				NotoSave_Update();
 				if ( IsSetOF( OF_Command_Sysmsgs ) )
 					pSrc->SysMessage( IsStatFlag( STATF_INVUL )? g_Cfg.GetDefaultMsg(DEFMSG_MSG_INVUL_ON) : g_Cfg.GetDefaultMsg(DEFMSG_MSG_INVUL_OFF) );
@@ -3717,6 +3718,20 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_NOTOUPDATE:
 			NotoSave_Update();
 			break;
+
+        case CHV_OWNER:
+        {
+            if (!s.HasArgs())   // If there are no args, direct call on NPC_PetSetOwner.
+            {
+                return NPC_PetSetOwner(pCharSrc);
+            }
+            CChar * pChar = static_cast<CChar*>(static_cast<CUID>(s.GetArgDWVal()).CharFind()); // otherwise we try to run it from the CChar with the given UID.
+            if (pChar)
+            {
+                return pChar->NPC_PetSetOwner(this);
+            }
+            return false;   // Something went wrong, giving a warning of it.
+        }
 
 		case CHV_PACK:
 			if ( pCharSrc == NULL || ! pCharSrc->IsClient())

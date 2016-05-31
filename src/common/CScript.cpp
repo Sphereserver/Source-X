@@ -119,7 +119,7 @@ dword CScriptKey::GetArgFlag( dword dwStart, dword dwMask )
 
 int64 CScriptKey::GetArgLLFlag(uint64 iStart, uint64 iMask)
 {
-    ADDTOCALLSTACK("CScriptKey::GetArgFlag");
+    ADDTOCALLSTACK("CScriptKey::GetArgLLFlag");
     // No args = toggle the flag.
     // 1 = set the flag.
     // 0 = clear the flag.

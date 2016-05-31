@@ -105,12 +105,12 @@ bool CItemMulti::MultiRealizeRegion()
 	m_pRegion->SetRegionRect( rect );
 	m_pRegion->m_pt = pt;
 
-	uint64 iFlags = pMultiDef->m_iRegionFlags;
+	dword dwFlags = pMultiDef->m_dwRegionFlags;
 	if ( IsType(IT_SHIP))
-        iFlags |= REGION_FLAG_SHIP;
+        dwFlags |= REGION_FLAG_SHIP;
 	else
-        iFlags |= pRegionBack->GetRegionFlags(); // Houses get some of the attribs of the land around it.
-	m_pRegion->SetRegionFlags(iFlags);
+        dwFlags |= pRegionBack->GetRegionFlags(); // Houses get some of the attribs of the land around it.
+	m_pRegion->SetRegionFlags(dwFlags);
 
 	tchar *pszTemp = Str_GetTemp();
 	sprintf(pszTemp, "%s (%s)", pRegionBack->GetName(), GetName());

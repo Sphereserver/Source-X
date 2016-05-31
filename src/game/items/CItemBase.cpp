@@ -153,6 +153,7 @@ void CItemBase::CopyBasic( const CItemBase * pBase )
 	m_flip_id	= pBase->m_flip_id;
 	m_type		= pBase->m_type;
 	m_layer		= pBase->m_layer;
+    m_CanUse    = pBase->m_CanUse;
 	SetDefNum("RANGE",pBase->GetDefNum("RANGE",true));	//m_range	= pBase->m_range;
 
 	// Just applies to weapons/armor.
@@ -1745,7 +1746,7 @@ CItemBase * CItemBaseMulti::MakeMultiRegion( CItemBase * pBase, CScript & s ) //
 CItemBaseMulti::CItemBaseMulti( CItemBase* pBase ) :
 	CItemBase( pBase->GetID() )
 {
-    m_iRegionFlags = REGION_FLAG_NODECAY | REGION_ANTIMAGIC_TELEPORT | REGION_ANTIMAGIC_RECALL_IN | REGION_FLAG_NOBUILDING;
+    m_dwRegionFlags = REGION_FLAG_NODECAY | REGION_ANTIMAGIC_TELEPORT | REGION_ANTIMAGIC_RECALL_IN | REGION_FLAG_NOBUILDING;
 	m_rect.SetRectEmpty();
 	m_shipSpeed.period = (1 * TICK_PER_SEC) / 2;
 	m_shipSpeed.tiles = 1;
@@ -1851,7 +1852,7 @@ bool CItemBaseMulti::r_LoadVal( CScript &s )
 		MakeMultiRegion( this, s );
 		break;
 	case MLC_REGIONFLAGS:
-        m_iRegionFlags = s.GetArgLLVal();
+        m_dwRegionFlags = s.GetArgDWVal();
 		return true;
 	case MLC_SHIPSPEED:
 	{
@@ -1955,7 +1956,7 @@ bool CItemBaseMulti::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole *
 		sVal.Format( "%d,%d,%d,%d", m_rect.m_left, m_rect.m_top, m_rect.m_right-1, m_rect.m_bottom-1 );
 		return true;
 	case MLC_REGIONFLAGS:
-		sVal.FormatLLHex(m_iRegionFlags);
+		sVal.FormatLLHex(m_dwRegionFlags);
 		return true;
 	case MLC_SHIPSPEED:
 	{

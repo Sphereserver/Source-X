@@ -249,9 +249,12 @@ bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 		case OBC_BASEID:
 			sVal = g_Cfg.ResourceGetName( GetResourceID());
 			break;
-		case OBC_CAN:
-			sVal.FormatHex( m_Can );
-			break;
+        case OBC_CAN:
+            sVal.FormatHex(m_Can);
+            break;
+        case OBC_CANUSE:
+            sVal.FormatHex(m_CanUse);
+            break;
 		case OBC_HEIGHT:
 			{
 				//CBaseBaseDef * pBaseBaseDef = dynamic_cast<CBaseBaseDef*>(this);
@@ -523,9 +526,12 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 			return true;
 		case OBC_BASEID:
 			return false;
-		case OBC_CAN:
-			m_Can = s.GetArgVal();// | ( m_Can & ( CAN_C_INDOORS|CAN_C_EQUIP|CAN_C_USEHANDS|CAN_C_NONHUMANOID )); //Fixed #2326 ?
-			return true;
+        case OBC_CAN:
+            m_Can = s.GetArgVal();// | ( m_Can & ( CAN_C_INDOORS|CAN_C_EQUIP|CAN_C_USEHANDS|CAN_C_NONHUMANOID )); //Fixed #2326 ?
+            return true;
+        case OBC_CANUSE:
+            m_CanUse = s.GetArgVal();
+            return true;
 
 		case OBC_DEFNAME:
 		case OBC_DEFNAME2:

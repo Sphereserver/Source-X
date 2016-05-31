@@ -1084,7 +1084,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t it
 		pVendor->Speak("Thou hast bought nothing!");
 		return;
 	}
-
+    costtotal = m_pChar->PayGold(pVendor,costtotal,NULL, PAYGOLD_BUY);
 	//	Check for gold being enough to buy this
 	bool fBoss = pVendor->NPC_IsOwnedBy(m_pChar);
 	if ( !fBoss )

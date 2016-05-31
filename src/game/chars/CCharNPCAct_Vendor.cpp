@@ -280,10 +280,10 @@ bool CChar::NPC_OnTrainPay(CChar *pCharSrc, CItemMemory *pMemory, CItem * pGold)
 	Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_TRAINER_SUCCESS ) );
 
 	// Can't ask for more gold than the maximum amount of the gold stack i am giving to the npc
-	word iTrainCostFinal = (word)minimum(UINT16_MAX, iTrainCost);
+	word iTrainCostFinal = (word)pCharSrc->PayGold(this, (word)minimum(UINT16_MAX, iTrainCost), NULL, PAYGOLD_TRAIN);
 
 	// Consume as much money as we can train for.
-	if ( pGold->GetAmount() < iTrainCost )
+	if ( pGold->GetAmount() < iTrainCostFinal )
 	{
 		iTrainCostFinal = pGold->GetAmount();
 	}
@@ -303,7 +303,7 @@ bool CChar::NPC_OnTrainPay(CChar *pCharSrc, CItemMemory *pMemory, CItem * pGold)
 	GetPackSafe()->ContentAdd( pGold );	// take my cash.
 
 	// Give credit for training.
-	NPC_TrainSkill( pCharSrc, skill, iTrainCost );
+	NPC_TrainSkill( pCharSrc, skill, iTrainCostFinal);
 	return true;
 }
 

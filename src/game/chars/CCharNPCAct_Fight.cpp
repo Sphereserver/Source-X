@@ -71,7 +71,7 @@ CChar * CChar::NPC_FightFindBestTarget()
 		CChar *pClosest = NULL;
 		SKILL_TYPE skillWeapon = Fight_GetWeaponSkill();
 
-		for ( std::vector<LastAttackers>::iterator it = m_lastAttackers.end(); it != m_lastAttackers.begin(); ++it )
+        for (std::vector<LastAttackers>::iterator it = m_lastAttackers.begin(); it != m_lastAttackers.end(); ++it)
 		{
 			LastAttackers &refAttacker = *it;
 			pChar = static_cast<CChar*>(static_cast<CUID>(refAttacker.charUID).CharFind());
@@ -105,6 +105,9 @@ CChar * CChar::NPC_FightFindBestTarget()
             if (iDist > UO_MAP_VIEW_SIGHT)
             {
                 Attacker_Delete(pChar, false, ATTACKER_CLEAR_DISTANCE);
+                if (m_lastAttackers.size() <= 0)
+                    break;
+                it--;
                 continue;
             }
 			if ( g_Cfg.IsSkillFlag(skillWeapon, SKF_RANGED) && (iDist < g_Cfg.m_iArcheryMinDist || iDist > g_Cfg.m_iArcheryMaxDist) )

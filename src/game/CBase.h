@@ -47,6 +47,7 @@ public:
 	word    m_defenseRange; ///< variable range of defense.
 
 	dword   m_Can;          ///< Base attribute flags. CAN_C_GHOST, etc
+    dword	m_CanUse;		///< Base attribute flags. can_u_all/male/female..
 
 public:
 

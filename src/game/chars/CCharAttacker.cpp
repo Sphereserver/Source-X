@@ -261,14 +261,13 @@ void CChar::Attacker_Clear()
 		OnTrigger(CTRIG_CombatEnd, this, 0);
 
 	m_lastAttackers.clear();
+    if (m_pNPC)
+        StatFlag_Clear(STATF_War);
 	if ( Fight_IsActive() )
 	{
 		Skill_Start(SKILL_NONE);
 		m_Fight_Targ.InitUID();
-		if ( m_pNPC )
-			StatFlag_Clear(STATF_War);
 	}
-
 	UpdateModeFlag();
 }
 

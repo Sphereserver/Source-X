@@ -651,7 +651,7 @@ void CChar::UnEquipAllItems( CItemContainer * pDest, bool bLeaveHands )
 					continue;
 				break;
 		}
-		if ( pDest && !pItem->IsAttr(ATTR_NEWBIE|ATTR_MOVE_NEVER|ATTR_BLESSED|ATTR_INSURED|ATTR_NODROPTRADE) )
+		if ( pDest && !pItem->IsAttr(ATTR_NEWBIE|ATTR_MOVE_NEVER|ATTR_BLESSED|ATTR_INSURED|ATTR_NODROP|ATTR_NOTRADE) )
 		{
 			// Move item to dest (corpse usually)
 			pDest->ContentAdd(pItem);
@@ -4005,4 +4005,12 @@ bool CChar::OnTick()
 #endif
 
     return true;
+}
+
+int CChar::PayGold(CChar * pCharSrc, int iGold, CItem * pGold, ePayGold iReason)
+{
+    ADDTOCALLSTACK("CChar::PayGold");
+    CScriptTriggerArgs Args(iGold,iReason,pGold);
+    OnTrigger(CTRIG_PayGold,pCharSrc,&Args);
+    return (int)Args.m_iN1;
 }

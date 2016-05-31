@@ -649,15 +649,14 @@ bool CChar::NPC_CheckHirelingStatus()
 	return true;
 }
 
-void CChar::NPC_OnHirePayMore( CItem * pGold, bool fHire )
+void CChar::NPC_OnHirePayMore( CItem * pGold, int iWage, bool fHire )
 {
 	ADDTOCALLSTACK("CChar::NPC_OnHirePayMore");
 	// We have been handed money.
 	// similar to PC_STATUS
-
-	CCharBase * pCharDef = Char_GetDef();
-	uint iWage = pCharDef->GetHireDayWage();
 	CItemContainer	*pBank = GetBank();
+
+
 	if ( !iWage || !pBank )
 		return;
 
@@ -685,6 +684,7 @@ bool CChar::NPC_OnHirePay( CChar * pCharSrc, CItemMemory * pMemory, CItem * pGol
 		return false;
 
 	CCharBase * pCharDef = Char_GetDef();
+    int iWage = pCharDef->GetHireDayWage();
 	if ( IsStatFlag( STATF_Pet ))
 	{
 		if ( ! pMemory->IsMemoryTypes(MEMORY_IPET|MEMORY_FRIEND))
@@ -695,12 +695,12 @@ bool CChar::NPC_OnHirePay( CChar * pCharSrc, CItemMemory * pMemory, CItem * pGol
 	}
 	else
 	{
-		uint iWage = pCharDef->GetHireDayWage();
 		if ( iWage <= 0 )
 		{
 			Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_NOT_FOR_HIRE ) );
 			return false;
 		}
+        iWage = pCharSrc->PayGold(this, iWage, pGold, PAYGOLD_HIRE);
 		if ( pGold->GetAmount() < iWage )
 		{
 			Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_NOT_ENOUGH ) );
@@ -722,7 +722,7 @@ bool CChar::NPC_OnHirePay( CChar * pCharSrc, CItemMemory * pMemory, CItem * pGol
 	}
 
 	pMemory->m_itEqMemory.m_Action = NPC_MEM_ACT_NONE;
-	NPC_OnHirePayMore( pGold, true );
+	NPC_OnHirePayMore( pGold, iWage, true );
 	return true;
 }
 
@@ -739,7 +739,7 @@ bool CChar::NPC_OnHireHear( CChar * pCharSrc )
 		Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_NOT_FOR_HIRE ) );
 		return false;
 	}
-
+    iWage = pCharSrc->PayGold(this, iWage, NULL, PAYGOLD_HIRE);
 	CItemMemory * pMemory = Memory_FindObj( pCharSrc );
 	if ( pMemory )
 	{
@@ -747,7 +747,7 @@ bool CChar::NPC_OnHireHear( CChar * pCharSrc )
 		{
 			// Next gold i get goes toward hire.
 			pMemory->m_itEqMemory.m_Action = NPC_MEM_ACT_SPEAK_HIRE;
-			NPC_OnHirePayMore( NULL, false );
+			NPC_OnHirePayMore( NULL, iWage, false );
 			return true;
 		}
 		if ( pMemory->IsMemoryTypes( MEMORY_FIGHT|MEMORY_HARMEDBY|MEMORY_IRRITATEDBY ))

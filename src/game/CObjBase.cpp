@@ -877,6 +877,20 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 				sVal.FormatLLVal(pVar ? pVar->GetValNum() : 0);
 			}	
 			break;
+        case OC_RECIPEALCHEMY:
+        case OC_RECIPEBLACKSMITH:
+        case OC_RECIPEBOWCRAFT:
+        case OC_RECIPECARPENTRY:
+        case OC_RECIPECARTOPGRAHY:
+        case OC_RECIPECOOKING:
+        case OC_RECIPEINSCRIPTION:
+        case OC_RECIPETAILORING:
+        case OC_RECIPETINKERING:
+        {
+            CVarDefCont * pVar = GetDefKey(pszKey, true);
+            sVal.FormatLLHex(pVar ? pVar->GetValNum() : 0);
+        }
+        break;
 			
 		case OC_ARMOR:
 			{
@@ -1712,6 +1726,19 @@ bool CObjBase::r_LoadVal( CScript & s )
 				}
 				break;
 			}
+        case OC_RECIPEALCHEMY:
+        case OC_RECIPEBLACKSMITH:
+        case OC_RECIPEBOWCRAFT:
+        case OC_RECIPECARPENTRY:
+        case OC_RECIPECARTOPGRAHY:
+        case OC_RECIPECOOKING:
+        case OC_RECIPEINSCRIPTION:
+        case OC_RECIPETAILORING:
+        case OC_RECIPETINKERING:
+        {
+            SetDefNum(s.GetKey(), s.GetArgLLVal());
+            break;
+        }
 		case OC_ARMOR:
 			{
 				if ( IsChar() )
