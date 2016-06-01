@@ -318,40 +318,36 @@ CChar * CChar::Attacker_GetUID( int index )
 }
 
 // Removing nID from list
-bool CChar::Attacker_Delete( int index, bool bForced, ATTACKER_CLEAR_TYPE type )
+bool CChar::Attacker_Delete(int index, bool bForced, ATTACKER_CLEAR_TYPE type)
 {
 	ADDTOCALLSTACK("CChar::Attacker_Delete(int)");
-	if ( !m_lastAttackers.size() || index < 0 || (int)(m_lastAttackers.size()) <= index )
+	if (!m_lastAttackers.size() || index < 0 || static_cast<int>(m_lastAttackers.size()) <= index)
 		return false;
-
 	LastAttackers &refAttacker = m_lastAttackers.at(index);
 	CChar *pChar = static_cast<CUID>(refAttacker.charUID).CharFind();
-	if ( !pChar )
+	if (!pChar)
 		return false;
 
-	if ( IsTrigUsed(TRIGGER_COMBATDELETE) )
+	if (IsTrigUsed(TRIGGER_COMBATDELETE))
 	{
 		CScriptTriggerArgs Args;
-		Args.m_iN1 = 0;
-		Args.m_iN2 = (int)(type);
-		TRIGRET_TYPE tRet = OnTrigger(CTRIG_CombatDelete,pChar,&Args);
-		if ( tRet == TRIGRET_RET_TRUE || Args.m_iN1 == 1 )
+		Args.m_iN1 = bForced;
+		Args.m_iN2 = static_cast<int>(type);
+		TRIGRET_TYPE tRet = OnTrigger(CTRIG_CombatDelete, pChar, &Args);
+		if (tRet == TRIGRET_RET_TRUE)
 			return false;
-		bForced = Args.m_iN1 ? true : false;
 	}
 	std::vector<LastAttackers>::iterator it = m_lastAttackers.begin() + index;
-	CItemMemory *pFight = Memory_FindObj(pChar->GetUID());	// My memory of the fight.
-	if ( pFight && bForced )
-		Memory_ClearTypes(pFight, MEMORY_WAR_TARG);
+
 
 	m_lastAttackers.erase(it);
-	if ( m_Fight_Targ == pChar->GetUID() )
+	if (m_Fight_Targ == pChar->GetUID())
 	{
 		m_Fight_Targ.InitUID();
-		if ( m_pNPC )
+		if (m_pNPC)
 			Fight_Attack(NPC_FightFindBestTarget());
 	}
-	if ( !m_lastAttackers.size() )
+	if (!m_lastAttackers.size())
 		Attacker_Clear();
 	return true;
 }
@@ -390,15 +386,12 @@ void CChar::Attacker_CheckTimeout()
 	ADDTOCALLSTACK("CChar::Attacker_CheckTimeout");
 	if (m_lastAttackers.size())
 	{
-		for (int count = 0; count < (int)(m_lastAttackers.size()); count++)
+		for (int count = 0; count < static_cast<int>(m_lastAttackers.size()); count++)
 		{
 			LastAttackers & refAttacker = m_lastAttackers.at(count);
-			if ((++(refAttacker.elapsed) > g_Cfg.m_iAttackerTimeout) && (g_Cfg.m_iAttackerTimeout > 0))
-			{
-				CChar *pEnemy = static_cast<CUID>(refAttacker.charUID).CharFind();
-				if (pEnemy && (pEnemy->Attacker_GetElapsed(pEnemy->Attacker_GetID(this))> g_Cfg.m_iAttackerTimeout) && (g_Cfg.m_iAttackerTimeout > 0))	//Do not remove if I kept attacking him.
-					Attacker_Delete(count, true, ATTACKER_CLEAR_ELAPSED);
-			}
+			CChar *pEnemy = static_cast<CUID>(refAttacker.charUID).CharFind();
+			if (pEnemy && (++(refAttacker.elapsed) > g_Cfg.m_iAttackerTimeout) && g_Cfg.m_iAttackerTimeout > 0)
+				Attacker_Delete(count, true, ATTACKER_CLEAR_ELAPSED);
 		}
 	}
 }

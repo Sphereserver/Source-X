@@ -903,10 +903,11 @@ public:
 	int  m_iArcheryMaxDist;			///< Max distance allowed for archery.
 	int  m_iArcheryMinDist;			///< Min distance required for archery.
 	int  m_iHitsUpdateRate;			///< how often send my hits updates to visible clients.
-	int  m_iSpeedScaleFactor;		///< fight skill delay = m_iSpeedScaleFactor / ( (dex + 100) * Weapon Speed )
-	int  m_iCombatDamageEra;		///< define damage formula to use on physical combat
-	int  m_iCombatSpeedEra;			///< define swing speed formula to use on physical combat
-	int  m_iSkillPracticeMax;		///< max skill level a player can practice on dummies/targets upto
+	int  m_iSpeedScaleFactor;		///< fight skill delay = m_iSpeedScaleFactor / ( (dex + 100) * Weapon Speed ).
+	int  m_iCombatDamageEra;		///< define damage formula to use on physical combat.
+	int  m_iCombatHitChanceEra;		///< define hit chance formula to use on physical combat.
+	int  m_iCombatSpeedEra;			///< define swing speed formula to use on physical combat.
+	int  m_iSkillPracticeMax;		///< max skill level a player can practice on dummies/targets upto.
 	bool m_iPacketDeathAnimation;	///< packet 02c
 
 	///< Flags for controlling pvp/pvm behaviour of players
@@ -914,7 +915,7 @@ public:
 	int   m_iMagicFlags;    ///< magic flags
 	int   m_iRacialFlags;   ///< racial traits flags
 	uchar m_iSkillFlags;    ///< Skill flags (expansion checks, etc)
-	int   m_iRevealFlags;   ///</* reveal flags used for SPELL_REVEAL (mostly for backwards).
+	int   m_iRevealFlags;   ///< reveal flags used for SPELL_REVEAL (mostly for backwards).
 
 	///< Criminal/Karma
 	bool m_fAttackingIsACrime;		///< Is attacking (even before hitting) a crime?

@@ -152,7 +152,7 @@ CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 	if ( !(wFlags & DEATH_NOLOOTDROP) )		// move non-newbie contents of the pack to corpse
 		DropAll( pCorpse );
 
-	pCorpse->SetKeyNum("OVERRIDE.MAXWEIGHT", g_Cfg.Calc_MaxCarryWeight(this) / 10);		// set corpse maxweight to prevent weird exploits like when someone place many items on an player corpse just to make this player get stuck on resurrect
+	pCorpse->m_ModMaxWeight = g_Cfg.Calc_MaxCarryWeight(this) / 10;		// set corpse maxweight to prevent weird exploits like when someone place many items on an player corpse just to make this player get stuck on resurrect
 	pCorpse->MoveToDecay(GetTopPoint(), iDecayTimer);
 	return( pCorpse );
 }

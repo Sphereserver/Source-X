@@ -656,10 +656,9 @@ public:
 	*
 	* Here fires the @MurderMark trigger, also gives exp if level system is enabled to give exp on killing.
 	* @param pKill, the chara I killed (or participated to kill).
-	* @param bPetKill when true the code will stop before giving fame and karma.
 	* @param iTotalKillers how many characters participated in this kill.
 	*/
-	void Noto_Kill(CChar * pKill, bool bPetKill = false, int iTotalKillers = 0);
+	void Noto_Kill(CChar * pKill, int iTotalKillers = 0);
 
 	/**
 	* @brief I'm becoming criminal.
@@ -898,8 +897,8 @@ public:
 	bool Spell_Teleport( CPointMap pt, bool bTakePets = false, bool bCheckAntiMagic = true, bool bDisplayEffect = true, ITEMID_TYPE iEffect = ITEMID_NOTHING, SOUND_TYPE iSound = SOUND_NONE );
 	bool Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool fFailMsg, bool fCheckAntiMagic = true );
 	int	GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharSrc = NULL );
+
 	// Memories about objects in the world. -------------------
-private:
 	bool Memory_OnTick( CItemMemory * pMemory );
 	bool Memory_UpdateFlags( CItemMemory * pMemory );
 	bool Memory_UpdateClearTypes( CItemMemory * pMemory, word MemTypes );

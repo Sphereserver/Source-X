@@ -1204,18 +1204,9 @@ bool CChar::Fight_IsAttackable()
 }
 
 // Clear all my active targets. Toggle out of war mode.
-// Should I add @CombatEnd trigger here too?
 void CChar::Fight_ClearAll()
 {
 	ADDTOCALLSTACK("CChar::Fight_ClearAll");
-	CItem *pItemNext = NULL;
-	for ( CItem *pItem = GetContentHead(); pItem != NULL; pItem = pItemNext )
-	{
-		pItemNext = pItem->GetNext();
-		if ( pItem->IsMemoryTypes(MEMORY_WAR_TARG) )
-			Memory_ClearTypes(static_cast<CItemMemory *>(pItem), MEMORY_WAR_TARG);
-	}
-
 	Attacker_Clear();
 	if ( Fight_IsActive() )
 	{

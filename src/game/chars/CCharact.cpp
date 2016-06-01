@@ -2751,7 +2751,7 @@ bool CChar::Death()
 			}
 		}
 
-		if ( pItem->IsMemoryTypes(MEMORY_HARMEDBY|MEMORY_WAR_TARG) )
+		if ( pItem->IsMemoryTypes(MEMORY_HARMEDBY) )
 			Memory_ClearTypes( static_cast<CItemMemory *>(pItem), 0xFFFF );
 	}
 
@@ -2773,7 +2773,7 @@ bool CChar::Death()
 					continue;
 			}
 
-			pKiller->Noto_Kill( this, IsStatFlag(STATF_Pet), Attacker() );
+			pKiller->Noto_Kill( this, Attacker() );
 			iKillStrLen += sprintf( pszKillStr+iKillStrLen, "%s%c'%s'", iKillers ? ", " : "", (pKiller->m_pPlayer) ? 'P':'N', pKiller->GetNameWithoutIncognito() );
 			++iKillers;
 		}

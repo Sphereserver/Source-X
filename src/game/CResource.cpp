@@ -138,6 +138,7 @@ CResource::CResource()
 	m_iSpeedScaleFactor		= 80000;
 	m_iCombatFlags			= 0;
 	m_iCombatDamageEra		= 0;
+	m_iCombatHitChanceEra	= 0;
 	m_iCombatSpeedEra		= 3;
 	m_iMagicFlags			= 0;
 	m_iMaxPolyStats			= 150;
@@ -156,7 +157,7 @@ CResource::CResource()
 	m_iWalkBuffer		= 75;
 	m_iWalkRegen		= 25;
 	m_iWoolGrowthTime	= 30*60 * TICK_PER_SEC;
-	m_iAttackerTimeout	= 300;
+	m_iAttackerTimeout	= 30;
 
 	m_iCommandLog		= 0;
 	m_fTelnetLog		= true;
@@ -414,6 +415,7 @@ enum RC_TYPE
 	RC_COLORNOTONEUTRAL,		// m_iColorNotoNeutral
 	RC_COMBATDAMAGEERA,			// m_iCombatDamageEra
 	RC_COMBATFLAGS,				// m_iCombatFlags
+	RC_COMBATHITCHANCEERA,		// m_iCombatHitChanceEra
 	RC_COMBATSPEEDERA,			// m_iCombatSpeedEra
 	RC_COMMANDLOG,
 	RC_COMMANDPREFIX,
@@ -644,6 +646,7 @@ const CAssocReg CResource::sm_szLoadKeys[RC_QTY+1] =
 	{ "COLORNOTONEUTRAL",		{ ELEM_WORD,	OFFSETOF(CResource,m_iColorNotoNeutral),	0 }},
 	{ "COMBATDAMAGEERA",		{ ELEM_BYTE,	OFFSETOF(CResource,m_iCombatDamageEra),		0 }},
 	{ "COMBATFLAGS",			{ ELEM_INT,		OFFSETOF(CResource,m_iCombatFlags),			0 }},
+	{ "COMBATHITCHANCEERA",		{ ELEM_BYTE,	OFFSETOF(CResource,m_iCombatHitChanceEra),	0 }},
 	{ "COMBATSPEEDERA",			{ ELEM_BYTE,	OFFSETOF(CResource,m_iCombatSpeedEra),		0 }},
 	{ "COMMANDLOG",				{ ELEM_INT,		OFFSETOF(CResource,m_iCommandLog),			0 }},
 	{ "COMMANDPREFIX",			{ ELEM_BYTE,	OFFSETOF(CResource,m_cCommandPrefix),		0 }},
@@ -968,7 +971,7 @@ bool CResource::r_LoadVal( CScript &s )
 			m_sAcctBaseDir = CSFile::GetMergedFileName( s.GetArgStr(), "" );
 			break;
 		case RC_ATTACKERTIMEOUT:
-			m_iAttackerTimeout = s.GetArgVal() * TICK_PER_SEC;
+			m_iAttackerTimeout = s.GetArgVal();
 			break;
 		case RC_BANKMAXWEIGHT:
 			m_iBankWMax = s.GetArgVal() * WEIGHT_UNITS;
@@ -1511,7 +1514,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 	switch (index)
 	{
 		case RC_ATTACKERTIMEOUT:
-			sVal.FormatVal(m_iAttackerTimeout / TICK_PER_SEC);
+			sVal.FormatVal(m_iAttackerTimeout);
 			break;
 		case RC_BANKMAXWEIGHT:
 			sVal.FormatVal( m_iBankWMax / WEIGHT_UNITS );

@@ -43,9 +43,9 @@ enum MEMORY_TYPE
 	MEMORY_GUILD        = 0x0400,	///< This is my guild stone. (never time out) only have 1
 	MEMORY_TOWN         = 0x0800,	///< This is my town stone. (never time out) only have 1
 	MEMORY_UNUSED       = 0x1000,	///< UNUSED!!!! I am following this Object (never time out)
-	MEMORY_WAR_TARG     = 0x2000,	///< This is one of my current war targets.
+	MEMORY_UNUSED2		= 0x2000,	///< UNUSED!!!! (MEMORY_WAR_TARG) This is one of my current war targets.
 	MEMORY_FRIEND       = 0x4000,	///< They can command me but not release me. (not primary blame)
-	MEMORY_UNUSED2      = 0x8000	///< UNUSED!!!! Gump record memory (More1 = Context, More2 = Uid)
+	MEMORY_UNUSED3      = 0x8000	///< UNUSED!!!! Gump record memory (More1 = Context, More2 = Uid)
 };
 
 enum NPC_MEM_ACT_TYPE	///< A simgle primary memory about the object.
@@ -94,6 +94,7 @@ public:
 	CVarDefMap m_TagDefs;		///< attach extra tags here.
 	CVarDefMap m_BaseDefs;		///< New Variable storage system
 	dword	m_Can;              ///< CAN_FLAGS
+	int m_ModMaxWeight;			///< ModMaxWeight prop for chars
 	
 	word	m_attackBase;       ///< dam for weapons
 	word	m_attackRange;      ///< variable range of attack damage.

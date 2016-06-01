@@ -369,6 +369,17 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 				return;
 			}
 		}
+
+		if (pObjTop->IsItem())
+		{
+			CItemContainer * pTopContainer = dynamic_cast<CItemContainer*>(pObjTop);
+			if (pTopContainer && !pTopContainer->CanContainerHold(pItem, m_pChar))
+			{
+				Event_Item_Drop_Fail(pItem);
+				return;
+			}
+		}
+
 		if ( pContItem != NULL )
 		{
 			//	bug with shifting selling list by gold coins
@@ -407,7 +418,6 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 
 		if ( pContItem != NULL )
 		{
-			// pChar->GetBank()->IsItemInside( pContItem )
 			bool isCheating = false;
 			bool isBank = pContItem->IsType( IT_EQ_BANK_BOX );
 
@@ -417,10 +427,6 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 			else
 				isCheating = m_pChar->GetBank()->IsItemInside( pContItem ) &&
 						m_pChar->GetBank()->m_itEqBankBox.m_pntOpen != m_pChar->GetTopPoint();
-
-//			g_Log.Event( LOGL_WARN, "%x:IsBank '%d', IsItemInside '%d'\n", m_Socket.GetSocket(), isBank, isBank ? -1 : m_pChar->GetBank()->IsItemInside( pContItem ) );
-
-//			if ( pContItem->IsType( IT_EQ_BANK_BOX ) && pContItem->m_itEqBankBox.m_pntOpen != m_pChar->GetTopPoint() )
 
 			if ( isCheating )
 			{
@@ -1084,7 +1090,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t it
 		pVendor->Speak("Thou hast bought nothing!");
 		return;
 	}
-    costtotal = m_pChar->PayGold(pVendor,costtotal,NULL, PAYGOLD_BUY);
+    costtotal = m_pChar->PayGold(pVendor,(int)costtotal, NULL, PAYGOLD_BUY);
 	//	Check for gold being enough to buy this
 	bool fBoss = pVendor->NPC_IsOwnedBy(m_pChar);
 	if ( !fBoss )

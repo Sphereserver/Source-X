@@ -105,37 +105,36 @@ lpctstr CChar::Guild_AbbrevBracket( MEMORY_TYPE MemType ) const
 // Memory this char has about something in the world.
 
 // Reset the check timer based on the type of memory.
-bool CChar::Memory_UpdateFlags( CItemMemory * pMemory )
+bool CChar::Memory_UpdateFlags(CItemMemory * pMemory)
 {
 	ADDTOCALLSTACK("CChar::Memory_UpdateFlags");
 
 	ASSERT(pMemory);
 	ASSERT(pMemory->IsType(IT_EQ_MEMORY_OBJ));
 
-	word wMemTypes = pMemory->GetMemoryTypes();
+	WORD wMemTypes = pMemory->GetMemoryTypes();
 
-	if ( !wMemTypes )	// No memories here anymore so kill it.
-	{
+	if (!wMemTypes)	// No memories here anymore so kill it.
 		return false;
-	}
 
-	int64 iCheckTime;
-	if ( wMemTypes & MEMORY_IPET )
-	{
-		StatFlag_Set( STATF_Pet );
-	}
-	if ( wMemTypes & MEMORY_FIGHT )	// update more often to check for retreat.
-		iCheckTime = 30*TICK_PER_SEC;
-	else if ( wMemTypes & ( MEMORY_IPET | MEMORY_GUARD | MEMORY_GUILD | MEMORY_TOWN ))
+	INT64 iCheckTime;
+	if (wMemTypes & MEMORY_IPET)
+		StatFlag_Set(STATF_Pet);
+	if (wMemTypes & MEMORY_FIGHT)	// update more often to check for retreat.
+		iCheckTime = 30 * TICK_PER_SEC;
+	else if (wMemTypes & (MEMORY_IPET | MEMORY_GUARD | MEMORY_GUILD | MEMORY_TOWN))
 		iCheckTime = -1;	// never go away.
-	else if ( m_pNPC )	// MEMORY_SPEAK
-		iCheckTime = 5*60*TICK_PER_SEC;
+	else if (m_pNPC)	// MEMORY_SPEAK
+		iCheckTime = 5 * 60 * TICK_PER_SEC;
 	else
-		iCheckTime = 20*60*TICK_PER_SEC;
-	pMemory->SetTimeout( iCheckTime );	// update it's decay time.
-    CChar * pCharLink = pMemory->m_uidLink.CharFind();
-    if (pCharLink)
-        NotoSave_Delete(pCharLink);
+		iCheckTime = 20 * 60 * TICK_PER_SEC;
+	pMemory->SetTimeout(iCheckTime);	// update it's decay time.	
+	CChar * pCharLink = pMemory->m_uidLink.CharFind();
+	if (pCharLink)
+	{
+		pCharLink->NotoSave_Update();	// Clear my notoriety from the target.
+		NotoSave_Update();		// iAggressor is stored in the other char, so the call should be reverted.
+	}
 	return true;
 }
 
@@ -206,7 +205,7 @@ CItemMemory * CChar::Memory_CreateObj( CUID uid, word MemTypes )
 
 	Memory_AddTypes( pMemory, MemTypes );
 	LayerAdd( pMemory, LAYER_SPECIAL );
-	return( pMemory );
+	return pMemory;
 }
 
 
@@ -418,8 +417,7 @@ bool CChar::Memory_Fight_OnTick( CItemMemory * pMemory )
 	// Attacker.Elapsed = -1 means no combat end for this attacker.
 	// g_Cfg.m_iAttackerTimeout = 0 means attackers doesnt decay. (but cleared when the attacker is killed or the char dies)
 
-	if ( (GetDist(pTarg) > UO_MAP_VIEW_RADAR) &&
-		( !IsSetCombatFlags(COMBAT_STAYINRANGE) || ((g_Cfg.m_iAttackerTimeout != 0) && (elapsed > (int64)g_Cfg.m_iAttackerTimeout) && (elapsed >= 0)) ) )
+	if (GetDist(pTarg) > UO_MAP_VIEW_RADAR || (g_Cfg.m_iAttackerTimeout != 0 && elapsed >= 0 && (unsigned int)elapsed > g_Cfg.m_iAttackerTimeout))
 	{
 		Memory_Fight_Retreat( pTarg, pMemory );
 	clearit:
@@ -474,23 +472,20 @@ void CChar::Memory_Fight_Start( const CChar * pTarg )
 			// Hmm, I must have started this i guess.
 			MemTypes = MEMORY_IAGGRESSOR;
 		}
-		pMemory = Memory_CreateObj( pTarg, MEMORY_FIGHT|MEMORY_WAR_TARG|MemTypes );
+		pMemory = Memory_CreateObj( pTarg, MEMORY_FIGHT|MemTypes );
 	}
 	else
 	{
-		// I have a memory of them.
-		bool fMemPrvType = pMemory->IsMemoryTypes(MEMORY_WAR_TARG);
-		if ( fMemPrvType )
+		if (Attacker_GetID(pTarg->GetUID()))	// I'm already in fight against pTarg, no need of more code
 			return;
 		if ( pMemory->IsMemoryTypes(MEMORY_HARMEDBY|MEMORY_SAWCRIME|MEMORY_AGGREIVED))
 			MemTypes = 0;	// I am defending myself rightly.
 		else
 			MemTypes = MEMORY_IAGGRESSOR;
 
-		// Update the fights status
-		Memory_AddTypes( pMemory, MEMORY_FIGHT|MEMORY_WAR_TARG|MemTypes );
+		Memory_AddTypes(pMemory, MEMORY_FIGHT | MemTypes);// Update the fight status.
 	}
-	//Attacker_Add(const_cast<CChar*>(pTarg));
+
 	if ( IsClient() && m_Fight_Targ == pTarg->GetUID() && !IsSetCombatFlags(COMBAT_NODIRCHANGE))
 	{
 		// This may be a useless command. How do i say the fight is over ?

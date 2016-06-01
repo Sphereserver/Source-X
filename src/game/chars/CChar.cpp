@@ -2503,9 +2503,6 @@ do_default:
 		case CHC_MAXWEIGHT:
 			sVal.FormatVal( g_Cfg.Calc_MaxCarryWeight(this));
 			return true;
-		case CHC_MODMAXWEIGHT:
-			sVal.FormatVal( m_ModMaxWeight );
-			return true;
 		case CHC_ACCOUNT:
 			if ( pszKey[7] == '.' )	// used as a ref ?
 			{
@@ -3052,10 +3049,6 @@ do_default:
 		case CHC_MANA:
 			Stat_SetVal(STAT_INT, s.GetArgSVal());
 			UpdateManaFlag();
-			break;
-		case CHC_MODMAXWEIGHT:
-			m_ModMaxWeight = s.GetArgVal();
-			UpdateStatsFlag();
 			break;
 		case CHC_STAM:
 		case CHC_STAMINA:
