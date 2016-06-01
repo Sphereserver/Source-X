@@ -1380,6 +1380,48 @@ int CChar::CalcFightRange( CItem * pWeapon )
 	return ( maximum(iCharRange , iWeaponRange) );
 }
 
+WAR_SWING_TYPE CChar::Fight_CanHit(CChar * pCharSrc)
+{
+	ADDTOCALLSTACK("CChar::Fight_CanHit");
+	// Very basic check on possibility to hit
+	//return:
+	//  WAR_SWING_INVALID	= target is invalid
+	//	WAR_SWING_EQUIPPING	= recoiling weapon / swing made
+	//  WAR_SWING_READY		= RETURN 1 // Won't have any effect on Fight_Hit() function other than allowing the hit. The rest of returns in here will stop the hit.
+	//  WAR_SWING_SWINGING	= taking my swing now
+	if (IsStatFlag(STATF_DEAD | STATF_Sleeping | STATF_Freeze | STATF_Stone) || pCharSrc->IsStatFlag(STATF_DEAD | STATF_INVUL | STATF_Stone | STATF_Ridden))
+		return WAR_SWING_INVALID;
+	if (pCharSrc->m_pArea && pCharSrc->m_pArea->IsFlag(REGION_FLAG_SAFE))
+		return WAR_SWING_INVALID;
+
+	int dist = GetTopDist3D(pCharSrc);
+	if (dist > UO_MAP_VIEW_RADAR)
+	{
+		if (!IsSetCombatFlags(COMBAT_STAYINRANGE))
+			return WAR_SWING_SWINGING; //Keep loading the hit or keep it loaded and ready.
+
+		return WAR_SWING_INVALID;
+	}
+	if (!CanSeeLOS(pCharSrc))
+		return WAR_SWING_EQUIPPING;
+
+	// I am on ship. Should be able to combat only inside the ship to avoid free sea and ground characters hunting
+	if ((m_pArea != pCharSrc->m_pArea) && !IsSetCombatFlags(COMBAT_ALLOWHITFROMSHIP))
+	{
+		if (m_pArea && m_pArea->IsFlag(REGION_FLAG_SHIP))
+		{
+			SysMessageDefault(DEFMSG_COMBAT_OUTSIDESHIP);
+			return WAR_SWING_INVALID;
+		}
+		if (pCharSrc->m_pArea && pCharSrc->m_pArea->IsFlag(REGION_FLAG_SHIP))
+		{
+			SysMessageDefault(DEFMSG_COMBAT_INSIDESHIP);
+			return WAR_SWING_INVALID;
+		}
+	}
+	return WAR_SWING_READY;
+}
+
 // Attempt to hit our target.
 // Calculating damage
 // Damaging target ( OnTakeDamage() / @GetHit )
@@ -1464,37 +1506,9 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		}
 	}
 
-	// Very basic check on possibility to hit
-    if (IsStatFlag(STATF_DEAD | STATF_Sleeping | STATF_Freeze | STATF_Stone) || pCharTarg->IsStatFlag(STATF_DEAD | STATF_INVUL | STATF_Stone | STATF_Ridden))
-        return WAR_SWING_INVALID;
-    if (pCharTarg->m_pArea && pCharTarg->m_pArea->IsFlag(REGION_FLAG_SAFE))
-        return WAR_SWING_INVALID;
-
-	int dist = GetTopDist3D(pCharTarg);
-	if ( dist > UO_MAP_VIEW_RADAR )
-	{
-        if (!IsSetCombatFlags(COMBAT_STAYINRANGE))
-            return WAR_SWING_EQUIPPING;
-
-		return WAR_SWING_INVALID;
-	}
-    if (!CanSeeLOS(pCharTarg))
-        return WAR_SWING_EQUIPPING;
-
-	// I am on ship. Should be able to combat only inside the ship to avoid free sea and ground characters hunting
-	if ( (m_pArea != pCharTarg->m_pArea) && !IsSetCombatFlags(COMBAT_ALLOWHITFROMSHIP) )
-	{
-		if ( m_pArea && m_pArea->IsFlag(REGION_FLAG_SHIP) )
-		{
-			SysMessageDefault(DEFMSG_COMBAT_OUTSIDESHIP);
-			return WAR_SWING_INVALID;
-		}
-		if ( pCharTarg->m_pArea && pCharTarg->m_pArea->IsFlag(REGION_FLAG_SHIP) )
-		{
-			SysMessageDefault(DEFMSG_COMBAT_INSIDESHIP);
-			return WAR_SWING_INVALID;
-		}
-	}
+	WAR_SWING_TYPE iHitCheck = Fight_CanHit(pCharTarg);
+	if (iHitCheck != WAR_SWING_READY)
+		return iHitCheck;
 
 	// Guards should remove conjured NPCs
 	if ( m_pNPC && m_pNPC->m_Brain == NPCBRAIN_GUARD && pCharTarg->m_pNPC && pCharTarg->IsStatFlag(STATF_Conjured) )
@@ -1564,6 +1578,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	SKILL_TYPE skill = Skill_GetActive();
 	RESOURCE_ID_BASE rid;
 	lpctstr t_Str;
+	int dist = GetTopDist3D(pCharTarg);
 
 	if ( g_Cfg.IsSkillFlag(skill, SKF_RANGED) )
 	{
@@ -1761,29 +1776,8 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	// We hit
 	if ( !(iTyp & DAMAGE_GOD) )
 	{
-		// Check if target will block the hit
-		// Legacy pre-SE formula
-		CItem *pItemHit = NULL;
-		int ParryChance = 0;
-		if ( pCharTarg->IsStatFlag(STATF_HasShield) )	// parry using shield
-		{
-			pItemHit = pCharTarg->LayerFind(LAYER_HAND2);
-			ParryChance = pCharTarg->Skill_GetBase(SKILL_PARRYING) / 40;
-		}
-		else if ( pCharTarg->m_uidWeapon.IsItem() )		// parry using weapon
-		{
-			pItemHit = pCharTarg->m_uidWeapon.ItemFind();
-			ParryChance = pCharTarg->Skill_GetBase(SKILL_PARRYING) / 80;
-		}
-
-		if ( pCharTarg->Skill_GetBase(SKILL_PARRYING) >= 1000 )
-			ParryChance += 5;
-
-		int Dex = pCharTarg->Stat_GetAdjusted(STAT_DEX);
-		if ( Dex < 80 )
-			ParryChance = ParryChance * (20 + Dex) / 100;
-
-		if ( pCharTarg->Skill_UseQuick(SKILL_PARRYING, ParryChance, true, false) )
+		CItem * pItemHit = NULL;
+		if (pCharTarg->Fight_Parry(pItemHit))
 		{
 			if ( IsPriv(PRIV_DETAIL) )
 				SysMessageDefault(DEFMSG_COMBAT_PARRY);
@@ -1970,4 +1964,34 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	}
 
 	return WAR_SWING_EQUIPPING;
+}
+
+bool CChar::Fight_Parry(CItem * &pItemParry)
+{
+	// Check if target will block the hit
+	// Legacy pre-SE formula
+	int ParryChance = 0;
+	if (IsStatFlag(STATF_HasShield))	// parry using shield
+	{
+		pItemParry = LayerFind(LAYER_HAND2);
+		ParryChance = Skill_GetBase(SKILL_PARRYING) / 40;
+	}
+	else if (m_uidWeapon.IsItem())		// parry using weapon
+	{
+		pItemParry = m_uidWeapon.ItemFind();
+		ParryChance = Skill_GetBase(SKILL_PARRYING) / 80;
+	}
+
+	if (Skill_GetBase(SKILL_PARRYING) >= 1000)
+		ParryChance += 5;
+
+	int Dex = Stat_GetAdjusted(STAT_DEX);
+	if (Dex < 80)
+		ParryChance = ParryChance * (20 + Dex) / 100;
+
+	if (Skill_UseQuick(SKILL_PARRYING, ParryChance, true, false))
+	{
+		return true;
+	}
+	return false;
 }

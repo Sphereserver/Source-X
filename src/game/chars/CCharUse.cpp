@@ -1461,7 +1461,22 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 				return false;
 
 			// Just make them spin
-			pItem->SetAnim(static_cast<ITEMID_TYPE>(pItem->GetID() + 1), 2 * TICK_PER_SEC);
+			dword id = pItem->GetDispID();
+			switch (id)
+			{
+			case ITEMID_SPININGWHEEL_ELVEN_S:
+				id = ITEMID_SPININGWHEEL_ELVEN_S_ANIMATED;
+				break;
+			case ITEMID_SPININGWHEEL_ELVEN_E:
+				id = ITEMID_SPININGWHEEL_ELVEN_E_ANIMATED;
+				break;
+			default:
+			case ITEMID_SPINWHEEL1:
+			case ITEMID_SPINWHEEL2:
+				id += 1;
+				break;
+			}
+			pItem->SetAnim(static_cast<ITEMID_TYPE>(id), 2 * TICK_PER_SEC);
 			SysMessageDefault(DEFMSG_ITEMUSE_SPINWHEEL);
 			return true;
 		}

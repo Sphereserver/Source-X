@@ -947,6 +947,8 @@ public:
 	void Fight_ClearAll();
 	void Fight_HitTry();
 	WAR_SWING_TYPE Fight_Hit( CChar * pCharTarg );
+	bool Fight_Parry(CItem * &pItemParry);
+	WAR_SWING_TYPE Fight_CanHit(CChar * pCharTarg);
 	int Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom = false, bool bGetMax = true ) const;
 	bool Fight_IsAttackable();
 	// Attacker System

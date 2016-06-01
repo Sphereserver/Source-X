@@ -3612,6 +3612,8 @@ void CItem::DupeCopy( const CItem * pItem )
 	m_type = pItem->m_type;
 	m_amount = pItem->m_amount;
 	m_Attr  = pItem->m_Attr;
+	m_Can = pItem->m_Can;
+	m_CanUse = pItem->m_CanUse;
 	m_uidLink = pItem->m_uidLink;
 
 	m_itNormal.m_more1 = pItem->m_itNormal.m_more1;
@@ -3628,7 +3630,7 @@ void CItem::SetAnim( ITEMID_TYPE id, int iTime )
 	ADDTOCALLSTACK("CItem::SetAnim");
 	// Set this to an active anim that will revert to old form when done.
 	// ??? use addEffect instead !!!
-	m_itAnim.m_PrevID = GetID(); // save old id.
+	m_itAnim.m_PrevID = GetDispID(); // save old id.
 	m_itAnim.m_PrevType = m_type;
 	SetDispID( id );
 	m_type = IT_ANIM_ACTIVE;
