@@ -2373,6 +2373,9 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		case IC_BALANCED:
 			sVal.FormatLLVal( m_Attr & ATTR_BALANCED );
 			break;
+		case IC_BANE:
+			sVal.FormatLLVal( m_Attr & ATTR_BANE );
+			break;
 		case IC_BATTLELUST:
 			sVal.FormatLLVal( m_Attr & ATTR_BATTLELUST );
 			break;
@@ -2402,6 +2405,9 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			break;
 		case IC_SEARINGWEAPON:
 			sVal.FormatLLVal( m_Attr & ATTR_SEARINGWEAPON );
+			break;
+		case IC_SPLINTERINGWEAPON:
+			sVal.FormatLLVal( m_Attr & ATTR_SPLINTERINGWEAPON );
 			break;
 		case IC_USEBESTWEAPONSKILL:
 			sVal.FormatLLVal( m_Attr & ATTR_USEBESTWEAPONSKILL );
@@ -2639,6 +2645,15 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				else
 					m_Attr &= ~ATTR_BALANCED;
 			break;
+		case IC_BANE:
+			if ( !s.HasArgs() )
+				m_Attr |= ATTR_BANE;
+			else
+				if ( s.GetArgVal() )
+					m_Attr |= ATTR_BANE;
+				else
+					m_Attr &= ~ATTR_BANE;
+			break;
 		case IC_BATTLELUST:
 			if ( !s.HasArgs() )
 				m_Attr |= ATTR_BATTLELUST;
@@ -2728,6 +2743,15 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 					m_Attr |= ATTR_SEARINGWEAPON;
 				else
 					m_Attr &= ~ATTR_SEARINGWEAPON;
+			break;
+		case IC_SPLINTERINGWEAPON:
+			if ( !s.HasArgs() )
+				m_Attr |= ATTR_SPLINTERINGWEAPON;
+			else
+				if ( s.GetArgVal() )
+					m_Attr |= ATTR_SPLINTERINGWEAPON;
+				else
+					m_Attr &= ~ATTR_SPLINTERINGWEAPON;
 			break;
 		case IC_USEBESTWEAPONSKILL:
 			if ( !s.HasArgs() )

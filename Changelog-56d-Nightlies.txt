@@ -50,7 +50,7 @@ TODO: add default npc and player speech color as a def to sphere_defs.scp
 19-05-2016, Nolok
 Fixed: wrong parsing when an unicode prompt response packet is received.
 
-29-05-2016, Kaylala
+29-05-2016, Kaylala (Khaos)
 Gump Enums, New Container Defines, Misc Switches from Prop Attributes…  to Flags, Added AlterItem Prop.
 
 - Added: uofiles_enums.h - New Gump Enums for several new containers, cards, and other miscellaneous assets.
@@ -66,18 +66,30 @@ Gump Enums, New Container Defines, Misc Switches from Prop Attributes…  to Fla
 Note: More needs to be switched over and I am trying to get this and the Base Packs completely up to date and somewhat synchronized with the most efficient methods Xun and I can think of.
 
 30-05-2016, XuN
-Fixed CanUse not inheriting from the higher item (ie: i_boomerang_bla not inheriting CanUse from i_boomerang).
-Fixed Statf_War not clearing in every situation when calling Attacker_Clear().
-Added RecipeAlchemy,RecipleBlacksmith, RecipeBowcraft, RecipeCarpentry, RecipeCartography, RecipeCooking, RecipeInscription, RecipeTailoring, RecipeTinkering (all of the current SKF_CRAFT skills).
-Changed back Region Flags to dword, they do not need to store higher values yet.
-Added PayGold() method to control payment values with it's own trigger:
-ON=@PayGold:
+- Fixed CanUse not inheriting from the higher item (ie: i_boomerang_bla not inheriting
+  CanUse from i_boomerang).
+- Fixed Statf_War not clearing in every situation when calling Attacker_Clear().
+- Added RecipeAlchemy,RecipleBlacksmith, RecipeBowcraft, RecipeCarpentry, RecipeCartography, RecipeCooking, RecipeInscription, RecipeTailoring, RecipeTinkering (all of the current SKF_CRAFT skills).
+- Changed back Region Flags to dword, they do not need to store higher values yet.
+- Added PayGold() method to control payment values with it's own trigger:
+  ON=@PayGold:
 	Argn1 = Gold to pay.
 	Argn2 = Payment type ( 0 = Train, 1 = Buy , 2 = Hire).
 	src = The NPC receiving the money.
 	argo(if any) = The stack of gold used to pay (ie: training)
 
-OWNER is now RW, it can be used to set NPC's owner directly without the need of custom functions.
-Added NEWSUMMON, working as NEWNPC and NEWITEM, eg:
+- OWNER is now RW, it can be used to set NPC's owner directly without the need of custom   functions.
+- Added NEWSUMMON, working as NEWNPC and NEWITEM, eg:
 	serv.newsummon=c_ogre,15
-	new.p=<p>	// Will summon an ogre for 15 seconds on your position, not giving the second param will result in default timer according to your magery skill.
+	new.p=<p>	// Will summon an ogre for 15 seconds on your position, not giving
+  the second param will result in default timer according to your magery skill.
+
+29-05-2016, Kaylala (Khaos)
+- Updated: Tables - Removed Balanced, BloodDrinker, and BattleLust from BaseBaseDef tables 
+  and CObjBase tables since they were moved. Moved Bane and SplinteringWeapon to CItem tables.
+- Added: Attr_SplinteringWeapon to CItem.h.
+- Added: SplinteringWeapon, Balanced, and Bane to Item Properties and removed them from Obj
+  handling. All now use ATTR_*.
+- Added: Missing recipes: RecipeMasonry and RecipeGlassblowing. They might not have their
+  craft skills, but they have recipes and synergy with Carpentry and Alchemy. Separated as
+  they would on EA for others using a custom system.

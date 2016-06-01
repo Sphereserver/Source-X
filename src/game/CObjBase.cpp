@@ -776,7 +776,6 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			break;
 		//return as decimal number or 0 if not set
 		//On these ones, check BaseDef if not found on dynamic
-		case OC_BANE:
 		case OC_CASTINGFOCUS:
 		case OC_DAMCHAOS:
 		case OC_DAMCOLD:
@@ -868,7 +867,6 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 		case OC_SPELLCHANNELING:
 		case OC_SPELLCONSUMPTION:
 		case OC_SPELLFOCUSING:
-		case OC_SPLINTERINGWEAPON:
 		case OC_VELOCITY:
 		case OC_WEIGHTREDUCTION:
 		case OC_RESPHYSICAL:
@@ -883,7 +881,9 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
         case OC_RECIPECARPENTRY:
         case OC_RECIPECARTOPGRAHY:
         case OC_RECIPECOOKING:
+        case OC_RECIPEGLASSBLOWING:
         case OC_RECIPEINSCRIPTION:
+        case OC_RECIPEMASONRY:
         case OC_RECIPETAILORING:
         case OC_RECIPETINKERING:
         {
@@ -1615,7 +1615,6 @@ bool CObjBase::r_LoadVal( CScript & s )
 			break;
 		//Set as number only
 		case OC_INCREASEHITCHANCE:
-		case OC_BANE:
 		case OC_CASTINGFOCUS:
 		case OC_DAMCHAOS:
 		case OC_DAMCOLD:
@@ -1677,7 +1676,6 @@ bool CObjBase::r_LoadVal( CScript & s )
 		case OC_SPELLCHANNELING:
 		case OC_SPELLCONSUMPTION:
 		case OC_SPELLFOCUSING:
-		case OC_SPLINTERINGWEAPON:
 		case OC_VELOCITY:
 		case OC_NAMELOC:
 			SetDefNum(s.GetKey(),s.GetArgVal(), false);
@@ -1732,7 +1730,9 @@ bool CObjBase::r_LoadVal( CScript & s )
         case OC_RECIPECARPENTRY:
         case OC_RECIPECARTOPGRAHY:
         case OC_RECIPECOOKING:
+        case OC_RECIPEGLASSBLOWING:
         case OC_RECIPEINSCRIPTION:
+        case OC_RECIPEMASONRY:
         case OC_RECIPETAILORING:
         case OC_RECIPETINKERING:
         {

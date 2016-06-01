@@ -110,6 +110,7 @@ public:
 #define ATTR_SHIPWRECKITEM		0x40000000000000	// Recovered from shipwreck
 #define ATTR_FACTIONITEM		0x80000000000000	// Faction Item (Has cliloc)
 #define ATTR_VVVITEM			0x100000000000000	// VvV Item (Has CliLoc)
+#define ATTR_SPLINTERINGWEAPON	0x200000000000000
 	uint64	m_Attr;
 	// NOTE: If this link is set but not valid -> then delete the whole object !
 	CUID m_uidLink;		// Linked to this other object in the world. (owned, key, etc)
