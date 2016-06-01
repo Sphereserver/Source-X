@@ -124,108 +124,164 @@ NotoReturn:
 		return Noto;
 }
 
-NOTO_TYPE CChar::Noto_CalcFlag( const CChar * pCharViewer, bool fAllowIncog, bool fAllowInvul ) const
+//		NOTO_GOOD		= 0x01
+//		NOTO_GUILD_SAME	= 0x02
+//		NOTO_NEUTRAL	= 0x04
+//		NOTO_CRIMINAL	= 0x08
+//		NOTO_GUILD_WAR	= 0x10
+//		NOTO_EVIL		= 0x20
+//		NOTO_INVUL		= 0x40
+NOTO_TYPE CChar::Noto_CalcFlag(const CChar * pCharViewer, bool fAllowIncog, bool fAllowInvul) const
 {
-	ADDTOCALLSTACK("CChar::Noto_CalcFlag");
-	NOTO_TYPE iNotoFlag = static_cast<NOTO_TYPE>(m_TagDefs.GetKeyNum("OVERRIDE.NOTO", true));
-	if ( iNotoFlag != NOTO_INVALID )
-		return iNotoFlag;
+    ADDTOCALLSTACK("CChar::Noto_GetFlag");
+    // What is this char to the viewer ?
+    // This allows the noto attack check in the client.
+    // NOTO_GOOD = it is criminal to attack me.
 
-	if ( this != pCharViewer )
-	{
-		if ( g_Cfg.m_iPetsInheritNotoriety != 0 )
-		{
-			// Do we have a master to inherit notoriety from?
-			CChar* pMaster = NPC_PetGetOwner();
-			if (pMaster != NULL && pMaster != pCharViewer) // master doesn't want to see their own status
-			{
-				// protect against infinite loop
-				static int sm_iReentrant = 0;
-				if (sm_iReentrant < 32)
-				{
-					// return master's notoriety
-					++sm_iReentrant;
-					NOTO_TYPE notoMaster = pMaster->Noto_GetFlag(pCharViewer, fAllowIncog, fAllowInvul);
-					--sm_iReentrant;
+    NOTO_TYPE iNotoFlag = static_cast<NOTO_TYPE>(m_TagDefs.GetKeyNum("OVERRIDE.NOTO", true));
+    if (iNotoFlag != NOTO_INVALID)
+        return iNotoFlag;
 
-					// check if notoriety is inheritable based on bitmask setting:
-					//		NOTO_GOOD		= 0x01
-					//		NOTO_GUILD_SAME	= 0x02
-					//		NOTO_NEUTRAL	= 0x04
-					//		NOTO_CRIMINAL	= 0x08
-					//		NOTO_GUILD_WAR	= 0x10
-					//		NOTO_EVIL		= 0x20
-					//		NOTO_INVUL		= 0x40
-					int iNotoFlags = 1 << (notoMaster - 1);
-					if ( (g_Cfg.m_iPetsInheritNotoriety & iNotoFlags) == iNotoFlags )
-						return notoMaster;
-				}
-				else
-				{
-					DEBUG_ERR(("Too many owners (circular ownership?) to continue acquiring notoriety towards %s uid=0%x\n", pMaster->GetName(), pMaster->GetUID().GetPrivateUID()));
-					// too many owners, return the notoriety for however far we got down the chain
-				}
-			}
-		}
-	}
+    TCHAR * getNoto = Str_GetTemp(); // get the override tag for this viewer
+    sprintf(getNoto, "OVERRIDE.NOTO.0%lx", (DWORD)pCharViewer->GetUID());
+    iNotoFlag = static_cast<NOTO_TYPE>(m_TagDefs.GetKeyNum(getNoto));
 
-	if ( fAllowInvul && IsStatFlag(STATF_INVUL))
-		return NOTO_INVUL;
-	if ( IsStatFlag(STATF_Criminal))	// criminal to everyone.
-		return NOTO_CRIMINAL;
-	if ( fAllowIncog && IsStatFlag(STATF_Incognito))
-		return NOTO_NEUTRAL;
-	if ( m_pArea && m_pArea->IsFlag(REGION_FLAG_ARENA))
-		return NOTO_NEUTRAL;			// everyone is neutral here.
-	if ( Noto_IsEvil())
-		return NOTO_EVIL;
-	if ( Noto_IsNeutral())
-		return NOTO_NEUTRAL;
+    if (iNotoFlag != NOTO_INVALID)
+        return iNotoFlag;
 
-	if ( this != pCharViewer ) // Am I checking myself?
-	{
-		// If they saw me commit a crime or I am their aggressor then criminal to just them.
-		CItemMemory * pMemory = pCharViewer->Memory_FindObjTypes(this, MEMORY_SAWCRIME|MEMORY_AGGREIVED|MEMORY_HARMEDBY);
-		if ( pMemory != NULL )
-			return( NOTO_CRIMINAL );
+    if (fAllowIncog && IsStatFlag(STATF_Incognito))
+    {
+        return NOTO_NEUTRAL;
+    }
 
-		// Are we in the same party ?
-		if ( m_pParty && m_pParty == pCharViewer->m_pParty )
-		{
-			if ( m_pParty->GetLootFlag(this))
-				return(NOTO_GUILD_SAME);
-		}
+    if (fAllowInvul && IsStatFlag(STATF_INVUL))
+    {
+        return NOTO_INVUL;
+    }
 
-		// Check the guild stuff
-		CItemStone * pMyGuild = Guild_Find(MEMORY_GUILD);
-		if ( pMyGuild )
-		{
-			CItemStone * pViewerGuild = pCharViewer->Guild_Find(MEMORY_GUILD);
-			if ( pViewerGuild )
-			{
-				if ( pViewerGuild == pMyGuild )
-					return NOTO_GUILD_SAME;
-				if ( pMyGuild->IsAlliedWith(pViewerGuild))
-					return NOTO_GUILD_SAME;
-				if ( pMyGuild->IsAtWarWith(pViewerGuild))
-					return NOTO_GUILD_WAR;
-			}
-		}
+    if (this != pCharViewer)
+    {
+        if (g_Cfg.m_iPetsInheritNotoriety != 0)
+        {
+            // Do we have a master to inherit notoriety from?
+            CChar* pMaster = NPC_PetGetOwner();
+            if (pMaster != NULL && pMaster != pCharViewer) // master doesn't want to see their own status
+            {
+                // protect against infinite loop
+                static int sm_iReentrant = 0;
+                if (sm_iReentrant < 32)
+                {
+                    // return master's notoriety
+                    ++sm_iReentrant;
+                    NOTO_TYPE notoMaster = pMaster->Noto_GetFlag(pCharViewer, false, false);
+                    --sm_iReentrant;
 
-		// Check the town stuff
-		CItemStone * pMyTown = Guild_Find(MEMORY_TOWN);
-		if ( pMyTown )
-		{
-			CItemStone * pViewerTown = pCharViewer->Guild_Find(MEMORY_TOWN);
-			if ( pViewerTown )
-			{
-				if ( pMyTown->IsAtWarWith(pViewerTown))
-					return NOTO_GUILD_WAR;
-			}
-		}
-	}
+                    // check if notoriety is inheritable based on bitmask setting:
+                    //		NOTO_GOOD		= 0x01
+                    //		NOTO_GUILD_SAME	= 0x02
+                    //		NOTO_NEUTRAL	= 0x04
+                    //		NOTO_CRIMINAL	= 0x08
+                    //		NOTO_GUILD_WAR	= 0x10
+                    //		NOTO_EVIL		= 0x20
+                    iNotoFlag = 1 << (notoMaster - 1);
+                    if ((g_Cfg.m_iPetsInheritNotoriety & iNotoFlag) == iNotoFlag)
+                        return notoMaster;
+                }
+                else
+                {
+                    DEBUG_ERR(("Too many owners (circular ownership?) to continue acquiring notoriety towards %s uid=0%lx\n", pMaster->GetName(), pMaster->GetUID().GetPrivateUID()));
+                    // too many owners, return the notoriety for however far we got down the chain
+                }
+            }
+        }
 
-	return( NOTO_GOOD );
+        // Are we in the same party ?
+        if (m_pParty && m_pParty == pCharViewer->m_pParty)
+        {
+            if (m_pParty->GetLootFlag(this))
+            {
+                return(NOTO_GUILD_SAME);
+            }
+        }
+    }
+
+    if (Noto_IsEvil())
+    {
+        return(NOTO_EVIL);
+    }
+
+    if (this != pCharViewer) // Am I checking myself?
+    {
+        // Check the guild stuff
+        CItemStone * pMyTown = Guild_Find(MEMORY_TOWN);
+        CItemStone * pMyGuild = Guild_Find(MEMORY_GUILD);
+        if (pMyGuild || pMyTown)
+        {
+            CItemStone * pViewerGuild = pCharViewer->Guild_Find(MEMORY_GUILD);
+            CItemStone * pViewerTown = pCharViewer->Guild_Find(MEMORY_TOWN);
+            // Are we both in a guild?
+            if (pViewerGuild || pViewerTown)
+            {
+                if (pMyGuild && pMyGuild->IsPrivMember(this))
+                {
+                    if (pViewerGuild && pViewerGuild->IsPrivMember(pCharViewer))
+                    {
+                        if (pViewerGuild == pMyGuild) // Same guild?
+                            return NOTO_GUILD_SAME; // return green
+                        if (pMyGuild->IsAlliedWith(pViewerGuild))
+                            return NOTO_GUILD_SAME;
+                        // Are we in different guilds but at war? (not actually a crime right?)
+                        if (pMyGuild->IsAtWarWith(pViewerGuild))
+                            return NOTO_GUILD_WAR; // return orange
+                    }
+                    if (pMyGuild->IsAtWarWith(pViewerTown))
+                        return NOTO_GUILD_WAR; // return orange
+                }
+                if (pMyTown && pMyTown->IsPrivMember(this))
+                {
+                    if (pViewerGuild && pViewerGuild->IsPrivMember(pCharViewer))
+                    {
+                        if (pMyTown->IsAtWarWith(pViewerGuild))
+                            return NOTO_GUILD_WAR; // return orange
+                    }
+                    if (pMyTown->IsAtWarWith(pViewerTown))
+                        return NOTO_GUILD_WAR; // return orange
+                }
+            }
+        }
+    }
+
+    if (IsStatFlag(STATF_Criminal))	// criminal to everyone.
+    {
+        return(NOTO_CRIMINAL);
+    }
+
+    if (this != pCharViewer) // Am I checking myself?
+    {
+        if (NPC_IsOwnedBy(pCharViewer, false))	// All pets are neutral to their owners.
+            return(NOTO_NEUTRAL);
+
+        // If they saw me commit a crime or I am their aggressor then
+        // criminal to just them.
+        CItemMemory * pMemory = pCharViewer->Memory_FindObjTypes(this, MEMORY_SAWCRIME | MEMORY_AGGREIVED);
+        if (pMemory != NULL)
+        {
+            return(NOTO_CRIMINAL);
+        }
+    }
+
+    if (m_pArea && m_pArea->IsFlag(REGION_FLAG_ARENA))
+    {
+        // everyone is neutral here.
+        return(NOTO_NEUTRAL);
+    }
+
+    if (Noto_IsNeutral() || m_TagDefs.GetKeyNum("NOTO.PERMAGREY", true))
+    {
+        return(NOTO_NEUTRAL);
+    }
+
+    return(NOTO_GOOD);
 }
 
 HUE_TYPE CChar::Noto_GetHue( const CChar * pCharViewer, bool fIncog ) const

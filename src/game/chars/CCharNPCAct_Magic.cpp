@@ -138,33 +138,31 @@ bool CChar::NPC_AddSpellsFromBook(CItem * pBook)
 bool CChar::NPC_FightMagery(CChar * pChar)
 {
 	ADDTOCALLSTACK("CChar::NPC_FightMagery");
-	int count = m_pNPC->Spells_GetCount();
-    if (count == -1)
-        return false;
+	if (!NPC_FightMayCast(false))	// not checking skill here since it will do a search later and it's an expensive function.
+		return(false);
 
-    if (!NPC_FightMayCast(false))	// not checking skill here since it will do a search later and it's an expensive function.
-        return false;
-
+	int iSpellCount = m_pNPC->Spells_GetCount();
 	CItem * pWand = LayerFind(LAYER_HAND1);		//Try to get a working wand.
 	CObjBase * pTarg = pChar;
 	if (pWand)
 	{
-		// If the item is really a wand and have it charges it's a valid wand, if not ... we get rid of it.
-		if ( (pWand->GetType() != IT_WAND) || (pWand->m_itWeapon.m_spellcharges <= 0) )
+		if (pWand->GetType() != IT_WAND || pWand->m_itWeapon.m_spellcharges <= 0)// If the item is really a wand and have it charges it's a valid wand, if not ... we get rid of it.
 			pWand = NULL;
 	}
-	if ( (count < 1) && !pWand )
+	if (iSpellCount < 1 && !pWand)
 		return false;
 
 	int iDist = GetTopDist3D(pChar);
-	if (iDist > ((UO_MAP_VIEW_SIGHT * 3) / 4))	// way too far away . close in.
-		return false;
+	if (iDist >((UO_MAP_VIEW_SIGHT * 3) / 4))	// way too far away . close in.
+		return(false);
 
-	if ( (iDist <= 1) && (Skill_GetBase(SKILL_TACTICS) > 200) && !Calc_GetRandVal(2) )
+	if (iDist <= 1 &&
+		Skill_GetBase(SKILL_TACTICS) > 200 &&
+		!Calc_GetRandVal(2))
 	{
 		// Within striking distance.
 		// Stand and fight for a bit.
-		return false;
+		return(false);
 	}
 	int skill = SKILL_NONE;
 	int iStatInt = Stat_GetBase(STAT_INT);
@@ -179,33 +177,32 @@ bool CChar::NPC_FightMagery(CChar * pChar)
 		if (mana > (iStatInt / 3) && Calc_GetRandVal(iStatInt))
 		{
 			if (iDist < 4 || iDist > 8)	// Here is fine?
+			{
 				NPC_Act_Follow(false, Calc_GetRandVal(3) + 2, true);
-			return true;
+			}
+			return(true);
 		}
-		return false;
+		return(false);
 	}
-	uchar i = 0;
-	if (pWand)
-		i = (uchar)Calc_GetRandVal2(0, (int32)count);	//chance between all spells + wand
-	else
-		i = (uchar)Calc_GetRandVal2(0, (int32)(count-1));
 
-	if (i > count)	// if i > count then we use wand to cast.
+	// We have the total count of spells inside iSpellCount, so we use 'iRandSpell' to store a rand representing the spell that will be casted
+	unsigned char iRandSpell = pWand ? 1 : 0;	// Having wand adding +1 spell to the total count
+	iRandSpell += static_cast<unsigned char>(Calc_GetRandVal2(0, iSpellCount - 1));	// spells are being stored using a vector, so it's assumed to be zero-based.
+
+	if (iRandSpell > iSpellCount)	// if iRandSpell > iSpellCount then we've got the roll pointing to use the wand's spell.
 	{
 		SPELL_TYPE spell = static_cast<SPELL_TYPE>(pWand->m_itWeapon.m_spell);
 		const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
 		if (!pSpellDef)	// wand check failed ... we go on melee, next cast try might select another type of spell :)
 			return false;
-		pSrc = pWand;
+		pSrc = pWand;	// Seting pWand as SRC, this will force @SpellCast to have the wand as ARGO.
 		if (NPC_FightCast(pTarg, pWand, spell))
 			goto BeginCast;	//if can cast this spell we jump the for() and go directly to it's casting.
 	}
 
-	for (; i < count; i++)
+	for (; iRandSpell < iSpellCount; iRandSpell++)
 	{
-		SPELL_TYPE spell = m_pNPC->Spells_GetAt(i);
-        if (spell == SPELL_NONE)
-            continue;
+		SPELL_TYPE spell = m_pNPC->Spells_GetAt(iRandSpell);
 		const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
 		if (!pSpellDef)	//If it reached here it should exist, checking anyway.
 			continue;
@@ -223,20 +220,20 @@ bool CChar::NPC_FightMagery(CChar * pChar)
 
 BeginCast:	//Start casting
 			// KRJ - give us some distance
-			// if the opponent is using melee
-			// the bigger the disadvantage we have in hitpoints, the further we will go
+			// if the opponent is close, get away from him
 	if (mana > iStatInt / 3 && Calc_GetRandVal(iStatInt << 1))
 	{
 		if (iDist < 4 || iDist > 8)	// Here is fine?
+		{
 			NPC_Act_Follow(false, 5, true);
+		}
 	}
-	else
-		NPC_Act_Follow();
+	else NPC_Act_Follow();
 
 	Reveal();
 
 	m_Act_Targ = pTarg->GetUID();
-	m_Act_TargPrv = pSrc->GetUID();	// I'm using a wand ... or casting this directly?.
+	m_Act_TargPrv = pSrc->GetUID();
 	m_Act_p = pTarg->GetTopPoint();
 
 	// Calculate the difficulty

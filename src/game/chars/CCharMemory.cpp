@@ -133,6 +133,9 @@ bool CChar::Memory_UpdateFlags( CItemMemory * pMemory )
 	else
 		iCheckTime = 20*60*TICK_PER_SEC;
 	pMemory->SetTimeout( iCheckTime );	// update it's decay time.
+    CChar * pCharLink = pMemory->m_uidLink.CharFind();
+    if (pCharLink)
+        NotoSave_Delete(pCharLink);
 	return true;
 }
 

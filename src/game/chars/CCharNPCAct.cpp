@@ -723,9 +723,7 @@ bool CChar::NPC_LookAtCharHuman( CChar * pChar )
 		return false;
 
 	// Yell for guard if we see someone evil.
-	if ( NPC_CanSpeak() &&
-		m_pArea->IsGuarded() &&
-		! Calc_GetRandVal( 3 ))
+	if (NPC_CanSpeak() && m_pArea->IsGuarded() && !IsStatFlag(STATF_DEAD) && !Calc_GetRandVal(3))
 	{
 		if ( m_pNPC->m_Brain == NPCBRAIN_GUARD )
 			return( NPC_LookAtCharGuard( pChar ));
@@ -972,6 +970,8 @@ bool CChar::NPC_LookAtChar( CChar * pChar, int iDist )
 			}
 		}
 	}
+	if (IsStatFlag(STATF_DEAD))
+		return false;
 
 	switch ( m_pNPC->m_Brain )	// my type of brain
 	{
@@ -1187,42 +1187,42 @@ void CChar::NPC_Act_Guard()
 	NPC_Act_Follow();
 }
 
-bool CChar::NPC_Act_Follow( bool fFlee, int maxDistance, bool forceDistance )
+bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 {
 	ADDTOCALLSTACK("CChar::NPC_Act_Follow");
-	// Follow our target or owner. (m_Act_Targ) we may be fighting.
-	// false = can't follow any more. give up.
-	if ( Can(CAN_C_NONMOVER) )
+	// Follow our target or owner (m_Act_Targ), we may be fighting (m_Fight_Targ).
+	// false = can't follow any more, give up.
+	if (Can(CAN_C_NONMOVER))
 		return false;
 
 	EXC_TRY("NPC_Act_Follow")
-	CChar * pChar = Fight_IsActive() ? m_Fight_Targ.CharFind() : m_Act_Targ.CharFind();
-	if ( pChar == NULL )
+		CChar * pChar = Fight_IsActive() ? m_Fight_Targ.CharFind() : m_Act_Targ.CharFind();
+	if (pChar == NULL)
 	{
 		// free to do as i wish !
-		Skill_Start( SKILL_NONE );
-		return false;
+		Skill_Start(SKILL_NONE);
+		return(false);
 	}
 
 	EXC_SET("Trigger");
-	if ( IsTrigUsed(TRIGGER_NPCACTFOLLOW) )
+	if (IsTrigUsed(TRIGGER_NPCACTFOLLOW))
 	{
-		CScriptTriggerArgs Args( fFlee, maxDistance, forceDistance );
-		switch ( OnTrigger( CTRIG_NPCActFollow, pChar, &Args ) )
+		CScriptTriggerArgs Args(fFlee, maxDistance, fMoveAway);
+		switch (OnTrigger(CTRIG_NPCActFollow, pChar, &Args))
 		{
-			case TRIGRET_RET_TRUE:	return false;
-			case TRIGRET_RET_FALSE:	return true;
-			default:				break;
+		case TRIGRET_RET_TRUE:	return false;
+		case TRIGRET_RET_FALSE:	return true;
+		default:				break;
 		}
 
-		fFlee			= (Args.m_iN1 != 0);
-		maxDistance		= (int)(Args.m_iN2);
-		forceDistance	= (Args.m_iN3 != 0);
+		fFlee = (Args.m_iN1 != 0);
+		maxDistance = static_cast<int>(Args.m_iN2);
+		fMoveAway = (Args.m_iN3 != 0);
 	}
 
 	EXC_SET("CanSee");
 	// Have to be able to see target to follow.
-	if ( CanSee( pChar ))
+	if (CanSee(pChar))
 	{
 		m_Act_p = pChar->GetTopPoint();
 	}
@@ -1230,48 +1230,48 @@ bool CChar::NPC_Act_Follow( bool fFlee, int maxDistance, bool forceDistance )
 	{
 		// Monster may get confused because he can't see you.
 		// There is a chance they could forget about you if hidden for a while.
-		if ( fFlee || !Calc_GetRandVal( 1 + (( 100 - Stat_GetAdjusted(STAT_INT)) / 20 )))
-			return false;
+		if (fFlee || !Calc_GetRandVal(1 + ((100 - Stat_GetAdjusted(STAT_INT)) / 20)))
+			return(false);
 	}
 
 	EXC_SET("Distance checks");
-	int dist = GetTopPoint().GetDist( m_Act_p );
-	if ( dist > UO_MAP_VIEW_RADAR )		// too far away ?
-		return false;
+	int dist = GetTopPoint().GetDist(m_Act_p);
+	if (dist > UO_MAP_VIEW_RADAR)		// too far away ?
+		return(false);
 
-	if ( forceDistance )
+	if (fMoveAway)
 	{
-		if ( dist < maxDistance )
+		if (dist < maxDistance)
 			fFlee = true;	// start moving away
 	}
 	else
 	{
-		if ( fFlee )
+		if (fFlee)
 		{
-			if ( dist >= maxDistance )
-				return false;
+			if (dist >= maxDistance)
+				return(false);
 		}
-		else if ( dist <= maxDistance )
-			return true;
+		else if (dist <= maxDistance)
+			return(true);
 	}
 
 	EXC_SET("Fleeing");
-	if ( fFlee )
+	if (fFlee)
 	{
 		CPointMap ptOld = m_Act_p;
 		m_Act_p = GetTopPoint();
-		m_Act_p.Move( GetDirTurn( m_Act_p.GetDir( ptOld ), 4 + 1 - Calc_GetRandVal(3)));
-		NPC_WalkToPoint( dist > 3 );
+		m_Act_p.Move(GetDirTurn(m_Act_p.GetDir(ptOld), 4 + 1 - Calc_GetRandVal(3)));
+		NPC_WalkToPoint(dist > 3);
 		m_Act_p = ptOld;	// last known point of the enemy.
-		return true;
+		return(true);
 	}
 
 	EXC_SET("WalkToPoint 1");
-	NPC_WalkToPoint( IsStatFlag( STATF_War ) ? true : ( dist > 3 ));
-	return true;
+	NPC_WalkToPoint(IsStatFlag(STATF_War) ? true : (dist > 3));
+	return(true);
 
 	EXC_CATCH;
-	return false;
+	return(false);
 }
 
 bool CChar::NPC_Act_Talk()

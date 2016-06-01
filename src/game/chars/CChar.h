@@ -168,6 +168,7 @@ public:
 	CServerTime m_timeCreate;		// When was i created ?
 
 	CServerTime m_timeLastHitsUpdate;
+	int64 m_timeLastCallGuards;
 
 	// Some character action in progress.
 	SKILL_TYPE	m_Act_SkillCurrent;	// Currently using a skill. Could be combat skill.
@@ -1026,6 +1027,18 @@ public:
 	bool Reveal( uint64 iFlags = 0 );
 	void Jail( CTextConsole * pSrc, bool fSet, int iCell );
 	void EatAnim( lpctstr pszName, short iQty );
+	/**
+	* @Brief I'm calling guards (Player speech)
+	*
+	* Looks for nearby criminals to call guards on
+	* This is called from players only, since NPCs will CallGuards(OnTarget) directly.
+	*/
+	void CallGuards();
+	/**
+	* @Brief I'm calling guards on pCriminal
+	*
+	* @param pCriminal: character who shall be punished by guards
+	*/
 	void CallGuards( CChar * pCriminal );
 
 #define DEATH_NOFAMECHANGE 0x01
@@ -1125,7 +1138,7 @@ private:
 	bool NPC_FightMayCast(bool fCheckSkill = true) const;
 	bool NPC_GetAllSpellbookSpells();
 
-	bool NPC_Act_Follow( bool fFlee = false, int maxDistance = 1, bool forceDistance = false );
+	bool NPC_Act_Follow( bool fFlee = false, int maxDistance = 1, bool fMoveAway = false );
 	void NPC_Act_Guard();
 	void NPC_Act_GoHome();
 	bool NPC_Act_Talk();
