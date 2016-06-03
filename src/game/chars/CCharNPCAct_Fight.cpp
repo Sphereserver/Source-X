@@ -105,9 +105,9 @@ CChar * CChar::NPC_FightFindBestTarget()
             if (iDist > UO_MAP_VIEW_SIGHT)
             {
                 Attacker_Delete(pChar, false, ATTACKER_CLEAR_DISTANCE);
+				pChar = NULL;
                 if (m_lastAttackers.size() <= 0)
                     break;
-                it--;
                 continue;
             }
 			if ( g_Cfg.IsSkillFlag(skillWeapon, SKF_RANGED) && (iDist < g_Cfg.m_iArcheryMinDist || iDist > g_Cfg.m_iArcheryMaxDist) )

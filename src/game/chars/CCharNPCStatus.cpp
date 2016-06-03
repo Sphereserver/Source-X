@@ -583,7 +583,7 @@ int CChar::NPC_GetAttackContinueMotivation( CChar * pChar, int iMotivation ) con
 	// 0 = I'm have no interest.
 	// 50 = even match.
 	// 100 = he's a push over.
-	if ( !m_pNPC )
+	if ( !m_pNPC || !pChar )
 		return 0;
 
 	if ( !pChar->Fight_IsAttackable() )
