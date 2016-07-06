@@ -451,7 +451,7 @@ void CChar::CallGuards()
 		if (m_pPlayer && Memory_FindObjTypes(pCriminal, MEMORY_SAWCRIME))
 			pCriminal->Noto_Criminal();
 
-		if (!pCriminal->IsStatFlag(STATF_Criminal) || (pCriminal->Noto_IsEvil() && !g_Cfg.m_fGuardsOnMurderers))
+		if (!pCriminal->IsStatFlag(STATF_Criminal) && !(pCriminal->Noto_IsEvil() && g_Cfg.m_fGuardsOnMurderers))
 			continue;
 
 		CallGuards(pCriminal);
@@ -1263,6 +1263,7 @@ bool CChar::Fight_Attack( const CChar *pCharTarg, bool btoldByMaster )
 	}
 	else if ( m_pNPC && !CanSee(pCharTarg) )
 	{
+		Attacker_Delete(const_cast<CChar*>(pCharTarg), true, ATTACKER_CLEAR_DISTANCE);
 		Skill_Start(SKILL_NONE);
 		return false;
 	}

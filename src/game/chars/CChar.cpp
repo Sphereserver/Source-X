@@ -261,6 +261,7 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false )
 
 	m_timeLastRegen = m_timeCreate = CServerTime::GetCurrentTime();
 	m_timeLastHitsUpdate = m_timeLastRegen;
+	m_timeLastCallGuards = 0;
 
 	m_prev_Hue = HUE_DEFAULT;
 	m_prev_id = CREID_INVALID;

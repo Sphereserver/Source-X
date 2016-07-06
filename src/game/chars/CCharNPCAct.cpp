@@ -607,22 +607,22 @@ bool CChar::NPC_LookAtCharGuard( CChar * pChar, bool bFromTrigger )
 {
 	ADDTOCALLSTACK("CChar::NPC_LookAtCharGuard");
 	// Does the guard hate the target ?
-
 	//	do not waste time on invul+dead, non-criminal and jailed chars
-	if ( !pChar || pChar->IsStatFlag(STATF_INVUL|STATF_DEAD) || pChar->IsPriv(PRIV_JAILED) || !bFromTrigger )	//|| !pChar->Noto_IsCriminal()
+	if ( !pChar || (pChar->IsStatFlag(STATF_INVUL|STATF_DEAD) || pChar->IsPriv(PRIV_JAILED) && !bFromTrigger) || !(pChar->Noto_IsCriminal() || pChar->Noto_IsEvil()))
 		return false;
 
-	static uint const sm_szSpeakGuardJeer[] =
-	{
-		DEFMSG_NPC_GUARD_THREAT_1,
-		DEFMSG_NPC_GUARD_THREAT_2,
-		DEFMSG_NPC_GUARD_THREAT_3,
-		DEFMSG_NPC_GUARD_THREAT_4,
-		DEFMSG_NPC_GUARD_THREAT_5
-	};
 
 	if ( ! pChar->m_pArea->IsGuarded())
 	{
+		static uint const sm_szSpeakGuardJeer[] =
+		{
+			DEFMSG_NPC_GUARD_THREAT_1,
+			DEFMSG_NPC_GUARD_THREAT_2,
+			DEFMSG_NPC_GUARD_THREAT_3,
+			DEFMSG_NPC_GUARD_THREAT_4,
+			DEFMSG_NPC_GUARD_THREAT_5
+		};
+
 		// At least jeer at the criminal.
 		if ( Calc_GetRandVal(10))
 			return false;
@@ -710,7 +710,7 @@ bool CChar::NPC_LookAtCharMonster( CChar * pChar )
 bool CChar::NPC_LookAtCharHuman( CChar * pChar )
 {
 	ADDTOCALLSTACK("CChar::NPC_LookAtCharHuman");
-	if ( !m_pNPC || pChar->IsStatFlag(STATF_DEAD) )
+	if ( !m_pNPC || IsStatFlag(STATF_DEAD) || pChar->IsStatFlag(STATF_DEAD) )
 		return false;
 
 	if ( Noto_IsEvil())		// I am evil.
@@ -719,33 +719,35 @@ bool CChar::NPC_LookAtCharHuman( CChar * pChar )
 		return( NPC_LookAtCharMonster( pChar ));
 	}
 
-	if (( ! pChar->Noto_IsEvil() &&  g_Cfg.m_fGuardsOnMurderers) && (! pChar->IsStatFlag( STATF_Criminal ))) 	// not interesting.
+	if (( ! pChar->Noto_IsEvil() && g_Cfg.m_fGuardsOnMurderers) && (! pChar->IsStatFlag( STATF_Criminal ))) 	// not interesting.
 		return false;
 
 	// Yell for guard if we see someone evil.
-	if (NPC_CanSpeak() && m_pArea->IsGuarded() && !IsStatFlag(STATF_DEAD) && !Calc_GetRandVal(3))
+	if (m_pArea->IsGuarded())
 	{
-		if ( m_pNPC->m_Brain == NPCBRAIN_GUARD )
-			return( NPC_LookAtCharGuard( pChar ));
+		if (m_pNPC->m_Brain == NPCBRAIN_GUARD)
+			return NPC_LookAtCharGuard(pChar);
+		else if (NPC_CanSpeak() && !Calc_GetRandVal(3))
+		{
 
-		Speak( pChar->IsStatFlag( STATF_Criminal) ?
-			 g_Cfg.GetDefaultMsg( DEFMSG_NPC_GENERIC_SEECRIM ) :
-			g_Cfg.GetDefaultMsg( DEFMSG_NPC_GENERIC_SEEMONS ) );
+			Speak(pChar->IsStatFlag(STATF_Criminal) ?
+				g_Cfg.GetDefaultMsg(DEFMSG_NPC_GENERIC_SEECRIM) :
+				g_Cfg.GetDefaultMsg(DEFMSG_NPC_GENERIC_SEEMONS));
 
-		// Find a guard.
-		CallGuards( pChar );
-		if ( IsStatFlag( STATF_War ))
-			return false;
+			// Find a guard.
+			CallGuards(pChar);
+			if (IsStatFlag(STATF_War))
+				return false;
 
-		// run away like a coward.
-		m_Act_Targ = pChar->GetUID();
-		m_atFlee.m_iStepsMax = 20;	// how long should it take to get there.
-		m_atFlee.m_iStepsCurrent = 0;	// how long has it taken ?
-		Skill_Start( NPCACT_FLEE );
-		m_pNPC->m_Act_Motivation = 80;
-		return true;
+			// run away like a coward.
+			m_Act_Targ = pChar->GetUID();
+			m_atFlee.m_iStepsMax = 20;	// how long should it take to get there.
+			m_atFlee.m_iStepsCurrent = 0;	// how long has it taken ?
+			Skill_Start(NPCACT_FLEE);
+			m_pNPC->m_Act_Motivation = 80;
+			return true;
+		}
 	}
-
 	// Attack an evil creature ?
 
 	return false;
