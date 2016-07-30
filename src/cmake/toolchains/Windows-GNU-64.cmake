@@ -18,8 +18,8 @@ function (toolchain_exe_stuff)
 	SET (CXX_WARNING_OPTS	"-Wall -Wextra -Wno-unknown-pragmas -Wno-switch -Wno-invalid-offsetof")
 	SET (C_ARCH_OPTS	"-march=x86-64 -m64")
 	SET (CXX_ARCH_OPTS	"-march=x86-64 -m64")
-	SET (C_OPTS		"-std=c11   -pthread -fno-omit-frame-pointer -fexceptions -fnon-call-exceptions")
-	SET (CXX_OPTS		"-std=c++11 -pthread -fno-omit-frame-pointer -fexceptions -fnon-call-exceptions -mno-ms-bitfields")
+	SET (C_OPTS		"-std=c11   -pthread -fexceptions -fnon-call-exceptions")
+	SET (CXX_OPTS		"-std=c++11 -pthread -fexceptions -fnon-call-exceptions -mno-ms-bitfields")
 	 # -mno-ms-bitfields is needed to fix structure packing;
 	 # -mwindows: specify the subsystem, avoiding the opening of a console when launching the application.
 	SET (C_SPECIAL		"-pipe -mwindows -fno-expensive-optimizations")

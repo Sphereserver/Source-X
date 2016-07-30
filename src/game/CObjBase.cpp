@@ -700,7 +700,7 @@ bool CObjBase::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 
 	}
 
-	return( CScriptObj::r_GetRef(pszKey, pRef) );
+	return CScriptObj::r_GetRef(pszKey, pRef);
 }
 
 enum OBC_TYPE
@@ -744,15 +744,15 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 		// Even though we have not really specified it correctly !
 
 		// WORLD. ?
-		if ( g_World.r_WriteVal( pszKey, sVal, pSrc ))
+		if ( g_World.r_WriteVal( pszKey, sVal, pSrc ) )
 			return true;
 
 
 		// TYPEDEF. ?
-		if ( Base_GetDef()->r_WriteVal( pszKey, sVal, pSrc ))
+		if ( Base_GetDef()->r_WriteVal( pszKey, sVal, pSrc ) )
 			return true;
 
-		return(	CScriptObj::r_WriteVal( pszKey, sVal, pSrc ));
+		return CScriptObj::r_WriteVal( pszKey, sVal, pSrc );
 	}
 
 	bool	fZero	= false;
@@ -928,13 +928,9 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 					SKIP_SEPARATORS( pszKey );
 
 					if ( !strnicmp( pszKey, "LO", 2 ) )
-					{
 						sVal.Format( "%d", m_attackBase );
-					}
 					else if ( !strnicmp( pszKey, "HI", 2 ) )
-					{
 						sVal.Format( "%d", m_attackBase+m_attackRange );
-					}
 				}
 				else
 				{
@@ -943,8 +939,10 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			} break;
 		case OC_RANGE:
 			{
-				if ( RangeH() == 0 ) sVal.Format( "%d", RangeL() );
-				else sVal.Format( "%d,%d", RangeH(), RangeL() );
+				if ( RangeH() == 0 )
+					sVal.Format( "%d", RangeL() );
+				else
+					sVal.Format( "%d,%d", RangeH(), RangeL() );
 			}
 			break;
 		case OC_RANGEL:
@@ -958,7 +956,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			break;
 		case OC_MODMAXWEIGHT:
 			sVal.FormatVal(m_ModMaxWeight);
-			return(true);
+			return true;
 		case OC_CANSEE:
 		case OC_CANSEELOS:
 		case OC_CANSEELOSFLAG:
@@ -968,7 +966,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 				CChar *pChar = pSrc->GetChar();
 				int flags = 0;
 
-				pszKey += (( bCanSee ) ? ( 6 ) : (( bFlags  ) ? ( 13 ) : ( 9 )));
+				pszKey += ( bCanSee ? 6 : (bFlags ? 13 : 9) );
 				SKIP_SEPARATORS(pszKey);
 				GETNONWHITESPACE(pszKey);
 
@@ -1009,7 +1007,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			}
 			break;
 		case OC_COLOR:
-			sVal.FormatHex( GetHue());
+			sVal.FormatHex( GetHue() );
 			break;
 		case OC_COMPLEXITY:
 			{
@@ -1020,8 +1018,10 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 		case OC_CTAGCOUNT:
 			{
 				CChar * pChar = dynamic_cast<CChar*>(this);
-				if ( !pChar ) sVal.FormatVal( 0 );
-				else sVal.FormatSTVal( pChar->IsClient() ? (pChar->GetClient()->m_TagDefs.GetCount()) : 0 );
+				if ( !pChar )
+					sVal.FormatVal( 0 );
+				else
+					sVal.FormatSTVal( pChar->IsClient() ? (pChar->GetClient()->m_TagDefs.GetCount()) : 0 );
 			}
 			break;
 		case OC_TEXTF:
@@ -1114,7 +1114,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 				GETNONWHITESPACE( pszKey );
 				CObjBase *	pObj	= pSrc->GetChar();
 
-				CObjBase	* pThis	= this;
+				CObjBase * pThis	= this;
 				if ( !IsTopLevel() )
 					pThis	= dynamic_cast <CObjBase*>( GetTopLevelObj() );
 				if ( !pThis )
@@ -1390,9 +1390,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			break;
 		case OC_P:
 			if ( pszKey[1] == '.' )
-			{
-				return( GetUnkPoint().r_WriteVal( pszKey+2, sVal ));
-			}
+				return GetUnkPoint().r_WriteVal( pszKey+2, sVal );
 			sVal = GetUnkPoint().WriteUsed();
 			break;
 		case OC_TAG0:
@@ -1406,13 +1404,13 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 
 				CVarDefCont *	pVarKey	= m_TagDefs.GetKey( pszKey );
 				if ( !pVarKey )
-					sVal	= Base_GetDef()->m_TagDefs.GetKeyStr( pszKey, fZero );
+					sVal = Base_GetDef()->m_TagDefs.GetKeyStr( pszKey, fZero );
 				else
 					sVal = pVarKey->GetValStr();
 			}
 			return true;
 		case OC_TIMER:
-			sVal.FormatLLVal( GetTimerAdjusted());
+			sVal.FormatLLVal( GetTimerAdjusted() );
 			break;
 		case OC_TIMERD:
 			sVal.FormatLLVal( GetTimerDAdjusted() );
@@ -1435,15 +1433,15 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 		case OC_TOPOBJ:
 			if ( pszKey[6] == '.' )
 			{
-				return( CScriptObj::r_WriteVal( pszKey, sVal, pSrc ));
+				return CScriptObj::r_WriteVal( pszKey, sVal, pSrc );
 			}
 			sVal.FormatHex(GetTopLevelObj()->GetUID());
 			break;
 		case OC_UID:
 			if ( pszKey[3] == '.' )
-				return(	CScriptObj::r_WriteVal( pszKey, sVal, pSrc ) );
+				return	CScriptObj::r_WriteVal( pszKey, sVal, pSrc );
 		case OC_SERIAL:
-			sVal.FormatHex( GetUID());
+			sVal.FormatHex( GetUID() );
 			break;
 		case OC_SPAWNITEM:
 			sVal.FormatHex(m_uidSpawnItem);
@@ -1469,19 +1467,19 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			if ( !this->IsItem() )
 				return false;
 			CItem * pItem = static_cast<CItem*>(this);
-			sVal.FormatVal(pItem->GetSpeed());
+			sVal.FormatVal( pItem->GetSpeed() );
 		}	break;
 		case OC_TIMESTAMP:
-			sVal.FormatLLVal(GetTimeStamp().GetTimeRaw());
+			sVal.FormatLLVal( GetTimeStamp().GetTimeRaw() );
 			break;
 		case OC_VERSION:
 			sVal = SPHERE_VERSION;
 			break;
 		case OC_WEIGHT:
-			sVal.FormatVal( GetWeight());
+			sVal.FormatVal( GetWeight() );
 			break;
 		case OC_Z:
-			sVal.FormatVal( GetUnkZ());
+			sVal.FormatVal( GetUnkZ() );
 			break;
 		case OC_TAGAT:
 			{
@@ -1596,7 +1594,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 	int index = FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( index < 0 )
 	{
-		return( CScriptObj::r_LoadVal(s));
+		return CScriptObj::r_LoadVal(s);
 	}
 
 	switch ( index )

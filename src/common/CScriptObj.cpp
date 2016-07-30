@@ -1521,7 +1521,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 		case SSV_SHOW:
 			{
 				CSString sVal;
-				if ( ! r_WriteVal( s.GetArgStr(), sVal, pSrc ))
+				if ( ! r_WriteVal( s.GetArgStr(), sVal, pSrc ) )
 					return false;
 				tchar * pszMsg = Str_GetTemp();
 				sprintf(pszMsg, "'%s' for '%s' is '%s'\n", static_cast<lpctstr>(s.GetArgStr()), GetName(), static_cast<lpctstr>(sVal));
@@ -1543,9 +1543,9 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 bool CScriptObj::r_Load( CScript & s )
 {
 	ADDTOCALLSTACK("CScriptObj::r_Load");
-	while ( s.ReadKeyParse())
+	while ( s.ReadKeyParse() )
 	{
-		if ( s.IsKeyHead( "ON", 2 ))	// trigger scripting marks the end
+		if ( s.IsKeyHead( "ON", 2 ) )	// trigger scripting marks the end
 			break;
 		r_LoadVal(s);
 	}

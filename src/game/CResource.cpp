@@ -2421,7 +2421,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 			return false;
 		}
 
-		rid.SetPrivateUID( (uint)(pVarNum->GetValNum()) );
+		rid.SetPrivateUID( (uint)pVarNum->GetValNum() );
 		restype	= rid.GetResType();
 
 		CResourceDef *	pRes = NULL;
@@ -3226,7 +3226,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 	switch ( restype )
 	{
 	case RES_UNKNOWN:
-		return( ridinvalid);
+		return ridinvalid;
 	case RES_ADVANCE:
 	case RES_BLOCKIP:
 	case RES_COMMENT:
@@ -3246,7 +3246,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 	case RES_WORLDLISTS:
 		// Single instance stuff. (fully read in)
 		// Ignore any resource name.
-		return( RESOURCE_ID( restype ));
+		return RESOURCE_ID( restype );
 	case RES_FUNCTION:		// Define a new command verb script that applies to a char.
 	case RES_ACCOUNT:
 	case RES_GMPAGE:
@@ -3255,9 +3255,9 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 		// These are multiple instance but name is not a RESOURCE_ID
 		if ( pszName[0] == '\0' )
 			return ridinvalid;	// invalid
-		return( RESOURCE_ID( restype ));
+		return RESOURCE_ID( restype );
 	// Extra args are allowed.
-	case RES_BOOK:	// BOOK BookName page
+	case RES_BOOK:		// BOOK BookName page
 	case RES_DIALOG:	// DIALOG GumpName ./TEXT/BUTTON
 	case RES_REGIONTYPE:
 		{
@@ -3270,14 +3270,12 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 			Str_Parse( pArg1, &pArg2 );
 			if ( !strnicmp( pArg2, "TEXT", 4 ) )
 				iPage = RES_DIALOG_TEXT;
-			else if ( !strnicmp( pArg2, "BUTTON",6 ) )
+			else if ( !strnicmp( pArg2, "BUTTON", 6 ) )
 				iPage = RES_DIALOG_BUTTON;
-			else
+			else	// for a REGIONTYPE block, pArg2 is the landtile type associated with the REGIONTYPE
 				iPage = RES_GET_INDEX( Exp_GetVal(pArg2) );
-			if ( iPage > 255 )
-			{
-				DEBUG_ERR(( "Bad resource index page %d\n", iPage ));
-			}
+			if ( iPage > RES_PAGE_MASK )
+				DEBUG_ERR(( "Bad resource index page %d for Resource named %s\n", iPage, pszName ));
 		}
 		break;
 	case RES_NEWBIE:	// MALE_DEFAULT, FEMALE_DEFAULT, Skill
@@ -3297,26 +3295,26 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 				iPage = RACETYPE_GARGOYLE;
 
 			if ( ! strcmpi( pszName, "MALE_DEFAULT" ))
-				return ( RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_MALE_DEFAULT, iPage ));
+				return RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_MALE_DEFAULT, iPage );
 			else if ( ! strcmpi( pszName, "FEMALE_DEFAULT" ))
-				return ( RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_FEMALE_DEFAULT, iPage ));
+				return RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_FEMALE_DEFAULT, iPage );
 
 			if ( ! strcmpi( pszName, "PROFESSION_ADVANCED" ))
-				return ( RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_PROF_ADVANCED, iPage ));
+				return RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_PROF_ADVANCED, iPage );
 			else if ( ! strcmpi( pszName, "PROFESSION_WARRIOR" ))
-				return ( RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_PROF_WARRIOR, iPage ));
+				return RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_PROF_WARRIOR, iPage );
 			else if ( ! strcmpi( pszName, "PROFESSION_MAGE" ))
-				return ( RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_PROF_MAGE, iPage ));
+				return RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_PROF_MAGE, iPage );
 			else if ( ! strcmpi( pszName, "PROFESSION_BLACKSMITH" ))
-				return ( RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_PROF_BLACKSMITH, iPage ));
+				return RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_PROF_BLACKSMITH, iPage );
 			else if ( ! strcmpi( pszName, "PROFESSION_NECROMANCER" ))
-				return ( RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_PROF_NECROMANCER, iPage ));
+				return RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_PROF_NECROMANCER, iPage );
 			else if ( ! strcmpi( pszName, "PROFESSION_PALADIN" ))
-				return ( RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_PROF_PALADIN, iPage ));
+				return RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_PROF_PALADIN, iPage );
 			else if ( ! strcmpi( pszName, "PROFESSION_SAMURAI" ))
-				return ( RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_PROF_SAMURAI, iPage ));
+				return RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_PROF_SAMURAI, iPage );
 			else if ( ! strcmpi( pszName, "PROFESSION_NINJA" ))
-				return ( RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_PROF_NINJA, iPage ));
+				return RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_PROF_NINJA, iPage );
 		}
 		break;
 	case RES_AREA:
@@ -3341,7 +3339,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 		if ( pszName[0] == '\0' )	// absense of resourceid = index 0
 		{
 			// This might be ok.
-			return( RESOURCE_ID( restype, 0, iPage ) );
+			return RESOURCE_ID( restype, 0, iPage );
 		}
 		if ( IsDigit(pszName[0]) )	// Its just an index.
 		{
@@ -3350,7 +3348,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 			switch ( restype )
 			{
 			case RES_BOOK:			// A book or a page from a book.
-			case RES_DIALOG:			// A scriptable gump dialog: text or handler block.
+			case RES_DIALOG:		// A scriptable gump dialog: text or handler block.
 			case RES_REGIONTYPE:	// Triggers etc. that can be assinged to a RES_AREA
 				rid = RESOURCE_ID( restype, index, iPage );
 				break;
@@ -3361,7 +3359,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 			case RES_NAMES:			// A block of possible names for a NPC type. (read as needed)
 			case RES_SCROLL:		// SCROLL_GUEST=message scroll sent to player at guest login. SCROLL_MOTD: SCROLL_NEWBIE
 			case RES_TIP:			// Tips (similar to RES_SCROLL) that can come up at startup.
-			case RES_TYPEDEF:			// Define a trigger block for a RES_WORLDITEM m_type.
+			case RES_TYPEDEF:		// Define a trigger block for a RES_WORLDITEM m_type.
 			case RES_CHARDEF:		// Define a char type.
 			case RES_TEMPLATE:		// Define lists of items. (for filling loot etc)
 				break;
@@ -3405,14 +3403,14 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 					{
 						const CVarDefContStr * pVarStr = dynamic_cast <CVarDefContStr*>( pVarBase );
 						if ( pVarStr != NULL )
-							return( ResourceGetNewID(restype, pVarStr->GetValStr(), ppVarNum, fNewStyleDef) );
+							return ResourceGetNewID(restype, pVarStr->GetValStr(), ppVarNum, fNewStyleDef);
 					}
 					default:
 						DEBUG_ERR(( "Re-Using name '%s' to define block\n", static_cast<lpctstr>(pszName) ));
 						return ridinvalid;
 				}
 			}
-			rid.SetPrivateUID( (uint)(pVarNum->GetValNum()));
+			rid.SetPrivateUID( (uint)pVarNum->GetValNum() );
 			if ( restype != rid.GetResType())
 			{
 				switch ( restype )
@@ -3430,24 +3428,20 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 						return ridinvalid;
 				}
 			}
-			else if ( fNewStyleDef && (dword)(pVarNum->GetValNum()) != rid.GetPrivateUID() )
+			else if ( fNewStyleDef && (dword)pVarNum->GetValNum() != rid.GetPrivateUID() )
 			{
 				DEBUG_ERR(( "WARNING: region redefines DEFNAME '%s' for another region!\n", pszName ));
 			}
-			else if ( iPage == rid.GetResPage())	// Books and dialogs have pages.
+			else if ( iPage == rid.GetResPage() )	// Books and dialogs have pages.
 			{
 				// We are redefining an item we have already read in ?
 				// Why do this unless it's a Resync ?
 				if ( g_Serv.m_iModeCode != SERVMODE_ResyncLoad )
 				{
-					if ( g_Cfg.m_wDebugFlags & DEBUGF_SCRIPTS )
-					{
+					//if ( g_Cfg.m_wDebugFlags & DEBUGF_SCRIPTS )
 						g_pLog->EventWarn("Redef resource '%s'\n", static_cast<lpctstr>(pszName));
-					}
-					else
-					{
-						DEBUG_WARN(( "Redef resource '%s'\n", static_cast<lpctstr>(pszName) ));
-					}
+					//else
+					//	DEBUG_WARN(( "Redef resource '%s'\n", static_cast<lpctstr>(pszName) ));
 				}
 			}
 			rid = RESOURCE_ID( restype, rid.GetResIndex(), iPage );
@@ -3548,10 +3542,10 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 	if ( iHashRange )
 	{
 		// find a new FREE entry starting here
-		rid.SetPrivateUID( rid.GetPrivateUID() + Calc_GetRandVal( iHashRange ));
+		rid.SetPrivateUID( rid.GetPrivateUID() + Calc_GetRandVal( iHashRange ) );
 		for (;;)
 		{
-			if ( m_ResHash.FindKey(rid) == m_ResHash.BadIndex())
+			if ( m_ResHash.FindKey(rid) == m_ResHash.BadIndex() )
 				break;
 			rid.SetPrivateUID( rid.GetPrivateUID()+1 );
 		}
@@ -3588,17 +3582,17 @@ CResourceDef * CResource::ResourceGetDef( RESOURCE_ID_BASE rid ) const
 	{
 		case RES_WEBPAGE:
 			index = m_WebPages.FindKey( rid );
-			if ( ! m_WebPages.IsValidIndex(index))
+			if ( ! m_WebPages.IsValidIndex(index) )
 				return NULL;
 			return m_WebPages.GetAt( index );
 
 		case RES_SKILL:
-			if ( ! m_SkillIndexDefs.IsValidIndex(index))
+			if ( ! m_SkillIndexDefs.IsValidIndex(index) )
 				return NULL;
 			return m_SkillIndexDefs[ index ];
 
 		case RES_SPELL:
-			if ( ! m_SpellDefs.IsValidIndex(index))
+			if ( ! m_SpellDefs.IsValidIndex(index) )
 				return NULL;
 			return m_SpellDefs[ index ];
 
@@ -3640,7 +3634,7 @@ void CResource::OnTick( bool fNow )
 {
 	ADDTOCALLSTACK("CResource::OnTick");
 	// Give a tick to the less critical stuff.
-	if ( !fNow && ( g_Serv.IsLoading() || ( m_timePeriodic > CServerTime::GetCurrentTime() )))
+	if ( !fNow && ( g_Serv.IsLoading() || ( m_timePeriodic > CServerTime::GetCurrentTime() ) ) )
 		return;
 
 	if ( this->m_fUseHTTP )

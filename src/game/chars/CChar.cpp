@@ -1312,13 +1312,13 @@ lpctstr CChar::GetName( bool fAllowAlt ) const
 		if ( pAltName && *pAltName )
 			return pAltName;
 	}
-	if ( ! IsIndividualName())			// allow some creatures to go unnamed.
+	if ( ! IsIndividualName() )			// allow some creatures to go unnamed.
 	{
 		CCharBase * pCharDef = Char_GetDef();
 		ASSERT(pCharDef);
-		return( pCharDef->GetTypeName());	// Just use it's type name instead.
+		return pCharDef->GetTypeName();	// Just use it's type name instead.
 	}
-	return( CObjBase::GetName());
+	return CObjBase::GetName();
 }
 
 // Create a brand new Player char. Called directly from the packet.

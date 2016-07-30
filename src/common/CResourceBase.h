@@ -64,7 +64,7 @@ enum RES_TYPE	// all the script resource blocks we know how to deal with !
 	RES_SPEECH,			// A speech block with ON=*blah* in it.
 	RES_SPELL,			// Define a magic spell. (0-64 are reserved)
 	RES_SPHERE,			// Main Server INI block
-	RES_SPHERECRYPT, // Encryption keys
+	RES_SPHERECRYPT,	// Encryption keys
 	RES_STARTS,			// (SI) List of starting locations for newbies.
 	RES_STAT,			// Stats elements like KARMA,STR,DEX,FOOD,FAME,CRIMINAL etc. Used for resource and desire scripts.
 	RES_TELEPORTERS,	// (SL) Where are the teleporters in the world ? dungeon transports etc.
@@ -100,14 +100,20 @@ enum RES_TYPE	// all the script resource blocks we know how to deal with !
 
 struct RESOURCE_ID_BASE : public CUIDBase
 {
-#define RES_TYPE_SHIFT	25	// leave 6 bits = 64 for RES_TYPE
-#define RES_TYPE_MASK	63
-#define RES_PAGE_SHIFT	18	// leave 7 bits = 128 pages of space.
-#define RES_PAGE_MASK	127
-#define RES_INDEX_SHIFT	0	// leave 18 bits = 262144 entries.
-#define RES_INDEX_MASK	0x3FFFF
-#define RES_GET_TYPE(dw)	( ( dw >> RES_TYPE_SHIFT) & RES_TYPE_MASK )
-#define RES_GET_INDEX(dw)	((dw)&RES_INDEX_MASK)
+// What is a Resource? Look at the comment made to the RES_TYPE enum.
+// RES_TYPE: Resource Type (look at the RES_TYPE enum entries).
+// RES_PAGE: Resource Page (used for dialog or book pages, but also to store an additional parameter
+//		when using other Resource Types, like REGIONTYPE).
+// RES_INDEX: Resource Index
+#define RES_TYPE_SHIFT	25		// leave 6 bits = 64 for RES_TYPE;
+#define RES_TYPE_MASK	63		//  63 = 0x3F = 6 bits.
+#define RES_PAGE_SHIFT	18		// leave 8 bits = 255 pages of space;
+#define RES_PAGE_MASK	255		//  255 = 0xFF = 8 bits.
+#define RES_INDEX_SHIFT	0		// leave 18 bits = 262144 entries;
+#define RES_INDEX_MASK	0x3FFFF	//  0x3FFFF = 18 bits.
+// Size: 6 + 8 + 18 = 32 --> it's a 32 bits number.
+#define RES_GET_TYPE(dw)	( ( dw >> RES_TYPE_SHIFT ) & RES_TYPE_MASK )
+#define RES_GET_INDEX(dw)	( dw & RES_INDEX_MASK )
 
 public:
 	RES_TYPE GetResType() const

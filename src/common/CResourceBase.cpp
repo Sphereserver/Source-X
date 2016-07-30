@@ -191,10 +191,10 @@ void CResourceBase::LoadResourcesOpen( CScript * pScript )
 	// Load an already open resource file.
 
 	ASSERT(pScript);
-	ASSERT( pScript->IsFileOpen());
+	ASSERT( pScript->IsFileOpen() );
 
 	int iSections = 0;
-	while ( pScript->FindNextSection())
+	while ( pScript->FindNextSection() )
 	{
 		LoadResourceSection( pScript );
 		iSections ++;

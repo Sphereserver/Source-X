@@ -1375,7 +1375,7 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, size_t i
 
 	if ( iGold )
 	{
-		char	*z = Str_GetTemp();
+		char *z = Str_GetTemp();
 		sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_SELL_TY),
 			iGold, (iGold==1) ? "" : g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_CA));
 		pVendor->Speak(z);

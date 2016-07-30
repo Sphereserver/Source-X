@@ -1301,13 +1301,13 @@ bool CChar::NPC_Act_Talk()
 	if ( Skill_GetActive() == NPCACT_TALK_FOLLOW && iDist > 3 )
 	{
 		// try to move closer.
-		if ( ! NPC_Act_Follow( false, 4, false ))
+		if ( ! NPC_Act_Follow( false, 4, false ) )
 			return false;
 	}
 
 	if ( m_atTalk.m_WaitCount <= 1 )
 	{
-		if ( NPC_CanSpeak())
+		if ( NPC_CanSpeak() )
 		{
 			static lpctstr const sm_szText[] =
 			{
@@ -1315,7 +1315,7 @@ bool CChar::NPC_Act_Talk()
 				g_Cfg.GetDefaultMsg( DEFMSG_NPC_GENERIC_GONE_2 )
 			};
 			tchar *pszMsg = Str_GetTemp();
-			sprintf(pszMsg, sm_szText[ Calc_GetRandVal( CountOf( sm_szText )) ], pChar->GetName());
+			sprintf(pszMsg, sm_szText[ Calc_GetRandVal( CountOf(sm_szText) - 1 ) ], pChar->GetName() );
 			Speak(pszMsg);
 		}
 		return false;

@@ -204,6 +204,7 @@ void ReportGarbageCollection(CObjBase * pObj, int iResultCode)
 		(dword)pObj->GetUID(), pObj->Base_GetDef()->GetResourceName(), pObj->GetName(), iResultCode, GetReasonForGarbageCode(iResultCode)));
 }
 
+
 //////////////////////////////////////////////////////////////////
 // -CTimedFunctionHandler
 
@@ -247,25 +248,19 @@ void CTimedFunctionHandler::OnTick()
 					CTextConsole* src;
 
 					if ( topobj->IsChar() )
-					{
 						src = dynamic_cast <CTextConsole*> ( topobj );
-					}
 					else
-					{
 						src = &g_Serv;
-					}
 
 					m_tFrecycled.push_back( tf );
 					//vector::erase crashes if the iterator is pointing at the only thing left in the list. So, we check if size is 1 and do pop_back instead if that's the case. -SL
-					if ( m_timedFunctions[tick].size()==1 )
+					if (m_timedFunctions[tick].size() == 1)
 					{
 						m_timedFunctions[tick].pop_back();
 						theEnd = 1;
 					}
 					else
-					{
 						it=m_timedFunctions[tick].erase( it );
-					}
 
 					obj->r_Verb( s, src );
 				}
@@ -285,9 +280,7 @@ void CTimedFunctionHandler::OnTick()
 				}
 
 				if (theEnd)
-				{
 					break;
-				}
 			}
 			else
 			{
@@ -325,14 +318,10 @@ void CTimedFunctionHandler::Erase( CUID uid )
 					break;
 				}
 				else
-				{
 					it = m_timedFunctions[tick].erase( it );
-				}
 			}
 			else
-			{
 				++it;
-			}
 		}
 	}
 }
@@ -346,7 +335,7 @@ int CTimedFunctionHandler::IsTimer( CUID uid, lpctstr funcname )
 		for ( it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); )
 		{
 			TimedFunction* tf = *it;
-			if (( tf->uid == uid) && (!strcmpi( tf->funcname, funcname)))
+			if ( (tf->uid == uid) && (!strcmpi( tf->funcname, funcname)) )
 				return tf->elapsed;
 
 			++it;
@@ -374,14 +363,10 @@ void CTimedFunctionHandler::Stop( CUID uid, lpctstr funcname )
 					break;
 				}
 				else
-				{
 					it = m_timedFunctions[tick].erase( it );
-				}
 			}
 			else
-			{
 				++it;
-			}
 		}
 	}
 }
@@ -448,13 +433,9 @@ void CTimedFunctionHandler::Add( CUID uid, int numSeconds, lpctstr funcname )
 	tf->elapsed = numSeconds;
 	strcpy( tf->funcname, funcname );
 	if ( m_isBeingProcessed )
-	{
 		m_tFqueuedToBeAdded.push_back( tf );
-	}
 	else
-	{
 		m_timedFunctions[tick].push_back( tf );
-	}
 }
 
 int CTimedFunctionHandler::Load( const char *pszName, bool fQuoted, const char *pszVal)
@@ -546,6 +527,7 @@ void CTimedFunctionHandler::r_Write( CScript & s )
 	}
 }
 
+
 //////////////////////////////////////////////////////////////////
 // -CWorldSearch
 
@@ -614,7 +596,7 @@ CItem * CWorldSearch::GetItem()
 				if ( m_pObj != NULL )
 					goto jumpover;
 			}
-			if ( GetNextSector())
+			if ( GetNextSector() )
 				continue;
 			return NULL;
 		}
@@ -625,26 +607,26 @@ jumpover:
 		{
 			if ( m_fAllShow )
 			{
-				if ( m_pt.GetDistSightBase( m_pObj->GetTopPoint()) <= m_iDist )
-					return( static_cast <CItem *> ( m_pObj ));
+				if ( m_pt.GetDistSightBase( m_pObj->GetTopPoint() ) <= m_iDist )
+					return static_cast <CItem *> ( m_pObj );
 			}
 			else
 			{
-				if ( m_pt.GetDistSight( m_pObj->GetTopPoint()) <= m_iDist )
-					return( static_cast <CItem *> ( m_pObj ));
+				if ( m_pt.GetDistSight( m_pObj->GetTopPoint() ) <= m_iDist )
+					return static_cast <CItem *> ( m_pObj );
 			}
 		}
 		else
 		{
 			if ( m_fAllShow )
 			{
-				if ( m_pt.GetDistBase( m_pObj->GetTopPoint()) <= m_iDist )
-					return( static_cast <CItem *> ( m_pObj ));
+				if ( m_pt.GetDistBase( m_pObj->GetTopPoint() ) <= m_iDist )
+					return static_cast <CItem *> ( m_pObj );
 			}
 			else
 			{
 				if ( m_pt.GetDist( m_pObj->GetTopPoint()) <= m_iDist )
-					return( static_cast <CItem *> ( m_pObj ));
+					return static_cast <CItem *> ( m_pObj );
 			}
 		}
 	}
@@ -679,9 +661,8 @@ CChar * CWorldSearch::GetChar()
 			m_pObj = static_cast <CObjBase*> ( m_pSector->m_Chars_Active.GetHead());
 		}
 		else
-		{
 			m_pObj = m_pObjNext;
-		}
+
 		if ( m_pObj == NULL )
 		{
 			if ( ! m_fInertToggle && m_fAllShow )
@@ -691,7 +672,7 @@ CChar * CWorldSearch::GetChar()
 				if ( m_pObj != NULL )
 					goto jumpover;
 			}
-			if ( GetNextSector())
+			if ( GetNextSector() )
 				continue;
 			return NULL;
 		}
@@ -703,12 +684,12 @@ jumpover:
 			if ( m_fAllShow )
 			{
 				if ( m_pt.GetDistSightBase( m_pObj->GetTopPoint()) <= m_iDist )
-					return( static_cast <CChar *> ( m_pObj ));
+					return static_cast <CChar *> ( m_pObj );
 			}
 			else
 			{
 				if ( m_pt.GetDistSight( m_pObj->GetTopPoint()) <= m_iDist )
-					return( static_cast <CChar *> ( m_pObj ));
+					return static_cast <CChar *> ( m_pObj );
 			}
 		}
 		else
@@ -716,16 +697,17 @@ jumpover:
 			if ( m_fAllShow )
 			{
 				if ( m_pt.GetDistBase( m_pObj->GetTopPoint()) <= m_iDist )
-					return( static_cast <CChar *> ( m_pObj ));
+					return static_cast <CChar *> ( m_pObj );
 			}
 			else
 			{
 				if ( m_pt.GetDist( m_pObj->GetTopPoint()) <= m_iDist )
-					return( static_cast <CChar *> ( m_pObj ));
+					return static_cast <CChar *> ( m_pObj );
 			}
 		}
 	}
 }
+
 
 //////////////////////////////////////////////////////////////////
 // -CWorldThread
@@ -950,7 +932,7 @@ int CWorldThread::FixObj( CObjBase * pObj, dword dwUID )
 		g_Log.CatchEvent( NULL, "UID=0%x, Asserted cleanup", dwUID );
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 	}
-	return( iResultCode );
+	return iResultCode;
 }
 
 void CWorldThread::GarbageCollection_New()
@@ -1049,7 +1031,7 @@ void CWorldThread::GarbageCollection_UIDs()
 
 		for ( dword d = 1; d < GetUIDCount(); d++ )
 		{
-			CObjBase	*pObj = m_UIDs[d];
+			CObjBase *pObj = m_UIDs[d];
 
 			if ( !pObj )
 			{
@@ -1262,9 +1244,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 	if ( m_iSaveStage == -1 )
 	{
 		if ( !g_Cfg.m_fSaveGarbageCollect )
-		{
 			GarbageCollection_New();
-		}
 	}
 	else if ( m_iSaveStage < (int)(m_SectorsQty) )
 	{
@@ -1417,8 +1397,8 @@ bool CWorld::SaveForce() // Save world state
 #endif
 
 	g_Serv.SetServerMode(SERVMODE_Saving);	// Forced save freezes the system.
-	bool	bSave = true;
-	bool	bSuccess = true;
+	bool bSave = true;
+	bool bSuccess = true;
 
 	static lpctstr const msgs[] =
 	{
@@ -1479,26 +1459,20 @@ bool CWorld::SaveTry( bool fForceImmediate ) // Save world state
 {
 	ADDTOCALLSTACK("CWorld::SaveTry");
 	EXC_TRY("SaveTry");
-	if ( m_FileWorld.IsFileOpen())
+	if ( m_FileWorld.IsFileOpen() )
 	{
 		// Save is already active !
-		ASSERT( IsSaving());
+		ASSERT( IsSaving() ) ;
 		if ( fForceImmediate )	// finish it now !
-		{
 			return SaveForce();
-		}
 		else if ( g_Cfg.m_iSaveBackgroundTime )
-		{
 			return SaveStage();
-		}
 		return false;
 	}
 
 	// Do the write async from here in the future.
 	if ( g_Cfg.m_fSaveGarbageCollect )
-	{
 		GarbageCollection();
-	}
 
 	llong llTicks;
 	TIME_PROFILE_START;
@@ -1530,14 +1504,12 @@ bool CWorld::SaveTry( bool fForceImmediate ) // Save world state
 	r_Write(m_FileMultis);
 
 	if ( fForceImmediate || ! g_Cfg.m_iSaveBackgroundTime )	// Save now !
-	{
 		return SaveForce();
-	}
 	return true;
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("immidiate '%d'\n", fForceImmediate? 1 : 0);
+	g_Log.EventDebug("Immediate '%d'\n", fForceImmediate? 1 : 0);
 	EXC_DEBUG_END;
 	return false;
 }
@@ -1545,7 +1517,7 @@ bool CWorld::SaveTry( bool fForceImmediate ) // Save world state
 bool CWorld::Save( bool fForceImmediate ) // Save world state
 {
 	ADDTOCALLSTACK("CWorld::Save");
-	bool	bSaved = false;
+	bool bSaved = false;
 	try
 	{
 		CScriptTriggerArgs Args(fForceImmediate, m_iSaveStage);
@@ -1577,7 +1549,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 #endif
 
 #ifdef _DEBUG
-			g_Log.EventDebug("Done flushing clients output data\n");
+			g_Log.EventDebug("Done flushing clients output data.\n");
 #endif
 		}
 
@@ -1588,7 +1560,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 	{
 		g_Log.CatchEvent( &e, "Save FAILED." );
 		Broadcast("Save FAILED. " SPHERE_TITLE " is UNSTABLE!");
-		m_FileData.Close();	// close if not already closed.
+		m_FileData.Close();		// close if not already closed.
 		m_FileWorld.Close();	// close if not already closed.
 		m_FilePlayers.Close();	// close if not already closed.
 		m_FileMultis.Close();	// close if not already closed.
@@ -1598,7 +1570,7 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 	{
 		g_Log.CatchEvent( NULL, "Save FAILED" );
 		Broadcast("Save FAILED. " SPHERE_TITLE " is UNSTABLE!");
-		m_FileData.Close();	// close if not already closed.
+		m_FileData.Close();		// close if not already closed.
 		m_FileWorld.Close();	// close if not already closed.
 		m_FilePlayers.Close();	// close if not already closed.
 		m_FileMultis.Close();	// close if not already closed.
@@ -1711,12 +1683,10 @@ bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from scr
 	// Read the header stuff first.
 	CScriptObj::r_Load( s );
 
-	while ( s.FindNextSection())
+	while ( s.FindNextSection() )
 	{
 		if (! ( ++iLoadStage & 0x1FF ))	// don't update too often
-		{
 			g_Serv.PrintPercent( s.GetPosition(), stLoadSize );
-		}
 
 		try
 		{
@@ -1734,7 +1704,7 @@ bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from scr
 		}
 	}
 
-	if ( s.IsSectionType( "EOF" ))
+	if ( s.IsSectionType( "EOF" ) )
 	{
 		// The only valid way to end.
 		s.Close();
@@ -1806,30 +1776,22 @@ bool CWorld::LoadWorld() // Load world from script
 		CSString sArchive;
 		GetBackupName( sArchive, g_Cfg.m_sWorldBaseDir, 'w', m_iSaveCountID );
 		if ( ! sArchive.CompareNoCase( sWorldName ))	// ! same file ? break endless loop.
-		{
 			break;
-		}
 		sWorldName = sArchive;
 
 		GetBackupName( sArchive, g_Cfg.m_sWorldBaseDir, 'c', m_iSaveCountID );
 		if ( ! sArchive.CompareNoCase( sCharsName ))	// ! same file ? break endless loop.
-		{
 			break;
-		}
 		sCharsName = sArchive;
 
 		GetBackupName( sArchive, g_Cfg.m_sWorldBaseDir, 'm', m_iSaveCountID );
 		if ( ! sArchive.CompareNoCase( sMultisName ))
-		{
 			break;
-		}
 		sMultisName = sArchive;
 
 		GetBackupName( sArchive, g_Cfg.m_sWorldBaseDir, 'd', m_iSaveCountID );
 		if ( ! sArchive.CompareNoCase( sDataName ))	// ! same file ? break endless loop.
-		{
 			break;
-		}
 		sDataName = sArchive;
 	}
 
@@ -1912,14 +1874,14 @@ bool CWorld::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	ADDTOCALLSTACK("CWorld::r_GetRef");
 	if ( ! strnicmp( pszKey, "LASTNEW", 7 ))
 	{
-		if ( ! strnicmp( pszKey+7, "ITEM", 4 ))
+		if ( ! strnicmp( pszKey+7, "ITEM", 4 ) )
 		{
 			pszKey += 11;
 			SKIP_SEPARATORS(pszKey);
 			pRef = m_uidLastNewItem.ItemFind();
 			return true;
 		}
-		if ( ! strnicmp( pszKey+7, "CHAR", 4 ))
+		else if ( ! strnicmp( pszKey+7, "CHAR", 4 ) )
 		{
 			pszKey += 11;
 			SKIP_SEPARATORS(pszKey);
@@ -2434,7 +2396,7 @@ CServerTime CWorld::GetNextNewMoon( bool bMoonIndex ) const
 	// Convert to TICK_PER_SEC ticks
 	CServerTime time;
 	time.InitTime( iNewStart * g_Cfg.m_iGameMinuteLength );
-	return(time);
+	return time;
 }
 
 uint CWorld::GetMoonPhase (bool bMoonIndex) const
@@ -2461,6 +2423,7 @@ uint CWorld::GetMoonPhase (bool bMoonIndex) const
 
 		return MulDivLL( dwCurrentTime % FELUCCA_SYNODIC_PERIOD, 8, FELUCCA_SYNODIC_PERIOD );
 }
+
 void CWorld::OnTick()
 {
 	ADDTOCALLSTACK_INTENSIVE("CWorld::OnTick");

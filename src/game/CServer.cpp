@@ -1419,7 +1419,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			} break;
 
 		case SV_SHUTDOWN: // "SHUTDOWN"
-			Shutdown(( s.HasArgs()) ? s.GetArgVal() : 15 );
+			Shutdown( s.HasArgs() ? s.GetArgVal() : 15 );
 			break;
 
 		case SV_UNBLOCKIP:	// "UNBLOCKIP"
@@ -1436,17 +1436,17 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			break;
 
 		case SV_VARLIST:
-			if ( ! strcmpi( s.GetArgStr(), "log" ))
+			if ( ! strcmpi( s.GetArgStr(), "log" ) )
 				pSrc = &g_Serv;
 			g_Exp.m_VarGlobals.DumpKeys(pSrc, "VAR.");
 			break;
 		case SV_PRINTLISTS:
-			if ( ! strcmpi( s.GetArgStr(), "log" ))
+			if ( ! strcmpi( s.GetArgStr(), "log" ) )
 				pSrc = &g_Serv;
 			g_Exp.m_ListGlobals.DumpKeys(pSrc, "LIST.");
 			break;
 		case SV_CLEARLISTS:
-			g_Exp.m_ListGlobals.ClearKeys(s.GetArgStr());
+			g_Exp.m_ListGlobals.ClearKeys( s.GetArgStr()) ;
 			break;
 		default:
 			return CScriptObj::r_Verb(s, pSrc);
