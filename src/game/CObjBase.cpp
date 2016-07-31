@@ -686,7 +686,9 @@ bool CObjBase::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 				pRef = GetTopLevelObj()->GetTopSector();
 				return true;
 			case OBR_SPAWNITEM:
-				pRef = (m_uidSpawnItem != static_cast<CUID>(UID_UNUSED)) ? m_uidSpawnItem.ItemFind() : NULL;
+				if (m_uidSpawnItem != static_cast<CUID>(UID_UNUSED) && pszKey[-1] != '.')
+					break;
+				pRef = m_uidSpawnItem.ItemFind();
 				return true;
 			case OBR_TOPOBJ:
 				if ( pszKey[-1] != '.' )	// only used as a ref !
@@ -1444,6 +1446,10 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			sVal.FormatHex( GetUID() );
 			break;
 		case OC_SPAWNITEM:
+			if (pszKey[9] == '.')
+			{
+				return CScriptObj::r_WriteVal(pszKey, sVal, pSrc);
+			}
 			sVal.FormatHex(m_uidSpawnItem);
 			break;
 		case OC_SEXTANTP:
