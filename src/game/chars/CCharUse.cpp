@@ -64,7 +64,7 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 	for ( size_t i = 0; i < pCorpseDef->m_BaseResources.GetCount(); i++ )
 	{
 		llong iQty = pCorpseDef->m_BaseResources[i].GetResQty();
-		RESOURCE_ID rid = pCorpseDef->m_BaseResources[i].GetResourceID();
+		CResourceID rid = pCorpseDef->m_BaseResources[i].GetResourceID();
 		if ( rid.GetResType() != RES_ITEMDEF )
 			continue;
 
@@ -424,13 +424,13 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 
 	// Determine ammo type
 	CVarDefCont *pVarAmmoType = pWeapon->GetDefKey("AMMOTYPE", true);
-	RESOURCE_ID_BASE rid;
+	CResourceIDBase rid;
 	lpctstr t_Str;
 
 	if ( pVarAmmoType )
 	{
 		t_Str = pVarAmmoType->GetValStr();
-		rid = static_cast<RESOURCE_ID_BASE>(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
+		rid = static_cast<CResourceIDBase>(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
 	}
 	else
 	{
@@ -499,19 +499,19 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 			if ( !pNewCont )	//if no UID, check for ITEMID_TYPE
 			{
 				t_Str = pCont->GetValStr();
-				RESOURCE_ID_BASE rContid = static_cast<RESOURCE_ID_BASE>(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
+				CResourceIDBase rContid = static_cast<CResourceIDBase>(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
 				ITEMID_TYPE ContID = static_cast<ITEMID_TYPE>(rContid.GetResIndex());
 				if ( ContID )
 					pNewCont = dynamic_cast<CItemContainer*>(ContentFind(rContid));
 			}
 
 			if ( pNewCont )
-				iFound = pNewCont->ContentConsume(RESOURCE_ID(RES_ITEMDEF, AmmoID));
+				iFound = pNewCont->ContentConsume(CResourceID(RES_ITEMDEF, AmmoID));
 			else
-				iFound = ContentConsume(RESOURCE_ID(RES_ITEMDEF, AmmoID));
+				iFound = ContentConsume(CResourceID(RES_ITEMDEF, AmmoID));
 		}
 		else
-			iFound = ContentConsume(RESOURCE_ID(RES_ITEMDEF, AmmoID));
+			iFound = ContentConsume(CResourceID(RES_ITEMDEF, AmmoID));
 		if ( iFound )
 		{
 			SysMessageDefault(DEFMSG_ITEMUSE_ARCHB_NOAMMO);
@@ -534,7 +534,7 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 	if ( pVarAnim )
 	{
 		t_Str = pVarAnim->GetValStr();
-		rid = static_cast<RESOURCE_ID_BASE>(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
+		rid = static_cast<CResourceIDBase>(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
 		AmmoAnim = static_cast<ITEMID_TYPE>(rid.GetResIndex());
 	}
 	else
@@ -542,7 +542,7 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 
 	AmmoHue = pVarAnimColor ? (dword)(pVarAnimColor->GetValNum()) : 0;
 	AmmoRender = pVarAnimRender ? (dword)(pVarAnimRender->GetValNum()) : 0;
-	
+
 	pButte->Effect(EFFECT_BOLT, AmmoAnim, this, 16, 0, false, AmmoHue, AmmoRender);
 	pButte->Sound(0x224);
 
@@ -692,7 +692,7 @@ int CChar::Use_PlayMusic( CItem * pInstrument, int iDifficultyToPlay )
 
 	if ( !pInstrument )
 	{
-		pInstrument = ContentFind(RESOURCE_ID(RES_TYPEDEF, IT_MUSICAL), 0, 1);
+		pInstrument = ContentFind(CResourceID(RES_TYPEDEF, IT_MUSICAL), 0, 1);
 		if ( !pInstrument )
 		{
 			SysMessageDefault(DEFMSG_MUSICANSHIP_NOTOOL);
@@ -1064,7 +1064,7 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool bCheckFollowerSlots )
 		return NULL;
 	}
 
-	// Create a new NPC if there's no one linked to this figurine 
+	// Create a new NPC if there's no one linked to this figurine
 	CChar *pPet = pItem->m_itFigurine.m_UID.CharFind();
 	if ( !pPet )
 	{

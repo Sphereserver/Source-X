@@ -59,7 +59,7 @@ dword CCrypt::GetClientVer() const
 
 bool CCrypt::IsValid() const
 {
-	return( m_iClientVersion >= 0 );
+	return ( m_iClientVersion >= 0 );
 }
 
 bool CCrypt::IsInit() const

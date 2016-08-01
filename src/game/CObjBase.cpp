@@ -128,7 +128,7 @@ void CObjBase::SetHue( HUE_TYPE wHue, bool bAvoidTrigger, CTextConsole *pSrc, CO
 	args.m_iN1=wHue;
 	args.m_iN2=sound;
 
-	/*	@Dye is now more universal, it is called on EVERY CObjBase color change. 
+	/*	@Dye is now more universal, it is called on EVERY CObjBase color change.
 		Sanity checks are recommended and if possible, avoid using it on universal events. */
 
 	/*	Trigger info to be added to intenal
@@ -141,7 +141,7 @@ void CObjBase::SetHue( HUE_TYPE wHue, bool bAvoidTrigger, CTextConsole *pSrc, CO
 
 	if (!bAvoidTrigger)
 	{
-		if (IsTrigUsed("@Dye")) 
+		if (IsTrigUsed("@Dye"))
 		{
 			TRIGRET_TYPE iRet;
 
@@ -301,7 +301,7 @@ bool CObjBase::SetNamePool( lpctstr pszName )
 		if ( CObjBaseTemplate::SetName( pszTmp ) == false )
 			return false;
 	}
-	
+
 	UpdatePropertyFlag(AUTOTOOLTIP_FLAG_NAME);
 	return true;
 }
@@ -875,7 +875,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			{
 				CVarDefCont * pVar = GetDefKey(pszKey, true);
 				sVal.FormatLLVal(pVar ? pVar->GetValNum() : 0);
-			}	
+			}
 			break;
         case OC_RECIPEALCHEMY:
         case OC_RECIPEBLACKSMITH:
@@ -893,7 +893,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
             sVal.FormatLLHex(pVar ? pVar->GetValNum() : 0);
         }
         break;
-			
+
 		case OC_ARMOR:
 			{
 				if ( IsChar() )
@@ -1089,7 +1089,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 
 								if ( !strnicmp(pszKey, "ID", 2) )
 								{
-									sVal.Format("%s", g_Cfg.ResourceGetName( RESOURCE_ID(RES_DIALOG, (*itGumpFound).first )) );
+									sVal.Format("%s", g_Cfg.ResourceGetName( CResourceID(RES_DIALOG, (*itGumpFound).first )) );
 								}
 								else if ( !strnicmp(pszKey, "COUNT", 5) )
 								{
@@ -1108,7 +1108,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 				else
 					return false;
 			}
-			break; 
+			break;
 		case OC_DISTANCE:
 			{
 				pszKey	+= 8;
@@ -1280,7 +1280,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 
 				if ( pClientToCheck )
 				{
-					RESOURCE_ID rid = g_Cfg.ResourceGetIDType( RES_DIALOG, pszKey );
+					CResourceID rid = g_Cfg.ResourceGetIDType( RES_DIALOG, pszKey );
 					int context;
 
 					if ( pClientToCheck->GetNetState()->isClientKR() )
@@ -1686,7 +1686,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 		case OC_NAMELOC:
 			SetDefNum(s.GetKey(),s.GetArgVal(), false);
 			break;
-			
+
 		case OC_INCREASESWINGSPEED:
 		case OC_INCREASEDAM:
 		case OC_LOWERREAGENTCOST:
@@ -1706,7 +1706,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 		case OC_RESCOLD:
 		case OC_RESPOISON:
 		case OC_RESENERGY:
-		case OC_LUCK:		
+		case OC_LUCK:
 		case OC_REGENFOOD:
 		case OC_REGENHITS:
 		case OC_REGENSTAM:
@@ -1964,7 +1964,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		m_TagDefs.ClearKeys(pszKey);
 		return true;
 	}
-	
+
 	CSString sVal;
 	CScriptTriggerArgs Args( s.GetArgRaw() );
 	if ( r_Call( pszKey, pSrc, &Args, &sVal ) )
@@ -2054,7 +2054,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					(iArgQty >= 4)? (uchar)(piCmd[3]) : 1,		// byte bLoop = 1,
 					(iArgQty >= 5)? (piCmd[4] != 0) : false,						// bool fExplode = false
 					(iArgQty >= 6)? (uint)(piCmd[5]) : 0,		// hue
-					(iArgQty >= 7)? (uint)(piCmd[6]) : 0,		// render mode,		
+					(iArgQty >= 7)? (uint)(piCmd[6]) : 0,		// render mode,
 					(iArgQty >= 8) ? (word)(piCmd[7]) : 0,				// EffectID	//New Packet 0xc7
 					(iArgQty >= 9) ? (word)(piCmd[8]) : 0,				// ExplodeID
 					(iArgQty >= 10) ? (word)(piCmd[9]) : 0,				// ExplodeSound
@@ -2207,7 +2207,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				int iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, CountOf(pszArgs) );
 				if ( iArgQty == 0 )
 					break;
-					
+
 				pClientSrc->addPromptConsoleFunction( pszArgs[0], pszArgs[1], (index == OV_PROMPTCONSOLEU) );
 			}
 			break;
@@ -2227,13 +2227,13 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		case OV_RESENDTOOLTIP:
 			{
 				EXC_SET("RESENDTOOLTIP");
-			
+
 				int64 piCmd[2];
 				int iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd) );
 
 				bool bSendFull = false;
 				bool bUseCache = false;
-			
+
 				if (iArgQty >= 1)
 					bSendFull = (piCmd[0] != 0);
 				if (iArgQty >= 2)
@@ -2315,7 +2315,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					pSrc = &g_Serv;
 				m_TagDefs.DumpKeys(pSrc, "TAG.");
 			}break;
-			
+
 		case OC_PROPSLIST:
 			{
 				EXC_SET("PROPSLIST");
@@ -2443,7 +2443,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 				if ( index == OV_SDIALOG )
 				{
-					RESOURCE_ID rid = g_Cfg.ResourceGetIDType( RES_DIALOG, Arg_ppCmd[0] );
+					CResourceID rid = g_Cfg.ResourceGetIDType( RES_DIALOG, Arg_ppCmd[0] );
 					int context;
 
 					if ( pClientSrc->GetNetState()->isClientKR() )
@@ -2699,7 +2699,7 @@ void CObjBase::RemoveFromView( CClient * pClientExclude, bool fHardcoded )
 	CItem * pItem = fHardcoded ? (dynamic_cast<CItem*>(this)) : (NULL);
 	CChar * pChar = NULL;
 
-	
+
 	ClientIterator it;
 	for (CClient* pClient = it.next(); pClient != NULL; pClient = it.next())
 	{
@@ -2736,7 +2736,7 @@ void CObjBase::ResendOnEquip( bool fAllClients )
 	CItem * pItem = dynamic_cast<CItem*>(this);
 	CChar * pChar = NULL;
 
-	
+
 	ClientIterator it;
 	for (CClient* pClient = it.next(); pClient != NULL; pClient = it.next())
 	{
@@ -2754,14 +2754,14 @@ void CObjBase::ResendOnEquip( bool fAllClients )
 				if (( pItem->GetEquipLayer() > LAYER_HORSE ) && ( pItem->GetEquipLayer() != LAYER_BANKBOX ) && ( pItem->GetEquipLayer() != LAYER_DRAGGING ))
 					continue;
 			}
-			
+
 			if ( pItem->IsTypeSpellbook() && pItem->IsItemInContainer())	// items must be removed from view before equipping in EC when on the floor, however spellbooks cannot be removed from view or client will crash
 				continue;
 		}
 
 		if (this->GetEquipLayer() == LAYER_BANKBOX)
 			pClient->closeContainer(this);
-		
+
 		pClient->addObjectRemove( this );
 		pClient->addItem( pItem );
 
@@ -2813,7 +2813,7 @@ void CObjBase::UpdatePropertyFlag(int mask)
 		return;
 	if ( mask != 0 && (g_Cfg.m_iAutoTooltipResend & mask) == 0 )
 		return;
-	
+
 	// contained items don't receive ticks and need to be added to a
 	// list of items to be processed separately
 	if ( IsItemInContainer() && g_World.m_ObjStatusUpdates.ContainsPtr(this) == false )
@@ -3067,7 +3067,7 @@ inline bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TR
 	UNREFERENCED_PARAMETER(bFull);
 	tchar * ppCmdTrigger[3];
 	size_t iResultArgs = Str_ParseCmds(pArgs, ppCmdTrigger, CountOf(ppCmdTrigger), ",");
-	
+
 	if ( iResultArgs > 0 )
 	{
 		lpctstr callTrigger = ppCmdTrigger[0];
@@ -3115,7 +3115,7 @@ inline bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TR
 			{
 				tchar * Arg_ppCmd[5];
 				iResultArgs = Str_ParseCmds(ppCmdTrigger[2], Arg_ppCmd, CountOf(Arg_ppCmd), ",");
-				
+
 				// ARGS
 				if ( iResultArgs == 5 )
 				{
@@ -3123,11 +3123,11 @@ inline bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TR
 					csTriggerArgs.m_s1_raw = Arg_ppCmd[4];
 				}
 				// ARGNs
-				if ( iResultArgs >= 4 ) 
-					csTriggerArgs.m_iN3 = Exp_GetVal(Arg_ppCmd[3]); 
-				if ( iResultArgs >= 3 ) 
+				if ( iResultArgs >= 4 )
+					csTriggerArgs.m_iN3 = Exp_GetVal(Arg_ppCmd[3]);
+				if ( iResultArgs >= 3 )
 					csTriggerArgs.m_iN2 = Exp_GetVal(Arg_ppCmd[2]);
-				if ( iResultArgs >= 2 ) 
+				if ( iResultArgs >= 2 )
 					csTriggerArgs.m_iN1 = Exp_GetVal(Arg_ppCmd[1]);
 				// ARGO
 				if ( iResultArgs >= 1 )

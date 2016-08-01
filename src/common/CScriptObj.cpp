@@ -1909,7 +1909,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 
 	if ( iType & 0x40 )	// FORINSTANCES
 	{
-		RESOURCE_ID rid;
+		CResourceID rid;
 		tchar * ppArgs[1];
 
 		if (Str_ParseCmds( s.GetArgStr(), ppArgs, CountOf( ppArgs ), " \t," ) >= 1)

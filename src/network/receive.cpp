@@ -2174,7 +2174,7 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 
 #ifdef _DEBUG
 	{
-		const CResourceDef* resource = g_Cfg.ResourceGetDef(RESOURCE_ID(RES_DIALOG, context));
+		const CResourceDef* resource = g_Cfg.ResourceGetDef(CResourceID(RES_DIALOG, context));
 		if (resource == NULL)
 			g_Log.Event(LOGM_DEBUG|LOGL_EVENT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, "undef", (dword)serial, button);
 		else
@@ -2228,7 +2228,7 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 	if (net->isClientKR())
 		context = g_Cfg.GetKRDialogMap(context);
 
-	RESOURCE_ID_BASE	rid	= RESOURCE_ID(RES_DIALOG, context);
+	CResourceIDBase	rid	= CResourceID(RES_DIALOG, context);
 	//
 	// Call the scripted response. Lose all the checks and text.
 	//

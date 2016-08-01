@@ -173,7 +173,7 @@ public:
      *
      * @return  null if it fails, else a pointer to a CItem.
      */
-	CItem * ContentFind( RESOURCE_ID_BASE rid, dword dwArg = 0, int iDecendLevels = 255 ) const;
+	CItem * ContentFind( CResourceIDBase rid, dword dwArg = 0, int iDecendLevels = 255 ) const;
 
     /**
      * @fn  TRIGRET_TYPE CContainer::OnContTriggerForLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult, CScriptLineContext & StartContext, CScriptLineContext & EndContext, RESOURCE_ID_BASE rid, dword dwArg = 0, int iDecendLevels = 255 );
@@ -192,7 +192,7 @@ public:
      *
      * @return  A TRIGRET_TYPE.
      */
-	TRIGRET_TYPE OnContTriggerForLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult, CScriptLineContext & StartContext, CScriptLineContext & EndContext, RESOURCE_ID_BASE rid, dword dwArg = 0, int iDecendLevels = 255 );
+	TRIGRET_TYPE OnContTriggerForLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult, CScriptLineContext & StartContext, CScriptLineContext & EndContext, CResourceIDBase rid, dword dwArg = 0, int iDecendLevels = 255 );
 
     /**
      * @fn  TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult, CScriptLineContext & StartContext, CScriptLineContext & EndContext, int iDecendLevels = 255 );
@@ -221,7 +221,7 @@ public:
      *
      * @return  An int.
      */
-	int ContentCount( RESOURCE_ID_BASE rid, dword dwArg = 0 );
+	int ContentCount( CResourceIDBase rid, dword dwArg = 0 );
 
     /**
      * @fn  size_t CContainer::ContentCountAll() const;
@@ -244,7 +244,7 @@ public:
      *
      * @return  An int.
      */
-	int ContentConsume( RESOURCE_ID_BASE rid, int iQty = 1, bool fTest = false, dword dwArg = 0 );
+	int ContentConsume( CResourceIDBase rid, int iQty = 1, bool fTest = false, dword dwArg = 0 );
 
     /**
      * @fn  int CContainer::ResourceConsume( const CResourceQtyArray * pResources, int iReplicationQty, bool fTest = false, dword dwArg = 0 );

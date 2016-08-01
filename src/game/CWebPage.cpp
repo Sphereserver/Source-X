@@ -72,7 +72,7 @@ private:
 
 int CWebPageDef::sm_iListIndex;
 
-CWebPageDef::CWebPageDef( RESOURCE_ID rid ) : CResourceLink( rid )
+CWebPageDef::CWebPageDef( CResourceID rid ) : CResourceLink( rid )
 {
 	// Web page m_sWebPageFilePath
 	m_type = WEBPAGE_TEMPLATE;
@@ -197,7 +197,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 					return false;
 				return ServPage( pClient, s.GetArgStr(), NULL );
 			}
-	
+
 		case WV_CLIENTLIST:
 			{
 				ClientIterator it;
@@ -208,9 +208,9 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 						continue;
 					if (( pChar->IsStatFlag(STATF_Insubstantial) ) && (!pChar->IsStatFlag(STATF_DEAD)))
 						continue;
-	
+
 					sm_iListIndex++;
-	
+
 					lpctstr pszArgs = s.GetArgStr();
 					if ( pszArgs[0] == '\0' )
 						pszArgs = "<tr><td>%NAME%</td><td>%REGION.NAME%</td></tr>\n";
@@ -220,7 +220,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 				}
 			}
 			break;
-	
+
 		case WV_GUILDLIST:
 		case WV_TOWNLIST:
 			{
@@ -234,9 +234,9 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 					CItemStone * pStone = g_World.m_Stones[i];
 					if ( !pStone || !pStone->IsType(needtype) )
 						continue;
-	
+
 					sm_iListIndex++;
-	
+
 					strcpy(pszTmp2, s.GetArgStr());
 					pStone->ParseText(Str_MakeFiltered(pszTmp2), &g_Serv, 1);
 					pSrc->SysMessage(pszTmp2);
@@ -258,7 +258,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 				}
 			}
 			break;
-	
+
 		default:
 			return( CResourceLink::r_Verb(s,pSrc));
 	}
@@ -791,7 +791,7 @@ bool CWebPageDef::ServPage( CClient * pClient, tchar * pszPage, CSTime * pdateIf
 	// Is it a file in the Script directory ?
 	if ( iError == 404 )
 	{
-		const RESOURCE_ID ridjunk( RES_UNKNOWN, 1 );
+		const CResourceID ridjunk( RES_UNKNOWN, 1 );
 		CWebPageDef tmppage( ridjunk );
 		if ( tmppage.SetSourceFile( szPageName, pClient ))
 		{

@@ -53,7 +53,7 @@ public:
 	void UnionPoint( int x, int y )
 	{
 		// Inflate this rect to include this point.
-		// NON inclusive rect! 
+		// NON inclusive rect!
 		if ( x	< m_left	) m_left = x;
 		if ( y	< m_top		) m_top = y;
 		if ( x	>= m_right	) m_right = x+1;
@@ -104,7 +104,7 @@ public:
 		// Is &rect inside me ?
 		// ASSUME: Normalized rect
 		if ( rect.m_map != m_map ) return false;
-		if ( rect.m_left	< m_left	) 
+		if ( rect.m_left	< m_left	)
 			return false;
 		if ( rect.m_top		< m_top		)
 			return false;
@@ -120,7 +120,7 @@ public:
 		// NON inclusive rect.
 		// ASSUME: Normalized rect
 //		if ( rect.m_map != m_map ) return false;
-		if ( rect.m_left	>= m_right	) 
+		if ( rect.m_left	>= m_right	)
 			return false;
 		if ( rect.m_top		>= m_bottom	)
 			return false;
@@ -428,7 +428,7 @@ public:
 	bool	MakeRegionName();
 
 public:
-	explicit CRegionBase( RESOURCE_ID rid, lpctstr pszName = NULL );
+	explicit CRegionBase( CResourceID rid, lpctstr pszName = NULL );
 	virtual ~CRegionBase();
 
 private:
@@ -460,7 +460,7 @@ public:
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
 
 public:
-	explicit CRegionWorld( RESOURCE_ID rid, lpctstr pszName = NULL );
+	explicit CRegionWorld( CResourceID rid, lpctstr pszName = NULL );
 	virtual ~CRegionWorld();
 
 private:

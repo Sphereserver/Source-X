@@ -821,7 +821,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					return true;
 				}
 
-				RESOURCE_ID rid = g_Cfg.ResourceGetID( RES_QTY, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(pszArgs)));
+				CResourceID rid = g_Cfg.ResourceGetID( RES_QTY, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(pszArgs)));
 				if (( rid.GetResType() == RES_CHARDEF ) || ( rid.GetResType() == RES_SPAWN ))
 				{
 					m_Targ_PrvUID.InitUID();
@@ -984,7 +984,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 								CResourceDef	*pDef = pSpawn->FixDef();
 								if ( !pDef )
 								{
-									RESOURCE_ID_BASE	rid = ( pItem->IsType(IT_SPAWN_ITEM) ? pItem->m_itSpawnItem.m_ItemID : pItem->m_itSpawnChar.m_CharID);
+									CResourceIDBase	rid = ( pItem->IsType(IT_SPAWN_ITEM) ? pItem->m_itSpawnItem.m_ItemID : pItem->m_itSpawnChar.m_CharID);
 
 									CPointMap	pt = pItem->GetTopPoint();
 									m_pChar->Spell_Teleport(pt, true, false);

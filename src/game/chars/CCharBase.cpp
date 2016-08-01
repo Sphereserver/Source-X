@@ -8,7 +8,7 @@
 // -CCharBase
 
 CCharBase::CCharBase( CREID_TYPE id ) :
-	CBaseBaseDef( RESOURCE_ID( RES_CHARDEF, id ))
+	CBaseBaseDef( CResourceID( RES_CHARDEF, id ))
 {
 	m_iHireDayWage = 0;
 	m_trackID = ITEMID_TRACK_WISP;
@@ -187,7 +187,7 @@ bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			sVal.FormatVal( m_Dex );
 			break;
 		case CBC_DISPID:
-			sVal = g_Cfg.ResourceGetName( RESOURCE_ID( RES_CHARDEF, GetDispID()));
+			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, GetDispID()));
 			break;
 		case CBC_ID:
 			sVal.FormatHex( GetDispID() );
@@ -218,7 +218,7 @@ bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			sVal.FormatVal(m_iMoveRate);
 			break;
 		case CBC_RESDISPDNID:
-			sVal = g_Cfg.ResourceGetName( RESOURCE_ID( RES_CHARDEF, GetResDispDnId()));
+			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, GetResDispDnId()));
 			break;
 		case CBC_SOUND:
 			sVal.FormatHex( m_soundbase );
@@ -373,7 +373,7 @@ bool CCharBase::r_Load( CScript & s )
 CCharBase * CCharBase::FindCharBase( CREID_TYPE baseID ) // static
 {
 	ADDTOCALLSTACK("CCharBase::FindCharBase");
-	RESOURCE_ID rid = RESOURCE_ID( RES_CHARDEF, baseID );
+	CResourceID rid = CResourceID( RES_CHARDEF, baseID );
 	size_t index = g_Cfg.m_ResHash.FindKey(rid);
 	if ( index == g_Cfg.m_ResHash.BadIndex() )
 		return NULL;

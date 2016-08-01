@@ -32,7 +32,7 @@ void CChar::OnNoticeCrime( CChar * pCriminal, const CChar * pCharMark )
 		if (IsTrigUsed(TRIGGER_SEECRIME))
 		{
 			CScriptTriggerArgs Args;
-			Args.m_iN1 = bCriminal; 
+			Args.m_iN1 = bCriminal;
 			Args.m_pO1 = const_cast<CChar*>(pCharMark);
 			OnTrigger(CTRIG_SeeCrime, pCriminal, &Args);
 			bCriminal = Args.m_iN1 ? true : false;
@@ -492,7 +492,7 @@ void CChar::CallGuards( CChar * pCriminal )
 	}
 
 	CVarDefCont *pVarDef = pCriminal->m_pArea->m_TagDefs.GetKey("OVERRIDE.GUARDS");
-	RESOURCE_ID rid = g_Cfg.ResourceGetIDType(RES_CHARDEF, (pVarDef ? pVarDef->GetValStr() : "GUARDS"));
+	CResourceID rid = g_Cfg.ResourceGetIDType(RES_CHARDEF, (pVarDef ? pVarDef->GetValStr() : "GUARDS"));
 	if (IsTrigUsed(TRIGGER_CALLGUARDS))
 	{
 		CScriptTriggerArgs Args(pGuard);
@@ -504,7 +504,7 @@ void CChar::CallGuards( CChar * pCriminal )
 			return;
 
 		if (static_cast<int>(Args.m_iN1) != rid.GetResIndex())
-			rid = RESOURCE_ID(RES_CHARDEF, static_cast<int>(Args.m_iN1));
+			rid = CResourceID(RES_CHARDEF, static_cast<int>(Args.m_iN1));
 		if (Args.m_iN2 > 0)	//ARGN2: If set to 1, a new guard will be spawned regardless of whether a nearby guard is available.
 			pGuard = NULL;
 	}
@@ -682,7 +682,7 @@ int CChar::CalcArmorDefense() const
 				}
 				break;
 			case LAYER_ARMS:		// 19 = armor
-				if (IsSetCombatFlags(COMBAT_STACKARMOR)) 
+				if (IsSetCombatFlags(COMBAT_STACKARMOR))
 					ArmorRegionMax[ ARMOR_ARMS ] += iDefense;
 				else
 					ArmorRegionMax[ ARMOR_ARMS ] = maximum( ArmorRegionMax[ ARMOR_ARMS ], iDefense );
@@ -690,19 +690,19 @@ int CChar::CalcArmorDefense() const
 			case LAYER_PANTS:
 			case LAYER_SKIRT:
 			case LAYER_HALF_APRON:
-				if (IsSetCombatFlags(COMBAT_STACKARMOR)) 
+				if (IsSetCombatFlags(COMBAT_STACKARMOR))
 					ArmorRegionMax[ ARMOR_LEGS ] += iDefense;
 				else
 					ArmorRegionMax[ ARMOR_LEGS ] = maximum( ArmorRegionMax[ ARMOR_LEGS ], iDefense );
 				break;
 			case LAYER_SHOES:
-				if (IsSetCombatFlags(COMBAT_STACKARMOR)) 
+				if (IsSetCombatFlags(COMBAT_STACKARMOR))
 					ArmorRegionMax[ ARMOR_FEET ] += iDefense;
 				else
 					ArmorRegionMax[ ARMOR_FEET ] = maximum( ArmorRegionMax[ ARMOR_FEET ], iDefense );
 				break;
 			case LAYER_GLOVES:	// 7
-				if (IsSetCombatFlags(COMBAT_STACKARMOR)) 
+				if (IsSetCombatFlags(COMBAT_STACKARMOR))
 					ArmorRegionMax[ ARMOR_HANDS ] += iDefense;
 				else
 					ArmorRegionMax[ ARMOR_HANDS ] = maximum( ArmorRegionMax[ ARMOR_HANDS ], iDefense );
@@ -752,7 +752,7 @@ int CChar::CalcArmorDefense() const
 		}
 		iArmorCount ++;
 	}
-	
+
 	if ( iArmorCount )
 	{
 		for ( int i=0; i<ARMOR_QTY; i++ )
@@ -1577,7 +1577,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	}
 
 	SKILL_TYPE skill = Skill_GetActive();
-	RESOURCE_ID_BASE rid;
+	CResourceIDBase rid;
 	lpctstr t_Str;
 	int dist = GetTopDist3D(pCharTarg);
 
@@ -1612,7 +1612,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		if ( pType )
 		{
 			t_Str = pType->GetValStr();
-			rid = static_cast<RESOURCE_ID_BASE>(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
+			rid = static_cast<CResourceIDBase>(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
 		}
 		else
 			rid = pWeaponDef->m_ttWeaponBow.m_idAmmo;
@@ -1627,7 +1627,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 				if ( !pNewCont )	//if no UID, check for ITEMID_TYPE
 				{
 					t_Str = pCont->GetValStr();
-					RESOURCE_ID_BASE rContid = static_cast<RESOURCE_ID_BASE>(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
+					CResourceIDBase rContid = static_cast<CResourceIDBase>(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
 					ITEMID_TYPE ContID = static_cast<ITEMID_TYPE>(rContid.GetResIndex());
 					if ( ContID )
 						pNewCont = dynamic_cast<CItemContainer*>(ContentFind(rContid));
@@ -1707,7 +1707,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		if ( pAnim )
 		{
 			t_Str = pAnim->GetValStr();
-			rid = static_cast<RESOURCE_ID_BASE>(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
+			rid = static_cast<CResourceIDBase>(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
 			AmmoAnim = static_cast<ITEMID_TYPE>(rid.GetResIndex());
 		}
 		else
@@ -1792,7 +1792,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 	// Calculate base damage
 	int	iDmg = Fight_CalcDamage(pWeapon);
-	
+
 	CScriptTriggerArgs Args(iDmg, iTyp, pWeapon);
 	Args.m_VarsLocal.SetNum("ItemDamageChance", 40);
 	if ( pAmmo )

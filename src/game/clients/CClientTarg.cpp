@@ -114,7 +114,7 @@ bool CClient::OnTarg_Obj_Info( CObjBase * pObj, const CPointMap & pt, ITEMID_TYP
 			if ( pItemDef )
 			{
 				len += sprintf( pszTemp+len, "%s->%s], ", pItemDef->GetResourceName(),
-					g_Cfg.ResourceGetName( RESOURCE_ID( RES_TYPEDEF, pItemDef->GetType() )));
+					g_Cfg.ResourceGetName( CResourceID( RES_TYPEDEF, pItemDef->GetType() )));
 			}
 			else
 			{
@@ -241,9 +241,9 @@ bool CClient::Cmd_Control( CChar * pChar2 )
 		if ( pChar1->GetID() == CREID_EQUIP_GM_ROBE ||
 			pChar1->GetID() == CREID_GHOSTMAN ||
 			pChar1->GetID() == CREID_GHOSTWOMAN ||
-			pChar1->GetID() == CREID_ELFGHOSTMAN || 
+			pChar1->GetID() == CREID_ELFGHOSTMAN ||
 			pChar1->GetID() == CREID_ELFGHOSTWOMAN ||
-			pChar1->GetID() == CREID_GARGGHOSTMAN || 
+			pChar1->GetID() == CREID_GARGGHOSTMAN ||
 			pChar1->GetID() == CREID_GARGGHOSTWOMAN )	// CREID_EQUIP_GM_ROBE
 		{
 			pChar1->Delete();
@@ -749,7 +749,7 @@ int CClient::OnSkill_AnimalLore( CUID uid, int iSkillLevel, bool fTest )
 		if ( pChar == m_pChar )
 			return( 2 );
 		if ( m_pChar->IsStatFlag( STATF_OnHorse ) )
-		{ 
+		{
 			CItem * pItem = m_pChar->LayerFind( LAYER_HORSE );
 			if ( pItem && pItem->m_itFigurine.m_UID == uid)
 				return 1;
@@ -787,7 +787,7 @@ int CClient::OnSkill_AnimalLore( CUID uid, int iSkillLevel, bool fTest )
 	// How well fed ?
 	// Food count = 30 minute intervals.
 	lpctstr pszText = pChar->IsStatFlag(STATF_Conjured) ?
-						g_Cfg.GetDefaultMsg(DEFMSG_ANIMALLORE_CONJURED) : 
+						g_Cfg.GetDefaultMsg(DEFMSG_ANIMALLORE_CONJURED) :
 						pChar->Food_GetLevelMessage(pCharOwner ? true : false, true);
 
 	sprintf(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_ANIMALLORE_FOOD), pszHe, pszText);
@@ -1879,7 +1879,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		// Mine at the location. (shovel)
 		m_pChar->m_Act_p = pt;
 		m_pChar->m_Act_TargPrv = m_Targ_PrvUID;
-		m_pChar->m_atResource.m_ridType = RESOURCE_ID(RES_TYPEDEF, IT_ROCK);
+		m_pChar->m_atResource.m_ridType = CResourceID(RES_TYPEDEF, IT_ROCK);
 		return( m_pChar->Skill_Start( SKILL_MINING ));
 
 	case IT_WEAPON_MACE_CROOK:
@@ -1961,7 +1961,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 			m_pChar->m_Act_TargPrv = m_Targ_PrvUID;
 			m_pChar->m_Act_Targ = m_Targ_UID;
 			m_pChar->m_Act_p = pt;
-			m_pChar->m_atResource.m_ridType = RESOURCE_ID(RES_TYPEDEF, IT_TREE);
+			m_pChar->m_atResource.m_ridType = CResourceID(RES_TYPEDEF, IT_TREE);
 			return( m_pChar->Skill_Start( SKILL_LUMBERJACKING ));
 
 		case IT_LOG:
@@ -2022,7 +2022,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 			if ( ! m_pChar->CanUse( pItemTarg, true ))
 				return false;
 			{
-			RESOURCE_ID defaultseed = g_Cfg.ResourceGetIDType( RES_ITEMDEF, "DEFAULTSEED" );
+			CResourceID defaultseed = g_Cfg.ResourceGetIDType( RES_ITEMDEF, "DEFAULTSEED" );
 			pItemTarg->SetDispID(static_cast<ITEMID_TYPE>(defaultseed.GetResIndex()));
 			pItemTarg->SetType(IT_SEED);
 			tchar *pszTemp = Str_GetTemp();
@@ -2131,14 +2131,14 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		if ( fLockable && pItemTarg->m_itContainer.m_lockUID )
 		{
 			// try all the keys on the object.
-			pKey = pKeyRing->ContentFind( RESOURCE_ID(RES_TYPEDEF,IT_KEY), pItemTarg->m_itContainer.m_lockUID );
+			pKey = pKeyRing->ContentFind( CResourceID(RES_TYPEDEF,IT_KEY), pItemTarg->m_itContainer.m_lockUID );
 		}
 		if ( pKey == NULL )
 		{
 			// are we trying to lock it down ?
 			if ( m_pChar->m_pArea->GetResourceID().IsItem())
 			{
-				pKey = pKeyRing->ContentFind( RESOURCE_ID(RES_TYPEDEF,IT_KEY), m_pChar->m_pArea->GetResourceID() );
+				pKey = pKeyRing->ContentFind( CResourceID(RES_TYPEDEF,IT_KEY), m_pChar->m_pArea->GetResourceID() );
 				if ( pKey )
 				{
 					if ( m_pChar->Use_MultiLockDown( pItemTarg ))
@@ -2274,7 +2274,7 @@ static lpctstr const sm_Txt_LoomUse[] =
 			pItemTarg->m_itLoom.m_ClothID = ITEMID_NOTHING;
 
 /*
-			CItemBase * pItemDef = pItemTarg->Item_GetDef(); 
+			CItemBase * pItemDef = pItemTarg->Item_GetDef();
 
 			if ( pItemDef->m_ttNormal.m_tData3 != 0 )
 			{
@@ -2286,7 +2286,7 @@ static lpctstr const sm_Txt_LoomUse[] =
 */
 
 				m_pChar->ItemBounce( CItem::CreateScript(ITEMID_CLOTH_BOLT1, m_pChar ));
-/*			}	
+/*			}
 */
 		}
 		}
@@ -2313,7 +2313,7 @@ static lpctstr const sm_Txt_LoomUse[] =
 
 	case IT_FISH_POLE:
 		m_pChar->m_Act_p = pt;
-		m_pChar->m_atResource.m_ridType = RESOURCE_ID(RES_TYPEDEF, IT_WATER);
+		m_pChar->m_atResource.m_ridType = CResourceID(RES_TYPEDEF, IT_WATER);
 		return( m_pChar->Skill_Start( SKILL_FISHING ));
 
 	case IT_LOCKPICK:

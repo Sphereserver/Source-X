@@ -938,7 +938,7 @@ void CClient::addEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTempla
 	ASSERT(m_pChar);
 	ASSERT(pDst);
 
-	if (pSrc == NULL && motion == EFFECT_BOLT) // source required for bolt effect
+	if ( (pSrc == NULL) && (motion == EFFECT_BOLT) ) // source required for bolt effect
 		return;
 
 	PacketSend* cmd(NULL);

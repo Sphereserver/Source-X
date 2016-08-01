@@ -93,7 +93,7 @@ public:
 #define ATTR_BATTLELUST			0x2000000000
 #define ATTR_MANAPHASE			0x4000000000
 #define ATTR_SEARINGWEAPON		0x8000000000
-#define ATTR_REACTIVEPARALYZE	0x10000000000		// 
+#define ATTR_REACTIVEPARALYZE	0x10000000000		//
 #define ATTR_SPELLFOCUSING		0x20000000000		// Still needs prop on char
 #define ATTR_CASTINGFOCUS		0x40000000000		// Still needs prop on char
 #define ATTR_RAGEFOCUS			0x80000000000		// Still needs prop on char
@@ -261,7 +261,7 @@ public:
 			word m_spell;				// morex=SPELL_TYPE = The magic spell cast on this. ( effect of eating.)
 			word m_spelllevel;			// morey=level of the spell. (0-1000)
 			byte m_poison_skill;		// morez=0-100 = Is poisoned ?
-			byte m_foodval;	
+			byte m_foodval;
 		} m_itFood;
 
 		// IT_DRINK
@@ -272,7 +272,7 @@ public:
 			word m_spell;				// morex=SPELL_TYPE = The magic spell cast on this. ( effect of eating.)
 			word m_spelllevel;			// morey=level of the spell. (0-1000)
 			byte m_poison_skill;		// morez=0-100 = Is poisoned ?
-			byte m_foodval;	
+			byte m_foodval;
 		} m_itDrink;
 
 		// IT_CORPSE
@@ -311,7 +311,7 @@ public:
 		// IT_SPAWN_ITEM
 		struct
 		{
-			RESOURCE_ID_BASE m_ItemID;	// more1=The ITEMID_* or template for items
+			CResourceIDBase m_ItemID;	// more1=The ITEMID_* or template for items
 			dword	m_pile;				// more2=The max # of items to spawn per interval.  If this is 0, spawn up to the total amount.
 			word	m_TimeLoMin;		// morex=Lo time in minutes.
 			word	m_TimeHiMin;		// morey=Hi time in minutes.
@@ -322,7 +322,7 @@ public:
 		// IT_SPAWN_CHAR
 		struct
 		{
-			RESOURCE_ID_BASE m_CharID;	// more1=CREID_*,  or SPAWNTYPE_*,
+			CResourceIDBase m_CharID;	// more1=CREID_*,  or SPAWNTYPE_*,
 			dword	m_unused;		// more2=used only by IT_SPAWN_ITEM, keeping it only for mantaining the structure of the union.
 			word	m_TimeLoMin;		// morex=Lo time in minutes.
 			word	m_TimeHiMin;		// morey=Hi time in minutes.
@@ -343,7 +343,7 @@ public:
 						// IT_MESSAGE
 		struct
 		{
-			RESOURCE_ID_BASE m_ResID;	// more1 = preconfigured book id from RES_BOOK or Time date stamp for the book/message creation. (if |0x80000000)
+			CResourceIDBase m_ResID;	// more1 = preconfigured book id from RES_BOOK or Time date stamp for the book/message creation. (if |0x80000000)
 										//CServerTime   	 m_Time;	// more2= Time date stamp for the book/message creation. (Now Placed inside TIMESTAMP for int64 support)
 		} m_itBook;
 
@@ -369,7 +369,7 @@ public:
 		// ? IT_GRASS
 		struct	// Natural resources. tend to be statics.
 		{
-			RESOURCE_ID_BASE m_rid_res;	// more1 = base resource type. RES_REGIONRESOURCE
+			CResourceIDBase m_rid_res;	// more1 = base resource type. RES_REGIONRESOURCE
 		} m_itResource;
 
 		// IT_FIGURINE
@@ -710,7 +710,7 @@ public:
 	bool IsTypeLockable() const;
 	bool IsTypeSpellable() const;
 
-	bool IsResourceMatch( RESOURCE_ID_BASE rid, dword dwArg );
+	bool IsResourceMatch( CResourceIDBase rid, dword dwArg );
 
 	bool IsValidLockLink( CItem * pItemLock ) const;
 	bool IsValidLockUID() const;

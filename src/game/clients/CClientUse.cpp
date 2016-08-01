@@ -622,7 +622,7 @@ void CClient::Cmd_EditItem( CObjBase *pObj, int iSelect )
 			OnTarg_Obj_Set(CUID(m_tmMenu.m_Item[(size_t)(iSelect)]).ObjFind());
 		return;
 	}
-	
+
 	CMenuItem item[minimum(CountOf(m_tmMenu.m_Item), MAX_MENU_ITEMS)];	// Most as we want to display at one time.
 	item[0].m_sText.Format("Contents of %s", pObj->GetName());
 
@@ -649,7 +649,7 @@ void CClient::Cmd_EditItem( CObjBase *pObj, int iSelect )
 		if ( count >= (CountOf(item) - 1) )
 			break;
 	}
-	
+
 	ASSERT(count < CountOf(item));
 	addItemMenu(CLIMODE_MENU_EDIT, item, count, pObj);
 }
@@ -670,7 +670,7 @@ bool CClient::Cmd_CreateChar( CREID_TYPE id )
 	return addTargetChars(CLIMODE_TARG_ADDCHAR, id, false);
 }
 
-bool CClient::Cmd_Skill_Menu( RESOURCE_ID_BASE rid, int iSelect )
+bool CClient::Cmd_Skill_Menu( CResourceIDBase rid, int iSelect )
 {
 	ADDTOCALLSTACK("CClient::Cmd_Skill_Menu");
 	// Build the skill menu for the curent active skill.
@@ -733,13 +733,13 @@ bool CClient::Cmd_Skill_Menu( RESOURCE_ID_BASE rid, int iSelect )
 		if ( g_Cfg.m_wDebugFlags & DEBUGF_SCRIPTS )
 			g_Log.EventDebug("SCRIPT: Too many empty skill menus to continue seeking through menu '%s'\n", g_Cfg.ResourceGetDef(rid)->GetResourceName());
 	}
-	
+
 	ASSERT(iShowCount < CountOf(item));
 	addItemMenu(CLIMODE_MENU_SKILL, item, iShowCount);
 	return true;
 }
 
-size_t CClient::Cmd_Skill_Menu_Build( RESOURCE_ID_BASE rid, int iSelect, CMenuItem *item, size_t iMaxSize, bool &fShowMenu, bool &fLimitReached )
+size_t CClient::Cmd_Skill_Menu_Build( CResourceIDBase rid, int iSelect, CMenuItem *item, size_t iMaxSize, bool &fShowMenu, bool &fLimitReached )
 {
 	ADDTOCALLSTACK("CClient::Cmd_Skill_Menu_Build");
 	// Build the skill menu for the curent active skill.
@@ -1242,7 +1242,7 @@ bool CClient::Cmd_Skill_Inscription()
 
 	ASSERT(m_pChar);
 
-	CItem *pBlankScroll = m_pChar->ContentFind(RESOURCE_ID(RES_TYPEDEF, IT_SCROLL_BLANK));
+	CItem *pBlankScroll = m_pChar->ContentFind(CResourceID(RES_TYPEDEF, IT_SCROLL_BLANK));
 	if ( !pBlankScroll )
 	{
 		SysMessageDefault(DEFMSG_INSCRIPTION_FAIL);

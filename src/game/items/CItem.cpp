@@ -339,7 +339,7 @@ CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CC
 	// Just read info on a single item carryed by a CChar.
 	// ITEM=#id,#amount,R#chance
 
-	RESOURCE_ID rid = g_Cfg.ResourceGetID( RES_ITEMDEF, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(pArg)) );
+	CResourceID rid = g_Cfg.ResourceGetID( RES_ITEMDEF, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(pArg)) );
 	if ( ! rid.IsValidUID())
 		return NULL;
 	if ( rid.GetResType() != RES_ITEMDEF && rid.GetResType() != RES_TEMPLATE )
@@ -445,7 +445,7 @@ CItem * CItem::CreateTemplate( ITEMID_TYPE id, CObjBase * pCont, CChar * pSrc )	
 	}
 
 	CResourceLock s;
-	if ( ! g_Cfg.ResourceLock( s, RESOURCE_ID( RES_TEMPLATE, id )))
+	if ( ! g_Cfg.ResourceLock( s, CResourceID( RES_TEMPLATE, id )))
 		return NULL;
 
 	return( ReadTemplate( s, pCont ));
@@ -2003,7 +2003,7 @@ void CItem::r_WriteMore1( CSString & sVal )
 		case IT_FOOD:
 		case IT_FOOD_RAW:
 		case IT_MEAT_RAW:
-			sVal = g_Cfg.ResourceGetName( RESOURCE_ID( RES_ITEMDEF, m_itFood.m_cook_id ));
+			sVal = g_Cfg.ResourceGetName( CResourceID( RES_ITEMDEF, m_itFood.m_cook_id ));
 			return;
 
 		case IT_TRAP:
@@ -2015,16 +2015,16 @@ void CItem::r_WriteMore1( CSString & sVal )
 		case IT_LOOM:
 		case IT_ARCHERY_BUTTE:
 		case IT_ITEM_STONE:
-			sVal = g_Cfg.ResourceGetName( RESOURCE_ID( RES_ITEMDEF, m_itNormal.m_more1 ));
+			sVal = g_Cfg.ResourceGetName( CResourceID( RES_ITEMDEF, m_itNormal.m_more1 ));
 			return;
 
 		case IT_FIGURINE:
 		case IT_EQ_HORSE:
-			sVal = g_Cfg.ResourceGetName(RESOURCE_ID(RES_CHARDEF, m_itNormal.m_more1));
+			sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, m_itNormal.m_more1));
 			return;
 
 		case IT_POTION:
-			sVal = g_Cfg.ResourceGetName( RESOURCE_ID( RES_SPELL, m_itPotion.m_Type ));
+			sVal = g_Cfg.ResourceGetName( CResourceID( RES_SPELL, m_itPotion.m_Type ));
 			return;
 
 		default:
@@ -2043,12 +2043,12 @@ void CItem::r_WriteMore2( CSString & sVal )
 		case IT_FOOD:
 		case IT_FOOD_RAW:
 		case IT_MEAT_RAW:
-			sVal = g_Cfg.ResourceGetName( RESOURCE_ID( RES_CHARDEF, m_itFood.m_MeatType ));
+			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, m_itFood.m_MeatType ));
 			return;
 
 		case IT_CROPS:
 		case IT_FOLIAGE:
-			sVal = g_Cfg.ResourceGetName( RESOURCE_ID( RES_ITEMDEF, m_itCrop.m_ReapFruitID ));
+			sVal = g_Cfg.ResourceGetName( CResourceID( RES_ITEMDEF, m_itCrop.m_ReapFruitID ));
 			return;
 
 		case IT_LEATHER:
@@ -2058,11 +2058,11 @@ void CItem::r_WriteMore2( CSString & sVal )
 		case IT_WOOL:
 		case IT_BLOOD:
 		case IT_BONE:
-			sVal = g_Cfg.ResourceGetName( RESOURCE_ID( RES_CHARDEF, m_itNormal.m_more2 ));
+			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, m_itNormal.m_more2 ));
 			return;
 
 		case IT_ANIM_ACTIVE:
-			sVal = g_Cfg.ResourceGetName( RESOURCE_ID( RES_TYPEDEF, m_itAnim.m_PrevType ));
+			sVal = g_Cfg.ResourceGetName( CResourceID( RES_TYPEDEF, m_itAnim.m_PrevType ));
 			return;
 
 		default:
@@ -2083,11 +2083,11 @@ void CItem::r_Write( CScript & s )
 	CObjBase::r_Write(s);
 
 	if ( GetDispID() != GetID() )	// the item is flipped.
-		s.WriteKey("DISPID", g_Cfg.ResourceGetName(RESOURCE_ID(RES_ITEMDEF, GetDispID())));
+		s.WriteKey("DISPID", g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, GetDispID())));
 	if ( GetAmount() != 1 )
 		s.WriteKeyVal("AMOUNT", GetAmount());
 	if ( !pItemDef->IsType(m_type) )
-		s.WriteKey("TYPE", g_Cfg.ResourceGetName(RESOURCE_ID(RES_TYPEDEF, m_type)));
+		s.WriteKey("TYPE", g_Cfg.ResourceGetName(CResourceID(RES_TYPEDEF, m_type)));
 	if ( m_uidLink.IsValidUID() )
 		s.WriteKeyHex("LINK", m_uidLink);
 	if ( m_Attr )
@@ -2438,7 +2438,7 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 				break;
 			}
 		case IC_DISPID:
-			sVal = g_Cfg.ResourceGetName( RESOURCE_ID( RES_ITEMDEF, GetDispID()));
+			sVal = g_Cfg.ResourceGetName( CResourceID( RES_ITEMDEF, GetDispID()));
 			break;
 		case IC_DISPIDDEC:
 			{
@@ -2542,7 +2542,7 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			fDoDefault = true;
 			break;
 		case IC_TYPE:
-			sVal = g_Cfg.ResourceGetName( RESOURCE_ID( RES_TYPEDEF, m_type ));
+			sVal = g_Cfg.ResourceGetName( CResourceID( RES_TYPEDEF, m_type ));
 			break;
 		default:
 			fDoDefault = true;
@@ -3295,7 +3295,7 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 		EXC_SET("typedef");
 		{
 			// It has an assigned trigger type.
-			CResourceLink * pResourceLink = dynamic_cast <CResourceLink *>( g_Cfg.ResourceGetDef( RESOURCE_ID( RES_TYPEDEF, GetType() )));
+			CResourceLink * pResourceLink = dynamic_cast <CResourceLink *>( g_Cfg.ResourceGetDef( CResourceID( RES_TYPEDEF, GetType() )));
 			if ( pResourceLink == NULL )
 			{
 				if ( pChar )
@@ -3444,7 +3444,7 @@ TRIGRET_TYPE CItem::OnTriggerCreate( CTextConsole * pSrc, CScriptTriggerArgs * p
 		EXC_SET("typedef");
 		{
 			// It has an assigned trigger type.
-			CResourceLink * pResourceLink = dynamic_cast <CResourceLink *>( g_Cfg.ResourceGetDef( RESOURCE_ID( RES_TYPEDEF, GetType() )));
+			CResourceLink * pResourceLink = dynamic_cast <CResourceLink *>( g_Cfg.ResourceGetDef( CResourceID( RES_TYPEDEF, GetType() )));
 			if ( pResourceLink == NULL )
 			{
 				if ( pChar )
@@ -3775,7 +3775,7 @@ void CItem::ConvertBolttoCloth()
 
 	for ( size_t i = 0; i < pDefCloth->m_BaseResources.GetCount(); i++ )
 	{
-		RESOURCE_ID rid = pDefCloth->m_BaseResources[i].GetResourceID();
+		CResourceID rid = pDefCloth->m_BaseResources[i].GetResourceID();
 		if ( rid.GetResType() != RES_ITEMDEF )
 			continue;
 
@@ -5280,7 +5280,7 @@ void CItem::OnExplosion()
 	Sound(0x307);
 }
 
-bool CItem::IsResourceMatch( RESOURCE_ID_BASE rid, dword dwArg )
+bool CItem::IsResourceMatch( CResourceIDBase rid, dword dwArg )
 {
 	ADDTOCALLSTACK("CItem::IsResourceMatch");
 	// Check for all the matching special cases.

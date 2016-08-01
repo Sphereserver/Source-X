@@ -452,7 +452,7 @@ void CChar::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when r
 		switch ( pItem->GetType())
 		{
 			case IT_COMM_CRYSTAL:
-				if ( ContentFind( RESOURCE_ID( RES_TYPEDEF,IT_COMM_CRYSTAL ), 0, 0 ) == NULL )
+				if ( ContentFind( CResourceID( RES_TYPEDEF,IT_COMM_CRYSTAL ), 0, 0 ) == NULL )
 				{
 					StatFlag_Clear(STATF_COMM_CRYSTAL);
 				}
@@ -3604,7 +3604,7 @@ bool CChar::SetPrivLevel(CTextConsole * pSrc, lpctstr pszFlags)
 	PLEVEL_TYPE PrivLevel = CAccount::GetPrivLevelText(pszFlags);
 
 	// Remove Previous GM Robe
-	ContentConsume(RESOURCE_ID(RES_ITEMDEF, ITEMID_GM_ROBE), INT32_MAX);
+	ContentConsume(CResourceID(RES_ITEMDEF, ITEMID_GM_ROBE), INT32_MAX);
 
 	if ( PrivLevel >= PLEVEL_Counsel )
 	{

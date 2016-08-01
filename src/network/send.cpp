@@ -182,9 +182,9 @@ PacketCharacterStatus::PacketCharacterStatus(const CClient* target, CChar* other
 		writeInt16((word)(other->Stat_GetMax(STAT_INT)));
 
 		if ( g_Cfg.m_fPayFromPackOnly )
-			writeInt32(other->GetPackSafe()->ContentCount(RESOURCE_ID(RES_TYPEDEF,IT_GOLD)));
+			writeInt32(other->GetPackSafe()->ContentCount(CResourceID(RES_TYPEDEF,IT_GOLD)));
 		else
-			writeInt32(other->ContentCount(RESOURCE_ID(RES_TYPEDEF,IT_GOLD)));
+			writeInt32(other->ContentCount(CResourceID(RES_TYPEDEF,IT_GOLD)));
 
 		if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 			writeInt16((word)(other->GetDefNum("RESPHYSICAL", true, true)));
@@ -1545,7 +1545,7 @@ void PacketBookPageContent::addPage(const CItem* book, size_t page)
 	if (book->IsBookSystem())
 	{
 		CResourceLock s;
-		if (g_Cfg.ResourceLock(s, RESOURCE_ID(RES_BOOK, book->m_itBook.m_ResID.GetResIndex(), (int)(page))) == true)
+		if (g_Cfg.ResourceLock(s, CResourceID(RES_BOOK, book->m_itBook.m_ResID.GetResIndex(), (int)(page))) == true)
 		{
 			while (s.ReadKey(false))
 			{

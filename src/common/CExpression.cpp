@@ -266,7 +266,7 @@ bool IsValidGameObjDef( lpctstr pszTest )
 		if (( ! ch ) || ( ch == '<'))
 			return false;
 
-		RESOURCE_ID rid = g_Cfg.ResourceGetID( RES_QTY, pszTest);
+		CResourceID rid = g_Cfg.ResourceGetID( RES_QTY, pszTest);
 		if (( rid.GetResType() != RES_CHARDEF ) && ( rid.GetResType() != RES_ITEMDEF ) && ( rid.GetResType() != RES_SPAWN ) && ( rid.GetResType() != RES_TEMPLATE ))
 			return false;
 	}

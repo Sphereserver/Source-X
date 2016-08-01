@@ -185,7 +185,7 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 				pCharSrc->m_Act_Targ = pItem->GetUID();
 			if (s.GetArgStr())
 				pCharSrc->ItemBounce(pItem);
-		
+
 			return( pItem != NULL );
 		}
 	case NV_TRAIN:
@@ -395,7 +395,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 	CPointMap	pTarg = m_Act_p;
 	DIR_TYPE	Dir = pMe.GetDir(pTarg);
 	bool		bUsePathfinding = false;
-	CCharBase	*pCharDef = Char_GetDef();		
+	CCharBase	*pCharDef = Char_GetDef();
 
 	EXC_TRY("NPC_WalkToPoint");
 	if ( Dir >= DIR_QTY ) return 0;		// we are already in the spot
@@ -1719,7 +1719,7 @@ bool CChar::NPC_Act_Food()
 	if ( bSearchGrass )
 	{
 		CCharBase			*pCharDef = Char_GetDef();
-		RESOURCE_ID_BASE	rid = RESOURCE_ID(RES_TYPEDEF, IT_GRASS);
+		CResourceIDBase	rid = CResourceID(RES_TYPEDEF, IT_GRASS);
 
 		if ( pCharDef->m_FoodType.ContainsResourceID(rid) ) // do I accept grass as food?
 		{
@@ -2352,7 +2352,7 @@ void CChar::NPC_Food()
 	if ( bSearchGrass )
 	{
 		CCharBase			*pCharDef = Char_GetDef();
-		RESOURCE_ID_BASE	rid = RESOURCE_ID(RES_TYPEDEF, IT_GRASS);
+		CResourceIDBase	rid = CResourceID(RES_TYPEDEF, IT_GRASS);
 
 		EXC_SET("searching grass");
 		if ( pCharDef->m_FoodType.ContainsResourceID(rid) ) // do I accept grass as a food?
@@ -2440,7 +2440,7 @@ void CChar::NPC_ExtraAI()
 			CItemContainer * pPack = GetPack();
 			if (pPack)
 			{
-				pShield = pPack->ContentFind(RESOURCE_ID(RES_TYPEDEF, IT_SHIELD));
+				pShield = pPack->ContentFind(CResourceID(RES_TYPEDEF, IT_SHIELD));
 				if (pShield)
 					ItemEquip(pShield);
 			}
@@ -2457,7 +2457,7 @@ void CChar::NPC_ExtraAI()
 		CItem *pLightSourceCheck = LayerFind(LAYER_HAND2);
 		if ( !(pLightSourceCheck && (pLightSourceCheck->IsType(IT_LIGHT_OUT) || pLightSourceCheck->IsType(IT_LIGHT_LIT))) )
 		{
-			CItem *pLightSource = ContentFind(RESOURCE_ID(RES_TYPEDEF, IT_LIGHT_OUT));
+			CItem *pLightSource = ContentFind(CResourceID(RES_TYPEDEF, IT_LIGHT_OUT));
 			if ( pLightSource )
 			{
 				ItemEquip(pLightSource);

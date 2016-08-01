@@ -231,11 +231,11 @@ CResource::CResource()
 	m_iColorNotoInvul			= 0x35;		// yellow
 	m_iColorNotoInvulGameMaster = 0x0b;		// purple
 	m_iColorNotoDefault			= 0x3b2;	// grey (if not any other)
-	
+
 	m_iColorInvis		= 0;
 	m_iColorInvisSpell	= 0;
 	m_iColorHidden		= 0;
-	
+
 	m_iNotoTimeout		= 30;					// seconds to remove this character from notoriety list.
 
 	m_iPetsInheritNotoriety = 0;
@@ -352,7 +352,7 @@ bool CResource::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	}
 	else
 	{
-		RESOURCE_ID	rid	= ResourceGetID(static_cast<RES_TYPE>(iResType), pszKey);
+		CResourceID	rid	= ResourceGetID(static_cast<RES_TYPE>(iResType), pszKey);
 
 		// check the found resource type matches what we searched for
 		if ( rid.GetResType() == iResType )
@@ -600,7 +600,7 @@ enum RC_TYPE
 	RC_WORLDSAVE,
 	RC_ZEROPOINT,				// m_sZeroPoint
 	RC_QTY
-}; 
+};
 
 
 const CAssocReg CResource::sm_szLoadKeys[RC_QTY+1] =
@@ -1189,7 +1189,7 @@ bool CResource::r_LoadVal( CScript &s )
 		case RC_TOOLTIPCACHE:
 			g_Cfg.m_iTooltipCache = s.GetArgVal() * TICK_PER_SEC;
 			break;
-			
+
 #ifdef _MTNETWORK
 		case RC_NETWORKTHREADS:
 			if (g_Serv.IsLoading())
@@ -1316,7 +1316,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			pszKey = pszArgsNext;
 			SKIP_SEPARATORS(pszKey);
 			return pt.r_WriteVal(pszKey, sVal);
-		} 
+		}
 
 		if ( !strnicmp( pszKey, "MAPLIST.", 8) )
 		{
@@ -1367,7 +1367,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			if ( g_MapList.IsMapSupported(iMapNumber) )
 			{
 				if ( !strnicmp( pszKey, "SECTOR", 6 ))
-				{ 
+				{
 					pszKey = pszKey + 6;
 					int iSecNumber = Exp_GetVal(pszKey);
 					SKIP_SEPARATORS(pszKey);
@@ -1384,7 +1384,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			}
 			g_Log.EventError("Unsupported Map %d\n", iMapNumber);
 			return false;
-		} 
+		}
 
 		if (!strnicmp( pszKey, "FUNCTIONS.", 10))
 		{
@@ -1813,7 +1813,7 @@ lpctstr CResource::GetNotoTitle( int iLevel, bool bFemale ) const
 		pFemaleTitle++;
 		if (bFemale)
 			return pFemaleTitle;
-		
+
 		// copy string so that it can be null-terminated without modifying m_NotoTitles
 		tchar* pTitle = Str_GetTemp();
 		strcpylen(pTitle, m_NotoTitles[iLevel]->GetPtr(), (int)(m_NotoTitles[iLevel]->GetLength() - strlen(pFemaleTitle)));
@@ -1925,7 +1925,7 @@ bool CResource::SetKRDialogMap(dword rid, dword idKRDialog)
 		if ( it->second == idKRDialog )	// already mapped to this kr dialog
 			return true;
 
-		g_Log.Event( LOGL_WARN, "Dialog '%s' is already mapped to KR dialog '%u'.\n", ResourceGetName(RESOURCE_ID(RES_DIALOG, rid)), it->second);
+		g_Log.Event( LOGL_WARN, "Dialog '%s' is already mapped to KR dialog '%u'.\n", ResourceGetName(CResourceID(RES_DIALOG, rid)), it->second);
 	}
 
 	// prevent double mapping of KR dialog
@@ -1934,7 +1934,7 @@ bool CResource::SetKRDialogMap(dword rid, dword idKRDialog)
 		if (it->second != idKRDialog)
 			continue;
 
-		DEBUG_ERR(("KR Dialog '%u' is already mapped to dialog '%s'.\n", idKRDialog, ResourceGetName(RESOURCE_ID(RES_DIALOG, it->first))));
+		DEBUG_ERR(("KR Dialog '%u' is already mapped to dialog '%s'.\n", idKRDialog, ResourceGetName(CResourceID(RES_DIALOG, it->first))));
 		return false;
 	}
 
@@ -2261,7 +2261,7 @@ int CResource::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar char
 		{
 			retValue |= ( m_iFeatureSA & FEATURE_SA_MOVEMENT ) ? 0x4000 : 0x00;
 		}
-		
+
 		retValue |= ( chars == 1 ) ? 0x0014 : 0x00;
 		retValue |= ( chars >= 6 ) ? 0x0040 : 0x00;
 		retValue |= ( chars >= 7 ) ? 0x1000 : 0x00;
@@ -2340,7 +2340,7 @@ int CResource::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar char
 		retValue |= ( m_iFeatureExtra & FEATURE_EXTRA_RUSTIC ) ? 0x80000 : 0x00;
 		retValue |= ( m_iFeatureExtra & FEATURE_EXTRA_JUNGLE ) ? 0x100000 : 0x00;
 		retValue |= ( m_iFeatureExtra & FEATURE_EXTRA_SHADOWGUARD ) ? 0x200000 : 0x00;
-		
+
 		retValue |= ( chars >= 6 ) ? 0x0020 : 0x00;
 		retValue |= ( chars >= 7 ) ? 0x1000 : 0x00;
 	}
@@ -2360,7 +2360,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 	ASSERT(pScript);
 	CScriptFileContext FileContext( pScript );	// set this as the context.
 	CVarDefContNum * pVarNum = NULL;
-	RESOURCE_ID rid;
+	CResourceID rid;
 	lpctstr		pszSection	= pScript->GetSection();
 
 	RES_TYPE restype;
@@ -2554,7 +2554,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		{
 			while ( pScript->ReadKey() )
 			{
-				lpctstr pName = pScript->GetKeyBuffer();	
+				lpctstr pName = pScript->GetKeyBuffer();
 				m_ResourceList.AddSortString( pName );
 			}
 		}
@@ -2567,7 +2567,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 				lpctstr pName = pScript->GetKeyBuffer();
 				if ( *pName == '<' )
 					pName = "";
-				
+
 				m_Fame.SetAtGrow( i, new CSString(pName) );
 				++i;
 			}
@@ -2581,7 +2581,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 				lpctstr pName = pScript->GetKeyBuffer();
 				if ( *pName == '<' )
 					pName = "";
-				
+
 				m_Karma.SetAtGrow( i, new CSString(pName) );
 				++i;
 			}
@@ -3040,7 +3040,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		// just get a block of defs.
 		while ( pScript->ReadKeyParse())
 		{
-			RESOURCE_ID ridnew( RES_TYPEDEF, pScript->GetArgVal() );
+			CResourceID ridnew( RES_TYPEDEF, pScript->GetArgVal() );
 			pPrvDef = ResourceGetDef( ridnew );
 			if ( pPrvDef )
 			{
@@ -3206,7 +3206,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 
 //*************************************************************
 
-RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVarDefContNum ** ppVarNum, bool fNewStyleDef )
+CResourceID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVarDefContNum ** ppVarNum, bool fNewStyleDef )
 {
 	ADDTOCALLSTACK("CResource::ResourceGetNewID");
 	// We are reading in a script block.
@@ -3218,8 +3218,8 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 	ASSERT(pszName);
 	ASSERT(ppVarNum);
 
-	const RESOURCE_ID ridinvalid;	// LINUX wants this for some reason.
-	RESOURCE_ID rid;
+	const CResourceID ridinvalid;	// LINUX wants this for some reason.
+	CResourceID rid;
 	int iPage = 0;	// sub page
 
 	// Some types don't use named indexes at all. (Single instance)
@@ -3246,7 +3246,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 	case RES_WORLDLISTS:
 		// Single instance stuff. (fully read in)
 		// Ignore any resource name.
-		return RESOURCE_ID( restype );
+		return CResourceID( restype );
 	case RES_FUNCTION:		// Define a new command verb script that applies to a char.
 	case RES_ACCOUNT:
 	case RES_GMPAGE:
@@ -3255,7 +3255,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 		// These are multiple instance but name is not a RESOURCE_ID
 		if ( pszName[0] == '\0' )
 			return ridinvalid;	// invalid
-		return RESOURCE_ID( restype );
+		return CResourceID( restype );
 	// Extra args are allowed.
 	case RES_BOOK:		// BOOK BookName page
 	case RES_DIALOG:	// DIALOG GumpName ./TEXT/BUTTON
@@ -3295,26 +3295,26 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 				iPage = RACETYPE_GARGOYLE;
 
 			if ( ! strcmpi( pszName, "MALE_DEFAULT" ))
-				return RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_MALE_DEFAULT, iPage );
+				return CResourceID( RES_NEWBIE, RES_NEWBIE_MALE_DEFAULT, iPage );
 			else if ( ! strcmpi( pszName, "FEMALE_DEFAULT" ))
-				return RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_FEMALE_DEFAULT, iPage );
+				return CResourceID( RES_NEWBIE, RES_NEWBIE_FEMALE_DEFAULT, iPage );
 
 			if ( ! strcmpi( pszName, "PROFESSION_ADVANCED" ))
-				return RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_PROF_ADVANCED, iPage );
+				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_ADVANCED, iPage );
 			else if ( ! strcmpi( pszName, "PROFESSION_WARRIOR" ))
-				return RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_PROF_WARRIOR, iPage );
+				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_WARRIOR, iPage );
 			else if ( ! strcmpi( pszName, "PROFESSION_MAGE" ))
-				return RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_PROF_MAGE, iPage );
+				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_MAGE, iPage );
 			else if ( ! strcmpi( pszName, "PROFESSION_BLACKSMITH" ))
-				return RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_PROF_BLACKSMITH, iPage );
+				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_BLACKSMITH, iPage );
 			else if ( ! strcmpi( pszName, "PROFESSION_NECROMANCER" ))
-				return RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_PROF_NECROMANCER, iPage );
+				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_NECROMANCER, iPage );
 			else if ( ! strcmpi( pszName, "PROFESSION_PALADIN" ))
-				return RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_PROF_PALADIN, iPage );
+				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_PALADIN, iPage );
 			else if ( ! strcmpi( pszName, "PROFESSION_SAMURAI" ))
-				return RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_PROF_SAMURAI, iPage );
+				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_SAMURAI, iPage );
 			else if ( ! strcmpi( pszName, "PROFESSION_NINJA" ))
-				return RESOURCE_ID( RES_NEWBIE, RES_NEWBIE_PROF_NINJA, iPage );
+				return CResourceID( RES_NEWBIE, RES_NEWBIE_PROF_NINJA, iPage );
 		}
 		break;
 	case RES_AREA:
@@ -3339,18 +3339,18 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 		if ( pszName[0] == '\0' )	// absense of resourceid = index 0
 		{
 			// This might be ok.
-			return RESOURCE_ID( restype, 0, iPage );
+			return CResourceID( restype, 0, iPage );
 		}
 		if ( IsDigit(pszName[0]) )	// Its just an index.
 		{
 			index = Exp_GetVal(pszName);
-			rid = RESOURCE_ID( restype, index );
+			rid = CResourceID( restype, index );
 			switch ( restype )
 			{
 			case RES_BOOK:			// A book or a page from a book.
 			case RES_DIALOG:		// A scriptable gump dialog: text or handler block.
 			case RES_REGIONTYPE:	// Triggers etc. that can be assinged to a RES_AREA
-				rid = RESOURCE_ID( restype, index, iPage );
+				rid = CResourceID( restype, index, iPage );
 				break;
 			case RES_SKILLMENU:
 			case RES_MENU:			// General scriptable menus.
@@ -3365,7 +3365,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 				break;
 			case RES_ITEMDEF:		// Define an item type
 				if (fNewStyleDef)	// indicates this is a multi and should have an appropriate offset applied
-					rid = RESOURCE_ID( restype, index + ITEMID_MULTI);
+					rid = CResourceID( restype, index + ITEMID_MULTI);
 				break;
 			default:
 				return rid;
@@ -3444,7 +3444,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 					//	DEBUG_WARN(( "Redef resource '%s'\n", static_cast<lpctstr>(pszName) ));
 				}
 			}
-			rid = RESOURCE_ID( restype, rid.GetResIndex(), iPage );
+			rid = CResourceID( restype, rid.GetResIndex(), iPage );
 			*ppVarNum = pVarNum;
 			return rid;
 		}
@@ -3535,9 +3535,9 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 	}
 
 	if ( iPage )
-		rid = RESOURCE_ID( restype, index, iPage );
+		rid = CResourceID( restype, index, iPage );
 	else
-		rid = RESOURCE_ID( restype, index );
+		rid = CResourceID( restype, index );
 
 	if ( iHashRange )
 	{
@@ -3567,7 +3567,7 @@ RESOURCE_ID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 	return rid;
 }
 
-CResourceDef * CResource::ResourceGetDef( RESOURCE_ID_BASE rid ) const
+CResourceDef * CResource::ResourceGetDef( CResourceIDBase rid ) const
 {
 	ADDTOCALLSTACK("CResource::ResourceGetDef");
 	// Get a CResourceDef from the RESOURCE_ID.
@@ -3929,12 +3929,12 @@ bool CResource::Load( bool fResync )
 		g_Serv.SetName(( ! iRet && szName[0] ) ? szName : SPHERE_TITLE );
 	}
 
-	if ( ! g_Cfg.ResourceGetDef( RESOURCE_ID( RES_SKILLCLASS, 0 )))
+	if ( ! g_Cfg.ResourceGetDef( CResourceID( RES_SKILLCLASS, 0 )))
 	{
 		// must have at least 1 skill class.
-		CSkillClassDef * pSkillClass = new CSkillClassDef( RESOURCE_ID( RES_SKILLCLASS ));
+		CSkillClassDef * pSkillClass = new CSkillClassDef( CResourceID( RES_SKILLCLASS ));
 		ASSERT(pSkillClass);
-		m_ResHash.AddSortKey( RESOURCE_ID( RES_SKILLCLASS, 0 ), pSkillClass );
+		m_ResHash.AddSortKey( CResourceID( RES_SKILLCLASS, 0 ), pSkillClass );
 	}
 
 	if ( !fResync )
@@ -3971,7 +3971,7 @@ bool CResource::Load( bool fResync )
 		CScript script("EVENTSITEM", m_sEventsItem);
 		m_iEventsItemLink.r_LoadVal(script, RES_EVENTS);
 	}
-	
+
 	// parse eventspet
 	m_pEventsPetLink.Empty();
 	if ( ! m_sEventsPet.IsEmpty() )
@@ -4134,7 +4134,7 @@ bool CResource::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilename )
 		pszFilename	= "unscripted_items" SPHERE_SCRIPT;
 	else if ( strlen( pszFilename ) <= 4 )
 		return false;
-	
+
 	// open file
 	CScript s;
 	if ( ! s.Open( pszFilename, OF_WRITE|OF_TEXT|OF_DEFAULTMODE ))
@@ -4156,7 +4156,7 @@ bool CResource::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilename )
 		if ( !( i % 0xff ))
 			g_Serv.PrintPercent(i, idMaxItem);
 
-		RESOURCE_ID rid = RESOURCE_ID(RES_ITEMDEF, i);
+		CResourceID rid = CResourceID(RES_ITEMDEF, i);
 		if (g_Cfg.m_ResHash.FindKey(rid) != g_Cfg.m_ResHash.BadIndex())
 			continue;
 
@@ -4168,7 +4168,7 @@ bool CResource::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilename )
 		// ensure there is actually some data here, treat "MissingName" as blank since some tiledata.muls
 		// have this name set in blank slots
 		if ( !tiledata.m_flags && !tiledata.m_weight && !tiledata.m_layer &&
-			 !tiledata.m_dwUnk11 && !tiledata.m_dwAnim && !tiledata.m_wUnk19 && !tiledata.m_height && 
+			 !tiledata.m_dwUnk11 && !tiledata.m_dwAnim && !tiledata.m_wUnk19 && !tiledata.m_height &&
 			 (!tiledata.m_name[0] || strcmp(tiledata.m_name, "MissingName") == 0))
 			 continue;
 
@@ -4186,7 +4186,7 @@ bool CResource::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilename )
 			s.Printf("// (unnamed object)\n");
 		}
 
-		s.WriteKey("TYPE", ResourceGetName(RESOURCE_ID(RES_TYPEDEF, CItemBase::GetTypeBase(static_cast<ITEMID_TYPE>(i), tiledata))));
+		s.WriteKey("TYPE", ResourceGetName(CResourceID(RES_TYPEDEF, CItemBase::GetTypeBase(static_cast<ITEMID_TYPE>(i), tiledata))));
 	}
 
 	s.WriteSection("EOF");

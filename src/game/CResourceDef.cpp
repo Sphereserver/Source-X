@@ -14,7 +14,7 @@
 int CValueRangeDef::GetRandomLinear( int iPercent ) const
 {
 	ADDTOCALLSTACK("CValueRangeDef::GetRandomLinear");
-	return( ( GetRandom() + GetLinear(iPercent) ) / 2 ); 
+	return( ( GetRandom() + GetLinear(iPercent) ) / 2 );
 }
 
 bool CValueRangeDef::Load( tchar * pszDef )
@@ -23,7 +23,7 @@ bool CValueRangeDef::Load( tchar * pszDef )
 	// Typically in {lo# hi#} format. is hi#,lo# is ok too ???
 	int64 piVal[2];
 	int iQty = g_Exp.GetRangeVals( pszDef, piVal, CountOf(piVal));
-	if ( iQty< 0 ) 
+	if ( iQty< 0 )
 		return false;
 
 	m_iLo = piVal[0];
@@ -176,7 +176,7 @@ int CValueCurveDef::GetChancePercent( int iSkillPercent ) const
 //*******************************************
 // -CSkillDef
 
-lpctstr const CSkillDef::sm_szTrigName[SKTRIG_QTY+1] = 
+lpctstr const CSkillDef::sm_szTrigName[SKTRIG_QTY+1] =
 {
 	"@AAAUNUSED",
 	"@ABORT",
@@ -244,7 +244,7 @@ lpctstr const CSkillDef::sm_szLoadKeys[SKC_QTY+1] =
 };
 
 CSkillDef::CSkillDef( SKILL_TYPE skill ) :
-	CResourceLink( RESOURCE_ID( RES_SKILL, skill ))
+	CResourceLink( CResourceID( RES_SKILL, skill ))
 {
 	m_StatPercent	= 0;
 	m_GainRadius	= 0;
@@ -397,7 +397,7 @@ bool CSkillDef::r_LoadVal( CScript &s )
 	case SKC_GAINRADIUS: // "GAINRADIUS"
 		m_GainRadius = s.GetArgVal();
 		break;
-	
+
 	default:
 		return( CResourceDef::r_LoadVal( s ));
 	}
@@ -542,7 +542,7 @@ bool CSkillClassDef::r_LoadVal( CScript &s )
 //*******************************************
 // -CSpellDef
 
-lpctstr const CSpellDef::sm_szTrigName[SPTRIG_QTY+1] = 
+lpctstr const CSpellDef::sm_szTrigName[SPTRIG_QTY+1] =
 {
 	"@AAAUNUSED",
 	"@EFFECT",
@@ -603,7 +603,7 @@ lpctstr const CSpellDef::sm_szLoadKeys[SPC_QTY+1] =
 };
 
 CSpellDef::CSpellDef( SPELL_TYPE id ) :
-	CResourceLink( RESOURCE_ID( RES_SPELL, id ))
+	CResourceLink( CResourceID( RES_SPELL, id ))
 {
 	m_dwFlags = SPELLFLAG_DISABLED;
 	m_dwGroup = 0;
@@ -1233,7 +1233,7 @@ bool CRegionResourceDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConso
 	return false;
 }
 
-CRegionResourceDef::CRegionResourceDef( RESOURCE_ID rid ) :
+CRegionResourceDef::CRegionResourceDef( CResourceID rid ) :
 	CResourceLink( rid )
 {
 	// set defaults first.

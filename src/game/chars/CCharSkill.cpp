@@ -218,7 +218,7 @@ int CChar::Skill_GetMax( SKILL_TYPE skill, bool ignoreLock ) const
 			iSkillMax = (int)(pTagStorage->GetValNum());
 		else
 			iSkillMax = pSkillClass->m_SkillLevelMax[skill];
-		
+
 		if ( !ignoreLock )
 		{
 			if ( m_pPlayer->Skill_GetLock(skill) >= SKILLLOCK_DOWN )
@@ -361,12 +361,12 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 
 	CScriptTriggerArgs pArgs( 0 , iChance, iSkillMax);
 	if ( IsTrigUsed(TRIGGER_SKILLGAIN) )
-	{	
+	{
 		if ( Skill_OnCharTrigger( skill, CTRIG_SkillGain, &pArgs ) == TRIGRET_RET_TRUE )
 			return;
 	}
 	if ( IsTrigUsed(TRIGGER_GAIN) )
-	{	
+	{
 		if ( Skill_OnTrigger( skill, SKTRIG_GAIN, &pArgs ) == TRIGRET_RET_TRUE )
 			return;
 	}
@@ -521,7 +521,7 @@ bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain,
 		else if ( ret == TRIGRET_RET_FALSE )
 			return false;
 	}
-	
+
 	if ( result )	// success
 	{
 		if ( bAllowGain )
@@ -959,7 +959,7 @@ CItem * CChar::Skill_NaturalResource_Create( CItem * pResBit, SKILL_TYPE skill )
 		tRet = this->OnTrigger(CTRIG_RegionResourceGather, this, &Args);
 	if ( IsTrigUsed(TRIGGER_RESOURCEGATHER) )
 		tRet = pOreDef->OnTrigger("@ResourceGather", this, &Args);
-	
+
 	if ( tRet == TRIGRET_RET_TRUE )
 		return NULL;
 
@@ -1064,7 +1064,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 		// find the ingot type resources.
 		for ( size_t i = 0; i < pOreDef->m_BaseResources.GetCount(); i++ )
 		{
-			RESOURCE_ID rid = pOreDef->m_BaseResources[i].GetResourceID();
+			CResourceID rid = pOreDef->m_BaseResources[i].GetResourceID();
 			if ( rid.GetResType() != RES_ITEMDEF )
 				continue;
 
@@ -1409,12 +1409,12 @@ int CChar::Skill_Fishing( SKTRIG_TYPE stage )
 }
 
 int CChar::Skill_Lumberjack( SKTRIG_TYPE stage )
-{	
+{
 	ADDTOCALLSTACK("CChar::Skill_Lumberjack");
 	// SKILL_LUMBERJACK
 	// m_Act_p = the point we want to chop/hack at.
 	// m_Act_TargPrv = Axe/Dagger
-	// NOTE: The skill is used for hacking with IT_FENCE (e.g. i_dagger) 
+	// NOTE: The skill is used for hacking with IT_FENCE (e.g. i_dagger)
 	//
 	// RETURN:
 	//   difficulty = 0-100
@@ -1700,7 +1700,7 @@ int CChar::Skill_Enticement( SKTRIG_TYPE stage )
 				pChar->NPC_WalkToPoint( ( pChar->m_Act_p.GetDist(pChar->GetTopPoint()) > 3) );
 				return 0;
 			}
-			
+
 		default:
 			break;
 	}
@@ -2031,7 +2031,7 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 	pMemory = pChar->Memory_AddObjTypes(this, MEMORY_SPEAK);
 	if ( pMemory )
 		pMemory->m_itEqMemory.m_Action = NPC_MEM_ACT_TAMED;
-		
+
 	return 0;
 }
 
@@ -2622,7 +2622,7 @@ int CChar::Skill_MakeItem( SKTRIG_TYPE stage )
 	// m_Act_Targ = the item we want to be part of this process.
 	// m_atCreate.m_ItemID = new item we are making
 	// m_atCreate.m_Amount = amount of said item.
-	
+
 	if ( stage == SKTRIG_START )
 		return m_Act_Difficulty;	// keep the already set difficulty
 
@@ -2895,7 +2895,7 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
     if ( pRock )
 	{
 		lpctstr t_Str = pRock->GetValStr();
-		RESOURCE_ID_BASE rid = static_cast<RESOURCE_ID_BASE>(g_Cfg.ResourceGetID( RES_ITEMDEF, t_Str ));
+		CResourceIDBase rid = static_cast<CResourceIDBase>(g_Cfg.ResourceGetID( RES_ITEMDEF, t_Str ));
 		id = static_cast<ITEMID_TYPE>(rid.GetResIndex());
 		if (!iDamage)
 			iDamage = Stat_GetVal(STAT_DEX)/4 + Calc_GetRandVal( Stat_GetVal(STAT_DEX)/4 );
@@ -2928,7 +2928,7 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 		if ( ! Calc_GetRandVal( pChar->GetTopPoint().GetDist( m_Act_p )))	// did it hit?
 			pChar->OnTakeDamage( iDamage, this, DAMAGE_HIT_BLUNT );
 	}
-	
+
 	return 0;
 }
 
@@ -3291,13 +3291,13 @@ void CChar::Skill_Fail( bool fCancel )
 	Skill_Cleanup();
 }
 
-TRIGRET_TYPE CChar::Skill_OnTrigger( SKILL_TYPE skill, SKTRIG_TYPE stage ) 
+TRIGRET_TYPE CChar::Skill_OnTrigger( SKILL_TYPE skill, SKTRIG_TYPE stage )
 {
 	CScriptTriggerArgs pArgs;
 	return Skill_OnTrigger(skill, stage, &pArgs);
 }
 
-TRIGRET_TYPE CChar::Skill_OnCharTrigger( SKILL_TYPE skill, CTRIG_TYPE stage ) 
+TRIGRET_TYPE CChar::Skill_OnCharTrigger( SKILL_TYPE skill, CTRIG_TYPE stage )
 {
 	CScriptTriggerArgs pArgs;
 	return Skill_OnCharTrigger(skill, stage, &pArgs);
@@ -3535,7 +3535,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficulty )
 		CScriptTriggerArgs pArgs;
 		bool bCraftSkill = g_Cfg.IsSkillFlag(skill, SKF_CRAFT);
 		bool bGatherSkill = g_Cfg.IsSkillFlag(skill, SKF_GATHER);
-		RESOURCE_ID pResBase(RES_ITEMDEF, bCraftSkill ? m_atCreate.m_ItemID : 0, 0);
+		CResourceID pResBase(RES_ITEMDEF, bCraftSkill ? m_atCreate.m_ItemID : 0, 0);
 
 		if ( bCraftSkill )
 		{

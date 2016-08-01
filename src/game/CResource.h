@@ -56,7 +56,7 @@ enum OF_TYPE
 enum EF_TYPE
 {
 	EF_NoDiagonalCheckLOS			= 0x0000001,    ///< Disable LOS checks on diagonal directions.
-	EF_Dynamic_Backsave				= 0x0000002,    ///< This will enable, if necessary, if a backgroundsave tick is triggered to save more than only one Sector. 
+	EF_Dynamic_Backsave				= 0x0000002,    ///< This will enable, if necessary, if a backgroundsave tick is triggered to save more than only one Sector.
 	EF_ItemStacking					= 0x0000004,    ///< Enable item stacking feature when drop items on ground.
 	EF_ItemStackDrop				= 0x0000008,    ///< The item stack will drop when an item got removed from the stack.
 	EF_FastWalkPrevention			= 0x0000010,    ///< Enable client fastwalk prevention (INCOMPLETE YET).
@@ -119,7 +119,7 @@ public:
      * @return  The linear.
      */
 	int GetLinear( int iPercent ) const
-	{	
+	{
 		// ARGS: iPercent = 0-1000
 		return (int)m_iLo + MulDiv( GetRange(), iPercent, 1000 );
 	}
@@ -132,7 +132,7 @@ public:
      * @return  The random.
      */
 	int GetRandom() const
-	{	
+	{
 		return ( (int)m_iLo + Calc_GetRandVal(GetRange()) );
 	}
 
@@ -298,7 +298,7 @@ public:
 	CValueCurveDef m_iRegenerateTime;///< TICK_PER_SEC once found how long to regen this type.
 
 public:
-	explicit CRegionResourceDef( RESOURCE_ID rid );
+	explicit CRegionResourceDef( CResourceID rid );
 	virtual ~CRegionResourceDef();
 
 private:
@@ -471,7 +471,7 @@ public:
 	static bool ServPage(CClient * pClient, tchar * pszPage, CSTime * pdateLastMod);
 
 public:
-	explicit CWebPageDef(RESOURCE_ID id);
+	explicit CWebPageDef(CResourceID id);
 	virtual ~CWebPageDef()
 	{
 	}
@@ -534,7 +534,7 @@ public:
 	CValueCurveDef m_Effect;        ///< Damage or effect level based on skill of caster.100% magery
 	CValueCurveDef m_Duration;      ///< length of effect. in TICK_PER_SEC
 	CValueCurveDef m_Interrupt;     ///< chance to interrupt a spell
-	
+
 public:
 
     /**
@@ -587,7 +587,7 @@ private:
 	int CalcTotalWeight();
 public:
 	static const char *m_sClassName;
-	explicit CSRandGroupDef( RESOURCE_ID rid ) : CResourceLink( rid )
+	explicit CSRandGroupDef( CResourceID rid ) : CResourceLink( rid )
 	{
 		m_iTotalWeight = 0;
 	}
@@ -611,7 +611,7 @@ public:
 	{
 		return m_Members[i];
 	}
-	RESOURCE_ID GetMemberID( size_t i ) const
+	CResourceID GetMemberID( size_t i ) const
 	{
 		return m_Members[i].GetResourceID();
 	}
@@ -664,7 +664,7 @@ public:
 private:
 	void Init();
 public:
-	explicit CSkillClassDef( RESOURCE_ID rid ) : CResourceLink( rid )
+	explicit CSkillClassDef( CResourceID rid ) : CResourceLink( rid )
 	{
 		// If there was none defined in scripts.
 		Init();
@@ -718,7 +718,7 @@ public:
 
 	dword			m_dwFlags;      ///< Skill Flags.
 	dword			m_dwGroup;      ///< Skill Group.
-	
+
 	// Delay before skill complete. modified by skill level of course !
 public:
 	explicit CSkillDef( SKILL_TYPE iSkill );
@@ -790,7 +790,7 @@ struct CMultiDefArray : public CSObjSortArray< CSphereMulti*, MULTI_TYPE >
  */
 extern class CResource : public CResourceBase
 {
-	// 
+	//
 	static const CAssocReg sm_szLoadKeys[];
 
 public:
@@ -980,7 +980,7 @@ public:
 
 	int m_iCommandLog;		///< Only commands issued by this plevel and higher will be logged
 	bool m_fTelnetLog;		///< Set to 1 to enable logging of commands issued via telnet
-	
+
 	bool m_fUsecrypt;		///< Set this to 1 to allow login to encrypted clients
 	bool m_fUsenocrypt;		///< Set this to 1 to allow login to unencrypted clients
 
@@ -1003,7 +1003,7 @@ public:
 	int	m_iFeatureSA;		///< SA features.
 	int	m_iFeatureTOL;		///< TOL features.
 	int	m_iFeatureExtra;	///< Extra features.
-	
+
 	int	m_iMaxLoopTimes;
 #define	STAT_FLAG_NORMAL    0x00    ///<    MAX* status allowed (default)
 #define STAT_FLAG_DENYMAX   0x01    ///<    MAX* denied
@@ -1057,7 +1057,7 @@ public:
 	HUE_TYPE m_iColorNotoInvul;         ///< Yellow
 	HUE_TYPE m_iColorNotoInvulGameMaster;///< Purple
 	HUE_TYPE m_iColorNotoDefault;       ///< Grey
-	
+
 	HUE_TYPE m_iColorInvis;     ///< 04001 = transparent color, 0 = default
 	HUE_TYPE m_iColorInvisSpell;///< 04001 = transparent color, 0 = default (This one is for s_invisibility spell, this includes the invis potion.)
 	HUE_TYPE m_iColorHidden;    ///< 04001 = transparent color, 0 = default
@@ -1117,7 +1117,7 @@ public:
 	int     m_iMaxPolyStats;        ///< Max amount of each Stat gained through Polymorph spell. This affects separatelly to each stat.
 
 	///< End INI file options.
-	
+
 	CResourceScript m_scpIni;       ///< Keep this around so we can link to it.
 	CResourceScript m_scpCryptIni;  ///< Encryption keys are in here
 
@@ -1157,12 +1157,12 @@ public:
 	CResourceHashArray m_WebPages;		///< These can be linked back to the script.
 
 private:
-	RESOURCE_ID ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVarDefContNum ** ppVarNum, bool fNewStyleDef );
+	CResourceID ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVarDefContNum ** ppVarNum, bool fNewStyleDef );
 
 public:
 	CResource();
 	~CResource();
-	
+
 private:
 	CResource(const CResource& copy);
 	CResource& operator=(const CResource& other);
@@ -1243,8 +1243,8 @@ public:
      *
      * @return  null if it fails, else a pointer to a CResourceDef.
      */
-	CResourceDef * ResourceGetDef( RESOURCE_ID_BASE rid ) const;
-	
+	CResourceDef * ResourceGetDef( CResourceIDBase rid ) const;
+
 	///< Print EF/OF Flags
 	void PrintEFOFFlags( bool bEF = true, bool bOF = true, CTextConsole *pSrc = NULL );
 
@@ -1356,7 +1356,7 @@ public:
     *
     * @return  null if it fails, else the spell definition.
     */
-	CSpellDef * GetSpellDef( SPELL_TYPE index ) 
+	CSpellDef * GetSpellDef( SPELL_TYPE index )
 	{
 		///< future: underlying type for SPELL_TYPE to avoid casts
 		if (index == SPELL_NONE || m_SpellDefs.IsValidIndex((size_t)(index)) == false)
@@ -1639,7 +1639,7 @@ public:
      * @return  The calculated mapto sextant.
      */
 	lpctstr Calc_MaptoSextant( CPointMap pntCoords );
-	
+
 #define SysMessageDefault( msg )	SysMessage( g_Cfg.GetDefaultMsg( msg ) )
 
     /**
@@ -1690,14 +1690,14 @@ public:
 	bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc );
 
 public:
-	explicit CDialogDef( RESOURCE_ID rid );
+	explicit CDialogDef( CResourceID rid );
 	virtual ~CDialogDef() { };
 
 private:
 	CDialogDef(const CDialogDef& copy);
 	CDialogDef& operator=(const CDialogDef& other);
 
-public:	
+public:
 	///< temporary placeholders - valid only during dialog setup
 	CObjBase *	m_pObj;
 	CSString	m_sControls[1024];
@@ -1720,8 +1720,8 @@ class CItemTypeDef : public CResourceLink
 {
 public:
 	static const char *m_sClassName;
-	explicit CItemTypeDef( RESOURCE_ID rid ) : CResourceLink( rid )
-	{	
+	explicit CItemTypeDef( CResourceID rid ) : CResourceLink( rid )
+	{
 	}
 
 private:

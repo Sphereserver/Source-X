@@ -157,10 +157,10 @@ void CClient::Event_Tips( word i) // Tip of the day window
 	if (i==0)
 		i=1;
 	CResourceLock s;
-	if ( g_Cfg.ResourceLock( s, RESOURCE_ID( RES_TIP, i )) == false )
+	if ( g_Cfg.ResourceLock( s, CResourceID( RES_TIP, i )) == false )
 	{
 		// requested tip was not found, default to tip 1 if possible
-		if ( i == 1 || ( g_Cfg.ResourceLock( s, RESOURCE_ID( RES_TIP, 1 )) == false ))
+		if ( i == 1 || ( g_Cfg.ResourceLock( s, CResourceID( RES_TIP, 1 )) == false ))
 			return;
 
 		i = 1;
@@ -1107,9 +1107,9 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t it
 		}
 		else
 		{
-			int iGold = m_pChar->GetPackSafe()->ContentConsume(RESOURCE_ID(RES_TYPEDEF, IT_GOLD), (int)(costtotal), true);
+			int iGold = m_pChar->GetPackSafe()->ContentConsume(CResourceID(RES_TYPEDEF, IT_GOLD), (int)(costtotal), true);
 			if ( !g_Cfg.m_fPayFromPackOnly && iGold )
-				iGold = m_pChar->ContentConsume(RESOURCE_ID(RES_TYPEDEF, IT_GOLD), (int)(costtotal), true);
+				iGold = m_pChar->ContentConsume(CResourceID(RES_TYPEDEF, IT_GOLD), (int)(costtotal), true);
 
 			if ( iGold )
 			{
@@ -1246,9 +1246,9 @@ do_consume:
 	//	Take the gold and add it to the vendor
 	if ( !fBoss )
 	{
-		int iGold = m_pChar->GetPackSafe()->ContentConsume( RESOURCE_ID(RES_TYPEDEF,IT_GOLD), (int)(costtotal));
+		int iGold = m_pChar->GetPackSafe()->ContentConsume( CResourceID(RES_TYPEDEF,IT_GOLD), (int)(costtotal));
 		if ( !g_Cfg.m_fPayFromPackOnly && iGold)
-			m_pChar->ContentConsume( RESOURCE_ID(RES_TYPEDEF,IT_GOLD), iGold);
+			m_pChar->ContentConsume( CResourceID(RES_TYPEDEF,IT_GOLD), iGold);
 			//m_pChar->ContentConsume( RESOURCE_ID(RES_TYPEDEF,IT_GOLD), (int)(costtotal));
 
 

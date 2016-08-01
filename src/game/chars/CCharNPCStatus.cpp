@@ -263,17 +263,17 @@ int CChar::NPC_GetTrainMax( const CChar * pStudent, SKILL_TYPE Skill ) const
 	int iMaxAllowed;
 
 	CVarDefCont * pValue = GetKey("OVERRIDE.TRAINSKILLMAXPERCENT",true);
-	if ( pValue ) 
+	if ( pValue )
 		iMax = (int)MulDivLL( pValue->GetValNum(), Skill_GetBase(Skill), 100 );
 	else
 		iMax = (int)MulDivLL( g_Cfg.m_iTrainSkillPercent, Skill_GetBase(Skill), 100 );
 
 	pValue = GetKey("OVERRIDE.TRAINSKILLMAX",true);
-	if ( pValue ) 
+	if ( pValue )
 		iMaxAllowed = (int)(pValue->GetValNum());
 	else
 		iMaxAllowed = g_Cfg.m_iTrainSkillMax;
-	
+
 	if ( iMax > iMaxAllowed )
 		return minimum(iMaxAllowed, pStudent->Skill_GetMax(Skill));
 
@@ -343,7 +343,7 @@ CItemVendable * CChar::NPC_FindVendableItem( CItemVendable * pVendItem, CItemCon
 	if ( !pVendItem || !pContBuy || !pVendItem->IsValidSaleItem(false) )
 		return NULL;
 
-	CItem * pItemTest = pContBuy->ContentFind(RESOURCE_ID(RES_ITEMDEF, pVendItem->GetID()));
+	CItem * pItemTest = pContBuy->ContentFind(CResourceID(RES_ITEMDEF, pVendItem->GetID()));
 	if ( pItemTest == NULL )
 		return NULL;
 

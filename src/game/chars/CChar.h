@@ -1,6 +1,6 @@
 /**
 * @file CChar.h
-* 
+*
 */
 
 #pragma once
@@ -305,8 +305,8 @@ public:
 
 	bool Can( word wCan ) const;
 	bool Can( int wCan ) const;
-	bool IsResourceMatch( RESOURCE_ID_BASE rid, dword dwArg );
-	bool IsResourceMatch( RESOURCE_ID_BASE rid, dword dwArg, dword dwArgResearch );
+	bool IsResourceMatch( CResourceIDBase rid, dword dwArg );
+	bool IsResourceMatch( CResourceIDBase rid, dword dwArg, dword dwArgResearch );
 
 	bool IsSpeakAsGhost() const;
 	bool CanUnderstandGhost() const;
@@ -512,7 +512,7 @@ public:
 	virtual bool r_WriteVal( lpctstr pszKey, CSString & s, CTextConsole * pSrc = NULL );
 	virtual void r_Write( CScript & s );
 
-	void r_WriteParity( CScript & s );	
+	void r_WriteParity( CScript & s );
 
 private:
 	// Noto/Karma stuff. --------------------------------
@@ -1162,7 +1162,7 @@ public:
 	void NPC_ExtraAI();			//	NPC thread AI - some general extra operations
 	bool NPC_AddSpellsFromBook(CItem * pBook);
 
-	void NPC_PetDesert();	
+	void NPC_PetDesert();
 	void NPC_PetClearOwners();
 	bool NPC_PetSetOwner( CChar * pChar );
 	CChar * NPC_PetGetOwner() const;

@@ -714,7 +714,7 @@ bool CChar::NPC_OnHirePay( CChar * pCharSrc, CItemMemory * pMemory, CItem * pGol
 		}
 
 		// Put all my loot cash away.
-		ContentConsume( RESOURCE_ID(RES_TYPEDEF,IT_GOLD), INT32_MAX, false, 0 );
+		ContentConsume( CResourceID(RES_TYPEDEF,IT_GOLD), INT32_MAX, false, 0 );
 		// Mark all my stuff ATTR_OWNED - i won't give it away.
 		ContentAttrMod( ATTR_OWNED, true );
 

@@ -14,7 +14,7 @@
 CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fTest, CChar * pCharSrc )
 {
 	ADDTOCALLSTACK("CWorld::CheckNaturalResource");
-	// RETURN: 
+	// RETURN:
 	//  The resource tracking item.
 	//  NULL = nothing here.
 
@@ -107,7 +107,7 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fT
 	}
 	else
 	{
-		RESOURCE_ID rid	= pResGroup->GetMemberID( id );
+		CResourceID rid	= pResGroup->GetMemberID( id );
 		pOreDef = dynamic_cast <CRegionResourceDef *>( g_Cfg.ResourceGetDef( rid ));
 	}
 
@@ -118,7 +118,7 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fT
 	pResBit = CItem::CreateScript(ITEMID_WorldGem, pCharSrc);
 	if ( !pResBit )
 		return NULL;
-	
+
 	pResBit->SetType(Type);
 	pResBit->SetAttr(ATTR_INVIS|ATTR_MOVE_NEVER);
 	pResBit->m_itResource.m_rid_res = pOreDef->GetResourceID();
@@ -158,7 +158,7 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fT
 	EXC_CATCH;
 
 	EXC_DEBUG_START;
-	g_Log.EventDebug("point '%d,%d,%d,%d' type '%d' [0%x]\n", pt.m_x, pt.m_y, pt.m_z, pt.m_map, (int)(Type), 
+	g_Log.EventDebug("point '%d,%d,%d,%d' type '%d' [0%x]\n", pt.m_x, pt.m_y, pt.m_z, pt.m_map, (int)(Type),
 		pCharSrc ? (dword)(pCharSrc->GetUID()) : 0);
 	EXC_DEBUG_END;
 	return NULL;
@@ -239,7 +239,7 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 
 		if (( z < ptElem[0].m_z ) || (( z == ptElem[0].m_z ) && ( fElem[0] )))
 			continue;
-        
+
 		ptElem[0] = pItem->GetTopPoint();
 		ptElem[0].m_z = z;
 		fElem[0] = false;
@@ -273,7 +273,7 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 			for ( size_t iMulti = 0; iMulti < iMultiQty; pItemDef = NULL, pMultiItem = NULL, Height = 0, ++iMulti )
 			{
 				pMultiItem = pMulti->GetItem(iMulti);
-				
+
 				if ( !pMultiItem )
 					break;
 
@@ -307,10 +307,10 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 
 				if ( ptElem[1].m_z > ptTest.m_z )
 					continue;
-		
+
 				if ( ((( ptTest.m_z - pt.m_z ) > 0) && ( ptTest.m_z - pt.m_z ) > RESOURCE_Z_CHECK ) || ((( pt.m_z - ptTest.m_z ) < 0) && (( pt.m_z - ptTest.m_z ) < - RESOURCE_Z_CHECK )))
 					continue;
-	
+
 				if (( ptTest.m_z < ptElem[1].m_z ) || (( ptTest.m_z == ptElem[1].m_z ) && ( fElem[1] )))
 					continue;
 		        //DEBUG_ERR(("pMultiItem->GetDispID()%x\n",pMultiItem->GetDispID()));
@@ -496,7 +496,7 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 	CPointMap ptFound;
 	int iTestDistance;
 
-		
+
 	// Check dynamics first since they are the easiest.
 	CWorldSearch Area( pt, iDistance );
 	for (;;)
@@ -578,12 +578,12 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 
 			if ( !pMapBlock )
 				continue;
-			
+
 			size_t iQty = pMapBlock->m_Statics.GetStaticQty();
 			if ( iQty <= 0 )
 				continue;
 
-			pStatic = NULL; 
+			pStatic = NULL;
 			pItemDef = NULL;
 
 			for ( size_t i = 0; i < iQty; i++, pStatic = NULL, pItemDef = NULL )
@@ -1407,7 +1407,7 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block
 		if (zHeight == 0)
 			zHeight = zStaticHeight;
 
-		if ( !block.CheckTile( 
+		if ( !block.CheckTile(
 			wBlockThis,
 			zitem, zHeight, pItemDef->GetDispID() + TERRAIN_QTY ) )
 		{
@@ -1462,7 +1462,7 @@ char CWorld::GetHeightPoint2( const CPointBase & pt, dword & wBlockFlags, bool f
 	//  pt = the point of interest.
 	//  pt.m_z = my starting altitude.
 	//  wBlockFlags = what we can pass thru. doors, water, walls ?
-	//		CAN_C_GHOST	= Moves thru doors etc.	- CAN_I_DOOR						
+	//		CAN_C_GHOST	= Moves thru doors etc.	- CAN_I_DOOR
 	//		CAN_C_SWIM = walk thru water - CAN_I_WATER
 	//		CAN_C_WALK = it is possible that i can step up. - CAN_I_PLATFORM
 	//		CAN_C_PASSWALLS	= walk through all blocking items - CAN_I_BLOCK
@@ -1531,10 +1531,10 @@ CItemTypeDef * CWorld::GetTerrainItemTypeDef( dword dwTerrainIndex )
 	{
 		pRes = g_World.m_TileTypes[dwTerrainIndex];
 	}
-		
+
 	if ( !pRes )
 	{
-		RESOURCE_ID	rid( RES_TYPEDEF, 0 );
+		CResourceID	rid( RES_TYPEDEF, 0 );
 		pRes = g_Cfg.ResourceGetDef( rid );
 	}
 	ASSERT( pRes );

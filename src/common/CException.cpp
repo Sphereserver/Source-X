@@ -114,7 +114,7 @@ const unsigned CAssert::GetAssertLine()
 #ifdef _WIN32
 
 CException::CException(uint uCode, size_t pAddress) :
-	m_pAddress(pAddress), CSError(LOGL_CRIT, uCode, "Exception")
+	CSError(LOGL_CRIT, uCode, "Exception"), m_pAddress(pAddress)
 {
 }
 

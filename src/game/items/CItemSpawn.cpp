@@ -29,7 +29,7 @@ inline CCharBase *CItemSpawn::TryChar(CREID_TYPE &id)
 	CCharBase *pCharDef = CCharBase::FindCharBase(id);
 	if ( pCharDef )
 	{
-		m_itSpawnChar.m_CharID = RESOURCE_ID(RES_CHARDEF, id);
+		m_itSpawnChar.m_CharID = CResourceID(RES_CHARDEF, id);
 		return pCharDef;
 	}
 	return NULL;
@@ -41,7 +41,7 @@ inline CItemBase *CItemSpawn::TryItem(ITEMID_TYPE &id)
 	CItemBase *pItemDef = CItemBase::FindItemBase(id);
 	if ( pItemDef )
 	{
-		m_itSpawnItem.m_ItemID = RESOURCE_ID(RES_ITEMDEF, id);
+		m_itSpawnItem.m_ItemID = CResourceID(RES_ITEMDEF, id);
 		return pItemDef;
 	}
 	return NULL;
@@ -51,7 +51,7 @@ CResourceDef *CItemSpawn::FixDef()
 {
 	ADDTOCALLSTACK("CitemSpawn:FixDef");
 
-	RESOURCE_ID_BASE rid = (IsType(IT_SPAWN_ITEM) ? m_itSpawnItem.m_ItemID : m_itSpawnChar.m_CharID);
+	CResourceIDBase rid = (IsType(IT_SPAWN_ITEM) ? m_itSpawnItem.m_ItemID : m_itSpawnChar.m_CharID);
 	if ( rid.GetResType() != RES_UNKNOWN )
 		return static_cast<CResourceDef *>(g_Cfg.ResourceGetDef(rid));
 
@@ -63,7 +63,7 @@ CResourceDef *CItemSpawn::FixDef()
 			return TryChar(id);
 
 		// try a spawn group.
-		rid = RESOURCE_ID(RES_SPAWN, id);
+		rid = CResourceID(RES_SPAWN, id);
 		CResourceDef *pDef = g_Cfg.ResourceGetDef(rid);
 		if ( pDef )
 		{
@@ -79,7 +79,7 @@ CResourceDef *CItemSpawn::FixDef()
 			return TryItem(id);
 
 		// try a template.
-		rid = RESOURCE_ID(RES_TEMPLATE, id);
+		rid = CResourceID(RES_TEMPLATE, id);
 		CResourceDef *pDef = g_Cfg.ResourceGetDef(rid);
 		if ( pDef )
 		{
@@ -93,7 +93,7 @@ CResourceDef *CItemSpawn::FixDef()
 int CItemSpawn::GetName(tchar *pszOut) const
 {
 	ADDTOCALLSTACK("CitemSpawn:GetName");
-	RESOURCE_ID_BASE rid;
+	CResourceIDBase rid;
 	if ( IsType(IT_SPAWN_ITEM) )
 		rid = m_itSpawnItem.m_ItemID;
 	else
@@ -132,7 +132,7 @@ void CItemSpawn::GenerateItem(CResourceDef *pDef)
 {
 	ADDTOCALLSTACK("CitemSpawn:GenerateItem");
 
-	RESOURCE_ID_BASE rid = pDef->GetResourceID();
+	CResourceIDBase rid = pDef->GetResourceID();
 	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(rid.GetResIndex());
 
 	CItemContainer *pCont = dynamic_cast<CItemContainer *>(GetParent());
@@ -165,7 +165,7 @@ void CItemSpawn::GenerateChar(CResourceDef *pDef)
 	if ( !IsTopLevel() )
 		return;
 
-	RESOURCE_ID_BASE rid = pDef->GetResourceID();
+	CResourceIDBase rid = pDef->GetResourceID();
 	if ( rid.GetResType() == RES_SPAWN )
 	{
 		const CSRandGroupDef *pSpawnGroup = static_cast<const CSRandGroupDef *>(pDef);
@@ -327,7 +327,7 @@ void CItemSpawn::OnTick(bool fExec)
 	CResourceDef *pDef = FixDef();
 	if ( !pDef )
 	{
-		RESOURCE_ID_BASE rid = IsType(IT_SPAWN_ITEM) ? m_itSpawnItem.m_ItemID : m_itSpawnChar.m_CharID;
+		CResourceIDBase rid = IsType(IT_SPAWN_ITEM) ? m_itSpawnItem.m_ItemID : m_itSpawnChar.m_CharID;
 		DEBUG_ERR(("Bad Spawn point uid=0%x, id=%s\n", (dword)GetUID(), g_Cfg.ResourceGetName(rid)));
 		return;
 	}
@@ -373,7 +373,7 @@ CCharBase *CItemSpawn::SetTrackID()
 	}
 
 	CCharBase *pCharDef = NULL;
-	RESOURCE_ID_BASE rid = m_itSpawnChar.m_CharID;
+	CResourceIDBase rid = m_itSpawnChar.m_CharID;
 
 	if ( rid.GetResType() == RES_CHARDEF )
 	{

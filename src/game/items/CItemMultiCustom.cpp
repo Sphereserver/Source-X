@@ -114,7 +114,7 @@ void CItemMultiCustom::BeginCustomize(CClient * pClientSrc)
 	for (CClient::OpenedGumpsMap_t::iterator it = pClientSrc->m_mapOpenedGumps.begin(); it != pClientSrc->m_mapOpenedGumps.end(); ++it)
 	{
 		// the client leaves 'nodispose' dialogs open
-		pDlg = dynamic_cast<CDialogDef*>( g_Cfg.ResourceGetDef(RESOURCE_ID(RES_DIALOG, it->first)) );
+		pDlg = dynamic_cast<CDialogDef*>( g_Cfg.ResourceGetDef(CResourceID(RES_DIALOG, it->first)) );
 		if (pDlg != NULL && pDlg->m_bNoDispose == true)
 			continue;
 

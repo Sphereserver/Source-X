@@ -12,7 +12,7 @@
 // -CItemBase
 
 CItemBase::CItemBase( ITEMID_TYPE id ) :
-	CBaseBaseDef( RESOURCE_ID( RES_ITEMDEF, id ))
+	CBaseBaseDef( CResourceID( RES_ITEMDEF, id ))
 {
 	m_weight		= 0;
 	m_speed			= 0;
@@ -743,7 +743,7 @@ height_t CItemBase::GetItemHeight( ITEMID_TYPE id, dword & wBlockThis ) // stati
 	// Get just the height and the blocking flags for the item by id.
 	// used for walk block checking.
 
-	RESOURCE_ID rid = RESOURCE_ID( RES_ITEMDEF, id );
+	CResourceID rid = CResourceID( RES_ITEMDEF, id );
 	size_t index = g_Cfg.m_ResHash.FindKey(rid);
 	if ( index != g_Cfg.m_ResHash.BadIndex() ) // already loaded ?
 	{
@@ -882,7 +882,7 @@ int CItemBase::CalculateMakeValue( int iQualityLevel ) const
 	// add value based on the base resources making this up.
 	for ( size_t i = 0; i < m_BaseResources.GetCount(); i++ )
 	{
-		RESOURCE_ID rid = m_BaseResources[i].GetResourceID();
+		CResourceID rid = m_BaseResources[i].GetResourceID();
 		if ( rid.GetResType() != RES_ITEMDEF )
 			continue;
 
@@ -896,7 +896,7 @@ int CItemBase::CalculateMakeValue( int iQualityLevel ) const
 	// add some value based on the skill required to create it.
 	for ( size_t i = 0; i < m_SkillMake.GetCount(); i++ )
 	{
-		RESOURCE_ID rid = m_SkillMake[i].GetResourceID();
+		CResourceID rid = m_SkillMake[i].GetResourceID();
 		if ( rid.GetResType() != RES_SKILL )
 			continue;
 		const CSkillDef* pSkillDef = g_Cfg.GetSkillDef(static_cast<SKILL_TYPE>(rid.GetResIndex()));
@@ -1082,7 +1082,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 			sVal.Format("%d,%d", pItemMulti->m_shipSpeed.period, pItemMulti->m_shipSpeed.tiles);
 		} break;
 		case IBC_DISPID:
-			sVal = g_Cfg.ResourceGetName( RESOURCE_ID( RES_ITEMDEF, GetDispID()));
+			sVal = g_Cfg.ResourceGetName( CResourceID( RES_ITEMDEF, GetDispID()));
 			break;
 		case IBC_DUPELIST:
 			{
@@ -1225,7 +1225,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 			}
 			break;
 		case IBC_RESDISPDNID:
-			sVal = g_Cfg.ResourceGetName( RESOURCE_ID( RES_TYPEDEF, GetResDispDnId()));
+			sVal = g_Cfg.ResourceGetName( CResourceID( RES_TYPEDEF, GetResDispDnId()));
 			break;
 		case IBC_RESMAKE:
 			// Print the resources need to make in nice format.
@@ -1265,7 +1265,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 		case IBC_TYPE:
 			// sVal.FormatVal( m_type );
 			{
-				RESOURCE_ID	rid( RES_TYPEDEF, m_type );
+				CResourceID	rid( RES_TYPEDEF, m_type );
 				CResourceDef *	pRes	= g_Cfg.ResourceGetDef( rid );
 				if ( !pRes )
 					sVal.FormatVal( m_type );
@@ -1656,7 +1656,7 @@ void CItemBase::ReplaceItemBase( CItemBase * pOld, CResourceDef * pNew ) // stat
 	ADDTOCALLSTACK("CItemBase::ReplaceItemBase");
 	ASSERT(pOld);
 	ASSERT(pOld->GetRefInstances() == 0);
-	RESOURCE_ID rid = pOld->GetResourceID();
+	CResourceID rid = pOld->GetResourceID();
 	size_t index = g_Cfg.m_ResHash.FindKey(rid);
 	ASSERT( index != g_Cfg.m_ResHash.BadIndex() );
 	g_Cfg.m_ResHash.SetAt( rid, index, pNew );
@@ -2006,7 +2006,7 @@ CItemBase * CItemBase::FindItemBase( ITEMID_TYPE id ) // static
 	if ( id <= 0 )
 		return NULL;
 
-	RESOURCE_ID rid = RESOURCE_ID( RES_ITEMDEF, id );
+	CResourceID rid = CResourceID( RES_ITEMDEF, id );
 	size_t index = g_Cfg.m_ResHash.FindKey(rid);
 	if ( index == g_Cfg.m_ResHash.BadIndex() )
 		return NULL;
@@ -2089,7 +2089,7 @@ CItemBaseDupe * CItemBaseDupe::GetDupeRef( ITEMID_TYPE id ) // static
 	if ( id <= 0 )
 		return NULL;
 
-	RESOURCE_ID rid = RESOURCE_ID( RES_ITEMDEF, id );
+	CResourceID rid = CResourceID( RES_ITEMDEF, id );
 	size_t index = g_Cfg.m_ResHash.FindKey(rid);
 	if ( index == g_Cfg.m_ResHash.BadIndex() )
 		return NULL;

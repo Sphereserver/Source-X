@@ -86,7 +86,7 @@ bool CItemMulti::MultiRealizeRegion()
 
 	if ( m_pRegion == NULL )
 	{
-		RESOURCE_ID rid;
+		CResourceID rid;
 		rid.SetPrivateUID( GetUID());
 		m_pRegion = new CRegionWorld( rid );
 	}
@@ -204,7 +204,7 @@ void CItemMulti::Multi_Create( CChar * pChar, dword dwKeyCode )
 	// Create house or Ship extra stuff.
 	// ARGS:
 	//  dwKeyCode = set the key code for the doors/sides to this in case it's a drydocked ship.
-	// NOTE: 
+	// NOTE:
 	//  This can only be done after the house is given location.
 
 	const CItemBaseMulti * pMultiDef = Multi_GetDef();
@@ -238,7 +238,7 @@ void CItemMulti::Multi_Create( CChar * pChar, dword dwKeyCode )
 			pKey->SetAttr(ATTR_NEWBIE);
 		pKey->SetAttr(m_Attr&ATTR_MAGIC);
 		pKey->m_itKey.m_lockUID.SetPrivateUID( dwKeyCode );
-		pKey->m_uidLink = GetUID();	
+		pKey->m_uidLink = GetUID();
 	}
 
 	Multi_GetSign();	// set the m_uidLink

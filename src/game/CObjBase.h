@@ -24,7 +24,7 @@ class CBaseBase;
  * @enum    MEMORY_TYPE
  *
  * @brief   Values that represent memory types ( IT_EQ_MEMORY_OBJ ).
- *          
+ *
  * Types of memory a CChar has about a game object. (m_wHue)
  */
 enum MEMORY_TYPE
@@ -95,7 +95,7 @@ public:
 	CVarDefMap m_BaseDefs;		///< New Variable storage system
 	dword	m_Can;              ///< CAN_FLAGS
 	int m_ModMaxWeight;			///< ModMaxWeight prop for chars
-	
+
 	word	m_attackBase;       ///< dam for weapons
 	word	m_attackRange;      ///< variable range of attack damage.
 
@@ -113,7 +113,7 @@ public:
      *
      * @return  null if it fails, else the tag defs.
      */
-	CVarDefMap * GetTagDefs();  
+	CVarDefMap * GetTagDefs();
 
     /**
      * @fn  virtual void CObjBase::DeletePrepare();
@@ -149,7 +149,7 @@ public:
      *
      * @param   trig    The trig.
      */
-	void SetTriggerActive(lpctstr trig = NULL); 
+	void SetTriggerActive(lpctstr trig = NULL);
 
 public:
 
@@ -381,7 +381,7 @@ public:
      *
      * @return  true if resource match, false if not.
      */
-	virtual bool IsResourceMatch( RESOURCE_ID_BASE rid, dword dwArg ) = 0;
+	virtual bool IsResourceMatch( CResourceIDBase rid, dword dwArg ) = 0;
 
     /**
      * @fn  virtual int CObjBase::IsWeird() const;
@@ -1097,7 +1097,7 @@ enum CTRIG_TYPE
 	CTRIG_NPCSeeNewPlayer,  ///< (NPC only) i see u for the first time. (in 20 minutes) (check memory time).
 	CTRIG_NPCSeeWantItem,   ///< (NPC only) i see something good.
 	CTRIG_NPCSpecialAction, ///< (NPC only) performing some special actions (spyder's web, dragon's breath...).
-	
+
 	CTRIG_PartyDisband, ///< I just disbanded my party.
 	CTRIG_PartyInvite,  ///< SRC invited me to join a party, so I may chose.
 	CTRIG_PartyLeave,   ///< I'm leaving this party.

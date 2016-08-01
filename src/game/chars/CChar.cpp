@@ -754,7 +754,7 @@ int CChar::FixWeirdness()
 
 		if ( m_pPlayer->GetSkillClass() == NULL )	// this should never happen.
 		{
-			m_pPlayer->SetSkillClass( this, RESOURCE_ID( RES_SKILLCLASS ));
+			m_pPlayer->SetSkillClass( this, CResourceID( RES_SKILLCLASS ));
 			ASSERT(m_pPlayer->GetSkillClass());
 		}
 
@@ -1662,12 +1662,12 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 	}
 
 	CResourceLock s;
-	if ( g_Cfg.ResourceLock(s, RESOURCE_ID(RES_NEWBIE, bFemale ? RES_NEWBIE_FEMALE_DEFAULT : RES_NEWBIE_MALE_DEFAULT)) )
+	if ( g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, bFemale ? RES_NEWBIE_FEMALE_DEFAULT : RES_NEWBIE_MALE_DEFAULT)) )
 		ReadScript(s);
 
-	if ( g_Cfg.ResourceLock(s, RESOURCE_ID(RES_NEWBIE, iProfession, rtRace)) )
+	if ( g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, iProfession, rtRace)) )
 		ReadScript(s);
-	else if ( g_Cfg.ResourceLock(s, RESOURCE_ID(RES_NEWBIE, iProfession)) )
+	else if ( g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, iProfession)) )
 		ReadScript(s);
 
 	if ( bCreateSkillItems )
@@ -1691,9 +1691,9 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 					break;
 			}
 
-			if ( !g_Cfg.ResourceLock(s, RESOURCE_ID(RES_NEWBIE, iSkill, rtRace)) )
+			if ( !g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, iSkill, rtRace)) )
 			{
-				if ( !g_Cfg.ResourceLock(s, RESOURCE_ID(RES_NEWBIE, iSkill)) )
+				if ( !g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, iSkill)) )
 					continue;
 			}
 			ReadScript(s);
@@ -2252,7 +2252,7 @@ do_default:
 			sVal.FormatLLVal( -( g_World.GetTimeDiff(m_timeCreate) / ( TICK_PER_SEC * 60 * 60 *24 ) )); //displayed in days
 			return true;
 		case CHC_BANKBALANCE:
-			sVal.FormatVal( GetBank()->ContentCount( RESOURCE_ID(RES_TYPEDEF,IT_GOLD)));
+			sVal.FormatVal( GetBank()->ContentCount( CResourceID(RES_TYPEDEF,IT_GOLD)));
 			return true;
 		case CHC_CANCAST:
 			{
@@ -2345,7 +2345,7 @@ do_default:
 
 		case CHC_GOLD:
 			{
-				sVal.FormatVal(ContentCount(RESOURCE_ID(RES_TYPEDEF, IT_GOLD)));
+				sVal.FormatVal(ContentCount(CResourceID(RES_TYPEDEF, IT_GOLD)));
 			} break;
 
 		case CHC_MOUNT:
@@ -2550,10 +2550,10 @@ do_default:
 			sVal.FormatHex( m_atUnk.m_Arg3 );
 			break;
 		case CHC_ACTION:
-			sVal = g_Cfg.ResourceGetName( RESOURCE_ID( RES_SKILL, Skill_GetActive()) );
+			sVal = g_Cfg.ResourceGetName( CResourceID( RES_SKILL, Skill_GetActive()) );
 			break;
 		case CHC_BODY:
-			sVal = g_Cfg.ResourceGetName( RESOURCE_ID( RES_CHARDEF, GetDispID()) );
+			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, GetDispID()) );
 			break;
 		case CHC_CREATE:
 			sVal.FormatLLVal( -( g_World.GetTimeDiff(m_timeCreate) / TICK_PER_SEC ));
@@ -2656,7 +2656,7 @@ do_default:
 			goto do_default;
 
 		case CHC_OBODY:
-			sVal = g_Cfg.ResourceGetName( RESOURCE_ID( RES_CHARDEF, m_prev_id ));
+			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, m_prev_id ));
 			break;
 
 		case CHC_OSKIN:
@@ -3018,11 +3018,11 @@ do_default:
 			break;
 		case CHC_GOLD:
 		{
-			word currentGold = (word)ContentCount(RESOURCE_ID(RES_TYPEDEF, IT_GOLD));
+			word currentGold = (word)ContentCount(CResourceID(RES_TYPEDEF, IT_GOLD));
 			word newGold = s.GetArgWVal();
 
 			if ( newGold < currentGold )
-				ContentConsume(RESOURCE_ID(RES_TYPEDEF, IT_GOLD), currentGold - newGold);
+				ContentConsume(CResourceID(RES_TYPEDEF, IT_GOLD), currentGold - newGold);
 			else if ( newGold > currentGold )
 			{
 				CItem *pGold = NULL;
@@ -3245,7 +3245,7 @@ void CChar::r_Write( CScript & s )
 	if ( m_dirFace != DIR_SE )
 		s.WriteKeyVal("DIR", m_dirFace);
 	if ( m_prev_id != GetID() )
-		s.WriteKey("OBODY", g_Cfg.ResourceGetName(RESOURCE_ID(RES_CHARDEF, m_prev_id)));
+		s.WriteKey("OBODY", g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, m_prev_id)));
 	if ( m_prev_Hue != HUE_DEFAULT )
 		s.WriteKeyHex("OSKIN", m_prev_Hue);
 	if ( m_iStatFlag )
@@ -3255,7 +3255,7 @@ void CChar::r_Write( CScript & s )
 
 	if ( Skill_GetActive() != SKILL_NONE )
 	{
-		s.WriteKey("ACTION", g_Cfg.ResourceGetName(RESOURCE_ID(RES_SKILL, Skill_GetActive())));
+		s.WriteKey("ACTION", g_Cfg.ResourceGetName(CResourceID(RES_SKILL, Skill_GetActive())));
 		if ( m_atUnk.m_Arg1 )
 			s.WriteKeyHex("ACTARG1", m_atUnk.m_Arg1);
 		if ( m_atUnk.m_Arg2 )

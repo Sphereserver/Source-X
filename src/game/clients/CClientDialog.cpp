@@ -129,8 +129,8 @@ size_t CDialogDef::GumpAddText( lpctstr pszText )
 	else if ( *pszArgs == '*' )								\
 		base = c	= base + Exp_GetSingle( ++pszArgs );		\
 	else													\
-		c = Exp_GetSingle( pszArgs );			
-	
+		c = Exp_GetSingle( pszArgs );
+
 
 bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on this object as a target
 {
@@ -150,7 +150,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 			return CResourceLink::r_Verb(s, pSrc);
 		return m_pObj->r_Verb(s, pSrc);
 	}
-	
+
 	lpctstr pszArgs	= s.GetArgStr();
 
 	switch( index )
@@ -170,7 +170,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 			else if ( page == m_iPage  )
 				iNewPage	= 1;
 			else
-				iNewPage	= page + 1;	
+				iNewPage	= page + 1;
 
 			m_sControls[m_iControls].Format( "page %d", iNewPage );
 			m_iControls++;
@@ -196,7 +196,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 			else if ( page == m_iPage  )
 				iNewPage	= 1;
 			else
-				iNewPage	= page + 1;	
+				iNewPage	= page + 1;
 
 			if (index == GUMPCTL_BUTTON)
 				m_sControls[m_iControls].Format( "button %d %d %d %d %d %d %d", x, y, down, up, press, iNewPage, id );
@@ -205,8 +205,8 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 				GET_ABSOLUTE( tileId );
 				GET_ABSOLUTE( tileHue );
 				GET_ABSOLUTE( tileX );
-				GET_ABSOLUTE( tileY );				
-				
+				GET_ABSOLUTE( tileY );
+
 				m_sControls[m_iControls].Format( "buttontileart %d %d %d %d %d %d %d %d %d %d %d", x, y, down, up, press, iNewPage, id, tileId, tileHue, tileX, tileY );
 			}
 
@@ -289,7 +289,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 				return false;
 			if ( m_iTexts >= (CountOf(m_sText) - 1) )
 				return false;
-			
+
 			GET_RELATIVE( x, m_iOriginX );
 			GET_RELATIVE( y, m_iOriginY );
 			GET_ABSOLUTE( w );
@@ -418,7 +418,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 			// GET_RELATIVE( y, m_iOriginY );
 			// m_iOriginX	= x;
 			// m_iOriginY	= y;
-			
+
 			SKIP_ALL( pszArgs );
 			if ( *pszArgs == '-' && (IsSpace( pszArgs[1] ) || !pszArgs[1]) )		pszArgs++;
 			else  if ( *pszArgs == '*' )	m_iOriginX	+= Exp_GetSingle( ++pszArgs );
@@ -428,7 +428,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 			if ( *pszArgs == '-' && (IsSpace( pszArgs[1] ) || !pszArgs[1]) )		pszArgs++;
 			else  if ( *pszArgs == '*' )	m_iOriginY	+= Exp_GetSingle( ++pszArgs );
 			else							m_iOriginY	= Exp_GetSingle( pszArgs );
-			
+
 			return true;
 		}
 		case GUMPCTL_NODISPOSE:
@@ -441,7 +441,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 			break;
 
 		case GUMPCTL_XMFHTMLGUMP:		// 7 = x,y,sx,sy, cliloc(1003000) hasBack canScroll
-		case GUMPCTL_XMFHTMLGUMPCOLOR: // 7 + color. 
+		case GUMPCTL_XMFHTMLGUMPCOLOR: // 7 + color.
 		{
 			GET_RELATIVE( x, m_iOriginX );
 			GET_RELATIVE( y, m_iOriginY );
@@ -496,7 +496,7 @@ bool CDialogDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on t
 }
 
 
-CDialogDef::CDialogDef( RESOURCE_ID rid ) :
+CDialogDef::CDialogDef( CResourceID rid ) :
 	CResourceLink( rid )
 {
 	m_iControls = 0;
@@ -547,7 +547,7 @@ bool CDialogDef::GumpSetup( int iPage, CClient * pClient, CObjBase * pObjSrc, lp
 	Args.m_s1_raw = Args.m_s1 = Arguments;
 
 	// read text first
-	if ( g_Cfg.ResourceLock( s, RESOURCE_ID( RES_DIALOG, GetResourceID().GetResIndex(), RES_DIALOG_TEXT ) ) )
+	if ( g_Cfg.ResourceLock( s, CResourceID( RES_DIALOG, GetResourceID().GetResIndex(), RES_DIALOG_TEXT ) ) )
 	{
 		while ( s.ReadKey())
 		{
@@ -585,7 +585,7 @@ bool CDialogDef::GumpSetup( int iPage, CClient * pClient, CObjBase * pObjSrc, lp
 
 
 
-bool CClient::Dialog_Setup( CLIMODE_TYPE mode, RESOURCE_ID_BASE rid, int iPage, CObjBase * pObj, lpctstr Arguments )
+bool CClient::Dialog_Setup( CLIMODE_TYPE mode, CResourceIDBase rid, int iPage, CObjBase * pObj, lpctstr Arguments )
 {
 	ADDTOCALLSTACK("CClient::Dialog_Setup");
 	if ( pObj == NULL )
@@ -674,7 +674,7 @@ void CClient::addGumpDialog( CLIMODE_TYPE mode, const CSString * psControls, siz
 	PacketGumpDialog* cmd = new PacketGumpDialog(x, y, pObj, context_mode);
 	cmd->writeControls(this, psControls, iControls, psText, iTexts);
 	cmd->push(this);
-	
+
 	if ( m_pChar )
 	{
 		m_mapOpenedGumps[context_mode]++;
@@ -700,7 +700,7 @@ bool CClient::addGumpDialogProps( CUID uid )
 	tchar *pszMsg = Str_GetTemp();
 	strcpy(pszMsg, pObj->IsItem() ? "d_ITEMPROP1" : "d_CHARPROP1" );
 
-	RESOURCE_ID rid = g_Cfg.ResourceGetIDType(RES_DIALOG, pszMsg);
+	CResourceID rid = g_Cfg.ResourceGetIDType(RES_DIALOG, pszMsg);
 	if ( ! rid.IsValidUID())
 		return false;
 
@@ -708,7 +708,7 @@ bool CClient::addGumpDialogProps( CUID uid )
 	return true;
 }
 
-TRIGRET_TYPE CClient::Dialog_OnButton( RESOURCE_ID_BASE rid, dword dwButtonID, CObjBase * pObj, CDialogResponseArgs * pArgs )
+TRIGRET_TYPE CClient::Dialog_OnButton( CResourceIDBase rid, dword dwButtonID, CObjBase * pObj, CDialogResponseArgs * pArgs )
 {
 	ADDTOCALLSTACK("CClient::Dialog_OnButton");
 	// one of the gump dialog buttons was pressed.
@@ -716,7 +716,7 @@ TRIGRET_TYPE CClient::Dialog_OnButton( RESOURCE_ID_BASE rid, dword dwButtonID, C
 		return TRIGRET_ENDIF;
 
 	CResourceLock s;
-	if ( ! g_Cfg.ResourceLock( s, RESOURCE_ID( RES_DIALOG, rid.GetResIndex(), RES_DIALOG_BUTTON )))
+	if ( ! g_Cfg.ResourceLock( s, CResourceID( RES_DIALOG, rid.GetResIndex(), RES_DIALOG_BUTTON )))
 	{
 		return TRIGRET_ENDIF;
 	}
@@ -748,7 +748,7 @@ TRIGRET_TYPE CClient::Dialog_OnButton( RESOURCE_ID_BASE rid, dword dwButtonID, C
 				continue;
 		}
 
-		pArgs->m_iN1	 = dwButtonID;		
+		pArgs->m_iN1	 = dwButtonID;
 		return pObj->OnTriggerRunVal( s, TRIGRUN_SECTION_TRUE, m_pChar, pArgs );
 	}
 
@@ -793,7 +793,7 @@ bool CClient::Dialog_Close( CObjBase * pObj, dword rid, int buttonID )
 
 
 
-TRIGRET_TYPE CClient::Menu_OnSelect( RESOURCE_ID_BASE rid, int iSelect, CObjBase * pObj ) // Menus for general purpose
+TRIGRET_TYPE CClient::Menu_OnSelect( CResourceIDBase rid, int iSelect, CObjBase * pObj ) // Menus for general purpose
 {
 	ADDTOCALLSTACK("CClient::Menu_OnSelect");
 	// A select was made. so run the script.
@@ -916,7 +916,7 @@ bool CMenuItem::ParseLine( tchar * pszArgs, CScriptObj * pObjBase, CTextConsole 
 	{
 		if ( pObjBase )	// use the objects name by default.
 		{
-			m_sText = pObjBase->GetName();	
+			m_sText = pObjBase->GetName();
 			if ( ! m_sText.IsEmpty())
 				return true;
 		}
@@ -926,7 +926,7 @@ bool CMenuItem::ParseLine( tchar * pszArgs, CScriptObj * pObjBase, CTextConsole 
 	return( !m_sText.IsEmpty() );
 }
 
-void CClient::Menu_Setup( RESOURCE_ID_BASE rid, CObjBase * pObj )
+void CClient::Menu_Setup( CResourceIDBase rid, CObjBase * pObj )
 {
 	ADDTOCALLSTACK("CClient::Menu_Setup");
 	// Menus for general purpose

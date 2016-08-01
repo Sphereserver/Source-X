@@ -121,7 +121,7 @@ CCharPlayer::CCharPlayer(CChar *pChar, CAccount *pAccount) : m_pAccount(pAccount
 
 	memset(m_SkillLock, 0, sizeof(m_SkillLock));
 	memset(m_StatLock, 0, sizeof(m_StatLock));
-	SetSkillClass(pChar, RESOURCE_ID(RES_SKILLCLASS));
+	SetSkillClass(pChar, CResourceID(RES_SKILLCLASS));
 }
 
 CCharPlayer::~CCharPlayer()
@@ -140,7 +140,7 @@ bool CCharPlayer::getKrToolbarStatus()
 	return m_bKrToolbarEnabled;
 }
 
-bool CCharPlayer::SetSkillClass( CChar * pChar, RESOURCE_ID rid )
+bool CCharPlayer::SetSkillClass( CChar * pChar, CResourceID rid )
 {
 	ADDTOCALLSTACK("CCharPlayer::SetSkillClass");
 	CResourceDef * pDef = g_Cfg.ResourceGetDef(rid);
@@ -173,7 +173,7 @@ CSkillClassDef * CCharPlayer::GetSkillClass() const
 	CResourceLink * pLink = m_SkillClass.GetRef();
 	if ( pLink == NULL )
 		return NULL;
-	return( static_cast <CSkillClassDef *>(pLink));	
+	return( static_cast <CSkillClassDef *>(pLink));
 }
 
 // only players can have skill locks.
@@ -368,7 +368,7 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 {
 	ADDTOCALLSTACK("CCharPlayer::r_LoadVal");
 	EXC_TRY("LoadVal");
-	
+
 	lpctstr pszKey = s.GetKey();
 
 	if ( !strnicmp(pszKey, "GMPAGE", 6) )		//	GM pages
@@ -507,7 +507,7 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 	return false;
 }
 
-void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s ) 
+void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 {
 	ADDTOCALLSTACK("CCharPlayer::r_WriteChar");
 	UNREFERENCED_PARAMETER(pChar);
@@ -584,7 +584,7 @@ lpctstr const CCharPlayer::sm_szVerbKeys[CPV_QTY+1] =
 };
 
 // Execute command from script
-bool CChar::Player_OnVerb( CScript &s, CTextConsole * pSrc ) 
+bool CChar::Player_OnVerb( CScript &s, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CChar::Player_OnVerb");
 	if ( !m_pPlayer || !pSrc )

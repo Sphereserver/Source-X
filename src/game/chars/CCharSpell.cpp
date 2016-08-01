@@ -454,7 +454,7 @@ bool CChar::Spell_Resurrection(CItemCorpse * pCorpse, CChar * pCharSrc, bool bNo
 
 	if (m_pPlayer)
 	{
-		CItem *pDeathShroud = ContentFind(RESOURCE_ID(RES_ITEMDEF, ITEMID_DEATHSHROUD));
+		CItem *pDeathShroud = ContentFind(CResourceID(RES_ITEMDEF, ITEMID_DEATHSHROUD));
 		if (pDeathShroud != NULL)
 			pDeathShroud->Delete();
 
@@ -2587,7 +2587,7 @@ bool CChar::Spell_CastDone()
 			// Magery
 			case SPELL_Create_Food:
 			{
-				RESOURCE_ID food = g_Cfg.ResourceGetIDType(RES_ITEMDEF, "DEFFOOD");
+				CResourceID food = g_Cfg.ResourceGetIDType(RES_ITEMDEF, "DEFFOOD");
 				CItem *pItem = CItem::CreateScript((iT1 ? iT1 : static_cast<ITEMID_TYPE>(food.GetResIndex())), this);
 				ASSERT(pItem);
 				if ( pSpellDef->IsSpellType(SPELLFLAG_TARG_OBJ|SPELLFLAG_TARG_XYZ) )

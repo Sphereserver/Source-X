@@ -272,7 +272,7 @@ public:
 		{
 			int		m_junk1;
 			int		m_StrReq;	// REQSTR= Strength required to weild weapons/armor.
-			RESOURCE_ID_BASE m_Light_ID;	// TDATA3=Change light state to on/off
+			CResourceIDBase m_Light_ID;	// TDATA3=Change light state to on/off
 		} m_ttEquippable;
 
 		// IT_WEAPON_BOW
@@ -282,8 +282,8 @@ public:
 		{
 			int		m_junk1;	// TDATA1= Sound it makes ?
 			int		m_StrReq;	// REQSTR= Strength required to weild weapons/armor.
-			RESOURCE_ID_BASE m_idAmmo;	// TDATA3= required source ammo.
-			RESOURCE_ID_BASE m_idAmmoX;	// TDATA4= fired ammo fx.
+			CResourceIDBase m_idAmmo;	// TDATA3= required source ammo.
+			CResourceIDBase m_idAmmoX;	// TDATA4= fired ammo fx.
 		} m_ttWeaponBow;
 
 		// IT_CONTAINER
@@ -310,7 +310,7 @@ public:
 		{
 			int	m_junk1;
 			int m_StrReq;		// REQSTR= Strength required to mount
-			RESOURCE_ID_BASE m_charid;	// TDATA3= (CREID_TYPE)
+			CResourceIDBase m_charid;	// TDATA3= (CREID_TYPE)
 		} m_ttFigurine;
 
 		// IT_MUSICAL
@@ -533,7 +533,7 @@ public:
 	dword		m_Can;
 	static const char *m_sClassName;
 	CItemBaseDupe( ITEMID_TYPE id, CItemBase * pMasterItem ) :
-		CResourceDef( RESOURCE_ID( RES_ITEMDEF, id ) ),
+		CResourceDef( CResourceID( RES_ITEMDEF, id ) ),
 		m_MasterItem( pMasterItem ),
 		m_dwFlags(0), m_Height(0), m_Can(0)
 	{

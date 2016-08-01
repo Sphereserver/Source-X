@@ -150,9 +150,9 @@ void CChar::NPC_Act_Fight()
 		m_pNPC->m_Brain == NPCBRAIN_BERSERK )
 	{
 		int iObservant = ( 130 - Stat_GetAdjusted(STAT_INT)) / 20;
-		if ( ! Calc_GetRandVal( 2 + maximum( 0, iObservant )))
+		if ( ! Calc_GetRandVal( 2 + maximum( 0, iObservant )) )
 		{
-            if (NPC_LookAround())
+            if (NPC_LookAround() )
             {
                 SetTimeout(1);
                 return;
@@ -176,9 +176,9 @@ void CChar::NPC_Act_Fight()
 	}
 	int iDist = GetDist( pChar );
 
-	if ( m_pNPC->m_Brain == NPCBRAIN_GUARD &&
-		m_atFight.m_War_Swing_State == WAR_SWING_READY &&
-		! Calc_GetRandVal(3))
+	if ( (m_pNPC->m_Brain == NPCBRAIN_GUARD) &&
+		(m_atFight.m_War_Swing_State == WAR_SWING_READY) &&
+		! Calc_GetRandVal(3) )
 	{
 		// If a guard is ever too far away (missed a chance to swing)
 		// Teleport me closer.
@@ -189,7 +189,7 @@ void CChar::NPC_Act_Fight()
 	// If i'm horribly damaged and smart enough to know it.
 	int iMotivation = NPC_GetAttackMotivation( pChar );
 
-	bool		fSkipHardcoded	= false;
+	bool fSkipHardcoded	= false;
 	if ( IsTrigUsed(TRIGGER_NPCACTFIGHT) )
 	{
 		CUID m_oldAct = m_Act_Targ;
@@ -278,14 +278,14 @@ void CChar::NPC_Act_Fight()
 				if (pRock)
 				{
 					lpctstr t_Str = pRock->GetValStr();
-					RESOURCE_ID_BASE rid = static_cast<RESOURCE_ID_BASE>(g_Cfg.ResourceGetID( RES_ITEMDEF, t_Str ));
+					CResourceIDBase rid = static_cast<CResourceIDBase>(g_Cfg.ResourceGetID( RES_ITEMDEF, t_Str ));
 					ITEMID_TYPE obj = static_cast<ITEMID_TYPE>(rid.GetResIndex());
-					if ( ContentFind( RESOURCE_ID(RES_ITEMDEF,obj), 0, 2 ) )
+					if ( ContentFind( CResourceID(RES_ITEMDEF,obj), 0, 2 ) )
 						id = ITEMID_NODRAW;
 				}
-				else 
+				else
 				{
-					if ( ContentFind( RESOURCE_ID(RES_TYPEDEF,IT_AROCK), 0, 2 ) )
+					if ( ContentFind( CResourceID(RES_TYPEDEF,IT_AROCK), 0, 2 ) )
 						id = ITEMID_NODRAW;
 				}
 

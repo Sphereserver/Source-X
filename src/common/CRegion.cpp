@@ -268,7 +268,7 @@ bool CGRegion::IsEqualRegion( const CGRegion * pRegionTest ) const
 //*************************************************************************
 // -CRegionBase
 
-CRegionBase::CRegionBase( RESOURCE_ID rid, lpctstr pszName ) :
+CRegionBase::CRegionBase( CResourceID rid, lpctstr pszName ) :
 	CResourceDef( rid )
 {
 	m_dwFlags	= 0;
@@ -544,7 +544,7 @@ bool CRegionBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pS
 					sVal = m_rectUnion.Write();
 					return true;
 				}
-	
+
 				iRect -= 1;
 				if ( !m_Rects.IsValidIndex( iRect ) )
 				{
@@ -566,14 +566,14 @@ bool CRegionBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pS
 				if ( *pszKey == '.' ) // do we have an argument?
 				{
 					SKIP_SEPARATORS( pszKey );
-					size_t iQty = (size_t)( Exp_GetVal( pszKey ) ); 
+					size_t iQty = (size_t)( Exp_GetVal( pszKey ) );
 					if ( iQty >= m_TagDefs.GetCount() )
 						return false; // trying to get non-existant tag
-						
+
 					CVarDefCont * pTagAt = m_TagDefs.GetAt( iQty );
 					if ( !pTagAt )
 						return false; // trying to get non-existant tag
-						
+
 					SKIP_SEPARATORS( pszKey );
 					if ( ! *pszKey )
 					{
@@ -591,15 +591,15 @@ bool CRegionBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pS
 						return true;
 					}
 				}
-					
+
 				return false;
-			} 
+			}
 			break;
 		case RC_TAG0:
 			fZero = true;
 			pszKey++;
 		case RC_TAG:	// "TAG" = get/set a local tag.
-			{	
+			{
 				if ( pszKey[3] != '.' )
 					return false;
 				pszKey += 4;
@@ -612,7 +612,7 @@ bool CRegionBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pS
 				const CItem * pItem = GetResourceID().ItemFind();
 				if (pItem != NULL)
 					pBase = pItem->Item_GetDef();
-				
+
 				if (pBase != NULL)
 					sVal = pBase->GetResourceName();
 				else
@@ -648,14 +648,14 @@ bool CRegionBase::r_LoadVal( CScript & s )
 	if ( s.IsKeyHead( "TAG.", 4 ))
 	{
 		SetModified( REGMOD_TAGS );
-		bool fQuoted = false; 
+		bool fQuoted = false;
 		m_TagDefs.SetStr( s.GetKey()+ 4, fQuoted, s.GetArgStr( &fQuoted ), false );
 		return true;
 	}
 	if ( s.IsKeyHead( "TAG0.", 5 ))
 	{
 		SetModified( REGMOD_TAGS );
-		bool fQuoted = false; 
+		bool fQuoted = false;
 		m_TagDefs.SetStr( s.GetKey()+ 5, fQuoted, s.GetArgStr( &fQuoted ), false );
 		return true;
 	}
@@ -925,7 +925,7 @@ bool CRegionBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command 
 		SKIP_SEPARATORS(pszKey);
 		m_TagDefs.ClearKeys(pszKey);
 		return true;
-	}	
+	}
 
 	int index = FindTableSorted( pszKey, sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 	switch (index)
@@ -1043,7 +1043,7 @@ TRIGRET_TYPE CRegionBase::OnRegionTrigger( CTextConsole * pSrc, RTRIG_TYPE iActi
 //*************************************************************************
 // -CRegionWorld
 
-CRegionWorld::CRegionWorld( RESOURCE_ID rid, lpctstr pszName ) :
+CRegionWorld::CRegionWorld( CResourceID rid, lpctstr pszName ) :
 	CRegionBase( rid, pszName )
 {
 }
@@ -1199,8 +1199,8 @@ bool CRegionWorld::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command
 		SKIP_SEPARATORS(pszKey);
 		m_TagDefs.ClearKeys(pszKey);
 		return true;
-	}	
-	
+	}
+
 	int index = FindTableSorted( pszKey, sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 	switch(index)
 	{
@@ -1208,7 +1208,7 @@ bool CRegionWorld::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command
 			m_TagDefs.DumpKeys( pSrc, "TAG." );
 			return true;
 	}*/
-	
+
 	return( CRegionBase::r_Verb( s, pSrc ));
 	EXC_CATCH;
 

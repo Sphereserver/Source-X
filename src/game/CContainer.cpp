@@ -113,7 +113,7 @@ void CContainer::r_WriteContent( CScript &s ) const
 	}
 }
 
-CItem *CContainer::ContentFind( RESOURCE_ID_BASE rid, dword dwArg, int iDecendLevels ) const
+CItem *CContainer::ContentFind( CResourceIDBase rid, dword dwArg, int iDecendLevels ) const
 {
 	ADDTOCALLSTACK("CContainer::ContentFind");
 	// send all the items in the container.
@@ -143,7 +143,7 @@ CItem *CContainer::ContentFind( RESOURCE_ID_BASE rid, dword dwArg, int iDecendLe
 }
 
 TRIGRET_TYPE CContainer::OnContTriggerForLoop( CScript &s, CTextConsole *pSrc, CScriptTriggerArgs *pArgs,
-	CSString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext, RESOURCE_ID_BASE rid, dword dwArg, int iDecendLevels )
+	CSString *pResult, CScriptLineContext &StartContext, CScriptLineContext &EndContext, CResourceIDBase rid, dword dwArg, int iDecendLevels )
 {
 	ADDTOCALLSTACK("CContainer::OnContTriggerForLoop");
 	if ( rid.GetResIndex() != 0 )
@@ -251,7 +251,7 @@ bool CContainer::ContentFindKeyFor( CItem *pLocked ) const
 {
 	ADDTOCALLSTACK("CContainer::ContentFindKeyFor");
 	// Look for the key that fits this in my possesion.
-	return (pLocked->m_itContainer.m_lockUID && (ContentFind(RESOURCE_ID(RES_TYPEDEF, IT_KEY), pLocked->m_itContainer.m_lockUID) != NULL));
+	return (pLocked->m_itContainer.m_lockUID && (ContentFind(CResourceID(RES_TYPEDEF, IT_KEY), pLocked->m_itContainer.m_lockUID) != NULL));
 }
 
 CItem *CContainer::ContentFindRandom() const
@@ -261,7 +261,7 @@ CItem *CContainer::ContentFindRandom() const
 	return dynamic_cast<CItem *>(GetAt(Calc_GetRandVal((int32)GetCount())));
 }
 
-int CContainer::ContentConsume( RESOURCE_ID_BASE rid, int amount, bool fTest, dword dwArg )
+int CContainer::ContentConsume( CResourceIDBase rid, int amount, bool fTest, dword dwArg )
 {
 	ADDTOCALLSTACK("CContainer::ContentConsume");
 	// ARGS:
@@ -287,7 +287,7 @@ int CContainer::ContentConsume( RESOURCE_ID_BASE rid, int amount, bool fTest, dw
 		CItemContainer *pCont = dynamic_cast<CItemContainer *>(pItem);
 		if ( pCont )	// this is a sub-container.
 		{
-			if ( rid == RESOURCE_ID(RES_TYPEDEF, IT_GOLD) )
+			if ( rid == CResourceID(RES_TYPEDEF, IT_GOLD) )
 			{
 				if ( pCont->IsType(IT_CONTAINER_LOCKED) )
 					continue;
@@ -305,7 +305,7 @@ int CContainer::ContentConsume( RESOURCE_ID_BASE rid, int amount, bool fTest, dw
 	return amount;
 }
 
-int CContainer::ContentCount( RESOURCE_ID_BASE rid, dword dwArg )
+int CContainer::ContentCount( CResourceIDBase rid, dword dwArg )
 {
 	ADDTOCALLSTACK("CContainer::ContentCount");
 	// Calculate total (gold or other items) in this recursed container
@@ -412,7 +412,7 @@ size_t CContainer::ResourceConsumePart( const CResourceQtyArray *pResources, int
 		if ( iQtyTotal <= 0 )
 			continue;
 
-		RESOURCE_ID rid = pResources->GetAt(i).GetResourceID();
+		CResourceID rid = pResources->GetAt(i).GetResourceID();
 		int iRet = ContentConsume(rid, iQtyTotal, fTest, dwArg);
 		if ( iRet )
 			iMissing = i;
@@ -448,7 +448,7 @@ int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iRepli
 			continue;
 
 		int iQtyTotal = (iResQty * iReplicationQty);
-		RESOURCE_ID rid = pResources->GetAt(i).GetResourceID();
+		CResourceID rid = pResources->GetAt(i).GetResourceID();
 		if ( rid.GetResType() == RES_SKILL )
 		{
 			if ( !pChar )
@@ -460,8 +460,8 @@ int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iRepli
 		else if ( rid.GetResType() == RES_ITEMDEF )	// TAG.MATOVERRIDE_%s
 		{
 			tchar * resOverride = Str_GetTemp();
-			sprintf(resOverride,"matoverride_%s",g_Cfg.ResourceGetName( RESOURCE_ID( RES_ITEMDEF, rid ) ));
-			RESOURCE_ID ridOverride = RESOURCE_ID( RES_ITEMDEF , (dword)pChar->m_TagDefs.GetKeyNum(resOverride, true) );
+			sprintf(resOverride,"matoverride_%s",g_Cfg.ResourceGetName( CResourceID( RES_ITEMDEF, rid ) ));
+			CResourceID ridOverride = CResourceID( RES_ITEMDEF , (dword)pChar->m_TagDefs.GetKeyNum(resOverride, true) );
 			if ( ridOverride.GetResIndex() > 0 )
 				rid = ridOverride;
 		}

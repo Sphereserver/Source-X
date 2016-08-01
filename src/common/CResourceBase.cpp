@@ -94,7 +94,7 @@ CResourceScript * CResourceBase::FindResourceFile( lpctstr pszPath )
 			break;
 		lpctstr pszTitle2 = pResFile->GetFileTitle();
 		if ( ! strcmpi( pszTitle2, pszTitle ))
-			return( pResFile );
+			return pResFile;
 	}
 	return NULL;
 }
@@ -135,7 +135,7 @@ CResourceScript * CResourceBase::AddResourceFile( lpctstr pszName )
 	// Try to prevent dupes
 	CResourceScript * pNewRes = FindResourceFile(szTitle);
 	if ( pNewRes )
-		return( pNewRes );
+		return pNewRes;
 
 	// Find correct path
 	CScript s;
@@ -146,7 +146,7 @@ CResourceScript * CResourceBase::AddResourceFile( lpctstr pszName )
 
 	pNewRes = new CResourceScript( s.GetFilePath() );
 	m_ResourceFiles.Add(pNewRes);
-	return( pNewRes );
+	return pNewRes;
 }
 
 void CResourceBase::AddResourceDir( lpctstr pszDirName )
@@ -173,9 +173,7 @@ void CResourceBase::AddResourceDir( lpctstr pszDirName )
 	}
 
 	if ( iRet <= 0 )	// no files here.
-	{
 		return;
-	}
 
 	CSStringListRec * psFile = filelist.GetHead();
 	for ( ; psFile; psFile = psFile->GetNext())
@@ -234,9 +232,9 @@ CResourceScript * CResourceBase::LoadResourcesAdd( lpctstr pszNewFileName )
 	// And load it now.
 
 	CResourceScript * pScript = AddResourceFile( pszNewFileName );
-	if ( ! LoadResources(pScript))
+	if ( ! LoadResources(pScript) )
 		return NULL;
-	return( pScript );
+	return pScript;
 }
 
 bool CResourceBase::OpenResourceFind( CScript &s, lpctstr pszFilename, bool bCritical )
@@ -246,24 +244,23 @@ bool CResourceBase::OpenResourceFind( CScript &s, lpctstr pszFilename, bool bCri
 	// Look in the specified path.
 
 	if ( pszFilename == NULL )
-	{
 		pszFilename = s.GetFilePath();
-	}
 
 	// search the local dir or full path first.
 	if ( s.Open(pszFilename, OF_READ | OF_NONCRIT ))
 		return true;
-	if ( !bCritical ) return false;
+	if ( !bCritical )
+		return false;
 
 	// next, check the script file path
 	CSString sPathName = CSFile::GetMergedFileName( m_sSCPBaseDir, pszFilename );
-	if ( s.Open(sPathName, OF_READ | OF_NONCRIT ))
+	if ( s.Open(sPathName, OF_READ | OF_NONCRIT ) )
 		return true;
 
 	// finally, strip the directory and re-check script file path
 	lpctstr pszTitle = CSFile::GetFilesTitle(pszFilename);
 	sPathName = CSFile::GetMergedFileName( m_sSCPBaseDir, pszTitle );
-	return( s.Open( sPathName, OF_READ ));
+	return s.Open( sPathName, OF_READ );
 }
 
 bool CResourceBase::LoadResourceSection( CScript * pScript )
@@ -277,7 +274,7 @@ bool CResourceBase::LoadResourceSection( CScript * pScript )
 //*********************************************************
 // Resource Block Definitions
 
-lpctstr CResourceBase::ResourceGetName( RESOURCE_ID_BASE rid ) const
+lpctstr CResourceBase::ResourceGetName( CResourceIDBase rid ) const
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceGetName");
 	// Get a portable name for the resource id type.
@@ -307,7 +304,7 @@ CResourceScript * CResourceBase::GetResourceFile( size_t i )
 	return m_ResourceFiles[i];
 }
 
-RESOURCE_ID CResourceBase::ResourceGetID( RES_TYPE restype, lpctstr & pszName )
+CResourceID CResourceBase::ResourceGetID( RES_TYPE restype, lpctstr & pszName )
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceGetID");
 	// Find the Resource ID given this name.
@@ -320,7 +317,7 @@ RESOURCE_ID CResourceBase::ResourceGetID( RES_TYPE restype, lpctstr & pszName )
 	//  pszName is now set to be after the expression.
 
 	// We are NOT creating.
-	RESOURCE_ID rid;
+	CResourceID rid;
 
 	// Try to handle private name spaces.
 	switch ( restype )
@@ -341,16 +338,16 @@ RESOURCE_ID CResourceBase::ResourceGetID( RES_TYPE restype, lpctstr & pszName )
 	if ( restype != RES_UNKNOWN && rid.GetResType() == RES_UNKNOWN )
 	{
 		// Label it with the type we want.
-		return RESOURCE_ID( restype, rid.GetResIndex());
+		return CResourceID( restype, rid.GetResIndex());
 	}
 
 	return rid;
 }
 
-RESOURCE_ID CResourceBase::ResourceGetIDType( RES_TYPE restype, lpctstr pszName )
+CResourceID CResourceBase::ResourceGetIDType( RES_TYPE restype, lpctstr pszName )
 {
 	// Get a resource of just this index type.
-	RESOURCE_ID rid = ResourceGetID( restype, pszName );
+	CResourceID rid = ResourceGetID( restype, pszName );
 	if ( rid.GetResType() != restype )
 	{
 		rid.InitUID();
@@ -363,13 +360,13 @@ int CResourceBase::ResourceGetIndexType( RES_TYPE restype, lpctstr pszName )
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceGetIndexType");
 	// Get a resource of just this index type.
-	RESOURCE_ID rid = ResourceGetID( restype, pszName );
+	CResourceID rid = ResourceGetID( restype, pszName );
 	if ( rid.GetResType() != restype )
 		return -1;
 	return rid.GetResIndex();
 }
 
-CResourceDef * CResourceBase::ResourceGetDef( RESOURCE_ID_BASE rid ) const
+CResourceDef * CResourceBase::ResourceGetDef( CResourceIDBase rid ) const
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceGetDef");
 	if ( ! rid.IsValidUID() )
@@ -383,11 +380,11 @@ CResourceDef * CResourceBase::ResourceGetDef( RESOURCE_ID_BASE rid ) const
 //*******************************************************
 // Open resource blocks.
 
-bool CResourceBase::ResourceLock( CResourceLock & s, RESOURCE_ID_BASE rid )
+bool CResourceBase::ResourceLock( CResourceLock & s, CResourceIDBase rid )
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceLock");
 	// Lock a referenced resource object.
-	if ( ! rid.IsValidUID())
+	if ( ! rid.IsValidUID() )
 		return false;
 	CResourceLink * pResourceLink = dynamic_cast <CResourceLink *>( ResourceGetDef( rid ));
 	if ( pResourceLink )
@@ -415,7 +412,7 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
 			DEBUG_ERR(( "Too long DEFNAME=%s\n", pszName ));
 			return false;
 		}
-		if ( ! _ISCSYM(pszName[i]))
+		if ( ! _ISCSYM(pszName[i]) )
 		{
 			DEBUG_ERR(( "Bad chars in DEFNAME=%s\n", pszName ));
 			return false;
@@ -445,7 +442,7 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
 	if ( iVarNum < 0 )
 		return false;
 
-	SetResourceVar( dynamic_cast <const CVarDefContNum*>( g_Exp.m_VarDefs.GetAt( iVarNum )));
+	SetResourceVar( dynamic_cast <const CVarDefContNum*>( g_Exp.m_VarDefs.GetAt( iVarNum )) );
 	return true;
 }
 
@@ -656,7 +653,7 @@ bool CResourceScript::CheckForChange()
 	m_dwSize = dwSize;			// Compare to see if this has changed.
 
 	m_dateChange = dateChange;	// real world time/date of last change.
-	return( fChange );
+	return fChange;
 }
 
 
@@ -686,7 +683,7 @@ bool CResourceScript::Open( lpctstr pszFilename, uint wFlags )
 
 		if ( ! CScript::Open( pszFilename, wFlags|mode))	// OF_READ
 			return false;
-		if ( ! ( wFlags & OF_READWRITE ) && CheckForChange())
+		if ( !( wFlags & OF_READWRITE ) && CheckForChange() )
 		{
 			//  what should we do about it ? reload it of course !
 			g_Cfg.LoadResourcesOpen( this );
@@ -733,10 +730,10 @@ bool CResourceLock::OpenBase( void * pExtra )
 	UNREFERENCED_PARAMETER(pExtra);
 	ASSERT(m_pLock);
 
-	if ( m_pLock->IsFileOpen())
+	if ( m_pLock->IsFileOpen() )
 		m_PrvLockContext = m_pLock->GetContext();
 
-	if ( ! m_pLock->Open())	// make sure the original is open.
+	if ( ! m_pLock->Open() )	// make sure the original is open.
 		return false;
 
 	// Open a seperate copy of an already opend file.
@@ -762,9 +759,7 @@ void CResourceLock::CloseBase()
 	m_PrvScriptContext.Close();
 
 	if ( m_PrvLockContext.IsValid())
-	{
 		m_pLock->SeekContext(m_PrvLockContext);	// no need to set the line number as it should not have changed.
-	}
 
 	// Restore old position in the file (if there was one)
 	m_pLock->Close();	// decrement open count on the orig.
@@ -811,9 +806,7 @@ int CResourceLock::OpenLock( CResourceScript * pLock, CScriptLineContext context
 		return -2;
 
 	if ( ! SeekContext( context ) )
-	{
 		return -3;
-	}
 
 	return 0;
 }
@@ -827,7 +820,7 @@ void CResourceLock::AttachObj( const CScriptObj * pObj )
 /////////////////////////////////////////////////
 //	-CResourceLink
 
-CResourceLink::CResourceLink( RESOURCE_ID rid, const CVarDefContNum * pDef ) :
+CResourceLink::CResourceLink( CResourceID rid, const CVarDefContNum * pDef ) :
 	CResourceDef( rid, pDef )
 {
 	m_pScript = NULL;
@@ -888,14 +881,14 @@ void CResourceLink::ScanSection( RES_TYPE restype )
 	}
 	ClearTriggers();
 
-	while ( m_pScript->ReadKey(false))
+	while ( m_pScript->ReadKey(false) )
 	{
-		if ( m_pScript->IsKeyHead( "DEFNAME", 7 ))
+		if ( m_pScript->IsKeyHead( "DEFNAME", 7 ) )
 		{
 			m_pScript->ParseKeyLate();
 			SetResourceName( m_pScript->GetArgRaw() );
 		}
-		if ( m_pScript->IsKeyHead( "ON", 2 ))
+		if ( m_pScript->IsKeyHead( "ON", 2 ) )
 		{
 			int iTrigger;
 			if ( iQty )
@@ -908,9 +901,9 @@ void CResourceLink::ScanSection( RES_TYPE restype )
 				else
 				{
 					TriglistAdd(m_pScript->GetArgRaw());
-					if ( HasTrigger(iTrigger))
+					if ( HasTrigger(iTrigger) )
 					{
-						DEBUG_ERR(( "Duplicate trigger '%s' in '%s'\n", ppTable[iTrigger], GetResourceName()));
+						DEBUG_ERR(( "Duplicate trigger '%s' in '%s'\n", ppTable[iTrigger], GetResourceName() ));
 						continue;
 					}
 				}
@@ -1208,21 +1201,21 @@ size_t CResourceRefArray::FindResourceType( RES_TYPE restype ) const
 	size_t iQty = GetCount();
 	for ( size_t i = 0; i < iQty; ++i )
 	{
-		RESOURCE_ID ridtest = GetAt(i).GetRef()->GetResourceID();
+		CResourceID ridtest = GetAt(i).GetRef()->GetResourceID();
 		if ( ridtest.GetResType() == restype )
 			return( i );
 	}
 	return BadIndex();
 }
 
-size_t CResourceRefArray::FindResourceID( RESOURCE_ID_BASE rid ) const
+size_t CResourceRefArray::FindResourceID( CResourceIDBase rid ) const
 {
 	ADDTOCALLSTACK("CResourceRefArray::FindResourceID");
 	// Is this resource already in the list ?
 	size_t iQty = GetCount();
 	for ( size_t i = 0; i < iQty; i++ )
 	{
-		RESOURCE_ID ridtest = GetAt(i).GetRef()->GetResourceID();
+		CResourceID ridtest = GetAt(i).GetRef()->GetResourceID();
 		if ( ridtest == rid )
 			return i;
 	}
@@ -1248,7 +1241,7 @@ void CResourceRefArray::r_Write( CScript & s, lpctstr pszKey ) const
 	}
 }
 
-int CResourceHashArray::CompareKey( RESOURCE_ID_BASE rid, CResourceDef * pBase, bool fNoSpaces ) const
+int CResourceHashArray::CompareKey( CResourceIDBase rid, CResourceDef * pBase, bool fNoSpaces ) const
 {
 	UNREFERENCED_PARAMETER(fNoSpaces);
 	dword dwID1 = rid.GetPrivateUID();
@@ -1447,21 +1440,21 @@ size_t CResourceQtyArray::FindResourceType( RES_TYPE type ) const
 	// BadIndex = fail
 	for ( size_t i = 0; i < GetCount(); i++ )
 	{
-		RESOURCE_ID ridtest = GetAt(i).GetResourceID();
+		CResourceID ridtest = GetAt(i).GetResourceID();
 		if ( type == ridtest.GetResType() )
 			return i;
 	}
 	return BadIndex();
 }
 
-size_t CResourceQtyArray::FindResourceID( RESOURCE_ID_BASE rid ) const
+size_t CResourceQtyArray::FindResourceID( CResourceIDBase rid ) const
 {
 	ADDTOCALLSTACK("CResourceQtyArray::FindResourceID");
 	// is this RESOURCE_ID in the array ?
 	// BadIndex = fail
 	for ( size_t i = 0; i < GetCount(); i++ )
 	{
-		RESOURCE_ID ridtest = GetAt(i).GetResourceID();
+		CResourceID ridtest = GetAt(i).GetResourceID();
 		if ( rid == ridtest )
 			return i;
 	}
@@ -1475,7 +1468,7 @@ size_t CResourceQtyArray::FindResourceMatch( CObjBase * pObj ) const
 	// Use to find intersection with this pOBj raw material and BaseResource creation elements.
 	for ( size_t i = 0; i < GetCount(); i++ )
 	{
-		RESOURCE_ID ridtest = GetAt(i).GetResourceID();
+		CResourceID ridtest = GetAt(i).GetResourceID();
 		if ( pObj->IsResourceMatch( ridtest, 0 ))
 			return i;
 	}
@@ -1492,7 +1485,7 @@ bool CResourceQtyArray::IsResourceMatchAll( CChar * pChar ) const
 
 	for ( size_t i = 0; i < GetCount(); i++ )
 	{
-		RESOURCE_ID ridtest = GetAt(i).GetResourceID();
+		CResourceID ridtest = GetAt(i).GetResourceID();
 
 		if ( ! pChar->IsResourceMatch( ridtest, (uint)(GetAt(i).GetResQty()) ))
 			return false;

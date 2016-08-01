@@ -62,7 +62,7 @@ public:
 	bool r_WriteVal( CChar * pChar, lpctstr pszKey, CSString & s );
 	bool r_LoadVal( CChar * pChar, CScript & s );
 
-	bool SetSkillClass( CChar * pChar, RESOURCE_ID rid );
+	bool SetSkillClass( CChar * pChar, CResourceID rid );
 	CSkillClassDef * GetSkillClass() const;
 
 	bool getKrToolbarStatus();

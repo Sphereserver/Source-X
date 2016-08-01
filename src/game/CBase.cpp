@@ -21,7 +21,7 @@ lpctstr const CBaseBaseDef::sm_szLoadKeys[OBC_QTY+1] =
 };
 
 
-CBaseBaseDef::CBaseBaseDef( RESOURCE_ID id ) :
+CBaseBaseDef::CBaseBaseDef( CResourceID id ) :
 	CResourceLink( id )
 {
 	m_dwDispIndex		= 0;	// Assume nothing til told differently.

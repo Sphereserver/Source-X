@@ -1,6 +1,6 @@
 /**
 * @file CBase.h
-* 
+*
 */
 
 #pragma once
@@ -31,7 +31,7 @@ private:
 	HUE_TYPE    m_ResDispDnHue; ///< Hue shown to players who don't have my ResLevel
 	word        m_ResDispDnId;  ///< ID shown to players who don't have my ResLevel
 	// -------------------------------------
-	
+
 public:
 	CVarDefMap  m_TagDefs;  ///< TAGs storage
 	CVarDefMap  m_BaseDefs; ///< New Variable storage system
@@ -184,7 +184,7 @@ public:
 #define CAN_C_NONMOVER      0x10000 ///< Just stay in place, avoid movement actions.
 
 public:
-	CBaseBaseDef( RESOURCE_ID id );
+	CBaseBaseDef( CResourceID id );
 	virtual ~CBaseBaseDef();
 
 private:
@@ -296,7 +296,7 @@ public:
      * @param   Height  The height.
      */
 	void SetHeight( height_t Height );
-	
+
 	// -------------- ResLevel -------------
 
     /**
