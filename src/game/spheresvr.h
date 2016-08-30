@@ -11,11 +11,6 @@
 #include "../sphere/threads.h"
 
 
-#if defined(_WIN32) && !defined(_MTNETWORK)
-	// _MTNETWORK enabled via makefile for other systems
-	#define _MTNETWORK
-#endif
-
 #ifdef DEBUGWALKSTUFF
 	#define WARNWALK(_x_)		g_pLog->EventWarn _x_;
 #else

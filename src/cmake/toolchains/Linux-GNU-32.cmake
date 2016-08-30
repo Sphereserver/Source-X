@@ -55,9 +55,10 @@ function (toolchain_exe_stuff)
 
 	#-- Set common define macros.
 
-	SET (COMMON_DEFS "_32BITS;_LINUX;_GITVERSION;_EXCEPTIONS_DEBUG")
-		# _32BITS: 32 bits architecture
-		# _LINUX: linux OS
+	SET (COMMON_DEFS "_32BITS;_LINUX;_GITVERSION;_MTNETWORK;_EXCEPTIONS_DEBUG")
+		# _32BITS: 32 bits architecture.
+		# _LINUX: linux OS.
+		# _MTNETWORK: multi-threaded networking support.
 		# _EXCEPTIONS_DEBUG: Enable advanced exceptions catching. Consumes some more resources, but is very useful for debug
 		#   on a running environment. Also it makes sphere more stable since exceptions are local.
 	FOREACH (DEF ${COMMON_DEFS})

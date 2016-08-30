@@ -2354,14 +2354,14 @@ int CResource::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar char
 bool CResource::LoadResourceSection( CScript * pScript )
 {
 	ADDTOCALLSTACK("CResource::LoadResourceSection");
-	bool	fNewStyleDef	= false;
+	bool fNewStyleDef = false;
 
 	// Index or read any resource blocks we know how to handle.
 	ASSERT(pScript);
 	CScriptFileContext FileContext( pScript );	// set this as the context.
 	CVarDefContNum * pVarNum = NULL;
 	CResourceID rid;
-	lpctstr		pszSection	= pScript->GetSection();
+	lpctstr	pszSection	= pScript->GetSection();
 
 	RES_TYPE restype;
 	if ( !strnicmp( pszSection, "DEFMESSAGE", 10 ) )
@@ -2386,18 +2386,6 @@ bool CResource::LoadResourceSection( CScript * pScript )
 	else if ( !strnicmp( pszSection, "LIST", 4) )
 	{
 		restype			= RES_WORLDLISTS;
-	}
-	else if ( !strnicmp( pszSection, "TIMERF", 7 ) )
-	{
-		restype			= RES_TIMERF;
-	}
-	else if ( !strnicmp( pszSection, "FAME", 7 ) )
-	{
-		restype			= RES_FAME;
-	}
-	else if ( !strnicmp( pszSection, "KARMA", 7 ) )
-	{
-		restype			= RES_KARMA;
 	}
 	else if ( !strnicmp( pszSection, "MULTIDEF", 8 ) )
 	{

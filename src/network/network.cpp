@@ -1030,7 +1030,7 @@ void NetworkIn::tick(void)
 			if ((client->m_client->GetConnectType() != CONNECT_TELNET) && (client->m_client->GetConnectType() != CONNECT_AXIS))
 			{
 				// check for timeout
-				int iLastEventDiff = -g_World.GetTimeDiff( client->m_client->m_timeLastEvent );
+				int64 iLastEventDiff = -g_World.GetTimeDiff( client->m_client->m_timeLastEvent );
 				if ( g_Cfg.m_iDeadSocketTime && iLastEventDiff > g_Cfg.m_iDeadSocketTime )
 				{
 					g_Log.Event(LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Frozen client disconnected.\n", client->m_id);
@@ -2317,8 +2317,8 @@ int NetworkOut::sendBytesNow(CClient* client, const byte* data, dword length)
 		state->m_bufferWSA.len = length;
 		state->m_bufferWSA.buf = (CHAR*)data;
 
-		dword bytesSent;
-		if (state->m_socket.SendAsync(&state->m_bufferWSA, 1, &bytesSent, 0, &state->m_overlapped, SendCompleted) == 0)
+		DWORD bytesSent;
+		if (state->m_socket.SendAsync(&state->m_bufferWSA, 1, &bytesSent, 0, &state->m_overlapped, (LPWSAOVERLAPPED_COMPLETION_ROUTINE)SendCompleted) == 0)
 		{
 			ret = bytesSent;
 			state->setSendingAsync(true);
