@@ -112,12 +112,12 @@ bool CChar::Memory_UpdateFlags(CItemMemory * pMemory)
 	ASSERT(pMemory);
 	ASSERT(pMemory->IsType(IT_EQ_MEMORY_OBJ));
 
-	WORD wMemTypes = pMemory->GetMemoryTypes();
+	word wMemTypes = pMemory->GetMemoryTypes();
 
 	if (!wMemTypes)	// No memories here anymore so kill it.
 		return false;
 
-	INT64 iCheckTime;
+	int64 iCheckTime;
 	if (wMemTypes & MEMORY_IPET)
 		StatFlag_Set(STATF_Pet);
 	if (wMemTypes & MEMORY_FIGHT)	// update more often to check for retreat.

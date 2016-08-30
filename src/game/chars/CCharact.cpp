@@ -3999,7 +3999,7 @@ bool CChar::OnTick()
 #ifdef _DEBUG
     EXC_DEBUG_START;
     g_Log.EventDebug("'%s' npc '%d' player '%d' client '%d' [0%lx]\n",
-        GetName(), (int)(m_pNPC ? m_pNPC->m_Brain : 0), (int)(m_pPlayer != 0), (int)IsClient(), (DWORD)GetUID());
+        GetName(), (int)(m_pNPC ? m_pNPC->m_Brain : 0), (int)(m_pPlayer != 0), (int)IsClient(), (dword)GetUID());
     EXC_DEBUG_END;
 #endif
 

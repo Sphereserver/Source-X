@@ -349,7 +349,7 @@ private:
 
 public:
 	static const char *m_sClassName;
-	explicit CResourceScript(LPCTSTR pszFileName)
+	explicit CResourceScript(lpctstr pszFileName)
 	{
 		Init();
 		SetFilePath(pszFileName);
@@ -551,7 +551,7 @@ public:
 	static const char *m_sClassName;
 	const CSString m_sName;
 public:
-	CResourceNamed(CResourceID rid, LPCTSTR pszName) : CResourceLink(rid), m_sName(pszName)
+	CResourceNamed(CResourceID rid, lpctstr pszName) : CResourceLink(rid), m_sName(pszName)
 	{
 	}
 	virtual ~CResourceNamed()

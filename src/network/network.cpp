@@ -1087,7 +1087,7 @@ void NetworkIn::tick(void)
 					{
 						DEBUGNETWORK(("%x:Receiving new client login handshake.\n", client->id()));
 
-						CEvent *pEvent = static_cast<CEvent*>(buffer);
+						CEvent *pEvent = static_cast<CEvent*>((void *)buffer);
 
 						if (client->m_newseed)
 						{
@@ -1104,7 +1104,7 @@ void NetworkIn::tick(void)
 
 						if (received >= iSeedLen)
 						{
-							DEBUG_MSG(("%x:New Login Handshake Detected. Client Version: %u.%u.%u.%u\n", client->id(), pEvent->NewSeed.m_Version_Maj, pEvent->NewSeed.m_Version_Min, pEvent->NewSeed.m_Version_Rev, pEvent->NewSeed.m_Version_Pat);
+							DEBUG_MSG(("%x:New Login Handshake Detected. Client Version: %u.%u.%u.%u\n", client->id(), pEvent->NewSeed.m_Version_Maj, pEvent->NewSeed.m_Version_Min, pEvent->NewSeed.m_Version_Rev, pEvent->NewSeed.m_Version_Pat));
 
 							client->m_reportedVersion = CCrypt::GetVerFromNumber(pEvent->NewSeed.m_Version_Maj, pEvent->NewSeed.m_Version_Min, pEvent->NewSeed.m_Version_Rev, pEvent->NewSeed.m_Version_Pat);
 							seed = (dword) pEvent->NewSeed.m_Seed;
@@ -1181,7 +1181,7 @@ void NetworkIn::tick(void)
 			// log in the client
 			EXC_SET("messages - setup");
 			client->m_client->SetConnectType(CONNECT_CRYPT);
-			client->m_client->xProcessClientSetup(static_cast<CEvent*>(buffer), received);
+			client->m_client->xProcessClientSetup(static_cast<CEvent*>((void *)buffer), received);
 			continue;
 		}
 
@@ -1213,7 +1213,7 @@ void NetworkIn::tick(void)
 								continue;
 
 							received -= iEncKrLen;
-							client->m_client->xProcessClientSetup(static_cast<CEvent*>(evt.m_Raw + iEncKrLen), received);
+							client->m_client->xProcessClientSetup(static_cast<CEvent*>((void *)(evt.m_Raw + iEncKrLen)), received);
 							break;
 						}
 						else
@@ -1978,7 +1978,8 @@ int NetworkOut::proceedQueue(CClient* client, int priority)
 	int length = 0;
 
 	// send N transactions from the queue
-	for (int i = 0; i < maxClientPackets; i++)
+	int i;
+	for (i = 0; i < maxClientPackets; i++)
 	{
 		// select next transaction
 		while (state->m_outgoing.currentTransaction == NULL)
