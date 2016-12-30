@@ -721,10 +721,10 @@ bool CPointBase::r_LoadVal( lpctstr pszKey, lpctstr pszArgs )
 	int iVal = Exp_GetVal(pszArgs);
 	switch (index)
 	{
-		case 0: m_map = (uchar)(iVal); break;
-		case 1: m_x = (short)(iVal); break;
-		case 2: m_y = (short)(iVal); break;
-		case 3: m_z = (char)(iVal); break;
+		case 0: m_map = (uchar)iVal; break;
+		case 1: m_x = (short)iVal; break;
+		case 2: m_y = (short)iVal; break;
+		case 3: m_z = (char)iVal; break;
 	}
 	return true;
 }

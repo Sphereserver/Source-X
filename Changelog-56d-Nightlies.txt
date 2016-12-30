@@ -100,3 +100,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 		This also extends the maximum number of pages in a book or a dialog.
   - Fixed: Sphere crashing sometimes just before saying Defmessages: npc_generic_gone_1 and npc_generic_gone_2.
   - Changed: The redefinition of a resource will always be notified, even without DEBUGF_SCRIPTS enabled in Sphere.ini.
+
+  30-12-2016, Nolok
+  - Fixed EFFECT duration (bLoop variable) on Enhanced Client. Given the same bLoop or the same packet, Enhanced Client shows the effect for a much shorter amount of time
+		than Classic Client. To be the EFFECT statements more portable between the two clients, if the client is the EC then bLoop is multiplied by 3.

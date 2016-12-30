@@ -392,7 +392,7 @@ void CObjBase::Sound( SOUND_TYPE id, int iOnce ) const // Play sound effect for 
 	ClientIterator it;
 	for (CClient* pClient = it.next(); pClient != NULL; pClient = it.next())
 	{
-		if ( ! pClient->CanHear( this, TALKMODE_OBJ ))
+		if ( ! pClient->CanHear( this, TALKMODE_OBJ ) )
 			continue;
 		pClient->addSound( id, this, iOnce );
 	}
@@ -410,9 +410,16 @@ void CObjBase::Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSour
 	ClientIterator it;
 	for (CClient* pClient = it.next(); pClient != NULL; pClient = it.next())
 	{
-		if ( ! pClient->CanSee( this ))
+		if ( ! pClient->CanSee( this ) )
 			continue;
-		pClient->addEffect(motion, id, this, pSource, bSpeedSeconds, bLoop, fExplode, color, render, effectid, explodeid, explodesound, effectuid, type);
+
+		// Given the same bLoop, Enhanced Client shows the effect for a much shorter amount of time than Classic Client,
+		//	so it may be a nice idea to adjust it automatically.
+		byte bLoopAdjusted = bLoop;
+		if (pClient->GetNetState()->isClientEnhanced())
+			bLoopAdjusted *= 3;
+
+		pClient->addEffect(motion, id, this, pSource, bSpeedSeconds, bLoopAdjusted, fExplode, color, render, effectid, explodeid, explodesound, effectuid, type);
 	}
 }
 
@@ -2032,7 +2039,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			{
 				EXC_SET("EFFECT");
 				int64 piCmd[12];
-				int iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd));
+				int iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd) );
 				if ( iArgQty < 2 )
 					return false;
 				CObjBase *	pThis	= this;
@@ -2048,24 +2055,24 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 				}
 				//DEBUG_ERR(("this->GetUID() 0%x pThis->GetUID() 0%x pCharSrc->GetUID() 0%x\n",(dword)this->GetUID(),(dword)pThis->GetUID(),(dword)pCharSrc->GetUID()));
-				pThis->Effect( static_cast<EFFECT_TYPE>(piCmd[0]), static_cast<ITEMID_TYPE>(RES_GET_INDEX(piCmd[1])),
+				pThis->Effect( static_cast<EFFECT_TYPE>(piCmd[0]), static_cast<ITEMID_TYPE>(RES_GET_INDEX(piCmd[1]) ),
 					pCharSrc,
 					(iArgQty >= 3)? (uchar)(piCmd[2]) : 5,		// byte bSpeedSeconds = 5,
 					(iArgQty >= 4)? (uchar)(piCmd[3]) : 1,		// byte bLoop = 1,
-					(iArgQty >= 5)? (piCmd[4] != 0) : false,						// bool fExplode = false
+					(iArgQty >= 5)? (piCmd[4] != 0) : false,	// bool fExplode = false
 					(iArgQty >= 6)? (uint)(piCmd[5]) : 0,		// hue
 					(iArgQty >= 7)? (uint)(piCmd[6]) : 0,		// render mode,
-					(iArgQty >= 8) ? (word)(piCmd[7]) : 0,				// EffectID	//New Packet 0xc7
-					(iArgQty >= 9) ? (word)(piCmd[8]) : 0,				// ExplodeID
-					(iArgQty >= 10) ? (word)(piCmd[9]) : 0,				// ExplodeSound
-					(iArgQty >= 11) ? (dword)(piCmd[10]) : 0,			// EffectUID
-					(iArgQty >= 12) ? (uchar)(piCmd[11]) : 0		// Type
+					(iArgQty >= 8) ? (word)(piCmd[7]) : 0,		// EffectID	//New Packet 0xc7
+					(iArgQty >= 9) ? (word)(piCmd[8]) : 0,		// ExplodeID
+					(iArgQty >= 10) ? (word)(piCmd[9]) : 0,		// ExplodeSound
+					(iArgQty >= 11) ? (dword)(piCmd[10]) : 0,	// EffectUID
+					(iArgQty >= 12) ? (uchar)(piCmd[11]) : 0	// Type
 					);
 			}
 			break;
 		case OV_EMOTE:
 			EXC_SET("EMOTE");
-			Emote( s.GetArgStr());
+			Emote( s.GetArgStr() );
 			break;
 		case OV_FLIP:
 			EXC_SET("FLIP");
