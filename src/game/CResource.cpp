@@ -3424,7 +3424,7 @@ CResourceID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 						return ridinvalid;
 				}
 			}
-			else if ( fNewStyleDef && (dword)pVarNum->GetValNum() != rid.GetPrivateUID() )
+			else if ( fNewStyleDef && (dword)(pVarNum->GetValNum()) != rid.GetPrivateUID() )
 			{
 				DEBUG_ERR(( "WARNING: region redefines DEFNAME '%s' for another region!\n", pszName ));
 			}
@@ -3442,10 +3442,9 @@ CResourceID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 					if ( restype != RES_TYPEDEF )
 					{
 						//if ( g_Cfg.m_wDebugFlags & DEBUGF_SCRIPTS )
-						g_pLog->EventWarn("Redef resource '%s'\n", static_cast<lpctstr>(pszName));
-						g_pLog->EventWarn("SERVMODE '%d'\n", static_cast<int>(g_Serv.m_iModeCode));
+						g_pLog->EventWarn("Redef resource '%s'\n", pszName);
 						//else
-						//	DEBUG_WARN(( "Redef resource '%s'\n", static_cast<lpctstr>(pszName) ));
+						//	DEBUG_WARN(( "Redef resource '%s'\n"pszName ));
 					}		
 				}
 			}
