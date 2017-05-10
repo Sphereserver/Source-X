@@ -23,7 +23,9 @@
 - Fixed: Killing pets and/or bonded pets not giving karma (same reason as above).
 - Fixed: Hits being canceled when going out of range and COMBAT_STAYINRANGE was enabled, it should happen when it is disabled.
 - Fixed: Attack delay broken when COMBAT_PREHIT is disabled because of using as SetTimeOut animDelay instead of iSwingDelay.
-- Fixed: Weird crash related to a change on CChar:OnTick() (Not really fixed, just reverted the code because I couldn't track what is exactly causing it and seems to happen when there are ~100 clients online, so I'm not going to mess a lot with it, it's not cool to use 100 players to do tests :) ).
+- Fixed: Weird crash related to a change on CChar:OnTick()
+	(Not really fixed, just reverted the code because I couldn't track what is exactly causing it and seems to happen when there are ~100 clients
+	 online, so I'm not going to mess a lot with it, it's not cool to use 100 players to do tests :) ).
 - Attempt to log and stop a crash related to the NetworkOutput.
 - Fixed: NPC_FightMagery not correctly checking if the NPC can use magic skills and creating some infinite loops under certain circumstances.
 
@@ -60,16 +62,18 @@ Gump Enums, New Container Defines, Misc Switches from Prop Attributes…  to Fla
 	Moved over Balanced, BattleLust, and BloodDrinker as they are now being checked as Item Attributes.
 	These all are now stored on Items only.
 	cItemBase_props.tbl had AlterItem added to it.
-- Updated: Several old Props that are checked in Can's and Attr. These got a minor update switching the checks to force any 1 set in individual props to just work with those Can's and Attr's.
-- Added: New Attr list from base pack reflecting EA attributes and changes from some props to a more appropriate Attr setting where no values are truly needed. This should save on some memory consumption.
-
+- Updated: Several old Props that are checked in Can's and Attr.
+	These got a minor update switching the checks to force any 1 set in individual props to just work with those Can's and Attr's.
+- Added: New Attr list from base pack reflecting EA attributes and changes from some props to a more appropriate Attr setting where no values are truly needed.
+	This should save on some memory consumption.
 Note: More needs to be switched over and I am trying to get this and the Base Packs completely up to date and somewhat synchronized with the most efficient methods Xun and I can think of.
 
 30-05-2016, XuN
 - Fixed CanUse not inheriting from the higher item (ie: i_boomerang_bla not inheriting
   CanUse from i_boomerang).
 - Fixed Statf_War not clearing in every situation when calling Attacker_Clear().
-- Added RecipeAlchemy,RecipleBlacksmith, RecipeBowcraft, RecipeCarpentry, RecipeCartography, RecipeCooking, RecipeInscription, RecipeTailoring, RecipeTinkering (all of the current SKF_CRAFT skills).
+- Added RecipeAlchemy,RecipleBlacksmith, RecipeBowcraft, RecipeCarpentry, RecipeCartography, RecipeCooking, RecipeInscription,
+	RecipeTailoring, RecipeTinkering (all of the current SKF_CRAFT skills).
 - Changed back Region Flags to dword, they do not need to store higher values yet.
 - Added PayGold() method to control payment values with it's own trigger:
   ON=@PayGold:
@@ -97,6 +101,20 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
  30-07-2016, Nolok
   - Updated the README.md file with fundamental informations about this fork.
   - Fixed: REGIONTYPE block could not accept landtile types with index > 163. Extended this limit to 255.
-		This also extends the maximum number of pages in a book or a dialog.
+		This also extends the maximum number of pages in a book.
   - Fixed: Sphere crashing sometimes just before saying Defmessages: npc_generic_gone_1 and npc_generic_gone_2.
   - Changed: The redefinition of a resource will always be notified, even without DEBUGF_SCRIPTS enabled in Sphere.ini.
+
+  10-05-2017, Nolok
+  - Fixed: Resources page not being stored correctly. This solves a bug with books and REGIONTYPEs.
+  - Fixed: <ACTION> returned the skill defname but its value could only be set via the skill key
+			(example: <ACTION> returns skill_hiding, but ACTION=skill_hiding didn't activate the skill, you need to use ACTION=hiding).
+			Solved this dicrepancy making ACTION return the skill key. Compatibility with older scripts is
+			not broken, since the skill key or defname can be compared regardless to both another key or defname.
+  - Changed: ACT and ACTP are now stored in the save files, in order not to break actions performed during the save process
+		at the server restart.
+  - Fixed: TAG.MATOVERRIDE containing wrong or no defname.
+  - Fixed: Server crashed when calling some functions with invalid argument (IsDigit, IsSpace, IsAlpha, IsAlnum).
+  - Changed: Added/removed some debug and warning messages; updated some other messages and enabled them also in non-debug builds.
+		Consider now the debug build as usable (it's pretty useful for finding bugs in the source or in the scripts).
+  - Changed: Increased the text capacity of the console on Windows.

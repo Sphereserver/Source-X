@@ -1338,7 +1338,6 @@ int CChar::Skill_Fishing( SKTRIG_TYPE stage )
 		SysMessageDefault(DEFMSG_FISHING_3);
 		return -SKTRIG_QTY;
 	}
-
 	if ( m_Act_p.GetRegion(REGION_TYPE_MULTI) )		// do not allow fishing through ship floor
 	{
 		SysMessageDefault(DEFMSG_FISHING_4);

@@ -2509,7 +2509,7 @@ jump_in:
 					{
 						iRet = OnTriggerRun( s, fTrigger ? TRIGRUN_SECTION_TRUE : TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult );
 						if (( iRet < TRIGRET_ENDIF ) || ( iRet >= TRIGRET_RET_HALFBAKED ))
-							return( iRet );
+							return iRet ;
 						if ( iRet == TRIGRET_ENDIF )
 							break;
 						fBeenTrue |= fTrigger;
@@ -2592,14 +2592,10 @@ jump_in:
 								pArgs->m_v.SetCount(0);
 							}
 							else
-							{
 								fRes = pRef->r_Call(argRaw, pSrc, pArgs, &sVal);
-							}
 						}
 						else
-						{
 							fRes = false;
-						}
 					}
 					else if ( !strnicmp(s.GetKey(), "FullTrigger", 11 ) )
 					{
@@ -2662,16 +2658,13 @@ jump_in:
 								pArgs->m_v.SetCount(0);
 							}
 							else
-							{
 								tRet = pRef->OnTrigger( psTmp, pSrc, pArgs);
-							}
+
 							pArgs->m_VarsLocal.SetNum("return",tRet,false);
 							fRes = tRet > 0 ? 1 : 0;
 						}
 						else
-						{
 							fRes = false;
-						}
 					}
 					else
 					{
@@ -2680,9 +2673,7 @@ jump_in:
 					}
 
 					if ( !fRes  )
-					{
 						DEBUG_MSG(( "WARNING: Trigger Bad Verb '%s','%s'\n", s.GetKey(), s.GetArgStr()));
-					}
 				}
 				break;
 		}

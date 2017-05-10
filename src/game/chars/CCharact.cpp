@@ -2987,7 +2987,8 @@ CRegionBase * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool f
 	pArea = CheckValidMove(ptDst, &wBlockFlags, dir, &ClimbHeight, fPathFinding);
 	if ( !pArea )
 	{
-		WARNWALK(("CheckValidMove failed\n"));
+		if (g_Cfg.m_wDebugFlags & DEBUGF_WALK)
+			g_pLog->EventWarn("CheckValidMove failed\n");
 		return NULL;
 	}
 
@@ -3953,7 +3954,7 @@ bool CChar::OnTick()
             StatFlag_Clear(STATF_Fly);
 
         // Check targeting timeout, if set
-        if (GetClient()->m_Targ_Timeout.IsTimeValid() && g_World.GetTimeDiff(GetClient()->m_Targ_Timeout) <= 0)
+        if (GetClient()->m_Targ_Timeout.IsTimeValid() && (g_World.GetTimeDiff(GetClient()->m_Targ_Timeout) <= 0) )
             GetClient()->addTargetCancel();
     }
 
@@ -3963,9 +3964,9 @@ bool CChar::OnTick()
         // My turn to do some action.
         switch (Skill_Done())
         {
-        case -SKTRIG_ABORT:	EXC_SET("skill abort"); Skill_Fail(true); break;	// fail with no message or credit.
-        case -SKTRIG_FAIL:	EXC_SET("skill fail"); Skill_Fail(false); break;
-        case -SKTRIG_QTY:	EXC_SET("skill cleanup"); Skill_Cleanup(); break;
+			case -SKTRIG_ABORT:	EXC_SET("skill abort");		Skill_Fail(true);	break;	// fail with no message or credit.
+			case -SKTRIG_FAIL:	EXC_SET("skill fail");		Skill_Fail(false);	break;
+			case -SKTRIG_QTY:	EXC_SET("skill cleanup");	Skill_Cleanup();	break;
         }
 
         if (m_pNPC)		// What to do next ?
@@ -3996,12 +3997,12 @@ bool CChar::OnTick()
 
     EXC_CATCH;
 
-#ifdef _DEBUG
-    EXC_DEBUG_START;
-    g_Log.EventDebug("'%s' npc '%d' player '%d' client '%d' [0%lx]\n",
-        GetName(), (int)(m_pNPC ? m_pNPC->m_Brain : 0), (int)(m_pPlayer != 0), (int)IsClient(), (dword)GetUID());
-    EXC_DEBUG_END;
-#endif
+//#ifdef _DEBUG
+//    EXC_DEBUG_START;
+//    g_Log.EventDebug("'%s' isNPC? '%d' isPlayer? '%d' client '%d' [uid=0%" PRIx16 "]\n",
+//        GetName(), (int)(m_pNPC ? m_pNPC->m_Brain : 0), (int)(m_pPlayer != 0), (int)IsClient(), (dword)GetUID());
+//    EXC_DEBUG_END;
+//#endif
 
     return true;
 }

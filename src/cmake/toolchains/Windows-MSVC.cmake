@@ -102,7 +102,7 @@ function (toolchain_exe_stuff)
 	 # Per-build defines
 		 $<$<OR:$<CONFIG:Release>,$<CONFIG:Nightly>>: THREAD_TRACK_CALLSTACK NDEBUG>
 
-		 $<$<CONFIG:Debug>:	_DEBUG _PACKETDUMP _TESTEXCEPTION DEBUG_CRYPT_MSGS>
+		 $<$<CONFIG:Debug>:	_DEBUG _PACKETDUMP _TESTEXCEPTION>
 
 		 $<$<CONFIG:Nightly>:	_NIGHTLYBUILD>
 	)

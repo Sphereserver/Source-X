@@ -930,7 +930,7 @@ llong CExpression::GetValMath( llong lVal, lpctstr & pExpr )
 				llong iVal = GetVal( pExpr );
 				if ( ! iVal )
 				{
-					DEBUG_ERR(( "Exp_GetVal: Divide by 0\n" ));
+					g_Log.EventError("Evaluating math: Divide by 0\n");
 					break;
 				}
 				lVal /= iVal;
@@ -942,7 +942,7 @@ llong CExpression::GetValMath( llong lVal, lpctstr & pExpr )
 				llong iVal = GetVal( pExpr );
 				if ( ! iVal )
 				{
-					DEBUG_ERR(( "Exp_GetVal: Divide by 0\n" ));
+					g_Log.EventError("Evaluating math: Modulo 0\n");
 					break;
 				}
 				lVal %= iVal;
@@ -1015,32 +1015,32 @@ int g_getval_reentrant_check = 0;
 
 llong CExpression::GetVal( lpctstr & pExpr )
 {
+	// This function moves the pointer forward, so you can retrieve the value only once!
+
 	ADDTOCALLSTACK("CExpression::GetVal");
 	// Get a value (default decimal) that could also be an expression.
 	// This does not parse beyond a comma !
 	//
 	// These are all the type of expressions and defines we'll see:
 	//
-	//	all_skin_colors					// simple DEF value
+	//	all_skin_colors				// simple DEF value
 	//	7933 						// simple decimal
 	//	-100.0						// simple negative decimal
-	//	.5						// simple decimal
-	//	0.5						// simple decimal
+	//	.5							// simple decimal
+	//	0.5							// simple decimal
 	//	073a 						// hex value (leading zero and no .)
 	//
 	//	0 -1						// Subtraction. has a space separator. (Yes I know I hate this)
 	//	{0-1}						// hyphenated simple range (GET RID OF THIS!)
 	//		complex ranges must be in {}
-	//	{ 3 6}						// simple range
+	//	{ 3 6 }							// simple range
 	//	{ 400 1 401 1 } 				// weighted values (2nd val = 1)
 	//	{ 1102 1148 1 }					// weighted range (3rd val < 10)
-	//	{ animal_colors 1 no_colors 1 } 		// weighted range
-	//	{ red_colors 1 {34 39} 1 }			// same (red_colors expands to a range)
+	//	{ animal_colors 1 no_colors 1 } // weighted range
+	//	{ red_colors 1 {34 39} 1 }		// same (red_colors expands to a range)
 
 	if ( pExpr == NULL )
 		return 0;
-
-	GETNONWHITESPACE( pExpr );
 
 	g_getval_reentrant_check++;
 	if ( g_getval_reentrant_check > 128 )
@@ -1049,10 +1049,10 @@ llong CExpression::GetVal( lpctstr & pExpr )
 		g_getval_reentrant_check--;
 		return 0;
 	}
-	llong lVal = GetValMath(GetSingle(pExpr), pExpr);
+	llong llVal = GetValMath(GetSingle(pExpr), pExpr);
 	g_getval_reentrant_check--;
 
-	return lVal;
+	return llVal;
 }
 
 int CExpression::GetRangeVals(lpctstr & pExpr, int64 * piVals, int iMaxQty)

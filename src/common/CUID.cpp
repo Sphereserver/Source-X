@@ -29,14 +29,14 @@ bool CUIDBase::IsResource() const
 
 bool CUIDBase::IsItem() const	// Item vs. Char
 {
-	if ( (m_dwInternalVal & (UID_F_ITEM|UID_F_RESOURCE)) == UID_F_ITEM )
+	if ( (m_dwInternalVal & (UID_F_RESOURCE|UID_F_ITEM)) == UID_F_ITEM )
 		return true;	// might be static in client ?
 	return false;
 }
 
 bool CUIDBase::IsChar() const	// Item vs. Char
 {
-	if ( ( m_dwInternalVal & (UID_F_ITEM|UID_F_RESOURCE)) == 0 )
+	if ( ( m_dwInternalVal & (UID_F_RESOURCE|UID_F_ITEM)) == 0 )
 		return IsValidUID();
 	return false;
 }
@@ -71,7 +71,7 @@ bool CUIDBase::IsItemInContainer() const
 
 void CUIDBase::SetObjContainerFlags( dword dwFlags )
 {
-	m_dwInternalVal = ( m_dwInternalVal & (UID_O_INDEX_MASK|UID_F_ITEM )) | dwFlags;
+	m_dwInternalVal = ( m_dwInternalVal & (UID_O_INDEX_MASK|UID_F_ITEM) ) | dwFlags;
 }
 
 void CUIDBase::SetPrivateUID( dword dwVal )

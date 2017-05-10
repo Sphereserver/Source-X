@@ -220,9 +220,9 @@ BOOL CNTWindow::COptionsDlg::DefDialogProc( UINT message, WPARAM wParam, LPARAM 
 	switch ( message )
 	{
 	case WM_INITDIALOG:
-		return( OnInitDialog());
+		return OnInitDialog();
 	case WM_COMMAND:
-		return( OnCommand(  HIWORD(wParam), LOWORD(wParam), (HWND) lParam ));
+		return OnCommand(  HIWORD(wParam), LOWORD(wParam), (HWND) lParam );
 	case WM_DESTROY:
 		OnDestroy();
 		return true;
@@ -307,9 +307,9 @@ BOOL CNTWindow::CStatusWnd::DefDialogProc( UINT message, WPARAM wParam, LPARAM l
 	switch ( message )
 	{
 	case WM_INITDIALOG:
-		return( OnInitDialog());
+		return OnInitDialog();
 	case WM_COMMAND:
-		return( OnCommand( HIWORD(wParam), LOWORD(wParam), (HWND) lParam ));
+		return OnCommand( HIWORD(wParam), LOWORD(wParam), (HWND) lParam );
 	case WM_DESTROY:
 		m_wndListClients.OnDestroy();
 		m_wndListStats.OnDestroy();
@@ -344,15 +344,16 @@ void CNTWindow::List_Clear()
 
 void CNTWindow::List_Add( COLORREF color, LPCTSTR pszText )
 {
+	const int iMaxTextLen = (64 * 1024);	// It was: (32*1024)
 	int iTextLen = (int)strlen( pszText );
 	int iNewLen = m_iLogTextLen + iTextLen;
 
-	if ( iNewLen > (32*1024) )
+	if ( iNewLen > iMaxTextLen )
 	{
-		int iCut = iNewLen - (32*1024);
+		int iCut = iNewLen - iMaxTextLen;
 		m_wndLog.SetSel( 0, iCut );
 		m_wndLog.ReplaceSel( "" );
-		m_iLogTextLen = (32*1024);
+		m_iLogTextLen = iMaxTextLen;
 	}
 
 	m_wndLog.SetSel( m_iLogTextLen, m_iLogTextLen );
@@ -376,7 +377,7 @@ void CNTWindow::List_Add( COLORREF color, LPCTSTR pszText )
 	m_iLogTextLen = iSelBegin;	// make sure it's correct.
 
 	// If the select is on screen then keep scrolling.
-	if ( ! m_fLogScrollLock && ! GetCapture())
+	if ( ! m_fLogScrollLock && ! GetCapture() )
 	{
 		if ( Sphere_GetOSInfo()->dwPlatformId == VER_PLATFORM_WIN32_NT )
 		{
@@ -669,7 +670,7 @@ bool CNTWindow::OnSysCommand( WPARAM uCmdType, int xPos, int yPos )
 	return false;
 }
 
-void	CNTWindow::SetLogFont( const char * pszFont )
+void CNTWindow::SetLogFont( const char * pszFont )
 {
 	// use an even spaced font
 	if ( pszFont == NULL )

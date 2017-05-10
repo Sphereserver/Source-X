@@ -48,10 +48,10 @@
 	#define IsAlpha(c)			iswalpha((wint_t)c)
 	#define IsAlnum(c)			iswalnum((wint_t)c)
 #else
-	#define IsDigit(c)			isdigit((int)c)	// It was: (uchar)c
-	#define IsSpace(c)			isspace((int)c)
-	#define IsAlpha(c)			isalpha((int)c)
-	#define IsAlnum(c)			isalnum((int)c)
+	#define IsDigit(c)			isdigit((int)(c & 0xFF))	// It was: (uchar)c
+	#define IsSpace(c)			isspace((int)(c & 0xFF))
+	#define IsAlpha(c)			isalpha((int)(c & 0xFF))
+	#define IsAlnum(c)			isalnum((int)(c & 0xFF))
 #endif
 
 #define IsNegative(c)		((c < 0)?1:0)
@@ -84,8 +84,8 @@
 
 #ifndef ASSERT
 	#ifdef _DEBUG
-		extern void Assert_CheckFail(const char * pExp, const char *pFile, long lLine);
-		#define ASSERT(exp)			(void)( (exp) || (Assert_CheckFail(#exp, __FILE__, __LINE__), 0) )
+		extern void Assert_Fail(const char * pExp, const char *pFile, long long llLine);
+		#define ASSERT(exp)			if ( !(exp) )	Assert_Fail(#exp, __FILE__, __LINE__);
 	#else
 		#define ASSERT(exp)			(void)0
 	#endif

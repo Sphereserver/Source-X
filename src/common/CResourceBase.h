@@ -13,7 +13,6 @@
 #include "CScript.h"
 #include "CScriptObj.h"
 
-
 class CVarDefContNum;
 
 
@@ -107,7 +106,7 @@ struct CResourceIDBase : public CUIDBase
 // RES_INDEX: Resource Index
 #define RES_TYPE_SHIFT	25		// leave 6 bits = 64 for RES_TYPE;
 #define RES_TYPE_MASK	63		//  63 = 0x3F = 6 bits.
-#define RES_PAGE_SHIFT	18		// leave 8 bits = 255 pages of space;
+#define RES_PAGE_SHIFT	17		// leave 8 bits = 255 pages of space;
 #define RES_PAGE_MASK	255		//  255 = 0xFF = 8 bits.
 #define RES_INDEX_SHIFT	0		// leave 18 bits = 262144 entries;
 #define RES_INDEX_MASK	0x3FFFF	//  0x3FFFF = 18 bits.
@@ -146,18 +145,18 @@ struct CResourceID : public CResourceIDBase
 	CResourceID(RES_TYPE restype)
 	{
 		// single instance type.
-		m_dwInternalVal = UID_F_RESOURCE | ((restype) << RES_TYPE_SHIFT);
+		m_dwInternalVal = UID_F_RESOURCE | (restype << RES_TYPE_SHIFT);
 	}
 	CResourceID(RES_TYPE restype, int index)
 	{
 		ASSERT(index < RES_INDEX_MASK);
-		m_dwInternalVal = UID_F_RESOURCE | ((restype) << RES_TYPE_SHIFT) | (index);
+		m_dwInternalVal = UID_F_RESOURCE | (restype << RES_TYPE_SHIFT) | index;
 	}
 	CResourceID(RES_TYPE restype, int index, int iPage)
 	{
 		ASSERT(index < RES_INDEX_MASK);
 		ASSERT(iPage < RES_PAGE_MASK);
-		m_dwInternalVal = UID_F_RESOURCE | ((restype) << RES_TYPE_SHIFT) | ((iPage) << RES_PAGE_SHIFT) | (index);
+		m_dwInternalVal = UID_F_RESOURCE | (restype << RES_TYPE_SHIFT) | (iPage << RES_PAGE_SHIFT) | index;
 	}
 	CResourceIDBase & operator = (const CResourceIDBase & rid)
 	{

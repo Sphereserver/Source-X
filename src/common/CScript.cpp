@@ -33,13 +33,13 @@ CScriptLineContext::CScriptLineContext()
 bool CScriptKey::IsKey( lpctstr pszName ) const
 {
 	ASSERT(m_pszKey);
-	return( ! strcmpi( m_pszKey, pszName ));
+	return ( ! strcmpi( m_pszKey, pszName ));
 }
 
 bool CScriptKey::IsKeyHead( lpctstr pszName, size_t len ) const
 {
 	ASSERT(m_pszKey);
-	return( ! strnicmp( m_pszKey, pszName, len ));
+	return ( ! strnicmp( m_pszKey, pszName, len ));
 }
 
 void CScriptKey::InitKey()
@@ -52,20 +52,20 @@ lpctstr CScriptKey::GetKey() const
 {
 	// Get the key or section name.
 	ASSERT(m_pszKey);
-	return(m_pszKey);
+	return m_pszKey;
 }
 
 // Args passed with the key.
 bool CScriptKey::HasArgs() const
 {
 	ASSERT(m_pszArg);
-	return(( m_pszArg[0] ) ? true : false );
+	return (( m_pszArg[0] ) ? true : false );
 }
 
 tchar * CScriptKey::GetArgRaw() const	// Not need to parse at all.
 {
 	ASSERT(m_pszArg);
-	return(m_pszArg);
+	return m_pszArg;
 }
 
 tchar * CScriptKey::GetArgStr( bool * fQuoted )	// this could be a quoted string ?
@@ -75,7 +75,7 @@ tchar * CScriptKey::GetArgStr( bool * fQuoted )	// this could be a quoted string
 
 	tchar * pStr = GetArgRaw();
 	if ( *pStr != '"' )
-		return( pStr );
+		return pStr ;
 
 	pStr++;
 	//tchar * pEnd = strchr( pStr, '"' );
@@ -91,7 +91,7 @@ tchar * CScriptKey::GetArgStr( bool * fQuoted )	// this could be a quoted string
 		}
 	}
 
-	return( pStr );
+	return pStr ;
 }
 
 tchar * CScriptKey::GetArgStr()

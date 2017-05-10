@@ -81,7 +81,7 @@ int CSString::SetLength(int iNewLength)
 		gMemAmount += m_iMaxLength;
 		gReallocs++;
 #endif
-		tchar	*pNewData = new tchar[m_iMaxLength + 1];
+		tchar *pNewData = new tchar[m_iMaxLength + 1];
 		ASSERT(pNewData);
 
 		int iMinLength = minimum(iNewLength, m_iLength);

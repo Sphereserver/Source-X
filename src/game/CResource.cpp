@@ -3251,17 +3251,25 @@ CResourceID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 		{
 			if ( pszName[0] == '\0' )
 				return ridinvalid;
+
 			tchar * pArg1 = Str_GetTemp();
 			strcpy( pArg1, pszName );
 			pszName = pArg1;
 			tchar * pArg2;
 			Str_Parse( pArg1, &pArg2 );
+
+			// For dialog resources, we use the page bits to mark if it's the TEXT or BUTTON block
 			if ( !strnicmp( pArg2, "TEXT", 4 ) )
 				iPage = RES_DIALOG_TEXT;
 			else if ( !strnicmp( pArg2, "BUTTON", 6 ) )
 				iPage = RES_DIALOG_BUTTON;
-			else	// for a REGIONTYPE block, pArg2 is the landtile type associated with the REGIONTYPE
-				iPage = RES_GET_INDEX( Exp_GetVal(pArg2) );
+			else
+			{
+				// For a book the page is... the page number
+				// For a REGIONTYPE block, the page (pArg2) is the landtile type associated with the REGIONTYPE
+				iPage = RES_GET_INDEX(Exp_GetVal(pArg2));
+			}
+				
 			if ( iPage > RES_PAGE_MASK )
 				DEBUG_ERR(( "Bad resource index page %d for Resource named %s\n", iPage, pszName ));
 		}
@@ -3324,7 +3332,7 @@ CResourceID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 	dword index;
 	if ( pszName )
 	{
-		if ( pszName[0] == '\0' )	// absense of resourceid = index 0
+		if ( pszName[0] == '\0' )	// absence of resourceid = index 0
 		{
 			// This might be ok.
 			return CResourceID( restype, 0, iPage );
@@ -3361,7 +3369,7 @@ CResourceID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 #ifdef _DEBUG
 			if ( g_Serv.m_iModeCode != SERVMODE_ResyncLoad )	// this really is ok.
 			{
-				// Warn of  duplicates.
+				// Warn of duplicates.
 				size_t duplicateIndex = m_ResHash.FindKey( rid );
 				if ( duplicateIndex != m_ResHash.BadIndex() )	// i found it. So i have to find something else.
 					ASSERT(m_ResHash.GetAt(rid, duplicateIndex));
@@ -3420,16 +3428,25 @@ CResourceID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 			{
 				DEBUG_ERR(( "WARNING: region redefines DEFNAME '%s' for another region!\n", pszName ));
 			}
-			else if ( iPage == rid.GetResPage() )	// Books and dialogs have pages.
+			else if ( iPage == rid.GetResPage() )
 			{
+				// Books and dialogs have pages; if it's not a book or dialog, the if is 0 == 0, so execute it always
+
 				// We are redefining an item we have already read in ?
 				// Why do this unless it's a Resync ?
 				if ( g_Serv.m_iModeCode != SERVMODE_ResyncLoad )
 				{
-					//if ( g_Cfg.m_wDebugFlags & DEBUGF_SCRIPTS )
+					// Ensure it's not a "type", because hardcoded types indexes are defined in sphere_defs.scp,
+					//  which is usually parsed before sphere_types.scp or its TYPEDEF block. So some time after declaring the
+					//	index for a type we'll read its TYPEDEF, it would be normal to find another "declaration" for the type.
+					if ( restype != RES_TYPEDEF )
+					{
+						//if ( g_Cfg.m_wDebugFlags & DEBUGF_SCRIPTS )
 						g_pLog->EventWarn("Redef resource '%s'\n", static_cast<lpctstr>(pszName));
-					//else
-					//	DEBUG_WARN(( "Redef resource '%s'\n", static_cast<lpctstr>(pszName) ));
+						g_pLog->EventWarn("SERVMODE '%d'\n", static_cast<int>(g_Serv.m_iModeCode));
+						//else
+						//	DEBUG_WARN(( "Redef resource '%s'\n", static_cast<lpctstr>(pszName) ));
+					}		
 				}
 			}
 			rid = CResourceID( restype, rid.GetResIndex(), iPage );
@@ -3438,7 +3455,8 @@ CResourceID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 		}
 	}
 
-	// we must define this as a new unique entry.
+
+	// At this point, we must define this as a new, unique entry.
 	// Find a new free entry.
 
 	int iHashRange = 0;

@@ -294,7 +294,7 @@ void _cdecl CLog::CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ...
 			eSeverity = pErr->m_eSeverity;
 			const CAssert * pAssertErr = dynamic_cast<const CAssert*>(pErr);
 			if ( pAssertErr )
-				pAssertErr->GetErrorMessage(szMsg, sizeof(szMsg), 0);
+				pAssertErr->GetErrorMessage(szMsg, sizeof(szMsg));
 			else
 				pErr->GetErrorMessage(szMsg, sizeof(szMsg));
 			stLen = strlen(szMsg);

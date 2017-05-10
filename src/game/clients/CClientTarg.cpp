@@ -2142,20 +2142,14 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 				if ( pKey )
 				{
 					if ( m_pChar->Use_MultiLockDown( pItemTarg ))
-					{
 						return true;
-					}
 				}
 			}
 
 			if ( ! fLockable || ! pItemTarg->m_itContainer.m_lockUID )
-			{
 				SysMessageDefault( DEFMSG_ITEMUSE_KEY_NOLOCK );
-			}
 			else
-			{
 				SysMessageDefault( DEFMSG_ITEMUSE_KEY_NOKEY );
-			}
 			return false;
 		}
 
@@ -2312,7 +2306,9 @@ static lpctstr const sm_Txt_LoomUse[] =
 		return false;
 
 	case IT_FISH_POLE:
+
 		m_pChar->m_Act_p = pt;
+
 		m_pChar->m_atResource.m_ridType = CResourceID(RES_TYPEDEF, IT_WATER);
 		return( m_pChar->Skill_Start( SKILL_FISHING ));
 

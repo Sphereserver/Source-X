@@ -172,7 +172,7 @@ public:
 
 	// Some character action in progress.
 	SKILL_TYPE	m_Act_SkillCurrent;	// Currently using a skill. Could be combat skill.
-	CUID	m_Act_Targ;				// Current caction target
+	CUID	m_Act_Targ;				// Current action target
 	CUID	m_Fight_Targ;			// Current combat target
 	CUID	m_Act_TargPrv;			// Previous target.
 	int			m_Act_Difficulty;	// -1 = fail skill. (0-100) for skill advance calc.
@@ -951,8 +951,8 @@ public:
 	WAR_SWING_TYPE Fight_CanHit(CChar * pCharTarg);
 	int Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom = false, bool bGetMax = true ) const;
 	bool Fight_IsAttackable();
-	// Attacker System
 
+	// Attacker System
 	enum ATTACKER_CLEAR_TYPE
 	{
 		ATTACKER_CLEAR_FORCED		= 0,
@@ -963,31 +963,31 @@ public:
 		//ATTACKER_CLEAR_DEATH		= 3,
 	};
 
-	int	 Attacker() { return (int)(m_lastAttackers.size()); }
-	bool Attacker_Add(CChar * pChar, int64 threat = 0);
+	size_t	Attacker() { return m_lastAttackers.size(); }
+	bool	Attacker_Add(CChar * pChar, int64 threat = 0);
 	CChar * Attacker_GetLast();
-	bool Attacker_Delete(CChar * pChar, bool bForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
-	bool Attacker_Delete(int id, bool bForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
-	void Attacker_RemoveChar();
-	void Attacker_Clear();
-	void Attacker_CheckTimeout();
-	int64 Attacker_GetDam( int attacker );
-	void  Attacker_SetDam( CChar * pChar, int64 value );
-	void  Attacker_SetDam( int attacker, int64 value );
-	CChar * Attacker_GetUID( int attacker);
-	int64  Attacker_GetElapsed( int attacker );
-	void  Attacker_SetElapsed( CChar * pChar, int64 value );
-	void  Attacker_SetElapsed( int pChar, int64 value );
-	int64  Attacker_GetThreat( int attacker );
-	void  Attacker_SetThreat( CChar * pChar, int64 value );
-	void  Attacker_SetThreat(int pChar, int64 value);
-	bool Attacker_GetIgnore(int pChar);
-	bool Attacker_GetIgnore(CChar * pChar);
-	void Attacker_SetIgnore(int pChar, bool fIgnore);
-	void Attacker_SetIgnore(CChar * pChar, bool fIgnore);
-	int64 Attacker_GetHighestThreat();
-	int  Attacker_GetID( CChar * pChar );
-	int  Attacker_GetID( CUID pChar );
+	bool	Attacker_Delete(CChar * pChar, bool bForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
+	bool	Attacker_Delete(size_t attackerIndex, bool bForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
+	void	Attacker_RemoveChar();
+	void	Attacker_Clear();
+	void	Attacker_CheckTimeout();
+	int64	Attacker_GetDam(size_t attackerIndex);
+	void	Attacker_SetDam(CChar * pChar, int64 value);
+	void	Attacker_SetDam(size_t attackerIndex, int64 value);
+	CChar * Attacker_GetUID(size_t attackerIndex);
+	int64	Attacker_GetElapsed(size_t attackerIndex);
+	void	Attacker_SetElapsed(CChar * pChar, int64 value);
+	void	Attacker_SetElapsed(size_t attackerIndex, int64 value);
+	int64	Attacker_GetThreat(size_t attackerIndex);
+	void	Attacker_SetThreat(CChar * pChar, int64 value);
+	void	Attacker_SetThreat(size_t attackerIndex, int64 value);
+	bool	Attacker_GetIgnore(size_t pChar);
+	bool	Attacker_GetIgnore(CChar * pChar);
+	void	Attacker_SetIgnore(size_t pChar, bool fIgnore);
+	void	Attacker_SetIgnore(CChar * pChar, bool fIgnore);
+	int64	Attacker_GetHighestThreat();
+	int		Attacker_GetID(CChar * pChar);
+	int		Attacker_GetID(CUID pChar);
 
 	//
 	bool Player_OnVerb( CScript &s, CTextConsole * pSrc );

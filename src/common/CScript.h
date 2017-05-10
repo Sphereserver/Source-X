@@ -22,8 +22,9 @@
 #define REMOVE_QUOTES( x )			\
 {									\
 	GETNONWHITESPACE( x );			\
-	if ( *x == '"' )	++x;				\
-		tchar * psX	= const_cast<tchar*>(strchr( x, '"' ));	\
+	if ( *x == '"' )				\
+		++x;						\
+	tchar * psX	= const_cast<tchar*>(strchr( x, '"' ));	\
 	if ( psX )						\
 		*psX	= '\0';				\
 }

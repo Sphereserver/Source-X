@@ -139,7 +139,7 @@ realtype CVarFloat::GetValMath( realtype dVal, lpctstr & pExpr )
 				realtype dTempVal = MakeFloatMath( pExpr );
 				if ( ! dTempVal )
 				{
-					DEBUG_ERR(( "Float_MakeFloatMath: Divide by 0\n" ));
+					g_Log.EventError("Evaluating float math: Divide by 0\n");
 					break;
 				}
 				dVal /= dTempVal;

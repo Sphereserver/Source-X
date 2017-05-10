@@ -92,10 +92,10 @@ extern class CExpression
 {
 public:
 	static const char *m_sClassName;
-	CVarDefMap		m_VarDefs;		// Defined variables in sorted order.
-	CVarDefMap		m_VarGlobals;	// Global variables
-	CListDefMap		m_ListGlobals; // Global lists
-	CListDefMap		m_ListInternals; // Internal lists
+	CVarDefMap		m_VarDefs;			// Defined variables in sorted order.
+	CVarDefMap		m_VarGlobals;		// Global variables
+	CListDefMap		m_ListGlobals;		// Global lists
+	CListDefMap		m_ListInternals;	// Internal lists
 	CSString		m_sTmp;
 
 	//	defined default messages
@@ -123,11 +123,12 @@ public:
 	}
 
 	// Evaluate using the stuff we know.
-	llong GetSingle( lpctstr & pArgs );
-	llong GetVal( lpctstr & pArgs );
-	llong GetValMath( llong lVal, lpctstr & pExpr );
+	llong GetSingle(lpctstr & pArgs);
 	int GetRangeVals(lpctstr & pExpr, int64 * piVals, int iMaxQty);
 	int64 GetRange(lpctstr & pArgs);
+	llong GetValMath(llong lVal, lpctstr & pExpr);
+	llong GetVal(lpctstr & pArgs);
+
 
 public:
 	CExpression();

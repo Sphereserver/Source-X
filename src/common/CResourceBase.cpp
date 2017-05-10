@@ -1364,7 +1364,7 @@ bool CResourceQty::Load(lpctstr &pszCmds)
 	// Can be either order.:
 	// "Name Qty" or "Qty Name"
 
-	const char *orig = pszCmds;
+	lpctstr orig = pszCmds;
 	GETNONWHITESPACE(pszCmds);	// Skip leading spaces.
 
 	m_iQty = INT64_MIN;

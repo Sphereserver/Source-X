@@ -213,11 +213,10 @@ void CObjBase::SetUID( dword dwIndex, bool fItem )
 	}
 
 	if ( dwIndex != UID_O_INDEX_MASK )	// just wanted to remove it
-	{
 		dwIndex = g_World.AllocUID( dwIndex, this );
-	}
 
-	if ( fItem ) dwIndex |= UID_F_ITEM;
+	if ( fItem )
+		dwIndex |= UID_F_ITEM;
 
 	CObjBaseTemplate::SetUID( dwIndex );
 }
