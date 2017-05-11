@@ -394,7 +394,7 @@ bool CPartyDef::DeclineEvent( CChar *pCharDecline, CUID uidInviter )	// static
 	return true;
 }
 
-bool CPartyDef::AcceptEvent( CChar *pCharAccept, CUID uidInviter, bool bForced )	// static
+bool CPartyDef::AcceptEvent( CChar *pCharAccept, CUID uidInviter, bool bForced, bool bSendMessages ) // static
 {
 	ADDTOCALLSTACK("CPartyDef::AcceptEvent");
 	// We are accepting the invite to join a party
@@ -402,7 +402,7 @@ bool CPartyDef::AcceptEvent( CChar *pCharAccept, CUID uidInviter, bool bForced )
 	// Party master is only one that can add ! GetChar(0)
 
 	CChar *pCharInviter = uidInviter.CharFind();
-	if ( !pCharInviter || !pCharInviter->IsClient() || !pCharAccept || !pCharAccept->IsClient() || pCharInviter == pCharAccept )
+	if ( !pCharInviter || !pCharInviter->IsClient() || !pCharAccept || !pCharAccept->IsClient() || (pCharInviter == pCharAccept) )
 		return false;
 
 	CPartyDef *pParty = pCharInviter->m_pParty;
@@ -441,7 +441,8 @@ bool CPartyDef::AcceptEvent( CChar *pCharAccept, CUID uidInviter, bool bForced )
 		pParty = new CPartyDef(pCharInviter, pCharAccept);
 		ASSERT(pParty);
 		g_World.m_Parties.InsertHead(pParty);
-		pCharInviter->SysMessage(pszMsg);
+		if (bSendMessages)
+			pCharInviter->SysMessage(pszMsg);
 	}
 	else
 	{
@@ -449,11 +450,13 @@ bool CPartyDef::AcceptEvent( CChar *pCharAccept, CUID uidInviter, bool bForced )
 		if ( pParty->IsPartyFull() || (!bForced && !pParty->IsPartyMaster(pCharInviter)) )
 			return false;
 
-		pParty->SysMessageAll(pszMsg);	// tell everyone already in the party about this
+		if (bSendMessages)
+			pParty->SysMessageAll(pszMsg);	// tell everyone already in the party about this
 		pParty->AcceptMember(pCharAccept);
 	}
 
-	pCharAccept->SysMessageDefault(DEFMSG_PARTY_ADDED);
+	if (bSendMessages)
+		pCharAccept->SysMessageDefault(DEFMSG_PARTY_ADDED);
 	return true;
 }
 

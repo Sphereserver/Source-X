@@ -58,14 +58,13 @@ private:
 	CPartyDef& operator=(const CPartyDef& other);
 
 public:
-	static bool AcceptEvent( CChar * pCharAccept, CUID uidInviter, bool bForced = false );
+	static bool AcceptEvent( CChar * pCharAccept, CUID uidInviter, bool bForced = false, bool bSendMessages = true);
 	static bool DeclineEvent( CChar * pCharDecline, CUID uidInviter );
 
 	bool IsPartyFull() const;
 	bool IsInParty( const CChar * pChar ) const;
 	bool IsPartyMaster( const CChar * pChar ) const;
 	CUID GetMaster();
-
 
 	// Refresh status for party members
 	void AddStatsUpdate( CChar * pChar, PacketSend * pPacket );

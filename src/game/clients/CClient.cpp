@@ -471,13 +471,25 @@ bool CClient::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 					if ( !strnicmp(pszKey, "CREATE", 7) )
 						pszKey +=7;
 
-					SKIP_SEPARATORS(pszKey);
-					CChar * pChar = static_cast<CChar*>(static_cast<CUID>(Exp_GetSingle(pszKey)).CharFind());
-					if ( !pChar )
-						return false;
-					if ( !pChar->IsClient() )
-						return false;
-					CPartyDef::AcceptEvent( pChar , this->GetChar()->GetUID(), true);
+					// Do i want to send the "joined" message to the party members?
+					int iSendMsgs = Exp_GetSingle(pszKey);
+					bool bSendMsgs = (iSendMsgs != 0) ? true : false;
+
+					// Add all the UIDs to the party
+					for (int ip = ip; ip < 10; ip++)
+					{
+						SKIP_ARGSEP(pszKey);
+						CChar * pChar = (static_cast<CUID>(Exp_GetSingle(pszKey))).CharFind();
+						if (!pChar)
+							continue;
+						if (!pChar->IsClient())
+							continue;
+						CPartyDef::AcceptEvent(pChar, this->GetChar()->GetUID(), true, bSendMsgs);
+
+						if (*pszKey == '\0')
+							break;
+					}
+
 					if ( !this->m_pChar->m_pParty )
 						return false;
 					pszKey = oldKey;	// Restoring back to real pszKey, so we don't get errors for giving an uid instead of PDV_CREATE.

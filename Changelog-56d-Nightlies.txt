@@ -98,23 +98,27 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
   craft skills, but they have recipes and synergy with Carpentry and Alchemy. Separated as
   they would on EA for others using a custom system.
 
- 30-07-2016, Nolok
-  - Updated the README.md file with fundamental informations about this fork.
-  - Fixed: REGIONTYPE block could not accept landtile types with index > 163. Extended this limit to 255.
-		This also extends the maximum number of pages in a book.
-  - Fixed: Sphere crashing sometimes just before saying Defmessages: npc_generic_gone_1 and npc_generic_gone_2.
-  - Changed: The redefinition of a resource will always be notified, even without DEBUGF_SCRIPTS enabled in Sphere.ini.
+30-07-2016, Nolok
+- Updated the README.md file with fundamental informations about this fork.
+- Fixed: REGIONTYPE block could not accept landtile types with index > 163. Extended this limit to 255.
+	This also extends the maximum number of pages in a book.
+- Fixed: Sphere crashing sometimes just before saying Defmessages: npc_generic_gone_1 and npc_generic_gone_2.
+- Changed: The redefinition of a resource will always be notified, even without DEBUGF_SCRIPTS enabled in Sphere.ini.
 
-  10-05-2017, Nolok
-  - Fixed: Resources page not being stored correctly. This solves a bug with books and REGIONTYPEs.
-  - Fixed: <ACTION> returned the skill defname but its value could only be set via the skill key
-			(example: <ACTION> returns skill_hiding, but ACTION=skill_hiding didn't activate the skill, you need to use ACTION=hiding).
-			Solved this dicrepancy making ACTION return the skill key. Compatibility with older scripts is
-			not broken, since the skill key or defname can be compared regardless to both another key or defname.
-  - Changed: ACT and ACTP are now stored in the save files, in order not to break actions performed during the save process
-		at the server restart.
-  - Fixed: TAG.MATOVERRIDE containing wrong or no defname.
-  - Fixed: Server crashed when calling some functions with invalid argument (IsDigit, IsSpace, IsAlpha, IsAlnum).
-  - Changed: Added/removed some debug and warning messages; updated some other messages and enabled them also in non-debug builds.
-		Consider now the debug build as usable (it's pretty useful for finding bugs in the source or in the scripts).
-  - Changed: Increased the text capacity of the console on Windows.
+10-05-2017, Nolok
+- Fixed: Resources page not being stored correctly. This solves a bug with books and REGIONTYPEs.
+- Fixed: <ACTION> returned the skill defname but its value could only be set via the skill key
+	(example: <ACTION> returns skill_hiding, but ACTION=skill_hiding didn't activate the skill, you need to use ACTION=hiding).
+	Solved this dicrepancy making ACTION return the skill key. Compatibility with older scripts is
+	not broken, since the skill key or defname can be compared regardless to both another key or defname.
+	-> This fixes also ACTION being stored in saves (via skill defname) but not set at the server startup.
+- Changed: ACT and ACTP are now stored in the save files, in order not to break actions performed during the save process
+	at the server restart.
+- Fixed: TAG.MATOVERRIDE containing wrong or no defname.
+- Fixed: Server crashed when calling some functions with invalid argument (IsDigit, IsSpace, IsAlpha, IsAlnum).
+- Changed: Added/removed some debug and warning messages; updated some other messages and enabled them also in non-debug builds.
+	-> Consider now the debug build as usable (it's pretty useful for finding bugs in the source or in the scripts).
+- Changed: Increased the text capacity of the console on Windows.
+
+12-05-2017, Nolok
+- Fixed: PARTY.CREATE wasn't working properly.

@@ -1,4 +1,5 @@
 #include "SQLite.h"
+#include "../CExpression.h"
 #include "../CException.h"
 #include "../../common/CLog.h"
 

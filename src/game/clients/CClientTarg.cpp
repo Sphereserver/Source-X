@@ -2503,7 +2503,7 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 		return true;
 	}
 
-	if ( pChar->m_pParty != NULL )	// Aready in a party !
+	if ( pChar->m_pParty != NULL )	// Already in a party !
 	{
 		if ( m_pChar->m_pParty == pChar->m_pParty )	// already in this party
 		{

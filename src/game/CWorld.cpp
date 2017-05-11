@@ -942,7 +942,7 @@ void CWorldThread::GarbageCollection_New()
 	// Clean up new objects that are never placed.
 	if ( m_ObjNew.GetCount() > 0 )
 	{
-		g_Log.Event( LOGL_ERROR, "GC: %" PRIuSIZE_T " unplaced object deleted\n", m_ObjNew.GetCount());
+		g_Log.Event( LOGL_ERROR, "GC: %" PRIuSIZE_T " unplaced objects deleted\n", m_ObjNew.GetCount());
 
 		for (size_t i = 0; i < m_ObjNew.GetCount(); ++i)
 		{

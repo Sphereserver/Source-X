@@ -858,11 +858,11 @@ try_dec:
 		}
 
 		// Must be a symbol of some sort ?
-		llong lVal;
-		if ( m_VarGlobals.GetParseVal( pszArgs, &lVal ) )
-			return lVal;
-		if ( m_VarDefs.GetParseVal( pszArgs, &lVal ) )
-			return lVal;
+		llong llVal;
+		if ( m_VarGlobals.GetParseVal( pszArgs, &llVal ) )
+			return llVal;
+		if ( m_VarDefs.GetParseVal( pszArgs, &llVal ) )
+			return llVal;
 	}
 #pragma endregion intrinsics
 
@@ -877,7 +877,7 @@ try_dec:
 	return 0;
 }
 
-llong CExpression::GetValMath( llong lVal, lpctstr & pExpr )
+llong CExpression::GetValMath( llong llVal, lpctstr & pExpr )
 {
 	ADDTOCALLSTACK("CExpression::GetValMath");
 	GETNONWHITESPACE(pExpr);
@@ -894,35 +894,35 @@ llong CExpression::GetValMath( llong lVal, lpctstr & pExpr )
 			break;
 		case '+':
 			pExpr++;
-			lVal += GetVal( pExpr );
+			llVal += GetVal( pExpr );
 			break;
 		case '-':
 			pExpr++;
-			lVal -= GetVal( pExpr );
+			llVal -= GetVal( pExpr );
 			break;
 		case '*':
 			pExpr++;
-			lVal *= GetVal( pExpr );
+			llVal *= GetVal( pExpr );
 			break;
 		case '|':
 			pExpr++;
 			if ( pExpr[0] == '|' )	// boolean ?
 			{
 				pExpr++;
-				lVal = ( GetVal( pExpr ) || lVal );
+				llVal = ( GetVal( pExpr ) || llVal );
 			}
 			else	// bitwise
-				lVal |= GetVal( pExpr );
+				llVal |= GetVal( pExpr );
 			break;
 		case '&':
 			pExpr++;
 			if ( pExpr[0] == '&' )	// boolean ?
 			{
 				pExpr++;
-				lVal = ( GetVal( pExpr ) && lVal );	// tricky stuff here. logical ops must come first or possibly not get processed.
+				llVal = ( GetVal( pExpr ) && llVal );	// tricky stuff here. logical ops must come first or possibly not get processed.
 			}
 			else	// bitwise
-				lVal &= GetVal( pExpr );
+				llVal &= GetVal( pExpr );
 			break;
 		case '/':
 			pExpr++;
@@ -933,7 +933,7 @@ llong CExpression::GetValMath( llong lVal, lpctstr & pExpr )
 					g_Log.EventError("Evaluating math: Divide by 0\n");
 					break;
 				}
-				lVal /= iVal;
+				llVal /= iVal;
 			}
 			break;
 		case '%':
@@ -945,70 +945,70 @@ llong CExpression::GetValMath( llong lVal, lpctstr & pExpr )
 					g_Log.EventError("Evaluating math: Modulo 0\n");
 					break;
 				}
-				lVal %= iVal;
+				llVal %= iVal;
 			}
 			break;
 		case '^':
 			pExpr ++;
-			lVal ^= GetVal(pExpr);
+			llVal ^= GetVal(pExpr);
 			break;
 		case '>': // boolean
 			pExpr++;
 			if ( pExpr[0] == '=' )	// boolean ?
 			{
 				pExpr++;
-				lVal = ( lVal >= GetVal( pExpr ) );
+				llVal = ( llVal >= GetVal( pExpr ) );
 			}
 			else if ( pExpr[0] == '>' )	// shift
 			{
 				pExpr++;
-				lVal >>= GetVal( pExpr );
+				llVal >>= GetVal( pExpr );
 			}
 			else
-				lVal = ( lVal > GetVal( pExpr ) );
+				llVal = ( llVal > GetVal( pExpr ) );
 			break;
 		case '<': // boolean
 			pExpr++;
 			if ( pExpr[0] == '=' )	// boolean ?
 			{
 				pExpr++;
-				lVal = ( lVal <= GetVal( pExpr ) );
+				llVal = ( llVal <= GetVal( pExpr ) );
 			}
 			else if ( pExpr[0] == '<' )	// shift
 			{
 				pExpr++;
-				lVal <<= GetVal( pExpr );
+				llVal <<= GetVal( pExpr );
 			}
 			else
-				lVal = ( lVal < GetVal( pExpr ) );
+				llVal = ( llVal < GetVal( pExpr ) );
 			break;
 		case '!':
 			pExpr ++;
 			if ( pExpr[0] != '=' )
 				break; // boolean ! is handled as a single expresion.
 			pExpr ++;
-			lVal = ( lVal != GetVal( pExpr ) );
+			llVal = ( llVal != GetVal( pExpr ) );
 			break;
 		case '=': // boolean
 			while ( pExpr[0] == '=' )
 				pExpr ++;
-			lVal = ( lVal == GetVal( pExpr ) );
+			llVal = ( llVal == GetVal( pExpr ) );
 			break;
 		case '@':
 			pExpr++;
 			{
 				llong iVal = GetVal( pExpr );
-				if ( (lVal == 0) && (iVal < 0) )
+				if ( (llVal == 0) && (iVal < 0) )
 				{
 					DEBUG_ERR(( "Exp_GetVal: Power of zero with negative exponent is undefined\n" ));
 					break;
 				}
-				lVal = power(lVal, iVal);
+				llVal = power(llVal, iVal);
 			}
 			break;
 	}
 
-	return lVal;
+	return llVal;
 }
 
 int g_getval_reentrant_check = 0;
