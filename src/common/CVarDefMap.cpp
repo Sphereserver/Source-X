@@ -513,21 +513,15 @@ int CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fZero )
 		pVarBase = (*iResult);
 
 	if ( !pVarBase )
-	{
 		return SetNumNew( pszName, iVal );
-	}
 
 	CVarDefContNum * pVarNum = dynamic_cast <CVarDefContNum *>( pVarBase );
 	if ( pVarNum )
-	{
 		pVarNum->SetValNum( iVal );
-	}
 	else
 	{
 		if ( g_Serv.IsLoading() )
-		{
-			DEBUG_ERR(( "Replace existing VarStr '%s'\n", pVarBase->GetKey()));
-		}
+			DEBUG_WARN(( "Replace existing VarStr '%s' with number: 0x%" PRIx64" \n", pVarBase->GetKey(), iVal ));
 		return SetNumOverride( pszName, iVal );
 	}
 
@@ -583,21 +577,15 @@ int CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, bool fZer
 		pVarBase = (*iResult);
 
 	if ( !pVarBase )
-	{
 		return SetStrNew( pszName, pszVal );
-	}
 
 	CVarDefContStr * pVarStr = dynamic_cast <CVarDefContStr *>( pVarBase );
 	if ( pVarStr )
-	{
 		pVarStr->SetValStr( pszVal );
-	}
 	else
 	{
 		if ( g_Serv.IsLoading())
-		{
-			DEBUG_ERR(( "Replace existing VarNum '%s' with %s\n", pVarBase->GetKey(), pszVal ));
-		}
+			DEBUG_WARN(( "Replace existing VarNum '%s' with string: '%s^\n", pVarBase->GetKey(), pszVal ));
 		return SetStrOverride( pszName, pszVal );
 	}
 	return (int)(std::distance(m_Container.begin(), iResult) );

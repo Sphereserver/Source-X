@@ -170,7 +170,7 @@ CItemContainer *CChar::GetBank( LAYER_TYPE layer )
 
 CItemContainer * CChar::GetPackSafe()
 {
-	return( GetBank(LAYER_PACK));
+	return GetBank(LAYER_PACK);
 }
 
 CItem *CChar::GetBackpackItem(ITEMID_TYPE id)

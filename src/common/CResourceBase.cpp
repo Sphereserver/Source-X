@@ -199,9 +199,7 @@ void CResourceBase::LoadResourcesOpen( CScript * pScript )
 	}
 
 	if ( ! iSections )
-	{
 		DEBUG_WARN(( "No resource sections in '%s'\n", (lpctstr)pScript->GetFilePath()));
-	}
 }
 
 bool CResourceBase::LoadResources( CResourceScript * pScript )
@@ -686,7 +684,9 @@ bool CResourceScript::Open( lpctstr pszFilename, uint wFlags )
 		if ( !( wFlags & OF_READWRITE ) && CheckForChange() )
 		{
 			//  what should we do about it ? reload it of course !
+			g_Serv.SetServerMode(SERVMODE_ResyncLoad);
 			g_Cfg.LoadResourcesOpen( this );
+			g_Serv.SetServerMode(SERVMODE_Run);
 		}
 	}
 

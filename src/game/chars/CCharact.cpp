@@ -1824,12 +1824,24 @@ bool CChar::ItemBounce( CItem * pItem, bool bDisplayMsg )
 		return true;
 
 	lpctstr pszWhere = NULL;
-	if ( pPack && CanCarry(pItem) )		// this can happen at load time
+	bool bCanAddToPack = false;
+
+	if (pPack && CanCarry(pItem))		// this can happen at load time
+	{
+		bCanAddToPack = true;
+		if (IsTrigUsed(TRIGGER_DROPON_SELF) || IsTrigUsed(TRIGGER_ITEMDROPON_SELF))
+		{
+			CScriptTriggerArgs Args(pItem);
+			if (pPack->OnTrigger(ITRIG_DROPON_SELF, this, &Args) == TRIGRET_RET_TRUE)
+				bCanAddToPack = false;
+		}
+	}
+
+	if (bCanAddToPack)
 	{
 		pszWhere = g_Cfg.GetDefaultMsg( DEFMSG_MSG_BOUNCE_PACK );
 		pItem->RemoveFromView();
 		pPack->ContentAdd(pItem);		// add it to pack
-		Sound(pItem->GetDropSound(pPack));
 	}
 	else
 	{
@@ -1844,11 +1856,18 @@ bool CChar::ItemBounce( CItem * pItem, bool bDisplayMsg )
 			pItem->Delete();
 			return false;
 		}
-		pszWhere = g_Cfg.GetDefaultMsg( DEFMSG_MSG_FEET );
-		pItem->RemoveFromView();
-		pItem->MoveToDecay(GetTopPoint(), pItem->GetDecayTime());	// drop it on ground
+
+		// Maybe in the trigger call i have changed/overridden the container, so drop it on ground
+		//	only if the item still hasn't a container
+		if (pItem->GetContainer() == NULL)
+		{
+			pszWhere = g_Cfg.GetDefaultMsg(DEFMSG_MSG_FEET);
+			pItem->RemoveFromView();
+			pItem->MoveToDecay(GetTopPoint(), pItem->GetDecayTime());	// drop it on ground
+		}
 	}
 
+	Sound(pItem->GetDropSound(pPack));
 	if ( bDisplayMsg )
 		SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_MSG_ITEMPLACE ), pItem->GetName(), pszWhere );
 	return true;

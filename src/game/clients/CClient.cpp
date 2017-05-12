@@ -465,18 +465,20 @@ bool CClient::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 				pRef = m_pHouseDesign;
 				return true;
 			case CLIR_PARTY:
-				if ( !this->m_pChar->m_pParty )
+				if (!strnicmp(pszKey, "CREATE", 7))
 				{
+					if (this->m_pChar->m_pParty)
+						return false;
+
 					lpctstr oldKey = pszKey;
-					if ( !strnicmp(pszKey, "CREATE", 7) )
-						pszKey +=7;
+					pszKey += 7;
 
 					// Do i want to send the "joined" message to the party members?
 					int iSendMsgs = Exp_GetSingle(pszKey);
 					bool bSendMsgs = (iSendMsgs != 0) ? true : false;
 
 					// Add all the UIDs to the party
-					for (int ip = ip; ip < 10; ip++)
+					for (int ip = 0; ip < 10; ip++)
 					{
 						SKIP_ARGSEP(pszKey);
 						CChar * pChar = (static_cast<CUID>(Exp_GetSingle(pszKey))).CharFind();
@@ -489,11 +491,10 @@ bool CClient::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 						if (*pszKey == '\0')
 							break;
 					}
-
-					if ( !this->m_pChar->m_pParty )
-						return false;
 					pszKey = oldKey;	// Restoring back to real pszKey, so we don't get errors for giving an uid instead of PDV_CREATE.
 				}
+				if (!this->m_pChar->m_pParty)
+					return false;
 				pRef = this->m_pChar->m_pParty;
 				return true;
 			case CLIR_TARG:

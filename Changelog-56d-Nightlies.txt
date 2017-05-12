@@ -122,3 +122,9 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 
 12-05-2017, Nolok
 - Fixed: PARTY.CREATE wasn't working properly.
+
+13-05-2017, Nolok
+- Added: Now BOUNCE calls triggers @DropOn_Self and @ItemDropOn_Self on the char's backpack.
+	If a RETURN 1 is performed and a new CONT has not been set via scripts on the trigger call, the item is dropped on ground,
+	otherwise the item is left in the new CONT.
+- Fixed: Item drop sound not being played if BOUNCE dropped item on ground.

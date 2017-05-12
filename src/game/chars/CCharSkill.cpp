@@ -1396,7 +1396,7 @@ int CChar::Skill_Fishing( SKTRIG_TYPE stage )
 	if ( !pItem )
 	{
 		SysMessageDefault(DEFMSG_FISHING_2);
-		return -SKTRIG_ABORT;
+		return -SKTRIG_FAIL;
 	}
 
 	SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_FISHING_SUCCESS), pItem->GetName());
@@ -3231,7 +3231,7 @@ void CChar::Skill_Fail( bool fCancel )
 	// Other types of failure don't come here.
 	//
 	// ARGS:
-	//	fCancel = no credt.
+	//	fCancel = no credit.
 	//  else We still get some credit for having tried.
 
 	SKILL_TYPE skill = Skill_GetActive();
