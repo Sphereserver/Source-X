@@ -642,7 +642,7 @@ bool CChar::Skill_MakeItem_Success()
 			pItem->m_itSpell.m_spelllevel = iSkillLevel;
 
 		CItemBase *ptItemDef = CItemBase::FindItemBase(m_atCreate.m_ItemID);
-		if ( ptItemDef->Can(CAN_I_PILE) )
+		if ( ptItemDef->IsStackableType() )
 			pItem->SetAmount(m_atCreate.m_Amount);
 		else
 		{

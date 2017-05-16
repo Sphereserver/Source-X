@@ -100,9 +100,9 @@ function (toolchain_exe_stuff)
 		_WINSOCK_DEPRECATED_NO_WARNINGS
 
 	 # Per-build defines
-		 $<$<OR:$<CONFIG:Release>,$<CONFIG:Nightly>>: THREAD_TRACK_CALLSTACK NDEBUG>
+		 $<$<OR:$<CONFIG:Release>,$<CONFIG:Nightly>>: NDEBUG THREAD_TRACK_CALLSTACK>
 
-		 $<$<CONFIG:Debug>:	_DEBUG _PACKETDUMP _TESTEXCEPTION>
+		 $<$<CONFIG:Debug>:	_DEBUG THREAD_TRACK_CALLSTACK _PACKETDUMP _TESTEXCEPTION>
 
 		 $<$<CONFIG:Nightly>:	_NIGHTLYBUILD>
 	)

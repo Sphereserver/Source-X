@@ -1336,7 +1336,8 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 	{
 		if ( pszKey[0] )
 		{
-			if ( !pRef ) return true;
+			if ( !pRef )
+				return true;
 			CScript script( pszKey, s.GetArgStr());
 			return pRef->r_Verb( script, pSrc );
 		}

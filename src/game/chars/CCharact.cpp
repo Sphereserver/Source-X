@@ -1334,7 +1334,7 @@ void CChar::UpdateMove( const CPointMap & ptOld, CClient * pExcludeClient, bool 
 // Change in direction.
 void CChar::UpdateDir( DIR_TYPE dir )
 {
-	ADDTOCALLSTACK("CChar::UpdateDir");
+	ADDTOCALLSTACK("CChar::UpdateDir (DIR_TYPE)");
 
 	if ( dir != m_dirFace && dir > DIR_INVALID && dir < DIR_QTY )
 	{
@@ -1346,7 +1346,7 @@ void CChar::UpdateDir( DIR_TYPE dir )
 // Change in direction.
 void CChar::UpdateDir( const CPointMap & pt )
 {
-	ADDTOCALLSTACK("CChar::UpdateDir");
+	ADDTOCALLSTACK("CChar::UpdateDir (CPointMap)");
 
 	UpdateDir(GetTopPoint().GetDir(pt));
 }
@@ -1354,7 +1354,7 @@ void CChar::UpdateDir( const CPointMap & pt )
 // Change in direction.
 void CChar::UpdateDir( const CObjBaseTemplate * pObj )
 {
-	ADDTOCALLSTACK("CChar::UpdateDir");
+	ADDTOCALLSTACK("CChar::UpdateDir (CObjBaseTemplate)");
 	if ( pObj == NULL )
 		return;
 

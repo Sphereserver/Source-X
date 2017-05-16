@@ -684,7 +684,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 						} return true;	
 					case PT_TERRAIN:
 						{
-							pszKey += strlen(sm_szLoadKeys[index]);
+							pszKey += 7;
 							if ( *pszKey == '.' )	// do we have an argument?
 							{
 								SKIP_SEPARATORS( pszKey );
@@ -836,13 +836,13 @@ size_t CPointBase::Read( tchar * pszVal )
 			}
 		case 3: // m_z
 			if ( IsDigit(ppVal[2][0]) || ppVal[2][0] == '-' )
-			{
 				m_z = (char)(ATOI(ppVal[2]));
-			}
 		case 2:
-			m_y = (short)(ATOI(ppVal[1]));
+			if (IsDigit(ppVal[1][0]))
+				m_y = (short)(ATOI(ppVal[1]));
 		case 1:
-			m_x = (short)(ATOI(ppVal[0]));
+			if (IsDigit(ppVal[0][0]))
+				m_x = (short)(ATOI(ppVal[0]));
 		case 0:
 			break;
 	}

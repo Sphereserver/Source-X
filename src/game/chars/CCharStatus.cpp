@@ -1090,26 +1090,26 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 				if ( IsClient() && pObjCont->IsItem() && pObjCont->GetTopLevelObj() != this )
 				{
 					CClient *pClient = GetClient();
-					if ( pClient && pClient->m_openedContainers.find(pObjCont->GetUID().GetPrivateUID()) == pClient->m_openedContainers.end() )
+					if ( pClient && (pClient->m_openedContainers.find(pObjCont->GetUID().GetPrivateUID()) == pClient->m_openedContainers.end()) )
 					{
+/*
 #ifdef _DEBUG
 						if ( CanSee(pObjCont) )
 						{
 	#ifdef THREAD_TRACK_CALLSTACK
 							StackDebugInformation::printStackTrace();
 	#endif
-							/*
 							g_Log.EventDebug("%x:EF_FixCanSeeInClosedConts prevents %s, (0%x, '%s') from seeing item uid=0%x (%s, '%s') in container uid=0%x (%s, '%s')\n",
 								pClient->GetSocketID(), pClient->GetAccount()->GetName(), (dword)GetUID(), GetName(false),
 								(dword)pItem->GetUID(), pItem->GetResourceName(), pItem->GetName(),
 								(dword)pObjCont->GetUID(), pObjCont->GetResourceName(), pObjCont->GetName());
-							*/
 						}
 #endif
+*/
 						return false;
-						}
 					}
 				}
+			}
 
 			return CanSee(pObjCont);
 		}

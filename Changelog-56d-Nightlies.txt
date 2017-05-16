@@ -128,3 +128,8 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 	If a RETURN 1 is performed and a new CONT has not been set via scripts on the trigger call, the item is dropped on ground,
 	otherwise the item is left in the new CONT.
 - Fixed: Item drop sound not being played if BOUNCE dropped item on ground.
+
+16-05-2017, Nolok
+- Added: Now FACE can also accept the coordinates of the point towards which the char should look.
+- Added: Now ACTP behaves like every other point (so you can also extract x, y, z, statics, etc).
+- Fixed: RESMAKE returning val and key without a space character to separate them (e.g.: 2Logs).

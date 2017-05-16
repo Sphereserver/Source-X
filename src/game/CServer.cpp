@@ -575,10 +575,10 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 #ifdef _TESTEXCEPTION
 		case '$':	// call stack integrity
 			{
-#ifdef _EXCEPTIONS_DEBUG
+	#ifdef _EXCEPTIONS_DEBUG
 				{ // test without PAUSECALLSTACK
-					EXC_TRY("Test1");
 					ADDTOCALLSTACK("CServer::TestException1");
+					EXC_TRY("Test1");
 					throw CSError( LOGM_DEBUG, 0, "Test Exception #1");
 					}
 					catch (const CSError& e)
@@ -591,8 +591,8 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 				}
 
 				{ // test with PAUSECALLSTACK
-					EXC_TRY("Test2");
 					ADDTOCALLSTACK("CServer::TestException2");
+					EXC_TRY("Test2");
 					throw CSError( LOGM_DEBUG, 0, "Test Exception #2");
 					}
 					catch (const CSError& e)
@@ -604,9 +604,9 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 						EXC_CATCH_EXCEPTION(&e);
 					}
 				}
-#else
+	#else
 				throw CSError(LOGL_CRIT, E_FAIL, "This test requires exception debugging enabled");
-#endif
+	#endif
 			} break;
 		case '%':	// throw simple exception
 			{

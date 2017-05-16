@@ -2527,6 +2527,12 @@ do_default:
 			sVal.FormatHex( m_Act_Targ.GetObjUID() );	// uid
 			break;
 		case CHC_ACTP:
+			if (pszKey[4] == '.')
+			{
+				pszKey += 4;
+				SKIP_SEPARATORS(pszKey);
+				return m_Act_p.r_WriteVal(pszKey, sVal);
+			}
 			sVal = m_Act_p.WriteUsed();
 			break;
 		case CHC_ACTPRV:
@@ -3563,8 +3569,34 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			return ItemEquipWeapon(false);
 		case CHV_FACE:
 		{
-			UpdateDir(CUID(s.GetArgVal()).ObjFind());
-			break;
+			lpctstr pszVerbArg = s.GetArgStr();
+			GETNONWHITESPACE(pszVerbArg);
+			if (*pszVerbArg == '\0')
+			{
+				UpdateDir(dynamic_cast<CObjBase*>(pCharSrc));
+				return true;
+			}
+			else if (IsStrNumeric(pszVerbArg))
+			{
+				CObjBase* pTowards = CUID(s.GetArgVal()).ObjFind();
+				if (pTowards != NULL)
+				{
+					UpdateDir(pTowards);
+					return true;
+				}
+			}
+			else
+			{
+				CPointBase pt;
+				pt.InitPoint();
+				pt.Read(s.GetArgStr());
+				if (pt.IsValidPoint())
+				{
+					UpdateDir(pt);
+					return true;
+				}
+			}
+			return false;
 		}
 		case CHV_FIXWEIGHT:
 			FixWeight();
