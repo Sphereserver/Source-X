@@ -140,9 +140,7 @@ CResourceScript * CResourceBase::AddResourceFile( lpctstr pszName )
 	// Find correct path
 	CScript s;
 	if ( ! OpenResourceFind( s, szName ))
-	{
 		return NULL;
-	}
 
 	pNewRes = new CResourceScript( s.GetFilePath() );
 	m_ResourceFiles.Add(pNewRes);
@@ -1013,7 +1011,8 @@ bool CResourceLink::ResourceLock( CResourceLock &s )
 
 	//	Give several tryes to lock the script while multithreading
 	int iRet = s.OpenLock( m_pScript, m_Context );
-	if ( ! iRet ) return true;
+	if ( ! iRet )
+		return true;
 
 	s.AttachObj( this );
 
@@ -1126,7 +1125,8 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
 		{
 			// Add a single knowledge fragment or appropriate group item.
 
-			if ( pszCmd[0] == '+' ) pszCmd ++;
+			if ( pszCmd[0] == '+' )
+				pszCmd ++;
 
 			CResourceLink * pResourceLink = dynamic_cast<CResourceLink *>( g_Cfg.ResourceGetDefByName( restype, pszCmd ));
 			if ( pResourceLink == NULL )
@@ -1587,10 +1587,10 @@ void CResourceQtyArray::WriteNames( tchar * pszArgs, size_t index ) const
 						iQty / 10, iQty % 10 );
 			}
 			else
-				pszArgs += sprintf( pszArgs, "%" PRId64 , iQty);
+				pszArgs += sprintf( pszArgs, "%" PRId64 " ", iQty);
 		}
 
-		pszArgs += GetAt(i).WriteNameSingle( pszArgs, (int)(iQty) );
+		pszArgs += GetAt(i).WriteNameSingle( pszArgs, (int)iQty );
 	}
 	*pszArgs = '\0';
 }
