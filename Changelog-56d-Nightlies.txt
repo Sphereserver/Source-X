@@ -133,3 +133,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Added: Now FACE can also accept the coordinates of the point towards which the char should look.
 - Added: Now ACTP behaves like every other point (so you can also extract x, y, z, statics, etc).
 - Fixed: RESMAKE returning val and key without a space character to separate them (e.g.: 2Logs).
+
+20-05-2017, Nolok
+- Added: Print the stack trace when an ASSERT fails, in order to ease the debug process.
+- Changed: Better formatting of the stack trace.
