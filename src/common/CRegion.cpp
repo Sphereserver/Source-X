@@ -932,14 +932,17 @@ bool CRegionBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command 
 	{
 		case RV_ALLCLIENTS:
 		{
+			s.ParseKey(s.GetKey(), s.GetArgStr());
 			ClientIterator it;
 			for (CClient* pClient = it.next(); pClient != NULL; pClient = it.next())
 			{
 				CChar * pChar = pClient->GetChar();
 				if ( !pChar || ( pChar->GetRegion() != this ))
 					continue;
-
-				CScript script( s.GetArgStr() );
+				
+				CScript script(s.GetArgRaw());
+				script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
+				script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
 				pChar->r_Verb(script, pSrc);
 			}
 			return true;
@@ -981,6 +984,7 @@ bool CRegionBase::SendSectorsVerb( lpctstr pszVerb, lpctstr pszArgs, CTextConsol
 		CSector * pSector = GetSector(i);
 		if ( pSector == NULL )
 			break;
+
 		// Does the rect overlap ?
 		if ( IsOverlapped( pSector->GetRect() ) )
 		{
@@ -988,7 +992,7 @@ bool CRegionBase::SendSectorsVerb( lpctstr pszVerb, lpctstr pszArgs, CTextConsol
 			fRet |= pSector->r_Verb( script, pSrc );
 		}
 	}
-	return( fRet );
+	return fRet ;
 }
 
 lpctstr const CRegionBase::sm_szTrigName[RTRIG_QTY+1] =	// static

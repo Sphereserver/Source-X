@@ -310,9 +310,7 @@ bool CScriptKeyAlloc::ParseKey( lpctstr pszKey, lpctstr pszVal )
 
 	size_t lenkey = strlen( pszKey );
 	if ( ! lenkey )
-	{
 		return ParseKey(pszVal);
-	}
 
 	ASSERT( lenkey < SCRIPT_MAX_LINE_LEN-2 );
 
@@ -380,17 +378,20 @@ void CScriptKeyAlloc::ParseKeyLate()
 CScript::CScript()
 {
 	InitBase();
+	m_iResourceFileIndex = (size_t)-1;
 }
 
 CScript::CScript( lpctstr pszKey )
 {
 	InitBase();
+	m_iResourceFileIndex = (size_t)-1;
 	ParseKey(pszKey);
 }
 
 CScript::CScript( lpctstr pszKey, lpctstr pszVal )
 {
 	InitBase();
+	m_iResourceFileIndex = (size_t)-1;
 	ParseKey( pszKey, pszVal );
 }
 
@@ -413,13 +414,9 @@ bool CScript::Open( lpctstr pszFilename, uint wFlags )
 	InitBase();
 
 	if ( pszFilename == NULL )
-	{
 		pszFilename = GetFilePath();
-	}
 	else
-	{
 		SetFilePath( pszFilename );
-	}
 
 	lpctstr pszTitle = GetFileTitle();
 	if ( pszTitle == NULL || pszTitle[0] == '\0' )
@@ -438,9 +435,7 @@ bool CScript::Open( lpctstr pszFilename, uint wFlags )
 	if ( !PhysicalScriptFile::Open( GetFilePath(), wFlags ))
 	{
 		if ( ! ( wFlags & OF_NONCRIT ))
-		{
 			g_Log.Event(LOGL_WARN, "'%s' not found...\n", static_cast<lpctstr>(GetFilePath()));
-		}
 		return false;
 	}
 

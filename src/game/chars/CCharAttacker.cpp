@@ -376,7 +376,7 @@ void CChar::Attacker_RemoveChar()
 void CChar::Attacker_CheckTimeout()
 {
 	ADDTOCALLSTACK("CChar::Attacker_CheckTimeout");
-	if (m_lastAttackers.size())
+	if (m_lastAttackers.size() > 0)
 	{
 		for (size_t count = 0; count < m_lastAttackers.size(); count++)
 		{

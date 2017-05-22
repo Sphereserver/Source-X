@@ -344,7 +344,9 @@ void CSector::r_Write()
 bool CSector::v_AllChars( CScript & s, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CSector::v_AllChars");
-	CScript	script(s.GetArgStr());
+	CScript script(s.GetArgStr());
+	script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
+	script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
 	CChar * pChar = NULL;
 	bool fRet = false;
 
@@ -368,7 +370,9 @@ bool CSector::v_AllChars( CScript & s, CTextConsole * pSrc )
 bool CSector::v_AllCharsIdle( CScript & s, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CSector::v_AllCharsIdle");
-	CScript	script(s.GetArgStr());
+	CScript script(s.GetArgStr());
+	script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
+	script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
 	CChar * pChar = NULL;
 	bool fRet = false;
 
@@ -392,7 +396,9 @@ bool CSector::v_AllCharsIdle( CScript & s, CTextConsole * pSrc )
 bool CSector::v_AllItems( CScript & s, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CSector::v_AllItems");
-	CScript	script(s.GetArgStr());
+	CScript script(s.GetArgStr());
+	script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
+	script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
 	CItem * pItem = NULL;
 	bool fRet = false;
 
@@ -434,6 +440,8 @@ bool CSector::v_AllClients( CScript & s, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CSector::v_AllClients");
 	CScript script(s.GetArgStr());
+	script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
+	script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
 	CChar * pChar = NULL;
 	bool fRet = false;
 

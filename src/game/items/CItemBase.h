@@ -231,12 +231,12 @@ class CItemBase : public CBaseBaseDef
 	// Describe basic stuff about all items.
 	// Partly based on CUOItemTypeRec/CUOItemTypeRec_HS
 private:
-	word	m_weight;		// weight in WEIGHT_UNITS (UINT16_MAX=not movable) defaults from the .MUL file.
+	word	m_weight;			// weight in WEIGHT_UNITS (UINT16_MAX=not movable) defaults from the .MUL file.
 	CSTypedArray<ITEMID_TYPE,ITEMID_TYPE> m_flip_id;	//  can be flipped to make these display ids.
-	IT_TYPE	m_type;			// default double click action type. (if any)
-	CValueRangeDef m_values;		// range of values given a quality skill
-	byte    m_layer;		// Is this item equippable on paperdoll? LAYER=LAYER_TYPE defaults from the .MUL file.
-	dword   m_dwFlags;		//  UFLAG4_DOOR from CUOItemTypeRec/CUOItemTypeRec_HS
+	IT_TYPE	m_type;				// default double click action type. (if any)
+	CValueRangeDef m_values;	// range of values given a quality skill
+	byte    m_layer;			// Is this item equippable on paperdoll? LAYER=LAYER_TYPE defaults from the .MUL file.
+	dword   m_dwFlags;			//  UFLAG4_DOOR from CUOItemTypeRec/CUOItemTypeRec_HS
 	byte	m_speed;
 public:
 	static const char *m_sClassName;

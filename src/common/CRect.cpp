@@ -215,10 +215,15 @@ bool CPointBase::IsCharValid() const
 
 void CPointBase::ValidatePoint()
 {
-	if ( m_x < 0 ) m_x = 0;
-	if (m_x >= (short)(g_MapList.GetX(m_map))) m_x = (short)(g_MapList.GetX(m_map) - 1);
-	if ( m_y < 0 ) m_y = 0;
-	if (m_y >= (short)(g_MapList.GetY(m_map))) m_y = (short)(g_MapList.GetY(m_map) - 1);
+	if ( m_x < 0 )
+		m_x = 0;
+	if (m_x >= (short)(g_MapList.GetX(m_map)))
+		m_x = (short)(g_MapList.GetX(m_map) - 1);
+
+	if ( m_y < 0 )
+		m_y = 0;
+	if (m_y >= (short)(g_MapList.GetY(m_map)))
+		m_y = (short)(g_MapList.GetY(m_map) - 1);
 }
 
 bool CPointBase::IsSame2D( const CPointBase & pt ) const

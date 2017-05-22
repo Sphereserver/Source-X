@@ -143,7 +143,7 @@ CResourceScript * CResourceBase::AddResourceFile( lpctstr pszName )
 		return NULL;
 
 	pNewRes = new CResourceScript( s.GetFilePath() );
-	m_ResourceFiles.Add(pNewRes);
+	pNewRes->m_iResourceFileIndex = m_ResourceFiles.Add(pNewRes);
 	return pNewRes;
 }
 
@@ -805,6 +805,9 @@ int CResourceLock::OpenLock( CResourceScript * pLock, CScriptLineContext context
 
 	if ( ! SeekContext( context ) )
 		return -3;
+
+	// Propagate m_iResourceFileIndex from the CResourceScript to this CResourceLock
+	m_iResourceFileIndex = m_pLock->m_iResourceFileIndex;
 
 	return 0;
 }

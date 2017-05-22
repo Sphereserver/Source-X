@@ -698,6 +698,8 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 			if ( !pRef )
 				return true;
 			CScript script(pszKey, s.GetArgStr());
+			script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
+			script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
 			return pRef->r_Verb(script, pSrc);
 		}
 	}

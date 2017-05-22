@@ -200,8 +200,17 @@ void ReportGarbageCollection(CObjBase * pObj, int iResultCode)
 {
 	ASSERT(pObj != NULL);
 
-	DEBUG_ERR(("GC: UID=0%x, Defname='%s', Name='%s'. Invalid code=%0x (%s)\n",
+	DEBUG_ERR(("GC: Deleted UID=0%" PRIx32 ", Defname='%s', Name='%s'. Invalid code=0x%x (%s)\n",
 		(dword)pObj->GetUID(), pObj->Base_GetDef()->GetResourceName(), pObj->GetName(), iResultCode, GetReasonForGarbageCode(iResultCode)));
+
+	if ( (pObj->m_iCreatedResScriptIdx != (size_t)-1) && (pObj->m_iCreatedResScriptLine != -1) )
+	{
+		// Object was created via NEWITEM or NEWNPC in scripts, tell me where
+		CResourceScript* pResFile = g_Cfg.GetResourceFile((size_t)(pObj->m_iCreatedResScriptIdx));
+		if (pResFile == NULL)
+			return;
+		DEBUG_ERR(("GC:\t Object was created in '%s', line %d \n", (lpctstr)pResFile->GetFilePath(), pObj->m_iCreatedResScriptLine));
+	}
 }
 
 
@@ -729,8 +738,8 @@ CWorldThread::~CWorldThread()
 void CWorldThread::CloseAllUIDs()
 {
 	ADDTOCALLSTACK("CWorldThread::CloseAllUIDs");
-	m_ObjDelete.DeleteAll();	// clean up our delete list.
-	m_ObjNew.DeleteAll();
+	m_ObjDelete.DeleteAll();	// empty our list of unplaced objects (and delete the objects in the list)
+	m_ObjNew.DeleteAll();		// empty our list of objects to delete (and delete the objects in the list)
 	m_UIDs.RemoveAll();
 
 	if ( m_FreeUIDs != NULL )
@@ -940,23 +949,22 @@ void CWorldThread::GarbageCollection_New()
 	ADDTOCALLSTACK("CWorldThread::GarbageCollection_New");
 	EXC_TRY("GarbageCollection_New");
 	// Clean up new objects that are never placed.
-	if ( m_ObjNew.GetCount() > 0 )
+	size_t iObjCount = m_ObjNew.GetCount();
+	if (iObjCount > 0 )
 	{
-		g_Log.Event( LOGL_ERROR, "GC: %" PRIuSIZE_T " unplaced objects deleted\n", m_ObjNew.GetCount());
+		g_Log.Event(LOGL_ERROR, "GC: %" PRIuSIZE_T " unplaced objects!\n", iObjCount);
 
-		for (size_t i = 0; i < m_ObjNew.GetCount(); ++i)
+		for (size_t i = 0; i < iObjCount; i++)
 		{
 			CObjBase * pObj = dynamic_cast<CObjBase*>(m_ObjNew.GetAt(i));
 			if (pObj == NULL)
 				continue;
 
 			ReportGarbageCollection(pObj, 0x3202);
-			pObj->Delete();
 		}
-
-		m_ObjNew.DeleteAll();
+		m_ObjNew.DeleteAll();	// empty our list of unplaced objects (and delete the objects in the list)
 	}
-	m_ObjDelete.DeleteAll();	// clean up our delete list.
+	m_ObjDelete.DeleteAll();	// empty our list of objects to delete (and delete the objects in the list)
 
 	// Make sure all GM pages have accounts.
 	CGMPage *pPage = static_cast<CGMPage *>(g_World.m_GMPages.GetHead());

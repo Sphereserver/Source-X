@@ -971,7 +971,7 @@ public:
 	CResourceRefArray   m_iEventsItemLink;		///< EventsItem.
 
 	///< Third Party Tools
-	CSString m_sStripPath;	///< Strip Path for TNG.
+	CSString m_sStripPath;	///< Strip Path for TNG and Axis.
 	bool m_fCUOStatus;      ///< Enable or disable the response to ConnectUO pings
 	bool m_fUOGStatus;      ///< Enable or disable the response to UOGateway pings
 

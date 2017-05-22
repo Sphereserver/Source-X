@@ -293,9 +293,7 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 	ASSERT(pSrc);
 	m_timeNextUpdate = CServerTime::GetCurrentTime() + m_iUpdatePeriod;
 	if ( pszDstName == NULL )
-	{
 		pszDstName = m_sDstFilePath;
-	}
 
 	if ( m_type != WEBPAGE_TEMPLATE ||
 		*pszDstName == '\0' ||
@@ -304,9 +302,7 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 
 	CScript FileRead;
 	if ( ! FileRead.Open( m_sSrcFilePath, OF_READ|OF_TEXT|OF_DEFAULTMODE ))
-	{
 		return false;
-	}
 
 	CScriptFileContext context( &FileRead );	// set this as the context.
 

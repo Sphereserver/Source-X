@@ -137,3 +137,8 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 20-05-2017, Nolok
 - Added: Print the stack trace when an ASSERT fails, in order to ease the debug process.
 - Changed: Better formatting of the stack trace.
+
+22-05-2017, Nolok
+- Fixed: Garbage Collection deleting (and reporting) only a fraction of the unplaced objects. Fixed also incorrect formatting of the "invalid code".
+- Added: Now the Garbage Collection report prints the script file name and the line where the object was created.
+	This only works for objects added in the scripts through the keywords: NEWITEM, NEWNPC, NEWSUMMON, NEWDUPE, DUPE.

@@ -361,8 +361,6 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 			default:
 				break;
 		}
-
-
 	}
 
 	pItem->Update();
@@ -1985,9 +1983,7 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 	if ( pVar )
 	{
 		if ( pVar->GetValNum() )
-		{
 			iSound = static_cast<SOUND_TYPE>(pVar->GetValNum());
-		}
 	}
 	if ( CItemBase::IsVisibleLayer(layer) )	// visible layer ?
 		Sound(iSound);

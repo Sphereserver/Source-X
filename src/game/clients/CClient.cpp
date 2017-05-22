@@ -1532,6 +1532,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					return true;
 				}
 			}
+
 			return CScriptObj::r_Verb( s, pSrc );	// used in the case of web pages to access server level things..
 	}
 	return true;

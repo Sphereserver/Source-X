@@ -67,6 +67,9 @@ bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
 CObjBase::CObjBase( bool fItem )
 {
 	sm_iCount ++;
+	m_iCreatedResScriptIdx = (size_t)-1;
+	m_iCreatedResScriptLine = -1;
+
 	m_wHue=HUE_DEFAULT;
 	m_timeout.Init();
 	m_timestamp.Init();
@@ -2520,8 +2523,9 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			{
 				EXC_SET("TRY or TRYP");
 				lpctstr pszVerb = s.GetArgStr();
-				CScript script( pszVerb );
-				//DEBUG_WARN(("pszVerb %s",pszVerb));
+				CScript script(pszVerb);
+				script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
+				script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
 				if ( !r_Verb(script, pSrc) )
 				{
 					DEBUG_ERR(( "Can't try %s object %s (0%x)\n", pszVerb, GetName(), (dword)(GetUID())));
@@ -2539,22 +2543,13 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				if ( index == OV_TRYSRC )
 				{
 					NewSrc = s.GetArgVal();
-				}
-
-				lpctstr pszVerb = s.GetArgStr();
-
-				if ( index == OV_TRYSRC )
-				{
 					if ( NewSrc.IsValidUID() )
-					{
 						pNewSrc = NewSrc.CharFind();
-					}
 				}
 				else
-				{
 					pNewSrc = &g_Serv;
-				}
 
+				lpctstr pszVerb = s.GetArgStr();
 				if ( pNewSrc == NULL )
 				{
 					if ( index == OV_TRYSRC )
@@ -2564,7 +2559,9 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 					return false;
 				}
-				CScript script( pszVerb );
+				CScript script(pszVerb);
+				script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
+				script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
 				if (!r_Verb(script, pNewSrc))
 				{
 					if ( index == OV_TRYSRC )

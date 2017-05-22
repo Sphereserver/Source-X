@@ -3418,6 +3418,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 	ADDTOCALLSTACK("CChar::r_Verb");
 	if ( !pSrc )
 		return false;
+
 	if ( IsClient() && GetClient()->r_Verb(s, pSrc) )
 		return true;
 
@@ -3519,30 +3520,27 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			break;
 		case CHV_CRIMINAL:
 			if ( s.HasArgs() && ! s.GetArgVal())
-			{
 				StatFlag_Clear( STATF_Criminal );
-			}
 			else
-			{
 				Noto_Criminal();
-			}
 			break;
 		case CHV_DISCONNECT:
 			// Push a player char off line. CLIENTLINGER thing
 			if ( IsClient())
-			{
 				return GetClient()->addKick( pSrc, false );
-			}
 			SetDisconnected();
 			break;
 		case CHV_DROP:	// uid
-			return ItemDrop( CUID( s.GetArgVal()).ItemFind(), GetTopPoint());
+			return ItemDrop( CUID(s.GetArgVal()).ItemFind(), GetTopPoint() );
 		case CHV_DUPE:	// = dupe a creature !
 			{
-			CChar * pChar = CreateNPC( GetID());
-			pChar->MoveTo( GetTopPoint() );
-			pChar->DupeFrom(this,s.GetArgVal() < 1 ? true : false);
-			}break;
+				CChar * pChar = CreateNPC( GetID() );
+				pChar->MoveTo( GetTopPoint() );
+				pChar->DupeFrom(this,s.GetArgVal() < 1 ? true : false);
+				pChar->m_iCreatedResScriptIdx = s.m_iResourceFileIndex;
+				pChar->m_iCreatedResScriptLine = s.m_iLineNum;
+			}
+			break;
 		case CHV_EQUIP:	// uid
 			return ItemEquip( CUID( s.GetArgVal()).ItemFind());
 		case CHV_EQUIPHALO:

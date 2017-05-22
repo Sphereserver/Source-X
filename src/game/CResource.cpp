@@ -886,10 +886,11 @@ bool CResource::r_LoadVal( CScript &s )
 
 							if ( pszStr && *pszStr )
 							{
-								CScript scp(pszStr);
-
+								CScript script(pszStr);
+								script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
+								script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
 								for ( int nIndex = 0; nIndex < nSectors; ++nIndex )
-									g_World.GetSector(nMapNumber, nIndex)->r_Verb(scp, &g_Serv);
+									g_World.GetSector(nMapNumber, nIndex)->r_Verb(script, &g_Serv);
 							}
 
 							return true;
@@ -907,8 +908,10 @@ bool CResource::r_LoadVal( CScript &s )
 
 								if ( pszStr && *pszStr )
 								{
-									CScript scp(pszStr);
-									g_World.GetSector(nMapNumber, iSecNumber-1)->r_Verb(scp, &g_Serv);
+									CScript script(pszStr);
+									script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
+									script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
+									g_World.GetSector(nMapNumber, iSecNumber-1)->r_Verb(script, &g_Serv);
 								}
 							}
 							else
@@ -1014,7 +1017,7 @@ bool CResource::r_LoadVal( CScript &s )
 		case RC_CRIMINALTIMER:
 			m_iCriminalTimer = s.GetArgVal() * 60 * TICK_PER_SEC;
 			break;
-		case RC_STRIPPATH:	// Put TNG stripped files here.
+		case RC_STRIPPATH:	// Put TNG or Axis stripped files here.
 			m_sStripPath = CSFile::GetMergedFileName( s.GetArgStr(), "" );
 			break;
 		case RC_DEADSOCKETTIME:
@@ -2738,6 +2741,9 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		{
 			pNewLink = new CItemTypeDef( rid );
 			ASSERT(pNewLink);
+			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
+			if (pLinkResScript != NULL)
+				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
 			m_ResHash.AddSortKey( rid, pNewLink );
 		}
 
@@ -2770,6 +2776,9 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		{
 			pNewLink = new CResourceLink( rid );
 			ASSERT(pNewLink);
+			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
+			if (pLinkResScript != NULL)
+				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
 			m_ResHash.AddSortKey( rid, pNewLink );
 		}
 		break;
@@ -2785,6 +2794,9 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		{
 			pNewLink = new CDialogDef( rid );
 			ASSERT(pNewLink);
+			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
+			if (pLinkResScript != NULL)
+				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
 			m_ResHash.AddSortKey( rid, pNewLink );
 		}
 		break;
@@ -2801,6 +2813,9 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		{
 			pNewLink = new CRegionResourceDef( rid );
 			ASSERT(pNewLink);
+			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
+			if (pLinkResScript != NULL)
+				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
 			m_ResHash.AddSortKey( rid, pNewLink );
 		}
 		{
@@ -2844,7 +2859,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		pPrvDef = ResourceGetDef( rid );
 		if ( pPrvDef && fNewStyleDef )
 		{
-			CRegionBase *	pRegion = dynamic_cast <CRegionBase*>( pPrvDef );
+			CRegionBase * pRegion = dynamic_cast <CRegionBase*>( pPrvDef );
 			pNewDef	= pRegion;
 			ASSERT(pNewDef);
 			pRegion->UnRealizeRegion();
@@ -2883,6 +2898,9 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		{
 			pNewLink = new CSRandGroupDef( rid );
 			ASSERT(pNewLink);
+			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
+			if (pLinkResScript != NULL)
+				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
 			m_ResHash.AddSortKey( rid, pNewLink );
 		}
 		{
@@ -2903,6 +2921,9 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		{
 			pNewLink = new CSkillClassDef( rid );
 			ASSERT(pNewLink);
+			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
+			if (pLinkResScript != NULL)
+				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
 			m_ResHash.AddSortKey( rid, pNewLink );
 		}
 		{
@@ -2936,6 +2957,9 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		{
 			pNewLink = new CResourceLink(rid);
 			ASSERT(pNewLink);
+			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
+			if (pLinkResScript != NULL)
+				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
 			m_ResHash.AddSortKey( rid, pNewLink );
 		}
 		break;
@@ -2966,9 +2990,18 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		break;
 
 	case RES_FUNCTION:
-		// Define a char macro. (Name is NOT DEFNAME)
-		pNewLink = new CResourceNamed( rid, pScript->GetArgStr());
-		m_Functions.AddSortKey( pNewLink, pNewLink->GetName());
+		{
+			// Define a char macro. (Name is NOT DEFNAME)
+			pNewLink = new CResourceNamed(rid, pScript->GetArgStr());
+
+			// Link the CResourceLink to the CResourceScript it was read and created,
+			//	so later we can retrieve the file and the line for debugging purposes.
+			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
+			if (pLinkResScript != NULL)
+				pNewLink->SetLink(pLinkResScript);
+
+			m_Functions.AddSortKey(pNewLink, pNewLink->GetName());
+		}
 		break;
 
 	case RES_SERVERS:	// Old way to define a block of servers.
@@ -2987,26 +3020,20 @@ bool CResource::LoadResourceSection( CScript * pScript )
 					fAddNew = true;
 				}
 				else
-				{
 					pServ = Server_GetDef(i);
-				}
 				ASSERT(pServ != NULL);
+
 				if ( pScript->ReadKey())
 				{
 					pServ->m_ip.SetHostPortStr( pScript->GetKey());
 					if ( pScript->ReadKey())
-					{
 						pServ->m_ip.SetPort( (word)(pScript->GetArgVal()));
-					}
 				}
+
 				if ( ! strcmpi( pServ->GetName(), g_Serv.GetName()))
-				{
 					fReadSelf = true;
-				}
 				if ( g_Serv.m_ip == pServ->m_ip )
-				{
 					fReadSelf = true;
-				}
 				if ( fReadSelf )
 				{
 					// I can be listed first here. (old way)
@@ -3016,10 +3043,9 @@ bool CResource::LoadResourceSection( CScript * pScript )
 					fReadSelf = false;
 					continue;
 				}
+
 				if ( fAddNew )
-				{
 					m_Servers.AddSortKey( pServ, pServ->GetName());
-				}
 			}
 		}
 		return true;

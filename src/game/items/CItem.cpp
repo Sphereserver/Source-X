@@ -2169,7 +2169,8 @@ bool CItem::LoadSetContainer( CUID uid, LAYER_TYPE layer )
 			// equip the item
 			CItemBase * pItemDef = Item_GetDef();
 			ASSERT(pItemDef);
-			if ( ! layer ) layer = pItemDef->GetEquipLayer();
+			if ( ! layer )
+				layer = pItemDef->GetEquipLayer();
 
 			pChar->LayerAdd( this, layer );
 			return true;
@@ -3135,7 +3136,10 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 					iCount = g_Cfg.m_iMaxItemComplexity;
 				while ( iCount-- )
 				{
-					CItem::CreateDupeItem(this, dynamic_cast<CChar *>(pSrc), true)->MoveNearObj(this, 1);
+					CItem* pDupe = CItem::CreateDupeItem(this, dynamic_cast<CChar *>(pSrc), true);
+					pDupe->m_iCreatedResScriptIdx = s.m_iResourceFileIndex;
+					pDupe->m_iCreatedResScriptLine = s.m_iLineNum;
+					pDupe->MoveNearObj(this, 1);
 				}
 			}
 			break;

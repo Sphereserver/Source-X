@@ -502,8 +502,10 @@ bool CItemMulti::r_LoadVal( CScript & s  )
 			Update();
 		}
 		ASSERT( m_pRegion );
-		CScript script( s.GetKey()+7, s.GetArgStr());
-		return( m_pRegion->r_LoadVal( script ) );
+		CScript script(s.GetKey() + 7, s.GetArgStr());
+		script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
+		script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
+		return m_pRegion->r_LoadVal( script );
 	}
 	return CItem::r_LoadVal(s);
 	EXC_CATCH;

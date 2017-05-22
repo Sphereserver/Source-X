@@ -767,7 +767,8 @@ longcommand:
 			}
 		}
 
-		if ( g_Cfg.IsConsoleCmd(low) ) pszText++;
+		if ( g_Cfg.IsConsoleCmd(low) )
+			pszText++;
 
 		CScript	script(pszText);
 		if ( !g_Cfg.CanUsePrivVerb(this, pszText, pSrc) )
@@ -1168,6 +1169,8 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			if ( pAccount && *pszKey )
 			{
 				CScript script(pszKey, s.GetArgStr());
+				script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
+				script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
 				return pAccount->r_LoadVal(script);
 			}
 			return false;
@@ -1201,7 +1204,9 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 				{
 					if ( pClient->GetChar() == NULL )
 						continue;
-					CScript script( s.GetArgStr() );
+					CScript script(s.GetArgStr());
+					script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
+					script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
 					pClient->GetChar()->r_Verb( script, pSrc );
 				}
 			}
@@ -1450,7 +1455,6 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			break;
 		default:
 			return CScriptObj::r_Verb(s, pSrc);
-
 	}
 
 	if ( pszMsg && *pszMsg )

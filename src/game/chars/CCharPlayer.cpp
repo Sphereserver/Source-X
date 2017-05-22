@@ -1,5 +1,5 @@
 
-// Actions specific to an NPC.
+// Actions specific to a Player.
 
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
@@ -605,8 +605,10 @@ bool CChar::Player_OnVerb( CScript &s, CTextConsole * pSrc )
 				CItemStone *pMyGuild = Guild_Find(bIsGuild ? MEMORY_GUILD : MEMORY_TOWN);
                 if ( pMyGuild )
                 {
-                        CScript sToParse(pszKey, s.GetArgRaw());
-                        return pMyGuild->r_Verb(sToParse, pSrc);
+					CScript script(pszKey, s.GetArgRaw());
+					script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
+					script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
+                   	return pMyGuild->r_Verb(script, pSrc);
                 }
 			}
 			return false;
@@ -661,5 +663,3 @@ bool CChar::Player_OnVerb( CScript &s, CTextConsole * pSrc )
 	return true;
 }
 
-//////////////////////////
-// -CCharNPC

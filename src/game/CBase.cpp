@@ -24,17 +24,17 @@ lpctstr const CBaseBaseDef::sm_szLoadKeys[OBC_QTY+1] =
 CBaseBaseDef::CBaseBaseDef( CResourceID id ) :
 	CResourceLink( id )
 {
-	m_dwDispIndex		= 0;	// Assume nothing til told differently.
-	m_attackBase		= 0;
-	m_attackRange		= 0;
-	m_defenseBase		= 0;
-	m_defenseRange		= 0;
-	m_Height			= 0;
-	m_Can			= CAN_C_INDOORS;	// most things can cover us from the weather.
-	SetDefNum("RANGE",1); //m_range			= 1;
-	m_ResLevel		= RDS_T2A;
-	m_ResDispDnHue	= HUE_DEFAULT;
-	m_ResDispDnId = 0;
+	m_dwDispIndex			= 0;	// Assume nothing til told differently.
+	m_attackBase			= 0;
+	m_attackRange			= 0;
+	m_defenseBase			= 0;
+	m_defenseRange			= 0;
+	m_Height				= 0;
+	m_Can					= CAN_C_INDOORS;	// most things can cover us from the weather.
+	SetDefNum("RANGE",1);	//m_range			= 1;
+	m_ResLevel				= RDS_T2A;
+	m_ResDispDnHue			= HUE_DEFAULT;
+	m_ResDispDnId			= 0;
 	m_BaseResources.setNoMergeOnLoad();
 }
 

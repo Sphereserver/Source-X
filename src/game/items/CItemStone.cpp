@@ -1133,7 +1133,7 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
 	if ( index < 0 )
 	{
-		return( CItem::r_Verb( s, pSrc ));
+		return ( CItem::r_Verb( s, pSrc ));
 	}
 
 	CChar * pCharSrc = pSrc->GetChar();
@@ -1147,7 +1147,6 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 				{
 					tchar * pszArgs = s.GetArgRaw();
 					int iFlags = Exp_GetVal(pszArgs);
-					SKIP_ARGSEP(pszArgs);
 
 					if ( iFlags < 0 )
 					{
@@ -1159,7 +1158,10 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 						if ( pszArgs[0] != '\0' )
 						{
 							pMember = static_cast <CStoneMember *>(GetHead());
-							CScript scriptVerb( pszArgs );
+							SKIP_ARGSEP(pszArgs);
+							CScript script(pszArgs);
+							script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
+							script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
 
 							for (; pMember != NULL; pMember = pMember->GetNext())
 							{
@@ -1167,21 +1169,13 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 									continue;
 
 								if ( !iFlags )
-								{
-									pMember->r_Verb(scriptVerb, pSrc);
-								}
+									pMember->r_Verb(script, pSrc);
 								else if ( ( iFlags == 1 ) && ( pMember->GetWeDeclared() && !pMember->GetTheyDeclared() ) )
-								{
-									pMember->r_Verb(scriptVerb, pSrc);
-								}
+									pMember->r_Verb(script, pSrc);
 								else if ( ( iFlags == 2 ) && ( !pMember->GetWeDeclared() && pMember->GetTheyDeclared() ) )
-								{
-									pMember->r_Verb(scriptVerb, pSrc);
-								}
+									pMember->r_Verb(script, pSrc);
 								else if ( ( iFlags == 3 ) && ( pMember->GetWeDeclared() && pMember->GetTheyDeclared() ) )
-								{
-									pMember->r_Verb(scriptVerb, pSrc);
-								}
+									pMember->r_Verb(script, pSrc);
 							}
 						}
 						else
@@ -1199,7 +1193,6 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 				{
 					tchar * pszArgs = s.GetArgRaw();
 					int iFlags = Exp_GetVal(pszArgs);
-					SKIP_ARGSEP(pszArgs);
 
 					if (( iFlags < -1 ) || ( iFlags > STONEPRIV_ACCEPTED ))
 					{
@@ -1211,7 +1204,10 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 						if ( pszArgs[0] != '\0' )
 						{
 							pMember = static_cast <CStoneMember *>(GetHead());
-							CScript scriptVerb( pszArgs );
+							SKIP_ARGSEP(pszArgs);
+							CScript script(s.GetKey(), pszArgs);
+							script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
+							script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
 
 							for (; pMember != NULL; pMember = pMember->GetNext())
 							{
@@ -1219,13 +1215,9 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 									continue;
 
 								if ( iFlags == -1 )
-								{
-									pMember->r_Verb(scriptVerb, pSrc);
-								}
+									pMember->r_Verb(script, pSrc);
 								else if ( pMember->GetPriv() == static_cast<STONEPRIV_TYPE>(iFlags) )
-								{
-									pMember->r_Verb(scriptVerb, pSrc);
-								}
+									pMember->r_Verb(script, pSrc);
 							}
 						}
 						else
@@ -1243,9 +1235,7 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 				CUID pMemberUid = s.GetArgVal();
 				CChar * pMemberChar = pMemberUid.CharFind();
 				if ( pMemberChar )
-				{
 					AddRecruit( pMemberChar, STONEPRIV_CANDIDATE );
-				}
 			}
 			break;
 		case ISV_CHANGEALIGN:
@@ -1273,9 +1263,7 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 				{
 					CItemStone * pNewEnemy = dynamic_cast<CItemStone*>(pEnemyItem);
 					if ( pNewEnemy )
-					{
 						WeDeclareWar(pNewEnemy);
-					}
 				}
 			}
 			break;
@@ -1328,9 +1316,7 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 				{
 					CStoneMember * pMemberGuild = GetMember( pMemberChar );
 					if ( pMemberGuild )
-					{
 						delete pMemberGuild;
-					}
 				}
 			}
 			else
@@ -1344,6 +1330,7 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 				CUID pMemberUid = pMember->GetLinkUID();
 				if ( s.HasArgs() )
 					pMemberUid = s.GetArgVal();
+
 				CChar * pMemberChar = pMemberUid.CharFind();
 				if ( pMemberChar )
 				{
