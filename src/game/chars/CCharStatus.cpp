@@ -145,7 +145,7 @@ CItemContainer *CChar::GetBank( LAYER_TYPE layer )
 			layer = LAYER_BANKBOX;
 			break;
 	}
-
+	
 	CItem *pItemTest = LayerFind(layer);
 	CItemContainer *pBankBox = dynamic_cast<CItemContainer *>(pItemTest);
 	if ( pBankBox )
@@ -502,23 +502,31 @@ bool CChar::IsSwimming() const
 NPCBRAIN_TYPE CChar::GetNPCBrain(bool fDefault) const
 {
 	ADDTOCALLSTACK("CChar::GetNPCBrain");
-	// return 1 for animal, 2 for monster, 3 for NPC humans and PCs
+	// Return NPCBRAIN_ANIMAL for animals, _HUMAN for NPC human and PCs, >= _MONSTER for monsters
+	//	(can return also _BERSERK and _DRAGON)
 	// For tracking and other purposes.
 
-	if ( m_pNPC && fDefault )
+	if (fDefault)
 	{
-		if ( (m_pNPC->m_Brain >= NPCBRAIN_HUMAN) && (m_pNPC->m_Brain <= NPCBRAIN_STABLE) )
+		if (m_pNPC)
+		{
+			if ((m_pNPC->m_Brain >= NPCBRAIN_HUMAN) && (m_pNPC->m_Brain <= NPCBRAIN_STABLE))
+				return NPCBRAIN_HUMAN;
+
+			return m_pNPC->m_Brain;
+		}
+		else if (m_pPlayer)
 			return NPCBRAIN_HUMAN;
-
-		return m_pNPC->m_Brain;
 	}
+	
 
-	// Handle the exceptions
+	// Handle the exceptions (or voluntarily auto-detect the brain, if fDefault == false)
 	CREID_TYPE id = GetDispID();
 	if ( id >= CREID_IRON_GOLEM )
 	{
 		switch ( id )
 		{
+			//TODO: add other dragons
 			case CREID_SERPENTINE_DRAGON:
 			case CREID_SKELETAL_DRAGON:
 			case CREID_REPTILE_LORD:
@@ -1081,36 +1089,40 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 		CObjBase *pObjCont = pItem->GetContainer();
 		if ( pObjCont )
 		{
-			if ( !CanSeeInContainer(dynamic_cast<const CItemContainer*>(pObjCont)) )
-				return false;
+//			LAYER_TYPE layerCont = pObjCont->GetEquipLayer();
+//			if (layerCont < 26 && layerCont > 28)	// you can always see what a vendor can buy or sell
+//			{
+				if (!CanSeeInContainer(dynamic_cast<const CItemContainer*>(pObjCont)))
+					return false;
 
-			if ( IsSetEF(EF_FixCanSeeInClosedConts) )
-			{
-				// A client cannot see the contents of someone else's container, unless they have opened it first
-				if ( IsClient() && pObjCont->IsItem() && pObjCont->GetTopLevelObj() != this )
+				if (IsSetEF(EF_FixCanSeeInClosedConts))
 				{
-					CClient *pClient = GetClient();
-					if ( pClient && (pClient->m_openedContainers.find(pObjCont->GetUID().GetPrivateUID()) == pClient->m_openedContainers.end()) )
+					// A client cannot see the contents of someone else's container, unless they have opened it first
+					if (IsClient() && pObjCont->IsItem() && pObjCont->GetTopLevelObj() != this)
 					{
-/*
-#ifdef _DEBUG
-						if ( CanSee(pObjCont) )
+						CClient *pClient = GetClient();
+						if (pClient && (pClient->m_openedContainers.find(pObjCont->GetUID().GetPrivateUID()) == pClient->m_openedContainers.end()))
 						{
-	#ifdef THREAD_TRACK_CALLSTACK
-							StackDebugInformation::printStackTrace();
-	#endif
-							g_Log.EventDebug("%x:EF_FixCanSeeInClosedConts prevents %s, (0%x, '%s') from seeing item uid=0%x (%s, '%s') in container uid=0%x (%s, '%s')\n",
-								pClient->GetSocketID(), pClient->GetAccount()->GetName(), (dword)GetUID(), GetName(false),
-								(dword)pItem->GetUID(), pItem->GetResourceName(), pItem->GetName(),
-								(dword)pObjCont->GetUID(), pObjCont->GetResourceName(), pObjCont->GetName());
+						/*
+						#ifdef _DEBUG
+							if ( CanSee(pObjCont) )
+							{
+							#ifdef THREAD_TRACK_CALLSTACK
+								StackDebugInformation::printStackTrace();
+							#endif
+								g_Log.EventDebug("%x:EF_FixCanSeeInClosedConts prevents %s, (0%x, '%s') from seeing item uid=0%x (%s, '%s') in container uid=0%x (%s, '%s')\n",
+									pClient->GetSocketID(), pClient->GetAccount()->GetName(), (dword)GetUID(), GetName(false),
+									(dword)pItem->GetUID(), pItem->GetResourceName(), pItem->GetName(),
+									(dword)pObjCont->GetUID(), pObjCont->GetResourceName(), pObjCont->GetName());
+							}
+						#endif
+						*/
+							return false;
 						}
-#endif
-*/
-						return false;
 					}
 				}
-			}
 
+//			}
 			return CanSee(pObjCont);
 		}
 	}
@@ -2209,7 +2221,7 @@ bool CChar::IsTakeCrime( const CItem *pItem, CChar ** ppCharMark ) const
 		return false;	// I guess it's not a crime
 	}
 
-	if ( pCharMark->NPC_IsOwnedBy(this) || pCharMark->Memory_FindObjTypes(this, MEMORY_FRIEND) != NULL )	// he let's you
+	if ( pCharMark->NPC_IsOwnedBy(this) || pCharMark->Memory_FindObjTypes(this, MEMORY_FRIEND) != NULL )	// he lets you
 		return false;
 
 	// Pack animal has no owner ?

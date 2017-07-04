@@ -329,13 +329,10 @@ CResourceID CResourceBase::ResourceGetID( RES_TYPE restype, lpctstr & pszName )
 			break;
 	}
 
-	rid.SetPrivateUID( Exp_GetVal(pszName));	// May be some complex expression {}
+	rid.SetPrivateUID(Exp_GetVal(pszName));	// May be some complex expression {}
 
 	if ( restype != RES_UNKNOWN && rid.GetResType() == RES_UNKNOWN )
-	{
-		// Label it with the type we want.
-		return CResourceID( restype, rid.GetResIndex());
-	}
+		return CResourceID( restype, rid.GetResIndex());	// Label it with the type we want.
 
 	return rid;
 }
@@ -405,12 +402,12 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
 	{
 		if ( i >= EXPRESSION_MAX_KEY_LEN )
 		{
-			DEBUG_ERR(( "Too long DEFNAME=%s\n", pszName ));
+			DEBUG_ERR(( "DEFNAME=%s: too long. Aborting registration of the resource\n", pszName ));
 			return false;
 		}
 		if ( ! _ISCSYM(pszName[i]) )
 		{
-			DEBUG_ERR(( "Bad chars in DEFNAME=%s\n", pszName ));
+			DEBUG_ERR(( "DEFNAME=%s: bad characters. Aborting registration of the resource\n", pszName ));
 			return false;
 		}
 	}
@@ -420,13 +417,19 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
 	CVarDefCont * pVarKey = g_Exp.m_VarDefs.GetKey( pszName );
 	if ( pVarKey )
 	{
-		if ( (dword)pVarKey->GetValNum() == GetResourceID().GetPrivateUID() )
+		dword keyVal = (dword)pVarKey->GetValNum();
+		if ( keyVal == GetResourceID().GetPrivateUID() )
+		{
+			// DEBUG_WARN(("DEFNAME=%s: redefinition (new value same as previous)\n", pszName));
+			// It happens tipically for types pre-defined in sphere_defs.scp and other things. Wanted behaviour.
 			return true;
+		}
+			
 
-		if ( RES_GET_INDEX(pVarKey->GetValNum()) == GetResourceID().GetResIndex())
-			DEBUG_WARN(( "The DEFNAME=%s has a strange type mismatch? 0%" PRIx64 "!=0%x\n", pszName, pVarKey->GetValNum(), GetResourceID().GetPrivateUID() ));
+		if ( RES_GET_INDEX(keyVal) == (dword)GetResourceID().GetResIndex())
+			DEBUG_WARN(( "DEFNAME=%s: redefinition with a strange type mismatch? (0%" PRIx32 "!=0%" PRIx32 ")\n", pszName, keyVal, GetResourceID().GetPrivateUID() ));
 		else
-			DEBUG_WARN(( "The DEFNAME=%s already exists! 0%" PRIx64 "!=0%x\n", pszName, RES_GET_INDEX(pVarKey->GetValNum()), GetResourceID().GetResIndex() ));
+			DEBUG_WARN(( "DEFNAME=%s: redefinition (0%" PRIx32 "!=0%" PRIx32 ")\n", pszName, RES_GET_INDEX(keyVal), GetResourceID().GetResIndex() ));
 
 		iVarNum = g_Exp.m_VarDefs.SetNum( pszName, GetResourceID().GetPrivateUID() );
 	}

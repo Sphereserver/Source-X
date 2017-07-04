@@ -900,20 +900,20 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			// Add cliloc in @ClientTooltip trigger
 			{
 				tchar * ppLocArgs[256];
-				size_t qty = Str_ParseCmds(s.GetArgRaw(), ppLocArgs, CountOf(ppLocArgs), ",");
+				int qty = Str_ParseCmds(s.GetArgRaw(), ppLocArgs, CountOf(ppLocArgs), ",");
 				dword clilocid = Exp_GetVal(ppLocArgs[0]);
 
-				CSString LocArgs;
-				for ( size_t y = 1 ; y < qty; y++ )
+				CSString locArgs;
+				for (int y = 1 ; y < qty; y++ )
 				{
-					if ( LocArgs.GetLength() )
-						LocArgs += "\t";
-					LocArgs += ( !strncmp(ppLocArgs[y], "NULL", 4) ? " " : ppLocArgs[y] );
+					if ( locArgs.GetLength() )
+						locArgs += "\t";
+					locArgs += ( !strncmp(ppLocArgs[y], "NULL", 4) ? " " : ppLocArgs[y] );
 				}
 
 				if ( g_Cfg.m_wDebugFlags & DEBUGF_SCRIPTS )
-					g_Log.EventDebug("SCRIPT: addcliloc(%u,'%s')\n", clilocid, static_cast<lpctstr>(LocArgs));
-				this->m_TooltipData.Add(new CClientTooltip(clilocid, LocArgs));
+					g_Log.EventDebug("SCRIPT: addcliloc(%u,'%s')\n", clilocid, static_cast<lpctstr>(locArgs));
+				this->m_TooltipData.Add(new CClientTooltip(clilocid, locArgs));
 			}
 			break;
 		case CV_ADDCONTEXTENTRY:

@@ -3402,16 +3402,34 @@ bool PacketAOSTooltipReq::onReceive(NetState* net)
 	else if (client->GetResDisp() < RDS_AOS || !IsAosFlagEnabled(FEATURE_AOS_UPDATE_B))
 		return true;
 
-	const CObjBase* object;
 	for (word length = readInt16(); length > sizeof(dword); length -= sizeof(dword))
 	{
-		object = CUID(readInt32()).ObjFind();
+		const CObjBase* object = CUID(readInt32()).ObjFind();
 		if (object == NULL)
 			continue;
-		else if (character->CanSee(object) == false)
-			continue;
+		
+		// Check if this item is shown from a shop gump: for shop items we need to always send the tooltip!
+		bool bShop = false;
+		CItem* pObjItem = static_cast<CItem*>(const_cast<CObjBase*>(object));
+		CObjBase* pObjCont;
+		while ( (pObjCont = pObjItem->GetContainer()) != NULL )
+		{
+			if (!pObjCont->IsItem())
+				break;
+			pObjItem = static_cast<CItem*>(pObjCont);
+			LAYER_TYPE objItemLayer = pObjItem->GetEquipLayer();
+			if (objItemLayer >= 26 && objItemLayer <= 28)
+				bShop = true;	// Shop item (sending it because we are buying or selling items from/to a vendor)
+		}
 
-		client->addAOSTooltip(object, true);
+		if (bShop)	// shop item
+			client->addAOSTooltip(object, true, true);
+		else		// char or regular items		
+		{
+			if (character->CanSee(object) == false)
+				continue;
+			client->addAOSTooltip(object, true, false);
+		}
 	}
 
 	return true;

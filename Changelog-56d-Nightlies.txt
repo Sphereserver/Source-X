@@ -142,3 +142,23 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Fixed: Garbage Collection deleting (and reporting) only a fraction of the unplaced objects. Fixed also incorrect formatting of the "invalid code".
 - Added: Now the Garbage Collection report prints the script file name and the line where the object was created.
 	This only works for objects added in the scripts through the keywords: NEWITEM, NEWNPC, NEWSUMMON, NEWDUPE, DUPE.
+
+04-07-2017, Nolok
+- Fixed: random ranges ( e.g.: {i_dagger 1 i_gold 1} ) sometimes returned a totally random and unexpected value.
+	If the value was used to create an item, it could either create a random item or not create it at all, without logging any error.
+- Fixed: vendors couldn't re-sell the items bought from the players.
+- Fixed: with the current User Interface (the blue one, not the orange which is older) of the Enhanced Client, in the buy gump
+	the paperdoll of the vendor often was missing on the left.
+
+	IMPORTANT: with the same UI of the EC the buy gump may not work, because it doesn't show the items in stock.
+		This occurs with the new UI (blue) and not with the old (orange) because the new one wants the vendor to have
+		its name inclusive of the title. If the "the" keyword and the following title aren't found, the code of the interface
+		generates an internal error and halts the execution of the remaining code (which renders the items in the list).
+		As example: if the vendor name is Greg the items don't show, but if you set the NAME (and not the TITLE property)
+		to Greg the Butcher ("the" word is mandatory) the items are finally shown.
+		Since the client retrieves the name with the tooltip data (Cliloc 1042971) the server sends, if you want a workaround
+		to this requirement, you can leave untouched the NAME property and send a custom name cliloc which contains also the work/trade title:
+			ADDCLILOC 1042971, <NAME> The <QVAL <ISEMPTY <TITLE>> ? Vendor : <TITLE>>
+
+- Fixed: Tracking skill could not track brain_berserk npcs.
+- Changed: updated error and warning messages related to resources redefinition.

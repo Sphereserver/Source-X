@@ -2214,23 +2214,35 @@ int CResource::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar char
 	int retValue = 0;
 	bool bResOk = false;
 
+	// retValue size:
+	//	byte[2] feature# (<= 6.0.14.1)
+	//	byte[4] feature# (>= 6.0.14.2)
+
 	if ( bCharlist )
 	{
-		//	byte[4] Flags
-		//		0x0001	= unknown
-		//		0x0002	= send config/req logout (IGR?)
-		//		0x0004	= single character (siege) (alternative seen, Limit Characters)
-		//		0x0008	= enable npcpopup menus
-		//		0x0010	= unknown, (alternative seen, single character)
-		//		0x0020	= enable common AOS features (tooltip thing/fight system book, but not AOS monsters/map/skills)
-		//		0x0040	= Sixth Character Slot?
-		//		0x0080	= Samurai Empire?
-		//		0x0100	= Elf races?
-		//		0x0200	= Flag KR Unknown 1
-		//		0x0400	= (KR) Enables 0xE1 packet at character list (possibly other unknown effects)
-		//		0x1000	= Seventh Character Slot
-		//		0x4000	= New walk packets
-		//		0x8000  = New faction strongholds (uses map0x.mul, statics0x.mul, etc) - 7.0.6
+		/*
+		CHAR LIST FLAGS
+		0x0001	= unknown
+		0x0002	= overwrite configuration button [send config/req logout (IGR?)]
+		0x0004	= limit 1 character per account
+		0x0008	= enable npc popup menus (context menus)
+		0x0010	= can limit characters number
+		[under -> since AOS]
+		0x0020	= paladin and necromancer classes, tooltips
+		0x0040	= sixth character Slot
+		[under -> since SE]
+		0x0080	= samurai and ninja classes
+		[under -> since ML]
+		0x0100	= elven race
+		[under -> since KR]
+		0x0200	= flag KR Unknown 1
+		0x0400	= client will send 0xE1 packet at character list (possibly other unknown effects)
+		[under -> since SA]
+		0x1000	= seventh character Slot
+		[under -> since HS?]
+		0x4000	= new walk packets
+		0x8000  = new faction strongholds (uses map0x.mul, statics0x.mul, etc) - 7.0.6
+		*/
 
 		// T2A - LBR don't have char list flags
 		bResOk = ( res >= RDS_AOS );
@@ -2271,39 +2283,30 @@ int CResource::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar char
 	}
 	else
 	{
-		//	byte[2] feature# (<= 6.0.14.1)
-		//	byte[4] feature# (>= 6.0.14.2)
-		//		0x00001	T2A upgrade, enables chatbutton
-		//		0x00002	Enables LBR update.  (of course LBR installation is required)
-		//				(plays MP3 instead of midis, 2D LBR client shows new LBR monsters, ... )
-		//		0x00004	Unknown, never seen it set	(single char?)
-		//		0x00008	Unknown, set on OSI servers that have AOS code - no matter of account status (doesn�t seem to �unlock/lock� anything on client side)
-		//		0x00010	Enables AOS update (necro/paladin skills for all clients, malas map/AOS monsters if AOS installation present)
-		//		0x00020	Sixth Character Slot
-		//		0x00040	Samurai Empire?
-		//		0x00080	Elves?
-		//		0x00100	Eighth Age
-		//		0x00200	Ninth Age
-		//		0x00400
-		//		0x00800
-		//		0x01000	Seventh Character Slot
-		//		0x02000
-		//		0x04000 New movement engine
-		//		0x08000	Since client 4.0 this bit has to be set, otherwise bits 3..14 are ignored.
-		//		0x10000	Gargoyles, SA housing
-		//		0x20000 High Seas
-		//		0x40000	Gothic pack (house designer items)
-		//		0x80000	Rustic pack (house designer items)
-		//	Thus	0		neither T2A NOR LBR, equal to not sending it at all,
-		//			1		is T2A, chatbutton,
-		//			2		is LBR without chatbutton,
-		//			3		is LBR with chatbutton�
-		//			8013	LBR + chatbutton + AOS enabled
-		//	Note1: this message is send immediately after login.
-		//	Note2: on OSI  servers this controls features OSI enables/disables via �upgrade codes.�
-		//	Note3: a 3 doesn�t seem to �hurt� older (NON LBR) clients.
-		//	Note4: value is byte[2] prior to client 6.0.14.2
+		/*
+		FEATURE FLAGS
 
+		0x01:		enable T2A features:			chat, regions, ?new spellbook?mage??
+		0x02:		enable renaissance features:	damage packet, ?
+		0x04:		enable third dawn features
+		0x08:		enable LBR features:			skills, map, monsters, bufficon, plays MP3 instead of midis
+		0x10:		enable AOS features 1:			skills, map, monsters?, spells, fightbook?, housing tiles
+		0x20:		enable AOS features 2, 
+		0x40:		enable SE features:				skills, map, monsters?, spells, housing tiles
+		0x80:		enable ML features:				elven race, skills, monsters?, spells, housing tiles
+		0x100:		enable 8th age splash screen
+		0x200:		enable 9th age splash screen and crystal/shadow housing tiles
+		0x400:		enable 10th age
+		0x800:		enable increased housing and bank storage
+		0x1000:		7th character slot
+		0x2000:		enable KR (roleplay) faces
+		0x4000:		trial account
+		0x8000:		non-trial (live) account
+		0x10000:	enable SA features:				gargoyle race, spells, skills, housing tiles
+		0x20000:	enable HS features:
+		0x40000:	enable Gothic housing tiles
+		0x80000:	enable Rustic housing tiles
+		*/
 		bResOk = ( res >= RDS_T2A );
 		if ( bResOk )
 		{
@@ -2445,7 +2448,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 
 	if ( !rid.IsValidUID() )
 	{
-		DEBUG_ERR(( "Invalid %s block index '%s'\n", pszSection, static_cast<lpctstr>(pScript->GetArgStr())));
+		DEBUG_ERR(( "Invalid %s block, index '%s'\n", pszSection, static_cast<lpctstr>(pScript->GetArgStr())));
 		return false;
 	}
 
@@ -3411,6 +3414,7 @@ CResourceID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 			// An existing VarDef with the same name ?
 			// We are creating a new Block but using an old name ? weird.
 			// just check to see if this is a strange type conflict ?
+
 			CVarDefContNum * pVarNum = dynamic_cast <CVarDefContNum*>( pVarBase );
 			if ( pVarNum == NULL )
 			{
@@ -3428,7 +3432,7 @@ CResourceID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 							return ResourceGetNewID(restype, pVarStr->GetValStr(), ppVarNum, fNewStyleDef);
 					}
 					default:
-						DEBUG_ERR(( "Re-Using name '%s' to define block\n", static_cast<lpctstr>(pszName) ));
+						DEBUG_ERR(( "Re-Using DEFNAME='%s' to define a new block\n", static_cast<lpctstr>(pszName) ));
 						return ridinvalid;
 				}
 			}
@@ -3446,13 +3450,14 @@ CResourceID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 						// These are not truly defining a new DEFNAME
 						break;
 					default:
-						DEBUG_ERR(( "Redefined name '%s' from %s to %s\n", static_cast<lpctstr>(pszName), static_cast<lpctstr>(GetResourceBlockName(rid.GetResType())), static_cast<lpctstr>(GetResourceBlockName(restype)) ));
+						DEBUG_ERR(( "Redefined resource with DEFNAME='%s' from ResType %s to %s\n",
+							(lpctstr)pszName, (lpctstr)GetResourceBlockName(rid.GetResType()), (lpctstr)GetResourceBlockName(restype)) );
 						return ridinvalid;
 				}
 			}
-			else if ( fNewStyleDef && (dword)(pVarNum->GetValNum()) != rid.GetPrivateUID() )
+			else if ( fNewStyleDef && (dword)pVarNum->GetValNum() != rid.GetPrivateUID() )
 			{
-				DEBUG_ERR(( "WARNING: region redefines DEFNAME '%s' for another region!\n", pszName ));
+				DEBUG_ERR(( "WARNING: region redefines DEFNAME='%s' for another region!\n", pszName ));
 			}
 			else if ( iPage == rid.GetResPage() )
 			{
@@ -3466,12 +3471,7 @@ CResourceID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 					//  which is usually parsed before sphere_types.scp or its TYPEDEF block. So some time after declaring the
 					//	index for a type we'll read its TYPEDEF, it would be normal to find another "declaration" for the type.
 					if ( restype != RES_TYPEDEF )
-					{
-						//if ( g_Cfg.m_wDebugFlags & DEBUGF_SCRIPTS )
-						g_pLog->EventWarn("Redef resource '%s'\n", pszName);
-						//else
-						//	DEBUG_WARN(( "Redef resource '%s'\n"pszName ));
-					}		
+						g_pLog->EventWarn("Redefinition of resource with DEFNAME='%s'\n", pszName);
 				}
 			}
 			rid = CResourceID( restype, rid.GetResIndex(), iPage );

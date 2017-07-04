@@ -1129,7 +1129,7 @@ int64 CExpression::GetRange(lpctstr & pExpr)
 
 	int64 iTotalWeight = 0;
 	int i = 1;
-	for ( ; i < iQty; i+=2 )
+	for ( ; i+1 < iQty; i+=2 )
 	{
 		if ( ! lVals[i] )	// having a weight of 0 is very strange !
 			DEBUG_ERR(( "Weight of 0 in random set?\n" ));	// the whole table should really just be invalid here !
@@ -1140,7 +1140,7 @@ int64 CExpression::GetRange(lpctstr & pExpr)
 	iTotalWeight = Calc_GetRandLLVal(iTotalWeight) + 1;
 	// Now loop to that value
 	i = 1;
-	for ( ; i<iQty; i+=2 )
+	for ( ; i+1 < iQty; i+=2 )
 	{
 		iTotalWeight -= lVals[i];
 		if ( iTotalWeight <= 0 )

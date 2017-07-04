@@ -14,7 +14,7 @@
 void CChar::OnNoticeCrime( CChar * pCriminal, const CChar * pCharMark )
 {
 	ADDTOCALLSTACK("CChar::OnNoticeCrime");
-	if ( !pCriminal || pCriminal == this || pCriminal == pCharMark || pCriminal->IsPriv(PRIV_GM) || pCriminal->GetNPCBrain() == NPCBRAIN_GUARD )
+	if ( !pCriminal || pCriminal == this || pCriminal == pCharMark || pCriminal->IsPriv(PRIV_GM) ) //This never happens: || pCriminal->GetNPCBrain() == NPCBRAIN_GUARD )
 		return;
     NOTO_TYPE iNoto = pCharMark->Noto_GetFlag(pCriminal);
     if (iNoto == NOTO_CRIMINAL || iNoto == NOTO_EVIL)

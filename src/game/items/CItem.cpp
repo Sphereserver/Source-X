@@ -157,9 +157,7 @@ CItem * CItem::CreateBase( ITEMID_TYPE id )	// static
 		idErrorMsg = id;
 		id = static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, "DEFAULTITEM" ));
 		if ( id <= 0 )
-		{
 			id = ITEMID_GOLD_C1;
-		}
 		pItemDef = CItemBase::FindItemBase( id );
 		ASSERT(pItemDef);
 	}
@@ -228,10 +226,9 @@ CItem * CItem::CreateBase( ITEMID_TYPE id )	// static
 	}
 
 	ASSERT( pItem );
-	if ( idErrorMsg && idErrorMsg != -1 )
-	{
-		DEBUG_ERR(( "CreateBase invalid item 0%x\n", idErrorMsg ));
-	}
+	if (idErrorMsg && idErrorMsg != -1)
+		DEBUG_ERR(("CreateBase invalid item ID=0% " PRIx32 ", defaulting to ID=0%" PRIx32 ". Created UID=0%" PRIx32 "\n", idErrorMsg, id, (dword)pItem->GetUID()));
+
 	return pItem;
 }
 
@@ -387,8 +384,7 @@ CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CC
 		// Is the item movable ?
 		if ( ! pItem->IsMovableType() && pCont && pCont->IsItem())
 		{
-			DEBUG_ERR(( "Script Error: 0%x item is not movable type, cont=0%x\n", id, (dword)(pCont->GetUID()) ));
-			pItem->Delete();
+			DEBUG_ERR(( "Script Error: 0%x item is not movable type, cont=0%x\n", id, (dword)(pCont->GetUID()) ));			pItem->Delete();
 			return NULL;
 		}
 
@@ -448,7 +444,7 @@ CItem * CItem::CreateTemplate( ITEMID_TYPE id, CObjBase * pCont, CChar * pSrc )	
 	if ( ! g_Cfg.ResourceLock( s, CResourceID( RES_TEMPLATE, id )))
 		return NULL;
 
-	return( ReadTemplate( s, pCont ));
+	return ReadTemplate( s, pCont );
 }
 
 CItem * CItem::ReadTemplate( CResourceLock & s, CObjBase * pCont ) // static
@@ -485,9 +481,7 @@ CItem * CItem::ReadTemplate( CResourceLock & s, CObjBase * pCont ) // static
 				{
 					pItem = CItem::CreateHeader( s.GetArgRaw(), (index==ITC_SELL)?pVendorSell:pVendorBuy, false );
 					if ( pItem == NULL )
-					{
 						continue;
-					}
 					if ( pItem->IsItemInContainer())
 					{
 						fItemAttrib = true;
@@ -501,14 +495,10 @@ CItem * CItem::ReadTemplate( CResourceLock & s, CObjBase * pCont ) // static
 				{
 					pItem = CItem::CreateHeader( s.GetArgRaw(), pCont, false, pVendor );
 					if ( pItem == NULL )
-					{
 						continue;
-					}
 					pCont = dynamic_cast <CItemContainer *> ( pItem );
 					if ( pCont == NULL )
-					{
 						DEBUG_ERR(( "CreateTemplate CContainer %s is not a container\n", pItem->GetResourceName() ));
-					}
 					else
 					{
 						fItemAttrib = true;
@@ -522,15 +512,10 @@ CItem * CItem::ReadTemplate( CResourceLock & s, CObjBase * pCont ) // static
 			case ITC_ITEMNEWBIE:
 				fItemAttrib = false;
 				if ( pCont == NULL && pItem != NULL )
-				{
-					// Don't create anymore items til we have some place to put them !
-					continue;
-				}
+					continue;	// Don't create anymore items til we have some place to put them !
 				pItem = CItem::CreateHeader( s.GetArgRaw(), pCont, false, pVendor );
 				if ( pItem != NULL )
-				{
 					fItemAttrib = true;
-				}
 				continue;
 		}
 

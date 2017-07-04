@@ -350,9 +350,7 @@ void CVarDefMap::DeleteKey( lpctstr key )
 {
 	ADDTOCALLSTACK("CVarDefMap::DeleteKey");
 	if ( key && *key)
-	{
 		DeleteAtKey(key);
-	}
 }
 
 void CVarDefMap::Empty()
@@ -606,7 +604,7 @@ CVarDefCont * CVarDefMap::GetKey( lpctstr pszKey ) const
 			pReturn = (*i);
 	}
 
-	return( pReturn );
+	return pReturn;
 }
 
 int64 CVarDefMap::GetKeyNum( lpctstr pszKey, bool fZero  ) const
@@ -634,7 +632,7 @@ CVarDefCont * CVarDefMap::CheckParseKey( lpctstr & pszArgs ) const
 	GetIdentifierString( szTag, pszArgs );
 	CVarDefCont * pVar = GetKey(szTag);
 	if ( pVar )
-		return( pVar );
+		return pVar;
 
 	return NULL;
 }
@@ -651,7 +649,7 @@ CVarDefCont * CVarDefMap::GetParseKey( lpctstr & pszArgs ) const
 	if ( pVar )
 	{
 		pszArgs += i;
-		return( pVar );
+		return pVar;
 	}
 
 	return NULL;
@@ -721,7 +719,7 @@ bool CVarDefMap::r_LoadVal( CScript & s )
 {
 	ADDTOCALLSTACK("CVarDefMap::r_LoadVal");
 	bool fQuoted = false;
-	return( ( SetStr( s.GetKey(), fQuoted, s.GetArgStr( &fQuoted )) >= 0 ) ? true : false );
+	return ( ( SetStr( s.GetKey(), fQuoted, s.GetArgStr( &fQuoted )) >= 0 ) ? true : false );
 }
 
 void CVarDefMap::r_WritePrefix( CScript & s, lpctstr pszPrefix, lpctstr pszKeyExclude )
@@ -737,10 +735,7 @@ void CVarDefMap::r_WritePrefix( CScript & s, lpctstr pszPrefix, lpctstr pszKeyEx
 	{
 		const CVarDefCont * pVar = (*i);
 		if ( !pVar )
-		{
-			// This should not happen, a warning maybe?
-			continue;
-		}
+			continue;	// This should not happen, a warning maybe?
 
 		if ( bHasExclude && !strcmpi(pszKeyExclude, pVar->GetKey()))
 			continue;
