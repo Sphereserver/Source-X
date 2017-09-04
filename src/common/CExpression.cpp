@@ -1065,9 +1065,10 @@ int CExpression::GetRangeVals(lpctstr & pExpr, int64 * piVals, int iMaxQty)
 	ASSERT(piVals);
 
 	int iQty = 0;
-	for (;;)
+	while (true)
 	{
-		if ( !pExpr[0] ) break;
+		if ( !pExpr[0] )
+			break;
 		if ( pExpr[0] == ';' )
 			break;	// seperate field.
 		if ( pExpr[0] == ',' )
@@ -1078,7 +1079,7 @@ int CExpression::GetRangeVals(lpctstr & pExpr, int64 * piVals, int iMaxQty)
 			break;
 		if ( pExpr[0] == '-' && iQty == 1 )	// range separator. (if directly after, I know this is sort of strange)
 		{
-			pExpr++;	// ??? This is stupid. get rid of this and clean up it's use in the scripts.
+			pExpr++;	// ??? This is stupid. get rid of this and clean up its use in the scripts.
 			continue;
 		}
 

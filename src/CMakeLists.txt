@@ -99,7 +99,6 @@ SET (CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS)
 INCLUDE ("cmake/CMakeSources.cmake")
 INCLUDE ("cmake/CMakeGitStatus.cmake")
 
-
 IF (SINGLE_TARGET)
 
 	IF (NOT CMAKE_BUILD_TYPE)
@@ -124,6 +123,7 @@ IF (SINGLE_TARGET)
 					${tables_SRCS}
 		//			${docs_TEXT}
 			)
+	set_target_properties(spheresvr_release PROPERTIES OUTPUT_NAME SphereSvr${ARCH_BITS}_release)
 	ENDIF ((NOT ${CMAKE_BUILD_TYPE} STREQUAL "") OR (${CMAKE_BUILD_TYPE} STREQUAL "Release"))
 	IF ((NOT ${CMAKE_BUILD_TYPE} STREQUAL "") OR (${CMAKE_BUILD_TYPE} STREQUAL "Debug"))
 		ADD_EXECUTABLE (spheresvr_debug
@@ -143,6 +143,7 @@ IF (SINGLE_TARGET)
 					${tables_SRCS}
 		//			${docs_TEXT}
 			)
+	set_target_properties(spheresvr_debug PROPERTIES OUTPUT_NAME SphereSvr${ARCH_BITS}_debug)
 	ENDIF ((NOT ${CMAKE_BUILD_TYPE} STREQUAL "") OR (${CMAKE_BUILD_TYPE} STREQUAL "Debug"))
 	IF ((NOT ${CMAKE_BUILD_TYPE} STREQUAL "") OR (${CMAKE_BUILD_TYPE} STREQUAL "Nightly"))
 		ADD_EXECUTABLE (spheresvr_nightly
@@ -162,6 +163,7 @@ IF (SINGLE_TARGET)
 					${tables_SRCS}
 		//			${docs_TEXT}
 			)
+	set_target_properties(spheresvr_nightly PROPERTIES OUTPUT_NAME SphereSvr${ARCH_BITS}_nightly)
 	ENDIF ((NOT ${CMAKE_BUILD_TYPE} STREQUAL "") OR (${CMAKE_BUILD_TYPE} STREQUAL "Nightly"))
 
 ELSE (SINGLE_TARGET)
@@ -183,8 +185,8 @@ ELSE (SINGLE_TARGET)
             ${tables_SRCS}
             ${docs_TEXT}
 		)
+	set_target_properties(spheresvr PROPERTIES OUTPUT_NAME SphereSvr${ARCH_BITS})
 
 ENDIF (SINGLE_TARGET)
-
 
 toolchain_exe_stuff()

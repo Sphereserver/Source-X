@@ -507,7 +507,7 @@ CItem * CItem::ReadTemplate( CResourceLock & s, CObjBase * pCont ) // static
 					pCont = dynamic_cast <CItemContainer *> ( pItem );
 					if ( pCont == NULL )
 					{
-						DEBUG_ERR(( "CreateTemplate CContainer %s is not a container\n", pItem->GetResourceName() ));
+						DEBUG_ERR(( "CreateTemplate: CContainer %s is not a container\n", pItem->GetResourceName() ));
 					}
 					else
 					{
@@ -1840,7 +1840,6 @@ ITEMID_TYPE CItem::GetID() const
 }
 word CItem::GetBaseID() const
 {
-	// future: strongly typed enums will remove the need for this cast
 	return (word)GetID();
 }
 
@@ -2781,8 +2780,10 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				bool includeLower = 0;
 				int addCircle = 0;
 
-				if ( amount <= 0 ) return false;
-				if ( amount > 1 ) includeLower = (ATOI(ppVal[1]) != 0);
+				if ( amount <= 0 )
+					return false;
+				else
+					includeLower = (ATOI(ppVal[1]) != 0);
 
 				for ( addCircle = ATOI(ppVal[0]); addCircle; addCircle-- )
 				{
@@ -2881,9 +2882,8 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 		case IC_HITS:
 			{
 				int maxHits = HIWORD(m_itNormal.m_more1);
-				if( maxHits == 0 ) {
+				if( maxHits == 0 )
 					maxHits = s.GetArgVal();
-				}
 				m_itNormal.m_more1 = MAKEDWORD(s.GetArgVal(), maxHits);
 			}
 			break;
@@ -2899,14 +2899,40 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			}
 			return true;
 		case IC_ID:
-			return SetID(static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr())));
-		case IC_LAYER:
-			// used only during load.
-			if ( ! IsDisconnected() && ! IsItemInContainer() && ! IsItemEquipped())
+		{
+			lpctstr idstr = s.GetArgStr();
+			CResourceID rid = g_Cfg.ResourceGetID(RES_QTY, idstr);
+			if (rid.GetResType() == RES_TEMPLATE)
 			{
-				return false;
+				// here we don't have to check if we are setting the ID in the script's header, because that is handled
+				//	by IBC_ID in CItemBase; here we are under @Create trigger or loading from saves (?)
+
+				CItem * pItemTemp = CItem::CreateTemplate((ITEMID_TYPE)rid.GetResIndex(), NULL, NULL);
+				if (!pItemTemp)
+					return false;
+
+				bool bCont = pItemTemp->IsContainer();
+				ITEMID_TYPE id = pItemTemp->GetID();
+				pItemTemp->Delete();
+
+				if (bCont)
+				{
+					g_Log.EventError("The template should not return a container-type item!\n");
+					return false;	// not the kind of template we want...
+				}
+				else
+					return SetID(id);
 			}
-			SetUnkZ( (char)(s.GetArgVal())); // GetEquipLayer()
+			else if (rid.GetResType() == RES_ITEMDEF)
+				return SetID((ITEMID_TYPE)rid.GetResIndex());
+			else
+				return false;
+		}
+		case IC_LAYER:
+			// used only during load (i'm reading the save files and placing again the items in the world in the right place).
+			if ( ! IsDisconnected() && ! IsItemInContainer() && ! IsItemEquipped())
+				return false;
+			SetUnkZ( (char)(s.GetArgVal()) ); // GetEquipLayer()
 			return true;
 		case IC_LINK:
 			m_uidLink = s.GetArgVal();

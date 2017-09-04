@@ -87,7 +87,7 @@ public:
 	void Shutdown( int64 iMinutes );
 	bool IsLoading() const
 	{
-		return ( m_iModeCode > SERVMODE_Run || m_fResyncPause );
+		return ( (m_iModeCode > SERVMODE_Run) || m_fResyncPause );
 	}
 	void SetSignals( bool fMsg = true );
 

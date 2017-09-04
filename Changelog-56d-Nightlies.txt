@@ -104,3 +104,6 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
   30-12-2016, Nolok
   - Fixed EFFECT duration (bLoop variable) on Enhanced Client. Given the same bLoop or the same packet, Enhanced Client shows the effect for a much shorter amount of time
 		than Classic Client. To be the EFFECT statements more portable between the two clients, if the client is the EC then bLoop is multiplied by 3.
+
+04-09-2017, Nolok
+- Added: the ID of an item can be overridden after its creation by a random template (which must return a non-container type item).

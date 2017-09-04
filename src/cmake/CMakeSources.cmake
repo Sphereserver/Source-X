@@ -399,5 +399,5 @@ sphereCrypt.ini
 )
 
 INCLUDE_DIRECTORIES (
-common/mysql/include/
+common/mysql/
 )

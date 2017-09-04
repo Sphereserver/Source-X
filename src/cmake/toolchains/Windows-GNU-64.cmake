@@ -3,10 +3,10 @@ SET (TOOLCHAIN 1)
 function (toolchain_after_project)
 	MESSAGE (STATUS "Toolchain: Windows-GNU-64.cmake.")
 	SET(CMAKE_SYSTEM_NAME	"Windows"	PARENT_SCOPE)
-	#SET(ARCH_BITS		64		PARENT_SCOPE)
+	SET(ARCH_BITS		64		PARENT_SCOPE)
 	ENABLE_LANGUAGE(RC)
 
-	LINK_DIRECTORIES ("${CMAKE_SOURCE_DIR}/common/mysql/lib/x86_64")
+	LINK_DIRECTORIES ("${CMAKE_SOURCE_DIR}/../dlls")
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY	"${CMAKE_BINARY_DIR}/bin64"	PARENT_SCOPE)
 endfunction()
 
@@ -52,9 +52,9 @@ function (toolchain_exe_stuff)
 
 	 # Linking Unix (MinGW) libs.
 	 # same here, do not use " " to delimitate these flags!
-	TARGET_LINK_LIBRARIES ( spheresvr_release	mysql ws2_32	-s )
-	TARGET_LINK_LIBRARIES ( spheresvr_debug		mysql ws2_32	-g )
-	TARGET_LINK_LIBRARIES ( spheresvr_nightly	mysql ws2_32	-s )
+	TARGET_LINK_LIBRARIES ( spheresvr_release	mysql64 ws2_32	-s )
+	TARGET_LINK_LIBRARIES ( spheresvr_debug		mysql64 ws2_32	-g )
+	TARGET_LINK_LIBRARIES ( spheresvr_nightly	mysql64 ws2_32	-s )
 
 
 	#-- Set common define macros.

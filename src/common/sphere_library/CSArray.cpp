@@ -1,5 +1,5 @@
 
-#include "../../../sphere/threads.h"
+#include "../../sphere/threads.h"
 #include "CSArray.h"
 
 // CObListRec:: Constructors, Destructor, Asign operator.

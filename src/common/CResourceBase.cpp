@@ -320,6 +320,7 @@ CResourceID CResourceBase::ResourceGetID( RES_TYPE restype, lpctstr & pszName )
 	CResourceID rid;
 
 	// Try to handle private name spaces.
+	/*
 	switch ( restype )
 	{
 		case RES_ACCOUNT:
@@ -332,6 +333,7 @@ CResourceID CResourceBase::ResourceGetID( RES_TYPE restype, lpctstr & pszName )
 		default:
 			break;
 	}
+	*/
 
 	rid.SetPrivateUID( Exp_GetVal(pszName));	// May be some complex expression {}
 
@@ -1013,7 +1015,8 @@ bool CResourceLink::ResourceLock( CResourceLock &s )
 
 	//	Give several tryes to lock the script while multithreading
 	int iRet = s.OpenLock( m_pScript, m_Context );
-	if ( ! iRet ) return true;
+	if ( ! iRet )
+		return true;
 
 	s.AttachObj( this );
 

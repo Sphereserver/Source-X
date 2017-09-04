@@ -1910,13 +1910,13 @@ bool CItemBaseMulti::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole *
 			SKIP_SEPARATORS( pszKey );
 			const CUOMultiItemRec_HS* item = pMulti->GetItem(index);
 
-			if ( *pszKey == '\0' )						sVal.Format("%u,%i,%i,%i", item->m_wTileID, item->m_dx, item->m_dy, item->m_dz);
-			else if ( !strnicmp(pszKey, "ID", 2) )		sVal.FormatVal(item->m_wTileID);
-			else if ( !strnicmp(pszKey, "DX", 2) )		sVal.FormatVal(item->m_dx);
-			else if ( !strnicmp(pszKey, "DY", 2) )		sVal.FormatVal(item->m_dy);
-			else if ( !strnicmp(pszKey, "DZ", 2) )		sVal.FormatVal(item->m_dz);
-			else if ( !strnicmp(pszKey, "D", 1) )		sVal.Format("%i,%i,%i", item->m_dx, item->m_dy, item->m_dz);
-			else if ( !strnicmp(pszKey, "VISIBLE", 7) )	sVal.FormatVal(item->m_visible);
+			if ( *pszKey == '\0' )						{		sVal.Format("%u,%i,%i,%i", item->m_wTileID, item->m_dx, item->m_dy, item->m_dz); return true; }
+			else if ( !strnicmp(pszKey, "ID", 2) )		{		sVal.FormatVal(item->m_wTileID); return true; }
+			else if ( !strnicmp(pszKey, "DX", 2) )		{		sVal.FormatVal(item->m_dx); return true; }
+			else if ( !strnicmp(pszKey, "DY", 2) )		{		sVal.FormatVal(item->m_dy); return true; }
+			else if ( !strnicmp(pszKey, "DZ", 2) )		{		sVal.FormatVal(item->m_dz); return true; }
+			else if ( !strnicmp(pszKey, "D", 1) )		{		sVal.Format("%i,%i,%i", item->m_dx, item->m_dy, item->m_dz); return true; }
+			else if (!strnicmp(pszKey, "VISIBLE", 7))	{ sVal.FormatVal(item->m_visible); return true; }
 			else return false;
 		}
 		else
@@ -2046,23 +2046,17 @@ CItemBase * CItemBase::FindItemBase( ITEMID_TYPE id ) // static
 	while ( s.ReadKeyParse())
 	{
 		if ( s.IsKey( "DUPEITEM" ))
-		{
 			return MakeDupeReplacement( pBase, static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr() )) );
-		}
-		if ( s.IsKey( "MULTIREGION" ))
+		else if ( s.IsKey( "MULTIREGION" ))
 		{
 			// Upgrade the CItemBase::pBase to the CItemBaseMulti.
 			pBase = CItemBaseMulti::MakeMultiRegion( pBase, s );
 			continue;
 		}
-		if ( s.IsKeyHead( "ON", 2 ))	// trigger scripting marks the end
-		{
+		else if ( s.IsKeyHead( "ON", 2 ))	// trigger scripting marks the end
 			break;
-		}
-		if ( s.IsKey( "ID" ) || s.IsKey( "TYPE" ))	// These are required for CItemBaseMulti::MakeMultiRegion to function correctly
-		{
+		else if ( s.IsKey( "ID" ) || s.IsKey( "TYPE" ))	// These are required for CItemBaseMulti::MakeMultiRegion to function correctly
 			pBase->r_LoadVal( s );
-		}
 	}
 
 	// Return to the start of the item script
@@ -2073,7 +2067,7 @@ CItemBase * CItemBase::FindItemBase( ITEMID_TYPE id ) // static
 	{
 		if ( s.IsKey( "DUPEITEM" ) || s.IsKey( "MULTIREGION" ))
 			continue;
-		if ( s.IsKeyHead( "ON", 2 ))	// trigger scripting marks the end
+		else if ( s.IsKeyHead( "ON", 2 ))	// trigger scripting marks the end
 			break;
 
 		pBase->r_LoadVal( s );
