@@ -140,182 +140,191 @@ PacketCharacterStatus::PacketCharacterStatus(const CClient* target, CChar* other
 	writeInt32(other->GetUID());
 	writeStringFixedASCII(other->GetName(), 30);
 
+	if (state->isClientVersion(MINCLIVER_STATUS_V6))
+		version = 6;
+	else if (state->isClientVersion(MINCLIVER_STATUS_V5))
+		version = 5;
+	else if (state->isClientVersion(MINCLIVER_STATUS_V4))
+		version = 4;
+	else if (state->isClientVersion(MINCLIVER_STATUS_V3))
+		version = 3;
+	else if (state->isClientVersion(MINCLIVER_STATUS_V2))
+		version = 2;
+	else
+		version = 1;
+
 	if (character == other)
 	{
 		writeInt16((word)(other->Stat_GetVal(STAT_STR)));
 		writeInt16((word)(other->Stat_GetMax(STAT_STR)));
 		writeBool(canRename);
-
-		if (state->isClientVersion(MINCLIVER_STATUS_V6))
-			version = 6;
-		else if (state->isClientVersion(MINCLIVER_STATUS_V5))
-			version = 5;
-		else if (state->isClientVersion(MINCLIVER_STATUS_V4))
-			version = 4;
-		else if (state->isClientVersion(MINCLIVER_STATUS_V3))
-			version = 3;
-		else if (state->isClientVersion(MINCLIVER_STATUS_V2))
-			version = 2;
-		else
-			version = 1;
 		writeByte(version);
-
-		short strength = other->Stat_GetAdjusted(STAT_STR);
-		if (strength < 0)
-			strength = 0;
-
-		short dexterity = other->Stat_GetAdjusted(STAT_DEX);
-		if (dexterity < 0)
-			dexterity = 0;
-
-		short intelligence = other->Stat_GetAdjusted(STAT_INT);
-		if (intelligence < 0)
-			intelligence = 0;
-
-		writeBool(otherDefinition->IsFemale());
-		writeInt16((word)(strength));
-		writeInt16((word)(dexterity));
-		writeInt16((word)(intelligence));
-		writeInt16((word)(other->Stat_GetVal(STAT_DEX)));
-		writeInt16((word)(other->Stat_GetMax(STAT_DEX)));
-		writeInt16((word)(other->Stat_GetVal(STAT_INT)));
-		writeInt16((word)(other->Stat_GetMax(STAT_INT)));
-
-		if ( g_Cfg.m_fPayFromPackOnly )
-			writeInt32(other->GetPackSafe()->ContentCount(CResourceID(RES_TYPEDEF,IT_GOLD)));
-		else
-			writeInt32(other->ContentCount(CResourceID(RES_TYPEDEF,IT_GOLD)));
-
-		if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
-			writeInt16((word)(other->GetDefNum("RESPHYSICAL", true, true)));
-		else
-			writeInt16(other->m_defense + otherDefinition->m_defense);
-
-		writeInt16((word)(other->GetTotalWeight() / WEIGHT_UNITS));
-
-		if (version >= 5) // ML attributes
-		{
-			writeInt16((word)(g_Cfg.Calc_MaxCarryWeight(other) / WEIGHT_UNITS));
-
-			switch (other->GetDispID())
-			{
-				case CREID_MAN:
-				case CREID_WOMAN:
-				case CREID_GHOSTMAN:
-				case CREID_GHOSTWOMAN:
-					writeByte(RACETYPE_HUMAN);
-					break;
-				case CREID_ELFMAN:
-				case CREID_ELFWOMAN:
-				case CREID_ELFGHOSTMAN:
-				case CREID_ELFGHOSTWOMAN:
-					writeByte(RACETYPE_ELF);
-					break;
-				case CREID_GARGMAN:
-				case CREID_GARGWOMAN:
-				case CREID_GARGGHOSTMAN:
-				case CREID_GARGGHOSTWOMAN:
-					writeByte(RACETYPE_GARGOYLE);
-					break;
-				default:
-					writeByte(RACETYPE_UNDEFINED);
-					break;
-			}
-		}
-
-		if (version >= 2) // T2A attributes
-		{
-			short statcap = other->Stat_GetLimit(STAT_QTY);
-			if (statcap < 0) statcap = 0;
-
-			writeInt16(statcap);
-		}
-
-		if (version >= 3) // Renaissance attributes
-		{
-			if (other->m_pPlayer != NULL)
-			{
-				writeByte((byte)(other->GetDefNum("CURFOLLOWER", true, true)));
-				writeByte((byte)(other->GetDefNum("MAXFOLLOWER", true, true)));
-			}
-			else
-			{
-				writeByte(0);
-				writeByte(0);
-			}
-		}
-
-		if (version >= 4) // AOS attributes
-		{
-			writeInt16((word)(other->GetDefNum("RESFIRE", true, true)));
-			writeInt16((word)(other->GetDefNum("RESCOLD", true, true)));
-			writeInt16((word)(other->GetDefNum("RESPOISON", true, true)));
-			writeInt16((word)(other->GetDefNum("RESENERGY", true, true)));
-			writeInt16((word)(other->GetDefNum("LUCK", true, true)));
-
-			const CItem* weapon = other->m_uidWeapon.ItemFind();
-			writeInt16((word)(other->Fight_CalcDamage(weapon, true, false)));
-			writeInt16((word)(other->Fight_CalcDamage(weapon, true, true)));
-
-			writeInt32((dword)(other->GetDefNum("TITHING", true, true)));
-		}
-
-		if (version >= 6)	// SA attributes
-		{
-			writeInt16((word)(other->GetDefNum("RESPHYSICALMAX", true, true)));
-			writeInt16((word)(other->GetDefNum("RESFIREMAX", true, true)));
-			writeInt16((word)(other->GetDefNum("RESCOLDMAX", true, true)));
-			writeInt16((word)(other->GetDefNum("RESPOISONMAX", true, true)));
-			writeInt16((word)(other->GetDefNum("RESENERGYMAX", true, true)));
-			writeInt16((word)(other->GetDefNum("INCREASEDEFCHANCE", true, true)));
-			writeInt16((word)(other->GetDefNum("INCREASEDEFCHANCEMAX", true, true)));
-			writeInt16((word)(other->GetDefNum("INCREASEHITCHANCE", true, true)));
-			writeInt16((word)(other->GetDefNum("INCREASESWINGSPEED", true, true)));
-			writeInt16((word)(other->GetDefNum("INCREASEDAM", true, true)));
-			writeInt16((word)(other->GetDefNum("LOWERREAGENTCOST", true, true)));
-			writeInt16((word)(other->GetDefNum("INCREASESPELLDAM", true, true)));
-			writeInt16((word)(other->GetDefNum("FASTERCASTRECOVERY", true, true)));
-			writeInt16((word)(other->GetDefNum("FASTERCASTING", true, true)));
-			writeInt16((word)(other->GetDefNum("LOWERMANACOST", true, true)));
-		}
-/* We really don't know what is going on here. RUOSI Packet Guide was way off... -Khaos
-   Possible KR client status info... -Ben*/
-		if (target->GetNetState()->isClientKR() )
-		{
-			writeInt16((word)(other->GetDefNum("INCREASEHITCHANCE", true, true)));
-			writeInt16((word)(other->GetDefNum("INCREASESWINGSPEED", true, true)));
-			writeInt16((word)(other->GetDefNum("INCREASEDAM", true, true)));
-			writeInt16((word)(other->GetDefNum("LOWERREAGENTCOST", true, true)));
-			writeInt16((word)(other->GetDefNum("REGENHITS", true, true)));
-			writeInt16((word)(other->GetDefNum("REGENSTAM", true, true)));
-			writeInt16((word)(other->GetDefNum("REGENMANA", true, true)));
-			writeInt16((word)(other->GetDefNum("REFLECTPHYSICALDAM", true, true)));
-			writeInt16((word)(other->GetDefNum("ENHANCEPOTIONS", true, true)));
-			writeInt16((word)(other->GetDefNum("INCREASEDEFCHANCE", true, true)));
-			writeInt16((word)(other->GetDefNum("INCREASESPELLDAM", true, true)));
-			writeInt16((word)(other->GetDefNum("FASTERCASTRECOVERY", true, true)));
-			writeInt16((word)(other->GetDefNum("FASTERCASTING", true, true)));
-			writeInt16((word)(other->GetDefNum("LOWERMANACOST", true, true)));
-			writeInt16((word)(other->GetDefNum("BONUSSTR", true, true)));
-			writeInt16((word)(other->GetDefNum("BONUSDEX", true, true)));
-			writeInt16((word)(other->GetDefNum("BONUSINT", true, true)));
-			writeInt16((word)(other->GetDefNum("BONUSHITS", true, true)));
-			writeInt16((word)(other->GetDefNum("BONUSSTAM", true, true)));
-			writeInt16((word)(other->GetDefNum("BONUSMANA", true, true)));
-			writeInt16((word)(other->GetDefNum("BONUSHITSMAX", true, true)));
-			writeInt16((word)(other->GetDefNum("BONUSSTAMMAX", true, true)));
-			writeInt16((word)(other->GetDefNum("BONUSMANAMAX", true, true)));
-		}
+		WriteVersionSpecific(target, other, version);
 	}
 	else
 	{
-		writeInt16((word)((other->Stat_GetVal(STAT_STR) * 100) / maximum(other->Stat_GetMax(STAT_STR), 1)));
-		writeInt16(100);
+		writeInt16((word)((other->Stat_GetVal(STAT_STR) * 100) / maximum(other->Stat_GetMax(STAT_STR), 1)));	// Hit points (percentage)
+		writeInt16(100);		// Max hit points
 		writeBool(canRename);
 		writeByte(version);
+		if (target->GetNetState()->isClientEnhanced() && other->IsPlayableCharacter())
+			// The Enhanced Client wants the char race and other things when showing paperdolls (otherwise the interface throws an "unnoticeable" internal error)
+			WriteVersionSpecific(target, other, version);
 	}
 
 	push(target);
+}
+
+void PacketCharacterStatus::WriteVersionSpecific(const CClient* target, CChar* other, byte version)
+{
+	const CCharBase * otherDefinition = other->Char_GetDef();
+
+	short strength = other->Stat_GetAdjusted(STAT_STR);
+	if (strength < 0)
+		strength = 0;
+
+	short dexterity = other->Stat_GetAdjusted(STAT_DEX);
+	if (dexterity < 0)
+		dexterity = 0;
+
+	short intelligence = other->Stat_GetAdjusted(STAT_INT);
+	if (intelligence < 0)
+		intelligence = 0;
+
+	writeBool(otherDefinition->IsFemale());
+	writeInt16((word)(strength));
+	writeInt16((word)(dexterity));
+	writeInt16((word)(intelligence));
+	writeInt16((word)(other->Stat_GetVal(STAT_DEX)));
+	writeInt16((word)(other->Stat_GetMax(STAT_DEX)));
+	writeInt16((word)(other->Stat_GetVal(STAT_INT)));
+	writeInt16((word)(other->Stat_GetMax(STAT_INT)));
+
+	if (g_Cfg.m_fPayFromPackOnly)
+		writeInt32(other->GetPackSafe()->ContentCount(CResourceID(RES_TYPEDEF, IT_GOLD)));
+	else
+		writeInt32(other->ContentCount(CResourceID(RES_TYPEDEF, IT_GOLD)));
+
+	if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+		writeInt16((word)(other->GetDefNum("RESPHYSICAL", true, true)));
+	else
+		writeInt16(other->m_defense + otherDefinition->m_defense);
+
+	writeInt16((word)(other->GetTotalWeight() / WEIGHT_UNITS));
+
+	if (version >= 5) // ML attributes
+	{
+		writeInt16((word)(g_Cfg.Calc_MaxCarryWeight(other) / WEIGHT_UNITS));
+
+		switch (other->GetDispID())
+		{
+		case CREID_MAN:
+		case CREID_WOMAN:
+		case CREID_GHOSTMAN:
+		case CREID_GHOSTWOMAN:
+			writeByte(RACETYPE_HUMAN);
+			break;
+		case CREID_ELFMAN:
+		case CREID_ELFWOMAN:
+		case CREID_ELFGHOSTMAN:
+		case CREID_ELFGHOSTWOMAN:
+			writeByte(RACETYPE_ELF);
+			break;
+		case CREID_GARGMAN:
+		case CREID_GARGWOMAN:
+		case CREID_GARGGHOSTMAN:
+		case CREID_GARGGHOSTWOMAN:
+			writeByte(RACETYPE_GARGOYLE);
+			break;
+		default:
+			writeByte(RACETYPE_UNDEFINED);
+			break;
+		}
+	}
+
+	if (version >= 2) // T2A attributes
+	{
+		short statcap = other->Stat_GetLimit(STAT_QTY);
+		if (statcap < 0) statcap = 0;
+
+		writeInt16(statcap);
+	}
+
+	if (version >= 3) // Renaissance attributes
+	{
+		if (other->m_pPlayer != NULL)
+		{
+			writeByte((byte)(other->GetDefNum("CURFOLLOWER", true, true)));
+			writeByte((byte)(other->GetDefNum("MAXFOLLOWER", true, true)));
+		}
+		else
+		{
+			writeByte(0);
+			writeByte(0);
+		}
+	}
+
+	if (version >= 4) // AOS attributes
+	{
+		writeInt16((word)(other->GetDefNum("RESFIRE", true, true)));
+		writeInt16((word)(other->GetDefNum("RESCOLD", true, true)));
+		writeInt16((word)(other->GetDefNum("RESPOISON", true, true)));
+		writeInt16((word)(other->GetDefNum("RESENERGY", true, true)));
+		writeInt16((word)(other->GetDefNum("LUCK", true, true)));
+
+		const CItem* weapon = other->m_uidWeapon.ItemFind();
+		writeInt16((word)(other->Fight_CalcDamage(weapon, true, false)));
+		writeInt16((word)(other->Fight_CalcDamage(weapon, true, true)));
+
+		writeInt32((dword)(other->GetDefNum("TITHING", true, true)));
+	}
+
+	if (version >= 6)	// SA attributes
+	{
+		writeInt16((word)(other->GetDefNum("RESPHYSICALMAX", true, true)));
+		writeInt16((word)(other->GetDefNum("RESFIREMAX", true, true)));
+		writeInt16((word)(other->GetDefNum("RESCOLDMAX", true, true)));
+		writeInt16((word)(other->GetDefNum("RESPOISONMAX", true, true)));
+		writeInt16((word)(other->GetDefNum("RESENERGYMAX", true, true)));
+		writeInt16((word)(other->GetDefNum("INCREASEDEFCHANCE", true, true)));
+		writeInt16((word)(other->GetDefNum("INCREASEDEFCHANCEMAX", true, true)));
+		writeInt16((word)(other->GetDefNum("INCREASEHITCHANCE", true, true)));
+		writeInt16((word)(other->GetDefNum("INCREASESWINGSPEED", true, true)));
+		writeInt16((word)(other->GetDefNum("INCREASEDAM", true, true)));
+		writeInt16((word)(other->GetDefNum("LOWERREAGENTCOST", true, true)));
+		writeInt16((word)(other->GetDefNum("INCREASESPELLDAM", true, true)));
+		writeInt16((word)(other->GetDefNum("FASTERCASTRECOVERY", true, true)));
+		writeInt16((word)(other->GetDefNum("FASTERCASTING", true, true)));
+		writeInt16((word)(other->GetDefNum("LOWERMANACOST", true, true)));
+	}
+	/* We really don't know what is going on here. RUOSI Packet Guide was way off... -Khaos
+	Possible KR client status info... -Ben*/
+	if (target->GetNetState()->isClientKR())
+	{
+		writeInt16((word)(other->GetDefNum("INCREASEHITCHANCE", true, true)));
+		writeInt16((word)(other->GetDefNum("INCREASESWINGSPEED", true, true)));
+		writeInt16((word)(other->GetDefNum("INCREASEDAM", true, true)));
+		writeInt16((word)(other->GetDefNum("LOWERREAGENTCOST", true, true)));
+		writeInt16((word)(other->GetDefNum("REGENHITS", true, true)));
+		writeInt16((word)(other->GetDefNum("REGENSTAM", true, true)));
+		writeInt16((word)(other->GetDefNum("REGENMANA", true, true)));
+		writeInt16((word)(other->GetDefNum("REFLECTPHYSICALDAM", true, true)));
+		writeInt16((word)(other->GetDefNum("ENHANCEPOTIONS", true, true)));
+		writeInt16((word)(other->GetDefNum("INCREASEDEFCHANCE", true, true)));
+		writeInt16((word)(other->GetDefNum("INCREASESPELLDAM", true, true)));
+		writeInt16((word)(other->GetDefNum("FASTERCASTRECOVERY", true, true)));
+		writeInt16((word)(other->GetDefNum("FASTERCASTING", true, true)));
+		writeInt16((word)(other->GetDefNum("LOWERMANACOST", true, true)));
+		writeInt16((word)(other->GetDefNum("BONUSSTR", true, true)));
+		writeInt16((word)(other->GetDefNum("BONUSDEX", true, true)));
+		writeInt16((word)(other->GetDefNum("BONUSINT", true, true)));
+		writeInt16((word)(other->GetDefNum("BONUSHITS", true, true)));
+		writeInt16((word)(other->GetDefNum("BONUSSTAM", true, true)));
+		writeInt16((word)(other->GetDefNum("BONUSMANA", true, true)));
+		writeInt16((word)(other->GetDefNum("BONUSHITSMAX", true, true)));
+		writeInt16((word)(other->GetDefNum("BONUSSTAMMAX", true, true)));
+		writeInt16((word)(other->GetDefNum("BONUSMANAMAX", true, true)));
+	}
 }
 
 
@@ -757,12 +766,13 @@ bool PacketDragAnimation::canSendTo(const NetState* state) const
  *
  *
  ***************************************************************************/
-PacketContainerOpen::PacketContainerOpen(const CClient* target, const CObjBase* container, GUMP_TYPE gump) : PacketSend(XCMD_ContOpen, 9, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL), m_container(container->GetUID())
+PacketContainerOpen::PacketContainerOpen(const CClient* target, const CObjBase* container, GUMP_TYPE gump) : PacketSend(XCMD_ContOpen, 9, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL),
+	m_container(container->GetUID())
 {
 	ADDTOCALLSTACK("PacketContainerOpen::PacketContainerOpen");
 
-	writeInt32(container->GetUID());
-	writeInt16((word)(gump));
+	writeInt32(m_container);
+	writeInt16((word)gump);
 
 	// HS clients needs an extra 'container type' byte (0x00 for vendors, 0x7D for spellbooks/containers)
 	if (target->GetNetState()->isClientVersion(MINCLIVER_HS) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced())
@@ -967,10 +977,20 @@ PacketItemEquipped::PacketItemEquipped(const CClient* target, const CItem* item)
 	HUE_TYPE hue;
 	target->GetAdjustedItemID(parent, item, id, hue);
 
+	if (layer == LAYER_BANKBOX)
+		id = ITEMID_CHEST_SILVER;
+/*
+	else if ((layer > 25) && (layer < 29))
+	{
+		id = ITEMID_BACKPACK;
+		hue = 0;
+	}
+*/
+
 	writeInt32(item->GetUID());
-	writeInt16((word)(layer == LAYER_BANKBOX ? ITEMID_CHEST_SILVER : id));
+	writeInt16((word)id);
 	writeByte(0);
-	writeByte((byte)(layer));
+	writeByte((byte)layer);
 	writeInt32(parent->GetUID());
 	writeInt16(hue);
 
@@ -1095,12 +1115,8 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 	memset( boIsLayerSent, 0, sizeof(boIsLayerSent) );
 
 	const CChar* viewer = target->GetChar();
-	const CItemBase* itemDefinition;
-	ITEMID_TYPE id;
-	word wAmount;
-	HUE_TYPE hue;
-	CPointMap pos;
-	LAYER_TYPE layer;
+	std::vector<CItem*> items;
+	items.reserve(container->GetCount());
 
 	// Classic Client wants the container items sent with order a->z, Enhanced Client with order z->a;
 	// Classic client wants the prices sent (in PacketVendorBuyList::fillBuyData) with order a->z, Enhanced Client with order a->z.
@@ -1108,11 +1124,11 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 		item != NULL && m_count < MAX_ITEMS_CONT;
 		item = (target->GetNetState()->isClientEnhanced() ? item->GetPrev() : item->GetNext()) )
 	{
-		itemDefinition = item->Item_GetDef();
-		id = item->GetDispID();
-		wAmount = item->GetAmount();
-		hue = item->GetHue() & HUE_MASK_HI;
-		pos = item->GetContainedPoint();
+		const CItemBase* itemDefinition = item->Item_GetDef();
+		ITEMID_TYPE id = item->GetDispID();
+		word wAmount = item->GetAmount();
+		HUE_TYPE hue = item->GetHue() & HUE_MASK_HI;
+		CPointMap pos = item->GetContainedPoint();
 
 		if ( boIsShop )
 		{
@@ -1132,7 +1148,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 
 		if ( boFilterLayers )
 		{
-			layer = static_cast<LAYER_TYPE>(item->GetContainedLayer());
+			LAYER_TYPE layer = static_cast<LAYER_TYPE>(item->GetContainedLayer());
 			ASSERT(layer < LAYER_HORSE);
 			switch ( layer )	// don't put these on a corpse.
 			{
@@ -1173,8 +1189,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 		writeInt32(container->GetUID());
 		writeInt16((word)hue);
 
-		// include tooltip
-		target->addAOSTooltip(item, false, boIsShop);
+		items.push_back(item);
 
 		if ( ++m_count >= MAX_ITEMS_CONT )
 			break;
@@ -1185,8 +1200,15 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 	seek(3);
 	writeInt16(m_count);
 	seek(l);
-
+	
 	push(target);
+
+	if (m_count > 0)
+	{
+		// send tooltips
+		for (auto it = items.begin(); it != items.end(); it++)
+			target->addAOSTooltip(*it, false, boIsShop);
+	}	
 }
 
 PacketItemContents::PacketItemContents(const CClient* target, const CItem* spellbook) : PacketSend(XCMD_Content, 5, PRI_NORMAL),
@@ -2069,7 +2091,17 @@ size_t PacketVendorBuyList::fillBuyData(const CItemContainer* container, int iCo
 				price = 100000;
 		}
 
-		lpctstr name = vendorItem->GetName();
+		tchar* name;
+/*
+		CVarDefCont	* pVar = item->GetDefKey("NAMELOC", true);
+		if (pVar)
+		{
+			name = Str_GetTemp();
+			sprintf(name, "%" PRId64, pVar->GetValNum());
+		}
+		else
+*/
+			name = const_cast<tchar*>(vendorItem->GetName());
 		size_t len = strlen(name) + 1;
 		if (len > UCHAR_MAX)
 			len = UCHAR_MAX;
@@ -2085,7 +2117,7 @@ size_t PacketVendorBuyList::fillBuyData(const CItemContainer* container, int iCo
 	// seek back to write count
 	size_t endpos = getPosition();
 	seek(countpos);
-	writeByte((byte)(count));
+	writeByte((byte)count);
 	seek(endpos);
 
 	return count;
@@ -3540,7 +3572,7 @@ PacketProfile::PacketProfile(const CClient* target, const CChar* character) : Pa
 PacketEnableFeatures::PacketEnableFeatures(const CClient* target, dword flags) : PacketSend(XCMD_Features, 5, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketEnableFeatures::PacketEnableFeatures");
-
+	
 	const CAccountRef account = target->GetAccount();
 	ASSERT(account != NULL);
 	dword tmVer = (dword)(account->m_TagDefs.GetKeyNum("clientversion"));
@@ -3770,7 +3802,7 @@ PacketPropertyListVersionOld::PacketPropertyListVersionOld(const CClient* target
 
 	m_object = object->GetUID();
 
-	writeInt32(object->GetUID());
+	writeInt32(m_object);
 	writeInt32(version);
 
 	if (target != NULL)
@@ -4588,7 +4620,7 @@ PacketPropertyListVersion::PacketPropertyListVersion(const CClient* target, cons
 
 	m_object = object->GetUID();
 
-	writeInt32(object->GetUID());
+	writeInt32(m_object);
 	writeInt32(version);
 
 	if (target != NULL)

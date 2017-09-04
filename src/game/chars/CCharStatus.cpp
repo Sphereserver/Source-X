@@ -145,7 +145,7 @@ CItemContainer *CChar::GetBank( LAYER_TYPE layer )
 			layer = LAYER_BANKBOX;
 			break;
 	}
-
+	
 	CItem *pItemTest = LayerFind(layer);
 	CItemContainer *pBankBox = dynamic_cast<CItemContainer *>(pItemTest);
 	if ( pBankBox )
@@ -170,7 +170,7 @@ CItemContainer *CChar::GetBank( LAYER_TYPE layer )
 
 CItemContainer * CChar::GetPackSafe()
 {
-	return( GetBank(LAYER_PACK));
+	return GetBank(LAYER_PACK);
 }
 
 CItem *CChar::GetBackpackItem(ITEMID_TYPE id)
@@ -502,23 +502,31 @@ bool CChar::IsSwimming() const
 NPCBRAIN_TYPE CChar::GetNPCBrain(bool fDefault) const
 {
 	ADDTOCALLSTACK("CChar::GetNPCBrain");
-	// return 1 for animal, 2 for monster, 3 for NPC humans and PCs
+	// Return NPCBRAIN_ANIMAL for animals, _HUMAN for NPC human and PCs, >= _MONSTER for monsters
+	//	(can return also _BERSERK and _DRAGON)
 	// For tracking and other purposes.
 
-	if ( m_pNPC && fDefault )
+	if (fDefault)
 	{
-		if ( (m_pNPC->m_Brain >= NPCBRAIN_HUMAN) && (m_pNPC->m_Brain <= NPCBRAIN_STABLE) )
+		if (m_pNPC)
+		{
+			if ((m_pNPC->m_Brain >= NPCBRAIN_HUMAN) && (m_pNPC->m_Brain <= NPCBRAIN_STABLE))
+				return NPCBRAIN_HUMAN;
+
+			return m_pNPC->m_Brain;
+		}
+		else if (m_pPlayer)
 			return NPCBRAIN_HUMAN;
-
-		return m_pNPC->m_Brain;
 	}
+	
 
-	// Handle the exceptions
+	// Handle the exceptions (or voluntarily auto-detect the brain, if fDefault == false)
 	CREID_TYPE id = GetDispID();
 	if ( id >= CREID_IRON_GOLEM )
 	{
 		switch ( id )
 		{
+			//TODO: add other dragons
 			case CREID_SERPENTINE_DRAGON:
 			case CREID_SKELETAL_DRAGON:
 			case CREID_REPTILE_LORD:
@@ -1081,35 +1089,40 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 		CObjBase *pObjCont = pItem->GetContainer();
 		if ( pObjCont )
 		{
-			if ( !CanSeeInContainer(dynamic_cast<const CItemContainer*>(pObjCont)) )
-				return false;
+//			LAYER_TYPE layerCont = pObjCont->GetEquipLayer();
+//			if (layerCont < 26 && layerCont > 28)	// you can always see what a vendor can buy or sell
+//			{
+				if (!CanSeeInContainer(dynamic_cast<const CItemContainer*>(pObjCont)))
+					return false;
 
-			if ( IsSetEF(EF_FixCanSeeInClosedConts) )
-			{
-				// A client cannot see the contents of someone else's container, unless they have opened it first
-				if ( IsClient() && pObjCont->IsItem() && pObjCont->GetTopLevelObj() != this )
+				if (IsSetEF(EF_FixCanSeeInClosedConts))
 				{
-					CClient *pClient = GetClient();
-					if ( pClient && pClient->m_openedContainers.find(pObjCont->GetUID().GetPrivateUID()) == pClient->m_openedContainers.end() )
+					// A client cannot see the contents of someone else's container, unless they have opened it first
+					if (IsClient() && pObjCont->IsItem() && pObjCont->GetTopLevelObj() != this)
 					{
-#ifdef _DEBUG
-						if ( CanSee(pObjCont) )
+						CClient *pClient = GetClient();
+						if (pClient && (pClient->m_openedContainers.find(pObjCont->GetUID().GetPrivateUID()) == pClient->m_openedContainers.end()))
 						{
-#ifdef THREAD_TRACK_CALLSTACK
-							StackDebugInformation::printStackTrace();
-#endif
-							g_Log.EventDebug("%x:EF_FixCanSeeInClosedConts prevents %s, (0%x, '%s') from seeing item uid=0%x (%s, '%s') in container uid=0%x (%s, '%s')\n",
-								pClient->GetSocketID(), pClient->GetAccount()->GetName(), (dword)GetUID(), GetName(false),
-								(dword)pItem->GetUID(), pItem->GetResourceName(), pItem->GetName(),
-								(dword)pObjCont->GetUID(), pObjCont->GetResourceName(), pObjCont->GetName());
-						}
-#endif
-
-						return false;
+						/*
+						#ifdef _DEBUG
+							if ( CanSee(pObjCont) )
+							{
+							#ifdef THREAD_TRACK_CALLSTACK
+								StackDebugInformation::printStackTrace();
+							#endif
+								g_Log.EventDebug("%x:EF_FixCanSeeInClosedConts prevents %s, (0%x, '%s') from seeing item uid=0%x (%s, '%s') in container uid=0%x (%s, '%s')\n",
+									pClient->GetSocketID(), pClient->GetAccount()->GetName(), (dword)GetUID(), GetName(false),
+									(dword)pItem->GetUID(), pItem->GetResourceName(), pItem->GetName(),
+									(dword)pObjCont->GetUID(), pObjCont->GetResourceName(), pObjCont->GetName());
+							}
+						#endif
+						*/
+							return false;
 						}
 					}
 				}
 
+//			}
 			return CanSee(pObjCont);
 		}
 	}
@@ -2208,7 +2221,7 @@ bool CChar::IsTakeCrime( const CItem *pItem, CChar ** ppCharMark ) const
 		return false;	// I guess it's not a crime
 	}
 
-	if ( pCharMark->NPC_IsOwnedBy(this) || pCharMark->Memory_FindObjTypes(this, MEMORY_FRIEND) != NULL )	// he let's you
+	if ( pCharMark->NPC_IsOwnedBy(this) || pCharMark->Memory_FindObjTypes(this, MEMORY_FRIEND) != NULL )	// he lets you
 		return false;
 
 	// Pack animal has no owner ?
@@ -2318,12 +2331,14 @@ CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, word *pwBlockFlags, DIR_
 	CRegionBase *pArea = ptDest.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA|REGION_TYPE_ROOM);
 	if ( !pArea )
 	{
-		WARNWALK(("Failed to get region\n"));
+		if (g_Cfg.m_wDebugFlags & DEBUGF_WALK)
+			g_pLog->EventWarn("Failed to get region\n");
 		return NULL;
 	}
 
 	word wCan = (word)(GetMoveBlockFlags());
-	WARNWALK(("GetMoveBlockFlags() (0x%x)\n",wCan));
+	if (g_Cfg.m_wDebugFlags & DEBUGF_WALK)
+		g_pLog->EventWarn("GetMoveBlockFlags() (0x%x)\n", wCan);
 	if ( !(wCan & (CAN_C_SWIM| CAN_C_WALK|CAN_C_FLY|CAN_C_RUN|CAN_C_HOVER)) )
 		return NULL;	// cannot move at all, so WTF?
 
@@ -2331,15 +2346,19 @@ CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, word *pwBlockFlags, DIR_
 	if ( wCan & CAN_C_WALK )
 	{
 		wBlockFlags |= CAN_I_CLIMB;		// if we can walk than we can climb. Ignore CAN_C_FLY at all here
-		WARNWALK(("wBlockFlags (0%x) wCan(0%x)\n", wBlockFlags, wCan));
+		if (g_Cfg.m_wDebugFlags & DEBUGF_WALK)
+			g_pLog->EventWarn("wBlockFlags (0%x) wCan(0%x)\n", wBlockFlags, wCan);
 	}
 
 	CServerMapBlockState block(wBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 3, GetHeightMount());
-	WARNWALK(("\t\tCServerMapBlockState block( 0%x, %d, %d, %d );ptDest.m_z(%d) m_zClimbHeight(%d)\n", wBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 2, ptDest.m_z, m_zClimbHeight));
+	if (g_Cfg.m_wDebugFlags & DEBUGF_WALK)
+		g_pLog->EventWarn("\t\tCServerMapBlockState block( 0%x, %d, %d, %d );ptDest.m_z(%d) m_zClimbHeight(%d)\n",
+					wBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 2, ptDest.m_z, m_zClimbHeight);
 
 	if ( !ptDest.IsValidPoint() )
 	{
-		DEBUG_ERR(("Character 0%x on %d,%d,%d wants to move into an invalid location %d,%d,%d.\n", GetUID().GetObjUID(), GetTopPoint().m_x, GetTopPoint().m_y, GetTopPoint().m_z, ptDest.m_x, ptDest.m_y, ptDest.m_z));
+		DEBUG_ERR(("Character 0%x on %d,%d,%d wants to move into an invalid location %d,%d,%d.\n",
+			GetUID().GetObjUID(), GetTopPoint().m_x, GetTopPoint().m_y, GetTopPoint().m_z, ptDest.m_x, ptDest.m_y, ptDest.m_z));
 		return NULL;
 	}
 	g_World.GetHeightPoint(ptDest, block, true);
@@ -2350,15 +2369,17 @@ CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, word *pwBlockFlags, DIR_
 	if ( block.m_Top.m_dwBlockFlags )
 	{
 		wBlockFlags |= CAN_I_ROOF;	// we are covered by something.
-
-		WARNWALK(("block.m_Top.m_z (%d) > ptDest.m_z (%d) + m_zClimbHeight (%d) + (block.m_Top.m_dwTile (0x%x) > TERRAIN_QTY ? PLAYER_HEIGHT : PLAYER_HEIGHT/2 )(%d)\n", block.m_Top.m_z, ptDest.m_z, m_zClimbHeight, block.m_Top.m_dwTile, ptDest.m_z - (m_zClimbHeight + (block.m_Top.m_dwTile > TERRAIN_QTY ? PLAYER_HEIGHT : PLAYER_HEIGHT / 2))));
+		if (g_Cfg.m_wDebugFlags & DEBUGF_WALK)
+			g_pLog->EventWarn("block.m_Top.m_z (%d) > ptDest.m_z (%d) + m_zClimbHeight (%d) + (block.m_Top.m_dwTile (0x%x) > TERRAIN_QTY ? PLAYER_HEIGHT : PLAYER_HEIGHT/2 )(%d)\n",
+				block.m_Top.m_z, ptDest.m_z, m_zClimbHeight, block.m_Top.m_dwTile, ptDest.m_z - (m_zClimbHeight + (block.m_Top.m_dwTile > TERRAIN_QTY ? PLAYER_HEIGHT : PLAYER_HEIGHT / 2)));
 		if ( block.m_Top.m_z < block.m_Bottom.m_z + (m_zClimbHeight + (block.m_Top.m_dwTile > TERRAIN_QTY ? GetHeightMount() : GetHeightMount() / 2)) )
 			wBlockFlags |= CAN_I_BLOCK;		// we can't fit under this!
 	}
 
 	if ( (wCan != 0xFFFF) && (wBlockFlags != 0x0) )
 	{
-		WARNWALK(("BOTTOMitemID (0%x) TOPitemID (0%x)\n", (block.m_Bottom.m_dwTile - TERRAIN_QTY), (block.m_Top.m_dwTile - TERRAIN_QTY)));
+		if (g_Cfg.m_wDebugFlags & DEBUGF_WALK)
+			g_pLog->EventWarn("BOTTOMitemID (0%x) TOPitemID (0%x)\n", (block.m_Bottom.m_dwTile - TERRAIN_QTY), (block.m_Top.m_dwTile - TERRAIN_QTY));
 		CCharBase *pCharDef = Char_GetDef();
 		ASSERT(pCharDef);
 
@@ -2387,7 +2408,8 @@ CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, word *pwBlockFlags, DIR_
 		{
 			if ( !(wBlockFlags & CAN_I_CLIMB) ) // we can climb anywhere
 			{
-				WARNWALK(("block.m_Lowest.m_z %d  block.m_Bottom.m_z %d  block.m_Top.m_z %d\n", block.m_Lowest.m_z, block.m_Bottom.m_z, block.m_Top.m_z));
+				if (g_Cfg.m_wDebugFlags & DEBUGF_WALK)
+					g_pLog->EventWarn("block.m_Lowest.m_z %d  block.m_Bottom.m_z %d  block.m_Top.m_z %d\n", block.m_Lowest.m_z, block.m_Bottom.m_z, block.m_Top.m_z);
 				if ( block.m_Bottom.m_dwTile > TERRAIN_QTY )
 				{
 					if ( block.m_Bottom.m_z > ptDest.m_z + m_zClimbHeight + 2 ) // Too high to climb.
@@ -2409,7 +2431,8 @@ CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, word *pwBlockFlags, DIR_
 			return NULL;
 	}
 
-	WARNWALK(("GetHeightMount() %d  block.m_Top.m_z  %d ptDest.m_z  %d\n", GetHeightMount(), block.m_Top.m_z, ptDest.m_z));
+	if (g_Cfg.m_wDebugFlags & DEBUGF_WALK)
+		g_pLog->EventWarn("GetHeightMount() %d  block.m_Top.m_z  %d ptDest.m_z  %d\n", GetHeightMount(), block.m_Top.m_z, ptDest.m_z);
 	if ( (GetHeightMount() + ptDest.m_z >= block.m_Top.m_z) && g_Cfg.m_iMountHeight && !IsPriv(PRIV_GM) && !IsPriv(PRIV_ALLMOVE) )
 	{
 		SysMessageDefault(DEFMSG_MSG_MOUNT_CEILING);

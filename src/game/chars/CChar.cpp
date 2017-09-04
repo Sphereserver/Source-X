@@ -236,9 +236,7 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false )
 	m_iStatFlag = 0;
 
 	if ( g_World.m_fSaveParity )
-	{
 		StatFlag_Set(STATF_SaveParity);	// It will get saved next time.
-	}
 	m_UIDLastNewItem.InitUID();
 	m_dirFace = DIR_SE;
 	m_fonttype = FONT_NORMAL;
@@ -367,9 +365,7 @@ void CChar::ClientDetach()
 	{
 		CItemShip * pShipItem = dynamic_cast <CItemShip *>( m_pArea->GetResourceID().ItemFind());
 		if ( pShipItem )
-		{
 			pShipItem->Ship_Stop();
-		}
 	}
 
 	CSector * pSector = GetTopSector();
@@ -396,12 +392,12 @@ void CChar::ClientAttach( CClient * pClient )
 
 bool CChar::IsClient() const
 {
-	return( m_pClient != NULL );
+	return ( m_pClient != NULL );
 }
 
 CClient * CChar::GetClient() const
 {
-	return( m_pClient );
+	return m_pClient;
 }
 
 // Client logged out or NPC is dead.
@@ -575,13 +571,13 @@ char CChar::GetFixZ( CPointMap pt, uint wBlockFlags)
 	}
 	if (( GetHeightMount( false ) + pt.m_z >= block.m_Top.m_z ) && ( g_Cfg.m_iMountHeight ) && ( !IsPriv( PRIV_GM ) ) && ( !IsPriv( PRIV_ALLMOVE ) ))
 		return pt.m_z;
-	return(block.m_Bottom.m_z);
+	return block.m_Bottom.m_z;
 }
 
 
 bool CChar::IsStatFlag( uint64 iStatFlag ) const
 {
-	return((m_iStatFlag & iStatFlag) ? true : false );
+	return ((m_iStatFlag & iStatFlag) ? true : false );
 }
 
 void CChar::StatFlag_Set( uint64 iStatFlag)
@@ -1220,20 +1216,20 @@ CREID_TYPE CChar::GetID() const
 {
 	CCharBase * pCharDef = Char_GetDef();
 	ASSERT(pCharDef);
-	return( pCharDef->GetID());
+	return pCharDef->GetID();
 }
 
 word CChar::GetBaseID() const
 {
 	// future: strongly typed enums will remove the need for this cast
-	return( (word)(GetID()));
+	return (word)(GetID());
 }
 
 CREID_TYPE CChar::GetDispID() const
 {
 	CCharBase * pCharDef = Char_GetDef();
 	ASSERT(pCharDef);
-	return( pCharDef->GetDispID());
+	return pCharDef->GetDispID();
 }
 
 // Just set the base id and not the actual display id.
@@ -1798,7 +1794,7 @@ bool CChar::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 		return true;
 	}
 
-	return( CObjBase::r_GetRef( pszKey, pRef ));
+	return ( CObjBase::r_GetRef( pszKey, pRef ));
 }
 
 enum CHC_TYPE
@@ -1846,9 +1842,7 @@ do_default:
 		}
 
 		if ( r_WriteValContainer(pszKey, sVal, pSrc))
-		{
 			return true;
-		}
 
 		// special write values
 		int i;
@@ -1890,7 +1884,7 @@ do_default:
 			return true;
 		}
 
-		return( CObjBase::r_WriteVal( pszKey, sVal, pSrc ));
+		return CObjBase::r_WriteVal( pszKey, sVal, pSrc );
 	}
 
 	switch ( iKeyNum )
@@ -1954,7 +1948,8 @@ do_default:
 						CChar * pChar = static_cast<CChar*>(static_cast<CUID>(Exp_GetSingle(pszKey)).CharFind());
 						sVal.FormatVal(Attacker_GetID(pChar));
 						return true;
-					}else if ( !strnicmp(pszKey, "TARGET", 6 ) )
+					}
+					else if ( !strnicmp(pszKey, "TARGET", 6 ) )
 					{
 						pszKey += 6;
 						if ( m_Act_Targ )
@@ -2532,6 +2527,12 @@ do_default:
 			sVal.FormatHex( m_Act_Targ.GetObjUID() );	// uid
 			break;
 		case CHC_ACTP:
+			if (pszKey[4] == '.')
+			{
+				pszKey += 4;
+				SKIP_SEPARATORS(pszKey);
+				return m_Act_p.r_WriteVal(pszKey, sVal);
+			}
 			sVal = m_Act_p.WriteUsed();
 			break;
 		case CHC_ACTPRV:
@@ -2550,7 +2551,17 @@ do_default:
 			sVal.FormatHex( m_atUnk.m_Arg3 );
 			break;
 		case CHC_ACTION:
-			sVal = g_Cfg.ResourceGetName( CResourceID( RES_SKILL, Skill_GetActive()) );
+		{
+			const CSkillDef* pSkillDef = g_Cfg.GetSkillDef(Skill_GetActive());
+			if (pSkillDef != NULL)
+				sVal = pSkillDef->GetKey();
+			else
+			{
+				tchar *z = Str_GetTemp();
+				sprintf(z, "%d", Skill_GetActive());
+				sVal = z;
+			}
+		}
 			break;
 		case CHC_BODY:
 			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, GetDispID()) );
@@ -2874,13 +2885,19 @@ do_default:
 			m_atUnk.m_Arg3 = s.GetArgVal();
 			break;
 		case CHC_ACTION:
-			return Skill_Start( g_Cfg.FindSkillKey( s.GetArgStr() ) );
+		{
+			lpctstr argStr = s.GetArgStr();
+			SKILL_TYPE skillKey = g_Cfg.FindSkillKey(argStr);
+			if ( (skillKey == SKILL_NONE) && (s.GetArgVal() != -1) && !IsSkillNPC(skillKey) )
+				g_Log.EventError("Invalid skill key: %s\n", argStr);
+			return Skill_Start(skillKey);
+		}
 		case CHC_ATTACKER:
 		{
 			if ( strlen(pszKey) > 8 )
 			{
 				pszKey += 8;
-				int attackerIndex = (int)m_lastAttackers.size();
+				size_t attackerIndex = m_lastAttackers.size();
 				if ( *pszKey == '.' )
 				{
 					pszKey++;
@@ -2919,7 +2936,7 @@ do_default:
 						return true;
 					}
 
-					attackerIndex = Exp_GetVal(pszKey);
+					attackerIndex = Exp_GetSTVal(pszKey);
 					if ( attackerIndex < 0 )
 						return false;
 
@@ -3253,9 +3270,22 @@ void CChar::r_Write( CScript & s )
 	if ( m_LocalLight )
 		s.WriteKeyHex("LIGHT", m_LocalLight);
 
+	if ( (m_Act_Targ.GetObjUID() & UID_UNUSED) != UID_UNUSED )
+		s.WriteKeyHex("ACT", m_Act_Targ.GetObjUID());
+	if ( m_Act_p.IsValidPoint() )
+		s.WriteKey("ACTP", m_Act_p.WriteUsed());
 	if ( Skill_GetActive() != SKILL_NONE )
 	{
-		s.WriteKey("ACTION", g_Cfg.ResourceGetName(CResourceID(RES_SKILL, Skill_GetActive())));
+		const CSkillDef* pSkillDef = g_Cfg.GetSkillDef(Skill_GetActive());
+		tchar * pszActionTemp;
+		if (pSkillDef != NULL)
+			pszActionTemp = const_cast<tchar*>(pSkillDef->GetKey());
+		else
+		{
+			pszActionTemp = Str_GetTemp();
+			sprintf(pszActionTemp, "%d", Skill_GetActive());
+		}
+		s.WriteKey("ACTION", pszActionTemp);
 		if ( m_atUnk.m_Arg1 )
 			s.WriteKeyHex("ACTARG1", m_atUnk.m_Arg1);
 		if ( m_atUnk.m_Arg2 )
@@ -3388,6 +3418,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 	ADDTOCALLSTACK("CChar::r_Verb");
 	if ( !pSrc )
 		return false;
+
 	if ( IsClient() && GetClient()->r_Verb(s, pSrc) )
 		return true;
 
@@ -3489,30 +3520,27 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			break;
 		case CHV_CRIMINAL:
 			if ( s.HasArgs() && ! s.GetArgVal())
-			{
 				StatFlag_Clear( STATF_Criminal );
-			}
 			else
-			{
 				Noto_Criminal();
-			}
 			break;
 		case CHV_DISCONNECT:
 			// Push a player char off line. CLIENTLINGER thing
 			if ( IsClient())
-			{
 				return GetClient()->addKick( pSrc, false );
-			}
 			SetDisconnected();
 			break;
 		case CHV_DROP:	// uid
-			return ItemDrop( CUID( s.GetArgVal()).ItemFind(), GetTopPoint());
+			return ItemDrop( CUID(s.GetArgVal()).ItemFind(), GetTopPoint() );
 		case CHV_DUPE:	// = dupe a creature !
 			{
-			CChar * pChar = CreateNPC( GetID());
-			pChar->MoveTo( GetTopPoint() );
-			pChar->DupeFrom(this,s.GetArgVal() < 1 ? true : false);
-			}break;
+				CChar * pChar = CreateNPC( GetID() );
+				pChar->MoveTo( GetTopPoint() );
+				pChar->DupeFrom(this,s.GetArgVal() < 1 ? true : false);
+				pChar->m_iCreatedResScriptIdx = s.m_iResourceFileIndex;
+				pChar->m_iCreatedResScriptLine = s.m_iLineNum;
+			}
+			break;
 		case CHV_EQUIP:	// uid
 			return ItemEquip( CUID( s.GetArgVal()).ItemFind());
 		case CHV_EQUIPHALO:
@@ -3539,8 +3567,34 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			return ItemEquipWeapon(false);
 		case CHV_FACE:
 		{
-			UpdateDir(CUID(s.GetArgVal()).ObjFind());
-			break;
+			lpctstr pszVerbArg = s.GetArgStr();
+			GETNONWHITESPACE(pszVerbArg);
+			if (*pszVerbArg == '\0')
+			{
+				UpdateDir(dynamic_cast<CObjBase*>(pCharSrc));
+				return true;
+			}
+			else if (IsStrNumeric(pszVerbArg))
+			{
+				CObjBase* pTowards = CUID(s.GetArgVal()).ObjFind();
+				if (pTowards != NULL)
+				{
+					UpdateDir(pTowards);
+					return true;
+				}
+			}
+			else
+			{
+				CPointBase pt;
+				pt.InitPoint();
+				pt.Read(s.GetArgStr());
+				if (pt.IsValidPoint())
+				{
+					UpdateDir(pt);
+					return true;
+				}
+			}
+			return false;
 		}
 		case CHV_FIXWEIGHT:
 			FixWeight();
@@ -3586,7 +3640,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_HUNGRY:	// How hungry are we ?
 			if ( pCharSrc )
 			{
-				char *z = Str_GetTemp();
+				tchar *z = Str_GetTemp();
 				if ( pCharSrc == this )
 					sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_FOOD_LVL_SELF), Food_GetLevelMessage( false, false ));
 				else
@@ -3646,19 +3700,15 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			if ( iArg == 2 )
 			{
 				if ( IsDigit( ttVal[1][0] ) )
-				{
 					iTmp = ATOI( ttVal[1] );
-				}
 			}
 			//DEBUG_ERR(( "CHV_MAKEITEM iTmp is %d, arg was %s\n",iTmp,psTmp ));
 
 			if ( IsClient() )
-			{
 				m_Act_Targ = m_pClient->m_Targ_UID;
-			}
 
 			return Skill_MakeItem(
-				static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, ttVal[0])),
+				static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, ttVal[0] )),
 				m_Act_Targ, SKTRIG_START, false, iTmp );
 		}
 
@@ -3716,14 +3766,11 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
         case CHV_OWNER:
         {
             if (!s.HasArgs())   // If there are no args, direct call on NPC_PetSetOwner.
-            {
                 return NPC_PetSetOwner(pCharSrc);
-            }
-            CChar * pChar = static_cast<CChar*>(static_cast<CUID>(s.GetArgDWVal()).CharFind()); // otherwise we try to run it from the CChar with the given UID.
+            
+			CChar * pChar = static_cast<CChar*>(static_cast<CUID>(s.GetArgDWVal()).CharFind()); // otherwise we try to run it from the CChar with the given UID.
             if (pChar)
-            {
                 return pChar->NPC_PetSetOwner(this);
-            }
             return false;   // Something went wrong, giving a warning of it.
         }
 
@@ -3770,7 +3817,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			break;
 		}
 		case CHV_PRIVSET:
-			return( SetPrivLevel( pSrc, s.GetArgStr()));
+			return SetPrivLevel( pSrc, s.GetArgStr());
 		case CHV_RELEASE:
 			Skill_Start( SKILL_NONE );
 			NPC_PetClearOwners();
@@ -3810,11 +3857,11 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 					return Spell_Resurrection( NULL, pCharSrc, true );
 			}
 		case CHV_REVEAL:
-			Reveal((dword)(s.GetArgVal()));
+			Reveal( s.GetArgDWVal());
 			break;
 		case CHV_SALUTE:	//	salute to player
 		{
-			UpdateDir(CUID(s.GetArgVal()).ObjFind());
+			UpdateDir( CUID(s.GetArgVal()).ObjFind() );
 			UpdateAnimate(ANIM_SALUTE);
 			break;
 		}
@@ -3864,9 +3911,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			return false;
 		case CHV_SUMMONTO:	// i just got summoned
 			if ( pCharSrc != NULL )
-			{
 				Spell_Teleport( pCharSrc->GetTopPoint(), true, false );
-			}
 			break;
 		case CHV_SMSG:
 		case CHV_SMSGL:
@@ -3893,23 +3938,18 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_WHERE:
 			if ( pCharSrc )
 			{
-				char *z = Str_GetTemp();
+				tchar *z = Str_GetTemp();
 				if ( m_pArea )
 				{
 					if ( m_pArea->GetResourceID().IsItem())
-					{
 						sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_WHERE_AREA), m_pArea->GetName(), GetTopPoint().WriteUsed());
-					}
 					else
 					{
 						const CRegionBase * pRoom = GetTopPoint().GetRegion( REGION_TYPE_ROOM );
 						if ( ! pRoom )
-						{
 							sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_WHERE_AREA), m_pArea->GetName(), GetTopPoint().WriteUsed());
-						} else
-						{
+						else
 							sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_WHERE_ROOM), m_pArea->GetName(), pRoom->GetName(), GetTopPoint().WriteUsed());
-						}
 					}
 				}
 				else
@@ -3936,17 +3976,11 @@ bool CChar::OnTriggerSpeech( bool bIsPet, lpctstr pszText, CChar * pSrc, TALKMOD
 	lpctstr pszName;
 
 	if ( bIsPet && !g_Cfg.m_sSpeechPet.IsEmpty() )
-	{
 		pszName = static_cast<lpctstr>(g_Cfg.m_sSpeechPet);
-	}
 	else if ( !bIsPet && !g_Cfg.m_sSpeechSelf.IsEmpty() )
-	{
 		pszName = static_cast<lpctstr>(g_Cfg.m_sSpeechSelf);
-	}
 	else
-	{
 		goto lbl_cchar_ontriggerspeech;
-	}
 
 	{
 		CScriptObj * pDef = g_Cfg.ResourceGetDefByName( RES_SPEECH, pszName );
@@ -3965,19 +3999,13 @@ bool CChar::OnTriggerSpeech( bool bIsPet, lpctstr pszText, CChar * pSrc, TALKMOD
 						return false;
 				}
 				else
-				{
 					DEBUG_ERR(("TriggerSpeech: couldn't run script for speech %s\n", pszName));
-				}
 			}
 			else
-			{
 				DEBUG_ERR(("TriggerSpeech: couldn't find speech %s\n", pszName));
-			}
 		}
 		else
-		{
 			DEBUG_ERR(("TriggerSpeech: couldn't find speech resource %s\n", pszName));
-		}
 	}
 
 

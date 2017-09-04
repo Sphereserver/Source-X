@@ -886,10 +886,11 @@ bool CResource::r_LoadVal( CScript &s )
 
 							if ( pszStr && *pszStr )
 							{
-								CScript scp(pszStr);
-
+								CScript script(pszStr);
+								script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
+								script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
 								for ( int nIndex = 0; nIndex < nSectors; ++nIndex )
-									g_World.GetSector(nMapNumber, nIndex)->r_Verb(scp, &g_Serv);
+									g_World.GetSector(nMapNumber, nIndex)->r_Verb(script, &g_Serv);
 							}
 
 							return true;
@@ -907,8 +908,10 @@ bool CResource::r_LoadVal( CScript &s )
 
 								if ( pszStr && *pszStr )
 								{
-									CScript scp(pszStr);
-									g_World.GetSector(nMapNumber, iSecNumber-1)->r_Verb(scp, &g_Serv);
+									CScript script(pszStr);
+									script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
+									script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
+									g_World.GetSector(nMapNumber, iSecNumber-1)->r_Verb(script, &g_Serv);
 								}
 							}
 							else
@@ -1014,7 +1017,7 @@ bool CResource::r_LoadVal( CScript &s )
 		case RC_CRIMINALTIMER:
 			m_iCriminalTimer = s.GetArgVal() * 60 * TICK_PER_SEC;
 			break;
-		case RC_STRIPPATH:	// Put TNG stripped files here.
+		case RC_STRIPPATH:	// Put TNG or Axis stripped files here.
 			m_sStripPath = CSFile::GetMergedFileName( s.GetArgStr(), "" );
 			break;
 		case RC_DEADSOCKETTIME:
@@ -2211,23 +2214,35 @@ int CResource::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar char
 	int retValue = 0;
 	bool bResOk = false;
 
+	// retValue size:
+	//	byte[2] feature# (<= 6.0.14.1)
+	//	byte[4] feature# (>= 6.0.14.2)
+
 	if ( bCharlist )
 	{
-		//	byte[4] Flags
-		//		0x0001	= unknown
-		//		0x0002	= send config/req logout (IGR?)
-		//		0x0004	= single character (siege) (alternative seen, Limit Characters)
-		//		0x0008	= enable npcpopup menus
-		//		0x0010	= unknown, (alternative seen, single character)
-		//		0x0020	= enable common AOS features (tooltip thing/fight system book, but not AOS monsters/map/skills)
-		//		0x0040	= Sixth Character Slot?
-		//		0x0080	= Samurai Empire?
-		//		0x0100	= Elf races?
-		//		0x0200	= Flag KR Unknown 1
-		//		0x0400	= (KR) Enables 0xE1 packet at character list (possibly other unknown effects)
-		//		0x1000	= Seventh Character Slot
-		//		0x4000	= New walk packets
-		//		0x8000  = New faction strongholds (uses map0x.mul, statics0x.mul, etc) - 7.0.6
+		/*
+		CHAR LIST FLAGS
+		0x0001	= unknown
+		0x0002	= overwrite configuration button [send config/req logout (IGR?)]
+		0x0004	= limit 1 character per account
+		0x0008	= enable npc popup menus (context menus)
+		0x0010	= can limit characters number
+		[under -> since AOS]
+		0x0020	= paladin and necromancer classes, tooltips
+		0x0040	= sixth character Slot
+		[under -> since SE]
+		0x0080	= samurai and ninja classes
+		[under -> since ML]
+		0x0100	= elven race
+		[under -> since KR]
+		0x0200	= flag KR Unknown 1
+		0x0400	= client will send 0xE1 packet at character list (possibly other unknown effects)
+		[under -> since SA]
+		0x1000	= seventh character Slot
+		[under -> since HS?]
+		0x4000	= new walk packets
+		0x8000  = new faction strongholds (uses map0x.mul, statics0x.mul, etc) - 7.0.6
+		*/
 
 		// T2A - LBR don't have char list flags
 		bResOk = ( res >= RDS_AOS );
@@ -2268,39 +2283,30 @@ int CResource::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar char
 	}
 	else
 	{
-		//	byte[2] feature# (<= 6.0.14.1)
-		//	byte[4] feature# (>= 6.0.14.2)
-		//		0x00001	T2A upgrade, enables chatbutton
-		//		0x00002	Enables LBR update.  (of course LBR installation is required)
-		//				(plays MP3 instead of midis, 2D LBR client shows new LBR monsters, ... )
-		//		0x00004	Unknown, never seen it set	(single char?)
-		//		0x00008	Unknown, set on OSI servers that have AOS code - no matter of account status (doesn�t seem to �unlock/lock� anything on client side)
-		//		0x00010	Enables AOS update (necro/paladin skills for all clients, malas map/AOS monsters if AOS installation present)
-		//		0x00020	Sixth Character Slot
-		//		0x00040	Samurai Empire?
-		//		0x00080	Elves?
-		//		0x00100	Eighth Age
-		//		0x00200	Ninth Age
-		//		0x00400
-		//		0x00800
-		//		0x01000	Seventh Character Slot
-		//		0x02000
-		//		0x04000 New movement engine
-		//		0x08000	Since client 4.0 this bit has to be set, otherwise bits 3..14 are ignored.
-		//		0x10000	Gargoyles, SA housing
-		//		0x20000 High Seas
-		//		0x40000	Gothic pack (house designer items)
-		//		0x80000	Rustic pack (house designer items)
-		//	Thus	0		neither T2A NOR LBR, equal to not sending it at all,
-		//			1		is T2A, chatbutton,
-		//			2		is LBR without chatbutton,
-		//			3		is LBR with chatbutton�
-		//			8013	LBR + chatbutton + AOS enabled
-		//	Note1: this message is send immediately after login.
-		//	Note2: on OSI  servers this controls features OSI enables/disables via �upgrade codes.�
-		//	Note3: a 3 doesn�t seem to �hurt� older (NON LBR) clients.
-		//	Note4: value is byte[2] prior to client 6.0.14.2
+		/*
+		FEATURE FLAGS
 
+		0x01:		enable T2A features:			chat, regions, ?new spellbook?mage??
+		0x02:		enable renaissance features:	damage packet, ?
+		0x04:		enable third dawn features
+		0x08:		enable LBR features:			skills, map, monsters, bufficon, plays MP3 instead of midis
+		0x10:		enable AOS features 1:			skills, map, monsters?, spells, fightbook?, housing tiles
+		0x20:		enable AOS features 2, 
+		0x40:		enable SE features:				skills, map, monsters?, spells, housing tiles
+		0x80:		enable ML features:				elven race, skills, monsters?, spells, housing tiles
+		0x100:		enable 8th age splash screen
+		0x200:		enable 9th age splash screen and crystal/shadow housing tiles
+		0x400:		enable 10th age
+		0x800:		enable increased housing and bank storage
+		0x1000:		7th character slot
+		0x2000:		enable KR (roleplay) faces
+		0x4000:		trial account
+		0x8000:		non-trial (live) account
+		0x10000:	enable SA features:				gargoyle race, spells, skills, housing tiles
+		0x20000:	enable HS features:
+		0x40000:	enable Gothic housing tiles
+		0x80000:	enable Rustic housing tiles
+		*/
 		bResOk = ( res >= RDS_T2A );
 		if ( bResOk )
 		{
@@ -2442,7 +2448,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 
 	if ( !rid.IsValidUID() )
 	{
-		DEBUG_ERR(( "Invalid %s block index '%s'\n", pszSection, static_cast<lpctstr>(pScript->GetArgStr())));
+		DEBUG_ERR(( "Invalid %s block, index '%s'\n", pszSection, static_cast<lpctstr>(pScript->GetArgStr())));
 		return false;
 	}
 
@@ -2738,6 +2744,9 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		{
 			pNewLink = new CItemTypeDef( rid );
 			ASSERT(pNewLink);
+			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
+			if (pLinkResScript != NULL)
+				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
 			m_ResHash.AddSortKey( rid, pNewLink );
 		}
 
@@ -2770,6 +2779,9 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		{
 			pNewLink = new CResourceLink( rid );
 			ASSERT(pNewLink);
+			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
+			if (pLinkResScript != NULL)
+				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
 			m_ResHash.AddSortKey( rid, pNewLink );
 		}
 		break;
@@ -2785,6 +2797,9 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		{
 			pNewLink = new CDialogDef( rid );
 			ASSERT(pNewLink);
+			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
+			if (pLinkResScript != NULL)
+				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
 			m_ResHash.AddSortKey( rid, pNewLink );
 		}
 		break;
@@ -2801,6 +2816,9 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		{
 			pNewLink = new CRegionResourceDef( rid );
 			ASSERT(pNewLink);
+			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
+			if (pLinkResScript != NULL)
+				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
 			m_ResHash.AddSortKey( rid, pNewLink );
 		}
 		{
@@ -2844,7 +2862,7 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		pPrvDef = ResourceGetDef( rid );
 		if ( pPrvDef && fNewStyleDef )
 		{
-			CRegionBase *	pRegion = dynamic_cast <CRegionBase*>( pPrvDef );
+			CRegionBase * pRegion = dynamic_cast <CRegionBase*>( pPrvDef );
 			pNewDef	= pRegion;
 			ASSERT(pNewDef);
 			pRegion->UnRealizeRegion();
@@ -2883,6 +2901,9 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		{
 			pNewLink = new CSRandGroupDef( rid );
 			ASSERT(pNewLink);
+			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
+			if (pLinkResScript != NULL)
+				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
 			m_ResHash.AddSortKey( rid, pNewLink );
 		}
 		{
@@ -2903,6 +2924,9 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		{
 			pNewLink = new CSkillClassDef( rid );
 			ASSERT(pNewLink);
+			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
+			if (pLinkResScript != NULL)
+				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
 			m_ResHash.AddSortKey( rid, pNewLink );
 		}
 		{
@@ -2936,6 +2960,9 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		{
 			pNewLink = new CResourceLink(rid);
 			ASSERT(pNewLink);
+			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
+			if (pLinkResScript != NULL)
+				pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
 			m_ResHash.AddSortKey( rid, pNewLink );
 		}
 		break;
@@ -2966,9 +2993,18 @@ bool CResource::LoadResourceSection( CScript * pScript )
 		break;
 
 	case RES_FUNCTION:
-		// Define a char macro. (Name is NOT DEFNAME)
-		pNewLink = new CResourceNamed( rid, pScript->GetArgStr());
-		m_Functions.AddSortKey( pNewLink, pNewLink->GetName());
+		{
+			// Define a char macro. (Name is NOT DEFNAME)
+			pNewLink = new CResourceNamed(rid, pScript->GetArgStr());
+
+			// Link the CResourceLink to the CResourceScript it was read and created,
+			//	so later we can retrieve the file and the line for debugging purposes.
+			CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
+			if (pLinkResScript != NULL)
+				pNewLink->SetLink(pLinkResScript);
+
+			m_Functions.AddSortKey(pNewLink, pNewLink->GetName());
+		}
 		break;
 
 	case RES_SERVERS:	// Old way to define a block of servers.
@@ -2987,26 +3023,20 @@ bool CResource::LoadResourceSection( CScript * pScript )
 					fAddNew = true;
 				}
 				else
-				{
 					pServ = Server_GetDef(i);
-				}
 				ASSERT(pServ != NULL);
+
 				if ( pScript->ReadKey())
 				{
 					pServ->m_ip.SetHostPortStr( pScript->GetKey());
 					if ( pScript->ReadKey())
-					{
 						pServ->m_ip.SetPort( (word)(pScript->GetArgVal()));
-					}
 				}
+
 				if ( ! strcmpi( pServ->GetName(), g_Serv.GetName()))
-				{
 					fReadSelf = true;
-				}
 				if ( g_Serv.m_ip == pServ->m_ip )
-				{
 					fReadSelf = true;
-				}
 				if ( fReadSelf )
 				{
 					// I can be listed first here. (old way)
@@ -3016,10 +3046,9 @@ bool CResource::LoadResourceSection( CScript * pScript )
 					fReadSelf = false;
 					continue;
 				}
+
 				if ( fAddNew )
-				{
 					m_Servers.AddSortKey( pServ, pServ->GetName());
-				}
 			}
 		}
 		return true;
@@ -3251,17 +3280,25 @@ CResourceID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 		{
 			if ( pszName[0] == '\0' )
 				return ridinvalid;
+
 			tchar * pArg1 = Str_GetTemp();
 			strcpy( pArg1, pszName );
 			pszName = pArg1;
 			tchar * pArg2;
 			Str_Parse( pArg1, &pArg2 );
+
+			// For dialog resources, we use the page bits to mark if it's the TEXT or BUTTON block
 			if ( !strnicmp( pArg2, "TEXT", 4 ) )
 				iPage = RES_DIALOG_TEXT;
 			else if ( !strnicmp( pArg2, "BUTTON", 6 ) )
 				iPage = RES_DIALOG_BUTTON;
-			else	// for a REGIONTYPE block, pArg2 is the landtile type associated with the REGIONTYPE
-				iPage = RES_GET_INDEX( Exp_GetVal(pArg2) );
+			else
+			{
+				// For a book the page is... the page number
+				// For a REGIONTYPE block, the page (pArg2) is the landtile type associated with the REGIONTYPE
+				iPage = RES_GET_INDEX(Exp_GetVal(pArg2));
+			}
+				
 			if ( iPage > RES_PAGE_MASK )
 				DEBUG_ERR(( "Bad resource index page %d for Resource named %s\n", iPage, pszName ));
 		}
@@ -3324,7 +3361,7 @@ CResourceID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 	dword index;
 	if ( pszName )
 	{
-		if ( pszName[0] == '\0' )	// absense of resourceid = index 0
+		if ( pszName[0] == '\0' )	// absence of resourceid = index 0
 		{
 			// This might be ok.
 			return CResourceID( restype, 0, iPage );
@@ -3361,7 +3398,7 @@ CResourceID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 #ifdef _DEBUG
 			if ( g_Serv.m_iModeCode != SERVMODE_ResyncLoad )	// this really is ok.
 			{
-				// Warn of  duplicates.
+				// Warn of duplicates.
 				size_t duplicateIndex = m_ResHash.FindKey( rid );
 				if ( duplicateIndex != m_ResHash.BadIndex() )	// i found it. So i have to find something else.
 					ASSERT(m_ResHash.GetAt(rid, duplicateIndex));
@@ -3377,6 +3414,7 @@ CResourceID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 			// An existing VarDef with the same name ?
 			// We are creating a new Block but using an old name ? weird.
 			// just check to see if this is a strange type conflict ?
+
 			CVarDefContNum * pVarNum = dynamic_cast <CVarDefContNum*>( pVarBase );
 			if ( pVarNum == NULL )
 			{
@@ -3394,7 +3432,7 @@ CResourceID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 							return ResourceGetNewID(restype, pVarStr->GetValStr(), ppVarNum, fNewStyleDef);
 					}
 					default:
-						DEBUG_ERR(( "Re-Using name '%s' to define block\n", static_cast<lpctstr>(pszName) ));
+						DEBUG_ERR(( "Re-Using DEFNAME='%s' to define a new block\n", static_cast<lpctstr>(pszName) ));
 						return ridinvalid;
 				}
 			}
@@ -3412,24 +3450,28 @@ CResourceID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 						// These are not truly defining a new DEFNAME
 						break;
 					default:
-						DEBUG_ERR(( "Redefined name '%s' from %s to %s\n", static_cast<lpctstr>(pszName), static_cast<lpctstr>(GetResourceBlockName(rid.GetResType())), static_cast<lpctstr>(GetResourceBlockName(restype)) ));
+						DEBUG_ERR(( "Redefined resource with DEFNAME='%s' from ResType %s to %s\n",
+							(lpctstr)pszName, (lpctstr)GetResourceBlockName(rid.GetResType()), (lpctstr)GetResourceBlockName(restype)) );
 						return ridinvalid;
 				}
 			}
 			else if ( fNewStyleDef && (dword)pVarNum->GetValNum() != rid.GetPrivateUID() )
 			{
-				DEBUG_ERR(( "WARNING: region redefines DEFNAME '%s' for another region!\n", pszName ));
+				DEBUG_ERR(( "WARNING: region redefines DEFNAME='%s' for another region!\n", pszName ));
 			}
-			else if ( iPage == rid.GetResPage() )	// Books and dialogs have pages.
+			else if ( iPage == rid.GetResPage() )
 			{
+				// Books and dialogs have pages; if it's not a book or dialog, the if is 0 == 0, so execute it always
+
 				// We are redefining an item we have already read in ?
 				// Why do this unless it's a Resync ?
 				if ( g_Serv.m_iModeCode != SERVMODE_ResyncLoad )
 				{
-					//if ( g_Cfg.m_wDebugFlags & DEBUGF_SCRIPTS )
-						g_pLog->EventWarn("Redef resource '%s'\n", static_cast<lpctstr>(pszName));
-					//else
-					//	DEBUG_WARN(( "Redef resource '%s'\n", static_cast<lpctstr>(pszName) ));
+					// Ensure it's not a "type", because hardcoded types indexes are defined in sphere_defs.scp,
+					//  which is usually parsed before sphere_types.scp or its TYPEDEF block. So some time after declaring the
+					//	index for a type we'll read its TYPEDEF, it would be normal to find another "declaration" for the type.
+					if ( restype != RES_TYPEDEF )
+						g_pLog->EventWarn("Redefinition of resource with DEFNAME='%s'\n", pszName);
 				}
 			}
 			rid = CResourceID( restype, rid.GetResIndex(), iPage );
@@ -3438,7 +3480,8 @@ CResourceID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 		}
 	}
 
-	// we must define this as a new unique entry.
+
+	// At this point, we must define this as a new, unique entry.
 	// Find a new free entry.
 
 	int iHashRange = 0;

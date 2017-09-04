@@ -858,11 +858,11 @@ try_dec:
 		}
 
 		// Must be a symbol of some sort ?
-		llong lVal;
-		if ( m_VarGlobals.GetParseVal( pszArgs, &lVal ) )
-			return lVal;
-		if ( m_VarDefs.GetParseVal( pszArgs, &lVal ) )
-			return lVal;
+		llong llVal;
+		if ( m_VarGlobals.GetParseVal( pszArgs, &llVal ) )
+			return llVal;
+		if ( m_VarDefs.GetParseVal( pszArgs, &llVal ) )
+			return llVal;
 	}
 #pragma endregion intrinsics
 
@@ -877,7 +877,7 @@ try_dec:
 	return 0;
 }
 
-llong CExpression::GetValMath( llong lVal, lpctstr & pExpr )
+llong CExpression::GetValMath( llong llVal, lpctstr & pExpr )
 {
 	ADDTOCALLSTACK("CExpression::GetValMath");
 	GETNONWHITESPACE(pExpr);
@@ -894,35 +894,35 @@ llong CExpression::GetValMath( llong lVal, lpctstr & pExpr )
 			break;
 		case '+':
 			pExpr++;
-			lVal += GetVal( pExpr );
+			llVal += GetVal( pExpr );
 			break;
 		case '-':
 			pExpr++;
-			lVal -= GetVal( pExpr );
+			llVal -= GetVal( pExpr );
 			break;
 		case '*':
 			pExpr++;
-			lVal *= GetVal( pExpr );
+			llVal *= GetVal( pExpr );
 			break;
 		case '|':
 			pExpr++;
 			if ( pExpr[0] == '|' )	// boolean ?
 			{
 				pExpr++;
-				lVal = ( GetVal( pExpr ) || lVal );
+				llVal = ( GetVal( pExpr ) || llVal );
 			}
 			else	// bitwise
-				lVal |= GetVal( pExpr );
+				llVal |= GetVal( pExpr );
 			break;
 		case '&':
 			pExpr++;
 			if ( pExpr[0] == '&' )	// boolean ?
 			{
 				pExpr++;
-				lVal = ( GetVal( pExpr ) && lVal );	// tricky stuff here. logical ops must come first or possibly not get processed.
+				llVal = ( GetVal( pExpr ) && llVal );	// tricky stuff here. logical ops must come first or possibly not get processed.
 			}
 			else	// bitwise
-				lVal &= GetVal( pExpr );
+				llVal &= GetVal( pExpr );
 			break;
 		case '/':
 			pExpr++;
@@ -930,10 +930,10 @@ llong CExpression::GetValMath( llong lVal, lpctstr & pExpr )
 				llong iVal = GetVal( pExpr );
 				if ( ! iVal )
 				{
-					DEBUG_ERR(( "Exp_GetVal: Divide by 0\n" ));
+					g_Log.EventError("Evaluating math: Divide by 0\n");
 					break;
 				}
-				lVal /= iVal;
+				llVal /= iVal;
 			}
 			break;
 		case '%':
@@ -942,105 +942,105 @@ llong CExpression::GetValMath( llong lVal, lpctstr & pExpr )
 				llong iVal = GetVal( pExpr );
 				if ( ! iVal )
 				{
-					DEBUG_ERR(( "Exp_GetVal: Divide by 0\n" ));
+					g_Log.EventError("Evaluating math: Modulo 0\n");
 					break;
 				}
-				lVal %= iVal;
+				llVal %= iVal;
 			}
 			break;
 		case '^':
 			pExpr ++;
-			lVal ^= GetVal(pExpr);
+			llVal ^= GetVal(pExpr);
 			break;
 		case '>': // boolean
 			pExpr++;
 			if ( pExpr[0] == '=' )	// boolean ?
 			{
 				pExpr++;
-				lVal = ( lVal >= GetVal( pExpr ) );
+				llVal = ( llVal >= GetVal( pExpr ) );
 			}
 			else if ( pExpr[0] == '>' )	// shift
 			{
 				pExpr++;
-				lVal >>= GetVal( pExpr );
+				llVal >>= GetVal( pExpr );
 			}
 			else
-				lVal = ( lVal > GetVal( pExpr ) );
+				llVal = ( llVal > GetVal( pExpr ) );
 			break;
 		case '<': // boolean
 			pExpr++;
 			if ( pExpr[0] == '=' )	// boolean ?
 			{
 				pExpr++;
-				lVal = ( lVal <= GetVal( pExpr ) );
+				llVal = ( llVal <= GetVal( pExpr ) );
 			}
 			else if ( pExpr[0] == '<' )	// shift
 			{
 				pExpr++;
-				lVal <<= GetVal( pExpr );
+				llVal <<= GetVal( pExpr );
 			}
 			else
-				lVal = ( lVal < GetVal( pExpr ) );
+				llVal = ( llVal < GetVal( pExpr ) );
 			break;
 		case '!':
 			pExpr ++;
 			if ( pExpr[0] != '=' )
 				break; // boolean ! is handled as a single expresion.
 			pExpr ++;
-			lVal = ( lVal != GetVal( pExpr ) );
+			llVal = ( llVal != GetVal( pExpr ) );
 			break;
 		case '=': // boolean
 			while ( pExpr[0] == '=' )
 				pExpr ++;
-			lVal = ( lVal == GetVal( pExpr ) );
+			llVal = ( llVal == GetVal( pExpr ) );
 			break;
 		case '@':
 			pExpr++;
 			{
 				llong iVal = GetVal( pExpr );
-				if ( (lVal == 0) && (iVal < 0) )
+				if ( (llVal == 0) && (iVal < 0) )
 				{
 					DEBUG_ERR(( "Exp_GetVal: Power of zero with negative exponent is undefined\n" ));
 					break;
 				}
-				lVal = power(lVal, iVal);
+				llVal = power(llVal, iVal);
 			}
 			break;
 	}
 
-	return lVal;
+	return llVal;
 }
 
 int g_getval_reentrant_check = 0;
 
 llong CExpression::GetVal( lpctstr & pExpr )
 {
+	// This function moves the pointer forward, so you can retrieve the value only once!
+
 	ADDTOCALLSTACK("CExpression::GetVal");
 	// Get a value (default decimal) that could also be an expression.
 	// This does not parse beyond a comma !
 	//
 	// These are all the type of expressions and defines we'll see:
 	//
-	//	all_skin_colors					// simple DEF value
+	//	all_skin_colors				// simple DEF value
 	//	7933 						// simple decimal
 	//	-100.0						// simple negative decimal
-	//	.5						// simple decimal
-	//	0.5						// simple decimal
+	//	.5							// simple decimal
+	//	0.5							// simple decimal
 	//	073a 						// hex value (leading zero and no .)
 	//
 	//	0 -1						// Subtraction. has a space separator. (Yes I know I hate this)
 	//	{0-1}						// hyphenated simple range (GET RID OF THIS!)
 	//		complex ranges must be in {}
-	//	{ 3 6}						// simple range
+	//	{ 3 6 }							// simple range
 	//	{ 400 1 401 1 } 				// weighted values (2nd val = 1)
 	//	{ 1102 1148 1 }					// weighted range (3rd val < 10)
-	//	{ animal_colors 1 no_colors 1 } 		// weighted range
-	//	{ red_colors 1 {34 39} 1 }			// same (red_colors expands to a range)
+	//	{ animal_colors 1 no_colors 1 } // weighted range
+	//	{ red_colors 1 {34 39} 1 }		// same (red_colors expands to a range)
 
 	if ( pExpr == NULL )
 		return 0;
-
-	GETNONWHITESPACE( pExpr );
 
 	g_getval_reentrant_check++;
 	if ( g_getval_reentrant_check > 128 )
@@ -1049,10 +1049,10 @@ llong CExpression::GetVal( lpctstr & pExpr )
 		g_getval_reentrant_check--;
 		return 0;
 	}
-	llong lVal = GetValMath(GetSingle(pExpr), pExpr);
+	llong llVal = GetValMath(GetSingle(pExpr), pExpr);
 	g_getval_reentrant_check--;
 
-	return lVal;
+	return llVal;
 }
 
 int CExpression::GetRangeVals(lpctstr & pExpr, int64 * piVals, int iMaxQty)
@@ -1130,7 +1130,7 @@ int64 CExpression::GetRange(lpctstr & pExpr)
 
 	int64 iTotalWeight = 0;
 	int i = 1;
-	for ( ; i < iQty; i+=2 )
+	for ( ; i+1 < iQty; i+=2 )
 	{
 		if ( ! lVals[i] )	// having a weight of 0 is very strange !
 			DEBUG_ERR(( "Weight of 0 in random set?\n" ));	// the whole table should really just be invalid here !
@@ -1141,7 +1141,7 @@ int64 CExpression::GetRange(lpctstr & pExpr)
 	iTotalWeight = Calc_GetRandLLVal(iTotalWeight) + 1;
 	// Now loop to that value
 	i = 1;
-	for ( ; i<iQty; i+=2 )
+	for ( ; i+1 < iQty; i+=2 )
 	{
 		iTotalWeight -= lVals[i];
 		if ( iTotalWeight <= 0 )

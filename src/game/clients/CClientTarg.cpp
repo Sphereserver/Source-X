@@ -2066,13 +2066,13 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 			return false;
 		m_pChar->m_Act_TargPrv = m_Targ_PrvUID;
 		m_pChar->m_Act_Targ = m_Targ_UID;
-		return( m_pChar->Skill_Start( (pCharTarg->GetNPCBrain() == NPCBRAIN_ANIMAL) ? SKILL_VETERINARY : SKILL_HEALING ));
+		return m_pChar->Skill_Start( (pCharTarg->GetNPCBrain() == NPCBRAIN_ANIMAL) ? SKILL_VETERINARY : SKILL_HEALING );
 
 	case IT_SEED:
 		return m_pChar->Use_Seed( pItemUse, &pt );
 
 	case IT_DEED:
-		return( OnTarg_Use_Deed( pItemUse, pt ));
+		return OnTarg_Use_Deed( pItemUse, pt );
 
 	case IT_WOOL:
 	case IT_COTTON:
@@ -2142,20 +2142,14 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 				if ( pKey )
 				{
 					if ( m_pChar->Use_MultiLockDown( pItemTarg ))
-					{
 						return true;
-					}
 				}
 			}
 
 			if ( ! fLockable || ! pItemTarg->m_itContainer.m_lockUID )
-			{
 				SysMessageDefault( DEFMSG_ITEMUSE_KEY_NOLOCK );
-			}
 			else
-			{
 				SysMessageDefault( DEFMSG_ITEMUSE_KEY_NOKEY );
-			}
 			return false;
 		}
 
@@ -2312,7 +2306,9 @@ static lpctstr const sm_Txt_LoomUse[] =
 		return false;
 
 	case IT_FISH_POLE:
+
 		m_pChar->m_Act_p = pt;
+
 		m_pChar->m_atResource.m_ridType = CResourceID(RES_TYPEDEF, IT_WATER);
 		return( m_pChar->Skill_Start( SKILL_FISHING ));
 
@@ -2507,7 +2503,7 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 		return true;
 	}
 
-	if ( pChar->m_pParty != NULL )	// Aready in a party !
+	if ( pChar->m_pParty != NULL )	// Already in a party !
 	{
 		if ( m_pChar->m_pParty == pChar->m_pParty )	// already in this party
 		{

@@ -642,7 +642,7 @@ bool CChar::Skill_MakeItem_Success()
 			pItem->m_itSpell.m_spelllevel = iSkillLevel;
 
 		CItemBase *ptItemDef = CItemBase::FindItemBase(m_atCreate.m_ItemID);
-		if ( ptItemDef->Can(CAN_I_PILE) )
+		if ( ptItemDef->IsStackableType() )
 			pItem->SetAmount(m_atCreate.m_Amount);
 		else
 		{
@@ -1338,7 +1338,6 @@ int CChar::Skill_Fishing( SKTRIG_TYPE stage )
 		SysMessageDefault(DEFMSG_FISHING_3);
 		return -SKTRIG_QTY;
 	}
-
 	if ( m_Act_p.GetRegion(REGION_TYPE_MULTI) )		// do not allow fishing through ship floor
 	{
 		SysMessageDefault(DEFMSG_FISHING_4);
@@ -1397,7 +1396,7 @@ int CChar::Skill_Fishing( SKTRIG_TYPE stage )
 	if ( !pItem )
 	{
 		SysMessageDefault(DEFMSG_FISHING_2);
-		return -SKTRIG_ABORT;
+		return -SKTRIG_FAIL;
 	}
 
 	SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_FISHING_SUCCESS), pItem->GetName());
@@ -3232,7 +3231,7 @@ void CChar::Skill_Fail( bool fCancel )
 	// Other types of failure don't come here.
 	//
 	// ARGS:
-	//	fCancel = no credt.
+	//	fCancel = no credit.
 	//  else We still get some credit for having tried.
 
 	SKILL_TYPE skill = Skill_GetActive();

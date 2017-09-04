@@ -119,7 +119,7 @@ public:
 	void SetTriggerActive(lpctstr trig = NULL) { static_cast<CObjBase*>(this)->SetTriggerActive(trig); }
 
 	// Type specific info. IT_TYPE
-	union // 4(more1) + 4(more2) + 6(morep: (2 morex) (2 morey) (1 morez) (1morem) ) = 14 bytes
+	union // 4(more1) + 4(more2) + 6(morep: (2 morex) (2 morey) (1 morez) (1 morem) ) = 14 bytes
 	{
 		// IT_NORMAL
 		struct	// used only to save and restore all this junk.

@@ -679,7 +679,6 @@ void CCrypt::LoginCryptStart( dword dwIP, byte * pEvent, size_t iLen )
 		Decrypt( m_Raw, pEvent, iLen );
 
 #ifdef DEBUG_CRYPT_MSGS
-		// TODO: send a single string instead of lots.
 		DEBUG_MSG(("LoginCrypt %" PRIuSIZE_T " (%" PRIu32 ") type %" PRIx8 "-%" PRIx8 "\n", i, GetClientVer(), m_Raw[0], pEvent[0]));
 #endif
 		bool isValid = ( m_Raw[0] == 0x80 && m_Raw[30] == 0x00 && m_Raw[60] == 0x00 );

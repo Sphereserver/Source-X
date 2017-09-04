@@ -894,10 +894,7 @@ void CClient::Event_CombatMode( bool fWar ) // Only for switching to combat mode
 			return;
 
 		if ( Args.m_iN2 == 0 )
-		{
 			fCleanSkill = false;
-			DEBUG_WARN(("UserWarMode - Setting fCleanSkill to false\n"));
-		}
 
 		if ( Args.m_iN3 != 0 && Args.m_iN3 < 3)
 			fWar = (Args.m_iN3 == 1 ? false : true);

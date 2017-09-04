@@ -19,45 +19,6 @@
 
 
 class CBaseBase;
-
-/**
- * @enum    MEMORY_TYPE
- *
- * @brief   Values that represent memory types ( IT_EQ_MEMORY_OBJ ).
- *
- * Types of memory a CChar has about a game object. (m_wHue)
- */
-enum MEMORY_TYPE
-{
-	MEMORY_NONE         = 0,
-	MEMORY_SAWCRIME     = 0x0001,	///< I saw them commit a crime or i was attacked criminally. I can call the guards on them. the crime may not have been against me.
-	MEMORY_IPET         = 0x0002,	///< I am a pet. (this link is my master) (never time out)
-	MEMORY_FIGHT        = 0x0004,	///< Active fight going on now. may not have done any damage. and they may not know they are fighting me.
-	MEMORY_IAGGRESSOR   = 0x0008,	///< I was the agressor here. (good or evil)
-	MEMORY_HARMEDBY     = 0x0010,	///< I was harmed by them. (but they may have been retaliating)
-	MEMORY_IRRITATEDBY  = 0x0020,	///< I saw them snoop from me or someone.
-	MEMORY_SPEAK        = 0x0040,	///< We spoke about something at some point. (or was tamed) (NPC_MEM_ACT_TYPE)
-	MEMORY_AGGREIVED    = 0x0080,	///< I was attacked and was the inocent party here !
-	MEMORY_GUARD        = 0x0100,	///< Guard this item (never time out)
-	MEMORY_ISPAWNED     = 0x0200,	///< UNUSED!!!! I am spawned from this item. (never time out)
-	MEMORY_GUILD        = 0x0400,	///< This is my guild stone. (never time out) only have 1
-	MEMORY_TOWN         = 0x0800,	///< This is my town stone. (never time out) only have 1
-	MEMORY_UNUSED       = 0x1000,	///< UNUSED!!!! I am following this Object (never time out)
-	MEMORY_UNUSED2		= 0x2000,	///< UNUSED!!!! (MEMORY_WAR_TARG) This is one of my current war targets.
-	MEMORY_FRIEND       = 0x4000,	///< They can command me but not release me. (not primary blame)
-	MEMORY_UNUSED3      = 0x8000	///< UNUSED!!!! Gump record memory (More1 = Context, More2 = Uid)
-};
-
-enum NPC_MEM_ACT_TYPE	///< A simgle primary memory about the object.
-{
-	NPC_MEM_ACT_NONE = 0,       ///< we spoke about something non-specific,
-	NPC_MEM_ACT_SPEAK_TRAIN,    ///< I am speaking about training. Waiting for money
-	NPC_MEM_ACT_SPEAK_HIRE,     ///< I am speaking about being hired. Waiting for money
-	NPC_MEM_ACT_FIRSTSPEAK,     ///< I attempted (or could have) to speak to player. but have had no response.
-	NPC_MEM_ACT_TAMED,          ///< I was tamed by this person previously.
-	NPC_MEM_ACT_IGNORE          ///< I looted or looked at and discarded this item (ignore it)
-};
-
 class PacketSend;
 class PacketPropertyList;
 
@@ -75,22 +36,13 @@ private:
 
 protected:
 	CResourceRef m_BaseRef;     ///< Pointer to the resource that describes this type.
-public:
 
-    /**
-     * @fn  inline bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult, bool bFull);
-     *
-     * @brief   Call personal trigger (from scripts).
-     *
-     * @param [in,out]  pArgs       If non-null, the arguments.
-     * @param [in,out]  pSrc        If non-null, source for the.
-     * @param [in,out]  trResult    The tr result.
-     * @param   bFull               true to full.
-     *
-     * @return  true if it succeeds, false if it fails.
-     */
-	inline bool CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult, bool bFull);
+public:
 	static const char *m_sClassName;
+
+	size_t m_iCreatedResScriptIdx;	// index in g_Cfg.m_ResourceFiles of the script file where this obj was created
+	int m_iCreatedResScriptLine;	// line in the script file where this obj was created
+
 	CVarDefMap m_TagDefs;		///< attach extra tags here.
 	CVarDefMap m_BaseDefs;		///< New Variable storage system
 	dword	m_Can;              ///< CAN_FLAGS
@@ -105,6 +57,20 @@ public:
 
 	CResourceRefArray m_OEvents;
 	static size_t sm_iCount;    ///< how many total objects in the world ?
+
+	/**
+	* @fn  inline bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult, bool bFull);
+	*
+	* @brief   Call personal trigger (from scripts).
+	*
+	* @param [in,out]  pArgs       If non-null, the arguments.
+	* @param [in,out]  pSrc        If non-null, source for the.
+	* @param [in,out]  trResult    The tr result.
+	* @param   bFull               true to full.
+	*
+	* @return  true if it succeeds, false if it fails.
+	*/
+	inline bool CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult, bool bFull);
 
     /**
      * @fn  CVarDefMap * CObjBase::GetTagDefs();
@@ -930,6 +896,49 @@ public:
 	void UpdatePropertyFlag(int mask);
 };
 
+
+/**
+* @enum    MEMORY_TYPE
+*
+* @brief   Values that represent memory types ( IT_EQ_MEMORY_OBJ ).
+*
+* Types of memory a CChar has about a game object. (m_wHue)
+*/
+enum MEMORY_TYPE
+{
+	MEMORY_NONE = 0,
+	MEMORY_SAWCRIME = 0x0001,	///< I saw them commit a crime or i was attacked criminally. I can call the guards on them. the crime may not have been against me.
+	MEMORY_IPET = 0x0002,	///< I am a pet. (this link is my master) (never time out)
+	MEMORY_FIGHT = 0x0004,	///< Active fight going on now. may not have done any damage. and they may not know they are fighting me.
+	MEMORY_IAGGRESSOR = 0x0008,	///< I was the agressor here. (good or evil)
+	MEMORY_HARMEDBY = 0x0010,	///< I was harmed by them. (but they may have been retaliating)
+	MEMORY_IRRITATEDBY = 0x0020,	///< I saw them snoop from me or someone.
+	MEMORY_SPEAK = 0x0040,	///< We spoke about something at some point. (or was tamed) (NPC_MEM_ACT_TYPE)
+	MEMORY_AGGREIVED = 0x0080,	///< I was attacked and was the inocent party here !
+	MEMORY_GUARD = 0x0100,	///< Guard this item (never time out)
+	MEMORY_ISPAWNED = 0x0200,	///< UNUSED!!!! I am spawned from this item. (never time out)
+	MEMORY_GUILD = 0x0400,	///< This is my guild stone. (never time out) only have 1
+	MEMORY_TOWN = 0x0800,	///< This is my town stone. (never time out) only have 1
+	MEMORY_UNUSED = 0x1000,	///< UNUSED!!!! I am following this Object (never time out)
+	MEMORY_UNUSED2 = 0x2000,	///< UNUSED!!!! (MEMORY_WAR_TARG) This is one of my current war targets.
+	MEMORY_FRIEND = 0x4000,	///< They can command me but not release me. (not primary blame)
+	MEMORY_UNUSED3 = 0x8000	///< UNUSED!!!! Gump record memory (More1 = Context, More2 = Uid)
+};
+
+
+///<	number of steps to remember for pathfinding, default to 24 steps, will have 24*4 extra bytes per char
+#define MAX_NPC_PATH_STORAGE_SIZE	UO_MAP_VIEW_SIGHT*2
+
+enum NPC_MEM_ACT_TYPE	///< A simgle primary memory about the object.
+{
+	NPC_MEM_ACT_NONE = 0,       ///< we spoke about something non-specific,
+	NPC_MEM_ACT_SPEAK_TRAIN,    ///< I am speaking about training. Waiting for money
+	NPC_MEM_ACT_SPEAK_HIRE,     ///< I am speaking about being hired. Waiting for money
+	NPC_MEM_ACT_FIRSTSPEAK,     ///< I attempted (or could have) to speak to player. but have had no response.
+	NPC_MEM_ACT_TAMED,          ///< I was tamed by this person previously.
+	NPC_MEM_ACT_IGNORE          ///< I looted or looked at and discarded this item (ignore it)
+};
+
 enum STONEALIGN_TYPE ///< Types of Guild/Town stones
 {
 	STONEALIGN_STANDARD = 0,
@@ -976,9 +985,6 @@ enum ITRIG_TYPE
 	ITRIG_UNEQUIP,              ///< I'm being unequiped.
 	ITRIG_QTY
 };
-
-///<	number of steps to remember for pathfinding, default to 24 steps, will have 24*4 extra bytes per char
-#define MAX_NPC_PATH_STORAGE_SIZE	UO_MAP_VIEW_SIGHT*2
 
 enum WAR_SWING_TYPE	///< m_Act_War_Swing_State
 {
@@ -1174,6 +1180,7 @@ enum CTRIG_TYPE
 
 	CTRIG_QTY				///< 130
 };
+
 
 /**
  * @fn  DIR_TYPE GetDirStr( lpctstr pszDir );

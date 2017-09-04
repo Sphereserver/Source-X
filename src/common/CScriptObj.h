@@ -47,10 +47,6 @@ class CScriptObj
 {
 	// This object can be scripted. (but might not be)
 
-#define SKIP_SEPARATORS(p)	while ( *(p)=='.' ) { (p)++; }	// || ISWHITESPACE(*(p))
-#define SKIP_ARGSEP(p)	while ( *(p)== ',' || IsSpace(*p) ){ (p)++; }
-#define SKIP_IDENTIFIERSTRING(p) while ( _ISCSYM(*p) ){ (p)++; }
-
 	static lpctstr const sm_szScriptKeys[];
 	static lpctstr const sm_szLoadKeys[];
 	static lpctstr const sm_szVerbKeys[];

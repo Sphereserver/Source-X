@@ -101,6 +101,9 @@ class PacketCharacterStatus : public PacketSend
 {
 public:
 	PacketCharacterStatus(const CClient* target, CChar* other);
+
+private:
+	void WriteVersionSpecific(const CClient* target, CChar* other, byte version);
 };
 
 /***************************************************************************

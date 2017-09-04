@@ -2,7 +2,7 @@
 #include "../../sphere/threads.h"
 #include "CSArray.h"
 
-// CObListRec:: Constructors, Destructor, Asign operator.
+// CObListRec:: Constructors, Destructor, Assign operator.
 
 CSObjListRec::CSObjListRec()
 {
@@ -15,7 +15,7 @@ CSObjListRec::~CSObjListRec()
 	RemoveSelf();
 }
 
-// CSObjList:: Constructors, Destructor, Asign operator.
+// CSObjList:: Constructors, Destructor, Assign operator.
 
 CSObjList::CSObjList()
 {

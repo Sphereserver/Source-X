@@ -215,10 +215,15 @@ bool CPointBase::IsCharValid() const
 
 void CPointBase::ValidatePoint()
 {
-	if ( m_x < 0 ) m_x = 0;
-	if (m_x >= (short)(g_MapList.GetX(m_map))) m_x = (short)(g_MapList.GetX(m_map) - 1);
-	if ( m_y < 0 ) m_y = 0;
-	if (m_y >= (short)(g_MapList.GetY(m_map))) m_y = (short)(g_MapList.GetY(m_map) - 1);
+	if ( m_x < 0 )
+		m_x = 0;
+	if (m_x >= (short)(g_MapList.GetX(m_map)))
+		m_x = (short)(g_MapList.GetX(m_map) - 1);
+
+	if ( m_y < 0 )
+		m_y = 0;
+	if (m_y >= (short)(g_MapList.GetY(m_map)))
+		m_y = (short)(g_MapList.GetY(m_map) - 1);
 }
 
 bool CPointBase::IsSame2D( const CPointBase & pt ) const
@@ -684,7 +689,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 						} return true;	
 					case PT_TERRAIN:
 						{
-							pszKey += strlen(sm_szLoadKeys[index]);
+							pszKey += 7;
 							if ( *pszKey == '.' )	// do we have an argument?
 							{
 								SKIP_SEPARATORS( pszKey );
@@ -809,7 +814,7 @@ tchar * CPointBase::WriteUsed( tchar * pszBuffer ) const
 
 lpctstr CPointBase::WriteUsed() const
 {
-	return( WriteUsed( Str_GetTemp()));
+	return WriteUsed( Str_GetTemp() );
 }
 
 size_t CPointBase::Read( tchar * pszVal )
@@ -836,13 +841,13 @@ size_t CPointBase::Read( tchar * pszVal )
 			}
 		case 3: // m_z
 			if ( IsDigit(ppVal[2][0]) || ppVal[2][0] == '-' )
-			{
 				m_z = (char)(ATOI(ppVal[2]));
-			}
 		case 2:
-			m_y = (short)(ATOI(ppVal[1]));
+			if (IsDigit(ppVal[1][0]))
+				m_y = (short)(ATOI(ppVal[1]));
 		case 1:
-			m_x = (short)(ATOI(ppVal[0]));
+			if (IsDigit(ppVal[0][0]))
+				m_x = (short)(ATOI(ppVal[0]));
 		case 0:
 			break;
 	}

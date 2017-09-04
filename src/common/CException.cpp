@@ -37,11 +37,8 @@
 	}
 #endif
 
-bool CSError::GetErrorMessage( lptstr lpszError, uint nMaxError,	uint * pnHelpContext ) const
+bool CSError::GetErrorMessage( lptstr lpszError, uint uiMaxError ) const
 {
-	UNREFERENCED_PARAMETER(nMaxError);
-	UNREFERENCED_PARAMETER(pnHelpContext);
-
 #ifdef _WIN32
 	// Compatible with CException and CSFileException
 	if ( m_hError )
@@ -52,18 +49,18 @@ bool CSError::GetErrorMessage( lptstr lpszError, uint nMaxError,	uint * pnHelpCo
 		if ( nChars )
 		{
 			if ( m_hError & 0x80000000 )
-				sprintf( lpszError, "Error Pri=%d, Code=0x%x(%s), Desc='%s'", m_eSeverity, m_hError, szCode, m_pszDescription );
+				snprintf( lpszError, uiMaxError, "Error Pri=%d, Code=0x%x(%s), Desc='%s'", m_eSeverity, m_hError, szCode, m_pszDescription );
 			else
-				sprintf( lpszError, "Error Pri=%d, Code=%u(%s), Desc='%s'", m_eSeverity, m_hError, szCode, m_pszDescription );
+				snprintf( lpszError, uiMaxError, "Error Pri=%d, Code=%u(%s), Desc='%s'", m_eSeverity, m_hError, szCode, m_pszDescription );
 			return true;
 		}
 	}
 #endif
 
 	if ( m_hError & 0x80000000 )
-		sprintf( lpszError, "Error Pri=%d, Code=0x%x, Desc='%s'", m_eSeverity, m_hError, m_pszDescription );
+		snprintf( lpszError, uiMaxError, "Error Pri=%d, Code=0x%x, Desc='%s'", m_eSeverity, m_hError, m_pszDescription );
 	else
-		sprintf( lpszError, "Error Pri=%d, Code=%u, Desc='%s'", m_eSeverity, m_hError, m_pszDescription );
+		snprintf( lpszError, uiMaxError, "Error Pri=%d, Code=%u, Desc='%s'", m_eSeverity, m_hError, m_pszDescription );
 	return true;
 }
 
@@ -87,25 +84,11 @@ CSError::CSError( LOG_TYPE eSev, dword hErr, lpctstr pszDescription ) :
 // --------------------------------------------------------------------------------
 
 
-bool CAssert::GetErrorMessage(lptstr lpszError, uint nMaxError, uint * pnHelpContext) const
+bool CAssert::GetErrorMessage(lptstr lpszError, uint uiMaxError) const
 {
-	UNREFERENCED_PARAMETER(nMaxError);
-	UNREFERENCED_PARAMETER(pnHelpContext);
-	sprintf(lpszError, "Assert severity=%d: '%s' file '%s', line %ld", m_eSeverity, m_pExp, m_pFile, m_lLine);
+	snprintf(lpszError, uiMaxError, "Assert severity=%d: '%s' file '%s', line %lld", m_eSeverity, m_pExp, m_pFile, m_llLine);
 	return true;
 }
-
-/*lpctstr const CAssert::GetAssertFile()
-{
-	lptstr pTmp = Str_GetTemp();
-	strcpylen( pTmp, m_pFile, strlen( m_pFile ) ); //make a copy, don't send the original
-	return pTmp;
-}
-
-const unsigned CAssert::GetAssertLine()
-{
-	return m_uLine;
-}*/
 
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
@@ -150,15 +133,15 @@ bool CException::GetErrorMessage(lptstr lpszError, uint nMaxError, uint * pnHelp
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-void Assert_CheckFail( lpctstr pExp, lpctstr pFile, long lLine )
+void Assert_Fail( lpctstr pExp, lpctstr pFile, long long llLine )
 {
-	throw CAssert(LOGL_CRIT, pExp, pFile, lLine);
+	throw CAssert(LOGL_CRIT, pExp, pFile, llLine);
 }
 
 void _cdecl Sphere_Purecall_Handler()
 {
 	// catch this special type of C++ exception as well.
-	Assert_CheckFail("purecall", "unknown", 1);
+	Assert_Fail("purecall", "unknown", 1);
 }
 
 void SetPurecallHandler()

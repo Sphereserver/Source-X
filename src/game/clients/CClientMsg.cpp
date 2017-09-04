@@ -426,17 +426,11 @@ void CClient::addItem( CItem * pItem )
 	if ( pItem == NULL )
 		return;
 	if ( pItem->IsTopLevel())
-	{
 		addItem_OnGround( pItem );
-	}
 	else if ( pItem->IsItemEquipped())
-	{
 		addItem_Equipped( pItem );
-	}
 	else if ( pItem->IsItemInContainer())
-	{
 		addItem_InContainer( pItem );
-	}
 }
 
 void CClient::addContainerContents( const CItemContainer * pContainer, bool boCorpseEquip, bool boCorpseFilter, bool boShop ) // Send Backpack (with items)
@@ -2196,27 +2190,37 @@ bool CClient::addShopMenuBuy( CChar * pVendor )
 
 	CItemContainer *pContainer = pVendor->GetBank(LAYER_VENDOR_STOCK);
 	CItemContainer *pContainerExtra = pVendor->GetBank(LAYER_VENDOR_EXTRA);
-	if ( !pContainer || !pContainerExtra )
-		return false;
-
-	// Get item list
-	addItem(pContainer);	// send complete tooltip instead of just the name
-	addContainerContents(pContainer, false, false, true);
-	addItem(pContainerExtra);
-
-	// Get price list
-	PacketVendorBuyList *cmd = new PacketVendorBuyList();
-	size_t count = cmd->fillBuyData(pContainer, pVendor->NPC_GetVendorMarkup());
-	cmd->push(this);
-
-	// Open gump
-	if ( count )
+	if (!pContainer || !pContainerExtra)
 	{
-		addOpenGump(pVendor, GUMP_VENDOR_RECT);
-		return true;
+		DEBUG_MSG(("Vendor with no LAYER_VENDOR_STOCK or LAYER_VENDOR_EXTRA!\n"));
+		return false;
 	}
 
-	return false;
+	if (GetNetState()->isClientEnhanced())
+		new PacketCharacterStatus(this, pVendor);
+
+	// Send NPC layers 26 and 27 content
+	new PacketItemEquipped(this, pContainer);
+	new PacketItemEquipped(this, pContainerExtra);
+
+	// Send item list and then price list first for layer 26, then for 27.
+	new PacketItemContents(this, pContainer, true, false);
+	PacketVendorBuyList *buyList = new PacketVendorBuyList();
+	size_t buyListCount = buyList->fillBuyData(pContainer, pVendor->NPC_GetVendorMarkup());
+	buyList->push(this);
+
+	new PacketItemContents(this, pContainerExtra, true, false);
+	PacketVendorBuyList *buyListExtra = new PacketVendorBuyList();
+	size_t buyListExtraCount = buyListExtra->fillBuyData(pContainerExtra, pVendor->NPC_GetVendorMarkup());
+	buyListExtra->push(this);
+
+	if (!buyListCount && !buyListExtraCount)
+		return false;
+
+	// Open gump
+	addOpenGump(pVendor, GUMP_VENDOR_RECT);
+
+	return true;
 }
 
 bool CClient::addShopMenuSell( CChar * pVendor )
@@ -2266,11 +2270,11 @@ void CClient::addBankOpen( CChar * pChar, LAYER_TYPE layer )
 	ASSERT(pBankBox);
 	addItem( pBankBox );	// may crash client if we dont do this.
 
-	if ( pChar != GetChar())
+	/*if ( pChar != GetChar())
 	{
 		// xbank verb on others needs this ?
-		// addChar( pChar );
-	}
+		addChar( pChar );
+	}*/
 
 	pBankBox->OnOpenEvent( m_pChar, pChar );
 	addContainerSetup( pBankBox );
@@ -2471,7 +2475,6 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 		this->m_TooltipData.Clean(true);
 
 		//DEBUG_MSG(("Preparing tooltip for 0%x (%s)\n", (dword)pObj->GetUID(), pObj->GetName()));
-
 		if (bNameOnly) // if we only want to display the name (FEATURE_AOS_UPDATE_B disabled)
 		{
 			dword ClilocName = (dword)(pObj->GetDefNum("NAMELOC", false, true));
@@ -2497,7 +2500,7 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 
 			if ( iRet != TRIGRET_RET_TRUE )
 			{
-				dword ClilocName = (dword)(pObj->GetDefNum("NAMELOC", false, true));
+				dword ClilocName = (dword)(pObj->GetDefNum("NAMELOC", true, true));
 
 				if ( pItem )
 				{
@@ -3324,34 +3327,27 @@ void CClient::addAOSTooltip( const CObjBase * pObj, bool bRequested, bool bShop 
 
 	if (propertyList->isEmpty() == false)
 	{
-		if (bShop && GetNetState()->isClientEnhanced())
+		switch (g_Cfg.m_iTooltipMode)
 		{
-			new PacketPropertyList(this, propertyList);
-		}
-		else
-		{
-			switch (g_Cfg.m_iTooltipMode)
-			{
-				case TOOLTIPMODE_SENDVERSION:
-					if (bRequested == false && bShop == false)
-					{
-						// send property list version (client will send a request for the full tooltip if needed)
-						if ( PacketPropertyListVersion::CanSendTo(GetNetState()) == false )
-							new PacketPropertyListVersionOld(this, pObj, propertyList->getVersion());
-						else
-							new PacketPropertyListVersion(this, pObj, propertyList->getVersion());
+			case TOOLTIPMODE_SENDVERSION:
+				if (!bRequested)
+				{
+					// send property list version (client will send a request for the full tooltip if needed)
+					if ( PacketPropertyListVersion::CanSendTo(GetNetState()) == false )
+						new PacketPropertyListVersionOld(this, pObj, propertyList->getVersion());
+					else
+						new PacketPropertyListVersion(this, pObj, propertyList->getVersion());
 
-						break;
-					}
-
-					// fall through to send full list
-
-				case TOOLTIPMODE_SENDFULL:
-				default:
-					// send full property list
-					new PacketPropertyList(this, propertyList);
 					break;
-			}
+				}
+
+			// fall through to send full list
+
+			case TOOLTIPMODE_SENDFULL:
+			default:
+				// send full property list
+				new PacketPropertyList(this, propertyList);
+				break;
 		}
 	}
 
@@ -3639,9 +3635,7 @@ byte CClient::Setup_ListReq( const char * pszAccName, const char * pszPassword, 
 	// Gameserver login and request character listing
 
 	if ( GetConnectType() != CONNECT_GAME )	// Not a game connection ?
-	{
-		return(PacketLoginError::Other);
-	}
+		return PacketLoginError::Other;
 
 	switch ( GetTargMode())
 	{
@@ -3661,17 +3655,17 @@ byte CClient::Setup_ListReq( const char * pszAccName, const char * pszPassword, 
 		if ( fTest && lErr != PacketLoginError::Other )
 		{
 			if ( ! sMsg.IsEmpty())
-			{
 				SysMessage( sMsg );
-			}
 		}
-		return( lErr );
+		return lErr;
 	}
 
+
+	/*
 	CAccountRef pAcc = GetAccount();
 	ASSERT( pAcc );
 
-	/*CChar *pCharLast = pAcc->m_uidLastChar.CharFind();
+	CChar *pCharLast = pAcc->m_uidLastChar.CharFind();
 	if ( pCharLast && GetAccount()->IsMyAccountChar(pCharLast) && GetAccount()->GetPrivLevel() <= PLEVEL_GM && !pCharLast->IsDisconnected() )
 	{
 		// If the last char is lingering then log back into this char instantly.
@@ -3681,7 +3675,8 @@ byte CClient::Setup_ListReq( const char * pszAccName, const char * pszPassword, 
 		return PacketLoginError::Blocked;	//Setup_Start() returns false only when login blocked by Return 1 in @Login
 	}*/
 
-	new PacketEnableFeatures(this, g_Cfg.GetPacketFlag(false, static_cast<RESDISPLAY_VERSION>(pAcc->GetResDisp()), (uchar)(maximum(pAcc->GetMaxChars(), pAcc->m_Chars.GetCharCount()))));
+	new PacketEnableFeatures(this,
+		g_Cfg.GetPacketFlag(false, (RESDISPLAY_VERSION)(m_pAccount->GetResDisp()), (uchar)(maximum(m_pAccount->GetMaxChars(), m_pAccount->m_Chars.GetCharCount()))));
 	new PacketCharacterList(this);
 
 	m_Targ_Mode = CLIMODE_SETUP_CHARLIST;

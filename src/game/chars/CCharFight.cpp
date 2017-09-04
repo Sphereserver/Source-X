@@ -14,7 +14,7 @@
 void CChar::OnNoticeCrime( CChar * pCriminal, const CChar * pCharMark )
 {
 	ADDTOCALLSTACK("CChar::OnNoticeCrime");
-	if ( !pCriminal || pCriminal == this || pCriminal == pCharMark || pCriminal->IsPriv(PRIV_GM) || pCriminal->GetNPCBrain() == NPCBRAIN_GUARD )
+	if ( !pCriminal || pCriminal == this || pCriminal == pCharMark || pCriminal->IsPriv(PRIV_GM) ) //This never happens: || pCriminal->GetNPCBrain() == NPCBRAIN_GUARD )
 		return;
     NOTO_TYPE iNoto = pCharMark->Noto_GetFlag(pCriminal);
     if (iNoto == NOTO_CRIMINAL || iNoto == NOTO_EVIL)
@@ -909,7 +909,7 @@ effect_bounce:
 	}
 
 	// Disturb magic spells (only players can be disturbed)
-	if ( m_pPlayer && pSrc != this && !(uType & DAMAGE_NODISTURB) && g_Cfg.IsSkillFlag(Skill_GetActive(), SKF_MAGIC) )
+	if ( m_pPlayer && (pSrc != this) && !(uType & DAMAGE_NODISTURB) && g_Cfg.IsSkillFlag(Skill_GetActive(), SKF_MAGIC) )
 	{
 		// Check if my spell can be interrupted
 		int iDisturbChance = 0;
@@ -1325,7 +1325,6 @@ void CChar::Fight_HitTry()
 	ADDTOCALLSTACK("CChar::Fight_HitTry");
 
 	ASSERT( Fight_IsActive() );
-	ASSERT( m_atFight.m_War_Swing_State == (WAR_SWING_READY|WAR_SWING_SWINGING) );
 
 	CChar *pCharTarg = m_Fight_Targ.CharFind();
 	if ( !pCharTarg || (pCharTarg && !pCharTarg->Fight_IsAttackable()) )

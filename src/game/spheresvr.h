@@ -11,12 +11,6 @@
 #include "../sphere/threads.h"
 
 
-#ifdef DEBUGWALKSTUFF
-	#define WARNWALK(_x_)		g_pLog->EventWarn _x_;
-#else
-	#define WARNWALK(_x_)		if ( g_Cfg.m_wDebugFlags & DEBUGF_WALK ) { g_pLog->EventWarn _x_; }
-#endif
-
 // Text mashers.
 
 extern lpctstr GetTimeMinDesc( int dwMinutes );

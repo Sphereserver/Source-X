@@ -140,12 +140,10 @@ CResourceScript * CResourceBase::AddResourceFile( lpctstr pszName )
 	// Find correct path
 	CScript s;
 	if ( ! OpenResourceFind( s, szName ))
-	{
 		return NULL;
-	}
 
 	pNewRes = new CResourceScript( s.GetFilePath() );
-	m_ResourceFiles.Add(pNewRes);
+	pNewRes->m_iResourceFileIndex = m_ResourceFiles.Add(pNewRes);
 	return pNewRes;
 }
 
@@ -199,9 +197,7 @@ void CResourceBase::LoadResourcesOpen( CScript * pScript )
 	}
 
 	if ( ! iSections )
-	{
 		DEBUG_WARN(( "No resource sections in '%s'\n", (lpctstr)pScript->GetFilePath()));
-	}
 }
 
 bool CResourceBase::LoadResources( CResourceScript * pScript )
@@ -335,13 +331,10 @@ CResourceID CResourceBase::ResourceGetID( RES_TYPE restype, lpctstr & pszName )
 	}
 	*/
 
-	rid.SetPrivateUID( Exp_GetVal(pszName));	// May be some complex expression {}
+	rid.SetPrivateUID(Exp_GetVal(pszName));	// May be some complex expression {}
 
 	if ( restype != RES_UNKNOWN && rid.GetResType() == RES_UNKNOWN )
-	{
-		// Label it with the type we want.
-		return CResourceID( restype, rid.GetResIndex());
-	}
+		return CResourceID( restype, rid.GetResIndex());	// Label it with the type we want.
 
 	return rid;
 }
@@ -411,12 +404,12 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
 	{
 		if ( i >= EXPRESSION_MAX_KEY_LEN )
 		{
-			DEBUG_ERR(( "Too long DEFNAME=%s\n", pszName ));
+			DEBUG_ERR(( "DEFNAME=%s: too long. Aborting registration of the resource\n", pszName ));
 			return false;
 		}
 		if ( ! _ISCSYM(pszName[i]) )
 		{
-			DEBUG_ERR(( "Bad chars in DEFNAME=%s\n", pszName ));
+			DEBUG_ERR(( "DEFNAME=%s: bad characters. Aborting registration of the resource\n", pszName ));
 			return false;
 		}
 	}
@@ -426,13 +419,19 @@ bool CResourceDef::SetResourceName( lpctstr pszName )
 	CVarDefCont * pVarKey = g_Exp.m_VarDefs.GetKey( pszName );
 	if ( pVarKey )
 	{
-		if ( (dword)pVarKey->GetValNum() == GetResourceID().GetPrivateUID() )
+		dword keyVal = (dword)pVarKey->GetValNum();
+		if ( keyVal == GetResourceID().GetPrivateUID() )
+		{
+			// DEBUG_WARN(("DEFNAME=%s: redefinition (new value same as previous)\n", pszName));
+			// It happens tipically for types pre-defined in sphere_defs.scp and other things. Wanted behaviour.
 			return true;
+		}
+			
 
-		if ( RES_GET_INDEX(pVarKey->GetValNum()) == GetResourceID().GetResIndex())
-			DEBUG_WARN(( "The DEFNAME=%s has a strange type mismatch? 0%" PRIx64 "!=0%x\n", pszName, pVarKey->GetValNum(), GetResourceID().GetPrivateUID() ));
+		if ( RES_GET_INDEX(keyVal) == (dword)GetResourceID().GetResIndex())
+			DEBUG_WARN(( "DEFNAME=%s: redefinition with a strange type mismatch? (0%" PRIx32 "!=0%" PRIx32 ")\n", pszName, keyVal, GetResourceID().GetPrivateUID() ));
 		else
-			DEBUG_WARN(( "The DEFNAME=%s already exists! 0%" PRIx64 "!=0%x\n", pszName, RES_GET_INDEX(pVarKey->GetValNum()), GetResourceID().GetResIndex() ));
+			DEBUG_WARN(( "DEFNAME=%s: redefinition (0%" PRIx32 "!=0%" PRIx32 ")\n", pszName, RES_GET_INDEX(keyVal), GetResourceID().GetResIndex() ));
 
 		iVarNum = g_Exp.m_VarDefs.SetNum( pszName, GetResourceID().GetPrivateUID() );
 	}
@@ -688,7 +687,9 @@ bool CResourceScript::Open( lpctstr pszFilename, uint wFlags )
 		if ( !( wFlags & OF_READWRITE ) && CheckForChange() )
 		{
 			//  what should we do about it ? reload it of course !
+			g_Serv.SetServerMode(SERVMODE_ResyncLoad);
 			g_Cfg.LoadResourcesOpen( this );
+			g_Serv.SetServerMode(SERVMODE_Run);
 		}
 	}
 
@@ -809,6 +810,9 @@ int CResourceLock::OpenLock( CResourceScript * pLock, CScriptLineContext context
 
 	if ( ! SeekContext( context ) )
 		return -3;
+
+	// Propagate m_iResourceFileIndex from the CResourceScript to this CResourceLock
+	m_iResourceFileIndex = m_pLock->m_iResourceFileIndex;
 
 	return 0;
 }
@@ -1129,7 +1133,8 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
 		{
 			// Add a single knowledge fragment or appropriate group item.
 
-			if ( pszCmd[0] == '+' ) pszCmd ++;
+			if ( pszCmd[0] == '+' )
+				pszCmd ++;
 
 			CResourceLink * pResourceLink = dynamic_cast<CResourceLink *>( g_Cfg.ResourceGetDefByName( restype, pszCmd ));
 			if ( pResourceLink == NULL )
@@ -1367,7 +1372,7 @@ bool CResourceQty::Load(lpctstr &pszCmds)
 	// Can be either order.:
 	// "Name Qty" or "Qty Name"
 
-	const char *orig = pszCmds;
+	lpctstr orig = pszCmds;
 	GETNONWHITESPACE(pszCmds);	// Skip leading spaces.
 
 	m_iQty = INT64_MIN;
@@ -1590,10 +1595,10 @@ void CResourceQtyArray::WriteNames( tchar * pszArgs, size_t index ) const
 						iQty / 10, iQty % 10 );
 			}
 			else
-				pszArgs += sprintf( pszArgs, "%" PRId64 , iQty);
+				pszArgs += sprintf( pszArgs, "%" PRId64 " ", iQty);
 		}
 
-		pszArgs += GetAt(i).WriteNameSingle( pszArgs, (int)(iQty) );
+		pszArgs += GetAt(i).WriteNameSingle( pszArgs, (int)iQty );
 	}
 	*pszArgs = '\0';
 }

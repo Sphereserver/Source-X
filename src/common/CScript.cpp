@@ -33,13 +33,13 @@ CScriptLineContext::CScriptLineContext()
 bool CScriptKey::IsKey( lpctstr pszName ) const
 {
 	ASSERT(m_pszKey);
-	return( ! strcmpi( m_pszKey, pszName ));
+	return ( ! strcmpi( m_pszKey, pszName ));
 }
 
 bool CScriptKey::IsKeyHead( lpctstr pszName, size_t len ) const
 {
 	ASSERT(m_pszKey);
-	return( ! strnicmp( m_pszKey, pszName, len ));
+	return ( ! strnicmp( m_pszKey, pszName, len ));
 }
 
 void CScriptKey::InitKey()
@@ -52,20 +52,20 @@ lpctstr CScriptKey::GetKey() const
 {
 	// Get the key or section name.
 	ASSERT(m_pszKey);
-	return(m_pszKey);
+	return m_pszKey;
 }
 
 // Args passed with the key.
 bool CScriptKey::HasArgs() const
 {
 	ASSERT(m_pszArg);
-	return(( m_pszArg[0] ) ? true : false );
+	return (( m_pszArg[0] ) ? true : false );
 }
 
 tchar * CScriptKey::GetArgRaw() const	// Not need to parse at all.
 {
 	ASSERT(m_pszArg);
-	return(m_pszArg);
+	return m_pszArg;
 }
 
 tchar * CScriptKey::GetArgStr( bool * fQuoted )	// this could be a quoted string ?
@@ -75,7 +75,7 @@ tchar * CScriptKey::GetArgStr( bool * fQuoted )	// this could be a quoted string
 
 	tchar * pStr = GetArgRaw();
 	if ( *pStr != '"' )
-		return( pStr );
+		return pStr ;
 
 	pStr++;
 	//tchar * pEnd = strchr( pStr, '"' );
@@ -91,7 +91,7 @@ tchar * CScriptKey::GetArgStr( bool * fQuoted )	// this could be a quoted string
 		}
 	}
 
-	return( pStr );
+	return pStr ;
 }
 
 tchar * CScriptKey::GetArgStr()
@@ -310,9 +310,7 @@ bool CScriptKeyAlloc::ParseKey( lpctstr pszKey, lpctstr pszVal )
 
 	size_t lenkey = strlen( pszKey );
 	if ( ! lenkey )
-	{
 		return ParseKey(pszVal);
-	}
 
 	ASSERT( lenkey < SCRIPT_MAX_LINE_LEN-2 );
 
@@ -380,17 +378,20 @@ void CScriptKeyAlloc::ParseKeyLate()
 CScript::CScript()
 {
 	InitBase();
+	m_iResourceFileIndex = (size_t)-1;
 }
 
 CScript::CScript( lpctstr pszKey )
 {
 	InitBase();
+	m_iResourceFileIndex = (size_t)-1;
 	ParseKey(pszKey);
 }
 
 CScript::CScript( lpctstr pszKey, lpctstr pszVal )
 {
 	InitBase();
+	m_iResourceFileIndex = (size_t)-1;
 	ParseKey( pszKey, pszVal );
 }
 
@@ -413,13 +414,9 @@ bool CScript::Open( lpctstr pszFilename, uint wFlags )
 	InitBase();
 
 	if ( pszFilename == NULL )
-	{
 		pszFilename = GetFilePath();
-	}
 	else
-	{
 		SetFilePath( pszFilename );
-	}
 
 	lpctstr pszTitle = GetFileTitle();
 	if ( pszTitle == NULL || pszTitle[0] == '\0' )
@@ -438,9 +435,7 @@ bool CScript::Open( lpctstr pszFilename, uint wFlags )
 	if ( !PhysicalScriptFile::Open( GetFilePath(), wFlags ))
 	{
 		if ( ! ( wFlags & OF_NONCRIT ))
-		{
 			g_Log.Event(LOGL_WARN, "'%s' not found...\n", static_cast<lpctstr>(GetFilePath()));
-		}
 		return false;
 	}
 

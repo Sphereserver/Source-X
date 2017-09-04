@@ -350,9 +350,7 @@ void CVarDefMap::DeleteKey( lpctstr key )
 {
 	ADDTOCALLSTACK("CVarDefMap::DeleteKey");
 	if ( key && *key)
-	{
 		DeleteAtKey(key);
-	}
 }
 
 void CVarDefMap::Empty()
@@ -513,21 +511,15 @@ int CVarDefMap::SetNum( lpctstr pszName, int64 iVal, bool fZero )
 		pVarBase = (*iResult);
 
 	if ( !pVarBase )
-	{
 		return SetNumNew( pszName, iVal );
-	}
 
 	CVarDefContNum * pVarNum = dynamic_cast <CVarDefContNum *>( pVarBase );
 	if ( pVarNum )
-	{
 		pVarNum->SetValNum( iVal );
-	}
 	else
 	{
 		if ( g_Serv.IsLoading() )
-		{
-			DEBUG_ERR(( "Replace existing VarStr '%s'\n", pVarBase->GetKey()));
-		}
+			DEBUG_WARN(( "Replace existing VarStr '%s' with number: 0x%" PRIx64" \n", pVarBase->GetKey(), iVal ));
 		return SetNumOverride( pszName, iVal );
 	}
 
@@ -583,21 +575,15 @@ int CVarDefMap::SetStr( lpctstr pszName, bool fQuoted, lpctstr pszVal, bool fZer
 		pVarBase = (*iResult);
 
 	if ( !pVarBase )
-	{
 		return SetStrNew( pszName, pszVal );
-	}
 
 	CVarDefContStr * pVarStr = dynamic_cast <CVarDefContStr *>( pVarBase );
 	if ( pVarStr )
-	{
 		pVarStr->SetValStr( pszVal );
-	}
 	else
 	{
 		if ( g_Serv.IsLoading())
-		{
-			DEBUG_ERR(( "Replace existing VarNum '%s' with %s\n", pVarBase->GetKey(), pszVal ));
-		}
+			DEBUG_WARN(( "Replace existing VarNum '%s' with string: '%s^\n", pVarBase->GetKey(), pszVal ));
 		return SetStrOverride( pszName, pszVal );
 	}
 	return (int)(std::distance(m_Container.begin(), iResult) );
@@ -618,7 +604,7 @@ CVarDefCont * CVarDefMap::GetKey( lpctstr pszKey ) const
 			pReturn = (*i);
 	}
 
-	return( pReturn );
+	return pReturn;
 }
 
 int64 CVarDefMap::GetKeyNum( lpctstr pszKey, bool fZero  ) const
@@ -646,7 +632,7 @@ CVarDefCont * CVarDefMap::CheckParseKey( lpctstr & pszArgs ) const
 	GetIdentifierString( szTag, pszArgs );
 	CVarDefCont * pVar = GetKey(szTag);
 	if ( pVar )
-		return( pVar );
+		return pVar;
 
 	return NULL;
 }
@@ -663,7 +649,7 @@ CVarDefCont * CVarDefMap::GetParseKey( lpctstr & pszArgs ) const
 	if ( pVar )
 	{
 		pszArgs += i;
-		return( pVar );
+		return pVar;
 	}
 
 	return NULL;
@@ -733,7 +719,7 @@ bool CVarDefMap::r_LoadVal( CScript & s )
 {
 	ADDTOCALLSTACK("CVarDefMap::r_LoadVal");
 	bool fQuoted = false;
-	return( ( SetStr( s.GetKey(), fQuoted, s.GetArgStr( &fQuoted )) >= 0 ) ? true : false );
+	return ( ( SetStr( s.GetKey(), fQuoted, s.GetArgStr( &fQuoted )) >= 0 ) ? true : false );
 }
 
 void CVarDefMap::r_WritePrefix( CScript & s, lpctstr pszPrefix, lpctstr pszKeyExclude )
@@ -749,10 +735,7 @@ void CVarDefMap::r_WritePrefix( CScript & s, lpctstr pszPrefix, lpctstr pszKeyEx
 	{
 		const CVarDefCont * pVar = (*i);
 		if ( !pVar )
-		{
-			// This should not happen, a warning maybe?
-			continue;
-		}
+			continue;	// This should not happen, a warning maybe?
 
 		if ( bHasExclude && !strcmpi(pszKeyExclude, pVar->GetKey()))
 			continue;

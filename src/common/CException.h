@@ -47,7 +47,7 @@ public:
 #ifdef _WIN32
 	static int GetSystemErrorMessage( dword dwError, lptstr lpszError, uint nMaxError );
 #endif
-	virtual bool GetErrorMessage( lptstr lpszError, uint nMaxError,	uint * pnHelpContext = NULL ) const;
+	virtual bool GetErrorMessage( lptstr lpszError, uint nMaxError ) const;
 };
 
 class CAssert : public CSError
@@ -55,15 +55,11 @@ class CAssert : public CSError
 protected:
 	lpctstr const m_pExp;
 	lpctstr const m_pFile;
-	const long m_lLine;
+	const long long m_llLine;
 public:
-	/*
-	lpctstr const GetAssertFile();
-	const unsigned GetAssertLine();
-	*/
 	static const char *m_sClassName;
-	CAssert(LOG_TYPE eSeverity, lpctstr pExp, lpctstr pFile, long lLine) :
-		CSError(eSeverity, 0, "Assert"), m_pExp(pExp), m_pFile(pFile), m_lLine(lLine)
+	CAssert(LOG_TYPE eSeverity, lpctstr pExp, lpctstr pFile, long long llLine) :
+		CSError(eSeverity, 0, "Assert"), m_pExp(pExp), m_pFile(pFile), m_llLine(llLine)
 	{
 	}
 	virtual ~CAssert()
@@ -74,7 +70,7 @@ private:
 	CAssert& operator=(const CAssert& other);
 
 public:
-	virtual bool GetErrorMessage(lptstr lpszError, uint nMaxError, uint * pnHelpContext = NULL ) const;
+	virtual bool GetErrorMessage(lptstr lpszError, uint uiMaxError ) const;
 };
 
 #ifdef _WIN32

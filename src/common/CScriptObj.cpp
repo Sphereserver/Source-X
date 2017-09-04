@@ -205,6 +205,8 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
 						return false;
 
 					CScript script( pszKey, s.GetArgStr());
+					script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
+					script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
 					return pObj->r_Verb( script, pSrc );
 				}
 			}
@@ -213,7 +215,7 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
 	else if ( !strnicmp(pszKey, "ARGO", 4) )
 	{
 		pszKey += 4;
-		if ( !strnicmp(pszKey, ".", 1) )
+		if ( *pszKey == '.' )
 			index = AGC_O;
 		else
 		{
@@ -254,14 +256,18 @@ bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
 						return false;
 
 					CScript script( pszTemp, s.GetArgStr() );
+					script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
+					script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
 					return m_pO1->r_Verb( script, pSrc );
 				}
 			} return false;
 		case AGC_TRY:
 		case AGC_TRYSRV:
 			{
-				CScript try_script( s.GetArgStr() );
-				if ( r_Verb( try_script, pSrc ) )
+				CScript script(s.GetArgStr());
+				script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
+				script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
+				if (r_Verb(script, pSrc))
 					return true;
 			}
 		default:
@@ -593,8 +599,7 @@ bool CScriptObj::r_Call( lpctstr pszFunction, CTextConsole * pSrc, CScriptTrigge
 bool CScriptObj::r_SetVal( lpctstr pszKey, lpctstr pszVal )
 {
 	CScript s( pszKey, pszVal );
-	bool result = r_LoadVal( s );
-	return result;
+	return r_LoadVal( s );
 }
 
 bool CScriptObj::r_LoadVal( CScript & s )
@@ -1336,8 +1341,12 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 	{
 		if ( pszKey[0] )
 		{
-			if ( !pRef ) return true;
-			CScript script( pszKey, s.GetArgStr());
+			if ( !pRef )
+				return true;
+
+			CScript script(pszKey, s.GetArgStr());
+			script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
+			script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
 			return pRef->r_Verb( script, pSrc );
 		}
 		// else just fall through. as they seem to be setting the pointer !?
@@ -1353,7 +1362,10 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 			if ( !pRef )
 				return false;
 		}
+
 		CScript script(pszKey, s.GetArgStr());
+		script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
+		script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
 		return pRef->r_Verb(script, pSrc);
 	}
 
@@ -1376,7 +1388,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 		case SSV_NEWDUPE:
 			{
 				CUID uid(s.GetArgVal());
-				CObjBase	*pObj = uid.ObjFind();
+				CObjBase *pObj = uid.ObjFind();
 				if (pObj == NULL)
 				{
 					g_World.m_uidNew = 0;
@@ -1385,6 +1397,8 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 
 				g_World.m_uidNew = uid;
 				CScript script("DUPE");
+				script.m_iResourceFileIndex = s.m_iResourceFileIndex;
+				script.m_iLineNum = s.m_iLineNum;
 				bool bRc = pObj->r_Verb(script, pSrc);
 
 				if (this != &g_Serv)
@@ -1415,6 +1429,8 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 					g_World.m_uidNew = (dword)0;
 					return false;
 				}
+				pItem->m_iCreatedResScriptIdx = s.m_iResourceFileIndex;
+				pItem->m_iCreatedResScriptLine = s.m_iLineNum;
 
 				if ( ppCmd[1] )
 					pItem->SetAmount(Exp_GetWVal(ppCmd[1]));
@@ -1464,6 +1480,9 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 					return false;
 				}
 
+				pChar->m_iCreatedResScriptIdx = s.m_iResourceFileIndex;
+				pChar->m_iCreatedResScriptLine = s.m_iLineNum;
+
 				g_World.m_uidNew = pChar->GetUID();
 
 				if ( this != &g_Serv )
@@ -1481,43 +1500,48 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 			}
 			break;
         case SSV_NEWSUMMON:
-        {
-            tchar * ppCmd[2];
-            size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppCmd, CountOf(ppCmd), ",");
-            if (iQty <= 0)
-                return false;
-            CREID_TYPE id = static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType(RES_CHARDEF, ppCmd[0]));
-            CChar * pChar = CChar::CreateNPC(id);
-            CChar * pCharSrc = NULL;
-            if (!pChar)
-            {
-                g_World.m_uidNew = (dword)0;
-                return false;
-            }
+	        {
+	            tchar * ppCmd[2];
+	            size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppCmd, CountOf(ppCmd), ",");
+	            if (iQty <= 0)
+	                return false;
 
-            if (this != &g_Serv)
-            {
-                pCharSrc = pSrc->GetChar();
-                if (pCharSrc)
-                    pCharSrc->m_Act_Targ = g_World.m_uidNew;
-                else
-                {
-                    const CClient *pClient = dynamic_cast<CClient *>(this);
-                    if (pClient && pClient->GetChar())
-                        pClient->GetChar()->m_Act_Targ = g_World.m_uidNew;
-                }
-            }
-            pChar->OnSpellEffect(SPELL_Summon, pCharSrc, pCharSrc->Skill_GetAdjusted(SKILL_MAGERY), NULL, false);
-            g_World.m_uidNew = pChar->GetUID();
-            int iDuration = Exp_GetVal(ppCmd[1]);
-            if (iDuration)
-            {
-                CItem * pItemRune = pChar->LayerFind(LAYER_SPELL_Summon);
-                if (pItemRune)
-                    pItemRune->SetTimeout(iDuration * TICK_PER_SEC);
-            }
-        }break;
+	            CREID_TYPE id = static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType(RES_CHARDEF, ppCmd[0]));
+	            CChar * pChar = CChar::CreateNPC(id);
+	            CChar * pCharSrc = NULL;
+	            if (!pChar)
+	            {
+	                g_World.m_uidNew = (dword)0;
+	                return false;
+	            }
 
+				pChar->m_iCreatedResScriptIdx = s.m_iResourceFileIndex;
+				pChar->m_iCreatedResScriptLine = s.m_iLineNum;
+
+	            if (this != &g_Serv)
+	            {
+	                pCharSrc = pSrc->GetChar();
+	                if (pCharSrc)
+	                    pCharSrc->m_Act_Targ = g_World.m_uidNew;
+	                else
+	                {
+	                    const CClient *pClient = dynamic_cast<CClient *>(this);
+	                    if (pClient && pClient->GetChar())
+	                        pClient->GetChar()->m_Act_Targ = g_World.m_uidNew;
+	                }
+	            }
+
+	            pChar->OnSpellEffect(SPELL_Summon, pCharSrc, pCharSrc->Skill_GetAdjusted(SKILL_MAGERY), NULL, false);
+	            g_World.m_uidNew = pChar->GetUID();
+	            int iDuration = Exp_GetVal(ppCmd[1]);
+	            if (iDuration)
+	            {
+	                CItem * pItemRune = pChar->LayerFind(LAYER_SPELL_Summon);
+	                if (pItemRune)
+	                    pItemRune->SetTimeout(iDuration * TICK_PER_SEC);
+	            }
+	        }
+			break;
 		case SSV_SHOW:
 			{
 				CSString sVal;
@@ -2407,7 +2431,9 @@ jump_in:
 								{
 									CScriptLineContext StartContext = s.GetContext();
 									CScriptLineContext EndContext = StartContext;
-									iRet = pCont->OnContTriggerForLoop( s, pSrc, pArgs, pResult, StartContext, EndContext, g_Cfg.ResourceGetID( ( iCmd == SK_FORCONTID ) ? RES_ITEMDEF : RES_TYPEDEF, static_cast<lpctstr &>(ppParsed)), 0, ppArgs[1] != NULL ? Exp_GetVal( ppArgs[1] ) : 255 );
+									iRet = pCont->OnContTriggerForLoop( s, pSrc, pArgs, pResult, StartContext, EndContext,
+										g_Cfg.ResourceGetID( ( iCmd == SK_FORCONTID ) ? RES_ITEMDEF : RES_TYPEDEF, static_cast<lpctstr &>(ppParsed)),
+										0, ppArgs[1] != NULL ? Exp_GetVal( ppArgs[1] ) : 255 );
 								}
 								else
 								{
@@ -2509,7 +2535,7 @@ jump_in:
 					{
 						iRet = OnTriggerRun( s, fTrigger ? TRIGRUN_SECTION_TRUE : TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult );
 						if (( iRet < TRIGRET_ENDIF ) || ( iRet >= TRIGRET_RET_HALFBAKED ))
-							return( iRet );
+							return iRet ;
 						if ( iRet == TRIGRET_ENDIF )
 							break;
 						fBeenTrue |= fTrigger;
@@ -2592,14 +2618,10 @@ jump_in:
 								pArgs->m_v.SetCount(0);
 							}
 							else
-							{
 								fRes = pRef->r_Call(argRaw, pSrc, pArgs, &sVal);
-							}
 						}
 						else
-						{
 							fRes = false;
-						}
 					}
 					else if ( !strnicmp(s.GetKey(), "FullTrigger", 11 ) )
 					{
@@ -2662,16 +2684,13 @@ jump_in:
 								pArgs->m_v.SetCount(0);
 							}
 							else
-							{
 								tRet = pRef->OnTrigger( psTmp, pSrc, pArgs);
-							}
+
 							pArgs->m_VarsLocal.SetNum("return",tRet,false);
 							fRes = tRet > 0 ? 1 : 0;
 						}
 						else
-						{
 							fRes = false;
-						}
 					}
 					else
 					{
@@ -2680,9 +2699,7 @@ jump_in:
 					}
 
 					if ( !fRes  )
-					{
 						DEBUG_MSG(( "WARNING: Trigger Bad Verb '%s','%s'\n", s.GetKey(), s.GetArgStr()));
-					}
 				}
 				break;
 		}
@@ -3550,9 +3567,7 @@ bool CSFileObjContainer::r_Verb( CScript & s, CTextConsole * pSrc )
 		}
 
 		if ( pFirstUsed != NULL )
-		{
 			return static_cast<CScriptObj *>(pFirstUsed)->r_Verb(s,pSrc);
-		}
 
 		return false;
 	}
@@ -3563,21 +3578,20 @@ bool CSFileObjContainer::r_Verb( CScript & s, CTextConsole * pSrc )
 	{
 		if ( strchr( pszKey, '.') ) // 0.blah format
 		{
-			size_t nNumber = (size_t)( Exp_GetVal(pszKey) );
-
+			size_t nNumber = Exp_GetSTVal(pszKey);
 			if ( nNumber < sFileList.size() )
 			{
-				SKIP_SEPARATORS(pszKey);
-
 				CSFileObj * pFile = sFileList.at(nNumber);
-
 				if ( pFile != NULL )
 				{
 					CScriptObj* pObj = dynamic_cast<CScriptObj*>(pFile);
 					if (pObj != NULL)
 					{
-						CScript psContinue(pszKey, s.GetArgStr());
-						return pObj->r_Verb(psContinue, pSrc);
+						SKIP_SEPARATORS(pszKey);
+						CScript script(pszKey, s.GetArgStr());
+						script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
+						script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
+						return pObj->r_Verb(script, pSrc);
 					}
 				}
 
@@ -3585,7 +3599,7 @@ bool CSFileObjContainer::r_Verb( CScript & s, CTextConsole * pSrc )
 			}
 		}
 
-		return( this->r_LoadVal( s ) );
+		return ( this->r_LoadVal( s ) );
 	}
 
 	switch ( index )

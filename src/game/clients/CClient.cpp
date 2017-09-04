@@ -465,23 +465,36 @@ bool CClient::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 				pRef = m_pHouseDesign;
 				return true;
 			case CLIR_PARTY:
-				if ( !this->m_pChar->m_pParty )
+				if (!strnicmp(pszKey, "CREATE", 7))
 				{
-					lpctstr oldKey = pszKey;
-					if ( !strnicmp(pszKey, "CREATE", 7) )
-						pszKey +=7;
+					if (this->m_pChar->m_pParty)
+						return false;
 
-					SKIP_SEPARATORS(pszKey);
-					CChar * pChar = static_cast<CChar*>(static_cast<CUID>(Exp_GetSingle(pszKey)).CharFind());
-					if ( !pChar )
-						return false;
-					if ( !pChar->IsClient() )
-						return false;
-					CPartyDef::AcceptEvent( pChar , this->GetChar()->GetUID(), true);
-					if ( !this->m_pChar->m_pParty )
-						return false;
+					lpctstr oldKey = pszKey;
+					pszKey += 7;
+
+					// Do i want to send the "joined" message to the party members?
+					int iSendMsgs = Exp_GetSingle(pszKey);
+					bool bSendMsgs = (iSendMsgs != 0) ? true : false;
+
+					// Add all the UIDs to the party
+					for (int ip = 0; ip < 10; ip++)
+					{
+						SKIP_ARGSEP(pszKey);
+						CChar * pChar = (static_cast<CUID>(Exp_GetSingle(pszKey))).CharFind();
+						if (!pChar)
+							continue;
+						if (!pChar->IsClient())
+							continue;
+						CPartyDef::AcceptEvent(pChar, this->GetChar()->GetUID(), true, bSendMsgs);
+
+						if (*pszKey == '\0')
+							break;
+					}
 					pszKey = oldKey;	// Restoring back to real pszKey, so we don't get errors for giving an uid instead of PDV_CREATE.
 				}
+				if (!this->m_pChar->m_pParty)
+					return false;
 				pRef = this->m_pChar->m_pParty;
 				return true;
 			case CLIR_TARG:
@@ -887,20 +900,20 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			// Add cliloc in @ClientTooltip trigger
 			{
 				tchar * ppLocArgs[256];
-				size_t qty = Str_ParseCmds(s.GetArgRaw(), ppLocArgs, CountOf(ppLocArgs), ",");
+				int qty = Str_ParseCmds(s.GetArgRaw(), ppLocArgs, CountOf(ppLocArgs), ",");
 				dword clilocid = Exp_GetVal(ppLocArgs[0]);
 
-				CSString LocArgs;
-				for ( size_t y = 1 ; y < qty; y++ )
+				CSString locArgs;
+				for (int y = 1 ; y < qty; y++ )
 				{
-					if ( LocArgs.GetLength() )
-						LocArgs += "\t";
-					LocArgs += ( !strncmp(ppLocArgs[y], "NULL", 4) ? " " : ppLocArgs[y] );
+					if ( locArgs.GetLength() )
+						locArgs += "\t";
+					locArgs += ( !strncmp(ppLocArgs[y], "NULL", 4) ? " " : ppLocArgs[y] );
 				}
 
 				if ( g_Cfg.m_wDebugFlags & DEBUGF_SCRIPTS )
-					g_Log.EventDebug("SCRIPT: addcliloc(%u,'%s')\n", clilocid, static_cast<lpctstr>(LocArgs));
-				this->m_TooltipData.Add(new CClientTooltip(clilocid, LocArgs));
+					g_Log.EventDebug("SCRIPT: addcliloc(%u,'%s')\n", clilocid, static_cast<lpctstr>(locArgs));
+				this->m_TooltipData.Add(new CClientTooltip(clilocid, locArgs));
 			}
 			break;
 		case CV_ADDCONTEXTENTRY:
@@ -1519,6 +1532,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					return true;
 				}
 			}
+
 			return CScriptObj::r_Verb( s, pSrc );	// used in the case of web pages to access server level things..
 	}
 	return true;

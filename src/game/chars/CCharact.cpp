@@ -361,8 +361,6 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 			default:
 				break;
 		}
-
-
 	}
 
 	pItem->Update();
@@ -1334,7 +1332,7 @@ void CChar::UpdateMove( const CPointMap & ptOld, CClient * pExcludeClient, bool 
 // Change in direction.
 void CChar::UpdateDir( DIR_TYPE dir )
 {
-	ADDTOCALLSTACK("CChar::UpdateDir");
+	ADDTOCALLSTACK("CChar::UpdateDir (DIR_TYPE)");
 
 	if ( dir != m_dirFace && dir > DIR_INVALID && dir < DIR_QTY )
 	{
@@ -1346,7 +1344,7 @@ void CChar::UpdateDir( DIR_TYPE dir )
 // Change in direction.
 void CChar::UpdateDir( const CPointMap & pt )
 {
-	ADDTOCALLSTACK("CChar::UpdateDir");
+	ADDTOCALLSTACK("CChar::UpdateDir (CPointMap)");
 
 	UpdateDir(GetTopPoint().GetDir(pt));
 }
@@ -1354,7 +1352,7 @@ void CChar::UpdateDir( const CPointMap & pt )
 // Change in direction.
 void CChar::UpdateDir( const CObjBaseTemplate * pObj )
 {
-	ADDTOCALLSTACK("CChar::UpdateDir");
+	ADDTOCALLSTACK("CChar::UpdateDir (CObjBaseTemplate)");
 	if ( pObj == NULL )
 		return;
 
@@ -1824,12 +1822,24 @@ bool CChar::ItemBounce( CItem * pItem, bool bDisplayMsg )
 		return true;
 
 	lpctstr pszWhere = NULL;
-	if ( pPack && CanCarry(pItem) )		// this can happen at load time
+	bool bCanAddToPack = false;
+
+	if (pPack && CanCarry(pItem))		// this can happen at load time
+	{
+		bCanAddToPack = true;
+		if (IsTrigUsed(TRIGGER_DROPON_SELF) || IsTrigUsed(TRIGGER_ITEMDROPON_SELF))
+		{
+			CScriptTriggerArgs Args(pItem);
+			if (pPack->OnTrigger(ITRIG_DROPON_SELF, this, &Args) == TRIGRET_RET_TRUE)
+				bCanAddToPack = false;
+		}
+	}
+
+	if (bCanAddToPack)
 	{
 		pszWhere = g_Cfg.GetDefaultMsg( DEFMSG_MSG_BOUNCE_PACK );
 		pItem->RemoveFromView();
 		pPack->ContentAdd(pItem);		// add it to pack
-		Sound(pItem->GetDropSound(pPack));
 	}
 	else
 	{
@@ -1844,11 +1854,18 @@ bool CChar::ItemBounce( CItem * pItem, bool bDisplayMsg )
 			pItem->Delete();
 			return false;
 		}
-		pszWhere = g_Cfg.GetDefaultMsg( DEFMSG_MSG_FEET );
-		pItem->RemoveFromView();
-		pItem->MoveToDecay(GetTopPoint(), pItem->GetDecayTime());	// drop it on ground
+
+		// Maybe in the trigger call i have changed/overridden the container, so drop it on ground
+		//	only if the item still hasn't a container
+		if (pItem->GetContainer() == NULL)
+		{
+			pszWhere = g_Cfg.GetDefaultMsg(DEFMSG_MSG_FEET);
+			pItem->RemoveFromView();
+			pItem->MoveToDecay(GetTopPoint(), pItem->GetDecayTime());	// drop it on ground
+		}
 	}
 
+	Sound(pItem->GetDropSound(pPack));
 	if ( bDisplayMsg )
 		SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_MSG_ITEMPLACE ), pItem->GetName(), pszWhere );
 	return true;
@@ -1966,9 +1983,7 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 	if ( pVar )
 	{
 		if ( pVar->GetValNum() )
-		{
 			iSound = static_cast<SOUND_TYPE>(pVar->GetValNum());
-		}
 	}
 	if ( CItemBase::IsVisibleLayer(layer) )	// visible layer ?
 		Sound(iSound);
@@ -2987,7 +3002,8 @@ CRegionBase * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool f
 	pArea = CheckValidMove(ptDst, &wBlockFlags, dir, &ClimbHeight, fPathFinding);
 	if ( !pArea )
 	{
-		WARNWALK(("CheckValidMove failed\n"));
+		if (g_Cfg.m_wDebugFlags & DEBUGF_WALK)
+			g_pLog->EventWarn("CheckValidMove failed\n");
 		return NULL;
 	}
 
@@ -3953,7 +3969,7 @@ bool CChar::OnTick()
             StatFlag_Clear(STATF_Fly);
 
         // Check targeting timeout, if set
-        if (GetClient()->m_Targ_Timeout.IsTimeValid() && g_World.GetTimeDiff(GetClient()->m_Targ_Timeout) <= 0)
+        if (GetClient()->m_Targ_Timeout.IsTimeValid() && (g_World.GetTimeDiff(GetClient()->m_Targ_Timeout) <= 0) )
             GetClient()->addTargetCancel();
     }
 
@@ -3963,9 +3979,9 @@ bool CChar::OnTick()
         // My turn to do some action.
         switch (Skill_Done())
         {
-        case -SKTRIG_ABORT:	EXC_SET("skill abort"); Skill_Fail(true); break;	// fail with no message or credit.
-        case -SKTRIG_FAIL:	EXC_SET("skill fail"); Skill_Fail(false); break;
-        case -SKTRIG_QTY:	EXC_SET("skill cleanup"); Skill_Cleanup(); break;
+			case -SKTRIG_ABORT:	EXC_SET("skill abort");		Skill_Fail(true);	break;	// fail with no message or credit.
+			case -SKTRIG_FAIL:	EXC_SET("skill fail");		Skill_Fail(false);	break;
+			case -SKTRIG_QTY:	EXC_SET("skill cleanup");	Skill_Cleanup();	break;
         }
 
         if (m_pNPC)		// What to do next ?
@@ -3996,12 +4012,12 @@ bool CChar::OnTick()
 
     EXC_CATCH;
 
-#ifdef _DEBUG
-    EXC_DEBUG_START;
-    g_Log.EventDebug("'%s' npc '%d' player '%d' client '%d' [0%lx]\n",
-        GetName(), (int)(m_pNPC ? m_pNPC->m_Brain : 0), (int)(m_pPlayer != 0), (int)IsClient(), (dword)GetUID());
-    EXC_DEBUG_END;
-#endif
+//#ifdef _DEBUG
+//    EXC_DEBUG_START;
+//    g_Log.EventDebug("'%s' isNPC? '%d' isPlayer? '%d' client '%d' [uid=0%" PRIx16 "]\n",
+//        GetName(), (int)(m_pNPC ? m_pNPC->m_Brain : 0), (int)(m_pPlayer != 0), (int)IsClient(), (dword)GetUID());
+//    EXC_DEBUG_END;
+//#endif
 
     return true;
 }

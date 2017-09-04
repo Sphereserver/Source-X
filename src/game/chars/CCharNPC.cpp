@@ -270,7 +270,7 @@ void CChar::NPC_LoadScript( bool fRestock )
 {
 	ADDTOCALLSTACK("CChar::NPC_LoadScript");
 	if ( m_pNPC == NULL )
-		// Set a default brian type til we get the real one from scripts.
+		// Set a default brain type til we get the real one from scripts.
 		SetNPCBrain(GetNPCBrain(false));	// should have a default brain. watch out for override vendor.
 
 	CCharBase * pCharDef = Char_GetDef();

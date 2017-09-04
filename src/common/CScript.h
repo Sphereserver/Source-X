@@ -12,21 +12,8 @@
 #include "CacheableScriptFile.h"
 
 #define SPHERE_SCRIPT		".scp"
-
 #define SCRIPT_MAX_SECTION_LEN 128
 
-#define ISWHITESPACE(ch)			(IsSpace(ch)||((uchar)ch)==0xa0)	// IsSpace
-#define GETNONWHITESPACE( pStr )	while ( ISWHITESPACE( (pStr)[0] )) { (pStr)++; }
-#define _IS_SWITCH(c)				((c) == '-' || (c) == '/' )	// command line switch.
-
-#define REMOVE_QUOTES( x )			\
-{									\
-	GETNONWHITESPACE( x );			\
-	if ( *x == '"' )	++x;				\
-		tchar * psX	= const_cast<tchar*>(strchr( x, '"' ));	\
-	if ( psX )						\
-		*psX	= '\0';				\
-}
 
 struct CScriptLineContext
 {
@@ -96,14 +83,13 @@ protected:
 
 protected:
 	tchar * GetKeyBufferRaw( size_t iSize );
-
-	bool ParseKey( lpctstr pszKey, lpctstr pszArgs );
 	size_t ParseKeyEnd();
 
 public:
 	static const char *m_sClassName;
 	tchar * GetKeyBuffer();
-	bool ParseKey( lpctstr pszKey );
+	bool ParseKey(lpctstr pszKey, lpctstr pszArgs);
+	bool ParseKey(lpctstr pszKey);
 	void ParseKeyLate();
 
 public:
@@ -124,15 +110,15 @@ private:
 class CScript : public PhysicalScriptFile, public CScriptKeyAlloc
 {
 private:
-	bool m_fSectionHead;	// File Offset to current section header. [HEADER]
+	bool m_fSectionHead;	// Does the File Offset point to current section header? [HEADER]
 	size_t  m_pSectionData;	// File Offset to current section data, under section header.
 
 public:
 	static const char *m_sClassName;
-	int m_iLineNum;		// for debug purposes if there is an error.
+	int m_iLineNum;					// for debug purposes if there is an error.
+	size_t	m_iResourceFileIndex;	// index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
 protected:
 	void InitBase();
-
 	virtual size_t Seek( size_t offset = 0, int iOrigin = SEEK_SET );
 
 public:

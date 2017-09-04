@@ -15,8 +15,28 @@
 #include "ListDefContMap.h"
 #include "sphere_library/CSRand.h"
 
+
+#define SKIP_SEPARATORS(p)			while ( *(p)=='.' ) { (p)++; }	// || ISWHITESPACE(*(p))
+#define SKIP_ARGSEP(p)				while ( *(p)== ',' || IsSpace(*p) ){ (p)++; }
+#define SKIP_IDENTIFIERSTRING(p)	while ( _ISCSYM(*p) ){ (p)++; }
+
+#define ISWHITESPACE(ch)			(IsSpace(ch) || ((uchar)ch==0xa0))	// IsSpace
+#define GETNONWHITESPACE( pStr )	while ( ISWHITESPACE( (pStr)[0] )) { (pStr)++; }
+#define _IS_SWITCH(c)				((c) == '-' || (c) == '/' )	// command line switch.
+
+#define REMOVE_QUOTES( x )			\
+{									\
+	GETNONWHITESPACE( x );			\
+	if ( *x == '"' )				\
+		++x;						\
+	tchar * psX	= const_cast<tchar*>(strchr( x, '"' ));	\
+	if ( psX )						\
+		*psX	= '\0';				\
+}
+
 #define _ISCSYMF(ch) ( IsAlpha(ch) || (ch)=='_')	// __iscsym or __iscsymf
 #define _ISCSYM(ch) ( isalnum(ch) || (ch)=='_')		// __iscsym or __iscsymf
+
 
 #ifndef M_PI 
 	#define M_PI 3.14159265358979323846
@@ -92,10 +112,10 @@ extern class CExpression
 {
 public:
 	static const char *m_sClassName;
-	CVarDefMap		m_VarDefs;		// Defined variables in sorted order.
-	CVarDefMap		m_VarGlobals;	// Global variables
-	CListDefMap		m_ListGlobals; // Global lists
-	CListDefMap		m_ListInternals; // Internal lists
+	CVarDefMap		m_VarDefs;			// Defined variables in sorted order.
+	CVarDefMap		m_VarGlobals;		// Global variables
+	CListDefMap		m_ListGlobals;		// Global lists
+	CListDefMap		m_ListInternals;	// Internal lists
 	CSString		m_sTmp;
 
 	//	defined default messages
@@ -123,11 +143,12 @@ public:
 	}
 
 	// Evaluate using the stuff we know.
-	llong GetSingle( lpctstr & pArgs );
-	llong GetVal( lpctstr & pArgs );
-	llong GetValMath( llong lVal, lpctstr & pExpr );
+	llong GetSingle(lpctstr & pArgs);
 	int GetRangeVals(lpctstr & pExpr, int64 * piVals, int iMaxQty);
 	int64 GetRange(lpctstr & pArgs);
+	llong GetValMath(llong llVal, lpctstr & pExpr);
+	llong GetVal(lpctstr & pArgs);
+
 
 public:
 	CExpression();

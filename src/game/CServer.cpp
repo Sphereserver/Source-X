@@ -575,10 +575,10 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 #ifdef _TESTEXCEPTION
 		case '$':	// call stack integrity
 			{
-#ifdef _EXCEPTIONS_DEBUG
+	#ifdef _EXCEPTIONS_DEBUG
 				{ // test without PAUSECALLSTACK
-					EXC_TRY("Test1");
 					ADDTOCALLSTACK("CServer::TestException1");
+					EXC_TRY("Test1");
 					throw CSError( LOGM_DEBUG, 0, "Test Exception #1");
 					}
 					catch (const CSError& e)
@@ -591,8 +591,8 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 				}
 
 				{ // test with PAUSECALLSTACK
-					EXC_TRY("Test2");
 					ADDTOCALLSTACK("CServer::TestException2");
+					EXC_TRY("Test2");
 					throw CSError( LOGM_DEBUG, 0, "Test Exception #2");
 					}
 					catch (const CSError& e)
@@ -604,9 +604,9 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 						EXC_CATCH_EXCEPTION(&e);
 					}
 				}
-#else
+	#else
 				throw CSError(LOGL_CRIT, E_FAIL, "This test requires exception debugging enabled");
-#endif
+	#endif
 			} break;
 		case '%':	// throw simple exception
 			{
@@ -767,7 +767,8 @@ longcommand:
 			}
 		}
 
-		if ( g_Cfg.IsConsoleCmd(low) ) pszText++;
+		if ( g_Cfg.IsConsoleCmd(low) )
+			pszText++;
 
 		CScript	script(pszText);
 		if ( !g_Cfg.CanUsePrivVerb(this, pszText, pSrc) )
@@ -1168,6 +1169,8 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			if ( pAccount && *pszKey )
 			{
 				CScript script(pszKey, s.GetArgStr());
+				script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
+				script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
 				return pAccount->r_LoadVal(script);
 			}
 			return false;
@@ -1201,7 +1204,9 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 				{
 					if ( pClient->GetChar() == NULL )
 						continue;
-					CScript script( s.GetArgStr() );
+					CScript script(s.GetArgStr());
+					script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
+					script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
 					pClient->GetChar()->r_Verb( script, pSrc );
 				}
 			}
@@ -1450,7 +1455,6 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 			break;
 		default:
 			return CScriptObj::r_Verb(s, pSrc);
-
 	}
 
 	if ( pszMsg && *pszMsg )
