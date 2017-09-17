@@ -2936,9 +2936,9 @@ do_default:
 						return true;
 					}
 
-					attackerIndex = Exp_GetSTVal(pszKey);
-					if ( attackerIndex < 0 )
+					if (! IsStrNumeric(pszKey) )
 						return false;
+					attackerIndex = Exp_GetSTVal(pszKey);
 
 					SKIP_SEPARATORS(pszKey);
 					if ( attackerIndex < Attacker() )

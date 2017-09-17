@@ -344,7 +344,8 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
 				// add empty arguments if they are provided
 				if ( (*s == ',') && (!fQuotes))
 				{
-					m_v.Add( '\0' );
+                    m_new_arguments.push_back(CSString("\0"));
+					m_v.Add( m_new_arguments[m_new_arguments.size() - 1].GetPtr() );
 					++s;
 					continue;
 				}
@@ -383,7 +384,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
 
 		if ( *pszKey == '\0' )
 		{
-			sVal.FormatVal((int)(iQty));
+			sVal.FormatVal((int)iQty);
 			return true;
 		}
 

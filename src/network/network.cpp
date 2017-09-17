@@ -3299,7 +3299,18 @@ bool NetworkInput::processGameClientData(NetState* state, Packet* buffer)
 		ASSERT(remainingLength == packet->getRemainingLength());
 		byte packetId = packet->getRemainingData()[0];
 		Packet* handler = m_thread->m_manager.getPacketManager().getHandler(packetId);
-
+		
+		if (g_Cfg.m_wDebugFlags & DEBUGF_PACKETS)
+		{
+			#ifdef _DEBUG
+				g_Log.Event(LOGM_DEBUG, "Parsing next packet into the received packet data stream (previous dump).\n");
+			#endif
+			Packet packetPart;
+			packetPart.writeData(packet->getRemainingData(), packet->getRemainingLength());
+			packetPart.resize(packet->getRemainingLength());
+			xRecordPacket(client, &packetPart, "sub-packet client->server");
+		}
+		
 		if (handler != NULL)
 		{
 			size_t packetLength = handler->checkLength(state, packet);
@@ -3322,7 +3333,7 @@ bool NetworkInput::processGameClientData(NetState* state, Packet* buffer)
 			// copy data to handler
 			handler->seek();
 			handler->writeData(packet->getRemainingData(), packetLength);
-			packet->skip((int)(packetLength));
+			packet->skip((int)packetLength);
 
 			// move to position 1 (no need for id) and fire onReceive()
 			handler->resize(packetLength);
@@ -3346,7 +3357,7 @@ bool NetworkInput::processGameClientData(NetState* state, Packet* buffer)
 			// unknown packet.. we could skip 1 byte at a time but this can produce
 			// strange behaviours (it's unlikely that only 1 byte is incorrect), so
 			// it's best to just discard everything we have
-			g_Log.Event(LOGM_CLIENTS_LOG|LOGL_WARN, "%x:Unknown game packet (0x%x) received.\n", state->id(), packetId);
+			g_Log.Event(LOGL_WARN, "%x:Unknown game packet (0x%x) received.\n", state->id(), packetId);
 			packet->skip((int)(remainingLength));
 			remainingLength = 0;
 		}

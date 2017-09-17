@@ -101,11 +101,7 @@ INCLUDE ("cmake/CMakeGitStatus.cmake")
 
 IF (SINGLE_TARGET)
 
-	IF (NOT CMAKE_BUILD_TYPE)
-		SET (CMAKE_BUILD_TYPE "filler")	# workaround, cmake is so buggy...
-	ENDIF (NOT CMAKE_BUILD_TYPE)
-
-	IF ((NOT ${CMAKE_BUILD_TYPE} STREQUAL "") OR (${CMAKE_BUILD_TYPE} STREQUAL "Release"))
+	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(R|r?)elease"))
 		ADD_EXECUTABLE (spheresvr_release
 					${game_SRCS}
 					${items_SRCS}
@@ -121,11 +117,11 @@ IF (SINGLE_TARGET)
 					${sqlite_SRCS}
 					${zlib_SRCS}
 					${tables_SRCS}
-		//			${docs_TEXT}
+		#			${docs_TEXT}
 			)
-	set_target_properties(spheresvr_release PROPERTIES OUTPUT_NAME SphereSvr${ARCH_BITS}_release)
-	ENDIF ((NOT ${CMAKE_BUILD_TYPE} STREQUAL "") OR (${CMAKE_BUILD_TYPE} STREQUAL "Release"))
-	IF ((NOT ${CMAKE_BUILD_TYPE} STREQUAL "") OR (${CMAKE_BUILD_TYPE} STREQUAL "Debug"))
+        set_target_properties(spheresvr_release PROPERTIES OUTPUT_NAME SphereSvr${ARCH_BITS}_release)
+	ENDIF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(R|r?)elease"))
+	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(D|d?)ebug"))
 		ADD_EXECUTABLE (spheresvr_debug
 					${game_SRCS}
 					${items_SRCS}
@@ -141,11 +137,11 @@ IF (SINGLE_TARGET)
 					${sqlite_SRCS}
 					${zlib_SRCS}
 					${tables_SRCS}
-		//			${docs_TEXT}
+		#			${docs_TEXT}
 			)
-	set_target_properties(spheresvr_debug PROPERTIES OUTPUT_NAME SphereSvr${ARCH_BITS}_debug)
-	ENDIF ((NOT ${CMAKE_BUILD_TYPE} STREQUAL "") OR (${CMAKE_BUILD_TYPE} STREQUAL "Debug"))
-	IF ((NOT ${CMAKE_BUILD_TYPE} STREQUAL "") OR (${CMAKE_BUILD_TYPE} STREQUAL "Nightly"))
+        set_target_properties(spheresvr_debug PROPERTIES OUTPUT_NAME SphereSvr${ARCH_BITS}_debug)
+	ENDIF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(D|d?)ebug"))
+	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(N|n?)ightly"))
 		ADD_EXECUTABLE (spheresvr_nightly
 					${game_SRCS}
 					${items_SRCS}
@@ -161,10 +157,10 @@ IF (SINGLE_TARGET)
 					${sqlite_SRCS}
 					${zlib_SRCS}
 					${tables_SRCS}
-		//			${docs_TEXT}
+		#			${docs_TEXT}
 			)
-	set_target_properties(spheresvr_nightly PROPERTIES OUTPUT_NAME SphereSvr${ARCH_BITS}_nightly)
-	ENDIF ((NOT ${CMAKE_BUILD_TYPE} STREQUAL "") OR (${CMAKE_BUILD_TYPE} STREQUAL "Nightly"))
+        set_target_properties(spheresvr_nightly PROPERTIES OUTPUT_NAME SphereSvr${ARCH_BITS}_nightly)
+	ENDIF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(N|n?)ightly"))
 
 ELSE (SINGLE_TARGET)
 

@@ -7,10 +7,6 @@
        subject to change. Applications should only use zlib.h.
      */
 
-#pragma once
-#ifndef INFFIXED_H
-#define INFFIXED_H
-
     static const code lenfix[512] = {
         {96,7,0},{0,8,80},{0,8,16},{20,8,115},{18,7,31},{0,8,112},{0,8,48},
         {0,9,192},{16,7,10},{0,8,96},{0,8,32},{0,9,160},{0,8,0},{0,8,128},
@@ -96,6 +92,3 @@
         {16,5,4},{24,5,769},{20,5,49},{28,5,12289},{18,5,13},{26,5,3073},
         {22,5,193},{64,5,0}
     };
-
-
-#endif // INFFIXED_H

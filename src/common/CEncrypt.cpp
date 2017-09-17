@@ -81,13 +81,8 @@ void CCrypt::ClearKeyTable(void)
 {
 	ADDTOCALLSTACK("CCrypt::ClearKeyTable");
 
-	for ( size_t i = 0; i < client_keys.size(); i++ )
-	{
-		CCryptClientKey* key = client_keys.at(i);
-
-		delete key;
-	}
-
+	for (auto it = client_keys.begin(), end = client_keys.end(); it != end; ++it)
+		delete *it;
 	client_keys.clear();
 }
 

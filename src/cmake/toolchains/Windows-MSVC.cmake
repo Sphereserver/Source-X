@@ -80,6 +80,7 @@ function (toolchain_exe_stuff)
 	TARGET_COMPILE_DEFINITIONS ( spheresvr PUBLIC
 	  # _WIN32 is always defined, even on 64 bits. Keeping it for compatibility with external code and libraries.
 		_WIN32
+		Z_PREFIX
 	  # Multi-threaded networking support.
 		_MTNETWORK
 	  # GIT defs.

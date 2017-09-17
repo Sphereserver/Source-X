@@ -59,7 +59,7 @@ function (toolchain_exe_stuff)
 
 	#-- Set common define macros.
 
-	SET (COMMON_DEFS "_WIN32;_32BITS;_GITVERSION;_MTNETWORK;_EXCEPTIONS_DEBUG;_CRT_SECURE_NO_WARNINGS;_WINSOCK_DEPRECATED_NO_WARNINGS")
+	SET (COMMON_DEFS "_WIN32;_32BITS;Z_PREFIX;_GITVERSION;_MTNETWORK;_EXCEPTIONS_DEBUG;_CRT_SECURE_NO_WARNINGS;_WINSOCK_DEPRECATED_NO_WARNINGS")
 		# _WIN32: always defined, even on 64 bits. Keeping it for compatibility with external code and libraries.
 		# _32BITS: 32 bits architecture.
 		# _MTNETWORK: multi-threaded networking support.

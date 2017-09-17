@@ -97,7 +97,7 @@ void CClient::Event_ChatButton(const nchar * pszName) // Client's chat button wa
 	// Ok, below here we have a chat system nickname
 	// Tell the chat system it has a new client using it
 	SetChatActive();
-	this->GetChar()->SetTriggerActive("");
+	this->GetChar()->SetTriggerActive();
 }
 
 void CClient::Event_ChatText( const nchar * pszText, int len, CLanguageID lang ) // Text from a client

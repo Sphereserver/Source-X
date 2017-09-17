@@ -2,10 +2,6 @@
  * Generated automatically by crc32.c
  */
 
-#pragma once
-#ifndef CRC32_H
-#define CRC32_H
-
 local const z_crc_t FAR crc_table[TBLS][256] =
 {
   {
@@ -443,6 +439,3 @@ local const z_crc_t FAR crc_table[TBLS][256] =
 #endif
   }
 };
-
-
-#endif // CRC32_H

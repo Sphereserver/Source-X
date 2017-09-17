@@ -99,6 +99,7 @@ public:
 
 	CSString					m_s1;			// ""ARGS" or "ARGS1" = string 1
 	CSString					m_s1_raw;		// RAW, used to build argv in runtime
+	std::vector<CSString>       m_new_arguments;// add new arguments at runtime
 
 	CSPtrTypeArray	<lpctstr>	m_v;
 
@@ -157,7 +158,7 @@ public:
 		if (iVar3)
 			*iVar3 = this->m_iN3;
 	}
-		
+
 	void Init( lpctstr pszStr );
 	bool r_Verb( CScript & s, CTextConsole * pSrc );
 	bool r_LoadVal( CScript & s );

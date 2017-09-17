@@ -229,7 +229,7 @@ CItem * CItem::CreateBase( ITEMID_TYPE id )	// static
 
 	ASSERT( pItem );
 	if (idErrorMsg && idErrorMsg != -1)
-		DEBUG_ERR(("CreateBase invalid item ID=0% " PRIx32 ", defaulting to ID=0%" PRIx32 ". Created UID=0%" PRIx32 "\n", idErrorMsg, id, (dword)pItem->GetUID()));
+		DEBUG_ERR(("CreateBase invalid item ID=0%" PRIx32 ", defaulting to ID=0%" PRIx32 ". Created UID=0%" PRIx32 "\n", idErrorMsg, id, (dword)pItem->GetUID()));
 
 	return pItem;
 }

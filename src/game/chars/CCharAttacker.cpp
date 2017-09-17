@@ -88,8 +88,6 @@ int64 CChar::Attacker_GetElapsed(size_t attackerIndex)
 		return -1;
 	if ( m_lastAttackers.size() <= attackerIndex )
 		return -1;
-	if ( attackerIndex < 0 )
-		return -1;
 	LastAttackers & refAttacker = m_lastAttackers.at(attackerIndex);
 	return refAttacker.elapsed;
 }
@@ -151,8 +149,6 @@ void CChar::Attacker_SetElapsed(CChar * pChar, int64 value)
 void CChar::Attacker_SetElapsed(size_t attackerIndex, int64 value)
 {
 	ADDTOCALLSTACK("CChar::Attacker_SetElapsed(size_t)");
-	if (attackerIndex < 0)
-		return;
 	if ( ! m_lastAttackers.size() )
 		return;
 	if ( m_lastAttackers.size() <= attackerIndex )
@@ -173,8 +169,6 @@ void CChar::Attacker_SetDam( CChar * pChar, int64 value)
 void CChar::Attacker_SetDam(size_t attackerIndex, int64 value)
 {
 	ADDTOCALLSTACK("CChar::Attacker_SetDam(size_t)");
-	if (attackerIndex < 0)
-		return;
 	if ( ! m_lastAttackers.size() )
 		return;
 	if ( m_lastAttackers.size() <= attackerIndex)
@@ -194,8 +188,6 @@ void CChar::Attacker_SetThreat(CChar * pChar, int64 value)
 void CChar::Attacker_SetThreat(size_t attackerIndex, int64 value)
 {
 	ADDTOCALLSTACK("CChar::Attacker_SetThreat(int)");
-	if (attackerIndex < 0)
-		return;
 	if (m_pPlayer)
 		return;
 	if (!m_lastAttackers.size())
@@ -216,9 +208,7 @@ void CChar::Attacker_SetIgnore(CChar * pChar, bool fIgnore)
 // Ignoring this pChar on Hit checks
 void CChar::Attacker_SetIgnore(size_t attackerIndex, bool fIgnore)
 {
-	ADDTOCALLSTACK("CChar::Attacker_SetIgnore(int)");
-	if (attackerIndex < 0)
-		return;
+	ADDTOCALLSTACK("CChar::Attacker_SetIgnore(int)");\
 	if (!m_lastAttackers.size())
 		return;
 	if (m_lastAttackers.size() <= attackerIndex)
@@ -314,7 +304,7 @@ CChar * CChar::Attacker_GetUID(size_t attackerIndex)
 bool CChar::Attacker_Delete(size_t attackerIndex, bool bForced, ATTACKER_CLEAR_TYPE type)
 {
 	ADDTOCALLSTACK("CChar::Attacker_Delete(size_t)");
-	if (!m_lastAttackers.size() || (attackerIndex < 0) || (m_lastAttackers.size() <= attackerIndex))
+	if (!m_lastAttackers.size() || (m_lastAttackers.size() <= attackerIndex))
 		return false;
 	LastAttackers &refAttacker = m_lastAttackers.at(attackerIndex);
 	CChar *pChar = static_cast<CUID>(refAttacker.charUID).CharFind();

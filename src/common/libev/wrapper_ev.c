@@ -1,4 +1,4 @@
-// Current LibEV version: 4.22
+// Current LibEV version: 4.24
 
 #include "wrapper_ev.h"
 

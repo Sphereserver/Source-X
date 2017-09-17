@@ -189,6 +189,16 @@ void SetExceptionTranslator()
 	void _cdecl Signal_Hangup( int sig = 0 ) // If shutdown is initialized
 	{
 		UNREFERENCED_PARAMETER(sig);
+		
+		#ifdef THREAD_TRACK_CALLSTACK
+			static bool _Signal_Hangup_stack_printed = false;
+			if (!_Signal_Hangup_stack_printed)
+			{
+				StackDebugInformation::printStackTrace();
+				_Signal_Hangup_stack_printed = true;
+			}
+		#endif
+		
 		if ( !g_Serv.m_fResyncPause )
 			g_World.Save(true);
 
@@ -200,6 +210,14 @@ void SetExceptionTranslator()
 		sigset_t set;
 
 		g_Log.Event( LOGL_FATAL, "Server Unstable: %s\n", strsignal(sig) );
+		#ifdef THREAD_TRACK_CALLSTACK
+			static bool _Signal_Terminate_stack_printed = false;
+			if (!_Signal_Terminate_stack_printed)
+			{
+				StackDebugInformation::printStackTrace();
+				_Signal_Terminate_stack_printed = true;
+			}
+		#endif
 
 		if ( sig )
 		{
@@ -209,8 +227,10 @@ void SetExceptionTranslator()
 			sigprocmask(SIG_UNBLOCK, &set, NULL);
 		}
 
-		pthread_exit(0);
 		g_Serv.SetExitFlag(SIGABRT);
+		for (size_t i = 0; i < ThreadHolder::getActiveThreads(); i++)
+			ThreadHolder::getThreadAt(i)->terminate(false);
+		exit(EXIT_FAILURE);
 	}
 
 	void _cdecl Signal_Break( int sig = 0 )
