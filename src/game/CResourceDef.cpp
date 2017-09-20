@@ -14,27 +14,25 @@
 int CValueRangeDef::GetRandomLinear( int iPercent ) const
 {
 	ADDTOCALLSTACK("CValueRangeDef::GetRandomLinear");
-	return( ( GetRandom() + GetLinear(iPercent) ) / 2 );
+	return ( ( GetRandom() + GetLinear(iPercent) ) / 2 );
 }
 
 bool CValueRangeDef::Load( tchar * pszDef )
 {
 	ADDTOCALLSTACK("CValueRangeDef::Load");
-	// Typically in {lo# hi#} format. is hi#,lo# is ok too ???
+
+	// it can be a range (with format {lo# hi#}) or a single value, even without brackets,
+	//	so we don't need a warning if GetRangeVals doesn't find the brackets
 	int64 piVal[2];
-	int iQty = g_Exp.GetRangeVals( pszDef, piVal, CountOf(piVal));
-	if ( iQty< 0 )
+	int iQty = g_Exp.GetRangeVals( pszDef, piVal, CountOf(piVal), true);
+	if ( iQty <= 0 )
 		return false;
 
 	m_iLo = piVal[0];
 	if ( iQty > 1 )
-	{
 		m_iHi = piVal[1];
-	}
 	else
-	{
 		m_iHi = m_iLo;
-	}
 	return true;
 }
 

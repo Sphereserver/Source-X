@@ -861,27 +861,45 @@ bool CResource::r_LoadVal( CScript &s )
 				ok = false;
 				break;
 			}
-
 			if ( ok && str.size() > 0 )
-			{
 				return g_MapList.Load(ATOI(str.c_str()), s.GetArgRaw());
-			}
-			else
+			
+			size_t length = str.size();
+
+			if ( length >= 2 /*at least .X*/ && str[0] == '.' && isdigit(str[1]) )
 			{
-				size_t length = str.size();
+				lpctstr pszStr = &(str[1]);
+				int nMapNumber = Exp_GetVal(pszStr);
 
-				if ( length >= 2 /*at least .X*/ && str[0] == '.' && isdigit(str[1]) )
+				if ( g_MapList.IsMapSupported(nMapNumber) )
 				{
-					lpctstr pszStr = &(str[1]);
-					int nMapNumber = Exp_GetVal(pszStr);
+					SKIP_SEPARATORS(pszStr);
 
-					if ( g_MapList.IsMapSupported(nMapNumber) )
+					if ( !strnicmp(pszStr, "ALLSECTORS", 10) )
 					{
+						int nSectors = g_MapList.GetSectorQty(nMapNumber);
+						pszStr = s.GetArgRaw();
+
+						if ( pszStr && *pszStr )
+						{
+							CScript script(pszStr);
+							script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
+							script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
+							for ( int nIndex = 0; nIndex < nSectors; ++nIndex )
+								g_World.GetSector(nMapNumber, nIndex)->r_Verb(script, &g_Serv);
+						}
+
+						return true;
+					}
+					else if ( !strnicmp( pszStr, "SECTOR.",7 ) )
+					{
+						pszStr = pszStr + 7;
+						int iSecNumber = Exp_GetVal(pszStr);
+						int nSectors = g_MapList.GetSectorQty(nMapNumber);
 						SKIP_SEPARATORS(pszStr);
 
-						if ( !strnicmp(pszStr, "ALLSECTORS", 10) )
+						if ((iSecNumber > 0) && (iSecNumber <=  nSectors))
 						{
-							int nSectors = g_MapList.GetSectorQty(nMapNumber);
 							pszStr = s.GetArgRaw();
 
 							if ( pszStr && *pszStr )
@@ -889,41 +907,18 @@ bool CResource::r_LoadVal( CScript &s )
 								CScript script(pszStr);
 								script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
 								script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
-								for ( int nIndex = 0; nIndex < nSectors; ++nIndex )
-									g_World.GetSector(nMapNumber, nIndex)->r_Verb(script, &g_Serv);
+								g_World.GetSector(nMapNumber, iSecNumber-1)->r_Verb(script, &g_Serv);
 							}
-
-							return true;
 						}
-						else if ( !strnicmp( pszStr, "SECTOR.",7) )
-						{
-							pszStr = pszStr + 7;
-							int iSecNumber = Exp_GetVal(pszStr);
-							int nSectors = g_MapList.GetSectorQty(nMapNumber);
-							SKIP_SEPARATORS(pszStr);
+						else
+							g_Log.EventError("Invalid Sector #%d for Map %d\n", iSecNumber, nMapNumber);
 
-							if ((iSecNumber > 0) && (iSecNumber <=  nSectors))
-							{
-								pszStr = s.GetArgRaw();
-
-								if ( pszStr && *pszStr )
-								{
-									CScript script(pszStr);
-									script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
-									script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
-									g_World.GetSector(nMapNumber, iSecNumber-1)->r_Verb(script, &g_Serv);
-								}
-							}
-							else
-								g_Log.EventError("Invalid Sector #%d for Map %d\n", iSecNumber, nMapNumber);
-
-							return true;
-						}
+						return true;
 					}
 				}
-				DEBUG_ERR(("Bad usage of MAPx. Check your sphere.ini or scripts (SERV.MAP is a read only property)\n"));
-				return false;
 			}
+			DEBUG_ERR(("Bad usage of MAPx. Check your sphere.ini or scripts (SERV.MAP is a read only property)\n"));
+			return false;
 		}
 		else if ( s.IsKeyHead("PACKET", 6) )	//	PACKETx=<function name to execute upon packet>
 		{
@@ -1283,16 +1278,22 @@ bool CResource::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 		if ( !strnicmp(pszKey, "MAP(", 4) )
 		{
 			pszKey += 4;
-			tchar * pszArgsNext;
-			Str_Parse( const_cast<tchar*>(pszKey), &(pszArgsNext), ")" );
 			sVal.FormatVal(0);
+
+			// Parse the arguments after the round brackets
+			tchar * pszArgsNext;
+			Str_Parse( const_cast<tchar*>(pszKey), &pszArgsNext, ")" );
 
 			CPointMap pt;
 			if ( IsDigit( pszKey[0] ) || pszKey[0] == '-' )
 			{
-				pt.m_map = 0; pt.m_z = 0;
+				// Set the default values
+				pt.m_map = 0;
+				pt.m_z = 0;
+
+				// Parse the arguments inside the round brackets
 				tchar * ppVal[4];
-				size_t iArgs = Str_ParseCmds( const_cast<tchar*>(pszKey), ppVal, CountOf( ppVal ), "," );
+				int iArgs = Str_ParseCmds( const_cast<tchar*>(pszKey), ppVal, CountOf( ppVal ), "," );
 
 				switch ( iArgs )
 				{

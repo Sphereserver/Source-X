@@ -35,7 +35,7 @@
 	PRIu64		// llong, unsigned
 
 	Optional (for now):
-	all the others
+	all of the others
 */
 
 typedef double					realtype;
@@ -83,13 +83,13 @@ typedef	uint64_t		uint64;
 
 	#include <wchar.h>
 	#ifdef UNICODE
-		typedef	char16_t			tchar;
+		typedef	char16_t		tchar;
 	#else
 		typedef char			tchar;
 	#endif
-	typedef char16_t				wchar;
+	typedef char16_t			wchar;
 	typedef char16_t *			lpwstr;
-	typedef const char16_t *		lpcwstr;
+	typedef const char16_t *	lpcwstr;
 	typedef	char *				lpstr;
 	typedef	const char *		lpcstr;
 	typedef	tchar *				lptstr;

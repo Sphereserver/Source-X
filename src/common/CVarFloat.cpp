@@ -757,7 +757,7 @@ realtype CVarFloat::GetRandVal2( realtype dMin, realtype dMax )
 
 	realtype dTotalWeight = 0;
 	int i = 1;
-	for ( ; i < iQty; i+=2 )
+	for ( ; i+1 < iQty; i+=2 )
 	{
 		if ( ! dVals[i] )	// having a weight of 0 is very strange !
 		{
@@ -770,7 +770,7 @@ realtype CVarFloat::GetRandVal2( realtype dMin, realtype dMax )
 	dTotalWeight = GetRandVal(dTotalWeight) + 1;
 	// Now loop to that value
 	i = 1;
-	for ( ; i<iQty; i+=2 )
+	for ( ; i+1 < iQty; i+=2 )
 	{
 		dTotalWeight -= dVals[i];
 		if ( dTotalWeight <= 0 )
@@ -801,11 +801,6 @@ int CVarFloat::GetRangeVals( lpctstr & pExpr, realtype * piVals, short int iMaxQ
 		piVals[iQty] = GetSingle( pExpr );
 		if ( ++iQty >= iMaxQty )
 			break;
-		if ( pExpr[0] == '-' && iQty == 1 )	// range separator. (if directly after, I know this is sort of strange)
-		{
-			++pExpr;	// ??? This is stupid. get rid of this and clean up it's use in the scripts.
-			continue;
-		}
 
 		GETNONWHITESPACE(pExpr);
 

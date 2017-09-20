@@ -77,10 +77,10 @@ tchar * CScriptKey::GetArgStr( bool * fQuoted )	// this could be a quoted string
 	if ( *pStr != '"' )
 		return pStr ;
 
-	pStr++;
+	++pStr;
 	//tchar * pEnd = strchr( pStr, '"' );
-	// search for last qoute sybol starting from the end
-	for (tchar * pEnd = pStr + strlen( pStr ) - 1; pEnd >= pStr; pEnd-- )
+	// search for last quote symbol starting from the end
+	for (tchar * pEnd = pStr + strlen( pStr ) - 1; pEnd >= pStr; --pEnd )
 	{
 		if ( *pEnd == '"' )
 		{
@@ -92,11 +92,6 @@ tchar * CScriptKey::GetArgStr( bool * fQuoted )	// this could be a quoted string
 	}
 
 	return pStr ;
-}
-
-tchar * CScriptKey::GetArgStr()
-{
-	return GetArgStr( NULL );
 }
 
 dword CScriptKey::GetArgFlag( dword dwStart, dword dwMask )
@@ -260,12 +255,10 @@ tchar * CScriptKeyAlloc::GetKeyBufferRaw( size_t iLen )
 	// iLen = length of the string we want to hold.
 	if ( iLen > SCRIPT_MAX_LINE_LEN )
 		iLen = SCRIPT_MAX_LINE_LEN;
-	iLen ++;	// add null.
+	++iLen;	// add null.
 
 	if ( m_Mem.GetDataLength() < iLen )
-	{
 		m_Mem.Alloc( iLen );
-	}
 
 	m_pszKey = m_pszArg = GetKeyBuffer();
 	m_pszKey[0] = '\0';
@@ -325,7 +318,7 @@ bool CScriptKeyAlloc::ParseKey( lpctstr pszKey, lpctstr pszVal )
 
 	if ( pszVal )
 	{
-		m_pszArg ++;
+		++m_pszArg;
 		lenval = m_Mem.GetDataLength() - 2;
 		strcpylen( m_pszArg, pszVal, (int)( lenval - lenkey ) + 1 );	// strcpylen
 	}
@@ -342,7 +335,7 @@ size_t CScriptKeyAlloc::ParseKeyEnd()
 	ASSERT(m_pszKey);
 
 	int len = 0;
-	for ( ; len < SCRIPT_MAX_LINE_LEN; len++ )
+	for ( ; len < SCRIPT_MAX_LINE_LEN; ++len )
 	{
 		tchar ch = m_pszKey[len];
 		if ( ch == '\0' )
@@ -451,7 +444,7 @@ bool CScript::ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened 
 
 	while ( PhysicalScriptFile::ReadString( GetKeyBufferRaw(SCRIPT_MAX_LINE_LEN), SCRIPT_MAX_LINE_LEN ))
 	{
-		m_iLineNum++;
+		++m_iLineNum;
 		if ( fRemoveBlanks )
 		{
 			if ( ParseKeyEnd() <= 0 )
@@ -531,9 +524,9 @@ bool CScript::FindNextSection()
 
 foundit:
 	// Parse up the section name.
-	m_pszKey++;
+	++m_pszKey;
 	size_t len = strlen( m_pszKey );
-	for ( size_t i = 0; i < len; i++ )
+	for ( size_t i = 0; i < len; ++i )
 	{
 		if ( m_pszKey[i] == ']' )
 		{
@@ -650,7 +643,7 @@ bool CScript::ReadKeyParse() // Read line from script
 			tchar *	pQuote	= const_cast<tchar*>(strchr( pszArgs+1, '"' ));
 			if ( pQuote )
 			{
-				pszArgs++;
+				++pszArgs;
 				*pQuote	= '\0';
 			}
 		}

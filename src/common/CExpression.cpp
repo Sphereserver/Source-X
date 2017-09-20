@@ -35,7 +35,7 @@ dword ahextoi( lpctstr pszStr ) // Convert hex string to integer
 	{
 		if (*++pszStr != '.')
 			bHex = true;
-		pszStr--;
+		--pszStr;
 	}
 
 	dword val = 0;
@@ -75,7 +75,7 @@ int64 ahextoi64( lpctstr pszStr ) // Convert hex string to int64
 	{
 		if (*++pszStr != '.')
 			bHex = true;
-		pszStr--;
+		--pszStr;
 	}
 
 	int64 val = 0;
@@ -98,7 +98,7 @@ int64 ahextoi64( lpctstr pszStr ) // Convert hex string to int64
 
 		val *= ( bHex ? 0x10 : 10 );
 		val += ch;
-		pszStr ++;
+		++pszStr;
 	}
 	return val;
 }
@@ -124,11 +124,13 @@ bool IsCharNumeric( char & Test )
 
 bool IsStrEmpty( lpctstr pszTest )
 {
-	if ( !pszTest || !*pszTest ) return true;
+	if ( !pszTest || !*pszTest )
+		return true;
 
 	do
 	{
-		if ( !IsSpace(*pszTest) ) return false;
+		if ( !IsSpace(*pszTest) )
+			return false;
 	}
 	while ( *(++pszTest) );
 	return true;
@@ -136,11 +138,13 @@ bool IsStrEmpty( lpctstr pszTest )
 
 bool IsStrNumericDec( lpctstr pszTest )
 {
-	if ( !pszTest || !*pszTest ) return false;
+	if ( !pszTest || !*pszTest )
+		return false;
 
 	do
 	{
-		if ( !IsDigit(*pszTest) ) return false;
+		if ( !IsDigit(*pszTest) )
+			return false;
 	}
 	while ( *(++pszTest) );
 
@@ -152,9 +156,10 @@ bool IsStrNumeric( lpctstr pszTest )
 {
 	if ( !pszTest || !*pszTest )
 		return false;
-	bool	fHex	= false;
+
+	bool fHex = false;
 	if ( pszTest[0] == '0' )
-		fHex	= true;
+		fHex = true;
 
 	do
 	{
@@ -178,17 +183,17 @@ bool IsSimpleNumberString( lpctstr pszTest )
 	bool fHextDigitStart	= false;
 	bool fWhiteSpace		= false;
 
-	for ( ; ; pszTest++ )
+	for ( ; ; ++pszTest )
 	{
 		tchar ch = *pszTest;
 		if ( ! ch )
-		{
 			return true;
-		}
+
 		if (( ch >= 'A' && ch <= 'F') || ( ch >= 'a' && ch <= 'f' ))	// isxdigit
 		{
 			if ( ! fHextDigitStart )
 				return false;
+
 			fWhiteSpace = false;
 			fMathSep = false;
 			continue;
@@ -203,23 +208,21 @@ bool IsSimpleNumberString( lpctstr pszTest )
 		{
 			if ( fWhiteSpace && ! fMathSep )
 				return false;
+
 			if ( ch == '0' )
-			{
 				fHextDigitStart = true;
-			}
 			fWhiteSpace = false;
 			fMathSep = false;
 			continue;
 		}
 		if ( ch == '/' && pszTest[1] != '/' )
-			fMathSep	= true;
+			fMathSep = true;
 		else
 			fMathSep = strchr("+-\\*~|&!%^()", ch ) ? true : false ;
 
 		if ( ! fMathSep )
-		{
 			return false;
-		}
+
 		fHextDigitStart = false;
 		fWhiteSpace = false;
 	}
@@ -229,7 +232,7 @@ static size_t GetIdentifierString( tchar * szTag, lpctstr pszArgs )
 {
 	// Copy the identifier (valid char set) out to this buffer.
 	size_t i = 0;
-	for ( ; pszArgs[i]; i++ )
+	for ( ; pszArgs[i]; ++i )
 	{
 		if ( ! _ISCSYM(pszArgs[i]))
 			break;
@@ -281,7 +284,7 @@ int Calc_GetLog2( uint iVal )
 {
 	// This is really log2 + 1
 	int i = 0;
-	for ( ; iVal ; i++ )
+	for ( ; iVal ; ++i )
 	{
 		ASSERT( i < 32 );
 		iVal >>= 1 ;
@@ -405,7 +408,7 @@ llong CExpression::GetSingle( lpctstr & pszArgs )
 
 	lpctstr orig = pszArgs;
 	if (pszArgs[0]=='.')
-		pszArgs++;
+		++pszArgs;
 
 	if ( pszArgs[0] == '0' )	// leading '0' = hex value.
 	{
@@ -418,7 +421,7 @@ llong CExpression::GetSingle( lpctstr & pszArgs )
 
 		lpctstr pStart = pszArgs;
 		ullong val = 0;
-		for (;;)
+		while (true)
 		{
 			tchar ch = *pszArgs;
 			if ( IsDigit(ch) )
@@ -426,7 +429,7 @@ llong CExpression::GetSingle( lpctstr & pszArgs )
 			else
 			{
 				ch = static_cast<tchar>(tolower(ch));
-				if ( ch > 'f' || ch <'a' )
+				if ( ch > 'f' || ch < 'a' )
 				{
 					if ( ch == '.' && pStart[0] != '0' )	// ok i'm confused. it must be decimal.
 					{
@@ -439,7 +442,7 @@ llong CExpression::GetSingle( lpctstr & pszArgs )
 			}
 			val *= 0x10;
 			val += ch;
-			pszArgs ++;
+			++pszArgs;
 		}
 		return (llong)val;
 	}
@@ -448,7 +451,7 @@ llong CExpression::GetSingle( lpctstr & pszArgs )
 		// A decminal number
 try_dec:
 		llong iVal = 0;
-		for ( ; ; pszArgs++ )
+		for ( ; ; ++pszArgs )
 		{
 			if ( *pszArgs == '.' )
 				continue;	// just skip this.
@@ -467,26 +470,26 @@ try_dec:
 		switch ( pszArgs[0] )
 		{
 		case '{':
-			pszArgs ++;
+			++pszArgs;
 			return GetRange( pszArgs );
 		case '[':
 		case '(': // Parse out a sub expression.
-			pszArgs ++;
+			++pszArgs;
 			return GetVal( pszArgs );
 		case '+':
-			pszArgs++;
+			++pszArgs;
 			break;
 		case '-':
-			pszArgs++;
+			++pszArgs;
 			return -GetSingle( pszArgs );
 		case '~':	// Bitwise not.
-			pszArgs++;
+			++pszArgs;
 			return ~GetSingle( pszArgs );
 		case '!':	// boolean not.
-			pszArgs++;
+			++pszArgs;
 			if ( pszArgs[0] == '=' )  // odd condition such as (!=x) which is always true of course.
 			{
-				pszArgs++;		// so just skip it. and compare it to 0
+				++pszArgs;		// so just skip it. and compare it to 0
 				return GetSingle( pszArgs );
 			}
 			return !GetSingle( pszArgs );
@@ -551,7 +554,8 @@ try_dec:
 
 								if ( strchr(pszArgs, ',') )
 								{
-									iCount++; SKIP_ARGSEP(pszArgs);
+									++iCount;
+									SKIP_ARGSEP(pszArgs);
 									if ( !strcmpi(pszArgs, "e") )
 									{
 										iResult = (llong)log( (double)iArgument );
@@ -605,7 +609,7 @@ try_dec:
 
 							if (iTosquare >= 0)
 							{
-								iCount++;
+								++iCount;
 								iResult = (llong)sqrt( (double)iTosquare );
 							}
 							else
@@ -870,7 +874,7 @@ try_dec:
 	tchar szTag[ EXPRESSION_MAX_KEY_LEN ];
 	size_t i = GetIdentifierString( szTag, pszArgs );
 	pszArgs += i;	// skip it.
-	if (strlen(orig)> 1)
+	if ( strlen(orig) > 1)
 		DEBUG_ERR(("Undefined symbol '%s' ['%s']\n", szTag, orig));
 	else
 		DEBUG_ERR(("Undefined symbol '%s'\n", szTag));
@@ -890,42 +894,42 @@ llong CExpression::GetValMath( llong llVal, lpctstr & pExpr )
 		case ')':  // expression end markers.
 		case '}':
 		case ']':
-			pExpr++;	// consume this.
+			++pExpr;	// consume this.
 			break;
 		case '+':
-			pExpr++;
+			++pExpr;
 			llVal += GetVal( pExpr );
 			break;
 		case '-':
-			pExpr++;
+			++pExpr;
 			llVal -= GetVal( pExpr );
 			break;
 		case '*':
-			pExpr++;
+			++pExpr;
 			llVal *= GetVal( pExpr );
 			break;
 		case '|':
-			pExpr++;
+			++pExpr;
 			if ( pExpr[0] == '|' )	// boolean ?
 			{
-				pExpr++;
+				++pExpr;
 				llVal = ( GetVal( pExpr ) || llVal );
 			}
 			else	// bitwise
 				llVal |= GetVal( pExpr );
 			break;
 		case '&':
-			pExpr++;
+			++pExpr;
 			if ( pExpr[0] == '&' )	// boolean ?
 			{
-				pExpr++;
+				++pExpr;
 				llVal = ( GetVal( pExpr ) && llVal );	// tricky stuff here. logical ops must come first or possibly not get processed.
 			}
 			else	// bitwise
 				llVal &= GetVal( pExpr );
 			break;
 		case '/':
-			pExpr++;
+			++pExpr;
 			{
 				llong iVal = GetVal( pExpr );
 				if ( ! iVal )
@@ -937,7 +941,7 @@ llong CExpression::GetValMath( llong llVal, lpctstr & pExpr )
 			}
 			break;
 		case '%':
-			pExpr++;
+			++pExpr;
 			{
 				llong iVal = GetVal( pExpr );
 				if ( ! iVal )
@@ -949,53 +953,53 @@ llong CExpression::GetValMath( llong llVal, lpctstr & pExpr )
 			}
 			break;
 		case '^':
-			pExpr ++;
+			++pExpr;
 			llVal ^= GetVal(pExpr);
 			break;
 		case '>': // boolean
-			pExpr++;
+			++pExpr;
 			if ( pExpr[0] == '=' )	// boolean ?
 			{
-				pExpr++;
+				++pExpr;
 				llVal = ( llVal >= GetVal( pExpr ) );
 			}
 			else if ( pExpr[0] == '>' )	// shift
 			{
-				pExpr++;
+				++pExpr;
 				llVal >>= GetVal( pExpr );
 			}
 			else
 				llVal = ( llVal > GetVal( pExpr ) );
 			break;
 		case '<': // boolean
-			pExpr++;
+			++pExpr;
 			if ( pExpr[0] == '=' )	// boolean ?
 			{
-				pExpr++;
+				++pExpr;
 				llVal = ( llVal <= GetVal( pExpr ) );
 			}
 			else if ( pExpr[0] == '<' )	// shift
 			{
-				pExpr++;
+				++pExpr;
 				llVal <<= GetVal( pExpr );
 			}
 			else
 				llVal = ( llVal < GetVal( pExpr ) );
 			break;
 		case '!':
-			pExpr ++;
+			++pExpr;
 			if ( pExpr[0] != '=' )
 				break; // boolean ! is handled as a single expresion.
-			pExpr ++;
+			++pExpr;
 			llVal = ( llVal != GetVal( pExpr ) );
 			break;
 		case '=': // boolean
 			while ( pExpr[0] == '=' )
-				pExpr ++;
+				++pExpr;
 			llVal = ( llVal == GetVal( pExpr ) );
 			break;
 		case '@':
-			pExpr++;
+			++pExpr;
 			{
 				llong iVal = GetVal( pExpr );
 				if ( (llVal == 0) && (iVal < 0) )
@@ -1042,111 +1046,229 @@ llong CExpression::GetVal( lpctstr & pExpr )
 	if ( pExpr == NULL )
 		return 0;
 
-	g_getval_reentrant_check++;
+	++g_getval_reentrant_check;
 	if ( g_getval_reentrant_check > 128 )
 	{
 		DEBUG_WARN(( "Deadlock detected while parsing '%s'. Fix the error in your scripts.\n", pExpr ));
-		g_getval_reentrant_check--;
+		--g_getval_reentrant_check;
 		return 0;
 	}
 	llong llVal = GetValMath(GetSingle(pExpr), pExpr);
-	g_getval_reentrant_check--;
+	--g_getval_reentrant_check;
 
 	return llVal;
 }
 
-int CExpression::GetRangeVals(lpctstr & pExpr, int64 * piVals, int iMaxQty)
+int CExpression::GetRangeVals(lpctstr & pExpr, int64 * piVals, int iMaxQty, bool bNoWarn)
 {
 	ADDTOCALLSTACK("CExpression::GetRangeVals");
 	// Get a list of values.
-	if ( pExpr == NULL )
-		return 0;
 
+	if (pExpr == NULL)
+		return 0;
 	ASSERT(piVals);
 
 	int iQty = 0;
-	while (true)
+	while (pExpr[0] != '\0')
 	{
-		if ( !pExpr[0] )
-			break;
-		if ( pExpr[0] == ';' )
-			break;	// seperate field.
-		if ( pExpr[0] == ',' )
-			pExpr++;
+		if (pExpr[0] == ';')	// seperate field - is this used anymore?
+			return iQty;
+		if (pExpr[0] == ',')
+			++pExpr;
 
-		piVals[iQty] = GetSingle( pExpr );
-		if ( ++iQty >= iMaxQty )
-			break;
-		if ( pExpr[0] == '-' && iQty == 1 )	// range separator. (if directly after, I know this is sort of strange)
-		{
-			pExpr++;	// ??? This is stupid. get rid of this and clean up its use in the scripts.
-			continue;
-		}
+		piVals[iQty] = GetSingle(pExpr);
+		if (++iQty >= iMaxQty)
+			return iQty;
 
 		GETNONWHITESPACE(pExpr);
 
 		// Look for math type operator.
-		switch ( pExpr[0] )
+		switch (pExpr[0])
 		{
-			case ')':  // expression end markers.
-			case '}':
-			case ']':
-				pExpr++;	// consume this and end.
-				return iQty;
+		case ')':  // expression end markers.
+		case '}':
+		case ']':
+			++pExpr;	// consume this and end.
+			return iQty;
 
-			case '+':
-			case '*':
-			case '/':
-			case '%':
+		case '+':
+		case '*':
+		case '/':
+		case '%':
 			// case '^':
-			case '<':
-			case '>':
-			case '|':
-			case '&':
-				piVals[iQty-1] = GetValMath( piVals[iQty-1], pExpr );
-				break;
+		case '<':
+		case '>':
+		case '|':
+		case '&':
+			piVals[iQty - 1] = GetValMath(piVals[iQty - 1], pExpr);
+			return iQty;
 		}
 	}
 
+	if (!bNoWarn)
+		g_Log.EventError("Range isn't closed by a '}' character\n");
+	return iQty;
+}
+
+
+int CExpression::GetRangeArgsPos(lpctstr & pExpr, lpctstr (&pArgPos)[128][2], int iMaxQty)
+{
+	ADDTOCALLSTACK("CExpression::GetRangeArgsPos");
+	// Get the start and end pointers for each argument in the range
+
+	if ( pExpr == NULL )
+		return 0;
+	ASSERT(pArgPos);
+
+	int iQty = 0;	// number of arguments (not of value-weight couples)
+	while (pExpr[0] != '\0')
+	{
+		if ( pExpr[0] == ';' )	// seperate field - is this used anymore?
+			return iQty;
+		if ( pExpr[0] == ',' )
+			++pExpr;
+
+		if ( ++iQty >= iMaxQty )
+			return iQty;
+
+		GETNONWHITESPACE(pExpr);
+		pArgPos[iQty-1][0] = pExpr;		// Position of the first character of the argument
+
+		if (pExpr[0] == '{')	// there's another range
+		{
+			int iSubRanges = 1;
+			while (iSubRanges != 0)	// i'm interested only to the outermost range, not eventual sub-sub-sub-blah ranges
+			{
+				++pExpr;
+				if (pExpr[0] == '\0')
+					goto end_w_error;
+				else if (pExpr[0] == '{')
+					++iSubRanges;
+				else if (pExpr[0] == '}')
+					--iSubRanges;
+			}
+			++pExpr;	// consume this and end.
+			pArgPos[iQty-1][1] = pExpr;		// Position of the last '}' of the sub-range
+		}
+		else	// not another range, just plain text
+		{
+			GETNONWHITESPACE(pExpr);
+			while (true)
+			{
+				if (pExpr[0] == '\0')
+				{
+					pArgPos[iQty - 1][1] = pExpr;	// Position of the last character of the argument
+					goto end_w_error;
+				}
+
+				if (ISWHITESPACE(pExpr[0]) || (pExpr[0] == ','))
+				{
+					// is it another argument?
+					pArgPos[iQty-1][1] = pExpr;	// Position of the last character of the argument
+					GETNONWHITESPACE(pExpr);
+					if (pExpr[0] == '}')		// check if it's really another argument or it's simply the end of the range
+						goto end_of_range;
+					break;
+				}
+				else if (pExpr[0] == '}')	// end of the range we are evaluating
+				{
+					pArgPos[iQty-1][1] = pExpr;		// Position of the last character of the argument
+
+				end_of_range:
+					++pExpr;	// consume this and end.
+					return iQty;
+				}
+				++pExpr;
+			}
+		}
+	}
+
+end_w_error:
+	g_Log.EventError("Range isn't closed by a '}' character\n");
 	return iQty;
 }
 
 int64 CExpression::GetRange(lpctstr & pExpr)
 {
 	ADDTOCALLSTACK("CExpression::GetRange");
-	int64 lVals[256];		// Maximum elements in a list
 
-	int iQty = GetRangeVals( pExpr, lVals, CountOf(lVals) );
+	// Parse the arguments in the range and get the start and end position of every of them.
+	// When parsing and resolving the value of each argument, we create a substring for the argument
+	//	and use GetSingle to parse and resolve it.
+	// If iQty <= 2, parse each argument.
+	// If iQty (number of arguments) is > 2, it's a weighted range; in this case, parse only the weights
+	//	of the elements and then only the element which was randomly chosen.
+
+	lpctstr pElementsStart[128][2];
+	int iQty = GetRangeArgsPos( pExpr, pElementsStart, CountOf(pElementsStart) );	// number of arguments (not of value-weight couples)
 
 	if (iQty == 0)
 		return 0;
+
 	if (iQty == 1) // It's just a simple value
-		return lVals[0];
+	{
+		tchar pToParse[THREAD_STRING_LENGTH];
+		const int iToParseLen = (pElementsStart[0][1] - pElementsStart[0][0]);
+		memcpy((void*)pToParse, pElementsStart[0][0], iToParseLen * sizeof(tchar));
+		pToParse[iToParseLen] = '\0';
+		lptstr pToParseCasted = reinterpret_cast<lptstr>(pToParse);
+		return GetSingle(pToParseCasted);
+	}
+
 	if (iQty == 2) // It's just a simple range....pick one in range at random
-		return Calc_GetRandLLVal2( minimum(lVals[0],lVals[1]), maximum(lVals[0],lVals[1]) );
+	{
+		tchar pToParse[THREAD_STRING_LENGTH];
+
+		int iToParseLen = (pElementsStart[0][1] - pElementsStart[0][0]);
+		memcpy((void*)pToParse, pElementsStart[0][0], iToParseLen * sizeof(tchar));
+		pToParse[iToParseLen] = '\0';
+		lptstr pToParseCasted = reinterpret_cast<lptstr>(pToParse);
+		llong llValFirst = GetSingle(pToParseCasted);
+
+		iToParseLen = (pElementsStart[1][1] - pElementsStart[1][0]);
+		memcpy((void*)pToParse, pElementsStart[1][0], iToParseLen * sizeof(tchar));
+		pToParse[iToParseLen] = '\0';
+		pToParseCasted = reinterpret_cast<lptstr>(pToParse);
+		llong llValSecond = GetSingle(pToParseCasted);
+
+		return Calc_GetRandLLVal2(minimum(llValFirst, llValSecond), maximum(llValFirst, llValSecond));
+	}
 
 	// I guess it's weighted values
 	// First get the total of the weights
 
-	int64 iTotalWeight = 0;
-	int i = 1;
-	for ( ; i+1 < iQty; i+=2 )
+	llong llTotalWeight = 0;
+	llong llWeights[128];
+	tchar pToParse[THREAD_STRING_LENGTH];
+	for ( int i = 1; i+1 < iQty; i+=2 )
 	{
-		if ( ! lVals[i] )	// having a weight of 0 is very strange !
-			DEBUG_ERR(( "Weight of 0 in random set?\n" ));	// the whole table should really just be invalid here !
-		iTotalWeight += lVals[i];
+		const int iToParseLen = (pElementsStart[i][1] - pElementsStart[i][0]);
+		memcpy((void*)pToParse, pElementsStart[i][0], iToParseLen * sizeof(tchar));
+		pToParse[iToParseLen] = '\0';
+		lptstr pToParseCasted = reinterpret_cast<lptstr>(pToParse);
+		llWeights[i] = GetSingle(pToParseCasted);	// GetSingle changes the pointer value, so i need to work with a copy
+
+		if ( ! llWeights[i] )	// having a weight of 0 is very strange !
+			DEBUG_ERR(( "Weight of 0 in random set: invalid. Value-weight couple number %d\n", i ));	// the whole table should really just be invalid here !
+		llTotalWeight += llWeights[i];
 	}
 
 	// Now roll the dice to see what value to pick
-	iTotalWeight = Calc_GetRandLLVal(iTotalWeight) + 1;
+	llTotalWeight = Calc_GetRandLLVal(llTotalWeight) + 1;
+
 	// Now loop to that value
-	i = 1;
+	int i = 1;
 	for ( ; i+1 < iQty; i+=2 )
 	{
-		iTotalWeight -= lVals[i];
-		if ( iTotalWeight <= 0 )
+		llTotalWeight -= llWeights[i];
+		if ( llTotalWeight <= 0 )
 			break;
 	}
-
-	return lVals[i-1];
+	
+	--i;	// pick the value instead of the weight
+	const int iToParseLen = (pElementsStart[i][1] - pElementsStart[i][0]);
+	memcpy((void*)pToParse, pElementsStart[i][0], iToParseLen * sizeof(tchar));
+	pToParse[iToParseLen] = '\0';
+	lptstr pToParseCasted = reinterpret_cast<lptstr>(pToParse);
+	return GetSingle(pToParseCasted);
 }

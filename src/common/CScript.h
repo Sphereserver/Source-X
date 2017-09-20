@@ -47,7 +47,9 @@ public:
 	bool HasArgs() const;
 	tchar * GetArgRaw() const;				// Not need to parse at all.
 	tchar * GetArgStr( bool * fQuoted );	// this could be a quoted string ?
-	tchar * GetArgStr();
+	tchar * GetArgStr() {
+		return GetArgStr(NULL);
+	}
 
 	char GetArgCVal();
 	uchar GetArgUCVal();

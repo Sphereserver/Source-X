@@ -79,7 +79,7 @@ int CSString::SetLength(int iNewLength)
 		m_iMaxLength = iNewLength + (STRING_DEFAULT_SIZE >> 1);	// allow grow, and always expand only
 #ifdef DEBUG_STRINGS
 		gMemAmount += m_iMaxLength;
-		gReallocs++;
+		++gReallocs;
 #endif
 		tchar *pNewData = new tchar[m_iMaxLength + 1];
 		ASSERT(pNewData);
@@ -164,7 +164,7 @@ int CSString::indexOf(tchar c, int offset)
 	if (offset >= len)
 		return -1;
 
-	for (int i = offset; i<len; i++)
+	for (int i = offset; i<len; ++i)
 	{
 		if (m_pchData[i] == c)
 			return i;
@@ -189,7 +189,7 @@ int CSString::indexOf(CSString str, int offset)
 	strcpy(str_value, str.GetPtr());
 	tchar firstChar = str_value[0];
 
-	for (int i = offset; i < len; i++)
+	for (int i = offset; i < len; ++i)
 	{
 		tchar c = m_pchData[i];
 		if (c == firstChar)
@@ -207,7 +207,7 @@ int CSString::indexOf(CSString str, int offset)
 						found = false;
 						break;
 					}
-					j++; k++;
+					++j; ++k;
 				}
 				if (found)
 				{
@@ -231,7 +231,7 @@ int CSString::lastIndexOf(tchar c, int from)
 	if (from > len)
 		return -1;
 
-	for (int i = (len - 1); i >= from; i--)
+	for (int i = (len - 1); i >= from; --i)
 	{
 		if (m_pchData[i] == c)
 			return i;
@@ -255,7 +255,7 @@ int CSString::lastIndexOf(CSString str, int from)
 	tchar * str_value = new tchar[slen + 1];
 	strcpy(str_value, str.GetPtr());
 	tchar firstChar = str_value[0];
-	for (int i = (len - 1); i >= from; i--)
+	for (int i = (len - 1); i >= from; --i)
 	{
 		tchar c = m_pchData[i];
 		if (c == firstChar)
@@ -273,7 +273,7 @@ int CSString::lastIndexOf(CSString str, int from)
 						found = false;
 						break;
 					}
-					j++; k++;
+					++j; ++k;
 				}
 				if (found)
 				{
@@ -330,7 +330,7 @@ lpctstr Str_GetArticleAndSpace(lpctstr pszWord)
 	{
 		static const tchar sm_Vowels[] = { 'A', 'E', 'I', 'O', 'U' };
 		tchar chName = static_cast<tchar>(toupper(pszWord[0]));
-		for (uint x = 0; x < CountOf(sm_Vowels); x++)
+		for (uint x = 0; x < CountOf(sm_Vowels); ++x)
 		{
 			if (chName == sm_Vowels[x])
 				return "an ";
@@ -350,7 +350,7 @@ int Str_GetBare(tchar * pszOut, lpctstr pszInp, int iMaxOutSize, lpctstr pszStri
 	//GETNONWHITESPACE( pszInp );	// kill leading white space.
 
 	int j = 0;
-	for (int i = 0; ; i++)
+	for (int i = 0; ; ++i)
 	{
 		tchar ch = pszInp[i];
 		if (ch)
@@ -360,7 +360,7 @@ int Str_GetBare(tchar * pszOut, lpctstr pszInp, int iMaxOutSize, lpctstr pszStri
 
 			int k = 0;
 			while (pszStrip[k] && pszStrip[k] != ch)
-				k++;
+				++k;
 
 			if (pszStrip[k])
 				continue;
@@ -378,7 +378,7 @@ int Str_GetBare(tchar * pszOut, lpctstr pszInp, int iMaxOutSize, lpctstr pszStri
 tchar * Str_MakeFiltered(tchar * pStr)
 {
 	int len = (int)strlen(pStr);
-	for (int i = 0; len; i++, len--)
+	for (int i = 0; len; ++i, --len)
 	{
 		if (pStr[i] == '\\')
 		{
@@ -390,7 +390,7 @@ tchar * Str_MakeFiltered(tchar * pStr)
 				case 't': pStr[i] = '\t'; break;
 				case '\\': pStr[i] = '\\'; break;
 			}
-			len--;
+			--len;
 			memmove(pStr + i + 1, pStr + i + 2, len);
 		}
 	}
@@ -402,7 +402,7 @@ void Str_MakeUnFiltered(tchar * pStrOut, lpctstr pStrIn, int iSizeMax)
 	int len = (int)strlen(pStrIn);
 	int iIn = 0;
 	int iOut = 0;
-	for (; iOut < iSizeMax && iIn <= len; iIn++, iOut++)
+	for (; iOut < iSizeMax && iIn <= len; ++iIn, ++iOut)
 	{
 		tchar ch = pStrIn[iIn];
 		switch (ch)
@@ -426,7 +426,7 @@ int Str_TrimEndWhitespace(tchar * pStr, int len)
 {
 	while (len > 0)
 	{
-		len--;
+		--len;
 		if (pStr[len] < 0 || !ISWHITESPACE(pStr[len]))
 		{
 			++len;
@@ -439,7 +439,7 @@ int Str_TrimEndWhitespace(tchar * pStr, int len)
 
 tchar * Str_TrimWhitespace(tchar * pStr)
 {
-	// TODO: WARNING! Possible Memory Lake here!
+	// TODO: WARNING! Possible Memory Leak here!
 	GETNONWHITESPACE(pStr);
 	Str_TrimEndWhitespace(pStr, (int)strlen(pStr));
 	return pStr;
@@ -450,7 +450,7 @@ tchar * Str_TrimWhitespace(tchar * pStr)
 int FindTable(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
 {
 	// A non-sorted table.
-	for (int i = 0; i<iCount; i++)
+	for (int i = 0; i<iCount; ++i)
 	{
 		if (!strcmpi(*ppszTable, pszFind))
 			return i;
@@ -485,7 +485,7 @@ int FindTableSorted(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int 
 static int Str_CmpHeadI(lpctstr pszFind, lpctstr pszTable)
 {
 	tchar ch0 = '_';
-	for (int i = 0; ; i++)
+	for (int i = 0; ; ++i)
 	{
 		//	we should always use same case as in other places. since strcmpi lowers,
 		//	we should lower here as well. fucking shit!
@@ -504,7 +504,7 @@ static int Str_CmpHeadI(lpctstr pszFind, lpctstr pszTable)
 
 int FindTableHead(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
 {
-	for (int i = 0; i<iCount; i++)
+	for (int i = 0; i<iCount; ++i)
 	{
 		int iCompare = Str_CmpHeadI(pszFind, *ppszTable);
 		if (!iCompare)
@@ -546,7 +546,7 @@ bool Str_Check(lpctstr pszIn)
 
 	lpctstr p = pszIn;
 	while (*p != '\0' && (*p != 0x0A) && (*p != 0x0D))
-		p++;
+		++p;
 
 	return (*p != '\0');
 }
@@ -564,7 +564,7 @@ bool Str_CheckName(lpctstr pszIn)
 				   ((*p >= '0') && (*p <= '9')) ||
 				   ((*p == ' ') || (*p == '\'') || (*p == '-') || (*p == '.'))
 		   ))
-		p++;
+		++p;
 
 	return (*p != '\0');
 }
@@ -584,7 +584,7 @@ int Str_IndexOf(tchar * pStr1, tchar * pStr2, int offset)
 
 	tchar firstChar = pStr2[0];
 
-	for (int i = offset; i < len; i++)
+	for (int i = offset; i < len; ++i)
 	{
 		tchar c = pStr1[i];
 		if (c == firstChar)
@@ -602,7 +602,7 @@ int Str_IndexOf(tchar * pStr1, tchar * pStr2, int offset)
 						found = false;
 						break;
 					}
-					j++; k++;
+					++j; ++k;
 				}
 				if (found)
 					return i;
@@ -616,7 +616,7 @@ int Str_IndexOf(tchar * pStr1, tchar * pStr2, int offset)
 static MATCH_TYPE Str_Match_After_Star(lpctstr pPattern, lpctstr pText)
 {
 	// pass over existing ? and * in pattern
-	for (; *pPattern == '?' || *pPattern == '*'; pPattern++)
+	for (; *pPattern == '?' || *pPattern == '*'; ++pPattern)
 	{
 		// take one char for each ? and +
 		if (*pPattern == '?' &&
@@ -664,7 +664,7 @@ MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText)
 	tchar range_start;
 	tchar range_end;  // start and end in range
 
-	for (; *pPattern; pPattern++, pText++)
+	for (; *pPattern; ++pPattern, ++pText)
 	{
 		// if this is the end of the text then this is the end of the match
 		if (!*pText)
@@ -683,13 +683,13 @@ MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText)
 			case '[':
 			{
 				// move to beginning of range
-				pPattern++;
+				++pPattern;
 				// check if this is a member match or exclusion match
 				bool fInvert = false;             // is this [..] or [!..]
 				if (*pPattern == '!' || *pPattern == '^')
 				{
 					fInvert = true;
-					pPattern++;
+					++pPattern;
 				}
 				// if closing bracket here or at range start then we have a
 				// malformed pattern
@@ -730,7 +730,7 @@ MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText)
 								return MATCH_PATTERN;
 						}
 						// move just beyond this range
-						pPattern++;
+						++pPattern;
 					}
 
 					// if the text character is in range then match found.
@@ -773,13 +773,13 @@ MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText)
 						// skip exact match
 						if (*pPattern == '\\')
 						{
-							pPattern++;
+							++pPattern;
 							// if end of text then we have a bad pattern
 							if (!*pPattern)
 								return MATCH_PATTERN;
 						}
 						// move to next pattern char
-						pPattern++;
+						++pPattern;
 					}
 				}
 			}
@@ -798,7 +798,7 @@ MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText)
 		return MATCH_VALID;
 }
 
-bool Str_Parse(tchar * pLine, tchar ** ppLine2, lpctstr pszSep)
+bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
 {
 	// Parse a list of args. Just get the next arg.
 	// similar to strtok()
@@ -814,8 +814,9 @@ bool Str_Parse(tchar * pLine, tchar ** ppLine2, lpctstr pszSep)
 		memmove(pLine, pNonWhite, strlen(pNonWhite) + 1);
 
 	tchar ch;
-	bool bQuotes = false;
-	for (; ; pLine++)
+	bool bQuotes, bCurly, bSquare, bRound, bAngle;
+	bQuotes = bCurly = bSquare = bRound = bAngle = false;
+	for (; ; ++pLine)
 	{
 		ch = *pLine;
 		if (ch == '"')	// quoted argument
@@ -825,26 +826,76 @@ bool Str_Parse(tchar * pLine, tchar ** ppLine2, lpctstr pszSep)
 		}
 		if (ch == '\0')	// no args i guess.
 		{
-			if (ppLine2 != NULL)
-				*ppLine2 = pLine;
+			if (ppArg != NULL)
+				*ppArg = pLine;
 			return false;
 		}
-		if (strchr(pszSep, ch) && (bQuotes == false))
-			break;
+
+		if (ch == '{') {
+			if (!bSquare && !bRound && !bAngle)
+				bCurly = true;
+		}
+		else if (ch == '[') {
+			if (!bCurly && !bRound && !bAngle)
+				bSquare = true;
+		}
+		else if (ch == '(') {
+			if (!bCurly && !bSquare && !bAngle)
+				bRound = true;
+		}
+		else if (ch == '<') {
+			if (!bCurly && !bSquare && !bRound)
+				bAngle = true;
+		}
+		else if (ch == '}') {
+			if (!bQuotes && bCurly) {
+				ch = *(pLine++);
+				break;
+			}
+		}
+		else if (ch == ']') {
+			if (!bQuotes && bSquare) {
+				ch = *(pLine++);
+				break;
+			}
+		}
+		else if (ch == ')') {
+			if (!bQuotes && bRound) {
+				ch = *(pLine++);
+				break;
+			}
+		}
+		else if (ch == '>') {
+			if (!bQuotes && bAngle) {
+				ch = *(pLine++);
+				break;
+			}
+		}
+
+		// don't turn this if into an else if!
+		//	We can choose as a separator also one of {[(< >)]} and they have to be treated as such!
+		if (!bQuotes && !bCurly && !bSquare && !bRound) {
+			if (strchr(pszSep, ch))
+				break;
+		}
 	}
 
-	*pLine++ = '\0';
+	if (*pLine == '\0')
+		return false;
+
+	*pLine = '\0';
+	++pLine;
 	if (IsSpace(ch))	// space separators might have other seps as well ?
 	{
 		GETNONWHITESPACE(pLine);
 		ch = *pLine;
 		if (ch && strchr(pszSep, ch))
-			pLine++;
+			++pLine;
 	}
 
 	// skip leading white space on args as well.
-	if (ppLine2 != NULL)
-		*ppLine2 = Str_TrimWhitespace(pLine);
+	if (ppArg != NULL)
+		*ppArg = Str_TrimWhitespace(pLine);
 	return true;
 }
 
@@ -854,14 +905,14 @@ int Str_ParseCmds(tchar * pszCmdLine, tchar ** ppCmd, int iMax, lpctstr pszSep)
 	if (pszCmdLine != NULL && pszCmdLine[0] != '\0')
 	{
 		ppCmd[0] = pszCmdLine;
-		iQty++;
+		++iQty;
 		while (Str_Parse(ppCmd[iQty - 1], &(ppCmd[iQty]), pszSep))
 		{
 			if (++iQty >= iMax)
 				break;
 		}
 	}
-	for (int j = iQty; j < iMax; j++)
+	for (int j = iQty; j < iMax; ++j)
 		ppCmd[j] = NULL;	// terminate if possible.
 	return iQty;
 }
@@ -874,14 +925,13 @@ int Str_ParseCmds(tchar * pszCmdLine, int64 * piCmd, int iMax, lpctstr pszSep)
 
 	int iQty = Str_ParseCmds(pszCmdLine, ppTmp, iMax, pszSep);
 	int i;
-	for (i = 0; i < iQty; i++)
-	{
+	for (i = 0; i < iQty; ++i) {
 		piCmd[i] = Exp_GetVal(ppTmp[i]);
 	}
-	for (; i < iMax; i++)
-	{
+	for (; i < iMax; ++i) {
 		piCmd[i] = 0;
 	}
+	
 	return iQty;
 }
 

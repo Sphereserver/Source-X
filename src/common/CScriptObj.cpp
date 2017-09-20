@@ -650,9 +650,8 @@ bool CScriptObj::r_LoadVal( CScript & s )
 
 		case SSC_DEFMSG:
 			{
-				long	l;
 				pszKey += 7;
-				for ( l = 0; l < DEFMSG_QTY; ++l )
+				for ( long l = 0; l < DEFMSG_QTY; ++l )
 				{
 					if ( !strcmpi(pszKey, g_Exp.sm_szMsgNames[l]) )
 					{

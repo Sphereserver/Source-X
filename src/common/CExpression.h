@@ -16,12 +16,12 @@
 #include "sphere_library/CSRand.h"
 
 
-#define SKIP_SEPARATORS(p)			while ( *(p)=='.' ) { (p)++; }	// || ISWHITESPACE(*(p))
-#define SKIP_ARGSEP(p)				while ( *(p)== ',' || IsSpace(*p) ){ (p)++; }
-#define SKIP_IDENTIFIERSTRING(p)	while ( _ISCSYM(*p) ){ (p)++; }
+#define SKIP_SEPARATORS(p)			while ( *(p)=='.' ) { ++(p); }	// || ISWHITESPACE(*(p))
+#define SKIP_ARGSEP(p)				while ( *(p)== ',' || IsSpace(*p) ){ ++(p); }
+#define SKIP_IDENTIFIERSTRING(p)	while ( _ISCSYM(*p) ){ ++(p); }
 
 #define ISWHITESPACE(ch)			(IsSpace(ch) || ((uchar)ch==0xa0))	// IsSpace
-#define GETNONWHITESPACE( pStr )	while ( ISWHITESPACE( (pStr)[0] )) { (pStr)++; }
+#define GETNONWHITESPACE( pStr )	while ( ISWHITESPACE( (pStr)[0] )) { ++(pStr); }
 #define _IS_SWITCH(c)				((c) == '-' || (c) == '/' )	// command line switch.
 
 #define REMOVE_QUOTES( x )			\
@@ -123,32 +123,31 @@ public:
 	static lpctstr const sm_szMsgNames[DEFMSG_QTY];		// like: "put_it"
 
 public:
-	// Strict G++ Prototyping produces an error when not casting char*& to const char*&
-	// So this is a rather lazy workaround
-	llong GetSingle( lptstr &pArgs )
-	{
-		return GetSingle(const_cast<lpctstr &>(pArgs));
-	}
-	int64 GetRange( lptstr &pArgs )
-	{
-		return GetRange(const_cast<lpctstr &>(pArgs));
-	}
-	int GetRangeVals( lptstr &pExpr, int64 * piVals, int iMaxQty )
-	{
-		return GetRangeVals(const_cast<lpctstr &>(pExpr), piVals, iMaxQty );
-	}
-	llong GetVal( lptstr &pArgs )
-	{
-		return GetVal(const_cast<lpctstr &>(pArgs));
-	}
-
 	// Evaluate using the stuff we know.
 	llong GetSingle(lpctstr & pArgs);
-	int GetRangeVals(lpctstr & pExpr, int64 * piVals, int iMaxQty);
+	int GetRangeVals(lpctstr & pExpr, int64 * piVals, int iMaxQty, bool bNoWarn = false);
+	int GetRangeArgsPos(lpctstr & pExpr, lpctstr (&pArgPos)[128][2], int iMaxQty);
 	int64 GetRange(lpctstr & pArgs);
 	llong GetValMath(llong llVal, lpctstr & pExpr);
 	llong GetVal(lpctstr & pArgs);
 
+	// Strict G++ Prototyping produces an error when not casting char*& to const char*&
+	// So this is a rather lazy workaround
+	llong GetSingle(lptstr &pArgs) {
+		return GetSingle(const_cast<lpctstr &>(pArgs));
+	}
+	int GetRangeVals(lptstr &pExpr, int64 * piVals, int iMaxQty, bool bNoWarn = false) {
+		return GetRangeVals(const_cast<lpctstr &>(pExpr), piVals, iMaxQty, bNoWarn);
+	}
+	int GetRangeArgsPos(lptstr &pExpr, lpctstr (&pArgPos)[128][2], int iMaxQty) {
+		return GetRangeArgsPos(const_cast<lpctstr &>(pExpr), pArgPos, iMaxQty);
+	}
+	int64 GetRange(lptstr &pArgs) {
+		return GetRange(const_cast<lpctstr &>(pArgs));
+	}
+	llong GetVal(lptstr &pArgs) {
+		return GetVal(const_cast<lpctstr &>(pArgs));
+	}
 
 public:
 	CExpression();
