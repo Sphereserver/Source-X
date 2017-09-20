@@ -398,7 +398,7 @@ public:
 
 	CClient* GetNext() const
 	{
-		return( static_cast <CClient*>( CSObjListRec::GetNext()));
+		return ( static_cast <CClient*>( CSObjListRec::GetNext()));
 	}
 
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute script type command on me
@@ -547,6 +547,9 @@ public:
 	void addCharPaperdoll( CChar * pChar );
 
 	void addAOSTooltip( const CObjBase * pObj, bool bRequested = false, bool bShop = false );
+private:
+	void AOSTooltip_addDefaultCharData(const CChar * pChar);
+	void AOSTooltip_addDefaultItemData(const CItem * pItem);
 
 private:
 #define MAX_POPUPS 15

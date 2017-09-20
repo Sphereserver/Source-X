@@ -120,6 +120,7 @@ game/clients/CClientGMPage.cpp
 game/clients/CClient.h
 game/clients/CClientLog.cpp
 game/clients/CClientMsg.cpp
+game/clients/CClientMsg_AOSTooltip.cpp
 game/clients/CClientTarg.cpp
 game/clients/CClientTooltip.h
 game/clients/CClientTooltip.cpp

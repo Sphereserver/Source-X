@@ -1208,7 +1208,7 @@ int64 CExpression::GetRange(lpctstr & pExpr)
 	if (iQty == 1) // It's just a simple value
 	{
 		tchar pToParse[THREAD_STRING_LENGTH];
-		const int iToParseLen = (pElementsStart[0][1] - pElementsStart[0][0]);
+		const size_t iToParseLen = (pElementsStart[0][1] - pElementsStart[0][0]);
 		memcpy((void*)pToParse, pElementsStart[0][0], iToParseLen * sizeof(tchar));
 		pToParse[iToParseLen] = '\0';
 		lptstr pToParseCasted = reinterpret_cast<lptstr>(pToParse);
@@ -1219,7 +1219,7 @@ int64 CExpression::GetRange(lpctstr & pExpr)
 	{
 		tchar pToParse[THREAD_STRING_LENGTH];
 
-		int iToParseLen = (pElementsStart[0][1] - pElementsStart[0][0]);
+		size_t iToParseLen = (pElementsStart[0][1] - pElementsStart[0][0]);
 		memcpy((void*)pToParse, pElementsStart[0][0], iToParseLen * sizeof(tchar));
 		pToParse[iToParseLen] = '\0';
 		lptstr pToParseCasted = reinterpret_cast<lptstr>(pToParse);
@@ -1242,7 +1242,7 @@ int64 CExpression::GetRange(lpctstr & pExpr)
 	tchar pToParse[THREAD_STRING_LENGTH];
 	for ( int i = 1; i+1 < iQty; i+=2 )
 	{
-		const int iToParseLen = (pElementsStart[i][1] - pElementsStart[i][0]);
+		const size_t iToParseLen = (pElementsStart[i][1] - pElementsStart[i][0]);
 		memcpy((void*)pToParse, pElementsStart[i][0], iToParseLen * sizeof(tchar));
 		pToParse[iToParseLen] = '\0';
 		lptstr pToParseCasted = reinterpret_cast<lptstr>(pToParse);
@@ -1266,7 +1266,7 @@ int64 CExpression::GetRange(lpctstr & pExpr)
 	}
 	
 	--i;	// pick the value instead of the weight
-	const int iToParseLen = (pElementsStart[i][1] - pElementsStart[i][0]);
+	const size_t iToParseLen = (pElementsStart[i][1] - pElementsStart[i][0]);
 	memcpy((void*)pToParse, pElementsStart[i][0], iToParseLen * sizeof(tchar));
 	pToParse[iToParseLen] = '\0';
 	lptstr pToParseCasted = reinterpret_cast<lptstr>(pToParse);

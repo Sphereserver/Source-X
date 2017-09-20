@@ -459,7 +459,7 @@ int FindTable(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemS
 	return -1;
 }
 
-int FindTableSorted(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
+int FindTableSorted(lpctstr pszFind, lpctstr const * ppszTable, int iCount)
 {
 	// Do a binary search (un-cased) on a sorted table.
 	// RETURN: -1 = not found
@@ -467,10 +467,12 @@ int FindTableSorted(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int 
 	if (iHigh < 0)
 		return -1;
 	int iLow = 0;
+	//static const int iElemSize = sizeof(lpctstr);
 	while (iLow <= iHigh)
 	{
 		int i = (iHigh + iLow) / 2;
-		lpctstr pszName = *((lpctstr const *)((const byte*)ppszTable + (i*iElemSize)));
+		//lpctstr pszName = *((lpctstr const *)((const byte*)ppszTable + (i*iElemSize)));
+		lpctstr pszName = ppszTable[i];
 		int iCompare = strcmpi(pszFind, pszName);
 		if (iCompare == 0)
 			return i;
@@ -495,7 +497,7 @@ static int Str_CmpHeadI(lpctstr pszFind, lpctstr pszTable)
 		{
 			if ( (!isalnum(ch1)) && (ch1 != ch0) )
 				return 0;
-			return(ch1 - ch2);
+			return (ch1 - ch2);
 		}
 		if (ch1 != ch2)
 			return (ch1 - ch2);

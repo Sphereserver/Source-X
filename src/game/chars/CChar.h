@@ -963,7 +963,9 @@ public:
 		//ATTACKER_CLEAR_DEATH		= 3,
 	};
 
-	size_t	Attacker() { return m_lastAttackers.size(); }
+	int		Attacker() {
+		return (int)m_lastAttackers.size();
+	}
 	bool	Attacker_Add(CChar * pChar, int64 threat = 0);
 	CChar * Attacker_GetLast();
 	bool	Attacker_Delete(CChar * pChar, bool bForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
