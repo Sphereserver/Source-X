@@ -450,16 +450,16 @@ tchar * Str_TrimWhitespace(tchar * pStr)
 int FindTable(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
 {
 	// A non-sorted table.
-	for (int i = 0; i<iCount; ++i)
+	for (int i = 0; i < iCount; ++i)
 	{
 		if (!strcmpi(*ppszTable, pszFind))
 			return i;
-		ppszTable = (lpctstr const *)((const byte*)ppszTable + iElemSize);
+		ppszTable = (lpctstr const *)((const byte *)ppszTable + iElemSize);
 	}
 	return -1;
 }
 
-int FindTableSorted(lpctstr pszFind, lpctstr const * ppszTable, int iCount)
+int FindTableSorted(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
 {
 	// Do a binary search (un-cased) on a sorted table.
 	// RETURN: -1 = not found
@@ -467,12 +467,11 @@ int FindTableSorted(lpctstr pszFind, lpctstr const * ppszTable, int iCount)
 	if (iHigh < 0)
 		return -1;
 	int iLow = 0;
-	//static const int iElemSize = sizeof(lpctstr);
+
 	while (iLow <= iHigh)
 	{
 		int i = (iHigh + iLow) / 2;
-		//lpctstr pszName = *((lpctstr const *)((const byte*)ppszTable + (i*iElemSize)));
-		lpctstr pszName = ppszTable[i];
+		lpctstr pszName = *((lpctstr const *)((const byte *)ppszTable + (i*iElemSize)));
 		int iCompare = strcmpi(pszFind, pszName);
 		if (iCompare == 0)
 			return i;
@@ -506,12 +505,12 @@ static int Str_CmpHeadI(lpctstr pszFind, lpctstr pszTable)
 
 int FindTableHead(lpctstr pszFind, lpctstr const * ppszTable, int iCount, int iElemSize)
 {
-	for (int i = 0; i<iCount; ++i)
+	for (int i = 0; i < iCount; ++i)
 	{
 		int iCompare = Str_CmpHeadI(pszFind, *ppszTable);
 		if (!iCompare)
 			return i;
-		ppszTable = (lpctstr const *)( (const byte*)ppszTable + iElemSize );
+		ppszTable = (lpctstr const *)((const byte *)ppszTable + iElemSize);
 	}
 	return -1;
 }
@@ -522,14 +521,13 @@ int FindTableHeadSorted(lpctstr pszFind, lpctstr const * ppszTable, int iCount, 
 	// RETURN: -1 = not found
 	int iHigh = iCount - 1;
 	if (iHigh < 0)
-	{
 		return -1;
-	}
 	int iLow = 0;
+
 	while (iLow <= iHigh)
 	{
 		int i = (iHigh + iLow) / 2;
-		lpctstr pszName = *((lpctstr const *)((const byte*)ppszTable + (i*iElemSize)));
+		lpctstr pszName = *((lpctstr const *)((const byte *)ppszTable + (i*iElemSize)));
 		int iCompare = Str_CmpHeadI(pszFind, pszName);
 		if (iCompare == 0)
 			return i;
@@ -818,6 +816,7 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
 	tchar ch;
 	bool bQuotes, bCurly, bSquare, bRound, bAngle;
 	bQuotes = bCurly = bSquare = bRound = bAngle = false;
+
 	for (; ; ++pLine)
 	{
 		ch = *pLine;
@@ -850,28 +849,20 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
 				bAngle = true;
 		}
 		else if (ch == '}') {
-			if (!bQuotes && bCurly) {
-				ch = *(pLine++);
-				break;
-			}
+			if (!bQuotes && bCurly)
+				bCurly = false;
 		}
 		else if (ch == ']') {
-			if (!bQuotes && bSquare) {
-				ch = *(pLine++);
-				break;
-			}
+			if (!bQuotes && bSquare)
+				bSquare = false;
 		}
 		else if (ch == ')') {
-			if (!bQuotes && bRound) {
-				ch = *(pLine++);
-				break;
-			}
+			if (!bQuotes && bRound)
+				bRound = false;
 		}
 		else if (ch == '>') {
-			if (!bQuotes && bAngle) {
-				ch = *(pLine++);
-				break;
-			}
+			if (!bQuotes && bAngle)
+				bAngle = false;
 		}
 
 		// don't turn this if into an else if!

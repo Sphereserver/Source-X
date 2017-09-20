@@ -1776,13 +1776,11 @@ bool CChar::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 				SKIP_SEPARATORS(pszKey);
 				return true;
 			case CHR_OWNER:
-				pRef	= NPC_PetGetOwner();
+				pRef = NPC_PetGetOwner();
 				return true;
 			case CHR_WEAPON:
-				{
-					pRef	= m_uidWeapon.ObjFind();
-					return true;
-				}
+				pRef = m_uidWeapon.ObjFind();
+				return true;
 			case CHR_REGION:
 				pRef = m_pArea;
 				return true;
@@ -1790,9 +1788,7 @@ bool CChar::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	}
 
 	if ( r_GetRefContainer( pszKey, pRef ))
-	{
 		return true;
-	}
 
 	return ( CObjBase::r_GetRef( pszKey, pRef ));
 }

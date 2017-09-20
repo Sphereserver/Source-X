@@ -20,7 +20,7 @@ function (toolchain_after_project)
 	 # Setting the exe to be a GUI application and not a console one.
 	SET (LINKER_FLAGS_COMMON	"/SUBSYSTEM:WINDOWS"		)
 
-	 # These shouldn't be applied to Debug release.
+	 # These linker flags shouldn't be applied to Debug release.
 	IF (CMAKE_CL_64)	# 64 bits
 		SET(ARCH_BITS		64			PARENT_SCOPE)
 		SET(LINKER_FLAGS_NODEBUG "/OPT:REF,ICF"			)
@@ -53,18 +53,19 @@ function (toolchain_after_project)
 
 	#-- Set mysql .lib directory for the linker.
 
-	LINK_DIRECTORIES ("${CMAKE_SOURCE_DIR}/../dlls")
+	IF (CMAKE_CL_64)
+		LINK_DIRECTORIES ("${CMAKE_SOURCE_DIR}/../DLLs/64/")
+	ELSE (CMAKE_CL_64)
+		LINK_DIRECTORIES ("${CMAKE_SOURCE_DIR}/../DLLs/32/")
+	ENDIF (CMAKE_CL_64)
+	
 endfunction()
 
 
 function (toolchain_exe_stuff)
 	#-- Windows libraries to link against.
 
-	IF (CMAKE_CL_64)
-		TARGET_LINK_LIBRARIES ( spheresvr	libmysql64 ws2_32 )
-	ELSE (CMAKE_CL_64)
-		TARGET_LINK_LIBRARIES ( spheresvr	libmysql   ws2_32 )
-	ENDIF (CMAKE_CL_64)
+	TARGET_LINK_LIBRARIES ( spheresvr	libmysql ws2_32 )
 
 
 	#-- Set define macros.

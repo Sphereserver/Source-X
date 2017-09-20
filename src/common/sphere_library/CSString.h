@@ -629,7 +629,7 @@ int FindTable(lpctstr pFind, lpctstr const * ppTable, int iCount, int iElemSize 
 * @param iElemSize size of elements of the table.
 * @return the index of string if success, -1 otherwise.
 */
-int FindTableSorted(lpctstr pFind, lpctstr const * ppTable, int iCount);/**
+int FindTableSorted(lpctstr pFind, lpctstr const * ppTable, int iCount, int iElemSize = sizeof(lpctstr));/**
 * @brief Look for a string header in a table (uses Str_CmpHeadI to compare instead of strcmpi).
 * @param pFind string we are looking for.
 * @param ppTable table where we are looking for the string.

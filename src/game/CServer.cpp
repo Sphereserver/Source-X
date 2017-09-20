@@ -1499,7 +1499,7 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 #ifdef _WIN32
 					"-cClassName Setup custom window class name for sphere (default: " SPHERE_TITLE "Svr)\n"
 #else
-					"-c use colored console output (default: off)\n"
+					"-c do not use colored console output (default: on)\n"
 #endif
 					"-D Dump global variable DEFNAMEs to defs.txt\n"
 #if defined(_WIN32) && !defined(_DEBUG)
@@ -1522,7 +1522,7 @@ bool CServer::CommandLine( int argc, tchar * argv[] )
 				continue;
 #else
 			case 'C':
-				g_UnixTerminal.setColorEnabled(true);
+				g_UnixTerminal.setColorEnabled(false);
 				continue;
 #endif
 			case 'P':
@@ -1776,6 +1776,31 @@ bool CServer::Load()
 {
 	EXC_TRY("Load");
 
+	EXC_SET("print sphere infos");
+	g_Log.Event(LOGM_INIT, "%s.\n", g_szServerDescription);
+#ifdef __GITREVISION__
+	g_Log.Event(LOGM_INIT, "Compiled at %s (%s) [build %d / GIT hash %s]\n", __DATE__, __TIME__, __GITREVISION__, __GITHASH__);
+#else
+	g_Log.Event(LOGM_INIT, "Compiled at %s (%s)\n", __DATE__, __TIME__);
+#endif
+#ifdef _NIGHTLYBUILD
+	g_Log.EventWarn("\r\n"
+		"This is a nightly build of SphereServer. This build is to be used\r\n"
+		"for testing and/or bug reporting ONLY. DO NOT run this build on a\r\n"
+		"live shard unless you know what you are doing!\r\n"
+		"Nightly builds are automatically made at every commit to the source code\r\n"
+		"repo and might contain errors, might be unstable or even destroy your\r\n"
+		"shard as they are mostly untested!\r\n"
+		"-----------------------------------------------------------------\r\n\r\n");
+
+	if (!g_Cfg.m_bAgree)
+	{
+		g_Log.EventError("Please write AGREE=1 in Sphere.ini file to acknowledge that\nyou understand the terms of use for nightly builds.\n");
+		return false;
+	}
+#endif
+	g_Log.Event(LOGM_INIT, "\n");
+
 #ifdef _WIN32
 	EXC_SET("init winsock");
 	tchar * wSockInfo = Str_GetTemp();
@@ -1788,7 +1813,8 @@ bool CServer::Load()
 			if ( err == WSAVERNOTSUPPORTED )
 			{
 				err = WSAStartup(MAKEWORD(1,1), &wsaData);
-				if ( err ) goto nowinsock;
+				if ( err )
+					goto nowinsock;
 			}
 			else
 			{
@@ -1803,6 +1829,19 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 	EXC_SET("loading ini");
 	g_Cfg.LoadIni(false);
 
+#ifdef _NIGHTLYBUILD
+	if (!g_Cfg.m_bAgree)
+	{
+		g_Log.EventError("Please write AGREE=1 in Sphere.ini file to acknowledge that\nyou understand the terms of use for nightly builds.\n");
+		return false;
+	}
+#endif
+
+#ifdef _WIN32
+	if (wSockInfo[0])
+		g_Log.Event(LOGM_INIT, wSockInfo);
+#endif
+
 	if (g_Cfg.m_bMySql && g_Cfg.m_bMySqlTicks)
 	{
 		EXC_SET( "Connecting to MySQL server" );
@@ -1814,38 +1853,6 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 			return false;
 		}
 	}
-
-	EXC_SET("log write");
-	g_Log.WriteString("\n");
-
-#ifdef __GITREVISION__
-	g_Log.Event(LOGM_INIT, "%s, compiled at %s (%s) [build %d / GIT hash %s]\n", g_szServerDescription, __DATE__, __TIME__, __GITREVISION__, __GITHASH__);
-#else
-	g_Log.Event(LOGM_INIT, "%s, compiled at %s (%s)\n", g_szServerDescription, __DATE__, __TIME__);
-#endif
-
-#ifdef _WIN32
-	if ( wSockInfo[0] )
-		g_Log.Event(LOGM_INIT, wSockInfo);
-#endif
-
-
-#ifdef _NIGHTLYBUILD
-	g_Log.EventWarn("\r\n"
-					"This is a nightly build of SphereServer. This build is to be used\r\n"
-					"for testing and/or bug reporting ONLY. DO NOT run this build on a\r\n"
-					"live shard unless you know what you are doing!\r\n"
-					"Nightly builds are automatically made every night from source and\r\n"
-					"might contain errors, might be unstable or even destroy your\r\n"
-					"shard as they are mostly untested!\r\n"
-					"-----------------------------------------------------------------\r\n\r\n");
-
-	if (!g_Cfg.m_bAgree)
-	{
-		g_Log.EventError("Please write AGREE=1 in Sphere.ini file to acknowledge that\nyou understand the terms of use for nightly builds.\n");
-		return false;
-	}
-#endif
 
 	EXC_SET("setting signals");
 	SetSignals();

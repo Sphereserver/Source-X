@@ -1147,38 +1147,40 @@ int CExpression::GetRangeArgsPos(lpctstr & pExpr, lpctstr (&pArgPos)[128][2], in
 				else if (pExpr[0] == '}')
 					--iSubRanges;
 			}
-			++pExpr;	// consume this and end.
-			pArgPos[iQty-1][1] = pExpr;		// Position of the last '}' of the sub-range
+			++pExpr;
+			pArgPos[iQty-1][1] = pExpr;		// Position of the char after the last '}' of the sub-range
 		}
 		else	// not another range, just plain text
 		{
-			GETNONWHITESPACE(pExpr);
 			while (true)
 			{
+				++pExpr;
 				if (pExpr[0] == '\0')
 				{
-					pArgPos[iQty - 1][1] = pExpr;	// Position of the last character of the argument
+					pArgPos[iQty - 1][1] = pExpr;	// Position of the char ('\0') after of the last character of the argument
 					goto end_w_error;
 				}
 
 				if (ISWHITESPACE(pExpr[0]) || (pExpr[0] == ','))
 				{
-					// is it another argument?
-					pArgPos[iQty-1][1] = pExpr;	// Position of the last character of the argument
+					pArgPos[iQty-1][1] = pExpr;	// Position of the char after the last character of the argument
+
+					// is there another argument?
 					GETNONWHITESPACE(pExpr);
 					if (pExpr[0] == '}')		// check if it's really another argument or it's simply the end of the range
 						goto end_of_range;
+					else if (pExpr[0] == '\0')
+						goto end_w_error;
 					break;
 				}
 				else if (pExpr[0] == '}')	// end of the range we are evaluating
 				{
-					pArgPos[iQty-1][1] = pExpr;		// Position of the last character of the argument
+					pArgPos[iQty-1][1] = pExpr;		// Position of the char ('}') after the last character of the argument
 
 				end_of_range:
 					++pExpr;	// consume this and end.
 					return iQty;
 				}
-				++pExpr;
 			}
 		}
 	}

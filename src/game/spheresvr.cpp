@@ -610,9 +610,9 @@ void defragSphere(char *path)
 	for ( i = 0; i < 3; i++ )
 	{
 		strcpy(z, path);
-		if ( i == 0 ) strcat(z, SPHERE_FILE "statics" SPHERE_SCRIPT);
-		else if ( i == 1 ) strcat(z, SPHERE_FILE "world" SPHERE_SCRIPT);
-		else strcat(z, SPHERE_FILE "chars" SPHERE_SCRIPT);
+		if ( i == 0 )		strcat(z, SPHERE_FILE "statics" SPHERE_SCRIPT);
+		else if ( i == 1 )	strcat(z, SPHERE_FILE "world" SPHERE_SCRIPT);
+		else				strcat(z, SPHERE_FILE "chars" SPHERE_SCRIPT);
 
 		g_Log.Event(LOGM_INIT, "Reading current UIDs: %s\n", z);
 		if ( !inf.Open(z, OF_READ|OF_TEXT|OF_DEFAULTMODE) )
@@ -635,7 +635,7 @@ void defragSphere(char *path)
 			{
 				p = buf + 7;
 				p1 = p;
-				while ( *p1 && ( *p1 != '\r' ) && ( *p1 != '\n' ))
+				while ( *p1 && ( *p1 != '\r' ) && ( *p1 != '\n' ) )
 					p1++;
 				*p1 = 0;
 
@@ -657,11 +657,11 @@ void defragSphere(char *path)
 	for ( i = 0; i < 5; i++ )
 	{
 		strcpy(z, path);
-		if ( !i ) strcat(z, SPHERE_FILE "accu.scp");
-		else if ( i == 1 ) strcat(z, SPHERE_FILE "chars" SPHERE_SCRIPT);
-		else if ( i == 2 ) strcat(z, SPHERE_FILE "data" SPHERE_SCRIPT);
-		else if ( i == 3 ) strcat(z, SPHERE_FILE "world" SPHERE_SCRIPT);
-		else if ( i == 4 ) strcat(z, SPHERE_FILE "statics" SPHERE_SCRIPT);
+		if ( !i )			strcat(z, SPHERE_FILE "accu.scp");
+		else if ( i == 1 )	strcat(z, SPHERE_FILE "chars" SPHERE_SCRIPT);
+		else if ( i == 2 )	strcat(z, SPHERE_FILE "data" SPHERE_SCRIPT);
+		else if ( i == 3 )	strcat(z, SPHERE_FILE "world" SPHERE_SCRIPT);
+		else if ( i == 4 )	strcat(z, SPHERE_FILE "statics" SPHERE_SCRIPT);
 		g_Log.Event(LOGM_INIT, "Updating UID-s in %s to %s.new\n", z, z);
 		if ( !inf.Open(z, OF_READ|OF_TEXT|OF_DEFAULTMODE) )
 		{

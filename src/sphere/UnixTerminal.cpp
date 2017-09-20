@@ -17,7 +17,7 @@ UnixTerminal::UnixTerminal() :
 #ifdef _USECURSES
 	m_window(NULL),
 #endif
- m_nextChar('\0'), m_isColorEnabled(false), m_prepared(false)
+ m_nextChar('\0'), m_isColorEnabled(true), m_prepared(false)
 {
 }
 

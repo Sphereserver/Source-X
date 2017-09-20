@@ -901,7 +901,7 @@ LRESULT WINAPI CNTWindow::WindowProc( HWND hWnd, UINT message, WPARAM wParam, LP
 
 bool NTWindow_Init(HINSTANCE hInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
-	theApp.InitInstance(SPHERE_TITLE "Server V" SPHERE_VERSION, hInstance, lpCmdLine);
+	theApp.InitInstance(SPHERE_TITLE " V" SPHERE_VERSION, hInstance, lpCmdLine);
 
 	//	read target window name from the arguments
 	char	className[32] = SPHERE_TITLE "Svr";
