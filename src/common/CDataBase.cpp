@@ -1,7 +1,7 @@
 
 #include "../common/CDataBase.h"
 #include "../common/CLog.h"
-#include "../game/CResource.h"
+#include "../game/CServerConfig.h"
 #include "../game/CServer.h"
 #include "../sphere/asyncdb.h"
 #include "CException.h"

@@ -9,9 +9,7 @@ game/CObjBase.h
 game/CPathFinder.cpp
 game/CPathFinder.h
 game/CResourceCalc.cpp
-game/CResource.cpp
 game/CResourceDef.cpp
-game/CResource.h
 game/CScriptProfiler.h
 game/CSector.cpp
 game/CSector.h
@@ -19,6 +17,8 @@ game/CSectorEnviron.h
 game/CSectorEnviron.cpp
 game/CServer.cpp
 game/CServer.h
+game/CServerConfig.cpp
+game/CServerConfig.h
 game/CServerDef.cpp
 game/CServerDef.h
 game/CServerTime.cpp

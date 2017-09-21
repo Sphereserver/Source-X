@@ -11,7 +11,7 @@
 #include "../game/CBase.h"
 #include "../common/CLog.h"
 #include "../game/CObjBase.h"
-#include "../game/CResource.h"
+#include "../game/CServerConfig.h"
 #include "../game/CWorld.h"
 #include "../sphere/threads.h"
 

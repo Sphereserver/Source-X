@@ -1,15 +1,15 @@
 // The physics calculations of the world.
 
-#include "CResource.h"
+#include "CServerConfig.h"
 #include "chars/CChar.h"
 #include "chars/CCharNPC.h"
 
 //********************************
 // Movement
 
-int CResource::Calc_MaxCarryWeight( const CChar * pChar ) const
+int CServerConfig::Calc_MaxCarryWeight( const CChar * pChar ) const
 {
-	ADDTOCALLSTACK("CResource::Calc_MaxCarryWeight");
+	ADDTOCALLSTACK("CServerConfig::Calc_MaxCarryWeight");
 	// How much weight can i carry before i can carry no more. (and move at all)
 	// Amount of weight that can be carried Max:
 	// based on str 
@@ -28,9 +28,9 @@ int CResource::Calc_MaxCarryWeight( const CChar * pChar ) const
 //********************************
 // Combat
 
-int CResource::Calc_CombatAttackSpeed( CChar * pChar, CItem * pWeapon )
+int CServerConfig::Calc_CombatAttackSpeed( CChar * pChar, CItem * pWeapon )
 {
-	ADDTOCALLSTACK("CResource::Calc_CombatAttackSpeed");
+	ADDTOCALLSTACK("CServerConfig::Calc_CombatAttackSpeed");
 	// Calculate the swing speed value on chars
 	// RETURN:
 	//  Time in tenths of a sec. (for entire swing, not just time to hit)
@@ -122,9 +122,9 @@ int CResource::Calc_CombatAttackSpeed( CChar * pChar, CItem * pWeapon )
 	}
 }
 
-int CResource::Calc_CombatChanceToHit(CChar * pChar, CChar * pCharTarg, SKILL_TYPE skill)
+int CServerConfig::Calc_CombatChanceToHit(CChar * pChar, CChar * pCharTarg, SKILL_TYPE skill)
 {
-	ADDTOCALLSTACK("CResource::Calc_CombatChanceToHit");
+	ADDTOCALLSTACK("CServerConfig::Calc_CombatChanceToHit");
 	// Combat: Compare attacker skill vs target skill
 	// to calculate the hit chance on combat.
 	//
@@ -218,9 +218,9 @@ int CResource::Calc_CombatChanceToHit(CChar * pChar, CChar * pCharTarg, SKILL_TY
 	}
 }
 
-int CResource::Calc_FameKill( CChar * pKill )
+int CServerConfig::Calc_FameKill( CChar * pKill )
 {
-	ADDTOCALLSTACK("CResource::Calc_FameKill");
+	ADDTOCALLSTACK("CServerConfig::Calc_FameKill");
 	// Translate the fame for a Kill.
 
 	int iFameChange = pKill->Stat_GetAdjusted(STAT_FAME);
@@ -234,9 +234,9 @@ int CResource::Calc_FameKill( CChar * pKill )
 	return( iFameChange );
 }
 
-int CResource::Calc_KarmaKill( CChar * pKill, NOTO_TYPE NotoThem )
+int CServerConfig::Calc_KarmaKill( CChar * pKill, NOTO_TYPE NotoThem )
 {
-	ADDTOCALLSTACK("CResource::Calc_KarmaKill");
+	ADDTOCALLSTACK("CServerConfig::Calc_KarmaKill");
 	// Karma change on kill ?
 
 	int iKarmaChange = -pKill->Stat_GetAdjusted(STAT_KARMA);
@@ -269,9 +269,9 @@ int CResource::Calc_KarmaKill( CChar * pKill, NOTO_TYPE NotoThem )
 	return( iKarmaChange );
 }
 
-int CResource::Calc_KarmaScale( int iKarma, int iKarmaChange )
+int CServerConfig::Calc_KarmaScale( int iKarma, int iKarmaChange )
 {
-	ADDTOCALLSTACK("CResource::Calc_KarmaScale");
+	ADDTOCALLSTACK("CServerConfig::Calc_KarmaScale");
 	// Scale the karma based on the current level.
 	// Should be harder to gain karma than to loose it.
 
@@ -294,9 +294,9 @@ int CResource::Calc_KarmaScale( int iKarma, int iKarmaChange )
 //********************************
 // Stealing
 
-int CResource::Calc_StealingItem( CChar * pCharThief, CItem * pItem, CChar * pCharMark )
+int CServerConfig::Calc_StealingItem( CChar * pCharThief, CItem * pItem, CChar * pCharMark )
 {
-	ADDTOCALLSTACK("CResource::Calc_StealingItem");
+	ADDTOCALLSTACK("CServerConfig::Calc_StealingItem");
 	// Chance to steal and retrieve the item successfully.
 	// weight of the item
 	//  heavier items should be more difficult.
@@ -330,9 +330,9 @@ int CResource::Calc_StealingItem( CChar * pCharThief, CItem * pItem, CChar * pCh
 	return( iDifficulty / 2 );
 }
 
-bool CResource::Calc_CrimeSeen( CChar * pCharThief, CChar * pCharViewer, SKILL_TYPE SkillToSee, bool fBonus )
+bool CServerConfig::Calc_CrimeSeen( CChar * pCharThief, CChar * pCharViewer, SKILL_TYPE SkillToSee, bool fBonus )
 {
-	ADDTOCALLSTACK("CResource::Calc_CrimeSeen");
+	ADDTOCALLSTACK("CServerConfig::Calc_CrimeSeen");
 	// Chance to steal without being seen by a specific person
 	//	weight of the item
 	//	distance from crime. (0=i am the mark)
@@ -380,9 +380,9 @@ bool CResource::Calc_CrimeSeen( CChar * pCharThief, CChar * pCharViewer, SKILL_T
 	return true;
 }
 
-lpctstr CResource::Calc_MaptoSextant( CPointMap pntCoords )
+lpctstr CServerConfig::Calc_MaptoSextant( CPointMap pntCoords )
 {
-	ADDTOCALLSTACK("CResource::Calc_MaptoSextant");
+	ADDTOCALLSTACK("CServerConfig::Calc_MaptoSextant");
 	// Conversion from map square to degrees, minutes
 	char *z = Str_GetTemp();
 	CPointMap zeroPoint;

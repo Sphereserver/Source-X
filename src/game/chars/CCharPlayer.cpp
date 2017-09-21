@@ -187,30 +187,27 @@ SKILL_TYPE CCharPlayer::Skill_GetLockType( lpctstr pszKey ) const
 	tchar * ppArgs[3];
 	size_t i = Str_ParseCmds( szTmpKey, ppArgs, CountOf(ppArgs), ".[]" );
 	if ( i <= 1 )
-		return( SKILL_NONE );
+		return SKILL_NONE;
 
 	if ( IsDigit( ppArgs[1][0] ))
-	{
 		i = ATOI( ppArgs[1] );
-	}
 	else
-	{
 		i = g_Cfg.FindSkillKey( ppArgs[1] );
-	}
+	
 	if ( i >= g_Cfg.m_iMaxSkill )
-		return( SKILL_NONE );
+		return SKILL_NONE;
 	return static_cast<SKILL_TYPE>(i);
 }
 
 SKILLLOCK_TYPE CCharPlayer::Skill_GetLock( SKILL_TYPE skill ) const
 {
-	ASSERT( skill >= 0 && (size_t)(skill) < CountOf(m_SkillLock));
+	ASSERT( (skill >= 0) && ((size_t)skill < CountOf(m_SkillLock)));
 	return static_cast<SKILLLOCK_TYPE>(m_SkillLock[skill]);
 }
 
 void CCharPlayer::Skill_SetLock( SKILL_TYPE skill, SKILLLOCK_TYPE state )
 {
-	ASSERT( skill >= 0 && (size_t)(skill) < CountOf(m_SkillLock));
+	ASSERT( (skill >= 0) && ((size_t)skill < CountOf(m_SkillLock)));
 	m_SkillLock[skill] = (uchar)(state);
 }
 
@@ -225,30 +222,27 @@ STAT_TYPE CCharPlayer::Stat_GetLockType( lpctstr pszKey ) const
 	tchar * ppArgs[3];
 	size_t i = Str_ParseCmds( szTmpKey, ppArgs, CountOf(ppArgs), ".[]" );
 	if ( i <= 1 )
-		return( STAT_NONE );
+		return STAT_NONE;
 
 	if ( IsDigit( ppArgs[1][0] ))
-	{
 		i = ATOI( ppArgs[1] );
-	}
 	else
-	{
 		i = g_Cfg.FindStatKey( ppArgs[1] );
-	}
+
 	if ( i >= STAT_BASE_QTY )
-		return( STAT_NONE );
+		return STAT_NONE;
 	return static_cast<STAT_TYPE>(i);
 }
 
 SKILLLOCK_TYPE CCharPlayer::Stat_GetLock( STAT_TYPE stat ) const
 {
-	ASSERT( stat >= 0 && (size_t)(stat) < CountOf(m_StatLock));
+	ASSERT( (stat >= 0) && ((size_t)stat < CountOf(m_StatLock)));
 	return static_cast<SKILLLOCK_TYPE>(m_StatLock[stat]);
 }
 
 void CCharPlayer::Stat_SetLock( STAT_TYPE stat, SKILLLOCK_TYPE state )
 {
-	ASSERT( stat >= 0 && (size_t)(stat) < CountOf(m_StatLock));
+	ASSERT( (stat >= 0) && ((size_t)stat < CountOf(m_StatLock)));
 	m_StatLock[stat] = (uchar)(state);
 }
 
@@ -471,7 +465,7 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 				if ( skill <= SKILL_NONE )
 					return false;
 				int bState = s.GetArgVal();
-				if ( bState < SKILLLOCK_UP || bState > SKILLLOCK_LOCK )
+				if ( (bState < SKILLLOCK_UP) || (bState > SKILLLOCK_LOCK) )
 					return false;
 				Skill_SetLock(skill, static_cast<SKILLLOCK_TYPE>(bState));
 			} return true;
@@ -486,7 +480,7 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 				if (( stat <= STAT_NONE ) || ( stat >= STAT_BASE_QTY ))
 					return false;
 				int bState = s.GetArgVal();
-				if ( bState < SKILLLOCK_UP || bState > SKILLLOCK_LOCK )
+				if ( (bState < SKILLLOCK_UP) || (bState > SKILLLOCK_LOCK) )
 					return false;
 				Stat_SetLock(stat, static_cast<SKILLLOCK_TYPE>(bState));
 			} return true;
@@ -494,9 +488,7 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 		default:
 			// Just ignore any NPC type stuff.
 			if ( FindTableSorted( s.GetKey(), CCharNPC::sm_szLoadKeys, CNC_QTY ) >= 0 )
-			{
 				return true;
-			}
 			return false;
 	}
 	EXC_CATCH;

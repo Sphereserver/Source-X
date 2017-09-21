@@ -3,7 +3,7 @@
 #include "../game/items/CItem.h"
 #include "../common/CLog.h"
 #include "../game/CObjBase.h"
-#include "../game/CResource.h"
+#include "../game/CServerConfig.h"
 #include "../game/triggers.h"
 #include "CException.h"
 #include "CExpression.h"

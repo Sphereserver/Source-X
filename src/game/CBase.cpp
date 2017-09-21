@@ -2,7 +2,7 @@
 #include "../common/CException.h"
 #include "../common/common.h"
 #include "CBase.h"
-#include "CResource.h"
+#include "CServerConfig.h"
 
 enum OBC_TYPE
 {

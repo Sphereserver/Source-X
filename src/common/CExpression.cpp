@@ -1,7 +1,7 @@
 
 #include <cmath>
 #include "../game/CObjBase.h"
-#include "../game/CResource.h"
+#include "../game/CServerConfig.h"
 #include "../game/CWorld.h"
 #include "CException.h"
 #include "CExpression.h"

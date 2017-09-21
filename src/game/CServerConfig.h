@@ -1,5 +1,5 @@
 /**
-* @file CResource.h
+* @file CServerConfig.h
 *
 */
 
@@ -784,11 +784,11 @@ struct CMultiDefArray : public CSObjSortArray< CSphereMulti*, MULTI_TYPE >
 };
 
 /**
- * @class   CResource
+ * @class   CServerConfig
  *
  * @brief   Script defined resources (not saved in world file) (sphere.ini)
  */
-extern class CResource : public CResourceBase
+extern class CServerConfig : public CResourceBase
 {
 	//
 	static const CAssocReg sm_szLoadKeys[];
@@ -1160,12 +1160,12 @@ private:
 	CResourceID ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVarDefContNum ** ppVarNum, bool fNewStyleDef );
 
 public:
-	CResource();
-	~CResource();
+	CServerConfig();
+	~CServerConfig();
 
 private:
-	CResource(const CResource& copy);
-	CResource& operator=(const CResource& other);
+	CServerConfig(const CServerConfig& copy);
+	CServerConfig& operator=(const CServerConfig& other);
 
 public:
 	bool r_LoadVal( CScript &s );
@@ -1173,7 +1173,7 @@ public:
 	bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 
     /**
-     * @fn  bool CResource::LoadIni( bool fTest );
+     * @fn  bool CServerConfig::LoadIni( bool fTest );
      *
      * @brief   Loads sphere.ini.
      *
@@ -1184,7 +1184,7 @@ public:
 	bool LoadIni( bool fTest );
 
     /**
-     * @fn  bool CResource::LoadCryptIni( void );
+     * @fn  bool CServerConfig::LoadCryptIni( void );
      *
      * @brief   Loads sphereCrypt.ini.
      *
@@ -1196,7 +1196,7 @@ public:
 	bool LoadCryptIni( void );
 
     /**
-     * @fn  bool CResource::Load( bool fResync );
+     * @fn  bool CServerConfig::Load( bool fResync );
      *
      * @brief   Loads or resync scripts..
      *
@@ -1207,7 +1207,7 @@ public:
 	bool Load( bool fResync );
 
     /**
-     * @fn  void CResource::Unload( bool fResync );
+     * @fn  void CServerConfig::Unload( bool fResync );
      *
      * @brief   Unloads scripts and resources.
      *
@@ -1217,7 +1217,7 @@ public:
 	void OnTick( bool fNow );
 
     /**
-     * @fn  bool CResource::LoadResourceSection( CScript * pScript );
+     * @fn  bool CServerConfig::LoadResourceSection( CScript * pScript );
      *
      * @brief   Loads resource section ([SKILL ], [SPELL ], [CHARDEF ]...).
      *
@@ -1228,14 +1228,14 @@ public:
 	bool LoadResourceSection( CScript * pScript );
 
     /**
-     * @fn  void CResource::LoadSortSpells();
+     * @fn  void CServerConfig::LoadSortSpells();
      *
      * @brief   Sort all spells in order.
      */
 	void LoadSortSpells();
 
     /**
-     * @fn  CResourceDef * CResource::ResourceGetDef( RESOURCE_ID_BASE rid ) const;
+     * @fn  CResourceDef * CServerConfig::ResourceGetDef( RESOURCE_ID_BASE rid ) const;
      *
      * @brief   Get a CResourceDef from the RESOURCE_ID.
      *
@@ -1252,7 +1252,7 @@ public:
 	int GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res = RDS_T2A, uchar chars = 5 );
 
     /**
-     * @fn  bool CResource::CanUsePrivVerb( const CScriptObj * pObjTarg, lpctstr pszCmd, CTextConsole * pSrc ) const;
+     * @fn  bool CServerConfig::CanUsePrivVerb( const CScriptObj * pObjTarg, lpctstr pszCmd, CTextConsole * pSrc ) const;
      *
      * @brief   Can i use this verb on this object ?
      *
@@ -1265,7 +1265,7 @@ public:
 	bool CanUsePrivVerb( const CScriptObj * pObjTarg, lpctstr pszCmd, CTextConsole * pSrc ) const;
 
     /**
-     * @fn  PLEVEL_TYPE CResource::GetPrivCommandLevel( lpctstr pszCmd ) const;
+     * @fn  PLEVEL_TYPE CServerConfig::GetPrivCommandLevel( lpctstr pszCmd ) const;
      *
      * @brief   Gets this command's priv level.
      *
@@ -1276,7 +1276,7 @@ public:
 	PLEVEL_TYPE GetPrivCommandLevel( lpctstr pszCmd ) const;
 
     /**
-     * @fn  static STAT_TYPE CResource::FindStatKey( lpctstr pszKey );
+     * @fn  static STAT_TYPE CServerConfig::FindStatKey( lpctstr pszKey );
      *
      * @brief   Returns the Stat key from the given string( STR = STAT_STR... ).
      *
@@ -1287,7 +1287,7 @@ public:
 	static STAT_TYPE FindStatKey( lpctstr pszKey );
 
     /**
-     * @fn  static bool CResource::IsValidEmailAddressFormat( lpctstr pszText );
+     * @fn  static bool CServerConfig::IsValidEmailAddressFormat( lpctstr pszText );
      *
      * @brief   Query if 'pszText' is valid email address format.
      *
@@ -1298,7 +1298,7 @@ public:
 	static bool IsValidEmailAddressFormat( lpctstr pszText );
 
     /**
-     * @fn  bool CResource::IsObscene( lpctstr pszText ) const;
+     * @fn  bool CServerConfig::IsObscene( lpctstr pszText ) const;
      *
      * @brief   Query if 'pszText' is obscene.
      *
@@ -1309,7 +1309,7 @@ public:
 	bool IsObscene( lpctstr pszText ) const;
 
     /**
-     * @fn  CWebPageDef * CResource::FindWebPage( lpctstr pszPath ) const;
+     * @fn  CWebPageDef * CServerConfig::FindWebPage( lpctstr pszPath ) const;
      *
      * @brief   Searches for the requested web page.
      *
@@ -1320,7 +1320,7 @@ public:
 	CWebPageDef * FindWebPage( lpctstr pszPath ) const;
 
 	/**
-	* @fn  CServerRef CResource::Server_GetDef( size_t index );
+	* @fn  CServerRef CServerConfig::Server_GetDef( size_t index );
 	*
 	* @brief   Get the def for the server in position 'index' in servers list.
 	*
@@ -1331,7 +1331,7 @@ public:
 	CServerRef Server_GetDef( size_t index );
 
     /**
-     * @fn  const CSpellDef * CResource::GetSpellDef( SPELL_TYPE index ) const
+     * @fn  const CSpellDef * CServerConfig::GetSpellDef( SPELL_TYPE index ) const
      *
      * @brief   Gets spell definition.
      *
@@ -1348,7 +1348,7 @@ public:
 	}
 
     /**
-    * @fn  const CSpellDef * CResource::GetSpellDef( SPELL_TYPE index ) const
+    * @fn  const CSpellDef * CServerConfig::GetSpellDef( SPELL_TYPE index ) const
     *
     * @brief   Gets spell definition.
     *
@@ -1365,7 +1365,7 @@ public:
 	}
 
     /**
-     * @fn  lpctstr CResource::GetSkillKey( SKILL_TYPE index ) const
+     * @fn  lpctstr CServerConfig::GetSkillKey( SKILL_TYPE index ) const
      *
      * @brief   Gets skill key.
      *
@@ -1382,7 +1382,7 @@ public:
 	}
 
     /**
-     * @fn  bool CResource::IsSkillFlag( SKILL_TYPE index, SKF_TYPE skf ) const
+     * @fn  bool CServerConfig::IsSkillFlag( SKILL_TYPE index, SKF_TYPE skf ) const
      *
      * @brief   Query if 'index' has 'skf' skill flag.
      *
@@ -1398,7 +1398,7 @@ public:
 	}
 
     /**
-     * @fn  const CSkillDef* CResource::GetSkillDef( SKILL_TYPE index ) const
+     * @fn  const CSkillDef* CServerConfig::GetSkillDef( SKILL_TYPE index ) const
      *
      * @brief   Gets skill definition.
      *
@@ -1414,7 +1414,7 @@ public:
 	}
 
     /**
-    * @fn  const CSkillDef* CResource::GetSkillDef( SKILL_TYPE index ) const
+    * @fn  const CSkillDef* CServerConfig::GetSkillDef( SKILL_TYPE index ) const
     *
     * @brief   Gets skill definition.
     *
@@ -1430,7 +1430,7 @@ public:
 	}
 
     /**
-     * @fn  const CSkillDef* CResource::FindSkillDef( lpctstr pszKey ) const
+     * @fn  const CSkillDef* CServerConfig::FindSkillDef( lpctstr pszKey ) const
      *
      * @brief   Find the skill name in the alpha sorted list.
      *
@@ -1449,7 +1449,7 @@ public:
 	}
 
     /**
-     * @fn  const CSkillDef* CResource::SkillLookup( lpctstr pszKey );
+     * @fn  const CSkillDef* CServerConfig::SkillLookup( lpctstr pszKey );
      *
      * @brief   Search for the skill which NAME=pszKey.
      *
@@ -1460,7 +1460,7 @@ public:
 	const CSkillDef* SkillLookup( lpctstr pszKey );
 
     /**
-     * @fn  SKILL_TYPE CResource::FindSkillKey( lpctstr pszKey ) const;
+     * @fn  SKILL_TYPE CServerConfig::FindSkillKey( lpctstr pszKey ) const;
      *
      * @brief   Search for the skill which KEY=pszKey.
      *
@@ -1471,7 +1471,7 @@ public:
 	SKILL_TYPE FindSkillKey( lpctstr pszKey ) const;
 
     /**
-     * @fn  int CResource::GetSpellEffect( SPELL_TYPE spell, int iSkillval ) const;
+     * @fn  int CServerConfig::GetSpellEffect( SPELL_TYPE spell, int iSkillval ) const;
      *
      * @brief   Gets the Damage/Healing/etc done by the given params.
      *
@@ -1483,7 +1483,7 @@ public:
 	int GetSpellEffect( SPELL_TYPE spell, int iSkillval ) const;
 
     /**
-     * @fn  lpctstr CResource::GetRune( tchar ch ) const
+     * @fn  lpctstr CServerConfig::GetRune( tchar ch ) const
      *
      * @brief   Retrieves a Spell's rune (WOP).
      *
@@ -1500,7 +1500,7 @@ public:
 	}
 
     /**
-     * @fn  lpctstr CResource::GetNotoTitle( int iLevel, bool bFemale ) const;
+     * @fn  lpctstr CServerConfig::GetNotoTitle( int iLevel, bool bFemale ) const;
      *
      * @brief   Gets noto title.
      *
@@ -1515,7 +1515,7 @@ public:
 	const CSphereMulti * GetMultiItemDefs( ITEMID_TYPE itemid );
 
     /**
-     * @fn  bool CResource::IsConsoleCmd( tchar ch ) const;
+     * @fn  bool CServerConfig::IsConsoleCmd( tchar ch ) const;
      *
      * @brief   Query if 'ch' is a console command or ingame one.
      *
@@ -1529,7 +1529,7 @@ public:
 	CRegionBase * GetRegion( lpctstr pKey ) const; ///< Find a region with the given name/defname
 
     /**
-     * @fn  int CResource::Calc_MaxCarryWeight( const CChar * pChar ) const;
+     * @fn  int CServerConfig::Calc_MaxCarryWeight( const CChar * pChar ) const;
      *
      * @brief   Calculates the maximum carry weight.
      *
@@ -1540,7 +1540,7 @@ public:
 	int Calc_MaxCarryWeight( const CChar * pChar ) const;
 
     /**
-     * @fn  int CResource::Calc_CombatAttackSpeed( CChar * pChar, CItem * pWeapon );
+     * @fn  int CServerConfig::Calc_CombatAttackSpeed( CChar * pChar, CItem * pWeapon );
      *
      * @brief   Calculates the combat attack speed.
      *
@@ -1552,7 +1552,7 @@ public:
 	int Calc_CombatAttackSpeed( CChar * pChar, CItem * pWeapon );
 
     /**
-     * @fn  int CResource::Calc_CombatChanceToHit( CChar * pChar, CChar * pCharTarg, SKILL_TYPE skill );
+     * @fn  int CServerConfig::Calc_CombatChanceToHit( CChar * pChar, CChar * pCharTarg, SKILL_TYPE skill );
      *
      * @brief   Calculates the combat chance to hit.
      *
@@ -1565,7 +1565,7 @@ public:
 	int Calc_CombatChanceToHit( CChar * pChar, CChar * pCharTarg, SKILL_TYPE skill );
 
     /**
-     * @fn  int CResource::Calc_StealingItem( CChar * pCharThief, CItem * pItem, CChar * pCharMark );
+     * @fn  int CServerConfig::Calc_StealingItem( CChar * pCharThief, CItem * pItem, CChar * pCharMark );
      *
      * @brief   Chance to steal and retrieve the item successfully
      *
@@ -1578,7 +1578,7 @@ public:
 	int  Calc_StealingItem( CChar * pCharThief, CItem * pItem, CChar * pCharMark );
 
     /**
-     * @fn  bool CResource::Calc_CrimeSeen( CChar * pCharThief, CChar * pCharViewer, SKILL_TYPE SkillToSee, bool fBonus );
+     * @fn  bool CServerConfig::Calc_CrimeSeen( CChar * pCharThief, CChar * pCharViewer, SKILL_TYPE SkillToSee, bool fBonus );
      *
      * @brief   Chance to steal without being seen by a specific person.
      *
@@ -1592,7 +1592,7 @@ public:
 	bool Calc_CrimeSeen( CChar * pCharThief, CChar * pCharViewer, SKILL_TYPE SkillToSee, bool fBonus );
 
     /**
-     * @fn  int CResource::Calc_FameKill( CChar * pKill );
+     * @fn  int CServerConfig::Calc_FameKill( CChar * pKill );
      *
      * @brief   Calculates the fame given by the kill.
      *
@@ -1603,7 +1603,7 @@ public:
 	int Calc_FameKill( CChar * pKill );
 
     /**
-     * @fn  int CResource::Calc_KarmaKill( CChar * pKill, NOTO_TYPE NotoThem );
+     * @fn  int CServerConfig::Calc_KarmaKill( CChar * pKill, NOTO_TYPE NotoThem );
      *
      * @brief   Calculates the karma given or lost by the kill.
      *
@@ -1615,7 +1615,7 @@ public:
 	int Calc_KarmaKill( CChar * pKill, NOTO_TYPE NotoThem );
 
     /**
-     * @fn  int CResource::Calc_KarmaScale( int iKarma, int iKarmaChange );
+     * @fn  int CServerConfig::Calc_KarmaScale( int iKarma, int iKarmaChange );
      *
      * @brief   Scale the karma based on the current level, Should be harder to gain karma than to loose it.
      *
@@ -1627,7 +1627,7 @@ public:
 	int Calc_KarmaScale( int iKarma, int iKarmaChange );
 
     /**
-     * @fn  lpctstr CResource::Calc_MaptoSextant( CPointMap pntCoords );
+     * @fn  lpctstr CServerConfig::Calc_MaptoSextant( CPointMap pntCoords );
      *
      * @brief   Translates map coords to sextant coords.
      *
@@ -1643,7 +1643,7 @@ public:
 #define SysMessageDefault( msg )	SysMessage( g_Cfg.GetDefaultMsg( msg ) )
 
     /**
-     * @fn  lpctstr CResource::GetDefaultMsg(lpctstr pszKey);
+     * @fn  lpctstr CServerConfig::GetDefaultMsg(lpctstr pszKey);
      *
      * @brief   Gets default message (sphere_msgs.scp).
      *
@@ -1654,7 +1654,7 @@ public:
 	lpctstr GetDefaultMsg(lpctstr pszKey);
 
     /**
-    * @fn  lpctstr CResource::GetDefaultMsg(lpctstr pszKey);
+    * @fn  lpctstr CServerConfig::GetDefaultMsg(lpctstr pszKey);
     *
     * @brief   Gets default message (sphere_msgs.scp).
     *

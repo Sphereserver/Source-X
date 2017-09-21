@@ -11,14 +11,14 @@
 #include "items/CItemBase.h"
 #include "items/CItemStone.h"
 #include "uo_files/CUOItemInfo.h"
-#include "CResource.h"
 #include "CServerTime.h"
 #include "CWorld.h"
 #include "spheresvr.h"
 #include "triggers.h"
+#include "CServerConfig.h"
 
 
-CResource::CResource()
+CServerConfig::CServerConfig()
 {
 	m_timePeriodic.Init();
 
@@ -266,7 +266,7 @@ CResource::CResource()
 	m_NPCNoFameTitle = false;
 }
 
-CResource::~CResource()
+CServerConfig::~CServerConfig()
 {
 	for ( size_t i = 0; i < CountOf(m_ResHash.m_Array); i++ )
 	{
@@ -283,9 +283,9 @@ CResource::~CResource()
 
 
 // SKILL ITEMDEF, etc
-bool CResource::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
+bool CServerConfig::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
-	ADDTOCALLSTACK("CResource::r_GetRef");
+	ADDTOCALLSTACK("CServerConfig::r_GetRef");
 	tchar * pszSep = const_cast<tchar*>(strchr( pszKey, '(' ));	// acts like const_cast
 	if ( pszSep == NULL )
 	{
@@ -603,239 +603,239 @@ enum RC_TYPE
 };
 
 
-const CAssocReg CResource::sm_szLoadKeys[RC_QTY+1] =
+const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 {
-	{ "ACCTFILES",				{ ELEM_CSTRING,	OFFSETOF(CResource,m_sAcctBaseDir),			0 }},
-	{ "ADVANCEDLOS",			{ ELEM_INT,		OFFSETOF(CResource,m_iAdvancedLos),			0 }},
-	{ "AGREE",					{ ELEM_BOOL,	OFFSETOF(CResource,m_bAgree),				0 }},
-	{ "ALLOWBUYSELLAGENT",		{ ELEM_BOOL,	OFFSETOF(CResource,m_bAllowBuySellAgent),	0 }},
-	{ "ALLOWLIGHTOVERRIDE",		{ ELEM_BOOL,	OFFSETOF(CResource,m_bAllowLightOverride),	0 }},
-	{ "ALLOWNEWBTRANSFER",		{ ELEM_BOOL,	OFFSETOF(CResource,m_bAllowNewbTransfer),	0 }},
-	{ "ARCHERYMAXDIST",			{ ELEM_INT,		OFFSETOF(CResource,m_iArcheryMaxDist),		0 }},
-	{ "ARCHERYMINDIST",			{ ELEM_INT,		OFFSETOF(CResource,m_iArcheryMinDist),		0 }},
-	{ "ARRIVEDEPARTMSG",		{ ELEM_INT,		OFFSETOF(CResource,m_iArriveDepartMsg),		0 }},
-	{ "ATTACKERTIMEOUT",		{ ELEM_INT,		OFFSETOF(CResource,m_iAttackerTimeout),		0 }},
-	{ "ATTACKINGISACRIME",		{ ELEM_BOOL,	OFFSETOF(CResource,m_fAttackingIsACrime),	0 }},
-	{ "AUTONEWBIEKEYS",			{ ELEM_BOOL,	OFFSETOF(CResource,m_fAutoNewbieKeys),		0 }},
-	{ "AUTOPRIVFLAGS",			{ ELEM_INT,		OFFSETOF(CResource,m_iAutoPrivFlags),		0 }},
-	{ "AUTORESDISP",			{ ELEM_BOOL,	OFFSETOF(CResource,m_bAutoResDisp),			0 }},
-	{ "AUTOTOOLTIPRESEND",		{ ELEM_INT,		OFFSETOF(CResource,m_iAutoTooltipResend),	0 }},
-	{ "BACKUPLEVELS",			{ ELEM_INT,		OFFSETOF(CResource,m_iSaveBackupLevels),	0 }},
-	{ "BANKMAXITEMS",			{ ELEM_INT,		OFFSETOF(CResource,m_iBankIMax),			0 }},
-	{ "BANKMAXWEIGHT",			{ ELEM_INT,		OFFSETOF(CResource,m_iBankWMax),			0 }},
+	{ "ACCTFILES",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sAcctBaseDir),			0 }},
+	{ "ADVANCEDLOS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iAdvancedLos),			0 }},
+	{ "AGREE",					{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAgree),				0 }},
+	{ "ALLOWBUYSELLAGENT",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAllowBuySellAgent),	0 }},
+	{ "ALLOWLIGHTOVERRIDE",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAllowLightOverride),	0 }},
+	{ "ALLOWNEWBTRANSFER",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAllowNewbTransfer),	0 }},
+	{ "ARCHERYMAXDIST",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iArcheryMaxDist),		0 }},
+	{ "ARCHERYMINDIST",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iArcheryMinDist),		0 }},
+	{ "ARRIVEDEPARTMSG",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iArriveDepartMsg),		0 }},
+	{ "ATTACKERTIMEOUT",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iAttackerTimeout),		0 }},
+	{ "ATTACKINGISACRIME",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fAttackingIsACrime),	0 }},
+	{ "AUTONEWBIEKEYS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fAutoNewbieKeys),		0 }},
+	{ "AUTOPRIVFLAGS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iAutoPrivFlags),		0 }},
+	{ "AUTORESDISP",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAutoResDisp),			0 }},
+	{ "AUTOTOOLTIPRESEND",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iAutoTooltipResend),	0 }},
+	{ "BACKUPLEVELS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveBackupLevels),	0 }},
+	{ "BANKMAXITEMS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iBankIMax),			0 }},
+	{ "BANKMAXWEIGHT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iBankWMax),			0 }},
 	{ "BUILD",					{ ELEM_VOID,	0,											0 }},
-	{ "CANUNDRESSPETS",			{ ELEM_BOOL,	OFFSETOF(CResource,m_fCanUndressPets),		0 }},
-	{ "CHARTAGS",				{ ELEM_BOOL,	OFFSETOF(CResource,m_fCharTags),			0 }},
-	{ "CLIENTLINGER",			{ ELEM_INT,		OFFSETOF(CResource,m_iClientLingerTime),	0 }},
-	{ "CLIENTLOGINMAXTRIES",	{ ELEM_INT,		OFFSETOF(CResource,m_iClientLoginMaxTries),	0 }},
-	{ "CLIENTLOGINTEMPBAN",		{ ELEM_INT,		OFFSETOF(CResource,m_iClientLoginTempBan),	0 }},
-	{ "CLIENTMAX",				{ ELEM_INT,		OFFSETOF(CResource,m_iClientsMax),			0 }},
-	{ "CLIENTMAXIP",			{ ELEM_INT,		OFFSETOF(CResource,m_iClientsMaxIP),		0 }},
+	{ "CANUNDRESSPETS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fCanUndressPets),		0 }},
+	{ "CHARTAGS",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fCharTags),			0 }},
+	{ "CLIENTLINGER",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iClientLingerTime),	0 }},
+	{ "CLIENTLOGINMAXTRIES",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iClientLoginMaxTries),	0 }},
+	{ "CLIENTLOGINTEMPBAN",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iClientLoginTempBan),	0 }},
+	{ "CLIENTMAX",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iClientsMax),			0 }},
+	{ "CLIENTMAXIP",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iClientsMaxIP),		0 }},
 	{ "CLIENTS",				{ ELEM_VOID,	0,											0 }},	// duplicate
-	{ "COLORHIDDEN",			{ ELEM_VOID,	OFFSETOF(CResource,m_iColorHidden),			0 }},
-	{ "COLORINVIS",				{ ELEM_VOID,	OFFSETOF(CResource,m_iColorInvis),			0 }},
-	{ "COLORINVISSPELL",		{ ELEM_VOID,	OFFSETOF(CResource,m_iColorInvisSpell),		0 }},
-	{ "COLORNOTOCRIMINAL",		{ ELEM_WORD,	OFFSETOF(CResource,m_iColorNotoCriminal),	0 }},
-	{ "COLORNOTODEFAULT",		{ ELEM_WORD,	OFFSETOF(CResource,m_iColorNotoDefault),	0 }},
-	{ "COLORNOTOEVIL",			{ ELEM_WORD,	OFFSETOF(CResource,m_iColorNotoEvil),		0 }},
-	{ "COLORNOTOGOOD",			{ ELEM_WORD,	OFFSETOF(CResource,m_iColorNotoGood),		0 }},
-	{ "COLORNOTOGUILDSAME",		{ ELEM_WORD,	OFFSETOF(CResource,m_iColorNotoGuildSame),	0 }},
-	{ "COLORNOTOGUILDWAR",		{ ELEM_WORD,	OFFSETOF(CResource,m_iColorNotoGuildWar),	0 }},
-	{ "COLORNOTOINVUL",			{ ELEM_WORD,	OFFSETOF(CResource,m_iColorNotoInvul),		0 }},
-	{ "COLORNOTOINVULGAMEMASTER",{ ELEM_WORD,	OFFSETOF(CResource,m_iColorNotoInvulGameMaster),	0 }},
-	{ "COLORNOTONEUTRAL",		{ ELEM_WORD,	OFFSETOF(CResource,m_iColorNotoNeutral),	0 }},
-	{ "COMBATDAMAGEERA",		{ ELEM_BYTE,	OFFSETOF(CResource,m_iCombatDamageEra),		0 }},
-	{ "COMBATFLAGS",			{ ELEM_INT,		OFFSETOF(CResource,m_iCombatFlags),			0 }},
-	{ "COMBATHITCHANCEERA",		{ ELEM_BYTE,	OFFSETOF(CResource,m_iCombatHitChanceEra),	0 }},
-	{ "COMBATSPEEDERA",			{ ELEM_BYTE,	OFFSETOF(CResource,m_iCombatSpeedEra),		0 }},
-	{ "COMMANDLOG",				{ ELEM_INT,		OFFSETOF(CResource,m_iCommandLog),			0 }},
-	{ "COMMANDPREFIX",			{ ELEM_BYTE,	OFFSETOF(CResource,m_cCommandPrefix),		0 }},
-	{ "COMMANDTRIGGER",			{ ELEM_CSTRING,	OFFSETOF(CResource,m_sCommandTrigger),		0 }},
-	{ "CONNECTINGMAX",			{ ELEM_INT,		OFFSETOF(CResource,m_iConnectingMax),		0 }},
-	{ "CONNECTINGMAXIP",		{ ELEM_INT,		OFFSETOF(CResource,m_iConnectingMaxIP),		0 }},
-	{ "CONTEXTMENULIMIT",		{ ELEM_INT,		OFFSETOF(CResource,m_iContextMenuLimit),	0 }},
-	{ "CORPSENPCDECAY",			{ ELEM_INT,		OFFSETOF(CResource,m_iDecay_CorpseNPC),		0 }},
-	{ "CORPSEPLAYERDECAY",		{ ELEM_INT,		OFFSETOF(CResource,m_iDecay_CorpsePlayer),	0 }},
-	{ "CRIMINALTIMER",			{ ELEM_INT,		OFFSETOF(CResource,m_iCriminalTimer),		0 }},
-	{ "CUOSTATUS",				{ ELEM_BOOL,	OFFSETOF(CResource,m_fCUOStatus),			0 }},
-	{ "DEADCANNOTSEELIVING",	{ ELEM_INT,		OFFSETOF(CResource,m_fDeadCannotSeeLiving),	0 }},
-	{ "DEADSOCKETTIME",			{ ELEM_INT,		OFFSETOF(CResource,m_iDeadSocketTime),		0 }},
-	{ "DEBUGFLAGS",				{ ELEM_WORD,	OFFSETOF(CResource,m_wDebugFlags),			0 }},
-	{ "DECAYTIMER",				{ ELEM_INT,		OFFSETOF(CResource,m_iDecay_Item),			0 }},
-	{ "DEFAULTCOMMANDLEVEL",	{ ELEM_INT,		OFFSETOF(CResource,m_iDefaultCommandLevel),	0 }},
-	{ "DISTANCETALK",			{ ELEM_INT,		OFFSETOF(CResource,m_iDistanceTalk ),		0 }},
-	{ "DISTANCEWHISPER",		{ ELEM_INT,		OFFSETOF(CResource,m_iDistanceWhisper ),	0 }},
-	{ "DISTANCEYELL",			{ ELEM_INT,		OFFSETOF(CResource,m_iDistanceYell ),		0 }},
+	{ "COLORHIDDEN",			{ ELEM_VOID,	OFFSETOF(CServerConfig,m_iColorHidden),			0 }},
+	{ "COLORINVIS",				{ ELEM_VOID,	OFFSETOF(CServerConfig,m_iColorInvis),			0 }},
+	{ "COLORINVISSPELL",		{ ELEM_VOID,	OFFSETOF(CServerConfig,m_iColorInvisSpell),		0 }},
+	{ "COLORNOTOCRIMINAL",		{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoCriminal),	0 }},
+	{ "COLORNOTODEFAULT",		{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoDefault),	0 }},
+	{ "COLORNOTOEVIL",			{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoEvil),		0 }},
+	{ "COLORNOTOGOOD",			{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoGood),		0 }},
+	{ "COLORNOTOGUILDSAME",		{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoGuildSame),	0 }},
+	{ "COLORNOTOGUILDWAR",		{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoGuildWar),	0 }},
+	{ "COLORNOTOINVUL",			{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoInvul),		0 }},
+	{ "COLORNOTOINVULGAMEMASTER",{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoInvulGameMaster),	0 }},
+	{ "COLORNOTONEUTRAL",		{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoNeutral),	0 }},
+	{ "COMBATDAMAGEERA",		{ ELEM_BYTE,	OFFSETOF(CServerConfig,m_iCombatDamageEra),		0 }},
+	{ "COMBATFLAGS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCombatFlags),			0 }},
+	{ "COMBATHITCHANCEERA",		{ ELEM_BYTE,	OFFSETOF(CServerConfig,m_iCombatHitChanceEra),	0 }},
+	{ "COMBATSPEEDERA",			{ ELEM_BYTE,	OFFSETOF(CServerConfig,m_iCombatSpeedEra),		0 }},
+	{ "COMMANDLOG",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCommandLog),			0 }},
+	{ "COMMANDPREFIX",			{ ELEM_BYTE,	OFFSETOF(CServerConfig,m_cCommandPrefix),		0 }},
+	{ "COMMANDTRIGGER",			{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sCommandTrigger),		0 }},
+	{ "CONNECTINGMAX",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iConnectingMax),		0 }},
+	{ "CONNECTINGMAXIP",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iConnectingMaxIP),		0 }},
+	{ "CONTEXTMENULIMIT",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iContextMenuLimit),	0 }},
+	{ "CORPSENPCDECAY",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDecay_CorpseNPC),		0 }},
+	{ "CORPSEPLAYERDECAY",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDecay_CorpsePlayer),	0 }},
+	{ "CRIMINALTIMER",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCriminalTimer),		0 }},
+	{ "CUOSTATUS",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fCUOStatus),			0 }},
+	{ "DEADCANNOTSEELIVING",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_fDeadCannotSeeLiving),	0 }},
+	{ "DEADSOCKETTIME",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDeadSocketTime),		0 }},
+	{ "DEBUGFLAGS",				{ ELEM_WORD,	OFFSETOF(CServerConfig,m_wDebugFlags),			0 }},
+	{ "DECAYTIMER",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDecay_Item),			0 }},
+	{ "DEFAULTCOMMANDLEVEL",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDefaultCommandLevel),	0 }},
+	{ "DISTANCETALK",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDistanceTalk ),		0 }},
+	{ "DISTANCEWHISPER",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDistanceWhisper ),	0 }},
+	{ "DISTANCEYELL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDistanceYell ),		0 }},
 #ifdef _DUMPSUPPORT
-	{ "DUMPPACKETSFORACC",		{ ELEM_CSTRING,	OFFSETOF(CResource,m_sDumpAccPackets),		0 }},
+	{ "DUMPPACKETSFORACC",		{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sDumpAccPackets),		0 }},
 #endif
-	{ "DUNGEONLIGHT",			{ ELEM_INT,		OFFSETOF(CResource,m_iLightDungeon),		0 }},
-	{ "EQUIPPEDCAST",			{ ELEM_BOOL,	OFFSETOF(CResource,m_fEquippedCast),		0 }},
-	{ "EVENTSITEM",				{ ELEM_CSTRING, OFFSETOF(CResource,m_sEventsItem),			0 }},
-	{ "EVENTSPET",				{ ELEM_CSTRING,	OFFSETOF(CResource,m_sEventsPet),			0 }},
-	{ "EVENTSPLAYER",			{ ELEM_CSTRING,	OFFSETOF(CResource,m_sEventsPlayer),		0 }},
-	{ "EVENTSREGION",			{ ELEM_CSTRING,	OFFSETOF(CResource,m_sEventsRegion),		0 }},
-	{ "EXPERIENCEKOEFPVM",		{ ELEM_INT,		OFFSETOF(CResource,m_iExperienceKoefPVM),	0 }},
-	{ "EXPERIENCEKOEFPVP",		{ ELEM_INT,		OFFSETOF(CResource,m_iExperienceKoefPVP),	0 }},
-	{ "EXPERIENCEMODE",			{ ELEM_INT,		OFFSETOF(CResource,m_iExperienceMode),		0 }},
-	{ "EXPERIENCESYSTEM",		{ ELEM_BOOL,	OFFSETOF(CResource,m_bExperienceSystem),	0 }},
-	{ "EXPERIMENTAL",			{ ELEM_INT,		OFFSETOF(CResource,m_iExperimental),		0 }},
-	{ "FEATUREAOS",				{ ELEM_INT,		OFFSETOF(CResource,m_iFeatureAOS),			0 }},
-	{ "FEATUREEXTRA",			{ ELEM_INT,		OFFSETOF(CResource,m_iFeatureExtra),		0 }},
-	{ "FEATUREKR",				{ ELEM_INT,		OFFSETOF(CResource,m_iFeatureKR),			0 }},
-	{ "FEATURELBR",				{ ELEM_INT,		OFFSETOF(CResource,m_iFeatureLBR),			0 }},
-	{ "FEATUREML",				{ ELEM_INT,		OFFSETOF(CResource,m_iFeatureML),			0 }},
-	{ "FEATURESA",				{ ELEM_INT,		OFFSETOF(CResource,m_iFeatureSA),			0 }},
-	{ "FEATURESE",				{ ELEM_INT,		OFFSETOF(CResource,m_iFeatureSE),			0 }},
-	{ "FEATURET2A",				{ ELEM_INT,		OFFSETOF(CResource,m_iFeatureT2A),			0 }},
-	{ "FEATURETOL",				{ ELEM_INT,		OFFSETOF(CResource,m_iFeatureTOL),			0 }},
-	{ "FLIPDROPPEDITEMS",		{ ELEM_BOOL,	OFFSETOF(CResource,m_fFlipDroppedItems),	0 }},
-	{ "FORCEGARBAGECOLLECT",	{ ELEM_BOOL,	OFFSETOF(CResource,m_fSaveGarbageCollect),	0 }},
-	{ "FREEZERESTARTTIME",		{ ELEM_INT,		OFFSETOF(CResource,m_iFreezeRestartTime),	0 }},
-	{ "GAMEMINUTELENGTH",		{ ELEM_INT,		OFFSETOF(CResource,m_iGameMinuteLength),	0 }},
-	{ "GENERICSOUNDS",			{ ELEM_BOOL,	OFFSETOF(CResource,m_fGenericSounds),		0 }},
-	{ "GUARDLINGER",			{ ELEM_INT,		OFFSETOF(CResource,m_iGuardLingerTime),		0 }},
-	{ "GUARDSINSTANTKILL",		{ ELEM_BOOL,	OFFSETOF(CResource,m_fGuardsInstantKill),	0 }},
-	{ "GUARDSONMURDERERS",		{ ELEM_BOOL,	OFFSETOF(CResource,m_fGuardsOnMurderers),	0 }},
-	{ "GUESTSMAX",				{ ELEM_INT,		OFFSETOF(CResource,m_iGuestsMax),			0 }},
+	{ "DUNGEONLIGHT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iLightDungeon),		0 }},
+	{ "EQUIPPEDCAST",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fEquippedCast),		0 }},
+	{ "EVENTSITEM",				{ ELEM_CSTRING, OFFSETOF(CServerConfig,m_sEventsItem),			0 }},
+	{ "EVENTSPET",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sEventsPet),			0 }},
+	{ "EVENTSPLAYER",			{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sEventsPlayer),		0 }},
+	{ "EVENTSREGION",			{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sEventsRegion),		0 }},
+	{ "EXPERIENCEKOEFPVM",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iExperienceKoefPVM),	0 }},
+	{ "EXPERIENCEKOEFPVP",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iExperienceKoefPVP),	0 }},
+	{ "EXPERIENCEMODE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iExperienceMode),		0 }},
+	{ "EXPERIENCESYSTEM",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bExperienceSystem),	0 }},
+	{ "EXPERIMENTAL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iExperimental),		0 }},
+	{ "FEATUREAOS",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureAOS),			0 }},
+	{ "FEATUREEXTRA",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureExtra),		0 }},
+	{ "FEATUREKR",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureKR),			0 }},
+	{ "FEATURELBR",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureLBR),			0 }},
+	{ "FEATUREML",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureML),			0 }},
+	{ "FEATURESA",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureSA),			0 }},
+	{ "FEATURESE",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureSE),			0 }},
+	{ "FEATURET2A",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureT2A),			0 }},
+	{ "FEATURETOL",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureTOL),			0 }},
+	{ "FLIPDROPPEDITEMS",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fFlipDroppedItems),	0 }},
+	{ "FORCEGARBAGECOLLECT",	{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fSaveGarbageCollect),	0 }},
+	{ "FREEZERESTARTTIME",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFreezeRestartTime),	0 }},
+	{ "GAMEMINUTELENGTH",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iGameMinuteLength),	0 }},
+	{ "GENERICSOUNDS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fGenericSounds),		0 }},
+	{ "GUARDLINGER",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iGuardLingerTime),		0 }},
+	{ "GUARDSINSTANTKILL",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fGuardsInstantKill),	0 }},
+	{ "GUARDSONMURDERERS",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fGuardsOnMurderers),	0 }},
+	{ "GUESTSMAX",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iGuestsMax),			0 }},
 	{ "GUILDS",					{ ELEM_VOID,	0,											0 }},
 	{ "HEARALL",				{ ELEM_VOID,	0,											0 }},
-	{ "HELPINGCRIMINALSISACRIME",{ ELEM_BOOL,	OFFSETOF(CResource,m_fHelpingCriminalsIsACrime),	0 }},
-	{ "HITPOINTPERCENTONREZ",	{ ELEM_INT,		OFFSETOF(CResource,m_iHitpointPercentOnRez),0 }},
-	{ "HITSHUNGERLOSS",			{ ELEM_INT,		OFFSETOF(CResource,m_iHitsHungerLoss),		0 }},
+	{ "HELPINGCRIMINALSISACRIME",{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fHelpingCriminalsIsACrime),	0 }},
+	{ "HITPOINTPERCENTONREZ",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iHitpointPercentOnRez),0 }},
+	{ "HITSHUNGERLOSS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iHitsHungerLoss),		0 }},
 	{ "HITSUPDATERATE",			{ ELEM_VOID,	0,											0 }},
-	{ "ITEMSMAXAMOUNT",			{ ELEM_INT,		OFFSETOF(CResource,m_iItemsMaxAmount),		0 }},
-	{ "LEVELMODE",				{ ELEM_INT,		OFFSETOF(CResource,m_iLevelMode),			0 }},
-	{ "LEVELNEXTAT",			{ ELEM_INT,		OFFSETOF(CResource,m_iLevelNextAt),			0 }},
-	{ "LEVELSYSTEM",			{ ELEM_BOOL,	OFFSETOF(CResource,m_bLevelSystem),			0 }},
-	{ "LIGHTDAY",				{ ELEM_INT,		OFFSETOF(CResource,m_iLightDay),			0 }},
-	{ "LIGHTNIGHT",				{ ELEM_INT,		OFFSETOF(CResource,m_iLightNight),			0 }},
-	{ "LOCALIPADMIN",			{ ELEM_BOOL,	OFFSETOF(CResource,m_fLocalIPAdmin),		0 }}, // The local ip is assumed to be the admin.
+	{ "ITEMSMAXAMOUNT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iItemsMaxAmount),		0 }},
+	{ "LEVELMODE",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iLevelMode),			0 }},
+	{ "LEVELNEXTAT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iLevelNextAt),			0 }},
+	{ "LEVELSYSTEM",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bLevelSystem),			0 }},
+	{ "LIGHTDAY",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iLightDay),			0 }},
+	{ "LIGHTNIGHT",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iLightNight),			0 }},
+	{ "LOCALIPADMIN",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fLocalIPAdmin),		0 }}, // The local ip is assumed to be the admin.
 	{ "LOG",					{ ELEM_VOID,	0,											0 }},
 	{ "LOGMASK",				{ ELEM_VOID,	0,											0 }}, // GetLogMask
-	{ "LOOTINGISACRIME",		{ ELEM_BOOL,	OFFSETOF(CResource,m_fLootingIsACrime),		0 }},
-	{ "LOSTNPCTELEPORT",		{ ELEM_INT,		OFFSETOF(CResource,m_iLostNPCTeleport),		0 }},
-	{ "MAGICFLAGS",				{ ELEM_INT,		OFFSETOF(CResource,m_iMagicFlags),			0 }},
-	{ "MAGICUNLOCKDOOR",		{ ELEM_INT,		OFFSETOF(CResource,m_iMagicUnlockDoor),		0 }},
-	{ "MAPCACHETIME",			{ ELEM_INT,		OFFSETOF(CResource,m_iMapCacheTime),		0 }},
-	{ "MAXBASESKILL",			{ ELEM_INT,		OFFSETOF(CResource,m_iMaxBaseSkill),		0 }},
-	{ "MAXCHARSPERACCOUNT",		{ ELEM_BYTE,	OFFSETOF(CResource,m_iMaxCharsPerAccount),	0 }},
-	{ "MAXCOMPLEXITY",			{ ELEM_INT,		OFFSETOF(CResource,m_iMaxCharComplexity),	0 }},
-	{ "MAXFAME",				{ ELEM_INT,		OFFSETOF(CResource,m_iMaxFame),				0 }},
-	{ "MAXITEMCOMPLEXITY",		{ ELEM_INT,		OFFSETOF(CResource,m_iMaxItemComplexity),	0 }},
-	{ "MAXKARMA",				{ ELEM_INT,		OFFSETOF(CResource,m_iMaxKarma),			0 }},
-	{ "MAXLOOPTIMES",			{ ELEM_INT,		OFFSETOF(CResource,m_iMaxLoopTimes),		0 }},
-	{ "MAXPACKETSPERTICK",		{ ELEM_INT,		OFFSETOF(CResource,m_iNetMaxPacketsPerTick),0 }},
-	{ "MAXPINGS",				{ ELEM_INT,		OFFSETOF(CResource,m_iNetMaxPings),			0 }},
-	{ "MAXPOLYSTATS",			{ ELEM_INT,		OFFSETOF(CResource,m_iMaxPolyStats),		0 }},
-	{ "MAXQUEUESIZE",			{ ELEM_INT,		OFFSETOF(CResource,m_iNetMaxQueueSize),		0 }},
-	{ "MAXSECTORCOMPLEXITY",	{ ELEM_INT,		OFFSETOF(CResource,m_iMaxSectorComplexity),	0 }},
-	{ "MAXSHIPPLANKTELEPORT",	{ ELEM_INT,		OFFSETOF(CResource,m_iMaxShipPlankTeleport),0 }},
-	{ "MAXSIZEPERTICK",			{ ELEM_INT,		OFFSETOF(CResource,m_iNetMaxLengthPerTick),	0 }},
-	{ "MD5PASSWORDS",			{ ELEM_BOOL,	OFFSETOF(CResource,m_fMd5Passwords),		0 }},
-	{ "MEDIUMCANHEARGHOSTS",	{ ELEM_INT,		OFFSETOF(CResource,m_iMediumCanHearGhosts),	0 }},
-	{ "MINCHARDELETETIME",		{ ELEM_INT,		OFFSETOF(CResource,m_iMinCharDeleteTime),	0 }},
-	{ "MINKARMA",				{ ELEM_INT,		OFFSETOF(CResource,m_iMinKarma),			0 }},
-	{ "MONSTERFEAR",			{ ELEM_BOOL,	OFFSETOF(CResource,m_fMonsterFear),			0 }},
-	{ "MONSTERFIGHT",			{ ELEM_BOOL,	OFFSETOF(CResource,m_fMonsterFight),		0 }},
-	{ "MOUNTHEIGHT",			{ ELEM_BOOL,	OFFSETOF(CResource,m_iMountHeight),			0 }},
-	{ "MOVERATE",				{ ELEM_INT,		OFFSETOF(CResource,m_iMoveRate),			0 }},
+	{ "LOOTINGISACRIME",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fLootingIsACrime),		0 }},
+	{ "LOSTNPCTELEPORT",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iLostNPCTeleport),		0 }},
+	{ "MAGICFLAGS",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMagicFlags),			0 }},
+	{ "MAGICUNLOCKDOOR",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMagicUnlockDoor),		0 }},
+	{ "MAPCACHETIME",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMapCacheTime),		0 }},
+	{ "MAXBASESKILL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxBaseSkill),		0 }},
+	{ "MAXCHARSPERACCOUNT",		{ ELEM_BYTE,	OFFSETOF(CServerConfig,m_iMaxCharsPerAccount),	0 }},
+	{ "MAXCOMPLEXITY",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxCharComplexity),	0 }},
+	{ "MAXFAME",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxFame),				0 }},
+	{ "MAXITEMCOMPLEXITY",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxItemComplexity),	0 }},
+	{ "MAXKARMA",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxKarma),			0 }},
+	{ "MAXLOOPTIMES",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxLoopTimes),		0 }},
+	{ "MAXPACKETSPERTICK",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetMaxPacketsPerTick),0 }},
+	{ "MAXPINGS",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetMaxPings),			0 }},
+	{ "MAXPOLYSTATS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxPolyStats),		0 }},
+	{ "MAXQUEUESIZE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetMaxQueueSize),		0 }},
+	{ "MAXSECTORCOMPLEXITY",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxSectorComplexity),	0 }},
+	{ "MAXSHIPPLANKTELEPORT",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxShipPlankTeleport),0 }},
+	{ "MAXSIZEPERTICK",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetMaxLengthPerTick),	0 }},
+	{ "MD5PASSWORDS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fMd5Passwords),		0 }},
+	{ "MEDIUMCANHEARGHOSTS",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMediumCanHearGhosts),	0 }},
+	{ "MINCHARDELETETIME",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMinCharDeleteTime),	0 }},
+	{ "MINKARMA",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMinKarma),			0 }},
+	{ "MONSTERFEAR",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fMonsterFear),			0 }},
+	{ "MONSTERFIGHT",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fMonsterFight),		0 }},
+	{ "MOUNTHEIGHT",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_iMountHeight),			0 }},
+	{ "MOVERATE",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMoveRate),			0 }},
 	{ "MULFILES",				{ ELEM_VOID,	0,											0 }},
-	{ "MURDERDECAYTIME",		{ ELEM_INT,		OFFSETOF(CResource,m_iMurderDecayTime),		0 }},
-	{ "MURDERMINCOUNT",			{ ELEM_INT,		OFFSETOF(CResource,m_iMurderMinCount),		0 }}, // amount of murders before we get title.
-	{ "MYSQL",					{ ELEM_BOOL,	OFFSETOF(CResource,m_bMySql),				0 }},
-	{ "MYSQLDATABASE",			{ ELEM_CSTRING,	OFFSETOF(CResource,m_sMySqlDB),				0 }},
-	{ "MYSQLHOST",				{ ELEM_CSTRING, OFFSETOF(CResource,m_sMySqlHost),			0 }},
-	{ "MYSQLPASSWORD",			{ ELEM_CSTRING,	OFFSETOF(CResource,m_sMySqlPass),			0 }},
-	{ "MYSQLTICKS",				{ ELEM_BOOL,	OFFSETOF(CResource,m_bMySqlTicks),			0 }},
-	{ "MYSQLUSER",				{ ELEM_CSTRING,	OFFSETOF(CResource,m_sMySqlUser),			0 }},
-	{ "NETTTL",					{ ELEM_INT,		OFFSETOF(CResource,m_iNetHistoryTTL),		0 }},
+	{ "MURDERDECAYTIME",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMurderDecayTime),		0 }},
+	{ "MURDERMINCOUNT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMurderMinCount),		0 }}, // amount of murders before we get title.
+	{ "MYSQL",					{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bMySql),				0 }},
+	{ "MYSQLDATABASE",			{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sMySqlDB),				0 }},
+	{ "MYSQLHOST",				{ ELEM_CSTRING, OFFSETOF(CServerConfig,m_sMySqlHost),			0 }},
+	{ "MYSQLPASSWORD",			{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sMySqlPass),			0 }},
+	{ "MYSQLTICKS",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bMySqlTicks),			0 }},
+	{ "MYSQLUSER",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sMySqlUser),			0 }},
+	{ "NETTTL",					{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetHistoryTTL),		0 }},
 #ifdef _MTNETWORK
-	{ "NETWORKTHREADPRIORITY",	{ ELEM_INT,		OFFSETOF(CResource,m_iNetworkThreadPriority),	0 }},
-	{ "NETWORKTHREADS",			{ ELEM_INT,		OFFSETOF(CResource,m_iNetworkThreads),		0 }},
+	{ "NETWORKTHREADPRIORITY",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetworkThreadPriority),	0 }},
+	{ "NETWORKTHREADS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetworkThreads),		0 }},
 #endif
-	{ "NORESROBE",				{ ELEM_BOOL,	OFFSETOF(CResource,m_fNoResRobe),			0 }},
-	{ "NOTOTIMEOUT",			{ ELEM_INT,		OFFSETOF(CResource,m_iNotoTimeout),			0 }},
-	{ "NOWEATHER",				{ ELEM_BOOL,	OFFSETOF(CResource,m_fNoWeather),			0 }},
-	{ "NPCAI",					{ ELEM_INT,		OFFSETOF(CResource,m_iNpcAi),				0 }},
-	{ "NPCNOFAMETITLE",			{ ELEM_BOOL,	OFFSETOF(CResource,m_NPCNoFameTitle),		0 }},
-	{ "NPCSKILLSAVE",			{ ELEM_INT,		OFFSETOF(CResource,m_iSaveNPCSkills),		0 }},
-	{ "NPCTRAINCOST",			{ ELEM_INT,		OFFSETOF(CResource,m_iTrainSkillCost),		0 }},
-	{ "NPCTRAINMAX",			{ ELEM_INT,		OFFSETOF(CResource,m_iTrainSkillMax),		0 }},
-	{ "NPCTRAINPERCENT",		{ ELEM_INT,		OFFSETOF(CResource,m_iTrainSkillPercent),	0 }},
-	{ "NTSERVICE",				{ ELEM_BOOL,	OFFSETOF(CResource,m_fUseNTService),		0 }},
-	{ "OPTIONFLAGS",			{ ELEM_INT,		OFFSETOF(CResource,m_iOptionFlags),			0 }},
-	{ "OVERSKILLMULTIPLY",		{ ELEM_INT,		OFFSETOF(CResource,m_iOverSkillMultiply),	0 }},
-	{ "PACKETDEATHANIMATION",	{ ELEM_BOOL,	OFFSETOF(CResource,m_iPacketDeathAnimation),0 }},
-	{ "PAYFROMPACKONLY",		{ ELEM_BOOL,	OFFSETOF(CResource,m_fPayFromPackOnly),		0 }},
-	{ "PETSINHERITNOTORIETY",	{ ELEM_INT,		OFFSETOF(CResource,m_iPetsInheritNotoriety),0 }},
-	{ "PLAYEREVIL",				{ ELEM_INT,		OFFSETOF(CResource,m_iPlayerKarmaEvil),		0 }},
-	{ "PLAYERNEUTRAL",			{ ELEM_INT,		OFFSETOF(CResource,m_iPlayerKarmaNeutral),	0 }},
+	{ "NORESROBE",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fNoResRobe),			0 }},
+	{ "NOTOTIMEOUT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNotoTimeout),			0 }},
+	{ "NOWEATHER",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fNoWeather),			0 }},
+	{ "NPCAI",					{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNpcAi),				0 }},
+	{ "NPCNOFAMETITLE",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_NPCNoFameTitle),		0 }},
+	{ "NPCSKILLSAVE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveNPCSkills),		0 }},
+	{ "NPCTRAINCOST",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTrainSkillCost),		0 }},
+	{ "NPCTRAINMAX",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTrainSkillMax),		0 }},
+	{ "NPCTRAINPERCENT",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTrainSkillPercent),	0 }},
+	{ "NTSERVICE",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUseNTService),		0 }},
+	{ "OPTIONFLAGS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iOptionFlags),			0 }},
+	{ "OVERSKILLMULTIPLY",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iOverSkillMultiply),	0 }},
+	{ "PACKETDEATHANIMATION",	{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_iPacketDeathAnimation),0 }},
+	{ "PAYFROMPACKONLY",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fPayFromPackOnly),		0 }},
+	{ "PETSINHERITNOTORIETY",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iPetsInheritNotoriety),0 }},
+	{ "PLAYEREVIL",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iPlayerKarmaEvil),		0 }},
+	{ "PLAYERNEUTRAL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iPlayerKarmaNeutral),	0 }},
 	{ "PROFILE",				{ ELEM_VOID,	0,											0 }},
-	{ "RACIALFLAGS",			{ ELEM_INT,		OFFSETOF(CResource,m_iRacialFlags),			0 }},
-	{ "REAGENTLOSSFAIL",		{ ELEM_BOOL,	OFFSETOF(CResource,m_fReagentLossFail),		0 }},
-	{ "REAGENTSREQUIRED",		{ ELEM_BOOL,	OFFSETOF(CResource,m_fReagentsRequired),	0 }},
-	{ "REVEALFLAGS",			{ ELEM_INT,		OFFSETOF(CResource,m_iRevealFlags),			0 }},
+	{ "RACIALFLAGS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iRacialFlags),			0 }},
+	{ "REAGENTLOSSFAIL",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fReagentLossFail),		0 }},
+	{ "REAGENTSREQUIRED",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fReagentsRequired),	0 }},
+	{ "REVEALFLAGS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iRevealFlags),			0 }},
 	{ "RTICKS",					{ ELEM_VOID,	0,											0 }},
 	{ "RTIME",					{ ELEM_VOID,	0,											0 }},
-	{ "RUNNINGPENALTY",			{ ELEM_INT,		OFFSETOF(CResource,m_iStamRunningPenalty),	0 }},
-	{ "SAVEBACKGROUND",			{ ELEM_INT,		OFFSETOF(CResource,m_iSaveBackgroundTime),	0 }},
-	{ "SAVEPERIOD",				{ ELEM_INT,		OFFSETOF(CResource,m_iSavePeriod),			0 }},
-	{ "SAVESECTORSPERTICK",		{ ELEM_INT,		OFFSETOF(CResource,m_iSaveSectorsPerTick),	0 }},
-	{ "SAVESTEPMAXCOMPLEXITY",	{ ELEM_INT,		OFFSETOF(CResource,m_iSaveStepMaxComplexity),	0 }},
-	{ "SCPFILES",				{ ELEM_CSTRING,	OFFSETOF(CResource,m_sSCPBaseDir),			0 }},
-	{ "SECTORSLEEP",			{ ELEM_INT,		OFFSETOF(CResource,m_iSectorSleepMask),		0 }},
-	{ "SECURE",					{ ELEM_BOOL,	OFFSETOF(CResource,m_fSecure),				0 }},
-	{ "SKILLPRACTICEMAX",		{ ELEM_INT,		OFFSETOF(CResource,m_iSkillPracticeMax),	0 }},
-	{ "SNOOPCRIMINAL",			{ ELEM_INT,		OFFSETOF(CResource,m_iSnoopCriminal),		0 }},
-	{ "SPEECHOTHER",			{ ELEM_CSTRING,	OFFSETOF(CResource,m_sSpeechOther),			0 }},
-	{ "SPEECHPET",				{ ELEM_CSTRING,	OFFSETOF(CResource,m_sSpeechPet),			0 }},
-	{ "SPEECHSELF",				{ ELEM_CSTRING,	OFFSETOF(CResource,m_sSpeechSelf),			0 }},
-	{ "SPEEDSCALEFACTOR",		{ ELEM_INT,		OFFSETOF(CResource,m_iSpeedScaleFactor),	0 }},
-	{ "SPELLTIMEOUT",			{ ELEM_INT,		OFFSETOF(CResource,m_iSpellTimeout),		0 }},
-	{ "STAMINALOSSATWEIGHT",	{ ELEM_INT,		OFFSETOF(CResource,m_iStaminaLossAtWeight),	0 }},
-	{ "STATSFLAGS",				{ ELEM_INT,		OFFSETOF(CResource,m_iStatFlag),			0 }},
-	{ "STRIPPATH",				{ ELEM_INT,		OFFSETOF(CResource,m_sStripPath),			0 }},
-	{ "SUPPRESSCAPITALS",		{ ELEM_BOOL,	OFFSETOF(CResource,m_fSuppressCapitals),	0 }},
-	{ "TELEPORTEFFECTNPC",		{ ELEM_INT,		OFFSETOF(CResource,m_iSpell_Teleport_Effect_NPC),		0 }},
-	{ "TELEPORTEFFECTPLAYERS",	{ ELEM_INT,		OFFSETOF(CResource,m_iSpell_Teleport_Effect_Players),	0 }},
-	{ "TELEPORTEFFECTSTAFF",	{ ELEM_INT,		OFFSETOF(CResource,m_iSpell_Teleport_Effect_Staff),		0 }},
-	{ "TELEPORTSOUNDNPC",		{ ELEM_INT,		OFFSETOF(CResource,m_iSpell_Teleport_Sound_NPC),		0 }},
-	{ "TELEPORTSOUNDPLAYERS",	{ ELEM_INT,		OFFSETOF(CResource,m_iSpell_Teleport_Sound_Players),	0 }},
-	{ "TELEPORTSOUNDSTAFF",		{ ELEM_INT,		OFFSETOF(CResource,m_iSpell_Teleport_Sound_Staff),		0 }},
-	{ "TELNETLOG",				{ ELEM_BOOL,	OFFSETOF(CResource,m_fTelnetLog),			0 }},
-	{ "TIMERCALL",				{ ELEM_INT,		OFFSETOF(CResource,m_iTimerCall),			0 }},
+	{ "RUNNINGPENALTY",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iStamRunningPenalty),	0 }},
+	{ "SAVEBACKGROUND",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveBackgroundTime),	0 }},
+	{ "SAVEPERIOD",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSavePeriod),			0 }},
+	{ "SAVESECTORSPERTICK",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveSectorsPerTick),	0 }},
+	{ "SAVESTEPMAXCOMPLEXITY",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveStepMaxComplexity),	0 }},
+	{ "SCPFILES",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sSCPBaseDir),			0 }},
+	{ "SECTORSLEEP",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSectorSleepMask),		0 }},
+	{ "SECURE",					{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fSecure),				0 }},
+	{ "SKILLPRACTICEMAX",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSkillPracticeMax),	0 }},
+	{ "SNOOPCRIMINAL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSnoopCriminal),		0 }},
+	{ "SPEECHOTHER",			{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sSpeechOther),			0 }},
+	{ "SPEECHPET",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sSpeechPet),			0 }},
+	{ "SPEECHSELF",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sSpeechSelf),			0 }},
+	{ "SPEEDSCALEFACTOR",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpeedScaleFactor),	0 }},
+	{ "SPELLTIMEOUT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpellTimeout),		0 }},
+	{ "STAMINALOSSATWEIGHT",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iStaminaLossAtWeight),	0 }},
+	{ "STATSFLAGS",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iStatFlag),			0 }},
+	{ "STRIPPATH",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_sStripPath),			0 }},
+	{ "SUPPRESSCAPITALS",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fSuppressCapitals),	0 }},
+	{ "TELEPORTEFFECTNPC",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpell_Teleport_Effect_NPC),		0 }},
+	{ "TELEPORTEFFECTPLAYERS",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpell_Teleport_Effect_Players),	0 }},
+	{ "TELEPORTEFFECTSTAFF",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpell_Teleport_Effect_Staff),		0 }},
+	{ "TELEPORTSOUNDNPC",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpell_Teleport_Sound_NPC),		0 }},
+	{ "TELEPORTSOUNDPLAYERS",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpell_Teleport_Sound_Players),	0 }},
+	{ "TELEPORTSOUNDSTAFF",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpell_Teleport_Sound_Staff),		0 }},
+	{ "TELNETLOG",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fTelnetLog),			0 }},
+	{ "TIMERCALL",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTimerCall),			0 }},
 	{ "TIMEUP",					{ ELEM_VOID,	0,											0 }},
-	{ "TOOLTIPCACHE",			{ ELEM_INT,		OFFSETOF(CResource,m_iTooltipCache),		0 }},
-	{ "TOOLTIPMODE",			{ ELEM_INT,		OFFSETOF(CResource,m_iTooltipMode),			0 }},
-	{ "TRADEWINDOWSNOOPING",	{ ELEM_BOOL,	OFFSETOF(CResource,m_iTradeWindowSnooping),	0 }},
-	{ "UOGSTATUS",				{ ELEM_BOOL,	OFFSETOF(CResource,m_fUOGStatus),			0 }},
-	{ "USEASYNCNETWORK",		{ ELEM_INT,		OFFSETOF(CResource,m_fUseAsyncNetwork),		0 }},
-	{ "USEAUTHID",				{ ELEM_BOOL,	OFFSETOF(CResource,m_fUseAuthID),			0 }},	// we use authid like osi
-	{ "USECRYPT",				{ ELEM_BOOL,	OFFSETOF(CResource,m_fUsecrypt),			0 }},	// we don't want crypt clients
-	{ "USEEXTRABUFFER",			{ ELEM_BOOL,	OFFSETOF(CResource,m_fUseExtraBuffer),		0 }},
-	{ "USEHTTP",				{ ELEM_INT,		OFFSETOF(CResource,m_fUseHTTP),				0 }},
-	{ "USEMAPDIFFS",			{ ELEM_BOOL,	OFFSETOF(CResource,m_fUseMapDiffs),			0 }},
-	{ "USENOCRYPT",				{ ELEM_BOOL,	OFFSETOF(CResource,m_fUsenocrypt),			0 }},	// we don't want no-crypt clients
-	{ "USEPACKETPRIORITY",		{ ELEM_BOOL,	OFFSETOF(CResource,m_fUsePacketPriorities),	0 }},
-	{ "VENDORMAXSELL",			{ ELEM_INT,		OFFSETOF(CResource,m_iVendorMaxSell),		0 }},
-	{ "VENDORTRADETITLE",		{ ELEM_BOOL,	OFFSETOF(CResource,m_fVendorTradeTitle),	0 }},
+	{ "TOOLTIPCACHE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTooltipCache),		0 }},
+	{ "TOOLTIPMODE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTooltipMode),			0 }},
+	{ "TRADEWINDOWSNOOPING",	{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_iTradeWindowSnooping),	0 }},
+	{ "UOGSTATUS",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUOGStatus),			0 }},
+	{ "USEASYNCNETWORK",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_fUseAsyncNetwork),		0 }},
+	{ "USEAUTHID",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUseAuthID),			0 }},	// we use authid like osi
+	{ "USECRYPT",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUsecrypt),			0 }},	// we don't want crypt clients
+	{ "USEEXTRABUFFER",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUseExtraBuffer),		0 }},
+	{ "USEHTTP",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_fUseHTTP),				0 }},
+	{ "USEMAPDIFFS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUseMapDiffs),			0 }},
+	{ "USENOCRYPT",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUsenocrypt),			0 }},	// we don't want no-crypt clients
+	{ "USEPACKETPRIORITY",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUsePacketPriorities),	0 }},
+	{ "VENDORMAXSELL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iVendorMaxSell),		0 }},
+	{ "VENDORTRADETITLE",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fVendorTradeTitle),	0 }},
 	{ "VERSION",				{ ELEM_VOID,	0,											0 }},
-	{ "WALKBUFFER",				{ ELEM_INT,		OFFSETOF(CResource,m_iWalkBuffer),			0 }},
-	{ "WALKREGEN",				{ ELEM_INT,		OFFSETOF(CResource,m_iWalkRegen),			0 }},
-	{ "WOOLGROWTHTIME",			{ ELEM_INT,		OFFSETOF(CResource,m_iWoolGrowthTime),		0 }},
-	{ "WOPCOLOR",				{ ELEM_INT,		OFFSETOF(CResource,m_iWordsOfPowerColor),	0 }},
-	{ "WOPFONT",				{ ELEM_INT,		OFFSETOF(CResource,m_iWordsOfPowerFont),	0 }},
-	{ "WOPPLAYER",				{ ELEM_BOOL,	OFFSETOF(CResource,m_fWordsOfPowerPlayer),	0 }},
-	{ "WOPSTAFF",				{ ELEM_BOOL,	OFFSETOF(CResource,m_fWordsOfPowerStaff),	0 }},
-	{ "WORLDSAVE",				{ ELEM_CSTRING,	OFFSETOF(CResource,m_sWorldBaseDir),		0 }},
-	{ "ZEROPOINT",				{ ELEM_CSTRING,	OFFSETOF(CResource,m_sZeroPoint),			0 }},
+	{ "WALKBUFFER",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iWalkBuffer),			0 }},
+	{ "WALKREGEN",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iWalkRegen),			0 }},
+	{ "WOOLGROWTHTIME",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iWoolGrowthTime),		0 }},
+	{ "WOPCOLOR",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iWordsOfPowerColor),	0 }},
+	{ "WOPFONT",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iWordsOfPowerFont),	0 }},
+	{ "WOPPLAYER",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fWordsOfPowerPlayer),	0 }},
+	{ "WOPSTAFF",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fWordsOfPowerStaff),	0 }},
+	{ "WORLDSAVE",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sWorldBaseDir),		0 }},
+	{ "ZEROPOINT",				{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sZeroPoint),			0 }},
 	{ NULL,						{ ELEM_VOID,	0,											0 }}
 };
 
-bool CResource::r_LoadVal( CScript &s )
+bool CServerConfig::r_LoadVal( CScript &s )
 {
-	ADDTOCALLSTACK("CResource::r_LoadVal");
+	ADDTOCALLSTACK("CServerConfig::r_LoadVal");
 	EXC_TRY("LoadVal");
 
 	int i = FindTableHeadSorted( s.GetKey(), reinterpret_cast<lpctstr const *>(sm_szLoadKeys), CountOf( sm_szLoadKeys )-1, sizeof(sm_szLoadKeys[0]));
@@ -923,7 +923,7 @@ bool CResource::r_LoadVal( CScript &s )
 		else if ( s.IsKeyHead("PACKET", 6) )	//	PACKETx=<function name to execute upon packet>
 		{
 			int index = ATOI(s.GetKey() + 6);
-			if (( index >= 0 ) && ( index < 255 )) // why XCMD_QTY? let's them hook every possible custom packet
+			if (( index >= 0 ) && ( index < 255 )) // why XCMD_QTY? let them hook every possible custom packet
 			{
 				char *args = s.GetArgRaw();
 				if ( !args || ( strlen(args) >= 31 ))
@@ -1226,9 +1226,9 @@ bool CResource::r_LoadVal( CScript &s )
 }
 
 
-const CSkillDef * CResource::SkillLookup( lpctstr pszKey )
+const CSkillDef * CServerConfig::SkillLookup( lpctstr pszKey )
 {
-	ADDTOCALLSTACK("CResource::SkillLookup");
+	ADDTOCALLSTACK("CServerConfig::SkillLookup");
 
 	size_t iLen = strlen( pszKey );
     const CSkillDef * pDef;
@@ -1244,9 +1244,9 @@ const CSkillDef * CResource::SkillLookup( lpctstr pszKey )
 }
 
 
-bool CResource::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
+bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 {
-	ADDTOCALLSTACK("CResource::r_WriteVal");
+	ADDTOCALLSTACK("CServerConfig::r_WriteVal");
 	EXC_TRY("WriteVal");
 	// Just do stats values for now.
 	int index = FindTableHeadSorted( pszKey, reinterpret_cast<lpctstr const *>(sm_szLoadKeys), CountOf(sm_szLoadKeys) - 1, sizeof(sm_szLoadKeys[0]) );
@@ -1267,7 +1267,7 @@ bool CResource::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			SKIP_SEPARATORS( pszKey );
 			GETNONWHITESPACE( pszKey );
 
-			const CSkillDef *	pSkillDef	= SkillLookup( pszKey );
+			const CSkillDef * pSkillDef = SkillLookup( pszKey );
 			if ( !pSkillDef )
 				sVal.FormatVal( -1 );
 			else
@@ -1753,15 +1753,15 @@ bool CResource::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 
 //*************************************************************
 
-bool CResource::IsConsoleCmd( tchar ch ) const
+bool CServerConfig::IsConsoleCmd( tchar ch ) const
 {
-	ADDTOCALLSTACK("CResource::IsConsoleCmd");
+	ADDTOCALLSTACK("CServerConfig::IsConsoleCmd");
 	return (ch == '.' || ch == '/' );
 }
 
-SKILL_TYPE CResource::FindSkillKey( lpctstr pszKey ) const
+SKILL_TYPE CServerConfig::FindSkillKey( lpctstr pszKey ) const
 {
-	ADDTOCALLSTACK("CResource::FindSkillKey");
+	ADDTOCALLSTACK("CServerConfig::FindSkillKey");
 	// Find the skill name in the alpha sorted list.
 	// RETURN: SKILL_NONE = error.
 
@@ -1779,15 +1779,15 @@ SKILL_TYPE CResource::FindSkillKey( lpctstr pszKey ) const
 	return static_cast<SKILL_TYPE>(pSkillDef->GetResourceID().GetResIndex());
 }
 
-STAT_TYPE CResource::FindStatKey( lpctstr pszKey ) // static
+STAT_TYPE CServerConfig::FindStatKey( lpctstr pszKey ) // static
 {
-	ADDTOCALLSTACK("CResource::FindStatKey");
+	ADDTOCALLSTACK("CServerConfig::FindStatKey");
 	return (STAT_TYPE) FindTable( pszKey, g_Stat_Name, CountOf( g_Stat_Name ));
 }
 
-int CResource::GetSpellEffect( SPELL_TYPE spell, int iSkillVal ) const
+int CServerConfig::GetSpellEffect( SPELL_TYPE spell, int iSkillVal ) const
 {
-	ADDTOCALLSTACK("CResource::GetSpellEffect");
+	ADDTOCALLSTACK("CServerConfig::GetSpellEffect");
 	// NOTE: Any randomizing of the effect must be done by varying the skill level .
 	// iSkillVal = 0-1000
 	if ( !spell )
@@ -1798,9 +1798,9 @@ int CResource::GetSpellEffect( SPELL_TYPE spell, int iSkillVal ) const
 	return pSpellDef->m_Effect.GetLinear( iSkillVal );
 }
 
-lpctstr CResource::GetNotoTitle( int iLevel, bool bFemale ) const
+lpctstr CServerConfig::GetNotoTitle( int iLevel, bool bFemale ) const
 {
-	ADDTOCALLSTACK("CResource::GetNotoTitle");
+	ADDTOCALLSTACK("CServerConfig::GetNotoTitle");
 	// Retrieve the title used for the given noto level and gender
 
 	if ( !m_NotoTitles.IsValidIndex(iLevel) )
@@ -1825,9 +1825,9 @@ lpctstr CResource::GetNotoTitle( int iLevel, bool bFemale ) const
 	}
 }
 
-bool CResource::IsValidEmailAddressFormat( lpctstr pszEmail ) // static
+bool CServerConfig::IsValidEmailAddressFormat( lpctstr pszEmail ) // static
 {
-	ADDTOCALLSTACK("CResource::IsValidEmailAddressFormat");
+	ADDTOCALLSTACK("CServerConfig::IsValidEmailAddressFormat");
 	// what are the invalid email name chars ?
 	// Valid characters are, numbers, letters, underscore "_", dash "-" and the dot ".").
 
@@ -1853,17 +1853,17 @@ bool CResource::IsValidEmailAddressFormat( lpctstr pszEmail ) // static
 	return true;
 }
 
-CServerRef CResource::Server_GetDef( size_t index )
+CServerRef CServerConfig::Server_GetDef( size_t index )
 {
-	ADDTOCALLSTACK("CResource::Server_GetDef");
+	ADDTOCALLSTACK("CServerConfig::Server_GetDef");
 	if ( ! m_Servers.IsValidIndex(index))
 		return NULL;
 	return CServerRef( static_cast <CServerDef*>( m_Servers[index] ));
 }
 
-CWebPageDef * CResource::FindWebPage( lpctstr pszPath ) const
+CWebPageDef * CServerConfig::FindWebPage( lpctstr pszPath ) const
 {
-	ADDTOCALLSTACK("CResource::FindWebPage");
+	ADDTOCALLSTACK("CServerConfig::FindWebPage");
 	if ( pszPath == NULL )
 	{
 		if ( m_WebPages.GetCount() <= 0 )
@@ -1896,9 +1896,9 @@ CWebPageDef * CResource::FindWebPage( lpctstr pszPath ) const
 	return NULL;
 }
 
-bool CResource::IsObscene( lpctstr pszText ) const
+bool CServerConfig::IsObscene( lpctstr pszText ) const
 {
-	ADDTOCALLSTACK("CResource::IsObscene");
+	ADDTOCALLSTACK("CServerConfig::IsObscene");
 	// does this text contain obscene content?
 	// NOTE: allow partial match syntax *fuck* or ass (alone)
 
@@ -1915,9 +1915,9 @@ bool CResource::IsObscene( lpctstr pszText ) const
 	return false;
 }
 
-bool CResource::SetKRDialogMap(dword rid, dword idKRDialog)
+bool CServerConfig::SetKRDialogMap(dword rid, dword idKRDialog)
 {
-	ADDTOCALLSTACK("CResource::SetKRDialogMap");
+	ADDTOCALLSTACK("CServerConfig::SetKRDialogMap");
 	// Defines a link between the given ResourceID and KR DialogID, so that
 	// the dialogs of KR clients can be handled in scripts.
 	KRGumpsMap::iterator it;
@@ -1946,9 +1946,9 @@ bool CResource::SetKRDialogMap(dword rid, dword idKRDialog)
 	return true;
 }
 
-dword CResource::GetKRDialogMap(dword idKRDialog)
+dword CServerConfig::GetKRDialogMap(dword idKRDialog)
 {
-	ADDTOCALLSTACK("CResource::GetKRDialogMap");
+	ADDTOCALLSTACK("CServerConfig::GetKRDialogMap");
 	// Translates the given KR DialogID into the ResourceID of its scripted dialog.
 	// Returns 0 on failure
 	for (KRGumpsMap::iterator it = m_mapKRGumps.begin(); it != m_mapKRGumps.end(); ++it)
@@ -1962,9 +1962,9 @@ dword CResource::GetKRDialogMap(dword idKRDialog)
 	return 0;
 }
 
-dword CResource::GetKRDialog(dword rid)
+dword CServerConfig::GetKRDialog(dword rid)
 {
-	ADDTOCALLSTACK("CResource::GetKRDialog");
+	ADDTOCALLSTACK("CServerConfig::GetKRDialog");
 	// Translates the given ResourceID into it's equivalent KR DialogID.
 	// Returns 0 on failure
 	KRGumpsMap::iterator it = m_mapKRGumps.find(rid);
@@ -1974,9 +1974,9 @@ dword CResource::GetKRDialog(dword rid)
 	return 0;
 }
 
-const CSphereMulti * CResource::GetMultiItemDefs( CItem * pItem )
+const CSphereMulti * CServerConfig::GetMultiItemDefs( CItem * pItem )
 {
-	ADDTOCALLSTACK("CResource::GetMultiItemDefs(CItem*)");
+	ADDTOCALLSTACK("CServerConfig::GetMultiItemDefs(CItem*)");
 	if ( !pItem )
 		return NULL;
 
@@ -1987,9 +1987,9 @@ const CSphereMulti * CResource::GetMultiItemDefs( CItem * pItem )
 	return GetMultiItemDefs(pItem->GetDispID());		// multi.mul multi
 }
 
-const CSphereMulti * CResource::GetMultiItemDefs( ITEMID_TYPE itemid )
+const CSphereMulti * CServerConfig::GetMultiItemDefs( ITEMID_TYPE itemid )
 {
-	ADDTOCALLSTACK("CResource::GetMultiItemDefs(ITEMID_TYPE)");
+	ADDTOCALLSTACK("CServerConfig::GetMultiItemDefs(ITEMID_TYPE)");
 	if ( !CItemBase::IsID_Multi(itemid) )
 		return NULL;
 
@@ -2004,9 +2004,9 @@ const CSphereMulti * CResource::GetMultiItemDefs( ITEMID_TYPE itemid )
 	return pMulti;
 }
 
-PLEVEL_TYPE CResource::GetPrivCommandLevel( lpctstr pszCmd ) const
+PLEVEL_TYPE CServerConfig::GetPrivCommandLevel( lpctstr pszCmd ) const
 {
-	ADDTOCALLSTACK("CResource::GetPrivCommandLevel");
+	ADDTOCALLSTACK("CServerConfig::GetPrivCommandLevel");
 	// What is this commands plevel ?
 	// NOTE: This does not attempt to parse anything.
 
@@ -2026,9 +2026,9 @@ PLEVEL_TYPE CResource::GetPrivCommandLevel( lpctstr pszCmd ) const
 	return ( static_cast<PLEVEL_TYPE>(m_iDefaultCommandLevel) ); // default level.
 }
 
-bool CResource::CanUsePrivVerb( const CScriptObj * pObjTarg, lpctstr pszCmd, CTextConsole * pSrc ) const
+bool CServerConfig::CanUsePrivVerb( const CScriptObj * pObjTarg, lpctstr pszCmd, CTextConsole * pSrc ) const
 {
-	ADDTOCALLSTACK("CResource::CanUsePrivVerb");
+	ADDTOCALLSTACK("CServerConfig::CanUsePrivVerb");
 	// can i use this verb on this object ?
 	// Check just at entry points where commands are entered or targetted.
 	// NOTE:
@@ -2105,9 +2105,9 @@ bool CResource::CanUsePrivVerb( const CScriptObj * pObjTarg, lpctstr pszCmd, CTe
 
 //*************************************************************
 
-CPointMap CResource::GetRegionPoint( lpctstr pCmd ) const // Decode a teleport location number into X/Y/Z
+CPointMap CServerConfig::GetRegionPoint( lpctstr pCmd ) const // Decode a teleport location number into X/Y/Z
 {
-	ADDTOCALLSTACK("CResource::GetRegionPoint");
+	ADDTOCALLSTACK("CServerConfig::GetRegionPoint");
 	// get a point from a name. (probably the name of a region)
 	// Might just be a point coord number ?
 
@@ -2147,9 +2147,9 @@ CPointMap CResource::GetRegionPoint( lpctstr pCmd ) const // Decode a teleport l
 	return pt;
 }
 
-CRegionBase * CResource::GetRegion( lpctstr pKey ) const
+CRegionBase * CServerConfig::GetRegion( lpctstr pKey ) const
 {
-	ADDTOCALLSTACK("CResource::GetRegion");
+	ADDTOCALLSTACK("CServerConfig::GetRegion");
 	// get a region from a name or areadef.
 
 	GETNONWHITESPACE( pKey );
@@ -2176,7 +2176,7 @@ CRegionBase * CResource::GetRegion( lpctstr pKey ) const
 	return NULL;
 }
 
-void CResource::LoadSortSpells()
+void CServerConfig::LoadSortSpells()
 {
 	size_t iQtySpells = m_SpellDefs.GetCount();
 	if ( iQtySpells <= 0 )
@@ -2210,7 +2210,7 @@ void CResource::LoadSortSpells()
 
 //*************************************************************
 
-int CResource::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar chars )
+int CServerConfig::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar chars )
 {
 	int retValue = 0;
 	bool bResOk = false;
@@ -2358,9 +2358,9 @@ int CResource::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar char
 
 //*************************************************************
 
-bool CResource::LoadResourceSection( CScript * pScript )
+bool CServerConfig::LoadResourceSection( CScript * pScript )
 {
-	ADDTOCALLSTACK("CResource::LoadResourceSection");
+	ADDTOCALLSTACK("CServerConfig::LoadResourceSection");
 	bool fNewStyleDef = false;
 
 	// Index or read any resource blocks we know how to handle.
@@ -3224,9 +3224,9 @@ bool CResource::LoadResourceSection( CScript * pScript )
 
 //*************************************************************
 
-CResourceID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVarDefContNum ** ppVarNum, bool fNewStyleDef )
+CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVarDefContNum ** ppVarNum, bool fNewStyleDef )
 {
-	ADDTOCALLSTACK("CResource::ResourceGetNewID");
+	ADDTOCALLSTACK("CServerConfig::ResourceGetNewID");
 	// We are reading in a script block.
 	// We may be creating a new id or replacing an old one.
 	// ARGS:
@@ -3599,9 +3599,9 @@ CResourceID CResource::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, CVar
 	return rid;
 }
 
-CResourceDef * CResource::ResourceGetDef( CResourceIDBase rid ) const
+CResourceDef * CServerConfig::ResourceGetDef( CResourceIDBase rid ) const
 {
-	ADDTOCALLSTACK("CResource::ResourceGetDef");
+	ADDTOCALLSTACK("CServerConfig::ResourceGetDef");
 	// Get a CResourceDef from the RESOURCE_ID.
 	// ARGS:
 	//	restype = id must be this type.
@@ -3662,9 +3662,9 @@ CResourceDef * CResource::ResourceGetDef( CResourceIDBase rid ) const
 
 ////////////////////////////////////////////////////////////////////////////////
 
-void CResource::OnTick( bool fNow )
+void CServerConfig::OnTick( bool fNow )
 {
-	ADDTOCALLSTACK("CResource::OnTick");
+	ADDTOCALLSTACK("CServerConfig::OnTick");
 	// Give a tick to the less critical stuff.
 	if ( !fNow && ( g_Serv.IsLoading() || ( m_timePeriodic > CServerTime::GetCurrentTime() ) ) )
 		return;
@@ -3703,9 +3703,9 @@ void CResource::OnTick( bool fNow )
 	strcat(a, b); \
 }
 
-void CResource::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
+void CServerConfig::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
 {
-	ADDTOCALLSTACK("CResource::PrintEFOFFlags");
+	ADDTOCALLSTACK("CServerConfig::PrintEFOFFlags");
 	if ( g_Serv.IsLoading() ) return;
 	if ( bOF )
 	{
@@ -3767,9 +3767,9 @@ void CResource::PrintEFOFFlags(bool bEF, bool bOF, CTextConsole *pSrc)
 	}
 }
 
-bool CResource::LoadIni( bool fTest )
+bool CServerConfig::LoadIni( bool fTest )
 {
-	ADDTOCALLSTACK("CResource::LoadIni");
+	ADDTOCALLSTACK("CServerConfig::LoadIni");
 	// Load my INI file first.
 	if ( ! OpenResourceFind( m_scpIni, SPHERE_FILE ".ini", !fTest )) // Open script file
 	{
@@ -3788,9 +3788,9 @@ bool CResource::LoadIni( bool fTest )
 	return true;
 }
 
-bool CResource::LoadCryptIni( void )
+bool CServerConfig::LoadCryptIni( void )
 {
-	ADDTOCALLSTACK("CResource::LoadCryptIni");
+	ADDTOCALLSTACK("CServerConfig::LoadCryptIni");
 	if ( ! OpenResourceFind( m_scpCryptIni, SPHERE_FILE "Crypt.ini", false ) )
 	{
 		g_Log.Event( LOGL_WARN|LOGM_INIT, "Could not open " SPHERE_FILE "Crypt.ini, encryption might not be available\n");
@@ -3806,9 +3806,9 @@ bool CResource::LoadCryptIni( void )
 	return true;
 }
 
-void CResource::Unload( bool fResync )
+void CServerConfig::Unload( bool fResync )
 {
-	ADDTOCALLSTACK("CResource::Unload");
+	ADDTOCALLSTACK("CServerConfig::Unload");
 	if ( fResync )
 	{
 		// Unlock all the SCP and MUL files.
@@ -3855,9 +3855,9 @@ void CResource::Unload( bool fResync )
 	CCrypt::ClearKeyTable();
 }
 
-bool CResource::Load( bool fResync )
+bool CServerConfig::Load( bool fResync )
 {
-	ADDTOCALLSTACK("CResource::Load");
+	ADDTOCALLSTACK("CServerConfig::Load");
 	// ARGS:
 	//  fResync = just look for changes.
 
@@ -4049,9 +4049,9 @@ bool CResource::Load( bool fResync )
 	return true;
 }
 
-lpctstr CResource::GetDefaultMsg(int lKeyNum)
+lpctstr CServerConfig::GetDefaultMsg(int lKeyNum)
 {
-	ADDTOCALLSTACK("CResource::GetDefaultMsg");
+	ADDTOCALLSTACK("CServerConfig::GetDefaultMsg");
 	if (( lKeyNum < 0 ) || ( lKeyNum >= DEFMSG_QTY ))
 	{
 		g_Log.EventError("Defmessage %d out of range [0..%d]\n", lKeyNum, DEFMSG_QTY-1);
@@ -4060,9 +4060,9 @@ lpctstr CResource::GetDefaultMsg(int lKeyNum)
 	return g_Exp.sm_szMessages[lKeyNum];
 }
 
-lpctstr CResource::GetDefaultMsg(lpctstr pszKey)
+lpctstr CServerConfig::GetDefaultMsg(lpctstr pszKey)
 {
-	ADDTOCALLSTACK("CResource::GetDefaultMsg");
+	ADDTOCALLSTACK("CServerConfig::GetDefaultMsg");
 	for (int i = 0; i < DEFMSG_QTY; ++i )
 	{
 		if ( !strcmpi(pszKey, g_Exp.sm_szMsgNames[i]) )
@@ -4073,9 +4073,9 @@ lpctstr CResource::GetDefaultMsg(lpctstr pszKey)
 	return "";
 }
 
-bool CResource::GenerateDefname(tchar *pObjectName, size_t iInputLength, lpctstr pPrefix, tchar *pOutput, bool bCheckConflict, CVarDefMap* vDefnames)
+bool CServerConfig::GenerateDefname(tchar *pObjectName, size_t iInputLength, lpctstr pPrefix, tchar *pOutput, bool bCheckConflict, CVarDefMap* vDefnames)
 {
-	ADDTOCALLSTACK("CResource::GenerateDefname");
+	ADDTOCALLSTACK("CServerConfig::GenerateDefname");
 	if ( !pOutput )
 		return false;
 
@@ -4156,9 +4156,9 @@ bool CResource::GenerateDefname(tchar *pObjectName, size_t iInputLength, lpctstr
 	return true;
 }
 
-bool CResource::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilename )
+bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilename )
 {
-	ADDTOCALLSTACK("CResource::DumpUnscriptedItems");
+	ADDTOCALLSTACK("CServerConfig::DumpUnscriptedItems");
 	if ( pSrc == NULL )
 		return false;
 

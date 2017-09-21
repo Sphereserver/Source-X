@@ -13,7 +13,7 @@
 #include "../uo_files/uofiles_enums_creid.h"
 #include "../uo_files/CUOItemTypeRec.h"
 #include "../CBase.h"
-#include "../CResource.h"
+#include "../CServerConfig.h"
 
 
 enum IT_TYPE		// double click type action.

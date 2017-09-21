@@ -10,7 +10,7 @@
 #include "../../common/CResourceBase.h"
 #include "../../common/sphereproto.h"
 #include "../clients/CAccount.h"
-#include "../CResource.h"
+#include "../CServerConfig.h"
 #include "../CServerTime.h"
 
 

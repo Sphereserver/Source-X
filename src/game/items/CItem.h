@@ -13,7 +13,7 @@
 #include "../../common/CServerMap.h"
 #include "../../common/CUID.h"
 #include "../CBase.h"
-#include "../CResource.h"
+#include "../CServerConfig.h"
 #include "../CObjBase.h"
 #include "CItemBase.h"
 

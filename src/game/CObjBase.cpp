@@ -270,14 +270,15 @@ bool CObjBase::SetNamePool( lpctstr pszName )
 			SetNamePool_Fail( ppTitles[0] );
 			return false;
 		}
-		int iCount = Calc_GetRandVal( ATOI( s.GetKey())) + 1;
-		while ( iCount-- )
+		int iCount = Calc_GetRandVal2( 1, ATOI( s.GetKey()) );
+		while ( iCount > 0 )
 		{
 			if ( ! s.ReadKey())
 			{
 				SetNamePool_Fail( ppTitles[0] );
 				return false;
 			}
+			--iCount;
 		}
 
 		if ( CObjBaseTemplate::SetName( s.GetKey() ) == false )

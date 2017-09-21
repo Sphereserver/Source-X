@@ -12,7 +12,7 @@
 #include "../common/CUID.h"
 #include "../common/sphereproto.h"
 #include "../game/game_enums.h"
-#include "../game/CResource.h"
+#include "../game/CServerConfig.h"
 #include "packet.h"
 #include "network.h"
 

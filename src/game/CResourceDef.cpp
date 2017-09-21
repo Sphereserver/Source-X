@@ -4,7 +4,7 @@
 #include "../common/CException.h"
 #include "chars/CChar.h"
 #include "items/CItemBase.h"
-#include "CResource.h"
+#include "CServerConfig.h"
 #include "triggers.h"
 
 

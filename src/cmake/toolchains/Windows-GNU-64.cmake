@@ -43,18 +43,30 @@ function (toolchain_exe_stuff)
 	 # do not use " " to delimitate these flags!
 	 # -s: strips debug info (remove it when debugging); -g: adds debug informations;
 	 # -fno-omit-frame-pointer disables a good optimization which may corrupt the debugger stack trace.
-	TARGET_COMPILE_OPTIONS ( spheresvr_release	PUBLIC -s -O3 				)
-	TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -g -Og -fno-omit-frame-pointer	)
-	TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -s -O3 				)
+	IF (TARGET spheresvr_release)
+		TARGET_COMPILE_OPTIONS ( spheresvr_release	PUBLIC -s -O3 	)
+	ENDIF (TARGET spheresvr_release)
+	IF (TARGET spheresvr_nightly)
+		TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -s -O3    )
+	ENDIF (TARGET spheresvr_nightly)
+	IF (TARGET spheresvr_debug)
+		TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og -fno-omit-frame-pointer	)
+	ENDIF (TARGET spheresvr_debug)	)
 
 
 	#-- Setting per-build linker flags.
 
 	 # Linking Unix (MinGW) libs.
 	 # same here, do not use " " to delimitate these flags!
-	TARGET_LINK_LIBRARIES ( spheresvr_release	mysql ws2_32	-s )
-	TARGET_LINK_LIBRARIES ( spheresvr_debug		mysql ws2_32	-g )
-	TARGET_LINK_LIBRARIES ( spheresvr_nightly	mysql ws2_32	-s )
+	IF (TARGET spheresvr_release)
+		TARGET_LINK_LIBRARIES ( spheresvr_release	mysql ws2_32 )
+	ENDIF (TARGET spheresvr_release)
+	IF (TARGET spheresvr_nightly)
+		TARGET_LINK_LIBRARIES ( spheresvr_nightly	mysql ws2_32 )
+	ENDIF (TARGET spheresvr_nightly)
+	IF (TARGET spheresvr_debug)
+		TARGET_LINK_LIBRARIES ( spheresvr_debug		mysql ws2_32 )
+	ENDIF (TARGET spheresvr_debug)
 
 
 	#-- Set common define macros.

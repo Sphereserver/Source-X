@@ -14,7 +14,7 @@
 #include "CServerTime.h"
 #include "CContainer.h"
 #include "CBase.h"
-#include "CResource.h"
+#include "CServerConfig.h"
 #include "CWorld.h"
 
 

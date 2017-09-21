@@ -106,7 +106,7 @@ llong llTimeProfileFrequency = 1000;	// time profiler
 // game servers stuff.
 CWorld		g_World;	// the world. (we save this stuff)
 CServer		g_Serv;		// current state stuff not saved.
-CResource	g_Cfg;
+CServerConfig	g_Cfg;
 CUOInstall g_Install;
 CVerDataMul	g_VerData;
 CExpression g_Exp;		// Global script variables.

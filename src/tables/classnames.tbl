@@ -44,7 +44,7 @@ ADD(CSRandGroupDef,			"CSRandGroupDef");
 ADD(CSpellDef,				"CSpellDef");
 ADD(CSkillClassDef,			"CSkillClassDef");
 ADD(CItemTypeDef,			"CItemTypeDef");
-ADD(CResource,				"CResource");
+ADD(CServerConfig,			"CServerConfig");
 ADD(CObjBase,				"CObjBase");
 ADD(CContainer,				"CContainer");
 ADD(CItemContainer,			"CItemContainer");

@@ -1,7 +1,7 @@
 
 #include "../../common/CException.h"
 #include "../../common/CLog.h"
-#include "../CResource.h"
+#include "../CServerConfig.h"
 #include "CCharBase.h"
 
 /////////////////////////////////////////////////////////////////

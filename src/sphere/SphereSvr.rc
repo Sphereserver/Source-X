@@ -44,11 +44,11 @@ BEGIN
 		BLOCK "040904b0"
 		BEGIN
 			VALUE "CompanyName",		"Menasoft"
-			VALUE "FileDescription",	"SphereServer " SPHERE_VER_STR
+			VALUE "FileDescription",	"SphereServer-eXperimental " SPHERE_VER_STR
 			VALUE "FileVersion",		SPHERE_VERSION
-			VALUE "InternalName",		"SphereSvr"
+			VALUE "InternalName",		"SphereSvrX"
 			VALUE "LegalCopyright",		"Copyright 1998-2016 by Menasoft"
-			VALUE "OriginalFilename",	"SphereSvr.exe"
+			VALUE "OriginalFilename",	"SphereSvrX.exe"
 			VALUE "ProductName",		"SphereServer"
 			VALUE "ProductVersion",		SPHERE_VERSION
 		END

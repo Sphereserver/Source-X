@@ -9,7 +9,7 @@
 #include "../common/sphere_library/CSString.h"
 #include "../common/CLog.h"
 #include "../game/CObjBase.h"
-#include "../game/CResource.h"
+#include "../game/CServerConfig.h"
 #include "../game/CServer.h"
 #include "../game/spheresvr.h"
 #include "ProfileTask.h"

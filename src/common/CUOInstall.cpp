@@ -1,6 +1,6 @@
 
 #include "../common/CLog.h"
-#include "../game/CResource.h"
+#include "../game/CServerConfig.h"
 #include "../sphere/threads.h"
 #include "CUOInstall.h"
 #include "common.h"
@@ -471,12 +471,13 @@ void CUOInstall::CloseFiles()
 	ADDTOCALLSTACK("CUOInstall::CloseFiles");
 	int i;
 
-	for ( i = 0; i < VERFILE_QTY; i++ )
+	for ( i = 0; i < VERFILE_QTY; ++i )
 	{
-		if ( m_File[i].IsFileOpen() ) m_File[i].Close();
+		if ( m_File[i].IsFileOpen() )
+			m_File[i].Close();
 	}
 
-	for ( i = 0; i < 256; i++ )
+	for ( i = 0; i < 256; ++i )
 	{
 		if ( m_Maps[i].IsFileOpen() )		m_Maps[i].Close();
 		if ( m_Statics[i].IsFileOpen() )	m_Statics[i].Close();
@@ -484,8 +485,8 @@ void CUOInstall::CloseFiles()
 		if ( m_Mapdif[i].IsFileOpen() )		m_Mapdif[i].Close();
 		if ( m_Mapdifl[i].IsFileOpen() )	m_Mapdifl[i].Close();
 		if ( m_Stadif[i].IsFileOpen() )		m_Stadif[i].Close();
-		if ( m_Stadifi[i].IsFileOpen() )		m_Stadifi[i].Close();
-		if ( m_Stadifl[i].IsFileOpen() )		m_Stadifl[i].Close();
+		if ( m_Stadifi[i].IsFileOpen() )	m_Stadifi[i].Close();
+		if ( m_Stadifl[i].IsFileOpen() )	m_Stadifl[i].Close();
 	}
 }
 

@@ -30,7 +30,6 @@ enum ConsoleTextColor			// needed by both windows and unix
 
 #ifdef _USECURSES
 	#include <curses.h>
-	#pragma comment(lib, "ncurses")
 #else
 	#include <termios.h>
 #endif

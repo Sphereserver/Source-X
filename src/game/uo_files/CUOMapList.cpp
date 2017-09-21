@@ -1,6 +1,6 @@
 #include "../../common/CServerMap.h"
 #include "../../common/CUOInstall.h"
-#include "../CResource.h"
+#include "../CServerConfig.h"
 #include "CUOMapList.h"
 
 // CUOMapList:: Constructors, Destructor, Asign operator.

@@ -814,8 +814,25 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
 		memmove(pLine, pNonWhite, strlen(pNonWhite) + 1);
 
 	tchar ch;
+	// to track opened/closed brackets
 	bool bQuotes, bCurly, bSquare, bRound, bAngle;
 	bQuotes = bCurly = bSquare = bRound = bAngle = false;
+
+	// ignore opened/closed brackets if that type of bracket is also a separator
+	bool bSepHasCurly, bSepHasSquare, bSepHasRound, bSepHasAngle;
+	bSepHasCurly = bSepHasSquare = bSepHasRound = bSepHasAngle = false;
+	for (int j = 0; pszSep[j + 1] != '\0'; ++j)		// loop through each separator
+	{
+		const tchar & sep = pszSep[j];
+		if (sep == '{' || sep == '}')
+			bSepHasCurly = true;
+		else if (sep == '[' || sep == ']')
+			bSepHasSquare = true;
+		else if (sep == '(' || sep == ')')
+			bSepHasRound = true;
+		else if (sep == '<' || sep == '>')
+			bSepHasAngle = true;
+	}
 
 	for (; ; ++pLine)
 	{
@@ -832,44 +849,57 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
 			return false;
 		}
 
+		// track opened and closed brackets. we'll ignore items inside brackets, if the bracket isn't a separator in the list
 		if (ch == '{') {
-			if (!bSquare && !bRound && !bAngle)
-				bCurly = true;
+			if (!bSepHasCurly)
+				if (!bSquare && !bRound && !bAngle)
+					bCurly = true;
 		}
 		else if (ch == '[') {
-			if (!bCurly && !bRound && !bAngle)
-				bSquare = true;
+			if (!bSepHasSquare)
+				if (!bCurly && !bRound && !bAngle)
+					bSquare = true;
 		}
 		else if (ch == '(') {
-			if (!bCurly && !bSquare && !bAngle)
-				bRound = true;
+			if (!bSepHasRound)
+				if (!bCurly && !bSquare && !bAngle)
+					bRound = true;
 		}
 		else if (ch == '<') {
-			if (!bCurly && !bSquare && !bRound)
-				bAngle = true;
+			if (!bSepHasAngle)
+				if (!bCurly && !bSquare && !bRound)
+					bAngle = true;
 		}
 		else if (ch == '}') {
-			if (!bQuotes && bCurly)
-				bCurly = false;
+			if (!bSepHasCurly)
+				if (!bQuotes && bCurly)
+					bCurly = false;
 		}
 		else if (ch == ']') {
-			if (!bQuotes && bSquare)
-				bSquare = false;
+			if (!bSepHasSquare)
+				if (!bQuotes && bSquare)
+					bSquare = false;
 		}
 		else if (ch == ')') {
-			if (!bQuotes && bRound)
-				bRound = false;
+			if (!bSepHasRound)
+				if (!bQuotes && bRound)
+					bRound = false;
 		}
 		else if (ch == '>') {
-			if (!bQuotes && bAngle)
-				bAngle = false;
+			if (!bSepHasAngle)
+				if (!bQuotes && bAngle)
+					bAngle = false;
 		}
 
-		// don't turn this if into an else if!
+		//	don't turn this if into an else if!
 		//	We can choose as a separator also one of {[(< >)]} and they have to be treated as such!
-		if (!bQuotes && !bCurly && !bSquare && !bRound) {
-			if (strchr(pszSep, ch))
-				break;
+		if (!bQuotes)
+		{
+			// separate the string when i encounter a separator, but only if at this point of the string we aren't inside an argument
+			// enclosed by brackets. but, if one of the separators is a bracket, don't care if we are inside or outside, separate anyways.
+			if (!bCurly && !bSquare && !bRound)
+				if (strchr(pszSep, ch))		// if ch is a separator
+					break;
 		}
 	}
 
@@ -889,6 +919,10 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
 	// skip leading white space on args as well.
 	if (ppArg != NULL)
 		*ppArg = Str_TrimWhitespace(pLine);
+
+	//if (bQuotes == true)
+	//	g_Log.EventError("Quotes opened but not closed in expression. Terminal \" character missing!");
+
 	return true;
 }
 
@@ -918,12 +952,10 @@ int Str_ParseCmds(tchar * pszCmdLine, int64 * piCmd, int iMax, lpctstr pszSep)
 
 	int iQty = Str_ParseCmds(pszCmdLine, ppTmp, iMax, pszSep);
 	int i;
-	for (i = 0; i < iQty; ++i) {
+	for (i = 0; i < iQty; ++i)
 		piCmd[i] = Exp_GetVal(ppTmp[i]);
-	}
-	for (; i < iMax; ++i) {
-		piCmd[i] = 0;
-	}
+	for (; i < iMax; ++i)
+		piCmd[i] = NULL;
 	
 	return iQty;
 }

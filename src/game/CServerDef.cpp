@@ -5,7 +5,7 @@
 #include "../sphere/threads.h"
 #include "../common/CLog.h"
 #include "CObjBase.h"
-#include "CResource.h"
+#include "CServerConfig.h"
 #include "CServerDef.h"
 #include "CServerTime.h"
 #include "CWorld.h"

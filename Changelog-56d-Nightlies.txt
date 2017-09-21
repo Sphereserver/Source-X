@@ -176,3 +176,6 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Changed: removed the '-' symbol as a range argument separator.
 - Updated: now, when parsing weighted ranges, only the randomly extracted argument will be completely parsed and resolved,
 	instead of parsing recursively each argument of the range. Maybe, this can reduce the cpu usage on big servers by a little.
+
+21-09-2017, Nolok
+- Fixed: getting the name from a name pool sometimes failed.
