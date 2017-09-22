@@ -1444,9 +1444,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			} return false;
 		case OC_TOPOBJ:
 			if ( pszKey[6] == '.' )
-			{
 				return CScriptObj::r_WriteVal( pszKey, sVal, pSrc );
-			}
 			sVal.FormatHex(GetTopLevelObj()->GetUID());
 			break;
 		case OC_UID:
@@ -2128,7 +2126,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			{
 				EXC_SET("MESSAGEUA");
 				if ( pClientSrc == NULL )
-					return false;
+					break;	// We show the message only to players
 
 				tchar * pszArgs[5];
 				nchar ncBuffer[ MAX_TALK_BUFFER ];

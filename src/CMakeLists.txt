@@ -181,7 +181,9 @@ ELSE (SINGLE_TARGET)
             ${tables_SRCS}
             ${docs_TEXT}
 		)
-	set_target_properties(spheresvr PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS})
+	set_target_properties(spheresvr PROPERTIES OUTPUT_NAME_RELEASE SphereSvrX${ARCH_BITS}_release)
+	set_target_properties(spheresvr PROPERTIES OUTPUT_NAME_NIGHTLY SphereSvrX${ARCH_BITS}_nightly)
+	set_target_properties(spheresvr PROPERTIES OUTPUT_NAME_DEBUG SphereSvrX${ARCH_BITS}_debug)
 
 ENDIF (SINGLE_TARGET)
 

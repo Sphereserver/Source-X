@@ -381,7 +381,7 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 		int tmp_MinY = (pItemDef->m_ttContainer.m_dwMinXY & 0xFFFF);
 		int tmp_MaxX = (pItemDef->m_ttContainer.m_dwMaxXY & 0xFFFF0000) >> 16;
 		int tmp_MaxY = (pItemDef->m_ttContainer.m_dwMaxXY & 0xFFFF);
-		DEBUG_WARN(("Custom container gump id %d for 0%x\n", gump, GetDispID()));
+		//DEBUG_WARN(("Custom container gump id %d for 0%x\n", gump, GetDispID()));
 		return CPointMap(
 			(word)(tmp_MinX + Calc_GetRandVal(tmp_MaxX - tmp_MinX)),
 			(word)(tmp_MinY + Calc_GetRandVal(tmp_MaxY - tmp_MinY)),
@@ -389,12 +389,12 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 	}
 
 	uint i = 0;
-	for ( ; ; i++ )
+	for ( ; ; ++i )
 	{
 		if ( i >= CountOf(sm_ContSize) )
 		{
 			i = 0;	// set to default
-			DEBUG_WARN(("Unknown container gump id %d for 0%x\n", gump, GetDispID()));
+			g_Log.EventWarn("Unknown container gump id %d for 0%x\n", gump, GetDispID());
 			break;
 		}
 		if ( sm_ContSize[i].m_gump == gump )

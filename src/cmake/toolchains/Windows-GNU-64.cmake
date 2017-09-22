@@ -81,15 +81,27 @@ function (toolchain_exe_stuff)
 		# _CRT_SECURE_NO_WARNINGS: Temporary setting to do not spam so much in the build proccess while we get rid of -W4 warnings and, after it, -Wall.
 		# _WINSOCK_DEPRECATED_NO_WARNINGS: Removing warnings until the code gets updated or reviewed.
 	FOREACH (DEF ${COMMON_DEFS})
-		TARGET_COMPILE_DEFINITIONS ( spheresvr_release	PUBLIC ${DEF} )
-		TARGET_COMPILE_DEFINITIONS ( spheresvr_debug	PUBLIC ${DEF} )
-		TARGET_COMPILE_DEFINITIONS ( spheresvr_nightly	PUBLIC ${DEF} )
+		IF (TARGET spheresvr_release)
+			TARGET_COMPILE_DEFINITIONS ( spheresvr_release	PUBLIC ${DEF} )
+		ENDIF (TARGET spheresvr_release)
+		IF (TARGET spheresvr_nightly)
+			TARGET_COMPILE_DEFINITIONS ( spheresvr_nightly	PUBLIC ${DEF} )
+		ENDIF (TARGET spheresvr_nightly)
+		IF (TARGET spheresvr_debug)
+			TARGET_COMPILE_DEFINITIONS ( spheresvr_debug	PUBLIC ${DEF} )
+		ENDIF (TARGET spheresvr_debug)
 	ENDFOREACH (DEF)
 
 
 	#-- Set per-build define macros.
 
-	TARGET_COMPILE_DEFINITIONS ( spheresvr_release	PUBLIC NDEBUG THREAD_TRACK_CALLSTACK )
-	TARGET_COMPILE_DEFINITIONS ( spheresvr_nightly	PUBLIC NDEBUG THREAD_TRACK_CALLSTACK _NIGHTLYBUILD )
-	TARGET_COMPILE_DEFINITIONS ( spheresvr_debug	PUBLIC _DEBUG THREAD_TRACK_CALLSTACK _PACKETDUMP )
+	IF (TARGET spheresvr_release)
+		TARGET_COMPILE_DEFINITIONS ( spheresvr_release	PUBLIC NDEBUG THREAD_TRACK_CALLSTACK )
+	ENDIF (TARGET spheresvr_release)
+	IF (TARGET spheresvr_nightly)
+		TARGET_COMPILE_DEFINITIONS ( spheresvr_nightly	PUBLIC NDEBUG THREAD_TRACK_CALLSTACK _NIGHTLYBUILD )
+	ENDIF (TARGET spheresvr_nightly)
+	IF (TARGET spheresvr_debug)
+		TARGET_COMPILE_DEFINITIONS ( spheresvr_debug	PUBLIC _DEBUG THREAD_TRACK_CALLSTACK _PACKETDUMP )
+	ENDIF (TARGET spheresvr_debug)
 endfunction()

@@ -1111,9 +1111,7 @@ bool CChar::ReadScript(CResourceLock &s, bool bVendor)
 						m_UIDLastNewItem.InitUID();	//Clearing the attr for the next cycle
 
 						if ( iCmd == ITC_ITEMNEWBIE )
-						{
 							pItem->SetAttr(ATTR_NEWBIE);
-						}
 
 						if ( !pItem->IsItemInContainer() && !pItem->IsItemEquipped())
 							pItem = NULL;

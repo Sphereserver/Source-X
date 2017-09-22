@@ -380,8 +380,7 @@ CCharBase *CItemSpawn::SetTrackID()
 		CREID_TYPE id = static_cast<CREID_TYPE>(rid.GetResIndex());
 		pCharDef = CCharBase::FindCharBase(id);
 	}
-	if ( pCharDef )		// They must want it to look like this.
-		SetDispID(pCharDef ? pCharDef->m_trackID : ITEMID_TRACK_WISP);
+	SetDispID(pCharDef ? pCharDef->m_trackID : ITEMID_TRACK_WISP);	// They must want it to look like this.
 
 	return pCharDef;
 }

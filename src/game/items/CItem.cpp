@@ -3145,7 +3145,7 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 				int iCount = s.GetArgVal();
 				if ( iCount <= 0 )
 					iCount = 1;
-				if ( !GetContainer() && ( (uint)(iCount) > g_Cfg.m_iMaxItemComplexity ))	// if top-level, obey the complexity
+				if ( !GetContainer() && ( (uint)iCount > g_Cfg.m_iMaxItemComplexity ))	// if top-level, obey the complexity
 					iCount = g_Cfg.m_iMaxItemComplexity;
 				while ( iCount-- )
 				{
