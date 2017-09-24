@@ -196,7 +196,7 @@ public:
 		{
 			m_stackInfo[m_stackPos].functionName = name;
 			m_stackInfo[m_stackPos].startTime = ::GetTickCount();
-			m_stackPos++;
+			++m_stackPos;
 			m_stackInfo[m_stackPos].startTime = 0;
 		}
 	}
@@ -205,7 +205,7 @@ public:
 	{
 		if (m_freezeCallStack == false)
 		{
-			m_stackPos--;
+			--m_stackPos;
 		}
 	}
 

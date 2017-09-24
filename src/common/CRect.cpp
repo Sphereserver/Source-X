@@ -1055,7 +1055,7 @@ CPointMap::CPointMap()
 	InitPoint();
 }
 
-CPointMap::CPointMap( word x, word y, char z, uchar map )
+CPointMap::CPointMap( short x, short y, char z, uchar map )
 {
 	m_x = x;
 	m_y = y;

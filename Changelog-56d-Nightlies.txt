@@ -145,7 +145,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 22-05-2017, Nolok
 - Fixed: Garbage Collection deleting (and reporting) only a fraction of the unplaced objects. Fixed also incorrect formatting of the "invalid code".
 - Added: Now the Garbage Collection report prints the script file name and the line where the object was created.
-	This only works for objects added in the scripts through the keywords: NEWITEM, NEWNPC, NEWSUMMON, NEWDUPE, DUPE.
+	This only works for objects added in the scripts through the keywords: NEWITEM, NEWNPC, NEWSUMMON, NEWDUPE, DUPE (and ITEM/ITEMNEWBIE since 24/09/2017).
 
 04-07-2017, Nolok
 - Fixed: random ranges ( e.g.: {i_dagger 1 i_gold 1} ) sometimes returned a totally random and unexpected value.
@@ -186,3 +186,13 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 	the item is automatically bounced into the pack even if doing RETURN 1.
 - Changed: @EquipTest and @ItemEquipTest triggers are now called only when trying to equip equippable items. Before, they were called also when dropping or
 	creating an item to be equipped or bounced to the pack of a NPC.
+
+24-09-2017, Nolok
+- Fixed: TDATA3 and TDATA4 for t_container were not working.
+	TDATA3 stores the minimum X of an object placed inside a container as the first 16 bits, while the last 16 bits store the minimum Y.
+	TDATA4 stores the maximum X and maximum Y in the same way. Example:
+	TDATA3=((45 << 16) | 65)	// MinXY = ((X << 16) | Y)
+	TDATA4=((100 << 16) | 100)	// MaxXY
+- Added: the Garbage Collection report prints the script file name and the line where the object was created also for items created with ITEM or ITEMNEWBIE keywords.
+- Fixed: Linux console not showing colored text.
+- Fixed: Linux version crashing during the shutdown cleanups.

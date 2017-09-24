@@ -117,9 +117,9 @@ bool CLog::OpenLog( lpctstr pszBaseDirName )	// name set previously.
 
 void CLog::SetColor(ConsoleTextColor color)
 {
+#ifdef _WIN32
 	switch (color)
 	{
-#ifdef _WIN32
 		case CTCOL_RED:
 			NTWindow_PostMsgColor(RGB(255, 0, 0));
 			break;
@@ -143,10 +143,10 @@ void CLog::SetColor(ConsoleTextColor color)
 			break;        
         default:
             NTWindow_PostMsgColor(0);
-#else
-		g_UnixTerminal.setColor(color);
-#endif
 	}
+#else
+	g_UnixTerminal.setColor(color);
+#endif
 }
 
 int CLog::EventStr( dword wMask, lpctstr pszMsg )

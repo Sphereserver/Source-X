@@ -26,7 +26,7 @@ public:
 	short m_x;		// equipped items dont need x,y
 	short m_y;
 	char m_z;		// this might be layer if equipped ? or equipped on corpse. Not used if in other container.
-	byte m_map;		// another map? (only if top level.)
+	uchar m_map;		// another map? (only if top level.)
 
 public:
 	bool operator == ( const CPointBase & pt ) const;
@@ -88,7 +88,7 @@ struct CPointMap : public CPointBase
 {
 	// A point in the world (or in a container) (initialized)
 	CPointMap();
-	CPointMap( word x, word y, char z = 0, uchar map = 0 );
+	CPointMap( short x, short y, char z = 0, uchar map = 0 );
 	CPointMap & operator = ( const CPointBase & pt );
 	CPointMap( const CPointBase & pt );
 	CPointMap( tchar * pVal );

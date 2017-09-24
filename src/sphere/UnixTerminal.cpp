@@ -107,7 +107,7 @@ void UnixTerminal::setColor(ConsoleTextColor color)
 	if (m_isColorEnabled == false)
 		return;
 
-	if (color <= CTCOL_DEFAULT || color >= CTCOL_QTY)
+	if (color < CTCOL_DEFAULT || color >= CTCOL_QTY)
 		color = CTCOL_DEFAULT;
 
 #ifdef _USECURSES
@@ -116,7 +116,13 @@ void UnixTerminal::setColor(ConsoleTextColor color)
 	if (color == CTCOL_DEFAULT)
 		fprintf(stdout, "\033[0m");
 	else
-		fprintf(stdout, "\033[0;%dm", 30 + (int)color);
+	{
+		int bold = 1;
+		if ((color == CTCOL_YELLOW) || (color == CTCOL_CYAN))
+			bold = 0;
+		int colorcode = 30 + (int)color;
+		fprintf(stdout, "\033[%d;%dm", bold, colorcode);
+	}
 #endif
 }
 
@@ -138,7 +144,7 @@ void UnixTerminal::prepare()
 	ASSERT(m_prepared == false);
 
 #ifdef _USECURSES
-	initscr();	// init screen
+	initscr();	// init screen	-> THIS CAN FAIL AND MAKE SPHERE CRASH IF USING GDB (GNU Debugger)! If so, disable _USECURSES
 	cbreak();	// read one character at a time
 	echo();		// echo input
 
@@ -196,31 +202,39 @@ void UnixTerminal::prepareColor()
 
 #else
 
+	// Nowadays every terminal should support the main ASCII escape codes, so instead of keeping the list updated with
+	//	every possible terminal we can use, i'd rather assume that every terminal we are using supports them.
+/*
 	// enable colour based on known terminal types
-	m_isColorEnabled = false;
-
-	const char * termtype = getenv("TERM");
-	if (termtype != NULL)
+	if (m_isColorEnabled)
 	{
-		static const char *sz_Supported_Terminals[] =
-		{
-			"aixterm", "ansi", "color_xterm",
-			"con132x25", "con132x30", "con132x43", "con132x60",
-			"con80x25", "con80x28", "con80x30", "con80x43", "con80x50", "con80x60",
-			"cons25", "console", "gnome", "hft", "kon", "konsole", "kterm",
-			"linux", "rxvt", "screen", "screen.linux", "vt100-color",
-			"xterm", "xterm-color"
-		};
+		m_isColorEnabled = false;
 
-		for (size_t i = 0; i < CountOf(sz_Supported_Terminals); ++i)
+		const char * termtype = getenv("TERM");
+		if (termtype != NULL)
 		{
-			if (strcmp(termtype, sz_Supported_Terminals[i]) == 0)
+			static const char *sz_Supported_Terminals[] =
 			{
-				m_isColorEnabled = true;
-				break;
+				"aixterm", "ansi", "color_xterm",
+				"con132x25", "con132x30", "con132x43", "con132x60",
+				"con80x25", "con80x28", "con80x30", "con80x43", "con80x50", "con80x60",
+				"cons25", "console", "gnome", "hft", "kon", "konsole", "kterm",
+				"linux", "rxvt", "screen", "screen.linux", "vt100-color",
+				"xterm", "xterm-color", "xterm-256color"
+			};
+
+			for (size_t i = 0; i < CountOf(sz_Supported_Terminals); ++i)
+			{
+				if (strcmp(termtype, sz_Supported_Terminals[i]) == 0)
+				{
+					m_isColorEnabled = true;
+					break;
+				}
 			}
 		}
 	}
+*/
+	
 #endif
 }
 

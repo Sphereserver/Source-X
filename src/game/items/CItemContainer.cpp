@@ -368,14 +368,13 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 		{ GUMP_FLETCHING_STATION, 0, 0, 0, 0 },	// Presumably a container.
 	};
 
-	// ??? pItemDef->m_ttContainer.m_dwMinXY to m_dwMaxXY
 	// Get a random location in the container.
 
 	CItemBase *pItemDef = Item_GetDef();
 	GUMP_TYPE gump = pItemDef->IsTypeContainer();
 
 	// check for custom values in TDATA3/TDATA4
-	if ( pItemDef->m_ttContainer.m_dwMaxXY )
+	if ( pItemDef->m_ttContainer.m_dwMinXY || pItemDef->m_ttContainer.m_dwMaxXY )
 	{
 		int tmp_MinX = (pItemDef->m_ttContainer.m_dwMinXY & 0xFFFF0000) >> 16;
 		int tmp_MinY = (pItemDef->m_ttContainer.m_dwMinXY & 0xFFFF);
@@ -439,6 +438,24 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, uchar gridIndex )
 			default:
 				break;
 		}
+	}
+
+	// check for custom values in TDATA3/TDATA4
+	CItemBase *pContDef = Item_GetDef();
+	if (pContDef->m_ttContainer.m_dwMinXY || pContDef->m_ttContainer.m_dwMaxXY)
+	{
+		short tmp_MinX = (short)( (pContDef->m_ttContainer.m_dwMinXY & 0xFFFF0000) >> 16 );
+		short tmp_MinY = (short)( (pContDef->m_ttContainer.m_dwMinXY & 0xFFFF) );
+		short tmp_MaxX = (short)( (pContDef->m_ttContainer.m_dwMaxXY & 0xFFFF0000) >> 16 );
+		short tmp_MaxY = (short)( (pContDef->m_ttContainer.m_dwMaxXY & 0xFFFF) );
+		if (pt.m_x < tmp_MinX)
+			pt.m_x = tmp_MinX;
+		if (pt.m_x > tmp_MaxX)
+			pt.m_x = tmp_MaxX;
+		if (pt.m_y < tmp_MinY)
+			pt.m_y = tmp_MinY;
+		if (pt.m_y > tmp_MaxY)
+			pt.m_y = tmp_MaxY;
 	}
 
 	if ( pt.m_x <= 0 || pt.m_y <= 0 || pt.m_x > 512 || pt.m_y > 512 )	// invalid container location ?

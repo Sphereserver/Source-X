@@ -3851,8 +3851,6 @@ void CServerConfig::Unload( bool fResync )
 	// m_WebPages
 	m_SpellDefs.RemoveAll();	// Defined Spells
 	m_SpellDefs_Sorted.RemoveAll();
-
-	CCrypt::ClearKeyTable();
 }
 
 bool CServerConfig::Load( bool fResync )

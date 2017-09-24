@@ -11,7 +11,7 @@
 
 // #define DEBUG_CRYPT_MSGS 1
 
-std::vector<CCryptClientKey *> CCrypt::client_keys;
+std::vector<CCryptClientKey> CCrypt::client_keys;
 
 void CCrypt::SetClientVersion( dword iVer )
 {
@@ -77,32 +77,21 @@ ENCRYPTION_TYPE CCrypt::GetEncryptionType() const
 	return m_GameEnc;
 }
 
-void CCrypt::ClearKeyTable(void)
-{
-	ADDTOCALLSTACK("CCrypt::ClearKeyTable");
-
-	for (auto it = client_keys.begin(), end = client_keys.end(); it != end; ++it)
-		delete *it;
-	client_keys.clear();
-}
-
 void CCrypt::LoadKeyTable(CScript & s)
 {
 	ADDTOCALLSTACK("CCrypt::LoadKeyTable");
-	ClearKeyTable();
+	client_keys.clear();
 
 	// Always add nocrypt
 	addNoCryptKey();
 
 	while ( s.ReadKeyParse() )
 	{
-		CCryptClientKey *c = new CCryptClientKey;
-
-		c->m_client = ahextoi( s.GetKey() );
-		c->m_key_1 = s.GetArgVal();
-		c->m_key_2 = s.GetArgVal();
-		c->m_EncType = static_cast<ENCRYPTION_TYPE>(s.GetArgVal());
-
+		CCryptClientKey c;
+		c.m_client = ahextoi( s.GetKey() );
+		c.m_key_1 = s.GetArgVal();
+		c.m_key_2 = s.GetArgVal();
+		c.m_EncType = static_cast<ENCRYPTION_TYPE>(s.GetArgVal());
 		client_keys.push_back(c);
 	}
 }
@@ -110,11 +99,11 @@ void CCrypt::LoadKeyTable(CScript & s)
 void CCrypt::addNoCryptKey(void)
 {
 	ADDTOCALLSTACK("CCrypt::addNoCryptKey");
-	CCryptClientKey *c = new CCryptClientKey;
-	c->m_client = 0;
-	c->m_key_1 = 0;
-	c->m_key_2 = 0;
-	c->m_EncType = ENC_NONE;
+	CCryptClientKey c;
+	c.m_client = 0;
+	c.m_key_1 = 0;
+	c.m_key_2 = 0;
+	c.m_EncType = ENC_NONE;
 	client_keys.push_back(c);
 }
 
@@ -491,11 +480,11 @@ char* CCrypt::WriteClientVer( char * pStr ) const
 bool CCrypt::SetClientVerEnum( dword iVer, bool bSetEncrypt )
 {
 	ADDTOCALLSTACK("CCrypt::SetClientVerEnum");
-	for (size_t i = 0; i < client_keys.size(); i++ )
+	for (size_t i = 0; i < client_keys.size(); ++i )
 	{
-		CCryptClientKey * key = client_keys.at(i);
+		CCryptClientKey & key = client_keys[i];
 
-		if ( iVer == key->m_client )
+		if ( iVer == key.m_client )
 		{
 			if ( SetClientVerIndex( i, bSetEncrypt ))
 				return true;
@@ -511,12 +500,12 @@ bool CCrypt::SetClientVerIndex( size_t iVer, bool bSetEncrypt )
 	if ( iVer >= client_keys.size() )
 		return false;
 
-	CCryptClientKey * key = client_keys.at(iVer);
+	CCryptClientKey & key = client_keys[iVer];
 
-	SetClientVersion(key->m_client);
-	SetMasterKeys(key->m_key_1, key->m_key_2); // Hi - Lo
+	SetClientVersion(key.m_client);
+	SetMasterKeys(key.m_key_1, key.m_key_2); // Hi - Lo
 	if ( bSetEncrypt )
-		SetEncryptionType(key->m_EncType);
+		SetEncryptionType(key.m_EncType);
 
 	return true;
 }
@@ -559,9 +548,7 @@ CCrypt::CCrypt()
 {
 	// Always at least one crypt code, for non encrypted clients!
 	if ( ! client_keys.size() )
-	{
 		addNoCryptKey();
-	}
 
 	m_fInit = false;
 	m_fRelayPacket = false;

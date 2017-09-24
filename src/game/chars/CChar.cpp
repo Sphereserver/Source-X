@@ -1110,6 +1110,9 @@ bool CChar::ReadScript(CResourceLock &s, bool bVendor)
 						}
 						m_UIDLastNewItem.InitUID();	//Clearing the attr for the next cycle
 
+						pItem->m_iCreatedResScriptIdx = s.m_iResourceFileIndex;
+						pItem->m_iCreatedResScriptLine = s.m_iLineNum;
+
 						if ( iCmd == ITC_ITEMNEWBIE )
 							pItem->SetAttr(ATTR_NEWBIE);
 
