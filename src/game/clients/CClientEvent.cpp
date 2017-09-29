@@ -226,7 +226,7 @@ void CClient::Event_Item_Pickup(CUID uid, word amount) // Client grabs an item
 	EXC_SET("origin");
 	// Where is the item coming from ? (just in case we have to toss it back)
 	CObjBase * pObjParent = dynamic_cast <CObjBase *>(pItem->GetParent());
-	m_Targ_PrvUID = ( pObjParent ) ? (dword) pObjParent->GetUID() : UID_CLEAR;
+	m_Targ_Prv_UID = ( pObjParent ) ? (dword) pObjParent->GetUID() : UID_CLEAR;
 	m_Targ_p = pItem->GetUnkPoint();
 
 	EXC_SET("ItemPickup");
@@ -254,21 +254,21 @@ void CClient::Event_Item_Drop_Fail( CItem *pItem )
 	if ( !pItem || pItem != m_pChar->LayerFind(LAYER_DRAGGING) )
 		return;
 
-	CItemContainer *pPrevCont = static_cast<CItemContainer *>(m_Targ_PrvUID.ItemFind());
+	CItemContainer *pPrevCont = static_cast<CItemContainer *>(m_Targ_Prv_UID.ItemFind());
 	if ( pPrevCont )
 	{
 		pPrevCont->ContentAdd(pItem, m_Targ_p);
 		return;
 	}
 
-	CChar *pPrevChar = m_Targ_PrvUID.CharFind();
+	CChar *pPrevChar = m_Targ_Prv_UID.CharFind();
 	if ( pPrevChar )
 	{
 		pPrevChar->ItemEquip(pItem);
 		return;
 	}
 
-	if ( m_Targ_PrvUID )	// if there's a previous cont UID set but it's not a valid container/char, probably this container/char got removed. So drop the item at player foot
+	if ( m_Targ_Prv_UID )	// if there's a previous cont UID set but it's not a valid container/char, probably this container/char got removed. So drop the item at player foot
 		m_Targ_p = m_pChar->GetTopPoint();
 
 	pItem->MoveToCheck(m_Targ_p);
@@ -507,9 +507,9 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 	// Game pieces can only be dropped on their game boards.
 	if ( pItem->IsType(IT_GAME_PIECE))
 	{
-		if ( pObjOn == NULL || m_Targ_PrvUID != pObjOn->GetUID())
+		if ( pObjOn == NULL || m_Targ_Prv_UID != pObjOn->GetUID())
 		{
-			CItemContainer * pGame = dynamic_cast <CItemContainer *>( m_Targ_PrvUID.ItemFind());
+			CItemContainer * pGame = dynamic_cast <CItemContainer *>( m_Targ_Prv_UID.ItemFind());
 			if ( pGame != NULL )
 			{
 				pGame->ContentAdd( pItem, m_Targ_p );
@@ -908,7 +908,7 @@ void CClient::Event_CombatMode( bool fWar ) // Only for switching to combat mode
 	if ( fCleanSkill )
 	{
 		m_pChar->Skill_Fail( true );
-		DEBUG_WARN(("UserWarMode - Cleaning Skill Action\n"));
+		//DEBUG_WARN(("UserWarMode - Cleaning Skill Action\n"));
 	}
 
 	addPlayerWarMode();
@@ -1704,7 +1704,7 @@ void CClient::Event_Talk_Common(tchar *szText)	// PC speech
 
 		// Are we close to the char ?
 		int iDist = m_pChar->GetTopDist3D(pChar);
-		if ( pChar->Skill_GetActive() == NPCACT_TALK && pChar->m_Act_Targ == m_pChar->GetUID() )	// already talking to him
+		if ( pChar->Skill_GetActive() == NPCACT_TALK && pChar->m_Act_UID == m_pChar->GetUID() )	// already talking to him
 		{
 			pCharAlt = pChar;
 			iAltDist = 1;
@@ -2695,8 +2695,8 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 				m_tmSkillMagery.m_Spell = spell;
 				m_pChar->m_atMagery.m_Spell = spell;
 				m_pChar->m_Act_p = m_pChar->GetTopPoint();
-				m_pChar->m_Act_Targ = m_Targ_UID;
-				m_pChar->m_Act_TargPrv = m_Targ_PrvUID;
+				m_pChar->m_Act_UID = m_Targ_UID;
+				m_pChar->m_Act_Prv_UID = m_Targ_Prv_UID;
 				m_pChar->Skill_Start(static_cast<SKILL_TYPE>(skill));
 			}
 			else

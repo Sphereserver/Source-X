@@ -160,13 +160,13 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 			break;
 
         case PC_GUARD_ME:
-            m_Act_Targ = pSrc->GetUID();
+            m_Act_UID = pSrc->GetUID();
             Skill_Start(NPCACT_GUARD_TARG);
             break;
 
 		case PC_COME:
 		case PC_FOLLOW_ME:
-			m_Act_Targ = pSrc->GetUID();
+			m_Act_UID = pSrc->GetUID();
 			Skill_Start(NPCACT_FOLLOW_TARG);
 			break;
 
@@ -417,7 +417,7 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 		case PC_FOLLOW:
 			if ( !pCharTarg )
 				break;
-			m_Act_Targ = pCharTarg->GetUID();
+			m_Act_UID = pCharTarg->GetUID();
 			bSuccess = Skill_Start(NPCACT_FOLLOW_TARG);
 			break;
 
@@ -438,7 +438,7 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 			pCharTarg->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_TARG_FRIEND_SUCCESS2), pSrc->GetName(), GetName());
 			Memory_AddObjTypes(pCharTarg, MEMORY_FRIEND);
 
-			m_Act_Targ = pCharTarg->GetUID();
+			m_Act_UID = pCharTarg->GetUID();
 			bSuccess = Skill_Start(NPCACT_FOLLOW_TARG);
 			break;
 		}
@@ -460,7 +460,7 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 			pCharTarg->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_TARG_UNFRIEND_SUCCESS2), pSrc->GetName(), GetName());
 			pMemory->Delete();
 
-			m_Act_Targ = pSrc->GetUID();
+			m_Act_UID = pSrc->GetUID();
 			bSuccess = Skill_Start(NPCACT_FOLLOW_TARG);
 			break;
 		}
@@ -476,7 +476,7 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 			if ( !pCharTarg )
 				break;
 			pCharTarg->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_TARG_GUARD_SUCCESS), GetName());
-			m_Act_Targ = pCharTarg->GetUID();
+			m_Act_UID = pCharTarg->GetUID();
 			bSuccess = Skill_Start(NPCACT_GUARD_TARG);
 			break;
 

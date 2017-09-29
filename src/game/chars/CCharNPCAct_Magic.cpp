@@ -232,8 +232,8 @@ BeginCast:	//Start casting
 
 	Reveal();
 
-	m_Act_Targ = pTarg->GetUID();
-	m_Act_TargPrv = pSrc->GetUID();
+	m_Act_UID = pTarg->GetUID();
+	m_Act_Prv_UID = pSrc->GetUID();
 	m_Act_p = pTarg->GetTopPoint();
 
 	// Calculate the difficulty

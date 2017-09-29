@@ -501,7 +501,7 @@ bool CClient::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 				pRef = m_Targ_UID.ObjFind();
 				return true;
 			case CLIR_TARGPRV:
-				pRef = m_Targ_PrvUID.ObjFind();
+				pRef = m_Targ_Prv_UID.ObjFind();
 				return true;
 			case CLIR_TARGPROP:
 				pRef = m_Prop_UID.ObjFind();
@@ -654,7 +654,7 @@ bool CClient::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			sVal.FormatHex(m_Prop_UID);
 			break;
 		case CC_TARGPRV:
-			sVal.FormatHex(m_Targ_PrvUID);
+			sVal.FormatHex(m_Targ_Prv_UID);
 			break;
 		case CC_TARGTXT:
 			sVal = m_Targ_Text;
@@ -769,7 +769,7 @@ bool CClient::r_LoadVal( CScript & s )
 			m_Prop_UID = s.GetArgVal();
 			break;
 		case CC_TARGPRV:
-			m_Targ_PrvUID = s.GetArgVal();
+			m_Targ_Prv_UID = s.GetArgVal();
 			break;
 		default:
 			return false;
@@ -837,7 +837,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				CResourceID rid = g_Cfg.ResourceGetID( RES_QTY, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(pszArgs)));
 				if (( rid.GetResType() == RES_CHARDEF ) || ( rid.GetResType() == RES_SPAWN ))
 				{
-					m_Targ_PrvUID.InitUID();
+					m_Targ_Prv_UID.InitUID();
 					return Cmd_CreateChar(static_cast<CREID_TYPE>(rid.GetResIndex()));
 				}
 
@@ -1001,7 +1001,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 
 									CPointMap	pt = pItem->GetTopPoint();
 									m_pChar->Spell_Teleport(pt, true, false);
-									m_pChar->m_Act_Targ = pItem->GetUID();
+									m_pChar->m_Act_UID = pItem->GetUID();
 									SysMessagef("Bad spawn (0%x, id=%s). Set as ACT", (dword)pItem->GetUID(), g_Cfg.ResourceGetName(rid));
 									fFound = true;
 								}
@@ -1036,12 +1036,12 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					if (pObjSrc != NULL)
 					{
 						m_Targ_UID = pObjSrc->GetUID();	// default target.
-						m_Targ_PrvUID = pObjSrc->GetUID();
+						m_Targ_Prv_UID = pObjSrc->GetUID();
 					}
 					else
 					{
 						m_Targ_UID.ClearUID();
-						m_Targ_PrvUID.ClearUID();
+						m_Targ_Prv_UID.ClearUID();
 					}
 					m_pChar->Skill_Start(static_cast<SKILL_TYPE>(skill));
 					break;
@@ -1215,7 +1215,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			if ( GetTargMode() >= CLIMODE_MOUSE_TYPE )
 			{
 				ASSERT(m_pChar);
-				CObjBase * pObj = m_pChar->m_Act_Targ.ObjFind();
+				CObjBase * pObj = m_pChar->m_Act_UID.ObjFind();
 				if ( pObj != NULL )
 				{
 					Event_Target(GetTargMode(), pObj->GetUID(), pObj->GetUnkPoint());
@@ -1356,8 +1356,8 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			if ( !pSpellDef )
 				return false;
 
-			m_pChar->m_Act_Targ = m_pChar->GetUID();
-			m_pChar->m_Act_TargPrv = m_pChar->GetUID();
+			m_pChar->m_Act_UID = m_pChar->GetUID();
+			m_pChar->m_Act_Prv_UID = m_pChar->GetUID();
 
 			if ( pSpellDef->IsSpellType(SPELLFLAG_TARG_OBJ|SPELLFLAG_TARG_XYZ) )
 			{

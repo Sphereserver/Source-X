@@ -161,7 +161,7 @@ bool CChar::NPC_StablePetSelect( CChar * pCharPlayer )
 		return false;
 	}
 
-	pCharPlayer->m_pClient->m_Targ_PrvUID = GetUID();
+	pCharPlayer->m_pClient->m_Targ_Prv_UID = GetUID();
 	pCharPlayer->m_pClient->addTarget( CLIMODE_TARG_PET_STABLE, g_Cfg.GetDefaultMsg( DEFMSG_NPC_STABLEMASTER_TARG ) );
 	return true;
 }

@@ -197,13 +197,13 @@ bool CChar::Skill_Snoop_Check( const CItemContainer * pItem )
 	if ( Skill_Wait(SKILL_SNOOPING) )
 		return true;
 
-	m_Act_Targ = pItem->GetUID();
+	m_Act_UID = pItem->GetUID();
 	Skill_Start( SKILL_SNOOPING );
 	return true;
 }
 
 // SKILL_SNOOPING
-// m_Act_Targ = object to snoop into.
+// m_Act_UID = object to snoop into.
 // RETURN:
 // -SKTRIG_QTY = no chance. and not a crime
 // -SKTRIG_FAIL = no chance and caught.
@@ -216,7 +216,7 @@ int CChar::Skill_Snooping( SKTRIG_TYPE stage )
 		return 0;
 
 	// Assume the container is not locked.
-	CItemContainer * pCont = dynamic_cast <CItemContainer *>(m_Act_Targ.ItemFind());
+	CItemContainer * pCont = dynamic_cast <CItemContainer *>(m_Act_UID.ItemFind());
 	if ( pCont == NULL )
 		return ( -SKTRIG_QTY );
 
@@ -268,7 +268,7 @@ int CChar::Skill_Snooping( SKTRIG_TYPE stage )
 	return 0;
 }
 
-// m_Act_Targ = object to steal.
+// m_Act_UID = object to steal.
 // RETURN:
 // -SKTRIG_QTY = no chance. and not a crime
 // -SKTRIG_FAIL = no chance and caught.
@@ -279,11 +279,11 @@ int CChar::Skill_Stealing( SKTRIG_TYPE stage )
 	if ( stage == SKTRIG_STROKE )
 		return 0;
 
-	CItem * pItem = m_Act_Targ.ItemFind();
+	CItem * pItem = m_Act_UID.ItemFind();
 	CChar * pCharMark = NULL;
 	if ( pItem == NULL )	// on a chars head ? = random steal.
 	{
-		pCharMark = m_Act_Targ.CharFind();
+		pCharMark = m_Act_UID.CharFind();
 		if ( pCharMark == NULL )
 		{
 			SysMessageDefault( DEFMSG_STEALING_NOTHING );
@@ -301,7 +301,7 @@ cantsteal:
 		{
 			goto cantsteal;
 		}
-		m_Act_Targ = pItem->GetUID();
+		m_Act_UID = pItem->GetUID();
 	}
 
 	// Special cases.
@@ -483,7 +483,7 @@ void CChar::CallGuards( CChar * pCriminal )
 		while ((pGuardFound = AreaGuard.GetChar()) != NULL)
 		{
 			if (pGuardFound->m_pNPC && (pGuardFound->m_pNPC->m_Brain == NPCBRAIN_GUARD) && // Char found must be a guard
-				(pGuardFound->m_Fight_Targ == pCriminal->GetUID() || !pGuardFound->IsStatFlag(STATF_War)))	// and will be eligible to fight this target if it's not already on a fight or if its already attacking this target (to avoid spamming docens of guards at the same target).
+				(pGuardFound->m_Fight_Targ_UID == pCriminal->GetUID() || !pGuardFound->IsStatFlag(STATF_War)))	// and will be eligible to fight this target if it's not already on a fight or if its already attacking this target (to avoid spamming docens of guards at the same target).
 			{
 				pGuard = pGuardFound;
 				break;
@@ -534,7 +534,7 @@ void CChar::OnHarmedBy( CChar * pCharSrc )
 	bool fFightActive = Fight_IsActive();
 	Memory_AddObjTypes(pCharSrc, MEMORY_HARMEDBY);
 
-	if (fFightActive && m_Fight_Targ.CharFind())
+	if (fFightActive && m_Fight_Targ_UID.CharFind())
 	{
 		// In war mode already
 		if ( m_pPlayer )
@@ -577,7 +577,7 @@ bool CChar::OnAttackedBy(CChar * pCharSrc, int iHarmQty, bool fCommandPet, bool 
 		pCharSrc->Reveal();	// fix invis exploit
 
 							// Am i already attacking the source anyhow
-	if (Fight_IsActive() && m_Fight_Targ == pCharSrc->GetUID())
+	if (Fight_IsActive() && m_Fight_Targ_UID == pCharSrc->GetUID())
 		return true;
 
 	Memory_AddObjTypes(pCharSrc, MEMORY_HARMEDBY | MEMORY_IRRITATEDBY);
@@ -1011,7 +1011,7 @@ effect_bounce:
 	if ( Stat_GetVal(STAT_STR) <= 0 )
 	{
 		// We will die from this. Make sure the killer is set correctly, otherwise the person we are currently attacking will get credit for killing us.
-		m_Fight_Targ = pSrc->GetUID();
+		m_Fight_Targ_UID = pSrc->GetUID();
 		return( iDmg );
 	}
 
@@ -1211,7 +1211,7 @@ void CChar::Fight_ClearAll()
 	if ( Fight_IsActive() )
 	{
 		Skill_Start(SKILL_NONE);
-		m_Fight_Targ.InitUID();
+		m_Fight_Targ_UID.InitUID();
 	}
 
 	UpdateModeFlag();
@@ -1225,8 +1225,8 @@ bool CChar::Fight_Clear(const CChar *pChar, bool bForced)
 		return false;
 
 	// Go to my next target.
-	if (m_Fight_Targ == pChar->GetUID())
-		m_Fight_Targ.InitUID();
+	if (m_Fight_Targ_UID == pChar->GetUID())
+		m_Fight_Targ_UID.InitUID();
 
 	if ( m_pNPC )
 	{
@@ -1280,7 +1280,7 @@ bool CChar::Fight_Attack( const CChar *pCharTarg, bool btoldByMaster )
 	if ( btoldByMaster )
 		threat = 1000 + Attacker_GetHighestThreat();
 
-	if ( ((IsTrigUsed(TRIGGER_ATTACK)) || (IsTrigUsed(TRIGGER_CHARATTACK))) && m_Fight_Targ != pCharTarg->GetUID() )
+	if ( ((IsTrigUsed(TRIGGER_ATTACK)) || (IsTrigUsed(TRIGGER_CHARATTACK))) && m_Fight_Targ_UID != pCharTarg->GetUID() )
 	{
 		CScriptTriggerArgs Args;
 		Args.m_iN1 = threat;
@@ -1306,13 +1306,13 @@ bool CChar::Fight_Attack( const CChar *pCharTarg, bool btoldByMaster )
 	SKILL_TYPE skillWeapon = Fight_GetWeaponSkill();
 	SKILL_TYPE skillActive = Skill_GetActive();
 
-	if ( skillActive == skillWeapon && m_Fight_Targ == pCharTarg->GetUID() )		// already attacking this same target using the same skill
+	if ( skillActive == skillWeapon && m_Fight_Targ_UID == pCharTarg->GetUID() )		// already attacking this same target using the same skill
 		return true;
 
 	if ( m_pNPC && !btoldByMaster )		// call FindBestTarget when this CChar is a NPC and was not commanded to attack, otherwise it attack directly
 		pTarget = NPC_FightFindBestTarget();
 
-	m_Fight_Targ = pTarget ? pTarget->GetUID() : static_cast<CUID>(UID_UNUSED);
+	m_Fight_Targ_UID = pTarget ? pTarget->GetUID() : static_cast<CUID>(UID_UNUSED);
 	Skill_Start(skillWeapon);
 	return true;
 }
@@ -1326,14 +1326,14 @@ void CChar::Fight_HitTry()
 
 	ASSERT( Fight_IsActive() );
 
-	CChar *pCharTarg = m_Fight_Targ.CharFind();
+	CChar *pCharTarg = m_Fight_Targ_UID.CharFind();
 	if ( !pCharTarg || (pCharTarg && !pCharTarg->Fight_IsAttackable()) )
 	{
 		// I can't hit this target, try switch to another one
 		if ( !Fight_Attack(NPC_FightFindBestTarget()) )
 		{
 			Skill_Start(SKILL_NONE);
-			m_Fight_Targ.InitUID();
+			m_Fight_Targ_UID.InitUID();
 			if ( m_pNPC )
 				StatFlag_Clear(STATF_War);
 		}
@@ -1682,11 +1682,11 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		}
 
 		m_atFight.m_War_Swing_State = WAR_SWING_SWINGING;
-		m_atFight.m_timeNextCombatSwing = CServerTime::GetCurrentTime() + iSwingDelay;
+		m_atFight.m_timeNextCombatSwing = CServerTime::GetCurrentTime().GetTimeRaw() + iSwingDelay;
 
 		if ( IsSetCombatFlags(COMBAT_PREHIT) )
 		{
-			SetKeyNum("LastHit", m_atFight.m_timeNextCombatSwing.GetTimeRaw());
+			SetKeyNum("LastHit", m_atFight.m_timeNextCombatSwing);
 			SetTimeout(0);
 		}
 		else

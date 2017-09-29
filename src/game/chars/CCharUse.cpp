@@ -301,8 +301,8 @@ bool CChar::Use_Train_Dummy( CItem * pItem, bool fSetup )
 		if ( Skill_GetActive() == NPCACT_TRAINING )
 			return true;
 		UpdateAnimate(ANIM_ATTACK_WEAPON);
-		m_Act_TargPrv = m_uidWeapon;
-		m_Act_Targ = pItem->GetUID();
+		m_Act_Prv_UID = m_uidWeapon;
+		m_Act_UID = pItem->GetUID();
 		Skill_Start(NPCACT_TRAINING);
 	}
 	else
@@ -352,8 +352,8 @@ bool CChar::Use_Train_PickPocketDip( CItem *pItem, bool fSetup )
 	{
 		if ( Skill_GetActive() == NPCACT_TRAINING )
 			return true;
-		m_Act_TargPrv = m_uidWeapon;
-		m_Act_Targ = pItem->GetUID();
+		m_Act_Prv_UID = m_uidWeapon;
+		m_Act_UID = pItem->GetUID();
 		Skill_Start(NPCACT_TRAINING);
 	}
 	else if ( !Skill_UseQuick(SKILL_STEALING, Calc_GetRandLLVal(40)) )
@@ -480,8 +480,8 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 		if ( Skill_GetActive() == NPCACT_TRAINING )
 			return true;
 		UpdateAnimate(ANIM_ATTACK_WEAPON);
-		m_Act_TargPrv = m_uidWeapon;
-		m_Act_Targ = pButte->GetUID();
+		m_Act_Prv_UID = m_uidWeapon;
+		m_Act_UID = pButte->GetUID();
 		Skill_Start(NPCACT_TRAINING);
 		return true;
 	}
@@ -1545,7 +1545,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 
 		case IT_MUSICAL: {
 			if (!Skill_Wait(SKILL_MUSICIANSHIP)) {
-				m_Act_Targ = pItem->GetUID();
+				m_Act_UID = pItem->GetUID();
 				Skill_Start(SKILL_MUSICIANSHIP);
 			}
 			break;

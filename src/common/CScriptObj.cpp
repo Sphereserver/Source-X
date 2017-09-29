@@ -878,16 +878,18 @@ badcmd:
 			sVal = (CWebPageDef::sm_iListIndex&1) ? "bgcolor=\"#E8E8E8\"" : "";
 			return true;
 		case SSC_OBJ:
-			if ( !g_World.m_uidObj.ObjFind() ) g_World.m_uidObj = 0;
+			if ( !g_World.m_uidObj.ObjFind() )
+				g_World.m_uidObj = 0;
 			sVal.FormatHex((dword)g_World.m_uidObj);
 			return true;
 		case SSC_NEW:
-			if ( !g_World.m_uidNew.ObjFind() ) g_World.m_uidNew = 0;
+			if ( !g_World.m_uidNew.ObjFind() )
+				g_World.m_uidNew = 0;
 			sVal.FormatHex((dword)g_World.m_uidNew);
 			return true;
 		case SSC_SRC:
 			if ( pSrc == NULL )
-				pRef	= NULL;
+				pRef = NULL;
 			else
 			{
 				pRef = pSrc->GetChar();	// if it can be converted .
@@ -1405,12 +1407,12 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 				{
 					CChar *pChar = dynamic_cast <CChar *>(this);
 					if ( pChar )
-						pChar->m_Act_Targ = g_World.m_uidNew;
+						pChar->m_Act_UID = g_World.m_uidNew;
 					else
 					{
 						CClient *pClient = dynamic_cast <CClient *> (this);
 						if ( pClient && pClient->GetChar() )
-							pClient->GetChar()->m_Act_Targ = g_World.m_uidNew;
+							pClient->GetChar()->m_Act_UID = g_World.m_uidNew;
 					}
 				}
 				return bRc;
@@ -1459,12 +1461,12 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 				{
 					CChar *pChar = dynamic_cast <CChar *> (this);
 					if ( pChar )
-						pChar->m_Act_Targ = g_World.m_uidNew;
+						pChar->m_Act_UID = g_World.m_uidNew;
 					else
 					{
 						CClient *pClient = dynamic_cast <CClient *> (this);
 						if ( pClient && pClient->GetChar() )
-							pClient->GetChar()->m_Act_Targ = g_World.m_uidNew;
+							pClient->GetChar()->m_Act_UID = g_World.m_uidNew;
 					}
 				}
 			}
@@ -1489,12 +1491,12 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 				{
 					pChar = dynamic_cast<CChar *>(this);
 					if ( pChar )
-						pChar->m_Act_Targ = g_World.m_uidNew;
+						pChar->m_Act_UID = g_World.m_uidNew;
 					else
 					{
 						const CClient *pClient = dynamic_cast<CClient *>(this);
 						if ( pClient && pClient->GetChar() )
-							pClient->GetChar()->m_Act_Targ = g_World.m_uidNew;
+							pClient->GetChar()->m_Act_UID = g_World.m_uidNew;
 					}
 				}
 			}
@@ -1522,12 +1524,12 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 	            {
 	                pCharSrc = pSrc->GetChar();
 	                if (pCharSrc)
-	                    pCharSrc->m_Act_Targ = g_World.m_uidNew;
+	                    pCharSrc->m_Act_UID = g_World.m_uidNew;
 	                else
 	                {
 	                    const CClient *pClient = dynamic_cast<CClient *>(this);
 	                    if (pClient && pClient->GetChar())
-	                        pClient->GetChar()->m_Act_Targ = g_World.m_uidNew;
+	                        pClient->GetChar()->m_Act_UID = g_World.m_uidNew;
 	                }
 	            }
 
@@ -1599,9 +1601,7 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 	tchar chQval = '?';
 
 	if ((iFlags & 2) == 0)
-	{
 		sm_fBrackets = false;
-	}
 
 	size_t iBegin = 0;
 	tchar chBegin = '<';
@@ -1673,6 +1673,7 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 			if ( fRes == false )
 			{
 				EXC_SET("writeval");
+				// write the value of functions or triggers variables/objects like ARGO, ARGN1/2/3, LOCALs...
 				if ( pArgs != NULL && pArgs->r_WriteVal( pszKey, sVal, pSrc ) )
 					fRes = true;
 			}
@@ -2329,7 +2330,7 @@ jump_in:
 			case SK_FOR:			EXC_SET("for");			iRet = OnTriggerForLoop( s, 4, pSrc, pArgs, pResult );			break;
 			case SK_WHILE:			EXC_SET("while");		iRet = OnTriggerForLoop( s, 8, pSrc, pArgs, pResult );			break;
 			case SK_FORINSTANCE:	EXC_SET("forinstance");	iRet = OnTriggerForLoop( s, 0x40, pSrc, pArgs, pResult );		break;
-			case SK_FORTIMERF:		EXC_SET("fortimerf");	iRet = OnTriggerForLoop(s, 0x100, pSrc, pArgs, pResult);			break;
+			case SK_FORTIMERF:		EXC_SET("fortimerf");	iRet = OnTriggerForLoop(s, 0x100, pSrc, pArgs, pResult);		break;
 			case SK_FORCHARLAYER:
 			case SK_FORCHARMEMORYTYPE:
 				{
@@ -2422,21 +2423,29 @@ jump_in:
 							SKIP_SEPARATORS(pszKey);
 
 							tchar * ppArgs[2];
-							TemporaryString ppParsed;
 
 							if ( Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf(ppArgs), " \t," ) >= 1 )
 							{
-								strcpy(ppParsed, ppArgs[0]);
-								if ( ParseText( ppParsed, pSrc, 0, pArgs ) > 0 )
+								TemporaryString ppParsedArg0;
+								strcpy(ppParsedArg0, ppArgs[0]);
+								if ( (ParseText( ppParsedArg0, pSrc, 0, pArgs ) > 0 ) )
 								{
+									TemporaryString ppParsedArg1;
+									strcpy(ppParsedArg1, ppArgs[1]);
+									if ( ppArgs[1] != NULL)
+										if (ParseText(ppParsedArg1, pSrc, 0, pArgs) <= 0)
+											goto forcont_incorrect_args;
+
 									CScriptLineContext StartContext = s.GetContext();
 									CScriptLineContext EndContext = StartContext;
 									iRet = pCont->OnContTriggerForLoop( s, pSrc, pArgs, pResult, StartContext, EndContext,
-										g_Cfg.ResourceGetID( ( iCmd == SK_FORCONTID ) ? RES_ITEMDEF : RES_TYPEDEF, static_cast<lpctstr &>(ppParsed)),
-										0, ppArgs[1] != NULL ? Exp_GetVal( ppArgs[1] ) : 255 );
+										g_Cfg.ResourceGetID( ( iCmd == SK_FORCONTID ) ? RES_ITEMDEF : RES_TYPEDEF,
+										static_cast<lpctstr &>(ppParsedArg0)), 0,
+										ppArgs[1] != NULL ? Exp_GetVal(ppParsedArg1) : 255 );
 								}
 								else
 								{
+								forcont_incorrect_args:
 									DEBUG_ERR(( "FORCONT[id/type] called on container 0%x with incorrect arguments.\n", (dword)pObjCont->GetUID() ));
 									iRet = OnTriggerRun( s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult );
 								}

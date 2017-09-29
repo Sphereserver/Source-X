@@ -187,7 +187,7 @@ bool CChar::Spell_Teleport( CPointMap ptNew, bool bTakePets, bool bCheckAntiMagi
 				if ( pChar == this )
 					continue;
 
-				if ( pChar->Skill_GetActive() == NPCACT_FOLLOW_TARG && pChar->m_Act_Targ == GetUID() )	// my pet?
+				if ( pChar->Skill_GetActive() == NPCACT_FOLLOW_TARG && pChar->m_Act_UID == GetUID() )	// my pet?
 				{
 					if ( pChar->CanMoveWalkTo(ptOld, false, true) )
 						pChar->Spell_Teleport(ptNew, bTakePets, bCheckAntiMagic, bDisplayEffect, iEffect, iSound);
@@ -304,7 +304,7 @@ CChar * CChar::Spell_Summon( CREID_TYPE id, CPointMap pntTarg )
 	pChar->Update();
 	pChar->UpdateAnimate(ANIM_CAST_DIR);
 	pChar->SoundChar(CRESND_GETHIT);
-	m_Act_Targ = pChar->GetUID();	// for last target stuff
+	m_Act_UID = pChar->GetUID();	// for last target stuff
 	return pChar;
 }
 
@@ -2255,7 +2255,7 @@ bool CChar::Spell_TargCheck()
 		return false;
 	}
 
-	CObjBase * pObj = m_Act_Targ.ObjFind();
+	CObjBase * pObj = m_Act_UID.ObjFind();
 	CObjBaseTemplate * pObjTop = NULL;
 	if ( pObj != NULL )
 	{
@@ -2265,7 +2265,7 @@ bool CChar::Spell_TargCheck()
 	// NOTE: Targeting a field spell directly on a char should not be allowed ?
 	if ( pSpellDef->IsSpellType(SPELLFLAG_FIELD) && !pSpellDef->IsSpellType(SPELLFLAG_TARG_CHAR) )
 	{
-		if ( m_Act_Targ.IsValidUID() && m_Act_Targ.IsChar())
+		if ( m_Act_UID.IsValidUID() && m_Act_UID.IsChar())
 		{
 			SysMessageDefault( DEFMSG_SPELL_TARG_FIELDC );
 			return false;
@@ -2352,7 +2352,7 @@ bool CChar::Spell_CastDone()
 	ADDTOCALLSTACK("CChar::Spell_CastDone");
 	// Spell_CastDone
 	// Ready for the spell effect.
-	// m_Act_TargPrv = spell was magic item or scroll ?
+	// m_Act_Prv_UID = spell was magic item or scroll ?
 	// RETURN:
 	//  false = fail.
 	// ex. magery skill goes up FAR less if we use a scroll or magic device !
@@ -2361,8 +2361,8 @@ bool CChar::Spell_CastDone()
 	if (!Spell_TargCheck())
 		return false;
 
-	CObjBase * pObj = m_Act_Targ.ObjFind();	// dont always need a target.
-	CObjBase * pObjSrc = m_Act_TargPrv.ObjFind();
+	CObjBase * pObj = m_Act_UID.ObjFind();	// dont always need a target.
+	CObjBase * pObjSrc = m_Act_Prv_UID.ObjFind();
 	ITEMID_TYPE iT1 = ITEMID_NOTHING;
 	ITEMID_TYPE iT2 = ITEMID_NOTHING;
 	CREID_TYPE iC1 = CREID_INVALID;
@@ -2824,7 +2824,7 @@ void CChar::Spell_CastFail()
 {
 	ADDTOCALLSTACK("CChar::Spell_CastFail");
 	ITEMID_TYPE iT1 = ITEMID_FX_SPELL_FAIL;
-	CScriptTriggerArgs	Args( m_atMagery.m_Spell, 0, m_Act_TargPrv.ObjFind() );
+	CScriptTriggerArgs	Args( m_atMagery.m_Spell, 0, m_Act_Prv_UID.ObjFind() );
 	Args.m_VarsLocal.SetNum("CreateObject1",iT1);
 	if ( IsTrigUsed(TRIGGER_SPELLFAIL) )
 	{
@@ -2852,7 +2852,7 @@ void CChar::Spell_CastFail()
 	if ( g_Cfg.m_fReagentLossFail )
 	{
 		// consume the regs.
-		Spell_CanCast( m_atMagery.m_Spell, false, m_Act_TargPrv.ObjFind(), false );
+		Spell_CanCast( m_atMagery.m_Spell, false, m_Act_Prv_UID.ObjFind(), false );
 	}
 }
 
@@ -2864,8 +2864,8 @@ int CChar::Spell_CastStart()
 	// ARGS:
 	//  m_Act_p = location to cast to.
 	//  m_atMagery.m_Spell = the spell.
-	//  m_Act_TargPrv = the source of the spell.
-	//  m_Act_Targ = target for the spell.
+	//  m_Act_Prv_UID = the source of the spell.
+	//  m_Act_UID = target for the spell.
 	// RETURN:
 	//  0-100
 	//  -1 = instant failure.
@@ -2876,10 +2876,10 @@ int CChar::Spell_CastStart()
 	if ( IsClient() && IsSetMagicFlags(MAGICF_PRECAST) && !pSpellDef->IsSpellType(SPELLFLAG_NOPRECAST) )
 	{
 		m_Act_p = GetTopPoint();
-		m_Act_Targ = GetClient()->m_Targ_UID;
-		m_Act_TargPrv = GetClient()->m_Targ_PrvUID;
+		m_Act_UID = GetClient()->m_Targ_UID;
+		m_Act_Prv_UID = GetClient()->m_Targ_Prv_UID;
 
-		if ( !Spell_CanCast(m_atMagery.m_Spell, true, m_Act_TargPrv.ObjFind(), true) )
+		if ( !Spell_CanCast(m_atMagery.m_Spell, true, m_Act_Prv_UID.ObjFind(), true) )
 			return -1;
 	}
 	else
@@ -2899,7 +2899,7 @@ int CChar::Spell_CastStart()
 		fWOP = false;
 
 	bool fAllowEquip = false;
-	CItem *pItem = m_Act_TargPrv.ItemFind();
+	CItem *pItem = m_Act_Prv_UID.ItemFind();
 	if ( pItem )
 	{
 		if ( pItem->IsType(IT_WAND) )
@@ -3390,7 +3390,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 			CItem * pItem = NPC_Shrink(); // this delete's the char !!!
 			if ( pItem )
-				pCharSrc->m_Act_Targ = pItem->GetUID();
+				pCharSrc->m_Act_UID = pItem->GetUID();
 		}
 		break;
 

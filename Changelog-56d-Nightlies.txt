@@ -196,3 +196,12 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Added: the Garbage Collection report prints the script file name and the line where the object was created also for items created with ITEM or ITEMNEWBIE keywords.
 - Fixed: Linux console not showing colored text.
 - Fixed: Linux version crashing during the shutdown cleanups.
+
+29-09-2017, Nolok
+- Fixed: ACTARG1/2/3 values being zeroed or corrupted after the execution of any skill trigger.
+	Now they are zeroed before the @PreStart trigger (so after @Select) and	when we are done with the skill (success, abort, failure).
+	Also ACTDIFF is now set and cleared in the same situations of ACTARGs.
+- Fixed: FORCONT, FORCONTID, FORCONTTYPE second argument (the maximum number of subcontainers to be searched in) could only be a plain number, not an expression.
+- Fixed: for crafting skills, crafting difficulty didn't increase with the required skill value.
+- Added: for skills Enticement, Peacemaking and Provocation, if ACTARG1 is set to the UID of the instrument to play, it will be played the sound of that instrument.
+- Added: TAG.BARDING.DIFF is now used to determine the difficulty of Enticement, Peacemaking and Provocation skills. If this tag isn't set, the old behaviour is used.

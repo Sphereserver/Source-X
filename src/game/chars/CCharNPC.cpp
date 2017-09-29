@@ -281,10 +281,10 @@ void CChar::NPC_LoadScript( bool fRestock )
 		CChar * pChar = this->GetChar();
 		if ( pChar != NULL )
 		{
-			CUID uidOldAct = pChar->m_Act_Targ;
-			pChar->m_Act_Targ = GetUID();
+			CUID uidOldAct = pChar->m_Act_UID;
+			pChar->m_Act_UID = GetUID();
 			pChar->ReadScriptTrig(pCharDef, CTRIG_Create);
-			pChar->m_Act_Targ = uidOldAct;
+			pChar->m_Act_UID = uidOldAct;
 		}
 	}
 	//This remains untouched but moved after the chardef's section

@@ -594,7 +594,7 @@ int CChar::NPC_GetAttackContinueMotivation( CChar * pChar, int iMotivation ) con
 		return( iMotivation + 80 - GetDist( pChar ));	// less interested the further away they are
 
 	// Try to stay on one target.
-	if ( Fight_IsActive() && m_Act_Targ == pChar->GetUID())
+	if ( Fight_IsActive() && m_Act_UID == pChar->GetUID())
 		iMotivation += 8;
 
 	// Less interested the further away they are.

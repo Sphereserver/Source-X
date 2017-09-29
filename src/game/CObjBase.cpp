@@ -370,7 +370,7 @@ int64 CObjBase::GetTimerAdjusted() const
 	int64 iDiffInTicks = GetTimerDiff();
 	if ( iDiffInTicks < 0 )
 		return 0;
-	return( iDiffInTicks / TICK_PER_SEC );
+	return ( iDiffInTicks / TICK_PER_SEC );
 }
 
 int64 CObjBase::GetTimerDAdjusted() const
@@ -381,7 +381,7 @@ int64 CObjBase::GetTimerDAdjusted() const
 	int64 iDiffInTicks = GetTimerDiff();
 	if ( iDiffInTicks < 0 )
 		return 0;
-	return( iDiffInTicks );
+	return iDiffInTicks;
 }
 
 void CObjBase::Sound( SOUND_TYPE id, int iOnce ) const // Play sound effect for player
@@ -2988,7 +2988,8 @@ int64 CObjBase::GetKeyNum( lpctstr pszKey, bool fZero, bool fDef ) const
 CVarDefCont * CObjBase::GetKey( lpctstr pszKey, bool fDef ) const
 {
 	CVarDefCont	* pVar	= m_TagDefs.GetKey( pszKey );
-	if ( !fDef || pVar )	return pVar;
+	if ( !fDef || pVar )
+		return pVar;
 	if (IsItem())
 	{
 		CItemBase * pItemDef = static_cast <CItemBase*>( Base_GetDef());

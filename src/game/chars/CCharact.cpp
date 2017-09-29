@@ -24,7 +24,7 @@ bool CChar::TeleportToObj( int iType, tchar * pszArgs )
 {
 	ADDTOCALLSTACK("CChar::TeleportToObj");
 
-	dword dwUID = m_Act_Targ.GetObjUID() &~ UID_F_ITEM;
+	dword dwUID = m_Act_UID.GetObjUID() &~ UID_F_ITEM;
 	dword dwTotal = g_World.GetUIDCount();
 	dword dwCount = dwTotal-1;
 
@@ -101,7 +101,7 @@ bool CChar::TeleportToObj( int iType, tchar * pszArgs )
 				continue;
 		}
 
-		m_Act_Targ = pObj->GetUID();
+		m_Act_UID = pObj->GetUID();
 		Spell_Teleport( pObjTop->GetTopPoint(), true, false );
 		return true;
 	}
@@ -131,7 +131,7 @@ bool CChar::TeleportToCli( int iType, int iArgs )
 			if ( iArgs-- )
 				continue;
 		}
-		m_Act_Targ = pChar->GetUID();
+		m_Act_UID = pChar->GetUID();
 		Spell_Teleport( pChar->GetTopPoint(), true, false );
 		return true;
 	}
@@ -2288,7 +2288,7 @@ CItem * CChar::Make_Figurine( CUID uidOwner, ITEMID_TYPE id )
 	StatFlag_Set(STATF_Ridden);
 	Skill_Start(NPCACT_RIDDEN);
 	SetDisconnected();
-	m_atRidden.m_FigurineUID = pItem->GetUID();
+	m_atRidden.m_FigurineUID = pItem->GetUID().GetObjUID();
 
 	return pItem;
 }
@@ -2324,7 +2324,7 @@ CItem * CChar::Horse_GetMountItem() const
 	if ( ! IsStatFlag( STATF_Ridden ))
 		return NULL;
 
-	CItem * pItem = m_atRidden.m_FigurineUID.ItemFind();
+	CItem * pItem = CUID(m_atRidden.m_FigurineUID).ItemFind();
 
 	if ( pItem == NULL )
 	{
@@ -2340,7 +2340,7 @@ CItem * CChar::Horse_GetMountItem() const
 
 				if ( pItemMount != NULL && pItemMount->m_itNormal.m_more2 == GetUID() )
 				{
-					const_cast<CUIDBase&>(m_atRidden.m_FigurineUID) = pItemMount->GetUID();
+					m_atRidden.m_FigurineUID = pItemMount->GetUID().GetObjUID();
 					pItem = pItemMount;
 
 					DEBUG_ERR(("UID=0%x, id=0%x '%s', Fixed mount item UID=0%x, id=0%x '%s'\n",
@@ -2350,12 +2350,9 @@ CItem * CChar::Horse_GetMountItem() const
 		}
 	}
 
-	if ( pItem == NULL ||
-		( ! pItem->IsType( IT_FIGURINE ) && ! pItem->IsType( IT_EQ_HORSE )))
-	{
+	if ( pItem == NULL || ( ! pItem->IsType( IT_FIGURINE ) && ! pItem->IsType( IT_EQ_HORSE )) )
 		return NULL;
-	}
-	return( pItem );
+	return pItem;
 }
 
 // Gets my riding character, if i'm being mounted.
@@ -2365,7 +2362,7 @@ CChar * CChar::Horse_GetMountChar() const
 	CItem * pItem = Horse_GetMountItem();
 	if ( pItem == NULL )
 		return NULL;
-	return( dynamic_cast <CChar*>( pItem->GetTopLevelObj()));
+	return dynamic_cast <CChar*>( pItem->GetTopLevelObj());
 }
 
 // Remove horse char and give player a horse item
@@ -3706,10 +3703,10 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 		if ( pChar != NULL && this != pChar )
 		{
 			EXC_SET("chardef");
-			CUID uidOldAct = pChar->m_Act_Targ;
-			pChar->m_Act_Targ = GetUID();
+			CUID uidOldAct = pChar->m_Act_UID;
+			pChar->m_Act_UID = GetUID();
 			iRet = pChar->OnTrigger(sCharTrigName, pSrc, pArgs );
-			pChar->m_Act_Targ = uidOldAct;
+			pChar->m_Act_UID = uidOldAct;
 			if ( iRet == TRIGRET_RET_TRUE )
 				goto stopandret;//return iRet;	// Block further action.
 		}

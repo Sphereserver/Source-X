@@ -1762,7 +1762,7 @@ bool CChar::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 			case CHR_ACT:
 				if ( pszKey[-1] != '.' )	// only used as a ref !
 					break;
-				pRef = m_Act_Targ.ObjFind();
+				pRef = m_Act_UID.ObjFind();
 				return true;
 			case CHR_FINDLAYER:	// Find equipped layers.
 				pRef = LayerFind( (LAYER_TYPE) Exp_GetSingle( pszKey ));
@@ -1949,8 +1949,8 @@ do_default:
 					else if ( !strnicmp(pszKey, "TARGET", 6 ) )
 					{
 						pszKey += 6;
-						if ( m_Act_Targ )
-							sVal.FormatHex((dword)(m_Fight_Targ));
+						if ( m_Act_UID )
+							sVal.FormatHex((dword)(m_Fight_Targ_UID));
 						else
 							sVal.FormatVal(-1);
 						return true;
@@ -2271,7 +2271,7 @@ do_default:
 			return true;
 		case CHC_CANMAKE:
 			{
-				// use m_Act_Targ ?
+				// use m_Act_UID ?
 				pszKey += 7;
 				ITEMID_TYPE id = static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, pszKey ));
 				sVal.FormatVal( Skill_MakeItem( id,	UID_CLEAR, SKTRIG_SELECT ) );
@@ -2521,7 +2521,7 @@ do_default:
 		case CHC_ACT:
 			if ( pszKey[3] == '.' )	// used as a ref ?
 				goto do_default;
-			sVal.FormatHex( m_Act_Targ.GetObjUID() );	// uid
+			sVal.FormatHex( m_Act_UID.GetObjUID() );	// uid
 			break;
 		case CHC_ACTP:
 			if (pszKey[4] == '.')
@@ -2533,7 +2533,7 @@ do_default:
 			sVal = m_Act_p.WriteUsed();
 			break;
 		case CHC_ACTPRV:
-			sVal.FormatHex( m_Act_TargPrv.GetObjUID() );
+			sVal.FormatHex( m_Act_Prv_UID.GetObjUID() );
 			break;
 		case CHC_ACTDIFF:
 			sVal.FormatVal( m_Act_Difficulty * 10 );
@@ -2858,7 +2858,7 @@ do_default:
 		case CHC_ACCOUNT:
 			return SetPlayerAccount( s.GetArgStr() );
 		case CHC_ACT:
-			m_Act_Targ = s.GetArgVal();
+			m_Act_UID = s.GetArgVal();
 			break;
 		case CHC_ACTP:
 			if ( ! s.HasArgs() )
@@ -2867,7 +2867,7 @@ do_default:
 				m_Act_p.Read( s.GetArgStr() );
 			break;
 		case CHC_ACTPRV:
-			m_Act_TargPrv = s.GetArgVal();
+			m_Act_Prv_UID = s.GetArgVal();
 			break;
 		case CHC_ACTDIFF:
 			m_Act_Difficulty = (s.GetArgVal() / 10);
@@ -2926,10 +2926,10 @@ do_default:
 						CChar *pChar = static_cast<CChar *>(static_cast<CUID>(s.GetArgVal()).CharFind());
 						if ( !pChar || pChar == this )	// can't set ourself as target
 						{
-							m_Fight_Targ.InitUID();
+							m_Fight_Targ_UID.InitUID();
 							return false;
 						}
-						m_Fight_Targ = pChar->GetUID();
+						m_Fight_Targ_UID = pChar->GetUID();
 						return true;
 					}
 
@@ -3267,8 +3267,8 @@ void CChar::r_Write( CScript & s )
 	if ( m_LocalLight )
 		s.WriteKeyHex("LIGHT", m_LocalLight);
 
-	if ( (m_Act_Targ.GetObjUID() & UID_UNUSED) != UID_UNUSED )
-		s.WriteKeyHex("ACT", m_Act_Targ.GetObjUID());
+	if ( (m_Act_UID.GetObjUID() & UID_UNUSED) != UID_UNUSED )
+		s.WriteKeyHex("ACT", m_Act_UID.GetObjUID());
 	if ( m_Act_p.IsValidPoint() )
 		s.WriteKey("ACTP", m_Act_p.WriteUsed());
 	if ( Skill_GetActive() != SKILL_NONE )
@@ -3702,11 +3702,11 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			//DEBUG_ERR(( "CHV_MAKEITEM iTmp is %d, arg was %s\n",iTmp,psTmp ));
 
 			if ( IsClient() )
-				m_Act_Targ = m_pClient->m_Targ_UID;
+				m_Act_UID = m_pClient->m_Targ_UID;
 
 			return Skill_MakeItem(
 				static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, ttVal[0] )),
-				m_Act_Targ, SKTRIG_START, false, iTmp );
+				m_Act_UID, SKTRIG_START, false, iTmp );
 		}
 
 		case CHV_MOUNT:
@@ -3797,8 +3797,8 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 
 			m_atMagery.m_Spell = SPELL_Polymorph;
 			m_atMagery.m_SummonID = static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr()));
-			m_Act_Targ = GetUID();
-			m_Act_TargPrv = GetUID();
+			m_Act_UID = GetUID();
+			m_Act_Prv_UID = GetUID();
 
 			if ( m_pClient && IsSetMagicFlags(MAGICF_PRECAST) && !pSpellDef->IsSpellType(SPELLFLAG_NOPRECAST) )
 			{

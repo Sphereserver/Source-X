@@ -172,9 +172,9 @@ public:
 
 	// Some character action in progress.
 	SKILL_TYPE	m_Act_SkillCurrent;	// Currently using a skill. Could be combat skill.
-	CUID	m_Act_Targ;				// Current action target
-	CUID	m_Fight_Targ;			// Current combat target
-	CUID	m_Act_TargPrv;			// Previous target.
+	CUID		m_Act_UID;			// Current action target
+	CUID		m_Fight_Targ_UID;	// Current combat target
+	CUID		m_Act_Prv_UID;		// Previous target.
 	int			m_Act_Difficulty;	// -1 = fail skill. (0-100) for skill advance calc.
 	CPointBase  m_Act_p;			// Moving to this location. or location of forge we are working on.
 	int			m_StepStealth;		// Max steps allowed to walk invisible while using Stealth skill
@@ -182,6 +182,8 @@ public:
 									// Args related to specific actions type (m_Act_SkillCurrent)
 	union
 	{
+		// README! To access the various items with ACTARG1/2/3, each struct member must have a size of 4 bytes.
+
 		struct
 		{
 			dword m_Arg1;	// "ACTARG1"
@@ -211,9 +213,9 @@ public:
 		// SKILL_TINKERING
 		struct
 		{
-			word m_Stroke_Count;		// ACTARG1 = For smithing, tinkering, etc. all requiring multi strokes.
+			dword m_Stroke_Count;		// ACTARG1 = For smithing, tinkering, etc. all requiring multi strokes.
 			ITEMID_TYPE m_ItemID;		// ACTARG2 = Making this item.
-			word m_Amount;				// ACTARG3 = How many of this item are we making?
+			dword m_Amount;				// ACTARG3 = How many of this item are we making?
 		} m_atCreate;
 
 		// SKILL_LUMBERJACKING
@@ -221,16 +223,16 @@ public:
 		// SKILL_FISHING
 		struct
 		{
-			dword m_ridType;			// ACTARG1 = Type of item we're harvesting
-			byte m_bounceItem;			// ACTARG2 = Drop item on backpack (true) or drop it on ground (false)
-			word m_Stroke_Count;		// ACTARG3 = All requiring multi strokes.
+			dword m_Stroke_Count;		// ACTARG1 = All requiring multi strokes.
+			dword m_ridType;			// ACTARG2 = Type of item we're harvesting
+			dword m_bounceItem;			// ACTARG3 = Drop item on backpack (true) or drop it on ground (false)
 		} m_atResource;
 
 		// SKILL_TAMING
 		// SKILL_MEDITATION
 		struct
 		{
-			word m_Stroke_Count;		// ACTARG1 = All requiring multi strokes.
+			dword m_Stroke_Count;		// ACTARG1 = All requiring multi strokes.
 		} m_atTaming;
 
 		// SKILL_ARCHERY
@@ -242,19 +244,27 @@ public:
 		struct
 		{
 			WAR_SWING_TYPE m_War_Swing_State;		// ACTARG1 = We are in the war mode swing.
-			CServerTime m_timeNextCombatSwing;		// ACTARG2 = Time to wait before start another combat swing.
+			int64 m_timeNextCombatSwing;			// (ACTARG2 << 32) | ACTARG3 = Time to wait before starting another combat swing.
 		} m_atFight;
+
+		// SKILL_ENTICEMENT
+		// SKILL_DISCORDANCE
+		// SKILL_PEACEMAKING
+		struct
+		{
+			dword m_InstrumentUID;		// ACTARG1 = UID of the instrument we are playing
+		} m_atBard;
 
 		// SKILL_TRACKING
 		struct
 		{
-			DIR_TYPE m_PrvDir;				// ACTARG1 = Previous direction of tracking target, used for when to notify player
+			DIR_TYPE m_PrvDir;			// ACTARG1 = Previous direction of tracking target, used for when to notify player
 		} m_atTracking;
 
 		// NPCACT_RIDDEN
 		struct
 		{
-			CUIDBase m_FigurineUID;		// ACTARG1 = This creature is being ridden by this object link. IT_FIGURINE IT_EQ_HORSE
+			mutable dword m_FigurineUID;// ACTARG1 = This creature is being ridden by this object link. IT_FIGURINE IT_EQ_HORSE
 		} m_atRidden;
 
 		// NPCACT_TALK
@@ -263,7 +273,7 @@ public:
 		{
 			int m_HearUnknown;			// ACTARG1 = Speaking NPC has no idea what u're saying.
 			int m_WaitCount;			// ACTARG2 = How long have i been waiting (xN sec)
-										// m_Act_Targ = who am i talking to ?
+										// m_Act_UID = who am i talking to ?
 		} m_atTalk;
 
 		// NPCACT_FLEE
@@ -271,7 +281,7 @@ public:
 		{
 			int m_iStepsMax;			// ACTARG1 = How long should it take to get there.
 			int m_iStepsCurrent;		// ACTARG2 = How long has it taken ?
-										// m_Act_Targ = who am i fleeing from ?
+										// m_Act_UID = who am i fleeing from ?
 		} m_atFlee;
 	};
 
@@ -798,7 +808,7 @@ public:
 
 	bool Skill_CheckSuccess( SKILL_TYPE skill, int difficulty, bool bUseBellCurve = true ) const;
 	bool Skill_Wait( SKILL_TYPE skilltry );
-	bool Skill_Start( SKILL_TYPE skill, int iDifficulty = 0 ); // calc skill progress.
+	bool Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease = 0 ); // calc skill progress.
 	void Skill_Fail( bool fCancel = false );
 	int Skill_Stroke( bool fResource);				// Strokes in crafting skills, calling for SkillStroke trig
 	ANIM_TYPE Skill_GetAnim( SKILL_TYPE skill);

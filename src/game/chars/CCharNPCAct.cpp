@@ -128,7 +128,7 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 	}
 	case NV_BYE:
 		Skill_Start( SKILL_NONE );
-		m_Act_Targ.InitUID();
+		m_Act_UID.InitUID();
 		break;
 	case NV_LEAVE:
 	case NV_FLEE:
@@ -182,7 +182,7 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 				return false;
 			CItem * pItem = NPC_Shrink(); // this delete's the char !!!
 			if ( pItem )
-				pCharSrc->m_Act_Targ = pItem->GetUID();
+				pCharSrc->m_Act_UID = pItem->GetUID();
 			if (s.GetArgStr())
 				pCharSrc->ItemBounce(pItem);
 
@@ -208,7 +208,7 @@ void CChar::NPC_ActStart_SpeakTo( CChar * pSrc )
 	ADDTOCALLSTACK("CChar::NPC_ActStart_SpeakTo");
 	// My new action is that i am speaking to this person.
 	// Or just update the amount of time i will wait for this person.
-	m_Act_Targ = pSrc->GetUID();
+	m_Act_UID = pSrc->GetUID();
 	m_atTalk.m_WaitCount = 20;
 	m_atTalk.m_HearUnknown = 0;
 
@@ -240,11 +240,11 @@ void CChar::NPC_OnHear( lpctstr pszCmd, CChar * pSrc, bool fAllPets )
 		case NPCACT_TALK:
 		case NPCACT_TALK_FOLLOW:
 			// Was NPC talking to someone else ?
-			if ( m_Act_Targ != pSrc->GetUID())
+			if ( m_Act_UID != pSrc->GetUID())
 			{
 				if ( NPC_Act_Talk() )
 				{
-					CChar * pCharOld = m_Act_Targ.CharFind();
+					CChar * pCharOld = m_Act_UID.CharFind();
 					if (pCharOld != NULL)
 					{
 						tchar * z = Str_GetTemp();
@@ -370,7 +370,7 @@ void CChar::NPC_OnNoticeSnoop( CChar * pCharThief, CChar * pCharMark )
 	}
 	if ( ! Calc_GetRandVal(4))
 	{
-		m_Act_Targ = pCharThief->GetUID();
+		m_Act_UID = pCharThief->GetUID();
 		m_atFlee.m_iStepsMax = 20;	// how long should it take to get there.
 		m_atFlee.m_iStepsCurrent = 0;	// how long has it taken ?
 		Skill_Start( NPCACT_FLEE );
@@ -398,8 +398,10 @@ int CChar::NPC_WalkToPoint( bool fRun )
 	CCharBase	*pCharDef = Char_GetDef();
 
 	EXC_TRY("NPC_WalkToPoint");
-	if ( Dir >= DIR_QTY ) return 0;		// we are already in the spot
-	if ( iDex <= 0 ) return 2;			// we cannot move now
+	if ( Dir >= DIR_QTY )
+		return 0;		// we are already in the spot
+	if ( iDex <= 0 )
+		return 2;			// we cannot move now
 
 	EXC_SET("NPC_AI_PATH");
 	//	Use pathfinding
@@ -467,37 +469,37 @@ int CChar::NPC_WalkToPoint( bool fRun )
 			return( 2 );
 		}
 
-		if ( iRand < 35 ) iDiff = 4;	// 5
-		else if ( iRand < 40 ) iDiff = 3;	// 10
-		else if ( iRand < 65 ) iDiff = 2;
-		else iDiff = 1;
-		if ( iRand & 1 ) iDiff = -iDiff;
+		if ( iRand < 35 )		iDiff = 4;	// 5
+		else if ( iRand < 40 )	iDiff = 3;	// 10
+		else if ( iRand < 65 )	iDiff = 2;
+		else					iDiff = 1;
+		if ( iRand & 1 )		iDiff = -iDiff;
 		pMe = GetTopPoint();
 		Dir = GetDirTurn( Dir, iDiff );
 		pMe.Move( Dir );
 		if ( ! CanMoveWalkTo(pMe, true, false, Dir ))
 		{
-			bool	bClearedWay = false;
+			bool bClearedWay = false;
 			// Some object in my way that i could move ? Try to move it.
 			if ( !pCharDef->Can(CAN_C_USEHANDS) || IsStatFlag(STATF_DEAD|STATF_Sleeping|STATF_Freeze|STATF_Stone) ) ;		// i cannot use hands or i am frozen, so cannot move objects
 			else if (( NPC_GetAiFlags()&NPC_AI_MOVEOBSTACLES ) && ( iInt > iRand ))
 			{
 				int			i;
 				CPointMap	point;
-				for ( i = 0; i < 2; i++ )
+				for ( i = 0; i < 2; ++i )
 				{
-					if ( !i ) point = pMe;
-					else point = ptFirstTry;
+					if ( !i )	point = pMe;
+					else		point = ptFirstTry;
 
 					//	Scan point for items that could be moved by me and move them to my position
 					CWorldSearch	AreaItems(point);
 					for (;;)
 					{
-						CItem	*pItem = AreaItems.GetItem();
-						if ( !pItem ) break;
-						else if ( abs(pItem->GetTopZ() - pMe.m_z) > 3 ) continue;		// item is too high
+						CItem *pItem = AreaItems.GetItem();
+						if ( !pItem )	break;
+						else if ( abs(pItem->GetTopZ() - pMe.m_z) > 3 )		continue;		// item is too high
 						else if ( !pItem->Item_GetDef()->Can(CAN_I_BLOCK) ) continue;	// this item not blocking me
-						else if ( !CanMove(pItem) || !CanCarry(pItem) ) bClearedWay = false;
+						else if ( !CanMove(pItem) || !CanCarry(pItem) )		bClearedWay = false;
 						else
 						{
 							//	move this item to the position I am currently in
@@ -507,10 +509,12 @@ int CChar::NPC_WalkToPoint( bool fRun )
 						}
 					}
 
-					if ( bClearedWay ) break;
+					if ( bClearedWay )
+						break;
 					//	If not cleared the way still, but I am still clever enough
 					//	I should try to move in the first step I was trying to move to
-					else if ( iInt < iRand*3 ) break;
+					else if ( iInt < iRand*3 )
+						break;
 				}
 
 				//	we have just cleared our way
@@ -655,7 +659,7 @@ bool CChar::NPC_LookAtCharGuard( CChar * pChar, bool bFromTrigger )
 			Fight_Hit(pChar);
 		}
 	}
-	if ( !IsStatFlag(STATF_War) || m_Act_Targ != pChar->GetUID() )
+	if ( !IsStatFlag(STATF_War) || m_Act_UID != pChar->GetUID() )
 	{
 		Speak(g_Cfg.GetDefaultMsg(sm_szSpeakGuardStrike[Calc_GetRandVal(CountOf(sm_szSpeakGuardStrike))]));
 		Fight_Attack(pChar);
@@ -690,7 +694,7 @@ bool CChar::NPC_LookAtCharMonster( CChar * pChar )
 	int iActMotivation = NPC_GetAttackMotivation( pChar );
 	if ( iActMotivation <= 0 )
 		return false;
-	if ( Fight_IsActive() && m_Act_Targ == pChar->GetUID())	// same targ.
+	if ( Fight_IsActive() && m_Act_UID == pChar->GetUID())	// same targ.
 		return false;
 	if ( iActMotivation < m_pNPC->m_Act_Motivation )
 		return false;
@@ -740,7 +744,7 @@ bool CChar::NPC_LookAtCharHuman( CChar * pChar )
 				return false;
 
 			// run away like a coward.
-			m_Act_Targ = pChar->GetUID();
+			m_Act_UID = pChar->GetUID();
 			m_atFlee.m_iStepsMax = 20;	// how long should it take to get there.
 			m_atFlee.m_iStepsCurrent = 0;	// how long has it taken ?
 			Skill_Start(NPCACT_FLEE);
@@ -883,7 +887,7 @@ bool CChar::NPC_LookAtItem( CItem * pItem, int iDist )
 	// Loot nearby items on ground
 	if ( iWantThisItem > Calc_GetRandVal(100) )
 	{
-		m_Act_Targ = pItem->GetUID();
+		m_Act_UID = pItem->GetUID();
 		NPC_Act_Looting();
 		return true;
 	}
@@ -891,7 +895,7 @@ bool CChar::NPC_LookAtItem( CItem * pItem, int iDist )
 	// Loot nearby corpses
 	if ( pItem->IsType(IT_CORPSE) && (NPC_GetAiFlags() & NPC_AI_LOOTING) && (Memory_FindObj(pItem) == NULL) )
 	{
-		m_Act_Targ = pItem->GetUID();
+		m_Act_UID = pItem->GetUID();
 		NPC_Act_Looting();
 		return true;
 	}
@@ -945,7 +949,7 @@ bool CChar::NPC_LookAtChar( CChar * pChar, int iDist )
 	if ( NPC_IsOwnedBy( pChar, false ))
 	{
 		// follow my owner again. (Default action)
-		m_Act_Targ = pChar->GetUID();
+		m_Act_UID = pChar->GetUID();
 		m_pNPC->m_Act_Motivation = 50;
 		Skill_Start(Skill_GetActive() == NPCACT_FOLLOW_TARG ? NPCACT_FOLLOW_TARG : NPCACT_GUARD_TARG);
 		return true;
@@ -998,7 +1002,7 @@ bool CChar::NPC_LookAtChar( CChar * pChar, int iDist )
 			}
 			if ( Fight_IsActive()) // Is this a better target than my last ?
 			{
-				CChar * pCharTarg = m_Act_Targ.CharFind();
+				CChar * pCharTarg = m_Act_UID.CharFind();
 				if ( pCharTarg != NULL )
 				{
 					if ( iDist >= GetTopDist3D( pCharTarg ))
@@ -1170,16 +1174,16 @@ void CChar::NPC_Act_Wander()
 void CChar::NPC_Act_Guard()
 {
 	ADDTOCALLSTACK("CChar::NPC_Act_Guard");
-	// Protect our target or owner. (m_Act_Targ)
+	// Protect our target or owner. (m_Act_UID)
 	if ( m_pNPC == NULL )
 		return;
 
-	CChar * pChar = m_Act_Targ.CharFind();
+	CChar * pChar = m_Act_UID.CharFind();
 	if ( pChar != NULL && pChar != this && CanSeeLOS(pChar, LOS_NB_WINDOWS) )
 	{
 		if ( pChar->Fight_IsActive() )	// protect the target if they're in a fight
 		{
-			if ( Fight_Attack( pChar->m_Fight_Targ.CharFind() ))
+			if ( Fight_Attack( pChar->m_Fight_Targ_UID.CharFind() ))
 				return;
 		}
 	}
@@ -1192,13 +1196,13 @@ void CChar::NPC_Act_Guard()
 bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 {
 	ADDTOCALLSTACK("CChar::NPC_Act_Follow");
-	// Follow our target or owner (m_Act_Targ), we may be fighting (m_Fight_Targ).
+	// Follow our target or owner (m_Act_UID), we may be fighting (m_Fight_Targ_UID).
 	// false = can't follow any more, give up.
 	if (Can(CAN_C_NONMOVER))
 		return false;
 
 	EXC_TRY("NPC_Act_Follow")
-		CChar * pChar = Fight_IsActive() ? m_Fight_Targ.CharFind() : m_Act_Targ.CharFind();
+		CChar * pChar = Fight_IsActive() ? m_Fight_Targ_UID.CharFind() : m_Act_UID.CharFind();
 	if (pChar == NULL)
 	{
 		// free to do as i wish !
@@ -1285,7 +1289,7 @@ bool CChar::NPC_Act_Talk()
 	//  false = do something else. go Idle
 	//  true = just keep waiting.
 
-	CChar * pChar = m_Act_Targ.CharFind();
+	CChar * pChar = m_Act_UID.CharFind();
 	if ( pChar == NULL )	// they are gone ?
 		return false;
 
@@ -1425,7 +1429,7 @@ void CChar::NPC_Act_Looting()
 	// We killed something, let's take a look on the corpse.
 	// Or we find something interesting on ground
 	//
-	// m_Act_Targ = UID of the item/corpse that we trying to loot
+	// m_Act_UID = UID of the item/corpse that we trying to loot
 
 	if ( !(NPC_GetAiFlags() & NPC_AI_LOOTING) )
 		return;
@@ -1434,7 +1438,7 @@ void CChar::NPC_Act_Looting()
 	if ( m_pArea->IsFlag(REGION_FLAG_SAFE|REGION_FLAG_GUARDED) )
 		return;
 
-	CItem * pItem = m_Act_Targ.ItemFind();
+	CItem * pItem = m_Act_UID.ItemFind();
 	if ( pItem == NULL )
 		return;
 
@@ -2073,7 +2077,7 @@ void CChar::NPC_OnTickAction()
 			case NPCACT_FOLLOW_TARG:
 				// continue to follow our target.
 				EXC_SET("look at char");
-				NPC_LookAtChar( m_Act_Targ.CharFind(), 1 );
+				NPC_LookAtChar( m_Act_UID.CharFind(), 1 );
 				EXC_SET("follow char");
 				NPC_Act_Follow();
 				break;

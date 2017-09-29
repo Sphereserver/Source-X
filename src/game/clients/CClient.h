@@ -163,7 +163,7 @@ private:
 public:
 	CUID m_Targ_Last;	// The last object targeted by the client
 	CUID m_Targ_UID;			// The object of interest to apply to the target.
-	CUID m_Targ_PrvUID;		// The object of interest before this.
+	CUID m_Targ_Prv_UID;		// The object of interest before this.
 	CSString m_Targ_Text;		// Text transfered up from client.
 	CPointMap  m_Targ_p;			// For script targeting,
 	CServerTime m_Targ_Timeout;	// timeout time for targeting

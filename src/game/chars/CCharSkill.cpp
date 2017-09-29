@@ -28,13 +28,13 @@ SKILL_TYPE CChar::Skill_GetBest( uint iRank ) const
 	memset(pdwSkills, 0, (iRank + 1) * sizeof(dword));
 
 	dword dwSkillTmp;
-	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; i++ )
+	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
 		if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex(i) )
 			continue;
 
 		dwSkillTmp = MAKEDWORD(i, Skill_GetBase(static_cast<SKILL_TYPE>(i)));
-		for ( size_t j = 0; j <= iRank; j++ )
+		for ( size_t j = 0; j <= iRank; ++j )
 		{
 			if ( HIWORD(dwSkillTmp) >= HIWORD(pdwSkills[j]) )
 			{
@@ -497,7 +497,7 @@ bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain,
 	if (g_Cfg.IsSkillFlag(skill, SKF_SCRIPTED))
 		return false;
 
-	int64 result = Skill_CheckSuccess( skill, (int)(difficulty), bUseBellCurve );
+	int64 result = Skill_CheckSuccess( skill, (int)difficulty, bUseBellCurve );
 	CScriptTriggerArgs pArgs( 0 , difficulty, result);
 	TRIGRET_TYPE ret = TRIGRET_RET_DEFAULT;
 
@@ -507,9 +507,15 @@ bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain,
 		pArgs.getArgNs( 0, &difficulty, &result);
 
 		if ( ret == TRIGRET_RET_TRUE )
+		{
+			Skill_Cleanup();
 			return true;
+		}
 		else if ( ret == TRIGRET_RET_FALSE )
+		{
+			Skill_Cleanup();
 			return false;
+		}
 	}
 	if ( IsTrigUsed(TRIGGER_USEQUICK) )
 	{
@@ -517,9 +523,15 @@ bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain,
 		pArgs.getArgNs( 0, &difficulty, &result );
 
 		if ( ret == TRIGRET_RET_TRUE )
+		{
+			Skill_Cleanup();
 			return true;
+		}
 		else if ( ret == TRIGRET_RET_FALSE )
+		{
+			Skill_Cleanup();
 			return false;
+		}
 	}
 
 	if ( result )	// success
@@ -539,9 +551,12 @@ bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain,
 void CChar::Skill_Cleanup()
 {
 	ADDTOCALLSTACK("CChar::Skill_Cleanup");
-	// We are done with the skill (succeeded / failed / aborted)
+	// We are starting the skill or ended dealing with it (started / succeeded / failed / aborted)
 	m_Act_Difficulty = 0;
 	m_Act_SkillCurrent = SKILL_NONE;
+	m_atUnk.m_Arg1 = 0;		// init ACTARG1/2/3
+	m_atUnk.m_Arg2 = 0;
+	m_atUnk.m_Arg3 = 0;
 	SetTimeout( m_pPlayer ? -1 : TICK_PER_SEC );	// we should get a brain tick next time
 }
 
@@ -643,10 +658,10 @@ bool CChar::Skill_MakeItem_Success()
 
 		CItemBase *ptItemDef = CItemBase::FindItemBase(m_atCreate.m_ItemID);
 		if ( ptItemDef->IsStackableType() )
-			pItem->SetAmount(m_atCreate.m_Amount);
+			pItem->SetAmount((word)m_atCreate.m_Amount);
 		else
 		{
-			for ( int n = 1; n < m_atCreate.m_Amount; n++ )
+			for ( uint n = 1; n < m_atCreate.m_Amount; ++n )
 			{
 				CItem *ptItem = CItem::CreateTemplate(m_atCreate.m_ItemID, NULL, this);
 				ItemBounce(ptItem);
@@ -757,15 +772,15 @@ bool CChar::Skill_MakeItem_Success()
 	}
 
 	// Item goes into ACT of player
-	CUID uidOldAct = m_Act_Targ;
-	m_Act_Targ = pItem->GetUID();
+	CUID uidOldAct = m_Act_UID;
+	m_Act_UID = pItem->GetUID();
 	TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
 	if ( IsTrigUsed(TRIGGER_SKILLMAKEITEM) )
 	{
 		CScriptTriggerArgs Args(iSkillLevel, quality, uidOldAct.ObjFind());
 		iRet = OnTrigger(CTRIG_SkillMakeItem, this, &Args);
 	}
-	m_Act_Targ = uidOldAct;		// restore
+	m_Act_UID = uidOldAct;		// restore
 
 	CObjBase *pItemCont = pItem->GetContainer();
 	if ( iRet == TRIGRET_RET_TRUE )
@@ -886,7 +901,7 @@ bool CChar::Skill_MakeItem( ITEMID_TYPE id, CUID uidTarg, SKTRIG_TYPE stage, boo
 		if ( i == pItemDef->m_SkillMake.BadIndex() )
 			return false;
 
-		m_Act_Targ = uidTarg;	// targetted item to start the make process
+		m_Act_UID = uidTarg;	// targetted item to start the make process
 		m_atCreate.m_ItemID = id;
 		m_atCreate.m_Amount = (word)(iReplicationQty);
 
@@ -1193,7 +1208,7 @@ int CChar::Skill_Tracking( SKTRIG_TYPE stage )
 {
 	ADDTOCALLSTACK("CChar::Skill_Tracking");
 	// SKILL_TRACKING
-	// m_Act_Targ = what am i tracking ?
+	// m_Act_UID = what am i tracking ?
 	// m_atTracking.m_PrvDir = the previous dir it was in.
 
 	if ( stage == SKTRIG_START )
@@ -1215,7 +1230,7 @@ int CChar::Skill_Tracking( SKTRIG_TYPE stage )
 		if ( (g_Cfg.m_iRacialFlags & RACIALF_HUMAN_JACKOFTRADES) && IsHuman() )
 			iSkillLevel = maximum( iSkillLevel, 200 );			// humans always have a 20.0 minimum skill (racial traits)
 
-		if ( !Skill_Tracking( m_Act_Targ, m_atTracking.m_PrvDir, iSkillLevel/10 + 10 ))
+		if ( !Skill_Tracking( m_Act_UID, m_atTracking.m_PrvDir, iSkillLevel/10 + 10 ))
 			return -SKTRIG_ABORT;
 		Skill_SetTimeout();			// next update.
 		return( -SKTRIG_STROKE );	// keep it active.
@@ -1229,7 +1244,7 @@ int CChar::Skill_Mining( SKTRIG_TYPE stage )
 	ADDTOCALLSTACK("CChar::Skill_Mining");
 	// SKILL_MINING
 	// m_Act_p = the point we want to mine at.
-	// m_Act_TargPrv = Pickaxe/Shovel
+	// m_Act_Prv_UID = Pickaxe/Shovel
 	//
 	// Test the chance of precious ore.
 	// resource check  to IT_ORE. How much can we get ?
@@ -1239,7 +1254,7 @@ int CChar::Skill_Mining( SKTRIG_TYPE stage )
 	if ( stage == SKTRIG_FAIL )
 		return 0;
 
-	CItem *pTool = m_Act_TargPrv.ItemFind();
+	CItem *pTool = m_Act_Prv_UID.ItemFind();
 	if ( !pTool )
 	{
 		SysMessageDefault(DEFMSG_MINING_TOOL);
@@ -1293,7 +1308,7 @@ int CChar::Skill_Mining( SKTRIG_TYPE stage )
 	if ( stage == SKTRIG_START )
 	{
 		m_atResource.m_Stroke_Count = (word)(Calc_GetRandVal(5) + 2);
-		return Skill_NaturalResource_Setup(pResBit);
+		return Skill_NaturalResource_Setup(pResBit);	// How difficult? 1-1000
 	}
 
 	CItem *pItem = Skill_NaturalResource_Create(pResBit, SKILL_MINING);
@@ -1388,8 +1403,8 @@ int CChar::Skill_Fishing( SKTRIG_TYPE stage )
 	if ( stage == SKTRIG_START )
 	{
 		m_atResource.m_Stroke_Count = 1;
-		m_Act_Targ = pResBit->GetUID();
-		return Skill_NaturalResource_Setup(pResBit);
+		m_Act_UID = pResBit->GetUID();
+		return Skill_NaturalResource_Setup(pResBit);	// How difficult? 1-1000
 	}
 
 	CItem *pItem = Skill_NaturalResource_Create(pResBit, SKILL_FISHING);
@@ -1412,7 +1427,7 @@ int CChar::Skill_Lumberjack( SKTRIG_TYPE stage )
 	ADDTOCALLSTACK("CChar::Skill_Lumberjack");
 	// SKILL_LUMBERJACK
 	// m_Act_p = the point we want to chop/hack at.
-	// m_Act_TargPrv = Axe/Dagger
+	// m_Act_Prv_UID = Axe/Dagger
 	// NOTE: The skill is used for hacking with IT_FENCE (e.g. i_dagger)
 	//
 	// RETURN:
@@ -1421,7 +1436,7 @@ int CChar::Skill_Lumberjack( SKTRIG_TYPE stage )
 	if ( stage == SKTRIG_FAIL )
 		return 0;
 
-	CItem *pTool = m_Act_TargPrv.ItemFind();
+	CItem *pTool = m_Act_Prv_UID.ItemFind();
 	if ( pTool == NULL )
 	{
 		SysMessageDefault(DEFMSG_LUMBERJACKING_TOOL);
@@ -1481,7 +1496,7 @@ int CChar::Skill_Lumberjack( SKTRIG_TYPE stage )
 	if ( stage == SKTRIG_START )
 	{
 		m_atResource.m_Stroke_Count = (word)(Calc_GetRandVal(5) + 2);
-		return Skill_NaturalResource_Setup(pResBit);
+		return Skill_NaturalResource_Setup(pResBit);	// How difficult? 1-1000
 	}
 
 	if ( pTool->IsType(IT_WEAPON_FENCE) )	//dagger end
@@ -1515,7 +1530,7 @@ int CChar::Skill_DetectHidden( SKTRIG_TYPE stage )
 	// ??? Hidden objects ?
 
 	if ( stage == SKTRIG_START )
-		return 10;		// based on who is hiding ?
+		return 10;		// difficulty based on who is hiding ?
 
 	if ( stage == SKTRIG_FAIL || stage == SKTRIG_STROKE )
 		return 0;
@@ -1572,18 +1587,18 @@ int CChar::Skill_Cartography( SKTRIG_TYPE stage )
 			Sound( 0x249 );
 	}
 
-	return( Skill_MakeItem( stage ));
+	return( Skill_MakeItem( stage ));	// How difficult? 1-1000
 }
 
 int CChar::Skill_Musicianship( SKTRIG_TYPE stage )
 {
 	ADDTOCALLSTACK("CChar::Skill_Musicianship");
-	// m_Act_Targ = the intrument i targetted to play.
+	// m_Act_UID = the intrument i targetted to play.
 
 	if ( stage == SKTRIG_STROKE )
 		return 0;
 	if ( stage == SKTRIG_START )
-		return Use_PlayMusic( m_Act_Targ.ItemFind(), Calc_GetRandVal(90));	// no instrument fail immediate
+		return Use_PlayMusic( m_Act_UID.ItemFind(), Calc_GetRandVal(90));	// How difficult? 1-1000. If no instrument, it immediately fails
 
 	return 0;
 }
@@ -1601,37 +1616,65 @@ int CChar::Skill_Peacemaking( SKTRIG_TYPE stage )
 	switch ( stage )
 	{
 		case SKTRIG_START:
+		{
+			// ACTARG1: UID of the instrument i want to play, instead of picking a random one
+			CItem * pInstrument = NULL;
+			if (m_atBard.m_InstrumentUID != 0)
 			{
-				// Basic skill check.
-				int iDifficulty = Use_PlayMusic(NULL, Calc_GetRandVal(40));
-				if ( iDifficulty < -1 )	// no instrument fail immediate
-					return -SKTRIG_FAIL;
-
-				if ( !iDifficulty )
-					iDifficulty = Calc_GetRandVal(40);	// Depend on evil of the creatures here.
-
-				return iDifficulty;
+				CObjBase * pObj = CUID(m_atBard.m_InstrumentUID).ObjFind();
+				if (pObj && pObj->IsItem())
+				{
+					pInstrument = static_cast<CItem*>(pObj);
+					if (pInstrument->GetType() != IT_MUSICAL)
+					{
+						DEBUG_WARN(("Invalid ACTARG1 when using skill Peacemaking. Expected zero or the UID of an item with type t_musical.\n"));
+						pInstrument = NULL;
+					}
+				}
 			}
+			
+			// Basic skill check.
+			int iDifficulty = Use_PlayMusic(pInstrument, Calc_GetRandVal(40));
+			if (iDifficulty < -1)	// no instrument: immediate fail
+				return -SKTRIG_ABORT;
+
+			if ( !iDifficulty )
+				iDifficulty = Calc_GetRandVal(40);	// Depend on evil of the creatures here.
+
+			return iDifficulty;		// How difficult? 1-1000
+		}
 
 		case SKTRIG_FAIL:
-				return 0;
+			return 0;
 
 		case SKTRIG_SUCCESS:
+		{
+			int peace = Skill_GetAdjusted(SKILL_PEACEMAKING);
+			int iRadius = ( peace / 100 ) + 2;	// 2..12
+			CWorldSearch Area(GetTopPoint(), iRadius);
+			for (;;)
 			{
-				int peace = Skill_GetAdjusted(SKILL_PEACEMAKING);
-				int iRadius = ( peace / 100 ) + 2;	// 2..12
-				CWorldSearch Area(GetTopPoint(), iRadius);
-				for (;;)
-				{
-					CChar *pChar = Area.GetChar();
-					if ( pChar == NULL )
-						return -SKTRIG_FAIL;
-					if (( pChar == this ) || !CanSee(pChar) )
-						continue;
+				CChar *pChar = Area.GetChar();
+				if ( pChar == NULL )
+					return -SKTRIG_FAIL;
+				if (( pChar == this ) || !CanSee(pChar) )
+					continue;
 
-					if ( pChar->Skill_GetAdjusted(SKILL_PEACEMAKING) > peace )
-						SysMessagef("%s %s.", pChar->GetName(),g_Cfg.GetDefaultMsg( DEFMSG_PEACEMAKING_IGNORE ));
-					else if ( pChar->Skill_GetAdjusted(SKILL_PROVOCATION) > peace )
+				int iBardingDiff = (int)pChar->GetKeyNum("BARDING.DIFF", true, true);
+
+				int iPeaceDiff = pChar->Skill_GetAdjusted(SKILL_PEACEMAKING);
+				if (iBardingDiff != 0)
+					iPeaceDiff = ((iPeaceDiff + iBardingDiff) / 2);
+
+				if ( iPeaceDiff > peace )
+					SysMessagef("%s %s.", pChar->GetName(),g_Cfg.GetDefaultMsg( DEFMSG_PEACEMAKING_IGNORE ));
+				else
+				{
+					int iProvoDiff = pChar->Skill_GetAdjusted(SKILL_PROVOCATION);
+					if ( iBardingDiff != 0 )
+						iProvoDiff = ((iProvoDiff + iBardingDiff) / 2);
+
+					if ( iProvoDiff > peace )
 					{
 						SysMessagef("%s %s.", pChar->GetName(),g_Cfg.GetDefaultMsg( DEFMSG_PEACEMAKING_DISOBEY ));
 						if ( pChar->Noto_IsEvil() )
@@ -1639,11 +1682,11 @@ int CChar::Skill_Peacemaking( SKTRIG_TYPE stage )
 					}
 					else
 						pChar->Fight_ClearAll();
-
-					break;
 				}
-				return 0;
+				break;
 			}
+			return 0;
+		}
 		default:
 			break;
 	}
@@ -1653,52 +1696,81 @@ int CChar::Skill_Peacemaking( SKTRIG_TYPE stage )
 int CChar::Skill_Enticement( SKTRIG_TYPE stage )
 {
 	ADDTOCALLSTACK("CChar::Skill_Enticement");
-	// m_Act_Targ = my target
+	// m_Act_UID = my target
 	// Just keep playing and trying to allure them til we can't
 	// Must have a musical instrument.
 
 	if ( stage == SKTRIG_STROKE )
 		return 0;
 
-	CChar *pChar = m_Act_Targ.CharFind();
+	CChar *pChar = m_Act_UID.CharFind();
 	if ( !pChar || !CanSee(pChar) )
 		return -SKTRIG_QTY;
 
 	switch ( stage )
 	{
 		case SKTRIG_START:
+		{
+			// ACTARG1: UID of the instrument i want to play, instead of picking a random one
+			CItem * pInstrument = NULL;
+			if (m_atBard.m_InstrumentUID != 0)
 			{
-				// Basic skill check.
-				int iDifficulty = Use_PlayMusic(NULL, Calc_GetRandVal(40));
-				if ( iDifficulty < -1 )	// no instrument fail immediate
-					return -SKTRIG_FAIL;
-
-				if ( !iDifficulty )
-					iDifficulty = Calc_GetRandVal(40);	// Depend on evil of the creatures here.
-
-				return iDifficulty;
+				CObjBase * pObj = CUID(m_atBard.m_InstrumentUID).ObjFind();
+				if (pObj && pObj->IsItem())
+				{
+					pInstrument = static_cast<CItem*>(pObj);
+					if (pInstrument->GetType() != IT_MUSICAL)
+					{
+						DEBUG_WARN(("Invalid ACTARG1 when using skill Enticement. Expected zero or the UID of an item with type t_musical.\n"));
+						pInstrument = NULL;
+					}		
+				}
 			}
+
+			// Basic skill check.
+			CChar* pAct = m_Act_UID.CharFind();
+			if (!pAct)
+			{
+				g_Log.EventError("Act empty in skill Enticement, trigger @Start.\n");
+				return -SKTRIG_ABORT;
+			}
+			
+			int iBaseDiff = (int)pChar->GetKeyNum("BARDING.DIFF", true, true);
+			if (iBaseDiff != 0)
+				iBaseDiff = iBaseDiff / 18;
+			else
+				iBaseDiff = 40;		// No TAG.BARDING.DIFF? Use default
+
+			int iDifficulty = Use_PlayMusic(pInstrument, Calc_GetRandVal(iBaseDiff));	// How difficult? 1-100 (use RandBell). If no instrument, it immediately fails
+			if (iDifficulty < -1)	// no instrument: immediate fail
+				return -SKTRIG_ABORT;
+
+			if ( !iDifficulty )
+				iDifficulty = Calc_GetRandVal(40);	// Depend on evil of the creatures here.
+
+			return iDifficulty;
+		}
 
 		case SKTRIG_FAIL:
-				return 0;
+			return 0;
 
 		case SKTRIG_SUCCESS:
+		{
+			if ( pChar->m_pPlayer )
 			{
-				if ( pChar->m_pPlayer )
-				{
-					SysMessagef("%s", g_Cfg.GetDefaultMsg( DEFMSG_ENTICEMENT_PLAYER ));
-					return -SKTRIG_ABORT;
-				}
-				else if ( pChar->IsStatFlag(STATF_War) )
-				{
-					SysMessagef("%s %s.", pChar->GetName(), g_Cfg.GetDefaultMsg(DEFMSG_ENTICEMENT_BATTLE));
-					return -SKTRIG_ABORT;
-				}
-
-				pChar->m_Act_p = GetTopPoint();
-				pChar->NPC_WalkToPoint( ( pChar->m_Act_p.GetDist(pChar->GetTopPoint()) > 3) );
-				return 0;
+				SysMessagef("%s", g_Cfg.GetDefaultMsg( DEFMSG_ENTICEMENT_PLAYER ));
+				return -SKTRIG_ABORT;
 			}
+			else if ( pChar->IsStatFlag(STATF_War) )
+			{
+				SysMessagef("%s %s.", pChar->GetName(), g_Cfg.GetDefaultMsg(DEFMSG_ENTICEMENT_BATTLE));
+				return -SKTRIG_ABORT;
+			}
+
+			pChar->m_Act_p = GetTopPoint();
+			pChar->NPC_WalkToPoint( ( pChar->m_Act_p.GetDist(pChar->GetTopPoint()) > 3) );
+			return 0;
+		}
 
 		default:
 			break;
@@ -1709,14 +1781,14 @@ int CChar::Skill_Enticement( SKTRIG_TYPE stage )
 int CChar::Skill_Provocation(SKTRIG_TYPE stage)
 {
 	ADDTOCALLSTACK("CChar::Skill_Provocation");
-	// m_Act_TargPrv = provoke this person
-	// m_Act_Targ = against this person.
+	// m_Act_Prv_UID = provoke this person
+	// m_Act_UID = against this person.
 
 	if ( stage == SKTRIG_STROKE )
 		return 0;
 
-	CChar *pCharProv = m_Act_TargPrv.CharFind();
-	CChar *pCharTarg = m_Act_Targ.CharFind();
+	CChar *pCharProv = m_Act_Prv_UID.CharFind();
+	CChar *pCharTarg = m_Act_UID.CharFind();
 
 	if ( !pCharProv || !pCharTarg || ( pCharProv == this ) || ( pCharTarg == this ) || ( pCharProv == pCharTarg ) ||
 		pCharProv->IsStatFlag(STATF_Pet|STATF_Conjured|STATF_Stone|STATF_DEAD|STATF_INVUL) ||
@@ -1739,8 +1811,37 @@ int CChar::Skill_Provocation(SKTRIG_TYPE stage)
 	{
 		case SKTRIG_START:
 		{
-			int iDifficulty = Use_PlayMusic(NULL, Calc_GetRandVal(40));
-			if ( iDifficulty < -1 )	// no instrument fail immediate
+			// ACTARG1: UID of the instrument i want to play, instead of picking a random one
+			CItem * pInstrument = NULL;
+			if (m_atBard.m_InstrumentUID != 0)
+			{
+				CObjBase * pObj = CUID(m_atBard.m_InstrumentUID).ObjFind();
+				if (pObj && pObj->IsItem())
+				{
+					pInstrument = static_cast<CItem*>(pObj);
+					if (pInstrument->GetType() != IT_MUSICAL)
+					{
+						DEBUG_WARN(("Invalid ACTARG1 when using skill Provocation. Expected zero or the UID of an item with type t_musical.\n"));
+						pInstrument = NULL;
+					}
+				}
+			}
+
+			// Basic skill check.
+			CChar* pAct = dynamic_cast<CChar*>(m_Act_UID.CharFind());
+			if (!pAct)
+			{
+				g_Log.EventError("Act empty in skill Provocation, trigger @Start.\n");
+				return -SKTRIG_ABORT;
+			}
+			int iBaseDiff = (int)pAct->GetKeyNum("BARDING.DIFF", true, true);
+			if (iBaseDiff != 0)
+				iBaseDiff = iBaseDiff / 18;
+			else
+				iBaseDiff = 40;		// No TAG.BARDING.DIFF? Use default
+
+			int iDifficulty = Use_PlayMusic(pInstrument, Calc_GetRandVal(iBaseDiff));	// How difficult? 1-100 (use RandBell). If no instrument, it immediately fails
+			if (iDifficulty < -1)	// no instrument: immediate fail
 				return -SKTRIG_ABORT;
 
 			if ( !iDifficulty )
@@ -1828,12 +1929,12 @@ int CChar::Skill_Poisoning( SKTRIG_TYPE stage )
 	if ( stage == SKTRIG_STROKE )
 		return 0;
 
-	CItem * pPoison = m_Act_Targ.ItemFind();
+	CItem * pPoison = m_Act_UID.ItemFind();
 	if ( pPoison == NULL || !pPoison->IsType(IT_POTION))
 		return -SKTRIG_ABORT;
 
 	if ( stage == SKTRIG_START )
-		return Calc_GetRandVal( 60 );
+		return Calc_GetRandVal( 60 );	// How difficult? 1-1000
 
 	if ( stage == SKTRIG_FAIL )
 		return 0;	// lose the poison sometimes ?
@@ -1841,7 +1942,7 @@ int CChar::Skill_Poisoning( SKTRIG_TYPE stage )
 	if ( RES_GET_INDEX(pPoison->m_itPotion.m_Type) != SPELL_Poison )
 		return -SKTRIG_ABORT;
 
-	CItem * pItem = m_Act_TargPrv.ItemFind();
+	CItem * pItem = m_Act_Prv_UID.ItemFind();
 	if ( pItem == NULL )
 		return -SKTRIG_QTY;
 
@@ -1883,7 +1984,7 @@ int CChar::Skill_Cooking( SKTRIG_TYPE stage )
 	ADDTOCALLSTACK("CChar::Skill_Cooking");
 	// m_atCreate.m_ItemID = create this item
 	// m_Act_p = the heat source
-	// m_Act_Targ = the skill tool
+	// m_Act_UID = the skill tool
 
 	int iMaxDist = 3;
 
@@ -1918,11 +2019,11 @@ int CChar::Skill_Cooking( SKTRIG_TYPE stage )
 int CChar::Skill_Taming( SKTRIG_TYPE stage )
 {
 	ADDTOCALLSTACK("CChar::Skill_Taming");
-	// m_Act_Targ = creature to tame.
+	// m_Act_UID = creature to tame.
 	// Check the min required skill for this creature.
 	// Related to INT ?
 
-	CChar * pChar = m_Act_Targ.CharFind();
+	CChar * pChar = m_Act_UID.CharFind();
 	if ( pChar == NULL )
 		return -SKTRIG_QTY;
 
@@ -1970,10 +2071,10 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 	{
 		int iDifficulty = iTameBase/10;
 		if ( pChar->Memory_FindObjTypes( this, MEMORY_FIGHT|MEMORY_HARMEDBY|MEMORY_IRRITATEDBY|MEMORY_AGGREIVED ))	// I've attacked it before ?
-			iDifficulty += 50;
+			iDifficulty += 50;	// is it too much?
 
 		m_atTaming.m_Stroke_Count = (word)(Calc_GetRandVal(4) + 2);
-		return( iDifficulty );
+		return iDifficulty;		// How difficult? 1-1000
 	}
 
 	if ( stage == SKTRIG_FAIL )
@@ -2015,14 +2116,14 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 
 		pChar->NPC_PetSetOwner( this );
 		pChar->Stat_SetVal(STAT_FOOD, 50);	// this is good for something.
-		pChar->m_Act_Targ = GetUID();
+		pChar->m_Act_UID = GetUID();
 		pChar->Skill_Start( NPCACT_FOLLOW_TARG );
 		return -SKTRIG_QTY;	// no credit for this.
 	}
 
 	pChar->NPC_PetSetOwner( this );
 	pChar->Stat_SetVal(STAT_FOOD, 50);	// this is good for something.
-	pChar->m_Act_Targ = GetUID();
+	pChar->m_Act_UID = GetUID();
 	pChar->Skill_Start( NPCACT_FOLLOW_TARG );
 	SysMessageDefault( DEFMSG_TAMING_SUCCESS );
 
@@ -2037,20 +2138,20 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 int CChar::Skill_Lockpicking( SKTRIG_TYPE stage )
 {
 	ADDTOCALLSTACK("CChar::Skill_Lockpicking");
-	// m_Act_Targ = the item to be picked.
-	// m_Act_TargPrv = The pick.
+	// m_Act_UID = the item to be picked.
+	// m_Act_Prv_UID = The pick.
 
 	if ( stage == SKTRIG_STROKE )
 		return 0;
 
-	CItem * pPick = m_Act_TargPrv.ItemFind();
+	CItem * pPick = m_Act_Prv_UID.ItemFind();
 	if ( pPick == NULL || ! pPick->IsType( IT_LOCKPICK ))
 	{
 		SysMessageDefault( DEFMSG_LOCKPICKING_NOPICK );
 		return -SKTRIG_QTY;
 	}
 
-	CItem * pLock = m_Act_Targ.ItemFind();
+	CItem * pLock = m_Act_UID.ItemFind();
 	if ( pLock == NULL )
 	{
 		SysMessageDefault( DEFMSG_LOCKPICKING_WITEM );
@@ -2076,7 +2177,7 @@ int CChar::Skill_Lockpicking( SKTRIG_TYPE stage )
 	}
 
 	if (  stage == SKTRIG_START )
-		return( pLock->Use_LockPick( this, true, false ));
+		return pLock->Use_LockPick( this, true, false );	// How difficult? 1-1000
 
 	ASSERT( stage == SKTRIG_SUCCESS );
 
@@ -2130,7 +2231,7 @@ int CChar::Skill_Hiding( SKTRIG_TYPE stage )
 			}
 		}
 
-		return Calc_GetRandVal(70);
+		return Calc_GetRandVal(70);	// How difficult? 1-1000
 	}
 	ASSERT(0);
 	return -SKTRIG_QTY;
@@ -2139,15 +2240,15 @@ int CChar::Skill_Hiding( SKTRIG_TYPE stage )
 int CChar::Skill_Herding( SKTRIG_TYPE stage )
 {
 	ADDTOCALLSTACK("CChar::Skill_Herding");
-	// m_Act_Targ = move this creature.
+	// m_Act_UID = move this creature.
 	// m_Act_p = move to here.
 	// How do I make them move fast ? or with proper speed ???
 
 	if ( stage == SKTRIG_STROKE )
 		return 0;
 
-	CChar	*pChar = m_Act_Targ.CharFind();
-	CItem	*pCrook = m_Act_TargPrv.ItemFind();
+	CChar	*pChar = m_Act_UID.CharFind();
+	CItem	*pCrook = m_Act_Prv_UID.ItemFind();
 	if ( !pChar )
 	{
 		SysMessageDefault(DEFMSG_HERDING_LTARG);
@@ -2167,7 +2268,7 @@ int CChar::Skill_Herding( SKTRIG_TYPE stage )
 				UpdateAnimate(ANIM_ATTACK_WEAPON);
 
 			int iIntVal = pChar->Stat_GetAdjusted(STAT_INT) / 2;
-			return iIntVal + Calc_GetRandVal(iIntVal);
+			return iIntVal + Calc_GetRandVal(iIntVal);	// How difficult? 1-1000
 		}
 
 		case SKTRIG_FAIL:
@@ -2214,7 +2315,7 @@ int CChar::Skill_SpiritSpeak( SKTRIG_TYPE stage )
 		return 0;
 
 	if ( stage == SKTRIG_START )
-		return( Calc_GetRandVal( 90 ));		// difficulty based on spirits near ?
+		return( Calc_GetRandVal( 90 ));		// How difficult? 1-1000. difficulty based on spirits near ?
 
 	if ( stage == SKTRIG_SUCCESS )
 	{
@@ -2256,7 +2357,7 @@ int CChar::Skill_Meditation( SKTRIG_TYPE stage )
 
 		m_atTaming.m_Stroke_Count = 0;
 		SysMessageDefault( DEFMSG_MEDITATION_TRY );
-		return Calc_GetRandVal(100);	// how hard to get started ?
+		return Calc_GetRandVal(100);	// How difficult? 1-1000. how hard to get started ?
 	}
 	if ( stage == SKTRIG_STROKE )
 		return 0;
@@ -2296,8 +2397,8 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 	ADDTOCALLSTACK("CChar::Skill_Healing");
 	// SKILL_VETERINARY:
 	// SKILL_HEALING
-	// m_Act_TargPrv = bandages.
-	// m_Act_Targ = heal target.
+	// m_Act_Prv_UID = bandages.
+	// m_Act_UID = heal target.
 	//
 	// should depend on the severity of the wounds ?
 	// should be just a fast regen over time ?
@@ -2307,7 +2408,7 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 	if ( stage == SKTRIG_STROKE )
 		return 0;
 
-	CItem * pBandage = m_Act_TargPrv.ItemFind();
+	CItem * pBandage = m_Act_Prv_UID.ItemFind();
 	if ( pBandage == NULL )
 	{
 		SysMessageDefault( DEFMSG_HEALING_NOAIDS );
@@ -2319,7 +2420,7 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 		return -SKTRIG_QTY;
 	}
 
-	CObjBase * pObj = m_Act_Targ.ObjFind();
+	CObjBase * pObj = m_Act_UID.ObjFind();
 	if ( ! CanTouch(pObj))
 	{
 		SysMessageDefault( DEFMSG_HEALING_REACH );
@@ -2327,7 +2428,7 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 	}
 
 	CItemCorpse * pCorpse = NULL;	// resurrect by corpse
-	CChar * pChar = m_Act_Targ.CharFind();
+	CChar * pChar = m_Act_UID.CharFind();
 	if ( pObj->IsItem())
 	{
 		pCorpse = dynamic_cast<CItemCorpse *>(pObj);
@@ -2418,7 +2519,7 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 		if ( pChar->IsStatFlag( STATF_Poisoned ))	// poison level
 			return( 50 + Calc_GetRandVal(50));
 
-		return Calc_GetRandVal(80);
+		return Calc_GetRandVal(80);	// How difficult? 1-1000
 	}
 
 	ASSERT( stage == SKTRIG_SUCCESS );
@@ -2458,13 +2559,13 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 int CChar::Skill_RemoveTrap( SKTRIG_TYPE stage )
 {
 	ADDTOCALLSTACK("CChar::Skill_RemoveTrap");
-	// m_Act_Targ = trap
+	// m_Act_UID = trap
 	// Is it a trap ?
 
 	if ( stage == SKTRIG_STROKE )
 		return 0;
 
-	CItem * pTrap = m_Act_Targ.ItemFind();
+	CItem * pTrap = m_Act_UID.ItemFind();
 	if ( pTrap == NULL || ! pTrap->IsType(IT_TRAP))
 	{
 		SysMessageDefault( DEFMSG_REMOVETRAPS_WITEM );
@@ -2477,8 +2578,7 @@ int CChar::Skill_RemoveTrap( SKTRIG_TYPE stage )
 	}
 	if ( stage == SKTRIG_START )
 	{
-		// How difficult ?
-		return Calc_GetRandVal(95);
+		return Calc_GetRandVal(95);		// How difficult? 1-1000
 	}
 	if ( stage == SKTRIG_FAIL )
 	{
@@ -2497,9 +2597,9 @@ int CChar::Skill_RemoveTrap( SKTRIG_TYPE stage )
 int CChar::Skill_Begging( SKTRIG_TYPE stage )
 {
 	ADDTOCALLSTACK("CChar::Skill_Begging");
-	// m_Act_Targ = Our begging target..
+	// m_Act_UID = Our begging target..
 
-	CChar * pChar = m_Act_Targ.CharFind();
+	CChar * pChar = m_Act_UID.CharFind();
 	if ( pChar == NULL || pChar == this )
 		return -SKTRIG_QTY;
 
@@ -2507,7 +2607,8 @@ int CChar::Skill_Begging( SKTRIG_TYPE stage )
 	{
 		UpdateAnimate( ANIM_BOW );
 		SysMessagef(g_Cfg.GetDefaultMsg( DEFMSG_BEGGING_START ), pChar->GetName());
-		return( pChar->Stat_GetAdjusted(STAT_INT));
+		// How difficult? 1-1000
+		return( pChar->Stat_GetAdjusted(STAT_INT));		// How difficult? 1-1000
 	}
 	if ( stage == SKTRIG_STROKE )
 	{
@@ -2530,8 +2631,8 @@ int CChar::Skill_Magery( SKTRIG_TYPE stage )
 	ADDTOCALLSTACK("CChar::Skill_Magery");
 	// SKILL_MAGERY
 	//  m_Act_p = location to cast to.
-	//  m_Act_TargPrv = the source of the spell.
-	//  m_Act_Targ = target for the spell.
+	//  m_Act_Prv_UID = the source of the spell.
+	//  m_Act_UID = target for the spell.
 	//  m_atMagery.m_Spell = the spell.
 
 	if ( stage == SKTRIG_STROKE )
@@ -2550,7 +2651,7 @@ int CChar::Skill_Magery( SKTRIG_TYPE stage )
 
 		if ( IsClient() && IsSetMagicFlags( MAGICF_PRECAST ) && !tSpell->IsSpellType( SPELLFLAG_NOPRECAST ))
 		{
-			this->GetClient()->Cmd_Skill_Magery( this->m_atMagery.m_Spell, this->GetClient()->m_Targ_PrvUID.ObjFind() );
+			this->GetClient()->Cmd_Skill_Magery( this->m_atMagery.m_Spell, this->GetClient()->m_Targ_Prv_UID.ObjFind() );
 			return -SKTRIG_QTY;		// don't increase skill at this point. The client should select a target first.
 		}
 		else
@@ -2560,7 +2661,7 @@ int CChar::Skill_Magery( SKTRIG_TYPE stage )
 			return 0;
 		}
 	}
-	if ( stage == SKTRIG_START )
+	if ( stage == SKTRIG_START )	// How difficult? 1-1000
 		return Spell_CastStart();	// NOTE: this should call SetTimeout();
 
 	ASSERT(0);
@@ -2577,17 +2678,17 @@ int CChar::Skill_Fighting( SKTRIG_TYPE stage )
 	// SKILL_WRESTLING:
 	// SKILL_THROWING:
 	//
-	// m_Fight_Targ = attack target.
+	// m_Fight_Targ_UID = attack target.
 
 	if ( stage == SKTRIG_START )
 	{
 		m_atFight.m_War_Swing_State = WAR_SWING_EQUIPPING;
-		int64 iRemainingDelay = g_World.GetTimeDiff(m_atFight.m_timeNextCombatSwing);
+		int64 iRemainingDelay = g_World.GetCurrentTime().GetTimeRaw() - m_atFight.m_timeNextCombatSwing;
 		if ( iRemainingDelay < 0 || iRemainingDelay > 255)
 			iRemainingDelay = 0;
 
 		SetTimeout(iRemainingDelay);
-		return g_Cfg.Calc_CombatChanceToHit(this, m_Fight_Targ.CharFind(), Skill_GetActive());
+		return g_Cfg.Calc_CombatChanceToHit(this, m_Fight_Targ_UID.CharFind(), Skill_GetActive());	// How difficult? 1-10000
 	}
 
 	if ( stage == SKTRIG_STROKE )
@@ -2618,7 +2719,7 @@ int CChar::Skill_MakeItem( SKTRIG_TYPE stage )
 	// SKILL_TAILORING:
 	// SKILL_TINKERING:
 	//
-	// m_Act_Targ = the item we want to be part of this process.
+	// m_Act_UID = the item we want to be part of this process.
 	// m_atCreate.m_ItemID = new item we are making
 	// m_atCreate.m_Amount = amount of said item.
 
@@ -2627,13 +2728,13 @@ int CChar::Skill_MakeItem( SKTRIG_TYPE stage )
 
 	if ( stage == SKTRIG_SUCCESS )
 	{
-		if ( ! Skill_MakeItem( m_atCreate.m_ItemID, m_Act_Targ, SKTRIG_SUCCESS, false, (m_atCreate.m_Amount ? m_atCreate.m_Amount : 1) ))
+		if ( ! Skill_MakeItem( m_atCreate.m_ItemID, m_Act_UID, SKTRIG_SUCCESS, false, (m_atCreate.m_Amount ? m_atCreate.m_Amount : 1) ))
 			return -SKTRIG_ABORT;
 		return 0;
 	}
 	if ( stage == SKTRIG_FAIL )
 	{
-		Skill_MakeItem( m_atCreate.m_ItemID, m_Act_Targ, SKTRIG_FAIL );
+		Skill_MakeItem( m_atCreate.m_ItemID, m_Act_UID, SKTRIG_FAIL );
 		return 0;
 	}
 	ASSERT(0);
@@ -2663,7 +2764,7 @@ int CChar::Skill_Inscription( SKTRIG_TYPE stage )
 			Sound( 0x249 );
 	}
 
-	return( Skill_MakeItem( stage ));
+	return( Skill_MakeItem( stage ));	// How difficult? 1-1000
 }
 
 int CChar::Skill_Blacksmith( SKTRIG_TYPE stage )
@@ -2671,7 +2772,7 @@ int CChar::Skill_Blacksmith( SKTRIG_TYPE stage )
 	ADDTOCALLSTACK("CChar::Skill_Blacksmith");
 	// m_atCreate.m_ItemID = create this item
 	// m_Act_p = the anvil.
-	// m_Act_Targ = the hammer.
+	// m_Act_UID = the hammer.
 
 	int iMaxDist = 2;
 	if ( stage == SKTRIG_START )
@@ -2692,13 +2793,13 @@ int CChar::Skill_Blacksmith( SKTRIG_TYPE stage )
 			return( -SKTRIG_FAIL );
 	}
 
-	return( Skill_MakeItem( stage ));
+	return( Skill_MakeItem( stage ));	// How difficult? 1-1000
 }
 
 int CChar::Skill_Carpentry( SKTRIG_TYPE stage )
 {
 	ADDTOCALLSTACK("CChar::Skill_Carpentry");
-	// m_Act_Targ = the item we want to be part of this process.
+	// m_Act_UID = the item we want to be part of this process.
 	// m_atCreate.m_ItemID = new item we are making
 	// m_atCreate.m_Amount = amount of said item.
 
@@ -2708,7 +2809,7 @@ int CChar::Skill_Carpentry( SKTRIG_TYPE stage )
 	if ( stage == SKTRIG_START )
 		m_atCreate.m_Stroke_Count = 2;	// + Calc_GetRandVal( 3 )
 
-	return( Skill_MakeItem( stage ));
+	return( Skill_MakeItem( stage ));	// How difficult? 1-1000
 }
 
 int CChar::Skill_Scripted( SKTRIG_TYPE stage )
@@ -2731,7 +2832,7 @@ int CChar::Skill_Information( SKTRIG_TYPE stage )
 	// SKILL_FORENSICS:
 	// SKILL_TASTEID:
 	// Difficulty should depend on the target item !!!??
-	// m_Act_Targ = target.
+	// m_Act_UID = target.
 
 	if ( ! IsClient())	// purely informational
 		return -SKTRIG_QTY;
@@ -2742,9 +2843,9 @@ int CChar::Skill_Information( SKTRIG_TYPE stage )
 	SKILL_TYPE skill = Skill_GetActive();
 	int iSkillLevel = Skill_GetAdjusted(skill);
 	if ( stage == SKTRIG_START )
-		return GetClient()->OnSkill_Info( skill, m_Act_Targ, iSkillLevel, true );
+		return GetClient()->OnSkill_Info( skill, m_Act_UID, iSkillLevel, true );	// How difficult? 1-1000
 	if ( stage == SKTRIG_SUCCESS )
-		return GetClient()->OnSkill_Info( skill, m_Act_Targ, iSkillLevel, false );
+		return GetClient()->OnSkill_Info( skill, m_Act_UID, iSkillLevel, false );
 
 	ASSERT(0);
 	return -SKTRIG_QTY;
@@ -2780,12 +2881,12 @@ int CChar::Skill_Act_Breath( SKTRIG_TYPE stage )
 	ADDTOCALLSTACK("CChar::Skill_Act_Breath");
 	// NPCACT_BREATH
 	// A Dragon I assume.
-	// m_Fight_Targ = my target.
+	// m_Fight_Targ_UID = my target.
 
 	if ( stage == SKTRIG_STROKE || stage == SKTRIG_FAIL )
 		return 0;
 
-	CChar * pChar = m_Fight_Targ.CharFind();
+	CChar * pChar = m_Fight_Targ_UID.CharFind();
 	if ( pChar == NULL )
 		return -SKTRIG_QTY;
 
@@ -2839,12 +2940,12 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 {
 	ADDTOCALLSTACK("CChar::Skill_Act_Throwing");
 	// NPCACT_THROWING
-	// m_Fight_Targ = my target.
+	// m_Fight_Targ_UID = my target.
 
 	if ( stage == SKTRIG_STROKE )
 		return 0;
 
-	CChar * pChar = m_Fight_Targ.CharFind();
+	CChar * pChar = m_Fight_Targ_UID.CharFind();
 	if ( pChar == NULL )
 		return -SKTRIG_QTY;
 
@@ -2940,16 +3041,16 @@ int CChar::Skill_Act_Training( SKTRIG_TYPE stage )
 	if ( stage == SKTRIG_START )
 	{
 		SetTimeout(1 * TICK_PER_SEC);
-		return 0;
+		return 0;	// How difficult? 1-1000
 	}
 	if ( stage == SKTRIG_STROKE )
 		return 0;
 	if ( stage != SKTRIG_SUCCESS )
 		return -SKTRIG_QTY;
 
-	if ( m_Act_TargPrv == m_uidWeapon )
+	if ( m_Act_Prv_UID == m_uidWeapon )
 	{
-		CItem *pItem = m_Act_Targ.ItemFind();
+		CItem *pItem = m_Act_UID.ItemFind();
 		if ( pItem )
 		{
 			switch ( pItem->GetType() )
@@ -3365,7 +3466,10 @@ int CChar::Skill_Done()
 
 	SKILL_TYPE skill = Skill_GetActive();
 	if ( skill == SKILL_NONE )	// we should not be coming here (timer should not have expired)
+	{
+		Skill_Cleanup();
 		return -SKTRIG_QTY;
+	}
 
 	// multi stroke tried stuff here first.
 	// or stuff that never really fails.
@@ -3379,18 +3483,12 @@ int CChar::Skill_Done()
 	if ( IsTrigUsed(TRIGGER_SKILLSUCCESS) )
 	{
 		if ( Skill_OnCharTrigger(skill, CTRIG_SkillSuccess) == TRIGRET_RET_TRUE )
-		{
-			Skill_Cleanup();
 			return -SKTRIG_ABORT;
-		}
 	}
 	if ( IsTrigUsed(TRIGGER_SUCCESS) )
 	{
 		if ( Skill_OnTrigger(skill, SKTRIG_SUCCESS) == TRIGRET_RET_TRUE )
-		{
-			Skill_Cleanup();
 			return -SKTRIG_ABORT;
-		}
 	}
 
 	// Success for the skill.
@@ -3400,8 +3498,8 @@ int CChar::Skill_Done()
 
 	// Success = Advance the skill
 	Skill_Experience(skill, m_Act_Difficulty);
-	Skill_Cleanup();
 
+	Skill_Cleanup();
 	return -SKTRIG_SUCCESS;
 }
 
@@ -3475,15 +3573,13 @@ bool CChar::Skill_Wait( SKILL_TYPE skilltry )
 	return true;
 }
 
-bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficulty )
+bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 {
 	ADDTOCALLSTACK("CChar::Skill_Start");
 	// We have all the info we need to do the skill. (targeting etc)
 	// Set up how long we have to wait before we get the desired results from this skill.
 	// Set up any animations/sounds in the mean time.
 	// Calc if we will succeed or fail.
-	// ARGS:
-	//  iDifficulty = 0-100
 	// RETURN:
 	//  false = failed outright with no wait. "You have no chance of taming this"
 
@@ -3506,8 +3602,8 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficulty )
 
 	if ( skill != SKILL_NONE )
 	{
+		Skill_Cleanup();
 		m_Act_SkillCurrent = skill;
-		m_Act_Difficulty = iDifficulty;
 
 		// Some skill can start right away. Need no targetting.
 		// 0-100 scale of Difficulty
@@ -3528,7 +3624,9 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficulty )
 			}
 		}
 
-		m_Act_Difficulty = Skill_Stage(SKTRIG_START);
+		m_Act_Difficulty = Skill_Stage(SKTRIG_START) + iDifficultyIncrease;
+		if (m_Act_Difficulty > 1000)		m_Act_Difficulty = 1000;
+		else if (m_Act_Difficulty < 0)	m_Act_Difficulty = 0;
 
 		// Execute the @START trigger and pass various craft parameters there
 		CScriptTriggerArgs pArgs;

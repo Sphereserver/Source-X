@@ -249,7 +249,7 @@ void CChar::Attacker_Clear()
 	if ( Fight_IsActive() )
 	{
 		Skill_Start(SKILL_NONE);
-		m_Fight_Targ.InitUID();
+		m_Fight_Targ_UID.InitUID();
 	}
 	UpdateModeFlag();
 }
@@ -323,9 +323,9 @@ bool CChar::Attacker_Delete(size_t attackerIndex, bool bForced, ATTACKER_CLEAR_T
 	std::vector<LastAttackers>::iterator it = m_lastAttackers.begin() + attackerIndex;
 
 	m_lastAttackers.erase(it);
-	if (m_Fight_Targ == pChar->GetUID())
+	if (m_Fight_Targ_UID == pChar->GetUID())
 	{
-		m_Fight_Targ.InitUID();
+		m_Fight_Targ_UID.InitUID();
 		if (m_pNPC)
 			Fight_Attack(NPC_FightFindBestTarget());
 	}

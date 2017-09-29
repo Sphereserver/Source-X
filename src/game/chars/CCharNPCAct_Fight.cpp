@@ -131,7 +131,7 @@ CChar * CChar::NPC_FightFindBestTarget()
 	}
 
 	// New target not found, check if I can keep attacking my current target
-	CChar *pTarget = m_Fight_Targ.CharFind();
+	CChar *pTarget = m_Fight_Targ_UID.CharFind();
 	if ( pTarget )
 		return pTarget;
 
@@ -160,7 +160,7 @@ void CChar::NPC_Act_Fight()
 		}
 	}
 
-	CChar * pChar = m_Fight_Targ.CharFind();
+	CChar * pChar = m_Fight_Targ_UID.CharFind();
 	if (pChar == NULL || !pChar->IsTopLevel()) // target is not valid anymore ?
 		return;
 
@@ -170,7 +170,7 @@ void CChar::NPC_Act_Fight()
 		{
 			Skill_Start(SKILL_NONE);
 			StatFlag_Clear(STATF_War);
-			m_Fight_Targ.InitUID();
+			m_Fight_Targ_UID.InitUID();
 			return;
 		}
 	}
@@ -192,7 +192,7 @@ void CChar::NPC_Act_Fight()
 	bool fSkipHardcoded	= false;
 	if ( IsTrigUsed(TRIGGER_NPCACTFIGHT) )
 	{
-		CUID m_oldAct = m_Act_Targ;
+		CUID m_oldAct = m_Act_UID;
 		CScriptTriggerArgs Args( iDist, iMotivation );
 		switch ( OnTrigger( CTRIG_NPCActFight, pChar, &Args ) )
 		{

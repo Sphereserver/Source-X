@@ -888,13 +888,9 @@ bool CMenuItem::ParseLine( tchar * pszArgs, CScriptObj * pObjBase, CTextConsole 
 	}
 
 	if ( pObjBase != NULL )
-	{
 		pObjBase->ParseText( pszArgs, pSrc );
-	}
 	else
-	{
 		g_Serv.ParseText( pszArgs, pSrc );
-	}
 
 	// Parsing @color
 	if ( *pszArgs == '@' )

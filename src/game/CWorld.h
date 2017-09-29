@@ -247,7 +247,7 @@ public:
 	{
 		// How long till this event
 		// negative = in the past.
-		return( time.GetTimeDiff( GetCurrentTime() )); // Time in TICK_PER_SEC
+		return time.GetTimeDiff( GetCurrentTime() ); // Time in TICK_PER_SEC
 	}
 
 #define TRAMMEL_SYNODIC_PERIOD 105 // in game world minutes

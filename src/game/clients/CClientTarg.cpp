@@ -327,7 +327,7 @@ bool CClient::OnTarg_Char_Add( CObjBase * pObj, const CPointMap & pt )
 	pChar->Update();
 	pChar->UpdateAnimate(ANIM_CAST_DIR);
 	pChar->SoundChar(CRESND_GETHIT);
-	m_pChar->m_Act_Targ = pChar->GetUID();		// for last target stuff. (trigger stuff)
+	m_pChar->m_Act_UID = pChar->GetUID();		// for last target stuff. (trigger stuff)
 	return true;
 }
 
@@ -355,7 +355,7 @@ bool CClient::OnTarg_Item_Add( CObjBase * pObj, CPointMap & pt )
 	}
 
 	pItem->MoveToCheck(pt, m_pChar);
-	m_pChar->m_Act_Targ = pItem->GetUID();		// for last target stuff (trigger stuff) and to make AxisII able to initialize placed spawn items.
+	m_pChar->m_Act_UID = pItem->GetUID();		// for last target stuff (trigger stuff) and to make AxisII able to initialize placed spawn items.
 	return true;
 }
 
@@ -1302,7 +1302,7 @@ bool CClient::OnTarg_Skill( CObjBase * pObj )
 		const CSkillDef * pSkillDef = g_Cfg.GetSkillDef(m_tmSkillTarg.m_Skill);
 		if (pSkillDef != NULL && pSkillDef->m_sTargetPrompt.IsEmpty() == false)
 		{
-			m_pChar->m_Act_Targ = m_Targ_UID;
+			m_pChar->m_Act_UID = m_Targ_UID;
 			return m_pChar->Skill_Start( m_tmSkillTarg.m_Skill );
 		}
 		else
@@ -1330,7 +1330,7 @@ bool CClient::OnTarg_Skill( CObjBase * pObj )
 	case SKILL_EVALINT:
 	case SKILL_FORENSICS:
 	case SKILL_TASTEID:
-		m_pChar->m_Act_Targ = m_Targ_UID;
+		m_pChar->m_Act_UID = m_Targ_UID;
 		return( m_pChar->Skill_Start( m_tmSkillTarg.m_Skill ));
 
 	case SKILL_PROVOCATION:
@@ -1364,8 +1364,8 @@ bool CClient::OnTarg_Skill_Provoke( CObjBase * pObj )
 		SysMessageDefault(DEFMSG_PROVOKE_UNABLE);
 		return false;
 	}
-	m_pChar->m_Act_TargPrv = m_Targ_UID;	// provoke him
-	m_pChar->m_Act_Targ = pObj->GetUID();	// against him
+	m_pChar->m_Act_Prv_UID = m_Targ_UID;	// provoke him
+	m_pChar->m_Act_UID = pObj->GetUID();	// against him
 	return m_pChar->Skill_Start(SKILL_PROVOCATION);
 }
 
@@ -1375,8 +1375,8 @@ bool CClient::OnTarg_Skill_Poison( CObjBase * pObj )
 	// CLIMODE_TARG_SKILL_POISON
 	if ( pObj == NULL )
 		return false;
-	m_pChar->m_Act_TargPrv = m_Targ_UID;	// poison this
-	m_pChar->m_Act_Targ = pObj->GetUID();				// with this poison
+	m_pChar->m_Act_Prv_UID = m_Targ_UID;	// poison this
+	m_pChar->m_Act_UID = pObj->GetUID();				// with this poison
 	return( m_pChar->Skill_Start( SKILL_POISONING ));
 }
 
@@ -1387,8 +1387,8 @@ bool CClient::OnTarg_Skill_Herd_Dest( CObjBase * pObj, const CPointMap & pt )
 	// CLIMODE_TARG_SKILL_HERD_DEST
 
 	m_pChar->m_Act_p = pt;
-	m_pChar->m_Act_Targ = m_Targ_UID;	// Who to herd?
-	m_pChar->m_Act_TargPrv = m_Targ_PrvUID; // crook ?
+	m_pChar->m_Act_UID = m_Targ_UID;	// Who to herd?
+	m_pChar->m_Act_Prv_UID = m_Targ_Prv_UID; // crook ?
 
 	return( m_pChar->Skill_Start( SKILL_HERDING ));
 }
@@ -1447,8 +1447,8 @@ bool CClient::OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt )
 	m_pChar->m_atMagery.m_Spell			= m_tmSkillMagery.m_Spell;
 	m_pChar->m_atMagery.m_SummonID		= m_tmSkillMagery.m_SummonID;
 
-	m_pChar->m_Act_TargPrv				= m_Targ_PrvUID;	// Source (wand or you?)
-	m_pChar->m_Act_Targ					= pObj ? (dword) pObj->GetUID() : UID_CLEAR ;
+	m_pChar->m_Act_Prv_UID				= m_Targ_Prv_UID;	// Source (wand or you?)
+	m_pChar->m_Act_UID					= pObj ? (dword) pObj->GetUID() : UID_CLEAR ;
 	m_pChar->m_Act_p					= pt;
 	m_Targ_p							= pt;
 
@@ -1514,9 +1514,9 @@ bool CClient::OnTarg_Pet_Stable( CChar * pCharPet )
 	ADDTOCALLSTACK("CClient::OnTarg_Pet_Stable");
 	// CLIMODE_PET_STABLE
 	// NOTE: You are only allowed to stable x creatures here.
-	// m_Targ_PrvUID = stable master.
+	// m_Targ_Prv_UID = stable master.
 
-	CChar * pCharMaster = m_Targ_PrvUID.CharFind();
+	CChar * pCharMaster = m_Targ_Prv_UID.CharFind();
 	if ( pCharMaster == NULL )
 		return false;
 
@@ -1757,7 +1757,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		return false;
 	}
 
-	m_Targ_PrvUID = m_Targ_UID;	// used item.
+	m_Targ_Prv_UID = m_Targ_UID;	// used item.
 	m_Targ_p = pt;
 
 	ITRIG_TYPE trigtype;
@@ -1878,7 +1878,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 	case IT_WEAPON_MACE_PICK:
 		// Mine at the location. (shovel)
 		m_pChar->m_Act_p = pt;
-		m_pChar->m_Act_TargPrv = m_Targ_PrvUID;
+		m_pChar->m_Act_Prv_UID = m_Targ_Prv_UID;
 		m_pChar->m_atResource.m_ridType = CResourceID(RES_TYPEDEF, IT_ROCK);
 		return( m_pChar->Skill_Start( SKILL_MINING ));
 
@@ -1958,8 +1958,8 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		case IT_FOLIAGE:
 		case IT_TREE:
 			// Just targetted a tree type
-			m_pChar->m_Act_TargPrv = m_Targ_PrvUID;
-			m_pChar->m_Act_Targ = m_Targ_UID;
+			m_pChar->m_Act_Prv_UID = m_Targ_Prv_UID;
+			m_pChar->m_Act_UID = m_Targ_UID;
 			m_pChar->m_Act_p = pt;
 			m_pChar->m_atResource.m_ridType = CResourceID(RES_TYPEDEF, IT_TREE);
 			return( m_pChar->Skill_Start( SKILL_LUMBERJACKING ));
@@ -2064,8 +2064,8 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		// Use bandages on some creature.
 		if ( pCharTarg == NULL )
 			return false;
-		m_pChar->m_Act_TargPrv = m_Targ_PrvUID;
-		m_pChar->m_Act_Targ = m_Targ_UID;
+		m_pChar->m_Act_Prv_UID = m_Targ_Prv_UID;
+		m_pChar->m_Act_UID = m_Targ_UID;
 		return m_pChar->Skill_Start( (pCharTarg->GetNPCBrain() == NPCBRAIN_ANIMAL) ? SKILL_VETERINARY : SKILL_HEALING );
 
 	case IT_SEED:
@@ -2316,8 +2316,8 @@ static lpctstr const sm_Txt_LoomUse[] =
 		// Using a lock pick on something.
 		if ( pItemTarg== NULL )
 			return false;
-		m_pChar->m_Act_Targ = m_Targ_UID;	// the locked item to be picked
-		m_pChar->m_Act_TargPrv = m_Targ_PrvUID;	// the pick
+		m_pChar->m_Act_UID = m_Targ_UID;	// the locked item to be picked
+		m_pChar->m_Act_Prv_UID = m_Targ_Prv_UID;	// the pick
 		if ( ! m_pChar->CanUse( pItemTarg, false ))
 			return false;
 		return( m_pChar->Skill_Start( SKILL_LOCKPICKING ));

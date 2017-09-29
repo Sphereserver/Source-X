@@ -3004,7 +3004,7 @@ bool PacketSpellSelect::onReceive(NetState* net)
 			client->m_tmSkillMagery.m_Spell = spell;
 			character->m_atMagery.m_Spell = spell;
 			client->m_Targ_UID = character->GetUID();
-			client->m_Targ_PrvUID = character->GetUID();
+			client->m_Targ_Prv_UID = character->GetUID();
 			character->Skill_Start(static_cast<SKILL_TYPE>(skill));
 			return true;
 		}

@@ -132,7 +132,7 @@ CItem::~CItem()
 				CChar * pHorse = m_itFigurine.m_UID.CharFind();
 				if ( pHorse && pHorse->IsDisconnected() && ! pHorse->m_pPlayer )
 				{
-					pHorse->m_atRidden.m_FigurineUID.InitUID();
+					pHorse->m_atRidden.m_FigurineUID = UID_UNUSED;
 					pHorse->Delete();
 				}
 			}
@@ -245,7 +245,7 @@ CItem * CItem::CreateDupeItem( const CItem * pItem, CChar * pSrc, bool fSetNew )
 	pItemNew->DupeCopy( pItem );
 
 	if ( pSrc )
-		pSrc->m_Act_Targ = pItemNew->GetUID();
+		pSrc->m_Act_UID = pItemNew->GetUID();
 
 	if ( fSetNew )
 		g_World.m_uidNew = pItemNew->GetUID();
@@ -3240,10 +3240,10 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 		EXC_SET("chardef");
 		if ( pChar != NULL )
 		{
-			CUID uidOldAct = pChar->m_Act_Targ;
-			pChar->m_Act_Targ = GetUID();
+			CUID uidOldAct = pChar->m_Act_UID;
+			pChar->m_Act_UID = GetUID();
 			iRet = pChar->OnTrigger(sCharTrigName,  pSrc, pArgs );
-			pChar->m_Act_Targ = uidOldAct;
+			pChar->m_Act_UID = uidOldAct;
 			if ( iRet == TRIGRET_RET_TRUE )
 				goto stopandret;//return iRet;	// Block further action.
 		}
@@ -3415,10 +3415,10 @@ TRIGRET_TYPE CItem::OnTriggerCreate( CTextConsole * pSrc, CScriptTriggerArgs * p
 		EXC_SET("chardef");
 		if ( pChar != NULL )
 		{
-			CUID uidOldAct = pChar->m_Act_Targ;
-			pChar->m_Act_Targ = GetUID();
+			CUID uidOldAct = pChar->m_Act_UID;
+			pChar->m_Act_UID = GetUID();
 			iRet = pChar->OnTrigger(sCharTrigName,  pSrc, pArgs );
-			pChar->m_Act_Targ = uidOldAct;
+			pChar->m_Act_UID = uidOldAct;
 			if ( iRet == TRIGRET_RET_TRUE )
 				return iRet;	// Block further action.
 		}

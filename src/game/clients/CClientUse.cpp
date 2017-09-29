@@ -123,7 +123,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		pSpawn->DelObj(pItem->GetUID());
 
 	SetTargMode();
-	m_Targ_PrvUID = m_Targ_UID;
+	m_Targ_Prv_UID = m_Targ_UID;
 	m_Targ_UID = pItem->GetUID();
 	m_tmUseItem.m_pParent = pItem->GetParent();		// store item location to check later if it was not moved
 
@@ -959,7 +959,7 @@ bool CClient::Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase *pSrc )
 	SetTargMode();
 	m_tmSkillMagery.m_Spell = iSpell;	// m_atMagery.m_Spell
 	m_Targ_UID = m_pChar->GetUID();		// Default target.
-	m_Targ_PrvUID = pSrc->GetUID();		// Source of the spell.
+	m_Targ_Prv_UID = pSrc->GetUID();		// Source of the spell.
 
 	switch ( iSpell )
 	{
@@ -1017,8 +1017,8 @@ bool CClient::Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase *pSrc )
 
 	// Non-targeted spells
 	m_pChar->m_Act_p = m_pChar->GetTopPoint();
-	m_pChar->m_Act_Targ = m_Targ_UID;
-	m_pChar->m_Act_TargPrv = m_Targ_PrvUID;
+	m_pChar->m_Act_UID = m_Targ_UID;
+	m_pChar->m_Act_Prv_UID = m_Targ_Prv_UID;
 	m_pChar->m_atMagery.m_Spell = iSpell;
 	m_Targ_p = m_pChar->GetTopPoint();
 
@@ -1076,7 +1076,7 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 		{
 			// Tracking menu got us here. Start tracking the selected creature.
 			m_pChar->SetTimeout(1 * TICK_PER_SEC);
-			m_pChar->m_Act_Targ = m_tmMenu.m_Item[track_sel];	// selected UID
+			m_pChar->m_Act_UID = m_tmMenu.m_Item[track_sel];	// selected UID
 			m_pChar->Skill_Start(SKILL_TRACKING);
 			return true;
 		}
