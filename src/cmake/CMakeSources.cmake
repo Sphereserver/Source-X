@@ -249,6 +249,7 @@ SET (libev_SRCS
 #common/libev/event.h
 common/libev/wrapper_ev.c
 common/libev/wrapper_ev.h
+common/libev/config.h
 )
 SOURCE_GROUP (common\\libev FILES ${libev_SRCS})
 

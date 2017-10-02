@@ -2338,7 +2338,7 @@ CItem * CChar::Horse_GetMountItem() const
 			{
 				CItem* pItemMount = pOwner->LayerFind(LAYER_HORSE);
 
-				if ( pItemMount != NULL && pItemMount->m_itNormal.m_more2 == GetUID() )
+				if ( pItemMount != NULL && pItemMount->m_itNormal.m_more2 == GetUID().GetObjUID() )
 				{
 					m_atRidden.m_FigurineUID = pItemMount->GetUID().GetObjUID();
 					pItem = pItemMount;

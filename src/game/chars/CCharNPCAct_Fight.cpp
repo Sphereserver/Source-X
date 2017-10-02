@@ -192,7 +192,6 @@ void CChar::NPC_Act_Fight()
 	bool fSkipHardcoded	= false;
 	if ( IsTrigUsed(TRIGGER_NPCACTFIGHT) )
 	{
-		CUID m_oldAct = m_Act_UID;
 		CScriptTriggerArgs Args( iDist, iMotivation );
 		switch ( OnTrigger( CTRIG_NPCActFight, pChar, &Args ) )
 		{

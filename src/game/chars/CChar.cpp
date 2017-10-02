@@ -1957,7 +1957,7 @@ do_default:
 					}
 					if ( m_lastAttackers.size() )
 					{
-						size_t attackerIndex = m_lastAttackers.size();
+						int attackerIndex = (int)m_lastAttackers.size();
 						if( !strnicmp(pszKey, "MAX", 3) )
 						{
 							pszKey += 3;
@@ -1994,7 +1994,7 @@ do_default:
 						}
 
 						SKIP_SEPARATORS(pszKey);
-						if ( attackerIndex < m_lastAttackers.size() )
+						if ( attackerIndex < (int)m_lastAttackers.size() )
 						{
 							LastAttackers & refAttacker = m_lastAttackers.at(attackerIndex);
 
@@ -2894,7 +2894,7 @@ do_default:
 			if ( strlen(pszKey) > 8 )
 			{
 				pszKey += 8;
-				size_t attackerIndex = m_lastAttackers.size();
+				int attackerIndex = m_lastAttackers.size();
 				if ( *pszKey == '.' )
 				{
 					pszKey++;
@@ -2935,7 +2935,7 @@ do_default:
 
 					if (! IsStrNumeric(pszKey) )
 						return false;
-					attackerIndex = Exp_GetSTVal(pszKey);
+					attackerIndex = Exp_GetVal(pszKey);
 
 					SKIP_SEPARATORS(pszKey);
 					if ( attackerIndex < Attacker() )

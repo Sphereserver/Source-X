@@ -96,8 +96,15 @@ ENDIF (SINGLE_TARGET)
 SET (CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
 SET (CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS)
 
-INCLUDE ("cmake/CMakeSources.cmake")
+# Get the Git revision number
 INCLUDE ("cmake/CMakeGitStatus.cmake")
+# Generate config.h file for LibEV
+CONFIGURE_FILE ( "${CMAKE_CURRENT_SOURCE_DIR}/common/libev/cmake/config.h.cmake" "${CMAKE_CURRENT_SOURCE_DIR}/common/libev/config.h" )
+# Include the list of our source files
+MESSAGE (STATUS "Generating config.h for LibEV... (may require a minute or so)")
+INCLUDE ("${CMAKE_CURRENT_SOURCE_DIR}/common/libev/cmake/configure.cmake")
+MESSAGE (STATUS "config.h for LibEV generated")
+INCLUDE ("cmake/CMakeSources.cmake")
 
 IF (SINGLE_TARGET)
 

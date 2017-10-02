@@ -955,7 +955,7 @@ int Str_ParseCmds(tchar * pszCmdLine, int64 * piCmd, int iMax, lpctstr pszSep)
 	for (i = 0; i < iQty; ++i)
 		piCmd[i] = Exp_GetVal(ppTmp[i]);
 	for (; i < iMax; ++i)
-		piCmd[i] = NULL;
+		piCmd[i] = 0;
 	
 	return iQty;
 }

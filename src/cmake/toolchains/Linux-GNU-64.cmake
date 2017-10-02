@@ -13,16 +13,21 @@ endfunction()
 function (toolchain_exe_stuff)
 	#-- Setting compiler flags common to all builds.
 
-	SET (C_WARNING_OPTS	   "-Wall -Wextra -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-implicit-fallthrough -Wno-error=unused-but-set-variable")
-	SET (CXX_WARNING_OPTS  "-Wall -Wextra -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-implicit-fallthrough -Wno-invalid-offsetof")
+	SET (C_WARNING_OPTS
+        "-Wall -Wno-nonnull-compare -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-implicit-fallthrough\
+        -Wno-parentheses -Wno-misleading-indentation\
+        -Wno-error=unused-but-set-variable -Wno-maybe-uninitialized -Wno-implicit-function-declaration") # this line is for warnings issued by 3rd party C code
+	SET (CXX_WARNING_OPTS
+        "-Wall -Wno-nonnull-compare -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-implicit-fallthrough\
+        -Wno-parentheses -Wno-misleading-indentation -Wno-invalid-offsetof")
 	SET (C_ARCH_OPTS	"-march=x86-64 -m64")
 	SET (CXX_ARCH_OPTS	"-march=x86-64 -m64")
-	SET (C_OPTS		    "-std=c11   -pthread -fexceptions -fnon-call-exceptions")
+	SET (C_OPTS		"-std=c11   -pthread -fexceptions -fnon-call-exceptions")
 	SET (CXX_OPTS		"-std=c++11 -pthread -fexceptions -fnon-call-exceptions")
 	SET (C_SPECIAL		"-pipe -fno-expensive-optimizations")
 	SET (CXX_SPECIAL	"-pipe -ffast-math")
 
-	SET (CMAKE_C_FLAGS	    "${C_WARNING_OPTS} ${C_ARCH_OPTS} ${C_OPTS} ${C_SPECIAL}"		PARENT_SCOPE)
+	SET (CMAKE_C_FLAGS	"${C_WARNING_OPTS} ${C_ARCH_OPTS} ${C_OPTS} ${C_SPECIAL}"		PARENT_SCOPE)
 	SET (CMAKE_CXX_FLAGS	"${CXX_WARNING_OPTS} ${CXX_ARCH_OPTS} ${CXX_OPTS} ${CXX_SPECIAL}"	PARENT_SCOPE)
 
 

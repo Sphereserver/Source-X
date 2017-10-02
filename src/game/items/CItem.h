@@ -350,7 +350,7 @@ public:
 		// IT_DEED
 		struct
 		{
-			ITEMID_TYPE m_Type;		// more1 = deed for what multi, item or template ?
+			ITEMID_TYPE m_Type;			// more1 = deed for what multi, item or template ?
 			dword		m_dwKeyCode;	// more2 = previous key code. (dry docked ship)
 		} m_itDeed;
 
@@ -358,9 +358,9 @@ public:
 		// IT_FOLIAGE - the leaves of a tree normally.
 		struct
 		{
-			int m_Respawn_Sec;		// more1 = plant respawn time in seconds. (for faster growth plants)
+			int m_Respawn_Sec;			// more1 = plant respawn time in seconds. (for faster growth plants)
 			ITEMID_TYPE m_ReapFruitID;	// more2 = What is the fruit of this plant.
-			word m_ReapStages;		// morex = how many more stages of this to go til ripe.
+			word m_ReapStages;			// morex = how many more stages of this to go til ripe.
 		} m_itCrop;
 
 		// IT_TREE
@@ -377,7 +377,7 @@ public:
 		struct
 		{
 			CREID_TYPE m_ID;	// more1 = What sort of creature will this turn into.
-			CUIDBase m_UID;	// more2 = If stored by the stables. (offline creature)
+			CUIDBase m_UID;		// more2 = If stored by the stables. (offline creature)
 		} m_itFigurine;
 
 		// IT_RUNE

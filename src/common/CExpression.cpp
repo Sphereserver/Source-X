@@ -1118,7 +1118,7 @@ int CExpression::GetRangeArgsPos(lpctstr & pExpr, lpctstr (&pArgPos)[128][2], in
 
 	if ( pExpr == NULL )
 		return 0;
-	ASSERT(pArgPos);
+	//ASSERT(pArgPos);
 
 	int iQty = 0;	// number of arguments (not of value-weight couples)
 	while (pExpr[0] != '\0')

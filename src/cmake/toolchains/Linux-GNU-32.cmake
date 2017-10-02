@@ -2,10 +2,10 @@ SET (TOOLCHAIN 1)
 
 function (toolchain_after_project)
 	MESSAGE (STATUS "Toolchain: Linux-GNU-32.cmake.")
-	SET(CMAKE_SYSTEM_NAME	"Linux"		PARENT_SCOPE)
+	SET(CMAKE_SYSTEM_NAME	"Linux"      PARENT_SCOPE)
 	SET(ARCH_BITS		32		PARENT_SCOPE)
 
-	#LINK_DIRECTORIES (/usr/lib/mysql)
+	LINK_DIRECTORIES (/usr/lib/mysql)
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY	"${CMAKE_BINARY_DIR}/bin"	PARENT_SCOPE)
 endfunction()
 
@@ -13,8 +13,13 @@ endfunction()
 function (toolchain_exe_stuff)
 	#-- Setting compiler flags common to all builds.
 
-	SET (C_WARNING_OPTS	   "-Wall -Wextra -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-implicit-fallthrough -Wno-error=unused-but-set-variable")
-	SET (CXX_WARNING_OPTS  "-Wall -Wextra -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-implicit-fallthrough -Wno-invalid-offsetof")
+	SET (C_WARNING_OPTS
+        "-Wall -Wno-nonnull-compare -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-implicit-fallthrough\
+        -Wno-parentheses -Wno-misleading-indentation\
+        -Wno-error=unused-but-set-variable -Wno-maybe-uninitialized -Wno-implicit-function-declaration") # this line is for warnings issued by 3rd party C code
+	SET (CXX_WARNING_OPTS
+        "-Wall -Wno-nonnull-compare -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-implicit-fallthrough\
+        -Wno-parentheses -Wno-misleading-indentation -Wno-invalid-offsetof")
 	SET (C_ARCH_OPTS	"-march=i686 -m32")
 	SET (CXX_ARCH_OPTS	"-march=i686 -m32")
 	SET (C_OPTS		"-std=c11   -pthread -fexceptions -fnon-call-exceptions")
@@ -29,8 +34,8 @@ function (toolchain_exe_stuff)
 	#-- Setting common linker flags
 
 	 # -s and -g need to be added/removed also to/from linker flags!
-	SET (CMAKE_EXE_LINKER_FLAGS	-pthread -dynamic
-					-L/usr/lib/mysql		PARENT_SCOPE)
+	SET (CMAKE_EXE_LINKER_FLAGS	"-pthread -dynamic\
+					-L/usr/lib/mysql"		PARENT_SCOPE)
 
 
 	#-- Adding compiler flags per build.
