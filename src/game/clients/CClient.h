@@ -7,8 +7,8 @@
 #ifndef _INC_CCLIENT_H
 #define _INC_CCLIENT_H
 
+#include "../../common/crypto/CCrypto.h"
 #include "../../common/sphere_library/CSArray.h"
-#include "../../common/CEncrypt.h"
 #include "../../common/CScriptObj.h"
 #include "../../common/CTextConsole.h"
 #include "../../network/network.h"
@@ -251,7 +251,7 @@ public:
 
 private:
 	// encrypt/decrypt stuff.
-	CCrypt m_Crypt;			// Client source communications are always encrypted.
+	CCrypto m_Crypt;			// Client source communications are always encrypted.
 	static CHuffman m_Comp;
 
 private:

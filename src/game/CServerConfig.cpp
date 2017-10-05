@@ -2480,7 +2480,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		return true;
 
 	case RES_SPHERECRYPT:
-		CCrypt::LoadKeyTable(*pScript);
+		CCrypto::LoadKeyTable(*pScript);
 		return true;
 
 	case RES_ACCOUNT:	// NOTE: ArgStr is not the DEFNAME
@@ -3801,7 +3801,7 @@ bool CServerConfig::LoadCryptIni( void )
 	m_scpCryptIni.Close();
 	m_scpCryptIni.CloseForce();
 
-	g_Log.Event( LOGM_INIT, "Loaded %" PRIuSIZE_T " client encryption keys.\n", CCrypt::client_keys.size() );
+	g_Log.Event( LOGM_INIT, "Loaded %" PRIuSIZE_T " client encryption keys.\n", CCrypto::client_keys.size() );
 
 	return true;
 }

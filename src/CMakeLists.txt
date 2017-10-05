@@ -118,6 +118,7 @@ IF (SINGLE_TARGET)
 					${uofiles_SRCS}
 					${common_SRCS}
 					${network_SRCS}
+					${crypto_SRCS}
 					${sphere_SRCS}
 					${crashdump_SRCS}
 					${libev_SRCS}
@@ -138,6 +139,7 @@ IF (SINGLE_TARGET)
 					${uofiles_SRCS}
 					${common_SRCS}
 					${network_SRCS}
+					${crypto_SRCS}
 					${sphere_SRCS}
 					${crashdump_SRCS}
 					${libev_SRCS}
@@ -158,6 +160,7 @@ IF (SINGLE_TARGET)
 					${uofiles_SRCS}
 					${common_SRCS}
 					${network_SRCS}
+					${crypto_SRCS}
 					${sphere_SRCS}
 					${crashdump_SRCS}
 					${libev_SRCS}
@@ -180,6 +183,7 @@ ELSE (SINGLE_TARGET)
             ${uofiles_SRCS}
             ${common_SRCS}
             ${network_SRCS}
+	    ${crypto_SRCS}
             ${sphere_SRCS}
             ${crashdump_SRCS}
             ${libev_SRCS}

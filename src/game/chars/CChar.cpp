@@ -901,7 +901,7 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 
 	g_World.m_uidLastNewChar = GetUID();	// for script access.
 
-	for ( size_t i = 0; i < STAT_QTY; i++ )
+	for ( size_t i = 0; i < STAT_QTY; ++i )
 	{
 		Stat_SetBase(static_cast<STAT_TYPE>(i), pChar->Stat_GetBase(static_cast<STAT_TYPE>(i)));
 		Stat_SetMod(static_cast<STAT_TYPE>(i), pChar->Stat_GetMod(static_cast<STAT_TYPE>(i)));
@@ -910,7 +910,7 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 		m_Stat[i].m_regen = 0;
 	}
 
-	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; i++ )
+	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
 		m_Skill[i] = pChar->m_Skill[i];
 	}
@@ -1969,7 +1969,7 @@ do_default:
 								if ( iCurDmg > iMaxDmg )
 								{
 									iMaxDmg = iCurDmg;
-									attackerIndex = iAttacker;
+									attackerIndex = (int)iAttacker;
 								}
 							}
 						}
@@ -1984,7 +1984,7 @@ do_default:
 								if ( dwCurTime <= dwLastTime )
 								{
 									dwLastTime = dwCurTime;
-									attackerIndex = iAttacker;
+									attackerIndex = (int)iAttacker;
 								}
 							}
 						}
@@ -2894,7 +2894,7 @@ do_default:
 			if ( strlen(pszKey) > 8 )
 			{
 				pszKey += 8;
-				int attackerIndex = m_lastAttackers.size();
+				int attackerIndex = (int)m_lastAttackers.size();
 				if ( *pszKey == '.' )
 				{
 					pszKey++;

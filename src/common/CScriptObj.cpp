@@ -13,16 +13,17 @@
 #include "../game/chars/CChar.h"
 #include "../game/clients/CClient.h"
 #include "../game/items/CItemStone.h"
-#include "../common/CLog.h"
 #include "../game/spheresvr.h"
 #include "../game/CScriptProfiler.h"
 #include "../game/CWorld.h"
 #include "../sphere/ProfileTask.h"
+#include "../common/CLog.h"
 #include "sphere_library/CSString.h"
+#include "crypto/CMD5.h"
+
 #include "CException.h"
 #include "CExpression.h"
 #include "CUID.h"
-#include "CMD5.h"
 #include "CScript.h"
 #include "CScriptObj.h"
 #include "CTextConsole.h"
@@ -1764,7 +1765,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 
 	if ( iType & 4 )		// FOR
 	{
-		int fCountDown = FALSE;
+		bool fCountDown = false;
 		int iMin = 0;
 		int iMax = 0;
 		int i;

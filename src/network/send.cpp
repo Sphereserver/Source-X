@@ -3079,10 +3079,10 @@ void PacketServerList::writeServerEntry(const CServerRef& server, int index, boo
 
 	uint percentFull;
 	if (server == &g_Serv)
-		percentFull = minimum((server->StatGet(SERV_STAT_CLIENTS) * 100) / maximum(1, g_Cfg.m_iClientsMax), 100);
+		percentFull = (uint)(minimum((server->StatGet(SERV_STAT_CLIENTS) * 100) / maximum(1, g_Cfg.m_iClientsMax), 100));
 		//percentFull = (int)maximum(0, minimum((server->StatGet(SERV_STAT_CLIENTS) * 100) / maximum(1, g_Cfg.m_iClientsMax), 100));
 	else
-		percentFull = minimum(server->StatGet(SERV_STAT_CLIENTS), 100);
+		percentFull = (uint)(minimum(server->StatGet(SERV_STAT_CLIENTS), 100));
 
 	dword ip = server->m_ip.GetAddrIP();
 

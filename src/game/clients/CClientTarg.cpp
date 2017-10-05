@@ -1399,9 +1399,9 @@ bool CClient::OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt )
 	// The client player has targeted a spell.
 	// CLIMODE_TARG_SKILL_MAGERY
 
-	const CSpellDef *		pSpell	= g_Cfg.GetSpellDef( m_tmSkillMagery.m_Spell );
-
-	if ( ! pSpell )		return false;
+	const CSpellDef * pSpell	= g_Cfg.GetSpellDef( m_tmSkillMagery.m_Spell );
+	if ( ! pSpell )	
+		return false;
 
 	if ( pObj )
 	{

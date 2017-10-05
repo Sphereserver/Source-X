@@ -7,7 +7,6 @@
 #ifndef _INC_CSCRIPT_H
 #define _INC_CSCRIPT_H
 
-#include "common.h"
 #include "sphere_library/CSMemBlock.h"
 #include "CacheableScriptFile.h"
 

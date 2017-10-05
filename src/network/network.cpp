@@ -1106,7 +1106,7 @@ void NetworkIn::tick(void)
 						{
 							DEBUG_MSG(("%x:New Login Handshake Detected. Client Version: %u.%u.%u.%u\n", client->id(), pEvent->NewSeed.m_Version_Maj, pEvent->NewSeed.m_Version_Min, pEvent->NewSeed.m_Version_Rev, pEvent->NewSeed.m_Version_Pat));
 
-							client->m_reportedVersion = CCrypt::GetVerFromNumber(pEvent->NewSeed.m_Version_Maj, pEvent->NewSeed.m_Version_Min, pEvent->NewSeed.m_Version_Rev, pEvent->NewSeed.m_Version_Pat);
+							client->m_reportedVersion = CCrypto::GetVerFromNumber(pEvent->NewSeed.m_Version_Maj, pEvent->NewSeed.m_Version_Min, pEvent->NewSeed.m_Version_Rev, pEvent->NewSeed.m_Version_Pat);
 							seed = (dword) pEvent->NewSeed.m_Seed;
 						}
 						else
@@ -3543,7 +3543,7 @@ bool NetworkInput::processUnknownClientData(NetState* state, Packet* buffer)
 				dword versionPatch = buffer->readInt32();
 
 				DEBUG_MSG(("%x:New Login Handshake Detected. Client Version: %u.%u.%u.%u\n", state->id(), versionMajor, versionMinor, versionRevision, versionPatch));
-				state->m_reportedVersion = CCrypt::GetVerFromNumber(versionMajor, versionMinor, versionRevision, versionPatch);
+				state->m_reportedVersion = CCrypto::GetVerFromNumber(versionMajor, versionMinor, versionRevision, versionPatch);
 			}
 			else
 			{

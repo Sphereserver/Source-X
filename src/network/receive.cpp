@@ -2431,7 +2431,7 @@ bool PacketClientVersion::onReceive(NetState* net)
 		CClient* client = net->getClient();
 		ASSERT(client);
 
-		dword version = CCrypt::GetVerFromString(versionStr);
+		dword version = CCrypto::GetVerFromString(versionStr);
 		net->m_reportedVersion = version;
 		net->detectAsyncMode();
 

@@ -6,8 +6,8 @@
 #ifndef _INC_CSERVERDEF_H
 #define _INC_CSERVERDEF_H
 
+#include "../common/crypto/CCrypto.h"
 #include "../common/sphere_library/CSTime.h"
-#include "../common/CEncrypt.h"
 #include "../common/CScriptObj.h"
 #include "../common/CSocket.h"
 #include "CServerTime.h"
@@ -60,7 +60,7 @@ public:
 	static const char *m_sClassName;
 	CSocketAddress m_ip;	// socket and port.
 	CSString m_sClientVersion;
-	CCrypt m_ClientVersion;
+	CCrypto m_ClientVersion;
 
 	// Breakdown the string. or filled in locally.
 	char m_TimeZone;	// Hours from GMT. +5=EST

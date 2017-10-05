@@ -614,7 +614,7 @@ bool CClient::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 				{
 					// Return full version string (eg: 5.0.2d)
 					tchar szVersion[128];
-					sVal = CCrypt::WriteClientVerString(iCliVer, szVersion);
+					sVal = CCrypto::WriteClientVerString(iCliVer, szVersion);
 				}
 				else
 				{

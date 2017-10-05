@@ -1,3 +1,173 @@
+# Main program files: threads, console...
+SET (sphere_SRCS
+sphere/asyncdb.cpp
+sphere/asyncdb.h
+sphere/containers.h
+sphere/linuxev.cpp
+sphere/linuxev.h
+sphere/ProfileData.cpp
+sphere/ProfileData.h
+sphere/ProfileTask.cpp
+sphere/ProfileTask.h
+sphere/strings.cpp
+sphere/strings.h
+sphere/threads.cpp
+sphere/threads.h
+sphere/ntservice.cpp
+sphere/ntservice.h
+sphere/ntwindow.cpp
+sphere/UnixTerminal.cpp
+sphere/UnixTerminal.h
+sphere/SphereSvr.rc
+)
+SOURCE_GROUP (sphere FILES ${sphere_SRCS})
+
+# Network management files
+SET (network_SRCS
+network/network.cpp
+network/network.h
+network/packet.cpp
+network/packet.h
+network/receive.cpp
+network/receive.h
+network/send.cpp
+network/send.h
+network/PingServer.cpp
+network/PingServer.h
+)
+SOURCE_GROUP (network FILES ${network_SRCS})
+
+# Login encryption handling
+SET (crypto_SRCS
+common/crypto/CCrypto.cpp
+common/crypto/CCrypto.h
+common/crypto/CCryptoBlowFish.cpp
+common/crypto/CCryptoHuffman.cpp
+common/crypto/CCryptoLogin.cpp
+common/crypto/CCryptoMD5Interface.cpp
+common/crypto/CCryptoTwoFishInterface.cpp
+common/crypto/CMD5.cpp
+common/crypto/CMD5.h
+common/crypto/twofish.cpp
+common/crypto/twofish.h
+common/crypto/twofish_aux.h
+)
+SOURCE_GROUP (common\\crypto FILES ${crypto_SRCS})
+
+# Handle UO Client files
+SET (uofiles_SRCS
+game/uo_files/CUOMapList.h
+game/uo_files/CUOMapList.cpp
+game/uo_files/CUOItemInfo.h
+game/uo_files/CUOItemInfo.cpp
+game/uo_files/CUOHuesRec.h
+game/uo_files/CUOHuesRec.cpp
+game/uo_files/CUOIndexRec.h
+game/uo_files/CUOIndexRec.cpp
+game/uo_files/CUOItemTypeRec.h
+game/uo_files/CUOMapBlock.h
+game/uo_files/CUOMapMeter.h
+game/uo_files/CUOMapMeter.cpp
+game/uo_files/CUOMultiItemRec.h
+game/uo_files/CUOMultiItemRec.cpp
+game/uo_files/CUOStaticItemRec.h
+game/uo_files/CUOStaticItemRec.cpp
+game/uo_files/CUOTerrainInfo.h
+game/uo_files/CUOTerrainInfo.cpp
+game/uo_files/CUOTerrainTypeRec.h
+game/uo_files/CUOVersionBlock.h
+game/uo_files/CUOVersionBlock.cpp
+game/uo_files/uofiles_enums.h
+game/uo_files/uofiles_enums_itemid.h
+game/uo_files/uofiles_enums_creid.h
+game/uo_files/uofiles_macros.h
+game/uo_files/uofiles_types.h
+)
+SOURCE_GROUP (game\\uo_files FILES ${uofiles_SRCS})
+
+# Files containing 'background work'
+SET (common_SRCS
+common/CacheableScriptFile.cpp
+common/CacheableScriptFile.h
+common/CDataBase.cpp
+common/CDataBase.h
+common/CException.cpp
+common/CException.h
+common/CExpression.cpp
+common/CExpression.h
+common/CLog.cpp
+common/CLog.h
+common/CServerMap.cpp
+common/CServerMap.h
+common/CUID.cpp
+common/CUID.h
+common/CUIDExtra.h
+common/CObjBaseTemplate.cpp
+common/CObjBaseTemplate.h
+common/common.cpp
+common/common.h
+common/CRect.cpp
+common/CRect.h
+common/CRegion.cpp
+common/CRegion.h
+common/CResourceBase.cpp
+common/CResourceBase.h
+common/CScript.cpp
+common/CScript.h
+common/CScriptObj.cpp
+common/CScriptObj.h
+common/CSectorTemplate.cpp
+common/CSectorTemplate.h
+common/CSocket.cpp
+common/CSocket.h
+common/CsvFile.cpp
+common/CsvFile.h
+common/CTextConsole.cpp
+common/CTextConsole.h
+common/CUOInstall.cpp
+common/CUOInstall.h
+common/CVarDefMap.cpp
+common/CVarDefMap.h
+common/CVarFloat.cpp
+common/CVarFloat.h
+common/datatypes.h
+common/sphereproto.h
+common/sphereversion.h
+common/ListDefContMap.cpp
+common/ListDefContMap.h
+common/os_unix.h
+common/os_windows.h
+common/regex/deelx.h
+)
+SOURCE_GROUP (common FILES ${common_SRCS})
+
+# Sphere library files
+SET (spherelibrary_SRCS
+common/sphere_library/CSArray.cpp
+common/sphere_library/CSArray.h
+common/sphere_library/CSAssoc.cpp
+common/sphere_library/CSAssoc.h
+common/sphere_library/CSFile.cpp
+common/sphere_library/CSFile.h
+common/sphere_library/CSFileList.cpp
+common/sphere_library/CSFileList.h
+common/sphere_library/CSMemBlock.cpp
+common/sphere_library/CSMemBlock.h
+common/sphere_library/CSQueue.cpp
+common/sphere_library/CSQueue.h
+common/sphere_library/CSRand.cpp
+common/sphere_library/CSRand.h
+common/sphere_library/CSString.cpp
+common/sphere_library/CSString.h
+common/sphere_library/CSTime.cpp
+common/sphere_library/CSTime.h
+common/sphere_library/CSWindow.cpp
+common/sphere_library/CSWindow.h
+common/sphere_library/mutex.h
+common/sphere_library/mutex.cpp
+)
+SOURCE_GROUP (common\\sphere_library FILES ${spherelibrary_SRCS})
+
 # Main game files.
 SET (game_SRCS
 game/CBase.cpp
@@ -132,97 +302,6 @@ game/clients/CParty.h
 )
 SOURCE_GROUP (game\\clients FILES ${clients_SRCS})
 
-SET (uofiles_SRCS
-game/uo_files/CUOMapList.h
-game/uo_files/CUOMapList.cpp
-game/uo_files/CUOItemInfo.h
-game/uo_files/CUOItemInfo.cpp
-game/uo_files/CUOHuesRec.h
-game/uo_files/CUOHuesRec.cpp
-game/uo_files/CUOIndexRec.h
-game/uo_files/CUOIndexRec.cpp
-game/uo_files/CUOItemTypeRec.h
-game/uo_files/CUOMapBlock.h
-game/uo_files/CUOMapMeter.h
-game/uo_files/CUOMapMeter.cpp
-game/uo_files/CUOMultiItemRec.h
-game/uo_files/CUOMultiItemRec.cpp
-game/uo_files/CUOStaticItemRec.h
-game/uo_files/CUOStaticItemRec.cpp
-game/uo_files/CUOTerrainInfo.h
-game/uo_files/CUOTerrainInfo.cpp
-game/uo_files/CUOTerrainTypeRec.h
-game/uo_files/CUOVersionBlock.h
-game/uo_files/CUOVersionBlock.cpp
-game/uo_files/uofiles_enums.h
-game/uo_files/uofiles_enums_itemid.h
-game/uo_files/uofiles_enums_creid.h
-game/uo_files/uofiles_macros.h
-game/uo_files/uofiles_types.h
-)
-SOURCE_GROUP (game\\uo_files FILES ${uofiles_SRCS})
-
-# Files containing 'background work'
-SET (common_SRCS
-common/CacheableScriptFile.cpp
-common/CacheableScriptFile.h
-common/CDataBase.cpp
-common/CDataBase.h
-common/CEncrypt.cpp
-common/CEncrypt.h
-common/CException.cpp
-common/CException.h
-common/CExpression.cpp
-common/CExpression.h
-common/CLog.cpp
-common/CLog.h
-common/CServerMap.cpp
-common/CServerMap.h
-common/CUID.cpp
-common/CUID.h
-common/CUIDExtra.h
-common/CMD5.cpp
-common/CMD5.h
-common/CObjBaseTemplate.cpp
-common/CObjBaseTemplate.h
-common/common.cpp
-common/common.h
-common/CRect.cpp
-common/CRect.h
-common/CRegion.cpp
-common/CRegion.h
-common/CResourceBase.cpp
-common/CResourceBase.h
-common/CScript.cpp
-common/CScript.h
-common/CScriptObj.cpp
-common/CScriptObj.h
-common/CSectorTemplate.cpp
-common/CSectorTemplate.h
-common/CSocket.cpp
-common/CSocket.h
-common/CsvFile.cpp
-common/CsvFile.h
-common/CTextConsole.cpp
-common/CTextConsole.h
-common/CUOInstall.cpp
-common/CUOInstall.h
-common/CVarDefMap.cpp
-common/CVarDefMap.h
-common/CVarFloat.cpp
-common/CVarFloat.h
-common/datatypes.h
-common/sphereproto.h
-common/sphereversion.h
-common/ListDefContMap.cpp
-common/ListDefContMap.h
-common/os_unix.h
-common/os_windows.h
-common/twofish/twofish2.cpp
-common/regex/deelx.h
-)
-SOURCE_GROUP (common FILES ${common_SRCS})
-
 # CrashDump files
 SET (crashdump_SRCS
 common/crashdump/crashdump.cpp
@@ -249,36 +328,9 @@ SET (libev_SRCS
 #common/libev/event.h
 common/libev/wrapper_ev.c
 common/libev/wrapper_ev.h
-common/libev/config.h
+#common/libev/config.h
 )
 SOURCE_GROUP (common\\libev FILES ${libev_SRCS})
-
-# Sphere library files
-SET (spherelibrary_SRCS
-common/sphere_library/CSArray.cpp
-common/sphere_library/CSArray.h
-common/sphere_library/CSAssoc.cpp
-common/sphere_library/CSAssoc.h
-common/sphere_library/CSFile.cpp
-common/sphere_library/CSFile.h
-common/sphere_library/CSFileList.cpp
-common/sphere_library/CSFileList.h
-common/sphere_library/CSMemBlock.cpp
-common/sphere_library/CSMemBlock.h
-common/sphere_library/CSQueue.cpp
-common/sphere_library/CSQueue.h
-common/sphere_library/CSRand.cpp
-common/sphere_library/CSRand.h
-common/sphere_library/CSString.cpp
-common/sphere_library/CSString.h
-common/sphere_library/CSTime.cpp
-common/sphere_library/CSTime.h
-common/sphere_library/CSWindow.cpp
-common/sphere_library/CSWindow.h
-common/sphere_library/mutex.h
-common/sphere_library/mutex.cpp
-)
-SOURCE_GROUP (common\\sphere_library FILES ${spherelibrary_SRCS})
 
 # SQLite files
 SET (sqlite_SRCS
@@ -319,45 +371,6 @@ common/zlib/zutil.c
 common/zlib/zutil.h
 )
 SOURCE_GROUP (common\\zlib FILES ${zlib_SRCS})
-
-# Network management files
-SET (network_SRCS
-network/network.cpp
-network/network.h
-network/packet.cpp
-network/packet.h
-network/receive.cpp
-network/receive.h
-network/send.cpp
-network/send.h
-network/PingServer.cpp
-network/PingServer.h
-)
-SOURCE_GROUP (network FILES ${network_SRCS})
-
-# Main program files: threads, console...
-SET (sphere_SRCS
-sphere/asyncdb.cpp
-sphere/asyncdb.h
-sphere/containers.h
-sphere/linuxev.cpp
-sphere/linuxev.h
-sphere/ProfileData.cpp
-sphere/ProfileData.h
-sphere/ProfileTask.cpp
-sphere/ProfileTask.h
-sphere/strings.cpp
-sphere/strings.h
-sphere/threads.cpp
-sphere/threads.h
-sphere/ntservice.cpp
-sphere/ntservice.h
-sphere/ntwindow.cpp
-sphere/UnixTerminal.cpp
-sphere/UnixTerminal.h
-sphere/SphereSvr.rc
-)
-SOURCE_GROUP (sphere FILES ${sphere_SRCS})
 
 # Table definitions
 SET (tables_SRCS

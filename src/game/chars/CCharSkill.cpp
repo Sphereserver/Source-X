@@ -553,10 +553,8 @@ void CChar::Skill_Cleanup()
 	ADDTOCALLSTACK("CChar::Skill_Cleanup");
 	// We are starting the skill or ended dealing with it (started / succeeded / failed / aborted)
 	m_Act_Difficulty = 0;
+	m_atUnk.m_Arg1 = m_atUnk.m_Arg2 = m_atUnk.m_Arg3 = 0;		// init ACTARG1/2/3
 	m_Act_SkillCurrent = SKILL_NONE;
-	m_atUnk.m_Arg1 = 0;		// init ACTARG1/2/3
-	m_atUnk.m_Arg2 = 0;
-	m_atUnk.m_Arg3 = 0;
 	SetTimeout( m_pPlayer ? -1 : TICK_PER_SEC );	// we should get a brain tick next time
 }
 
@@ -3602,7 +3600,10 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 
 	if ( skill != SKILL_NONE )
 	{
-		Skill_Cleanup();
+		// Do the cleanup only at the end the skill, not at the start: we may want to set some parameters before the skill call
+		// (like ACTARG1/2 for magery, they are respectively m_atMagery.m_Spell	and m_atMagery.m_SummonID and are set in
+		// CClient::OnTarg_Skill_Magery, which then calls Skill_Start).
+		//Skill_Cleanup();
 		m_Act_SkillCurrent = skill;
 
 		// Some skill can start right away. Need no targetting.
@@ -3624,8 +3625,8 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 			}
 		}
 
-		m_Act_Difficulty = Skill_Stage(SKTRIG_START) + iDifficultyIncrease;
-		if (m_Act_Difficulty > 1000)		m_Act_Difficulty = 1000;
+		m_Act_Difficulty =				Skill_Stage(SKTRIG_START) + iDifficultyIncrease;
+		if (m_Act_Difficulty > 1000)	m_Act_Difficulty = 1000;
 		else if (m_Act_Difficulty < 0)	m_Act_Difficulty = 0;
 
 		// Execute the @START trigger and pass various craft parameters there

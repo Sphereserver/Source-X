@@ -1,9 +1,9 @@
 // Login and low level stuff for the client.
 
-#include "../../common/CLog.h"
-#include "../../common/CEncrypt.h"
-#include "../../common/CException.h"
+#include "../../common/crypto/CCrypto.h"
 #include "../../common/sphere_library/CSFileList.h"
+#include "../../common/CLog.h"
+#include "../../common/CException.h"
 #include "../../network/network.h"
 #include "../../network/send.h"
 #include "../CServer.h"
