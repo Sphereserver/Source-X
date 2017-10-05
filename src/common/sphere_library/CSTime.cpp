@@ -93,9 +93,10 @@ void FormatDateTime(tchar * pszTemp, lpctstr pszFormat, const struct tm * ptmTem
 
 #ifdef _WIN32
 	// on windows we need to set the invalid parameter handler, or else the program will terminate when a bad format is encountered
-	_invalid_parameter_handler oldHandler, newHandler;
+	_invalid_parameter_handler newHandler;
 	newHandler = static_cast<_invalid_parameter_handler>(invalidParameterHandler);
 #ifdef _MSC_VER
+    _invalid_parameter_handler oldHandler;
 	oldHandler = _set_invalid_parameter_handler(newHandler);
 #endif // _MSC_VER
 	try
@@ -169,9 +170,9 @@ bool CSTime::Read(tchar *pszVal)
 		return false;
 
 	struct tm atm;
-	atm.tm_wday = 0;    // days since Sunday - [0,6] 
-	atm.tm_yday = 0;    // days since January 1 - [0,365] 
-	atm.tm_isdst = 0;   // daylight savings time flag 
+	atm.tm_wday = 0;    // days since Sunday - [0,6]
+	atm.tm_yday = 0;    // days since January 1 - [0,365]
+	atm.tm_isdst = 0;   // daylight savings time flag
 
 	// Saves: "1999/8/1 14:30:18"
 	atm.tm_year = ATOI(ppCmds[0]) - 1900;

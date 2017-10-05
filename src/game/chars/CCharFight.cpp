@@ -162,35 +162,35 @@ bool CChar::Skill_Snoop_Check( const CItemContainer * pItem )
 	if ( pItem == NULL )
 		return true;
 
-	ASSERT( pItem->IsItem() );
 	if ( pItem->IsContainer() )
 	{
-		CItemContainer * pItemCont = dynamic_cast <CItemContainer *> (pItem->GetContainer());
-			if  ( ( pItemCont->IsItemInTrade() == true )  && ( g_Cfg.m_iTradeWindowSnooping == false ) )
-				return false;
+		if  ( ( g_Cfg.m_iTradeWindowSnooping == false ) && ( pItem->IsItemInTrade() == true ) )
+			return false;
 	}
 
 	if ( !IsPriv(PRIV_GM) )
-	switch ( pItem->GetType() )
 	{
-		case IT_SHIP_HOLD_LOCK:
-		case IT_SHIP_HOLD:
-			// Must be on board a ship to open the hatch.
-			ASSERT(m_pArea);
-			if ( m_pArea->GetResourceID() != pItem->m_uidLink )
-			{
-				SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_HATCH_FAIL));
-				return true;
-			}
-			break;
-		case IT_EQ_BANK_BOX:
-			// Some sort of cheater.
-			return false;
-		default:
-			break;
+		switch ( pItem->GetType() )
+		{
+			case IT_SHIP_HOLD_LOCK:
+			case IT_SHIP_HOLD:
+				// Must be on board a ship to open the hatch.
+				ASSERT(m_pArea);
+				if ( m_pArea->GetResourceID() != pItem->m_uidLink )
+				{
+					SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_HATCH_FAIL));
+					return true;
+				}
+				break;
+			case IT_EQ_BANK_BOX:
+				// Some sort of cheater.
+				return false;
+			default:
+				break;
+		}
 	}
 
-	CChar * pCharMark;
+	CChar * pCharMark = NULL;
 	if ( !IsTakeCrime( pItem, &pCharMark ) || pCharMark == NULL )
 		return false;
 

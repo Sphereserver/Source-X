@@ -64,17 +64,15 @@ bool CItemContainer::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole *p
 	return CItemVendable::r_WriteVal(pszKey, sVal, pSrc);
 }
 
-bool CItemContainer::IsItemInTrade()
+bool CItemContainer::IsItemInTrade() const
 {
 	// recursively get the item that is at "top" level.
-	CItemContainer *pObj = dynamic_cast<CItemContainer *>(this);
-	//const CObjBase *pObj = pItem->GetContainer();
-	if ( !pObj )
-		return false;
-	else if ( pObj->IsType(IT_EQ_TRADE_WINDOW) )
+	if ( IsType(IT_EQ_TRADE_WINDOW) )
 		return true;
-	CItemContainer *pObj2 = dynamic_cast<CItemContainer *>(GetContainer());
-	return pObj2->IsItemInTrade();
+	CItemContainer *pItemCont = dynamic_cast<CItemContainer *>(GetContainer());
+	if (pItemCont)
+		return pItemCont->IsItemInTrade();
+	return false;
 }
 
 void CItemContainer::Trade_Status( bool bCheck )

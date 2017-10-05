@@ -53,7 +53,7 @@ public:
 protected:
 	void OnRemoveObj( CSObjListRec* pObRec );	// Override this = called when removed from list.
 public:
-	bool IsItemInTrade();
+	bool IsItemInTrade() const;
 	void Trade_Status( bool bCheck );
 	void Trade_UpdateGold( dword platinum, dword gold );
 	void Trade_Delete();

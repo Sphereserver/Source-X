@@ -15,6 +15,7 @@ IF (MSVC)
 	INCLUDE ("cmake/toolchains/Windows-MSVC.cmake")
 ELSE (MSVC)
 	MESSAGE (STATUS "Toolchain: defaulting to 32 bits compiler.")
+	# ...or we can detect the architecture automatically
 	# INCLUDE ("cmake/CMakeDetectArch.cmake")
 	# target_architecture("ARCH_DETECT")
 
@@ -45,10 +46,17 @@ ENDIF (MSVC)
 
 ENDIF (NOT TOOLCHAIN)
 
-toolchain_after_project()
+
+toolchain_after_project()   # stuff that need to be executed before ADD_EXECUTABLE
+
+# Need to clear shared library flags. If not, cmake sets -rdynamic and this
+# add to the executable the full symbol table (included unused symbols).
+# This is a problem because the binary is ~700 KB bigger.
+SET (CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
+SET (CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS)
 
 
-string(FIND "${CMAKE_GENERATOR}" "Makefiles" MAKEFILE)
+STRING (FIND "${CMAKE_GENERATOR}" "Makefiles" MAKEFILE)
 IF ( (MAKEFILE GREATER 0) AND (NOT MSVC) )
 	SET (SINGLE_TARGET 1)
 ELSEIF ( MSVC )
@@ -90,21 +98,14 @@ ELSE (SINGLE_TARGET)
 ENDIF (SINGLE_TARGET)
 
 
-# Need to clear shared library flags. If not, cmake sets -rdynamic and this
-# add to the executable the full symbol table (included unused symbols).
-# This is a problem because the binary is ~700 KB bigger.
-SET (CMAKE_SHARED_LIBRARY_LINK_C_FLAGS)
-SET (CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS)
-
 # Get the Git revision number
 INCLUDE ("cmake/CMakeGitStatus.cmake")
 # Generate config.h file for LibEV
+INCLUDE ("${CMAKE_CURRENT_SOURCE_DIR}/common/libev/cmake/configure.cmake")
 CONFIGURE_FILE ( "${CMAKE_CURRENT_SOURCE_DIR}/common/libev/cmake/config.h.cmake" "${CMAKE_CURRENT_SOURCE_DIR}/common/libev/config.h" )
 # Include the list of our source files
-MESSAGE (STATUS "Generating config.h for LibEV... (may require a minute or so)")
-INCLUDE ("${CMAKE_CURRENT_SOURCE_DIR}/common/libev/cmake/configure.cmake")
-MESSAGE (STATUS "config.h for LibEV generated")
 INCLUDE ("cmake/CMakeSources.cmake")
+
 
 IF (SINGLE_TARGET)
 
@@ -126,7 +127,7 @@ IF (SINGLE_TARGET)
 					${tables_SRCS}
 		#			${docs_TEXT}
 			)
-        set_target_properties(spheresvr_release PROPERTIES OUTPUT_NAME SphereSvr${ARCH_BITS}_release)
+        SET_TARGET_PROPERTIES(spheresvr_release PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_release)
 	ENDIF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(R|r?)elease"))
 	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(D|d?)ebug"))
 		ADD_EXECUTABLE (spheresvr_debug
@@ -146,7 +147,7 @@ IF (SINGLE_TARGET)
 					${tables_SRCS}
 		#			${docs_TEXT}
 			)
-        set_target_properties(spheresvr_debug PROPERTIES OUTPUT_NAME SphereSvr${ARCH_BITS}_debug)
+        SET_TARGET_PROPERTIES(spheresvr_debug PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_debug)
 	ENDIF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(D|d?)ebug"))
 	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(N|n?)ightly"))
 		ADD_EXECUTABLE (spheresvr_nightly
@@ -166,7 +167,7 @@ IF (SINGLE_TARGET)
 					${tables_SRCS}
 		#			${docs_TEXT}
 			)
-        set_target_properties(spheresvr_nightly PROPERTIES OUTPUT_NAME SphereSvr${ARCH_BITS}_nightly)
+        SET_TARGET_PROPERTIES(spheresvr_nightly PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_nightly)
 	ENDIF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(N|n?)ightly"))
 
 ELSE (SINGLE_TARGET)
@@ -188,10 +189,10 @@ ELSE (SINGLE_TARGET)
             ${tables_SRCS}
             ${docs_TEXT}
 		)
-	set_target_properties(spheresvr PROPERTIES OUTPUT_NAME_RELEASE SphereSvrX${ARCH_BITS}_release)
-	set_target_properties(spheresvr PROPERTIES OUTPUT_NAME_NIGHTLY SphereSvrX${ARCH_BITS}_nightly)
-	set_target_properties(spheresvr PROPERTIES OUTPUT_NAME_DEBUG SphereSvrX${ARCH_BITS}_debug)
+	SET_TARGET_PROPERTIES(spheresvr PROPERTIES OUTPUT_NAME_RELEASE SphereSvrX${ARCH_BITS}_release)
+	SET_TARGET_PROPERTIES(spheresvr PROPERTIES OUTPUT_NAME_NIGHTLY SphereSvrX${ARCH_BITS}_nightly)
+	SET_TARGET_PROPERTIES(spheresvr PROPERTIES OUTPUT_NAME_DEBUG SphereSvrX${ARCH_BITS}_debug)
 
 ENDIF (SINGLE_TARGET)
 
-toolchain_exe_stuff()
+toolchain_exe_stuff()   # stuff to be executed after ADD_EXECUTABLE

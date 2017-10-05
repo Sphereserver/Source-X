@@ -5,8 +5,7 @@ function (toolchain_after_project)
 	SET(CMAKE_SYSTEM_NAME	"Linux"		PARENT_SCOPE)
 	SET(ARCH_BITS		64		PARENT_SCOPE)
 
-	#LINK_DIRECTORIES ("/usr/lib64/mysql")
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY	"${CMAKE_BINARY_DIR}/bin64"	PARENT_SCOPE)
+	SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY	"${CMAKE_BINARY_DIR}/bin64"	PARENT_SCOPE)
 endfunction()
 
 
@@ -14,12 +13,12 @@ function (toolchain_exe_stuff)
 	#-- Setting compiler flags common to all builds.
 
 	SET (C_WARNING_OPTS
-        "-Wall -Wno-nonnull-compare -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-implicit-fallthrough\
-        -Wno-parentheses -Wno-misleading-indentation\
-        -Wno-error=unused-but-set-variable -Wno-maybe-uninitialized -Wno-implicit-function-declaration") # this line is for warnings issued by 3rd party C code
+		"-Wall -Wextra -Wno-nonnull-compare -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-implicit-fallthrough\
+		-Wno-parentheses -Wno-misleading-indentation -Wno-strict-aliasing\
+		-Wno-error=unused-but-set-variable -Wno-maybe-uninitialized -Wno-implicit-function-declaration") # this line is for warnings issued by 3rd party C code
 	SET (CXX_WARNING_OPTS
-        "-Wall -Wno-nonnull-compare -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-implicit-fallthrough\
-        -Wno-parentheses -Wno-misleading-indentation -Wno-invalid-offsetof")
+		"-Wall -Wextra -Wno-nonnull-compare -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-implicit-fallthrough\
+		-Wno-parentheses -Wno-misleading-indentation -Wno-conversion-null -Wno-invalid-offsetof")
 	SET (C_ARCH_OPTS	"-march=x86-64 -m64")
 	SET (CXX_ARCH_OPTS	"-march=x86-64 -m64")
 	SET (C_OPTS		"-std=c11   -pthread -fexceptions -fnon-call-exceptions")
@@ -27,8 +26,8 @@ function (toolchain_exe_stuff)
 	SET (C_SPECIAL		"-pipe -fno-expensive-optimizations")
 	SET (CXX_SPECIAL	"-pipe -ffast-math")
 
-	SET (CMAKE_C_FLAGS	"${C_WARNING_OPTS} ${C_ARCH_OPTS} ${C_OPTS} ${C_SPECIAL}"		PARENT_SCOPE)
-	SET (CMAKE_CXX_FLAGS	"${CXX_WARNING_OPTS} ${CXX_ARCH_OPTS} ${CXX_OPTS} ${CXX_SPECIAL}"	PARENT_SCOPE)
+	SET (CMAKE_C_FLAGS	"${C_WARNING_OPTS} ${C_ARCH_OPTS} ${C_OPTS} ${C_SPECIAL} ${C_FLAGS_EXTRA}"		PARENT_SCOPE)
+	SET (CMAKE_CXX_FLAGS	"${CXX_WARNING_OPTS} ${CXX_ARCH_OPTS} ${CXX_OPTS} ${CXX_SPECIAL} ${CXX_FLAGS_EXTRA}"	PARENT_SCOPE)
 
 
 	#-- Setting common linker flags
@@ -36,7 +35,7 @@ function (toolchain_exe_stuff)
 	 # -s and -g need to be added/removed also to/from linker flags!
 	SET (CMAKE_EXE_LINKER_FLAGS	"-pthread -dynamic\
 					-L/usr/lib64/mysql -L/usr/lib/x86_64-linux-gnu/mysql\
-					-Wl,-rpath=/usr/lib/mysql -Wl,-rpath=/usr/lib/x86_64-linux-gnu/mysql"
+					-Wl,-rpath=/usr/lib64/mysql -Wl,-rpath=/usr/lib/x86_64-linux-gnu/mysql"
 					PARENT_SCOPE)
 
 
@@ -74,9 +73,11 @@ function (toolchain_exe_stuff)
 
 	#-- Set common define macros.
 
-	SET (COMMON_DEFS "_64BITS;_LINUX;Z_PREFIX;_GITVERSION;_MTNETWORK;_EXCEPTIONS_DEBUG")
+	SET (COMMON_DEFS "_64BITS;_LINUX;Z_PREFIX;_POSIX_SOURCE;_GITVERSION;_MTNETWORK;_EXCEPTIONS_DEBUG")
 		# _64BITS: 64 bits architecture.
 		# _LINUX: linux OS.
+		# Z_PREFIX: Use the "z_" prefix for the zlib functions
+		# _POSIX_SOURCE: needed for libev compilation in some linux distributions (doesn't seem to affect compilation on distributions that don't need it)
 		# _MTNETWORK: multi-threaded networking support.
 		# _EXCEPTIONS_DEBUG: Enable advanced exceptions catching. Consumes some more resources, but is very useful for debug
 		#   on a running environment. Also it makes sphere more stable since exceptions are local.

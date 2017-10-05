@@ -7,15 +7,20 @@ function (toolchain_after_project)
 	ENABLE_LANGUAGE(RC)
 
 	LINK_DIRECTORIES ("${CMAKE_SOURCE_DIR}/../DLLs/32/")
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY	"${CMAKE_BINARY_DIR}/bin"	PARENT_SCOPE)
+	SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY	"${CMAKE_BINARY_DIR}/bin"	PARENT_SCOPE)
 endfunction()
 
 
 function (toolchain_exe_stuff)
 	#-- Setting compiler flags common to all builds.
 
-	SET (C_WARNING_OPTS	"-Wall -Wextra -Wno-unknown-pragmas -Wno-switch -Wno-error=unused-but-set-variable")
-	SET (CXX_WARNING_OPTS	"-Wall -Wextra -Wno-unknown-pragmas -Wno-switch -Wno-invalid-offsetof")
+	SET (C_WARNING_OPTS
+		"-Wall -Wextra -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-parentheses\
+		-Wno-unused-variable -Wno-unused-function -Wno-unused-parameter -Wno-uninitialized -Wno-error=maybe-uninitialized -Wno-error=unused-but-set-variable\
+		-Wno-implicit-function-declaration -Wno-type-limits -Wno-incompatible-pointer-types -Wno-array-bounds")
+		# last 2 lines are for warnings issued by 3rd party C code
+	SET (CXX_WARNING_OPTS
+		"-Wall -Wextra -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-parentheses -Wno-conversion-null -Wno-invalid-offsetof")
 	SET (C_ARCH_OPTS	"-march=i686 -m32")
 	SET (CXX_ARCH_OPTS	"-march=i686 -m32")
 	SET (C_OPTS		"-std=c11   -pthread -fexceptions -fnon-call-exceptions")
@@ -26,8 +31,8 @@ function (toolchain_exe_stuff)
 	SET (CXX_SPECIAL	"-pipe -mwindows -ffast-math")
 
 	SET (CMAKE_RC_FLAGS	"--target=pe-i386"							PARENT_SCOPE)
-	SET (CMAKE_C_FLAGS	"${C_WARNING_OPTS} ${C_ARCH_OPTS} ${C_OPTS} ${C_SPECIAL}"		PARENT_SCOPE)
-	SET (CMAKE_CXX_FLAGS	"${CXX_WARNING_OPTS} ${CXX_ARCH_OPTS} ${CXX_OPTS} ${CXX_SPECIAL}"	PARENT_SCOPE)
+	SET (CMAKE_C_FLAGS	"${C_WARNING_OPTS} ${C_ARCH_OPTS} ${C_OPTS} ${C_SPECIAL} ${C_FLAGS_EXTRA}"		PARENT_SCOPE)
+	SET (CMAKE_CXX_FLAGS	"${CXX_WARNING_OPTS} ${CXX_ARCH_OPTS} ${CXX_OPTS} ${CXX_SPECIAL} ${CXX_FLAGS_EXTRA}"	PARENT_SCOPE)
 
 
 	#-- Setting common linker flags
@@ -74,6 +79,7 @@ function (toolchain_exe_stuff)
 	SET (COMMON_DEFS "_WIN32;_32BITS;Z_PREFIX;_GITVERSION;_MTNETWORK;_EXCEPTIONS_DEBUG;_CRT_SECURE_NO_WARNINGS;_WINSOCK_DEPRECATED_NO_WARNINGS")
 		# _WIN32: always defined, even on 64 bits. Keeping it for compatibility with external code and libraries.
 		# _32BITS: 32 bits architecture.
+		# Z_PREFIX: Use the "z_" prefix for the zlib functions
 		# _MTNETWORK: multi-threaded networking support.
 		# _EXCEPTIONS_DEBUG: Enable advanced exceptions catching. Consumes some more resources, but is very useful for debug
 		#   on a running environment. Also it makes sphere more stable since exceptions are local.

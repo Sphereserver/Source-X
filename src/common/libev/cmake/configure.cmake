@@ -1,8 +1,10 @@
 #Copypaste from https://github.com/LuaDist/libev/blob/master/cmake/configure.cmake
 
+message (STATUS "Generating config.h for LibEV... (may require some time)")
+
 include ( CheckFunctionExists )
 include ( CheckIncludeFiles )
-SET (CMAKE_REQUIRED_QUIET 1)  # We don't want to pollute the log with the log msgs with check_include_files and check_function_exists
+set (CMAKE_REQUIRED_QUIET 1)  # We don't want to pollute the log with the log msgs with check_include_files and check_function_exists
 
 check_include_files ( dlfcn.h HAVE_DLFCN_H )
 check_include_files ( inttypes.h HAVE_INTTYPES_H )
@@ -40,3 +42,4 @@ find_library ( HAVE_LIBRT rt )
 # Tweaks
 set ( HAVE_CLOCK_SYSCALL ${HAVE_CLOCK_GETTIME} )
  
+message (STATUS "config.h for LibEV generated")

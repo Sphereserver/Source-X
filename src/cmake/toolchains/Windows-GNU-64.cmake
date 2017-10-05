@@ -7,15 +7,20 @@ function (toolchain_after_project)
 	ENABLE_LANGUAGE(RC)
 
 	LINK_DIRECTORIES ("${CMAKE_SOURCE_DIR}/../DLLs/64/")
-	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY	"${CMAKE_BINARY_DIR}/bin64"	PARENT_SCOPE)
+	SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY	"${CMAKE_BINARY_DIR}/bin64"	PARENT_SCOPE)
 endfunction()
 
 
 function (toolchain_exe_stuff)
 	#-- Setting compiler flags common to all builds.
 
-	SET (C_WARNING_OPTS	"-Wall -Wextra -Wno-unknown-pragmas -Wno-switch -Wno-error=unused-but-set-variable")
-	SET (CXX_WARNING_OPTS	"-Wall -Wextra -Wno-unknown-pragmas -Wno-switch -Wno-invalid-offsetof")
+	SET (C_WARNING_OPTS
+		"-Wall -Wextra -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-parentheses\
+		-Wno-unused-variable -Wno-unused-function -Wno-unused-parameter -Wno-uninitialized -Wno-error=maybe-uninitialized -Wno-error=unused-but-set-variable\
+		-Wno-implicit-function-declaration -Wno-type-limits -Wno-incompatible-pointer-types -Wno-array-bounds")
+		# last 2 lines are for warnings issued by 3rd party C code
+	SET (CXX_WARNING_OPTS
+		"-Wall -Wextra -Wno-unknown-pragmas -Wno-format -Wno-switch -Wno-parentheses -Wno-conversion-null -Wno-invalid-offsetof")
 	SET (C_ARCH_OPTS	"-march=x86-64 -m64")
 	SET (CXX_ARCH_OPTS	"-march=x86-64 -m64")
 	SET (C_OPTS		"-std=c11   -pthread -fexceptions -fnon-call-exceptions")
@@ -26,8 +31,8 @@ function (toolchain_exe_stuff)
 	SET (CXX_SPECIAL	"-pipe -mwindows -ffast-math")
 
 	SET (CMAKE_RC_FLAGS	"--target=pe-x86-64"							PARENT_SCOPE)
-	SET (CMAKE_C_FLAGS	"${C_WARNING_OPTS} ${C_ARCH_OPTS} ${C_OPTS} ${C_SPECIAL}"		PARENT_SCOPE)
-	SET (CMAKE_CXX_FLAGS	"${CXX_WARNING_OPTS} ${CXX_ARCH_OPTS} ${CXX_OPTS} ${CXX_SPECIAL}"	PARENT_SCOPE)
+	SET (CMAKE_C_FLAGS	"${C_WARNING_OPTS} ${C_ARCH_OPTS} ${C_OPTS} ${C_SPECIAL} ${C_FLAGS_EXTRA}"		PARENT_SCOPE)
+	SET (CMAKE_CXX_FLAGS	"${CXX_WARNING_OPTS} ${CXX_ARCH_OPTS} ${CXX_OPTS} ${CXX_SPECIAL} ${CXX_FLAGS_EXTRA}"	PARENT_SCOPE)
 
 
 	#-- Setting common linker flags
@@ -51,7 +56,7 @@ function (toolchain_exe_stuff)
 	ENDIF (TARGET spheresvr_nightly)
 	IF (TARGET spheresvr_debug)
 		TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og -fno-omit-frame-pointer	)
-	ENDIF (TARGET spheresvr_debug)	)
+	ENDIF (TARGET spheresvr_debug)
 
 
 	#-- Setting per-build linker flags.
@@ -75,6 +80,7 @@ function (toolchain_exe_stuff)
 		# _WIN32: always defined, even on 64 bits. Keeping it for compatibility with external code and libraries.
 		# _WIN64: 64 bits windows application. Keeping it for compatibility with external code and libraries.
 		# _64BITS: 64 bits architecture.
+		# Z_PREFIX: Use the "z_" prefix for the zlib functions
 		# _MTNETWORK: multi-threaded networking support.
 		# _EXCEPTIONS_DEBUG: Enable advanced exceptions catching. Consumes some more resources, but is very useful for debug
 		#   on a running environment. Also it makes sphere more stable since exceptions are local.

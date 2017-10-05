@@ -274,8 +274,8 @@ HUE_TYPE CChar::Noto_GetHue(const CChar * pCharViewer, bool fIncog) const
 	case NOTO_CRIMINAL:		return static_cast<HUE_TYPE>(g_Cfg.m_iColorNotoCriminal);	// Grey (criminal)
 	case NOTO_GUILD_WAR:	return static_cast<HUE_TYPE>(g_Cfg.m_iColorNotoGuildWar);	// Orange (enemy guild)
 	case NOTO_EVIL:			return static_cast<HUE_TYPE>(g_Cfg.m_iColorNotoEvil);		// Red
-	case NOTO_INVUL:		return pChar->IsPriv(PRIV_GM) ? static_cast<HUE_TYPE>(g_Cfg.m_iColorNotoInvulGameMaster) : static_cast<HUE_TYPE>(g_Cfg.m_iColorNotoInvul);		// Purple / Yellow
-	default:				return static_cast<HUE_TYPE>((HUE_TYPE)color > NOTO_INVUL ? color : g_Cfg.m_iColorNotoDefault);	// Grey
+	case NOTO_INVUL:		return pChar->IsPriv(PRIV_GM) ? (HUE_TYPE)g_Cfg.m_iColorNotoInvulGameMaster : (HUE_TYPE)g_Cfg.m_iColorNotoInvul;		// Purple / Yellow
+	default:				return ((HUE_TYPE)color > NOTO_INVUL ? (HUE_TYPE)color : g_Cfg.m_iColorNotoDefault);	// Grey
 	}
 }
 

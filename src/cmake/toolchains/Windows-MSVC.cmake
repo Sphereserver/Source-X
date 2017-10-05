@@ -10,11 +10,12 @@ function (toolchain_after_project)
 	 # until this gets fixed, CXX and C compiler and linker flags should be the same.
 
 	 # Setting the Visual Studio warning level to 4 and forcing MultiProccessor compilation
-	SET (C_FLAGS_COMMON		"/W4 /MP /GR /fp:fast
+	SET (C_FLAGS_COMMON		"${C_FLAGS_EXTRA} /W4 /MP /GR /fp:fast\
 					/wd4127 /wd4131 /wd4310 /wd4996 /wd4701 /wd4703"		)
 	 #				# Disable warnings caused by external c libraries.
+	 # For zlib: C4244, C4245
 
-	SET (CXX_FLAGS_COMMON		"/W4 /MP /GR /fp:fast
+	SET (CXX_FLAGS_COMMON		"${CXX_FLAGS_EXTRA} /W4 /MP /GR /fp:fast\
 					/wd4127 /wd4131 /wd4310 /wd4996 /wd4701 /wd4703"		)
 
 	 # Setting the exe to be a GUI application and not a console one.
@@ -81,6 +82,7 @@ function (toolchain_exe_stuff)
 	TARGET_COMPILE_DEFINITIONS ( spheresvr PUBLIC
 	  # _WIN32 is always defined, even on 64 bits. Keeping it for compatibility with external code and libraries.
 		_WIN32
+      # Use the "z_" prefix for the zlib functions
 		Z_PREFIX
 	  # Multi-threaded networking support.
 		_MTNETWORK

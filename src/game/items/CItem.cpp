@@ -2775,7 +2775,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 
 				for ( addCircle = ATOI(ppVal[0]); addCircle; addCircle-- )
 				{
-					for ( int i = 1; i < 9; i++ )
+					for ( int i = 1; i < 9; ++i )
 					{
 						AddSpellbookSpell(static_cast<SPELL_TYPE>(RES_GET_INDEX(((addCircle - 1) * 8) + i)), false);
 					}
