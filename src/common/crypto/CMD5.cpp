@@ -1,5 +1,4 @@
 
-#include <algorithm>
 #include <cstdio>
 #include <cstring>
 #include "CMD5.h"

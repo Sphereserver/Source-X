@@ -3,6 +3,7 @@
 #ifndef _INC_PROFILEDATA_H
 #define _INC_PROFILEDATA_H
 
+#include "../common/common.h"
 
 enum PROFILE_TYPE
 {
@@ -59,8 +60,12 @@ private:
 	ProfileData& operator=(const ProfileData& other);
 
 public:
-	bool IsActive() const { return( m_iActiveWindowSeconds > 0 ? true : false ); }
-	int GetActiveWindow() const { return m_iActiveWindowSeconds; }
+	bool IsActive() const {
+		return ( m_iActiveWindowSeconds > 0 ? true : false );
+	}
+	int GetActiveWindow() const {
+		return m_iActiveWindowSeconds;
+	}
 
 	void SetActive(int iSampleSec);
 	void Start(PROFILE_TYPE id);

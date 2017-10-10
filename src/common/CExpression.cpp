@@ -3,10 +3,10 @@
 #include "../game/CObjBase.h"
 #include "../game/CServerConfig.h"
 #include "../game/CWorld.h"
+#include "sphere_library/CSRand.h"
+#include "CResourceBase.h"
 #include "CException.h"
 #include "CExpression.h"
-#include "common.h"
-#include "CResourceBase.h"
 
 tchar CExpression::sm_szMessages[DEFMSG_QTY][128] =
 {

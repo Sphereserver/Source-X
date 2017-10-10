@@ -1,6 +1,5 @@
 
 #include "../common/CException.h"
-#include "../common/common.h"
 #include "strings.h"
 #include "threads.h"
 

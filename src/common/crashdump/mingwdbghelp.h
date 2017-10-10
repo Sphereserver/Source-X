@@ -9,8 +9,6 @@
 #ifndef _INC_MINGWDBGHELP_H
 #define _INC_MINGWDBGHELP_H
 
-#include "../datatypes.h"
-
 typedef enum _MINIDUMP_TYPE {
     MiniDumpNormal                          = 0x00000000,
     MiniDumpWithDataSegs                    = 0x00000001,
@@ -63,8 +61,8 @@ typedef struct _MINIDUMP_THREAD_CALLBACK {
     HANDLE  ThreadHandle;
     CONTEXT Context;
 	UINT    SizeOfContext;
-	ullong  StackBase;
-	ullong  StackEnd;
+	ULONGLONG  StackBase;
+	ULONGLONG  StackEnd;
 } MINIDUMP_THREAD_CALLBACK, *PMINIDUMP_THREAD_CALLBACK;
 
 
@@ -73,16 +71,16 @@ typedef struct _MINIDUMP_THREAD_EX_CALLBACK {
     HANDLE  ThreadHandle;
     CONTEXT Context;
 	UINT    SizeOfContext;
-	ullong  StackBase;
-	ullong  StackEnd;
-	ullong  BackingStoreBase;
-	ullong  BackingStoreEnd;
+	ULONGLONG  StackBase;
+	ULONGLONG  StackEnd;
+	ULONGLONG  BackingStoreBase;
+	ULONGLONG  BackingStoreEnd;
 } MINIDUMP_THREAD_EX_CALLBACK, *PMINIDUMP_THREAD_EX_CALLBACK;
 
 
 typedef struct _MINIDUMP_MODULE_CALLBACK {
     PWCHAR           FullPath;
-	ullong           BaseOfImage;
+	ULONGLONG           BaseOfImage;
 	UINT             SizeOfImage;
 	UINT             CheckSum;
 	UINT             TimeDateStamp;
@@ -100,20 +98,20 @@ typedef struct _MINIDUMP_INCLUDE_THREAD_CALLBACK {
 
 
 typedef struct _MINIDUMP_INCLUDE_MODULE_CALLBACK {
-	ullong BaseOfImage;
+	ULONGLONG BaseOfImage;
 } MINIDUMP_INCLUDE_MODULE_CALLBACK, *PMINIDUMP_INCLUDE_MODULE_CALLBACK;
 
 
 typedef struct _MINIDUMP_IO_CALLBACK {
     HANDLE  Handle;
-	ullong  Offset;
+	ULONGLONG  Offset;
     PVOID   Buffer;
 	UINT    BufferBytes;
 } MINIDUMP_IO_CALLBACK, *PMINIDUMP_IO_CALLBACK;
 
 
 typedef struct _MINIDUMP_READ_MEMORY_FAILURE_CALLBACK {
-	ullong  Offset;
+	ULONGLONG  Offset;
 	UINT    Bytes;
     HRESULT FailureStatus;
 } MINIDUMP_READ_MEMORY_FAILURE_CALLBACK, *PMINIDUMP_READ_MEMORY_FAILURE_CALLBACK;
@@ -138,11 +136,11 @@ typedef struct _MINIDUMP_CALLBACK_INPUT {
 
 
 typedef struct _MINIDUMP_MEMORY_INFO {
-	ullong	BaseAddress;
-	ullong	AllocationBase;
-	ullong	AllocationProtect;
-	ullong	__alignment1;
-	ullong	RegionSize;
+	ULONGLONG	BaseAddress;
+	ULONGLONG	AllocationBase;
+	ULONGLONG	AllocationProtect;
+	ULONGLONG	__alignment1;
+	ULONGLONG	RegionSize;
 	UINT	State;
 	UINT	Protect;
 	UINT	Type;
@@ -156,7 +154,7 @@ typedef struct _MINIDUMP_CALLBACK_OUTPUT {
 		UINT  ThreadWriteFlags;
 		UINT  SecondaryFlags;
         struct {
-			ullong MemoryBase;
+			ULONGLONG MemoryBase;
 			UINT   MemorySize;
         };
         struct {

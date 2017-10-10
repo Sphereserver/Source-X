@@ -3,8 +3,6 @@
 #ifndef _INC_TWOFISH_H_
 #define _INC_TWOFISH_H_
 
-#include "../datatypes.h"
-
 /* ---------- See examples at end of this file for typical usage -------- */
 
 /* AES Cipher header file for ANSI C Submissions		// edited for SphereServer
@@ -78,7 +76,7 @@ parameters at the bottom of the structs as appropriate.
 typedef unsigned int			fullSbox[4][256];
 
 /* The structure for key information */
-typedef struct
+typedef struct keyInstance
 {
 	unsigned char direction;					/* Key used for encrypting or decrypting? */
 #if ALIGN32
@@ -110,7 +108,7 @@ typedef struct
 } keyInstance;
 
 /* The structure for cipher information */
-typedef struct
+typedef struct cipherInstance
 {
 	unsigned char mode;						/* MODE_ECB, MODE_CBC, or MODE_CFB1 */
 #if ALIGN32
@@ -121,7 +119,7 @@ typedef struct
 	/* Twofish-specific parameters: */
 	unsigned int cipherSig;				/* set to VALID_SIG by cipherInit() */
 	unsigned int iv32[BLOCK_SIZE / 32];		/* CBC IV bytes arranged as dwords */
-} cipherInstance;
+}cipherInstance;
 
 /* Function protoypes */
 void makeKey(keyInstance* key, unsigned char direction, int keyLen, char* keyMaterial);

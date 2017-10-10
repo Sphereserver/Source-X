@@ -79,7 +79,7 @@ private:
 public:
 	lpctstr GetStatus() const
 	{
-		return(m_sStatus);
+		return m_sStatus;
 	}
 
 	size_t StatGet( SERV_STAT_TYPE i ) const;
@@ -87,12 +87,12 @@ public:
 	void StatInc( SERV_STAT_TYPE i )
 	{
 		ASSERT( i>=0 && i<SERV_STAT_QTY );
-		m_stStat[i]++;
+		++m_stStat[i];
 	}
 	void StatDec( SERV_STAT_TYPE i )
 	{
 		ASSERT( i>=0 && i<SERV_STAT_QTY );
-		m_stStat[i]--;
+		--m_stStat[i];
 	}
 	void SetStat( SERV_STAT_TYPE i, dword dwVal )
 	{
@@ -100,7 +100,9 @@ public:
 		m_stStat[i] = dwVal;
 	}
 
-	lpctstr GetName() const { return( m_sName ); }
+	lpctstr GetName() const {
+		return m_sName;
+	}
 	void SetName( lpctstr pszName );
 
 	virtual int64 GetAgeHours() const;
@@ -117,13 +119,11 @@ public:
 	virtual bool r_LoadVal( CScript & s );
 	virtual bool r_WriteVal( lpctstr pKey, CSString &sVal, CTextConsole * pSrc = NULL );
 
-	bool IsConnected() const
-	{
-		return( m_timeLastValid.IsTimeValid() );
+	bool IsConnected() const {
+		return m_timeLastValid.IsTimeValid();
 	}
 
-	void SetCryptVersion(void)
-	{
+	void SetCryptVersion(void) {
 		m_ClientVersion.SetClientVer(m_sClientVersion.GetPtr());
 	}
 };

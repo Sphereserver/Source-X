@@ -7,7 +7,7 @@
 #ifndef _INC_CSERVTIME_H
 #define _INC_CSERVTIME_H
 
-#include "../common/common.h"
+#include "../common/datatypes.h"	// only the numeric data types
 
 
 class CServerTime
@@ -29,7 +29,7 @@ public:
 	bool IsTimeValid() const;
 	CServerTime operator+( int64 iTimeDiff ) const;
 	CServerTime operator-( int64 iTimeDiff ) const;
-	inline int64 operator-( CServerTime time ) const;
+	inline int64 operator-(CServerTime time ) const;
 	inline bool operator==(CServerTime time) const;
 	inline bool operator!=(CServerTime time) const;
 	inline bool operator<(CServerTime time) const;

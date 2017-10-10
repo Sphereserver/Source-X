@@ -1,5 +1,5 @@
-
 #include "ProfileTask.h"
+#include "threads.h"
 
 ProfileTask::ProfileTask(PROFILE_TYPE id) : m_context(NULL), m_previousTask(PROFILE_OVERHEAD)
 {

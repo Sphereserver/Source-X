@@ -13,7 +13,7 @@
 extern struct CScriptProfiler
 {
     uchar	initstate;
-    dword		called;
+    dword	called;
     llong	total;
     struct CScriptProfilerFunction
     {

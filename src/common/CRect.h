@@ -10,10 +10,10 @@
 #include "../game/uo_files/uofiles_enums.h"
 #include "sphere_library/CSString.h"
 
-
 class CRegionBase;
 class CRegionLinks;
 class CSector;
+
 
 struct CPointBase	// Non initialized 3d point.
 {

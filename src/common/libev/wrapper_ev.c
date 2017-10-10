@@ -26,5 +26,4 @@
 	};
 #endif  // __MINGW__
 
-#include "ev.h"
 #include "ev.c"

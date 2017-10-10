@@ -1,4 +1,5 @@
 
+#include "../../common/crypto/CMD5.h"
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
 #include "../../common/CUIDExtra.h"

@@ -1,7 +1,8 @@
 #include "SQLite.h"
+#include "../../common/CLog.h"
 #include "../CExpression.h"
 #include "../CException.h"
-#include "../../common/CLog.h"
+#include "../CScript.h"
 
 
 CSQLite::CSQLite()

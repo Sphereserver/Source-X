@@ -13,7 +13,6 @@
 #include "common.h"
 #include "CVarDefMap.h"
 #include "ListDefContMap.h"
-#include "sphere_library/CSRand.h"
 
 
 #define SKIP_SEPARATORS(p)			while ( *(p)=='.' ) { ++(p); }	// || ISWHITESPACE(*(p))

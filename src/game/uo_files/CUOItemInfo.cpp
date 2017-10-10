@@ -1,6 +1,7 @@
 #include "../../common/CException.h"
 #include "../../common/CUOInstall.h"
 #include "../../common/CLog.h"
+#include "../../sphere/threads.h"
 #include "CUOItemInfo.h"
 #include "CUOIndexRec.h"
 #include "CUOItemTypeRec.h"

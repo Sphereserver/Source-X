@@ -15,7 +15,7 @@
 #define SCRIPT_MAX_LINE_LEN		4096		// default size.
 
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #ifdef _WIN32
 	#include "os_windows.h"

@@ -12,8 +12,6 @@
 #include "../common/sphere_library/mutex.h"
 #include "../common/common.h"
 #include "../sphere/UnixTerminal.h"
-#include "../common/CScriptObj.h"
-#include "../common/CScript.h"
 
 
 // -----------------------------
@@ -43,6 +41,9 @@ enum LOG_TYPE
 	LOGM_NOCONTEXT		= 0x20000,	// do not include context information
 	LOGM_DEBUG			= 0x40000	// debug kind of message with DEBUG: prefix
 };
+
+class CScript;
+class CScriptObj;
 
 
 extern class CEventLog

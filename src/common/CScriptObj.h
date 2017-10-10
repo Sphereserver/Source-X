@@ -8,13 +8,14 @@
 #define _INC_CSCRIPTOBJ_H
 
 #include "sphere_library/CSArray.h"
-#include "CScript.h"
 #include "../sphere/threads.h"
 #include "CVarDefMap.h"
 #include "CVarFloat.h"
 #include "CTextConsole.h"
+#include <vector>
 
-
+class CScript;
+class CSFileText;
 class CChar;
 class CScriptTriggerArgs;
 

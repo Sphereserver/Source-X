@@ -186,12 +186,12 @@ lpctstr ProfileData::GetDescription(PROFILE_TYPE id) const
 	else
 	{
 		sprintf( pszTmp, "%3i.%04is  avg: %3i.%04is  [samples:%6i  avg:%6i ]  runtime: %is",
-			(int)( m_PreviousTimes[id].m_Time / ( llTimeProfileFrequency )),
-			(int)((( m_PreviousTimes[id].m_Time * 10000 ) / ( llTimeProfileFrequency )) % 10000 ),
-			(int)( m_AverageTimes[id].m_Time / ( llTimeProfileFrequency )),
-			(int)((( m_AverageTimes[id].m_Time * 10000 ) / ( llTimeProfileFrequency )) % 10000 ),
-			iCount,
-			(int)(m_AverageTimes[id].m_iCount),
+			(int)(		m_PreviousTimes[id].m_Time /			( llTimeProfileFrequency )),
+			(int)(((	m_PreviousTimes[id].m_Time * 10000 ) /	( llTimeProfileFrequency )) % 10000 ),
+			(int)(		m_AverageTimes[id].m_Time /				( llTimeProfileFrequency )),
+			(int)(((	m_AverageTimes[id].m_Time * 10000 ) /	( llTimeProfileFrequency )) % 10000 ),
+						iCount,
+			(int)(		m_AverageTimes[id].m_iCount),
 			m_iAverageCount );
 	}
 

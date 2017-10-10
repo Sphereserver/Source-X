@@ -6,7 +6,7 @@
 #ifndef _INC_CUID_H
 #define _INC_CUID_H
 
-#include "datatypes.h"
+#include "common.h"		// for the datatypes
 
 
 class CObjBase;

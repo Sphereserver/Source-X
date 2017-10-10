@@ -1,7 +1,7 @@
 #include "../../sphere/threads.h"
 #include "CCrypto.h"
 
-// Huffman compression
+// Huffman compression. Used to compress the outgoing data (packets sent from server to client).
 
 const word CHuffman::sm_xCompress_Base[COMPRESS_TREE_SIZE] =	// static
 {

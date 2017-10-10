@@ -8,8 +8,6 @@
 #define _INC_CEXCEPTION_H
 
 #include "../common/CLog.h"
-#include "../sphere/threads.h"
-
 
 // -------------------------------------------------------------------
 // -------------------------------------------------------------------
@@ -99,7 +97,6 @@ public:
 #ifdef _EXCEPTIONS_DEBUG
 
 
-#include "../common/CLog.h"
 #include "../sphere/ProfileTask.h"
 
 #define EXC_TRY(a) \

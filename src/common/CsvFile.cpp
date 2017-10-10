@@ -3,6 +3,7 @@
 #include "CException.h"
 #include "CExpression.h"
 #include "CsvFile.h"
+#include "CScript.h"
 #include "common.h"
 
 CSVFile::CSVFile()

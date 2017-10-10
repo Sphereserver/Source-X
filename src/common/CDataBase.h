@@ -7,11 +7,11 @@
 #ifndef _INC_CDATABASE_H
 #define	_INC_CDATABASE_H
 
-#include <vector>
-#include <queue>
 #include "common.h"
 #include "sphere_library/mutex.h"
 #include "CScriptObj.h"
+#include <vector>
+#include <queue>
 #include <errmsg.h>	// mysql standard include
 #include <mysql.h>	//this needs to be defined AFTER common.h
 

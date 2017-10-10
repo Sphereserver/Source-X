@@ -1,6 +1,7 @@
 #include "../../sphere/threads.h"
 #include "CCrypto.h"
 
+// Encryption used when logging in, to access the server list
 void CCrypto::DecryptLogin( byte * pOutput, const byte * pInput, size_t iLen  )
 {
 	ADDTOCALLSTACK("CCrypto::DecryptLogin");

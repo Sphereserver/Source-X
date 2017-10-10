@@ -12,7 +12,6 @@
 #include "../common/CScriptObj.h"
 #include "../common/CResourceBase.h"
 #include "CServerTime.h"
-#include "CContainer.h"
 #include "CBase.h"
 #include "CServerConfig.h"
 #include "CWorld.h"

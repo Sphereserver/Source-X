@@ -270,6 +270,7 @@ bool CChar::CanCarry( const CItem *pItem ) const
 
 void CChar::ContentAdd( CItem * pItem )
 {
+	ADDTOCALLSTACK("CChar::ContentAdd");
 	ItemEquip(pItem);
 	//LayerAdd( pItem, LAYER_QTY );
 }

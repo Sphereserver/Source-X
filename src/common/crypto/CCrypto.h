@@ -9,12 +9,11 @@
 
 #include "../CScript.h"
 
-// For TwoFish and MD5 we only provide an interface, so we include the headers of the code doing all the related crypto stuff
-#include "twofish.h"
-#include "CMD5.h"
-
 #define CLIENT_END 0x00000001
 
+typedef struct keyInstance*		tf_keyInstance;
+typedef struct cipherInstance*	tf_cipherInstance;
+class CMD5;
 
 enum CONNECT_TYPE	// What type of client connection is this ?
 {
@@ -65,6 +64,7 @@ private:
 // ---------------------------------------------------------------------------------------------------------------
 // ===============================================================================================================
 
+// Encryption key stored in SphereCrypt.ini
 struct CCryptoClientKey
 {
 	dword m_client;
@@ -73,10 +73,14 @@ struct CCryptoClientKey
 	ENCRYPTION_TYPE m_EncType;
 };
 
+// ---------------------------------------------------------------------------------------------------------------
+// ===============================================================================================================
+
+
 struct CCrypto
 {
 public:
-	union CCryptKey
+	union CCryptoKey		// For internal encryption calculations, it has nothing to do with SphereCrypt.ini
 	{
 		#define CRYPT_GAMESEED_LENGTH	8
 		byte  u_cKey[CRYPT_GAMESEED_LENGTH];
@@ -113,8 +117,8 @@ public:
 protected:
 	// --------------- Two Fish ------------------------------
 	#define TFISH_RESET 0x100
-	keyInstance tf_key;
-	cipherInstance tf_cipher;
+	tf_keyInstance tf_key;
+	tf_cipherInstance tf_cipher;
 	byte tf_cipherTable[TFISH_RESET];
 	int tf_position;
 private:
@@ -141,11 +145,11 @@ public:
 	int	m_gameBlockPos;		// 0-7
 	size_t	m_gameStreamPos;	// use this to track the 21K move to the new Blowfish m_gameTable.
 private:
-	CCrypto::CCryptKey m_Key;
+	CCrypto::CCryptoKey m_Key;
 private:
 	void InitSeed( int iTable );
 	static void InitTables();
-	static void PrepareKey( CCrypto::CCryptKey & key, int iTable );
+	static void PrepareKey( CCrypto::CCryptoKey & key, int iTable );
 	void DecryptBlowFish( byte * pOutput, const byte * pInput, size_t iLen );
 	byte DecryptBFByte( byte bEnc );
 	void InitBlowFish();
@@ -154,7 +158,7 @@ private:
 protected:
 	// -------------------- MD5 ------------------------------
 	#define MD5_RESET 0x0F
-	CMD5 md5_engine;
+	CMD5 * md5_engine;
 	uint md5_position;
 	byte md5_digest[16];
 protected:
@@ -163,9 +167,9 @@ protected:
 	// ------------------ EOF MD5 ----------------------------
 
 private:
-	// ------------- Old Encryption ----------------------
+	// ------------- Login Encryption ----------------------
 	void DecryptLogin( byte * pOutput, const byte * pInput, size_t iLen  );
-	// ------------- EOF Old Encryption ------------------
+	// ------------- EOF Login Encryption ------------------
 
 private:
 	int GetVersionFromString( lpctstr pszVersion );
@@ -197,6 +201,7 @@ public:
 // --------- Basic
 public:
 	CCrypto();
+	~CCrypto();
 private:
 	CCrypto(const CCrypto& copy);
 	CCrypto& operator=(const CCrypto& other);

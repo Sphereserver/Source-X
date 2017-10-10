@@ -5,9 +5,20 @@
 #include "CSString.h"
 #include "../../sphere/ProfileTask.h"
 #include "../../sphere/strings.h"
-#include "../regex/deelx.h"
+#include "../../sphere/threads.h"
 #include "../CExpression.h"
 #include "../CScript.h"
+
+#ifndef _MSC_VER
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
+
+#include "../regex/deelx.h"
+
+#ifndef _MSC_VER
+	#pragma GCC diagnostic pop
+#endif
 
 
 /**

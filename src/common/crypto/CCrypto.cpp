@@ -9,6 +9,10 @@
 #include "../CLog.h"
 #include "CCrypto.h"
 
+// For TwoFish and MD5 we only provide an interface, so we include the headers of the code doing all the related crypto stuff
+#include "twofish.h"
+#include "CMD5.h"
+
 
 // ===============================================================================================================
 // ---------------------------------------------------------------------------------------------------------------
@@ -309,6 +313,17 @@ CCrypto::CCrypto()
 	m_fRelayPacket = false;
 	//SetClientVerEnum(client_keys[0][2]);
 	SetClientVerEnum(0);
+
+	tf_cipher	= new cipherInstance;
+	tf_key		= new keyInstance;
+	md5_engine	= new CMD5();
+}
+
+CCrypto::~CCrypto()
+{
+	delete tf_cipher;
+	delete tf_key;
+	delete md5_engine;
 }
 
 bool CCrypto::Init( dword dwIP, byte * pEvent, size_t iLen, bool isclientKr )
@@ -420,7 +435,7 @@ void CCrypto::RelayGameCryptStart( byte * pOutput, const byte * pInput, size_t i
 	m_seed = dwNewSeed;
 
 	// new seed requires a reset of the md5 engine
-	md5_engine.reset();
+	md5_engine->reset();
 
 	ENCRYPTION_TYPE etPrevious = GetEncryptionType();
 

@@ -200,7 +200,7 @@ void ReportGarbageCollection(CObjBase * pObj, int iResultCode)
 {
 	ASSERT(pObj != NULL);
 
-	DEBUG_ERR(("GC: Deleted UID=0%" PRIx32 ", Defname='%s', Name='%s'. Invalid code=0x%x (%s)\n",
+	DEBUG_ERR(("GC: Deleted UID=0%" PRIx32 ", Defname='%s', Name='%s'. Invalid code=0x%x (%s).\n",
 		(dword)pObj->GetUID(), pObj->Base_GetDef()->GetResourceName(), pObj->GetName(), iResultCode, GetReasonForGarbageCode(iResultCode)));
 
 	if ( (pObj->m_iCreatedResScriptIdx != (size_t)-1) && (pObj->m_iCreatedResScriptLine != -1) )
@@ -209,7 +209,7 @@ void ReportGarbageCollection(CObjBase * pObj, int iResultCode)
 		CResourceScript* pResFile = g_Cfg.GetResourceFile((size_t)(pObj->m_iCreatedResScriptIdx));
 		if (pResFile == NULL)
 			return;
-		DEBUG_ERR(("GC:\t Object was created in '%s', line %d \n", (lpctstr)pResFile->GetFilePath(), pObj->m_iCreatedResScriptLine));
+		DEBUG_ERR(("GC:\t Object was created in '%s', line %d.\n", (lpctstr)pResFile->GetFilePath(), pObj->m_iCreatedResScriptLine));
 	}
 }
 

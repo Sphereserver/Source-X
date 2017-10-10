@@ -81,11 +81,14 @@ dword f32(dword x, CONST dword* k32, int keyLen)
 
 	/* Run each byte thru 8x8 S-boxes, xoring with key byte at each stage. */
 	/* Note that each byte goes through a different combination of S-boxes.*/
-
+#ifndef _MSC_VER
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wstrict-aliasing"	// disabling the warning for the type punning
+#endif
 	*((dword *)b) = Bswap(x);	/* make b[0] = LSB, b[3] = MSB */
+#ifndef _MSC_VER
 	#pragma GCC diagnostic pop
+#endif
 
 	switch (((keyLen + 63) / 64) & 3)
 	{
@@ -307,69 +310,68 @@ void cipherInit(cipherInstance* cipher, byte mode, CONST char* IV)
 -****************************************************************************/
 int blockEncrypt(cipherInstance* cipher, keyInstance* key, CONST byte* input, int inputLen, byte* outBuffer)
 {
-  int rounds = key->numRounds;
-  unsigned int x[4];
-  unsigned int t0, t1, tmp;
-  unsigned char bit = 0, ctBit = 0, carry = 0;
+	int rounds = key->numRounds;
+	unsigned int x[4];
+	unsigned int t0, t1, tmp;
+	unsigned char bit = 0, ctBit = 0, carry = 0;
 
-  if ( cipher->mode == 3 )
-  {
-    cipher->mode = 1;
-    for ( int n = 0; n < inputLen; n++ )
-    {
-      blockEncrypt( cipher, key, cipher->IV, 128, (unsigned char*)x );
-      bit = 0x80 >> ( n & 7 );
-      ctBit = ( input[n / 8] & bit ) ^ ( ( ( (unsigned char*)x )[0] & 0x80 ) >> ( n & 7 ) );
-      outBuffer[n / 8] = ( outBuffer[n / 8] & ~bit ) | ctBit;
-      carry = ctBit >> ( 7 - ( n & 7 ) );
-      for ( int i = 15; i >= 0; i-- )
-      {
-        bit = cipher->IV[i] >> 7;
-        cipher->IV[i] = ( cipher->IV[i] << 1 ) ^ carry;
-        carry = bit;
-      }
-    }
+	if ( cipher->mode == 3 )
+	{
+		cipher->mode = 1;
+		for ( int n = 0; n < inputLen; n++ )
+		{
+			blockEncrypt( cipher, key, cipher->IV, 128, (unsigned char*)x );
+			bit = 0x80 >> ( n & 7 );
+			ctBit = ( input[n / 8] & bit ) ^ ( ( ( (unsigned char*)x )[0] & 0x80 ) >> ( n & 7 ) );
+			outBuffer[n / 8] = ( outBuffer[n / 8] & ~bit ) | ctBit;
+			carry = ctBit >> ( 7 - ( n & 7 ) );
+			for ( int i = 15; i >= 0; i-- )
+			{
+				bit = cipher->IV[i] >> 7;
+				cipher->IV[i] = ( cipher->IV[i] << 1 ) ^ carry;
+				carry = bit;
+			}
+		}
+		cipher->mode = 3;
+	}
 
-    cipher->mode = 3;
-  }
+	for ( int n = 0; n < inputLen; n += 128, input += 16, outBuffer += 16 )
+	{
+		for ( int i = 0; i < 4; i++ )
+		{
+			x[i] = Bswap( ( (unsigned int*)input )[i] ) ^ key->subKeys[i];
+			if ( cipher->mode == 2 )
+				x[i] ^= cipher->iv32[i];
+		}
 
-  for ( int n = 0; n < inputLen; n += 128, input += 16, outBuffer += 16 )
-  {
-    for ( int i = 0; i < 4; i++ )
-    {
-      x[i] = Bswap( ( (unsigned int*)input )[i] ) ^ key->subKeys[i];
-      if ( cipher->mode == 2 )
-        x[i] ^= cipher->iv32[i];
-    }
+		for ( int r = 0; r < rounds; r++ )
+		{
+			t0 = f32( x[0], key->sboxKeys, key->keyLen );
+			t1 = f32( ROL( x[1], 8 ), key->sboxKeys, key->keyLen );
 
-    for ( int r = 0; r < rounds; r++ )
-    {
-      t0 = f32( x[0], key->sboxKeys, key->keyLen );
-      t1 = f32( ROL( x[1], 8 ), key->sboxKeys, key->keyLen );
+			x[3] = ROL( x[3], 1 );
+			x[2] ^= t0 + t1 + key->subKeys[8 + 2 * r];
+			x[3] ^= t0 + 2 * t1 + key->subKeys[8 + 2 * r + 1];
+			x[2] = ROR( x[2], 1 );
 
-      x[3] = ROL( x[3], 1 );
-      x[2] ^= t0 + t1 + key->subKeys[8 + 2 * r];
-      x[3] ^= t0 + 2 * t1 + key->subKeys[8 + 2 * r + 1];
-      x[2] = ROR( x[2], 1 );
+			if ( r < rounds - 1 )
+			{
+				tmp = x[0];
+				x[0] = x[2];
+				x[2] = tmp;
+				tmp = x[1];
+				x[1] = x[3];
+				x[3] = tmp;
+			}
+		}
 
-      if ( r < rounds - 1 )
-      {
-        tmp = x[0];
-        x[0] = x[2];
-        x[2] = tmp;
-        tmp = x[1];
-        x[1] = x[3];
-        x[3] = tmp;
-      }
-    }
-
-    for ( int i = 0; i < 4; i++ )
-    {
-      ( (unsigned int*)outBuffer )[i] = Bswap( x[i] ^ key->subKeys[4 + i] );
-      if ( cipher->mode == 2 )
-        cipher->iv32[i] = Bswap( ( (unsigned int*)outBuffer )[i] );
-    }
-  }
+		for ( int i = 0; i < 4; i++ )
+		{
+			( (unsigned int*)outBuffer )[i] = Bswap( x[i] ^ key->subKeys[4 + i] );
+			if ( cipher->mode == 2 )
+				cipher->iv32[i] = Bswap( ( (unsigned int*)outBuffer )[i] );
+		}
+	}
 	
 	return inputLen;
 }
@@ -405,10 +407,10 @@ int blockDecrypt(cipherInstance* cipher, keyInstance* key, CONST byte* input, in
 	byte  bit,ctBit,carry;			/* temps for CFB */
 
 	if (cipher->mode == MODE_CFB1)
-		{	/* use blockEncrypt here to handle CFB, one block at a time */
+	{	/* use blockEncrypt here to handle CFB, one block at a time */
 		cipher->mode = MODE_ECB;	/* do encryption in ECB */
 		for (n=0;n<inputLen;n++)
-			{
+		{
 			blockEncrypt(cipher,key,cipher->IV,BLOCK_SIZE,(byte *)x);
 			bit	  = 0x80 >> (n & 7);
 			ctBit = input[n/8] & bit;
@@ -416,26 +418,26 @@ int blockDecrypt(cipherInstance* cipher, keyInstance* key, CONST byte* input, in
 							 (ctBit ^ ((((byte *) x)[0] & 0x80) >> (n&7)));
 			carry = ctBit >> (7 - (n&7));
 			for (i=BLOCK_SIZE/8-1;i>=0;i--)
-				{
+			{
 				bit = cipher->IV[i] >> 7;	/* save next "carry" from shift */
 				cipher->IV[i] = (cipher->IV[i] << 1) ^ carry;
 				carry = bit;
-				}
 			}
+		}
 		cipher->mode = MODE_CFB1;	/* restore mode for next time */
 		return inputLen;
-		}
+	}
 
 	/* here for ECB, CBC modes */
 	for (n=0;n<inputLen;n+=BLOCK_SIZE,input+=BLOCK_SIZE/8,outBuffer+=BLOCK_SIZE/8)
-		{
+	{
 		//DebugDump(input,"\n",rounds+1,0,0,0,1);
 
 		for (i=0;i<BLOCK_SIZE/32;i++)	/* copy in the block, add whitening */
 			x[i]=Bswap(((dword *)input)[i]) ^ key->subKeys[OUTPUT_WHITEN+i];
 
 		for (r=rounds-1;r>=0;r--)			/* main Twofish decryption loop */
-			{
+		{
 			t0	 = f32(    x[0]   ,key->sboxKeys,key->keyLen);
 			t1	 = f32(ROL(x[1],8),key->sboxKeys,key->keyLen);
 
@@ -446,27 +448,25 @@ int blockDecrypt(cipherInstance* cipher, keyInstance* key, CONST byte* input, in
 			x[3] = ROR(x[3],1);
 
 			if (r)									/* unswap, except for last round */
-				{
+			{
 				t0   = x[0]; x[0]= x[2]; x[2] = t0;	
 				t1   = x[1]; x[1]= x[3]; x[3] = t1;
-				}
 			}
+		}
 		//DebugDump(x,"",0,0,0,0,0);/* make final output match encrypt initial output */
 
 		for (i=0;i<BLOCK_SIZE/32;i++)	/* copy out, with whitening */
-			{
+		{
 			x[i] ^= key->subKeys[INPUT_WHITEN+i];
 			if (cipher->mode == MODE_CBC)
-				{
+			{
 				x[i] ^= Bswap(cipher->iv32[i]);
 				cipher->iv32[i] = ((dword *)input)[i];
-				}
-			((dword *)outBuffer)[i] = Bswap(x[i]);
 			}
-		//DebugDump(outBuffer,"",-1,0,0,0,1);
+			((dword *)outBuffer)[i] = Bswap(x[i]);
 		}
-
-	return inputLen;
+		//DebugDump(outBuffer,"",-1,0,0,0,1);
 	}
 
-
+	return inputLen;
+}

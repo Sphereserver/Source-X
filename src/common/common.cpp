@@ -146,8 +146,10 @@ static int CvtUNICODEToSystem( tchar * pOut, int iSizeOutBytes, wchar wChar )
 
 // MinGW issues this warning, but not GCC on Linux, probably because the wchar type is different between
 // Windows and Linux. It's only an annoying warning: "comparison is always true due to limited range of data type".
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wtype-limits"
+#ifndef _MSC_VER
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wtype-limits"
+#endif
 	int iBytes;
 	int iStartBits;
 	if ( wChar < (1<<11) )
@@ -167,7 +169,9 @@ static int CvtUNICODEToSystem( tchar * pOut, int iSizeOutBytes, wchar wChar )
 	}
 	else
 		return -1;	// not valid UNICODE char.
-#pragma GCC diagnostic pop
+#ifndef _MSC_VER
+	#pragma GCC diagnostic pop
+#endif
 
 	if ( iBytes > iSizeOutBytes )	// not big enough to hold it.
 		return 0;

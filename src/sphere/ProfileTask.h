@@ -3,8 +3,9 @@
 #ifndef _INC_PROFILETASK_H
 #define _INC_PROFILETASK_H
 
-#include "threads.h"
 #include "ProfileData.h"
+
+class AbstractSphereThread;
 
 #define CurrentProfileData static_cast<AbstractSphereThread *>(ThreadHolder::current())->m_profile
 

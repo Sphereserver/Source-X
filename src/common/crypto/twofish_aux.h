@@ -1,7 +1,10 @@
 #ifndef _INC_TWOFISH_AUX_H_
 #define _INC_TWOFISH_AUX_H_
 
-#include "../datatypes.h"
+#include <inttypes.h>
+typedef uint_least32_t	dword;
+typedef uint_least8_t	byte;
+
 
 /***************************************************************************
 (ex) TABLE.H	-- Tables, macros, constants for Twofish S-boxes and MDS matrix		// edited for SphereServer

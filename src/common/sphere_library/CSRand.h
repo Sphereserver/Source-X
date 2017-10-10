@@ -6,7 +6,7 @@
 #pragma once
 #ifndef _INC_CSRAND_H
 
-#include "../datatypes.h"
+#include "../datatypes.h"	// only the numeric data types
 
 
 class CSRand

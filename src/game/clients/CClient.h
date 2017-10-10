@@ -421,20 +421,16 @@ public:
 #define SF_UPDATE_STAM		0x04
 #define SF_UPDATE_STATUS	0x08
 
-	void addUpdateStatsFlag()
-	{
+	void addUpdateStatsFlag() {
 		m_fUpdateStats |= SF_UPDATE_STATUS;
 	}
-	void addUpdateHitsFlag()
-	{
+	void addUpdateHitsFlag() {
 		m_fUpdateStats |= SF_UPDATE_HITS;
 	}
-	void addUpdateManaFlag()
-	{
+	void addUpdateManaFlag() {
 		m_fUpdateStats |= SF_UPDATE_MANA;
 	}
-	void addUpdateStamFlag()
-	{
+	void addUpdateStamFlag() {
 		m_fUpdateStats |= SF_UPDATE_STAM;
 	}
 	void UpdateStats();
