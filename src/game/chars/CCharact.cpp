@@ -234,11 +234,8 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 
 	if ( pItem == NULL )
 		return;
-	if ( pItem->GetParent() == this &&
-		pItem->GetEquipLayer() == layer )
-	{
+	if ( (pItem->GetParent() == this) && ( pItem->GetEquipLayer() == layer ) )
 		return;
-	}
 
 	if ( layer == LAYER_DRAGGING )
 	{
@@ -1941,7 +1938,9 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 	LAYER_TYPE layer = CanEquipLayer(pItem, LAYER_QTY, pCharMsg, false);
 	if ( layer == LAYER_NONE )	// if this isn't an equippable item or if i can't equip it
 	{
-		if ( m_pNPC )	// only bounce to backpack if NPC, because players will call CClient::Event_Item_Drop_Fail() to drop the item back on its last location
+		// Only bounce to backpack if NPC, because players will call CClient::Event_Item_Drop_Fail() to drop the item back on its last location.
+		// But, for clients, bounce it if we are trying to equip the item without an explicit client request (character creation, equipping from scripts or source..)
+		if ( m_pNPC || (!m_pNPC && !fFromDClick) )
 			ItemBounce(pItem);
 		return false;
 	}
@@ -1955,7 +1954,7 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 			// so, if this is an NPC, even if there's a RETURN 1 i need to bounce the item inside his pack
 
 			//if (m_pNPC && (pItem->GetTopLevelObj() == this) )		// use this if we want to bounce the item only if i have picked it up previously (so it isn't valid if picking up from the ground)
-			if (m_pNPC)
+			if (m_pNPC && !pItem->IsDeleted())
 				ItemBounce(pItem);
 			return false;
 		}

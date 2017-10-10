@@ -205,3 +205,8 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Fixed: for crafting skills, crafting difficulty didn't increase with the required skill value.
 - Added: for skills Enticement, Peacemaking and Provocation, if ACTARG1 is set to the UID of the instrument to play, it will be played the sound of that instrument.
 - Added: TAG.BARDING.DIFF is now used to determine the difficulty of Enticement, Peacemaking and Provocation skills. If this tag isn't set, the old behaviour is used.
+
+10-10-2017, Nolok
+- Fixed: object created but not placed in the world when trying to make a player equip non-equippable items; now they are bounced to the pack.
+	This fixes also the items in the NEWBIE section not being added (sometimes, and for some kind of items) at the character creation.
+- Fixed: bug occurring when doing REMOVE and RETURN 1 in @(Item)EquipTest trigger fired on an NPC.

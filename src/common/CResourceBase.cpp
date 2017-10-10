@@ -383,9 +383,7 @@ bool CResourceBase::ResourceLock( CResourceLock & s, CResourceIDBase rid )
 		return false;
 	CResourceLink * pResourceLink = dynamic_cast <CResourceLink *>( ResourceGetDef( rid ));
 	if ( pResourceLink )
-	{
 		return pResourceLink->ResourceLock(s);
-	}
 	return false;
 }
 
