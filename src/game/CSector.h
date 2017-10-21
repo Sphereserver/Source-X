@@ -54,6 +54,7 @@ public:
 	int GetLocalTime() const;
 	lpctstr GetLocalGameTime() const;
 
+	// Season
 	SEASON_TYPE GetSeason() const;
 	void SetSeason( SEASON_TYPE season );
 
@@ -75,7 +76,6 @@ public:
 	void SetLight( int light );
 
 	// Items in the sector
-
 	size_t GetItemComplexity() const;
 	bool IsItemInSector( const CItem * pItem ) const;
 	void MoveItemToSector( CItem * pItem, bool fActive );

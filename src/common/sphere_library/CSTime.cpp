@@ -102,6 +102,7 @@ void FormatDateTime(tchar * pszTemp, lpctstr pszFormat, const struct tm * ptmTem
 	{
 #endif // _WIN32
 
+	// only for ASCII strings
 	if (strftime( pszTemp, maxTimeBufferSize, pszFormat, ptmTemp) == 0)
 		pszTemp[0] = '\0';
 
@@ -113,9 +114,8 @@ void FormatDateTime(tchar * pszTemp, lpctstr pszFormat, const struct tm * ptmTem
 		pszTemp[0] = '\0';
 	}
 
-	// restore previous parameter handler
-
 #ifdef _MSC_VER
+	// restore previous parameter handler
 	_set_invalid_parameter_handler(oldHandler);
 #endif // _MSC_VER
 #endif // _WIN32

@@ -69,8 +69,7 @@ Gump Enums, New Container Defines, Misc Switches from Prop Attributes…  to Fla
 Note: More needs to be switched over and I am trying to get this and the Base Packs completely up to date and somewhat synchronized with the most efficient methods Xun and I can think of.
 
 30-05-2016, XuN
-- Fixed CanUse not inheriting from the higher item (ie: i_boomerang_bla not inheriting
-  CanUse from i_boomerang).
+- Fixed CanUse not inheriting from the higher item (ie: i_boomerang_blah not inheriting CanUse from i_boomerang).
 - Fixed Statf_War not clearing in every situation when calling Attacker_Clear().
 - Added RecipeAlchemy,RecipleBlacksmith, RecipeBowcraft, RecipeCarpentry, RecipeCartography, RecipeCooking, RecipeInscription,
 	RecipeTailoring, RecipeTinkering (all of the current SKF_CRAFT skills).
@@ -169,6 +168,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 
 04-09-2017, Nolok
 - Added: the ID of an item can be overridden after its creation by a random template (which must return a non-container type item).
+	Remember though that this is inefficient and that the preferred way is to use a { } random range.
 
 20-09-2017, Nolok
 - Fixed: very old bug which caused arguments of scripts instructions being silently parsed in the wrong way (if they
@@ -210,3 +210,8 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Fixed: object created but not placed in the world when trying to make a player equip non-equippable items; now they are bounced to the pack.
 	This fixes also the items in the NEWBIE section not being added (sometimes, and for some kind of items) at the character creation.
 - Fixed: bug occurring when doing REMOVE and RETURN 1 in @(Item)EquipTest trigger fired on an NPC.
+
+21-10-2017, Nolok
+- Fixed: if the client's LIGHT property was set, the Night Sight flag was ignored when calculating the light level to send to the client.
+- Fixed: the client didn't get the new light level nor when the sector's LIGHT property was overridden, neither when the client's LIGHT property was changed.
+- Added: warning message if AllowLightOverride ini flag is set to 0 but we are trying to manually set the sector's LIGHT property.

@@ -3010,7 +3010,8 @@ do_default:
 			}
 			break;
 		case CHC_FLAGS:		// DO NOT MODIFY STATF_SaveParity, STATF_Spawned, STATF_Pet
-            m_iStatFlag = ( s.GetArgLLVal() &~ (STATF_SaveParity|STATF_Pet|STATF_Spawned)) | ( m_iStatFlag & (STATF_SaveParity|STATF_Pet|STATF_Spawned) );			NotoSave_Update();
+            m_iStatFlag = ( s.GetArgLLVal() &~ (STATF_SaveParity|STATF_Pet|STATF_Spawned)) | ( m_iStatFlag & (STATF_SaveParity|STATF_Pet|STATF_Spawned) );
+			NotoSave_Update();
 			break;
 		case CHC_FONT:
 			m_fonttype = static_cast<FONT_TYPE>(s.GetArgVal());
@@ -3204,6 +3205,8 @@ do_default:
 			break;
 		case CHC_LIGHT:
 			m_LocalLight = s.GetArgBVal();
+			if (m_pClient)
+				m_pClient->addLight();
 			break;
 		case CHC_EXP:
 			m_exp = s.GetArgVal();

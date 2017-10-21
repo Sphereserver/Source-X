@@ -99,7 +99,7 @@ bool CSector::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			if ( pszKey[10] == '.' )
 			{
 				pszKey += 11;
-				sVal = ( ! strcmpi( pszKey, sm_ComplexityTitles->FindName( (int)GetCharComplexity() ))) ? "1" : "0";
+				sVal = ( ! strcmpi( pszKey, sm_ComplexityTitles->FindName( (int)GetCharComplexity() )) ) ? "1" : "0";
 				return true;
 			}
 			sVal.FormatSTVal( GetCharComplexity() );
@@ -163,7 +163,9 @@ bool CSector::r_LoadVal( CScript &s )
 			return true;
 		case SC_LIGHT:
 			if ( g_Cfg.m_bAllowLightOverride )
-				m_Env.m_Light = (uchar)(s.GetArgVal() | LIGHT_OVERRIDE);
+				SetLight( (s.HasArgs()) ? s.GetArgVal() : -1 );
+			else
+				g_Log.EventWarn("AllowLightOverride flag is disabled in sphere.ini, so sector's LIGHT property wasn't set\n");
 			return true;
 		case SC_RAINCHANCE:
 			SetWeatherChance( true, s.HasArgs() ? s.GetArgVal() : -1 );
@@ -225,6 +227,8 @@ bool CSector::r_Verb( CScript & s, CTextConsole * pSrc )
 		case SEV_LIGHT:
 			if ( g_Cfg.m_bAllowLightOverride )
 				SetLight( (s.HasArgs()) ? s.GetArgVal() : -1 );
+			else
+				g_Log.EventWarn("AllowLightOverride flag is disabled in sphere.ini, so sector's LIGHT property wasn't set\n");
 			break;
 		case SEV_RAIN:
 			SetWeather(s.HasArgs() ? static_cast<WEATHER_TYPE>(s.GetArgVal()) : WEATHER_RAIN);
@@ -456,8 +460,7 @@ bool CSector::v_AllClients( CScript & s, CTextConsole * pSrc )
 		if (pChar == NULL)
 			continue;
 
-		// Check that the character is a client (we only want to affect
-		// clients with this)
+		// Check that the character is a client (we only want to affect clients with this)
 		if ( ! pChar->IsClient())
 			continue;
 
@@ -557,8 +560,10 @@ byte CSector::GetLightCalc( bool fQuickSet ) const
 		//	0...	x	...12*60
 		int iTargLight = ((localtime * ( g_Cfg.m_iLightNight - g_Cfg.m_iLightDay ))/(12*60) + g_Cfg.m_iLightDay);
 
-		if ( iTargLight < LIGHT_BRIGHT ) iTargLight = LIGHT_BRIGHT;
-		if ( iTargLight > LIGHT_DARK ) iTargLight = LIGHT_DARK;
+		if ( iTargLight < LIGHT_BRIGHT )
+			iTargLight = LIGHT_BRIGHT;
+		if ( iTargLight > LIGHT_DARK )
+			iTargLight = LIGHT_DARK;
 
 		return (uchar)(iTargLight);
 	}
@@ -621,17 +626,19 @@ static const byte sm_FeluccaPhaseBrightness[] =
 		}
 	}
 
-	if ( iTargLight < LIGHT_BRIGHT ) iTargLight = LIGHT_BRIGHT;
-	if ( iTargLight > LIGHT_DARK ) iTargLight = LIGHT_DARK;
+	if ( iTargLight < LIGHT_BRIGHT )
+		iTargLight = LIGHT_BRIGHT;
+	if ( iTargLight > LIGHT_DARK )
+		iTargLight = LIGHT_DARK;
 
 	if ( fQuickSet || m_Env.m_Light == iTargLight )		// Initializing the sector
 		return (uchar)(iTargLight);
 
 	// Gradual transition to global light level.
 	if ( m_Env.m_Light > iTargLight )
-		return( m_Env.m_Light - 1 );
+		return ( m_Env.m_Light - 1 );
 	else
-		return( m_Env.m_Light + 1 );
+		return ( m_Env.m_Light + 1 );
 }
 
 void CSector::SetLightNow( bool fFlash )
@@ -650,12 +657,12 @@ void CSector::SetLightNow( bool fFlash )
 			CClient * pClient = pChar->GetClient();
 			ASSERT(pClient);
 
-			if ( fFlash )	// This does not seem to work predicably !
+			if ( fFlash )	// This does not seem to work predicably ! too fast?
 			{
-				byte bPrvLight = m_Env.m_Light;
-				m_Env.m_Light = LIGHT_BRIGHT;	// full bright.
+				byte bPrvLight = pChar->m_LocalLight;
+				pChar->m_LocalLight = LIGHT_BRIGHT;	// full bright.
 				pClient->addLight();
-				m_Env.m_Light = bPrvLight;	// back to previous.
+				pChar->m_LocalLight = bPrvLight;	// back to previous.
 			}
 			pClient->addLight();
 		}
@@ -680,9 +687,8 @@ void CSector::SetLight( int light )
 		m_Env.m_Light = (byte) GetLightCalc( true );
 	}
 	else
-	{
 		m_Env.m_Light = (byte) ( light | LIGHT_OVERRIDE );
-	}
+
 	SetLightNow(false);
 }
 

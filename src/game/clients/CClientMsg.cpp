@@ -530,9 +530,16 @@ void CClient::addLight()
 	// NOTE: This could just be a flash of light.
 	// Global light level.
 	ASSERT(m_pChar);
+
+	if (m_pChar->IsStatFlag(STATF_NightSight|STATF_DEAD))
+	{
+		new PacketGlobalLight(this, LIGHT_BRIGHT);
+		return;
+	}
+
 	byte iLight = UINT8_MAX;
 
-	if ( m_pChar->m_LocalLight )
+	if ( m_pChar->m_LocalLight )			// personal light override
 		iLight = m_pChar->m_LocalLight;
 
 	if ( iLight == UINT8_MAX )
@@ -547,7 +554,6 @@ void CClient::addLight()
 	if ( iLight == m_Env.m_Light )
 		return;
 
-	m_Env.m_Light = iLight;
 	new PacketGlobalLight(this, iLight);
 }
 

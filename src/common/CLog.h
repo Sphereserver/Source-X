@@ -145,7 +145,8 @@ private:
 	const CScript * m_pScriptContext;		// The current context.
 	const CScriptObj * m_pObjectContext;	// The current context.
 
-	static CSTime sm_prevCatchTick;	// don't flood with these.
+	static CSTime sm_prevCatchTick;			// don't flood with these.
+
 public:
 	bool m_fLockOpen;
 	SimpleMutex m_mutex;
