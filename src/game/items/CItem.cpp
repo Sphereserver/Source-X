@@ -2935,8 +2935,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 		case IC_MORE:
 		case IC_MORE1:
 			m_itNormal.m_more1 = s.GetArgVal();
-			if ( !g_Serv.IsLoading( )
-				&& ( IsType( IT_SPAWN_CHAR ) || IsType( IT_SPAWN_ITEM ) ) )
+			if ( !g_Serv.IsLoading() && ( IsType(IT_SPAWN_CHAR) || IsType(IT_SPAWN_ITEM) ) )
 			{
 				CItemSpawn *pSpawn = static_cast<CItemSpawn*>(this);
 				if (pSpawn)
@@ -2985,14 +2984,10 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 						default:
 						case 4:	// m_map
 							if ( IsDigit(ppVal[3][0]))
-							{
 								pt.m_map = (uchar)(ATOI(ppVal[3]));
-							}
 						case 3: // m_z
 							if ( IsDigit(ppVal[2][0]) || ppVal[2][0] == '-' )
-							{
 								pt.m_z = (char)(ATOI(ppVal[2]));
-							}
 						case 2:
 							pt.m_y = (short)(ATOI(ppVal[1]));
 						case 1:
@@ -3002,9 +2997,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 					}
 				}
 				if ( iArgs < 2 )
-				{
 					pt.InitPoint();
-				}
 
 				m_itNormal.m_morep = pt;
 				// m_itNormal.m_morep = g_Cfg.GetRegionPoint( s.GetArgStr() );

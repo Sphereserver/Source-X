@@ -200,6 +200,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 29-09-2017, Nolok
 - Fixed: ACTARG1/2/3 values being zeroed or corrupted after the execution of any skill trigger.
 	Now they are zeroed before the @PreStart trigger (so after @Select) and	when we are done with the skill (success, abort, failure).
+	! As of r2567 (of 05-10-2017) this cleanup isn't done anymore before the @PreStart trigger but only at the end of the skill!
 	Also ACTDIFF is now set and cleared in the same situations of ACTARGs.
 - Fixed: FORCONT, FORCONTID, FORCONTTYPE second argument (the maximum number of subcontainers to be searched in) could only be a plain number, not an expression.
 - Fixed: for crafting skills, crafting difficulty didn't increase with the required skill value.
@@ -210,8 +211,13 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Fixed: object created but not placed in the world when trying to make a player equip non-equippable items; now they are bounced to the pack.
 	This fixes also the items in the NEWBIE section not being added (sometimes, and for some kind of items) at the character creation.
 - Fixed: bug occurring when doing REMOVE and RETURN 1 in @(Item)EquipTest trigger fired on an NPC.
+- Changed: ACTARG1/2/3 values are now cleared only when we are done with the skill (success, abort, failure).
 
 21-10-2017, Nolok
 - Fixed: if the client's LIGHT property was set, the Night Sight flag was ignored when calculating the light level to send to the client.
 - Fixed: the client didn't get the new light level nor when the sector's LIGHT property was overridden, neither when the client's LIGHT property was changed.
 - Added: warning message if AllowLightOverride ini flag is set to 0 but we are trying to manually set the sector's LIGHT property.
+
+22-10-2017, Nolok
+- Fixed: when using the meditation skill, if the SKF_NOSFX flag was set, the bufficon wasn't added.
+- Fixed: ACTARG1/2/3 weren't zeroed at skill success, abort or failure if the SKF_SCRIPTED was set.

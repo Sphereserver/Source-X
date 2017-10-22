@@ -2372,12 +2372,10 @@ int CChar::Skill_Meditation( SKTRIG_TYPE stage )
 
 		if ( m_atTaming.m_Stroke_Count == 0 )
 		{
+			if ( IsClient() )
+				GetClient()->addBuff(BI_ACTIVEMEDITATION, 1075657, 1075658);
 			if ( !g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_NOSFX ) )
-			{
-				if ( IsClient() )
-					GetClient()->addBuff(BI_ACTIVEMEDITATION, 1075657, 1075658);
 				Sound( 0x0f9 );
-			}
 		}
 		m_atTaming.m_Stroke_Count++;
 		UpdateStatVal( STAT_INT, 1 );
@@ -2813,6 +2811,9 @@ int CChar::Skill_Carpentry( SKTRIG_TYPE stage )
 int CChar::Skill_Scripted( SKTRIG_TYPE stage )
 {
 	ADDTOCALLSTACK("CChar::Skill_Scripted");
+	if (stage == SKTRIG_SUCCESS || stage == SKTRIG_FAIL || stage == SKTRIG_ABORT)
+		Skill_Cleanup();
+
 	if ( stage == SKTRIG_FAIL || stage == SKTRIG_START || stage == SKTRIG_STROKE || stage == SKTRIG_SUCCESS )
 		return 0;
 

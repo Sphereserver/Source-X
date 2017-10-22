@@ -59,7 +59,7 @@ enum SKTRIG_TYPE
 {
 	// All skills may be scripted.
 	// XTRIG_UNKNOWN    = some named trigger not on this list.
-	SKTRIG_ABORT = 1,     // Some odd thing went wrong.
+	SKTRIG_ABORT = 1,  	// Some odd thing went wrong.
 	SKTRIG_FAIL,        // we failed the skill check.
 	SKTRIG_GAIN,        // called when there is a chance to gain skill
 	SKTRIG_PRESTART,    // called before any hardcoded messages
@@ -76,18 +76,18 @@ enum SKTRIG_TYPE
 
 enum SKF_TYPE
 {
-	SKF_SCRIPTED = 0x0001,       // fully scripted, no hardcoded behaviour
-	SKF_FIGHT = 0x0002,       // considered a fight skill, maintains fight active
-	SKF_MAGIC = 0x0004,       // considered a magic skill
-	SKF_CRAFT = 0x0008,       // considered a crafting skill, compatible with MAKEITEM function
-	SKF_IMMOBILE = 0x0010,       // fails skill if character moves
-	SKF_SELECTABLE = 0x0020,       // allows skill to be selected from the skill menu
-	SKF_NOMINDIST = 0x0040,       // you can mine, fish, chop, hack on the same point you are standing on
-	SKF_NOANIM = 0x0080,       // prevents hardcoded animation from playing
-	SKF_NOSFX = 0x0100,       // prevents hardcoded sound from playing
-	SKF_RANGED = 0x0200,       // Considered a ranged skill (combine with SKF_FIGHT)
-	SKF_GATHER = 0x0400,       // Considered a gathering skill, using SkillStrokes as SKF_CRAFT
-	SKF_DISABLED = 0x0800        // Disabled skill, can't be used.
+	SKF_SCRIPTED = 0x0001,		// fully scripted, no hardcoded behaviour
+	SKF_FIGHT = 0x0002,			// considered a fight skill, maintains fight active
+	SKF_MAGIC = 0x0004,			// considered a magic skill
+	SKF_CRAFT = 0x0008,			// considered a crafting skill, compatible with MAKEITEM function
+	SKF_IMMOBILE = 0x0010,		// fails skill if character moves
+	SKF_SELECTABLE = 0x0020,	// allows skill to be selected from the skill menu
+	SKF_NOMINDIST = 0x0040,		// you can mine, fish, chop, hack on the same point you are standing on
+	SKF_NOANIM = 0x0080,		// prevents hardcoded animation from playing
+	SKF_NOSFX = 0x0100,			// prevents hardcoded sound from playing
+	SKF_RANGED = 0x0200,		// Considered a ranged skill (combine with SKF_FIGHT)
+	SKF_GATHER = 0x0400,		// Considered a gathering skill, using SkillStrokes as SKF_CRAFT
+	SKF_DISABLED = 0x0800		// Disabled skill, can't be used.
 };
 
 
