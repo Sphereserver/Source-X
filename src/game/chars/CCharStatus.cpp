@@ -286,7 +286,7 @@ bool CChar::CanEquipStr( CItem *pItem ) const
 	if ( !pItemDef->IsTypeEquippable() || !CItemBase::IsVisibleLayer(layer) )
 		return true;
 
-	if ( Stat_GetAdjusted(STAT_STR) >= pItemDef->m_ttEquippable.m_StrReq * (100 - pItem->GetDefNum("LOWERREQ", true, true)) / 100 )
+	if ( Stat_GetAdjusted(STAT_STR) >= pItemDef->m_ttEquippable.m_iStrReq * (100 - pItem->GetDefNum("LOWERREQ", true, true)) / 100 )
 		return true;
 
 	return false;
@@ -313,7 +313,7 @@ LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg
 		if ( pItemDef->IsTypeEquippable() && CItemBase::IsVisibleLayer(layer) )
 		{
 			// Test only on players or if requested
-			if ( (m_pPlayer || fTest) && pItemDef->m_ttEquippable.m_StrReq && (Stat_GetAdjusted(STAT_STR) < pItemDef->m_ttEquippable.m_StrReq * (100 - pItem->GetDefNum("LOWERREQ", true, true)) / 100) )
+			if ( (m_pPlayer || fTest) && pItemDef->m_ttEquippable.m_iStrReq && (Stat_GetAdjusted(STAT_STR) < pItemDef->m_ttEquippable.m_iStrReq * (100 - pItem->GetDefNum("LOWERREQ", true, true)) / 100) )
 			{
 				if ( m_pPlayer )	// message only players
 				{
@@ -722,16 +722,19 @@ CItem *CChar::GetSpellbook(SPELL_TYPE iSpell) const	// Retrieves a spellbook fro
 	ADDTOCALLSTACK("CChar::GetSpellbook");
 	// Search for suitable book in hands first
 	CItem *pReturn = NULL;
-	for ( CItem *pBook = GetContentHead(); pBook != NULL; pBook = pBook->GetNext() )
+	for ( CItem *pItem = GetContentHead(); pItem != NULL; pItem = pItem->GetNext() )
 	{
-		if ( !pBook->IsTypeSpellbook() )
+		if ( !pItem->IsTypeSpellbook() )
 			continue;
-		if ( (iSpell > pBook->m_itSpellbook.m_baseid) && (iSpell - (pBook->m_itSpellbook.m_baseid + 1) < 96) )
+		CItemBase *pItemDef = pItem->Item_GetDef();
+		SPELL_TYPE min = (SPELL_TYPE)pItemDef->m_ttSpellbook.m_iOffset;
+		SPELL_TYPE max = (SPELL_TYPE)(pItemDef->m_ttSpellbook.m_iOffset + pItemDef->m_ttSpellbook.m_iMaxSpells);
+		if ( (iSpell > min) && (iSpell < max) )
 		{
-			if ( pBook->IsSpellInBook(iSpell) )	//We found a book with this same spell, nothing more to do.
-				return pBook;
+			if ( pItem->IsSpellInBook(iSpell) )	//We found a book with this same spell, nothing more to do.
+				return pItem;
 			else
-				pReturn = pBook;	// We did not find the spell, but this book is of the same school ... we'll return this book if none better is found (NOTE: some book must be returned or the code will think that we don't have a book).
+				pReturn = pItem;	// We did not find the spell, but this book is of the same school ... we'll return this book if none better is found (NOTE: some book must be returned or the code will think that we don't have a book).
 		}
 	}
 
@@ -739,76 +742,23 @@ CItem *CChar::GetSpellbook(SPELL_TYPE iSpell) const	// Retrieves a spellbook fro
 	CItemContainer *pPack = GetPack();
 	if ( pPack )
 	{
-		for ( CItem *pBook = pPack->GetContentHead(); pBook != NULL; pBook = pBook->GetNext() )
+		for ( CItem *pItem = pPack->GetContentHead(); pItem != NULL; pItem = pItem->GetNext() )
 		{
-			if ( !pBook->IsTypeSpellbook() )
+			if ( !pItem->IsTypeSpellbook() )
 				continue;
-			if ( (iSpell > pBook->m_itSpellbook.m_baseid) && (iSpell - (pBook->m_itSpellbook.m_baseid + 1) < 96) )
+			CItemBase *pItemDef = pItem->Item_GetDef();
+			SPELL_TYPE min = (SPELL_TYPE)pItemDef->m_ttSpellbook.m_iOffset;
+			SPELL_TYPE max = (SPELL_TYPE)(pItemDef->m_ttSpellbook.m_iOffset + pItemDef->m_ttSpellbook.m_iMaxSpells);
+			if ( (iSpell > min) && (iSpell < max) )
 			{
-				if ( pBook->IsSpellInBook(iSpell) )	//We found a book with this same spell, nothing more to do.
-					return pBook;
+				if ( pItem->IsSpellInBook(iSpell) )	//We found a book with this same spell, nothing more to do.
+					return pItem;
 				else
-					pReturn = pBook;	// We did not find the spell, but this book is of the same school ... we'll return this book if none better is found (NOTE: some book must be returned or the code will think that we don't have a book).
+					pReturn = pItem;	// We did not find the spell, but this book is of the same school ... we'll return this book if none better is found (NOTE: some book must be returned or the code will think that we don't have a book).
 			}
 		}
 	}
 	return pReturn;
-}
-
-int CChar::GetSpellbookExtra(CItem *pBooks[], int &count) const	// Retrieves a spellbook from the magic school given in iSpell
-{
-	ADDTOCALLSTACK("CChar::GetSpellbook");
-	// Search for suitable book in hands first
-	for ( CItem *pBook = GetContentHead(); pBook != NULL; pBook = pBook->GetNext() )
-	{
-		if ( pBook->GetType() != IT_SPELLBOOK_EXTRA )
-			continue;
-		if ( pBook->m_itSpellbook.m_baseid )
-			pBooks[++count] = pBook;
-	}
-
-	// Then search in the top level of the pack
-	CItemContainer *pPack = GetPack();
-	if ( pPack )
-	{
-		for ( CItem *pBook = pPack->GetContentHead(); pBook != NULL; pBook = pBook->GetNext() )
-		{
-			if ( pBook->GetType() != IT_SPELLBOOK_EXTRA )
-				continue;
-			if ( pBook->m_itSpellbook.m_baseid )
-				pBooks[++count] = pBook;
-		}
-	}
-	return count;
-}
-
-CItem *CChar::GetSpellbookRandom(SPELL_TYPE iSpell) const	// Retrieves a spellbook from the magic school given in iSpell
-{
-	ADDTOCALLSTACK("CChar::GetSpellbook");
-	CItem *pBook = NULL;
-	CItem *pBooks[(int)(SKILL_QTY)];
-	// Search for suitable book in hands first
-	int count = 0;
-	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; i++ )
-	{
-		SKILL_TYPE skill = static_cast<SKILL_TYPE>(i);
-		CSkillDef *pSkillDef = g_Cfg.GetSkillDef(skill);
-		if ( !pSkillDef )
-			continue;
-		if ( g_Cfg.IsSkillFlag(skill, SKF_MAGIC) && (Skill_GetBase(skill) > 1) )	//only selecting skills with value > 0.1
-		{
-			pBook = GetSpellbook(iSpell ? iSpell : const_cast<CChar*>(this)->Spell_GetIndex(skill));
-			if ( pBook )
-				pBooks[++count] = pBook;
-		}
-	}
-	GetSpellbookExtra(pBooks, count);	// add extra spellbooks to the list
-	if ( count > 0 )
-	{
-		int rand = Calc_GetRandVal2(1, count);
-		return pBooks[rand];
-	}
-	return NULL;
 }
 
 short CChar::Food_GetLevelPercent() const

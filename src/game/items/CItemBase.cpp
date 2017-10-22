@@ -235,7 +235,7 @@ CREID_TYPE CItemBase::FindCharTrack( ITEMID_TYPE trackID )	// static
 	if ( ! pItemDef->IsType(IT_EQ_HORSE) && ! pItemDef->IsType(IT_FIGURINE) )
 		return CREID_INVALID;
 
-	return static_cast<CREID_TYPE>(pItemDef->m_ttFigurine.m_charid.GetResIndex());
+	return static_cast<CREID_TYPE>(pItemDef->m_ttFigurine.m_idChar.GetResIndex());
 }
 
 bool CItemBase::IsTypeArmor( IT_TYPE type )  // static
@@ -294,7 +294,7 @@ GUMP_TYPE CItemBase::IsTypeContainer() const
 		case IT_EQ_BANK_BOX:
 		case IT_EQ_VENDOR_BOX:
 		case IT_KEYRING:
-			return	m_ttContainer.m_gumpid;
+			return	m_ttContainer.m_idGump;
 		default:
 			return GUMP_NONE;
 	}
@@ -1189,7 +1189,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 			break;
 		case IBC_REQSTR:
 			// IsTypeEquippable()
-			sVal.FormatVal( m_ttEquippable.m_StrReq );
+			sVal.FormatVal( m_ttEquippable.m_iStrReq );
 			break;
 		case IBC_SKILLMAKE:		// Print the resources need to make in nice format.
 			{
@@ -1576,7 +1576,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 		case IBC_REQSTR:
 			if ( ! IsTypeEquippable())
 				return false;
-			m_ttEquippable.m_StrReq = s.GetArgVal();
+			m_ttEquippable.m_iStrReq = s.GetArgVal();
 			break;
 
 		case IBC_RESDISPDNID:

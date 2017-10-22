@@ -1067,7 +1067,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 
 	if ( pOreDef->IsType( IT_ORE ))
 	{
-		ITEMID_TYPE idIngot = static_cast<ITEMID_TYPE>(RES_GET_INDEX( pOreDef->m_ttOre.m_IngotID));
+		ITEMID_TYPE idIngot = static_cast<ITEMID_TYPE>(RES_GET_INDEX( pOreDef->m_ttOre.m_idIngot));
 		pIngotDef = CItemBase::FindItemBase(idIngot);
 		iIngotQty = 1;	// ingots per ore.
 	}

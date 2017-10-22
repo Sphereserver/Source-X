@@ -2063,7 +2063,7 @@ void CClient::addBondedStatus( const CChar * pChar, bool bIsDead )
 	new PacketBondedStatus(this, pChar, bIsDead);
 }
 
-void CClient::addSpellbookOpen( CItem * pBook, word offset )
+void CClient::addSpellbookOpen( CItem * pBook )
 {
 	ADDTOCALLSTACK("CClient::addSpellbookOpen");
 
@@ -2102,7 +2102,7 @@ void CClient::addSpellbookOpen( CItem * pBook, word offset )
 	if ( PacketSpellbookContent::CanSendTo(GetNetState()) && GetNetState()->isClientVersion(MINCLIVER_SPELLBOOK) && IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) )
 	{
 		// Handle new AOS spellbook stuff (old packets no longer work)
-		new PacketSpellbookContent(this, pBook, offset);
+		new PacketSpellbookContent( this, pBook, (word)(pBook->Item_GetDef()->m_ttSpellbook.m_iOffset + 1) );
 		return;
 	}
 

@@ -608,7 +608,7 @@ void CClient::AOSTooltip_addDefaultItemData(const CItem * pItem)
 			t->FormatArgs("%s\t%d", g_Cfg.GetDefaultMsg(DEFMSG_TOOLTIP_TAG_ARMOR), ArmorRating);
 		}
 
-		int64 StrengthRequirement = pItem->Item_GetDef()->m_ttEquippable.m_StrReq - pItem->GetDefNum("LOWERREQ", true, true);
+		int64 StrengthRequirement = pItem->Item_GetDef()->m_ttEquippable.m_iStrReq - pItem->GetDefNum("LOWERREQ", true, true);
 		if (StrengthRequirement > 0)
 		{
 			this->m_TooltipData.Add(t = new CClientTooltip(1061170)); // strength requirement ~1_val~
@@ -805,7 +805,7 @@ void CClient::AOSTooltip_addDefaultItemData(const CItem * pItem)
 			t->FormatArgs("%hhu", Range);
 		}
 
-		int64 StrengthRequirement = pItem->Item_GetDef()->m_ttEquippable.m_StrReq - pItem->GetDefNum("LOWERREQ", true, true);
+		int64 StrengthRequirement = pItem->Item_GetDef()->m_ttEquippable.m_iStrReq - pItem->GetDefNum("LOWERREQ", true, true);
 		if (StrengthRequirement > 0)
 		{
 			this->m_TooltipData.Add(t = new CClientTooltip(1061170)); // strength requirement ~1_val~

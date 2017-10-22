@@ -87,17 +87,14 @@ int CCharNPC::Spells_FindSpell(SPELL_TYPE spellID)
 	return -1;
 }
 
-bool CChar::NPC_GetAllSpellbookSpells()	// Retrieves a spellbook from the magic school given in iSpell
+void CChar::NPC_GetAllSpellbookSpells()		// Add all spells found on spellbooks to the NPC internal spell list
 {
 	ADDTOCALLSTACK("CChar::GetSpellbook");
 	//	search for suitable book in hands first
 	for ( CItem *pBook = GetContentHead(); pBook != NULL; pBook = pBook->GetNext() )
 	{
 		if (pBook->IsTypeSpellbook())
-		{
-			if (!NPC_AddSpellsFromBook(pBook))
-				continue;
-		}
+			NPC_AddSpellsFromBook(pBook);
 	}
 
 	//	then search in the top level of the pack
@@ -107,28 +104,27 @@ bool CChar::NPC_GetAllSpellbookSpells()	// Retrieves a spellbook from the magic 
 		for ( CItem *pBook = pPack->GetContentHead(); pBook != NULL; pBook = pBook->GetNext() )
 		{
 			if (pBook->IsTypeSpellbook())
-			{
-				if (!NPC_AddSpellsFromBook(pBook))
-					continue;
-			}
+				NPC_AddSpellsFromBook(pBook);
 		}
 	}
-	return true;
 }
 
-bool CChar::NPC_AddSpellsFromBook(CItem * pBook)
+void CChar::NPC_AddSpellsFromBook(CItem * pBook)
 {
-	if (!m_pNPC)
-		return false;
-	SKILL_TYPE skill = pBook->GetSpellBookSkill();
-	int max = Spell_GetMax(skill);
-	for (int i = 0; i <= max; i++)
+	ADDTOCALLSTACK("CChar::NPC_AddSpellsFromBook");
+	CItemBase *pBookDef = pBook->Item_GetDef();
+	if ( !pBookDef )
+		return;
+
+	uint min = pBookDef->m_ttSpellbook.m_iOffset + 1;
+	uint max = pBookDef->m_ttSpellbook.m_iOffset + pBookDef->m_ttSpellbook.m_iMaxSpells;
+
+	for ( uint i = min; i <= max; ++i )
 	{
 		SPELL_TYPE spell = static_cast<SPELL_TYPE>(i);
-		if (pBook->IsSpellInBook(spell))
+		if ( pBook->IsSpellInBook(spell) )
 			m_pNPC->Spells_Add(spell);
 	}
-	return true;
 }
 
 // cast a spell if i can ?
@@ -138,8 +134,8 @@ bool CChar::NPC_AddSpellsFromBook(CItem * pBook)
 bool CChar::NPC_FightMagery(CChar * pChar)
 {
 	ADDTOCALLSTACK("CChar::NPC_FightMagery");
-	if (!NPC_FightMayCast(false))	// not checking skill here since it will do a search later and it's an expensive function.
-		return(false);
+	if ( !NPC_FightMayCast(false) )	// not checking skill here since it will do a search later and it's an expensive function.
+		return false;
 
 	int iSpellCount = m_pNPC->Spells_GetCount();
 	CItem * pWand = LayerFind(LAYER_HAND1);		//Try to get a working wand.
@@ -154,15 +150,13 @@ bool CChar::NPC_FightMagery(CChar * pChar)
 
 	int iDist = GetTopDist3D(pChar);
 	if (iDist >((UO_MAP_VIEW_SIGHT * 3) / 4))	// way too far away . close in.
-		return(false);
+		return false;
 
-	if (iDist <= 1 &&
-		Skill_GetBase(SKILL_TACTICS) > 200 &&
-		!Calc_GetRandVal(2))
+	if ( (iDist <= 1) && (Skill_GetBase(SKILL_TACTICS) > 200) && (!Calc_GetRandVal(2)) )
 	{
 		// Within striking distance.
 		// Stand and fight for a bit.
-		return(false);
+		return false;
 	}
 	int skill = SKILL_NONE;
 	int iStatInt = Stat_GetBase(STAT_INT);
@@ -177,17 +171,15 @@ bool CChar::NPC_FightMagery(CChar * pChar)
 		if (mana > (iStatInt / 3) && Calc_GetRandVal(iStatInt))
 		{
 			if (iDist < 4 || iDist > 8)	// Here is fine?
-			{
 				NPC_Act_Follow(false, Calc_GetRandVal(3) + 2, true);
-			}
-			return(true);
+			return true;
 		}
-		return(false);
+		return false;
 	}
 
 	// We have the total count of spells inside iSpellCount, so we use 'iRandSpell' to store a rand representing the spell that will be casted
-	unsigned char iRandSpell = pWand ? 1 : 0;	// Having wand adding +1 spell to the total count
-	iRandSpell += static_cast<unsigned char>(Calc_GetRandVal2(0, iSpellCount - 1));	// spells are being stored using a vector, so it's assumed to be zero-based.
+	uchar iRandSpell = pWand ? 1 : 0;	// Having wand adding +1 spell to the total count
+	iRandSpell += static_cast<uchar>(Calc_GetRandVal2(0, iSpellCount - 1));	// spells are being stored using a vector, so it's assumed to be zero-based.
 
 	if (iRandSpell > iSpellCount)	// if iRandSpell > iSpellCount then we've got the roll pointing to use the wand's spell.
 	{
@@ -200,7 +192,7 @@ bool CChar::NPC_FightMagery(CChar * pChar)
 			goto BeginCast;	//if can cast this spell we jump the for() and go directly to it's casting.
 	}
 
-	for (; iRandSpell < iSpellCount; iRandSpell++)
+	for (; iRandSpell < iSpellCount; ++iRandSpell)
 	{
 		SPELL_TYPE spell = m_pNPC->Spells_GetAt(iRandSpell);
 		const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
@@ -224,11 +216,10 @@ BeginCast:	//Start casting
 	if (mana > iStatInt / 3 && Calc_GetRandVal(iStatInt << 1))
 	{
 		if (iDist < 4 || iDist > 8)	// Here is fine?
-		{
 			NPC_Act_Follow(false, 5, true);
-		}
 	}
-	else NPC_Act_Follow();
+	else
+		NPC_Act_Follow();
 
 	Reveal();
 

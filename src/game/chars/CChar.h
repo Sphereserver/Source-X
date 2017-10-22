@@ -500,8 +500,6 @@ public:
 	int GetWeightLoadPercent( int iWeight ) const;
 
 	CItem * GetSpellbook(SPELL_TYPE iSpell = SPELL_Clumsy) const;
-	int GetSpellbookExtra(CItem * pBooks[], int &count) const;
-	CItem * GetSpellbookRandom(SPELL_TYPE iSpell = SPELL_Clumsy) const;
 	CItemContainer * GetPack() const;
 	CItemContainer * GetBank( LAYER_TYPE layer = LAYER_BANKBOX );
 	CItemContainer * GetPackSafe();
@@ -1149,7 +1147,7 @@ private:
 	bool NPC_FightCast(CObjBase * &pChar ,CObjBase * pSrc, SPELL_TYPE &spell, SKILL_TYPE skill = SKILL_NONE);
 	bool NPC_FightArchery( CChar * pChar );
 	bool NPC_FightMayCast(bool fCheckSkill = true) const;
-	bool NPC_GetAllSpellbookSpells();
+	void NPC_GetAllSpellbookSpells();
 
 	bool NPC_Act_Follow( bool fFlee = false, int maxDistance = 1, bool fMoveAway = false );
 	void NPC_Act_Guard();
@@ -1172,7 +1170,7 @@ public:
 	void NPC_Pathfinding();		//	NPC thread AI - pathfinding
 	void NPC_Food();			//	NPC thread AI - search for food
 	void NPC_ExtraAI();			//	NPC thread AI - some general extra operations
-	bool NPC_AddSpellsFromBook(CItem * pBook);
+	void NPC_AddSpellsFromBook(CItem * pBook);
 
 	void NPC_PetDesert();
 	void NPC_PetClearOwners();

@@ -221,3 +221,5 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 22-10-2017, Nolok
 - Fixed: when using the meditation skill, if the SKF_NOSFX flag was set, the bufficon wasn't added.
 - Fixed: ACTARG1/2/3 weren't zeroed at skill success, abort or failure if the SKF_SCRIPTED was set.
+- [Port from Source, 13-02-2017, Coruja] Changed: Spellbooks now store spell offset / max spells using TDATA3/TDATA4 instead MOREZ/MOREX.
+- [Port from Source, 21-04-2017, Coruja] Changed: Mount memories now can have their own i_mt_* ITEMDEFs instead use DEFNAME=i_mt_* directly on base items (usually 'boat parts').

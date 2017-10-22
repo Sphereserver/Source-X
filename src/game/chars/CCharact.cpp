@@ -2381,11 +2381,13 @@ bool CChar::Horse_Mount(CChar *pHorse)
 		return false;
 	}
 
-	ITEMID_TYPE id;
-	tchar * sMountDefname = Str_GetTemp();
-	sprintf(sMountDefname, "mount_0x%x", pHorse->GetDispID());
-	id = static_cast<ITEMID_TYPE>(g_Exp.m_VarDefs.GetKeyNum(sMountDefname));
-	if ( id <= ITEMID_NOTHING )
+	tchar * sMountID = Str_GetTemp();
+	sprintf(sMountID, "mount_0x%x", pHorse->GetDispID());
+	lpctstr sMemoryID = g_Exp.m_VarDefs.GetKeyStr(sMountID);			// get the mount item defname from the mount_0x** defname
+	
+	CResourceID memoryRid = g_Cfg.ResourceGetID(RES_ITEMDEF, sMemoryID);
+	ITEMID_TYPE memoryId = static_cast<ITEMID_TYPE>(memoryRid.GetResIndex());	// get the ID of the memory (mount item)
+	if ( memoryId <= ITEMID_NOTHING )
 		return false;
 
 	if ( !IsMountCapable() )
@@ -2416,7 +2418,7 @@ bool CChar::Horse_Mount(CChar *pHorse)
 			return false;
 	}
 
-	CItem * pItem = pHorse->Make_Figurine(GetUID(), id);
+	CItem * pItem = pHorse->Make_Figurine(GetUID(), memoryId);
 	if ( !pItem )
 		return false;
 

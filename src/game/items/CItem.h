@@ -211,20 +211,25 @@ public:
 		{
 			short m_PolyStr;	// more1l=polymorph effect of this. (on strength)
 			short m_PolyDex;	// more1h=polymorph effect of this. (on dex)
-			int  m_spellcharges; // more2=not sure how used here..
+			int  m_spellcharges;// more2=not sure how used here..
 			word m_spell;		// morex=SPELL_TYPE = The magic spell cast on this. (daemons breath)(boots of strength) etc
 			word m_spelllevel;	// morey=0-1000=level of the spell.
 			byte m_pattern;		// morez = light pattern - CAN_I_LIGHT LIGHT_QTY
 		} m_itSpell;
 
 		// IT_SPELLBOOK
-		struct	// Spellbook extra spells.
+		// IT_SPELLBOOK_NECRO
+		// IT_SPELLBOOK_PALA
+		// IT_SPELLBOOK_EXTRA
+		// IT_SPELLBOOK_BUSHIDO
+		// IT_SPELLBOOK_NINJITSU
+		// IT_SPELLBOOK_ARCANIST
+		// IT_SPELLBOOK_MYSTIC
+		// IT_SPELLBOOK_MASTERY
+		struct
 		{
 			dword m_spells1;	// more1=Mask of avail spells for spell book.
 			dword m_spells2;	// more2=Mask of avail spells for spell book.
-			word m_maxspells;	// morex = max amount of spells.
-			word m_junk1;
-			word m_baseid;		// morez
 		} m_itSpellbook;
 
 		// IT_POTION

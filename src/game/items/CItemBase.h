@@ -262,8 +262,6 @@ public:
 		// IT_ARMOR_LEATHER
 		// IT_SHIELD
 		// IT_CLOTHING
-		// IT_LIGHT_OUT
-		// IT_LIGHT_LIT
 		// IT_SPELLBOOK
 		// IT_JEWELRY
 		// IT_EQ_SCRIPT
@@ -271,17 +269,25 @@ public:
 		struct	// ALL equippable items ex. Weapons and armor
 		{
 			int		m_junk1;
-			int		m_StrReq;	// REQSTR= Strength required to weild weapons/armor.
-			CResourceIDBase m_Light_ID;	// TDATA3=Change light state to on/off
+			int		m_iStrReq;	// TDATA2 = REQSTR = Strength required to weild weapons/armor. Do not overwrite TDATA2 on these items!
 		} m_ttEquippable;
+
+		// IT_LIGHT_OUT
+		// IT_LIGHT_LIT
+		struct
+		{
+			int	m_junk1;
+			int m_junk2;
+			CResourceID m_idLight;	// TDATA3=Change light state to on/off
+		} m_ttLightSource;
 
 		// IT_WEAPON_BOW
 		// IT_WEAPON_XBOW
 		// IT_WEAPON_THROWING
 		struct	// ALL equippable items ex. Weapons and armor
 		{
-			int		m_junk1;	// TDATA1= Sound it makes ?
-			int		m_StrReq;	// REQSTR= Strength required to weild weapons/armor.
+			int		m_junk1;			// TDATA1= Sound it makes ?
+			int		m_iStrReq;			// TDATA2= REQSTR= Strength required to weild weapons/armor.
 			CResourceIDBase m_idAmmo;	// TDATA3= required source ammo.
 			CResourceIDBase m_idAmmoX;	// TDATA4= fired ammo fx.
 		} m_ttWeaponBow;
@@ -299,7 +305,7 @@ public:
 		struct
 		{
 			int	m_junk1;
-			GUMP_TYPE m_gumpid;	// TDATA2= the gump that comes up when this container is opened.
+			GUMP_TYPE m_idGump;	// TDATA2= the gump that comes up when this container is opened.
 			dword m_dwMinXY;	// TDATA3= Gump size used.
 			dword m_dwMaxXY;	// TDATA4=
 		} m_ttContainer;
@@ -309,21 +315,37 @@ public:
 		struct
 		{
 			int	m_junk1;
-			int m_StrReq;		// REQSTR= Strength required to mount
-			CResourceIDBase m_charid;	// TDATA3= (CREID_TYPE)
+			int m_iStrReq;				// TDATA2= REQSTR= Strength required to mount
+			CResourceIDBase m_idChar;	// TDATA3= (CREID_TYPE)
 		} m_ttFigurine;
+
+		// IT_SPELLBOOK
+		// IT_SPELLBOOK_NECRO
+		// IT_SPELLBOOK_PALA
+		// IT_SPELLBOOK_BUSHIDO
+		// IT_SPELLBOOK_NINJITSU
+		// IT_SPELLBOOK_ARCANIST
+		// IT_SPELLBOOK_MYSTIC
+		// IT_SPELLBOOK_MASTERY
+		struct
+		{
+			int	m_junk1;
+			int	m_junk2;
+			dword m_iOffset;		// TDATA3= First spell number of this book type
+			dword m_iMaxSpells;		// TDATA4= Max spells that this book type can handle
+		} m_ttSpellbook;
 
 		// IT_MUSICAL
 		struct
 		{
 			int m_iSoundGood;	// TDATA1= SOUND_TYPE if played well.
-			int m_iSoundBad;	// TDATA2=sound if played poorly.
+			int m_iSoundBad;	// TDATA2= sound if played poorly.
 		} m_ttMusical;
 
 		// IT_ORE
 		struct
 		{
-			ITEMID_TYPE m_IngotID;	// tdata1= what ingot is this to be made into.
+			ITEMID_TYPE m_idIngot;	// tdata1= what ingot is this to be made into.
 		} m_ttOre;
 
 		// IT_INGOT
