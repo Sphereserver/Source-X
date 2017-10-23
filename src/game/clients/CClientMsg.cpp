@@ -2091,7 +2091,7 @@ void CClient::addSpellbookOpen( CItem * pBook )
 	int count = pBook->GetSpellcountInBook();
 	if ( count == -1 )
 		return;
-
+	addItem(pBook);
 	OpenPacketTransaction transaction(this, PacketSend::PRI_NORMAL);
 	addOpenGump( pBook, GUMP_OPEN_SPELLBOOK );
 
