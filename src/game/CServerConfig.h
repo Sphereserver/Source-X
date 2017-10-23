@@ -1562,7 +1562,7 @@ public:
      *
      * @return  The calculated combat chance to hit.
      */
-	int Calc_CombatChanceToHit( CChar * pChar, CChar * pCharTarg, SKILL_TYPE skill );
+	int Calc_CombatChanceToHit( CChar * pChar, CChar * pCharTarg);
 
     /**
      * @fn  int CServerConfig::Calc_StealingItem( CChar * pCharThief, CItem * pItem, CChar * pCharMark );
