@@ -122,7 +122,7 @@ int CServerConfig::Calc_CombatAttackSpeed( CChar * pChar, CItem * pWeapon )
 	}
 }
 
-int CServerConfig::Calc_CombatChanceToHit(CChar * pChar, CChar * pCharTarg, SKILL_TYPE skill)
+int CServerConfig::Calc_CombatChanceToHit(CChar * pChar, CChar * pCharTarg)
 {
 	ADDTOCALLSTACK("CServerConfig::Calc_CombatChanceToHit");
 	// Combat: Compare attacker skill vs target skill
@@ -135,7 +135,8 @@ int CServerConfig::Calc_CombatChanceToHit(CChar * pChar, CChar * pCharTarg, SKIL
 		return 50;	// must be a training dummy
 	if (pChar->m_pNPC && pChar->m_pNPC->m_Brain == NPCBRAIN_GUARD && m_fGuardsInstantKill)
 		return 100;
-
+	SKILL_TYPE skillAttacker = pChar->Fight_GetWeaponSkill();
+	SKILL_TYPE skillTarget = pCharTarg->Fight_GetWeaponSkill();
 	switch (m_iCombatHitChanceEra)
 	{
 		default:
@@ -145,7 +146,7 @@ int CServerConfig::Calc_CombatChanceToHit(CChar * pChar, CChar * pCharTarg, SKIL
 			if (pCharTarg->IsStatFlag(STATF_Sleeping | STATF_Freeze))
 				return(Calc_GetRandVal(10));
 
-			int iSkillVal = pChar->Skill_GetAdjusted(skill);
+			int iSkillVal = pChar->Skill_GetAdjusted(skillAttacker);
 
 			// Offensive value mostly based on your skill and TACTICS.
 			// 0 - 1000
@@ -161,8 +162,8 @@ int CServerConfig::Calc_CombatChanceToHit(CChar * pChar, CChar * pCharTarg, SKIL
 			// a fight etc. Just use 90% of the statvalue when defending so its easier
 			// to hit than defend == more fun in combat.
 			int iStam = pCharTarg->Stat_GetVal(STAT_DEX);
-			if (g_Cfg.IsSkillFlag(pCharTarg->Skill_GetActive(), SKF_RANGED) &&
-				!g_Cfg.IsSkillFlag(skill, SKF_RANGED))
+			if (g_Cfg.IsSkillFlag(skillTarget, SKF_RANGED) &&
+				!g_Cfg.IsSkillFlag(skillAttacker, SKF_RANGED))
 				// The defender uses ranged weapon and the attacker is not.
 				// Make just a bit easier to hit.
 				iSkillDefend = (iSkillDefend + iStam * 9) / 2;
@@ -183,8 +184,8 @@ int CServerConfig::Calc_CombatChanceToHit(CChar * pChar, CChar * pCharTarg, SKIL
 		case 1:
 		{
 			// pre-AOS formula
-			int iAttackerSkill = pChar->Skill_GetBase(skill) + 500;
-			int iTargetSkill = pCharTarg->Skill_GetBase(skill) + 500;
+			int iAttackerSkill = pChar->Skill_GetBase(skillAttacker) + 500;
+			int iTargetSkill = pCharTarg->Skill_GetBase(skillTarget) + 500;
 
 			int iChance = iAttackerSkill * 100 / (iTargetSkill * 2);
 			if (iChance < 0)
@@ -196,17 +197,17 @@ int CServerConfig::Calc_CombatChanceToHit(CChar * pChar, CChar * pCharTarg, SKIL
 		case 2:
 		{
 			// AOS formula
-			int iAttackerSkill = pChar->Skill_GetBase(skill);
+			int iAttackerSkill = pChar->Skill_GetBase(skillAttacker);
 			int iAttackerHitChance = static_cast<int>(pChar->GetDefNum("INCREASEHITCHANCE", true));
 			if ((g_Cfg.m_iRacialFlags & RACIALF_GARG_DEADLYAIM) && pChar->IsGargoyle())
 			{
 				// Racial traits: Deadly Aim. Gargoyles always have +5 Hit Chance Increase and a minimum of 20.0 Throwing skill (not shown in skills gump)
-				if (skill == SKILL_THROWING && iAttackerSkill < 200)
+				if (skillAttacker == SKILL_THROWING && iAttackerSkill < 200)
 					iAttackerSkill = 200;
 				iAttackerHitChance += 5;
 			}
 			iAttackerSkill = ((iAttackerSkill / 10) + 20) * (100 + minimum(iAttackerHitChance, 45));
-			int iTargetSkill = ((pCharTarg->Skill_GetBase(skill) / 10) + 20) * (100 + minimum(static_cast<int>(pCharTarg->GetDefNum("INCREASEDEFCHANCE", true)), 45));
+			int iTargetSkill = ((pCharTarg->Skill_GetBase(skillTarget) / 10) + 20) * (100 + minimum(static_cast<int>(pCharTarg->GetDefNum("INCREASEDEFCHANCE", true)), 45));
 
 			int iChance = iAttackerSkill * 100 / (iTargetSkill * 2);
 			if (iChance < 2)

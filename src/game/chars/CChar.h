@@ -941,11 +941,11 @@ private:
 	// Armor, weapons and combat ------------------------------------
 	int	CalcFightRange( CItem * pWeapon = NULL );
 
-	SKILL_TYPE Fight_GetWeaponSkill() const;
+	
 	bool Fight_IsActive() const;
 public:
 	int CalcArmorDefense() const;
-
+	
 	void Memory_Fight_Retreat( CChar * pTarg, CItemMemory * pFight );
 	void Memory_Fight_Start( const CChar * pTarg );
 	bool Memory_Fight_OnTick( CItemMemory * pMemory );
@@ -957,6 +957,7 @@ public:
 	WAR_SWING_TYPE Fight_Hit( CChar * pCharTarg );
 	bool Fight_Parry(CItem * &pItemParry);
 	WAR_SWING_TYPE Fight_CanHit(CChar * pCharTarg);
+	SKILL_TYPE Fight_GetWeaponSkill() const;
 	int Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom = false, bool bGetMax = true ) const;
 	bool Fight_IsAttackable();
 
