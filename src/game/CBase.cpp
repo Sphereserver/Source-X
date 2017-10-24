@@ -496,13 +496,9 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, CountOf(piVal));
 				m_defenseBase = (uchar)(piVal[0]);
 				if ( iQty > 1 )
-				{
 					m_defenseRange = (uchar)(piVal[1]) - m_defenseBase;
-				}
 				else
-				{
 					m_defenseRange = 0;
-				}
 			}
 			return true;
 		case OBC_DAM:
@@ -511,13 +507,9 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 				size_t iQty = Str_ParseCmds( s.GetArgStr(), piVal, CountOf(piVal));
 				m_attackBase = (uchar)(piVal[0]);
 				if ( iQty > 1 )
-				{
 					m_attackRange = (uchar)(piVal[1]) - m_attackBase;
-				}
 				else
-				{
 					m_attackRange = 0;
-				}
 			}
 			return true;
 		case OBC_BASEID:

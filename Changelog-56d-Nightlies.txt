@@ -229,4 +229,6 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
   
 24-10-2017, Drk84 
 - [Port from Source, 19-09-2017, Coruja] Fixed: Client 'Open Spellbook' macro making the client crash if it try to open the requested spellbook gump when the spellbook item is not loaded yet.
-  
+
+24-10-2017, Nolok
+- Fixed: using ADDCIRCLE without the second argument caused sphere to crash. Also, its use on non t_spellbook items was incorrectly allowed.

@@ -76,24 +76,15 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 	// Do some special processing for certain items.
 
 	if ( IsType(IT_CHAIR))
-	{
 		SetHeight( 0 ); // have no effective height if they don't block.
-	}
 	else
-	{
-		//CBaseBaseDef * pBaseBaseDef = dynamic_cast<CBaseBaseDef*>(this);
-		//pBaseBaseDef->SetHeight( GetItemHeightFlags( tiledata, m_Can ));
 		SetHeight( GetItemHeightFlags( tiledata, m_Can ));
-		//DEBUG_WARN(("GetItemHeightFlags( tiledata, m_Can )(%d),tiledata.m_height(%d),m_dwDispIndex(0%x),GetHeight()(%d),pBaseBaseDef->GetHeight()(%d)\n",GetItemHeightFlags( tiledata, m_Can ),tiledata.m_height,m_wDispIndex,GetHeight(),pBaseBaseDef->GetHeight()));
-	}
-	//DEBUG_ERR(("ID: 0%x; this (0x%x), m_dwFlags (0%x), tiledata.m_flags (0%x), tiledata.m_height (%d) GetHeight() (%d)\n",id,this,m_dwFlags,tiledata.m_flags,tiledata.m_height,GetHeight()));
 
 	GetItemSpecificFlags( tiledata, m_Can, m_type, id );
 
-	if ( tiledata.m_weight == 0xFF ||	// not movable.
-		( tiledata.m_flags & UFLAG1_WATER ))
+	if ( (tiledata.m_weight == 0xFF) ||			// not movable.
+		( tiledata.m_flags & UFLAG1_WATER ) )	// water can't be picked up.
 	{
-		// water can't be picked up.
 		m_weight = UINT16_MAX;
 	}
 	else

@@ -2760,22 +2760,26 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			break;
 		case IC_ADDCIRCLE:
 			{
-				tchar	*ppVal[2];
+				if (m_type != IT_SPELLBOOK)
+				{
+					g_Log.EventError("ADDCIRCLE works only on t_spellbook items (mage spellbook).\n");
+					return false;
+				}
+
+				tchar *ppVal[2];
 				size_t amount = Str_ParseCmds(s.GetArgStr(), ppVal, CountOf(ppVal), " ,\t");
-				bool includeLower = 0;
+				bool includeLower = 0;	// should i add also the lower circles?
 				int addCircle = 0;
 
 				if ( amount <= 0 )
 					return false;
-				else
+				else if (amount > 1)
 					includeLower = (ATOI(ppVal[1]) != 0);
 
-				for ( addCircle = ATOI(ppVal[0]); addCircle; addCircle-- )
+				for ( addCircle = ATOI(ppVal[0]); addCircle; --addCircle )
 				{
 					for ( int i = 1; i < 9; ++i )
-					{
 						AddSpellbookSpell(static_cast<SPELL_TYPE>(RES_GET_INDEX(((addCircle - 1) * 8) + i)), false);
-					}
 
 					if ( includeLower == false )
 						break;
@@ -2876,12 +2880,10 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			if ( !IsTypeArmorWeapon() )
 			{
 				DEBUG_ERR(("Item:Hitpoints assigned for non-weapon %s\n", GetResourceName()));
+				return false;
 			}
-			else
-			{
-				m_itArmor.m_Hits_Cur = m_itArmor.m_Hits_Max = (word)(s.GetArgVal());
-				UpdatePropertyFlag(AUTOTOOLTIP_FLAG_DURABILITY);
-			}
+			m_itArmor.m_Hits_Cur = m_itArmor.m_Hits_Max = (word)(s.GetArgVal());
+			UpdatePropertyFlag(AUTOTOOLTIP_FLAG_DURABILITY);
 			return true;
 		case IC_ID:
 		{
