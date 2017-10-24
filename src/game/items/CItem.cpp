@@ -3046,9 +3046,7 @@ bool CItem::r_Load( CScript & s ) // Load an item from script
 	if ( GetContainer() == NULL )	// Place into the world.
 	{
 		if ( GetTopPoint().IsCharValid())
-		{
 			MoveToUpdate( GetTopPoint());
-		}
 	}
 
 	int iResultCode = CObjBase::IsWeird();

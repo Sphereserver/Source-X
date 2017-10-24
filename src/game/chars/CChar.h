@@ -121,8 +121,7 @@ public:
 
 	height_t m_height;			// Height set in-game or under some trigger (height=) - for both items and chars
 
-	int m_ModMaxWeight;
-	CUID m_UIDLastNewItem;		///< Last item created, used to store on this CChar the UID of the last created item via ITEM or ITEMNEWBIe in @Create and @Restock to prevent COLOR, etc properties to be called with no reference when the item was not really created, ie: ITEM=i_dagger,R5
+	CUID m_UIDLastNewItem;		// Last item created, used to store on this CChar the UID of the last created item via ITEM or ITEMNEWBIe in @Create and @Restock to prevent COLOR, etc properties to be called with no reference when the item was not really created, ie: ITEM=i_dagger,R5
 	uint m_exp;					// character experience
 	uint m_level;				// character experience level
 	byte m_iVisualRange;		// Visual Range
@@ -131,7 +130,7 @@ public:
 	bool m_fIgnoreNextPetCmd;	// return 1 in speech block for this pet will make it ignore target petcmds while allowing the rest to perform them
 	height_t m_zClimbHeight;	// The height at the end of the climbable.
 
-								// Saved stuff.
+	// Saved stuff.
 	DIR_TYPE m_dirFace;			// facing this dir.
 	CSString m_sTitle;			// Special title such as "the guard" (replaces the normal skill title)
 	CPointMap m_ptHome;			// What is our "home" region. (towns and bounding of NPC's)
@@ -149,7 +148,7 @@ public:
 	bool IsTriggerActive(lpctstr trig) { return static_cast<CObjBase*>(const_cast<CChar*>(this))->IsTriggerActive(trig); }
 	void SetTriggerActive(lpctstr trig = NULL) { static_cast<CObjBase*>(const_cast<CChar*>(this))->SetTriggerActive(trig); }
 
-	// Client's local light
+	// Client's local light (might be useful in the future for NPCs also? keep it here for now)
 	byte m_LocalLight;
 
 	// When events happen to the char. check here for reaction scripts.
@@ -327,16 +326,14 @@ public:
 	int	 GetHealthPercent() const;
 	lpctstr GetTradeTitle() const; // Paperdoll title for character p (2)
 
-								   // Information about us.
+	// Information about us.
 	CREID_TYPE GetID() const;
 	word GetBaseID() const;
 	CREID_TYPE GetDispID() const;
 	void SetID( CREID_TYPE id );
 
 	lpctstr GetName() const;
-
 	lpctstr GetNameWithoutIncognito() const;
-
 	lpctstr GetName( bool fAllowAlt ) const;
 
 	bool SetName( lpctstr pName );

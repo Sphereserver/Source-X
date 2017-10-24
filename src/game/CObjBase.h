@@ -23,18 +23,18 @@ class PacketPropertyList;
 
 class CObjBase : public CObjBaseTemplate, public CScriptObj
 {
-	static lpctstr const sm_szLoadKeys[];   ///< All Instances of CItem or CChar have these base attributes.
-	static lpctstr const sm_szVerbKeys[];   ///< All Instances of CItem or CChar have these base attributes.
-	static lpctstr const sm_szRefKeys[];    ///< All Instances of CItem or CChar have these base attributes.
+	static lpctstr const sm_szLoadKeys[];   // All Instances of CItem or CChar have these base attributes.
+	static lpctstr const sm_szVerbKeys[];   // All Instances of CItem or CChar have these base attributes.
+	static lpctstr const sm_szRefKeys[];    // All Instances of CItem or CChar have these base attributes.
 
 private:
-	CServerTime m_timeout;		///< when does this rot away ? or other action. 0 = never, else system time
-	CServerTime m_timestamp;    ///< TimeStam
-	HUE_TYPE m_wHue;			///< Hue or skin color. (CItems must be < 0x4ff or so)
-	lpctstr m_RunningTrigger;   ///< Current trigger being run on this object. Used to prevent the same trigger being called over and over.
+	CServerTime m_timeout;		// when does this rot away ? or other action. 0 = never, else system time
+	CServerTime m_timestamp;    // TimeStam
+	HUE_TYPE m_wHue;			// Hue or skin color. (CItems must be < 0x4ff or so)
+	lpctstr m_RunningTrigger;   // Current trigger being run on this object. Used to prevent the same trigger being called over and over.
 
 protected:
-	CResourceRef m_BaseRef;     ///< Pointer to the resource that describes this type.
+	CResourceRef m_BaseRef;     // Pointer to the resource that describes this type.
 
 public:
 	static const char *m_sClassName;
@@ -42,20 +42,20 @@ public:
 	size_t m_iCreatedResScriptIdx;	// index in g_Cfg.m_ResourceFiles of the script file where this obj was created
 	int m_iCreatedResScriptLine;	// line in the script file where this obj was created
 
-	CVarDefMap m_TagDefs;		///< attach extra tags here.
-	CVarDefMap m_BaseDefs;		///< New Variable storage system
-	dword	m_Can;              ///< CAN_FLAGS
-	int m_ModMaxWeight;			///< ModMaxWeight prop for chars
+	CVarDefMap m_TagDefs;		// attach extra tags here.
+	CVarDefMap m_BaseDefs;		// New Variable storage system
+	dword	m_Can;              // CAN_FLAGS
 
-	word	m_attackBase;       ///< dam for weapons
-	word	m_attackRange;      ///< variable range of attack damage.
+	word	m_attackBase;       // dam for weapons
+	word	m_attackRange;      // variable range of attack damage.
 
-	word	m_defenseBase;	    ///< Armor for IsArmor items
-	word	m_defenseRange;     ///< variable range of defense.
-	CUID m_uidSpawnItem;		///< SpawnItem for this item
+	word	m_defenseBase;	    // Armor for IsArmor items
+	word	m_defenseRange;     // variable range of defense.
+	int 	m_ModMaxWeight;		// ModMaxWeight prop.
+	CUID 	m_uidSpawnItem;		// SpawnItem for this item
 
 	CResourceRefArray m_OEvents;
-	static size_t sm_iCount;    ///< how many total objects in the world ?
+	static size_t sm_iCount;    // how many total objects in the world ?
 
 	/**
 	* @fn  inline bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult, bool bFull);

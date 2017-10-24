@@ -17,7 +17,9 @@ class CItemContainer : public CItemVendable, public CContainer
 	static lpctstr const sm_szVerbKeys[];
 public:
 	static const char *m_sClassName;
+
 	// bool m_fTinkerTrapped;	// magic trap is diff.
+
 	bool NotifyDelete();
 	void DeletePrepare();
 
@@ -41,7 +43,7 @@ public:
 	bool CanContainerHold(const CItem * pItem, const CChar * pCharMsg );
 
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
-	virtual void  r_Write( CScript & s );
+	virtual void r_Write( CScript & s );
 	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc );
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 

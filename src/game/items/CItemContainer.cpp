@@ -34,9 +34,7 @@ bool CItemContainer::NotifyDelete()
 void CItemContainer::DeletePrepare()
 {
 	if ( IsType( IT_EQ_TRADE_WINDOW ))
-	{
 		Trade_Delete();
-	}
 	CItem::DeletePrepare();
 }
 
@@ -59,9 +57,16 @@ bool CItemContainer::r_GetRef( lpctstr &pszKey, CScriptObj *&pRef )
 bool CItemContainer::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole *pSrc )
 {
 	ADDTOCALLSTACK("CItemContainer::r_WriteVal");
+	EXC_TRY("WriteVal");
 	if ( r_WriteValContainer(pszKey, sVal, pSrc) )
 		return true;
 	return CItemVendable::r_WriteVal(pszKey, sVal, pSrc);
+	EXC_CATCH;
+
+	EXC_DEBUG_START;
+	EXC_ADD_KEYRET(pSrc);
+	EXC_DEBUG_END;
+	return false;
 }
 
 bool CItemContainer::IsItemInTrade() const
@@ -724,7 +729,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 
 	if (m_ModMaxWeight)
 	{
-		if ((GetWeight(GetType() == IT_CORPSE ? 1 : 0) + pItem->GetWeight()) > (m_ModMaxWeight * WEIGHT_UNITS))
+		if ( GetTotalWeight() + pItem->GetWeight() > m_ModMaxWeight )
 		{
 			pCharMsg->SysMessageDefault(DEFMSG_CONT_FULL_WEIGHT);
 			return false;

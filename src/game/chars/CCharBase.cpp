@@ -27,14 +27,9 @@ CCharBase::CCharBase( CREID_TYPE id ) :
 	m_iMoveRate = (short)(g_Cfg.m_iMoveRate);
 
 	if ( IsValidDispID(id))
-	{
-		// in display range.
-		m_dwDispIndex = id;
-	}
+		m_dwDispIndex = id;	// in display range.
 	else
-	{
 		m_dwDispIndex = 0;	// must read from SCP file later
-	}
 
 	SetResDispDnId(CREID_MAN);
 }
@@ -46,16 +41,16 @@ lpctstr CCharBase::GetTradeName() const
 	ADDTOCALLSTACK("CCharBase::GetTradeName");
 	lpctstr pName = CBaseBaseDef::GetTypeName();
 	if ( pName[0] != '#' )
-		return( pName );
+		return pName;
 
 	lpctstr pSpace = strchr( pName, ' ' );
 	if ( pSpace == NULL )
-		return( pName );
+		return pName;
 
 	pSpace++;
 	if ( ! strnicmp( pSpace, "the ", 4 ))
 		pSpace += 4;
-	return( pSpace );
+	return pSpace;
 }
 
 void CCharBase::CopyBasic( const CCharBase * pCharDef )

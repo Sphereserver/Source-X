@@ -92,15 +92,12 @@ void CItemVendable::r_Write(CScript &s)
 	ADDTOCALLSTACK_INTENSIVE("CItemVendable::r_Write");
 	CItem::r_Write(s);
 	if ( GetQuality() != 0 )
-	{
 		s.WriteKeyVal( "QUALITY", GetQuality());
-	}
 
 	// am i on a vendor right now ?
 	if ( m_price > 0 )
-	{
 		s.WriteKeyVal( "PRICE", m_price );
-	}
+
 	return;
 }
 
