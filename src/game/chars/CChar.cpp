@@ -3269,7 +3269,10 @@ void CChar::r_Write( CScript & s )
 		s.WriteKeyHex("FLAGS", m_iStatFlag);
 	if ( m_LocalLight )
 		s.WriteKeyHex("LIGHT", m_LocalLight);
-
+	if ( m_attackBase )
+		s.WriteKeyFormat("DAM", "%hu,%hu", m_attackBase, m_attackBase + m_attackRange);
+	if ( m_defense )
+		s.WriteKeyVal("ARMOR", m_defense);
 	if ( (m_Act_UID.GetObjUID() & UID_UNUSED) != UID_UNUSED )
 		s.WriteKeyHex("ACT", m_Act_UID.GetObjUID());
 	if ( m_Act_p.IsValidPoint() )

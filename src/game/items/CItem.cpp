@@ -2078,7 +2078,10 @@ void CItem::r_Write( CScript & s )
 		s.WriteKeyHex("LINK", m_uidLink);
 	if ( m_Attr )
 		s.WriteKeyHex("ATTR", m_Attr);
-
+	if ( m_attackBase )
+		s.WriteKeyFormat("DAM", "%hu,%hu", m_attackBase, m_attackBase + m_attackRange);
+	if ( m_defenseBase )
+		s.WriteKeyFormat("ARMOR", "%hu,%hu", m_defenseBase, m_defenseBase + m_defenseRange);
 	if ( m_itNormal.m_more1 )
 	{
 		CSString sVal;
