@@ -70,17 +70,18 @@ CObjBase::CObjBase( bool fItem )
 	m_iCreatedResScriptIdx = (size_t)-1;
 	m_iCreatedResScriptLine = -1;
 
-	m_wHue=HUE_DEFAULT;
+	m_wHue = HUE_DEFAULT;
 	m_timeout.Init();
 	m_timestamp.Init();
 
 	//	Init some global variables
 	m_fStatusUpdate = 0;
 	m_ModAr = 0;
+	m_ModMaxWeight = 0;
+	m_uidSpawnItem = UID_UNUSED;
 	m_PropertyList = NULL;
 	m_PropertyHash = 0;
 	m_PropertyRevision = 0;
-	m_uidSpawnItem = UID_UNUSED;
 
 	if ( g_Serv.IsLoading())
 	{
@@ -1818,7 +1819,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 			m_Can = s.GetArgVal();
 			break;
 		case OC_MODMAXWEIGHT:
-			m_ModMaxWeight = static_cast<int>(s.GetArgVal());
+			m_ModMaxWeight = s.GetArgVal();
 			break;
 		case OC_COLOR:
 			if ( !strnicmp( s.GetArgStr(), "match_shirt", 11 ) || !strnicmp( s.GetArgStr(), "match_hair", 10 ))
@@ -1933,6 +1934,8 @@ void CObjBase::r_Write( CScript & s )
 		s.WriteKeyHex("SPAWNITEM", m_uidSpawnItem);
 	if ( m_ModAr )
 		s.WriteKeyVal("MODAR", m_ModAr);
+	if ( m_ModMaxWeight )
+		s.WriteKeyVal("MODMAXWEIGHT", m_ModMaxWeight);
 
 	// Write New variables
 	m_BaseDefs.r_WritePrefix(s);

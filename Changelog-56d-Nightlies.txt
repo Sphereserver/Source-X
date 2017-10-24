@@ -232,3 +232,8 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 
 24-10-2017, Nolok
 - Fixed: using ADDCIRCLE without the second argument caused sphere to crash. Also, its use on non t_spellbook items was incorrectly allowed.
+- Fixed: MODMAXWEIGHT of a new player or item was a random number instead of zero.
+- Fixed: corpse MORE2 held an invalid UID instead of the killer's.
+- [Port from Source, 15-10-2017, Coruja]
+	Fixed: MODMAXWEIGHT property not working correctly.
+	Changed: Updated 'weight' tooltip on containers.

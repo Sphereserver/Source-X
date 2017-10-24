@@ -3302,8 +3302,6 @@ void CChar::r_Write( CScript & s )
 	if ( m_level )
 		s.WriteKeyVal("LEVEL", m_level);
 
-	if ( m_ModMaxWeight )
-		s.WriteKeyVal("MODMAXWEIGHT", m_ModMaxWeight);
 	if ( m_height )
 		s.WriteKeyVal("HEIGHT", m_height);
 	if ( m_ptHome.IsValidPoint() )
@@ -3375,9 +3373,8 @@ bool CChar::r_Load( CScript & s ) // Load a character from script
 	CScriptObj::r_Load(s);
 
 	if (m_pNPC)
-	{
 		NPC_GetAllSpellbookSpells();
-	}
+
 	// Init the STATF_SaveParity flag.
 	// StatFlag_Mod( STATF_SaveParity, g_World.m_fSaveParity );
 
