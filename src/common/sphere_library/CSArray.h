@@ -1074,17 +1074,11 @@ size_t CSObjSortArray<TYPE, KEY_TYPE>::FindKeyNear( KEY_TYPE key, int & iCompare
 		if ( iCompareRes == 0 )
 			break;
 		if ( iCompareRes > 0 )
-		{
 			iLow = i + 1;
-		}
 		else if ( i == 0 )
-		{
 			break;
-		}
 		else
-		{
 			iHigh = i - 1;
-		}
 	}
 	return i;
 }

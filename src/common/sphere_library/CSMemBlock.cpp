@@ -99,5 +99,5 @@ void CSMemLenBlock::Resize( size_t dwSizeNew )
 
 size_t CSMemLenBlock::GetDataLength() const
 {
-    return( m_dwLength );
+    return m_dwLength;
 }

@@ -28,7 +28,7 @@ size_t CSQueueBytes::GetDataQty() const
 
 void CSQueueBytes::AddNewData( const byte * pData, size_t iLen )
 {
-	ADDTOCALLSTACK("CSQueueBytes::AddNewData");
+	//ADDTOCALLSTACK("CSQueueBytes::AddNewData");
 	// Add new data to the end of the queue.
 	memcpy( AddNewDataLock(iLen), pData, iLen );
 	AddNewDataFinish( iLen );
@@ -42,7 +42,7 @@ void CSQueueBytes::AddNewDataFinish( size_t iLen )
 
 byte * CSQueueBytes::AddNewDataLock( size_t iLen )
 {
-	ADDTOCALLSTACK("CSQueueBytes::AddNewDataLock");
+	//ADDTOCALLSTACK("CSQueueBytes::AddNewDataLock");
 	// lock the queue to place this data in it.
 
 	size_t iLenNew = m_iDataQty + iLen;
@@ -64,7 +64,7 @@ void CSQueueBytes::Empty()
 
 void CSQueueBytes::RemoveDataAmount( size_t iSize )
 {
-	ADDTOCALLSTACK("CSQueueBytes::RemoveDataAmount");
+	//ADDTOCALLSTACK("CSQueueBytes::RemoveDataAmount");
 	// use up this read data. (from the start)
 	if ( iSize > m_iDataQty )
 		iSize = m_iDataQty;
