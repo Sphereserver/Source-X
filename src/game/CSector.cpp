@@ -981,7 +981,8 @@ void CSector::OnTick(int iPulseCount)
 	EXC_SET("light change");
 
 	//	do not tick sectors on maps not supported by server
-	if ( !g_MapList.m_maps[m_map] ) return;
+	if ( !g_MapList.m_maps[m_map] )
+		return;
 
 	// Check for light change before putting the sector to sleep, since in other case the
 	// world light levels will be shitty
@@ -1084,14 +1085,10 @@ void CSector::OnTick(int iPulseCount)
 
 	ProfileTask charactersTask(PROFILE_CHARS);
 
-	//pChar = static_cast <CChar*>( m_Chars_Active.GetHead());
-	CChar * pCharNext = NULL;
-	CChar * pChar = dynamic_cast <CChar*>( m_Chars_Active.GetHead());
-	for ( ; pChar != NULL; pChar = pCharNext )
+	for ( CChar * pChar = static_cast <CChar*>( m_Chars_Active.GetHead()); pChar != NULL; pChar = pChar->GetNext() )
 	{
 		EXC_TRYSUB("TickChar");
 
-		pCharNext = pChar->GetNext();
 		if (( fEnvironChange ) && ( IsTrigUsed(TRIGGER_ENVIRONCHANGE) ))
 			pChar->OnTrigger(CTRIG_EnvironChange, pChar);
 
@@ -1137,13 +1134,9 @@ void CSector::OnTick(int iPulseCount)
 
 	ProfileTask itemsTask(PROFILE_ITEMS);
 
-	CItem * pItemNext = NULL;
-	CItem * pItem = dynamic_cast <CItem*>( m_Items_Timer.GetHead());
-	for ( ; pItem != NULL; pItem = pItemNext )
+	for ( CItem * pItem = static_cast <CItem*>( m_Items_Timer.GetHead()); pItem != NULL; pItem = pItem->GetNext() )
 	{
 		EXC_TRYSUB("TickItem");
-		pItemNext = pItem->GetNext();
-
 		EXC_SETSUB("TimerExpired");
 		if ( pItem->IsTimerExpired() )
 		{

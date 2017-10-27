@@ -5452,13 +5452,9 @@ bool CItem::OnTick()
 				EXC_SET("default behaviour::IT_TRAP_INACTIVE");
 				// Set inactive til someone triggers it again.
 				if ( m_itTrap.m_fPeriodic )
-				{
 					SetTrapState( IT_TRAP_ACTIVE, m_itTrap.m_AnimID, m_itTrap.m_wResetSec );
-				}
 				else
-				{
 					SetTrapState( IT_TRAP, GetDispID(), -1 );
-				}
 			}
 			return true;
 

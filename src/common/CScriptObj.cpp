@@ -2851,8 +2851,8 @@ bool CSFileObj::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	return false;
 }
 
-bool CSFileObj::OnTick(){ return true; }
-int CSFileObj::FixWeirdness(){ return 0; }
+bool CSFileObj::OnTick()		{ return true; }
+int CSFileObj::FixWeirdness()	{ return 0; }
 
 bool CSFileObj::r_LoadVal( CScript & s )
 {
