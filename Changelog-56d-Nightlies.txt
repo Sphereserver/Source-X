@@ -243,3 +243,6 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 
 28-10-2017, Drk84
 - [Port from Source,  08-05-2016, Coruja] Fixed: Explosion potions not working correctly.
+
+28-10-2017, Drk84
+- [Port from Source,  07-02-2017, Coruja] Fixed: Hidden/Invisible chars not getting revealed when being stumbled.
