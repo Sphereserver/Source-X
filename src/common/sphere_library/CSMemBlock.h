@@ -64,7 +64,9 @@ public:
 	* @brief Gets the internal data pointer.
 	* @return The internal data pointer (can be NULL).
 	*/
-	byte * GetData() const;
+	byte * GetData() const {
+		return m_pData;
+	}
 	///@}
 
 private:
@@ -117,7 +119,9 @@ public:
 	* @brief Get the buffer len.
 	+ @return Length of the buffer.
     */
-	size_t GetDataLength() const;
+	size_t GetDataLength() const {
+		return m_dwLength;
+	}
 	///@}
 
 private:

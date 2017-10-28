@@ -41,7 +41,9 @@ public:
     * @brief set references for parent, next and previous to NULL.
     */
 	CSObjListRec();
-	virtual ~CSObjListRec();
+	virtual ~CSObjListRec() {
+		RemoveSelf();
+	}
 private:
 	/**
     * @brief No copies allowed.
@@ -122,12 +124,16 @@ public:
     * @brief Get the record count of the list.
     * @return The record count of the list.
     */
-	size_t GetCount() const;
+	size_t GetCount() const {
+		return m_iCount;
+	}
 	/**
     * @brief Check if CSObjList if empty.
     * @return true if CSObjList is empty, false otherwise.
     */
-	bool IsEmpty() const;
+	bool IsEmpty() const {
+		return !GetCount();
+	}
 	///@}
 	/** @name Element Access:
 	 */
@@ -142,12 +148,16 @@ public:
     * @brief Get the first record of the CSObjList.
     * @return The first record of the CSObjList if list is not empty, NULL otherwise.
     */
-	CSObjListRec * GetHead() const;
+	CSObjListRec * GetHead() const {
+		return m_pHead;
+	}
 	/**
     * @brief Get the last record of the CSObjList.
     * @return The last record of the CSObjList if list is not empty, NULL otherwise.
     */
-	CSObjListRec * GetTail() const;
+	CSObjListRec * GetTail() const {
+		return m_pTail;
+	}
 	///@}
 	/** @name Modifiers:
 	 */
@@ -162,7 +172,9 @@ public:
     * TODO: Really needed?
     * @see DeleteAll()
     */
-	void Empty();
+	void Empty() {
+		DeleteAll();
+	}
 	/**
     * @brief Insert a record after the referenced record.
     *
@@ -175,12 +187,16 @@ public:
     * @brief Insert a record at head.
     * @param pNewRec record to insert.
     */
-	void InsertHead( CSObjListRec * pNewRec );
+	void InsertHead( CSObjListRec * pNewRec ) {
+		InsertAfter(pNewRec, NULL);
+	}
 	/**
     * @brief Insert a record at tail.
     * @param pNewRec record to insert.
     */
-	void InsertTail( CSObjListRec * pNewRec );
+	void InsertTail( CSObjListRec * pNewRec ) {
+		InsertAfter(pNewRec, GetTail());
+	}
 protected:
 	/**
     * @brief Trigger that fires when a record if removed.
@@ -191,16 +207,8 @@ protected:
     * @param pObRec removed record.
     */
 	virtual void OnRemoveObj( CSObjListRec* pObRec );
-private:
-	/**
-    * @brief Call the trigger OnRemoveObj.
-    *
-    * Only called by CSObjListRec::RemoveSelf()
-    * @see OnRemoveObj()
-    * @param pObRec record to remove.
-    */
-	void RemoveAtSpecial( CSObjListRec * pObRec );
 	///@}
+private:
 
 	CSObjListRec * m_pHead;  ///< Head of the list.
 	CSObjListRec * m_pTail;  ///< Tail of the list. Do we really care about tail ? (as it applies to lists anyhow)
@@ -613,7 +621,7 @@ public:
 inline void CSObjListRec::RemoveSelf()
 {
 	if (GetParent())
-		m_pParent->RemoveAtSpecial(this);
+		m_pParent->OnRemoveObj(this);	// call any approriate virtuals.
 }
 
 // CSTypedArray:: Constructors, Destructor, Asign operator.
@@ -1074,17 +1082,11 @@ size_t CSObjSortArray<TYPE, KEY_TYPE>::FindKeyNear( KEY_TYPE key, int & iCompare
 		if ( iCompareRes == 0 )
 			break;
 		if ( iCompareRes > 0 )
-		{
 			iLow = i + 1;
-		}
 		else if ( i == 0 )
-		{
 			break;
-		}
 		else
-		{
 			iHigh = i - 1;
-		}
 	}
 	return i;
 }

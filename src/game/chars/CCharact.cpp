@@ -3928,11 +3928,9 @@ bool CChar::OnTick()
 
     if (iTimeDiff >= TICK_PER_SEC)	// don't bother with < 1 sec times.
     {
-        // decay equipped items (spells)
-        CItem* pItem = GetContentHead();
-        int iCount = 0;
+        // decay equipped items
 
-        for (; pItem != NULL; pItem = GetAt(++iCount))
+        for (CItem* pItem = GetContentHead(); pItem != NULL; pItem->GetNext())
         {
             EXC_TRYSUB("Ticking items");
 

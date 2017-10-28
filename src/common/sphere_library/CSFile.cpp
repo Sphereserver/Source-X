@@ -38,7 +38,7 @@ void CFile::Close()
 
 const CSString & CFile::GetFilePath() const
 {
-	return( m_strFileName);
+	return m_strFileName;
 }
 
 bool CFile::SetFilePath( lpctstr pszName )
