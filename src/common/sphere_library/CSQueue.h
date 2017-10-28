@@ -39,7 +39,9 @@ public:
 	* @brief Get the element count from the queue.
 	* @return Element count.
 	*/
-	size_t GetDataQty() const;
+	size_t GetDataQty() const {
+		return m_iDataQty;
+	}
 	///@}
 	/** @name Modifiers:
 	 */
@@ -51,11 +53,6 @@ public:
 	*/
 	void AddNewData( const byte * pData, size_t iLen );
 	/**
-	* @brief Increment the data counter.
-	* @param iLen increment to add.
-	*/
-	void AddNewDataFinish( size_t iLen );
-	/**
 	* @brief Get the position to add an amount of data, resizing the buffer if needed.
 	* @param iLen length needed.
 	* @return pointer to the position where the data can be added.
@@ -64,7 +61,9 @@ public:
 	/**
 	* @brief Clear the queue.
 	*/
-	void Empty();
+	void Empty() {
+		m_iDataQty = 0;
+	}
 	/**
 	* @brief Remove an amount of data from the queue.
 	*
@@ -76,7 +75,9 @@ public:
 	* @brief Get the internal data pointer.
 	* @return Pointer to internal data.
 	*/
-	const byte * RemoveDataLock() const;
+	const byte * RemoveDataLock() const {
+		return m_Mem.GetData();
+	}
 	///@}
 
 private:

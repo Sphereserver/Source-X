@@ -1,5 +1,3 @@
-
-#include "../../sphere/threads.h"
 #include "CSArray.h"
 
 // CObListRec:: Constructors, Destructor, Assign operator.
@@ -10,10 +8,6 @@ CSObjListRec::CSObjListRec()
 	m_pNext = m_pPrev = NULL;
 }
 
-CSObjListRec::~CSObjListRec()
-{
-	RemoveSelf();
-}
 
 // CSObjList:: Constructors, Destructor, Assign operator.
 
@@ -28,25 +22,11 @@ CSObjList::~CSObjList()
 	DeleteAll();
 }
 
-// CSObjList:: Capacity.
-
-size_t CSObjList::GetCount() const
-{
-	//ADDTOCALLSTACK("CSObjList::GetCount");
-	return m_iCount;
-}
-
-bool CSObjList::IsEmpty() const
-{
-	//ADDTOCALLSTACK("CSObjList::IsEmpty");
-	return !GetCount();
-}
 
 // CSObjList:: Element access.
 
 CSObjListRec * CSObjList::GetAt( size_t index ) const
 {
-	//ADDTOCALLSTACK("CSObjList::GetAt");
 	CSObjListRec * pRec = GetHead();
 	while ( index > 0 && pRec != NULL )
 	{
@@ -56,23 +36,10 @@ CSObjListRec * CSObjList::GetAt( size_t index ) const
 	return pRec;
 }
 
-CSObjListRec * CSObjList::GetHead() const
-{
-	//ADDTOCALLSTACK("CSObjList::GetHead");
-	return m_pHead;
-}
-
-CSObjListRec * CSObjList::GetTail() const
-{
-	//ADDTOCALLSTACK("CSObjList::GetTail");
-	return m_pTail;
-}
-
 // CSObjList:: Modifiers.
 
 void CSObjList::DeleteAll()
 {
-	//ADDTOCALLSTACK("CSObjList::DeleteAll");
 	// delete all entries.
 	for (;;)	// iterate the list.
 	{
@@ -87,15 +54,9 @@ void CSObjList::DeleteAll()
 	m_pTail = NULL;
 }
 
-void CSObjList::Empty()
-{
-	//ADDTOCALLSTACK("CSObjList::Empty");
-	DeleteAll();
-}
 
 void CSObjList::InsertAfter( CSObjListRec * pNewRec, CSObjListRec * pPrev )
 {
-	//ADDTOCALLSTACK("CSObjList::InsertAfter");
 	// Add after pPrev.
 	// pPrev = NULL == add to the start.
 	ASSERT( pNewRec != NULL );
@@ -134,21 +95,8 @@ void CSObjList::InsertAfter( CSObjListRec * pNewRec, CSObjListRec * pPrev )
 	++m_iCount;
 }
 
-void CSObjList::InsertHead( CSObjListRec * pNewRec )
-{
-	//ADDTOCALLSTACK("CSObjList::InsertHead");
-	InsertAfter(pNewRec, NULL);
-}
-
-void CSObjList::InsertTail( CSObjListRec * pNewRec )
-{
-	//ADDTOCALLSTACK("CSObjList::InsertTail");
-	InsertAfter(pNewRec, GetTail());
-}
-
 void CSObjList::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when removed from list.
 {
-	//ADDTOCALLSTACK("CSObjList::OnRemoveObj");
 	// just remove from list. DON'T delete !
 	if ( pObRec == NULL )
 		return;
@@ -172,9 +120,3 @@ void CSObjList::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called wh
 	--m_iCount;
 }
 
-void CSObjList::RemoveAtSpecial( CSObjListRec * pObRec )
-{
-	//ADDTOCALLSTACK("CSObjList::RemoveAtSpecial");
-	// only called by pObRec->RemoveSelf()
-	OnRemoveObj(pObRec);	// call any approriate virtuals.
-}

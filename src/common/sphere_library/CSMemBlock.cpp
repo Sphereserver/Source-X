@@ -19,9 +19,7 @@ void CSMemBlock::Alloc( size_t dwSize )
 {
     Free();
     if ( dwSize > 0 )
-    {
         m_pData = AllocBase(dwSize);
-    }
 }
 
 byte * CSMemBlock::AllocBase( size_t dwSize )
@@ -47,12 +45,6 @@ void CSMemBlock::MemLink( byte * pData )
     m_pData = pData;
 }
 
-// CSMemBlock:: Operations.
-
-byte * CSMemBlock::GetData() const
-{
-    return( m_pData );
-}
 
 // CSMemLenBlock:: Constructors, Destructor, Asign operator.
 
@@ -95,9 +87,3 @@ void CSMemLenBlock::Resize( size_t dwSizeNew )
     MemLink( pDataNew );
 }
 
-// CSMemLenBlock:: Operations.
-
-size_t CSMemLenBlock::GetDataLength() const
-{
-    return m_dwLength;
-}

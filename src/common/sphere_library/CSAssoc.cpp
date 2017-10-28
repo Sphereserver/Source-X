@@ -1,6 +1,5 @@
 
 #include "CSAssoc.h"
-#include "../../sphere/threads.h"
 #include "../CExpression.h"
 #include "../common.h"
 
@@ -9,7 +8,6 @@
 
 lpctstr CValStr::FindName( int iVal ) const
 {
-	//ADDTOCALLSTACK("CValStr::FindName");
 	size_t i = 0;
 	ASSERT(this[i].m_pszName != NULL);
 	for ( ; this[i].m_pszName; i++ )
@@ -42,7 +40,6 @@ const int CElementDef::sm_Lengths[ELEM_QTY] =
 
 bool CElementDef::SetValStr( void * pBase, lpctstr pszVal ) const
 {
-	//ADDTOCALLSTACK("CElementDef::SetValStr");
 	// Set the element value as a string.
 	dword dwVal = 0;
 	//ASSERT(m_offset>=0);
@@ -91,7 +88,6 @@ int CElementDef::GetValLength() const
 
 bool CElementDef::GetValStr( const void * pBase, CSString & sVal ) const
 {
-	//ADDTOCALLSTACK("CElementDef::GetValStr");
 	// Get the element value as a string.
 
 	dword dwVal = 0;
