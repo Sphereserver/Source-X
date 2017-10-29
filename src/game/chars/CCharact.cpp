@@ -3930,9 +3930,12 @@ bool CChar::OnTick()
     {
         // decay equipped items
 
-        for (CItem* pItem = GetContentHead(); pItem != NULL; pItem->GetNext())
-        {
-            EXC_TRYSUB("Ticking items");
+		CItem * pItemNext = NULL;
+		CItem * pItem = static_cast <CItem*>( GetHead());
+		for ( ; pItem != NULL; pItem = pItemNext )
+		{
+			EXC_TRYSUB("Ticking items");
+			pItemNext = pItem->GetNext();
 
             // always check the validity of the memory objects
             if (pItem->IsType(IT_EQ_MEMORY_OBJ) && !pItem->m_uidLink.ObjFind())

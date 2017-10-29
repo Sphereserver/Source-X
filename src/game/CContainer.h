@@ -22,19 +22,14 @@ public:
 
     /**
      * @fn  virtual void CContainer::OnRemoveObj( CSObjListRec* pObRec );
-     *
      * @brief   Override this = called when removed from list.
-
-     *
      * @param [in,out]  pObRec  If non-null, the ob record.
      */
 	virtual void OnRemoveObj( CSObjListRec* pObRec );
 
     /**
      * @fn  void CContainer::ContentAddPrivate( CItem * pItem );
-     *
      * @brief  Adds an item to this CContainer.
-     *
      * @param [in,out]  pItem   If non-null, the item.
      */
 	void ContentAddPrivate( CItem * pItem );
@@ -56,59 +51,37 @@ private:
 public:
 
     /**
-     * @fn  CItem * CContainer::GetAt( size_t index ) const;
-     *
-     * @brief   Gets at.
-     *
-     * @param   index   Zero-based index of the.
-     *
-     * @return  null if it fails, else at.
-     */
-	CItem * GetAt( size_t index ) const;
-
-    /**
      * @fn  int CContainer::GetTotalWeight() const;
-     *
      * @brief   Gets total weight.
-     *
      * @return  The total weight.
      */
 	int	GetTotalWeight() const;
 
     /**
      * @fn  CItem* CContainer::GetContentHead() const;
-     *
      * @brief   Gets content head.
-     *
      * @return  null if it fails, else the content head.
      */
 	CItem* GetContentHead() const;
 
     /**
      * @fn  CItem* CContainer::GetContentTail() const;
-     *
      * @brief   Gets content tail.
-     *
      * @return  null if it fails, else the content tail.
      */
 	CItem* GetContentTail() const;
 
     /**
      * @fn  int CContainer::FixWeight();
-     *
      * @brief   Fix weight.
-     *
      * @return  An int.
      */
 	int FixWeight();
 
     /**
      * @fn  bool CContainer::ContentFindKeyFor( CItem * pLocked ) const;
-     *
      * @brief   Content find key for.
-     *
      * @param [in,out]  pLocked If non-null, the locked.
-     *
      * @return  true if it succeeds, false if it fails.
      */
 	bool ContentFindKeyFor( CItem * pLocked ) const;
@@ -116,18 +89,14 @@ public:
 
     /**
      * @fn  CItem * CContainer::ContentFindRandom() const;
-     *
      * @brief   Content find random.
-     *
      * @return  null if it fails, else a pointer to a CItem.
      */
 	CItem * ContentFindRandom() const;
 
     /**
      * @fn  void CContainer::ContentsDump( const CPointMap & pt, uint64 iAttr = 0 );
-     *
      * @brief   Contents dump.
-     *
      * @param   pt      The point.
      * @param   dwAttr  The attribute.
      */
@@ -135,9 +104,7 @@ public:
 
     /**
      * @fn  void CContainer::ContentsTransfer( CItemContainer * pCont, bool fNoNewbie );
-     *
      * @brief   Contents transfer.
-     *
      * @param [in,out]  pCont   If non-null, the container.
      * @param   fNoNewbie       true to no newbie.
      */
@@ -145,9 +112,7 @@ public:
 
     /**
      * @fn  void CContainer::ContentAttrMod( uint64 iAttr, bool fSet );
-     *
      * @brief   Content attribute modifier.
-     *
      * @param   dwAttr  The attribute.
      * @param   fSet    true to set.
      */
@@ -155,7 +120,6 @@ public:
 
     /**
      * @fn  void CContainer::ContentNotifyDelete();
-     *
      * @brief   Content notify delete.
      */
 	void ContentNotifyDelete();
@@ -164,22 +128,17 @@ public:
 
     /**
      * @fn  CItem * CContainer::ContentFind( RESOURCE_ID_BASE rid, dword dwArg = 0, int iDecendLevels = 255 ) const;
-     *
      * @brief   Content find.
-     *
      * @param   rid             The rid.
      * @param   dwArg           The argument.
      * @param   iDecendLevels   Zero-based index of the decend levels.
-     *
      * @return  null if it fails, else a pointer to a CItem.
      */
 	CItem * ContentFind( CResourceIDBase rid, dword dwArg = 0, int iDecendLevels = 255 ) const;
 
     /**
      * @fn  TRIGRET_TYPE CContainer::OnContTriggerForLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult, CScriptLineContext & StartContext, CScriptLineContext & EndContext, RESOURCE_ID_BASE rid, dword dwArg = 0, int iDecendLevels = 255 );
-     *
      * @brief   Executes the container trigger for loop action.
-     *
      * @param [in,out]  s               The CScript to process.
      * @param [in,out]  pSrc            If non-null, source for the.
      * @param [in,out]  pArgs           If non-null, the arguments.
@@ -196,9 +155,7 @@ public:
 
     /**
      * @fn  TRIGRET_TYPE CContainer::OnGenericContTriggerForLoop( CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult, CScriptLineContext & StartContext, CScriptLineContext & EndContext, int iDecendLevels = 255 );
-     *
      * @brief   Executes the generic container trigger for loop action.
-     *
      * @param [in,out]  s               The CScript to process.
      * @param [in,out]  pSrc            If non-null, source for the.
      * @param [in,out]  pArgs           If non-null, the arguments.
@@ -213,30 +170,23 @@ public:
 
     /**
      * @fn  int CContainer::ContentCount( RESOURCE_ID_BASE rid, dword dwArg = 0 );
-     *
      * @brief   Content count of rid.
-     *
      * @param   rid     The rid.
      * @param   dwArg   The argument.
-     *
      * @return  An int.
      */
 	int ContentCount( CResourceIDBase rid, dword dwArg = 0 );
 
     /**
      * @fn  size_t CContainer::ContentCountAll() const;
-     *
      * @brief   Content count all.
-     *
      * @return  A size_t.
      */
 	size_t ContentCountAll() const;
 
     /**
      * @fn  int CContainer::ContentConsume( RESOURCE_ID_BASE rid, int iQty = 1, bool fTest = false, dword dwArg = 0 );
-     *
      * @brief   Content consume.
-     *
      * @param   rid     The rid.
      * @param   iQty    Zero-based index of the qty.
      * @param   fTest   true to test.
@@ -248,9 +198,7 @@ public:
 
     /**
      * @fn  int CContainer::ResourceConsume( const CResourceQtyArray * pResources, int iReplicationQty, bool fTest = false, dword dwArg = 0 );
-     *
      * @brief   Resource consume.
-     *
      * @param   pResources      The resources.
      * @param   iReplicationQty Zero-based index of the replication qty.
      * @param   fTest           true to test.
@@ -262,9 +210,7 @@ public:
 
     /**
      * @fn  size_t CContainer::ResourceConsumePart( const CResourceQtyArray * pResources, int iReplicationQty, int iFailPercent, bool fTest = false, dword dwArg = 0 );
-     *
      * @brief   Resource consume part.
-     *
      * @param   pResources      The resources.
      * @param   iReplicationQty Zero-based index of the replication qty.
      * @param   iFailPercent    Zero-based index of the fail percent.
@@ -277,18 +223,14 @@ public:
 
     /**
      * @fn  virtual void CContainer::OnWeightChange( int iChange );
-     *
      * @brief   Executes the weight change action.
-     *
      * @param   iChange Zero-based index of the change.
      */
 	virtual void OnWeightChange( int iChange );
 
     /**
      * @fn  virtual void CContainer::ContentAdd( CItem * pItem ) = 0;
-     *
      * @brief   Content add.
-     *
      * @param [in,out]  pItem   If non-null, the item.
      */
 	virtual void ContentAdd( CItem * pItem ) = 0;

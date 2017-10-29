@@ -242,7 +242,8 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - [Port from Source, 27-09-2016, Coruja]  Fixed: Worldsave not saving DAM/ARMOR properties set manually on chars/items already placed on world.
 
 28-10-2017, Drk84
-- [Port from Source,  08-05-2016, Coruja] Fixed: Explosion potions not working correctly.
+- [Port from Source, 08-05-2016, Coruja] Fixed: Explosion potions not working correctly.
+- [Port from Source, 07-02-2017, Coruja] Fixed: Hidden/Invisible chars not getting revealed when being stumbled.
 
-28-10-2017, Drk84
-- [Port from Source,  07-02-2017, Coruja] Fixed: Hidden/Invisible chars not getting revealed when being stumbled.
+29-10-2017, Nolok
+- Added: now the logout console message shows also the character's name.

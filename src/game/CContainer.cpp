@@ -20,14 +20,9 @@ void CContainer::OnWeightChange( int iChange )
 	m_totalweight += iChange;
 }
 
-CItem * CContainer::GetAt( size_t index ) const
-{
-	return( dynamic_cast <CItem*>( CSObjList::GetAt( index )));
-}
-
 int	CContainer::GetTotalWeight() const
 {
-	return( m_totalweight );
+	return m_totalweight;
 }
 
 CItem* CContainer::GetContentHead() const
@@ -515,7 +510,7 @@ bool CContainer::r_GetRefContainer( lpctstr &pszKey, CScriptObj *&pRef )
 		{
 			pszKey += 4;
 			SKIP_SEPARATORS(pszKey);
-			pRef = GetAt(Exp_GetSingle(pszKey));
+			pRef = dynamic_cast<CItem*>(GetAt(Exp_GetSingle(pszKey)));
 			SKIP_SEPARATORS(pszKey);
 			return true;
 		}

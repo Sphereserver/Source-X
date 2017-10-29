@@ -1085,9 +1085,13 @@ void CSector::OnTick(int iPulseCount)
 
 	ProfileTask charactersTask(PROFILE_CHARS);
 
-	for ( CChar * pChar = static_cast <CChar*>( m_Chars_Active.GetHead()); pChar != NULL; pChar = pChar->GetNext() )
+	CChar * pCharNext = NULL;
+	CChar * pChar = static_cast <CChar*>( m_Chars_Active.GetHead());
+	for ( ; pChar != NULL; pChar = pCharNext )
 	{
 		EXC_TRYSUB("TickChar");
+
+		pCharNext = pChar->GetNext();
 
 		if (( fEnvironChange ) && ( IsTrigUsed(TRIGGER_ENVIRONCHANGE) ))
 			pChar->OnTrigger(CTRIG_EnvironChange, pChar);
@@ -1107,7 +1111,7 @@ void CSector::OnTick(int iPulseCount)
 
 			if ( iRegionPeriodic && pChar->m_pArea )
 			{
-				if (( iRegionPeriodic == 2 )&&( IsTrigUsed(TRIGGER_REGPERIODIC) ))
+				if ( ( iRegionPeriodic == 2 ) && IsTrigUsed(TRIGGER_REGPERIODIC))
 				{
 					pChar->m_pArea->OnRegionTrigger( pChar, RTRIG_REGPERIODIC );
 					--iRegionPeriodic;
@@ -1134,9 +1138,13 @@ void CSector::OnTick(int iPulseCount)
 
 	ProfileTask itemsTask(PROFILE_ITEMS);
 
-	for ( CItem * pItem = static_cast <CItem*>( m_Items_Timer.GetHead()); pItem != NULL; pItem = pItem->GetNext() )
+	CItem * pItemNext = NULL;
+	CItem * pItem = static_cast <CItem*>( m_Items_Timer.GetHead());
+	for ( ; pItem != NULL; pItem = pItemNext )
 	{
 		EXC_TRYSUB("TickItem");
+		pItemNext = pItem->GetNext();
+
 		EXC_SETSUB("TimerExpired");
 		if ( pItem->IsTimerExpired() )
 		{

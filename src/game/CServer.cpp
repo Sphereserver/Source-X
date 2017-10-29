@@ -1737,8 +1737,8 @@ void CServer::OnTick()
 	{
 		EXC_SET("console input");
 		CSString sText = m_sConsoleText;	// make a copy.
-		m_sConsoleText.Empty();	// done using this.
-		m_fConsoleTextReadyFlag = false; // rady to use again
+		m_sConsoleText.Empty();				// done using this.
+		m_fConsoleTextReadyFlag = false;	// ready to use again
 		OnConsoleCmd( sText, this );
 	}
 

@@ -1883,7 +1883,7 @@ int CChar::Skill_Provocation(SKTRIG_TYPE stage)
 				return -SKTRIG_ABORT;
 			}
 
-			// or just the npcs are in the same ally groups so can both attack you
+			// If the npcs are in the same ally groups, both can attack you
 			if ( NPC_GetAllyGroupType(pCharProv->GetDispID()) == NPC_GetAllyGroupType(pCharTarg->GetDispID()) )
 			{
 				if ( pCharProv->Noto_IsEvil() )
@@ -1895,17 +1895,15 @@ int CChar::Skill_Provocation(SKTRIG_TYPE stage)
 				return -SKTRIG_ABORT;
 			}
 
-			// If we are provoking against a "good" PC/NPC and the provoked NPC/PC is good,
-			// we are flagged criminal for it and guards are called.
+			// If the provoked NPC/PC is good, we are flagged criminal for it and guards are called.
 			if ( pCharProv->Noto_GetFlag(this) == NOTO_GOOD )
 			{
 				// lose some karma for this.
 				CheckCrimeSeen(SKILL_PROVOCATION, NULL, pCharProv, g_Cfg.GetDefaultMsg( DEFMSG_PROVOKING_CRIME ));
-				return -SKTRIG_ABORT;
+				return -SKTRIG_ABORT;	// can't provoke a good target!
 			}
 
-			// If we provoke upon a good char we should go criminal for it
-			// but skill still succeed.
+			// If we provoke upon a good char we should go criminal for it but skill still succeed.
 			if ( pCharTarg->Noto_GetFlag(this) == NOTO_GOOD )
 				CheckCrimeSeen(SKILL_PROVOCATION, NULL, pCharTarg, "provoking");
 
@@ -3460,7 +3458,7 @@ int CChar::Skill_Done()
 	//   0 = success
 	//	 -SKTRIG_STROKE = stay in skill. (stroke)
 	//   -SKTRIG_FAIL = we must print the fail msg. (credit for trying)
-	//   -SKTRIG_ABORT = we must print the fail msg. (But get no credit, canceled )
+	//   -SKTRIG_ABORT = we must print the fail msg. (But get no credit, cancelled )
 	//   -SKTRIG_QTY = special failure. clean up the skill but say nothing. (no credit)
 
 	SKILL_TYPE skill = Skill_GetActive();

@@ -2,6 +2,7 @@
 #include <deque>
 #include "../common/CException.h"
 #include "../game/clients/CClient.h"
+#include "../game/chars/CChar.h"
 #include "../common/CLog.h"
 #include "../game/CServer.h"
 #include "../game/CServerTime.h"
@@ -138,21 +139,27 @@ void NetState::clear(void)
 	m_isWriteClosed = true;
 	m_needsFlush = false;
 
-	CClient* client = m_client;
-	if (client != NULL)
+	if (m_client != NULL)
 	{
-		//m_client = NULL;	// commented to test
-        CAccount *pAccount = client->GetAccount();
 		g_Serv.StatDec(SERV_STAT_CLIENTS);
-		if ( client->GetConnectType() == CONNECT_LOGIN )
-		{	// if account name is retrieved when a connection is refused (ie. wrong password), sphere will crash (at least on MinGW)
+		if ( m_client->GetConnectType() == CONNECT_LOGIN )
+		{	// when a connection is refused (ie. wrong password), there's no account
 			g_Log.Event(LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Client disconnected [Total:%" PRIuSIZE_T "]. IP='%s'.\n",
 				m_id, g_Serv.StatGet(SERV_STAT_CLIENTS), m_peerAddress.GetAddrStr());
 		}
 		else
 		{
-			g_Log.Event(LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Client disconnected [Total:%" PRIuSIZE_T "]. Account: '%s'. IP='%s'.\n",
-				m_id, g_Serv.StatGet(SERV_STAT_CLIENTS), pAccount ? pAccount->GetName() : "No Account", m_peerAddress.GetAddrStr());
+			if (!m_client->GetChar())
+			{
+				g_Log.Event(LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Client disconnected [Total:%" PRIuSIZE_T "]. Account: '%s'. IP='%s'.\n",
+					m_id, g_Serv.StatGet(SERV_STAT_CLIENTS), m_client->GetName(), m_peerAddress.GetAddrStr());
+			}
+			else
+			{
+				g_Log.Event(LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Client disconnected [Total:%" PRIuSIZE_T "]. Account: '%s'. Char: '%s'. IP='%s'.\n",
+					m_id, g_Serv.StatGet(SERV_STAT_CLIENTS), m_client->GetName(), m_client->GetChar()->GetName(), m_peerAddress.GetAddrStr());
+			}
+			
 		}
 
 #if !defined(_WIN32) || defined(_LIBEV)
@@ -161,7 +168,7 @@ void NetState::clear(void)
 #endif
 
 		//	record the client reference to the garbage collection to be deleted on it's time
-		g_World.m_ObjDelete.InsertHead(client);
+		g_World.m_ObjDelete.InsertHead(m_client);
 	}
 
 #ifdef _WIN32
@@ -2696,8 +2703,8 @@ void NetworkManager::start(void)
 	ASSERT(m_states == NULL);
 	ASSERT(m_stateCount == 0);
 	m_states = new NetState*[g_Cfg.m_iClientsMax];
-	for (size_t l = 0; l < g_Cfg.m_iClientsMax; l++)
-		m_states[l] = new NetState((int)(l));
+	for (size_t l = 0; l < g_Cfg.m_iClientsMax; ++l)
+		m_states[l] = new NetState((int)l);
 	m_stateCount = g_Cfg.m_iClientsMax;
 
 	DEBUGNETWORK(("Created %" PRIuSIZE_T " network slots (system limit of %d clients)\n", m_stateCount, FD_SETSIZE));

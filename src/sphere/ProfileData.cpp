@@ -61,7 +61,7 @@ void ProfileData::Start(PROFILE_TYPE id)
 	// Stop prev task.
 	if ( m_TimeTotal >= (llTimeProfileFrequency * m_iActiveWindowSeconds) )
 	{
-		for ( int i = 0; i < PROFILE_DATA_QTY; i++ )
+		for ( int i = 0; i < PROFILE_DATA_QTY; ++i )
 		{
 			if ( m_iAverageCount < 4 )
 			{
@@ -99,7 +99,7 @@ void ProfileData::Start(PROFILE_TYPE id)
 	llong Diff = ( llTicks - m_CurrentTime );
 	m_TimeTotal += Diff;
 	m_CurrentTimes[m_CurrentTask].m_Time += Diff;
-	m_CurrentTimes[m_CurrentTask].m_iCount ++;
+	++ m_CurrentTimes[m_CurrentTask].m_iCount;
 
 	// We are now on to the new task.
 	m_CurrentTime = llTicks;
@@ -112,7 +112,7 @@ void ProfileData::Count(PROFILE_TYPE id, dword dwVal)
 
 	ASSERT( id >= PROFILE_TIME_QTY && id < PROFILE_QTY );
 	m_CurrentTimes[id].m_Time += dwVal;
-	m_CurrentTimes[id].m_iCount ++;
+	++ m_CurrentTimes[id].m_iCount;
 }
 
 bool ProfileData::IsEnabled(PROFILE_TYPE id) const
@@ -190,8 +190,8 @@ lpctstr ProfileData::GetDescription(PROFILE_TYPE id) const
 			(int)(((	m_PreviousTimes[id].m_Time * 10000 ) /	( llTimeProfileFrequency )) % 10000 ),
 			(int)(		m_AverageTimes[id].m_Time /				( llTimeProfileFrequency )),
 			(int)(((	m_AverageTimes[id].m_Time * 10000 ) /	( llTimeProfileFrequency )) % 10000 ),
-						iCount,
-			(int)(		m_AverageTimes[id].m_iCount),
+			iCount,
+			m_AverageTimes[id].m_iCount,
 			m_iAverageCount );
 	}
 

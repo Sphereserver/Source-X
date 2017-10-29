@@ -179,7 +179,8 @@ void CClient::CharDisconnect()
 
 	m_pChar->ClientDetach();	// we are not a client any more.
 
-	if ( iLingerTime <= 0 ) fCanInstaLogOut = true;
+	if ( iLingerTime <= 0 )
+		fCanInstaLogOut = true;
 
 	// Gump memory cleanup, we don't want them on logged out players
 	m_mapOpenedGumps.clear();
@@ -187,9 +188,7 @@ void CClient::CharDisconnect()
 	// Layer dragging, moving it to backpack
 	CItem * pItemDragging = m_pChar->LayerFind(LAYER_DRAGGING);
 	if ( pItemDragging )
-	{
 		m_pChar->ItemBounce(pItemDragging);
-	}
 
 	// log out immediately ? (test before ClientDetach())
 	if ( ! fCanInstaLogOut )
