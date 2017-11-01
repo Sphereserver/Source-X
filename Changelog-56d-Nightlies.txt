@@ -251,3 +251,6 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 30-10-2017, Drk84
 - [Port from Source, 17-10-2016, Coruja] Fixed: NPCs losing 'statf_spawned' flag after server restart.
 - [Port from Source, 30-01-2017, Coruja] Fixed: ML/SA/HS/TOL doors not working correctly.
+
+01-11-2017, Drk84
+- [Port from Source, 12-01-2017, Coruja] Fixed: Char death counting kill/fame/karma gain for killers that started the attack but don't have caused any damage yet.
