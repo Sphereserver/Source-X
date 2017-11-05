@@ -254,3 +254,21 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 
 01-11-2017, Drk84
 - [Port from Source, 12-01-2017, Coruja] Fixed: Char death counting kill/fame/karma gain for killers that started the attack but don't have caused any damage yet.
+
+05-11-2017, Drk84
+- Added SkillAdjusted commmand, returns the skill value adjusted by the stat bonus.
+  The stat bonus are BONUS_STR, BONUS_DEX, BONUS_INT and BONUS_STATS and they can be found in sphere_skills.scp
+  Normally you can see the skill values adjusted by the stats bonues by checking the value of the skill in the Skill Menu when the "Show Real" option is turned OFF,
+  The adjusted skill value is used by Sphere for calculating the chance of success for NON-combat skills (and also ResistingSpells), in the scripts there was no
+ "short-way" to display the correct chance of success unless using a lot of multiplication and division. 
+  Usage:   SkillAdjusted.skillnumber or SkillAdjusted.skillkey (Example: SkillAdjusted.1 or SkillAdjusted.Anatomy)
+  Example calculating chance of success by scripts:
+  ON=@SkillStart
+	local.skillFlag =<serv.skill.<argn1>.flags>
+	if !(<local.skillFlag>&SKF_FIGHT)
+		if <actdiff> >= <skilladjusted.<argn1>>
+			sysmessage @50 <serv.skill.<argn1>.name>: <fval randbell(<eval (<skilladjusted.<argn1>>) - <actdiff>>,100)>%
+		else
+			sysmessage @50  <serv.skill.<argn1>.name>: <fval 1000 -  randbell(<eval (<skilladjusted.<argn1>>) - <actdiff>>,100)>%
+		endif
+	endif

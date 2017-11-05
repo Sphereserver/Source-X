@@ -2170,6 +2170,17 @@ do_default:
 				sVal.FormatVal( Skill_CheckSuccess( iSkill, Exp_GetVal( ppArgs[1] )));
 			}
 			return true;
+		case CHC_SKILLADJUSTED:
+			pszKey += 13;
+			SKIP_SEPARATORS(pszKey);
+			{
+				SKILL_TYPE iSkill = g_Cfg.FindSkillKey(pszKey);
+				if (iSkill == SKILL_NONE)
+					return false;
+				ushort iValAdjusted = Skill_GetAdjusted(iSkill);
+				sVal.Format("%hu.%hu", iValAdjusted / 10, iValAdjusted % 10);
+			}
+			return true;
 		case CHC_SKILLBEST:
 			// Get the top skill.
 			pszKey += 9;
