@@ -254,3 +254,8 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 
 01-11-2017, Drk84
 - [Port from Source, 12-01-2017, Coruja] Fixed: Char death counting kill/fame/karma gain for killers that started the attack but don't have caused any damage yet.
+
+05-11-2017, Drk84
+- Added SkillAdjusted commmand, returns the skill value adjusted by the stat bonus.
+  The stat bonus are BONUS_STR, BONUS_DEX, BONUS_INT and BONUS_STATS and they can be found in sphere_skills.scp 
+  Usage:   SkillAdjusted.skillnumber or SkillAdjusted.skillkey (Example: SkillAdjusted.1 or SkillAdjusted.Anatomy)
