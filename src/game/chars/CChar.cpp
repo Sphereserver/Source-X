@@ -1490,12 +1490,12 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 		case RACETYPE_GARGOYLE:
 			if ( bFemale )
 			{
-				if ( !((idHair == 0x4261 || idHair == 0x4262) || (idHair >= 0x4273 && idHair <= 0x4275) || (idHair == 0x42B0 || idHair == 0x42B1) || (idHair == 0x42AA || idHair == 0x42AB)) )
+				if (!((idHair == ITEMID_GARG_HORN_FEMALE_1) || (idHair == ITEMID_GARG_HORN_FEMALE_2) || ((idHair >= ITEMID_GARG_HORN_FEMALE_3) && (idHair <= ITEMID_GARG_HORN_FEMALE_5)) || (idHair == ITEMID_GARG_HORN_FEMALE_6) || (idHair == ITEMID_GARG_HORN_FEMALE_7) || (idHair == ITEMID_GARG_HORN_FEMALE_8)))
 					idHair = ITEMID_NOTHING;
 			}
 			else
 			{
-				if ( !((idHair >= 0x4258) && (idHair <= 0x425F)) )
+				if ( !((idHair >= ITEMID_GARG_HORN_1) && (idHair <= ITEMID_GARG_HORN_8)) )
 					idHair = ITEMID_NOTHING;
 			}
 			break;
@@ -1562,23 +1562,27 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 	}
 
 	// Create beard
-	switch ( rtRace )
+	if (bFemale)
+		idBeard = ITEMID_NOTHING;
+	else
 	{
-		case RACETYPE_HUMAN:
-			if ( !(((idBeard >= ITEMID_BEARD_LONG) && (idBeard <= ITEMID_BEARD_MOUSTACHE)) || ((idBeard >= ITEMID_BEARD_SH_M) && (idBeard <= ITEMID_BEARD_GO_M))) )
+		switch (rtRace)
+		{
+			default:
+			case RACETYPE_HUMAN:
+				if (!(((idBeard >= ITEMID_BEARD_LONG) && (idBeard <= ITEMID_BEARD_MOUSTACHE)) || ((idBeard >= ITEMID_BEARD_SH_M) && (idBeard <= ITEMID_BEARD_GO_M))))
+					idBeard = ITEMID_NOTHING;
+				break;
+			case RACETYPE_ELF:
 				idBeard = ITEMID_NOTHING;
-
-		case RACETYPE_GARGOYLE:
-			if ( !((idBeard >= 0x42ad) && (idBeard <= 0x42b0)) )
-				idBeard = ITEMID_NOTHING;
-			break;
-
-		default:
-			break;
+				break;
+			case RACETYPE_GARGOYLE:
+				if (!((idBeard >= ITEMID_GARG_HORN_FACIAL_1) && (idBeard <= ITEMID_GARG_HORN_FACIAL_4)))
+					idBeard = ITEMID_NOTHING;
+				break;
+		}
 	}
 
-	if ( bFemale || rtRace == RACETYPE_ELF )
-		idBeard = ITEMID_NOTHING;
 
 	if ( idBeard )
 	{
