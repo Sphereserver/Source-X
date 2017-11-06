@@ -272,3 +272,6 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 			sysmessage @50  <serv.skill.<argn1>.name>: <fval 1000 -  randbell(<eval (<skilladjusted.<argn1>>) - <actdiff>>,100)>%
 		endif
 	endif
+
+06-11-2017, Dirk84
+- [Port from Source, 24-12-2016, Coruja] Fixed account character creation not creating beards. 
