@@ -906,7 +906,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					pSpell->m_itSpell.m_PolyDex = 9;			// UnArmed DamHi
 					pSpell->m_itSpell.m_spelllevel = 25;		// Melee Damage Increase
 					pSpell->m_itSpell.m_spellcharges = 20;	// RegenHitsVal
-					m_atMagery.m_SummonID = CREID_Horrific_Beast;
+					m_atMagery.m_SummonID = CREID_HORRIFIC_BEAST;
 					SetDefNum("RegenHitsVal", GetDefNum("RegenHitsVal", true) + pSpell->m_itSpell.m_spellcharges);
 					iBuffIcon = BI_HORRIFICBEAST;
 					break;
@@ -915,7 +915,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					pSpell->m_itSpell.m_PolyDex = 5;			// +RegenStamVal
 					pSpell->m_itSpell.m_spellcharges = 3;	// +RegenManaVal
 					pSpell->m_itSpell.m_spelllevel = 25;		// -ResFire
-					m_atMagery.m_SummonID = CREID_Vampire_Bat;
+					m_atMagery.m_SummonID = CREID_VAMPIRE_BAT;
 					SetDefNum("HitLeechLife", GetDefNum("HitLeechLife", true) + pSpell->m_itSpell.m_PolyStr);		// +Hit Leech Life
 					SetDefNum("RegenStamVal", GetDefNum("RegenStamVal", true) + pSpell->m_itSpell.m_PolyDex);		// +RegenStamVal
 					SetDefNum("RegenManaVal", GetDefNum("RegenManaVal", true) + pSpell->m_itSpell.m_spellcharges);	// RegenManaVal
@@ -923,11 +923,11 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					iBuffIcon = BI_VAMPIRICEMBRACE;
 					break;
 				case SPELL_Stone_Form:
-					m_atMagery.m_SummonID = CREID_Stone_Form;
+					m_atMagery.m_SummonID = CREID_STONE_FORM;
 					iBuffIcon = BI_STONEFORM;
 					break;
 				case SPELL_Reaper_Form:
-					m_atMagery.m_SummonID = CREID_Stone_Form;
+					m_atMagery.m_SummonID = CREID_STONE_FORM;
 					iBuffIcon = BI_REAPERFORM;
 					break;
 				default:
@@ -2567,7 +2567,7 @@ bool CChar::Spell_CastDone()
 					case 9:					m_atMagery.m_SummonID = CREID_SKELETON;		break;
 					default:				m_atMagery.m_SummonID = CREID_ZOMBIE;		break;
 					}
-				case SPELL_Vengeful_Spirit:	m_atMagery.m_SummonID = CREID_Revenant;		break;
+				case SPELL_Vengeful_Spirit:	m_atMagery.m_SummonID = CREID_REVENANT;		break;
 				default: break;
 				}
 			}

@@ -271,7 +271,7 @@ void CChar::NPC_Act_Fight()
 		if (iDist >= iRangeMin && iDist <= iRangeMax && CanSeeLOS( pChar,LOS_NB_WINDOWS ))//NPCs can throw through a window
 		{
 			CVarDefCont * pRock = GetDefKey("THROWOBJ",true);
-			if ( GetDispID() == CREID_OGRE || GetDispID() == CREID_ETTIN || GetDispID() == CREID_Cyclops || pRock )
+			if ( GetDispID() == CREID_OGRE || GetDispID() == CREID_ETTIN || GetDispID() == CREID_CYCLOPS || pRock )
 			{
 				ITEMID_TYPE id = ITEMID_NOTHING;
 				if (pRock)

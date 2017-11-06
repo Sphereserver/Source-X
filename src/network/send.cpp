@@ -3602,8 +3602,8 @@ PacketArrowQuest::PacketArrowQuest(const CClient* target, int x, int y, int id) 
 	ADDTOCALLSTACK("PacketArrowQuest::PacketArrowQuest");
 
 	writeBool(x && y);
-	writeInt16((word)(x));
-	writeInt16((word)(y));
+	writeInt16((word)x);
+	writeInt16((word)y);
 
 	if (target->GetNetState()->isClientVersion(MINCLIVER_HS) || target->GetNetState()->isClientEnhanced())
 		writeInt32(id);

@@ -902,7 +902,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
 		{
 			// Animals have certain anims. Monsters have others.
 
-			if (GetDispID() >= CREID_HORSE1)
+			if (GetDispID() >= CREID_HORSE_TAN)
 			{
 				// All animals have all these anims thankfully
 				switch (action)
@@ -2477,11 +2477,11 @@ bool CChar::OnTickEquip( CItem * pItem )
 		case LAYER_FLAG_Wool:
 			// This will regen the sheep it was sheered from.
 			// Sheared sheep regen wool on a new day.
-			if ( GetID() != CREID_Sheep_Sheered )
+			if ( GetID() != CREID_SHEEP_SHORN )
 				return false;
 
 			// Is it a new day ? regen my wool.
-			SetID( CREID_Sheep );
+			SetID( CREID_SHEEP );
 			return false;
 
 		case LAYER_FLAG_ClientLinger:

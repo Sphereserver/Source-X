@@ -24,7 +24,9 @@ SOURCE_GROUP (sphere FILES ${sphere_SRCS})
 
 # Network management files
 SET (network_SRCS
-network/network.cpp
+network/network_common.cpp
+network/network_singlethreaded.cpp
+network/network_multithreaded.cpp
 network/network.h
 network/packet.cpp
 network/packet.h

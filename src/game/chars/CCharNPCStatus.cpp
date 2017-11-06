@@ -57,45 +57,45 @@ CREID_TYPE CChar::NPC_GetAllyGroupType(CREID_TYPE idTest)	// static
 		case CREID_TROLL:
 		case CREID_TROLL_MACE:
 			return( CREID_TROLL );
-		case CREID_Tera_Warrior:
-		case CREID_Tera_Drone:
-		case CREID_Tera_Matriarch:
-			return( CREID_Tera_Drone );
-		case CREID_Ophid_Mage:
-		case CREID_Ophid_Warrior:
-		case CREID_Ophid_Queen:
-			return( CREID_Ophid_Warrior );
-		case CREID_HORSE1:
-		case CREID_HORSE4:
-		case CREID_HORSE2:
-		case CREID_HORSE3:
+		case CREID_TERA_WARRIOR:
+		case CREID_TERA_DRONE:
+		case CREID_TERA_MATRIARCH:
+			return( CREID_TERA_DRONE );
+		case CREID_OPHID_SHAMAN:
+		case CREID_OPHID_WARRIOR:
+		case CREID_OPHID_QUEEN:
+			return( CREID_OPHID_WARRIOR );
+		case CREID_HORSE_TAN:
+		case CREID_HORSE_BROWN_DK:
+		case CREID_HORSE_GRAY:
+		case CREID_HORSE_BROWN_LT:
 		case CREID_HORSE_PACK:
-			return( CREID_HORSE1 );
-		case CREID_BrownBear:
-		case CREID_GrizzlyBear:
-		case CREID_PolarBear:
-			return( CREID_BrownBear );
-		case CREID_Cow_BW:
-		case CREID_Cow2:
-		case CREID_Bull_Brown:
-		case CREID_Bull2:
-			return( CREID_Bull_Brown );
-		case CREID_Ostard_Desert:
-		case CREID_Ostard_Frenz:
-		case CREID_Ostard_Forest:
-			return( CREID_Ostard_Forest );
-		case CREID_Sheep:
-		case CREID_Sheep_Sheered:
-			return( CREID_Sheep );
-		case CREID_Hart:
-		case CREID_Deer:
-			return( CREID_Deer );
-		case CREID_Pig:
-		case CREID_Boar:
-			return( CREID_Pig );
-		case CREID_Llama:
+			return( CREID_HORSE_TAN );
+		case CREID_BEAR_BROWN:
+		case CREID_BEAR_GRIZZLY:
+		case CREID_BEAR_POLAR:
+			return( CREID_BEAR_BROWN );
+		case CREID_COW_BW:
+		case CREID_COW_BROWN:
+		case CREID_BULL_BROWN_LT:
+		case CREID_BULL_BROWN_DK:
+			return( CREID_BULL_BROWN_LT );
+		case CREID_OSTARD_DESERT:
+		case CREID_OSTARD_FRENZ:
+		case CREID_OSTARD_FOREST:
+			return( CREID_OSTARD_FOREST );
+		case CREID_SHEEP:
+		case CREID_SHEEP_SHORN:
+			return( CREID_SHEEP );
+		case CREID_HART:
+		case CREID_DEER:
+			return( CREID_DEER );
+		case CREID_PIG:
+		case CREID_BOAR:
+			return( CREID_PIG );
+		case CREID_LLAMA:
 		case CREID_LLAMA_PACK:
-			return( CREID_Llama );
+			return( CREID_LLAMA );
 		default:
 			return( idTest );
 	}

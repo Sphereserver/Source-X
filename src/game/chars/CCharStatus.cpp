@@ -532,8 +532,8 @@ NPCBRAIN_TYPE CChar::GetNPCBrain(bool fDefault) const
 			case CREID_SKELETAL_DRAGON:
 			case CREID_REPTILE_LORD:
 			case CREID_ANCIENT_WYRM:
-			case CREID_SWAMP_DRAGON1:
-			case CREID_SWAMP_DRAGON2:
+			case CREID_SWAMP_DRAGON:
+			case CREID_SWAMP_DRAGON_AR:
 				return NPCBRAIN_DRAGON;
 			default:
 				break;
@@ -547,7 +547,7 @@ NPCBRAIN_TYPE CChar::GetNPCBrain(bool fDefault) const
 	if ( id >= CREID_MAN )
 		return NPCBRAIN_HUMAN;
 
-	if ( id >= CREID_HORSE1 )
+	if ( id >= CREID_HORSE_TAN )
 		return NPCBRAIN_ANIMAL;
 
 	switch ( id )
@@ -555,9 +555,9 @@ NPCBRAIN_TYPE CChar::GetNPCBrain(bool fDefault) const
 		case CREID_EAGLE:
 		case CREID_BIRD:
 		case CREID_GORILLA:
-		case CREID_Snake:
-		case CREID_Bull_Frog:
-		case CREID_Dolphin:
+		case CREID_SNAKE:
+		case CREID_BULL_FROG:
+		case CREID_DOLPHIN:
 			return NPCBRAIN_ANIMAL;
 		default:
 			return NPCBRAIN_MONSTER;

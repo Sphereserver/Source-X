@@ -1021,7 +1021,7 @@ void CClient::GetAdjustedCharID( const CChar * pChar, CREID_TYPE &id, HUE_TYPE &
 			while ( pCharDef == NULL )
 			{
 				id = static_cast<CREID_TYPE>(Calc_GetRandVal(CREID_EQUIP_GM_ROBE));
-				if ( id != CREID_SEA_Creature )		// skip this chardef, it can crash many clients
+				if ( id != CREID_SEA_CREATURE )		// skip this chardef, it can crash many clients
 					pCharDef = CCharBase::FindCharBase(id);
 			}
 		}

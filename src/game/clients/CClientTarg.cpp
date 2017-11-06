@@ -1925,13 +1925,13 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 				return false;
 			switch ( pCharTarg->GetID())
 			{
-				case CREID_Sheep: // Sheep have wool.
+				case CREID_SHEEP: // Sheep have wool.
 					// Get the wool.
 					{
 						CItem *pWool = CItem::CreateBase( ITEMID_WOOL );
 						ASSERT(pWool);
 						m_pChar->ItemBounce(pWool);
-						pCharTarg->SetID(CREID_Sheep_Sheered);
+						pCharTarg->SetID(CREID_SHEEP_SHORN);
 						// Set wool to regrow.
 						pWool = CItem::CreateBase( ITEMID_WOOL );
 						ASSERT(pWool);
@@ -1939,7 +1939,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 						pCharTarg->LayerAdd( pWool, LAYER_FLAG_Wool );
 					}
 					return true;
-				case CREID_Sheep_Sheered:
+				case CREID_SHEEP_SHORN:
 					SysMessageDefault( DEFMSG_ITEMUSE_WEAPON_WWAIT );
 					return true;
 				default:

@@ -2134,7 +2134,7 @@ do_default:
 				strcpylen(pszFameAt0, pFameAt0->GetPtr());
 
 				int iFame = Stat_GetAdjusted(STAT_FAME);
-				size_t i = Str_ParseCmds( pszFameAt0, ppLevel_sep, CountOf(ppLevel_sep), "," ) - 1; //range
+				int i = Str_ParseCmds( pszFameAt0, ppLevel_sep, CountOf(ppLevel_sep), "," ) - 1; //range
 				for (;;)
 				{
 					if ( !IsStrNumeric( ppLevel_sep[i] ) )
@@ -2151,7 +2151,7 @@ do_default:
 					if ( i == 0 )
 						break;
 
-					i--;
+					--i;
 				}
 
 				sVal = 0;
@@ -2163,7 +2163,8 @@ do_default:
 			SKIP_SEPARATORS(pszKey);
 			{
 				tchar * ppArgs[2];
-				Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf( ppArgs ));
+				if ( !Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf(ppArgs)) )
+					return false;
 				SKILL_TYPE iSkill = g_Cfg.FindSkillKey( ppArgs[0] );
 				if ( iSkill == SKILL_NONE )
 					return false;
@@ -2199,7 +2200,8 @@ do_default:
 			SKIP_SEPARATORS(pszKey);
 			{
 				tchar * ppArgs[2];
-				Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf(ppArgs), ":,/" );
+				if ( !Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf(ppArgs), ":,/" ) )
+					return false;
 				sVal = ( pCharDef->IsFemale()) ? ppArgs[1] : ppArgs[0];
 			}
 			return true;
@@ -2224,7 +2226,7 @@ do_default:
 
 				int iKarma = Stat_GetAdjusted(STAT_KARMA);
 
-				size_t i = Str_ParseCmds( pszKarmaAt0, ppLevel_sep, CountOf(ppLevel_sep), "," ) - 1; //range
+				int i = Str_ParseCmds( pszKarmaAt0, ppLevel_sep, CountOf(ppLevel_sep), "," ) - 1; //range
 				for (;;)
 				{
 					if ( ppLevel_sep[i][0] != '-' && !IsStrNumeric( ppLevel_sep[i] ) )
@@ -2240,7 +2242,7 @@ do_default:
 
 					if ( i == 0 )
 						break;
-					i--;
+					--i;
 				}
 
 				sVal = 0;
@@ -2263,7 +2265,7 @@ do_default:
 				GETNONWHITESPACE(pszKey);
 
 				tchar * ppArgs[2];
-				size_t iQty = Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf( ppArgs ));
+				int iQty = Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf( ppArgs ));
 
 				// Check that we have at least the first argument
 				if ( iQty <= 0 )
@@ -2303,7 +2305,7 @@ do_default:
 				if ( *pszKey )
 				{
 					tchar * ppArgs[2];
-					size_t iQty = Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf( ppArgs ));
+					int iQty = Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf( ppArgs ));
 					if ( iQty == 2 )
 					{
 						SKILL_TYPE iSkill = g_Cfg.FindSkillKey( ppArgs[0] );
@@ -3125,7 +3127,7 @@ do_default:
 				if ( s.GetArgStr() )
 				{
 					tchar * ppArgs[2];
-					size_t iQty = Str_ParseCmds(const_cast<tchar *>(s.GetArgStr()), ppArgs, CountOf( ppArgs ));
+					int iQty = Str_ParseCmds(const_cast<tchar *>(s.GetArgStr()), ppArgs, CountOf( ppArgs ));
 					if ( iQty == 2 )
 					{
 						SKILL_TYPE iSkill = g_Cfg.FindSkillKey( ppArgs[0] );
@@ -3496,7 +3498,9 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			// ANIM, ANIM_TYPE action, bool fBackward = false, byte iFrameDelay = 1
 			{
 				int64 Arg_piCmd[3];		// Maximum parameters in one line
-				size_t Arg_Qty = Str_ParseCmds(s.GetArgRaw(), Arg_piCmd, CountOf(Arg_piCmd));
+				int Arg_Qty = Str_ParseCmds(s.GetArgRaw(), Arg_piCmd, CountOf(Arg_piCmd));
+				if ( !Arg_Qty )
+					return false;
 				return UpdateAnimate(static_cast<ANIM_TYPE>(Arg_piCmd[0]), true, false,
 					(Arg_Qty > 1) ? (uchar)(Arg_piCmd[1]) : 1,
 					(Arg_Qty > 2) ? (uchar)(Arg_piCmd[2]) : 1);
@@ -3714,7 +3718,9 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			GETNONWHITESPACE( psTmp );
 			tchar * ttVal[2];
 			int iTmp = 1;
-			size_t iArg = Str_ParseCmds( psTmp, ttVal, CountOf( ttVal ), " ,\t" );
+			int iArg = Str_ParseCmds( psTmp, ttVal, CountOf( ttVal ), " ,\t" );
+			if ( !iArg )
+				return false;
 			if ( iArg == 2 )
 			{
 				if ( IsDigit( ttVal[1][0] ) )

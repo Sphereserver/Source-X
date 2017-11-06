@@ -3514,7 +3514,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 
 	case RES_CHARDEF:		// Define a char type.
 		iHashRange = 2000;
-		index = NPCID_SCRIPT2 + 0x2000;	// add another offset to avoid Sphere ranges.
+		index = NPCID_SCRIPT + 0x2000;	// add another offset to avoid Sphere ranges.
 		break;
 	case RES_ITEMDEF:		// Define an item type
 		iHashRange = 2000;

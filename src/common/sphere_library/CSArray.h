@@ -393,8 +393,8 @@ public:
 	///@}
 
 private:
-	TYPE* m_pData;	///< Pointer to allocated mem.
-	size_t m_nCount;	///< count of elements stored.
+	TYPE* m_pData;			///< Pointer to allocated mem.
+	size_t m_nCount;		///< count of elements stored.
 	size_t m_nRealCount;	///< Size of allocated mem.
 };
 

@@ -575,7 +575,7 @@ bool CClient::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		case CC_CLIENTISKR:
 			sVal.FormatVal( GetNetState()->isClientKR() );
 			break;
-		case CC_CLIENTISSA:
+		case CC_CLIENTISENHANCED:
 			sVal.FormatVal( GetNetState()->isClientEnhanced() );
 			break;
 		case CC_CLIENTVERSION:
@@ -736,17 +736,12 @@ bool CClient::r_LoadVal( CScript & s )
 			if ( GetPrivLevel() >= PLEVEL_Counsel )
 			{
 				if ( ! s.HasArgs())
-				{
 					GetAccount()->TogPrivFlags( PRIV_PRIV_NOSHOW, NULL );
-				}
 				else if ( s.GetArgVal() )
-				{
 					GetAccount()->ClearPrivFlags( PRIV_PRIV_NOSHOW );
-				}
 				else
-				{
 					GetAccount()->SetPrivFlags( PRIV_PRIV_NOSHOW );
-				}
+
 				m_pChar->ResendTooltip();
 				if ( IsSetOF( OF_Command_Sysmsgs ) )
 					m_pChar->SysMessage( IsPriv(PRIV_PRIV_NOSHOW)? "Privshow OFF" : "Privshow ON" );
@@ -878,7 +873,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				{
 					Args[i] = ppArgs[i + 4];
 					if ( Args[i] != NULL )
-						ArgsCount++;
+						++ArgsCount;
 				}
 
 				addBuff(static_cast<BUFF_ICONS>(iArgs[0]), iArgs[1], iArgs[2], (word)(iArgs[3]), Args, ArgsCount);
@@ -975,17 +970,19 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			{
 				//	Loop the world searching for bad spawns
 				bool fFound = false;
-				for ( int m = 0; m < 256 && !fFound; m++ )
+				for ( int m = 0; m < 256 && !fFound; ++m )
 				{
-					if ( !g_MapList.m_maps[m] ) continue;
+					if ( !g_MapList.m_maps[m] )
+						continue;
 
-					for ( int d = 0; d < g_MapList.GetSectorQty(m) && !fFound; d++ )
+					for ( int d = 0; d < g_MapList.GetSectorQty(m) && !fFound; ++d )
 					{
 						CSector	*pSector = g_World.GetSector(m, d);
-						if ( !pSector ) continue;
+						if ( !pSector )
+							continue;
 
 						CItem	*pNext;
-						CItem	*pItem = static_cast <CItem*>(pSector->m_Items_Inert.GetHead());
+						CItem	*pItem = static_cast <CItem*>(pSector->m_Items_Timer.GetHead());
 						for ( ; pItem != NULL && !fFound; pItem = pNext )
 						{
 							pNext = pItem->GetNext();
@@ -993,12 +990,12 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 							if ( pItem->IsType(IT_SPAWN_ITEM) || pItem->IsType(IT_SPAWN_CHAR) )
 							{
 								CItemSpawn *pSpawn = static_cast<CItemSpawn*>(pItem);
-								CResourceDef	*pDef = pSpawn->FixDef();
+								CResourceDef *pDef = pSpawn->FixDef();
 								if ( !pDef )
 								{
 									CResourceIDBase	rid = ( pItem->IsType(IT_SPAWN_ITEM) ? pItem->m_itSpawnItem.m_ItemID : pItem->m_itSpawnChar.m_CharID);
 
-									CPointMap	pt = pItem->GetTopPoint();
+									CPointMap pt = pItem->GetTopPoint();
 									m_pChar->Spell_Teleport(pt, true, false);
 									m_pChar->m_Act_UID = pItem->GetUID();
 									SysMessagef("Bad spawn (0%x, id=%s). Set as ACT", (dword)pItem->GetUID(), g_Cfg.ResourceGetName(rid));
