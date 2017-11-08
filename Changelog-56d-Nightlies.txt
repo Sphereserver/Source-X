@@ -281,3 +281,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 07-11-2017, Nolok
 - Fixed: beard not added at the character creation with the 2D client.
 - Fixed: character creation on the Enhanced Client didn't add the face or the gargoyle horns.
+
+08-11-2017, Drk84
+- Fixed: wrong sound played when a human male character get hit.
+- Fixed: monsters and animal sometimes executing the wrong animation when attacking.
