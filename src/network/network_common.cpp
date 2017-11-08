@@ -686,7 +686,7 @@ void PacketManager::registerStandardPackets(void)
 	registerPacket(XCMD_WalkRequestNew, new PacketMovementReqNew());			// new movement request (KR/SA)
 	registerPacket(XCMD_TimeSyncRequest, new PacketTimeSyncRequest());			// time sync request (KR/SA)
 	registerPacket(XCMD_CrashReport, new PacketCrashReport());					//
-	registerPacket(XCMD_CreateHS, new PacketCreateHS());						// create character (HS)
+	registerPacket(XCMD_CreateHS, new PacketCreate70016());						// create character (HS)
 
 	// extended packets (0xBF)
 	registerExtended(EXTDATA_ScreenSize, new PacketScreenSize());				// client screen size

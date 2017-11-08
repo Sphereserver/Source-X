@@ -2585,7 +2585,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 	{
 		int iDist = 1;
 		int i;
-		for ( i = 0; i < 20; i++ )
+		for ( i = 0; i < 20; ++i )
 		{
 			int iDistNew = iDist + 20;
 			for ( int iDir = DIR_NE; iDir <= DIR_NW; iDir += 2 )	// try diagonal in all directions

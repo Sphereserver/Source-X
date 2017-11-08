@@ -43,10 +43,9 @@ public:
 	virtual bool onReceive(NetState* net);
 
 protected:
-	bool onReceive(NetState* net, bool hasExtraSkill);
 	bool doCreate(NetState* net, lpctstr charname, bool bFemale, RACE_TYPE rtRace, short wStr, short wDex, short wInt, PROFESSION_TYPE prProf,
 		SKILL_TYPE skSkill1, int iSkillVal1, SKILL_TYPE skSkill2, int iSkillVal2, SKILL_TYPE skSkill3, int iSkillVal3, SKILL_TYPE skSkill4, int iSkillVal4,
-		HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, int iStartLoc, int iPortrait, int iFlags);
+		HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, int iStartLoc, int iFlags);
 };
 
 /***************************************************************************
@@ -440,7 +439,7 @@ public:
 /***************************************************************************
  *
  *
- *	Packet 0x8D : PacketCreateNew					create new character request (KR/SA)
+ *	Packet 0x8D : PacketCreateNew					create new character request (KR/SA Enhanced Client)
  *
  *
  ***************************************************************************/
@@ -1462,14 +1461,14 @@ public:
 /***************************************************************************
  *
  *
- *	Packet 0xF8 : PacketCreateHS					create new character request (HS)
+ *	Packet 0xF8 : PacketCreate70016					create new character request (only by CC 7.0.16+)
  *
  *
  ***************************************************************************/
-class PacketCreateHS : public PacketCreate
+class PacketCreate70016 : public PacketCreate
 {
 public:
-	PacketCreateHS();
+	PacketCreate70016();
 	virtual bool onReceive(NetState* net);
 };
 

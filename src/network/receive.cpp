@@ -50,12 +50,6 @@ PacketCreate::PacketCreate(size_t size) : Packet(size)
 bool PacketCreate::onReceive(NetState* net)
 {
 	ADDTOCALLSTACK("PacketCreate::onReceive");
-	return PacketCreate::onReceive(net, false);
-}
-
-bool PacketCreate::onReceive(NetState* net, bool hasExtraSkill)
-{
-	ADDTOCALLSTACK("PacketCreate::onReceive[1]");
 	tchar charname[MAX_NAME_SIZE];
 	SKILL_TYPE skill1 = SKILL_NONE, skill2 = SKILL_NONE, skill3 = SKILL_NONE, skill4 = SKILL_NONE;
 	byte skillval1 = 0, skillval2 = 0, skillval3 = 0, skillval4 = 0;
@@ -67,7 +61,7 @@ bool PacketCreate::onReceive(NetState* net, bool hasExtraSkill)
 	skip(8); // unk
 	PROFESSION_TYPE prof = static_cast<PROFESSION_TYPE>(readByte());
 	skip(15); // 0x00
-	byte sex = readByte();
+	byte race_sex_flag = readByte();
 	byte strength = readByte();
 	byte dexterity = readByte();
 	byte intelligence = readByte();
@@ -77,11 +71,6 @@ bool PacketCreate::onReceive(NetState* net, bool hasExtraSkill)
 	skillval2 = readByte();
 	skill3 = static_cast<SKILL_TYPE>(readByte());
 	skillval3 = readByte();
-	if (hasExtraSkill)
-	{
-		skill4 = static_cast<SKILL_TYPE>(readByte());
-		skillval4 = readByte();
-	}
 	HUE_TYPE hue = static_cast<HUE_TYPE>(readInt16());
 	ITEMID_TYPE hairid = static_cast<ITEMID_TYPE>(readInt16());
 	HUE_TYPE hairhue = static_cast<HUE_TYPE>(readInt16());
@@ -93,11 +82,11 @@ bool PacketCreate::onReceive(NetState* net, bool hasExtraSkill)
 	HUE_TYPE shirthue = static_cast<HUE_TYPE>(readInt16());
 	HUE_TYPE pantshue = static_cast<HUE_TYPE>(readInt16());
 
-	bool isFemale = (sex % 2) != 0; // Even=Male, Odd=Female (rule applies to all clients)
+	bool isFemale = (race_sex_flag % 2) != 0; // Even=Male, Odd=Female (rule applies to all clients)
 	RACE_TYPE rtRace = RACETYPE_HUMAN; // Human
 
 	// determine which race the client has selected
-	if (net->isClientVersion(MINCLIVER_SA) || net->isClientEnhanced())
+	if (net->isClientVersion(MINCLIVER_SA))
 	{
 		/*
 			m_sex values from clients 7.0.0.0+
@@ -108,10 +97,11 @@ bool PacketCreate::onReceive(NetState* net, bool hasExtraSkill)
 			0x6 = Gargoyle (male)
 			0x7 = Gargoyle (female)
 		*/
-		switch (sex)
+		switch (race_sex_flag)
 		{
-			case 0x0: case 0x1: case 0x2: case 0x3:
 			default:
+				g_Log.EventWarn("PacketCreate: unknown race_sex_flag (% " PRIu8 "), defaulting to 2 (human male).", race_sex_flag);
+			case 0x2: case 0x3:
 				rtRace = RACETYPE_HUMAN;
 				break;
 			case 0x4: case 0x5:
@@ -131,7 +121,7 @@ bool PacketCreate::onReceive(NetState* net, bool hasExtraSkill)
 			0x2 = Elf (male)
 			0x3 = Elf (female)
 		*/
-		if ((sex - 2) >= 0)
+		if ((race_sex_flag - 2) >= 0)
 			rtRace = RACETYPE_ELF;
 	}
 
@@ -152,12 +142,12 @@ bool PacketCreate::onReceive(NetState* net, bool hasExtraSkill)
 		strength, dexterity, intelligence, prof,
 		skill1, skillval1, skill2, skillval2, skill3, skillval3, skill4, skillval4,
 		hue, hairid, hairhue, beardid, beardhue, shirthue, pantshue,
-		startloc, 0, flags);
+		startloc, flags);
 }
 
 bool PacketCreate::doCreate(NetState* net, lpctstr charname, bool bFemale, RACE_TYPE rtRace, short wStr, short wDex, short wInt,
 	PROFESSION_TYPE prProf, SKILL_TYPE skSkill1, int iSkillVal1, SKILL_TYPE skSkill2, int iSkillVal2, SKILL_TYPE skSkill3, int iSkillVal3, SKILL_TYPE skSkill4, int iSkillVal4,
-	HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, int iStartLoc, int iPortrait, int iFlags)
+	HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, int iStartLoc, int iFlags)
 {
 	ADDTOCALLSTACK("PacketCreate::doCreate");
 
@@ -205,12 +195,13 @@ bool PacketCreate::doCreate(NetState* net, lpctstr charname, bool bFemale, RACE_
 	createArgs.m_iN1 = iFlags;
 	createArgs.m_iN2 = prProf;
 	createArgs.m_iN3 = rtRace;
-	createArgs.m_VarsLocal.SetNum("PORTRAIT", iPortrait);
 	createArgs.m_s1 = account->GetName();
 	createArgs.m_pO1 = client;
 
 	//Creating the pChar
-	pChar->InitPlayer(client, charname, bFemale, rtRace, wStr, wDex, wInt, prProf, skSkill1, iSkillVal1, skSkill2, iSkillVal2, skSkill3, iSkillVal3, skSkill4, iSkillVal4, wSkinHue, idHair, wHairHue, idBeard, wBeardHue, wShirtHue, wPantsHue, iStartLoc);
+	pChar->InitPlayer(client, charname, bFemale, rtRace, wStr, wDex, wInt,
+		prProf, skSkill1, iSkillVal1, skSkill2, iSkillVal2, skSkill3, iSkillVal3, skSkill4, iSkillVal4,
+		wSkinHue, idHair, wHairHue, idBeard, wBeardHue, wShirtHue, wPantsHue, iStartLoc);
 
 	//Calling the function after the char creation, it can't be done before or the function won't have SRC
 	client->r_Call("f_onchar_create", pChar, &createArgs, NULL, &tr);
@@ -1494,11 +1485,11 @@ bool PacketCharDelete::onReceive(NetState* net)
 /***************************************************************************
  *
  *
- *	Packet 0x8D : PacketCreateNew		create new character request (KR/SA)
+ *	Packet 0x8D : PacketCreateNew		create new character request (KR/SA Enhanced Client)
  *
  *
  ***************************************************************************/
-PacketCreateNew::PacketCreateNew() : PacketCreate(0)
+PacketCreateNew::PacketCreateNew() : PacketCreate(146)
 {
 }
 
@@ -1513,7 +1504,10 @@ bool PacketCreateNew::onReceive(NetState* net)
 	PROFESSION_TYPE profession = static_cast<PROFESSION_TYPE>(readByte());
 	skip(1);
 	byte sex = readByte();
-	RACE_TYPE race = static_cast<RACE_TYPE>(readByte());
+	byte race_raw = readByte();
+	if ( net->isClientKR() && (race_raw > 0) )	// SA client sends race packet one higher than KR
+		race_raw -= 1;
+	RACE_TYPE race = static_cast<RACE_TYPE>(race_raw);
 	byte strength = readByte();
 	byte dexterity = readByte();
 	byte intelligence = readByte();
@@ -1523,20 +1517,24 @@ bool PacketCreateNew::onReceive(NetState* net)
 	byte skillval1 = readByte();
 	SKILL_TYPE skill2 = static_cast<SKILL_TYPE>(readByte());
 	byte skillval2 = readByte();
-	SKILL_TYPE skill4 = static_cast<SKILL_TYPE>(readByte());
-	byte skillval4 = readByte();
 	SKILL_TYPE skill3 = static_cast<SKILL_TYPE>(readByte());
 	byte skillval3 = readByte();
+	SKILL_TYPE skill4 = static_cast<SKILL_TYPE>(readByte());
+	byte skillval4 = readByte();
 	skip(26);
 	HUE_TYPE hairhue = static_cast<HUE_TYPE>(readInt16());
 	ITEMID_TYPE hairid = static_cast<ITEMID_TYPE>(readInt16());
-	skip(14); // unk
-	byte portrait = readByte();
+	skip(6);
+	HUE_TYPE shirthue = static_cast<HUE_TYPE>(readInt16());
+	ITEMID_TYPE shirtid = static_cast<ITEMID_TYPE>(readInt16());
+	skip(1);
+	HUE_TYPE facehue = static_cast<HUE_TYPE>(readInt16());
+	ITEMID_TYPE faceid = static_cast<ITEMID_TYPE>(readInt16());
 	skip(1);
 	HUE_TYPE beardhue = static_cast<HUE_TYPE>(readInt16());
 	ITEMID_TYPE beardid = static_cast<ITEMID_TYPE>(readInt16());
 
-	// Since client 7.0.16.0 the new creation packet does not contain skills and values if
+	// This creation packet does not contain skills and values if
 	// a profession is selected, so here we must translate the selected profession -> skills
 	switch (profession)
 	{
@@ -1638,11 +1636,27 @@ bool PacketCreateNew::onReceive(NetState* net)
 			break;
 	}
 
-	return doCreate(net, charname, sex > 0, race,
+	bool success = doCreate(net, charname, sex > 0, race,
 		strength, dexterity, intelligence, profession,
 		skill1, skillval1, skill2, skillval2, skill3, skillval3, skill4, skillval4,
 		hue, hairid, hairhue, beardid, beardhue, HUE_DEFAULT, HUE_DEFAULT,
-		0, portrait, 0xFFFFFFFF);
+		0, 0xFFFFFFFF);
+	if (!success)
+		return false;
+
+	CChar* pChar = net->getClient()->GetAccount()->m_uidLastChar.CharFind();
+	ASSERT(pChar);
+
+	//CItemBase * pItemDef = CItemBase::FindItemBase( shirtid );
+	CItem* pItem = CItem::CreateScript( shirtid );
+	pItem->SetHue(shirthue);
+	pChar->LayerAdd(pItem);
+
+	pItem = CItem::CreateScript( faceid );
+	pItem->SetHue(facehue);
+	pChar->LayerAdd(pItem);
+
+	return true;
 }
 
 
@@ -3478,7 +3492,7 @@ bool PacketEncodedCommand::onReceive(NetState* net)
 		return false;
 
 	handler->seek();
-	for (int i = 0; i < packetLength; i++)
+	for (int i = 0; i < packetLength; ++i)
 	{
 		byte next = readByte();
 		handler->writeByte(next);
@@ -4381,19 +4395,84 @@ bool PacketCrashReport::onReceive(NetState* net)
 /***************************************************************************
  *
  *
- *	Packet 0xF8 : PacketCreateHS					create new character request (HS)
+ *	Packet 0xF8 : PacketCreate70016					create new character request (only by CC 7.0.16+)
  *
  *
  ***************************************************************************/
-PacketCreateHS::PacketCreateHS() : PacketCreate(106)
+PacketCreate70016::PacketCreate70016() : PacketCreate(106)
 {
 }
 
-bool PacketCreateHS::onReceive(NetState* net)
+bool PacketCreate70016::onReceive(NetState* net)
 {
-	ADDTOCALLSTACK("PacketCreateHS::onReceive");
+	ADDTOCALLSTACK("PacketCreate70016::onReceive");
+	// standard character creation packet, but with 4 skills and different handling of race and sex.
+	
+	tchar charname[MAX_NAME_SIZE];
+	SKILL_TYPE skill1 = SKILL_NONE, skill2 = SKILL_NONE, skill3 = SKILL_NONE, skill4 = SKILL_NONE;
+	byte skillval1 = 0, skillval2 = 0, skillval3 = 0, skillval4 = 0;
 
-	// standard character creation packet.. with 4 skills
-	return PacketCreate::onReceive(net, true);
+	skip(9); // 4=pattern1, 4=pattern2, 1=kuoc
+	readStringASCII(charname, MAX_NAME_SIZE);
+	skip(2); // 0x00
+	dword flags = readInt32();
+	skip(8); // unk
+	PROFESSION_TYPE prof = static_cast<PROFESSION_TYPE>(readByte());
+	skip(15); // 0x00
+	byte race_sex_flag = readByte();
+	byte strength = readByte();
+	byte dexterity = readByte();
+	byte intelligence = readByte();
+	skill1 = static_cast<SKILL_TYPE>(readByte());
+	skillval1 = readByte();
+	skill2 = static_cast<SKILL_TYPE>(readByte());
+	skillval2 = readByte();
+	skill3 = static_cast<SKILL_TYPE>(readByte());
+	skillval3 = readByte();
+	skill4 = static_cast<SKILL_TYPE>(readByte());
+	skillval4 = readByte();
+	HUE_TYPE hue = static_cast<HUE_TYPE>(readInt16());
+	ITEMID_TYPE hairid = static_cast<ITEMID_TYPE>(readInt16());
+	HUE_TYPE hairhue = static_cast<HUE_TYPE>(readInt16());
+	ITEMID_TYPE beardid = static_cast<ITEMID_TYPE>(readInt16());
+	HUE_TYPE beardhue = static_cast<HUE_TYPE>(readInt16());
+	skip(1); // shard index
+	byte startloc = readByte();
+	skip(8); // 4=slot, 4=ip
+	HUE_TYPE shirthue = static_cast<HUE_TYPE>(readInt16());
+	HUE_TYPE pantshue = static_cast<HUE_TYPE>(readInt16());
+
+	// convert race_sex_flag: determine which race and sex the client has selected
+	bool isFemale = (race_sex_flag % 2) != 0;	// Even=Male, Odd=Female (rule applies to all clients)
+	RACE_TYPE rtRace = RACETYPE_HUMAN;			// Human								   
+	/*
+	race_sex_flag values since Classic Client 7.0.16.0
+	0x2 = Human (male)
+	0x3 = Human (female)
+	0x4 = Elf (male)
+	0x5 = Elf (female)
+	0x6 = Gargoyle (male)
+	0x7 = Gargoyle (female)
+	*/
+	switch (race_sex_flag)
+	{
+	default:
+		g_Log.EventWarn("Creating new character (client > 7.0.16.0 packet) with unknown race_sex_flag (% " PRIu8 "): defaulting to 2 (human male).", race_sex_flag);
+	case 0x2: case 0x3:
+		rtRace = RACETYPE_HUMAN;
+		break;
+	case 0x4: case 0x5:
+		rtRace = RACETYPE_ELF;
+		break;
+	case 0x6: case 0x7:
+		rtRace = RACETYPE_GARGOYLE;
+		break;
+	}
+
+	return doCreate(net, charname, isFemale, rtRace,
+		strength, dexterity, intelligence, prof,
+		skill1, skillval1, skill2, skillval2, skill3, skillval3, skill4, skillval4,
+		hue, hairid, hairhue, beardid, beardhue, shirthue, pantshue,
+		startloc, flags);
 }
 
