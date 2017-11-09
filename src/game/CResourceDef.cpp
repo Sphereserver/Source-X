@@ -437,11 +437,11 @@ void CSkillClassDef::Init()
 	m_SkillSumMax = 10*1000;
 	m_StatSumMax = 300;
 	size_t i;
-	for ( i = 0; i < CountOf(m_SkillLevelMax); i++ )
+	for ( i = 0; i < CountOf(m_SkillLevelMax); ++i )
 	{
 		m_SkillLevelMax[i] = 1000;
 	}
-	for ( i = 0; i < CountOf(m_StatMax); i++ )
+	for ( i = 0; i < CountOf(m_StatMax); ++i )
 	{
 		m_StatMax[i] = 100;
 	}
@@ -513,14 +513,14 @@ bool CSkillClassDef::r_LoadVal( CScript &s )
 			int i = g_Cfg.FindSkillKey( s.GetKey());
 			if ( i != SKILL_NONE )
 			{
-				ASSERT( i >= 0 && (size_t)(i) < CountOf(m_SkillLevelMax));
+				ASSERT( i >= 0 && (size_t)i < CountOf(m_SkillLevelMax));
 				m_SkillLevelMax[i] = (word)(s.GetArgVal());
 				break;
 			}
 			i = g_Cfg.FindStatKey( s.GetKey());
 			if ( i >= 0 )
 			{
-				ASSERT( (size_t)(i) < CountOf(m_StatMax));
+				ASSERT( (size_t)i < CountOf(m_StatMax));
 				m_StatMax[i] = (word)(s.GetArgVal());
 				break;
 			}

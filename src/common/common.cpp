@@ -44,8 +44,9 @@
 	{
 		char *pEnd = string;
 		char temp;
-		while (*pEnd) pEnd++;
-		pEnd--;
+		while (*pEnd)
+			++pEnd;
+		--pEnd;
 		while (string < pEnd)
 		{
 			temp = *pEnd;
@@ -313,14 +314,13 @@ int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const nchar * pInp, in
 
 #ifdef _WIN32
 	const OSVERSIONINFO * posInfo = Sphere_GetOSInfo();
-	if ( posInfo->dwPlatformId == VER_PLATFORM_WIN32_NT ||
-		posInfo->dwMajorVersion > 4 )
+	if ( (posInfo->dwPlatformId == VER_PLATFORM_WIN32_NT) || (posInfo->dwMajorVersion > 4) )
 	{
 		// Windows 98, 2000 or NT
 
 		// Flip all from network order.
 		wchar szBuffer[ 1024*8 ];
-		for ( ; iInp < (int)CountOf(szBuffer) - 1 && iInp < iSizeInChars && pInp[iInp]; iInp++ )
+		for ( ; iInp < (int)CountOf(szBuffer) - 1 && iInp < iSizeInChars && pInp[iInp]; ++iInp )
 		{
 			szBuffer[iInp] = pInp[iInp];
 		}
@@ -328,14 +328,14 @@ int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const nchar * pInp, in
 
 		// Convert to proper UTF8
 		iOut = WideCharToMultiByte(
-			CP_UTF8,         // code page
-			0,         // performance and mapping flags
-			szBuffer, // address of wide-character string
-			iInp,       // number of characters in string
-			pOut,  // address of buffer for new string
-			iSizeOutBytes,      // size of buffer in bytes
-			NULL,  // address of default for unmappable characters
-			NULL  // address of flag set when default char. used
+			CP_UTF8,		// code page
+			0,				// performance and mapping flags
+			szBuffer,		// address of wide-character string
+			iInp,			// number of characters in string
+			pOut,			// address of buffer for new string
+			iSizeOutBytes,	// size of buffer in bytes
+			NULL,			// address of default for unmappable characters
+			NULL			// address of flag set when default char. used
 			);
 		if ( iOut < 0 )
 		{
@@ -347,7 +347,7 @@ int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const nchar * pInp, in
 #endif // _WIN32
 	{
 		// Win95 or linux = just assume its really ASCII
-		for ( ; iInp < iSizeInChars; iInp++ )
+		for ( ; iInp < iSizeInChars; ++iInp )
 		{
 			// Flip all from network order.
 			wchar wChar = pInp[iInp];
@@ -360,15 +360,13 @@ int CvtNUNICODEToSystem( tchar * pOut, int iSizeOutBytes, const nchar * pInp, in
 			{
 				int iOutTmp = CvtUNICODEToSystem( pOut+iOut, iSizeOutBytes-iOut, wChar );
 				if ( iOutTmp <= 0 )
-				{
 					break;
-				}
 				iOut += iOutTmp;
 			}
 			else
 			{
 				pOut[iOut] = static_cast<tchar>(wChar);
-				iOut++;
+				++iOut;
 			}
 		}
 	}

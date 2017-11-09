@@ -285,3 +285,6 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 08-11-2017, Drk84
 - Fixed: wrong sound played when a human male character get hit.
 - Fixed: monsters and animal sometimes executing the wrong animation when attacking.
+
+09-11-2017, Nolok
+- Fixed: RAND(x) not returning a value between 0 and x - 1 (instead it returned a value between 0 and x).

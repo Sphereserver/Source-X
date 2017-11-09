@@ -1055,7 +1055,7 @@ void CItemContainer::Game_Create()
 
 	if ( m_itGameBoard.m_GameType == 0 )	// Chess
 	{
-		for ( size_t i = 0; i < CountOf(sm_Item_ChessPieces); i++ )
+		for ( size_t i = 0; i < CountOf(sm_Item_ChessPieces); ++i )
 		{
 			// Add all it's pieces. (if not already added)
 			CItem *pPiece = CItem::CreateBase(sm_Item_ChessPieces[i]);
@@ -1078,7 +1078,7 @@ void CItemContainer::Game_Create()
 	}
 	else if ( m_itGameBoard.m_GameType == 1 )	// Checkers
 	{
-		for ( int i = 0; i < 24; i++ )
+		for ( int i = 0; i < 24; ++i )
 		{
 			// Add all it's pieces. (if not already added)
 			CItem *pPiece = CItem::CreateBase(((i >= (3 * 4)) ? ITEMID_GAME1_CHECKER : ITEMID_GAME2_CHECKER));

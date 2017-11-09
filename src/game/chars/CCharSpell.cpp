@@ -115,7 +115,7 @@ bool CChar::Spell_Teleport( CPointMap ptNew, bool bTakePets, bool bCheckAntiMagi
 				g_Cfg.GetDefaultMsg(DEFMSG_SPELL_TELE_JAILED_1),
 				g_Cfg.GetDefaultMsg(DEFMSG_SPELL_TELE_JAILED_2)
 			};
-			SysMessage(sm_szPunishMsg[Calc_GetRandVal(CountOf(sm_szPunishMsg) - 1)]);
+			SysMessage(sm_szPunishMsg[Calc_GetRandVal(CountOf(sm_szPunishMsg))]);
 
 			int iCell = 0;
 			if ( m_pPlayer && m_pPlayer->GetAccount() )
@@ -2767,7 +2767,7 @@ bool CChar::Spell_CastDone()
 				};
 
 				int iGet = 0;
-				for (size_t i = 0; i < CountOf(sm_Item_Bone); i++)
+				for (size_t i = 0; i < CountOf(sm_Item_Bone); ++i)
 				{
 					if (!Calc_GetRandVal(2 + iGet))
 						break;

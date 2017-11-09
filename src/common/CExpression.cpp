@@ -294,11 +294,11 @@ int Calc_GetLog2( uint iVal )
 
 int32 Calc_GetRandVal( int32 iQty )
 {
-	if ( iQty <= 0 )
+	if ( iQty < 2 )
 		return 0;
 	if ( iQty >= INT32_MAX )
-		return ( MulDivLL(CSRand::genRandInt32(0, iQty), iQty, INT32_MAX ) );
-	return CSRand::genRandInt32(0, iQty);
+		return ( MulDivLL(CSRand::genRandInt32(0, iQty - 1), (uint32) iQty, INT32_MAX ) );
+	return CSRand::genRandInt32(0, iQty - 1);
 }
 
 int32 Calc_GetRandVal2( int32 iMin, int32 iMax )
@@ -314,11 +314,11 @@ int32 Calc_GetRandVal2( int32 iMin, int32 iMax )
 
 int64 Calc_GetRandLLVal( int64 iQty )
 {
-	if ( iQty <= 0 )
+	if ( iQty < 2 )
 		return 0;
 	if ( iQty >= INT64_MAX )
-		return ( MulDivLL(CSRand::genRandInt64(0, iQty), (uint64) iQty, INT64_MAX ) );
-	return CSRand::genRandInt64(0, iQty);
+		return ( MulDivLL(CSRand::genRandInt64(0, iQty - 1), (uint32) iQty, INT64_MAX ) );
+	return CSRand::genRandInt64(0, iQty - 1);
 }
 
 int64 Calc_GetRandLLVal2( int64 iMin, int64 iMax )

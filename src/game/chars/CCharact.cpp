@@ -938,7 +938,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
 					case ANIM_ATTACK_BOW:
 					case ANIM_ATTACK_XBOW:
 					case ANIM_ATTACK_WRESTLE:
-						switch (Calc_GetRandVal(1))
+						switch (Calc_GetRandVal(2))
 						{
 							case 0: return ANIM_ANI_ATTACK1; break;
 							case 1: return ANIM_ANI_ATTACK2; break;
@@ -985,7 +985,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
 					case ANIM_DIE_FORWARD:
 						return ANIM_MON_DIE2;
 					case ANIM_GET_HIT:
-						switch (Calc_GetRandVal(2))
+						switch (Calc_GetRandVal(3))
 						{
 							case 0: return ANIM_MON_GETHIT; break;
 							case 1: return ANIM_MON_BlockRight; break;
@@ -1001,7 +1001,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
 					case ANIM_ATTACK_BOW:
 					case ANIM_ATTACK_XBOW:
 					case ANIM_ATTACK_WRESTLE:
-						switch (Calc_GetRandVal(2))
+						switch (Calc_GetRandVal(3))
 						{
 							case 0: return ANIM_MON_ATTACK1; break;
 							case 1: return ANIM_MON_ATTACK2; break;
@@ -1434,10 +1434,10 @@ void CChar::SoundChar( CRESND_TYPE type )
 				switch ( type )
 				{
 					case CRESND_GETHIT:
-						id = sm_Snd_Wom_Omf[ Calc_GetRandVal( CountOf(sm_Snd_Wom_Omf)) - 1  ];
+						id = sm_Snd_Wom_Omf[ Calc_GetRandVal( CountOf(sm_Snd_Wom_Omf)) ];
 						break;
 					case CRESND_DIE:
-						id = sm_Snd_Wom_Die[ Calc_GetRandVal( CountOf(sm_Snd_Wom_Die)) - 1];
+						id = sm_Snd_Wom_Die[ Calc_GetRandVal( CountOf(sm_Snd_Wom_Die)) ];
 						break;
 					default:
 						break;
@@ -1448,10 +1448,10 @@ void CChar::SoundChar( CRESND_TYPE type )
 				switch ( type )
 				{
 					case CRESND_GETHIT:
-						id = sm_Snd_Man_Omf[ Calc_GetRandVal( CountOf(sm_Snd_Man_Omf)) - 1];
+						id = sm_Snd_Man_Omf[ Calc_GetRandVal( CountOf(sm_Snd_Man_Omf)) ];
 						break;
 					case CRESND_DIE:
-						id = sm_Snd_Man_Die[ Calc_GetRandVal( CountOf(sm_Snd_Man_Die)) - 1];
+						id = sm_Snd_Man_Die[ Calc_GetRandVal( CountOf(sm_Snd_Man_Die)) ];
 						break;
 					default:
 						break;

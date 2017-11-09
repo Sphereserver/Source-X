@@ -905,7 +905,7 @@ int CClient::OnSkill_EvalInt( CUID uid, int iSkillLevel, bool fTest )
 	int iIntEntry = (iIntVal-1) / 10;
 	if ( iIntEntry < 0 )
 		iIntEntry = 0;
-	if ( (uint)(iIntEntry) >= CountOf( sm_szIntDesc ))
+	if ( (uint)iIntEntry >= CountOf( sm_szIntDesc ))
 		iIntEntry = CountOf( sm_szIntDesc )-1;
 
 	SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_EVALINT_RESULT ), pChar->GetName(), sm_szIntDesc[iIntEntry]);
@@ -939,7 +939,7 @@ int CClient::OnSkill_EvalInt( CUID uid, int iSkillLevel, bool fTest )
 		int iMagicEntry = iMagicSkill / 200;
 		if ( iMagicEntry < 0 )
 			iMagicEntry = 0;
-		if ( (uint)(iMagicEntry) >= CountOf(sm_szMagicDesc))
+		if ( (uint)iMagicEntry >= CountOf(sm_szMagicDesc))
 			iMagicEntry = CountOf(sm_szMagicDesc)-1;
 
 		int iManaEntry = 0;
@@ -948,7 +948,7 @@ int CClient::OnSkill_EvalInt( CUID uid, int iSkillLevel, bool fTest )
 
 		if ( iManaEntry < 0 )
 			iManaEntry = 0;
-		if ( (uint)(iManaEntry) >= CountOf(sm_szManaDesc))
+		if ( (uint)iManaEntry >= CountOf(sm_szManaDesc))
 			iManaEntry = CountOf(sm_szManaDesc)-1;
 
 		SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_EVALINT_RESULT_2 ), static_cast<lpctstr>(sm_szMagicDesc[iMagicEntry]), static_cast<lpctstr>(sm_szManaDesc[iManaEntry]));
@@ -1113,14 +1113,14 @@ int CClient::OnSkill_Anatomy( CUID uid, int iSkillLevel, bool fTest )
 	int iStrEntry = (iStrVal-1)/10;
 	if ( iStrEntry < 0 )
 		iStrEntry = 0;
-	if ( (uint)(iStrEntry) >= CountOf( sm_szStrEval ))
+	if ( (uint)iStrEntry >= CountOf( sm_szStrEval ))
 		iStrEntry = CountOf( sm_szStrEval )-1;
 
 	int iDexVal = pChar->Stat_GetAdjusted(STAT_DEX);
 	int iDexEntry = (iDexVal-1)/10;
 	if ( iDexEntry < 0 )
 		iDexEntry = 0;
-	if ( (uint)(iDexEntry) >= CountOf( sm_szDexEval ))
+	if ( (uint)iDexEntry >= CountOf( sm_szDexEval ))
 		iDexEntry = CountOf( sm_szDexEval )-1;
 
 	tchar * pszTemp = Str_GetTemp();

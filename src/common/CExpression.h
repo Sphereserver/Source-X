@@ -171,9 +171,9 @@ template<typename T> inline const T SphereAbs(T const & x)
 {	// TODO: we can do some specialization
 	return (x<0) ? -x : x;
 }
-int64 Calc_GetRandLLVal( int64 iqty );
+int64 Calc_GetRandLLVal( int64 iqty );					// Get a random value between 0 and iQty - 1
 int64 Calc_GetRandLLVal2( int64 iMin, int64 iMax );
-int32 Calc_GetRandVal( int32 iQty );
+int32 Calc_GetRandVal( int32 iQty );					// Get a random value between 0 and iQty - 1
 int32 Calc_GetRandVal2( int32 iMin, int32 iMax );
 int Calc_GetLog2( uint iVal );
 int Calc_GetSCurve( int iValDiff, int iVariance );

@@ -268,9 +268,9 @@ CServerConfig::CServerConfig()
 
 CServerConfig::~CServerConfig()
 {
-	for ( size_t i = 0; i < CountOf(m_ResHash.m_Array); i++ )
+	for ( size_t i = 0; i < CountOf(m_ResHash.m_Array); ++i )
 	{
-		for ( size_t j = 0; j < m_ResHash.m_Array[i].GetCount(); j++ )
+		for ( size_t j = 0; j < m_ResHash.m_Array[i].GetCount(); ++j )
 		{
 			CResourceDef* pResDef = m_ResHash.m_Array[i][j];
 			if ( pResDef != NULL )
@@ -2185,7 +2185,7 @@ void CServerConfig::LoadSortSpells()
 	m_SpellDefs_Sorted.RemoveAll();
 	m_SpellDefs_Sorted.Add( m_SpellDefs[0] );		// the null spell
 
-	for ( size_t i = 1; i < iQtySpells; i++ )
+	for ( size_t i = 1; i < iQtySpells; ++i )
 	{
 		if ( !m_SpellDefs.IsValidIndex( i ) )
 			continue;
