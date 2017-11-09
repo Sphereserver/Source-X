@@ -285,3 +285,6 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 08-11-2017, Drk84
 - Fixed: wrong sound played when a human male character get hit.
 - Fixed: monsters and animal sometimes executing the wrong animation when attacking.
+
+09-11-2017, Drk84
+- [Port from Source, 12-03-2017, Coruja] Added: Basic internal packet filters that will make Sphere avoid crash or consume excessive resources when under DDoS attack.
