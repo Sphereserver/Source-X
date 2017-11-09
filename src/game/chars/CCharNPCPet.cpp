@@ -532,7 +532,7 @@ void CChar::NPC_PetClearOwners()
 			pOwner->AddGoldToPack( pBankVendor->m_itEqBankBox.m_Check_Amount, pBankOwner );
 			pBankVendor->m_itEqBankBox.m_Check_Amount = 0;
 
-			for ( size_t i = 0; i < CountOf(sm_VendorLayers); i++ )
+			for ( size_t i = 0; i < CountOf(sm_VendorLayers); ++i )
 			{
 				CItemContainer * pCont = GetBank( sm_VendorLayers[i] );
 				if ( !pCont )

@@ -1794,7 +1794,7 @@ bool CChar::ItemEquipArmor( bool fForce )
 	if ( !fForce )
 	{
 		// Block those layers that are already used
-		for ( size_t i = 0; i < CountOf(iBestScore); i++ )
+		for ( size_t i = 0; i < CountOf(iBestScore); ++i )
 		{
 			pBestArmor[i] = LayerFind(static_cast<LAYER_TYPE>(i));
 			if ( pBestArmor[i] != NULL )
@@ -1821,7 +1821,7 @@ bool CChar::ItemEquipArmor( bool fForce )
 	}
 
 	// Equip all the stuff we found
-	for ( size_t i = 0; i < CountOf(iBestScore); i++ )
+	for ( size_t i = 0; i < CountOf(iBestScore); ++i )
 	{
 		if ( pBestArmor[i] )
 			ItemEquip(pBestArmor[i], this);

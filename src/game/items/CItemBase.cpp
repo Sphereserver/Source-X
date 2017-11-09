@@ -429,14 +429,14 @@ int CItemBase::IsID_Door( ITEMID_TYPE id ) // static
 	if ( id == 0x190f )
 	{
 		// anomoly door. bar door just has 2 pieces.
-		return( 2 );
+		return 2;
 	}
 
-	for ( size_t i = 0; i < CountOf(sm_Item_DoorBase); i++)
+	for ( size_t i = 0; i < CountOf(sm_Item_DoorBase); ++i)
 	{
 		int did = id - sm_Item_DoorBase[i];
 		if ( did >= 0 && did <= 15 )
-			return( did+1 );
+			return ( did+1 );
 	}
 	return 0;
 }

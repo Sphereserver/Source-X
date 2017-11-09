@@ -209,7 +209,7 @@ void CClient::Cmd_GM_PageCmd( lpctstr pszCmd )
 
 	if ( pszCmd == NULL || pszCmd[0] == '?' )
 	{
-		for ( size_t i = 0; i < CountOf(sm_pszGMPageVerbsHelp); i++ )
+		for ( size_t i = 0; i < CountOf(sm_pszGMPageVerbsHelp); ++i )
 		{
 			SysMessage( sm_pszGMPageVerbsHelp[i] );
 		}

@@ -745,7 +745,7 @@ bool CChar::NPC_LookAtCharHuman( CChar * pChar )
 
 			// run away like a coward.
 			m_Act_UID = pChar->GetUID();
-			m_atFlee.m_iStepsMax = 20;	// how long should it take to get there.
+			m_atFlee.m_iStepsMax = 20;		// how long should it take to get there.
 			m_atFlee.m_iStepsCurrent = 0;	// how long has it taken ?
 			Skill_Start(NPCACT_FLEE);
 			m_pNPC->m_Act_Motivation = 80;
@@ -1319,7 +1319,7 @@ bool CChar::NPC_Act_Talk()
 				g_Cfg.GetDefaultMsg( DEFMSG_NPC_GENERIC_GONE_2 )
 			};
 			tchar *pszMsg = Str_GetTemp();
-			sprintf(pszMsg, sm_szText[ Calc_GetRandVal( CountOf(sm_szText) - 1 ) ], pChar->GetName() );
+			sprintf(pszMsg, sm_szText[ Calc_GetRandVal(CountOf(sm_szText)) ], pChar->GetName() );
 			Speak(pszMsg);
 		}
 		return false;
@@ -1363,7 +1363,7 @@ void CChar::NPC_Act_GoHome()
 		}
 		else
 		{
-			g_Log.Event( LOGL_WARN, "Guard 0%x '%s' has no guard post (%s)!\n", (dword)(GetUID()), GetName(), GetTopPoint().WriteUsed());
+			g_Log.Event( LOGL_WARN, "Guard 0%x '%s' has no guard post (%s)! Removing it.\n", (dword)(GetUID()), GetName(), GetTopPoint().WriteUsed());
 
 			// If we arent conjured and still got no valid home
 			// then set our status to conjured and take our life.
