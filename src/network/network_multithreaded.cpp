@@ -1110,9 +1110,9 @@ bool NetworkInput::processUnknownClientData(NetState* state, Packet* buffer)
 	CClient* client = state->getClient();
 	ASSERT(client != NULL);
 
-	if (buffer->getRemainingLength() > SCHAR_MAX)
+	if (buffer->getRemainingLength() > INT8_MAX)
 	{
-		g_Log.EventWarn("%x:Client connected with a seed length of %" PRIuSIZE_T " exceeding max length limit of %d, disconneting.\n", state->id(), buffer->getRemainingLength(), SCHAR_MAX);
+		g_Log.EventWarn("%x:Client connected with a seed length of %" PRIuSIZE_T " exceeding max length limit of %d, disconneting.\n", state->id(), buffer->getRemainingLength(), INT8_MAX);
 		return false;
 	}
 

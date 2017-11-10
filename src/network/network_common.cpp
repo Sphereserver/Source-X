@@ -548,20 +548,21 @@ HistoryIP& IPHistoryManager::getHistoryForIP(const CSocketAddressIP& ip)
 {
 	// get history for an ip
 	ADDTOCALLSTACK("IPHistoryManager::getHistoryForIP");
-	if (&ip)	//Temporal code until I find out the cause of an error produced here crashing the server.
-	{
+	// commented to test
+	//if (&ip)	//Temporal code until I find out the cause of an error produced here crashing the server.
+	//{
 		// find existing entry
-		for (IPHistoryList::iterator it = m_ips.begin(); it != m_ips.end(); ++it)
+		for (IPHistoryList::iterator it = m_ips.begin(), end = m_ips.end(); it != end; ++it)
 		{
-			if (( *it ).m_ip == ip)
+			if (it->m_ip == ip)
 				return *it;
 		}
-	}
-	else
-	{
-		g_Log.EventDebug("No IP on getHistoryForIP, stack trace:\n" );
-		ASSERT(&ip);
-	}
+	//}
+	//else
+	//{
+	//	g_Log.EventDebug("No IP on getHistoryForIP, stack trace:\n" );
+	//	ASSERT(&ip);
+	//}
 
 	// create a new entry
 	HistoryIP hist;

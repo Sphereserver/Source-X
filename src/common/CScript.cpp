@@ -17,7 +17,7 @@ void CScriptLineContext::Init()
 
 bool CScriptLineContext::IsValid() const
 {
-	return ( m_stOffset >= 0 );
+	return ( m_stOffset != (size_t)-1 );
 }
 
 CScriptLineContext::CScriptLineContext()

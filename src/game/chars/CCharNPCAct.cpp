@@ -333,10 +333,10 @@ void CChar::NPC_OnHear( lpctstr pszCmd, CChar * pSrc, bool fAllPets )
 			return;
 	}
 
-	if ( Skill_GetActive() == NPCACT_TALK || Skill_GetActive() == NPCACT_TALK_FOLLOW )
+	if ( (Skill_GetActive() == NPCACT_TALK) || (Skill_GetActive() == NPCACT_TALK_FOLLOW) )
 	{
 		++ m_atTalk.m_HearUnknown;
-		int iMaxUnk = 4;
+		uint iMaxUnk = 4;
 		if ( GetDist( pSrc ) > 4 )
 			iMaxUnk = 1;
 		if ( m_atTalk.m_HearUnknown > iMaxUnk )

@@ -68,7 +68,8 @@ dword CCrypto::GetClientVer() const
 
 bool CCrypto::IsValid() const
 {
-	return ( m_iClientVersion >= 0 );
+	return ( m_iClientVersion > 0 );
+	//return ( (m_iClientVersion > 0) && (m_iClientVersion < 10000000) );	// should be safer? which versions do the Enhanced clients report?
 }
 
 bool CCrypto::IsInit() const

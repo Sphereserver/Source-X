@@ -2620,8 +2620,8 @@ PacketDisplayMap::PacketDisplayMap(const CClient* target, const CItemMap* map, c
 	const CItemBase* itemDef = map->Item_GetDef();
 	ASSERT(itemDef != NULL);
 
-	word width = (word)(itemDef->m_ttMap.m_iGumpWidth > 0 ? itemDef->m_ttMap.m_iGumpWidth : CItemMap::DEFAULT_SIZE);
-	word height = (word)(itemDef->m_ttMap.m_iGumpHeight > 0 ? itemDef->m_ttMap.m_iGumpHeight : CItemMap::DEFAULT_SIZE);
+	word width = (word)(itemDef->m_ttMap.m_iGumpWidth > 0 ? itemDef->m_ttMap.m_iGumpWidth : (word)CItemMap::DEFAULT_SIZE);
+	word height = (word)(itemDef->m_ttMap.m_iGumpHeight > 0 ? itemDef->m_ttMap.m_iGumpHeight : (word)CItemMap::DEFAULT_SIZE);
 
 	writeInt32(map->GetUID());
 	writeInt16(GUMP_MAP_2_NORTH);
@@ -4897,8 +4897,8 @@ PacketDisplayMapNew::PacketDisplayMapNew(const CClient* target, const CItemMap* 
 	const CItemBase* itemDef = map->Item_GetDef();
 	ASSERT(itemDef != NULL);
 
-	word width = (word)(itemDef->m_ttMap.m_iGumpWidth > 0 ? itemDef->m_ttMap.m_iGumpWidth : CItemMap::DEFAULT_SIZE);
-	word height = (word)(itemDef->m_ttMap.m_iGumpHeight > 0 ? itemDef->m_ttMap.m_iGumpHeight : CItemMap::DEFAULT_SIZE);
+	word width	= (word)(itemDef->m_ttMap.m_iGumpWidth 	> 0 ? itemDef->m_ttMap.m_iGumpWidth		:	(word)CItemMap::DEFAULT_SIZE);
+	word height = (word)(itemDef->m_ttMap.m_iGumpHeight	> 0 ? itemDef->m_ttMap.m_iGumpHeight	:	(word)CItemMap::DEFAULT_SIZE);
 
 	writeInt32(map->GetUID());
 	writeInt16(GUMP_MAP_2_NORTH);
