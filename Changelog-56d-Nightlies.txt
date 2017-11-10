@@ -292,3 +292,10 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 09-11-2017, Drk84
 - [Port from Source, 12-03-2017, Coruja] Added: Basic internal packet filters that will make Sphere avoid crash or consume excessive resources when under DDoS attack.
 
+10-11-2017, Nolok
+- Updated NPC ally groups. Before this commit, they included the creatures up only to the LBR expansion. This affects the NPC hostility
+	calculations and the Provocation skill.
+- Added: override for an hardcoded behaviour of Provocation. If the provoked character is in the same ally group of the targeted character, at the skill @Success
+	the skill execution was (and still is) aborted. Now on skill @Start trigger ACTARG3 is set to 1 if the characters are in the same ally group, otherwise it's 0.
+	Then, if you want to always allow the Provocation, put ACTARG3=0 in @Start or @Success.
+- [sphere_msgs.scp] Added: PROVOCATION_KIND defmessage to be shown if the Provocation skill is aborted due to provoked and target characters being in the same ally group.

@@ -268,16 +268,16 @@ public:
 		// Container pack is the only exception here. IT_CONTAINER
 		struct	// ALL equippable items ex. Weapons and armor
 		{
-			int		m_junk1;
-			int		m_iStrReq;	// TDATA2 = REQSTR = Strength required to weild weapons/armor. Do not overwrite TDATA2 on these items!
+			dword m_junk1;
+			dword m_iStrReq;	// TDATA2 = REQSTR = Strength required to weild weapons/armor. Do not overwrite TDATA2 on these items!
 		} m_ttEquippable;
 
 		// IT_LIGHT_OUT
 		// IT_LIGHT_LIT
 		struct
 		{
-			int	m_junk1;
-			int m_junk2;
+			dword m_junk1;
+			dword m_junk2;
 			CResourceID m_idLight;	// TDATA3=Change light state to on/off
 		} m_ttLightSource;
 
@@ -286,8 +286,8 @@ public:
 		// IT_WEAPON_THROWING
 		struct	// ALL equippable items ex. Weapons and armor
 		{
-			int		m_junk1;			// TDATA1= Sound it makes ?
-			int		m_iStrReq;			// TDATA2= REQSTR= Strength required to weild weapons/armor.
+			dword		m_junk1;		// TDATA1= Sound it makes ?
+			dword		m_iStrReq;		// TDATA2= REQSTR= Strength required to weild weapons/armor.
 			CResourceIDBase m_idAmmo;	// TDATA3= required source ammo.
 			CResourceIDBase m_idAmmoX;	// TDATA4= fired ammo fx.
 		} m_ttWeaponBow;
@@ -304,7 +304,7 @@ public:
 		// IT_KEYRING
 		struct
 		{
-			int	m_junk1;
+			dword m_junk1;
 			GUMP_TYPE m_idGump;	// TDATA2= the gump that comes up when this container is opened.
 			dword m_dwMinXY;	// TDATA3= Gump size used.
 			dword m_dwMaxXY;	// TDATA4=
@@ -314,8 +314,8 @@ public:
 		// IT_EQ_HORSE
 		struct
 		{
-			int	m_junk1;
-			int m_iStrReq;				// TDATA2= REQSTR= Strength required to mount
+			dword m_junk1;
+			dword m_iStrReq;			// TDATA2= REQSTR= Strength required to mount
 			CResourceIDBase m_idChar;	// TDATA3= (CREID_TYPE)
 		} m_ttFigurine;
 
@@ -329,8 +329,8 @@ public:
 		// IT_SPELLBOOK_MASTERY
 		struct
 		{
-			int	m_junk1;
-			int	m_junk2;
+			dword m_junk1;
+			dword m_junk2;
 			dword m_iOffset;		// TDATA3= First spell number of this book type
 			dword m_iMaxSpells;		// TDATA4= Max spells that this book type can handle
 		} m_ttSpellbook;
@@ -338,8 +338,8 @@ public:
 		// IT_MUSICAL
 		struct
 		{
-			int m_iSoundGood;	// TDATA1= SOUND_TYPE if played well.
-			int m_iSoundBad;	// TDATA2= sound if played poorly.
+			dword m_iSoundGood;	// TDATA1= SOUND_TYPE if played well.
+			dword m_iSoundBad;	// TDATA2= sound if played poorly.
 		} m_ttMusical;
 
 		// IT_ORE
@@ -351,8 +351,8 @@ public:
 		// IT_INGOT
 		struct
 		{
-			int m_iSkillMin;	// tdata1= what is the lowest skill
-			int m_iSkillMax;	// tdata2= what is the highest skill for max yield
+			dword m_iSkillMin;	// tdata1= what is the lowest skill
+			dword m_iSkillMax;	// tdata2= what is the highest skill for max yield
 		} m_ttIngot;
 
 		// IT_DOOR
@@ -361,22 +361,22 @@ public:
 		{
 			SOUND_TYPE m_iSoundClose;	// tdata1(low)= sound to close. SOUND_TYPE
 			SOUND_TYPE m_iSoundOpen;	// tdata1(high)= sound to open. SOUND_TYPE
-			ITEMID_TYPE m_idSwitch; // tdata2 ID to change into when open/close
-			int m_iXChange;		// tdata3= X position to change
-			int m_iYChange;		// tdata4= Y position to change
+			ITEMID_TYPE m_idSwitch;		// tdata2 ID to change into when open/close
+			dword m_iXChange;			// tdata3= X position to change
+			dword m_iYChange;			// tdata4= Y position to change
 		} m_ttDoor;
 
 		// IT_GAME_PIECE
 		struct
 		{
-			int m_iStartPosX;	// tdata1=
-			int m_iStartPosY;	// tdata2=
+			dword m_iStartPosX;	// tdata1=
+			dword m_iStartPosY;	// tdata2=
 		} m_ttGamePiece;
 
 		// IT_BED
 		struct
 		{
-			int m_iDir;		// tdata1= direction of the bed. DIR_TYPE
+			dword m_iDir;		// tdata1= direction of the bed. DIR_TYPE
 		} m_ttBed;
 
 		// IT_FOLIAGE - is not consumed on reap (unless eaten then will regrow invis)
@@ -417,8 +417,8 @@ public:
 		// IT_MAP
 		struct
 		{
-			int m_iGumpWidth;	// tdata1= map gump width
-			int m_iGumpHeight;	// tdata2= map gump height
+			dword m_iGumpWidth;	// tdata1= map gump width
+			dword m_iGumpHeight;	// tdata2= map gump height
 		} m_ttMap;
 	};
 

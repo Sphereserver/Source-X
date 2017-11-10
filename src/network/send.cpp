@@ -4939,7 +4939,7 @@ PacketMoveShip::PacketMoveShip(const CClient* target, const CItemShip* ship, COb
 	// assume that first object is the ship itself
 	writeInt16((word)(objectCount - 1));
 
-	for (size_t i = 1; i < objectCount; i++)
+	for (size_t i = 1; i < objectCount; ++i)
 	{
 		const CObjBase* object = objects[i];
 		const CPointMap& objectLocation = object->GetTopPoint();

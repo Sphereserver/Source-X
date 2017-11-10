@@ -56,7 +56,7 @@ SKILL_TYPE CChar::Skill_GetMagicRandom(ushort iVal)
 	ADDTOCALLSTACK("CChar::Skill_GetMagicRandom");
 	SKILL_TYPE skills[SKILL_QTY];
 	int count = 0;
-	for ( uchar i = 0; i < g_Cfg.m_iMaxSkill; i++ )
+	for ( uchar i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
 		SKILL_TYPE skill = static_cast<SKILL_TYPE>(i);
 		if (!g_Cfg.IsSkillFlag(skill, SKF_MAGIC))
@@ -91,7 +91,7 @@ SKILL_TYPE CChar::Skill_GetMagicBest()
 	ADDTOCALLSTACK("CChar::Skill_GetMagicBest");
 	SKILL_TYPE skill = SKILL_NONE;
 	int value = 0;
-	for ( uchar i = 0; i < g_Cfg.m_iMaxSkill; i++ )
+	for ( uchar i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
 		if (!g_Cfg.IsSkillFlag(skill, SKF_MAGIC))
 			continue;
@@ -173,14 +173,14 @@ void CChar::Skill_SetBase( SKILL_TYPE skill, int iValue )
 	if ( IsTrigUsed(TRIGGER_SKILLCHANGE) )
 	{
 		CScriptTriggerArgs args;
-		args.m_iN1 = (llong)(skill);
-		args.m_iN2 = (llong)(iValue);
+		args.m_iN1 = (llong)skill;
+		args.m_iN2 = (llong)iValue;
 		if ( OnTrigger(CTRIG_SkillChange, this, &args) == TRIGRET_RET_TRUE )
 			return;
 
 		iValue = (int)(args.m_iN2);
 	}
-	m_Skill[skill] = (ushort)(iValue);
+	m_Skill[skill] = (ushort)iValue;
 
 	if ( IsClient())
 		m_pClient->addSkillWindow(skill);	// update the skills list
@@ -229,7 +229,7 @@ int CChar::Skill_GetMax( SKILL_TYPE skill, bool ignoreLock ) const
 			}
 		}
 
-		return( iSkillMax );
+		return iSkillMax;
 	}
 	else
 	{
@@ -255,7 +255,7 @@ int CChar::Skill_GetSum() const
 	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; i++ )
 		iSkillSum += Skill_GetBase(static_cast<SKILL_TYPE>(i));
 
-	return( iSkillSum );
+	return iSkillSum;
 }
 
 void CChar::Skill_Decay()
@@ -298,7 +298,7 @@ void CChar::Skill_Decay()
 	// deduct a point from the chosen skill
 	if ( skillDeduct != SKILL_NONE )
 	{
-		iSkillLevel--;
+		--iSkillLevel;
 		Skill_SetBase(skillDeduct, iSkillLevel);
 	}
 }
@@ -330,7 +330,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 	if ( m_pPlayer )
 	{
 		int iSkillSum = 0;
-		for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; i++ )
+		for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 			iSkillSum += Skill_GetBase(static_cast<SKILL_TYPE>(i));
 
 		if ( iSkillSum >= Skill_GetMax(static_cast<SKILL_TYPE>(g_Cfg.m_iMaxSkill)) )
@@ -398,7 +398,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 
 			if ( iRoll <= iChance )
 			{
-				iSkillLevel++;
+				++iSkillLevel;
 				Skill_SetBase( skill, iSkillLevel );
 			}
 		}
@@ -411,7 +411,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 	int iStatCap = Stat_GetLimit(STAT_QTY);
 
 	// Stat effects are unrelated to advance in skill !
-	for ( int i = STAT_STR; i < STAT_BASE_QTY; i++ )
+	for ( int i = STAT_STR; i < STAT_BASE_QTY; ++i )
 	{
 		// Can't gain STR or DEX if morphed.
 		if ( IsStatFlag( STATF_Polymorph ) && i != STAT_INT )
@@ -449,7 +449,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 		if (decrease)
 			iStatSum = Stat_GetSum();
 
-		if ( iChance > Calc_GetRandVal(1000) && decrease )
+		if ( (iChance > Calc_GetRandVal(1000)) && decrease )
 		{
 			Stat_SetBase(static_cast<STAT_TYPE>(i), (short)(iStatVal + 1));
 			break;
@@ -472,7 +472,7 @@ bool CChar::Skill_CheckSuccess( SKILL_TYPE skill, int difficulty, bool bUseBellC
 	if  ( IsPriv(PRIV_GM) && skill != SKILL_PARRYING )	// GM's can't always succeed Parrying or they won't receive any damage on combat even without STATF_Invul set
 		return true;
 
-	if ( !IsSkillBase(skill) || difficulty < 0 )	// auto failure.
+	if ( !IsSkillBase(skill) || (difficulty < 0) )	// auto failure.
 		return false;
 
 	difficulty *= 10;
@@ -1848,6 +1848,9 @@ int CChar::Skill_Provocation(SKTRIG_TYPE stage)
 			if ( pCharProv->Skill_GetAdjusted(SKILL_PROVOCATION) >= Skill_GetAdjusted(SKILL_PROVOCATION) )	// cannot provoke more experienced provoker
 				iDifficulty = 0;
 
+			if ( NPC_GetAllyGroupType(pCharProv->GetDispID()) == NPC_GetAllyGroupType(pCharTarg->GetDispID()) )
+				m_atProvocation.m_IsAlly = 1;	// If still true on @Success, the action will fail because the provoked refuses to attack the target.
+
 			return iDifficulty;
 		}
 
@@ -1874,7 +1877,7 @@ int CChar::Skill_Provocation(SKTRIG_TYPE stage)
 			pCharProv->Memory_AddObjTypes(this, MEMORY_AGGREIVED|MEMORY_IRRITATEDBY);
 
 			// If out of range we might get attacked ourself.
-			if ( pCharProv->GetTopDist3D(pCharTarg) > UO_MAP_VIEW_SIGHT || pCharProv->GetTopDist3D(this) > UO_MAP_VIEW_SIGHT )
+			if ( (pCharProv->GetTopDist3D(pCharTarg) > UO_MAP_VIEW_SIGHT) || (pCharProv->GetTopDist3D(this) > UO_MAP_VIEW_SIGHT) )
 			{
 				// Check that only "evil" monsters attack provoker back
 				if ( pCharProv->Noto_IsEvil() )
@@ -1884,16 +1887,17 @@ int CChar::Skill_Provocation(SKTRIG_TYPE stage)
 			}
 
 			// If the npcs are in the same ally groups, both can attack you
-			if ( NPC_GetAllyGroupType(pCharProv->GetDispID()) == NPC_GetAllyGroupType(pCharTarg->GetDispID()) )
+			if ( m_atProvocation.m_IsAlly != 0 )
 			{
 				if ( pCharProv->Noto_IsEvil() )
 				{
 					pCharProv->Fight_Attack(this);
 					pCharTarg->Fight_Attack(this);
 				}
-
+				SysMessageDefault(DEFMSG_PROVOCATION_KIND);
 				return -SKTRIG_ABORT;
 			}
+			
 
 			// If the provoked NPC/PC is good, we are flagged criminal for it and guards are called.
 			if ( pCharProv->Noto_GetFlag(this) == NOTO_GOOD )
@@ -3169,14 +3173,14 @@ int CChar::Skill_Stroke( bool fResource )
 	if ( fResource )
 	{
 		if ( m_atResource.m_Stroke_Count )
-			m_atResource.m_Stroke_Count--;
+			--m_atResource.m_Stroke_Count;
 		if ( m_atResource.m_Stroke_Count < 1 )
 			return SKTRIG_SUCCESS;
 	}
 	else
 	{
 		if ( m_atCreate.m_Stroke_Count )
-			m_atCreate.m_Stroke_Count--;
+			--m_atCreate.m_Stroke_Count;
 		if ( m_atCreate.m_Stroke_Count < 1 )
 			return SKTRIG_SUCCESS;
 	}

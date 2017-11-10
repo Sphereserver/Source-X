@@ -2553,7 +2553,7 @@ bool CChar::Spell_CastDone()
 				case SPELL_Blade_Spirit:	m_atMagery.m_SummonID = CREID_BLADES;		break;
 				case SPELL_Vortex:			m_atMagery.m_SummonID = CREID_VORTEX;		break;
 				case SPELL_Air_Elem:		m_atMagery.m_SummonID = CREID_AIR_ELEM;		break;
-				case SPELL_Daemon:			m_atMagery.m_SummonID = CREID_DAEMON;		break;
+				case SPELL_Daemon:			m_atMagery.m_SummonID = CREID_DEMON;		break;
 				case SPELL_Earth_Elem:		m_atMagery.m_SummonID = CREID_EARTH_ELEM;	break;
 				case SPELL_Fire_Elem:		m_atMagery.m_SummonID = CREID_FIRE_ELEM;	break;
 				case SPELL_Water_Elem:		m_atMagery.m_SummonID = CREID_WATER_ELEM;	break;

@@ -4320,7 +4320,7 @@ bool PacketMovementReqNew::onReceive(NetState* net)
 			break;
 		}
 
-		steps--;
+		--steps;
 	}
 	return true;
 }

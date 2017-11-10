@@ -22,8 +22,8 @@ enum CREID_TYPE	// enum the creature animations. (dont allow any others !) also 
 	CREID_BIRD				= 0x6,
 	CREID_ORC_CAPTAIN		= 0x7,
 	CREID_CORPSER			= 0x8,
-	CREID_DAEMON			= 0x9,
-	CREID_DAEMON_SWORD		= 0xA,
+	CREID_DEMON				= 0x9,
+	CREID_DEMON_SWORD		= 0xA,
 	CREID_DRAGON_GREY		= 0xC,
 	CREID_AIR_ELEM			= 0xD,
 	CREID_EARTH_ELEM		= 0xE,
@@ -55,8 +55,8 @@ enum CREID_TYPE	// enum the creature animations. (dont allow any others !) also 
 	CREID_TROLL_SWORD		= 0x35,
 	CREID_TROLL				= 0x36,
 	CREID_TROLL_MACE		= 0x37,
-	CREID_SKEL_AXE			= 0x38,
-	CREID_SKEL_SW_SH		= 0x39,	// sword and shield
+	CREID_SKELETON_AXE		= 0x38,
+	CREID_SKELETON_SW_SH	= 0x39,	// sword and shield
 	CREID_WISP				= 0x3A,
 	CREID_DRAGON_RED		= 0x3B,
 	CREID_DRAKE_GREY		= 0x3C,
@@ -106,9 +106,6 @@ enum CREID_TYPE	// enum the creature animations. (dont allow any others !) also 
 	CREID_WOLF_SILVER		= 0x64,
 	CREID_CENTAUR			= 0x65,
 	CREID_DEMON_EXODUS		= 0x66,
-	CREID_DRAGON_SERPENTINE	= 0x67,
-	CREID_DRAGON_SKELETAL	= 0x68,
-	CREID_DRAGON_GREATER	= 0x69,
 	CREID_WYRM_SHADOW		= 0x6A,
 
 	CREID_ELEM_ORE_AGA		= 0x6B,
@@ -120,7 +117,7 @@ enum CREID_TYPE	// enum the creature animations. (dont allow any others !) also 
 	CREID_ELEM_ORE_VERI		= 0x71,
 
 	CREID_STEED_DARK		= 0x72,
-	CREID_STEED_ETHEREAL	= 0x73,
+	CREID_STEED_ETH			= 0x73,
 	CREID_NIGHTMARE			= 0x74,
 	CREID_STEED_SILVER		= 0x75,
 
@@ -143,8 +140,8 @@ enum CREID_TYPE	// enum the creature animations. (dont allow any others !) also 
 	CREID_ALLIGATOR_SM		= 0x85,
 	CREID_DRAGON_KOMODO		= 0x86,
 	CREID_OGRE_LORD_ARCTIC	= 0x87,
-	CREID_OPHIDIAN_JUSTICAR	= 0x88,
-	CREID_OPHIDIAN_AVENGER	= 0x89,
+	CREID_OPHID_JUSTICAR	= 0x88,
+	CREID_OPHID_AVENGER		= 0x89,
 	CREID_ORC_LORD			= 0x8A,
 	CREID_ORC_CHOPPER		= 0x8B,
 	CREID_ORC_MAGE			= 0x8C,
@@ -161,10 +158,13 @@ enum CREID_TYPE	// enum the creature animations. (dont allow any others !) also 
 	// LBR (Lord Blackthorn's revenge) monsters
 
 	CREID_SPIDER_MALEFIC	= 0x13,
-	CREID_SERPENTINE_DRAGON = 0x67,
-	CREID_SKELETAL_DRAGON	= 0x68,
+	CREID_ICE_FIEND			= 0x2B,
 
-	CREID_SEA_SERP			= 0x96,
+	CREID_DRAGON_SERPENTINE = 0x67,
+	CREID_DRAGON_SKELETAL	= 0x68,
+	CREID_DRAGON_GREATER	= 0x69,
+
+	CREID_SEA_SERPENT		= 0x96,
 	CREID_DOLPHIN			= 0x97,
 
 	CREID_GHOUL				= 0x99,
@@ -185,7 +185,7 @@ enum CREID_TYPE	// enum the creature animations. (dont allow any others !) also 
 
 	CREID_BEAR_BROWN		= 0xA7,
 	CREID_SHADOW_FIEND		= 0xA8,
-	CREID_BEETLE_FIRE		= 0xA9,
+	CREID_FIRE_BEETLE		= 0xA9,
 	CREID_LLAMA_ETH			= 0xAA,
 	CREID_OSTARD_FRENZ_ETH	= 0xAB,
 	CREID_CHAMP_RIKKTOR		= 0xAC,
@@ -244,10 +244,16 @@ enum CREID_TYPE	// enum the creature animations. (dont allow any others !) also 
 	CREID_SWAMP_DRAGON		= 0x31A,
 	CREID_HORDE_DEMON_L		= 0x31C,
 	CREID_REPTILE_LORD		= 0x31D,
-	CREID_ANCIENT_WYRM		= 0x31E,
+	CREID_WYRM_ANCIENT		= 0x31E,
 	CREID_SWAMP_DRAGON_AR	= 0x31F, // Armored swamp dragon
+	CREID_SOLEN_QUEEN_BK	= 0x324, // Black solen queen
+	CREID_SOLEN_WORKER_BK	= 0x325,
+	CREID_SOLEN_WARRIOR_BK	= 0x326,
+	CREID_SOLEN_MATRIARCH	= 0x327,
+	CREID_SOLEN_MATRIARCH_BK= 0x328,
 
-	CREID_MULTICOLORED_HORDE_DEMON = 0x3e7,
+
+	CREID_HORDE_DEMON_MULTIC= 0x3E7, // Multicolored horde demon
 
 	// AOS (Age of Shadows) monsters
 
@@ -263,7 +269,7 @@ enum CREID_TYPE	// enum the creature animations. (dont allow any others !) also 
 	CREID_GIBBERLING		= 0x133,
 	CREID_BONE_DAEMON		= 0x134,
 	CREID_PATCHW_SKELETON	= 0x135, // patchwork skeleton
-	CREID_BANSHEE_WAILING	= 0x136,
+	CREID_BANSHEE			= 0x136,
 	CREID_SHADOW_KNIGHT		= 0x137,
 	CREID_ABYSSMAL_HORROR	= 0x138,
 	CREID_DARKNIGHT_CREEPER	= 0x139,
@@ -328,7 +334,7 @@ enum CREID_TYPE	// enum the creature animations. (dont allow any others !) also 
 
 	// ---- Animals (Low detail critters) ----
 
-	CREID_HORSE_TAN			= 0xC8,	// white = 200 decinal
+	CREID_HORSE_TAN			= 0xC8,
 	CREID_CAT				= 0xc9,
 	CREID_ALLIGATOR			= 0xCA,
 	CREID_PIG				= 0xCB,
@@ -338,7 +344,7 @@ enum CREID_TYPE	// enum the creature animations. (dont allow any others !) also 
 	CREID_SHEEP				= 0xCF,	// un-sheered.
 	CREID_CHICKEN			= 0xD0,
 	CREID_GOAT_MOUNTAIN		= 0xD1,
-	CREID_OSTARD_DESERT		= 0xD2,	// T2A = Desert Ostard (ridable)
+	CREID_OSTARD_DESERT		= 0xD2,
 	CREID_BEAR_BLACK		= 0xD3,
 	CREID_BEAR_GRIZZLY		= 0xD4,
 	CREID_BEAR_POLAR		= 0xD5,
@@ -347,7 +353,7 @@ enum CREID_TYPE	// enum the creature animations. (dont allow any others !) also 
 	CREID_COW_BW			= 0xD8,
 	CREID_DOG				= 0xD9,
 	CREID_OSTARD_FRENZ		= 0xDA,	// Frenzied Ostard
-	CREID_OSTARD_FOREST		= 0xDB,	// Forest Ostard
+	CREID_OSTARD_FOREST		= 0xDB,
 	CREID_LLAMA				= 0xDC,
 	CREID_WALRUS			= 0xDD,
 	CREID_SHEEP_SHORN		= 0xDF,
@@ -397,12 +403,13 @@ enum CREID_TYPE	// enum the creature animations. (dont allow any others !) also 
 	CREID_GARG_FIRE				= 0x82,
 	CREID_DRAGON_CRIMSON		= 0xC5,
 	CREID_DRAGON_PLATINUM		= 0xC6,
+	CREID_DRAGON_STYGIAN		= 0x33A,
 	CREID_TROGLODYTE			= 0x10B,
 	CREID_GRUBBER				= 0x10E,
 	CREID_BLOODWORM				= 0x11E,
 	CREID_VOLLEM				= 0x125,
 	CREID_GOBLIN_GRAY			= 0x14E,
-	CREID_BOURA_ARMORED			= 0x1B0,
+	CREID_BOURA_AR				= 0x1B0, // Armored boura
 	CREID_STONE_FORM			= 0x2C1,
 	CREID_ABYSSAL_INFERNAL		= 0x2C9,
 	CREID_BEETLE_IRON			= 0x2CA,
@@ -435,6 +442,8 @@ enum CREID_TYPE	// enum the creature animations. (dont allow any others !) also 
 	CREID_VAMPIRE				= 0x2E8,
 	CREID_VAMPIRE_FEMALE		= 0x2E9,
 	CREID_GARG_ENSLAVED			= 0x2F1,
+
+	CREID_LICH_PRIMEVAL			= 0x33e,
 	CREID_TURKEY_GIANT 			= 0x402,
 
 	// HS (High Seas) monsters
@@ -491,7 +500,7 @@ enum CREID_TYPE	// enum the creature animations. (dont allow any others !) also 
 	CREID_LITHOS 				= 0x597,
 	CREID_STRATOS 				= 0x598,
 	CREID_PYROS 				= 0x599,
-	CREID_SERPENTINE_DRAGON_ETH = 0x59A,
+	CREID_DRAGON_SERPENTINE_ETH = 0x59A,
 
 /* ----	 Special ----	*/
 

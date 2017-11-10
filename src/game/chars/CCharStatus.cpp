@@ -528,10 +528,10 @@ NPCBRAIN_TYPE CChar::GetNPCBrain(bool fDefault) const
 		switch ( id )
 		{
 			//TODO: add other dragons
-			case CREID_SERPENTINE_DRAGON:
-			case CREID_SKELETAL_DRAGON:
+			case CREID_DRAGON_SERPENTINE:
+			case CREID_DRAGON_SKELETAL:
 			case CREID_REPTILE_LORD:
-			case CREID_ANCIENT_WYRM:
+			case CREID_WYRM_ANCIENT:
 			case CREID_SWAMP_DRAGON:
 			case CREID_SWAMP_DRAGON_AR:
 				return NPCBRAIN_DRAGON;

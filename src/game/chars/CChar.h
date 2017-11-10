@@ -243,7 +243,7 @@ public:
 		struct
 		{
 			WAR_SWING_TYPE m_War_Swing_State;		// ACTARG1 = We are in the war mode swing.
-			int64 m_timeNextCombatSwing;			// (ACTARG2 << 32) | ACTARG3 = Time to wait before starting another combat swing.
+			uint64 m_timeNextCombatSwing;			// (ACTARG2 << 32) | ACTARG3 = Time to wait before starting another combat swing.
 		} m_atFight;
 
 		// SKILL_ENTICEMENT
@@ -251,8 +251,16 @@ public:
 		// SKILL_PEACEMAKING
 		struct
 		{
-			dword m_InstrumentUID;		// ACTARG1 = UID of the instrument we are playing
+			dword m_InstrumentUID;		// ACTARG1 = UID of the instrument we are playing.
 		} m_atBard;
+
+		// SKILL_PROVOCATION
+		struct
+		{
+			dword m_InstrumentUID;		// ACTARG1 = UID of the instrument we are playing.
+			dword m_Unused2;
+			dword m_IsAlly;				// ACTARG3 = Is the provoked considered an ally of the target? 0/1
+		} m_atProvocation;				//	If so, abort the skill. To allow always, override it to 0 in @Success via scripts.
 
 		// SKILL_TRACKING
 		struct
@@ -270,16 +278,16 @@ public:
 		// NPCACT_TALK_FOLLOW
 		struct
 		{
-			int m_HearUnknown;			// ACTARG1 = Speaking NPC has no idea what u're saying.
-			int m_WaitCount;			// ACTARG2 = How long have i been waiting (xN sec)
+			dword m_HearUnknown;		// ACTARG1 = Speaking NPC has no idea what u're saying.
+			dword m_WaitCount;			// ACTARG2 = How long have i been waiting (xN sec)
 										// m_Act_UID = who am i talking to ?
 		} m_atTalk;
 
 		// NPCACT_FLEE
 		struct
 		{
-			int m_iStepsMax;			// ACTARG1 = How long should it take to get there.
-			int m_iStepsCurrent;		// ACTARG2 = How long has it taken ?
+			dword m_iStepsMax;			// ACTARG1 = How long should it take to get there.
+			dword m_iStepsCurrent;		// ACTARG2 = How long has it taken ?
 										// m_Act_UID = who am i fleeing from ?
 		} m_atFlee;
 	};

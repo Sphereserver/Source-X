@@ -1325,7 +1325,7 @@ bool CChar::NPC_Act_Talk()
 		return false;
 	}
 
-	m_atTalk.m_WaitCount--;
+	--m_atTalk.m_WaitCount;
 	return true;	// just keep waiting.
 }
 
