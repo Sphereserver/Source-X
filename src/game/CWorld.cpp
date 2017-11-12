@@ -228,20 +228,17 @@ void CTimedFunctionHandler::OnTick()
 	ADDTOCALLSTACK("CTimedFunctionHandler::OnTick");
 	m_isBeingProcessed = true;
 
-	m_curTick++;
+	++m_curTick;
 
 	if ( m_curTick >= TICK_PER_SEC )
-	{
 		m_curTick = 0;
-	}
 
 	int tick = m_curTick;
-	std::vector<TimedFunction *>::iterator it;
 	ProfileTask scriptsTask(PROFILE_SCRIPTS);
 
-	if ( m_timedFunctions[tick].size() > 0 )
+	if ( !m_timedFunctions[tick].empty() )
 	{
-		for ( it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); )
+		for ( auto it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); )	// the end iterator changes at each erase call
 		{
 			TimedFunction* tf = *it;
 			tf->elapsed -= 1;
@@ -249,7 +246,6 @@ void CTimedFunctionHandler::OnTick()
 			{
 				CScript s(tf->funcname);
 				CObjBase * obj = tf->uid.ObjFind();
-				int theEnd = 0;
 
 				if ( obj != NULL ) //just in case
 				{
@@ -261,35 +257,16 @@ void CTimedFunctionHandler::OnTick()
 					else
 						src = &g_Serv;
 
-					m_tFrecycled.push_back( tf );
-					//vector::erase crashes if the iterator is pointing at the only thing left in the list. So, we check if size is 1 and do pop_back instead if that's the case. -SL
-					if (m_timedFunctions[tick].size() == 1)
-					{
-						m_timedFunctions[tick].pop_back();
-						theEnd = 1;
-					}
-					else
-						it=m_timedFunctions[tick].erase( it );
+					m_tfRecycled.push_back( tf );
+					it = m_timedFunctions[tick].erase( it );
 
 					obj->r_Verb( s, src );
 				}
 				else
 				{
-					m_tFrecycled.push_back( tf );
-					//vector::erase crashes if the iterator is pointing at the only thing left in the list. So, we check if size is 1 and do pop_back instead if that's the case. -SL
-					if ( m_timedFunctions[tick].size()==1 )
-					{
-						m_timedFunctions[tick].pop_back();
-						theEnd = 1;
-					}
-					else
-					{
-						it = m_timedFunctions[tick].erase( it );
-					}
+					m_tfRecycled.push_back( tf );
+					it = m_timedFunctions[tick].erase( it );
 				}
-
-				if (theEnd)
-					break;
 			}
 			else
 			{
@@ -300,10 +277,10 @@ void CTimedFunctionHandler::OnTick()
 
 	m_isBeingProcessed = false;
 
-	while ( m_tFqueuedToBeAdded.size() > 0 )
+	while ( m_tfQueuedToBeAdded.size() > 0 )
 	{
-		TimedFunction *tf = m_tFqueuedToBeAdded.back();
-		m_tFqueuedToBeAdded.pop_back();
+		TimedFunction *tf = m_tfQueuedToBeAdded.back();
+		m_tfQueuedToBeAdded.pop_back();
 		m_timedFunctions[tick].push_back( tf );
 	}
 }
@@ -311,23 +288,15 @@ void CTimedFunctionHandler::OnTick()
 void CTimedFunctionHandler::Erase( CUID uid )
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::Erase");
-	for ( int tick = 0; tick < TICK_PER_SEC; tick++ )
+	for ( int tick = 0; tick < TICK_PER_SEC; ++tick )
 	{
-		std::vector<TimedFunction *>::iterator it;
-		for ( it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); )
+		for ( auto it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); )	// the end iterator changes at each stl container erase call
 		{
 			TimedFunction* tf = *it;
 			if ( tf->uid == uid)
 			{
-				m_tFrecycled.push_back( tf );
-				//vector::erase crashes if the iterator is pointing at the only thing left in the list. So, we check if size is 1 and do pop_back instead if that's the case. -SL
-				if ( m_timedFunctions[tick].size()==1 )
-				{
-					m_timedFunctions[tick].pop_back();
-					break;
-				}
-				else
-					it = m_timedFunctions[tick].erase( it );
+				m_tfRecycled.push_back( tf );
+				it = m_timedFunctions[tick].erase( it );
 			}
 			else
 				++it;
@@ -338,10 +307,9 @@ void CTimedFunctionHandler::Erase( CUID uid )
 int CTimedFunctionHandler::IsTimer( CUID uid, lpctstr funcname )
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::IsTimer");
-	for ( int tick = 0; tick < TICK_PER_SEC; tick++ )
+	for ( int tick = 0; tick < TICK_PER_SEC; ++tick )
 	{
-		std::vector<TimedFunction *>::iterator it;
-		for ( it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); )
+		for ( auto it = m_timedFunctions[tick].begin(), end = m_timedFunctions[tick].end(); it != end; )
 		{
 			TimedFunction* tf = *it;
 			if ( (tf->uid == uid) && (!strcmpi( tf->funcname, funcname)) )
@@ -356,23 +324,15 @@ int CTimedFunctionHandler::IsTimer( CUID uid, lpctstr funcname )
 void CTimedFunctionHandler::Stop( CUID uid, lpctstr funcname )
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::Stop");
-	for ( int tick = 0; tick < TICK_PER_SEC; tick++ )
+	for ( int tick = 0; tick < TICK_PER_SEC; ++tick )
 	{
-		std::vector<TimedFunction *>::iterator it;
-		for ( it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); )
+		for ( auto it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); )	// the end iterator changes at each erase call
 		{
 			TimedFunction* tf = *it;
 			if (( tf->uid == uid) && (!strcmpi( tf->funcname, funcname)))
 			{
-				m_tFrecycled.push_back( tf );
-				//vector::erase crashes if the iterator is pointing at the only thing left in the list. So, we check if size is 1 and do pop_back instead if that's the case. -SL
-				if ( m_timedFunctions[tick].size()==1 )
-				{
-					m_timedFunctions[tick].pop_back();
-					break;
-				}
-				else
-					it = m_timedFunctions[tick].erase( it );
+				m_tfRecycled.push_back( tf );
+				it = m_timedFunctions[tick].erase( it );
 			}
 			else
 				++it;
@@ -384,10 +344,9 @@ TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr funcname, int LoopsMade, CScrip
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::Loop");
 	bool endLooping = false;
-	for (int tick = 0; tick < TICK_PER_SEC && endLooping == false; tick++)
+	for (int tick = 0; (tick < TICK_PER_SEC) && !endLooping; ++tick)
 	{
-		std::vector<TimedFunction *>::iterator it;
-		for (it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end() && endLooping == false;)
+		for (auto it = m_timedFunctions[tick].begin(), end = m_timedFunctions[tick].end(); it != end; )
 		{
 			++LoopsMade;
 			if (g_Cfg.m_iMaxLoopTimes && (LoopsMade >= g_Cfg.m_iMaxLoopTimes))
@@ -408,7 +367,7 @@ TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr funcname, int LoopsMade, CScrip
 					break;
 				}
 				if ((iRet != TRIGRET_ENDIF) && (iRet != TRIGRET_CONTINUE))
-					return(iRet);
+					return iRet;
 				if (iRet == TRIGRET_CONTINUE)
 					EndContext = StartContext;
 				else
@@ -429,10 +388,10 @@ void CTimedFunctionHandler::Add( CUID uid, int numSeconds, lpctstr funcname )
 
 	int tick = m_curTick;
 	TimedFunction *tf;
-	if ( m_tFrecycled.size() > 0 )
+	if ( !m_tfRecycled.empty() )
 	{
-		tf = m_tFrecycled.back();
-		m_tFrecycled.pop_back();
+		tf = m_tfRecycled.back();
+		m_tfRecycled.pop_back();
 	}
 	else
 	{
@@ -442,7 +401,7 @@ void CTimedFunctionHandler::Add( CUID uid, int numSeconds, lpctstr funcname )
 	tf->elapsed = numSeconds;
 	strcpy( tf->funcname, funcname );
 	if ( m_isBeingProcessed )
-		m_tFqueuedToBeAdded.push_back( tf );
+		m_tfQueuedToBeAdded.push_back( tf );
 	else
 		m_timedFunctions[tick].push_back( tf );
 }
@@ -521,10 +480,9 @@ void CTimedFunctionHandler::r_Write( CScript & s )
 {
 	ADDTOCALLSTACK("CTimedFunctionHandler::r_Write");
 	s.WriteKeyFormat( "CurTick", "%i", m_curTick );
-	for ( int tick = 0; tick < TICK_PER_SEC; tick++ )
+	for ( int tick = 0; tick < TICK_PER_SEC; ++tick )
 	{
-		std::vector<TimedFunction *>::iterator it;
-		for ( it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); ++it )
+		for ( auto it = m_timedFunctions[tick].begin(), end = m_timedFunctions[tick].end(); it != end; ++it )
 		{
 			TimedFunction* tf = *it;
 			if ( tf->uid.IsValidUID() )
@@ -827,7 +785,7 @@ setcount:
 
 successalloc:
 	m_iUIDIndexLast = dwIndex; // start from here next time so we have even distribution of allocation.
-	CObjBase	*pObjPrv = m_UIDs[dwIndex];
+	CObjBase *pObjPrv = m_UIDs[dwIndex];
 	if ( pObjPrv )
 	{
 		//NOTE: We cannot use Delete() in here because the UID will
@@ -842,7 +800,7 @@ successalloc:
 void CWorldThread::SaveThreadClose()
 {
 	ADDTOCALLSTACK("CWorldThread::SaveThreadClose");
-	for ( size_t i = 1; i < GetUIDCount(); i++ )
+	for ( size_t i = 1; i < GetUIDCount(); ++i )
 	{
 		if ( m_UIDs[i] == UID_PLACE_HOLDER )
 			m_UIDs[i] = NULL;
@@ -954,7 +912,7 @@ void CWorldThread::GarbageCollection_New()
 	{
 		g_Log.Event(LOGL_ERROR, "GC: %" PRIuSIZE_T " unplaced objects!\n", iObjCount);
 
-		for (size_t i = 0; i < iObjCount; i++)
+		for (size_t i = 0; i < iObjCount; ++i)
 		{
 			CObjBase * pObj = dynamic_cast<CObjBase*>(m_ObjNew.GetAt(i));
 			if (pObj == NULL)
@@ -990,7 +948,7 @@ void CWorldThread::GarbageCollection_UIDs()
 	GarbageCollection_New();
 
 	dword iCount = 0;
-	for (dword i = 1; i < GetUIDCount(); i++ )
+	for (dword i = 1; i < GetUIDCount(); ++i )
 	{
 		try
 		{
@@ -1155,7 +1113,7 @@ void CWorld::Init()
 	//	initialize all sectors
 	int	sectors = 0;
 	int m = 0;
-	for ( m = 0; m < 256; m++ )
+	for ( m = 0; m < 256; ++m )
 	{
 		if ( !g_MapList.m_maps[m] ) continue;
 		sectors += g_MapList.GetSectorQty(m);
@@ -1165,13 +1123,13 @@ void CWorld::Init()
 	TemporaryString z;
 	TemporaryString z1;
 
-	for ( m = 0; m < 256; m++ )
+	for ( m = 0; m < 256; ++m )
 	{
 		if ( !g_MapList.m_maps[m] ) continue;
 
 		sprintf(z1, " %d=%d", m, g_MapList.GetSectorQty(m));
 		strcat(z, z1);
-		for ( int s = 0; s < g_MapList.GetSectorQty(m); s++ )
+		for ( int s = 0; s < g_MapList.GetSectorQty(m); ++s )
 		{
 			CSector	*pSector = new CSector;
 			ASSERT(pSector);
@@ -1198,7 +1156,7 @@ void CWorld::GetBackupName( CSString & sArchive, lpctstr pszBaseDir, tchar chTyp
 	ADDTOCALLSTACK("CWorld::GetBackupName");
 	int iCount = iSaveCount;
 	int iGroup = 0;
-	for ( ; iGroup<g_Cfg.m_iSaveBackupLevels; iGroup++ )
+	for ( ; iGroup<g_Cfg.m_iSaveBackupLevels; ++iGroup )
 	{
 		if ( iCount & 0x7 )
 			break;
@@ -1268,7 +1226,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 				s->r_Write();
 				szComplexity += ( s->GetCharComplexity() + s->GetInactiveChars())*100 + s->GetItemComplexity();
 			}
-			uint dynStage = m_iSaveStage+1;
+			uint dynStage = m_iSaveStage + 1;
 			if( szComplexity <= g_Cfg.m_iSaveStepMaxComplexity )
 			{
 				uint szSectorCnt = 1;
@@ -1283,14 +1241,14 @@ bool CWorld::SaveStage() // Save world state in stages.
 						{
 							s->r_Write();
 							m_iSaveStage = dynStage;
-							szSectorCnt++;
+							++szSectorCnt;
 						}
 						else
 						{
 							break;
 						}
 					}
-					dynStage++;
+					++dynStage;
 				}
 			}
 		}
@@ -1379,7 +1337,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 			iNextTime = TICK_PER_SEC/2;	// max out at 30 minutes or so.
 		m_timeSave = GetCurrentTime() + iNextTime;
 	}
-	m_iSaveStage++;
+	++m_iSaveStage;
 	return bRc;
 
 	EXC_CATCH;

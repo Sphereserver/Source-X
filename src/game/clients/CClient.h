@@ -463,7 +463,7 @@ public:
 	void addPlayerWarMode();
 
 	void addCharMove( const CChar * pChar );
-	void addCharMove( const CChar * pChar, byte bCharDir );
+	void addCharMove( const CChar * pChar, byte iCharDirFlag );
 	void addChar( const CChar * pChar );
 	void addCharName( const CChar * pChar ); // Singleclick text for a character
 	void addItemName( const CItem * pItem );

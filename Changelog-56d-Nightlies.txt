@@ -53,7 +53,7 @@
 - Fixed: wrong parsing when an unicode prompt response packet is received.
 
 29-05-2016, Kaylala (Khaos)
-Gump Enums, New Container Defines, Misc Switches from Prop Attributes…  to Flags, Added AlterItem Prop.
+Gump Enums, New Container Defines, Misc Switches from Prop Attributes to Flags, Added AlterItem Prop.
 
 - Added: uofiles_enums.h - New Gump Enums for several new containers, cards, and other miscellaneous assets.
 - Added: CContainer.cpp - definitions for the new Container Gump assets.
@@ -299,3 +299,8 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 	the skill execution was (and still is) aborted. Now on skill @Start trigger ACTARG3 is set to 1 if the characters are in the same ally group, otherwise it's 0.
 	Then, if you want to always allow the Provocation, put ACTARG3=0 in @Start or @Success.
 - [sphere_msgs.scp] Added: PROVOCATION_KIND defmessage to be shown if the Provocation skill is aborted due to provoked and target characters being in the same ally group.
+
+12-11-2017, Nolok
+- Fixed: nested random ranges not being parsed correctly.
+- Fixed: random ranges ignoring the last element-weight couple.
+- Changed: ADD command does not show anymore the console error if the argument is invalid. The sysmessage is still displayed.

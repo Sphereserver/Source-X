@@ -823,7 +823,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				tchar * pszArgs = s.GetArgStr();
 				if ( !IsValidGameObjDef( static_cast<lpctstr>(pszArgs) ) )
 				{
-					g_Log.EventWarn("Invalid ADD argument '%s'\n", pszArgs);
+					//g_Log.EventWarn("Invalid ADD argument '%s'\n", pszArgs);
 					SysMessageDefault( DEFMSG_CMD_INVALID );
 					return true;
 				}

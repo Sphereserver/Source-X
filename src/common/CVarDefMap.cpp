@@ -13,7 +13,7 @@ static size_t GetIdentifierString( tchar * szTag, lpctstr pszArgs )
 {
 	// Copy the identifier (valid char set) out to this buffer.
 	size_t i = 0;
-	for ( ;pszArgs[i]; i++ )
+	for ( ;pszArgs[i]; ++i )
 	{
 		if ( ! _ISCSYM(pszArgs[i]))
 			break;

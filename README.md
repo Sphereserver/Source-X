@@ -1,44 +1,58 @@
-# SphereServer
+# SphereServer-eXperimental
 Game server for Ultima Online.
 
 
-## Join gitter chat
-[![Join the chat at https://gitter.im/Sphereserver/Source](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Sphereserver/Source)
+## Join SphereServer Discord channel!
+https://discord.gg/ZrMTXrs
 
 
-## Why a new repository?
+## Why a fork?
+
 This is an experimental fork of SphereServer. Since so many (and sometimes radical) changes were done, it was impossible to work on the main repo.<br>
 Most notable changes (right now) are:
 * Bug fixes and heavy changing of some internal behaviours, when needed, to achieve better speed and stability.
+* New features.
 * Support for CMake, which is now the standard way to generate updated build and project files.
 * Support for 64 bits architecture and TDM-GCC compiler for Windows.
-* Updated external libraries: MySQL, SQLite, LibEv.
 * Added (and still adding) comments to the code to make it more understandable.
 * Reorganization of directories and files, avoiding big files with thousands of lines.
 * Refactoring of the code, updating to most recent programming standards and to the conventions described below.
 
 
 ## Building
+
 You need to build makefiles (and project files if you wish) with CMake for both Linux (GCC) and Windows (MSVC and TDM-GCC).<br>
 Both 32 and 64 bits compilation are supported.<br>
-No pre-built project files included.
+No pre-built project files included.<br>
+When generating project files, if you don't specify a toolchain (setting the `CMAKE_TOOLCHAIN_FILE` variable in the GUI or passing the CLI parameter `-DCMAKE_TOOLCHAIN_FILE="..."`),
+ the CMake script will pick the 32 bits one as default.<br>
+When using Unix Makefiles, you can specify a build type by setting (also this via GUI or CLI) `CMAKE_BUILD_TYPE="build"`, where build is Nightly, Debug or Release. If the build type
+ was not set, by default the makefiles for all of the three build types are generated.
 
+### Ubuntu 12.x to 16.x
+Install the following packages:
+```
+sudo apt-get install git
+sudo apt-get install libmysql++ libmysql++-dev libmysqld-dev libmysqlclient-dev
+```
+If you are on a 64 bits architecture but you want to compile (or execute) a 32 bits binary, you will need to
+ install the MySQL packages adding the postfix `:i386` to each package name.
 
-### Ubuntu
-
-Install mysql library:
-* sudo apt-get install libmysqld-dev
-* sudo apt-get install libmysql++ libmysql++-dev
-* sudo apt-get install libmysqlclient-dev:i386
-<br>If you want to compile to a 64 bits architecture, you'll need also:
-* sudo apt-get install libmysqlclient-dev:x86_64
+### CentOS 6 / 7 - Red Hat 6 / 7 - Fedora 26
+If you're using CentOS 7, Red Hat 7 or Fedora 26, the default package repository only have support to MariaDB instead MySQL. So you need to add the repo for MySQL:<br>
+For CentOS and Red Hat: `sudo rpm -Uvh https://dev.mysql.com/get/mysql57-community-release-el7-9.noarch.rpm`<br>
+For Fedora: `sudo rpm -Uvh https://dev.mysql.com/get/mysql57-community-release-fc26-10.noarch.rpm`<br>
+Then install the required packages via yum (CentOS or RH) or dnf (Fedora): `git gcc-c++ glibc-devel mysql-community-devel mysql-community-libs`<br>
+<br>If you are on a 64 bits architecture but you want to compile (or execute) a 32 bits binary, you will need to install the appropriate gcc package
+ and to install the MySQL packages adding the postfix `.i686` to each package name.
 
 
 ## Running
-Required libraries (Windows):
-<br>	<b>dbghelp.dll</b> Newer OS versions have it by default on system folders so don't mess with it, but for some old OS you may need it, 
-	so there is an old one (32 bits) in /required libraries/dbghelp.dll.
-<br>	<b>libmysql.dll</b> placed on /required libraries/x86/libmysql.dll for 32 bits builds or in /required libraries/x86_64/libmysql.dll for 64 bits builds.
+
+### Required libraries (Windows):
+`dbghelp.dll`: Newer OS versions have it by default on system folders so don't mess with it, but for some old OS you may need it, 
+ so there is an old one (32 bits) in /dlls/dbghelp.dll.<br>
+`libmysql.dll`: Placed on /dlls/x86/libmysql.dll for 32 bits builds or in /dlls/x86_64/libmysql.dll for 64 bits builds.
 
 
 ## Coding Notes (add as you wish to standardize the coding for new contributors)
@@ -60,7 +74,7 @@ Required libraries (Windows):
   to "wchar" for string that should always have Unicode encoding.
 
 
-##Naming Conventions
+### Naming Conventions
 These are meant to be applied to new code and, if there's some old code not following them, it would be nice to update it.
 <br>
 * Pointer variables should have as first prefix "p".
@@ -69,7 +83,6 @@ These are meant to be applied to new code and, if there's some old code not foll
 * Classes need to have the first letter uppercase and the prefix "C".
 * Internal (mostly private) variables of a class or struct need to have the prefix "m_".
 * After the prefix, the descriptive name should begin with an upper letter.
-<br>
 <br>
 <b>Variables meant to hold numerical values:</b>
 * For char, short, int, long, llong, use the prefix: "i".
@@ -85,17 +98,16 @@ These are meant to be applied to new code and, if there's some old code not foll
 Examples:
 * Class or Struct: "CChar".
 * Class internal variable, integer: "m_iAmount".
-* Char pointer: "pcName".
+* Tchar pointer: "ptcName".
 * Dword: "dwUID".
 
-
-##Coding Style Conventions
+### Coding Style Conventions
 * Indent with tabs of size 4.
 * Use the Allman indentation style:<br>
 while (x == y)<br>
 {<br>
-    something();<br>
-    somethingelse();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;something();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;somethingelse();<br>
 }
 * When a single statement follows the if/else clauses, avoid the use of brackets:<br>
 if (bTrue)<br>
@@ -103,7 +115,8 @@ if (bTrue)<br>
 
 
 ## Licensing
-Copyright 2016 SphereServer development team.<br>
+
+Copyright 2017 SphereServer development team.<br>
 
 Licensed under the Apache License, Version 2.0 (the "License").<br>
 You may not use any file of this project except in compliance with the License.<br>

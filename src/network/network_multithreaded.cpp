@@ -1282,7 +1282,7 @@ bool NetworkOutput::processOutput()
 
 	static uchar tick = 0;
 	EXC_TRY("NetworkOutput");
-	tick++;
+	++tick;
 
 	// decide which queues need to be processed
 	bool toProcess[PacketSend::PRI_QTY];

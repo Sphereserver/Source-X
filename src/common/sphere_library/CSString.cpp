@@ -819,15 +819,13 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
 		pszSep = "=, \t";
 
 	// skip leading white space.
-	tchar * pNonWhite = pLine;
-	GETNONWHITESPACE(pNonWhite);
-	if (pNonWhite != pLine)
-		memmove(pLine, pNonWhite, strlen(pNonWhite) + 1);
+	GETNONWHITESPACE(pLine);
 
 	tchar ch;
-	// to track opened/closed brackets
-	bool bQuotes, bCurly, bSquare, bRound, bAngle;
-	bQuotes = bCurly = bSquare = bRound = bAngle = false;
+	// variables used to track opened/closed quotes and brackets
+	bool bQuotes = false;
+	int iCurly, iSquare, iRound, iAngle;
+	iCurly = iSquare = iRound = iAngle = 0;
 
 	// ignore opened/closed brackets if that type of bracket is also a separator
 	bool bSepHasCurly, bSepHasSquare, bSepHasRound, bSepHasAngle;
@@ -860,59 +858,64 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
 			return false;
 		}
 
-		// track opened and closed brackets. we'll ignore items inside brackets, if the bracket isn't a separator in the list
-		if (ch == '{') {
-			if (!bSepHasCurly)
-				if (!bSquare && !bRound && !bAngle)
-					bCurly = true;
-		}
-		else if (ch == '[') {
-			if (!bSepHasSquare)
-				if (!bCurly && !bRound && !bAngle)
-					bSquare = true;
-		}
-		else if (ch == '(') {
-			if (!bSepHasRound)
-				if (!bCurly && !bSquare && !bAngle)
-					bRound = true;
-		}
-		else if (ch == '<') {
-			if (!bSepHasAngle)
-				if (!bCurly && !bSquare && !bRound)
-					bAngle = true;
-		}
-		else if (ch == '}') {
-			if (!bSepHasCurly)
-				if (!bQuotes && bCurly)
-					bCurly = false;
-		}
-		else if (ch == ']') {
-			if (!bSepHasSquare)
-				if (!bQuotes && bSquare)
-					bSquare = false;
-		}
-		else if (ch == ')') {
-			if (!bSepHasRound)
-				if (!bQuotes && bRound)
-					bRound = false;
-		}
-		else if (ch == '>') {
-			if (!bSepHasAngle)
-				if (!bQuotes && bAngle)
-					bAngle = false;
-		}
-
-		//	don't turn this if into an else if!
-		//	We can choose as a separator also one of {[(< >)]} and they have to be treated as such!
 		if (!bQuotes)
 		{
+			// We are not inside a quote, so let's check if the char is a bracket or a separator
+
+			// Here we track opened and closed brackets.
+			//	we'll ignore items inside brackets, if the bracket isn't a separator in the list
+			if (ch == '{') {
+				if (!bSepHasCurly)
+					if (!iSquare && !iRound && !iAngle)
+						++iCurly;
+			}
+			else if (ch == '[') {
+				if (!bSepHasSquare)
+					if (!iCurly && !iRound && !iAngle)
+						++iSquare;
+			}
+			else if (ch == '(') {
+				if (!bSepHasRound)
+					if (!iCurly && !iSquare && !iAngle)
+						++iRound;
+			}
+			else if (ch == '<') {
+				if (!bSepHasAngle)
+					if (!iCurly && !iSquare && !iRound)
+						++iAngle;
+			}
+			else if (ch == '}') {
+				if (!bSepHasCurly)
+					if (iCurly)
+						--iCurly;
+			}
+			else if (ch == ']') {
+				if (!bSepHasSquare)
+					if (iSquare)
+						--iSquare;
+			}
+			else if (ch == ')') {
+				if (!bSepHasRound)
+					if (iRound)
+						--iRound;
+			}
+			else if (ch == '>') {
+				if (!bSepHasAngle)
+					if (iAngle)
+						--iAngle;
+			}
+
 			// separate the string when i encounter a separator, but only if at this point of the string we aren't inside an argument
 			// enclosed by brackets. but, if one of the separators is a bracket, don't care if we are inside or outside, separate anyways.
-			if (!bCurly && !bSquare && !bRound)
+
+			//	don't turn this if into an else if!
+			//	We can choose as a separator also one of {[(< >)]} and they have to be treated as such!
+			if (!iCurly && !iSquare && !iRound)
 				if (strchr(pszSep, ch))		// if ch is a separator
 					break;
-		}
-	}
+		}	// end of the quotes if clause
+		
+	}	// end of the for loop
 
 	if (*pLine == '\0')
 		return false;
@@ -931,8 +934,8 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
 	if (ppArg != NULL)
 		*ppArg = Str_TrimWhitespace(pLine);
 
-	//if (bQuotes == true)
-	//	g_Log.EventError("Quotes opened but not closed in expression. Terminal \" character missing!");
+	//if (iCurly || iSquare || iRound || bQuotes)		// not every bracket or quote has been closed
+	//	return false;
 
 	return true;
 }
@@ -940,6 +943,7 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
 int Str_ParseCmds(tchar * pszCmdLine, tchar ** ppCmd, int iMax, lpctstr pszSep)
 {
 	int iQty = 0;
+
 	if (pszCmdLine != NULL && pszCmdLine[0] != '\0')
 	{
 		ppCmd[0] = pszCmdLine;

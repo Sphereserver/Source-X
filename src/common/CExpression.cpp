@@ -1154,7 +1154,6 @@ int CExpression::GetRangeArgsPos(lpctstr & pExpr, lpctstr (&pArgPos)[128][2], in
 		{
 			while (true)
 			{
-				++pExpr;
 				if (pExpr[0] == '\0')
 				{
 					pArgPos[iQty - 1][1] = pExpr;	// Position of the char ('\0') after of the last character of the argument
@@ -1163,17 +1162,17 @@ int CExpression::GetRangeArgsPos(lpctstr & pExpr, lpctstr (&pArgPos)[128][2], in
 
 				if (ISWHITESPACE(pExpr[0]) || (pExpr[0] == ','))
 				{
-					pArgPos[iQty-1][1] = pExpr;	// Position of the char after the last character of the argument
+					pArgPos[iQty-1][1] = pExpr;		// Position of the char after the last character of the argument
 
 					// is there another argument?
 					GETNONWHITESPACE(pExpr);
-					if (pExpr[0] == '}')		// check if it's really another argument or it's simply the end of the range
+					if (pExpr[0] == '}')			// check if it's really another argument or it's simply the end of the range
 						goto end_of_range;
 					else if (pExpr[0] == '\0')
 						goto end_w_error;
 					break;
 				}
-				else if (pExpr[0] == '}')	// end of the range we are evaluating
+				else if (pExpr[0] == '}')			// end of the range we are evaluating
 				{
 					pArgPos[iQty-1][1] = pExpr;		// Position of the char ('}') after the last character of the argument
 
@@ -1181,6 +1180,8 @@ int CExpression::GetRangeArgsPos(lpctstr & pExpr, lpctstr (&pArgPos)[128][2], in
 					++pExpr;	// consume this and end.
 					return iQty;
 				}
+
+				++pExpr;
 			}
 		}
 	}
@@ -1210,6 +1211,8 @@ int64 CExpression::GetRange(lpctstr & pExpr)
 	if (iQty == 1) // It's just a simple value
 	{
 		tchar pToParse[THREAD_STRING_LENGTH];
+		
+		// Copy the value in a new string
 		const size_t iToParseLen = (pElementsStart[0][1] - pElementsStart[0][0]);
 		memcpy((void*)pToParse, pElementsStart[0][0], iToParseLen * sizeof(tchar));
 		pToParse[iToParseLen] = '\0';
@@ -1221,12 +1224,14 @@ int64 CExpression::GetRange(lpctstr & pExpr)
 	{
 		tchar pToParse[THREAD_STRING_LENGTH];
 
+		// Copy the first element in a new string
 		size_t iToParseLen = (pElementsStart[0][1] - pElementsStart[0][0]);
 		memcpy((void*)pToParse, pElementsStart[0][0], iToParseLen * sizeof(tchar));
 		pToParse[iToParseLen] = '\0';
 		lptstr pToParseCasted = reinterpret_cast<lptstr>(pToParse);
 		llong llValFirst = GetSingle(pToParseCasted);
 
+		// Copy the second element in a new string
 		iToParseLen = (pElementsStart[1][1] - pElementsStart[1][0]);
 		memcpy((void*)pToParse, pElementsStart[1][0], iToParseLen * sizeof(tchar));
 		pToParse[iToParseLen] = '\0';
@@ -1237,13 +1242,20 @@ int64 CExpression::GetRange(lpctstr & pExpr)
 	}
 
 	// I guess it's weighted values
+	if ( (iQty % 2) == 1 )
+	{
+		g_Log.EventError("Even number of elements in the random range: invalid. Forgot to write an element?\n");
+		return 0;
+	}
+
 	// First get the total of the weights
 
 	llong llTotalWeight = 0;
 	llong llWeights[128];
 	tchar pToParse[THREAD_STRING_LENGTH];
-	for ( int i = 1; i+1 < iQty; i+=2 )
+	for ( int i = 1; i+1 <= iQty; i += 2 )
 	{
+		// Copy the weight element in a new string
 		const size_t iToParseLen = (pElementsStart[i][1] - pElementsStart[i][0]);
 		memcpy((void*)pToParse, pElementsStart[i][0], iToParseLen * sizeof(tchar));
 		pToParse[iToParseLen] = '\0';
@@ -1260,7 +1272,7 @@ int64 CExpression::GetRange(lpctstr & pExpr)
 
 	// Now loop to that value
 	int i = 1;
-	for ( ; i+1 < iQty; i+=2 )
+	for ( ; i+1 <= iQty; i += 2 )
 	{
 		llTotalWeight -= llWeights[i];
 		if ( llTotalWeight <= 0 )
@@ -1269,8 +1281,11 @@ int64 CExpression::GetRange(lpctstr & pExpr)
 	
 	--i;	// pick the value instead of the weight
 	const size_t iToParseLen = (pElementsStart[i][1] - pElementsStart[i][0]);
+
+	// Copy the value element in a new string
 	memcpy((void*)pToParse, pElementsStart[i][0], iToParseLen * sizeof(tchar));
 	pToParse[iToParseLen] = '\0';
 	lptstr pToParseCasted = reinterpret_cast<lptstr>(pToParse);
+
 	return GetSingle(pToParseCasted);
 }

@@ -1064,14 +1064,14 @@ void CClient::addCharMove( const CChar * pChar )
 	addCharMove(pChar, pChar->GetDirFlag());
 }
 
-void CClient::addCharMove( const CChar * pChar, byte bCharDir )
+void CClient::addCharMove( const CChar * pChar, byte iCharDirFlag )
 {
 	ADDTOCALLSTACK("CClient::addCharMove");
 	// This char has just moved on screen.
 	// or changed in a subtle way like "hidden"
 	// NOTE: If i have been turned this will NOT update myself.
 
-	new PacketCharacterMove(this, pChar, bCharDir);
+	new PacketCharacterMove(this, pChar, iCharDirFlag);
 }
 
 void CClient::addChar( const CChar * pChar )

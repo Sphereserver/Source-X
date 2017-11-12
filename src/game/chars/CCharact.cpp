@@ -448,9 +448,7 @@ void CChar::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when r
 		{
 			case IT_COMM_CRYSTAL:
 				if ( ContentFind( CResourceID( RES_TYPEDEF,IT_COMM_CRYSTAL ), 0, 0 ) == NULL )
-				{
 					StatFlag_Clear(STATF_COMM_CRYSTAL);
-				}
 				break;
 			case IT_EQ_HORSE:
 				StatFlag_Clear(STATF_OnHorse);
