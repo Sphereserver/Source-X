@@ -42,39 +42,40 @@ lpctstr CLog::GetLogDir() const
 
 dword CLog::GetLogMask() const
 {
-	return ( m_dwMsgMask &~ 0x0f );
+	return ( m_dwMsgMask &~ (LOGL_QTY|LOGF_QTY) );
 }
 
 void CLog::SetLogMask( dword dwMask )
 {
-	m_dwMsgMask = GetLogLevel() | ( dwMask &~ 0x0f );
+	m_dwMsgMask = GetLogLevel() | ( dwMask &~ (LOGL_QTY|LOGF_QTY) );
 }
 
 bool CLog::IsLoggedMask( dword dwMask ) const
 {
-	return ( ((dwMask &~ (0x0f | LOGM_NOCONTEXT | LOGM_DEBUG)) == 0) ||
-			 (( GetLogMask() & ( dwMask &~ 0x0f )) != 0) );
+	return ( ((dwMask &~ (LOGL_QTY | LOGF_QTY | LOGM_NOCONTEXT | LOGM_DEBUG)) == 0) ||	// debug and msgs with no context are not masks to be logged?
+			 (( GetLogMask() & ( dwMask &~ (LOGL_QTY|LOGF_QTY) )) != 0) );
 }
 
 LOG_TYPE CLog::GetLogLevel() const
 {
-	return static_cast<LOG_TYPE>(m_dwMsgMask & 0x0f);
+	return static_cast<LOG_TYPE>(m_dwMsgMask & LOGL_QTY);
 }
 
 void CLog::SetLogLevel( LOG_TYPE level )
 {
-	m_dwMsgMask = GetLogMask() | ( level & 0x0f );
+	m_dwMsgMask = GetLogMask() | ( level & LOGL_QTY );
 }
 
 bool CLog::IsLoggedLevel( LOG_TYPE level ) const
 {
-	return ( ((level & 0x0f) != 0) &&
-			 (GetLogLevel() >= ( level & 0x0f ) ) );
+	return ( ((level & LOGL_QTY) != 0) && (GetLogLevel() >= (level & LOGL_QTY)) );
 }
 
-bool CLog::IsLogged( dword wMask ) const
+bool CLog::IsLogged( dword dwMask ) const
 {
-	return IsLoggedMask(wMask) || IsLoggedLevel(static_cast<LOG_TYPE>(wMask));
+	bool mask = IsLoggedMask(dwMask);
+	bool lvl = IsLoggedLevel((LOG_TYPE)dwMask);
+	return mask || lvl;
 }
 
 bool CLog::OpenLog( lpctstr pszBaseDirName )	// name set previously.
@@ -149,10 +150,10 @@ void CLog::SetColor(ConsoleTextColor color)
 #endif
 }
 
-int CLog::EventStr( dword wMask, lpctstr pszMsg )
+int CLog::EventStr( dword dwMask, lpctstr pszMsg )
 {
 	// NOTE: This could be called in odd interrupt context so don't use dynamic stuff
-	if ( !IsLogged(wMask) )	// I don't care about these.
+	if ( !IsLogged(dwMask) )	// I don't care about these.
 		return 0;
 	else if ( !pszMsg || !*pszMsg )
 		return 0;
@@ -188,7 +189,7 @@ int CLog::EventStr( dword wMask, lpctstr pszMsg )
 
 		lpctstr pszLabel = NULL;
 
-		switch (wMask & 0x07)
+		switch (dwMask & LOGL_QTY)
 		{
 			case LOGL_FATAL:	// fatal error !
 				pszLabel = "FATAL:";
@@ -206,7 +207,7 @@ int CLog::EventStr( dword wMask, lpctstr pszMsg )
 
 		// Get the script context. (if there is one)
 		tchar szScriptContext[ _MAX_PATH + 16 ];
-		if ( !( wMask&LOGM_NOCONTEXT ) && m_pScriptContext )
+		if ( !( dwMask&LOGM_NOCONTEXT ) && m_pScriptContext )
 		{
 			CScriptLineContext LineContext = m_pScriptContext->GetContext();
 			sprintf( szScriptContext, "(%s,%d)", m_pScriptContext->GetFileTitle(), LineContext.m_iLineNum );
@@ -215,48 +216,55 @@ int CLog::EventStr( dword wMask, lpctstr pszMsg )
 			szScriptContext[0] = '\0';
 
 		// Print to screen.
-		if ( !(wMask & LOGM_INIT) && !g_Serv.IsLoading() )
+		if ( !(dwMask & LOGF_LOGFILE_ONLY) )
 		{
-			SetColor(CTCOL_YELLOW);
-			g_Serv.PrintStr( szTime );
-			SetColor(CTCOL_DEFAULT);
-		}
-
-		if ( pszLabel )	// some sort of error
-		{
-			SetColor(CTCOL_RED);
-			g_Serv.PrintStr( pszLabel );
-			if ( (wMask & 0x07) == LOGL_WARN )
+			if ( !(dwMask & LOGM_INIT) && !g_Serv.IsLoading() )
+			{
+				SetColor(CTCOL_YELLOW);
+				g_Serv.PrintStr( szTime );
 				SetColor(CTCOL_DEFAULT);
-			else
-				SetColor(CTCOL_WHITE);
-		}
-		else if ((wMask & LOGM_DEBUG) && !(wMask & LOGM_INIT))	// debug log
-		{
-			SetColor(CTCOL_MAGENTA);
-			g_Serv.PrintStr("DEBUG:");
+			}
+
+			if ( pszLabel )	// some sort of error
+			{
+				SetColor(CTCOL_RED);
+				g_Serv.PrintStr( pszLabel );
+				if ( (dwMask & 0x07) == LOGL_WARN )
+					SetColor(CTCOL_DEFAULT);
+				else
+					SetColor(CTCOL_WHITE);
+			}
+			else if ((dwMask & LOGM_DEBUG) && !(dwMask & LOGM_INIT))	// debug log
+			{
+				pszLabel = "DEBUG:";
+				SetColor(CTCOL_MAGENTA);
+				g_Serv.PrintStr(pszLabel);
+				SetColor(CTCOL_DEFAULT);
+			}
+
+			if ( szScriptContext[0] )
+			{
+				SetColor(CTCOL_CYAN);
+				g_Serv.PrintStr( szScriptContext );
+				SetColor(CTCOL_DEFAULT);
+			}
+			g_Serv.PrintStr( pszMsg );
+
+			// Back to normal color.
 			SetColor(CTCOL_DEFAULT);
 		}
-
-		if ( szScriptContext[0] )
-		{
-			SetColor(CTCOL_CYAN);
-			g_Serv.PrintStr( szScriptContext );
-			SetColor(CTCOL_DEFAULT);
-		}
-		g_Serv.PrintStr( pszMsg );
-
-		// Back to normal color.
-		SetColor(CTCOL_DEFAULT);
-
+		
 		// Print to log file.
-		WriteString( szTime );
-		if ( pszLabel )
-			WriteString( pszLabel );
-		if ( szScriptContext[0] )
-			WriteString( szScriptContext );
+		if ( !(dwMask & LOGF_CONSOLE_ONLY) )
+		{
+			WriteString( szTime );
+			if ( pszLabel )
+				WriteString( pszLabel );
+			if ( szScriptContext[0] )
+				WriteString( szScriptContext );
 
-		WriteString( pszMsg );
+			WriteString( pszMsg );
+		}
 
 		iRet = 1;
 

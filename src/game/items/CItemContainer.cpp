@@ -313,7 +313,6 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 		word m_maxx;
 		word m_maxy;
 	}
-
 	sm_ContSize[] =
 	{
 		{ GUMP_RESERVED, 40, 50, 100, 100 },		// default.
@@ -374,21 +373,23 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 	// Get a random location in the container.
 
 	CItemBase *pItemDef = Item_GetDef();
-	GUMP_TYPE gump = pItemDef->IsTypeContainer();
+	GUMP_TYPE gump = pItemDef->IsTypeContainer();	// Get the TDATA2
 
 	// check for custom values in TDATA3/TDATA4
 	if ( pItemDef->m_ttContainer.m_dwMinXY || pItemDef->m_ttContainer.m_dwMaxXY )
 	{
 		int tmp_MinX = (pItemDef->m_ttContainer.m_dwMinXY & 0xFFFF0000) >> 16;
-		int tmp_MinY = (pItemDef->m_ttContainer.m_dwMinXY & 0xFFFF);
+		int tmp_MinY = (pItemDef->m_ttContainer.m_dwMinXY & 0x0000FFFF);
 		int tmp_MaxX = (pItemDef->m_ttContainer.m_dwMaxXY & 0xFFFF0000) >> 16;
-		int tmp_MaxY = (pItemDef->m_ttContainer.m_dwMaxXY & 0xFFFF);
+		int tmp_MaxY = (pItemDef->m_ttContainer.m_dwMaxXY & 0x0000FFFF);
 		//DEBUG_WARN(("Custom container gump id %d for 0%x\n", gump, GetDispID()));
 		return CPointMap(
 			(word)(tmp_MinX + Calc_GetRandVal(tmp_MaxX - tmp_MinX)),
 			(word)(tmp_MinY + Calc_GetRandVal(tmp_MaxY - tmp_MinY)),
 			0);
 	}
+
+	// No TDATA3 or no TDATA4: check if we have hardcoded in sm_ContSize the size of the gump indicated by TDATA2
 
 	uint i = 0;
 	for ( ; ; ++i )
@@ -448,9 +449,9 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, uchar gridIndex )
 	if (pContDef->m_ttContainer.m_dwMinXY || pContDef->m_ttContainer.m_dwMaxXY)
 	{
 		short tmp_MinX = (short)( (pContDef->m_ttContainer.m_dwMinXY & 0xFFFF0000) >> 16 );
-		short tmp_MinY = (short)( (pContDef->m_ttContainer.m_dwMinXY & 0xFFFF) );
+		short tmp_MinY = (short)( (pContDef->m_ttContainer.m_dwMinXY & 0x0000FFFF) );
 		short tmp_MaxX = (short)( (pContDef->m_ttContainer.m_dwMaxXY & 0xFFFF0000) >> 16 );
-		short tmp_MaxY = (short)( (pContDef->m_ttContainer.m_dwMaxXY & 0xFFFF) );
+		short tmp_MaxY = (short)( (pContDef->m_ttContainer.m_dwMaxXY & 0x0000FFFF) );
 		if (pt.m_x < tmp_MinX)
 			pt.m_x = tmp_MinX;
 		if (pt.m_x > tmp_MaxX)

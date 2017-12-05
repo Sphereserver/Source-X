@@ -36,7 +36,7 @@ public:
 	CSString()
 	{
 #ifdef DEBUG_STRINGS
-		gAmount++;
+		++gAmount;
 #endif
 		Init();
 	}
@@ -48,7 +48,7 @@ public:
 	~CSString()
 	{
 #ifdef DEBUG_STRINGS
-		gAmount--;
+		--gAmount;
 #endif
 		Empty(true);
 	}

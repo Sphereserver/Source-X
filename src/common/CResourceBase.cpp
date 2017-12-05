@@ -193,7 +193,7 @@ void CResourceBase::LoadResourcesOpen( CScript * pScript )
 	while ( pScript->FindNextSection() )
 	{
 		LoadResourceSection( pScript );
-		iSections ++;
+		++iSections;
 	}
 
 	if ( ! iSections )

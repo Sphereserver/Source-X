@@ -20,26 +20,33 @@
 
 enum LOG_TYPE
 {
-	// --critical Level.
+	// --severity Level
+	//	it can be only one of them, so we don't need to use a bitmask
 	LOGL_FATAL	= 1, 	// fatal error ! cannot continue.
 	LOGL_CRIT	= 2, 	// critical. might not continue.
 	LOGL_ERROR	= 3, 	// non-fatal errors. can continue.
 	LOGL_WARN	= 4,	// strange.
 	LOGL_EVENT	= 5,	// Misc major events.
+	LOGL_QTY	= 0xF,	// first 4 bits = binary 1111 = dec 15 = hex 0xF
 
-	// --subject Matter. (severity level is first 4 bits, LOGL_EVENT)
-	LOGM_ACCOUNTS		= 0x00080,
-	LOGM_INIT			= 0x00100,	// start up messages.
-	LOGM_SAVE			= 0x00200,	// world save status.
-	LOGM_CLIENTS_LOG	= 0x00400,	// all clients as they log in and out.
-	LOGM_GM_PAGE		= 0x00800,	// player gm pages.
-	LOGM_PLAYER_SPEAK	= 0x01000,	// All that the players say.
-	LOGM_GM_CMDS		= 0x02000,	// Log all GM commands.
-	LOGM_CHEAT			= 0x04000,	// Probably an exploit !
-	LOGM_KILLS			= 0x08000,	// Log player combat results.
-	LOGM_HTTP			= 0x10000,
-	LOGM_NOCONTEXT		= 0x20000,	// do not include context information
-	LOGM_DEBUG			= 0x40000	// debug kind of message with DEBUG: prefix
+	// --log Flags
+	LOGF_CONSOLE_ONLY	= 0x10,	// do not write this message to the log file
+	LOGF_LOGFILE_ONLY	= 0x20,	// write this message only to the log file
+	LOGF_QTY			= 0xF0,
+
+	// --subject Matter (severity level is first 4 bits, LOGL_EVENT)
+	LOGM_ACCOUNTS		= 0x000100,
+	LOGM_INIT			= 0x000200,	// start up messages.
+	LOGM_SAVE			= 0x000400,	// world save status.
+	LOGM_CLIENTS_LOG	= 0x000800,	// all clients as they log in and out.
+	LOGM_GM_PAGE		= 0x001000,	// player gm pages.
+	LOGM_PLAYER_SPEAK	= 0x002000,	// All that the players say.
+	LOGM_GM_CMDS		= 0x004000,	// Log all GM commands.
+	LOGM_CHEAT			= 0x008000,	// Probably an exploit !
+	LOGM_KILLS			= 0x010000,	// Log player combat results.
+	LOGM_HTTP			= 0x020000,
+	LOGM_NOCONTEXT		= 0x040000,	// do not include context information
+	LOGM_DEBUG			= 0x080000	// debug kind of message with "DEBUG:" prefix	
 };
 
 class CScript;
@@ -52,20 +59,20 @@ extern class CEventLog
 	// May include __LINE__ or __FILE__ macro as well ?
 
 protected:
-	virtual int EventStr(dword wMask, lpctstr pszMsg)
+	virtual int EventStr(dword dwMask, lpctstr pszMsg)
 	{
-		UNREFERENCED_PARAMETER(wMask);
+		UNREFERENCED_PARAMETER(dwMask);
 		UNREFERENCED_PARAMETER(pszMsg);
 		return 0;
 	}
-	virtual int VEvent(dword wMask, lpctstr pszFormat, va_list args);
+	virtual int VEvent(dword dwMask, lpctstr pszFormat, va_list args);
 
 public:
-	int _cdecl Event( dword wMask, lpctstr pszFormat, ... ) __printfargs(3,4)
+	int _cdecl Event( dword dwMask, lpctstr pszFormat, ... ) __printfargs(3,4)
 	{
 		va_list vargs;
 		va_start( vargs, pszFormat );
-		int iret = VEvent( wMask, pszFormat, vargs );
+		int iret = VEvent( dwMask, pszFormat, vargs );
 		va_end( vargs );
 		return iret;
 	}
@@ -164,9 +171,9 @@ public:
 	LOG_TYPE GetLogLevel() const;
 	void SetLogLevel( LOG_TYPE level );
 	bool IsLoggedLevel( LOG_TYPE level ) const;
-	bool IsLogged( dword wMask ) const;
+	bool IsLogged( dword dwMask ) const;
 
-	virtual int EventStr( dword wMask, lpctstr pszMsg );
+	virtual int EventStr( dword dwMask, lpctstr pszMsg );
 	void _cdecl CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ...  ) __printfargs(3,4);
 
 public:

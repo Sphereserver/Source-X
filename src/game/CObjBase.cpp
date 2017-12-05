@@ -2172,7 +2172,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				if ( iArgQty < 2 )
 					piCmd[1] = 1;
 
-				CUID uid = (uint)(piCmd[0]);
+				CUID uid = (dword)(piCmd[0]);
 				pObjNear = uid.ObjFind();
 				if ( !pObjNear )
 					return false;

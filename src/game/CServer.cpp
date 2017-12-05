@@ -1777,29 +1777,23 @@ bool CServer::Load()
 	EXC_TRY("Load");
 
 	EXC_SET("print sphere infos");
-	g_Log.Event(LOGM_INIT, "%s.\n", g_szServerDescription);
+	g_Log.Event(LOGM_INIT|LOGF_CONSOLE_ONLY, "%s.\n", g_szServerDescription);
 #ifdef __GITREVISION__
-	g_Log.Event(LOGM_INIT, "Compiled at %s (%s) [build %d / GIT hash %s]\n", __DATE__, __TIME__, __GITREVISION__, __GITHASH__);
+	g_Log.Event(LOGM_INIT|LOGF_CONSOLE_ONLY, "Compiled at %s (%s) [build %d / GIT hash %s]\n\n", __DATE__, __TIME__, __GITREVISION__, __GITHASH__);
 #else
-	g_Log.Event(LOGM_INIT, "Compiled at %s (%s)\n", __DATE__, __TIME__);
+	g_Log.Event(LOGM_INIT|LOGF_CONSOLE_ONLY, "Compiled at %s (%s)\n\n", __DATE__, __TIME__);
 #endif
 #ifdef _NIGHTLYBUILD
-	g_Log.EventWarn("\r\n-----------------------------------------------------------------\r\n"
-		"This is a nightly build of SphereServer. This build is to be used\r\n"
-		"for testing and/or bug reporting ONLY. DO NOT run this build on a\r\n"
-		"live shard unless you know what you are doing!\r\n"
-		"Nightly builds are automatically made at every commit to the source code\r\n"
-		"repository and might contain errors, might be unstable or even destroy\r\n"
-		"your shard as they are mostly untested!\r\n"
-		"-----------------------------------------------------------------\r\n\r\n");
+	static lpctstr pszNightlyMsg = "\r\n"
+		"-----------------------------------------------------------------\r\n"
+		"This is a nightly build of SphereServer. This build is to be used for testing and/or bug reporting ONLY.\r\n"
+		"DO NOT run this build on a live shard unless you know what you are doing!\r\n"
+		"Nightly builds are automatically made at every commit to the source code repository and might\r\n"
+		"contain errors, might be unstable or even destroy your shard as they are mostly untested!\r\n"
+		"-----------------------------------------------------------------\r\n\r\n";
 
-	if (!g_Cfg.m_bAgree)
-	{
-		g_Log.EventError("Please write AGREE=1 in Sphere.ini file to acknowledge that\nyou understand the terms of use for nightly builds.\n");
-		return false;
-	}
+	g_Log.Event(LOGL_WARN|LOGF_CONSOLE_ONLY, pszNightlyMsg);
 #endif
-	g_Log.Event(LOGM_INIT, "\n");
 
 #ifdef _WIN32
 	EXC_SET("init winsock");
@@ -1829,10 +1823,19 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 	EXC_SET("loading ini");
 	g_Cfg.LoadIni(false);
 
+	// Now that we have read the ini file, the folder for the log files has been set and i can write the msgs
+	g_Log.Event(LOGM_INIT|LOGF_LOGFILE_ONLY, "%s.\n", g_szServerDescription);
+#ifdef __GITREVISION__
+	g_Log.Event(LOGM_INIT|LOGF_LOGFILE_ONLY, "Compiled at %s (%s) [build %d / GIT hash %s]\n\n", __DATE__, __TIME__, __GITREVISION__, __GITHASH__);
+#else
+	g_Log.Event(LOGM_INIT|LOGF_LOGFILE_ONLY, "Compiled at %s (%s)\n\n", __DATE__, __TIME__);
+#endif
+
 #ifdef _NIGHTLYBUILD
+	g_Log.Event(LOGL_WARN|LOGF_LOGFILE_ONLY, pszNightlyMsg);
 	if (!g_Cfg.m_bAgree)
 	{
-		g_Log.EventError("Please write AGREE=1 in Sphere.ini file to acknowledge that\nyou understand the terms of use for nightly builds.\n");
+		g_Log.Event(LOGL_ERROR,"Please write AGREE=1 in Sphere.ini file to acknowledge that\nyou understand the risks of using nightly builds.\n");
 		return false;
 	}
 #endif

@@ -69,21 +69,22 @@ bool WritePidFile(int iMode = 0)
 	}
 }
 
-int CEventLog::VEvent( dword wMask, lpctstr pszFormat, va_list args )
+int CEventLog::VEvent( dword dwMask, lpctstr pszFormat, va_list args )
 {
 	if ( pszFormat == NULL || pszFormat[0] == '\0' )
 		return 0;
 
 	TemporaryString pszTemp;
 	size_t len = vsnprintf(pszTemp, (SCRIPT_MAX_LINE_LEN - 1), pszFormat, args);
-	if ( ! len ) strncpy(pszTemp, pszFormat, (SCRIPT_MAX_LINE_LEN - 1));
+	if ( ! len )
+		strncpy(pszTemp, pszFormat, (SCRIPT_MAX_LINE_LEN - 1));
 
 	// This get rids of exploits done sending 0x0C to the log subsytem.
 	// tchar *	 pFix;
 	// if ( ( pFix = strchr( pszText, 0x0C ) ) )
 	//	*pFix = ' ';
 
-	return EventStr(wMask, pszTemp);
+	return EventStr(dwMask, pszTemp);
 }
 
 lpctstr const g_Stat_Name[STAT_QTY] =	// not sorted obviously.
@@ -100,27 +101,27 @@ lpctstr g_szServerDescription =	SPHERE_TITLE " Version " SPHERE_VERSION " " SPHE
 
 int g_szServerBuild = 0;
 
-size_t CObjBase::sm_iCount = 0;	// UID table.
+size_t CObjBase::sm_iCount = 0;			// UID table.
 llong llTimeProfileFrequency = 1000;	// time profiler
 
 // game servers stuff.
-CWorld		g_World;	// the world. (we save this stuff)
-CServer		g_Serv;		// current state stuff not saved.
+CWorld			g_World;			// the world. (we save this stuff)
+CServer			g_Serv;				// current state stuff not saved.
 CServerConfig	g_Cfg;
-CUOInstall g_Install;
-CVerDataMul	g_VerData;
-CExpression g_Exp;		// Global script variables.
-CLog		g_Log;
-CEventLog * g_pLog = &g_Log;
-CAccounts	g_Accounts;	// All the player accounts. name sorted CAccount
-CSStringList	g_AutoComplete;	// auto-complete list
-CScriptProfiler g_profiler;		// script profiler
-CUOMapList	g_MapList;			// global maps information
+CUOInstall		g_Install;
+CVerDataMul		g_VerData;
+CExpression		g_Exp;				// Global script variables.
+CLog			g_Log;
+CEventLog		* g_pLog = &g_Log;
+CAccounts		g_Accounts;			// All the player accounts. name sorted CAccount
+CSStringList	g_AutoComplete;		// auto-complete list
+CScriptProfiler g_profiler;			// script profiler
+CUOMapList		g_MapList;			// global maps information
 
 
 lpctstr GetTimeMinDesc( int minutes )
 {
-	tchar	*pTime = Str_GetTemp();
+	tchar *pTime = Str_GetTemp();
 
 	int minute = minutes % 60;
 	int hour = ( minutes / 60 ) % 24;
@@ -208,7 +209,7 @@ size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord )
 	// Make sure we look for starts of words.
 
 	size_t j = 0;
-	for ( size_t i = 0; ; i++ )
+	for ( size_t i = 0; ; ++i )
 	{
 		if ( pszKeyWord[j] == '\0' || pszKeyWord[j] == ',')
 		{
@@ -234,7 +235,7 @@ size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord )
 				continue;
 		}
 		if ( toupper( pTextSearch[i] ) == toupper( pszKeyWord[j] ))
-			j++;
+			++j;
 		else
 			j = 0;
 	}
