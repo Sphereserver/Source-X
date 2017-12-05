@@ -304,3 +304,6 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Fixed: nested random ranges not being parsed correctly.
 - Fixed: random ranges ignoring the last element-weight couple.
 - Changed: ADD command does not show anymore the console error if the argument is invalid. The sysmessage is still displayed.
+
+05-12-2017, Drk84
+- [Port from Source, 05-09-2016, Coruja]  Fixed: TimerCall setting on sphere.ini using wrong time format (hours instead minutes) to call f_onserver_timer function
