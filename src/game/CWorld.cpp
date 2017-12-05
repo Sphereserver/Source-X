@@ -2478,8 +2478,8 @@ void CWorld::OnTick()
 	{
 		if ( g_Cfg.m_iTimerCall )
 		{
-			m_timeCallUserFunc = GetCurrentTime() + g_Cfg.m_iTimerCall*60*TICK_PER_SEC;
-			CScriptTriggerArgs args(g_Cfg.m_iTimerCall);
+			m_timeCallUserFunc = GetCurrentTime() + g_Cfg.m_iTimerCall;
+			CScriptTriggerArgs args(g_Cfg.m_iTimerCall / (60 * TICK_PER_SEC));
 			g_Serv.r_Call("f_onserver_timer", &g_Serv, &args);
 		}
 	}
