@@ -166,23 +166,6 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg )
 		// Put up the date/time.
 		CSTime datetime = CSTime::GetCurrentTime();	// last real time stamp.
 
-		if ( datetime.GetDaysTotal() != m_dateStamp.GetDaysTotal())
-		{
-			// it's a new day, open with new day name.
-			Close();	// LINUX should alrady be closed.
-
-			OpenLog( NULL );
-			Printf( "%s", datetime.Format(NULL) );
-		}
-		else
-		{
-#ifndef _WIN32
-			uint	mode = OF_READWRITE|OF_TEXT;
-			mode |= OF_SHARE_DENY_WRITE;
-			Open(NULL, mode);	// LINUX needs to close and re-open for each log line !
-#endif
-		}
-
 		tchar szTime[32];
 		sprintf(szTime, "%02d:%02d:", datetime.GetHour(), datetime.GetMinute());
 		m_dateStamp = datetime;
@@ -257,6 +240,22 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg )
 		// Print to log file.
 		if ( !(dwMask & LOGF_CONSOLE_ONLY) )
 		{
+			if ( datetime.GetDaysTotal() != m_dateStamp.GetDaysTotal())
+			{
+				// it's a new day, open a log file with new day name.
+				Close();	// LINUX should alrady be closed.
+
+				OpenLog( NULL );
+				Printf( "%s", datetime.Format(NULL) );
+			}
+#ifndef _WIN32
+			else
+			{
+				uint mode = OF_READWRITE|OF_TEXT|OF_SHARE_DENY_WRITE;
+				Open(NULL, mode);	// LINUX needs to close and re-open for each log line !
+			}
+#endif
+
 			WriteString( szTime );
 			if ( pszLabel )
 				WriteString( pszLabel );
@@ -264,13 +263,14 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg )
 				WriteString( szScriptContext );
 
 			WriteString( pszMsg );
+
+#ifndef _WIN32
+			Close();
+#endif
 		}
 
 		iRet = 1;
 
-#ifndef _WIN32
-		Close();
-#endif
 	}
 	catch (...)
 	{
