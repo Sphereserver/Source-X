@@ -307,3 +307,6 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 
 05-12-2017, Drk84
 - [Port from Source, 05-09-2016, Coruja]  Fixed: TimerCall setting on sphere.ini using wrong time format (hours instead minutes) to call f_onserver_timer function
+
+13-12-2017, Drk84
+- Possible fix for stat cap issue when the sum of the players stats are at StatCap -1. 
