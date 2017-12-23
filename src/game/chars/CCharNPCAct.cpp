@@ -1050,7 +1050,10 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 		return false;
 
 	if ( m_pNPC->m_Brain == NPCBRAIN_BERSERK || !Calc_GetRandVal(6) )
-		SoundChar(Calc_GetRandVal(2) ? CRESND_RAND1 : CRESND_RAND2);		// Make some random noise
+	{
+		CRESND_TYPE snd = GetDefaultSound();
+		SoundChar(Calc_GetRandVal(2) ? snd : (CRESND_TYPE)(snd+1));		// Make some random noise
+	}
 
 	int iRange = GetSight();
 	int iRangeBlur = UO_MAP_VIEW_SIGHT;
@@ -1142,33 +1145,49 @@ void CChar::NPC_Act_Wander()
 
 	if ( Can(CAN_C_NONMOVER) )
 		return;
-	if ( ! Calc_GetRandVal( 7 + ( Stat_GetVal(STAT_DEX) / 30 )))
-	{
-		// Stop wandering ?
-		Skill_Start( SKILL_NONE );
-		return;
-	}
 
-	/*if ( Calc_GetRandVal( 2 ) )
+	int iStopWandering = 0;
+
+	if ( ! Calc_GetRandVal( 7 + ( Stat_GetVal(STAT_DEX) / 30 )) )
+		iStopWandering = 1;			// i'm stopping to wander "for the dexterity". 
+
+	if ( !Calc_GetRandVal(3) )
 	{
 		if ( NPC_LookAround() )
-			return;
-	}*/
+			iStopWandering = 2;		// i'm stopping to wander because i have seen something interesting 
+	}
 
 	// Staggering Walk around.
 	m_Act_p = GetTopPoint();
-	m_Act_p.Move( GetDirTurn( m_dirFace, 1 - Calc_GetRandVal(3)));
+	m_Act_p.Move( GetDirTurn(m_dirFace, 1 - Calc_GetRandVal(3)) );
+
+	int iReturnToHome = 0;
 
 	if ( m_pNPC->m_Home_Dist_Wander && m_ptHome.IsValidPoint() )
 	{
 		if ( m_Act_p.GetDist(m_ptHome) > m_pNPC->m_Home_Dist_Wander )
-		{
-			Skill_Start(NPCACT_GO_HOME);
-			return;
-		}
+			iReturnToHome = 1;
 	}
 
-	NPC_WalkToPoint();
+	if (IsTrigUsed(TRIGGER_NPCACTWANDER))
+	{
+		CScriptTriggerArgs Args(iStopWandering, iReturnToHome);
+		if (OnTrigger(CTRIG_NPCActWander, const_cast<CChar*>(this), &Args) == TRIGRET_RET_TRUE)
+			return;
+
+		iStopWandering = (int)Args.m_iN1;
+		iReturnToHome = (int)Args.m_iN2;
+	}
+
+	if (iStopWandering)
+		Skill_Start( SKILL_NONE );
+	else
+	{
+		if (iReturnToHome)
+			Skill_Start(NPCACT_GO_HOME);
+		else
+			NPC_WalkToPoint();
+	}
 }
 
 void CChar::NPC_Act_Guard()
@@ -1202,12 +1221,12 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 		return false;
 
 	EXC_TRY("NPC_Act_Follow")
-		CChar * pChar = Fight_IsActive() ? m_Fight_Targ_UID.CharFind() : m_Act_UID.CharFind();
+	CChar * pChar = Fight_IsActive() ? m_Fight_Targ_UID.CharFind() : m_Act_UID.CharFind();
 	if (pChar == NULL)
 	{
 		// free to do as i wish !
 		Skill_Start(SKILL_NONE);
-		return(false);
+		return false;
 	}
 
 	EXC_SET("Trigger");
