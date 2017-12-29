@@ -1049,16 +1049,17 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 	if ( !m_pNPC || !pSector )
 		return false;
 
-	if ( m_pNPC->m_Brain == NPCBRAIN_BERSERK || !Calc_GetRandVal(6) )
+	if ( !IsPlayableCharacter() && ( (m_pNPC->m_Brain == NPCBRAIN_BERSERK) || !Calc_GetRandVal(6) ) )
 	{
-		CRESND_TYPE snd = GetDefaultSound();
-		SoundChar(Calc_GetRandVal(2) ? snd : (CRESND_TYPE)(snd+1));		// Make some random noise
+		// Make some random noise, unrelated to the action (if action related, use CRESND_TYPE and SoundChar)
+		SOUND_TYPE snd = GetDefaultSound();
+		Sound(Calc_GetRandVal(2) ? snd : (SOUND_TYPE)(snd+1));
 	}
 
 	int iRange = GetSight();
 	int iRangeBlur = UO_MAP_VIEW_SIGHT;
 
-	// If I can't move don't look to far.
+	// If I can't move don't look too far.
 	CCharBase *pCharDef = Char_GetDef();
 	if ( !pCharDef->Can(CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY|CAN_C_HOVER|CAN_C_RUN) || IsStatFlag(STATF_Freeze|STATF_Stone) )
 	{

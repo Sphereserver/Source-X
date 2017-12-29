@@ -2281,7 +2281,7 @@ CItem * CChar::Make_Figurine( CUID uidOwner, ITEMID_TYPE id )
 	if ( IsStatFlag(STATF_Insubstantial) )
 		pItem->SetAttr(ATTR_INVIS);
 
-	SoundChar(GetDefaultSound());	// Horse winny
+	Sound(GetDefaultSound());			// Horse winny
 	StatFlag_Set(STATF_Ridden);
 	Skill_Start(NPCACT_RIDDEN);
 	SetDisconnected();

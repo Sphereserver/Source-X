@@ -3547,16 +3547,16 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			break;
 		case CHV_BARK:
 		{
-			CRESND_TYPE snd;
+			SOUND_TYPE snd;
 			if (s.HasArgs())
-				snd = (CRESND_TYPE)s.GetArgVal();
+				snd = (SOUND_TYPE)s.GetArgVal();
 			else
 			{
 				snd = GetDefaultSound();
 				if (Calc_GetRandVal(2))
-					snd = (CRESND_TYPE)(snd + 1);
+					snd = (SOUND_TYPE)(snd + 1);
 			}
-			SoundChar( snd );
+			Sound( snd );
 			break;
 		}
 		case CHV_BOUNCE: // uid
