@@ -310,3 +310,6 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 
 13-12-2017, Drk84
 - Possible fix for stat cap issue when the sum of the players stats are at StatCap -1. 
+
+29-12-2017, Drk84
+- Fix for the spellchanneling item property.
