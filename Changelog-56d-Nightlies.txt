@@ -81,7 +81,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 	src = The NPC receiving the money.
 	argo(if any) = The stack of gold used to pay (ie: training)
 
-- OWNER is now RW, it can be used to set NPC's owner directly without the need of custom   functions.
+- OWNER is now RW, it can be used to set NPC's owner directly without the need of custom functions.
 - Added NEWSUMMON, working as NEWNPC and NEWITEM, eg:
 	serv.newsummon=c_ogre,15
 	new.p=<p>	// Will summon an ogre for 15 seconds on your position, not giving
@@ -228,7 +228,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - [Port from Source, 14-02-2017, Coruja] Fixed: Combat Hit Chance formulas incorrectly assuming that defender is always using the same combat skill as the attacker.
   
 24-10-2017, Drk84 
-- [Port from Source, 19-09-2017, Coruja] Fixed: Client 'Open Spellbook' macro making the client crash if it try to open the requested spellbook gump when the spellbook item is not loaded yet.
+- [Port from Source, 19-09-2017, Coruja] Fixed: Client 'Open Spellbook' macro making the client crash if it tries to open the requested spellbook gump when the spellbook item is not loaded yet.
 
 24-10-2017, Nolok
 - Fixed: using ADDCIRCLE without the second argument caused sphere to crash. Also, its use on non t_spellbook items was incorrectly allowed.
@@ -239,7 +239,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 	Changed: Updated 'weight' tooltip on containers.
 
 24-10-2017, Drk84
-- [Port from Source, 27-09-2016, Coruja]  Fixed: Worldsave not saving DAM/ARMOR properties set manually on chars/items already placed on world.
+- [Port from Source, 27-09-2016, Coruja] Fixed: Worldsave not saving DAM/ARMOR properties set manually on chars/items already placed on world.
 
 28-10-2017, Drk84
 - [Port from Source, 08-05-2016, Coruja] Fixed: Explosion potions not working correctly.
@@ -317,9 +317,14 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 	RETURN 1 stops decisions for this step, so it will not return to home, do another step or stop wandering (again, for this step).
 - Fixed: actions or events requiring an NPC to play its default sound played only sound 0 or 1. Now the SOUND property of the CHARDEF is used, if not set SOUND 1 or 2 will be played.
 	Examples of these events are: BARK without arguments, NPC "looking around", hearing a command, shrinking/unshrinking.
-- Updated: NPCs when wondering around now do "look around", doing in fact some AI checks.
+- Updated: NPCs when wandering around now do "look around", doing in fact some AI checks.
 	This also makes the trigger @NpcLookAtChar fire more times than before.
-- Updated: if DEBUGF_ADVANCE_STATS is enabled in the .ini, the gain chance will be shown also on non-debug builds
+- Updated: if DEBUGF_ADVANCE_STATS is enabled in the .ini, the gain chance will be shown also on non-debug builds.
 
-29-12-2017, Drk84,
+29-12-2017, Nolok
+- Fixed: wrong sound played when using BARK, shrinking/unshrinking a pet, pet receiving a speech command.
+- Fixed: playable characters (men, elves and gargoyles) NPCs should not make random noises when wandering around.
+- Added: debug message when trying to retrieve the SOUND property from an NPC whose property wasn't set.
+
+29-12-2017, Drk84
 - Fix for the spellchanneling item property.

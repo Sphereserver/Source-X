@@ -25,8 +25,8 @@ void CChar::NPC_OnPetCommand( bool fSuccess, CChar * pMaster )
 		Speak( fSuccess ? g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_SUCCESS ) : g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_FAILURE ) );
 	else
 	{
-		CRESND_TYPE snd = GetDefaultSound();
-		SoundChar( fSuccess ? snd : (CRESND_TYPE)(snd + 1) );
+		SOUND_TYPE snd = GetDefaultSound();
+		Sound( fSuccess ? snd : (SOUND_TYPE)(snd + 1) );	// random sound
 	}
 }
 

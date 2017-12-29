@@ -244,12 +244,11 @@ enum ANIM_TYPE_NEW	// not all creatures animate the same for some reason. http:/
 };
 
 
-enum CRESND_TYPE	// Creature sound offset types.
-{	// Some creatures have no random sounds. others (humans,birds) have many sounds.
-    CRESND_RAND1 = 1,	// just random noise. or default "yes" response
-    CRESND_RAND2,		// just random noise. or default "no" response
+enum CRESND_TYPE	// Placeholders (not real sound IDs): the SoundChar method chooses the best sound for each creature
+{
+    CRESND_RAND1,	// just random noise. or default "yes" response
+    CRESND_RAND2,	// just random noise. or default "no" response
     
-	// Placeholders: the SoundChar method chooses the best sound for each creature
 	CRESND_HIT,
     CRESND_GETHIT,
     CRESND_DIE

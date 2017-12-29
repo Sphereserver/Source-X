@@ -334,7 +334,7 @@ public:
 
 	int	 GetHealthPercent() const;
 	lpctstr GetTradeTitle() const; // Paperdoll title for character p (2)
-	CRESND_TYPE GetDefaultSound() const;
+	SOUND_TYPE GetDefaultSound() const;
 
 	// Information about us.
 	CREID_TYPE GetID() const;

@@ -1023,7 +1023,7 @@ badcmd:
 				}
 
 				GETNONWHITESPACE( pszKey );
-				int64	iLen	= strlen( pszKey );
+				int64 iLen	= strlen( pszKey );
 				if ( iPos < 0 )
 					iPos	= iLen + iPos;
 				if ( iPos < 0 )
