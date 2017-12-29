@@ -14,20 +14,19 @@ void CChar::NPC_OnPetCommand( bool fSuccess, CChar * pMaster )
 	if ( m_pPlayer )	// players don't respond
 		return;
 
-	if (  !g_Cfg.m_sSpeechPet.IsEmpty() )
-		return;
+	if ( !g_Cfg.m_sSpeechPet.IsEmpty() )
+		return;			// if using a custom SPEECH and still want sound, just put BARK on each command
 
 	if ( !CanSee( pMaster ) )
 		return;
 
 	// i take a command from my master.
-	if ( NPC_CanSpeak())
-	{
-		Speak( fSuccess? g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_SUCCESS ) : g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_FAILURE ) );
-	}
+	if ( NPC_CanSpeak() )
+		Speak( fSuccess ? g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_SUCCESS ) : g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_FAILURE ) );
 	else
 	{
-		SoundChar( fSuccess? CRESND_RAND1 : CRESND_RAND2 );
+		CRESND_TYPE snd = GetDefaultSound();
+		SoundChar( fSuccess ? snd : (CRESND_TYPE)(snd + 1) );
 	}
 }
 

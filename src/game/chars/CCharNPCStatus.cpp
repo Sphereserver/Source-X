@@ -415,7 +415,7 @@ bool CChar::NPC_CanSpeak() const
 		return true;
 
 	CCharBase * pCharDef = Char_GetDef();
-	return( pCharDef != NULL && pCharDef->m_Speech.GetCount() > 0 );
+	return ( pCharDef != NULL && (pCharDef->m_Speech.GetCount() > 0) );
 }
 
 bool CChar::NPC_FightMayCast(bool fCheckSkill) const

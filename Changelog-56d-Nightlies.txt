@@ -311,5 +311,15 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 13-12-2017, Drk84
 - Possible fix for stat cap issue when the sum of the players stats are at StatCap -1. 
 
-29-12-2017, Drk84
+23-12-2017, Nolok
+- Added: trigger @NPCActWander. It is called each step an NPC does while wandering. ARGN1 = 0 if it will continue to wander, 1 if randomly deciding to stop, 2 if deciding to stop because
+	after looking around it found something interesting; ARGN2 = 1 if it's returning to home, 0 otherwise.
+	RETURN 1 stops decisions for this step, so it will not return to home, do another step or stop wandering (again, for this step).
+- Fixed: actions or events requiring an NPC to play its default sound played only sound 0 or 1. Now the SOUND property of the CHARDEF is used, if not set SOUND 1 or 2 will be played.
+	Examples of these events are: BARK without arguments, NPC "looking around", hearing a command, shrinking/unshrinking.
+- Updated: NPCs when wondering around now do "look around", doing in fact some AI checks.
+	This also makes the trigger @NpcLookAtChar fire more times than before.
+- Updated: if DEBUGF_ADVANCE_STATS is enabled in the .ini, the gain chance will be shown also on non-debug builds
+
+29-12-2017, Drk84,
 - Fix for the spellchanneling item property.

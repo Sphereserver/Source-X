@@ -331,8 +331,10 @@ public:
 	bool IsHuman() const;
 	bool IsElf() const;
 	bool IsGargoyle() const;
+
 	int	 GetHealthPercent() const;
 	lpctstr GetTradeTitle() const; // Paperdoll title for character p (2)
+	CRESND_TYPE GetDefaultSound() const;
 
 	// Information about us.
 	CREID_TYPE GetID() const;
@@ -343,8 +345,8 @@ public:
 	lpctstr GetName() const;
 	lpctstr GetNameWithoutIncognito() const;
 	lpctstr GetName( bool fAllowAlt ) const;
-
 	bool SetName( lpctstr pName );
+
 	height_t GetHeightMount( bool fEyeSubstract = false ) const;
 	height_t GetHeight() const;
 

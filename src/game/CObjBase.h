@@ -1092,6 +1092,7 @@ enum CTRIG_TYPE
 	CTRIG_NPCActFight,      ///< (NPC only) I have to fight against my target.
 	CTRIG_NPCActFollow,     ///< (NPC only) decided to follow someone.
 	CTRIG_NPCAction,        ///< (NPC only) doing some action.
+	CTRIG_NPCActWander,		///< (NPC only) i'm wandering aimlessly
 	CTRIG_NPCHearGreeting,  ///< (NPC only) i have been spoken to for the first time. (no memory of previous hearing).
 	CTRIG_NPCHearUnknown,   ///< (NPC only) I heard something i don't understand.
 	CTRIG_NPCLookAtChar,    ///< (NPC only) I found a char, i'm looking at it now.

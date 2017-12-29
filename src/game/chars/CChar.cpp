@@ -125,6 +125,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@NPCActFight",
 	"@NPCActFollow",		// (NPC only) following someone right now
 	"@NPCAction",
+	"@NPCActWander",		// (NPC only) i'm wandering aimlessly
 	"@NPCHearGreeting",		// (NPC only) i have been spoken to for the first time. (no memory of previous hearing)
 	"@NPCHearUnknown",		//+(NPC only) I heard something i don't understand.
 	"@NPCLookAtChar",		// (NPC only) look at a character
@@ -2720,9 +2721,7 @@ do_default:
 		case CHC_TITLE:
 			{
 				if (strlen(pszKey) == 5)
-				{
 					sVal = m_sTitle; //GetTradeTitle
-				}
 				else
 					sVal = GetTradeTitle();
 			}break;
@@ -3547,8 +3546,19 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			pCharSrc->GetClient()->addBankOpen( this, ((s.HasArgs()) ? static_cast<LAYER_TYPE>(s.GetArgVal()) : LAYER_BANKBOX ));
 			break;
 		case CHV_BARK:
-			SoundChar( ( s.HasArgs() ? static_cast<CRESND_TYPE>(s.GetArgVal()) : ( Calc_GetRandVal(2) ? CRESND_RAND1 : CRESND_RAND2 )));
+		{
+			CRESND_TYPE snd;
+			if (s.HasArgs())
+				snd = (CRESND_TYPE)s.GetArgVal();
+			else
+			{
+				snd = GetDefaultSound();
+				if (Calc_GetRandVal(2))
+					snd = (CRESND_TYPE)(snd + 1);
+			}
+			SoundChar( snd );
 			break;
+		}
 		case CHV_BOUNCE: // uid
 			return ItemBounce( CUID( s.GetArgVal()).ItemFind());
 		case CHV_BOW:
