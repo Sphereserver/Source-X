@@ -308,6 +308,9 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 05-12-2017, Drk84
 - [Port from Source, 05-09-2016, Coruja]  Fixed: TimerCall setting on sphere.ini using wrong time format (hours instead minutes) to call f_onserver_timer function
 
+13-12-2017, Drk84
+- Possible fix for stat cap issue when the sum of the players stats are at StatCap -1. 
+
 23-12-2017, Nolok
 - Added: trigger @NPCActWander. It is called each step an NPC does while wandering. ARGN1 = 0 if it will continue to wander, 1 if randomly deciding to stop, 2 if deciding to stop because
 	after looking around it found something interesting; ARGN2 = 1 if it's returning to home, 0 otherwise.
@@ -322,3 +325,6 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Fixed: wrong sound played when using BARK, shrinking/unshrinking a pet, pet receiving a speech command.
 - Fixed: playable characters (men, elves and gargoyles) NPCs should not make random noises when wandering around.
 - Added: debug message when trying to retrieve the SOUND property from an NPC whose property wasn't set.
+
+29-12-2017, Drk84
+- Fix for the spellchanneling item property.

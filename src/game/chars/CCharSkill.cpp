@@ -423,8 +423,10 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 		short iStatVal = Stat_GetBase(static_cast<STAT_TYPE>(i));
 		if ( iStatVal <= 0 )	// some odd condition
 			continue;
-
-		if (iStatSum >= iStatCap)	// stat cap already reached
+		
+		/*Before there was iStatSum >= iStatCap:
+		That condition prevented the decrease of stats when the player's Stats were equal to the StatCap */
+		if (iStatSum > iStatCap)	// stat cap already reached
 			break;
 
 		short iStatMax = Stat_GetLimit(static_cast<STAT_TYPE>(i));

@@ -2321,16 +2321,18 @@ bool CChar::Spell_Unequip( LAYER_TYPE layer )
 	CItem * pItemPrev = LayerFind( layer );
 	if ( pItemPrev != NULL )
 	{
+
 		if ( IsSetMagicFlags(MAGICF_NOCASTFROZENHANDS) && IsStatFlag( STATF_Freeze ))
 		{
 			SysMessageDefault( DEFMSG_SPELL_TRY_FROZENHANDS );
 			return false;
 		}
-		else if ( ! CanMove( pItemPrev ))
+		else if ( !CanMove( pItemPrev ))
 		{
 			return false;
 		}
-		else if ( ! pItemPrev->IsTypeSpellbook() && ! pItemPrev->IsType(IT_WAND) && ! pItemPrev->GetDefKey("SPELLCHANNELING",true))
+
+		else if ( !pItemPrev->IsTypeSpellbook() && !pItemPrev->IsType(IT_WAND) && !pItemPrev->GetDefNum("SPELLCHANNELING",true))
 		{
 			ItemBounce( pItemPrev );
 		}
