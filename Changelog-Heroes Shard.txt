@@ -1,0 +1,4 @@
+Heroes Shard Changelog
+
+03-01-2018
+Start of combat re-implementation: HitChance, Parry Chance, Swing Speed and Damage formulaes.
