@@ -111,7 +111,7 @@ void CItemMultiCustom::BeginCustomize(CClient * pClientSrc)
 
 	// client will silently close all open dialogs and let the server think they're still open, so we need to update opened gump counts here
 	CDialogDef* pDlg = NULL;
-	for (CClient::OpenedGumpsMap_t::iterator it = pClientSrc->m_mapOpenedGumps.begin(); it != pClientSrc->m_mapOpenedGumps.end(); ++it)
+	for (CClient::OpenedGumpsMap_t::iterator it = pClientSrc->m_mapOpenedGumps.begin(), end = pClientSrc->m_mapOpenedGumps.end(); it != end; ++it)
 	{
 		// the client leaves 'nodispose' dialogs open
 		pDlg = dynamic_cast<CDialogDef*>( g_Cfg.ResourceGetDef(CResourceID(RES_DIALOG, it->first)) );
@@ -1566,7 +1566,7 @@ bool CItemMultiCustom::LoadValidItems()
 
 	tchar* pszRowFull = Str_GetTemp();
 	tchar* pszHeaderFull = Str_GetTemp();
-	for ( CSVRowData::iterator itCsv = csvDataRow.begin(); itCsv != csvDataRow.end(); ++itCsv )
+	for ( CSVRowData::iterator itCsv = csvDataRow.begin(), end = csvDataRow.end(); itCsv != end; ++itCsv )
 	{
 		strcat(pszHeaderFull, "\t");
 		strcat(pszHeaderFull, itCsv->first.c_str());

@@ -97,12 +97,12 @@ IThread * ThreadHolder::getThreadAt(size_t at)
 		return NULL;
 
 	SimpleThreadLock lock(m_mutex);
-	for ( spherethreadlist_t::const_iterator it = m_threads.begin(); it != m_threads.end(); ++it )
+	for ( spherethreadlist_t::const_iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it )
 	{
 		if ( at == 0 )
 			return *it;
 
-		at--;
+		--at;
 	}
 
 	return NULL;
