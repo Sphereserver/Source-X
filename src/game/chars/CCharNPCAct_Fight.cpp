@@ -104,7 +104,7 @@ CChar * CChar::NPC_FightFindBestTarget()
 			int iDist = GetDist(pChar);
             if (iDist > UO_MAP_VIEW_SIGHT)
             {
-                Attacker_Delete(it, false, ATTACKER_CLEAR_DISTANCE);
+                Attacker_Delete(pChar, false, ATTACKER_CLEAR_DISTANCE);
 				pChar = NULL;
                 if (m_lastAttackers.empty())
                     break;

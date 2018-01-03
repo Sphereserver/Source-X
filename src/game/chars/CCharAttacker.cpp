@@ -107,6 +107,7 @@ int64 CChar::Attacker_GetThreat(size_t attackerIndex)
 // Retrieves the character with most Threat
 int64 CChar::Attacker_GetHighestThreat()
 {
+	ADDTOCALLSTACK("CChar::Attacker_GetHighestThreat");
 	if ( m_lastAttackers.empty() )
 		return -1;
 
@@ -123,6 +124,7 @@ int64 CChar::Attacker_GetHighestThreat()
 // Retrieves the last character that I hit
 CChar * CChar::Attacker_GetLast()
 {
+	ADDTOCALLSTACK("CChar::Attacker_GetLast");
 	int64 dwLastTime = INT32_MAX, dwCurTime = 0;
 	CChar * retChar = NULL;
 	for (auto it = m_lastAttackers.begin(), end = m_lastAttackers.end(); it != end; ++it)
@@ -208,7 +210,7 @@ void CChar::Attacker_SetIgnore(CChar * pChar, bool fIgnore)
 // Ignoring this pChar on Hit checks
 void CChar::Attacker_SetIgnore(size_t attackerIndex, bool fIgnore)
 {
-	ADDTOCALLSTACK("CChar::Attacker_SetIgnore(int)");\
+	ADDTOCALLSTACK("CChar::Attacker_SetIgnore(int)");
 	if (m_lastAttackers.empty())
 		return;
 	if (m_lastAttackers.size() <= attackerIndex)
@@ -300,42 +302,6 @@ CChar * CChar::Attacker_GetUID(size_t attackerIndex)
 	return pChar;
 }
 
-// Removing nID from list
-bool CChar::Attacker_Delete(size_t attackerIndex, bool bForced, ATTACKER_CLEAR_TYPE type)
-{
-	ADDTOCALLSTACK("CChar::Attacker_Delete(size_t)");
-	if (m_lastAttackers.empty() || (m_lastAttackers.size() <= attackerIndex))
-		return false;
-
-	LastAttackers &refAttacker = m_lastAttackers[attackerIndex];
-	CChar *pChar = static_cast<CUID>(refAttacker.charUID).CharFind();
-	if (!pChar)
-		return false;
-
-	if (IsTrigUsed(TRIGGER_COMBATDELETE))
-	{
-		CScriptTriggerArgs Args;
-		Args.m_iN1 = bForced;
-		Args.m_iN2 = static_cast<int>(type);
-		TRIGRET_TYPE tRet = OnTrigger(CTRIG_CombatDelete, pChar, &Args);
-		if (tRet == TRIGRET_RET_TRUE)
-			return false;
-	}
-
-	std::vector<LastAttackers>::iterator it = m_lastAttackers.begin() + attackerIndex;
-	m_lastAttackers.erase(it);
-
-	if (m_Fight_Targ_UID == pChar->GetUID())
-	{
-		m_Fight_Targ_UID.InitUID();
-		if (m_pNPC)
-			Fight_Attack(NPC_FightFindBestTarget());
-	}
-	if (m_lastAttackers.empty())
-		Attacker_Clear();
-	return true;
-}
-
 // Removing attacker pointed by iterator
 bool CChar::Attacker_Delete(std::vector<LastAttackers>::iterator &itAttacker, bool bForced, ATTACKER_CLEAR_TYPE type)
 {
@@ -370,13 +336,22 @@ bool CChar::Attacker_Delete(std::vector<LastAttackers>::iterator &itAttacker, bo
 	return true;
 }
 
+// Removing nID from list
+bool CChar::Attacker_Delete(size_t attackerIndex, bool bForced, ATTACKER_CLEAR_TYPE type)
+{
+	ADDTOCALLSTACK("CChar::Attacker_Delete(size_t)");
+	if (m_lastAttackers.empty() || (m_lastAttackers.size() <= attackerIndex))
+		return false;
+
+	std::vector<LastAttackers>::iterator it = m_lastAttackers.begin() + attackerIndex;
+	return Attacker_Delete(it, bForced, type);
+}
+
 // Removing pChar from list
 bool CChar::Attacker_Delete(CChar * pChar, bool bForced, ATTACKER_CLEAR_TYPE type)
 {		
 	ADDTOCALLSTACK("CChar::Attacker_Delete(CChar)");
-	if ( !pChar )
-		return false;
-	if ( m_lastAttackers.empty() )
+	if ( !pChar || m_lastAttackers.empty())
 		return false;
 	return Attacker_Delete( Attacker_GetID(pChar), bForced, type );
 }
@@ -391,9 +366,9 @@ void CChar::Attacker_RemoveChar()
 		{
 			LastAttackers & refAttacker = *it;
 			CChar * pSrc = static_cast<CUID>(refAttacker.charUID).CharFind();
-			if ( !pSrc )
+			if (!pSrc)
 				continue;
-			pSrc->Attacker_Delete(it, false, ATTACKER_CLEAR_REMOVEDCHAR);
+			pSrc->Attacker_Delete(this, false, ATTACKER_CLEAR_REMOVEDCHAR);
 		}
 	}
 }
@@ -405,7 +380,7 @@ void CChar::Attacker_CheckTimeout()
 	if (!m_lastAttackers.empty())
 	{
 		size_t count = 0;
-		for (auto it = m_lastAttackers.begin(), end = m_lastAttackers.end(); it != end; ++it)
+		for (auto it = m_lastAttackers.begin(), end = m_lastAttackers.end(); it != end; )
 		{
 			LastAttackers & refAttacker = *it;
 			CChar *pEnemy = static_cast<CUID>(refAttacker.charUID).CharFind();
@@ -414,8 +389,13 @@ void CChar::Attacker_CheckTimeout()
 				DEBUG_MSG(("AttackerTimeout elapsed for char '%s' (UID: 0%" PRIx32 "): "
 					"deleted attacker '%s' (index: %d, UID: 0%" PRIx32 ")\n",
 					GetName(), GetUID().GetObjUID(), pEnemy->GetName(), count, pEnemy->GetUID().GetObjUID() ));
-				Attacker_Delete(it, true, ATTACKER_CLEAR_ELAPSED);
+				if (Attacker_Delete(it, true, ATTACKER_CLEAR_ELAPSED))
+					end = m_lastAttackers.end();	// Attacker_Delete uses the erase method, which moves forward the iterator and invalidates the old end iterator!
+				else
+					++it;
 			}
+			else
+				++it;
 			++count;				
 		}
 	}

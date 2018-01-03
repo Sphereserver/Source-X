@@ -2959,7 +2959,8 @@ void CObjBase::DeleteDef(lpctstr pszKey)
 CVarDefCont * CObjBase::GetDefKey( lpctstr pszKey, bool fDef ) const
 {
 	CVarDefCont	* pVar	= m_BaseDefs.GetKey( pszKey );
-	if ( !fDef || pVar )	return pVar;
+	if ( !fDef || pVar )
+		return pVar;
 	if (IsItem())
 	{
 		CItemBase * pItemDef = static_cast <CItemBase*>( Base_GetDef());

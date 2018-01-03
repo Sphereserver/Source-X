@@ -983,8 +983,8 @@ public:
 	}
 	bool	Attacker_Add(CChar * pChar, int64 threat = 0);
 	CChar * Attacker_GetLast();
+	bool	Attacker_Delete(std::vector<LastAttackers>::iterator &itAttacker, bool bForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
 	bool	Attacker_Delete(size_t attackerIndex, bool bForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
-	bool	Attacker_Delete(std::vector<LastAttackers>::iterator &itAttacker, bool bForced, ATTACKER_CLEAR_TYPE type);
 	bool	Attacker_Delete(CChar * pChar, bool bForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
 	void	Attacker_RemoveChar();
 	void	Attacker_Clear();
