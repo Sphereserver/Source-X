@@ -2286,6 +2286,8 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				EXC_SET("SOUND");
 				int64 piCmd[2];
 				int iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd));
+				if (!iArgQty)
+					return false;
 				Sound( static_cast<SOUND_TYPE>(piCmd[0]), ( iArgQty > 1 ) ? (int)(piCmd[1]) : 1 );
 			}
 			break;

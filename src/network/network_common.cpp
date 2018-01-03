@@ -507,12 +507,12 @@ void IPHistoryManager::tick(void)
 	if (decayTTL)
 		m_lastDecayTime = CServerTime::GetCurrentTime();
 
-	for (IPHistoryList::iterator it = m_ips.begin(); it != m_ips.end(); ++it)
+	for (IPHistoryList::iterator it = m_ips.begin(), end = m_ips.end(); it != end; ++it)
 	{
 		if (it->m_blocked)
 		{
 			// blocked ips don't decay, but check if the ban has expired
-			if (it->m_blockExpire.IsTimeValid() && CServerTime::GetCurrentTime() > it->m_blockExpire)
+			if (it->m_blockExpire.IsTimeValid() && (CServerTime::GetCurrentTime() > it->m_blockExpire))
 				it->setBlocked(false);
 		}
 		else if (decayTTL)
@@ -534,7 +534,7 @@ void IPHistoryManager::tick(void)
 	}
 
 	// clear old ip history
-	for (IPHistoryList::iterator it = m_ips.begin(); it != m_ips.end(); ++it)
+	for (IPHistoryList::iterator it = m_ips.begin(), end = m_ips.end(); it != end; ++it)
 	{
 		if (it->m_ttl >= 0)
 			continue;

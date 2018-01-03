@@ -56,13 +56,8 @@ public:
 			return 0;
 
 		size_t toSkip = 1;
-		for ( const_iterator it = m_list.begin(); it != m_head && it != m_list.end(); ++it )
-		{
-			if ( it == m_list.end() )
-				break;
-
-			toSkip++;
-		}
+		for ( const_iterator it = m_list.begin(), end = m_list.end(); (it != m_head) && (it != end); ++it )
+			++toSkip;
 
 		return m_list.size() - toSkip;
 	}

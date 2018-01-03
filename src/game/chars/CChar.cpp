@@ -526,7 +526,7 @@ int CChar::IsWeird() const
 // Get the Z we should be at
 char CChar::GetFixZ( CPointMap pt, uint wBlockFlags)
 {
-	if (! wBlockFlags )
+	if ( !wBlockFlags )
 		wBlockFlags = GetMoveBlockFlags();
 	dword dwCan = GetMoveBlockFlags();
 	if ( dwCan & CAN_C_WALK )
@@ -1033,7 +1033,7 @@ bool CChar::ReadScriptTrig(CCharBase * pCharDef, CTRIG_TYPE trig, bool bVendor)
 bool CChar::ReadScript(CResourceLock &s, bool bVendor)
 {
 	ADDTOCALLSTACK("CChar::ReadScript");
-	bool fFullInterp		= false;
+	bool fFullInterp = false;
 
 	CItem * pItem = NULL;
 	while ( s.ReadKeyParse() )
@@ -1074,7 +1074,7 @@ bool CChar::ReadScript(CResourceLock &s, bool bVendor)
 			{
 				case ITC_FULLINTERP:
 					{
-						lpctstr		pszArgs	= s.GetArgStr();
+						lpctstr	pszArgs	= s.GetArgStr();
 						GETNONWHITESPACE(pszArgs);
 						fFullInterp = ( *pszArgs == '\0' ) ? true : ( s.GetArgVal() != 0);
 						continue;
@@ -1968,7 +1968,7 @@ do_default:
 
 				if ( *pszKey == '.' )
 				{
-					pszKey++;
+					++pszKey;
 					if ( !strnicmp(pszKey, "ID", 2 ) )
 					{
 						pszKey += 3;	// ID + whitspace
@@ -1995,7 +1995,7 @@ do_default:
 
 							for ( size_t iAttacker = 0; iAttacker < m_lastAttackers.size(); ++iAttacker )
 							{
-								iCurDmg = m_lastAttackers.at(iAttacker).amountDone;
+								iCurDmg = m_lastAttackers[iAttacker].amountDone;
 								if ( iCurDmg > iMaxDmg )
 								{
 									iMaxDmg = iCurDmg;
@@ -2010,7 +2010,7 @@ do_default:
 
 							for ( size_t iAttacker = 0; iAttacker < m_lastAttackers.size(); ++iAttacker )
 							{
-								dwCurTime = m_lastAttackers.at(iAttacker).elapsed;
+								dwCurTime = m_lastAttackers[iAttacker].elapsed;
 								if ( dwCurTime <= dwLastTime )
 								{
 									dwLastTime = dwCurTime;
@@ -2026,7 +2026,7 @@ do_default:
 						SKIP_SEPARATORS(pszKey);
 						if ( attackerIndex < (int)m_lastAttackers.size() )
 						{
-							LastAttackers & refAttacker = m_lastAttackers.at(attackerIndex);
+							LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
 
 							if( !strnicmp(pszKey, "DAM", 3) )
 							{
@@ -2089,7 +2089,7 @@ do_default:
 
 				if ( *pszKey == '.' )
 				{
-					pszKey++;
+					++pszKey;
 					if ( !strnicmp(pszKey, "ID", 2 ) )
 					{
 						pszKey += 2;	// ID + whitspace
@@ -2106,7 +2106,7 @@ do_default:
 						SKIP_SEPARATORS(pszKey);
 						if ( notoIndex < m_notoSaves.size() )
 						{
-							NotoSaves & refnoto = m_notoSaves.at(notoIndex);
+							NotoSaves & refnoto = m_notoSaves[notoIndex];
 
 							if ( !strnicmp(pszKey, "VALUE", 5) )
 							{
@@ -2483,13 +2483,13 @@ do_default:
 		case CHC_MEMORY:
 			// What is our memory flags about this pSrc person.
 			{
-				uint64 iFlags	= 0;
-				CItemMemory *	pMemory;
+				uint64 iFlags = 0;
+				CItemMemory *pMemory;
 				pszKey += 6;
 				if ( *pszKey == '.' )
 				{
-					pszKey++;
-					CUID		uid	= Exp_GetVal( pszKey );
+					++pszKey;
+					CUID uid	= Exp_GetVal( pszKey );
 					pMemory	= Memory_FindObj( uid );
 				}
 				else
@@ -2935,22 +2935,24 @@ do_default:
 			if ( strlen(pszKey) > 8 )
 			{
 				pszKey += 8;
-				int attackerIndex = (int)m_lastAttackers.size();
 				if ( *pszKey == '.' )
 				{
-					pszKey++;
+					++pszKey;
 					if ( !strnicmp(pszKey, "CLEAR", 5) )
 					{
-						if ( m_lastAttackers.size() )
+						if ( !m_lastAttackers.empty() )
 							Fight_ClearAll();
 						return true;
 					}
 					else if ( !strnicmp(pszKey, "DELETE", 6) )
 					{
-						if ( m_lastAttackers.size() )
+						if ( !m_lastAttackers.empty() )
 						{
-							CChar *pChar = static_cast<CChar *>(static_cast<CUID>(s.GetArgVal()).CharFind());
-							Attacker_Delete(pChar, false, ATTACKER_CLEAR_SCRIPT);
+							int idx = s.GetArgVal();
+							CChar *pChar = static_cast<CChar *>(static_cast<CUID>(idx).CharFind());
+							if (!pChar)
+								return false;
+							Attacker_Delete(idx, false, ATTACKER_CLEAR_SCRIPT);
 						}
 						return true;
 					}
@@ -2965,7 +2967,7 @@ do_default:
 					else if ( !strnicmp(pszKey, "TARGET", 6) )
 					{
 						CChar *pChar = static_cast<CChar *>(static_cast<CUID>(s.GetArgVal()).CharFind());
-						if ( !pChar || pChar == this )	// can't set ourself as target
+						if ( !pChar || (pChar == this) )	// can't set ourself as target
 						{
 							m_Fight_Targ_UID.InitUID();
 							return false;
@@ -2976,36 +2978,35 @@ do_default:
 
 					if (! IsStrNumeric(pszKey) )
 						return false;
-					attackerIndex = Exp_GetVal(pszKey);
+					int attackerIndex = Exp_GetVal(pszKey);
 
 					SKIP_SEPARATORS(pszKey);
 					if ( attackerIndex < Attacker() )
 					{
-						CChar *pChar = Attacker_GetUID(attackerIndex);
 						if ( !strnicmp(pszKey, "DAM", 3) )
 						{
-							Attacker_SetDam(pChar, s.GetArgVal());
+							Attacker_SetDam(attackerIndex, s.GetArgVal());
 							return true;
 						}
 						else if ( !strnicmp(pszKey, "ELAPSED", 7) )
 						{
-							Attacker_SetElapsed(pChar, s.GetArgVal());
+							Attacker_SetElapsed(attackerIndex, s.GetArgVal());
 							return true;
 						}
 						else if ( !strnicmp(pszKey, "THREAT", 6) )
 						{
-							Attacker_SetThreat(pChar, s.GetArgVal());
+							Attacker_SetThreat(attackerIndex, s.GetArgVal());
 							return true;
 						}
 						else if ( !strnicmp(pszKey, "DELETE", 6) )
 						{
-							Attacker_Delete(pChar, false, ATTACKER_CLEAR_SCRIPT);
+							Attacker_Delete(attackerIndex, false, ATTACKER_CLEAR_SCRIPT);
 							return true;
 						}
 						else if ( !strnicmp(pszKey, "IGNORE", 6) )
 						{
 							bool fIgnore = s.GetArgVal() < 1 ? 0 : 1;
-							Attacker_SetIgnore(pChar, fIgnore);
+							Attacker_SetIgnore(attackerIndex, fIgnore);
 							return true;
 						}
 					}
@@ -3486,13 +3487,9 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				bool fAFK = ( Skill_GetActive() == NPCACT_NAPPING );
 				bool fMode;
 				if ( s.HasArgs())
-				{
 					fMode = ( s.GetArgVal() != 0 );
-				}
 				else
-				{
 					fMode = ! fAFK;
-				}
 				if ( fMode != fAFK )
 				{
 					if ( fMode )
@@ -3513,7 +3510,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_ALLSKILLS:
 			{
 				int iVal = s.GetArgVal();
-				for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; i++ )
+				for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 				{
 					if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex(static_cast<SKILL_TYPE>(i)) )
 						continue;
@@ -3529,54 +3526,41 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				int Arg_Qty = Str_ParseCmds(s.GetArgRaw(), Arg_piCmd, CountOf(Arg_piCmd));
 				if ( !Arg_Qty )
 					return false;
-				return UpdateAnimate(static_cast<ANIM_TYPE>(Arg_piCmd[0]), true, false,
+				return UpdateAnimate((ANIM_TYPE)(Arg_piCmd[0]), true, false,
 					(Arg_Qty > 1) ? (uchar)(Arg_piCmd[1]) : 1,
 					(Arg_Qty > 2) ? (uchar)(Arg_piCmd[2]) : 1);
 			}
 			break;
 		case CHV_ATTACK:
-		{
 			Fight_Attack(CUID(s.GetArgVal()).CharFind());
 			break;
-		}
 		case CHV_BANK:
 			// Open the bank box for this person
 			if ( pCharSrc == NULL || ! pCharSrc->IsClient() )
 				return false;
-			pCharSrc->GetClient()->addBankOpen( this, ((s.HasArgs()) ? static_cast<LAYER_TYPE>(s.GetArgVal()) : LAYER_BANKBOX ));
+			pCharSrc->GetClient()->addBankOpen( this, ((s.HasArgs()) ? (LAYER_TYPE)(s.GetArgVal()) : LAYER_BANKBOX ) );
 			break;
-		case CHV_BARK:
-		{
-			SOUND_TYPE snd;
-			if (s.HasArgs())
-				snd = (SOUND_TYPE)s.GetArgVal();
-			else
-			{
-				snd = GetDefaultSound();
-				if (Calc_GetRandVal(2))
-					snd = (SOUND_TYPE)(snd + 1);
-			}
-			Sound( snd );
+		case CHV_BARK:	// This plays creature-specific sounds (CRESND_TYPE). Use CHV_SOUND to play a precise sound ID (SOUND_TYPE) instead.
+			SoundChar(s.HasArgs() ? (CRESND_TYPE)s.GetArgVal() : CRESND_RAND);
 			break;
-		}
 		case CHV_BOUNCE: // uid
-			return ItemBounce( CUID( s.GetArgVal()).ItemFind());
+			return ItemBounce( CUID( s.GetArgVal()).ItemFind() );
 		case CHV_BOW:
-		{
-			UpdateDir(CUID(s.GetArgVal()).ObjFind());
+			if (s.HasArgs())
+				UpdateDir( CUID(s.GetArgVal()).ObjFind() );
 			UpdateAnimate(ANIM_BOW);
 			break;
-		}
+
 		case CHV_CONTROL: // Possess
 			if ( pCharSrc == NULL || ! pCharSrc->IsClient())
 				return false;
-			return( pCharSrc->GetClient()->Cmd_Control( this ));
+			return pCharSrc->GetClient()->Cmd_Control(this);
 
 		case CHV_CONSUME:
 			{
-			CResourceQtyArray Resources;
-			Resources.Load( s.GetArgStr() );
-			ResourceConsume( &Resources, 1, false );
+				CResourceQtyArray Resources;
+				Resources.Load( s.GetArgStr() );
+				ResourceConsume( &Resources, 1, false );
 			}
 			break;
 		case CHV_CRIMINAL:
@@ -3603,12 +3587,12 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			}
 			break;
 		case CHV_EQUIP:	// uid
-			return ItemEquip( CUID( s.GetArgVal()).ItemFind());
+			return ItemEquip( CUID( s.GetArgVal()).ItemFind() );
 		case CHV_EQUIPHALO:
 			{
 				// equip a halo light
 				CItem * pItem = CItem::CreateScript(ITEMID_LIGHT_SRC, this);
-				ASSERT( pItem);
+				ASSERT(pItem);
 				if ( s.HasArgs())	// how long to last ?
 				{
 					int64 iTimer = s.GetArgLLVal();
@@ -3680,7 +3664,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_GOTYPE:
 			return TeleportToObj( 2, s.GetArgStr());
 		case CHV_GOUID:	// uid
-			if ( s.HasArgs())
+			if ( s.HasArgs() )
 			{
 				CUID uid( s.GetArgVal());
 				CObjBaseTemplate * pObj = uid.ObjFind();
@@ -3778,8 +3762,9 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_MOUNT:
 			{
 				CChar * pChar = dynamic_cast <CChar*> (pSrc);
-				if ( pChar )
-					pChar->Horse_Mount(this);
+				if ( !pChar )
+					return false;
+				pChar->Horse_Mount(this);
 			}
 			break;
 
@@ -3803,7 +3788,8 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 					GetPackSafe()->ContentAdd(pItem);
 				}
 				UpdateStatsFlag();
-			} break;
+			}
+			break;
 
 		case CHV_NEWLOOT:
 			{
@@ -3884,7 +3870,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_RELEASE:
 			Skill_Start( SKILL_NONE );
 			NPC_PetClearOwners();
-			SoundChar( CRESND_RAND2 );	// No noise
+			SoundChar( CRESND_RAND );
 			return true;
 		case CHV_REMOVE:	// remove this char from the world instantly.
 			if ( m_pPlayer )
@@ -3924,7 +3910,8 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			break;
 		case CHV_SALUTE:	//	salute to player
 		{
-			UpdateDir( CUID(s.GetArgVal()).ObjFind() );
+			if (s.HasArgs())
+				UpdateDir( CUID(s.GetArgVal()).ObjFind() );
 			UpdateAnimate(ANIM_SALUTE);
 			break;
 		}
@@ -3973,8 +3960,9 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			}
 			return false;
 		case CHV_SUMMONTO:	// i just got summoned
-			if ( pCharSrc != NULL )
-				Spell_Teleport( pCharSrc->GetTopPoint(), true, false );
+			if ( !pCharSrc )
+				return false;
+			Spell_Teleport( pCharSrc->GetTopPoint(), true, false );
 			break;
 		case CHV_SMSG:
 		case CHV_SMSGL:
@@ -4135,7 +4123,7 @@ uint Calc_ExpGet_Level(uint exp)
 	{
 		// reduce xp and raise level
 		exp -= req;
-		level++;
+		++level;
 
 		// calculate requirement for next level
 		switch ( g_Cfg.m_iLevelMode )

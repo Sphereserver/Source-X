@@ -1049,13 +1049,6 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 	if ( !m_pNPC || !pSector )
 		return false;
 
-	if ( !IsPlayableCharacter() && ( (m_pNPC->m_Brain == NPCBRAIN_BERSERK) || !Calc_GetRandVal(6) ) )
-	{
-		// Make some random noise, unrelated to the action (if action related, use CRESND_TYPE and SoundChar)
-		SOUND_TYPE snd = GetDefaultSound();
-		Sound(Calc_GetRandVal(2) ? snd : (SOUND_TYPE)(snd+1));
-	}
-
 	int iRange = GetSight();
 	int iRangeBlur = UO_MAP_VIEW_SIGHT;
 
@@ -1075,6 +1068,7 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 			m_Act_p = GetTopPoint();
 			m_Act_p.Move(static_cast<DIR_TYPE>(Calc_GetRandVal(DIR_QTY)));
 			NPC_WalkToPoint(true);
+			SoundChar(CRESND_NOTICE);
 			return true;
 		}
 
@@ -1105,7 +1099,10 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 				continue;	// can't see them.
 		}
 		if ( NPC_LookAtChar(pChar, iDist) )
+		{
+			SoundChar(CRESND_NOTICE);
 			return true;
+		}
 	}
 
 	// Check the ground for good stuff.
@@ -1129,9 +1126,15 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 					continue;	// can't see them.
 			}
 			if ( NPC_LookAtItem(pItem, iDist) )
+			{
+				SoundChar(CRESND_NOTICE);
 				return true;
+			}
 		}
 	}
+
+	if ( !IsPlayableCharacter() && ( (m_pNPC->m_Brain == NPCBRAIN_BERSERK) || !Calc_GetRandVal(6) ) )
+		SoundChar(CRESND_IDLE);
 
 	// Move stuff that is in our way ? (chests etc.)
 	return false;

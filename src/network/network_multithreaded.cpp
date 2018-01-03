@@ -156,7 +156,7 @@ NetworkThread* NetworkManager::selectBestThread(void)
 	DEBUGNETWORK(("Searching for a suitable thread to handle a new client..\n"));
 
 	// search for quietest thread
-	for (NetworkThreadList::iterator it = m_threads.begin(); it != m_threads.end(); ++it)
+	for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)
 	{
 		if ((*it)->getClientCount() < bestThreadSize)
 		{
@@ -339,7 +339,7 @@ void NetworkManager::start(void)
 	if (isThreaded())
 	{
 		// start network threads
-		for (NetworkThreadList::iterator it = m_threads.begin(); it != m_threads.end(); ++it)
+		for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)
 			(*it)->start();
 
 		DEBUGNETWORK(("Started %" PRIuSIZE_T " network threads.\n", m_threads.size()));
@@ -347,7 +347,7 @@ void NetworkManager::start(void)
 	else
 	{
 		// initialise network threads
-		for (NetworkThreadList::iterator it = m_threads.begin(); it != m_threads.end(); ++it)
+		for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)
 			(*it)->onStart();
 	}
 }
@@ -355,7 +355,7 @@ void NetworkManager::start(void)
 void NetworkManager::stop(void)
 {
 	// terminate child threads
-	for (NetworkThreadList::iterator it = m_threads.begin(); it != m_threads.end(); ++it)
+	for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)
 		(*it)->waitForClose();
 }
 
@@ -426,7 +426,7 @@ void NetworkManager::tick(void)
 	m_ips.tick();
 
 	// tick child threads, if single-threaded mode
-	for (NetworkThreadList::iterator it = m_threads.begin(); it != m_threads.end(); ++it)
+	for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)
 	{
 		NetworkThread* thread = *it;
 		if (thread->isActive() == false)
@@ -446,7 +446,7 @@ void NetworkManager::processAllInput(void)
 		acceptNewConnection();
 
 	// force each thread to process input (NOT THREADSAFE)
-	for (NetworkThreadList::iterator it = m_threads.begin(); it != m_threads.end(); ++it)
+	for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)
 		(*it)->processInput();
 }
 
@@ -458,7 +458,7 @@ void NetworkManager::processAllOutput(void)
 	if (isOutputThreaded() == false)
 	{
 		// force each thread to process output (NOT THREADSAFE)
-		for (NetworkThreadList::iterator it = m_threads.begin(); it != m_threads.end(); ++it)
+		for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)
 			(*it)->processOutput();
 	}
 }
@@ -468,7 +468,7 @@ void NetworkManager::flushAllClients(void)
 	// flush data for every client
 	ADDTOCALLSTACK("NetworkManager::flushAllClients");
 
-	for (NetworkThreadList::iterator it = m_threads.begin(); it != m_threads.end(); ++it)
+	for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)
 		(*it)->flushAllClients();
 }
 

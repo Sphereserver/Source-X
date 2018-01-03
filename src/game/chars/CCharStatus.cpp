@@ -938,16 +938,6 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 	return pTemp;
 }
 
-SOUND_TYPE CChar::GetDefaultSound() const
-{
-	ADDTOCALLSTACK_INTENSIVE("CChar::GetDefaultSound");
-	const CCharBase* pBase = Char_GetDef();
-	if (pBase->m_soundbase)
-		return (CRESND_TYPE)pBase->m_soundbase;
-	DEBUG_MSG(("CHARDEF %s has no SOUND!\n", GetResourceName()));
-	return (SOUND_TYPE)0;
-}
-
 bool CChar::CanDisturb( const CChar *pChar ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CChar::CanDisturb");

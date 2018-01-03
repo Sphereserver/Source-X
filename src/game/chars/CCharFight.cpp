@@ -938,7 +938,7 @@ effect_bounce:
 	{
 		// Update attacker list
 		bool bAttackerExists = false;
-		for (std::vector<LastAttackers>::iterator it = m_lastAttackers.begin(); it != m_lastAttackers.end(); ++it)
+		for (std::vector<LastAttackers>::iterator it = m_lastAttackers.begin(), end = m_lastAttackers.end(); it != end; ++it)
 		{
 			LastAttackers & refAttacker = *it;
 			if ( refAttacker.charUID == pSrc->GetUID().GetPrivateUID() )

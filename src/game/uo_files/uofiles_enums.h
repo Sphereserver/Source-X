@@ -85,7 +85,7 @@ enum SOUND_CODE
     SOUND_FEET_PAVE_1	= 0x12f,	// on slate sound
     SOUND_FEET_PAVE_2	= 0x130,
 
-    SOUND_HIT_10		= 0x013e,
+    SOUND_HIT_10		= 0x13e,
 
     SOUND_GHOST_1		= 382,
     SOUND_GHOST_2,
@@ -97,8 +97,23 @@ enum SOUND_CODE
     SOUND_SWORD_7		= 0x023c,
 
     SOUND_SNIP			= 0x248,
+	SOUND_SCRIBE		= 0x249,
+	SOUND_SPIRITSPEAK	= 0x24A,
+	SOUND_CROSSBOW		= 0x2B1,
+	SOUND_DROP_MONEY1	= 0x2E4,
+	SOUND_DROP_MONEY2	= 0x2E5,
+	SOUND_DROP_MONEY3	= 0x2E6,
+	SOUND_GLASS_BREAK4	= 0x390,
 
-    SOUND_QTY			= 0x300
+    //SOUND_QTY			= 0x67F,
+
+	// Special sounds: they are internally converted to the right sound.
+	//	These are used because some creatures do not have sound IDs sequentially ordered in the sound file
+	//	(or they do not have a sound, so we mix different sounds).
+	SOUND_SPECIAL_HUMAN			= 0x900,
+	SOUND_SPECIAL_MONSTER_JUKA,
+	SOUND_SPECIAL_MONSTER_MEER,
+	SOUND_SPECIAL_MONSTER_EXODUSMINION
 };
 
 
@@ -246,8 +261,9 @@ enum ANIM_TYPE_NEW	// not all creatures animate the same for some reason. http:/
 
 enum CRESND_TYPE	// Placeholders (not real sound IDs): the SoundChar method chooses the best sound for each creature
 {
-    CRESND_RAND1,	// just random noise. or default "yes" response
-    CRESND_RAND2,	// just random noise. or default "no" response
+	CRESND_RAND		= -1,	// pick up randomly CRESND_IDLE or CRESND_NOTICE
+    CRESND_IDLE		= 0,	// just random noise. or default "no" response
+    CRESND_NOTICE,			// just random noise. or default "yes" response
     
 	CRESND_HIT,
     CRESND_GETHIT,

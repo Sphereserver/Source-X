@@ -1206,7 +1206,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 	if (m_count > 0)
 	{
 		// send tooltips
-		for (auto it = items.begin(); it != items.end(); it++)
+		for (auto it = items.begin(), end = items.end(); it != end; ++it)
 			target->addAOSTooltip(*it, false, boIsShop);
 	}	
 }

@@ -325,7 +325,7 @@ int64 Calc_GetRandLLVal2( int64 iMin, int64 iMax )
 {
 	if ( iMin > iMax )
 	{
-		int64 tmp = iMin;
+		llong tmp = iMin;
 		iMin = iMax;
 		iMax = tmp;
 	}
@@ -1049,7 +1049,7 @@ llong CExpression::GetVal( lpctstr & pExpr )
 	++g_getval_reentrant_check;
 	if ( g_getval_reentrant_check > 128 )
 	{
-		DEBUG_WARN(( "Deadlock detected while parsing '%s'. Fix the error in your scripts.\n", pExpr ));
+		g_Log.EventError( "Deadlock detected while parsing '%s'. Fix the error in your scripts.\n", pExpr );
 		--g_getval_reentrant_check;
 		return 0;
 	}

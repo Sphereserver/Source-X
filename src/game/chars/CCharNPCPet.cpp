@@ -24,10 +24,7 @@ void CChar::NPC_OnPetCommand( bool fSuccess, CChar * pMaster )
 	if ( NPC_CanSpeak() )
 		Speak( fSuccess ? g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_SUCCESS ) : g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_FAILURE ) );
 	else
-	{
-		SOUND_TYPE snd = GetDefaultSound();
-		Sound( fSuccess ? snd : (SOUND_TYPE)(snd + 1) );	// random sound
-	}
+		SoundChar( fSuccess ? CRESND_NOTICE : CRESND_IDLE );
 }
 
 enum PC_TYPE
@@ -211,7 +208,7 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 			break;
 
 		case PC_RELEASE:
-			SoundChar(CRESND_RAND2);
+			SoundChar(CRESND_RAND);
 			if ( IsStatFlag(STATF_Conjured) || (m_pNPC->m_bonded && IsStatFlag(STATF_DEAD)) )
 			{
 				Delete();
