@@ -1933,7 +1933,8 @@ bool CServerConfig::SetKRDialogMap(dword rid, dword idKRDialog)
 	}
 
 	// prevent double mapping of KR dialog
-	for (it = m_mapKRGumps.begin(); it != m_mapKRGumps.end(); ++it)
+	KRGumpsMap::iterator end = m_mapKRGumps.end();
+	for (it = m_mapKRGumps.begin(); it != end; ++it)
 	{
 		if (it->second != idKRDialog)
 			continue;

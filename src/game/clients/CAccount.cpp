@@ -854,7 +854,7 @@ void CAccount::ClearPasswordTries(bool bAll)
 	}
 
 	llong timeCurrent = CServerTime::GetCurrentTime().GetTimeRaw();
-	for ( BlockLocalTime_t::iterator itData = m_BlockIP.begin(); itData != m_BlockIP.end(); ++itData )
+	for ( BlockLocalTime_t::iterator itData = m_BlockIP.begin(), end = m_BlockIP.end(); itData != end; ++itData )
 	{
 		BlockLocalTimePair_t itResult = (*itData).second;
 		if ( (timeCurrent - itResult.first.m_Last) > g_Cfg.m_iClientLoginTempBan )

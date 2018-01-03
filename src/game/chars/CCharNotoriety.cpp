@@ -92,7 +92,7 @@ NOTO_TYPE CChar::Noto_GetFlag(const CChar * pCharViewer, bool fAllowIncog, bool 
 	CChar * pTarget = const_cast<CChar*>(pCharViewer);
 	NOTO_TYPE iNoto = NOTO_INVALID;
 	NOTO_TYPE iColor = NOTO_INVALID;
-	if (pThis->m_notoSaves.size())
+	if ( ! pThis->m_notoSaves.empty() )
 	{
 		int id = -1;
 		if (pThis->m_pNPC && pThis->NPC_PetGetOwner() && g_Cfg.m_iPetsInheritNotoriety != 0)	// If I'm a pet and have owner I redirect noto to him.
@@ -620,9 +620,9 @@ void CChar::NotoSave_Add( CChar * pChar, NOTO_TYPE value, NOTO_TYPE color  )
 	if ( !pChar )
 		return;
 	CUID uid = pChar->GetUID();
-	if  ( m_notoSaves.size() )	// Checking if I already have him in the list, only if there 's any list.
+	if  ( !m_notoSaves.empty() )	// Checking if I already have him in the list, only if there 's any list.
 	{
-		for (std::vector<NotoSaves>::iterator it = m_notoSaves.begin(); it != m_notoSaves.end(); ++it)
+		for (std::vector<NotoSaves>::iterator it = m_notoSaves.begin(), end = m_notoSaves.end(); it != end; ++it)
 		{
 			NotoSaves & refNoto = *it;
 			if ( refNoto.charUID == uid )
@@ -647,13 +647,13 @@ void CChar::NotoSave_Add( CChar * pChar, NOTO_TYPE value, NOTO_TYPE color  )
 NOTO_TYPE CChar::NotoSave_GetValue( int id, bool bGetColor )
 {
 	ADDTOCALLSTACK("CChar::NotoSave_GetValue");
-	if ( !m_notoSaves.size() )
+	if ( m_notoSaves.empty() )
 		return NOTO_INVALID;
 	if ( id < 0 )
 		return NOTO_INVALID;
 	if ( (int)(m_notoSaves.size()) <= id )
 		return NOTO_INVALID;
-	NotoSaves & refNotoSave = m_notoSaves.at(id);
+	NotoSaves & refNotoSave = m_notoSaves[id];
 	if (bGetColor && refNotoSave.color != 0 )	// retrieving color if requested... only if a color is greater than 0 (to avoid possible crashes).
 		return refNotoSave.color;
 	else
@@ -663,20 +663,20 @@ NOTO_TYPE CChar::NotoSave_GetValue( int id, bool bGetColor )
 int64 CChar::NotoSave_GetTime( int id )
 {
 	ADDTOCALLSTACK("CChar::NotoSave_GetTime");
-	if ( !m_notoSaves.size() )
+	if ( m_notoSaves.empty() )
 		return -1;
 	if ( id < 0 )
 		return NOTO_INVALID;
 	if ( (int)(m_notoSaves.size()) <= id )
 		return -1;
-	NotoSaves & refNotoSave = m_notoSaves.at(id);
+	NotoSaves & refNotoSave = m_notoSaves[id];
 	return refNotoSave.time;
 }
 
 void CChar::NotoSave_Clear()
 {
 	ADDTOCALLSTACK("CChar::NotoSave_Clear");
-	if ( m_notoSaves.size() )
+	if ( !m_notoSaves.empty() )
 		m_notoSaves.clear();
 }
 
@@ -693,10 +693,10 @@ void CChar::NotoSave_CheckTimeout()
 	ADDTOCALLSTACK("CChar::NotoSave_CheckTimeout");
 	if (g_Cfg.m_iNotoTimeout <= 0)	// No value = no expiration.
 		return;
-	if (m_notoSaves.size())
+	if (!m_notoSaves.empty())
 	{
 		int count = 0;
-		for (std::vector<NotoSaves>::iterator it = m_notoSaves.begin(); it != m_notoSaves.end(); ++it)
+		for (std::vector<NotoSaves>::iterator it = m_notoSaves.begin(), end = m_notoSaves.end(); it != end; ++it)
 		{
 			NotoSaves & refNoto = *it;
 			if (++(refNoto.time) > g_Cfg.m_iNotoTimeout)	// updating timer while checking ini's value.
@@ -713,11 +713,11 @@ void CChar::NotoSave_CheckTimeout()
 void CChar::NotoSave_Resend( int id )
 {
 	ADDTOCALLSTACK("CChar::NotoSave_Resend()");
-	if ( !m_notoSaves.size() )
+	if ( m_notoSaves.empty() )
 		return;
 	if ( (int)(m_notoSaves.size()) <= id )
 		return;
-	NotoSaves & refNotoSave = m_notoSaves.at( id );
+	NotoSaves & refNotoSave = m_notoSaves[ id ];
 	CUID uid = refNotoSave.charUID;
 	CChar * pChar = uid.CharFind();
 	if ( ! pChar )
@@ -731,18 +731,18 @@ void CChar::NotoSave_Resend( int id )
 int CChar::NotoSave_GetID( CChar * pChar )
 {
 	ADDTOCALLSTACK("CChar::NotoSave_GetID(CChar)");
-	if ( !pChar || !m_notoSaves.size() )
+	if ( !pChar || m_notoSaves.empty() )
 		return -1;
 	if ( NotoSave() )
 	{
 		int count = 0;
-		for ( std::vector<NotoSaves>::iterator it = m_notoSaves.begin(); it != m_notoSaves.end(); ++it )
+		for (std::vector<NotoSaves>::iterator it = m_notoSaves.begin(), end = m_notoSaves.end(); it != end; ++it)
 		{
-			NotoSaves & refNotoSave = m_notoSaves.at(count);
+			NotoSaves & refNotoSave = m_notoSaves[count];
 			CUID uid = refNotoSave.charUID;
 			if ( uid.CharFind() && uid == (dword)(pChar->GetUID()) )
 				return count;
-			count++;
+			++count;
 		}
 	}
 	return -1;
@@ -756,9 +756,9 @@ bool CChar::NotoSave_Delete( CChar * pChar )
 	if ( NotoSave() )
 	{
 		int count = 0;
-		for ( std::vector<NotoSaves>::iterator it = m_notoSaves.begin(); it != m_notoSaves.end(); ++it )
+		for (std::vector<NotoSaves>::iterator it = m_notoSaves.begin(), end = m_notoSaves.end(); it != end; ++it)
 		{
-			NotoSaves & refNotoSave = m_notoSaves.at(count);
+			NotoSaves & refNotoSave = m_notoSaves[count];
 			CUID uid = refNotoSave.charUID;
 			if ( uid.CharFind() && uid == (dword)(pChar->GetUID()) )
 			{

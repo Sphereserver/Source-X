@@ -331,3 +331,12 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 
 03-01-2018, Drk84
 - Added missing parenthesis to MulDivLL and MulDiv.
+
+03-01-2017, Nolok
+- Fixed: when playing a sound from a character from Samurai Empire and later expansions, it was chosen the wrong sound ID for the given action. This is caused by the different
+	order of IDs in the sound file after that expansion. Also, updated the script pack (sphere_defs.scp and sphere_monsters.scp) with a lot of new and corrected old sounds.
+	Still, some sounds are missing.
+- Fixed: some rare combat-related crashes.
+- Added: SOUNDTYPE_RAND, SOUNDTYPE_IDLE, SOUNDTYPE_NOTICE, SOUNDTYPE_HIT, SOUNDTYPE_GETHIT, SOUNDTYPE_DIE defs to the scripts. They are meant to be used with BARK,
+	which has always accepted as parameter the sound type (even if the wiki at this day doesn't say so), not the sound ID (use SOUND for this).
+- Updated: now when an NPC is looking around it can play different sounds depending on its AI choices. Also prevented human-sounding chars to play such noises.

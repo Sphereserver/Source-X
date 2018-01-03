@@ -1109,7 +1109,7 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool bCheckFollowerSlots )
 	pPet->MoveToChar(pItem->GetTopLevelObj()->GetTopPoint());
 	pPet->Update();
 	pPet->Skill_Start(SKILL_NONE);	// was NPCACT_RIDDEN
-	pPet->Sound(pPet->GetDefaultSound());
+	pPet->SoundChar(CRESND_IDLE);
 	return pPet;
 }
 

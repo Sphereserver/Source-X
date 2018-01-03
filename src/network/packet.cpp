@@ -1277,7 +1277,7 @@ SimplePacketTransaction::~SimplePacketTransaction(void)
  ***************************************************************************/
 ExtendedPacketTransaction::~ExtendedPacketTransaction(void)
 {
-	for (std::list<PacketSend*>::iterator it = m_packets.begin(); it != m_packets.end(); ++it)
+	for (std::list<PacketSend*>::iterator it = m_packets.begin(), end = m_packets.end(); it != end; ++it)
 		delete *it;
 
 	m_packets.clear();
