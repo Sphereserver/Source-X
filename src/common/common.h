@@ -54,8 +54,8 @@
 #endif
 
 #define IsNegative(c)		((c < 0)?1:0)
-#define MulDiv(a,b,c)		(((((int)a*(int)b) + ((int)c / 2)) / (int)c) - (IsNegative((int)a*(int)b)))
-#define MulDivLL(a,b,c)		(((((llong)a*(llong)b) + (llong)(c / 2)) / (llong)c) - (IsNegative((llong)a*(llong)b)))
+#define MulDiv(a,b,c)		(((((int)(a)*(int)(b)) + (int)(c / 2)) / (int)(c)) - (IsNegative((int)(a)*(int)(b))))
+#define MulDivLL(a,b,c)		(((((llong)(a)*(llong)(b)) + (llong)(c / 2)) / (llong)(c)) - (IsNegative((llong)(a)*(llong)(b))))
 #define MulMulDiv(a,b,c)	(((a)*(b))/(c))
 #define minimum(x,y)		((x)<(y)?(x):(y))
 #define maximum(x,y)		((x)>(y)?(x):(y))
