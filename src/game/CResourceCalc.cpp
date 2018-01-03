@@ -119,6 +119,13 @@ int CServerConfig::Calc_CombatAttackSpeed( CChar * pChar, CItem * pWeapon )
 			iSwingSpeed = (iSwingSpeed * TICK_PER_SEC) / 4;		// convert 0.25s ticks into ms
 			return iSwingSpeed;
 		}
+		case 5:
+		{
+			//Heroes Shard Swing Speed Formula
+			iSwingSpeedIncrease = maximum(-100, minimum(100, iSwingSpeedIncrease));
+			int iSwingSpeed = (60 * (100 - iBaseSpeed))/100 - ((int)MulMulDiv(pChar->Stat_GetVal(STAT_DEX),100,pChar->Stat_GetMax(STAT_DEX)) * (100 + iSwingSpeedIncrease)) / 1000;
+			return maximum(10,iSwingSpeed);
+		}
 	}
 }
 
@@ -215,6 +222,17 @@ int CServerConfig::Calc_CombatChanceToHit(CChar * pChar, CChar * pCharTarg)
 			else if (iChance > 100)
 				iChance = 100;
 			return(iChance);
+		}
+		case 3:
+		{
+			//Heroes Hit Chance Formula
+			int iAttackerBonus = 100 + maximum(-100,minimum(100,(int)pChar->GetDefNum("INCREASEHITCHANCE", true)));
+			int iAttackerSkill = pChar->Skill_GetAdjusted(skillAttacker) * iAttackerBonus;
+
+			int iDefenderBonus = 100 + maximum(-100,minimum(100,(int)pCharTarg->GetDefNum("INCREASEDEFCHANCE", true)));
+			int iDefenderStat = pCharTarg->Stat_GetBase(STAT_DEX) * iDefenderBonus * 2;
+
+			return (iAttackerSkill * 100) / (25000 + iAttackerSkill + iDefenderStat);
 		}
 	}
 }
