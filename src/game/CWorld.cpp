@@ -238,7 +238,7 @@ void CTimedFunctionHandler::OnTick()
 
 	if ( !m_timedFunctions[tick].empty() )
 	{
-		for ( auto it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); )	// the end iterator changes at each erase call
+		for ( auto it = m_timedFunctions[tick].begin(), end = m_timedFunctions[tick].end(); it != end; )	
 		{
 			TimedFunction* tf = *it;
 			tf->elapsed -= 1;
@@ -259,6 +259,7 @@ void CTimedFunctionHandler::OnTick()
 
 					m_tfRecycled.push_back( tf );
 					it = m_timedFunctions[tick].erase( it );
+					end = m_timedFunctions[tick].end();	// the end iterator changes at each erase call
 
 					obj->r_Verb( s, src );
 				}
@@ -266,6 +267,7 @@ void CTimedFunctionHandler::OnTick()
 				{
 					m_tfRecycled.push_back( tf );
 					it = m_timedFunctions[tick].erase( it );
+					end = m_timedFunctions[tick].end();	// the end iterator changes at each erase call
 				}
 			}
 			else
