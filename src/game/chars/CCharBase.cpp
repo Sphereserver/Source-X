@@ -12,7 +12,8 @@ CCharBase::CCharBase( CREID_TYPE id ) :
 {
 	m_iHireDayWage = 0;
 	m_trackID = ITEMID_TRACK_WISP;
-	m_soundbase = 0;
+	m_soundBase = SOUND_NONE;
+	m_soundIdle = m_soundNotice = m_soundHit = m_soundGetHit = m_soundDie = SOUND_NONE;
 	m_defense = 0;
 	m_defenseBase = 0;
 	m_defenseRange = 0;
@@ -47,7 +48,7 @@ lpctstr CCharBase::GetTradeName() const
 	if ( pSpace == NULL )
 		return pName;
 
-	pSpace++;
+	++pSpace;
 	if ( ! strnicmp( pSpace, "the ", 4 ))
 		pSpace += 4;
 	return pSpace;
@@ -57,7 +58,13 @@ void CCharBase::CopyBasic( const CCharBase * pCharDef )
 {
 	ADDTOCALLSTACK("CCharBase::CopyBasic");
 	m_trackID = pCharDef->m_trackID;
-	m_soundbase = pCharDef->m_soundbase;
+
+	m_soundBase = pCharDef->m_soundBase;
+	m_soundIdle = pCharDef->m_soundIdle;
+	m_soundNotice = pCharDef->m_soundNotice;
+	m_soundHit = pCharDef->m_soundHit;
+	m_soundGetHit = pCharDef->m_soundGetHit;
+	m_soundDie = pCharDef->m_soundDie;
 
 	m_wBloodHue = pCharDef->m_wBloodHue;
 	m_MaxFood = pCharDef->m_MaxFood;
@@ -216,7 +223,22 @@ bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, GetResDispDnId()));
 			break;
 		case CBC_SOUND:
-			sVal.FormatHex( m_soundbase );
+			sVal.FormatHex( m_soundBase );
+			break;
+		case CBC_SOUNDDIE:
+			sVal.FormatHex( m_soundDie );
+			break;
+		case CBC_SOUNDGETHIT:
+			sVal.FormatHex( m_soundGetHit );
+			break;
+		case CBC_SOUNDHIT:
+			sVal.FormatHex( m_soundHit );
+			break;
+		case CBC_SOUNDIDLE:
+			sVal.FormatHex( m_soundIdle );
+			break;
+		case CBC_SOUNDNOTICE:
+			sVal.FormatHex( m_soundNotice );
 			break;
 		case CBC_STR:
 			sVal.FormatVal( m_Str );
@@ -304,9 +326,7 @@ bool CCharBase::r_LoadVal( CScript & s )
 			}
 			break;
 		case CBC_ID:
-			{
-				return SetDispID(static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType( RES_CHARDEF, s.GetArgStr())));
-			}
+			return SetDispID(static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType( RES_CHARDEF, s.GetArgStr())));
 		case CBC_INT:
 			m_Int = (short)(s.GetArgVal());
 			break;
@@ -320,7 +340,22 @@ bool CCharBase::r_LoadVal( CScript & s )
 			SetResDispDnId((word)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr())));
 			break;
 		case CBC_SOUND:
-			m_soundbase = static_cast<SOUND_TYPE>(s.GetArgVal());
+			m_soundBase = (SOUND_TYPE)(s.GetArgVal());
+			break;
+		case CBC_SOUNDDIE:
+			m_soundDie = (SOUND_TYPE)(s.GetArgVal());
+			break;
+		case CBC_SOUNDGETHIT:
+			m_soundGetHit = (SOUND_TYPE)(s.GetArgVal());
+			break;
+		case CBC_SOUNDHIT:
+			m_soundHit = (SOUND_TYPE)(s.GetArgVal());
+			break;
+		case CBC_SOUNDIDLE:
+			m_soundIdle = (SOUND_TYPE)(s.GetArgVal());
+			break;
+		case CBC_SOUNDNOTICE:
+			m_soundNotice = (SOUND_TYPE)(s.GetArgVal());
 			break;
 		case CBC_STR:
 			m_Str = (short)(s.GetArgVal());

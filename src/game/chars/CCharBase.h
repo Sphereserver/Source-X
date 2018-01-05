@@ -23,7 +23,9 @@ class CCharBase : public CBaseBaseDef // define basic info about each "TYPE" of 
 public:
 	static const char *m_sClassName;
 	ITEMID_TYPE m_trackID;	// ITEMID_TYPE what look like on tracking.
-	SOUND_TYPE m_soundbase;	// sounds ( typically 5 sounds per creature, humans and birds have more.)
+	SOUND_TYPE m_soundBase;	// first sound ID for the creature ( typically 5 sounds per creature, humans and birds have more.)
+	SOUND_TYPE m_soundIdle, m_soundNotice;				// Overrides for each action, or simply some creatures doesn't have a soundBase.
+	SOUND_TYPE m_soundHit, m_soundGetHit, m_soundDie;	// If != 0 use these, otherwise use soundBase;
 
 	CResourceQtyArray m_FoodType; // FOODTYPE=MEAT 15 (3)
 	short m_MaxFood;		// Derived from foodtype...this is the max amount of food we can eat. (based on str ?)
