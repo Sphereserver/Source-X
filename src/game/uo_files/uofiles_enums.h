@@ -64,11 +64,9 @@ enum SOUND_CODE
 {
     SOUND_NONE			= 0,
     SOUND_ANVIL			= 0x02a,
-
     SOUND_TURN_PAGE		= 0x055,	// open spellbook
     SOUND_SPELL_FIZZLE	= 0x05C,
     SOUND_OPEN_METAL	= 0x0ec,	// open bank box.
-
     SOUND_HOOF_MARBLE_1	= 0x121,	// marble echoing sound. (horse)
     SOUND_HOOF_MARBLE_2	= 0x122,
     SOUND_HOOF_BRIDGE_1 = 0x123,
@@ -77,25 +75,20 @@ enum SOUND_CODE
     SOUND_HOOF_DIRT_2	= 0x126,
     SOUND_HOOF_QUIET_1	= 0x129,	// quiet
     SOUND_HOOF_QUIET_2	= 0x12a,	// quiet, horse run on grass.
-
     SOUND_FEET_STONE_1	= 0x12b,	// on stone (default)
     SOUND_FEET_STONE_2	= 0x12c,
     SOUND_FEET_GRASS_1	= 0x12d,
     SOUND_FEET_GRASS_2	= 0x12e,
     SOUND_FEET_PAVE_1	= 0x12f,	// on slate sound
     SOUND_FEET_PAVE_2	= 0x130,
-
     SOUND_HIT_10		= 0x13e,
-
     SOUND_GHOST_1		= 382,
     SOUND_GHOST_2,
     SOUND_GHOST_3,
     SOUND_GHOST_4,
     SOUND_GHOST_5,
-
-    SOUND_SWORD_1		= 0x023b,
-    SOUND_SWORD_7		= 0x023c,
-
+    SOUND_SWORD_1		= 0x23b,
+    SOUND_SWORD_7		= 0x23c,
     SOUND_SNIP			= 0x248,
 	SOUND_SCRIBE		= 0x249,
 	SOUND_SPIRITSPEAK	= 0x24A,
@@ -105,15 +98,10 @@ enum SOUND_CODE
 	SOUND_DROP_MONEY3	= 0x2E6,
 	SOUND_GLASS_BREAK4	= 0x390,
 
-    //SOUND_QTY			= 0x67F,
-
 	// Special sounds: they are internally converted to the right sound.
 	//	These are used because some creatures do not have sound IDs sequentially ordered in the sound file
 	//	(or they do not have a sound, so we mix different sounds).
-	SOUND_SPECIAL_HUMAN			= 0x900,
-	SOUND_SPECIAL_MONSTER_JUKA,
-	SOUND_SPECIAL_MONSTER_MEER,
-	SOUND_SPECIAL_MONSTER_EXODUSMINION
+	SOUND_SPECIAL_HUMAN			= 0x900
 };
 
 

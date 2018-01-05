@@ -337,6 +337,10 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 	order of IDs in the sound file after that expansion. Also, updated the script pack (sphere_defs.scp and sphere_monsters.scp) with a lot of new and corrected old sounds.
 	Still, some sounds are missing.
 - Fixed: some rare combat-related crashes.
-- Added: SOUNDTYPE_RAND, SOUNDTYPE_IDLE, SOUNDTYPE_NOTICE, SOUNDTYPE_HIT, SOUNDTYPE_GETHIT, SOUNDTYPE_DIE defs to the scripts. They are meant to be used with BARK,
+- Added: SOUNDACT_RAND, SOUNDACT_IDLE, SOUNDACT_NOTICE, SOUNDACT_HIT, SOUNDACT_GETHIT, SOUNDACT_DIE defs to the scripts. They are meant to be used with BARK,
 	which has always accepted as parameter the sound type (even if the wiki at this day doesn't say so), not the sound ID (use SOUND for this).
 - Updated: now when an NPC is looking around it can play different sounds depending on its AI choices. Also prevented human-sounding chars to play such noises.
+
+05-01-2018, Nolok
+- Added: SOUNDIDLE, SOUNDNOTICE, SOUNDHIT, SOUNDGETHIT, SOUNDDIE CharDef properties. When a creature emits a sound linked to an action, the sound ID of	the corresponding override,
+	if set, will be used instead of obtaining it from the SOUND property. Set one of these overrides to -1 if you don't want that action-related sound to be played.
