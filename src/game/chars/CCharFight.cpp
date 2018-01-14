@@ -518,7 +518,7 @@ void CChar::CallGuards( CChar * pCriminal )
 
 		if (pCriminal->m_pArea->m_TagDefs.GetKeyNum("RED", true))
 			pGuard->m_TagDefs.SetNum("NAME.HUE", g_Cfg.m_iColorNotoEvil, true);
-		pGuard->Spell_Effect_Create(SPELL_Summon, LAYER_SPELL_Summon, 1000, g_Cfg.m_iGuardLingerTime);
+		pGuard->Spell_Effect_Create(SPELL_Summon, LAYER_SPELL_Summon, g_Cfg.GetSpellEffect(SPELL_Summon, 1000), g_Cfg.m_iGuardLingerTime);
 		pGuard->Spell_Teleport(pCriminal->GetTopPoint(), false, false);
 	}
 	pGuard->NPC_LookAtCharGuard(pCriminal, true);
