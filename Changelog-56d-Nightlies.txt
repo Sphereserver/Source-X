@@ -346,6 +346,6 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 	if set, will be used instead of obtaining it from the SOUND property. Set one of these overrides to -1 if you don't want that action-related sound to be played.
 
 14-01-2018, Drk84
-- Fixed: The effect value of spells that equips a "memory item" on a character(Bless, Curse and so on) was calculated twice, also causing     to ignore the 
+- Fixed: The effect value of spells that equips a "memory item" on a character(Bless, Curse and so on) was calculated twice, also causing to ignore the 
 	value of local.effect.
 											
