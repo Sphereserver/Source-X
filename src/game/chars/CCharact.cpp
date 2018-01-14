@@ -2650,7 +2650,7 @@ bool CChar::SetPoison( int iSkill, int iTicks, CChar * pCharSrc )
 	}
 	else
 	{
-		pPoison = Spell_Effect_Create(SPELL_Poison, LAYER_FLAG_Poison, iSkill, 1 + Calc_GetRandVal(2) * TICK_PER_SEC, pCharSrc, false);
+		pPoison = Spell_Effect_Create(SPELL_Poison, LAYER_FLAG_Poison, g_Cfg.GetSpellEffect(SPELL_Poison, iSkill), 1 + Calc_GetRandVal(2) * TICK_PER_SEC, pCharSrc, false);
 		if ( !pPoison )
 		return false;
 		LayerAdd(pPoison, LAYER_FLAG_Poison);
