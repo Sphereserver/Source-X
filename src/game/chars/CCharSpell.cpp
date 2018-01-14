@@ -1724,7 +1724,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 	return false;
 }
 
-CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iSkillLevel, int iDuration, CObjBase * pSrc, bool bEquip )
+CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEffect, int iDuration, CObjBase * pSrc, bool bEquip )
 {
 	ADDTOCALLSTACK("CChar::Spell_Effect_Create");
 	// Attach an effect to the Character.
@@ -1781,7 +1781,7 @@ CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iSki
 	pSpell->SetType(IT_SPELL);
 	pSpell->SetDecayTime(iDuration);
 	pSpell->m_itSpell.m_spell = (word)(spell);
-	pSpell->m_itSpell.m_spelllevel = (word)(g_Cfg.GetSpellEffect(spell, iSkillLevel));
+	pSpell->m_itSpell.m_spelllevel = (word)iEffect;
 	pSpell->m_itSpell.m_spellcharges = 1;
 	if ( pSrc )
 		pSpell->m_uidLink = pSrc->GetUID();
@@ -3264,7 +3264,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		case SPELL_Bless:
 		case SPELL_Mana_Drain:
 		case SPELL_Mass_Curse:
-			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_STATS, iSkillLevel, iDuration, pCharSrc );
+			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_STATS, iEffect, iDuration, pCharSrc );
 			break;
 
 		case SPELL_Heal:
@@ -3277,16 +3277,16 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			break;
 
 		case SPELL_Reactive_Armor:
-			Spell_Effect_Create( spell, LAYER_SPELL_Reactive, iSkillLevel, iDuration, pCharSrc );
+			Spell_Effect_Create( spell, LAYER_SPELL_Reactive, iEffect, iDuration, pCharSrc );
 			break;
 
 		case SPELL_Magic_Reflect:
-			Spell_Effect_Create( spell, LAYER_SPELL_Magic_Reflect, iSkillLevel, iDuration, pCharSrc );
+			Spell_Effect_Create( spell, LAYER_SPELL_Magic_Reflect, iEffect, iDuration, pCharSrc );
 			break;
 
 		case SPELL_Poison:
 		case SPELL_Poison_Field:
-			Spell_Effect_Create( spell, LAYER_FLAG_Poison, iSkillLevel, iDuration, pCharSrc );
+			Spell_Effect_Create( spell, LAYER_FLAG_Poison, iEffect, iDuration, pCharSrc );
 			break;
 
 		case SPELL_Cure:
@@ -3299,11 +3299,11 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 		case SPELL_Protection:
 		case SPELL_Arch_Prot:
-			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_Protection, iSkillLevel, iDuration, pCharSrc );
+			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_Protection, iEffect, iDuration, pCharSrc );
 			break;
 
 		case SPELL_Summon:
-			Spell_Effect_Create( spell,	LAYER_SPELL_Summon, iSkillLevel, iDuration, pCharSrc );
+			Spell_Effect_Create( spell,	LAYER_SPELL_Summon, iEffect, iDuration, pCharSrc );
 			break;
 
 		case SPELL_Dispel:
@@ -3319,18 +3319,18 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			break;
 
 		case SPELL_Invis:
-			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_Invis, iSkillLevel, iDuration, pCharSrc );
+			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_Invis, iEffect, iDuration, pCharSrc );
 			break;
 
 		case SPELL_Incognito:
-			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_Incognito, iSkillLevel, iDuration, pCharSrc );
+			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_Incognito, iEffect, iDuration, pCharSrc );
 			break;
 
 		case SPELL_Paralyze:
 		case SPELL_Paralyze_Field:
 		case SPELL_Stone:
 		case SPELL_Particle_Form:
-			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_Paralyze, iSkillLevel, iDuration, pCharSrc );
+			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_Paralyze, iEffect, iDuration, pCharSrc );
 			break;
 
 		case SPELL_Mana_Vamp:
@@ -3373,12 +3373,12 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 		case SPELL_Light:
 			Effect(EFFECT_OBJ, iEffectID, this, 9, 6, fExplode, iColor, iRender);
-			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_NEWLIGHT, iSkillLevel, iDuration, pCharSrc );
+			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_NEWLIGHT, iEffect, iDuration, pCharSrc );
 			break;
 
 		case SPELL_Hallucination:
 		{
-			CItem * pItem = Spell_Effect_Create( spell, LAYER_FLAG_Hallucination, iSkillLevel, 10*TICK_PER_SEC, pCharSrc );
+			CItem * pItem = Spell_Effect_Create( spell, LAYER_FLAG_Hallucination, iEffect, 10*TICK_PER_SEC, pCharSrc );
 			pItem->m_itSpell.m_spellcharges = Calc_GetRandVal(30);
 		}
 		break;
@@ -3437,24 +3437,24 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		case SPELL_Reaper_Form:
 		case SPELL_Polymorph:
 		{
-			Spell_Effect_Create(spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_Polymorph, iSkillLevel, iDuration, pCharSrc);
+			Spell_Effect_Create(spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_Polymorph, iEffect, iDuration, pCharSrc);
 		}
 		break;
 
 		case SPELL_Chameleon:		// 106 // makes your skin match the colors of whatever is behind you.
 		case SPELL_BeastForm:		// 107 // polymorphs you into an animal for a while.
 		case SPELL_Monster_Form:	// 108 // polymorphs you into a monster for a while.
-			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_Polymorph, iSkillLevel, iDuration, pCharSrc );
+			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_Polymorph, iEffect, iDuration, pCharSrc );
 			break;
 
 		case SPELL_Trance:			// 111 // temporarily increases your meditation skill.
-			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_STATS, iSkillLevel, iDuration, pCharSrc );
+			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_STATS, iEffect, iDuration, pCharSrc );
 			break;
 
 		case SPELL_Shield:			// 113 // erects a temporary force field around you. Nobody approaching will be able to get within 1 tile of you, though you can move close to them if you wish.
 		case SPELL_Steelskin:		// 114 // turns your skin into steel, giving a boost to your AR.
 		case SPELL_Stoneskin:		// 115 // turns your skin into stone, giving a boost to your AR.
-			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_Protection, iSkillLevel, iDuration, pCharSrc );
+			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_Protection, iEffect, iDuration, pCharSrc );
 			break;
 
 		case SPELL_Regenerate:		// Set number of charges based on effect level.
@@ -3462,38 +3462,38 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			iDuration /= (2*TICK_PER_SEC);
 			if ( iDuration <= 0 )
 				iDuration = 1;
-			CItem * pSpell = Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_STATS, iSkillLevel, iDuration, pCharSrc );
+			CItem * pSpell = Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_STATS, iEffect, iDuration, pCharSrc );
 			ASSERT(pSpell);
 			pSpell->m_itSpell.m_spellcharges = iDuration;
 		}
 		break;
 
 		case SPELL_Blood_Oath:	// Blood Oath is a pact created between the casted and the target, memory is stored on the caster because one caster can have only 1 enemy, but one target can have the effect from various spells.
-			pCharSrc->Spell_Effect_Create(spell, LAYER_SPELL_Blood_Oath, iSkillLevel, iDuration, this);
+			pCharSrc->Spell_Effect_Create(spell, LAYER_SPELL_Blood_Oath, iEffect, iDuration, this);
 			break;
 
 		case SPELL_Corpse_Skin:
-			Spell_Effect_Create(spell, LAYER_SPELL_Corpse_Skin, iSkillLevel, iDuration, pCharSrc);
+			Spell_Effect_Create(spell, LAYER_SPELL_Corpse_Skin, iEffect, iDuration, pCharSrc);
 			break;
 
 		case SPELL_Evil_Omen:
-			Spell_Effect_Create(spell, LAYER_SPELL_Evil_Omen, iSkillLevel, iDuration, pCharSrc);
+			Spell_Effect_Create(spell, LAYER_SPELL_Evil_Omen, iEffect, iDuration, pCharSrc);
 			break;
 
 		case SPELL_Mind_Rot:
-			Spell_Effect_Create(spell, LAYER_SPELL_Mind_Rot, iSkillLevel, iDuration, pCharSrc);
+			Spell_Effect_Create(spell, LAYER_SPELL_Mind_Rot, iEffect, iDuration, pCharSrc);
 			break;
 
 		case SPELL_Pain_Spike:
-			Spell_Effect_Create(spell, LAYER_SPELL_Pain_Spike, iSkillLevel, iDuration, pCharSrc);
+			Spell_Effect_Create(spell, LAYER_SPELL_Pain_Spike, iEffect, iDuration, pCharSrc);
 			break;
 
 		case SPELL_Strangle:
-			Spell_Effect_Create(spell, LAYER_SPELL_Strangle, iSkillLevel, iDuration, pCharSrc);
+			Spell_Effect_Create(spell, LAYER_SPELL_Strangle, iEffect, iDuration, pCharSrc);
 			break;
 
 		case SPELL_Curse_Weapon:
-			Spell_Effect_Create(spell, LAYER_SPELL_Curse_Weapon, iSkillLevel, iDuration, pCharSrc);
+			Spell_Effect_Create(spell, LAYER_SPELL_Curse_Weapon, iEffect, iDuration, pCharSrc);
 			break;
 
 			/*case SPELL_Animate_Dead_AOS:

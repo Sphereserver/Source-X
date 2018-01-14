@@ -891,7 +891,7 @@ private:
 	bool Spell_Recall(CItem * pRune, bool fGate);
 	SPELL_TYPE Spell_GetIndex(SKILL_TYPE skill = SKILL_NONE);	//gets first spell for the magic skill given.
 	SPELL_TYPE Spell_GetMax(SKILL_TYPE skill = SKILL_NONE);	//gets first spell for the magic skill given.
-	CItem * Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iSkillLevel, int iDuration, CObjBase * pSrc = NULL, bool bEquip = true );
+	CItem * Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEffect, int iDuration, CObjBase * pSrc = NULL, bool bEquip = true );
 	bool Spell_Equip_OnTick( CItem * pItem );
 
 	void Spell_Field(CPointMap pt, ITEMID_TYPE idEW, ITEMID_TYPE idNS, uint fieldWidth, uint fieldGauge, int iSkill, CChar * pCharSrc = NULL, ITEMID_TYPE idnewEW = static_cast<ITEMID_TYPE>(NULL), ITEMID_TYPE idnewNS = static_cast<ITEMID_TYPE>(NULL), int iDuration = 0, HUE_TYPE iColor = HUE_DEFAULT);
