@@ -1732,7 +1732,7 @@ CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEff
 	// ARGS:
 	// spell = SPELL_Invis, etc.
 	// layer == LAYER_FLAG_Potion, etc.
-	// iSkillLevel = 0-1000 = skill level or other spell specific value.
+	// iEffect = The effect value, for spells is usually calculated by using g_Cfg.GetSpellEffect(spell, iSkillLevel) but other specific values can be used. 
 	// iDuration = TICK_PER_SEC
 	// bEquip automatically equips the memory, false requires manual equipment... usefull to setup everything before calling @MemoryEquip
 	//
