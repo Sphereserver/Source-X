@@ -1809,7 +1809,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		else if (!fRanged)
 			iParryChance = pCharTarg->Skill_GetAdjusted(parrySkill);
 		
-		iParryChance = (iParryChance * 100) / (250 + iParryChance + m_Act_Difficulty * 10);
+		iParryChance = (iParryChance * 100) / (500 + iParryChance + m_Act_Difficulty * 10);
 		if (pCharTarg->Skill_UseQuick(parrySkill,iParryChance,true,false))
 		{
 			if ( IsPriv(PRIV_DETAIL) )

@@ -122,9 +122,10 @@ int CServerConfig::Calc_CombatAttackSpeed( CChar * pChar, CItem * pWeapon )
 		case 5:
 		{
 			//Heroes Shard Swing Speed Formula
-			iSwingSpeedIncrease = maximum(-100, minimum(100, iSwingSpeedIncrease));
-			int iSwingSpeed = (60 * (100 - iBaseSpeed))/100 - ((int)MulMulDiv(pChar->Stat_GetVal(STAT_DEX),100,pChar->Stat_GetMax(STAT_DEX)) * (100 + iSwingSpeedIncrease)) / 1000;
-			return maximum(10,iSwingSpeed);
+			iSwingSpeedIncrease = 100 -  maximum(-100, minimum(100, iSwingSpeedIncrease));
+			int iSwingSpeed = (35 * (100 - iBaseSpeed) * iSwingSpeedIncrease) / 10000 - ((int)MulMulDiv(pChar->Stat_GetVal(STAT_DEX), 100, pChar->Stat_GetMax(STAT_DEX)) - 50)/10;
+
+			return maximum(10,1 + iSwingSpeed);
 		}
 	}
 }
