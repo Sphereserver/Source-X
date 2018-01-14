@@ -362,7 +362,7 @@ void CChar::Noto_Murder()
 		SysMessageDefault(DEFMSG_MSG_MURDERER);
 
 	if ( m_pPlayer && m_pPlayer->m_wMurders )
-		Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_Murders, 0, g_Cfg.m_iMurderDecayTime, NULL);
+		Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_Murders, g_Cfg.GetSpellEffect(SPELL_NONE, 0), g_Cfg.m_iMurderDecayTime, NULL);
 }
 
 bool CChar::Noto_Criminal( CChar * pChar )
@@ -387,7 +387,7 @@ bool CChar::Noto_Criminal( CChar * pChar )
 	if ( !IsStatFlag(STATF_Criminal) )
 		SysMessageDefault(DEFMSG_MSG_GUARDS);
 
-	Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_Criminal, 0, decay);
+	Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_Criminal, g_Cfg.GetSpellEffect(SPELL_NONE, 0), decay);
 	return true;
 }
 

@@ -990,7 +990,7 @@ void CChar::Use_Drink( CItem * pItem )
 		}
 		else
 		{
-			CItem *pSpell = Spell_Effect_Create(SPELL_Liquor, LAYER_FLAG_Drunk, iStrength, 15 * TICK_PER_SEC, this);
+			CItem *pSpell = Spell_Effect_Create(SPELL_Liquor, LAYER_FLAG_Drunk, g_Cfg.GetSpellEffect(SPELL_Liquor, iStrength), 15 * TICK_PER_SEC, this);
 			pSpell->m_itSpell.m_spellcharges = 10;	// how long to last.
 		}
 	}
@@ -1016,7 +1016,7 @@ void CChar::Use_Drink( CItem * pItem )
 		OnSpellEffect(static_cast<SPELL_TYPE>(RES_GET_INDEX(pItem->m_itPotion.m_Type)), this, iSkillQuality, pItem);
 
 		// Give me the marker that i've used a potion.
-		Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_PotionUsed, iSkillQuality, 15 * TICK_PER_SEC, this);
+		Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_PotionUsed, g_Cfg.GetSpellEffect(SPELL_NONE, iSkillQuality), 15 * TICK_PER_SEC, this);
 	}
 
 	if ( pItem->IsType(IT_DRINK) && IsSetOF(OF_DrinkIsFood) )
