@@ -3056,12 +3056,12 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		uchar iResistChance = (uchar)(maximum(iFirst, iSecond) / 30);
 		iResist = Skill_UseQuick(SKILL_MAGICRESISTANCE, iResistChance, true, false) ? 25 : 0;	// If we successfully resist then we have a 25% damage reduction, 0 if we don't.
 
-		if ( IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) )
+		/*if ( IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) )
 		{
 			CItem *pEvilOmen = LayerFind(LAYER_SPELL_Evil_Omen);
 			if ( pEvilOmen )
 				iResist /= 2;	// Effect 3: Only 50% of magic resistance used in next resistable spell.
-		}
+		}*/
 	}
 
 	if ( pSpellDef->IsSpellType(SPELLFLAG_DAMAGE) )
@@ -3087,8 +3087,9 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 				DamageBonus += pCharSrc->Skill_GetBase(SKILL_INSCRIPTION) / 100;
 
 				// Racial Bonus (Berserk), gargoyles gains +3% Spell Damage Increase per each 20 HP lost
-				if ( (g_Cfg.m_iRacialFlags & RACIALF_GARG_BERSERK) && IsGargoyle() )
+				/*if ( (g_Cfg.m_iRacialFlags & RACIALF_GARG_BERSERK) && IsGargoyle() )
 					DamageBonus += minimum(3 * ((Stat_GetMax(STAT_STR) - Stat_GetVal(STAT_STR)) / 20), 12);		// value is capped at 12%
+				*/
 
 				iEffect += iEffect * DamageBonus / 100;
 			}

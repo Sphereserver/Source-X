@@ -812,7 +812,7 @@ effect_bounce:
 		return 0;
 
 	// Apply Necromancy cursed effects
-	if ( IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) )
+	/*if ( IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) )
 	{
 		CItem * pEvilOmen = LayerFind(LAYER_SPELL_Evil_Omen);
 		if ( pEvilOmen )
@@ -827,7 +827,7 @@ effect_bounce:
 			iDmg += iDmg / 10;
 			pSrc->OnTakeDamage(iDmg * (100 - pBloodOath->m_itSpell.m_spelllevel) / 100, this, DAMAGE_MAGIC|DAMAGE_FIXED);
 		}
-	}
+	}*/
 
 	CCharBase * pCharDef = Char_GetDef();
 	ASSERT(pCharDef);
@@ -1920,10 +1920,10 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 	if ( iDmg > 0 )
 	{
-		CItem *pCurseWeapon = LayerFind(LAYER_SPELL_Curse_Weapon);
+		//CItem *pCurseWeapon = LayerFind(LAYER_SPELL_Curse_Weapon);
 		short iHitLifeLeech = (short)(GetDefNum("HitLeechLife", true));
-		if ( pWeapon && pCurseWeapon )
-			iHitLifeLeech += pCurseWeapon->m_itSpell.m_spelllevel;
+		//if ( pWeapon && pCurseWeapon )
+			//iHitLifeLeech += pCurseWeapon->m_itSpell.m_spelllevel;
 
 		bool bMakeLeechSound = false;
 		if ( iHitLifeLeech )
@@ -1948,12 +1948,12 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		}
 
 		short iManaDrain = 0;
-		if ( g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B )
+		/*if ( g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B )
 		{
 			CItem *pPoly = LayerFind(LAYER_SPELL_Polymorph);
 			if ( pPoly && pPoly->m_itSpell.m_spell == SPELL_Wraith_Form )
 				iManaDrain += 5 + (15 * Skill_GetBase(SKILL_SPIRITSPEAK) / 1000);
-		}
+		}*/
 		if ( GetDefNum("HitManaDrain", true) > Calc_GetRandLLVal(100) )
 			iManaDrain += (short)MulDivLL(iDmg, 20, 100);		// leech 20% of damage value
 

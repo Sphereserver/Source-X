@@ -1,4 +1,29 @@
 Heroes Shard Changelog
 
+23-01-2018
+Removal of hardcoded behaviour for the following spells/racial abilities in the following methods:
+
+CCharAct.cpp
+In SetPoison()
+	Removed Evil Omen spell.
+
+CCharFight.cpp
+In Fight_CalcDamage()
+	Removed Horrific Beast spell.
+	Removed Gargoyle Berserk racial ability.
+	
+In Fight_Hit()
+	Removed Curse Weapon spell.
+	Removed Wraith Form spell.
+
+In OnTakeDamage()
+	Removed Evil Omen spell.
+	Removed Blood Oath spell.
+	
+CCharSpell.cpp
+In OnSpellEffect()
+	Removed Evil Omen spell.
+	Removed Gargoyle Berserk racial ability.
+
 03-01-2018
 Start of combat re-implementation: HitChance, Parry Chance, Swing Speed and Damage formulaes.
