@@ -510,12 +510,10 @@ bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain,
 
 		if ( ret == TRIGRET_RET_TRUE )
 		{
-			Skill_Cleanup();
 			return true;
 		}
 		else if ( ret == TRIGRET_RET_FALSE )
 		{
-			Skill_Cleanup();
 			return false;
 		}
 	}
@@ -526,12 +524,10 @@ bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain,
 
 		if ( ret == TRIGRET_RET_TRUE )
 		{
-			Skill_Cleanup();
 			return true;
 		}
 		else if ( ret == TRIGRET_RET_FALSE )
 		{
-			Skill_Cleanup();
 			return false;
 		}
 	}
@@ -555,7 +551,6 @@ void CChar::Skill_Cleanup()
 	ADDTOCALLSTACK("CChar::Skill_Cleanup");
 	// We are starting the skill or ended dealing with it (started / succeeded / failed / aborted)
 	m_Act_Difficulty = 0;
-	m_atUnk.m_Arg1 = m_atUnk.m_Arg2 = m_atUnk.m_Arg3 = 0;		// init ACTARG1/2/3
 	m_Act_SkillCurrent = SKILL_NONE;
 	SetTimeout( m_pPlayer ? -1 : TICK_PER_SEC );	// we should get a brain tick next time
 }
