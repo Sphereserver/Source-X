@@ -1,5 +1,9 @@
 Heroes Shard Changelog
 
+26-01-2018
+Added behaviour for Stamina recover for the Endurance skill (see Skill_Focus).
+Buff icon and Sysmessage handling for this Skill is still missing
+
 23-01-2018
 Removal of hardcoded behaviour for the following spells/racial abilities in the following methods:
 
