@@ -881,6 +881,9 @@ private:
 	int Skill_Musicianship( SKTRIG_TYPE stage );
 	int Skill_Tailoring( SKTRIG_TYPE stage );
 
+	/*Heroes Shard Skill*/
+	int Skill_Focus( SKTRIG_TYPE stage);
+
 	int Skill_Act_Napping(SKTRIG_TYPE stage);
 	int Skill_Act_Throwing(SKTRIG_TYPE stage);
 	int Skill_Act_Breath(SKTRIG_TYPE stage);
