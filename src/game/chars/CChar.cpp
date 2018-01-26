@@ -3338,12 +3338,19 @@ void CChar::r_Write( CScript & s )
 			sprintf(pszActionTemp, "%d", Skill_GetActive());
 		}
 		s.WriteKey("ACTION", pszActionTemp);
-		if ( m_atUnk.m_Arg1 )
+		/*We save ACTARG1/ACTARG2/ACTARG3 only if the following conditions are satisfied:
+		ACTARG1/ACTARG2/ACTARG3 is different from 0 AND
+		The character action is one of the valid skill OR
+		The character action is one of the NPC Action that uses ACTARG1/ACTARG2/ACTARG3
+		*/
+		SKILL_TYPE action = Skill_GetActive();
+		if ((m_atUnk.m_Arg1 != 0) && ((action > SKILL_NONE && action < SKILL_QTY) || action == NPCACT_FLEE || action == NPCACT_TALK || action == NPCACT_TALK_FOLLOW || action == NPCACT_RIDDEN))
 			s.WriteKeyHex("ACTARG1", m_atUnk.m_Arg1);
-		if ( m_atUnk.m_Arg2 )
+		if ((m_atUnk.m_Arg2 != 0) && ((action > SKILL_NONE && action < SKILL_QTY) || action == NPCACT_FLEE || action == NPCACT_TALK || action == NPCACT_TALK_FOLLOW || action == NPCACT_RIDDEN))
 			s.WriteKeyHex("ACTARG2", m_atUnk.m_Arg2);
-		if ( m_atUnk.m_Arg3 )
+		if ((m_atUnk.m_Arg3 != 0) && ((action > SKILL_NONE && action < SKILL_QTY) || action == NPCACT_FLEE || action == NPCACT_TALK || action == NPCACT_TALK_FOLLOW || action == NPCACT_RIDDEN))
 			s.WriteKeyHex("ACTARG3", m_atUnk.m_Arg3);
+
 	}
 
 	if ( m_virtualGold )
