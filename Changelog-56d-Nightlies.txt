@@ -348,4 +348,12 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 14-01-2018, Drk84
 - Fixed: The effect value of spells that equips a "memory item" on a character(Bless, Curse and so on) was calculated twice, also causing to ignore the 
 	value of local.effect.
-											
+	
+25-01-2018, Nolok & Drk84
+-Changed the way ACTARG1/ACTARG2/ACTARG3 are saved, they will be saved only if their value is different from 0 and the character's action is a valid skill or is one 
+	of the action that uses ACTARG1/ACTARG2/ACTARG3 (NPCACT_FLEE, NPCACT_TALK, NPCACT_TALKFOLLOW, NPCACT_RIDDEN).
+-Reverted the following changes made in a precedent commit for avoiding conflict with Spellcasting or custom scripts.
+	Removed the call to Skill_CleanUp method inside the trigger checks in Skill_UseQuick.
+	Removed the reset of ACTARG1/ACTARG2/ACTARG3 inside the Skill_CleanUp method.
+
+	
