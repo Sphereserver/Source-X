@@ -576,7 +576,7 @@ bool CChar::OnAttackedBy(CChar * pCharSrc, int iHarmQty, bool fCommandPet, bool 
 	if (fShouldReveal)
 		pCharSrc->Reveal();	// fix invis exploit
 
-							// Am i already attacking the source anyhow
+	// Am i already attacking the source anyhow
 	if (Fight_IsActive() && m_Fight_Targ_UID == pCharSrc->GetUID())
 		return true;
 
@@ -812,7 +812,7 @@ effect_bounce:
 		return 0;
 
 	// Apply Necromancy cursed effects
-	/*if ( IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) )
+	if ( IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) )
 	{
 		CItem * pEvilOmen = LayerFind(LAYER_SPELL_Evil_Omen);
 		if ( pEvilOmen )
@@ -827,7 +827,7 @@ effect_bounce:
 			iDmg += iDmg / 10;
 			pSrc->OnTakeDamage(iDmg * (100 - pBloodOath->m_itSpell.m_spelllevel) / 100, this, DAMAGE_MAGIC|DAMAGE_FIXED);
 		}
-	}*/
+	}
 
 	CCharBase * pCharDef = Char_GetDef();
 	ASSERT(pCharDef);
@@ -1092,7 +1092,7 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 		iDmgMax = iDmgMin + m_attackRange;
 
 		// Horrific Beast (necro spell) changes char base damage to 5-15
-		/*if (g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B)
+		if (g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B)
 		{
 			CItem * pPoly = LayerFind(LAYER_SPELL_Polymorph);
 			if (pPoly && pPoly->m_itSpell.m_spell == SPELL_Horrific_Beast)
@@ -1100,7 +1100,7 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 				iDmgMin += pPoly->m_itSpell.m_PolyStr;
 				iDmgMax += pPoly->m_itSpell.m_PolyDex;
 			}
-		}*/
+		}
 	}
 
 	if ( m_pPlayer && m_pNPC )	// only players and NPCs can have damage bonus
@@ -1108,7 +1108,7 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 		int iDmgBonus = minimum((int)(GetDefNum("INCREASEDAM", true, true)), 100);		// Damage Increase is capped at 100%
 
 																									// Racial Bonus (Berserk), gargoyles gains +15% Damage Increase per each 20 HP lost
-		/*if ((g_Cfg.m_iRacialFlags & RACIALF_GARG_BERSERK) && IsGargoyle())
+		if ((g_Cfg.m_iRacialFlags & RACIALF_GARG_BERSERK) && IsGargoyle())
 			iDmgBonus += minimum(15 * ((Stat_GetMax(STAT_STR) - Stat_GetVal(STAT_STR)) / 20), 60);		// value is capped at 60%
 		
 																										// Horrific Beast (necro spell) add +25% Damage Increase
@@ -1117,7 +1117,7 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 			CItem * pPoly = LayerFind(LAYER_SPELL_Polymorph);
 			if (pPoly && pPoly->m_itSpell.m_spell == SPELL_Horrific_Beast)
 				iDmgBonus += 25;
-		}*/
+		}
 
 		switch ( g_Cfg.m_iCombatDamageEra )
 		{
