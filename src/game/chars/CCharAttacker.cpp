@@ -379,24 +379,21 @@ void CChar::Attacker_CheckTimeout()
 	ADDTOCALLSTACK("CChar::Attacker_CheckTimeout");
 	if (!m_lastAttackers.empty())
 	{
-		size_t count = 0;
-		for (auto it = m_lastAttackers.begin(), end = m_lastAttackers.end(); it != end; )
+		// do not iterate with an iterator here, since Attacker_Delete can invalidate both current and end iterators!
+		for (size_t count = 0; count < m_lastAttackers.size(); )
 		{
-			LastAttackers & refAttacker = *it;
+			LastAttackers & refAttacker = m_lastAttackers[count];
 			CChar *pEnemy = static_cast<CUID>(refAttacker.charUID).CharFind();
 			if ( pEnemy && ( ++(refAttacker.elapsed) > g_Cfg.m_iAttackerTimeout ) && (g_Cfg.m_iAttackerTimeout > 0) )
 			{
 				DEBUG_MSG(("AttackerTimeout elapsed for char '%s' (UID: 0%" PRIx32 "): "
 					"deleted attacker '%s' (index: %d, UID: 0%" PRIx32 ")\n",
 					GetName(), GetUID().GetObjUID(), pEnemy->GetName(), count, pEnemy->GetUID().GetObjUID() ));
-				if (Attacker_Delete(it, true, ATTACKER_CLEAR_ELAPSED))
-					end = m_lastAttackers.end();	// Attacker_Delete uses the erase method, which moves forward the iterator and invalidates the old end iterator!
-				else
-					++it;
+				if (!Attacker_Delete(count, true, ATTACKER_CLEAR_ELAPSED))
+					++count;
 			}
 			else
-				++it;
-			++count;				
+				++count;				
 		}
 	}
 }

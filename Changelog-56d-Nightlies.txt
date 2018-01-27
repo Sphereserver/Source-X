@@ -350,10 +350,12 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 	value of local.effect.
 	
 25-01-2018, Nolok & Drk84
--Changed the way ACTARG1/ACTARG2/ACTARG3 are saved, they will be saved only if their value is different from 0 and the character's action is a valid skill or is one 
+- Changed the way ACTARG1/ACTARG2/ACTARG3 are saved, they will be saved only if their value is different from 0 and the character's action is a valid skill or is one 
 	of the action that uses ACTARG1/ACTARG2/ACTARG3 (NPCACT_FLEE, NPCACT_TALK, NPCACT_TALKFOLLOW, NPCACT_RIDDEN).
--Reverted the following changes made in a precedent commit for avoiding conflict with Spellcasting or custom scripts.
+- Reverted the following changes made in a precedent commit for avoiding conflict with Spellcasting or custom scripts.
 	Removed the call to Skill_CleanUp method inside the trigger checks in Skill_UseQuick.
 	Removed the reset of ACTARG1/ACTARG2/ACTARG3 inside the Skill_CleanUp method.
 
-	
+27-01-2018, Nolok & Drk84
+- Fixed: crash occurring when an NPC cleaned its attackers.
+- Fixed: magic-capable NPCs often did not attack or cast spells when they should instead start to attack.
