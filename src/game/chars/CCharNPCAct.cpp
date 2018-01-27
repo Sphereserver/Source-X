@@ -685,9 +685,7 @@ bool CChar::NPC_LookAtCharMonster( CChar * pChar )
 
 	// Attacks those not of my kind.
 	if ( ! Noto_IsCriminal() && iFoodLevel > 40 )		// I am not evil ?
-	{
 		return NPC_LookAtCharHuman( pChar );
-	}
 
 	// Attack if i am stronger.
 	// or i'm just stupid.
@@ -707,7 +705,8 @@ bool CChar::NPC_LookAtCharMonster( CChar * pChar )
 
 	if ( Fight_Attack( pChar ) == false )
 		return false;
-	m_pNPC->m_Act_Motivation = (uchar)(iActMotivation);
+
+	m_pNPC->m_Act_Motivation = (uchar)iActMotivation;
 	return true;
 }
 

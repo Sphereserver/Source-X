@@ -1851,7 +1851,7 @@ void NetworkOutput::QueuePacketTransaction(PacketTransaction* transaction)
 	{
 		while (priority > PacketSend::PRI_IDLE && state->m_outgoing.queue[priority].size() >= maxQueueSize)
 		{
-			priority--;
+			--priority;
 			transaction->setPriority(priority);
 		}
 	}
