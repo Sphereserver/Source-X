@@ -20,7 +20,7 @@ class CServerTime
 	
 public:
 	static const char *m_sClassName;
-	int64 m_lPrivateTime;
+	int64 m_llPrivateTime;
 public:
 	int64 GetTimeRaw() const;
 	int64 GetTimeDiff( const CServerTime & time ) const;
@@ -45,35 +45,35 @@ public:
 
 int64 CServerTime::operator-(CServerTime time) const
 {
-	return (m_lPrivateTime - time.m_lPrivateTime);
+	return (m_llPrivateTime - time.m_llPrivateTime);
 }
 bool CServerTime::operator==(CServerTime time) const
 {
-	return (m_lPrivateTime == time.m_lPrivateTime);
+	return (m_llPrivateTime == time.m_llPrivateTime);
 }
 bool CServerTime::operator!=(CServerTime time) const
 {
-	return (m_lPrivateTime != time.m_lPrivateTime);
+	return (m_llPrivateTime != time.m_llPrivateTime);
 }
 bool CServerTime::operator<(CServerTime time) const
 {
-	return (m_lPrivateTime<time.m_lPrivateTime);
+	return (m_llPrivateTime < time.m_llPrivateTime);
 }
 bool CServerTime::operator>(CServerTime time) const
 {
-	return (m_lPrivateTime>time.m_lPrivateTime);
+	return (m_llPrivateTime > time.m_llPrivateTime);
 }
 bool CServerTime::operator<=(CServerTime time) const
 {
-	return (m_lPrivateTime <= time.m_lPrivateTime);
+	return (m_llPrivateTime <= time.m_llPrivateTime);
 }
 bool CServerTime::operator>=(CServerTime time) const
 {
-	return (m_lPrivateTime >= time.m_lPrivateTime);
+	return (m_llPrivateTime >= time.m_llPrivateTime);
 }
 void CServerTime::SetCurrentTime()
 {
-	m_lPrivateTime = GetCurrentTime().m_lPrivateTime;
+	m_llPrivateTime = GetCurrentTime().m_llPrivateTime;
 }
 
 

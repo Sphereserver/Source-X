@@ -243,7 +243,8 @@ public:
 		struct
 		{
 			WAR_SWING_TYPE m_War_Swing_State;		// ACTARG1 = We are in the war mode swing.
-			uint64 m_timeNextCombatSwing;			// (ACTARG2 << 32) | ACTARG3 = Time to wait before starting another combat swing.
+			int64 m_timeNextCombatSwing;			// (ACTARG2 << 32) | ACTARG3 = Time to wait before starting another combat swing.
+													//	(the time variable here is signed because Sphere's time class stores it internally as an int64, not uint64)
 		} m_atFight;
 
 		// SKILL_ENTICEMENT
