@@ -49,7 +49,7 @@ inline void AddSocketToSet(fd_set& fds, SOCKET socket, int& count)
 ***************************************************************************/
 const char * GenerateNetworkThreadName(size_t id)
 {
-	char * name = new char[16];		// On Linux the name can be only max 16 chars, including the terminal '\0'
+	char * name = new char[AbstractSphereThread::m_nameMaxLength];
 	sprintf(name, "T_Network #%" PRIuSIZE_T, id);
 	return name;
 }
@@ -340,15 +340,40 @@ void NetworkManager::start(void)
 	{
 		// start network threads
 		for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)
-			(*it)->start();
+			(*it)->start();		// The thread structure (class) was created via createNetworkThreads, spawn a new thread and do the work inside there.
+								// The start method creates a thread with "runner" as main function thread. Runner calls Start, which calls onStart.
+								// OnStart, among the other things, actually sets the thread name.
 
 		DEBUGNETWORK(("Started %" PRIuSIZE_T " network threads.\n", m_threads.size()));
 	}
 	else
 	{
-		// initialise network threads
+		// initialise network threads (if g_Cfg.m_iNetworkThreads is == 0 then we'll have only 1 NetworkThread)
+		size_t ntCount = m_threads.size();
 		for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)
-			(*it)->onStart();
+		{
+			NetworkThread* pThread = *it;
+
+			// Since the thread name is set in the onStart method, if we don't overwrite now the internal name, the thread executing the NetworkThread code
+			//	(so the main/first one) will be named as a network thread. In this case this isn't correct: since isThreaded is false
+			//	the main/first thread will only run Sphere_MainMonitorLoop, and all the sphere/scripts/networking work will be done in the MainThread class,
+			//	which code will be executed in another thread named "T_Main".
+			if (ntCount == 1)
+			{
+				// If we have only 1 network thread, it will be created by the main/first thread, which will then run Sphere_MainMonitorLoop.
+				// Since AbstractSphereThread::onStart sets the calling thread name, we can use that to set the monitor thread name.
+				pThread->overwriteInternalThreadName("T_Monitor");
+			}
+			else
+			{
+				// If we have more than one thread (this hasn't sense... at this point isThreaded should be == true), these should be working threads (for networking?)
+				char name[AbstractSphereThread::m_nameMaxLength];
+				sprintf(name, "T_Worker #%u", pThread->getId());
+				pThread->overwriteInternalThreadName(name);
+			}
+			
+			(*it)->onStart();	// the thread structure (class) was created via createNetworkThreads, but we execute the worker method of that class in this thread
+		}
 	}
 }
 

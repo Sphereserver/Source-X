@@ -18,15 +18,15 @@ extern size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord );
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-class Main : public AbstractSphereThread
+class MainThread : public AbstractSphereThread
 {
 public:
-	Main();
-	virtual ~Main() { };
+	MainThread();
+	virtual ~MainThread() { };
 
 private:
-	Main(const Main& copy);
-	Main& operator=(const Main& other);
+	MainThread(const MainThread& copy);
+	MainThread& operator=(const MainThread& other);
 
 public:
 	// we increase the access level from protected to public in order to allow manual execution when
