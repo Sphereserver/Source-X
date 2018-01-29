@@ -245,7 +245,7 @@ size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord )
 //	Main server loop
 
 Main::Main()
-	: AbstractSphereThread("Main", IThread::RealTime)
+	: AbstractSphereThread("T_Main", IThread::RealTime)
 {
 	m_profile.EnableProfile(PROFILE_NETWORK_RX);
 	m_profile.EnableProfile(PROFILE_CLIENTS);

@@ -2816,10 +2816,10 @@ bool CChar::Death()
 	CChar * pKiller = NULL;
 	tchar * pszKillStr = Str_GetTemp();
 	int iKillStrLen = sprintf( pszKillStr, g_Cfg.GetDefaultMsg(DEFMSG_MSG_KILLED_BY), (m_pPlayer)? 'P':'N', GetNameWithoutIncognito() );
-	for ( size_t count = 0; count < m_lastAttackers.size(); count++ )
+	for ( size_t count = 0; count < m_lastAttackers.size(); ++count )
 	{
-		pKiller = CUID(m_lastAttackers.at(count).charUID).CharFind();
-		if ( pKiller && (m_lastAttackers.at(count).amountDone > 0) )
+		pKiller = CUID(m_lastAttackers[count].charUID).CharFind();
+		if ( pKiller && (m_lastAttackers[count].amountDone > 0) )
 		{
 			if ( IsTrigUsed(TRIGGER_KILL) )
 			{

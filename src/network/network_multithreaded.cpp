@@ -49,8 +49,8 @@ inline void AddSocketToSet(fd_set& fds, SOCKET socket, int& count)
 ***************************************************************************/
 const char * GenerateNetworkThreadName(size_t id)
 {
-	char * name = new char[25];
-	sprintf(name, "NetworkThread #%" PRIuSIZE_T, id);
+	char * name = new char[16];		// On Linux the name can be only max 16 chars, including the terminal '\0'
+	sprintf(name, "T_Network #%" PRIuSIZE_T, id);
 	return name;
 }
 

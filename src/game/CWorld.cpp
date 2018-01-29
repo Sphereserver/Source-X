@@ -220,6 +220,7 @@ void ReportGarbageCollection(CObjBase * pObj, int iResultCode)
 CTimedFunctionHandler::CTimedFunctionHandler()
 {
 	m_curTick = 0;
+	m_processedFunctionsPerTick = 0;
 	m_isBeingProcessed = false;
 }
 
@@ -236,10 +237,17 @@ void CTimedFunctionHandler::OnTick()
 	int tick = m_curTick;
 	ProfileTask scriptsTask(PROFILE_SCRIPTS);
 
+
 	if ( !m_timedFunctions[tick].empty() )
 	{
-		for ( auto it = m_timedFunctions[tick].begin(), end = m_timedFunctions[tick].end(); it != end; )	
+		for ( auto it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); )	
 		{
+			++m_processedFunctionsPerTick;
+			if (g_Cfg.m_iMaxLoopTimes && (m_processedFunctionsPerTick >= g_Cfg.m_iMaxLoopTimes))
+			{
+				g_Log.EventError("Terminating TIMERF executions for this tick, since it seems being dead-locked (%d iterations already passed)\n", m_processedFunctionsPerTick);
+				break;
+			}
 			TimedFunction* tf = *it;
 			tf->elapsed -= 1;
 			if ( tf->elapsed <= 0 )
@@ -259,7 +267,6 @@ void CTimedFunctionHandler::OnTick()
 
 					m_tfRecycled.push_back( tf );
 					it = m_timedFunctions[tick].erase( it );
-					end = m_timedFunctions[tick].end();	// the end iterator changes at each erase call
 
 					obj->r_Verb( s, src );
 				}
@@ -267,7 +274,6 @@ void CTimedFunctionHandler::OnTick()
 				{
 					m_tfRecycled.push_back( tf );
 					it = m_timedFunctions[tick].erase( it );
-					end = m_timedFunctions[tick].end();	// the end iterator changes at each erase call
 				}
 			}
 			else
@@ -278,8 +284,9 @@ void CTimedFunctionHandler::OnTick()
 	}
 
 	m_isBeingProcessed = false;
+	m_processedFunctionsPerTick = 0;
 
-	while ( m_tfQueuedToBeAdded.size() > 0 )
+	while ( !m_tfQueuedToBeAdded.empty() )
 	{
 		TimedFunction *tf = m_tfQueuedToBeAdded.back();
 		m_tfQueuedToBeAdded.pop_back();
@@ -348,7 +355,7 @@ TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr funcname, int LoopsMade, CScrip
 	bool endLooping = false;
 	for (int tick = 0; (tick < TICK_PER_SEC) && !endLooping; ++tick)
 	{
-		for (auto it = m_timedFunctions[tick].begin(), end = m_timedFunctions[tick].end(); it != end; )
+		for (auto it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); )
 		{
 			++LoopsMade;
 			if (g_Cfg.m_iMaxLoopTimes && (LoopsMade >= g_Cfg.m_iMaxLoopTimes))
