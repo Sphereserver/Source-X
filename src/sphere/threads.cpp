@@ -300,6 +300,7 @@ void AbstractThread::run()
 
 SPHERE_THREADENTRY_RETNTYPE AbstractThread::runner(void *callerThread)
 {
+	// If the caller thread is an AbstractThread, call run, which starts it and make it enter in its main loop
 	AbstractThread * caller = reinterpret_cast<AbstractThread*>(callerThread);
 	if (caller != NULL)
 	{
@@ -432,7 +433,7 @@ void AbstractThread::onStart()
 #elif !defined(_BSD)
 	// Unix uses prctl to set thread name
 	// thread name must be 16 bytes, zero-padded if shorter
-	char name[16] = { '\0' };
+	char name[16] = { '\0' };	// m_nameMaxLength = 16
 	strcpylen(name, m_name, CountOf(name));
 	prctl(PR_SET_NAME, name, 0, 0, 0);
 #endif

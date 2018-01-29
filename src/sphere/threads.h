@@ -118,6 +118,8 @@ public:
 	AbstractThread(const char *name, Priority priority = IThread::Normal);
 	virtual ~AbstractThread();
 
+	static const int m_nameMaxLength = 16;	// Unix support a max 16 bytes thread name.
+
 private:
 	AbstractThread(const AbstractThread& copy);
 	AbstractThread& operator=(const AbstractThread& other);
@@ -125,6 +127,9 @@ private:
 public:
 	uint getId() const { return m_id; }
 	const char *getName() const { return m_name; }
+	void overwriteInternalThreadName(const char* name) {	// Use it only if you know what you are doing!
+		m_name = name;										//  This doesn't actually do the change of the thread name!
+	}
 
 	bool isActive() const;
 	bool isCurrentThread() const;

@@ -731,6 +731,7 @@ private:
 	void dropInvalidStates(void);		// check for states that don't belong to use anymore
 
 public:
+	friend class NetworkManager;
 	friend class NetworkInput;
 	friend class NetworkOutput;
 	friend class NetworkThreadStateIterator;

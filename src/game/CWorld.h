@@ -142,6 +142,7 @@ class CTimedFunctionHandler
 	private:
 		std::vector<TimedFunction *> m_timedFunctions[TICK_PER_SEC];
 		int m_curTick;
+		int m_processedFunctionsPerTick;
 		std::vector<TimedFunction *> m_tfRecycled;
 		std::vector<TimedFunction *> m_tfQueuedToBeAdded;
 		bool m_isBeingProcessed;

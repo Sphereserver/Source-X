@@ -244,8 +244,8 @@ size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord )
 //*******************************************************************
 //	Main server loop
 
-Main::Main()
-	: AbstractSphereThread("Main", IThread::RealTime)
+MainThread::MainThread()
+	: AbstractSphereThread("T_Main", IThread::RealTime)
 {
 	m_profile.EnableProfile(PROFILE_NETWORK_RX);
 	m_profile.EnableProfile(PROFILE_CLIENTS);
@@ -268,25 +268,25 @@ Main::Main()
 #endif
 }
 
-void Main::onStart()
+void MainThread::onStart()
 {
 	AbstractSphereThread::onStart();
 	SetExceptionTranslator();
 }
 
-void Main::tick()
+void MainThread::tick()
 {
 	Sphere_OnTick();
 }
 
-bool Main::shouldExit()
+bool MainThread::shouldExit()
 {
 	if (g_Serv.m_iExitFlag != 0)
 		return true;
 	return AbstractSphereThread::shouldExit();
 }
 
-Main g_Main;
+MainThread g_Main;
 extern PingServer g_PingServer;
 extern CDataBaseAsyncHelper g_asyncHdb;
 #if !defined(_WIN32) || defined(_LIBEV)
@@ -858,25 +858,26 @@ int _cdecl main( int argc, char * argv[] )
 #endif
 
 #ifndef _MTNETWORK
-		g_NetworkIn.onStart();
+		g_NetworkIn.onStart();					// A class to process network input, but not multi threaded (declarations and definitions in network_singlethreaded.h/.cpp)
 		if (IsSetEF( EF_NetworkOutThread ))
-			g_NetworkOut.start();
+			g_NetworkOut.start();				// A class to process network output, but not multi threaded (declarations and definitions in network_singlethreaded.h/.cpp)
 #else
-		g_NetworkManager.start();
+		g_NetworkManager.start();	// NetworkManager spawns a number of NetworkThread. Every NetworkThread has an instance of NetworkInput nad NetworkOutput,
+									//	which support working in a multi threaded way (declarations and definitions in network_multithreaded.h/.cpp)
 #endif
 
 		bool shouldRunInThread = ( g_Cfg.m_iFreezeRestartTime > 0 );
 
 		if( shouldRunInThread )
 		{
-			g_Main.start();
-			Sphere_MainMonitorLoop();
+			g_Main.start();				// Starts another thread to do all the work (it does Sphere_OnTick())
+			Sphere_MainMonitorLoop();	// Use this thread to monitor if the others are stuck
 		}
 		else
 		{
 			while( !g_Serv.m_iExitFlag )
 			{
-				g_Main.tick();
+				g_Main.tick();			// Use this thread to do all the work, without monitoring the other threads state
 			}
 		}
 	}
