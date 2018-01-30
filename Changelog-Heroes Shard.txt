@@ -1,5 +1,11 @@
 Heroes Shard Changelog
 
+31-01-2018
+Readded the hardcoded behaviour of the following ability:
+CCharSpell.cpp
+In OnSpellEffect()
+	Readded Gargoyle Berserk racial ability, because it's only used with MAGICF_OSIFORMULAS flag.
+
 26-01-2018
 Added behaviour for Stamina recover for the Endurance skill (see Skill_Focus).
 Buff icon and Sysmessage handling for this Skill is still missing

@@ -2706,16 +2706,6 @@ bool CChar::SetPoison( int iSkill, int iTicks, CChar * pCharSrc )
 		pPoison->m_itSpell.m_spellcharges = iTicks;		// effect duration
 	}
 
-	/*if (IsAosFlagEnabled(FEATURE_AOS_UPDATE_B))
-	{
-		CItem * pEvilOmen = LayerFind(LAYER_SPELL_Evil_Omen);
-		if (pEvilOmen)
-		{
-			pPoison->m_itSpell.m_spelllevel++;	// Effect 2: next poison will have one additional level of poison.
-			pEvilOmen->Delete();
-		}
-	}*/
-
 	CClient *pClient = GetClient();
 	if ( pClient && IsSetOF(OF_Buffs) )
 	{
