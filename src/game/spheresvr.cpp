@@ -489,12 +489,13 @@ int Sphere_OnTick()
 		g_NetworkOut.tick();
 	}
 #else
-	EXC_SET("network-tick");
-	g_NetworkManager.tick();
-
 	EXC_SET("network-out");
 	g_NetworkManager.processAllOutput();
 #endif
+
+	// don't put the network-tick between in.tick and out.tick, otherwise it will clean the out queue!
+	EXC_SET("network-tick");
+	g_NetworkManager.tick();	// then this thread has to call the network tick
 
 	EXC_CATCH;
 	return g_Serv.m_iExitFlag;
@@ -862,8 +863,8 @@ int _cdecl main( int argc, char * argv[] )
 		if (IsSetEF( EF_NetworkOutThread ))
 			g_NetworkOut.start();				// A class to process network output, but not multi threaded (declarations and definitions in network_singlethreaded.h/.cpp)
 #else
-		g_NetworkManager.start();	// NetworkManager spawns a number of NetworkThread. Every NetworkThread has an instance of NetworkInput nad NetworkOutput,
-									//	which support working in a multi threaded way (declarations and definitions in network_multithreaded.h/.cpp)
+		g_NetworkManager.start();	// NetworkManager creates a number of NetworkThread classes, which may run on new threads or on the calling thread. Every NetworkThread has
+									//  an instance of NetworkInput nad NetworkOutput, which support working in a multi threaded way (declarations and definitions in network_multithreaded.h/.cpp)
 #endif
 
 		bool shouldRunInThread = ( g_Cfg.m_iFreezeRestartTime > 0 );
@@ -871,6 +872,7 @@ int _cdecl main( int argc, char * argv[] )
 		if( shouldRunInThread )
 		{
 			g_Main.start();				// Starts another thread to do all the work (it does Sphere_OnTick())
+			IThread::setThreadName("T_Monitor");
 			Sphere_MainMonitorLoop();	// Use this thread to monitor if the others are stuck
 		}
 		else

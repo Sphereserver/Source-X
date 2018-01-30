@@ -4,10 +4,16 @@
 #include "../game/CServer.h"
 #include "linuxev.h"
 
+// LibEv is used by Linux to notify when a socket is readable or writable, so when i can read and send data again.
+// Windows supports async network I/O via WinSock.
+
+
 LinuxEv g_NetworkEvent;
 
+// call this function (cb = callback) when the socket is readable -> there may be new received data to read
 static void socketmain_cb(struct ev_loop *loop, struct ev_io *w, int revents)
 {
+	/*
 	ev_io_stop(loop, w);
 	
 	if ( !g_Serv.IsLoading() )
@@ -26,8 +32,10 @@ static void socketmain_cb(struct ev_loop *loop, struct ev_io *w, int revents)
 	}
 	
 	ev_io_start(loop, w);
+	*/
 }
 
+// call this function when the socket is readable again -> we have finished sending data
 static void socketslave_cb(struct ev_loop *loop, struct ev_io *w, int revents)
 {
 	ev_io_stop(loop, w);
@@ -57,7 +65,7 @@ static void socketslave_cb(struct ev_loop *loop, struct ev_io *w, int revents)
 	}
 }
 
-LinuxEv::LinuxEv(void) : AbstractSphereThread("NetworkEvents", IThread::High)
+LinuxEv::LinuxEv(void) : AbstractSphereThread("T_NetworkEvents", IThread::High)
 {
 	m_eventLoop = ev_loop_new(EV_BACKEND_LIST);
 	ASSERT(m_eventLoop != NULL);	// libev probably couldn't find sys/poll.h, select.h and other includes (compiling on ubuntu with both x86_64 and i386 compilers? or more gcc versions?)
@@ -89,8 +97,11 @@ void LinuxEv::waitForClose()
 	AbstractSphereThread::waitForClose();
 }
 
+// start to monitor the data sent to a client (each NetState is a client, or more generically a connection)
 void LinuxEv::registerClient(NetState * state, EventsID eventCheck)
 {
+	// we call it with eventCheck = LinuxEv::Write, so we check when the socket will be again writable
+
 	ADDTOCALLSTACK("LinuxEv::registerClient");
 	ASSERT(state != NULL);
 	
@@ -103,9 +114,12 @@ void LinuxEv::registerClient(NetState * state, EventsID eventCheck)
 	ev_io_init(state->iocb(), socketslave_cb, state->m_socket.GetSocket(), (int)eventCheck);
 #endif
 	state->iocb()->data = state;
-	state->setSendingAsync(true);
+	state->setSendingAsync(true);	// set it true: when the socket will be again writable (so we have finished writing data in it)
+									//  socketslave_cb will be called (even immediately after this function if we aren't actually sending data)
+									//  and it will report that we are not sending async data anymore.
+	// When a NetworkThread tries to send data, it will check if the socket/netstate isWriteClosed(), 
 	
-    ev_io_start(m_eventLoop, state->iocb());	
+    ev_io_start(m_eventLoop, state->iocb());
 }
 
 void LinuxEv::unregisterClient(NetState * state)
@@ -139,6 +153,8 @@ void LinuxEv::forceClientwrite(NetState * state)
 
 void LinuxEv::registerMainsocket()
 {
+	// the sockets will be checked for incoming data/connections by NetworkManager::processAllInput?
+	/*
 #ifdef _WIN32
 	int fd = EV_WIN32_HANDLE_TO_FD(g_Serv.m_SocketMain.GetSocket());
 	ev_io_init(&m_watchMainsock, socketmain_cb, fd, EV_READ);
@@ -146,11 +162,12 @@ void LinuxEv::registerMainsocket()
 	ev_io_init(&m_watchMainsock, socketmain_cb, g_Serv.m_SocketMain.GetSocket(), EV_READ);
 #endif
     ev_io_start(m_eventLoop, &m_watchMainsock);		
+	*/
 }
 
 void LinuxEv::unregisterMainsocket()
 {
-	ev_io_stop(m_eventLoop, &m_watchMainsock);
+	//ev_io_stop(m_eventLoop, &m_watchMainsock);
 }
 
 #endif

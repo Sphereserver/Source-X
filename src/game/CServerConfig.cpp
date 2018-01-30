@@ -236,12 +236,12 @@ CServerConfig::CServerConfig()
 	m_iColorInvisSpell	= 0;
 	m_iColorHidden		= 0;
 
-	m_iNotoTimeout		= 30;					// seconds to remove this character from notoriety list.
+	m_iNotoTimeout		= 30;				// seconds to remove this character from notoriety list.
 
 	m_iPetsInheritNotoriety = 0;
 
 #ifdef _MTNETWORK
-	m_iNetworkThreads			= 0;
+	m_iNetworkThreads			= 0;				// if there aren't the ini settings, by default we'll not use additional network threads
 	m_iNetworkThreadPriority	= IThread::Disabled;
 #endif
 	m_fUseAsyncNetwork		= 0;
@@ -1199,10 +1199,12 @@ bool CServerConfig::r_LoadVal( CScript &s )
 		case RC_NETWORKTHREADPRIORITY:
 			{
 				int priority = s.GetArgVal();
-				if (priority < IThread::Idle)
-					priority = IThread::Idle;
-				else if (priority > IThread::RealTime)
-					priority = IThread::Disabled;
+				if (priority < 1)
+					priority = IThread::Normal;
+				else if (priority > 4)
+					priority = IThread::RealTime;
+				else
+					priority = IThread::Low + (IThread::Priority)priority;
 
 				m_iNetworkThreadPriority = priority;
 			}

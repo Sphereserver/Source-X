@@ -56,6 +56,9 @@ public:
 	virtual void setPriority(Priority) = 0;
 	virtual Priority getPriority() const = 0;
 
+	static const int m_nameMaxLength = 16;	// Unix support a max 16 bytes thread name.
+	static void setThreadName(const char* name);
+
 protected:
 	virtual bool shouldExit() = 0;
 
@@ -117,8 +120,6 @@ private:
 public:
 	AbstractThread(const char *name, Priority priority = IThread::Normal);
 	virtual ~AbstractThread();
-
-	static const int m_nameMaxLength = 16;	// Unix support a max 16 bytes thread name.
 
 private:
 	AbstractThread(const AbstractThread& copy);
