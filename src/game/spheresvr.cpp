@@ -289,9 +289,7 @@ bool MainThread::shouldExit()
 MainThread g_Main;
 extern PingServer g_PingServer;
 extern CDataBaseAsyncHelper g_asyncHdb;
-#if !defined(_WIN32) || defined(_LIBEV)
-	extern LinuxEv g_NetworkEvent;
-#endif
+
 
 //*******************************************************************
 

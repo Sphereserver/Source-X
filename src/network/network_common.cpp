@@ -288,7 +288,7 @@ void NetState::init(SOCKET socket, CSocketAddress addr)
 	m_isReadClosed = false;
 	m_isInUse = true;
 
-	DEBUGNETWORK(("%x:Determining async mode\n", id()));
+	DEBUGNETWORK(("%x:Determining async mode. Current: %d\n", id(), isAsyncMode()));
 	detectAsyncMode();
 }
 
