@@ -63,9 +63,9 @@ const char * GenerateNetworkThreadName(size_t id)
 *
 *
 ***************************************************************************/
-void CALLBACK SendCompleted_Winsock(dword dwError, dword cbTransferred, LPWSAOVERLAPPED lpOverlapped, uint64 iFlags)
+void CALLBACK SendCompleted_Winsock(DWORD dwError, DWORD cbTransferred, LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
 {
-	UNREFERENCED_PARAMETER(iFlags);
+	UNREFERENCED_PARAMETER(dwFlags);
 	ADDTOCALLSTACK("SendCompleted_Winsock");
 
 	NetState* state = reinterpret_cast<NetState*>(lpOverlapped->hEvent);
