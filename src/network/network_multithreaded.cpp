@@ -338,7 +338,7 @@ void NetworkManager::start(void)
 	{
 		// start network threads
 		for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)
-			(*it)->start();		// The thread structure (class) was created via createNetworkThreads, spawn a new thread and do the work inside there.
+			(*it)->start();		// The thread structure (class) was created via createNetworkThreads, now spawn a new thread and do the work inside there.
 								// The start method creates a thread with "runner" as main function thread. Runner calls Start, which calls onStart.
 								// onStart, among the other things, actually sets the thread name.
 
