@@ -342,7 +342,7 @@ void NetworkManager::start(void)
 								// The start method creates a thread with "runner" as main function thread. Runner calls Start, which calls onStart.
 								// onStart, among the other things, actually sets the thread name.
 
-		DEBUGNETWORK(("Started %" PRIuSIZE_T " network threads.\n", m_threads.size()));
+		g_Log.Event(LOGM_INIT, "Started %" PRIuSIZE_T " network threads.\n", m_threads.size());
 	}
 	else
 	{
