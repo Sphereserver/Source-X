@@ -1,0 +1,39 @@
+Heroes Shard Changelog
+
+31-01-2018
+Readded the hardcoded behaviour of the following ability:
+CCharSpell.cpp
+In OnSpellEffect()
+	Readded Gargoyle Berserk racial ability, because it's only used with MAGICF_OSIFORMULAS flag.
+
+26-01-2018
+Added behaviour for Stamina recover for the Endurance skill (see Skill_Focus).
+Buff icon and Sysmessage handling for this Skill is still missing
+
+23-01-2018
+Removal of hardcoded behaviour for the following spells/racial abilities in the following methods:
+
+CCharAct.cpp
+In SetPoison()
+	Removed Evil Omen spell.
+
+CCharFight.cpp
+In Fight_CalcDamage()
+	Removed Horrific Beast spell.
+	Removed Gargoyle Berserk racial ability.
+	
+In Fight_Hit()
+	Removed Curse Weapon spell.
+	Removed Wraith Form spell.
+
+In OnTakeDamage()
+	Removed Evil Omen spell.
+	Removed Blood Oath spell.
+	
+CCharSpell.cpp
+In OnSpellEffect()
+	Removed Evil Omen spell.
+	Removed Gargoyle Berserk racial ability.
+
+03-01-2018
+Start of combat re-implementation: HitChance, Parry Chance, Swing Speed and Damage formulaes.

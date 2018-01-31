@@ -2330,6 +2330,56 @@ int CChar::Skill_SpiritSpeak( SKTRIG_TYPE stage )
 	return -SKTRIG_ABORT;
 }
 
+int CChar::Skill_Focus(SKTRIG_TYPE stage)
+{
+	ADDTOCALLSTACK("CChar::Skill_Focus");
+	//SKILL_FOCUS
+	//This is actually the Endurance skill, allowing to recover Stamina.
+	if (stage == SKTRIG_FAIL || stage == SKTRIG_ABORT)
+	{
+		//Remove buff here.
+		return 0;
+	}
+	if (stage == SKTRIG_START)
+	{
+		if (Stat_GetVal(STAT_DEX) >= Stat_GetMax(STAT_DEX))
+		{
+			//Stamina full message here.
+			return -SKTRIG_QTY;
+		}
+		m_atTaming.m_Stroke_Count = 0;
+		//Attempt to recover stamina message here.
+		return Calc_GetRandVal(100);
+	}
+	if (stage == SKTRIG_STROKE)
+		return 0;
+	if (stage == SKTRIG_SUCCESS)
+	{
+		if (Stat_GetVal(STAT_DEX) >= Stat_GetMax(STAT_DEX))
+		{
+			if (IsClient())
+				GetClient()->removeBuff(BI_ACTIVEMEDITATION);
+			//Stamina full message here.
+			return 0;	// only give skill credit now.
+		}
+
+		if (m_atTaming.m_Stroke_Count == 0)
+		{
+			if (IsClient())
+				GetClient()->addBuff(BI_ACTIVEMEDITATION, 1075657, 1075658);
+			if (!g_Cfg.IsSkillFlag(Skill_GetActive(), SKF_NOSFX))
+				Sound(0x0f9);
+		}
+		m_atTaming.m_Stroke_Count++;
+		const CSkillDef * pSkillDef = g_Cfg.GetSkillDef(SKILL_FOCUS);
+		if (pSkillDef == NULL)
+			return -SKTRIG_QTY;
+		UpdateStatVal(STAT_DEX, (short)(pSkillDef->m_Effect.GetLinear(Skill_GetAdjusted(SKILL_FOCUS))));
+		Skill_SetTimeout();		// next update (depends on skill)
+		return(-SKTRIG_STROKE);
+	}
+	return -SKTRIG_QTY;
+}
 int CChar::Skill_Meditation( SKTRIG_TYPE stage )
 {
 	ADDTOCALLSTACK("CChar::Skill_Meditation");
@@ -3306,6 +3356,8 @@ int CChar::Skill_Stage( SKTRIG_TYPE stage )
 			return Skill_Meditation(stage);
 		case SKILL_REMOVETRAP:
 			return Skill_RemoveTrap(stage);
+		case SKILL_FOCUS:
+			return Skill_Focus(stage);
 		case NPCACT_BREATH:
 			return Skill_Act_Breath(stage);
 		case NPCACT_THROWING:
@@ -3565,7 +3617,7 @@ bool CChar::Skill_Wait( SKILL_TYPE skilltry )
 	// Cancel passive actions
 	if ( skilltry != skill )
 	{
-		if ( skill == SKILL_MEDITATION || skill == SKILL_HIDING || skill == SKILL_STEALTH )		// SKILL_SPIRITSPEAK ?
+		if ( skill == SKILL_MEDITATION || skill == SKILL_HIDING || skill == SKILL_STEALTH || skill == SKILL_FOCUS)		// SKILL_SPIRITSPEAK ?
 		{
 			Skill_Fail(true);
 			return false;

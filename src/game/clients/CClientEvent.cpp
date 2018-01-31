@@ -646,6 +646,7 @@ void CClient::Event_Skill_Use( SKILL_TYPE skill ) // Skill is clicked on the ski
 			break;
 
 		case SKILL_STEALTH:	// How is this supposed to work.
+		case SKILL_FOCUS:
 		case SKILL_HIDING:
 		case SKILL_SPIRITSPEAK:
 		case SKILL_PEACEMAKING:
