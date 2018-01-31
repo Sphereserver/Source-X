@@ -362,8 +362,13 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 
 29-01-2018, Nolok
 - Added: ini setting MaxLoopTimes is now controlling also the TIMERF executions. If too many TIMERFs are executed in the current tick, the loop will be aborted and a warning will be issued.
+29-01-2018, Nolok
+- Added: ini setting MaxLoopTimes is now controlling also the TIMERF executions. If too many TIMERFs are executed in the current tick, the loop will be aborted and a warning will be issued.
 	If it value is 0, there will be no limit (still it is suggested to set a value, even very high, because have just a distraction when writing some kind of scripts and you can cause a deadlock).
 
+31-01-2018, Drk84
+- Commented 4 lines of in code in method Skill_Fight() (CCharSkill.cpp), these 4 lines refers to a fix for an exploit in combat
+  Because the lines above cause problems with combat swings and we don't know what the exploit is they were commented and replaced with Set_Timeout(0).
 31-01-2018, Nolok
 - Fixed the multi-threading and async networking system, which was disabled long time ago because of its instability.
 - Added ini flags: NetworkThreads (specify how many new network threads do you want), NetworkThreadPriority (priority of the dedicated networking threads),
