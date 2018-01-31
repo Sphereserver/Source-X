@@ -11,7 +11,7 @@ LinuxEv g_NetworkEvent;
 
 
 // Call this function (cb = callback) when the socket is readable -> there may be new received data to read
-static void socketmain_cb(struct ev_loop *loop, struct ev_io *w, int revents)
+static void socketmain_cb(struct ev_loop * /* loop */, struct ev_io * /* w */, int /* revents */)
 {
 	/*
 	ev_io_stop(loop, w);
