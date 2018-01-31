@@ -1307,10 +1307,10 @@ bool NetworkOut::sendPacket(CClient* client, PacketSend* packet)
 
 #ifdef _WIN32
 
-void CALLBACK SendCompleted(dword dwError, dword cbTransferred, LPWSAOVERLAPPED lpOverlapped, uint64 iFlags)
+void CALLBACK SendCompleted_Winsock(dword dwError, dword cbTransferred, LPWSAOVERLAPPED lpOverlapped, uint64 iFlags)
 {
 	UNREFERENCED_PARAMETER(iFlags);
-	ADDTOCALLSTACK("SendCompleted");
+	ADDTOCALLSTACK("SendCompleted_Winsock");
 
 	NetState* state = reinterpret_cast<NetState *>(lpOverlapped->hEvent);
 	if (state == NULL)
@@ -1470,7 +1470,7 @@ int NetworkOut::sendBytesNow(CClient* client, const byte* data, dword length)
 		state->m_bufferWSA.buf = (CHAR*)data;
 
 		DWORD bytesSent;
-		if (state->m_socket.SendAsync(&state->m_bufferWSA, 1, &bytesSent, 0, &state->m_overlapped, (LPWSAOVERLAPPED_COMPLETION_ROUTINE)SendCompleted) == 0)
+		if (state->m_socket.SendAsync(&state->m_bufferWSA, 1, &bytesSent, 0, &state->m_overlapped, (LPWSAOVERLAPPED_COMPLETION_ROUTINE)SendCompleted_Winsock) == 0)
 		{
 			ret = bytesSent;
 			state->setSendingAsync(true);

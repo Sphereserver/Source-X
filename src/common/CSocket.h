@@ -140,8 +140,8 @@ public:
 	int SetSockOpt( int nOptionName, const void* optval, int optlen, int nLevel = SOL_SOCKET ) const;
 	int GetSockOpt( int nOptionName, void* optval, int * poptlen, int nLevel = SOL_SOCKET ) const;
 #ifdef _WIN32
-	int IOCtlSocket(int icmd, dword * pdwArgs );
-	int SendAsync( LPWSABUF lpBuffers, dword dwBufferCount, LPDWORD lpNumberOfBytesSent, dword dwFlags, LPWSAOVERLAPPED lpOverlapped, LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine ) const;
+	int IOCtlSocket(int icmd, DWORD * pdwArgs );
+	int SendAsync( LPWSABUF lpBuffers, DWORD dwBufferCount, LPDWORD lpNumberOfBytesSent, DWORD dwFlags, LPWSAOVERLAPPED lpOverlapped, LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine ) const;
 	void ClearAsync();
 #else
 	int IOCtlSocket(int icmd, int iVal );

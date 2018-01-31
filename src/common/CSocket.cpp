@@ -412,12 +412,12 @@ int CSocket::GetSockOpt( int nOptionName, void * optval, int * poptlen, int nLev
 }
 
 #ifdef _WIN32
-	int CSocket::IOCtlSocket(int icmd, dword * pdwArgs )
+	int CSocket::IOCtlSocket(int icmd, DWORD * pdwArgs )
 	{
 		return ioctlsocket( m_hSocket, icmd, (DWORD*)pdwArgs );
 	}
 
-	int CSocket::SendAsync( LPWSABUF lpBuffers, dword dwBufferCount, LPDWORD lpNumberOfBytesSent, dword dwFlags, LPWSAOVERLAPPED lpOverlapped, LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine ) const
+	int CSocket::SendAsync( LPWSABUF lpBuffers, DWORD dwBufferCount, LPDWORD lpNumberOfBytesSent, DWORD dwFlags, LPWSAOVERLAPPED lpOverlapped, LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine ) const
 	{
 		 // RETURN: length sent
 		 return( WSASend( m_hSocket, lpBuffers, dwBufferCount, lpNumberOfBytesSent, dwFlags, lpOverlapped, lpCompletionRoutine ));

@@ -137,19 +137,19 @@ void NetState::clear(void)
 		g_Serv.StatDec(SERV_STAT_CLIENTS);
 		if ( m_client->GetConnectType() == CONNECT_LOGIN )
 		{	// when a connection is refused (ie. wrong password), there's no account
-			g_Log.Event(LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Client disconnected [Total:%" PRIuSIZE_T "]. IP='%s'.\n",
+			g_Log.Event(LOGM_NOCONTEXT|LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Client disconnected [Total:%" PRIuSIZE_T "]. IP='%s'.\n",
 				m_id, g_Serv.StatGet(SERV_STAT_CLIENTS), m_peerAddress.GetAddrStr());
 		}
 		else
 		{
 			if (!m_client->GetChar())
 			{
-				g_Log.Event(LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Client disconnected [Total:%" PRIuSIZE_T "]. Account: '%s'. IP='%s'.\n",
+				g_Log.Event(LOGM_NOCONTEXT|LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Client disconnected [Total:%" PRIuSIZE_T "]. Account: '%s'. IP='%s'.\n",
 					m_id, g_Serv.StatGet(SERV_STAT_CLIENTS), m_client->GetName(), m_peerAddress.GetAddrStr());
 			}
 			else
 			{
-				g_Log.Event(LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Client disconnected [Total:%" PRIuSIZE_T "]. Account: '%s'. Char: '%s'. IP='%s'.\n",
+				g_Log.Event(LOGM_NOCONTEXT|LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Client disconnected [Total:%" PRIuSIZE_T "]. Account: '%s'. Char: '%s'. IP='%s'.\n",
 					m_id, g_Serv.StatGet(SERV_STAT_CLIENTS), m_client->GetName(), m_client->GetChar()->GetName(), m_peerAddress.GetAddrStr());
 			}
 			
@@ -288,7 +288,7 @@ void NetState::init(SOCKET socket, CSocketAddress addr)
 	m_isReadClosed = false;
 	m_isInUse = true;
 
-	DEBUGNETWORK(("%x:Determining async mode\n", id()));
+	DEBUGNETWORK(("%x:Determining async mode. Current: %d\n", id(), isAsyncMode()));
 	detectAsyncMode();
 }
 
@@ -328,17 +328,14 @@ void NetState::markFlush(bool needsFlush) volatile
 void NetState::detectAsyncMode(void)
 {
 	ADDTOCALLSTACK("NetState::detectAsyncMode");
-	//bool wasAsync = isAsyncMode();
+	bool wasAsync = isAsyncMode();
 
-	// Disabled because of unstability.
-	setAsyncMode(false);
-	return;
 	// is async mode enabled?
-/*	if ( !g_Cfg.m_fUseAsyncNetwork || !isInUse() )
+	if ( !g_Cfg.m_fUseAsyncNetwork || !isInUse() )
 		setAsyncMode(false);
 
 	// if the version mod flag is not set, always use async mode
-	else if ( g_Cfg.m_fUseAsyncNetwork != 2 )
+	else if ( g_Cfg.m_fUseAsyncNetwork == 1 )
 		setAsyncMode(true);
 
 	// http clients do not want to be using async networking unless they have keep-alive set
@@ -356,7 +353,7 @@ void NetState::detectAsyncMode(void)
 		setAsyncMode(false);
 
 	if (wasAsync != isAsyncMode())
-		DEBUGNETWORK(("%x:Switching async mode from %s to %s.\n", id(), wasAsync? "1":"0", isAsyncMode()? "1":"0"));*/
+		DEBUGNETWORK(("%x:Switching async mode from %s to %s.\n", id(), wasAsync? "1":"0", isAsyncMode()? "1":"0"));
 }
 
 bool NetState::hasPendingData(void) const

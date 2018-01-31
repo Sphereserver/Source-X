@@ -19,10 +19,12 @@
 // Types definition for different platforms
 #ifdef _WIN32
 	typedef HANDLE spherethread_t;
+	typedef DWORD threadid_t;
 	#define SPHERE_THREADENTRY_RETNTYPE unsigned
 	#define SPHERE_THREADENTRY_CALLTYPE __stdcall
 #else
 	typedef pthread_t spherethread_t;
+	typedef pthread_t threadid_t;
 	#define SPHERE_THREADENTRY_RETNTYPE void *
 	#define SPHERE_THREADENTRY_CALLTYPE
 #endif
@@ -43,7 +45,7 @@ public:
 		Disabled = 0xFF	// tick never
 	};
 
-	virtual uint getId() const = 0;
+	virtual threadid_t getId() const = 0;
 	virtual const char *getName() const = 0;
 
 	virtual bool isActive() const = 0;
@@ -55,6 +57,13 @@ public:
 
 	virtual void setPriority(Priority) = 0;
 	virtual Priority getPriority() const = 0;
+
+	static threadid_t getCurrentThreadId();
+	static bool isSameThreadId(threadid_t firstId, threadid_t secondId);
+	bool isSameThread(threadid_t otherThreadId)	{ return isSameThreadId(getCurrentThreadId(), otherThreadId); }
+
+	static const int m_nameMaxLength = 16;	// Unix support a max 16 bytes thread name.
+	static void setThreadName(const char* name);
 
 protected:
 	virtual bool shouldExit() = 0;
@@ -102,7 +111,7 @@ private:
 class AbstractThread : public IThread
 {
 private:
-	uint m_id;
+	threadid_t m_id;
 	const char *m_name;
 	static int m_threadsAvailable;
 	spherethread_t m_handle;
@@ -118,14 +127,12 @@ public:
 	AbstractThread(const char *name, Priority priority = IThread::Normal);
 	virtual ~AbstractThread();
 
-	static const int m_nameMaxLength = 16;	// Unix support a max 16 bytes thread name.
-
 private:
 	AbstractThread(const AbstractThread& copy);
 	AbstractThread& operator=(const AbstractThread& other);
 
 public:
-	uint getId() const { return m_id; }
+	threadid_t getId() const { return m_id; }
 	const char *getName() const { return m_name; }
 	void overwriteInternalThreadName(const char* name) {	// Use it only if you know what you are doing!
 		m_name = name;										//  This doesn't actually do the change of the thread name!

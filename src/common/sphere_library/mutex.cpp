@@ -126,7 +126,7 @@ void ManualThreadLock::doUnlock()
 	m_mutex->unlock();
 }
 
-// AutoResetEvent:: Constructors, Destructor, Asign operator.
+// AutoResetEvent:: Constructors, Destructor, Assign operator.
 
 AutoResetEvent::AutoResetEvent()
 {
