@@ -1191,7 +1191,14 @@ bool CServerConfig::r_LoadVal( CScript &s )
 #ifdef _MTNETWORK
 		case RC_NETWORKTHREADS:
 			if (g_Serv.IsLoading())
-				g_Cfg.m_iNetworkThreads = s.GetArgVal();
+			{
+				int iNetThreads = s.GetArgVal();
+				//if (iNetThreads < 0)
+				//	iNetThreads = 0;
+				//else if (iNetThreads > 10)
+				//	iNetThreads = 10;
+				g_Cfg.m_iNetworkThreads = (uint)iNetThreads;
+			}
 			else
 				g_Log.EventError("The value of NetworkThreads cannot be modified after the server has started\n");
 			break;
