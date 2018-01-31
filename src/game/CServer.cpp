@@ -27,11 +27,6 @@
 #include "triggers.h"
 #include "CScriptProfiler.h"
 
-#if !defined(_WIN32) || defined(_LIBEV)
-	extern LinuxEv g_NetworkEvent;
-#endif
-
-
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // -CServer

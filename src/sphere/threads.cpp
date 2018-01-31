@@ -37,6 +37,78 @@ struct TemporaryStringStorage
 	char m_state;
 } g_tmpTemporaryStringStorage[THREAD_STRING_STORAGE];
 
+
+
+threadid_t IThread::getCurrentThreadId()
+{
+#ifdef _WIN32
+	return ::GetCurrentThreadId();
+#else
+	return pthread_self();
+#endif
+}
+
+bool IThread::isSameThreadId(threadid_t firstId, threadid_t secondId)
+{
+#ifdef _WIN32
+	return (firstId == secondId);
+#else
+	return pthread_equal(firstId,secondId);
+#endif
+}
+
+#ifdef _WIN32
+#pragma pack(push, 8)
+typedef struct tagTHREADNAME_INFO
+{
+	DWORD dwType;
+	LPCSTR szName;
+	DWORD dwThreadID;
+	DWORD dwFlags;
+} THREADNAME_INFO;
+#pragma pack(pop)
+
+const dword MS_VC_EXCEPTION = 0x406D1388;
+#endif
+
+void IThread::setThreadName(const char* name)
+{
+	// register the thread name
+
+	// Unix uses prctl to set thread name
+	// thread name must be 16 bytes, zero-padded if shorter
+	char name_trimmed[m_nameMaxLength] = { '\0' };	// m_nameMaxLength = 16
+	strcpylen(name_trimmed, name, m_nameMaxLength);
+
+#if defined(_WIN32)
+#if defined(_MSC_VER)	// TODO: support thread naming when compiling with compilers other than Microsoft
+	// Windows uses THREADNAME_INFO structure to set thread name
+	THREADNAME_INFO info;
+	info.dwType = 0x1000;
+	info.szName = name_trimmed;
+	info.dwThreadID = (DWORD)(-1);
+	info.dwFlags = 0;
+
+	__try
+	{
+		RaiseException(MS_VC_EXCEPTION, 0, sizeof(info) / sizeof(ULONG_PTR), (ULONG_PTR*)&info);
+	}
+	__except(EXCEPTION_EXECUTE_HANDLER)
+	{
+	}
+#endif
+#elif defined(__APPLE__)	// Mac
+	pthread_setname_np(name_trimmed);
+#elif !defined(_BSD)		// Linux
+	prctl(PR_SET_NAME, name_trimmed, 0, 0, 0);
+#elif defined(__FreeBSD__) || defined(__OpenBSD__)
+	pthread_set_name_np(getCurrentThreadId(), name_trimmed);
+#elif defined(__NetBSD__)
+	pthread_setname_np(getCurrentThreadId(), "%s", name_trimmed);
+#endif
+}
+
+
 /**
  * ThreadHolder
 **/
@@ -56,11 +128,8 @@ IThread *ThreadHolder::current()
 	if (thread == NULL)
 		return DummySphereThread::getInstance();
 
-#ifdef _WIN32
-	ASSERT(thread->getId() == ::GetCurrentThreadId());
-#else
-	ASSERT(thread->getId() == (unsigned)pthread_self());
-#endif
+	ASSERT( thread->isSameThread(thread->getId()) );
+
 	return thread;
 }
 
@@ -382,20 +451,6 @@ bool AbstractThread::checkStuck()
 	return false;
 }
 
-#ifdef _WIN32
-#pragma pack(push, 8)
-typedef struct tagTHREADNAME_INFO
-{
-	DWORD dwType;
-	LPCSTR szName;
-	DWORD dwThreadID;
-	DWORD dwFlags;
-} THREADNAME_INFO;
-#pragma pack(pop)
-
-const dword MS_VC_EXCEPTION = 0x406D1388;
-#endif
-
 void AbstractThread::onStart()
 {
 	// start-up actions for each thread
@@ -405,38 +460,11 @@ void AbstractThread::onStart()
 	// we set the id here to ensure it is available before the first tick, otherwise there's
 	// a small delay when setting it from AbstractThread::start and it's possible for the id
 	// to not be set fast enough (particular when using pthreads)
-#ifdef _WIN32
-	m_id = ::GetCurrentThreadId();
-#else
-	m_id = pthread_self();
-#endif
+	m_id = getCurrentThreadId();
 	ThreadHolder::m_currentThread = this;
 
-	// register the thread name
-#if defined(_WIN32)
-	#if defined(_MSC_VER)	// TODO: support thread naming when compiling with compilers other than Microsoft
-		// Windows uses THREADNAME_INFO structure to set thread name
-		THREADNAME_INFO info;
-		info.dwType = 0x1000;
-		info.szName = getName();
-		info.dwThreadID = (DWORD)(-1);
-		info.dwFlags = 0;
-
-		__try
-		{
-			RaiseException(MS_VC_EXCEPTION, 0, sizeof(info) / sizeof(ULONG_PTR), (ULONG_PTR*)&info);
-		}
-		__except(EXCEPTION_EXECUTE_HANDLER)
-		{
-		}
-	#endif
-#elif !defined(_BSD)
-	// Unix uses prctl to set thread name
-	// thread name must be 16 bytes, zero-padded if shorter
-	char name[16] = { '\0' };	// m_nameMaxLength = 16
-	strcpylen(name, m_name, CountOf(name));
-	prctl(PR_SET_NAME, name, 0, 0, 0);
-#endif
+	if (isActive())		// This thread has actually been spawned and the code is executing on a different thread
+		setThreadName(getName());
 }
 
 void AbstractThread::setPriority(IThread::Priority pri)

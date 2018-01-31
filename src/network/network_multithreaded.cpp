@@ -49,7 +49,7 @@ inline void AddSocketToSet(fd_set& fds, SOCKET socket, int& count)
 ***************************************************************************/
 const char * GenerateNetworkThreadName(size_t id)
 {
-	char * name = new char[AbstractSphereThread::m_nameMaxLength];
+	char * name = new char[IThread::m_nameMaxLength];
 	sprintf(name, "T_Network #%" PRIuSIZE_T, id);
 	return name;
 }
@@ -59,37 +59,35 @@ const char * GenerateNetworkThreadName(size_t id)
 /***************************************************************************
 *
 *
-*	void SendCompleted			Winsock event handler for when async operation completes
+*	void SendCompleted_Winsock			Winsock event handler for when async operation completes
 *
 *
 ***************************************************************************/
-void CALLBACK SendCompleted(dword dwError, dword cbTransferred, LPWSAOVERLAPPED lpOverlapped, uint64 iFlags)
+void CALLBACK SendCompleted_Winsock(DWORD dwError, DWORD cbTransferred, LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
 {
-	UNREFERENCED_PARAMETER(iFlags);
-	ADDTOCALLSTACK("SendCompleted");
+	UNREFERENCED_PARAMETER(dwFlags);
+	ADDTOCALLSTACK("SendCompleted_Winsock");
 
 	NetState* state = reinterpret_cast<NetState*>(lpOverlapped->hEvent);
 	if (state == NULL)
 	{
-		DEBUGNETWORK(("Async i/o operation completed without client context.\n"));
+		DEBUGNETWORK(("Async i/o operation (Winsock) completed without client context.\n"));
 		return;
 	}
 
 	NetworkThread* thread = state->getParentThread();
 	if (thread == NULL)
 	{
-		DEBUGNETWORK(("%x:Async i/o operation completed.\n", state->id()));
+		DEBUGNETWORK(("%x:Async i/o operation (Winsock) completed (single-threaded, or no thread context).\n", state->id()));
+		// This wasn't called by a NetworkThread, so we can't do onAsyncSendComplete.
+		state->setSendingAsync(false);	// new addition. is it breaking something or instead fixing things?
 		return;
 	}
 
 	if (dwError != 0)
-	{
-		DEBUGNETWORK(("%x:Async i/o operation completed with error code 0x%x, %d bytes sent.\n", state->id(), dwError, cbTransferred));
-	}
+		DEBUGNETWORK(("%x:Async i/o operation (Winsock) completed with error code 0x%x, %d bytes sent.\n", state->id(), dwError, cbTransferred));
 	//else
-	//{
-	//	DEBUGNETWORK(("%x:Async i/o operation completed successfully, %d bytes sent.\n", state->id(), cbTransferred));
-	//}
+	//	DEBUGNETWORK(("%x:Async i/o operation (Winsock) completed successfully, %d bytes sent.\n", state->id(), cbTransferred));
 
 	thread->onAsyncSendComplete(state, dwError == 0 && cbTransferred > 0);
 }
@@ -232,7 +230,7 @@ void NetworkManager::acceptNewConnection(void)
 		ip.m_ip.GetAddrStr(), ip.m_blocked, ip.m_ttl, ip.m_pings, ip.m_connecting, ip.m_connected));
 
 	// check if ip is allowed to connect
-	if ( ip.checkPing() ||									// check for ip ban
+	if ( ip.checkPing() ||								// check for ip ban
 		( maxIp > 0 && ip.m_connecting > maxIp ) ||		// check for too many connecting
 		( climaxIp > 0 && ip.m_connected > climaxIp ) )	// check for too many connected
 	{
@@ -340,9 +338,9 @@ void NetworkManager::start(void)
 	{
 		// start network threads
 		for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)
-			(*it)->start();		// The thread structure (class) was created via createNetworkThreads, spawn a new thread and do the work inside there.
+			(*it)->start();		// The thread structure (class) was created via createNetworkThreads, now spawn a new thread and do the work inside there.
 								// The start method creates a thread with "runner" as main function thread. Runner calls Start, which calls onStart.
-								// OnStart, among the other things, actually sets the thread name.
+								// onStart, among the other things, actually sets the thread name.
 
 		DEBUGNETWORK(("Started %" PRIuSIZE_T " network threads.\n", m_threads.size()));
 	}
@@ -354,20 +352,12 @@ void NetworkManager::start(void)
 		{
 			NetworkThread* pThread = *it;
 
-			// Since the thread name is set in the onStart method, if we don't overwrite now the internal name, the thread executing the NetworkThread code
-			//	(so the main/first one) will be named as a network thread. In this case this isn't correct: since isThreaded is false
-			//	the main/first thread will only run Sphere_MainMonitorLoop, and all the sphere/scripts/networking work will be done in the MainThread class,
-			//	which code will be executed in another thread named "T_Main".
-			if (ntCount == 1)
+			// Since isThreaded is false the main/first thread will only run Sphere_MainMonitorLoop, and all the sphere/scripts/networking work will be done in the MainThread class,
+			//	which code will be executed in another thread named "T_Main". So, in this case even the NetworkThread(s) will be executed on the main thread.
+			if (ntCount > 1)
 			{
-				// If we have only 1 network thread, it will be created by the main/first thread, which will then run Sphere_MainMonitorLoop.
-				// Since AbstractSphereThread::onStart sets the calling thread name, we can use that to set the monitor thread name.
-				pThread->overwriteInternalThreadName("T_Monitor");
-			}
-			else
-			{
-				// If we have more than one thread (this hasn't sense... at this point isThreaded should be == true), these should be working threads (for networking?)
-				char name[AbstractSphereThread::m_nameMaxLength];
+				// If we have more than one thread (this hasn't sense... at this point isThreaded should be == true)
+				char name[IThread::m_nameMaxLength];
 				sprintf(name, "T_Worker #%u", pThread->getId());
 				pThread->overwriteInternalThreadName(name);
 			}
@@ -450,12 +440,14 @@ void NetworkManager::tick(void)
 	// tick ip history
 	m_ips.tick();
 
-	// tick child threads, if single-threaded mode
-	for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)
+	// tick child threads, if single-threaded mode (otherwise they will tick themselves)
+	if (isThreaded() == false)
 	{
-		NetworkThread* thread = *it;
-		if (thread->isActive() == false)
-			thread->tick();
+		for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)
+		{
+			if ((*it)->isActive() == false)
+				(*it)->tick();
+		}
 	}
 
 	EXC_CATCH;
@@ -467,12 +459,17 @@ void NetworkManager::processAllInput(void)
 {
 	// process network input
 	ADDTOCALLSTACK("NetworkManager::processAllInput");
+
+	// checkNewConnection will work on both Windows and Linux because it uses the select method, even if it's not the most efficient way to do it
 	if (checkNewConnection())
 		acceptNewConnection();
 
-	// force each thread to process input (NOT THREADSAFE)
-	for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)
-		(*it)->processInput();
+	if (isInputThreaded() == false)	// Don't do this if the input is multi threaded, since the NetworkThread ticks automatically by itself
+	{
+		// force each thread to process input (NOT THREADSAFE)
+		for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)
+			(*it)->processInput();
+	}
 }
 
 void NetworkManager::processAllOutput(void)
@@ -480,7 +477,7 @@ void NetworkManager::processAllOutput(void)
 	// process network output
 	ADDTOCALLSTACK("NetworkManager::processAllOutput");
 
-	if (isOutputThreaded() == false)
+	if (isOutputThreaded() == false) // Don't do this if the output is multi threaded, since the NetworkThread ticks automatically by itself
 	{
 		// force each thread to process output (NOT THREADSAFE)
 		for (NetworkThreadList::iterator it = m_threads.begin(), end = m_threads.end(); it != end; ++it)
@@ -662,11 +659,15 @@ bool NetworkInput::processInput()
 	processData();
 #else
 	// when called from within the thread's context, we just receive data
-	if (!m_thread->isActive() || m_thread->isCurrentThread())
+	if ( (m_thread->isActive() && m_thread->isCurrentThread()) ||	// check for multi-threaded network
+		!m_thread->isActive() )										// check for single-threaded network
+	{
 		receiveData();
+		processData();
+	}
 
 	// when called from outside the thread's context, we process data
-	if (!m_thread->isActive() || !m_thread->isCurrentThread())
+	else if (!m_thread->isActive() || !m_thread->isCurrentThread())
 	{
 		// if the thread does not receive ticks, we must perform a quick select to see if we should
 		// wake up the thread
@@ -756,7 +757,7 @@ void NetworkInput::processData()
 	ADDTOCALLSTACK("NetworkInput::processData");
 	ASSERT(m_thread != NULL);
 #ifdef MTNETWORK_INPUT
-	ASSERT(!m_thread->isActive() || !m_thread->isCurrentThread());
+	ASSERT(!m_thread->isActive() || m_thread->isCurrentThread());
 #endif
 	EXC_TRY("ProcessData");
 
@@ -1431,7 +1432,7 @@ size_t NetworkOutput::flush(NetState* state)
 		packetsSent += processAsyncQueue(state);
 
 	if (state->isWriteClosed() == false && processByteQueue(state))
-		packetsSent++;
+		++packetsSent;
 
 	state->markFlush(false);
 	return packetsSent;
@@ -1739,7 +1740,7 @@ size_t NetworkOutput::sendData(NetState* state, const byte* data, size_t length)
 		state->m_bufferWSA.buf = reinterpret_cast<CHAR *>(const_cast<byte *>(data));
 
 		DWORD bytesSent;
-		if (state->m_socket.SendAsync(&state->m_bufferWSA, 1, &bytesSent, 0, &state->m_overlapped, (LPWSAOVERLAPPED_COMPLETION_ROUTINE)SendCompleted) == 0)
+		if (state->m_socket.SendAsync(&state->m_bufferWSA, 1, &bytesSent, 0, &state->m_overlapped, (LPWSAOVERLAPPED_COMPLETION_ROUTINE)SendCompleted_Winsock) == 0)
 		{
 			result = bytesSent;
 			state->setSendingAsync(true);
@@ -1766,7 +1767,7 @@ size_t NetworkOutput::sendData(NetState* state, const byte* data, size_t length)
 		EXC_SET("error parse");
 		int errorCode = CSocket::GetLastError(true);
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_LIBEV)
 		if (state->isAsyncMode() && errorCode == WSA_IO_PENDING)
 		{
 			// safe to ignore this, data has actually been sent (or will be)
@@ -1780,7 +1781,7 @@ size_t NetworkOutput::sendData(NetState* state, const byte* data, size_t length)
 			// send failed but it is safe to ignore and try again later
 			result = 0;
 		}
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(_LIBEV)
 		else if (errorCode == WSAECONNRESET || errorCode == WSAECONNABORTED)
 #else
 		else if (errorCode == ECONNRESET || errorCode == ECONNABORTED)
@@ -1816,6 +1817,10 @@ void NetworkOutput::onAsyncSendComplete(NetState* state, bool success)
 	// notify that async operation completed
 	ADDTOCALLSTACK("NetworkOutput::onAsyncSendComplete");
 	ASSERT(state != NULL);
+#ifdef _LIBEV
+	if (state->isSendingAsync() == true)
+		DEBUGNETWORK(("%x: Changing SendingAsync from true to false.\n", state->id()));
+#endif
 	state->setSendingAsync(false);
 	if (success == false)
 		return;
@@ -1823,8 +1828,8 @@ void NetworkOutput::onAsyncSendComplete(NetState* state, bool success)
 #ifdef MTNETWORK_OUTPUT
 	// we could process another batch of async data right now, but only if we
 	// are in the output thread
-	// - WinSock calls this from the same thread
-	// - LinuxEv calls this from a completely different thread
+	// - WinSock calls this from the same thread (so, enter the if)
+	// - LinuxEv calls this from a completely different thread (cannot enter the if)
 	if (m_thread->isActive() && m_thread->isCurrentThread())
 	{
 		if (processAsyncQueue(state) > 0)

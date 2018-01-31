@@ -14,10 +14,6 @@
 
 CHuffman CClient::m_Comp;
 
-#if !defined(_WIN32) || defined(_LIBEV)
-	extern LinuxEv g_NetworkEvent;
-#endif
-
 
 /////////////////////////////////////////////////////////////////
 // -CClient stuff.

@@ -4,10 +4,16 @@
 #include "../game/CServer.h"
 #include "linuxev.h"
 
+// LibEv is used by Linux to notify when our main socket is readable or writable, so when i can read and send data again (async I/O).
+// Windows supports async network I/O via WinSock.
+
 LinuxEv g_NetworkEvent;
 
-static void socketmain_cb(struct ev_loop *loop, struct ev_io *w, int revents)
+
+// Call this function (cb = callback) when the socket is readable -> there may be new received data to read
+static void socketmain_cb(struct ev_loop * /* loop */, struct ev_io * /* w */, int /* revents */)
 {
+	/*
 	ev_io_stop(loop, w);
 	
 	if ( !g_Serv.IsLoading() )
@@ -15,8 +21,7 @@ static void socketmain_cb(struct ev_loop *loop, struct ev_io *w, int revents)
 		if ( revents & EV_READ )
 		{
 			// warning: accepting a new connection here can result in a threading issue,
-			// where the main thread can clear the connection before it has been fully
-			// initialised
+			// where the main thread can clear the connection before it has been fully initialised
 #ifndef _MTNETWORK
 			g_NetworkIn.acceptConnection();
 #else
@@ -26,8 +31,12 @@ static void socketmain_cb(struct ev_loop *loop, struct ev_io *w, int revents)
 	}
 	
 	ev_io_start(loop, w);
+	*/
 }
 
+// Call this function when the socket is readable again -> we are not sending data anymore
+// The data is sent (if the checks are passing) at each tick on a NetworkThread, which sets also isSendingAsync to true. If in that tick
+//  the NetworkThread can't send the data (maybe because socketslave_cb wasn't called, so onAsyncSendComplete wasn't called), wait for the next tick.
 static void socketslave_cb(struct ev_loop *loop, struct ev_io *w, int revents)
 {
 	ev_io_stop(loop, w);
@@ -46,7 +55,7 @@ static void socketslave_cb(struct ev_loop *loop, struct ev_io *w, int revents)
 #else
 			NetworkThread* thread = state->getParentThread();
 			if (thread != NULL)
-				thread->onAsyncSendComplete(state, true);
+				thread->onAsyncSendComplete(state, true);	// we can send (again) data
 #endif
 		}
 	}
@@ -57,7 +66,7 @@ static void socketslave_cb(struct ev_loop *loop, struct ev_io *w, int revents)
 	}
 }
 
-LinuxEv::LinuxEv(void) : AbstractSphereThread("NetworkEvents", IThread::High)
+LinuxEv::LinuxEv(void) : AbstractSphereThread("T_NetworkEvents", IThread::High)
 {
 	m_eventLoop = ev_loop_new(EV_BACKEND_LIST);
 	ASSERT(m_eventLoop != NULL);	// libev probably couldn't find sys/poll.h, select.h and other includes (compiling on ubuntu with both x86_64 and i386 compilers? or more gcc versions?)
@@ -89,8 +98,11 @@ void LinuxEv::waitForClose()
 	AbstractSphereThread::waitForClose();
 }
 
+// Start to monitor the state of the socket with a NetState
 void LinuxEv::registerClient(NetState * state, EventsID eventCheck)
 {
+	// we call it with eventCheck = LinuxEv::Write, so we check when the socket will be again writable
+
 	ADDTOCALLSTACK("LinuxEv::registerClient");
 	ASSERT(state != NULL);
 	
@@ -103,9 +115,11 @@ void LinuxEv::registerClient(NetState * state, EventsID eventCheck)
 	ev_io_init(state->iocb(), socketslave_cb, state->m_socket.GetSocket(), (int)eventCheck);
 #endif
 	state->iocb()->data = state;
-	state->setSendingAsync(true);
+	state->setSendingAsync(true);	// set it true: when the socket will be again writable (so we have finished writing data in it)
+									//  socketslave_cb will be called (even immediately after this function if we aren't actually sending data)
+									//  and it will report that we are not sending async data anymore.
 	
-    ev_io_start(m_eventLoop, state->iocb());	
+    ev_io_start(m_eventLoop, state->iocb());
 }
 
 void LinuxEv::unregisterClient(NetState * state)
@@ -139,6 +153,9 @@ void LinuxEv::forceClientwrite(NetState * state)
 
 void LinuxEv::registerMainsocket()
 {
+	// The socket will be checked for incoming data/connections by NetworkManager::processAllInput.
+	//	Right now neither Windows nor Linux support asynchronous input, but they do support async output.
+	/*
 #ifdef _WIN32
 	int fd = EV_WIN32_HANDLE_TO_FD(g_Serv.m_SocketMain.GetSocket());
 	ev_io_init(&m_watchMainsock, socketmain_cb, fd, EV_READ);
@@ -146,11 +163,12 @@ void LinuxEv::registerMainsocket()
 	ev_io_init(&m_watchMainsock, socketmain_cb, g_Serv.m_SocketMain.GetSocket(), EV_READ);
 #endif
     ev_io_start(m_eventLoop, &m_watchMainsock);		
+	*/
 }
 
 void LinuxEv::unregisterMainsocket()
 {
-	ev_io_stop(m_eventLoop, &m_watchMainsock);
+	//ev_io_stop(m_eventLoop, &m_watchMainsock);
 }
 
 #endif
