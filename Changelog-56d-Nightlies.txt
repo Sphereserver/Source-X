@@ -373,3 +373,6 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Fixed the multi-threading and async networking system, which was disabled long time ago because of its instability.
 - Added ini flags: NetworkThreads (specify how many new network threads do you want), NetworkThreadPriority (priority of the dedicated networking threads),
 	UseAsyncNetwork (enable/disable asynchronous packet sending).
+
+02-02-2018
+- [Port from Source, 22-01-2018, Coruja]Fixed: Spells being disturbed even when they have INTERRUPT=0.0 set 

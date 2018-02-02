@@ -1305,6 +1305,8 @@ bool CChar::Fight_Attack( const CChar *pCharTarg, bool btoldByMaster )
 
 	if ( skillActive == skillWeapon && m_Fight_Targ_UID == pCharTarg->GetUID() )		// already attacking this same target using the same skill
 		return true;
+	else if (g_Cfg.IsSkillFlag(skillActive, SKF_MAGIC))	// don't start another fight skill when already casting spells
+		return true;
 
 	if ( m_pNPC && !btoldByMaster )		// call FindBestTarget when this CChar is a NPC and was not commanded to attack, otherwise it attack directly
 		pTarget = NPC_FightFindBestTarget();
