@@ -27,7 +27,7 @@
 */
 struct CUOMapBlock
 {
-    word m_wID1;  ///< ?
+    word m_wID1;  // ?
     word m_wID2;
     CUOMapMeter m_Meter[UO_BLOCK_SIZE * UO_BLOCK_SIZE];
 } PACK_NEEDED;

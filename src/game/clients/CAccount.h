@@ -15,20 +15,20 @@
 #include "../CServerConfig.h"
 
 #define PRIV_UNUSED0		0x0001
-#define PRIV_GM				0x0002	///< Acts as a GM (dif from having GM level)
+#define PRIV_GM				0x0002	// Acts as a GM (dif from having GM level)
 #define PRIV_UNUSED1		0x0004
-#define PRIV_GM_PAGE		0x0008	///< Listen to GM pages or not.
-#define PRIV_HEARALL		0x0010	///< I can hear everything said by people of lower plevel
-#define PRIV_ALLMOVE		0x0020	///< I can move all things. (GM only)
-#define PRIV_DETAIL			0x0040	///< Show combat detail messages
-#define PRIV_DEBUG			0x0080	///< Show all objects as boxes and chars as humans.
+#define PRIV_GM_PAGE		0x0008	// Listen to GM pages or not.
+#define PRIV_HEARALL		0x0010	// I can hear everything said by people of lower plevel
+#define PRIV_ALLMOVE		0x0020	// I can move all things. (GM only)
+#define PRIV_DETAIL			0x0040	// Show combat detail messages
+#define PRIV_DEBUG			0x0080	// Show all objects as boxes and chars as humans.
 #define PRIV_UNUSED2		0x0100
-#define PRIV_PRIV_NOSHOW	0x0200	///< Show the GM title and Invul flags.
-#define PRIV_TELNET_SHORT	0x0400	///< Disable broadcasts to be accepted by client
-#define PRIV_JAILED			0x0800	///< Must be /PARDONed from jail.
+#define PRIV_PRIV_NOSHOW	0x0200	// Show the GM title and Invul flags.
+#define PRIV_TELNET_SHORT	0x0400	// Disable broadcasts to be accepted by client
+#define PRIV_JAILED			0x0800	// Must be /PARDONed from jail.
 #define PRIV_UNUSED3		0x1000
-#define PRIV_BLOCKED		0x2000	///< The account is blocked.
-#define PRIV_ALLSHOW		0x4000	///< Show even the offline chars.
+#define PRIV_BLOCKED		0x2000	// The account is blocked.
+#define PRIV_ALLSHOW		0x4000	// Show even the offline chars.
 #define PRIV_UNUSED4		0x8000
 #define PRIV_UNUSED (PRIV_UNUSED0|PRIV_UNUSED1|PRIV_UNUSED2|PRIV_UNUSED3|PRIV_UNUSED4)
 
@@ -41,44 +41,44 @@ class CClient;
 class CAccount : public CScriptObj
 {
 	// RES_ACCOUNT
-	static lpctstr const sm_szVerbKeys[]; ///< Action list.
-	static lpctstr const sm_szLoadKeys[]; ///< Script fields.
+	static lpctstr const sm_szVerbKeys[]; // Action list.
+	static lpctstr const sm_szLoadKeys[]; // Script fields.
 private:
-	PLEVEL_TYPE m_PrivLevel; ///< Privileges level of the CAccount.
-	CSString m_sName; ///< Name = no spaces. case independant.
-	CSString m_sCurPassword; ///< Accounts auto-generated but never used should not last long !
-	CSString m_sNewPassword; ///< The new password will be transfered when they use it.
+	PLEVEL_TYPE m_PrivLevel; // Privileges level of the CAccount.
+	CSString m_sName; // Name = no spaces. case independant.
+	CSString m_sCurPassword; // Accounts auto-generated but never used should not last long !
+	CSString m_sNewPassword; // The new password will be transfered when they use it.
 
 
-	word m_PrivFlags; ///< optional privileges for char (bit-mapped)
+	word m_PrivFlags; // optional privileges for char (bit-mapped)
 
-	byte m_ResDisp; ///< current CAccount resdisp.
-	byte m_MaxChars; ///< Max chars allowed for this CAccount.
+	byte m_ResDisp; // current CAccount resdisp.
+	byte m_MaxChars; // Max chars allowed for this CAccount.
 
 	typedef struct { llong m_First; llong m_Last; llong m_Delay; } TimeTriesStruct_t;
 	typedef std::pair<TimeTriesStruct_t, int> BlockLocalTimePair_t;
 	typedef std::map<dword,BlockLocalTimePair_t> BlockLocalTime_t;
-	BlockLocalTime_t m_BlockIP; ///< Password tries.
+	BlockLocalTime_t m_BlockIP; // Password tries.
 
 public:
 	static const char *m_sClassName;
 
-	CLanguageID m_lang;			///< UNICODE language preference (ENU=english).
-	CSString m_sChatName;		///< Chat System Name
+	CLanguageID m_lang;			// UNICODE language preference (ENU=english).
+	CSString m_sChatName;		// Chat System Name
 
-	int64 m_Total_Connect_Time;	///< Previous total amount of time in game (minutes). "TOTALCONNECTTIME"
+	int64 m_Total_Connect_Time;	// Previous total amount of time in game (minutes). "TOTALCONNECTTIME"
 
-	CSocketAddressIP m_Last_IP;	///< last ip logged in from.
-	CSTime m_dateLastConnect;	///< Last logged in date (use localtime()).
-	int64  m_Last_Connect_Time;	///< Amount of time spent online last time (in minutes).
+	CSocketAddressIP m_Last_IP;	// last ip logged in from.
+	CSTime m_dateLastConnect;	// Last logged in date (use localtime()).
+	int64  m_Last_Connect_Time;	// Amount of time spent online last time (in minutes).
 
-	CSocketAddressIP m_First_IP;	///< First ip logged in from.
-	CSTime m_dateFirstConnect;	///< First date logged in (use localtime()).
+	CSocketAddressIP m_First_IP;	// First ip logged in from.
+	CSTime m_dateFirstConnect;	// First date logged in (use localtime()).
 
-	CUID m_uidLastChar;		///< Last CChar logged with this CAccount.
-	CCharRefArray m_Chars;		///< CChars attached to this CAccount.
-	CVarDefMap m_TagDefs;		///< Tags storage system.
-	CVarDefMap m_BaseDefs;		///< New Variable storage system.
+	CUID m_uidLastChar;		// Last CChar logged with this CAccount.
+	CCharRefArray m_Chars;		// CChars attached to this CAccount.
+	CVarDefMap m_TagDefs;		// Tags storage system.
+	CVarDefMap m_BaseDefs;		// New Variable storage system.
 
 public:
 	/**
@@ -368,9 +368,9 @@ typedef CAccount * CAccountRef;
 class CAccounts
 {
 protected:
-	static const char *m_sClassName; ///< TODOC.
-	static lpctstr const sm_szVerbKeys[]; ///< ACCOUNT action list.
-	CObjNameSortArray m_Accounts; ///< Sorted CAccount list.
+	static const char *m_sClassName; // TODOC.
+	static lpctstr const sm_szVerbKeys[]; // ACCOUNT action list.
+	CObjNameSortArray m_Accounts; // Sorted CAccount list.
 public:
 	/**
 	* CAccount needs CAccounts methods.

@@ -27,11 +27,11 @@
 struct CUOIndexRec
 {
 private:
-    dword m_dwOffset;	///< 0xFFFFFFFF = nothing here ! else pointer to something (CUOStaticItemRec possibly)
-    dword m_dwLength;	///< Length of the object in question.
+    dword m_dwOffset;	// 0xFFFFFFFF = nothing here ! else pointer to something (CUOStaticItemRec possibly)
+    dword m_dwLength;	// Length of the object in question.
 public:
-    word m_wVal3;  ///< Varied uses. ex. GumpSizey
-    word m_wVal4;  ///< Varied uses. ex. GumpSizex
+    word m_wVal3;  // Varied uses. ex. GumpSizey
+    word m_wVal4;  // Varied uses. ex. GumpSizex
 public:
     /** @name Modifiers:
      */

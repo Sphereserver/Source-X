@@ -48,9 +48,9 @@
 
 //#define DEBUG_STRINGS
 #ifdef DEBUG_STRINGS
-	uint	gAmount		= 0;		///< Current amount of CSString.
-	size_t	gMemAmount	= 0;		///< Total mem allocated by CGStrings.
-	uint	gReallocs	= 0;		///< Total reallocs caused by CSString resizing.
+	uint	gAmount		= 0;		// Current amount of CSString.
+	size_t	gMemAmount	= 0;		// Total mem allocated by CGStrings.
+	uint	gReallocs	= 0;		// Total reallocs caused by CSString resizing.
 #endif
 
 

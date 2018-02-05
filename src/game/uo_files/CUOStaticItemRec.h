@@ -26,11 +26,11 @@
 */
 struct CUOStaticItemRec
 {
-    word m_wTileID;  ///< ITEMID_TYPE = Index to tile CUOItemTypeRec/CUOItemTypeRec_HS
-    byte m_x;  ///< x <= 7 = offset from block.
-    byte m_y;  ///< y <= 7
-    char m_z;  ///<
-    word m_wHue;  ///< HUE_TYPE modifier for the item
+    word m_wTileID;  // ITEMID_TYPE = Index to tile CUOItemTypeRec/CUOItemTypeRec_HS
+    byte m_x;  // x <= 7 = offset from block.
+    byte m_y;  // y <= 7
+    char m_z;  //
+    word m_wHue;  // HUE_TYPE modifier for the item
 
     // For internal caching purposes only. overload this.
     // LOBYTE(m_wColor) = Blocking flags for this item. (CAN_I_BLOCK)

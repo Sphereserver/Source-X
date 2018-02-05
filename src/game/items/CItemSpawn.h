@@ -17,7 +17,7 @@ class CItemSpawn : public CItem
 private:
 	static lpctstr const sm_szLoadKeys[];
 	static lpctstr const sm_szVerbKeys[];
-	CUID m_obj[UINT8_MAX];	///< Storing UIDs of the created items/chars.
+	CUID m_obj[UINT8_MAX];	// Storing UIDs of the created items/chars.
 
 public:
 	static const char *m_sClassName;

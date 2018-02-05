@@ -81,8 +81,8 @@ public:
 	///@}
 
 private:
-	CSMemLenBlock m_Mem;	///< Data buffer.
-	size_t m_iDataQty;	///< Item count of the data queue.
+	CSMemLenBlock m_Mem;	// Data buffer.
+	size_t m_iDataQty;	// Item count of the data queue.
 };
 
 #endif // _INC_CSQUEUE_H

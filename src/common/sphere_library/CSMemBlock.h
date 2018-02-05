@@ -70,7 +70,7 @@ public:
 	///@}
 
 private:
-	byte * m_pData;	 ///< the actual data bytes of the bitmap.
+	byte * m_pData;	 // the actual data bytes of the bitmap.
 };
 
 /**
@@ -125,7 +125,7 @@ public:
 	///@}
 
 private:
-	size_t m_dwLength;  ///< Buffer len.
+	size_t m_dwLength;  // Buffer len.
 };
 
 

@@ -26,8 +26,8 @@
 */
 struct CUOTerrainTypeRec
 {
-    dword m_flags;		///< 0xc0=water, 0x40=dirt or rock, 0x60=lava, 0x50=cave, 0=floor
-    word m_index;		///< just counts up.  0 = unused.
+    dword m_flags;		// 0xc0=water, 0x40=dirt or rock, 0x60=lava, 0x50=cave, 0=floor
+    word m_index;		// just counts up.  0 = unused.
     char m_name[20];
 } PACK_NEEDED;
 
@@ -41,9 +41,9 @@ struct CUOTerrainTypeRec
 */
 struct CUOTerrainTypeRec_HS
 {
-	dword m_flags;		///< 0xc0=water, 0x40=dirt or rock, 0x60=lava, 0x50=cave, 0=floor
+	dword m_flags;		// 0xc0=water, 0x40=dirt or rock, 0x60=lava, 0x50=cave, 0=floor
 	dword m_unknown;
-	word m_index;		///< just counts up.  0 = unused.
+	word m_index;		// just counts up.  0 = unused.
 	char m_name[20];
 } PACK_NEEDED;
 

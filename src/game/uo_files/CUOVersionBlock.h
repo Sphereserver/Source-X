@@ -28,13 +28,13 @@ struct CUOVersionBlock
 {
     // First 4 bytes of this file = the qty of records.
 private:
-    dword m_file;  ///< file type id. VERFILE_TYPE (ex.tiledata = 0x1E)
-    dword m_block; ///< tile number. ( items = itemid + 0x200 )
+    dword m_file;  // file type id. VERFILE_TYPE (ex.tiledata = 0x1E)
+    dword m_block; // tile number. ( items = itemid + 0x200 )
 public:
-    dword m_filepos; ///< pos in this file to find the patch block.
+    dword m_filepos; // pos in this file to find the patch block.
     dword m_length;
 
-    word  m_wVal3;  ///< stuff that would have been in CUOIndexRec
+    word  m_wVal3;  // stuff that would have been in CUOIndexRec
     word  m_wVal4;
 public:
     /** @name File ops:

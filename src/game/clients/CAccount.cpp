@@ -291,14 +291,14 @@ bool CAccounts::Cmd_AddNew( CTextConsole * pSrc, lpctstr pszName, lpctstr pszArg
 */
 enum VACS_TYPE
 {
-	VACS_ADD, ///< Add a new CAccount.
-	VACS_ADDMD5, ///< Add a new CAccount, storing the password with md5.
-	VACS_BLOCKED, ///< Bloc a CAccount.
-	VACS_HELP, ///< Show CAccount commands.
-	VACS_JAILED, ///< "Jail" the CAccount.
-	VACS_UNUSED, ///< Use a command on unused CAccount.
-	VACS_UPDATE, ///< Process the acct file to add accounts.
-	VACS_QTY ///< TODOC.
+	VACS_ADD, // Add a new CAccount.
+	VACS_ADDMD5, // Add a new CAccount, storing the password with md5.
+	VACS_BLOCKED, // Bloc a CAccount.
+	VACS_HELP, // Show CAccount commands.
+	VACS_JAILED, // "Jail" the CAccount.
+	VACS_UNUSED, // Use a command on unused CAccount.
+	VACS_UPDATE, // Process the acct file to add accounts.
+	VACS_QTY // TODOC.
 };
 
 lpctstr const CAccounts::sm_szVerbKeys[] =	// CAccounts:: // account group verbs.

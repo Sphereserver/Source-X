@@ -515,9 +515,9 @@ private:
 	*/
 	void Init();
 
-	tchar	*m_pchData;		///< Data pointer.
-	int	m_iLength;		///< Length of string.
-	int	m_iMaxLength;	///< Size of memory allocated pointed by m_pchData.
+	tchar	*m_pchData;		// Data pointer.
+	int	m_iLength;		// Length of string.
+	int	m_iMaxLength;	// Size of memory allocated pointed by m_pchData.
 };
 
 /**
@@ -526,12 +526,12 @@ private:
 enum MATCH_TYPE
 {
 	MATCH_INVALID = 0,
-	MATCH_VALID,		///< valid match
-	MATCH_END,			///< premature end of pattern string
-	MATCH_ABORT,		///< premature end of text string
-	MATCH_RANGE,		///< match failure on [..] construct
-	MATCH_LITERAL,		///< match failure on literal match
-	MATCH_PATTERN		///< bad pattern
+	MATCH_VALID,		// valid match
+	MATCH_END,			// premature end of pattern string
+	MATCH_ABORT,		// premature end of text string
+	MATCH_RANGE,		// match failure on [..] construct
+	MATCH_LITERAL,		// match failure on literal match
+	MATCH_PATTERN		// bad pattern
 };
 
 

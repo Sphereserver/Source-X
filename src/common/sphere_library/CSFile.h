@@ -159,8 +159,8 @@ public:
 	llong m_llFile;			/// File descriptor (POSIX, int) or HANDLE (Windows, size of a pointer).
 
 protected:
-	CSString m_strFileName;	///< File name (with path).
-	uint m_uMode;   ///< MMSYSTEM may use 32 bit flags.
+	CSString m_strFileName;	// File name (with path).
+	uint m_uMode;   // MMSYSTEM may use 32 bit flags.
 };
 
 
@@ -404,10 +404,10 @@ public:
 	bool IsBinaryMode() const;
 	///@}
 public:
-	FILE * m_pStream;		///< The current open script type file.
+	FILE * m_pStream;		// The current open script type file.
 protected:
 #ifdef _WIN32
-	bool	bNoBuffer;		///< TODOC.
+	bool	bNoBuffer;		// TODOC.
 #endif
 };
 

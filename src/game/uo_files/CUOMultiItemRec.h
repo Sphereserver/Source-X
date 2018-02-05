@@ -29,11 +29,11 @@
 */
 struct CUOMultiItemRec
 {
-    word  m_wTileID;	///< ITEMID_TYPE = Index to tile CUOItemTypeRec/CUOItemTypeRec_HS
-    short m_dx;			///< signed delta.
+    word  m_wTileID;	// ITEMID_TYPE = Index to tile CUOItemTypeRec/CUOItemTypeRec_HS
+    short m_dx;			// signed delta.
     short m_dy;
     short m_dz;
-    dword m_visible;	///< 0 or 1 (non-visible items are things like doors and signs)
+    dword m_visible;	// 0 or 1 (non-visible items are things like doors and signs)
     ITEMID_TYPE GetDispID() const;
 } PACK_NEEDED;
 

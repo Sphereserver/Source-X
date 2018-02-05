@@ -54,10 +54,10 @@ public:
 
 private:
 #ifdef _WIN32
-	CRITICAL_SECTION m_criticalSection;   ///< Windows API specific mutex.
+	CRITICAL_SECTION m_criticalSection;   // Windows API specific mutex.
 #else
-	pthread_mutex_t m_criticalSection;   ///< Unix API specific mutex.
-	pthread_mutexattr_t m_criticalSectionAttr;   ///< Unix API mutex attr.
+	pthread_mutex_t m_criticalSection;   // Unix API specific mutex.
+	pthread_mutexattr_t m_criticalSectionAttr;   // Unix API mutex attr.
 #endif
 
 };
@@ -92,8 +92,8 @@ public:
 	///@}
 
 private:
-	SimpleMutex &m_mutex;   ///< Mutex to control the lock.
-	bool m_locked;    ///< Always true.
+	SimpleMutex &m_mutex;   // Mutex to control the lock.
+	bool m_locked;    // Always true.
 };
 
 /**
@@ -155,8 +155,8 @@ public:
 	///@}
 
 private:
-	SimpleMutex * m_mutex;   ///< Mutex to control the lock.
-	bool m_locked;    ///< Is the thread locked?
+	SimpleMutex * m_mutex;   // Mutex to control the lock.
+	bool m_locked;    // Is the thread locked?
 };
 
 /**
@@ -166,9 +166,9 @@ class AutoResetEvent
 {
 public:
 #ifdef _WIN32
-	static const uint _infinite = INFINITE;   ///< Default wait time.
+	static const uint _infinite = INFINITE;   // Default wait time.
 #else
-	static const uint _infinite = 0xffffffff;   ///< Default wait time.
+	static const uint _infinite = 0xffffffff;   // Default wait time.
 #endif
 	/** @name Constructors, Destructor, Asign operator:
 	*/
@@ -196,12 +196,12 @@ public:
 
 private:
 #ifdef _WIN32
-	HANDLE m_handle;   ///< Windows API Handler to handle the event.
+	HANDLE m_handle;   // Windows API Handler to handle the event.
 #else
-	pthread_mutex_t m_criticalSection;    ///< Unix API mutex.
-	pthread_mutexattr_t m_criticalSectionAttr;    ///< Unix API mutex attr.
-	pthread_condattr_t m_conditionAttr;    ///< Unix API condition attr.
-	pthread_cond_t m_condition;    ///< Unix API condition.
+	pthread_mutex_t m_criticalSection;    // Unix API mutex.
+	pthread_mutexattr_t m_criticalSectionAttr;    // Unix API mutex attr.
+	pthread_condattr_t m_conditionAttr;    // Unix API condition attr.
+	pthread_cond_t m_condition;    // Unix API condition.
 #endif
 };
 
@@ -213,9 +213,9 @@ class ManualResetEvent
 {
 public:
 #ifdef _WIN32
-	static const uint _infinite = INFINITE;   ///< Default wait time.
+	static const uint _infinite = INFINITE;   // Default wait time.
 #else
-	static const uint _infinite = 0xffffffff;   ///< Default wait time.
+	static const uint _infinite = 0xffffffff;   // Default wait time.
 #endif
 	/** @name Constructors, Destructor, Asign operator:
 	*/
@@ -247,13 +247,13 @@ public:
 
 private:
 #ifdef _WIN32
-	HANDLE m_handle;   ///< Windows API Handler to handle the event.
+	HANDLE m_handle;   // Windows API Handler to handle the event.
 #else
 	bool m_value;
-	pthread_mutex_t m_criticalSection;    ///< Unix API mutex.
-	pthread_mutexattr_t m_criticalSectionAttr;    ///< Unix API mutex attr.
-	pthread_condattr_t m_conditionAttr;    ///< Unix API condition attr.
-	pthread_cond_t m_condition;    ///< Unix API condition.
+	pthread_mutex_t m_criticalSection;    // Unix API mutex.
+	pthread_mutexattr_t m_criticalSectionAttr;    // Unix API mutex attr.
+	pthread_condattr_t m_conditionAttr;    // Unix API condition attr.
+	pthread_cond_t m_condition;    // Unix API condition.
 #endif
 };
 

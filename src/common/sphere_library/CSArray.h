@@ -84,9 +84,9 @@ public:
 	///@}
 
 private:
-	CSObjList * m_pParent;	///< Parent list.
-	CSObjListRec * m_pNext;  ///< Next record.
-	CSObjListRec * m_pPrev;  ///< Prev record.
+	CSObjList * m_pParent;	// Parent list.
+	CSObjListRec * m_pNext;  // Next record.
+	CSObjListRec * m_pPrev;  // Prev record.
 };
 
 /**
@@ -210,9 +210,9 @@ protected:
 	///@}
 private:
 
-	CSObjListRec * m_pHead;  ///< Head of the list.
-	CSObjListRec * m_pTail;  ///< Tail of the list. Do we really care about tail ? (as it applies to lists anyhow)
-	size_t m_iCount;		///< Count of elements of the CSObjList.
+	CSObjListRec * m_pHead;  // Head of the list.
+	CSObjListRec * m_pTail;  // Tail of the list. Do we really care about tail ? (as it applies to lists anyhow)
+	size_t m_iCount;		// Count of elements of the CSObjList.
 };
 
 /**
@@ -393,9 +393,9 @@ public:
 	///@}
 
 private:
-	TYPE* m_pData;			///< Pointer to allocated mem.
-	size_t m_nCount;		///< count of elements stored.
-	size_t m_nRealCount;	///< Size of allocated mem.
+	TYPE* m_pData;			// Pointer to allocated mem.
+	size_t m_nCount;		// count of elements stored.
+	size_t m_nRealCount;	// Size of allocated mem.
 };
 
 /**

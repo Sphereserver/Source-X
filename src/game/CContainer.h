@@ -15,10 +15,10 @@
 
 class CItemContainer;
 
-class CContainer : public CSObjList	///< This class contains a list of items but may or may not be an item itself.
+class CContainer : public CSObjList	// This class contains a list of items but may or may not be an item itself.
 {
 public:
-	int	m_totalweight;      ///< weight of all the items it has. (1/WEIGHT_UNITS pound)
+	int	m_totalweight;      // weight of all the items it has. (1/WEIGHT_UNITS pound)
 
     /**
      * @fn  virtual void CContainer::OnRemoveObj( CSObjListRec* pObRec );

@@ -10,10 +10,10 @@ https://discord.gg/ZrMTXrs
 
 This is an experimental fork of SphereServer. Since so many (and sometimes radical) changes were done, it was impossible to work on the main repo.<br>
 Most notable changes (right now) are:
-* Bug fixes and heavy changing of some internal behaviours, when needed, to achieve better speed and stability;
+* Bug fixes and heavy changing of some internal behaviours, with the aim to achieve truly better <b>speed</b> and <b>stability</b>;
+* Support for 64 bits architecture and TDM-GCC compiler for Windows;
 * Supports multi-threaded and async networking;
 * Support for CMake, which is now the standard way to generate updated build and project files;
-* Support for 64 bits architecture and TDM-GCC compiler for Windows;
 * Added (and still adding) comments to the code to make it more understandable;
 * Reorganization of directories and files, avoiding big files with thousands of lines;
 * Refactoring of the code, updating to most recent programming standards and to the conventions described below.
@@ -26,16 +26,20 @@ Both 32 and 64 bits compilation are supported.<br>
 No pre-built project files included.<br>
 When generating project files, if you don't specify a toolchain (setting the `CMAKE_TOOLCHAIN_FILE` variable in the GUI or passing the CLI parameter `-DCMAKE_TOOLCHAIN_FILE="..."`),
  the CMake script will pick the 32 bits one as default.<br>
+Does CMake give you an error? Ensure that you have Git installed, and if you are on Windows ensure also that the Git executable was added to the PATH environmental variable
+ (you'll need to add it manually if you are using Git Desktop,
+ <a href="https://stackoverflow.com/questions/26620312/installing-git-in-path-with-github-client-for-windows?answertab=votes#tab-top">here's a quick guide</a>).<br>
 When using Unix Makefiles, you can specify a build type by setting (also this via GUI or CLI) `CMAKE_BUILD_TYPE="build"`, where build is Nightly, Debug or Release. If the build type
  was not set, by default the makefiles for all of the three build types are generated.<br>
-Example to build a 64 bits Nightly version inside the "build" directory (run it inside the src folder): <br>
+Example to build on Linux a 64 bits Nightly version inside the "build" directory (run it inside the src folder): <br>
 ```
 mkdir build
 cmake -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/Linux-GNU-64.cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" --build ./build .
 make -j8
 ```
-<br>You can also add other compiler flags, like optimization flags: <br>
-```-DC_FLAGS_EXTRA="-mtune=native" -DCXX_FLAGS_EXTRA="-mtune=native"```
+You can also add other compiler flags, like optimization flags: <br>
+```-DC_FLAGS_EXTRA="-mtune=native" -DCXX_FLAGS_EXTRA="-mtune=native"```<br>
+(Use the -mtune=native flag only if you are compiling on the same machine on which you will execute Sphere!)
 
 ### Ubuntu 12.x to 16.x
 Install the following packages:
