@@ -20,6 +20,8 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 	if ( pItem->m_Can & CAN_I_FORCEDC )
 		fTestTouch = false;
 
+	const CObjBaseTemplate *pObjTop = pItem->GetTopLevelObj();
+
 	if ( fTestTouch )
 	{
 		if ( !fScript )
@@ -36,10 +38,9 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 					CClient::OpenedContainerMap_t::iterator itContainerFound = m_openedContainers.find(pContainer->GetUID().GetPrivateUID());
 					if ( itContainerFound != m_openedContainers.end() )
 					{
-						dword dwTopContainerUID = (((*itContainerFound).second).first).first;
-						dword dwTopMostContainerUID = (((*itContainerFound).second).first).second;
-						CPointMap ptOpenedContainerPosition = ((*itContainerFound).second).second;
-						const CObjBaseTemplate *pObjTop = pItem->GetTopLevelObj();
+						dword dwTopContainerUID = ((itContainerFound->second).first).first;
+						dword dwTopMostContainerUID = ((itContainerFound->second).first).second;
+						CPointMap ptOpenedContainerPosition = (itContainerFound->second).second;
 
 						dword dwTopContainerUID_ToCheck = 0;
 						if ( pContainer->GetContainer() )
@@ -107,7 +108,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 			if ( !m_pChar->CanMove(pItem) )
 				return false;
 
-			if ( !m_pChar->CanCarry(pItem) )
+			if ( (pObjTop != m_pChar) && !m_pChar->CanCarry(pItem) )
 			{
 				SysMessageDefault(DEFMSG_MSG_HEAVY);
 				return false;

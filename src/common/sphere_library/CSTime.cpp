@@ -13,11 +13,11 @@
 #ifndef _WIN32
 #include <sys/time.h>
 
-llong GetTickCount()
+llong GetTickCount64()
 {
-	struct timeval tv;
-	gettimeofday( &tv, NULL );
-	return (llong) (((llong) tv.tv_sec * 1000) + ((llong) tv.tv_usec/1000));
+	struct timespec ts;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	return (llong)(((ts.tv_sec * 10000) + (ts.tv_nsec / 100000)) / 10);
 }
 #endif
 

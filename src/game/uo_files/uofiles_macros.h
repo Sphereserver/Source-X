@@ -10,18 +10,18 @@
 #include "uofiles_enums.h"
 
 
-// Door ID Attribute flags.
+// Door ID Attribute flags
 #define DOOR_OPENED			0x00000001  // set is open
 #define DOOR_RIGHTLEFT		0x00000002
 #define DOOR_INOUT			0x00000004
 #define DOOR_NORTHSOUTH		0x00000008
-#define LAYER_IS_VISIBLE(layer)		((layer)> LAYER_NONE && (layer) <= LAYER_HORSE )
-#define VERDATA_MAKE_INDEX( f, i )	((f+1)<< 26 | (i))
+
+// Sight distance definitions
 #define UO_MAP_VIEW_SIGHT	14	// True max sight distance of creatures is 14
 #define UO_MAP_VIEW_SIZE	18  // Visibility for normal items
 #define UO_MAP_VIEW_RADAR	31  // Visibility for castles, keeps and boats
 
-// Map definition.
+// Map definitions
 #define UO_BLOCK_SIZE		8  // Base width/height size of a block.
 #define UO_BLOCK_ALIGN(i)	((i) &~ 7 )
 #define UO_BLOCK_OFFSET(i)	((i) & 7 )  // i%UO_BLOCK_SIZE
@@ -29,12 +29,13 @@
 #define UO_SIZE_MIN_Z		-127
 
 #define UO_SIZE_X_REAL		0x1400  // 640*UO_BLOCK_SIZE = 5120 = The actual world is only this big
-// This should depend on height of players char.
-#define PLAYER_HEIGHT		15  // We need x units of room to walk under something. (human) ??? this should vary based on creature type.
 
 #define UOTILE_BLOCK_QTY	32  // Come in blocks of 32.
 
+// This should depend on height of players char.
+#define PLAYER_HEIGHT		15  // We need x units of room to walk under something. (human) ??? this should vary based on creature type.
 
+// Tiledata flags
 #define UFLAG1_FLOOR		0x00000001  // 0= floor (Walkable at base position)
 #define UFLAG1_EQUIP		0x00000002  // 1= equipable. m_layer is LAYER_TYPE
 #define UFLAG1_NONBLOCKING	0x00000004  // 2= Signs and railings that do not block.
@@ -68,6 +69,8 @@
 #define UFLAG4_STAIRS		0x40000000  // 1e=
 #define UFLAG4_WALKABLE		0x80000000  // 1f= We can walk here.
 
+
+// Light levels
 #define LIGHT_BRIGHT	0
 #define LIGHT_DARK		30
 #define LIGHT_BLACK		32

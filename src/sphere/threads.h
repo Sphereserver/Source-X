@@ -6,6 +6,7 @@
 #include "../common/sphere_library/mutex.h"
 #include "../sphere/strings.h"
 #include "../sphere/ProfileData.h"
+#include "../sphere_library/CSTime.h"
 #include <list>
 
 
@@ -207,7 +208,7 @@ public:
 		if (m_freezeCallStack == false)
 		{
 			m_stackInfo[m_stackPos].functionName = name;
-			m_stackInfo[m_stackPos].startTime = ::GetTickCount();
+			m_stackInfo[m_stackPos].startTime = GetTickCount64();
 			++m_stackPos;
 			m_stackInfo[m_stackPos].startTime = 0;
 		}

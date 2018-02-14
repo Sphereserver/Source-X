@@ -8,7 +8,6 @@
 #define _INC_CSCRIPTPROFILER_H
 
 #include "../common/sphere_library/CSTime.h"
-#include "../common/common.h"
 
 extern struct CScriptProfiler
 {
@@ -40,26 +39,21 @@ extern struct CScriptProfiler
 //	Time measurement macros
 extern llong llTimeProfileFrequency;
 
+#define	TIME_PROFILE_INIT			llong llTicksStart = 0, llTicksEnd = 0
+
 #ifdef _WIN32
+	#define	TIME_PROFILE_START		if (!QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER *>(&llTicksStart)))	llTicksStart = GetTickCount64()
+	#define TIME_PROFILE_END		if (!QueryPerformanceCounter(reinterpret_cast<LARGE_INTEGER *>(&llTicksEnd)))	llTicksEnd = GetTickCount64()
 
-#define	TIME_PROFILE_INIT	\
-	llong llTicks(0), llTicksEnd
-#define	TIME_PROFILE_START	\
-	if ( !QueryPerformanceCounter((LARGE_INTEGER *)&llTicks)) llTicks = GetTickCount()
-#define TIME_PROFILE_END	if ( !QueryPerformanceCounter((LARGE_INTEGER *)&llTicksEnd)) llTicksEnd = GetTickCount()
+	#define TIME_PROFILE_GET_HI		((llTicksEnd - llTicksStart) / (llTimeProfileFrequency / 1000))
+	#define	TIME_PROFILE_GET_LO		((((llTicksEnd - llTicksStart) * 10000) / (llTimeProfileFrequency / 1000)) % 10000)
+#else
+	#define	TIME_PROFILE_START		llTicksStart = GetTickCount64()
+	#define TIME_PROFILE_END		llTicksEnd = GetTickCount64();
 
-#else // !_WIN32
-
-#define	TIME_PROFILE_INIT	\
-	llong llTicks(0), llTicksEnd
-#define	TIME_PROFILE_START	\
-	llTicks = GetTickCount()
-#define TIME_PROFILE_END	llTicksEnd = GetTickCount();
-
-#endif // _WIN32
-
-#define TIME_PROFILE_GET_HI	((llTicksEnd - llTicks)/(llTimeProfileFrequency/1000))
-#define	TIME_PROFILE_GET_LO	((((llTicksEnd - llTicks)*10000)/(llTimeProfileFrequency/1000))%10000)
+	#define TIME_PROFILE_GET_HI		(llTicksEnd - llTicksStart)
+	#define	TIME_PROFILE_GET_LO		(((llTicksEnd - llTicksStart) * 10) % 10000)
+#endif
 
 
 #endif //_INC_CSCRIPTPROFILER_H

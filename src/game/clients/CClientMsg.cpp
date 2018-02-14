@@ -2529,7 +2529,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 	ASSERT(m_pChar);
 
 	bool fNoMessages = false;
-	bool fQuickLogIn = !pChar->IsDisconnected();
+	bool fQuickLogIn = pChar->LayerFind(LAYER_FLAG_ClientLinger);
 	if ( IsTrigUsed(TRIGGER_LOGIN) )
 	{
 		CScriptTriggerArgs Args( fNoMessages, fQuickLogIn );

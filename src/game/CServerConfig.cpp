@@ -1620,7 +1620,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 		case RC_RTICKS:
 			{
 				if ( pszKey[6] != '.' )
-					sVal.FormatUVal((uint)(CSTime::GetCurrentTime().GetTime()));
+					sVal.FormatLLVal((llong)(CSTime::GetCurrentTime().GetTime()));
 				else
 				{
 					pszKey += 6;
@@ -1640,7 +1640,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 						if ( datetime.GetTime() == -1 )
 							sVal.FormatVal(-1);
 						else
-							sVal.FormatUVal((uint)(datetime.GetTime()));
+							sVal.FormatLLVal((llong)(datetime.GetTime()));
 					}
 					else if ( !strnicmp("FORMAT", pszKey, 6) )
 					{

@@ -1,5 +1,5 @@
 /**
-* @file CSString.
+* @file CSTime.
 * @brief Custom time management.
 */
 
@@ -10,8 +10,12 @@
 #include <time.h>
 #include "../common.h"
 
-#ifndef _WIN32
-	llong GetTickCount();
+#if !defined(_WIN32)
+	llong GetTickCount64();
+#elif (defined(_WIN32_WINNT) && (_WIN32_WINNT < 0x0600))
+	// we don't have GetTickCount64 on older Windows versions, but since we use it only to calculate
+	//  the difference between two near ticks, we won't overflow anyways
+	inline llong GetTickCount64() { return (llong)GetTickCount(); }
 #endif
 
 

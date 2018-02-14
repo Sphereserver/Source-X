@@ -706,7 +706,7 @@ bool CClient::Event_CheckWalkBuffer()
 		return true;
 
 	// Client only allows 4 steps of walk ahead.
-	llong CurrTime = (llong)(GetTickCount());
+	llong CurrTime = (llong)(GetTickCount64());
 	int iTimeDiff = (int)((CurrTime - m_timeWalkStep) / 10);
 	int iTimeMin = m_pChar->IsStatFlag(STATF_OnHorse|STATF_Hovering) ? 70 : 140; // minimum time to move 8 steps
 

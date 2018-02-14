@@ -10,6 +10,9 @@
 #include "../../common/common.h"
 #include "uofiles_macros.h"
 
+#define VERDATA_MAKE_INDEX( f, i )	((f+1)<< 26 | (i))
+
+
 // All these structures must be byte packed.
 #if defined(_WIN32) && defined(_MSC_VER)
 	// Microsoft dependant pragma

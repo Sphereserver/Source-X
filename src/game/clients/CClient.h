@@ -108,20 +108,20 @@ public:
 	static lpctstr const sm_szLoadKeys[];
 	static lpctstr const sm_szVerbKeys[];
 private:
-	CChar * m_pChar;			// What char are we playing ?
-	NetState* m_net; // network state
+	CChar * m_pChar;		// What char are we playing ?
+	NetState* m_net;		// network state
 
-					 // Client last know state stuff.
-	CSectorEnviron m_Env;		// Last Environment Info Sent. so i don't have to keep resending if it's the same.
+	// Client last know state stuff.
+	CSectorEnviron m_Env;	// Last Environment Info Sent. so i don't have to keep resending if it's the same.
 
 	uchar m_fUpdateStats;	// update our own status (weight change) when done with the cycle.
 
-									// Walk limiting code
+	// Walk limiting code
 	int	m_iWalkTimeAvg;
-	int m_iWalkStepCount;		// Count the actual steps . Turning does not count.
-	llong m_timeWalkStep;	// the last %8 walk step time.
+	int m_iWalkStepCount;	// Count the actual steps . Turning does not count.
+	int64 m_timeWalkStep;	// the last %8 walk step time.
 
-								// Screensize
+	// Screensize
 	struct __screensize
 	{
 		dword x;

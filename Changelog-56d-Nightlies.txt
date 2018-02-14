@@ -346,7 +346,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 	if set, will be used instead of obtaining it from the SOUND property. Set one of these overrides to -1 if you don't want that action-related sound to be played.
 
 14-01-2018, Drk84
-- Fixed: The effect value of spells that equips a "memory item" on a character(Bless, Curse and so on) was calculated twice, also causing to ignore the 
+- Fixed: The effect value of spells that equips a "memory item" on a character (Bless, Curse and so on) was calculated twice, also causing to ignore the 
 	value of local.effect.
 	
 25-01-2018, Nolok & Drk84
@@ -362,17 +362,31 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 
 29-01-2018, Nolok
 - Added: ini setting MaxLoopTimes is now controlling also the TIMERF executions. If too many TIMERFs are executed in the current tick, the loop will be aborted and a warning will be issued.
-29-01-2018, Nolok
-- Added: ini setting MaxLoopTimes is now controlling also the TIMERF executions. If too many TIMERFs are executed in the current tick, the loop will be aborted and a warning will be issued.
 	If it value is 0, there will be no limit (still it is suggested to set a value, even very high, because have just a distraction when writing some kind of scripts and you can cause a deadlock).
 
 31-01-2018, Drk84
-- Commented 4 lines of in code in method Skill_Fight() (CCharSkill.cpp), these 4 lines refers to a fix for an exploit in combat
-  Because the lines above cause problems with combat swings and we don't know what the exploit is they were commented and replaced with Set_Timeout(0).
+- Fixed: when a character started to attack, the first swing was started after an incorrect amount of time.
+	This was done by reverting an old supposed (and broken) fix for a combat exploit, which we couldn't recreate.
+
 31-01-2018, Nolok
 - Fixed the multi-threading and async networking system, which was disabled long time ago because of its instability.
 - Added ini flags: NetworkThreads (specify how many new network threads do you want), NetworkThreadPriority (priority of the dedicated networking threads),
 	UseAsyncNetwork (enable/disable asynchronous packet sending).
 
-02-02-2018
-- [Port from Source, 22-01-2018, Coruja]Fixed: Spells being disturbed even when they have INTERRUPT=0.0 set 
+02-02-2018, Drk84
+- [Port from Source, 22-01-2018, Coruja] Fixed: Spells being disturbed even when they have INTERRUPT=0.0 set.
+
+14-02-2017, Nolok
+- Fixed: ARGN2 of @Login trigger storing a wrong value.
+- Changed: like Source, also this branch now uses 64 bits internal tick count, instead of the old 32 bits.
+- Updated SphereCrypt.ini.
+- [Port from Source, 20-03-2017, Coruja] Fixed: Message 'World save completed in X seconds' not showing correct timing precision on Linux builds.
+- [Port from Source, 01-10-2017, Coruja] Fixed: Lightsource items not updating tooltip after toggle light state.
+- [Port from Source, 03-10-2017, Coruja]
+	Fixed: AutoTooltipResend .ini setting not working on equipped items.
+	Fixed: Summoned NPCs not showing smoke effect when they got released.
+- [Port from Source, 26-12-2017, Coruja] Fixed: 'memory_guard' memories not being removed after its linked item get deleted.
+- [Port from Source, 27-01-2018, Coruja] Fixed: Items placed on char backpack not checking char weight limit correctly before get equipped.
+- [Port from Source, 30-01-2018, Coruja]
+	Fixed: Items not getting amount stacked when dropped on ground.
+	Fixed: Ship commands not working correctly.

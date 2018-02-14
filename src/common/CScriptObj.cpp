@@ -584,12 +584,14 @@ bool CScriptObj::r_Call( lpctstr pszFunction, CTextConsole * pSrc, CScriptTrigge
 		{
 			//	update the time call information
 			TIME_PROFILE_END;
-			llTicks = llTicksEnd - llTicks;
-			pFun->total += llTicks;
+			llTicksStart = llTicksEnd - llTicksStart;
+			pFun->total += llTicksStart;
 			pFun->average = (pFun->total / pFun->called);
-			if ( pFun->max < llTicks ) pFun->max = llTicks;
-			if (( pFun->min > llTicks ) || ( !pFun->min )) pFun->min = llTicks;
-			g_profiler.total += llTicks;
+			if ( pFun->max < llTicksStart )
+				pFun->max = llTicksStart;
+			if (( pFun->min > llTicksStart ) || ( !pFun->min ))
+				pFun->min = llTicksStart;
+			g_profiler.total += llTicksStart;
 		}
 
 		if ( piRet )
@@ -2119,14 +2121,14 @@ TRIGRET_TYPE CScriptObj::OnTriggerScript( CScript & s, lpctstr pszTrigName, CTex
 	{
 		//	update the time call information
 		TIME_PROFILE_END;
-		llTicks = llTicksEnd - llTicks;
-		pTrig->total += llTicks;
+		llTicksStart = llTicksEnd - llTicksStart;
+		pTrig->total += llTicksStart;
 		pTrig->average = (pTrig->total/pTrig->called);
-		if ( pTrig->max < llTicks )
-			pTrig->max = llTicks;
-		if (( pTrig->min > llTicks ) || ( !pTrig->min ))
-			pTrig->min = llTicks;
-		g_profiler.total += llTicks;
+		if ( pTrig->max < llTicksStart )
+			pTrig->max = llTicksStart;
+		if (( pTrig->min > llTicksStart ) || ( !pTrig->min ))
+			pTrig->min = llTicksStart;
+		g_profiler.total += llTicksStart;
 	}
 
 	return iRet;

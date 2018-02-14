@@ -1608,7 +1608,8 @@ CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, u
 	// Check water/mountains/etc.
 	if ( pMultiDef != NULL && ! (iAttr&ATTR_MAGIC))
 	{
-		if ( pMultiDef->m_rect.m_bottom > 0 && (pMultiDef->IsType(IT_MULTI) || pMultiDef->IsType(IT_MULTI_CUSTOM)) )
+		//if ( pMultiDef->m_rect.m_bottom > 0 && (pMultiDef->IsType(IT_MULTI) || pMultiDef->IsType(IT_MULTI_CUSTOM)) )
+		if ( CItemBase::IsID_Multi(pItemDef->GetID()) )
 			pt.m_y -= (short)(pMultiDef->m_rect.m_bottom - 1);
 
 		// Check for items in the way and bumpy terrain.
@@ -1701,7 +1702,7 @@ CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, u
 		return NULL;
 	}
 
-	pItemNew->SetAttr(iAttr & ( ATTR_MAGIC | ATTR_INVIS ));
+	pItemNew->SetAttr(ATTR_MOVE_NEVER | (iAttr & (ATTR_MAGIC|ATTR_INVIS)));
 	pItemNew->SetHue( wHue );
 	pItemNew->MoveToUpdate( pt );
 

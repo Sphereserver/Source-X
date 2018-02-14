@@ -1321,7 +1321,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		g_Log.Event(LOGM_SAVE, "Context data saved (%s).\n", static_cast<lpctstr>(m_FileData.GetFilePath()));
 
 		llong	llTicksEnd;
-		llong	llTicks = m_savetimer;
+		llong	llTicksStart = m_savetimer;
 		TIME_PROFILE_END;
 
 		tchar * time = Str_GetTemp();
@@ -1449,9 +1449,9 @@ bool CWorld::SaveTry( bool fForceImmediate ) // Save world state
 	if ( g_Cfg.m_fSaveGarbageCollect )
 		GarbageCollection();
 
-	llong llTicks;
+	llong llTicksStart;
 	TIME_PROFILE_START;
-	m_savetimer = llTicks;
+	m_savetimer = llTicksStart;
 
 	// Determine the save name based on the time.
 	// exponentially degrade the saves over time.

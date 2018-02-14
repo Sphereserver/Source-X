@@ -1,4 +1,3 @@
-
 #include <cstdio>
 #include "../common/sphere_library/CSString.h"
 #include "../common/common.h"
@@ -19,10 +18,10 @@ ProfileData::ProfileData()
 	m_iActiveWindowSeconds = 10;
 	m_iAverageCount = 1;
 
-	llong llTicks;
+	llong llTicksStart;
 	TIME_PROFILE_START;
 
-	m_CurrentTime = llTicks;
+	m_CurrentTime = llTicksStart;
 	m_CurrentTask = PROFILE_IDLE;
 	m_TimeTotal = 0;
 }
@@ -41,10 +40,10 @@ void ProfileData::SetActive(int iSampleSec)
 	if (m_iActiveWindowSeconds == 0)
 		return;
 
-	llong llTicks;
+	llong llTicksStart;
 	TIME_PROFILE_START;
 
-	m_CurrentTime = llTicks;
+	m_CurrentTime = llTicksStart;
 	m_CurrentTask = PROFILE_OVERHEAD;
 	m_TimeTotal = 0;
 }
@@ -92,17 +91,17 @@ void ProfileData::Start(PROFILE_TYPE id)
 	}
 
 	// Get the current precise time.
-	llong llTicks;
+	llong llTicksStart;
 	TIME_PROFILE_START;
 
 	// accumulate the time for this task.
-	llong Diff = ( llTicks - m_CurrentTime );
+	llong Diff = ( llTicksStart - m_CurrentTime );
 	m_TimeTotal += Diff;
 	m_CurrentTimes[m_CurrentTask].m_Time += Diff;
 	++ m_CurrentTimes[m_CurrentTask].m_iCount;
 
 	// We are now on to the new task.
-	m_CurrentTime = llTicks;
+	m_CurrentTime = llTicksStart;
 	m_CurrentTask = id;
 }
 

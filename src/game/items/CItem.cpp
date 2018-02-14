@@ -1127,6 +1127,8 @@ bool CItem::Stack( CItem * pItem )
 		return true;
 	if ( !IsStackable(pItem) )
 		return false;
+	if ( (m_Attr & ~ATTR_DECAY) != (pItem->m_Attr & ~ATTR_DECAY) )
+		return false;
 	if ( !m_TagDefs.Compare(&pItem->m_TagDefs) )
 		return false;
 	if ( !m_BaseDefs.CompareAll(&pItem->m_BaseDefs) )
@@ -4670,6 +4672,7 @@ bool CItem::Use_Light()
 
 	SetID(id);
 	Update();
+	ResendTooltip();
 
 	if ( IsType(IT_LIGHT_LIT) )
 	{

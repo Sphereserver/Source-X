@@ -657,7 +657,7 @@ public:
 
 inline bool CItemBase::IsVisibleLayer( LAYER_TYPE layer ) // static
 {
-	return LAYER_IS_VISIBLE( layer );
+	return ((layer > LAYER_NONE) && (layer <= LAYER_HORSE) );
 }
 
 inline bool CItemBase::IsValidDispID( ITEMID_TYPE id ) // static

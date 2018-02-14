@@ -120,5 +120,13 @@ int CItemMemory::FixWeirdness()
 			return iResultCode;	// get rid of it.
 		}
 	}
+
+	// Make sure guard memories are linked correctly (this is not an ERROR, just make the item decay on next tick)
+	if ( IsMemoryTypes(MEMORY_GUARD) && !m_uidLink.ObjFind() )
+	{
+		SetAttr(ATTR_DECAY);
+		SetTimeout(0);
+	}
+
 	return 0;
 }
