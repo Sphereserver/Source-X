@@ -321,7 +321,7 @@ public:
 	int GetSight() const;
 	void SetSight(byte newSight);
 
-	bool Can( word wCan ) const;
+	bool Can( dword wCan ) const;
 	bool Can( int wCan ) const;
 	bool IsResourceMatch( CResourceIDBase rid, dword dwArg );
 	bool IsResourceMatch( CResourceIDBase rid, dword dwArg, dword dwArgResearch );

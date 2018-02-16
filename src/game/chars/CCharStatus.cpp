@@ -1022,13 +1022,8 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 	if ( !pObj || IsDisconnected() || !pObj->GetTopLevelObj()->GetTopPoint().IsValidPoint() )
 		return false;
 
-	// If an object is normally visible at radar distance, then it is not affected by GetSight()
-	int iVisualRange = pObj->GetVisualRange();
-	if (iVisualRange < UO_MAP_VIEW_RADAR)
-		iVisualRange = GetSight();
-
 	// First check the distance since if this will fail, we do not need to scan all subcontainers to find this result ;)
-	if ( pObj->GetTopLevelObj()->GetTopPoint().GetDistSight(GetTopPoint()) > iVisualRange )
+	if ( pObj->GetTopLevelObj()->GetTopPoint().GetDistSight(GetTopPoint()) > GetSight() )
 		return false;
 
 	if ( pObj->IsItem() )
@@ -1131,7 +1126,7 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 	}
 
 	if ( IsPriv(PRIV_ALLSHOW) && (pObj->IsTopLevel() || pObj->IsDisconnected()) )		// don't exclude for logged out and diff maps
-		return (GetTopPoint().GetDistSightBase(pObj->GetTopPoint()) <= pObj->GetVisualRange());
+		return (GetTopPoint().GetDistSightBase(pObj->GetTopPoint()) <= GetSight());
 
 	return true;
 }
@@ -1971,7 +1966,15 @@ bool CChar::CanHear( const CObjBaseTemplate *pSrc, TALKMODE_TYPE mode ) const
 	{
 		case TALKMODE_YELL:
 			if ( g_Cfg.m_iDistanceYell < 0 )
-				return true;
+				return false;
+			else if ( g_Cfg.m_iDistanceYell == 0 )
+			{
+				int dist = GetSight();
+				if ( dist == 0 )
+					return true;
+				iHearRange = dist;
+				break;
+			}
 			iHearRange = g_Cfg.m_iDistanceYell;
 			fThrough = true;
 			break;
@@ -1979,12 +1982,28 @@ bool CChar::CanHear( const CObjBaseTemplate *pSrc, TALKMODE_TYPE mode ) const
 			return true;
 		case TALKMODE_WHISPER:
 			if ( g_Cfg.m_iDistanceWhisper < 0 )
-				return true;
+				return false;
+			else if ( g_Cfg.m_iDistanceWhisper == 0 )
+			{
+				int dist = GetSight();
+				if ( dist == 0 )
+					return true;
+				iHearRange = dist;
+				break;
+			}
 			iHearRange = g_Cfg.m_iDistanceWhisper;
 			break;
-		default:
+		default:	// this is executed also when playing a sound (TALKMODE_OBJ)
 			if ( g_Cfg.m_iDistanceTalk < 0 )
-				return true;
+				return false;
+			else if ( g_Cfg.m_iDistanceTalk == 0 )
+			{
+				int dist = GetSight();
+				if ( dist == 0 )
+					return true;
+				iHearRange = dist;
+				break;
+			}
 			iHearRange = g_Cfg.m_iDistanceTalk;
 			break;
 	}

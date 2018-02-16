@@ -313,7 +313,7 @@ void CClient::addRemoveAll( bool fItems, bool fChars )
 	if ( fChars )
 	{
 		CChar * pCharSrc = GetChar();
-		CWorldSearch AreaChars(GetChar()->GetTopPoint(), UO_MAP_VIEW_SIZE);
+		CWorldSearch AreaChars(GetChar()->GetTopPoint(), GetChar()->GetSight());
 		AreaChars.SetAllShow(IsPriv(PRIV_ALLSHOW));
 		AreaChars.SetSearchSquare(true);
 		for (;;)
@@ -345,12 +345,10 @@ void CClient::addItem_OnGround( CItem * pItem ) // Send items (on ground)
 
 	// send item sound
 	if (pItem->IsType(IT_SOUND))
-	{
 		addSound(static_cast<SOUND_TYPE>(pItem->m_itSound.m_Sound), pItem, pItem->m_itSound.m_Repeat );
-	}
 
 	// send corpse clothing
-	if (IsPriv(PRIV_DEBUG) == false && (pItem->GetDispID() == ITEMID_CORPSE && CCharBase::IsPlayableID(pItem->GetCorpseType())) )	// cloths on corpse
+	if ( !IsPriv(PRIV_DEBUG) && ((pItem->GetDispID() == ITEMID_CORPSE) && CCharBase::IsPlayableID(pItem->GetCorpseType())) )	// cloths on corpse
 	{
 		CItemCorpse *pCorpse = static_cast<CItemCorpse *>(pItem);
 		if ( pCorpse )
@@ -363,7 +361,7 @@ void CClient::addItem_OnGround( CItem * pItem ) // Send items (on ground)
 	// send item tooltip
 	addAOSTooltip(pItem);
 
-	if ( (pItem->IsType(IT_MULTI_CUSTOM)) && (m_pChar->GetTopPoint().GetDistSight(pItem->GetTopPoint()) <= UO_MAP_VIEW_SIZE) )
+	if ( (pItem->IsType(IT_MULTI_CUSTOM)) && (m_pChar->GetTopPoint().GetDistSight(pItem->GetTopPoint()) <= m_pChar->GetSight()) )
 	{
 		// send house design version
 		CItemMultiCustom *pItemMulti = static_cast<CItemMultiCustom *>(pItem);

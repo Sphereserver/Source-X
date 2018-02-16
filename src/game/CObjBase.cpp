@@ -2715,8 +2715,8 @@ void CObjBase::RemoveFromView( CClient * pClientExclude, bool fHardcoded )
 		pChar = pClient->GetChar();
 		if ( pChar == NULL )
 			continue;
-		if ( pChar->GetTopDistSight( pObjTop ) > UO_MAP_VIEW_SIZE )
-			//Client does not support removing of items which are farther (will be removed from the radar on the next step, cause the server won't resend it)
+		if ( pChar->GetTopDistSight( pObjTop ) > pChar->GetSight() )
+			//Client does not support removing of items which are farther (will be removed from the radar on the next step, because the server won't resend it)
 			continue;
 		if ( pItem && pItem->IsItemEquipped() )
 		{
@@ -2753,8 +2753,8 @@ void CObjBase::ResendOnEquip( bool fAllClients )
 		pChar = pClient->GetChar();
 		if ( pChar == NULL )
 			continue;
-		if ( pChar->GetTopDistSight( pObjTop ) > UO_MAP_VIEW_SIZE ) //Client does not support removing of items which are farther (will be removed from the radar on the next step, cause the server won't resend it)
-			continue;
+		if ( pChar->GetTopDistSight( pObjTop ) > pChar->GetSight() )
+			continue;	//Client does not support removing of items which are farther (will be removed from the radar on the next step, because the server won't resend it)
 		if ( pItem )
 		{
 			if (( pItem->IsItemEquipped() ) && ( !pChar->IsPriv(PRIV_GM) ))
@@ -2763,8 +2763,8 @@ void CObjBase::ResendOnEquip( bool fAllClients )
 					continue;
 			}
 
-			if ( pItem->IsTypeSpellbook() && pItem->IsItemInContainer())	// items must be removed from view before equipping in EC when on the floor, however spellbooks cannot be removed from view or client will crash
-				continue;
+			if ( pItem->IsTypeSpellbook() && pItem->IsItemInContainer())
+				continue;	// items must be removed from view before equipping in EC when on the floor, however spellbooks cannot be removed from view or client will crash
 		}
 
 		if (this->GetEquipLayer() == LAYER_BANKBOX)
@@ -2772,7 +2772,6 @@ void CObjBase::ResendOnEquip( bool fAllClients )
 
 		pClient->addObjectRemove( this );
 		pClient->addItem( pItem );
-
 	}
 }
 

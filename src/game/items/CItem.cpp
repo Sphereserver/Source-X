@@ -577,7 +577,7 @@ int CItem::GetVisualRange() const	// virtual
 {
 	if ( GetDispID() >= ITEMID_MULTI ) // ( IsTypeMulti() ) why not this?
 		return( UO_MAP_VIEW_RADAR );
-	return UO_MAP_VIEW_SIZE;
+	return UO_MAP_VIEW_SIZE_DEFAULT;
 }
 
 // Retrieve tag.override.speed for this CItem

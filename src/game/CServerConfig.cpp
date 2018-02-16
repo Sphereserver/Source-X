@@ -150,7 +150,7 @@ CServerConfig::CServerConfig()
 	m_iExperimental		= 0;
 	m_iDistanceYell		= UO_MAP_VIEW_RADAR;
 	m_iDistanceWhisper	= 3;
-	m_iDistanceTalk		= UO_MAP_VIEW_SIZE;
+	m_iDistanceTalk		= UO_MAP_VIEW_SIZE_DEFAULT;
 	m_iOptionFlags		= (OF_Command_Sysmsgs|OF_NoHouseMuteSpeech);
 
 	m_iMaxSkill			= SKILL_QTY;
@@ -261,7 +261,7 @@ CServerConfig::CServerConfig()
 
 	m_iClientLoginMaxTries	= 0;		// maximum bad password tries before a temp ip ban
 	m_iClientLoginTempBan	= 3*60 * TICK_PER_SEC;
-	m_iMaxShipPlankTeleport = UO_MAP_VIEW_SIZE;
+	m_iMaxShipPlankTeleport = UO_MAP_VIEW_SIZE_DEFAULT;
 
 	m_NPCNoFameTitle = false;
 }

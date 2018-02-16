@@ -706,11 +706,11 @@ bool CClient::Event_CheckWalkBuffer()
 		return true;
 
 	// Client only allows 4 steps of walk ahead.
-	llong CurrTime = (llong)(GetTickCount64());
-	int iTimeDiff = (int)((CurrTime - m_timeWalkStep) / 10);
+	llong CurrTime = GetSupportedTickCount();
+	int iTimeDiff = abs((int)((CurrTime - m_timeWalkStep) / 10));	// use absolute value to prevent overflows
 	int iTimeMin = m_pChar->IsStatFlag(STATF_OnHorse|STATF_Hovering) ? 70 : 140; // minimum time to move 8 steps
 
-	if ( m_pChar->m_pPlayer && m_pChar->m_pPlayer->m_speedMode != 0 )
+	if ( m_pChar->m_pPlayer && (m_pChar->m_pPlayer->m_speedMode != 0) )
 	{
 		// Speed Modes:
 		// 0 = Foot=Normal, Mount=Normal                         140 -  70
@@ -1656,10 +1656,14 @@ void CClient::Event_Talk_Common(tchar *szText)	// PC speech
 	CChar *pChar = NULL;
 	CChar *pCharAlt = NULL;
 	size_t i = 0;
-	int iAltDist = UO_MAP_VIEW_SIGHT;
+	int iAltDist;
+	if (g_Cfg.m_iDistanceTalk > 0)
+		iAltDist = g_Cfg.m_iDistanceTalk;
+	else
+		iAltDist = UO_MAP_VIEW_SIGHT;
 	bool bGhostSpeak = m_pChar->IsSpeakAsGhost();
 
-	CWorldSearch AreaChars(m_pChar->GetTopPoint(), UO_MAP_VIEW_SIGHT);
+	CWorldSearch AreaChars(m_pChar->GetTopPoint(), iAltDist);
 	for (;;)
 	{
 		pChar = AreaChars.GetChar();
@@ -2207,7 +2211,7 @@ void CClient::Event_Target(dword context, CUID uid, CPointMap pt, byte flags, IT
 		else
 		{
 			// the point must be valid
-			if (m_pChar->GetTopDistSight(pt) > UO_MAP_VIEW_SIZE)
+			if (m_pChar->GetTopDistSight(pt) > m_pChar->GetSight())
 				return;
 		}
 	}

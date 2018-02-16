@@ -1229,7 +1229,7 @@ void CChar::UpdateMode( CClient * pExcludeClient, bool fFull )
 			continue;
 		if ( pClient->GetChar() == NULL )
 			continue;
-		if ( GetTopPoint().GetDistSight(pClient->GetChar()->GetTopPoint()) > UO_MAP_VIEW_SIZE )
+		if ( GetTopPoint().GetDistSight(pClient->GetChar()->GetTopPoint()) > pClient->GetChar()->GetSight() )
 			continue;
 		if ( !pClient->CanSee(this) )
 		{
@@ -1375,7 +1375,7 @@ void CChar::Update(const CClient * pClientExclude )
 			continue;
 		if ( pClient->GetChar() == NULL )
 			continue;
-		if ( GetTopPoint().GetDistSight(pClient->GetChar()->GetTopPoint()) > UO_MAP_VIEW_SIZE )
+		if ( GetTopPoint().GetDistSight(pClient->GetChar()->GetTopPoint()) > pClient->GetChar()->GetSight() )
 			continue;
 		if ( !pClient->CanSee(this) )
 		{
@@ -2938,7 +2938,7 @@ bool CChar::Death()
 		// Remove the characters which I can't see as dead from the screen
 		if ( g_Cfg.m_fDeadCannotSeeLiving )
 		{
-			CWorldSearch AreaChars(GetTopPoint(), UO_MAP_VIEW_SIZE);
+			CWorldSearch AreaChars(GetTopPoint(), pClient->GetChar()->GetSight());
 			AreaChars.SetSearchSquare(true);
 			for (;;)
 			{

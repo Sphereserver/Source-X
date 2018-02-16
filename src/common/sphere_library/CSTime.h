@@ -11,11 +11,14 @@
 #include "../common.h"
 
 #if !defined(_WIN32)
-	llong GetTickCount64();
+	llong GetSupportedTickCount();
 #elif (defined(_WIN32_WINNT) && (_WIN32_WINNT < 0x0600))
-	// we don't have GetTickCount64 on older Windows versions, but since we use it only to calculate
-	//  the difference between two near ticks, we won't overflow anyways
-	inline llong GetTickCount64() { return (llong)GetTickCount(); }
+	// We don't have GetSupportedTickCount on Windows versions previous to Vista. We need to check for overflows
+	//  (which occurs every 49.7 days of continuous running of the server, if measured with GetTickCount, every 7 years
+	//	with GetSupportedTickCount) manually every time we compare two values.
+	inline llong GetSupportedTickCount() { return (llong)GetTickCount(); }
+#else
+	inline llong GetSupportedTickCount() { return (llong)GetTickCount64(); }
 #endif
 
 

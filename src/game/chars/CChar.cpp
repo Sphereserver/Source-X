@@ -248,7 +248,7 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false )
 	m_ModMaxWeight = 0;
 
 	m_StepStealth = 0;
-	m_iVisualRange = UO_MAP_VIEW_SIZE;
+	m_iVisualRange = UO_MAP_VIEW_SIZE_DEFAULT;
 	m_virtualGold = 0;
 
 	m_exp = 0;
@@ -636,12 +636,13 @@ int CChar::GetSight() const
 
 void CChar::SetSight(byte newSight)
 {
-	m_iVisualRange = minimum(newSight, 31);		// max value is 18 on classic clients and 31 on enhanced clients
+	// max value is 18 on classic clients prior 7.0.55.27 version and 24 on enhanced clients and latest classic clients
+	m_iVisualRange = minimum(newSight, UO_MAP_VIEW_SIZE_MAX);
 	if ( IsClient() )
 		GetClient()->addVisualRange(m_iVisualRange);
 }
 
-bool CChar::Can( word wCan ) const
+bool CChar::Can( dword wCan ) const
 {
 	return (( m_Can & wCan ) ? true : false );
 }

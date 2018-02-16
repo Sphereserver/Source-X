@@ -724,7 +724,7 @@ void CChar::NotoSave_Resend( int id )
 		return;
 	NotoSave_Delete( pChar );
 	CObjBaseTemplate *pObj = pChar->GetTopLevelObj();
-	if (  GetDist( pObj ) < UO_MAP_VIEW_SIGHT )
+	if ( GetDist( pObj ) < UO_MAP_VIEW_SIGHT )
 		Noto_GetFlag( pChar, true , true );
 }
 

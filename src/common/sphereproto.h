@@ -3091,7 +3091,7 @@ struct CCommand	// command buffer from server to client.
 		struct	// size = 2	// Sent for altering visual range
 		{
 			byte m_Cmd;		// 0 =0xC8
-			byte m_Value;	// 0x01 to UO_MAP_VIEW_SIZE
+			byte m_Value;	// 0x01 to UO_MAP_VIEW_SIZE_MAX
 		} VisualRange;
 
 		struct

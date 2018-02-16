@@ -240,7 +240,7 @@ DIR_TYPE CObjBaseTemplate::GetDir( const CObjBaseTemplate * pObj, DIR_TYPE DirDe
 
 int CObjBaseTemplate::GetVisualRange() const
 {
-	return UO_MAP_VIEW_SIZE;
+	return UO_MAP_VIEW_SIZE_DEFAULT;
 }
 
 // Names

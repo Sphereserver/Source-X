@@ -387,6 +387,13 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 	Fixed: Summoned NPCs not showing smoke effect when they got released.
 - [Port from Source, 26-12-2017, Coruja] Fixed: 'memory_guard' memories not being removed after its linked item get deleted.
 - [Port from Source, 27-01-2018, Coruja] Fixed: Items placed on char backpack not checking char weight limit correctly before get equipped.
-- [Port from Source, 30-01-2018, Coruja]
-	Fixed: Items not getting amount stacked when dropped on ground.
-	Fixed: Ship commands not working correctly.
+- [Port from Source, 30-01-2018, Coruja] Fixed: Items not getting amount stacked when dropped on ground.
+
+16-02-2017, Nolok
+- Updated: VisualRange maximum value is now 24 (this maximum value is valid for Classic Clients 7.0.55.27+ and probably all the Enhanced Client versions;
+	prior client versions support a maximum value of 18).
+- Changed: DistanceTalk, DistanceWhisper, DistanceYell ini settings can now have two special values: if -1 it will never be heared, if 0 it will be heared
+	if the distance from the source to the listener is <= the listener's VisualRange.
+- Fixed: multi placement is now checking if there's enough space around the target using the multi size instead of a fixed size area of 18 tiles.
+- Fixed: internal CAN checks not working for high value CAN flags.
+- Fixed: rare time overflows in internal checks.

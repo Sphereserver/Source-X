@@ -586,7 +586,7 @@ public:
 
 	void addShowDamage( int damage, dword uid_damage );
 	void addSpeedMode( byte speedMode = 0 );
-	void addVisualRange( byte visualRange = UO_MAP_VIEW_SIZE );
+	void addVisualRange( byte visualRange );
 	void addIdleWarning( byte message );
 	void addKRToolbar( bool bEnable );
 

@@ -3826,7 +3826,7 @@ bool PacketPropertyListVersionOld::onSend(const CClient* client)
 		return false;
 
 	const CObjBase* object = m_object.ObjFind();
-	if (object == NULL || character->GetTopDistSight(object->GetTopLevelObj()) > UO_MAP_VIEW_SIZE)
+	if (object == NULL || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(character->GetSight(),UO_MAP_VIEW_SIZE_DEFAULT) )
 		return false;
 
 	return true;
@@ -4421,7 +4421,7 @@ bool PacketPropertyList::onSend(const CClient* client)
 		return false;
 
 	const CObjBase* object = m_object.ObjFind();
-	if (object == NULL || character->GetTopDistSight(object->GetTopLevelObj()) > UO_MAP_VIEW_SIZE)
+	if (object == NULL || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(character->GetSight(),UO_MAP_VIEW_SIZE_DEFAULT))
 		return false;
 
 	if (hasExpired(TICK_PER_SEC * 30))
@@ -4644,7 +4644,7 @@ bool PacketPropertyListVersion::onSend(const CClient* client)
 		return false;
 
 	const CObjBase* object = m_object.ObjFind();
-	if (object == NULL || character->GetTopDistSight(object->GetTopLevelObj()) > UO_MAP_VIEW_SIZE)
+	if (object == NULL || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(character->GetSight(),UO_MAP_VIEW_SIZE_DEFAULT))
 		return false;
 
 	return true;
@@ -4669,11 +4669,11 @@ PacketBuff::PacketBuff(const CClient* target, const BUFF_ICONS iconId, const dwo
 	initLength();
 
 	writeInt32(character->GetUID());
-	writeInt16((word)(iconId));
+	writeInt16((word)iconId);
 	writeInt16(0x1);	// show
 
 	writeInt32(0);
-	writeInt16((word)(iconId));
+	writeInt16((word)iconId);
 	writeInt16(0x1);	// show
 
 	writeInt32(0);
@@ -4690,7 +4690,7 @@ PacketBuff::PacketBuff(const CClient* target, const BUFF_ICONS iconId, const dwo
 		writeInt16(0x1);		// show icon
 		writeInt16(0);
 
-		for (size_t i = 0; i < argCount; i++)
+		for (size_t i = 0; i < argCount; ++i)
 		{
 			writeCharUNICODE('\t');
 			writeStringUNICODE(args[i], false);

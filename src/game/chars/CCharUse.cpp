@@ -144,9 +144,9 @@ void CChar::Use_MoonGate( CItem * pItem )
 		// What gate are we at ?
 		size_t i = 0;
 		size_t iCount = g_Cfg.m_MoonGates.GetCount();
-		for ( ; i < iCount; i++ )
+		for ( ; i < iCount; ++i )
 		{
-			if ( GetTopPoint().GetDist(g_Cfg.m_MoonGates[i]) <= UO_MAP_VIEW_SIZE )
+			if ( GetTopPoint().GetDist(g_Cfg.m_MoonGates[i]) <= UO_MAP_VIEW_SIZE_DEFAULT )
 				break;
 		}
 

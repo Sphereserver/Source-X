@@ -1620,9 +1620,9 @@ CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, u
 		CPointMap ptn = pt;
 
 		int x = rect.m_left;
-		for ( ; x <rect.m_right; ++x )
+		for ( ; x < rect.m_right; ++x )
 		{
-			ptn.m_x = (short)(x);
+			ptn.m_x = (short)x;
 			int y = rect.m_top;
 			for ( ; y < rect.m_bottom; ++y )
 			{
@@ -1666,7 +1666,7 @@ CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, u
 
 		// Check for chars in the way.
 
-		CWorldSearch Area( pt, UO_MAP_VIEW_SIZE );
+		CWorldSearch Area( pt, maximum(rect.GetWidth(), rect.GetHeight()) );
 		Area.SetSearchSquare( true );
 		for (;;)
 		{

@@ -208,7 +208,7 @@ public:
 		if (m_freezeCallStack == false)
 		{
 			m_stackInfo[m_stackPos].functionName = name;
-			m_stackInfo[m_stackPos].startTime = GetTickCount64();
+			m_stackInfo[m_stackPos].startTime = GetSupportedTickCount();
 			++m_stackPos;
 			m_stackInfo[m_stackPos].startTime = 0;
 		}

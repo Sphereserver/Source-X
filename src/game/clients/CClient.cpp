@@ -46,7 +46,7 @@ CClient::CClient(NetState* state)
 
 	m_iWalkStepCount = 0;
 	m_iWalkTimeAvg	= 100;
-	m_timeWalkStep = GetTickCount64();
+	m_timeWalkStep = GetSupportedTickCount();
 
 	m_Targ_Timeout.Init();
 	m_Targ_Mode = CLIMODE_SETUP_CONNECTING;
@@ -325,18 +325,13 @@ bool CClient::CanHear( const CObjBaseTemplate * pSrc, TALKMODE_TYPE mode ) const
 		return false;
 
 	if ( IsPriv( PRIV_HEARALL ) &&
-		pSrc->IsChar()&&
-		( mode == TALKMODE_SYSTEM || mode == TALKMODE_SAY || mode == TALKMODE_WHISPER || mode == TALKMODE_YELL ))
+		pSrc->IsChar() &&
+		( mode == TALKMODE_SYSTEM || mode == TALKMODE_SAY || mode == TALKMODE_WHISPER || mode == TALKMODE_YELL ) )
 	{
 		const CChar * pCharSrc = dynamic_cast <const CChar*> ( pSrc );
 		ASSERT(pCharSrc);
-		if ( pCharSrc && pCharSrc->IsClient())
-		{
-			if ( pCharSrc->GetPrivLevel() <= GetPrivLevel())
-			{
-				return true;
-			}
-		}
+		if ( pCharSrc->IsClient() && (pCharSrc->GetPrivLevel() <= GetPrivLevel()) )
+			return true;
 	}
 
 	return( m_pChar->CanHear( pSrc, mode ));

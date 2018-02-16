@@ -13,7 +13,7 @@
 #ifndef _WIN32
 #include <sys/time.h>
 
-llong GetTickCount64()
+llong GetSupportedTickCount()	// 64 bits tick count
 {
 	struct timespec ts;
 	clock_gettime(CLOCK_MONOTONIC, &ts);

@@ -8,7 +8,6 @@
 #ifndef _INC_PATHFINDER_H
 #define _INC_PATHFINDER_H
 
-//#include "../game/spheresvr.h" Removed to test.
 #include <deque>
 #include <list>
 #include "../common/CRect.h"
