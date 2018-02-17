@@ -376,7 +376,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 02-02-2018, Drk84
 - [Port from Source, 22-01-2018, Coruja] Fixed: Spells being disturbed even when they have INTERRUPT=0.0 set.
 
-14-02-2017, Nolok
+14-02-2018, Nolok
 - Fixed: ARGN2 of @Login trigger storing a wrong value.
 - Changed: like Source, also this branch now uses 64 bits internal tick count, instead of the old 32 bits.
 - Updated SphereCrypt.ini.
@@ -389,7 +389,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - [Port from Source, 27-01-2018, Coruja] Fixed: Items placed on char backpack not checking char weight limit correctly before get equipped.
 - [Port from Source, 30-01-2018, Coruja] Fixed: Items not getting amount stacked when dropped on ground.
 
-16-02-2017, Nolok
+16-02-2018, Nolok
 - Updated: VisualRange maximum value is now 24 (this maximum value is valid for Classic Clients 7.0.55.27+ and probably all the Enhanced Client versions;
 	prior client versions support a maximum value of 18).
 - Changed: DistanceTalk, DistanceWhisper, DistanceYell ini settings can now have two special values: if -1 it will never be heared, if 0 it will be heared
@@ -397,3 +397,6 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Fixed: multi placement is now checking if there's enough space around the target using the multi size instead of a fixed size area of 18 tiles.
 - Fixed: internal CAN checks not working for high value CAN flags.
 - Fixed: rare time overflows in internal checks.
+
+17-02-2018, Nolok
+- Fixed: items not being dropped on ground and being kept on the dragging layer when dragging an item too heavy and aborting the dragging action.

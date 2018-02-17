@@ -1888,8 +1888,8 @@ bool CChar::ItemBounce( CItem * pItem, bool bDisplayMsg )
 		}
 
 		// Maybe in the trigger call i have changed/overridden the container, so drop it on ground
-		//	only if the item still hasn't a container
-		if (pItem->GetContainer() == NULL)
+		//	only if the item still hasn't a container, or if i'm dragging it but i can't add it to pack
+		if ( (pItem->GetContainer() == NULL) || (pItem->GetContainedLayer() == LAYER_DRAGGING) )
 		{
 			pszWhere = g_Cfg.GetDefaultMsg(DEFMSG_MSG_FEET);
 			pItem->RemoveFromView();
