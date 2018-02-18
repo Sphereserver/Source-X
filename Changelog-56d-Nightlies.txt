@@ -400,3 +400,6 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 
 17-02-2018, Nolok
 - Fixed: items not being dropped on ground and being kept on the dragging layer when dragging an item too heavy and aborting the dragging action.
+
+18-02-2018, Nolok
+- Fixed: when an overloaded player drags an equippable item on himself, it returned to its previous location on the ground instead of at the player's feet.

@@ -268,10 +268,7 @@ void CClient::Event_Item_Drop_Fail( CItem *pItem )
 		return;
 	}
 
-	if ( m_Targ_Prv_UID )	// if there's a previous cont UID set but it's not a valid container/char, probably this container/char got removed. So drop the item at player foot
-		m_Targ_p = m_pChar->GetTopPoint();
-
-	pItem->MoveToCheck(m_Targ_p);
+	pItem->MoveToCheck(m_pChar->GetTopPoint()); // Drop the item at player foot
 }
 
 void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gridIndex )
