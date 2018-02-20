@@ -73,9 +73,10 @@ function (toolchain_exe_stuff)
 
 	#-- Set common define macros.
 
-	SET (COMMON_DEFS "_64BITS;_LINUX;Z_PREFIX;_POSIX_SOURCE;_GITVERSION;_MTNETWORK;_EXCEPTIONS_DEBUG")
+	SET (COMMON_DEFS "_64BITS;_LINUX;_LIBEV;Z_PREFIX;_POSIX_SOURCE;_GITVERSION;_MTNETWORK;_EXCEPTIONS_DEBUG")
 		# _64BITS: 64 bits architecture.
 		# _LINUX: linux OS.
+		# _LIBEV: use libev
 		# Z_PREFIX: Use the "z_" prefix for the zlib functions
 		# _POSIX_SOURCE: needed for libev compilation in some linux distributions (doesn't seem to affect compilation on distributions that don't need it)
 		# _MTNETWORK: multi-threaded networking support.

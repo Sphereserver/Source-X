@@ -12,7 +12,7 @@
 #include "receive.h"
 #include "send.h"
 
-#if !defined(_WIN32) || defined(_LIBEV)
+#ifdef _LIBEV
 	extern LinuxEv g_NetworkEvent;
 #endif
 
@@ -155,7 +155,7 @@ void NetState::clear(void)
 			
 		}
 
-#if !defined(_WIN32) || defined(_LIBEV)
+#ifdef _LIBEV
 		if (m_socket.IsOpen() && g_Cfg.m_fUseAsyncNetwork != 0)
 			g_NetworkEvent.unregisterClient(this);
 #endif
@@ -275,7 +275,7 @@ void NetState::init(SOCKET socket, CSocketAddress addr)
 	CClient* client = new CClient(this);
 	m_client = client;
 
-#if !defined(_WIN32) || defined(_LIBEV)
+#ifdef _LIBEV
 	if (g_Cfg.m_fUseAsyncNetwork != 0)
 	{
 		DEBUGNETWORK(("%x:Registering async client\n", id()));

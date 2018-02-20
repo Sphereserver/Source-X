@@ -20,12 +20,12 @@
 #include "clients/CAccount.h"
 #include "clients/CClient.h"
 #include "items/CItemShip.h"
-#include "CServer.h"
 #include "../common/CLog.h"
 #include "CServerTime.h"
 #include "spheresvr.h"
 #include "triggers.h"
 #include "CScriptProfiler.h"
+#include "CServer.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -1654,7 +1654,7 @@ bool CServer::SocketsInit( CSocket & socket )
 	}
 	socket.Listen();
 
-#if !defined(_WIN32) || defined(_LIBEV)
+#ifdef _LIBEV
 #ifdef LIBEV_REGISTERMAIN
 	if ( g_Cfg.m_fUseAsyncNetwork != 0 )
 		g_NetworkEvent.registerMainsocket();
@@ -1704,7 +1704,7 @@ bool CServer::SocketsInit() // Initialize sockets
 void CServer::SocketsClose()
 {
 	ADDTOCALLSTACK("CServer::SocketsClose");
-#if !defined(_WIN32) || defined(_LIBEV)
+#ifdef _LIBEV
 #ifdef LIBEV_REGISTERMAIN
 	if ( g_Cfg.m_fUseAsyncNetwork != 0 )
 		g_NetworkEvent.unregisterMainsocket();

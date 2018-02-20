@@ -1,5 +1,5 @@
 
-#if !defined(_WIN32) || defined(_LIBEV)
+#ifdef _LIBEV
 	#include "../sphere/linuxev.h"
 	#include "../sphere/UnixTerminal.h"
 	
@@ -420,7 +420,7 @@ void Sphere_ExitServer()
 	g_Main.waitForClose();
 	g_PingServer.waitForClose();
 	g_asyncHdb.waitForClose();
-#if !defined(_WIN32) || defined(_LIBEV)
+#ifdef _LIBEV
 	if ( g_Cfg.m_fUseAsyncNetwork != 0 )
 		g_NetworkEvent.waitForClose();
 #endif
@@ -853,7 +853,7 @@ int _cdecl main( int argc, char * argv[] )
 		if ( IsSetEF( EF_UsePingServer ) )
 			g_PingServer.start();
 
-#if !defined(_WIN32) || defined(_LIBEV)
+#ifdef _LIBEV
 		if ( g_Cfg.m_fUseAsyncNetwork != 0 )
 			g_NetworkEvent.start();
 #endif

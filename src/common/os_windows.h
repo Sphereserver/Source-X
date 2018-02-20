@@ -8,23 +8,30 @@
 #define _INC_OS_WINDOWS_H
 
 //#define SLASH_PATH	"\\"
-#define _WIN32_DCOM
 #ifndef _WIN32_WINNT
-	#define _WIN32_WINNT 0x0501
+	#define _WIN32_WINNT 0x0501	// By default we target Windows XP
 #endif
 
 #undef FD_SETSIZE
 #define FD_SETSIZE 1024		// for max of n users ! default = 64	(FD: file descriptor)
 
-#ifndef NOMINMAX
-	#define NOMINMAX			// we don't want to have windows min and max macros, we have our minimum and maximum
-#endif
-#ifndef WIN32_LEAN_AND_MEAN
-	#define WIN32_LEAN_AND_MEAN	// include just windows.h without the other winapi headers, we'll add them manually when needed
-#endif
-#include <winsock2.h>		// this needs to be included BEFORE windows.h, since windows.h by default includes winsock.h version 1.1 (if the macro above is not set).
+// disable useless windows.h features
+#define WIN32_LEAN_AND_MEAN	// include just windows.h without the other winapi headers, we'll add them manually when needed
+#define NOMINMAX			// we don't want to have windows min and max macros, we have our minimum and maximum
+#define NOATOM
+#define NOCRYPT
+#define NOMCX
+#define NOMETAFILE
+#define NOKANJI
+#define NOKERNEL
+#define NOOPENFILE
+#define NORASTEROPS
+#define NOSOUND
+#define NOSYSMETRICS
+#define NOTEXTMETRIC
+#define NOWH
+	
 #include <windows.h>
-#include <process.h>
 
 
 /*  cross-platform functions macros  */

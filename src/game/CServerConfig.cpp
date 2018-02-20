@@ -1,5 +1,6 @@
-﻿#include "../common/CException.h"
-#include "../common/sphere_library/CSFileList.h"
+﻿#include "../common/sphere_library/CSFileList.h"
+#include "../common/CSocket.h"
+#include "../common/CException.h"
 #include "../common/CUOInstall.h"
 #include "../common/sphereversion.h"
 #include "../network/network.h"

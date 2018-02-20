@@ -1,6 +1,5 @@
 #include <cstring>
 #include "CSocket.h"
-#include "common.h"
 
 //		***		***			***
 //

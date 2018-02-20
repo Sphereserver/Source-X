@@ -8,8 +8,11 @@
 #define _INC_SPHEREPROTO_H
 
 #include "sphere_library/CSString.h"
-#include "common.h"
 #include "../sphere/threads.h"
+#include "common.h"
+#ifdef _WIN32
+	#include <winsock2.h>	// this needs to be included after common.h, which sets some defines and then includes windows.h, since winsock2.h needs windows.h
+#endif
 
 
 //---------------------------PROTOCOL DEFS---------------------------

@@ -7,10 +7,10 @@
 #ifndef _INC_CLOG_H
 #define _INC_CLOG_H
 
-#include "../common/sphere_library/CSFile.h"
-#include "../common/sphere_library/CSTime.h"
-#include "../common/sphere_library/mutex.h"
-#include "../common/common.h"
+#include "sphere_library/CSFile.h"
+#include "sphere_library/CSTime.h"
+#include "sphere_library/mutex.h"
+#include "common.h"
 #include "../sphere/UnixTerminal.h"
 
 

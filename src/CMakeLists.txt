@@ -98,11 +98,6 @@ ELSE (SINGLE_TARGET)
 ENDIF (SINGLE_TARGET)
 
 
-# Get the Git revision number
-INCLUDE ("cmake/CMakeGitStatus.cmake")
-# Generate config.h file for LibEV
-INCLUDE ("${CMAKE_CURRENT_SOURCE_DIR}/common/libev/cmake/configure.cmake")
-CONFIGURE_FILE ( "${CMAKE_CURRENT_SOURCE_DIR}/common/libev/cmake/config.h.cmake" "${CMAKE_CURRENT_SOURCE_DIR}/common/libev/config.h" )
 # Include the list of our source files
 INCLUDE ("cmake/CMakeSources.cmake")
 
@@ -110,6 +105,7 @@ INCLUDE ("cmake/CMakeSources.cmake")
 IF (SINGLE_TARGET)
 
 	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(R|r?)elease"))
+		SET(TARGETS ${TARGETS} spheresvr_release)
 		ADD_EXECUTABLE (spheresvr_release
 					${game_SRCS}
 					${items_SRCS}
@@ -130,28 +126,8 @@ IF (SINGLE_TARGET)
 			)
         SET_TARGET_PROPERTIES(spheresvr_release PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_release)
 	ENDIF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(R|r?)elease"))
-	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(D|d?)ebug"))
-		ADD_EXECUTABLE (spheresvr_debug
-					${game_SRCS}
-					${items_SRCS}
-					${chars_SRCS}
-					${clients_SRCS}
-					${uofiles_SRCS}
-					${common_SRCS}
-					${network_SRCS}
-					${crypto_SRCS}
-					${sphere_SRCS}
-					${crashdump_SRCS}
-					${libev_SRCS}
-					${spherelibrary_SRCS}
-					${sqlite_SRCS}
-					${zlib_SRCS}
-					${tables_SRCS}
-		#			${docs_TEXT}
-			)
-        SET_TARGET_PROPERTIES(spheresvr_debug PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_debug)
-	ENDIF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(D|d?)ebug"))
 	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(N|n?)ightly"))
+		SET(TARGETS ${TARGETS} spheresvr_nightly)
 		ADD_EXECUTABLE (spheresvr_nightly
 					${game_SRCS}
 					${items_SRCS}
@@ -172,9 +148,32 @@ IF (SINGLE_TARGET)
 			)
         SET_TARGET_PROPERTIES(spheresvr_nightly PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_nightly)
 	ENDIF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(N|n?)ightly"))
+	IF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(D|d?)ebug"))
+		SET(TARGETS ${TARGETS} spheresvr_debug)
+		ADD_EXECUTABLE (spheresvr_debug
+					${game_SRCS}
+					${items_SRCS}
+					${chars_SRCS}
+					${clients_SRCS}
+					${uofiles_SRCS}
+					${common_SRCS}
+					${network_SRCS}
+					${crypto_SRCS}
+					${sphere_SRCS}
+					${crashdump_SRCS}
+					${libev_SRCS}
+					${spherelibrary_SRCS}
+					${sqlite_SRCS}
+					${zlib_SRCS}
+					${tables_SRCS}
+		#			${docs_TEXT}
+			)
+        SET_TARGET_PROPERTIES(spheresvr_debug PROPERTIES OUTPUT_NAME SphereSvrX${ARCH_BITS}_debug)
+	ENDIF (("${CMAKE_BUILD_TYPE}" STREQUAL "") OR (${CMAKE_BUILD_TYPE} MATCHES "(D|d?)ebug"))
 
 ELSE (SINGLE_TARGET)
 
+	SET(TARGETS ${TARGETS} spheresvr)
     ADD_EXECUTABLE (spheresvr
             ${game_SRCS}
             ${items_SRCS}
@@ -199,4 +198,24 @@ ELSE (SINGLE_TARGET)
 
 ENDIF (SINGLE_TARGET)
 
+
 toolchain_exe_stuff()   # stuff to be executed after ADD_EXECUTABLE
+
+
+# Get the Git revision number
+INCLUDE ("cmake/CMakeGitStatus.cmake")
+
+# Generate config.h file for libev (if we are using it)
+SET(USE_EV 0)
+FOREACH (TARG ${TARGETS})
+	GET_TARGET_PROPERTY(DEFS ${TARG} COMPILE_DEFINITIONS)
+	FOREACH (DEF ${DEFS})
+		IF ("${DEF}" STREQUAL "_LIBEV")
+			SET(USE_EV 1)
+		ENDIF ("${DEF}" STREQUAL "_LIBEV")
+	ENDFOREACH (DEF ${DEFS})
+ENDFOREACH (TARG ${TARGETS})
+IF (USE_EV)
+	INCLUDE ("${CMAKE_CURRENT_SOURCE_DIR}/common/libev/cmake/configure.cmake")
+	CONFIGURE_FILE ( "${CMAKE_CURRENT_SOURCE_DIR}/common/libev/cmake/config.h.cmake" "${CMAKE_CURRENT_SOURCE_DIR}/common/libev/config.h" )
+ENDIF (USE_EV)

@@ -8,9 +8,8 @@
 #define _INC_CSOCKET_H
 
 #include "common.h"
-
 #ifdef _WIN32
-	//#include <winsock2.h>
+	#include <winsock2.h>		// this needs to be included after common.h, which sets some defines and then includes windows.h, since winsock2.h needs windows.h
 	typedef int socklen_t;
 #else	
 	// else assume LINUX

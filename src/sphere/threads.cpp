@@ -10,6 +10,7 @@
 #include "threads.h"
 
 #if defined(_WIN32)
+	#include <process.h>
 	#include <objbase.h>
 #elif !defined(_BSD)
 	#include <sys/prctl.h>

@@ -1,10 +1,10 @@
-#if !defined(_WIN32) || defined(_LIBEV)
+#ifdef _LIBEV
 
 #include "../network/network.h"
 #include "../game/CServer.h"
 #include "linuxev.h"
 
-// LibEv is used by Linux to notify when our main socket is readable or writable, so when i can read and send data again (async I/O).
+// libev is used by Linux to notify when our main socket is readable or writable, so when i can read and send data again (async I/O).
 // Windows supports async network I/O via WinSock.
 
 LinuxEv g_NetworkEvent;
