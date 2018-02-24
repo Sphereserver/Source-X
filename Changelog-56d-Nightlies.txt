@@ -403,3 +403,6 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 
 18-02-2018, Nolok
 - Fixed: when an overloaded player drags an equippable item on himself, it returned to its previous location on the ground instead of at the player's feet.
+
+24-02-2018, Drk84
+- Fixed:  Unhandled [TYPEDEF 40] error when creating a "chair" item, this was caused by the removal of typedef t_chair in the scripts pack.

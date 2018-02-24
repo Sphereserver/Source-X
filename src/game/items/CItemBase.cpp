@@ -75,10 +75,7 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 
 	// Do some special processing for certain items.
 
-	if ( IsType(IT_CHAIR))
-		SetHeight( 0 ); // have no effective height if they don't block.
-	else
-		SetHeight( GetItemHeightFlags( tiledata, m_Can ));
+	SetHeight( GetItemHeightFlags( tiledata, m_Can ));
 
 	GetItemSpecificFlags( tiledata, m_Can, m_type, id );
 
@@ -796,8 +793,6 @@ IT_TYPE CItemBase::GetTypeBase( ITEMID_TYPE id, const CUOItemTypeRec_HS &tiledat
 
 	if ( IsID_WaterWash( id ) )
 		return IT_WATER_WASH;
-	else if ( IsID_Chair( id ) )
-		return IT_CHAIR;
 	else if ( IsID_Track( id ) )
 		return IT_FIGURINE;
 	else if ( IsID_GamePiece( id ) )
