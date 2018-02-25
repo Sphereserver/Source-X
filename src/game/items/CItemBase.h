@@ -60,7 +60,7 @@ enum IT_TYPE		// double click type action.
 	IT_FIGURINE,			// 37 = magic figure that turns into a creature when activated.
 	IT_SHRINE,				// 38 = can res you
 	IT_MOONGATE,			// 39 = linked to other moon gates (hard coded locations)
-	IT_CHAIR,				// 40 = Any sort of a chair item. we can sit on.
+	IT_UNUSED_40,			// 40 =This was typedef t_chair (Any sort of a chair item. we can sit on.)
 	IT_FORGE,				// 41 = used to smelt ore, blacksmithy etc.
 	IT_ORE,					// 42 = smelt to ingots.
 	IT_LOG,					// 43 = make into furniture etc. lumber,logs,
