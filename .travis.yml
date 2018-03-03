@@ -1,0 +1,69 @@
+language: cpp
+compiler: gcc
+dist: trusty
+sudo: required
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-7
+      - gcc-7-multilib
+      - g++-7
+      - g++-7-multilib
+branches:
+  only:
+    - master
+git:
+  depth: false
+notifications:
+  email: false
+
+env:
+  CMAKE_GEN="Unix Makefiles"
+  CMAKE_TCH_32="../src/cmake/toolchains/Linux-GNU-32.cmake"
+  CMAKE_TCH_64="../src/cmake/toolchains/Linux-GNU-64.cmake"
+  BUILD_DIR_32="build-32"
+  BUILD_DIR_64="build-64"
+
+script:
+  - mkdir "$BUILD_DIR_32" "$BUILD_DIR_64"
+
+  - echo "** Setting up MySQL development packages for 64 bits"
+  - sudo apt install -qq --no-install-recommends libmysql++3 libmysqlclient-dev
+  - export CC="gcc-7"
+  - export CXX="g++-7"
+
+  - cd "$BUILD_DIR_64"
+  - echo "** Starting to build 64 bits Nightly"
+  - cmake -G "$CMAKE_GEN" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_64" ../src
+  - make -j4
+  - echo "** Starting to build 64 bits Debug"
+  - cmake -G "$CMAKE_GEN" -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_64" ../src
+  - make -j4
+  - cd ..
+
+  - echo "** Setting up MySQL development packages for 32 bits"
+  - sudo apt-mark hold oracle-java8-installer oracle-java9-installer
+  - sudo apt remove -qq libmysql++3 libmysqlclient-dev
+  - sudo apt install -qq --no-install-recommends libmysql++3:i386 libmysqlclient-dev:i386
+  - export CC="gcc-7"
+  - export CXX="g++-7"
+
+  - cd "$BUILD_DIR_32"
+  - echo "** Starting to build 32 bits Nightly"
+  - cmake -G "$CMAKE_GEN" -DCMAKE_BUILD_TYPE="Nightly" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_32" ../src
+  - make -j4
+  - echo "** Starting to build 32 bits Debug"
+  - cmake -G "$CMAKE_GEN" -DCMAKE_BUILD_TYPE="Debug" -DCMAKE_TOOLCHAIN_FILE="$CMAKE_TCH_32" ../src
+  - make -j4
+  - cd ..
+
+after_success:
+  - echo "** Compilation done. Packing the files and uploading to FTP"
+  - mkdir accounts logs save scripts
+  - tar -czvf SphereSvr-Linux64-nightly.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_64}/SphereSvrX64_nightly" -C src/ sphere.ini sphereCrypt.ini
+  - tar -czvf SphereSvr-Linux64-debug.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_64}/SphereSvrX64_debug" -C src/ sphere.ini sphereCrypt.ini
+  - tar -czvf SphereSvr-Linux32-nightly.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_32}/SphereSvrX32_nightly" -C src/ sphere.ini sphereCrypt.ini
+  - tar -czvf SphereSvr-Linux32-debug.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_32}/SphereSvrX32_debug" -C src/ sphere.ini sphereCrypt.ini
+  #- curl -T "{SphereSvr-Linux64-nightly.tar.gz,SphereSvr-Linux64-debug.tar.gz,SphereSvr-Linux32-nightly.tar.gz,SphereSvr-Linux32-debug.tar.gz}" -u $FTP_USER:$FTP_PASSWORD $FTP_SERVER
