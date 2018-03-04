@@ -2386,11 +2386,11 @@ do_default:
 
 		case CHC_MOUNT:
 			{
-				CChar *pChar = Horse_GetMountChar();
-				if ( pChar == NULL )
-					sVal.FormatVal(0);
+				CItem *pItem = LayerFind(LAYER_HORSE);
+				if ( pItem )
+					sVal.FormatHex(pItem->m_itFigurine.m_UID);
 				else
-					sVal.FormatVal(pChar->GetUID());
+					sVal.FormatVal(0);
 				return true;
 			}
 		case CHC_MOVE:
@@ -3769,10 +3769,10 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 
 		case CHV_MOUNT:
 			{
-				CChar * pChar = dynamic_cast <CChar*> (pSrc);
-				if ( !pChar )
-					return false;
-				pChar->Horse_Mount(this);
+				CUID uid(s.GetArgVal());
+				CChar *pChar = uid.CharFind();
+				if ( pChar )
+					Horse_Mount(pChar);
 			}
 			break;
 

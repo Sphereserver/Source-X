@@ -406,3 +406,6 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 
 24-02-2018, Drk84
 - Fixed:  Unhandled [TYPEDEF 40] error when creating a "chair" item, this was caused by the removal of typedef t_chair in the scripts pack.
+
+03-03-2018, Drk84
+- [Port from Source, 03-03-2018, Coruja] Fixed: MOUNT property/function not working correctly.
