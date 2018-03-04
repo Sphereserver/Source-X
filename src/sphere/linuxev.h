@@ -5,7 +5,6 @@
 
 #ifdef _LIBEV
 
-	#include "../common/libev/wrapper_ev.h"
 	#include "../common/libev/ev.h"
 	#include "../common/sphere_library/mutex.h"
 	#include "threads.h"
