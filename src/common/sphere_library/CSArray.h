@@ -729,7 +729,7 @@ void CSTypedArray<TYPE,ARG_TYPE>::DestructElements(TYPE* pElements, size_t nCoun
 {
 	UNREFERENCED_PARAMETER(pElements);
 	UNREFERENCED_PARAMETER(nCount);
-	//memset(static_cast<void *>(pElements), 0, nCount * sizeof(*pElements));
+	//memset(static_cast<void *>(pElements), 0, nCount * sizeof(TYPE));
 }
 
 template<class TYPE, class ARG_TYPE>
@@ -803,6 +803,10 @@ void CSTypedArray<TYPE, ARG_TYPE>::SetCount( size_t nNewCount )
 
 	if ( nNewCount > m_nCount )
 	{
+#ifndef _MSC_VER
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Walloc-size-larger-than="
+#endif
 		TYPE * pNewData = reinterpret_cast<TYPE *>(new byte[ nNewCount * sizeof( TYPE ) ]);
 		if ( m_nCount )
 		{
@@ -810,6 +814,9 @@ void CSTypedArray<TYPE, ARG_TYPE>::SetCount( size_t nNewCount )
 			memcpy( pNewData, m_pData, sizeof(TYPE)*m_nCount );
 			delete[] reinterpret_cast<byte *>(m_pData);	// don't call any destructors.
 		}
+#ifndef _MSC_VER
+	#pragma GCC diagnostic pop
+#endif
 
 		// Just construct or init the new stuff.
 		ConstructElements( pNewData + m_nCount, nNewCount - m_nCount );
@@ -897,7 +904,14 @@ CSPtrTypeArray<TYPE>::~CSPtrTypeArray() {
 template<class TYPE>
 inline void CSPtrTypeArray<TYPE>::DestructElements( TYPE* pElements, size_t nCount )
 {
-	memset(pElements, 0, nCount * sizeof(*pElements));
+#ifndef _MSC_VER
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wstringop-overflow="
+#endif
+	memset(pElements, 0, nCount * sizeof(TYPE));
+#ifndef _MSC_VER
+	#pragma GCC diagnostic pop
+#endif
 }
 
 template<class TYPE>

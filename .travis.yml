@@ -62,8 +62,8 @@ script:
 after_success:
   - echo "** Compilation done. Packing the files and uploading to FTP"
   - mkdir accounts logs save scripts
-  - tar -czvf SphereSvr-Linux64-nightly.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_64}/SphereSvrX64_nightly" -C src/ sphere.ini sphereCrypt.ini
-  - tar -czvf SphereSvr-Linux64-debug.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_64}/SphereSvrX64_debug" -C src/ sphere.ini sphereCrypt.ini
-  - tar -czvf SphereSvr-Linux32-nightly.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_32}/SphereSvrX32_nightly" -C src/ sphere.ini sphereCrypt.ini
-  - tar -czvf SphereSvr-Linux32-debug.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_32}/SphereSvrX32_debug" -C src/ sphere.ini sphereCrypt.ini
-  #- curl -T "{SphereSvr-Linux64-nightly.tar.gz,SphereSvr-Linux64-debug.tar.gz,SphereSvr-Linux32-nightly.tar.gz,SphereSvr-Linux32-debug.tar.gz}" -u $FTP_USER:$FTP_PASSWORD $FTP_SERVER
+  - tar -czvf SphereSvrX-linux64-nightly.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_64}/bin64/SphereSvrX64_nightly" -C src/ sphere.ini sphereCrypt.ini
+  - tar -czvf SphereSvrX-linux64-debug.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_64}/bin64/SphereSvrX64_debug" -C src/ sphere.ini sphereCrypt.ini
+  - tar -czvf SphereSvrX-linux32-nightly.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_32}/bin/SphereSvrX32_nightly" -C src/ sphere.ini sphereCrypt.ini
+  - tar -czvf SphereSvrX-linux32-debug.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_32}/bin/SphereSvrX32_debug" -C src/ sphere.ini sphereCrypt.ini
+  - curl -ST "{SphereSvrX-linux64-nightly.tar.gz,SphereSvrX-linux64-debug.tar.gz,SphereSvrX-linux32-nightly.tar.gz,SphereSvrX-linux32-debug.tar.gz}" -u $FTP_USER:$FTP_PASSWORD $FTP_SERVER

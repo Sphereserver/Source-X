@@ -13,11 +13,17 @@ skip_tags: true
 
 # Environmental variables
 environment:
-   MSBUILD_FLAGS: /verbosity:minimal /maxcpucount
-   CMAKE_GEN_32: Visual Studio 15 2017
-   CMAKE_GEN_64: Visual Studio 15 2017 Win64
-   BUILD_DIR_32: build-32
-   BUILD_DIR_64: build-64
+  MSBUILD_FLAGS: /verbosity:minimal /maxcpucount
+  CMAKE_GEN_32: Visual Studio 15 2017
+  CMAKE_GEN_64: Visual Studio 15 2017 Win64
+  BUILD_DIR_32: build-32
+  BUILD_DIR_64: build-64
+  FTP_USER:
+    secure: zkxiTiVr5wfmALN6TjuhfQ==
+  FTP_PASSWORD:
+    secure: C21uMb7NoO6R6ILqDeVqrY3W+6Jap5PFqLgUt65BEzU=
+  FTP_SERVER:
+    secure: ypUVoKvq2e+1urlrXABB5r5XsWuxKXWmvlJpQEe4iNw=
 
 # to run your custom scripts instead of automatic MSBuild
 build_script:
@@ -29,7 +35,6 @@ build_script:
   - msbuild SphereServer.sln %MSBUILD_FLAGS% /p:Configuration=Nightly
   - ECHO ** Starting to build 64 bits Debug
   - msbuild SphereServer.sln %MSBUILD_FLAGS% /p:Configuration=Debug
-  #/p:OutputPath="%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_64%"
 
   - cd ..
 
@@ -45,9 +50,8 @@ build_script:
 after_build:
   - ECHO ** Compilation done. Packing the files and uploading to FTP
   - mkdir accounts logs save scripts
-  - 7z a SphereSvrX-Win64-Nightly.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_64%\bin64\Nightly\SphereSvrX64_nightly.exe" "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini"
-  - 7z a SphereSvrX-Win64-Debug.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_64%\bin64\Debug\SphereSvrX64_debug.exe" "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini"
-  - 7z a SphereSvrX-Win32-Nightly.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_32%\bin\Nightly\SphereSvrX32_nightly.exe" "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini"
-  - 7z a SphereSvrX-Win32-Debug.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_32%\bin\Debug\SphereSvrX32_debug.exe" "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini"
-
-#artifact: SphereSvrX-Win32-Nightly.zip SphereSvrX-Win64-Nightly.zip SphereSvrX-Win32-Debug.zip SphereSvrX-Win64-Debug.zip
+  - 7z a SphereSvrX-win64-nightly.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_64%\bin64\Nightly\SphereSvrX64_nightly.exe" "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\dlls\64\*.dll"
+  - 7z a SphereSvrX-win64-debug.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_64%\bin64\Debug\SphereSvrX64_debug.exe" "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\dlls\64\*.dll"
+  - 7z a SphereSvrX-win32-nightly.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_32%\bin\Nightly\SphereSvrX32_nightly.exe" "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\dlls\32\*.dll"
+  - 7z a SphereSvrX-win32-debug.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_32%\bin\Debug\SphereSvrX32_debug.exe" "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\dlls\32\*.dll"
+  - curl -ST "{SphereSvrX-win64-nightly.zip,SphereSvrX-win64-debug.zip,SphereSvrX-win32-nightly.zip,SphereSvrX-win32-debug.zip}" -u %FTP_USER%:%FTP_PASSWORD% %FTP_SERVER%
