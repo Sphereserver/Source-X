@@ -28,26 +28,37 @@ environment:
 # to run your custom scripts instead of automatic MSBuild
 build_script:
   - mkdir %BUILD_DIR_32% %BUILD_DIR_64%
-
-  - ECHO ** Starting to build 64 bits Nightly
   - cd "%BUILD_DIR_64%"
+
+  - ECHO. && ECHO ** Starting to build 64 bits Nightly version && ECHO.
   - cmake -G "%CMAKE_GEN_64%" ..\src
   - msbuild SphereServer.sln %MSBUILD_FLAGS% /p:Configuration=Nightly
-  - ECHO ** Starting to build 64 bits Debug
+  - ECHO. && ECHO ** End of the compilation of the 64 bits Nightly version && ECHO.
+
+  # if we are testing a pull request, building only a version will be sufficient, so stop this script
+  - IF DEFINED APPVEYOR_PULL_REQUEST_NUMBER (appveyor exit)
+
+  - ECHO. && ECHO ** Starting to build 64 bits Debug version && ECHO.
   - msbuild SphereServer.sln %MSBUILD_FLAGS% /p:Configuration=Debug
+  - ECHO. && ECHO ** End of the compilation of the 64 bits Debug version && ECHO.
 
-  - cd ..
+  - cd "..\%BUILD_DIR_32%"
 
-  - ECHO ** Starting to build 32 bits Nightly
-  - cd "%BUILD_DIR_32%"
+  - ECHO. && ECHO ** Starting to build 32 bits Nightly version && ECHO.
   - cmake -G "%CMAKE_GEN_32%" ..\src
   - msbuild SphereServer.sln %MSBUILD_FLAGS% /p:Configuration=Nightly
-  - ECHO ** Starting to build 32 bits Debug
+  - ECHO. && ECHO ** End of the compilation of the 32 bits Nightly version && ECHO.
+
+  - ECHO. && ECHO ** Starting to build 32 bits Debug version && ECHO.
   - msbuild SphereServer.sln %MSBUILD_FLAGS% /p:Configuration=Debug
+  - ECHO. && ECHO ** End of the compilation of the 32 bits Debug version && ECHO.
 
   - cd ..
 
 after_build:
+  # if we are testing a pull request, we don't want to upload the build to the host
+  - IF DEFINED APPVEYOR_PULL_REQUEST_NUMBER (appveyor exit)
+
   - ECHO ** Compilation done. Packing the files and uploading to FTP
   - mkdir accounts logs save scripts
   - 7z a SphereSvrX-win64-nightly.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_64%\bin64\Nightly\SphereSvrX64_nightly.exe" "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\dlls\64\*.dll"

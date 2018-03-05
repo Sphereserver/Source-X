@@ -1,5 +1,9 @@
 # SphereServer-eXperimental
 Game server for Ultima Online.
+<br>
+[![Windows Build status](https://ci.appveyor.com/api/projects/status/ab152o83mipjojin/branch/master?svg=true)](https://ci.appveyor.com/project/cbnolok/source2/branch/master)
+[![Linux Build Status](https://travis-ci.org/Sphereserver/Source-experimental.svg?branch=master)](https://travis-ci.org/Sphereserver/Source-experimental)
+<br><a href="https://forum.spherecommunity.net/sshare.php?srt=4">Get the automated builds here!</a>
 
 
 ## Join SphereServer Discord channel!
@@ -8,7 +12,8 @@ https://discord.gg/ZrMTXrs
 
 ## Why a fork?
 
-This is an experimental fork of SphereServer. Since so many (and sometimes radical) changes were done, it was impossible to work on the main repo.<br>
+This is an experimental branch of SphereServer. Since we are doing so many (and sometimes radical) changes, it is impossible to work on the main branch.<br>
+This branch will preserve scripts compatibility with the main one.<br>
 Most notable changes (right now) are:
 * Bug fixes and heavy changing of some internal behaviours, with the aim to achieve truly better <b>speed</b> and <b>stability</b>;
 * Support for 64 bits architecture and TDM-GCC compiler for Windows;
