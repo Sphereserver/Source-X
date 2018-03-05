@@ -409,3 +409,6 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 
 03-03-2018, Drk84
 - [Port from Source, 03-03-2018, Coruja] Fixed: MOUNT property/function not working correctly.
+
+05-03-2018, Drk84
+- [Port from Source, 30-06-2016, Coruja] Fixed: WOP flood when casting spells using extremely short delays.
