@@ -271,7 +271,6 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false )
 	m_attackRange = pCharDef->m_attackRange;
 	m_defenseBase = pCharDef->m_defenseBase;
 	m_defenseRange = pCharDef->m_defenseRange;
-	m_Can = pCharDef->m_Can;
 	m_wBloodHue = pCharDef->m_wBloodHue;	// when damaged , what color is the blood (-1) = no blood
 
 	SetName( pCharDef->GetTypeName());	// set the name in case there is a name template.
@@ -524,36 +523,35 @@ int CChar::IsWeird() const
 }
 
 // Get the Z we should be at
-char CChar::GetFixZ( CPointMap pt, uint wBlockFlags)
+char CChar::GetFixZ( CPointMap pt, dword dwBlockFlags)
 {
-	if ( !wBlockFlags )
-		wBlockFlags = GetMoveBlockFlags();
+	if ( !dwBlockFlags )
+		dwBlockFlags = GetMoveBlockFlags();
 	dword dwCan = GetMoveBlockFlags();
 	if ( dwCan & CAN_C_WALK )
-		wBlockFlags |= CAN_I_CLIMB; // If we can walk than we can climb. Ignore CAN_C_FLY at all here
+		dwBlockFlags |= CAN_I_CLIMB; // If we can walk than we can climb. Ignore CAN_C_FLY at all here
 
-	CServerMapBlockState block( wBlockFlags, pt.m_z, pt.m_z + m_zClimbHeight + GetHeightMount( false ), pt.m_z + m_zClimbHeight + 2, GetHeightMount( false ) );
+	CServerMapBlockState block( dwBlockFlags, pt.m_z, pt.m_z + m_zClimbHeight + GetHeightMount( false ), pt.m_z + m_zClimbHeight + 2, GetHeightMount( false ) );
 	g_World.GetFixPoint( pt, block );
 
-	wBlockFlags = block.m_Bottom.m_dwBlockFlags;
+	dwBlockFlags = block.m_Bottom.m_dwBlockFlags;
 	if ( block.m_Top.m_dwBlockFlags )
 	{
-		wBlockFlags |= CAN_I_ROOF;	// we are covered by something.
+		dwBlockFlags |= CAN_I_ROOF;	// we are covered by something.
 		if ( block.m_Top.m_z < pt.m_z + (m_zClimbHeight + (block.m_Top.m_dwTile > TERRAIN_QTY ? GetHeightMount( false ) : GetHeightMount( false )/2 )) )
-			wBlockFlags |= CAN_I_BLOCK; // we can't fit under this!
+			dwBlockFlags |= CAN_I_BLOCK; // we can't fit under this!
 	}
-	if (( dwCan != 0xFFFF ) && ( wBlockFlags != 0x0 ))
+	if (( dwCan != 0xFFFFFFFF ) && ( dwBlockFlags != 0x0 ))
 	{
+		if ( ( dwBlockFlags & CAN_I_DOOR ) && Can( CAN_C_GHOST ))
+			dwBlockFlags &= ~CAN_I_BLOCK;
 
-		if ( ( wBlockFlags & CAN_I_DOOR ) && Can( CAN_C_GHOST ))
-			wBlockFlags &= ~CAN_I_BLOCK;
-
-		if ( ( wBlockFlags & CAN_I_WATER ) && Can( CAN_C_SWIM ))
-			wBlockFlags &= ~CAN_I_BLOCK;
+		if ( ( dwBlockFlags & CAN_I_WATER ) && Can( CAN_C_SWIM ))
+			dwBlockFlags &= ~CAN_I_BLOCK;
 
 		if ( ! Can( CAN_C_FLY ))
 		{
-			if ( ! ( wBlockFlags & CAN_I_CLIMB ) ) // we can climb anywhere
+			if ( ! ( dwBlockFlags & CAN_I_CLIMB ) ) // we can climb anywhere
 			{
 				if ( block.m_Bottom.m_dwTile > TERRAIN_QTY )
 				{
@@ -564,7 +562,7 @@ char CChar::GetFixZ( CPointMap pt, uint wBlockFlags)
 					return pt.m_z;
 			}
 		}
-		if (( wBlockFlags & CAN_I_BLOCK ) && ( ! Can( CAN_C_PASSWALLS )) )
+		if (( dwBlockFlags & CAN_I_BLOCK ) && ( ! Can( CAN_C_PASSWALLS )) )
 			return pt.m_z;
 
 		if ( block.m_Bottom.m_z >= UO_SIZE_Z )
@@ -640,16 +638,6 @@ void CChar::SetSight(byte newSight)
 	m_iVisualRange = minimum(newSight, UO_MAP_VIEW_SIZE_MAX);
 	if ( IsClient() )
 		GetClient()->addVisualRange(m_iVisualRange);
-}
-
-bool CChar::Can( dword wCan ) const
-{
-	return (( m_Can & wCan ) ? true : false );
-}
-
-bool CChar::Can( int wCan ) const
-{
-	return ( ( m_Can & static_cast< dword >( wCan ) ) ? true : false );
 }
 
 // Clean up weird flags.
@@ -895,7 +883,7 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 	SetHue(pChar->GetHue());
 	m_prev_id = pChar->m_prev_id;
 	SetID( pChar->GetID() );
-	m_Can = pChar->m_Can;
+	m_CanMask = pChar->m_CanMask;
 	m_wBloodHue = pChar->m_wBloodHue;
 	//m_totalweight = 0;
 
@@ -1264,11 +1252,11 @@ void CChar::SetID( CREID_TYPE id )
 	if ( !IsMountCapable() )	// new body may not be capable of riding mounts
 		Horse_UnMount();
 
-	if ( !pCharDef->Can(CAN_C_EQUIP) )	// new body may not be capable of equipping items (except maybe on hands)
+	if ( !Can(CAN_C_EQUIP) )	// new body may not be capable of equipping items (except maybe on hands)
 	{
-		UnEquipAllItems(NULL, pCharDef->Can(CAN_C_USEHANDS));
+		UnEquipAllItems(NULL, Can(CAN_C_USEHANDS));
 	}
-	else if ( !pCharDef->Can(CAN_C_USEHANDS) )
+	else if ( !Can(CAN_C_USEHANDS) )
 	{
 		CItem *pHand = LayerFind(LAYER_HAND1);
 		if ( pHand )
@@ -4309,6 +4297,5 @@ int CChar::GetSkillTotal(int what, bool how)
 
 int CChar::GetAbilityFlags() const
 {
-	CCharBase * pCharBase = Char_GetDef();
-	return pCharBase->m_Can;
+	return GetCanFlags();
 }

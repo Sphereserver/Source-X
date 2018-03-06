@@ -2372,7 +2372,7 @@ static lpctstr const sm_Txt_LoomUse[] =
 			if ( ! m_pChar->CanUse( pItemTarg, false ))
 				return false;
 			if ( ! IsPriv( PRIV_GM ) &&
-				! pItemTarg->Item_GetDef()->Can( CAN_I_DYE ) &&
+				! pItemTarg->Can( CAN_I_DYE ) &&
 				! pItemTarg->IsType(IT_CLOTHING) )
 			{
 				SysMessageDefault( DEFMSG_ITEMUSE_DYE_FAIL );

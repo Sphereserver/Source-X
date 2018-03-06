@@ -624,28 +624,27 @@ public:
 	bool IsMovable() const;
 	int GetVisualRange() const;
 
-	bool  IsStackableException() const;
-	bool  IsStackable( const CItem * pItem ) const;
+	bool IsStackableException() const;
+	bool IsStackable( const CItem * pItem ) const;
 	bool IsStackableType() const
 	{
 		return Can(CAN_I_PILE);
 	}
 
-	bool Can(word wCan) const
-	{
-		return ((m_Can & wCan) ? true : false);
-	}
 	virtual bool  IsSameType( const CObjBase * pObj ) const;
 	bool Stack( CItem * pItem );
 	word ConsumeAmount( word iQty = 1, bool fTest = false );
 
 	CREID_TYPE GetCorpseType() const;
 	void  SetCorpseType( CREID_TYPE id );
-	virtual void SetAmount( word amount );						// virtual for override in CItemSpawn
+	virtual void SetAmount( word amount );					// virtual for override in CItemSpawn
 	word GetMaxAmount();
 	bool SetMaxAmount( word amount );
 	void SetAmountUpdate( word amount );
-	virtual word GetAmount() const { return( m_amount ); }		// virtual for override in CItemSpawn
+	virtual word GetAmount() const							// virtual for override in CItemSpawn
+	{
+		return m_amount;
+	}
 
 	lpctstr GetName() const;	// allowed to be default name.
 	lpctstr GetNameFull( bool fIdentified ) const;

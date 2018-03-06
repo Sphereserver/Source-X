@@ -2046,7 +2046,7 @@ bool CClient::Event_DoubleClick( CUID uid, bool fMacro, bool fTestTouch, bool fS
 		return false;
 
 	CObjBase * pObj = uid.ObjFind();
-	if ( !pObj || (fTestTouch && !m_pChar->CanSee(pObj) && !(pObj->m_Can & CAN_I_FORCEDC)) )
+	if ( !pObj || (fTestTouch && !m_pChar->CanSee(pObj) && !(pObj->Can( CAN_I_FORCEDC )) ) )
 	{
 		addObjectRemoveCantSee(uid, "the target");
 		return false;

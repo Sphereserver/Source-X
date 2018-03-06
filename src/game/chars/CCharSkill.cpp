@@ -2221,7 +2221,7 @@ int CChar::Skill_Hiding( SKTRIG_TYPE stage )
 		{
 			if ( !CItemBase::IsVisibleLayer( pItem->GetEquipLayer()))
 				continue;
-			if ( pItem->Item_GetDef()->Can( CAN_I_LIGHT ))
+			if ( pItem->Can( CAN_I_LIGHT ))
 			{
 				SysMessageDefault( DEFMSG_HIDING_TOOLIT );
 				return -SKTRIG_QTY;

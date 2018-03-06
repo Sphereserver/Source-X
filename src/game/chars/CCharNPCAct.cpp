@@ -481,7 +481,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 		{
 			bool bClearedWay = false;
 			// Some object in my way that i could move ? Try to move it.
-			if ( !pCharDef->Can(CAN_C_USEHANDS) || IsStatFlag(STATF_DEAD|STATF_Sleeping|STATF_Freeze|STATF_Stone) ) ;		// i cannot use hands or i am frozen, so cannot move objects
+			if ( !Can(CAN_C_USEHANDS) || IsStatFlag(STATF_DEAD|STATF_Sleeping|STATF_Freeze|STATF_Stone) ) ;		// i cannot use hands or i am frozen, so cannot move objects
 			else if (( NPC_GetAiFlags()&NPC_AI_MOVEOBSTACLES ) && ( iInt > iRand ))
 			{
 				int			i;
@@ -498,7 +498,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 						CItem *pItem = AreaItems.GetItem();
 						if ( !pItem )	break;
 						else if ( abs(pItem->GetTopZ() - pMe.m_z) > 3 )		continue;		// item is too high
-						else if ( !pItem->Item_GetDef()->Can(CAN_I_BLOCK) ) continue;	// this item not blocking me
+						else if ( !pItem->Can(CAN_I_BLOCK) )				continue;		// this item not blocking me
 						else if ( !CanMove(pItem) || !CanCarry(pItem) )		bClearedWay = false;
 						else
 						{
@@ -548,7 +548,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 	// ??? Make sure we are not facing a wall.
 	ASSERT(Dir > DIR_INVALID && Dir < DIR_QTY);
 	m_dirFace = Dir;	// Face this direction.
-	if ( fRun && ( ! pCharDef->Can(CAN_C_RUN|CAN_C_FLY) || Stat_GetVal(STAT_DEX) <= 1 ))
+	if ( fRun && ( ! Can(CAN_C_RUN|CAN_C_FLY) || Stat_GetVal(STAT_DEX) <= 1 ))
 		fRun = false;
 
 	EXC_SET("StatFlag");
@@ -862,7 +862,6 @@ bool CChar::NPC_LookAtItem( CItem * pItem, int iDist )
 {
 	ADDTOCALLSTACK("CChar::NPC_LookAtItem");
 
-	// Checking if I can use hands (Can flags can be now changed in a single character, they are inheriting CCharBase::m_can automatically on CChar's constructor, no need to check CCharBase anymore).
 	if ( !Can(CAN_C_USEHANDS) || !CanSee(pItem) )
 		return false;
 
@@ -1052,8 +1051,7 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 	int iRangeBlur = UO_MAP_VIEW_SIGHT;
 
 	// If I can't move don't look too far.
-	CCharBase *pCharDef = Char_GetDef();
-	if ( !pCharDef->Can(CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY|CAN_C_HOVER|CAN_C_RUN) || IsStatFlag(STATF_Freeze|STATF_Stone) )
+	if ( !Can(CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY|CAN_C_HOVER|CAN_C_RUN) || IsStatFlag(STATF_Freeze|STATF_Stone) )
 	{
 		if ( !NPC_FightMayCast() )	// And i have no distance attack.
 			iRange = iRangeBlur = 2;

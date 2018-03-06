@@ -74,11 +74,11 @@ CObjBase::CObjBase( bool fItem )
 	m_timeout.Init();
 	m_timestamp.Init();
 
-	//	Init some global variables
-	m_fStatusUpdate = 0;
+	m_CanMask = 0;
 	m_ModAr = 0;
 	m_ModMaxWeight = 0;
 	m_uidSpawnItem = UID_UNUSED;
+	m_fStatusUpdate = 0;
 	m_PropertyList = NULL;
 	m_PropertyHash = 0;
 	m_PropertyRevision = 0;
@@ -965,7 +965,10 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			sVal.FormatVal( RangeL() );
 			break;
 		case OC_CAN:
-			sVal.FormatHex( m_Can );
+			sVal.FormatHex( GetCanFlags() );
+			break;
+		case OC_CANMASK:
+			sVal.FormatHex( m_CanMask );
 			break;
 		case OC_MODMAXWEIGHT:
 			sVal.FormatVal(m_ModMaxWeight);
@@ -1816,7 +1819,9 @@ bool CObjBase::r_LoadVal( CScript & s )
 			break;
 
 		case OC_CAN:
-			m_Can = s.GetArgVal();
+			return false;
+		case OC_CANMASK:
+			m_CanMask = s.GetArgVal();
 			break;
 		case OC_MODMAXWEIGHT:
 			m_ModMaxWeight = s.GetArgVal();
@@ -3028,11 +3033,6 @@ void CObjBase::DupeCopy( const CObjBase * pObj )
 	// m_timeout = pObj->m_timeout;
 	m_TagDefs.Copy( &( pObj->m_TagDefs ) );
 	m_BaseDefs.Copy(&(pObj->m_BaseDefs));
-}
-
-CBaseBaseDef * CObjBase::Base_GetDef() const
-{
-	return( static_cast <CBaseBaseDef *>( m_BaseRef.GetRef() ));
 }
 
 void CObjBase::Delete(bool bforce)

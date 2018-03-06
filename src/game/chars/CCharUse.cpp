@@ -1781,9 +1781,8 @@ bool CChar::ItemEquipArmor( bool fForce )
 	ADDTOCALLSTACK("CChar::ItemEquipArmor");
 	// Equip ourselves as best as possible.
 
-	CCharBase *pCharDef = Char_GetDef();
 	CItemContainer *pPack = GetPack();
-	if ( !pPack || !pCharDef || !pCharDef->Can(CAN_C_EQUIP) )
+	if ( !pPack || !Can(CAN_C_EQUIP) )
 		return false;
 
 	int iBestScore[LAYER_HORSE];
@@ -1837,10 +1836,9 @@ bool CChar::ItemEquipWeapon( bool fForce )
 	if ( !fForce && m_uidWeapon.IsValidUID() )	// we already have a weapon equipped
 		return true;
 
-	CCharBase *pCharDef = Char_GetDef();
 	CItemContainer *pPack = GetPack();
 
-	if ( !pPack || !pCharDef || !pCharDef->Can(CAN_C_USEHANDS) )
+	if ( !pPack || !Can(CAN_C_USEHANDS) )
 		return false;
 
 	// Loop through all my weapons and come up with a score for it's usefulness

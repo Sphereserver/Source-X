@@ -17,7 +17,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 	if ( !pItem )
 		return false;
 
-	if ( pItem->m_Can & CAN_I_FORCEDC )
+	if ( pItem->Can( CAN_I_FORCEDC ) )
 		fTestTouch = false;
 
 	const CObjBaseTemplate *pObjTop = pItem->GetTopLevelObj();

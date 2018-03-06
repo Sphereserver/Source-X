@@ -409,3 +409,17 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 
 03-03-2018, Drk84
 - [Port from Source, 03-03-2018, Coruja] Fixed: MOUNT property/function not working correctly.
+
+07-03-2018, Nolok
+- Fixed: light sources didn't change their light type according to their MOREZ.
+	Remember: a light source needs the CAN_I_LIGHT CAN flag and the LightSource Tiledata flag.
+- Fixed: characters always had the CAN flag MT_EQUIP, even when it wasn't set in the script.
+- Fixed: a lot of buggy internal CAN checks.
+- Added: CANMASK item and char property. This property is a bitmask, like the CAN property, and stores the CAN flags to be dynamically switched on or off from the base CAN property.
+    When retrieving the CAN property, now it is first XORed with CANMASK (the return value will be CAN ^ CANMASK), so in other words:
+        If a flag set in the CANMASK is also set in CAN, the flag is ignored;
+        If a flag set in the CANMASK isn't set in CAN, the flag is considered as set.
+- Changed: the CAN property now is READ-ONLY and can be set only in the ITEMDEF/CHARDEF blocks.
+    This change ensures that the CAN property of an object will always be synchronized with the current ITEMDEF/CHARDEF.
+    Retrieving the CAN value (<CAN>) will return the ITEMDEF/CHARDEF CAN modified with the CANMASK.
+    To retrieve the base CAN value, use <SERV.ITEMDEF(defname).CAN> or <SERV.CHARDEF(defname).CAN>.

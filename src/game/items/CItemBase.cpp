@@ -80,7 +80,7 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 	GetItemSpecificFlags( tiledata, m_Can, m_type, id );
 
 	if ( (tiledata.m_weight == 0xFF) ||			// not movable.
-		( tiledata.m_flags & UFLAG1_WATER ) )	// water can't be picked up.
+		( m_dwFlags & UFLAG1_WATER ) )	// water can't be picked up.
 	{
 		m_weight = UINT16_MAX;
 	}
@@ -89,7 +89,7 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 		m_weight = tiledata.m_weight * WEIGHT_UNITS;
 	}
 
-	if ( tiledata.m_flags & ( UFLAG1_EQUIP | UFLAG3_EQUIP2 ))
+	if ( m_dwFlags & ( UFLAG1_EQUIP | UFLAG3_EQUIP2 ))
 	{
 		m_layer = tiledata.m_layer;
 		if ( m_layer && ! IsMovableType())
@@ -1577,7 +1577,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 			break;
 
 		case IBC_SPEED:
-			m_speed = (uchar)s.GetArgVal();
+			m_speed = s.GetArgUCVal();
 			break;
 
 		case IBC_SKILL:		// Skill to use.

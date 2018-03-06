@@ -2579,7 +2579,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 	Announce(true);		// announce you to the world
 
 	// Don't login on the water, bring us to nearest shore (unless I can swim)
-	if ( !IsPriv(PRIV_GM) && !m_pChar->Char_GetDef()->Can(CAN_C_SWIM) && m_pChar->IsSwimming() )
+	if ( !IsPriv(PRIV_GM) && !m_pChar->Can(CAN_C_SWIM) && m_pChar->IsSwimming() )
 	{
 		int iDist = 1;
 		int i;

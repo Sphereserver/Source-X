@@ -369,7 +369,7 @@ LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg
 		case LAYER_HAND1:
 		case LAYER_HAND2:
 		{
-			if ( !pItemDef->IsTypeEquippable() || !pCharDef->Can(CAN_C_USEHANDS) )
+			if ( !pItemDef->IsTypeEquippable() || !Can(CAN_C_USEHANDS) )
 			{
 				fCantEquip = true;
 				break;
@@ -400,16 +400,7 @@ LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg
 			break;
 
 		default:
-			if ( CItemBase::IsVisibleLayer(layer) )
-			{
-				if ( !pCharDef->Can(CAN_C_EQUIP) )
-				{
-					if ( m_pNPC )		// auto-patch NPC adding CAN equip flags
-						pCharDef->m_Can |= CAN_C_EQUIP;
-					else
-						fCantEquip = true;
-				}
-			}
+			fCantEquip = true;
 			break;
 	}
 
@@ -492,9 +483,9 @@ bool CChar::IsSwimming() const
 		return false;
 
 	// Is there a solid surface under us?
-	dword wBlockFlags = GetMoveBlockFlags();
-	char iSurfaceZ = g_World.GetHeightPoint2(ptTop, wBlockFlags, true);
-	if ( (iSurfaceZ == pt.m_z) && (wBlockFlags & CAN_I_WATER) )
+	dword dwBlockFlags = GetMoveBlockFlags();
+	char iSurfaceZ = g_World.GetHeightPoint2(ptTop, dwBlockFlags, true);
+	if ( (iSurfaceZ == pt.m_z) && (dwBlockFlags & CAN_I_WATER) )
 		return true;
 
 	return false;
@@ -685,12 +676,11 @@ byte CChar::GetDirFlag(bool fSquelchForwardStep) const
 dword CChar::GetMoveBlockFlags(bool bIgnoreGM) const
 {
 	// What things block us ?
-	if ( IsPriv(PRIV_GM|PRIV_ALLMOVE) && !bIgnoreGM)	// nothing blocks us.
-		return( 0xFFFF );
+	if ( IsPriv(PRIV_GM|PRIV_ALLMOVE) && !bIgnoreGM )	// nothing blocks us.
+		return 0xFFFFFFFF;
 
-	dword dwCan = m_Can;
-	CCharBase * pCharDef = Char_GetDef();
-	if ((pCharDef) && (pCharDef->Can(CAN_C_GHOST)))
+	dword dwCan = GetCanFlags();
+	if ( Can(CAN_C_GHOST) )
 		dwCan |= CAN_C_GHOST;
 
 	if ( IsStatFlag(STATF_Hovering) )
@@ -702,7 +692,7 @@ dword CChar::GetMoveBlockFlags(bool bIgnoreGM) const
 	else
 		dwCan |= CAN_C_INDOORS;
 
-	return( dwCan & CAN_C_MOVEMASK );
+	return ( dwCan & CAN_C_MOVEMASK );
 }
 
 byte CChar::GetLightLevel() const
@@ -1469,7 +1459,8 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 					}
 					else
 					{
-						if ( (flags & LOS_FISHING) && (ptSrc.GetDist(ptNow) >= 2) && (pItemDef->GetType() != IT_WATER) && (pItemDef->Can(CAN_I_DOOR | CAN_I_PLATFORM | CAN_I_BLOCK | CAN_I_CLIMB | CAN_I_FIRE | CAN_I_ROOF) || (pItemDef->m_Can & CAN_I_BLOCKLOS)) )
+						if ( (flags & LOS_FISHING) && (ptSrc.GetDist(ptNow) >= 2) && (pItemDef->GetType() != IT_WATER) &&
+							( pItemDef->Can(CAN_I_DOOR | CAN_I_PLATFORM | CAN_I_BLOCK | CAN_I_CLIMB | CAN_I_FIRE | CAN_I_ROOF) || (pItemDef->m_Can & CAN_I_BLOCKLOS) ) )
 						{
 							WARNLOS(("pStatic blocked - flags & 0800, distance >= 2 and type of pItemDef is not IT_WATER\n"));
 							bPath = false;
@@ -1559,7 +1550,8 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 					}
 					else
 					{
-						if ( (flags & LOS_FISHING) && (ptSrc.GetDist(ptNow) >= 2) && (pItemDef->GetType() != IT_WATER) && (pItemDef->Can(CAN_I_DOOR | CAN_I_PLATFORM | CAN_I_BLOCK | CAN_I_CLIMB | CAN_I_FIRE | CAN_I_ROOF) || (pItemDef->m_Can & CAN_I_BLOCKLOS)) )
+						if ( (flags & LOS_FISHING) && (ptSrc.GetDist(ptNow) >= 2) && (pItemDef->GetType() != IT_WATER) &&
+							( pItemDef->Can(CAN_I_DOOR | CAN_I_PLATFORM | CAN_I_BLOCK | CAN_I_CLIMB | CAN_I_FIRE | CAN_I_ROOF) || (pItemDef->m_Can & CAN_I_BLOCKLOS) ) )
 						{
 							WARNLOS(("pItem blocked - flags & 0800, distance >= 2 and type of pItemDef is not IT_WATER\n"));
 							bPath = false;
@@ -1663,7 +1655,8 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 							}
 							else
 							{
-								if ( (flags & LOS_FISHING) && (ptSrc.GetDist(ptNow) >= 2) && (pItemDef->GetType() != IT_WATER) && (pItemDef->Can(CAN_I_DOOR | CAN_I_PLATFORM | CAN_I_BLOCK | CAN_I_CLIMB | CAN_I_FIRE | CAN_I_ROOF) || (pItemDef->m_Can & CAN_I_BLOCKLOS)) )
+								if ( (flags & LOS_FISHING) && (ptSrc.GetDist(ptNow) >= 2) && (pItemDef->GetType() != IT_WATER) &&
+									( pItemDef->Can(CAN_I_DOOR | CAN_I_PLATFORM | CAN_I_BLOCK | CAN_I_CLIMB | CAN_I_FIRE | CAN_I_ROOF) || (pItemDef->m_Can & CAN_I_BLOCKLOS) ) )
 								{
 									WARNLOS(("pMultiItem blocked - flags & 0800, distance >= 2 and type of pItemDef is not IT_WATER\n"));
 									bPath = false;
@@ -2256,11 +2249,11 @@ bool CChar::IsVerticalSpace( CPointMap ptDest, bool fForceMount )
 	if ( IsPriv(PRIV_GM | PRIV_ALLMOVE) || !ptDest.IsValidPoint() )
 		return true;
 
-	word wBlockFlags = (word)(GetMoveBlockFlags());
-	if ( wBlockFlags & CAN_C_WALK )
-		wBlockFlags |= CAN_I_CLIMB;
+	dword dwBlockFlags = GetMoveBlockFlags();
+	if ( dwBlockFlags & CAN_C_WALK )
+		dwBlockFlags |= CAN_I_CLIMB;
 
-	CServerMapBlockState block(wBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 2, GetHeightMount());
+	CServerMapBlockState block(dwBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 2, GetHeightMount());
 	g_World.GetHeightPoint(ptDest, block, true);
 
 	if ( GetHeightMount() + ptDest.m_z + (fForceMount ? 4 : 0) >= block.m_Top.m_z )		// 4 is the mount height
@@ -2306,24 +2299,24 @@ CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, word *pwBlockFlags, DIR_
 		return NULL;
 	}
 
-	word wCan = (word)(GetMoveBlockFlags());
+	dword dwCan = GetMoveBlockFlags();
 	if (g_Cfg.m_wDebugFlags & DEBUGF_WALK)
-		g_pLog->EventWarn("GetMoveBlockFlags() (0x%x)\n", wCan);
-	if ( !(wCan & (CAN_C_SWIM| CAN_C_WALK|CAN_C_FLY|CAN_C_RUN|CAN_C_HOVER)) )
+		g_pLog->EventWarn("GetMoveBlockFlags() (0x%x)\n", dwCan);
+	if ( !(dwCan & (CAN_C_SWIM| CAN_C_WALK|CAN_C_FLY|CAN_C_RUN|CAN_C_HOVER)) )
 		return NULL;	// cannot move at all, so WTF?
 
-	word wBlockFlags = wCan;
-	if ( wCan & CAN_C_WALK )
+	dword dwBlockFlags = dwCan;
+	if ( dwCan & CAN_C_WALK )
 	{
-		wBlockFlags |= CAN_I_CLIMB;		// if we can walk than we can climb. Ignore CAN_C_FLY at all here
+		dwBlockFlags |= CAN_I_CLIMB;		// if we can walk than we can climb. Ignore CAN_C_FLY at all here
 		if (g_Cfg.m_wDebugFlags & DEBUGF_WALK)
-			g_pLog->EventWarn("wBlockFlags (0%x) wCan(0%x)\n", wBlockFlags, wCan);
+			g_pLog->EventWarn("wBlockFlags (0%x) wCan(0%x)\n", dwBlockFlags, dwCan);
 	}
 
-	CServerMapBlockState block(wBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 3, GetHeightMount());
+	CServerMapBlockState block(dwBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 3, GetHeightMount());
 	if (g_Cfg.m_wDebugFlags & DEBUGF_WALK)
 		g_pLog->EventWarn("\t\tCServerMapBlockState block( 0%x, %d, %d, %d );ptDest.m_z(%d) m_zClimbHeight(%d)\n",
-					wBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 2, ptDest.m_z, m_zClimbHeight);
+					dwBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 2, ptDest.m_z, m_zClimbHeight);
 
 	if ( !ptDest.IsValidPoint() )
 	{
@@ -2334,49 +2327,47 @@ CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, word *pwBlockFlags, DIR_
 	g_World.GetHeightPoint(ptDest, block, true);
 
 	// Pass along my results.
-	wBlockFlags = (word)(block.m_Bottom.m_dwBlockFlags);
+	dwBlockFlags = block.m_Bottom.m_dwBlockFlags;
 
 	if ( block.m_Top.m_dwBlockFlags )
 	{
-		wBlockFlags |= CAN_I_ROOF;	// we are covered by something.
+		dwBlockFlags |= CAN_I_ROOF;	// we are covered by something.
 		if (g_Cfg.m_wDebugFlags & DEBUGF_WALK)
 			g_pLog->EventWarn("block.m_Top.m_z (%d) > ptDest.m_z (%d) + m_zClimbHeight (%d) + (block.m_Top.m_dwTile (0x%x) > TERRAIN_QTY ? PLAYER_HEIGHT : PLAYER_HEIGHT/2 )(%d)\n",
 				block.m_Top.m_z, ptDest.m_z, m_zClimbHeight, block.m_Top.m_dwTile, ptDest.m_z - (m_zClimbHeight + (block.m_Top.m_dwTile > TERRAIN_QTY ? PLAYER_HEIGHT : PLAYER_HEIGHT / 2)));
 		if ( block.m_Top.m_z < block.m_Bottom.m_z + (m_zClimbHeight + (block.m_Top.m_dwTile > TERRAIN_QTY ? GetHeightMount() : GetHeightMount() / 2)) )
-			wBlockFlags |= CAN_I_BLOCK;		// we can't fit under this!
+			dwBlockFlags |= CAN_I_BLOCK;		// we can't fit under this!
 	}
 
-	if ( (wCan != 0xFFFF) && (wBlockFlags != 0x0) )
+	if ( (dwCan != 0xFFFFFFFF) && (dwBlockFlags != 0x0) )
 	{
 		if (g_Cfg.m_wDebugFlags & DEBUGF_WALK)
 			g_pLog->EventWarn("BOTTOMitemID (0%x) TOPitemID (0%x)\n", (block.m_Bottom.m_dwTile - TERRAIN_QTY), (block.m_Top.m_dwTile - TERRAIN_QTY));
-		CCharBase *pCharDef = Char_GetDef();
-		ASSERT(pCharDef);
 
-		if ( (wBlockFlags & CAN_I_DOOR) && !pCharDef->Can(CAN_C_GHOST) )
-			wBlockFlags |= CAN_I_BLOCK;
-		else if ( (wBlockFlags & CAN_I_ROOF) && !pCharDef->Can(CAN_C_INDOORS) )
-			wBlockFlags |= CAN_I_BLOCK;
-		else if ( (wBlockFlags & CAN_I_WATER) && !pCharDef->Can(CAN_C_SWIM) )
-			wBlockFlags |= CAN_I_BLOCK;
-		else if ( (wBlockFlags & CAN_I_HOVER) && !pCharDef->Can(CAN_C_HOVER) && !IsStatFlag(STATF_Hovering) )
-			wBlockFlags |= CAN_I_BLOCK;
+		if ( (dwBlockFlags & CAN_I_DOOR) && !Can(CAN_C_GHOST) )
+			dwBlockFlags |= CAN_I_BLOCK;
+		else if ( (dwBlockFlags & CAN_I_ROOF) && !Can(CAN_C_INDOORS) )
+			dwBlockFlags |= CAN_I_BLOCK;
+		else if ( (dwBlockFlags & CAN_I_WATER) && !Can(CAN_C_SWIM) )
+			dwBlockFlags |= CAN_I_BLOCK;
+		else if ( (dwBlockFlags & CAN_I_HOVER) && !Can(CAN_C_HOVER) && !IsStatFlag(STATF_Hovering) )
+			dwBlockFlags |= CAN_I_BLOCK;
 
 		// If anything blocks us it should not be overridden by this.
-		if ( (wBlockFlags & CAN_I_DOOR) && pCharDef->Can(CAN_C_GHOST) )
-			wBlockFlags &= ~CAN_I_BLOCK;
-		else if ( (wBlockFlags & CAN_I_ROOF) && pCharDef->Can(CAN_C_INDOORS) )
-			wBlockFlags &= ~CAN_I_BLOCK;
-		else if ( (wBlockFlags & CAN_I_WATER) && pCharDef->Can(CAN_C_SWIM) )
-			wBlockFlags &= ~CAN_I_BLOCK;
-		else if ( (wBlockFlags & CAN_I_PLATFORM) && pCharDef->Can(CAN_C_WALK) )
-			wBlockFlags &= ~CAN_I_BLOCK;
-		else if ( (wBlockFlags & CAN_I_HOVER) && (pCharDef->Can(CAN_C_HOVER) || IsStatFlag(STATF_Hovering)) )
-			wBlockFlags &= ~CAN_I_BLOCK;
+		if ( (dwBlockFlags & CAN_I_DOOR) && Can(CAN_C_GHOST) )
+			dwBlockFlags &= ~CAN_I_BLOCK;
+		else if ( (dwBlockFlags & CAN_I_ROOF) && Can(CAN_C_INDOORS) )
+			dwBlockFlags &= ~CAN_I_BLOCK;
+		else if ( (dwBlockFlags & CAN_I_WATER) && Can(CAN_C_SWIM) )
+			dwBlockFlags &= ~CAN_I_BLOCK;
+		else if ( (dwBlockFlags & CAN_I_PLATFORM) && Can(CAN_C_WALK) )
+			dwBlockFlags &= ~CAN_I_BLOCK;
+		else if ( (dwBlockFlags & CAN_I_HOVER) && (Can(CAN_C_HOVER) || IsStatFlag(STATF_Hovering)) )
+			dwBlockFlags &= ~CAN_I_BLOCK;
 
-		if ( !pCharDef->Can(CAN_C_FLY) )
+		if ( !Can(CAN_C_FLY) )
 		{
-			if ( !(wBlockFlags & CAN_I_CLIMB) ) // we can climb anywhere
+			if ( !(dwBlockFlags & CAN_I_CLIMB) ) // we can climb anywhere
 			{
 				if (g_Cfg.m_wDebugFlags & DEBUGF_WALK)
 					g_pLog->EventWarn("block.m_Lowest.m_z %d  block.m_Bottom.m_z %d  block.m_Top.m_z %d\n", block.m_Lowest.m_z, block.m_Bottom.m_z, block.m_Top.m_z);
@@ -2392,10 +2383,10 @@ CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, word *pwBlockFlags, DIR_
 
 		// CAN_I_CLIMB is not releveant for moving as you would need CAN_C_FLY to negate it. All others seem to match
 		// and the above uncommented checks are redundant (even dont make sense(?))
-		//word wMoveBlock = (wBlockFlags & CAN_I_MOVEMASK) &~ (CAN_I_CLIMB);
-		//word wMoveBlock = (wBlockFlags & CAN_I_MOVEMASK) &~ (CAN_I_CLIMB|CAN_I_ROOF);
-		//if ( wMoveBlock &~ wCan )
-		if ( (wBlockFlags & CAN_I_BLOCK) && (!pCharDef->Can(CAN_C_PASSWALLS)) )
+		//dword dwMoveBlock = (dwBlockFlags & CAN_I_MOVEMASK) &~ (CAN_I_CLIMB);
+		//dword dwMoveBlock = (dwBlockFlags & CAN_I_MOVEMASK) &~ (CAN_I_CLIMB|CAN_I_ROOF);
+		//if ( dwMoveBlock &~ dwCan )
+		if ( (dwBlockFlags & CAN_I_BLOCK) && (Can(CAN_C_PASSWALLS) ) )
 			return NULL;
 		if ( block.m_Bottom.m_z >= UO_SIZE_Z )
 			return NULL;
@@ -2410,8 +2401,8 @@ CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, word *pwBlockFlags, DIR_
 	}
 
 	if ( pwBlockFlags )
-		*pwBlockFlags = wBlockFlags;
-	if ( (wBlockFlags & CAN_I_CLIMB) && pClimbHeight )
+		*pwBlockFlags = dwBlockFlags;
+	if ( (dwBlockFlags & CAN_I_CLIMB) && pClimbHeight )
 		*pClimbHeight = block.m_zClimbHeight;
 
 	ptDest.m_z = block.m_Bottom.m_z;

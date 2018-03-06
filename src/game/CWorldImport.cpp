@@ -471,8 +471,8 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			}
 			else if ( s.IsKey("DYEABLE" ))
 			{
-				//if ( ATOI(pArg))
-				//	pItem->m_pDef->m_Can |= CAN_I_DYE;
+				if ( ATOI(pArg))
+					pItem->m_CanMask |= CAN_I_DYE;
 				continue;
 			}
 			else if ( s.IsKey("ATT" ))

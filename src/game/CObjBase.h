@@ -44,7 +44,7 @@ public:
 
 	CVarDefMap m_TagDefs;		// attach extra tags here.
 	CVarDefMap m_BaseDefs;		// New Variable storage system
-	dword	m_Can;              // CAN_FLAGS
+	dword	m_CanMask;			// Mask to be XORed to Can: enable or disable some Can Flags
 
 	word	m_attackBase;       // dam for weapons
 	word	m_attackRange;      // variable range of attack damage.
@@ -56,6 +56,37 @@ public:
 
 	CResourceRefArray m_OEvents;
 	static size_t sm_iCount;    // how many total objects in the world ?
+
+	/**
+	* @fn  CBaseBaseDef * CObjBase::Base_GetDef() const;
+	*
+	* @brief   Base get definition.
+	*
+	* @return  null if it fails, else a pointer to a CBaseBaseDef.
+	*/
+	CBaseBaseDef * Base_GetDef() const
+	{
+		return ( static_cast <CBaseBaseDef *>( m_BaseRef.GetRef() ));
+	}
+
+	dword GetCanFlagsBase() const
+	{
+		return Base_GetDef()->m_Can;
+	}
+
+	dword GetCanFlags() const
+	{
+		// m_CanMask is XORed to m_Can:
+		//  If a flag in m_CanMask is enabled in m_Can, it is ignored in this Can check
+		//  If a flag in m_CanMask isn't enabled in m_Can, it is considered as enabled in this Can check
+		// So m_CanMask is useful to dynamically switch on/off some of the read-only CAN flags in the ITEMDEF/CHARDEF.
+		return (GetCanFlagsBase() ^ m_CanMask);
+	}	
+
+	bool Can(dword dwCan) const
+	{
+		return ( (GetCanFlags() & dwCan) ? true : false );
+	}
 
 	/**
 	* @fn  inline bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult, bool bFull);
@@ -377,15 +408,6 @@ public:
      */
 
 	virtual word GetBaseID() const = 0;
-
-    /**
-     * @fn  CBaseBaseDef * CObjBase::Base_GetDef() const;
-     *
-     * @brief   Base get definition.
-     *
-     * @return  null if it fails, else a pointer to a CBaseBaseDef.
-     */
-	CBaseBaseDef * Base_GetDef() const;
 
     /**
      * @fn  void CObjBase::SetUID( dword dwVal, bool fItem );

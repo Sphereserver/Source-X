@@ -238,7 +238,7 @@ public:
      *
      * @return  true if it succeeds, false if it fails.
      */
-	bool Can( word wCan ) const;
+	bool Can( dword wCan ) const;
 
     /**
      * @fn  virtual void UnLink();

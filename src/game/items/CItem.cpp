@@ -1789,7 +1789,6 @@ bool CItem::SetBase( CItemBase * pItemDef )
 	}
 
 	m_type = pItemDef->GetType();	// might change the type.
-	m_Can = pItemDef->m_Can;
 	return true;
 }
 
@@ -2353,9 +2352,6 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		case IC_BASEWEIGHT:
 			sVal.FormatVal(m_weight);
 			break;
-		case IC_CAN:
-			sVal.FormatLLHex( m_Can ) ;
-			break;
 		case IC_ATTR:
 			sVal.FormatLLHex( m_Attr );
 			break;
@@ -2807,9 +2803,6 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			break;
 		case IC_BASEWEIGHT:
 			m_weight = (word)s.GetArgVal();
-			return true;
-		case IC_CAN:
-			m_Can = s.GetArgVal();
 			return true;
 		case IC_CANUSE:
 			m_CanUse = s.GetArgVal();
@@ -3621,7 +3614,7 @@ void CItem::DupeCopy( const CItem * pItem )
 	m_type = pItem->m_type;
 	m_amount = pItem->m_amount;
 	m_Attr  = pItem->m_Attr;
-	m_Can = pItem->m_Can;
+	m_CanMask = pItem->m_CanMask;
 	m_CanUse = pItem->m_CanUse;
 	m_uidLink = pItem->m_uidLink;
 
@@ -4015,7 +4008,7 @@ void CItem::Flip()
 	// Equivelant rotational objects.
 	// These objects are all the same except they are rotated.
 
-	if ( IsTypeLit())	// m_pDef->Can( CAN_I_LIGHT ) ?
+	if ( Can(CAN_I_LIGHT) )		// with the standard WoldItem packet (0x1A) the item can be flippable OR a light source, not both
 	{
 		if ( ++m_itLight.m_pattern >= LIGHT_QTY )
 			m_itLight.m_pattern = 0;
@@ -5598,6 +5591,5 @@ bool CItem::OnTick()
 
 int CItem::GetAbilityFlags() const
 {
-	CItemBase * pItemBase = Item_GetDef();
-	return pItemBase->m_Can;
+	return GetCanFlags();
 }

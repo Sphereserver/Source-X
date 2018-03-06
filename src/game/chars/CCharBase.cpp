@@ -166,9 +166,6 @@ bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 				sVal = pszTmp;
 			}
 			break;
-		case CBC_CAN:
-			sVal.FormatHex( m_Can);
-			break;
 		case CBC_BLOODCOLOR:
 			sVal.FormatHex( m_wBloodHue );
 			break;
@@ -289,14 +286,11 @@ bool CCharBase::r_LoadVal( CScript & s )
 		case CBC_AVERSIONS:
 			m_Aversions.Load( s.GetArgStr() );
 			break;
-		case CBC_CAN:
-			m_Can = s.GetArgVal();
-			break;
 		case CBC_BLOODCOLOR:
 			m_wBloodHue = static_cast<HUE_TYPE>(s.GetArgVal());
 			break;
 		case CBC_ARMOR:
-			m_defense = (word)(s.GetArgVal());
+			m_defense = s.GetArgWVal();
 			break;
 		case CBC_COLOR:
 			m_wColor = static_cast<HUE_TYPE>(s.GetArgVal());
@@ -305,7 +299,7 @@ bool CCharBase::r_LoadVal( CScript & s )
 			m_Desires.Load( s.GetArgStr() );
 			break;
 		case CBC_DEX:
-			m_Dex = (short)(s.GetArgVal());
+			m_Dex = s.GetArgSVal();
 			break;
 		case CBC_DISPID:
 			return false;
@@ -318,23 +312,21 @@ bool CCharBase::r_LoadVal( CScript & s )
 		case CBC_ICON:
 			{
 				ITEMID_TYPE id = static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
-				if ( id < 0 || id >= ITEMID_MULTI )
-				{
+				if ( (id < 0) || (id >= ITEMID_MULTI) )
 					return false;
-				}
 				m_trackID = id;
 			}
 			break;
 		case CBC_ID:
 			return SetDispID(static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType( RES_CHARDEF, s.GetArgStr())));
 		case CBC_INT:
-			m_Int = (short)(s.GetArgVal());
+			m_Int = s.GetArgSVal();
 			break;
 		case CBC_MAXFOOD:
-			m_MaxFood = (short)(s.GetArgVal());
+			m_MaxFood = s.GetArgSVal();
 			break;
 		case CBC_MOVERATE:
-			m_iMoveRate = (short)(s.GetArgVal());
+			m_iMoveRate = s.GetArgSVal();
 			break;
 		case CBC_RESDISPDNID:
 			SetResDispDnId((word)(g_Cfg.ResourceGetIndexType(RES_CHARDEF, s.GetArgStr())));
@@ -358,7 +350,7 @@ bool CCharBase::r_LoadVal( CScript & s )
 			m_soundNotice = (SOUND_TYPE)(s.GetArgVal());
 			break;
 		case CBC_STR:
-			m_Str = (short)(s.GetArgVal());
+			m_Str = s.GetArgSVal();
 			break;
 		case CBC_TSPEECH:
 			return( m_Speech.r_LoadVal( s, RES_SPEECH ));

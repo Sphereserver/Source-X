@@ -1941,7 +1941,7 @@ bool CChar::ItemDrop( CItem * pItem, const CPointMap & pt )
 
 	// Does this item have a flipped version?
 	CItemBase * pItemDef = pItem->Item_GetDef();
-	if (( g_Cfg.m_fFlipDroppedItems || pItemDef->Can(CAN_I_FLIP)) && pItem->IsMovableType() && !pItemDef->IsStackableType())
+	if (( g_Cfg.m_fFlipDroppedItems || pItem->Can(CAN_I_FLIP)) && pItem->IsMovableType() && !pItemDef->IsStackableType())
 		pItem->SetDispID( pItemDef->GetNextFlipID( pItem->GetDispID()));
 
 	return( pItem->MoveToCheck( pt, this ));
@@ -2873,7 +2873,7 @@ bool CChar::Death()
 	{
 		if ( m_pNPC->m_bonded )
 		{
-			m_Can |= CAN_C_GHOST;
+			m_CanMask |= CAN_C_GHOST;
 			UpdateMode(NULL, true);
 			return true;
 		}

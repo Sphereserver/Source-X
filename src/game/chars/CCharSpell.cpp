@@ -255,22 +255,16 @@ CChar * CChar::Spell_Summon( CREID_TYPE id, CPointMap pntTarg )
 	{
 		if ( IsSetMagicFlags(MAGICF_SUMMONWALKCHECK) )	// check if the target location is valid
 		{
-			CCharBase *pSummonDef = CCharBase::FindCharBase(id);
-			word wCan = 0xFFFF;
-			if ( pSummonDef != NULL )
-				wCan = pSummonDef->m_Can & CAN_C_MOVEMASK;
+			dword dwCan = pChar->GetCanFlags() & CAN_C_MOVEMASK;
 
-			if ( wCan != 0xFFFF )
+			dword dwBlockFlags = 0;
+			g_World.GetHeightPoint2(pntTarg, dwBlockFlags, true);
+
+			if ( dwBlockFlags & ~dwCan )
 			{
-				dword wBlockFlags = 0;
-				g_World.GetHeightPoint2(pntTarg, wBlockFlags, true);
-
-				if ( wBlockFlags & ~wCan )
-				{
-					SysMessageDefault(DEFMSG_MSG_SUMMON_INVALIDTARG);
-					pChar->Delete();
-					return NULL;
-				}
+				SysMessageDefault(DEFMSG_MSG_SUMMON_INVALIDTARG);
+				pChar->Delete();
+				return NULL;
 			}
 		}
 
@@ -426,7 +420,7 @@ bool CChar::Spell_Resurrection(CItemCorpse * pCorpse, CChar * pCharSrc, bool bNo
 	Stat_SetVal(STAT_STR, maximum(hits, 1));
 
 	if (m_pNPC && m_pNPC->m_bonded)
-		m_Can &= ~CAN_C_GHOST;
+		m_CanMask &= ~CAN_C_GHOST;
 
 	ClientIterator it;
 	for (CClient* pClient = it.next(); pClient != NULL; pClient = it.next())

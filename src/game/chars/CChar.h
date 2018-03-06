@@ -305,7 +305,7 @@ private:
 public:
 	// Status and attributes ------------------------------------
 	int IsWeird() const;
-	char GetFixZ( CPointMap pt, uint wBlockFlags = 0);
+	char GetFixZ( CPointMap pt, dword dwBlockFlags = 0);
 	virtual void Delete(bool bforce = false);
 	virtual bool NotifyDelete();
 	bool IsStatFlag( uint64 iStatFlag ) const;
@@ -321,8 +321,6 @@ public:
 	int GetSight() const;
 	void SetSight(byte newSight);
 
-	bool Can( dword wCan ) const;
-	bool Can( int wCan ) const;
 	bool IsResourceMatch( CResourceIDBase rid, dword dwArg );
 	bool IsResourceMatch( CResourceIDBase rid, dword dwArg, dword dwArgResearch );
 

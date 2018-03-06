@@ -406,7 +406,7 @@ PacketItemWorld::PacketItemWorld(const CClient* target, CItem *item) : PacketSen
 		uid &= 0x7fffffff;
 
 	p.m_x &= 0x7fff;
-	if (dir > 0)
+	if ( (dir > 0) || (light > 0) )	// with this packet the item can be flippable OR a light source, not both
 		p.m_x |= 0x8000;
 	p.m_y &= 0x3fff;
 	if (hue > 0)
@@ -416,13 +416,15 @@ PacketItemWorld::PacketItemWorld(const CClient* target, CItem *item) : PacketSen
 
 	initLength();
 	writeInt32(uid);
-	writeInt16((word)(id));
+	writeInt16((word)id);
 	if (amount > 0)
 		writeInt16(amount);
 	writeInt16(p.m_x);
 	writeInt16(p.m_y);
-	if (dir > 0)
-		writeByte((byte)(dir));
+	if (light > 0)
+		writeByte(light);
+	else if (dir > 0)
+		writeByte((byte)dir);
 	writeByte(p.m_z);
 	if (hue > 0)
 		writeInt16(hue);
@@ -492,7 +494,7 @@ void PacketItemWorld::adjustItemData(const CClient* target, CItem* item, ITEMID_
 		if (character->CanSee(item) == false)
 			flags |= ITEMF_INVIS;
 
-		if (item->Item_GetDef()->Can(CAN_I_LIGHT))
+		if (item->Can(CAN_I_LIGHT))
 		{
 			if (item->IsTypeLit())
 				light = item->m_itLight.m_pattern;
@@ -4834,16 +4836,16 @@ PacketItemWorldNew::PacketItemWorldNew(const CClient* target, CItem *item) : Pac
 	}
 
 	writeInt16(1);
-	writeByte((byte)(source));
+	writeByte((byte)source);
 	writeInt32(uid);
-	writeInt16((word)(id));
-	writeByte((byte)(dir));
+	writeInt16((word)id);
+	writeByte((byte)dir);
 	writeInt16(amount);
 	writeInt16(amount);
 	writeInt16(pt.m_x & 0x7FFF);
 	writeInt16(pt.m_y & 0x3FFF);
 	writeByte(pt.m_z);
-	writeByte(light);
+	writeByte(light);	// if the item hasn't the LightSource flag in the tiledata, sending this will have no effect
 	writeInt16(hue);
 	writeByte(flags);
 
