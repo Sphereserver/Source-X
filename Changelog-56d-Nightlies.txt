@@ -408,7 +408,9 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Fixed:  Unhandled [TYPEDEF 40] error when creating a "chair" item, this was caused by the removal of typedef t_chair in the scripts pack.
 
 03-03-2018, Drk84
-- [Port from Source, 03-03-2018, Coruja] Fixed: MOUNT property/function not working correctly.
+
+05-03-2018, Drk84
+- [Port from Source, 30-06-2016, Coruja] Fixed: WOP flood when casting spells using extremely short delays.
 
 07-03-2018, Nolok
 - Fixed: light sources didn't change their light type according to their MOREZ.

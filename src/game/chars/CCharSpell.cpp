@@ -2975,9 +2975,11 @@ int CChar::Spell_CastStart()
 		WOPColor = Args.m_VarsLocal.GetKeyNum("WOPColor", true);
 		WOPFont = Args.m_VarsLocal.GetKeyNum("WOPFont", true);
 
+		// Correct talk mode for spells WOP is TALKMODE_SPELL, but since sphere doesn't have any delay between spell casts this can allow WOP flood on screen.
+		// So to avoid this problem we must use TALKMODE_SAY, which is not the correct type but with this type the client only show last 3 messages on screen.
 		if ( pSpellDef->m_sRunes[0] == '.' )
 		{
-			Speak((pSpellDef->m_sRunes.GetPtr()) + 1, static_cast<HUE_TYPE>(WOPColor), TALKMODE_SPELL, static_cast<FONT_TYPE>(WOPFont));
+			Speak((pSpellDef->m_sRunes.GetPtr()) + 1, static_cast<HUE_TYPE>(WOPColor), TALKMODE_SAY, static_cast<FONT_TYPE>(WOPFont));
 		}
 		else
 		{
@@ -2995,7 +2997,7 @@ int CChar::Spell_CastStart()
 			if ( len > 0 )
 			{
 				pszTemp[len] = 0;
-				Speak(pszTemp, static_cast<HUE_TYPE>(WOPColor), TALKMODE_SPELL, static_cast<FONT_TYPE>(WOPFont));
+				Speak(pszTemp, static_cast<HUE_TYPE>(WOPColor), TALKMODE_SAY, static_cast<FONT_TYPE>(WOPFont));
 			}
 		}
 	}
