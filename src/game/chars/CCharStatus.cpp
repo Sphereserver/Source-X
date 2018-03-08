@@ -1150,7 +1150,7 @@ blocked:
 	while ( --iDist >= 0 )
 	{
 		DIR_TYPE dir = ptSrc.GetDir(ptDst);
-		dword wBlockFlags;
+		dword dwBlockFlags;
 		if ( dir % 2 && !IsSetEF(EF_NoDiagonalCheckLOS) )	// test only diagonal dirs
 		{
 			CPointMap ptTest = ptSrc;
@@ -1160,22 +1160,22 @@ blocked:
 				dirTest2 = DIR_N;
 
 			ptTest.Move(dirTest1);
-			wBlockFlags = CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY;
-			char z = g_World.GetHeightPoint2(ptTest, wBlockFlags, true);
+			dwBlockFlags = CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY;
+			char z = g_World.GetHeightPoint2(ptTest, dwBlockFlags, true);
 			char zDiff = (char)(abs(z - ptTest.m_z));
 
-			if ( (zDiff > PLAYER_HEIGHT) || (wBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR)) )		// blocked
+			if ( (zDiff > PLAYER_HEIGHT) || (dwBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR)) )		// blocked
 			{
 				ptTest = ptSrc;
 				ptTest.Move(dirTest2);
 				{
-					wBlockFlags = CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY;
-					z = g_World.GetHeightPoint2(ptTest, wBlockFlags, true);
+					dwBlockFlags = CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY;
+					z = g_World.GetHeightPoint2(ptTest, dwBlockFlags, true);
 					zDiff = (char)(abs(z - ptTest.m_z));
 					if ( zDiff > PLAYER_HEIGHT )
 						goto blocked;
 
-					if ( wBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR) )
+					if ( dwBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR) )
 					{
 						ptSrc = ptTest;
 						goto blocked;
@@ -1188,15 +1188,15 @@ blocked:
 		if ( iDist )
 		{
 			ptSrc.Move(dir);	// NOTE: The dir is very coarse and can change slightly.
-			wBlockFlags = CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY;
-			char z = g_World.GetHeightPoint2(ptSrc, wBlockFlags, true);
+			dwBlockFlags = CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY;
+			char z = g_World.GetHeightPoint2(ptSrc, dwBlockFlags, true);
 			char zDiff = (char)(abs(z - ptSrc.m_z));
 
-			if ( (zDiff > PLAYER_HEIGHT) || (wBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR)) || (iDistTry > iMaxDist) )
+			if ( (zDiff > PLAYER_HEIGHT) || (dwBlockFlags & (CAN_I_BLOCK|CAN_I_DOOR)) || (iDistTry > iMaxDist) )
 				goto blocked;
 
 			ptSrc.m_z = z;
-			iDistTry++;
+			++iDistTry;
 		}
 	}
 
@@ -1282,11 +1282,11 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 			{
 				CPointMap ptEnd = path.at(path.size() - 1);
 				if ( ptEnd.m_x != dx || ptEnd.m_y != dy || ptEnd.m_z != dz )
-					path.push_back(CPointMap((word)(dx), (word)(dy), (char)(dz), ptSrc.m_map));
+					path.push_back(CPointMap((word)dx, (word)dy, (char)dz, ptSrc.m_map));
 			}
 			else
 			{
-				path.push_back(CPointMap((word)(dx), (word)(dy), (char)(dz), ptSrc.m_map));
+				path.push_back(CPointMap((word)dx, (word)dy, (char)dz, ptSrc.m_map));
 			}
 			WARNLOS(("PATH X:%d Y:%d Z:%d\n", dx, dy, dz));
 
@@ -1337,7 +1337,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 
 	for (size_t i = 0; i < path.size(); lp_x = ptNow.m_x, lp_y = ptNow.m_y, pItemDef = NULL, pStatic = NULL, pMulti = NULL, pMultiItem = NULL, min_z = 0, max_z = 0, ++i )
 	{
-		ptNow = path.at(i);
+		ptNow = path[i];
 		WARNLOS(("---------------------------------------------\n"));
 		WARNLOS(("Point %d,%d,%d \n", ptNow.m_x, ptNow.m_y, ptNow.m_z));
 
@@ -1357,7 +1357,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 			break;
 		}
 
-		if ( lp_x != ptNow.m_x || lp_y != ptNow.m_y )
+		if ( (lp_x != ptNow.m_x) || (lp_y != ptNow.m_y) )
 		{
 			WARNLOS(("\tLoading new map block.\n"));
 			pBlock = g_World.GetMapBlock(ptNow);
@@ -1441,7 +1441,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 				for ( size_t s = 0; s < pBlock->m_Statics.GetStaticQty(); pStatic = NULL, pItemDef = NULL, ++s )
 				{
 					pStatic = pBlock->m_Statics.GetStatic(s);
-					if ( pStatic->m_x + pBlock->m_x != ptNow.m_x || pStatic->m_y + pBlock->m_y != ptNow.m_y )
+					if ( (pStatic->m_x + pBlock->m_x != ptNow.m_x) || (pStatic->m_y + pBlock->m_y != ptNow.m_y) )
 						continue;
 
 					//Fix for Stacked items blocking view
@@ -1501,7 +1501,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 							WARNLOS(("wTFlags(0%x)\n", wTFlags));
 
 							WARNLOS(("pStatic %0x Z check: %d,%d (Now: %d) (Dest: %d).\n", pStatic->GetDispID(), min_z, max_z, ptNow.m_z, ptDst.m_z));
-							if ( min_z <= ptNow.m_z && max_z >= ptNow.m_z )
+							if ( (min_z <= ptNow.m_z) && (max_z >= ptNow.m_z) )
 							{
 								if ( ptNow.m_x != ptDst.m_x || ptNow.m_y != ptDst.m_y || min_z > ptDst.m_z || max_z < ptDst.m_z )
 								{
@@ -2261,7 +2261,7 @@ bool CChar::IsVerticalSpace( CPointMap ptDest, bool fForceMount )
 	return true;
 }
 
-CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, word *pwBlockFlags, DIR_TYPE dir, height_t *pClimbHeight, bool fPathFinding ) const
+CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DIR_TYPE dir, height_t *pClimbHeight, bool fPathFinding ) const
 {
 	ADDTOCALLSTACK("CChar::CheckValidMove");
 	// Is it ok to move here ? is it blocked ?
@@ -2269,7 +2269,7 @@ CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, word *pwBlockFlags, DIR_
 	// RETURN:
 	//  The new region we may be in.
 	//  Fill in the proper ptDest.m_z value for this location. (if walking)
-	//  pwBlockFlags = what is blocking me. (can be null = don't care)
+	//  pdwBlockFlags = what is blocking me. (can be null = don't care)
 
 	//	test diagonal dirs by two others *only* when already having a normal location
 	if ( GetTopPoint().IsValidPoint() && !fPathFinding && (dir % 2) )
@@ -2282,12 +2282,12 @@ CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, word *pwBlockFlags, DIR_
 
 		ptTest = GetTopPoint();
 		ptTest.Move(dirTest1);
-		if ( !CheckValidMove(ptTest, pwBlockFlags, DIR_QTY, pClimbHeight) )
+		if ( !CheckValidMove(ptTest, pdwBlockFlags, DIR_QTY, pClimbHeight) )
 			return NULL;
 
 		ptTest = GetTopPoint();
 		ptTest.Move(dirTest2);
-		if ( !CheckValidMove(ptTest, pwBlockFlags, DIR_QTY, pClimbHeight) )
+		if ( !CheckValidMove(ptTest, pdwBlockFlags, DIR_QTY, pClimbHeight) )
 			return NULL;
 	}
 
@@ -2310,7 +2310,7 @@ CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, word *pwBlockFlags, DIR_
 	{
 		dwBlockFlags |= CAN_I_CLIMB;		// if we can walk than we can climb. Ignore CAN_C_FLY at all here
 		if (g_Cfg.m_wDebugFlags & DEBUGF_WALK)
-			g_pLog->EventWarn("wBlockFlags (0%x) wCan(0%x)\n", dwBlockFlags, dwCan);
+			g_pLog->EventWarn("dwBlockFlags (0%x) dwCan(0%x)\n", dwBlockFlags, dwCan);
 	}
 
 	CServerMapBlockState block(dwBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 3, GetHeightMount());
@@ -2400,8 +2400,8 @@ CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, word *pwBlockFlags, DIR_
 		return NULL;
 	}
 
-	if ( pwBlockFlags )
-		*pwBlockFlags = dwBlockFlags;
+	if ( pdwBlockFlags )
+		*pdwBlockFlags = dwBlockFlags;
 	if ( (dwBlockFlags & CAN_I_CLIMB) && pClimbHeight )
 		*pClimbHeight = block.m_zClimbHeight;
 

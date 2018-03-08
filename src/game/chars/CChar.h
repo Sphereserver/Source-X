@@ -410,7 +410,7 @@ private:
 	bool TeleportToCli( int iType, int iArgs );
 	bool TeleportToObj( int iType, tchar * pszArgs );
 private:
-	CRegionBase * CheckValidMove( CPointBase & ptDest, word * pwBlockFlags, DIR_TYPE dir, height_t * ClimbHeight, bool fPathFinding = false ) const;
+	CRegionBase * CheckValidMove( CPointBase & ptDest, dword * pdwBlockFlags, DIR_TYPE dir, height_t * ClimbHeight, bool fPathFinding = false ) const;
 	void FixClimbHeight();
 	bool MoveToRegion( CRegionWorld * pNewArea, bool fAllowReject);
 	bool MoveToRoom( CRegionBase * pNewRoom, bool fAllowReject);
@@ -1139,7 +1139,7 @@ public:
 	bool NPC_TrainSkill( CChar * pCharSrc, SKILL_TYPE skill, int toTrain );
     int PayGold(CChar * pCharSrc, int iGold, CItem * pGold, ePayGold iReason);
 private:
-	bool NPC_CheckWalkHere( const CPointBase & pt, const CRegionBase * pArea, word wBlockFlags ) const;
+	bool NPC_CheckWalkHere( const CPointBase & pt, const CRegionBase * pArea, dword dwBlockFlags ) const;
 	void NPC_OnNoticeSnoop( CChar * pCharThief, CChar * pCharMark );
 
 	void NPC_LootMemory( CItem * pItem );

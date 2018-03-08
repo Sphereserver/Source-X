@@ -2360,9 +2360,9 @@ do_default:
 				CPointBase	ptDst	= GetTopPoint();
 				DIR_TYPE	dir = GetDirStr(pszKey);
 				ptDst.Move( dir );
-				word		wBlockFlags	= 0;
+				dword		dwBlockFlags	= 0;
 				CRegionBase	*	pArea;
-				pArea = CheckValidMove( ptDst, &wBlockFlags, dir, NULL );
+				pArea = CheckValidMove( ptDst, &dwBlockFlags, dir, NULL );
 				sVal.FormatHex( pArea ? pArea->GetResourceID() : 0 );
 			}
 			return true;

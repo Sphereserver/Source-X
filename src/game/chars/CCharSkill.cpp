@@ -3630,9 +3630,9 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 			}
 		}
 
-		m_Act_Difficulty =				Skill_Stage(SKTRIG_START) + iDifficultyIncrease;
-		if (m_Act_Difficulty > 1000)	m_Act_Difficulty = 1000;
-		else if (m_Act_Difficulty < 0)	m_Act_Difficulty = 0;
+		m_Act_Difficulty =	Skill_Stage(SKTRIG_START);
+		if (m_Act_Difficulty >= 0)	// If m_Act_Difficulty == -1 then the skill stage has failed, so preserve this result for later.
+			m_Act_Difficulty += iDifficultyIncrease;
 
 		// Execute the @START trigger and pass various craft parameters there
 		CScriptTriggerArgs pArgs;

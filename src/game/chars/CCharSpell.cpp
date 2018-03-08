@@ -2274,7 +2274,7 @@ bool CChar::Spell_TargCheck()
 			SysMessageDefault( DEFMSG_SPELL_TARG_OBJ );
 			return false;
 		}
-		if ( !CanSee(pObj) || !CanSeeLOS(pObj, LOS_NB_WINDOWS) ) //we should be able to cast through a window
+		if ( !CanSeeLOS(pObj, LOS_NB_WINDOWS) ) //we should be able to cast through a window
 		{
 			SysMessageDefault(DEFMSG_SPELL_TARG_LOS);
 			return false;

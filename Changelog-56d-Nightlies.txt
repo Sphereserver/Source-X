@@ -425,3 +425,6 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
     This change ensures that the CAN property of an object will always be synchronized with the current ITEMDEF/CHARDEF.
     Retrieving the CAN value (<CAN>) will return the ITEMDEF/CHARDEF CAN modified with the CANMASK.
     To retrieve the base CAN value, use <SERV.ITEMDEF(defname).CAN> or <SERV.CHARDEF(defname).CAN>.
+
+08-03-2018, Nolok
+- Fixed #28: skills not failing correctly when ACTDIFF was -1. Among the other bugs, this also permitted to spam spells without delay.
