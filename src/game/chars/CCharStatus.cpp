@@ -299,8 +299,6 @@ LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg
 	// NOTE: Do not check to see if i can pick this up or steal this etc.
 	// LAYER_NONE = can't equip this .
 
-	CCharBase *pCharDef = Char_GetDef();
-	ASSERT(pCharDef);
 	ASSERT(pItem);
 
 	if ( pItem->IsType(IT_SPELL) )	// spell memory conflicts are handled by CChar::Spell_Effect_Create()
@@ -400,7 +398,8 @@ LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg
 			break;
 
 		default:
-			fCantEquip = true;
+			if ( CItemBase::IsVisibleLayer(layer) && Can(CAN_C_EQUIP) )
+				fCantEquip = true;
 			break;
 	}
 

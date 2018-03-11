@@ -428,3 +428,6 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 
 08-03-2018, Nolok
 - Fixed #28: skills not failing correctly when ACTDIFF was -1. Among the other bugs, this also permitted to spam spells without delay.
+
+11-03-2018, Nolok
+- Fixed #30: player couldn't move items in the backpack.
