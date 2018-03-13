@@ -752,9 +752,9 @@ bool CChar::Skill_MakeItem_Success()
 		}
 
 		if ( pItemVend )	// check that the item is vendable before setting quality
-			pItemVend->SetQuality((word)(quality));
+			pItemVend->SetQuality((word)quality);
 
-		if ( iSkillLevel > 999 && quality > 175 && !IsSetOF(OF_NoItemNaming) )
+		if ( (iSkillLevel > 999) && (quality > 175) && !IsSetOF(OF_NoItemNaming) )
 		{
 			// A GM made this, and it is of high quality
 			tchar *szNewName = Str_GetTemp();
@@ -849,7 +849,7 @@ bool CChar::Skill_MakeItem( ITEMID_TYPE id, CUID uidTarg, SKTRIG_TYPE stage, boo
 		return false;
 
 	CItem *pItemTarg = uidTarg.ItemFind();
-	if ( pItemTarg && stage == SKTRIG_SELECT )
+	if ( pItemTarg && (stage == SKTRIG_SELECT) )
 	{
 		if ( !pItemDef->m_SkillMake.ContainsResourceMatch(pItemTarg) && !pItemDef->m_BaseResources.ContainsResourceMatch(pItemTarg) )
 			return false;
@@ -864,7 +864,7 @@ bool CChar::Skill_MakeItem( ITEMID_TYPE id, CUID uidTarg, SKTRIG_TYPE stage, boo
 	if ( pItemDragging )
 		ItemBounce(pItemDragging);
 
-	iReplicationQty = ResourceConsume(&(pItemDef->m_BaseResources), iReplicationQty, stage != SKTRIG_SUCCESS, pItemDef->GetResourceID().GetResIndex());
+	iReplicationQty = ResourceConsume(&(pItemDef->m_BaseResources), iReplicationQty, (stage != SKTRIG_SUCCESS), pItemDef->GetResourceID().GetResIndex());
 	if ( !iReplicationQty )
 		return false;
 

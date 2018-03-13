@@ -730,7 +730,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 
 	if (m_ModMaxWeight)
 	{
-		if ( GetTotalWeight() + pItem->GetWeight() > m_ModMaxWeight )
+		if ( (GetTotalWeight() + pItem->GetWeight()) > m_ModMaxWeight )
 		{
 			pCharMsg->SysMessageDefault(DEFMSG_CONT_FULL_WEIGHT);
 			return false;
@@ -739,7 +739,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 
 	if ( !IsItemEquipped() &&	// does not apply to my pack.
 		pItem->IsContainer() &&
-		pItem->Item_GetDef()->GetVolume() >= Item_GetDef()->GetVolume() )
+		(pItem->Item_GetDef()->GetVolume() >= Item_GetDef()->GetVolume()) )
 	{
 		// is the container too small ? can't put barrels in barrels.
 		pCharMsg->SysMessageDefault(DEFMSG_CONT_TOOSMALL);
