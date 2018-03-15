@@ -622,7 +622,7 @@ CRegionWorld * CChar::GetRegion() const
 	return m_pArea; // What region are we in now. (for guarded message)
 }
 
-CRegionBase * CChar::GetRoom() const
+CRegion * CChar::GetRoom() const
 {
 	return m_pRoom; // What room are we in now.
 }
@@ -2361,7 +2361,7 @@ do_default:
 				DIR_TYPE	dir = GetDirStr(pszKey);
 				ptDst.Move( dir );
 				dword		dwBlockFlags	= 0;
-				CRegionBase	*	pArea;
+				CRegion	*	pArea;
 				pArea = CheckValidMove( ptDst, &dwBlockFlags, dir, NULL );
 				sVal.FormatHex( pArea ? pArea->GetResourceID() : 0 );
 			}
@@ -2388,7 +2388,7 @@ do_default:
 
 				CPointBase	ptDst	= GetTopPoint();
 				ptDst.Move( GetDirStr( pszKey ) );
-				CRegionBase * pArea = ptDst.GetRegion( REGION_TYPE_MULTI | REGION_TYPE_AREA );
+				CRegion * pArea = ptDst.GetRegion( REGION_TYPE_MULTI | REGION_TYPE_AREA );
 				if ( !pArea )
 					sVal.FormatHex( UINT32_MAX );
 				else
@@ -3992,7 +3992,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 						sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_WHERE_AREA), m_pArea->GetName(), GetTopPoint().WriteUsed());
 					else
 					{
-						const CRegionBase * pRoom = GetTopPoint().GetRegion( REGION_TYPE_ROOM );
+						const CRegion * pRoom = GetTopPoint().GetRegion( REGION_TYPE_ROOM );
 						if ( ! pRoom )
 							sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_WHERE_AREA), m_pArea->GetName(), GetTopPoint().WriteUsed());
 						else

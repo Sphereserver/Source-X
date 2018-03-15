@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CITEMSPAWN_H
 #define _INC_CITEMSPAWN_H
 

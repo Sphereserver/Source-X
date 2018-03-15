@@ -260,25 +260,25 @@ bool CSectorBase::IsInDungeon() const
 	// What part of the maps are filled with dungeons.
 	// Used for light / weather calcs.
 	CPointMap pt = GetBasePoint();
-	CRegionBase *pRegion = GetRegion(pt, REGION_TYPE_AREA);
+	CRegion *pRegion = GetRegion(pt, REGION_TYPE_AREA);
 
 	return ( pRegion && pRegion->IsFlag(REGION_FLAG_UNDERGROUND) );
 }
 
-CRegionBase * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) const
+CRegion * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) const
 {
 	ADDTOCALLSTACK("CSectorBase::GetRegion");
 	// Does it match the mask of types we care about ?
 	// Assume sorted so that the smallest are first.
 	//
 	// REGION_TYPE_AREA => RES_AREA = World region area only = CRegionWorld
-	// REGION_TYPE_ROOM => RES_ROOM = NPC House areas only = CRegionBase.
+	// REGION_TYPE_ROOM => RES_ROOM = NPC House areas only = CRegion.
 	// REGION_TYPE_MULTI => RES_WORLDITEM = UID linked types in general = CRegionWorld
 
 	size_t iQty = m_RegionLinks.GetCount();
 	for ( size_t i = 0; i < iQty; i++ )
 	{
-		CRegionBase * pRegion = m_RegionLinks[i];
+		CRegion * pRegion = m_RegionLinks[i];
 		ASSERT(pRegion);
 
 		ASSERT( pRegion->GetResourceID().IsValidUID());
@@ -320,7 +320,7 @@ size_t CSectorBase::GetRegions( const CPointBase & pt, dword dwType, CRegionLink
 	size_t iQty = m_RegionLinks.GetCount();
 	for ( size_t i = 0; i < iQty; i++ )
 	{
-		CRegionBase * pRegion = m_RegionLinks[i];
+		CRegion * pRegion = m_RegionLinks[i];
 		ASSERT(pRegion);
 
 		ASSERT( pRegion->GetResourceID().IsValidUID());
@@ -355,7 +355,7 @@ size_t CSectorBase::GetRegions( const CPointBase & pt, dword dwType, CRegionLink
 	return( rlist.GetCount() );
 }
 
-bool CSectorBase::UnLinkRegion( CRegionBase * pRegionOld )
+bool CSectorBase::UnLinkRegion( CRegion * pRegionOld )
 {
 	ADDTOCALLSTACK("CSectorBase::UnLinkRegion");
 	if ( !pRegionOld )
@@ -363,7 +363,7 @@ bool CSectorBase::UnLinkRegion( CRegionBase * pRegionOld )
 	return m_RegionLinks.RemovePtr(pRegionOld);
 }
 
-bool CSectorBase::LinkRegion( CRegionBase * pRegionNew )
+bool CSectorBase::LinkRegion( CRegion * pRegionNew )
 {
 	ADDTOCALLSTACK("CSectorBase::LinkRegion");
 	// link in a region. may have just moved !
@@ -376,7 +376,7 @@ bool CSectorBase::LinkRegion( CRegionBase * pRegionNew )
 
 	for ( size_t i = 0; i < iQty; i++ )
 	{
-		CRegionBase * pRegion = m_RegionLinks[i];
+		CRegion * pRegion = m_RegionLinks[i];
 		ASSERT(pRegion);
 		if ( pRegionNew == pRegion )
 		{

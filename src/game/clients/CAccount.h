@@ -2,15 +2,13 @@
 * @file CAcount.h
 */
 
-#pragma once
 #ifndef _INC_CACCOUNT_H
 #define _INC_CACCOUNT_H
 
-
+#include "../../network/CSocket.h"
 #include "../../common/sphere_library/CSString.h"
 #include "../../common/sphereproto.h"
 #include "../../common/CScriptObj.h"
-#include "../../common/CSocket.h"
 #include "../chars/CCharRefArray.h"
 #include "../CServerConfig.h"
 

@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CUOMULTIITEMREC_H
 #define _INC_CUOMULTIITEMREC_H
 

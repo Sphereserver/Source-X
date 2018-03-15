@@ -1,15 +1,13 @@
 /**
-* @file CSectorTemplate.
+* @file CSectorTemplate.h
 *
 */
 
-#pragma once
 #ifndef _INC_CSECTORTEMPLATE_H
 #define _INC_CSECTORTEMPLATE_H
 
 #include "../game/CServer.h"
-#include "CRect.h"
-#include "CRegion.h"
+#include "../game/CRegion.h"
 
 
 class CItem;
@@ -96,7 +94,7 @@ private:
 public:
 	static const char *m_sClassName;
 	CObjPointSortArray	m_Teleports;		//	CTeleport array
-	CRegionLinks		m_RegionLinks;		//	CRegionBase(s) in this CSector
+	CRegionLinks		m_RegionLinks;		//	CRegion(s) in this CSector
 	dword			m_dwFlags;
 public:
 	CCharsActiveList		m_Chars_Active;		// CChar(s) activte in this CSector.
@@ -127,12 +125,12 @@ public:
 	static int m_iMapBlockCacheTime;
 	const CServerMapBlock * GetMapBlock( const CPointMap & pt );
 
-	// CRegionBase
-	CRegionBase * GetRegion( const CPointBase & pt, dword dwType ) const;
+	// CRegion
+	CRegion * GetRegion( const CPointBase & pt, dword dwType ) const;
 	size_t GetRegions( const CPointBase & pt, dword dwType, CRegionLinks & rlist ) const;
 
-	bool UnLinkRegion( CRegionBase * pRegionOld );
-	bool LinkRegion( CRegionBase * pRegionNew );
+	bool UnLinkRegion( CRegion * pRegionOld );
+	bool LinkRegion( CRegion * pRegionNew );
 
 	// CTeleport(s) in the region.
 	CTeleport * GetTeleport( const CPointMap & pt ) const;

@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CWORLD_H
 #define _INC_CWORLD_H
 

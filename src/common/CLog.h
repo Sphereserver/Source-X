@@ -1,9 +1,8 @@
 /**
 * @file CLog.h
-*
+* @brief Sphere logging system.
 */
 
-#pragma once
 #ifndef _INC_CLOG_H
 #define _INC_CLOG_H
 

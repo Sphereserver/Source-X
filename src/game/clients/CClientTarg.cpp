@@ -1634,7 +1634,7 @@ CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, u
 					return NULL;
 				}
 
-				CRegionBase * pRegion = ptn.GetRegion( REGION_TYPE_MULTI | REGION_TYPE_AREA | REGION_TYPE_ROOM );
+				CRegion * pRegion = ptn.GetRegion( REGION_TYPE_MULTI | REGION_TYPE_AREA | REGION_TYPE_ROOM );
 				if ( pRegion == NULL || ( pRegion->IsFlag(REGION_FLAG_NOBUILDING|REGION_FLAG_UNDERGROUND|REGION_FLAG_GUARDED|REGION_FLAG_SAFE) && ! fShip ))
 				{
 					SysMessageDefault( DEFMSG_ITEMUSE_MULTI_FAIL );

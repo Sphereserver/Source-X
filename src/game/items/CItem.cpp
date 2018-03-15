@@ -539,7 +539,7 @@ bool CItem::IsTopLevelMultiLocked() const
 		return false;
 	if ( IsType(IT_KEY))	// keys cannot be locked down.
 		return false;
-	const CRegionBase * pArea = GetTopPoint().GetRegion( REGION_TYPE_MULTI );
+	const CRegion * pArea = GetTopPoint().GetRegion( REGION_TYPE_MULTI );
 	if ( pArea == NULL )
 		return false;
 	if ( pArea->GetResourceID() == m_uidLink )
@@ -1357,7 +1357,7 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 	llong iDecayTime = GetDecayTime();
 	if ( iDecayTime > 0 )
 	{
-		const CRegionBase * pRegion = ptNewPlace.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA|REGION_TYPE_ROOM);
+		const CRegion * pRegion = ptNewPlace.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA|REGION_TYPE_ROOM);
 		if ( pRegion != NULL && pRegion->IsFlag(REGION_FLAG_NODECAY) )
 			iDecayTime = -1;
 	}

@@ -1,9 +1,8 @@
-/*
+/**
 * @file CDataBase.h
 * @brief mySQL wrapper for easier data operations witheen in-game server.
 */
 
-#pragma once
 #ifndef _INC_CDATABASE_H
 #define	_INC_CDATABASE_H
 

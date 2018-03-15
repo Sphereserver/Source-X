@@ -1,9 +1,8 @@
 /**
 * @file CUOItemTypeRec.h
-*
+* @brief Tiledata entry for an item.
 */
 
-#pragma once
 #ifndef _INC_CUOITEMTYPEREC_H
 #define _INC_CUOITEMTYPEREC_H
 

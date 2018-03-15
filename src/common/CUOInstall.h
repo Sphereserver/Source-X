@@ -1,5 +1,8 @@
+/**
+* @file CUOInstall.h
+* @brief Handler for UO files.
+*/
 
-#pragma once
 #ifndef _INC_CUOINSTALL_H
 #define _INC_CUOINSTALL_H
 

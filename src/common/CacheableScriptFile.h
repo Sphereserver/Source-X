@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CACHEABLESCRIPTFILE_H
 #define _INC_CACHEABLESCRIPTFILE_H
 

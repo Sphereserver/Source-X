@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CUOMAPMETER_H
 #define _INC_CUOMAPMETER_H
 

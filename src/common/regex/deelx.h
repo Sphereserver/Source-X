@@ -14,7 +14,6 @@
 // $Revision: 1.1.2.27 $
 //
 
-#pragma once
 #ifndef _INC_DEELX_H
 #define _INC_DEELX_H
 

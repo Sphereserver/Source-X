@@ -1856,7 +1856,7 @@ void CItemStone::SetTownName()
 	// For town stones.
 	if ( ! IsTopLevel())
 		return;
-	CRegionBase * pArea = GetTopPoint().GetRegion(( IsType(IT_STONE_TOWN)) ? REGION_TYPE_AREA : REGION_TYPE_ROOM );
+	CRegion * pArea = GetTopPoint().GetRegion(( IsType(IT_STONE_TOWN)) ? REGION_TYPE_AREA : REGION_TYPE_ROOM );
 	if ( pArea )
 	{
 		pArea->SetName( GetIndividualName());

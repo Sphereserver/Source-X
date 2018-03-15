@@ -3,7 +3,6 @@
 * @brief Header that should be included by every file.
 */
 
-#pragma once
 #ifndef _INC_COMMON_H
 #define _INC_COMMON_H
 

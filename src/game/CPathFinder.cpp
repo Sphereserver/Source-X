@@ -221,7 +221,7 @@ void CPathFinder::Clear()
 void CPathFinder::FillMap()
 {
 	ADDTOCALLSTACK("CPathFinder::FillMap");
-	CRegionBase	*pArea;
+	CRegion	*pArea;
 	CPointMap	pt, ptChar;
 
 	EXC_TRY("FillMap");

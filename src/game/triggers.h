@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_TRIGGERS_H
 #define _INC_TRIGGERS_H
 

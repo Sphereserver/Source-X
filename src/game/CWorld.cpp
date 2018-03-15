@@ -1280,7 +1280,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		size_t iQty = g_Cfg.m_RegionDefs.GetCount();
 		for ( size_t i = 0; i < iQty; i++ )
 		{
-			CRegionBase *pRegion = dynamic_cast <CRegionBase*> (g_Cfg.m_RegionDefs.GetAt(i));
+			CRegion *pRegion = dynamic_cast <CRegion*> (g_Cfg.m_RegionDefs.GetAt(i));
 			if ( !pRegion || !pRegion->HasResourceName() || !pRegion->m_iModified )
 				continue;
 

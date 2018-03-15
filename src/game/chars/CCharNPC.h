@@ -3,7 +3,6 @@
 * 
 */
 
-#pragma once
 #ifndef _INC_CCHARNPC_H
 #define _INC_CCHARNPC_H
 

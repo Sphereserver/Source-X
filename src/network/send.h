@@ -3,14 +3,14 @@
 * @brief Outward packets.
 */
 
-#pragma once
 #ifndef _INC_SEND_H
 #define _INC_SEND_H
 
-#include "../common/CRect.h"
-#include "../common/CRegion.h"
+
 #include "../common/CUID.h"
 #include "../common/sphereproto.h"
+#include "../common/CRect.h"
+#include "../game/CRegion.h"
 #include "../game/game_enums.h"
 #include "../game/CServerConfig.h"
 #include "packet.h"

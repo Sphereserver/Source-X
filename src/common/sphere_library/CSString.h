@@ -3,7 +3,6 @@
 * @brief Custom string implementation.
 */
 
-#pragma once
 #ifndef _INC_CSSTRING_H
 #define _INC_CSSTRING_H
 

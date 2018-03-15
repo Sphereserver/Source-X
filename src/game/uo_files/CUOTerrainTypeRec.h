@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CUOTERRAINTYPEREC_H
 #define _INC_CUOTERRAINTYPEREC_H
 

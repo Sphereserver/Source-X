@@ -1,5 +1,8 @@
+/**
+* @file CResourceBase.h
+*
+*/
 
-#pragma once
 #ifndef _INC_CRESOURCEBASE_H
 #define _INC_CRESOURCEBASE_H
 

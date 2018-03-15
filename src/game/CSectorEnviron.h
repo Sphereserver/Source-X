@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CSECTORENVIRON_H
 #define _INC_CSECTORENVIRON_H
 

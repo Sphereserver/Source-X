@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CITEMBASE_H
 #define _INC_CITEMBASE_H
 

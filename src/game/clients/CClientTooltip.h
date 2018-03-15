@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CCLIENTTOOLTIP_H
 #define _INC_CCLIENTTOOLTIP_H
 

@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CUOSTATICITEMREC_H
 #define _INC_CUOSTATICITEMREC_H
 

@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CGMPAGE_H
 #define _INC_CGMPAGE_H
 

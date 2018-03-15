@@ -1,5 +1,8 @@
+/**
+* @file CChatChanMember.h
+*
+*/
 
-#pragma once
 #ifndef _INC_CCHATCHANMEMBER_H
 #define _INC_CCHATCHANMEMBER_H
 

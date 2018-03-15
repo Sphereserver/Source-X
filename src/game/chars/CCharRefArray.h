@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CCHARREFARRAY_H
 #define _INC_CCHARREFARRAY_H
 

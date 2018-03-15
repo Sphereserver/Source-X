@@ -1,5 +1,8 @@
+/**
+* @file ProfileData.h
+*
+*/
 
-#pragma once
 #ifndef _INC_PROFILEDATA_H
 #define _INC_PROFILEDATA_H
 

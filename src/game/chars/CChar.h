@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CCHAR_H
 #define _INC_CCHAR_H
 
@@ -107,7 +106,7 @@ public:
 	CCharNPC * m_pNPC;			// we can be both a player and an NPC if "controlled" ?
 	CPartyDef * m_pParty;		// What party am i in ?
 	CRegionWorld * m_pArea;		// What region are we in now. (for guarded message)
-	CRegionBase * m_pRoom;		// What room we are in now.
+	CRegion * m_pRoom;		// What room we are in now.
 
 	static lpctstr const sm_szRefKeys[];
 	static lpctstr const sm_szLoadKeys[];
@@ -317,7 +316,7 @@ public:
 
 	CCharBase * Char_GetDef() const;
 	CRegionWorld * GetRegion() const;
-	CRegionBase * GetRoom() const;
+	CRegion * GetRoom() const;
 	int GetSight() const;
 	void SetSight(byte newSight);
 
@@ -410,10 +409,10 @@ private:
 	bool TeleportToCli( int iType, int iArgs );
 	bool TeleportToObj( int iType, tchar * pszArgs );
 private:
-	CRegionBase * CheckValidMove( CPointBase & ptDest, dword * pdwBlockFlags, DIR_TYPE dir, height_t * ClimbHeight, bool fPathFinding = false ) const;
+	CRegion * CheckValidMove( CPointBase & ptDest, dword * pdwBlockFlags, DIR_TYPE dir, height_t * ClimbHeight, bool fPathFinding = false ) const;
 	void FixClimbHeight();
 	bool MoveToRegion( CRegionWorld * pNewArea, bool fAllowReject);
-	bool MoveToRoom( CRegionBase * pNewRoom, bool fAllowReject);
+	bool MoveToRoom( CRegion * pNewRoom, bool fAllowReject);
 	bool IsVerticalSpace( CPointMap ptDest, bool fForceMount = false );
 
 public:
@@ -430,7 +429,7 @@ public:
 	virtual bool MoveNearObj( const CObjBaseTemplate *pObj, word iSteps = 0 );
 	bool MoveNear( CPointMap pt, word iSteps = 0 );
 
-	CRegionBase * CanMoveWalkTo( CPointBase & pt, bool fCheckChars = true, bool fCheckOnly = false, DIR_TYPE dir = DIR_QTY, bool fPathFinding = false );
+	CRegion * CanMoveWalkTo( CPointBase & pt, bool fCheckChars = true, bool fCheckOnly = false, DIR_TYPE dir = DIR_QTY, bool fPathFinding = false );
 	void CheckRevealOnMove();
 	TRIGRET_TYPE CheckLocation( bool fStanding = false );
 
@@ -1139,7 +1138,7 @@ public:
 	bool NPC_TrainSkill( CChar * pCharSrc, SKILL_TYPE skill, int toTrain );
     int PayGold(CChar * pCharSrc, int iGold, CItem * pGold, ePayGold iReason);
 private:
-	bool NPC_CheckWalkHere( const CPointBase & pt, const CRegionBase * pArea, dword dwBlockFlags ) const;
+	bool NPC_CheckWalkHere( const CPointBase & pt, const CRegion * pArea, dword dwBlockFlags ) const;
 	void NPC_OnNoticeSnoop( CChar * pCharThief, CChar * pCharMark );
 
 	void NPC_LootMemory( CItem * pItem );

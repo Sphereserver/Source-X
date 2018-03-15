@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CPARTY_H
 #define _INC_CPARTY_H
 

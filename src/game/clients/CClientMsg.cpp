@@ -1800,7 +1800,7 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 	// Adjust to my new location, what do I now see here?
 	int iViewDist = m_pChar->GetSight();
 	bool bOSIMultiSight = IsSetOF(OF_OSIMultiSight);
-	CRegionBase *pCurrentCharRegion = m_pChar->GetTopPoint().GetRegion(REGION_TYPE_HOUSE);
+	CRegion *pCurrentCharRegion = m_pChar->GetTopPoint().GetRegion(REGION_TYPE_HOUSE);
 
 	// Nearby items on ground
 	CItem *pItem = NULL;

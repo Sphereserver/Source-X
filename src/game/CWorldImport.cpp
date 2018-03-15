@@ -714,7 +714,7 @@ bool CWorld::DumpAreas( CTextConsole * pSrc, lpctstr pszFilename )
 	size_t iMax = g_Cfg.m_RegionDefs.GetCount();
 	for ( size_t i = 0; i < iMax; i++ )
 	{
-		CRegionBase * pRegion = g_Cfg.m_RegionDefs.GetAt(i);
+		CRegion * pRegion = g_Cfg.m_RegionDefs.GetAt(i);
 		if ( !pRegion  )
 			continue;
 		pRegion->r_Write( s );

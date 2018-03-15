@@ -168,13 +168,13 @@ void CChar::Use_MoonGate( CItem * pItem )
 			return;
 		if ( m_pNPC->m_Brain == NPCBRAIN_GUARD )	// guards won't leave the guarded region
 		{
-			CRegionBase *pArea = pt.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA);
+			CRegion *pArea = pt.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA);
 			if ( !pArea || !pArea->IsGuarded() )
 				return;
 		}
 		if ( Noto_IsCriminal() )	// criminals won't enter on guarded regions
 		{
-			CRegionBase *pArea = pt.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA);
+			CRegion *pArea = pt.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA);
 			if ( !pArea || pArea->IsGuarded() )
 				return;
 		}

@@ -3,7 +3,6 @@
 * @brief Simple shared useful base classes.
 */
 
-#pragma once
 #ifndef _INC_CSASSOC_H
 #define _INC_CSASSOC_H
 

@@ -3,7 +3,6 @@
 * @brief Macros commonly used in the "game" folder (and by send/receive.cpp).
 */
 
-#pragma once
 #ifndef _INC_GAME_MACROS_H
 #define _INC_GAME_MACROS_H
 

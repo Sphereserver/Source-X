@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CCHAT_H
 #define _INC_CCHAT_H
 

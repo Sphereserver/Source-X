@@ -8,7 +8,6 @@
  public domain code.
  */
 
-#pragma once
 #ifndef _INC_CMD5_H 
 #define _INC_CMD5_H
 

@@ -3,8 +3,7 @@
 *
 */
 
-#pragma once
-#ifndef _INC_UOFILES_ENUMS_ITEMDID_H
+#ifndef _INC_UOFILES_ENUMS_ITEMID_H
 #define _INC_UOFILES_ENUMS_ITEMID_H
 
 

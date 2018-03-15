@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CITEMMAP_H
 #define _INC_CITEMMAP_H
 

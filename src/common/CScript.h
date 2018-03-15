@@ -1,9 +1,8 @@
 /**
 * @file CScript.h
-*
+* @brief Script entity.
 */
 
-#pragma once
 #ifndef _INC_CSCRIPT_H
 #define _INC_CSCRIPT_H
 

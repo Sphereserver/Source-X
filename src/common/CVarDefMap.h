@@ -1,5 +1,8 @@
+/**
+* @file CVarDefMap.h
+*
+*/
 
-#pragma once
 #ifndef _INC_CVARDEFMAP_H
 #define _INC_CVARDEFMAP_H
 

@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CCLIENT_H
 #define _INC_CCLIENT_H
 

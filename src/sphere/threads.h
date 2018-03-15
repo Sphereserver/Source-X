@@ -1,4 +1,8 @@
-#pragma once
+/**
+* @file threads.h
+*
+*/
+
 #ifndef _INC_THREADS_H
 #define _INC_THREADS_H
 

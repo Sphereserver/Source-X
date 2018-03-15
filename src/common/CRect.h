@@ -3,103 +3,217 @@
 * @brief Coordinates storage and operations.
 */
 
-#pragma once
 #ifndef _INC_CRECT_H
 #define _INC_CRECT_H
 
 #include "../game/uo_files/uofiles_enums.h"
-#include "sphere_library/CSString.h"
+#include "../game/uo_files/CUOMapList.h"
+#include "../common/CLog.h"
+#include "CPointBase.h"
 
-class CRegionBase;
+class CRegion;
 class CRegionLinks;
 class CSector;
 
 
-struct CPointBase	// Non initialized 3d point.
-{
+struct CRect			// Basic rectangle. (May not be on the map)
+{						// Similar to _WIN32 RECT
 public:
-	static lpctstr const sm_szLoadKeys[];
-	static const int sm_Moves[DIR_QTY+1][2];
-	static lpctstr sm_szDirs[DIR_QTY+1];
+	int m_left;		// West	 x=0
+	int m_top;		// North y=0
+	int m_right;	// East	( NON INCLUSIVE !)
+	int m_bottom;	// South ( NON INCLUSIVE !)
+	int m_map;
 public:
-	// Do NOT change these datatypes: they seem to not have much sense, but are stored this way inside the mul files.
-	short m_x;		// equipped items dont need x,y
-	short m_y;
-	char m_z;		// this might be layer if equipped ? or equipped on corpse. Not used if in other container.
-	uchar m_map;		// another map? (only if top level.)
+	int GetWidth() const { return( m_right - m_left ); }
+	int GetHeight() const { return( m_bottom - m_top ); }
 
-public:
-	bool operator == ( const CPointBase & pt ) const;
-	bool operator != ( const CPointBase & pt ) const;
-	const CPointBase operator += ( const CPointBase & pt );
-	const CPointBase operator -= ( const CPointBase & pt );
+	bool IsRectEmpty() const
+	{
+		return( m_left >= m_right || m_top >= m_bottom );
+	}
+	void SetRectEmpty()
+	{
+		m_left = m_top = 0;	// 0x7ffe
+		m_right = m_bottom = 0;
+		m_map = 0;
+	}
 
-	void InitPoint();
-	void ZeroPoint();
-	int GetDistZ( const CPointBase & pt ) const;
-	int GetDistZAdj( const CPointBase & pt ) const;
-	int GetDistBase( const CPointBase & pt ) const;			// Distance between points
-	int GetDist( const CPointBase & pt ) const;				// Distance between points
-	int GetDistSightBase( const CPointBase & pt ) const;	// Distance between points based on UO sight
-	int GetDistSight( const CPointBase & pt ) const;		// Distance between points based on UO sight
-	int GetDist3D( const CPointBase & pt ) const;			// 3D Distance between points
+	void OffsetRect( int x, int y )
+	{
+		m_left += x;
+		m_top += y;
+		m_right += x;
+		m_bottom += y;
+	}
+	void UnionPoint( int x, int y )
+	{
+		// Inflate this rect to include this point.
+		// NON inclusive rect!
+		if ( x	< m_left	) m_left = x;
+		if ( y	< m_top		) m_top = y;
+		if ( x	>= m_right	) m_right = x+1;
+		if ( y	>= m_bottom	) m_bottom = y+1;
+	}
 
-	bool IsValidZ() const;
-	bool IsValidXY() const;
-	bool IsValidPoint() const;
-	bool IsCharValid() const;
+	bool IsInsideX( int x ) const
+	{	// non-inclusive
+		return( x >= m_left && x < m_right );
+	}
+	bool IsInsideY( int y ) const
+	{	// non-inclusive
+		return( y >= m_top && y < m_bottom );
+	}
+	bool IsInside( int x, int y, int map ) const
+	{
+		// NON inclusive rect! Is the point in the rectangle ?
+		return( IsInsideX(x) &&	IsInsideY(y) && ( m_map == map ));
+	}
+	bool IsInside2d( const CPointBase & pt ) const
+	{
+		// NON inclusive rect! Is the point in the rectangle ?
+		return( IsInside( pt.m_x, pt.m_y, pt.m_map ) );
+	}
 
-	void ValidatePoint();
+	void UnionRect( const CRect & rect )
+	{
+		// Inflate this rect to include both rectangles.
+		// ASSUME: Normalized rect
+		if ( rect.IsRectEmpty())
+			return;
+		if ( IsRectEmpty())
+		{
+			*this = rect;
+			return;
+		}
+		if ( rect.m_left	< m_left	) m_left = rect.m_left;
+		if ( rect.m_top		< m_top		) m_top = rect.m_top;
+		if ( rect.m_right	> m_right	) m_right = rect.m_right;
+		if ( rect.m_bottom	> m_bottom	) m_bottom = rect.m_bottom;
+		if ( m_map != rect.m_map )
+		{
+			DEBUG_ERR(("Uniting regions from different maps!\n"));
+		}
+	}
+	bool IsInside( const CRect & rect ) const
+	{
+		// Is &rect inside me ?
+		// ASSUME: Normalized rect
+		if ( rect.m_map != m_map )
+			return false;
+		if ( rect.m_left	< m_left	)
+			return false;
+		if ( rect.m_top		< m_top		)
+			return false;
+		if ( rect.m_right	> m_right	)
+			return false;
+		if ( rect.m_bottom	> m_bottom	)
+			return false;
+		return true;
+	}
+	bool IsOverlapped( const CRect & rect ) const
+	{
+		// are the 2 rects overlapped at all ?
+		// NON inclusive rect.
+		// ASSUME: Normalized rect
+		//		if ( rect.m_map != m_map ) return false;
+		if ( rect.m_left	>= m_right	)
+			return false;
+		if ( rect.m_top		>= m_bottom	)
+			return false;
+		if ( rect.m_right	<= m_left	)
+			return false;
+		if ( rect.m_bottom	<= m_top	)
+			return false;
+		return true;
+	}
+	bool IsEqual( const CRect & rect ) const
+	{
+		return m_left == rect.m_left &&
+			m_top == rect.m_top &&
+			m_right == rect.m_right &&
+			m_bottom == rect.m_bottom &&
+			m_map == rect.m_map;
+	}
+	virtual void NormalizeRect()
+	{
+		if ( m_bottom < m_top )
+		{
+			int wtmp = m_bottom;
+			m_bottom = m_top;
+			m_top = wtmp;
+		}
+		if ( m_right < m_left )
+		{
+			int wtmp = m_right;
+			m_right = m_left;
+			m_left = wtmp;
+		}
+		if (( m_map < 0 ) || ( m_map >= 256 )) m_map = 0;
+		if ( !g_MapList.m_maps[m_map] ) m_map = 0;
+	}
 
-	bool IsSame2D( const CPointBase & pt ) const;
+	void SetRect( int left, int top, int right, int bottom, int map )
+	{
+		m_left = left;
+		m_top = top;
+		m_right = right;
+		m_bottom = bottom;
+		m_map = map;
+		NormalizeRect();
+	}
 
-	void Set( const CPointBase & pt );
-	void Set( word x, word y, char z = 0, uchar map = 0 );
-	size_t Read( tchar * pVal );
+	void NormalizeRectMax( int cx, int cy )
+	{
+		if ( m_left < 0 )
+			m_left = 0;
+		if ( m_top < 0 )
+			m_top = 0;
+		if ( m_right > cx )
+			m_right = cx;
+		if ( m_bottom > cy )
+			m_bottom = cy;
+	}
 
-	tchar * WriteUsed( tchar * pszBuffer ) const;
-	lpctstr WriteUsed() const;
+	size_t Read( lpctstr pVal );
+	tchar * Write( tchar * pBuffer ) const
+	{
+		sprintf(pBuffer, "%d,%d,%d,%d,%d", m_left, m_top, m_right, m_bottom, m_map);
+		return( pBuffer );
+	}
+	lpctstr Write() const;
 
-	void Move( DIR_TYPE dir );
-	void MoveN( DIR_TYPE dir, int amount );
+	CPointBase GetCenter() const
+	{
+		CPointBase pt;
+		pt.m_x = (short)(( m_left + m_right ) / 2);
+		pt.m_y = (short)((m_top + m_bottom) / 2);
+		pt.m_z = 0;
+		pt.m_map = (uchar)(m_map);
+		return( pt );
+	}
 
-	DIR_TYPE GetDir( const CPointBase & pt, DIR_TYPE DirDefault = DIR_QTY ) const; // Direction to point pt
-
-	// Take a step directly toward the target.
-	int StepLinePath( const CPointBase & ptSrc, int iSteps );
-
-	CSector * GetSector() const;
-
-#define REGION_TYPE_AREA  1
-#define REGION_TYPE_ROOM  2
-#define REGION_TYPE_HOUSE 4
-#define REGION_TYPE_SHIP  8
-#define REGION_TYPE_MULTI 12
-	CRegionBase * GetRegion( dword dwType ) const;
-	size_t GetRegions( dword dwType, CRegionLinks & rlinks ) const;
-
-	int GetPointSortIndex() const;
-
-	bool r_WriteVal( lpctstr pszKey, CSString & sVal ) const;
-	bool r_LoadVal( lpctstr pszKey, lpctstr pszArgs );
+	CPointBase GetRectCorner( DIR_TYPE dir ) const;
+	CSector * GetSector( int i ) const;	// ge all the sectors that make up this rect.
 };
 
-struct CPointMap : public CPointBase
+struct CRectMap : public CRect
 {
-	// A point in the world (or in a container) (initialized)
-	CPointMap();
-	CPointMap( short x, short y, char z = 0, uchar map = 0 );
-	CPointMap & operator = ( const CPointBase & pt );
-	CPointMap( const CPointBase & pt );
-	CPointMap( tchar * pVal );
-};
+public:
 
-struct CPointSort : public CPointMap
-{
-	CPointSort();
-	CPointSort( word x, word y, char z = 0, uchar map = 0 );
-	CPointSort( const CPointBase & pt );
-	virtual ~CPointSort(); // just to make this dynamic
+	bool IsValid() const
+	{
+		int iSizeX = GetWidth();
+		if ( iSizeX < 0 || iSizeX > g_MapList.GetX(m_map) )
+			return false;
+		int iSizeY = GetHeight();
+		if ( iSizeY < 0 || iSizeY > g_MapList.GetY(m_map) )
+			return false;
+		return true;
+	}
+
+	void NormalizeRect();
+	void NormalizeRectMax();
 };
 
 

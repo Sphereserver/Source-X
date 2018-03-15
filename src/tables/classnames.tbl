@@ -32,7 +32,7 @@ ADD(CScriptTriggerArgs,		"CScriptTriggerArgs");
 ADD(CScript,				"CScript");
 ADD(CResourceRefArray,		"CResourceRefArray");
 ADD(CRegionWorld,			"CRegionWorld");
-ADD(CRegionBase,			"CRegionBase");
+ADD(CRegion,				"CRegion");
 ADD(CWorld,					"CWorld");
 ADD(CWorldThread,			"CWorldThread");
 ADD(CWebPageDef,			"CWebPageDef");

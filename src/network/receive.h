@@ -3,7 +3,6 @@
 * @brief Inwards packets.
 */
 
-#pragma once
 #ifndef _INC_RECEIVE_H
 #define _INC_RECEIVE_H
 

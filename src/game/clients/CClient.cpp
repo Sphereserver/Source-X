@@ -132,8 +132,8 @@ bool CClient::CanInstantLogOut() const
 	if ( pArea->IsFlag( REGION_FLAG_INSTA_LOGOUT ))
 		return true;
 
-	const CRegionBase * pRoom = m_pChar->GetRoom(); //Allows Room flag to work!
-	if ( pRoom != NULL && pRoom->IsFlag( REGION_FLAG_INSTA_LOGOUT )) //sanity check for null rooms // Can C++ guarantee short-circuit evaluation for CRegionBase ?
+	const CRegion * pRoom = m_pChar->GetRoom(); //Allows Room flag to work!
+	if ( pRoom != NULL && pRoom->IsFlag( REGION_FLAG_INSTA_LOGOUT )) //sanity check for null rooms // Can C++ guarantee short-circuit evaluation for CRegion ?
 		return true;
 
 	return false;
@@ -260,7 +260,7 @@ void CClient::Announce( bool fArrive ) const
 	}
 	else if ( g_Cfg.m_iArriveDepartMsg == 1 )		// notify of players
 	{
-		const CRegionBase *pRegion = m_pChar->GetTopPoint().GetRegion(REGION_TYPE_AREA);
+		const CRegion *pRegion = m_pChar->GetTopPoint().GetRegion(REGION_TYPE_AREA);
 		sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MSG_ARRDEP_1),
 			m_pChar->GetName(),
 			fArrive ? g_Cfg.GetDefaultMsg(DEFMSG_MSG_ARRDEP_2) : g_Cfg.GetDefaultMsg(DEFMSG_MSG_ARRDEP_3),

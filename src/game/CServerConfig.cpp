@@ -1,8 +1,8 @@
 ﻿#include "../common/sphere_library/CSFileList.h"
-#include "../common/CSocket.h"
 #include "../common/CException.h"
 #include "../common/CUOInstall.h"
 #include "../common/sphereversion.h"
+#include "../network/CSocket.h"
 #include "../network/network.h"
 #include "../sphere/ProfileTask.h"
 #include "clients/CAccount.h"
@@ -2148,7 +2148,7 @@ CPointMap CServerConfig::GetRegionPoint( lpctstr pCmd ) const // Decode a telepo
 	else
 	{
 		// Match the region name with global regions.
-		CRegionBase * pRegion = GetRegion(pCmd);
+		CRegion * pRegion = GetRegion(pCmd);
 		if ( pRegion != NULL )
 		{
 			return pRegion->m_pt;
@@ -2158,7 +2158,7 @@ CPointMap CServerConfig::GetRegionPoint( lpctstr pCmd ) const // Decode a telepo
 	return pt;
 }
 
-CRegionBase * CServerConfig::GetRegion( lpctstr pKey ) const
+CRegion * CServerConfig::GetRegion( lpctstr pKey ) const
 {
 	ADDTOCALLSTACK("CServerConfig::GetRegion");
 	// get a region from a name or areadef.
@@ -2171,7 +2171,7 @@ CRegionBase * CServerConfig::GetRegion( lpctstr pKey ) const
 			CResourceDef * pResDef = m_ResHash.m_Array[i][j];
 			ASSERT(pResDef);
 
-			CRegionBase * pRegion = dynamic_cast <CRegionBase*> (pResDef);
+			CRegion * pRegion = dynamic_cast <CRegion*> (pResDef);
 			if ( pRegion == NULL )
 				continue;
 
@@ -2874,7 +2874,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		pPrvDef = ResourceGetDef( rid );
 		if ( pPrvDef && fNewStyleDef )
 		{
-			CRegionBase * pRegion = dynamic_cast <CRegionBase*>( pPrvDef );
+			CRegion * pRegion = dynamic_cast <CRegion*>( pPrvDef );
 			pNewDef	= pRegion;
 			ASSERT(pNewDef);
 			pRegion->UnRealizeRegion();
@@ -2883,7 +2883,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		}
 		else
 		{
-			CRegionBase * pRegion = new CRegionBase( rid, pScript->GetArgStr());
+			CRegion * pRegion = new CRegion( rid, pScript->GetArgStr());
 			pNewDef = pRegion;
 			ASSERT(pNewDef);
 			pRegion->r_Load(*pScript);
@@ -3998,7 +3998,7 @@ bool CServerConfig::Load( bool fResync )
 		size_t iMax = g_Cfg.m_RegionDefs.GetCount();
 		for ( size_t k = 0; k < iMax; k++ )
 		{
-			CRegionBase * pRegion = dynamic_cast <CRegionBase*> (g_Cfg.m_RegionDefs.GetAt(i));
+			CRegion * pRegion = dynamic_cast <CRegion*> (g_Cfg.m_RegionDefs.GetAt(i));
 			if ( !pRegion )
 				continue;
 			pRegion->MakeRegionName();

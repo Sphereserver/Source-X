@@ -2,7 +2,6 @@
 * @file CSMemBlock.h
 */
 
-#pragma once
 #ifndef _INC_CSMEMBLOCK_H
 #define _INC_CSMEMBLOCK_H
 

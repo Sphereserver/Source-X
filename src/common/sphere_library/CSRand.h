@@ -3,8 +3,8 @@
 * @brief Wrapper for C++ Mersenne Twister pseudo-random number generator
 */
 
-#pragma once
 #ifndef _INC_CSRAND_H
+#define _INC_CSRAND_H
 
 #include "../datatypes.h"	// only the numeric data types
 

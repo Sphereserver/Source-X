@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CUOMAPLIST_H
 #define _INC_CUOMAPLIST_H
 

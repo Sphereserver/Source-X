@@ -3,7 +3,6 @@
 * 
 */
 
-#pragma once
 #ifndef _INC_CCHARBASE_H
 #define _INC_CCHARBASE_H
 

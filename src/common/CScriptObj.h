@@ -3,7 +3,6 @@
 * @brief Base window class for controls.
 */
 
-#pragma once
 #ifndef _INC_CSCRIPTOBJ_H
 #define _INC_CSCRIPTOBJ_H
 

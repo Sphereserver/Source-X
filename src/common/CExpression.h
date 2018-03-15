@@ -1,12 +1,12 @@
 /**
 * @file CExpression.h
+* @brief Parse SphereScript expressions.
 */
 
 /* Random values have int64 type because the max size, due to the algorithm, can be an int64;
 	Other calculations have type llong because in the future llong may be bigger than int64 and
 	there's no reason to put an upper limit to the number.	*/
 
-#pragma once
 #ifndef _INC_CEXPRSSION_H
 #define _INC_CEXPRSSION_H
 

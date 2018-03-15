@@ -2,7 +2,6 @@
 * @file CSFileList.h
 */
 
-#pragma once
 #ifndef _INC_CSFILELIST_H
 #define _INC_CSFILELIST_H
 

@@ -3,7 +3,6 @@
 * @brief Basic packet sending/receiving support.
 */
 
-#pragma once
 #ifndef _INC_PACKET_H
 #define _INC_PACKET_H
 

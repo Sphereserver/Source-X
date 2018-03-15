@@ -1,13 +1,14 @@
+/**
+* @file CUIDExtra.h
+* @brief Inlined CUIDBase methods which need CItem and CChar classes
+*/
 
-#pragma once
 #ifndef _INC_CUIDEXTRA_H
 #define _INC_CUIDEXTRA_H
 
 #include "CUID.h"
 #include "../game/CWorld.h"
 #include "../game/chars/CChar.h"
-#include "../game/CObjBase.h"
-
 
 inline CObjBase * CUIDBase::ObjFind() const
 {

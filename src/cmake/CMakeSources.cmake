@@ -24,6 +24,8 @@ SOURCE_GROUP (sphere FILES ${sphere_SRCS})
 
 # Network management files
 SET (network_SRCS
+network/CSocket.cpp
+network/CSocket.h
 network/network_common.cpp
 network/network_singlethreaded.cpp
 network/network_multithreaded.cpp
@@ -108,10 +110,10 @@ common/CObjBaseTemplate.cpp
 common/CObjBaseTemplate.h
 common/common.cpp
 common/common.h
+common/CPointBase.cpp
+common/CPointBase.h
 common/CRect.cpp
 common/CRect.h
-common/CRegion.cpp
-common/CRegion.h
 common/CResourceBase.cpp
 common/CResourceBase.h
 common/CScript.cpp
@@ -120,8 +122,6 @@ common/CScriptObj.cpp
 common/CScriptObj.h
 common/CSectorTemplate.cpp
 common/CSectorTemplate.h
-common/CSocket.cpp
-common/CSocket.h
 common/CsvFile.cpp
 common/CsvFile.h
 common/CTextConsole.cpp
@@ -180,6 +180,10 @@ game/CObjBase.cpp
 game/CObjBase.h
 game/CPathFinder.cpp
 game/CPathFinder.h
+game/CRegion.cpp
+game/CRegion.h
+game/CRegionBase.cpp
+game/CRegionBase.h
 game/CResourceCalc.cpp
 game/CResourceDef.cpp
 game/CScriptProfiler.h
@@ -247,13 +251,14 @@ game/items/CItemVendable.h
 SOURCE_GROUP (game\\items FILES ${items_SRCS})
 
 SET (chars_SRCS
-game/chars/CCharact.cpp
+game/chars/CCharAct.cpp
 game/chars/CCharBase.cpp
 game/chars/CChar.cpp
 game/chars/CChar.h
 game/chars/CCharAttacker.cpp
 game/chars/CCharBase.h
 game/chars/CCharFight.cpp
+game/chars/CCharLOS.cpp
 game/chars/CCharMemory.cpp
 game/chars/CCharNotoriety.cpp
 game/chars/CCharNPC.cpp
@@ -314,22 +319,7 @@ SOURCE_GROUP (common\\crashdump FILES ${crashdump_SRCS})
 
 # LibEv files
 SET (libev_SRCS
-#common/libev/ev.c
-#common/libev/ev.h
-#common/libev/ev_config.h
-#common/libev/ev_epoll.c
-#common/libev/ev_kqueue.c
-#common/libev/ev_poll.c
-#common/libev/ev_port.c
-#common/libev/ev_select.c
-#common/libev/ev_vars.h
-#common/libev/ev_win32.c
-#common/libev/ev_wrap.h
-#common/libev/ev++.h
-#common/libev/event.c
-#common/libev/event.h
 common/libev/wrapper_ev.c
-#common/libev/config.h
 )
 SOURCE_GROUP (common\\libev FILES ${libev_SRCS})
 

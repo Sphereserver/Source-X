@@ -1,5 +1,8 @@
+/**
+* @file ProfileTask.h
+*
+*/
 
-#pragma once
 #ifndef _INC_PROFILETASK_H
 #define _INC_PROFILETASK_H
 

@@ -1,15 +1,15 @@
-//
-// CServerDef.h
-//
+/**
+* @file CServerDef.h
+*
+*/
 
-#pragma once
 #ifndef _INC_CSERVERDEF_H
 #define _INC_CSERVERDEF_H
 
+#include "../network/CSocket.h"
 #include "../common/crypto/CCrypto.h"
 #include "../common/sphere_library/CSTime.h"
 #include "../common/CScriptObj.h"
-#include "../common/CSocket.h"
 #include "CServerTime.h"
 
 

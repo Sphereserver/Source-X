@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_UOFILES_MACROS_H
 #define _INC_UOFILES_MACROS_H
 

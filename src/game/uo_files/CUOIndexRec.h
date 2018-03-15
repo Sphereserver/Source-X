@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CUOINDEXREC_H
 #define _INC_CUOINDEXREC_H
 

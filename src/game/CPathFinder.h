@@ -4,7 +4,6 @@
 //		based on A* Pathfinder (Version 1.71a) by Patrick Lester, pwlester@policyalmanac.org
 //
 
-#pragma once
 #ifndef _INC_PATHFINDER_H
 #define _INC_PATHFINDER_H
 

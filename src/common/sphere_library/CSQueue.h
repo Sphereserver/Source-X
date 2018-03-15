@@ -2,7 +2,6 @@
 * @file CSQueue.h
 */
 
-#pragma once
 #ifndef _INC_CSQUEUE_H
 #define _INC_CSQUEUE_H
 

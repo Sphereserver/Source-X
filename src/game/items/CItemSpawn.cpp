@@ -1,12 +1,12 @@
 
+#include "../../common/CLog.h"
 #include "../../common/CException.h"
 #include "../../common/CObjBaseTemplate.h"
-#include "../../common/CRegion.h"
 #include "../../common/CUIDExtra.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
-#include "../../common/CLog.h"
 #include "../CContainer.h"
+#include "../CRegion.h"
 #include "CItemSpawn.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -199,7 +199,7 @@ void CItemSpawn::GenerateChar(CResourceDef *pDef)
 	}
 
 	// Check if the NPC can spawn in this region
-	CRegionBase *pRegion = pt.GetRegion(REGION_TYPE_AREA);
+	CRegion *pRegion = pt.GetRegion(REGION_TYPE_AREA);
 	if ( !pRegion || (pRegion->IsGuarded() && pChar->Noto_IsEvil()) )
 	{
 		pChar->Delete();

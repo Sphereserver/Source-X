@@ -1,5 +1,8 @@
+/**
+* @file strings.h
+*
+*/
 
-#pragma once
 #ifndef _INC_STRINGS_H
 #define _INC_STRINGS_H
 

@@ -1,5 +1,8 @@
+/**
+* @file CTextConsole.h
+*
+*/
 
-#pragma once
 #ifndef _INC_CTEXTCONSOLE_H
 #define _INC_CTEXTCONSOLE_H
 

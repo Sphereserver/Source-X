@@ -3,11 +3,10 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CSERVER_H
 #define _INC_CSERVER_H
 
-#include "../common/CSocket.h"
+#include "../network/CSocket.h"
 #include "../common/sphere_library/CSFile.h"
 #include "../common/CTextConsole.h"
 #include "../common/CDataBase.h"

@@ -3,7 +3,6 @@
 * This file is needed for mingw32 because dbghelp.h do not exists.
 */
 
-#pragma once
 #ifdef __MINGW32__
 
 #ifndef _INC_MINGWDBGHELP_H

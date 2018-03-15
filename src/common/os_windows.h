@@ -3,7 +3,6 @@
 * @brief Windows-specific declarations.
 */
 
-#pragma once
 #ifndef _INC_OS_WINDOWS_H
 #define _INC_OS_WINDOWS_H
 

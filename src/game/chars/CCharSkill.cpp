@@ -1342,7 +1342,7 @@ int CChar::Skill_Fishing( SKTRIG_TYPE stage )
 		return -SKTRIG_QTY;
 	}
 
-	CRegionBase *pRegion = GetTopPoint().GetRegion(REGION_TYPE_MULTI);		// are we in a house ?
+	CRegion *pRegion = GetTopPoint().GetRegion(REGION_TYPE_MULTI);		// are we in a house ?
 	if ( pRegion && !pRegion->IsFlag(REGION_FLAG_SHIP) )
 	{
 		SysMessageDefault(DEFMSG_FISHING_3);
@@ -2457,7 +2457,7 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 			SysMessageDefault( DEFMSG_HEALING_CORPSEG );
 			return -SKTRIG_QTY;
 		}
-		CRegionBase * pRegion = pCorpse->GetTopPoint().GetRegion(REGION_TYPE_AREA|REGION_TYPE_MULTI);
+		CRegion * pRegion = pCorpse->GetTopPoint().GetRegion(REGION_TYPE_AREA|REGION_TYPE_MULTI);
 		if ( pRegion == NULL )
 			return -SKTRIG_QTY;
 		if ( pRegion->IsFlag( REGION_ANTIMAGIC_ALL | REGION_ANTIMAGIC_RECALL_IN | REGION_ANTIMAGIC_TELEPORT ))

@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CITEMMULTICUSTOM_H
 #define _INC_CITEMMULTICUSTOM_H
 

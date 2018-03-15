@@ -2993,7 +2993,7 @@ void CChar::Flip()
 // RETURN:
 //  ptDst.m_z = the new z
 //  NULL = failed to walk here.
-CRegionBase * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool fCheckOnly, DIR_TYPE dir, bool fPathFinding )
+CRegion * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool fCheckOnly, DIR_TYPE dir, bool fPathFinding )
 {
 	ADDTOCALLSTACK("CChar::CanMoveWalkTo");
 
@@ -3035,7 +3035,7 @@ CRegionBase * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool f
 	// ok to go here ? physical blocking objects ?
 	dword dwBlockFlags = 0;
 	height_t ClimbHeight = 0;
-	CRegionBase *pArea = NULL;
+	CRegion *pArea = NULL;
 
 	EXC_TRY("CanMoveWalkTo");
 
@@ -3194,7 +3194,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 			if ( m_pArea->OnRegionTrigger( this, RTRIG_STEP ) == TRIGRET_RET_TRUE )
 				return TRIGRET_RET_FALSE;
 
-			CRegionBase *pRoom = GetTopPoint().GetRegion(REGION_TYPE_ROOM);
+			CRegion *pRoom = GetTopPoint().GetRegion(REGION_TYPE_ROOM);
 			if ( pRoom && pRoom->OnRegionTrigger( this, RTRIG_STEP ) == TRIGRET_RET_TRUE )
 				return TRIGRET_RET_FALSE;
 		}
@@ -3454,7 +3454,7 @@ bool CChar::MoveToRegion( CRegionWorld * pNewArea, bool fAllowReject )
 // Moving to a new room.
 // RETURN:
 // false = do not allow in this room.
-bool CChar::MoveToRoom( CRegionBase * pNewRoom, bool fAllowReject)
+bool CChar::MoveToRoom( CRegion * pNewRoom, bool fAllowReject)
 {
 	ADDTOCALLSTACK("CChar::MoveToRoom");
 
@@ -3553,7 +3553,7 @@ bool CChar::MoveToChar(CPointMap pt, bool bForceFix)
 	if ( !MoveToRegion(pAreaNew, true) )
 		return false;
 
-	CRegionBase * pRoomNew = pt.GetRegion(REGION_TYPE_ROOM);
+	CRegion * pRoomNew = pt.GetRegion(REGION_TYPE_ROOM);
 	if ( !MoveToRoom(pRoomNew, true) )
 		return false;
 
@@ -3606,7 +3606,7 @@ bool CChar::MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart, bool bFromS
 		if ( pt.IsValidPoint() )
 		{
 			// Don't allow boarding of other ships (they may be locked)
-			CRegionBase * pRegionBase = pt.GetRegion( REGION_TYPE_SHIP);
+			CRegion * pRegionBase = pt.GetRegion( REGION_TYPE_SHIP);
 			if ( pRegionBase)
 			{
 				pt.Move( dir );

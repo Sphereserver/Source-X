@@ -1,9 +1,8 @@
-/*
+/**
 * @file CException.h
 * @brief Management of exceptions.
 */
 
-#pragma once
 #ifndef _INC_CEXCEPTION_H
 #define _INC_CEXCEPTION_H
 

@@ -3,9 +3,8 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CCHARPLAYER_H
-#define CCHARPLAYER_H
+#define _INC_CCHARPLAYER_H
 
 #include "../../common/CResourceBase.h"
 #include "../../common/sphereproto.h"

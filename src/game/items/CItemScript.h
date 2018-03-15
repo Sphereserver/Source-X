@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CITEMSCRIPT_H
 #define _INC_CITEMSCRIPT_H
 

@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CUOVERSIONBLOCK_H
 #define _INC_CUOVERSIONBLOCK_H
 

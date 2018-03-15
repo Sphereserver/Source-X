@@ -3,7 +3,6 @@
 * @brief Enums commonly used in the "game" folder. 
 */
 
-#pragma once
 #ifndef _INC_GAME_ENUMS_H
 #define _INC_GAME_ENUMS_H
 

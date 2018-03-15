@@ -3,7 +3,6 @@
 * @brief Versioning stuff.
 */
 
-#pragma once
 #ifndef _INC_SPHEREVERSION_H
 #define _INC_SPHEREVERSION_H
 

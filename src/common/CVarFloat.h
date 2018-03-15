@@ -3,7 +3,6 @@
 * @brief Custom float implementation.
 */
 
-#pragma once
 #ifndef _INC_CVARFLOAT_H
 #define _INC_CVARFLOAT_H
 

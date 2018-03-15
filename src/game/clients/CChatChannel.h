@@ -1,5 +1,8 @@
+/**
+* @file CChatChannel.h
+*
+*/
 
-#pragma once
 #ifndef _INC_CCHATCHANNEL_H
 #define _INC_CCHATCHANNEL_H
 

@@ -1,4 +1,3 @@
-#pragma once
 #if !defined(_INC_CRASHDUMP_H) && defined(_WIN32) && !defined(_DEBUG) && !defined(_NO_CRASHDUMP)
 #define _INC_CRASHDUMP_H
 

@@ -3,7 +3,6 @@
 * @brief Unix-specific declarations.
 */
 
-#pragma once
 #ifndef _INC_OS_UNIX_H
 #define _INC_OS_UNIX_H
 

@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_SPHERESVR_H
 #define _INC_SPHERESVR_H
 

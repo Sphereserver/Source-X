@@ -106,7 +106,7 @@ bool CChar::Spell_Teleport( CPointMap ptNew, bool bTakePets, bool bCheckAntiMagi
 
 	if ( IsPriv(PRIV_JAILED) )
 	{
-		CRegionBase *pJail = g_Cfg.GetRegion("jail");
+		CRegion *pJail = g_Cfg.GetRegion("jail");
 		if ( !pJail || !pJail->IsInside2d(ptNew) )
 		{
 			// Must be /PARDONed to leave jail area
@@ -138,7 +138,7 @@ bool CChar::Spell_Teleport( CPointMap ptNew, bool bTakePets, bool bCheckAntiMagi
 	// Is it a valid teleport location that allows this ?
 	if ( bCheckAntiMagic && !IsPriv(PRIV_GM) )
 	{
-		CRegionBase * pArea = CheckValidMove(ptNew, NULL, DIR_QTY, NULL);
+		CRegion * pArea = CheckValidMove(ptNew, NULL, DIR_QTY, NULL);
 		if ( !pArea )
 		{
 			SysMessageDefault(DEFMSG_SPELL_TELE_CANT);
@@ -333,7 +333,7 @@ bool CChar::Spell_Recall(CItem * pRune, bool fGate)
 
 	if (fGate)
 	{
-		CRegionBase * pArea = pRune->m_itRune.m_pntMark.GetRegion(REGION_TYPE_AREA | REGION_TYPE_MULTI | REGION_TYPE_ROOM);
+		CRegion * pArea = pRune->m_itRune.m_pntMark.GetRegion(REGION_TYPE_AREA | REGION_TYPE_MULTI | REGION_TYPE_ROOM);
 		if (pArea == NULL)
 			return false;
 
@@ -2227,7 +2227,7 @@ bool CChar::Spell_TargCheck_Face()
 		UpdateDir(m_Act_p);
 
 	// Check if target in on anti-magic region
-	CRegionBase *pArea = m_Act_p.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA);
+	CRegion *pArea = m_Act_p.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA);
 	if ( !IsPriv(PRIV_GM) && pArea && pArea->CheckAntiMagic(m_atMagery.m_Spell) )
 	{
 		SysMessageDefault( DEFMSG_SPELL_TRY_AM );

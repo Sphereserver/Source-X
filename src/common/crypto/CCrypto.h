@@ -3,7 +3,6 @@
 * @brief Support for login encryption and MD5 hashing.
 */
 
-#pragma once
 #ifndef _INC_CCRYPT_H
 #define _INC_CCRYPT_H
 

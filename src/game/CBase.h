@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CBASE_H
 #define _INC_CBASE_H
 

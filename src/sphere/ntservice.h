@@ -1,8 +1,8 @@
-//
-// NTService.h
-//
+/**
+* @file ntservice.h
+*
+*/
 
-#pragma once
 #ifndef _INC_NTSERVICE_H
 #define _INC_NTSERVICE_H
 

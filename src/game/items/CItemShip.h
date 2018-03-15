@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CITEMSHIP_H
 #define _INC_CITEMSHIP_H
 

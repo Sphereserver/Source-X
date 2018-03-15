@@ -3,7 +3,6 @@
 * @brief Base window class for controls.
 */
 
-#pragma once
 #ifndef _INC_CSWINDOW_H
 #define _INC_CSWINDOW_H
 

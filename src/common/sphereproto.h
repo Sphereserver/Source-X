@@ -3,7 +3,6 @@
 * @brief Protocol formats. Define all the data passed from Client to Server.
 */
 
-#pragma once
 #ifndef _INC_SPHEREPROTO_H
 #define _INC_SPHEREPROTO_H
 

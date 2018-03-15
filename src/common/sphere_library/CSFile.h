@@ -2,7 +2,6 @@
 * @file CSFile.h
 */
 
-#pragma once
 #ifndef _INC_CSFILE_H
 #define _INC_CSFILE_H
 

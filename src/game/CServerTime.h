@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CSERVTIME_H
 #define _INC_CSERVTIME_H
 

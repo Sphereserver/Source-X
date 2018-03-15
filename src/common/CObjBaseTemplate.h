@@ -1,5 +1,8 @@
+/**
+* @file CObjBaseTemplate.h
+* @brief Base functionalities for every CObjBase.
+*/
 
-#pragma once
 #ifndef _INC_COBJBASETEMPLATE_H
 #define _INC_COBJBASETEMPLATE_H
 

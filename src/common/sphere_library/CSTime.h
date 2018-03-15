@@ -3,7 +3,6 @@
 * @brief Custom time management.
 */
 
-#pragma once
 #ifndef _INC_CSTIME_H
 #define _INC_CSTIME_H
 

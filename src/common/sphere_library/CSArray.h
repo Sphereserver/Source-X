@@ -3,7 +3,6 @@
 * @brief C++ collections custom implementation.
 */
 
-#pragma once
 #ifndef _INC_CSARRAY_H
 #define _INC_CSARRAY_H
 

@@ -1,5 +1,8 @@
+/**
+* @file CSRand.h
+* @brief Sphere simple mutex implementation.
+*/
 
-#pragma once
 #ifndef _INC_MUTEX_H
 #define _INC_MUTEX_H
 

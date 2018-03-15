@@ -534,9 +534,9 @@ bool CResourceDef::MakeResourceName()
 
 
 
-bool CRegionBase::MakeRegionName()
+bool CRegion::MakeRegionName()
 {
-	ADDTOCALLSTACK("CRegionBase::MakeRegionName");
+	ADDTOCALLSTACK("CRegion::MakeRegionName");
 	if ( m_pDefName )
 		return true;
 
@@ -586,7 +586,7 @@ bool CRegionBase::MakeRegionName()
 
 	for ( size_t i = 0; i < iMax; i++ )
 	{
-		CRegionBase * pRegion = dynamic_cast <CRegionBase*> (g_Cfg.m_RegionDefs.GetAt(i));
+		CRegion * pRegion = dynamic_cast <CRegion*> (g_Cfg.m_RegionDefs.GetAt(i));
 		if ( !pRegion )
 			continue;
 		pszKey = pRegion->GetResourceName();

@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CITEMVENDABLE_H
 #define _INC_CITEMVENDABLE_H
 

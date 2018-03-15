@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CRESOURCE_H
 #define _INC_CRESOURCE_H
 
@@ -12,8 +11,8 @@
 #include "../common/CExpression.h"
 #include "../common/CServerMap.h"
 #include "../common/CResourceBase.h"
-#include "../common/CRegion.h"
 #include "../common/sphereproto.h"
+#include "../game/CRegion.h"
 
 
 class CAccount;
@@ -1525,7 +1524,7 @@ public:
 	bool IsConsoleCmd( tchar ch ) const;
 
 	CPointMap GetRegionPoint( lpctstr pCmd ) const; // Decode a teleport location number into X/Y/Z
-	CRegionBase * GetRegion( lpctstr pKey ) const; // Find a region with the given name/defname
+	CRegion * GetRegion( lpctstr pKey ) const; // Find a region with the given name/defname
 
     /**
      * @fn  int CServerConfig::Calc_MaxCarryWeight( const CChar * pChar ) const;

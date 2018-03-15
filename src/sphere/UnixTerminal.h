@@ -3,8 +3,6 @@
 * @brief Unix terminal utilities (set colors, read text...)
 */
 
-
-#pragma once
 #ifndef _INC_UNIXTERMINAL_H
 #define _INC_UNIXTERMINAL_H
 

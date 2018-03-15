@@ -1,5 +1,8 @@
+/**
+* @file containers.h
+* @brief Sphere custom containers.
+*/
 
-#pragma once
 #ifndef _INC_CONTAINERS_H
 #define _INC_CONTAINERS_H
 

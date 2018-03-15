@@ -1,5 +1,8 @@
+/**
+* @file CSRand.h
+* @brief Sphere wrapper for SQLite functions.
+*/
 
-#pragma once
 #ifndef _INC_SQLITE_H
 #define _INC_SQLITE_H
 

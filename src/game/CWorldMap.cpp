@@ -257,7 +257,7 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 	size_t iRegionQty = pt.GetRegions(REGION_TYPE_MULTI, rlinks);
 	if ( iRegionQty > 0 )
 	{
-		CRegionBase *pRegion = NULL;
+		CRegion *pRegion = NULL;
 		const CSphereMulti *pMulti = NULL;				// Multi Def (multi check)
 		const CUOMultiItemRec_HS *pMultiItem = NULL;	// Multi item iterator
 		for ( size_t iRegion = 0; iRegion < iRegionQty; pMulti = NULL, ++iRegion )
@@ -638,7 +638,7 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 				{
 					for (size_t iRegion = 0; iRegion < iRegionQty; iRegion++)
 					{
-						CRegionBase* pRegion = rlinks.GetAt(iRegion);
+						CRegion* pRegion = rlinks.GetAt(iRegion);
 						CItem* pItem = pRegion->GetResourceID().ItemFind();
 						if (pItem == NULL)
 							continue;
@@ -788,7 +788,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 	if ( iRegionQty > 0 )
 	{
 		//  ------------ For variables --------------------
-		CRegionBase * pRegion = NULL;
+		CRegion * pRegion = NULL;
 		const CSphereMulti * pMulti = NULL;
 		const CUOMultiItemRec_HS * pMultiItem = NULL;
 		x2 = 0;
@@ -1086,7 +1086,7 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block,
 		if ( iRegionQty > 0 )
 		{
 			//  ------------ For variables --------------------
-			CRegionBase * pRegion = NULL;
+			CRegion * pRegion = NULL;
 			const CSphereMulti * pMulti = NULL;
 			const CUOMultiItemRec_HS * pMultiItem = NULL;
 			x2 = 0;
@@ -1342,7 +1342,7 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block
 		{
 			for ( size_t i = 0; i < iRegionQty; i++)
 			{
-				CRegionBase * pRegion = rlinks.GetAt(i);
+				CRegion * pRegion = rlinks.GetAt(i);
 				CItem * pItem = pRegion->GetResourceID().ItemFind();
 				if ( pItem != NULL )
 				{

@@ -3,7 +3,6 @@
 *
 */
 
-#pragma once
 #ifndef _INC_CITEMSTONE_H
 #define _INC_CITEMSTONE_H
 

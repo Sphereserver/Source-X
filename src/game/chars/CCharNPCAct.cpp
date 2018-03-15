@@ -1369,7 +1369,7 @@ void CChar::NPC_Act_GoHome()
 		// this goes hand in hand with the change that guards arent
 		// called if the criminal makes it outside guarded territory.
 
-		const CRegionBase * pArea = m_ptHome.GetRegion( REGION_TYPE_AREA );
+		const CRegion * pArea = m_ptHome.GetRegion( REGION_TYPE_AREA );
 		if ( pArea && pArea->IsGuarded())
 		{
 			if ( !m_pArea || !m_pArea->IsGuarded() )

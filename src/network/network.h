@@ -3,16 +3,15 @@
 * @brief Networking stuff.
 */
 
-#pragma once
 #ifndef _INC_NETWORK_H
 #define _INC_NETWORK_H
 
 #include <deque>
+#include "CSocket.h"
 #include "packet.h"
 #include "../common/common.h"
 #include "../common/sphere_library/CSArray.h"
 #include "../common/sphere_library/CSQueue.h"
-#include "../common/CSocket.h"
 #include "../common/sphereproto.h"
 #include "../sphere/containers.h"
 #include "../game/CServerTime.h"
