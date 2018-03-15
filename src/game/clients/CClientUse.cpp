@@ -711,7 +711,7 @@ bool CClient::Cmd_Skill_Menu( CResourceIDBase rid, int iSelect )
 			return fSuccess;
 		}
 
-		if ( g_Cfg.m_wDebugFlags & DEBUGF_SCRIPTS )
+		if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
 			g_Log.EventDebug("SCRIPT: Too many empty skill menus to continue seeking through menu '%s'\n", g_Cfg.ResourceGetDef(rid)->GetResourceName());
 	}
 
@@ -872,7 +872,7 @@ size_t CClient::Cmd_Skill_Menu_Build( CResourceIDBase rid, int iSelect, CMenuIte
 				static int sm_iReentrant = 0;
 				if ( sm_iReentrant > 1024 )
 				{
-					if ( g_Cfg.m_wDebugFlags & DEBUGF_SCRIPTS )
+					if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
 						g_Log.EventDebug("SCRIPT: Too many skill menus (circular menus?) to continue searching in menu '%s'\n", g_Cfg.ResourceGetDef(rid)->GetResourceName());
 
 					fLimitReached = true;

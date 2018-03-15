@@ -3043,7 +3043,7 @@ CRegionBase * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool f
 	pArea = CheckValidMove(ptDst, &dwBlockFlags, dir, &ClimbHeight, fPathFinding);
 	if ( !pArea )
 	{
-		if (g_Cfg.m_wDebugFlags & DEBUGF_WALK)
+		if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
 			g_pLog->EventWarn("CheckValidMove failed\n");
 		return NULL;
 	}

@@ -424,19 +424,19 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 
 	// Determine ammo type
 	CVarDefCont *pVarAmmoType = pWeapon->GetDefKey("AMMOTYPE", true);
-	CResourceIDBase rid;
+	CResourceID rid;
 	lpctstr t_Str;
 
 	if ( pVarAmmoType )
 	{
 		t_Str = pVarAmmoType->GetValStr();
-		rid = static_cast<CResourceIDBase>(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
+		rid = g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str);
 	}
 	else
 	{
-		rid = pWeaponDef->m_ttWeaponBow.m_idAmmo;
+		rid = CResourceID(RES_ITEMDEF, pWeaponDef->m_ttWeaponBow.m_idAmmo);
 	}
-	AmmoID = static_cast<ITEMID_TYPE>(rid.GetResIndex());
+	AmmoID = (ITEMID_TYPE)(rid.GetResIndex());
 
 	// If there is a different ammo type on the butte currently, tell us to remove the current type first
 	if ( (pButte->m_itArcheryButte.m_AmmoType != ITEMID_NOTHING) && (pButte->m_itArcheryButte.m_AmmoType != AmmoID) )
@@ -534,11 +534,11 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 	if ( pVarAnim )
 	{
 		t_Str = pVarAnim->GetValStr();
-		rid = static_cast<CResourceIDBase>(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
-		AmmoAnim = static_cast<ITEMID_TYPE>(rid.GetResIndex());
+		rid = g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str);
+		AmmoAnim = (ITEMID_TYPE)(rid.GetResIndex());
 	}
 	else
-		AmmoAnim = static_cast<ITEMID_TYPE>(pWeaponDef->m_ttWeaponBow.m_idAmmoX.GetResIndex());
+		AmmoAnim = (ITEMID_TYPE)(pWeaponDef->m_ttWeaponBow.m_idAmmoX);
 
 	AmmoHue = pVarAnimColor ? (dword)(pVarAnimColor->GetValNum()) : 0;
 	AmmoRender = pVarAnimRender ? (dword)(pVarAnimRender->GetValNum()) : 0;

@@ -819,7 +819,7 @@ public:
 #define DEBUGF_WALK				0x2000  // debug flags for Walking stuff.
 #define DEBUGF_PACKETS			0x4000  // log packets to file.
 #define DEBUGF_NETWORK			0x8000  // debug flags for networking.
-	word m_wDebugFlags;         // DEBUG In game effects to turn on and off.
+	uint m_iDebugFlags;         // DEBUG In game effects to turn on and off.
 
 	// Decay
 	int  m_iDecay_Item;         // Base decay time in minutes.
@@ -911,18 +911,17 @@ public:
 	bool m_iPacketDeathAnimation;	// packet 02c
 
 	// Flags for controlling pvp/pvm behaviour of players
-	int   m_iCombatFlags;   // combat flags
-	int   m_iMagicFlags;    // magic flags
-	int   m_iRacialFlags;   // racial traits flags
-	uchar m_iSkillFlags;    // Skill flags (expansion checks, etc)
-	int   m_iRevealFlags;   // reveal flags used for SPELL_REVEAL (mostly for backwards).
+	uint m_iCombatFlags;   // combat flags
+	uint m_iMagicFlags;    // magic flags
+	uint m_iRacialFlags;   // racial traits flags
+	uint m_iRevealFlags;   // reveal flags used for SPELL_REVEAL (mostly for backwards).
 
 	// Criminal/Karma
 	bool m_fAttackingIsACrime;		// Is attacking (even before hitting) a crime?
 	bool m_fGuardsInstantKill;		// Will guards kill instantly or follow normal combat rules?
 	bool m_fGuardsOnMurderers;		// should guards be only called on criminals ?
 	int	 m_iGuardLingerTime;		// How long do guards linger about.
-	int  m_iSnoopCriminal;			// 1 in # chance of getting criminalflagged when succesfully snooping.
+	int  m_iSnoopCriminal;			// 1 in # chance of getting criminal flagged when succesfully snooping.
 	bool m_iTradeWindowSnooping;	// 1 means opening a container in trade window needs to use snooping, 0 direct open.
 	int  m_iMurderMinCount;			// amount of murders before we get title.
 	int	 m_iMurderDecayTime;		// (minutes) Roll murder counts off this often.
@@ -938,8 +937,8 @@ public:
 	// other
 	bool m_fNoResRobe;          // Adding resurrection robe to resurrected players or not.
 	int	 m_iLostNPCTeleport;    // if Distance from HOME is greater than this, NPC will teleport to it instead of walking.
-	int	 m_iExperimental;       // Experimental Flags.
-	int	 m_iOptionFlags;        // Option Flags.
+	uint m_iExperimentalFlags;	// Experimental Flags.
+	uint m_iOptionFlags;		// Option Flags.
 	int	 m_iWoolGrowthTime;     // how long till wool grows back on sheared sheep, in minutes.
 	uint m_iAttackerTimeout;    // Timeout for attacker.
 	uint m_iNotoTimeout;        // Timeout for NOTOriety checks.
@@ -950,7 +949,7 @@ public:
 	int m_iDistanceTalk;        // Max distance at which Talking can be readed.
 
 	CSString	m_sSpeechSelf;  // [SPEECH ] associated to players.
-	CSString	m_sSpeechPet;   //[SPEECH ] associated to pets.
+	CSString	m_sSpeechPet;   // [SPEECH ] associated to pets.
 	CSString	m_sSpeechOther; // unused?
 	CSString	m_sCommandTrigger;//Function to call if client is executing a command to override the default.
 
@@ -1009,7 +1008,7 @@ public:
 #define STAT_FLAG_DENYMAX   0x01    //    MAX* denied
 #define STAT_FLAG_DENYMAXP  0x02    //        .. for players
 #define STAT_FLAG_DENYMAXN  0x04    //        .. for npcs
-	int	m_iStatFlag;
+	uint m_iStatFlag;
 
 #define NPC_AI_PATH				0x00001     // NPC pathfinding.
 #define	NPC_AI_FOOD				0x00002     // NPC food search (objects + grass).
@@ -1022,7 +1021,7 @@ public:
 #define	NPC_AI_MOVEOBSTACLES	0x00200     // If moveable items block my way, try to move them.
 #define NPC_AI_PERSISTENTPATH	0x00400     // NPC will try often to find a path with pathfinding.
 #define NPC_AI_THREAT			0x00800     // Enable the use of the threat variable when finding for target while fighting.
-	int  m_iNpcAi;      // NPCAI Flags.
+	uint m_iNpcAi;      // NPCAI Flags.
 
 	//	Experience system
 	bool m_bExperienceSystem;   // Enables the experience system.
@@ -1101,7 +1100,7 @@ public:
 #define AUTOTOOLTIP_FLAG_POISON        0x0010   // weapon poison charge changes
 #define AUTOTOOLTIP_FLAG_WANDCHARGES   0x0020   // wand charge changes
 #define AUTOTOOLTIP_FLAG_SPELLBOOK     0x0040   // spell added to spellbook
-	int	m_iAutoTooltipResend;       // automatically resend tooltip
+	uint m_iAutoTooltipResend;       // automatically resend tooltip
 
 	int     m_iRegenRate[STAT_QTY]; // Regen's delay for each stat.
 	int     m_iTimerCall;           // Amount of minutes to call f_onserver_timer (0 disables this, default).
@@ -1734,7 +1733,7 @@ public:
 };
 
 
-#define IsSetEF(ef)				((g_Cfg.m_iExperimental & ef) != 0)
+#define IsSetEF(ef)				((g_Cfg.m_iExperimentalFlags & ef) != 0)
 #define IsSetOF(of)				((g_Cfg.m_iOptionFlags & of) != 0)
 #define IsSetCombatFlags(of)	((g_Cfg.m_iCombatFlags & of) != 0)
 #define IsSetMagicFlags(of)		((g_Cfg.m_iMagicFlags & of) != 0)

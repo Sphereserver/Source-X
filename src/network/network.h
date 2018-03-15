@@ -43,7 +43,7 @@
 #ifdef DEBUGPACKETS
 	#define DEBUGNETWORK(_x_)	g_pLog->EventDebug _x_;
 #else
-	#define DEBUGNETWORK(_x_)	if ( g_Cfg.m_wDebugFlags & DEBUGF_NETWORK ) { g_pLog->EventDebug _x_; }
+	#define DEBUGNETWORK(_x_)	if ( g_Cfg.m_iDebugFlags & DEBUGF_NETWORK ) { g_pLog->EventDebug _x_; }
 #endif
 
 class CClient;

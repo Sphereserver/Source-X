@@ -123,14 +123,14 @@ public:
 	}
 
 // Map Movement flags.
-#define CAN_C_GHOST         0x00001 // Moves thru doors etc.
-#define CAN_C_SWIM          0x00002	// dolphin, elemental or is water.
-#define CAN_C_WALK          0x00004	// Can walk on land, climbed on walked over else Frozen by nature(Corpser) or can just swim.
-#define CAN_C_PASSWALLS     0x00008	// Walk thru walls.
-#define CAN_C_FLY           0x00010	// Mongbat etc.
-#define CAN_C_FIRE_IMMUNE   0x00020	// Has some immunity to fire ? (will walk into it (lava)).
-#define CAN_C_INDOORS       0x00040	// Can go under roof. Not really used except to mask.
-#define CAN_C_HOVER         0x00080	// Can hover.
+#define CAN_C_GHOST         0x0001 // Moves thru doors etc.
+#define CAN_C_SWIM          0x0002	// dolphin, elemental or is water.
+#define CAN_C_WALK          0x0004	// Can walk on land, climbed on walked over else Frozen by nature(Corpser) or can just swim.
+#define CAN_C_PASSWALLS     0x0008	// Walk thru walls.
+#define CAN_C_FLY           0x0010	// Mongbat etc.
+#define CAN_C_FIRE_IMMUNE   0x0020	// Has some immunity to fire ? (will walk into it (lava)).
+#define CAN_C_INDOORS       0x0040	// Can go under roof. Not really used except to mask.
+#define CAN_C_HOVER         0x0080	// Can hover.
 
 #define CAN_I_DOOR          0x0001	// Is a door UFLAG4_DOOR.
 #define CAN_I_WATER			0x0002  // Need to swim in it. UFLAG1_WATER.

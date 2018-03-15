@@ -1063,7 +1063,7 @@ badcmd:
 				strncpy( buf, ppArgs[2] + iPos, (size_t)(iCnt) );
 				buf[iCnt] = '\0';
 
-				if ( g_Cfg.m_wDebugFlags & DEBUGF_SCRIPTS )
+				if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
 					g_Log.EventDebug("SCRIPT: strsub(%" PRId64 ",%" PRId64 ",'%s') -> '%s'\n", iPos, iCnt, ppArgs[2], buf);
 
 				sVal = buf;
@@ -1266,7 +1266,7 @@ badcmd:
 				else
 					iRes = MulDivLL(iNum,iMul,iDiv);
 
-				if ( g_Cfg.m_wDebugFlags & DEBUGF_SCRIPTS )
+				if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
 					g_Log.EventDebug("SCRIPT: muldiv(%" PRId64 ",%" PRId64 ",%" PRId64 ") -> %" PRId64 "\n", iNum, iMul, iDiv, iRes);
 
 				sVal.FormatLLVal(iRes);

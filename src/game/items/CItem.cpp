@@ -4658,7 +4658,7 @@ bool CItem::Use_Light()
 	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(m_TagDefs.GetKeyNum("OVERRIDE_LIGHTID", true));
 	if ( !id )
 	{
-		id = static_cast<ITEMID_TYPE>(Item_GetDef()->m_ttLightSource.m_idLight.GetResIndex());
+		id = Item_GetDef()->m_ttLightSource.m_idLight;
 		if ( !id )
 			return false;
 	}

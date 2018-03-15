@@ -4170,7 +4170,7 @@ void CChar::ChangeExperience(int delta, CChar *pCharDead)
 			}
 		}
 
-		if (g_Cfg.m_wDebugFlags&DEBUGF_EXP)
+		if (g_Cfg.m_iDebugFlags&DEBUGF_EXP)
 		{
 			DEBUG_ERR(("%s %s experience change (was %u, delta %d, now %u)\n",
 				(m_pNPC ? "NPC" : "Player"), GetName(), m_exp, delta, m_exp + delta));
@@ -4244,7 +4244,7 @@ void CChar::ChangeExperience(int delta, CChar *pCharDead)
 			// Prevent integer underflow due to negative level change
 			if( delta < 0 && abs(delta) > (int)(m_level) )
 				level = 0;
-			if (g_Cfg.m_wDebugFlags&DEBUGF_LEVEL)
+			if (g_Cfg.m_iDebugFlags&DEBUGF_LEVEL)
 			{
 				DEBUG_ERR(("%s %s level change (was %u, delta %d, now %u)\n",
 					(m_pNPC ? "NPC" : "Player"), GetName(), m_level, delta, level));

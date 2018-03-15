@@ -34,7 +34,7 @@ void xRecordPacketData(const CClient* client, const byte* data, size_t length, l
 	if (client->GetAccount() != NULL && strnicmp(client->GetAccount()->GetName(), (lpctstr) g_Cfg.m_sDumpAccPackets, strlen( client->GetAccount()->GetName())))
 		return;
 #else
-	if (!(g_Cfg.m_wDebugFlags & DEBUGF_PACKETS))
+	if (!(g_Cfg.m_iDebugFlags & DEBUGF_PACKETS))
 		return;
 #endif
 
@@ -48,7 +48,7 @@ void xRecordPacket(const CClient* client, Packet* packet, lpctstr heading)
 	if (client->GetAccount() != NULL && strnicmp(client->GetAccount()->GetName(), (lpctstr) g_Cfg.m_sDumpAccPackets, strlen( client->GetAccount()->GetName())))
 		return;
 #else
-	if (!(g_Cfg.m_wDebugFlags & DEBUGF_PACKETS))
+	if (!(g_Cfg.m_iDebugFlags & DEBUGF_PACKETS))
 		return;
 #endif
 

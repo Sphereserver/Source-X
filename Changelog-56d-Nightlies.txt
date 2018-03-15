@@ -435,3 +435,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 13-03-2018, Nolok
 - Fixed: BOUNCE (and commands like MAKEITEM which at some point bounce some items) did not check if the container could actually hold the item, so ignoring
 	the maximum items count, the maximum weight of its content, the size of the item, etc.
+
+15-03-2018, Nolok
+- Fixed: a GM could shoot through impassable items (like walls) with ranged weapons.
+- Fixed: couldn't shoot through windows with ranged weapons when the Advanced LOS algorithm was on.

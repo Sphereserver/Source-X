@@ -1120,7 +1120,7 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 	return true;
 }
 
-bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist, word wFlags ) const
+bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist, word wFlags, bool bCombatCheck ) const
 {
 	ADDTOCALLSTACK("CChar::CanSeeLOS");
 	if ( (m_pPlayer && (g_Cfg.m_iAdvancedLos & ADVANCEDLOS_PLAYER)) || (m_pNPC && (g_Cfg.m_iAdvancedLos & ADVANCEDLOS_NPC)) )
@@ -1131,7 +1131,7 @@ bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist
 	// NOTE: if not blocked. pptBlock is undefined.
 	// 3D LOS later - real LOS, i.e. we can't shoot through the floor, but can shoot through the hole in it
 
-	if ( IsPriv(PRIV_GM) )
+	if ( !bCombatCheck && IsPriv(PRIV_GM) )	// If i'm checking the LOS during a combat, i don't want to shoot through the walls even if i'm a GM
 		return true;
 
 	CPointMap ptSrc = GetTopPoint();
@@ -1208,7 +1208,7 @@ blocked:
 #define BETWEENPOINT(coord, coordt, coords) ( (coord > ((double)minimum(coordt, coords) - 0.5)) && (coord < ((double)maximum(coordt, coords) + 0.5)) )
 #define APPROX(num) ((double)((num - floor(num)) > 0.5)? ceil(num) : floor(num))
 //#define CALCITEMHEIGHT(num) num + ((pItemDef->GetTFlags() & 0x400)? pItemDef->GetHeight() / 2 : pItemDef->GetHeight())
-#define WARNLOS(_x_)		if ( g_Cfg.m_wDebugFlags & DEBUGF_LOS ) { g_pLog->EventWarn _x_; }
+#define WARNLOS(_x_)		if ( g_Cfg.m_iDebugFlags & DEBUGF_LOS ) { g_pLog->EventWarn _x_; }
 
 bool inline CChar::CanSeeLOS_New_Failed( CPointMap *pptBlock, CPointMap &ptNow ) const
 {
@@ -1218,10 +1218,10 @@ bool inline CChar::CanSeeLOS_New_Failed( CPointMap *pptBlock, CPointMap &ptNow )
 	return false;
 }
 
-bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist, word flags ) const
+bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist, word flags, bool bCombatCheck ) const
 {
 	ADDTOCALLSTACK("CChar::CanSeeLOS_New");
-	if ( IsPriv(PRIV_GM) )
+	if ( !bCombatCheck && IsPriv(PRIV_GM) )	// If i'm checking the LOS during a combat, i don't want to shoot through the walls even if i'm a GM
 	{
 		WARNLOS(("GM Pass\n"));
 		return true;
@@ -1277,9 +1277,9 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 			dz = (int)APPROX(nPz);
 
 			// Add point to vector
-			if ( path.size() )
+			if ( !path.empty() )
 			{
-				CPointMap ptEnd = path.at(path.size() - 1);
+				CPointMap ptEnd = path[path.size() - 1];
 				if ( ptEnd.m_x != dx || ptEnd.m_y != dy || ptEnd.m_z != dz )
 					path.push_back(CPointMap((word)dx, (word)dy, (char)dz, ptSrc.m_map));
 			}
@@ -1297,9 +1297,9 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 			break;
 	}
 
-	if ( path.size() )
+	if ( !path.empty() )
 	{
-		if ( path.at(path.size() - 1) != ptDst )
+		if ( path[path.size() - 1] != ptDst )
 			path.push_back(CPointMap(ptDst.m_x, ptDst.m_y, ptDst.m_z, ptDst.m_map));
 	}
 	else
@@ -1736,7 +1736,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 #undef BETWEENPOINT
 //#undef CALCITEMHEIGHT
 
-bool CChar::CanSeeLOS( const CObjBaseTemplate *pObj, word wFlags ) const
+bool CChar::CanSeeLOS( const CObjBaseTemplate *pObj, word wFlags, bool bCombatCheck ) const
 {
 	ADDTOCALLSTACK("CChar::CanSeeLOS");
 
@@ -1753,10 +1753,10 @@ bool CChar::CanSeeLOS( const CObjBaseTemplate *pObj, word wFlags ) const
 		const CChar *pChar = dynamic_cast<const CChar*>(pObj);
 		if ( pChar )
 			pt.m_z = minimum(pt.m_z + pChar->GetHeightMount(true), UO_SIZE_Z);
-		return CanSeeLOS_New(pt, NULL, pObj->GetVisualRange(), wFlags);
+		return CanSeeLOS_New(pt, NULL, pObj->GetVisualRange(), wFlags, bCombatCheck);
 	}
 	else
-		return CanSeeLOS(pObj->GetTopPoint(), NULL, pObj->GetVisualRange(), wFlags);
+		return CanSeeLOS(pObj->GetTopPoint(), NULL, pObj->GetVisualRange(), wFlags, bCombatCheck);
 }
 
 bool CChar::CanSeeItem( const CItem * pItem ) const
@@ -2293,13 +2293,13 @@ CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DI
 	CRegionBase *pArea = ptDest.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA|REGION_TYPE_ROOM);
 	if ( !pArea )
 	{
-		if (g_Cfg.m_wDebugFlags & DEBUGF_WALK)
+		if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
 			g_pLog->EventWarn("Failed to get region\n");
 		return NULL;
 	}
 
 	dword dwCan = GetMoveBlockFlags();
-	if (g_Cfg.m_wDebugFlags & DEBUGF_WALK)
+	if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
 		g_pLog->EventWarn("GetMoveBlockFlags() (0x%x)\n", dwCan);
 	if ( !(dwCan & (CAN_C_SWIM| CAN_C_WALK|CAN_C_FLY|CAN_C_RUN|CAN_C_HOVER)) )
 		return NULL;	// cannot move at all, so WTF?
@@ -2308,12 +2308,12 @@ CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DI
 	if ( dwCan & CAN_C_WALK )
 	{
 		dwBlockFlags |= CAN_I_CLIMB;		// if we can walk than we can climb. Ignore CAN_C_FLY at all here
-		if (g_Cfg.m_wDebugFlags & DEBUGF_WALK)
+		if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
 			g_pLog->EventWarn("dwBlockFlags (0%x) dwCan(0%x)\n", dwBlockFlags, dwCan);
 	}
 
 	CServerMapBlockState block(dwBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 3, GetHeightMount());
-	if (g_Cfg.m_wDebugFlags & DEBUGF_WALK)
+	if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
 		g_pLog->EventWarn("\t\tCServerMapBlockState block( 0%x, %d, %d, %d );ptDest.m_z(%d) m_zClimbHeight(%d)\n",
 					dwBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 2, ptDest.m_z, m_zClimbHeight);
 
@@ -2331,7 +2331,7 @@ CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DI
 	if ( block.m_Top.m_dwBlockFlags )
 	{
 		dwBlockFlags |= CAN_I_ROOF;	// we are covered by something.
-		if (g_Cfg.m_wDebugFlags & DEBUGF_WALK)
+		if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
 			g_pLog->EventWarn("block.m_Top.m_z (%d) > ptDest.m_z (%d) + m_zClimbHeight (%d) + (block.m_Top.m_dwTile (0x%x) > TERRAIN_QTY ? PLAYER_HEIGHT : PLAYER_HEIGHT/2 )(%d)\n",
 				block.m_Top.m_z, ptDest.m_z, m_zClimbHeight, block.m_Top.m_dwTile, ptDest.m_z - (m_zClimbHeight + (block.m_Top.m_dwTile > TERRAIN_QTY ? PLAYER_HEIGHT : PLAYER_HEIGHT / 2)));
 		if ( block.m_Top.m_z < block.m_Bottom.m_z + (m_zClimbHeight + (block.m_Top.m_dwTile > TERRAIN_QTY ? GetHeightMount() : GetHeightMount() / 2)) )
@@ -2340,7 +2340,7 @@ CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DI
 
 	if ( (dwCan != 0xFFFFFFFF) && (dwBlockFlags != 0x0) )
 	{
-		if (g_Cfg.m_wDebugFlags & DEBUGF_WALK)
+		if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
 			g_pLog->EventWarn("BOTTOMitemID (0%x) TOPitemID (0%x)\n", (block.m_Bottom.m_dwTile - TERRAIN_QTY), (block.m_Top.m_dwTile - TERRAIN_QTY));
 
 		if ( (dwBlockFlags & CAN_I_DOOR) && !Can(CAN_C_GHOST) )
@@ -2368,7 +2368,7 @@ CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DI
 		{
 			if ( !(dwBlockFlags & CAN_I_CLIMB) ) // we can climb anywhere
 			{
-				if (g_Cfg.m_wDebugFlags & DEBUGF_WALK)
+				if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
 					g_pLog->EventWarn("block.m_Lowest.m_z %d  block.m_Bottom.m_z %d  block.m_Top.m_z %d\n", block.m_Lowest.m_z, block.m_Bottom.m_z, block.m_Top.m_z);
 				if ( block.m_Bottom.m_dwTile > TERRAIN_QTY )
 				{
@@ -2391,7 +2391,7 @@ CRegionBase *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DI
 			return NULL;
 	}
 
-	if (g_Cfg.m_wDebugFlags & DEBUGF_WALK)
+	if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
 		g_pLog->EventWarn("GetHeightMount() %d  block.m_Top.m_z  %d ptDest.m_z  %d\n", GetHeightMount(), block.m_Top.m_z, ptDest.m_z);
 	if ( (GetHeightMount() + ptDest.m_z >= block.m_Top.m_z) && g_Cfg.m_iMountHeight && !IsPriv(PRIV_GM) && !IsPriv(PRIV_ALLMOVE) )
 	{

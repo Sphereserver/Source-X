@@ -10,7 +10,7 @@ lpctstr CValStr::FindName( int iVal ) const
 {
 	size_t i = 0;
 	ASSERT(this[i].m_pszName != NULL);
-	for ( ; this[i].m_pszName; i++ )
+	for ( ; this[i].m_pszName; ++i )
 	{
 		if ( iVal < this[i + 1].m_iVal )
 			return ( this[i].m_pszName );
@@ -28,12 +28,12 @@ const int CElementDef::sm_Lengths[ELEM_QTY] =
 	-1,	// ELEM_CSTRING,
 	-1, // ELEM_STRING,	// Assume max size of REG_SIZE
 	sizeof(bool),	// ELEM_BOOL
-	sizeof(byte), // ELEM_BYTE,		// 1 byte.
+	sizeof(byte), // ELEM_BYTE,			// 1 byte.
 	sizeof(byte), // ELEM_MASK_BYTE,	// bits in a byte
-	sizeof(word), // ELEM_WORD,		// 2 bytes
+	sizeof(word), // ELEM_WORD,			// 2 bytes
 	sizeof(word), // ELEM_MASK_WORD,	// bits in a word
-	sizeof(int),  // ELEM_INT,		// Whatever the int size is. 4 i assume
-	sizeof(int),  // ELEM_MASK_INT,
+	sizeof(int),  // ELEM_INT,			// Whatever the int size is. 4 i assume
+	sizeof(uint), // ELEM_MASK_INT,		// bits in a int
 	sizeof(dword), // ELEM_DWORD,		// 4 bytes.
 	sizeof(dword), // ELEM_MASK_DWORD,	// bits in a dword
 };
@@ -55,18 +55,20 @@ bool CElementDef::SetValStr( void * pBase, lpctstr pszVal ) const
 			*static_cast<CSString *>(pValPtr) = pszVal;
 			return true;
 		case ELEM_BOOL:
+		case ELEM_INT:
+			dwVal = Exp_GetVal( pszVal );
+			memcpy( pValPtr, &dwVal, GetValLength() );
+			return true;
 		case ELEM_BYTE:
 		case ELEM_WORD:
-		case ELEM_INT: // signed ?
 		case ELEM_DWORD:
-			dwVal = Exp_GetVal( pszVal );
-			memcpy( pValPtr, &dwVal, GetValLength());
-			return true;
 		case ELEM_MASK_BYTE:	// bits in a byte
 		case ELEM_MASK_WORD:	// bits in a word
-		case ELEM_MASK_INT:
 		case ELEM_MASK_DWORD:	// bits in a dword
-			return false;
+		case ELEM_MASK_INT:		// bits in an (unsigned) int
+			dwVal = Exp_GetUVal( pszVal );
+			memcpy( pValPtr, &dwVal, GetValLength());
+			return true;
 		default:
 			break;
 	}
@@ -104,18 +106,20 @@ bool CElementDef::GetValStr( const void * pBase, CSString & sVal ) const
 			sVal = *static_cast<CSString *>(pValPtr);
 			return true;
 		case ELEM_BOOL:
+		case ELEM_INT:
+			memcpy( &dwVal, pValPtr, GetValLength() );
+			sVal.Format("%d", dwVal);
+			return true;
 		case ELEM_BYTE:
 		case ELEM_WORD:
-		case ELEM_INT: // signed ?
 		case ELEM_DWORD:
-			memcpy( &dwVal, pValPtr, GetValLength());
-			sVal.Format("%u", dwVal);
-			return true;
 		case ELEM_MASK_BYTE:	// bits in a byte
 		case ELEM_MASK_WORD:	// bits in a word
-		case ELEM_MASK_INT:
 		case ELEM_MASK_DWORD:	// bits in a dword
-			return false;
+		case ELEM_MASK_INT:		// bits in an (unsigned) int
+			memcpy( &dwVal, pValPtr, GetValLength() );
+			sVal.Format("%u", dwVal);
+			return true;
 		default:
 			break;
 	}

@@ -286,7 +286,7 @@ void CChar::Skill_Decay()
 
 	// debug message
 #ifdef _DEBUG
-	if ( ( g_Cfg.m_wDebugFlags & DEBUGF_ADVANCE_STATS ) && IsPriv( PRIV_DETAIL ) && GetPrivLevel() >= PLEVEL_GM )
+	if ( ( g_Cfg.m_iDebugFlags & DEBUGF_ADVANCE_STATS ) && IsPriv( PRIV_DETAIL ) && GetPrivLevel() >= PLEVEL_GM )
 	{
 		if ( skillDeduct == SKILL_NONE )
 			SysMessage("No suitable skill to reduce.\n");
@@ -387,7 +387,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 //#ifdef _DEBUG
 			if ( IsPriv( PRIV_DETAIL ) &&
 				GetPrivLevel() >= PLEVEL_GM &&
-				( g_Cfg.m_wDebugFlags & DEBUGF_ADVANCE_STATS ))
+				( g_Cfg.m_iDebugFlags & DEBUGF_ADVANCE_STATS ))
 			{
 				SysMessagef( "%s=%d.%d Difficult=%d Gain Chance=%" PRId64 ".%" PRId64 "%% Roll=%d%%",
 					(lpctstr) pSkillDef->GetKey(),
@@ -1072,7 +1072,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	{
 		// Smelting something like armor etc.
 		// find the ingot type resources.
-		for ( size_t i = 0; i < pOreDef->m_BaseResources.GetCount(); i++ )
+		for ( size_t i = 0; i < pOreDef->m_BaseResources.GetCount(); ++i )
 		{
 			CResourceID rid = pOreDef->m_BaseResources[i].GetResourceID();
 			if ( rid.GetResType() != RES_ITEMDEF )
@@ -3715,7 +3715,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 	}
 
 	// emote the action i am taking.
-	if ( (g_Cfg.m_wDebugFlags & DEBUGF_NPC_EMOTE) || IsStatFlag(STATF_EmoteAction) )
+	if ( (g_Cfg.m_iDebugFlags & DEBUGF_NPC_EMOTE) || IsStatFlag(STATF_EmoteAction) )
 		Emote(Skill_GetName(true));
 
 	return true;

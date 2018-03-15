@@ -278,7 +278,7 @@ public:
 		{
 			dword m_junk1;
 			dword m_junk2;
-			CResourceID m_idLight;	// TDATA3=Change light state to on/off
+			ITEMID_TYPE m_idLight;	// TDATA3=Change light state to on/off
 		} m_ttLightSource;
 
 		// IT_WEAPON_BOW
@@ -288,8 +288,8 @@ public:
 		{
 			dword		m_junk1;		// TDATA1= Sound it makes ?
 			dword		m_iStrReq;		// TDATA2= REQSTR= Strength required to weild weapons/armor.
-			CResourceIDBase m_idAmmo;	// TDATA3= required source ammo.
-			CResourceIDBase m_idAmmoX;	// TDATA4= fired ammo fx.
+			ITEMID_TYPE m_idAmmo;		// TDATA3= required source ammo.
+			ITEMID_TYPE m_idAmmoX;		// TDATA4= fired ammo fx.
 		} m_ttWeaponBow;
 
 		// IT_CONTAINER

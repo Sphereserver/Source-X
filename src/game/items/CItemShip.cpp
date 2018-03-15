@@ -143,7 +143,7 @@ size_t CItemShip::Ship_ListObjs( CObjBase ** ppObjList )
 			continue;
 
 		int zdiff = pChar->GetTopZ() - iShipHeight;
-		if ( zdiff < -2 || zdiff > PLAYER_HEIGHT )
+		if ( (zdiff < -2) || (zdiff > PLAYER_HEIGHT) )
 			continue;
 
 		ppObjList[iCount++] = pChar;
@@ -169,12 +169,12 @@ size_t CItemShip::Ship_ListObjs( CObjBase ** ppObjList )
 				continue;
 	
 			int zdiff = pItem->GetTopZ() - iShipHeight;
-			if (zdiff < -2 || zdiff > PLAYER_HEIGHT)
+			if ((zdiff < -2) || (zdiff > PLAYER_HEIGHT))
 				continue;
 		}
 		ppObjList[iCount++] = pItem;
 	}
-	return(iCount);
+	return iCount;
 }
 
 bool CItemShip::Ship_MoveDelta(CPointBase pdelta)
@@ -300,10 +300,10 @@ bool CItemShip::Ship_CanMoveTo( const CPointMap & pt ) const
 	if ( IsAttr(ATTR_MAGIC ))
 		return true;
 
-	dword wBlockFlags = CAN_I_WATER;
+	dword dwBlockFlags = CAN_I_WATER;
 
-	g_World.GetHeightPoint2( pt, wBlockFlags, true );
-	if ( wBlockFlags & CAN_I_WATER )
+	g_World.GetHeightPoint2( pt, dwBlockFlags, true );
+	if ( dwBlockFlags & CAN_I_WATER )
 		return true;
 
 	return false;
@@ -961,13 +961,9 @@ dodirmovechange:
 			CPointMap pt;
 			pt.m_z = -PLAYER_HEIGHT;
 			if ( Ship_MoveDelta( pt ))
-			{
 				pszSpeak = g_Cfg.GetDefaultMsg( DEFMSG_TILLER_CONFIRM );
-			}
 			else
-			{
 				pszSpeak = g_Cfg.GetDefaultMsg( DEFMSG_TILLER_DENY );
-			}
 			break;
 		}
 

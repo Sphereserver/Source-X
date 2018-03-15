@@ -956,7 +956,7 @@ bool NetworkInput::processGameClientData(NetState* state, Packet* buffer)
 		byte packetId = packet->getRemainingData()[0];
 		Packet* handler = m_thread->m_manager.getPacketManager().getHandler(packetId);
 
-		if (g_Cfg.m_wDebugFlags & DEBUGF_PACKETS)
+		if (g_Cfg.m_iDebugFlags & DEBUGF_PACKETS)
 		{
 #ifdef _DEBUG
 			g_Log.Event(LOGM_DEBUG, "Parsing next packet into the received packet data stream (previous dump).\n");

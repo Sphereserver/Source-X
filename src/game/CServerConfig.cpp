@@ -30,7 +30,7 @@ CServerConfig::CServerConfig()
 	m_iSectorSleepMask	= (1 << 10) - 1;
 	m_fUseMapDiffs		= false;
 
-	m_wDebugFlags			= 0;	//DEBUGF_NPC_EMOTE
+	m_iDebugFlags			= 0;	//DEBUGF_NPC_EMOTE
 	m_fSecure				= true;
 	m_iFreezeRestartTime	= 60;
 	m_bAgree				= false;
@@ -148,7 +148,7 @@ CServerConfig::CServerConfig()
 
 	m_fNoResRobe		= 0;
 	m_iLostNPCTeleport	= 50;
-	m_iExperimental		= 0;
+	m_iExperimentalFlags= 0;
 	m_iDistanceYell		= UO_MAP_VIEW_RADAR;
 	m_iDistanceWhisper	= 3;
 	m_iDistanceTalk		= UO_MAP_VIEW_SIZE_DEFAULT;
@@ -449,7 +449,7 @@ enum RC_TYPE
 	RC_EXPERIENCEKOEFPVP,		// m_iExperienceKoefPVP
 	RC_EXPERIENCEMODE,			// m_iExperienceMode
 	RC_EXPERIENCESYSTEM,		// m_bExperienceSystem
-	RC_EXPERIMENTAL,			// m_iExperimental
+	RC_EXPERIMENTAL,			// m_iExperimentalFlags
 	RC_FEATURESAOS,
 	RC_FEATURESEXTRA,
 	RC_FEATURESKR,
@@ -645,10 +645,10 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "COLORNOTOINVUL",			{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoInvul),		0 }},
 	{ "COLORNOTOINVULGAMEMASTER",{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoInvulGameMaster),	0 }},
 	{ "COLORNOTONEUTRAL",		{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoNeutral),	0 }},
-	{ "COMBATDAMAGEERA",		{ ELEM_BYTE,	OFFSETOF(CServerConfig,m_iCombatDamageEra),		0 }},
-	{ "COMBATFLAGS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCombatFlags),			0 }},
-	{ "COMBATHITCHANCEERA",		{ ELEM_BYTE,	OFFSETOF(CServerConfig,m_iCombatHitChanceEra),	0 }},
-	{ "COMBATSPEEDERA",			{ ELEM_BYTE,	OFFSETOF(CServerConfig,m_iCombatSpeedEra),		0 }},
+	{ "COMBATDAMAGEERA",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCombatDamageEra),		0 }},
+	{ "COMBATFLAGS",			{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iCombatFlags),			0 }},
+	{ "COMBATHITCHANCEERA",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCombatHitChanceEra),	0 }},
+	{ "COMBATSPEEDERA",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCombatSpeedEra),		0 }},
 	{ "COMMANDLOG",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCommandLog),			0 }},
 	{ "COMMANDPREFIX",			{ ELEM_BYTE,	OFFSETOF(CServerConfig,m_cCommandPrefix),		0 }},
 	{ "COMMANDTRIGGER",			{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sCommandTrigger),		0 }},
@@ -661,7 +661,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "CUOSTATUS",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fCUOStatus),			0 }},
 	{ "DEADCANNOTSEELIVING",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_fDeadCannotSeeLiving),	0 }},
 	{ "DEADSOCKETTIME",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDeadSocketTime),		0 }},
-	{ "DEBUGFLAGS",				{ ELEM_WORD,	OFFSETOF(CServerConfig,m_wDebugFlags),			0 }},
+	{ "DEBUGFLAGS",				{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iDebugFlags),			0 }},
 	{ "DECAYTIMER",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDecay_Item),			0 }},
 	{ "DEFAULTCOMMANDLEVEL",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDefaultCommandLevel),	0 }},
 	{ "DISTANCETALK",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDistanceTalk ),		0 }},
@@ -680,7 +680,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "EXPERIENCEKOEFPVP",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iExperienceKoefPVP),	0 }},
 	{ "EXPERIENCEMODE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iExperienceMode),		0 }},
 	{ "EXPERIENCESYSTEM",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bExperienceSystem),	0 }},
-	{ "EXPERIMENTAL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iExperimental),		0 }},
+	{ "EXPERIMENTAL",			{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iExperimentalFlags),		0 }},
 	{ "FEATUREAOS",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureAOS),			0 }},
 	{ "FEATUREEXTRA",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureExtra),		0 }},
 	{ "FEATUREKR",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iFeatureKR),			0 }},
@@ -716,7 +716,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "LOGMASK",				{ ELEM_VOID,	0,											0 }}, // GetLogMask
 	{ "LOOTINGISACRIME",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fLootingIsACrime),		0 }},
 	{ "LOSTNPCTELEPORT",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iLostNPCTeleport),		0 }},
-	{ "MAGICFLAGS",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMagicFlags),			0 }},
+	{ "MAGICFLAGS",				{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iMagicFlags),			0 }},
 	{ "MAGICUNLOCKDOOR",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMagicUnlockDoor),		0 }},
 	{ "MAPCACHETIME",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMapCacheTime),		0 }},
 	{ "MAXBASESKILL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxBaseSkill),		0 }},
@@ -765,7 +765,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "NPCTRAINMAX",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTrainSkillMax),		0 }},
 	{ "NPCTRAINPERCENT",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTrainSkillPercent),	0 }},
 	{ "NTSERVICE",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fUseNTService),		0 }},
-	{ "OPTIONFLAGS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iOptionFlags),			0 }},
+	{ "OPTIONFLAGS",			{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iOptionFlags),			0 }},
 	{ "OVERSKILLMULTIPLY",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iOverSkillMultiply),	0 }},
 	{ "PACKETDEATHANIMATION",	{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_iPacketDeathAnimation),0 }},
 	{ "PAYFROMPACKONLY",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fPayFromPackOnly),		0 }},
@@ -773,10 +773,10 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "PLAYEREVIL",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iPlayerKarmaEvil),		0 }},
 	{ "PLAYERNEUTRAL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iPlayerKarmaNeutral),	0 }},
 	{ "PROFILE",				{ ELEM_VOID,	0,											0 }},
-	{ "RACIALFLAGS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iRacialFlags),			0 }},
+	{ "RACIALFLAGS",			{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iRacialFlags),			0 }},
 	{ "REAGENTLOSSFAIL",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fReagentLossFail),		0 }},
 	{ "REAGENTSREQUIRED",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fReagentsRequired),	0 }},
-	{ "REVEALFLAGS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iRevealFlags),			0 }},
+	{ "REVEALFLAGS",			{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iRevealFlags),			0 }},
 	{ "RTICKS",					{ ELEM_VOID,	0,											0 }},
 	{ "RTIME",					{ ELEM_VOID,	0,											0 }},
 	{ "RUNNINGPENALTY",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iStamRunningPenalty),	0 }},
@@ -1173,12 +1173,12 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			break;
 
 		case RC_EXPERIMENTAL:
-			g_Cfg.m_iExperimental = s.GetArgVal();
+			g_Cfg.m_iExperimentalFlags = s.GetArgUVal();
 			//PrintEFOFFlags(true, false);
 			break;
 
 		case RC_OPTIONFLAGS:
-			g_Cfg.m_iOptionFlags = s.GetArgVal();
+			g_Cfg.m_iOptionFlags = s.GetArgUVal();
 			//PrintEFOFFlags(false, true);
 			break;
 		case RC_TIMERCALL:
@@ -1715,7 +1715,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			sVal = g_szServerDescription;
 			break;
 		case RC_EXPERIMENTAL:
-			sVal.FormatHex( g_Cfg.m_iExperimental );
+			sVal.FormatHex( g_Cfg.m_iExperimentalFlags );
 			//PrintEFOFFlags(true, false, pSrc);
 			break;
 		case RC_OPTIONFLAGS:

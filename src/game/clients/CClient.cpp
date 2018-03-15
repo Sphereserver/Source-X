@@ -896,7 +896,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					locArgs += ( !strncmp(ppLocArgs[y], "NULL", 4) ? " " : ppLocArgs[y] );
 				}
 
-				if ( g_Cfg.m_wDebugFlags & DEBUGF_SCRIPTS )
+				if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
 					g_Log.EventDebug("SCRIPT: addcliloc(%u,'%s')\n", clilocid, static_cast<lpctstr>(locArgs));
 				this->m_TooltipData.Add(new CClientTooltip(clilocid, locArgs));
 			}

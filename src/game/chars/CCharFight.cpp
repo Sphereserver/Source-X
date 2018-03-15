@@ -1401,7 +1401,8 @@ WAR_SWING_TYPE CChar::Fight_CanHit(CChar * pCharSrc)
 
 		return WAR_SWING_INVALID;
 	}
-	if (!CanSeeLOS(pCharSrc))
+	word wLOSFlags = (g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_RANGED )) ? LOS_NB_WINDOWS : 0;
+	if (!CanSeeLOS(pCharSrc, wLOSFlags, true))
 		return WAR_SWING_EQUIPPING;
 
 	// I am on ship. Should be able to combat only inside the ship to avoid free sea and ground characters hunting
@@ -1575,7 +1576,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	}
 
 	SKILL_TYPE skill = Skill_GetActive();
-	CResourceIDBase rid;
+	CResourceID rid;
 	lpctstr t_Str;
 	int dist = GetTopDist3D(pCharTarg);
 
@@ -1597,25 +1598,25 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		if ( dist < iMinDist )
 		{
 			SysMessageDefault(DEFMSG_COMBAT_ARCH_TOOCLOSE);
-			if ( !IsSetCombatFlags(COMBAT_STAYINRANGE) || m_atFight.m_War_Swing_State != WAR_SWING_SWINGING )
-				return(WAR_SWING_READY);
+			if ( !IsSetCombatFlags(COMBAT_STAYINRANGE) || (m_atFight.m_War_Swing_State != WAR_SWING_SWINGING) )
+				return WAR_SWING_READY;
 			return WAR_SWING_EQUIPPING;
 		}
 		else if ( dist > iMaxDist )
 		{
-			if ( !IsSetCombatFlags(COMBAT_STAYINRANGE) || m_atFight.m_War_Swing_State != WAR_SWING_SWINGING )
-				return(WAR_SWING_READY);
+			if ( !IsSetCombatFlags(COMBAT_STAYINRANGE) || (m_atFight.m_War_Swing_State != WAR_SWING_SWINGING) )
+				return WAR_SWING_READY;
 			return WAR_SWING_EQUIPPING;
 		}
 		if ( pType )
 		{
 			t_Str = pType->GetValStr();
-			rid = static_cast<CResourceIDBase>(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
+			rid = g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str);
 		}
 		else
-			rid = pWeaponDef->m_ttWeaponBow.m_idAmmo;
+			rid = CResourceID(RES_ITEMDEF, pWeaponDef->m_ttWeaponBow.m_idAmmo);
 
-		ITEMID_TYPE AmmoID = static_cast<ITEMID_TYPE>(rid.GetResIndex());
+		ITEMID_TYPE AmmoID = (ITEMID_TYPE)(rid.GetResIndex());
 		if ( AmmoID )
 		{
 			if ( pCont )
@@ -1625,8 +1626,8 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 				if ( !pNewCont )	//if no UID, check for ITEMID_TYPE
 				{
 					t_Str = pCont->GetValStr();
-					CResourceIDBase rContid = static_cast<CResourceIDBase>(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
-					ITEMID_TYPE ContID = static_cast<ITEMID_TYPE>(rContid.GetResIndex());
+					CResourceID rContid = g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str);
+					ITEMID_TYPE ContID = (ITEMID_TYPE)(rContid.GetResIndex());
 					if ( ContID )
 						pNewCont = dynamic_cast<CItemContainer*>(ContentFind(rContid));
 				}
@@ -1647,10 +1648,10 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	{
 		int	iMinDist = pWeapon ? pWeapon->RangeH() : 0;
 		int	iMaxDist = CalcFightRange(pWeapon);
-		if ( dist < iMinDist || dist > iMaxDist )
+		if ( (dist < iMinDist) || (dist > iMaxDist) )
 		{
-			if ( !IsSetCombatFlags(COMBAT_STAYINRANGE) || m_atFight.m_War_Swing_State != WAR_SWING_SWINGING )
-				return(WAR_SWING_READY);
+			if ( !IsSetCombatFlags(COMBAT_STAYINRANGE) || (m_atFight.m_War_Swing_State != WAR_SWING_SWINGING) )
+				return WAR_SWING_READY;
 			return WAR_SWING_EQUIPPING;
 		}
 	}
@@ -1672,7 +1673,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 				return WAR_SWING_READY;
 
 			iSwingDelay = (int)(Args.m_iN1);
-			anim = static_cast<ANIM_TYPE>(Args.m_VarsLocal.GetKeyNum("Anim", false));
+			anim = (ANIM_TYPE)(Args.m_VarsLocal.GetKeyNum("Anim", false));
 			animDelay = (int)(Args.m_VarsLocal.GetKeyNum("AnimDelay", true));
 			if ( iSwingDelay < 0 )
 				iSwingDelay = 0;
@@ -1705,11 +1706,11 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		if ( pAnim )
 		{
 			t_Str = pAnim->GetValStr();
-			rid = static_cast<CResourceIDBase>(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
-			AmmoAnim = static_cast<ITEMID_TYPE>(rid.GetResIndex());
+			rid = g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str);
+			AmmoAnim = (ITEMID_TYPE)(rid.GetResIndex());
 		}
 		else
-			AmmoAnim = static_cast<ITEMID_TYPE>(pWeaponDef->m_ttWeaponBow.m_idAmmoX.GetResIndex());
+			AmmoAnim = pWeaponDef->m_ttWeaponBow.m_idAmmoX;
 
 		dword AmmoHue = 0;
 		if ( pColor )
@@ -1822,7 +1823,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 			pAmmo = NULL;
 
 		iDmg = (int)(Args.m_iN1);
-		iTyp = static_cast<DAMAGE_TYPE>(Args.m_iN2);
+		iTyp = (DAMAGE_TYPE)(Args.m_iN2);
 	}
 
 	// BAD BAD Healing fix.. Cant think of something else -- Radiant
@@ -1938,7 +1939,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 			Sound(0x44d);
 
 		// Make blood effects
-		if ( pCharTarg->m_wBloodHue != static_cast<HUE_TYPE>(-1) )
+		if ( pCharTarg->m_wBloodHue != (HUE_TYPE)(-1) )
 		{
 			static const ITEMID_TYPE sm_Blood[] = { ITEMID_BLOOD1, ITEMID_BLOOD2, ITEMID_BLOOD3, ITEMID_BLOOD4, ITEMID_BLOOD5, ITEMID_BLOOD6, ITEMID_BLOOD_SPLAT };
 			int iBloodQty = (g_Cfg.m_iFeatureSE & FEATURE_SE_UPDATE) ? Calc_GetRandVal2(4, 5) : Calc_GetRandVal2(1, 2);
