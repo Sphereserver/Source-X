@@ -78,7 +78,7 @@ bool CChar::IsResourceMatch( CResourceIDBase rid, dword dwAmount, dword dwArgRes
 bool CChar::IsSpeakAsGhost() const
 {
 	return( IsStatFlag(STATF_DEAD) &&
-		! IsStatFlag( STATF_SpiritSpeak ) &&
+		! IsStatFlag( STATF_SPIRITSPEAK ) &&
 		! IsPriv( PRIV_GM ));
 }
 
@@ -89,7 +89,7 @@ bool CChar::CanUnderstandGhost() const
 		return true;
 	if ( Skill_GetBase( SKILL_SPIRITSPEAK ) >= g_Cfg.m_iMediumCanHearGhosts )
 		return true;
-	return( IsStatFlag( STATF_SpiritSpeak|STATF_DEAD ) || IsPriv( PRIV_GM|PRIV_HEARALL ));
+	return( IsStatFlag( STATF_SPIRITSPEAK|STATF_DEAD ) || IsPriv( PRIV_GM|PRIV_HEARALL ));
 }
 
 bool CChar::IsPlayableCharacter() const
@@ -606,19 +606,19 @@ byte CChar::GetModeFlag( const CClient *pViewer ) const
 	CCharBase *pCharDef = Char_GetDef();
 	byte mode = 0;
 
-	if ( IsStatFlag(STATF_Freeze|STATF_Stone) )
+	if ( IsStatFlag(STATF_FREEZE|STATF_STONE) )
 		mode |= CHARMODE_FREEZE;
 	if ( pCharDef->IsFemale() )
 		mode |= CHARMODE_FEMALE;
 
 	if ( pViewer && (pViewer->GetNetState()->isClientVersion(MINCLIVER_SA) || pViewer->GetNetState()->isClientEnhanced()) )
 	{
-		if ( IsStatFlag(STATF_Hovering) )
+		if ( IsStatFlag(STATF_HOVERING) )
 			mode |= CHARMODE_FLYING;
 	}
 	else
 	{
-		if ( IsStatFlag(STATF_Poisoned) )
+		if ( IsStatFlag(STATF_POISONED) )
 			mode |= CHARMODE_POISON;
 	}
 
@@ -626,16 +626,16 @@ byte CChar::GetModeFlag( const CClient *pViewer ) const
 		mode |= CHARMODE_YELLOW;
 	if ( GetPrivLevel() > PLEVEL_Player )
 		mode |= CHARMODE_IGNOREMOBS;
-	if ( IsStatFlag(STATF_War) )
+	if ( IsStatFlag(STATF_WAR) )
 		mode |= CHARMODE_WAR;
 
-	uint64 iFlags = STATF_Sleeping;
+	uint64 iFlags = STATF_SLEEPING;
 	if ( !g_Cfg.m_iColorInvis )	//This is needed for Serv.ColorInvis to work, proper flags must be set
-        iFlags |= STATF_Insubstantial;
+        iFlags |= STATF_INSUBSTANTIAL;
 	if ( !g_Cfg.m_iColorHidden )	//serv.ColorHidden
-        iFlags |= STATF_Hidden;
+        iFlags |= STATF_HIDDEN;
 	if ( !g_Cfg.m_iColorInvisSpell )	//serv.ColorInvisSpell
-        iFlags |= STATF_Invisible;
+        iFlags |= STATF_INVISIBLE;
 	if ( IsStatFlag(iFlags) )	// Checking if I have any of these settings enabled on the ini and I have any of them, if so ... CHARMODE_INVIS is set and color applied.
 		mode |= CHARMODE_INVIS;
 
@@ -664,7 +664,7 @@ byte CChar::GetDirFlag(bool fSquelchForwardStep) const
 		}
 	}
 
-	if ( IsStatFlag( STATF_Fly ))
+	if ( IsStatFlag( STATF_FLY ))
 		dir |= 0x80; // running/flying ?
 
 	return( dir );
@@ -680,7 +680,7 @@ dword CChar::GetMoveBlockFlags(bool bIgnoreGM) const
 	if ( Can(CAN_C_GHOST) )
 		dwCan |= CAN_C_GHOST;
 
-	if ( IsStatFlag(STATF_Hovering) )
+	if ( IsStatFlag(STATF_HOVERING) )
 		dwCan |= CAN_C_HOVER;
 
 	// Inversion of MT_INDOORS, so MT_INDOORS should be named MT_NOINDOORS now.
@@ -697,7 +697,7 @@ byte CChar::GetLightLevel() const
 	ADDTOCALLSTACK("CChar::GetLightLevel");
 	// Get personal light level.
 
-	if ( IsStatFlag(STATF_DEAD|STATF_Sleeping|STATF_NightSight) || IsPriv(PRIV_DEBUG) )
+	if ( IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_NIGHTSIGHT) || IsPriv(PRIV_DEBUG) )
 		return LIGHT_BRIGHT;
 	if ( (g_Cfg.m_iRacialFlags & RACIALF_ELF_NIGHTSIGHT) && IsElf() )		// elves always have nightsight enabled (Night Sight racial trait)
 		return LIGHT_BRIGHT;
@@ -849,7 +849,7 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 
 	// Incognito ?
 	// If polymorphed then use the poly name.
-	if ( IsStatFlag(STATF_Incognito) || !IsPlayableCharacter() || (m_pNPC && pCharDef->GetTypeName() != pCharDef->GetTradeName()) )
+	if ( IsStatFlag(STATF_INCOGNITO) || !IsPlayableCharacter() || (m_pNPC && pCharDef->GetTypeName() != pCharDef->GetTradeName()) )
 	{
 		if ( !IsIndividualName() )
 			return "";	// same as type anyhow.
@@ -932,7 +932,7 @@ bool CChar::CanDisturb( const CChar *pChar ) const
 	if ( !pChar )
 		return false;
 	if ( GetPrivLevel() < pChar->GetPrivLevel() )
-		return !pChar->IsStatFlag(STATF_Insubstantial | STATF_INVUL);
+		return !pChar->IsStatFlag(STATF_INSUBSTANTIAL | STATF_INVUL);
 	return true;
 }
 
@@ -1074,7 +1074,7 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 			if ( m_pNPC->m_Brain != NPCBRAIN_HEALER && Skill_GetBase(SKILL_SPIRITSPEAK) < 1000 )
 				return false;
 		}
-		else if ( pChar->IsStatFlag(STATF_Invisible|STATF_Insubstantial|STATF_Hidden) )
+		else if ( pChar->IsStatFlag(STATF_INVISIBLE|STATF_INSUBSTANTIAL|STATF_HIDDEN) )
 		{
 			// Characters can be invisible, but not to GM's (true sight ?)
 			// equal level can see each other if they are staff members or they return 1 in @SeeHidden
@@ -1099,7 +1099,7 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 
 		if ( pChar->IsDisconnected() )
 		{
-			if ( pChar->IsStatFlag(STATF_Ridden) )
+			if ( pChar->IsStatFlag(STATF_RIDDEN) )
 			{
 				CChar *pCharRider = Horse_GetMountChar();
 				if ( pCharRider )
@@ -1181,7 +1181,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 		case IT_SHIP_SIDE:
 		case IT_SHIP_SIDE_LOCKED:
 		case IT_ROPE:
-			if ( IsStatFlag(STATF_Sleeping|STATF_Freeze|STATF_Stone) )
+			if ( IsStatFlag(STATF_SLEEPING|STATF_FREEZE|STATF_STONE) )
 				break;
 			return (iDist <= g_Cfg.m_iMaxShipPlankTeleport);
 
@@ -1189,7 +1189,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 			break;
 		}
 
-		if ( !bDeathImmune && IsStatFlag(STATF_DEAD|STATF_Sleeping|STATF_Freeze|STATF_Stone) )
+		if ( !bDeathImmune && IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_FREEZE|STATF_STONE) )
 			return false;
 	}
 
@@ -1206,7 +1206,7 @@ bool CChar::CanTouch( const CObjBase *pObj ) const
 				return true;
 			if ( IsPriv(PRIV_GM) )
 				return (GetPrivLevel() >= pChar->GetPrivLevel());
-			if ( pChar->IsStatFlag(STATF_DEAD|STATF_Stone) )
+			if ( pChar->IsStatFlag(STATF_DEAD|STATF_STONE) )
 				return false;
 		}
 
@@ -1418,7 +1418,7 @@ bool CChar::CanMove( CItem *pItem, bool fMsg ) const
 	if ( pItem->IsAttr(ATTR_MOVE_NEVER|ATTR_LOCKEDDOWN) && !pItem->IsAttr(ATTR_MOVE_ALWAYS) )
 		return false;
 
-	if ( IsStatFlag(STATF_Stone|STATF_Freeze|STATF_Insubstantial|STATF_DEAD|STATF_Sleeping) )
+	if ( IsStatFlag(STATF_STONE|STATF_FREEZE|STATF_INSUBSTANTIAL|STATF_DEAD|STATF_SLEEPING) )
 	{
 		if ( fMsg )
 			SysMessageDefault(DEFMSG_CANTMOVE_DEAD);
@@ -1546,7 +1546,7 @@ bool CChar::IsTakeCrime( const CItem *pItem, CChar ** ppCharMark ) const
 		return false;
 
 	// Pack animal has no owner ?
-	if ( pCharMark->m_pNPC && pCharMark->GetNPCBrain() == NPCBRAIN_ANIMAL && !pCharMark->IsStatFlag(STATF_Pet) )
+	if ( pCharMark->m_pNPC && pCharMark->GetNPCBrain() == NPCBRAIN_ANIMAL && !pCharMark->IsStatFlag(STATF_PET) )
 		return false;
 
 	return true;
@@ -1708,7 +1708,7 @@ CRegion *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DIR_TY
 			dwBlockFlags |= CAN_I_BLOCK;
 		else if ( (dwBlockFlags & CAN_I_WATER) && !Can(CAN_C_SWIM) )
 			dwBlockFlags |= CAN_I_BLOCK;
-		else if ( (dwBlockFlags & CAN_I_HOVER) && !Can(CAN_C_HOVER) && !IsStatFlag(STATF_Hovering) )
+		else if ( (dwBlockFlags & CAN_I_HOVER) && !Can(CAN_C_HOVER) && !IsStatFlag(STATF_HOVERING) )
 			dwBlockFlags |= CAN_I_BLOCK;
 
 		// If anything blocks us it should not be overridden by this.
@@ -1720,7 +1720,7 @@ CRegion *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DIR_TY
 			dwBlockFlags &= ~CAN_I_BLOCK;
 		else if ( (dwBlockFlags & CAN_I_PLATFORM) && Can(CAN_C_WALK) )
 			dwBlockFlags &= ~CAN_I_BLOCK;
-		else if ( (dwBlockFlags & CAN_I_HOVER) && (Can(CAN_C_HOVER) || IsStatFlag(STATF_Hovering)) )
+		else if ( (dwBlockFlags & CAN_I_HOVER) && (Can(CAN_C_HOVER) || IsStatFlag(STATF_HOVERING)) )
 			dwBlockFlags &= ~CAN_I_BLOCK;
 
 		if ( !Can(CAN_C_FLY) )
@@ -1744,7 +1744,7 @@ CRegion *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DIR_TY
 		//dword dwMoveBlock = (dwBlockFlags & CAN_I_MOVEMASK) &~ (CAN_I_CLIMB);
 		//dword dwMoveBlock = (dwBlockFlags & CAN_I_MOVEMASK) &~ (CAN_I_CLIMB|CAN_I_ROOF);
 		//if ( dwMoveBlock &~ dwCan )
-		if ( (dwBlockFlags & CAN_I_BLOCK) && (Can(CAN_C_PASSWALLS) ) )
+		if ( (dwBlockFlags & CAN_I_BLOCK) && !Can(CAN_C_PASSWALLS) )
 			return NULL;
 		if ( block.m_Bottom.m_z >= UO_SIZE_Z )
 			return NULL;

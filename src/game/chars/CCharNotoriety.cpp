@@ -139,7 +139,7 @@ NOTO_TYPE CChar::Noto_CalcFlag(const CChar * pCharViewer, bool fAllowIncog, bool
 	if (iNotoFlag != NOTO_INVALID)
 		return iNotoFlag;
 
-	if (fAllowIncog && IsStatFlag(STATF_Incognito))
+	if (fAllowIncog && IsStatFlag(STATF_INCOGNITO))
 		return NOTO_NEUTRAL;
 
 	if (fAllowInvul && IsStatFlag(STATF_INVUL))
@@ -229,7 +229,7 @@ NOTO_TYPE CChar::Noto_CalcFlag(const CChar * pCharViewer, bool fAllowIncog, bool
 		}
 	}
 
-	if (IsStatFlag(STATF_Criminal))	// criminal to everyone.
+	if (IsStatFlag(STATF_CRIMINAL))	// criminal to everyone.
 		return(NOTO_CRIMINAL);
 
 	if (this != pCharViewer) // Am I checking myself?
@@ -282,7 +282,7 @@ HUE_TYPE CChar::Noto_GetHue(const CChar * pCharViewer, bool fIncog) const
 lpctstr CChar::Noto_GetFameTitle() const
 {
 	ADDTOCALLSTACK("CChar::Noto_GetFameTitle");
-	if ( IsStatFlag(STATF_Incognito|STATF_Polymorph) )
+	if ( IsStatFlag(STATF_INCOGNITO|STATF_POLYMORPH) )
 		return "";
 
 	if ( !IsPriv(PRIV_PRIV_NOSHOW) )	// PRIVSHOW is on
@@ -338,7 +338,7 @@ lpctstr CChar::Noto_GetTitle() const
 {
 	ADDTOCALLSTACK("CChar::Noto_GetTitle");
 
-	lpctstr pTitle = Noto_IsMurderer() ? g_Cfg.GetDefaultMsg( DEFMSG_TITLE_MURDERER ) : ( IsStatFlag(STATF_Criminal) ? g_Cfg.GetDefaultMsg( DEFMSG_TITLE_CRIMINAL ) :  g_Cfg.GetNotoTitle(Noto_GetLevel(), Char_GetDef()->IsFemale()) );
+	lpctstr pTitle = Noto_IsMurderer() ? g_Cfg.GetDefaultMsg( DEFMSG_TITLE_MURDERER ) : ( IsStatFlag(STATF_CRIMINAL) ? g_Cfg.GetDefaultMsg( DEFMSG_TITLE_CRIMINAL ) :  g_Cfg.GetNotoTitle(Noto_GetLevel(), Char_GetDef()->IsFemale()) );
 	lpctstr pFameTitle = GetKeyStr("NAME.PREFIX");
 	if ( !*pFameTitle )
 		pFameTitle = Noto_GetFameTitle();
@@ -384,7 +384,7 @@ bool CChar::Noto_Criminal( CChar * pChar )
 		decay = (int)(Args.m_iN1);
 	}
 
-	if ( !IsStatFlag(STATF_Criminal) )
+	if ( !IsStatFlag(STATF_CRIMINAL) )
 		SysMessageDefault(DEFMSG_MSG_GUARDS);
 
 	Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_Criminal, g_Cfg.GetSpellEffect(SPELL_NONE, 0), decay);
@@ -537,7 +537,7 @@ void CChar::Noto_Kill(CChar * pKill, int iTotalKillers)
 		{
             if (m_pNPC->m_Brain == NPCBRAIN_GUARD)	// don't create corpse if NPC got killed by a guard
             {
-                pKill->StatFlag_Set(STATF_Conjured);
+                pKill->StatFlag_Set(STATF_CONJURED);
                 return;
             }
 		}
@@ -568,7 +568,7 @@ void CChar::Noto_Kill(CChar * pKill, int iTotalKillers)
 	}
 
 	// No fame/karma/exp gain on these conditions
-	if ( NotoThem == NOTO_GUILD_SAME || pKill->IsStatFlag(STATF_Conjured) )
+	if ( NotoThem == NOTO_GUILD_SAME || pKill->IsStatFlag(STATF_CONJURED) )
 		return;
 
 	int iPrvLevel = Noto_GetLevel();	// store title before fame/karma changes to check if it got changed

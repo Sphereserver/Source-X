@@ -971,7 +971,7 @@ int CItem::FixWeirdness()
 					return iResultCode;	// get rid of it.
 				}
 				SetAttr(ATTR_MOVE_NEVER);
-				pChar->StatFlag_Set( STATF_OnHorse );
+				pChar->StatFlag_Set( STATF_ONHORSE );
 				break;
 			case LAYER_FLAG_ClientLinger:
 				if ( m_type != IT_EQ_CLIENT_LINGER )

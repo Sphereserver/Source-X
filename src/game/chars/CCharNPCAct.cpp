@@ -481,7 +481,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 		{
 			bool bClearedWay = false;
 			// Some object in my way that i could move ? Try to move it.
-			if ( !Can(CAN_C_USEHANDS) || IsStatFlag(STATF_DEAD|STATF_Sleeping|STATF_Freeze|STATF_Stone) ) ;		// i cannot use hands or i am frozen, so cannot move objects
+			if ( !Can(CAN_C_USEHANDS) || IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_FREEZE|STATF_STONE) ) ;		// i cannot use hands or i am frozen, so cannot move objects
 			else if (( NPC_GetAiFlags()&NPC_AI_MOVEOBSTACLES ) && ( iInt > iRand ))
 			{
 				int			i;
@@ -552,7 +552,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 		fRun = false;
 
 	EXC_SET("StatFlag");
-	StatFlag_Mod(STATF_Fly, fRun);
+	StatFlag_Mod(STATF_FLY, fRun);
 
 	EXC_SET("Old Top Point");
 	CPointMap ptOld = GetTopPoint();
@@ -587,7 +587,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 	// END TAG.OVERRIDE.MOVERATE
 	if (fRun)
 	{
-		if (IsStatFlag(STATF_Pet))	// pets run a little faster.
+		if (IsStatFlag(STATF_PET))	// pets run a little faster.
 		{
 			if (iDex < 75)
 				iDex = 75;
@@ -659,7 +659,7 @@ bool CChar::NPC_LookAtCharGuard( CChar * pChar, bool bFromTrigger )
 			Fight_Hit(pChar);
 		}
 	}
-	if ( !IsStatFlag(STATF_War) || m_Act_UID != pChar->GetUID() )
+	if ( !IsStatFlag(STATF_WAR) || m_Act_UID != pChar->GetUID() )
 	{
 		Speak(g_Cfg.GetDefaultMsg(sm_szSpeakGuardStrike[Calc_GetRandVal(CountOf(sm_szSpeakGuardStrike))]));
 		Fight_Attack(pChar);
@@ -698,7 +698,7 @@ bool CChar::NPC_LookAtCharMonster( CChar * pChar )
 		return false;
 
 	int iDist = GetTopDist3D( pChar );
-	if ( IsStatFlag( STATF_Hidden ) &&
+	if ( IsStatFlag( STATF_HIDDEN ) &&
 		! NPC_FightMayCast() &&
 		iDist > 1 )
 		return false;	// element of suprise.
@@ -722,7 +722,7 @@ bool CChar::NPC_LookAtCharHuman( CChar * pChar )
 		return( NPC_LookAtCharMonster( pChar ));
 	}
 
-	if (( ! pChar->Noto_IsEvil() && g_Cfg.m_fGuardsOnMurderers) && (! pChar->IsStatFlag( STATF_Criminal ))) 	// not interesting.
+	if (( ! pChar->Noto_IsEvil() && g_Cfg.m_fGuardsOnMurderers) && (! pChar->IsStatFlag( STATF_CRIMINAL ))) 	// not interesting.
 		return false;
 
 	// Yell for guard if we see someone evil.
@@ -733,13 +733,13 @@ bool CChar::NPC_LookAtCharHuman( CChar * pChar )
 		else if (NPC_CanSpeak() && !Calc_GetRandVal(3))
 		{
 
-			Speak(pChar->IsStatFlag(STATF_Criminal) ?
+			Speak(pChar->IsStatFlag(STATF_CRIMINAL) ?
 				g_Cfg.GetDefaultMsg(DEFMSG_NPC_GENERIC_SEECRIM) :
 				g_Cfg.GetDefaultMsg(DEFMSG_NPC_GENERIC_SEEMONS));
 
 			// Find a guard.
 			CallGuards(pChar);
-			if (IsStatFlag(STATF_War))
+			if (IsStatFlag(STATF_WAR))
 				return false;
 
 			// run away like a coward.
@@ -794,7 +794,7 @@ bool CChar::NPC_LookAtCharHealer( CChar * pChar )
 	lpctstr pszRefuseMsg;
 
 	int iDist = GetDist( pChar );
-	if ( pChar->IsStatFlag( STATF_Insubstantial ))
+	if ( pChar->IsStatFlag( STATF_INSUBSTANTIAL ))
 	{
 		pszRefuseMsg = g_Cfg.GetDefaultMsg( DEFMSG_NPC_HEALER_MANIFEST );
 		if ( Calc_GetRandVal(5) || iDist > 3 )
@@ -816,7 +816,7 @@ bool CChar::NPC_LookAtCharHealer( CChar * pChar )
 	bool ImNeutral = Noto_IsNeutral();
 	NOTO_TYPE NotoThem = pChar->Noto_GetFlag( this, true );
 
-	if ( !IsStatFlag( STATF_Criminal ) && NotoThem == NOTO_CRIMINAL )
+	if ( !IsStatFlag( STATF_CRIMINAL ) && NotoThem == NOTO_CRIMINAL )
 	{
 		pszRefuseMsg = sm_szHealerRefuseCriminals[ Calc_GetRandVal( CountOf( sm_szHealerRefuseCriminals )) ];
 		if ( Calc_GetRandVal(5) || iDist > 3 )
@@ -956,7 +956,7 @@ bool CChar::NPC_LookAtChar( CChar * pChar, int iDist )
 	else
 	{
 		// initiate a conversation ?
-		if ( ! IsStatFlag( STATF_War ) &&
+		if ( ! IsStatFlag( STATF_WAR ) &&
 			( Skill_GetActive() == SKILL_NONE || Skill_GetActive() == NPCACT_WANDER ) && // I'm idle
 			pChar->m_pPlayer &&
 			! Memory_FindObjTypes( pChar, MEMORY_SPEAK ))
@@ -1051,7 +1051,7 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 	int iRangeBlur = UO_MAP_VIEW_SIGHT;
 
 	// If I can't move don't look too far.
-	if ( !Can(CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY|CAN_C_HOVER|CAN_C_RUN) || IsStatFlag(STATF_Freeze|STATF_Stone) )
+	if ( !Can(CAN_C_SWIM|CAN_C_WALK|CAN_C_FLY|CAN_C_HOVER|CAN_C_RUN) || IsStatFlag(STATF_FREEZE|STATF_STONE) )
 	{
 		if ( !NPC_FightMayCast() )	// And i have no distance attack.
 			iRange = iRangeBlur = 2;
@@ -1293,7 +1293,7 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 	}
 
 	EXC_SET("WalkToPoint 1");
-	NPC_WalkToPoint(IsStatFlag(STATF_War) ? true : (dist > 3));
+	NPC_WalkToPoint(IsStatFlag(STATF_WAR) ? true : (dist > 3));
 	return(true);
 
 	EXC_CATCH;
@@ -1387,9 +1387,9 @@ void CChar::NPC_Act_GoHome()
 
 			// If we arent conjured and still got no valid home
 			// then set our status to conjured and take our life.
-			if ( ! IsStatFlag(STATF_Conjured))
+			if ( ! IsStatFlag(STATF_CONJURED))
 			{
-				StatFlag_Set( STATF_Conjured );
+				StatFlag_Set( STATF_CONJURED );
 				Stat_SetVal(STAT_STR, -1000);
 				return;
 			}
@@ -1453,7 +1453,7 @@ void CChar::NPC_Act_Looting()
 
 	if ( !(NPC_GetAiFlags() & NPC_AI_LOOTING) )
 		return;
-	if ( !m_pNPC || m_pNPC->m_Brain != NPCBRAIN_MONSTER || !Can(CAN_C_USEHANDS) || IsStatFlag(STATF_Conjured|STATF_Pet) || (m_TagDefs.GetKeyNum("DEATHFLAGS", true) & DEATH_NOCORPSE) )
+	if ( !m_pNPC || m_pNPC->m_Brain != NPCBRAIN_MONSTER || !Can(CAN_C_USEHANDS) || IsStatFlag(STATF_CONJURED|STATF_PET) || (m_TagDefs.GetKeyNum("DEATHFLAGS", true) & DEATH_NOCORPSE) )
 		return;
 	if ( m_pArea->IsFlag(REGION_FLAG_SAFE|REGION_FLAG_GUARDED) )
 		return;
@@ -1543,7 +1543,7 @@ void CChar::NPC_Act_Runto(int iDist)
 			{
 				if ( m_Act_p.IsValidPoint() &&
 					IsPlayableCharacter() &&
-					!IsStatFlag( STATF_Freeze|STATF_Stone ))
+					!IsStatFlag( STATF_FREEZE|STATF_STONE ))
 					Spell_Teleport( m_Act_p, true, false);
 				else
 					NPC_Act_Idle();
@@ -1586,7 +1586,7 @@ void CChar::NPC_Act_Goto(int iDist)
 			{
 				if ( m_Act_p.IsValidPoint() &&
 					IsPlayableCharacter() &&
-					!IsStatFlag( STATF_Freeze|STATF_Stone ))
+					!IsStatFlag( STATF_FREEZE|STATF_STONE ))
 					Spell_Teleport( m_Act_p, true, false);
 				else
 					NPC_Act_Idle();	// look for something new to do.
@@ -1863,7 +1863,7 @@ void CChar::NPC_Act_Idle()
 		!m_pArea->IsGuarded())
 	{
 		// Just hide here.
-		if ( !IsStatFlag(STATF_Hidden) )
+		if ( !IsStatFlag(STATF_HIDDEN) )
 		{
 			Skill_Start(SKILL_HIDING);
 			return;
@@ -1989,7 +1989,7 @@ bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
 		}
 	}
 
-	if ( NPC_IsVendor() && !IsStatFlag(STATF_Pet) )
+	if ( NPC_IsVendor() && !IsStatFlag(STATF_PET) )
 	{
 		// Dropping item on vendor means quick sell
 		if ( pCharSrc->IsClient() )
@@ -2160,7 +2160,7 @@ void CChar::NPC_OnTickAction()
 	}
 
 	EXC_SET("timer expired");
-	if ( IsTimerExpired() && IsStatFlag(STATF_War) && !(IsSetCombatFlags(COMBAT_PREHIT) && m_atFight.m_War_Swing_State == WAR_SWING_SWINGING))	// Was not reset? PREHIT forces timer to be 0, so it get's defaulted here breaking NPC's speed when PREHIT is enabled. Must not check in this case.
+	if ( IsTimerExpired() && IsStatFlag(STATF_WAR) && !(IsSetCombatFlags(COMBAT_PREHIT) && m_atFight.m_War_Swing_State == WAR_SWING_SWINGING))	// Was not reset? PREHIT forces timer to be 0, so it get's defaulted here breaking NPC's speed when PREHIT is enabled. Must not check in this case.
 	{
 		int64 timeout	= maximum((150-Stat_GetAdjusted(STAT_DEX))/2, 0);
 		timeout = Calc_GetRandLLVal2(timeout/2, timeout);
@@ -2452,7 +2452,7 @@ void CChar::NPC_ExtraAI()
 
 	// Equip weapons if possible
 	EXC_SET("weapon/shield");
-	if ( IsStatFlag(STATF_War) )
+	if ( IsStatFlag(STATF_WAR) )
 	{
 		CItem *pWeapon = LayerFind(LAYER_HAND1);
 		if ( !pWeapon || !pWeapon->IsTypeWeapon() )

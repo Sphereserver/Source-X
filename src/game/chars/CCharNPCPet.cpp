@@ -171,7 +171,7 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 			break;
 
 		case PC_FRIEND:
-			if ( IsStatFlag(STATF_Conjured) )
+			if ( IsStatFlag(STATF_CONJURED) )
 			{
 				pSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_TARG_FRIEND_SUMMONED));
 				return false;
@@ -199,7 +199,7 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 			break;
 
 		case PC_TRANSFER:
-			if ( IsStatFlag(STATF_Conjured) )
+			if ( IsStatFlag(STATF_CONJURED) )
 			{
 				pSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_TARG_TRANSFER_SUMMONED));
 				return true;
@@ -208,7 +208,7 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 			break;
 
 		case PC_RELEASE:
-			if ( IsStatFlag(STATF_Conjured) || (m_pNPC->m_bonded && IsStatFlag(STATF_DEAD)) )
+			if ( IsStatFlag(STATF_CONJURED) || (m_pNPC->m_bonded && IsStatFlag(STATF_DEAD)) )
 			{
 				Effect(EFFECT_XYZ, ITEMID_FX_TELE_VANISH, this, 10, 15);
 				Sound(SOUND_TELEPORT);
@@ -546,7 +546,7 @@ void CChar::NPC_PetClearOwners()
 		}
 	}
 
-	if ( IsStatFlag(STATF_Ridden) )
+	if ( IsStatFlag(STATF_RIDDEN) )
 	{
 		CChar *pCharRider = Horse_GetMountChar();
 		if ( pCharRider )
@@ -600,7 +600,7 @@ bool CChar::NPC_CheckHirelingStatus()
 	// RETURN:
 	//  true = happy.
 
-	if ( ! IsStatFlag( STATF_Pet ))
+	if ( ! IsStatFlag( STATF_PET ))
 		return true;
 
 	CCharBase * pCharDef = Char_GetDef();
@@ -641,7 +641,7 @@ bool CChar::NPC_CheckHirelingStatus()
 
 		// Some sort of strange bug to get here.
 		Memory_ClearTypes( MEMORY_IPET );
-		StatFlag_Clear( STATF_Pet );
+		StatFlag_Clear( STATF_PET );
 	}
 
 	return true;
@@ -683,7 +683,7 @@ bool CChar::NPC_OnHirePay( CChar * pCharSrc, CItemMemory * pMemory, CItem * pGol
 
 	CCharBase * pCharDef = Char_GetDef();
     int iWage = pCharDef->GetHireDayWage();
-	if ( IsStatFlag( STATF_Pet ))
+	if ( IsStatFlag( STATF_PET ))
 	{
 		if ( ! pMemory->IsMemoryTypes(MEMORY_IPET|MEMORY_FRIEND))
 		{
@@ -754,7 +754,7 @@ bool CChar::NPC_OnHireHear( CChar * pCharSrc )
 			return false;
 		}
 	}
-	if ( IsStatFlag( STATF_Pet ))
+	if ( IsStatFlag( STATF_PET ))
 	{
 		Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_PET_EMPLOYED ) );
 		return false;

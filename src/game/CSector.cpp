@@ -649,7 +649,7 @@ void CSector::SetLightNow( bool fFlash )
 	CChar * pChar = static_cast <CChar*>( m_Chars_Active.GetHead());
 	for ( ; pChar != NULL; pChar = pChar->GetNext())
 	{
-		if ( pChar->IsStatFlag( STATF_DEAD | STATF_NightSight ))
+		if ( pChar->IsStatFlag( STATF_DEAD | STATF_NIGHTSIGHT ))
 			continue;
 
 		if ( pChar->IsClient())
@@ -852,7 +852,7 @@ bool CSector::MoveCharToSector( CChar * pChar )
 		return false;	// already here
 
 	// Check my save parity vs. this sector's
-	if ( pChar->IsStatFlag( STATF_SaveParity ) != m_fSaveParity )
+	if ( pChar->IsStatFlag( STATF_SAVEPARITY ) != m_fSaveParity )
 	{
 		if ( g_World.IsSaving())
 		{
@@ -1103,7 +1103,7 @@ void CSector::OnTick(int iPulseCount)
 			if ( sound )
 				pClient->addSound(sound, pChar);
 
-			if ( fLightChange && ! pChar->IsStatFlag( STATF_DEAD | STATF_NightSight ))
+			if ( fLightChange && ! pChar->IsStatFlag( STATF_DEAD | STATF_NIGHTSIGHT ))
 				pClient->addLight();
 
 			if ( fWeatherChange )

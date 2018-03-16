@@ -39,7 +39,7 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 		return false;
 
 	// Make sure that we're a vendor and not a pet
-	if ( IsStatFlag(STATF_Pet) || !NPC_IsVendor() )
+	if ( IsStatFlag(STATF_PET) || !NPC_IsVendor() )
 		return false;
 
 	bool bRestockNow = true;

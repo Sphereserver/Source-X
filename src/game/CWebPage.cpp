@@ -206,7 +206,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 					CChar * pChar = pClient->GetChar();
 					if ( pChar == NULL )
 						continue;
-					if (( pChar->IsStatFlag(STATF_Insubstantial) ) && (!pChar->IsStatFlag(STATF_DEAD)))
+					if (( pChar->IsStatFlag(STATF_INSUBSTANTIAL) ) && (!pChar->IsStatFlag(STATF_DEAD)))
 						continue;
 
 					sm_iListIndex++;

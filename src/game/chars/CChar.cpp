@@ -237,7 +237,7 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false )
 	m_iStatFlag = 0;
 
 	if ( g_World.m_fSaveParity )
-		StatFlag_Set(STATF_SaveParity);	// It will get saved next time.
+		StatFlag_Set(STATF_SAVEPARITY);	// It will get saved next time.
 	m_UIDLastNewItem.InitUID();
 	m_dirFace = DIR_SE;
 	m_fonttype = FONT_NORMAL;
@@ -305,7 +305,7 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false )
 CChar::~CChar()
 {
 	DeletePrepare();	// remove me early so virtuals will work.
-	if ( IsStatFlag( STATF_Ridden ))
+	if ( IsStatFlag( STATF_RIDDEN ))
 	{
 		CItem * pItem = Horse_GetMountItem();
 		if ( pItem )
@@ -475,7 +475,7 @@ int CChar::IsWeird() const
 		}
 		if ( m_pNPC )
 		{
-			if ( IsStatFlag( STATF_Ridden ))
+			if ( IsStatFlag( STATF_RIDDEN ))
 			{
 				if ( Skill_GetActive() != NPCACT_RIDDEN )
 				{
@@ -661,34 +661,34 @@ int CChar::FixWeirdness()
 
 	// Make sure my flags are good.
 
-	if ( IsStatFlag( STATF_HasShield ))
+	if ( IsStatFlag( STATF_HASSHIELD ))
 	{
 		CItem * pShield = LayerFind( LAYER_HAND2 );
 		if ( pShield == NULL )
-			StatFlag_Clear( STATF_HasShield );
+			StatFlag_Clear( STATF_HASSHIELD );
 	}
-	if ( IsStatFlag( STATF_OnHorse ))
+	if ( IsStatFlag( STATF_ONHORSE ))
 	{
 		CItem * pHorse = LayerFind( LAYER_HORSE );
 		if ( pHorse == NULL )
-			StatFlag_Clear( STATF_OnHorse );
+			StatFlag_Clear( STATF_ONHORSE );
 	}
-	if ( IsStatFlag( STATF_Spawned ))
+	if ( IsStatFlag( STATF_SPAWNED ))
 	{
 		if ( !m_uidSpawnItem.ItemFind() )
-			StatFlag_Clear( STATF_Spawned );
+			StatFlag_Clear( STATF_SPAWNED );
 	}
-	if ( IsStatFlag( STATF_Pet ))
+	if ( IsStatFlag( STATF_PET ))
 	{
 		CItemMemory *pMemory = Memory_FindTypes( MEMORY_IPET );
 		if ( pMemory == NULL )
-			StatFlag_Clear( STATF_Pet );
+			StatFlag_Clear( STATF_PET );
 	}
-	if ( IsStatFlag( STATF_Ridden ))
+	if ( IsStatFlag( STATF_RIDDEN ))
 	{
 		// Move the ridden creature to the same location as it's rider.
 		if ( m_pPlayer || ! IsDisconnected())
-			StatFlag_Clear( STATF_Ridden );
+			StatFlag_Clear( STATF_RIDDEN );
 		else
 		{
 			if ( Skill_GetActive() != NPCACT_RIDDEN )
@@ -710,11 +710,11 @@ int CChar::FixWeirdness()
 			}
 		}
 	}
-	if ( IsStatFlag( STATF_Criminal ))
+	if ( IsStatFlag( STATF_CRIMINAL ))
 	{
 		CItem * pMemory = LayerFind( LAYER_FLAG_Criminal );
 		if ( pMemory == NULL )
-			StatFlag_Clear( STATF_Criminal );
+			StatFlag_Clear( STATF_CRIMINAL );
 	}
 
 	if ( ! IsIndividualName() && pCharDef->GetTypeName()[0] == '#' )
@@ -736,7 +736,7 @@ int CChar::FixWeirdness()
 	if ( m_pPlayer )	// Player char.
 	{
 		Memory_ClearTypes( MEMORY_IPET );
-		StatFlag_Clear( STATF_Ridden );
+		StatFlag_Clear( STATF_RIDDEN );
 
 		if ( m_pPlayer->GetSkillClass() == NULL )	// this should never happen.
 		{
@@ -759,7 +759,7 @@ int CChar::FixWeirdness()
 			}
 
 			// ??? What if magically enhanced !!!
-			if ( IsPlayableCharacter() && ( GetPrivLevel() < PLEVEL_Counsel ) && !IsStatFlag( STATF_Polymorph ))
+			if ( IsPlayableCharacter() && ( GetPrivLevel() < PLEVEL_Counsel ) && !IsStatFlag( STATF_POLYMORPH ))
 			{
 				for ( int j = STAT_STR; j < STAT_BASE_QTY; j++ )
 				{
@@ -853,7 +853,7 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
     m_iStatFlag = pChar->m_iStatFlag;
 
 	if ( g_World.m_fSaveParity )
-		StatFlag_Set(STATF_SaveParity);	// It will get saved next time.
+		StatFlag_Set(STATF_SAVEPARITY);	// It will get saved next time.
 
 	m_dirFace = pChar->m_dirFace;
 	m_fonttype = pChar->m_fonttype;
@@ -1089,7 +1089,7 @@ bool CChar::ReadScript(CResourceLock &s, bool bVendor)
 				case ITC_CONTAINER:
 				case ITC_ITEMNEWBIE:
 					{
-						if ( IsStatFlag( STATF_Conjured ) && iCmd != ITC_ITEMNEWBIE ) // This check is not needed.
+						if ( IsStatFlag( STATF_CONJURED ) && iCmd != ITC_ITEMNEWBIE ) // This check is not needed.
 							break; // conjured creates have no loot.
 
 						pItem = CItem::CreateHeader( s.GetArgRaw(), this, iCmd == ITC_ITEMNEWBIE );
@@ -1168,7 +1168,7 @@ height_t CChar::GetHeightMount( bool fEyeSubstract ) const
 {
 	ADDTOCALLSTACK("CChar::GetHeightMount");
 	height_t height = GetHeight();
-	if ( IsStatFlag(STATF_OnHorse|STATF_Hovering) )
+	if ( IsStatFlag(STATF_ONHORSE|STATF_HOVERING) )
 		height += 4;
 	if ( fEyeSubstract )
 		--height;
@@ -1277,7 +1277,7 @@ lpctstr CChar::GetName() const
 
 lpctstr CChar::GetNameWithoutIncognito() const
 {
-	if ( IsStatFlag( STATF_Incognito ) )
+	if ( IsStatFlag( STATF_INCOGNITO ) )
 	{
 		CItem * pSpell = NULL;
 		pSpell = LayerFind(LAYER_SPELL_Incognito);
@@ -2608,7 +2608,7 @@ do_default:
 					sVal.FormatVal( m_dirFace );
 			}break;
 		case CHC_EMOTEACT:
-			sVal.FormatVal( IsStatFlag(STATF_EmoteAction) );
+			sVal.FormatVal( IsStatFlag(STATF_EMOTEACTION) );
 			break;
 		case CHC_FLAGS:
 			sVal.FormatLLHex(m_iStatFlag);
@@ -2665,7 +2665,7 @@ do_default:
 			break;
 		case CHC_NIGHTSIGHT:
 			{
-				//sVal.FormatVal(IsStatFlag(STATF_NightSight));
+				//sVal.FormatVal(IsStatFlag(STATF_NIGHTSIGHT));
 				CVarDefCont * pVar = GetDefKey(pszKey, true);
 				sVal.FormatLLVal(pVar ? pVar->GetValNum() : 0);
 				}break;
@@ -2705,7 +2705,7 @@ do_default:
 		case CHC_P:
 			goto do_default;
 		case CHC_STONE:
-			sVal.FormatVal( IsStatFlag( STATF_Stone ));
+			sVal.FormatVal( IsStatFlag( STATF_STONE ));
 			break;
 		case CHC_TITLE:
 			{
@@ -3032,23 +3032,23 @@ do_default:
 			break;
 		case CHC_EMOTEACT:
 			{
-				bool fSet = IsStatFlag(STATF_EmoteAction);
+				bool fSet = IsStatFlag(STATF_EMOTEACTION);
 				if ( s.HasArgs() )
 					fSet = s.GetArgVal() ? true : false;
 				else
 					fSet = ! fSet;
-				StatFlag_Mod(STATF_EmoteAction,fSet);
+				StatFlag_Mod(STATF_EMOTEACTION,fSet);
 			}
 			break;
 		case CHC_FLAGS:		
 			if (g_Serv.IsLoading())
 			{
-				// Don't set STATF_SaveParity at server startup, otherwise the first worldsave will not save these chars
-				m_iStatFlag = s.GetArgLLVal() & ~STATF_SaveParity;
+				// Don't set STATF_SAVEPARITY at server startup, otherwise the first worldsave will not save these chars
+				m_iStatFlag = s.GetArgLLVal() & ~STATF_SAVEPARITY;
 				break;
 			}
-			// Don't modify STATF_SaveParity, STATF_Pet, STATF_Spawned here
-			m_iStatFlag = (m_iStatFlag & (STATF_SaveParity | STATF_Pet | STATF_Spawned)) | (s.GetArgLLVal() & ~(STATF_SaveParity | STATF_Pet | STATF_Spawned));
+			// Don't modify STATF_SAVEPARITY, STATF_PET, STATF_SPAWNED here
+			m_iStatFlag = (m_iStatFlag & (STATF_SAVEPARITY | STATF_PET | STATF_SPAWNED)) | (s.GetArgLLVal() & ~(STATF_SAVEPARITY | STATF_PET | STATF_SPAWNED));
 			NotoSave_Update();
 			break;
 		case CHC_FONT:
@@ -3178,9 +3178,9 @@ do_default:
 			{
 				int fNightsight = s.GetArgVal();
 				if (!fNightsight)	// Keep old 'switch' from 0 to 1 and viceversa behaviour while no args are given.
-					 fNightsight = !IsStatFlag(STATF_NightSight);
+					 fNightsight = !IsStatFlag(STATF_NIGHTSIGHT);
 				SetDefNum(s.GetKey(), fNightsight, false);
-				StatFlag_Mod( STATF_NightSight, fNightsight > 0 ? true : false );
+				StatFlag_Mod( STATF_NIGHTSIGHT, fNightsight > 0 ? true : false );
 				if ( IsClient() )
 					m_pClient->addLight();
 			}
@@ -3211,7 +3211,7 @@ do_default:
 		case CHC_STONE:
 			{
 				bool fSet;
-				bool fChange = IsStatFlag(STATF_Stone);
+				bool fChange = IsStatFlag(STATF_STONE);
 				if ( s.HasArgs() )
 				{
 					fSet = s.GetArgVal() ? true : false;
@@ -3222,7 +3222,7 @@ do_default:
 					fSet = ! fChange;
 					fChange = true;
 				}
-				StatFlag_Mod(STATF_Stone,fSet);
+				StatFlag_Mod(STATF_STONE,fSet);
 				if ( fChange )
 				{
 					UpdateMode(NULL, true);
@@ -3404,12 +3404,12 @@ void CChar::r_WriteParity( CScript & s )
 
 	// if ( GetPrivLevel() <= PLEVEL_Guest ) return;
 
-	if ( g_World.m_fSaveParity == IsStatFlag(STATF_SaveParity))
+	if ( g_World.m_fSaveParity == IsStatFlag(STATF_SAVEPARITY))
 	{
 		return; // already saved.
 	}
 
-	StatFlag_Mod( STATF_SaveParity, g_World.m_fSaveParity );
+	StatFlag_Mod( STATF_SAVEPARITY, g_World.m_fSaveParity );
 	if ( IsWeird() )
 		return;
 	r_WriteSafe(s);
@@ -3423,12 +3423,12 @@ bool CChar::r_Load( CScript & s ) // Load a character from script
 	if (m_pNPC)
 		NPC_GetAllSpellbookSpells();
 
-	// Init the STATF_SaveParity flag.
-	// StatFlag_Mod( STATF_SaveParity, g_World.m_fSaveParity );
+	// Init the STATF_SAVEPARITY flag.
+	// StatFlag_Mod( STATF_SAVEPARITY, g_World.m_fSaveParity );
 
 	// Make sure everything is ok.
 	if (( m_pPlayer && ! IsClient()) ||
-		( m_pNPC && IsStatFlag( STATF_Ridden )))	// ridden npc
+		( m_pNPC && IsStatFlag( STATF_RIDDEN )))	// ridden npc
 	{
 		SetDisconnected();
 	}
@@ -3561,7 +3561,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			break;
 		case CHV_CRIMINAL:
 			if ( s.HasArgs() && ! s.GetArgVal())
-				StatFlag_Clear( STATF_Criminal );
+				StatFlag_Clear( STATF_CRIMINAL );
 			else
 				Noto_Criminal();
 			break;
@@ -3692,9 +3692,9 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_INVIS:
 			if ( pSrc )
 			{
-                m_iStatFlag = s.GetArgLLFlag( m_iStatFlag, STATF_Insubstantial );
+                m_iStatFlag = s.GetArgLLFlag( m_iStatFlag, STATF_INSUBSTANTIAL );
 				UpdateMode(NULL, true);
-				if ( IsStatFlag(STATF_Insubstantial) )
+				if ( IsStatFlag(STATF_INSUBSTANTIAL) )
 				{
 					if ( IsClient() )
 						GetClient()->addBuff(BI_HIDDEN, 1075655, 1075656);
@@ -3703,7 +3703,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				}
 				else
 				{
-					if ( IsClient() && !IsStatFlag(STATF_Hidden) )
+					if ( IsClient() && !IsStatFlag(STATF_HIDDEN) )
 						GetClient()->removeBuff(BI_HIDDEN);
 					if ( IsSetOF(OF_Command_Sysmsgs) )
 						pSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_MSG_INVIS_OFF));
@@ -3789,7 +3789,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 
 		case CHV_NEWLOOT:
 			{
-				if ( m_pNPC && !m_pPlayer && !IsStatFlag(STATF_Conjured) )
+				if ( m_pNPC && !m_pPlayer && !IsStatFlag(STATF_CONJURED) )
 				{
 					CItem *pItem = CItem::CreateHeader(s.GetArgStr(), NULL, false, this);
 					if ( !pItem )

@@ -414,7 +414,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 	for ( int i = STAT_STR; i < STAT_BASE_QTY; ++i )
 	{
 		// Can't gain STR or DEX if morphed.
-		if ( IsStatFlag( STATF_Polymorph ) && i != STAT_INT )
+		if ( IsStatFlag( STATF_POLYMORPH ) && i != STAT_INT )
 			continue;
 
 		if ( !Stat_GetLock(static_cast<STAT_TYPE>(i)) == SKILLLOCK_UP)
@@ -1166,7 +1166,7 @@ bool CChar::Skill_Tracking( CUID uidTarg, DIR_TYPE & dirPrv, int iDistMax )
 	{
 		// Prevent tracking of hidden staff
 		const CChar * pChar = dynamic_cast<const CChar *>(pObjTop);
-		if ( pChar && pChar->IsStatFlag(STATF_Insubstantial) && pChar->GetPrivLevel() > GetPrivLevel() )
+		if ( pChar && pChar->IsStatFlag(STATF_INSUBSTANTIAL) && pChar->GetPrivLevel() > GetPrivLevel() )
 			return false;
 	}
 
@@ -1549,7 +1549,7 @@ int CChar::Skill_DetectHidden( SKTRIG_TYPE stage )
 		CChar *pChar = Area.GetChar();
 		if ( pChar == NULL )
 			break;
-		if ( pChar == this || !pChar->IsStatFlag(STATF_Invisible|STATF_Hidden) )
+		if ( pChar == this || !pChar->IsStatFlag(STATF_INVISIBLE|STATF_HIDDEN) )
 			continue;
 
 		// Check chance to reveal the target
@@ -1756,7 +1756,7 @@ int CChar::Skill_Enticement( SKTRIG_TYPE stage )
 				SysMessagef("%s", g_Cfg.GetDefaultMsg( DEFMSG_ENTICEMENT_PLAYER ));
 				return -SKTRIG_ABORT;
 			}
-			else if ( pChar->IsStatFlag(STATF_War) )
+			else if ( pChar->IsStatFlag(STATF_WAR) )
 			{
 				SysMessagef("%s %s.", pChar->GetName(), g_Cfg.GetDefaultMsg(DEFMSG_ENTICEMENT_BATTLE));
 				return -SKTRIG_ABORT;
@@ -1786,8 +1786,8 @@ int CChar::Skill_Provocation(SKTRIG_TYPE stage)
 	CChar *pCharTarg = m_Act_UID.CharFind();
 
 	if ( !pCharProv || !pCharTarg || ( pCharProv == this ) || ( pCharTarg == this ) || ( pCharProv == pCharTarg ) ||
-		pCharProv->IsStatFlag(STATF_Pet|STATF_Conjured|STATF_Stone|STATF_DEAD|STATF_INVUL) ||
-		pCharTarg->IsStatFlag(STATF_Pet|STATF_Conjured|STATF_Stone|STATF_DEAD|STATF_INVUL) )
+		pCharProv->IsStatFlag(STATF_PET|STATF_CONJURED|STATF_STONE|STATF_DEAD|STATF_INVUL) ||
+		pCharTarg->IsStatFlag(STATF_PET|STATF_CONJURED|STATF_STONE|STATF_DEAD|STATF_INVUL) )
 	{
 		SysMessageDefault(DEFMSG_PROVOCATION_UPSET);
 		return -SKTRIG_QTY;
@@ -2051,7 +2051,7 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 	int iTameBase = pChar->Skill_GetBase(SKILL_TAMING);
 	if ( !IsPriv( PRIV_GM )) // if its a gm doing it, just check that its not
 	{
-		if ( pChar->IsStatFlag( STATF_Pet ))		// is it tamable ?
+		if ( pChar->IsStatFlag( STATF_PET ))		// is it tamable ?
 		{
 			SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_TAMING_TAME ), pChar->GetName());
 			return -SKTRIG_QTY;
@@ -2203,8 +2203,8 @@ int CChar::Skill_Hiding( SKTRIG_TYPE stage )
 	if ( stage == SKTRIG_SUCCESS )
 	{
 		ObjMessage(g_Cfg.GetDefaultMsg(DEFMSG_HIDING_SUCCESS), this);
-		StatFlag_Set(STATF_Hidden);
-		Reveal(STATF_Invisible);	// clear previous invisibility spell effect (this will not reveal the char because STATF_Hidden still set)
+		StatFlag_Set(STATF_HIDDEN);
+		Reveal(STATF_INVISIBLE);	// clear previous invisibility spell effect (this will not reveal the char because STATF_HIDDEN still set)
 		UpdateMode();
 		if ( IsClient() )
 		{
@@ -2316,7 +2316,7 @@ int CChar::Skill_SpiritSpeak( SKTRIG_TYPE stage )
 
 	if ( stage == SKTRIG_SUCCESS )
 	{
-		if ( IsStatFlag( STATF_SpiritSpeak ))
+		if ( IsStatFlag( STATF_SPIRITSPEAK ))
 			return -SKTRIG_ABORT;
 		if ( !g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_NOSFX ) )
 			Sound( 0x24a );
@@ -2475,7 +2475,7 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 		return -SKTRIG_QTY;
 	}
 
-	if ( !pChar->IsStatFlag( STATF_Poisoned|STATF_DEAD ) && pChar->Stat_GetVal(STAT_STR) >= pChar->Stat_GetMax(STAT_STR) )
+	if ( !pChar->IsStatFlag( STATF_POISONED|STATF_DEAD ) && pChar->Stat_GetVal(STAT_STR) >= pChar->Stat_GetMax(STAT_STR) )
 	{
 		if ( pChar == this )
 			SysMessageDefault( DEFMSG_HEALING_HEALTHY );
@@ -2511,7 +2511,7 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 		}
 		if ( pCorpse )	// resurrect
 			return( 85 + Calc_GetRandVal(25));
-		if ( pChar->IsStatFlag( STATF_Poisoned ))	// poison level
+		if ( pChar->IsStatFlag( STATF_POISONED ))	// poison level
 			return( 50 + Calc_GetRandVal(50));
 
 		return Calc_GetRandVal(80);	// How difficult? 1-1000
@@ -2534,7 +2534,7 @@ int CChar::Skill_Healing( SKTRIG_TYPE stage )
 	}
 
 	int iSkillLevel = Skill_GetAdjusted( Skill_GetActive());
-	if ( pChar->IsStatFlag( STATF_Poisoned ))
+	if ( pChar->IsStatFlag( STATF_POISONED ))
 	{
 		if ( !SetPoisonCure( iSkillLevel, true ))
 			return -SKTRIG_ABORT;
@@ -2694,7 +2694,7 @@ int CChar::Skill_Fighting( SKTRIG_TYPE stage )
 	if ( stage == SKTRIG_STROKE )
 	{
 		// Hit or miss my current target.
-		if ( !IsStatFlag(STATF_War) )
+		if ( !IsStatFlag(STATF_WAR) )
 			return -SKTRIG_ABORT;
 
 		if ( m_atFight.m_War_Swing_State != WAR_SWING_SWINGING )
@@ -3543,7 +3543,7 @@ bool CChar::Skill_Wait( SKILL_TYPE skilltry )
 		}
 	}
 
-	if ( IsStatFlag(STATF_DEAD|STATF_Sleeping|STATF_Freeze|STATF_Stone) )
+	if ( IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_FREEZE|STATF_STONE) )
 	{
 		SysMessageDefault(DEFMSG_SKILLWAIT_1);
 		return true;
@@ -3556,7 +3556,7 @@ bool CChar::Skill_Wait( SKILL_TYPE skilltry )
 		return false;
 	}
 
-	if ( IsStatFlag(STATF_War) )
+	if ( IsStatFlag(STATF_WAR) )
 	{
 		SysMessageDefault(DEFMSG_SKILLWAIT_2);
 		return true;
@@ -3715,7 +3715,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 	}
 
 	// emote the action i am taking.
-	if ( (g_Cfg.m_iDebugFlags & DEBUGF_NPC_EMOTE) || IsStatFlag(STATF_EmoteAction) )
+	if ( (g_Cfg.m_iDebugFlags & DEBUGF_NPC_EMOTE) || IsStatFlag(STATF_EMOTEACTION) )
 		Emote(Skill_GetName(true));
 
 	return true;

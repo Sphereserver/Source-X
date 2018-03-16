@@ -295,7 +295,7 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 			{
 				// Shield of some sort.
 				m_defense = (word)(CalcArmorDefense());
-				StatFlag_Set( STATF_HasShield );
+				StatFlag_Set( STATF_HASSHIELD );
 				UpdateStatsFlag();
 			}
 			break;
@@ -321,14 +321,14 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 			// These effects are not magical. (make them spells !)
 
 		case LAYER_FLAG_Criminal:
-			StatFlag_Set( STATF_Criminal );
+			StatFlag_Set( STATF_CRIMINAL );
 			NotoSave_Update();
 			return;
 		case LAYER_FLAG_SpiritSpeak:
-			StatFlag_Set( STATF_SpiritSpeak );
+			StatFlag_Set( STATF_SPIRITSPEAK );
 			return;
 		case LAYER_FLAG_Stuck:
-			StatFlag_Set( STATF_Freeze );
+			StatFlag_Set( STATF_FREEZE );
 			if ( IsClient() )
 				GetClient()->addBuff(BI_PARALYZE, 1075827, 1075828, (word)(pItem->GetTimerAdjusted()));
 			break;
@@ -350,7 +350,7 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 				break;
 			}
 			case IT_EQ_HORSE:
-				StatFlag_Set(STATF_OnHorse);
+				StatFlag_Set(STATF_ONHORSE);
 				break;
 			case IT_COMM_CRYSTAL:
 				StatFlag_Set(STATF_COMM_CRYSTAL);
@@ -397,7 +397,7 @@ void CChar::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when r
 			{
 				// Shield
 				m_defense = (word)(CalcArmorDefense());
-				StatFlag_Clear( STATF_HasShield );
+				StatFlag_Clear( STATF_HASSHIELD );
 				UpdateStatsFlag();
 			}
 			if (( this->m_Act_SkillCurrent == SKILL_MINING ) || ( this->m_Act_SkillCurrent == SKILL_FISHING ) || ( this->m_Act_SkillCurrent == SKILL_LUMBERJACKING ))
@@ -423,14 +423,14 @@ void CChar::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when r
 			break;
 
 		case LAYER_FLAG_Criminal:
-			StatFlag_Clear( STATF_Criminal );
+			StatFlag_Clear( STATF_CRIMINAL );
 			NotoSave_Update();
 			break;
 		case LAYER_FLAG_SpiritSpeak:
-			StatFlag_Clear( STATF_SpiritSpeak );
+			StatFlag_Clear( STATF_SPIRITSPEAK );
 			break;
 		case LAYER_FLAG_Stuck:
-			StatFlag_Clear( STATF_Freeze );
+			StatFlag_Clear( STATF_FREEZE );
 			if ( IsClient() )
 			{
 				GetClient()->removeBuff(BI_PARALYZE);
@@ -451,7 +451,7 @@ void CChar::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when r
 					StatFlag_Clear(STATF_COMM_CRYSTAL);
 				break;
 			case IT_EQ_HORSE:
-				StatFlag_Clear(STATF_OnHorse);
+				StatFlag_Clear(STATF_ONHORSE);
 				break;
 			case IT_EQ_MEMORY_OBJ:
 			{
@@ -549,7 +549,7 @@ void CChar::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when r
 
 		if ( pItem->GetDefNum("NIGHTSIGHT", true, true))
 		{
-			StatFlag_Mod( STATF_NightSight, 0 );
+			StatFlag_Mod( STATF_NIGHTSIGHT, 0 );
 			if ( IsClient() )
 				m_pClient->addLight();
 		}
@@ -563,7 +563,7 @@ void CChar::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when r
 void CChar::DropAll( CItemContainer * pCorpse, uint64 iAttr )
 {
 	ADDTOCALLSTACK("CChar::DropAll");
-	if ( IsStatFlag( STATF_Conjured ))
+	if ( IsStatFlag( STATF_CONJURED ))
 		return;	// drop nothing.
 
 	CItemContainer * pPack = GetPack();
@@ -799,7 +799,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
 	if ( fBackward && iFrameDelay )	// backwards and delayed just dont work ! = invis
 		iFrameDelay = 0;
 
-	if (fTranslate || IsStatFlag(STATF_OnHorse))
+	if (fTranslate || IsStatFlag(STATF_ONHORSE))
 	{
 		CItem * pWeapon = m_uidWeapon.ItemFind();
 		if (pWeapon != NULL && action == ANIM_ATTACK_WEAPON)
@@ -845,7 +845,7 @@ ANIM_TYPE CChar::GenerateAnimate( ANIM_TYPE action, bool fTranslate, bool fBackw
 			}*/
 		}
 
-		if (IsStatFlag(STATF_OnHorse))	// on horse back.
+		if (IsStatFlag(STATF_ONHORSE))	// on horse back.
 		{
 			// Horse back anims are dif.
 			switch (action)
@@ -1827,7 +1827,7 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 	// Remove the item from other clients view if the item is
 	// being taken from the ground by a hidden character to
 	// prevent lingering item.
-	if ( ( trigger == ITRIG_PICKUP_GROUND ) && (IsStatFlag( STATF_Insubstantial | STATF_Invisible | STATF_Hidden )) )
+	if ( ( trigger == ITRIG_PICKUP_GROUND ) && (IsStatFlag( STATF_INSUBSTANTIAL | STATF_INVISIBLE | STATF_HIDDEN )) )
         pItem->RemoveFromView( m_pClient );
 
 	// Pick it up.
@@ -2117,7 +2117,7 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 
 	if (pItem->GetDefNum("NIGHTSIGHT", true, true))
 	{
-		StatFlag_Mod(STATF_NightSight, 1);
+		StatFlag_Mod(STATF_NIGHTSIGHT, 1);
 		if (IsClient())
 			m_pClient->addLight();
 	}
@@ -2134,7 +2134,7 @@ void CChar::EatAnim( lpctstr pszName, short iQty )
 	static const SOUND_TYPE sm_EatSounds[] = { 0x03a, 0x03b, 0x03c };
 	Sound(sm_EatSounds[Calc_GetRandVal(CountOf(sm_EatSounds))]);
 
-	if ( !IsStatFlag(STATF_OnHorse) )
+	if ( !IsStatFlag(STATF_ONHORSE) )
 		UpdateAnimate(ANIM_EAT);
 
 	tchar * pszMsg = Str_GetTemp();
@@ -2181,7 +2181,7 @@ bool CChar::Reveal( uint64 iFlags )
 	ADDTOCALLSTACK("CChar::Reveal");
 
 	if ( !iFlags)
-        iFlags = STATF_Invisible|STATF_Hidden|STATF_Sleeping;
+        iFlags = STATF_INVISIBLE|STATF_HIDDEN|STATF_SLEEPING;
 	if ( !IsStatFlag(iFlags) )
 		return false;
 
@@ -2194,10 +2194,10 @@ bool CChar::Reveal( uint64 iFlags )
 		GetClient()->m_pHouseDesign->EndCustomize(true);
 	}
 
-	if ( (iFlags & STATF_Sleeping) && IsStatFlag(STATF_Sleeping) )
+	if ( (iFlags & STATF_SLEEPING) && IsStatFlag(STATF_SLEEPING) )
 		Wake();
 
-	if ( (iFlags & STATF_Invisible) && IsStatFlag(STATF_Invisible) )
+	if ( (iFlags & STATF_INVISIBLE) && IsStatFlag(STATF_INVISIBLE) )
 	{
 		CItem * pSpell = LayerFind(LAYER_SPELL_Invis);
 		if ( pSpell && pSpell->IsType(IT_SPELL) && (pSpell->m_itSpell.m_spell == SPELL_Invis) )
@@ -2217,13 +2217,13 @@ bool CChar::Reveal( uint64 iFlags )
 	CClient *pClient = GetClient();
 	if ( pClient )
 	{
-		if ( !IsStatFlag(STATF_Hidden|STATF_Insubstantial) )
+		if ( !IsStatFlag(STATF_HIDDEN|STATF_INSUBSTANTIAL) )
 			pClient->removeBuff(BI_HIDDEN);
-		if ( !IsStatFlag(STATF_Invisible) )
+		if ( !IsStatFlag(STATF_INVISIBLE) )
 			pClient->removeBuff(BI_INVISIBILITY);
 	}
 
-	if ( IsStatFlag(STATF_Invisible|STATF_Hidden|STATF_Insubstantial|STATF_Sleeping) )
+	if ( IsStatFlag(STATF_INVISIBLE|STATF_HIDDEN|STATF_INSUBSTANTIAL|STATF_SLEEPING) )
 		return false;
 
 	m_StepStealth = 0;
@@ -2239,7 +2239,7 @@ void CChar::Speak(lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE 
 {
 	ADDTOCALLSTACK("CChar::Speak");
 
-	if (IsStatFlag(STATF_Stone))
+	if (IsStatFlag(STATF_STONE))
 		return;
 	if ((mode == TALKMODE_YELL) && (GetPrivLevel() >= PLEVEL_Counsel))
 		mode = TALKMODE_BROADCAST;					// GM Broadcast (done if a GM yells something)
@@ -2260,7 +2260,7 @@ void CChar::SpeakUTF8( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_
 {
 	ADDTOCALLSTACK("CChar::SpeakUTF8");
 
-	if ( IsStatFlag(STATF_Stone) )
+	if ( IsStatFlag(STATF_STONE) )
 		return;
 	if ((mode == TALKMODE_YELL) && (GetPrivLevel() >= PLEVEL_Counsel))
 		mode = TALKMODE_BROADCAST;					// GM Broadcast (done if a GM yells something)
@@ -2281,7 +2281,7 @@ void CChar::SpeakUTF8Ex( const nword * pszText, HUE_TYPE wHue, TALKMODE_TYPE mod
 {
 	ADDTOCALLSTACK("CChar::SpeakUTF8Ex");
 
-	if ( IsStatFlag(STATF_Stone) )
+	if ( IsStatFlag(STATF_STONE) )
 		return;
 	if ((mode == TALKMODE_YELL) && (GetPrivLevel() >= PLEVEL_Counsel))
 		mode = TALKMODE_BROADCAST;
@@ -2315,11 +2315,11 @@ CItem * CChar::Make_Figurine( CUID uidOwner, ITEMID_TYPE id )
 	pItem->m_itFigurine.m_UID = GetUID();
 	pItem->m_uidLink = uidOwner;
 
-	if ( IsStatFlag(STATF_Insubstantial) )
+	if ( IsStatFlag(STATF_INSUBSTANTIAL) )
 		pItem->SetAttr(ATTR_INVIS);
 
 	SoundChar(CRESND_IDLE);			// Horse winny
-	StatFlag_Set(STATF_Ridden);
+	StatFlag_Set(STATF_RIDDEN);
 	Skill_Start(NPCACT_RIDDEN);
 	SetDisconnected();
 	m_atRidden.m_FigurineUID = pItem->GetUID().GetObjUID();
@@ -2332,7 +2332,7 @@ CItem * CChar::Make_Figurine( CUID uidOwner, ITEMID_TYPE id )
 CItem * CChar::NPC_Shrink()
 {
 	ADDTOCALLSTACK("CChar::NPC_Shrink");
-	if ( IsStatFlag(STATF_Conjured) )
+	if ( IsStatFlag(STATF_CONJURED) )
 	{
 		Stat_SetVal(STAT_STR, 0);
 		return NULL;
@@ -2355,7 +2355,7 @@ CItem * CChar::Horse_GetMountItem() const
 {
 	ADDTOCALLSTACK("CChar::Horse_GetMountItem");
 
-	if ( ! IsStatFlag( STATF_Ridden ))
+	if ( ! IsStatFlag( STATF_RIDDEN ))
 		return NULL;
 
 	CItem * pItem = CUID(m_atRidden.m_FigurineUID).ItemFind();
@@ -2465,7 +2465,7 @@ bool CChar::Horse_Mount(CChar *pHorse)
 	pItem->SetType(IT_EQ_HORSE);
 	pItem->SetTimeout(TICK_PER_SEC);	// the first time we give it immediately a tick, then give the horse a tick everyone once in a while.
 	LayerAdd(pItem, LAYER_HORSE);		// equip the horse item
-	pHorse->StatFlag_Set(STATF_Ridden);
+	pHorse->StatFlag_Set(STATF_RIDDEN);
 	pHorse->Skill_Start(NPCACT_RIDDEN);
 	return true;
 }
@@ -2474,13 +2474,13 @@ bool CChar::Horse_Mount(CChar *pHorse)
 bool CChar::Horse_UnMount()
 {
 	ADDTOCALLSTACK("CChar::Horse_UnMount");
-	if ( !IsStatFlag(STATF_OnHorse) || (IsStatFlag(STATF_Stone) && !IsPriv(PRIV_GM)) )
+	if ( !IsStatFlag(STATF_ONHORSE) || (IsStatFlag(STATF_STONE) && !IsPriv(PRIV_GM)) )
 		return false;
 
 	CItem * pItem = LayerFind(LAYER_HORSE);
 	if ( pItem == NULL || pItem->IsDeleted() )
 	{
-		StatFlag_Clear(STATF_OnHorse);	// flag got out of sync !
+		StatFlag_Clear(STATF_ONHORSE);	// flag got out of sync !
 		return false;
 	}
 
@@ -2557,7 +2557,7 @@ bool CChar::OnTickEquip( CItem * pItem )
 
 		case LAYER_FLAG_Criminal:
 			// update char notoriety when criminal timer goes off
-			StatFlag_Clear( STATF_Criminal );
+			StatFlag_Clear( STATF_CRIMINAL );
 			NotoSave_Update();
 			return false;
 
@@ -2724,7 +2724,7 @@ bool CChar::SetPoison( int iSkill, int iTicks, CChar * pCharSrc )
 	}
 
 	SysMessageDefault(DEFMSG_JUST_BEEN_POISONED);
-	StatFlag_Set(STATF_Poisoned);
+	StatFlag_Set(STATF_POISONED);
 	UpdateStatsFlag();
 	return true;
 }
@@ -2733,7 +2733,7 @@ bool CChar::SetPoison( int iSkill, int iTicks, CChar * pCharSrc )
 void CChar::Wake()
 {
 	ADDTOCALLSTACK("CChar::Wake");
-	if (!IsStatFlag(STATF_Sleeping))
+	if (!IsStatFlag(STATF_SLEEPING))
 		return;
 
 	CItemCorpse *pCorpse = FindMyCorpse(true);
@@ -2744,7 +2744,7 @@ void CChar::Wake()
 	}
 
 	RaiseCorpse(pCorpse);
-	StatFlag_Clear(STATF_Sleeping);
+	StatFlag_Clear(STATF_SLEEPING);
 	UpdateMode();
 }
 
@@ -2752,7 +2752,7 @@ void CChar::Wake()
 void CChar::SleepStart( bool fFrontFall )
 {
 	ADDTOCALLSTACK("CChar::SleepStart");
-	if (IsStatFlag(STATF_DEAD|STATF_Sleeping|STATF_Polymorph))
+	if (IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_POLYMORPH))
 		return;
 
 	CItemCorpse *pCorpse = MakeCorpse(fFrontFall);
@@ -2766,8 +2766,8 @@ void CChar::SleepStart( bool fFrontFall )
 	UpdateCanSee(new PacketDeath(this, pCorpse), m_pClient);
 
 	SetID(m_prev_id);
-	StatFlag_Set(STATF_Sleeping);
-	StatFlag_Clear(STATF_Hidden);
+	StatFlag_Set(STATF_SLEEPING);
+	StatFlag_Clear(STATF_HIDDEN);
 	UpdateMode();
 }
 
@@ -2846,7 +2846,7 @@ bool CChar::Death()
 	Reveal();
 	SoundChar(CRESND_DIE);
 	StatFlag_Set(STATF_DEAD);
-	StatFlag_Clear(STATF_Stone|STATF_Freeze|STATF_Hidden|STATF_Sleeping|STATF_Hovering);
+	StatFlag_Clear(STATF_STONE|STATF_FREEZE|STATF_HIDDEN|STATF_SLEEPING|STATF_HOVERING);
 	SetPoisonCure(0, true);
 	Skill_Cleanup();
 	Spell_Dispel(100);			// get rid of all spell effects (moved here to prevent double @Destroy trigger)
@@ -2909,8 +2909,8 @@ bool CChar::Death()
 		}
 		ASSERT(pszGhostName != NULL);
 
-		if ( !IsStatFlag(STATF_War) )
-			StatFlag_Set(STATF_Insubstantial);	// manifest war mode for ghosts
+		if ( !IsStatFlag(STATF_WAR) )
+			StatFlag_Set(STATF_INSUBSTANTIAL);	// manifest war mode for ghosts
 
 		m_pPlayer->m_wDeaths++;
 		SetHue( HUE_DEFAULT );	// get all pale
@@ -2959,7 +2959,7 @@ bool CChar::OnFreezeCheck()
 {
 	ADDTOCALLSTACK("CChar::OnFreezeCheck");
 
-	if ( IsStatFlag(STATF_Freeze|STATF_Stone) && !IsPriv(PRIV_GM) )
+	if ( IsStatFlag(STATF_FREEZE|STATF_STONE) && !IsPriv(PRIV_GM) )
 		return true;
 	if ( GetKeyNum("NoMoveTill", true) > g_World.GetCurrentTime().GetTimeRaw() )
 		return true;
@@ -3054,7 +3054,7 @@ CRegion * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool fChec
 
 	EXC_SET("Creature bumping");
 	short iStamReq = 0;
-	if ( fCheckChars && !IsStatFlag(STATF_DEAD|STATF_Sleeping|STATF_Insubstantial) )
+	if ( fCheckChars && !IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_INSUBSTANTIAL) )
 	{
 		CItem *pPoly = LayerFind(LAYER_SPELL_Polymorph);
 		CWorldSearch AreaChars(ptDst);
@@ -3063,13 +3063,13 @@ CRegion * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool fChec
 			CChar *pChar = AreaChars.GetChar();
 			if (!pChar )
 				break;
-			if ( (pChar == this) || (abs(pChar->GetTopZ() - ptDst.m_z) > 5) || (pChar->IsStatFlag(STATF_Insubstantial)) )
+			if ( (pChar == this) || (abs(pChar->GetTopZ() - ptDst.m_z) > 5) || (pChar->IsStatFlag(STATF_INSUBSTANTIAL)) )
 				continue;
 			if ( m_pNPC && pChar->m_pNPC )	// NPCs can't walk over another NPC
 				return NULL;
 
 			iStamReq = 10;
-			if ( IsPriv(PRIV_GM) || pChar->IsStatFlag(STATF_DEAD|STATF_Invisible|STATF_Hidden) )
+			if ( IsPriv(PRIV_GM) || pChar->IsStatFlag(STATF_DEAD|STATF_INVISIBLE|STATF_HIDDEN) )
 				iStamReq = 0;
 			else if ( (pPoly && pPoly->m_itSpell.m_spell == SPELL_Wraith_Form) && (GetTopMap() == 0) )		// chars under Wraith Form effect can always walk through chars in Felucca
 				iStamReq = 0;
@@ -3098,12 +3098,12 @@ CRegion * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool fChec
 				SysMessage(pszMsg);
 				return NULL;
 			}
-			else if ( pChar->IsStatFlag(STATF_Hidden) )
+			else if ( pChar->IsStatFlag(STATF_HIDDEN) )
 			{
 				sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_HIDING_STUMBLE), pChar->GetName());
-				pChar->Reveal(STATF_Hidden);
+				pChar->Reveal(STATF_HIDDEN);
 			}
-			else if ( pChar->IsStatFlag(STATF_Sleeping) )
+			else if ( pChar->IsStatFlag(STATF_SLEEPING) )
 				sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MSG_STEPON_BODY), pChar->GetName());
 			else
 				sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MSG_PUSH), pChar->GetName());
@@ -3120,7 +3120,7 @@ CRegion * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool fChec
 		EXC_SET("Stamina penalty");
 		// Chance to drop more stamina if running or overloaded
 		CVarDefCont *pVal = GetKey("OVERRIDE.RUNNINGPENALTY", true);
-		if ( IsStatFlag(STATF_Fly|STATF_Hovering) )
+		if ( IsStatFlag(STATF_FLY|STATF_HOVERING) )
 			iWeightLoadPercent += pVal ? (int)(pVal->GetValNum()) : g_Cfg.m_iStamRunningPenalty;
 
 		pVal = GetKey("OVERRIDE.STAMINALOSSATWEIGHT", true);
@@ -3131,7 +3131,7 @@ CRegion * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool fChec
 		if ( iStamReq )
 			UpdateStatVal(STAT_DEX, -iStamReq);
 
-		StatFlag_Mod(STATF_InDoors, (dwBlockFlags & CAN_I_ROOF) || pArea->IsFlag(REGION_FLAG_UNDERGROUND));
+		StatFlag_Mod(STATF_INDOORS, (dwBlockFlags & CAN_I_ROOF) || pArea->IsFlag(REGION_FLAG_UNDERGROUND));
 		m_zClimbHeight = (dwBlockFlags & CAN_I_CLIMB) ? ClimbHeight : 0;
 	}
 
@@ -3144,13 +3144,13 @@ void CChar::CheckRevealOnMove()
 {
 	ADDTOCALLSTACK("CChar::CheckRevealOnMove");
 
-	if ( !IsStatFlag(STATF_Invisible|STATF_Hidden|STATF_Sleeping) )
+	if ( !IsStatFlag(STATF_INVISIBLE|STATF_HIDDEN|STATF_SLEEPING) )
 		return;
 
 	if ( IsTrigUsed(TRIGGER_STEPSTEALTH) )
 		OnTrigger(CTRIG_StepStealth, this);
 
-	m_StepStealth -= IsStatFlag(STATF_Fly|STATF_Hovering) ? 2 : 1;
+	m_StepStealth -= IsStatFlag(STATF_FLY|STATF_HOVERING) ? 2 : 1;
 	if ( m_StepStealth <= 0 )
 		Reveal();
 }
@@ -3181,7 +3181,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 		SKILL_TYPE iSkillActive	= Skill_GetActive();
 		if ( g_Cfg.IsSkillFlag(iSkillActive, SKF_IMMOBILE) )
 			Skill_Fail(false);
-		else if ( g_Cfg.IsSkillFlag(iSkillActive, SKF_FIGHT) && g_Cfg.IsSkillFlag(iSkillActive, SKF_RANGED) && !IsSetCombatFlags(COMBAT_ARCHERYCANMOVE) && !IsStatFlag(STATF_ArcherCanMove) )
+		else if ( g_Cfg.IsSkillFlag(iSkillActive, SKF_FIGHT) && g_Cfg.IsSkillFlag(iSkillActive, SKF_RANGED) && !IsSetCombatFlags(COMBAT_ARCHERYCANMOVE) && !IsStatFlag(STATF_ARCHERCANMOVE) )
 		{
 			// Keep timer active holding the swing action until the char stops moving
 			m_atFight.m_War_Swing_State = WAR_SWING_EQUIPPING;
@@ -3241,7 +3241,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 				{
 					int iSkillLevel = pItem->m_itSpell.m_spelllevel;	// heat level (0-1000)
 					iSkillLevel = Calc_GetRandVal2(iSkillLevel/2, iSkillLevel);
-					if ( IsStatFlag(STATF_Fly) )
+					if ( IsStatFlag(STATF_FLY) )
 						iSkillLevel /= 2;
 
 					OnTakeDamage( g_Cfg.GetSpellEffect(SPELL_Fire_Field, iSkillLevel), NULL, DAMAGE_FIRE|DAMAGE_GENERAL, 0, 100, 0, 0, 0 );
@@ -3293,7 +3293,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 				return TRIGRET_RET_DEFAULT;
 			case IT_SHIP_PLANK:
 			case IT_ROPE:
-				if ( !fStanding && !IsStatFlag(STATF_Hovering) )
+				if ( !fStanding && !IsStatFlag(STATF_HOVERING) )
 				{
 					// Check if we can go out of the ship (in the same direction of plank)
 					if ( MoveToValidSpot(m_dirFace, g_Cfg.m_iMaxShipPlankTeleport, 1, true) )
@@ -3903,9 +3903,9 @@ void CChar::OnTickStatusUpdate()
 void CChar::OnTickFood(short iVal, int HitsHungerLoss)
 {
 	ADDTOCALLSTACK("CChar::OnTickFood");
-	if ( IsStatFlag(STATF_DEAD|STATF_Conjured|STATF_Spawned) || !Stat_GetMax(STAT_FOOD) )
+	if ( IsStatFlag(STATF_DEAD|STATF_CONJURED|STATF_SPAWNED) || !Stat_GetMax(STAT_FOOD) )
 		return;
-	if ( IsStatFlag(STATF_Pet) && !NPC_CheckHirelingStatus() )		// this may be money instead of food
+	if ( IsStatFlag(STATF_PET) && !NPC_CheckHirelingStatus() )		// this may be money instead of food
 		return;
 	if ( IsPriv(PRIV_GM) )
 		return;
@@ -3920,10 +3920,10 @@ void CChar::OnTickFood(short iVal, int HitsHungerLoss)
 	short iFoodLevel = Food_GetLevelPercent();
 	if ( iFoodLevel > 40 )
 		return;
-	if ( HitsHungerLoss <= 0 || IsStatFlag(STATF_Sleeping|STATF_Stone) )
+	if ( HitsHungerLoss <= 0 || IsStatFlag(STATF_SLEEPING|STATF_STONE) )
 		return;
 
-	bool bPet = IsStatFlag(STATF_Pet);
+	bool bPet = IsStatFlag(STATF_PET);
 	lpctstr pszMsgLevel = Food_GetLevelMessage(bPet, false);
 	SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_HUNGER), pszMsgLevel);
 
@@ -4009,7 +4009,7 @@ bool CChar::OnTick()
     {
         // Players have a silly "always run" flag that gets stuck on.
         if (-g_World.GetTimeDiff(GetClient()->m_timeLastEventWalk) > 2)
-            StatFlag_Clear(STATF_Fly);
+            StatFlag_Clear(STATF_FLY);
 
         // Check targeting timeout, if set
         if (GetClient()->m_Targ_Timeout.IsTimeValid() && (g_World.GetTimeDiff(GetClient()->m_Targ_Timeout) <= 0) )

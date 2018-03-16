@@ -138,7 +138,7 @@ void CItemMultiCustom::BeginCustomize(CClient * pClientSrc)
 
 	// move client to building and hide it
 	CChar * pChar = pClientSrc->GetChar();
-	pChar->StatFlag_Set(STATF_Hidden);
+	pChar->StatFlag_Set(STATF_HIDDEN);
 
 	CPointMap ptOld = pChar->GetTopPoint();
 	CPointMap ptNew(GetTopPoint());
@@ -197,7 +197,7 @@ void CItemMultiCustom::EndCustomize(bool bForced)
 		}
 
 		// reveal character
-		pChar->StatFlag_Clear( STATF_Hidden );
+		pChar->StatFlag_Clear( STATF_HIDDEN );
 
 		// move character to signpost (unless they're already outside of the building)
 		if ( Multi_GetSign() && m_pRegion->IsInside2d(pChar->GetTopPoint()) )

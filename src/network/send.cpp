@@ -345,9 +345,9 @@ PacketHealthBarUpdate::PacketHealthBarUpdate(const CClient* target, const CChar*
 
 	writeInt16(2);
 	writeInt16(GreenBar);
-	writeByte(character->IsStatFlag(STATF_Poisoned));
+	writeByte(character->IsStatFlag(STATF_POISONED));
 	writeInt16(YellowBar);
-	writeByte(character->IsStatFlag(STATF_Freeze|STATF_Sleeping|STATF_Hallucinating|STATF_Stone));
+	writeByte(character->IsStatFlag(STATF_FREEZE|STATF_SLEEPING|STATF_HALLUCINATING|STATF_STONE));
 
 	push(target);
 }
@@ -2024,7 +2024,7 @@ PacketWarMode::PacketWarMode(const CClient* target, const CChar* character) : Pa
 {
 	ADDTOCALLSTACK("PacketWarMode::PacketWarMode");
 
-	writeBool(character->IsStatFlag(STATF_War));
+	writeBool(character->IsStatFlag(STATF_WAR));
 	writeByte(0x00);
 	writeByte(0x32);
 	writeByte(0x00);
@@ -2215,7 +2215,7 @@ PacketCharacter::PacketCharacter(CClient* target, const CChar* character) : Pack
 
 	bool isNewMobilePacket = target->GetNetState()->isClientVersion(MINCLIVER_NEWMOBINCOMING);
 
-	if (character->IsStatFlag(STATF_Sleeping) == false)
+	if (character->IsStatFlag(STATF_SLEEPING) == false)
 	{
 		bool isLayerSent[LAYER_HORSE + 1];
 		memset(isLayerSent, 0, sizeof(isLayerSent));
@@ -2416,7 +2416,7 @@ PacketPaperdoll::PacketPaperdoll(const CClient* target, const CChar* character) 
 	ADDTOCALLSTACK("PacketPaperdoll::PacketPaperdoll");
 
 	uint mode = 0;
-	if (character->IsStatFlag(STATF_War))
+	if (character->IsStatFlag(STATF_WAR))
 		mode |= (target->GetNetState()->isClientVersion(MINCLIVER_ML)) ? 0x1 : 0x40;
 	if (target->GetNetState()->isClientVersion(MINCLIVER_ML))
 	{
@@ -2427,7 +2427,7 @@ PacketPaperdoll::PacketPaperdoll(const CClient* target, const CChar* character) 
 
 	writeInt32(character->GetUID());
 
-	if (character->IsStatFlag(STATF_Incognito))
+	if (character->IsStatFlag(STATF_INCOGNITO))
 	{
 		writeStringFixedASCII(character->GetName(), 60);
 	}
@@ -3537,7 +3537,7 @@ PacketProfile::PacketProfile(const CClient* target, const CChar* character) : Pa
 	ADDTOCALLSTACK("PacketProfile::PacketProfile");
 
 	// alter profile when viewing an incognitoed player, unless being viewed by a GM or the profile is our own
-	bool isIncognito = character->IsStatFlag(STATF_Incognito) && !target->IsPriv(PRIV_GM) && character != target->GetChar();
+	bool isIncognito = character->IsStatFlag(STATF_INCOGNITO) && !target->IsPriv(PRIV_GM) && character != target->GetChar();
 
 	initLength();
 

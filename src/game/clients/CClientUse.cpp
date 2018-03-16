@@ -1090,7 +1090,7 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 			if ( m_pChar == pChar )
 				continue;
 
-			if ( GetPrivLevel() < pChar->GetPrivLevel() && pChar->IsStatFlag(STATF_Insubstantial) )
+			if ( GetPrivLevel() < pChar->GetPrivLevel() && pChar->IsStatFlag(STATF_INSUBSTANTIAL) )
 				continue;
 
 			CCharBase *pCharDef = pChar->Char_GetDef();

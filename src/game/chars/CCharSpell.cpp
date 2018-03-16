@@ -151,11 +151,11 @@ bool CChar::Spell_Teleport( CPointMap ptNew, bool bTakePets, bool bCheckAntiMagi
 		}
 	}
 
-	if ( !IsStatFlag(STATF_Insubstantial) )
+	if ( !IsStatFlag(STATF_INSUBSTANTIAL) )
 	{
 		if ( m_pPlayer )
 		{
-			if ( IsPriv(PRIV_GM) && !IsPriv(PRIV_PRIV_NOSHOW) && !IsStatFlag(STATF_Incognito) )
+			if ( IsPriv(PRIV_GM) && !IsPriv(PRIV_PRIV_NOSHOW) && !IsStatFlag(STATF_INCOGNITO) )
 			{
 				iEffect = g_Cfg.m_iSpell_Teleport_Effect_Staff;
 				iSound = g_Cfg.m_iSpell_Teleport_Sound_Staff;
@@ -286,7 +286,7 @@ CChar * CChar::Spell_Summon( CREID_TYPE id, CPointMap pntTarg )
 		}
 	}
 
-	pChar->StatFlag_Set(STATF_Conjured);	// conjured creates have no loot
+	pChar->StatFlag_Set(STATF_CONJURED);	// conjured creates have no loot
 	pChar->NPC_LoadScript(false);
 	pChar->MoveToChar(pntTarg);
 	pChar->m_ptHome = pntTarg;
@@ -416,7 +416,7 @@ bool CChar::Spell_Resurrection(CItemCorpse * pCorpse, CChar * pCharSrc, bool bNo
 
 	SetID(m_prev_id);
 	SetHue(m_prev_Hue);
-	StatFlag_Clear(STATF_DEAD|STATF_Insubstantial);
+	StatFlag_Clear(STATF_DEAD|STATF_INSUBSTANTIAL);
 	Stat_SetVal(STAT_STR, maximum(hits, 1));
 
 	if (m_pNPC && m_pNPC->m_bonded)
@@ -489,7 +489,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 		case LAYER_NONE:
 			break;
 		case LAYER_FLAG_Poison:
-			StatFlag_Clear(STATF_Poisoned);
+			StatFlag_Clear(STATF_POISONED);
 			UpdateModeFlag();
 			if (pClient)
 				pClient->removeBuff(BI_POISON);
@@ -560,14 +560,14 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 				Stat_SetVal(STAT_STR, minimum(Stat_GetVal(STAT_STR), Stat_GetMax(STAT_STR)));
 				Stat_SetVal(STAT_DEX, minimum(Stat_GetVal(STAT_DEX), Stat_GetMax(STAT_DEX)));
 			}
-			StatFlag_Clear(STATF_Polymorph);
+			StatFlag_Clear(STATF_POLYMORPH);
 			if (pClient)
 				pClient->removeBuff(iBuffIcon);
 			return;
 		}
 		case LAYER_SPELL_Night_Sight:
 		{
-			StatFlag_Clear(STATF_NightSight);
+			StatFlag_Clear(STATF_NIGHTSIGHT);
 			if (pClient)
 			{
 				pClient->addLight();
@@ -577,10 +577,10 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 		}
 
 		case LAYER_SPELL_Incognito:
-			StatFlag_Clear(STATF_Incognito);
+			StatFlag_Clear(STATF_INCOGNITO);
 			SetName(pSpell->GetName());	// restore your name
 			pSpell->SetName("");	// clear the name from the item (might be a worn item)
-			if (!IsStatFlag(STATF_Polymorph))
+			if (!IsStatFlag(STATF_POLYMORPH))
 				SetHue(m_prev_Hue);
 			if (pClient)
 				pClient->removeBuff(BI_INCOGNITO);
@@ -588,11 +588,11 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			return;
 
 		case LAYER_SPELL_Invis:
-			Reveal(STATF_Invisible);
+			Reveal(STATF_INVISIBLE);
 			return;
 
 		case LAYER_SPELL_Paralyze:
-			StatFlag_Clear(STATF_Freeze);
+			StatFlag_Clear(STATF_FREEZE);
 			UpdateMode();	// immediately tell the client that now he's able to move (without this, it will be able to move only on next tick update)
 			if (pClient)
 				pClient->removeBuff(BI_PARALYZE);
@@ -678,11 +678,11 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			return;
 		case SPELL_Particle_Form:	// 112 // turns you into an immobile, but untargetable particle system for a while.
 		case SPELL_Stone:
-			StatFlag_Clear( STATF_Stone );
+			StatFlag_Clear( STATF_STONE );
 			UpdateModeFlag();
 			return;
 		case SPELL_Hallucination:
-			StatFlag_Clear( STATF_Hallucinating );
+			StatFlag_Clear( STATF_HALLUCINATING );
 			UpdateModeFlag();
 			if (pClient)
 			{
@@ -754,13 +754,13 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			}
 			else
 			{
-				StatFlag_Clear(STATF_Reactive);
+				StatFlag_Clear(STATF_REACTIVE);
 			}
 			if (pClient)
 				pClient->removeBuff(BI_REACTIVEARMOR);
 			return;
 		case SPELL_Magic_Reflect:
-			StatFlag_Clear(STATF_Reflection);
+			StatFlag_Clear(STATF_REFLECTION);
 			if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
 			{
 				SetDefNum("RESPHYSICAL", GetDefNum("RESPHYSICAL", true) + pSpell->m_itSpell.m_spelllevel);
@@ -935,7 +935,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			ASSERT(pCharDef);
 
 			// re-apply our incognito name
-			if (IsStatFlag(STATF_Incognito))
+			if (IsStatFlag(STATF_INCOGNITO))
 				SetName(pCharDef->GetTypeName());
 
 			// set to creature type stats
@@ -972,7 +972,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					pSpell->m_itSpell.m_PolyDex = 0;
 			}
 
-			StatFlag_Set(STATF_Polymorph);
+			StatFlag_Set(STATF_POLYMORPH);
 			if (pClient && IsSetOF(OF_Buffs) && iBuffIcon)
 			{
 				pClient->removeBuff(iBuffIcon);
@@ -981,7 +981,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			return;
 		}
 		case LAYER_FLAG_Poison:
-			StatFlag_Set(STATF_Poisoned);
+			StatFlag_Set(STATF_POISONED);
 			UpdateModeFlag();
 			if (pClient && IsSetOF(OF_Buffs))
 			{
@@ -990,7 +990,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			}
 			return;
 		case LAYER_SPELL_Night_Sight:
-			StatFlag_Set(STATF_NightSight);
+			StatFlag_Set(STATF_NIGHTSIGHT);
 			if (pClient)
 			{
 				pClient->addLight();
@@ -1002,14 +1002,14 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			}
 			return;
 		case LAYER_SPELL_Incognito:
-			if (!IsStatFlag(STATF_Incognito))
+			if (!IsStatFlag(STATF_INCOGNITO))
 			{
 				const CCharBase * pCharDef = Char_GetDef();
 				ASSERT(pCharDef);
-				StatFlag_Set(STATF_Incognito);
+				StatFlag_Set(STATF_INCOGNITO);
 				pSpell->SetName(GetName());	// Give it my name
 				SetName(pCharDef->GetTypeName());	// Give me general name for the type
-				if (!IsStatFlag(STATF_Polymorph) && IsPlayableCharacter())
+				if (!IsStatFlag(STATF_POLYMORPH) && IsPlayableCharacter())
 					SetHue((HUE_UNDERWEAR | HUE_SKIN_LOW) + static_cast<HUE_TYPE>(Calc_GetRandVal(HUE_SKIN_HIGH - HUE_SKIN_LOW)));
 
 				if (pClient && IsSetOF(OF_Buffs))
@@ -1020,8 +1020,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			}
 			return;
 		case LAYER_SPELL_Invis:
-			StatFlag_Set(STATF_Invisible);
-			Reveal(STATF_Hidden);	// clear previous Hiding skill effect (this will not reveal the char because STATF_Invisibility still set)
+			StatFlag_Set(STATF_INVISIBLE);
+			Reveal(STATF_HIDDEN);	// clear previous Hiding skill effect (this will not reveal the char because STATF_Invisibility still set)
 			UpdateModeFlag();
 			if (pClient && IsSetOF(OF_Buffs))
 			{
@@ -1030,7 +1030,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			}
 			return;
 		case LAYER_SPELL_Paralyze:
-			StatFlag_Set(STATF_Freeze);
+			StatFlag_Set(STATF_FREEZE);
 			UpdateMode();
 			if (pClient && IsSetOF(OF_Buffs))
 			{
@@ -1039,7 +1039,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			}
 			return;
 		case LAYER_SPELL_Summon:
-			StatFlag_Set(STATF_Conjured);
+			StatFlag_Set(STATF_CONJURED);
 			return;
 		case LAYER_SPELL_Strangle:	// TO-DO: NumBuff[0] and NumBuff[1] to hold the damage range values.
 			{
@@ -1207,7 +1207,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			}
 			else
 			{
-				StatFlag_Set( STATF_Reactive );
+				StatFlag_Set( STATF_REACTIVE );
 			}
 			if (pClient && IsSetOF(OF_Buffs))
 			{
@@ -1244,11 +1244,11 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			return;
 		case SPELL_Particle_Form:	// 112 // turns you into an immobile, but untargetable particle system for a while.
 		case SPELL_Stone:
-			StatFlag_Set( STATF_Stone );
+			StatFlag_Set( STATF_STONE );
 			UpdateModeFlag();
 			return;
 		case SPELL_Hallucination:
-			StatFlag_Set( STATF_Hallucinating );
+			StatFlag_Set( STATF_HALLUCINATING );
 			UpdateModeFlag();
 			if (pClient)
 			{
@@ -1406,7 +1406,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			}
 			return;
 		case SPELL_Magic_Reflect:
-			StatFlag_Set( STATF_Reflection );
+			StatFlag_Set( STATF_REFLECTION );
 			if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 			{
 				iStatEffect = 25 - (pCaster->Skill_GetBase(SKILL_INSCRIPTION) / 200);
@@ -1527,7 +1527,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 			if ( !Calc_GetRandVal(3) )
 			{
 				Speak(g_Cfg.GetDefaultMsg(DEFMSG_SPELL_ALCOHOL_HIC));
-				if ( !IsStatFlag(STATF_OnHorse) )
+				if ( !IsStatFlag(STATF_ONHORSE) )
 				{
 					UpdateDir(static_cast<DIR_TYPE>(Calc_GetRandVal(8)));
 					UpdateAnimate(ANIM_BOW);
@@ -2127,7 +2127,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 
 		if ( m_pPlayer )
 		{
-			if ( IsStatFlag( STATF_DEAD|STATF_Sleeping ) || ! pSpellDef->m_SkillReq.IsResourceMatchAll(this))
+			if ( IsStatFlag( STATF_DEAD|STATF_SLEEPING ) || ! pSpellDef->m_SkillReq.IsResourceMatchAll(this))
 			{
 				if ( fFailMsg )
 					SysMessageDefault( DEFMSG_SPELL_TRY_DEAD );
@@ -2316,7 +2316,7 @@ bool CChar::Spell_Unequip( LAYER_TYPE layer )
 	if ( pItemPrev != NULL )
 	{
 
-		if ( IsSetMagicFlags(MAGICF_NOCASTFROZENHANDS) && IsStatFlag( STATF_Freeze ))
+		if ( IsSetMagicFlags(MAGICF_NOCASTFROZENHANDS) && IsStatFlag( STATF_FREEZE ))
 		{
 			SysMessageDefault( DEFMSG_SPELL_TRY_FROZENHANDS );
 			return false;
@@ -2804,7 +2804,7 @@ bool CChar::Spell_CastDone()
 	}
 
 	// If we are visible, play sound.
-	if ( !IsStatFlag( STATF_Insubstantial) )
+	if ( !IsStatFlag( STATF_INSUBSTANTIAL) )
 		Sound( pSpellDef->m_sound );
 
 	// At this point we should gain skill if precasting is enabled
@@ -2891,7 +2891,7 @@ int CChar::Spell_CastStart()
 
 	iDifficulty /= 10;		// adjust to 0 - 100
 	bool fWOP = (GetPrivLevel() >= PLEVEL_Counsel) ? g_Cfg.m_fWordsOfPowerStaff : g_Cfg.m_fWordsOfPowerPlayer;
-	if ( !NPC_CanSpeak() || IsStatFlag(STATF_Insubstantial) )
+	if ( !NPC_CanSpeak() || IsStatFlag(STATF_INSUBSTANTIAL) )
 		fWOP = false;
 
 	bool fAllowEquip = false;
@@ -2961,9 +2961,9 @@ int CChar::Spell_CastStart()
 		return -1;
 
 	if ( g_Cfg.m_iRevealFlags & REVEALF_SPELLCAST )
-		Reveal(STATF_Hidden|STATF_Invisible);
+		Reveal(STATF_HIDDEN|STATF_INVISIBLE);
 	else
-		Reveal(STATF_Hidden);
+		Reveal(STATF_HIDDEN);
 
 	// Animate casting
 	if ( !pSpellDef->IsSpellType(SPELLFLAG_NO_CASTANIM) && !IsSetMagicFlags(MAGICF_NOANIM) )
@@ -3024,9 +3024,9 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		return false;
 	if ( IsStatFlag(STATF_DEAD) && !pSpellDef->IsSpellType(SPELLFLAG_TARG_DEAD) )
 		return false;
-	if ( spell == SPELL_Paralyze_Field && IsStatFlag(STATF_Freeze) )
+	if ( spell == SPELL_Paralyze_Field && IsStatFlag(STATF_FREEZE) )
 		return false;
-	if ( spell == SPELL_Poison_Field && IsStatFlag(STATF_Poisoned) )
+	if ( spell == SPELL_Poison_Field && IsStatFlag(STATF_POISONED) )
 		return false;
 
 	iSkillLevel = iSkillLevel / 2 + Calc_GetRandVal(iSkillLevel / 2);	// randomize the potency
@@ -3159,14 +3159,14 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		// Check if the spell can be reflected
 		if ( pSpellDef->IsSpellType(SPELLFLAG_TARG_CHAR) && pCharSrc && pCharSrc != this )		// only spells with direct target can be reflected
 		{
-			if ( IsStatFlag(STATF_Reflection) )
+			if ( IsStatFlag(STATF_REFLECTION) )
 			{
 				Effect(EFFECT_OBJ, ITEMID_FX_GLOW, this, 10, 5);
 				CItem *pMagicReflect = LayerFind(LAYER_SPELL_Magic_Reflect);
 				if ( pMagicReflect )
 					pMagicReflect->Delete();
 
-				if ( pCharSrc->IsStatFlag(STATF_Reflection) )		// caster is under reflection effect too, so the spell will reflect back to default target
+				if ( pCharSrc->IsStatFlag(STATF_REFLECTION) )		// caster is under reflection effect too, so the spell will reflect back to default target
 				{
 					pCharSrc->Effect(EFFECT_OBJ, ITEMID_FX_GLOW, pCharSrc, 10, 5);
 					pMagicReflect = pCharSrc->LayerFind(LAYER_SPELL_Magic_Reflect);

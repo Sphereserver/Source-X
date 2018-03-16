@@ -145,7 +145,7 @@ public:
 
 	CServerTime m_timeLogin;			// World clock of login time. "LASTCONNECTTIME"
 	CServerTime m_timeLastEvent;		// Last time we got event from client.
-	CServerTime m_timeLastEventWalk;	// Last time we got a walk event from client (only used to handle STATF_Fly char flag)
+	CServerTime m_timeLastEventWalk;	// Last time we got a walk event from client (only used to handle STATF_FLY char flag)
 	int64 m_timeNextEventWalk;		// Fastwalk prevention: only allow more walk requests after this timer
 
 									// GM only stuff.

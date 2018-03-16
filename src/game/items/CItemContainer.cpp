@@ -861,7 +861,7 @@ void CItemContainer::Restock()
 	{
 		// Part of a vendor.
 		CChar *pChar = dynamic_cast<CChar *>(GetParent());
-		if ( pChar && !pChar->IsStatFlag(STATF_Pet) )
+		if ( pChar && !pChar->IsStatFlag(STATF_PET) )
 		{
 			switch ( GetEquipLayer() )
 			{

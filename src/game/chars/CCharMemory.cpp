@@ -119,7 +119,7 @@ bool CChar::Memory_UpdateFlags(CItemMemory * pMemory)
 
 	int64 iCheckTime;
 	if (wMemTypes & MEMORY_IPET)
-		StatFlag_Set(STATF_Pet);
+		StatFlag_Set(STATF_PET);
 	if (wMemTypes & MEMORY_FIGHT)	// update more often to check for retreat.
 		iCheckTime = 30 * TICK_PER_SEC;
 	else if (wMemTypes & (MEMORY_IPET | MEMORY_GUARD | MEMORY_GUILD | MEMORY_TOWN))
@@ -155,7 +155,7 @@ bool CChar::Memory_UpdateClearTypes( CItemMemory * pMemory, word MemTypes )
 		// Am i still a pet of some sort ?
 		if ( Memory_FindTypes( MEMORY_IPET ) == NULL )
 		{
-			StatFlag_Clear( STATF_Pet );
+			StatFlag_Clear( STATF_PET );
 		}
 	}
 

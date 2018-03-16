@@ -146,7 +146,7 @@ void CChar::NPC_Act_Fight()
 		return;
 
 	// Review our targets periodically.
-	if ( ! IsStatFlag(STATF_Pet) ||
+	if ( ! IsStatFlag(STATF_PET) ||
 		m_pNPC->m_Brain == NPCBRAIN_BERSERK )
 	{
 		int iObservant = ( 130 - Stat_GetAdjusted(STAT_INT)) / 20;
@@ -169,7 +169,7 @@ void CChar::NPC_Act_Fight()
 		if (!NPC_FightFindBestTarget())
 		{
 			Skill_Start(SKILL_NONE);
-			StatFlag_Clear(STATF_War);
+			StatFlag_Clear(STATF_WAR);
 			m_Fight_Targ_UID.InitUID();
 			return;
 		}
@@ -217,7 +217,7 @@ void CChar::NPC_Act_Fight()
 		iMotivation = (int)(Args.m_iN2);
 	}
 
-	if ( ! IsStatFlag(STATF_Pet))
+	if ( ! IsStatFlag(STATF_PET))
 	{
 		if ( iMotivation < 0 )
 		{

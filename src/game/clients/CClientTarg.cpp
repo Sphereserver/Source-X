@@ -748,7 +748,7 @@ int CClient::OnSkill_AnimalLore( CUID uid, int iSkillLevel, bool fTest )
 	{
 		if ( pChar == m_pChar )
 			return( 2 );
-		if ( m_pChar->IsStatFlag( STATF_OnHorse ) )
+		if ( m_pChar->IsStatFlag( STATF_ONHORSE ) )
 		{
 			CItem * pItem = m_pChar->LayerFind( LAYER_HORSE );
 			if ( pItem && pItem->m_itFigurine.m_UID == uid)
@@ -786,7 +786,7 @@ int CClient::OnSkill_AnimalLore( CUID uid, int iSkillLevel, bool fTest )
 
 	// How well fed ?
 	// Food count = 30 minute intervals.
-	lpctstr pszText = pChar->IsStatFlag(STATF_Conjured) ?
+	lpctstr pszText = pChar->IsStatFlag(STATF_CONJURED) ?
 						g_Cfg.GetDefaultMsg(DEFMSG_ANIMALLORE_CONJURED) :
 						pChar->Food_GetLevelMessage(pCharOwner ? true : false, true);
 
@@ -1127,7 +1127,7 @@ int CClient::OnSkill_Anatomy( CUID uid, int iSkillLevel, bool fTest )
 	sprintf(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_ANATOMY_RESULT), pChar->GetName(), sm_szStrEval[iStrEntry], sm_szDexEval[iDexEntry]);
 	addObjMessage(pszTemp, pChar);
 
-	if ( pChar->IsStatFlag(STATF_Conjured) )
+	if ( pChar->IsStatFlag(STATF_CONJURED) )
 		addObjMessage(g_Cfg.GetDefaultMsg(DEFMSG_ANATOMY_MAGIC), pChar);
 
 	// ??? looks hungry ?
@@ -1538,7 +1538,7 @@ bool CClient::OnTarg_Pet_Stable( CChar * pCharPet )
 		return false;
 	}
 
-	if ( pCharPet->IsStatFlag(STATF_Conjured))
+	if ( pCharPet->IsStatFlag(STATF_CONJURED))
 	{
 		pCharMaster->Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_STABLEMASTER_TARG_SUMMON ) );
 		return false;

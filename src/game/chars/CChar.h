@@ -43,36 +43,36 @@ private:
 	// Spell type effects.
 #define STATF_INVUL			0x00000001	// Invulnerability
 #define STATF_DEAD			0x00000002
-#define STATF_Freeze		0x00000004	// Paralyzed. (spell)
-#define STATF_Invisible		0x00000008	// Invisible (spell).
-#define STATF_Sleeping		0x00000010	// You look like a corpse ?
-#define STATF_War			0x00000020	// War mode on ?
-#define STATF_Reactive		0x00000040	// have reactive armor on.
-#define STATF_Poisoned		0x00000080	// Poison level is in the poison object
-#define STATF_NightSight	0x00000100	// All is light to you
-#define STATF_Reflection	0x00000200	// Magic reflect on.
-#define STATF_Polymorph		0x00000400	// We have polymorphed to another form.
-#define STATF_Incognito		0x00000800	// Dont show skill titles
-#define STATF_SpiritSpeak	0x00001000	// I can hear ghosts clearly.
-#define STATF_Insubstantial	0x00002000	// Ghost has not manifest. or GM hidden
-#define STATF_EmoteAction	0x00004000	// The creature will emote its actions to it's owners.
+#define STATF_FREEZE		0x00000004	// Paralyzed. (spell)
+#define STATF_INVISIBLE		0x00000008	// Invisible (spell).
+#define STATF_SLEEPING		0x00000010	// You look like a corpse ?
+#define STATF_WAR			0x00000020	// War mode on ?
+#define STATF_REACTIVE		0x00000040	// have reactive armor on.
+#define STATF_POISONED		0x00000080	// Poison level is in the poison object
+#define STATF_NIGHTSIGHT	0x00000100	// All is light to you
+#define STATF_REFLECTION	0x00000200	// Magic reflect on.
+#define STATF_POLYMORPH		0x00000400	// We have polymorphed to another form.
+#define STATF_INCOGNITO		0x00000800	// Dont show skill titles
+#define STATF_SPIRITSPEAK	0x00001000	// I can hear ghosts clearly.
+#define STATF_INSUBSTANTIAL	0x00002000	// Ghost has not manifest. or GM hidden
+#define STATF_EMOTEACTION	0x00004000	// The creature will emote its actions to it's owners.
 #define STATF_COMM_CRYSTAL	0x00008000	// I have a IT_COMM_CRYSTAL or listening item on me.
-#define STATF_HasShield		0x00010000	// Using a shield
-#define STATF_ArcherCanMove	0x00020000	// Can move with archery
-#define STATF_Stone			0x00040000	// turned to stone.
-#define STATF_Hovering		0x00080000	// hovering (flying gargoyle)
-#define STATF_Fly			0x00100000	// Flying or running ? (anim)
-	//							0x00200000
-#define STATF_Hallucinating	0x00400000	// eat 'shrooms or bad food.
-#define STATF_Hidden		0x00800000	// Hidden (non-magical)
-#define STATF_InDoors		0x01000000	// we are covered from the rain.
-#define STATF_Criminal		0x02000000	// The guards will attack me. (someone has called guards)
-#define STATF_Conjured		0x04000000	// This creature is conjured and will expire. (leave no corpse or loot)
-#define STATF_Pet			0x08000000	// I am a pet/hirling. check for my owner memory.
-#define STATF_Spawned		0x10000000	// I am spawned by a spawn item.
-#define STATF_SaveParity	0x20000000	// Has this char been saved or not ?
-#define STATF_Ridden		0x40000000	// This is the horse. (don't display me) I am being ridden
-#define STATF_OnHorse		0x80000000	// Mounted on horseback.
+#define STATF_HASSHIELD		0x00010000	// Using a shield
+#define STATF_ARCHERCANMOVE	0x00020000	// Can move with archery
+#define STATF_STONE			0x00040000	// turned to stone.
+#define STATF_HOVERING		0x00080000	// hovering (flying gargoyle)
+#define STATF_FLY			0x00100000	// Flying or running ? (anim)
+//							0x00200000
+#define STATF_HALLUCINATING	0x00400000	// eat 'shrooms or bad food.
+#define STATF_HIDDEN		0x00800000	// Hidden (non-magical)
+#define STATF_INDOORS		0x01000000	// we are covered from the rain.
+#define STATF_CRIMINAL		0x02000000	// The guards will attack me. (someone has called guards)
+#define STATF_CONJURED		0x04000000	// This creature is conjured and will expire. (leave no corpse or loot)
+#define STATF_PET			0x08000000	// I am a pet/hirling. check for my owner memory.
+#define STATF_SPAWNED		0x10000000	// I am spawned by a spawn item.
+#define STATF_SAVEPARITY	0x20000000	// Has this char been saved or not ?
+#define STATF_RIDDEN		0x40000000	// This is the horse. (don't display me) I am being ridden
+#define STATF_ONHORSE		0x80000000	// Mounted on horseback.
 
 	uint64 m_iStatFlag;		// Flags above
 
@@ -635,7 +635,7 @@ public:
 	bool Noto_IsCriminal() const
 	{
 		// do the guards hate me ?
-		if ( IsStatFlag( STATF_Criminal ) )
+		if ( IsStatFlag( STATF_CRIMINAL ) )
 			return true;
 		return Noto_IsEvil();
 	}

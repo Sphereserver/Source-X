@@ -451,7 +451,7 @@ void CChar::CallGuards()
 		if (m_pPlayer && Memory_FindObjTypes(pCriminal, MEMORY_SAWCRIME))
 			pCriminal->Noto_Criminal();
 
-		if (!pCriminal->IsStatFlag(STATF_Criminal) && !(pCriminal->Noto_IsEvil() && g_Cfg.m_fGuardsOnMurderers))
+		if (!pCriminal->IsStatFlag(STATF_CRIMINAL) && !(pCriminal->Noto_IsEvil() && g_Cfg.m_fGuardsOnMurderers))
 			continue;
 
 		CallGuards(pCriminal);
@@ -483,7 +483,7 @@ void CChar::CallGuards( CChar * pCriminal )
 		while ((pGuardFound = AreaGuard.GetChar()) != NULL)
 		{
 			if (pGuardFound->m_pNPC && (pGuardFound->m_pNPC->m_Brain == NPCBRAIN_GUARD) && // Char found must be a guard
-				(pGuardFound->m_Fight_Targ_UID == pCriminal->GetUID() || !pGuardFound->IsStatFlag(STATF_War)))	// and will be eligible to fight this target if it's not already on a fight or if its already attacking this target (to avoid spamming docens of guards at the same target).
+				(pGuardFound->m_Fight_Targ_UID == pCriminal->GetUID() || !pGuardFound->IsStatFlag(STATF_WAR)))	// and will be eligible to fight this target if it's not already on a fight or if its already attacking this target (to avoid spamming docens of guards at the same target).
 			{
 				pGuard = pGuardFound;
 				break;
@@ -591,7 +591,7 @@ bool CChar::OnAttackedBy(CChar * pCharSrc, int iHarmQty, bool fCommandPet, bool 
 		else
 		{
 			// If it is a pet then this a crime others can report.
-			CChar * pCharMark = IsStatFlag(STATF_Pet) ? NPC_PetGetOwner() : this;
+			CChar * pCharMark = IsStatFlag(STATF_PET) ? NPC_PetGetOwner() : this;
 			pCharSrc->CheckCrimeSeen(Skill_GetActive(), pCharMark, NULL, NULL);
 		}
 	}
@@ -789,7 +789,7 @@ int CChar::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType, int iDmgPhys
 		return -1;
 	if ( !(uType & DAMAGE_GOD) )
 	{
-		if ( IsStatFlag(STATF_INVUL|STATF_Stone) )
+		if ( IsStatFlag(STATF_INVUL|STATF_STONE) )
 		{
 effect_bounce:
 			Effect( EFFECT_OBJ, ITEMID_FX_GLOW, this, 10, 16 );
@@ -801,7 +801,7 @@ effect_bounce:
 		{
 			if ( m_pArea->IsFlag(REGION_FLAG_SAFE) )
 				goto effect_bounce;
-			if ( m_pArea->IsFlag(REGION_FLAG_NO_PVP) && pSrc && ((IsStatFlag(STATF_Pet) && NPC_PetGetOwner() == pSrc) || (m_pPlayer && (pSrc->m_pPlayer || pSrc->IsStatFlag(STATF_Pet)))) )
+			if ( m_pArea->IsFlag(REGION_FLAG_NO_PVP) && pSrc && ((IsStatFlag(STATF_PET) && NPC_PetGetOwner() == pSrc) || (m_pPlayer && (pSrc->m_pPlayer || pSrc->IsStatFlag(STATF_PET)))) )
 				goto effect_bounce;
 		}
 	}
@@ -901,9 +901,9 @@ effect_bounce:
 		if ( pStuck )
 			pStuck->Delete();
 
-		if ( IsStatFlag(STATF_Freeze) )
+		if ( IsStatFlag(STATF_FREEZE) )
 		{
-			StatFlag_Clear(STATF_Freeze);
+			StatFlag_Clear(STATF_FREEZE);
 			UpdateMode();
 		}
 	}
@@ -965,7 +965,7 @@ effect_bounce:
 		if (uType & (DAMAGE_HIT_BLUNT|DAMAGE_HIT_PIERCE|DAMAGE_HIT_SLASH))
 		{
 			// Check if Reactive Armor will reflect some damage back
-			if ( IsStatFlag(STATF_Reactive) && !(uType & DAMAGE_GOD) )
+			if ( IsStatFlag(STATF_REACTIVE) && !(uType & DAMAGE_GOD) )
 			{
 				if ( GetTopDist3D(pSrc) < 2 )
 				{
@@ -1040,7 +1040,7 @@ SKILL_TYPE CChar::Fight_GetWeaponSkill() const
 bool CChar::Fight_IsActive() const
 {
 	ADDTOCALLSTACK("CChar::Fight_IsActive");
-	if ( ! IsStatFlag(STATF_War))
+	if ( ! IsStatFlag(STATF_WAR))
 		return false;
 
 	SKILL_TYPE iSkillActive = Skill_GetActive();
@@ -1197,7 +1197,7 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 bool CChar::Fight_IsAttackable()
 {
 	ADDTOCALLSTACK("CChar::IsAttackable");
-	return !IsStatFlag(STATF_DEAD|STATF_Stone|STATF_Invisible|STATF_Insubstantial|STATF_Hidden|STATF_INVUL);
+	return !IsStatFlag(STATF_DEAD|STATF_STONE|STATF_INVISIBLE|STATF_INSUBSTANTIAL|STATF_HIDDEN|STATF_INVUL);
 }
 
 // Clear all my active targets. Toggle out of war mode.
@@ -1292,9 +1292,9 @@ bool CChar::Fight_Attack( const CChar *pCharTarg, bool btoldByMaster )
 		return false;
 
 	// I'm attacking (or defending)
-	if ( !IsStatFlag(STATF_War) )
+	if ( !IsStatFlag(STATF_WAR) )
 	{
-		StatFlag_Set(STATF_War);
+		StatFlag_Set(STATF_WAR);
 		UpdateModeFlag();
 		if ( IsClient() )
 			GetClient()->addPlayerWarMode();
@@ -1334,7 +1334,7 @@ void CChar::Fight_HitTry()
 			Skill_Start(SKILL_NONE);
 			m_Fight_Targ_UID.InitUID();
 			if ( m_pNPC )
-				StatFlag_Clear(STATF_War);
+				StatFlag_Clear(STATF_WAR);
 		}
 		return;
 	}
@@ -1388,7 +1388,7 @@ WAR_SWING_TYPE CChar::Fight_CanHit(CChar * pCharSrc)
 	//	WAR_SWING_EQUIPPING	= recoiling weapon / swing made
 	//  WAR_SWING_READY		= RETURN 1 // Won't have any effect on Fight_Hit() function other than allowing the hit. The rest of returns in here will stop the hit.
 	//  WAR_SWING_SWINGING	= taking my swing now
-	if (IsStatFlag(STATF_DEAD | STATF_Sleeping | STATF_Freeze | STATF_Stone) || pCharSrc->IsStatFlag(STATF_DEAD | STATF_INVUL | STATF_Stone | STATF_Ridden))
+	if (IsStatFlag(STATF_DEAD | STATF_SLEEPING | STATF_FREEZE | STATF_STONE) || pCharSrc->IsStatFlag(STATF_DEAD | STATF_INVUL | STATF_STONE | STATF_RIDDEN))
 		return WAR_SWING_INVALID;
 	if (pCharSrc->m_pArea && pCharSrc->m_pArea->IsFlag(REGION_FLAG_SAFE))
 		return WAR_SWING_INVALID;
@@ -1511,7 +1511,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		return iHitCheck;
 
 	// Guards should remove conjured NPCs
-	if ( m_pNPC && m_pNPC->m_Brain == NPCBRAIN_GUARD && pCharTarg->m_pNPC && pCharTarg->IsStatFlag(STATF_Conjured) )
+	if ( m_pNPC && m_pNPC->m_Brain == NPCBRAIN_GUARD && pCharTarg->m_pNPC && pCharTarg->IsStatFlag(STATF_CONJURED) )
 	{
 		pCharTarg->Delete();
 		return WAR_SWING_EQUIPPING;
@@ -1582,7 +1582,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 	if ( g_Cfg.IsSkillFlag(skill, SKF_RANGED) )
 	{
-		if ( IsStatFlag(STATF_HasShield) )		// this should never happen
+		if ( IsStatFlag(STATF_HASSHIELD) )		// this should never happen
 		{
 			SysMessageDefault(DEFMSG_ITEMUSE_BOW_SHIELD);
 			return WAR_SWING_INVALID;
@@ -1971,7 +1971,7 @@ bool CChar::Fight_Parry(CItem * &pItemParry)
 	// Check if target will block the hit
 	// Legacy pre-SE formula
 	int ParryChance = 0;
-	if (IsStatFlag(STATF_HasShield))	// parry using shield
+	if (IsStatFlag(STATF_HASSHIELD))	// parry using shield
 	{
 		pItemParry = LayerFind(LAYER_HAND2);
 		ParryChance = Skill_GetBase(SKILL_PARRYING) / 40;

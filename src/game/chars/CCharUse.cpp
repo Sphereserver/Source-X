@@ -612,7 +612,7 @@ bool CChar::Use_Item_Web( CItem * pItemWeb )
 	// RETURN: true = held in place.
 	//  false = walk thru it.
 
-	if ( GetDispID() == CREID_GIANT_SPIDER || !pItemWeb || !pItemWeb->IsTopLevel() || IsStatFlag(STATF_DEAD|STATF_Insubstantial) || IsPriv(PRIV_GM) )
+	if ( GetDispID() == CREID_GIANT_SPIDER || !pItemWeb || !pItemWeb->IsTopLevel() || IsStatFlag(STATF_DEAD|STATF_INSUBSTANTIAL) || IsPriv(PRIV_GM) )
 		return false;	// just walk through it
 
 	// Try to break it.
@@ -1101,7 +1101,7 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool bCheckFollowerSlots )
 	}
 
 	if ( pPet->IsDisconnected() )
-		pPet->StatFlag_Clear(STATF_Ridden);		// pull the creature out of IDLE space
+		pPet->StatFlag_Clear(STATF_RIDDEN);		// pull the creature out of IDLE space
 
 	pItem->m_itFigurine.m_UID.InitUID();
 	pPet->m_dirFace = m_dirFace;

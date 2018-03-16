@@ -247,7 +247,7 @@ void CChar::Attacker_Clear()
 
 	m_lastAttackers.clear();
     if (m_pNPC)
-        StatFlag_Clear(STATF_War);
+        StatFlag_Clear(STATF_WAR);
 	if ( Fight_IsActive() )
 	{
 		Skill_Start(SKILL_NONE);

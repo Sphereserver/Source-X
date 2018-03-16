@@ -333,7 +333,7 @@ int CChar::NPC_GetVendorMarkup() const
 	//  0% = default price
 	//  -100% = free
 
-	if ( IsStatFlag(STATF_Pet) )	// not on a hired vendor
+	if ( IsStatFlag(STATF_PET) )	// not on a hired vendor
 		return 0;
 
 	// Use char value
@@ -451,7 +451,7 @@ bool CChar::NPC_IsOwnedBy( const CChar * pChar, bool fAllowGM ) const
 	if ( fAllowGM && pChar->IsPriv( PRIV_GM ))
 		return( pChar->GetPrivLevel() > GetPrivLevel());
 
-	if ( ! IsStatFlag( STATF_Pet ) || m_pPlayer )	// shortcut - i'm not a pet.
+	if ( ! IsStatFlag( STATF_PET ) || m_pPlayer )	// shortcut - i'm not a pet.
 		return false;
 	if ( m_pNPC == NULL )
 		return false;
@@ -466,7 +466,7 @@ CChar * CChar::NPC_PetGetOwner() const
 	ADDTOCALLSTACK("CChar::NPC_PetGetOwner");
 	// Assume i am a pet. Get my first (primary) owner. not just friends. used for blame .
 
-	if ( !IsStatFlag(STATF_Pet) )
+	if ( !IsStatFlag(STATF_PET) )
 		return NULL;
 
 	CItemMemory	*pMemory = Memory_FindTypes(MEMORY_IPET);
@@ -514,7 +514,7 @@ bool CChar::NPC_CheckWalkHere( const CPointBase & pt, const CRegion * pArea, dwo
 
 	if ( m_pArea != NULL )
 	{
-		if ( m_pNPC->m_Brain == NPCBRAIN_GUARD && !IsStatFlag(STATF_War) )	// guards will want to stay in guard range
+		if ( m_pNPC->m_Brain == NPCBRAIN_GUARD && !IsStatFlag(STATF_WAR) )	// guards will want to stay in guard range
 		{
 			if ( m_pArea->IsGuarded() && !pArea->IsGuarded() )
 				return false;

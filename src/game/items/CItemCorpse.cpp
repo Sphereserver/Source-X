@@ -31,7 +31,7 @@ CChar *CItemCorpse::IsCorpseSleeping() const
 	}
 
 	CChar *pCharCorpse = m_uidLink.CharFind();
-	if ( pCharCorpse && pCharCorpse->IsStatFlag(STATF_Sleeping) && !GetTimeStamp().IsTimeValid() )
+	if ( pCharCorpse && pCharCorpse->IsStatFlag(STATF_SLEEPING) && !GetTimeStamp().IsTimeValid() )
 		return pCharCorpse;
 
 	return NULL;
@@ -96,8 +96,8 @@ CItemCorpse *CChar::FindMyCorpse( bool ignoreLOS, int iRadius ) const
 	return NULL;
 }
 
-// Create the char corpse when i die (STATF_DEAD) or fall asleep (STATF_Sleeping)
-// Summoned (STATF_Conjured) and some others creatures have no corpse.
+// Create the char corpse when i die (STATF_DEAD) or fall asleep (STATF_SLEEPING)
+// Summoned (STATF_CONJURED) and some others creatures have no corpse.
 CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 {
 	ADDTOCALLSTACK("CChar::MakeCorpse");
@@ -105,7 +105,7 @@ CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 	word wFlags = (word)(m_TagDefs.GetKeyNum("DEATHFLAGS", true));
 	if (wFlags & DEATH_NOCORPSE)
 		return NULL;
-	if (IsStatFlag(STATF_Conjured) && !(wFlags & (DEATH_NOCONJUREDEFFECT|DEATH_HASCORPSE)))
+	if (IsStatFlag(STATF_CONJURED) && !(wFlags & (DEATH_NOCONJUREDEFFECT|DEATH_HASCORPSE)))
 	{
 		Effect(EFFECT_XYZ, ITEMID_FX_SPELL_FAIL, this, 1, 30);
 		return NULL;
@@ -146,7 +146,7 @@ CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 		pCorpse->m_itCorpse.m_uidKiller = GetUID();
 	}
 
-	if ((m_pNPC && m_pNPC->m_bonded) || IsStatFlag(STATF_Conjured|STATF_Sleeping))
+	if ((m_pNPC && m_pNPC->m_bonded) || IsStatFlag(STATF_CONJURED|STATF_SLEEPING))
 		pCorpse->m_itCorpse.m_carved = 1;	// corpse of bonded and summoned creatures (or sleeping players) can't be carved
 
 	if ( !(wFlags & DEATH_NOLOOTDROP) )		// move non-newbie contents of the pack to corpse

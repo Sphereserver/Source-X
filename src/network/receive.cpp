@@ -3182,16 +3182,16 @@ bool PacketGargoyleFly::onReceive(NetState* net)
 			return false;
 	}
 
-	if ( character->IsStatFlag(STATF_Hovering) )
+	if ( character->IsStatFlag(STATF_HOVERING) )
 	{
 		// stop hovering
-		character->StatFlag_Clear(STATF_Hovering);
+		character->StatFlag_Clear(STATF_HOVERING);
 		client->removeBuff(BI_GARGOYLEFLY);
 	}
 	else
 	{
 		// begin hovering
-		character->StatFlag_Set(STATF_Hovering);
+		character->StatFlag_Set(STATF_HOVERING);
 		client->addBuff(BI_GARGOYLEFLY, 1112193, 1112567);
 
 		// float player up to the hover Z
@@ -3202,7 +3202,7 @@ bool PacketGargoyleFly::onReceive(NetState* net)
 
 	// Sending this packet here instead of calling UpdateAnimate because of conversions, NANIM_TAKEOFF = 9 and the function
 	// is reading 9 from old ANIM_TYPE to know when the character is attacking and modifying its animation accordingly
-	PacketActionBasic *cmd = new PacketActionBasic(character, character->IsStatFlag(STATF_Hovering) ? NANIM_TAKEOFF : NANIM_LANDING, static_cast<ANIM_TYPE_NEW>(0), (byte)(0));
+	PacketActionBasic *cmd = new PacketActionBasic(character, character->IsStatFlag(STATF_HOVERING) ? NANIM_TAKEOFF : NANIM_LANDING, static_cast<ANIM_TYPE_NEW>(0), (byte)(0));
 	ClientIterator it;
 	for ( CClient *pClient = it.next(); pClient != NULL; pClient = it.next() )
 	{

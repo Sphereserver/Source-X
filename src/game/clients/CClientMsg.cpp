@@ -35,7 +35,7 @@ void CClient::resendBuffs()
 	// time will stay cached on client, making it not display the remaining time if the server
 	// send this same buff again. To avoid this, we must remove the buff before send it.
 
-	if ( pChar->IsStatFlag(STATF_Hidden | STATF_Insubstantial) )
+	if ( pChar->IsStatFlag(STATF_HIDDEN | STATF_INSUBSTANTIAL) )
 		addBuff(BI_HIDDEN, 1075655, 1075656);
 
 	CItem *pStuck = pChar->LayerFind(LAYER_FLAG_Stuck);
@@ -529,7 +529,7 @@ void CClient::addLight()
 	// Global light level.
 	ASSERT(m_pChar);
 
-	if (m_pChar->IsStatFlag(STATF_NightSight|STATF_DEAD))
+	if (m_pChar->IsStatFlag(STATF_NIGHTSIGHT|STATF_DEAD))
 	{
 		new PacketGlobalLight(this, LIGHT_BRIGHT);
 		return;
@@ -968,11 +968,11 @@ void CClient::GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMI
 		}
 	}
 
-	if ( m_pChar->IsStatFlag( STATF_Hallucinating ))
+	if ( m_pChar->IsStatFlag( STATF_HALLUCINATING ))
 		wHue = static_cast<HUE_TYPE>(Calc_GetRandVal( HUE_DYE_HIGH ));
-	else if ( pChar->IsStatFlag(STATF_Stone))
+	else if ( pChar->IsStatFlag(STATF_STONE))
 		wHue = HUE_STONE;
-	else if ( pChar->IsStatFlag(STATF_Insubstantial))
+	else if ( pChar->IsStatFlag(STATF_INSUBSTANTIAL))
 		wHue = g_Cfg.m_iColorInvis;
 	else
 	{
@@ -1010,7 +1010,7 @@ void CClient::GetAdjustedCharID( const CChar * pChar, CREID_TYPE &id, HUE_TYPE &
 	id = pChar->GetDispID();
 	CCharBase * pCharDef = pChar->Char_GetDef();
 
-	if ( m_pChar->IsStatFlag(STATF_Hallucinating) )
+	if ( m_pChar->IsStatFlag(STATF_HALLUCINATING) )
 	{
 		if ( pChar != m_pChar )
 		{
@@ -1028,13 +1028,13 @@ void CClient::GetAdjustedCharID( const CChar * pChar, CREID_TYPE &id, HUE_TYPE &
 	}
 	else
 	{
-		if ( pChar->IsStatFlag(STATF_Stone) )	// turned to stone.
+		if ( pChar->IsStatFlag(STATF_STONE) )	// turned to stone.
 			wHue = HUE_STONE;
-		else if ( pChar->IsStatFlag(STATF_Insubstantial) )	// turned to stone.
+		else if ( pChar->IsStatFlag(STATF_INSUBSTANTIAL) )	// turned to stone.
 			wHue = g_Cfg.m_iColorInvis;
-		else if ( pChar->IsStatFlag(STATF_Hidden) )	// turned to stone.
+		else if ( pChar->IsStatFlag(STATF_HIDDEN) )	// turned to stone.
 			wHue = g_Cfg.m_iColorHidden;
-		else if ( pChar->IsStatFlag(STATF_Invisible) )	// turned to stone.
+		else if ( pChar->IsStatFlag(STATF_INVISIBLE) )	// turned to stone.
 			wHue = g_Cfg.m_iColorInvisSpell;
 		else
 		{
@@ -1233,7 +1233,7 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 	strcat( pszTemp, pChar->GetName() );
 	strcat( pszTemp, pChar->GetKeyStr( "NAME.SUFFIX" ) );
 
-	if ( !pChar->IsStatFlag(STATF_Incognito) || ( GetPrivLevel() > pChar->GetPrivLevel() ))
+	if ( !pChar->IsStatFlag(STATF_INCOGNITO) || ( GetPrivLevel() > pChar->GetPrivLevel() ))
 	{
 		// Guild abbrev.
 		lpctstr pAbbrev = pChar->Guild_AbbrevBracket(MEMORY_TOWN);
@@ -1271,27 +1271,27 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 		{
 			if ( pChar->IsPlayableCharacter())
 				strcat( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_NPC) );
-			if ( pChar->IsStatFlag( STATF_Conjured ))
+			if ( pChar->IsStatFlag( STATF_CONJURED ))
 				strcat( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_SUMMONED) );
-			else if ( pChar->IsStatFlag( STATF_Pet ))
+			else if ( pChar->IsStatFlag( STATF_PET ))
 				strcat( pszTemp, (pChar->m_pNPC->m_bonded) ? g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_BONDED) : g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_TAME) );
 		}
-		if ( pChar->IsStatFlag( STATF_INVUL ) && ! pChar->IsStatFlag( STATF_Incognito ) && ! pChar->IsPriv( PRIV_PRIV_NOSHOW ))
+		if ( pChar->IsStatFlag( STATF_INVUL ) && ! pChar->IsStatFlag( STATF_INCOGNITO ) && ! pChar->IsPriv( PRIV_PRIV_NOSHOW ))
 			strcat( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_INVUL) );
-		if ( pChar->IsStatFlag( STATF_Stone ))
+		if ( pChar->IsStatFlag( STATF_STONE ))
 			strcat( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_STONE) );
-		if ( pChar->IsStatFlag( STATF_Freeze ))
+		if ( pChar->IsStatFlag( STATF_FREEZE ))
 			strcat( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_FROZEN) );
-		if ( pChar->IsStatFlag( STATF_Insubstantial | STATF_Invisible | STATF_Hidden ))
+		if ( pChar->IsStatFlag( STATF_INSUBSTANTIAL | STATF_INVISIBLE | STATF_HIDDEN ))
 			strcat( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_HIDDEN) );
-		if ( pChar->IsStatFlag( STATF_Sleeping ))
+		if ( pChar->IsStatFlag( STATF_SLEEPING ))
 			strcat( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_SLEEPING) );
-		if ( pChar->IsStatFlag( STATF_Hallucinating ))
+		if ( pChar->IsStatFlag( STATF_HALLUCINATING ))
 			strcat( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_HALLU) );
 
 		if ( fAllShow )
 		{
-			if ( pChar->IsStatFlag(STATF_Spawned) )
+			if ( pChar->IsStatFlag(STATF_SPAWNED) )
 				strcat(pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_SPAWN));
 			if ( IsPriv( PRIV_DEBUG ))
 				sprintf(pszTemp+strlen(pszTemp), " [0%x]", (dword) pChar->GetUID());
@@ -1305,7 +1305,7 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 		strcat( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_JAILED) );
 	if ( pChar->IsDisconnected())
 		strcat( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_LOGOUT) );
-	if (( fAllShow || pChar == m_pChar ) && pChar->IsStatFlag( STATF_Criminal ))
+	if (( fAllShow || pChar == m_pChar ) && pChar->IsStatFlag( STATF_CRIMINAL ))
 		strcat( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_CHARINFO_CRIMINAL) );
 	if ( fAllShow || ( IsPriv(PRIV_GM) && ( g_Cfg.m_iDebugFlags & DEBUGF_NPC_EMOTE )))
 	{
@@ -2172,7 +2172,7 @@ bool CClient::addShopMenuBuy( CChar * pVendor )
 	OpenPacketTransaction transaction(this, PacketSend::PRI_HIGH);
 
 	// Non-player vendors could be restocked on-the-fly
-	if ( !pVendor->IsStatFlag(STATF_Pet) )
+	if ( !pVendor->IsStatFlag(STATF_PET) )
 		pVendor->NPC_Vendor_Restock(false, true);
 
 	CItemContainer *pContainer = pVendor->GetBank(LAYER_VENDOR_STOCK);
@@ -2223,7 +2223,7 @@ bool CClient::addShopMenuSell( CChar * pVendor )
 	OpenPacketTransaction transaction( this, PacketSend::PRI_LOW );
 
 	//	non-player vendors could be restocked on-the-fly
-	if ( !pVendor->IsStatFlag( STATF_Pet ) )
+	if ( !pVendor->IsStatFlag( STATF_PET ) )
 		pVendor->NPC_Vendor_Restock( false, true );
 
 	CItemContainer *pContainer1 = pVendor->GetBank( LAYER_VENDOR_BUYS );
@@ -2235,7 +2235,7 @@ bool CClient::addShopMenuSell( CChar * pVendor )
 	CItemContainer *pContainer3 = pVendor->GetBank( LAYER_VENDOR_EXTRA );
 	addItem( pContainer3 );
 
-	if ( pVendor->IsStatFlag( STATF_Pet ) )	// player vendor
+	if ( pVendor->IsStatFlag( STATF_PET ) )	// player vendor
 		pContainer2 = NULL;		// no stock
 
 	PacketVendorSellList cmd( pVendor );

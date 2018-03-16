@@ -184,7 +184,7 @@ void CItemSpawn::GenerateChar(CResourceDef *pDef)
 
 	CPointMap pt = GetTopPoint();
 	pChar->NPC_LoadScript(true);
-	pChar->StatFlag_Set(STATF_Spawned);
+	pChar->StatFlag_Set(STATF_SPAWNED);
 	word iDistMax = m_itSpawnChar.m_DistMax;
 	// Try placing this char near the spawn
 	if ( !pChar->MoveNearObj(this, iDistMax ? (word)(Calc_GetRandVal(iDistMax) + 1) : 1) )
@@ -232,7 +232,7 @@ void CItemSpawn::DelObj(CUID uid)
 
 		m_currentSpawned--;
 		if ( GetType() == IT_SPAWN_CHAR )
-			uid.CharFind()->StatFlag_Clear(STATF_Spawned);
+			uid.CharFind()->StatFlag_Clear(STATF_SPAWNED);
 
 		while ( m_obj[i + 1].IsValidUID() )				// searching for any entry higher than this one...
 		{
@@ -292,7 +292,7 @@ void CItemSpawn::AddObj(CUID uid)
 				{
 					CChar *pChar = uid.CharFind();
 					ASSERT(pChar->m_pNPC);
-					pChar->StatFlag_Set(STATF_Spawned);
+					pChar->StatFlag_Set(STATF_SPAWNED);
 					pChar->m_ptHome = GetTopPoint();
 					pChar->m_pNPC->m_Home_Dist_Wander = (word)(m_itSpawnChar.m_DistMax);
 				}

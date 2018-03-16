@@ -705,7 +705,7 @@ bool CClient::Event_CheckWalkBuffer()
 	// Client only allows 4 steps of walk ahead.
 	llong CurrTime = GetSupportedTickCount();
 	int iTimeDiff = abs((int)((CurrTime - m_timeWalkStep) / 10));	// use absolute value to prevent overflows
-	int iTimeMin = m_pChar->IsStatFlag(STATF_OnHorse|STATF_Hovering) ? 70 : 140; // minimum time to move 8 steps
+	int iTimeMin = m_pChar->IsStatFlag(STATF_ONHORSE|STATF_HOVERING) ? 70 : 140; // minimum time to move 8 steps
 
 	if ( m_pChar->m_pPlayer && (m_pChar->m_pPlayer->m_speedMode != 0) )
 	{
@@ -804,7 +804,7 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 			}
 
 			int64 iDelay = 0;
-			if ( m_pChar->IsStatFlag(STATF_OnHorse|STATF_Hovering) )
+			if ( m_pChar->IsStatFlag(STATF_ONHORSE|STATF_HOVERING) )
 				iDelay = (rawdir & 0x80) ? 70 : 170;	// 100ms : 200ms
 			else
 				iDelay = (rawdir & 0x80) ? 170 : 370;	// 200ms : 400ms
@@ -847,7 +847,7 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 		m_pChar->CheckRevealOnMove();
 
 		// Set running flag if I'm running
-		m_pChar->StatFlag_Mod(STATF_Fly, (rawdir & 0x80) ? true : false);
+		m_pChar->StatFlag_Mod(STATF_FLY, (rawdir & 0x80) ? true : false);
 
 		if ( iRet == TRIGRET_RET_TRUE )
 		{
@@ -884,7 +884,7 @@ void CClient::Event_CombatMode( bool fWar ) // Only for switching to combat mode
 	if ( IsTrigUsed(TRIGGER_USERWARMODE) )
 	{
 		CScriptTriggerArgs Args;
-		Args.m_iN1 = m_pChar->IsStatFlag(STATF_War) ? 1 : 0;
+		Args.m_iN1 = m_pChar->IsStatFlag(STATF_WAR) ? 1 : 0;
 		Args.m_iN2 = 1;
 		Args.m_iN3 = 0;
 		if (m_pChar->OnTrigger(CTRIG_UserWarmode, m_pChar, &Args) == TRIGRET_RET_TRUE)
@@ -897,10 +897,10 @@ void CClient::Event_CombatMode( bool fWar ) // Only for switching to combat mode
 			fWar = (Args.m_iN3 == 1 ? false : true);
 	}
 
-	m_pChar->StatFlag_Mod( STATF_War, fWar );
+	m_pChar->StatFlag_Mod( STATF_WAR, fWar );
 
 	if ( m_pChar->IsStatFlag( STATF_DEAD ))
-		m_pChar->StatFlag_Mod( STATF_Insubstantial, !fWar );	// manifest the ghost
+		m_pChar->StatFlag_Mod( STATF_INSUBSTANTIAL, !fWar );	// manifest the ghost
 
 	if ( fCleanSkill )
 	{
@@ -1030,7 +1030,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t it
 		return;
 
 #define MAX_COST (INT32_MAX / 2)
-	bool bPlayerVendor = pVendor->IsStatFlag(STATF_Pet);
+	bool bPlayerVendor = pVendor->IsStatFlag(STATF_PET);
 	pVendor->GetBank(LAYER_VENDOR_STOCK);
 	CItemContainer* pPack = m_pChar->GetPackSafe();
 
@@ -1350,14 +1350,14 @@ void CClient::Event_VendorSell(CChar* pVendor, const VendorItem* items, size_t i
 		if ( amount >= pItem->GetAmount())
 		{
 			pItem->RemoveFromView();
-			if ( pVendor->IsStatFlag(STATF_Pet) && pContExtra )
+			if ( pVendor->IsStatFlag(STATF_PET) && pContExtra )
 				pContExtra->ContentAdd(pItem);
 			else
 				pItem->Delete();
 		}
 		else
 		{
-			if ( pVendor->IsStatFlag(STATF_Pet) && pContExtra )
+			if ( pVendor->IsStatFlag(STATF_PET) && pContExtra )
 			{
 				CItem * pItemNew = CItem::CreateDupeItem(pItem);
 				pItemNew->SetAmount(amount);
@@ -2074,11 +2074,11 @@ bool CClient::Event_DoubleClick( CUID uid, bool fMacro, bool fTestTouch, bool fS
 	{
 		if ( pChar == m_pChar )
 		{
-			if ( pChar->IsStatFlag(STATF_OnHorse) )
+			if ( pChar->IsStatFlag(STATF_ONHORSE) )
 			{
 				// in war mode not to drop from horse accidentally we need this check
-				// Should also check for STATF_War in case someone starts fight and runs away.
-				if ( !IsSetCombatFlags(COMBAT_DCLICKSELF_UNMOUNTS) && pChar->IsStatFlag(STATF_War) && pChar->Memory_FindTypes(MEMORY_FIGHT) )
+				// Should also check for STATF_WAR in case someone starts fight and runs away.
+				if ( !IsSetCombatFlags(COMBAT_DCLICKSELF_UNMOUNTS) && pChar->IsStatFlag(STATF_WAR) && pChar->Memory_FindTypes(MEMORY_FIGHT) )
 				{
 					addCharPaperdoll(pChar);
 					return true;
@@ -2346,7 +2346,7 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 				m_pPopupPacket->addOption(POPUP_PETKILL, 6111, iEnabled, 0xFFFF);
 				m_pPopupPacket->addOption(POPUP_PETSTOP, 6112, POPUPFLAG_COLOR, 0xFFFF);
 				m_pPopupPacket->addOption(POPUP_PETSTAY, 6114, POPUPFLAG_COLOR, 0xFFFF);
-				if ( !pChar->IsStatFlag(STATF_Conjured) )
+				if ( !pChar->IsStatFlag(STATF_CONJURED) )
 				{
 					m_pPopupPacket->addOption(POPUP_PETFRIEND_ADD, 6110, iEnabled, 0xFFFF);
 					m_pPopupPacket->addOption(POPUP_PETFRIEND_REMOVE, 6099, iEnabled, 0xFFFF);

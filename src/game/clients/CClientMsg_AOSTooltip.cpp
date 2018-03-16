@@ -132,7 +132,7 @@ void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
 					strcpy(lpSuffix, pChar->GetKeyStr("NAME.SUFFIX"));
 
 					const CStoneMember * pGuildMember = pChar->Guild_FindMember(MEMORY_GUILD);
-					if (pGuildMember && (!pChar->IsStatFlag(STATF_Incognito) || GetPrivLevel() > pChar->GetPrivLevel()))
+					if (pGuildMember && (!pChar->IsStatFlag(STATF_INCOGNITO) || GetPrivLevel() > pChar->GetPrivLevel()))
 					{
 						const CItemStone * pParentStone = pGuildMember->GetParentStone();
 						ASSERT(pParentStone != NULL);
@@ -160,7 +160,7 @@ void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
 					//	(byte)((((int)wHue) & 0x7C00) >> 7), (byte)((((int)wHue) & 0x3E0) >> 2),
 					//	(byte)((((int)wHue) & 0x1F) << 3),lpPrefix, pObj->GetName(), lpSuffix); // ~1_PREFIX~~2_NAME~~3_SUFFIX~
 
-					if (!pChar->IsStatFlag(STATF_Incognito) || (GetPrivLevel() > pChar->GetPrivLevel()))
+					if (!pChar->IsStatFlag(STATF_INCOGNITO) || (GetPrivLevel() > pChar->GetPrivLevel()))
 					{
 						if (pGuildMember && pGuildMember->IsAbbrevOn())
 						{
@@ -287,9 +287,9 @@ void CClient::AOSTooltip_addDefaultCharData(const CChar * pChar)
 				this->m_TooltipData.Add(new CClientTooltip(1080078)); // guarding
 		}
 
-		if (pChar->IsStatFlag(STATF_Conjured))
+		if (pChar->IsStatFlag(STATF_CONJURED))
 			this->m_TooltipData.Add(new CClientTooltip(1049646)); // (summoned)
-		else if (pChar->IsStatFlag(STATF_Pet))
+		else if (pChar->IsStatFlag(STATF_PET))
 			this->m_TooltipData.Add(new CClientTooltip(pChar->m_pNPC->m_bonded ? 1049608 : 502006)); // (bonded) / (tame)
 	}
 }

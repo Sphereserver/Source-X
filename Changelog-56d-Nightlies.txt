@@ -439,3 +439,6 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 15-03-2018, Nolok
 - Fixed: a GM could shoot through impassable items (like walls) with ranged weapons.
 - Fixed: couldn't shoot through windows with ranged weapons when the Advanced LOS algorithm was on.
+
+16-03-2018, Nolok
+- Fixed: NPCs could move to points they shouldn't be able to reach/walk on.

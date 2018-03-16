@@ -143,7 +143,7 @@ int CServerConfig::Calc_CombatChanceToHit(CChar * pChar, CChar * pCharTarg)
 		case 0:
 		{
 			// Sphere custom formula
-			if (pCharTarg->IsStatFlag(STATF_Sleeping | STATF_Freeze))
+			if (pCharTarg->IsStatFlag(STATF_SLEEPING | STATF_FREEZE))
 				return(Calc_GetRandVal(10));
 
 			int iSkillVal = pChar->Skill_GetAdjusted(skillAttacker);
@@ -323,7 +323,7 @@ int CServerConfig::Calc_StealingItem( CChar * pCharThief, CItem * pItem, CChar *
 	
 	if ( pItem->IsItemEquipped())
 		iDifficulty += iDexMark/2 + pCharMark->Stat_GetAdjusted(STAT_INT);		// This is REALLY HARD to do.
-	if ( pCharThief->IsStatFlag( STATF_War )) // all keyed up.
+	if ( pCharThief->IsStatFlag( STATF_WAR )) // all keyed up.
 		iDifficulty += Calc_GetRandVal( iDexMark/2 );
 	
 	// return( iDifficulty );
