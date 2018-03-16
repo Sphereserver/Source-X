@@ -442,3 +442,4 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 
 16-03-2018, Nolok
 - Fixed: NPCs could move to points they shouldn't be able to reach/walk on.
+- Fixed: characters couldn't equip some items.

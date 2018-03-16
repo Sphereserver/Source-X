@@ -396,7 +396,7 @@ LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg
 			break;
 
 		default:
-			if ( CItemBase::IsVisibleLayer(layer) && Can(CAN_C_EQUIP) )
+			if ( CItemBase::IsVisibleLayer(layer) && !Can(CAN_C_EQUIP) )
 				fCantEquip = true;
 			break;
 	}
