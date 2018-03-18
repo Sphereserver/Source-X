@@ -30,7 +30,7 @@ script:
   - mkdir "$BUILD_DIR_32" "$BUILD_DIR_64"
 
   - echo && echo "** Setting up MySQL development packages for 64 bits" && echo
-  - sudo apt install -qq --no-install-recommends libmysql++3 libmysqlclient-dev
+  - sudo apt install -qq --no-install-recommends curl libmysql++3 libmysqlclient-dev
   - export CC="gcc-7" && export CXX="g++-7"
 
   - cd "$BUILD_DIR_64"
@@ -85,8 +85,11 @@ after_success:
     fi
   - echo && echo "** Compilation done. Packing the files and uploading to SphereCommunity" && echo
   - mkdir accounts logs save scripts
-  - tar -czvf SphereSvrX-linux64-nightly.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_64}/bin64/SphereSvrX64_nightly" -C src/ sphere.ini sphereCrypt.ini
-  - tar -czvf SphereSvrX-linux64-debug.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_64}/bin64/SphereSvrX64_debug" -C src/ sphere.ini sphereCrypt.ini
-  - tar -czvf SphereSvrX-linux32-nightly.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_32}/bin/SphereSvrX32_nightly" -C src/ sphere.ini sphereCrypt.ini
-  - tar -czvf SphereSvrX-linux32-debug.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_32}/bin/SphereSvrX32_debug" -C src/ sphere.ini sphereCrypt.ini
-  - curl -ST "{SphereSvrX-linux64-nightly.tar.gz,SphereSvrX-linux64-debug.tar.gz,SphereSvrX-linux32-nightly.tar.gz,SphereSvrX-linux32-debug.tar.gz}" -u $FTP_USER:$FTP_PASSWORD $FTP_SERVER
+  - tar -czf SphereSvrX-linux64-nightly.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_64}/bin64/SphereSvrX64_nightly" -C src/ sphere.ini sphereCrypt.ini
+  - tar -czf SphereSvrX-linux64-debug.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_64}/bin64/SphereSvrX64_debug" -C src/ sphere.ini sphereCrypt.ini
+  - tar -czf SphereSvrX-linux32-nightly.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_32}/bin/SphereSvrX32_nightly" -C src/ sphere.ini sphereCrypt.ini
+  - tar -czf SphereSvrX-linux32-debug.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_32}/bin/SphereSvrX32_debug" -C src/ sphere.ini sphereCrypt.ini
+  - curl -sST SphereSvrX-linux64-nightly.tar.gz -u ${FTP_USER}:${FTP_PASSWORD} ${FTP_SERVER}
+  - curl -sST SphereSvrX-linux64-debug.tar.gz -u ${FTP_USER}:${FTP_PASSWORD} ${FTP_SERVER}
+  - curl -sST SphereSvrX-linux32-nightly.tar.gz -u ${FTP_USER}:${FTP_PASSWORD} ${FTP_SERVER}
+  - curl -sST SphereSvrX-linux32-debug.tar.gz -u ${FTP_USER}:${FTP_PASSWORD} ${FTP_SERVER}

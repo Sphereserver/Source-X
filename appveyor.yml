@@ -59,10 +59,10 @@ after_build:
   # if we are testing a pull request, we don't want to upload the build to the host
   - IF DEFINED APPVEYOR_PULL_REQUEST_NUMBER (appveyor exit)
 
-  - ECHO ** Compilation done. Packing the files and uploading to FTP
+  - ECHO ** Compilation done. Packing the files and uploading to SphereCommunity
   - mkdir accounts logs save scripts
   - 7z a SphereSvrX-win64-nightly.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_64%\bin64\Nightly\SphereSvrX64_nightly.exe" "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\dlls\64\*.dll"
   - 7z a SphereSvrX-win64-debug.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_64%\bin64\Debug\SphereSvrX64_debug.exe" "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\dlls\64\*.dll"
   - 7z a SphereSvrX-win32-nightly.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_32%\bin\Nightly\SphereSvrX32_nightly.exe" "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\dlls\32\*.dll"
   - 7z a SphereSvrX-win32-debug.zip accounts\ logs\ save\ scripts\ "%APPVEYOR_BUILD_FOLDER%\%BUILD_DIR_32%\bin\Debug\SphereSvrX32_debug.exe" "%APPVEYOR_BUILD_FOLDER%\src\sphere.ini" "%APPVEYOR_BUILD_FOLDER%\src\sphereCrypt.ini" "%APPVEYOR_BUILD_FOLDER%\dlls\32\*.dll"
-  - curl -ST "{SphereSvrX-win64-nightly.zip,SphereSvrX-win64-debug.zip,SphereSvrX-win32-nightly.zip,SphereSvrX-win32-debug.zip}" -u %FTP_USER%:%FTP_PASSWORD% %FTP_SERVER%
+  - curl -sST "{SphereSvrX-win64-nightly.zip,SphereSvrX-win64-debug.zip,SphereSvrX-win32-nightly.zip,SphereSvrX-win32-debug.zip}" -u %FTP_USER%:%FTP_PASSWORD% %FTP_SERVER%
