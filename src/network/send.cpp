@@ -133,7 +133,7 @@ PacketCharacterStatus::PacketCharacterStatus(const CClient* target, CChar* other
 	ASSERT(otherDefinition != NULL);
 
 	byte version = 0;
-	bool canRename = (character != other && other->NPC_IsOwnedBy(character) && otherDefinition->GetHireDayWage() == 0 );
+	bool canRename = ((character != other) && other->IsOwnedBy(character) && (otherDefinition->GetHireDayWage() == 0) );
 
 	initLength();
 
@@ -2421,7 +2421,7 @@ PacketPaperdoll::PacketPaperdoll(const CClient* target, const CChar* character) 
 	if (target->GetNetState()->isClientVersion(MINCLIVER_ML))
 	{
 		if (character == target->GetChar() ||
-		(g_Cfg.m_fCanUndressPets? (character->NPC_IsOwnedBy(target->GetChar())) : (target->IsPriv(PRIV_GM) && target->GetPrivLevel() > character->GetPrivLevel())) )
+		(g_Cfg.m_fCanUndressPets ? (character->IsOwnedBy(target->GetChar())) : (target->IsPriv(PRIV_GM) && target->GetPrivLevel() > character->GetPrivLevel())) )
 		mode |= 0x2;
 	}
 

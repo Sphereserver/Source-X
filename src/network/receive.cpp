@@ -100,7 +100,7 @@ bool PacketCreate::onReceive(NetState* net)
 		switch (race_sex_flag)
 		{
 			default:
-				g_Log.EventWarn("PacketCreate: unknown race_sex_flag (% " PRIu8 "), defaulting to 2 (human male).", race_sex_flag);
+				g_Log.EventWarn("PacketCreate: unknown race_sex_flag (% " PRIu8 "), defaulting to 2 (human male).\n", race_sex_flag);
 			case 0x2: case 0x3:
 				rtRace = RACETYPE_HUMAN;
 				break;
@@ -524,7 +524,7 @@ bool PacketItemEquipReq::onReceive(NetState* net)
 
 	CChar* target = targetSerial.CharFind();
 	bool bCanCarry = target->CanCarry(item);
-	if ( target == NULL || (itemLayer >= LAYER_HORSE) || !target->NPC_IsOwnedBy(source) || !bCanCarry || !target->ItemEquip(item, source) )
+	if ( (target == NULL) || (itemLayer >= LAYER_HORSE) || !target->IsOwnedBy(source) || !bCanCarry || !target->ItemEquip(item, source) )
 	{
 		client->Event_Item_Drop_Fail(item);		//cannot equip
 		if ( !bCanCarry )
@@ -4457,7 +4457,7 @@ bool PacketCreate70016::onReceive(NetState* net)
 	switch (race_sex_flag)
 	{
 	default:
-		g_Log.EventWarn("Creating new character (client > 7.0.16.0 packet) with unknown race_sex_flag (% " PRIu8 "): defaulting to 2 (human male).", race_sex_flag);
+		g_Log.EventWarn("Creating new character (client > 7.0.16.0 packet) with unknown race_sex_flag (% " PRIu8 "): defaulting to 2 (human male).\n", race_sex_flag);
 	case 0x2: case 0x3:
 		rtRace = RACETYPE_HUMAN;
 		break;

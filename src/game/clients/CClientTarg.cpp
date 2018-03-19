@@ -1492,9 +1492,11 @@ bool CClient::OnTarg_Pet_Command( CObjBase * pObj, const CPointMap & pt )
 				break;
 			if ( pCharPet == m_pChar )
 				continue;
-			if ( fGhostSpeak && ! pCharPet->CanUnderstandGhost())
+			if ( !pCharPet->m_pNPC )
 				continue;
-			if ( ! pCharPet->NPC_IsOwnedBy( GetChar(), true ))
+			if ( fGhostSpeak && !pCharPet->CanUnderstandGhost())
+				continue;
+			if ( !pCharPet->NPC_IsOwnedBy( GetChar(), true ))
 				continue;
 			pCharPet->NPC_OnHearPetCmdTarg( m_tmPetCmd.m_iCmd, GetChar(), pObj, pt, m_Targ_Text );
 		}
@@ -1517,10 +1519,10 @@ bool CClient::OnTarg_Pet_Stable( CChar * pCharPet )
 	// m_Targ_Prv_UID = stable master.
 
 	CChar * pCharMaster = m_Targ_Prv_UID.CharFind();
-	if ( pCharMaster == NULL )
+	if ( !pCharMaster || !pCharMaster->m_pNPC )
 		return false;
 
-	if ( pCharPet == NULL || pCharPet->m_pPlayer || pCharMaster == pCharPet )
+	if ( (pCharPet == NULL) || pCharPet->m_pPlayer || (pCharMaster == pCharPet) )
 	{
 		pCharMaster->Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_STABLEMASTER_TARG_FAIL ) );
 		return false;

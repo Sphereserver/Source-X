@@ -837,6 +837,37 @@ short CChar::Food_CanEat( CObjBase *pObj ) const
 	return 0;
 }
 
+CChar * CChar::GetOwner() const
+{
+	ADDTOCALLSTACK("CChar::GetOwner");
+
+	if (m_pPlayer)
+		return NULL;
+	if (m_pNPC)
+		return NPC_PetGetOwner();
+	return NULL;
+}
+
+bool CChar::IsOwnedBy( const CChar * pChar, bool fAllowGM ) const
+{
+	ADDTOCALLSTACK("CChar::IsOwnedBy");
+	// Is pChar my master ?
+	// BESERK will not listen to commands tho.
+	// fAllowGM = consider GM's to be owners of all NPC's
+
+	if ( !pChar )
+		return false;
+	if ( pChar == this )
+		return true;
+
+	if (m_pPlayer)
+		return false;
+	if (m_pNPC)
+		return NPC_IsOwnedBy(pChar, fAllowGM);
+
+	return false;
+}
+
 lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 {
 	ADDTOCALLSTACK("CChar::GetTradeTitle");
@@ -989,7 +1020,7 @@ bool CChar::CanSeeInContainer( const CItemContainer *pContItem ) const
 		return false;
 	}
 
-	if ( !pChar->NPC_IsOwnedBy(this) )		// pets and player vendors
+	if ( !pChar->IsOwnedBy(this) )		// pets and player vendors
 		return false;
 
 	if ( pContItem->IsType(IT_EQ_VENDOR_BOX) || pContItem->IsType(IT_EQ_BANK_BOX) )
@@ -1472,15 +1503,15 @@ bool CChar::CanMove( CItem *pItem, bool fMsg ) const
 						return false;
 				}
 			}
-			else if ( pObjTop->IsChar() && pObjTop != this )
+			else if ( pObjTop->IsChar() && (pObjTop != this) )
 			{
-				if (( pItem->IsAttr(ATTR_NEWBIE) ) && ( g_Cfg.m_bAllowNewbTransfer ))
+				if (( pItem->IsAttr(ATTR_NEWBIE) ) && g_Cfg.m_bAllowNewbTransfer )
 				{
-					CChar *pPet = dynamic_cast<CChar*>( pItem->GetTopLevelObj());
-					if (pPet->NPC_PetGetOwner() == this)
+					CChar *pPet = dynamic_cast<CChar*>( pItem->GetTopLevelObj() );
+					if (pPet && (pPet->GetOwner() == this) )
 						return true;
 				}
-				if ( !pItem->IsItemEquipped() || pItem->GetEquipLayer() != LAYER_DRAGGING )
+				if ( !pItem->IsItemEquipped() || (pItem->GetEquipLayer() != LAYER_DRAGGING) )
 					return false;
 			}
 		}
@@ -1542,11 +1573,11 @@ bool CChar::IsTakeCrime( const CItem *pItem, CChar ** ppCharMark ) const
 		return false;	// I guess it's not a crime
 	}
 
-	if ( pCharMark->NPC_IsOwnedBy(this) || pCharMark->Memory_FindObjTypes(this, MEMORY_FRIEND) != NULL )	// he lets you
+	if ( pCharMark->IsOwnedBy(this) || (pCharMark->Memory_FindObjTypes(this, MEMORY_FRIEND) != NULL) )	// he lets you
 		return false;
 
 	// Pack animal has no owner ?
-	if ( pCharMark->m_pNPC && pCharMark->GetNPCBrain() == NPCBRAIN_ANIMAL && !pCharMark->IsStatFlag(STATF_PET) )
+	if ( pCharMark->m_pNPC && (pCharMark->GetNPCBrain() == NPCBRAIN_ANIMAL) && !pCharMark->IsStatFlag(STATF_PET) )
 		return false;
 
 	return true;

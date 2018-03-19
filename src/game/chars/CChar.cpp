@@ -1796,7 +1796,7 @@ bool CChar::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 				SKIP_SEPARATORS(pszKey);
 				return true;
 			case CHR_OWNER:
-				pRef = NPC_PetGetOwner();
+				pRef = GetOwner();
 				return true;
 			case CHR_WEAPON:
 				pRef = m_uidWeapon.ObjFind();
@@ -2421,18 +2421,20 @@ do_default:
 				sVal = "0";
 			return true;
 		case CHC_ISMYPET:
+			if (!m_pNPC)
+				return false;
 			sVal = NPC_IsOwnedBy( pCharSrc, true ) ? "1" : "0";
 			return true;
 		case CHC_ISONLINE:
 			if ( m_pPlayer != NULL )
 			{
 				sVal = IsClient() ? "1" : "0";
-				return ( true );
+				return true;
 			}
 			if ( m_pNPC != NULL )
 			{
 				sVal = IsDisconnected() ? "0" : "1";
-				return ( true );
+				return true;
 			}
 			sVal = 0;
 			return true;
@@ -3471,7 +3473,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 
 	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
 	if ( index < 0 )
-		return ( NPC_OnVerb(s, pSrc) || Player_OnVerb(s, pSrc) || CObjBase::r_Verb(s, pSrc) );
+		return ( (m_pNPC && NPC_OnVerb(s, pSrc)) || (m_pPlayer && Player_OnVerb(s, pSrc)) || CObjBase::r_Verb(s, pSrc) );
 
 	CChar * pCharSrc = pSrc->GetChar();
 

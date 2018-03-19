@@ -92,10 +92,12 @@ NOTO_TYPE CChar::Noto_GetFlag(const CChar * pCharViewer, bool fAllowIncog, bool 
 	CChar * pTarget = const_cast<CChar*>(pCharViewer);
 	NOTO_TYPE iNoto = NOTO_INVALID;
 	NOTO_TYPE iColor = NOTO_INVALID;
+
+
 	if ( ! pThis->m_notoSaves.empty() )
 	{
 		int id = -1;
-		if (pThis->m_pNPC && pThis->NPC_PetGetOwner() && g_Cfg.m_iPetsInheritNotoriety != 0)	// If I'm a pet and have owner I redirect noto to him.
+		if (pThis->m_pNPC && pThis->NPC_PetGetOwner() && (g_Cfg.m_iPetsInheritNotoriety != 0))	// If I'm a pet and have owner I redirect noto to him.
 			pThis = pThis->NPC_PetGetOwner();
 
 		id = pThis->NotoSave_GetID(pTarget);
@@ -103,6 +105,7 @@ NOTO_TYPE CChar::Noto_GetFlag(const CChar * pCharViewer, bool fAllowIncog, bool 
 		if (id != -1)
 			return pThis->NotoSave_GetValue(id, bOnlyColor);
 	}
+
 	if (IsTrigUsed(TRIGGER_NOTOSEND))
 	{
 		CScriptTriggerArgs args;
@@ -112,6 +115,7 @@ NOTO_TYPE CChar::Noto_GetFlag(const CChar * pCharViewer, bool fAllowIncog, bool 
 		if (iNoto < NOTO_INVALID)
 			iNoto = NOTO_INVALID;
 	}
+
 	if (iNoto == NOTO_INVALID)
 		iNoto = Noto_CalcFlag(pCharViewer, fAllowIncog, fAllowInvul);
 	if (iColor == NOTO_INVALID)
@@ -147,7 +151,7 @@ NOTO_TYPE CChar::Noto_CalcFlag(const CChar * pCharViewer, bool fAllowIncog, bool
 
 	if (this != pCharViewer)
 	{
-		if (g_Cfg.m_iPetsInheritNotoriety != 0)
+		if (m_pNPC && (g_Cfg.m_iPetsInheritNotoriety != 0))
 		{
 			// Do we have a master to inherit notoriety from?
 			CChar* pMaster = NPC_PetGetOwner();
@@ -234,25 +238,23 @@ NOTO_TYPE CChar::Noto_CalcFlag(const CChar * pCharViewer, bool fAllowIncog, bool
 
 	if (this != pCharViewer) // Am I checking myself?
 	{
-		if (NPC_IsOwnedBy(pCharViewer, false))	// All pets are neutral to their owners.
-			return(NOTO_NEUTRAL);
+		if (IsOwnedBy(pCharViewer, false))	// All pets are neutral to their owners.
+			return NOTO_NEUTRAL;
 
 		// If they saw me commit a crime or I am their aggressor then
 		// criminal to just them.
 		CItemMemory * pMemory = pCharViewer->Memory_FindObjTypes(this, MEMORY_SAWCRIME | MEMORY_AGGREIVED);
 		if (pMemory != NULL)
-		{
-			return(NOTO_CRIMINAL);
-		}
+			return NOTO_CRIMINAL;
 	}
 
 	if (m_pArea && m_pArea->IsFlag(REGION_FLAG_ARENA))	// everyone is neutral here.
-		return(NOTO_NEUTRAL);
+		return NOTO_NEUTRAL;
 
 	if (Noto_IsNeutral() || m_TagDefs.GetKeyNum("NOTO.PERMAGREY", true))
-		return(NOTO_NEUTRAL);
+		return NOTO_NEUTRAL;
 
-	return(NOTO_GOOD);
+	return NOTO_GOOD;
 }
 
 HUE_TYPE CChar::Noto_GetHue(const CChar * pCharViewer, bool fIncog) const
@@ -263,7 +265,7 @@ HUE_TYPE CChar::Noto_GetHue(const CChar * pCharViewer, bool fIncog) const
 		return  static_cast<HUE_TYPE>(sVal->GetValNum());
 
 	NOTO_TYPE color = Noto_GetFlag(pCharViewer, fIncog, true, true);
-	CChar *pChar = NPC_PetGetOwner();
+	CChar *pChar = GetOwner();
 	if (!pChar)
 		pChar = const_cast<CChar*>(this);
 	switch (color)

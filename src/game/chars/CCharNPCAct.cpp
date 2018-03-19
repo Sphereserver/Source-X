@@ -57,6 +57,7 @@ lpctstr const CCharNPC::sm_szVerbKeys[NV_QTY+1] =
 void CChar::Action_StartSpecial( CREID_TYPE id )
 {
 	ADDTOCALLSTACK("CChar::Action_StartSpecial");
+	ASSERT(m_pNPC);
 	// Take the special creature action.
 	// lay egg, breath weapon (fire, lightning, acid, code, paralyze),
 	//  create web, fire patch, fire ball,
@@ -104,9 +105,8 @@ void CChar::Action_StartSpecial( CREID_TYPE id )
 bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command from script
 {
 	ADDTOCALLSTACK("CChar::NPC_OnVerb");
+	ASSERT(m_pNPC);
 	// Stuff that only NPC's do.
-	if ( !m_pNPC )
-		return false;
 
 	CChar * pCharSrc = pSrc->GetChar();
 
@@ -178,15 +178,15 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 	case NV_SHRINK:
 		{
 			// we must own it.
-			if ( ! NPC_IsOwnedBy( pCharSrc ))
+			if ( !NPC_IsOwnedBy( pCharSrc ))
 				return false;
-			CItem * pItem = NPC_Shrink(); // this delete's the char !!!
+			CItem * pItem = NPC_Shrink(); // this deletes the char !!!
 			if ( pItem )
 				pCharSrc->m_Act_UID = pItem->GetUID();
 			if (s.GetArgStr())
 				pCharSrc->ItemBounce(pItem);
 
-			return( pItem != NULL );
+			return ( pItem != NULL );
 		}
 	case NV_TRAIN:
 		return( NPC_OnTrainHear( pCharSrc, s.GetArgStr()));
@@ -206,6 +206,7 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 void CChar::NPC_ActStart_SpeakTo( CChar * pSrc )
 {
 	ADDTOCALLSTACK("CChar::NPC_ActStart_SpeakTo");
+	ASSERT(m_pNPC);
 	// My new action is that i am speaking to this person.
 	// Or just update the amount of time i will wait for this person.
 	m_Act_UID = pSrc->GetUID();
@@ -220,8 +221,9 @@ void CChar::NPC_ActStart_SpeakTo( CChar * pSrc )
 void CChar::NPC_OnHear( lpctstr pszCmd, CChar * pSrc, bool fAllPets )
 {
 	ADDTOCALLSTACK("CChar::NPC_OnHear");
+	ASSERT(m_pNPC);
 	// This CChar has heard you say something.
-	if ( !m_pNPC || !pSrc )
+	if ( !pSrc )
 		return;
 
 	// Pets always have a basic set of actions.
@@ -349,8 +351,7 @@ void CChar::NPC_OnHear( lpctstr pszCmd, CChar * pSrc, bool fAllPets )
 void CChar::NPC_OnNoticeSnoop( CChar * pCharThief, CChar * pCharMark )
 {
 	ADDTOCALLSTACK("CChar::NPC_OnNoticeSnoop");
-	if ( !m_pNPC )
-		return;
+	ASSERT(m_pNPC);
 
 	// start making them angry at you.
 	static uint const sm_szTextSnoop[] =
@@ -380,12 +381,14 @@ void CChar::NPC_OnNoticeSnoop( CChar * pCharThief, CChar * pCharMark )
 int CChar::NPC_WalkToPoint( bool fRun )
 {
 	ADDTOCALLSTACK("CChar::NPC_WalkToPoint");
+	ASSERT(m_pNPC);
 	// Move toward my target .
 	//
 	// RETURN:
 	//  0 = we are here.
 	//  1 = took the step.
 	//  2 = can't take this step right now. (obstacle)
+
 	if (Can(CAN_C_NONMOVER))
 		return 0;
 
@@ -610,9 +613,10 @@ int CChar::NPC_WalkToPoint( bool fRun )
 bool CChar::NPC_LookAtCharGuard( CChar * pChar, bool bFromTrigger )
 {
 	ADDTOCALLSTACK("CChar::NPC_LookAtCharGuard");
+	ASSERT(m_pNPC);
 	// Does the guard hate the target ?
 	//	do not waste time on invul+dead, non-criminal and jailed chars
-	if ( !pChar || (pChar->IsStatFlag(STATF_INVUL|STATF_DEAD) || pChar->IsPriv(PRIV_JAILED) && !bFromTrigger) || !(pChar->Noto_IsCriminal() || pChar->Noto_IsEvil()))
+	if ( (pChar->IsStatFlag(STATF_INVUL|STATF_DEAD) || pChar->IsPriv(PRIV_JAILED) && !bFromTrigger) || !(pChar->Noto_IsCriminal() || pChar->Noto_IsEvil()) )
 		return false;
 
 
@@ -671,6 +675,7 @@ bool CChar::NPC_LookAtCharGuard( CChar * pChar, bool bFromTrigger )
 bool CChar::NPC_LookAtCharMonster( CChar * pChar )
 {
 	ADDTOCALLSTACK("CChar::NPC_LookAtCharMonster");
+	ASSERT(m_pNPC);
 	// return:
 	//   true = take new action.
 	//   false = continue with any previous action.
@@ -679,8 +684,6 @@ bool CChar::NPC_LookAtCharMonster( CChar * pChar )
 	//  100 = definitly.
 	//
 
-	if ( !m_pNPC )
-		return false;
 	int iFoodLevel = Food_GetLevelPercent();
 
 	// Attacks those not of my kind.
@@ -713,7 +716,9 @@ bool CChar::NPC_LookAtCharMonster( CChar * pChar )
 bool CChar::NPC_LookAtCharHuman( CChar * pChar )
 {
 	ADDTOCALLSTACK("CChar::NPC_LookAtCharHuman");
-	if ( !m_pNPC || IsStatFlag(STATF_DEAD) || pChar->IsStatFlag(STATF_DEAD) )
+	ASSERT(m_pNPC);
+
+	if ( IsStatFlag(STATF_DEAD) || pChar->IsStatFlag(STATF_DEAD) )
 		return false;
 
 	if ( Noto_IsEvil())		// I am evil.
@@ -759,6 +764,8 @@ bool CChar::NPC_LookAtCharHuman( CChar * pChar )
 bool CChar::NPC_LookAtCharHealer( CChar * pChar )
 {
 	ADDTOCALLSTACK("CChar::NPC_LookAtCharHealer");
+	ASSERT(m_pNPC);
+
 	if ( !pChar->IsStatFlag(STATF_DEAD) || (pChar->m_pNPC && pChar->m_pNPC->m_bonded) )
 		return false;
 
@@ -861,6 +868,7 @@ bool CChar::NPC_LookAtCharHealer( CChar * pChar )
 bool CChar::NPC_LookAtItem( CItem * pItem, int iDist )
 {
 	ADDTOCALLSTACK("CChar::NPC_LookAtItem");
+	ASSERT(m_pNPC);
 
 	if ( !Can(CAN_C_USEHANDS) || !CanSee(pItem) )
 		return false;
@@ -925,13 +933,14 @@ bool CChar::NPC_LookAtItem( CItem * pItem, int iDist )
 bool CChar::NPC_LookAtChar( CChar * pChar, int iDist )
 {
 	ADDTOCALLSTACK("CChar::NPC_LookAtChar");
+	ASSERT(m_pNPC);
 	// I see a char.
 	// Do I want to do something to this char (more that what i'm already doing ?)
 	// RETURN:
 	//   true = yes i do want to take a new action.
 	//
 
-	if ( !m_pNPC || !pChar || ( pChar == this ) || !CanSeeLOS(pChar,LOS_NB_WINDOWS) )//Flag - we can attack through a window
+	if ( !pChar || ( pChar == this ) || !CanSeeLOS(pChar,LOS_NB_WINDOWS) ) //Flag - we can attack through a window
 		return false;
 
 	if ( IsTrigUsed(TRIGGER_NPCLOOKATCHAR) )
@@ -944,36 +953,39 @@ bool CChar::NPC_LookAtChar( CChar * pChar, int iDist )
 		}
 	}
 
-	if ( NPC_IsOwnedBy( pChar, false ))
+	if (m_pNPC->m_Brain != NPCBRAIN_BERSERK)
 	{
-		// follow my owner again. (Default action)
-		m_Act_UID = pChar->GetUID();
-		m_pNPC->m_Act_Motivation = 50;
-		Skill_Start(Skill_GetActive() == NPCACT_FOLLOW_TARG ? NPCACT_FOLLOW_TARG : NPCACT_GUARD_TARG);
-		return true;
-	}
-
-	else
-	{
-		// initiate a conversation ?
-		if ( ! IsStatFlag( STATF_WAR ) &&
-			( Skill_GetActive() == SKILL_NONE || Skill_GetActive() == NPCACT_WANDER ) && // I'm idle
-			pChar->m_pPlayer &&
-			! Memory_FindObjTypes( pChar, MEMORY_SPEAK ))
+		if ( NPC_IsOwnedBy( pChar, false ))
 		{
-			if ( IsTrigUsed(TRIGGER_NPCSEENEWPLAYER) )
+			// follow my owner again. (Default action)
+			m_Act_UID = pChar->GetUID();
+			m_pNPC->m_Act_Motivation = 50;
+			Skill_Start( (Skill_GetActive() == NPCACT_FOLLOW_TARG) ? NPCACT_FOLLOW_TARG : NPCACT_GUARD_TARG);
+			return true;
+		}
+		else
+		{
+			// initiate a conversation ?
+			if ( ! IsStatFlag( STATF_WAR ) &&
+				( (Skill_GetActive() == SKILL_NONE) || (Skill_GetActive() == NPCACT_WANDER) ) && // I'm idle
+				pChar->m_pPlayer &&
+				! Memory_FindObjTypes( pChar, MEMORY_SPEAK ))
 			{
-				if ( OnTrigger( CTRIG_NPCSeeNewPlayer, pChar ) != TRIGRET_RET_TRUE )
+				if ( IsTrigUsed(TRIGGER_NPCSEENEWPLAYER) )
 				{
-					// record that we attempted to speak to them.
-					CItemMemory * pMemory = Memory_AddObjTypes( pChar, MEMORY_SPEAK );
-					if ( pMemory )
-						pMemory->m_itEqMemory.m_Action = NPC_MEM_ACT_FIRSTSPEAK;
-					// m_Act_Hear_Unknown = 0;
+					if ( OnTrigger( CTRIG_NPCSeeNewPlayer, pChar ) != TRIGRET_RET_TRUE )
+					{
+						// record that we attempted to speak to them.
+						CItemMemory * pMemory = Memory_AddObjTypes( pChar, MEMORY_SPEAK );
+						if ( pMemory )
+							pMemory->m_itEqMemory.m_Action = NPC_MEM_ACT_FIRSTSPEAK;
+						// m_Act_Hear_Unknown = 0;
+					}
 				}
 			}
 		}
 	}
+	
 	if (IsStatFlag(STATF_DEAD))
 		return false;
 
@@ -992,20 +1004,13 @@ bool CChar::NPC_LookAtChar( CChar * pChar, int iDist )
 			break;
 
 		case NPCBRAIN_BERSERK:
-			// Blades or EV.
-			// ??? Attack everyone you touch !
-			if ( iDist <= CalcFightRange( m_uidWeapon.ItemFind() ) )
-			{
-				Fight_Hit( pChar );
-			}
+			// Blade Spirits or Energy Vortex.
+			// Attack everyone you see!
 			if ( Fight_IsActive()) // Is this a better target than my last ?
 			{
 				CChar * pCharTarg = m_Act_UID.CharFind();
-				if ( pCharTarg != NULL )
-				{
-					if ( iDist >= GetTopDist3D( pCharTarg ))
-						break;
-				}
+				if ( pCharTarg && (GetTopDist3D(pCharTarg) <= iDist) )
+						return true;
 			}
 			if ( Fight_Attack( pChar ) )
 				return true;
@@ -1038,6 +1043,7 @@ bool CChar::NPC_LookAtChar( CChar * pChar, int iDist )
 bool CChar::NPC_LookAround( bool fForceCheckItems )
 {
 	ADDTOCALLSTACK("CChar::NPC_LookAround");
+	ASSERT(m_pNPC);
 	// Take a look around for other people/chars.
 	// We may be doing something already. So check current action motivation level.
 	// RETURN:
@@ -1140,6 +1146,7 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 void CChar::NPC_Act_Wander()
 {
 	ADDTOCALLSTACK("CChar::NPC_Act_Wander");
+	ASSERT(m_pNPC);
 	// NPCACT_WANDER
 	// just wander aimlessly. (but within bounds)
 	// Stop wandering and re-eval frequently
@@ -1194,9 +1201,8 @@ void CChar::NPC_Act_Wander()
 void CChar::NPC_Act_Guard()
 {
 	ADDTOCALLSTACK("CChar::NPC_Act_Guard");
+	ASSERT(m_pNPC);
 	// Protect our target or owner. (m_Act_UID)
-	if ( m_pNPC == NULL )
-		return;
 
 	CChar * pChar = m_Act_UID.CharFind();
 	if ( pChar != NULL && pChar != this && CanSeeLOS(pChar, LOS_NB_WINDOWS) )
@@ -1216,8 +1222,10 @@ void CChar::NPC_Act_Guard()
 bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 {
 	ADDTOCALLSTACK("CChar::NPC_Act_Follow");
+	ASSERT(m_pNPC);
 	// Follow our target or owner (m_Act_UID), we may be fighting (m_Fight_Targ_UID).
 	// false = can't follow any more, give up.
+
 	if (Can(CAN_C_NONMOVER))
 		return false;
 
@@ -1303,6 +1311,7 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 bool CChar::NPC_Act_Talk()
 {
 	ADDTOCALLSTACK("CChar::NPC_Act_Talk");
+	ASSERT(m_pNPC);
 	// NPCACT_TALK:
 	// NPCACT_TALK_FOLLOW
 	// RETURN:
@@ -1352,16 +1361,12 @@ bool CChar::NPC_Act_Talk()
 void CChar::NPC_Act_GoHome()
 {
 	ADDTOCALLSTACK("CChar::NPC_Act_GoHome");
+	ASSERT(m_pNPC);
 	// NPCACT_GO_HOME
 	// If our home is not valid then
-	if ( !m_pNPC )
-		return;
 
-	if ( !Calc_GetRandVal(2) )
-	{
-		if ( NPC_LookAround() )
-			return;
-	}
+	if ( !Calc_GetRandVal(2) && NPC_LookAround())
+		return;
 
 	if ( m_pNPC->m_Brain == NPCBRAIN_GUARD )
 	{
@@ -1433,8 +1438,10 @@ void CChar::NPC_Act_GoHome()
 void CChar::NPC_LootMemory( CItem * pItem )
 {
 	ADDTOCALLSTACK("CChar::NPC_LootMemory");
+	ASSERT(m_pNPC);
 	// Create a memory of this item.
 	// I have already looked at it.
+
 	CItem * pMemory = Memory_AddObjTypes( pItem, MEMORY_SPEAK );
 	pMemory->m_itEqMemory.m_Action = NPC_MEM_ACT_IGNORE;
 
@@ -1446,6 +1453,7 @@ void CChar::NPC_LootMemory( CItem * pItem )
 void CChar::NPC_Act_Looting()
 {
 	ADDTOCALLSTACK("CChar::NPC_Act_Looting");
+	ASSERT(m_pNPC);
 	// We killed something, let's take a look on the corpse.
 	// Or we find something interesting on ground
 	//
@@ -1453,7 +1461,7 @@ void CChar::NPC_Act_Looting()
 
 	if ( !(NPC_GetAiFlags() & NPC_AI_LOOTING) )
 		return;
-	if ( !m_pNPC || m_pNPC->m_Brain != NPCBRAIN_MONSTER || !Can(CAN_C_USEHANDS) || IsStatFlag(STATF_CONJURED|STATF_PET) || (m_TagDefs.GetKeyNum("DEATHFLAGS", true) & DEATH_NOCORPSE) )
+	if ( m_pNPC->m_Brain != NPCBRAIN_MONSTER || !Can(CAN_C_USEHANDS) || IsStatFlag(STATF_CONJURED|STATF_PET) || (m_TagDefs.GetKeyNum("DEATHFLAGS", true) & DEATH_NOCORPSE) )
 		return;
 	if ( m_pArea->IsFlag(REGION_FLAG_SAFE|REGION_FLAG_GUARDED) )
 		return;
@@ -1494,6 +1502,7 @@ void CChar::NPC_Act_Looting()
 void CChar::NPC_Act_Flee()
 {
 	ADDTOCALLSTACK("CChar::NPC_Act_Flee");
+	ASSERT(m_pNPC);
 	// NPCACT_FLEE
 	// I should move faster this way.
 	// ??? turn to strike if they are close.
@@ -1512,6 +1521,7 @@ void CChar::NPC_Act_Flee()
 void CChar::NPC_Act_Runto(int iDist)
 {
 	ADDTOCALLSTACK("CChar::NPC_Act_Runto");
+	ASSERT(m_pNPC);
 	// NPCACT_RUNTO:
 	// Still trying to get to this point.
 
@@ -1555,6 +1565,7 @@ void CChar::NPC_Act_Runto(int iDist)
 void CChar::NPC_Act_Goto(int iDist)
 {
 	ADDTOCALLSTACK("CChar::NPC_Act_Goto");
+	ASSERT(m_pNPC);
 	// NPCACT_GOTO:
 	// Still trying to get to this point.
 
@@ -1598,15 +1609,16 @@ void CChar::NPC_Act_Goto(int iDist)
 bool CChar::NPC_Act_Food()
 {
 	ADDTOCALLSTACK("CChar::NPC_Act_Food");
+	ASSERT(m_pNPC);
+
 	int		iFood = Stat_GetVal(STAT_FOOD);
 	int		iFoodLevel = Food_GetLevelPercent();
-
 	if ( iFood >= 10 )
 		return false;							//	search for food is starving or very hungry
 	if ( iFoodLevel > 40 )
 		return false;							// and it is at least 60% hungry
 
-	m_pNPC->m_Act_Motivation = (uchar)((50 - (iFoodLevel / 2)));
+	m_pNPC->m_Act_Motivation = (uchar)(50 - (iFoodLevel / 2));
 
 	short	iEatAmount = 1;
 	int		iSearchDistance = 2;
@@ -1786,8 +1798,10 @@ bool CChar::NPC_Act_Food()
 void CChar::NPC_Act_Idle()
 {
 	ADDTOCALLSTACK("CChar::NPC_Act_Idle");
+	ASSERT(m_pNPC);
 	// Free to do as we please. decide what we want to do next.
 	// Idle NPC's should try to take some action.
+
 	m_pNPC->m_Act_Motivation = 0;	// we have no motivation to do anything.
 
 	if ( NPC_GetAiFlags()&NPC_AI_INTFOOD )
@@ -1886,10 +1900,11 @@ void CChar::NPC_Act_Idle()
 bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
 {
 	ADDTOCALLSTACK("CChar::NPC_OnItemGive");
+	ASSERT(m_pNPC);
 	// Someone (Player) is giving me an item.
 	// return true = accept
 
-	if ( !m_pNPC || !pCharSrc )
+	if ( !pCharSrc )
 		return false;
 
 	CScriptTriggerArgs Args(pItem);
@@ -2033,6 +2048,7 @@ bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
 void CChar::NPC_OnTickAction()
 {
 	ADDTOCALLSTACK("CChar::NPC_OnTickAction");
+	ASSERT(m_pNPC);
 	// Our action timer has expired. last skill or task might be complete ?
 	// What action should we take now ?
 	EXC_TRY("NPC_TickAction");
@@ -2182,13 +2198,11 @@ void CChar::NPC_OnTickAction()
 void CChar::NPC_Pathfinding()
 {
 	ADDTOCALLSTACK("CChar::NPC_Pathfinding");
+	ASSERT(m_pNPC);
 	CPointMap local = GetTopPoint();
 
 	EXC_TRY("Pathfinding");
 	EXC_SET("pre-checking");
-
-	if ( !m_pNPC )
-		return;
 
 	// If NPC_AI_ALWAYSINT is set, just make it as smart as possible.
 	int			iInt = ( NPC_GetAiFlags() & NPC_AI_ALWAYSINT ) ? 300 : Stat_GetAdjusted(STAT_INT);
@@ -2258,6 +2272,7 @@ void CChar::NPC_Pathfinding()
 void CChar::NPC_Food()
 {
 	ADDTOCALLSTACK("CChar::NPC_Food");
+	ASSERT(m_pNPC);
 	EXC_TRY("FoodAI");
 
 	int		iFood = Stat_GetVal(STAT_FOOD);
@@ -2436,6 +2451,7 @@ void CChar::NPC_Food()
 void CChar::NPC_ExtraAI()
 {
 	ADDTOCALLSTACK("CChar::NPC_ExtraAI");
+	ASSERT(m_pNPC);
 	EXC_TRY("ExtraAI");
 
 	if ( !m_pNPC )

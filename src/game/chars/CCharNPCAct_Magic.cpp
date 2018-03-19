@@ -90,6 +90,8 @@ int CCharNPC::Spells_FindSpell(SPELL_TYPE spellID)
 void CChar::NPC_GetAllSpellbookSpells()		// Add all spells found on spellbooks to the NPC internal spell list
 {
 	ADDTOCALLSTACK("CChar::GetSpellbook");
+	ASSERT(m_pNPC);
+
 	//	search for suitable book in hands first
 	for ( CItem *pBook = GetContentHead(); pBook != NULL; pBook = pBook->GetNext() )
 	{
@@ -112,6 +114,8 @@ void CChar::NPC_GetAllSpellbookSpells()		// Add all spells found on spellbooks t
 void CChar::NPC_AddSpellsFromBook(CItem * pBook)
 {
 	ADDTOCALLSTACK("CChar::NPC_AddSpellsFromBook");
+	ASSERT(m_pNPC);
+
 	CItemBase *pBookDef = pBook->Item_GetDef();
 	if ( !pBookDef )
 		return;
@@ -134,6 +138,8 @@ void CChar::NPC_AddSpellsFromBook(CItem * pBook)
 bool CChar::NPC_FightMagery(CChar * pChar)
 {
 	ADDTOCALLSTACK("CChar::NPC_FightMagery");
+	ASSERT(m_pNPC);
+
 	if ( !NPC_FightMayCast(false) )	// not checking skill here since it will do a search later and it's an expensive function.
 		return false;
 
@@ -237,6 +243,8 @@ BeginCast:	//Start casting
 bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell, SKILL_TYPE skill)
 {
 	ADDTOCALLSTACK("CChar::NPC_FightCast");
+	ASSERT(m_pNPC);
+
 	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
 	if (skill == SKILL_NONE)
 	{

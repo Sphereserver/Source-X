@@ -11,8 +11,7 @@
 void CChar::NPC_OnPetCommand( bool fSuccess, CChar * pMaster )
 {
 	ADDTOCALLSTACK("CChar::NPC_OnPetCommand");
-	if ( m_pPlayer )	// players don't respond
-		return;
+	ASSERT(m_pNPC);
 
 	if ( !g_Cfg.m_sSpeechPet.IsEmpty() )
 		return;			// if using a custom SPEECH and still want sound, just put BARK on each command
@@ -59,16 +58,17 @@ enum PC_TYPE
 bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 {
 	ADDTOCALLSTACK("CChar::NPC_OnHearPetCmd");
+	ASSERT(m_pNPC);
 	// This should just be another speech block !!!
 
 	// We own this char (pet or hireling)
 	// pObjTarget = the m_ActTarg has been set for them to attack.
 	// RETURN:
-	//  true = we understand this. tho we may not do what we are told.
+	//  true = we understand this. though we may not do what we are told.
 	//  false = this is not a command we know.
 	//  if ( GetTargMode() == CLIMODE_TARG_PET_CMD ) it needs a target.
 
-	if ( !pSrc->IsClient() || m_pPlayer || !m_pNPC )
+	if ( !pSrc->IsClient() )
 		return false;
 
 	m_fIgnoreNextPetCmd = false;	// We clear this incase it's true from previous pet cmds.
@@ -78,6 +78,8 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 		m_fIgnoreNextPetCmd = !fAllPets;
 		return true;
 	}
+	if ( (m_pNPC->m_Brain == NPCBRAIN_BERSERK) && !pSrc->IsPriv(PRIV_GM) )
+		return false;	// Berserk npcs do not listen to any command (except if src is a GM)
 
 	static lpctstr const sm_Pet_table[] =
 	{
@@ -116,12 +118,22 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 			return false;
 	}
 
+	// Check if pSrc can use the commands on this pet
 	switch ( iCmd )
 	{
 		case PC_FOLLOW:
 		case PC_STAY:
 		case PC_STOP:
 		{
+			// If it's a conjured monster, it can be controlled (accepts commands) only by its summoner.
+			// This is just a security check, because conjured NPCs "friend" command is blocked.
+			if  (IsStatFlag(STATF_CONJURED))
+			{
+				if (NPC_IsOwnedBy(pSrc, true))
+					break;
+				else
+					return false;
+			}
 			// Pet friends can use only these commands
 			if ( Memory_FindObjTypes(pSrc, MEMORY_FRIEND) )
 				break;
@@ -130,7 +142,7 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 		{
 			// All others commands are avaible only to pet owner
 			if ( !NPC_IsOwnedBy(pSrc, true) )
-				return false;
+				return true;
 		}
 	}
 
@@ -138,7 +150,7 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 	{
 		// Bonded NPCs still placed on world even when dead.
 		// They can listen to commands, but not to these commands below
-		if ( iCmd == PC_GUARD || iCmd == PC_GUARD_ME || iCmd == PC_ATTACK || iCmd == PC_KILL || iCmd == PC_TRANSFER || iCmd == PC_DROP || iCmd == PC_DROP_ALL )
+		if ( (iCmd == PC_GUARD) || (iCmd == PC_GUARD_ME) || (iCmd == PC_ATTACK) || (iCmd == PC_KILL) || (iCmd == PC_TRANSFER) || (iCmd == PC_DROP) || (iCmd == PC_DROP_ALL) )
 			return true;
 	}
 
@@ -202,7 +214,7 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 			if ( IsStatFlag(STATF_CONJURED) )
 			{
 				pSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_TARG_TRANSFER_SUMMONED));
-				return true;
+				return false;
 			}
 			pTargPrompt = g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_TARG_TRANSFER);
 			break;
@@ -361,24 +373,45 @@ bool CChar::NPC_OnHearPetCmd( lpctstr pszCmd, CChar *pSrc, bool fAllPets )
 bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const CPointMap &pt, lpctstr pszArgs )
 {
 	ADDTOCALLSTACK("CChar::NPC_OnHearPetCmdTarg");
+	ASSERT(m_pNPC);
 	// Pet commands that required a target.
+	// First NPC_OnHearPetCmd is called, then a target is requested. After you select the target object, then this function is called.
+	// It's wise to check again if we can use this command (it's already done in NPC_OnHearPetCmd), because something (like the ownership)
+	// could have changed after the pet heared the command but before we select the target.
 
 	if ( m_fIgnoreNextPetCmd )
 	{
 		m_fIgnoreNextPetCmd = false;
 		return false;
 	}
+	if ( (m_pNPC->m_Brain == NPCBRAIN_BERSERK) && !(pSrc->IsPriv(PRIV_GM) && (pSrc->GetPrivLevel() > GetPrivLevel())) )
+		return false;	// Berserk npcs do not listen to any command (except if src is a GM)
 
+	// Check if pSrc can use the commands on this pet
 	switch ( iCmd )
 	{
 		case PC_FOLLOW:
 		case PC_STAY:
 		case PC_STOP:
-		{
+			// If it's a conjured monster, it can be controlled (accepts commands) only by its summoner.
+			// This is just a security check, because conjured NPCs "friend" command is blocked.
+			if  (IsStatFlag(STATF_CONJURED))
+			{
+				if (NPC_IsOwnedBy(pSrc, true))
+					break;
+				else
+					return false;
+			}
 			// Pet friends can use only these commands
 			if ( Memory_FindObjTypes(pSrc, MEMORY_FRIEND) )
 				break;
-		}
+		case PC_TRANSFER:
+			// Can't transfer ownership of a conjured monster, it can be controlled only by its summoner
+			if (IsStatFlag(STATF_CONJURED))
+			{	
+				pSrc->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_TARG_TRANSFER_SUMMONED));
+				return false;
+			}
 		default:
 		{
 			// All others commands are avaible only to pet owner
@@ -391,7 +424,7 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 	{
 		// Bonded NPCs still placed on world even when dead.
 		// They can listen to commands, but not to these commands below
-		if ( iCmd == PC_GUARD || iCmd == PC_GUARD_ME || iCmd == PC_ATTACK || iCmd == PC_KILL || iCmd == PC_TRANSFER || iCmd == PC_DROP || iCmd == PC_DROP_ALL )
+		if ( (iCmd == PC_GUARD) || (iCmd == PC_GUARD_ME) || (iCmd == PC_ATTACK) || (iCmd == PC_KILL) || (iCmd == PC_TRANSFER) || (iCmd == PC_DROP) || (iCmd == PC_DROP_ALL) )
 			return true;
 	}
 
@@ -404,7 +437,7 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 		case PC_ATTACK:
 		case PC_KILL:
 		{
-			if ( !pCharTarg || pCharTarg == pSrc )
+			if ( !pCharTarg || (pCharTarg == pSrc) )
 				break;
 			bSuccess = pCharTarg->OnAttackedBy(pSrc, 1, true);	// we know who told them to do this.
 			if ( bSuccess )
@@ -421,7 +454,7 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 
 		case PC_FRIEND:
 		{
-			if ( !pCharTarg || !pCharTarg->m_pPlayer || pCharTarg == pSrc )
+			if ( !pCharTarg || !pCharTarg->m_pPlayer || (pCharTarg == pSrc) )
 			{
 				Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_PET_CONFUSED));
 				break;
@@ -514,11 +547,11 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 void CChar::NPC_PetClearOwners()
 {
 	ADDTOCALLSTACK("CChar::NPC_PetClearOwners");
+	ASSERT(m_pNPC);
+
 	CChar * pOwner = NPC_PetGetOwner();
 	Memory_ClearTypes(MEMORY_IPET|MEMORY_FRIEND);
-
-	if ( m_pNPC )
-		m_pNPC->m_bonded = 0;	// pets without owner cannot be bonded
+	m_pNPC->m_bonded = 0;	// pets without owner cannot be bonded
 
 	if ( NPC_IsVendor() )
 	{
@@ -560,8 +593,9 @@ void CChar::NPC_PetClearOwners()
 bool CChar::NPC_PetSetOwner( CChar * pChar )
 {
 	ADDTOCALLSTACK("CChar::NPC_PetSetOwner");
-	// m_pNPC may not be set yet if this is a conjured creature.
-	if ( m_pPlayer || pChar == this || pChar == NULL )
+	//ASSERT(m_pNPC); // m_pNPC may not be set yet if this is a conjured creature.
+
+	if ( m_pPlayer || !pChar|| (pChar == this) )
 		return false;
 
 	CChar * pOwner = NPC_PetGetOwner();
@@ -594,6 +628,7 @@ bool CChar::NPC_PetSetOwner( CChar * pChar )
 bool CChar::NPC_CheckHirelingStatus()
 {
 	ADDTOCALLSTACK("CChar::NPC_CheckHirelingStatus");
+	ASSERT(m_pNPC);
 	//  Am i happy at the moment ?
 	//  If not then free myself.
 	//
@@ -650,11 +685,11 @@ bool CChar::NPC_CheckHirelingStatus()
 void CChar::NPC_OnHirePayMore( CItem * pGold, int iWage, bool fHire )
 {
 	ADDTOCALLSTACK("CChar::NPC_OnHirePayMore");
+	ASSERT(m_pNPC);
 	// We have been handed money.
 	// similar to PC_STATUS
+
 	CItemContainer	*pBank = GetBank();
-
-
 	if ( !iWage || !pBank )
 		return;
 
@@ -678,7 +713,9 @@ void CChar::NPC_OnHirePayMore( CItem * pGold, int iWage, bool fHire )
 bool CChar::NPC_OnHirePay( CChar * pCharSrc, CItemMemory * pMemory, CItem * pGold )
 {
 	ADDTOCALLSTACK("CChar::NPC_OnHirePay");
-	if ( !m_pNPC || !pCharSrc || !pMemory )
+	ASSERT(m_pNPC);
+
+	if ( !pCharSrc || !pMemory )
 		return false;
 
 	CCharBase * pCharDef = Char_GetDef();
@@ -727,8 +764,7 @@ bool CChar::NPC_OnHirePay( CChar * pCharSrc, CItemMemory * pMemory, CItem * pGol
 bool CChar::NPC_OnHireHear( CChar * pCharSrc )
 {
 	ADDTOCALLSTACK("CChar::NPC_OnHireHear");
-	if ( !m_pNPC )
-		return false;
+	ASSERT(m_pNPC);
 
 	CCharBase * pCharDef = Char_GetDef();
 	uint iWage = pCharDef->GetHireDayWage();
@@ -775,6 +811,7 @@ bool CChar::NPC_OnHireHear( CChar * pCharSrc )
 bool CChar::NPC_SetVendorPrice( CItem * pItem, int iPrice )
 {
 	ADDTOCALLSTACK("CChar::NPC_SetVendorPrice");
+	ASSERT(m_pNPC);
 	// player vendors.
 	// CLIMODE_PROMPT_VENDOR_PRICE
 	// This does not check who is setting the price if if it is valid for them to do so.
@@ -811,6 +848,13 @@ bool CChar::NPC_SetVendorPrice( CItem * pItem, int iPrice )
 void CChar::NPC_PetDesert()
 {
 	ADDTOCALLSTACK("CChar::NPC_PetDesert");
+	ASSERT(m_pNPC);
+	// If the monster has brain_berserk (i.e. energy vortex): when the player summons it, his CurFollower property rises.
+	//	If the master attacks the berserk pet, the pet deserts him and the master's CurFollower goes down. If we don't prevent
+	//	berserk monsters to desert the master, he can do this trick to summon a lot of energy vortexes without any cost to his followers property.
+
+	if (m_pNPC->m_Brain == NPCBRAIN_BERSERK)
+		return;
 	CChar * pCharOwn = NPC_PetGetOwner();
 	if ( !pCharOwn )
 		return;

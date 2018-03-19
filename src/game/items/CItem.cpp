@@ -2403,9 +2403,7 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		case IC_CONT:
 			{
 				if ( pszKey[4] == '.' )
-				{
-					return( CScriptObj::r_WriteVal( pszKey, sVal, pSrc ));
-				}
+					return CScriptObj::r_WriteVal( pszKey, sVal, pSrc );
 
 				CObjBase * pCont = GetContainer();
 				sVal.FormatHex( pCont ? ((dword) pCont->GetUID() ) : 0 );
@@ -2419,7 +2417,7 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		case IC_CONTP:
 			{
 				CObjBase * pContainer = GetContainer();
-				if (( IsItem() ) && ( IsItemInContainer() ) && ( pContainer->IsValidUID() ) && ( pContainer->IsContainer() ) && ( pContainer->IsItem() ))
+				if ( IsItem() && IsItemInContainer() && pContainer->IsValidUID() && pContainer->IsContainer() && pContainer->IsItem() )
 					sVal = GetContainedPoint().WriteUsed();
 				else
 					return false;
@@ -2478,9 +2476,7 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			break;
 		case IC_LINK:
 			if ( pszKey[4] == '.' )
-			{
-				return( CScriptObj::r_WriteVal( pszKey, sVal, pSrc ));
-			}
+				return CScriptObj::r_WriteVal( pszKey, sVal, pSrc );
 			sVal.FormatHex( m_uidLink );
 			break;
 		case IC_MAXHITS:
@@ -2527,13 +2523,13 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			fDoDefault = true;
 			break;
 		case IC_TYPE:
-			sVal = g_Cfg.ResourceGetName( CResourceID( RES_TYPEDEF, m_type ));
+			sVal = g_Cfg.ResourceGetName( CResourceID(RES_TYPEDEF, m_type) );
 			break;
 		default:
 			fDoDefault = true;
 	}
 	if ( fDoDefault )
-		return( CObjBase::r_WriteVal( pszKey, sVal, pSrc ));
+		return CObjBase::r_WriteVal( pszKey, sVal, pSrc );
 	return true;
 	EXC_CATCH;
 
@@ -2756,7 +2752,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				SetDefNum("UsesCur", amount, false);
 		}	break;
 		case IC_MAXAMOUNT:
-			if (!SetMaxAmount((ushort)(s.GetArgVal())))
+			if ( !SetMaxAmount(s.GetArgUSVal()) )
 				return false;
 			break;
 		case IC_ADDCIRCLE:
@@ -2796,13 +2792,13 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				return true;
 			}
 		case IC_AMOUNT:
-			SetAmountUpdate( (word)s.GetArgVal() );
+			SetAmountUpdate( s.GetArgWVal() );
 			return true;
 		case IC_ATTR:
 			m_Attr = s.GetArgVal();
 			break;
 		case IC_BASEWEIGHT:
-			m_weight = (word)s.GetArgVal();
+			m_weight = s.GetArgWVal();
 			return true;
 		case IC_CANUSE:
 			m_CanUse = s.GetArgVal();
@@ -2820,7 +2816,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 		case IC_CONTGRID:
 			if ( !IsItemInContainer() )
 				return false;
-			SetContainedGridIndex((uchar)(s.GetArgVal()));
+			SetContainedGridIndex(s.GetArgUCVal());
 			return true;
 		case IC_CONTP:
 			{
@@ -2917,7 +2913,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			// used only during load (i'm reading the save files and placing again the items in the world in the right place).
 			if ( ! IsDisconnected() && ! IsItemInContainer() && ! IsItemEquipped())
 				return false;
-			SetUnkZ( (char)(s.GetArgVal()) ); // GetEquipLayer()
+			SetUnkZ( s.GetArgCVal() ); // GetEquipLayer()
 			return true;
 		case IC_LINK:
 			m_uidLink = s.GetArgVal();
@@ -2962,7 +2958,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			m_itNormal.m_more2 = MAKEDWORD( s.GetArgVal(), HIWORD(m_itNormal.m_more2));
 			break;
 		case IC_MOREM:
-			m_itNormal.m_morep.m_map = (uchar)(s.GetArgVal());
+			m_itNormal.m_morep.m_map = s.GetArgUCVal();
 			break;
 		case IC_MOREP:
 			{
@@ -3001,17 +2997,17 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			}
 			break;
 		case IC_MOREX:
-			m_itNormal.m_morep.m_x = (short)(s.GetArgVal());
+			m_itNormal.m_morep.m_x = s.GetArgSVal();
 			return true;
 		case IC_MOREY:
-			m_itNormal.m_morep.m_y = (short)(s.GetArgVal());
+			m_itNormal.m_morep.m_y = s.GetArgSVal();
 			break;
 		case IC_MOREZ:
-			m_itNormal.m_morep.m_z = static_cast<char>(s.GetArgVal());
+			m_itNormal.m_morep.m_z = s.GetArgCVal();
 			break;
 		case IC_P:
 			// Loading or import ONLY ! others use the r_Verb
-			if ( ! IsDisconnected() && ! IsItemInContainer())
+			if ( ! IsDisconnected() && ! IsItemInContainer() )
 				return false;
 			else
 			{
@@ -3025,7 +3021,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			SetType(static_cast<IT_TYPE>(g_Cfg.ResourceGetIndexType( RES_TYPEDEF, s.GetArgStr())));
 			break;
 		default:
-			return( CObjBase::r_LoadVal( s ));
+			return CObjBase::r_LoadVal( s );
 	}
 	ResendTooltip();
 	return true;
@@ -3083,7 +3079,7 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 	if ( index < 0 )
 	{
-		return( CObjBase::r_Verb( s, pSrc ));
+		return CObjBase::r_Verb( s, pSrc );
 	}
 
 	CChar * pCharSrc = pSrc->GetChar();
@@ -3127,10 +3123,10 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 			return true;
 		case CIV_DUPE:
 			{
-				int iCount = s.GetArgVal();
+				uint iCount = s.GetArgUVal();
 				if ( iCount <= 0 )
 					iCount = 1;
-				if ( !GetContainer() && ( (uint)iCount > g_Cfg.m_iMaxItemComplexity ))	// if top-level, obey the complexity
+				if ( !GetContainer() && (iCount > g_Cfg.m_iMaxItemComplexity) )	// if top-level, obey the complexity
 					iCount = g_Cfg.m_iMaxItemComplexity;
 				while ( iCount-- )
 				{
@@ -3220,7 +3216,7 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 	int iCharAction = (CTRIG_TYPE) FindTableSorted( sCharTrigName, CChar::sm_szTrigName, CountOf(CChar::sm_szTrigName)-1 );
 
 	// 1) Triggers installed on character, sensitive to actions on all items
-	if (( IsTrigUsed(sCharTrigName) ) && ( iCharAction > XTRIG_UNKNOWN ))
+	if ( IsTrigUsed(sCharTrigName) && (iCharAction > XTRIG_UNKNOWN) )
 	{
 		EXC_SET("chardef");
 		if ( pChar != NULL )
@@ -3389,9 +3385,7 @@ TRIGRET_TYPE CItem::OnTriggerCreate( CTextConsole * pSrc, CScriptTriggerArgs * p
 	{
 		CResourceLock s;
 		if ( pResourceBase->ResourceLock(s))
-		{
 			iRet = CScriptObj::OnTriggerScript( s, pszTrigName, pSrc, pArgs );
-		}
 	}
 
 	// 2) Triggers installed on character, sensitive to actions on all items
@@ -3836,7 +3830,7 @@ CREID_TYPE CItem::GetCorpseType() const
 void CItem::SetCorpseType( CREID_TYPE id )
 {
 	// future: strongly typed enums will remove the need for this cast
-	m_amount = (word)(id);	// m_corpse_DispID
+	m_amount = (word)id;	// m_corpse_DispID
 }
 
 SPELL_TYPE CItem::GetScrollSpell() const
@@ -4431,7 +4425,6 @@ SKILL_TYPE CItem::Weapon_GetSkill() const
 
 bool CItem::IsMemoryTypes( word wType ) const
 {
-	// MEMORY_FIGHT
 	if ( ! IsType( IT_EQ_MEMORY_OBJ ))
 		return false;
 	return (( GetHueAlt() & wType ) ? true : false );

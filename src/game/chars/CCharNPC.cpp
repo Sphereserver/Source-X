@@ -254,7 +254,7 @@ void CCharNPC::r_WriteChar( CChar * pChar, CScript & s )
 
 bool CCharNPC::IsVendor() const
 {
-	return( m_Brain == NPCBRAIN_HEALER || m_Brain == NPCBRAIN_BANKER || m_Brain == NPCBRAIN_VENDOR || m_Brain == NPCBRAIN_STABLE );
+	return ( (m_Brain == NPCBRAIN_HEALER) || (m_Brain == NPCBRAIN_BANKER) || (m_Brain == NPCBRAIN_VENDOR) || (m_Brain == NPCBRAIN_STABLE) );
 }
 
 int CCharNPC::GetNpcAiFlags( const CChar *pChar ) const 
@@ -269,9 +269,12 @@ int CCharNPC::GetNpcAiFlags( const CChar *pChar ) const
 void CChar::NPC_LoadScript( bool fRestock )
 {
 	ADDTOCALLSTACK("CChar::NPC_LoadScript");
-	if ( m_pNPC == NULL )
+	if (!m_pNPC)
+	{
 		// Set a default brain type til we get the real one from scripts.
-		SetNPCBrain(GetNPCBrain(false));	// should have a default brain. watch out for override vendor.
+		// should have a default brain. watch out for override vendor.
+		SetNPCBrain(GetNPCBrain(false));	
+	}					
 
 	CCharBase * pCharDef = Char_GetDef();
 
@@ -288,7 +291,7 @@ void CChar::NPC_LoadScript( bool fRestock )
 		}
 	}
 	//This remains untouched but moved after the chardef's section
-	if (( fRestock ) && ( IsTrigUsed(TRIGGER_NPCRESTOCK) ))
+	if ( fRestock && IsTrigUsed(TRIGGER_NPCRESTOCK) )
 		ReadScriptTrig(pCharDef, CTRIG_NPCRestock);
 
 	CreateNewCharCheck();	//This one is giving stats, etc to the char, so we can read/set them in the next triggers.
@@ -298,8 +301,7 @@ void CChar::NPC_LoadScript( bool fRestock )
 void CChar::NPC_CreateTrigger()
 {
 	ADDTOCALLSTACK("CChar::NPC_CreateTrigger");
-	if (!m_pNPC)
-		return;
+	ASSERT(m_pNPC);
 
 	CCharBase *pCharDef = Char_GetDef();
 	TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;

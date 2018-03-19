@@ -14,6 +14,8 @@
 bool CChar::NPC_FightArchery( CChar * pChar )
 {
 	ADDTOCALLSTACK("CChar::NPC_FightArchery");
+	ASSERT(m_pNPC);
+
 	if ( !g_Cfg.IsSkillFlag(Skill_GetActive(), SKF_RANGED) )
 		return false;
 
@@ -55,10 +57,9 @@ bool CChar::NPC_FightArchery( CChar * pChar )
 CChar * CChar::NPC_FightFindBestTarget()
 {
 	ADDTOCALLSTACK("CChar::NPC_FightFindBestTarget");
+	ASSERT(m_pNPC);
 	// Find the best target to attack, and switch to this
 	// new target even if I'm already attacking someone.
-	if ( !m_pNPC )
-		return NULL;
 
 	if ( Attacker() )
 	{
@@ -141,13 +142,14 @@ CChar * CChar::NPC_FightFindBestTarget()
 void CChar::NPC_Act_Fight()
 {
 	ADDTOCALLSTACK("CChar::NPC_Act_Fight");
+	ASSERT(m_pNPC);
+
 	// I am in an attack mode.
-	if ( !m_pNPC || !Fight_IsActive() )
+	if ( !Fight_IsActive() )
 		return;
 
 	// Review our targets periodically.
-	if ( ! IsStatFlag(STATF_PET) ||
-		m_pNPC->m_Brain == NPCBRAIN_BERSERK )
+	if ( !IsStatFlag(STATF_PET) || (m_pNPC->m_Brain == NPCBRAIN_BERSERK) )
 	{
 		int iObservant = ( 130 - Stat_GetAdjusted(STAT_INT)) / 20;
 		if ( ! Calc_GetRandVal( 2 + maximum( 0, iObservant )) )

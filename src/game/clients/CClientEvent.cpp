@@ -324,7 +324,7 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 		{
 			CChar * pChar = dynamic_cast <CChar*>( pObjTop );
 			ASSERT(pChar);
-			if ( ! pChar->NPC_IsOwnedBy( m_pChar ))
+			if ( ! pChar->IsOwnedBy( m_pChar ))
 			{
 				// Slyly dropping item in someone elses pack.
 				// or just dropping on their trade window.
@@ -1705,12 +1705,12 @@ void CClient::Event_Talk_Common(tchar *szText)	// PC speech
 
 		// Are we close to the char ?
 		int iDist = m_pChar->GetTopDist3D(pChar);
-		if ( pChar->Skill_GetActive() == NPCACT_TALK && pChar->m_Act_UID == m_pChar->GetUID() )	// already talking to him
+		if ( (pChar->Skill_GetActive() == NPCACT_TALK) && (pChar->m_Act_UID == m_pChar->GetUID()) )	// already talking to him
 		{
 			pCharAlt = pChar;
 			iAltDist = 1;
 		}
-		else if ( pChar->IsClient() && iAltDist >= 2 )	// PC's have higher priority
+		else if ( pChar->IsClient() && (iAltDist >= 2) )	// PC's have higher priority
 		{
 			pCharAlt = pChar;
 			iAltDist = 2;	// high priority
@@ -1926,7 +1926,7 @@ void CClient::Event_SetName( CUID uid, const char * pszCharName )
 		return;
 
 	// Do we have the right to do this ?
-	if ( m_pChar == pChar || ! pChar->NPC_IsOwnedBy( m_pChar, true ) )
+	if ( (m_pChar == pChar) || !pChar->IsOwnedBy( m_pChar, true ) )
 		return;
 	if ( FindTableSorted( pszCharName, sm_szCmd_Redirect, CountOf(sm_szCmd_Redirect) ) >= 0 )
 		return;
@@ -2334,7 +2334,7 @@ void CClient::Event_AOSPopupMenuRequest( dword uid ) //construct packet after a 
 			}
 
 			word iEnabled = pChar->IsStatFlag(STATF_DEAD) ? POPUPFLAG_LOCKED : POPUPFLAG_COLOR;
-			if ( pChar->NPC_IsOwnedBy(m_pChar, false) )
+			if ( pChar->IsOwnedBy(m_pChar, false) )
 			{
 				CREID_TYPE id = pChar->GetID();
 				bool bBackpack = (id == CREID_LLAMA_PACK || id == CREID_HORSE_PACK || id == CREID_GIANT_BEETLE);

@@ -1023,6 +1023,8 @@ private:
 	CItem * Horse_GetMountItem() const;
 	CChar * Horse_GetMountChar() const;
 public:
+	bool IsOwnedBy( const CChar * pChar, bool fAllowGM = true ) const;
+	CChar * GetOwner() const;
 	CChar * Use_Figurine( CItem * pItem, bool bCheckFollowerSlots = true );
 	CItem * Make_Figurine( CUID uidOwner, ITEMID_TYPE id = ITEMID_NOTHING );
 	CItem * NPC_Shrink();
@@ -1183,7 +1185,8 @@ public:
 	void NPC_PetDesert();
 	void NPC_PetClearOwners();
 	bool NPC_PetSetOwner( CChar * pChar );
-	CChar * NPC_PetGetOwner() const;
+	CChar * NPC_PetGetOwner() const;			// find my master
+	CChar * NPC_PetGetOwnerRecursive() const;	// find the owner of the owner of the owner...
 	bool NPC_IsOwnedBy( const CChar * pChar, bool fAllowGM = true ) const;
 	bool NPC_CanSpeak() const;
 

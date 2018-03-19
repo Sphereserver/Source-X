@@ -325,6 +325,7 @@ CREID_TYPE CChar::NPC_GetAllyGroupType(CREID_TYPE idTest) // static
 int CChar::NPC_GetVendorMarkup() const
 {
 	ADDTOCALLSTACK("CChar::NPC_GetVendorMarkup");
+	ASSERT(m_pNPC);
 	// This vendor marks stuff up/down this percentage.
 	// When vendor sells to players this is the markup value.
 	//
@@ -361,6 +362,7 @@ int CChar::NPC_GetVendorMarkup() const
 size_t CChar::NPC_OnHearName( lpctstr pszText ) const
 {
 	ADDTOCALLSTACK("CChar::NPC_OnHearName");
+	ASSERT(m_pNPC);
 	// Did I just hear my name in this text ?
 	// should be able to deal with "hi Dennis" in the future.
 	// RETURN:
@@ -410,6 +412,7 @@ size_t CChar::NPC_OnHearName( lpctstr pszText ) const
 bool CChar::NPC_CanSpeak() const
 {
 	ADDTOCALLSTACK("CChar::NPC_CanSpeak");
+	ASSERT(m_pNPC);
 	//	players and chars with speech can
 	if ( m_pNPC == NULL || m_pNPC->m_Speech.GetCount() > 0 )
 		return true;
@@ -421,11 +424,10 @@ bool CChar::NPC_CanSpeak() const
 bool CChar::NPC_FightMayCast(bool fCheckSkill) const
 {
 	ADDTOCALLSTACK("CChar::NPC_FightMayCast");
+	ASSERT(m_pNPC);
 	// This NPC could cast spells if they wanted to ?
 	// check mana and anti-magic
 	// Dont check for skill if !fCheckSkill
-	if (!m_pNPC)
-		return false;
 	if (fCheckSkill && !const_cast<CChar*>(this)->Skill_GetMagicRandom(300))
 		return false;
 	if ( m_pArea && m_pArea->IsFlag(REGION_ANTIMAGIC_DAMAGE|REGION_FLAG_SAFE) )
@@ -439,6 +441,7 @@ bool CChar::NPC_FightMayCast(bool fCheckSkill) const
 bool CChar::NPC_IsOwnedBy( const CChar * pChar, bool fAllowGM ) const
 {
 	ADDTOCALLSTACK("CChar::NPC_IsOwnedBy");
+	ASSERT(m_pNPC);
 	// Is pChar my master ?
 	// BESERK will not listen to commands tho.
 	// fAllowGM = consider GM's to be owners of all NPC's
@@ -451,20 +454,17 @@ bool CChar::NPC_IsOwnedBy( const CChar * pChar, bool fAllowGM ) const
 	if ( fAllowGM && pChar->IsPriv( PRIV_GM ))
 		return( pChar->GetPrivLevel() > GetPrivLevel());
 
-	if ( ! IsStatFlag( STATF_PET ) || m_pPlayer )	// shortcut - i'm not a pet.
-		return false;
-	if ( m_pNPC == NULL )
-		return false;
-	if ( m_pNPC->m_Brain == NPCBRAIN_BERSERK )	// i cannot be commanded.
+	if ( ! IsStatFlag( STATF_PET ) )
 		return false;
 
-	return( Memory_FindObjTypes( pChar, MEMORY_IPET ) != NULL );
+	return ( Memory_FindObjTypes( pChar, MEMORY_IPET ) != NULL );
 }
 
 CChar * CChar::NPC_PetGetOwner() const
 {
 	ADDTOCALLSTACK("CChar::NPC_PetGetOwner");
-	// Assume i am a pet. Get my first (primary) owner. not just friends. used for blame .
+	ASSERT(m_pNPC);
+	// Assume i am a pet. Get my owner. not just friends. used for blame.
 
 	if ( !IsStatFlag(STATF_PET) )
 		return NULL;
@@ -476,9 +476,37 @@ CChar * CChar::NPC_PetGetOwner() const
 	return pMemory->m_uidLink.CharFind();
 }
 
+CChar * CChar::NPC_PetGetOwnerRecursive() const
+{
+	ADDTOCALLSTACK("CChar::NPC_PetGetOwnerRecursive");
+	ASSERT(m_pNPC);
+	// Assume i am a pet. Get the primary owner (the owner of the owner of my owner and so on).
+
+	static int iReentrantCheck_PetGetOwnerRecursive = 0;
+
+	CChar *pCharOwner = NULL, *pCharOwnerNext = const_cast<CChar*>(this);
+	while ((pCharOwnerNext = pCharOwnerNext->NPC_PetGetOwner()) != NULL)
+	{
+		if (iReentrantCheck_PetGetOwnerRecursive > 30)
+		{
+			DEBUG_ERR(("Too many owners (circular ownership?) to continue searching the primary owner of %s uid=0%x\n", GetName(), GetUID().GetPrivateUID()));
+			iReentrantCheck_PetGetOwnerRecursive = 0;
+			return NULL;
+		}
+		pCharOwner = pCharOwnerNext;
+		if (!pCharOwner->m_pNPC)
+			break;
+		++iReentrantCheck_PetGetOwnerRecursive;
+	}
+
+	iReentrantCheck_PetGetOwnerRecursive = 0;
+	return pCharOwner;
+}
+
 int CChar::NPC_GetTrainMax( const CChar * pStudent, SKILL_TYPE Skill ) const
 {
 	ADDTOCALLSTACK("CChar::NPC_GetTrainMax");
+	ASSERT(m_pNPC);
 	// What is the max I can train to ?
 	int iMax;
 	int iMaxAllowed;
@@ -505,10 +533,9 @@ int CChar::NPC_GetTrainMax( const CChar * pStudent, SKILL_TYPE Skill ) const
 bool CChar::NPC_CheckWalkHere( const CPointBase & pt, const CRegion * pArea, dword dwBlockFlags ) const
 {
 	ADDTOCALLSTACK("CChar::NPC_CheckWalkHere");
+	ASSERT(m_pNPC);
 	UNREFERENCED_PARAMETER(dwBlockFlags);
 	// Does the NPC want to walk here ? step on this item ?
-	if ( !m_pNPC )
-		return false;
 	if ( !pt.IsValidXY() )
 		return true;
 
@@ -584,6 +611,7 @@ CItemVendable * CChar::NPC_FindVendableItem( CItemVendable * pVendItem, CItemCon
 int CChar::NPC_WantThisItem( CItem * pItem ) const
 {
 	ADDTOCALLSTACK("CChar::NPC_WantThisItem");
+	ASSERT(m_pNPC);
 	//  This should be the ULTIMATE place to check if the NPC wants this in any way.
 	//  May not want to use it but rather just put it in my pack.
 	//
@@ -626,6 +654,7 @@ int CChar::NPC_WantThisItem( CItem * pItem ) const
 int CChar::NPC_GetWeaponUseScore( CItem * pWeapon )
 {
 	ADDTOCALLSTACK("CChar::NPC_GetWeaponUseScore");
+	ASSERT(m_pNPC);
 	// How good would i be at this weapon ?
 
 	SKILL_TYPE skill;
@@ -654,10 +683,11 @@ int CChar::NPC_GetWeaponUseScore( CItem * pWeapon )
 int CChar::NPC_GetHostilityLevelToward( const CChar * pCharTarg ) const
 {
 	ADDTOCALLSTACK("CChar::NPC_GetHostilityLevelToward");
+	ASSERT(m_pNPC);
 	// What is my general hostility level toward this type of creature ?
 	//
 	// based on:
-	//  npc vs player, (evil npc's don't like players regurdless of align, xcept in town)
+	//  npc vs player, (evil npc's don't like players regurdless of align, except in town)
 	//  karma (we are of different alignments)
 	//  creature body type. (allie groups)
 	//  hunger, (they could be food)
@@ -675,14 +705,13 @@ int CChar::NPC_GetHostilityLevelToward( const CChar * pCharTarg ) const
 	//   -100 = love them
 	//
 
-
-	if ( !pCharTarg || !m_pNPC )
+	if ( !pCharTarg )
 		return 0;
 
 	int iHostility = 0;
 
 	// if it is a pet - register it the same as it's master.
-	CChar * pCharOwn = pCharTarg->NPC_PetGetOwner();
+	CChar * pCharOwn = pCharTarg->GetOwner();
 	if ( pCharOwn != NULL && pCharOwn != this )
 	{
 		static int sm_iReentrant = 0;
@@ -793,6 +822,7 @@ int CChar::NPC_GetHostilityLevelToward( const CChar * pCharTarg ) const
 int CChar::NPC_GetAttackContinueMotivation( CChar * pChar, int iMotivation ) const
 {
 	ADDTOCALLSTACK("CChar::NPC_GetAttackContinueMotivation");
+	ASSERT(m_pNPC);
 	// I have seen fit to attack them.
 	// How much do i want to continue an existing fight ? cowardice ?
 	// ARGS:
@@ -804,15 +834,15 @@ int CChar::NPC_GetAttackContinueMotivation( CChar * pChar, int iMotivation ) con
 	// 0 = I'm have no interest.
 	// 50 = even match.
 	// 100 = he's a push over.
-	if ( !m_pNPC || !pChar )
+	if ( !pChar )
 		return 0;
 
 	if ( !pChar->Fight_IsAttackable() )
-		return( -100 );
+		return ( -100 );
 	if ( m_pNPC->m_Brain == NPCBRAIN_GUARD )
-		return( 100 );
+		return ( 100 );
 	if ( m_pNPC->m_Brain == NPCBRAIN_BERSERK )
-		return( iMotivation + 80 - GetDist( pChar ));	// less interested the further away they are
+		return ( iMotivation + 80 - GetDist( pChar ));	// less interested the further away they are
 
 	// Try to stay on one target.
 	if ( Fight_IsActive() && m_Act_UID == pChar->GetUID())
@@ -843,6 +873,7 @@ int CChar::NPC_GetAttackContinueMotivation( CChar * pChar, int iMotivation ) con
 int CChar::NPC_GetAttackMotivation( CChar * pChar, int iMotivation ) const
 {
 	ADDTOCALLSTACK("CChar::NPC_GetAttackMotivation");
+	ASSERT(m_pNPC);
 	// Some sort of monster.
 	// Am I stronger than he is ? Should I continue fighting ?
 	// Take into consideration AC, health, skills, etc..
@@ -852,7 +883,7 @@ int CChar::NPC_GetAttackMotivation( CChar * pChar, int iMotivation ) const
 	//   50 = even match.
 	//   100 = he's a push over.
 
-	if ( !m_pNPC || !pChar || !pChar->m_pArea )
+	if ( !pChar || !pChar->m_pArea )
 		return 0;
 	if ( IsStatFlag(STATF_DEAD) || pChar->IsStatFlag(STATF_DEAD) )
 		return 0;

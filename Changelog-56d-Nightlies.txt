@@ -443,3 +443,9 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 16-03-2018, Nolok
 - Fixed: NPCs could move to points they shouldn't be able to reach/walk on.
 - Fixed: characters couldn't equip some items.
+
+18-03-2018, Nolok
+- Fixed: summoned monsters with BRAIN_BERSERK didn't decrease owner's CurFollower property when killed.
+- Fixed: BRAIN_BERSERK monsters hitting more times than normal during combat.
+- Fixed: bonded pets losed their pet status and their master after they died.
+- Fixed: corpses being always created with the front falling animation, never with the backwards falling.

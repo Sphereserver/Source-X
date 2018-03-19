@@ -24,19 +24,16 @@ bool CChar::NPC_IsVendor() const
 
 int CChar::NPC_GetAiFlags()
 {
-	if(m_pNPC == NULL)
-		return 0;
+	ASSERT(m_pNPC);
 	return (m_pNPC->GetNpcAiFlags(this));
 }
 
 bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 {
 	ADDTOCALLSTACK("CChar::NPC_Vendor_Restock");
+	ASSERT(m_pNPC);
 	// Restock this NPC char.
 	// Then Set the next restock time for this .
-
-	if ( m_pNPC == NULL )
-		return false;
 
 	// Make sure that we're a vendor and not a pet
 	if ( IsStatFlag(STATF_PET) || !NPC_IsVendor() )
@@ -105,6 +102,7 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 bool CChar::NPC_StablePetSelect( CChar * pCharPlayer )
 {
 	ADDTOCALLSTACK("CChar::NPC_StablePetSelect");
+	ASSERT(m_pNPC);
 	// I am a stable master.
 	// I will stable a pet for the player.
 
@@ -169,10 +167,11 @@ bool CChar::NPC_StablePetSelect( CChar * pCharPlayer )
 bool CChar::NPC_StablePetRetrieve( CChar * pCharPlayer )
 {
 	ADDTOCALLSTACK("CChar::NPC_StablePetRetrieve");
+	ASSERT(m_pNPC);
 	// Get pets for this person from my inventory.
 	// May want to put up a menu ???
 
-	if ( !m_pNPC || m_pNPC->m_Brain != NPCBRAIN_STABLE )
+	if ( m_pNPC->m_Brain != NPCBRAIN_STABLE )
 		return false;
 
 	int iCount = 0;
@@ -202,9 +201,9 @@ bool CChar::NPC_StablePetRetrieve( CChar * pCharPlayer )
 int CChar::NPC_OnTrainCheck( CChar * pCharSrc, SKILL_TYPE Skill )
 {
 	ADDTOCALLSTACK("CChar::NPC_OnTrainCheck");
+	ASSERT(m_pNPC);
 	// Can we train in this skill ?
 	// RETURN: Amount of skill we can train.
-	//
 
 	if ( !IsSkillBase(Skill) )
 	{
@@ -262,6 +261,8 @@ int CChar::NPC_OnTrainCheck( CChar * pCharSrc, SKILL_TYPE Skill )
 bool CChar::NPC_OnTrainPay(CChar *pCharSrc, CItemMemory *pMemory, CItem * pGold)
 {
 	ADDTOCALLSTACK("CChar::NPC_OnTrainPay");
+	ASSERT(m_pNPC);
+
 	SKILL_TYPE skill = static_cast<SKILL_TYPE>(pMemory->m_itEqMemory.m_Skill);
 	if ( !IsSkillBase(skill) || !g_Cfg.m_SkillIndexDefs.IsValidIndex(skill) )
 	{
@@ -313,6 +314,8 @@ bool CChar::NPC_OnTrainPay(CChar *pCharSrc, CItemMemory *pMemory, CItem * pGold)
 bool CChar::NPC_TrainSkill( CChar * pCharSrc, SKILL_TYPE skill, int toTrain )
 {
 	ADDTOCALLSTACK("CChar::NPC_TrainSkill");
+	ASSERT(m_pNPC);
+
 	int iTrain = toTrain;
 	if ( (pCharSrc->GetSkillTotal() + toTrain) > pCharSrc->Skill_GetMax(static_cast<SKILL_TYPE>(g_Cfg.m_iMaxSkill)) )
 	{	
@@ -353,10 +356,8 @@ bool CChar::NPC_TrainSkill( CChar * pCharSrc, SKILL_TYPE skill, int toTrain )
 bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 {
 	ADDTOCALLSTACK("CChar::NPC_OnTrainHear");
+	ASSERT(m_pNPC);
 	// We are asking for training ?
-
-	if ( ! m_pNPC )
-		return false;
 
 	// Check the NPC is capable of teaching
 	if ( (m_pNPC->m_Brain < NPCBRAIN_HUMAN) || (m_pNPC->m_Brain > NPCBRAIN_STABLE) || (m_pNPC->m_Brain == NPCBRAIN_GUARD) )

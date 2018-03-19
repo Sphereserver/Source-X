@@ -1774,7 +1774,7 @@ CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEff
 	pSpell->SetAttr(pSpellDef ? ATTR_NEWBIE|ATTR_MAGIC : ATTR_NEWBIE);
 	pSpell->SetType(IT_SPELL);
 	pSpell->SetDecayTime(iDuration);
-	pSpell->m_itSpell.m_spell = (word)(spell);
+	pSpell->m_itSpell.m_spell = (word)spell;
 	pSpell->m_itSpell.m_spelllevel = (word)iEffect;
 	pSpell->m_itSpell.m_spellcharges = 1;
 	if ( pSrc )
@@ -2891,7 +2891,7 @@ int CChar::Spell_CastStart()
 
 	iDifficulty /= 10;		// adjust to 0 - 100
 	bool fWOP = (GetPrivLevel() >= PLEVEL_Counsel) ? g_Cfg.m_fWordsOfPowerStaff : g_Cfg.m_fWordsOfPowerPlayer;
-	if ( !NPC_CanSpeak() || IsStatFlag(STATF_INSUBSTANTIAL) )
+	if ( (m_pNPC && !NPC_CanSpeak()) || IsStatFlag(STATF_INSUBSTANTIAL) )
 		fWOP = false;
 
 	bool fAllowEquip = false;

@@ -1725,10 +1725,10 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 		bool bCanTake = false;
 		if (pChar == this) // we can always take our own items
 			bCanTake = true;
-		else if (pItem->GetContainer() != pChar || g_Cfg.m_fCanUndressPets == true) // our owners can take items from us (with CanUndressPets=true, they can undress us too)
-			bCanTake = pChar->NPC_IsOwnedBy(this);
+		else if ( (pItem->GetContainer() != pChar) || (g_Cfg.m_fCanUndressPets == true) ) // our owners can take items from us (with CanUndressPets=true, they can undress us too)
+			bCanTake = pChar->IsOwnedBy(this);
 		else  // higher priv players can take items and undress us
-			bCanTake = IsPriv(PRIV_GM) && GetPrivLevel() > pChar->GetPrivLevel();
+			bCanTake = ( IsPriv(PRIV_GM) && (GetPrivLevel() > pChar->GetPrivLevel()) );
 
 		if (bCanTake == false)
 		{
@@ -2406,6 +2406,7 @@ CChar * CChar::Horse_GetMountChar() const
 bool CChar::Horse_Mount(CChar *pHorse)
 {
 	ADDTOCALLSTACK("CChar::Horse_Mount");
+	ASSERT(pHorse->m_pNPC);
 
 	if ( !CanTouch(pHorse) )
 	{
@@ -2807,8 +2808,9 @@ bool CChar::Death()
 			}
 		}
 
-		if ( pItem->IsMemoryTypes(MEMORY_HARMEDBY) )
-			Memory_ClearTypes( static_cast<CItemMemory *>(pItem), 0xFFFF );
+		// Remove every memory, with some exceptions
+		if ( pItem->IsType(IT_EQ_MEMORY_OBJ) )
+			Memory_ClearTypes( static_cast<CItemMemory *>(pItem), 0xFFFF & ~(MEMORY_IPET|MEMORY_TOWN|MEMORY_GUILD) );
 	}
 
 	// Give credit for the kill to my attacker(s)
@@ -2849,13 +2851,13 @@ bool CChar::Death()
 	StatFlag_Clear(STATF_STONE|STATF_FREEZE|STATF_HIDDEN|STATF_SLEEPING|STATF_HOVERING);
 	SetPoisonCure(0, true);
 	Skill_Cleanup();
-	Spell_Dispel(100);			// get rid of all spell effects (moved here to prevent double @Destroy trigger)
+	Spell_Dispel(100);		// get rid of all spell effects (moved here to prevent double @Destroy trigger)
 
 	if ( m_pPlayer )		// if I'm NPC then my mount goes with me
 		Horse_UnMount();
 
 	// Create the corpse item
-	CItemCorpse * pCorpse = MakeCorpse(Calc_GetRandVal(2) > 1 ? true : false);
+	CItemCorpse * pCorpse = MakeCorpse(Calc_GetRandVal(2) ? true : false);
 	if ( pCorpse )
 	{
 		if ( IsTrigUsed(TRIGGER_DEATHCORPSE) )

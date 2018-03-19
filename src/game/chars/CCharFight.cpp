@@ -21,7 +21,7 @@ void CChar::OnNoticeCrime( CChar * pCriminal, const CChar * pCharMark )
 		return;
 
 	// Make my owner criminal too (if I have one)
-	/*CChar * pOwner = pCriminal->NPC_PetGetOwner();
+	/*CChar * pOwner = pCriminal->GetOwner();
 	if ( pOwner != NULL && pOwner != this )
 		OnNoticeCrime( pOwner, pCharMark );*/
 
@@ -59,7 +59,7 @@ void CChar::OnNoticeCrime( CChar * pCriminal, const CChar * pCharMark )
 		OnHarmedBy( pCriminal );
 	}
 
-	if ( ! NPC_CanSpeak() )
+	if ( !NPC_CanSpeak() )
 		return;	// I can't talk anyhow.
 
 	if (GetNPCBrain() != NPCBRAIN_HUMAN)
@@ -544,7 +544,7 @@ void CChar::OnHarmedBy( CChar * pCharSrc )
 		// NPC will Change targets.
 	}
 
-	if ( NPC_IsOwnedBy(pCharSrc, false) )
+	if ( m_pNPC && NPC_IsOwnedBy(pCharSrc, false) )
 		NPC_PetDesert();
 
 	// I will Auto-Defend myself.
@@ -577,7 +577,7 @@ bool CChar::OnAttackedBy(CChar * pCharSrc, int iHarmQty, bool fCommandPet, bool 
 		pCharSrc->Reveal();	// fix invis exploit
 
 	// Am i already attacking the source anyhow
-	if (Fight_IsActive() && m_Fight_Targ_UID == pCharSrc->GetUID())
+	if ( Fight_IsActive() && (m_Fight_Targ_UID == pCharSrc->GetUID()) )
 		return true;
 
 	Memory_AddObjTypes(pCharSrc, MEMORY_HARMEDBY | MEMORY_IRRITATEDBY);
@@ -787,6 +787,7 @@ int CChar::OnTakeDamage( int iDmg, CChar * pSrc, DAMAGE_TYPE uType, int iDmgPhys
 
 	if ( IsStatFlag(STATF_DEAD) )	// already dead
 		return -1;
+
 	if ( !(uType & DAMAGE_GOD) )
 	{
 		if ( IsStatFlag(STATF_INVUL|STATF_STONE) )
@@ -797,12 +798,24 @@ effect_bounce:
 		}
 		if ( (uType & DAMAGE_FIRE) && Can(CAN_C_FIRE_IMMUNE) )
 			goto effect_bounce;
+		// I can't take damage from my pets, the only exception is for BRAIN_BERSERK pets
+		if ( pSrc->m_pNPC && (pSrc->NPC_PetGetOwner() == this) && (pSrc->m_pNPC->m_Brain != NPCBRAIN_BERSERK) )
+			goto effect_bounce;
 		if ( m_pArea )
 		{
 			if ( m_pArea->IsFlag(REGION_FLAG_SAFE) )
 				goto effect_bounce;
-			if ( m_pArea->IsFlag(REGION_FLAG_NO_PVP) && pSrc && ((IsStatFlag(STATF_PET) && NPC_PetGetOwner() == pSrc) || (m_pPlayer && (pSrc->m_pPlayer || pSrc->IsStatFlag(STATF_PET)))) )
-				goto effect_bounce;
+			if ( m_pArea->IsFlag(REGION_FLAG_NO_PVP) && m_pPlayer)
+			{
+				if (pSrc->m_pPlayer)	// player attacking player
+					goto effect_bounce;
+				if (pSrc->m_pNPC)
+				{
+					CChar* pOwner = pSrc->NPC_PetGetOwnerRecursive();
+					if (pOwner && pOwner->m_pPlayer)	// pet attacking player
+						goto effect_bounce;
+				}
+			}
 		}
 	}
 
@@ -999,7 +1012,7 @@ effect_bounce:
 			pSrc->m_pClient->addShowDamage( iDmg, (dword)(GetUID()) );
 		else
 		{
-			CChar * pSrcOwner = pSrc->NPC_PetGetOwner();
+			CChar * pSrcOwner = pSrc->GetOwner();
 			if ( pSrcOwner != NULL )
 			{
 				if ( pSrcOwner->IsClient() )
@@ -1303,7 +1316,7 @@ bool CChar::Fight_Attack( const CChar *pCharTarg, bool btoldByMaster )
 	SKILL_TYPE skillWeapon = Fight_GetWeaponSkill();
 	SKILL_TYPE skillActive = Skill_GetActive();
 
-	if ( skillActive == skillWeapon && m_Fight_Targ_UID == pCharTarg->GetUID() )		// already attacking this same target using the same skill
+	if ( (skillActive == skillWeapon) && (m_Fight_Targ_UID == pCharTarg->GetUID()) )	// already attacking this same target using the same skill
 		return true;
 	else if (g_Cfg.IsSkillFlag(skillActive, SKF_MAGIC))	// don't start another fight skill when already casting spells
 		return true;
