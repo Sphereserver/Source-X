@@ -141,13 +141,12 @@ bool PacketCreate::onReceive(NetState* net)
 	return doCreate(net, charname, isFemale, rtRace,
 		strength, dexterity, intelligence, prof,
 		skill1, skillval1, skill2, skillval2, skill3, skillval3, skill4, skillval4,
-		hue, hairid, hairhue, beardid, beardhue, shirthue, pantshue,
-		startloc, flags);
+		hue, hairid, hairhue, beardid, beardhue, shirthue, pantshue, ITEMID_NOTHING, startloc, flags);
 }
 
 bool PacketCreate::doCreate(NetState* net, lpctstr charname, bool bFemale, RACE_TYPE rtRace, short wStr, short wDex, short wInt,
 	PROFESSION_TYPE prProf, SKILL_TYPE skSkill1, int iSkillVal1, SKILL_TYPE skSkill2, int iSkillVal2, SKILL_TYPE skSkill3, int iSkillVal3, SKILL_TYPE skSkill4, int iSkillVal4,
-	HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, int iStartLoc, int iFlags)
+	HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, ITEMID_TYPE idFace, int iStartLoc, int iFlags)
 {
 	ADDTOCALLSTACK("PacketCreate::doCreate");
 
@@ -160,7 +159,7 @@ bool PacketCreate::doCreate(NetState* net, lpctstr charname, bool bFemale, RACE_
 	{
 		// logging in as a new player whilst already online !
 		client->addSysMessage(g_Cfg.GetDefaultMsg(DEFMSG_MSG_ALREADYONLINE));
-		DEBUG_ERR(("%x:Setup_CreateDialog acct='%s' already online!\n", net->id(), account->GetName()));
+		g_Log.Event(LOGM_CLIENTS_LOG, "%lx:Account '%s' already in use\n", net->id(), account->GetName());
 		return false;
 	}
 
@@ -201,19 +200,19 @@ bool PacketCreate::doCreate(NetState* net, lpctstr charname, bool bFemale, RACE_
 	//Creating the pChar
 	pChar->InitPlayer(client, charname, bFemale, rtRace, wStr, wDex, wInt,
 		prProf, skSkill1, iSkillVal1, skSkill2, iSkillVal2, skSkill3, iSkillVal3, skSkill4, iSkillVal4,
-		wSkinHue, idHair, wHairHue, idBeard, wBeardHue, wShirtHue, wPantsHue, iStartLoc);
+		wSkinHue, idHair, wHairHue, idBeard, wBeardHue, wShirtHue, wPantsHue, idFace, iStartLoc);
 
 	//Calling the function after the char creation, it can't be done before or the function won't have SRC
 	client->r_Call("f_onchar_create", pChar, &createArgs, NULL, &tr);
 
-	if ( tr == 1 )
+	if ( tr == TRIGRET_RET_TRUE )
 	{
 		client->addLoginErr(PacketLoginError::CreationBlocked);
 		pChar->Delete();	//Delete it if function is returning 1 or the char will remain created
 		return false;
 	}
 
-	g_Log.Event(LOGM_CLIENTS_LOG, "%x:Setup_CreateDialog acct='%s', char='%s'\n", net->id(), account->GetName(), pChar->GetName());
+	g_Log.Event(LOGM_CLIENTS_LOG, "%lx:Account '%s' created new char '%s' [0%lx]\n", net->id(), account->GetName(), pChar->GetName(), (dword)pChar->GetUID() );
 	client->Setup_Start(pChar);
 	return true;
 }
@@ -513,7 +512,7 @@ bool PacketItemEquipReq::onReceive(NetState* net)
 		return false;
 
 	CItem* item = source->LayerFind(LAYER_DRAGGING);
-	if ( item == NULL || client->GetTargMode() != CLIMODE_DRAG || item->GetUID() != itemSerial )
+	if ( !item || (client->GetTargMode() != CLIMODE_DRAG) || (item->GetUID() != itemSerial) )
 	{
 		// I have no idea why i got here.
 		new PacketDragCancel(client, PacketDragCancel::Other);
@@ -648,7 +647,7 @@ bool PacketCharStatusReq::onReceive(NetState* net)
 	CUID targetSerial = static_cast<CUID>(readInt32());
 
 	if ( requestType == 4 )
-		client->addCharStatWindow(targetSerial.CharFind(), true);
+		client->addStatusWindow(targetSerial.ObjFind(), true);
 	else if ( requestType == 5 )
 		client->addSkillWindow(SKILL_QTY);
 	return true;
@@ -1117,7 +1116,7 @@ bool PacketSecureTradeReq::onReceive(NetState* net)
 
 		case SECURE_TRADE_CHANGE:		// change check marks. possible conclude trade
 		{
-			if ( character->GetDist(container) > character->GetSight() )
+			if ( character->GetDist(container) > character->GetVisualRange() )
 			{
 				client->SysMessageDefault(DEFMSG_MSG_TRADE_TOOFAR);
 				return true;
@@ -1502,7 +1501,7 @@ bool PacketCreateNew::onReceive(NetState* net)
 	readStringASCII(charname, MAX_NAME_SIZE);
 	skip(30);
 	PROFESSION_TYPE profession = static_cast<PROFESSION_TYPE>(readByte());
-	skip(1);
+	byte startloc = readByte();
 	byte sex = readByte();
 	byte race_raw = readByte();
 	if ( net->isClientKR() && (race_raw > 0) )	// SA client sends race packet one higher than KR
@@ -1639,8 +1638,7 @@ bool PacketCreateNew::onReceive(NetState* net)
 	bool success = doCreate(net, charname, sex > 0, race,
 		strength, dexterity, intelligence, profession,
 		skill1, skillval1, skill2, skillval2, skill3, skillval3, skill4, skillval4,
-		hue, hairid, hairhue, beardid, beardhue, HUE_DEFAULT, HUE_DEFAULT,
-		0, 0xFFFFFFFF);
+		hue, hairid, hairhue, beardid, beardhue, shirthue, shirthue, faceid, startloc, -1);
 	if (!success)
 		return false;
 
@@ -2166,26 +2164,44 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 	// maybe keep a memory for each gump?
 	CObjBase* object = serial.ObjFind();
 
-	// virtue button -- Handling this here because the packet is a little different
-	if ((context == CLIMODE_DIALOG_VIRTUE) && (character == object))
+	// Check client internal dialogs first (they must be handled separately because packets can be a bit different on these dialogs)
+	if (character == object)
 	{
-		CChar* viewed = character;
-		if (button == 1 && checkCount > 0)
+		if (context == CLIMODE_DIALOG_VIRTUE)
 		{
-			viewed = CUID(readInt32()).CharFind();
-			if (viewed == NULL)
-				viewed = character;
+			CChar *viewed = character;
+			if ((button == 1) && (checkCount > 0))
+			{
+				viewed = CUID(readInt32()).CharFind();
+				if (!viewed)
+					viewed = character;
+			}
+			if (IsTrigUsed(TRIGGER_USERVIRTUE))
+			{
+				CScriptTriggerArgs Args(viewed);
+				Args.m_iN1 = button;
+				character->OnTrigger(CTRIG_UserVirtue, static_cast<CTextConsole *>(character), &Args);
+			}
+			return true;
 		}
-
-		if ( IsTrigUsed(TRIGGER_USERVIRTUE) )
+		else if (context == CLIMODE_DIALOG_FACESELECTION)
 		{
-			CScriptTriggerArgs Args(viewed);
-			Args.m_iN1 = button;
+			dword maxID = (g_Cfg.m_iFeatureExtra & FEATURE_EXTRA_ROLEPLAYFACES) ? ITEMID_FACE_VAMPIRE : ITEMID_FACE_10;
+			if ((button >= ITEMID_FACE_1) && (button <= maxID))
+			{
+				CItem *pFace = character->LayerFind(LAYER_FACE);
+				if (pFace)
+					pFace->Delete();
 
-			character->OnTrigger(CTRIG_UserVirtue, static_cast<CTextConsole *>(character), &Args);
+				pFace = CItem::CreateBase(static_cast<ITEMID_TYPE>(button));
+				if (pFace)
+				{
+					pFace->SetHue(character->GetHue());
+					character->LayerAdd(pFace, LAYER_FACE);
+				}
+			}
+			return true;
 		}
-
-		return true;
 	}
 
 #ifdef _DEBUG
@@ -3332,7 +3348,7 @@ bool PacketViewRange::onReceive(NetState* net)
 		return false;
 
 	byte iVal = readByte();
-	character->SetSight(iVal);
+	character->SetVisualRange(iVal);
 	return true;
 }
 
@@ -4472,7 +4488,6 @@ bool PacketCreate70016::onReceive(NetState* net)
 	return doCreate(net, charname, isFemale, rtRace,
 		strength, dexterity, intelligence, prof,
 		skill1, skillval1, skill2, skillval2, skill3, skillval3, skill4, skillval4,
-		hue, hairid, hairhue, beardid, beardhue, shirthue, pantshue,
-		startloc, flags);
+		hue, hairid, hairhue, beardid, beardhue, shirthue, pantshue, ITEMID_NOTHING, startloc, flags);
 }
 

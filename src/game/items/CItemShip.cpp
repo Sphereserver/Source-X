@@ -222,7 +222,7 @@ bool CItemShip::Ship_MoveDelta(CPointBase pdelta)
 		if (tMe == NULL)
 			continue;
 
-		byte tViewDist = (uchar)(tMe->GetSight());
+		byte tViewDist = (uchar)(tMe->GetVisualRange());
 		for (size_t i = 0; i < iCount; i++)
 		{
 			CObjBase * pObj = ppObjs[i];
@@ -975,8 +975,8 @@ dodirmovechange:
 			CPointMap pt = GetTopPoint();
 			pt.m_z = zold;
 			SetTopZ( -UO_SIZE_Z );	// bottom of the world where i won't get in the way.
-			dword wBlockFlags = CAN_I_WATER;
-			char z = g_World.GetHeightPoint2( pt, wBlockFlags );
+			dword dwBlockFlags = CAN_I_WATER;
+			char z = g_World.GetHeightPoint2( pt, dwBlockFlags );
 			SetTopZ( zold );	// restore z for now.
 			pt.InitPoint();
 			pt.m_z = z - zold;

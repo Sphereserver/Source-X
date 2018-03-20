@@ -24,6 +24,7 @@ enum NV_TYPE
 	NV_LEAVE,
 	NV_PETRETRIEVE,
 	NV_PETSTABLE,
+	NV_RELEASE,
 	NV_RESTOCK,
 	NV_RUN,
 	NV_RUNTO,
@@ -44,6 +45,7 @@ lpctstr const CCharNPC::sm_szVerbKeys[NV_QTY+1] =
 	"LEAVE",
 	"PETRETRIEVE",
 	"PETSTABLE",
+	"RELEASE",
 	"RESTOCK",
 	"RUN",
 	"RUNTO",
@@ -150,6 +152,11 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 		return( NPC_StablePetRetrieve( pCharSrc ));
 	case NV_PETSTABLE:
 		return( NPC_StablePetSelect( pCharSrc ));
+	case NV_RELEASE:
+		Skill_Start( SKILL_NONE );
+		NPC_PetClearOwners();
+		SoundChar( CRESND_RAND );
+		return true;
 	case NV_RESTOCK:	// individual restock command.
 		return NPC_Vendor_Restock(true, s.GetArgVal() != 0);
 	case NV_RUN:
@@ -1053,7 +1060,7 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 	if ( !m_pNPC || !pSector )
 		return false;
 
-	int iRange = GetSight();
+	int iRange = GetVisualRange();
 	int iRangeBlur = UO_MAP_VIEW_SIGHT;
 
 	// If I can't move don't look too far.

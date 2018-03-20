@@ -62,10 +62,17 @@ enum HUE_CODE
 enum SOUND_CODE
 {
     SOUND_NONE			= 0,
-    SOUND_ANVIL			= 0x02a,
-    SOUND_TURN_PAGE		= 0x055,	// open spellbook
-    SOUND_SPELL_FIZZLE	= 0x05C,
-    SOUND_OPEN_METAL	= 0x0ec,	// open bank box.
+    SOUND_ANVIL			= 0x2A,
+	SOUND_DROP_GOLD1	= 0x32,
+	SOUND_DROP_GOLD2	= 0x37,
+	SOUND_HAMMER		= 0x42,
+	SOUND_LEATHER		= 0x48,
+	SOUND_RUSTLE		= 0x4F,
+	SOUND_TURN_PAGE		= 0x55,		// open spellbook
+	SOUND_USE_CLOTH		= 0x57,
+	SOUND_SPELL_FIZZLE	= 0x5C,
+	SOUND_OPEN_METAL	= 0x0EC,	// open bank box.
+	SOUND_SFX6			= 0xF9,
     SOUND_HOOF_MARBLE_1	= 0x121,	// marble echoing sound. (horse)
     SOUND_HOOF_MARBLE_2	= 0x122,
     SOUND_HOOF_BRIDGE_1 = 0x123,
@@ -414,7 +421,7 @@ enum LAYER_TYPE		// defined by UO. Only one item can be in a slot.
     LAYER_HALF_APRON,// 12 = 0x0c =
     LAYER_CHEST,	// 13 = 0x0d = armor chest
     LAYER_WRIST,	// 14 = 0x0e = watch
-    LAYER_NEWLIGHT,	// 15 = Unused (use it for: a ITEMID_LIGHT_SRC equip item can be put here.)
+    LAYER_FACE,		// 15 = character face style on enhanced clients (can be also used for light halo 'ITEMID_LIGHT_SRC')
     LAYER_BEARD,	// 16 = try to have only men have this.
     LAYER_TUNIC,	// 17 = jester suit or full apron.
     LAYER_EARS,		// 18 = earrings
@@ -722,25 +729,25 @@ enum GUMP_TYPE	// The gumps. (most of these are not useful to the server.)
 	GUMP_SCROLL							= 0x7,
     GUMP_CORPSE							= 0x09,
     GUMP_VENDOR_RECT					= 0x30,	// Big blue rectangle for vendor mask.
-    GUMP_PACK							= 0x3C,	// Open backpack
+    GUMP_BACKPACK						= 0x3C,	// Open backpack
     GUMP_BAG							= 0x3D,	// Leather Bag
     GUMP_BARREL							= 0x3E,	// Barrel
-    GUMP_BASKET_SQ						= 0x3F,	// Square picknick Basket
+    GUMP_BASKET_SQUARE					= 0x3F,	// Square picknick Basket
     GUMP_BOX_WOOD						= 0x40,	// Small wood box with a lock
-    GUMP_BASKET_RO						= 0x41,	// Round Basket
-    GUMP_CHEST_GO_SI					= 0x42,	// Gold and Silver Chest.
-    GUMP_BOX_WOOD_OR					= 0x43,	// Small wood box (ornate)(no lock)
+    GUMP_BASKET_ROUND					= 0x41,	// Round Basket
+    GUMP_CHEST_METAL_GOLD				= 0x42,	// Gold and Silver Chest.
+    GUMP_BOX_WOOD_ORNATE				= 0x43,	// Small wood box (ornate)(no lock)
     GUMP_CRATE							= 0x44,	// Wood Crate
 	GUMP_LEATHER						= 0x47,
-    GUMP_DRAWER_DK						= 0x48,
-    GUMP_CHEST_WO_GO					= 0x49,	// Wood with gold trim
-    GUMP_CHEST_SI						= 0x4A,	// Silver chest
-    GUMP_BOX_GO_LO						= 0x4B,	// Gold/Brass box with a lock
-    GUMP_SHIP_HOLD						= 0x4C,
+    GUMP_DRAWER_DARK					= 0x48,
+    GUMP_CHEST_WOOD						= 0x49,	// Wood with gold trim
+    GUMP_CHEST_METAL					= 0x4A,	// Silver chest
+    GUMP_BOX_METAL						= 0x4B,	// Gold/Brass box with a lock
+    GUMP_SHIP_HATCH						= 0x4C,
     GUMP_BOOK_SHELF						= 0x4D,
-    GUMP_CABINET_DK						= 0x4E,
-    GUMP_CABINET_LT						= 0x4F,
-    GUMP_DRAWER_LT						= 0x51,
+    GUMP_CABINET_DARK					= 0x4E,
+    GUMP_CABINET_LIGHT					= 0x4F,
+    GUMP_DRAWER_LIGHT					= 0x51,
 	GUMP_SIGN_BRASS						= 0x64,
 	GUMP_GRAVESTONE_ROUNDED				= 0x65,
 	GUMP_GRAVESTONE_SQUARE				= 0x66,
@@ -765,7 +772,7 @@ enum GUMP_TYPE	// The gumps. (most of these are not useful to the server.)
     GUMP_GIFT_BOX_OCTOGON				= 0x11D,
     GUMP_GIFT_BOX_RECTANGLE				= 0x11E,
     GUMP_GIFT_BOX_ANGEL					= 0x11F,
-    GUMP_HEART_SHAPED					= 0x120,
+    GUMP_GIFT_BOX_HEART_SHAPED			= 0x120,
 	GUMP_GIFT_BOX_TALL					= 0x121,
 	GUMP_MAP_BRITANNIA_1				= 0x12B,
 	GUMP_TREASURE_CHEST					= 0x423,
@@ -779,9 +786,11 @@ enum GUMP_TYPE	// The gumps. (most of these are not useful to the server.)
 	GUMP_VENDOR_OFFER					= 0x873,
 	GUMP_SEED_BOX						= 0x87C,
 	GUMP_SECURE_TRADE_NEW				= 0x88A,
-    GUMP_GAME_BOARD						= 0x91A,	// Chess or checker board.
-    GUMP_GAME_BACKGAM					= 0x92E,	// backgammon board.
+    GUMP_BOARD_CHECKER					= 0x91A,	// Chess or checker board.
+    GUMP_BOARD_BACKGAMMON				= 0x92E,	// backgammon board.
     GUMP_MAP_2_NORTH					= 0x139D,
+	GUMP_CHEST_WEDDING					= 0x266a,
+	GUMP_STONE_BASE						= 0x266b,
 	GUMP_BULLETIN_BOARD					= 0x1518,
 	GUMP_MAP_BRITANNIA_2				= 0x1598,
 	GUMP_MAP_REAL_WORLD					= 0x1599,
@@ -791,7 +800,7 @@ enum GUMP_TYPE	// The gumps. (most of these are not useful to the server.)
 	GUMP_MAP_MALAS						= 0x15DC,
 	GUMP_MAP_TOKUNO_ISLANDS				= 0x15DD,
 	GUMP_MAP_STYGIAN_ABYSS				= 0x15DE,
-	GUMP_PLAGUE_BEAST_CORE				= 0x2A63,	// Plague beast core
+	GUMP_PLAGUE_BEAST					= 0x2A63,	// Plague beast core
 	GUMP_REGAL_CASE						= 0x4D0C,	// King's Collection Container
 	GUMP_TAROT_CARD_DEATH				= 0x7725,
 	GUMP_TAROT_CARD_FORTUNE				= 0x7726,
@@ -824,6 +833,9 @@ enum GUMP_TYPE	// The gumps. (most of these are not useful to the server.)
 	GUMP_HEAD_ON_SPIKE_9				= 0x7742,
 	GUMP_HEAD_ON_SPIKE_10				= 0x7743,
 	GUMP_HEAD_ON_SPIKE_11				= 0x7744,
+	GUMP_BACKPACK_SUEDE					= 0x775e,
+	GUMP_BACKPACK_POLAR_BEAR			= 0x7760,
+	GUMP_BACKPACK_GHOUL_SKIN			= 0x7762,
 	GUMP_VICE_VS_VIRTUE					= 0x7766,
 	GUMP_COLLECTORS_CARD_1				= 0x7767,	// Need to look into these more. Not noted anywhere.
 	GUMP_COLLECTORS_CARD_2				= 0x7768,	// All 'Collectors Cards' are to be considered Experimental
@@ -851,7 +863,10 @@ enum GUMP_TYPE	// The gumps. (most of these are not useful to the server.)
 	GUMP_WALL_SAFE						= 0x9BF2,
 	GUMP_RUNIC_ATLAS					= 0x9BF3,
 	GUMP_SEMIDAR_CARD_BACK				= 0x9BF4,
-	GUMP_FLETCHING_STATION				= 0x9BFE,	// Presumably a container.
+	GUMP_CRATE_FLETCHING				= 0x9BFe,
+	GUMP_CHEST_WOODEN					= 0x9CD9,
+	GUMP_PILLOW_HEART					= 0x9CDA,
+	GUMP_CHEST_METAL2					= 0xEFE7,
 	GUMP_MAP_EODON						= 0xC34F,
     GUMP_QTY							= 0xFFFE,
     GUMP_OPEN_SPELLBOOK					= 0xFFFF

@@ -42,11 +42,12 @@
 #define FEATURE_TOL_UPDATE			0x01	// 0x400000 feature
 #define FEATURE_TOL_VIRTUALGOLD		0x02	// Not related to login flags
 
-#define FEATURE_EXTRA_CRYSTAL		0x01	// 0x200 feature (unlock ML crystal items on house design)
-#define FEATURE_EXTRA_GOTHIC		0x02	// 0x40000 feature (unlock SA gothic items on house design)
-#define FEATURE_EXTRA_RUSTIC		0x04	// 0x80000 feature (unlock SA rustic items on house design)
+#define FEATURE_EXTRA_CRYSTAL		0x01	// 0x000200 feature (unlock ML crystal items on house design)
+#define FEATURE_EXTRA_GOTHIC		0x02	// 0x040000 feature (unlock SA gothic items on house design)
+#define FEATURE_EXTRA_RUSTIC		0x04	// 0x080000 feature (unlock SA rustic items on house design)
 #define FEATURE_EXTRA_JUNGLE		0x08	// 0x100000 feature (unlock TOL jungle items on house design)
 #define FEATURE_EXTRA_SHADOWGUARD	0x10	// 0x200000 feature (unlock TOL shadowguard items on house design)
+#define FEATURE_EXTRA_ROLEPLAYFACES	0x20	// 0x002000 feature (unlock extra roleplay face styles on character creation) - enhanced clients only
 
 
 //--Damage

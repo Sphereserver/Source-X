@@ -206,8 +206,8 @@ void CItemMultiCustom::EndCustomize(bool bForced)
 			CPointMap ptDest = Multi_GetSign()->GetTopPoint();
 
 			// find ground height, since the signpost is usually raised
-			dword wBlockFlags = 0;
-			ptDest.m_z = g_World.GetHeightPoint2(ptDest, wBlockFlags, true);
+			dword dwBlockFlags = 0;
+			ptDest.m_z = g_World.GetHeightPoint2(ptDest, dwBlockFlags, true);
 
 			pChar->MoveToChar(ptDest);
 			pChar->UpdateMove(ptOld);

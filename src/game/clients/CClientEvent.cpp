@@ -240,6 +240,9 @@ void CClient::Event_Item_Pickup(CUID uid, word amount) // Client grabs an item
 	else if ( tempamount > 1 )
 		m_tNextPickup = m_tNextPickup + 2;	// +100 msec if amount should slow down the client
 
+	SOUND_TYPE iSnd = static_cast<SOUND_TYPE>(pItem->GetDefNum("PICKUPSOUND", true));
+	addSound(iSnd ? iSnd : SOUND_USE_CLOTH);
+
 	EXC_SET("TargMode");
 	SetTargMode(CLIMODE_DRAG);
 	m_Targ_UID = uid;
@@ -251,7 +254,7 @@ void CClient::Event_Item_Drop_Fail( CItem *pItem )
 	ADDTOCALLSTACK("CClient::Event_Item_Drop_Fail");
 	// The item was in the LAYER_DRAGGING.
 	// Try to bounce it back to where it came from.
-	if ( !pItem || pItem != m_pChar->LayerFind(LAYER_DRAGGING) )
+	if ( !pItem || (pItem != m_pChar->LayerFind(LAYER_DRAGGING)) )
 		return;
 
 	CItemContainer *pPrevCont = static_cast<CItemContainer *>(m_Targ_Prv_UID.ItemFind());
@@ -2208,7 +2211,7 @@ void CClient::Event_Target(dword context, CUID uid, CPointMap pt, byte flags, IT
 		else
 		{
 			// the point must be valid
-			if (m_pChar->GetTopDistSight(pt) > m_pChar->GetSight())
+			if (m_pChar->GetTopDistSight(pt) > m_pChar->GetVisualRange())
 				return;
 		}
 	}

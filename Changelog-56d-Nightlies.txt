@@ -405,7 +405,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Fixed: when an overloaded player drags an equippable item on himself, it returned to its previous location on the ground instead of at the player's feet.
 
 24-02-2018, Drk84
-- Fixed:  Unhandled [TYPEDEF 40] error when creating a "chair" item, this was caused by the removal of typedef t_chair in the scripts pack.
+- Fixed: Unhandled [TYPEDEF 40] error when creating a "chair" item, this was caused by the removal of typedef t_chair in the scripts pack.
 
 03-03-2018, Drk84
 
@@ -444,8 +444,37 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Fixed: NPCs could move to points they shouldn't be able to reach/walk on.
 - Fixed: characters couldn't equip some items.
 
-18-03-2018, Nolok
+19-03-2018, Nolok
 - Fixed: summoned monsters with BRAIN_BERSERK didn't decrease owner's CurFollower property when killed.
 - Fixed: BRAIN_BERSERK monsters hitting more times than normal during combat.
 - Fixed: bonded pets losed their pet status and their master after they died.
-- Fixed: corpses being always created with the front falling animation, never with the backwards falling.
+- Fixed: corpses being always created with the front falling animation, never with the backwards falling one.
+
+20-03-2018, Nolok
+- Added: .ADD command accepts as a second parameter the amount of the item to create. Usage: .add i_gold, 500
+- Fixed: starting locations of the Enhanced Client's character creation wasn't working.
+- [Port from Source, 27-11-2016, Coruja]
+	Added: Support for items health bar on HS clients >= 7.0.30.0. Added the CAN flag 'can_i_damageable' to enable health bar on items (MORE1L = cur hitpoints / MORE1H = max hitpoints).
+- [Port from Source, 30-11-2016, Coruja]
+	Fixed: Server crash when custom clients connect using invalid client version.
+- [Port from Source, 22-12-2016, Coruja]
+	Fixed: Enhanced clients not able to login on accounts with no created chars.
+- [Port from Source, 24-12-2016, Coruja]
+	Added: Support for character face style on enhanced clients. It works like hairs/beards, just create the item and equip it on character.
+	[Sphere.ini] Added: new FEATURE_EXTRA_ROLEPLAYFACES feature to enable extra roleplay face styles on character creation
+- [Port from Source, 25-12-2016, Coruja]
+	Removed: Support for CHARLIST function on enhanced clients, they don't have support for this packet anymore, so disabling it will prevent client crash.
+- [Port from Source, 17-01-2017, Coruja]
+	Fixed: Functions SYSMESSAGELOC / SYSMESSAGELOCEX using wrong default color.
+- [Port from Source, 16-06-2017]
+	Added: New item property PICKUPSOUND to override default pickup sound for items (it can be used together with DROPSOUND).
+- [Port from Source, 02-01-2018, Coruja]
+	Fixed: ENHANCEPOTIONS item property only working when FEATURE_AOS_UPDATE_B .ini feature is enabled.
+- [Port from Source, 19-02-2018, Coruja] 
+	Fixed: Sphere console not closing correctly when it get closed before load startup files.
+	Fixed: Multis (houses/boats) not being loaded at proper distance when client is walking.
+- [Port from Source, 14-03-2018, Coruja]
+	Fixed: Server function 'f_onaccount_connect' not being called correctly when AccApp=2 (free/auto account) is set on sphere.ini.
+- [Port from Source, 19-03-2018, Coruja]
+	Fixed: Multi placement making players get stuck when place the multi over his own char.
+	Fixed: Multi placement being incorrectly blocked by region flags region_flag_underground, region_flag_guarded, region_flag_safe.

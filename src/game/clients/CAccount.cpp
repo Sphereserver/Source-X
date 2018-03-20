@@ -872,15 +872,11 @@ bool CAccount::CheckPassword( lpctstr pszPassword )
 	ADDTOCALLSTACK("CAccount::CheckPassword");
 	ASSERT(pszPassword);
 
-	if ( m_sCurPassword.IsEmpty())
+	if ( m_sCurPassword.IsEmpty() )
 	{
-		// First guy in sets the password.
-		// check the account in use first.
-		if ( *pszPassword == '\0' )
+		// If account password is empty, set the password given by the client trying to connect
+		if ( !SetPassword(pszPassword) )
 			return false;
-
-		SetPassword( pszPassword );
-		return true;
 	}
 
 	CScriptTriggerArgs Args;
@@ -924,10 +920,11 @@ bool CAccount::CheckPassword( lpctstr pszPassword )
 bool CAccount::SetPassword( lpctstr pszPassword, bool isMD5Hash )
 {
 	ADDTOCALLSTACK("CAccount::SetPassword");
-	bool useMD5 = g_Cfg.m_fMd5Passwords;
 
 	if ( Str_Check( pszPassword ) )	// Prevents exploits
 		return false;
+
+	bool useMD5 = g_Cfg.m_fMd5Passwords;
 
 	//Accounts are 'created' in server startup so we don't fire the function.
 	if ( !g_Serv.IsLoading() )

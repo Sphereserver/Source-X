@@ -93,14 +93,14 @@ public:
 /***************************************************************************
  *
  *
- *	Packet 0x11 : PacketCharacterStatus		sends status window data (LOW)
+ *	Packet 0x11 : PacketObjectStatus		sends status window data (LOW)
  *
  *
  ***************************************************************************/
-class PacketCharacterStatus : public PacketSend
+class PacketObjectStatus : public PacketSend
 {
 public:
-	PacketCharacterStatus(const CClient* target, CChar* other);
+	PacketObjectStatus(const CClient* target, CObjBase* object);
 
 private:
 	void WriteVersionSpecific(const CClient* target, CChar* other, byte version);
@@ -797,6 +797,12 @@ class PacketChangeCharacter : public PacketSend
 {
 public:
 	PacketChangeCharacter(CClient* target);
+
+	virtual bool canSendTo(const NetState* state) const { return CanSendTo(state); }
+	static bool CanSendTo(const NetState* state)
+	{
+		return !(state->isClientKR() || state->isClientEnhanced());
+	}
 };
 
 /***************************************************************************
@@ -1858,9 +1864,10 @@ protected:
 public:
 	enum DataSource
 	{
-		TileData = 0x0,
-		Character = 0x1,
-		Multi = 0x2
+		TileData	= 0x0,
+		Character	= 0x1,
+		Multi		= 0x2,
+		Damageable	= 0x3
 	};
 
 	PacketItemWorldNew(const CClient* target, CItem* item);

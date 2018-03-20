@@ -119,26 +119,25 @@ PacketCombatDamage::PacketCombatDamage(const CClient* target, word damage, CUID 
 /***************************************************************************
  *
  *
- *	Packet 0x11 : PacketCharacterStatus		sends status window data (LOW)
+ *	Packet 0x11 : PacketObjectStatus		sends status window data (LOW)
  *
  *
  ***************************************************************************/
-PacketCharacterStatus::PacketCharacterStatus(const CClient* target, CChar* other) : PacketSend(XCMD_Status, 7, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
+PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) : PacketSend(XCMD_Status, 7, g_Cfg.m_fUsePacketPriorities? PRI_LOW : PRI_NORMAL)
 {
-	ADDTOCALLSTACK("PacketCharacterStatus::PacketCharacterStatus");
+	ADDTOCALLSTACK("PacketObjectStatus::PacketObjectStatus");
 
 	const NetState * state = target->GetNetState();
-	const CChar* character = target->GetChar();
-	const CCharBase * otherDefinition = other->Char_GetDef();
-	ASSERT(otherDefinition != NULL);
+	const CChar *character = target->GetChar();
+	CChar *objectChar = object->IsChar() ? static_cast<CChar *>(object) : NULL;
+	bool canRename = false;
 
 	byte version = 0;
-	bool canRename = ((character != other) && other->IsOwnedBy(character) && (otherDefinition->GetHireDayWage() == 0) );
 
 	initLength();
 
-	writeInt32(other->GetUID());
-	writeStringFixedASCII(other->GetName(), 30);
+	writeInt32(object->GetUID());
+	writeStringFixedASCII(object->GetName(), 30);
 
 	if (state->isClientVersion(MINCLIVER_STATUS_V6))
 		version = 6;
@@ -153,29 +152,40 @@ PacketCharacterStatus::PacketCharacterStatus(const CClient* target, CChar* other
 	else
 		version = 1;
 
-	if (character == other)
+	if (objectChar && (objectChar == character))
 	{
-		writeInt16((word)(other->Stat_GetVal(STAT_STR)));
-		writeInt16((word)(other->Stat_GetMax(STAT_STR)));
+		writeInt16((word)(objectChar->Stat_GetVal(STAT_STR)));
+		writeInt16((word)(objectChar->Stat_GetMax(STAT_STR)));
 		writeBool(canRename);
 		writeByte(version);
-		WriteVersionSpecific(target, other, version);
+		WriteVersionSpecific(target, objectChar, version);
 	}
 	else
 	{
-		writeInt16((word)((other->Stat_GetVal(STAT_STR) * 100) / maximum(other->Stat_GetMax(STAT_STR), 1)));	// Hit points (percentage)
+		if ( objectChar )
+		{
+			canRename = objectChar->NPC_IsOwnedBy(character);
+			writeInt16((word)((objectChar->Stat_GetVal(STAT_STR) * 100) / maximum(objectChar->Stat_GetMax(STAT_STR), 1)));
+		}
+		else
+		{
+			const CItem *objectItem = object->IsItem() ? static_cast<const CItem *>(object) : NULL;
+			if ( objectItem )
+				writeInt16((word)((objectItem->m_itArmor.m_Hits_Cur * 100) / maximum(objectItem->m_itArmor.m_Hits_Max, 1)));
+		}
+
 		writeInt16(100);		// Max hit points
 		writeBool(canRename);
 		writeByte(version);
-		if (target->GetNetState()->isClientEnhanced() && other->IsPlayableCharacter())
+		if (target->GetNetState()->isClientEnhanced() && objectChar->IsPlayableCharacter())
 			// The Enhanced Client wants the char race and other things when showing paperdolls (otherwise the interface throws an "unnoticeable" internal error)
-			WriteVersionSpecific(target, other, version);
+			WriteVersionSpecific(target, objectChar, version);
 	}
 
 	push(target);
 }
 
-void PacketCharacterStatus::WriteVersionSpecific(const CClient* target, CChar* other, byte version)
+void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* other, byte version)
 {
 	const CCharBase * otherDefinition = other->Char_GetDef();
 
@@ -1155,7 +1165,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 			switch ( layer )	// don't put these on a corpse.
 			{
 				case LAYER_NONE:
-				case LAYER_NEWLIGHT:
+				case LAYER_FACE:
 				case LAYER_PACK: // these display strange.
 					continue;
 
@@ -2492,10 +2502,8 @@ PacketCorpseEquipment::PacketCorpseEquipment(CClient* target, const CItemContain
 		switch (layer) // don't put these on a corpse.
 		{
 			case LAYER_NONE:
+			case LAYER_FACE:
 			case LAYER_PACK: // these display strange.
-				continue;
-
-			case LAYER_NEWLIGHT:
 				continue;
 
 			default:
@@ -3181,12 +3189,14 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 	if ( target->GetNetState()->isClientEnhanced() )
 	{
 		word iLastCharSlot = 0;
-		for ( size_t i = 0; i < count; i++ )
+		for ( size_t i = 0; i < count; ++i )
 		{
+			if ( !account->m_Chars.IsValidIndex(i) )
+				continue;
 			if ( account->m_Chars.GetChar(i) != account->m_uidLastChar )
 				continue;
 
-			iLastCharSlot = (word)(i);
+			iLastCharSlot = (word)i;
 			break;
 		}
 		writeInt16(iLastCharSlot);
@@ -3828,7 +3838,7 @@ bool PacketPropertyListVersionOld::onSend(const CClient* client)
 		return false;
 
 	const CObjBase* object = m_object.ObjFind();
-	if (object == NULL || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(character->GetSight(),UO_MAP_VIEW_SIZE_DEFAULT) )
+	if (object == NULL || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(character->GetVisualRange(),UO_MAP_VIEW_SIZE_DEFAULT) )
 		return false;
 
 	return true;
@@ -4423,7 +4433,7 @@ bool PacketPropertyList::onSend(const CClient* client)
 		return false;
 
 	const CObjBase* object = m_object.ObjFind();
-	if (object == NULL || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(character->GetSight(),UO_MAP_VIEW_SIZE_DEFAULT))
+	if (object == NULL || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(character->GetVisualRange(),UO_MAP_VIEW_SIZE_DEFAULT))
 		return false;
 
 	if (hasExpired(TICK_PER_SEC * 30))
@@ -4646,7 +4656,7 @@ bool PacketPropertyListVersion::onSend(const CClient* client)
 		return false;
 
 	const CObjBase* object = m_object.ObjFind();
-	if (object == NULL || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(character->GetSight(),UO_MAP_VIEW_SIZE_DEFAULT))
+	if (object == NULL || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(character->GetVisualRange(),UO_MAP_VIEW_SIZE_DEFAULT))
 		return false;
 
 	return true;
@@ -4831,7 +4841,7 @@ PacketItemWorldNew::PacketItemWorldNew(const CClient* target, CItem *item) : Pac
 	}
 	else
 	{
-		source = TileData;
+		source = (item->Can(CAN_I_DAMAGEABLE) && (target->GetNetState()->isClientVersion(MINCLIVER_STATUS_V6))) ? Damageable : TileData;
 		id = static_cast<ITEMID_TYPE>(id & 0xFFFF);
 	}
 

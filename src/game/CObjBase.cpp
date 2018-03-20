@@ -980,7 +980,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 				bool bCanSee = ( index == OC_CANSEE );
 				bool bFlags = ( index == OC_CANSEELOSFLAG );
 				CChar *pChar = pSrc->GetChar();
-				int flags = 0;
+				word flags = 0;
 
 				pszKey += ( bCanSee ? 6 : (bFlags ? 13 : 9) );
 				SKIP_SEPARATORS(pszKey);
@@ -988,7 +988,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 
 				if ( bFlags && *pszKey )
 				{
-					flags = Exp_GetVal(pszKey);
+					flags = Exp_GetWVal(pszKey);
 					SKIP_ARGSEP(pszKey);
 				}
 				if ( *pszKey )		// has an argument - UID to see(los) or POS to los only
@@ -1002,7 +1002,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 
 					if ( bCanSee || !pt.IsValidPoint() )
 					{
-						uid = Exp_GetVal( pszKey );
+						uid = Exp_GetWVal( pszKey );
 						pObj = uid.ObjFind();
 						if ( !bCanSee && pObj )
 							pt = pObj->GetTopPoint();
@@ -1011,7 +1011,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 					pChar = GetUID().CharFind();
 
 					if ( pChar )
-						sVal.FormatVal(bCanSee ? pChar->CanSee(pObj) : pChar->CanSeeLOS(pt, NULL, pChar->GetVisualRange(), (word)(flags)));
+						sVal.FormatVal(bCanSee ? pChar->CanSee(pObj) : pChar->CanSeeLOS(pt, NULL, pChar->GetVisualRange(), flags));
 					else
 						sVal.FormatVal(0);
 
@@ -2720,7 +2720,7 @@ void CObjBase::RemoveFromView( CClient * pClientExclude, bool fHardcoded )
 		pChar = pClient->GetChar();
 		if ( pChar == NULL )
 			continue;
-		if ( pChar->GetTopDistSight( pObjTop ) > pChar->GetSight() )
+		if ( pChar->GetTopDistSight( pObjTop ) > pChar->GetVisualRange() )
 			//Client does not support removing of items which are farther (will be removed from the radar on the next step, because the server won't resend it)
 			continue;
 		if ( pItem && pItem->IsItemEquipped() )
@@ -2758,7 +2758,7 @@ void CObjBase::ResendOnEquip( bool fAllClients )
 		pChar = pClient->GetChar();
 		if ( pChar == NULL )
 			continue;
-		if ( pChar->GetTopDistSight( pObjTop ) > pChar->GetSight() )
+		if ( pChar->GetTopDistSight( pObjTop ) > pChar->GetVisualRange() )
 			continue;	//Client does not support removing of items which are farther (will be removed from the radar on the next step, because the server won't resend it)
 		if ( pItem )
 		{

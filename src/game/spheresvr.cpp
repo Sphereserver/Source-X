@@ -380,12 +380,13 @@ int Sphere_InitServer( int argc, char *argv[] )
 			dict.Close();
 		}
 	}
-	g_Serv.SetServerMode(SERVMODE_Run);	// ready to go.
 
 	// Display EF/OF Flags
 	g_Cfg.PrintEFOFFlags();
 
-	EXC_SET("finilizing");
+	EXC_SET("finalizing");
+	g_Serv.SetServerMode(SERVMODE_Run);	// ready to go.
+
 	g_Log.Event(LOGM_INIT, "%s", g_Serv.GetStatusString(0x24));
 	g_Log.Event(LOGM_INIT, "Startup complete. items=%" PRIuSIZE_T ", chars=%" PRIuSIZE_T "\n", g_Serv.StatGet(SERV_STAT_ITEMS), g_Serv.StatGet(SERV_STAT_CHARS));
 
@@ -395,7 +396,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 
 	// Trigger server start
 	g_Serv.r_Call("f_onserver_start", &g_Serv, NULL);
-	return 0;
+	return g_Serv.m_iExitFlag;
 
 	EXC_CATCH;
 

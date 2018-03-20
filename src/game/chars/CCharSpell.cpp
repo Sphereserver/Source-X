@@ -77,7 +77,7 @@ void CChar::Spell_Dispel(int iLevel)
 		pItemNext = pItem->GetNext();
 		if ( iLevel <= 100 && pItem->IsAttr(ATTR_MOVE_NEVER) )	// we don't lose this.
 			continue;
-		if ( pItem->GetEquipLayer() == LAYER_NEWLIGHT || (pItem->GetEquipLayer() >= LAYER_SPELL_STATS && pItem->GetEquipLayer() <= LAYER_SPELL_Summon) )
+		if ( (pItem->GetEquipLayer() == LAYER_FACE) || ((pItem->GetEquipLayer() >= LAYER_SPELL_STATS) && (pItem->GetEquipLayer() <= LAYER_SPELL_Summon)) )
 			pItem->Delete();
 	}
 }
@@ -1889,9 +1889,9 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 					ptg.m_y += (short)(iy);
 				}
 
-				dword wBlockFlags = 0;
-				g_World.GetHeightPoint2(ptg, wBlockFlags, true);
-				if ( wBlockFlags & ( CAN_I_BLOCK | CAN_I_DOOR ) )
+				dword dwBlockFlags = 0;
+				g_World.GetHeightPoint2(ptg, dwBlockFlags, true);
+				if ( dwBlockFlags & ( CAN_I_BLOCK | CAN_I_DOOR ) )
 				{
 					if (ix < 0)	// field cannot extend fully to the left
 						minX = ix + 1;
@@ -3369,7 +3369,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 		case SPELL_Light:
 			Effect(EFFECT_OBJ, iEffectID, this, 9, 6, fExplode, iColor, iRender);
-			Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_NEWLIGHT, iEffect, iDuration, pCharSrc );
+			Spell_Effect_Create( spell, LAYER_FLAG_Potion, iEffect, iDuration, pCharSrc );
 			break;
 
 		case SPELL_Hallucination:

@@ -635,10 +635,10 @@ int CItem::IsWeird() const
 	return( ( ptCont == NULL ) ? 0x2106 : ptCont->IsWeird() );
 }
 
-char CItem::GetFixZ( CPointMap pt, dword wBlockFlags )
+char CItem::GetFixZ( CPointMap pt, dword dwBlockFlags )
 {
-	height_t zHeight = CItemBase::GetItemHeight( GetDispID(), wBlockFlags );
-	CServerMapBlockState block( wBlockFlags, pt.m_z, pt.m_z + zHeight, pt.m_z + 2, zHeight );
+	height_t zHeight = CItemBase::GetItemHeight( GetDispID(), dwBlockFlags );
+	CServerMapBlockState block( dwBlockFlags, pt.m_z, pt.m_z + zHeight, pt.m_z + 2, zHeight );
 	g_World.GetFixPoint( pt, block );
 	return block.m_Bottom.m_z;
 }
@@ -2269,6 +2269,7 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		case IC_AMMOSOUNDHIT:
 		case IC_AMMOSOUNDMISS:
 		case IC_DROPSOUND:
+		case IC_PICKUPSOUND:
 		case IC_EQUIPSOUND:
 		case IC_BONUSSKILL1:
 		case IC_BONUSSKILL2:
@@ -2555,6 +2556,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 		case IC_AMMOSOUNDHIT:
 		case IC_AMMOSOUNDMISS:
 		case IC_DROPSOUND:
+		case IC_PICKUPSOUND:
 		case IC_EQUIPSOUND:
 		case IC_BONUSSKILL1:
 		case IC_BONUSSKILL2:

@@ -313,7 +313,7 @@ void CClient::addRemoveAll( bool fItems, bool fChars )
 	if ( fChars )
 	{
 		CChar * pCharSrc = GetChar();
-		CWorldSearch AreaChars(GetChar()->GetTopPoint(), GetChar()->GetSight());
+		CWorldSearch AreaChars(GetChar()->GetTopPoint(), GetChar()->GetVisualRange());
 		AreaChars.SetAllShow(IsPriv(PRIV_ALLSHOW));
 		AreaChars.SetSearchSquare(true);
 		for (;;)
@@ -361,7 +361,7 @@ void CClient::addItem_OnGround( CItem * pItem ) // Send items (on ground)
 	// send item tooltip
 	addAOSTooltip(pItem);
 
-	if ( (pItem->IsType(IT_MULTI_CUSTOM)) && (m_pChar->GetTopPoint().GetDistSight(pItem->GetTopPoint()) <= m_pChar->GetSight()) )
+	if ( (pItem->IsType(IT_MULTI_CUSTOM)) && (m_pChar->GetTopPoint().GetDistSight(pItem->GetTopPoint()) <= m_pChar->GetVisualRange()) )
 	{
 		// send house design version
 		CItemMultiCustom *pItemMulti = static_cast<CItemMultiCustom *>(pItem);
@@ -1798,7 +1798,7 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 {
 	ADDTOCALLSTACK("CClient::addPlayerSee");
 	// Adjust to my new location, what do I now see here?
-	int iViewDist = m_pChar->GetSight();
+	int iViewDist = m_pChar->GetVisualRange();
 	bool bOSIMultiSight = IsSetOF(OF_OSIMultiSight);
 	CRegion *pCurrentCharRegion = m_pChar->GetTopPoint().GetRegion(REGION_TYPE_HOUSE);
 
@@ -1901,7 +1901,7 @@ void CClient::addReSync()
 	addLight();		// Current light level where I am.
 	addWeather();	// if any ...
 	addSpeedMode(m_pChar->m_pPlayer->m_speedMode);
-	addCharStatWindow(m_pChar);
+	addStatusWindow(m_pChar);
 }
 
 void CClient::addMap()
@@ -1953,7 +1953,7 @@ void CClient::UpdateStats()
 
 	if ( m_fUpdateStats & SF_UPDATE_STATUS )
 	{
-		addCharStatWindow( m_pChar);
+		addStatusWindow( m_pChar);
 		m_fUpdateStats = 0;
 	}
 	else
@@ -1977,26 +1977,26 @@ void CClient::UpdateStats()
 	}
 }
 
-void CClient::addCharStatWindow( CChar *pChar, bool fRequested ) // Opens the status window
+void CClient::addStatusWindow( CObjBase *pObj, bool fRequested ) // Opens the status window
 {
-	ADDTOCALLSTACK("CClient::addCharStatWindow");
-	if ( !pChar )
+	ADDTOCALLSTACK("CClient::addStatusWindow");
+	if ( !pObj )
 		return;
 
 	if ( IsTrigUsed(TRIGGER_USERSTATS) )
 	{
-		CScriptTriggerArgs Args(0, 0, pChar);
+		CScriptTriggerArgs Args(0, 0, pObj);
 		Args.m_iN3 = fRequested;
-		if ( m_pChar->OnTrigger(CTRIG_UserStats, pChar, &Args) == TRIGRET_RET_TRUE )
+		if ( m_pChar->OnTrigger(CTRIG_UserStats, dynamic_cast<CTextConsole *>(pObj), &Args) == TRIGRET_RET_TRUE )
 			return;
 	}
 
-	new PacketCharacterStatus(this, pChar);
-	if ( pChar == m_pChar )
+	new PacketObjectStatus(this, pObj);
+	if ( pObj == m_pChar )
 	{
 		m_fUpdateStats = 0;
-		if ( pChar->m_pPlayer && PacketStatLocks::CanSendTo(GetNetState()) )
-			new PacketStatLocks(this, pChar);
+		if ( PacketStatLocks::CanSendTo(GetNetState()) )
+			new PacketStatLocks(this, m_pChar);
 	}
 }
 
@@ -2184,7 +2184,7 @@ bool CClient::addShopMenuBuy( CChar * pVendor )
 	}
 
 	if (GetNetState()->isClientEnhanced())
-		new PacketCharacterStatus(this, pVendor);
+		new PacketObjectStatus(this, pVendor);
 
 	// Send NPC layers 26 and 27 content
 	new PacketItemEquipped(this, pContainer);

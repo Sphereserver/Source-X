@@ -982,6 +982,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 		case IBC_AMMOSOUNDHIT:
 		case IBC_AMMOSOUNDMISS:
 		case IBC_DROPSOUND:
+		case IBC_PICKUPSOUND:
 		case IBC_EQUIPSOUND:
 		case IBC_BONUSSKILL1:
 		case IBC_BONUSSKILL2:
@@ -1305,6 +1306,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 		case IBC_AMMOSOUNDHIT:
 		case IBC_AMMOSOUNDMISS:
 		case IBC_DROPSOUND:
+		case IBC_PICKUPSOUND:
 		case IBC_EQUIPSOUND:
 		case IBC_BONUSSKILL1:
 		case IBC_BONUSSKILL2:
@@ -1363,7 +1365,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 			SetDefNum(s.GetKey(), s.GetArgVal(), false);
 			break;
 		case IBC_MAXAMOUNT:
-			if (!SetMaxAmount((ushort)(s.GetArgVal())))
+			if (!SetMaxAmount(s.GetArgUSVal()))
 				return false;
 			break;
 		case IBC_SPEEDMODE:
@@ -1371,7 +1373,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 			if (!IsType(IT_SHIP))
 				return false;
 			CItemBaseMulti *pItemMulti = dynamic_cast<CItemBaseMulti*>(this);
-			byte speed = (uchar)(s.GetArgVal());
+			byte speed = s.GetArgBVal();
 			if (speed > 4)
 				speed = 4;
 			else if (speed < 1)

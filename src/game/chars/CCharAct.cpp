@@ -1229,7 +1229,7 @@ void CChar::UpdateMode( CClient * pExcludeClient, bool fFull )
 			continue;
 		if ( pClient->GetChar() == NULL )
 			continue;
-		if ( GetTopPoint().GetDistSight(pClient->GetChar()->GetTopPoint()) > pClient->GetChar()->GetSight() )
+		if ( GetTopPoint().GetDistSight(pClient->GetChar()->GetTopPoint()) > pClient->GetChar()->GetVisualRange() )
 			continue;
 		if ( !pClient->CanSee(this) )
 		{
@@ -1300,7 +1300,7 @@ void CChar::UpdateMove( const CPointMap & ptOld, CClient * pExcludeClient, bool 
 		if ( pChar == NULL )
 			continue;
 
-		bool fCouldSee = (ptOld.GetDistSight(pChar->GetTopPoint()) <= pChar->GetSight());
+		bool fCouldSee = (ptOld.GetDistSight(pChar->GetTopPoint()) <= pChar->GetVisualRange());
 		EXC_SET("CanSee");
 		if ( !pClient->CanSee(this) )
 		{
@@ -1375,7 +1375,7 @@ void CChar::Update(const CClient * pClientExclude )
 			continue;
 		if ( pClient->GetChar() == NULL )
 			continue;
-		if ( GetTopPoint().GetDistSight(pClient->GetChar()->GetTopPoint()) > pClient->GetChar()->GetSight() )
+		if ( GetTopPoint().GetDistSight(pClient->GetChar()->GetTopPoint()) > pClient->GetChar()->GetVisualRange() )
 			continue;
 		if ( !pClient->CanSee(this) )
 		{
@@ -2940,7 +2940,7 @@ bool CChar::Death()
 		// Remove the characters which I can't see as dead from the screen
 		if ( g_Cfg.m_fDeadCannotSeeLiving )
 		{
-			CWorldSearch AreaChars(GetTopPoint(), pClient->GetChar()->GetSight());
+			CWorldSearch AreaChars(GetTopPoint(), pClient->GetChar()->GetVisualRange());
 			AreaChars.SetSearchSquare(true);
 			for (;;)
 			{
@@ -3602,7 +3602,7 @@ bool CChar::MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart, bool bFromS
 	pt.m_z += PLAYER_HEIGHT;
 	char startZ = pt.m_z;
 
-	word wCan = (word)(GetMoveBlockFlags(true));	// CAN_C_SWIM
+	dword dwCan = GetMoveBlockFlags(true);	// CAN_C_SWIM
 	for ( int i=0; i<iDist; ++i )
 	{
 		if ( pt.IsValidPoint() )
@@ -3615,20 +3615,20 @@ bool CChar::MoveToValidSpot(DIR_TYPE dir, int iDist, int iDistStart, bool bFromS
 				continue;
 			}
 
-			dword wBlockFlags = wCan;
+			dword dwBlockFlags = dwCan;
 			// Reset Z back to start Z + PLAYER_HEIGHT so we don't climb buildings
 			pt.m_z = startZ;
 			// Set new Z so we don't end up floating or underground
-			pt.m_z = g_World.GetHeightPoint( pt, wBlockFlags, true );
+			pt.m_z = g_World.GetHeightPoint( pt, dwBlockFlags, true );
 
 			// don't allow characters to pass through walls or other blocked
 			// paths when they're disembarking from a ship
-			if ( bFromShip && (wBlockFlags & CAN_I_BLOCK) && !(wCan & CAN_C_PASSWALLS) && (pt.m_z > startZ) )
+			if ( bFromShip && (dwBlockFlags & CAN_I_BLOCK) && !(dwCan & CAN_C_PASSWALLS) && (pt.m_z > startZ) )
 			{
 				break;
 			}
 
-			if ( ! ( wBlockFlags &~ wCan ))
+			if ( ! ( dwBlockFlags &~ dwCan ))
 			{
 				// we can go here. (maybe)
 				if ( Spell_Teleport(pt, true, !bFromShip, false) )

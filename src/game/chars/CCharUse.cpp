@@ -994,8 +994,7 @@ void CChar::Use_Drink( CItem * pItem )
 			pSpell->m_itSpell.m_spellcharges = 10;	// how long to last.
 		}
 	}
-
-	if ( pItem->IsType(IT_POTION) )
+	else if ( pItem->IsType(IT_POTION) )
 	{
 		// Time limit on using potions.
 		if ( LayerFind(LAYER_FLAG_PotionUsed) )
@@ -1006,20 +1005,16 @@ void CChar::Use_Drink( CItem * pItem )
 
 		// Convey the effect of the potion.
 		int iSkillQuality = pItem->m_itPotion.m_skillquality;
-		if ( g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B )
-		{
-			int iEnhance = (int)(GetDefNum("EnhancePotions", false));
-			if ( iEnhance )
-				iSkillQuality += MulDivLL(iSkillQuality, iEnhance, 100);
-		}
+		int iEnhance = (int)(GetDefNum("EnhancePotions", false));
+		if ( iEnhance )
+			iSkillQuality += MulDivLL(iSkillQuality, iEnhance, 100);
 
 		OnSpellEffect(static_cast<SPELL_TYPE>(RES_GET_INDEX(pItem->m_itPotion.m_Type)), this, iSkillQuality, pItem);
 
 		// Give me the marker that i've used a potion.
 		Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_PotionUsed, g_Cfg.GetSpellEffect(SPELL_NONE, iSkillQuality), 15 * TICK_PER_SEC, this);
 	}
-
-	if ( pItem->IsType(IT_DRINK) && IsSetOF(OF_DrinkIsFood) )
+	else if ( pItem->IsType(IT_DRINK) && IsSetOF(OF_DrinkIsFood) )
 	{
 		short iRestore = 0;
 		if ( pItem->m_itDrink.m_foodval )

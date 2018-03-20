@@ -387,8 +387,7 @@ LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg
 			break;
 		}
 
-		case LAYER_NEWLIGHT:
-			// DEBUG_ERR(( "ALERT: Weird layer %d used for '%s' check this\n", LAYER_HIDDEN, pItem->GetResourceName()));
+		case LAYER_FACE:
 		case LAYER_COLLAR:
 		case LAYER_RING:
 		case LAYER_EARS:
@@ -1040,14 +1039,14 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 	if ( !pObj || IsDisconnected() || !pObj->GetTopLevelObj()->GetTopPoint().IsValidPoint() )
 		return false;
 
-	// First check the distance since if this will fail, we do not need to scan all subcontainers to find this result ;)
-	if ( pObj->GetTopLevelObj()->GetTopPoint().GetDistSight(GetTopPoint()) > GetSight() )
-		return false;
-
 	if ( pObj->IsItem() )
 	{
 		const CItem *pItem = static_cast<const CItem*>(pObj);
 		if ( !pItem || !CanSeeItem(pItem) )
+			return false;
+
+		int iDist = pItem->IsTypeMulti() ? UO_MAP_VIEW_RADAR : GetVisualRange();
+		if ( GetTopPoint().GetDistSight(pObj->GetTopLevelObj()->GetTopPoint()) > iDist )
 			return false;
 
 		CObjBase *pObjCont = pItem->GetContainer();
@@ -1097,12 +1096,14 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 			return false;
 		if ( pChar == this )
 			return true;
+		if ( GetTopPoint().GetDistSight(pChar->GetTopPoint()) > GetVisualRange() )
+			return false;
 		if ( IsPriv(PRIV_ALLSHOW) )
 			return (GetPrivLevel() < pChar->GetPrivLevel()) ? false : true;
 
 		if ( m_pNPC && pChar->IsStatFlag(STATF_DEAD) )
 		{
-			if ( m_pNPC->m_Brain != NPCBRAIN_HEALER && Skill_GetBase(SKILL_SPIRITSPEAK) < 1000 )
+			if ( m_pNPC->m_Brain != NPCBRAIN_HEALER )
 				return false;
 		}
 		else if ( pChar->IsStatFlag(STATF_INVISIBLE|STATF_INSUBSTANTIAL|STATF_HIDDEN) )
@@ -1144,7 +1145,7 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 	}
 
 	if ( IsPriv(PRIV_ALLSHOW) && (pObj->IsTopLevel() || pObj->IsDisconnected()) )		// don't exclude for logged out and diff maps
-		return (GetTopPoint().GetDistSightBase(pObj->GetTopPoint()) <= GetSight());
+		return (GetTopPoint().GetDistSightBase(pObj->GetTopPoint()) <= GetVisualRange());
 
 	return true;
 }
@@ -1351,7 +1352,7 @@ bool CChar::CanHear( const CObjBaseTemplate *pSrc, TALKMODE_TYPE mode ) const
 				return false;
 			else if ( g_Cfg.m_iDistanceYell == 0 )
 			{
-				int dist = GetSight();
+				int dist = GetVisualRange();
 				if ( dist == 0 )
 					return true;
 				iHearRange = dist;
@@ -1367,7 +1368,7 @@ bool CChar::CanHear( const CObjBaseTemplate *pSrc, TALKMODE_TYPE mode ) const
 				return false;
 			else if ( g_Cfg.m_iDistanceWhisper == 0 )
 			{
-				int dist = GetSight();
+				int dist = GetVisualRange();
 				if ( dist == 0 )
 					return true;
 				iHearRange = dist;
@@ -1380,7 +1381,7 @@ bool CChar::CanHear( const CObjBaseTemplate *pSrc, TALKMODE_TYPE mode ) const
 				return false;
 			else if ( g_Cfg.m_iDistanceTalk == 0 )
 			{
-				int dist = GetSight();
+				int dist = GetVisualRange();
 				if ( dist == 0 )
 					return true;
 				iHearRange = dist;

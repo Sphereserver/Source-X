@@ -1600,7 +1600,7 @@ CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, u
 	ADDTOCALLSTACK("CClient::OnTarg_Use_Multi");
 	// Might be a IT_MULTI or it might not. place it anyhow.
 
-	if ( pItemDef == NULL || !pt.GetRegion(REGION_TYPE_AREA) )
+	if ( (pItemDef == NULL) || !pt.GetRegion(REGION_TYPE_AREA) )
 		return NULL;
 
 	bool fShip = ( pItemDef->IsType(IT_SHIP));	// must be in water.
@@ -1608,7 +1608,7 @@ CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, u
 	const CItemBaseMulti * pMultiDef = dynamic_cast <const CItemBaseMulti *> ( pItemDef );
 
 	// Check water/mountains/etc.
-	if ( pMultiDef != NULL && ! (iAttr&ATTR_MAGIC))
+	if ( (pMultiDef != NULL) && !(iAttr&ATTR_MAGIC) )
 	{
 		//if ( pMultiDef->m_rect.m_bottom > 0 && (pMultiDef->IsType(IT_MULTI) || pMultiDef->IsType(IT_MULTI_CUSTOM)) )
 		if ( CItemBase::IsID_Multi(pItemDef->GetID()) )
@@ -1637,31 +1637,35 @@ CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, u
 				}
 
 				CRegion * pRegion = ptn.GetRegion( REGION_TYPE_MULTI | REGION_TYPE_AREA | REGION_TYPE_ROOM );
-				if ( pRegion == NULL || ( pRegion->IsFlag(REGION_FLAG_NOBUILDING|REGION_FLAG_UNDERGROUND|REGION_FLAG_GUARDED|REGION_FLAG_SAFE) && ! fShip ))
+				if ( (pRegion == NULL) || ( pRegion->IsFlag(REGION_FLAG_NOBUILDING) && ! fShip ))
 				{
 					SysMessageDefault( DEFMSG_ITEMUSE_MULTI_FAIL );
-					if ( ! IsPriv( PRIV_GM )) return NULL;
+					if ( !IsPriv( PRIV_GM ))
+						return NULL;
 				}
 
-				dword wBlockFlags = ( fShip ) ? CAN_C_SWIM : CAN_C_WALK;
-				ptn.m_z = g_World.GetHeightPoint2( ptn, wBlockFlags, true ); //hm...should really use the 2nd function ? it does fixed #2373
+				dword dwBlockFlags = ( fShip ) ? CAN_C_SWIM : CAN_C_WALK;
+				ptn.m_z = g_World.GetHeightPoint2( ptn, dwBlockFlags, true ); //hm...should really use the 2nd function ? it does fixed #2373
 				if ( abs( ptn.m_z - pt.m_z ) > 4 )
 				{
 					SysMessageDefault( DEFMSG_ITEMUSE_MULTI_BUMP );
-					if ( ! IsPriv( PRIV_GM )) return NULL;
+					if ( ! IsPriv( PRIV_GM ))
+						return NULL;
 				}
 				if ( fShip )
 				{
-					if ( ! ( wBlockFlags & CAN_I_WATER ))
+					if ( ! ( dwBlockFlags & CAN_I_WATER ))
 					{
 						SysMessageDefault( DEFMSG_ITEMUSE_MULTI_SHIPW );
-						if ( ! IsPriv( PRIV_GM )) return NULL;
+						if ( ! IsPriv( PRIV_GM ))
+							return NULL;
 					}
 				}
-				else if ( wBlockFlags & ( CAN_I_WATER | CAN_I_BLOCK | CAN_I_CLIMB ))
+				else if ( dwBlockFlags & ( CAN_I_WATER | CAN_I_BLOCK | CAN_I_CLIMB ))
 				{
 					SysMessageDefault( DEFMSG_ITEMUSE_MULTI_BLOCKED );
-					if ( ! IsPriv( PRIV_GM )) return NULL;
+					if ( ! IsPriv( PRIV_GM ))
+						return NULL;
 				}
 			}
 		}
@@ -1675,25 +1679,16 @@ CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, u
 			CChar * pChar = Area.GetChar();
 			if ( pChar == NULL )
 				break;
-			if ( pChar == m_pChar )
+			if ( !rect.IsInside2d(pChar->GetTopPoint()) )
 				continue;
-			if ( ! rect.IsInside2d( pChar->GetTopPoint()))
+			if ( pChar->IsPriv(PRIV_GM) && !CanSee(pChar) )
 				continue;
-			if ( pChar->GetPrivLevel() >= PLEVEL_Counsel && !CanSee( pChar ) )
-			{
-				// Don't reveal the presence of hidden staff
-				pChar->Spell_Teleport(m_pChar->GetTopPoint(), false, false, false);
-				continue;
-			}
 
-			SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_ITEMUSE_MULTI_INTWAY ), pChar->GetName());
-			if ( IsPriv(PRIV_GM) )
-			{
-				//	Teleport the char to self. At least I will be able to move him to someplace
-				pChar->Spell_Teleport(m_pChar->GetTopPoint(), false, false);
-			}
-			else
+			SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_MULTI_INTWAY), pChar->GetName());
+			if ( !IsPriv(PRIV_GM) )
 				return NULL;
+			if ( pChar != m_pChar )
+				pChar->Spell_Teleport(m_pChar->GetTopPoint(), false, false);
 		}
 	}
 

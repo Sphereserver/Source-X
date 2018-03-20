@@ -810,24 +810,27 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 		case CV_ADD:
 			if ( s.HasArgs())
 			{
-				// FindItemName ???
-				tchar * pszArgs = s.GetArgStr();
-				if ( !IsValidGameObjDef( static_cast<lpctstr>(pszArgs) ) )
+				tchar *ppszArgs[2];
+				size_t iQty = Str_ParseCmds(s.GetArgStr(), ppszArgs, CountOf(ppszArgs));
+
+				if ( !IsValidGameObjDef(static_cast<lpctstr>(ppszArgs[0])) )
 				{
 					//g_Log.EventWarn("Invalid ADD argument '%s'\n", pszArgs);
 					SysMessageDefault( DEFMSG_CMD_INVALID );
 					return true;
 				}
 
-				CResourceID rid = g_Cfg.ResourceGetID( RES_QTY, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(pszArgs)));
-				if (( rid.GetResType() == RES_CHARDEF ) || ( rid.GetResType() == RES_SPAWN ))
+				CResourceID rid = g_Cfg.ResourceGetID( RES_QTY, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(ppszArgs[0])));
+				m_tmAdd.m_amount = (iQty > 1) ? (word)(maximum(ATOI(ppszArgs[1]), 1)) : 1;
+				if ( (rid.GetResType() == RES_CHARDEF) || (rid.GetResType() == RES_SPAWN) )
 				{
 					m_Targ_Prv_UID.InitUID();
-					return Cmd_CreateChar(static_cast<CREID_TYPE>(rid.GetResIndex()));
+					return addTargetChars(CLIMODE_TARG_ADDCHAR, static_cast<CREID_TYPE>(m_tmAdd.m_id), false);
 				}
-
-				ITEMID_TYPE id = static_cast<ITEMID_TYPE>(rid.GetResIndex());
-				return Cmd_CreateItem( id );
+				else
+				{
+					return addTargetItems(CLIMODE_TARG_ADDITEM, static_cast<ITEMID_TYPE>(m_tmAdd.m_id));
+				}
 			}
 			else
 			{
@@ -1038,15 +1041,27 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			}
 			break;
 
-		case CV_CHARLIST:
-			{
-				// usually just a gm command
-				new PacketChangeCharacter(this);
-
-				CharDisconnect();	// since there is no undoing this in the client.
-				SetTargMode( CLIMODE_SETUP_CHARLIST );
-			}
+		case CV_CHANGEFACE:		// open 'face selection' dialog (enhanced clients only)
+		{
+			addGumpDialog(CLIMODE_DIALOG, NULL, NULL, NULL, NULL, 50, 50, m_pChar, CLIMODE_DIALOG_FACESELECTION);
 			break;
+		}
+
+		case CV_CHARLIST:
+		{
+			if ( !PacketChangeCharacter::CanSendTo(GetNetState()) )
+			{
+				addSysMessage("The client in use doesn't support the CHARLIST command!");
+				break;
+			}
+
+			// usually just a gm command
+			new PacketChangeCharacter(this);
+
+			CharDisconnect();	// since there is no undoing this in the client.
+			SetTargMode( CLIMODE_SETUP_CHARLIST );
+		}
+		break;
 
 		case CV_CTAGLIST:
 			if ( !strnicmp( s.GetArgStr(), "log", 3 ) )
@@ -1182,8 +1197,8 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					CPointMap po = pObj->GetTopLevelObj()->GetTopPoint();
 					CPointMap pnt = po;
 					pnt.MoveN( DIR_W, 3 );
-					dword wBlockFlags = m_pChar->GetMoveBlockFlags();
-					pnt.m_z = g_World.GetHeightPoint2( pnt, wBlockFlags );	// ??? Get Area
+					dword dwBlockFlags = m_pChar->GetMoveBlockFlags();
+					pnt.m_z = g_World.GetHeightPoint2( pnt, dwBlockFlags );	// ??? Get Area
 					m_pChar->m_dirFace = pnt.GetDir( po, m_pChar->m_dirFace ); // Face the player
 					m_pChar->Spell_Teleport( pnt, true, false );
 				}
@@ -1437,7 +1452,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				if ( iArgQty > 1 )
 				{
 					int hue = -1;
-					if ( ppArgs[0] )
+					if ( ATOI(ppArgs[0]) > 0 )
 						hue = Exp_GetVal( ppArgs[0] );
 					int iClilocId = Exp_GetVal( ppArgs[1] );
 
@@ -1465,7 +1480,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				{
 					int hue = -1;
 					int affix = 0;
-					if ( ppArgs[0] )
+					if ( ATOI(ppArgs[0]) > 0 )
 						hue = Exp_GetVal( ppArgs[0] );
 					int iClilocId = Exp_GetVal( ppArgs[1] );
 					if ( ppArgs[2] )

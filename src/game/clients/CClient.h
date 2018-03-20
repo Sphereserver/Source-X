@@ -224,8 +224,8 @@ public:
 		// CLIMODE_TARG_ADDITEM
 		struct
 		{
-			dword m_junk0;
 			int m_id;
+			word m_amount;
 		} m_tmAdd;
 
 		// CLIMODE_TARG_SKILL
@@ -363,9 +363,6 @@ private:
 	int Cmd_Extract( CScript * pScript, CRectMap &rect, int & zlowest );
 	size_t Cmd_Skill_Menu_Build( CResourceIDBase rid, int iSelect, CMenuItem* item, size_t iMaxSize, bool &fShowMenu, bool &fLimitReached );
 public:
-	bool Cmd_CreateItem( ITEMID_TYPE id );
-	bool Cmd_CreateChar( CREID_TYPE id );
-
 	void Cmd_GM_PageMenu( uint iEntryStart = 0 );
 	void Cmd_GM_PageCmd( lpctstr pCmd );
 	void Cmd_GM_PageSelect( size_t iSelect );
@@ -514,7 +511,7 @@ public:
 	void addCustomSpellbookOpen( CItem * pBook, dword gumpID );
 	bool addBookOpen( CItem * pBook );
 	void addBookPage( const CItem * pBook, size_t iPage, size_t iCount );
-	void addCharStatWindow( CChar * pChar, bool fRequested = false ); // Opens the status window
+	void addStatusWindow( CObjBase * pObj, bool fRequested = false ); // Opens the status window
 	void addHitsUpdate( CChar * pChar );
 	void addManaUpdate( CChar * pChar );
 	void addStamUpdate( CChar * pChar );

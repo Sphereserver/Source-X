@@ -155,46 +155,32 @@ int CCrypto::GetPacketSize(byte packet) // static
 
 int CCrypto::GetVerFromString( lpctstr pszVersion )
 {
-	ADDTOCALLSTACK("CCrypto::GetVerFromString");
+	ADDTOCALLSTACK("CCrypt::GetVerFromString");
 	// Get version of old clients, which report the client version as ASCII string (eg: '5.0.2b')
 
-	if ( pszVersion == NULL || *pszVersion == '\0' )
+	if ( (pszVersion == NULL) || (*pszVersion == '\0') )
 		return 0;
 
-	int n = 0;
-	int iArgs[] = { 0,0,0,0 };
+	byte iLetter = 0;
 	size_t iMax = strlen(pszVersion);
-	tchar ch, chNext;
-
-	for ( size_t i = 0; i < iMax; i++ )
+	for ( size_t i = 0; i < iMax; ++i )
 	{
-		ch = pszVersion[i];
-		if ( ch == '.' )
+		if ( IsAlpha(pszVersion[i]) )
 		{
-			n++;
-			continue;
-		}
-
-		if ( IsDigit(ch) )
-		{
-			iArgs[n] = ch - '0';
-
-			chNext = pszVersion[i + 1];
-			if ( IsDigit(chNext) )
-			{
-				iArgs[n] = (iArgs[n] * 10) + (chNext - '0');
-				i++;
-			}
-		}
-		else if ( IsAlpha(ch) )
-		{
-			n++;
-			iArgs[n] = (ch - 'a') + 1;
+			iLetter = (pszVersion[i] - 'a') + 1;
 			break;
 		}
 	}
 
-	return (iArgs[0] * 1000000) + (iArgs[1] * 10000) + (iArgs[2] * 100) + iArgs[3];
+	tchar *piVer[3];
+	Str_ParseCmds(const_cast<tchar *>(pszVersion), piVer, CountOf(piVer), ".");
+
+	// Don't rely on all values reported by client, because it can be easily faked. Injection users can report any
+	// client version they want, and some custom clients may also report client version as "Custom" instead X.X.Xy
+	if ( !piVer[0] || !piVer[1] || !piVer[2] || (iLetter > 26) )
+		return 0;
+
+	return (ATOI(piVer[0]) * 1000000) + (ATOI(piVer[1]) * 10000) + (ATOI(piVer[2]) * 100) + iLetter;
 }
 
 int CCrypto::GetVerFromNumber( dword maj, dword min, dword rev, dword pat )

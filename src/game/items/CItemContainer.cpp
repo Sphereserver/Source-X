@@ -315,59 +315,69 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 	}
 	sm_ContSize[] =
 	{
-		{ GUMP_RESERVED, 40, 50, 100, 100 },		// default.
-		{ GUMP_CORPSE, 20, 85, 80, 185 },
-		{ GUMP_PACK, 44, 65, 142, 150 },			// Open backpack
-		{ GUMP_BAG, 29, 34, 93, 119 },				// Leather Bag
-		{ GUMP_BARREL, 33, 36, 98, 139 },			// Barrel
-		{ GUMP_BASKET_SQ, 19, 47, 138, 114 },		// Square picknick Basket
-		{ GUMP_BOX_WOOD, 16, 51, 140, 115 },		// small wood box with a lock
-		{ GUMP_BASKET_RO, 33, 36,  98, 134 },		// Round Basket
-		{ GUMP_CHEST_GO_SI, 18, 105, 118, 169 },	// Gold and Silver Chest.
-		{ GUMP_BOX_WOOD_OR, 16, 51, 140, 115 },		// Small wood box (ornate)(no lock)
-		{ GUMP_CRATE, 20, 10, 126, 91 },			// Wood Crate
-		{ GUMP_DRAWER_DK, 16, 17, 110, 85 },
-		{ GUMP_CHEST_WO_GO, 18, 105, 118, 169 },	// Wood with gold trim.
-		{ GUMP_CHEST_SI, 18, 105, 118, 169 },		// silver chest.
-		{ GUMP_BOX_GO_LO, 16, 51, 140, 115 },		// Gold/Brass box with a lock.
-		{ GUMP_SHIP_HOLD, 46, 74, 152, 175 },
-		{ GUMP_BOOK_SHELF, 76, 12, 96, 59 },
-		{ GUMP_CABINET_DK, 24, 96, 91, 143 },
-		{ GUMP_CABINET_LT, 24, 96, 91, 143 },
-		{ GUMP_DRAWER_LT, 16, 17, 110, 85 },
-		{ GUMP_GIFT_BOX, 35, 10, 155, 85 },
-		{ GUMP_STOCKING, 0, 0, 0, 0 },
-		{ GUMP_ARMOIRE_ELVEN, 10, 10, 160, 105 },
-		{ GUMP_ARMOIRE_RED, 10, 10, 150, 95 },
-		{ GUMP_ARMOIRE_MAPLE, 10, 10, 150, 95 },
-		{ GUMP_ARMOIRE_CHERRY, 10, 10, 150, 95 },
-		{ GUMP_BASKET_TALL, 10, 10, 116, 71 },
-		{ GUMP_CHEST_WOOD_PLAIN, 10, 10, 150, 95 },
-		{ GUMP_CHEST_WOOD_GILDED, 10, 10, 150, 95 },
-		{ GUMP_CHEST_WOOD_ORNATE, 10, 10, 150, 95 },
-		{ GUMP_TALL_CABINET, 10, 10, 150, 95 },
-		{ GUMP_CHEST_WOOD_FINISH, 10, 10, 150, 95 },
-		{ GUMP_BLESSED_STATUE, 0, 0, 0, 0 },
-		{ GUMP_MAIL_BOX, 0, 0, 0, 0 },
-		{ GUMP_GIFT_BOX_CUBE, 23, 51, 140, 100 },
-		{ GUMP_GIFT_BOX_CYLINDER, 16, 51, 140, 115 },
-		{ GUMP_GIFT_BOX_OCTOGON, 25, 51, 140, 115 },
-		{ GUMP_GIFT_BOX_RECTANGLE, 16, 51, 140, 100 },
-		{ GUMP_GIFT_BOX_ANGEL, 21, 51, 140, 100 },
-		{ GUMP_HEART_SHAPED, 56, 30, 102, 74 },
-		{ GUMP_GIFT_BOX_TALL, 0, 0, 0, 0 },
-		{ GUMP_TREASURE_CHEST, 21, 51, 140, 100 },
-		{ GUMP_FOUNTAIN_OF_LIFE, 0, 0, 0, 0 },
-		{ GUMP_COMBINATION_CHEST, 0, 0, 0, 0 },
-		{ GUMP_SECURE_TRADE, 1, 1, 66, 26 },
-		{ GUMP_SECURE_TRADE_NEW, 0, 0, 0, 0 },
-		{ GUMP_GAME_BOARD,	 4, 10, 220, 185 },		// Chess or checker board.
-		{ GUMP_GAME_BACKGAM, 4, 10, 220, 185 },
-		{ GUMP_PLAGUE_BEAST_CORE, 60, 33, 400, 411 },
-		{ GUMP_REGAL_CASE, 0, 0, 0, 0 },
-		{ GUMP_GIFT_BOX_CHRISTMAS, 0, 0, 0, 0 },
-		{ GUMP_WALL_SAFE, 0, 0, 0, 0 },
-		{ GUMP_FLETCHING_STATION, 0, 0, 0, 0 },	// Presumably a container.
+		{ GUMP_SCROLL, 30, 30, 270, 170 },
+		{ GUMP_CORPSE, 20, 85, 124, 196 },
+		{ GUMP_BACKPACK, 44, 65, 186, 159 },
+		{ GUMP_BAG, 29, 34, 137, 128 },
+		{ GUMP_BARREL, 33, 36, 142, 148 },
+		{ GUMP_BASKET_SQUARE, 19, 47, 182, 123 },
+		{ GUMP_BOX_WOOD, 16, 38, 152, 125 },
+		{ GUMP_BASKET_ROUND, 35, 38, 145, 116 },
+		{ GUMP_CHEST_METAL_GOLD, 18, 105, 162, 178 },
+		{ GUMP_BOX_WOOD_ORNATE, 16, 51, 184, 124 },
+		{ GUMP_CRATE, 20, 10, 170, 100 },
+		{ GUMP_LEATHER, 16, 10, 148, 138 },
+		{ GUMP_DRAWER_DARK, 16, 10, 154, 94 },
+		{ GUMP_CHEST_WOOD, 18, 105, 162, 178 },
+		{ GUMP_CHEST_METAL, 18, 105, 162, 178 },
+		{ GUMP_BOX_METAL, 16, 51, 184, 124 },
+		{ GUMP_SHIP_HATCH, 46, 74, 196, 184 },
+		{ GUMP_BOOK_SHELF, 76, 12, 110, 68 },
+		{ GUMP_CABINET_DARK, 24, 96, 96, 152 },
+		{ GUMP_CABINET_LIGHT, 24, 96, 96, 152 },
+		{ GUMP_DRAWER_LIGHT, 16, 10, 154, 94 },
+		{ GUMP_BULLETIN_BOARD, 0, 0, 110, 62 },
+		{ GUMP_GIFT_BOX, 35, 10, 190, 95 },
+		{ GUMP_STOCKING, 41, 21, 186, 111 },
+		{ GUMP_ARMOIRE_ELVEN, 10, 10, 170, 115 },
+		{ GUMP_ARMOIRE_RED, 10, 10, 170, 115 },
+		{ GUMP_ARMOIRE_MAPLE, 10, 10, 170, 115 },
+		{ GUMP_ARMOIRE_CHERRY, 10, 10, 170, 115 },
+		{ GUMP_BASKET_TALL, 10, 30, 170, 145 },
+		{ GUMP_CHEST_WOOD_PLAIN, 10, 10, 170, 115 },
+		{ GUMP_CHEST_WOOD_GILDED, 10, 10, 170, 115 },
+		{ GUMP_CHEST_WOOD_ORNATE, 10, 10, 170, 115 },
+		{ GUMP_TALL_CABINET, 10, 10, 170, 115 },
+		{ GUMP_CHEST_WOOD_FINISH, 10, 10, 170, 115 },
+		//{ GUMP_BLESSED_STATUE, 0, 0, 0, 0 },		// TO-DO: confirm gump size
+		//{ GUMP_MAIL_BOX, 0, 0, 0, 0 },			// TO-DO: confirm gump size
+		{ GUMP_GIFT_BOX_CUBE, 23, 51, 163, 151 },
+		{ GUMP_GIFT_BOX_CYLINDER, 16, 51, 156, 166 },
+		{ GUMP_GIFT_BOX_OCTOGON, 25, 51, 165, 166 },
+		{ GUMP_GIFT_BOX_RECTANGLE, 16, 51, 156, 151 },
+		{ GUMP_GIFT_BOX_ANGEL, 21, 51, 161, 151 },
+		{ GUMP_GIFT_BOX_HEART_SHAPED, 56, 30, 158, 104 },
+		//{ GUMP_GIFT_BOX_TALL, 0, 0, 0, 0 },		// TO-DO: confirm gump size
+		{ GUMP_GIFT_BOX_CHRISTMAS, 16, 51, 156, 166 },
+		//{ GUMP_WALL_SAFE, 0, 0, 0, 0 },			// TO-DO: confirm gump size
+		//{ GUMP_CHEST_PIRATE, 0, 0, 0, 0 },		// TO-DO: confirm gump size
+		//{ GUMP_FOUNTAIN_LIFE, 0, 0, 0, 0 },		// TO-DO: confirm gump size
+		//{ GUMP_SECRET_CHEST, 0, 0, 0, 0 },		// TO-DO: confirm gump size
+		{ GUMP_SECURE_TRADE, 20, 30, 380, 180 },
+		{ GUMP_BOARD_CHECKER, 0, 0, 282, 230 },
+		{ GUMP_BOARD_BACKGAMMON, 0, 0, 282, 210 },
+		{ GUMP_CHEST_WEDDING, 16, 51, 184, 124 },
+		{ GUMP_STONE_BASE, 16, 51, 184, 124 },
+		{ GUMP_PLAGUE_BEAST, 60, 33, 460, 348 },
+		//{ GUMP_KING_COLLECTION_BOX, 0, 0, 0, 0 },	// TO-DO: confirm gump size
+		{ GUMP_BACKPACK_SUEDE, 44, 65, 186, 159 },
+		{ GUMP_BACKPACK_POLAR_BEAR, 44, 65, 186, 159 },
+		{ GUMP_BACKPACK_GHOUL_SKIN, 44, 65, 186, 159 },
+		//{ GUMP_GIFT_BOX_SQUARE, 0, 0, 0, 0 },		// TO-DO: confirm gump size
+		{ GUMP_CRATE_FLETCHING, 24, 96, 196, 152 },
+		{ GUMP_CHEST_WOODEN, 10, 10, 170, 115 },
+		//{ GUMP_PILLOW_HEART, 0, 0, 0, 0 },		// TO-DO: confirm gump size
+		{ GUMP_CHEST_METAL2, 18, 105, 162, 178 }
 	};
 
 	// Get a random location in the container.

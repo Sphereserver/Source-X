@@ -329,9 +329,10 @@ CChar::~CChar()
 		m_pParty->RemoveMember( GetUID(), (dword) GetUID() );
 		m_pParty = NULL;
 	}
-	Attacker_RemoveChar();	// Removing me from enemy's attacker list (I asume that if he is on my list, I'm on his one and no one have me on their list if I dont have them)
-	NPC_PetClearOwners();	// Clear follower slots on pet owner
-	DeleteAll();			// Remove me early so virtuals will work
+	Attacker_RemoveChar();		// Removing me from enemy's attacker list (I asume that if he is on my list, I'm on his one and no one have me on their list if I dont have them)
+	if (m_pNPC)
+		NPC_PetClearOwners();	// Clear follower slots on pet owner
+	DeleteAll();				// Remove me early so virtuals will work
 	ClearNPC();
 	ClearPlayer();
 	g_Serv.StatDec( SERV_STAT_CHARS );
@@ -627,12 +628,12 @@ CRegion * CChar::GetRoom() const
 	return m_pRoom; // What room are we in now.
 }
 
-int CChar::GetSight() const
+int CChar::GetVisualRange() const
 {
 	return (int)m_iVisualRange;
 }
 
-void CChar::SetSight(byte newSight)
+void CChar::SetVisualRange(byte newSight)
 {
 	// max value is 18 on classic clients prior 7.0.55.27 version and 24 on enhanced clients and latest classic clients
 	m_iVisualRange = minimum(newSight, UO_MAP_VIEW_SIZE_MAX);
@@ -1311,7 +1312,7 @@ lpctstr CChar::GetName( bool fAllowAlt ) const
 // Create a brand new Player char. Called directly from the packet.
 void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale, RACE_TYPE rtRace, short wStr, short wDex, short wInt,
 	PROFESSION_TYPE prProf, SKILL_TYPE skSkill1, int iSkillVal1, SKILL_TYPE skSkill2, int iSkillVal2, SKILL_TYPE skSkill3, int iSkillVal3, SKILL_TYPE skSkill4, int iSkillVal4,
-	HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, int iStartLoc )
+	HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, ITEMID_TYPE idFace, int iStartLoc )
 {
 	ADDTOCALLSTACK("CChar::InitPlayer");
 	ASSERT(pClient);
@@ -1640,6 +1641,29 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 			pBeard->SetAttr(ATTR_NEWBIE|ATTR_MOVE_NEVER);
 			LayerAdd(pBeard);	// add content
 		}
+	}
+
+	// Create face (enhanced clients only)
+	if ( idFace != ITEMID_NOTHING )
+	{
+		switch ( rtRace )
+		{
+			case RACETYPE_GARGOYLE:
+				if ( !((idFace >= ITEMID_FACE_1_GARG) && (idFace <= ITEMID_FACE_6_GARG)) )
+					idFace = ITEMID_NOTHING;
+				break;
+
+			default:
+				if ( !(((idFace >= ITEMID_FACE_1) && (idFace <= ITEMID_FACE_10)) || ((idFace >= ITEMID_FACE_ANIME) && (idFace <= ITEMID_FACE_VAMPIRE))) )
+					idFace = ITEMID_NOTHING;
+				break;
+		}
+
+		CItem *pFace = CItem::CreateScript(idFace, this);
+		ASSERT(pFace);
+		pFace->SetHue(wSkinHue);
+		pFace->SetAttr(ATTR_NEWBIE|ATTR_MOVE_NEVER);
+		LayerAdd(pFace);
 	}
 
 	// Get starting items for the profession / skills.
@@ -2393,9 +2417,9 @@ do_default:
 					sVal.FormatHex( UINT32_MAX );
 				else
 				{
-					dword		wBlockFlags	= 0;
-					g_World.GetHeightPoint2( ptDst, wBlockFlags, true );
-					sVal.FormatHex( wBlockFlags );
+					dword dwBlockFlags = 0;
+					g_World.GetHeightPoint2( ptDst, dwBlockFlags, true );
+					sVal.FormatHex( dwBlockFlags );
 				}
 			}
 			return true;
@@ -2729,7 +2753,7 @@ do_default:
 			sVal.FormatLLVal(m_virtualGold);
 			break;
 		case CHC_VISUALRANGE:
-			sVal.FormatVal(GetSight());
+			sVal.FormatVal(GetVisualRange());
 			break;
 		default:
 			return false;
@@ -3261,7 +3285,7 @@ do_default:
 			UpdateStatsFlag();
 			break;
 		case CHC_VISUALRANGE:
-			SetSight(s.GetArgBVal());
+			SetVisualRange(s.GetArgBVal());
 			break;
 		default:
 			return false;
@@ -3600,7 +3624,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 					pItem->Item_GetDef()->m_ttNormal.m_tData4 = 0;
 				}
 				pItem->SetAttr(ATTR_MOVE_NEVER);
-				LayerAdd( pItem, LAYER_NEWLIGHT );
+				LayerAdd( pItem, LAYER_HAND2 );
 			}
 			return true;
 		case CHV_EQUIPARMOR:
@@ -3863,13 +3887,10 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			Skill_Start(static_cast<SKILL_TYPE>(skill));
 			break;
 		}
+
 		case CHV_PRIVSET:
 			return SetPrivLevel( pSrc, s.GetArgStr());
-		case CHV_RELEASE:
-			Skill_Start( SKILL_NONE );
-			NPC_PetClearOwners();
-			SoundChar( CRESND_RAND );
-			return true;
+		
 		case CHV_REMOVE:	// remove this char from the world instantly.
 			if ( m_pPlayer )
 			{
