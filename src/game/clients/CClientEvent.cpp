@@ -240,8 +240,8 @@ void CClient::Event_Item_Pickup(CUID uid, word amount) // Client grabs an item
 	else if ( tempamount > 1 )
 		m_tNextPickup = m_tNextPickup + 2;	// +100 msec if amount should slow down the client
 
-	SOUND_TYPE iSnd = static_cast<SOUND_TYPE>(pItem->GetDefNum("PICKUPSOUND", true));
-	addSound(iSnd ? iSnd : SOUND_USE_CLOTH);
+	SOUND_TYPE iSnd = (SOUND_TYPE)(pItem->GetDefNum("PICKUPSOUND", true));
+	addSound(iSnd ? iSnd : (SOUND_TYPE)SOUND_USE_CLOTH);
 
 	EXC_SET("TargMode");
 	SetTargMode(CLIMODE_DRAG);

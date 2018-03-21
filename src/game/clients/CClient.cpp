@@ -821,6 +821,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				}
 
 				CResourceID rid = g_Cfg.ResourceGetID( RES_QTY, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(ppszArgs[0])));
+				m_tmAdd.m_id = rid.GetResIndex();
 				m_tmAdd.m_amount = (iQty > 1) ? (word)(maximum(ATOI(ppszArgs[1]), 1)) : 1;
 				if ( (rid.GetResType() == RES_CHARDEF) || (rid.GetResType() == RES_SPAWN) )
 				{
