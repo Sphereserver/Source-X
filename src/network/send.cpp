@@ -164,7 +164,7 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
 	{
 		if ( objectChar )
 		{
-			canRename = objectChar->NPC_IsOwnedBy(character);
+			canRename = objectChar->IsOwnedBy(character);
 			writeInt16((word)((objectChar->Stat_GetVal(STAT_STR) * 100) / maximum(objectChar->Stat_GetMax(STAT_STR), 1)));
 		}
 		else

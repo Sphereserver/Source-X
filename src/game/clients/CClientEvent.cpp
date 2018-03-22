@@ -1678,6 +1678,8 @@ void CClient::Event_Talk_Common(tchar *szText)	// PC speech
 
 		if ( pChar == m_pChar )
 			continue;
+		if ( !pChar->m_pNPC )
+			continue;
 		if ( bGhostSpeak && !pChar->CanUnderstandGhost() )
 			continue;
 

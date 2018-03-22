@@ -372,21 +372,18 @@ size_t CChar::NPC_OnHearName( lpctstr pszText ) const
 
 	size_t i = FindStrWord( pszText, pszName );
 	if ( i )
-		return( i );
+		return i;
 
-	if ( m_pNPC )
+	// My title ?
+	if ( m_pNPC->m_Brain == NPCBRAIN_GUARD )
 	{
-		// My title ?
-		if ( m_pNPC->m_Brain == NPCBRAIN_GUARD )
-		{
-			if ( ! strnicmp( pszText, "GUARD ", 6 ))
-				return 6;
-		}
-		else if ( NPC_IsVendor())
-		{
-			if ( ! strnicmp( pszText, "VENDOR ", 7 ))
-				return 7;
-		}
+		if ( ! strnicmp( pszText, "GUARD ", 6 ))
+			return 6;
+	}
+	else if ( NPC_IsVendor())
+	{
+		if ( ! strnicmp( pszText, "VENDOR ", 7 ))
+			return 7;
 	}
 
 	CCharBase * pCharDef = Char_GetDef();
