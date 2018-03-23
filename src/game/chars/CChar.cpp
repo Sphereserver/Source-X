@@ -2973,7 +2973,7 @@ do_default:
 					}
 					else if ( !strnicmp(pszKey, "ADD", 3) )
 					{
-						CChar *pChar = static_cast<CChar *>(static_cast<CUID>(s.GetArgVal()).CharFind());
+						CChar *pChar = static_cast<CUID>(s.GetArgVal()).CharFind();
 						if ( !pChar )
 							return false;
 						Fight_Attack(pChar);
@@ -2981,7 +2981,7 @@ do_default:
 					}
 					else if ( !strnicmp(pszKey, "TARGET", 6) )
 					{
-						CChar *pChar = static_cast<CChar *>(static_cast<CUID>(s.GetArgVal()).CharFind());
+						CChar *pChar = static_cast<CUID>(s.GetArgVal()).CharFind();
 						if ( !pChar || (pChar == this) )	// can't set ourself as target
 						{
 							m_Fight_Targ_UID.InitUID();
@@ -3334,7 +3334,7 @@ void CChar::r_Write( CScript & s )
 	if ( m_LocalLight )
 		s.WriteKeyHex("LIGHT", m_LocalLight);
 	if ( m_attackBase )
-		s.WriteKeyFormat("DAM", "%hu,%hu", m_attackBase, m_attackBase + m_attackRange);
+		s.WriteKeyFormat("DAM", "%" PRIu16 ",%" PRIu16, m_attackBase, m_attackBase + m_attackRange);
 	if ( m_defense )
 		s.WriteKeyVal("ARMOR", m_defense);
 	if ( (m_Act_UID.GetObjUID() & UID_UNUSED) != UID_UNUSED )
@@ -3353,7 +3353,7 @@ void CChar::r_Write( CScript & s )
 			sprintf(pszActionTemp, "%d", Skill_GetActive());
 		}
 		s.WriteKey("ACTION", pszActionTemp);
-		/*We save ACTARG1/ACTARG2/ACTARG3 only if the following conditions are satisfied:
+		/* We save ACTARG1/ACTARG2/ACTARG3 only if the following conditions are satisfied:
 		ACTARG1/ACTARG2/ACTARG3 is different from 0 AND
 		The character action is one of the valid skill OR
 		The character action is one of the NPC Action that uses ACTARG1/ACTARG2/ACTARG3
@@ -3385,18 +3385,18 @@ void CChar::r_Write( CScript & s )
 
 	tchar szTmp[100];
 	size_t j = 0;
-	for ( j = 0; j < STAT_QTY; j++ )
+	for ( j = 0; j < STAT_QTY; ++j )
 	{
 		// this is VERY important, saving the MOD first
-		if ( Stat_GetMod(static_cast<STAT_TYPE>(j)) )
+		if ( Stat_GetMod((STAT_TYPE)j) )
 		{
 			sprintf(szTmp, "MOD%s", g_Stat_Name[j]);
-			s.WriteKeyVal(szTmp, Stat_GetMod(static_cast<STAT_TYPE>(j)));
+			s.WriteKeyVal(szTmp, Stat_GetMod((STAT_TYPE)j) );
 		}
-		if ( Stat_GetBase(static_cast<STAT_TYPE>(j)) )
+		if ( Stat_GetBase((STAT_TYPE)j) )
 		{
 			sprintf(szTmp, "O%s", g_Stat_Name[j]);
-			s.WriteKeyVal(szTmp, Stat_GetBase(static_cast<STAT_TYPE>(j)));
+			s.WriteKeyVal(szTmp, Stat_GetBase((STAT_TYPE)j) );
 		}
 	}
 
@@ -3412,11 +3412,11 @@ void CChar::r_Write( CScript & s )
 	s.WriteKeyVal("MANA", Stat_GetVal(STAT_INT));
 	s.WriteKeyVal("FOOD", Stat_GetVal(STAT_FOOD));
 
-	for ( j = 0; j < g_Cfg.m_iMaxSkill; j++ )
+	for ( j = 0; j < g_Cfg.m_iMaxSkill; ++j )
 	{
-		if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex(static_cast<SKILL_TYPE>(j)) || Skill_GetBase(static_cast<SKILL_TYPE>(j)) == 0 )
+		if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)j) || Skill_GetBase((SKILL_TYPE)j) == 0 )
 			continue;
-		s.WriteKeyVal(g_Cfg.GetSkillDef(static_cast<SKILL_TYPE>(j))->GetKey(), Skill_GetBase(static_cast<SKILL_TYPE>(j)));
+		s.WriteKeyVal(g_Cfg.GetSkillDef((SKILL_TYPE)j)->GetKey(), Skill_GetBase((SKILL_TYPE)j) );
 	}
 
 	r_WriteContent(s);
@@ -3461,7 +3461,7 @@ bool CChar::r_Load( CScript & s ) // Load a character from script
 	int iResultCode = CObjBase::IsWeird();
 	if ( iResultCode )
 	{
-		DEBUG_ERR(( "Char 0%x Invalid, id='%s', code=0%x\n", (dword)(GetUID()), static_cast<lpctstr>(GetResourceName()), iResultCode ));
+		DEBUG_ERR(( "Char 0%x Invalid, id='%s', code=0%x\n", (dword)GetUID(), GetResourceName(), iResultCode ));
 		Delete();
 	}
 
@@ -3534,10 +3534,10 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				int iVal = s.GetArgVal();
 				for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 				{
-					if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex(static_cast<SKILL_TYPE>(i)) )
+					if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i) )
 						continue;
 
-					Skill_SetBase(static_cast<SKILL_TYPE>(i), iVal );
+					Skill_SetBase((SKILL_TYPE)i, iVal );
 				}
 			}
 			break;
@@ -3554,7 +3554,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			}
 			break;
 		case CHV_ATTACK:
-			Fight_Attack(CUID(s.GetArgVal()).CharFind());
+			Fight_Attack(CUID(s.GetArgVal()).CharFind(), true);
 			break;
 		case CHV_BANK:
 			// Open the bank box for this person

@@ -449,7 +449,7 @@ bool CChar::NPC_IsOwnedBy( const CChar * pChar, bool fAllowGM ) const
 		return true;
 
 	if ( fAllowGM && pChar->IsPriv( PRIV_GM ))
-		return( pChar->GetPrivLevel() > GetPrivLevel());
+		return ( pChar->GetPrivLevel() > GetPrivLevel());
 
 	if ( ! IsStatFlag( STATF_PET ) )
 		return false;

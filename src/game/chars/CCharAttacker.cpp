@@ -317,7 +317,7 @@ bool CChar::Attacker_Delete(std::vector<LastAttackers>::iterator &itAttacker, bo
 	{
 		CScriptTriggerArgs Args;
 		Args.m_iN1 = bForced;
-		Args.m_iN2 = static_cast<int>(type);
+		Args.m_iN2 = (int)type;
 		TRIGRET_TYPE tRet = OnTrigger(CTRIG_CombatDelete, pChar, &Args);
 		if (tRet == TRIGRET_RET_TRUE)
 			return false;

@@ -621,7 +621,7 @@ static const LAYER_TYPE sm_ArmorLayerFeet[] = { LAYER_SHOES, LAYER_LEGS };						
 
 struct CArmorLayerType
 {
-	word m_wCoverage;	// Percentage of humanoid body area
+	int m_iCoverage;	// Percentage of humanoid body area
 	const LAYER_TYPE * m_pLayers;
 };
 
@@ -646,23 +646,24 @@ int CChar::CalcArmorDefense() const
 
 	int iDefenseTotal = 0;
 	int iArmorCount = 0;
-	word ArmorRegionMax[ARMOR_QTY];
-	for ( int i = 0; i < ARMOR_QTY; i++ )
+	int ArmorRegionMax[ARMOR_QTY];
+	for ( int i = 0; i < ARMOR_QTY; ++i )
 		ArmorRegionMax[i] = 0;
 
-	for ( CItem* pItem=GetContentHead(); pItem!=NULL; pItem=pItem->GetNext())
+	for ( CItem* pItem=GetContentHead(); pItem!=NULL; pItem=pItem->GetNext() )
 	{
-		word iDefense = (word)(pItem->Armor_GetDefense());
+		int iDefense = pItem->Armor_GetDefense();
+		if ( !iDefense && !pItem->IsType(IT_SPELL) )
+			continue;
 
 		// reverse of sm_ArmorLayers
-		switch ( pItem->GetEquipLayer())
+		switch ( pItem->GetEquipLayer() )
 		{
 			case LAYER_HELM:		// 6
 				if (IsSetCombatFlags(COMBAT_STACKARMOR))
 					ArmorRegionMax[ ARMOR_HEAD ] += iDefense;
 				else
 					ArmorRegionMax[ ARMOR_HEAD ] = maximum( ArmorRegionMax[ ARMOR_HEAD ], iDefense );
-
 				break;
 			case LAYER_COLLAR:	// 10 = gorget or necklace.
 				if (IsSetCombatFlags(COMBAT_STACKARMOR))
@@ -747,17 +748,20 @@ int CChar::CalcArmorDefense() const
 						ArmorRegionMax[ ARMOR_HANDS ] = maximum( ArmorRegionMax[ ARMOR_HANDS ], iDefense );
 				}
 				break;
+			case LAYER_SPELL_Protection:
+				iDefenseTotal += pItem->m_itSpell.m_spelllevel * 100;
+				break;
 			default:
 				continue;
 		}
-		iArmorCount ++;
+		++iArmorCount;
 	}
 
 	if ( iArmorCount )
 	{
-		for ( int i=0; i<ARMOR_QTY; i++ )
-			iDefenseTotal += sm_ArmorLayers[i].m_wCoverage * ArmorRegionMax[i];
-		}
+		for ( int i=0; i<ARMOR_QTY; ++i )
+			iDefenseTotal += sm_ArmorLayers[i].m_iCoverage * ArmorRegionMax[i];
+	}
 
 	return maximum(( iDefenseTotal / 100 ) + m_ModAr, 0);
 }
@@ -1342,12 +1346,15 @@ void CChar::Fight_HitTry()
 	if ( !pCharTarg || (pCharTarg && !pCharTarg->Fight_IsAttackable()) )
 	{
 		// I can't hit this target, try switch to another one
-		if ( !Fight_Attack(NPC_FightFindBestTarget()) )
+		if (m_pNPC)
 		{
-			Skill_Start(SKILL_NONE);
-			m_Fight_Targ_UID.InitUID();
-			if ( m_pNPC )
-				StatFlag_Clear(STATF_WAR);
+			if ( !Fight_Attack(NPC_FightFindBestTarget()) )
+			{
+				Skill_Start(SKILL_NONE);
+				m_Fight_Targ_UID.InitUID();
+				if ( m_pNPC )
+					StatFlag_Clear(STATF_WAR);
+			}
 		}
 		return;
 	}
@@ -1401,7 +1408,7 @@ WAR_SWING_TYPE CChar::Fight_CanHit(CChar * pCharSrc)
 	//	WAR_SWING_EQUIPPING	= recoiling weapon / swing made
 	//  WAR_SWING_READY		= RETURN 1 // Won't have any effect on Fight_Hit() function other than allowing the hit. The rest of returns in here will stop the hit.
 	//  WAR_SWING_SWINGING	= taking my swing now
-	if (IsStatFlag(STATF_DEAD | STATF_SLEEPING | STATF_FREEZE | STATF_STONE) || pCharSrc->IsStatFlag(STATF_DEAD | STATF_INVUL | STATF_STONE | STATF_RIDDEN))
+	if (IsStatFlag(STATF_DEAD | STATF_SLEEPING | STATF_FREEZE | STATF_STONE) || !pCharSrc->Fight_IsAttackable() )
 		return WAR_SWING_INVALID;
 	if (pCharSrc->m_pArea && pCharSrc->m_pArea->IsFlag(REGION_FLAG_SAFE))
 		return WAR_SWING_INVALID;
@@ -1599,6 +1606,12 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		{
 			SysMessageDefault(DEFMSG_ITEMUSE_BOW_SHIELD);
 			return WAR_SWING_INVALID;
+		}
+		else if ( !IsSetCombatFlags(COMBAT_ARCHERYCANMOVE) && !IsStatFlag(STATF_ARCHERCANMOVE) )
+		{
+			// Only start the swing this much seconds after the char stopped moving
+			if ( m_pClient && -g_World.GetTimeDiff(m_pClient->m_timeLastEventWalk) < g_Cfg.m_iCombatArcheryMovementDelay )
+				return WAR_SWING_EQUIPPING;
 		}
 
 		int	iMinDist = pWeapon ? pWeapon->RangeH() : g_Cfg.m_iArcheryMinDist;

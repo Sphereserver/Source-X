@@ -306,7 +306,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Changed: ADD command does not show anymore the console error if the argument is invalid. The sysmessage is still displayed.
 
 05-12-2017, Drk84
-- [Port from Source, 05-09-2016, Coruja]  Fixed: TimerCall setting on sphere.ini using wrong time format (hours instead minutes) to call f_onserver_timer function
+- [Port from Source, 05-09-2016, Coruja] Fixed: TimerCall setting on sphere.ini using wrong time format (hours instead minutes) to call f_onserver_timer function
 
 13-12-2017, Drk84
 - Possible fix for stat cap issue when the sum of the players stats are at StatCap -1. 
@@ -315,8 +315,6 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Added: trigger @NPCActWander. It is called each step an NPC does while wandering. ARGN1 = 0 if it will continue to wander, 1 if randomly deciding to stop, 2 if deciding to stop because
 	after looking around it found something interesting; ARGN2 = 1 if it's returning to home, 0 otherwise.
 	RETURN 1 stops decisions for this step, so it will not return to home, do another step or stop wandering (again, for this step).
-- Fixed: actions or events requiring an NPC to play its default sound played only sound 0 or 1. Now the SOUND property of the CHARDEF is used, if not set SOUND 1 or 2 will be played.
-	Examples of these events are: BARK without arguments, NPC "looking around", hearing a command, shrinking/unshrinking.
 - Updated: NPCs when wandering around now do "look around", doing in fact some AI checks.
 	This also makes the trigger @NpcLookAtChar fire more times than before.
 - Updated: if DEBUGF_ADVANCE_STATS is enabled in the .ini, the gain chance will be shown also on non-debug builds.
@@ -332,14 +330,14 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 03-01-2018, Drk84
 - Added missing parenthesis to MulDivLL and MulDiv.
 
-03-01-2017, Nolok
+03-01-2018, Nolok
 - Fixed: when playing a sound from a character from Samurai Empire and later expansions, it was chosen the wrong sound ID for the given action. This is caused by the different
 	order of IDs in the sound file after that expansion. Also, updated the script pack (sphere_defs.scp and sphere_monsters.scp) with a lot of new and corrected old sounds.
 	Still, some sounds are missing.
 - Fixed: some rare combat-related crashes.
 - Added: SOUNDACT_RAND, SOUNDACT_IDLE, SOUNDACT_NOTICE, SOUNDACT_HIT, SOUNDACT_GETHIT, SOUNDACT_DIE defs to the scripts. They are meant to be used with BARK,
 	which has always accepted as parameter the sound type (even if the wiki at this day doesn't say so), not the sound ID (use SOUND for this).
-- Updated: now when an NPC is looking around it can play different sounds depending on its AI choices. Also prevented human-sounding chars to play such noises.
+- Updated: now when an NPC is looking around it can play different sounds depending on its AI choices.
 
 05-01-2018, Nolok
 - Added: SOUNDIDLE, SOUNDNOTICE, SOUNDHIT, SOUNDGETHIT, SOUNDDIE CharDef properties. When a creature emits a sound linked to an action, the sound ID of	the corresponding override,
@@ -357,7 +355,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 	Removed the reset of ACTARG1/ACTARG2/ACTARG3 inside the Skill_CleanUp method.
 
 27-01-2018, Nolok & Drk84
-- Fixed: crash occurring when an NPC cleaned its attackers.
+- Fixed: crash occurring when an NPC cleared its attackers.
 - Fixed: magic-capable NPCs often did not attack or cast spells when they should instead start to attack.
 
 29-01-2018, Nolok
@@ -478,3 +476,13 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - [Port from Source, 19-03-2018, Coruja]
 	Fixed: Multi placement making players get stuck when place the multi over his own char.
 	Fixed: Multi placement being incorrectly blocked by region flags region_flag_underground, region_flag_guarded, region_flag_safe.
+
+23-03-2018, Nolok
+- Fixed: ATTACK command didn't set maximum priority to attacking the specified character over the others.
+- Added: .ini setting CombatArcheryMovementDelay. If the COMBAT_ARCHERYCANMOVE CombatFlag isn't set, use that value to set the seconds after which a player, after he stopped moving,
+	can start again a new combat swing with	a ranged weapon.
+- [Port from Source, 19-04-2016, Coruja] Fixed: Protection spell not working correctly if COMBAT_ELEMENTAL_ENGINE combat flag is disabled.
+- [Port from Source, 21-04-2016, Coruja] Added: New guild functions ISALLY/WEALLIANCE/THEYALLIANCE, they work exactly in the same way as ISENEMY/WEWAR/THEYWAR but used to set alliances instead of wars.
+- [Port from Source, 29-04-2016, Coruja]
+	Fixed: Hidden (statf_hidden|statf_invisible) chars not being revealed when others chars walk over him.
+	Fixed: Vendor buy menu showing wrong char 'gold available' value.

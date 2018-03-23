@@ -424,12 +424,11 @@ int CChar::NPC_WalkToPoint( bool fRun )
 		local.m_x = m_pNPC->m_nextX[0];
 		local.m_y = m_pNPC->m_nextY[0];
 		local.m_map = pMe.m_map;
-			// no steps available yet, or pathfinding not usable in this situation
-			// so, use default movements
 
+		// no steps available yet, or pathfinding not usable in this situation
+		// so, use default movements
 		if (local.m_x > 0 && local.m_y > 0)
 		{
-
 			bUsePathfinding = true;
 
 			if ( pMe.GetDist(local) != 1 )
@@ -476,7 +475,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 				SetTimeout( TICK_PER_SEC ); // wait a moment before finding a new route
 				return 1;
 			}
-			return( 2 );
+			return 2;
 		}
 
 		if ( iRand < 35 )		iDiff = 4;	// 5
@@ -2182,7 +2181,7 @@ void CChar::NPC_OnTickAction()
 		}
 	}
 
-	EXC_SET("timer expired");
+	EXC_SET("timer expired (NPC)");
 	if ( IsTimerExpired() && IsStatFlag(STATF_WAR) && !(IsSetCombatFlags(COMBAT_PREHIT) && m_atFight.m_War_Swing_State == WAR_SWING_SWINGING))	// Was not reset? PREHIT forces timer to be 0, so it get's defaulted here breaking NPC's speed when PREHIT is enabled. Must not check in this case.
 	{
 		int64 timeout	= maximum((150-Stat_GetAdjusted(STAT_DEX))/2, 0);

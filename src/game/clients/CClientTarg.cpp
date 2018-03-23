@@ -343,7 +343,7 @@ bool CClient::OnTarg_Item_Add( CObjBase * pObj, CPointMap & pt )
 	if ( pObj && pObj->IsItemInContainer() )
 		return false;
 
-	CItem *pItem = CItem::CreateTemplate(static_cast<ITEMID_TYPE>(m_tmAdd.m_id), NULL, m_pChar);
+	CItem *pItem = CItem::CreateTemplate((ITEMID_TYPE)m_tmAdd.m_id, NULL, m_pChar);
 	if ( !pItem )
 		return false;
 
@@ -353,6 +353,8 @@ bool CClient::OnTarg_Item_Add( CObjBase * pObj, CPointMap & pt )
 		pItem->Delete();
 		return pMulti ? true : false;
 	}
+	else
+		pItem->SetAmount(m_tmAdd.m_amount);
 
 	pItem->MoveToCheck(pt, m_pChar);
 	m_pChar->m_Act_UID = pItem->GetUID();		// for last target stuff (trigger stuff) and to make AxisII able to initialize placed spawn items.
@@ -1628,7 +1630,7 @@ CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, u
 			int y = rect.m_top;
 			for ( ; y < rect.m_bottom; ++y )
 			{
-				ptn.m_y = (short)(y);
+				ptn.m_y = (short)y;
 
 				if ( !ptn.IsValidPoint() )
 				{
@@ -1705,9 +1707,7 @@ CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, u
 
 	CItemMulti * pMultiItem = dynamic_cast <CItemMulti*>(pItemNew);
 	if ( pMultiItem )
-	{
 		pMultiItem->Multi_Create( m_pChar, UID_CLEAR );
-	}
 
 	if ( pItemDef->IsType(IT_STONE_GUILD))
 	{
@@ -1717,9 +1717,7 @@ CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, u
 		addPromptConsole( CLIMODE_PROMPT_STONE_NAME, g_Cfg.GetDefaultMsg( DEFMSG_ITEMUSE_GUILDSTONE_NEW ), pItemNew->GetUID() );
 	}
 	else if ( fShip )
-	{
 		pItemNew->Sound( Calc_GetRandVal(2)? 0x12:0x13 );
-	}
 
 	return pItemNew;
 }

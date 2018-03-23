@@ -278,6 +278,8 @@ game/chars/CCharSpell.cpp
 game/chars/CCharStat.cpp
 game/chars/CCharStatus.cpp
 game/chars/CCharUse.cpp
+game/chars/CStoneMember.h
+game/chars/CStoneMember.cpp
 )
 SOURCE_GROUP (game\\chars FILES ${chars_SRCS})
 

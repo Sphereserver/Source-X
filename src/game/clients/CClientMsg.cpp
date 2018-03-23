@@ -2183,8 +2183,8 @@ bool CClient::addShopMenuBuy( CChar * pVendor )
 		return false;
 	}
 
-	if (GetNetState()->isClientEnhanced())
-		new PacketObjectStatus(this, pVendor);
+	// The Enhanced Client needs it always, for the Classic Client we send it always too, but we do that to have the updated 'Gold Available' value.
+	new PacketObjectStatus(this, pVendor);
 
 	// Send NPC layers 26 and 27 content
 	new PacketItemEquipped(this, pContainer);

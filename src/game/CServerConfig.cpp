@@ -138,6 +138,7 @@ CServerConfig::CServerConfig()
 	m_iHitsUpdateRate		= TICK_PER_SEC;
 	m_iSpeedScaleFactor		= 80000;
 	m_iCombatFlags			= 0;
+	m_iCombatArcheryMovementDelay = TICK_PER_SEC;
 	m_iCombatDamageEra		= 0;
 	m_iCombatHitChanceEra	= 0;
 	m_iCombatSpeedEra		= 3;
@@ -414,6 +415,7 @@ enum RC_TYPE
 	RC_COLORNOTOINVUL,			// m_iColorNotoInvul
 	RC_COLORNOTOINVULGAMEMASTER,// m_iColorNotoInvulGameMaster
 	RC_COLORNOTONEUTRAL,		// m_iColorNotoNeutral
+	RC_COMBATARCHERYMOVEMENTDELAY, // m_iCombatArcheryMovementDelay
 	RC_COMBATDAMAGEERA,			// m_iCombatDamageEra
 	RC_COMBATFLAGS,				// m_iCombatFlags
 	RC_COMBATHITCHANCEERA,		// m_iCombatHitChanceEra
@@ -645,6 +647,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "COLORNOTOINVUL",			{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoInvul),		0 }},
 	{ "COLORNOTOINVULGAMEMASTER",{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoInvulGameMaster),	0 }},
 	{ "COLORNOTONEUTRAL",		{ ELEM_WORD,	OFFSETOF(CServerConfig,m_iColorNotoNeutral),	0 }},
+	{ "COMBATARCHERYMOVEMENTDELAY",{ ELEM_INT,	OFFSETOF(CServerConfig,m_iCombatArcheryMovementDelay),	0 }},
 	{ "COMBATDAMAGEERA",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCombatDamageEra),		0 }},
 	{ "COMBATFLAGS",			{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iCombatFlags),			0 }},
 	{ "COMBATHITCHANCEERA",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCombatHitChanceEra),	0 }},
@@ -1003,6 +1006,12 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			break;
 		case RC_COLORINVISSPELL:
 			m_iColorInvisSpell = static_cast<HUE_TYPE>(s.GetArgVal());
+			break;
+		case RC_COMBATARCHERYMOVEMENTDELAY:
+		{
+			int iVal = s.GetArgVal();
+			m_iCombatArcheryMovementDelay = maximum(iVal, 10);
+		}
 			break;
 		case RC_CORPSENPCDECAY:
 			m_iDecay_CorpseNPC = s.GetArgVal()*60*TICK_PER_SEC;

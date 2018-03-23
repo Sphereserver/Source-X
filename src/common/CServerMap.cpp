@@ -19,13 +19,6 @@
 //////////////////////////////////////////////////////////////////
 // -CServerMapBlockState
 
-#ifndef CAN_I_BLOCK
-	#define CAN_I_BLOCK		UFLAG1_BLOCK
-	#define CAN_I_PLATFORM	UFLAG2_PLATFORM
-	#define CAN_I_CLIMB		UFLAG2_CLIMBABLE
-	#define CAN_I_DOOR		UFLAG4_DOOR
-#endif
-
 CCachedMulItem::CCachedMulItem()
 {
 	InitCacheTime();

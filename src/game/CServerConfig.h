@@ -902,10 +902,12 @@ public:
 	int  m_iArcheryMaxDist;			// Max distance allowed for archery.
 	int  m_iArcheryMinDist;			// Min distance required for archery.
 	int  m_iHitsUpdateRate;			// how often send my hits updates to visible clients.
-	int  m_iSpeedScaleFactor;		// fight skill delay = m_iSpeedScaleFactor / ( (dex + 100) * Weapon Speed ).
+	int  m_iCombatArcheryMovementDelay; // If COMBAT_ARCHERYCANMOVE is not enabled, wait this much milliseconds (minimum=10) after the player stopped moving before starting a new attack.
 	int  m_iCombatDamageEra;		// define damage formula to use on physical combat.
 	int  m_iCombatHitChanceEra;		// define hit chance formula to use on physical combat.
 	int  m_iCombatSpeedEra;			// define swing speed formula to use on physical combat.
+	int  m_iSpeedScaleFactor;		// fight skill delay = m_iSpeedScaleFactor / ( (dex + 100) * Weapon Speed ).
+
 	int  m_iSkillPracticeMax;		// max skill level a player can practice on dummies/targets upto.
 	bool m_iPacketDeathAnimation;	// packet 02c
 
