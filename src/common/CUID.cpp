@@ -111,17 +111,3 @@ CUIDBase::operator dword () const
 }
 
 
-// -----------------------------
-//	CUID
-// -----------------------------
-
-CUID::CUID()
-{
-	InitUID();
-}
-
-CUID::CUID( dword dw )
-{
-	SetPrivateUID( dw );
-}
-

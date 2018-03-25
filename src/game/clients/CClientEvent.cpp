@@ -226,7 +226,7 @@ void CClient::Event_Item_Pickup(CUID uid, word amount) // Client grabs an item
 	EXC_SET("Origin");
 	// Where is the item coming from ? (just in case we have to toss it back)
 	CObjBase * pObjParent = dynamic_cast <CObjBase *>(pItem->GetParent());
-	m_Targ_Prv_UID = pObjParent ? pObjParent->GetUID() : UID_CLEAR;
+	m_Targ_Prv_UID = pObjParent ? pObjParent->GetUID() : CUID(UID_CLEAR);
 	m_Targ_p = pItem->GetUnkPoint();
 
 	EXC_SET("ItemPickup");

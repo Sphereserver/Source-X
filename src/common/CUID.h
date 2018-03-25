@@ -65,8 +65,14 @@ public:
 class CUID : public CUIDBase
 {
 public:
-	CUID();
-	CUID( dword dw );
+	CUID()
+	{
+		InitUID();
+	}
+	CUID(dword dw)
+	{
+		SetPrivateUID( dw );
+	}
 };
 
 #endif // _INC_CUID_H
