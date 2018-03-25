@@ -382,8 +382,8 @@ void CClient::addItem_Equipped( const CItem * pItem )
 		return;
 
 	new PacketItemEquipped(this, pItem);
-
-	addAOSTooltip( pItem );
+	
+	//addAOSTooltip(pItem);		// tooltips for equipped items are handled on packet 0x78 (PacketCharacter)
 }
 
 void CClient::addItem_InContainer( const CItem * pItem )
@@ -399,7 +399,7 @@ void CClient::addItem_InContainer( const CItem * pItem )
 	if ( PacketDropAccepted::CanSendTo(GetNetState()) )
 		new PacketDropAccepted(this);
 
-	addAOSTooltip( pItem );
+	//addAOSTooltip(pItem);		// tooltips for items inside containers are handled on packet 0x3C (PacketItemContents)
 }
 
 void CClient::addItem( CItem * pItem )
@@ -697,14 +697,14 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 			if (pSrcChar)
 				if (GetNetState()->isClientEnhanced() && pSrcChar->m_pNPC)
 					goto forcesay;
-			defaultHue = static_cast<HUE_TYPE>(g_Exp.m_VarDefs.GetKeyNum("SMSG_DEF_COLOR"));
+			defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("SMSG_DEF_COLOR"));
 			defaultFont = static_cast<FONT_TYPE>(g_Exp.m_VarDefs.GetKeyNum("SMSG_DEF_FONT"));
 			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("SMSG_DEF_UNICODE", true) > 0 ? true : false;
 			break;
 		}
 		case TALKMODE_EMOTE:
 		{
-			defaultHue = static_cast<HUE_TYPE>(g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_COLOR"));
+			defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_COLOR"));
 			defaultFont = static_cast<FONT_TYPE>(g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_FONT"));
 			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_UNICODE", true) > 0 ? true : false;
 			break;
@@ -712,14 +712,14 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		case TALKMODE_SAY:
 		{
 			forcesay:
-			defaultHue = static_cast<HUE_TYPE>(g_Exp.m_VarDefs.GetKeyNum("SAY_DEF_COLOR"));
+			defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("SAY_DEF_COLOR"));
 			defaultFont = static_cast<FONT_TYPE>(g_Exp.m_VarDefs.GetKeyNum("SAY_DEF_FONT"));
 			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("SAY_DEF_UNICODE", true) > 0 ? true : false;
 			break;
 		}
 		case TALKMODE_OBJ:
 		{
-			defaultHue = static_cast<HUE_TYPE>(g_Exp.m_VarDefs.GetKeyNum("MSG_DEF_COLOR"));
+			defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("MSG_DEF_COLOR"));
 			defaultFont = static_cast<FONT_TYPE>(g_Exp.m_VarDefs.GetKeyNum("MSG_DEF_FONT"));
 			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("MSG_DEF_UNICODE", true) > 0 ? true : false;
 			break;
@@ -733,7 +733,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 			}
 			else
 			{
-				defaultHue = static_cast<HUE_TYPE>(g_Exp.m_VarDefs.GetKeyNum("IMSG_DEF_COLOR"));
+				defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("IMSG_DEF_COLOR"));
 				defaultFont = static_cast<FONT_TYPE>(g_Exp.m_VarDefs.GetKeyNum("IMSG_DEF_FONT"));
 				defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("IMSG_DEF_UNICODE", true) > 0 ? true : false;
 			}
@@ -825,7 +825,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 				CArgs += ( !strcmp(ppArgs[i], "NULL") ? " " : ppArgs[i] );
 			}
 
-			addBarkLocalizedEx( iClilocId, pSrc, static_cast<HUE_TYPE>(Args[0]), mode, static_cast<FONT_TYPE>(Args[1]), static_cast<AFFIX_TYPE>(iAffixType), ppArgs[2], CArgs.GetPtr());
+			addBarkLocalizedEx( iClilocId, pSrc, (HUE_TYPE)(Args[0]), mode, static_cast<FONT_TYPE>(Args[1]), static_cast<AFFIX_TYPE>(iAffixType), ppArgs[2], CArgs.GetPtr());
 			break;
 		}
 
@@ -842,7 +842,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 				CArgs += ( !strcmp(ppArgs[i], "NULL") ? " " : ppArgs[i] );
 			}
 
-			addBarkLocalized( iClilocId, pSrc, static_cast<HUE_TYPE>(Args[0]), mode, static_cast<FONT_TYPE>(Args[1]), CArgs.GetPtr());
+			addBarkLocalized( iClilocId, pSrc, (HUE_TYPE)(Args[0]), mode, static_cast<FONT_TYPE>(Args[1]), CArgs.GetPtr());
 			break;
 		}
 
@@ -850,7 +850,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		{
 			nchar szBuffer[ MAX_TALK_BUFFER ];
 			CvtSystemToNUNICODE( szBuffer, CountOf(szBuffer), m_BarkBuffer.GetPtr(), -1 );
-			addBarkUNICODE( szBuffer, pSrc, static_cast<HUE_TYPE>(Args[0]), mode, static_cast<FONT_TYPE>(Args[1]), 0 );
+			addBarkUNICODE( szBuffer, pSrc, (HUE_TYPE)(Args[0]), mode, static_cast<FONT_TYPE>(Args[1]), 0 );
 			break;
 		}
 
@@ -861,7 +861,7 @@ bark_default:
 			if ( m_BarkBuffer.IsEmpty())
 				m_BarkBuffer.Format("%s%s", name, pszText);
 
-			addBark( m_BarkBuffer.GetPtr(), pSrc, static_cast<HUE_TYPE>(Args[0]), mode, static_cast<FONT_TYPE>(Args[1]));
+			addBark( m_BarkBuffer.GetPtr(), pSrc, (HUE_TYPE)(Args[0]), mode, static_cast<FONT_TYPE>(Args[1]));
 			break;
 		}
 	}
@@ -969,7 +969,7 @@ void CClient::GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMI
 	}
 
 	if ( m_pChar->IsStatFlag( STATF_HALLUCINATING ))
-		wHue = static_cast<HUE_TYPE>(Calc_GetRandVal( HUE_DYE_HIGH ));
+		wHue = (HUE_TYPE)(Calc_GetRandVal( HUE_DYE_HIGH ));
 	else if ( pChar->IsStatFlag(STATF_STONE))
 		wHue = HUE_STONE;
 	else if ( pChar->IsStatFlag(STATF_INSUBSTANTIAL))
@@ -1024,7 +1024,7 @@ void CClient::GetAdjustedCharID( const CChar * pChar, CREID_TYPE &id, HUE_TYPE &
 			}
 		}
 
-		wHue = static_cast<HUE_TYPE>(Calc_GetRandVal(HUE_DYE_HIGH));
+		wHue = (HUE_TYPE)(Calc_GetRandVal(HUE_DYE_HIGH));
 	}
 	else
 	{
@@ -1210,7 +1210,7 @@ void CClient::addItemName( const CItem * pItem )
 		if ( pNewStr != NULL )
 			strcpylen(szName, pNewStr, CountOf(szName));
 
-		wHue = static_cast<HUE_TYPE>(Args.m_VarsLocal.GetKeyNum("ClickMsgHue", true));
+		wHue = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("ClickMsgHue", true));
 	}
 
 	addObjMessage( szName, pItem, wHue, TALKMODE_ITEM );
@@ -1330,7 +1330,7 @@ void CClient::addCharName( const CChar * pChar ) // Singleclick text for a chara
 		if ( pNewStr != NULL )
 			strcpy(pszTemp, pNewStr);
 
-		wHue = static_cast<HUE_TYPE>(Args.m_VarsLocal.GetKeyNum("ClickMsgHue", true));
+		wHue = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("ClickMsgHue", true));
 	}
 
 	addObjMessage( pszTemp, pChar, wHue, TALKMODE_ITEM );
@@ -2729,7 +2729,8 @@ byte CClient::Setup_ListReq( const char * pszAccName, const char * pszPassword, 
 	}*/
 
 	new PacketEnableFeatures(this,
-		g_Cfg.GetPacketFlag(false, (RESDISPLAY_VERSION)(m_pAccount->GetResDisp()), (uchar)(maximum(m_pAccount->GetMaxChars(), m_pAccount->m_Chars.GetCharCount()))));
+		g_Cfg.GetPacketFlag( false, (RESDISPLAY_VERSION)(m_pAccount->GetResDisp()),
+		(uchar)(maximum(m_pAccount->GetMaxChars(), m_pAccount->m_Chars.GetCharCount()))) );
 	new PacketCharacterList(this);
 
 	m_Targ_Mode = CLIMODE_SETUP_CHARLIST;

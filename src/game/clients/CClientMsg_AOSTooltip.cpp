@@ -29,21 +29,22 @@ void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
 	if (PacketPropertyList::CanSendTo(GetNetState()) == false)
 		return;
 
+	// Enhanced and KR clients always need the tooltips (but they can't be enabled without FEATURE_AOS_UPDATE_B, since this has to be sent to the client via the packet 0xB9).
+	// Shop items use tooltips whether they're disabled or not,
+	//  so we can just send a basic tooltip with the item name
 	bool bNameOnly = false;
-	if (!IsResClient(RDS_AOS) || !IsAosFlagEnabled(FEATURE_AOS_UPDATE_B))
+	if ( !(IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) && IsResClient(RDS_AOS)) /* && !GetNetState()->isClientKR() && !GetNetState()->isClientEnhanced() */ )
 	{
 		if (!bShop)
 			return;
 
-		// shop items use tooltips whether they're disabled or not,
-		// so we can just send a basic tooltip with the item name
 		bNameOnly = true;
 	}
 
 	// we do not need to send tooltips for items not in LOS (multis/ships)
 	//DEBUG_MSG(("(( m_pChar->GetTopPoint().GetDistSight(pObj->GetTopPoint()) (%x) > UO_MAP_VIEW_SIZE_DEFAULT (%x) ) && ( !bShop ) (%x) )", m_pChar->GetTopPoint().GetDistSight(pObj->GetTopPoint()), UO_MAP_VIEW_SIZE_DEFAULT, ( !bShop )));
 	int iDist = m_pChar->GetTopPoint().GetDistSight(pObj->GetTopPoint());
-	if ( (iDist > m_pChar->GetVisualRange()) && (iDist <= UO_MAP_VIEW_RADAR) && !bShop )
+	if ( (iDist > m_pChar->GetVisualRange()) && !bShop )
 		return;
 
 	// We check here if we are sending a tooltip for a static/non-movable items
@@ -75,7 +76,7 @@ void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
 		this->m_TooltipData.Clean(true);
 
 		//DEBUG_MSG(("Preparing tooltip for 0%x (%s)\n", (dword)pObj->GetUID(), pObj->GetName()));
-		if (bNameOnly) // if we only want to display the name (FEATURE_AOS_UPDATE_B disabled)
+		if (bNameOnly) // if we only want to display the name
 		{
 			dword ClilocName = (dword)(pObj->GetDefNum("NAMELOC", false, true));
 
@@ -87,7 +88,7 @@ void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
 				t->FormatArgs("%s", pObj->GetName());
 			}
 		}
-		else // we have FEATURE_AOS_UPDATE_B enabled
+		else
 		{
 			TRIGRET_TYPE iRet = TRIGRET_RET_FALSE;
 
@@ -102,19 +103,23 @@ void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
 			{
 				// First add the name tooltip entry
 
-				dword ClilocName = (dword)(pObj->GetDefNum("NAMELOC", true, true));
+				dword dwClilocName = (dword)(pObj->GetDefNum("NAMELOC", true, true));
 
 				if (pItem)
 				{
-					if (ClilocName)
-						m_TooltipData.InsertAt(0, new CClientTooltip(ClilocName));
+					if ( dwClilocName )
+					{
+						m_TooltipData.InsertAt(0, new CClientTooltip(dwClilocName));
+					}
+					else if ( (pItem->GetAmount() > 1) && (pItem->GetType() != IT_CORPSE) )
+					{
+						m_TooltipData.InsertAt(0, t = new CClientTooltip(1050039)); // ~1_NUMBER~ ~2_ITEMNAME~
+						t->FormatArgs("%" PRIu32 "\t%s", pItem->GetAmount(), pObj->GetName());
+					}
 					else
 					{
 						m_TooltipData.InsertAt(0, t = new CClientTooltip(1050045)); // ~1_PREFIX~~2_NAME~~3_SUFFIX~
-						if ((pItem->GetAmount() != 1) && (pItem->GetType() != IT_CORPSE))
-							t->FormatArgs("%d \t%s\t ", pItem->GetAmount(), pObj->GetName());
-						else
-							t->FormatArgs(" \t%s\t ", pObj->GetName());
+						t->FormatArgs(" \t%s\t ", pObj->GetName());
 					}
 				}
 				else if (pChar)
@@ -150,8 +155,8 @@ void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
 
 					// The name
 					m_TooltipData.InsertAt(0, t = new CClientTooltip(1050045)); // ~1_PREFIX~~2_NAME~~3_SUFFIX~
-					if (ClilocName)
-						t->FormatArgs("%s\t%u\t%s", lpPrefix, ClilocName, lpSuffix);
+					if (dwClilocName)
+						t->FormatArgs("%s\t%u\t%s", lpPrefix, dwClilocName, lpSuffix);
 					else
 						t->FormatArgs("%s\t%s\t%s", lpPrefix, pObj->GetName(), lpSuffix);
 

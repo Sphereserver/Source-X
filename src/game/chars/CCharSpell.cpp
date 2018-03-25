@@ -577,15 +577,28 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 		}
 
 		case LAYER_SPELL_Incognito:
+		{
 			StatFlag_Clear(STATF_INCOGNITO);
-			SetName(pSpell->GetName());	// restore your name
-			pSpell->SetName("");	// clear the name from the item (might be a worn item)
-			if (!IsStatFlag(STATF_POLYMORPH))
+			SetName(pSpell->GetName());		// restore your name
+
+			if (!IsStatFlag(STATF_POLYMORPH) && IsPlayableCharacter())	// polymorph doesn't change the hue of the character, only the id
 				SetHue(m_prev_Hue);
+
+			CItem *pHair = LayerFind(LAYER_HAIR);
+			if (pHair)
+				pHair->SetHue((HUE_TYPE)(pSpell->GetTagDefs()->GetKeyNum("COLOR.HAIR")));
+
+			CItem *pBeard = LayerFind(LAYER_BEARD);
+			if (pBeard)
+				pBeard->SetHue((HUE_TYPE)(pSpell->GetTagDefs()->GetKeyNum("COLOR.BEARD")));
+				
+			NotoSave_Update();
 			if (pClient)
 				pClient->removeBuff(BI_INCOGNITO);
-			NotoSave_Update();
+
+				
 			return;
+		}
 
 		case LAYER_SPELL_Invis:
 			Reveal(STATF_INVISIBLE);
@@ -876,7 +889,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					break;
 				case SPELL_Lich_Form:
 					pSpell->m_itSpell.m_PolyStr = 13;		// +RegenManaVal
-					pSpell->m_itSpell.m_PolyDex = 5;			// -RegenHitsVal
+					pSpell->m_itSpell.m_PolyDex = 5;		// -RegenHitsVal
 					pSpell->m_itSpell.m_spellcharges = 10;	// -ResFire, +ResPoison, +ResCold
 					m_atMagery.m_SummonID = CREID_LICH;
 					SetDefNum("RegenManaVal", GetDefNum("RegenManaVal", true) + pSpell->m_itSpell.m_PolyStr);	// RegenManaVal
@@ -906,9 +919,9 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					break;
 				case SPELL_Vampiric_Embrace:
 					pSpell->m_itSpell.m_PolyStr = 13;		// +Hit Leech Life
-					pSpell->m_itSpell.m_PolyDex = 5;			// +RegenStamVal
+					pSpell->m_itSpell.m_PolyDex = 5;		// +RegenStamVal
 					pSpell->m_itSpell.m_spellcharges = 3;	// +RegenManaVal
-					pSpell->m_itSpell.m_spelllevel = 25;		// -ResFire
+					pSpell->m_itSpell.m_spelllevel = 25;	// -ResFire
 					m_atMagery.m_SummonID = CREID_VAMPIRE_BAT;
 					SetDefNum("HitLeechLife", GetDefNum("HitLeechLife", true) + pSpell->m_itSpell.m_PolyStr);		// +Hit Leech Life
 					SetDefNum("RegenStamVal", GetDefNum("RegenStamVal", true) + pSpell->m_itSpell.m_PolyDex);		// +RegenStamVal
@@ -935,8 +948,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			ASSERT(pCharDef);
 
 			// re-apply our incognito name
-			if (IsStatFlag(STATF_INCOGNITO))
-				SetName(pCharDef->GetTypeName());
+			//if (IsStatFlag(STATF_INCOGNITO))
+			//	SetName(pCharDef->GetTypeName());
 
 			// set to creature type stats
 			if (IsSetMagicFlags(MAGICF_POLYMORPHSTATS))
@@ -1006,12 +1019,36 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			{
 				const CCharBase * pCharDef = Char_GetDef();
 				ASSERT(pCharDef);
+
 				StatFlag_Set(STATF_INCOGNITO);
 				pSpell->SetName(GetName());	// Give it my name
-				SetName(pCharDef->GetTypeName());	// Give me general name for the type
-				if (!IsStatFlag(STATF_POLYMORPH) && IsPlayableCharacter())
-					SetHue((HUE_UNDERWEAR | HUE_SKIN_LOW) + static_cast<HUE_TYPE>(Calc_GetRandVal(HUE_SKIN_HIGH - HUE_SKIN_LOW)));
 
+				if (IsHuman())
+					SetName(pCharDef->IsFemale() ? "#NAMES_HUMANFEMALE" : "#NAMES_HUMANMALE");
+				else if (IsElf())
+					SetName(pCharDef->IsFemale() ? "#NAMES_ELF_FEMALE" : "#NAMES_ELF_MALE");
+				else if (IsGargoyle())
+					SetName(pCharDef->IsFemale() ? "#NAMES_GARGOYLE_FEMALE" : "#NAMES_GARGOYLE_MALE");
+
+				if (IsPlayableCharacter())
+					SetHue((HUE_TYPE)(Calc_GetRandVal2(HUE_SKIN_LOW, HUE_SKIN_HIGH)) | HUE_UNDERWEAR);
+
+				HUE_TYPE RandomHairHue = (HUE_TYPE)(Calc_GetRandVal2(HUE_HAIR_LOW, HUE_HAIR_HIGH));
+				CItem *pHair = LayerFind(LAYER_HAIR);
+				if (pHair)
+				{
+					pSpell->GetTagDefs()->SetNum("COLOR.HAIR", (int64)(pHair->GetHue()));
+					pHair->SetHue(RandomHairHue);
+				}
+
+				CItem *pBeard = LayerFind(LAYER_BEARD);
+				if (pBeard)
+				{
+					pSpell->GetTagDefs()->SetNum("COLOR.BEARD", (int64)(pBeard->GetHue()));
+					pBeard->SetHue(RandomHairHue);
+				}
+
+				NotoSave_Update();
 				if (pClient && IsSetOF(OF_Buffs))
 				{
 					pClient->removeBuff(BI_INCOGNITO);
@@ -2546,25 +2583,25 @@ bool CChar::Spell_CastDone()
 			{
 				switch (spell)
 				{
-				case SPELL_Blade_Spirit:	m_atMagery.m_SummonID = CREID_BLADES;		break;
-				case SPELL_Vortex:			m_atMagery.m_SummonID = CREID_VORTEX;		break;
-				case SPELL_Air_Elem:		m_atMagery.m_SummonID = CREID_AIR_ELEM;		break;
-				case SPELL_Daemon:			m_atMagery.m_SummonID = CREID_DEMON;		break;
-				case SPELL_Earth_Elem:		m_atMagery.m_SummonID = CREID_EARTH_ELEM;	break;
-				case SPELL_Fire_Elem:		m_atMagery.m_SummonID = CREID_FIRE_ELEM;	break;
-				case SPELL_Water_Elem:		m_atMagery.m_SummonID = CREID_WATER_ELEM;	break;
-				case SPELL_Summon_Undead:
-					switch (Calc_GetRandVal(15))
-					{
-					case 1:					m_atMagery.m_SummonID = CREID_LICH;			break;
-					case 3:
-					case 5:
-					case 7:
-					case 9:					m_atMagery.m_SummonID = CREID_SKELETON;		break;
-					default:				m_atMagery.m_SummonID = CREID_ZOMBIE;		break;
-					}
-				case SPELL_Vengeful_Spirit:	m_atMagery.m_SummonID = CREID_REVENANT;		break;
-				default: break;
+					case SPELL_Blade_Spirit:	m_atMagery.m_SummonID = CREID_BLADE_SPIRIT;	break;
+					case SPELL_Vortex:			m_atMagery.m_SummonID = CREID_ENERGY_VORTEX;break;
+					case SPELL_Air_Elem:		m_atMagery.m_SummonID = CREID_AIR_ELEM;		break;
+					case SPELL_Daemon:			m_atMagery.m_SummonID = CREID_DEMON;		break;
+					case SPELL_Earth_Elem:		m_atMagery.m_SummonID = CREID_EARTH_ELEM;	break;
+					case SPELL_Fire_Elem:		m_atMagery.m_SummonID = CREID_FIRE_ELEM;	break;
+					case SPELL_Water_Elem:		m_atMagery.m_SummonID = CREID_WATER_ELEM;	break;
+					case SPELL_Summon_Undead:
+						switch (Calc_GetRandVal(15))
+						{
+							case 1:				m_atMagery.m_SummonID = CREID_LICH;			break;
+							case 3:
+							case 5:
+							case 7:
+							case 9:				m_atMagery.m_SummonID = CREID_SKELETON;		break;
+							default:			m_atMagery.m_SummonID = CREID_ZOMBIE;		break;
+						}
+					case SPELL_Vengeful_Spirit:	m_atMagery.m_SummonID = CREID_REVENANT;		break;
+					default: break;
 				}
 			}
 			else
@@ -2586,7 +2623,7 @@ bool CChar::Spell_CastDone()
 				CResourceID food = g_Cfg.ResourceGetIDType(RES_ITEMDEF, "DEFFOOD");
 				CItem *pItem = CItem::CreateScript((iT1 ? iT1 : static_cast<ITEMID_TYPE>(food.GetResIndex())), this);
 				ASSERT(pItem);
-				if ( pSpellDef->IsSpellType(SPELLFLAG_TARG_OBJ|SPELLFLAG_TARG_XYZ) )
+				if (pSpellDef->IsSpellType(SPELLFLAG_TARG_OBJ|SPELLFLAG_TARG_XYZ))
 				{
 					pItem->MoveToCheck(m_Act_p, this);
 				}
@@ -2607,7 +2644,7 @@ bool CChar::Spell_CastDone()
 			case SPELL_Telekin:	// Act as DClick on the object.
 			{
 				CItemCorpse * pCorpse = dynamic_cast<CItemCorpse *>(pObj->GetTopLevelObj());
-				if ( pCorpse && pCorpse->m_uidLink != GetUID() )
+				if (pCorpse && pCorpse->m_uidLink != GetUID())
 				{
 					CheckCorpseCrime(pCorpse, true, false);
 					Reveal();
@@ -2629,7 +2666,7 @@ bool CChar::Spell_CastDone()
 			case SPELL_Dispel_Field:
 			{
 				CItem * pItem = dynamic_cast <CItem*> (pObj);
-				if ( pItem == NULL || pItem->IsAttr(ATTR_MOVE_NEVER) || !pItem->IsType(IT_SPELL) )
+				if (pItem == NULL || pItem->IsAttr(ATTR_MOVE_NEVER) || !pItem->IsType(IT_SPELL))
 				{
 					SysMessageDefault(DEFMSG_SPELL_DISPELLF_WT);
 					return false;
@@ -3557,6 +3594,12 @@ int CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharSrc
 				iDuration = 120;
 				break;
 
+			case SPELL_Incognito:
+				iDuration = 1 + ((6 * pCharSrc->Skill_GetBase(SKILL_MAGERY)) / 50);
+				if (iDuration > 144)
+					iDuration = 144;
+				break;
+
 			case SPELL_Paralyze:
 				iDuration = 7 + (pCharSrc->Skill_GetBase(SKILL_MAGERY) / 50);	// pre-AOS formula
 				break;
@@ -3585,12 +3628,12 @@ int CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharSrc
 				break;
 
 			case SPELL_Polymorph:
-				{
-					iDuration = pCharSrc->Skill_GetBase(SKILL_MAGERY) / 10;
-					if ( iDuration > 120 )
-						iDuration = 120;
-				}
-				break;
+			{
+				iDuration = pCharSrc->Skill_GetBase(SKILL_MAGERY) / 10;
+				if (iDuration > 120)
+					iDuration = 120;
+			}
+			break;
 
 			case SPELL_Vortex:
 				iDuration = 90;

@@ -1441,7 +1441,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					// anyway.. I'd like to keep the syntax similar to SAYUA
 			 		nchar szBuffer[ MAX_TALK_BUFFER ];
 					CvtSystemToNUNICODE( szBuffer, CountOf(szBuffer), pszArgs[4], -1 );
-					addBarkUNICODE( szBuffer, NULL, static_cast<HUE_TYPE>(Exp_GetVal(pszArgs[0])), TALKMODE_SYSTEM, FONT_NORMAL, pszArgs[3] );
+					addBarkUNICODE( szBuffer, NULL, (HUE_TYPE)(Exp_GetVal(pszArgs[0])), TALKMODE_SYSTEM, FONT_NORMAL, pszArgs[3] );
 				}
 			}
 			break;
@@ -1468,7 +1468,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 						CArgs += ( !strncmp(ppArgs[i], "NULL", 4) ? " " : ppArgs[i] );
 					}
 
-					addBarkLocalized(iClilocId, NULL, static_cast<HUE_TYPE>(hue), TALKMODE_SYSTEM, FONT_NORMAL, CArgs.GetPtr());
+					addBarkLocalized(iClilocId, NULL, (HUE_TYPE)(hue), TALKMODE_SYSTEM, FONT_NORMAL, CArgs.GetPtr());
 				}
 			}
 			break;
@@ -1497,7 +1497,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 						CArgs += ( !strncmp(ppArgs[i], "NULL", 4) ? " " : ppArgs[i] );
 					}
 
-					addBarkLocalizedEx( iClilocId, NULL, static_cast<HUE_TYPE>(hue), TALKMODE_SYSTEM, FONT_NORMAL, static_cast<AFFIX_TYPE>(affix), ppArgs[3], CArgs.GetPtr() );
+					addBarkLocalizedEx( iClilocId, NULL, (HUE_TYPE)(hue), TALKMODE_SYSTEM, FONT_NORMAL, static_cast<AFFIX_TYPE>(affix), ppArgs[3], CArgs.GetPtr() );
 				}
 			}
 			break;

@@ -436,7 +436,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			}
 			else if ( s.IsKey("COLOR" ))
 			{
-				pItem->SetHue( static_cast<HUE_TYPE>( ATOI(pArg) ) );
+				pItem->SetHue( (HUE_TYPE)( ATOI(pArg) ) );
 				continue;
 			}
 			else if ( s.IsKey("AMOUNT" ))
@@ -537,7 +537,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			}
 			else if ( s.IsKey("SKIN" ))
 			{
-				pChar->SetHue( static_cast<HUE_TYPE>( ATOI(pArg) ));
+				pChar->SetHue( (HUE_TYPE)( ATOI(pArg) ));
 				continue;
 			}
 			else if ( s.IsKey("DIR" ))
@@ -554,7 +554,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			}
 			else if ( s.IsKey("XSKIN" ))
 			{
-				pChar->m_prev_Hue = static_cast<HUE_TYPE>( ATOI(pArg) );
+				pChar->m_prev_Hue = (HUE_TYPE)( ATOI(pArg) );
 				continue;
 			}
 			else if ( s.IsKey("FONT" ))

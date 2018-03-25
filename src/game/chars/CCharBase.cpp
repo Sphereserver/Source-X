@@ -287,13 +287,13 @@ bool CCharBase::r_LoadVal( CScript & s )
 			m_Aversions.Load( s.GetArgStr() );
 			break;
 		case CBC_BLOODCOLOR:
-			m_wBloodHue = static_cast<HUE_TYPE>(s.GetArgVal());
+			m_wBloodHue = (HUE_TYPE)(s.GetArgVal());
 			break;
 		case CBC_ARMOR:
 			m_defense = s.GetArgWVal();
 			break;
 		case CBC_COLOR:
-			m_wColor = static_cast<HUE_TYPE>(s.GetArgVal());
+			m_wColor = (HUE_TYPE)(s.GetArgVal());
 			break;
 		case CBC_DESIRES:
 			m_Desires.Load( s.GetArgStr() );

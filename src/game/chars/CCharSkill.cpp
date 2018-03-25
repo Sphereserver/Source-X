@@ -2926,7 +2926,7 @@ int CChar::Skill_Act_Breath( SKTRIG_TYPE stage )
 			iDamage = 200;
 	}
 
-	HUE_TYPE hue = static_cast<HUE_TYPE>(GetDefNum("BREATH.HUE", true));
+	HUE_TYPE hue = (HUE_TYPE)(GetDefNum("BREATH.HUE", true));
 	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(GetDefNum("BREATH.ANIM", true));
 	EFFECT_TYPE effect = static_cast<EFFECT_TYPE>(GetDefNum("BREATH.TYPE",true));
 	if ( !id )

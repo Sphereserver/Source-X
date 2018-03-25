@@ -463,11 +463,13 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 				int bState = s.GetArgVal();
 				if ( (bState < SKILLLOCK_UP) || (bState > SKILLLOCK_LOCK) )
 					return false;
-				Skill_SetLock(skill, static_cast<SKILLLOCK_TYPE>(bState));
+				Skill_SetLock(skill, (SKILLLOCK_TYPE)bState);
+				if ( pChar->IsClient() )
+					pChar->GetClient()->addSkillWindow(skill);
 			} return true;
 		case CPC_SPEEDMODE:
 			{
-				m_speedMode = (byte)(s.GetArgVal());
+				m_speedMode = s.GetArgBVal();
 				pChar->UpdateSpeedMode();
 			} return true;
 		case CPC_STATLOCK:
@@ -478,7 +480,9 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 				int bState = s.GetArgVal();
 				if ( (bState < SKILLLOCK_UP) || (bState > SKILLLOCK_LOCK) )
 					return false;
-				Stat_SetLock(stat, static_cast<SKILLLOCK_TYPE>(bState));
+				Stat_SetLock(stat, (SKILLLOCK_TYPE)bState );
+				if ( pChar->IsClient() )
+					pChar->GetClient()->addStatusWindow(pChar);
 			} return true;
 
 		default:

@@ -696,7 +696,7 @@ PacketMovementAck::PacketMovementAck(const CClient* target, byte sequence) : Pac
 	ADDTOCALLSTACK("PacketMovementAck::PacketMovementAck");
 
 	writeByte(sequence);
-	writeByte((byte)(target->GetChar()->Noto_GetFlag(target->GetChar(), false, target->GetNetState()->isClientVersion(MINCLIVER_NOTOINVUL), true)));
+	writeByte((byte)(target->GetChar()->Noto_GetFlag(target->GetChar(), true, target->GetNetState()->isClientVersion(MINCLIVER_NOTOINVUL), true)));
 	push(target);
 }
 
@@ -2187,7 +2187,7 @@ PacketCharacterMove::PacketCharacterMove(const CClient* target, const CChar* cha
 	writeByte(direction);
 	writeInt16(hue);
 	writeByte(character->GetModeFlag(target));
-	writeByte((byte)(character->Noto_GetFlag(target->GetChar(), false, target->GetNetState()->isClientVersion(MINCLIVER_NOTOINVUL), true)));
+	writeByte((byte)(character->Noto_GetFlag(target->GetChar(), true, target->GetNetState()->isClientVersion(MINCLIVER_NOTOINVUL), true)));
 
 	push(target);
 }
@@ -2214,14 +2214,14 @@ PacketCharacter::PacketCharacter(CClient* target, const CChar* character) : Pack
 
 	initLength();
 	writeInt32(character->GetUID());
-	writeInt16((word)(id));
+	writeInt16((word)id);
 	writeInt16(pos.m_x);
 	writeInt16(pos.m_y);
 	writeByte(pos.m_z);
 	writeByte(character->GetDirFlag());
 	writeInt16(hue);
 	writeByte(character->GetModeFlag(target));
-	writeByte((byte)(character->Noto_GetFlag(target->GetChar(), false, target->GetNetState()->isClientVersion(MINCLIVER_NOTOINVUL), true)));
+	writeByte((byte)(character->Noto_GetFlag(target->GetChar(), true, target->GetNetState()->isClientVersion(MINCLIVER_NOTOINVUL), true)));
 
 	bool isNewMobilePacket = target->GetNetState()->isClientVersion(MINCLIVER_NEWMOBINCOMING);
 
@@ -2254,20 +2254,20 @@ PacketCharacter::PacketCharacter(CClient* target, const CChar* character) : Pack
 
 			if (isNewMobilePacket)
 			{
-				writeInt16((word)(itemid));
-				writeByte((byte)(layer));
-				writeInt16((word)(hue));
+				writeInt16((word)itemid);
+				writeByte((byte)layer);
+				writeInt16((word)hue);
 			}
 			else if (hue != 0)
 			{
 				writeInt16((word)(itemid | 0x8000));
-				writeByte((byte)(layer));
-				writeInt16((word)(hue));
+				writeByte((byte)layer);
+				writeInt16((word)hue);
 			}
 			else
 			{
-				writeInt16((word)(itemid));
-				writeByte((byte)(layer));
+				writeInt16((word)itemid);
+				writeByte((byte)layer);
 			}
 		}
 	}
@@ -2304,7 +2304,7 @@ PacketDisplayMenu::PacketDisplayMenu(const CClient* target, CLIMODE_TYPE mode, c
 
 	initLength();
 	writeInt32(object->GetUID());
-	writeInt16((word)(mode));
+	writeInt16((word)mode);
 
 	size_t len = items[0].m_sText.GetLength();
 	if (len > 255)
@@ -2450,13 +2450,15 @@ PacketPaperdoll::PacketPaperdoll(const CClient* target, const CChar* character) 
 		if (guildMember != NULL && guildMember->IsAbbrevOn() && guildMember->GetParentStone()->GetAbbrev()[0])
 		{
 			len = sprintf(text, "%s [%s], %s", character->Noto_GetTitle(), guildMember->GetParentStone()->GetAbbrev(),
-							guildMember->GetTitle()[0]? guildMember->GetTitle() : character->GetTradeTitle());
+							( guildMember->GetTitle()[0] ? guildMember->GetTitle() : (IsSetOF(OF_NoPaperdollTradeTitle) ? "" : character->GetTradeTitle()) ) );
 		}
 
 		if (len <= 0)
 		{
-			const char *title = character->GetTradeTitle();
-			if ( title[0] )
+			const char *title = NULL;
+			if (!IsSetOF(OF_NoPaperdollTradeTitle))
+				title = character->GetTradeTitle();
+			if ( title && title[0] )
 				sprintf(text, "%s, %s", character->Noto_GetTitle(), title);
 			else
 				sprintf(text, "%s", character->Noto_GetTitle());
@@ -2465,7 +2467,7 @@ PacketPaperdoll::PacketPaperdoll(const CClient* target, const CChar* character) 
 		writeStringFixedASCII(text, 60);
 	}
 
-	writeByte((byte)(mode));
+	writeByte((byte)mode);
 	push(target);
 }
 
@@ -3144,11 +3146,11 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 	size_t count = target->Setup_FillCharList(this, account->m_uidLastChar.CharFind());
 	seek(countPos);
 
-	writeByte((byte)(count));
+	writeByte((byte)count);
 	skip(count * 60);
 
 	size_t startCount = g_Cfg.m_StartDefs.GetCount();
-	writeByte((byte)(startCount));
+	writeByte((byte)startCount);
 
 	// since 7.0.13.0, start locations have extra information
 	dword tmVer = (dword)(account->m_TagDefs.GetKeyNum("clientversion"));
@@ -3156,7 +3158,7 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 	if ( tmVer >= MINCLIVER_EXTRASTARTINFO || tmVerReported >= MINCLIVER_EXTRASTARTINFO )
 	{
 		// newer clients receive additional start info
-		for ( size_t i = 0; i < startCount; i++ )
+		for ( size_t i = 0; i < startCount; ++i )
 		{
 			const CStartLoc *start = g_Cfg.m_StartDefs[i];
 			writeByte((byte)(i));
@@ -3172,7 +3174,7 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 	}
 	else
 	{
-		for ( size_t i = 0; i < startCount; i++ )
+		for ( size_t i = 0; i < startCount; ++i )
 		{
 			const CStartLoc *start = g_Cfg.m_StartDefs[i];
 			writeByte((byte)(i));
@@ -3181,7 +3183,8 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 		}
 	}
 
-	int flags = g_Cfg.GetPacketFlag(true, static_cast<RESDISPLAY_VERSION>(account->GetResDisp()), maximum(account->GetMaxChars(), (byte)(account->m_Chars.GetCharCount())));
+	int flags = g_Cfg.GetPacketFlag(true, (RESDISPLAY_VERSION)(account->GetResDisp()),
+		maximum(account->GetMaxChars(), (byte)(account->m_Chars.GetCharCount())));
 	if ( !target->GetNetState()->getClientType() )
 		flags |= 0x400;
 	writeInt32(flags);

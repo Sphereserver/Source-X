@@ -71,16 +71,16 @@ bool PacketCreate::onReceive(NetState* net)
 	skillval2 = readByte();
 	skill3 = static_cast<SKILL_TYPE>(readByte());
 	skillval3 = readByte();
-	HUE_TYPE hue = static_cast<HUE_TYPE>(readInt16());
+	HUE_TYPE hue = (HUE_TYPE)(readInt16());
 	ITEMID_TYPE hairid = static_cast<ITEMID_TYPE>(readInt16());
-	HUE_TYPE hairhue = static_cast<HUE_TYPE>(readInt16());
+	HUE_TYPE hairhue = (HUE_TYPE)(readInt16());
 	ITEMID_TYPE beardid = static_cast<ITEMID_TYPE>(readInt16());
-	HUE_TYPE beardhue = static_cast<HUE_TYPE>(readInt16());
+	HUE_TYPE beardhue = (HUE_TYPE)(readInt16());
 	skip(1); // shard index
 	byte startloc = readByte();
 	skip(8); // 4=slot, 4=ip
-	HUE_TYPE shirthue = static_cast<HUE_TYPE>(readInt16());
-	HUE_TYPE pantshue = static_cast<HUE_TYPE>(readInt16());
+	HUE_TYPE shirthue = (HUE_TYPE)(readInt16());
+	HUE_TYPE pantshue = (HUE_TYPE)(readInt16());
 
 	bool isFemale = (race_sex_flag % 2) != 0; // Even=Male, Odd=Female (rule applies to all clients)
 	RACE_TYPE rtRace = RACETYPE_HUMAN; // Human
@@ -279,7 +279,7 @@ bool PacketSpeakReq::onReceive(NetState* net)
 
 	size_t packetLength = readInt16();
 	TALKMODE_TYPE mode = static_cast<TALKMODE_TYPE>(readByte());
-	HUE_TYPE hue = static_cast<HUE_TYPE>(readInt16());
+	HUE_TYPE hue = (HUE_TYPE)(readInt16());
 	skip(2); // font
 
 	if (packetLength < getPosition())
@@ -1510,7 +1510,7 @@ bool PacketCreateNew::onReceive(NetState* net)
 	byte strength = readByte();
 	byte dexterity = readByte();
 	byte intelligence = readByte();
-	HUE_TYPE hue = static_cast<HUE_TYPE>(readInt16());
+	HUE_TYPE hue = (HUE_TYPE)(readInt16());
 	skip(8);
 	SKILL_TYPE skill1 = static_cast<SKILL_TYPE>(readByte());
 	byte skillval1 = readByte();
@@ -1521,16 +1521,16 @@ bool PacketCreateNew::onReceive(NetState* net)
 	SKILL_TYPE skill4 = static_cast<SKILL_TYPE>(readByte());
 	byte skillval4 = readByte();
 	skip(26);
-	HUE_TYPE hairhue = static_cast<HUE_TYPE>(readInt16());
+	HUE_TYPE hairhue = (HUE_TYPE)(readInt16());
 	ITEMID_TYPE hairid = static_cast<ITEMID_TYPE>(readInt16());
 	skip(6);
-	HUE_TYPE shirthue = static_cast<HUE_TYPE>(readInt16());
+	HUE_TYPE shirthue = (HUE_TYPE)(readInt16());
 	ITEMID_TYPE shirtid = static_cast<ITEMID_TYPE>(readInt16());
 	skip(1);
-	HUE_TYPE facehue = static_cast<HUE_TYPE>(readInt16());
+	HUE_TYPE facehue = (HUE_TYPE)(readInt16());
 	ITEMID_TYPE faceid = static_cast<ITEMID_TYPE>(readInt16());
 	skip(1);
-	HUE_TYPE beardhue = static_cast<HUE_TYPE>(readInt16());
+	HUE_TYPE beardhue = (HUE_TYPE)(readInt16());
 	ITEMID_TYPE beardid = static_cast<ITEMID_TYPE>(readInt16());
 
 	// This creation packet does not contain skills and values if
@@ -1732,7 +1732,7 @@ bool PacketDyeObject::onReceive(NetState* net)
 
 	CUID serial(readInt32());
 	skip(2); // item id
-	HUE_TYPE hue = static_cast<HUE_TYPE>(readInt16());
+	HUE_TYPE hue = (HUE_TYPE)(readInt16());
 
 	net->getClient()->Event_Item_Dye(serial, hue);
 	return true;
@@ -2087,7 +2087,7 @@ bool PacketSpeakReqUNICODE::onReceive(NetState* net)
 
 	size_t packetLength = readInt16();
 	TALKMODE_TYPE mode = static_cast<TALKMODE_TYPE>(readByte());
-	HUE_TYPE hue = static_cast<HUE_TYPE>(readInt16());
+	HUE_TYPE hue = (HUE_TYPE)(readInt16());
 	FONT_TYPE font = static_cast<FONT_TYPE>(readInt16());
 	tchar language[4];
 	readStringASCII(language, CountOf(language));
@@ -4447,16 +4447,16 @@ bool PacketCreate70016::onReceive(NetState* net)
 	skillval3 = readByte();
 	skill4 = static_cast<SKILL_TYPE>(readByte());
 	skillval4 = readByte();
-	HUE_TYPE hue = static_cast<HUE_TYPE>(readInt16());
+	HUE_TYPE hue = (HUE_TYPE)(readInt16());
 	ITEMID_TYPE hairid = static_cast<ITEMID_TYPE>(readInt16());
-	HUE_TYPE hairhue = static_cast<HUE_TYPE>(readInt16());
+	HUE_TYPE hairhue = (HUE_TYPE)(readInt16());
 	ITEMID_TYPE beardid = static_cast<ITEMID_TYPE>(readInt16());
-	HUE_TYPE beardhue = static_cast<HUE_TYPE>(readInt16());
+	HUE_TYPE beardhue = (HUE_TYPE)(readInt16());
 	skip(1); // shard index
 	byte startloc = readByte();
 	skip(8); // 4=slot, 4=ip
-	HUE_TYPE shirthue = static_cast<HUE_TYPE>(readInt16());
-	HUE_TYPE pantshue = static_cast<HUE_TYPE>(readInt16());
+	HUE_TYPE shirthue = (HUE_TYPE)(readInt16());
+	HUE_TYPE pantshue = (HUE_TYPE)(readInt16());
 
 	// convert race_sex_flag: determine which race and sex the client has selected
 	bool isFemale = (race_sex_flag % 2) != 0;	// Even=Male, Odd=Female (rule applies to all clients)

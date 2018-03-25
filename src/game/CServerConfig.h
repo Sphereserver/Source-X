@@ -16,6 +16,7 @@
 
 
 class CAccount;
+
 class CClient;
 class CServerDef;
 
@@ -44,7 +45,8 @@ enum OF_TYPE
 	OF_NoPrefix					= 0x0004000,    // Don't show "a" and "an" prefix on item names
 	OF_DyeType					= 0x0008000,    // Allow use i_dye on all items with t_dye_vat typedef instead only on i_dye_tub itemdef
 	OF_DrinkIsFood				= 0x0010000,    // Typedef t_drink will increase food level like t_food
-	OF_DClickNoTurn				= 0x0020000     // Don't turn the player when DClick or targ an item
+	OF_DClickNoTurn				= 0x0020000,    // Don't turn the player when DClick or targ an item
+	OF_NoPaperdollTradeTitle	= 0x0040000		// Don't show the trade title on the paperdoll
 };
 
 /**
@@ -902,7 +904,7 @@ public:
 	int  m_iArcheryMaxDist;			// Max distance allowed for archery.
 	int  m_iArcheryMinDist;			// Min distance required for archery.
 	int  m_iHitsUpdateRate;			// how often send my hits updates to visible clients.
-	int  m_iCombatArcheryMovementDelay; // If COMBAT_ARCHERYCANMOVE is not enabled, wait this much milliseconds (minimum=10) after the player stopped moving before starting a new attack.
+	int  m_iCombatArcheryMovementDelay; // If COMBAT_ARCHERYCANMOVE is not enabled, wait this much tenth of seconds (minimum=0) after the player stopped moving before starting a new attack.
 	int  m_iCombatDamageEra;		// define damage formula to use on physical combat.
 	int  m_iCombatHitChanceEra;		// define hit chance formula to use on physical combat.
 	int  m_iCombatSpeedEra;			// define swing speed formula to use on physical combat.

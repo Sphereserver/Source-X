@@ -177,7 +177,7 @@ enum CREID_TYPE	// enum the creature animations. (dont allow any others !) also 
 	CREID_ELEM_ICE			= 0xA1,
 	CREID_ELEM_POISON		= 0xA2,
 	CREID_ELEM_SNOW			= 0xA3,
-	CREID_ENERGY_VORTEX		= 0xA4,	// GOOD?
+	CREID_ENERGY_VORTEX		= 0xA4,	// T2A Vortex
 	CREID_WISP_DARK			= 0xA5,
 
 	CREID_ELEM_ORE_GOLD		= 0xA6,
@@ -377,8 +377,8 @@ enum CREID_TYPE	// enum the creature animations. (dont allow any others !) also 
 	CREID_GHOSTMAN			= 0x192, // Ghost robe is not automatic !
 	CREID_GHOSTWOMAN		= 0x193,
 
-	CREID_VORTEX			= 0x23d, // T2A = vortex
-	CREID_BLADES			= 0x23e, // blade spirits (in human range? not sure why)
+	//CREID_ENERGY_VORTEX_NEW= 0x23D, // slot which was supposed to contain the new energy vortex animation, but actually it's broken
+	CREID_BLADE_SPIRIT		= 0x23E, // blade spirits (in human range? not sure why)
 		 
 	CREID_ELFMAN			= 0x25D, // 605 decimal
 	CREID_ELFWOMAN			= 0x25E,

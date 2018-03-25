@@ -577,12 +577,12 @@ public:
 	* Actually 2 values are stored in this vectored list: Notoriety (the notoriety level) and Color (the color we are showing in the HP bar and in our character for the viewer).
 	* Calls @NotoSend trigger with src = pChar, argn1 = notoriety level, argn2 = color to send.
 	* @param pChar is the CChar that needs to know what I am (good, evil, criminal, neutral...) to him.
-	* @param fIncog if set to true (usually because of Incognito spell), this character will be gray for the viever (pChar).
+	* @param fIncog if set to true and he has STATF_INCOGNITO, this character will be gray for the viever (pChar).
 	* @param fInvul if set to true invulnerable characters will return NOTO_INVUL (yellow bar, etc).
 	* @param bGetColor if set to true only the color will be returned and not the notoriety (note that they can differ if set to so in the @NotoSend trigger).
 	* @return NOTO_TYPE notoriety level.
 	*/
-	NOTO_TYPE Noto_GetFlag( const CChar * pChar, bool fIncog = false, bool fInvul = false, bool bGetColor = false ) const;
+	NOTO_TYPE Noto_GetFlag( const CChar * pChar, bool fIncog = true, bool fInvul = false, bool bGetColor = false ) const;
 
 	/**
 	* @brief Notoriety calculations
@@ -976,7 +976,7 @@ public:
 		//ATTACKER_CLEAR_DEATH		= 3,
 	};
 
-	int		Attacker() {
+	int		GetAttackersCount() {
 		return (int)m_lastAttackers.size();
 	}
 	bool	Attacker_Add(CChar * pChar, int64 threat = 0);

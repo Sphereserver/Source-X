@@ -1144,14 +1144,12 @@ bool CItem::Stack( CItem * pItem )
 	if ( IsAttr(ATTR_LOCKEDDOWN) != pItem->IsAttr(ATTR_LOCKEDDOWN) )
 		return false;
 
-	word amount = pItem->GetAmount() + GetAmount();
-	if ( amount > pItem->GetMaxAmount() )
+	word destMaxAmount = pItem->GetMaxAmount();
+	if ( (pItem->GetAmount() + GetAmount()) > destMaxAmount )
 	{
-		amount = pItem->GetMaxAmount() - pItem->GetAmount();
-		pItem->SetAmount(pItem->GetAmount() + amount);
-		pItem->Update();
-		SetAmount(GetAmount() - amount);
-		//Update();
+		word amount = destMaxAmount - pItem->GetAmount();
+		pItem->SetAmountUpdate(pItem->GetAmount() + amount);
+		SetAmountUpdate(GetAmount() - amount);
 		ResendTooltip();
 		pItem->ResendTooltip();
 		return false;
@@ -5387,7 +5385,7 @@ bool CItem::OnTick()
 				if ( pSrc && pSrc->m_pPlayer )
 				{
 					SetID(static_cast<ITEMID_TYPE>(Calc_GetRandVal2(ITEMID_SKELETON_1, ITEMID_SKELETON_9)));
-					SetHue(static_cast<HUE_TYPE>(HUE_DEFAULT));
+					SetHue((HUE_TYPE)(HUE_DEFAULT));
 					SetTimeout((llong)(g_Cfg.m_iDecay_CorpsePlayer));
 					m_itCorpse.m_carved = 1;	// the corpse can't be carved anymore
 					m_uidLink.InitUID();		// and also it's not linked to the char anymore (others players can loot it without get flagged criminal)

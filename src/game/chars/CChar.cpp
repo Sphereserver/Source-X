@@ -1433,9 +1433,9 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 		default:
 		case RACETYPE_HUMAN:
 			if ( wSkinHue < HUE_SKIN_LOW )
-				wSkinHue = static_cast<HUE_TYPE>(HUE_SKIN_LOW);
+				wSkinHue = (HUE_TYPE)(HUE_SKIN_LOW);
 			if ( wSkinHue > HUE_SKIN_HIGH )
-				wSkinHue = static_cast<HUE_TYPE>(HUE_SKIN_HIGH);
+				wSkinHue = (HUE_TYPE)(HUE_SKIN_HIGH);
 			break;
 
 		case RACETYPE_ELF:
@@ -1456,15 +1456,15 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 				}
 			}
 			if ( !isValid )
-				wSkinHue = static_cast<HUE_TYPE>(sm_ElfSkinHues[0]);
+				wSkinHue = (HUE_TYPE)(sm_ElfSkinHues[0]);
 		}
 		break;
 
 		case RACETYPE_GARGOYLE:
 			if ( wSkinHue < HUE_GARGSKIN_LOW )
-				wSkinHue = static_cast<HUE_TYPE>(HUE_GARGSKIN_LOW);
+				wSkinHue = (HUE_TYPE)(HUE_GARGSKIN_LOW);
 			if ( wSkinHue > HUE_GARGSKIN_HIGH )
-				wSkinHue = static_cast<HUE_TYPE>(HUE_GARGSKIN_HIGH);
+				wSkinHue = (HUE_TYPE)(HUE_GARGSKIN_HIGH);
 			break;
 	}
 	SetHue((wSkinHue|HUE_UNDERWEAR));
@@ -1514,9 +1514,9 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 				default:
 				case RACETYPE_HUMAN:
 					if ( wHairHue < HUE_HAIR_LOW )
-						wHairHue = static_cast<HUE_TYPE>(HUE_HAIR_LOW);
+						wHairHue = (HUE_TYPE)(HUE_HAIR_LOW);
 					if ( wHairHue > HUE_HAIR_HIGH )
-						wHairHue = static_cast<HUE_TYPE>(HUE_HAIR_HIGH);
+						wHairHue = (HUE_TYPE)(HUE_HAIR_HIGH);
 					break;
 
 				case RACETYPE_ELF:
@@ -1540,7 +1540,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 						}
 					}
 					if ( !isValid )
-						wHairHue = static_cast<HUE_TYPE>(sm_ElfHairHues[0]);
+						wHairHue = (HUE_TYPE)(sm_ElfHairHues[0]);
 				}
 				break;
 
@@ -1562,7 +1562,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 						}
 					}
 					if ( !isValid )
-						wHairHue = static_cast<HUE_TYPE>(sm_GargoyleHornHues[0]);
+						wHairHue = (HUE_TYPE)(sm_GargoyleHornHues[0]);
 				}
 				break;
 			}
@@ -1607,9 +1607,9 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 			{
 				case RACETYPE_HUMAN:
 					if ( wBeardHue < HUE_HAIR_LOW )
-						wBeardHue = static_cast<HUE_TYPE>(HUE_HAIR_LOW);
+						wBeardHue = (HUE_TYPE)(HUE_HAIR_LOW);
 					if ( wBeardHue > HUE_HAIR_HIGH )
-						wBeardHue = static_cast<HUE_TYPE>(HUE_HAIR_HIGH);
+						wBeardHue = (HUE_TYPE)(HUE_HAIR_HIGH);
 					break;
 
 				case RACETYPE_GARGOYLE:
@@ -1630,7 +1630,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 						}
 					}
 					if ( !isValid )
-						wHairHue = static_cast<HUE_TYPE>(sm_GargoyleBeardHues[0]);
+						wHairHue = (HUE_TYPE)(sm_GargoyleBeardHues[0]);
 				}
 				break;
 
@@ -2392,9 +2392,8 @@ do_default:
 			return true;
 
 		case CHC_GOLD:
-			{
-				sVal.FormatVal(ContentCount(CResourceID(RES_TYPEDEF, IT_GOLD)));
-			} break;
+			sVal.FormatVal(ContentCount(CResourceID(RES_TYPEDEF, IT_GOLD)));
+			break;
 
 		case CHC_MOUNT:
 			{
@@ -2897,7 +2896,7 @@ do_default:
 			break;
 
 		case CHC_BLOODCOLOR:
-			m_wBloodHue = static_cast<HUE_TYPE>(s.GetArgVal());
+			m_wBloodHue = (HUE_TYPE)(s.GetArgVal());
 			break;
 		case CHC_MAXFOOD:
 			Stat_SetMax(STAT_FOOD, s.GetArgSVal());
@@ -2996,7 +2995,7 @@ do_default:
 					int attackerIndex = Exp_GetVal(pszKey);
 
 					SKIP_SEPARATORS(pszKey);
-					if ( attackerIndex < Attacker() )
+					if ( attackerIndex < GetAttackersCount() )
 					{
 						if ( !strnicmp(pszKey, "DAM", 3) )
 						{
@@ -3085,38 +3084,29 @@ do_default:
 		case CHC_SPEECHCOLOR:
 			if ( m_pPlayer )	// read-only on players, set SPEECHCOLOROVERRIDE instead
 				return false;
-			m_SpeechHue = static_cast<HUE_TYPE>(s.GetArgWVal());
+			m_SpeechHue = (HUE_TYPE)(s.GetArgWVal());
 			break;
 		case CHC_SPEECHCOLOROVERRIDE:
 			if ( !m_pPlayer )	// valid only for players
 				return false;
-			m_SpeechHueOverride = static_cast<HUE_TYPE>(s.GetArgWVal());
+			m_SpeechHueOverride = (HUE_TYPE)(s.GetArgWVal());
 			break;
 		case CHC_FOOD:
 			Stat_SetVal(STAT_FOOD, (short)s.GetArgVal());
 			break;
 		case CHC_GOLD:
 		{
-			word currentGold = (word)ContentCount(CResourceID(RES_TYPEDEF, IT_GOLD));
-			word newGold = s.GetArgWVal();
+			int currentGold = ContentCount(CResourceID(RES_TYPEDEF, IT_GOLD));
+			int newGold = s.GetArgVal();
 
 			if ( newGold < currentGold )
 				ContentConsume(CResourceID(RES_TYPEDEF, IT_GOLD), currentGold - newGold);
 			else if ( newGold > currentGold )
 			{
-				CItem *pGold = NULL;
 				CItemContainer *pBank = GetBank();
 				if ( !pBank )
 					return false;
-
-				word amount = newGold - currentGold;
-				while ( amount > 0 )
-				{
-					pGold = CItem::CreateBase(ITEMID_GOLD_C1);
-					pGold->SetAmount(minimum(amount, pGold->GetMaxAmount()));
-					amount -= pGold->GetAmount();
-					pBank->ContentAdd(pGold);
-				}
+				AddGoldToPack(newGold - currentGold, pBank);
 			}
 			UpdateStatsFlag();
 			break;
@@ -3225,7 +3215,7 @@ do_default:
 			}
 			break;
 		case CHC_OSKIN:
-			m_prev_Hue = static_cast<HUE_TYPE>(s.GetArgVal());
+			m_prev_Hue = (HUE_TYPE)(s.GetArgVal());
 			break;
 		case CHC_P:
 			{

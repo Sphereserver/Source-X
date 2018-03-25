@@ -93,7 +93,6 @@ NOTO_TYPE CChar::Noto_GetFlag(const CChar * pCharViewer, bool fAllowIncog, bool 
 	NOTO_TYPE iNoto = NOTO_INVALID;
 	NOTO_TYPE iColor = NOTO_INVALID;
 
-
 	if ( ! pThis->m_notoSaves.empty() )
 	{
 		int id = -1;
@@ -185,7 +184,7 @@ NOTO_TYPE CChar::Noto_CalcFlag(const CChar * pCharViewer, bool fAllowIncog, bool
 		// Are we in the same party ?
 		if (m_pParty && (m_pParty == pCharViewer->m_pParty) )
 		{
-			if (m_pParty->GetLootFlag(this))
+			//if (m_pParty->GetLootFlag(this))
 				return NOTO_GUILD_SAME;
 		}
 
@@ -257,7 +256,7 @@ HUE_TYPE CChar::Noto_GetHue(const CChar * pCharViewer, bool fIncog) const
 	ADDTOCALLSTACK("CChar::Noto_GetHue");
 	CVarDefCont * sVal = GetKey("NAME.HUE", true);
 	if (sVal)
-		return  static_cast<HUE_TYPE>(sVal->GetValNum());
+		return (HUE_TYPE)(sVal->GetValNum());
 
 	NOTO_TYPE color = Noto_GetFlag(pCharViewer, fIncog, true, true);
 	CChar *pChar = GetOwner();
@@ -265,12 +264,12 @@ HUE_TYPE CChar::Noto_GetHue(const CChar * pCharViewer, bool fIncog) const
 		pChar = const_cast<CChar*>(this);
 	switch (color)
 	{
-	case NOTO_GOOD:			return static_cast<HUE_TYPE>(g_Cfg.m_iColorNotoGood);		// Blue
-	case NOTO_GUILD_SAME:	return static_cast<HUE_TYPE>(g_Cfg.m_iColorNotoGuildSame);	// Green (same guild)
-	case NOTO_NEUTRAL:		return static_cast<HUE_TYPE>(g_Cfg.m_iColorNotoNeutral);	// Grey (someone that can be attacked)
-	case NOTO_CRIMINAL:		return static_cast<HUE_TYPE>(g_Cfg.m_iColorNotoCriminal);	// Grey (criminal)
-	case NOTO_GUILD_WAR:	return static_cast<HUE_TYPE>(g_Cfg.m_iColorNotoGuildWar);	// Orange (enemy guild)
-	case NOTO_EVIL:			return static_cast<HUE_TYPE>(g_Cfg.m_iColorNotoEvil);		// Red
+	case NOTO_GOOD:			return (HUE_TYPE)(g_Cfg.m_iColorNotoGood);		// Blue
+	case NOTO_GUILD_SAME:	return (HUE_TYPE)(g_Cfg.m_iColorNotoGuildSame);	// Green (same guild)
+	case NOTO_NEUTRAL:		return (HUE_TYPE)(g_Cfg.m_iColorNotoNeutral);	// Grey (someone that can be attacked)
+	case NOTO_CRIMINAL:		return (HUE_TYPE)(g_Cfg.m_iColorNotoCriminal);	// Grey (criminal)
+	case NOTO_GUILD_WAR:	return (HUE_TYPE)(g_Cfg.m_iColorNotoGuildWar);	// Orange (enemy guild)
+	case NOTO_EVIL:			return (HUE_TYPE)(g_Cfg.m_iColorNotoEvil);		// Red
 	case NOTO_INVUL:		return pChar->IsPriv(PRIV_GM) ? (HUE_TYPE)g_Cfg.m_iColorNotoInvulGameMaster : (HUE_TYPE)g_Cfg.m_iColorNotoInvul;		// Purple / Yellow
 	default:				return ((HUE_TYPE)color > NOTO_INVUL ? (HUE_TYPE)color : g_Cfg.m_iColorNotoDefault);	// Grey
 	}
@@ -519,7 +518,7 @@ void CChar::Noto_Kill(CChar * pKill, int iTotalKillers)
 	if ( !pKill )
 		return;
 
-	// What was there noto to me ?
+	// What was their noto to me ?
 	NOTO_TYPE NotoThem = pKill->Noto_GetFlag( this, false );
 
 	// Fight is over now that i have won. (if i was fighting at all )
@@ -721,7 +720,7 @@ void CChar::NotoSave_Resend( int id )
 		return;
 	NotoSave_Delete( pChar );
 	CObjBaseTemplate *pObj = pChar->GetTopLevelObj();
-	if ( GetDist( pObj ) < UO_MAP_VIEW_SIGHT )
+	if ( GetDist( pObj ) < pChar->GetVisualRange() )
 		Noto_GetFlag( pChar, true , true );
 }
 

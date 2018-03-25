@@ -1843,7 +1843,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 				break;
 			}
 			RemoveFromView();
-			SetHue(static_cast<HUE_TYPE>(s.GetArgVal()), false, &g_Serv); //@Dye is called from @Create/.xcolor/script command here // since we can not receive pSrc on this r_LoadVal function ARGO/SRC will be null
+			SetHue((HUE_TYPE)(s.GetArgVal()), false, &g_Serv); //@Dye is called from @Create/.xcolor/script command here // since we can not receive pSrc on this r_LoadVal function ARGO/SRC will be null
 			Update();
 			break;
 		case OC_EVENTS:
@@ -2145,7 +2145,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 				CvtSystemToNUNICODE( ncBuffer, CountOf( ncBuffer ), pszArgs[4], -1 );
 				pClientSrc->addBarkUNICODE( ncBuffer, this,
-					static_cast<HUE_TYPE>( pszArgs[0][0] ? Exp_GetVal(pszArgs[0]) : HUE_TEXT_DEF ),
+					(HUE_TYPE)( pszArgs[0][0] ? Exp_GetVal(pszArgs[0]) : HUE_TEXT_DEF ),
 					static_cast<TALKMODE_TYPE>( pszArgs[1][0] ? Exp_GetVal(pszArgs[1]) : TALKMODE_SAY ),
 					static_cast<FONT_TYPE>( pszArgs[2][0] ? Exp_GetVal(pszArgs[2]) : FONT_NORMAL ),
 					CLanguageID(pszArgs[3]));
@@ -2279,7 +2279,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					break;
 
 				SpeakUTF8( pszArgs[4],
-					static_cast<HUE_TYPE>( pszArgs[0][0] ? Exp_GetVal(pszArgs[0]) : HUE_TEXT_DEF ),
+					(HUE_TYPE)( pszArgs[0][0] ? Exp_GetVal(pszArgs[0]) : HUE_TEXT_DEF ),
 					static_cast<TALKMODE_TYPE>( pszArgs[1][0] ? Exp_GetVal(pszArgs[1]) : TALKMODE_SAY ),
 					static_cast<FONT_TYPE>( pszArgs[2][0] ? Exp_GetVal(pszArgs[2]) : FONT_NORMAL ),
 					CLanguageID(pszArgs[3]));

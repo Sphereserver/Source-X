@@ -999,18 +999,18 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			}
 			break;
 		case RC_COLORHIDDEN:
-			m_iColorHidden = static_cast<HUE_TYPE>(s.GetArgVal());
+			m_iColorHidden = (HUE_TYPE)(s.GetArgVal());
 			break;
 		case RC_COLORINVIS:
-			m_iColorInvis = static_cast<HUE_TYPE>(s.GetArgVal());
+			m_iColorInvis = (HUE_TYPE)(s.GetArgVal());
 			break;
 		case RC_COLORINVISSPELL:
-			m_iColorInvisSpell = static_cast<HUE_TYPE>(s.GetArgVal());
+			m_iColorInvisSpell = (HUE_TYPE)(s.GetArgVal());
 			break;
 		case RC_COMBATARCHERYMOVEMENTDELAY:
 		{
 			int iVal = s.GetArgVal();
-			m_iCombatArcheryMovementDelay = maximum(iVal, 10);
+			m_iCombatArcheryMovementDelay = maximum(iVal, 0);
 		}
 			break;
 		case RC_CORPSENPCDECAY:
@@ -2232,6 +2232,9 @@ void CServerConfig::LoadSortSpells()
 
 int CServerConfig::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar chars )
 {
+	// This is needed by the packet 0xB9, which is sent to the client very early, before we can know if this is a 2D, KR, EC, 3D client.
+	// Using the NetState here to know which kind of client is it is pointless, because at this time the client type is always the default value (2D).
+
 	int retValue = 0;
 	bool bResOk = false;
 
@@ -2266,6 +2269,7 @@ int CServerConfig::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar 
 		*/
 
 		// T2A - LBR don't have char list flags
+
 		bResOk = ( res >= RDS_AOS );
 		if ( bResOk )
 		{
@@ -2367,6 +2371,8 @@ int CServerConfig::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar 
 		retValue |= ( m_iFeatureExtra & FEATURE_EXTRA_RUSTIC ) ? 0x80000 : 0x00;
 		retValue |= ( m_iFeatureExtra & FEATURE_EXTRA_JUNGLE ) ? 0x100000 : 0x00;
 		retValue |= ( m_iFeatureExtra & FEATURE_EXTRA_SHADOWGUARD ) ? 0x200000 : 0x00;
+
+		retValue |= ( m_iFeatureExtra & FEATURE_EXTRA_ROLEPLAYFACES ) ? 0x2000 : 0x00;
 
 		retValue |= ( chars >= 6 ) ? 0x0020 : 0x00;
 		retValue |= ( chars >= 7 ) ? 0x1000 : 0x00;

@@ -2826,12 +2826,12 @@ bool CChar::Death()
 			if ( IsTrigUsed(TRIGGER_KILL) )
 			{
 				CScriptTriggerArgs args(this);
-				args.m_iN1 = Attacker();
+				args.m_iN1 = GetAttackersCount();
 				if ( pKiller->OnTrigger(CTRIG_Kill, pKiller, &args) == TRIGRET_RET_TRUE )
 					continue;
 			}
 
-			pKiller->Noto_Kill( this, Attacker() );
+			pKiller->Noto_Kill( this, GetAttackersCount() );
 			iKillStrLen += sprintf( pszKillStr+iKillStrLen, "%s%c'%s'", iKillers ? ", " : "", (pKiller->m_pPlayer) ? 'P':'N', pKiller->GetNameWithoutIncognito() );
 			++iKillers;
 		}
@@ -3677,7 +3677,7 @@ bool CChar::SetPrivLevel(CTextConsole * pSrc, lpctstr pszFlags)
 		if ( pItem )
 		{
 			pItem->SetAttr(ATTR_MOVE_NEVER|ATTR_NEWBIE|ATTR_MAGIC);
-			pItem->SetHue(static_cast<HUE_TYPE>((PrivLevel >= PLEVEL_GM) ? HUE_RED : HUE_BLUE_NAVY));	// since sept/2014 OSI changed 'Counselor' plevel to 'Advisor', using GM Robe color 05f
+			pItem->SetHue((HUE_TYPE)((PrivLevel >= PLEVEL_GM) ? HUE_RED : HUE_BLUE_NAVY));	// since sept/2014 OSI changed 'Counselor' plevel to 'Advisor', using GM Robe color 05f
 			ItemEquip(pItem);
 		}
 	}

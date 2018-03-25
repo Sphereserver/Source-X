@@ -362,23 +362,26 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 	{
 		case '?':
 			pSrc->SysMessagef(
-				"Available Commands:\n"
-				"# = Immediate Save world (## to save both world and statics)\n"
-				"A = Accounts file update\n"
-				"B message = Broadcast a message\n"
-				"C = Clients List (%" PRIuSIZE_T ")\n"
-				"D = Dump data to external file (DA to dump areas)\n"
-				"E = Clear internal variables (like script profile)\n"
-				"G = Garbage collection\n"
-				"H = Hear all that is said (%s)\n"
-				"I = Information\n"
-				"L = Toggle log file (%s)\n"
-				"P = Profile Info (%s) (P# to dump to profiler_dump.txt)\n"
-				"R = Resync Pause\n"
-				"S = Secure mode toggle (%s)\n"
-				"T = List of active Threads\n"
-				"U = List used triggers\n"
-				"X = immediate exit of the server (X# to save world and statics before exit)\n"
+				"Available commands:\n"
+				"#         Immediate save world (## to save both world and statics)\n"
+				"A         Update pending changes on Accounts file\n"
+				"B [msg]   Broadcast message to all clients\n"
+				"C         List of online Clients (%lu)\n"
+				"DA        Dump Areas to external file\n"
+				"DUI       Dump Unscripted Items to external file\n"
+				"E         Clear internal variables (like script profile)\n"
+				"G         Garbage collection\n"
+				"H         Hear all that is said (%s)\n"
+				"I         View server Information\n"
+				"L         Toggle log file (%s)\n"
+				"P         Profile Info (%s) (P# to dump to profiler_dump.txt)\n"
+				"R         Resync Pause\n"
+				"S         Secure mode toggle (%s)\n"
+				"STRIP     Dump all script templates to external file, formatted for Axis\n"
+				"STRIPTNG  Dump all script templates to external file, formatted for TNG\n"
+				"T         List of active Threads\n"
+				"U         List used triggers\n"
+				"X         Immediate exit the server (X# to save world and statics before exit)\n"
 				,
 				StatGet(SERV_STAT_CLIENTS),
 				g_Log.IsLoggedMask( LOGM_PLAYER_SPEAK ) ? "ON" : "OFF",
@@ -472,6 +475,8 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 						pSrc->SysMessage("Scripts profiler info cleared\n");
 					}
 				}
+				else
+					pSrc->SysMessage("Script profiler feature is not enabled on Sphere.ini.\n");
 				pSrc->SysMessage("Complete!\n");
 			} break;
 		case 'g':
@@ -940,7 +945,7 @@ void CServer::ProfileDump( CTextConsole * pSrc, bool bDump )
 	}
 	else
 	{
-		pSrc->SysMessage("Script profiler is turned OFF\n");
+		pSrc->SysMessage("Script profiler feature is not enabled on Sphere.ini.\n");
 	}
 
 	if ( ftDump != NULL )
