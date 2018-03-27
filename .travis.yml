@@ -89,7 +89,7 @@ after_success:
   - tar -czf SphereSvrX-linux64-debug.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_64}/bin64/SphereSvrX64_debug" -C src/ sphere.ini sphereCrypt.ini
   - tar -czf SphereSvrX-linux32-nightly.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_32}/bin/SphereSvrX32_nightly" -C src/ sphere.ini sphereCrypt.ini
   - tar -czf SphereSvrX-linux32-debug.tar.gz accounts/ logs/ save/ scripts/ "${BUILD_DIR_32}/bin/SphereSvrX32_debug" -C src/ sphere.ini sphereCrypt.ini
-  - curl -sST -m 40 --retry 5 --retry-max-time 260 SphereSvrX-linux64-nightly.tar.gz -u ${FTP_USER}:${FTP_PASSWORD} ${FTP_SERVER}
-  - curl -sST -m 40 --retry 5 --retry-max-time 260 SphereSvrX-linux64-debug.tar.gz -u ${FTP_USER}:${FTP_PASSWORD} ${FTP_SERVER}
-  - curl -sST -m 40 --retry 5 --retry-max-time 260 SphereSvrX-linux32-nightly.tar.gz -u ${FTP_USER}:${FTP_PASSWORD} ${FTP_SERVER}
-  - curl -sST -m 40 --retry 5 --retry-max-time 260 SphereSvrX-linux32-debug.tar.gz -u ${FTP_USER}:${FTP_PASSWORD} ${FTP_SERVER}
+  - curl -m 40 --retry 5 --retry-max-time 260 -sST SphereSvrX-linux64-nightly.tar.gz -u ${FTP_USER}:${FTP_PASSWORD} ${FTP_SERVER}
+  - curl -m 40 --retry 5 --retry-max-time 260 -sST SphereSvrX-linux64-debug.tar.gz -u ${FTP_USER}:${FTP_PASSWORD} ${FTP_SERVER}
+  - curl -m 40 --retry 5 --retry-max-time 260 -sST SphereSvrX-linux32-nightly.tar.gz -u ${FTP_USER}:${FTP_PASSWORD} ${FTP_SERVER}
+  - curl -m 40 --retry 5 --retry-max-time 260 -sST SphereSvrX-linux32-debug.tar.gz -u ${FTP_USER}:${FTP_PASSWORD} ${FTP_SERVER}

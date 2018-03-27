@@ -1002,7 +1002,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 
 					if ( bCanSee || !pt.IsValidPoint() )
 					{
-						uid = Exp_GetWVal( pszKey );
+						uid = Exp_GetDWVal( pszKey );
 						pObj = uid.ObjFind();
 						if ( !bCanSee && pObj )
 							pt = pObj->GetTopPoint();
@@ -1014,7 +1014,6 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 						sVal.FormatVal(bCanSee ? pChar->CanSee(pObj) : pChar->CanSeeLOS(pt, NULL, pChar->GetVisualRange(), flags));
 					else
 						sVal.FormatVal(0);
-
 				}
 				else if ( !pChar )		// no char -> no see
 					sVal.FormatVal(0);

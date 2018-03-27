@@ -2103,8 +2103,11 @@ word CItemBase::GetMaxAmount()
 	if (!IsStackableType())
 		return 0;
 
-	word pMax = (word)(GetDefNum("MaxAmount", false));
-	return pMax ? pMax : (word)(g_Cfg.m_iItemsMaxAmount);
+	int64 iMax = GetDefNum("MaxAmount", false);
+	if (iMax)
+		return (word)minimum(iMax, UINT16_MAX);
+	else
+		return (word)minimum(g_Cfg.m_iItemsMaxAmount, UINT16_MAX);
 }
 
 bool CItemBase::SetMaxAmount(word amount)

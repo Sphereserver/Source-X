@@ -499,3 +499,13 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 	Added: Missing features on Incognito spell
 		- It will change char name to a random human/elf/gargoyle male/female name instead of using always Man/Woman.
 		- It will change char body/hair/beard to a random color temporarily.
+
+28-03-2018, Nolok
+- Fixed: combat animation now has the same duration as the combat swing (before, it had a fixed duration of ~ 0.7 s). On the 2D/Classic Clients, the Gargoyle playable character animations still have
+	a fixed duration, because to show those animations we need to send a new animation packet, which doesn't support a variable duration. On Kingdom Reborn and Enhanced Clients, the animation still has
+	a fixed duration, because both the old and the new packets generates here a fixed duration animation.
+- Fixed #33: CanSeeLOS not parsing correctly the char UID when passed as argument.
+- Fixed #36: Poison spell extremely bugged when MAGICF_OSIFORMULAS was enabled.
+- Changed: added upper limit (65535) to the .ini setting ItemsMaxAmount.
+- Fixed: GOLD, NEWGOLD ignoring the ItemsMaxAmount .ini setting.
+- Fixed: duped char not inheriting the brain.

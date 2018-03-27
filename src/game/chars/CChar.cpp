@@ -920,7 +920,11 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 		else
 			m_pPlayer->m_Speech.Copy(&(pChar->m_pPlayer->m_Speech));
 	}*/
-
+	if (m_pNPC && pChar->m_pNPC)
+	{
+		m_pNPC->m_Brain = pChar->m_pNPC->m_Brain;
+		//m_pNPC->m_bonded = pChar->m_pNPC->m_bonded;
+	}
 	FixWeirdness();
 	SetName( pChar->GetName());	// SetName after FixWeirdness, otherwise it can be replaced again.
 	// We copy tags,etc first and place it because of NPC_LoadScript and @Create trigger, so it have information before calling it
@@ -954,25 +958,25 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 				{
 					pItemCont->SetAttr(ATTR_NEWBIE);
 
-					CChar *pTest = static_cast<CChar*>(static_cast<CUID>(pItemCont->m_itNormal.m_more1).CharFind());
+					CChar *pTest = static_cast<CUID>(pItemCont->m_itNormal.m_more1).CharFind();
 					if ( pTest && pTest == pChar )
 						pItemCont->m_itNormal.m_more1 = this->GetUID();
 
-					CChar *pTest2 = static_cast<CChar*>(static_cast<CUID>(pItemCont->m_itNormal.m_more2).CharFind());
+					CChar *pTest2 = static_cast<CUID>(pItemCont->m_itNormal.m_more2).CharFind();
 					if ( pTest2 && pTest2 == pChar )
 						pItemCont->m_itNormal.m_more2 = this->GetUID();
 
-					CChar *pTest3 = static_cast<CChar*>(static_cast<CUID>(pItemCont->m_uidLink).CharFind());
+					CChar *pTest3 = static_cast<CUID>(pItemCont->m_uidLink).CharFind();
 					if ( pTest3 && pTest3 == pChar )
 						pItemCont->m_uidLink = this->GetUID();
 				}
 			}
 		}
-		CChar * pTest = static_cast<CChar*>(static_cast<CUID>(pItem->m_itNormal.m_more1).CharFind());
+		CChar * pTest = static_cast<CUID>(pItem->m_itNormal.m_more1).CharFind();
 		if ( pTest && pTest == pChar)
 			pItem->m_itNormal.m_more1 = this->GetUID();
 
-		CChar * pTest2 = static_cast<CChar*>(static_cast<CUID>(pItem->m_itNormal.m_more2).CharFind());
+		CChar * pTest2 = static_cast<CUID>(pItem->m_itNormal.m_more2).CharFind();
 		if ( pTest2)
 		{
 			if ( pTest2 == pChar)
@@ -994,7 +998,7 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 			}
 		}
 
-		CChar * pTest3 = static_cast<CChar*>(static_cast<CUID>(pItem->m_uidLink).CharFind());
+		CChar * pTest3 = static_cast<CUID>(pItem->m_uidLink).CharFind();
 		if ( pTest3 && pTest3 == pChar)
 			pItem->m_uidLink = this->GetUID();
 
@@ -3790,17 +3794,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			break;
 
 		case CHV_NEWGOLD:
-			{
-				int amount = s.GetArgVal();
-				while ( amount > 0 )
-				{
-					CItem *pItem = CItem::CreateScript(ITEMID_GOLD_C1, this);
-					pItem->SetAmount( (word)minimum(amount, (int)pItem->GetMaxAmount()) );
-					amount -= pItem->GetAmount();
-					GetPackSafe()->ContentAdd(pItem);
-				}
-				UpdateStatsFlag();
-			}
+			AddGoldToPack(s.GetArgVal(), GetPackSafe());
 			break;
 
 		case CHV_NEWLOOT:

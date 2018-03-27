@@ -486,7 +486,7 @@ public:
 
 private:
 	// Contents/Carry stuff. ---------------------------------
-	void ContentAdd( CItem * pItem );
+	void ContentAdd( CItem * pItem, bool bForceNoStack = false );
 protected:
 	void OnRemoveObj( CSObjListRec* pObRec );	// Override this = called when removed from list.
 public:
@@ -889,7 +889,7 @@ private:
 	bool Spell_Recall(CItem * pRune, bool fGate);
 	SPELL_TYPE Spell_GetIndex(SKILL_TYPE skill = SKILL_NONE);	//gets first spell for the magic skill given.
 	SPELL_TYPE Spell_GetMax(SKILL_TYPE skill = SKILL_NONE);	//gets first spell for the magic skill given.
-	CItem * Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEffect, int iDuration, CObjBase * pSrc = NULL, bool bEquip = true );
+	CItem * Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEffect, int iTicksDuration, CObjBase * pSrc = NULL, bool bEquip = true );
 	bool Spell_Equip_OnTick( CItem * pItem );
 
 	void Spell_Field(CPointMap pt, ITEMID_TYPE idEW, ITEMID_TYPE idNS, uint fieldWidth, uint fieldGauge, int iSkill, CChar * pCharSrc = NULL, ITEMID_TYPE idnewEW = static_cast<ITEMID_TYPE>(NULL), ITEMID_TYPE idnewNS = static_cast<ITEMID_TYPE>(NULL), int iDuration = 0, HUE_TYPE iColor = HUE_DEFAULT);
@@ -1038,7 +1038,7 @@ public:
 	bool ItemDrop( CItem * pItem, const CPointMap & pt );
 
 	void Flip();
-	bool SetPoison( int iLevel, int iTicks, CChar * pCharSrc );
+	bool SetPoison( int iSkill, int iHits, CChar * pCharSrc );
 	bool SetPoisonCure( int iLevel, bool fExtra );
 	bool CheckCorpseCrime( const CItemCorpse *pCorpse, bool fLooting, bool fTest );
 	CItemCorpse * FindMyCorpse( bool ignoreLOS = false, int iRadius = 2) const;

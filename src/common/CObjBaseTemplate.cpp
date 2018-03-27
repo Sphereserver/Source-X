@@ -38,51 +38,6 @@ CObjBaseTemplate * CObjBaseTemplate::GetPrev() const
 	return ( static_cast <CObjBaseTemplate*> ( CSObjListRec::GetPrev()) );
 }
 
-CUID CObjBaseTemplate::GetUID() const
-{	
-	return m_UID; 
-}
-
-bool CObjBaseTemplate::IsItem() const	
-{
-	return m_UID.IsItem();
-}
-
-bool CObjBaseTemplate::IsChar() const		
-{	
-	return m_UID.IsChar();
-}
-
-bool CObjBaseTemplate::IsItemInContainer() const
-{	
-	return m_UID.IsItemInContainer();
-}
-
-bool CObjBaseTemplate::IsItemEquipped() const	
-{	
-	return m_UID.IsItemEquipped();
-}
-
-bool CObjBaseTemplate::IsDisconnected() const	
-{	
-	return m_UID.IsObjDisconnected();
-}
-
-bool CObjBaseTemplate::IsTopLevel() const	
-{	
-	return m_UID.IsObjTopLevel();
-}
-
-bool CObjBaseTemplate::IsValidUID() const
-{	
-	return m_UID.IsValidUID();
-}
-
-void CObjBaseTemplate::SetContainerFlags( dword dwFlags )
-{
-	m_UID.SetObjContainerFlags( dwFlags );
-}
-
 CSector * CObjBaseTemplate::GetTopSector() const
 {
 	return GetTopLevelObj()->GetTopPoint().GetSector();

@@ -808,11 +808,17 @@ effect_bounce:
 		if ( m_pArea )
 		{
 			if ( m_pArea->IsFlag(REGION_FLAG_SAFE) )
+			{
+				// TODO: add a sysmessage
 				goto effect_bounce;
+			}
 			if ( m_pArea->IsFlag(REGION_FLAG_NO_PVP) && m_pPlayer)
 			{
 				if (pSrc->m_pPlayer)	// player attacking player
+				{
+					// TODO: add a sysmessage
 					goto effect_bounce;
+				}
 				if (pSrc->m_pNPC)
 				{
 					CChar* pOwner = pSrc->NPC_PetGetOwnerRecursive();
@@ -1688,24 +1694,24 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	{
 
 		ANIM_TYPE anim = GenerateAnimate(ANIM_ATTACK_WEAPON);
-		int animDelay = 7;		// attack speed is always 7ms and then the char keep waiting the remaining time
-		int iSwingDelay = g_Cfg.Calc_CombatAttackSpeed(this, pWeapon) - 1;	// swings are started only on the next tick, so substract -1 to compensate that
+		int iSwingDelay = g_Cfg.Calc_CombatAttackSpeed(this, pWeapon);
+		int iAnimDelay = iSwingDelay; 	// with newer clients the anim speed ("delay") is always 7ms, no matter the value we send, and then the char keep waiting the remaining time
 
 		if ( IsTrigUsed(TRIGGER_HITTRY) )
 		{
 			CScriptTriggerArgs Args(iSwingDelay, 0, pWeapon);
 			Args.m_VarsLocal.SetNum("Anim", (int)anim);
-			Args.m_VarsLocal.SetNum("AnimDelay", animDelay);
+			Args.m_VarsLocal.SetNum("AnimDelay", iAnimDelay);
 			if ( OnTrigger(CTRIG_HitTry, pCharTarg, &Args) == TRIGRET_RET_TRUE )
 				return WAR_SWING_READY;
 
 			iSwingDelay = (int)(Args.m_iN1);
 			anim = (ANIM_TYPE)(Args.m_VarsLocal.GetKeyNum("Anim", false));
-			animDelay = (int)(Args.m_VarsLocal.GetKeyNum("AnimDelay", true));
+			iAnimDelay = (int)(Args.m_VarsLocal.GetKeyNum("AnimDelay", true));
 			if ( iSwingDelay < 0 )
 				iSwingDelay = 0;
-			if ( animDelay < 0 )
-				animDelay = 0;
+			if ( iAnimDelay < 0 )
+				iAnimDelay = 0;
 		}
 
 		m_atFight.m_War_Swing_State = WAR_SWING_SWINGING;
@@ -1717,12 +1723,12 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 			SetTimeout(0);
 		}
 		else
-			SetTimeout(iSwingDelay);
+			SetTimeout(iSwingDelay - 1);	// swings are started only on the next tick, so substract -1 to compensate that
 
 		Reveal();
 		if ( !IsSetCombatFlags(COMBAT_NODIRCHANGE) )
 			UpdateDir(pCharTarg);
-		UpdateAnimate(anim, false, false, (byte)(animDelay / TICK_PER_SEC));
+		UpdateAnimate(anim, false, false, (byte)maximum(0,(iAnimDelay-1) / 10) );
 		return WAR_SWING_SWINGING;
 	}
 

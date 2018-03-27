@@ -49,8 +49,8 @@ public:
 	virtual int GetWeight(word amount = 0) const;
 	void OnWeightChange( int iChange );
 
-	void ContentAdd( CItem * pItem );
-	void ContentAdd( CItem * pItem, CPointMap pt, uchar gridIndex = 0 );
+	void ContentAdd( CItem * pItem, bool bForceNoStack = false );
+	void ContentAdd( CItem * pItem, CPointMap pt, bool bForceNoStack = false, uchar gridIndex = 0 );
 protected:
 	void OnRemoveObj( CSObjListRec* pObRec );	// Override this = called when removed from list.
 public:

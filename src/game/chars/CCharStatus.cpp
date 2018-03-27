@@ -266,9 +266,10 @@ bool CChar::CanCarry( const CItem *pItem ) const
 	return true;
 }
 
-void CChar::ContentAdd( CItem * pItem )
+void CChar::ContentAdd( CItem * pItem, bool bForceNoStack )
 {
 	ADDTOCALLSTACK("CChar::ContentAdd");
+	UNREFERENCED_PARAMETER(bForceNoStack);
 	ItemEquip(pItem);
 	//LayerAdd( pItem, LAYER_QTY );
 }
@@ -1152,6 +1153,7 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 
 bool CChar::CanSeeItem( const CItem * pItem ) const
 {
+	ADDTOCALLSTACK("CChar::CanSeeItem");
 	ASSERT(pItem);
 	if (pItem->IsAttr(ATTR_INVIS))
 	{

@@ -1046,6 +1046,12 @@ bool CServerConfig::r_LoadVal( CScript &s )
 		case RC_HITSUPDATERATE:
 			m_iHitsUpdateRate = s.GetArgVal() * TICK_PER_SEC;
 			break;
+		case RC_ITEMSMAXAMOUNT:
+		{
+			int iVal = s.GetArgVal();
+			m_iItemsMaxAmount = minimum(iVal, UINT16_MAX);
+		}
+		break;
 		case RC_LOG:
 			g_Log.OpenLog( s.GetArgStr());
 			break;

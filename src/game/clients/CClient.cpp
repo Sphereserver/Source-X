@@ -309,7 +309,7 @@ bool CClient::CanSee( const CObjBaseTemplate * pObj ) const
 		if (pChar->IsDisconnected())
 			return false;
 	}
-	return( m_pChar->CanSee( pObj ));
+	return m_pChar->CanSee( pObj );
 }
 
 bool CClient::CanHear( const CObjBaseTemplate * pSrc, TALKMODE_TYPE mode ) const

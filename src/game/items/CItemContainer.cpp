@@ -420,7 +420,7 @@ CPointMap CItemContainer::GetRandContainerLoc() const
 		0);
 }
 
-void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, uchar gridIndex )
+void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack, uchar gridIndex )
 {
 	ADDTOCALLSTACK("CItemContainer::ContentAdd");
 	// Add to CItemContainer
@@ -476,7 +476,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, uchar gridIndex )
 	{
 		bool fInsert = false;
 		// Try to stack it.
-		if ( !g_Serv.IsLoading() && pItem->Item_GetDef()->IsStackableType() )
+		if ( !g_Serv.IsLoading() && pItem->Item_GetDef()->IsStackableType() && !bForceNoStack )
 		{
 			for ( CItem *pTry = GetContentHead(); pTry != NULL; pTry = pTry->GetNext() )
 			{
@@ -507,7 +507,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, uchar gridIndex )
 	{
 		// the grid index we've been given is already in use, so find the
 		// first unused grid index
-		for ( gridIndex = 0; (gridIndex < 255 && !bValidGrid); gridIndex++ )
+		for ( gridIndex = 0; (gridIndex < 255 && !bValidGrid); ++gridIndex )
 		{
 			bValidGrid = true;
 			for ( CItem *pTry = GetContentHead(); pTry != NULL; pTry = pTry->GetNext() )
@@ -583,7 +583,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, uchar gridIndex )
 	pItem->Update();
 }
 
-void CItemContainer::ContentAdd( CItem *pItem )
+void CItemContainer::ContentAdd( CItem *pItem, bool bForceNoStack )
 {
 	ADDTOCALLSTACK("CItemContainer::ContentAdd");
 	if ( !pItem )
@@ -594,7 +594,7 @@ void CItemContainer::ContentAdd( CItem *pItem )
 	if ( g_Serv.IsLoading() )
 		pt = pItem->GetUnkPoint();
 
-	ContentAdd(pItem, pt);
+	ContentAdd(pItem, pt, bForceNoStack);
 }
 
 bool CItemContainer::IsWeighed() const

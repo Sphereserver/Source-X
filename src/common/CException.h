@@ -107,7 +107,7 @@ public:
 	try \
 	{
 
-#define EXC_SET(a) inLocalBlock = a; inLocalBlockCnt++
+#define EXC_SET(a) inLocalBlock = a; ++inLocalBlockCnt
 
 #ifdef THREAD_TRACK_CALLSTACK
 	#define EXC_CATCH_EXCEPTION(a) \

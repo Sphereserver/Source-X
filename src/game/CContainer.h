@@ -231,8 +231,9 @@ public:
      * @fn  virtual void CContainer::ContentAdd( CItem * pItem ) = 0;
      * @brief   Content add.
      * @param [in,out]  pItem   If non-null, the item.
+	 * @param [in,out]  bForceNoStack	Do not stack on other identical items, even if it's a stackable type.
      */
-	virtual void ContentAdd( CItem * pItem ) = 0;
+	virtual void ContentAdd( CItem * pItem, bool bForceNoStack = false ) = 0;
 };
 
 

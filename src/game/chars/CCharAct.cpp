@@ -211,17 +211,22 @@ void CChar::AddGoldToPack( int iAmount, CItemContainer * pPack )
 	if ( pPack == NULL )
 		pPack = GetPackSafe();
 
+	iAmount = minimum(iAmount, INT32_MAX);
+	word iMax = 0;
 	while ( iAmount > 0 )
 	{
 		CItem * pGold = CItem::CreateScript( ITEMID_GOLD_C1, this );
+		if (!iMax)
+			iMax = pGold->GetMaxAmount();
 
-		word iGoldStack = (word)minimum( iAmount, UINT16_MAX );
+		word iGoldStack = (word)minimum(iAmount, iMax);
 		pGold->SetAmount( iGoldStack );
 
 		Sound( pGold->GetDropSound( pPack ));
-		pPack->ContentAdd( pGold );
+		pPack->ContentAdd( pGold, true );
 		iAmount -= iGoldStack;
 	}
+	UpdateStatsFlag();
 }
 
 // add equipped items.
@@ -1112,7 +1117,8 @@ bool CChar::UpdateAnimate(ANIM_TYPE action, bool fTranslate, bool fBackward , by
 					break;
 			}
 		}
-		else {
+		else
+		{
 			switch (action)
 			{
 				case ANIM_ATTACK_1H_SLASH:
@@ -1179,7 +1185,7 @@ bool CChar::UpdateAnimate(ANIM_TYPE action, bool fTranslate, bool fBackward , by
 					break;
 			}
 		}
-	}//Other new animations than work on humans, elfs and gargoyles
+	}//Other new animations that work on humans, elfs and gargoyles
 	switch (action)
 	{
 		case ANIM_DIE_BACK:
@@ -1192,6 +1198,14 @@ bool CChar::UpdateAnimate(ANIM_TYPE action, bool fTranslate, bool fBackward , by
 		default:
 			break;
 	}
+
+
+	// New animation packet (PacketActionBasic): it supports some extra Gargoyle animations (and it can play Human/Elf animations), but lacks the animation "timing"/delay.
+
+	// Old animation packet (PacketAction): doesn't really support Gargoyle animations (supported even by the Enhanced Client).
+	//  On 2D/CC clients it can play Gargoyle animations, on Enhanced Client it can play some Gargoyle anims.
+	//	 On 2D/CC clients (even recent, Stygian Abyss ones) it supports the animation "timing"/delay, on Enhanced Client it has a fixed delay. EA always uses this packet for the EC.
+
 	PacketActionBasic* cmdnew = new PacketActionBasic(this, action1, subaction, variation);
 	PacketAction* cmd = new PacketAction(this, action, 1, fBackward, iFrameDelay, iAnimLen);
 
@@ -1200,12 +1214,14 @@ bool CChar::UpdateAnimate(ANIM_TYPE action, bool fTranslate, bool fBackward , by
 	{
 		if (!pClient->CanSee(this))
 			continue;
-		if (pClient->GetNetState()->isClientEnhanced() && pClient->GetNetState()->m_reportedVersion < 6700351)	//Enhanced client always used this packet, at least until ~ 4.0.35 (6700351)
+		
+		NetState* state = pClient->GetNetState();
+		if (state->isClientEnhanced() || state->isClientKR())
 			cmdnew->send(pClient);
-		else if (pClient->GetNetState()->isClientVersion(MINCLIVER_NEWMOBILEANIM) && (IsGargoyle()) && (action1 >= 0))	// On classic clients only send new packets for gargoyles
+		else if (IsGargoyle() && state->isClientVersion(MINCLIVER_NEWMOBILEANIM))
 			cmdnew->send(pClient);
 		else
-			cmd->send(pClient);
+			cmd->send(pClient);	
 	}
 	delete cmdnew;
 	delete cmd;
@@ -2621,10 +2637,10 @@ bool CChar::SetPoisonCure( int iSkill, bool fExtra )
 }
 
 // SPELL_Poison
-// iSkill = 0-1000 = how bad the poison is
-// iTicks = how long to last. Should be 0 with MAGIFC_OSIFORMULAS enabled to calculate defaults
+// iSkill = 0-1000 = how bad the poison is.
+// iHits = how much times the poison will hit. Irrelevant with MAGIFC_OSIFORMULAS enabled, because defaults will be used.
 // Physical attack of poisoning.
-bool CChar::SetPoison( int iSkill, int iTicks, CChar * pCharSrc )
+bool CChar::SetPoison( int iSkill, int iHits, CChar * pCharSrc )
 {
 	ADDTOCALLSTACK("CChar::SetPoison");
 
@@ -2645,66 +2661,59 @@ bool CChar::SetPoison( int iSkill, int iTicks, CChar * pCharSrc )
 	{
 		if ( !IsSetMagicFlags(MAGICF_OSIFORMULAS) )		// strengthen the poison
 		{
-			pPoison->m_itSpell.m_spellcharges += iTicks;
+			pPoison->m_itSpell.m_spellcharges += iHits;
 			return true;
 		}
 	}
 	else
 	{
-		pPoison = Spell_Effect_Create(SPELL_Poison, LAYER_FLAG_Poison, g_Cfg.GetSpellEffect(SPELL_Poison, iSkill), 1 + Calc_GetRandVal(2) * TICK_PER_SEC, pCharSrc, false);
+		pPoison = Spell_Effect_Create(SPELL_Poison, LAYER_FLAG_Poison, iSkill, (1 + Calc_GetRandVal(2)) * TICK_PER_SEC, pCharSrc, false);
 		if ( !pPoison )
-		return false;
+			return false;
 		LayerAdd(pPoison, LAYER_FLAG_Poison);
 	}
 
 	pPoison->SetTimeout((5 + Calc_GetRandLLVal(4)) * TICK_PER_SEC);
 
-	if (IsSetMagicFlags(MAGICF_OSIFORMULAS))
+	if (!IsSetMagicFlags(MAGICF_OSIFORMULAS))
 	{
-		if ( iSkill >= 1000 )
-		{
-			if ( GetDist(pCharSrc) < 3 && Calc_GetRandVal(10) == 1 )
-			{
-				// Lethal poison
-				pPoison->m_itSpell.m_pattern = (byte)MulDivLL(Stat_GetMax(STAT_STR), Calc_GetRandVal2(16, 33), 100);
-				pPoison->m_itSpell.m_spelllevel = 4;
-				pPoison->m_itSpell.m_spellcharges = 80;		//1 min, 20 sec
-		}
-			else
-		{
-				// Deadly poison
-				pPoison->m_itSpell.m_pattern = (byte)MulDivLL(Stat_GetMax(STAT_STR), Calc_GetRandVal2(15, 30), 100);
-				pPoison->m_itSpell.m_spelllevel = 3;
-				pPoison->m_itSpell.m_spellcharges = 60;
-		}
-		}
-		else if ( iSkill >= 851 )
-		{
-			pPoison->m_itSpell.m_pattern = (uchar)MulDivLL(Stat_GetMax(STAT_STR), Calc_GetRandVal2(7, 15), 100);
-			// Greater poison
-			pPoison->m_itSpell.m_pattern = (byte)MulDivLL(Stat_GetMax(STAT_STR), Calc_GetRandVal2(7, 15), 100);
-			pPoison->m_itSpell.m_spelllevel = 2;
-			pPoison->m_itSpell.m_spellcharges = 60;
-		}
-		else if ( iSkill >= 600 )
-		{
-			// Poison
-			pPoison->m_itSpell.m_pattern = (byte)MulDivLL(Stat_GetMax(STAT_STR), Calc_GetRandVal2(5, 10), 100);
-			pPoison->m_itSpell.m_spelllevel = 1;
-			pPoison->m_itSpell.m_spellcharges = 30;		}
-		else
-		{
-			// Lesser poison
-			pPoison->m_itSpell.m_spelllevel = 0;
-			pPoison->m_itSpell.m_spellcharges = 30;
-		}
-
-		if (iTicks > 0)
-			pPoison->m_itSpell.m_spellcharges = iTicks;
+		//pPoison->m_itSpell.m_spellcharges has already been set by Spell_Effect_Create (and it's equal to iSkill)
+		pPoison->m_itSpell.m_spellcharges = iHits;
 	}
 	else
 	{
-		pPoison->m_itSpell.m_spellcharges = iTicks;		// effect duration
+		// Get the poison level
+		int iPoisonLevel = 0;
+
+		int iDist = GetDist(pCharSrc);
+		if (iDist <= UO_MAP_VIEW_SIZE_MAX)
+		{
+			if (iSkill >= 1000)		//Lethal-Deadly
+				iPoisonLevel = 3 + !Calc_GetRandVal(10);
+			else if (iSkill > 850)	//Greater
+				iPoisonLevel = 2;
+			else if (iSkill > 650)	//Standard
+				iPoisonLevel = 1;
+			else					//Lesser
+				iPoisonLevel = 0;
+			if (iDist >= 4)
+			{
+				iPoisonLevel -= (iDist / 2);
+				if (iPoisonLevel < 0)
+					iPoisonLevel = 0;
+			}
+		}
+		pPoison->m_itSpell.m_spelllevel = (word)iPoisonLevel;	// Overwrite the spell level
+
+		switch (iPoisonLevel)
+		{
+			case 4:		pPoison->m_itSpell.m_spellcharges = 8; break;
+			case 3:		pPoison->m_itSpell.m_spellcharges = 6; break;
+			case 2:		pPoison->m_itSpell.m_spellcharges = 6; break;
+			case 1:		pPoison->m_itSpell.m_spellcharges = 3; break;
+			default:
+			case 0:		pPoison->m_itSpell.m_spellcharges = 3; break;
+		}
 	}
 
 	if (IsAosFlagEnabled(FEATURE_AOS_UPDATE_B))
@@ -2712,7 +2721,7 @@ bool CChar::SetPoison( int iSkill, int iTicks, CChar * pCharSrc )
 		CItem * pEvilOmen = LayerFind(LAYER_SPELL_Evil_Omen);
 		if (pEvilOmen)
 		{
-			pPoison->m_itSpell.m_spelllevel++;	// Effect 2: next poison will have one additional level of poison.
+			++pPoison->m_itSpell.m_spelllevel;	// Effect 2: next poison will have one additional level of poison.
 			pEvilOmen->Delete();
 		}
 	}
