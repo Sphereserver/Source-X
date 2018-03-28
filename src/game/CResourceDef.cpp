@@ -829,7 +829,7 @@ bool CSpellDef::GetPrimarySkill( int * piSkill, int * piQty ) const
 		*piQty = (int)(m_SkillReq[i].GetResQty());
 	if ( piSkill != NULL )
 		*piSkill = m_SkillReq[i].GetResIndex();
-	return (g_Cfg.GetSkillDef(static_cast<SKILL_TYPE>(m_SkillReq[i].GetResIndex())) != NULL);
+	return (g_Cfg.GetSkillDef((SKILL_TYPE)(m_SkillReq[i].GetResIndex())) != NULL);
 }
 
 //*******************************************

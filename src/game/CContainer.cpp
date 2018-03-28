@@ -448,7 +448,7 @@ int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iRepli
 		{
 			if ( !pChar )
 				continue;
-			if ( pChar->Skill_GetBase(static_cast<SKILL_TYPE>(rid.GetResIndex())) < iResQty )
+			if ( pChar->Skill_GetBase((SKILL_TYPE)(rid.GetResIndex())) < iResQty )
 				return 0;
 			continue;
 		}

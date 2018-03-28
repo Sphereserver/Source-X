@@ -211,7 +211,9 @@ int CServerConfig::Calc_CombatChanceToHit(CChar * pChar, CChar * pCharTarg)
 				iAttackerHitChance += 5;
 			}
 			iAttackerSkill = ((iAttackerSkill / 10) + 20) * (100 + minimum(iAttackerHitChance, 45));
-			int iTargetSkill = ((pCharTarg->Skill_GetBase(skillTarget) / 10) + 20) * (100 + minimum(static_cast<int>(pCharTarg->GetDefNum("INCREASEDEFCHANCE", true)), 45));
+
+			int iTargetIncreaseDefChance = (int)pCharTarg->GetDefNum("INCREASEDEFCHANCE", true);
+			int iTargetSkill = ((pCharTarg->Skill_GetBase(skillTarget) / 10) + 20) * (100 + minimum(iTargetIncreaseDefChance, 45));
 
 			int iChance = iAttackerSkill * 100 / (iTargetSkill * 2);
 			if (iChance < 2)

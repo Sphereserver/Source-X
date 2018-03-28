@@ -326,7 +326,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 
 				m_tmSkillMagery.m_Spell = spell;	// m_atMagery.m_Spell
 				m_pChar->m_atMagery.m_Spell = spell;
-				m_pChar->Skill_Start(static_cast<SKILL_TYPE>(skill));
+				m_pChar->Skill_Start((SKILL_TYPE)skill);
 				return true;
 			}
 			return Cmd_Skill_Magery(spell, pItem);
@@ -998,7 +998,7 @@ bool CClient::Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase *pSrc )
 		if ( !pSpellDef->GetPrimarySkill(&skill, NULL) )
 			return false;
 
-		return m_pChar->Skill_Start(static_cast<SKILL_TYPE>(skill));
+		return m_pChar->Skill_Start((SKILL_TYPE)(skill));
 	}
 }
 

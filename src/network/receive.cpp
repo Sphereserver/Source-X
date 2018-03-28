@@ -65,11 +65,11 @@ bool PacketCreate::onReceive(NetState* net)
 	byte strength = readByte();
 	byte dexterity = readByte();
 	byte intelligence = readByte();
-	skill1 = static_cast<SKILL_TYPE>(readByte());
+	skill1 = (SKILL_TYPE)readByte();
 	skillval1 = readByte();
-	skill2 = static_cast<SKILL_TYPE>(readByte());
+	skill2 = (SKILL_TYPE)readByte();
 	skillval2 = readByte();
-	skill3 = static_cast<SKILL_TYPE>(readByte());
+	skill3 = (SKILL_TYPE)readByte();
 	skillval3 = readByte();
 	HUE_TYPE hue = (HUE_TYPE)(readInt16());
 	ITEMID_TYPE hairid = (ITEMID_TYPE)(readInt16());
@@ -145,7 +145,7 @@ bool PacketCreate::onReceive(NetState* net)
 }
 
 bool PacketCreate::doCreate(NetState* net, lpctstr charname, bool bFemale, RACE_TYPE rtRace, short wStr, short wDex, short wInt,
-	PROFESSION_TYPE prProf, SKILL_TYPE skSkill1, int iSkillVal1, SKILL_TYPE skSkill2, int iSkillVal2, SKILL_TYPE skSkill3, int iSkillVal3, SKILL_TYPE skSkill4, int iSkillVal4,
+	PROFESSION_TYPE prProf, SKILL_TYPE skSkill1, ushort uiSkillVal1, SKILL_TYPE skSkill2, ushort uiSkillVal2, SKILL_TYPE skSkill3, ushort uiSkillVal3, SKILL_TYPE skSkill4, ushort uiSkillVal4,
 	HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, ITEMID_TYPE idFace, int iStartLoc, int iFlags)
 {
 	ADDTOCALLSTACK("PacketCreate::doCreate");
@@ -199,7 +199,7 @@ bool PacketCreate::doCreate(NetState* net, lpctstr charname, bool bFemale, RACE_
 
 	//Creating the pChar
 	pChar->InitPlayer(client, charname, bFemale, rtRace, wStr, wDex, wInt,
-		prProf, skSkill1, iSkillVal1, skSkill2, iSkillVal2, skSkill3, iSkillVal3, skSkill4, iSkillVal4,
+		prProf, skSkill1, uiSkillVal1, skSkill2, uiSkillVal2, skSkill3, uiSkillVal3, skSkill4, uiSkillVal4,
 		wSkinHue, idHair, wHairHue, idBeard, wBeardHue, wShirtHue, wPantsHue, idFace, iStartLoc);
 
 	//Calling the function after the char creation, it can't be done before or the function won't have SRC
@@ -683,7 +683,7 @@ bool PacketSkillLockChange::onReceive(NetState* net)
 	while (len > 0)
 	{
 		// set next lock
-		SKILL_TYPE index = static_cast<SKILL_TYPE>(readInt16());
+		SKILL_TYPE index = (SKILL_TYPE)readInt16();
 		SKILLLOCK_TYPE state = static_cast<SKILLLOCK_TYPE>(readByte());
 		len -= 3;
 
@@ -1512,13 +1512,13 @@ bool PacketCreateNew::onReceive(NetState* net)
 	byte intelligence = readByte();
 	HUE_TYPE hue = (HUE_TYPE)(readInt16());
 	skip(8);
-	SKILL_TYPE skill1 = static_cast<SKILL_TYPE>(readByte());
+	SKILL_TYPE skill1 = (SKILL_TYPE)readByte();
 	byte skillval1 = readByte();
-	SKILL_TYPE skill2 = static_cast<SKILL_TYPE>(readByte());
+	SKILL_TYPE skill2 = (SKILL_TYPE)readByte();
 	byte skillval2 = readByte();
-	SKILL_TYPE skill3 = static_cast<SKILL_TYPE>(readByte());
+	SKILL_TYPE skill3 = (SKILL_TYPE)readByte();
 	byte skillval3 = readByte();
-	SKILL_TYPE skill4 = static_cast<SKILL_TYPE>(readByte());
+	SKILL_TYPE skill4 = (SKILL_TYPE)readByte();
 	byte skillval4 = readByte();
 	skip(26);
 	HUE_TYPE hairhue = (HUE_TYPE)(readInt16());
@@ -3026,7 +3026,7 @@ bool PacketSpellSelect::onReceive(NetState* net)
 	int skill;
 	if (spellDef->GetPrimarySkill(&skill, NULL) == false)
 		return true;
-	if ( !character->Skill_CanUse(static_cast<SKILL_TYPE>(skill)) )
+	if ( !character->Skill_CanUse((SKILL_TYPE)skill) )
 		return true;
 
 	if (IsSetMagicFlags(MAGICF_PRECAST))
@@ -3037,7 +3037,7 @@ bool PacketSpellSelect::onReceive(NetState* net)
 			character->m_atMagery.m_Spell = spell;
 			client->m_Targ_UID = character->GetUID();
 			client->m_Targ_Prv_UID = character->GetUID();
-			character->Skill_Start(static_cast<SKILL_TYPE>(skill));
+			character->Skill_Start((SKILL_TYPE)skill);
 			return true;
 		}
 	}
@@ -4439,13 +4439,13 @@ bool PacketCreate70016::onReceive(NetState* net)
 	byte strength = readByte();
 	byte dexterity = readByte();
 	byte intelligence = readByte();
-	skill1 = static_cast<SKILL_TYPE>(readByte());
+	skill1 = (SKILL_TYPE)readByte();
 	skillval1 = readByte();
-	skill2 = static_cast<SKILL_TYPE>(readByte());
+	skill2 = (SKILL_TYPE)readByte();
 	skillval2 = readByte();
-	skill3 = static_cast<SKILL_TYPE>(readByte());
+	skill3 = (SKILL_TYPE)readByte();
 	skillval3 = readByte();
-	skill4 = static_cast<SKILL_TYPE>(readByte());
+	skill4 = (SKILL_TYPE)readByte();
 	skillval4 = readByte();
 	HUE_TYPE hue = (HUE_TYPE)(readInt16());
 	ITEMID_TYPE hairid = (ITEMID_TYPE)(readInt16());

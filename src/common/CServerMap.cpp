@@ -133,13 +133,9 @@ bool CServerMapBlockState::CheckTile( dword wItemBlockFlags, char zBottom, heigh
 	if ( ! ( wItemBlockFlags &~ m_dwBlockFlags ))
 	{	// this does not block me.
 		if ( wItemBlockFlags & CAN_I_PLATFORM ) // i can always walk on the platform.
-		{
 			zBottom = zTop;
-		}
 		else if ( ! ( wItemBlockFlags & CAN_I_CLIMB ))
-		{
 			zTop = zBottom; // or i could walk under it.
-		}
 	}
 
 	if ( zTop < m_Lowest.m_z )

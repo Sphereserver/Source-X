@@ -892,7 +892,7 @@ int CItemBase::CalculateMakeValue( int iQualityLevel ) const
 		CResourceID rid = m_SkillMake[i].GetResourceID();
 		if ( rid.GetResType() != RES_SKILL )
 			continue;
-		const CSkillDef* pSkillDef = g_Cfg.GetSkillDef(static_cast<SKILL_TYPE>(rid.GetResIndex()));
+		const CSkillDef* pSkillDef = g_Cfg.GetSkillDef((SKILL_TYPE)(rid.GetResIndex()));
 		if ( pSkillDef == NULL )
 			continue;
 
@@ -1135,7 +1135,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 			break;
 		case IBC_SKILL:		// Skill to use.
 			{
-				if ( m_iSkill > SKILL_NONE && m_iSkill < static_cast<SKILL_TYPE>(g_Cfg.m_iMaxSkill) )
+				if ( m_iSkill > SKILL_NONE && m_iSkill < (SKILL_TYPE)(g_Cfg.m_iMaxSkill) )
 				{
 					sVal.FormatVal(m_iSkill);
 					break;

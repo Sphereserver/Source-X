@@ -2599,7 +2599,7 @@ void CClient::Event_UseToolbar(byte bType, dword dwArg)
 
 		case 0x03: // Skill
 		{
-			Event_Skill_Use(static_cast<SKILL_TYPE>(dwArg));
+			Event_Skill_Use((SKILL_TYPE)(dwArg));
 		} break;
 
 		case 0x04: // Item
@@ -2670,7 +2670,7 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 
 		case EXTCMD_SKILL:
 		{
-			Event_Skill_Use(static_cast<SKILL_TYPE>(ATOI(ppArgs[0])));
+			Event_Skill_Use((SKILL_TYPE)(ATOI(ppArgs[0])));
 			return;
 		}
 
@@ -2704,7 +2704,7 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 				m_pChar->m_Act_p = m_pChar->GetTopPoint();
 				m_pChar->m_Act_UID = m_Targ_UID;
 				m_pChar->m_Act_Prv_UID = m_Targ_Prv_UID;
-				m_pChar->Skill_Start(static_cast<SKILL_TYPE>(skill));
+				m_pChar->Skill_Start((SKILL_TYPE)skill);
 			}
 			else
 				Cmd_Skill_Magery(spell, m_pChar);

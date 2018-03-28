@@ -179,7 +179,9 @@ bool CWorld::IsTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDistance 
 CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDistance )
 {
 	ADDTOCALLSTACK("CWorld::FindTypeNear_Top");
+
 #define RESOURCE_Z_CHECK 8
+
 	CPointMap ptFound;
 	CItemBase * pItemDef = NULL;
 	CItem * pItem = NULL;
@@ -229,7 +231,8 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 			else
 				Height = pDupeDef->GetHeight();
 		}
-		z = minimum( Height + pItem->GetTopPoint().m_z, UO_SIZE_Z ); //height + current position = the top point
+		z = Height + pItem->GetTopPoint().m_z;
+		z = minimum(z , UO_SIZE_Z ); //height + current position = the top point
 
 		if ( ptElem[0].m_z > z ) //if ( ptElem[0].m_z > pItem->GetTopPoint().m_z )
 			continue;

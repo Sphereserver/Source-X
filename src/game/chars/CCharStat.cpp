@@ -165,7 +165,7 @@ short CChar::Stat_GetSum() const
 	ADDTOCALLSTACK("CChar::Stat_GetSum");
 	short iStatSum = 0;
 	for ( int i = 0; i < STAT_BASE_QTY; i++ )
-		iStatSum += Stat_GetBase(static_cast<STAT_TYPE>(i));
+		iStatSum += Stat_GetBase((STAT_TYPE)(i));
 
 	return iStatSum;
 }
@@ -349,7 +349,7 @@ bool CChar::Stats_Regen(int64 iTimeDiff)
 	// iTimeDiff is the next tick the stats are going to regen.
 
 	int HitsHungerLoss = g_Cfg.m_iHitsHungerLoss ? g_Cfg.m_iHitsHungerLoss : 0;
-	for (STAT_TYPE i = STAT_STR; i <= STAT_FOOD; i = static_cast<STAT_TYPE>(i + 1))
+	for (STAT_TYPE i = STAT_STR; i <= STAT_FOOD; i = (STAT_TYPE)(i + 1))
 	{
 		if (g_Cfg.m_iRegenRate[i] < 0)
 			continue;
@@ -381,7 +381,7 @@ bool CChar::Stats_Regen(int64 iTimeDiff)
 				continue;
 			}
 
-			i = static_cast<STAT_TYPE>(Args.m_VarsLocal.GetKeyNum("StatID", true));
+			i = (STAT_TYPE)(Args.m_VarsLocal.GetKeyNum("StatID", true));
 			if (i < STAT_STR)
 				i = STAT_STR;
 			else if (i > STAT_FOOD)
@@ -498,9 +498,9 @@ bool CChar::Stat_Decrease(STAT_TYPE stat, SKILL_TYPE skill)
 		int ival = 0;
 		for ( int i = STAT_STR; i<STAT_BASE_QTY; i++ )
 		{
-			if ( static_cast<STAT_TYPE>(i) == stat )
+			if ( (STAT_TYPE)(i) == stat )
 				continue;
-			if ( Stat_GetLock( static_cast<STAT_TYPE>(i) ) != SKILLLOCK_DOWN )
+			if ( Stat_GetLock( (STAT_TYPE)(i) ) != SKILLLOCK_DOWN )
 				continue;
 
 			if ( skill )
@@ -509,7 +509,7 @@ bool CChar::Stat_Decrease(STAT_TYPE stat, SKILL_TYPE skill)
 				ival = pSkillDef->m_StatBonus[i];
 			}
 			else
-				ival = Stat_GetBase( static_cast<STAT_TYPE>(i) );
+				ival = Stat_GetBase( (STAT_TYPE)(i) );
 
 			if ( iminval > ival )
 			{
@@ -521,10 +521,10 @@ bool CChar::Stat_Decrease(STAT_TYPE stat, SKILL_TYPE skill)
 		if ( imin < 0 )
 			return false;
 
-		short iStatVal = Stat_GetBase(static_cast<STAT_TYPE>(imin));
+		short iStatVal = Stat_GetBase((STAT_TYPE)(imin));
 		if ( iStatVal > 10 )
 		{
-			Stat_SetBase(static_cast<STAT_TYPE>(imin), (short)(iStatVal - 1));
+			Stat_SetBase((STAT_TYPE)(imin), (short)(iStatVal - 1));
 			return true;
 		}
 	}

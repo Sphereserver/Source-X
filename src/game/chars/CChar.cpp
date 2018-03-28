@@ -282,10 +282,10 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false )
 	size_t i = 0;
 	for ( ; i < STAT_QTY; ++i )
 	{
-		Stat_SetBase(static_cast<STAT_TYPE>(i), 0);
-		Stat_SetMod(static_cast<STAT_TYPE>(i), 0);
-		Stat_SetVal(static_cast<STAT_TYPE>(i), 0);
-		Stat_SetMax(static_cast<STAT_TYPE>(i), 0);
+		Stat_SetBase((STAT_TYPE)i, 0);
+		Stat_SetMod((STAT_TYPE)i, 0);
+		Stat_SetVal((STAT_TYPE)i, 0);
+		Stat_SetMax((STAT_TYPE)i, 0);
 		m_Stat[i].m_regen = 0;
 	}
 	Stat_SetVal( STAT_FOOD, Stat_GetMax(STAT_FOOD) );
@@ -749,24 +749,24 @@ int CChar::FixWeirdness()
 		//		m_iOverSkillMultiply disables this check if set to < 1
 		if (( GetPrivLevel() <= PLEVEL_Player ) && ( g_Cfg.m_iOverSkillMultiply > 0 ))
 		{
-			for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; i++ )
+			for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 			{
-				int iSkillMax = Skill_GetMax(static_cast<SKILL_TYPE>(i));
-				int iSkillVal = Skill_GetBase(static_cast<SKILL_TYPE>(i));
-				if ( iSkillVal < 0 )
-					Skill_SetBase(static_cast<SKILL_TYPE>(i), 0);
-				if ( iSkillVal > iSkillMax * g_Cfg.m_iOverSkillMultiply )
-					Skill_SetBase(static_cast<SKILL_TYPE>(i), iSkillMax);
+				ushort uiSkillMax = Skill_GetMax((SKILL_TYPE)i);
+				ushort uiSkillVal = Skill_GetBase((SKILL_TYPE)i);
+				if ( uiSkillVal < 0 )
+					Skill_SetBase((SKILL_TYPE)i, 0);
+				if ( uiSkillVal > uiSkillMax * g_Cfg.m_iOverSkillMultiply )
+					Skill_SetBase((SKILL_TYPE)i, uiSkillMax);
 			}
 
 			// ??? What if magically enhanced !!!
 			if ( IsPlayableCharacter() && ( GetPrivLevel() < PLEVEL_Counsel ) && !IsStatFlag( STATF_POLYMORPH ))
 			{
-				for ( int j = STAT_STR; j < STAT_BASE_QTY; j++ )
+				for ( int j = STAT_STR; j < STAT_BASE_QTY; ++j )
 				{
-					int iStatMax = Stat_GetLimit(static_cast<STAT_TYPE>(j));
-					if ( Stat_GetAdjusted(static_cast<STAT_TYPE>(j)) > iStatMax*g_Cfg.m_iOverSkillMultiply )
-						Stat_SetBase(static_cast<STAT_TYPE>(j), (short)(iStatMax));
+					short iStatMax = Stat_GetLimit((STAT_TYPE)j);
+					if ( Stat_GetAdjusted((STAT_TYPE)j) > iStatMax*g_Cfg.m_iOverSkillMultiply )
+						Stat_SetBase((STAT_TYPE)j, (short)iStatMax);
 				}
 			}
 		}
@@ -783,7 +783,7 @@ int CChar::FixWeirdness()
 		for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; i++ )
 		{
 			if ( m_Skill[i] > 0 && m_Skill[i] < g_Cfg.m_iSaveNPCSkills )
-				Skill_SetBase(static_cast<SKILL_TYPE>(i), 0);
+				Skill_SetBase((SKILL_TYPE)i, 0);
 		}
 	}
 
@@ -896,10 +896,10 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 
 	for ( size_t i = 0; i < STAT_QTY; ++i )
 	{
-		Stat_SetBase(static_cast<STAT_TYPE>(i), pChar->Stat_GetBase(static_cast<STAT_TYPE>(i)));
-		Stat_SetMod(static_cast<STAT_TYPE>(i), pChar->Stat_GetMod(static_cast<STAT_TYPE>(i)));
-		Stat_SetVal(static_cast<STAT_TYPE>(i), pChar->Stat_GetVal(static_cast<STAT_TYPE>(i)));
-		Stat_SetMax(static_cast<STAT_TYPE>(i), pChar->Stat_GetMax(static_cast<STAT_TYPE>(i)));
+		Stat_SetBase((STAT_TYPE)i, pChar->Stat_GetBase((STAT_TYPE)i));
+		Stat_SetMod((STAT_TYPE)i, pChar->Stat_GetMod((STAT_TYPE)i));
+		Stat_SetVal((STAT_TYPE)i, pChar->Stat_GetVal((STAT_TYPE)i));
+		Stat_SetMax((STAT_TYPE)i, pChar->Stat_GetMax((STAT_TYPE)i));
 		m_Stat[i].m_regen = 0;
 	}
 
@@ -1317,7 +1317,7 @@ lpctstr CChar::GetName( bool fAllowAlt ) const
 
 // Create a brand new Player char. Called directly from the packet.
 void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale, RACE_TYPE rtRace, short wStr, short wDex, short wInt,
-	PROFESSION_TYPE prProf, SKILL_TYPE skSkill1, int iSkillVal1, SKILL_TYPE skSkill2, int iSkillVal2, SKILL_TYPE skSkill3, int iSkillVal3, SKILL_TYPE skSkill4, int iSkillVal4,
+	PROFESSION_TYPE prProf, SKILL_TYPE skSkill1, ushort uiSkillVal1, SKILL_TYPE skSkill2, ushort uiSkillVal2, SKILL_TYPE skSkill3, ushort uiSkillVal3, SKILL_TYPE skSkill4, ushort uiSkillVal4,
 	HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, ITEMID_TYPE idFace, int iStartLoc )
 {
 	ADDTOCALLSTACK("CChar::InitPlayer");
@@ -1381,32 +1381,32 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
 		if ( g_Cfg.m_SkillIndexDefs.IsValidIndex(i) )
-			Skill_SetBase(static_cast<SKILL_TYPE>(i), Calc_GetRandVal(g_Cfg.m_iMaxBaseSkill));
+			Skill_SetBase((SKILL_TYPE)i, (ushort)Calc_GetRandVal(g_Cfg.m_iMaxBaseSkill));
 	}
 
 	if ( wStr > 60 )		wStr = 60;
 	if ( wDex > 60 )		wDex = 60;
 	if ( wInt > 60 )		wInt = 60;
-	if ( iSkillVal1 > 50 )	iSkillVal1 = 50;
-	if ( iSkillVal2 > 50 )	iSkillVal2 = 50;
-	if ( iSkillVal3 > 50 )	iSkillVal3 = 50;
-	if ( iSkillVal4 > 50 )	iSkillVal4 = 50;
+	if ( uiSkillVal1 > 50 )	uiSkillVal1 = 50;
+	if ( uiSkillVal2 > 50 )	uiSkillVal2 = 50;
+	if ( uiSkillVal3 > 50 )	uiSkillVal3 = 50;
+	if ( uiSkillVal4 > 50 )	uiSkillVal4 = 50;
 
 	if ( skSkill4 != SKILL_NONE )
 	{
 		if ( (wStr + wDex + wInt) > 90 )
 			wStr = wDex = wInt = 30;
 
-		if ( (iSkillVal1 + iSkillVal2 + iSkillVal3 + iSkillVal4) > 120 )
-			iSkillVal4 = 1;
+		if ( (uiSkillVal1 + uiSkillVal2 + uiSkillVal3 + uiSkillVal4) > 120 )
+			uiSkillVal4 = 1;
 	}
 	else
 	{
 		if ( (wStr + wDex + wInt) > 80 )
 			wStr = wDex = wInt = 26;
 
-		if ( (iSkillVal1 + iSkillVal2 + iSkillVal3) > 100 )
-			iSkillVal3 = 1;
+		if ( (uiSkillVal1 + uiSkillVal2 + uiSkillVal3) > 100 )
+			uiSkillVal3 = 1;
 	}
 
 	Stat_SetBase(STAT_STR, wStr);
@@ -1414,15 +1414,15 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 	Stat_SetBase(STAT_INT, wInt);
 
 	if ( IsSkillBase(skSkill1) && g_Cfg.m_SkillIndexDefs.IsValidIndex(skSkill1) )
-		Skill_SetBase(skSkill1, iSkillVal1 * 10);
+		Skill_SetBase(skSkill1, uiSkillVal1 * 10);
 	if ( IsSkillBase(skSkill2) && g_Cfg.m_SkillIndexDefs.IsValidIndex(skSkill2) )
-		Skill_SetBase(skSkill2, iSkillVal2 * 10);
+		Skill_SetBase(skSkill2, uiSkillVal2 * 10);
 	if ( IsSkillBase(skSkill3) && g_Cfg.m_SkillIndexDefs.IsValidIndex(skSkill3) )
-		Skill_SetBase(skSkill3, iSkillVal3 * 10);
+		Skill_SetBase(skSkill3, uiSkillVal3 * 10);
 	if ( skSkill4 != SKILL_NONE )
 	{
 		if ( IsSkillBase(skSkill4) && g_Cfg.m_SkillIndexDefs.IsValidIndex(skSkill4) )
-			Skill_SetBase(skSkill4, iSkillVal4 * 10);
+			Skill_SetBase(skSkill4, uiSkillVal4 * 10);
 	}
 
 	m_fonttype			= FONT_NORMAL;		// Set speech font type
@@ -1899,7 +1899,7 @@ do_default:
 		i = g_Cfg.FindStatKey( pszKey );
 		if ( i >= 0 )
 		{
-			sVal.FormatVal(Stat_GetAdjusted(static_cast<STAT_TYPE>(i)));
+			sVal.FormatVal(Stat_GetAdjusted((STAT_TYPE)i));
 			return true;
 		}
 
@@ -1908,7 +1908,7 @@ do_default:
 			i = g_Cfg.FindStatKey( pszKey+1 );
 			if ( i >= 0 )
 			{
-				sVal.FormatVal(Stat_GetBase(static_cast<STAT_TYPE>(i)));
+				sVal.FormatVal(Stat_GetBase((STAT_TYPE)i));
 				return true;
 			}
 		}
@@ -1918,16 +1918,16 @@ do_default:
 			i = g_Cfg.FindStatKey( pszKey+3 );
 			if ( i >= 0 )
 			{
-				sVal.FormatVal(Stat_GetMod(static_cast<STAT_TYPE>(i)));
+				sVal.FormatVal(Stat_GetMod((STAT_TYPE)i));
 				return true;
 			}
 		}
 
 		i = g_Cfg.FindSkillKey( pszKey );
-		if ( IsSkillBase(static_cast<SKILL_TYPE>(i)))
+		if ( IsSkillBase((SKILL_TYPE)i))
 		{
 			// Check some skill name.
-			ushort iVal = Skill_GetBase( static_cast<SKILL_TYPE>(i) );
+			ushort iVal = Skill_GetBase( (SKILL_TYPE)i );
 			sVal.Format( "%i.%i", iVal/10, iVal%10 );
 			return true;
 		}
@@ -2801,7 +2801,7 @@ do_default:
 			if ( i != SKILL_NONE )
 			{
 				// Check some skill name.
-				Skill_SetBase(static_cast<SKILL_TYPE>(i), s.GetArgVal() );
+				Skill_SetBase((SKILL_TYPE)i, s.GetArgUSVal() );
 				return true;
 			}
 
@@ -2814,7 +2814,7 @@ do_default:
 				else if (iVal < INT16_MIN)
 					iVal = INT16_MIN;
 
-				Stat_SetBase(static_cast<STAT_TYPE>(i), (short)iVal);
+				Stat_SetBase((STAT_TYPE)i, (short)iVal);
 				return true;
 			}
 
@@ -2823,7 +2823,7 @@ do_default:
 				i = g_Cfg.FindStatKey( pszKey+1 );
 				if ( i >= 0 )
 				{
-					Stat_SetBase(static_cast<STAT_TYPE>(i), s.GetArgSVal());
+					Stat_SetBase((STAT_TYPE)i, s.GetArgSVal());
 					return true;
 				}
 			}
@@ -2832,7 +2832,7 @@ do_default:
 				i = g_Cfg.FindStatKey( pszKey+3 );
 				if ( i >= 0 )
 				{
-					Stat_SetMod(static_cast<STAT_TYPE>(i), s.GetArgSVal());
+					Stat_SetMod((STAT_TYPE)i, s.GetArgSVal());
 					return true;
 				}
 			}
@@ -3529,13 +3529,13 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 
 		case CHV_ALLSKILLS:
 			{
-				int iVal = s.GetArgVal();
+				ushort uiVal = s.GetArgUSVal();
 				for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 				{
 					if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i) )
 						continue;
 
-					Skill_SetBase((SKILL_TYPE)i, iVal );
+					Skill_SetBase((SKILL_TYPE)i, uiVal );
 				}
 			}
 			break;
@@ -3872,7 +3872,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			if ( !pSpellDef->GetPrimarySkill(&skill, NULL) )
 				return false;
 
-			Skill_Start(static_cast<SKILL_TYPE>(skill));
+			Skill_Start((SKILL_TYPE)skill);
 			break;
 		}
 
@@ -4272,38 +4272,38 @@ void CChar::ChangeExperience(int delta, CChar *pCharDead)
 }
 
 // returns <SkillTotal>
-int CChar::GetSkillTotal(int what, bool how)
+uint CChar::GetSkillTotal(int what, bool how)
 {
 	ADDTOCALLSTACK("CChar::GetSkillTotal");
-	int iTotal = 0;
-	int	iBase;
+	uint	uiTotal = 0;
+	ushort	uiBase;
 
-	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; i++ )
+	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
-		iBase = Skill_GetBase(static_cast<SKILL_TYPE>(i));
+		uiBase = Skill_GetBase((SKILL_TYPE)i);
 		if ( how )
 		{
 			if ( what < 0 )
 			{
-				if ( iBase >= -what )
+				if ( uiBase >= -what )
 				continue;
 			}
-			else if ( iBase < what )
+			else if ( uiBase < what )
 				continue;
 		}
 		else
 		{
 			// check group flags
-			const CSkillDef * pSkill = g_Cfg.GetSkillDef(static_cast<SKILL_TYPE>(i));
+			const CSkillDef * pSkill = g_Cfg.GetSkillDef((SKILL_TYPE)i);
 			if ( !pSkill )
 				continue;
 			if ( !( pSkill->m_dwGroup & what ) )
 				continue;
 		}
-		iTotal += iBase;
+		uiTotal += uiBase;
 	}
 
-	return iTotal;
+	return uiTotal;
 }
 
 int CChar::GetAbilityFlags() const

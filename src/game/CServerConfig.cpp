@@ -1792,7 +1792,7 @@ SKILL_TYPE CServerConfig::FindSkillKey( lpctstr pszKey ) const
 
 	if ( IsDigit( pszKey[0] ) )
 	{
-		SKILL_TYPE skill = static_cast<SKILL_TYPE>(Exp_GetVal(pszKey));
+		SKILL_TYPE skill = (SKILL_TYPE)(Exp_GetVal(pszKey));
 		if ( ( !CChar::IsSkillBase(skill) || !g_Cfg.m_SkillIndexDefs.IsValidIndex(skill) ) && !CChar::IsSkillNPC(skill) )
 			return SKILL_NONE;
 		return skill;
@@ -1801,7 +1801,7 @@ SKILL_TYPE CServerConfig::FindSkillKey( lpctstr pszKey ) const
 	const CSkillDef * pSkillDef = FindSkillDef( pszKey );
 	if ( pSkillDef == NULL )
 		return SKILL_NONE;
-	return static_cast<SKILL_TYPE>(pSkillDef->GetResourceID().GetResIndex());
+	return (SKILL_TYPE)(pSkillDef->GetResourceID().GetResIndex());
 }
 
 STAT_TYPE CServerConfig::FindStatKey( lpctstr pszKey ) // static
@@ -2733,7 +2733,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 					g_Cfg.m_iMaxSkill = rid.GetResIndex() + 1;
 
 				// Just replace any previous CSkillDef
-				pSkill = new CSkillDef(static_cast<SKILL_TYPE>(rid.GetResIndex()));
+				pSkill = new CSkillDef((SKILL_TYPE)(rid.GetResIndex()));
 			}
 
 			ASSERT(pSkill);

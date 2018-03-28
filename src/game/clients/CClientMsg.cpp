@@ -1467,17 +1467,17 @@ size_t CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
 		pPacket->writeStringFixedASCII(pCharFirst->GetName(), MAX_NAME_SIZE);
 		pPacket->writeStringFixedASCII("", MAX_NAME_SIZE);
 
-		count++;
+		++count;
 	}
 
-
-	size_t iMax = minimum(maximum(pAccount->m_Chars.GetCharCount(), pAccount->GetMaxChars()), MAX_CHARS_PER_ACCT);
+	size_t iAcctCharCount = pAccount->m_Chars.GetCharCount(), iAcctMaxChars = pAccount->GetMaxChars();
+	size_t iMax = minimum(maximum(iAcctCharCount,iAcctMaxChars), MAX_CHARS_PER_ACCT);
 
 	size_t iQty = pAccount->m_Chars.GetCharCount();
 	if (iQty > iMax)
 		iQty = iMax;
 
-	for (size_t i = 0; i < iQty; i++)
+	for (size_t i = 0; i < iQty; ++i)
 	{
 		CUID uid(pAccount->m_Chars.GetChar(i));
 		CChar* pChar = uid.CharFind();
@@ -1777,7 +1777,7 @@ void CClient::addSkillWindow(SKILL_TYPE skill, bool bFromInfo) // Opens the skil
 	if (pChar == NULL)
 		pChar = m_pChar;
 
-	bool bAllSkills = (skill >= static_cast<SKILL_TYPE>(g_Cfg.m_iMaxSkill));
+	bool bAllSkills = (skill >= (SKILL_TYPE)(g_Cfg.m_iMaxSkill));
 	if (bAllSkills == false && g_Cfg.m_SkillIndexDefs.IsValidIndex(skill) == false)
 		return;
 

@@ -209,9 +209,9 @@ bool CChar::NPC_FightMagery(CChar * pChar)
 		if (!pSpellDef->GetPrimarySkill(&skill, &iSkillReq))
 			skill = SKILL_MAGERY;
 
-		if (Skill_GetBase(static_cast<SKILL_TYPE>(skill)) < iSkillReq)
+		if (Skill_GetBase((SKILL_TYPE)(skill)) < iSkillReq)
 			continue;
-		if (NPC_FightCast(pTarg, this, spell, static_cast<SKILL_TYPE>(skill)))
+		if (NPC_FightCast(pTarg, this, spell, (SKILL_TYPE)skill))
 			goto BeginCast;	//if can cast this spell we jump the for() and go directly to it's casting.
 	}
 	return false;	// No castable spell found, go back on melee.
@@ -234,7 +234,7 @@ BeginCast:	//Start casting
 	m_Act_p = pTarg->GetTopPoint();
 
 	// Calculate the difficulty
-	return Skill_Start(static_cast<SKILL_TYPE>(skill));
+	return Skill_Start((SKILL_TYPE)skill);
 }
 
 // I'm able to use magery
@@ -251,7 +251,7 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
 		int iSkillTest = 0;
 		if (!pSpellDef->GetPrimarySkill(&iSkillTest, NULL))
 			iSkillTest = SKILL_MAGERY;
-		skill = static_cast<SKILL_TYPE>(iSkillTest);
+		skill = (SKILL_TYPE)iSkillTest;
 	}
 	if (!Spell_CanCast(spell, true, pSrc, false))
 		return false;

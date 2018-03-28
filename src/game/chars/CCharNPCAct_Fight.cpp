@@ -213,7 +213,7 @@ void CChar::NPC_Act_Fight()
 			case TRIGRET_RET_FALSE:	fSkipHardcoded	= true;	break;
 			case static_cast<TRIGRET_TYPE>(2):
 			{
-				SKILL_TYPE iSkillforced = static_cast<SKILL_TYPE>(Args.m_VarsLocal.GetKeyNum("skill", false));
+				SKILL_TYPE iSkillforced = (SKILL_TYPE)(Args.m_VarsLocal.GetKeyNum("skill", false));
 				if (iSkillforced)
 				{
 					SPELL_TYPE iSpellforced = (SPELL_TYPE)(Args.m_VarsLocal.GetKeyNum("spell", false));

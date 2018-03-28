@@ -777,7 +777,7 @@ public:
 	* @param ppCharDead from who we gained the experience.
 	*/
 	void ChangeExperience(int delta = 0, CChar *pCharDead = NULL);
-	int GetSkillTotal(int what = 0, bool how = true);
+	uint GetSkillTotal(int what = 0, bool how = true);
 
 	// skills and actions. -------------------------------------------
 	static bool IsSkillBase( SKILL_TYPE skill );
@@ -790,11 +790,11 @@ public:
 	}
 	lpctstr Skill_GetName( bool fUse = false ) const;
 	ushort Skill_GetBase( SKILL_TYPE skill ) const;
-	int Skill_GetMax( SKILL_TYPE skill, bool ignoreLock = false ) const;
-	int Skill_GetSum() const;
+	ushort Skill_GetMax( SKILL_TYPE skill, bool ignoreLock = false ) const;
+	uint Skill_GetSum() const;
 	SKILLLOCK_TYPE Skill_GetLock( SKILL_TYPE skill ) const;
 	ushort Skill_GetAdjusted(SKILL_TYPE skill) const;
-	SKILL_TYPE Skill_GetMagicRandom(ushort iMinValue = 0);
+	SKILL_TYPE Skill_GetMagicRandom(ushort uiMinValue = 0);
 	SKILL_TYPE Skill_GetMagicBest();
 
 	/**
@@ -805,7 +805,7 @@ public:
 	*/
 	bool Skill_CanUse( SKILL_TYPE skill );
 
-	void Skill_SetBase( SKILL_TYPE skill, int iValue );
+	void Skill_SetBase( SKILL_TYPE skill, ushort iValue );
 	bool Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain = true, bool bUseBellCurve = true );
 
 	bool Skill_CheckSuccess( SKILL_TYPE skill, int difficulty, bool bUseBellCurve = true ) const;
@@ -1008,7 +1008,7 @@ public:
 	//
 	bool Player_OnVerb( CScript &s, CTextConsole * pSrc );
 	void InitPlayer( CClient * pClient, const char * pszCharname, bool bFemale, RACE_TYPE rtRace, short wStr, short wDex, short wInt,
-		PROFESSION_TYPE iProf, SKILL_TYPE skSkill1, int iSkillVal1, SKILL_TYPE skSkill2, int iSkillVal2, SKILL_TYPE skSkill3, int iSkillVal3, SKILL_TYPE skSkill4, int iSkillVal4,
+		PROFESSION_TYPE iProf, SKILL_TYPE skSkill1, ushort uiSkillVal1, SKILL_TYPE skSkill2, ushort uiSkillVal2, SKILL_TYPE skSkill3, ushort uiSkillVal3, SKILL_TYPE skSkill4, ushort uiSkillVal4,
 		HUE_TYPE wSkinHue, ITEMID_TYPE idHair, HUE_TYPE wHairHue, ITEMID_TYPE idBeard, HUE_TYPE wBeardHue, HUE_TYPE wShirtHue, HUE_TYPE wPantsHue, ITEMID_TYPE idFace, int iStartLoc );
 	bool ReadScriptTrig(CCharBase * pCharDef, CTRIG_TYPE trig, bool bVendor = false);
 	bool ReadScript(CResourceLock &s, bool bVendor = false);
@@ -1127,17 +1127,17 @@ private:
 	int	 NPC_GetAttackContinueMotivation( CChar * pChar, int iMotivation = 0 ) const;
 	int  NPC_GetAttackMotivation( CChar * pChar, int iMotivation = 0 ) const;
 	bool NPC_CheckHirelingStatus();
-	int  NPC_GetTrainMax( const CChar * pStudent, SKILL_TYPE Skill ) const;
+	ushort NPC_GetTrainMax( const CChar * pStudent, SKILL_TYPE Skill ) const;
 
 	bool NPC_OnVerb( CScript &s, CTextConsole * pSrc = NULL );
 	void NPC_OnHirePayMore( CItem * pGold, int iWage, bool fHire = false );
 public:
 	bool NPC_OnHirePay( CChar * pCharSrc, CItemMemory * pMemory, CItem * pGold );
 	bool NPC_OnHireHear( CChar * pCharSrc );
-	int	 NPC_OnTrainCheck( CChar * pCharSrc, SKILL_TYPE Skill );
+	ushort NPC_OnTrainCheck( CChar * pCharSrc, SKILL_TYPE Skill );
 	bool NPC_OnTrainPay( CChar * pCharSrc, CItemMemory * pMemory, CItem * pGold );
 	bool NPC_OnTrainHear( CChar * pCharSrc, lpctstr pCmd );
-	bool NPC_TrainSkill( CChar * pCharSrc, SKILL_TYPE skill, int toTrain );
+	bool NPC_TrainSkill( CChar * pCharSrc, SKILL_TYPE skill, ushort uiAmountToTrain );
     int PayGold(CChar * pCharSrc, int iGold, CItem * pGold, ePayGold iReason);
 private:
 	bool NPC_CheckWalkHere( const CPointBase & pt, const CRegion * pArea, dword dwBlockFlags ) const;
@@ -1226,7 +1226,7 @@ public:
 inline bool CChar::IsSkillBase( SKILL_TYPE skill ) // static
 {
 	// Is this in the base set of skills.
-	return (skill > SKILL_NONE && skill < static_cast<SKILL_TYPE>(g_Cfg.m_iMaxSkill));
+	return (skill > SKILL_NONE && skill < (SKILL_TYPE)(g_Cfg.m_iMaxSkill));
 }
 
 inline bool CChar::IsSkillNPC( SKILL_TYPE skill )  // static

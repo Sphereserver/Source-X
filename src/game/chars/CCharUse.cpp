@@ -797,7 +797,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 	// apply arms lore skillgain now
 	lpctstr pszText;
 	Skill_Experience(SKILL_ARMSLORE, iArmsLoreDiff);
-	bool fSuccess = Skill_UseQuick(static_cast<SKILL_TYPE>(RetMainSkill.GetResIndex()), iDifficulty);
+	bool fSuccess = Skill_UseQuick((SKILL_TYPE)(RetMainSkill.GetResIndex()), iDifficulty);
 	if ( fSuccess )
 	{
 		pItemArmor->m_itArmor.m_Hits_Cur = (word)(iTotalHits);

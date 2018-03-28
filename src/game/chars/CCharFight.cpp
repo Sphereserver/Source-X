@@ -939,7 +939,7 @@ effect_bounce:
 		int iSpellSkill;
 		const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
 		if ( pSpellDef && pSpellDef->GetPrimarySkill(&iSpellSkill) )
-			iDisturbChance = pSpellDef->m_Interrupt.GetLinear(Skill_GetBase(static_cast<SKILL_TYPE>(iSpellSkill)));
+			iDisturbChance = pSpellDef->m_Interrupt.GetLinear(Skill_GetBase((SKILL_TYPE)iSpellSkill));
 
 		if ( iDisturbChance && IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 		{
@@ -1099,7 +1099,7 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 
 	int iDmgMin = 0;
 	int iDmgMax = 0;
-	STAT_TYPE iStatBonus = static_cast<STAT_TYPE>(GetDefNum("COMBATBONUSSTAT"));
+	STAT_TYPE iStatBonus = (STAT_TYPE)(GetDefNum("COMBATBONUSSTAT"));
 	int iStatBonusPercent = (int)(GetDefNum("COMBATBONUSPERCENT"));
 	if ( pWeapon != NULL )
 	{
@@ -1125,11 +1125,15 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 
 	if ( m_pPlayer )	// only players can have damage bonus
 	{
-		int iDmgBonus = minimum((int)(GetDefNum("INCREASEDAM", true, true)), 100);		// Damage Increase is capped at 100%
+		int iIncreaseDam = (int)(GetDefNum("INCREASEDAM", true, true));
+		int iDmgBonus = minimum(iIncreaseDam, 100);		// Damage Increase is capped at 100%
 
 		// Racial Bonus (Berserk), gargoyles gains +15% Damage Increase per each 20 HP lost
 		if ((g_Cfg.m_iRacialFlags & RACIALF_GARG_BERSERK) && IsGargoyle())
-			iDmgBonus += minimum(15 * ((Stat_GetMax(STAT_STR) - Stat_GetVal(STAT_STR)) / 20), 60);		// value is capped at 60%
+		{
+			int iStrDiff = (Stat_GetMax(STAT_STR) - Stat_GetVal(STAT_STR));
+			iDmgBonus += minimum(15 * (iStrDiff / 20), 60);		// value is capped at 60%
+		}
 
 		// Horrific Beast (necro spell) add +25% Damage Increase
 		if (g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B)
@@ -1146,7 +1150,7 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 			{
 				// Sphere damage bonus (custom)
 				if ( !iStatBonus )
-					iStatBonus = static_cast<STAT_TYPE>(STAT_STR);
+					iStatBonus = STAT_STR;
 				if ( !iStatBonusPercent )
 					iStatBonusPercent = 10;
 				iDmgBonus += Stat_GetAdjusted(iStatBonus) * iStatBonusPercent / 100;
@@ -1170,7 +1174,7 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 				}
 
 				if ( !iStatBonus )
-					iStatBonus = static_cast<STAT_TYPE>(STAT_STR);
+					iStatBonus = STAT_STR;
 				if ( !iStatBonusPercent )
 					iStatBonusPercent = 20;
 				iDmgBonus += Stat_GetAdjusted(iStatBonus) * iStatBonusPercent / 100;
@@ -1199,7 +1203,7 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 					iDmgBonus += 5;
 
 				if ( !iStatBonus )
-					iStatBonus = static_cast<STAT_TYPE>(STAT_STR);
+					iStatBonus = STAT_STR;
 				if ( !iStatBonusPercent )
 					iStatBonusPercent = 30;
 				iDmgBonus += Stat_GetAdjusted(iStatBonus) * iStatBonusPercent / 100;

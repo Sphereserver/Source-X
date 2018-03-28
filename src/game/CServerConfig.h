@@ -656,11 +656,11 @@ public:
 	static const char *m_sClassName;
 	CSString m_sName;	// The name of this skill class.
 
-	word m_StatSumMax;  // Max Stat sum.
-	dword m_SkillSumMax;// Max Skill sum.
+	ushort m_StatSumMax;	// Max Stat sum.
+	uint   m_SkillSumMax;	// Max Skill sum.
 
-	word m_StatMax[STAT_BASE_QTY];      // Max Stat value.
-	word m_SkillLevelMax[ SKILL_QTY ];  // Max Skill Value.
+	ushort m_StatMax[STAT_BASE_QTY];      // Max Stat value.
+	ushort m_SkillLevelMax[ SKILL_QTY ];  // Max Skill Value.
 
 private:
 	void Init();
@@ -714,8 +714,8 @@ public:
 
 	CValueCurveDef	m_AdvRate;      // ADV_RATE defined "skill curve" 0 to 100 skill levels.
 	CValueCurveDef	m_Values;       // VALUES= influence for items made with 0 to 100 skill levels.
-	int			m_GainRadius;       // GAINRADIUS= max. amount of skill above the necessary skill for a task to gain from it.
-	int			m_Range;            // RANGE=n Used for SKF_GATHER skills represnting the max distace at which it can be used.
+	int				m_GainRadius;	// GAINRADIUS= max. amount of skill above the necessary skill for a task to gain from it.
+	int				m_Range;		// RANGE=n Used for SKF_GATHER skills represnting the max distace at which it can be used.
 
 	dword			m_dwFlags;      // Skill Flags.
 	dword			m_dwGroup;      // Skill Group.

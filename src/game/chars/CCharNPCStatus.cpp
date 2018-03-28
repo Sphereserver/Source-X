@@ -500,31 +500,34 @@ CChar * CChar::NPC_PetGetOwnerRecursive() const
 	return pCharOwner;
 }
 
-int CChar::NPC_GetTrainMax( const CChar * pStudent, SKILL_TYPE Skill ) const
+ushort CChar::NPC_GetTrainMax( const CChar * pStudent, SKILL_TYPE Skill ) const
 {
 	ADDTOCALLSTACK("CChar::NPC_GetTrainMax");
 	ASSERT(m_pNPC);
+	
 	// What is the max I can train to ?
-	int iMax;
-	int iMaxAllowed;
+	ushort uiMax;
+	ushort uiMaxAllowed;
 
 	CVarDefCont * pValue = GetKey("OVERRIDE.TRAINSKILLMAXPERCENT",true);
 	if ( pValue )
-		iMax = (int)IMulDivLL( pValue->GetValNum(), Skill_GetBase(Skill), 100 );
+		uiMax = (ushort)IMulDiv( (ushort)pValue->GetValNum(), Skill_GetBase(Skill), 100 );
 	else
-		iMax = (int)IMulDivLL( g_Cfg.m_iTrainSkillPercent, Skill_GetBase(Skill), 100 );
+		uiMax = (ushort)IMulDiv( g_Cfg.m_iTrainSkillPercent, Skill_GetBase(Skill), 100 );
 
 	pValue = GetKey("OVERRIDE.TRAINSKILLMAX",true);
 	if ( pValue )
-		iMaxAllowed = (int)(pValue->GetValNum());
+		uiMaxAllowed = (ushort)pValue->GetValNum();
 	else
-		iMaxAllowed = g_Cfg.m_iTrainSkillMax;
+		uiMaxAllowed = (ushort)g_Cfg.m_iTrainSkillMax;
 
-	if ( iMax > iMaxAllowed )
-		return minimum(iMaxAllowed, pStudent->Skill_GetMax(Skill));
+	ushort uiStudentMax = pStudent->Skill_GetMax(Skill);
+
+	if ( uiMax > uiMaxAllowed )
+		return minimum(uiMaxAllowed, uiStudentMax);
 
 	// Is this more that the student can take ?
-	return minimum(iMax, pStudent->Skill_GetMax(Skill));
+	return minimum(uiMax, uiStudentMax);
 }
 
 bool CChar::NPC_CheckWalkHere( const CPointBase & pt, const CRegion * pArea, dword dwBlockFlags ) const

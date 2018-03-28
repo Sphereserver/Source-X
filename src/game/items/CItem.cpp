@@ -4403,9 +4403,9 @@ SKILL_TYPE CItem::Weapon_GetSkill() const
 	if ( iSkillOverride == -1)
 		iSkillOverride = (int)(m_TagDefs.GetKeyNum("OVERRIDE.SKILL", true) - 1);
 	if ( iSkillOverride > SKILL_NONE && iSkillOverride < (int)(g_Cfg.m_iMaxSkill) )
-		return static_cast<SKILL_TYPE>(iSkillOverride);
+		return (SKILL_TYPE)(iSkillOverride);
 
-	if ( pItemDef->m_iSkill > SKILL_NONE && pItemDef->m_iSkill < static_cast<SKILL_TYPE>(g_Cfg.m_iMaxSkill) )
+	if ( pItemDef->m_iSkill > SKILL_NONE && pItemDef->m_iSkill < (SKILL_TYPE)(g_Cfg.m_iMaxSkill) )
 		return pItemDef->m_iSkill;
 
 	switch ( pItemDef->GetType() )

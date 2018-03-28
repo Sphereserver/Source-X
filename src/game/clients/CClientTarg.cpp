@@ -1469,7 +1469,7 @@ bool CClient::OnTarg_Skill_Magery( CObjBase * pObj, const CPointMap & pt )
 	if (!pSpell->GetPrimarySkill(&skill, NULL))
 		return false;
 
-	return( m_pChar->Skill_Start(static_cast<SKILL_TYPE>(skill)));
+	return( m_pChar->Skill_Start((SKILL_TYPE)skill));
 }
 
 bool CClient::OnTarg_Pet_Command( CObjBase * pObj, const CPointMap & pt )

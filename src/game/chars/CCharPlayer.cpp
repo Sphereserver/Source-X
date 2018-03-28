@@ -192,7 +192,7 @@ SKILL_TYPE CCharPlayer::Skill_GetLockType( lpctstr pszKey ) const
 	
 	if ( i >= g_Cfg.m_iMaxSkill )
 		return SKILL_NONE;
-	return static_cast<SKILL_TYPE>(i);
+	return (SKILL_TYPE)i;
 }
 
 SKILLLOCK_TYPE CCharPlayer::Skill_GetLock( SKILL_TYPE skill ) const
@@ -227,7 +227,7 @@ STAT_TYPE CCharPlayer::Stat_GetLockType( lpctstr pszKey ) const
 
 	if ( i >= STAT_BASE_QTY )
 		return STAT_NONE;
-	return static_cast<STAT_TYPE>(i);
+	return (STAT_TYPE)i;
 }
 
 SKILLLOCK_TYPE CCharPlayer::Stat_GetLock( STAT_TYPE stat ) const

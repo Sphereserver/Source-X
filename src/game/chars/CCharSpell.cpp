@@ -294,7 +294,7 @@ CChar * CChar::Spell_Summon( CREID_TYPE id, CPointMap pntTarg )
 	pChar->m_pNPC->m_Home_Dist_Wander = 10;
 	pChar->NPC_CreateTrigger();		// removed from NPC_LoadScript() and triggered after char placement
 	pChar->NPC_PetSetOwner(this);
-	pChar->OnSpellEffect(SPELL_Summon, this, Skill_GetAdjusted(static_cast<SKILL_TYPE>(skill)), NULL);
+	pChar->OnSpellEffect(SPELL_Summon, this, Skill_GetAdjusted((SKILL_TYPE)(skill)), NULL);
 
 	pChar->Update();
 	pChar->UpdateAnimate(ANIM_CAST_DIR);
@@ -558,8 +558,10 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			{
 				Stat_AddMod(STAT_STR, -pSpell->m_itSpell.m_PolyStr);
 				Stat_AddMod(STAT_DEX, -pSpell->m_itSpell.m_PolyDex);
-				Stat_SetVal(STAT_STR, minimum(Stat_GetVal(STAT_STR), Stat_GetMax(STAT_STR)));
-				Stat_SetVal(STAT_DEX, minimum(Stat_GetVal(STAT_DEX), Stat_GetMax(STAT_DEX)));
+				short iValStr = Stat_GetVal(STAT_STR), iMaxStr = Stat_GetMax(STAT_STR);
+				short iValDex = Stat_GetVal(STAT_DEX), iMaxDex = Stat_GetMax(STAT_DEX);
+				Stat_SetVal(STAT_STR, minimum(iValStr, iMaxStr));
+				Stat_SetVal(STAT_DEX, minimum(iValDex, iMaxDex));
 			}
 			StatFlag_Clear(STATF_POLYMORPH);
 			if (pClient)
@@ -724,7 +726,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 				SetDefNum("RESENERGYMAX", GetDefNum("RESENERGYMAX", true, true) + 10);
 			}
 			for (int i = STAT_STR; i < STAT_BASE_QTY; i++ )
-				Stat_AddMod(static_cast<STAT_TYPE>(i), iStatEffect);
+				Stat_AddMod((STAT_TYPE)(i), iStatEffect);
 			if (pClient)
 				pClient->removeBuff(BI_CURSE);
 			return;
@@ -746,8 +748,8 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			return;
 		case SPELL_Bless:
 		{
-			for ( int i = STAT_STR; i < STAT_BASE_QTY; i++ )
-				Stat_AddMod(static_cast<STAT_TYPE>(i), -iStatEffect);
+			for ( int i = STAT_STR; i < STAT_BASE_QTY; ++i )
+				Stat_AddMod((STAT_TYPE)(i), -iStatEffect);
 			if (pClient)
 				pClient->removeBuff(BI_BLESS);
 			return;
@@ -796,7 +798,9 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			{
 				SetDefNum("RESPHYSICAL", GetDefNum("RESPHYSICAL", true) + pSpell->m_itSpell.m_PolyStr);
 				SetDefNum("FASTERCASTING", GetDefNum("FASTERCASTING", true) + 2);
-				Skill_SetBase(SKILL_MAGICRESISTANCE, minimum(Skill_GetMax(SKILL_MAGICRESISTANCE, true), Skill_GetBase(SKILL_MAGICRESISTANCE) + pSpell->m_itSpell.m_PolyDex));
+				ushort iMagicResistanceMax = Skill_GetMax(SKILL_MAGICRESISTANCE, true);
+				ushort iMagicResistanceVal = Skill_GetBase(SKILL_MAGICRESISTANCE) + pSpell->m_itSpell.m_PolyDex;
+				Skill_SetBase(SKILL_MAGICRESISTANCE, minimum(iMagicResistanceMax, iMagicResistanceVal));
 			}
 			else
 			{
@@ -813,7 +817,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 		/*case SPELL_Chameleon:		// 106 // makes your skin match the colors of whatever is behind you.
 			return;*/
 		case SPELL_Trance:			// 111 // temporarily increases your meditation skill.
-			Skill_SetBase(SKILL_MEDITATION, Skill_GetBase(SKILL_MEDITATION) - g_Cfg.GetSpellEffect(spell, iStatEffect));
+			Skill_SetBase(SKILL_MEDITATION, Skill_GetBase(SKILL_MEDITATION) - (ushort)g_Cfg.GetSpellEffect(spell, iStatEffect));
 			return;
 		/*case SPELL_Shield:			// 113 // erects a temporary force field around you. Nobody approaching will be able to get within 1 tile of you, though you can move close to them if you wish.
 			return;*/
@@ -1342,7 +1346,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					SetDefNum("RESENERGYMAX", GetDefNum("RESENERGYMAX", true, true) - 10);
 				}
 				for ( int i = STAT_STR; i < STAT_BASE_QTY; i++ )
-					Stat_AddMod(static_cast<STAT_TYPE>(i), -iStatEffect);
+					Stat_AddMod((STAT_TYPE)(i), -iStatEffect);
 
 				if (pClient && IsSetOF(OF_Buffs))
 				{
@@ -1419,7 +1423,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					pSpell->m_itSpell.m_spelllevel = iStatEffect;
 				}
 				for ( int i = STAT_STR; i < STAT_BASE_QTY; i++ )
-					Stat_AddMod(static_cast<STAT_TYPE>(i), iStatEffect);
+					Stat_AddMod((STAT_TYPE)(i), iStatEffect);
 
 				if (pClient && IsSetOF(OF_Buffs))
 				{
@@ -1479,21 +1483,25 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 		case SPELL_Protection:
 		case SPELL_Arch_Prot:
 			{
-				int iPhysicalResist = 0;
-				int iMagicResist = 0;
+				ushort uiPhysicalResist = 0;
+				ushort uiMagicResist = 0;
 				if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 				{
-					iStatEffect = minimum(75, (pCaster->Skill_GetBase(SKILL_EVALINT) + pCaster->Skill_GetBase(SKILL_MEDITATION) + pCaster->Skill_GetBase(SKILL_INSCRIPTION)) / 40);
-					iPhysicalResist = 15 - (pCaster->Skill_GetBase(SKILL_INSCRIPTION) / 200);
-					iMagicResist = minimum(Skill_GetBase(SKILL_MAGICRESISTANCE), 350 - (Skill_GetBase(SKILL_INSCRIPTION) / 20));
+					ushort uiCasterEvalInt = pCaster->Skill_GetBase(SKILL_EVALINT), uiCasterMeditation = pCaster->Skill_GetBase(SKILL_MEDITATION);
+					ushort uiCasterInscription = pCaster->Skill_GetBase(SKILL_INSCRIPTION);
+					ushort uiMyMagicResistance = Skill_GetBase(SKILL_MAGICRESISTANCE), uiMyInscription = Skill_GetBase(SKILL_INSCRIPTION);
+					iStatEffect = (uiCasterEvalInt + uiCasterMeditation + uiCasterInscription) / 40;
+					iStatEffect = minimum(75, iStatEffect);
+					uiPhysicalResist = 15 - (uiCasterInscription / 200);
+					uiMagicResist = minimum(uiMyMagicResistance, 350 - (uiMyInscription / 20));
 
 					pSpell->m_itSpell.m_spelllevel = iStatEffect;
-					pSpell->m_itSpell.m_PolyStr = (short)(iPhysicalResist);
-					pSpell->m_itSpell.m_PolyDex = (short)(iMagicResist);
+					pSpell->m_itSpell.m_PolyStr = (short)uiPhysicalResist;
+					pSpell->m_itSpell.m_PolyDex = (short)uiMagicResist;
 
-					SetDefNum("RESPHYSICAL", GetDefNum("RESPHYSICAL", true) - iPhysicalResist);
+					SetDefNum("RESPHYSICAL", GetDefNum("RESPHYSICAL", true) - uiPhysicalResist);
 					SetDefNum("FASTERCASTING", GetDefNum("FASTERCASTING", true) - 2);
-					Skill_SetBase(SKILL_MAGICRESISTANCE, Skill_GetBase(SKILL_MAGICRESISTANCE) - iMagicResist);
+					Skill_SetBase(SKILL_MAGICRESISTANCE, uiMyMagicResistance - uiMagicResist);
 				}
 				else
 				{
@@ -1512,8 +1520,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 					pClient->removeBuff(BuffIcon);
 					if ( IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE) )
 					{
-						ITOA(-iPhysicalResist, NumBuff[0], 10);
-						ITOA(-iMagicResist/10, NumBuff[1], 10);
+						ITOA(-uiPhysicalResist, NumBuff[0], 10);
+						ITOA(-uiMagicResist/10, NumBuff[1], 10);
 						pClient->addBuff(BuffIcon, BuffCliloc, 1075815, iTimerEffect, pNumBuff, 2);
 					}
 					else
@@ -2043,17 +2051,19 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 	if ( pSpellDef->IsSpellType( SPELLFLAG_DISABLED ))
 		return false;
 
-	int skill = SKILL_NONE;
+	SKILL_TYPE skill = SKILL_NONE;
 	int iSkillTest = 0;
 	if (!pSpellDef->GetPrimarySkill(&iSkillTest, NULL))
 		iSkillTest = SKILL_MAGERY;
-	skill = static_cast<SKILL_TYPE>(iSkillTest);
+	skill = (SKILL_TYPE)iSkillTest;
 
-	if ( !Skill_CanUse(static_cast<SKILL_TYPE>(skill)) )
+	if ( !Skill_CanUse(skill) )
 		return false;
 
-	short wManaUse = (short)(pSpellDef->m_wManaUse * (100 - minimum(GetDefNum("LOWERMANACOST", true, true), 40)) / 100);
-	short wTithingUse = (short)(pSpellDef->m_wTithingUse * (100 - minimum(GetDefNum("LOWERREAGENTCOST", true, true), 40)) / 100);
+	short iLowerManaCost = (short)GetDefNum("LOWERMANACOST", true, true);
+	short iLowerReagentCost = (short)GetDefNum("LOWERREAGENTCOST", true, true);
+	short iManaUse = ((short)pSpellDef->m_wManaUse * (100 - minimum(iLowerManaCost, 40)) / 100);
+	short iTithingUse = ((short)pSpellDef->m_wTithingUse * (100 - minimum(iLowerReagentCost, 40)) / 100);
 
 	if (pSrc != this)
 	{
@@ -2062,24 +2072,24 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 		{
 			if (pItem->GetType() == IT_WAND)
 			{
-				wManaUse = 0;
-				wTithingUse = 0;
+				iManaUse = 0;
+				iTithingUse = 0;
 			}
 			else if (pItem->GetType() == IT_SCROLL)
 			{
-				wManaUse /= 2;
-				wTithingUse /= 2;
+				iManaUse /= 2;
+				iTithingUse /= 2;
 			}
 		}
 	}
 
 
-	CScriptTriggerArgs Args( spell, wManaUse, pSrc );
+	CScriptTriggerArgs Args( spell, iManaUse, pSrc );
 	if ( fTest )
 		Args.m_iN3 |= 0x0001;
 	if ( fFailMsg )
 		Args.m_iN3 |= 0x0002;
-	Args.m_VarsLocal.SetNum("TithingUse",wTithingUse);
+	Args.m_VarsLocal.SetNum("TithingUse",iTithingUse);
 
 	if ( IsTrigUsed(TRIGGER_SELECT) )
 	{
@@ -2111,8 +2121,8 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 			return false;
 		spell = (SPELL_TYPE)(Args.m_iN1);
 	}
-	wManaUse = (short)(Args.m_iN2);
-	wTithingUse = (short)(Args.m_VarsLocal.GetKeyNum("TithingUse",true));
+	iManaUse = (short)(Args.m_iN2);
+	iTithingUse = (short)(Args.m_VarsLocal.GetKeyNum("TithingUse",true));
 
 	if ( pSrc != this )
 	{
@@ -2142,7 +2152,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 					SysMessageDefault( DEFMSG_SPELL_WAND_NOCHARGE );
 				return false;
 			}
-			//wManaUse = 0;
+			//iManaUse = 0;
 			if ( ! fTest && pItem->m_itWeapon.m_spellcharges != 255 )
 			{
 				pItem->m_itWeapon.m_spellcharges --;
@@ -2151,7 +2161,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 		}
 		else	// Scroll
 		{
-			//wManaUse /= 2;
+			//iManaUse /= 2;
 			if ( ! fTest )
 			{
 				 pItem->ConsumeAmount();
@@ -2222,38 +2232,38 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 	}
 
 	// Check for mana
-	if (Stat_GetVal(STAT_INT) < wManaUse)
+	if (Stat_GetVal(STAT_INT) < iManaUse)
 	{
 		if (fFailMsg)
 			SysMessageDefault(DEFMSG_SPELL_TRY_NOMANA);
 		return false;
 	}
-	if (!fTest && wManaUse)
+	if (!fTest && iManaUse)
 	{
 		// Consume mana.
 		if (m_Act_Difficulty < 0)	// use diff amount of mana if we fail.
 		{
-			wManaUse = wManaUse / 2 + (short)(Calc_GetRandVal(wManaUse / 2 + wManaUse / 4));
+			iManaUse = iManaUse / 2 + (short)(Calc_GetRandVal(iManaUse / 2 + iManaUse / 4));
 		}
-		UpdateStatVal(STAT_INT, -wManaUse);
+		UpdateStatVal(STAT_INT, -iManaUse);
 	}
 
 	// Check for Tithing
 	int wTithing = (int)(GetDefNum("Tithing"));
-	if ( wTithing < wTithingUse)
+	if ( wTithing < iTithingUse)
 	{
 		if (fFailMsg)
-			SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_SPELL_TRY_NOTITHING),wTithingUse);
+			SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_SPELL_TRY_NOTITHING),iTithingUse);
 		return false;
 	}
-	if (!fTest && wTithingUse)
+	if (!fTest && iTithingUse)
 	{
 		// Consume points
 		if (m_Act_Difficulty < 0)	// use diff amount of points if we fail.
 		{
-			wTithingUse = wTithingUse / 2 + (short)(Calc_GetRandVal(wTithingUse / 2 + wTithingUse / 4));
+			iTithingUse = iTithingUse / 2 + (short)(Calc_GetRandVal(iTithingUse / 2 + iTithingUse / 4));
 		}
-		SetDefNum("Tithing", wTithing - wTithingUse);
+		SetDefNum("Tithing", wTithing - iTithingUse);
 	}
 
 	return true;
@@ -2432,7 +2442,7 @@ bool CChar::Spell_CastDone()
 	}
 	else
 	{
-		iSkillLevel = Skill_GetAdjusted(static_cast<SKILL_TYPE>(iSkill));
+		iSkillLevel = Skill_GetAdjusted((SKILL_TYPE)(iSkill));
 	}
 
 	if ( (iSkill == SKILL_MYSTICISM) && (g_Cfg.m_iRacialFlags & RACIALF_GARG_MYSTICINSIGHT) && (iSkillLevel < 300) && IsGargoyle() )
@@ -2849,7 +2859,7 @@ bool CChar::Spell_CastDone()
 	if ( IsClient() && IsSetMagicFlags(MAGICF_PRECAST) && !pSpellDef->IsSpellType(SPELLFLAG_NOPRECAST) )
 	{
 		iDifficulty /= 10;
-		Skill_Experience(static_cast<SKILL_TYPE>(iSkill), iDifficulty);
+		Skill_Experience((SKILL_TYPE)(iSkill), iDifficulty);
 	}
 	return true;
 }
@@ -2950,7 +2960,7 @@ int CChar::Spell_CastStart()
 		}
 	}
 
-	int64 iWaitTime = pSpellDef->m_CastTime.GetLinear(Skill_GetBase(static_cast<SKILL_TYPE>(iSkill)));
+	int64 iWaitTime = pSpellDef->m_CastTime.GetLinear(Skill_GetBase((SKILL_TYPE)(iSkill)));
 	iWaitTime -= GetDefNum("FASTERCASTING", true, true) * 2;	//correct value is 0.25, but sphere can handle only 0.2.
 	if ( iWaitTime < 1 || IsPriv(PRIV_GM) )
 		iWaitTime = 1;
@@ -3122,7 +3132,10 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 				// Racial Bonus (Berserk), gargoyles gains +3% Spell Damage Increase per each 20 HP lost
 				if ( (g_Cfg.m_iRacialFlags & RACIALF_GARG_BERSERK) && IsGargoyle() )
-					DamageBonus += minimum(3 * ((Stat_GetMax(STAT_STR) - Stat_GetVal(STAT_STR)) / 20), 12);		// value is capped at 12%
+				{
+					int iInc = 3 * ((Stat_GetMax(STAT_STR) - Stat_GetVal(STAT_STR)) / 20);
+					DamageBonus += minimum(iInc, 12);		// value is capped at 12%
+				}
 
 				iEffect += iEffect * DamageBonus / 100;
 			}

@@ -1056,15 +1056,15 @@ PacketSkills::PacketSkills(const CClient* target, const CChar* character, SKILL_
 
 		for (size_t i = 0; i < g_Cfg.m_iMaxSkill; i++)
 		{
-			if (g_Cfg.m_SkillIndexDefs.IsValidIndex(static_cast<SKILL_TYPE>(i)) == false)
+			if (g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i) == false)
 				continue;
 
 			writeInt16((word)(i + 1));
-			writeInt16(character->Skill_GetAdjusted(static_cast<SKILL_TYPE>(i)));
-			writeInt16(character->Skill_GetBase(static_cast<SKILL_TYPE>(i)));
-			writeByte((byte)(character->Skill_GetLock(static_cast<SKILL_TYPE>(i))));
+			writeInt16(character->Skill_GetAdjusted((SKILL_TYPE)i));
+			writeInt16(character->Skill_GetBase((SKILL_TYPE)i));
+			writeByte((byte)(character->Skill_GetLock((SKILL_TYPE)i)));
 			if (includeCaps)
-				writeInt16((word)(character->Skill_GetMax(static_cast<SKILL_TYPE>(i))));
+				writeInt16((word)(character->Skill_GetMax((SKILL_TYPE)i)));
 		}
 
 		writeInt16(0);
@@ -3098,16 +3098,16 @@ void PacketServerList::writeServerEntry(const CServerRef& server, int index, boo
 	size_t servClients = server->StatGet(SERV_STAT_CLIENTS);
 	if (server == &g_Serv)
 		percentFull = (uint)(minimum((servClients * 100) / maximum(1, g_Cfg.m_iClientsMax), 100));
-		//percentFull = (int)maximum(0, minimum((server->StatGet(SERV_STAT_CLIENTS) * 100) / maximum(1, g_Cfg.m_iClientsMax), 100));
+		//percentFull = (int)maximum(0, minimum((servClients * 100) / maximum(1, g_Cfg.m_iClientsMax), 100));
 	else
 		percentFull = (uint)(minimum(servClients, 100));
 
 	dword ip = server->m_ip.GetAddrIP();
 
 
-	writeInt16((word)(index));
+	writeInt16((word)index);
 	writeStringFixedASCII(server->GetName(), 32);
-	writeByte((byte)(percentFull));
+	writeByte((byte)percentFull);
 	writeByte(server->m_TimeZone);
 
 	if (reverseIp)

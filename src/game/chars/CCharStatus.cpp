@@ -22,7 +22,7 @@ bool CChar::IsResourceMatch( CResourceIDBase rid, dword dwAmount, dword dwArgRes
 	switch ( rid.GetResType() )
 	{
 		case RES_SKILL:			// do I have this skill level?
-			if ( Skill_GetBase(static_cast<SKILL_TYPE>(rid.GetResIndex())) < dwAmount )
+			if ( Skill_GetBase((SKILL_TYPE)(rid.GetResIndex())) < dwAmount )
 				return false;
 			return true;
 
