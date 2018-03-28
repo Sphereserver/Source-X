@@ -108,10 +108,11 @@ public:
 	static void push(IThread *thread);
 	// removes a thread from the list. Sould NOT be called, internal usage
 	static void pop(IThread *thread);
-	// returns number of running threads. Sould NOT be called, unit tests usage
-	static size_t getActiveThreads() { return m_threadCount; }
 	// returns thread at i pos
 	static IThread * getThreadAt(size_t at);
+
+	// returns number of running threads. Sould NOT be called, unit tests usage
+	static inline size_t getActiveThreads() { return m_threadCount; }
 
 private:
 	static void init();
@@ -238,9 +239,7 @@ public:
 	inline void popStackCall(void)
 	{
 		if (m_freezeCallStack == false)
-		{
 			--m_stackPos;
-		}
 	}
 
 	void printStackTrace(void);

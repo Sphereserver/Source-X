@@ -123,14 +123,14 @@ public:
     * @brief Get the record count of the list.
     * @return The record count of the list.
     */
-	size_t GetCount() const {
+	inline size_t GetCount() const {
 		return m_iCount;
 	}
 	/**
     * @brief Check if CSObjList if empty.
     * @return true if CSObjList is empty, false otherwise.
     */
-	bool IsEmpty() const {
+	inline bool IsEmpty() const {
 		return !GetCount();
 	}
 	///@}
@@ -147,14 +147,14 @@ public:
     * @brief Get the first record of the CSObjList.
     * @return The first record of the CSObjList if list is not empty, NULL otherwise.
     */
-	CSObjListRec * GetHead() const {
+	inline CSObjListRec * GetHead() const {
 		return m_pHead;
 	}
 	/**
     * @brief Get the last record of the CSObjList.
     * @return The last record of the CSObjList if list is not empty, NULL otherwise.
     */
-	CSObjListRec * GetTail() const {
+	inline CSObjListRec * GetTail() const {
 		return m_pTail;
 	}
 	///@}
@@ -171,7 +171,7 @@ public:
     * TODO: Really needed?
     * @see DeleteAll()
     */
-	void Empty() {
+	inline void Empty() {
 		DeleteAll();
 	}
 	/**

@@ -132,19 +132,19 @@ public:
 
 	// Strict G++ Prototyping produces an error when not casting char*& to const char*&
 	// So this is a rather lazy workaround
-	llong GetSingle(lptstr &pArgs) {
+	inline llong GetSingle(lptstr &pArgs) {
 		return GetSingle(const_cast<lpctstr &>(pArgs));
 	}
-	int GetRangeVals(lptstr &pExpr, int64 * piVals, int iMaxQty, bool bNoWarn = false) {
+	inline int GetRangeVals(lptstr &pExpr, int64 * piVals, int iMaxQty, bool bNoWarn = false) {
 		return GetRangeVals(const_cast<lpctstr &>(pExpr), piVals, iMaxQty, bNoWarn);
 	}
-	int GetRangeArgsPos(lptstr &pExpr, lpctstr (&pArgPos)[128][2], int iMaxQty) {
+	inline int GetRangeArgsPos(lptstr &pExpr, lpctstr (&pArgPos)[128][2], int iMaxQty) {
 		return GetRangeArgsPos(const_cast<lpctstr &>(pExpr), pArgPos, iMaxQty);
 	}
-	int64 GetRange(lptstr &pArgs) {
+	inline int64 GetRange(lptstr &pArgs) {
 		return GetRange(const_cast<lpctstr &>(pArgs));
 	}
-	llong GetVal(lptstr &pArgs) {
+	inline llong GetVal(lptstr &pArgs) {
 		return GetVal(const_cast<lpctstr &>(pArgs));
 	}
 

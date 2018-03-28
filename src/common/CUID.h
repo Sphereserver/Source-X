@@ -33,8 +33,12 @@ protected:
 
 public:
 	bool IsValidUID() const;
-	void InitUID();
-	void ClearUID();
+	inline void InitUID() {
+		m_dwInternalVal = UID_UNUSED;
+	}
+	inline void ClearUID() {
+		m_dwInternalVal = UID_CLEAR;
+	}
 
 	bool IsResource() const;
 	bool IsItem() const;
@@ -46,17 +50,27 @@ public:
 	bool IsItemEquipped() const;
 	bool IsItemInContainer() const;
 
-	void SetObjContainerFlags( dword dwFlags = 0 );
+	void SetObjContainerFlags(dword dwFlags = 0);
 
-	void SetPrivateUID( dword dwVal );
-	dword GetPrivateUID() const;
+	inline void SetPrivateUID(dword dwVal) {
+		m_dwInternalVal = dwVal;
+	}
+	inline dword GetPrivateUID() const {
+		return m_dwInternalVal;
+	}
 
 	dword GetObjUID() const;
-	void SetObjUID( dword dwVal );
+	void SetObjUID(dword dwVal);
 
-	bool operator == ( dword index ) const;
-	bool operator != ( dword index ) const;
-	operator dword () const;
+	inline bool operator == (dword index) const {
+		return (GetObjUID() == index);
+	}
+	inline bool operator != (dword index) const {
+		return (GetObjUID() != index);
+	}
+	inline operator dword () const {
+		return GetObjUID();
+	}
 	CObjBase * ObjFind() const;
 	CItem * ItemFind() const;
 	CChar * CharFind() const;
@@ -65,11 +79,11 @@ public:
 class CUID : public CUIDBase
 {
 public:
-	CUID()
+	inline CUID()
 	{
 		InitUID();
 	}
-	CUID(dword dw)
+	inline CUID(dword dw)
 	{
 		SetPrivateUID( dw );
 	}

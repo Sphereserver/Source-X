@@ -153,10 +153,9 @@ ushort CChar::Skill_GetAdjusted( SKILL_TYPE skill ) const
 
 	if (pSkillDef != NULL)
 	{
-		ushort uiStrAdj = Stat_GetAdjusted(STAT_STR), uiIntAdj = Stat_GetAdjusted(STAT_INT), uiDexAdj = Stat_GetAdjusted(STAT_DEX);
-		ushort uiPureBonus =( pSkillDef->m_StatBonus[STAT_STR] * maximum(0,uiStrAdj) ) +
-							( pSkillDef->m_StatBonus[STAT_INT] * maximum(0,uiIntAdj) ) +
-							( pSkillDef->m_StatBonus[STAT_DEX] * maximum(0,uiDexAdj) );
+		ushort uiPureBonus =( pSkillDef->m_StatBonus[STAT_STR] * Stat_GetAdjusted(STAT_STR) ) +
+							( pSkillDef->m_StatBonus[STAT_INT] * Stat_GetAdjusted(STAT_INT) ) +
+							( pSkillDef->m_StatBonus[STAT_DEX] * Stat_GetAdjusted(STAT_DEX) );
 
 		uiAdjSkill = (ushort)IMulDiv( pSkillDef->m_StatPercent, uiPureBonus, 10000 );
 	}
@@ -168,8 +167,6 @@ void CChar::Skill_SetBase( SKILL_TYPE skill, ushort uiValue )
 {
 	ADDTOCALLSTACK("CChar::Skill_SetBase");
 	ASSERT( IsSkillBase(skill));
-	if ( uiValue < 0 )
-		uiValue = 0;
 
 	if ( IsTrigUsed(TRIGGER_SKILLCHANGE) )
 	{

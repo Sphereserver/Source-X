@@ -753,8 +753,6 @@ int CChar::FixWeirdness()
 			{
 				ushort uiSkillMax = Skill_GetMax((SKILL_TYPE)i);
 				ushort uiSkillVal = Skill_GetBase((SKILL_TYPE)i);
-				if ( uiSkillVal < 0 )
-					Skill_SetBase((SKILL_TYPE)i, 0);
 				if ( uiSkillVal > uiSkillMax * g_Cfg.m_iOverSkillMultiply )
 					Skill_SetBase((SKILL_TYPE)i, uiSkillMax);
 			}

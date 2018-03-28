@@ -10,16 +10,6 @@ bool CUIDBase::IsValidUID() const
 	return ( m_dwInternalVal && ( m_dwInternalVal & UID_O_INDEX_MASK ) != UID_O_INDEX_MASK );
 }
 
-void CUIDBase::InitUID()
-{
-	m_dwInternalVal = UID_UNUSED;
-}
-
-void CUIDBase::ClearUID()
-{
-	m_dwInternalVal = UID_CLEAR;
-}
-
 bool CUIDBase::IsResource() const
 {
 	if ( m_dwInternalVal & UID_F_RESOURCE )
@@ -74,16 +64,6 @@ void CUIDBase::SetObjContainerFlags( dword dwFlags )
 	m_dwInternalVal = ( m_dwInternalVal & (UID_O_INDEX_MASK|UID_F_ITEM) ) | dwFlags;
 }
 
-void CUIDBase::SetPrivateUID( dword dwVal )
-{
-	m_dwInternalVal = dwVal;
-}
-
-dword CUIDBase::GetPrivateUID() const
-{
-	return m_dwInternalVal;
-}
-
 dword CUIDBase::GetObjUID() const
 {
 	return ( m_dwInternalVal & (UID_O_INDEX_MASK|UID_F_ITEM) );
@@ -95,19 +75,5 @@ void CUIDBase::SetObjUID( dword dwVal )
 	m_dwInternalVal = ( dwVal & (UID_O_INDEX_MASK|UID_F_ITEM) ) | UID_O_DISCONNECT;
 }
 
-bool CUIDBase::operator == ( dword index ) const
-{
-	return ( GetObjUID() == index );
-}
-
-bool CUIDBase::operator != ( dword index ) const
-{
-	return ( GetObjUID() != index );
-}
-
-CUIDBase::operator dword () const
-{
-	return GetObjUID();
-}
 
 
