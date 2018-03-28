@@ -870,7 +870,7 @@ bool CMenuItem::ParseLine( tchar * pszArgs, CScriptObj * pObjBase, CTextConsole 
 	// The item id (if we want to have an item type menu) or 0
 	if ( strcmp( pszArgStart, "0" ) != 0 )
 	{
-		CItemBase * pItemBase = CItemBase::FindItemBase(static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, pszArgStart )));
+		CItemBase * pItemBase = CItemBase::FindItemBase((ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, pszArgStart )));
 		if ( pItemBase != NULL )
 		{
 			m_id = (word)(pItemBase->GetDispID());

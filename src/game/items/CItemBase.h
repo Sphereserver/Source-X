@@ -481,11 +481,11 @@ public:
 
 	ITEMID_TYPE GetID() const
 	{
-		return static_cast<ITEMID_TYPE>(GetResourceID().GetResIndex());
+		return (ITEMID_TYPE)(GetResourceID().GetResIndex());
 	}
 	ITEMID_TYPE GetDispID() const
 	{
-		return static_cast<ITEMID_TYPE>(m_dwDispIndex);
+		return (ITEMID_TYPE)(m_dwDispIndex);
 	}
 	dword GetTFlags() const
 	{

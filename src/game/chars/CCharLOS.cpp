@@ -7,6 +7,8 @@
 bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist, word wFlags, bool bCombatCheck ) const
 {
 	ADDTOCALLSTACK("CChar::CanSeeLOS");
+	// WARNING: CanSeeLOS is an expensive function (lot of calculations but	most importantly it has to read the UO files, and file I/O is slow).
+
 	if ( (m_pPlayer && (g_Cfg.m_iAdvancedLos & ADVANCEDLOS_PLAYER)) || (m_pNPC && (g_Cfg.m_iAdvancedLos & ADVANCEDLOS_NPC)) )
 		return CanSeeLOS_New(ptDst, pptBlock, iMaxDist, wFlags);
 
@@ -105,6 +107,8 @@ bool inline CChar::CanSeeLOS_New_Failed( CPointMap *pptBlock, CPointMap &ptNow )
 bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist, word flags, bool bCombatCheck ) const
 {
 	ADDTOCALLSTACK("CChar::CanSeeLOS_New");
+	// WARNING: CanSeeLOS is an expensive function (lot of calculations but	most importantly it has to read the UO files, and file I/O is slow).
+
 	if ( !bCombatCheck && IsPriv(PRIV_GM) )	// If i'm checking the LOS during a combat, i don't want to shoot through the walls even if i'm a GM
 	{
 		WARNLOS(("GM Pass\n"));
@@ -120,7 +124,8 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 	if ( ptSrc == ptDst )	// Same point ^^
 		return true;
 
-	ptSrc.m_z = minimum(ptSrc.m_z + GetHeightMount(true), UO_SIZE_Z);	//true - substract one from the height because of eyes height
+	char iTotalZ = ptSrc.m_z + GetHeightMount(true);
+	ptSrc.m_z = minimum(iTotalZ, UO_SIZE_Z);	//true - substract one from the height because of eyes height
 	WARNLOS(("Total Z: %d\n", ptSrc.m_z));
 
 	int dx, dy, dz;
@@ -292,7 +297,10 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 						for ( byte posy = pos_y; (abs(defx - UO_BLOCK_OFFSET(pos_x)) <= 1 && pos_x <= 7); ++pos_x )
 						{
 							for ( pos_y = posy; (abs(defy - UO_BLOCK_OFFSET(pos_y)) <= 1 && pos_y <= 7); ++pos_y )
-								min_z = minimum(min_z, pBlock->GetTerrain(pos_x, pos_y)->m_z);
+							{
+								char terrain_z = pBlock->GetTerrain(pos_x, pos_y)->m_z;
+								min_z = minimum(min_z, terrain_z);
+							}
 						}
 						//min_z = MAPTILEZ;
 						//max_z = MAPTILEZ;
@@ -356,7 +364,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 						if ( pItemDef->GetID() != pStatic->GetDispID() ) //not a parent item
 						{
 							WARNLOS(("Not a parent item (STATIC)\n"));
-							pDupeDef = CItemBaseDupe::GetDupeRef(static_cast<ITEMID_TYPE>(pStatic->GetDispID()));
+							pDupeDef = CItemBaseDupe::GetDupeRef((ITEMID_TYPE)(pStatic->GetDispID()));
 							if ( !pDupeDef )
 							{
 								g_Log.EventDebug("Failed to get non-parent reference (static) (DispID 0%x) (X: %d Y: %d Z: %d)\n", pStatic->GetDispID(), ptNow.m_x, ptNow.m_y, pStatic->m_z);
@@ -448,7 +456,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 						if ( pItemDef->GetID() != pItem->GetDispID() )	//not a parent item
 						{
 							WARNLOS(("Not a parent item (DYNAMIC)\n"));
-							pDupeDef = CItemBaseDupe::GetDupeRef(static_cast<ITEMID_TYPE>(pItem->GetDispID()));
+							pDupeDef = CItemBaseDupe::GetDupeRef((ITEMID_TYPE)(pItem->GetDispID()));
 							if ( !pDupeDef )
 							{
 								g_Log.EventDebug("Failed to get non-parent reference (dynamic) (DispID 0%x) (X: %d Y: %d Z: %d)\n", pItem->GetDispID(), ptNow.m_x, ptNow.m_y, pItem->GetUnkZ());
@@ -553,7 +561,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 								if ( pItemDef->GetID() != pMultiItem->GetDispID() ) //not a parent item
 								{
 									WARNLOS(("Not a parent item (MULTI)\n"));
-									pDupeDef = CItemBaseDupe::GetDupeRef(static_cast<ITEMID_TYPE>(pMultiItem->GetDispID()));
+									pDupeDef = CItemBaseDupe::GetDupeRef((ITEMID_TYPE)(pMultiItem->GetDispID()));
 									if ( !pDupeDef )
 									{
 										g_Log.EventDebug("Failed to get non-parent reference (multi) (DispID 0%x) (X: %d Y: %d Z: %d)\n", pMultiItem->GetDispID(), ptNow.m_x, ptNow.m_y, pMultiItem->m_dz + pItem->GetTopPoint().m_z);
@@ -623,6 +631,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 bool CChar::CanSeeLOS( const CObjBaseTemplate *pObj, word wFlags, bool bCombatCheck ) const
 {
 	ADDTOCALLSTACK("CChar::CanSeeLOS");
+	// WARNING: CanSeeLOS is an expensive function (lot of calculations but	most importantly it has to read the UO files, and file I/O is slow).
 
 	if ( !CanSee(pObj) )
 		return false;
@@ -636,7 +645,10 @@ bool CChar::CanSeeLOS( const CObjBaseTemplate *pObj, word wFlags, bool bCombatCh
 		CPointMap pt = pObj->GetTopPoint();
 		const CChar *pChar = dynamic_cast<const CChar*>(pObj);
 		if ( pChar )
-			pt.m_z = minimum(pt.m_z + pChar->GetHeightMount(true), UO_SIZE_Z);
+		{
+			char iTotalZ = pt.m_z + pChar->GetHeightMount(true);
+			pt.m_z = minimum(iTotalZ, UO_SIZE_Z);
+		}
 		return CanSeeLOS_New(pt, NULL, pObj->GetVisualRange(), wFlags, bCombatCheck);
 	}
 	else

@@ -179,7 +179,7 @@ dword CItemVendable::GetVendorPrice( int iConvertFactor )
 		if ( IsType(IT_DEED) )
 		{
 			// Deeds just represent the item they are deeding.
-			pItemDef = CItemBase::FindItemBase(static_cast<ITEMID_TYPE>(RES_GET_INDEX(m_itDeed.m_Type)));
+			pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(RES_GET_INDEX(m_itDeed.m_Type)));
 			if ( !pItemDef )
 				return 1;
 		}
@@ -189,7 +189,7 @@ dword CItemVendable::GetVendorPrice( int iConvertFactor )
 		llPrice = pItemDef->GetMakeValue(GetQuality());
 	}
 
-	llPrice += (ullong)MulDivLL(llPrice, maximum(iConvertFactor, -100), 100);
+	llPrice += (ullong)IMulDivLL(llPrice, maximum(iConvertFactor, -100), 100);
 	if ( llPrice > UINT32_MAX )
 		return UINT32_MAX;
 	else

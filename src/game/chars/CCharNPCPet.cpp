@@ -516,7 +516,8 @@ bool CChar::NPC_OnHearPetCmdTarg( int iCmd, CChar *pSrc, CObjBase *pObj, const C
 				break;
 			if ( IsSetOF(OF_PetSlots) )
 			{
-				if ( !pCharTarg->FollowersUpdate(this, (short)(maximum(1, GetDefNum("FOLLOWERSLOTS", true, true))), true) )
+				short iFollowerSlots = (short)GetDefNum("FOLLOWERSLOTS", true, true);
+				if ( !pCharTarg->FollowersUpdate(this, (maximum(1, iFollowerSlots)), true) )
 				{
 					pSrc->SysMessageDefault(DEFMSG_PETSLOTS_TRY_TRANSFER);
 					break;
@@ -587,7 +588,10 @@ void CChar::NPC_PetClearOwners()
 	}
 
 	if ( pOwner && IsSetOF(OF_PetSlots) )
-		pOwner->FollowersUpdate(this, (short)(-maximum(1, GetDefNum("FOLLOWERSLOTS", true, true))));
+	{
+		short iFollowerSlots = (short)GetDefNum("FOLLOWERSLOTS", true, true);
+		pOwner->FollowersUpdate(this, (-maximum(1, iFollowerSlots)));
+	}
 }
 
 bool CChar::NPC_PetSetOwner( CChar * pChar )
@@ -618,7 +622,10 @@ bool CChar::NPC_PetSetOwner( CChar * pChar )
 	}
 
 	if ( IsSetOF(OF_PetSlots) )
-		pChar->FollowersUpdate(this, (short)(maximum(1, GetDefNum("FOLLOWERSLOTS", true, true))));
+	{
+		short iFollowerSlots = (short)GetDefNum("FOLLOWERSLOTS", true, true);
+		pChar->FollowersUpdate(this, maximum(1, iFollowerSlots));
+	}
 
 	return true;
 }
@@ -646,7 +653,7 @@ bool CChar::NPC_CheckHirelingStatus()
 		return true;
 
 	// I am hired for money not for food.
-	uint iPeriodWage = (uint)MulDivLL( iWage, iFoodConsumeRate, 24 * 60 * g_Cfg.m_iGameMinuteLength );
+	uint iPeriodWage = (uint)IMulDivLL( iWage, iFoodConsumeRate, 24 * 60 * g_Cfg.m_iGameMinuteLength );
 	if ( iPeriodWage <= 0 )
 		iPeriodWage = 1;
 

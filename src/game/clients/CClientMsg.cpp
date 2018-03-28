@@ -345,7 +345,7 @@ void CClient::addItem_OnGround( CItem * pItem ) // Send items (on ground)
 
 	// send item sound
 	if (pItem->IsType(IT_SOUND))
-		addSound(static_cast<SOUND_TYPE>(pItem->m_itSound.m_Sound), pItem, pItem->m_itSound.m_Repeat );
+		addSound((SOUND_TYPE)(pItem->m_itSound.m_Sound), pItem, pItem->m_itSound.m_Repeat );
 
 	// send corpse clothing
 	if ( !IsPriv(PRIV_DEBUG) && ((pItem->GetDispID() == ITEMID_CORPSE) && CCharBase::IsPlayableID(pItem->GetCorpseType())) )	// cloths on corpse
@@ -958,7 +958,7 @@ void CClient::GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMI
 			{
 				tchar * sMountDefname = Str_GetTemp();
 				sprintf(sMountDefname, "mount_0x%x", idHorse);
-				ITEMID_TYPE idMountItem = static_cast<ITEMID_TYPE>(g_Exp.m_VarDefs.GetKeyNum(sMountDefname));
+				ITEMID_TYPE idMountItem = (ITEMID_TYPE)(g_Exp.m_VarDefs.GetKeyNum(sMountDefname));
 				if ( idMountItem > ITEMID_NOTHING )
 				{
 					id = idMountItem;
@@ -988,7 +988,7 @@ void CClient::GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMI
 	}
 
 	if ( pItemDef && ( GetResDisp() < pItemDef->GetResLevel() ) )
-		id = static_cast<ITEMID_TYPE>(pItemDef->GetResDispDnId());
+		id = (ITEMID_TYPE)(pItemDef->GetResDispDnId());
 }
 
 void CClient::GetAdjustedCharID( const CChar * pChar, CREID_TYPE &id, HUE_TYPE &wHue ) const
@@ -1676,7 +1676,7 @@ void CClient::addTargetDeed( const CItem * pDeed )
 	// Place an item from a deed. preview all the stuff
 
 	ASSERT( m_Targ_UID == pDeed->GetUID());
-	ITEMID_TYPE iddef = static_cast<ITEMID_TYPE>(RES_GET_INDEX(pDeed->m_itDeed.m_Type));
+	ITEMID_TYPE iddef = (ITEMID_TYPE)(RES_GET_INDEX(pDeed->m_itDeed.m_Type));
 	m_tmUseItem.m_pParent = pDeed->GetParent();	// Cheat Verify.
 	addTargetItems( CLIMODE_TARG_USE_ITEM, iddef );
 }

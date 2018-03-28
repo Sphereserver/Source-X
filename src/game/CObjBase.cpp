@@ -162,9 +162,9 @@ void CObjBase::SetHue( HUE_TYPE wHue, bool bAvoidTrigger, CTextConsole *pSrc, CO
 	}
 
 	if (args.m_iN2 > 0) //No sound? No checks for who can hear, packets....
-		Sound(static_cast<SOUND_TYPE>(args.m_iN2));
+		Sound((SOUND_TYPE)(args.m_iN2));
 
-	m_wHue = static_cast<SOUND_TYPE>(args.m_iN1);
+	m_wHue = (SOUND_TYPE)(args.m_iN1);
 }
 
 HUE_TYPE CObjBase::GetHue() const
@@ -1338,7 +1338,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 				pItem = dynamic_cast<CItem*> (uid.ObjFind());
 				if (pItem == NULL)
 				{
-					ITEMID_TYPE id = static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetID(RES_ITEMDEF, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(pszArg))).GetResIndex());
+					ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetID(RES_ITEMDEF, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(pszArg))).GetResIndex());
 					const CItemBase * pItemDef = CItemBase::FindItemBase( id );
 					if ( pItemDef != NULL )
 					{
@@ -1378,7 +1378,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 				pItem = dynamic_cast<CItem*> (uid.ObjFind());
 				if ( pItem == NULL )
 				{
-					ITEMID_TYPE id = static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetID(RES_ITEMDEF, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(pszArg))).GetResIndex());
+					ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetID(RES_ITEMDEF, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(pszArg))).GetResIndex());
 					const CItemBase * pItemDef = CItemBase::FindItemBase( id );
 					if (pItemDef != NULL)
 					{
@@ -2018,7 +2018,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				if ( pChar )
 					pChar->OnTakeDamage((int)(piCmd[0]),
 						pCharSrc,
-						(iArgQty >= 1) ? static_cast<DAMAGE_TYPE>(piCmd[1]) : DAMAGE_HIT_BLUNT|DAMAGE_GENERAL,
+						(iArgQty >= 1) ? (DAMAGE_TYPE)(piCmd[1]) : DAMAGE_HIT_BLUNT|DAMAGE_GENERAL,
 						(iArgQty >= 3) ? (int)(piCmd[3]) : 0,		// physical damage %
 						(iArgQty >= 4) ? (int)(piCmd[4]) : 0,		// fire damage %
 						(iArgQty >= 5) ? (int)(piCmd[5]) : 0,		// cold damage %
@@ -2028,7 +2028,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				else if ( pItem )
 					pItem->OnTakeDamage((int)(piCmd[0]),
 						pCharSrc,
-						(iArgQty >= 1) ? static_cast<DAMAGE_TYPE>(piCmd[1]) : DAMAGE_HIT_BLUNT|DAMAGE_GENERAL
+						(iArgQty >= 1) ? (DAMAGE_TYPE)(piCmd[1]) : DAMAGE_HIT_BLUNT|DAMAGE_GENERAL
 					);
 			}
 			break;
@@ -2063,7 +2063,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 				}
 				//DEBUG_ERR(("this->GetUID() 0%x pThis->GetUID() 0%x pCharSrc->GetUID() 0%x\n",(dword)this->GetUID(),(dword)pThis->GetUID(),(dword)pCharSrc->GetUID()));
-				pThis->Effect( static_cast<EFFECT_TYPE>(piCmd[0]), static_cast<ITEMID_TYPE>(RES_GET_INDEX(piCmd[1]) ),
+				pThis->Effect( static_cast<EFFECT_TYPE>(piCmd[0]), (ITEMID_TYPE)(RES_GET_INDEX(piCmd[1]) ),
 					pCharSrc,
 					(iArgQty >= 3)? (uchar)(piCmd[2]) : 5,		// byte bSpeedSeconds = 5,
 					(iArgQty >= 4)? (uchar)(piCmd[3]) : 1,		// byte bLoop = 1,
@@ -2292,7 +2292,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				int iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd));
 				if (!iArgQty)
 					return false;
-				Sound( static_cast<SOUND_TYPE>(piCmd[0]), ( iArgQty > 1 ) ? (int)(piCmd[1]) : 1 );
+				Sound( (SOUND_TYPE)(piCmd[0]), ( iArgQty > 1 ) ? (int)(piCmd[1]) : 1 );
 			}
 			break;
 		case OV_SPELLEFFECT:	// spell, strength, noresist
@@ -2322,7 +2322,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				default:
 					break;
 				}
-				OnSpellEffect(static_cast<SPELL_TYPE>(RES_GET_INDEX(piCmd[0])), pCharSrc, (int)(piCmd[1]), pItemSrc);
+				OnSpellEffect((SPELL_TYPE)(RES_GET_INDEX(piCmd[0])), pCharSrc, (int)(piCmd[1]), pItemSrc);
 			}
 			break;
 		case OV_TAGLIST:
@@ -2380,7 +2380,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 						Str_ParseCmds( s.GetArgStr(), ppArg, CountOf(ppArg), "," );
 						if ( !IsStrNumeric( ppArg[1] ))
 							DEBUG_ERR(("Invalid argument in Target Multi\n"));
-						ITEMID_TYPE itemid = static_cast<ITEMID_TYPE>(Exp_GetVal(ppArg[1]));
+						ITEMID_TYPE itemid = (ITEMID_TYPE)(Exp_GetVal(ppArg[1]));
 						pClientSrc->addTargetFunctionMulti( ppArg[0], itemid, fGround );
 					}
 					else
@@ -2393,7 +2393,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 						if ( !IsStrNumeric( s.GetArgStr() ))
 							DEBUG_ERR(("Invalid argument in Target Multi\n"));
 						lpctstr arg = s.GetArgStr();
-						ITEMID_TYPE itemid = static_cast<ITEMID_TYPE>(Exp_GetVal(arg));
+						ITEMID_TYPE itemid = (ITEMID_TYPE)(Exp_GetVal(arg));
 						pClientSrc->addTargetItems( CLIMODE_TARG_USE_ITEM, itemid, fGround );
 					}
 					else

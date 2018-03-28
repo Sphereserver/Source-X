@@ -23,7 +23,7 @@ bool CItem::Plant_Use(CChar *pChar)
 		return false;
 
 	const CItemBase *pItemDef = Item_GetDef();
-	ITEMID_TYPE iFruitID = static_cast<ITEMID_TYPE>(RES_GET_INDEX(pItemDef->m_ttCrops.m_idFruit));	// if it's reapable at this stage
+	ITEMID_TYPE iFruitID = (ITEMID_TYPE)(RES_GET_INDEX(pItemDef->m_ttCrops.m_idFruit));	// if it's reapable at this stage
 	if ( iFruitID <= 0 )
 	{
 		// not ripe. (but we could just eat it if we are herbivorous ?)
@@ -32,7 +32,7 @@ bool CItem::Plant_Use(CChar *pChar)
 	}
 
 	if ( m_itCrop.m_ReapFruitID )
-		iFruitID = static_cast<ITEMID_TYPE>(RES_GET_INDEX(m_itCrop.m_ReapFruitID));
+		iFruitID = (ITEMID_TYPE)(RES_GET_INDEX(m_itCrop.m_ReapFruitID));
 	if ( iFruitID )
 	{
 		CItem *pItemFruit = CItem::CreateScript(iFruitID, pChar);
@@ -76,9 +76,9 @@ bool CItem::Plant_OnTick()
 	if ( iGrowID == -1 )
 	{
 		// Some plants generate a fruit on the ground when ripe.
-		ITEMID_TYPE iFruitID = static_cast<ITEMID_TYPE>(RES_GET_INDEX(pItemDef->m_ttCrops.m_idGrow));
+		ITEMID_TYPE iFruitID = (ITEMID_TYPE)(RES_GET_INDEX(pItemDef->m_ttCrops.m_idGrow));
 		if ( m_itCrop.m_ReapFruitID )
-			iFruitID = static_cast<ITEMID_TYPE>(RES_GET_INDEX(m_itCrop.m_ReapFruitID));
+			iFruitID = (ITEMID_TYPE)(RES_GET_INDEX(m_itCrop.m_ReapFruitID));
 		if ( !iFruitID )
 			return true;
 
@@ -104,7 +104,7 @@ bool CItem::Plant_OnTick()
 
 	if ( iGrowID )
 	{
-		SetID(static_cast<ITEMID_TYPE>(RES_GET_INDEX(iGrowID)));
+		SetID((ITEMID_TYPE)(RES_GET_INDEX(iGrowID)));
 		Update();
 		return true;
 	}
@@ -127,7 +127,7 @@ void CItem::Plant_CropReset()
 	}
 
 	const CItemBase *pItemDef = Item_GetDef();
-	ITEMID_TYPE iResetID = static_cast<ITEMID_TYPE>(RES_GET_INDEX(pItemDef->m_ttCrops.m_idReset));
+	ITEMID_TYPE iResetID = (ITEMID_TYPE)(RES_GET_INDEX(pItemDef->m_ttCrops.m_idReset));
 	if ( iResetID != ITEMID_NOTHING )
 		SetID(iResetID);
 

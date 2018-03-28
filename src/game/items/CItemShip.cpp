@@ -31,7 +31,7 @@ bool CItem::Ship_Plank( bool fOpen )
 	// This item is the ships plank.
 
 	CItemBase * pItemDef = Item_GetDef();
-	ITEMID_TYPE idState = static_cast<ITEMID_TYPE>(RES_GET_INDEX(pItemDef->m_ttShipPlank.m_idState));
+	ITEMID_TYPE idState = (ITEMID_TYPE)(RES_GET_INDEX(pItemDef->m_ttShipPlank.m_idState));
 	if ( !idState )
 		return false;
 
@@ -336,7 +336,7 @@ bool CItemShip::Ship_Face( DIR_TYPE dir )
 	}
 
 	int iFaceOffset = Ship_GetFaceOffset();
-	ITEMID_TYPE idnew = static_cast<ITEMID_TYPE>( GetID() - iFaceOffset + iDirection );
+	ITEMID_TYPE idnew = (ITEMID_TYPE)( GetID() - iFaceOffset + iDirection );
 	const CItemBaseMulti * pMultiNew = Multi_GetDef( idnew );
 	if ( pMultiNew == NULL ) {
 		return false;

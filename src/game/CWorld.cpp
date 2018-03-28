@@ -1057,7 +1057,7 @@ bool CWorldClock::Advance()
 	int64 Clock_Sys = GetSystemClock();
 
 	int64 iTimeDiff = Clock_Sys - m_Clock_SysPrev;
-	iTimeDiff = MulMulDiv(TICK_PER_SEC, iTimeDiff, CLOCKS_PER_SEC);
+	iTimeDiff = IMulDivDownLL(TICK_PER_SEC, iTimeDiff, CLOCKS_PER_SEC);
 	if ( !iTimeDiff )
 		return false;
 	else if ( iTimeDiff < 0 )
@@ -2393,10 +2393,10 @@ uint CWorld::GetMoonPhase (bool bMoonIndex) const
 
 	if (!bMoonIndex)	// Trammel
 
-		return MulDivLL( dwCurrentTime % TRAMMEL_SYNODIC_PERIOD, 8, TRAMMEL_SYNODIC_PERIOD );
+		return IMulDiv( dwCurrentTime % TRAMMEL_SYNODIC_PERIOD, 8, TRAMMEL_SYNODIC_PERIOD );
 	else	// Luna2
 
-		return MulDivLL( dwCurrentTime % FELUCCA_SYNODIC_PERIOD, 8, FELUCCA_SYNODIC_PERIOD );
+		return IMulDiv( dwCurrentTime % FELUCCA_SYNODIC_PERIOD, 8, FELUCCA_SYNODIC_PERIOD );
 }
 
 void CWorld::OnTick()

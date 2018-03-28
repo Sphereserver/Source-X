@@ -117,5 +117,5 @@ ITEMID_TYPE CUOItemInfo::GetMaxTileDataItem()
     // many blocks will fit in the file to find how many items there could be
     dwLength -= dwOffset;
     dword dwBlocks = (dwLength / ((UOTILE_BLOCK_QTY * dwEntrySize) + 4)) + 1;
-    return static_cast<ITEMID_TYPE>(dwBlocks * UOTILE_BLOCK_QTY);
+    return (ITEMID_TYPE)(dwBlocks * UOTILE_BLOCK_QTY);
 }

@@ -297,7 +297,7 @@ int32 Calc_GetRandVal( int32 iQty )
 	if ( iQty < 2 )
 		return 0;
 	if ( iQty >= INT32_MAX )
-		return ( MulDivLL(CSRand::genRandInt32(0, iQty - 1), (uint32) iQty, INT32_MAX ) );
+		return ( (int32)IMulDivLL(CSRand::genRandInt32(0, iQty - 1), (uint32) iQty, INT32_MAX ) );
 	return CSRand::genRandInt32(0, iQty - 1);
 }
 
@@ -317,7 +317,7 @@ int64 Calc_GetRandLLVal( int64 iQty )
 	if ( iQty < 2 )
 		return 0;
 	if ( iQty >= INT64_MAX )
-		return ( MulDivLL(CSRand::genRandInt64(0, iQty - 1), (uint32) iQty, INT64_MAX ) );
+		return ( IMulDivLL(CSRand::genRandInt64(0, iQty - 1), (uint32) iQty, INT64_MAX ) );
 	return CSRand::genRandInt64(0, iQty - 1);
 }
 
@@ -370,7 +370,7 @@ int Calc_GetBellCurve( int iValDiff, int iVariance )
 		iChance /= 2;	// chance is halved for each Variance period.
 	}
 
-	return ( iChance - MulDivLL( iChance/2, iValDiff, iVariance ) );
+	return ( iChance - IMulDiv( iChance/2, iValDiff, iVariance ) );
 }
 
 int Calc_GetSCurve( int iValDiff, int iVariance )
@@ -1238,7 +1238,13 @@ int64 CExpression::GetRange(lpctstr & pExpr)
 		pToParseCasted = reinterpret_cast<lptstr>(pToParse);
 		llong llValSecond = GetSingle(pToParseCasted);
 
-		return Calc_GetRandLLVal2(minimum(llValFirst, llValSecond), maximum(llValFirst, llValSecond));
+		if (llValSecond < llValFirst)	// the first value has to be < than the second before passing it to Calc_GetRandLLVal2
+		{
+			llong llValTemp = llValFirst;
+			llValFirst = llValSecond;
+			llValSecond = llValTemp;
+		}
+		return Calc_GetRandLLVal2(llValFirst, llValSecond);
 	}
 
 	// I guess it's weighted values

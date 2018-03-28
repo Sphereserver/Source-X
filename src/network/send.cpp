@@ -165,7 +165,8 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
 		if ( objectChar )
 		{
 			canRename = objectChar->IsOwnedBy(character);
-			writeInt16((word)((objectChar->Stat_GetVal(STAT_STR) * 100) / maximum(objectChar->Stat_GetMax(STAT_STR), 1)));
+			short iStatMax = objectChar->Stat_GetMax(STAT_STR);
+			writeInt16((word)((objectChar->Stat_GetVal(STAT_STR) * 100) / maximum(iStatMax, 1)));
 		}
 		else
 		{
@@ -406,7 +407,7 @@ PacketItemWorld::PacketItemWorld(const CClient* target, CItem *item) : PacketSen
 	// multis need to be adjusted to the lower range, and items between 03fff and 08000 need to be adjusted
 	// to something safer
 	if (id >= ITEMID_MULTI)
-		id = static_cast<ITEMID_TYPE>(id - (ITEMID_MULTI - ITEMID_MULTI_LEGACY));
+		id = (ITEMID_TYPE)(id - (ITEMID_MULTI - ITEMID_MULTI_LEGACY));
 	else if (id >= ITEMID_MULTI_LEGACY)
 		id = ITEMID_WorldGem;
 
@@ -457,7 +458,7 @@ void PacketItemWorld::adjustItemData(const CClient* target, CItem* item, ITEMID_
 		const CItemBase* itemDefintion = item->Item_GetDef();
 		if (itemDefintion && (target->GetResDisp() < itemDefintion->GetResLevel()))
 		{
-			id = static_cast<ITEMID_TYPE>(itemDefintion->GetResDispDnId());
+			id = (ITEMID_TYPE)(itemDefintion->GetResDispDnId());
 			if (itemDefintion->GetResDispDnHue() != HUE_DEFAULT)
 				hue = itemDefintion->GetResDispDnHue();
 		}
@@ -831,7 +832,7 @@ PacketItemContainer::PacketItemContainer(const CClient* target, const CItem* ite
 
 	if (itemDefinition && target->GetResDisp() < itemDefinition->GetResLevel())
 	{
-		id = static_cast<ITEMID_TYPE>(itemDefinition->GetResDispDnId());
+		id = (ITEMID_TYPE)(itemDefinition->GetResDispDnId());
 		if (itemDefinition->GetResDispDnHue() != HUE_DEFAULT)
 			hue = itemDefinition->GetResDispDnHue() & HUE_MASK_HI;
 	}
@@ -1180,7 +1181,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 
 		if ( itemDefinition != NULL && target->GetResDisp() < itemDefinition->GetResLevel() )
 		{
-			id = static_cast<ITEMID_TYPE>(itemDefinition->GetResDispDnId());
+			id = (ITEMID_TYPE)(itemDefinition->GetResDispDnId());
 
 			if ( itemDefinition->GetResDispDnHue() != HUE_DEFAULT )
 				hue = itemDefinition->GetResDispDnHue() & HUE_MASK_HI;
@@ -1235,7 +1236,7 @@ PacketItemContents::PacketItemContents(const CClient* target, const CItem* spell
 
 	for (int i = SPELL_Clumsy; i <= SPELL_MAGERY_QTY; i++)
 	{
-		if (spellbook->IsSpellInBook(static_cast<SPELL_TYPE>(i)) == false)
+		if (spellbook->IsSpellInBook((SPELL_TYPE)(i)) == false)
 			continue;
 
 		writeInt32(UID_F_ITEM + UID_O_INDEX_FREE + i);
@@ -1277,7 +1278,7 @@ PacketItemContents::PacketItemContents(const CClient* target, const CItemContain
 		if (item->IsType(IT_SCROLL) == false)
 			continue;
 
-		spellDefinition = g_Cfg.GetSpellDef(static_cast<SPELL_TYPE>(item->m_itSpell.m_spell));
+		spellDefinition = g_Cfg.GetSpellDef((SPELL_TYPE)(item->m_itSpell.m_spell));
 		if (spellDefinition == NULL)
 			continue;
 
@@ -1664,7 +1665,7 @@ PacketAddTarget::PacketAddTarget(const CClient* target, PacketAddTarget::TargetT
 {
 	ADDTOCALLSTACK("PacketAddTarget::PacketAddTarget(2)");
 
-	//CItemBase *pItemDef = CItemBase::FindItemBase(static_cast<ITEMID_TYPE>(RES_GET_INDEX(id)));
+	//CItemBase *pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(RES_GET_INDEX(id)));
 	CItemBase *pItemDef = CItemBase::FindItemBase(id);
 	if ( !pItemDef )
 		return;
@@ -2923,7 +2924,8 @@ PacketHealthUpdate::PacketHealthUpdate(const CChar* character, bool full) : Pack
 	else
 	{
 		writeInt16(100);
-		writeInt16((word)((character->Stat_GetVal(STAT_STR) * 100) / maximum(character->Stat_GetMax(STAT_STR), 1)));
+		short iStatMax = character->Stat_GetMax(STAT_STR);
+		writeInt16((word)((character->Stat_GetVal(STAT_STR) * 100) / maximum(iStatMax, 1)));
 	}
 }
 
@@ -2949,7 +2951,8 @@ PacketManaUpdate::PacketManaUpdate(const CChar* character, bool full) : PacketSe
 	else
 	{
 		writeInt16(100);
-		writeInt16((word)((character->Stat_GetVal(STAT_INT) * 100) / maximum(character->Stat_GetMax(STAT_INT), 1)));
+		short iStatMax = character->Stat_GetMax(STAT_INT);
+		writeInt16((word)((character->Stat_GetVal(STAT_INT) * 100) / maximum(iStatMax, 1)));
 	}
 }
 
@@ -2975,7 +2978,8 @@ PacketStaminaUpdate::PacketStaminaUpdate(const CChar* character, bool full) : Pa
 	else
 	{
 		writeInt16(100);
-		writeInt16((word)((character->Stat_GetVal(STAT_DEX) * 100) / maximum(character->Stat_GetMax(STAT_DEX), 1)));
+		short iStatMax = character->Stat_GetMax(STAT_DEX);
+		writeInt16((word)((character->Stat_GetVal(STAT_DEX) * 100) / maximum(iStatMax, 1)));
 	}
 }
 
@@ -3091,11 +3095,12 @@ void PacketServerList::writeServerEntry(const CServerRef& server, int index, boo
 	ADDTOCALLSTACK("PacketServerList::writeServerEntry");
 
 	uint percentFull;
+	size_t servClients = server->StatGet(SERV_STAT_CLIENTS);
 	if (server == &g_Serv)
-		percentFull = (uint)(minimum((server->StatGet(SERV_STAT_CLIENTS) * 100) / maximum(1, g_Cfg.m_iClientsMax), 100));
+		percentFull = (uint)(minimum((servClients * 100) / maximum(1, g_Cfg.m_iClientsMax), 100));
 		//percentFull = (int)maximum(0, minimum((server->StatGet(SERV_STAT_CLIENTS) * 100) / maximum(1, g_Cfg.m_iClientsMax), 100));
 	else
-		percentFull = (uint)(minimum(server->StatGet(SERV_STAT_CLIENTS), 100));
+		percentFull = (uint)(minimum(servClients, 100));
 
 	dword ip = server->m_ip.GetAddrIP();
 
@@ -3841,7 +3846,8 @@ bool PacketPropertyListVersionOld::onSend(const CClient* client)
 		return false;
 
 	const CObjBase* object = m_object.ObjFind();
-	if (object == NULL || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(character->GetVisualRange(),UO_MAP_VIEW_SIZE_DEFAULT) )
+	int iCharVisualRange = character->GetVisualRange();
+	if (object == NULL || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(iCharVisualRange, UO_MAP_VIEW_SIZE_DEFAULT))
 		return false;
 
 	return true;
@@ -4436,7 +4442,8 @@ bool PacketPropertyList::onSend(const CClient* client)
 		return false;
 
 	const CObjBase* object = m_object.ObjFind();
-	if (object == NULL || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(character->GetVisualRange(),UO_MAP_VIEW_SIZE_DEFAULT))
+	int iCharVisualRange = character->GetVisualRange();
+	if (object == NULL || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(iCharVisualRange, UO_MAP_VIEW_SIZE_DEFAULT))
 		return false;
 
 	if (hasExpired(TICK_PER_SEC * 30))
@@ -4659,7 +4666,8 @@ bool PacketPropertyListVersion::onSend(const CClient* client)
 		return false;
 
 	const CObjBase* object = m_object.ObjFind();
-	if (object == NULL || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(character->GetVisualRange(),UO_MAP_VIEW_SIZE_DEFAULT))
+	int iCharVisualRange = character->GetVisualRange();
+	if (object == NULL || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(iCharVisualRange, UO_MAP_VIEW_SIZE_DEFAULT))
 		return false;
 
 	return true;
@@ -4840,12 +4848,12 @@ PacketItemWorldNew::PacketItemWorldNew(const CClient* target, CItem *item) : Pac
 	if ( id >= ITEMID_MULTI )
 	{
 		source = Multi;
-		id = static_cast<ITEMID_TYPE>(id & 0x3FFF);
+		id = (ITEMID_TYPE)(id & 0x3FFF);
 	}
 	else
 	{
 		source = (item->Can(CAN_I_DAMAGEABLE) && (target->GetNetState()->isClientVersion(MINCLIVER_STATUS_V6))) ? Damageable : TileData;
-		id = static_cast<ITEMID_TYPE>(id & 0xFFFF);
+		id = (ITEMID_TYPE)(id & 0xFFFF);
 	}
 
 	writeInt16(1);
@@ -5004,7 +5012,7 @@ PacketContainer::PacketContainer(const CClient* target, CObjBase** objects, size
 			adjustItemData(target, item, id, hue, amount, p, dir, flags, light);
 
 			if (id >= ITEMID_MULTI)
-				id = static_cast<ITEMID_TYPE>(id - ITEMID_MULTI);
+				id = (ITEMID_TYPE)(id - ITEMID_MULTI);
 
 			if (item->IsTypeMulti())
 				source = Multi;

@@ -254,7 +254,7 @@ bool CImportFile::ImportSCP( CScript & s, word wModeFlags )
 		{
 			if ( wModeFlags & IMPFLAGS_ITEMS )
 			{
-				m_pCurObj = CItem::CreateTemplate(static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType(RES_ITEMDEF, s.GetArgStr())));
+				m_pCurObj = CItem::CreateTemplate((ITEMID_TYPE)(g_Cfg.ResourceGetIndexType(RES_ITEMDEF, s.GetArgStr())));
 			}
 		}
 		else
@@ -386,7 +386,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			{
 				if ( m_pCurObj != NULL )
 					return false;
-				pItem = CItem::CreateTemplate(static_cast<ITEMID_TYPE>(ATOI(pArg)));
+				pItem = CItem::CreateTemplate((ITEMID_TYPE)(ATOI(pArg)));
 				pItem->SetName( sName );
 				m_pCurObj = pItem;
 				m_pCurSer->m_pObj = pItem;

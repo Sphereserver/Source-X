@@ -74,7 +74,7 @@ CResourceDef *CItemSpawn::FixDef()
 	}
 	else
 	{
-		ITEMID_TYPE id = static_cast<ITEMID_TYPE>(rid.GetResIndex());
+		ITEMID_TYPE id = (ITEMID_TYPE)(rid.GetResIndex());
 		if ( id < ITEMID_TEMPLATE )
 			return TryItem(id);
 
@@ -133,7 +133,7 @@ void CItemSpawn::GenerateItem(CResourceDef *pDef)
 	ADDTOCALLSTACK("CitemSpawn:GenerateItem");
 
 	CResourceIDBase rid = pDef->GetResourceID();
-	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(rid.GetResIndex());
+	ITEMID_TYPE id = (ITEMID_TYPE)(rid.GetResIndex());
 
 	CItemContainer *pCont = dynamic_cast<CItemContainer *>(GetParent());
 	byte iCount = pCont ? (uchar)(pCont->ContentCount(rid)) : GetCount();

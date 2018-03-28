@@ -696,7 +696,7 @@ void CSector::SetDefaultWeatherChance()
 {
 	ADDTOCALLSTACK("CSector::SetDefaultWeatherChance");
 	CPointMap pt = GetBasePoint();
-	byte iPercent = (byte)(MulDivLL( pt.m_y, 100, g_MapList.GetY(pt.m_map) ));	// 100 = south
+	byte iPercent = (byte)(IMulDiv( pt.m_y, 100, g_MapList.GetY(pt.m_map) ));	// 100 = south
 	if ( iPercent < 50 )
 	{
 		// Anywhere north of the Britain Moongate is a good candidate for snow

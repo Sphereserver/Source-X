@@ -1073,7 +1073,8 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t it
 			CCharBase *pPetDef = CCharBase::FindCharBase( pItem->m_itFigurine.m_ID );
 			if ( pPetDef )
 			{
-				if ( !m_pChar->FollowersUpdate(pVendor, (short)(maximum(1, pPetDef->GetDefNum("FOLLOWERSLOTS", true)))) )
+				short iFollowerSlots = (short)pPetDef->GetDefNum("FOLLOWERSLOTS", true);
+				if ( !m_pChar->FollowersUpdate(pVendor, (maximum(1, iFollowerSlots))) )
 				{
 					m_pChar->SysMessageDefault( DEFMSG_PETSLOTS_TRY_CONTROL );
 					return;
@@ -2588,7 +2589,7 @@ void CClient::Event_UseToolbar(byte bType, dword dwArg)
 	{
 		case 0x01: // Spell call
 		{
-			Cmd_Skill_Magery(static_cast<SPELL_TYPE>(dwArg), m_pChar);
+			Cmd_Skill_Magery((SPELL_TYPE)(dwArg), m_pChar);
 		} break;
 
 		case 0x02: // Weapon ability
@@ -2687,7 +2688,7 @@ void CClient::Event_ExtCmd( EXTCMD_TYPE type, tchar *pszName )
 		case EXTCMD_CAST_BOOK:	// cast spell from book.
 		case EXTCMD_CAST_MACRO:	// macro spell.
 		{
-			SPELL_TYPE spell = static_cast<SPELL_TYPE>(ATOI(ppArgs[0]));
+			SPELL_TYPE spell = (SPELL_TYPE)(ATOI(ppArgs[0]));
 			CSpellDef *pSpellDef = g_Cfg.GetSpellDef(spell);
 			if ( !pSpellDef )
 				return;

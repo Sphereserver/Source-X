@@ -68,7 +68,7 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 		if ( rid.GetResType() != RES_ITEMDEF )
 			continue;
 
-		ITEMID_TYPE id = static_cast<ITEMID_TYPE>(rid.GetResIndex());
+		ITEMID_TYPE id = (ITEMID_TYPE)(rid.GetResIndex());
 		if ( id == ITEMID_NOTHING )
 			break;
 
@@ -307,7 +307,7 @@ bool CChar::Use_Train_Dummy( CItem * pItem, bool fSetup )
 	}
 	else
 	{
-		pItem->SetAnim(static_cast<ITEMID_TYPE>(pItem->GetID() + 1), 3 * TICK_PER_SEC);
+		pItem->SetAnim((ITEMID_TYPE)(pItem->GetID() + 1), 3 * TICK_PER_SEC);
 		pItem->Sound(0x033);
 		Skill_UseQuick(skill, Calc_GetRandLLVal(40));
 	}
@@ -500,7 +500,7 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 			{
 				t_Str = pCont->GetValStr();
 				CResourceIDBase rContid = static_cast<CResourceIDBase>(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
-				ITEMID_TYPE ContID = static_cast<ITEMID_TYPE>(rContid.GetResIndex());
+				ITEMID_TYPE ContID = (ITEMID_TYPE)(rContid.GetResIndex());
 				if ( ContID )
 					pNewCont = dynamic_cast<CItemContainer*>(ContentFind(rContid));
 			}
@@ -766,7 +766,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 	// Use up some raw materials to repair.
 	int iTotalHits = pItemArmor->m_itArmor.m_Hits_Max;
 	int iDamageHits = pItemArmor->m_itArmor.m_Hits_Max - pItemArmor->m_itArmor.m_Hits_Cur;
-	int iDamagePercent = (int)MulDivLL(100, iDamageHits, iTotalHits);
+	int iDamagePercent = IMulDiv(100, iDamageHits, iTotalHits);
 
 	size_t iMissing = ResourceConsumePart(&(pItemDef->m_BaseResources), 1, iDamagePercent / 2, true);
 	if ( iMissing != pItemDef->m_BaseResources.BadIndex() )
@@ -790,7 +790,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 
 	CResourceQty RetMainSkill = pItemDef->m_SkillMake[iRes];
 	int iSkillLevel = (int)(RetMainSkill.GetResQty()) / 10;
-	int iDifficulty = MulDivLL(iSkillLevel, iDamagePercent, 100);
+	int iDifficulty = IMulDiv(iSkillLevel, iDamagePercent, 100);
 	if ( iDifficulty < iSkillLevel / 4 )
 		iDifficulty = iSkillLevel / 4;
 
@@ -924,7 +924,7 @@ bool CChar::Use_Eat( CItem * pItemFood, short iQty )
 	Use_EatQty(pItemFood, iQty);
 
 	lpctstr pMsg;
-	int index = MulDivLL(Stat_GetVal(STAT_FOOD), 5, Stat_GetMax(STAT_FOOD));
+	int index = IMulDiv(Stat_GetVal(STAT_FOOD), 5, Stat_GetMax(STAT_FOOD));
 	switch ( index )
 	{
 		case 0:
@@ -967,7 +967,7 @@ void CChar::Use_Drink( CItem * pItem )
 	}
 
 	const CItemBase *pItemDef = pItem->Item_GetDef();
-	ITEMID_TYPE idbottle = static_cast<ITEMID_TYPE>(RES_GET_INDEX(pItemDef->m_ttDrink.m_idEmpty));
+	ITEMID_TYPE idbottle = (ITEMID_TYPE)(RES_GET_INDEX(pItemDef->m_ttDrink.m_idEmpty));
 
 	if ( pItem->IsType(IT_BOOZE) )
 	{
@@ -1007,9 +1007,9 @@ void CChar::Use_Drink( CItem * pItem )
 		int iSkillQuality = pItem->m_itPotion.m_skillquality;
 		int iEnhance = (int)(GetDefNum("EnhancePotions", false));
 		if ( iEnhance )
-			iSkillQuality += MulDivLL(iSkillQuality, iEnhance, 100);
+			iSkillQuality += IMulDiv(iSkillQuality, iEnhance, 100);
 
-		OnSpellEffect(static_cast<SPELL_TYPE>(RES_GET_INDEX(pItem->m_itPotion.m_Type)), this, iSkillQuality, pItem);
+		OnSpellEffect((SPELL_TYPE)(RES_GET_INDEX(pItem->m_itPotion.m_Type)), this, iSkillQuality, pItem);
 
 		// Give me the marker that i've used a potion.
 		Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_PotionUsed, g_Cfg.GetSpellEffect(SPELL_NONE, iSkillQuality), 15 * TICK_PER_SEC, this);
@@ -1086,7 +1086,8 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool bCheckFollowerSlots )
 
 	if ( bCheckFollowerSlots && IsSetOF(OF_PetSlots) )
 	{
-		if ( !FollowersUpdate(pPet, (short)(maximum(1, pPet->GetDefNum("FOLLOWERSLOTS", true, true))), true) )
+		short iFollowerSlots = (short)pPet->GetDefNum("FOLLOWERSLOTS", true, true);
+		if ( !FollowersUpdate(pPet, (maximum(1, iFollowerSlots)), true) )
 		{
 			SysMessageDefault(DEFMSG_PETSLOTS_TRY_CONTROL);
 			if ( bCreatedNewNpc )
@@ -1318,7 +1319,7 @@ bool CChar::Use_Seed( CItem * pSeed, CPointMap * pPoint )
 	}
 
 	const CItemBase *pItemDef = pSeed->Item_GetDef();
-	ITEMID_TYPE idReset = static_cast<ITEMID_TYPE>(RES_GET_INDEX(pItemDef->m_ttFruit.m_idReset));
+	ITEMID_TYPE idReset = (ITEMID_TYPE)(RES_GET_INDEX(pItemDef->m_ttFruit.m_idReset));
 	if ( idReset == 0 )
 	{
 		SysMessageDefault(DEFMSG_MSG_SEED_NOGOOD);
@@ -1471,7 +1472,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 				id += 1;
 				break;
 			}
-			pItem->SetAnim(static_cast<ITEMID_TYPE>(id), 2 * TICK_PER_SEC);
+			pItem->SetAnim((ITEMID_TYPE)id, 2 * TICK_PER_SEC);
 			SysMessageDefault(DEFMSG_ITEMUSE_SPINWHEEL);
 			return true;
 		}

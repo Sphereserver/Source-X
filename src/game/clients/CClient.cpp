@@ -822,7 +822,13 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 
 				CResourceID rid = g_Cfg.ResourceGetID( RES_QTY, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(ppszArgs[0])));
 				m_tmAdd.m_id = rid.GetResIndex();
-				m_tmAdd.m_amount = (iQty > 1) ? (word)(maximum(ATOI(ppszArgs[1]), 1)) : 1;
+				if (iQty > 1)
+				{
+					m_tmAdd.m_amount = (word)ATOI(ppszArgs[1]);
+					m_tmAdd.m_amount = maximum(m_tmAdd.m_amount, 1);
+				}
+				else
+					m_tmAdd.m_amount = 1;
 				if ( (rid.GetResType() == RES_CHARDEF) || (rid.GetResType() == RES_SPAWN) )
 				{
 					m_Targ_Prv_UID.InitUID();
@@ -830,7 +836,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				}
 				else
 				{
-					return addTargetItems(CLIMODE_TARG_ADDITEM, static_cast<ITEMID_TYPE>(m_tmAdd.m_id));
+					return addTargetItems(CLIMODE_TARG_ADDITEM, (ITEMID_TYPE)(m_tmAdd.m_id));
 				}
 			}
 			else
@@ -1009,7 +1015,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			break;
 		case CV_CAST:
 			{
-				SPELL_TYPE spell = static_cast<SPELL_TYPE>(g_Cfg.ResourceGetIndexType(RES_SPELL, s.GetArgStr()));
+				SPELL_TYPE spell = (SPELL_TYPE)(g_Cfg.ResourceGetIndexType(RES_SPELL, s.GetArgStr()));
 				const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
 				if (pSpellDef == NULL)
 					return true;

@@ -339,9 +339,9 @@ bool CServerConfig::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	else if ( iResType == RES_ITEMDEF )
 	{
 		if (fNewStyleDef && IsDigit(pszKey[0]))
-			pRef = CItemBase::FindItemBase(static_cast<ITEMID_TYPE>(Exp_GetVal(pszKey) + ITEMID_MULTI));
+			pRef = CItemBase::FindItemBase((ITEMID_TYPE)(Exp_GetVal(pszKey) + ITEMID_MULTI));
 		else
-			pRef = CItemBase::FindItemBase(static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType(RES_ITEMDEF, pszKey)));
+			pRef = CItemBase::FindItemBase((ITEMID_TYPE)(g_Cfg.ResourceGetIndexType(RES_ITEMDEF, pszKey)));
 	}
 	else if ( iResType == RES_SPELL && *pszKey == '-' )
 	{
@@ -2706,7 +2706,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			if ( pPrvDef )
 				pSpell = dynamic_cast<CSpellDef*>(pPrvDef);
 			else
-				pSpell = new CSpellDef(static_cast<SPELL_TYPE>(rid.GetResIndex()));
+				pSpell = new CSpellDef((SPELL_TYPE)(rid.GetResIndex()));
 			ASSERT(pSpell);
 			pNewLink = pSpell;
 
@@ -3218,7 +3218,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			g_Log.Event(LOGL_ERROR|LOGM_INIT, "Undefined item type '%s'\n", static_cast<lpctstr>(pScript->GetArgStr()));
 			return false;
 		}
-		return CItem::CreateBase(static_cast<ITEMID_TYPE>(rid.GetResIndex()))->r_Load(*pScript);
+		return CItem::CreateBase((ITEMID_TYPE)(rid.GetResIndex()))->r_Load(*pScript);
 
 	default:
 		break;
@@ -4224,7 +4224,7 @@ bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilenam
 
 		// check item in tiledata
 		CUOItemTypeRec_HS tiledata;
-		if (CItemBase::GetItemData(static_cast<ITEMID_TYPE>(i), &tiledata) == false)
+		if (CItemBase::GetItemData((ITEMID_TYPE)(i), &tiledata) == false)
 			continue;
 
 		// ensure there is actually some data here, treat "MissingName" as blank since some tiledata.muls
@@ -4248,7 +4248,7 @@ bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilenam
 			s.Printf("// (unnamed object)\n");
 		}
 
-		s.WriteKey("TYPE", ResourceGetName(CResourceID(RES_TYPEDEF, CItemBase::GetTypeBase(static_cast<ITEMID_TYPE>(i), tiledata))));
+		s.WriteKey("TYPE", ResourceGetName(CResourceID(RES_TYPEDEF, CItemBase::GetTypeBase((ITEMID_TYPE)i, tiledata))));
 	}
 
 	s.WriteSection("EOF");

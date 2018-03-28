@@ -321,7 +321,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 
 		if ( type == RES_ITEMDEF )
 		{
-			const CItemBase * pItemDef = CItemBase::FindItemBase(static_cast<ITEMID_TYPE>(RES_GET_INDEX(iStatic)));
+			const CItemBase * pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(RES_GET_INDEX(iStatic)));
 			if ( !pItemDef )
 			{
 				sVal.FormatVal( 0 );
@@ -462,7 +462,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 
 		if ( type == RES_ITEMDEF )
 		{
-			const CItemBase * pItemDef = CItemBase::FindItemBase(static_cast<ITEMID_TYPE>(RES_GET_INDEX(iComponent)));
+			const CItemBase * pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(RES_GET_INDEX(iComponent)));
 			if ( pItemDef == NULL )
 			{
 				sVal.FormatVal( 0 );
@@ -798,8 +798,8 @@ int CPointBase::StepLinePath( const CPointBase & ptSrc, int iSteps )
 	if ( ! iDist2D )
 		return 0;
 
-	m_x = (short)(ptSrc.m_x + MulDivLL( iSteps, dx, iDist2D ));
-	m_y = (short)(ptSrc.m_y + MulDivLL( iSteps, dy, iDist2D ));
+	m_x = (short)(ptSrc.m_x + IMulDivLL( iSteps, dx, iDist2D ));
+	m_y = (short)(ptSrc.m_y + IMulDivLL( iSteps, dy, iDist2D ));
 	return( iDist2D );
 }
 

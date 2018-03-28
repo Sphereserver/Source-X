@@ -122,7 +122,7 @@ public:
 	int GetLinear( int iPercent ) const
 	{
 		// ARGS: iPercent = 0-1000
-		return (int)m_iLo + MulDiv( GetRange(), iPercent, 1000 );
+		return (int)m_iLo + IMulDiv( GetRange(), iPercent, 1000 );
 	}
 
     /**

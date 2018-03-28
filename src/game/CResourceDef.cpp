@@ -120,8 +120,8 @@ int CValueCurveDef::GetLinear( int iSkillPercent ) const
 		break;
 	default:
 		// More
-		iLoIdx = MulDivLL( iSkillPercent, iQty, 1000 );
-		iQty--;
+		iLoIdx = IMulDiv( iSkillPercent, iQty, 1000 );
+		--iQty;
 		if ( iLoIdx >= iQty )
 			iLoIdx = iQty - 1;
 		iSegSize = 1000 / iQty;
@@ -131,7 +131,7 @@ int CValueCurveDef::GetLinear( int iSkillPercent ) const
 
 	int iLoVal = m_aiValues[iLoIdx];
 	int iHiVal = m_aiValues[iLoIdx + 1];
-	int iChance = iLoVal + (int)MulDivLL( iHiVal - iLoVal, iSkillPercent, iSegSize );
+	int iChance = iLoVal + (int)IMulDivLL( iHiVal - iLoVal, iSkillPercent, iSegSize );
 
 	if ( iChance <= 0 )
 		return 0; // less than no chance ?
@@ -759,7 +759,7 @@ bool CSpellDef::r_LoadVal( CScript &s )
 			m_Effect.Load( s.GetArgRaw());
 			break;
 		case SPC_EFFECT_ID:
-			m_idEffect = static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
+			m_idEffect = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
 			break;
 		case SPC_FLAGS:
 			m_dwFlags = s.GetArgVal();
@@ -786,20 +786,20 @@ bool CSpellDef::r_LoadVal( CScript &s )
 			m_Reags.Load( s.GetArgStr());
 			break;
 		case SPC_RUNE_ITEM:
-			m_idSpell = static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
+			m_idSpell = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
 			break;
 		case SPC_RUNES:
 			// This may only be basic chars !
 			m_sRunes = s.GetArgStr();
 			break;
 		case SPC_SCROLL_ITEM:
-			m_idScroll = static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
+			m_idScroll = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
 			break;
 		case SPC_SKILLREQ:
 			m_SkillReq.Load( s.GetArgStr());
 			break;
 		case SPC_SOUND:
-			m_sound = static_cast<SOUND_TYPE>(s.GetArgVal());
+			m_sound = (SOUND_TYPE)(s.GetArgVal());
 			break;
 		case SPC_TITHINGUSE:
 			m_wTithingUse = (word)(s.GetArgVal());
@@ -1077,7 +1077,7 @@ size_t CSRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool bTrigger ) con
 			rid = pOreDef->m_ReapItem;
 			if (rid != 0)
 			{
-				if (!pCharSrc->Skill_MakeItem(static_cast<ITEMID_TYPE>(rid), UID_CLEAR, SKTRIG_SELECT))
+				if (!pCharSrc->Skill_MakeItem((ITEMID_TYPE)(rid), UID_CLEAR, SKTRIG_SELECT))
 					continue;
 				if (IsTrigUsed(TRIGGER_RESOURCETEST))
 				{
@@ -1167,7 +1167,7 @@ bool CRegionResourceDef::r_LoadVal( CScript & s )
 		case RMC_DEFNAME: // "DEFNAME",
 			return SetResourceName( s.GetArgStr());
 		case RMC_REAP: // "REAP",
-			m_ReapItem = static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
+			m_ReapItem = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
 			break;
 		case RMC_REAPAMOUNT:
 			m_ReapAmount.Load( s.GetArgRaw() );

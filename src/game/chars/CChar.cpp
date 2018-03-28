@@ -814,13 +814,15 @@ void CChar::CreateNewCharCheck()
 				CCharBase *pCharDef = Char_GetDef();
 
 				int mult = (Stat_GetMax(STAT_STR) + (Stat_GetMax(STAT_DEX) / 2) + Stat_GetMax(STAT_INT)) / 3;
+				ushort iSkillArchery = Skill_GetBase(SKILL_ARCHERY), iSkillThrowing = Skill_GetBase(SKILL_THROWING), iSkillSwordsmanship = Skill_GetBase(SKILL_SWORDSMANSHIP);
+				ushort iSkillMacefighting = Skill_GetBase(SKILL_MACEFIGHTING), iSkillFencing = Skill_GetBase(SKILL_FENCING), iSkillWrestling = Skill_GetBase(SKILL_WRESTLING);
 				m_exp = maximum(
-						Skill_GetBase(SKILL_ARCHERY),
-						maximum(Skill_GetBase(SKILL_THROWING),
-						maximum(Skill_GetBase(SKILL_SWORDSMANSHIP),
-						maximum(Skill_GetBase(SKILL_MACEFIGHTING),
-						maximum(Skill_GetBase(SKILL_FENCING),
-						Skill_GetBase(SKILL_WRESTLING)))))
+						iSkillArchery,
+						maximum(iSkillThrowing,
+						maximum(iSkillSwordsmanship,
+						maximum(iSkillMacefighting,
+						maximum(iSkillFencing,
+						iSkillWrestling))))
 					) +
 					(Skill_GetBase(SKILL_TACTICS)     / 4) +
 					(Skill_GetBase(SKILL_PARRYING)    / 4) +
@@ -1706,7 +1708,9 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 	}
 
 	CResourceLock s;
-	if ( g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, bFemale ? RES_NEWBIE_FEMALE_DEFAULT : RES_NEWBIE_MALE_DEFAULT)) )
+	if ( g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, bFemale ? RES_NEWBIE_FEMALE_DEFAULT : RES_NEWBIE_MALE_DEFAULT, rtRace)) )
+		ReadScript(s);
+	else if ( g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, bFemale ? RES_NEWBIE_FEMALE_DEFAULT : RES_NEWBIE_MALE_DEFAULT)) )
 		ReadScript(s);
 
 	if ( g_Cfg.ResourceLock(s, CResourceID(RES_NEWBIE, iProfession, rtRace)) )
@@ -2319,7 +2323,7 @@ do_default:
 					return false;
 
 				// Lookup the spell ID to ensure it's valid
-				SPELL_TYPE spell = static_cast<SPELL_TYPE>(g_Cfg.ResourceGetIndexType( RES_SPELL, ppArgs[0] ));
+				SPELL_TYPE spell = (SPELL_TYPE)(g_Cfg.ResourceGetIndexType( RES_SPELL, ppArgs[0] ));
 				bool fCheckAntiMagic = true; // AntiMagic check is enabled by default
 
 				// Set AntiMagic check if second argument has been provided
@@ -2333,14 +2337,14 @@ do_default:
 			{
 				// use m_Act_UID ?
 				pszKey += 7;
-				ITEMID_TYPE id = static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, pszKey ));
+				ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, pszKey ));
 				sVal.FormatVal( Skill_MakeItem( id,	UID_CLEAR, SKTRIG_SELECT ) );
 			}
 			return true;
 		case CHC_CANMAKESKILL:
 			{
 				pszKey += 12;
-				ITEMID_TYPE id = static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, pszKey ));
+				ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, pszKey ));
 				sVal.FormatVal( Skill_MakeItem( id,	UID_CLEAR, SKTRIG_SELECT, true ) );
 			}
 			return true;
@@ -3771,7 +3775,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				m_Act_UID = m_pClient->m_Targ_UID;
 
 			return Skill_MakeItem(
-				static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, ttVal[0] )),
+				(ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, ttVal[0] )),
 				m_Act_UID, SKTRIG_START, false, iTmp );
 		}
 
@@ -3948,7 +3952,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			if ( pCharSrc != NULL )
 			{
 				// Let's make a cage to put the player in
-				ITEMID_TYPE id = static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, "i_multi_cage" ));
+				ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, "i_multi_cage" ));
 				if ( id < 0 )
 					return false;
 				CItemMulti * pItem = dynamic_cast <CItemMulti*>( CItem::CreateBase( id ));

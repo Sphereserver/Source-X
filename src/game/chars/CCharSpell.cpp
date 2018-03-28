@@ -270,7 +270,8 @@ CChar * CChar::Spell_Summon( CREID_TYPE id, CPointMap pntTarg )
 
 		if ( IsSetOF(OF_PetSlots) )
 		{
-			if ( !FollowersUpdate(pChar, (short)(maximum(1, pChar->GetDefNum("FOLLOWERSLOTS", true, true))), true) )
+			short iFollowerSlots = (short)pChar->GetDefNum("FOLLOWERSLOTS", true, true);
+			if ( !FollowersUpdate(pChar, maximum(1, iFollowerSlots)), true )
 			{
 				SysMessageDefault(DEFMSG_PETSLOTS_TRY_SUMMON);
 				pChar->Delete();
@@ -353,7 +354,7 @@ bool CChar::Spell_Recall(CItem * pRune, bool fGate)
 		pGate->m_uidLink = GetUID();
 		pGate->SetType(IT_TELEPAD);
 		pGate->SetAttr(ATTR_MAGIC | ATTR_MOVE_NEVER | ATTR_CAN_DECAY);	// why is this movable ?
-		pGate->SetHue(static_cast<HUE_TYPE>(pArea->IsGuarded() ? HUE_DEFAULT : HUE_RED));
+		pGate->SetHue((HUE_TYPE)(pArea->IsGuarded() ? HUE_DEFAULT : HUE_RED));
 		pGate->m_itTelepad.m_pntMark = pRune->m_itRune.m_pntMark;
 		pGate->MoveToDecay(GetTopPoint(), iDuration);
 		pGate->Effect(EFFECT_OBJ, ITEMID_MOONGATE_FX_BLUE, pGate, 2);
@@ -362,7 +363,7 @@ bool CChar::Spell_Recall(CItem * pRune, bool fGate)
 		// Far end gate.
 		pGate = CItem::CreateDupeItem(pGate);
 		ASSERT(pGate);
-		pGate->SetHue(static_cast<HUE_TYPE>((m_pArea && m_pArea->IsGuarded()) ? HUE_DEFAULT : HUE_RED));
+		pGate->SetHue((HUE_TYPE)((m_pArea && m_pArea->IsGuarded()) ? HUE_DEFAULT : HUE_RED));
 		pGate->m_itTelepad.m_pntMark = GetTopPoint();
 		pGate->MoveToDecay(pRune->m_itRune.m_pntMark, iDuration);
 		pGate->Effect(EFFECT_OBJ, ITEMID_MOONGATE_FX_BLUE, pGate, 2);
@@ -402,7 +403,7 @@ bool CChar::Spell_Resurrection(CItemCorpse * pCorpse, CChar * pCharSrc, bool bNo
 		return false;
 	}
 
-	short hits = (short)MulDivLL(Stat_GetMax(STAT_STR), g_Cfg.m_iHitpointPercentOnRez, 100);
+	short hits = (short)IMulDiv(Stat_GetMax(STAT_STR), g_Cfg.m_iHitpointPercentOnRez, 100);
 	if (!pCorpse)
 		pCorpse = FindMyCorpse();
 
@@ -476,7 +477,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 	if ( !pSpell || !pSpell->IsTypeSpellable() || pSpell->IsType(IT_WAND) )
 		return;
 
-	SPELL_TYPE spell = static_cast<SPELL_TYPE>(RES_GET_INDEX(pSpell->m_itSpell.m_spell));
+	SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(pSpell->m_itSpell.m_spell));
 	const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(spell);
 	if ( !spell || !pSpellDef )
 		return;
@@ -844,7 +845,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 	if ( !pSpell || !pSpell->IsTypeSpellable() || pSpell->IsType(IT_WAND) )
 		return;
 
-	SPELL_TYPE spell = static_cast<SPELL_TYPE>(RES_GET_INDEX(pSpell->m_itSpell.m_spell));
+	SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(pSpell->m_itSpell.m_spell));
 	const CSpellDef *pSpellDef = g_Cfg.GetSpellDef(spell);
 	if ( !spell || !pSpellDef )
 		return;
@@ -852,7 +853,8 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 	CClient *pClient = GetClient();
 	CChar *pCaster = pSpell->m_uidLink.CharFind();
 	word iStatEffect = pSpell->m_itSpell.m_spelllevel;
-	word iTimerEffect = (word)(maximum(pSpell->GetTimerAdjusted(), 0));
+	word iTimerEffect = (word)pSpell->GetTimerAdjusted();
+	iTimerEffect = maximum(iTimerEffect, 0);
 
 	if (IsTrigUsed(TRIGGER_EFFECTADD))
 	{
@@ -1544,7 +1546,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 
 	ASSERT(pItem);
 
-	SPELL_TYPE spell = static_cast<SPELL_TYPE>(RES_GET_INDEX(pItem->m_itSpell.m_spell));
+	SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(pItem->m_itSpell.m_spell));
 	int iCharges = pItem->m_itSpell.m_spellcharges;
 	int iLevel = pItem->m_itSpell.m_spelllevel;
 
@@ -1558,8 +1560,9 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 			if ( 10 > Calc_GetRandVal(100) )
 				--pItem->m_itSpell.m_spellcharges;
 
-			Stat_SetVal(STAT_INT, maximum(0, Stat_GetVal(STAT_INT) - 1));
-			Stat_SetVal(STAT_DEX, maximum(0, Stat_GetVal(STAT_DEX) - 1));
+			short iInt = Stat_GetVal(STAT_INT) - 1, iDex = Stat_GetVal(STAT_DEX) - 1;
+			Stat_SetVal(STAT_INT, maximum(0, iInt));
+			Stat_SetVal(STAT_DEX, maximum(0, iDex));
 
 			if ( !Calc_GetRandVal(3) )
 			{
@@ -1617,24 +1620,24 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 				switch (pItem->m_itSpell.m_spelllevel)
 				{
 					case 4:
-						iDmg = MulDiv(Stat_GetMax(STAT_STR), Calc_GetRandVal2(16, 33), 100);
+						iDmg = IMulDiv(Stat_GetMax(STAT_STR), Calc_GetRandVal2(16, 33), 100);
 						pItem->SetTimeout(5*TICK_PER_SEC);
 						break;
 					case 3:
-						iDmg = MulDiv(Stat_GetMax(STAT_STR), Calc_GetRandVal2(15, 30), 100);
+						iDmg = IMulDiv(Stat_GetMax(STAT_STR), Calc_GetRandVal2(15, 30), 100);
 						pItem->SetTimeout(5*TICK_PER_SEC);
 						break;
 					case 2:
-						iDmg = MulDiv(Stat_GetMax(STAT_STR), Calc_GetRandVal2(7, 15), 100);
+						iDmg = IMulDiv(Stat_GetMax(STAT_STR), Calc_GetRandVal2(7, 15), 100);
 						pItem->SetTimeout(4*TICK_PER_SEC);
 						break;
 					case 1:
-						iDmg = MulDiv(Stat_GetMax(STAT_STR), Calc_GetRandVal2(5, 10), 100);;
+						iDmg = IMulDiv(Stat_GetMax(STAT_STR), Calc_GetRandVal2(5, 10), 100);;
 						pItem->SetTimeout(3*TICK_PER_SEC);
 						break;
 					default:
 					case 0:
-						iDmg = MulDiv(Stat_GetVal(STAT_STR), Calc_GetRandVal2(4, 7), 100);
+						iDmg = IMulDiv(Stat_GetVal(STAT_STR), Calc_GetRandVal2(4, 7), 100);
 						pItem->SetTimeout(2*TICK_PER_SEC);
 						break;
 				}
@@ -1675,7 +1678,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 					iLevel = 3;
 
 				pItem->m_itSpell.m_spelllevel -= 50;	// gets weaker too.	Only on old formulas
-				iDmg = MulDiv(Stat_GetMax(STAT_STR), iLevel * 2, 100);
+				iDmg = IMulDiv(Stat_GetMax(STAT_STR), iLevel * 2, 100);
 				pItem->SetTimeout((5 + Calc_GetRandLLVal(4)) * TICK_PER_SEC);
 
 				static lpctstr const sm_Poison_Message[] =
@@ -2106,7 +2109,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 		pSpellDef = g_Cfg.GetSpellDef(spell);
 		if ( pSpellDef == NULL )
 			return false;
-		spell = static_cast<SPELL_TYPE>(Args.m_iN1);
+		spell = (SPELL_TYPE)(Args.m_iN1);
 	}
 	wManaUse = (short)(Args.m_iN2);
 	wTithingUse = (short)(Args.m_VarsLocal.GetKeyNum("TithingUse",true));
@@ -2477,18 +2480,23 @@ bool CChar::Spell_CastDone()
 	if (bIsSpellField)
 	{
 		//Setting new IDs as another variables to pass as different arguments to the field function.
-		it1test = static_cast<ITEMID_TYPE>(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1", true)));
-		it2test = static_cast<ITEMID_TYPE>(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject2", true)));
+		it1test = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1", true)));
+		it2test = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject2", true)));
 		//Can't be < 0, so max it to 0
-		fieldWidth = (uint)(maximum(0, Args.m_VarsLocal.GetKeyNum("fieldWidth", true)));
-		fieldGauge = (uint)(maximum(0, Args.m_VarsLocal.GetKeyNum("fieldGauge", true)));
+		fieldWidth = (uint)Args.m_VarsLocal.GetKeyNum("fieldWidth", true);
+		fieldWidth = maximum(0, fieldWidth);
+		fieldGauge = (uint)Args.m_VarsLocal.GetKeyNum("fieldGauge", true);
+		fieldGauge = maximum(0, fieldGauge);
 
 	}
 
-	iC1 = static_cast<CREID_TYPE>(Args.m_VarsLocal.GetKeyNum("CreateObject1", true) & 0xFFFF);
-	areaRadius = (uint)(maximum(0, Args.m_VarsLocal.GetKeyNum("areaRadius", true)));
-	int iDuration = maximum(0, (int)(Args.m_VarsLocal.GetKeyNum("duration", true)));
-	iColor = static_cast<HUE_TYPE>(maximum(0, Args.m_VarsLocal.GetKeyNum("EffectColor", true)));
+	iC1 = (CREID_TYPE)(Args.m_VarsLocal.GetKeyNum("CreateObject1", true) & 0xFFFF);
+	areaRadius = (uint)Args.m_VarsLocal.GetKeyNum("areaRadius", true);
+	areaRadius = maximum(0, areaRadius);
+	int iDuration = (int)(Args.m_VarsLocal.GetKeyNum("duration", true));
+	iDuration = maximum(0, iDuration);
+	iColor = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("EffectColor", true));
+	iColor = maximum((HUE_TYPE)0, iColor);
 
 	// Consume the reagents/mana/scroll/charge
 	if (!Spell_CanCast(spell, false, pObjSrc, true))
@@ -2620,7 +2628,7 @@ bool CChar::Spell_CastDone()
 			case SPELL_Create_Food:
 			{
 				CResourceID food = g_Cfg.ResourceGetIDType(RES_ITEMDEF, "DEFFOOD");
-				CItem *pItem = CItem::CreateScript((iT1 ? iT1 : static_cast<ITEMID_TYPE>(food.GetResIndex())), this);
+				CItem *pItem = CItem::CreateScript((iT1 ? iT1 : (ITEMID_TYPE)(food.GetResIndex())), this);
 				ASSERT(pItem);
 				if (pSpellDef->IsSpellType(SPELLFLAG_TARG_OBJ|SPELLFLAG_TARG_XYZ))
 				{
@@ -2870,10 +2878,12 @@ void CChar::Spell_CastFail()
 			return;
 	}
 
-	HUE_TYPE iColor = static_cast<HUE_TYPE>(maximum(0, Args.m_VarsLocal.GetKeyNum("EffectColor", true)));
-	dword iRender = (dword)(maximum(0, Args.m_VarsLocal.GetKeyNum("EffectRender", true)));
+	HUE_TYPE iColor = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("EffectColor", true));
+	iColor = maximum(0, iColor);
+	dword iRender = (dword)Args.m_VarsLocal.GetKeyNum("EffectRender", true);
+	iRender = maximum(0, iRender);
 
-	iT1 = static_cast<ITEMID_TYPE>(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1", true)));
+	iT1 = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1", true)));
 	if (iT1)
 		Effect(EFFECT_OBJ, iT1, this, 1, 30, false, iColor, iRender);
 	Sound( SOUND_SPELL_FIZZLE );
@@ -2975,7 +2985,7 @@ int CChar::Spell_CastStart()
 
 	if ( IsTrigUsed(TRIGGER_START) )
 	{
-		if ( Spell_OnTrigger(static_cast<SPELL_TYPE>(Args.m_iN1), SPTRIG_START, this, &Args) == TRIGRET_RET_TRUE )
+		if ( Spell_OnTrigger((SPELL_TYPE)(Args.m_iN1), SPTRIG_START, this, &Args) == TRIGRET_RET_TRUE )
 			return -1;
 	}
 
@@ -2988,7 +2998,7 @@ int CChar::Spell_CastStart()
 			return -1;
 	}
 
-	m_atMagery.m_Spell = static_cast<SPELL_TYPE>(Args.m_iN1);
+	m_atMagery.m_Spell = (SPELL_TYPE)(Args.m_iN1);
 	iDifficulty = (int)Args.m_iN2;
 	iWaitTime = (int64)Args.m_iN3;
 
@@ -3015,7 +3025,7 @@ int CChar::Spell_CastStart()
 		// So to avoid this problem we must use TALKMODE_SAY, which is not the correct type but with this type the client only show last 3 messages on screen.
 		if ( pSpellDef->m_sRunes[0] == '.' )
 		{
-			Speak((pSpellDef->m_sRunes.GetPtr()) + 1, static_cast<HUE_TYPE>(WOPColor), TALKMODE_SAY, static_cast<FONT_TYPE>(WOPFont));
+			Speak((pSpellDef->m_sRunes.GetPtr()) + 1, (HUE_TYPE)WOPColor, TALKMODE_SAY, static_cast<FONT_TYPE>(WOPFont));
 		}
 		else
 		{
@@ -3033,7 +3043,7 @@ int CChar::Spell_CastStart()
 			if ( len > 0 )
 			{
 				pszTemp[len] = 0;
-				Speak(pszTemp, static_cast<HUE_TYPE>(WOPColor), TALKMODE_SAY, static_cast<FONT_TYPE>(WOPFont));
+				Speak(pszTemp, (HUE_TYPE)WOPColor, TALKMODE_SAY, static_cast<FONT_TYPE>(WOPFont));
 			}
 		}
 	}
@@ -3156,18 +3166,20 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		}
 	}
 
-	spell = static_cast<SPELL_TYPE>(Args.m_iN1);
+	spell = (SPELL_TYPE)(Args.m_iN1);
 	iSkillLevel = (int)(Args.m_iN2);		// remember that effect/duration is calculated before triggers
-	DAMAGE_TYPE iDmgType = static_cast<DAMAGE_TYPE>(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("DamageType", true)));
-	ITEMID_TYPE iEffectID = static_cast<ITEMID_TYPE>(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1", true)));
+	DAMAGE_TYPE iDmgType = (DAMAGE_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("DamageType", true)));
+	ITEMID_TYPE iEffectID = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1", true)));
 	fExplode = Args.m_VarsLocal.GetKeyNum("EffectExplode", true) > 0 ? true : false;
-	iSound = static_cast<SOUND_TYPE>(Args.m_VarsLocal.GetKeyNum("Sound", true));
+	iSound = (SOUND_TYPE)(Args.m_VarsLocal.GetKeyNum("Sound", true));
 	iEffect = (int)(Args.m_VarsLocal.GetKeyNum("Effect", true));
 	iResist = (ushort)(Args.m_VarsLocal.GetKeyNum("Resist", true));
 	iDuration = (int)(Args.m_VarsLocal.GetKeyNum("Duration", true));
 
-	HUE_TYPE iColor = static_cast<HUE_TYPE>(maximum(0, Args.m_VarsLocal.GetKeyNum("EffectColor", true)));
-	dword iRender = (dword)(maximum(0, Args.m_VarsLocal.GetKeyNum("EffectRender", true)));
+	HUE_TYPE iColor = (HUE_TYPE)Args.m_VarsLocal.GetKeyNum("EffectColor", true);
+	iColor = maximum(0, iColor);
+	dword iRender = (dword)Args.m_VarsLocal.GetKeyNum("EffectRender", true);
+	iRender = maximum(0, iRender);
 
 	if ( iEffectID > ITEMID_QTY )
 		iEffectID = pSpellDef->m_idEffect;

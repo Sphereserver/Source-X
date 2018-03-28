@@ -1264,7 +1264,7 @@ badcmd:
 				if ( iDiv == 0 )
 					g_Log.EventWarn("MULDIV(%" PRId64 ",%" PRId64 ",%" PRId64 ") -> Dividing by '0'\n", iNum, iMul, iDiv);
 				else
-					iRes = MulDivLL(iNum,iMul,iDiv);
+					iRes = IMulDivLL(iNum,iMul,iDiv);
 
 				if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
 					g_Log.EventDebug("SCRIPT: muldiv(%" PRId64 ",%" PRId64 ",%" PRId64 ") -> %" PRId64 "\n", iNum, iMul, iDiv, iRes);

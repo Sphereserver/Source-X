@@ -52,7 +52,9 @@ private:
 	CServerStaticsBlock& operator=(const CServerStaticsBlock& other);
 
 public:
-	size_t GetStaticQty() const;
+	size_t GetStaticQty() const { 
+		return m_iStatics;
+	}
 	const CUOStaticItemRec * GetStatic( size_t i ) const;
 	bool IsStaticPoint( size_t i, int xo, int yo ) const;
 };

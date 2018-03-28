@@ -247,7 +247,7 @@ int CChar::GetWeightLoadPercent( int iWeight ) const
 	if ( !MaxCarry )
 		return 1000;	// suppose self extra-overloaded
 
-	return (int)MulDivLL( iWeight, 100, MaxCarry );
+	return (int)IMulDivLL( iWeight, 100, MaxCarry );
 }
 
 bool CChar::CanCarry( const CItem *pItem ) const
@@ -449,7 +449,7 @@ int CChar::GetHealthPercent() const
 	short str = Stat_GetAdjusted(STAT_STR);
 	if ( !str )
 		return 0;
-	return (int)MulDivLL(Stat_GetVal(STAT_STR), 100, str);
+	return IMulDiv(Stat_GetVal(STAT_STR), 100, str);
 }
 
 CChar* CChar::GetNext() const
@@ -754,7 +754,7 @@ short CChar::Food_GetLevelPercent() const
 	short max	= Stat_GetMax(STAT_FOOD);
 	if ( max == 0 )
 		return 100;
-	return (short)(MulDivLL(Stat_GetVal(STAT_FOOD), 100, max));
+	return (short)(IMulDiv(Stat_GetVal(STAT_FOOD), 100, max));
 }
 
 lpctstr CChar::Food_GetLevelMessage(bool fPet, bool fHappy) const
@@ -764,7 +764,7 @@ lpctstr CChar::Food_GetLevelMessage(bool fPet, bool fHappy) const
 	if ( max == 0 )
 		return g_Cfg.GetDefaultMsg(DEFMSG_PET_HAPPY_UNAFFECTED);
 
-	uint index = MulDiv(Stat_GetVal(STAT_FOOD), 8, max);
+	uint index = (uint)IMulDiv(Stat_GetVal(STAT_FOOD), 8, max);
 
 	if ( fPet )
 	{

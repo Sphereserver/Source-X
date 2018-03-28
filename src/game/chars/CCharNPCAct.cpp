@@ -89,7 +89,7 @@ void CChar::Action_StartSpecial( CREID_TYPE id )
 		case CREID_GIANT_SPIDER:
 		{
 			// Leave a web path
-			CItem * pItem = CItem::CreateScript( static_cast<ITEMID_TYPE>(Calc_GetRandVal2(ITEMID_WEB1_1, ITEMID_WEB1_4)), this );
+			CItem * pItem = CItem::CreateScript( (ITEMID_TYPE)(Calc_GetRandVal2(ITEMID_WEB1_1, ITEMID_WEB1_4)), this );
 			ASSERT(pItem);
 			pItem->SetType(IT_WEB);
 			pItem->MoveToDecay( GetTopPoint(), 10 + Calc_GetRandVal(170)*TICK_PER_SEC );
@@ -944,8 +944,9 @@ bool CChar::NPC_LookAtChar( CChar * pChar, int iDist )
 	// Do I want to do something to this char (more that what i'm already doing ?)
 	// RETURN:
 	//   true = yes i do want to take a new action.
-	//
 
+	// Don't call this function frequently, since CanSeeLOS is an expensive function (lot of calculations but
+	//	most importantly it has to read the UO files, and file I/O is slow)
 	if ( !pChar || ( pChar == this ) || !CanSeeLOS(pChar,LOS_NB_WINDOWS) ) //Flag - we can attack through a window
 		return false;
 
@@ -1107,7 +1108,7 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 			if ( Calc_GetRandVal(iDist) )
 				continue;	// can't see them.
 		}
-		if ( NPC_LookAtChar(pChar, iDist) )
+		if ( NPC_LookAtChar(pChar, iDist) )		// expensive function call
 		{
 			SoundChar(CRESND_NOTICE);
 			return true;
@@ -1162,11 +1163,13 @@ void CChar::NPC_Act_Wander()
 
 	int iStopWandering = 0;
 
-	if ( ! Calc_GetRandVal( 7 + ( Stat_GetVal(STAT_DEX) / 30 )) )
+	if ( ! Calc_GetRandVal( 7 + (Stat_GetVal(STAT_DEX) / 30)) )
 		iStopWandering = 1;			// i'm stopping to wander "for the dexterity". 
 
-	if ( !Calc_GetRandVal(3) )
+	if ( !Calc_GetRandVal(2 + TICK_PER_SEC/2) )
 	{
+		// NPC_LookAround() is very expensive, so since NPC_Act_Wander is called every tick for every char with ACTION == NPCACT_WANDER,
+		//	don't look around every time.
 		if ( NPC_LookAround() )
 			iStopWandering = 2;		// i'm stopping to wander because i have seen something interesting 
 	}
@@ -1371,7 +1374,7 @@ void CChar::NPC_Act_GoHome()
 	// NPCACT_GO_HOME
 	// If our home is not valid then
 
-	if ( !Calc_GetRandVal(2) && NPC_LookAround())
+	if ( !Calc_GetRandVal(3) && NPC_LookAround())
 		return;
 
 	if ( m_pNPC->m_Brain == NPCBRAIN_GUARD )
@@ -1819,8 +1822,13 @@ void CChar::NPC_Act_Idle()
 	}
 
 	// Look around for things to do.
-	if ( NPC_LookAround() )
-		return;
+	if ( !Calc_GetRandVal(1 + TICK_PER_SEC/3) )
+	{
+		// NPC_LookAround() is very expensive, so since NPC_Act_Wander is called every tick for every char with ACTION == NPCACT_IDLE,
+		//	don't look around every time.
+		if ( NPC_LookAround() )
+			return;			// found something interesting
+	}
 
 	// ---------- If we found nothing else to do. do this. -----------
 
@@ -2184,7 +2192,8 @@ void CChar::NPC_OnTickAction()
 	EXC_SET("timer expired (NPC)");
 	if ( IsTimerExpired() && IsStatFlag(STATF_WAR) && !(IsSetCombatFlags(COMBAT_PREHIT) && m_atFight.m_War_Swing_State == WAR_SWING_SWINGING))	// Was not reset? PREHIT forces timer to be 0, so it get's defaulted here breaking NPC's speed when PREHIT is enabled. Must not check in this case.
 	{
-		int64 timeout	= maximum((150-Stat_GetAdjusted(STAT_DEX))/2, 0);
+		int64 timeout = (150-Stat_GetAdjusted(STAT_DEX))/2;
+		timeout = maximum(timeout, 0);
 		timeout = Calc_GetRandLLVal2(timeout/2, timeout);
 		// default next brain/move tick
 		SetTimeout( TICK_PER_SEC + timeout * TICK_PER_SEC / 10 );

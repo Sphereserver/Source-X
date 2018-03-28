@@ -879,7 +879,7 @@ int CItemBase::CalculateMakeValue( int iQualityLevel ) const
 		if ( rid.GetResType() != RES_ITEMDEF )
 			continue;
 
-		CItemBase * pItemDef = CItemBase::FindItemBase( static_cast<ITEMID_TYPE>(rid.GetResIndex()) );
+		CItemBase * pItemDef = CItemBase::FindItemBase( (ITEMID_TYPE)(rid.GetResIndex()) );
 		if ( pItemDef == NULL )
 			continue;
 
@@ -1428,7 +1428,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 				m_flip_id.Empty();
 				for ( int i = 0; i < iArgQty; i++ )
 				{
-					ITEMID_TYPE id = static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, ppArgs[i] ));
+					ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, ppArgs[i] ));
 					if ( ! IsValidDispID( id ))
 						continue;
 					if ( IsSameDispID(id))
@@ -1544,7 +1544,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 					return false;
 				}
 
-				ITEMID_TYPE id = static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
+				ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
 				if ( ! IsValidDispID(id))
 				{
 					DEBUG_ERR(( "Setting invalid id=%s for base type %s\n", s.GetArgStr(), GetResourceName()));
@@ -1794,7 +1794,7 @@ bool CItemBaseMulti::AddComponent( tchar * pArgs )
 	size_t iQty = Str_ParseCmds( pArgs, piArgs, CountOf(piArgs));
 	if ( iQty <= 1 )
 		return false;
-	return AddComponent(static_cast<ITEMID_TYPE>(RES_GET_INDEX(piArgs[0])), (short)piArgs[1], (short)piArgs[2], (char)piArgs[3] );
+	return AddComponent((ITEMID_TYPE)(RES_GET_INDEX(piArgs[0])), (short)piArgs[1], (short)piArgs[2], (char)piArgs[3] );
 }
 
 int CItemBaseMulti::GetMaxDist() const
@@ -2041,7 +2041,7 @@ CItemBase * CItemBase::FindItemBase( ITEMID_TYPE id ) // static
 	while ( s.ReadKeyParse())
 	{
 		if ( s.IsKey( "DUPEITEM" ))
-			return MakeDupeReplacement( pBase, static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr() )) );
+			return MakeDupeReplacement( pBase, (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr() )) );
 		else if ( s.IsKey( "MULTIREGION" ))
 		{
 			// Upgrade the CItemBase::pBase to the CItemBaseMulti.

@@ -153,11 +153,12 @@ ushort CChar::Skill_GetAdjusted( SKILL_TYPE skill ) const
 
 	if (pSkillDef != NULL)
 	{
-		int iPureBonus = ( pSkillDef->m_StatBonus[STAT_STR] * maximum(0,Stat_GetAdjusted( STAT_STR )) ) +
-						 ( pSkillDef->m_StatBonus[STAT_INT] * maximum(0,Stat_GetAdjusted( STAT_INT )) ) +
-						 ( pSkillDef->m_StatBonus[STAT_DEX] * maximum(0,Stat_GetAdjusted( STAT_DEX )) );
+		int iStrAdj = Stat_GetAdjusted(STAT_STR), iIntAdj = Stat_GetAdjusted(STAT_INT), iDexAdj = Stat_GetAdjusted(STAT_DEX);
+		int iPureBonus = ( pSkillDef->m_StatBonus[STAT_STR] * maximum(0,iStrAdj) ) +
+						 ( pSkillDef->m_StatBonus[STAT_INT] * maximum(0,iIntAdj) ) +
+						 ( pSkillDef->m_StatBonus[STAT_DEX] * maximum(0,iDexAdj) );
 
-		iAdjSkill = (ushort)MulDivLL( pSkillDef->m_StatPercent, iPureBonus, 10000 );
+		iAdjSkill = (ushort)IMulDiv( pSkillDef->m_StatPercent, iPureBonus, 10000 );
 	}
 
 	return ( Skill_GetBase(skill) + iAdjSkill );
@@ -439,7 +440,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 			continue;		// you've got higher stats than this skill is good for
 
 		// Adjust the chance by the percent of this that the skill uses
-		difficulty = MulDivLL( iStatVal, 1000, iStatTarg );
+		difficulty = IMulDiv( iStatVal, 1000, iStatTarg );
 		iChance = g_Cfg.m_StatAdv[i].GetChancePercent( difficulty );
 		if ( pSkillDef->m_StatPercent )
 			iChance = ( iChance * pSkillDef->m_StatBonus[i] * pSkillDef->m_StatPercent ) / 10000;
@@ -686,7 +687,7 @@ bool CChar::Skill_MakeItem_Success()
 			variance = -variance;		// worse than I can normally make
 
 		// Determine which range I'm in
-		quality = MulDivLL(iSkillLevel, 2, 10);	// default value for quality
+		quality = IMulDiv(iSkillLevel, 2, 10);	// default value for quality
 		int qualityBase;
 		if ( quality < 25 )			// 1 - 25		Shoddy
 			qualityBase = 0;
@@ -974,7 +975,7 @@ CItem * CChar::Skill_NaturalResource_Create( CItem * pResBit, SKILL_TYPE skill )
 		return NULL;
 
 	//Creating the 'id' variable with the local given through->by the trigger(s) instead on top of method
-	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(RES_GET_INDEX( Args.m_VarsLocal.GetKeyNum("ResourceID")));
+	ITEMID_TYPE id = (ITEMID_TYPE)(RES_GET_INDEX( Args.m_VarsLocal.GetKeyNum("ResourceID")));
 
 	iAmount = pResBit->ConsumeAmount( (word)(Args.m_iN1) );	// amount i used up.
 	if ( iAmount <= 0 )
@@ -1064,7 +1065,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 
 	if ( pOreDef->IsType( IT_ORE ))
 	{
-		ITEMID_TYPE idIngot = static_cast<ITEMID_TYPE>(RES_GET_INDEX( pOreDef->m_ttOre.m_idIngot));
+		ITEMID_TYPE idIngot = (ITEMID_TYPE)(RES_GET_INDEX( pOreDef->m_ttOre.m_idIngot));
 		pIngotDef = CItemBase::FindItemBase(idIngot);
 		iIngotQty = 1;	// ingots per ore.
 	}
@@ -1078,7 +1079,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 			if ( rid.GetResType() != RES_ITEMDEF )
 				continue;
 
-			const CItemBase * pBaseDef = CItemBase::FindItemBase(static_cast<ITEMID_TYPE>(rid.GetResIndex()));
+			const CItemBase * pBaseDef = CItemBase::FindItemBase((ITEMID_TYPE)(rid.GetResIndex()));
 			if ( pBaseDef == NULL )
 				continue;
 
@@ -2927,7 +2928,7 @@ int CChar::Skill_Act_Breath( SKTRIG_TYPE stage )
 	}
 
 	HUE_TYPE hue = (HUE_TYPE)(GetDefNum("BREATH.HUE", true));
-	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(GetDefNum("BREATH.ANIM", true));
+	ITEMID_TYPE id = (ITEMID_TYPE)(GetDefNum("BREATH.ANIM", true));
 	EFFECT_TYPE effect = static_cast<EFFECT_TYPE>(GetDefNum("BREATH.TYPE",true));
 	if ( !id )
 		id = ITEMID_FX_FIRE_BALL;
@@ -2999,7 +3000,7 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 	{
 		lpctstr t_Str = pRock->GetValStr();
 		CResourceIDBase rid = static_cast<CResourceIDBase>(g_Cfg.ResourceGetID( RES_ITEMDEF, t_Str ));
-		id = static_cast<ITEMID_TYPE>(rid.GetResIndex());
+		id = (ITEMID_TYPE)(rid.GetResIndex());
 		if (!iDamage)
 			iDamage = Stat_GetVal(STAT_DEX)/4 + Calc_GetRandVal( Stat_GetVal(STAT_DEX)/4 );
 	}
@@ -3007,13 +3008,13 @@ int CChar::Skill_Act_Throwing( SKTRIG_TYPE stage )
 	{
 		if ( Calc_GetRandVal( 3 ) )
 		{
-			id = static_cast<ITEMID_TYPE>(ITEMID_ROCK_B_LO + Calc_GetRandVal(ITEMID_ROCK_B_HI-ITEMID_ROCK_B_LO));
+			id = (ITEMID_TYPE)(ITEMID_ROCK_B_LO + Calc_GetRandVal(ITEMID_ROCK_B_HI-ITEMID_ROCK_B_LO));
 			if (!iDamage)
 				iDamage = Stat_GetVal(STAT_DEX)/4 + Calc_GetRandVal( Stat_GetVal(STAT_DEX)/4 );
 		}
 		else
 		{
-			id = static_cast<ITEMID_TYPE>(ITEMID_ROCK_2_LO + Calc_GetRandVal(ITEMID_ROCK_2_HI-ITEMID_ROCK_2_LO));
+			id = (ITEMID_TYPE)(ITEMID_ROCK_2_LO + Calc_GetRandVal(ITEMID_ROCK_2_HI-ITEMID_ROCK_2_LO));
 			if (!iDamage)
 				iDamage = 2 + Calc_GetRandVal( Stat_GetVal(STAT_DEX)/4 );
 		}
@@ -3155,7 +3156,7 @@ int CChar::Skill_Stroke( bool fResource )
 		if ( Skill_OnTrigger(skill, SKTRIG_STROKE, &args) == TRIGRET_RET_TRUE )
 			return -SKTRIG_ABORT;
 
-		sound = static_cast<SOUND_TYPE>(args.m_VarsLocal.GetKeyNum("Sound", false));
+		sound = (SOUND_TYPE)(args.m_VarsLocal.GetKeyNum("Sound", false));
 		delay = args.m_VarsLocal.GetKeyNum("Delay", true);
 		anim = static_cast<ANIM_TYPE>(args.m_VarsLocal.GetKeyNum("Anim", true));
 
@@ -3675,8 +3676,9 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 		{
 			// read crafting parameters
 			pResBase.SetPrivateUID((dword)(pArgs.m_VarsLocal.GetKeyNum("CraftItemdef", true)));
-			m_atCreate.m_Stroke_Count = (word)(maximum(1, pArgs.m_VarsLocal.GetKeyNum("CraftStrokeCnt", true)));
-			m_atCreate.m_ItemID = static_cast<ITEMID_TYPE>(pResBase.GetResIndex());
+			m_atCreate.m_Stroke_Count = (word)pArgs.m_VarsLocal.GetKeyNum("CraftStrokeCnt", true);
+			m_atCreate.m_Stroke_Count = maximum(1,m_atCreate.m_Stroke_Count);
+			m_atCreate.m_ItemID = (ITEMID_TYPE)(pResBase.GetResIndex());
 			m_atCreate.m_Amount = (word)(pArgs.m_VarsLocal.GetKeyNum("CraftAmount", true));
 		}
 		if ( bGatherSkill )

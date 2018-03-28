@@ -287,8 +287,8 @@ bool CChar::NPC_OnTrainPay(CChar *pCharSrc, CItemMemory *pMemory, CItem * pGold)
 	// Consume as much money as we can train for.
 	if ( pGold->GetAmount() < iTrainCost )
 	{
-        int iDiffPercent = MulDiv(iTrainCost, 100, pGold->GetAmount());
-		iTrainVal = MulDiv(iTrainVal,100,iDiffPercent);
+        int iDiffPercent = IMulDiv(iTrainCost, 100, pGold->GetAmount());
+		iTrainVal = IMulDiv(iTrainVal,100,iDiffPercent);
         iTrainCost = (word)pCharSrc->PayGold(this, (word)minimum(UINT16_MAX, iTrainVal * iTrainMult), pGold, PAYGOLD_TRAIN);
 	}
 	else if ( pGold->GetAmount() == iTrainCost)

@@ -216,7 +216,7 @@ void CChar::NPC_Act_Fight()
 				SKILL_TYPE iSkillforced = static_cast<SKILL_TYPE>(Args.m_VarsLocal.GetKeyNum("skill", false));
 				if (iSkillforced)
 				{
-					SPELL_TYPE iSpellforced = static_cast<SPELL_TYPE>(Args.m_VarsLocal.GetKeyNum("spell", false));
+					SPELL_TYPE iSpellforced = (SPELL_TYPE)(Args.m_VarsLocal.GetKeyNum("spell", false));
 					if (g_Cfg.IsSkillFlag(iSkillforced, SKF_MAGIC))
 						m_atMagery.m_Spell = iSpellforced;
 
@@ -292,7 +292,7 @@ void CChar::NPC_Act_Fight()
 				{
 					lpctstr t_Str = pRock->GetValStr();
 					CResourceIDBase rid = static_cast<CResourceIDBase>(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
-					ITEMID_TYPE obj = static_cast<ITEMID_TYPE>(rid.GetResIndex());
+					ITEMID_TYPE obj = (ITEMID_TYPE)(rid.GetResIndex());
 					if (ContentFind(CResourceID(RES_ITEMDEF, obj), 0, 2))
 						id = ITEMID_NODRAW;
 				}

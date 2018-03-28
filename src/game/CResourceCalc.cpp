@@ -52,14 +52,15 @@ int CServerConfig::Calc_CombatAttackSpeed( CChar * pChar, CItem * pWeapon )
 			// pre-AOS formula (Sphere custom)		(default m_iSpeedScaleFactor = 15000, uses DEX instead STAM and calculate delay using weapon WEIGHT if weapon SPEED is not set)
 			if ( pWeapon && iBaseSpeed )
 			{
-				int iSwingSpeed = maximum(1, (pChar->Stat_GetAdjusted(STAT_DEX) + 100) * iBaseSpeed);
+				int iSwingSpeed = (pChar->Stat_GetAdjusted(STAT_DEX) + 100) * iBaseSpeed;
+				iSwingSpeed = maximum(1, iSwingSpeed);
 				iSwingSpeed = (g_Cfg.m_iSpeedScaleFactor * TICK_PER_SEC) / iSwingSpeed;
 				if ( iSwingSpeed < 5 )
 					iSwingSpeed = 5;
 				return iSwingSpeed;
 			}
 
-			int iSwingSpeed = MulDivLL(100 - pChar->Stat_GetAdjusted(STAT_DEX), 40, 100);	// base speed is just the char DEX range (0 ~ 40)
+			int iSwingSpeed = IMulDiv(100 - pChar->Stat_GetAdjusted(STAT_DEX), 40, 100);	// base speed is just the char DEX range (0 ~ 40)
 			if ( iSwingSpeed < 5 )
 				iSwingSpeed = 5;
 			else
@@ -80,7 +81,8 @@ int CServerConfig::Calc_CombatAttackSpeed( CChar * pChar, CItem * pWeapon )
 		case 1:
 		{
 			// pre-AOS formula	(default m_iSpeedScaleFactor = 15000)
-			int iSwingSpeed = maximum(1, (pChar->Stat_GetVal(STAT_DEX) + 100) * iBaseSpeed);
+			int iSwingSpeed = (pChar->Stat_GetVal(STAT_DEX) + 100) * iBaseSpeed;
+			iSwingSpeed = maximum(1, iSwingSpeed);
 			iSwingSpeed = (g_Cfg.m_iSpeedScaleFactor * TICK_PER_SEC) / iSwingSpeed;
 			if ( iSwingSpeed < 1 )
 				iSwingSpeed = 1;
@@ -91,7 +93,8 @@ int CServerConfig::Calc_CombatAttackSpeed( CChar * pChar, CItem * pWeapon )
 		{
 			// AOS formula		(default m_iSpeedScaleFactor = 40000)
 			int iSwingSpeed = (pChar->Stat_GetVal(STAT_DEX) + 100) * iBaseSpeed;
-			iSwingSpeed = maximum(1, iSwingSpeed * (100 + iSwingSpeedIncrease) / 100);
+			iSwingSpeed = iSwingSpeed * (100 + iSwingSpeedIncrease) / 100;
+			iSwingSpeed = maximum(1, iSwingSpeed);
 			iSwingSpeed = ((g_Cfg.m_iSpeedScaleFactor * TICK_PER_SEC) / iSwingSpeed) / 2;
 			if ( iSwingSpeed < 12 )		//1.25
 				iSwingSpeed = 12;
@@ -102,7 +105,8 @@ int CServerConfig::Calc_CombatAttackSpeed( CChar * pChar, CItem * pWeapon )
 		case 3:
 		{
 			// SE formula		(default m_iSpeedScaleFactor = 80000)
-			int iSwingSpeed = maximum(1, iBaseSpeed * (100 + iSwingSpeedIncrease) / 100);
+			int iSwingSpeed = iBaseSpeed * (100 + iSwingSpeedIncrease) / 100;
+			iSwingSpeed = maximum(1, iSwingSpeed);
 			iSwingSpeed = (g_Cfg.m_iSpeedScaleFactor / ((pChar->Stat_GetVal(STAT_DEX) + 100) * iSwingSpeed)) - 2;	// get speed in ticks of 0.25s each
 			if ( iSwingSpeed < 5 )
 				iSwingSpeed = 5;
@@ -317,9 +321,9 @@ int CServerConfig::Calc_StealingItem( CChar * pCharThief, CItem * pItem, CChar *
 	int iSkillMark = pCharMark->Skill_GetAdjusted( SKILL_STEALING );
 	int iWeightItem = pItem->GetWeight();
 	
-	// int iDifficulty = iDexMark/2 + (iSkillMark/5) + Calc_GetRandVal(iDexMark/2) + MulDivLL( iWeightItem, 4, WEIGHT_UNITS );
+	// int iDifficulty = iDexMark/2 + (iSkillMark/5) + Calc_GetRandVal(iDexMark/2) + IMulDivLL( iWeightItem, 4, WEIGHT_UNITS );
 	// Melt mod:
-    int iDifficulty = (iSkillMark/5) + Calc_GetRandVal(iDexMark/2) + MulDivLL( iWeightItem, 4, WEIGHT_UNITS );
+    int iDifficulty = (iSkillMark/5) + Calc_GetRandVal(iDexMark/2) + IMulDiv( iWeightItem, 4, WEIGHT_UNITS );
 	
 	if ( pItem->IsItemEquipped())
 		iDifficulty += iDexMark/2 + pCharMark->Stat_GetAdjusted(STAT_INT);		// This is REALLY HARD to do.

@@ -46,23 +46,13 @@
 	#define IsAlpha(c)			iswalpha((wint_t)c)
 	#define IsAlnum(c)			iswalnum((wint_t)c)
 #else
-	#define IsDigit(c)			isdigit((int)(c & 0xFF))	// It was: (uchar)c
+	#define IsDigit(c)			isdigit((int)(c & 0xFF))
 	#define IsSpace(c)			isspace((int)(c & 0xFF))
 	#define IsAlpha(c)			isalpha((int)(c & 0xFF))
 	#define IsAlnum(c)			isalnum((int)(c & 0xFF))
 #endif
 
-#define IsNegative(c)		((c < 0)?1:0)
-#define MulDiv(a,b,c)		(((((int)(a)*(int)(b)) + (int)(c / 2)) / (int)(c)) - (IsNegative((int)(a)*(int)(b))))
-#define MulDivLL(a,b,c)		(((((llong)(a)*(llong)(b)) + (llong)(c / 2)) / (llong)(c)) - (IsNegative((llong)(a)*(llong)(b))))
-#define MulMulDiv(a,b,c)	(((a)*(b))/(c))
-#define minimum(x,y)		((x)<(y)?(x):(y))
-#define maximum(x,y)		((x)>(y)?(x):(y))
-#define medium(x,y,z)		((x)>(y)?(x):((z)<(y)?(z):(y)))
 #define CountOf(a)			(sizeof(a)/sizeof((a)[0]))
-#define sign(n) (((n) < 0) ? -1 : (((n) > 0) ? 1 : 0))
-//#define abs(n) (((n) < 0) ? (-(n)) : (n))
-
 
 /* These macros are uppercase for conformity to windows.h macros */
 #define MAKEDWORD(low, high) ((dword)(((word)low) | (((dword)((word)high)) << 16)))
@@ -90,8 +80,51 @@
 #endif
 /* End of macros section */
 
+
 typedef uint	ERROR_CODE;
 typedef THREAD_ENTRY_RET(_cdecl * PTHREAD_ENTRY_PROC)(void *);
+
+
+#define IsNegative(c)		(((c) < 0)?1:0)
+
+//#define IMulDiv(a,b,c)		(((((int)(a)*(int)(b)) + (int)(c / 2)) / (int)(c)) - (IsNegative((int)(a)*(int)(b))))
+inline int IMulDiv(int a, int b, int c)
+{
+	int ab = a*b;
+	return ((ab + (c/2)) / c) - IsNegative(ab);
+}
+
+//#define IMulDivLL(a,b,c)		(((((llong)(a)*(llong)(b)) + (llong)(c / 2)) / (llong)(c)) - (IsNegative((llong)(a)*(llong)(b))))
+inline llong IMulDivLL(llong a, llong b, llong c)
+{
+	llong ab = a*b;
+	return ((ab + (c/2)) / c) - IsNegative(ab);
+}
+inline realtype IMulDivRT(realtype a, realtype b, realtype c)
+{
+	realtype ab = a*b;
+	return ((ab + (c/2)) / c) - IsNegative(ab);
+}
+
+//#define IMulDivDown(a,b,c)	(((a)*(b))/(c))
+inline int IMulDivDown(int a, int b, int c)
+{
+	return (a*b)/c;
+}
+inline llong IMulDivDownLL(llong a, llong b, llong c)
+{
+	return (a*b)/c;
+}
+
+//#define sign(n) (((n) < 0) ? -1 : (((n) > 0) ? 1 : 0))
+template<typename T> inline T sign(T n)
+{
+	return ( (n < 0) ? -1 : ((n > 0) ? 1 : 0) );
+}
+
+#define minimum(x,y)		((x)<(y)?(x):(y))		// NOT to be used with functions! Store the result of the function in a variable first, otherwise the function will be executed twice!
+#define maximum(x,y)		((x)>(y)?(x):(y))		// NOT to be used with functions! Store the result of the function in a variable first, otherwise the function will be executed twice!
+#define medium(x,y,z)		((x)>(y)?(x):((z)<(y)?(z):(y)))	// NOT to be used with functions! Store the result of the function in a variable first, otherwise the function will be executed twice!
 
 
 #endif	// _INC_COMMON_H

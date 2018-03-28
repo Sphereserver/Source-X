@@ -901,7 +901,7 @@ effect_bounce:
 		if ( OnTrigger( CTRIG_GetHit, pSrc, &Args ) == TRIGRET_RET_TRUE )
 			return 0;
 		iDmg = (int)(Args.m_iN1);
-		uType = static_cast<DAMAGE_TYPE>(Args.m_iN2);
+		uType = (DAMAGE_TYPE)(Args.m_iN2);
 	}
 
 	int iItemDamageChance = (int)(Args.m_VarsLocal.GetKeyNum("ItemDamageChance", true));
@@ -997,7 +997,7 @@ effect_bounce:
 						iReactiveDamage = 1;
 
 					iDmg -= iReactiveDamage;
-					pSrc->OnTakeDamage( iReactiveDamage, this, static_cast<DAMAGE_TYPE>(DAMAGE_FIXED), iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy );
+					pSrc->OnTakeDamage( iReactiveDamage, this, (DAMAGE_TYPE)(DAMAGE_FIXED), iDmgPhysical, iDmgFire, iDmgCold, iDmgPoison, iDmgEnergy );
 					pSrc->Sound( 0x1F1 );
 					pSrc->Effect( EFFECT_OBJ, ITEMID_FX_CURSE_EFFECT, this, 10, 16 );
 				}
@@ -1478,7 +1478,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 			return WAR_SWING_INVALID;
 
 		m_atFight.m_War_Swing_State = static_cast<WAR_SWING_TYPE>(pArgs.m_iN1);
-		iTyp = static_cast<DAMAGE_TYPE>(pArgs.m_iN2);
+		iTyp = (DAMAGE_TYPE)(pArgs.m_iN2);
 
 		if ( (m_atFight.m_War_Swing_State == WAR_SWING_SWINGING) && (iTyp & DAMAGE_FIXED) )
 		{
@@ -1492,7 +1492,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 				{
 					CVarDefCont *pDamTypeOverride = pWeapon->GetKey("OVERRIDE.DAMAGETYPE", true);
 					if ( pDamTypeOverride )
-						iTyp = static_cast<DAMAGE_TYPE>(pDamTypeOverride->GetValNum());
+						iTyp = (DAMAGE_TYPE)(pDamTypeOverride->GetValNum());
 					else
 					{
 						CItemBase *pWeaponDef = pWeapon->Item_GetDef();
@@ -1579,7 +1579,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		pRender = pWeapon->GetDefKey("AMMOANIMRENDER", true);
 		CVarDefCont *pDamTypeOverride = pWeapon->GetKey("OVERRIDE.DAMAGETYPE", true);
 		if ( pDamTypeOverride )
-			iTyp = static_cast<DAMAGE_TYPE>(pDamTypeOverride->GetValNum());
+			iTyp = (DAMAGE_TYPE)(pDamTypeOverride->GetValNum());
 		else
 		{
 			pWeaponDef = pWeapon->Item_GetDef();
@@ -1782,7 +1782,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 		SOUND_TYPE iSound = 0;
 		if ( pWeapon )
-			iSound = static_cast<SOUND_TYPE>(pWeapon->GetDefNum("AMMOSOUNDMISS", true));
+			iSound = (SOUND_TYPE)(pWeapon->GetDefNum("AMMOSOUNDMISS", true));
 		if ( !iSound )
 		{
 			if ( g_Cfg.IsSkillFlag(skill, SKF_RANGED) )
@@ -1955,7 +1955,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 				iManaDrain += 5 + (15 * Skill_GetBase(SKILL_SPIRITSPEAK) / 1000);
 		}
 		if ( GetDefNum("HitManaDrain", true) > Calc_GetRandLLVal(100) )
-			iManaDrain += (short)MulDivLL(iDmg, 20, 100);		// leech 20% of damage value
+			iManaDrain += (short)IMulDivLL(iDmg, 20, 100);		// leech 20% of damage value
 
 		short iTargMana = pCharTarg->Stat_GetVal(STAT_INT);
 		if ( iManaDrain > iTargMana )

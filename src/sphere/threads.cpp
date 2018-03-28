@@ -38,26 +38,6 @@ struct TemporaryStringStorage
 	char m_state;
 } g_tmpTemporaryStringStorage[THREAD_STRING_STORAGE];
 
-
-
-threadid_t IThread::getCurrentThreadId()
-{
-#ifdef _WIN32
-	return ::GetCurrentThreadId();
-#else
-	return pthread_self();
-#endif
-}
-
-bool IThread::isSameThreadId(threadid_t firstId, threadid_t secondId)
-{
-#ifdef _WIN32
-	return (firstId == secondId);
-#else
-	return pthread_equal(firstId,secondId);
-#endif
-}
-
 #ifdef _WIN32
 #pragma pack(push, 8)
 typedef struct tagTHREADNAME_INFO

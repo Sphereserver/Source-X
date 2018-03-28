@@ -712,8 +712,8 @@ realtype CVarFloat::GetRandVal( realtype dQty )
 	ADDTOCALLSTACK("CVarFloat::GetRandVal");
 	if ( dQty <= 0 )
 		return 0;
-	if ( dQty >= INT64_MAX )
-		return (realtype)(MulDivLL( CSRand::genRandReal64(0,dQty), dQty, INT64_MAX ));
+	if ( dQty >= std::numeric_limits<realtype>::max() )
+		return IMulDivRT( CSRand::genRandReal64(0,dQty), dQty, std::numeric_limits<realtype>::max() );
 	return CSRand::genRandReal64(0, dQty);
 }
 

@@ -688,7 +688,7 @@ void CNTWindow::SetLogFont( const char * pszFont )
 		HDC hdc = GetDC(NULL);
 		if (hdc != NULL)
 		{
-			logfont.lfHeight = MulDivLL(10, GetDeviceCaps(hdc, LOGPIXELSY), 72);
+			logfont.lfHeight = IMulDiv(10, GetDeviceCaps(hdc, LOGPIXELSY), 72);
 			ReleaseDC(NULL, hdc);
 		}
 

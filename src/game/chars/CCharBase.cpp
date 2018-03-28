@@ -311,7 +311,7 @@ bool CCharBase::r_LoadVal( CScript & s )
 			break;
 		case CBC_ICON:
 			{
-				ITEMID_TYPE id = static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
+				ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
 				if ( (id < 0) || (id >= ITEMID_MULTI) )
 					return false;
 				m_trackID = id;

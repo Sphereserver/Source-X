@@ -435,7 +435,8 @@ void CChar::Noto_Fame( int iFameChange )
 	if ( ! iFameChange )
 		return;
 
-	int iFame = maximum(Stat_GetAdjusted(STAT_FAME), 0);
+	int iFame = Stat_GetAdjusted(STAT_FAME);
+	iFame = maximum(iFame, 0);
 	if ( iFameChange > 0 )
 	{
 		if ( iFame + iFameChange > g_Cfg.m_iMaxFame )

@@ -63,9 +63,26 @@ public:
 	virtual void setPriority(Priority) = 0;
 	virtual Priority getPriority() const = 0;
 
-	static threadid_t getCurrentThreadId();
-	static bool isSameThreadId(threadid_t firstId, threadid_t secondId);
-	bool isSameThread(threadid_t otherThreadId)	{ return isSameThreadId(getCurrentThreadId(), otherThreadId); }
+	static inline threadid_t getCurrentThreadId()
+	{
+#ifdef _WIN32
+		return ::GetCurrentThreadId();
+#else
+		return pthread_self();
+#endif
+	}
+	static inline bool isSameThreadId(threadid_t firstId, threadid_t secondId)
+	{
+#ifdef _WIN32
+		return (firstId == secondId);
+#else
+		return pthread_equal(firstId,secondId);
+#endif
+	}
+	inline bool isSameThread(threadid_t otherThreadId)
+	{
+		return isSameThreadId(getCurrentThreadId(), otherThreadId);
+	}
 
 	static const int m_nameMaxLength = 16;	// Unix support a max 16 bytes thread name.
 	static void setThreadName(const char* name);

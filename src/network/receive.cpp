@@ -72,9 +72,9 @@ bool PacketCreate::onReceive(NetState* net)
 	skill3 = static_cast<SKILL_TYPE>(readByte());
 	skillval3 = readByte();
 	HUE_TYPE hue = (HUE_TYPE)(readInt16());
-	ITEMID_TYPE hairid = static_cast<ITEMID_TYPE>(readInt16());
+	ITEMID_TYPE hairid = (ITEMID_TYPE)(readInt16());
 	HUE_TYPE hairhue = (HUE_TYPE)(readInt16());
-	ITEMID_TYPE beardid = static_cast<ITEMID_TYPE>(readInt16());
+	ITEMID_TYPE beardid = (ITEMID_TYPE)(readInt16());
 	HUE_TYPE beardhue = (HUE_TYPE)(readInt16());
 	skip(1); // shard index
 	byte startloc = readByte();
@@ -1070,7 +1070,7 @@ bool PacketTarget::onReceive(NetState* net)
 	word y = readInt16();
 	skip(1);
 	byte z = readByte();
-	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(readInt16());
+	ITEMID_TYPE id = (ITEMID_TYPE)(readInt16());
 
 	client->Event_Target(context, targetSerial, CPointMap(x, y, z, character->GetTopMap()), flags, id);
 	return true;
@@ -1522,16 +1522,16 @@ bool PacketCreateNew::onReceive(NetState* net)
 	byte skillval4 = readByte();
 	skip(26);
 	HUE_TYPE hairhue = (HUE_TYPE)(readInt16());
-	ITEMID_TYPE hairid = static_cast<ITEMID_TYPE>(readInt16());
+	ITEMID_TYPE hairid = (ITEMID_TYPE)(readInt16());
 	skip(6);
 	HUE_TYPE shirthue = (HUE_TYPE)(readInt16());
-	ITEMID_TYPE shirtid = static_cast<ITEMID_TYPE>(readInt16());
+	ITEMID_TYPE shirtid = (ITEMID_TYPE)(readInt16());
 	skip(1);
 	HUE_TYPE facehue = (HUE_TYPE)(readInt16());
-	ITEMID_TYPE faceid = static_cast<ITEMID_TYPE>(readInt16());
+	ITEMID_TYPE faceid = (ITEMID_TYPE)(readInt16());
 	skip(1);
 	HUE_TYPE beardhue = (HUE_TYPE)(readInt16());
-	ITEMID_TYPE beardid = static_cast<ITEMID_TYPE>(readInt16());
+	ITEMID_TYPE beardid = (ITEMID_TYPE)(readInt16());
 
 	// This creation packet does not contain skills and values if
 	// a profession is selected, so here we must translate the selected profession -> skills
@@ -2193,7 +2193,7 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 				if (pFace)
 					pFace->Delete();
 
-				pFace = CItem::CreateBase(static_cast<ITEMID_TYPE>(button));
+				pFace = CItem::CreateBase((ITEMID_TYPE)(button));
 				if (pFace)
 				{
 					pFace->SetHue(character->GetHue());
@@ -3015,7 +3015,7 @@ bool PacketSpellSelect::onReceive(NetState* net)
 		return false;
 
 	skip(2); // unknown
-	SPELL_TYPE spell = static_cast<SPELL_TYPE>(readInt16());
+	SPELL_TYPE spell = (SPELL_TYPE)(readInt16());
 	if (!spell)
 		 return false;
 
@@ -3624,7 +3624,7 @@ bool PacketHouseDesignDestroyItem::onReceive(NetState* net)
 		return true;
 
 	skip(1); // 0x00
-	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(readInt32());
+	ITEMID_TYPE id = (ITEMID_TYPE)(readInt32());
 	skip(1); // 0x00
 	word x = (word)(readInt32());
 	skip(1); // 0x00
@@ -3660,7 +3660,7 @@ bool PacketHouseDesignPlaceItem::onReceive(NetState* net)
 		return true;
 
 	skip(1); // 0x00
-	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(readInt32());
+	ITEMID_TYPE id = (ITEMID_TYPE)(readInt32());
 	skip(1); // 0x00
 	word x = (word)(readInt32());
 	skip(1); // 0x00
@@ -3721,7 +3721,7 @@ bool PacketHouseDesignPlaceStair::onReceive(NetState* net)
 		return true;
 
 	skip(1); // 0x00
-	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(readInt32() + ITEMID_MULTI);
+	ITEMID_TYPE id = (ITEMID_TYPE)(readInt32() + ITEMID_MULTI);
 	skip(1); // 0x00
 	word x = (word)(readInt32());
 	skip(1); // 0x00
@@ -3839,7 +3839,7 @@ bool PacketHouseDesignPlaceRoof::onReceive(NetState* net)
 		return true;
 
 	skip(1); // 0x00
-	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(readInt32());
+	ITEMID_TYPE id = (ITEMID_TYPE)(readInt32());
 	skip(1); // 0x00
 	word x = (word)(readInt32());
 	skip(1); // 0x00
@@ -3875,7 +3875,7 @@ bool PacketHouseDesignDestroyRoof::onReceive(NetState* net)
 		return true;
 
 	skip(1); // 0x00
-	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(readInt32());
+	ITEMID_TYPE id = (ITEMID_TYPE)(readInt32());
 	skip(1); // 0x00
 	word x = (word)(readInt32());
 	skip(1); // 0x00
@@ -4448,9 +4448,9 @@ bool PacketCreate70016::onReceive(NetState* net)
 	skill4 = static_cast<SKILL_TYPE>(readByte());
 	skillval4 = readByte();
 	HUE_TYPE hue = (HUE_TYPE)(readInt16());
-	ITEMID_TYPE hairid = static_cast<ITEMID_TYPE>(readInt16());
+	ITEMID_TYPE hairid = (ITEMID_TYPE)(readInt16());
 	HUE_TYPE hairhue = (HUE_TYPE)(readInt16());
-	ITEMID_TYPE beardid = static_cast<ITEMID_TYPE>(readInt16());
+	ITEMID_TYPE beardid = (ITEMID_TYPE)(readInt16());
 	HUE_TYPE beardhue = (HUE_TYPE)(readInt16());
 	skip(1); // shard index
 	byte startloc = readByte();

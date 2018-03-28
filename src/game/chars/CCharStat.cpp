@@ -435,7 +435,7 @@ ushort CChar::Stats_GetRegenVal(STAT_TYPE iStat, bool bGetTicks)
 		if ( bGetTicks )
 		{
 			sprintf(sRegen, "REGEN%s", stat);
-			ushort iRate = (ushort)( GetDefNum(sRegen, true) ) * TICK_PER_SEC;
+			ushort iRate = (ushort)GetDefNum(sRegen, true) * TICK_PER_SEC;
 			if ( iRate )
 				return iRate; //maximum(0, iRate);
 
@@ -444,7 +444,8 @@ ushort CChar::Stats_GetRegenVal(STAT_TYPE iStat, bool bGetTicks)
 		else
 		{
 			sprintf(sRegen, "REGENVAL%s", stat);
-			return (ushort)(maximum(1, GetDefNum(sRegen, true)));
+			ushort iRate = (ushort)GetDefNum(sRegen, true);
+			return maximum(1, iRate);
 		}
 	}
 	return 0;

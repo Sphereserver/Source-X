@@ -1352,7 +1352,7 @@ size_t CResourceQty::WriteNameSingle( tchar * pszArgs, int iQty ) const
 	ADDTOCALLSTACK("CResourceQty::WriteNameSingle");
 	if ( GetResType() == RES_ITEMDEF )
 	{
-		const CItemBase * pItemBase = CItemBase::FindItemBase(static_cast<ITEMID_TYPE>(m_rid.GetResIndex()));
+		const CItemBase * pItemBase = CItemBase::FindItemBase((ITEMID_TYPE)(m_rid.GetResIndex()));
 		//DEBUG_ERR(("pItemBase 0x%x  m_rid 0%x  m_rid.GetResIndex() 0%x\n",pItemBase,m_rid,m_rid.GetResIndex()));
 		if ( pItemBase )
 			return( strcpylen( pszArgs, pItemBase->GetNamePluralize(pItemBase->GetTypeName(),(( iQty > 1 ) ? true : false))) );

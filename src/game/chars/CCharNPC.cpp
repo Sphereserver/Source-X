@@ -127,7 +127,7 @@ bool CCharNPC::r_LoadVal( CChar * pChar, CScript &s )
 			if (count < 1)
 				return false;
 			for (size_t i = 0; i < count; i++)
-				Spells_Add(static_cast<SPELL_TYPE>(ppCmd[i]));
+				Spells_Add((SPELL_TYPE)(ppCmd[i]));
 		}
 
 		default:

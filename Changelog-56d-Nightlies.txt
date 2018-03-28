@@ -509,3 +509,4 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Changed: added upper limit (65535) to the .ini setting ItemsMaxAmount.
 - Fixed: GOLD, NEWGOLD ignoring the ItemsMaxAmount .ini setting.
 - Fixed: duped char not inheriting the brain.
+- Fixed: new characters receiving the newbie sets of starting items for another race.

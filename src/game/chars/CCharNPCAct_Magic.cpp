@@ -125,7 +125,7 @@ void CChar::NPC_AddSpellsFromBook(CItem * pBook)
 
 	for ( uint i = min; i <= max; ++i )
 	{
-		SPELL_TYPE spell = static_cast<SPELL_TYPE>(i);
+		SPELL_TYPE spell = (SPELL_TYPE)i;
 		if ( pBook->IsSpellInBook(spell) )
 			m_pNPC->Spells_Add(spell);
 	}
@@ -189,7 +189,7 @@ bool CChar::NPC_FightMagery(CChar * pChar)
 
 	if (iRandSpell > iSpellCount)	// if iRandSpell > iSpellCount then we've got the roll pointing to use the wand's spell.
 	{
-		SPELL_TYPE spell = static_cast<SPELL_TYPE>(pWand->m_itWeapon.m_spell);
+		SPELL_TYPE spell = (SPELL_TYPE)(pWand->m_itWeapon.m_spell);
 		const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
 		if (!pSpellDef)	// wand check failed ... we go on melee, next cast try might select another type of spell :)
 			return false;

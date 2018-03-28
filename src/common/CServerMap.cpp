@@ -101,7 +101,7 @@ lpctstr CServerMapBlockState::GetTileName( dword dwID )	// static
 	else
 	{
 		dwID -= TERRAIN_QTY;
-		CUOItemInfo item(static_cast<ITEMID_TYPE>(dwID));
+		CUOItemInfo item((ITEMID_TYPE)(dwID));
 		strcpy( pStr, item.m_name );
 	}
 	return pStr;
@@ -406,7 +406,7 @@ void CServerStaticsBlock::LoadStatics( dword ulBlockIndex, int map )
 		if ((index.GetBlockLength() % sizeof(CUOStaticItemRec)) != 0)
 		{
 			tchar *pszTemp = Str_GetTemp();
-			sprintf(pszTemp, "CGrapMapBlock: Read Statics - Block Length of %u", index.GetBlockLength());
+			sprintf(pszTemp, "CServerStaticsBlock: Read Statics - Block Length of %u", index.GetBlockLength());
 			throw CSError(LOGL_CRIT, CSFile::GetLastError(), pszTemp);
 		}
 		m_iStatics = index.GetBlockLength()/sizeof(CUOStaticItemRec);
@@ -450,11 +450,6 @@ CServerStaticsBlock::~CServerStaticsBlock()
 		delete[] m_pStatics;
 }
 
-size_t CServerStaticsBlock::GetStaticQty() const
-{
-	return( m_iStatics );
-}
-
 const CUOStaticItemRec * CServerStaticsBlock::GetStatic( size_t i ) const
 {
 	ASSERT( i < m_iStatics );
@@ -463,7 +458,7 @@ const CUOStaticItemRec * CServerStaticsBlock::GetStatic( size_t i ) const
 
 bool CServerStaticsBlock::IsStaticPoint( size_t i, int xo, int yo ) const
 {
-	ADDTOCALLSTACK("CServerStaticsBlock::IsStaticPoint");
+	//ADDTOCALLSTACK("CServerStaticsBlock::IsStaticPoint");		// this function is called very frequently, so it's better to avoid the cpu cost of ADDCALLTOSTACK
 	ASSERT( xo >= 0 && xo < UO_BLOCK_SIZE );
 	ASSERT( yo >= 0 && yo < UO_BLOCK_SIZE );
 	ASSERT( i < m_iStatics );
@@ -726,7 +721,7 @@ CServerMapDiffCollection::CServerMapDiffCollection()
 CServerMapDiffCollection::~CServerMapDiffCollection()
 {
 	// Remove all of the loaded dif data
-	for ( uint m = 0; m < 256; m++ )
+	for ( uint m = 0; m < 256; ++m )
 	{
 		while ( m_pMapDiffBlocks[m].GetCount() > 0 )
 		{

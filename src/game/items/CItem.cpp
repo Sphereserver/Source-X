@@ -155,7 +155,7 @@ CItem * CItem::CreateBase( ITEMID_TYPE id )	// static
 	if ( pItemDef == NULL )
 	{
 		idErrorMsg = id;
-		id = static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, "DEFAULTITEM" ));
+		id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, "DEFAULTITEM" ));
 		if ( id <= 0 )
 
 			id = ITEMID_GOLD_C1;
@@ -365,7 +365,7 @@ CItem * CItem::CreateHeader( tchar * pArg, CObjBase * pCont, bool fDupeCheck, CC
 	if ( amount == 0 )
 		return NULL;
 
-	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(rid.GetResIndex());
+	ITEMID_TYPE id = (ITEMID_TYPE)(rid.GetResIndex());
 
 	if ( fDupeCheck && rid.GetResType() == RES_ITEMDEF && pCont )
 	{
@@ -1296,7 +1296,7 @@ SOUND_TYPE CItem::GetDropSound( const CObjBase * pObjOn ) const
 	if ( pVar )
 	{
 		if ( pVar->GetValNum() )
-			iSnd = static_cast<SOUND_TYPE>(pVar->GetValNum());
+			iSnd = (SOUND_TYPE)(pVar->GetValNum());
 	}
 
 	// normal drop sound for what dropped in/on.
@@ -1444,7 +1444,7 @@ lpctstr CItem::GetName() const
 			{
 				if ( RES_GET_INDEX(m_itPotion.m_Type) != SPELL_Explosion )
 				{
-					const CSpellDef * pSpell = g_Cfg.GetSpellDef(static_cast<SPELL_TYPE>(m_itSpell.m_spell));
+					const CSpellDef * pSpell = g_Cfg.GetSpellDef((SPELL_TYPE)(m_itSpell.m_spell));
 					if (pSpell != NULL)
 						pszNameBase	= pSpell->GetName();
 				}
@@ -1586,7 +1586,7 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 
 	if ( fIdentified && IsAttr(ATTR_MAGIC) && IsTypeArmorWeapon())	// wand is also a weapon.
 	{
-		SPELL_TYPE spell = static_cast<SPELL_TYPE>(RES_GET_INDEX(m_itWeapon.m_spell));
+		SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(m_itWeapon.m_spell));
 		if ( spell )
 		{
 			const CSpellDef * pSpellDef = g_Cfg.GetSpellDef( spell );
@@ -1606,7 +1606,7 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 		case IT_LOOM:
 			if ( m_itLoom.m_ClothQty )
 			{
-				ITEMID_TYPE AmmoID = static_cast<ITEMID_TYPE>(RES_GET_INDEX(m_itLoom.m_ClothID));
+				ITEMID_TYPE AmmoID = (ITEMID_TYPE)(RES_GET_INDEX(m_itLoom.m_ClothID));
 				const CItemBase * pAmmoDef = CItemBase::FindItemBase(AmmoID);
 				if ( pAmmoDef )
 				{
@@ -1618,7 +1618,7 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 		case IT_ARCHERY_BUTTE:
 			if ( m_itArcheryButte.m_AmmoCount )
 			{
-				ITEMID_TYPE AmmoID = static_cast<ITEMID_TYPE>(RES_GET_INDEX(m_itArcheryButte.m_AmmoType));
+				ITEMID_TYPE AmmoID = (ITEMID_TYPE)(RES_GET_INDEX(m_itArcheryButte.m_AmmoType));
 				const CItemBase * pAmmoDef = CItemBase::FindItemBase(AmmoID);
 				if ( pAmmoDef )
 				{
@@ -1710,7 +1710,7 @@ int CItem::GetWeight(word amount) const
 	CVarDefCont * pReduction = GetDefKey("WEIGHTREDUCTION", true);
 	if (pReduction)
 	{
-		iWeight -= (int)MulDivLL( iWeight, pReduction->GetValNum(), 100 );
+		iWeight -= (int)IMulDivLL( iWeight, pReduction->GetValNum(), 100 );
 		if ( iWeight < 0)
 			iWeight = 0;
 	}
@@ -1738,8 +1738,8 @@ height_t CItem::GetHeight() const
 	if ( tmpHeight ) //set by a defname ([DEFNAME charheight]  height_10)
 		return tmpHeight;
 
-	const CItemBase * pItemDef = CItemBase::FindItemBase(static_cast<ITEMID_TYPE>(GetDispID()));
-	const CItemBaseDupe * pDupeDef = CItemBaseDupe::GetDupeRef(static_cast<ITEMID_TYPE>(GetDispID()));
+	const CItemBase * pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(GetDispID()));
+	const CItemBaseDupe * pDupeDef = CItemBaseDupe::GetDupeRef((ITEMID_TYPE)(GetDispID()));
 	if (pItemDef != NULL)
 	{
 		tmpHeight = (pDupeDef ? pDupeDef->GetHeight() : pItemDef->GetHeight());
@@ -1872,7 +1872,7 @@ bool CItem::SetDispID( ITEMID_TYPE id )
 		const CItemBase * pItemDef = Item_GetDef();
 		ASSERT(pItemDef);
 		m_dwDispIndex = pItemDef->GetDispID();
-		ASSERT( CItemBase::IsValidDispID(static_cast<ITEMID_TYPE>(m_dwDispIndex)));
+		ASSERT( CItemBase::IsValidDispID((ITEMID_TYPE)(m_dwDispIndex)));
 	}
 	return true;
 }
@@ -2346,7 +2346,7 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		case IC_ADDSPELL:
 			pszKey	+= 8;
 			SKIP_SEPARATORS( pszKey );
-			sVal.FormatVal( IsSpellInBook(static_cast<SPELL_TYPE>(g_Cfg.ResourceGetIndexType( RES_SPELL, pszKey ))));
+			sVal.FormatVal( IsSpellInBook((SPELL_TYPE)(g_Cfg.ResourceGetIndexType( RES_SPELL, pszKey ))));
 			break;
 		case IC_AMOUNT:
 			sVal.FormatVal( GetAmount());
@@ -2779,7 +2779,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				for ( addCircle = ATOI(ppVal[0]); addCircle; --addCircle )
 				{
 					for ( int i = 1; i < 9; ++i )
-						AddSpellbookSpell(static_cast<SPELL_TYPE>(RES_GET_INDEX(((addCircle - 1) * 8) + i)), false);
+						AddSpellbookSpell((SPELL_TYPE)(RES_GET_INDEX(((addCircle - 1) * 8) + i)), false);
 
 					if ( includeLower == false )
 						break;
@@ -2789,7 +2789,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 		case IC_ADDSPELL:
 			// Add this spell to the i_spellbook.
 			{
-				SPELL_TYPE spell = static_cast<SPELL_TYPE>(RES_GET_INDEX(s.GetArgVal()));
+				SPELL_TYPE spell = (SPELL_TYPE)(RES_GET_INDEX(s.GetArgVal()));
 				if (AddSpellbookSpell(spell, false))
 					return false;
 				return true;
@@ -2864,7 +2864,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			}
 		case IC_DISPID:
 		case IC_DISPIDDEC:
-			return SetDispID(static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr())));
+			return SetDispID((ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr())));
 		case IC_HITS:
 			{
 				int maxHits = HIWORD(m_itNormal.m_more1);
@@ -2923,7 +2923,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			return true;
 
 		case IC_FRUIT:	// m_more2
-			m_itCrop.m_ReapFruitID = static_cast<ITEMID_TYPE>(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
+			m_itCrop.m_ReapFruitID = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
 			return true;
 		case IC_MAXHITS:
 			m_itNormal.m_more1 = MAKEDWORD(LOWORD(m_itNormal.m_more1), s.GetArgVal());
@@ -3756,7 +3756,7 @@ void CItem::ConvertBolttoCloth()
 	// We need to check all cloth_bolt items
 	bool correctID = false;
 	for (int i = (int)(ITEMID_CLOTH_BOLT1); i <= (int)(ITEMID_CLOTH_BOLT8); i++)
-		if ( IsSameDispID(static_cast<ITEMID_TYPE>(i) ))
+		if ( IsSameDispID((ITEMID_TYPE)i) )
 			correctID = true;
 
 	if ( !correctID )
@@ -3778,7 +3778,7 @@ void CItem::ConvertBolttoCloth()
 		if ( rid.GetResType() != RES_ITEMDEF )
 			continue;
 
-		const CItemBase * pBaseDef = CItemBase::FindItemBase(static_cast<ITEMID_TYPE>(rid.GetResIndex()));
+		const CItemBase * pBaseDef = CItemBase::FindItemBase((ITEMID_TYPE)(rid.GetResIndex()));
 		if ( pBaseDef == NULL )
 			continue;
 
@@ -3842,11 +3842,11 @@ SPELL_TYPE CItem::GetScrollSpell() const
 	// Given a scroll type. what spell is this ?
 	for (size_t i = SPELL_Clumsy; i < g_Cfg.m_SpellDefs.GetCount(); i++)
 	{
-		const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(static_cast<SPELL_TYPE>(i));
+		const CSpellDef * pSpellDef = g_Cfg.GetSpellDef((SPELL_TYPE)i);
 		if ( pSpellDef == NULL || pSpellDef->m_idScroll == ITEMID_NOTHING )
 			continue;
 		if ( GetID() == pSpellDef->m_idScroll )
-			return static_cast<SPELL_TYPE>(i);
+			return (SPELL_TYPE)i;
 	}
 	return( SPELL_NONE );
 }
@@ -3889,7 +3889,7 @@ int CItem::GetSpellcountInBook() const
 	int count = 0;
 	for ( uint i = min; i <= max; ++i )
 	{
-		if ( IsSpellInBook(static_cast<SPELL_TYPE>(i)) )
+		if ( IsSpellInBook((SPELL_TYPE)i) )
 			++count;
 	}
 
@@ -4019,7 +4019,7 @@ void CItem::Flip()
 		ITEMID_TYPE id = GetDispID();
 		int doordir = CItemBase::IsID_Door( id )-1;
 		int iNewID = (id - doordir) + (( doordir &~DOOR_OPENED ) + 2 ) % 16; // next closed door type.
-		SetDispID(static_cast<ITEMID_TYPE>(iNewID));
+		SetDispID((ITEMID_TYPE)iNewID);
 		Update();
 		return;
 	}
@@ -4063,13 +4063,13 @@ bool CItem::Use_Portculis()
 
 	SOUND_TYPE iSnd = 0x21d;
 	if (GetDefNum("PORTCULISSOUND"))
-		iSnd = static_cast<SOUND_TYPE>(GetDefNum("PORTCULISSOUND"));
+		iSnd = (SOUND_TYPE)(GetDefNum("PORTCULISSOUND"));
 	/*CVarDefCont * pTagStorage = NULL;
 	pTagStorage = GetKey("OVERRIDE.PORTCULISSOUND", true);
 	if ( pTagStorage )
 	{
 		if ( pTagStorage->GetValNum() )
-			iSnd = static_cast<SOUND_TYPE>(pTagStorage->GetValNum());
+			iSnd = (SOUND_TYPE)(pTagStorage->GetValNum());
 		else
 			iSnd = 0x21d;
 	} else
@@ -4084,7 +4084,7 @@ SOUND_TYPE CItem::Use_Music( bool fWell ) const
 {
 	ADDTOCALLSTACK("CItem::Use_Music");
 	const CItemBase * pItemDef = Item_GetDef();
-	return static_cast<SOUND_TYPE>(fWell ? ( pItemDef->m_ttMusical.m_iSoundGood ) : ( pItemDef->m_ttMusical.m_iSoundBad ));
+	return (SOUND_TYPE)(fWell ? ( pItemDef->m_ttMusical.m_iSoundGood ) : ( pItemDef->m_ttMusical.m_iSoundBad ));
 }
 
 bool CItem::IsDoorOpen() const
@@ -4107,7 +4107,8 @@ bool CItem::Use_DoorNew( bool bJustOpen )
 	CItemBase * pItemDef = Item_GetDef();
 
 	//default or override ID
-	ITEMID_TYPE idSwitch = GetDefNum("DOOROPENID") ? static_cast<ITEMID_TYPE>(GetDefNum("DOOROPENID", true)) : pItemDef->m_ttDoor.m_idSwitch;
+	int64 idOverride = GetDefNum("DOOROPENID");
+	ITEMID_TYPE idSwitch = idOverride ? (ITEMID_TYPE)idOverride : pItemDef->m_ttDoor.m_idSwitch;
 	if (!idSwitch)
 		return Use_Door(bJustOpen);
 
@@ -4121,10 +4122,12 @@ bool CItem::Use_DoorNew( bool bJustOpen )
 	SOUND_TYPE iOpenSnd = pItemDef->m_ttDoor.m_iSoundOpen ? pItemDef->m_ttDoor.m_iSoundOpen : 0x00ea;
 
 	//override sounds
-	if (GetDefNum("DOORCLOSESOUND"))
-		iCloseSnd = static_cast<SOUND_TYPE>(GetDefNum("DOORCLOSESOUND"));
-	if (GetDefNum("DOOROPENSOUND"))
-		iOpenSnd = static_cast<SOUND_TYPE>(GetDefNum("DOOROPENSOUND"));
+	int64 sndCloseOverride = GetDefNum("DOORCLOSESOUND");
+	if (sndCloseOverride)
+		iCloseSnd = (SOUND_TYPE)sndCloseOverride;
+	int64 sndOpenOverride = GetDefNum("DOOROPENSOUND");
+	if (sndOpenOverride)
+		iOpenSnd = (SOUND_TYPE)sndOpenOverride;
 
 	CPointMap pt = GetTopPoint();
 	if (bClosing)
@@ -4161,7 +4164,7 @@ bool CItem::Use_Door( bool fJustOpen )
 	if ( doordir < 0 || ! IsTopLevel())
 		return false;
 
-	id = static_cast<ITEMID_TYPE>(id - doordir);
+	id = (ITEMID_TYPE)(id - doordir);
 	// IT_TYPE typelock = m_type;
 
 	bool fClosing = ( doordir & DOOR_OPENED );	// currently open
@@ -4245,7 +4248,7 @@ bool CItem::Use_Door( bool fJustOpen )
 			break;
 	}
 
-	SetDispID(static_cast<ITEMID_TYPE>(id + doordir));
+	SetDispID((ITEMID_TYPE)(id + doordir));
 	// SetType( typelock );	// preserve the fact that it was locked.
 	MoveToUpdate(pt);
 
@@ -4277,18 +4280,20 @@ bool CItem::Use_Door( bool fJustOpen )
 	}
 
 	//override sounds
-	if (GetDefNum("DOORCLOSESOUND"))
-		iCloseSnd = static_cast<SOUND_TYPE>(GetDefNum("DOORCLOSESOUND"));
-	if (GetDefNum("DOOROPENSOUND"))
-		iOpenSnd = static_cast<SOUND_TYPE>(GetDefNum("DOOROPENSOUND"));
+	int64 sndCloseOverride = GetDefNum("DOORCLOSESOUND");
+	if (sndCloseOverride)
+		iCloseSnd = (SOUND_TYPE)sndCloseOverride;
+	int64 sndOpenOverride = GetDefNum("DOOROPENSOUND");
+	if (sndOpenOverride)
+		iOpenSnd = (SOUND_TYPE)sndOpenOverride;
 
 	/*pTagStorage = GetKey("OVERRIDE.DOORSOUND_CLOSE", true);
 	if ( pTagStorage )
-		iCloseSnd = static_cast<SOUND_TYPE>(pTagStorage->GetValNum());
+		iCloseSnd = (SOUND_TYPE)(pTagStorage->GetValNum());
 	pTagStorage = NULL;
 	pTagStorage = GetKey("OVERRIDE.DOORSOUND_OPEN", true);
 	if ( pTagStorage )
-		iOpenSnd = static_cast<SOUND_TYPE>(pTagStorage->GetValNum());*/
+		iOpenSnd = (SOUND_TYPE)(pTagStorage->GetValNum());*/
 
 	Sound( fClosing ? iCloseSnd : iOpenSnd );
 
@@ -4353,7 +4358,7 @@ int CItem::Armor_GetDefense() const
 	if ( IsSetOF(OF_ScaleDamageByDurability) && m_itArmor.m_Hits_Max > 0 && m_itArmor.m_Hits_Cur < m_itArmor.m_Hits_Max )
 	{
 		int iRepairPercent = 50 + ((50 * m_itArmor.m_Hits_Cur) / m_itArmor.m_Hits_Max);
-		iVal = (int)MulDivLL( iVal, iRepairPercent, 100 );
+		iVal = (int)IMulDivLL( iVal, iRepairPercent, 100 );
 	}
 	if ( IsAttr(ATTR_MAGIC) )
 		iVal += g_Cfg.GetSpellEffect( SPELL_Enchant, m_itArmor.m_spelllevel );
@@ -4377,7 +4382,7 @@ int CItem::Weapon_GetAttack(bool bGetRange) const
 	if ( IsSetOF(OF_ScaleDamageByDurability) && m_itArmor.m_Hits_Max > 0 && m_itArmor.m_Hits_Cur < m_itArmor.m_Hits_Max )
 	{
 		int iRepairPercent = 50 + ((50 * m_itArmor.m_Hits_Cur) / m_itArmor.m_Hits_Max);
-		iVal = (int)MulDivLL( iVal, iRepairPercent, 100 );
+		iVal = (int)IMulDivLL( iVal, iRepairPercent, 100 );
 	}
 	if ( IsAttr(ATTR_MAGIC) && ! IsType(IT_WAND))
 		iVal += g_Cfg.GetSpellEffect( SPELL_Enchant, m_itArmor.m_spelllevel );
@@ -4651,7 +4656,7 @@ bool CItem::Use_Light()
 	if ( IsType(IT_LIGHT_OUT) && (m_itLight.m_burned || IsItemInContainer()) )
 		return false;
 
-	ITEMID_TYPE id = static_cast<ITEMID_TYPE>(m_TagDefs.GetKeyNum("OVERRIDE_LIGHTID", true));
+	ITEMID_TYPE id = (ITEMID_TYPE)(m_TagDefs.GetKeyNum("OVERRIDE_LIGHTID", true));
 	if ( !id )
 	{
 		id = Item_GetDef()->m_ttLightSource.m_idLight;
@@ -4774,7 +4779,7 @@ void CItem::SetTrapState( IT_TYPE state, ITEMID_TYPE id, int iTimeSec )
 	{
 		id = m_itTrap.m_AnimID;
 		if ( ! id )
-			id = static_cast<ITEMID_TYPE>( GetDispID() + 1 );
+			id = (ITEMID_TYPE)( GetDispID() + 1 );
 	}
 	if ( ! iTimeSec )
 		iTimeSec = 3*TICK_PER_SEC;
@@ -4922,7 +4927,7 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		}
 	}
 
-	spell = static_cast<SPELL_TYPE>(Args.m_iN1);
+	spell = (SPELL_TYPE)(Args.m_iN1);
 	iSkillLevel = (int)(Args.m_iN2);
 	pSpellDef = g_Cfg.GetSpellDef( spell );
 
@@ -5045,8 +5050,8 @@ int CItem::Armor_GetRepairPercent() const
 	ADDTOCALLSTACK("CItem::Armor_GetRepairPercent");
 
 	if ( !m_itArmor.m_Hits_Max || ( m_itArmor.m_Hits_Max < m_itArmor.m_Hits_Cur ))
-		return( 100 );
- 	return( MulDivLL( m_itArmor.m_Hits_Cur, 100, m_itArmor.m_Hits_Max ));
+		return 100;
+ 	return IMulDiv( m_itArmor.m_Hits_Cur, 100, m_itArmor.m_Hits_Max );
 }
 
 lpctstr CItem::Armor_GetRepairDesc() const
@@ -5302,7 +5307,7 @@ bool CItem::IsResourceMatch( CResourceIDBase rid, dword dwArg )
 			return false;
 
 		ITEMID_TYPE itemid = pItemDef->GetID();
-		ITEMID_TYPE index = static_cast<ITEMID_TYPE>(rid.GetResIndex());
+		ITEMID_TYPE index = (ITEMID_TYPE)(rid.GetResIndex());
 
 		switch ( index )
 		{
@@ -5387,7 +5392,7 @@ bool CItem::OnTick()
 				CChar * pSrc = m_uidLink.CharFind();
 				if ( pSrc && pSrc->m_pPlayer )
 				{
-					SetID(static_cast<ITEMID_TYPE>(Calc_GetRandVal2(ITEMID_SKELETON_1, ITEMID_SKELETON_9)));
+					SetID((ITEMID_TYPE)(Calc_GetRandVal2(ITEMID_SKELETON_1, ITEMID_SKELETON_9)));
 					SetHue((HUE_TYPE)(HUE_DEFAULT));
 					SetTimeout((llong)(g_Cfg.m_iDecay_CorpsePlayer));
 					m_itCorpse.m_carved = 1;	// the corpse can't be carved anymore

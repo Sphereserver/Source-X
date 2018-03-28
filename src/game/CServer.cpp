@@ -184,7 +184,7 @@ ssize_t CServer::PrintPercent( ssize_t iCount, ssize_t iTotal )
 	if ( iTotal <= 0 )
 		return 100;
 
-	int iPercent = MulDiv( iCount, 100, iTotal );
+	int iPercent = (int)IMulDivLL( iCount, 100, iTotal );
 	tchar *pszTemp = Str_GetTemp();
 	sprintf(pszTemp, "%d%%", iPercent);
 	size_t len = strlen(pszTemp);

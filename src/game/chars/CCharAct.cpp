@@ -1810,8 +1810,9 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 	// Do stack dropping if items are stacked
 	if (( trigger == ITRIG_PICKUP_GROUND ) && IsSetEF( EF_ItemStackDrop ))
 	{
-		char iItemHeight = maximum(pItem->GetHeight(), 1);
-		char	iStackMaxZ = GetTopZ() + 16;
+		char iItemHeight = pItem->GetHeight();
+		iItemHeight = maximum(iItemHeight, 1);
+		char iStackMaxZ = GetTopZ() + 16;
 		CItem * pStack = NULL;
 		CPointMap ptNewPlace = pItem->GetTopPoint();
 		CWorldSearch AreaItems(ptNewPlace);
@@ -1928,7 +1929,8 @@ bool CChar::ItemDrop( CItem * pItem, const CPointMap & pt )
 
 	if ( IsSetEF( EF_ItemStacking ) )
 	{
-		CServerMapBlockState block( CAN_C_WALK, pt.m_z, pt.m_z, pt.m_z, maximum(pItem->GetHeight(), 1) );
+		char iItemHeight = pItem->GetHeight();
+		CServerMapBlockState block( CAN_C_WALK, pt.m_z, pt.m_z, pt.m_z, maximum(iItemHeight,1) );
 		//g_World.GetHeightPoint( pt, block, true );
 		//DEBUG_ERR(("Drop: %d / Min: %d / Max: %d\n", pItem->GetFixZ(pt), block.m_Bottom.m_z, block.m_Top.m_z));
 
@@ -1944,9 +1946,10 @@ bool CChar::ItemDrop( CItem * pItem, const CPointMap & pt )
 			if ( pStack->GetTopZ() < pt.m_z || pStack->GetTopZ() > iStackMaxZ )
 				continue;
 
-			ptStack.m_z += maximum(pStack->GetHeight(), 1);
-			//DEBUG_ERR(("(%d > %d) || (%d > %d)\n", ptStack.m_z, iStackMaxZ, ptStack.m_z + maximum(pItem->GetHeight(), 1), iStackMaxZ + 3));
-			if ( (ptStack.m_z > iStackMaxZ) || (ptStack.m_z + maximum(pItem->GetHeight(), 1) > iStackMaxZ + 3) )
+			char iStackHeight = pStack->GetHeight();
+			ptStack.m_z += maximum(iStackHeight, 1);
+			//DEBUG_ERR(("(%d > %d) || (%d > %d)\n", ptStack.m_z, iStackMaxZ, ptStack.m_z + maximum(iItemHeight, 1), iStackMaxZ + 3));
+			if ( (ptStack.m_z > iStackMaxZ) || (ptStack.m_z + maximum(iItemHeight, 1) > iStackMaxZ + 3) )
 			{
 				ItemBounce( pItem );		// put the item on backpack (or drop it on ground if it's too heavy)
 				return false;
@@ -2041,7 +2044,7 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 	if ( pVar )
 	{
 		if ( pVar->GetValNum() )
-			iSound = static_cast<SOUND_TYPE>(pVar->GetValNum());
+			iSound = (SOUND_TYPE)(pVar->GetValNum());
 	}
 	if ( CItemBase::IsVisibleLayer(layer) )	// visible layer ?
 		Sound(iSound);
@@ -2438,7 +2441,7 @@ bool CChar::Horse_Mount(CChar *pHorse)
 	lpctstr sMemoryID = g_Exp.m_VarDefs.GetKeyStr(sMountID);			// get the mount item defname from the mount_0x** defname
 	
 	CResourceID memoryRid = g_Cfg.ResourceGetID(RES_ITEMDEF, sMemoryID);
-	ITEMID_TYPE memoryId = static_cast<ITEMID_TYPE>(memoryRid.GetResIndex());	// get the ID of the memory (mount item)
+	ITEMID_TYPE memoryId = (ITEMID_TYPE)(memoryRid.GetResIndex());	// get the ID of the memory (mount item)
 	if ( memoryId <= ITEMID_NOTHING )
 		return false;
 
@@ -3274,7 +3277,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 				// tile that got overlapped. But Sphere doesn't use this method, so this workaround is needed.
 				if ( !bSpellHit )
 				{
-					OnSpellEffect(static_cast<SPELL_TYPE>(RES_GET_INDEX(pItem->m_itSpell.m_spell)), pItem->m_uidLink.CharFind(), (int)(pItem->m_itSpell.m_spelllevel), pItem);
+					OnSpellEffect((SPELL_TYPE)(RES_GET_INDEX(pItem->m_itSpell.m_spell)), pItem->m_uidLink.CharFind(), (int)(pItem->m_itSpell.m_spelllevel), pItem);
 					bSpellHit = true;
 					if ( m_pNPC && fStanding )
 					{
