@@ -1,5 +1,6 @@
 
 #include <cmath>
+#include <limits>
 #include "../game/CObjBase.h"
 #include "../game/CServerConfig.h"
 #include "../game/CWorld.h"

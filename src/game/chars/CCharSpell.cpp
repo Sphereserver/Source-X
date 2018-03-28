@@ -2482,21 +2482,15 @@ bool CChar::Spell_CastDone()
 		//Setting new IDs as another variables to pass as different arguments to the field function.
 		it1test = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1", true)));
 		it2test = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject2", true)));
-		//Can't be < 0, so max it to 0
 		fieldWidth = (uint)Args.m_VarsLocal.GetKeyNum("fieldWidth", true);
-		fieldWidth = maximum(0, fieldWidth);
 		fieldGauge = (uint)Args.m_VarsLocal.GetKeyNum("fieldGauge", true);
-		fieldGauge = maximum(0, fieldGauge);
-
 	}
 
 	iC1 = (CREID_TYPE)(Args.m_VarsLocal.GetKeyNum("CreateObject1", true) & 0xFFFF);
 	areaRadius = (uint)Args.m_VarsLocal.GetKeyNum("areaRadius", true);
-	areaRadius = maximum(0, areaRadius);
 	int iDuration = (int)(Args.m_VarsLocal.GetKeyNum("duration", true));
 	iDuration = maximum(0, iDuration);
 	iColor = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("EffectColor", true));
-	iColor = maximum((HUE_TYPE)0, iColor);
 
 	// Consume the reagents/mana/scroll/charge
 	if (!Spell_CanCast(spell, false, pObjSrc, true))
@@ -2715,7 +2709,7 @@ bool CChar::Spell_CastDone()
 				else
 				{
 					// Burn person at location.
-					//pObj->Effect(EFFECT_OBJ, iT1, pObj, 10, 30, false, iColor, iRender);
+					//pObj->Effect(EFFECT_OBJ, iT1, pObj, 10, 30, false, iColor, dwRender);
 					if (!Spell_SimpleEffect(pObj, pObjSrc, spell, iSkillLevel))
 						return false;
 				}
@@ -2879,13 +2873,11 @@ void CChar::Spell_CastFail()
 	}
 
 	HUE_TYPE iColor = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("EffectColor", true));
-	iColor = maximum(0, iColor);
-	dword iRender = (dword)Args.m_VarsLocal.GetKeyNum("EffectRender", true);
-	iRender = maximum(0, iRender);
+	dword dwRender = (dword)Args.m_VarsLocal.GetKeyNum("EffectRender", true);
 
 	iT1 = (ITEMID_TYPE)(RES_GET_INDEX(Args.m_VarsLocal.GetKeyNum("CreateObject1", true)));
 	if (iT1)
-		Effect(EFFECT_OBJ, iT1, this, 1, 30, false, iColor, iRender);
+		Effect(EFFECT_OBJ, iT1, this, 1, 30, false, iColor, dwRender);
 	Sound( SOUND_SPELL_FIZZLE );
 
 	if ( IsClient() )
@@ -3177,9 +3169,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	iDuration = (int)(Args.m_VarsLocal.GetKeyNum("Duration", true));
 
 	HUE_TYPE iColor = (HUE_TYPE)Args.m_VarsLocal.GetKeyNum("EffectColor", true);
-	iColor = maximum(0, iColor);
-	dword iRender = (dword)Args.m_VarsLocal.GetKeyNum("EffectRender", true);
-	iRender = maximum(0, iRender);
+	dword dwRender = (dword)Args.m_VarsLocal.GetKeyNum("EffectRender", true);
 
 	if ( iEffectID > ITEMID_QTY )
 		iEffectID = pSpellDef->m_idEffect;
@@ -3234,9 +3224,9 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		return true;
 
 	if ( pSpellDef->IsSpellType(SPELLFLAG_FX_BOLT) && iEffectID )
-		Effect(EFFECT_BOLT, iEffectID, pCharSrc, 5, 1, fExplode, iColor, iRender);
+		Effect(EFFECT_BOLT, iEffectID, pCharSrc, 5, 1, fExplode, iColor, dwRender);
 	if ( pSpellDef->IsSpellType(SPELLFLAG_FX_TARG) && iEffectID )
-		Effect(EFFECT_OBJ, iEffectID, this, 0, 15, fExplode, iColor, iRender); // 9, 14
+		Effect(EFFECT_OBJ, iEffectID, this, 0, 15, fExplode, iColor, dwRender); // 9, 14
 	if ( iSound )
 		Sound(iSound);
 
@@ -3361,7 +3351,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		case SPELL_Reveal:
 			if ( ! Reveal())
 				break;
-			Effect(EFFECT_OBJ, iEffectID, this, 0, 15, fExplode, iColor, iRender);
+			Effect(EFFECT_OBJ, iEffectID, this, 0, 15, fExplode, iColor, dwRender);
 			break;
 
 		case SPELL_Invis:
@@ -3405,7 +3395,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		break;
 
 		case SPELL_Meteor_Swarm:
-			Effect(EFFECT_BOLT, iEffectID, pCharSrc, 9, 6, fExplode, iColor, iRender);
+			Effect(EFFECT_BOLT, iEffectID, pCharSrc, 9, 6, fExplode, iColor, dwRender);
 			break;
 
 		case SPELL_Lightning:
@@ -3418,7 +3408,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			return Spell_Resurrection(NULL, pCharSrc, (pSourceItem && pSourceItem->IsType(IT_SHRINE)));
 
 		case SPELL_Light:
-			Effect(EFFECT_OBJ, iEffectID, this, 9, 6, fExplode, iColor, iRender);
+			Effect(EFFECT_OBJ, iEffectID, this, 9, 6, fExplode, iColor, dwRender);
 			Spell_Effect_Create( spell, LAYER_FLAG_Potion, iEffect, iDuration, pCharSrc );
 			break;
 
