@@ -154,6 +154,7 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
 
 	if (objectChar && (objectChar == character))
 	{
+		// Send real (not percentual) hitpoints if these infos regard myself
 		writeInt16((word)(objectChar->Stat_GetVal(STAT_STR)));
 		writeInt16((word)(objectChar->Stat_GetMax(STAT_STR)));
 		writeBool(canRename);
@@ -175,10 +176,11 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
 				writeInt16((word)((objectItem->m_itArmor.m_Hits_Cur * 100) / maximum(objectItem->m_itArmor.m_Hits_Max, 1)));
 		}
 
+		// Send percentual hitpoints
 		writeInt16(100);		// Max hit points
 		writeBool(canRename);
 		writeByte(version);
-		if (target->GetNetState()->isClientEnhanced() && objectChar->IsPlayableCharacter())
+		if (target->GetNetState()->isClientEnhanced() && objectChar && objectChar->IsPlayableCharacter())
 			// The Enhanced Client wants the char race and other things when showing paperdolls (otherwise the interface throws an "unnoticeable" internal error)
 			WriteVersionSpecific(target, objectChar, version);
 	}
@@ -1137,10 +1139,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 		item != NULL && m_count < MAX_ITEMS_CONT;
 		item = (target->GetNetState()->isClientEnhanced() ? item->GetPrev() : item->GetNext()) )
 	{
-		const CItemBase* itemDefinition = item->Item_GetDef();
-		ITEMID_TYPE id = item->GetDispID();
 		word wAmount = item->GetAmount();
-		HUE_TYPE hue = item->GetHue() & HUE_MASK_HI;
 		CPointMap pos = item->GetContainedPoint();
 
 		if ( boIsShop )
@@ -1159,6 +1158,10 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 				continue;
 		}
 
+		const CItemBase* itemDefinition = item->Item_GetDef();
+		ITEMID_TYPE id = item->GetDispID();
+		HUE_TYPE hue = item->GetHue() & HUE_MASK_HI;
+
 		if ( boFilterLayers )
 		{
 			LAYER_TYPE layer = static_cast<LAYER_TYPE>(item->GetContainedLayer());
@@ -1166,7 +1169,6 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 			switch ( layer )	// don't put these on a corpse.
 			{
 				case LAYER_NONE:
-				case LAYER_FACE:
 				case LAYER_PACK: // these display strange.
 					continue;
 
@@ -1213,7 +1215,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 	seek(3);
 	writeInt16(m_count);
 	seek(l);
-	
+
 	push(target);
 
 	if (m_count > 0)

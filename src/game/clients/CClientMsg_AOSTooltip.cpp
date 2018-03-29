@@ -33,7 +33,7 @@ void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
 	// Shop items use tooltips whether they're disabled or not,
 	//  so we can just send a basic tooltip with the item name
 	bool bNameOnly = false;
-	if ( !(IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) && IsResClient(RDS_AOS)) /* && !GetNetState()->isClientKR() && !GetNetState()->isClientEnhanced() */ )
+	if (!IsResClient(RDS_AOS) || !IsAosFlagEnabled(FEATURE_AOS_UPDATE_B))
 	{
 		if (!bShop)
 			return;
@@ -44,7 +44,7 @@ void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
 	// we do not need to send tooltips for items not in LOS (multis/ships)
 	//DEBUG_MSG(("(( m_pChar->GetTopPoint().GetDistSight(pObj->GetTopPoint()) (%x) > UO_MAP_VIEW_SIZE_DEFAULT (%x) ) && ( !bShop ) (%x) )", m_pChar->GetTopPoint().GetDistSight(pObj->GetTopPoint()), UO_MAP_VIEW_SIZE_DEFAULT, ( !bShop )));
 	int iDist = m_pChar->GetTopPoint().GetDistSight(pObj->GetTopPoint());
-	if ( (iDist > m_pChar->GetVisualRange()) && !bShop )
+	if ( (iDist > m_pChar->GetVisualRange()) && (iDist <= UO_MAP_VIEW_RADAR) && !bShop ) //(iDist <= UO_MAP_VIEW_RADAR) is needed because items equipped or in a container have invalid GetTopPoint (and a very high iDist)
 		return;
 
 	// We check here if we are sending a tooltip for a static/non-movable items
