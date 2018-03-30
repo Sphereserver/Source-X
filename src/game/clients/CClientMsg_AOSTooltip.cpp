@@ -92,7 +92,7 @@ void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
 		{
 			TRIGRET_TYPE iRet = TRIGRET_RET_FALSE;
 
-			if ((IsTrigUsed(TRIGGER_CLIENTTOOLTIP)) || ((IsTrigUsed(TRIGGER_ITEMCLIENTTOOLTIP)) && (pItem)) || ((IsTrigUsed(TRIGGER_CHARCLIENTTOOLTIP)) && (pChar)))
+			if (IsTrigUsed(TRIGGER_CLIENTTOOLTIP) || (pItem && IsTrigUsed(TRIGGER_ITEMCLIENTTOOLTIP)) || (pChar && IsTrigUsed(TRIGGER_CHARCLIENTTOOLTIP)))
 			{
 				CScriptTriggerArgs args(const_cast<CObjBase *>(pObj));
 				args.m_iN1 = bRequested;

@@ -1137,7 +1137,8 @@ bool CChar::NPC_LookAround( bool fForceCheckItems )
 			}
 			if ( NPC_LookAtItem(pItem, iDist) )
 			{
-				SoundChar(CRESND_NOTICE);
+				if (!IsPlayableCharacter())
+					SoundChar(CRESND_NOTICE);
 				return true;
 			}
 		}
