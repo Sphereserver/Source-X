@@ -510,3 +510,6 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Fixed: GOLD, NEWGOLD ignoring the ItemsMaxAmount .ini setting.
 - Fixed: duped char not inheriting the brain.
 - Fixed: new characters receiving the newbie sets of starting items for another race.
+
+31-03-2018, Drk84
+-Fixed:  criminal 0 now removing the criminal memory item.
