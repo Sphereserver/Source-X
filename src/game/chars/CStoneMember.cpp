@@ -433,10 +433,11 @@ lpctstr CStoneMember::GetPrivName() const
 	ADDTOCALLSTACK("CStoneMember::GetPrivName");
 	STONEPRIV_TYPE iPriv = GetPriv();
 
-	TemporaryString sDefname;
-	sprintf(sDefname, "STONECONFIG_PRIVNAME_PRIVID-%d", (int)(iPriv));
+	TemporaryString tsDefname;
+	tchar* pszDefname = static_cast<tchar *>(tsDefname);
+	sprintf(pszDefname, "STONECONFIG_PRIVNAME_PRIVID-%d", (int)iPriv);
 
-	CVarDefCont * pResult = g_Exp.m_VarDefs.GetKey(sDefname);
+	CVarDefCont * pResult = g_Exp.m_VarDefs.GetKey(pszDefname);
 	if (pResult)
 		return pResult->GetValStr();
 	else

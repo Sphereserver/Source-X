@@ -32,13 +32,20 @@ public:
 	uchar m_map;		// another map? (only if top level.)
 
 public:
+	void InitPoint();
+	void ZeroPoint();
+
+	CPointBase()
+	{
+		InitPoint();
+	}
+
 	bool operator == ( const CPointBase & pt ) const;
 	bool operator != ( const CPointBase & pt ) const;
 	const CPointBase operator += ( const CPointBase & pt );
 	const CPointBase operator -= ( const CPointBase & pt );
 
-	void InitPoint();
-	void ZeroPoint();
+	
 	int GetDistZ( const CPointBase & pt ) const;
 	int GetDistZAdj( const CPointBase & pt ) const;
 	int GetDistBase( const CPointBase & pt ) const;			// Distance between points
@@ -90,7 +97,7 @@ public:
 struct CPointMap : public CPointBase
 {
 	// A point in the world (or in a container) (initialized)
-	CPointMap();
+	CPointMap() {};
 	CPointMap( short x, short y, char z = 0, uchar map = 0 );
 	CPointMap & operator = ( const CPointBase & pt );
 	CPointMap( const CPointBase & pt );

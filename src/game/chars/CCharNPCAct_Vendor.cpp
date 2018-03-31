@@ -364,9 +364,10 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 	}
 
 	// Did they mention a skill name i recognize ?
-	TemporaryString pszMsg;
+	TemporaryString tsMsg;
+	tchar* pszMsg = static_cast<tchar *>(tsMsg);
 
-	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; i++ )
+	for ( size_t i = 0; i < g_Cfg.m_iMaxSkill; ++i )
 	{
 		if ( !g_Cfg.m_SkillIndexDefs.IsValidIndex((SKILL_TYPE)i) )
 			continue;
@@ -380,7 +381,7 @@ bool CChar::NPC_OnTrainHear( CChar * pCharSrc, lpctstr pszCmd )
 		if ( iTrainCost <= 0 )
 			return true;
 
-		sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_NPC_TRAINER_PRICE), iTrainCost, static_cast<lpctstr>(pSkillKey));
+		sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_NPC_TRAINER_PRICE), iTrainCost, pSkillKey);
 		Speak(pszMsg);
 		CItemMemory * pMemory = Memory_AddObjTypes( pCharSrc, MEMORY_SPEAK );
 		if ( pMemory )

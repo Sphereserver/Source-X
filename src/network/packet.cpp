@@ -991,7 +991,8 @@ void Packet::dump(AbstractString& output) const
 #	define PROTECT_BYTE(_b_)
 #endif
 
-	TemporaryString z;
+	TemporaryString tsZ;
+	tchar* z = static_cast<tchar *>(tsZ);
 
 	sprintf(z, "Packet len=%" PRIuSIZE_T " id=0x%02x [%s]\n", m_length, m_buffer[0], CSTime::GetCurrentTime().Format(NULL));
 	output.append(z);

@@ -558,8 +558,9 @@ bool CScript::FindSection( lpctstr pszName, uint uModeFlags )
 		return false;
 	}
 
-	TemporaryString pszSec;
-	sprintf(static_cast<tchar *>(pszSec), "[%s]", pszName);
+	TemporaryString tsSec;
+	tchar* pszSec = static_cast<tchar *>(tsSec);
+	sprintf(pszSec, "[%s]", pszName);
 	if ( FindTextHeader(pszSec) )
 	{
 		// Success
@@ -570,9 +571,7 @@ bool CScript::FindSection( lpctstr pszName, uint uModeFlags )
 	// Failure Error display. (default)
 
 	if ( ! ( uModeFlags & OF_NONCRIT ))
-	{
 		g_Log.Event(LOGL_WARN, "Did not find '%s' section '%s'\n", static_cast<lpctstr>(GetFileTitle()), static_cast<lpctstr>(pszName));
-	}
 	return false;
 }
 
@@ -632,7 +631,8 @@ bool CScript::ReadKeyParse() // Read line from script
 	lpctstr	pszArgs	= m_pszArg;
 	pszArgs += 2;
 	GETNONWHITESPACE( pszArgs );
-	TemporaryString buf;
+	TemporaryString tsBuf;
+	tchar* pszBuf = static_cast<tchar *>(tsBuf);
 
 	int iKeyIndex = (strnicmp(m_pszKey, "float.", 6) == 0) ? 1 : 0;
 
@@ -647,25 +647,25 @@ bool CScript::ReadKeyParse() // Read line from script
 				*pQuote	= '\0';
 			}
 		}
-		sprintf(buf, "<%s>%s", m_pszKey, pszArgs);
+		sprintf(pszBuf, "<%s>%s", m_pszKey, pszArgs);
 	}
 	else if ( m_pszArg[0] == m_pszArg[1] && m_pszArg[1] == '+' )
 	{
 		if ( m_pszArg[2] != '\0' )
 			return true;
-		sprintf(buf, "<eval (<%s> +1)>", m_pszKey);
+		sprintf(pszBuf, "<eval (<%s> +1)>", m_pszKey);
 	}
 	else if ( m_pszArg[0] == m_pszArg[1] && m_pszArg[1] == '-' )
 	{
 		if ( m_pszArg[2] != '\0' )
 			return true;
-		sprintf(buf, "<eval (<%s> -1)>", m_pszKey);
+		sprintf(pszBuf, "<eval (<%s> -1)>", m_pszKey);
 	}
 	else
 	{
-		sprintf(buf, "<%s (<%s> %c (%s))>", sm_szEvalTypes[iKeyIndex], m_pszKey, *m_pszArg, pszArgs);
+		sprintf(pszBuf, "<%s (<%s> %c (%s))>", sm_szEvalTypes[iKeyIndex], m_pszKey, *m_pszArg, pszArgs);
 	}
-	strcpy(m_pszArg, buf);
+	strcpy(m_pszArg, pszBuf);
 
 	return true;
 	EXC_CATCH;
@@ -799,10 +799,11 @@ bool CScript::WriteKey( lpctstr pszKey, lpctstr pszVal )
 void _cdecl CScript::WriteKeyFormat( lpctstr pszKey, lpctstr pszVal, ... )
 {
 	ADDTOCALLSTACK_INTENSIVE("CScript::WriteKeyFormat");
-	TemporaryString pszTemp;
+	TemporaryString tsTemp;
+	tchar* pszTemp = static_cast<tchar *>(tsTemp);
 	va_list vargs;
 	va_start( vargs, pszVal );
-	vsnprintf(pszTemp, pszTemp.realLength(), pszVal, vargs);
+	vsnprintf(pszTemp, tsTemp.realLength(), pszVal, vargs);
 	WriteKey(pszKey, pszTemp);
 	va_end( vargs );
 }

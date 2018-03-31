@@ -66,9 +66,10 @@ void CListDefContNum::SetValNum( int64 iVal )
 
 inline lpctstr CListDefContNum::GetValStr() const
 {
-	TemporaryString pszTmp;
-	sprintf(pszTmp, "0%" PRIx64 , m_iVal);
-	return pszTmp;
+	TemporaryString tsTemp;
+	tchar* pszTemp = static_cast<tchar *>(tsTemp);
+	sprintf(pszTemp, "0%" PRIx64 , m_iVal);
+	return pszTemp;
 }
 
 bool CListDefContNum::r_LoadVal( CScript & s )

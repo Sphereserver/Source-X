@@ -246,9 +246,10 @@ void CCharNPC::r_WriteChar( CChar * pChar, CScript & s )
 
 	if ( m_Need.GetResourceID().IsValidUID())
 	{
-		TemporaryString pszTmp;
-		m_Need.WriteKey( pszTmp );
-		s.WriteKey( "NEED", pszTmp );
+		TemporaryString tsTemp;
+		tchar* pszTemp = static_cast<tchar *>(tsTemp);
+		m_Need.WriteKey( pszTemp );
+		s.WriteKey( "NEED", pszTemp );
 	}
 }
 

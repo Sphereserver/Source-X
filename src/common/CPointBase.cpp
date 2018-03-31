@@ -89,7 +89,7 @@ bool CPointBase::operator== ( const CPointBase & pt ) const
 
 bool CPointBase::operator!= ( const CPointBase & pt ) const
 {
-	return( ! ( *this == pt ));
+	return ( ! ( *this == pt ));
 }
 
 const CPointBase CPointBase::operator+= ( const CPointBase & pt )
@@ -284,13 +284,13 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 		if ( *pszKey == '\0' )
 		{
 			int iStaticQty = 0;
-			for ( size_t i = 0; i < pBlock->m_Statics.GetStaticQty(); i++ )
+			for ( size_t i = 0; i < pBlock->m_Statics.GetStaticQty(); ++i )
 			{
 				const CUOStaticItemRec * pStatic = pBlock->m_Statics.GetStatic( i );
 				CPointMap ptTest( pStatic->m_x+pBlock->m_x, pStatic->m_y+pBlock->m_y, pStatic->m_z, this->m_map );
 				if ( this->GetDist( ptTest ) > 0 )
 					continue;
-				iStaticQty++;
+				++iStaticQty;
 			}
 
 			sVal.FormatVal( iStaticQty );
@@ -327,7 +327,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 				sVal.FormatVal( 0 );
 				return false;
 			}
-			for ( size_t i = 0; i < pBlock->m_Statics.GetStaticQty(); pStatic = NULL, i++ )
+			for ( size_t i = 0; i < pBlock->m_Statics.GetStaticQty(); pStatic = NULL, ++i )
 			{
 				pStatic = pBlock->m_Statics.GetStatic( i );
 				CPointMap ptTest( pStatic->m_x+pBlock->m_x, pStatic->m_y+pBlock->m_y, pStatic->m_z, this->m_map);
@@ -339,7 +339,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 		}
 		else
 		{
-			for ( size_t i = 0; i < pBlock->m_Statics.GetStaticQty(); pStatic = NULL, i++ )
+			for ( size_t i = 0; i < pBlock->m_Statics.GetStaticQty(); pStatic = NULL, ++i )
 			{
 				pStatic = pBlock->m_Statics.GetStatic( i );
 				CPointMap ptTest( pStatic->m_x+pBlock->m_x, pStatic->m_y+pBlock->m_y, pStatic->m_z, this->m_map);
@@ -347,7 +347,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 					continue;
 				if ( iStatic == 0 )
 					break;
-				iStatic--;
+				--iStatic;
 			}
 		}
 
@@ -807,17 +807,11 @@ tchar * CPointBase::WriteUsed( tchar * pszBuffer ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CPointBase::WriteUsed");
 	if ( m_map )
-	{
-		sprintf(pszBuffer, "%d,%d,%d,%d", m_x, m_y, m_z, m_map);
-	}
+		sprintf(pszBuffer, "%" PRId16 ",%" PRId16 ",%" PRId8 ",%" PRIu8, m_x, m_y, m_z, m_map);
 	else if ( m_z )
-	{
-		sprintf(pszBuffer, "%d,%d,%d", m_x, m_y, m_z);
-	}
+		sprintf(pszBuffer, "%" PRId16 ",%" PRId16 ",%" PRId8, m_x, m_y, m_z);
 	else
-	{
-		sprintf(pszBuffer, "%d,%d", m_x, m_y);
-	}
+		sprintf(pszBuffer, "%" PRId16 ",%" PRId16, m_x, m_y);
 	return pszBuffer;
 }
 

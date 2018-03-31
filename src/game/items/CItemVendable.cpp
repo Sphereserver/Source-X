@@ -75,7 +75,7 @@ bool CItemVendable::r_LoadVal(CScript &s)
 		m_price = s.GetArgVal();
 		return true;
 	case IVC_QUALITY:	// QUALITY
-		SetQuality( (word)(s.GetArgVal()));
+		SetQuality( s.GetArgWVal());
 		return true;
 	}
 	return CItem::r_LoadVal(s);

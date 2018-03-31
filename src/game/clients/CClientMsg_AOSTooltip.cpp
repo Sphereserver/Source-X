@@ -114,7 +114,7 @@ void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
 					else if ( (pItem->GetAmount() > 1) && (pItem->GetType() != IT_CORPSE) )
 					{
 						m_TooltipData.InsertAt(0, t = new CClientTooltip(1050039)); // ~1_NUMBER~ ~2_ITEMNAME~
-						t->FormatArgs("%" PRIu32 "\t%s", pItem->GetAmount(), pObj->GetName());
+						t->FormatArgs("%" PRIu16 "\t%s", pItem->GetAmount(), pObj->GetName());
 					}
 					else
 					{
@@ -234,7 +234,7 @@ void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
 				pChar->SetPropertyList(propertyList);
 		}
 	}
-
+	
 	if (propertyList->isEmpty() == false)
 	{
 		switch (g_Cfg.m_iTooltipMode)

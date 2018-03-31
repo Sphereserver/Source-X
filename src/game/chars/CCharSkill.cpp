@@ -194,7 +194,8 @@ ushort CChar::Skill_GetMax( SKILL_TYPE skill, bool ignoreLock ) const
 {
 	ADDTOCALLSTACK("CChar::Skill_GetMax");
 	const CVarDefCont * pTagStorage = NULL;
-	TemporaryString sSkillName;
+	TemporaryString tsSkillName;
+	tchar* pszSkillName = static_cast<tchar *>(tsSkillName);
 
 	// What is my max potential in this skill ?
 	if ( m_pPlayer )
@@ -210,9 +211,9 @@ ushort CChar::Skill_GetMax( SKILL_TYPE skill, bool ignoreLock ) const
 
 		ASSERT( IsSkillBase(skill) );
 
-		sprintf(sSkillName, "OVERRIDE.SKILLCAP_%d", (int)skill);
+		sprintf(pszSkillName, "OVERRIDE.SKILLCAP_%d", (int)skill);
 		ushort uiSkillMax;
-		if ( (pTagStorage = GetKey(sSkillName, true)) != NULL )
+		if ( (pTagStorage = GetKey(pszSkillName, true)) != NULL )
 			uiSkillMax = (ushort)(pTagStorage->GetValNum());
 		else
 			uiSkillMax = pSkillClass->m_SkillLevelMax[skill];
@@ -238,8 +239,8 @@ ushort CChar::Skill_GetMax( SKILL_TYPE skill, bool ignoreLock ) const
 		}
 
 		ushort uiSkillMax = 1000;
-		sprintf(sSkillName, "OVERRIDE.SKILLCAP_%d", (int)(skill));
-		if ( (pTagStorage = GetKey(sSkillName, true)) != NULL )
+		sprintf(pszSkillName, "OVERRIDE.SKILLCAP_%d", (int)skill);
+		if ( (pTagStorage = GetKey(pszSkillName, true)) != NULL )
 			uiSkillMax = (ushort)(pTagStorage->GetValNum());
 
 		return uiSkillMax;

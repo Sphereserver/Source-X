@@ -111,7 +111,8 @@ void CItemStone::r_Write( CScript & s )
 	if ( ! m_sAbbrev.IsEmpty())
 		s.WriteKey( "ABBREV", m_sAbbrev );
 
-	TemporaryString pszTemp;
+	TemporaryString tsTemp;
+	tchar* pszTemp = static_cast<tchar *>(tsTemp);
 	for ( uint i = 0; i < CountOf(m_sCharter); ++i )
 	{
 		if ( ! m_sCharter[i].IsEmpty())
@@ -149,15 +150,16 @@ lpctstr CItemStone::GetAlignName() const
 	ADDTOCALLSTACK("CItemStone::GetAlignName");
 	int iAlign = GetAlignType();
 
-	TemporaryString sDefname;
+	TemporaryString tsDefname;
+	tchar* pszDefname = static_cast<tchar *>(tsDefname);
 	if ( GetType() == IT_STONE_GUILD )
-		sprintf(sDefname, "GUILDCONFIG_ALIGN_%d", iAlign);
+		sprintf(pszDefname, "GUILDCONFIG_ALIGN_%d", iAlign);
 	else if ( GetType() == IT_STONE_TOWN )
-		sprintf(sDefname, "TOWNSCONFIG_ALIGN_%d", iAlign);
+		sprintf(pszDefname, "TOWNSCONFIG_ALIGN_%d", iAlign);
 	else
 		return "";
 
-	lpctstr sRes = g_Exp.m_VarDefs.GetKeyStr(sDefname);
+	lpctstr sRes = g_Exp.m_VarDefs.GetKeyStr(pszDefname);
 	return ( sRes == NULL ) ? "" : sRes;
 }
 

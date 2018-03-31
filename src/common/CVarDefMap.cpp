@@ -85,9 +85,10 @@ void CVarDefContNum::SetValNum( int64 iVal )
 
 inline lpctstr CVarDefContNum::GetValStr() const
 {
-	TemporaryString pszTmp;
-	sprintf(pszTmp, "0%" PRIx64 , m_iVal);
-	return pszTmp;
+	TemporaryString tsTemp;
+	tchar* pszTemp = static_cast<tchar *>(tsTemp);
+	sprintf(pszTemp, "0%" PRIx64 , m_iVal);
+	return pszTemp;
 }
 
 bool CVarDefContNum::r_LoadVal( CScript & s )
@@ -725,7 +726,8 @@ bool CVarDefMap::r_LoadVal( CScript & s )
 void CVarDefMap::r_WritePrefix( CScript & s, lpctstr pszPrefix, lpctstr pszKeyExclude )
 {
 	ADDTOCALLSTACK_INTENSIVE("CVarDefMap::r_WritePrefix");
-	TemporaryString z;
+	TemporaryString tsZ;
+	tchar* z = static_cast<tchar *>(tsZ);
 	lpctstr		pszVal;
 	bool bHasPrefix = (pszPrefix && *pszPrefix);
 	bool bHasExclude = (pszKeyExclude && *pszKeyExclude);

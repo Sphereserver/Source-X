@@ -76,7 +76,8 @@ int CEventLog::VEvent( dword dwMask, lpctstr pszFormat, va_list args )
 	if ( pszFormat == NULL || pszFormat[0] == '\0' )
 		return 0;
 
-	TemporaryString pszTemp;
+	TemporaryString tsTemp;
+	tchar* pszTemp = static_cast<tchar *>(tsTemp);
 	size_t len = vsnprintf(pszTemp, (SCRIPT_MAX_LINE_LEN - 1), pszFormat, args);
 	if ( ! len )
 		strncpy(pszTemp, pszFormat, (SCRIPT_MAX_LINE_LEN - 1));

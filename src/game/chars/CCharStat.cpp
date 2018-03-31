@@ -295,7 +295,8 @@ short CChar::Stat_GetLimit( STAT_TYPE i ) const
 {
 	ADDTOCALLSTACK("CChar::Stat_GetLimit");
 	const CVarDefCont * pTagStorage = NULL;
-	TemporaryString sStatName;
+	TemporaryString tsStatName;
+	tchar* pszStatName = static_cast<tchar *>(tsStatName);
 
 	if ( m_pPlayer )
 	{
@@ -308,9 +309,9 @@ short CChar::Stat_GetLimit( STAT_TYPE i ) const
 		}
 		ASSERT( i >= 0 && i < STAT_BASE_QTY );
 
-		sprintf(sStatName, "OVERRIDE.STATCAP_%d", (int)(i));
+		sprintf(pszStatName, "OVERRIDE.STATCAP_%d", (int)(i));
 		short iStatMax;
-		if ( (pTagStorage = GetKey(sStatName, true)) != NULL )
+		if ( (pTagStorage = GetKey(pszStatName, true)) != NULL )
 			iStatMax = (short)(pTagStorage->GetValNum());
 		else
 			iStatMax = pSkillClass->m_StatMax[i];
@@ -332,11 +333,11 @@ short CChar::Stat_GetLimit( STAT_TYPE i ) const
 		}
 
 		short iStatMax = 100;
-		sprintf(sStatName, "OVERRIDE.STATCAP_%d", (int)(i));
-		if ( (pTagStorage = GetKey(sStatName, true)) != NULL )
+		sprintf(pszStatName, "OVERRIDE.STATCAP_%d", (int)(i));
+		if ( (pTagStorage = GetKey(pszStatName, true)) != NULL )
 			iStatMax = (short)(pTagStorage->GetValNum());
 
-		return( iStatMax );
+		return iStatMax;
 	}
 }
 

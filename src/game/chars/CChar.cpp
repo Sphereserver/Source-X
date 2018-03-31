@@ -224,7 +224,8 @@ CChar * CChar::CreateBasic(CREID_TYPE baseID) // static
 	return new CChar(baseID);
 }
 
-CChar::CChar( CREID_TYPE baseID ) : CObjBase( false )
+CChar::CChar( CREID_TYPE baseID ) : CObjBase( false ),
+	m_Stat()
 {
 	g_Serv.StatInc( SERV_STAT_CHARS );	// Count created CChars.
 

@@ -26,7 +26,8 @@ void CItemMessage::r_Write(CScript & s)
     s.WriteKey("AUTHOR", m_sAuthor);
 
     // Store the message body lines. MAX_BOOK_PAGES
-    TemporaryString pszTemp;
+    TemporaryString tsTemp;
+	tchar* pszTemp = static_cast<tchar *>(tsTemp);
     for ( size_t i = 0; i < GetPageCount(); ++i )
     {
         sprintf(pszTemp, "BODY.%" PRIuSIZE_T, i);

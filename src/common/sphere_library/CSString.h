@@ -57,7 +57,7 @@ public:
 	* @see Copy()
 	* @param pStr string to copy.
 	*/
-	inline CSString(lpctstr pStr)
+	CSString(lpctstr pStr)
 	{
 		m_iMaxLength = m_iLength = 0;
 		m_pchData = NULL;
@@ -69,7 +69,7 @@ public:
 	* @see Copy()
 	* @param pStr string to copy.
 	*/
-	inline CSString(const CSString &s)
+	CSString(const CSString &s)
 	{
 		m_iMaxLength = m_iLength = 0;
 		m_pchData = NULL;

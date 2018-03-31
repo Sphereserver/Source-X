@@ -1728,7 +1728,8 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 	{
 		tchar * pszCond;
 		CSString pszOrig;
-		TemporaryString pszTemp;
+		TemporaryString tsTemp;
+		tchar* pszTemp = static_cast<tchar *>(tsTemp);
 		int iWhile	= 0;
 
 		pszOrig.Copy( s.GetArgStr() );
@@ -1752,7 +1753,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 				break;
 			}
 			if (( iRet != TRIGRET_ENDIF ) && ( iRet != TRIGRET_CONTINUE ))
-				return( iRet );
+				return iRet;
 			if ( iRet == TRIGRET_CONTINUE )
 				EndContext = StartContext;
 			else
@@ -2115,7 +2116,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerScript( CScript & s, lpctstr pszTrigName, CTex
 		TIME_PROFILE_START;
 	}
 
-	TRIGRET_TYPE	iRet = OnTriggerRunVal(s, TRIGRUN_SECTION_TRUE, pSrc, pArgs);
+	TRIGRET_TYPE iRet = OnTriggerRunVal(s, TRIGRUN_SECTION_TRUE, pSrc, pArgs);
 
 	if ( IsSetEF(EF_Script_Profiler) && pTrig != NULL )
 	{
@@ -2371,12 +2372,12 @@ jump_in:
 
 						if ( iArgQty >= 1 )
 						{
-							TemporaryString porigValue;
-							strcpy(porigValue, ppArgs[0]);
-							tchar *tempPoint = porigValue;
-							ParseText( tempPoint, pSrc, 0, pArgs );
+							TemporaryString tsOrigValue;
+							tchar* pszOrigValue = static_cast<tchar *>(tsOrigValue);
+							strcpy(pszOrigValue, ppArgs[0]);
+							ParseText( pszOrigValue, pSrc, 0, pArgs );
 
-							CUID pCurUid = Exp_GetDWVal(tempPoint);
+							CUID pCurUid = Exp_GetDWVal(pszOrigValue);
 							if ( pCurUid.IsValidUID() )
 							{
 								CObjBase * pObj = pCurUid.ObjFind();
@@ -2429,22 +2430,25 @@ jump_in:
 
 							if ( Str_ParseCmds(const_cast<tchar *>(pszKey), ppArgs, CountOf(ppArgs), " \t," ) >= 1 )
 							{
-								TemporaryString ppParsedArg0;
-								strcpy(ppParsedArg0, ppArgs[0]);
-								if ( (ParseText( ppParsedArg0, pSrc, 0, pArgs ) > 0 ) )
+								TemporaryString tsParsedArg0;
+								tchar* pszParsedArg0 = static_cast<tchar *>(tsParsedArg0);
+								strcpy(pszParsedArg0, ppArgs[0]);
+								if ( (ParseText( pszParsedArg0, pSrc, 0, pArgs ) > 0 ) )
 								{
-									TemporaryString ppParsedArg1;
-									strcpy(ppParsedArg1, ppArgs[1]);
+									TemporaryString tsParsedArg1;
+									tchar* pszParsedArg1 = static_cast<tchar *>(tsParsedArg1);
+									strcpy(pszParsedArg1, ppArgs[1]);
 									if ( ppArgs[1] != NULL)
-										if (ParseText(ppParsedArg1, pSrc, 0, pArgs) <= 0)
+										if (ParseText(pszParsedArg1, pSrc, 0, pArgs) <= 0)
 											goto forcont_incorrect_args;
 
 									CScriptLineContext StartContext = s.GetContext();
 									CScriptLineContext EndContext = StartContext;
+									lpctstr castedParsedArg0 = pszParsedArg0;
 									iRet = pCont->OnContTriggerForLoop( s, pSrc, pArgs, pResult, StartContext, EndContext,
 										g_Cfg.ResourceGetID( ( iCmd == SK_FORCONTID ) ? RES_ITEMDEF : RES_TYPEDEF,
-										static_cast<lpctstr &>(ppParsedArg0)), 0,
-										ppArgs[1] != NULL ? Exp_GetVal(ppParsedArg1) : 255 );
+											static_cast<lpctstr &>(castedParsedArg0)),
+										0, ppArgs[1] != NULL ? Exp_GetVal(pszParsedArg1) : 255 );
 								}
 								else
 								{
@@ -2478,13 +2482,14 @@ jump_in:
 					if( strchr(s.GetKey(), '<') )
 					{
 						EXC_SET("parsing <> in a key");
-						TemporaryString buf;
-						strcpy(buf, s.GetKey());
-						strcat(buf, " ");
-						strcat(buf, s.GetArgRaw());
-						ParseText(buf, pSrc, 0, pArgs);
+						TemporaryString tsBuf;
+						tchar* pszBuf = static_cast<tchar *>(tsBuf);
+						strcpy(pszBuf, s.GetKey());
+						strcat(pszBuf, " ");
+						strcat(pszBuf, s.GetArgRaw());
+						ParseText(pszBuf, pSrc, 0, pArgs);
 
-						s.ParseKey(buf);
+						s.ParseKey(pszBuf);
 					}
 					else
 					{

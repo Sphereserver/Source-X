@@ -1021,10 +1021,10 @@ bool NetworkInput::processGameClientData(NetState* state, Packet* buffer)
 
 	EXC_CATCHSUB("Message");
 	EXC_DEBUGSUB_START;
-	TemporaryString dump;
-	packet->dump(dump);
+	TemporaryString tsDump;
+	packet->dump(tsDump);
 
-	g_Log.EventDebug("%x:Parsing %s", state->id(), static_cast<lpctstr>(dump));
+	g_Log.EventDebug("%x:Parsing %s", state->id(), static_cast<lpctstr>(tsDump));
 
 	state->m_packetExceptions++;
 	if (state->m_packetExceptions > 10)

@@ -69,6 +69,7 @@ CObjBase::CObjBase( bool fItem )
 	sm_iCount ++;
 	m_iCreatedResScriptIdx = (size_t)-1;
 	m_iCreatedResScriptLine = -1;
+	m_RunningTrigger = NULL;
 
 	m_wHue = HUE_DEFAULT;
 	m_timeout.Init();
@@ -2938,6 +2939,7 @@ void CObjBase::SetTriggerActive(lpctstr trig)
 		sprintf(text, "Trigger: %s", trig);
 		ADDTOCALLSTACK(text);
 	}
+
 	m_RunningTrigger = trig ? trig : NULL;
 }
 

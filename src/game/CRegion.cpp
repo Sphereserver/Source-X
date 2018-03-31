@@ -537,7 +537,8 @@ bool CRegion::r_LoadVal( CScript & s )
 void CRegion::r_WriteBody( CScript & s, lpctstr pszPrefix )
 {
 	ADDTOCALLSTACK("CRegion::r_WriteBody");
-	TemporaryString z;
+	TemporaryString tsZ;
+	tchar* z = static_cast<tchar *>(tsZ);
 	if ( GetRegionFlags())
 	{
 		sprintf(z, "%sFLAGS", pszPrefix);

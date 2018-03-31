@@ -16,6 +16,7 @@
 
 // disable useless windows.h features
 #define WIN32_LEAN_AND_MEAN	// include just windows.h without the other winapi headers, we'll add them manually when needed
+#undef NOMINMAX
 #define NOMINMAX			// we don't want to have windows min and max macros, we have our minimum and maximum
 #define NOATOM
 #define NOCRYPT
@@ -29,7 +30,7 @@
 #define NOSYSMETRICS
 #define NOTEXTMETRIC
 #define NOWH
-	
+
 #include <windows.h>
 
 

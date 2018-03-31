@@ -114,8 +114,8 @@ public:
 	// NOTE: If this link is set but not valid -> then delete the whole object !
 	CUID m_uidLink;		// Linked to this other object in the world. (owned, key, etc)
 
-	bool IsTriggerActive(lpctstr trig) { return static_cast<CObjBase*>(this)->IsTriggerActive(trig); }
-	void SetTriggerActive(lpctstr trig = NULL) { static_cast<CObjBase*>(this)->SetTriggerActive(trig); }
+	inline bool IsTriggerActive(lpctstr trig) { return static_cast<CObjBase*>(this)->IsTriggerActive(trig); }
+	inline void SetTriggerActive(lpctstr trig = NULL) { static_cast<CObjBase*>(this)->SetTriggerActive(trig); }
 
 	// Type specific info. IT_TYPE
 	union // 4(more1) + 4(more2) + 6(morep: (2 morex) (2 morey) (1 morez) (1 morem) ) = 14 bytes

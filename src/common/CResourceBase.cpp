@@ -451,9 +451,10 @@ lpctstr CResourceDef::GetResourceName() const
 	if ( m_pDefName )
 		return m_pDefName->GetKey();
 
-	TemporaryString pszTmp;
-	sprintf(pszTmp, "0%x", GetResourceID().GetResIndex());
-	return pszTmp;
+	TemporaryString tsTemp;
+	tchar* pszTemp = static_cast<tchar *>(tsTemp);
+	sprintf(pszTemp, "0%x", GetResourceID().GetResIndex());
+	return pszTemp;
 }
 
 bool CResourceDef::HasResourceName()
@@ -1187,12 +1188,12 @@ void CResourceRefArray::WriteResourceRefList( CSString & sVal ) const
 	TemporaryString tsVal;
 	tchar * pszVal = static_cast<tchar *>(tsVal);
 	size_t len = 0;
-	for ( size_t j = 0; j < GetCount(); j++ )
+	for ( size_t j = 0; j < GetCount(); ++j )
 	{
 		if ( j > 0 )
 			pszVal[len++] = ',';
 
-		len += strcpylen( pszVal + len, GetResourceName( j ));
+		len += strcpylen( pszVal + len, GetResourceName(j) );
 		if ( len >= SCRIPT_MAX_LINE_LEN-1 )
 			break;
 	}

@@ -52,12 +52,12 @@ void xRecordPacket(const CClient* client, Packet* packet, lpctstr heading)
 		return;
 #endif
 
-	TemporaryString dump;
-	packet->dump(dump);
+	TemporaryString tsDump;
+	packet->dump(tsDump);
 
 #ifdef _DEBUG
 	// write to console
-	g_Log.EventDebug("%x:%s %s\n", client->GetSocketID(), heading, (lpctstr)dump);
+	g_Log.EventDebug("%x:%s %s\n", client->GetSocketID(), heading, (lpctstr)tsDump);
 #endif
 
 	// build file name
@@ -80,7 +80,7 @@ void xRecordPacket(const CClient* client, Packet* packet, lpctstr heading)
 	CSFileText out;
 	if (out.Open(sFullFileName, OF_READWRITE|OF_TEXT))
 	{
-		out.Printf("%s %s\n\n", heading, (lpctstr)dump);
+		out.Printf("%s %s\n\n", heading, (lpctstr)tsDump);
 		out.Close();
 	}
 }

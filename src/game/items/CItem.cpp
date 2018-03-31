@@ -3095,7 +3095,7 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 			pCharSrc->ItemBounce( this );
 			break;
 		case CIV_CONSUME:
-			ConsumeAmount( s.HasArgs() ? (word)s.GetArgVal() : 1 );
+			ConsumeAmount( s.HasArgs() ? s.GetArgWVal() : 1 );
 			break;
 		case CIV_CONTCONSUME:
 			{
@@ -3213,20 +3213,21 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 	ASSERT(pItemDef);
 	CChar * pChar = pSrc->GetChar();
 
-	TemporaryString sCharTrigName;
-	sprintf(sCharTrigName, "@item%s", pszTrigName+1);
+	TemporaryString tsCharTrigName;
+	tchar* pszCharTrigName = static_cast<tchar *>(tsCharTrigName);
+	sprintf(pszCharTrigName, "@item%s", pszTrigName + 1);
 
-	int iCharAction = (CTRIG_TYPE) FindTableSorted( sCharTrigName, CChar::sm_szTrigName, CountOf(CChar::sm_szTrigName)-1 );
+	int iCharAction = (CTRIG_TYPE) FindTableSorted( pszCharTrigName, CChar::sm_szTrigName, CountOf(CChar::sm_szTrigName)-1 );
 
 	// 1) Triggers installed on character, sensitive to actions on all items
-	if ( IsTrigUsed(sCharTrigName) && (iCharAction > XTRIG_UNKNOWN) )
+	if ( IsTrigUsed(pszCharTrigName) && (iCharAction > XTRIG_UNKNOWN) )
 	{
-		EXC_SET("chardef");
 		if ( pChar != NULL )
 		{
+			EXC_SET("chardef");
 			CUID uidOldAct = pChar->m_Act_UID;
 			pChar->m_Act_UID = GetUID();
-			iRet = pChar->OnTrigger(sCharTrigName,  pSrc, pArgs );
+			iRet = pChar->OnTrigger(pszCharTrigName,  pSrc, pArgs );
 			pChar->m_Act_UID = uidOldAct;
 			if ( iRet == TRIGRET_RET_TRUE )
 				goto stopandret;//return iRet;	// Block further action.
@@ -3375,10 +3376,11 @@ TRIGRET_TYPE CItem::OnTriggerCreate( CTextConsole * pSrc, CScriptTriggerArgs * p
 	ASSERT(pItemDef);
 	CChar * pChar = pSrc->GetChar();
 
-	TemporaryString sCharTrigName;
-	sprintf(sCharTrigName, "@item%s", pszTrigName+1);
+	TemporaryString tsCharTrigName;
+	tchar* pszCharTrigName = static_cast<tchar *>(tsCharTrigName);
+	sprintf(pszCharTrigName, "@item%s", pszTrigName+1);
 
-	int iCharAction = (CTRIG_TYPE) FindTableSorted( sCharTrigName, CChar::sm_szTrigName, CountOf(CChar::sm_szTrigName)-1 );
+	int iCharAction = (CTRIG_TYPE) FindTableSorted( pszCharTrigName, CChar::sm_szTrigName, CountOf(CChar::sm_szTrigName)-1 );
 
 	// 1) Look up the trigger in the RES_ITEMDEF. (default)
 	EXC_SET("itemdef");
@@ -3392,14 +3394,14 @@ TRIGRET_TYPE CItem::OnTriggerCreate( CTextConsole * pSrc, CScriptTriggerArgs * p
 	}
 
 	// 2) Triggers installed on character, sensitive to actions on all items
-	if (( IsTrigUsed(sCharTrigName) ) && ( iCharAction > XTRIG_UNKNOWN ))
+	if ( IsTrigUsed(pszCharTrigName) && ( iCharAction > XTRIG_UNKNOWN ))
 	{
 		EXC_SET("chardef");
 		if ( pChar != NULL )
 		{
 			CUID uidOldAct = pChar->m_Act_UID;
 			pChar->m_Act_UID = GetUID();
-			iRet = pChar->OnTrigger(sCharTrigName,  pSrc, pArgs );
+			iRet = pChar->OnTrigger(pszCharTrigName,  pSrc, pArgs );
 			pChar->m_Act_UID = uidOldAct;
 			if ( iRet == TRIGRET_RET_TRUE )
 				return iRet;	// Block further action.

@@ -155,10 +155,9 @@ CSector * CRect::GetSector( int i ) const	// ge all the sectors that make up thi
 }
 
 
-CPointMap::CPointMap()
-{
-	InitPoint();
-}
+//CPointMap::CPointMap()
+//{
+//}
 
 CPointMap::CPointMap( short x, short y, char z, uchar map )
 {

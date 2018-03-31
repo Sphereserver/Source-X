@@ -165,14 +165,15 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
 bool __cdecl CDataBase::queryf(CVarDefMap & mapQueryResult, char *fmt, ...)
 {
 	ADDTOCALLSTACK("CDataBase::queryf");
-	TemporaryString buf;
+	TemporaryString tsBuf;
+	tchar* pszBuf = static_cast<tchar *>(tsBuf);
 	va_list	marker;
 
 	va_start(marker, fmt);
-	vsnprintf(buf, buf.realLength(), fmt, marker);
+	vsnprintf(pszBuf, tsBuf.realLength(), fmt, marker);
 	va_end(marker);
 
-	return this->query(buf, mapQueryResult);
+	return this->query(pszBuf, mapQueryResult);
 }
 
 bool CDataBase::exec(const char *query)
@@ -214,14 +215,15 @@ bool CDataBase::exec(const char *query)
 bool __cdecl CDataBase::execf(char *fmt, ...)
 {
 	ADDTOCALLSTACK("CDataBase::execf");
-	TemporaryString buf;
+	TemporaryString tsBuf;
+	tchar* pszBuf = static_cast<tchar *>(tsBuf);
 	va_list	marker;
 
 	va_start(marker, fmt);
-	vsnprintf(buf, buf.realLength(), fmt, marker);
+	vsnprintf(pszBuf, tsBuf.realLength(), fmt, marker);
 	va_end(marker);
 
-	return this->exec(buf);
+	return this->exec(pszBuf);
 }
 
 bool CDataBase::addQuery(bool isQuery, lpctstr theFunction, lpctstr theQuery)

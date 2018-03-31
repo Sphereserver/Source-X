@@ -514,10 +514,10 @@ void NetworkIn::tick(void)
 
 		EXC_CATCHSUB("Network");
 		EXC_DEBUGSUB_START;
-		TemporaryString dump;
-		packet->dump(dump);
+		TemporaryString tsDump;
+		packet->dump(tsDump);
 
-		g_Log.EventDebug("%x:Parsing %s", client->id(), (lpctstr)dump);
+		g_Log.EventDebug("%x:Parsing %s", client->id(), (lpctstr)tsDump);
 
 		client->m_packetExceptions++;
 		if (client->m_packetExceptions > 10 && client->m_client != NULL)

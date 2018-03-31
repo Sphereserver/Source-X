@@ -3720,6 +3720,9 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 	if ( IsTriggerActive( pszTrigName ) ) //This should protect any char trigger from infinite loop
 		return TRIGRET_RET_DEFAULT;
 
+	if ( !pSrc )
+		pSrc = &g_Serv;
+
 	// Attach some trigger to the cchar. (PC or NPC)
 	// RETURN: true = block further action.
 	CCharBase* pCharDef = Char_GetDef();
@@ -3727,6 +3730,7 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 		return TRIGRET_RET_DEFAULT;
 
 	CTRIG_TYPE iAction;
+
 	if ( ISINTRESOURCE( pszTrigName ) )
 	{
 		iAction = (CTRIG_TYPE) GETINTRESOURCE( pszTrigName );
@@ -3740,15 +3744,17 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 
 	TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
 
-	TemporaryString sCharTrigName;
-	sprintf(sCharTrigName, "@char%s", pszTrigName+1);
-
-	int iCharAction = (CTRIG_TYPE) FindTableSorted( sCharTrigName, sm_szTrigName, CountOf(sm_szTrigName)-1 );
-
 	EXC_TRY("Trigger");
 
+	TemporaryString tsCharTrigName;
+	tchar* pszCharTrigName = static_cast<tchar *>(tsCharTrigName);
+	sprintf(pszCharTrigName, "@char%s", pszTrigName + 1);
+
+	int iCharAction = (CTRIG_TYPE) FindTableSorted( pszCharTrigName, sm_szTrigName, CountOf(sm_szTrigName)-1 );
+
+
 	// 1) Triggers installed on characters, sensitive to actions on all chars
-	if (( IsTrigUsed(sCharTrigName) ) && ( iCharAction > XTRIG_UNKNOWN ))
+	if (( IsTrigUsed(pszCharTrigName) ) && ( iCharAction > XTRIG_UNKNOWN ))
 	{
 		CChar * pChar = pSrc->GetChar();
 		if ( pChar != NULL && this != pChar )
@@ -3756,7 +3762,7 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 			EXC_SET("chardef");
 			CUID uidOldAct = pChar->m_Act_UID;
 			pChar->m_Act_UID = GetUID();
-			iRet = pChar->OnTrigger(sCharTrigName, pSrc, pArgs );
+			iRet = pChar->OnTrigger(pszCharTrigName, pSrc, pArgs );
 			pChar->m_Act_UID = uidOldAct;
 			if ( iRet == TRIGRET_RET_TRUE )
 				goto stopandret;//return iRet;	// Block further action.

@@ -143,7 +143,7 @@ void CSString::Copy(lpctstr pszStr)
 	if ((pszStr != m_pchData) && pszStr)
 	{
 		SetLength((int)strlen(pszStr));
-		strcpy(m_pchData, pszStr);
+		strncpy(m_pchData, pszStr, m_iLength);
 	}
 }
 
@@ -159,8 +159,9 @@ void _cdecl CSString::Format(lpctstr pStr, ...)
 
 void CSString::FormatV(lpctstr pszFormat, va_list args)
 {
-	TemporaryString pszTemp;
-	vsnprintf(static_cast<char *>(pszTemp), pszTemp.realLength(), pszFormat, args);
+	TemporaryString tsTemp;
+	tchar* pszTemp = static_cast<tchar *>(tsTemp);
+	vsnprintf(pszTemp, tsTemp.realLength(), pszFormat, args);
 	Copy(pszTemp);
 }
 

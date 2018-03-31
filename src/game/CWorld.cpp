@@ -1129,8 +1129,10 @@ void CWorld::Init()
 	}
 
 	m_Sectors = new CSector*[sectors];
-	TemporaryString z;
-	TemporaryString z1;
+	TemporaryString tsZ;
+	TemporaryString tsZ1;
+	tchar* z = static_cast<tchar *>(tsZ);
+	tchar* z1 = static_cast<tchar *>(tsZ1);
 
 	for ( m = 0; m < 256; ++m )
 	{
@@ -2333,12 +2335,13 @@ void CWorld::Broadcast(lpctstr pMsg) // System broadcast in bold text
 void __cdecl CWorld::Broadcastf(lpctstr pMsg, ...) // System broadcast in bold text
 {
 	ADDTOCALLSTACK("CWorld::Broadcastf");
-	TemporaryString sTemp;
+	TemporaryString tsTemp;
+	tchar* pszTemp = static_cast<tchar *>(tsTemp);
 	va_list vargs;
 	va_start(vargs, pMsg);
-	vsnprintf(sTemp, sTemp.realLength(), pMsg, vargs);
+	vsnprintf(pszTemp, tsTemp.realLength(), pMsg, vargs);
 	va_end(vargs);
-	Broadcast(sTemp);
+	Broadcast(pszTemp);
 }
 
 //////////////////////////////////////////////////////////////////

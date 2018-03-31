@@ -815,9 +815,9 @@ bool PacketStaticUpdate::onReceive(NetState* net)
 	ADDTOCALLSTACK("PacketStaticUpdate::onReceive");
 	/*skip(12);
     byte UlCmd = readByte();*/
-	TemporaryString dump;
-	this->dump(dump);
-	g_Log.EventDebug("%x:Parsing %s", net->id(), static_cast<lpctstr>(dump));
+	TemporaryString tsDump;
+	this->dump(tsDump);
+	g_Log.EventDebug("%x:Parsing %s", net->id(), static_cast<lpctstr>(tsDump));
 	return true;
 }
 
@@ -1142,7 +1142,7 @@ bool PacketSecureTradeReq::onReceive(NetState* net)
 			return true;
 	}
 
-	return true;
+	//return true;
 }
 
 
