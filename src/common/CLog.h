@@ -80,7 +80,7 @@ public:
 	{
 		va_list vargs;
 		va_start(vargs, pszFormat);
-		int iret = VEvent(LOGM_NOCONTEXT|LOGM_DEBUG, pszFormat, vargs);
+		int iret = VEvent(LOGM_DEBUG|LOGM_NOCONTEXT, pszFormat, vargs);
 		va_end(vargs);
 		return iret;
 	}

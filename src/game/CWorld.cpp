@@ -2108,7 +2108,7 @@ void CWorld::GarbageCollection()
 	ADDTOCALLSTACK("CWorld::GarbageCollection");
 	g_Log.Flush();
 	g_Serv.SetServerMode(SERVMODE_GarbageCollection);
-	g_Log.Event(LOGL_EVENT, "Garbage Collection: started.\n");
+	g_Log.Event(LOGL_EVENT|LOGM_NOCONTEXT, "Garbage Collection: started.\n");
 	GarbageCollection_UIDs();
 	g_Serv.SetServerMode(SERVMODE_Run);
 	g_Log.Flush();
