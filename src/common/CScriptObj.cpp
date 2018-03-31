@@ -2746,9 +2746,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerRunVal( CScript &s, TRIGRUN_TYPE trigrun, CTex
 
 	lpctstr pszVal = sVal.GetPtr();
 	if ( pszVal && *pszVal )
-	{
 		tr = static_cast<TRIGRET_TYPE>(Exp_GetVal(pszVal));
-	}
 
 	return tr;
 }

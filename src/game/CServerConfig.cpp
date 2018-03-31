@@ -3960,11 +3960,12 @@ bool CServerConfig::Load( bool fResync )
 	//	Initialize the world sectors
 	g_World.Init();
 
+	g_Log.Event(LOGM_INIT, "\nRetrieving script files...\n");
 	// open and index all my script files i'm going to use.
 	AddResourceDir( m_sSCPBaseDir );		// if we want to get *.SCP files from elsewhere.
 
 	size_t count = m_ResourceFiles.GetCount();
-	g_Log.Event(LOGM_INIT, "\nIndexing %" PRIuSIZE_T " scripts...\n", count);
+	g_Log.Event(LOGM_INIT, "Indexing %" PRIuSIZE_T " script files...\n", count);
 
 	for ( size_t j = 0; ; j++ )
 	{

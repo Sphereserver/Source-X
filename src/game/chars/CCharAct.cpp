@@ -2926,7 +2926,7 @@ bool CChar::Death()
 		if ( !IsStatFlag(STATF_WAR) )
 			StatFlag_Set(STATF_INSUBSTANTIAL);	// manifest war mode for ghosts
 
-		m_pPlayer->m_wDeaths++;
+		++m_pPlayer->m_wDeaths;
 		SetHue( HUE_DEFAULT );	// get all pale
 		SetID( static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType( RES_CHARDEF, pszGhostName )) );
 		LayerAdd( CItem::CreateScript( ITEMID_DEATHSHROUD, this ) );

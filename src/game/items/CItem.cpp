@@ -3026,7 +3026,11 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 		default:
 			return CObjBase::r_LoadVal( s );
 	}
-	ResendTooltip();
+	if (GetCallingObjTrigger() != sm_szTrigName[ITRIG_CLIENTTOOLTIP])
+	{
+		// Avoid @ClientTooltip calling TRIGGER @Create, and this calling again ResendTooltip() and the @ClientTooltip trigger
+		ResendTooltip();
+	}
 	return true;
 	EXC_CATCH;
 

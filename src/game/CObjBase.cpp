@@ -70,6 +70,7 @@ CObjBase::CObjBase( bool fItem )
 	m_iCreatedResScriptIdx = (size_t)-1;
 	m_iCreatedResScriptLine = -1;
 	m_RunningTrigger = NULL;
+	m_CallingObjTrigger = NULL;
 
 	m_wHue = HUE_DEFAULT;
 	m_timeout.Init();
@@ -1439,7 +1440,9 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 				if ( *pszKey )
 				{
 					TRIGRET_TYPE trReturn;
+					m_CallingObjTrigger = m_RunningTrigger;
 					bool bTrigReturn = CallPersonalTrigger(const_cast<tchar *>(pszKey), pSrc, trReturn,false);
+					m_CallingObjTrigger = NULL;
 					if ( bTrigReturn )
 						sVal.FormatVal(trReturn);
 
@@ -2444,7 +2447,9 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				if ( s.HasArgs() )
 				{
 					TRIGRET_TYPE tResult;
+					m_CallingObjTrigger = m_RunningTrigger;
 					CallPersonalTrigger(s.GetArgRaw(), pSrc, tResult,false);
+					m_CallingObjTrigger = NULL;
 				}
 			} break;
 		case OV_DIALOG:
@@ -3068,7 +3073,7 @@ TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CCh
 	return TRIGRET_RET_DEFAULT;
 }
 
-inline bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult, bool bFull)
+bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult, bool bFull)
 {
 	ADDTOCALLSTACK("CObjBase::CallPersonalTrigger");
 	UNREFERENCED_PARAMETER(bFull);
@@ -3090,19 +3095,13 @@ inline bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TR
 				iResultArgs = Str_ParseCmds(ppCmdTrigger[2], Arg_piCmd, CountOf(Arg_piCmd), ",");
 
 				if ( iResultArgs == 3 )
-				{
 					csTriggerArgs.m_iN3 = Arg_piCmd[2];
-				}
 
 				if ( iResultArgs >= 2 )
-				{
 					csTriggerArgs.m_iN2 = Arg_piCmd[1];
-				}
 
 				if ( iResultArgs >= 1 )
-				{
 					csTriggerArgs.m_iN1 = Arg_piCmd[0];
-				}
 			}
 			else if ( iTriggerArgType == 2 ) // ARGS
 			{
@@ -3114,9 +3113,7 @@ inline bool CObjBase::CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TR
 				CUID guTriggerArg(Exp_GetVal(ppCmdTrigger[2]));
 				CObjBase * pTriggerArgObj = guTriggerArg.ObjFind();
 				if ( pTriggerArgObj )
-				{
 					csTriggerArgs.m_pO1 = pTriggerArgObj;
-				}
 			}
 			else if ( iTriggerArgType == 4 ) // FULL TRIGGER
 			{

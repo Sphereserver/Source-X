@@ -30,9 +30,16 @@ private:
 	CServerTime m_timestamp;    // TimeStam
 	HUE_TYPE m_wHue;			// Hue or skin color. (CItems must be < 0x4ff or so)
 	lpctstr m_RunningTrigger;   // Current trigger being run on this object. Used to prevent the same trigger being called over and over.
+	lpctstr m_CallingObjTrigger;// I am running a trigger called via TRIGGER (CallPersonalTrigger method). In which trigger (OF THIS SAME OBJECT) was this call executed?
 
 protected:
 	CResourceRef m_BaseRef;     // Pointer to the resource that describes this type.
+	inline lpctstr GetRunningTrigger() const {
+		return m_RunningTrigger;
+	}
+	inline lpctstr GetCallingObjTrigger() const {
+		return m_CallingObjTrigger;
+	}
 
 public:
 	static const char *m_sClassName;

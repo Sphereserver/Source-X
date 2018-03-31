@@ -198,7 +198,7 @@ void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
 		// build a hash value from the tooltip entries
 		dword hash = 0;
 		dword argumentHash = 0;
-		for (size_t i = 0; i < m_TooltipData.GetCount(); i++)
+		for (size_t i = 0; i < m_TooltipData.GetCount(); ++i)
 		{
 			CClientTooltip* tipEntry = m_TooltipData.GetAt(i);
 			argumentHash = HashString(tipEntry->m_args, strlen(tipEntry->m_args));
