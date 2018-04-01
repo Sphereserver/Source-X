@@ -509,7 +509,9 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Changed: added upper limit (65535) to the .ini setting ItemsMaxAmount.
 - Fixed: GOLD, NEWGOLD ignoring the ItemsMaxAmount .ini setting.
 - Fixed: duped char not inheriting the brain.
-- Fixed: new characters receiving the newbie sets of starting items for another race.
+
+31-03-2018, Drk84
+-Fixed:  criminal 0 not removing the criminal memory item.
 
 01-04-2018, Nolok
 - [sphereCrypt.ini]: Added encryption key for Classic Client 7.0.62.x and Enhanced Client 4.0.62.x.
