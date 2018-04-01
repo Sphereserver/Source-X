@@ -292,7 +292,7 @@ bool CChar::Use_Train_Dummy( CItem * pItem, bool fSetup )
 		}
 
 		int iAnimDelay = g_Cfg.Calc_CombatAttackSpeed(this, m_uidWeapon.ItemFind());
-		UpdateAnimate(ANIM_ATTACK_WEAPON);
+		UpdateAnimate(ANIM_ATTACK_WEAPON, true, false, (byte)maximum(0,(iAnimDelay-1) / 10));
 		m_Act_Prv_UID = m_uidWeapon;
 		m_Act_UID = pItem->GetUID();
 		Skill_Start(NPCACT_TRAINING);
@@ -508,7 +508,7 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 
 	if ( Skill_UseQuick(skill, Calc_GetRandVal(40)) )
 	{
-		static LPCTSTR const sm_Txt_ArcheryButte_Success[] =
+		static lpctstr const sm_Txt_ArcheryButte_Success[] =
 		{
 			g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHBUTTE_HIT1),
 			g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHBUTTE_HIT2),
