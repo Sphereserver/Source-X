@@ -994,9 +994,9 @@ void CWorldThread::GarbageCollection_UIDs()
 	GarbageCollection_New();
 
 	if ( iCount != CObjBase::sm_iCount )	// All objects must be accounted for.
-		g_Log.Event(LOGL_ERROR, "Garbage Collection: done. Object memory leak %" PRIu32 "!=%" PRIuSIZE_T ".\n", iCount, CObjBase::sm_iCount);
+		g_Log.Event(LOGL_ERROR|LOGM_NOCONTEXT, "Garbage Collection: done. Object memory leak %" PRIu32 "!=%" PRIuSIZE_T ".\n", iCount, CObjBase::sm_iCount);
 	else
-		g_Log.Event(LOGL_EVENT, "Garbage Collection: done. %" PRIu32 " Objects accounted for.\n", iCount);
+		g_Log.Event(LOGL_EVENT|LOGM_NOCONTEXT, "Garbage Collection: done. %" PRIu32 " Objects accounted for.\n", iCount);
 
 	if ( m_FreeUIDs != NULL )	// new UID engine - search for empty holes and store it in a huge array
 	{							// the size of the array should be enough even for huge shards

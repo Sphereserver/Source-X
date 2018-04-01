@@ -874,10 +874,10 @@ int CItem::FixWeirdness()
 
 		case IT_KEY:
 			// blank unlinked keys.
-			if ( m_itKey.m_lockUID && ! IsValidUID())
+			if ( m_itKey.m_UIDLock && ! IsValidUID())
 			{
-				DEBUG_ERR(("Key '%s' has bad link to 0%x, blanked out\n", GetName(), (dword)(m_itKey.m_lockUID)));
-				m_itKey.m_lockUID.ClearUID();
+				DEBUG_ERR(("Key '%s' has bad link to 0%x, blanked out\n", GetName(), (dword)(m_itKey.m_UIDLock)));
+				m_itKey.m_UIDLock.ClearUID();
 			}
 			break;
 
@@ -1563,7 +1563,7 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 				len += strcpylen( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_SPAWN ) );
 			break;
 		case IT_KEY:
-			if ( ! m_itKey.m_lockUID.IsValidUID())
+			if ( ! m_itKey.m_UIDLock.IsValidUID())
 				len += strcpylen( pTemp+len, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_BLANK ) );
 			break;
 		case IT_RUNE:
@@ -1594,9 +1594,7 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 			{
 				len += sprintf( pTemp+len, " of %s", pSpellDef->GetName());
 				if (m_itWeapon.m_spellcharges)
-				{
 					len += sprintf( pTemp+len, " (%d %s)", m_itWeapon.m_spellcharges, g_Cfg.GetDefaultMsg( DEFMSG_ITEMTITLE_CHARGES ) );
-				}
 			}
 		}
 	}
@@ -1606,24 +1604,20 @@ lpctstr CItem::GetNameFull( bool fIdentified ) const
 		case IT_LOOM:
 			if ( m_itLoom.m_ClothQty )
 			{
-				ITEMID_TYPE AmmoID = (ITEMID_TYPE)(RES_GET_INDEX(m_itLoom.m_ClothID));
+				ITEMID_TYPE AmmoID = (ITEMID_TYPE)m_itLoom.m_ridCloth.GetResIndex();
 				const CItemBase * pAmmoDef = CItemBase::FindItemBase(AmmoID);
 				if ( pAmmoDef )
-				{
 					len += sprintf( pTemp+len, " (%d %ss)", m_itLoom.m_ClothQty, pAmmoDef->GetName());
-				}
 			}
 			break;
 
 		case IT_ARCHERY_BUTTE:
 			if ( m_itArcheryButte.m_AmmoCount )
 			{
-				ITEMID_TYPE AmmoID = (ITEMID_TYPE)(RES_GET_INDEX(m_itArcheryButte.m_AmmoType));
+				ITEMID_TYPE AmmoID = (ITEMID_TYPE)(m_itArcheryButte.m_ridAmmoType.GetResIndex());
 				const CItemBase * pAmmoDef = CItemBase::FindItemBase(AmmoID);
 				if ( pAmmoDef )
-				{
 					len += sprintf( pTemp+len, " %d %ss", m_itArcheryButte.m_AmmoCount, pAmmoDef->GetName());
-				}
 			}
 			break;
 
@@ -1984,14 +1978,14 @@ void CItem::r_WriteMore1( CSString & sVal )
 		case IT_GRASS:
 		case IT_ROCK:
 		case IT_WATER:
-			sVal = g_Cfg.ResourceGetName( m_itResource.m_rid_res );
+			sVal = g_Cfg.ResourceGetName( m_itResource.m_ridRes );
 			return;
 
 		case IT_FRUIT:
 		case IT_FOOD:
 		case IT_FOOD_RAW:
 		case IT_MEAT_RAW:
-			sVal = g_Cfg.ResourceGetName( CResourceID( RES_ITEMDEF, m_itFood.m_cook_id ));
+			sVal = g_Cfg.ResourceGetName( m_itFood.m_ridCook );
 			return;
 
 		case IT_TRAP:
@@ -2036,7 +2030,7 @@ void CItem::r_WriteMore2( CSString & sVal )
 
 		case IT_CROPS:
 		case IT_FOLIAGE:
-			sVal = g_Cfg.ResourceGetName( CResourceID( RES_ITEMDEF, m_itCrop.m_ReapFruitID ));
+			sVal = g_Cfg.ResourceGetName( m_itCrop.m_ridReapFruit );
 			return;
 
 		case IT_LEATHER:
@@ -2923,7 +2917,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			return true;
 
 		case IC_FRUIT:	// m_more2
-			m_itCrop.m_ReapFruitID = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, s.GetArgStr()));
+			m_itCrop.m_ridReapFruit.SetObjUID( s.GetArgDWVal() );
 			return true;
 		case IC_MAXHITS:
 			m_itNormal.m_more1 = MAKEDWORD(LOWORD(m_itNormal.m_more1), s.GetArgVal());
@@ -3640,6 +3634,7 @@ void CItem::SetAnim( ITEMID_TYPE id, int iTime )
 	SetDispID( id );
 	m_type = IT_ANIM_ACTIVE;
 	SetTimeout( iTime );
+	//RemoveFromView();
 	Update();
 }
 
@@ -3716,7 +3711,7 @@ bool CItem::IsValidLockLink( CItem * pItemLock ) const
 	if ( pItemLock == NULL )
 		return false;
 	if ( pItemLock->IsTypeLockable())
-		return( pItemLock->m_itContainer.m_lockUID == m_itKey.m_lockUID );
+		return( pItemLock->m_itContainer.m_UIDLock == m_itKey.m_UIDLock );
 	if ( CItemBase::IsID_Multi( pItemLock->GetDispID()))
 	{
 		// Is it linked to the item it is locking. (should be)
@@ -3733,15 +3728,15 @@ bool CItem::IsValidLockUID() const
 	ADDTOCALLSTACK("CItem::IsValidLockUID");
 	// IT_KEY
 	// Keys must:
-	//  1. have m_lockUID == UID of the container.
+	//  1. have m_UIDLock == UID of the container.
 	//  2. m_uidLink == UID of the multi.
 
-	if ( ! m_itKey.m_lockUID.IsValidUID() )	// blank
+	if ( ! m_itKey.m_UIDLock.IsValidUID() )	// blank
 		return false;
 
 	// or we are a key to a multi.
 	// we can be linked to the multi.
-	if ( IsValidLockLink( m_itKey.m_lockUID.ItemFind()) )
+	if ( IsValidLockLink( m_itKey.m_UIDLock.ItemFind()) )
 		return true;
 	if ( IsValidLockLink( m_uidLink.ItemFind()) )
 		return true;
@@ -3751,7 +3746,7 @@ bool CItem::IsValidLockUID() const
 
 bool CItem::IsKeyLockFit( dword dwLockUID ) const
 {
-	return ( m_itKey.m_lockUID == dwLockUID );
+	return ( m_itKey.m_UIDLock == dwLockUID );
 }
 
 void CItem::ConvertBolttoCloth()
@@ -4114,7 +4109,7 @@ bool CItem::Use_DoorNew( bool bJustOpen )
 
 	//default or override ID
 	int64 idOverride = GetDefNum("DOOROPENID");
-	ITEMID_TYPE idSwitch = idOverride ? (ITEMID_TYPE)idOverride : pItemDef->m_ttDoor.m_idSwitch;
+	ITEMID_TYPE idSwitch = idOverride ? (ITEMID_TYPE)idOverride : (ITEMID_TYPE)pItemDef->m_ttDoor.m_ridSwitch.GetResIndex();
 	if (!idSwitch)
 		return Use_Door(bJustOpen);
 
@@ -4437,6 +4432,107 @@ SKILL_TYPE CItem::Weapon_GetSkill() const
 	}
 }
 
+SOUND_TYPE CItem::Weapon_GetSoundHit() const
+{
+	ADDTOCALLSTACK("CItem::Weapon_GetSoundHit");
+	// Get weapon hit sound
+
+	CVarDefCont *pVar = GetDefKey("AMMOSOUNDHIT", true);
+	if ( pVar )
+		return (SOUND_TYPE)pVar->GetValNum();
+	return SOUND_NONE;
+}
+
+SOUND_TYPE CItem::Weapon_GetSoundMiss() const
+{
+	ADDTOCALLSTACK("CItem::Weapon_GetSoundMiss");
+	// Get weapon miss sound
+
+	CVarDefCont *pVar = GetDefKey("AMMOSOUNDMISS", true);
+	if ( pVar )
+		return (SOUND_TYPE)pVar->GetValNum();
+	return SOUND_NONE;
+}
+
+void CItem::Weapon_GetRangedAmmoAnim(ITEMID_TYPE &id, dword &hue, dword &render)
+{
+	ADDTOCALLSTACK("CItem::Weapon_GetRangedAmmoAnim");
+	// Get animation properties of this ranged weapon (archery/throwing)
+
+	CVarDefCont *pVarAnim = GetDefKey("AMMOANIM", true);
+	if ( pVarAnim )
+	{
+		lpctstr t_Str = pVarAnim->GetValStr();
+		CResourceIDBase rid = static_cast<CResourceIDBase>(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
+		id = (ITEMID_TYPE)rid.GetResIndex();
+	}
+	else
+	{
+		const CItemBase *pWeaponDef = Item_GetDef();
+		if ( pWeaponDef )
+			id = (ITEMID_TYPE)(pWeaponDef->m_ttWeaponBow.m_ridAmmoX.GetResIndex());
+	}
+
+	CVarDefCont *pVarAnimHue = GetDefKey("AMMOANIMHUE", true);
+	if ( pVarAnimHue )
+		hue = (dword)pVarAnimHue->GetValNum();
+
+	CVarDefCont *pVarAnimRender = GetDefKey("AMMOANIMRENDER", true);
+	if ( pVarAnimRender )
+		render = (dword)pVarAnimRender->GetValNum();
+}
+
+CResourceIDBase CItem::Weapon_GetRangedAmmoRes()
+{
+	ADDTOCALLSTACK("CItem::Weapon_GetRangedAmmoRes");
+	// Get ammo resource id of this ranged weapon (archery/throwing)
+
+	CVarDefCont *pVarType = GetDefKey("AMMOTYPE", true);
+	if ( pVarType )
+	{
+		lpctstr pszAmmoID = pVarType->GetValStr();
+		return static_cast<CResourceIDBase>(g_Cfg.ResourceGetID(RES_ITEMDEF, pszAmmoID));
+	}
+
+	CItemBase *pItemDef = Item_GetDef();
+	return pItemDef->m_ttWeaponBow.m_ridAmmo;
+}
+
+CItem *CItem::Weapon_FindRangedAmmo(CResourceIDBase id)
+{
+	ADDTOCALLSTACK("CItem::Weapon_FindRangedAmmo");
+	// Find ammo used by this ranged weapon (archery/throwing)
+
+	// Get the container to search
+	CContainer *pParent = dynamic_cast<CContainer *>(dynamic_cast<CObjBase *>(GetParent()));
+	CVarDefCont *pVarCont = GetDefKey("AMMOCONT", true);
+	if ( pVarCont )
+	{
+		// Search container using UID
+		CUID uidCont = CUID((dword)pVarCont->GetValNum());
+		CContainer *pCont = dynamic_cast<CContainer *>(uidCont.ItemFind());
+		if ( pCont )
+			return pCont->ContentFind(id);
+
+		// Search container using ITEMID_TYPE
+		if ( pParent )
+		{
+			lpctstr pszContID = pVarCont->GetValStr();
+			CResourceIDBase ridCont = static_cast<CResourceIDBase>(g_Cfg.ResourceGetID(RES_ITEMDEF, pszContID));
+			pCont = dynamic_cast<CContainer *>(pParent->ContentFind(ridCont));
+			if ( pCont )
+				return pCont->ContentFind(id);
+		}
+		return NULL;
+	}
+
+	// Search on parent container if there's no specific container to search
+	if ( pParent )
+		return pParent->ContentFind(id);
+
+	return NULL;
+}
+
 bool CItem::IsMemoryTypes( word wType ) const
 {
 	if ( ! IsType( IT_EQ_MEMORY_OBJ ))
@@ -4665,7 +4761,7 @@ bool CItem::Use_Light()
 	ITEMID_TYPE id = (ITEMID_TYPE)(m_TagDefs.GetKeyNum("OVERRIDE_LIGHTID", true));
 	if ( !id )
 	{
-		id = Item_GetDef()->m_ttLightSource.m_idLight;
+		id = (ITEMID_TYPE)Item_GetDef()->m_ttLightSource.m_ridLight.GetResIndex();
 		if ( !id )
 			return false;
 	}
@@ -5352,7 +5448,7 @@ bool CItem::IsResourceMatch( CResourceIDBase rid, dword dwArg )
 				}
 				case IT_KEY:		// keys with different links are not the same resource
 				{
-					if ( m_itKey.m_lockUID != dwArg )
+					if ( m_itKey.m_UIDLock != dwArg )
 						return false;
 					break;
 				}
@@ -5465,6 +5561,7 @@ bool CItem::OnTick()
 			{
 				// reset the anim
 				EXC_SET("default behaviour::IT_ANIM_ACTIVE");
+				RemoveFromView();
 				SetDispID( m_itAnim.m_PrevID );
 				m_type = m_itAnim.m_PrevType;
 				SetTimeout( -1 );

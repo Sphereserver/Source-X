@@ -406,18 +406,18 @@ bool CClient::OnTarg_Item_Link( CObjBase * pObj2 )
 			pItem2 = pTmp;
 		}
 		// pItem1 = the IT_KEY
-		if ( pItem2->m_itContainer.m_lockUID )
-		{
-			pItem1->m_itKey.m_lockUID = pItem2->m_itContainer.m_lockUID;
-		}
-		else if ( pItem1->m_itKey.m_lockUID )
-		{
-			pItem2->m_itContainer.m_lockUID = pItem1->m_itKey.m_lockUID;
-		}
+		if ( pItem2->m_itContainer.m_UIDLock )
+
+			pItem1->m_itKey.m_UIDLock = pItem2->m_itContainer.m_UIDLock;
+
+		else if ( pItem1->m_itKey.m_UIDLock )
+
+			pItem2->m_itContainer.m_UIDLock = pItem1->m_itKey.m_UIDLock;
+
 		else
-		{
-			pItem1->m_itKey.m_lockUID = pItem2->m_itContainer.m_lockUID = pItem2->GetUID();
-		}
+
+			pItem1->m_itKey.m_UIDLock = pItem2->m_itContainer.m_UIDLock = pItem2->GetUID();
+
 	}
 	else
 	{
@@ -2127,10 +2127,10 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		CItem * pKey = NULL;
 		bool fLockable = pItemTarg->IsTypeLockable();
 
-		if ( fLockable && pItemTarg->m_itContainer.m_lockUID )
+		if ( fLockable && pItemTarg->m_itContainer.m_UIDLock )
 		{
 			// try all the keys on the object.
-			pKey = pKeyRing->ContentFind( CResourceID(RES_TYPEDEF,IT_KEY), pItemTarg->m_itContainer.m_lockUID );
+			pKey = pKeyRing->ContentFind( CResourceID(RES_TYPEDEF,IT_KEY), pItemTarg->m_itContainer.m_UIDLock );
 		}
 		if ( pKey == NULL )
 		{
@@ -2145,7 +2145,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 				}
 			}
 
-			if ( ! fLockable || ! pItemTarg->m_itContainer.m_lockUID )
+			if ( ! fLockable || ! pItemTarg->m_itContainer.m_UIDLock )
 				SysMessageDefault( DEFMSG_ITEMUSE_KEY_NOLOCK );
 			else
 				SysMessageDefault( DEFMSG_ITEMUSE_KEY_NOKEY );
@@ -2231,20 +2231,20 @@ static lpctstr const sm_Txt_LoomUse[] =
 		// Use more1 to record the type of resource last used on this object
 		// Use more2 to record the number of resources used so far
 		// Check what was used last.
-		if ( pItemTarg->m_itLoom.m_ClothID != pItemUse->GetDispID() &&
-			pItemTarg->m_itLoom.m_ClothID )
+		ITEMID_TYPE ClothID = (ITEMID_TYPE)pItemTarg->m_itLoom.m_ridCloth.GetResIndex();
+		if ( ClothID && (ClothID != pItemUse->GetDispID()) )
 		{
 			// throw away what was on here before
 			SysMessageDefault( DEFMSG_ITEMUSE_LOOM_REMOVE );
-			CItem * pItemCloth = CItem::CreateTemplate( pItemTarg->m_itLoom.m_ClothID, NULL, m_pChar );
+			CItem * pItemCloth = CItem::CreateTemplate( ClothID, NULL, m_pChar );
 			pItemCloth->SetAmount( (word)pItemTarg->m_itLoom.m_ClothQty );
 			pItemTarg->m_itLoom.m_ClothQty = 0;
-			pItemTarg->m_itLoom.m_ClothID = ITEMID_NOTHING;
+			pItemTarg->m_itLoom.m_ridCloth.ClearUID();
 			m_pChar->ItemBounce( pItemCloth );
 			return true;
 		}
 
-		pItemTarg->m_itLoom.m_ClothID = pItemUse->GetDispID();
+		pItemTarg->m_itLoom.m_ridCloth = CResourceID(RES_ITEMDEF, pItemUse->GetDispID());
 
 		int iUsed = 0;
 		int iNeed = CountOf( sm_Txt_LoomUse ) - 1;
@@ -2264,7 +2264,7 @@ static lpctstr const sm_Txt_LoomUse[] =
 		{
 			SysMessage( sm_Txt_LoomUse[ CountOf( sm_Txt_LoomUse ) - 1 ] );
 			pItemTarg->m_itLoom.m_ClothQty = 0;
-			pItemTarg->m_itLoom.m_ClothID = ITEMID_NOTHING;
+			pItemTarg->m_itLoom.m_ridCloth.ClearUID();
 
 /*
 			CItemBase * pItemDef = pItemTarg->Item_GetDef();

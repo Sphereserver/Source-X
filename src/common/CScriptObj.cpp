@@ -40,7 +40,7 @@ void CScriptTriggerArgs::Init( lpctstr pszStr )
 	if ( pszStr == NULL )
 		pszStr	= "";
 	// raw is left untouched for now - it'll be split the 1st time argv is accessed
-	m_s1_raw		= pszStr;
+	m_s1_raw = pszStr;
 	bool fQuote = false;
 	if ( *pszStr == '"' )
 	{
@@ -48,7 +48,7 @@ void CScriptTriggerArgs::Init( lpctstr pszStr )
 		++pszStr;
 	}
 
-	m_s1	= pszStr ;
+	m_s1 = pszStr ;
 
 	// take quote if present.
 	if (fQuote)
@@ -296,11 +296,11 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
 	if ( IsSetEF( EF_Intrinsic_Locals ) )
 	{
 		EXC_SET("intrinsic");
-		CVarDefCont *	pVar	= m_VarsLocal.GetKey( pszKey );
+		CVarDefCont * pVar = m_VarsLocal.GetKey( pszKey );
 
 		if ( pVar )
 		{
-			sVal	= pVar->GetValStr();
+			sVal = pVar->GetValStr();
 			return true;
 		}
 	}
@@ -308,7 +308,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
 	{
 		EXC_SET("local");
 		pszKey	+= 6;
-		sVal	= m_VarsLocal.GetKeyStr(pszKey, true);
+		sVal = m_VarsLocal.GetKeyStr(pszKey, true);
 		return true;
 	}
 
@@ -343,10 +343,10 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
 				}
 
 				// add empty arguments if they are provided
-				if ( (*s == ',') && (!fQuotes))
+				if ( (*s == ',') && !fQuotes)
 				{
-                    m_new_arguments.push_back(CSString("\0"));
-					m_v.Add( m_new_arguments[m_new_arguments.size() - 1].GetPtr() );
+					lpctstr pszZero = "\0";
+					m_v.Add( pszZero );
 					++s;
 					continue;
 				}
@@ -364,18 +364,34 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
 
 				while (*s)
 				{
-					if (( *s == '"' ) && ( fQuotes ))	{	*s	= '\0';	fQuotes = false;	}
-					else if (( *s == '"' ))	{	fInerQuotes = !fInerQuotes;	}
+					if ( (*s == '"' ) && fQuotes )
+					{
+						*s	= '\0';
+						fQuotes = false;
+					}
+					else if (( *s == '"' ))
+					{
+						fInerQuotes = !fInerQuotes;
+					}
 					/*if ( *s == '"' )
 					{
-						if ( fQuotes )	{	*s	= '\0';	fQuotes = false;	break;	}
+						if ( fQuotes )
+						{
+							*s	= '\0';
+							fQuotes = false;
+							break;
+						}
 						*s = '\0';
 						++s;
 						fQuotes	= true;	// maintain
 						break;
 					}*/
 					if ( !fQuotes && !fInerQuotes && (*s == ',') )
-					{ *s = '\0'; s++; break; }
+					{
+						*s = '\0';
+						++s;
+						break;
+					}
 					++s;
 				}
 				m_v.Add( pszArg );
@@ -2620,7 +2636,7 @@ jump_in:
 								int64 iN3 = pArgs->m_iN3;
 								CScriptObj *pO1 = pArgs->m_pO1;
 								CSString s1 = pArgs->m_s1;
-								CSString s1_raw = pArgs->m_s1;
+								CSString s1_raw = pArgs->m_s1_raw;
 								pArgs->m_v.SetCount(0);
 								pArgs->Init(z);
 
@@ -2651,7 +2667,7 @@ jump_in:
 						CScriptObj *pRef = this;
 						if ( iArgQty == 2 )
 						{
-							CUID uid = ATOI(piCmd[1]);
+							CUID uid( ATOI(piCmd[1]) );
 							if ( uid.ObjFind() )
 								pRef = uid.ObjFind();
 						}
@@ -2686,7 +2702,7 @@ jump_in:
 								int64 iN3 = pArgs->m_iN3;
 								CScriptObj *pO1 = pArgs->m_pO1;
 								CSString s1 = pArgs->m_s1;
-								CSString s1_raw = pArgs->m_s1;
+								CSString s1_raw = pArgs->m_s1_raw;
 								pArgs->m_v.SetCount(0);
 								pArgs->Init(z);
 
@@ -2704,7 +2720,7 @@ jump_in:
 								tRet = pRef->OnTrigger( psTmp, pSrc, pArgs);
 
 							pArgs->m_VarsLocal.SetNum("return",tRet,false);
-							fRes = tRet > 0 ? 1 : 0;
+							fRes = (tRet > 0) ? 1 : 0;
 						}
 						else
 							fRes = false;

@@ -821,15 +821,21 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 
 				CResourceID rid = g_Cfg.ResourceGetID( RES_QTY, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(ppszArgs[0])));
 				m_tmAdd.m_id = rid.GetResIndex();
-				m_tmAdd.m_amount = (iQty > 1) ? (word)(maximum(ATOI(ppszArgs[1]), 1)) : 1;
+				if (iQty > 1)
+				{
+					m_tmAdd.m_amount = (word)ATOI(ppszArgs[1]);
+					m_tmAdd.m_amount = maximum(m_tmAdd.m_amount, 1);
+				}
+				else
+					m_tmAdd.m_amount = 1;
 				if ( (rid.GetResType() == RES_CHARDEF) || (rid.GetResType() == RES_SPAWN) )
 				{
 					m_Targ_Prv_UID.InitUID();
-					return addTargetChars(CLIMODE_TARG_ADDCHAR, static_cast<CREID_TYPE>(m_tmAdd.m_id), false);
+					return addTargetChars(CLIMODE_TARG_ADDCHAR, (CREID_TYPE)m_tmAdd.m_id, false);
 				}
 				else
 				{
-					return addTargetItems(CLIMODE_TARG_ADDITEM, static_cast<ITEMID_TYPE>(m_tmAdd.m_id));
+					return addTargetItems(CLIMODE_TARG_ADDITEM, (ITEMID_TYPE)m_tmAdd.m_id);
 				}
 			}
 			else
@@ -1033,7 +1039,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 						m_Targ_UID.ClearUID();
 						m_Targ_Prv_UID.ClearUID();
 					}
-					m_pChar->Skill_Start(static_cast<SKILL_TYPE>(skill));
+					m_pChar->Skill_Start((SKILL_TYPE)skill);
 					break;
 				}
 				else
@@ -1343,7 +1349,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			}
 			return false;
 		case CV_SHOWSKILLS:
-			addSkillWindow(static_cast<SKILL_TYPE>(g_Cfg.m_iMaxSkill)); // Reload the real skills
+			addSkillWindow((SKILL_TYPE)(g_Cfg.m_iMaxSkill)); // Reload the real skills
 			break;
 		case CV_SKILLMENU:				// Just put up another menu.
 			Cmd_Skill_Menu( g_Cfg.ResourceGetIDType( RES_SKILLMENU, s.GetArgStr()));
@@ -1393,7 +1399,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 					if ( !pSpellDef->GetPrimarySkill(&skill, NULL) )
 						return false;
 
-					m_pChar->Skill_Start(static_cast<SKILL_TYPE>(skill));
+					m_pChar->Skill_Start((SKILL_TYPE)(skill));
 				}
 			}
 			break;

@@ -135,26 +135,33 @@ private:
 	} m_BfAntiCheat;
 
 	// Promptconsole
-	CLIMODE_TYPE m_Prompt_Mode;	// type of prompt
-	CUID m_Prompt_Uid;		// context uid
-	CSString m_Prompt_Text;		// text (i.e. callback function)
+	CLIMODE_TYPE m_Prompt_Mode;			// type of prompt
+	CUID m_Prompt_Uid;					// context uid
+	CSString m_Prompt_Text;				// text (i.e. callback function)
 
 public:
-	CONNECT_TYPE	m_iConnectType;	// what sort of a connection is this ?
-	CAccount * m_pAccount;		// The account name. we logged in on
+	CONNECT_TYPE m_iConnectType;		// what sort of a connection is this ?
+	CAccount * m_pAccount;				// The account name. we logged in on
 
 	CServerTime m_timeLogin;			// World clock of login time. "LASTCONNECTTIME"
 	CServerTime m_timeLastEvent;		// Last time we got event from client.
 	CServerTime m_timeLastEventWalk;	// Last time we got a walk event from client
 	int64 m_timeNextEventWalk;			// Fastwalk prevention: only allow more walk requests after this timer
 
-									// GM only stuff.
-	CGMPage * m_pGMPage;		// Current GM page we are connected to.
+	// GM only stuff.
+	CGMPage * m_pGMPage;	// Current GM page we are connected to.
 	CUID m_Prop_UID;		// The object of /props (used for skills list as well!)
 
-								// Gump stuff
+	// Gump stuff
 	typedef std::map<int,int> OpenedGumpsMap_t;
 	OpenedGumpsMap_t m_mapOpenedGumps;
+
+	// Throwing weapons stuff (this is used to play weapon returning anim after throw it)
+	CServerTime m_timeLastSkillThrowing;	// Last time we throw the weapon
+	CObjBase *m_pSkillThrowingTarg;			// Object from where the anim will return from
+	ITEMID_TYPE m_SkillThrowingAnimID;		// Weapon anim ID (AMMOANIM)
+	dword m_SkillThrowingAnimHue;			// Weapon anim hue (AMMOANIMHUE)
+	dword m_SkillThrowingAnimRender;		// Weapon anim render (AMMOANIMRENDER)
 
 	// Current operation context args for modal async operations..
 private:

@@ -277,7 +277,7 @@ public:
 		{
 			dword m_junk1;
 			dword m_junk2;
-			ITEMID_TYPE m_idLight;	// TDATA3=Change light state to on/off
+			CResourceIDBase m_ridLight;	// TDATA3=Change light state to on/off
 		} m_ttLightSource;
 
 		// IT_WEAPON_BOW
@@ -287,8 +287,8 @@ public:
 		{
 			dword		m_junk1;		// TDATA1= Sound it makes ?
 			dword		m_iStrReq;		// TDATA2= REQSTR= Strength required to weild weapons/armor.
-			ITEMID_TYPE m_idAmmo;		// TDATA3= required source ammo.
-			ITEMID_TYPE m_idAmmoX;		// TDATA4= fired ammo fx.
+			CResourceIDBase m_ridAmmo;		// TDATA3= required source ammo.
+			CResourceIDBase m_ridAmmoX;		// TDATA4= fired ammo fx.
 		} m_ttWeaponBow;
 
 		// IT_CONTAINER
@@ -360,7 +360,7 @@ public:
 		{
 			SOUND_TYPE m_iSoundClose;	// tdata1(low)= sound to close. SOUND_TYPE
 			SOUND_TYPE m_iSoundOpen;	// tdata1(high)= sound to open. SOUND_TYPE
-			ITEMID_TYPE m_idSwitch;		// tdata2 ID to change into when open/close
+			CResourceIDBase m_ridSwitch;// tdata2 ID to change into when open/close
 			dword m_iXChange;			// tdata3= X position to change
 			dword m_iYChange;			// tdata4= Y position to change
 		} m_ttDoor;
@@ -382,17 +382,17 @@ public:
 		// IT_CROPS	- is consumed and will regrow invis.
 		struct
 		{
-			ITEMID_TYPE m_idReset;	// tdata1= what will it be reset to regrow from ? 0=nothing
-			ITEMID_TYPE m_idGrow;	// tdata2= what will it grow further into ? 0=fully mature.
-			ITEMID_TYPE m_idFruit;	// tdata3= what can it be reaped for ? 0=immature can't be reaped
+			CResourceIDBase m_ridReset;	// tdata1= what will it be reset to regrow from ? 0=nothing
+			CResourceIDBase m_ridGrow;	// tdata2= what will it grow further into ? 0=fully mature.
+			CResourceIDBase m_ridFruit;	// tdata3= what can it be reaped for ? 0=immature can't be reaped
 		} m_ttCrops;
 
 		// IT_SEED
 		// IT_FRUIT
 		struct
 		{
-			ITEMID_TYPE m_idReset;	// tdata1= what will it be reset to regrow from ? 0=nothing
-			ITEMID_TYPE m_idSeed;	// tdata2= what does the seed look like ? Copper coin = default.
+			CResourceIDBase m_ridReset;	// tdata1= what will it be reset to regrow from ? 0=nothing
+			CResourceIDBase m_ridSeed;	// tdata2= what does the seed look like ? Copper coin = default.
 		} m_ttFruit;
 
 		// IT_DRINK
@@ -402,7 +402,7 @@ public:
 		// IT_WATER_WASH
 		struct
 		{
-			ITEMID_TYPE m_idEmpty;	// tdata1= the empty container. IT_POTION_EMPTY IT_PITCHER_EMPTY
+			CResourceIDBase m_ridEmpty;	// tdata1= the empty container. IT_POTION_EMPTY IT_PITCHER_EMPTY
 		} m_ttDrink;
 
 		// IT_SHIP_PLANK
@@ -410,7 +410,7 @@ public:
 		// IT_SHIP_SIDE_LOCKED
 		struct
 		{
-			ITEMID_TYPE m_idState;	// tdata1= next state open/close for the Ship Side
+			CResourceIDBase m_ridState;	// tdata1= next state open/close for the Ship Side
 		} m_ttShipPlank;
 
 		// IT_MAP

@@ -99,7 +99,6 @@ public:
 
 	CSString					m_s1;			// ""ARGS" or "ARGS1" = string 1
 	CSString					m_s1_raw;		// RAW, used to build argv in runtime
-	std::vector<CSString>       m_new_arguments;// add new arguments at runtime
 
 	CSPtrTypeArray	<lpctstr>	m_v;
 

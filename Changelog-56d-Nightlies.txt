@@ -510,3 +510,16 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Fixed: GOLD, NEWGOLD ignoring the ItemsMaxAmount .ini setting.
 - Fixed: duped char not inheriting the brain.
 - Fixed: new characters receiving the newbie sets of starting items for another race.
+
+01-04-2018, Nolok
+- [sphereCrypt.ini]: Added encryption key for Classic Client 7.0.62.x and Enhanced Client 4.0.62.x.
+- Changed: added a limit of 25.000.000 to GOLD and NEWGOLD functions, to avoid making sphere hang or crash when using too high values.
+- Fixed: the new animation packet wasn't working properly when attacking with a bow or a crossbow.
+- Fixed: temporarily animated items, when their timer reached zero, never appeared to return to their original state (even if they actually did) when using some clients.
+- Fixed: some items (like lanterns, fruits, crops...) accepted as valid MORE1/2 or TDATA1/2/3/4 only an item ID and generated an error if that was a defname.
+- [Port from Source, 02/06/2017, Coruja] Changed: Misc fixes and improvements on training items (Training Dummy, Pickpocket Dip and Archery Butte).
+- [Port from Source, 06/06/2017, Coruja]
+	Fixed: Throwing weapons not working correctly.
+	Added: Missing animation of throwing weapons returning after throwing them.
+- [Port from Source, 16/06/2017, Coruja] Improved Throwing weapons returning animation.
+- [Port from Source, 02-01-2018, Coruja] Changed: Improved how ranged weapons handle ammo.

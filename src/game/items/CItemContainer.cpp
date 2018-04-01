@@ -680,12 +680,12 @@ void CItemContainer::MakeKey()
 {
 	ADDTOCALLSTACK("CItemContainer::MakeKey");
 	SetType(IT_CONTAINER);
-	m_itContainer.m_lockUID = GetUID();
+	m_itContainer.m_UIDLock = GetUID();
 	m_itContainer.m_lock_complexity = 500 + Calc_GetRandVal(600);
 
 	CItem *pKey = CreateScript(ITEMID_KEY_COPPER);
 	ASSERT(pKey);
-	pKey->m_itKey.m_lockUID = GetUID();
+	pKey->m_itKey.m_UIDLock = GetUID();
 	ContentAdd(pKey);
 }
 
@@ -820,7 +820,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 				pCharMsg->SysMessageDefault(DEFMSG_MSG_ERR_NOTKEY);
 				return false;
 			}
-			if ( !pItem->m_itKey.m_lockUID )
+			if ( !pItem->m_itKey.m_UIDLock )
 			{
 				pCharMsg->SysMessageDefault(DEFMSG_MSG_ERR_NOBLANKRING);
 				return false;

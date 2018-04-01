@@ -255,118 +255,114 @@ bool CChar::Use_Train_Dummy( CItem * pItem, bool fSetup )
 	ADDTOCALLSTACK("CChar::Use_Train_Dummy");
 	// IT_TRAIN_DUMMY
 	// Dummy animation timer prevents over dclicking.
-
 	ASSERT(pItem);
+
+	if ( !pItem->IsTopLevel() || (GetDist(pItem) > 1) )
+	{
+		SysMessageDefault(DEFMSG_ITEMUSE_TRAININGDUMMY_TOOFAR);
+		return false;
+	}
+	else if ( IsStatFlag(STATF_ONHORSE) )
+	{
+		SysMessageDefault(DEFMSG_ITEMUSE_TRAININGDUMMY_MOUNT);
+		return false;
+	}
+
 	SKILL_TYPE skill = Fight_GetWeaponSkill();
-	if ( g_Cfg.IsSkillFlag(skill, SKF_RANGED) )		// do not allow archery training on dummys
+	if ( g_Cfg.IsSkillFlag(skill, SKF_RANGED) )
 	{
-		SysMessageDefault(DEFMSG_ITEMUSE_TDUMMY_ARCH);
+		SysMessageDefault(DEFMSG_ITEMUSE_TRAININGDUMMY_RANGED);
 		return false;
 	}
 
-	char skilltag[32];
-	sprintf(skilltag, "OVERRIDE.PracticeMax.SKILL_%d", skill &~0xD2000000);
-	CVarDefCont *pSkillTag = pItem->GetKey(skilltag, true);
-	int iMaxSkill = pSkillTag ? (int)(pSkillTag->GetValNum()) : g_Cfg.m_iSkillPracticeMax;
-
-	if ( Skill_GetBase(skill) > iMaxSkill )
-	{
-		SysMessageDefault(DEFMSG_ITEMUSE_TDUMMY_SKILL);
-		return false;
-	}
-	if ( !pItem->IsTopLevel() )
-	{
-	baddumy:
-		SysMessageDefault(DEFMSG_ITEMUSE_TDUMMY_P);
-		return false ;
-	}
-
-	// Check location
-	int dx = GetTopPoint().m_x - pItem->GetTopPoint().m_x;
-	int dy = GetTopPoint().m_y - pItem->GetTopPoint().m_y;
-
-	if ( pItem->GetDispID() == ITEMID_DUMMY1 )
-	{
-		if ( !(!dx && abs(dy) < 2) )
-			goto baddumy;
-	}
-	else
-	{
-		if ( !(!dy && abs(dx) < 2) )
-			goto baddumy;
-	}
-
+	// Start action
 	if ( fSetup )
 	{
 		if ( Skill_GetActive() == NPCACT_TRAINING )
 			return true;
+
+		char skilltag[38];
+		sprintf(skilltag, "OVERRIDE.PracticeMax.SKILL_%d", (int)(skill & ~0xD2000000));
+		CVarDefCont *pSkillTag = pItem->GetKey(skilltag, true);
+		word iMaxSkill = pSkillTag ? (word)pSkillTag->GetValNum() : (word)g_Cfg.m_iSkillPracticeMax;
+		if ( Skill_GetBase(skill) > iMaxSkill )
+		{
+			SysMessageDefault(DEFMSG_ITEMUSE_TRAININGDUMMY_SKILL);
+			return false;
+		}
+
+		int iAnimDelay = g_Cfg.Calc_CombatAttackSpeed(this, m_uidWeapon.ItemFind());
 		UpdateAnimate(ANIM_ATTACK_WEAPON);
 		m_Act_Prv_UID = m_uidWeapon;
 		m_Act_UID = pItem->GetUID();
 		Skill_Start(NPCACT_TRAINING);
+		return true;
 	}
-	else
-	{
-		pItem->SetAnim((ITEMID_TYPE)(pItem->GetID() + 1), 3 * TICK_PER_SEC);
-		pItem->Sound(0x033);
-		Skill_UseQuick(skill, Calc_GetRandLLVal(40));
-	}
+
+	// Finish action
+	if ( Skill_GetActive() != NPCACT_TRAINING )
+		return false;
+
+	pItem->SetAnim((ITEMID_TYPE)(pItem->GetDispID() + 1), 3 * TICK_PER_SEC);
+	static const SOUND_TYPE sm_TrainingDummySounds[] = { 0x3A4, 0x3A6, 0x3A9, 0x3AE, 0x3B4, 0x3B6 };
+	pItem->Sound(sm_TrainingDummySounds[Calc_GetRandVal(CountOf(sm_TrainingDummySounds))]);
+	Skill_Experience(skill, Calc_GetRandVal(40));
 	return true;
 }
 
-bool CChar::Use_Train_PickPocketDip( CItem *pItem, bool fSetup )
+bool CChar::Use_Train_PickPocketDip( CItem * pItem, bool fSetup )
 {
 	ADDTOCALLSTACK("CChar::Use_Train_PickPocketDip");
 	// IT_TRAIN_PICKPOCKET
 	// Train dummy.
-
 	ASSERT(pItem);
-	if ( Skill_GetBase(SKILL_STEALING) > g_Cfg.m_iSkillPracticeMax )
+
+	if ( !pItem->IsTopLevel() || (GetDist(pItem) > 1) )
 	{
-		SysMessageDefault(DEFMSG_ITEMUSE_PDUMMY_SKILL);
+		SysMessageDefault(DEFMSG_ITEMUSE_PICKPOCKET_TOOFAR);
 		return true;
 	}
-	if ( !pItem->IsTopLevel() )
+	else if ( IsStatFlag(STATF_ONHORSE) )
 	{
-	badpickpocket:
-		SysMessageDefault(DEFMSG_ITEMUSE_PDUMMY_P);
-		return true;
+		SysMessageDefault(DEFMSG_ITEMUSE_PICKPOCKET_MOUNT);
+		return false;
 	}
 
-	int dx = GetTopPoint().m_x - pItem->GetTopPoint().m_x;
-	int dy = GetTopPoint().m_y - pItem->GetTopPoint().m_y;
-
-	bool fNS = (pItem->GetDispID() == ITEMID_PICKPOCKET_NS || pItem->GetDispID() == ITEMID_PICKPOCKET_NS2);
-	if ( fNS )
-	{
-		if ( !(!dx && abs(dy) < 2) )
-			goto badpickpocket;
-	}
-	else
-	{
-		if ( !(!dy && abs(dx) < 2) )
-			goto badpickpocket;
-	}
-
+	// Start action
 	if ( fSetup )
 	{
 		if ( Skill_GetActive() == NPCACT_TRAINING )
 			return true;
+
+		if ( Skill_GetBase(SKILL_STEALING) > g_Cfg.m_iSkillPracticeMax )
+		{
+			SysMessageDefault(DEFMSG_ITEMUSE_PICKPOCKET_SKILL);
+			return true;
+		}
+
 		m_Act_Prv_UID = m_uidWeapon;
 		m_Act_UID = pItem->GetUID();
 		Skill_Start(NPCACT_TRAINING);
+		return true;
 	}
-	else if ( !Skill_UseQuick(SKILL_STEALING, Calc_GetRandLLVal(40)) )
+
+	// Finish action
+	if ( Skill_GetActive() != NPCACT_TRAINING )
+		return false;
+
+	pItem->Sound(SOUND_RUSTLE);
+	if ( Skill_UseQuick(SKILL_STEALING, Calc_GetRandVal(40)) )
 	{
-		pItem->Sound(0x041);
-		pItem->SetAnim(fNS ? ITEMID_PICKPOCKET_NS_FX : ITEMID_PICKPOCKET_EW_FX, 3 * TICK_PER_SEC);
-		UpdateAnimate(ANIM_ATTACK_WEAPON);
+		SysMessageDefault(DEFMSG_ITEMUSE_PICKPOCKET_SUCCESS);
+		pItem->SetAnim(pItem->GetDispID(), 3 * TICK_PER_SEC);
 	}
 	else
 	{
-		SysMessageDefault(DEFMSG_ITEMUSE_PDUMMY_OK);
-		//pItem->Sound(0x033);
+		SysMessageDefault(DEFMSG_ITEMUSE_PICKPOCKET_FAIL);
+		pItem->Sound(SOUND_GLASS_BREAK4);
+		pItem->SetAnim((ITEMID_TYPE)(pItem->GetDispID() + 1), 3 * TICK_PER_SEC);
 	}
+	Skill_Experience(SKILL_STEALING, Calc_GetRandVal(40));
 	return true;
 }
 
@@ -376,228 +372,165 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 	// IT_ARCHERY_BUTTE
 	ASSERT(pButte);
 
-	ITEMID_TYPE AmmoID;
-	if ( GetDist(pButte) < 2 )		// if we are standing right next to the butte, retrieve the arrows/bolts
+	// If standing right next to the butte, gather the arrows/bolts
+	int iDist = GetDist(pButte);
+	if ( (iDist < 2) && pButte->m_itArcheryButte.m_AmmoCount )
 	{
-		if ( pButte->m_itArcheryButte.m_AmmoCount == 0 )
-		{
-			SysMessageDefault(DEFMSG_ITEMUSE_ARCHB_EMPTY);
-			return true;
-		}
+		CItem *pRemovedAmmo = CItem::CreateBase((ITEMID_TYPE)pButte->m_itArcheryButte.m_ridAmmoType.GetResIndex());
+		ASSERT(pRemovedAmmo);
+		pRemovedAmmo->SetAmount((word)pButte->m_itArcheryButte.m_AmmoCount);
+		ItemBounce(pRemovedAmmo, false);
+		SysMessageDefault(DEFMSG_ITEMUSE_ARCHBUTTE_GATHER);
 
-		AmmoID = pButte->m_itArcheryButte.m_AmmoType;
-		CItemBase *pAmmoDef = CItemBase::FindItemBase(AmmoID);
-		if ( pAmmoDef )
-		{
-			tchar *pszMsg = Str_GetTemp();
-			sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHB_REM), pAmmoDef->GetName(), (pButte->m_itArcheryButte.m_AmmoCount == 1) ? "" : g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHB_REMS));
-			Emote(pszMsg);
-
-			CItem *pRemovedAmmo = CItem::CreateBase(AmmoID);
-			ASSERT(pRemovedAmmo);
-			pRemovedAmmo->SetAmount((word)pButte->m_itArcheryButte.m_AmmoCount);
-			ItemBounce(pRemovedAmmo);
-		}
-
-		// Clear the target
-		pButte->m_itArcheryButte.m_AmmoType = ITEMID_NOTHING;
+		pButte->m_itArcheryButte.m_ridAmmoType.ClearUID();
 		pButte->m_itArcheryButte.m_AmmoCount = 0;
 		return true;
 	}
 
-	SKILL_TYPE skill = Fight_GetWeaponSkill();
-	if ( !g_Cfg.IsSkillFlag(skill, SKF_RANGED) )
-	{
-		SysMessageDefault(DEFMSG_ITEMUSE_ARCHB_WS);
-		return true;
-	}
-	if ( Skill_GetBase(skill) > g_Cfg.m_iSkillPracticeMax )
-	{
-		SysMessageDefault(DEFMSG_ITEMUSE_ARCHB_SKILL);
-		return true;
-	}
-
-	// Make sure we have some ammo
 	CItem *pWeapon = m_uidWeapon.ItemFind();
-	ASSERT(pWeapon);
-	const CItemBase *pWeaponDef = pWeapon->Item_GetDef();
-
-	// Determine ammo type
-	CVarDefCont *pVarAmmoType = pWeapon->GetDefKey("AMMOTYPE", true);
-	CResourceID rid;
-	lpctstr t_Str;
-
-	if ( pVarAmmoType )
+	SKILL_TYPE skill = pWeapon ? pWeapon->Weapon_GetSkill() : SKILL_NONE;
+	if ( !pWeapon || !g_Cfg.IsSkillFlag(skill, SKF_RANGED) )
 	{
-		t_Str = pVarAmmoType->GetValStr();
-		rid = g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str);
+		SysMessageDefault(DEFMSG_ITEMUSE_ARCHBUTTE_RANGED);
+		return true;
+	}
+
+	// Check distance
+	if ( iDist < 5 )
+	{
+		SysMessageDefault(DEFMSG_ITEMUSE_ARCHBUTTE_TOOCLOSE);
+		return false;
+	}
+	else if ( iDist > 6 )
+	{
+		SysMessageDefault(DEFMSG_ITEMUSE_ARCHBUTTE_TOOFAR);
+		return false;
+	}
+
+	// Check position alignment
+	CPointMap ptChar = GetTopPoint();
+	CPointMap ptButte = pButte->GetTopPoint();
+	if ( pButte->GetDispID() == ITEMID_ARCHERYBUTTE_S )
+	{
+		if ( ptChar.m_x != ptButte.m_x )
+		{
+			SysMessageDefault(DEFMSG_ITEMUSE_ARCHBUTTE_WRONGALIGN);
+			return false;
+		}
+		else if ( ptChar.m_y < ptButte.m_y )
+		{
+			SysMessageDefault(DEFMSG_ITEMUSE_ARCHBUTTE_WRONGPOS);
+			return false;
+		}
 	}
 	else
 	{
-		rid = CResourceID(RES_ITEMDEF, pWeaponDef->m_ttWeaponBow.m_idAmmo);
-	}
-	AmmoID = (ITEMID_TYPE)(rid.GetResIndex());
-
-	// If there is a different ammo type on the butte currently, tell us to remove the current type first
-	if ( (pButte->m_itArcheryButte.m_AmmoType != ITEMID_NOTHING) && (pButte->m_itArcheryButte.m_AmmoType != AmmoID) )
-	{
-		SysMessageDefault(DEFMSG_ITEMUSE_ARCHB_X);
-		return true;
-	}
-
-	// We need to be correctly aligned with the target before we can use it
-	// For the south facing butte, we need to have the same X value and a Y > 2
-	// For the east facing butte, we need to have the same Y value and an X > 2
-	if ( !pButte->IsTopLevel() )
-	{
-	badalign:
-		SysMessageDefault(DEFMSG_ITEMUSE_ARCHB_P);
-		return true;
+		if ( ptChar.m_y != ptButte.m_y )
+		{
+			SysMessageDefault(DEFMSG_ITEMUSE_ARCHBUTTE_WRONGALIGN);
+			return false;
+		}
+		else if ( ptChar.m_x < ptButte.m_x )
+		{
+			SysMessageDefault(DEFMSG_ITEMUSE_ARCHBUTTE_WRONGPOS);
+			return false;
+		}
 	}
 
-	int targDistX = GetTopPoint().m_x - pButte->GetTopPoint().m_x;
-	int targDistY = GetTopPoint().m_y - pButte->GetTopPoint().m_y;
-
-	if ( (pButte->GetID() == ITEMID_ARCHERYBUTTE_S) || (pButte->GetID() == ITEMID_MONGBATTARGET_S) )
-	{
-		if ( !(targDistX == 0 && targDistY > 2) )
-			goto badalign;
-	}
-	else
-	{
-		if ( !(targDistY == 0 && targDistX > 2) )
-			goto badalign;
-	}
-
-	if ( !CanSeeLOS(pButte, LOS_NB_WINDOWS) )	//we should be able to shoot through a window
-	{
-		SysMessageDefault(DEFMSG_ITEMUSE_ARCHB_BLOCK);
-		return true;
-	}
-
+	// Start action
 	if ( fSetup )
 	{
-		if ( Skill_GetActive() == NPCACT_TRAINING )
+		if (Skill_GetActive() == NPCACT_TRAINING)
 			return true;
-		UpdateAnimate(ANIM_ATTACK_WEAPON);
+
+		char skilltag[38];
+		sprintf(skilltag, "OVERRIDE.PracticeMax.SKILL_%d", (int)(skill & ~0xD2000000));
+		CVarDefCont *pSkillTag = pButte->GetKey(skilltag, true);
+		word iMaxSkill = pSkillTag ? (word)pSkillTag->GetValNum() : (word)g_Cfg.m_iSkillPracticeMax;
+		if ( Skill_GetBase(skill) > iMaxSkill )
+		{
+			SysMessageDefault(DEFMSG_ITEMUSE_ARCHBUTTE_SKILL);
+			return false;
+		}
+
+		int iAnimDelay = g_Cfg.Calc_CombatAttackSpeed(this, pWeapon);
+		UpdateAnimate(ANIM_ATTACK_WEAPON, true, false, (byte)maximum(0,(iAnimDelay-1) / 10) );
 		m_Act_Prv_UID = m_uidWeapon;
 		m_Act_UID = pButte->GetUID();
 		Skill_Start(NPCACT_TRAINING);
 		return true;
 	}
 
-	CVarDefCont *pCont = pWeapon->GetDefKey("AMMOCONT",true);
+	// Finish action
+	if ( Skill_GetActive() != NPCACT_TRAINING )
+		return false;
 
-	if ( m_pPlayer && AmmoID )
+	CItem *pAmmo = NULL;
+	CResourceIDBase ridAmmo = pWeapon->Weapon_GetRangedAmmoRes();
+	if ( ridAmmo )
 	{
-		int iFound = 1;
-		if ( pCont )
+		pAmmo = pWeapon->Weapon_FindRangedAmmo(ridAmmo);
+		if ( !pAmmo )
 		{
-			//check for UID
-			CUID uidCont = (dword)(pCont->GetValNum());
-			CItemContainer *pNewCont = dynamic_cast<CItemContainer*>(uidCont.ItemFind());
-			if ( !pNewCont )	//if no UID, check for ITEMID_TYPE
-			{
-				t_Str = pCont->GetValStr();
-				CResourceIDBase rContid = static_cast<CResourceIDBase>(g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str));
-				ITEMID_TYPE ContID = (ITEMID_TYPE)(rContid.GetResIndex());
-				if ( ContID )
-					pNewCont = dynamic_cast<CItemContainer*>(ContentFind(rContid));
-			}
-
-			if ( pNewCont )
-				iFound = pNewCont->ContentConsume(CResourceID(RES_ITEMDEF, AmmoID));
-			else
-				iFound = ContentConsume(CResourceID(RES_ITEMDEF, AmmoID));
-		}
-		else
-			iFound = ContentConsume(CResourceID(RES_ITEMDEF, AmmoID));
-		if ( iFound )
-		{
-			SysMessageDefault(DEFMSG_ITEMUSE_ARCHB_NOAMMO);
-			return true;
+			SysMessageDefault(DEFMSG_COMBAT_ARCH_NOAMMO);
+			return false;
 		}
 	}
 
-	// OK...go ahead and fire at the target
-	// Check the skill
-	bool fSuccess = Skill_UseQuick(skill, Calc_GetRandLLVal(40));
-
-	// determine animation parameters
-	CVarDefCont *pVarAnim = pWeapon->GetDefKey("AMMOANIM", true);
-	CVarDefCont *pVarAnimColor = pWeapon->GetDefKey("AMMOANIMHUE", true);
-	CVarDefCont *pVarAnimRender = pWeapon->GetDefKey("AMMOANIMRENDER", true);
-	ITEMID_TYPE AmmoAnim;
-	dword AmmoHue;
-	dword AmmoRender;
-
-	if ( pVarAnim )
+	// If there is a different ammo type on the butte, it must be removed first
+	ITEMID_TYPE ButteAmmoID = (ITEMID_TYPE)pButte->m_itArcheryButte.m_ridAmmoType.GetResIndex();
+	ITEMID_TYPE WeaponAmmoID = ITEMID_NOTHING;
+	if ( pAmmo )
 	{
-		t_Str = pVarAnim->GetValStr();
-		rid = g_Cfg.ResourceGetID(RES_ITEMDEF, t_Str);
-		AmmoAnim = (ITEMID_TYPE)(rid.GetResIndex());
-	}
-	else
-		AmmoAnim = (ITEMID_TYPE)(pWeaponDef->m_ttWeaponBow.m_idAmmoX);
-
-	AmmoHue = pVarAnimColor ? (dword)(pVarAnimColor->GetValNum()) : 0;
-	AmmoRender = pVarAnimRender ? (dword)(pVarAnimRender->GetValNum()) : 0;
-
-	pButte->Effect(EFFECT_BOLT, AmmoAnim, this, 16, 0, false, AmmoHue, AmmoRender);
-	pButte->Sound(0x224);
-
-	// Did we destroy the ammo?
-	const CItemBase *pAmmoDef = NULL;
-	if ( AmmoID )
-		pAmmoDef = CItemBase::FindItemBase(AmmoID);
-
-	if ( !fSuccess )
-	{
-		// Small chance of destroying the ammo
-		if ( pAmmoDef && !Calc_GetRandVal(10) )
+		WeaponAmmoID = pAmmo->GetID();
+		if ( ButteAmmoID && (ButteAmmoID != WeaponAmmoID) )
 		{
-			tchar *pszMsg = Str_GetTemp();
-			sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHB_DEST), pAmmoDef->GetName());
-			Emote(pszMsg, NULL, true);
-			return true;
+			SysMessageDefault(DEFMSG_ITEMUSE_ARCHBUTTE_CLEAN);
+			return false;
 		}
-
-		static lpctstr const sm_Txt_ArcheryButte_Failure[] =
-		{
-			g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHB_MISS_1),
-			g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHB_MISS_2),
-			g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHB_MISS_3),
-			g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHB_MISS_4)
-		};
-		Emote(sm_Txt_ArcheryButte_Failure[Calc_GetRandVal(CountOf(sm_Txt_ArcheryButte_Failure))]);
+		pAmmo->ConsumeAmount();
 	}
-	else
-	{
-		// Very small chance of destroying another arrow
-		if ( pAmmoDef && !Calc_GetRandVal(50) && pButte->m_itArcheryButte.m_AmmoCount )
-		{
-			tchar *pszMsg = Str_GetTemp();
-			sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHB_SPLIT), pAmmoDef->GetName());
-			Emote(pszMsg, NULL, true);
-			return true;
-		}
 
-		static lpctstr const sm_Txt_ArcheryButte_Success[] =
+	// Ammo animation
+	ITEMID_TYPE AnimID = ITEMID_NOTHING;
+	dword AnimHue = 0, AnimRender = 0;
+	pWeapon->Weapon_GetRangedAmmoAnim(AnimID, AnimHue, AnimRender);
+	pButte->Effect(EFFECT_BOLT, AnimID, this, 18, 1, false, AnimHue, AnimRender);
+
+	if ( m_pClient && (skill == SKILL_THROWING) )		// throwing weapons also have anim of the weapon returning after throw it
+	{
+		m_pClient->m_timeLastSkillThrowing = CServerTime::GetCurrentTime();
+		m_pClient->m_pSkillThrowingTarg = pButte;
+		m_pClient->m_SkillThrowingAnimID = AnimID;
+		m_pClient->m_SkillThrowingAnimHue = AnimHue;
+		m_pClient->m_SkillThrowingAnimRender = AnimRender;
+	}
+
+	if ( Skill_UseQuick(skill, Calc_GetRandVal(40)) )
+	{
+		static LPCTSTR const sm_Txt_ArcheryButte_Success[] =
 		{
-			g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHB_HIT_1),
-			g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHB_HIT_2),
-			g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHB_HIT_3),
-			g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHB_HIT_4)
+			g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHBUTTE_HIT1),
+			g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHBUTTE_HIT2),
+			g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHBUTTE_HIT3),
+			g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHBUTTE_HIT4)
 		};
 		Emote(sm_Txt_ArcheryButte_Success[Calc_GetRandVal(CountOf(sm_Txt_ArcheryButte_Success))]);
+		Sound(pWeapon->Weapon_GetSoundHit());
+
+		if ( WeaponAmmoID )
+		{
+			pButte->m_itArcheryButte.m_ridAmmoType = CResourceID(RES_ITEMDEF, (int)WeaponAmmoID);
+			++pButte->m_itArcheryButte.m_AmmoCount;
+		}
+	}
+	else
+	{
+		Emote(g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_ARCHBUTTE_MISS));
+		Sound(pWeapon->Weapon_GetSoundMiss());
 	}
 
-	// Update the target
-	if ( AmmoID )
-	{
-		pButte->m_itArcheryButte.m_AmmoType = AmmoID;
-		pButte->m_itArcheryButte.m_AmmoCount++;
-	}
+	Skill_Experience(skill, Calc_GetRandVal(40));
 	return true;
 }
 
@@ -967,7 +900,7 @@ void CChar::Use_Drink( CItem * pItem )
 	}
 
 	const CItemBase *pItemDef = pItem->Item_GetDef();
-	ITEMID_TYPE idbottle = (ITEMID_TYPE)(RES_GET_INDEX(pItemDef->m_ttDrink.m_idEmpty));
+	ITEMID_TYPE idbottle = (ITEMID_TYPE)pItemDef->m_ttDrink.m_ridEmpty.GetResIndex();
 
 	if ( pItem->IsType(IT_BOOZE) )
 	{
@@ -1162,12 +1095,12 @@ bool CChar::Use_Key( CItem * pKey, CItem * pItemTarg )
 			return false;
 		}
 
-		if ( !pKey->m_itKey.m_lockUID && !pItemTarg->m_itKey.m_lockUID )
+		if ( !pKey->m_itKey.m_UIDLock && !pItemTarg->m_itKey.m_UIDLock )
 		{
 			SysMessageDefault(DEFMSG_MSG_KEY_BLANKS);
 			return false;
 		}
-		if ( pItemTarg->m_itKey.m_lockUID && pKey->m_itKey.m_lockUID )
+		if ( pItemTarg->m_itKey.m_UIDLock && pKey->m_itKey.m_UIDLock )
 		{
 			SysMessageDefault(DEFMSG_MSG_KEY_NOTBLANKS);
 			return false;
@@ -1179,14 +1112,14 @@ bool CChar::Use_Key( CItem * pKey, CItem * pItemTarg )
 			SysMessageDefault(DEFMSG_MSG_KEY_FAILC);
 			return false;
 		}
-		if ( pItemTarg->m_itKey.m_lockUID )
-			pKey->m_itKey.m_lockUID = pItemTarg->m_itKey.m_lockUID;
+		if ( pItemTarg->m_itKey.m_UIDLock )
+			pKey->m_itKey.m_UIDLock = pItemTarg->m_itKey.m_UIDLock;
 		else
-			pItemTarg->m_itKey.m_lockUID = pKey->m_itKey.m_lockUID;
+			pItemTarg->m_itKey.m_UIDLock = pKey->m_itKey.m_UIDLock;
 		return true;
 	}
 
-	if ( !pKey->m_itKey.m_lockUID )
+	if ( !pKey->m_itKey.m_UIDLock )
 	{
 		SysMessageDefault(DEFMSG_MSG_KEY_ISBLANK);
 		return false;
@@ -1204,18 +1137,18 @@ bool CChar::Use_Key( CItem * pKey, CItem * pItemTarg )
 		return false;
 	}
 
-	if ( m_pArea->GetResourceID() == pKey->m_itKey.m_lockUID )
+	if ( m_pArea->GetResourceID() == pKey->m_itKey.m_UIDLock )
 	{
 		if ( Use_MultiLockDown(pItemTarg) )
 			return true;
 	}
 
-	if ( !pItemTarg->m_itContainer.m_lockUID )	// or m_itContainer.m_lockUID
+	if ( !pItemTarg->m_itContainer.m_UIDLock )	// or m_itContainer.m_UIDLock
 	{
 		SysMessageDefault(DEFMSG_MSG_KEY_NOLOCK);
 		return false;
 	}
-	if ( !pKey->IsKeyLockFit(pItemTarg->m_itContainer.m_lockUID) )	// or m_itKey
+	if ( !pKey->IsKeyLockFit(pItemTarg->m_itContainer.m_UIDLock) )	// or m_itKey
 	{
 		SysMessageDefault(DEFMSG_MSG_KEY_WRONGLOCK);
 		return false;
@@ -1319,7 +1252,7 @@ bool CChar::Use_Seed( CItem * pSeed, CPointMap * pPoint )
 	}
 
 	const CItemBase *pItemDef = pSeed->Item_GetDef();
-	ITEMID_TYPE idReset = (ITEMID_TYPE)(RES_GET_INDEX(pItemDef->m_ttFruit.m_idReset));
+	ITEMID_TYPE idReset = (ITEMID_TYPE)pItemDef->m_ttFruit.m_ridReset.GetResIndex();
 	if ( idReset == 0 )
 	{
 		SysMessageDefault(DEFMSG_MSG_SEED_NOGOOD);
@@ -1350,7 +1283,7 @@ bool CChar::Use_Seed( CItem * pSeed, CPointMap * pPoint )
 	pPlant->MoveToUpdate(pt);
 	if ( pPlant->IsType(IT_CROPS) || pPlant->IsType(IT_FOLIAGE) )
 	{
-		pPlant->m_itCrop.m_ReapFruitID = pSeed->GetID();
+		pPlant->m_itCrop.m_ridReapFruit.SetPrivateUID( pSeed->GetID() );
 		pPlant->Plant_CropReset();
 	}
 	else
@@ -1420,23 +1353,29 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 		pSpawn->DelObj(pItem->GetUID());    // remove this item from it's spawn when DClicks it
 
 	int fAction = true;
-	switch(pItem->GetType()) {
-		case IT_ITEM_STONE: {
+	switch(pItem->GetType())
+	{
+		case IT_ITEM_STONE:
+		{
 			// Give them this item
-			if (pItem->m_itItemStone.m_wAmount == UINT16_MAX) {
+			if (pItem->m_itItemStone.m_wAmount == UINT16_MAX)
+			{
 				SysMessageDefault(DEFMSG_MSG_IT_IS_DEAD);
 				return true;
 			}
-			if (pItem->m_itItemStone.m_wRegenTime) {
-				if (pItem->IsTimerSet()) {
+			if (pItem->m_itItemStone.m_wRegenTime)
+			{
+				if (pItem->IsTimerSet())
+				{
 					SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_STONEREG_TIME), pItem->GetTimerDiff() / TICK_PER_SEC);
 					return true;
 				}
 				pItem->SetTimeout(pItem->m_itItemStone.m_wRegenTime * TICK_PER_SEC);
 			}
 			ItemBounce(CItem::CreateTemplate(pItem->m_itItemStone.m_ItemID, GetPackSafe(), this));
-			if (pItem->m_itItemStone.m_wAmount != 0) {
-				pItem->m_itItemStone.m_wAmount--;
+			if (pItem->m_itItemStone.m_wAmount != 0)
+			{
+				--pItem->m_itItemStone.m_wAmount;
 				if (pItem->m_itItemStone.m_wAmount == 0)
 					pItem->m_itItemStone.m_wAmount = UINT16_MAX;
 			}
@@ -1452,7 +1391,8 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 		case IT_KINDLING:
 			return Use_Kindling(pItem);
 
-		case IT_SPINWHEEL: {
+		case IT_SPINWHEEL:
+		{
 			if (fLink)
 				return false;
 
@@ -1477,7 +1417,8 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 			return true;
 		}
 
-		case IT_TRAIN_DUMMY: {
+		case IT_TRAIN_DUMMY:
+		{
 			if (fLink)
 				return false;
 
@@ -1485,7 +1426,8 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 			return true;
 		}
 
-		case IT_TRAIN_PICKPOCKET: {
+		case IT_TRAIN_PICKPOCKET:
+		{
 			if (fLink)
 				return false;
 
@@ -1493,7 +1435,8 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 			return true;
 		}
 
-		case IT_ARCHERY_BUTTE: {
+		case IT_ARCHERY_BUTTE:
+		{
 			if (fLink)
 				return false;
 
@@ -1501,7 +1444,8 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 			return true;
 		}
 
-		case IT_LOOM: {
+		case IT_LOOM:
+		{
 			if (fLink)
 				return false;
 
@@ -1509,7 +1453,8 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 			return true;
 		}
 
-		case IT_BEE_HIVE: {
+		case IT_BEE_HIVE:
+		{
 			if (fLink)
 				return false;
 
@@ -1517,8 +1462,10 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 			ITEMID_TYPE id = ITEMID_NOTHING;
 			if (!pItem->m_itBeeHive.m_honeycount)
 				SysMessageDefault(DEFMSG_ITEMUSE_BEEHIVE);
-			else {
-				switch(Calc_GetRandVal(3)) {
+			else
+			{
+				switch(Calc_GetRandVal(3))
+				{
 					case 1:
 						id = ITEMID_JAR_HONEY;
 						break;
@@ -1527,9 +1474,10 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 						break;
 				}
 			}
-			if (id) {
+			if (id)
+			{
 				ItemBounce(CItem::CreateScript(id, this));
-				pItem->m_itBeeHive.m_honeycount--;
+				--pItem->m_itBeeHive.m_honeycount;
 			}
 			else {
 				SysMessageDefault(DEFMSG_ITEMUSE_BEEHIVE_STING);
@@ -1539,8 +1487,10 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 			return true;
 		}
 
-		case IT_MUSICAL: {
-			if (!Skill_Wait(SKILL_MUSICIANSHIP)) {
+		case IT_MUSICAL:
+		{
+			if (!Skill_Wait(SKILL_MUSICIANSHIP))
+			{
 				m_Act_UID = pItem->GetUID();
 				Skill_Start(SKILL_MUSICIANSHIP);
 			}
@@ -1548,13 +1498,15 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 		}
 
 		case IT_CROPS:
-		case IT_FOLIAGE: {
+		case IT_FOLIAGE:
+		{
 			// Pick cotton/hay/etc
 			fAction = pItem->Plant_Use(this);
 			break;
 		}
 
-		case IT_FIGURINE: {
+		case IT_FIGURINE:
+		{
 			// Create the creature here
 			if (Use_Figurine(pItem) != NULL)
 				pItem->Delete();
@@ -1562,7 +1514,8 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 		}
 
 		case IT_TRAP:
-		case IT_TRAP_ACTIVE: {
+		case IT_TRAP_ACTIVE:
+		{
 			// Activate the trap (plus any linked traps)
 			int iDmg = pItem->Use_Trap();
 			if (CanTouch(pItem->GetTopLevelObj()->GetTopPoint()))
@@ -1570,7 +1523,8 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 			break;
 		}
 
-		case IT_SWITCH: {
+		case IT_SWITCH:
+		{
 			// Switches can be linked to gates and doors and such.
 			// Flip the switch graphic.
 			pItem->SetSwitchState();
@@ -1578,7 +1532,8 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 		}
 
 		case IT_PORT_LOCKED:
-			if (!fLink && !IsPriv(PRIV_GM)) {
+			if (!fLink && !IsPriv(PRIV_GM))
+			{
 				SysMessageDefault(DEFMSG_ITEMUSE_PORT_LOCKED);
 				return true;
 			}
@@ -1588,7 +1543,8 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 			break;
 
 		case IT_DOOR_LOCKED:
-			if (!ContentFindKeyFor(pItem)) {
+			if (!ContentFindKeyFor(pItem))
+			{
 				SysMessageDefault(DEFMSG_MSG_KEY_DOORLOCKED);
 				if (!pItem->IsTopLevel())
 					return false;
@@ -1604,33 +1560,39 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 					return true;
 			}
 		case IT_DOOR_OPEN:
-		case IT_DOOR: {
+		case IT_DOOR:
+		{
 			bool fOpen = pItem->Use_DoorNew(fLink);
 			if (fLink || !fOpen)    // don't link if we are just closing the door
 				return true;
 		}
 			break;
 
-		case IT_SHIP_PLANK: {
+		case IT_SHIP_PLANK:
+		{
 			// Close the plank if I'm inside the ship
-			if (m_pArea->IsFlag(REGION_FLAG_SHIP) && m_pArea->GetResourceID() == pItem->m_uidLink) {
-				if (pItem->m_itShipPlank.m_itSideType == IT_SHIP_SIDE_LOCKED && !ContentFindKeyFor(pItem)) {
+			if (m_pArea->IsFlag(REGION_FLAG_SHIP) && m_pArea->GetResourceID() == pItem->m_uidLink)
+			{
+				if (pItem->m_itShipPlank.m_itSideType == IT_SHIP_SIDE_LOCKED && !ContentFindKeyFor(pItem))
+				{
 					SysMessageDefault(DEFMSG_ITEMUSE_SHIPSIDE);
 					return true;
 				}
 				return pItem->Ship_Plank(false);
 			}
-			else if (pItem->IsTopLevel()) {
+			else if (pItem->IsTopLevel())
+			{
 				// Teleport to plank if I'm outside the ship
 				CPointMap pntTarg = pItem->GetTopPoint();
-				pntTarg.m_z++;
+				++pntTarg.m_z;
 				Spell_Teleport(pntTarg, true, false, false);
 			}
 			return true;
 		}
 
 		case IT_SHIP_SIDE_LOCKED:
-			if (!ContentFindKeyFor(pItem)) {
+			if (!ContentFindKeyFor(pItem))
+			{
 				SysMessageDefault(DEFMSG_ITEMUSE_SHIPSIDE);
 				return true;
 			}
@@ -1645,7 +1607,8 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 		case IT_FRUIT:
 		case IT_FOOD:
 		case IT_FOOD_RAW:
-		case IT_MEAT_RAW: {
+		case IT_MEAT_RAW:
+		{
 			if (fLink)
 				return false;
 
@@ -1657,7 +1620,8 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 		case IT_DRINK:
 		case IT_PITCHER:
 		case IT_WATER_WASH:
-		case IT_BOOZE: {
+		case IT_BOOZE:
+		{
 			if (fLink)
 				return false;
 
@@ -1685,14 +1649,16 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 		case IT_WEAPON_XBOW:
 		case IT_WEAPON_MACE_STAFF:
 		case IT_JEWELRY:
-		case IT_WEAPON_THROWING: {
+		case IT_WEAPON_THROWING:
+		{
 			if (fLink)
 				return false;
 
 			return ItemEquip(pItem);
 		}
 
-		case IT_WEB: {
+		case IT_WEB:
+		{
 			if (fLink)
 				return false;
 
@@ -1700,7 +1666,8 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 			return true;
 		}
 
-		case IT_SPY_GLASS: {
+		case IT_SPY_GLASS:
+		{
 			if (fLink)
 				return false;
 
@@ -1724,13 +1691,15 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 			return true;
 		}
 
-		case IT_SEXTANT: {
+		case IT_SEXTANT:
+		{
 			if (fLink)
 				return false;
 
 			if ((GetTopPoint().m_map <= 1) && (GetTopPoint().m_x > UO_SIZE_X_REAL))    // dungeons and T2A lands
 				ObjMessage(g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_SEXTANT_T2A), this);
-			else {
+			else
+			{
 				tchar *pszMsg = Str_GetTemp();
 				sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_SEXTANT), m_pArea->GetName(),
 				        pItem->Use_Sextant(GetTopPoint()));
@@ -1750,11 +1719,11 @@ bool CChar::Use_Item(CItem *pItem, bool fLink) {
 	int result = Do_Use_Item(pItem, fLink);
 	if ((result & MASK_RETURN_FOLLOW_LINKS) == MASK_RETURN_FOLLOW_LINKS) {
 		CItem *pLinkItem = pItem;
-		for (int i = 0; i < 64; i++) { // dumb protection for endless loop
+		for (int i = 0; i < 64; ++i)
+		{ // dumb protection for endless loop
 			pLinkItem = pLinkItem->m_uidLink.ItemFind();
-			if (pLinkItem == NULL || pLinkItem == pItem) {
+			if (pLinkItem == NULL || pLinkItem == pItem)
 				break;
-			}
 			result |= Do_Use_Item(pLinkItem, true);
 		}
 	}
@@ -1791,7 +1760,7 @@ bool CChar::ItemEquipArmor( bool fForce )
 		// Block those layers that are already used
 		for ( size_t i = 0; i < CountOf(iBestScore); ++i )
 		{
-			pBestArmor[i] = LayerFind(static_cast<LAYER_TYPE>(i));
+			pBestArmor[i] = LayerFind((LAYER_TYPE)i);
 			if ( pBestArmor[i] != NULL )
 				iBestScore[i] = INT32_MAX;
 		}

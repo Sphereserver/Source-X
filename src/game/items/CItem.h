@@ -139,7 +139,7 @@ public:
 		// IT_SHIP_HOLD_LOCK
 		struct	// IsTypeLockable()
 		{
-			CUIDBase m_lockUID;		// more1=the lock code. normally this is the same as the uid (magic lock=non UID)
+			CUIDBase m_UIDLock;			// more1=the lock code. normally this is the same as the uid (magic lock=non UID)
 			dword m_lock_complexity;	// more2=0-1000 = How hard to pick or magic unlock. (conflict with door ?)
 		} m_itContainer;
 
@@ -148,7 +148,7 @@ public:
 		// IT_SIGN_GUMP
 		struct
 		{
-			CUIDBase m_lockUID;		// more1 = the lock code. Normally this is the UID, except if uidLink is set.
+			CUIDBase m_UIDLock;			// more1 = the lock code. Normally this is the UID, except if uidLink is set.
 		} m_itKey;
 
 		// IT_EQ_BANK_BOX
@@ -156,7 +156,7 @@ public:
 		{
 			dword m_Check_Amount;		// more1=Current amount of gold in account..
 			dword m_Check_Restock;		// more2= amount to restock the bank account to
-			CPointBase m_pntOpen;	// morep=point we are standing on when opened bank box.
+			CPointBase m_pntOpen;		// morep=point we are standing on when opened bank box.
 		} m_itEqBankBox;
 
 		// IT_EQ_VENDOR_BOX
@@ -164,13 +164,13 @@ public:
 		{
 			dword m_junk1;
 			dword m_junk2;
-			CPointBase m_pntOpen;	// morep=point we are standing on when opened vendor box.
+			CPointBase m_pntOpen;		// morep=point we are standing on when opened vendor box.
 		} m_itEqVendorBox;
 
 		// IT_GAME_BOARD
 		struct
 		{
-			int m_GameType;		// more1=0=chess, 1=checkers, 2=backgammon, 3=no pieces.
+			int m_GameType;				// more1=0=chess, 1=checkers, 2=backgammon, 3=no pieces.
 		} m_itGameBoard;
 
 		// IT_WAND
@@ -260,30 +260,30 @@ public:
 		// IT_MEAT_RAW
 		struct
 		{
-			ITEMID_TYPE m_cook_id;		// more1=Cooks into this. (only if raw)
+			CResourceIDBase m_ridCook;	// more1=Cooks into this. (only if raw)
 			CREID_TYPE m_MeatType;		// more2= Meat from what type of creature ?
 			word m_spell;				// morex=SPELL_TYPE = The magic spell cast on this. ( effect of eating.)
 			word m_spelllevel;			// morey=level of the spell. (0-1000)
 			byte m_poison_skill;		// morez=0-100 = Is poisoned ?
-			byte m_foodval;
+			byte m_foodval;				// morem=food value to restore
 		} m_itFood;
 
 		// IT_DRINK
 		struct
 		{
-			ITEMID_TYPE m_cook_id;		// more1=Cooks into this. (only if raw)
+			CResourceIDBase m_ridCook;	// more1=Cooks into this. (only if raw)
 			CREID_TYPE m_MeatType;		// more2= Meat from what type of creature ?
 			word m_spell;				// morex=SPELL_TYPE = The magic spell cast on this. ( effect of eating.)
 			word m_spelllevel;			// morey=level of the spell. (0-1000)
 			byte m_poison_skill;		// morez=0-100 = Is poisoned ?
-			byte m_foodval;
+			byte m_foodval;				// morem=food value to restore
 		} m_itDrink;
 
 		// IT_CORPSE
 		struct	// might just be a sleeping person as well
 		{
 			dword			m_carved;		// more1 = Corpse is already carved? (0=not carved, 1=carved)
-			CUIDBase	m_uidKiller;	// more2 = Who killed this corpse, carved or looted it last. sleep=self.
+			CUIDBase		m_uidKiller;	// more2 = Who killed this corpse, carved or looted it last. sleep=self.
 			CREID_TYPE		m_BaseID;		// morex,morey = The true type of the creature who's corpse this is.
 			DIR_TYPE		m_facing_dir;	// morez = Corpse dir. 0x80 = on face.
 											// m_amount = the body type.
@@ -362,9 +362,9 @@ public:
 		// IT_FOLIAGE - the leaves of a tree normally.
 		struct
 		{
-			int m_Respawn_Sec;			// more1 = plant respawn time in seconds. (for faster growth plants)
-			ITEMID_TYPE m_ReapFruitID;	// more2 = What is the fruit of this plant.
-			word m_ReapStages;			// morex = how many more stages of this to go til ripe.
+			int m_Respawn_Sec;				// more1 = plant respawn time in seconds. (for faster growth plants)
+			CResourceIDBase m_ridReapFruit;	// more2 = What is the fruit of this plant.
+			word m_ReapStages;				// morex = how many more stages of this to go til ripe.
 		} m_itCrop;
 
 		// IT_TREE
@@ -373,7 +373,7 @@ public:
 		// ? IT_GRASS
 		struct	// Natural resources. tend to be statics.
 		{
-			CResourceIDBase m_rid_res;	// more1 = base resource type. RES_REGIONRESOURCE
+			CResourceIDBase m_ridRes;	// more1 = base resource type. RES_REGIONRESOURCE
 		} m_itResource;
 
 		// IT_FIGURINE
@@ -413,13 +413,14 @@ public:
 		} m_itEqMemory;
 
 		// IT_MULTI
+		// IT_MULTI_CUSTOM
 		// IT_SHIP
 		struct
 		{
 			CUIDBase m_UIDCreator;	// more1 = who created this house or ship ?
-			byte m_fSail;		// more2.b1 = ? speed ?
+			byte m_fSail;			// more2.b1 = ? speed ?
 			byte m_fAnchored;
-			byte m_DirMove;		// DIR_TYPE
+			byte m_DirMove;			// DIR_TYPE
 			byte m_DirFace;
 			// uidLink = my IT_SHIP_TILLER or IT_SIGN_GUMP,
 			CUIDBase m_Pilot;
@@ -428,7 +429,7 @@ public:
 		// IT_SHIP_PLANK
 		struct
 		{
-			CUIDBase m_lockUID;		// more1 = the lock code. normally this is the same as the uid (magic lock=non UID)
+			CUIDBase m_UIDLock;			// more1 = the lock code. normally this is the same as the uid (magic lock=non UID)
 			dword m_lock_complexity;	// more2=0-1000 = How hard to pick or magic unlock. (conflict with door ?)
 			word m_itSideType;			// morex = type to become (IT_SHIP_SIDE or IT_SHIP_SIDE_LOCKED)
 		} m_itShipPlank;
@@ -450,15 +451,15 @@ public:
 		// IT_LOOM
 		struct
 		{
-			ITEMID_TYPE m_ClothID;	// more1 = the cloth type currenctly loaded here.
-			int m_ClothQty;			// more2 = IS the loom loaded with cloth ?
+			CResourceIDBase m_ridCloth;	// more1 = the cloth type currenctly loaded here.
+			int m_ClothQty;				// more2 = IS the loom loaded with cloth ?
 		} m_itLoom;
 
 		// IT_ARCHERY_BUTTE
 		struct
 		{
-			ITEMID_TYPE m_AmmoType;	// more1 = arrow or bolt currently stuck in it.
-			int m_AmmoCount;		// more2 = how many arrows or bolts ?
+			CResourceIDBase m_ridAmmoType;	// more1 = arrow or bolt currently stuck in it.
+			int m_AmmoCount;				// more2 = how many arrows or bolts ?
 		} m_itArcheryButte;
 
 		// IT_CANNON_MUZZLE
@@ -518,7 +519,7 @@ public:
 		{
 			// NOTE: This is slightly dangerous to use as it will overwrite more1 and more2
 			ITEMID_TYPE m_PrevID;	// more1 = What to turn back into after the animation.
-			IT_TYPE m_PrevType;	// more2 = Any item that will animate.	??? Get rid of this !!
+			IT_TYPE m_PrevType;		// more2 = Any item that will animate.	??? Get rid of this !!
 		} m_itAnim;
 
 		// IT_SWITCH
@@ -758,6 +759,11 @@ public:
 	int Armor_GetDefense() const;
 	int Weapon_GetAttack(bool bGetRange = true) const;
 	SKILL_TYPE Weapon_GetSkill() const;
+	SOUND_TYPE Weapon_GetSoundHit() const;
+	SOUND_TYPE Weapon_GetSoundMiss() const;
+	void Weapon_GetRangedAmmoAnim(ITEMID_TYPE &id, dword &hue, dword &render);
+	CResourceIDBase Weapon_GetRangedAmmoRes();
+	CItem *Weapon_FindRangedAmmo(CResourceIDBase id);
 
 	bool IsMemoryTypes( word wType ) const;
 

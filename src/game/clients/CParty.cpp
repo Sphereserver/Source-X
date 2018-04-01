@@ -244,7 +244,7 @@ bool CPartyDef::MessageEvent( CUID uidDst, CUID uidSrc, const nchar *pText, int 
 	}
 
 	if ( g_Log.IsLoggedMask(LOGM_PLAYER_SPEAK) )
-		g_Log.Event(LOGM_PLAYER_SPEAK, "%x:'%s' Says '%s' in party to '%s'\n", pFrom->GetClient()->GetSocketID(), pFrom->GetName(), szText, pTo ? pTo->GetName() : "all");
+		g_Log.Event(LOGM_PLAYER_SPEAK|LOGM_NOCONTEXT, "%x:'%s' Says '%s' in party to '%s'\n", pFrom->GetClient()->GetSocketID(), pFrom->GetName(), szText, pTo ? pTo->GetName() : "all");
 
 	sprintf(szText, g_Cfg.GetDefaultMsg(DEFMSG_PARTY_MSG), pText);
 	PacketPartyChat cmd(pFrom, pText);

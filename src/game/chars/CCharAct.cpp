@@ -211,21 +211,27 @@ void CChar::AddGoldToPack( int iAmount, CItemContainer * pPack )
 	if ( pPack == NULL )
 		pPack = GetPackSafe();
 
-	iAmount = minimum(iAmount, INT32_MAX);
+	if (iAmount > 25000000)
+	{
+		iAmount = 25000000;
+		g_Log.EventWarn("The amount of the new Gold to create is too big. Limited to 25.000.000.\n");
+	}
 	word iMax = 0;
+	CItem * pGold = NULL;
 	while ( iAmount > 0 )
 	{
-		CItem * pGold = CItem::CreateScript( ITEMID_GOLD_C1, this );
+		pGold = CItem::CreateScript( ITEMID_GOLD_C1, this );
 		if (!iMax)
 			iMax = pGold->GetMaxAmount();
 
 		word iGoldStack = (word)minimum(iAmount, iMax);
 		pGold->SetAmount( iGoldStack );
 
-		Sound( pGold->GetDropSound( pPack ));
 		pPack->ContentAdd( pGold, true );
 		iAmount -= iGoldStack;
 	}
+	if (pGold)
+		Sound( pGold->GetDropSound( pPack ));
 	UpdateStatsFlag();
 }
 
@@ -319,7 +325,7 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 		case LAYER_SKIRT:
 		case LAYER_LEGS:
 			// If armor or clothing = change in defense rating.
-			m_defense = (word)(CalcArmorDefense());
+			m_defense = (word)CalcArmorDefense();
 			UpdateStatsFlag();
 			break;
 
@@ -1078,10 +1084,11 @@ bool CChar::UpdateAnimate(ANIM_TYPE action, bool fTranslate, bool fBackward , by
 	if (fTranslate)
 		action = GenerateAnimate( action, true, fBackward);
 	ANIM_TYPE_NEW action1 = static_cast<ANIM_TYPE_NEW>(action);
+
 	if (IsPlayableCharacter())		//Perform these checks only for Gargoyles or in Enhanced Client
 	{
 		CItem * pWeapon = m_uidWeapon.ItemFind();
-		if (pWeapon != NULL && action == ANIM_ATTACK_WEAPON)
+		if (pWeapon && ((action == ANIM_ATTACK_WEAPON) || (action == ANIM_ATTACK_BOW) || (action == ANIM_ATTACK_XBOW)) )
 		{
 			if (!IsGargoyle())		//Set variation to 1 for non gargoyle characters (Humans and Elfs using EC) in all fighting animations.
 				variation = 1;

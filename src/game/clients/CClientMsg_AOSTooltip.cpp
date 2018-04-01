@@ -64,8 +64,8 @@ void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
 
 	if (propertyList == NULL || propertyList->hasExpired(g_Cfg.m_iTooltipCache))
 	{
-		CItem *pItem = pObj->IsItem() ? (CItem *)pObj : NULL;
-		CChar *pChar = pObj->IsChar() ? (CChar *)pObj : NULL;
+		CItem *pItem = pObj->IsItem() ? const_cast<CItem *>(static_cast<const CItem *>(pObj)) : NULL;
+		CChar *pChar = pObj->IsChar() ? const_cast<CChar *>(static_cast<const CChar *>(pObj)) : NULL;
         CChar *pClientChar = GetChar();
 
 		if (pItem != NULL)

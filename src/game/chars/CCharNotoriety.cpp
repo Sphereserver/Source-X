@@ -9,14 +9,14 @@
 bool CChar::Noto_IsMurderer() const
 {
 	ADDTOCALLSTACK("CChar::Noto_IsMurderer");
-	return( m_pPlayer && m_pPlayer->m_wMurders > g_Cfg.m_iMurderMinCount );
+	return ( m_pPlayer && (m_pPlayer->m_wMurders > g_Cfg.m_iMurderMinCount) );
 }
 
 // I'm evil?
 bool CChar::Noto_IsEvil() const
 {
 	ADDTOCALLSTACK("CChar::Noto_IsEvil");
-	int		iKarma = Stat_GetAdjusted(STAT_KARMA);
+	int	iKarma = Stat_GetAdjusted(STAT_KARMA);
 
 	//	guarded areas could be both RED and BLUE ones.
 	if ( m_pArea && m_pArea->IsGuarded() && m_pArea->m_TagDefs.GetKeyNum("RED", true) )

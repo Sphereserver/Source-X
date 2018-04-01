@@ -911,7 +911,7 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
 
 			//	don't turn this if into an else if!
 			//	We can choose as a separator also one of {[(< >)]} and they have to be treated as such!
-			if (!iCurly && !iSquare && !iRound)
+			if ((iCurly<=0) && (iSquare<=0) && (iRound<=0))
 				if (strchr(pszSep, ch))		// if ch is a separator
 					break;
 		}	// end of the quotes if clause

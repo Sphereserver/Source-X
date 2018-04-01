@@ -1181,7 +1181,7 @@ void CClient::addItemName( const CItem * pItem )
 			case IT_ROCK:
 			case IT_WATER:
 				{
-					CResourceDef *pResDef = g_Cfg.ResourceGetDef(pItem->m_itResource.m_rid_res);
+					CResourceDef *pResDef = g_Cfg.ResourceGetDef(pItem->m_itResource.m_ridRes);
 					if ( pResDef )
 						len += sprintf(szName + len, " (%s)", pResDef->GetName());
 				}

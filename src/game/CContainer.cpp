@@ -246,7 +246,7 @@ bool CContainer::ContentFindKeyFor( CItem *pLocked ) const
 {
 	ADDTOCALLSTACK("CContainer::ContentFindKeyFor");
 	// Look for the key that fits this in my possesion.
-	return (pLocked->m_itContainer.m_lockUID && (ContentFind(CResourceID(RES_TYPEDEF, IT_KEY), pLocked->m_itContainer.m_lockUID) != NULL));
+	return (pLocked->m_itContainer.m_UIDLock && (ContentFind(CResourceID(RES_TYPEDEF, IT_KEY), pLocked->m_itContainer.m_UIDLock) != NULL));
 }
 
 CItem *CContainer::ContentFindRandom() const

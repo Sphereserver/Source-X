@@ -31,7 +31,7 @@ bool CItem::Ship_Plank( bool fOpen )
 	// This item is the ships plank.
 
 	CItemBase * pItemDef = Item_GetDef();
-	ITEMID_TYPE idState = (ITEMID_TYPE)(RES_GET_INDEX(pItemDef->m_ttShipPlank.m_idState));
+	ITEMID_TYPE idState = (ITEMID_TYPE)pItemDef->m_ttShipPlank.m_ridState.GetResIndex();
 	if ( !idState )
 		return false;
 
@@ -52,7 +52,7 @@ bool CItem::Ship_Plank( bool fOpen )
 	if ( IsType(IT_SHIP_PLANK) && (oldType == IT_SHIP_SIDE || oldType == IT_SHIP_SIDE_LOCKED) )
 	{
 		// Save the original Type of the plank if it used to be a ship side
-		m_itShipPlank.m_itSideType = (word)(oldType);
+		m_itShipPlank.m_itSideType = (word)oldType;
 	}
 	else if ( oldType == IT_SHIP_PLANK )
 	{

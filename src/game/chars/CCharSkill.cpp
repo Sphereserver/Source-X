@@ -508,13 +508,9 @@ bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain,
 		pArgs.getArgNs( 0, &difficulty, &result);
 
 		if ( ret == TRIGRET_RET_TRUE )
-		{
 			return true;
-		}
 		else if ( ret == TRIGRET_RET_FALSE )
-		{
 			return false;
-		}
 	}
 	if ( IsTrigUsed(TRIGGER_USEQUICK) )
 	{
@@ -522,13 +518,9 @@ bool CChar::Skill_UseQuick( SKILL_TYPE skill, int64 difficulty, bool bAllowGain,
 		pArgs.getArgNs( 0, &difficulty, &result );
 
 		if ( ret == TRIGRET_RET_TRUE )
-		{
 			return true;
-		}
 		else if ( ret == TRIGRET_RET_FALSE )
-		{
 			return false;
-		}
 	}
 
 	if ( result )	// success
@@ -920,7 +912,7 @@ int CChar::Skill_NaturalResource_Setup( CItem * pResBit )
 	ASSERT(pResBit);
 
 	// Find the ore type located here based on color.
-	const CRegionResourceDef * pOreDef = dynamic_cast<const CRegionResourceDef *>(g_Cfg.ResourceGetDef(pResBit->m_itResource.m_rid_res));
+	const CRegionResourceDef * pOreDef = dynamic_cast<const CRegionResourceDef *>(g_Cfg.ResourceGetDef(pResBit->m_itResource.m_ridRes));
 	if ( pOreDef == NULL )
 		return -1;
 
@@ -939,7 +931,7 @@ CItem * CChar::Skill_NaturalResource_Create( CItem * pResBit, SKILL_TYPE skill )
 	ASSERT(pResBit);
 
 	// Find the ore type located here based on color.
-	CRegionResourceDef * pOreDef = dynamic_cast<CRegionResourceDef *>(g_Cfg.ResourceGetDef(pResBit->m_itResource.m_rid_res));
+	CRegionResourceDef * pOreDef = dynamic_cast<CRegionResourceDef *>(g_Cfg.ResourceGetDef(pResBit->m_itResource.m_ridRes));
 	if ( pOreDef == NULL )
 		return NULL;
 

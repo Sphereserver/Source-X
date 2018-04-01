@@ -121,7 +121,7 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fT
 
 	pResBit->SetType(Type);
 	pResBit->SetAttr(ATTR_INVIS|ATTR_MOVE_NEVER);
-	pResBit->m_itResource.m_rid_res = pOreDef->GetResourceID();
+	pResBit->m_itResource.m_ridRes = pOreDef->GetResourceID();
 
 	// Total amount of ore here.
 	word amount = (word)pOreDef->m_Amount.GetRandom();

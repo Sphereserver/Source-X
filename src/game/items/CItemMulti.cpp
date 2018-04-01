@@ -159,7 +159,7 @@ bool CItemMulti::Multi_CreateComponent( ITEMID_TYPE id, short dx, short dy, char
 		case IT_KEY:	// it will get locked down with the house ?
 		case IT_SIGN_GUMP:
 		case IT_SHIP_TILLER:
-			pItem->m_itKey.m_lockUID.SetPrivateUID( dwKeyCode );	// Set the key id for the key/sign.
+			pItem->m_itKey.m_UIDLock.SetPrivateUID( dwKeyCode );	// Set the key id for the key/sign.
 			m_uidLink.SetPrivateUID(pItem->GetUID());
 			fNeedKey = true;
 			break;
@@ -189,7 +189,7 @@ bool CItemMulti::Multi_CreateComponent( ITEMID_TYPE id, short dx, short dy, char
 
 	if ( pItem->IsTypeLockable() || pItem->IsTypeLocked())
 	{
-		pItem->m_itContainer.m_lockUID.SetPrivateUID( dwKeyCode );	// Set the key id for the door/key/sign.
+		pItem->m_itContainer.m_UIDLock.SetPrivateUID( dwKeyCode );	// Set the key id for the door/key/sign.
 		pItem->m_itContainer.m_lock_complexity = 10000;	// never pickable.
 	}
 
@@ -237,7 +237,7 @@ void CItemMulti::Multi_Create( CChar * pChar, dword dwKeyCode )
 		if ( g_Cfg.m_fAutoNewbieKeys )
 			pKey->SetAttr(ATTR_NEWBIE);
 		pKey->SetAttr(m_Attr&ATTR_MAGIC);
-		pKey->m_itKey.m_lockUID.SetPrivateUID( dwKeyCode );
+		pKey->m_itKey.m_UIDLock.SetPrivateUID( dwKeyCode );
 		pKey->m_uidLink = GetUID();
 	}
 

@@ -23,7 +23,7 @@ bool CItem::Plant_Use(CChar *pChar)
 		return false;
 
 	const CItemBase *pItemDef = Item_GetDef();
-	ITEMID_TYPE iFruitID = (ITEMID_TYPE)(RES_GET_INDEX(pItemDef->m_ttCrops.m_idFruit));	// if it's reapable at this stage
+	ITEMID_TYPE iFruitID = (ITEMID_TYPE)pItemDef->m_ttCrops.m_ridFruit.GetResIndex();	// if it's reapable at this stage
 	if ( iFruitID <= 0 )
 	{
 		// not ripe. (but we could just eat it if we are herbivorous ?)
@@ -31,8 +31,8 @@ bool CItem::Plant_Use(CChar *pChar)
 		return true;
 	}
 
-	if ( m_itCrop.m_ReapFruitID )
-		iFruitID = (ITEMID_TYPE)(RES_GET_INDEX(m_itCrop.m_ReapFruitID));
+	if ( m_itCrop.m_ridReapFruit )
+		iFruitID = (ITEMID_TYPE)m_itCrop.m_ridReapFruit.GetResIndex();
 	if ( iFruitID )
 	{
 		CItem *pItemFruit = CItem::CreateScript(iFruitID, pChar);
@@ -71,14 +71,14 @@ bool CItem::Plant_OnTick()
 	}
 
 	const CItemBase *pItemDef = Item_GetDef();
-	ITEMID_TYPE iGrowID = pItemDef->m_ttCrops.m_idGrow;
+	ITEMID_TYPE iGrowID = (ITEMID_TYPE)pItemDef->m_ttCrops.m_ridGrow.GetResIndex();
 
 	if ( iGrowID == -1 )
 	{
 		// Some plants generate a fruit on the ground when ripe.
-		ITEMID_TYPE iFruitID = (ITEMID_TYPE)(RES_GET_INDEX(pItemDef->m_ttCrops.m_idGrow));
-		if ( m_itCrop.m_ReapFruitID )
-			iFruitID = (ITEMID_TYPE)(RES_GET_INDEX(m_itCrop.m_ReapFruitID));
+		ITEMID_TYPE iFruitID = (ITEMID_TYPE)pItemDef->m_ttCrops.m_ridGrow.GetResIndex();
+		if ( m_itCrop.m_ridReapFruit )
+			iFruitID = (ITEMID_TYPE)m_itCrop.m_ridReapFruit.GetResIndex();
 		if ( !iFruitID )
 			return true;
 
@@ -99,12 +99,12 @@ bool CItem::Plant_OnTick()
 		}
 
 		// NOTE: ??? The plant should cycle here as well !
-		iGrowID = pItemDef->m_ttCrops.m_idReset;
+		iGrowID = (ITEMID_TYPE)pItemDef->m_ttCrops.m_ridReset.GetResIndex();
 	}
 
 	if ( iGrowID )
 	{
-		SetID((ITEMID_TYPE)(RES_GET_INDEX(iGrowID)));
+		SetID(iGrowID);
 		Update();
 		return true;
 	}
@@ -127,7 +127,7 @@ void CItem::Plant_CropReset()
 	}
 
 	const CItemBase *pItemDef = Item_GetDef();
-	ITEMID_TYPE iResetID = (ITEMID_TYPE)(RES_GET_INDEX(pItemDef->m_ttCrops.m_idReset));
+	ITEMID_TYPE iResetID = (ITEMID_TYPE)pItemDef->m_ttCrops.m_ridReset.GetResIndex();
 	if ( iResetID != ITEMID_NOTHING )
 		SetID(iResetID);
 

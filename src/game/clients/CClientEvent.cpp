@@ -1800,7 +1800,7 @@ void CClient::Event_Talk( lpctstr pszText, HUE_TYPE wHue, TALKMODE_TYPE mode, bo
 
 		if ( g_Log.IsLoggedMask(LOGM_PLAYER_SPEAK) )
 		{
-			g_Log.Event( LOGM_PLAYER_SPEAK, "%x:'%s' Says '%s' mode=%d%s\n",
+			g_Log.Event(LOGM_PLAYER_SPEAK|LOGM_NOCONTEXT, "%x:'%s' Says '%s' mode=%d%s\n",
 				GetSocketID(), m_pChar->GetName(), pszText, mode, fCancelSpeech ? " (muted)" : "");
 		}
 
@@ -1885,7 +1885,7 @@ void CClient::Event_TalkUNICODE( nword* wszText, int iTextLen, HUE_TYPE wHue, TA
 
 		if ( g_Log.IsLoggedMask(LOGM_PLAYER_SPEAK) )
 		{
-			g_Log.Event(LOGM_PLAYER_SPEAK, "%x:'%s' Says UNICODE '%s' '%s' mode=%d%s\n", GetSocketID(),
+			g_Log.Event(LOGM_PLAYER_SPEAK|LOGM_NOCONTEXT, "%x:'%s' Says UNICODE '%s' '%s' mode=%d%s\n", GetSocketID(),
 				m_pChar->GetName(), pAccount->m_lang.GetStr(), pszText, mMode, fCancelSpeech ? " (muted)" : "" );
 		}
 
