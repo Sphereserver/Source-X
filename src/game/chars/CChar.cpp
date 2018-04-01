@@ -3583,8 +3583,13 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			}
 			break;
 		case CHV_CRIMINAL:
-			if ( s.HasArgs() && ! s.GetArgVal())
-				StatFlag_Clear( STATF_CRIMINAL );
+			if (s.HasArgs() && !s.GetArgVal()) 
+			{
+				StatFlag_Clear(STATF_CRIMINAL);
+				CItem * pMemoryCriminal = LayerFind(LAYER_FLAG_Criminal);
+				if (pMemoryCriminal)
+					pMemoryCriminal->Delete();
+			}
 			else
 				Noto_Criminal();
 			break;
