@@ -540,8 +540,8 @@ public:
 
 	void addAOSTooltip( const CObjBase * pObj, bool bRequested = false, bool bShop = false );
 private:
-	void AOSTooltip_addDefaultCharData(const CChar * pChar);
-	void AOSTooltip_addDefaultItemData(const CItem * pItem);
+	void AOSTooltip_addDefaultCharData(CChar * pChar);
+	void AOSTooltip_addDefaultItemData(CItem * pItem);
 
 private:
 #define MAX_POPUPS 15
@@ -720,8 +720,6 @@ public:
 	CVarDefMap	m_BaseDefs;		// New Variable storage system
 	typedef std::map<dword, std::pair<std::pair<dword,dword>, CPointMap> > OpenedContainerMap_t;
 	OpenedContainerMap_t m_openedContainers;	// list of UIDs of all opened containers by the client
-
-	CSObjArray<CClientTooltip *> m_TooltipData; // Storage for tooltip data while in trigger
 
 	CItemMultiCustom * m_pHouseDesign; // The building this client is designing
 
