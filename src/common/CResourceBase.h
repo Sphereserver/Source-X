@@ -513,14 +513,14 @@ public:
 public:
 	void AddRefInstance()
 	{
-		m_lRefInstances++;
+		++m_lRefInstances;
 	}
 	void DelRefInstance()
 	{
 #ifdef _DEBUG
 		ASSERT(m_lRefInstances > 0);
 #endif
-		m_lRefInstances--;
+		--m_lRefInstances;
 	}
 	dword GetRefInstances() const
 	{

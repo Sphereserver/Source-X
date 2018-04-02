@@ -142,7 +142,7 @@ bool CacheableScriptFile::useDefaultFile() const
 
 size_t CacheableScriptFile::Seek(size_t offset, int origin)
 {
-	//ADDTOCALLSTACK("CacheableScriptFile::Seek");
+	ADDTOCALLSTACK("CacheableScriptFile::Seek");
 	if (useDefaultFile())
 		return CSFileText::Seek(offset, origin);
 
@@ -162,7 +162,7 @@ size_t CacheableScriptFile::Seek(size_t offset, int origin)
 
 size_t CacheableScriptFile::GetPosition() const
 {
-	//ADDTOCALLSTACK("CacheableScriptFile::GetPosition");
+	ADDTOCALLSTACK("CacheableScriptFile::GetPosition");
 	if (useDefaultFile())
 		return CSFileText::GetPosition();
 

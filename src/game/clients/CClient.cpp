@@ -907,7 +907,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 
 				if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
 					g_Log.EventDebug("SCRIPT: addcliloc(%u,'%s')\n", clilocid, static_cast<lpctstr>(locArgs));
-				GetChar()->m_TooltipData.Add(new CClientTooltip(clilocid, locArgs));
+				GetChar()->m_TooltipData.push_back(std::move(std::unique_ptr<CClientTooltip>(new CClientTooltip(clilocid, locArgs))));
 			}
 			break;
 		case CV_ADDCONTEXTENTRY:

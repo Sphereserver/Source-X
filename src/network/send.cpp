@@ -4389,14 +4389,14 @@ PacketDisplayBookNew::PacketDisplayBookNew(const CClient* target, CItem* book) :
  *
  *
  ***************************************************************************/
-PacketPropertyList::PacketPropertyList(const CObjBase* object, dword version, const CSObjArray<CClientTooltip*>* data) : PacketSend(XCMD_AOSTooltip, 48, PRI_IDLE)
+PacketPropertyList::PacketPropertyList(const CObjBase* object, dword version, const std::vector<std::unique_ptr<CClientTooltip>>& data) : PacketSend(XCMD_AOSTooltip, 48, PRI_IDLE)
 {
 	ADDTOCALLSTACK("PacketPropertyList::PacketPropertyList");
 
 	m_time = g_World.GetCurrentTime().GetTimeRaw();
 	m_object = object->GetUID();
 	m_version = version;
-	m_entryCount = (int)data->GetCount();
+	m_entryCount = (int)data.size();
 
 	initLength();
 	writeInt16(1);
@@ -4404,9 +4404,9 @@ PacketPropertyList::PacketPropertyList(const CObjBase* object, dword version, co
 	writeInt16(0);
 	writeInt32(version);
 
-	for (size_t x = 0; x < data->GetCount(); x++)
+	for (size_t x = 0; x < data.size(); ++x)
 	{
-		const CClientTooltip* tipEntry = data->GetAt(x);
+		const CClientTooltip* tipEntry = data[x].get();
 		size_t tipLength = strlen(tipEntry->m_args);
 
 		writeInt32(tipEntry->m_clilocid);

@@ -70,7 +70,8 @@ void CSString::Empty(bool bTotal)
 			m_iMaxLength = 0;
 		}
 	}
-	else m_iLength = 0;
+	else
+		m_iLength = 0;
 }
 
 bool CSString::IsValid() const

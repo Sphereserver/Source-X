@@ -871,7 +871,7 @@ public:
 	virtual void OnTickStatusUpdate();
 
 public:
-    CSObjArray<CClientTooltip *> m_TooltipData; // Storage for tooltip data while in trigger
+    std::vector<std::unique_ptr<CClientTooltip>> m_TooltipData; // Storage for tooltip data while in trigger
 protected:
 	PacketPropertyList* m_PropertyList;	// currently cached property list packet
 	dword m_PropertyHash;				// latest property list hash

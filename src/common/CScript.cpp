@@ -371,26 +371,24 @@ void CScriptKeyAlloc::ParseKeyLate()
 CScript::CScript()
 {
 	InitBase();
-	m_iResourceFileIndex = (size_t)-1;
 }
 
 CScript::CScript( lpctstr pszKey )
 {
 	InitBase();
-	m_iResourceFileIndex = (size_t)-1;
 	ParseKey(pszKey);
 }
 
 CScript::CScript( lpctstr pszKey, lpctstr pszVal )
 {
 	InitBase();
-	m_iResourceFileIndex = (size_t)-1;
 	ParseKey( pszKey, pszVal );
 }
 
 void CScript::InitBase()
 {
 	ADDTOCALLSTACK("CScript::InitBase");
+	m_iResourceFileIndex = (size_t)-1;
 	m_iLineNum		= 0;
 	m_fSectionHead	= false;
 	m_pSectionData	= 0;
@@ -707,7 +705,7 @@ void CScript::CloseForce()
 bool CScript::SeekContext( CScriptLineContext LineContext )
 {
 	m_iLineNum = LineContext.m_iLineNum;
-	return Seek( LineContext.m_stOffset, SEEK_SET ) == (size_t)(LineContext.m_stOffset);
+	return (Seek( LineContext.m_stOffset, SEEK_SET ) == LineContext.m_stOffset);
 }
 
 CScriptLineContext CScript::GetContext() const

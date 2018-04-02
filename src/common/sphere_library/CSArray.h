@@ -424,13 +424,6 @@ private:
 	/** @name Modifiers:
 	 */
 	///@{
-protected:
-	/**
-    * @brief TODOC
-    * @param pElements TODOC
-    * @param nCount TODOC
-    */
-	virtual void DestructElements( TYPE* pElements, size_t nCount );
 public:
 	/**
     * @brief if data is in array, rmove it.
@@ -498,7 +491,7 @@ public:
     * @brief remove all elements.
     * @param bElements if true, destroy elements too.
     */
-	void Clean(bool bElements = false);
+	void Clean();
 	/**
     * @brief Remove an element if exists in the array.
     * @param pData data to remove.
@@ -511,13 +504,6 @@ public:
     * @return true if index is valid and object is removed, false otherwise.
     */
 	void DeleteAt( size_t nIndex );
-protected:
-	/**
-    * @brief Destroy elements.
-    * @param pElements pointer to data to destroy.
-    * @param nCount Number of elements to destroy.
-    */
-	virtual void DestructElements( TYPE* pElements, size_t nCount );
 	///@}
 };
 
@@ -728,6 +714,9 @@ void CSTypedArray<TYPE,ARG_TYPE>::DestructElements(TYPE* pElements, size_t nCoun
 {
 	UNREFERENCED_PARAMETER(pElements);
 	UNREFERENCED_PARAMETER(nCount);
+	delete[] reinterpret_cast<byte *>(m_pData);
+	m_pData = NULL;
+	m_nCount = m_nRealCount = 0;
 	//memset(static_cast<void *>(pElements), 0, nCount * sizeof(TYPE));
 }
 
@@ -759,7 +748,7 @@ void CSTypedArray<TYPE,ARG_TYPE>::RemoveAt( size_t nIndex )
 	if ( !IsValidIndex(nIndex) )
 		return;
 
-	DestructElements(&m_pData[nIndex], 1);
+	//DestructElements(&m_pData[nIndex], 1);
 	memmove(&m_pData[nIndex], &m_pData[nIndex + 1], sizeof(TYPE) * (m_nCount - nIndex - 1));
 	SetCount(m_nCount - 1);
 }
@@ -769,7 +758,7 @@ void CSTypedArray<TYPE,ARG_TYPE>::SetAt( size_t nIndex, ARG_TYPE newElement )
 {
 	ASSERT(IsValidIndex(nIndex));
 
-	DestructElements(&m_pData[nIndex], 1);
+	//DestructElements(&m_pData[nIndex], 1);
 	m_pData[nIndex] = newElement;
 }
 
@@ -793,9 +782,6 @@ void CSTypedArray<TYPE, ARG_TYPE>::SetCount( size_t nNewCount )
 		if (m_nCount > 0)
 		{
 			DestructElements( m_pData, m_nCount );
-			delete[] reinterpret_cast<byte *>(m_pData);
-			m_nCount = m_nRealCount = 0;	// that's probably wrong.. but SetCount(0) should be never called
-			m_pData = NULL;					// before Clean(true) in CSObjArray
 		}
 		return;
 	}
@@ -901,19 +887,6 @@ CSPtrTypeArray<TYPE>::~CSPtrTypeArray() {
 // CSPtrTypeArray:: Modifiers.
 
 template<class TYPE>
-inline void CSPtrTypeArray<TYPE>::DestructElements( TYPE* pElements, size_t nCount )
-{
-#ifndef _MSC_VER
-	#pragma GCC diagnostic push
-	#pragma GCC diagnostic ignored "-Wstringop-overflow="
-#endif
-	memset(pElements, 0, nCount * sizeof(TYPE));
-#ifndef _MSC_VER
-	#pragma GCC diagnostic pop
-#endif
-}
-
-template<class TYPE>
 bool CSPtrTypeArray<TYPE>::RemovePtr( TYPE pData )
 {
 	size_t nIndex = FindPtr( pData );
@@ -939,7 +912,7 @@ size_t CSPtrTypeArray<TYPE>::FindPtr( TYPE pData ) const
 	if ( !pData )
 		return STANDARD_CPLUSPLUS_THIS(BadIndex());
 
-	for ( size_t nIndex = 0; nIndex < STANDARD_CPLUSPLUS_THIS(GetCount()); nIndex++ )
+	for ( size_t nIndex = 0; nIndex < STANDARD_CPLUSPLUS_THIS(GetCount()); ++nIndex )
 	{
 		if ( STANDARD_CPLUSPLUS_THIS(GetAt(nIndex)) == pData )
 			return nIndex;
@@ -973,10 +946,10 @@ inline CSObjArray<TYPE>::~CSObjArray()
 // CSObjArray:: Modifiers.
 
 template<class TYPE>
-void CSObjArray<TYPE>::Clean(bool bElements)
+void CSObjArray<TYPE>::Clean()
 {
-	if ( bElements && STANDARD_CPLUSPLUS_THIS(GetRealCount()) > 0 )
-		DestructElements( STANDARD_CPLUSPLUS_THIS(GetBasePtr()), STANDARD_CPLUSPLUS_THIS(GetRealCount()) );
+	//if ( bElements && STANDARD_CPLUSPLUS_THIS(GetRealCount()) > 0 )
+	//	DestructElements( STANDARD_CPLUSPLUS_THIS(GetBasePtr()), STANDARD_CPLUSPLUS_THIS(GetRealCount()) );
 
 	STANDARD_CPLUSPLUS_THIS(Empty());
 }
@@ -991,18 +964,6 @@ template<class TYPE>
 inline void CSObjArray<TYPE>::DeleteAt( size_t nIndex )
 {
 	STANDARD_CPLUSPLUS_THIS(RemoveAt(nIndex));
-}
-
-template<class TYPE>
-void CSObjArray<TYPE>::DestructElements( TYPE* pElements, size_t nCount )
-{
-	// delete the objects that we own.
-	for ( size_t i = 0; i < nCount; i++ )
-	{
-		if ( pElements[i] != NULL )
-			delete pElements[i];
-	}
-	CSPtrTypeArray<TYPE>::DestructElements(pElements, nCount);
 }
 
 // CSObjSortArray:: Constructors, Destructor, Asign operator.

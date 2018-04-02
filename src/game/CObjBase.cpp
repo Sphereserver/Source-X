@@ -107,9 +107,8 @@ CObjBase::~CObjBase()
 {
 	FreePropertyList();
 	g_World.m_ObjStatusUpdates.RemovePtr(this);
-    m_TooltipData.Clean(true);
 
-	sm_iCount --;
+	--sm_iCount;
 	ASSERT( IsDisconnected());
 
 	// free up the UID slot.

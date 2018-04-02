@@ -1688,7 +1688,7 @@ protected:
 	int m_entryCount;
 
 public:
-	PacketPropertyList(const CObjBase* object, dword version, const CSObjArray<CClientTooltip*>* data);
+	PacketPropertyList(const CObjBase* object, dword version, const std::vector<std::unique_ptr<CClientTooltip>> &data);
 	PacketPropertyList(const CClient* target, const PacketPropertyList* other);
 	virtual bool onSend(const CClient* client);
 

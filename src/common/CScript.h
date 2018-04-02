@@ -41,11 +41,12 @@ public:
 
 	// Query the key.
 	lpctstr GetKey() const;
+
 	// Args passed with the key.
 	bool HasArgs() const;
 	tchar * GetArgRaw() const;				// Not need to parse at all.
 	tchar * GetArgStr( bool * fQuoted );	// this could be a quoted string ?
-	tchar * GetArgStr() {
+	inline tchar * GetArgStr() {
 		return GetArgStr(NULL);
 	}
 

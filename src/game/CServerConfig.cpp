@@ -3932,7 +3932,7 @@ bool CServerConfig::Load( bool fResync )
 	}
 	catch (...)
 	{
-		g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".INI file is corrupt or missing\n" );
+		g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".ini file is corrupt or missing\n" );
 		g_Log.CatchEvent( NULL, "g_VerData.Load" );
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 		return false;
@@ -3943,8 +3943,8 @@ bool CServerConfig::Load( bool fResync )
 	{
 		if ( ! OpenResourceFind( m_scpTables, SPHERE_FILE "tables" ))
 		{
-			g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".INI file is corrupt or missing\n" );
-			g_Log.Event( LOGL_FATAL|LOGM_INIT, "Error opening table definitions file...\n" );
+			g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".ini file is corrupt or missing\n" );
+			g_Log.Event( LOGL_FATAL|LOGM_INIT, "Error opening table definitions file (" SPHERE_FILE "tables." SPHERE_SCRIPT ")...\n" );
 			return false;
 		}
 
@@ -3958,16 +3958,16 @@ bool CServerConfig::Load( bool fResync )
 	m_scpTables.CloseForce();
 
 	//	Initialize the world sectors
+	g_Log.Event(LOGM_INIT, "\nInitializing the world...");
 	g_World.Init();
 
-	g_Log.Event(LOGM_INIT, "\nRetrieving script files...\n");
 	// open and index all my script files i'm going to use.
 	AddResourceDir( m_sSCPBaseDir );		// if we want to get *.SCP files from elsewhere.
 
 	size_t count = m_ResourceFiles.GetCount();
-	g_Log.Event(LOGM_INIT, "Indexing %" PRIuSIZE_T " script files...\n", count);
+	g_Log.Event(LOGM_INIT, "\nIndexing %" PRIuSIZE_T " script files...\n", count);
 
-	for ( size_t j = 0; ; j++ )
+	for ( size_t j = 0; ; ++j )
 	{
 		CResourceScript * pResFile = GetResourceFile(j);
 		if ( !pResFile )

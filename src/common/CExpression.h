@@ -13,6 +13,8 @@
 #include "common.h"
 #include "CVarDefMap.h"
 #include "ListDefContMap.h"
+#include <algorithm>
+#include <memory>
 
 
 #define SKIP_SEPARATORS(p)			while ( *(p)=='.' ) { ++(p); }	// || ISWHITESPACE(*(p))
@@ -43,6 +45,25 @@
 
 #define EXPRESSION_MAX_KEY_LEN	SCRIPT_MAX_SECTION_LEN
 
+template<typename X,typename Y>
+typename X::iterator findRawPtrInUniquePtrContainer (X &findInThisContainer, Y* thisPtr)
+{
+	X::iterator end = findInThisContainer.end();
+	for (X::iterator it = findInThisContainer.begin(); it != end; ++it)
+	{
+		if (it->get() == thisPtr)
+			return it;
+	}
+	return end;
+	//return std::find_if(findInThisContainer.begin(), findInThisContainer.end(), [thisPtr](const auto &x) {return x.get() == thisPtr;} );
+}
+/*
+template<typename X,typename Y>
+typename X::iterator findUniquePtrInUniquePtrContainer (const X &findInThisContainer, const std::unique_ptr<Y> &thisUniquePtr)
+{
+	return std::find_if(findInThisContainer.begin(), findInThisContainer.end(), [thisUniquePtr](const auto &x) {return x.get() == thisUniquePtr.get();} );
+}
+*/
 
 enum DEFMSG_TYPE
 {
