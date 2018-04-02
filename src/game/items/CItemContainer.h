@@ -26,7 +26,7 @@ public:
 	CItemContainer( ITEMID_TYPE id, CItemBase * pItemDef );
 	virtual ~CItemContainer()
 	{
-		DeleteAll();	// get rid of my contents first to protect against weight calc errors.
+		Clear();		// get rid of my contents first to protect against weight calc errors.
 		DeletePrepare();
 	}
 

@@ -906,7 +906,7 @@ bool PacketMapEdit::onReceive(NetState* net)
 			break;
 
 		case MAP_CLEAR: // clear all pins
-			map->m_Pins.RemoveAll();
+			map->m_Pins.Clear();
 			break;
 
 		case MAP_TOGGLE: // edit req/cancel

@@ -247,7 +247,7 @@ void CClient::Cmd_GM_PageCmd( lpctstr pszCmd )
 		case GPV_WIPE:
 			if ( ! IsPriv( PRIV_GM ))
 				return;
-			g_World.m_GMPages.DeleteAll();
+			g_World.m_GMPages.Clear();
 			return;
 	}
 

@@ -24,7 +24,7 @@ public:
 	void EmptyRegion()
 	{
 		m_rectUnion.SetRectEmpty();
-		m_Rects.Empty();
+		m_Rects.Clear();
 	}
 	size_t GetRegionRectCount() const;
 	CRect & GetRegionRect(size_t i);

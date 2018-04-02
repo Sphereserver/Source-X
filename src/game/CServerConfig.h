@@ -189,7 +189,7 @@ public:
 public:
 	void Init()
 	{
-		m_aiValues.Empty();
+		m_aiValues.Clear();
 	}
 
     /**

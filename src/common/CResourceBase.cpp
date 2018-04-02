@@ -1113,7 +1113,7 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
 			pszCmd ++;
 			if ( pszCmd[0] == '0' || pszCmd[0] == '*' )
 			{
-				RemoveAll();
+				Clear();
 				fRet = true;
 				continue;
 			}
@@ -1259,21 +1259,6 @@ int CResourceHashArray::CompareKey( CResourceIDBase rid, CResourceDef * pBase, b
 	if (dwID1 == dwID2 )
 		return 0;
 	return -1;
-}
-
-void CSStringSortArray::DestructElements( tchar** pElements, size_t nCount )
-{
-	// delete the objects that we own.
-	for ( size_t i = 0; i < nCount; i++ )
-	{
-		if ( pElements[i] != NULL )
-		{
-			delete[] pElements[i];
-			pElements[i] = NULL;
-		}
-	}
-
-	CSObjSortArray<tchar*, tchar*>::DestructElements(pElements, nCount);
 }
 
 // Sorted array of strings
@@ -1507,7 +1492,7 @@ size_t CResourceQtyArray::Load(lpctstr pszCmds)
 	//	clear-before-load in order not to mess with the previous data
 	if ( !m_mergeOnLoad )
 	{
-		RemoveAll();
+		Clear();
 	}
 
 	// 0 = clear the list.
@@ -1518,8 +1503,8 @@ size_t CResourceQtyArray::Load(lpctstr pszCmds)
 		if ( *pszCmds == '0' &&
 			( pszCmds[1] == '\0' || pszCmds[1] == ',' ))
 		{
-			RemoveAll();	// clear any previous stuff.
-			pszCmds ++;
+			Clear();	// clear any previous stuff.
+			++pszCmds;
 		}
 		else
 		{

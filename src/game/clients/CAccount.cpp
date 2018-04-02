@@ -220,7 +220,7 @@ bool CAccounts::Account_Delete( CAccount * pAccount )
 		return false;
 	}
 
-	m_Accounts.DeleteOb( pAccount );
+	m_Accounts.DeleteObj( pAccount );
 	return true;
 }
 

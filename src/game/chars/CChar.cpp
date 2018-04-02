@@ -333,7 +333,7 @@ CChar::~CChar()
 	Attacker_RemoveChar();		// Removing me from enemy's attacker list (I asume that if he is on my list, I'm on his one and no one have me on their list if I dont have them)
 	if (m_pNPC)
 		NPC_PetClearOwners();	// Clear follower slots on pet owner
-	DeleteAll();				// Remove me early so virtuals will work
+	Clear();				// Remove me early so virtuals will work
 	ClearNPC();
 	ClearPlayer();
 	g_Serv.StatDec( SERV_STAT_CHARS );

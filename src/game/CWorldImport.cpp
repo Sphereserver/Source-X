@@ -226,7 +226,7 @@ void CImportFile::ImportFix()
 	{
 		DEBUG_ERR(( "Import: removed %d bad items\n", iRemoved ));
 	}
-	m_ListSer.DeleteAll();	// done with the list now.
+	m_ListSer.Clear();	// done with the list now.
 }
 
 bool CImportFile::ImportSCP( CScript & s, word wModeFlags )

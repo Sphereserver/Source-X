@@ -1425,8 +1425,8 @@ bool CItemBase::r_LoadVal( CScript &s )
 				int iArgQty = Str_ParseCmds( s.GetArgStr(), ppArgs, CountOf(ppArgs));
 				if ( iArgQty <= 0 )
 					return false;
-				m_flip_id.Empty();
-				for ( int i = 0; i < iArgQty; i++ )
+				m_flip_id.Clear();
+				for ( int i = 0; i < iArgQty; ++i )
 				{
 					ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, ppArgs[i] ));
 					if ( ! IsValidDispID( id ))
@@ -1783,7 +1783,7 @@ void CItemBaseMulti::SetMultiRegion( tchar * pArgs )
 	size_t iQty = Str_ParseCmds( pArgs, piArgs, CountOf(piArgs));
 	if ( iQty <= 1 )
 		return;
-	m_Components.Empty();	// might be after a resync
+	m_Components.Clear();	// might be after a resync
 	m_rect.SetRect( (int)(piArgs[0]), (int)(piArgs[1]), (int)(piArgs[2]+1), (int)(piArgs[3]+1), (int)(piArgs[4]) );
 }
 

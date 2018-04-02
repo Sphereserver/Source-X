@@ -905,10 +905,10 @@ void CSector::Close()
 {
 	ADDTOCALLSTACK("CSector::Close");
 	// Clear up all dynamic data for this sector.
-	m_Items_Timer.DeleteAll();
-	m_Items_Inert.DeleteAll();
-	m_Chars_Active.DeleteAll();
-	m_Chars_Disconnect.DeleteAll();
+	m_Items_Timer.Clear();
+	m_Items_Inert.Clear();
+	m_Chars_Active.Clear();
+	m_Chars_Disconnect.Clear();
 
 	// These are resource type things.
 	// m_Teleports.RemoveAll();

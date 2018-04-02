@@ -17,11 +17,6 @@ CSObjList::CSObjList()
 	m_iCount = 0;
 }
 
-CSObjList::~CSObjList()
-{
-	DeleteAll();
-}
-
 
 // CSObjList:: Element access.
 
@@ -38,7 +33,7 @@ CSObjListRec * CSObjList::GetAt( size_t index ) const
 
 // CSObjList:: Modifiers.
 
-void CSObjList::DeleteAll()
+void CSObjList::Clear()
 {
 	// delete all entries.
 	for (;;)	// iterate the list.

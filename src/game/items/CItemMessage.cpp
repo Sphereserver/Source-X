@@ -126,7 +126,7 @@ bool CItemMessage::r_Verb(CScript & s, CTextConsole *pSrc)
             size_t iPage = (s.GetArgStr()[0] && toupper(s.GetArgStr()[0]) != 'A') ? s.GetArgVal() : 0;
             if ( iPage <= 0 )
             {
-                m_sBodyLines.RemoveAll();
+                m_sBodyLines.Clear();
                 return true;
             }
             else if ( iPage <= m_sBodyLines.GetCount() )
@@ -195,5 +195,5 @@ void CItemMessage::AddPageText( lpctstr pszText )
 void CItemMessage::UnLoadSystemPages()
 {
     m_sAuthor.Empty();
-    m_sBodyLines.RemoveAll();
+    m_sBodyLines.Clear();
 }

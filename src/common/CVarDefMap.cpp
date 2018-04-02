@@ -344,6 +344,8 @@ void CVarDefMap::DeleteAtIterator( DefSet::iterator it )
 					delete pVarStr;
 			}
 		}
+		else
+			delete *it;
 	}
 }
 
@@ -382,6 +384,8 @@ void CVarDefMap::Empty()
 					delete pVarStr;
 			}
 		}
+		else
+			delete pVarBase;
 	}
 
 	m_Container.clear();

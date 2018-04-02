@@ -40,7 +40,7 @@ public:
     * @brief set references for parent, next and previous to NULL.
     */
 	CSObjListRec();
-	virtual ~CSObjListRec() {
+	virtual inline ~CSObjListRec() {
 		RemoveSelf();
 	}
 private:
@@ -104,7 +104,10 @@ public:
     * @brief Sets head, tail and count.
     */
 	CSObjList();
-	virtual ~CSObjList();
+	virtual ~CSObjList() {
+		Clear();
+	}
+
 private:
 	/**
     * @brief No copies allowed.
@@ -164,16 +167,7 @@ public:
 	/**
     * @brief Remove all records of the CSObjList.
     */
-	void DeleteAll();
-	/**
-    * @brief Remove all records of the CSObjList.
-    *
-    * TODO: Really needed?
-    * @see DeleteAll()
-    */
-	inline void Empty() {
-		DeleteAll();
-	}
+	void Clear();
 	/**
     * @brief Insert a record after the referenced record.
     *
@@ -186,14 +180,14 @@ public:
     * @brief Insert a record at head.
     * @param pNewRec record to insert.
     */
-	void InsertHead( CSObjListRec * pNewRec ) {
+	inline void InsertHead( CSObjListRec * pNewRec ) {
 		InsertAfter(pNewRec, NULL);
 	}
 	/**
     * @brief Insert a record at tail.
     * @param pNewRec record to insert.
     */
-	void InsertTail( CSObjListRec * pNewRec ) {
+	inline void InsertTail( CSObjListRec * pNewRec ) {
 		InsertAfter(pNewRec, GetTail());
 	}
 protected:
@@ -325,28 +319,16 @@ public:
     */
 	void Copy( const CSTypedArray<TYPE, ARG_TYPE> * pArray );
 	/**
-    * @brief TODOC
-    * @param pElements TODOC
-    * @param nCount TODOC
-    */
-	virtual void DestructElements(TYPE* pElements, size_t nCount );
-	/**
-    * @brief Remove all elements from the array and free mem.
-    *
-    * TODO: Really needed?
-    * @see RemoveAll()
-    */
-	void Empty();
+	* @brief Remove all elements from the array and free mem.
+	*/
+	void Clear();
 	/**
     * @brief Insert a element in nth position.
     * @param nIndex position to insert the element.
     * @param newElement element to insert.
-    */
+	*/
 	void InsertAt( size_t nIndex, ARG_TYPE newElement );
-	/**
-    * @brief Remove all elements from the array and free mem.
-    */
-	void RemoveAll();
+
 	/**
     * @brief Removes the nth element and move the next elements one position left.
     * @param nIndex position of the element to remove.
@@ -409,8 +391,8 @@ public:
 	/** @name Constructors, Destructor, Asign operator:
 	 */
 	///@{
-	CSPtrTypeArray();
-	virtual ~CSPtrTypeArray();
+	CSPtrTypeArray() {}
+	virtual ~CSPtrTypeArray() {}
 private:
 	/**
     * @brief No copy on construction allowed.
@@ -471,8 +453,8 @@ public:
 	 */
 	///@{
 public:
-	CSObjArray();
-	virtual ~CSObjArray();
+	CSObjArray() {}
+	virtual ~CSObjArray() {}
 private:
 	/**
     * @brief No copy on construction allowed.
@@ -488,16 +470,11 @@ private:
 	///@{
 public:
 	/**
-    * @brief remove all elements.
-    * @param bElements if true, destroy elements too.
-    */
-	void Clean();
-	/**
     * @brief Remove an element if exists in the array.
     * @param pData data to remove.
     * @return true if data is removed, false otherwise.
     */
-	bool DeleteOb( TYPE pData );
+	bool DeleteObj( TYPE pData );
 	/**
     * @brief Remove the nth element.
     * @param nIndex position of the element to remove.
@@ -520,8 +497,8 @@ class CSObjSortArray : public CSObjArray<TYPE>
 	 */
 	///@{
 public:
-	CSObjSortArray();
-	virtual ~CSObjSortArray();
+	CSObjSortArray() {}
+	virtual ~CSObjSortArray() {}
 private:
 	/**
     * @brief No copy on construction allowed.
@@ -601,6 +578,7 @@ public:
 
 /* Template methods (inlined or not) are defined here to avoid linker errors */
 
+
 // CSObjListRec:: Capacity.
 
 inline void CSObjListRec::RemoveSelf()
@@ -608,6 +586,8 @@ inline void CSObjListRec::RemoveSelf()
 	if (GetParent())
 		m_pParent->OnRemoveObj(this);	// call any approriate virtuals.
 }
+
+
 
 // CSTypedArray:: Constructors, Destructor, Asign operator.
 
@@ -622,7 +602,7 @@ CSTypedArray<TYPE,ARG_TYPE>::CSTypedArray()
 template<class TYPE, class ARG_TYPE>
 inline CSTypedArray<TYPE,ARG_TYPE>::~CSTypedArray()
 {
-	SetCount(0);
+	Clear();
 }
 
 template<class TYPE, class ARG_TYPE>
@@ -704,26 +684,9 @@ void CSTypedArray<TYPE,ARG_TYPE>::Copy(const CSTypedArray<TYPE, ARG_TYPE> * pArr
 	if ( !pArray || pArray == this )	// it was !=
 		return;
 
-	Empty();
+	Clear();
 	SetCount(pArray->GetCount());
 	memcpy(GetBasePtr(), pArray->GetBasePtr(), GetCount() * sizeof(TYPE));
-}
-
-template<class TYPE, class ARG_TYPE>
-void CSTypedArray<TYPE,ARG_TYPE>::DestructElements(TYPE* pElements, size_t nCount )
-{
-	UNREFERENCED_PARAMETER(pElements);
-	UNREFERENCED_PARAMETER(nCount);
-	delete[] reinterpret_cast<byte *>(m_pData);
-	m_pData = NULL;
-	m_nCount = m_nRealCount = 0;
-	//memset(static_cast<void *>(pElements), 0, nCount * sizeof(TYPE));
-}
-
-template<class TYPE, class ARG_TYPE>
-inline void CSTypedArray<TYPE,ARG_TYPE>::Empty()
-{
-	RemoveAll();
 }
 
 template<class TYPE, class ARG_TYPE>
@@ -737,9 +700,11 @@ void CSTypedArray<TYPE,ARG_TYPE>::InsertAt( size_t nIndex, ARG_TYPE newElement )
 }
 
 template<class TYPE, class ARG_TYPE>
-inline void CSTypedArray<TYPE,ARG_TYPE>::RemoveAll()
+inline void CSTypedArray<TYPE,ARG_TYPE>::Clear()
 {
-	SetCount(0);
+	delete[] reinterpret_cast<byte *>(m_pData);
+	m_pData = NULL;
+	m_nCount = m_nRealCount = 0;
 }
 
 template<class TYPE, class ARG_TYPE>
@@ -748,7 +713,6 @@ void CSTypedArray<TYPE,ARG_TYPE>::RemoveAt( size_t nIndex )
 	if ( !IsValidIndex(nIndex) )
 		return;
 
-	//DestructElements(&m_pData[nIndex], 1);
 	memmove(&m_pData[nIndex], &m_pData[nIndex + 1], sizeof(TYPE) * (m_nCount - nIndex - 1));
 	SetCount(m_nCount - 1);
 }
@@ -758,7 +722,6 @@ void CSTypedArray<TYPE,ARG_TYPE>::SetAt( size_t nIndex, ARG_TYPE newElement )
 {
 	ASSERT(IsValidIndex(nIndex));
 
-	//DestructElements(&m_pData[nIndex], 1);
 	m_pData[nIndex] = newElement;
 }
 
@@ -780,9 +743,7 @@ void CSTypedArray<TYPE, ARG_TYPE>::SetCount( size_t nNewCount )
 	{
 		// shrink to nothing
 		if (m_nCount > 0)
-		{
-			DestructElements( m_pData, m_nCount );
-		}
+			Clear();
 		return;
 	}
 
@@ -811,43 +772,6 @@ void CSTypedArray<TYPE, ARG_TYPE>::SetCount( size_t nNewCount )
 	}
 
 	m_nCount = nNewCount;
-
-/*	if ( nNewCount < 0 )
-		return;
-
-	// shrink to nothing?
-	if ( !nNewCount )
-	{
-		if ( m_nRealCount )
-		{
-			delete[] (byte*) m_pData;
-			m_nCount = m_nRealCount = 0;
-			m_pData = NULL;
-		}
-		return;
-	}
-
-	//	do we need to resize the array?
-	if (( nNewCount > m_nRealCount ) || ( nNewCount < m_nRealCount-10 ))
-	{
-		m_nRealCount = nNewCount + 5;	// auto-allocate space for 5 extra elements
-		TYPE * pNewData = (TYPE*) new byte[m_nRealCount * sizeof(TYPE)];
-
-		// i have already data inside, so move to the new place
-		if ( m_nCount )
-			memcpy(pNewData, m_pData, sizeof(TYPE) * m_nCount);
-		delete[] (byte*) m_pData;
-		m_pData = pNewData;
-	}
-
-	//	construct new element
-	if ( nNewCount > m_nCount )
-	{
-		ConstructElements(m_pData + m_nCount, nNewCount - m_nCount);
-	}
-
-	m_nCount = nNewCount;
-*/
 }
 
 // CSTypedArray:: Operations.
@@ -871,18 +795,6 @@ inline bool CSTypedArray<TYPE,ARG_TYPE>::IsValidIndex( size_t i ) const
 	return ( i < m_nCount );
 }
 
-
-// CSPtrTypeArray:: Constructors, Destructor, Asign operator.
-
-template<class TYPE>
-CSPtrTypeArray<TYPE>::CSPtrTypeArray() {
-
-}
-
-template<class TYPE>
-CSPtrTypeArray<TYPE>::~CSPtrTypeArray() {
-
-}
 
 // CSPtrTypeArray:: Modifiers.
 
@@ -929,33 +841,11 @@ bool CSPtrTypeArray<TYPE>::IsValidIndex( size_t i ) const
 	return ( STANDARD_CPLUSPLUS_THIS(GetAt(i)) != NULL );
 }
 
-// CSObjArray:: Constructors, Destructor, Asign operator.
-
-template<class TYPE>
-CSObjArray<TYPE>::CSObjArray()
-{
-}
-
-template<class TYPE>
-inline CSObjArray<TYPE>::~CSObjArray()
-{
-	// Make sure the virtuals get called.
-	STANDARD_CPLUSPLUS_THIS(SetCount(0));
-}
 
 // CSObjArray:: Modifiers.
 
 template<class TYPE>
-void CSObjArray<TYPE>::Clean()
-{
-	//if ( bElements && STANDARD_CPLUSPLUS_THIS(GetRealCount()) > 0 )
-	//	DestructElements( STANDARD_CPLUSPLUS_THIS(GetBasePtr()), STANDARD_CPLUSPLUS_THIS(GetRealCount()) );
-
-	STANDARD_CPLUSPLUS_THIS(Empty());
-}
-
-template<class TYPE>
-inline bool CSObjArray<TYPE>::DeleteOb( TYPE pData )
+inline bool CSObjArray<TYPE>::DeleteObj( TYPE pData )
 {
 	return this->RemovePtr(pData);
 }
@@ -966,17 +856,6 @@ inline void CSObjArray<TYPE>::DeleteAt( size_t nIndex )
 	STANDARD_CPLUSPLUS_THIS(RemoveAt(nIndex));
 }
 
-// CSObjSortArray:: Constructors, Destructor, Asign operator.
-
-template<class TYPE,class KEY_TYPE>
-CSObjSortArray<TYPE,KEY_TYPE>::CSObjSortArray()
-{
-}
-
-template<class TYPE,class KEY_TYPE>
-CSObjSortArray<TYPE,KEY_TYPE>::~CSObjSortArray()
-{
-}
 
 // CSObjSortArray:: Modifiers.
 
@@ -984,7 +863,7 @@ template<class TYPE,class KEY_TYPE>
 size_t CSObjSortArray<TYPE,KEY_TYPE>::AddPresorted( size_t index, int iCompareRes, TYPE pNew )
 {
 	if ( iCompareRes > 0 )
-		index++;
+		++index;
 
 	this->InsertAt(index, pNew);
 	return index;
@@ -998,7 +877,7 @@ size_t CSObjSortArray<TYPE, KEY_TYPE>::AddSortKey( TYPE pNew, KEY_TYPE key )
 	size_t index = FindKeyNear(key, iCompareRes);
 	if ( iCompareRes == 0 )
 	{
-		// duplicate should not happen ?!? DestructElements is called automatically for previous.
+		// duplicate should not happen ?!?
 		this->SetAt(index, pNew);
 		return index;
 	}

@@ -9,13 +9,15 @@
 #include "../../common/common.h"
 
 
+#define MAX_TOOLTIP_LEN 256
+
 // Storage for Tooltip data while in trigger on an item
 class CClientTooltip
 {
 public:
     static const char *m_sClassName;
     dword m_clilocid;
-    tchar m_args[SCRIPT_MAX_LINE_LEN];
+    tchar m_args[MAX_TOOLTIP_LEN];
 
 public:
     explicit CClientTooltip(dword clilocid, lpctstr args = NULL);

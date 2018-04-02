@@ -664,7 +664,7 @@ const CUOVersionBlock * CVerDataMul::GetEntry(size_t i) const
 
 void CVerDataMul::Unload()
 {
-	m_Data.Empty();
+	m_Data.Clear();
 }
 
 bool CVerDataMul::FindVerDataBlock(VERFILE_TYPE type, dword id, CUOIndexRec & Index) const

@@ -122,7 +122,7 @@ CCharPlayer::CCharPlayer(CChar *pChar, CAccount *pAccount) : m_pAccount(pAccount
 
 CCharPlayer::~CCharPlayer()
 {
-	m_Speech.RemoveAll();
+	m_Speech.Clear();
 }
 
 CAccountRef CCharPlayer::GetAccount() const

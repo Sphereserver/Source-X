@@ -2208,7 +2208,7 @@ void CServerConfig::LoadSortSpells()
 	if ( iQtySpells <= 0 )
 		return;
 
-	m_SpellDefs_Sorted.RemoveAll();
+	m_SpellDefs_Sorted.Clear();
 	m_SpellDefs_Sorted.Add( m_SpellDefs[0] );		// the null spell
 
 	for ( size_t i = 1; i < iQtySpells; ++i )
@@ -2688,7 +2688,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		return true;
 	case RES_RUNES:
 		// The full names of the magic runes.
-		m_Runes.RemoveAll();
+		m_Runes.Clear();
 		while ( pScript->ReadKey() )
 		{
 			m_Runes.Add( new CSString(pScript->GetKey()) );
@@ -3109,7 +3109,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 	case RES_STARTS:
 		{
 			int iStartVersion = pScript->GetArgVal();
-			m_StartDefs.RemoveAll();
+			m_StartDefs.Clear();
 			while ( pScript->ReadKey())
 			{
 				CStartLoc * pStart = new CStartLoc( pScript->GetKey());
@@ -3131,7 +3131,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			return true;
 		}
 	case RES_MOONGATES:
-		m_MoonGates.RemoveAll();
+		m_MoonGates.Clear();
 		while ( pScript->ReadKey())
 		{
 			CPointMap pt = GetRegionPoint( pScript->GetKey());
@@ -3857,32 +3857,32 @@ void CServerConfig::Unload( bool fResync )
 		return;
 	}
 
-	m_ResourceFiles.RemoveAll();
+	m_ResourceFiles.Clear();
 
-	// m_ResHash.RemoveAll();
+	// m_ResHash.Clear();
 
-	m_Obscene.RemoveAll();
-	m_Fame.RemoveAll();
-	m_Karma.RemoveAll();
-	m_NotoTitles.RemoveAll();
-	m_NotoKarmaLevels.RemoveAll();
-	m_NotoFameLevels.RemoveAll();
-	m_Runes.RemoveAll();	// Words of power. (A-Z)
+	m_Obscene.Clear();
+	m_Fame.Clear();
+	m_Karma.Clear();
+	m_NotoTitles.Clear();
+	m_NotoKarmaLevels.Clear();
+	m_NotoFameLevels.Clear();
+	m_Runes.Clear();	// Words of power. (A-Z)
 	// m_MultiDefs
-	m_SkillNameDefs.RemoveAll();	// Defined Skills
-	m_SkillIndexDefs.RemoveAll();
+	m_SkillNameDefs.Clear();	// Defined Skills
+	m_SkillIndexDefs.Clear();
 	// m_Servers
-	m_Functions.RemoveAll();
-	m_StartDefs.RemoveAll(); // Start points list
+	m_Functions.Clear();
+	m_StartDefs.Clear(); // Start points list
 	// m_StatAdv
-	for ( int j=0; j<PLEVEL_QTY; j++ )
+	for ( int j=0; j<PLEVEL_QTY; ++j )
 	{
-		m_PrivCommands[j].RemoveAll();
+		m_PrivCommands[j].Clear();
 	}
-	m_MoonGates.Empty();
+	m_MoonGates.Clear();
 	// m_WebPages
-	m_SpellDefs.RemoveAll();	// Defined Spells
-	m_SpellDefs_Sorted.RemoveAll();
+	m_SpellDefs.Clear();	// Defined Spells
+	m_SpellDefs_Sorted.Clear();
 }
 
 bool CServerConfig::Load( bool fResync )
@@ -3958,7 +3958,7 @@ bool CServerConfig::Load( bool fResync )
 	m_scpTables.CloseForce();
 
 	//	Initialize the world sectors
-	g_Log.Event(LOGM_INIT, "\nInitializing the world...");
+	g_Log.Event(LOGM_INIT, "\nInitializing the world...\n");
 	g_World.Init();
 
 	// open and index all my script files i'm going to use.
@@ -4028,7 +4028,7 @@ bool CServerConfig::Load( bool fResync )
 	}
 
 	// parse eventsitem
-	m_iEventsItemLink.Empty();
+	m_iEventsItemLink.Clear();
 	if ( ! m_sEventsItem.IsEmpty() )
 	{
 		CScript script("EVENTSITEM", m_sEventsItem);
@@ -4036,7 +4036,7 @@ bool CServerConfig::Load( bool fResync )
 	}
 
 	// parse eventspet
-	m_pEventsPetLink.Empty();
+	m_pEventsPetLink.Clear();
 	if ( ! m_sEventsPet.IsEmpty() )
 	{
 		CScript script("EVENTSPET", m_sEventsPet);
@@ -4044,7 +4044,7 @@ bool CServerConfig::Load( bool fResync )
 	}
 
 	// parse eventsplayer
-	m_pEventsPlayerLink.Empty();
+	m_pEventsPlayerLink.Clear();
 	if ( ! m_sEventsPlayer.IsEmpty() )
 	{
 		CScript script("EVENTSPLAYER", m_sEventsPlayer);
@@ -4052,7 +4052,7 @@ bool CServerConfig::Load( bool fResync )
 	}
 
 	// parse eventsregion
-	m_pEventsRegionLink.Empty();
+	m_pEventsRegionLink.Clear();
 	if ( ! m_sEventsRegion.IsEmpty() )
 	{
 		CScript script("EVENTSREGION", m_sEventsRegion);

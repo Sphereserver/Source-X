@@ -533,7 +533,7 @@ CContainer::CContainer()
 
 CContainer::~CContainer()
 {
-	DeleteAll(); // call this early so the virtuals will work.
+	Clear(); // call this early so the virtuals will work.
 }
 
 bool CContainer::r_WriteValContainer( lpctstr pszKey, CSString &sVal, CTextConsole *pSrc )

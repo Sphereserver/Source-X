@@ -79,7 +79,7 @@ void CCharRefArray::DeleteChars()
         if ( pChar )
             pChar->Delete();
     }
-    m_uidCharArray.RemoveAll();
+    m_uidCharArray.Clear();
 }
 
 

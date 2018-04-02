@@ -447,7 +447,7 @@ void CChat::KillChannels()
 	// First /kick everyone
 	for ( ; pChannel != NULL; pChannel = pChannel->GetNext())
 		pChannel->KickAll();
-	m_Channels.Empty();
+	m_Channels.Clear();
 }
 
 void CChat::WhereIs(CChatChanMember * pBy, lpctstr pszName ) const

@@ -728,7 +728,6 @@ private:
 	CSStringSortArray(const CSStringSortArray& copy);
 	CSStringSortArray& operator=(const CSStringSortArray& other);
 public:
-	virtual void DestructElements( tchar** pElements, size_t nCount );
 	// Sorted array of strings
 	int CompareKey( tchar* pszID1, tchar* pszID2, bool fNoSpaces ) const;
 	void AddSortString( lpctstr pszText );

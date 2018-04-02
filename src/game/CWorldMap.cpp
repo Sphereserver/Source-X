@@ -1071,7 +1071,6 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block,
 		}
 	}
 
-	//delete pItemDef;
 	pItemDef = NULL;
 	pDupeDef = NULL;
 	pItem = NULL;

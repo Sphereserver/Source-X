@@ -705,9 +705,9 @@ CWorldThread::~CWorldThread()
 void CWorldThread::CloseAllUIDs()
 {
 	ADDTOCALLSTACK("CWorldThread::CloseAllUIDs");
-	m_ObjDelete.DeleteAll();	// empty our list of unplaced objects (and delete the objects in the list)
-	m_ObjNew.DeleteAll();		// empty our list of objects to delete (and delete the objects in the list)
-	m_UIDs.RemoveAll();
+	m_ObjDelete.Clear();	// empty our list of unplaced objects (and delete the objects in the list)
+	m_ObjNew.Clear();		// empty our list of objects to delete (and delete the objects in the list)
+	m_UIDs.Clear();
 
 	if ( m_FreeUIDs != NULL )
 	{
@@ -929,9 +929,9 @@ void CWorldThread::GarbageCollection_New()
 
 			ReportGarbageCollection(pObj, 0x3202);
 		}
-		m_ObjNew.DeleteAll();	// empty our list of unplaced objects (and delete the objects in the list)
+		m_ObjNew.Clear();	// empty our list of unplaced objects (and delete the objects in the list)
 	}
-	m_ObjDelete.DeleteAll();	// empty our list of objects to delete (and delete the objects in the list)
+	m_ObjDelete.Clear();	// empty our list of objects to delete (and delete the objects in the list)
 
 	// Make sure all GM pages have accounts.
 	CGMPage *pPage = static_cast<CGMPage *>(g_World.m_GMPages.GetHead());
@@ -1731,14 +1731,14 @@ bool CWorld::LoadWorld() // Load world from script
 		if ( m_iSaveCountID == iPrevSaveCount ) break;
 
 		// Reset everything that has been loaded
-		m_Stones.RemoveAll();
-		m_ObjStatusUpdates.RemoveAll();
-		m_Parties.DeleteAll();
-		m_GMPages.DeleteAll();
+		m_Stones.Clear();
+		m_ObjStatusUpdates.Clear();
+		m_Parties.Clear();
+		m_GMPages.Clear();
 
 		if ( m_Sectors )
 		{
-			for ( uint s = 0; s < m_SectorsQty; s++ )
+			for ( uint s = 0; s < m_SectorsQty; ++s )
 			{
 				// Remove everything from the sectors
 				m_Sectors[s]->Close();
@@ -2063,22 +2063,22 @@ void CWorld::Close()
 	if ( IsSaving() )
 		Save(true);
 
-	m_Stones.RemoveAll();
-	m_ObjStatusUpdates.RemoveAll();
-	m_Parties.DeleteAll();
-	m_GMPages.DeleteAll();
+	m_Stones.Clear();
+	m_ObjStatusUpdates.Clear();
+	m_Parties.Clear();
+	m_GMPages.Clear();
 
 	if ( m_Sectors != NULL )
 	{
 		//	free memory allocated by sectors
-		for ( uint s = 0; s < m_SectorsQty; s++ )
+		for ( uint s = 0; s < m_SectorsQty; ++s )
 		{
 			// delete everything in sector
 			m_Sectors[s]->Close();
 		}
 		// do this in two loops because destructors of items
 		// may access server sectors
-		for ( uint s = 0; s < m_SectorsQty; s++ )
+		for ( uint s = 0; s < m_SectorsQty; ++s )
 		{
 			// delete the sectors
 			delete m_Sectors[s];
@@ -2455,12 +2455,12 @@ void CWorld::OnTick()
 					pObj->OnTickStatusUpdate();
 			}
 
-			m_ObjStatusUpdates.RemoveAll();
+			m_ObjStatusUpdates.Clear();
 
 			EXC_CATCHSUB("StatusUpdates");
 		}
 
-		m_ObjDelete.DeleteAll();	// clean up our delete list.
+		m_ObjDelete.Clear();	// clean up our delete list.
 	}
 
 	EXC_TRYSUB("Tick");
@@ -2566,12 +2566,12 @@ void CWorld::OnTickMySQL()
 					pObj->OnTickStatusUpdate();
 			}
 
-			m_ObjStatusUpdates.RemoveAll();
+			m_ObjStatusUpdates.Clear();
 
 			EXC_CATCHSUB("StatusUpdates");
 		}
 
-		m_ObjDelete.DeleteAll();	// clean up our delete list.
+		m_ObjDelete.Clear();	// clean up our delete list.
 	}
 
 	EXC_TRYSUB("Tick");

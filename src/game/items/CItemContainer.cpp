@@ -446,7 +446,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 				// delete all it's pieces.
 				CItemContainer *pCont = dynamic_cast<CItemContainer *>(pItem);
 				ASSERT(pCont);
-				pCont->DeleteAll();
+				pCont->Clear();
 				break;
 			}
 			default:
@@ -890,7 +890,7 @@ void CItemContainer::Restock()
 				case LAYER_VENDOR_EXTRA:
 					// clear all this junk periodically.
 					// sell it back for cash value ?
-					DeleteAll();
+					Clear();
 					break;
 
 				case LAYER_VENDOR_BUYS:
@@ -1180,7 +1180,7 @@ bool CItemContainer::r_Verb( CScript &s, CTextConsole *pSrc )
 			return false;
 		case ICV_EMPTY:
 		{
-			DeleteAll();
+			Clear();
 			return true;
 		}
 		case ICV_FIXWEIGHT:
@@ -1237,7 +1237,7 @@ bool CItemContainer::OnTick()
 	{
 		case IT_TRASH_CAN:
 			// Empty it !
-			DeleteAll();
+			Clear();
 			return true;
 		case IT_CONTAINER:
 			if ( IsAttr(ATTR_MAGIC) )

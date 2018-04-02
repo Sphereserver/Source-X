@@ -525,8 +525,8 @@ public:
 
 	virtual void UnLink()
 	{
-		m_flip_id.RemoveAll();
-		m_SkillMake.RemoveAll();
+		m_flip_id.Clear();
+		m_SkillMake.Clear();
 		CBaseBaseDef::UnLink();
 	}
 

@@ -73,7 +73,7 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 			if ( !pCont )
 				return false;
 
-			pCont->Empty();
+			pCont->Clear();
 		}
 	}
 

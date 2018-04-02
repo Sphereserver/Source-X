@@ -22,7 +22,7 @@ CItemStone::~CItemStone()
 	g_World.m_Stones.RemovePtr( this );
 
 	// all members are deleted automatically.
-	Empty();	// do this manually to preserve the parents type cast
+	Clear();	// do this manually to preserve the parents type cast
 }
 
 MEMORY_TYPE CItemStone::GetMemoryType() const

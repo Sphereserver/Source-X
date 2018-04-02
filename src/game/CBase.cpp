@@ -70,8 +70,8 @@ bool CBaseBaseDef::Can( dword wCan ) const
 
 void CBaseBaseDef::UnLink()
 {
-	m_BaseResources.RemoveAll();
-	m_TEvents.RemoveAll();
+	m_BaseResources.Clear();
+	m_TEvents.Clear();
 	CResourceLink::UnLink();
 }
 
