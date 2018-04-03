@@ -1439,7 +1439,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 
 				if ( *pszKey )
 				{
-					TRIGRET_TYPE trReturn;
+					TRIGRET_TYPE trReturn = TRIGRET_RET_FALSE;
 					m_CallingObjTrigger = m_RunningTrigger;
 					bool bTrigReturn = CallPersonalTrigger(const_cast<tchar *>(pszKey), pSrc, trReturn,false);
 					m_CallingObjTrigger = NULL;

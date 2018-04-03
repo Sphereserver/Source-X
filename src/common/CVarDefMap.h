@@ -48,7 +48,7 @@ public:
 
 	CVarDefContNum( lpctstr pszKey, int64 iVal );
 	CVarDefContNum( lpctstr pszKey );
-	~CVarDefContNum();
+	virtual ~CVarDefContNum();
 
 private:
 	CVarDefContNum(const CVarDefContNum& copy);
@@ -75,7 +75,7 @@ public:
 
 	CVarDefContStr( lpctstr pszKey, lpctstr pszVal );
 	explicit CVarDefContStr( lpctstr pszKey );
-	~CVarDefContStr();
+	virtual ~CVarDefContStr();
 
 private:
 	CVarDefContStr(const CVarDefContStr& copy);

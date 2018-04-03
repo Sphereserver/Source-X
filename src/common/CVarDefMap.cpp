@@ -360,32 +360,12 @@ void CVarDefMap::Empty()
 {
 	ADDTOCALLSTACK("CVarDefMap::Empty");
 	DefSet::iterator i = m_Container.begin();
-	CVarDefCont * pVarBase = NULL;
-	CVarDefContNum * pVarNum = NULL;
-	CVarDefContStr * pVarStr = NULL;
 
 	while ( i != m_Container.end() )
 	{
-		pVarBase = (*i);
-		m_Container.erase(i); // This don't free all the resource
+		delete (*i);	// This calls the appropriate destructors, from derived to base class, because the destructors are virtual.
+		m_Container.erase(i);
 		i = m_Container.begin();
-
-		if ( pVarBase )
-		{
-			pVarNum = dynamic_cast<CVarDefContNum *>(pVarBase);
-			if (pVarNum)
-			{
-				delete pVarNum;
-			}
-			else
-			{
-				pVarStr = dynamic_cast<CVarDefContStr *>(pVarBase);
-				if ( pVarStr )
-					delete pVarStr;
-			}
-		}
-		else
-			delete pVarBase;
 	}
 
 	m_Container.clear();
