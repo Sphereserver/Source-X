@@ -15,6 +15,7 @@
 #include "../game/CServerConfig.h"
 #include "packet.h"
 #include "network.h"
+#include <memory>
 
 
 class CItemMap;

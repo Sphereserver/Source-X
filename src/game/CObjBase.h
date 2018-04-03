@@ -14,6 +14,7 @@
 #include "CServerConfig.h"
 #include "CWorld.h"
 #include "clients/CClientTooltip.h"
+#include <memory>
 
 
 class CBaseBase;
