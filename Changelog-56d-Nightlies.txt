@@ -525,3 +525,8 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 	Added: Missing animation of throwing weapons returning after throwing them.
 - [Port from Source, 16/06/2017, Coruja] Improved Throwing weapons returning animation.
 - [Port from Source, 02-01-2018, Coruja] Changed: Improved how ranged weapons handle ammo.
+
+04-04-2018, Nolok
+- Fixed: wrong NEWBIE set added at the character creation (gargoyle in place of the human one, if the player was a human).
+- Changed: a client now logouts instantly if its account PLEVEL is >= 2, that is, starting from the the Counselor priv.
+	Before this change, it logged out instantly only if the GM mode was activated, regardless of the plevel.

@@ -89,6 +89,7 @@ enum RES_TYPE	// all the script resource blocks we know how to deal with !
 
 #define RES_DIALOG_TEXT				1	// sub page for the section.
 #define RES_DIALOG_BUTTON			2
+
 #define RES_NEWBIE_MALE_DEFAULT		(10000+1)	// just an unused number for the range.
 #define RES_NEWBIE_FEMALE_DEFAULT	(10000+2)
 #define RES_NEWBIE_PROF_ADVANCED	(10000+3)
@@ -114,6 +115,7 @@ struct CResourceIDBase : public CUIDBase
 #define RES_INDEX_SHIFT	0		// leave 18 bits = 262144 entries;
 #define RES_INDEX_MASK	0x3FFFF	//  0x3FFFF = 18 bits.
 // Size: 6 + 8 + 18 = 32 --> it's a 32 bits number.
+// WARNING: when adding new resource types, make sure that the last bit (31) doesn't overlap with UID_F_RESOURCE!
 #define RES_GET_TYPE(dw)	( ( dw >> RES_TYPE_SHIFT ) & RES_TYPE_MASK )
 #define RES_GET_INDEX(dw)	( dw & RES_INDEX_MASK )
 

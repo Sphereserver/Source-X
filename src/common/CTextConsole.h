@@ -12,7 +12,7 @@
 
 class CChar;
 
-enum PLEVEL_TYPE		// Priv levels.
+enum PLEVEL_TYPE			// Priviledge (priv) levels.
 {
 	PLEVEL_Guest = 0,		// 0 = This is just a guest account. (cannot PK)
 	PLEVEL_Player,			// 1 = Player or NPC.

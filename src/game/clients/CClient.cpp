@@ -118,7 +118,7 @@ bool CClient::CanInstantLogOut() const
 		return true;
 	if ( ! g_Cfg.m_iClientLingerTime )
 		return true;
-	if ( IsPriv( PRIV_GM ))
+	if ( GetPrivLevel() > PLEVEL_Player )
 		return true;
 	if ( m_pChar == NULL )
 		return true;
@@ -151,7 +151,7 @@ void CClient::CharDisconnect()
 	bool fCanInstaLogOut = CanInstantLogOut();
 
 	//	stoned chars cannot logout if they are not privileged of course
-	if ( m_pChar->IsStatFlag(STATF_STONE) && ( GetPrivLevel() < PLEVEL_Counsel ))
+	if ( m_pChar->IsStatFlag(STATF_STONE) )
 	{
 		iLingerTime = 60*60*TICK_PER_SEC;	// 1 hour of linger time
 		fCanInstaLogOut = false;

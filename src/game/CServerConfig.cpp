@@ -3345,12 +3345,14 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 			pszName = pArg1;
 			tchar * pArg2;
 			Str_Parse( pArg1, &pArg2 );
-			if ( ! strcmpi( pArg2, "HUMAN" ))
-				iPage = RACETYPE_HUMAN;
-			else if ( ! strcmpi( pArg2, "ELF" ))
+			if ( ! strcmpi( pArg2, "ELF" ))
 				iPage = RACETYPE_ELF;
-			else if ( ! strcmpi( pArg2, "GARGOYLE" ))
+			else if ( ! strcmpi( pArg2, "GARG" ))
 				iPage = RACETYPE_GARGOYLE;
+			else if (*pArg2)
+				g_Log.EventWarn("Unrecognized race for a NEWBIE section. Defaulting to human.\n");
+			else
+				iPage = RACETYPE_HUMAN;
 
 			if ( ! strcmpi( pszName, "MALE_DEFAULT" ))
 				return CResourceID( RES_NEWBIE, RES_NEWBIE_MALE_DEFAULT, iPage );
