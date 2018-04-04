@@ -708,24 +708,19 @@ CItem *CChar::GetSpellbook(SPELL_TYPE iSpell) const	// Retrieves a spellbook fro
 {
 	ADDTOCALLSTACK("CChar::GetSpellbook");
 	// Search for suitable book in hands first
-	CItem *pReturn = NULL;
-	for ( CItem *pItem = GetContentHead(); pItem != NULL; pItem = pItem->GetNext() )
-	{
-		if ( !pItem->IsTypeSpellbook() )
-			continue;
-		CItemBase *pItemDef = pItem->Item_GetDef();
-		SPELL_TYPE min = (SPELL_TYPE)pItemDef->m_ttSpellbook.m_iOffset;
-		SPELL_TYPE max = (SPELL_TYPE)(pItemDef->m_ttSpellbook.m_iOffset + pItemDef->m_ttSpellbook.m_iMaxSpells);
-		if ( (iSpell > min) && (iSpell < max) )
-		{
-			if ( pItem->IsSpellInBook(iSpell) )	//We found a book with this same spell, nothing more to do.
-				return pItem;
-			else
-				pReturn = pItem;	// We did not find the spell, but this book is of the same school ... we'll return this book if none better is found (NOTE: some book must be returned or the code will think that we don't have a book).
+	CItem *pReturn = LayerFind(LAYER_HAND1);    // Let's do first a direct search for any book in hands.
+	if (pReturn && pReturn->IsTypeSpellbook() ){
+	    CItemBase *pItemDef = pReturn->Item_GetDef();
+	    SPELL_TYPE min = (SPELL_TYPE)pItemDef->m_ttSpellbook.m_iOffset;
+	    SPELL_TYPE max = (SPELL_TYPE)(pItemDef->m_ttSpellbook.m_iOffset + pItemDef->m_ttSpellbook.m_iMaxSpells);
+	    if ( (iSpell > min) && (iSpell < max) )
+	    {
+		    if (pReturn->IsSpellInBook(iSpell) )	//We found a book with this same spell, nothing more to do.
+			    return pReturn;
 		}
-	}
+    }
 
-	// Then search in the top level of the pack
+	// No book found or found one which doesn't have the spell I am going to cast, then let's search in the top level of the backpack.
 	CItemContainer *pPack = GetPack();
 	if ( pPack )
 	{
@@ -733,15 +728,16 @@ CItem *CChar::GetSpellbook(SPELL_TYPE iSpell) const	// Retrieves a spellbook fro
 		{
 			if ( !pItem->IsTypeSpellbook() )
 				continue;
+            // Found a book, let's find each magic school's offsets to search for the desired spell.
 			CItemBase *pItemDef = pItem->Item_GetDef();
 			SPELL_TYPE min = (SPELL_TYPE)pItemDef->m_ttSpellbook.m_iOffset;
 			SPELL_TYPE max = (SPELL_TYPE)(pItemDef->m_ttSpellbook.m_iOffset + pItemDef->m_ttSpellbook.m_iMaxSpells);
-			if ( (iSpell > min) && (iSpell < max) )
+			if ( (iSpell > min) && (iSpell < max) ) // and check now the spell is within the spells that this book can hold.
 			{
-				if ( pItem->IsSpellInBook(iSpell) )	//We found a book with this same spell, nothing more to do.
+				if ( pItem->IsSpellInBook(iSpell) )	//I found a book with this spell, nothing more to do.
 					return pItem;
 				else
-					pReturn = pItem;	// We did not find the spell, but this book is of the same school ... we'll return this book if none better is found (NOTE: some book must be returned or the code will think that we don't have a book).
+					pReturn = pItem;	// I did not find the spell, but this book is of the same school ... so i'll return this book if none better is found (NOTE: some book must be returned or the code will think that i don't have any book).
 			}
 		}
 	}

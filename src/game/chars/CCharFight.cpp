@@ -445,7 +445,7 @@ void CChar::CallGuards()
 		// Mark person as criminal if I saw him criming
 		// Only players call guards this way. NPC's flag criminal instantly
 		if (m_pPlayer && Memory_FindObjTypes(pCriminal, MEMORY_SAWCRIME))
-			pCriminal->Noto_Criminal();
+			pCriminal->Noto_Criminal(this);
 
 		if (!pCriminal->IsStatFlag(STATF_CRIMINAL) && !(pCriminal->Noto_IsEvil() && g_Cfg.m_fGuardsOnMurderers))
 			continue;
