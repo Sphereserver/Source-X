@@ -33,7 +33,7 @@
 
 CServer::CServer() : CServerDef( SPHERE_TITLE, CSocketAddressIP( SOCKET_LOCAL_ADDRESS ))
 {
-	m_iExitFlag = 0;
+	m_iExitFlag.store(0, std::memory_order_release);
 	m_fResyncPause = false;
 	m_fResyncRequested = NULL;
 
@@ -84,7 +84,7 @@ void CServer::SetSignals( bool fMsg )
 void CServer::SetServerMode( SERVMODE_TYPE mode )
 {
 	ADDTOCALLSTACK("CServer::SetServerMode");
-	m_iModeCode = mode;
+	m_iModeCode.store(mode, std::memory_order_release);
 #ifdef _WIN32
 	NTWindow_SetWindowTitle();
 #endif
@@ -94,7 +94,7 @@ bool CServer::IsValidBusy() const
 {
 	// We might appear to be stopped but it's really ok ?
 	// ?
-	switch ( m_iModeCode )
+	switch ( m_iModeCode.load(std::memory_order_acquire) )
 	{
 		case SERVMODE_Saving:
 			if ( g_World.IsSaving() )
@@ -113,9 +113,9 @@ bool CServer::IsValidBusy() const
 void CServer::SetExitFlag( int iFlag )
 {
 	ADDTOCALLSTACK("CServer::SetExitFlag");
-	if ( m_iExitFlag )
+	if ( m_iExitFlag.load(std::memory_order_acquire) )
 		return;
-	m_iExitFlag = iFlag;
+	m_iExitFlag.store(iFlag, std::memory_order_release);
 }
 
 void CServer::Shutdown( int64 iMinutes ) // If shutdown is initialized

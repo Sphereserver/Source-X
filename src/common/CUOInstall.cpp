@@ -226,10 +226,12 @@ VERFILE_TYPE CUOInstall::OpenFiles( dword dwMask )
 	// RETURN: VERFILE_QTY = all open success.
 	int i(0);
 
-	for ( i = 0; i < VERFILE_QTY; i++ )
+	for ( i = 0; i < VERFILE_QTY; ++i )
 	{
-		if ( ! ( dwMask & ( 1 << i )) ) continue;
-		if ( GetBaseFileName(static_cast<VERFILE_TYPE>(i)) == NULL ) continue;
+		if ( ! ( dwMask & ( 1 << i )) )
+			continue;
+		if ( GetBaseFileName(static_cast<VERFILE_TYPE>(i)) == NULL )
+			continue;
 
 		bool bFileLoaded = true;
 		switch (i)
@@ -255,7 +257,7 @@ VERFILE_TYPE CUOInstall::OpenFiles( dword dwMask )
 				tchar z[256];
 
 				//	check for map files of custom maps
-				for ( int m = 0; m < 256; m++ )
+				for ( int m = 0; m < 256; ++m )
 				{
 					if (g_MapList.IsInitialized(m) || (m == 0)) //Need at least a minimum of map0... (Ben)
 					{
@@ -306,8 +308,8 @@ VERFILE_TYPE CUOInstall::OpenFiles( dword dwMask )
 
 										while ((dwFilesInBlock > 0)&&(dwTotalFiles > 0))
 										{
-											dwTotalFiles--;
-											dwFilesInBlock--;
+											--dwTotalFiles;
+											--dwFilesInBlock;
 
 											m_Maps[index].Read( &dwHashLo, sizeof(dword) );
 											m_Maps[index].Read( &dwHashHi, sizeof(dword) );
@@ -432,7 +434,7 @@ VERFILE_TYPE CUOInstall::OpenFiles( dword dwMask )
 
 	tchar * z = Str_GetTemp();
 	tchar * z1 = Str_GetTemp();
-	for ( uchar j = 0; j < 7; j++ )
+	for ( uchar j = 0; j < 7; ++j )
 	{
 		if ( j == 5 )	// ML just added some changes on maps 0/1 instead a new map
 			continue;

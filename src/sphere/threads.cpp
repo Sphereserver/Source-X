@@ -120,7 +120,7 @@ void ThreadHolder::push(IThread *thread)
 
 	SimpleThreadLock lock(m_mutex);
 	m_threads.push_back(thread);
-	m_threadCount++;
+	++m_threadCount;
 }
 
 void ThreadHolder::pop(IThread *thread)
@@ -133,7 +133,7 @@ void ThreadHolder::pop(IThread *thread)
 	spherethreadlist_t::iterator it = std::find(m_threads.begin(), m_threads.end(), thread);
 	if (it != m_threads.end())
 	{
-		m_threadCount--;
+		--m_threadCount;
 		m_threads.erase(it);
 		return;
 	}
@@ -567,7 +567,7 @@ void AbstractSphereThread::allocateString(TemporaryString &string)
 
 bool AbstractSphereThread::shouldExit()
 {
-	if ( g_Serv.m_iModeCode == SERVMODE_Exiting )
+	if ( g_Serv.m_iModeCode.load(std::memory_order_acquire) == SERVMODE_Exiting )
 		return true;
 
 	return AbstractThread::shouldExit();

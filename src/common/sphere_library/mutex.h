@@ -37,7 +37,14 @@ public:
 	* Waits for ownership of the specified critical section object. The function
 	* returns when the calling thread is granted ownership.
 	*/
-	void lock();
+	inline void lock()
+	{
+#ifdef _WIN32
+		EnterCriticalSection(&m_criticalSection);
+#else
+		pthread_mutex_lock(&m_criticalSection);
+#endif
+	}
 	/**
 	* @brief Tries to lock the mutex.
 	*
@@ -46,13 +53,27 @@ public:
     * @return True If the critical section is successfully entered or the current
     * thread already owns the critical section, false otherwise.
 	*/
-	bool tryLock();
+	inline bool tryLock()
+	{
+#ifdef _WIN32
+		return TryEnterCriticalSection(&m_criticalSection) == TRUE;
+#else
+		return pthread_mutex_trylock(&m_criticalSection) == 0;
+#endif
+	}
 	/**
 	* @brief Unlocks the mutex.
 	*
 	* Releases ownership of the specified critical section object.
 	*/
-	void unlock();
+	inline void unlock()
+	{
+#ifdef _WIN32
+		LeaveCriticalSection(&m_criticalSection);
+#else
+		pthread_mutex_unlock(&m_criticalSection);
+#endif
+	}
 	///@}
 
 private:
@@ -76,8 +97,12 @@ public:
 	/** @name Constructors, Destructor, Asign operator:
 	*/
 	///@{
-	explicit SimpleThreadLock(SimpleMutex &mutex);
-	~SimpleThreadLock();
+	inline explicit SimpleThreadLock(SimpleMutex &mutex) : m_mutex(mutex), m_locked(true) {
+		mutex.lock();
+	}
+	inline ~SimpleThreadLock() {
+		m_mutex.unlock();
+	}
 private:
 	SimpleThreadLock(const SimpleThreadLock& copy);
 	SimpleThreadLock& operator=(const SimpleThreadLock& other);
@@ -91,7 +116,9 @@ public:
 	*
 	* In practice, this is always true.
 	*/
-	operator bool() const;
+	inline operator bool() const {
+		return m_locked;
+	}
 	///@}
 
 private:
@@ -108,9 +135,15 @@ public:
 	/** @name Constructors, Destructor, Asign operator:
 	*/
 	///@{
-	ManualThreadLock();
-	explicit ManualThreadLock(SimpleMutex * mutex);
-	~ManualThreadLock();
+	inline ManualThreadLock() : m_mutex(NULL), m_locked(false) {
+	}
+	inline explicit ManualThreadLock(SimpleMutex * mutex) : m_locked(false) {
+		setMutex(mutex);
+	}
+	inline ~ManualThreadLock() {
+		if (m_mutex != NULL)
+			doUnlock();
+	}
 private:
 	ManualThreadLock(const ManualThreadLock& copy);
 	ManualThreadLock& operator=(const ManualThreadLock& other);
@@ -123,12 +156,16 @@ public:
 	* @brief Sets the mutex to modify.
 	* @param mutex
 	*/
-	void setMutex(SimpleMutex * mutex);
+	inline void setMutex(SimpleMutex * mutex) {
+		m_mutex = mutex;
+	}
 	///@}
 	/** @name Operators:
 	*/
 	///@{
-	operator bool() const;
+	inline operator bool() const {
+		return m_locked;
+	}
 	///@}
 	/** @name Interaction:
 	*/

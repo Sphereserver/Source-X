@@ -100,7 +100,7 @@ bool PacketCreate::onReceive(NetState* net)
 		switch (race_sex_flag)
 		{
 			default:
-				g_Log.EventWarn("PacketCreate: unknown race_sex_flag (% " PRIu8 "), defaulting to 2 (human male).\n", race_sex_flag);
+				g_Log.Event(LOGL_WARN|LOGM_NOCONTEXT,"PacketCreate: unknown race_sex_flag (% " PRIu8 "), defaulting to 2 (human male).\n", race_sex_flag);
 			case 0x2: case 0x3:
 				rtRace = RACETYPE_HUMAN;
 				break;
@@ -159,7 +159,7 @@ bool PacketCreate::doCreate(NetState* net, lpctstr charname, bool bFemale, RACE_
 	{
 		// logging in as a new player whilst already online !
 		client->addSysMessage(g_Cfg.GetDefaultMsg(DEFMSG_MSG_ALREADYONLINE));
-		g_Log.Event(LOGM_CLIENTS_LOG, "%lx:Account '%s' already in use\n", net->id(), account->GetName());
+		g_Log.Event(LOGM_CLIENTS_LOG|LOGM_NOCONTEXT, "%lx:Account '%s' already in use\n", net->id(), account->GetName());
 		return false;
 	}
 
@@ -212,7 +212,7 @@ bool PacketCreate::doCreate(NetState* net, lpctstr charname, bool bFemale, RACE_
 		return false;
 	}
 
-	g_Log.Event(LOGM_CLIENTS_LOG, "%lx:Account '%s' created new char '%s' [0%lx]\n", net->id(), account->GetName(), pChar->GetName(), (dword)pChar->GetUID() );
+	g_Log.Event(LOGM_CLIENTS_LOG|LOGM_NOCONTEXT, "%lx:Account '%s' created new char '%s' [0%lx]\n", net->id(), account->GetName(), pChar->GetName(), (dword)pChar->GetUID() );
 	client->Setup_Start(pChar);
 	return true;
 }
@@ -2058,7 +2058,7 @@ bool PacketGumpValueInputResponse::onReceive(NetState* net)
 			object->Update();
 		}
 
-		g_Log.Event(LOGM_GM_CMDS, "%x:'%s' tweak uid=0%x (%s) to '%s %s'=%d\n", net->id(), client->GetName(), (dword)(object->GetUID()), object->GetName(), static_cast<lpctstr>(client->m_Targ_Text), static_cast<lpctstr>(text), ret);
+		g_Log.Event(LOGM_GM_CMDS|LOGM_NOCONTEXT, "%x:'%s' tweak uid=0%x (%s) to '%s %s'=%d\n", net->id(), client->GetName(), (dword)(object->GetUID()), object->GetName(), static_cast<lpctstr>(client->m_Targ_Text), static_cast<lpctstr>(text), ret);
 	}
 
 	return true;
@@ -2208,14 +2208,14 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 	{
 		const CResourceDef* resource = g_Cfg.ResourceGetDef(CResourceID(RES_DIALOG, context));
 		if (resource == NULL)
-			g_Log.Event(LOGM_DEBUG|LOGL_EVENT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, "undef", (dword)serial, button);
+			g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGM_NOCONTEXT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, "undef", (dword)serial, button);
 		else
 		{
 			const CDialogDef* dialog = dynamic_cast<const CDialogDef*>(resource);
 			if (dialog == NULL)
-				g_Log.Event(LOGM_DEBUG | LOGL_EVENT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, "undef", (dword)serial, button);
+				g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGM_NOCONTEXT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, "undef", (dword)serial, button);
 			else
-				g_Log.Event(LOGM_DEBUG | LOGL_EVENT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, (lpctstr)dialog->GetName(), (dword)serial, button);
+				g_Log.Event(LOGM_DEBUG|LOGL_EVENT|LOGM_NOCONTEXT, "Gump: %u (%s), Uid: 0x%x, Button: %u.\n", context, (lpctstr)dialog->GetName(), (dword)serial, button);
 		}
 	}
 #endif
@@ -4401,7 +4401,7 @@ bool PacketCrashReport::onReceive(NetState* net)
 	skip(1); // zero
 	dword errorOffset = readInt32();
 
-	g_Log.Event(LOGM_CLIENTS_LOG|LOGL_WARN, "%x:Client crashed at %d,%d,%d,%d: 0x%08X %s @ 0x%08X (%s, %d.%d.%d.%d)\n", net->id(),
+	g_Log.Event(LOGM_CLIENTS_LOG|LOGL_WARN|LOGM_NOCONTEXT, "%x:Client crashed at %d,%d,%d,%d: 0x%08X %s @ 0x%08X (%s, %d.%d.%d.%d)\n", net->id(),
 					x, y, z, map,
 					errorCode, description, errorOffset, executable,
 					versionMaj, versionMin, versionRev, versionPat);
@@ -4473,7 +4473,7 @@ bool PacketCreate70016::onReceive(NetState* net)
 	switch (race_sex_flag)
 	{
 	default:
-		g_Log.EventWarn("Creating new character (client > 7.0.16.0 packet) with unknown race_sex_flag (% " PRIu8 "): defaulting to 2 (human male).\n", race_sex_flag);
+		g_Log.Event(LOGL_WARN|LOGM_NOCONTEXT, "Creating new character (client > 7.0.16.0 packet) with unknown race_sex_flag (% " PRIu8 "): defaulting to 2 (human male).\n", race_sex_flag);
 	case 0x2: case 0x3:
 		rtRace = RACETYPE_HUMAN;
 		break;

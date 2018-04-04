@@ -749,7 +749,7 @@ void CSTypedArray<TYPE, ARG_TYPE>::SetCount( size_t nNewCount )
 
 	if ( nNewCount > m_nCount )
 	{
-#ifndef _MSC_VER
+#if __GNUC__ >= 7
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Walloc-size-larger-than="
 #endif
@@ -760,7 +760,7 @@ void CSTypedArray<TYPE, ARG_TYPE>::SetCount( size_t nNewCount )
 			memcpy( pNewData, m_pData, sizeof(TYPE)*m_nCount );
 			delete[] reinterpret_cast<byte *>(m_pData);	// don't call any destructors.
 		}
-#ifndef _MSC_VER
+#if __GNUC__ >= 7
 	#pragma GCC diagnostic pop
 #endif
 

@@ -1145,7 +1145,7 @@ void CItemStone::ElectMaster()
 bool CItemStone::IsUniqueName( lpctstr pName ) // static
 {
 	ADDTOCALLSTACK("CItemStone::IsUniqueName");
-	for ( size_t i = 0; i < g_World.m_Stones.GetCount(); i++ )
+	for ( size_t i = 0; i < g_World.m_Stones.GetCount(); ++i )
 	{
 		if ( ! strcmpi( pName, g_World.m_Stones[i]->GetName()))
 			return false;
@@ -1159,7 +1159,7 @@ bool CItemStone::CheckValidMember( CStoneMember * pMember )
 	ASSERT(pMember);
 	ASSERT( pMember->GetParent() == this );
 
-	if ( GetAmount()==0 || g_Serv.m_iExitFlag )	// no reason to elect new if the stone is dead.
+	if ( GetAmount()==0 || g_Serv.m_iExitFlag.load(std::memory_order_acquire) )	// no reason to elect new if the stone is dead.
 		return true;	// we are deleting anyhow.
 
 	switch ( pMember->GetPriv())

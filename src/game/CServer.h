@@ -14,6 +14,7 @@
 #include "clients/CChat.h"
 #include "CServerDef.h"
 #include "CServerTime.h"
+#include <atomic>
 
 
 class CItemShip;
@@ -38,8 +39,8 @@ extern class CServer : public CServerDef, public CTextConsole
 
 public:
 	static const char *m_sClassName;
-	SERVMODE_TYPE m_iModeCode;  // Just some error code to return to system.
-	int  m_iExitFlag;	// identifies who caused the exit. <0 = error
+	std::atomic<SERVMODE_TYPE> m_iModeCode;	// Just some error code to return to system.
+	std::atomic_int m_iExitFlag;			// identifies who caused the exit. <0 = error
 	bool m_fResyncPause;		// Server is temporarily halted so files can be updated.
 	CTextConsole * m_fResyncRequested;		// A resync pause has been requested by this source.
 
@@ -85,7 +86,7 @@ public:
 	void Shutdown( int64 iMinutes );
 	bool IsLoading() const
 	{
-		return ( (m_iModeCode > SERVMODE_Run) || m_fResyncPause );
+		return ( m_fResyncPause || (m_iModeCode.load(std::memory_order_acquire) > SERVMODE_Run) );
 	}
 	void SetSignals( bool fMsg = true );
 

@@ -2802,11 +2802,12 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			return true;
 		case IC_CONT:	// needs special processing.
 			{
-				bool normcont = LoadSetContainer(s.GetArgVal(), static_cast<LAYER_TYPE>(GetUnkZ()));
-				if ( !normcont && ((g_Serv.m_iModeCode == SERVMODE_Loading) || (g_Serv.m_iModeCode == SERVMODE_GarbageCollection)) )
+				bool normcont = LoadSetContainer(s.GetArgVal(), static_cast<LAYER_TYPE>(GetUnkZ()));				
+				if (!normcont)
 				{
-					//	since the item is no longer in container, it should be deleted
-					Delete();
+					SERVMODE_TYPE iModeCode = g_Serv.m_iModeCode.load(std::memory_order_acquire);
+					if ((iModeCode == SERVMODE_Loading) || (iModeCode == SERVMODE_GarbageCollection))						
+						Delete();	//	since the item is no longer in container, it should be deleted
 				}
 				return normcont;
 			}

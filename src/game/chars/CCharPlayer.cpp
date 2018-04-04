@@ -25,7 +25,7 @@ void CChar::ClearPlayer()
 		return;
 
 	// unlink me from my account.
-	if ( g_Serv.m_iModeCode != SERVMODE_Exiting )
+	if ( g_Serv.m_iModeCode.load(std::memory_order_acquire) != SERVMODE_Exiting )
 	{
 		if ( m_pPlayer->m_pAccount )
 			DEBUG_WARN(("Player delete '%s' name '%s'\n", m_pPlayer->GetAccount()->GetName(), GetName()));

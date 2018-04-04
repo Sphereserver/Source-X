@@ -3429,7 +3429,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 				return rid;
 			}
 #ifdef _DEBUG
-			if ( g_Serv.m_iModeCode != SERVMODE_ResyncLoad )	// this really is ok.
+			if ( g_Serv.m_iModeCode.load(std::memory_order_acquire) != SERVMODE_ResyncLoad )	// this really is ok.
 			{
 				// Warn of duplicates.
 				size_t duplicateIndex = m_ResHash.FindKey( rid );
@@ -3498,7 +3498,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 
 				// We are redefining an item we have already read in ?
 				// Why do this unless it's a Resync ?
-				if ( g_Serv.m_iModeCode != SERVMODE_ResyncLoad )
+				if ( g_Serv.m_iModeCode.load(std::memory_order_acquire) != SERVMODE_ResyncLoad )
 				{
 					// Ensure it's not a "type", because hardcoded types indexes are defined in sphere_defs.scp,
 					//  which is usually parsed before sphere_types.scp or its TYPEDEF block. So some time after declaring the
@@ -3902,6 +3902,7 @@ bool CServerConfig::Load( bool fResync )
 	}
 
 	// Open the MUL files I need.
+	g_Log.Event(LOGM_INIT, "\nAnalyzing the client files...\n");
 	VERFILE_TYPE i = g_Install.OpenFiles(
 		(1<<VERFILE_MAP)|
 		(1<<VERFILE_STAIDX)|
@@ -3913,8 +3914,7 @@ bool CServerConfig::Load( bool fResync )
 		);
 	if ( i != VERFILE_QTY )
 	{
-		g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".INI file is corrupt or missing\n" );
-		g_Log.Event( LOGL_FATAL|LOGM_INIT, "MUL File '%s' not found...\n", static_cast<lpctstr>(g_Install.GetBaseFileName(i)));
+		g_Log.Event( LOGL_FATAL|LOGM_INIT, "MUL File '%s' not found...\n", g_Install.GetBaseFileName(i));
 		return false;
 	}
 
@@ -3925,7 +3925,7 @@ bool CServerConfig::Load( bool fResync )
 	}
 	catch ( const CSError& e )
 	{
-		g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".INI file is corrupt or missing\n" );
+		g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".ini file is corrupt or missing\n" );
 		g_Log.CatchEvent( &e, "g_VerData.Load" );
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 		return false;
@@ -3943,7 +3943,6 @@ bool CServerConfig::Load( bool fResync )
 	{
 		if ( ! OpenResourceFind( m_scpTables, SPHERE_FILE "tables" ))
 		{
-			g_Log.Event( LOGL_FATAL|LOGM_INIT, "The " SPHERE_FILE ".ini file is corrupt or missing\n" );
 			g_Log.Event( LOGL_FATAL|LOGM_INIT, "Error opening table definitions file (" SPHERE_FILE "tables." SPHERE_SCRIPT ")...\n" );
 			return false;
 		}
