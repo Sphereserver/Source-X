@@ -3350,7 +3350,10 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 			else if ( ! strcmpi( pArg2, "GARG" ))
 				iPage = RACETYPE_GARGOYLE;
 			else if (*pArg2)
+			{
 				g_Log.EventWarn("Unrecognized race for a NEWBIE section. Defaulting to human.\n");
+				iPage = RACETYPE_HUMAN;
+			}
 			else
 				iPage = RACETYPE_HUMAN;
 
