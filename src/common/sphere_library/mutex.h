@@ -1,5 +1,5 @@
 /**
-* @file CSRand.h
+* @file mutex.h
 * @brief Sphere simple mutex implementation.
 */
 

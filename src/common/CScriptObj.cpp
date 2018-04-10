@@ -1565,11 +1565,12 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 			break;
 		case SSV_SHOW:
 			{
+				CSString sOriginalArg(s.GetArgRaw());
 				CSString sVal;
 				if ( ! r_WriteVal( s.GetArgStr(), sVal, pSrc ) )
 					return false;
 				tchar * pszMsg = Str_GetTemp();
-				sprintf(pszMsg, "'%s' for '%s' is '%s'\n", static_cast<lpctstr>(s.GetArgStr()), GetName(), static_cast<lpctstr>(sVal));
+				sprintf(pszMsg, "'%s' for '%s' is '%s'\n", sOriginalArg.GetPtr(), GetName(), sVal.GetPtr());
 				pSrc->SysMessage(pszMsg);
 				break;
 			}

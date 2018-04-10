@@ -202,7 +202,7 @@ ssize_t CServer::PrintPercent( ssize_t iCount, ssize_t iTotal )
 #ifndef _WIN32
  			SysMessage("\x08");
 #endif
-			len--;
+			--len;
 		}
 #ifndef _WIN32
 	}
@@ -1340,7 +1340,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 				int		mask = LOGL_EVENT;
 				if ( pszArgs && ( *pszArgs == '@' ))
 				{
-					pszArgs++;
+					++pszArgs;
 					if ( *pszArgs != '@' )
 						mask |= LOGM_NOCONTEXT;
 				}

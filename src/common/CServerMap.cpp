@@ -95,13 +95,13 @@ lpctstr CServerMapBlockState::GetTileName( dword dwID )	// static
 	tchar * pStr = Str_GetTemp();
 	if ( dwID < TERRAIN_QTY )
 	{
-		CSphereTerrainInfo land( (word)dwID );
+		CUOTerrainInfo land( (TERRAIN_TYPE)dwID );
 		strcpy( pStr, land.m_name );
 	}
 	else
 	{
 		dwID -= TERRAIN_QTY;
-		CUOItemInfo item((ITEMID_TYPE)(dwID));
+		CUOItemInfo item((ITEMID_TYPE)dwID);
 		strcpy( pStr, item.m_name );
 	}
 	return pStr;

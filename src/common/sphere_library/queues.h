@@ -16,7 +16,7 @@
 template <typename T>
 class fixedqueue {
 public:
-    fixedqueue(dword size=_SPHERE_QUEUE_DEFAULT_SIZE);
+    fixedqueue(uint size=_SPHERE_QUEUE_DEFAULT_SIZE);
     fixedqueue(const fixedqueue<T> & o);
     ~fixedqueue();
 
@@ -28,17 +28,17 @@ public:
 
     bool empty();
     void clear();
-    dword size();
+	uint size();
 private:
     T * _queue;
-    dword _front, _end, _size;
+	uint _front, _end, _size;
     bool _empty;
 };
 
 template <typename T>
 class fixedgrowingqueue {
 public:
-    fixedgrowingqueue(dword size=_SPHERE_QUEUE_DEFAULT_SIZE);
+    fixedgrowingqueue(uint size=_SPHERE_QUEUE_DEFAULT_SIZE);
     fixedgrowingqueue(const fixedgrowingqueue<T> & o);
     ~fixedgrowingqueue();
 
@@ -50,11 +50,11 @@ public:
 
     bool empty();
     void clear();
-    dword size();
+	uint size();
 
 private:
     T * _queue;
-    dword _front, _end, _size;
+	uint _front, _end, _size;
     bool _empty;
 };
 
@@ -63,7 +63,7 @@ class dynamicqueue {
 public:
     dynamicqueue();
     // To allow thread secure wrapper constructor.
-    dynamicqueue(dword _);
+    dynamicqueue(uint _);
     dynamicqueue(const dynamicqueue<T> & o);
     ~dynamicqueue();
 
@@ -75,7 +75,7 @@ public:
 
     void clear();
     bool empty();
-    dword size();
+	uint size();
 private:
     struct _dynamicqueueitem {
     public:
@@ -84,13 +84,13 @@ private:
         _dynamicqueueitem * _next;
     };
     _dynamicqueueitem * _front, *_end;
-    dword _size;
+	uint _size;
 };
 
 template <typename T, class Q>
 class tsqueue {
 public:
-    tsqueue(dword size=_SPHERE_QUEUE_DEFAULT_SIZE);
+    tsqueue(uint size=_SPHERE_QUEUE_DEFAULT_SIZE);
     tsqueue(const tsqueue<T, Q> & o);
 
     tsqueue & operator=(const tsqueue<T, Q> & o);
@@ -102,7 +102,7 @@ public:
 
     void clear();
     bool empty();
-    dword size();
+	uint size();
 private:
     std::mutex _mutex;
     Q _q;
@@ -122,7 +122,7 @@ using tsdynamicqueue = tsqueue<T, dynamicqueue<T>>;
 */
 
 template <typename T>
-fixedqueue<T>::fixedqueue(dword size) {
+fixedqueue<T>::fixedqueue(uint size) {
     _queue = new T[size];
     _size = size;
     _front = 0;
@@ -139,7 +139,7 @@ fixedqueue<T>::fixedqueue(const fixedqueue<T> & o) {
     _queue = new T[_size];
     if (!_empty) {
         _queue[0] = o._queue[o._front];
-        for (dword i = 1; i % _size != _end; ++i) _queue[i] = o._queue[(i + o._front) % _size];
+        for (uint i = 1; i % _size != _end; ++i) _queue[i] = o._queue[(i + o._front) % _size];
     }
 }
 
@@ -158,7 +158,7 @@ fixedqueue<T> & fixedqueue<T>::operator=(const fixedqueue<T> & o) {
     _queue = new T[_size];
     if (!_empty) {
         _queue[0] = o._queue[o._front];
-        for(dword i = 1; i % _size != _end; ++i) _queue[i] = o._queue[(i + o._front) % _size];
+        for(uint i = 1; i % _size != _end; ++i) _queue[i] = o._queue[(i + o._front) % _size];
     }
     return *this;
 }
@@ -207,17 +207,17 @@ void fixedqueue<T>::clear() {
 }
 
 template <typename T>
-dword fixedqueue<T>::size() {
+uint fixedqueue<T>::size() {
     return _size;
 }
 
 template <typename T>
-fixedgrowingqueue<T>::fixedgrowingqueue(dword size) {
-_queue = new T[size];
-_size = size;
-_front = 0;
-_end = 0;
-_empty = true;
+fixedgrowingqueue<T>::fixedgrowingqueue(uint size) {
+	_queue = new T[size];
+	_size = size;
+	_front = 0;
+	_end = 0;
+	_empty = true;
 }
 
 template <typename T>
@@ -229,7 +229,7 @@ fixedgrowingqueue<T>::fixedgrowingqueue(const fixedgrowingqueue<T> & o) {
     _queue = new T[_size];
     if (!_empty) {
         _queue[0] = o._queue[o._front];
-        for(dword i = 1; i % _size != _end; ++i) _queue[i] = o._queue[(i + o._front) % _size];
+        for(uint i = 1; i % _size != _end; ++i) _queue[i] = o._queue[(i + o._front) % _size];
     }
 }
 
@@ -248,7 +248,7 @@ fixedgrowingqueue<T> & fixedgrowingqueue<T>::operator=(const fixedgrowingqueue<T
     _queue = new T[_size];
     if (!_empty) {
         _queue[0] = o._queue[o._front];
-        for(dword i = 1; i % _size != _end; ++i) _queue[i] = o._queue[(i + o._front) % _size];
+        for(uint i = 1; i % _size != _end; ++i) _queue[i] = o._queue[(i + o._front) % _size];
     }
     return *this;
 }
@@ -258,7 +258,7 @@ void fixedgrowingqueue<T>::push(T t) {
     if (_end == _front && !_empty) {
         T * nqueue = new T[_size + _SPHERE_QUEUE_DEFAULT_SIZE];
         nqueue[0] = _queue[_front];
-        for(dword i = 1; i % _size != _end; ++i) nqueue[i] = _queue[(i + _front) % _size];
+        for(uint i = 1; i % _size != _end; ++i) nqueue[i] = _queue[(i + _front) % _size];
         _end = _size - 1;
         _front = 0;
         delete[] _queue;
@@ -304,7 +304,7 @@ void fixedgrowingqueue<T>::clear() {
 }
 
 template <typename T>
-dword fixedgrowingqueue<T>::size() {
+uint fixedgrowingqueue<T>::size() {
     return _size;
 }
 
@@ -316,7 +316,7 @@ dynamicqueue<T>::dynamicqueue() {
 }
 
 template <typename T>
-dynamicqueue<T>::dynamicqueue(dword _) : dynamicqueue<T>() { UNREFERENCED_PARAMETER(_); }
+dynamicqueue<T>::dynamicqueue(uint _) : dynamicqueue<T>() { UNREFERENCED_PARAMETER(_); }
 
 template <typename T>
 dynamicqueue<T>::dynamicqueue(const dynamicqueue<T> & o) {
@@ -396,18 +396,18 @@ bool dynamicqueue<T>::empty() {
 }
 
 template <typename T>
-dword dynamicqueue<T>::size() {
+uint dynamicqueue<T>::size() {
     return _size;
 }
 
 template <typename T>
 dynamicqueue<T>::_dynamicqueueitem::_dynamicqueueitem(T item) {
-_item = item;
-_next = NULL;
+	_item = item;
+	_next = NULL;
 }
 
 template <typename T, class Q>
-tsqueue<T, Q>::tsqueue(dword size) : _q(size) {}
+tsqueue<T, Q>::tsqueue(uint size) : _q(size) {}
 
 template <typename T, class Q>
 tsqueue<T, Q>::tsqueue(const tsqueue<T, Q> & o) {
@@ -473,9 +473,9 @@ bool tsqueue<T, Q>::empty() {
 }
 
 template <typename T, class Q>
-dword tsqueue<T, Q>::size() {
+uint tsqueue<T, Q>::size() {
     _mutex.lock();
-    dword s = _q.size();
+    uint s = _q.size();
     _mutex.unlock();
     return s;
 }

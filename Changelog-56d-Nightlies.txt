@@ -530,3 +530,11 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Fixed: wrong NEWBIE set added at the character creation (gargoyle in place of the human one, if the player was a human).
 - Changed: a client now logouts instantly if its account PLEVEL is >= 2, that is, starting from the the Counselor priv.
 	Before this change, it logged out instantly only if the GM mode was activated, regardless of the plevel.
+
+10-04-2018, Nolok
+- Added: SERV.TILEDATA to read directly from the tiledata.mul the item properties.
+	Use SERV.TILEDATA.TERRAIN(id).property to get a specific property for a given landtile id. Retrievable properties: FLAGS, UNK, INDEX, NAME.
+	Use SERV.TILEDATA.ITEM(id).property to get a specific property for a given item id. Retrievable properties: FLAGS, UNK5, WEIGHT, LAYER, UNK11, ANIM, UNK19, HEIGHT, NAME.
+	Probably the most useful usage of these keywords is to retrieve the paperdoll gump id of an item: <SERV.TILEDATA.ITEM(<DISPIDDEC>).ANIM> + offset,
+	where the offset is 50000 for male gumps and 60000 for female gumps.
+- Fixed: .show command sometimes showing a truncated command argument.

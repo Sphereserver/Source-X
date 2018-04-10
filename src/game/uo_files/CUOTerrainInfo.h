@@ -21,9 +21,9 @@
 #endif
 
 
-struct CSphereTerrainInfo : public CUOTerrainTypeRec_HS
+struct CUOTerrainInfo : public CUOTerrainTypeRec_HS
 {
-    CSphereTerrainInfo( TERRAIN_TYPE id );
+    CUOTerrainInfo( TERRAIN_TYPE id );
 };
 
 

@@ -11,6 +11,7 @@
 #include "clients/CClient.h"
 #include "items/CItemBase.h"
 #include "items/CItemStone.h"
+#include "uo_files/CUOTerrainInfo.h"
 #include "uo_files/CUOItemInfo.h"
 #include "CServerTime.h"
 #include "CWorld.h"
@@ -1461,16 +1462,16 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 
 			if (!strnicmp(pszCmd,"COUNT", 5))
 			{
-				for ( size_t i = 0; i < g_World.m_Stones.GetCount(); i++ )
+				for ( size_t i = 0; i < g_World.m_Stones.GetCount(); ++i )
 				{
 					pStone = g_World.m_Stones[i];
 					if ( pStone == NULL )
 						continue;
 
 					if (( pStone->GetType() == IT_STONE_GUILD ) && bGuild )
-						x++;
+						++x;
 					else if (( pStone->GetType() == IT_STONE_TOWN ) && !bGuild )
-						x++;
+						++x;
 				}
 
 				sVal.FormatSTVal(x);
@@ -1481,7 +1482,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			SKIP_SEPARATORS(pszCmd);
 			sVal.FormatVal(0);
 
-			for ( size_t i = 0; i < g_World.m_Stones.GetCount(); i++ )
+			for ( size_t i = 0; i < g_World.m_Stones.GetCount(); ++i )
 			{
 				pStone = g_World.m_Stones[i];
 				if ( pStone == NULL )
@@ -1490,18 +1491,14 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 				if (( pStone->GetType() == IT_STONE_GUILD ) && bGuild )
 				{
 					if ( iNumber == x )
-					{
 						return pStone->r_WriteVal(pszCmd, sVal, pSrc);
-					}
-					x++;
+					++x;
 				}
 				else if (( pStone->GetType() == IT_STONE_TOWN ) && !bGuild )
 				{
 					if ( iNumber == x )
-					{
 						return pStone->r_WriteVal(pszCmd, sVal, pSrc) ;
-					}
-					x++;
+					++x;
 				}
 			}
 
@@ -1533,10 +1530,108 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 					else
 						return pClient->r_WriteVal(pszKey, sVal, pSrc);
 				}
-				i++;
+				++i;
 			}
 			return true;
 		}
+
+		if ( !strnicmp(pszKey, "TILEDATA.", 9) )
+		{
+			pszKey += 9;
+			
+			bool bTerrain = false;
+			if (!strnicmp(pszKey, "TERRAIN(", 8))
+			{
+				pszKey += 8;
+				bTerrain = true;
+			}
+			else if (!strnicmp(pszKey, "ITEM(", 5))
+			{
+				pszKey += 5;
+				//SKIP_SEPARATORS(pszKey); // già fatto da str_parse?
+			}
+			else
+				return false;
+
+			// Get the position of the arguments after the round brackets
+			tchar * pszArgsNext;
+			if (! Str_Parse(const_cast<tchar*>(pszKey), &pszArgsNext, ")") )
+				return false;
+			// Get the argument inside the round brackets
+			tchar * pVal;
+			if ( !Str_ParseCmds(const_cast<tchar*>(pszKey), &pVal, 1, ")") )
+				return false;
+
+			int id = Exp_GetVal(pVal);
+			if ( bTerrain && (id >= TERRAIN_QTY) )
+			{
+				// Invalid id
+				return false;
+			}
+			
+			pszKey = pszArgsNext;
+			if (pszKey[0] != '.')
+				return false;
+			SKIP_SEPARATORS(pszKey);
+			if (bTerrain)
+			{
+				enum {ITATTR_FLAGS, ITATTR_UNK, ITATTR_IDX, ITATTR_NAME};
+				int iAttr = 0;
+				if (!strnicmp(pszKey, "FLAGS", 5))			iAttr = ITATTR_FLAGS;
+				else if (!strnicmp(pszKey, "UNK", 7))		iAttr = ITATTR_UNK;
+				else if (!strnicmp(pszKey, "INDEX", 5))		iAttr = ITATTR_IDX;
+				else if (!strnicmp(pszKey, "NAME", 4))		iAttr = ITATTR_NAME;
+				else
+				{
+					// Invalid attr
+					return false;
+				}
+				CUOTerrainInfo landInfo( (TERRAIN_TYPE)id );
+				switch (iAttr)
+				{
+					case ITATTR_FLAGS:	sVal.FormatDWVal(landInfo.m_flags);		break;
+					case ITATTR_UNK:	sVal.FormatDWVal(landInfo.m_unknown);	break;
+					case ITATTR_IDX:	sVal.FormatWVal(landInfo.m_index);		break;
+					case ITATTR_NAME:	sVal = landInfo.m_name;					break;
+					default: return false;
+				}
+			}
+			else
+			{
+				enum {TTATTR_FLAGS, TTATTR_UNK5, TTATTR_WEIGHT, TTATTR_LAYER, TTATTR_UNK11, TTATTR_ANIM, TTATTR_UNK19, TTATTR_HEIGHT, TTATTR_NAME};
+				int iAttr = 0;
+				if (!strnicmp(pszKey, "FLAGS", 5))			iAttr = TTATTR_FLAGS;
+				else if (!strnicmp(pszKey, "UNK5", 4))		iAttr = TTATTR_UNK5;
+				else if (!strnicmp(pszKey, "WEIGHT", 6))	iAttr = TTATTR_WEIGHT;
+				else if (!strnicmp(pszKey, "LAYER", 5))		iAttr = TTATTR_LAYER;
+				else if (!strnicmp(pszKey, "UNK11", 5))		iAttr = TTATTR_UNK11;
+				else if (!strnicmp(pszKey, "ANIM", 4))		iAttr = TTATTR_ANIM;
+				else if (!strnicmp(pszKey, "UNK19", 5))		iAttr = TTATTR_UNK19;
+				else if (!strnicmp(pszKey, "HEIGHT", 6))	iAttr = TTATTR_HEIGHT;
+				else if (!strnicmp(pszKey, "NAME", 4))		iAttr = TTATTR_NAME;
+				else
+				{
+					// Invalid attr
+					return false;
+				}
+				CUOItemInfo itemInfo((ITEMID_TYPE)id);
+				switch (iAttr)
+				{
+					case TTATTR_FLAGS:	sVal.FormatDWVal(itemInfo.m_flags);		break;
+					case TTATTR_UNK5:	sVal.FormatDWVal(itemInfo.m_dwUnk5);	break;
+					case TTATTR_WEIGHT:	sVal.FormatBVal(itemInfo.m_weight);		break;
+					case TTATTR_LAYER:	sVal.FormatBVal(itemInfo.m_layer);		break;
+					case TTATTR_UNK11:	sVal.FormatDWVal(itemInfo.m_dwUnk11);	break;
+					case TTATTR_ANIM:	sVal.FormatDWVal(itemInfo.m_dwAnim);	break;
+					case TTATTR_UNK19:	sVal.FormatWVal(itemInfo.m_wUnk19);		break;
+					case TTATTR_HEIGHT:	sVal.FormatBVal(itemInfo.m_height);		break;
+					case TTATTR_NAME:	sVal = itemInfo.m_name;					break;
+					default: return false;
+				}
+			}
+			return true;
+		}
+
 		return false;
 	}
 

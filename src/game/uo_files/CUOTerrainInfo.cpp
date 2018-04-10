@@ -8,7 +8,7 @@
 #include "uofiles_enums.h"
 #include "uofiles_macros.h"
 
-CSphereTerrainInfo::CSphereTerrainInfo( TERRAIN_TYPE id )
+CUOTerrainInfo::CUOTerrainInfo( TERRAIN_TYPE id )
 {
     ASSERT( id < TERRAIN_QTY );
 

@@ -375,6 +375,15 @@ public:
 		Format("%" PRIuSIZE_T, iVal);
 	}
 	/**
+	* @brief Print a byte value into the string.
+	* @see Format()
+	* @param iVal value to print.
+	*/
+	inline void FormatBVal(word iVal)
+	{
+		Format("0%" PRIx8, iVal);
+	}
+	/**
 	* @brief Print a word value into the string.
 	* @see Format()
 	* @param iVal value to print.

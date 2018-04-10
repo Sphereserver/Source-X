@@ -313,7 +313,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 							bPath = false;
 							break;
 						}
-						CSphereTerrainInfo land(terrainid);
+						CUOTerrainInfo land(terrainid);
 						if ( (land.m_flags & UFLAG1_WATER) && (flags & LOS_NC_WATER) )
 							bNullTerrain = true;
 					}

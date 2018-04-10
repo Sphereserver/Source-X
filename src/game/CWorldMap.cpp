@@ -957,7 +957,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 	}
 	else
 	{
-		CSphereTerrainInfo land( pMeter->m_wTerrainIndex );
+		CUOTerrainInfo land( pMeter->m_wTerrainIndex );
 		//DEBUG_ERR(("Terrain flags - land.m_flags 0%x dwBlockThis (0%x)\n",land.m_flags,dwBlockThis));
 		if ( land.m_flags & UFLAG1_WATER )
 			dwBlockThis |= CAN_I_WATER;
@@ -1237,7 +1237,7 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block,
 		}
 		else
 		{
-			CSphereTerrainInfo land( pMeter->m_wTerrainIndex );
+			CUOTerrainInfo land( pMeter->m_wTerrainIndex );
 			//DEBUG_ERR(("Terrain flags - land.m_flags 0%x dwBlockThis (0%x)\n",land.m_flags,dwBlockThis));
 			if ( land.m_flags & UFLAG1_WATER )
 				dwBlockThis |= CAN_I_WATER;
@@ -1433,7 +1433,7 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block
 			dwBlockThis = CAN_I_BLOCK;
 		else
 		{
-			CSphereTerrainInfo land( pMeter->m_wTerrainIndex );
+			CUOTerrainInfo land( pMeter->m_wTerrainIndex );
 			if ( land.m_flags & UFLAG2_PLATFORM ) // Platform items should take precendence over non-platforms.
 				dwBlockThis = CAN_I_PLATFORM;
 			else if ( land.m_flags & UFLAG1_WATER )

@@ -145,7 +145,6 @@ SOURCE_GROUP (common FILES ${common_SRCS})
 
 # Sphere library files
 SET (spherelibrary_SRCS
-common/sphere_library/CQueue.h
 common/sphere_library/CSArray.cpp
 common/sphere_library/CSArray.h
 common/sphere_library/CSAssoc.cpp
@@ -168,6 +167,7 @@ common/sphere_library/CSWindow.cpp
 common/sphere_library/CSWindow.h
 common/sphere_library/mutex.h
 common/sphere_library/mutex.cpp
+common/sphere_library/queues.h
 )
 SOURCE_GROUP (common\\sphere_library FILES ${spherelibrary_SRCS})
 
