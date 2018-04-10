@@ -16,8 +16,8 @@ This is an experimental branch of SphereServer. Since we are doing so many (and 
 This branch will preserve scripts compatibility with the main one.<br>
 Most notable changes (right now) are:
 * Bug fixes and heavy changing of some internal behaviours, with the aim to achieve truly better <b>speed</b> and <b>stability</b>;
-* Support for 64 bits architecture and TDM-GCC compiler for Windows;
-* Supports multi-threaded and async networking;
+* Support for 64 bits architecture and MinGW compiler for Windows;
+* Experimental support for multi-threaded and async networking;
 * Support for CMake, which is now the standard way to generate updated build and project files;
 * Added (and still adding) comments to the code to make it more understandable;
 * Reorganization of directories and files, avoiding big files with thousands of lines;
@@ -26,7 +26,8 @@ Most notable changes (right now) are:
 
 ## Building
 
-You need to build makefiles (and project files if you wish) with CMake for both Linux (GCC) and Windows (MSVC and TDM-GCC).<br>
+The compilation of the code is possible only using recent compilers, since C++17 features are used: Visual Studio 2017 or 2015 Update 3, GCC 7.1 and later (even if GCC 6 can work, 7 is reccomended), MinGW distributions using GCC 7.1 and later (like nuwen's).<br>
+You need to build makefiles (and project files if you wish) with CMake for both Linux (GCC) and Windows (MSVC and MinGW).<br>
 Both 32 and 64 bits compilation are supported.<br>
 No pre-built project files included.<br>
 When generating project files, if you don't specify a toolchain (setting the `CMAKE_TOOLCHAIN_FILE` variable in the GUI or passing the CLI parameter `-DCMAKE_TOOLCHAIN_FILE="..."`),
@@ -98,7 +99,7 @@ These are meant to be applied to new code and, if there's some old code not foll
 * Unsigned variables should have as first (or second to "p") prefix "u".
 * Boolean variables should have the prefix "f".
 * Classes need to have the first letter uppercase and the prefix "C".
-* Internal (mostly private) variables of a class or struct need to have the prefix "m_".
+* Internal (mostly private) variables of a class or struct need to have the prefix "_". This is a new convention, the old one used the "m_" prefix.
 * After the prefix, the descriptive name should begin with an upper letter.
 <br>
 <b>Variables meant to hold numerical values:</b>
@@ -114,7 +115,7 @@ These are meant to be applied to new code and, if there's some old code not foll
 <br>
 Examples:
 * Class or Struct: "CChar".
-* Class internal variable, integer: "m_iAmount".
+* Class internal variable, integer: "_iAmount".
 * Tchar pointer: "ptcName".
 * Dword: "dwUID".
 

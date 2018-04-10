@@ -22,7 +22,7 @@ function (toolchain_exe_stuff)
 	SET (C_ARCH_OPTS	"-march=i686 -m32")
 	SET (CXX_ARCH_OPTS	"-march=i686 -m32")
 	SET (C_OPTS		"-std=c11   -pthread -fexceptions -fnon-call-exceptions")
-	SET (CXX_OPTS		"-std=c++11 -pthread -fexceptions -fnon-call-exceptions")
+	SET (CXX_OPTS		"-std=c++17 -pthread -fexceptions -fnon-call-exceptions")
 	SET (C_SPECIAL		"-pipe -fno-expensive-optimizations")
 	SET (CXX_SPECIAL	"-pipe -ffast-math")
 
