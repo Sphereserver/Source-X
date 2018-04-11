@@ -9,7 +9,7 @@
 #ifdef _LIBEV
 
 	#include "../common/libev/ev.h"
-	#include "../common/sphere_library/mutex.h"
+	#include "../common/sphere_library/smutex.h"
 	#include "threads.h"
 
 	#ifdef _BSD

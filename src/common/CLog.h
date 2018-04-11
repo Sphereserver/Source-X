@@ -8,7 +8,7 @@
 
 #include "sphere_library/CSFile.h"
 #include "sphere_library/CSTime.h"
-#include "sphere_library/mutex.h"
+#include "sphere_library/smutex.h"
 #include "common.h"
 #include "../sphere/UnixTerminal.h"
 

@@ -165,9 +165,11 @@ common/sphere_library/CSTime.cpp
 common/sphere_library/CSTime.h
 common/sphere_library/CSWindow.cpp
 common/sphere_library/CSWindow.h
-common/sphere_library/mutex.h
-common/sphere_library/mutex.cpp
-common/sphere_library/queues.h
+common/sphere_library/smutex.h
+common/sphere_library/smutex.cpp
+common/sphere_library/squeues.h
+common/sphere_library/sresetevents.cpp
+common/sphere_library/sresetevents.h
 )
 SOURCE_GROUP (common\\sphere_library FILES ${spherelibrary_SRCS})
 

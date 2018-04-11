@@ -7,7 +7,7 @@
 #define	_INC_CDATABASE_H
 
 #include "common.h"
-#include "sphere_library/mutex.h"
+#include "sphere_library/smutex.h"
 #include "CScriptObj.h"
 #include <vector>
 #include <queue>
