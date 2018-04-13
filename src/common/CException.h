@@ -127,12 +127,12 @@ public:
 #else	// we want the debugger to notice this exception
 	#ifdef _WIN32
 		#ifdef _MSC_VER
-			#define EXC_NOTIFY_DEBUGGER if (IsDebuggerPresent()) __debugbreak();
+			#define EXC_NOTIFY_DEBUGGER if (IsDebuggerPresent()) __debugbreak()
 		#else
-			#define EXC_NOTIFY_DEBUGGER if (IsDebuggerPresent()) abort();
+			#define EXC_NOTIFY_DEBUGGER if (IsDebuggerPresent()) abort()
 		#endif
 	#else
-		#define EXC_NOTIFY_DEBUGGER if (IsDebuggerPresent()) std::raise(SIGINT);
+		#define EXC_NOTIFY_DEBUGGER if (IsDebuggerPresent()) std::raise(SIGINT)
 	#endif
 #endif
 

@@ -7,6 +7,9 @@
 #define _INC_SRESETEVENTS_H
 
 #include "../../common/common.h"
+#ifndef _WIN32
+	#include <pthread.h>
+#endif
 
 
 /**
