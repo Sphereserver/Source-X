@@ -7,6 +7,10 @@
 #define _INC_CEXCEPTION_H
 
 #include "../common/CLog.h"
+#include <csignal>
+#ifndef _WIN32
+	#include <sys/wait.h>
+#endif
 
 // -------------------------------------------------------------------
 // -------------------------------------------------------------------
@@ -22,6 +26,10 @@ extern "C"
 void SetPurecallHandler();
 void SetExceptionTranslator();
 void SetUnixSignals( bool );
+
+#if !defined(_WIN32) && defined(_DEBUG)
+	int IsDebuggerPresent();	// Windows already has this function
+#endif
 
 // -------------------------------------------------------------------
 // -------------------------------------------------------------------
@@ -98,6 +106,7 @@ public:
 
 #include "../sphere/ProfileTask.h"
 
+// EXC_TRY
 #define EXC_TRY(a) \
 	lpctstr inLocalBlock = ""; \
 	lpctstr inLocalArgs = a; \
@@ -107,37 +116,78 @@ public:
 	try \
 	{
 
-#define EXC_SET(a) inLocalBlock = a; ++inLocalBlockCnt
+// EXC_SET
+#define EXC_SET(a)	\
+	inLocalBlock = a; \
+	++inLocalBlockCnt
 
+// EXC_NOTIFY_DEBUGGER
+#ifndef _DEBUG
+	#define EXC_NOTIFY_DEBUGGER (void)0
+#else	// we want the debugger to notice this exception
+	#ifdef _WIN32
+		#ifdef _MSC_VER
+			#define EXC_NOTIFY_DEBUGGER if (IsDebuggerPresent()) __debugbreak();
+		#else
+			#define EXC_NOTIFY_DEBUGGER if (IsDebuggerPresent()) abort();
+		#endif
+	#else
+		#define EXC_NOTIFY_DEBUGGER if (IsDebuggerPresent()) std::raise(SIGINT);
+	#endif
+#endif
+
+// EXC_CATCH_EXCEPTION (used inside other macros! don't use it manually!)
 #ifdef THREAD_TRACK_CALLSTACK
 	#define EXC_CATCH_EXCEPTION(a) \
 		bCATCHExcept = true; \
-		StackDebugInformation::printStackTrace(); \
 		if ( inLocalBlock != NULL && inLocalBlockCnt > 0 ) \
-			g_Log.CatchEvent(a, "%s::%s() #%u \"%s\"", m_sClassName, inLocalArgs, \
-														inLocalBlockCnt, inLocalBlock); \
+			g_Log.CatchEvent(a, "%s::%s() #%u \"%s\"", m_sClassName, inLocalArgs, inLocalBlockCnt, inLocalBlock); \
 		else \
-			g_Log.CatchEvent(a, "%s::%s()", m_sClassName, inLocalArgs)
+			g_Log.CatchEvent(a, "%s::%s()", m_sClassName, inLocalArgs); \
+		StackDebugInformation::printStackTrace()
 #else // !THREAD_TRACK_CALLSTACK
 	#define EXC_CATCH_EXCEPTION(a) \
 		bCATCHExcept = true; \
 		if ( inLocalBlock != NULL && inLocalBlockCnt > 0 ) \
-			g_Log.CatchEvent(a, "%s::%s() #%u \"%s\"", m_sClassName, inLocalArgs, \
-														inLocalBlockCnt, inLocalBlock); \
+			g_Log.CatchEvent(a, "%s::%s() #%u \"%s\"", m_sClassName, inLocalArgs, inLocalBlockCnt, inLocalBlock); \
 		else \
 			g_Log.CatchEvent(a, "%s::%s()", m_sClassName, inLocalArgs)
 #endif // THREAD_TRACK_CALLSTACK
 
-#define EXC_CATCH	}	\
-	catch ( const CSError& e )	{ EXC_CATCH_EXCEPTION(&e); CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); } \
-	catch (...) { EXC_CATCH_EXCEPTION(NULL); CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); }
+// EXC_CATCH
+#define EXC_CATCH \
+	} \
+	catch ( const CSError& e ) \
+	{ \
+		EXC_CATCH_EXCEPTION(&e); \
+		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
+		EXC_NOTIFY_DEBUGGER; \
+	} \
+	catch (...) \
+	{ \
+		EXC_CATCH_EXCEPTION(NULL); \
+		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
+		EXC_NOTIFY_DEBUGGER; \
+	}
 
-#define EXC_DEBUG_START if ( bCATCHExcept ) { try {
+// EXC_DEBUG_START
+#define EXC_DEBUG_START \
+	if ( bCATCHExcept ) \
+	{ \
+		try \
+		{
 
 #define EXC_DEBUG_END \
-	/*StackDebugInformation::printStackTrace();*/ \
-	} catch ( ... ) { g_Log.EventError("Exception adding debug message on the exception.\n"); CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); }}
+			/*StackDebugInformation::printStackTrace();*/ \
+		} \
+		catch ( ... ) \
+		{ \
+			g_Log.EventError("Exception adding debug message on the exception.\n"); \
+			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
+		} \
+	}
 
+// EXC_TRYSUB
 #define EXC_TRYSUB(a) \
 	lpctstr inLocalSubBlock = ""; \
 	lpctstr inLocalSubArgs = a; \
@@ -147,8 +197,12 @@ public:
 	try \
 	{
 
-#define EXC_SETSUB(a) inLocalSubBlock = a; inLocalSubBlockCnt++
+// EXC_SETSUB
+#define EXC_SETSUB(a) \
+	inLocalSubBlock = a; \
+	++inLocalSubBlockCnt
 
+// EXC_CATCH_SUB(a,b) (used inside other macros! don't use it manually!)
 #ifdef THREAD_TRACK_CALLSTACK
 	#define EXC_CATCH_SUB(a,b) \
 		bCATCHExceptSub = true; \
@@ -170,7 +224,9 @@ public:
 			//g_Log.CatchEvent(a, "%s::%s", b, inLocalSubBlock)
 #endif // THREAD_TRACK_CALLSTACK
 
-#define EXC_CATCHSUB(a)	}	\
+// EXC_CATCHSUB(a)
+#define EXC_CATCHSUB(a)	\
+	} \
 	catch ( const CSError& e )	\
 	{ \
 		EXC_CATCH_SUB(&e, a); \
@@ -182,15 +238,27 @@ public:
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
 	}
 
-#define EXC_DEBUGSUB_START if ( bCATCHExceptSub ) { try {
+// EXC_DEBUGSUB_START
+#define EXC_DEBUGSUB_START \
+	if ( bCATCHExceptSub ) \
+	{ \
+		try \
+		{
 
+// EXC_DEBUGSUB_END
 #define EXC_DEBUGSUB_END \
-	/*StackDebugInformation::printStackTrace();*/ \
-	} catch ( ... ) { g_Log.EventError("Exception adding debug message on the exception.\n"); CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); }}
+			/*StackDebugInformation::printStackTrace();*/ \
+		} \
+		catch ( ... ) \
+		{ \
+			g_Log.EventError("Exception adding debug message on the exception.\n"); \
+			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
+		} \
+	}
 
 #define EXC_ADD_SCRIPT		g_Log.EventDebug("command '%s' args '%s'\n", s.GetKey(), s.GetArgRaw());
 #define EXC_ADD_SCRIPTSRC	g_Log.EventDebug("command '%s' args '%s' [%p]\n", s.GetKey(), s.GetArgRaw(), static_cast<void *>(pSrc));
-#define EXC_ADD_KEYRET(src)	g_Log.EventDebug("command '%s' ret '%s' [%p]\n", pszKey, (lpctstr)sVal, static_cast<void *>(src));
+#define EXC_ADD_KEYRET(src)	g_Log.EventDebug("command '%s' ret '%s' [%p]\n", pszKey, static_cast<lpctstr>(sVal), static_cast<void *>(src));
 
 
 #else //!_EXCEPTIONS_DEBUG

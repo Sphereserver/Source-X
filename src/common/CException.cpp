@@ -6,6 +6,37 @@
 #include "../game/CWorld.h"
 #include "CException.h"
 
+
+#if !defined(_WIN32) && defined(_DEBUG)
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <cstring>
+int IsDebuggerPresent(void)
+{
+	char buf[1024];
+	int debugger_present = 0;
+
+	int status_fd = open("/proc/self/status", O_RDONLY);
+	if (status_fd == -1)
+		return 0;
+
+	ssize_t num_read = read(status_fd, buf, sizeof(buf)-1);
+
+	if (num_read > 0)
+	{
+		static const char TracerPid[] = "TracerPid:";
+		char *tracer_pid;
+
+		buf[num_read] = 0;
+		tracer_pid    = strstr(buf, TracerPid);
+		if (tracer_pid)
+			debugger_present = !!atoi(tracer_pid + sizeof(TracerPid) - 1);
+	}
+
+	return debugger_present;
+}
+#endif
+
 #ifdef _WIN32
 	int CSError::GetSystemErrorMessage( dword dwError, lptstr lpszError, uint nMaxError ) // static
 	{
@@ -180,7 +211,7 @@ void _cdecl Sphere_Exception_Windows( unsigned int id, struct _EXCEPTION_POINTER
 
 void SetExceptionTranslator()
 {
-#if defined(_WIN32) && defined(_MSC_VER) && defined(_NIGHTLYBUILD)
+#if defined(_WIN32) && !defined(_DEBUG)
 	_set_se_translator( Sphere_Exception_Windows );
 #endif
 }
@@ -228,17 +259,22 @@ void SetExceptionTranslator()
 		}
 
 		g_Serv.SetExitFlag(SIGABRT);
-		for (size_t i = 0; i < ThreadHolder::getActiveThreads(); i++)
+		for (size_t i = 0; i < ThreadHolder::getActiveThreads(); ++i)
 			ThreadHolder::getThreadAt(i)->terminate(false);
 		exit(EXIT_FAILURE);
 	}
 
-	void _cdecl Signal_Break( int sig = 0 )
+	void _cdecl Signal_Break( int sig = 0 )		// signal handler attached when using secure mode
 	{
-		sigset_t set;
+// Shouldn't be needed, since gdb consumes the signals itself and this code won't be executed
+//#ifdef _DEBUG
+//		if (IsDebuggerPresent())
+//			return;		// do not block this signal, so that the debugger can catch it
+//#endif
 
 		g_Log.Event( LOGL_FATAL, "Secure Mode prevents CTRL+C\n" );
 
+		sigset_t set;
 		if ( sig )
 		{
 			signal( sig, &Signal_Break );

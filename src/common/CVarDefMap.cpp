@@ -3,6 +3,7 @@
 #include "../sphere/threads.h"
 #include "../common/CLog.h"
 #include "../game/CServer.h"
+#include "CException.h"
 #include "CExpression.h"
 #include "CScript.h"
 #include "CTextConsole.h"
@@ -210,6 +211,11 @@ CVarDefCont * CVarDefMap::CVarDefContTest::CopySelf() const
 
 bool CVarDefMap::ltstr::operator()(CVarDefCont * s1, CVarDefCont * s2) const
 {
+	//ADDTOCALLSTACK("CVarDefMap::ltstr::operator()");
+	if (!s1)
+		throw CSError(LOGL_ERROR, 0, "s1 empty!");
+	else if (!s2)
+		throw CSError(LOGL_ERROR, 0, "s2 empty!");
 	return( strcmpi(s1->GetKey(), s2->GetKey()) < 0 );
 }
 
@@ -294,7 +300,7 @@ CVarDefCont * CVarDefMap::GetAtKey( lpctstr at ) const
 	delete pVarBase;
 
 	if ( i != m_Container.end() )
-		return( (*i) );
+		return (*i);
 	else
 		return NULL;
 }

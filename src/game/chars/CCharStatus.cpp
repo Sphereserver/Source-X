@@ -876,7 +876,7 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 
 	// Incognito ?
 	// If polymorphed then use the poly name.
-	if ( IsStatFlag(STATF_INCOGNITO) || !IsPlayableCharacter() || (m_pNPC && pCharDef->GetTypeName() != pCharDef->GetTradeName()) )
+	if ( IsStatFlag(STATF_INCOGNITO) || !IsPlayableCharacter() || (m_pNPC && (pCharDef->GetTypeName() != pCharDef->GetTradeName())) )
 	{
 		if ( !IsIndividualName() )
 			return "";	// same as type anyhow.

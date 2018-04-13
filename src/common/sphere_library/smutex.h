@@ -7,6 +7,9 @@
 #define _INC_SMUTEX_H
 
 #include "../../common/common.h"
+#ifndef _WIN32
+	#include <pthread.h>
+#endif
 
 #ifdef _BSD
 	#define PTHREAD_MUTEX_RECURSIVE_NP PTHREAD_MUTEX_RECURSIVE

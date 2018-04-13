@@ -14,6 +14,9 @@
 #include "../sphere_library/CSTime.h"
 #include <list>
 
+#ifndef _WIN32
+	#include <pthread.h>
+#endif
 
 /*
  * Defines for easy C++17 thread-locking for class methods.

@@ -1124,7 +1124,8 @@ void CWorld::Init()
 	int m = 0;
 	for ( m = 0; m < 256; ++m )
 	{
-		if ( !g_MapList.m_maps[m] ) continue;
+		if ( !g_MapList.m_maps[m] )
+			continue;
 		sectors += g_MapList.GetSectorQty(m);
 	}
 
@@ -1136,7 +1137,8 @@ void CWorld::Init()
 
 	for ( m = 0; m < 256; ++m )
 	{
-		if ( !g_MapList.m_maps[m] ) continue;
+		if ( !g_MapList.m_maps[m] )
+			continue;
 
 		sprintf(z1, " %d=%d", m, g_MapList.GetSectorQty(m));
 		strcat(z, z1);

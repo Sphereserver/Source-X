@@ -1,5 +1,9 @@
-#include <cstring>
 #include "CSocket.h"
+#include <cstring>
+#ifndef _WIN32
+	#include <errno.h>
+#endif
+
 
 //		***		***			***
 //

@@ -6,18 +6,8 @@
 #ifndef _INC_OS_UNIX_H
 #define _INC_OS_UNIX_H
 
-#include <pthread.h>
-#include <unistd.h>
-#include <sys/wait.h>
-#include <signal.h>
-#include <setjmp.h>
-#include <dlfcn.h>
-#include <errno.h>
-#include <aio.h>
-#include <exception>
-#include <cctype>
-#include <sys/types.h>
-#include "sphere_library/CSTime.h"
+#include <unistd.h>			// usleep
+#include <cctype>			// toupper/tolower
 
 
 //#define SLASH_PATH	"/"
@@ -29,7 +19,7 @@
 #define _cdecl
 #define __cdecl
 #define FAR
-#define E_FAIL			0x80004005
+#define E_FAIL			0x80004005	// exception code
 #define HANDLE			dword
 
 
@@ -86,13 +76,13 @@ void STRREV(char* string);
 // The others, not inlined, are in common.cpp
 inline void _strupr( tchar * pszStr )
 {
-	for ( ; pszStr[0] != '\0'; pszStr++ )
+	for ( ; pszStr[0] != '\0'; ++pszStr )
 		*pszStr = toupper( *pszStr );
 }
 
 inline void _strlwr( tchar * pszStr )
 {
-	for ( ; pszStr[0] != '\0'; pszStr++ )
+	for ( ; pszStr[0] != '\0'; ++pszStr )
 		*pszStr = tolower( *pszStr );
 }
 /*  */

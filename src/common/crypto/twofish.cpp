@@ -17,7 +17,6 @@ Version  1.00		April 1998
 Copyright 1998, Hi/fn and Counterpane Systems.  All rights reserved.
 
 Notes:
-*	Optimized version
 *	Tab size is set to 4 characters in this file
 
 ***************************************************************************/

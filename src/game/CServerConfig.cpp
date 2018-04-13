@@ -4057,7 +4057,8 @@ bool CServerConfig::Load( bool fResync )
 	m_scpTables.CloseForce();
 
 	//	Initialize the world sectors
-	g_Log.Event(LOGM_INIT, "\nInitializing the world...\n");
+	if (!fResync)
+		g_Log.Event(LOGM_INIT, "\nInitializing the world...\n");
 	g_World.Init();
 
 	// open and index all my script files i'm going to use.
