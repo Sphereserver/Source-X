@@ -538,3 +538,8 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 	Probably the most useful usage of these keywords is to retrieve the paperdoll gump id of an item: <SERV.TILEDATA.ITEM(<DISPIDDEC>).ANIM> + offset,
 	where the offset is 50000 for male gumps and 60000 for female gumps.
 - Fixed: .show command sometimes showing a truncated command argument.
+
+14-04-2018, Nolok
+- Fixed: MEMORY function was overwriting the old memory flags, instead of adding new ones.
+- Fixed: Client sometimes didn't receive an update when a char notoriety flag changed.
+- Changed: removed CHARGESCUR and CHARGESMAX item properties, which were only partially supported. Use USESCUR and USESMAX instead.

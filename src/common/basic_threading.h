@@ -34,8 +34,8 @@
 	#define THREAD_UNIQUE_LOCK_SET	(void)0
 	#define THREAD_UNIQUE_LOCK		(void)0
 	#define THREAD_UNIQUE_UNLOCK	(void)0
-	#define TS_RETURN(x)			(void)0
-	#define THREAD_LOCK_RETURN(x)	(void)0
+	#define TS_RETURN(x)			return (x)
+	#define THREAD_LOCK_RETURN(x)	return (x)
 #endif
 */
 
