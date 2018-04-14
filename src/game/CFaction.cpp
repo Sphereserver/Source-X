@@ -1,0 +1,385 @@
+/**
+* @file CCharSlayer.cpp
+*
+*/
+
+/*
+TODO: CFaction must be instantiated/deleted in CItem and CChar constructors/destructors and defined in CObjBase*
+        
+    *Ideal approach would be to add CChar::_iFaction* and CItem::_iSlayer pointing to this class
+    to do not have multiple classes for almost the same, but differencing them enough to know
+    they are not meant to behave in the same way, also CChar should save it as FACTION and CItem as
+    SLAYER in the save files, so a check must be made here to difference both.
+*/
+
+#include "CFaction.h"
+#include "CObjBase.h"
+
+bool CFaction::IsOppositeGroup(CFaction *target)
+{
+    ADDTOCALLSTACK("CFaction::IsOppositeGroup");
+    if (IsGroupElemental() && target->IsGroupAbyss())
+        return true;
+    else if (IsGroupAbyss() && (target->IsGroupElemental() || target->IsGroupFey()))
+        return true;
+    else if (IsGroupFey() && target->IsGroupAbyss())
+        return true;
+    else if (IsGroupReptilian() && target->IsGroupArachnid())
+        return true;
+    else if (IsGroupArachnid() && target->IsGroupReptilian())
+        return true;
+    else if (IsGroupHumanoid() && target->IsGroupUndead())
+        return true;
+    else if (IsGroupUndead() && target->IsGroupHumanoid())
+        return true;
+    return false;
+}
+
+bool CFaction::IsOppositeSuperSlayer(CFaction *target)
+{
+    ADDTOCALLSTACK("CFaction::IsOppositeSuperSlayer");
+    if ((GetFactionID() & FACTION_FEY) && (target->GetFactionID() & FACTION_FEY))
+        return true;
+    else if ((GetFactionID() & FACTION_ELEMENTAL) && (target->GetFactionID() & FACTION_ELEMENTAL))
+        return true;
+    else if ((GetFactionID() & FACTION_DEMON) && (target->GetFactionID() & FACTION_DEMON))
+        return true;
+    else if ((GetFactionID() & FACTION_REPOND) && (target->GetFactionID() & FACTION_REPOND))
+        return true;
+    else if ((GetFactionID() & FACTION_UNDEAD) && (target->GetFactionID() & FACTION_UNDEAD))
+        return true;
+    else if ((GetFactionID() & FACTION_ARACHNID) && (target->GetFactionID() & FACTION_ARACHNID))
+        return true;
+    else if ((GetFactionID() & FACTION_REPTILE) && (target->GetFactionID() & FACTION_REPTILE))
+        return true;
+    return false;
+}
+
+bool CFaction::IsOppositeLesserSlayer(CFaction *target)
+{
+    ADDTOCALLSTACK("CFaction::IsOppositeLesserSlayer");
+    // Start Elemental Lesser Slayers
+    if ((GetFactionID() & FACTION_BLOODELEMENTAL) && (target->GetFactionID() & FACTION_BLOODELEMENTAL))
+        return true;
+    else if ((GetFactionID() & FACTION_EARTHELEMENTAL) && (target->GetFactionID() & FACTION_EARTHELEMENTAL))
+        return true;
+    else if ((GetFactionID() & FACTION_FIREELEMENTAL) && (target->GetFactionID() & FACTION_FIREELEMENTAL))
+        return true;
+    else if ((GetFactionID() & FACTION_POISONELEMENTAL) && (target->GetFactionID() & FACTION_POISONELEMENTAL))
+        return true;
+    else if ((GetFactionID() & FACTION_SNOWELEMENTAL) && (target->GetFactionID() & FACTION_SNOWELEMENTAL))
+        return true;
+    else if ((GetFactionID() & FACTION_WATERELEMENTAL) && (target->GetFactionID() & FACTION_WATERELEMENTAL))
+        return true;
+
+    // Abyss Lesser Slayers
+    else if ((GetFactionID() & FACTION_GARGOYLE) && (target->GetFactionID() & FACTION_GARGOYLE))
+        return true;
+
+    // Humanoid Lesser Slayers
+    else if ((GetFactionID() & FACTION_GOBLIN) && (target->GetFactionID() & FACTION_GOBLIN))
+        return true;
+    else if ((GetFactionID() & FACTION_VERMIN) && (target->GetFactionID() & FACTION_VERMIN))
+        return true;
+    else if ((GetFactionID() & FACTION_OGRE) && (target->GetFactionID() & FACTION_OGRE))
+        return true;
+    else if ((GetFactionID() & FACTION_ORC) && (target->GetFactionID() & FACTION_ORC))
+        return true;
+    else if ((GetFactionID() & FACTION_TROLL) && (target->GetFactionID() & FACTION_TROLL))
+        return true;
+
+    // Undead Lesser Slayers
+    else if ((GetFactionID() & FACTION_MAGE) && (target->GetFactionID() & FACTION_MAGE))
+        return true;
+
+    // Arachnid Lesser Slayers
+    else if ((GetFactionID() & FACTION_SCORPION) && (target->GetFactionID() & FACTION_SCORPION))
+        return true;
+    else if ((GetFactionID() & FACTION_SPIDER) && (target->GetFactionID() & FACTION_SPIDER))
+        return true;
+    else if ((GetFactionID() & FACTION_TERATHAN) && (target->GetFactionID() & FACTION_TERATHAN))
+        return true;
+
+    // Reptilian Lesser Slayers
+    else if ((GetFactionID() & FACTION_DRAGON) && (target->GetFactionID() & FACTION_DRAGON))
+        return true;
+    else if ((GetFactionID() & FACTION_OPHIDIAN) && (target->GetFactionID() & FACTION_OPHIDIAN))
+        return true;
+    else if ((GetFactionID() & FACTION_SNAKE) && (target->GetFactionID() & FACTION_SNAKE))
+        return true; 
+    else if ((GetFactionID() & FACTION_LIZARDMAN) && (target->GetFactionID() & FACTION_LIZARDMAN))
+        return true;
+
+    // Old ML's Lesser Slayers
+    else if ((GetFactionID() & FACTION_BAT) && (target->GetFactionID() & FACTION_BAT))
+        return true;
+    else if ((GetFactionID() & FACTION_BEAR) && (target->GetFactionID() & FACTION_BEAR))
+        return true;
+    else if ((GetFactionID() & FACTION_BEETLE) && (target->GetFactionID() & FACTION_BEETLE))
+        return true;
+    else if ((GetFactionID() & FACTION_BIRD) && (target->GetFactionID() & FACTION_BIRD))
+        return true;
+
+    // Standalone Lesser Slayers
+    else if ((GetFactionID() & FACTION_BOVINE) && (target->GetFactionID() & FACTION_BOVINE))
+        return true;
+    else if ((GetFactionID() & FACTION_FLAME) && (target->GetFactionID() & FACTION_FLAME))
+        return true;
+    else if ((GetFactionID() & FACTION_ICE) && (target->GetFactionID() & FACTION_ICE))
+        return true;
+    else if ((GetFactionID() & FACTION_WOLF) && (target->GetFactionID() & FACTION_WOLF))
+        return true;
+
+    return false;
+}
+
+enum CHF_TYPE
+{
+    CHF_FACTION,
+    CHF_SLAYER,
+    CHF_FACTIONGROUP,
+    CHF_SLAYERGROUP,
+    CHF_QTY
+};
+
+lpctstr const CFaction::sm_szLoadKeys[CHF_QTY + 1] =
+{
+    "FACTION",
+    "SLAYER",
+    "FACTIONGROUP",
+    "SLAYERGROUP",
+    NULL
+};
+
+CFaction::CFaction(FACTION_TYPE type)
+{
+    ADDTOCALLSTACK("CFaction::CFaction");
+    _iType = type;
+    _iFaction = (NPC_FACTION)0;
+}
+
+CFaction::CFaction(CFaction *faction)
+{
+    Copy(faction);
+}
+
+void CFaction::Copy(CFaction * copy)
+{
+    ADDTOCALLSTACK("CFaction::Copy");
+    _iType = copy->GetType();
+    _iFaction = copy->GetFactionID();
+}
+
+bool CFaction::r_LoadVal(CScript & s)
+{
+    ADDTOCALLSTACK("CFaction::r_LoadVal");
+    lpctstr	pszKey = s.GetKey();
+    CHF_TYPE iKeyNum = (CHF_TYPE)FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    switch (iKeyNum)
+    {
+        case CHF_FACTION:
+        {
+            if (_iType == FT_CHAR)
+            {
+                SetFactionID(static_cast<NPC_FACTION>(s.GetArgULLVal()));
+                return true;
+            }
+            return false;
+        }
+        case CHF_SLAYER:
+        {
+            if (_iType == FT_ITEM)
+            {
+                SetFactionID(static_cast<NPC_FACTION>(s.GetArgULLVal()));
+                return true;
+            }
+            return false;
+        }
+        default:
+            return false;
+    }
+    return true;
+}
+
+bool CFaction::r_Load(CScript & s)
+{
+    ADDTOCALLSTACK("CFaction::r_Load");
+    UNREFERENCED_PARAMETER(s);
+    return true;
+}
+
+bool CFaction::r_WriteVal(lpctstr pszKey, CSString & s, CTextConsole * pSrc)
+{
+    ADDTOCALLSTACK("CFaction::CFaction");
+    CHF_TYPE iKeyNum = (CHF_TYPE)FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    UNREFERENCED_PARAMETER(pSrc);
+    switch (iKeyNum)
+    {
+        case CHF_FACTION:
+        {
+            if (_iType == FT_CHAR)
+            {
+                s.FormatLLHex(GetFactionID());
+                return true;
+            }
+            return false;
+        }
+        case CHF_SLAYER:
+        {
+            if (_iType == FT_ITEM)
+            {
+                s.FormatLLHex(GetFactionID());
+                return true;
+            }
+            return false;
+        }
+        case CHF_SLAYERGROUP:
+        {
+            if (_iType == FT_CHAR)
+            {
+                s.FormatHex(GetGroupID());
+                return true;
+            }
+            return false;
+        }
+        case CHF_FACTIONGROUP:
+        {
+            if (_iType == FT_ITEM)
+            {
+                s.FormatHex(GetGroupID());
+                return true;
+            }
+            return false;
+        }
+        default:
+            return false;
+    }
+    return true;
+}
+
+void CFaction::r_Write(CScript & s)
+{
+    ADDTOCALLSTACK("CFaction::r_Write");
+    s.WriteKeyVal(_iType == FT_CHAR ? "FACTION" : "SLAYER", (int)GetFactionID()); // Same value stored with different names for CChars and CItems.
+}
+
+NPC_GROUP CFaction::GetGroupID()
+{
+    ADDTOCALLSTACK("CFaction::GetGroupID");
+    if (IsGroupElemental())
+        return NPCGROUP_ELEMENTAL;
+    else if (IsGroupAbyss())
+        return NPCGROUP_ABYSS;
+    else if (IsGroupFey())
+        return NPCGROUP_FEY;
+    else if (IsGroupHumanoid())
+        return NPCGROUP_HUMANOID;
+    else if (IsGroupUndead())
+        return NPCGROUP_UNDEAD;
+    else if (IsGroupArachnid())
+        return NPCGROUP_ARACHNID;
+    else if (IsGroupReptilian())
+        return NPCGROUP_REPTILIAN;
+    else
+        return NPCGROUP_QTY;
+}
+
+NPC_FACTION CFaction::GetFactionID()
+{
+    ADDTOCALLSTACK("CFaction::GetFactionID");
+    return _iFaction;
+}
+
+FACTION_TYPE CFaction::GetType()
+{
+    ADDTOCALLSTACK("CFaction::GetType");
+    return _iType;
+}
+
+void CFaction::SetFactionID(NPC_FACTION faction)
+{
+    ADDTOCALLSTACK("CFaction::SetFactionID");
+    ASSERT(faction < FACTION_QTY);
+    _iFaction = faction;
+}
+
+bool CFaction::IsGroupElemental()
+{
+    ADDTOCALLSTACK("CFaction::IsGroupElemental");
+    return (_iFaction >= NPCGROUP_ELEMENTAL) && (_iFaction <= FACTION_ELEMENTAL_QTY);
+}
+
+bool CFaction::IsGroupFey()
+{
+    ADDTOCALLSTACK("CFaction::IsGroupFey");
+    return (_iFaction == NPCGROUP_FEY);
+}
+
+bool CFaction::IsGroupAbyss()
+{
+    ADDTOCALLSTACK("CFaction::IsGroupAbyss");
+    return (_iFaction >= NPCGROUP_ABYSS) && (_iFaction <= FACTION_ABYSS_QTY);
+}
+
+bool CFaction::IsGroupHumanoid()
+{
+    ADDTOCALLSTACK("CFaction::IsGroupHumanoid");
+    return (_iFaction >= NPCGROUP_HUMANOID) && (_iFaction <= FACTION_HUMANOID_QTY);
+}
+
+bool CFaction::IsGroupUndead()
+{
+    ADDTOCALLSTACK("CFaction::IsGroupUndead");
+    return (_iFaction >= NPCGROUP_UNDEAD) && (_iFaction <= FACTION_UNDEAD_QTY);
+}
+
+bool CFaction::IsGroupArachnid()
+{
+    ADDTOCALLSTACK("CFaction::IsGroupArachnid");
+    return (_iFaction >= NPCGROUP_ARACHNID) && (_iFaction <= FACTION_ARACHNID_QTY);
+}
+
+bool CFaction::IsGroupReptilian()
+{
+    ADDTOCALLSTACK("CFaction::IsGroupReptilian");
+    return (_iFaction >= NPCGROUP_REPTILIAN) && (_iFaction <= FACTION_REPTILIAN_QTY);
+}
+
+bool CFaction::IsSuperSlayer()
+{
+    ADDTOCALLSTACK("CFaction::IsSuperSlayer");
+    switch (_iFaction)
+    {
+        case FACTION_FEY:
+        case FACTION_ELEMENTAL:
+        case FACTION_DEMON:
+        case FACTION_REPOND:
+        case FACTION_UNDEAD:
+        case FACTION_ARACHNID:
+        case FACTION_REPTILE:
+            return true;
+        default:
+            return false;
+    }
+    return false;
+}
+
+bool CFaction::IsLesserSlayer()
+{
+    ADDTOCALLSTACK("CFaction::IsLesserSlayer");
+    if ((_iFaction < FACTION_QTY) && (!IsSuperSlayer()))
+        return true;
+    return false;
+}
+
+int CFaction::GetSlayerDamageBonus(CFaction *target)
+{
+    ADDTOCALLSTACK("CFaction::GetSlayerDamageBonus");
+    if (IsOppositeSuperSlayer(target))
+        return DAMAGE_SLAYER_SUPER;
+    else if (IsOppositeLesserSlayer(target))
+        return DAMAGE_SLAYER_LESSER;
+    else if (IsOppositeGroup(target))
+        return DAMAGE_SLAYER_OPPOSITE;
+    return 1;
+}

@@ -927,6 +927,18 @@ effect_bounce:
 		}
 	}
 
+    if (m_pNPC && IsSetCombatFlags(COMBAT_SLAYER))
+    {
+        if (GetFaction()->GetFactionID() != FACTION_QTY)
+        {
+            CItem *pWeapon = pSrc->m_uidWeapon.ItemFind();
+            if (pWeapon && pWeapon->GetSlayer()->GetFactionID() != FACTION_QTY)
+            {
+                iDmg *= GetFaction()->GetSlayerDamageBonus(pWeapon->GetSlayer());
+            }
+        }
+    }
+
 	// Disturb magic spells (only players can be disturbed)
 	if ( m_pPlayer && (pSrc != this) && !(uType & DAMAGE_NODISTURB) && g_Cfg.IsSkillFlag(Skill_GetActive(), SKF_MAGIC) )
 	{

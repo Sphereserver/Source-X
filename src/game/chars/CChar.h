@@ -13,6 +13,7 @@
 #include "../items/CItemMemory.h"
 #include "../items/CItemStone.h"
 #include "../CObjBase.h"
+#include "../CFaction.h"
 #include "CCharBase.h"
 #include "CCharPlayer.h"
 
@@ -80,6 +81,7 @@ private:
 	ushort m_Skill[SKILL_QTY];	// List of skills ( skill * 10 )
 
 	CClient * m_pClient;	// is the char a logged in m_pPlayer ?
+    CFaction *_pFaction;        // Faction type.
 
 public:
 	struct LastAttackers
@@ -304,6 +306,7 @@ private:
 public:
 	// Status and attributes ------------------------------------
 	int IsWeird() const;
+    CFaction *GetFaction();
 	char GetFixZ( CPointMap pt, dword dwBlockFlags = 0);
 	virtual void Delete(bool bforce = false);
 	virtual bool NotifyDelete();

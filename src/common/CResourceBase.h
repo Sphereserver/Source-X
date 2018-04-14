@@ -15,6 +15,7 @@
 #include "CUID.h"
 #include "CScript.h"
 #include "CScriptObj.h"
+#include "CLog.h"
 
 class CVarDefContNum;
 
@@ -117,7 +118,7 @@ struct CResourceIDBase : public CUIDBase
 // Size: 6 + 8 + 18 = 32 --> it's a 32 bits number.
 // WARNING: when adding new resource types, make sure that the last bit (31) doesn't overlap with UID_F_RESOURCE!
 #define RES_GET_TYPE(dw)	( ( dw >> RES_TYPE_SHIFT ) & RES_TYPE_MASK )
-#define RES_GET_INDEX(dw)	( dw & RES_INDEX_MASK )
+#define RES_GET_INDEX(dw)	( dw & (dword)RES_INDEX_MASK )
 
 public:
 	RES_TYPE GetResType() const

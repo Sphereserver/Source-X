@@ -179,6 +179,8 @@ game/CBase.cpp
 game/CBase.h
 game/CContainer.cpp
 game/CContainer.h
+game/CFaction.cpp
+game/CFaction.h
 game/CObjBase.cpp
 game/CObjBase.h
 game/CPathFinder.cpp

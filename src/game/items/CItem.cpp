@@ -82,6 +82,8 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CObjBase( true )
 	m_containedGridIndex = 0;
 	m_dwDispIndex = ITEMID_NOTHING;
 
+    _pSlayer = new CFaction(pItemDef->GetSlayer());
+
 	m_itNormal.m_more1 = 0;
 	m_itNormal.m_more2 = 0;
 	m_itNormal.m_morep.ZeroPoint();
@@ -140,6 +142,7 @@ CItem::~CItem()
 		default:
 			break;
 	}
+    delete _pSlayer;
 	g_Serv.StatDec(SERV_STAT_ITEMS);
 }
 
@@ -2064,6 +2067,9 @@ void CItem::r_Write( CScript & s )
 
 	CObjBase::r_Write(s);
 
+    if (GetSlayer())
+        GetSlayer()->r_Write(s);
+
 	if ( GetDispID() != GetID() )	// the item is flipped.
 		s.WriteKey("DISPID", g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, GetDispID())));
 	if ( GetAmount() != 1 )
@@ -2524,8 +2530,15 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		default:
 			fDoDefault = true;
 	}
-	if ( fDoDefault )
-		return CObjBase::r_WriteVal( pszKey, sVal, pSrc );
+    if (fDoDefault)
+    {
+        if (GetSlayer())
+        {
+            if (GetSlayer()->r_WriteVal(pszKey, sVal, pSrc))
+                return true;
+        }
+        return CObjBase::r_WriteVal(pszKey, sVal, pSrc);
+    }
 	return true;
 	EXC_CATCH;
 
@@ -3019,7 +3032,14 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			SetType(static_cast<IT_TYPE>(g_Cfg.ResourceGetIndexType( RES_TYPEDEF, s.GetArgStr())));
 			break;
 		default:
-			return CObjBase::r_LoadVal( s );
+        {
+            if (GetSlayer())
+            {
+                if (GetSlayer()->r_LoadVal(s))
+                    return true;
+            }
+            return CObjBase::r_LoadVal(s);
+        }
 	}
 	if (GetCallingObjTrigger() != sm_szTrigName[ITRIG_CLIENTTOOLTIP])
 	{
@@ -3039,6 +3059,10 @@ bool CItem::r_Load( CScript & s ) // Load an item from script
 {
 	ADDTOCALLSTACK("CItem::r_Load");
 	CScriptObj::r_Load( s );
+
+    if (GetSlayer())
+        GetSlayer()->r_Load(s);
+
 	if ( GetContainer() == NULL )	// Place into the world.
 	{
 		if ( GetTopPoint().IsCharValid())
@@ -3052,7 +3076,6 @@ bool CItem::r_Load( CScript & s ) // Load an item from script
 		Delete();
 		return true;
 	}
-
 	return true;
 }
 
@@ -3623,6 +3646,7 @@ void CItem::DupeCopy( const CItem * pItem )
 	m_TagDefs.Copy(&(pItem->m_TagDefs));
 	m_BaseDefs.Copy(&(pItem->m_BaseDefs));
 	m_OEvents.Copy(&(pItem->m_OEvents));
+    _pSlayer->Copy(const_cast<CItem*>(pItem)->GetSlayer());
 }
 
 void CItem::SetAnim( ITEMID_TYPE id, int iTime )
@@ -5037,7 +5061,7 @@ bool CItem::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 	if ( IsType(IT_WAND) )	// try to recharge the wand.
 	{
-		if ( !m_itWeapon.m_spell || RES_GET_INDEX(m_itWeapon.m_spell) == spell )
+		if ( !m_itWeapon.m_spell || RES_GET_INDEX(m_itWeapon.m_spell) == (word)spell )
 		{
 			SetAttr(ATTR_MAGIC);
 			if ( !m_itWeapon.m_spell || ( pCharSrc && pCharSrc->IsPriv(PRIV_GM) ) )
@@ -5461,6 +5485,12 @@ bool CItem::IsResourceMatch( CResourceIDBase rid, dword dwArg )
 	}
 
 	return false;
+}
+
+CFaction * CItem::GetSlayer()
+{
+    ADDTOCALLSTACK("CItem::GetSlayer");
+    return _pSlayer;
 }
 
 bool CItem::OnTick()

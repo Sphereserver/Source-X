@@ -21,7 +21,7 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 	m_type			= IT_NORMAL;
 	m_layer			= LAYER_NONE;
 	m_CanUse		= 0;
-
+    _pSlayer = new CFaction(FT_ITEM);
 	// Just applies to equippable weapons/armor.
 	m_ttNormal.m_tData1 = 0;
 	m_ttNormal.m_tData2 = 0;
@@ -106,6 +106,7 @@ CItemBase::CItemBase( ITEMID_TYPE id ) :
 CItemBase::~CItemBase()
 {
 	// These don't really get destroyed til the server is shut down but keep this around anyhow.
+    delete _pSlayer;
 }
 
 
@@ -143,7 +144,7 @@ void CItemBase::CopyBasic( const CItemBase * pBase )
 	m_layer		= pBase->m_layer;
     m_CanUse    = pBase->m_CanUse;
 	SetDefNum("RANGE",pBase->GetDefNum("RANGE",true));	//m_range	= pBase->m_range;
-
+    _pSlayer = const_cast<CItemBase*>(pBase)->GetSlayer();
 	// Just applies to weapons/armor.
 	m_ttNormal.m_tData1 = pBase->m_ttNormal.m_tData1;
 	m_ttNormal.m_tData2 = pBase->m_ttNormal.m_tData2;
@@ -1278,7 +1279,10 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 			sVal.FormatVal( m_weight / WEIGHT_UNITS );
 			break;
 		default:
-			return( CBaseBaseDef::r_WriteVal( pszKey, sVal ));
+        {
+            _pSlayer->r_WriteVal(pszKey, sVal);
+            return(CBaseBaseDef::r_WriteVal(pszKey, sVal));
+        }
 	}
 	return true;
 	EXC_CATCH;
@@ -1635,7 +1639,10 @@ bool CItemBase::r_LoadVal( CScript &s )
 			}
 			break;
 		default:
-			return CBaseBaseDef::r_LoadVal( s );
+        {
+            _pSlayer->r_LoadVal(s);
+            return CBaseBaseDef::r_LoadVal(s);
+        }
 	}
 	return true;
 	EXC_CATCH;
@@ -1655,6 +1662,12 @@ void CItemBase::ReplaceItemBase( CItemBase * pOld, CResourceDef * pNew ) // stat
 	size_t index = g_Cfg.m_ResHash.FindKey(rid);
 	ASSERT( index != g_Cfg.m_ResHash.BadIndex() );
 	g_Cfg.m_ResHash.SetAt( rid, index, pNew );
+}
+
+CFaction * CItemBase::GetSlayer()
+{
+    ADDTOCALLSTACK("CItemBase::GetSlayer");
+    return _pSlayer;
 }
 
 CItemBase * CItemBase::MakeDupeReplacement( CItemBase * pBase, ITEMID_TYPE idmaster ) // static

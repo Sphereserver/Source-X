@@ -14,6 +14,7 @@
 #include "../CBase.h"
 #include "../CServerConfig.h"
 #include "../CObjBase.h"
+#include "../CFaction.h"
 #include "CItemBase.h"
 
 
@@ -48,6 +49,7 @@ private:
 	uchar m_containedGridIndex;	// Which grid have i been placed in ? (when in a container)
 	dword	m_CanUse;		// Base attribute flags. can_u_all/male/female..
 	word	m_weight;
+    CFaction *_pSlayer; // Storing Slayer type.
 
 public:
 	byte	m_speed;
@@ -575,6 +577,7 @@ protected:
 	virtual int FixWeirdness();
 
 public:
+    CFaction *GetSlayer();
 	virtual bool OnTick();
 	virtual void OnHear( lpctstr pszCmd, CChar * pSrc );
 	CItemBase * Item_GetDef() const;

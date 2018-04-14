@@ -24,6 +24,7 @@ CCharBase::CCharBase( CREID_TYPE id ) :
 	m_Str = 0;
 	m_Dex = 0;
 	m_Int = 0;
+    _pFaction = new CFaction(FT_CHAR);
 
 	m_iMoveRate = (short)(g_Cfg.m_iMoveRate);
 
@@ -33,6 +34,12 @@ CCharBase::CCharBase( CREID_TYPE id ) :
 		m_dwDispIndex = 0;	// must read from SCP file later
 
 	SetResDispDnId(CREID_MAN);
+}
+
+CCharBase::~CCharBase()
+{
+    ADDTOCALLSTACK("CCharBase::~CCharBase");
+    delete _pFaction;
 }
 
 // From "Bill the carpenter" or "#HUMANMALE the Carpenter",
@@ -75,8 +82,15 @@ void CCharBase::CopyBasic( const CCharBase * pCharDef )
 	m_Anims = pCharDef->m_Anims;
 
 	m_BaseResources = pCharDef->m_BaseResources;
+    _pFaction = pCharDef->_pFaction;
 
 	CBaseBaseDef::CopyBasic( pCharDef );	// This will overwrite the CResourceLink!!
+}
+
+CFaction * CCharBase::GetFaction()
+{
+    ADDTOCALLSTACK("CCharBase::GetFaction");
+    return _pFaction;
 }
 
 // Setting the visual "ID" for this.
@@ -244,7 +258,10 @@ bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			m_Speech.WriteResourceRefList( sVal );
 			break;
 		default:
-			return( CBaseBaseDef::r_WriteVal( pszKey, sVal ));
+        {
+            _pFaction->r_WriteVal(pszKey, sVal);
+            return(CBaseBaseDef::r_WriteVal(pszKey, sVal));
+        }
 	}
 	return true;
 	EXC_CATCH;
@@ -355,7 +372,10 @@ bool CCharBase::r_LoadVal( CScript & s )
 		case CBC_TSPEECH:
 			return( m_Speech.r_LoadVal( s, RES_SPEECH ));
 		default:
-			return( CBaseBaseDef::r_LoadVal( s ));
+        {
+            _pFaction->r_LoadVal(s);
+            return(CBaseBaseDef::r_LoadVal(s));
+        }
 	}
 	return true;
 	EXC_CATCH;
@@ -371,6 +391,7 @@ bool CCharBase::r_Load( CScript & s )
 	ADDTOCALLSTACK("CCharBase::r_Load");
 	// Do a prelim read from the script file.
 	CScriptObj::r_Load(s);
+    _pFaction->r_Load(s);
 
 	if ( m_sName.IsEmpty() )
 	{

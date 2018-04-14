@@ -891,7 +891,7 @@ inline bool CSector::IsSectorSleeping() const
 	}
 
 	//default behaviour
-	return (-g_World.GetTimeDiff(GetLastClientTime()) > 10 * 60 * TICK_PER_SEC);
+	return (-g_World.GetTimeDiff(GetLastClientTime()) > 10 * 60 * TICK_PER_SEC); // Sector Sleep timeout.
 }
 
 void CSector::SetSectorWakeStatus()
@@ -1009,10 +1009,8 @@ void CSector::OnTick(int iPulseCount)
 	{
 		// Put the sector to sleep if no clients been here in a while.
 		fSleeping = IsSectorSleeping();
-		if ( fSleeping )
+		if ( fSleeping && g_Cfg.m_iSectorSleepMask > 0)
 		{
-			if ( !g_Cfg.m_iSectorSleepMask )
-				return;
 			if (( iPulseCount & g_Cfg.m_iSectorSleepMask ) != ( GetIndex() & g_Cfg.m_iSectorSleepMask ))
 				return;
 		}

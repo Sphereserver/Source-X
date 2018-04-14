@@ -268,6 +268,7 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false ),
 	SetID( baseID );
 	CCharBase* pCharDef = Char_GetDef();
 	ASSERT(pCharDef);
+    _pFaction = new CFaction(pCharDef->GetFaction());
 	m_attackBase = pCharDef->m_attackBase;
 	m_attackRange = pCharDef->m_attackRange;
 	m_defenseBase = pCharDef->m_defenseBase;
@@ -305,38 +306,39 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false ),
 // Delete character
 CChar::~CChar()
 {
-	DeletePrepare();	// remove me early so virtuals will work.
-	if ( IsStatFlag( STATF_RIDDEN ))
-	{
-		CItem * pItem = Horse_GetMountItem();
-		if ( pItem )
-		{
-			pItem->m_itFigurine.m_UID.InitUID();	// unlink it first.
-			pItem->Delete();
-		}
-	}
+    DeletePrepare();    // remove me early so virtuals will work.
+    if ( IsStatFlag( STATF_RIDDEN ))
+    {
+        CItem * pItem = Horse_GetMountItem();
+        if ( pItem )
+        {
+            pItem->m_itFigurine.m_UID.InitUID();    // unlink it first.
+            pItem->Delete();
+        }
+    }
 
-	if ( IsClient())	// this should never happen.
-	{
-		ASSERT( m_pClient );
-		m_pClient->GetNetState()->markReadClosed();
-	}
+    if ( IsClient())    // this should never happen.
+    {
+        ASSERT( m_pClient );
+        m_pClient->GetNetState()->markReadClosed();
+    }
 
-	Guild_Resign(MEMORY_GUILD);
-	Guild_Resign(MEMORY_TOWN);
+    Guild_Resign(MEMORY_GUILD);
+    Guild_Resign(MEMORY_TOWN);
 
-	if ( m_pParty )
-	{
-		m_pParty->RemoveMember( GetUID(), (dword) GetUID() );
-		m_pParty = NULL;
-	}
-	Attacker_RemoveChar();		// Removing me from enemy's attacker list (I asume that if he is on my list, I'm on his one and no one have me on their list if I dont have them)
-	if (m_pNPC)
-		NPC_PetClearOwners();	// Clear follower slots on pet owner
-	Clear();				// Remove me early so virtuals will work
-	ClearNPC();
-	ClearPlayer();
-	g_Serv.StatDec( SERV_STAT_CHARS );
+    if ( m_pParty )
+    {
+        m_pParty->RemoveMember( GetUID(), (dword) GetUID() );
+        m_pParty = NULL;
+    }
+    Attacker_RemoveChar();      // Removing me from enemy's attacker list (I asume that if he is on my list, I'm on his one and no one have me on their list if I dont have them)
+    if (m_pNPC)
+        NPC_PetClearOwners();   // Clear follower slots on pet owner
+    Clear();                    // Remove me early so virtuals will work
+    ClearNPC();
+    ClearPlayer();
+    delete _pFaction;
+    g_Serv.StatDec( SERV_STAT_CHARS );
 }
 
 // Client is detaching from this CChar.
@@ -522,6 +524,12 @@ int CChar::IsWeird() const
 	}
 
 	return 0;
+}
+
+CFaction * CChar::GetFaction()
+{
+	ADDTOCALLSTACK("CChar::GetFaction");
+    return _pFaction;
 }
 
 // Get the Z we should be at
@@ -932,6 +940,7 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 	m_TagDefs.Copy( &( pChar->m_TagDefs ) );
 	m_BaseDefs.Copy( &( pChar->m_BaseDefs ) );
 	m_OEvents.Copy(&(pChar->m_OEvents));
+    _pFaction->Copy(pChar->GetFaction());
 	//NPC_LoadScript( false );	//Calling it now so everything above can be accessed and overrided in the @Create
 	//Not calling NPC_LoadScript() because, in some part, it's breaking the name and looking for template names.
 	// end of CChar
@@ -1891,6 +1900,11 @@ do_default:
 		if ( r_WriteValContainer(pszKey, sVal, pSrc))
 			return true;
 
+        if (GetFaction())
+        {
+            if (GetFaction()->r_WriteVal(pszKey, sVal, pSrc))
+                return true;
+        }
 		// special write values
 		int i;
 
@@ -2794,6 +2808,11 @@ do_default:
 			if ( m_pNPC->r_LoadVal( this, s ))
 				return true;
 		}
+        if (GetFaction())
+        {
+            if (GetFaction()->r_LoadVal(s))
+                return true;
+        }
 
 		{
 			int i = g_Cfg.FindSkillKey( pszKey );
@@ -3309,6 +3328,7 @@ void CChar::r_Write( CScript & s )
 		m_pPlayer->r_WriteChar(this, s);
 	if ( m_pNPC )
 		m_pNPC->r_WriteChar(this, s);
+    GetFaction()->r_Write(s);
 
 	if ( GetTopPoint().IsValidPoint() )
 		s.WriteKey("P", GetTopPoint().WriteUsed());
@@ -3445,6 +3465,8 @@ bool CChar::r_Load( CScript & s ) // Load a character from script
 
 	if (m_pNPC)
 		NPC_GetAllSpellbookSpells();
+
+    GetFaction()->r_Load(s);
 
 	// Init the STATF_SAVEPARITY flag.
 	// StatFlag_Mod( STATF_SAVEPARITY, g_World.m_fSaveParity );

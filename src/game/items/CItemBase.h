@@ -13,6 +13,7 @@
 #include "../uo_files/CUOItemTypeRec.h"
 #include "../CBase.h"
 #include "../CServerConfig.h"
+#include "../CFaction.h"
 
 
 enum IT_TYPE		// double click type action.
@@ -237,12 +238,14 @@ private:
 	byte    m_layer;			// Is this item equippable on paperdoll? LAYER=LAYER_TYPE defaults from the .MUL file.
 	dword   m_dwFlags;			//  UFLAG4_DOOR from CUOItemTypeRec/CUOItemTypeRec_HS
 	byte	m_speed;
+    CFaction *_pSlayer;
 public:
 	static const char *m_sClassName;
 	SKILL_TYPE m_iSkill;
 	dword	m_CanUse;		// CanUse flags.
 							// Not applicable to all.
 	CResourceQtyArray m_SkillMake;	// what skills to create this ? (and non-consumed items)
+    CFaction *GetSlayer();
 
 	union
 	{
