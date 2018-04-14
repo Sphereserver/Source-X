@@ -2307,8 +2307,6 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		case IC_BONUSSKILL3AMT:
 		case IC_BONUSSKILL4AMT:
 		case IC_BONUSSKILL5AMT:
-		case IC_CHARGESCUR:
-		case IC_CHARGESMAX:
 		case IC_DURABILITY:
 		case IC_ITEMSETAMTCUR:
 		case IC_ITEMSETAMTMAX:
@@ -2593,8 +2591,6 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 		case IC_BONUSSKILL3AMT:
 		case IC_BONUSSKILL4AMT:
 		case IC_BONUSSKILL5AMT:
-		case IC_CHARGESCUR:
-		case IC_CHARGESMAX:
 		case IC_DURABILITY:
 		case IC_ITEMSETAMTCUR:
 		case IC_ITEMSETAMTMAX:

@@ -105,89 +105,9 @@ void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
 			if (iRet != TRIGRET_RET_TRUE)
 			{
 				// First add the name tooltip entry
-
-				dword dwClilocName = (dword)(pObj->GetDefNum("NAMELOC", true, true));
-
-				if (pItem)
-				{
-					if ( dwClilocName )
-					{
-                        PUSH_FRONT_TOOLTIP(pClientChar, new CClientTooltip(dwClilocName));
-					}
-					else if ( (pItem->GetAmount() > 1) && (pItem->GetType() != IT_CORPSE) )
-					{
-						PUSH_FRONT_TOOLTIP(pClientChar, t = new CClientTooltip(1050039)); // ~1_NUMBER~ ~2_ITEMNAME~
-						t->FormatArgs("%" PRIu16 "\t%s", pItem->GetAmount(), pObj->GetName());
-					}
-					else
-					{
-						PUSH_FRONT_TOOLTIP(pClientChar, t = new CClientTooltip(1050045)); // ~1_PREFIX~~2_NAME~~3_SUFFIX~
-						t->FormatArgs(" \t%s\t ", pObj->GetName());
-					}
-				}
-				else if (pChar)
-				{
-					lpctstr lpPrefix = pChar->GetKeyStr("NAME.PREFIX");
-					// HUE_TYPE wHue = m_pChar->Noto_GetHue( pChar, true );
-
-					if (!*lpPrefix)
-						lpPrefix = pChar->Noto_GetFameTitle();
-
-					if (!*lpPrefix)
-						lpPrefix = " ";
-
-					tchar * lpSuffix = Str_GetTemp();
-					strcpy(lpSuffix, pChar->GetKeyStr("NAME.SUFFIX"));
-
-					const CStoneMember * pGuildMember = pChar->Guild_FindMember(MEMORY_GUILD);
-					if (pGuildMember && (!pChar->IsStatFlag(STATF_INCOGNITO) || GetPrivLevel() > pChar->GetPrivLevel()))
-					{
-						const CItemStone * pParentStone = pGuildMember->GetParentStone();
-						ASSERT(pParentStone != NULL);
-
-						if (pGuildMember->IsAbbrevOn() && pParentStone->GetAbbrev()[0])
-						{
-							strcat(lpSuffix, " [");
-							strcat(lpSuffix, pParentStone->GetAbbrev());
-							strcat(lpSuffix, "]");
-						}
-					}
-
-					if (*lpSuffix == '\0')
-						strcpy(lpSuffix, " ");
-
-					// The name
-					PUSH_FRONT_TOOLTIP(pClientChar, t = new CClientTooltip(1050045)); // ~1_PREFIX~~2_NAME~~3_SUFFIX~
-					if (dwClilocName)
-						t->FormatArgs("%s\t%u\t%s", lpPrefix, dwClilocName, lpSuffix);
-					else
-						t->FormatArgs("%s\t%s\t%s", lpPrefix, pObj->GetName(), lpSuffix);
-
-					// Need to find a way to get the ushort inside hues.mul for index wHue to get this working.
-					// t->FormatArgs("<basefont color=\"#%02x%02x%02x\">%s\t%s\t%s</basefont>",
-					//	(byte)((((int)wHue) & 0x7C00) >> 7), (byte)((((int)wHue) & 0x3E0) >> 2),
-					//	(byte)((((int)wHue) & 0x1F) << 3),lpPrefix, pObj->GetName(), lpSuffix); // ~1_PREFIX~~2_NAME~~3_SUFFIX~
-
-					if (!pChar->IsStatFlag(STATF_INCOGNITO) || (GetPrivLevel() > pChar->GetPrivLevel()))
-					{
-						if (pGuildMember && pGuildMember->IsAbbrevOn())
-						{
-							if (pGuildMember->GetTitle()[0])
-							{
-								PUSH_FRONT_TOOLTIP(pClientChar, t = new CClientTooltip(1060776)); // ~1_val~, ~2_val~
-								t->FormatArgs("%s\t%s", pGuildMember->GetTitle(), pGuildMember->GetParentStone()->GetName());
-							}
-							else
-							{
-								PUSH_BACK_TOOLTIP(pClientChar, new CClientTooltip(1070722, pGuildMember->GetParentStone()->GetName())); // ~1_NOTHING~
-							}
-						}
-					}
-				}
-
+				AOSTooltip_addName(pObj);
 
 				// Then add some default tooltip entries, if RETURN 0 or no script
-
 				if (pChar)		// Character specific stuff
 					AOSTooltip_addDefaultCharData(pChar);
 				else if (pItem)	// Item specific stuff
@@ -270,6 +190,93 @@ void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
 		delete propertyList;
 }
 
+void CClient::AOSTooltip_addName(const CObjBase* pObj)
+{
+	CItem *pItem = pObj->IsItem() ? const_cast<CItem *>(static_cast<const CItem *>(pObj)) : NULL;
+	CChar *pChar = pObj->IsChar() ? const_cast<CChar *>(static_cast<const CChar *>(pObj)) : NULL;
+	CChar *pClientChar = GetChar();
+	CClientTooltip* t = NULL;
+
+	dword dwClilocName = (dword)(pObj->GetDefNum("NAMELOC", true, true));
+
+	if (pItem)
+	{
+		if ( dwClilocName )
+		{
+			PUSH_FRONT_TOOLTIP(pClientChar, new CClientTooltip(dwClilocName));
+		}
+		else if ( (pItem->GetAmount() > 1) && (pItem->GetType() != IT_CORPSE) )
+		{
+			PUSH_FRONT_TOOLTIP(pClientChar, t = new CClientTooltip(1050039)); // ~1_NUMBER~ ~2_ITEMNAME~
+			t->FormatArgs("%" PRIu16 "\t%s", pItem->GetAmount(), pObj->GetName());
+		}
+		else
+		{
+			PUSH_FRONT_TOOLTIP(pClientChar, t = new CClientTooltip(1050045)); // ~1_PREFIX~~2_NAME~~3_SUFFIX~
+			t->FormatArgs(" \t%s\t ", pObj->GetName());
+		}
+	}
+	else if (pChar)
+	{
+		lpctstr lpPrefix = pChar->GetKeyStr("NAME.PREFIX");
+		// HUE_TYPE wHue = m_pChar->Noto_GetHue( pChar, true );
+
+		if (!*lpPrefix)
+			lpPrefix = pChar->Noto_GetFameTitle();
+
+		if (!*lpPrefix)
+			lpPrefix = " ";
+
+		tchar * lpSuffix = Str_GetTemp();
+		strcpy(lpSuffix, pChar->GetKeyStr("NAME.SUFFIX"));
+
+		const CStoneMember * pGuildMember = pChar->Guild_FindMember(MEMORY_GUILD);
+		if (pGuildMember && (!pChar->IsStatFlag(STATF_INCOGNITO) || GetPrivLevel() > pChar->GetPrivLevel()))
+		{
+			const CItemStone * pParentStone = pGuildMember->GetParentStone();
+			ASSERT(pParentStone != NULL);
+
+			if (pGuildMember->IsAbbrevOn() && pParentStone->GetAbbrev()[0])
+			{
+				strcat(lpSuffix, " [");
+				strcat(lpSuffix, pParentStone->GetAbbrev());
+				strcat(lpSuffix, "]");
+			}
+		}
+
+		if (*lpSuffix == '\0')
+			strcpy(lpSuffix, " ");
+
+		// The name
+		PUSH_FRONT_TOOLTIP(pClientChar, t = new CClientTooltip(1050045)); // ~1_PREFIX~~2_NAME~~3_SUFFIX~
+		if (dwClilocName)
+			t->FormatArgs("%s\t%u\t%s", lpPrefix, dwClilocName, lpSuffix);
+		else
+			t->FormatArgs("%s\t%s\t%s", lpPrefix, pObj->GetName(), lpSuffix);
+
+		// Need to find a way to get the ushort inside hues.mul for index wHue to get this working.
+		// t->FormatArgs("<basefont color=\"#%02x%02x%02x\">%s\t%s\t%s</basefont>",
+		//	(byte)((((int)wHue) & 0x7C00) >> 7), (byte)((((int)wHue) & 0x3E0) >> 2),
+		//	(byte)((((int)wHue) & 0x1F) << 3),lpPrefix, pObj->GetName(), lpSuffix); // ~1_PREFIX~~2_NAME~~3_SUFFIX~
+
+		if (!pChar->IsStatFlag(STATF_INCOGNITO) || (GetPrivLevel() > pChar->GetPrivLevel()))
+		{
+			if (pGuildMember && pGuildMember->IsAbbrevOn())
+			{
+				if (pGuildMember->GetTitle()[0])
+				{
+					PUSH_FRONT_TOOLTIP(pClientChar, t = new CClientTooltip(1060776)); // ~1_val~, ~2_val~
+					t->FormatArgs("%s\t%s", pGuildMember->GetTitle(), pGuildMember->GetParentStone()->GetName());
+				}
+				else
+				{
+					PUSH_BACK_TOOLTIP(pClientChar, new CClientTooltip(1070722, pGuildMember->GetParentStone()->GetName())); // ~1_NOTHING~
+				}
+			}
+		}
+	}
+}
+
 void CClient::AOSTooltip_addDefaultCharData(CChar * pChar)
 {
 	CClientTooltip* t = NULL;
@@ -304,6 +311,8 @@ void CClient::AOSTooltip_addDefaultCharData(CChar * pChar)
 
 void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 {
+	// TODO: add check to ATTR_IDENTIFIED, then add tooltips: stolen, BonusSkill1/2/3/4/5, minlevel/maxlevel, shurikencount
+
 	CClientTooltip* t = NULL;
 
 	if (pItem->IsAttr(ATTR_LOCKEDDOWN))
@@ -333,8 +342,8 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 		}
 	}
 
-	CUID uid = static_cast<CUID>((dword)(pItem->GetDefNum("CRAFTEDBY")));
-	CChar *pCraftsman = uid.CharFind();
+	CUID uidCraftsman((dword)(pItem->GetDefNum("CRAFTEDBY")));
+	const CChar *pCraftsman = uidCraftsman.CharFind();
 	if (pCraftsman)
 	{
 		PUSH_FRONT_TOOLTIP(pItem, t = new CClientTooltip(1050043)); // crafted by ~1_NAME~
@@ -904,6 +913,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 	break;
 
 	case IT_SPELLBOOK:
+	case IT_SPELLBOOK_EXTRA:
 	case IT_SPELLBOOK_NECRO:
 	case IT_SPELLBOOK_PALA:
 	case IT_SPELLBOOK_BUSHIDO:

@@ -547,6 +547,7 @@ public:
 
 	void addAOSTooltip( const CObjBase * pObj, bool bRequested = false, bool bShop = false );
 private:
+	void AOSTooltip_addName(const CObjBase* pObj);
 	void AOSTooltip_addDefaultCharData(CChar * pChar);
 	void AOSTooltip_addDefaultItemData(CItem * pItem);
 

@@ -3209,11 +3209,7 @@ do_default:
 				CUID	uid		= (uint)piCmd[0];
 				dword	dwFlags	= (uint)piCmd[1];
 
-				CItemMemory * pMemory = Memory_FindObj( uid );
-				if ( pMemory != NULL )
-					pMemory->SetMemoryTypes( (word)(dwFlags) );
-				else
-					pMemory = Memory_AddObjTypes( uid, (word)(dwFlags) );
+				Memory_AddObjTypes( uid, (word)dwFlags );
 			}
 			break;
 		case CHC_NIGHTSIGHT:

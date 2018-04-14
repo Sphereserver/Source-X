@@ -15,6 +15,7 @@
 
 
 #include <cstdlib>
+#include "basic_threading.h"
 
 #ifdef _WIN32
 	#include "os_windows.h"
@@ -23,52 +24,10 @@
 #ifndef _WIN32
 	#include "os_unix.h"
 #endif
-
-// use to indicate that a function uses printf-style arguments, allowing GCC
-// to validate the format string and arguments:
-// a = 1-based index of format string
-// b = 1-based index of arguments
-// (note: add 1 to index for non-static class methods because 'this' argument
-// is inserted in position 1)
-#ifdef _MSC_VER
-	#define __printfargs(a,b)
-#else
-	#ifdef _WIN32
-		#define __printfargs(a,b) __attribute__ ((format(gnu_printf, a, b)))
-	#else
-		#define __printfargs(a,b) __attribute__ ((format(printf, a, b)))
-	#endif
-#endif
-
-#ifdef UNICODE
-	#define IsDigit(c)			iswdigit((wint_t)c)
-	#define IsSpace(c)			iswspace((wint_t)c)
-	#define IsAlpha(c)			iswalpha((wint_t)c)
-	#define IsAlnum(c)			iswalnum((wint_t)c)
-#else
-	#define IsDigit(c)			isdigit((int)(c & 0xFF))
-	#define IsSpace(c)			isspace((int)(c & 0xFF))
-	#define IsAlpha(c)			isalpha((int)(c & 0xFF))
-	#define IsAlnum(c)			isalnum((int)(c & 0xFF))
-#endif
+typedef THREAD_ENTRY_RET(_cdecl * PTHREAD_ENTRY_PROC)(void *);
+typedef uint	ERROR_CODE;
 
 #define CountOf(a)			(sizeof(a)/sizeof((a)[0]))
-
-/* These macros are uppercase for conformity to windows.h macros */
-#define MAKEDWORD(low, high) ((dword)(((word)low) | (((dword)((word)high)) << 16)))
-
-// Desguise an id as a pointer.
-#ifndef MAKEINTRESOURCE			// typically on unix
-	#define MAKEINTRESOURCEA(i) ((lpstr)((size_t)((word)i)))
-	#define MAKEINTRESOURCEW(i) ((lpwstr)((size_t)((word)i)))
-	#ifdef UNICODE
-		#define MAKEINTRESOURCE  MAKEINTRESOURCEW
-	#else
-		#define MAKEINTRESOURCE  MAKEINTRESOURCEA
-	#endif
-#endif
-#define ISINTRESOURCE(r)	((((size_t)r) >> 16) == 0)
-#define GETINTRESOURCE(r)	(((size_t)r)&0xFFFF)
 
 #ifndef ASSERT
 	#ifdef _DEBUG
@@ -78,11 +37,16 @@
 		#define ASSERT(exp)			(void)0
 	#endif
 #endif
-/* End of macros section */
 
 
-typedef uint	ERROR_CODE;
-typedef THREAD_ENTRY_RET(_cdecl * PTHREAD_ENTRY_PROC)(void *);
+// MAKEWORD:  defined in minwindef.h (loaded my windows.h), so it's missing only on Linux.
+// MAKEDWORD: undefined even on Windows, it isn't in windows.h.
+// MAKELONG:  defined in minwindef.h, we use it only on Windows (CSWindow.h). on Linux is missing, we created a define but is commented.
+#define MAKEDWORD(low, high) ((dword)(((word)low) | (((dword)((word)high)) << 16)))
+
+// Desguise an id as a pointer.
+#define ISINTRESOURCE(r)	((((size_t)r) >> 16) == 0)
+#define GETINTRESOURCE(r)	(((size_t)r)&0xFFFF)
 
 
 #define IsNegative(c)		(((c) < 0)?1:0)
@@ -126,5 +90,33 @@ template<typename T> inline T sign(T n)
 #define maximum(x,y)		((x)>(y)?(x):(y))		// NOT to be used with functions! Store the result of the function in a variable first, otherwise the function will be executed twice!
 #define medium(x,y,z)		((x)>(y)?(x):((z)<(y)?(z):(y)))	// NOT to be used with functions! Store the result of the function in a variable first, otherwise the function will be executed twice!
 
+
+// use to indicate that a function uses printf-style arguments, allowing GCC
+// to validate the format string and arguments:
+// a = 1-based index of format string
+// b = 1-based index of arguments
+// (note: add 1 to index for non-static class methods because 'this' argument
+// is inserted in position 1)
+#ifdef _MSC_VER
+	#define __printfargs(a,b)
+#else
+	#ifdef _WIN32
+		#define __printfargs(a,b) __attribute__ ((format(gnu_printf, a, b)))
+	#else
+		#define __printfargs(a,b) __attribute__ ((format(printf, a, b)))
+	#endif
+#endif
+
+#ifdef UNICODE
+	#define IsDigit(c)			iswdigit((wint_t)c)
+	#define IsSpace(c)			iswspace((wint_t)c)
+	#define IsAlpha(c)			iswalpha((wint_t)c)
+	#define IsAlnum(c)			iswalnum((wint_t)c)
+#else
+	#define IsDigit(c)			isdigit((int)(c & 0xFF))
+	#define IsSpace(c)			isspace((int)(c & 0xFF))
+	#define IsAlpha(c)			isalpha((int)(c & 0xFF))
+	#define IsAlnum(c)			isalnum((int)(c & 0xFF))
+#endif
 
 #endif	// _INC_COMMON_H

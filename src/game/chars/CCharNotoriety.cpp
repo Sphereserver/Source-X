@@ -702,7 +702,7 @@ void CChar::NotoSave_CheckTimeout()
 				NotoSave_Resend(count);
 				break;
 			}
-			count++;
+			++count;
 		}
 	}
 }
@@ -752,17 +752,16 @@ bool CChar::NotoSave_Delete( CChar * pChar )
 		return false;
 	if ( NotoSave() )
 	{
-		int count = 0;
-		for (std::vector<NotoSaves>::iterator it = m_notoSaves.begin(), end = m_notoSaves.end(); it != end; ++it)
+		for (std::vector<NotoSaves>::iterator it = m_notoSaves.begin(), end = m_notoSaves.end(); it != end; )
 		{
-			NotoSaves & refNotoSave = m_notoSaves[count];
+			NotoSaves & refNotoSave = *it;
 			CUID uid = refNotoSave.charUID;
 			if ( uid.CharFind() && uid == (dword)(pChar->GetUID()) )
 			{
-				m_notoSaves.erase(it);
+				it = m_notoSaves.erase(it);
 				return true;
 			}
-			count++;
+			++it;
 		}
 	}
 	return false;

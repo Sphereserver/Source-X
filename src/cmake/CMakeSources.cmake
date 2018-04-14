@@ -91,6 +91,7 @@ SOURCE_GROUP (game\\uo_files FILES ${uofiles_SRCS})
 
 # Files containing 'background work'
 SET (common_SRCS
+common/basic_threading.h
 common/CacheableScriptFile.cpp
 common/CacheableScriptFile.h
 common/CDataBase.cpp

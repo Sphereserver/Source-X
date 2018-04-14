@@ -49,7 +49,7 @@ inline void byteReverse( uchar *buffer, uint longs )
 
 void CMD5::update()
 {
-    register uint a, b, c, d;
+    uint a, b, c, d;
 	uint *ptrInput = reinterpret_cast<uint *>( m_input );
 
     a = m_buffer[0];

@@ -175,8 +175,8 @@ dword RS_MDS_Encode(dword k0, dword k1)
 void ReverseRoundSubkeys(keyInstance* key, byte newDir)
 {
 	dword t0, t1;
-	register dword * r0 = key->subKeys + ROUND_SUBKEYS;
-	register dword * r1 = r0 + 2 * key->numRounds - 2;
+	dword * r0 = key->subKeys + ROUND_SUBKEYS;
+	dword * r1 = r0 + 2 * key->numRounds - 2;
 
 	for (; r0 < r1; r0 += 2, r1 -= 2)
 	{

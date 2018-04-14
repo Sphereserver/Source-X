@@ -1016,8 +1016,6 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 		case IBC_MAGEWEAPON:
 		case IBC_SELFREPAIR:
 		case IBC_DURABILITY:
-		case IBC_CHARGESCUR:
-		case IBC_CHARGESMAX:
 		case IBC_USESCUR:
 		case IBC_USESMAX:
 		case IBC_RECHARGE:
@@ -1346,8 +1344,6 @@ bool CItemBase::r_LoadVal( CScript &s )
 		case IBC_MAGEWEAPON:
 		case IBC_SELFREPAIR:
 		case IBC_DURABILITY:
-		case IBC_CHARGESCUR:
-		case IBC_CHARGESMAX:
 		case IBC_USESCUR:
 		case IBC_USESMAX:
 		case IBC_RECHARGE:

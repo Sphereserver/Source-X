@@ -120,6 +120,7 @@ bool CChar::Memory_UpdateFlags(CItemMemory * pMemory)
 	int64 iCheckTime;
 	if (wMemTypes & MEMORY_IPET)
 		StatFlag_Set(STATF_PET);
+
 	if (wMemTypes & MEMORY_FIGHT)	// update more often to check for retreat.
 		iCheckTime = 30 * TICK_PER_SEC;
 	else if (wMemTypes & (MEMORY_IPET | MEMORY_GUARD | MEMORY_GUILD | MEMORY_TOWN))
@@ -128,12 +129,13 @@ bool CChar::Memory_UpdateFlags(CItemMemory * pMemory)
 		iCheckTime = 5 * 60 * TICK_PER_SEC;
 	else
 		iCheckTime = 20 * 60 * TICK_PER_SEC;
-	pMemory->SetTimeout(iCheckTime);	// update it's decay time.	
+
+	pMemory->SetTimeout(iCheckTime);	// update its decay time.	
 	CChar * pCharLink = pMemory->m_uidLink.CharFind();
 	if (pCharLink)
 	{
 		pCharLink->NotoSave_Update();	// Clear my notoriety from the target.
-		NotoSave_Update();		// iAggressor is stored in the other char, so the call should be reverted.
+		NotoSave_Update();				// iAggressor is stored in the other char, so the call should be reverted.
 	}
 	return true;
 }
@@ -337,12 +339,11 @@ CItemMemory * CChar::Memory_AddObjTypes( CUID uid, word MemTypes )
 	ADDTOCALLSTACK("CChar::Memory_AddObjTypes");
 	CItemMemory * pMemory = Memory_FindObj( uid );
 	if ( pMemory == NULL )
-	{
 		return Memory_CreateObj( uid, MemTypes );
-	}
+
 	Memory_AddTypes( pMemory, MemTypes );
 	NotoSave_Delete( uid.CharFind() );
-	return( pMemory );
+	return pMemory ;
 }
 
 CItemMemory * CChar::Memory_AddObjTypes( const CObjBase * pObj, word MemTypes )

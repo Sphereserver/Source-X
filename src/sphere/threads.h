@@ -18,29 +18,6 @@
 	#include <pthread.h>
 #endif
 
-/*
- * Defines for easy C++17 thread-locking for class methods.
-**/
-
-//#ifdef _DEBUG
-	#include <shared_mutex>
-	#define THREAD_SHARED_LOCK_SET	std::shared_lock<std::shared_mutex> _shared_lock(_classMutex)	// Read-Only: multiple threads can read the same resource
-	#define THREAD_SHARED_LOCK		_shared_lock.lock()
-	#define THREAD_SHARED_UNLOCK	_shared_lock.unlock()
-	#define THREAD_UNIQUE_LOCK_SET	std::unique_lock<std::shared_mutex> _unique_lock(_classMutex)	// Read/Write: exclusive access to a thread at a time
-	#define THREAD_UNIQUE_LOCK		_unique_lock.lock()
-	#define THREAD_UNIQUE_UNLOCK	_unique_lock.unlock()
-/*
-#else
-	#define THREAD_SHARED_LOCK_SET	;
-	#define THREAD_SHARED_LOCK		;
-	#define THREAD_SHARED_UNLOCK	;
-	#define THREAD_UNIQUE_LOCK_SET	;
-	#define THREAD_UNIQUE_LOCK		;
-	#define THREAD_UNIQUE_UNLOCK	;
-#endif
-*/
-
 
 /**
  * Sphere threading system

@@ -25,6 +25,13 @@
 
 /*  cross-platform functions macros  */
 
+#define MAKEINTRESOURCEA(i) ((lpstr)((size_t)((word)i)))
+#define MAKEINTRESOURCEW(i) ((lpwstr)((size_t)((word)i)))
+#ifdef UNICODE
+	#define MAKEINTRESOURCE  MAKEINTRESOURCEW
+#else
+	#define MAKEINTRESOURCE  MAKEINTRESOURCEA
+#endif
 #define MAKEWORD(low,high)		((word)(((byte)(low))|(((word)((byte)(high)))<<8)))
 //#define MAKELONG(low,high)	((long)(((word)(low))|(((dword)((word)(high)))<<16)))
 #define LOWORD(l)		((word)((dword)(l) & 0xffff))
