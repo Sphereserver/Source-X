@@ -2002,6 +2002,26 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 	switch (index)
 	{
+        case OV_ADDCLILOC:
+            // Add cliloc in @ClientTooltip trigger
+            {
+                tchar * ppLocArgs[256];
+                int qty = Str_ParseCmds(s.GetArgRaw(), ppLocArgs, CountOf(ppLocArgs), ",");
+                dword clilocid = Exp_GetVal(ppLocArgs[0]);
+
+                CSString sLocArgs;
+                for (int y = 1 ; y < qty; ++y )
+                {
+                    if ( sLocArgs.GetLength() )
+                        sLocArgs += "\t";
+                    sLocArgs += ( !strncmp(ppLocArgs[y], "NULL", 4) ? " " : ppLocArgs[y] );
+                }
+
+                if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
+                    g_Log.EventDebug("SCRIPT: addcliloc(%u,'%s')\n", clilocid, sLocArgs.GetPtr());
+                m_TooltipData.push_back(std::move(std::unique_ptr<CClientTooltip>(new CClientTooltip(clilocid, sLocArgs.GetPtr()))));
+            }
+            break;
 		case OV_DAMAGE:	//	"Dmg, SourceFlags, SourceCharUid, DmgPhysical(%), DmgFire(%), DmgCold(%), DmgPoison(%), DmgEnergy(%)" = do me some damage.
 			{
 				EXC_SET("DAMAGE");

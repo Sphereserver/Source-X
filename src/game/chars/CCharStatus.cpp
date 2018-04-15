@@ -1046,44 +1046,55 @@ bool CChar::CanSee( const CObjBaseTemplate *pObj ) const
 		if ( GetTopPoint().GetDistSight(pObj->GetTopLevelObj()->GetTopPoint()) > iDist )
 			return false;
 
-		CObjBase *pObjCont = pItem->GetContainer();
+		const CObjBase *pObjCont = pItem->GetContainer();
 		if ( pObjCont )
 		{
-//			LAYER_TYPE layerCont = pObjCont->GetEquipLayer();
-//			if (layerCont < 26 && layerCont > 28)	// you can always see what a vendor can buy or sell
-//			{
-				if (!CanSeeInContainer(dynamic_cast<const CItemContainer*>(pObjCont)))
-					return false;
+			if (IsSetEF(EF_FixCanSeeInClosedConts))
+			{
+                // the bSkip check is mainly needed when a trade window is created script-side
+                bool bSkip = false;
+                if (const CItemContainer* pItemContainer = dynamic_cast<const CItemContainer*>(pObjCont))
+                {
+                    if (pItemContainer->IsType(IT_EQ_TRADE_WINDOW))
+                    {
+                        // Both of the chars in a trade can see the items being traded
+                        if (this == dynamic_cast<const CChar*>(pItemContainer->GetContainer()))
+                            bSkip = true;
+                        else
+                        {
+                            if (const CItem* pLinkedTradeWindow = pItemContainer->m_uidLink.ItemFind())
+                                if (const CChar* pSecondClientInTrade = dynamic_cast<const CChar*>(pLinkedTradeWindow->GetContainer()))
+                                    if (this == pSecondClientInTrade)
+                                        bSkip = true;
+                        }
+                    }
+                }
 
-				if (IsSetEF(EF_FixCanSeeInClosedConts))
+				// A client cannot see the contents of someone else's container, unless they have opened it first
+				if (!bSkip && IsClient() && pObjCont->IsItem() && pObjCont->GetTopLevelObj() != this)
 				{
-					// A client cannot see the contents of someone else's container, unless they have opened it first
-					if (IsClient() && pObjCont->IsItem() && pObjCont->GetTopLevelObj() != this)
+					const CClient *pClient = GetClient();
+					if (pClient && (pClient->m_openedContainers.find(pObjCont->GetUID().GetPrivateUID()) == pClient->m_openedContainers.end()))
 					{
-						CClient *pClient = GetClient();
-						if (pClient && (pClient->m_openedContainers.find(pObjCont->GetUID().GetPrivateUID()) == pClient->m_openedContainers.end()))
+					/*
+					#ifdef _DEBUG
+						if ( CanSee(pObjCont) )
 						{
-						/*
-						#ifdef _DEBUG
-							if ( CanSee(pObjCont) )
-							{
-							#ifdef THREAD_TRACK_CALLSTACK
-								StackDebugInformation::printStackTrace();
-							#endif
-								g_Log.EventDebug("%x:EF_FixCanSeeInClosedConts prevents %s, (0%x, '%s') from seeing item uid=0%x (%s, '%s') in container uid=0%x (%s, '%s')\n",
-									pClient->GetSocketID(), pClient->GetAccount()->GetName(), (dword)GetUID(), GetName(false),
-									(dword)pItem->GetUID(), pItem->GetResourceName(), pItem->GetName(),
-									(dword)pObjCont->GetUID(), pObjCont->GetResourceName(), pObjCont->GetName());
-							}
+						#ifdef THREAD_TRACK_CALLSTACK
+							StackDebugInformation::printStackTrace();
 						#endif
-						*/
-							return false;
+							g_Log.EventDebug("%x:EF_FixCanSeeInClosedConts prevents %s, (0%x, '%s') from seeing item uid=0%x (%s, '%s') in container uid=0%x (%s, '%s')\n",
+								pClient->GetSocketID(), pClient->GetAccount()->GetName(), (dword)GetUID(), GetName(false),
+								(dword)pItem->GetUID(), pItem->GetResourceName(), pItem->GetName(),
+								(dword)pObjCont->GetUID(), pObjCont->GetResourceName(), pObjCont->GetName());
 						}
+					#endif
+					*/
+						return false;
 					}
 				}
-
-//			}
-			return CanSee(pObjCont);
+			}
+            return CanSee(pObjCont);
 		}
 	}
 	else

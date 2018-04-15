@@ -166,6 +166,7 @@ bool CException::GetErrorMessage(lptstr lpszError, uint nMaxError, uint * pnHelp
 
 void Assert_Fail( lpctstr pExp, lpctstr pFile, long long llLine )
 {
+	EXC_NOTIFY_DEBUGGER;
 	throw CAssert(LOGL_CRIT, pExp, pFile, llLine);
 }
 

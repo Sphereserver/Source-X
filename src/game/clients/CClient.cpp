@@ -890,26 +890,6 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				removeBuff(IconId);
 			}
 			break;
-		case CV_ADDCLILOC:
-			// Add cliloc in @ClientTooltip trigger
-			{
-				tchar * ppLocArgs[256];
-				int qty = Str_ParseCmds(s.GetArgRaw(), ppLocArgs, CountOf(ppLocArgs), ",");
-				dword clilocid = Exp_GetVal(ppLocArgs[0]);
-
-				CSString locArgs;
-				for (int y = 1 ; y < qty; y++ )
-				{
-					if ( locArgs.GetLength() )
-						locArgs += "\t";
-					locArgs += ( !strncmp(ppLocArgs[y], "NULL", 4) ? " " : ppLocArgs[y] );
-				}
-
-				if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
-					g_Log.EventDebug("SCRIPT: addcliloc(%u,'%s')\n", clilocid, static_cast<lpctstr>(locArgs));
-				GetChar()->m_TooltipData.push_back(std::move(std::unique_ptr<CClientTooltip>(new CClientTooltip(clilocid, locArgs))));
-			}
-			break;
 		case CV_ADDCONTEXTENTRY:
 			{
 				tchar * ppLocArgs[20];

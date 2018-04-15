@@ -804,8 +804,8 @@ int CItem::FixWeirdness()
 	switch ( GetType() )
 	{
 		case IT_EQ_TRADE_WINDOW:
-			// Should not exist except equipped.
-			if ( !IsItemEquipped() || GetEquipLayer() != LAYER_NONE || !pChar || !pChar->m_pPlayer || !pChar->IsClient() )
+			// Should not exist except equipped. Commented the check on the layer because, right now, placing it on LAYER_SPECIAL is the only way to create script-side a trade window.
+			if ( !IsItemEquipped() || /*GetEquipLayer() != LAYER_NONE ||*/ !pChar || !pChar->m_pPlayer || !pChar->IsClient() )
 			{
 				iResultCode = 0x2220;
 				return iResultCode;	// get rid of it.
@@ -2033,7 +2033,7 @@ void CItem::r_WriteMore2( CSString & sVal )
 
 		case IT_CROPS:
 		case IT_FOLIAGE:
-			sVal = g_Cfg.ResourceGetName( m_itCrop.m_ridReapFruit );
+			sVal = g_Cfg.ResourceGetName( m_itCrop.m_ridFruitOverride );
 			return;
 
 		case IT_LEATHER:
@@ -2133,7 +2133,6 @@ bool CItem::LoadSetContainer( CUID uid, LAYER_TYPE layer )
 		DEBUG_ERR(( "Invalid container 0%x\n", (dword) uid ));
 		return false;	// not valid object.
 	}
-
 
 	if ( IsTypeSpellbook() && pObjCont->GetTopLevelObj()->IsChar())	// Intercepting the spell's addition here for NPCs, they store the spells on vector <Spells>m_spells for better access from their AI.
 	{
@@ -2927,7 +2926,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			return true;
 
 		case IC_FRUIT:	// m_more2
-			m_itCrop.m_ridReapFruit.SetObjUID( s.GetArgDWVal() );
+			m_itCrop.m_ridFruitOverride.SetObjUID( s.GetArgDWVal() );
 			return true;
 		case IC_MAXHITS:
 			m_itNormal.m_more1 = MAKEDWORD(LOWORD(m_itNormal.m_more1), s.GetArgVal());

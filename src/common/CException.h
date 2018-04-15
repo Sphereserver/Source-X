@@ -157,6 +157,11 @@ public:
 // EXC_CATCH
 #define EXC_CATCH \
 	} \
+	catch ( const CAssert& e ) \
+	{ \
+		EXC_CATCH_EXCEPTION(&e); \
+		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
+	} \
 	catch ( const CSError& e ) \
 	{ \
 		EXC_CATCH_EXCEPTION(&e); \
@@ -279,6 +284,7 @@ public:
 	{
 	#define EXC_DEBUGSUB_END }
 
+    #define EXC_NOTIFY_DEBUGGER (void)0
 	#define EXC_ADD_SCRIPT		(void)0
 	#define EXC_ADD_SCRIPTSRC	(void)0
 	#define EXC_ADD_KEYRET(a)	(void)0

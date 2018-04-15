@@ -1282,14 +1282,9 @@ bool CChar::Use_Seed( CItem * pSeed, CPointMap * pPoint )
 
 	pPlant->MoveToUpdate(pt);
 	if ( pPlant->IsType(IT_CROPS) || pPlant->IsType(IT_FOLIAGE) )
-	{
-		pPlant->m_itCrop.m_ridReapFruit.SetPrivateUID( pSeed->GetID() );
 		pPlant->Plant_CropReset();
-	}
 	else
-	{
 		pPlant->SetDecayTime(10 * g_Cfg.m_iDecay_Item);
-	}
 
 	pSeed->ConsumeAmount();
 	return true;

@@ -300,7 +300,7 @@ public:
 			// CAN_I_LIGHT may be set for others as well..ie.Moon gate conflict
 			dword   m_junk1;
 			dword	m_junk2;
-			byte	m_burned;	// morex = out of charges? (1=yes / 0=no)
+			word	m_burned;	// morex = out of charges? (1=yes / 0=no)
 			word	m_charges;	// morey = how long will the torch last ?
 			byte	m_pattern;	// morez = light rotation pattern (LIGHT_PATTERN)
 		} m_itLight;
@@ -308,10 +308,13 @@ public:
 		// IT_EQ_TRADE_WINDOW
 		struct
 		{
-			dword	m_iGold;
-			dword	m_iPlatinum;
-			int64	m_iWaitTime;
-			byte	m_bCheck;		// morez=Check box for trade window.
+			int64	m_iWaitTime;	// more1|more2
+			dword	m_iGold;		// morex|morey
+			byte	m_iPlatinum;	// morez		// a platinum coin is 1 million gold, we'll ever want to trade 256 millions+ currency?
+			byte	m_bCheck;		// morem = Check box for trade window.
+            // We can make m_iPlatinum to be a dword (the packet uses a dword for this amount),
+            //  but doing so we'll increase the union size for every item... not worth it.
+            // If we'll need a bigger amount for m_iPlatinum, it would be better to use a tag for gold and platinum, instead of using more bytes here.
 		} m_itEqTradeWindow;
 
 		// IT_SPAWN_ITEM
@@ -364,9 +367,8 @@ public:
 		// IT_FOLIAGE - the leaves of a tree normally.
 		struct
 		{
-			int m_Respawn_Sec;				// more1 = plant respawn time in seconds. (for faster growth plants)
-			CResourceIDBase m_ridReapFruit;	// more2 = What is the fruit of this plant.
-			word m_ReapStages;				// morex = how many more stages of this to go til ripe.
+			int m_Respawn_Sec;					// more1 = plant respawn time in seconds. (for faster growth plants)
+			CResourceIDBase m_ridFruitOverride;	// more2 = Override for TDATA2 = What is the fruit of this plant
 		} m_itCrop;
 
 		// IT_TREE

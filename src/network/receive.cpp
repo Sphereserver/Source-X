@@ -1136,7 +1136,7 @@ bool PacketSecureTradeReq::onReceive(NetState* net)
 		}
 
 		case SECURE_TRADE_UPDATEGOLD:	// update trade window virtual gold
-			container->Trade_UpdateGold(readInt32(), readInt32());
+			container->Trade_UpdateGold((byte)readInt32(), readInt32());
 			return true;
 		default:
 			return true;

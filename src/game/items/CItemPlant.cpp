@@ -22,25 +22,31 @@ bool CItem::Plant_Use(CChar *pChar)
 	if ( !pChar->CanSeeItem(this) )		// might be invis underground
 		return false;
 
-	const CItemBase *pItemDef = Item_GetDef();
-	ITEMID_TYPE iFruitID = (ITEMID_TYPE)pItemDef->m_ttCrops.m_ridFruit.GetResIndex();	// if it's reapable at this stage
-	if ( iFruitID <= 0 )
+	const CItemBase* pItemDef = Item_GetDef();
+
+	ITEMID_TYPE iGrowID = (ITEMID_TYPE)pItemDef->m_ttCrops.m_ridGrow.GetResIndex();
+	ITEMID_TYPE iFruitIDOverride = (ITEMID_TYPE)m_itCrop.m_ridFruitOverride.GetResIndex();
+	if ( (iGrowID == ITEMID_NOTHING) && (iFruitIDOverride != ITEMID_NOTHING) )	// If we set an override, we can reap this at every stage
 	{
 		// not ripe. (but we could just eat it if we are herbivorous ?)
 		pChar->SysMessageDefault(DEFMSG_CROPS_NOT_RIPE);
 		return true;
 	}
 
-	if ( m_itCrop.m_ridReapFruit )
-		iFruitID = (ITEMID_TYPE)m_itCrop.m_ridReapFruit.GetResIndex();
-	if ( iFruitID )
+	ITEMID_TYPE iFruitID = ITEMID_NOTHING;
+	if ( iFruitIDOverride != ITEMID_NOTHING )
+		iFruitID = iFruitIDOverride;
+	else
+		iFruitID = (ITEMID_TYPE)pItemDef->m_ttCrops.m_ridFruit.GetResIndex();
+	
+	if ( iFruitID == ITEMID_NOTHING )
+		pChar->SysMessageDefault(DEFMSG_CROPS_NO_FRUIT);
+	else
 	{
 		CItem *pItemFruit = CItem::CreateScript(iFruitID, pChar);
 		if ( pItemFruit )
 			pChar->ItemBounce(pItemFruit);
-	}
-	else
-		pChar->SysMessageDefault(DEFMSG_CROPS_NO_FRUIT);
+	}	
 
 	Plant_CropReset();
 	pChar->UpdateAnimate(ANIM_BOW);
@@ -73,44 +79,43 @@ bool CItem::Plant_OnTick()
 	const CItemBase *pItemDef = Item_GetDef();
 	ITEMID_TYPE iGrowID = (ITEMID_TYPE)pItemDef->m_ttCrops.m_ridGrow.GetResIndex();
 
-	if ( iGrowID == -1 )
+	if ( iGrowID == RES_INDEX_MASK ) // if TDATA2 == -1
 	{
 		// Some plants generate a fruit on the ground when ripe.
-		ITEMID_TYPE iFruitID = (ITEMID_TYPE)pItemDef->m_ttCrops.m_ridGrow.GetResIndex();
-		if ( m_itCrop.m_ridReapFruit )
-			iFruitID = (ITEMID_TYPE)m_itCrop.m_ridReapFruit.GetResIndex();
-		if ( !iFruitID )
-			return true;
-
-		// Put a fruit on the ground if not already here.
-		CWorldSearch AreaItems(GetTopPoint());
-		for (;;)
+		ITEMID_TYPE iFruitID = ITEMID_NOTHING;
+		if ( m_itCrop.m_ridFruitOverride )
+			iFruitID = (ITEMID_TYPE)m_itCrop.m_ridFruitOverride.GetResIndex();
+		else
+			iFruitID = (ITEMID_TYPE)pItemDef->m_ttCrops.m_ridFruit.GetResIndex();
+		
+		if (iFruitID != ITEMID_NOTHING)
 		{
-			CItem *pItem = AreaItems.GetItem();
-			if ( !pItem )
+			// Put a fruit on the ground if not already here.
+			CWorldSearch AreaItems(GetTopPoint());
+			for (;;)
 			{
-				CItem *pItemFruit = CItem::CreateScript(iFruitID);
-				ASSERT(pItemFruit);
-				pItemFruit->MoveToDecay(GetTopPoint(), 10 * g_Cfg.m_iDecay_Item);
-				break;
+				CItem *pItem = AreaItems.GetItem();
+				if ( !pItem )
+				{
+					CItem *pItemFruit = CItem::CreateScript(iFruitID);
+					ASSERT(pItemFruit);
+					pItemFruit->MoveToDecay(GetTopPoint(), 10 * g_Cfg.m_iDecay_Item);
+					break;
+				}
+				else if ( pItem->IsType(IT_FRUIT) || pItem->IsType(IT_REAGENT_RAW) )
+					break;
 			}
-			if ( pItem->IsType(IT_FRUIT) || pItem->IsType(IT_REAGENT_RAW) )
-				break;
 		}
 
-		// NOTE: ??? The plant should cycle here as well !
-		iGrowID = (ITEMID_TYPE)pItemDef->m_ttCrops.m_ridReset.GetResIndex();
+		Plant_CropReset();
+		return true;
 	}
-
-	if ( iGrowID )
+	else if ( iGrowID )
 	{
 		SetID(iGrowID);
 		Update();
-		return true;
 	}
 
-	// some plants go dormant again ?
-	// m_itCrop.m_Fruit_ID = iTemp;
 	return true;
 }
 
@@ -135,4 +140,5 @@ void CItem::Plant_CropReset()
 	RemoveFromView();		// remove from most screens.
 	SetHue(HUE_RED_DARK);	// Indicate to GM's that it is growing.
 	SetAttr(ATTR_INVIS);	// regrown invis.
+    Update();
 }

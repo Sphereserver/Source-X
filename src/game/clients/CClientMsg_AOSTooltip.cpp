@@ -121,9 +121,9 @@ void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
 		// build a hash value from the tooltip entries
 		dword hash = 0;
 		dword argumentHash = 0;
-		for (size_t i = 0; i < pClientChar->m_TooltipData.size(); ++i)
+		for (size_t i = 0; i < pObj->m_TooltipData.size(); ++i)
 		{
-			CClientTooltip* tipEntry = pClientChar->m_TooltipData[i].get();
+			CClientTooltip* tipEntry = pObj->m_TooltipData[i].get();
 			argumentHash = HashString(tipEntry->m_args, strlen(tipEntry->m_args));
 
 			DOHASH(tipEntry->m_clilocid);

@@ -499,8 +499,8 @@ void CChar::CallGuards( CChar * pCriminal )
 		if (OnTrigger(CTRIG_CallGuards, pCriminal, &Args) == TRIGRET_RET_TRUE)
 			return;
 
-		if (static_cast<int>(Args.m_iN1) != rid.GetResIndex())
-			rid = CResourceID(RES_CHARDEF, static_cast<int>(Args.m_iN1));
+		if ( (int)Args.m_iN1 != rid.GetResIndex())
+			rid = CResourceID(RES_CHARDEF, (int)Args.m_iN1);
 		if (Args.m_iN2 > 0)	//ARGN2: If set to 1, a new guard will be spawned regardless of whether a nearby guard is available.
 			pGuard = NULL;
 	}

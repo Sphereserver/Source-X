@@ -56,7 +56,7 @@ protected:
 public:
 	bool IsItemInTrade() const;
 	void Trade_Status( bool bCheck );
-	void Trade_UpdateGold( dword platinum, dword gold );
+	void Trade_UpdateGold( byte platinum, dword gold );
 	void Trade_Delete();
 
 	void MakeKey();

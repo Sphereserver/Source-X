@@ -511,7 +511,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Fixed: duped char not inheriting the brain.
 
 31-03-2018, Drk84
--Fixed:  criminal 0 not removing the criminal memory item.
+-Fixed: "CRIMINAL 0" not removing the criminal memory item.
 
 01-04-2018, Nolok
 - [sphereCrypt.ini]: Added encryption key for Classic Client 7.0.62.x and Enhanced Client 4.0.62.x.
@@ -543,3 +543,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Fixed: MEMORY function was overwriting the old memory flags, instead of adding new ones.
 - Fixed: Client sometimes didn't receive an update when a char notoriety flag changed.
 - Changed: removed CHARGESCUR and CHARGESMAX item properties, which were only partially supported. Use USESCUR and USESMAX instead.
+
+15-04-2018, Nolok
+- Fixed: tooltips sometimes not being updated.
+- Fixed: t_crops and t_foliage weren't working correctly.
