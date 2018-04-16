@@ -1,6 +1,7 @@
 #include "../../sphere/threads.h"
 #include "CCrypto.h"
 
+
 // Huffman compression. Used to compress the outgoing data (packets sent from server to client).
 
 const word CHuffman::sm_xCompress_Base[COMPRESS_TREE_SIZE] =	// static
@@ -44,33 +45,37 @@ const word CHuffman::sm_xCompress_Base[COMPRESS_TREE_SIZE] =	// static
 	0x00d4 // terminator
 } ;
 
-size_t CHuffman::Compress( byte * pOutput, const byte * pInput, size_t inplen ) // static
+size_t CHuffman::Compress( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen ) // static
 {
 	ADDTOCALLSTACK("CHuffman::Compress");
-	size_t iLen = 0;
-	int bitidx = 0;	// Offset in output byte (xOutVal)
-	byte xOutVal = 0;	// Don't bother to init this. It will just roll off all junk anyhow.
+	
+    size_t iLen = 0;
+	int bitidx = 0;	    // Offset in output byte (xOutVal)
+	byte xOutVal = 0;   // Don't bother to init this. It will just roll off all junk anyhow.
 
-	for ( size_t i = 0; i <= inplen; i++ )
+
+    for ( size_t i = 0; i <= inLen; ++i )
 	{
-		word value = sm_xCompress_Base[ ( i == inplen ) ? (COMPRESS_TREE_SIZE - 1) : pInput[i] ];
+        word value = sm_xCompress_Base[ ( i == inLen ) ? (COMPRESS_TREE_SIZE - 1) : pInput[i] ];
 		int nBits = value & 0xF;
 		value >>= 4;
 		while ( nBits-- )
 		{
+            PERSISTANT_ASSERT(iLen < outLen);   // am i trying to write more bytes than the output buffer length?
 			xOutVal <<= 1;
 			xOutVal |= (value >> nBits) & 0x1;
 			if ( ++bitidx == 8)
 			{
 				bitidx = 0;
-				pOutput[iLen++] = xOutVal;
+				pOutput[iLen++] = xOutVal;  
 			}
 		}
 	}
 	if (bitidx)	// flush odd bits.
 	{
+        PERSISTANT_ASSERT(iLen < outLen);
 		pOutput[iLen++] = xOutVal << (8 - bitidx);
 	}
-
-	return( iLen );
+    
+	return iLen;
 }

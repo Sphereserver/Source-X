@@ -2,13 +2,15 @@
 #include "CCrypto.h"
 
 // Encryption used when logging in, to access the server list
-void CCrypto::DecryptLogin( byte * pOutput, const byte * pInput, size_t iLen  )
+void CCrypto::DecryptLogin( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen  )
 {
 	ADDTOCALLSTACK("CCrypto::DecryptLogin");
+
 	if ( GetClientVer() >= 0x125370 )
 	{
-		for ( size_t i = 0; i < iLen; i++ )
+		for ( size_t i = 0; i < inLen; ++i )
 		{
+            PERSISTANT_ASSERT(i < outLen);   // am i trying to write more bytes than the output buffer length?
 			pOutput[i] = pInput[i] ^ (byte) m_CryptMaskLo;
 			dword MaskLo = m_CryptMaskLo;
 			dword MaskHi = m_CryptMaskHi;
@@ -21,8 +23,9 @@ void CCrypto::DecryptLogin( byte * pOutput, const byte * pInput, size_t iLen  )
 
 	if ( GetClientVer() == 0x125360 )
 	{
-		for ( size_t i = 0; i < iLen; i++ )
+		for ( size_t i = 0; i < inLen; ++i )
 		{
+            PERSISTANT_ASSERT(i < outLen);   // am i trying to write more bytes than the output buffer length?
 			pOutput[i] = pInput[i] ^ (byte) m_CryptMaskLo;
 			dword MaskLo = m_CryptMaskLo;
 			dword MaskHi = m_CryptMaskHi;
@@ -42,8 +45,9 @@ void CCrypto::DecryptLogin( byte * pOutput, const byte * pInput, size_t iLen  )
 
 	if ( GetClientVer() ) // CLIENT_VER <= 0x125350
 	{
-		for ( size_t i = 0; i < iLen; i++ )
+		for ( size_t i = 0; i < inLen; ++i )
 		{
+            PERSISTANT_ASSERT(i < outLen);   // am i trying to write more bytes than the output buffer length?
 			pOutput[i] = pInput[i] ^ (byte) m_CryptMaskLo;
 			dword MaskLo = m_CryptMaskLo;
 			dword MaskHi = m_CryptMaskHi;
@@ -55,6 +59,6 @@ void CCrypto::DecryptLogin( byte * pOutput, const byte * pInput, size_t iLen  )
 
 	if ( pOutput != pInput )
 	{
-		memcpy( pOutput, pInput, iLen );
+		memcpy( pOutput, pInput, inLen );
 	}
 }

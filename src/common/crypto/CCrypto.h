@@ -51,7 +51,7 @@ private:
 public:
 	static const char *m_sClassName;
 	
-	static size_t Compress( byte * pOutput, const byte * pInput, size_t inplen );
+	static size_t Compress( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
 
 public:
 	CHuffman() { };
@@ -161,13 +161,13 @@ protected:
 	uint md5_position;
 	byte md5_digest[16];
 protected:
-	void EncryptMD5( byte * pOutput, const byte * pInput, size_t iLen );
+	void EncryptMD5( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
 	void InitMD5(byte * ucInitialize);
 	// ------------------ EOF MD5 ----------------------------
 
 private:
 	// ------------- Login Encryption ----------------------
-	void DecryptLogin( byte * pOutput, const byte * pInput, size_t iLen  );
+	void DecryptLogin( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
 	// ------------- EOF Login Encryption ------------------
 
 private:
@@ -206,14 +206,14 @@ private:
 	CCrypto& operator=(const CCrypto& other);
 
 public:
-	bool Init( dword dwIP, byte * pEvent, size_t iLen, bool isclientKr = false );
+	bool Init( dword dwIP, byte * pEvent, size_t inLen, bool isclientKr = false );
 	void InitFast( dword dwIP, CONNECT_TYPE ctInit, bool fRelay = true );
-	void Decrypt( byte * pOutput, const byte * pInput, size_t iLen );
-	void Encrypt( byte * pOutput, const byte * pInput, size_t iLen );
+	void Decrypt( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
+	void Encrypt( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
 protected:
-	void LoginCryptStart( dword dwIP, byte * pEvent, size_t iLen );
-	void GameCryptStart( dword dwIP, byte * pEvent, size_t iLen );
-	void RelayGameCryptStart( byte * pOutput, const byte * pInput, size_t iLen );
+	void LoginCryptStart( dword dwIP, byte * pEvent, size_t inLen );
+	void GameCryptStart( dword dwIP, byte * pEvent, size_t inLen );
+	void RelayGameCryptStart( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
 };
 
 #endif // _INC_CENCRYPT_H

@@ -313,7 +313,7 @@ CCrypto::~CCrypto()
 	delete md5_engine;
 }
 
-bool CCrypto::Init( dword dwIP, byte * pEvent, size_t iLen, bool isclientKr )
+bool CCrypto::Init( dword dwIP, byte * pEvent, size_t inLen, bool isclientKr )
 {
 	ADDTOCALLSTACK("CCrypto::Init");
 	bool bReturn = true;
@@ -322,9 +322,9 @@ bool CCrypto::Init( dword dwIP, byte * pEvent, size_t iLen, bool isclientKr )
 		DEBUG_MSG(("Called Init Seed(0x%x)\n", dwIP));
 #endif
 
-	if ( iLen == 62 ) // SERVER_Login 1.26.0
+	if ( inLen == 62 ) // SERVER_Login 1.26.0
 	{
-		LoginCryptStart( dwIP, pEvent, iLen );
+		LoginCryptStart( dwIP, pEvent, inLen );
 	}
 	else
 	{
@@ -333,9 +333,9 @@ bool CCrypto::Init( dword dwIP, byte * pEvent, size_t iLen, bool isclientKr )
 			m_seed = dwIP;
 			m_fInit = SetConnectType( CONNECT_GAME ) && SetEncryptionType( ENC_NONE );
 		}
-		else if ( iLen == 65 )	// Auto-registering server sending us info.
+		else if ( inLen == 65 )	// Auto-registering server sending us info.
 		{
-			GameCryptStart( dwIP, pEvent, iLen );
+			GameCryptStart( dwIP, pEvent, inLen );
 		}
 		else
 		{
@@ -386,7 +386,7 @@ void CCrypto::InitFast( dword dwIP, CONNECT_TYPE ctInit, bool fRelay)
 /*		Encryption utility methods		*/
 
 
-void CCrypto::RelayGameCryptStart( byte * pOutput, const byte * pInput, size_t iLen )
+void CCrypto::RelayGameCryptStart( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen )
 {
 	/**
 	* When the client switches between login and game server without opening a new connection, the first game packet
@@ -409,7 +409,7 @@ void CCrypto::RelayGameCryptStart( byte * pOutput, const byte * pInput, size_t i
 	{
 		InitBlowFish();
 		InitTwoFish();
-		Decrypt(pOutput, pInput, iLen);
+		Decrypt(pOutput, pInput, outLen, inLen);
 		return;
 	}
 
@@ -430,15 +430,15 @@ void CCrypto::RelayGameCryptStart( byte * pOutput, const byte * pInput, size_t i
 	// - rather than trust spherecrypt.ini, we can autodetect the encryption type
 	//   by looking for the 0x91 command if the packet length is 65 (which it should be anyway)
 	bool bFoundEncrypt = false;
-	if ( iLen == 65 )
+	if ( inLen == 65 )
 	{
-		for (int i = ENC_NONE; i < ENC_QTY; i++)
+		for (int i = ENC_NONE; i < ENC_QTY; ++i)
 		{
 			SetEncryptionType(static_cast<ENCRYPTION_TYPE>(i));
 
 			InitBlowFish();
 			InitTwoFish();
-			Decrypt(pOutput, pInput, iLen);
+			Decrypt(pOutput, pInput, outLen, inLen);
 
 			if ((pOutput[0] ^ (byte) m_CryptMaskLo) == 0x91)
 			{
@@ -455,17 +455,17 @@ void CCrypto::RelayGameCryptStart( byte * pOutput, const byte * pInput, size_t i
 
 		InitBlowFish();
 		InitTwoFish();
-		Decrypt(pOutput, pInput, iLen);
+		Decrypt(pOutput, pInput, outLen, inLen);
 	}
 
 	// decrypt decrypted packet as login
-	DecryptLogin( pOutput, pOutput, iLen );
+	DecryptLogin( pOutput, pOutput, outLen, inLen );
 }
 
-void CCrypto::Encrypt( byte * pOutput, const byte * pInput, size_t iLen )
+void CCrypto::Encrypt( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen )
 {
 	ADDTOCALLSTACK("CCrypto::Encrypt");
-	if ( ! iLen )
+	if ( ! inLen )
 		return;
 
 	if ( m_ConnectType == CONNECT_LOGIN )
@@ -473,48 +473,48 @@ void CCrypto::Encrypt( byte * pOutput, const byte * pInput, size_t iLen )
 
 	if ( GetEncryptionType() == ENC_TFISH )
 	{
-		EncryptMD5( pOutput, pInput, iLen );
+		EncryptMD5( pOutput, pInput, outLen, inLen );
 		return;
 	}
 
-	memcpy( pOutput, pInput, iLen );
+	memcpy( pOutput, pInput, inLen );
 }
 
 
-void CCrypto::Decrypt( byte * pOutput, const byte * pInput, size_t iLen  )
+void CCrypto::Decrypt( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen  )
 {
 	ADDTOCALLSTACK("CCrypto::Decrypt");
-	if ( ! iLen )
+	if ( ! inLen )
 		return;
 
 	if ( m_ConnectType == CONNECT_LOGIN )
 	{
-		DecryptLogin( pOutput, pInput, iLen );
+		DecryptLogin( pOutput, pInput, outLen, inLen );
 		return;
 	}
 
 	if ( m_fRelayPacket == true )
 	{
-		RelayGameCryptStart(pOutput, pInput, iLen );
+		RelayGameCryptStart(pOutput, pInput, outLen, inLen );
 		return;
 	}
 
 	if ( GetEncryptionType() == ENC_NONE )
 	{
-		memcpy( pOutput, pInput, iLen );
+		memcpy( pOutput, pInput, inLen );
 		return;
 	}
 
 	if ( GetEncryptionType() == ENC_TFISH || GetEncryptionType() == ENC_BTFISH )
-		DecryptTwoFish( pOutput, pInput, iLen );
+		DecryptTwoFish( pOutput, pInput, inLen );
 
 	if ( GetEncryptionType() == ENC_BFISH || GetEncryptionType() == ENC_BTFISH )
 	{
 
 		if ( GetEncryptionType() == ENC_BTFISH )
-			DecryptBlowFish( pOutput, pOutput, iLen );
+			DecryptBlowFish( pOutput, pOutput, inLen );
 		else
-			DecryptBlowFish( pOutput, pInput, iLen );
+			DecryptBlowFish( pOutput, pInput, inLen );
 	}
 }
 
@@ -525,15 +525,15 @@ void CCrypto::Decrypt( byte * pOutput, const byte * pInput, size_t iLen  )
 
 /*		Handle login encryption		*/
 
-void CCrypto::LoginCryptStart( dword dwIP, byte * pEvent, size_t iLen )
+void CCrypto::LoginCryptStart( dword dwIP, byte * pEvent, size_t inLen )
 {
 	ADDTOCALLSTACK("CCrypto::LoginCryptStart");
 	ASSERT(pEvent != NULL);
 	byte m_Raw[ MAX_BUFFER ];
 	char pszAccountNameCheck[ MAX_ACCOUNT_NAME_SIZE ];
 
-	ASSERT( iLen <= sizeof(m_Raw) );
-	memcpy( m_Raw, pEvent, iLen );
+	ASSERT( inLen <= sizeof(m_Raw) );
+	memcpy( m_Raw, pEvent, inLen );
 	m_seed = dwIP;
 	SetConnectType( CONNECT_LOGIN );
 
@@ -562,7 +562,7 @@ void CCrypto::LoginCryptStart( dword dwIP, byte * pEvent, size_t iLen )
 		SetClientVerIndex(i);
 
 		// Test Decrypt
-		Decrypt( m_Raw, pEvent, iLen );
+		Decrypt( m_Raw, pEvent, MAX_BUFFER, inLen );
 
 #ifdef DEBUG_CRYPT_MSGS
 		DEBUG_MSG(("LoginCrypt %" PRIuSIZE_T " (%" PRIu32 ") type %" PRIx8 "-%" PRIx8 "\n", i, GetClientVer(), m_Raw[0], pEvent[0]));
@@ -619,21 +619,21 @@ void CCrypto::LoginCryptStart( dword dwIP, byte * pEvent, size_t iLen )
 	m_fInit = true;
 }
 
-void CCrypto::GameCryptStart( dword dwIP, byte * pEvent, size_t iLen )
+void CCrypto::GameCryptStart( dword dwIP, byte * pEvent, size_t inLen )
 {
 	ADDTOCALLSTACK("CCrypto::GameCryptStart");
 	ASSERT( pEvent != NULL );
 
 	byte m_Raw[ MAX_BUFFER ];
-	ASSERT( iLen <= sizeof(m_Raw) );
-	memcpy( m_Raw, pEvent, iLen );
+	ASSERT( inLen <= sizeof(m_Raw) );
+	memcpy( m_Raw, pEvent, inLen );
 
 	m_seed = dwIP;
 	SetConnectType( CONNECT_GAME );
 
 	bool bOut = false;
 
-	for ( size_t i = ENC_NONE; i < ENC_QTY; i++ )
+	for ( size_t i = ENC_NONE; i < ENC_QTY; ++i )
 	{
 		SetEncryptionType(static_cast<ENCRYPTION_TYPE>(i));
 
@@ -643,7 +643,7 @@ void CCrypto::GameCryptStart( dword dwIP, byte * pEvent, size_t iLen )
 		if ( GetEncryptionType() == ENC_BFISH || GetEncryptionType() == ENC_BTFISH )
 			InitBlowFish();
 
-		Decrypt( m_Raw, pEvent, iLen );
+		Decrypt( m_Raw, pEvent, MAX_BUFFER, inLen );
 
 #ifdef DEBUG_CRYPT_MSGS
 		DEBUG_MSG(("GameCrypt %" PRIuSIZE_T " (%" PRIu32 ") type %" PRIx8 "-%" PRIx8 "\n", i, GetClientVer(), m_Raw[0], pEvent[0]));

@@ -18,11 +18,11 @@ CHuffman CClient::m_Comp;
 /////////////////////////////////////////////////////////////////
 // -CClient stuff.
 
-size_t CClient::xCompress( byte * pOutput, const byte * pInput, size_t iLen ) // static
+size_t CClient::xCompress( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen ) // static
 {
 	ADDTOCALLSTACK("CClient::xCompress");
 	// The game server will compress the outgoing data to the clients.
-	return m_Comp.Compress( pOutput, pInput, iLen );
+	return m_Comp.Compress( pOutput, pInput, outLen, inLen );
 }
 
 bool CClient::IsConnecting() const
@@ -838,7 +838,7 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
 	
 	byte lErr = PacketLoginError::EncUnknown;
 	
-	m_Crypt.Decrypt( pEvent->m_Raw, bincopy.m_Raw, iLen );
+	m_Crypt.Decrypt( pEvent->m_Raw, bincopy.m_Raw, MAX_BUFFER, iLen );
 	
 	tchar szAccount[MAX_ACCOUNT_NAME_SIZE+3];
 

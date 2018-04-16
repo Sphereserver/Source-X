@@ -15,6 +15,7 @@
 
 
 #include <cstdlib>
+#include "sassertion.h"
 #include "basic_threading.h"
 
 #ifdef _WIN32
@@ -28,15 +29,6 @@ typedef THREAD_ENTRY_RET(_cdecl * PTHREAD_ENTRY_PROC)(void *);
 typedef uint	ERROR_CODE;
 
 #define CountOf(a)			(sizeof(a)/sizeof((a)[0]))
-
-#ifndef ASSERT
-	#ifdef _DEBUG
-		extern void Assert_Fail(const char * pExp, const char *pFile, long long llLine);
-		#define ASSERT(exp)			if ( !(exp) )	Assert_Fail(#exp, __FILE__, __LINE__);
-	#else
-		#define ASSERT(exp)			(void)0
-	#endif
-#endif
 
 
 // MAKEWORD:  defined in minwindef.h (loaded my windows.h), so it's missing only on Linux.

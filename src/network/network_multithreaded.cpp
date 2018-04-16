@@ -925,7 +925,7 @@ bool NetworkInput::processGameClientData(NetState* state, Packet* buffer)
 	ASSERT(client != NULL);
 
 	EXC_SET("decrypt message");
-	client->m_Crypt.Decrypt(m_decryptBuffer, buffer->getRemainingData(), buffer->getRemainingLength());
+	client->m_Crypt.Decrypt(m_decryptBuffer, buffer->getRemainingData(), MAX_BUFFER, buffer->getRemainingLength());
 
 	if (state->m_incoming.buffer == NULL)
 	{
@@ -1499,7 +1499,7 @@ size_t NetworkOutput::processPacketQueue(NetState* state, uint priority)
 
 		EXC_TRY("processPacketQueue");
 		lengthProcessed += packet->getLength();
-		packetsProcessed++;
+		++packetsProcessed;
 
 		EXC_SET("sending");
 		if (sendPacket(state, packet) == false)
@@ -1670,11 +1670,11 @@ bool NetworkOutput::sendPacketData(NetState* state, PacketSend* packet)
 		EXC_SET("compress and encrypt");
 
 		// compress
-		size_t compressLength = client->xCompress(m_encryptBuffer, packet->getData(), packet->getLength());
+		size_t compressLength = client->xCompress(m_encryptBuffer, packet->getData(), MAX_BUFFER, packet->getLength());
 
 		// encrypt
 		if (client->m_Crypt.GetEncryptionType() == ENC_TFISH)
-			client->m_Crypt.Encrypt(m_encryptBuffer, m_encryptBuffer, compressLength);
+			client->m_Crypt.Encrypt(m_encryptBuffer, m_encryptBuffer, MAX_BUFFER, compressLength);
 
 		sendBuffer = m_encryptBuffer;
 		sendBufferLength = compressLength;

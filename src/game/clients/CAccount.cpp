@@ -553,9 +553,7 @@ CAccount::CAccount( lpctstr pszName, bool fGuest )
 
 	tchar szName[ MAX_ACCOUNT_NAME_SIZE ];
 	if ( !CAccount::NameStrip( szName, pszName ) )
-	{
 		g_Log.Event(LOGL_ERROR|LOGM_INIT, "Account '%s': BAD name\n", pszName);
-	}
 	m_sName = szName;
 
 	if ( !strnicmp(m_sName, "GUEST", 5) || fGuest )
@@ -564,6 +562,7 @@ CAccount::CAccount( lpctstr pszName, bool fGuest )
 		SetPrivLevel(PLEVEL_Player);
 
 	m_PrivFlags = (word)(g_Cfg.m_iAutoPrivFlags);
+    SetResDisp(RDS_T2A);
 	m_MaxChars = 0;
 
 	m_Total_Connect_Time = 0;
@@ -1335,7 +1334,7 @@ bool CAccount::r_LoadVal( CScript & s )
 			SetPassword( s.GetArgStr() );
 			break;
 		case AC_PRIV:
-			m_PrivFlags = (word)(s.GetArgVal());
+			m_PrivFlags = s.GetArgWVal();
 			if ( m_PrivFlags & PRIV_UNUSED )
 			{
 				g_Log.EventError("Fixing PRIV field (0%x) for account %s have not supported flags set (caught by mask 0%x).\n", m_PrivFlags, GetName(), (word)PRIV_UNUSED);
@@ -1343,7 +1342,7 @@ bool CAccount::r_LoadVal( CScript & s )
 			}
 			break;
 		case AC_RESDISP:
-			SetResDisp((byte)(s.GetArgVal()));
+			SetResDisp(s.GetArgBVal());
 			break;
 		case AC_TAG0:
 			{

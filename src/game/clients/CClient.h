@@ -409,7 +409,7 @@ public:
 	virtual bool r_LoadVal( CScript & s );
 
 	// Low level message traffic.
-	static size_t xCompress( byte * pOutput, const byte * pInput, size_t inplen );
+	static size_t xCompress( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
 
 	bool xProcessClientSetup( CEvent * pEvent, size_t iLen );
 	bool xPacketFilter(const byte * pEvent, size_t iLen = 0);

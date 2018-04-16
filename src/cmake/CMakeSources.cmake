@@ -134,6 +134,7 @@ common/CVarDefMap.h
 common/CVarFloat.cpp
 common/CVarFloat.h
 common/datatypes.h
+common/sassertion.h
 common/sphereproto.h
 common/sphereversion.h
 common/ListDefContMap.cpp
