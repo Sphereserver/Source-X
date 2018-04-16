@@ -3137,7 +3137,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 					DamageBonus += minimum(iInc, 12);		// value is capped at 12%
 				}
 
-				iEffect += iEffect * DamageBonus / 100;
+				iEffect += ((iEffect * DamageBonus) / 100);
 			}
 		}
 	}

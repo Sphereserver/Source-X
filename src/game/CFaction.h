@@ -1,10 +1,10 @@
 /**
-* @file CCharSlayer.h
+* @file CFaction.h
 *
 */
 
-#ifndef _INC_CCHARSLAYER_H
-#define _INC_CCHARSLAYER_H
+#ifndef _INC_CFACTION_H
+#define _INC_CFACTION_H
 
 #include "../common/datatypes.h"
 #include "../common/CScript.h"
@@ -38,8 +38,13 @@ enum FACTION_TYPE
     FT_ITEM,
     FT_CHAR
 };
+
+/*
+    Groups of NPC_FACTION
+*/
 enum NPC_GROUP
 {
+    NPCGROUP_NONE       = 0,
     NPCGROUP_FEY        = 0x1,
     NPCGROUP_ELEMENTAL  = 0x2,
     NPCGROUP_ABYSS      = 0x4,
@@ -50,15 +55,15 @@ enum NPC_GROUP
     NPCGROUP_QTY
 };
 /*
-    NPC's Types, factions, etc.
-    Each NPC should have the 'group' and the inner type, eg: NPCGROUP_ELEMENTAL|NPCGROUP_POISONELEMENTAL or NPCGROUP_ABYSS|NPCGROUP_DEMON
+    Faction IDs
 */
 enum NPC_FACTION : ullong
 {
+    FACTION_NONE                   = 0,
     // Fey Group (opposed to Abyss Group)
     FACTION_FEY                    = 0x1,  // SuperSlayer
 
-    // Elemental Group(opposed to Abyss Group)
+    // Elemental Group (opposed to Abyss Group)
     FACTION_ELEMENTAL              = 0x2,  //  SuperSlayer
     FACTION_BLOODELEMENTAL         = 0x4,
     FACTION_EARTHELEMENTAL         = 0x8,
@@ -68,7 +73,7 @@ enum NPC_FACTION : ullong
     FACTION_WATERELEMENTAL         = 0x80,
     FACTION_ELEMENTAL_QTY,
 
-    // Abyss Group(opposed to Elemental and Fey Groups)
+    // Abyss Group (opposed to Elemental and Fey Groups)
     FACTION_DEMON                  = 0x100,    // SuperSlayer
     FACTION_GARGOYLE               = 0x200,
     FACTION_ABYSS_QTY,
@@ -94,7 +99,7 @@ enum NPC_FACTION : ullong
     FACTION_TERATHAN               = 0x200000,
     FACTION_ARACHNID_QTY,
 
-    // Reptile Group, opposite to Arachnid
+    // Reptile Group (opposed to Arachnid)
     FACTION_REPTILE                = 0x400000,    // SuperSlayer
     FACTION_DRAGON                 = 0x800000,
     FACTION_OPHIDIAN               = 0x1000000,
@@ -116,8 +121,12 @@ enum NPC_FACTION : ullong
     FACTION_QTY                    = 0x800000000
 };
 
-class CObjBase;
-
+class CChar;
+/*
+    This class is used to store FACTION for NPCs and SLAYER for items
+    Initially involved in the Slayer system it handles Super Slayer,
+    Lesser Slayer and Opposites to increase damage dealt/received
+*/
 class CFaction
 {
     static lpctstr const sm_szLoadKeys[];
@@ -127,6 +136,7 @@ class CFaction
 public:
     CFaction(FACTION_TYPE type);
     CFaction(CFaction *copy);
+	~CFaction(){}
     void Copy(CFaction *copy);
     virtual bool r_LoadVal(CScript & s);
     virtual bool r_Load(CScript & s);  // Load a character from Script
@@ -209,6 +219,13 @@ public:
         Sphere's 'versatility' forces us to do so).
     */
     int GetSlayerDamageBonus(CFaction *target);
+
+    /*
+        Wielding a slayer type against its opposite will cause the attacker to take more damage
+        returns the penalty damage.
+    */
+    int GetSlayerDamagePenalty(CFaction *target);
+
 };
 
-#endif // _INC_CCHARSLAYER_H
+#endif // _INC_CFACTION_H
