@@ -136,7 +136,7 @@ class CFaction
 public:
     CFaction(FACTION_TYPE type);
     CFaction(CFaction *copy);
-	~CFaction(){}
+	virtual ~CFaction(){}
     void Copy(CFaction *copy);
     virtual bool r_LoadVal(CScript & s);
     virtual bool r_Load(CScript & s);  // Load a character from Script
