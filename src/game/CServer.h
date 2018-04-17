@@ -72,7 +72,7 @@ private:
 
 public:
 	CServer();
-	~CServer();
+	virtual ~CServer();
 
 private:
 	CServer(const CServer& copy);

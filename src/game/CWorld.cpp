@@ -2462,7 +2462,7 @@ void CWorld::OnTick()
 			EXC_CATCHSUB("StatusUpdates");
 		}
 
-		m_ObjDelete.Clear();	// clean up our delete list.
+		m_ObjDelete.Clear();	// clean up our delete list (this DOES delete the objects, thanks to the virtual destructors).
 	}
 
 	EXC_TRYSUB("Tick");

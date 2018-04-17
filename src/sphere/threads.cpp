@@ -265,9 +265,9 @@ void AbstractThread::terminate(bool ended)
 		if (ended == false && wasCurrentThread)
 		{
 #ifdef _WIN32
-			_endthreadex(0);
+			_endthreadex(EXIT_SUCCESS);
 #else
-			pthread_exit(0);
+			pthread_exit(EXIT_SUCCESS);
 #endif
 		}
 	}

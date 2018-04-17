@@ -107,9 +107,23 @@ int g_szServerBuild = 0;
 size_t CObjBase::sm_iCount = 0;			// UID table.
 llong llTimeProfileFrequency = 1000;	// time profiler
 
-// game servers stuff.
+// Game servers stuff.
 CWorld			g_World;			// the world. (we save this stuff)
-CServer			g_Serv;				// current state stuff not saved.
+
+// Networking stuff. They are declared here (in the same file of the other global declarations) to control the order of construction
+//  and destruction of these classes. If this order is altered, you'll get segmentation faults (access violations) when the server is closing!
+#ifdef _LIBEV
+	extern LinuxEv g_NetworkEvent;
+#endif
+#ifndef _MTNETWORK
+	NetworkIn g_NetworkIn;
+	NetworkOut g_NetworkOut;
+#else
+	NetworkManager g_NetworkManager;
+#endif
+
+// Again, game servers stuff.
+CServer			g_Serv;				// current state, stuff not saved.
 CServerConfig	g_Cfg;
 CUOInstall		g_Install;
 CVerDataMul		g_VerData;
@@ -120,6 +134,7 @@ CAccounts		g_Accounts;			// All the player accounts. name sorted CAccount
 CSStringList	g_AutoComplete;		// auto-complete list
 CScriptProfiler g_profiler;			// script profiler
 CUOMapList		g_MapList;			// global maps information
+
 
 
 lpctstr GetTimeMinDesc( int minutes )

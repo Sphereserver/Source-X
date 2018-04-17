@@ -1662,7 +1662,7 @@ void CItemBase::ReplaceItemBase( CItemBase * pOld, CResourceDef * pNew ) // stat
 
 CFaction * CItemBase::GetSlayer()
 {
-    ADDTOCALLSTACK("CItemBase::GetSlayer");
+    ADDTOCALLSTACK_INTENSIVE("CItemBase::GetSlayer");
     return _pSlayer;
 }
 
@@ -1707,6 +1707,7 @@ CItemBase * CItemBase::MakeDupeReplacement( CItemBase * pBase, ITEMID_TYPE idmas
 		pBaseDupe->SetHeight( Height );
 	}
 	ReplaceItemBase( pBase, pBaseDupe );
+    delete pBase;   // replaced the old base, delete the old one since it's not used anymore
 
 	return pBaseNew;
 }

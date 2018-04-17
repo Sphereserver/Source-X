@@ -12,16 +12,6 @@
 #include "receive.h"
 #include "send.h"
 
-#ifdef _LIBEV
-	extern LinuxEv g_NetworkEvent;
-#endif
-
-#ifndef _MTNETWORK
-	NetworkIn g_NetworkIn;
-	NetworkOut g_NetworkOut;
-#else
-	NetworkManager g_NetworkManager;
-#endif
 
 //
 // Packet logging

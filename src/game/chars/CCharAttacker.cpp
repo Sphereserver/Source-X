@@ -257,7 +257,7 @@ void CChar::Attacker_Clear()
 }
 
 // Get nID value of attacker list from the given pChar
-int CChar::Attacker_GetID( CChar * pChar )
+int CChar::Attacker_GetID( CChar * pChar ) const
 {
 	ADDTOCALLSTACK("CChar::Attacker_GetID(CChar)");
 	if ( !pChar )
@@ -265,15 +265,18 @@ int CChar::Attacker_GetID( CChar * pChar )
 	if ( m_lastAttackers.empty() )
 		return -1;
 	int count = 0;
-	for ( auto it = m_lastAttackers.begin(), end = m_lastAttackers.end(); it != end; ++it )
+	for (std::vector<LastAttackers>::const_iterator it = m_lastAttackers.begin(), end = m_lastAttackers.end(); it != end; ++it)
 	{
-		LastAttackers & refAttacker = m_lastAttackers[count];
-		CUID uid = refAttacker.charUID;
-		if ( ! uid || !uid.CharFind() )
+		CUID uid = it->charUID;
+		if ( ! uid  )
 			continue;
-		CChar * pMe = uid.CharFind()->GetChar();
+        const CChar* pUIDChar = uid.CharFind();
+        if (!pUIDChar)
+            continue;
+		const CChar * pMe = pUIDChar->GetChar();
 		if ( ! pMe )
 			continue;
+
 		if ( pMe == pChar )
 			return count;
 

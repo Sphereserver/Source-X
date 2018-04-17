@@ -49,7 +49,7 @@ public:
 	// Erase elements from before reader head (writer)
 	void clean( void )
 	{
-		m_list.erase( m_list.begin(), m_head );
+        m_head = m_list.erase( m_list.begin(), m_head );
 	}
 
 	// Retrieve the number of elements in the queue (reader/writer)

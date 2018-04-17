@@ -84,8 +84,8 @@ CClient::~CClient()
 	HistoryIP& history = g_NetworkManager.getIPHistoryManager().getHistoryForIP(GetPeer());
 #endif
 	if ( GetConnectType() != CONNECT_GAME )
-		history.m_connecting--;
-	history.m_connected--;
+		--history.m_connecting;
+	--history.m_connected;
 
 	bWasChar = ( m_pChar != NULL );
 	CharDisconnect();	// am i a char in game ?

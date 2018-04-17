@@ -583,9 +583,9 @@ private:
 	size_t m_lastGivenSlot;			// last slot index assigned
 	bool m_isThreaded;
 
-	CSObjList m_clients;				// current list of clients (CClient)
+    IPHistoryManager m_ips;			// ip history
+	CSObjList m_clients;			// current list of clients (CClient)
 	NetworkThreadList m_threads;	// list of network threads
-	IPHistoryManager m_ips;			// ip history
 	PacketManager m_packets;		// packet handlers
 
 public:

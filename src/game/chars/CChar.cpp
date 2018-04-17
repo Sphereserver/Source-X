@@ -263,6 +263,7 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false ),
 	m_timeLastHitsUpdate = m_timeLastRegen;
 	m_timeLastCallGuards = 0;
 
+    m_zClimbHeight = 0;
 	m_prev_Hue = HUE_DEFAULT;
 	m_prev_id = CREID_INVALID;
 	SetID( baseID );
@@ -372,9 +373,9 @@ void CChar::ClientDetach()
 			pShipItem->Ship_Stop();
 	}
 
-	CSector * pSector = GetTopSector();
-	pSector->ClientDetach( this );
-	m_pClient = NULL;
+    CSector * pSector = GetTopSector();
+    pSector->ClientDetach( this );
+    m_pClient = NULL;	
 }
 
 // Client is Attaching to this CChar.

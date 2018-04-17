@@ -61,7 +61,7 @@ private:
 
 public:
 	explicit CCharBase( CREID_TYPE id );
-    ~CCharBase();
+    virtual ~CCharBase();
 
 private:
 	CCharBase(const CCharBase& copy);

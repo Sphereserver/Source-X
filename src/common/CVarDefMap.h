@@ -110,7 +110,7 @@ private:
 			static const char *m_sClassName;
 
 			CVarDefContTest( lpctstr pszKey );
-			~CVarDefContTest();
+			virtual ~CVarDefContTest();
 
 		private:
 			CVarDefContTest(const CVarDefContTest& copy);

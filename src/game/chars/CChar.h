@@ -1005,7 +1005,7 @@ public:
 	void	Attacker_SetIgnore(size_t pChar, bool fIgnore);
 	void	Attacker_SetIgnore(CChar * pChar, bool fIgnore);
 	int64	Attacker_GetHighestThreat();
-	int		Attacker_GetID(CChar * pChar);
+	int		Attacker_GetID(CChar * pChar) const;
 	int		Attacker_GetID(CUID pChar);
 
 	//

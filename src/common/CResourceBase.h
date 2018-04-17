@@ -364,6 +364,7 @@ public:
 	{
 		Init();
 	}
+    virtual ~CResourceScript() { }
 
 private:
 	CResourceScript(const CResourceScript& copy);
@@ -727,6 +728,7 @@ struct CSStringSortArray : public CSObjSortArray< tchar*, tchar* >
 {
 public:
 	CSStringSortArray() { }
+    virtual ~CSStringSortArray() { }
 private:
 	CSStringSortArray(const CSStringSortArray& copy);
 	CSStringSortArray& operator=(const CSStringSortArray& other);
@@ -741,6 +743,7 @@ class CObjNameSortArray : public CSObjSortArray< CScriptObj*, lpctstr >
 public:
 	static const char *m_sClassName;
 	CObjNameSortArray();
+    virtual ~CObjNameSortArray() { }
 private:
 	CObjNameSortArray(const CObjNameSortArray& copy);
 	CObjNameSortArray& operator=(const CObjNameSortArray& other);

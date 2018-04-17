@@ -71,6 +71,7 @@ public:
 
 public:
 	CServerDef( lpctstr pszName, CSocketAddressIP dwIP );
+    virtual ~CServerDef() { }
 
 private:
 	CServerDef(const CServerDef& copy);

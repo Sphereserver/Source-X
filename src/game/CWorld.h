@@ -226,7 +226,7 @@ private:
 
 public:
 	CWorld();
-	~CWorld();
+	virtual ~CWorld();
 
 private:
 	CWorld(const CWorld& copy);

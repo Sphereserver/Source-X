@@ -929,7 +929,7 @@ effect_bounce:
 
     if (IsSetCombatFlags(COMBAT_SLAYER))
     {
-        CFaction *pFaction = NULL;
+        //CFaction *pFaction = NULL;
 		CItem *pWeapon = NULL;
 		if (uType & DAMAGE_MAGIC)	// If the damage is magic
 		{

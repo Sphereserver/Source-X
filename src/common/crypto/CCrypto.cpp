@@ -101,8 +101,8 @@ void CCrypto::LoadKeyTable(CScript & s)
 		c.m_client = ahextoi( s.GetKey() );
 		c.m_key_1 = s.GetArgVal();
 		c.m_key_2 = s.GetArgVal();
-		c.m_EncType = static_cast<ENCRYPTION_TYPE>(s.GetArgVal());
-		client_keys.push_back(c);
+		c.m_EncType = (ENCRYPTION_TYPE)s.GetArgVal();
+		client_keys.emplace_back(c);
 	}
 }
 
@@ -114,7 +114,7 @@ void CCrypto::addNoCryptKey(void)
 	c.m_key_1 = 0;
 	c.m_key_2 = 0;
 	c.m_EncType = ENC_NONE;
-	client_keys.push_back(c);
+	client_keys.emplace_back(c);
 }
 
 // ---------------------------------------------------------------------------------------------------------------
