@@ -12,6 +12,9 @@
 #include "receive.h"
 #include "send.h"
 
+#ifdef _LIBEV
+    extern LinuxEv g_NetworkEvent;
+#endif
 
 //
 // Packet logging

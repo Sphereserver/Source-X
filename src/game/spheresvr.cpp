@@ -2,8 +2,6 @@
 #ifdef _LIBEV
 	#include "../sphere/linuxev.h"
 	#include "../sphere/UnixTerminal.h"
-	
-	extern LinuxEv g_NetworkEvent;
 #endif
 
 #if !defined(pid_t)
