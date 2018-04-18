@@ -6,7 +6,7 @@
 #ifndef _INC_CQUEUE_H
 #define _INC_CQUEUE_H
 
-#include <mutex>
+#include <shared_mutex>
 
 #include "../common.h"
 #include "../CException.h"
@@ -104,7 +104,7 @@ public:
     bool empty();
 	uint size();
 private:
-    std::mutex _mutex;
+    std::shared_mutex _mutex;
     Q _q;
 };
 
@@ -411,17 +411,17 @@ tsqueue<T, Q>::tsqueue(uint size) : _q(size) {}
 
 template <typename T, class Q>
 tsqueue<T, Q>::tsqueue(const tsqueue<T, Q> & o) {
-    o._mutex.lock();
+    o._mutex.lock_shared();
     _q = o._q;
-    o._mutex.unlock();
+    o._mutex.unlock_shared();
 }
 
 template <typename T, class Q>
 tsqueue<T, Q> & tsqueue<T, Q>::operator=(const tsqueue<T, Q> & o) {
     _mutex.lock();
-    o._mutex.lock();
+    o._mutex.lock_shared();
     _q = o._q;
-    o._mutex.unlock();
+    o._mutex.unlock_shared();
     _mutex.unlock();
     return *this;
 }
@@ -442,9 +442,9 @@ void tsqueue<T, Q>::pop() {
 
 template <typename T, class Q>
 T tsqueue<T, Q>::front() {
-    _mutex.lock();
+    _mutex.lock_shared();
     T x = _q.front();
-    _mutex.unlock();
+    _mutex.unlock_shared();
     return x;
 }
 
@@ -466,17 +466,17 @@ void tsqueue<T, Q>::clear() {
 
 template <typename T, class Q>
 bool tsqueue<T, Q>::empty() {
-    _mutex.lock();
+    _mutex.lock_shared();
     bool b = _q.empty();
-    _mutex.unlock();
+    _mutex.unlock_shared();
     return b;
 }
 
 template <typename T, class Q>
 uint tsqueue<T, Q>::size() {
-    _mutex.lock();
+    _mutex.lock_shared();
     uint s = _q.size();
-    _mutex.unlock();
+    _mutex.unlock_shared();
     return s;
 }
 
