@@ -163,7 +163,6 @@ common/sphere_library/CSRand.cpp
 common/sphere_library/CSRand.h
 common/sphere_library/CSString.cpp
 common/sphere_library/CSString.h
-common/sphere_library/CStack.h
 common/sphere_library/CSTime.cpp
 common/sphere_library/CSTime.h
 common/sphere_library/CSWindow.cpp
@@ -173,6 +172,7 @@ common/sphere_library/smutex.cpp
 common/sphere_library/squeues.h
 common/sphere_library/sresetevents.cpp
 common/sphere_library/sresetevents.h
+common/sphere_library/sstacks.h
 )
 SOURCE_GROUP (common\\sphere_library FILES ${spherelibrary_SRCS})
 
