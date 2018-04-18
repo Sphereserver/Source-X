@@ -163,6 +163,7 @@ common/sphere_library/CSRand.cpp
 common/sphere_library/CSRand.h
 common/sphere_library/CSString.cpp
 common/sphere_library/CSString.h
+common/sphere_library/CStack.h
 common/sphere_library/CSTime.cpp
 common/sphere_library/CSTime.h
 common/sphere_library/CSWindow.cpp
