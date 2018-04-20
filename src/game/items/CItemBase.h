@@ -220,6 +220,7 @@ enum IT_TYPE		// double click type action.
 	IT_PILOT,				// 197 = ship's pilot (PacketWheelMove)
 	IT_ROPE,				// 198 = t_rope (working like t_ship_plank but without id changes)
 	IT_HEALING_STONE,		// 199 = t_healing_stone
+    IT_SPAWN_CHAMPION,	// 200 = t_spawn_champion
 
 	IT_QTY,
 	IT_TRIGGER = 1000	// custom triggers starts from here

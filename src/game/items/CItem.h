@@ -308,9 +308,8 @@ public:
 		// IT_EQ_TRADE_WINDOW
 		struct
 		{
-			int64	m_iWaitTime;	// more1|more2
 			dword	m_iGold;		// morex|morey
-			byte	m_iPlatinum;	// morez		// a platinum coin is 1 million gold, we'll ever want to trade 256 millions+ currency?
+			dword	m_iPlatinum;	// morez		// a platinum coin is 1 million gold, we'll ever want to trade 256 millions+ currency?
 			byte	m_bCheck;		// morem = Check box for trade window.
             // We can make m_iPlatinum to be a dword (the packet uses a dword for this amount),
             //  but doing so we'll increase the union size for every item... not worth it.

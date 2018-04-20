@@ -18,6 +18,7 @@
 #include "spheresvr.h"
 #include "triggers.h"
 #include "CServerConfig.h"
+#include "CChampion.h"
 
 
 CServerConfig::CServerConfig()
@@ -3047,6 +3048,35 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		}
 		break;
 
+    case RES_CHAMPION:
+    {
+        pPrvDef = ResourceGetDef(rid);
+        if (pPrvDef)
+        {
+            pNewLink = dynamic_cast <CChampionDef*>(pPrvDef);
+            ASSERT(pNewLink);
+        }
+        else
+        {
+            ASSERT(_CrtCheckMemory());
+            pNewLink = new CChampionDef(rid);
+            ASSERT(_CrtCheckMemory());
+            if (pNewLink) 
+            {
+                CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
+                ASSERT(_CrtCheckMemory());
+                if (pLinkResScript != NULL)
+                    pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
+                m_ResHash.AddSortKey(rid, pNewLink);
+            }
+        }
+        {
+            CScriptLineContext LineContext = pScript->GetContext();
+            pNewLink->r_Load(*pScript);
+            pScript->SeekContext(LineContext);
+        }
+        break;
+    }
 	case RES_SKILLCLASS:
 		pPrvDef = ResourceGetDef( rid );
 		if ( pPrvDef )
@@ -3526,6 +3556,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 			case RES_TYPEDEF:		// Define a trigger block for a RES_WORLDITEM m_type.
 			case RES_CHARDEF:		// Define a char type.
 			case RES_TEMPLATE:		// Define lists of items. (for filling loot etc)
+            case RES_CHAMPION:
 				break;
 			case RES_ITEMDEF:		// Define an item type
 				if (fNewStyleDef)	// indicates this is a multi and should have an appropriate offset applied
@@ -3695,6 +3726,9 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 		iHashRange = 1000;
 		index = SPAWNTYPE_START + 100000;
 		break;
+    case RES_CHAMPION:
+        iHashRange = 100;
+        index = 10000;	// RES_SPAWN +10k, no reason to have 100k [SPAWN ] templates ... but leaving this huge margin.
 	case RES_WEBPAGE:		// Define a web page template.
 		index = (dword)m_WebPages.GetCount() + 1;
 		break;
@@ -3789,6 +3823,7 @@ CResourceDef * CServerConfig::ResourceGetDef( CResourceIDBase rid ) const
 		case RES_SKILLCLASS:
 		case RES_AREA:
 		case RES_ROOM:
+        case RES_CHAMPION:
 			break;
 
 		default:

@@ -1318,14 +1318,12 @@ bool CClient::Cmd_SecureTrade( CChar *pChar, CItem *pItem )
 
 	pCont1->SetName("Trade Window");
 	pCont1->SetType(IT_EQ_TRADE_WINDOW);
-	pCont1->m_itEqTradeWindow.m_iWaitTime = 0;
 	pCont1->m_itEqTradeWindow.m_bCheck = 0;
 	pCont1->m_uidLink = pCont2->GetUID();
 	m_pChar->LayerAdd(pCont1, LAYER_SPECIAL);
 
 	pCont2->SetName("Trade Window");
 	pCont2->SetType(IT_EQ_TRADE_WINDOW);
-	pCont2->m_itEqTradeWindow.m_iWaitTime = 0;
 	pCont2->m_itEqTradeWindow.m_bCheck = 0;
 	pCont2->m_uidLink = pCont1->GetUID();
 	pChar->LayerAdd(pCont2, LAYER_SPECIAL);

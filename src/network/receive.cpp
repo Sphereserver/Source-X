@@ -1101,6 +1101,7 @@ bool PacketSecureTradeReq::onReceive(NetState* net)
 	skip(2); // length
 	SECURE_TRADE_TYPE action = static_cast<SECURE_TRADE_TYPE>(readByte());
 	CUID containerSerial(readInt32());
+	bool fCheck = readInt32();
 
 	CItemContainer* container = dynamic_cast<CItemContainer*>( containerSerial.ItemFind() );
 	if (container == NULL)
@@ -1122,16 +1123,7 @@ bool PacketSecureTradeReq::onReceive(NetState* net)
 				return true;
 			}
 
-			int64 iWaitTime = container->m_itEqTradeWindow.m_iWaitTime;
-			int64 iTimestamp = g_World.GetCurrentTime().GetTimeRaw();
-			if ( iWaitTime > iTimestamp )
-			{
-				int64 iSeconds = (iWaitTime - iTimestamp) / TICK_PER_SEC;
-				client->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_TRADE_WAIT), iSeconds);
-				return true;
-			}
-
-			container->Trade_Status(readInt32() != 0);
+			container->Trade_Status(fCheck);
 			return true;
 		}
 

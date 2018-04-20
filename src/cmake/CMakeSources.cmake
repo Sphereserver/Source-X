@@ -185,6 +185,8 @@ SOURCE_GROUP (common\\sphere_library FILES ${spherelibrary_SRCS})
 SET (game_SRCS
 game/CBase.cpp
 game/CBase.h
+game/CChampion.cpp
+game/CChampion.h
 game/CContainer.cpp
 game/CContainer.h
 game/CFaction.cpp

@@ -191,7 +191,7 @@ void CItemContainer::Trade_Status( bool bCheck )
 	Delete();
 }
 
-void CItemContainer::Trade_UpdateGold( byte platinum, dword gold )
+void CItemContainer::Trade_UpdateGold( dword platinum, dword gold )
 {
 	ADDTOCALLSTACK("CItemContainer::Trade_UpdateGold");
 	// Update trade gold/platinum values on TOL clients
@@ -213,7 +213,7 @@ void CItemContainer::Trade_UpdateGold( byte platinum, dword gold )
 	if ( gold + (platinum * 1000000000) > iMaxValue )
 	{
 		gold = (dword)(iMaxValue % 1000000000);
-		platinum = (byte)(iMaxValue / 1000000000);
+		platinum = (dword)(iMaxValue / 1000000000);
 		bUpdateChar1 = true;
 	}
 
@@ -647,7 +647,6 @@ void CItemContainer::OnRemoveObj( CSObjListRec *pObRec )	// Override this = call
 	{
 		// Remove from a trade window.
 		Trade_Status(false);
-		m_itEqTradeWindow.m_iWaitTime = g_World.GetCurrentTime().GetTimeRaw() + (10 * TICK_PER_SEC);
 	}
 	if ( IsType(IT_EQ_VENDOR_BOX) && IsItemEquipped() )	// vendor boxes should ALWAYS be equipped !
 	{

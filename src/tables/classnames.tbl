@@ -17,6 +17,7 @@
 ADD(CAccount,				"CAccount");
 ADD(CAccounts,				"CAccounts");
 ADD(CResourceLink,			"CResourceLink");
+ADD(CChampionDef,			"CChampionDef");
 ADD(CChar,					"CChar");
 ADD(CCharBase,				"CCharBase");
 ADD(CCharNPC,				"CCharNPC");
@@ -48,6 +49,7 @@ ADD(CServerConfig,			"CServerConfig");
 ADD(CObjBase,				"CObjBase");
 ADD(CContainer,				"CContainer");
 ADD(CItemContainer,			"CItemContainer");
+ADD(CItemChampion,			"CItemChampion");
 ADD(CGMPage,				"CGMPage");
 ADD(CItemBase,				"CItemBase");
 ADD(CItem,					"CItem");

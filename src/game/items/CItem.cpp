@@ -8,6 +8,7 @@
 #include "../chars/CCharNPC.h"
 #include "../clients/CClient.h"
 #include "../triggers.h"
+#include "../CChampion.h"
 #include "CItem.h"
 #include "CItemCommCrystal.h"
 #include "CItemContainer.h"
@@ -1977,6 +1978,9 @@ void CItem::r_WriteMore1( CSString & sVal )
 			return;
 		case IT_SPAWN_ITEM:
 			sVal = g_Cfg.ResourceGetName( m_itSpawnItem.m_ItemID );
+			return;
+		case IT_SPAWN_CHAMPION:
+			sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHAMPION, m_itSpawnChar.m_CharID));
 			return;
 		case IT_TREE:
 		case IT_GRASS:

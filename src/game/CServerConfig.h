@@ -1736,7 +1736,6 @@ public:
 	int GetItemType() const;
 };
 
-
 #define IsSetEF(ef)				((g_Cfg.m_iExperimentalFlags & ef) != 0)
 #define IsSetOF(of)				((g_Cfg.m_iOptionFlags & of) != 0)
 #define IsSetCombatFlags(of)	((g_Cfg.m_iCombatFlags & of) != 0)
