@@ -3,7 +3,6 @@
 #include "../common/common.h"
 #include "../game/CScriptProfiler.h"
 #include "ProfileData.h"
-#include "strings.h"
 #include "threads.h"
 
 ProfileData::ProfileData()

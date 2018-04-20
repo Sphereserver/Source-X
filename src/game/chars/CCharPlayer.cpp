@@ -178,7 +178,7 @@ SKILL_TYPE CCharPlayer::Skill_GetLockType( lpctstr pszKey ) const
 	ADDTOCALLSTACK("CCharPlayer::Skill_GetLockType");
 
 	tchar szTmpKey[128];
-	strcpylen( szTmpKey, pszKey, CountOf(szTmpKey) );
+    strncpynull( szTmpKey, pszKey, CountOf(szTmpKey) );
 
 	tchar * ppArgs[3];
 	size_t i = Str_ParseCmds( szTmpKey, ppArgs, CountOf(ppArgs), ".[]" );
@@ -213,7 +213,7 @@ STAT_TYPE CCharPlayer::Stat_GetLockType( lpctstr pszKey ) const
 	ADDTOCALLSTACK("CCharPlayer::Stat_GetLockType");
 
 	tchar szTmpKey[128];
-	strcpylen( szTmpKey, pszKey, CountOf(szTmpKey) );
+    strncpynull( szTmpKey, pszKey, CountOf(szTmpKey) );
 
 	tchar * ppArgs[3];
 	size_t i = Str_ParseCmds( szTmpKey, ppArgs, CountOf(ppArgs), ".[]" );

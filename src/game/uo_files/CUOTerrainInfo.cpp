@@ -63,7 +63,7 @@ CUOTerrainInfo::CUOTerrainInfo( TERRAIN_TYPE id )
             m_flags = record.m_flags;
             m_unknown = 0;
             m_index = record.m_index;
-            strcpylen(m_name, record.m_name, CountOf(m_name));
+            strncpynull(m_name, record.m_name, CountOf(m_name));
             break;
         }
     }

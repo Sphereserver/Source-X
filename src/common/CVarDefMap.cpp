@@ -1,6 +1,5 @@
 
-#include "../sphere/strings.h"
-#include "../sphere/threads.h"
+#include "../common/sphere_library/sstringobjs.h"
 #include "../common/CLog.h"
 #include "../game/CServer.h"
 #include "CException.h"
@@ -8,7 +7,7 @@
 #include "CScript.h"
 #include "CTextConsole.h"
 #include "CVarDefMap.h"
-#include "common.h"
+
 
 static size_t GetIdentifierString( tchar * szTag, lpctstr pszArgs )
 {

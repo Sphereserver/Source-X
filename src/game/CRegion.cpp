@@ -499,6 +499,8 @@ bool CRegion::r_LoadVal( CScript & s )
 			break;
 		case RC_P:
 			m_pt.Read(s.GetArgStr());
+            if (!m_pt.IsValidPoint())
+                return false;
 			break;
 		case RC_RAINCHANCE:
 			SendSectorsVerb( s.GetKey(), s.GetArgStr(), &g_Serv );

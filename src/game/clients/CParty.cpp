@@ -801,7 +801,7 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 						pszArg++;
 						x++;
 					}
-					strcpylen(pUid, __pszArg, ++x);
+                    strncpynull(pUid, __pszArg, ++x);
 
 					int nMember = Exp_GetVal(pUid);
 					if ( !m_Chars.IsValidIndex(nMember) )
@@ -815,10 +815,10 @@ bool CPartyDef::r_Verb( CScript &s, CTextConsole *pSrc )
 				lpctstr __pszArg = pszArg;
 				while ( *pszArg != ' ' )
 				{
-					pszArg++;
-					x++;
+					++pszArg;
+					++x;
 				}
-				strcpylen(pUid, __pszArg, ++x);
+                strncpynull(pUid, __pszArg, ++x);
 
 				toSysmessage = Exp_GetDWVal(pUid);
 			}

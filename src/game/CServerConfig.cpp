@@ -1940,7 +1940,7 @@ lpctstr CServerConfig::GetNotoTitle( int iLevel, bool bFemale ) const
 
 		// copy string so that it can be null-terminated without modifying m_NotoTitles
 		tchar* pTitle = Str_GetTemp();
-		strcpylen(pTitle, m_NotoTitles[iLevel]->GetPtr(), (int)(m_NotoTitles[iLevel]->GetLength() - strlen(pFemaleTitle)));
+        strncpynull(pTitle, m_NotoTitles[iLevel]->GetPtr(), (int)(m_NotoTitles[iLevel]->GetLength() - strlen(pFemaleTitle)));
 		return pTitle;
 	}
 }
@@ -4336,7 +4336,7 @@ bool CServerConfig::DumpUnscriptedItems( CTextConsole * pSrc, lpctstr pszFilenam
 			 continue;
 
 		s.WriteSection("ITEMDEF 0%04x", i);
-		strcpylen(sItemName, tiledata.m_name, CountOf(sItemName));
+        strncpynull(sItemName, tiledata.m_name, CountOf(sItemName));
 
 		// generate a suitable defname
 		if (GenerateDefname(sItemName, CountOf(sItemName), "i_", pDefnameBuffer, true, &defnames))

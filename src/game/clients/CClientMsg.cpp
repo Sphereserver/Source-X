@@ -1112,7 +1112,7 @@ void CClient::addItemName( const CItem * pItem )
 	lpctstr pszNameFull = pItem->GetNameFull( fIdentified );
 
 	tchar szName[ MAX_ITEM_NAME_SIZE + 256 ];
-	size_t len = strcpylen( szName, pszNameFull, CountOf(szName) );
+	size_t len = strncpylen( szName, pszNameFull, CountOf(szName) );
 
 	const CContainer* pCont = dynamic_cast<const CContainer*>(pItem);
 	if ( pCont != NULL )
@@ -1208,7 +1208,7 @@ void CClient::addItemName( const CItem * pItem )
 		lpctstr pNewStr = Args.m_VarsLocal.GetKeyStr("ClickMsgText");
 
 		if ( pNewStr != NULL )
-			strcpylen(szName, pNewStr, CountOf(szName));
+			strncpynull(szName, pNewStr, CountOf(szName));
 
 		wHue = (HUE_TYPE)(Args.m_VarsLocal.GetKeyNum("ClickMsgHue", true));
 	}
@@ -1804,7 +1804,6 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 
 	// Nearby items on ground
 	CItem *pItem = NULL;
-	int ptOldDist = 0;
 	uint iSeeCurrent = 0;
 	uint iSeeMax = g_Cfg.m_iMaxItemComplexity * 30;
 
@@ -1816,24 +1815,36 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 		if ( !pItem )
 			break;
 
-		ptOldDist = ptOld.GetDistSight(pItem->GetTopPoint());
-		if ( (ptOldDist > UO_MAP_VIEW_RADAR) && pItem->IsTypeMulti() )		// incoming multi on radar view
+
+        int ptOldDist = ptOld.GetDistSight(pItem->GetTopPoint());
+        if ( pItem->IsTypeMulti() && (ptOldDist > UO_MAP_VIEW_RADAR) )		// incoming multi on radar view
 		{
 			addItem_OnGround(pItem);
 			continue;
 		}
 
 		if ( (iSeeCurrent > iSeeMax) || !m_pChar->CanSee(pItem) )
-			continue;
+            continue;
 
 		if ( bOSIMultiSight )
 		{
-			if ( (((ptOld.GetRegion(REGION_TYPE_HOUSE) != pCurrentCharRegion) || (ptOld.GetDistSight(pItem->GetTopPoint()) > iViewDist)) && (pItem->GetTopLevelObj()->GetTopPoint().GetRegion(REGION_TYPE_HOUSE) == pCurrentCharRegion))		// item is in same house as me
-				|| (((ptOld.GetDistSight(pItem->GetTopPoint()) > iViewDist) && (m_pChar->GetTopPoint().GetDistSight(pItem->GetTopPoint()) <= iViewDist))	// item just came into view
-					&& (!pItem->GetTopLevelObj()->GetTopPoint().GetRegion(REGION_TYPE_HOUSE)		// item is not in a house (ships are ok)
-						|| (pItem->m_uidLink.IsValidUID() && pItem->m_uidLink.IsItem() && pItem->m_uidLink.ItemFind()->IsTypeMulti())		// item is linked to a multi
-						|| pItem->IsTypeMulti()		// item is an multi
-						|| pItem->GetKeyNum("ALWAYSSEND", true, true))) )	// item has ALWAYSSEND tag set
+            bool bSee = false;
+            if (((ptOld.GetRegion(REGION_TYPE_HOUSE) != pCurrentCharRegion) || (ptOld.GetDistSight(pItem->GetTopPoint()) > iViewDist)) &&
+                (pItem->GetTopLevelObj()->GetTopPoint().GetRegion(REGION_TYPE_HOUSE) == pCurrentCharRegion))
+            {
+                bSee = true;    // item is in same house as me
+            }
+            else if ((ptOld.GetDistSight(pItem->GetTopPoint()) > iViewDist) && (m_pChar->GetTopPoint().GetDistSight(pItem->GetTopPoint()) <= iViewDist))	// item just came into view 
+            {
+                if (!pItem->GetTopLevelObj()->GetTopPoint().GetRegion(REGION_TYPE_HOUSE)		// item is not in a house (ships are ok)
+                    || (pItem->m_uidLink.IsValidUID() && pItem->m_uidLink.IsItem() && pItem->m_uidLink.ItemFind()->IsTypeMulti())	// item is linked to a multi
+                    || pItem->IsTypeMulti()		                    // item is an multi
+                    || pItem->GetKeyNum("ALWAYSSEND", true, true))	// item has ALWAYSSEND tag set
+                {
+                    bSee = true;
+                }
+            }
+            if (bSee)
 			{
 				++iSeeCurrent;
 				addItem_OnGround(pItem);
@@ -1841,7 +1852,7 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 		}
 		else
 		{
-			if ( ptOldDist > iViewDist && m_pChar->GetTopPoint().GetDistSight(pItem->GetTopPoint()) <= iViewDist )		// item just came into view
+			if ( (ptOldDist > iViewDist) && (m_pChar->GetTopPoint().GetDistSight(pItem->GetTopPoint()) <= iViewDist) )		// item just came into view
 			{
 				++iSeeCurrent;
 				addItem_OnGround(pItem);
@@ -1892,16 +1903,17 @@ void CClient::addPlayerView( const CPointMap & pt, bool bFull )
 void CClient::addReSync()
 {
 	ADDTOCALLSTACK("CClient::addReSync");
-	if ( m_pChar == NULL )
+    CChar* pChar = GetChar();
+	if ( pChar == NULL )
 		return;
 	// Reloads the client with all it needs.
 	addMap();
-	addChar(m_pChar);
-	addPlayerView(NULL);
+	addChar(pChar);
+	addPlayerView(pChar->GetTopPoint());
 	addLight();		// Current light level where I am.
 	addWeather();	// if any ...
-	addSpeedMode(m_pChar->m_pPlayer->m_speedMode);
-	addStatusWindow(m_pChar);
+	addSpeedMode(pChar->m_pPlayer->m_speedMode);
+	addStatusWindow(pChar);
 }
 
 void CClient::addMap()

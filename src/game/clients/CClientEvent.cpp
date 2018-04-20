@@ -1515,7 +1515,7 @@ void CClient::Event_PromptResp( lpctstr pszText, size_t len, dword context1, dwo
 	else
 	{
 		if ( bNoStrip )	// Str_GetBare will eat unicode characters
-			len = strcpylen( szText, pszText, CountOf(szText) );
+			len = strncpylen( szText, pszText, CountOf(szText) );
 		else if ( promptMode == CLIMODE_PROMPT_SCRIPT_VERB )
 			len = Str_GetBare( szText, pszText, CountOf(szText), "|~=[]{|}~" );
 		else

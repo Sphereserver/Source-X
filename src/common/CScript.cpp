@@ -320,7 +320,7 @@ bool CScriptKeyAlloc::ParseKey( lpctstr pszKey, lpctstr pszVal )
 	{
 		++m_pszArg;
 		lenval = m_Mem.GetDataLength() - 2;
-		strcpylen( m_pszArg, pszVal, (int)( lenval - lenkey ) + 1 );	// strcpylen
+		strncpynull( m_pszArg, pszVal, lenval - lenkey + 1 );
 	}
 
 	return true;

@@ -1,10 +1,9 @@
 
-#include "../sphere/strings.h"
+#include "../common/sphere_library/sstringobjs.h"
 #include "../sphere/threads.h"
 #include "CExpression.h"
 #include "CScript.h"
 #include "CTextConsole.h"
-#include "common.h"
 #include "ListDefContMap.h"
 
 /***************************************************************************

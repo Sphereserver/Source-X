@@ -649,7 +649,7 @@ PacketPlayerUpdate::PacketPlayerUpdate(const CClient* target) : PacketSend(XCMD_
 	const CPointMap& pt = character->GetTopPoint();
 
 	writeInt32(character->GetUID());
-	writeInt16((word)(id));
+	writeInt16((word)id);
 	writeByte(0);
 	writeInt16(hue);
 	writeByte(character->GetModeFlag(target));

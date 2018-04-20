@@ -3020,7 +3020,10 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				// Will be placed in the world later.
 				CPointMap pt;
 				pt.Read( s.GetArgStr());
-				SetUnkPoint(pt);
+                if (pt.IsValidPoint())
+				    SetUnkPoint(pt);
+                else
+                    return false;
 			}
 			return true;
 		case IC_TYPE:

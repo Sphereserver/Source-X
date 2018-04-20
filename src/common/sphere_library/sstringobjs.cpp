@@ -1,7 +1,7 @@
+#include "../../sphere/threads.h"
+#include "../CException.h"
+#include "sstringobjs.h"
 
-#include "../common/CException.h"
-#include "strings.h"
-#include "threads.h"
 
 #define	STRING_DEFAULT_SIZE	40
 

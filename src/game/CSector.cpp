@@ -833,13 +833,9 @@ void CSector::MoveItemToSector( CItem * pItem, bool fActive )
 	// May just be setting a timer. SetTimer or MoveTo()
 	ASSERT( pItem );
 	if ( fActive )
-	{
 		m_Items_Timer.AddItemToSector( pItem );
-	}
 	else
-	{
 		m_Items_Inert.AddItemToSector( pItem );
-	}
 }
 
 bool CSector::MoveCharToSector( CChar * pChar )

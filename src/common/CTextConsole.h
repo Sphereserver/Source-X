@@ -6,7 +6,7 @@
 #ifndef _INC_CTEXTCONSOLE_H
 #define _INC_CTEXTCONSOLE_H
 
-#include "../sphere/strings.h"
+#include "sphere_library/sstringobjs.h"
 #include "common.h"
 
 

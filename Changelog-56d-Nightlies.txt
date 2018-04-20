@@ -547,3 +547,7 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 15-04-2018, Nolok
 - Fixed: tooltips sometimes not being updated.
 - Fixed: t_crops and t_foliage weren't working correctly.
+
+20-04-2018, Nolok
+- Fixed: some functions (like SKILLCHECK, TEXTF and others) didn't parse the arguments correctly.
+- Fixed: setting P for an item or a char didn't send an updated position to clients.

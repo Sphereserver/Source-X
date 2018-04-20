@@ -825,8 +825,10 @@ size_t CPointBase::Read( tchar * pszVal )
 	ADDTOCALLSTACK("CPointBase::Read");
 	// parse reading the point
 	// NOTE: do not use = as a separator here !
-	m_z = 0;
-	m_map = 0;
+    CPointBase ptTest;
+    ptTest.m_z = 0;
+    ptTest.m_map = 0;
+
 	tchar * ppVal[4];
 	size_t iArgs = Str_ParseCmds( pszVal, ppVal, CountOf( ppVal ), " ,\t" );
 	switch ( iArgs )
@@ -835,25 +837,33 @@ size_t CPointBase::Read( tchar * pszVal )
 		case 4:	// m_map
 			if ( IsDigit(ppVal[3][0]))
 			{
-				m_map = (uchar)(ATOI(ppVal[3]));
-				if ( !g_MapList.m_maps[m_map] )
+                ptTest.m_map = (uchar)(ATOI(ppVal[3]));
+				if ( !g_MapList.m_maps[ptTest.m_map] )
 				{
-					g_Log.EventError("Unsupported map #%d specified. Auto-fixing that to 0.\n", m_map);
-					m_map = 0;
+					g_Log.EventError("Unsupported map #%d specified. Auto-fixing that to 0.\n", ptTest.m_map);
+                    ptTest.m_map = 0;
 				}
 			}
 		case 3: // m_z
 			if ( IsDigit(ppVal[2][0]) || ppVal[2][0] == '-' )
-				m_z = (char)(ATOI(ppVal[2]));
+                ptTest.m_z = (char)(ATOI(ppVal[2]));
 		case 2:
 			if (IsDigit(ppVal[1][0]))
-				m_y = (short)(ATOI(ppVal[1]));
+                ptTest.m_y = (short)(ATOI(ppVal[1]));
 		case 1:
 			if (IsDigit(ppVal[0][0]))
-				m_x = (short)(ATOI(ppVal[0]));
+                ptTest.m_x = (short)(ATOI(ppVal[0]));
 		case 0:
 			break;
 	}
+    
+    if (!ptTest.IsValidPoint())
+    {
+        g_Log.EventError("Trying to set a point to invalid coordinates.\n");
+        return 0;
+    }
+
+    Set(ptTest);
 	return iArgs;
 }
 

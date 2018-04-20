@@ -105,17 +105,14 @@ CChar * CChar::NPC_FightFindBestTarget()
 				pClosest = pChar;
 
 			int iDist = GetDist(pChar);
-			if (iDist > GetVisualRange())
+            /*if (iDist > GetVisualRange())     // does this cause a deadlock sometimes?
 			{
-				Attacker_Delete(pChar, false, ATTACKER_CLEAR_DISTANCE);
+				Attacker_Delete(i, false, ATTACKER_CLEAR_DISTANCE);
 				//++i; // Do NOT increment here!
 				if (m_lastAttackers.empty())
-				{
-					pChar = NULL;
 					break;
-				}
 				continue;
-			}
+			} */
 			if (g_Cfg.IsSkillFlag(skillWeapon, SKF_RANGED) && ((iDist < g_Cfg.m_iArcheryMinDist) || (iDist > g_Cfg.m_iArcheryMaxDist)))
 			{
 				++i;

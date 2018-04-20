@@ -685,41 +685,41 @@ bool CClient::r_LoadVal( CScript & s )
 			addRemoveAll(true, false);
 			GetAccount()->TogPrivFlags( PRIV_ALLMOVE, s.GetArgStr() );
 			if ( IsSetOF( OF_Command_Sysmsgs ) )
-				m_pChar->SysMessage( IsPriv(PRIV_ALLMOVE)? "Allmove ON" : "Allmove OFF" );
-			addPlayerView(NULL);
+				GetChar()->SysMessage( IsPriv(PRIV_ALLMOVE)? "Allmove ON" : "Allmove OFF" );
+			addPlayerView(GetChar()->GetTopPoint());
 			break;
 		case CC_ALLSHOW:
 			addRemoveAll(false, true);
 			GetAccount()->TogPrivFlags( PRIV_ALLSHOW, s.GetArgStr() );
 			if ( IsSetOF( OF_Command_Sysmsgs ) )
-				m_pChar->SysMessage( IsPriv(PRIV_ALLSHOW)? "Allshow ON" : "Allshow OFF" );
-			addPlayerView(NULL);
+                GetChar()->SysMessage( IsPriv(PRIV_ALLSHOW)? "Allshow ON" : "Allshow OFF" );
+			addPlayerView(GetChar()->GetTopPoint());
 			break;
 		case CC_DEBUG:
 			addRemoveAll(true, false);
 			GetAccount()->TogPrivFlags( PRIV_DEBUG, s.GetArgStr() );
 			if ( IsSetOF( OF_Command_Sysmsgs ) )
-					m_pChar->SysMessage( IsPriv(PRIV_DEBUG)? "Debug ON" : "Debug OFF" );
-			addPlayerView(NULL);
+                GetChar()->SysMessage( IsPriv(PRIV_DEBUG)? "Debug ON" : "Debug OFF" );
+			addPlayerView(GetChar()->GetTopPoint());
 			break;
 		case CC_DETAIL:
 			GetAccount()->TogPrivFlags( PRIV_DETAIL, s.GetArgStr() );
 			if ( IsSetOF( OF_Command_Sysmsgs ) )
-					m_pChar->SysMessage( IsPriv(PRIV_DETAIL)? "Detail ON" : "Detail OFF" );
+                GetChar()->SysMessage( IsPriv(PRIV_DETAIL)? "Detail ON" : "Detail OFF" );
 			break;
 		case CC_GM: // toggle your GM status on/off
 			if ( GetPrivLevel() >= PLEVEL_GM )
 			{
 				GetAccount()->TogPrivFlags( PRIV_GM, s.GetArgStr() );
-				m_pChar->ResendTooltip();
+                GetChar()->ResendTooltip();
 				if ( IsSetOF( OF_Command_Sysmsgs ) )
-					m_pChar->SysMessage( IsPriv(PRIV_GM)? "GM ON" : "GM OFF" );
+                    GetChar()->SysMessage( IsPriv(PRIV_GM)? "GM ON" : "GM OFF" );
 			}
 			break;
 		case CC_HEARALL:
 			GetAccount()->TogPrivFlags( PRIV_HEARALL, s.GetArgStr() );
 			if ( IsSetOF( OF_Command_Sysmsgs ) )
-					m_pChar->SysMessage( IsPriv(PRIV_HEARALL)? "Hearall ON" : "Hearall OFF" );
+                GetChar()->SysMessage( IsPriv(PRIV_HEARALL)? "Hearall ON" : "Hearall OFF" );
 			break;
 		case CC_PRIVSHOW:
 			// Hide my priv title.
@@ -732,9 +732,9 @@ bool CClient::r_LoadVal( CScript & s )
 				else
 					GetAccount()->SetPrivFlags( PRIV_PRIV_NOSHOW );
 
-				m_pChar->ResendTooltip();
+                GetChar()->ResendTooltip();
 				if ( IsSetOF( OF_Command_Sysmsgs ) )
-					m_pChar->SysMessage( IsPriv(PRIV_PRIV_NOSHOW)? "Privshow OFF" : "Privshow ON" );
+                    GetChar()->SysMessage( IsPriv(PRIV_PRIV_NOSHOW)? "Privshow OFF" : "Privshow ON" );
 			}
 			break;
 
@@ -1404,8 +1404,8 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				}
 				//strip quotes if any
 				if ( *pszArgs[0] == '"' )
-					pszArgs[0]++;
-				for (tchar * pEnd = pszArgs[0] + strlen( pszArgs[0] ) - 1; pEnd >= pszArgs[0]; pEnd-- )
+					++pszArgs[0];
+				for (tchar * pEnd = pszArgs[0] + strlen( pszArgs[0] ) - 1; pEnd >= pszArgs[0]; --pEnd )
 				{
 					if ( *pEnd == '"' )
 					{

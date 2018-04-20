@@ -9,7 +9,7 @@
 #include "../common/common.h"
 #include "../common/sphere_library/smutex.h"
 #include "../common/sphere_library/sresetevents.h"
-#include "../sphere/strings.h"
+#include "../common/sphere_library/sstringobjs.h"
 #include "../sphere/ProfileData.h"
 #include "../sphere_library/CSTime.h"
 #include <list>
@@ -89,7 +89,7 @@ public:
 		return isSameThreadId(getCurrentThreadId(), otherThreadId);
 	}
 
-	static const int m_nameMaxLength = 16;	// Unix support a max 16 bytes thread name.
+	static const uint m_nameMaxLength = 16;	// Unix support a max 16 bytes thread name.
 	static void setThreadName(const char* name);
 
 protected:

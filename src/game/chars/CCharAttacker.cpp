@@ -134,7 +134,7 @@ CChar * CChar::Attacker_GetLast()
 		if (dwCurTime <= dwLastTime)
 		{
 			dwLastTime = dwCurTime;
-			retChar = static_cast<CUID>(refAttacker.charUID).CharFind();
+			retChar = CUID(refAttacker.charUID).CharFind();
 		}
 	}
 	return retChar;
@@ -268,16 +268,14 @@ int CChar::Attacker_GetID( CChar * pChar ) const
 	for (std::vector<LastAttackers>::const_iterator it = m_lastAttackers.begin(), end = m_lastAttackers.end(); it != end; ++it)
 	{
 		CUID uid = it->charUID;
-		if ( ! uid  )
+		if ( !uid )
 			continue;
+
         const CChar* pUIDChar = uid.CharFind();
         if (!pUIDChar)
             continue;
-		const CChar * pMe = pUIDChar->GetChar();
-		if ( ! pMe )
-			continue;
 
-		if ( pMe == pChar )
+		if ( pUIDChar == pChar )
 			return count;
 
 		++count;
@@ -301,7 +299,7 @@ CChar * CChar::Attacker_GetUID(size_t attackerIndex)
 	if ( m_lastAttackers.size() <= attackerIndex)
 		return NULL;
 	LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
-	CChar * pChar = static_cast<CChar*>( static_cast<CUID>( refAttacker.charUID ).CharFind() );
+	CChar * pChar = CUID(refAttacker.charUID).CharFind();
 	return pChar;
 }
 
@@ -312,7 +310,7 @@ bool CChar::Attacker_Delete(std::vector<LastAttackers>::iterator &itAttacker, bo
 	if (m_lastAttackers.empty())
 		return false;
 
-	CChar *pChar = static_cast<CUID>(itAttacker->charUID).CharFind();
+	CChar *pChar = CUID(itAttacker->charUID).CharFind();
 	if (!pChar)
 		return false;
 
@@ -368,7 +366,7 @@ void CChar::Attacker_RemoveChar()
 		for (auto it = m_lastAttackers.begin(), end = m_lastAttackers.end(); it != end; ++it)
 		{
 			LastAttackers & refAttacker = *it;
-			CChar * pSrc = static_cast<CUID>(refAttacker.charUID).CharFind();
+			CChar * pSrc = CUID(refAttacker.charUID).CharFind();
 			if (!pSrc)
 				continue;
 			pSrc->Attacker_Delete(this, false, ATTACKER_CLEAR_REMOVEDCHAR);
@@ -386,7 +384,7 @@ void CChar::Attacker_CheckTimeout()
 		for (size_t count = 0; count < m_lastAttackers.size(); )
 		{
 			LastAttackers & refAttacker = m_lastAttackers[count];
-			CChar *pEnemy = static_cast<CUID>(refAttacker.charUID).CharFind();
+			CChar *pEnemy = CUID(refAttacker.charUID).CharFind();
 			if ( pEnemy && ( ++(refAttacker.elapsed) > g_Cfg.m_iAttackerTimeout ) && (g_Cfg.m_iAttackerTimeout > 0) )
 			{
 				DEBUG_MSG(("AttackerTimeout elapsed for char '%s' (UID: 0%" PRIx32 "): "

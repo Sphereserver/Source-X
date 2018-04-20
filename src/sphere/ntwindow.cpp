@@ -454,7 +454,7 @@ int CNTWindow::OnCreate( HWND hWnd, LPCREATESTRUCT lParam )
 		pnid.uFlags = NIF_TIP | NIF_ICON | NIF_MESSAGE;
 		pnid.uCallbackMessage = WM_USER_TRAY_NOTIFY;
 		pnid.hIcon  = theApp.LoadIcon( IDR_MAINFRAME );
-		strcpylen(pnid.szTip, theApp.m_pszAppName, CountOf(pnid.szTip)-1);
+        strncpynull(pnid.szTip, theApp.m_pszAppName, CountOf(pnid.szTip)-1);
 		Shell_NotifyIcon(NIM_ADD, &pnid);
 	}
 
@@ -1008,7 +1008,7 @@ void NTWindow_SetWindowTitle( LPCTSTR pszText )
 	if ( Sphere_GetOSInfo()->dwPlatformId > VER_PLATFORM_WIN32s )
 	{
 		theApp.m_wndMain.pnid.uFlags = NIF_TIP;
-		strcpylen(theApp.m_wndMain.pnid.szTip, psTitle, CountOf(theApp.m_wndMain.pnid.szTip)-1);
+        strncpynull(theApp.m_wndMain.pnid.szTip, psTitle, CountOf(theApp.m_wndMain.pnid.szTip)-1);
 		Shell_NotifyIcon(NIM_MODIFY, &theApp.m_wndMain.pnid);
 	}
 }

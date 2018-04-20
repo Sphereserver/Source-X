@@ -1354,7 +1354,7 @@ void CChar::InitPlayer( CClient *pClient, const char *pszCharname, bool bFemale,
 	// Set name
 	bool bNameIsAccepted = true;
 	tchar *zCharName = Str_GetTemp();
-	strcpylen(zCharName, pszCharname, MAX_NAME_SIZE);
+    strncpynull(zCharName, pszCharname, MAX_NAME_SIZE);
 
 	if ( !strlen(zCharName) || g_Cfg.IsObscene(zCharName) || Str_CheckName(zCharName) ||!strnicmp(zCharName, "lord ", 5) || !strnicmp(zCharName, "lady ", 5) ||
 		!strnicmp(zCharName, "seer ", 5) || !strnicmp(zCharName, "gm ", 3) || !strnicmp(zCharName, "admin ", 6) || !strnicmp(zCharName, "counselor ", 10) )
@@ -3244,7 +3244,10 @@ do_default:
 			{
 				CPointMap pt;
 				pt.Read( s.GetArgStr() );
-				MoveTo(pt);
+                if (pt.IsValidPoint())
+				    MoveTo(pt);
+                else
+                    return false;
 			}
 			break;
 		case CHC_STONE:

@@ -78,7 +78,7 @@ CUOItemInfo::CUOItemInfo( ITEMID_TYPE id )
             m_wUnk19 = record.m_wUnk14;
             m_dwUnk11 = record.m_dwUnk6;
             m_dwUnk5 = 0;
-            strcpylen(m_name, record.m_name, CountOf(m_name));
+            strncpynull(m_name, record.m_name, CountOf(m_name));
             break;
         }
     }

@@ -295,7 +295,7 @@ bool CObjBase::SetNamePool( lpctstr pszName )
 		tchar szTmp[ MAX_ITEM_NAME_SIZE + 1 ];
 		if ( strlen( pszName ) >= MAX_ITEM_NAME_SIZE )
 		{
-			strcpylen( szTmp, pszName, MAX_ITEM_NAME_SIZE );
+			strncpynull( szTmp, pszName, MAX_ITEM_NAME_SIZE );
 			pszTmp = szTmp;
 		}
 
@@ -1046,7 +1046,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 				tchar * key = const_cast<tchar*>(pszKey);
 				key += 5;
 				tchar * pszArg[4];
-				int iArgQty = Str_ParseCmds(key , pszArg, CountOf(pszArg));
+				int iArgQty = Str_ParseCmds(key, pszArg, CountOf(pszArg));
 				if (iArgQty < 2)
 				{
 					g_Log.EventError("SysMessagef with less than 1 args for the given text\n");
@@ -1059,16 +1059,16 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 				}
 				//strip quotes if any
 				if (*pszArg[0] == '"')
-					pszArg[0]++;
+					++pszArg[0];
 				byte count = 0;
-				for (tchar * pEnd = pszArg[0] + strlen(pszArg[0]) - 1; pEnd >= pszArg[0]; pEnd--)
+				for (tchar * pEnd = pszArg[0] + strlen(pszArg[0]) - 1; pEnd >= pszArg[0]; --pEnd)
 				{
 					if (*pEnd == '"')
 					{
 						*pEnd = '\0';
 						break;
 					}
-					count++;
+					++count;
 				}
 				sVal.Format(pszArg[0], pszArg[1], pszArg[2] ? pszArg[2] : 0, pszArg[3] ? pszArg[3] : 0);
 				return true;
@@ -1334,7 +1334,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			if ( *pszKey )
 			{
 				tchar * pszArg = Str_GetTemp();
-				strcpylen( pszArg, pszKey, (int)strlen( pszKey ) + 1 );
+                strncpynull( pszArg, pszKey, strlen( pszKey ) + 1 );
 
 				CUID uid = Exp_GetVal( pszKey );
 				pItem = dynamic_cast<CItem*> (uid.ObjFind());
@@ -1374,7 +1374,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			if ( *pszKey )
 			{
 				tchar * pszArg = Str_GetTemp();
-				strcpylen( pszArg, pszKey, (int)strlen( pszKey ) + 1 );
+				strncpynull( pszArg, pszKey, strlen( pszKey ) + 1 );
 
 				CUID uid = Exp_GetVal( pszKey );
 				pItem = dynamic_cast<CItem*> (uid.ObjFind());
@@ -2229,10 +2229,18 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			break;
 		case OV_MOVETO:
 		case OV_P:
+        {
 			EXC_SET("P or MOVETO");
-			MoveTo( g_Cfg.GetRegionPoint( s.GetArgStr()));
-			if (IsItem())
-				Update();
+            CPointMap pt( g_Cfg.GetRegionPoint(s.GetArgStr()) );
+            if (pt.IsValidPoint())
+            {
+                RemoveFromView();
+                MoveTo(pt);
+                Update();
+            }
+            else
+                return false;
+        }	
 			break;
 		case OV_PROMPTCONSOLE:
 		case OV_PROMPTCONSOLEU:

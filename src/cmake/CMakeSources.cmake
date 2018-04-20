@@ -9,8 +9,6 @@ sphere/ProfileData.cpp
 sphere/ProfileData.h
 sphere/ProfileTask.cpp
 sphere/ProfileTask.h
-sphere/strings.cpp
-sphere/strings.h
 sphere/threads.cpp
 sphere/threads.h
 sphere/ntservice.cpp
@@ -173,6 +171,10 @@ common/sphere_library/squeues.h
 common/sphere_library/sresetevents.cpp
 common/sphere_library/sresetevents.h
 common/sphere_library/sstacks.h
+common/sphere_library/sstring.cpp
+common/sphere_library/sstring.h
+common/sphere_library/sstringobjs.cpp
+common/sphere_library/sstringobjs.h
 )
 SOURCE_GROUP (common\\sphere_library FILES ${spherelibrary_SRCS})
 

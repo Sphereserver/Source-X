@@ -1231,7 +1231,7 @@ badcmd:
 				char separators[16];
 
 				GETNONWHITESPACE(pszKey);
-				strcpylen(separators, pszKey, 16);
+				strncpynull(separators, pszKey, 16);
 				{
 					char *p = separators;
 					while ( *p && *p != ',' )
@@ -1296,7 +1296,7 @@ badcmd:
 				if ( iLenString > 0 )
 				{
 					SKIP_ARGSEP(pszKey);
-					strcpylen(sToMatch, pszKey, iLenString + 1);
+					strncpynull(sToMatch, pszKey, iLenString + 1);
 					pszKey += iLenString;
 				}
 

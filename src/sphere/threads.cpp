@@ -59,7 +59,7 @@ void IThread::setThreadName(const char* name)
 	// Unix uses prctl to set thread name
 	// thread name must be 16 bytes, zero-padded if shorter
 	char name_trimmed[m_nameMaxLength] = { '\0' };	// m_nameMaxLength = 16
-	strcpylen(name_trimmed, name, m_nameMaxLength);
+    strncpynull(name_trimmed, name, m_nameMaxLength);
 
 #if defined(_WIN32)
 #if defined(_MSC_VER)	// TODO: support thread naming when compiling with compilers other than Microsoft
