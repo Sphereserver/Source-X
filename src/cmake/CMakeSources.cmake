@@ -165,6 +165,7 @@ common/sphere_library/CSTime.cpp
 common/sphere_library/CSTime.h
 common/sphere_library/CSWindow.cpp
 common/sphere_library/CSWindow.h
+common/sphere_library/smap.h
 common/sphere_library/smutex.h
 common/sphere_library/smutex.cpp
 common/sphere_library/squeues.h
