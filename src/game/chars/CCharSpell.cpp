@@ -430,7 +430,7 @@ bool CChar::Spell_Resurrection(CItemCorpse * pCorpse, CChar * pCharSrc, bool bNo
 			continue;
 
 		if ( pClient == m_pClient )
-			pClient->addPlayerView(NULL, g_Cfg.m_fDeadCannotSeeLiving ? true : false);
+			pClient->addPlayerView(CPointMap(), g_Cfg.m_fDeadCannotSeeLiving ? true : false);
 
 		pClient->addChar(this);
 		if ( m_pNPC )
@@ -703,7 +703,7 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 			if (pClient)
 			{
 				pClient->addChar(this);
-				pClient->addPlayerSee(GetTopPoint());
+				pClient->addPlayerSee(CPointMap());
 			}
 			return;
 		case SPELL_Feeblemind:
@@ -1296,7 +1296,7 @@ void CChar::Spell_Effect_Add( CItem * pSpell )
 			if (pClient)
 			{
 				pClient->addChar(this);
-				pClient->addPlayerSee(GetTopPoint());
+				pClient->addPlayerSee(CPointMap());
 			}
 			return;
 		case SPELL_Feeblemind:
@@ -1607,7 +1607,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 				static const SOUND_TYPE sm_sounds[] = { 0x243, 0x244 };
 				m_pClient->addSound(sm_sounds[Calc_GetRandVal(CountOf(sm_sounds))]);
 				m_pClient->addChar(this);
-				m_pClient->addPlayerSee(GetTopPoint());
+				m_pClient->addPlayerSee(CPointMap());
 			}
 			pItem->SetTimeout(Calc_GetRandLLVal2(15, 30) * TICK_PER_SEC);
 		}

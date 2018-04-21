@@ -1815,7 +1815,6 @@ void CClient::addPlayerSee( const CPointMap & ptOld )
 		if ( !pItem )
 			break;
 
-
         int ptOldDist = ptOld.GetDistSight(pItem->GetTopPoint());
         if ( pItem->IsTypeMulti() && (ptOldDist > UO_MAP_VIEW_RADAR) )		// incoming multi on radar view
 		{
@@ -1909,7 +1908,7 @@ void CClient::addReSync()
 	// Reloads the client with all it needs.
 	addMap();
 	addChar(pChar);
-	addPlayerView(pChar->GetTopPoint());
+	addPlayerView(CPointMap());
 	addLight();		// Current light level where I am.
 	addWeather();	// if any ...
 	addSpeedMode(pChar->m_pPlayer->m_speedMode);
@@ -1945,7 +1944,7 @@ void CClient::addChangeServer()
 	new PacketZoneChange(this, pt);
 }
 
-void CClient::addPlayerUpdate()
+void CClient::addPlayerUpdate() const
 {
 	ADDTOCALLSTACK("CClient::addPlayerUpdate");
 	// Update player character on screen (id / hue / notoriety / position / dir).

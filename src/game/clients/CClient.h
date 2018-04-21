@@ -482,7 +482,7 @@ public:
 	void addMap();
 	void addMapDiff();
 	void addChangeServer();
-	void addPlayerUpdate();
+	void addPlayerUpdate() const;
 
 	void addBark( lpctstr pText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_DEFAULT, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD );
 	void addBarkUNICODE( const nchar * pText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang = 0 );

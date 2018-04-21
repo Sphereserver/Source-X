@@ -251,7 +251,7 @@ bool CItemShip::Ship_MoveDelta(CPointBase pdelta)
 							//If client is on Ship
 							if (tMe->GetRegion()->GetResourceID().GetObjUID() == GetUID())
 							{
-								pClient->addPlayerSee(tMe->GetTopPoint());
+								pClient->addPlayerSee(CPointMap());
 								break; //skip to next client
 							}
 						}
