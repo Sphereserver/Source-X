@@ -1126,37 +1126,37 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			break;
 		case OC_DISTANCE:
 			{
-				pszKey	+= 8;
+				pszKey += 8;
 				SKIP_SEPARATORS( pszKey );
 				GETNONWHITESPACE( pszKey );
-				CObjBase *	pObj	= pSrc->GetChar();
+				CObjBase * pObj = pSrc->GetChar();
 
-				CObjBase * pThis	= this;
+				CObjBase * pThis = this;
 				if ( !IsTopLevel() )
-					pThis	= dynamic_cast <CObjBase*>( GetTopLevelObj() );
+					pThis = dynamic_cast <CObjBase*>( GetTopLevelObj() );
 				if ( !pThis )
 					return false;
 
 				if ( *pszKey )
 				{
-					CPointMap	pt	= g_Cfg.GetRegionPoint( pszKey );
+					CPointMap pt = g_Cfg.GetRegionPoint( pszKey );
 
 					if ( pt.IsValidPoint() )
 					{
 						if ( !pThis->GetTopPoint().IsValidPoint() )
 							return false;
-						else
-							sVal.FormatVal( pThis->GetTopDist( pt ) );
+						sVal.FormatVal( pThis->GetTopDist( pt ) );
 						return true;
 					}
 
-					CUID	uid			= Exp_GetVal( pszKey );
-					SKIP_SEPARATORS( pszKey ); GETNONWHITESPACE( pszKey );
-					pObj	= uid.ObjFind();
+					CUID uid = Exp_GetVal( pszKey );
+					SKIP_SEPARATORS( pszKey );
+                    GETNONWHITESPACE( pszKey );
+					pObj = uid.ObjFind();
 				}
 
 				if ( pObj && !pObj->IsTopLevel() )
-						pObj	= dynamic_cast <CObjBase*>( pObj->GetTopLevelObj() );
+					pObj = dynamic_cast <CObjBase*>( pObj->GetTopLevelObj() );
 				if ( !pObj )
 					return false;
 				sVal.FormatVal( pThis->GetDist( pObj ) );
@@ -1171,9 +1171,9 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 				SKIP_SEPARATORS(pszKey);
 				GETNONWHITESPACE(pszKey);
 
-				CObjBase *	pObj = pSrc->GetChar();
+				CObjBase * pObj = pSrc->GetChar();
 
-				CObjBase	* pThis = this;
+				CObjBase * pThis = this;
 				if (!IsTopLevel())
 					pThis = dynamic_cast <CObjBase*>(GetTopLevelObj());
 				if (!pThis)
@@ -1181,7 +1181,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 
 				if (*pszKey)
 				{
-					CPointMap	pt = g_Cfg.GetRegionPoint(pszKey);
+					CPointMap pt = g_Cfg.GetRegionPoint(pszKey);
 
 					if (pt.IsValidPoint())
 					{
@@ -1192,8 +1192,9 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 						return true;
 					}
 
-					CUID	uid = Exp_GetVal(pszKey);
-					SKIP_SEPARATORS(pszKey); GETNONWHITESPACE(pszKey);
+					CUID uid = Exp_GetVal(pszKey);
+					SKIP_SEPARATORS(pszKey);
+                    GETNONWHITESPACE(pszKey);
 					pObj = uid.ObjFind();
 				}
 
@@ -1411,15 +1412,15 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			sVal = GetUnkPoint().WriteUsed();
 			break;
 		case OC_TAG0:
-			fZero	= true;
-			pszKey++;
+			fZero = true;
+			++pszKey;
 		case OC_TAG:			// "TAG" = get/set a local tag.
 			{
 				if ( pszKey[3] != '.' )
 					return false;
 				pszKey += 4;
 
-				CVarDefCont *	pVarKey	= m_TagDefs.GetKey( pszKey );
+				CVarDefCont * pVarKey	= m_TagDefs.GetKey( pszKey );
 				if ( !pVarKey )
 					sVal = Base_GetDef()->m_TagDefs.GetKeyStr( pszKey, fZero );
 				else
@@ -1462,15 +1463,14 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			break;
 		case OC_SPAWNITEM:
 			if (pszKey[9] == '.')
-			{
 				return CScriptObj::r_WriteVal(pszKey, sVal, pSrc);
-			}
 			sVal.FormatHex(m_uidSpawnItem);
 			break;
 		case OC_SEXTANTP:
 			{
 				pszKey += 8;
-				SKIP_SEPARATORS( pszKey ); GETNONWHITESPACE( pszKey );
+				SKIP_SEPARATORS( pszKey );
+                GETNONWHITESPACE( pszKey );
 
 				CPointMap pt;
 				if ( *pszKey )

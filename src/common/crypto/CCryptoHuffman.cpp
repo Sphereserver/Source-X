@@ -61,7 +61,8 @@ size_t CHuffman::Compress( byte * pOutput, const byte * pInput, size_t outLen, s
 		value >>= 4;
 		while ( nBits-- )
 		{
-            PERSISTANT_ASSERT(iLen < outLen);   // am i trying to write more bytes than the output buffer length?
+            if (iLen >= outLen)
+                return 0; // error: i'm trying to write more bytes than the output buffer length
 			xOutVal <<= 1;
 			xOutVal |= (value >> nBits) & 0x1;
 			if ( ++bitidx == 8)
@@ -73,7 +74,8 @@ size_t CHuffman::Compress( byte * pOutput, const byte * pInput, size_t outLen, s
 	}
 	if (bitidx)	// flush odd bits.
 	{
-        PERSISTANT_ASSERT(iLen < outLen);
+        if (iLen >= outLen)
+            return 0;
 		pOutput[iLen++] = xOutVal << (8 - bitidx);
 	}
     

@@ -42,13 +42,16 @@ void CCrypto::InitTwoFish()
 	}
 }
 
-void CCrypto::DecryptTwoFish( byte * pOutput, const byte * pInput, size_t iLen )
+bool CCrypto::DecryptTwoFish( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen )
 {
 	ADDTOCALLSTACK("CCrypto::DecryptTwoFish");
 	byte tmpBuff[TFISH_RESET];
 
-	for ( size_t i = 0; i < iLen; ++i )
+	for ( size_t i = 0; i < inLen; ++i )
 	{
+        if (i >= outLen)
+            return false;
+
 		if ( tf_position >= TFISH_RESET )
 		{
 			blockEncrypt( tf_cipher, tf_key, &tf_cipherTable[0], 0x800, &tmpBuff[0] ); // function09
@@ -58,4 +61,5 @@ void CCrypto::DecryptTwoFish( byte * pOutput, const byte * pInput, size_t iLen )
 
 		pOutput[i] = pInput[i] ^ tf_cipherTable[tf_position++];
 	}
+    return true;
 }

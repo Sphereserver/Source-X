@@ -925,7 +925,11 @@ bool NetworkInput::processGameClientData(NetState* state, Packet* buffer)
 	ASSERT(client != NULL);
 
 	EXC_SET("decrypt message");
-	client->m_Crypt.Decrypt(m_decryptBuffer, buffer->getRemainingData(), MAX_BUFFER, buffer->getRemainingLength());
+	if (!client->m_Crypt.Decrypt(m_decryptBuffer, buffer->getRemainingData(), MAX_BUFFER, buffer->getRemainingLength()))
+    {
+        g_Log.EventError("NET-IN: processGameClientData failed (Decrypt).\n");
+        return false;
+    }
 
 	if (state->m_incoming.buffer == NULL)
 	{
@@ -1671,10 +1675,21 @@ bool NetworkOutput::sendPacketData(NetState* state, PacketSend* packet)
 
 		// compress
 		size_t compressLength = client->xCompress(m_encryptBuffer, packet->getData(), MAX_BUFFER, packet->getLength());
+        if (compressLength == 0)
+        {
+            g_Log.EventError("NET-OUT: Trying to compress (Huffman) too much data. Packet will not be sent. (Probably it's a dialog with a lot of data inside).\n");
+            return false;
+        }
 
 		// encrypt
-		if (client->m_Crypt.GetEncryptionType() == ENC_TFISH)
-			client->m_Crypt.Encrypt(m_encryptBuffer, m_encryptBuffer, MAX_BUFFER, compressLength);
+        if (client->m_Crypt.GetEncryptionType() == ENC_TFISH)
+        {
+            if (!client->m_Crypt.Encrypt(m_encryptBuffer, m_encryptBuffer, MAX_BUFFER, compressLength))
+            {
+                g_Log.EventError("NET-OUT: Trying to compress (TFISH/MD5) too much data. Packet will not be sent. (Probably it's a dialog with a lot of data inside).\n");
+                return false;
+            }
+        }
 
 		sendBuffer = m_encryptBuffer;
 		sendBufferLength = compressLength;

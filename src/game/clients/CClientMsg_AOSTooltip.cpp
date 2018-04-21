@@ -13,7 +13,7 @@
 uint HashString(lpctstr str, size_t length)
 {
 	uint hash = 5381;
-	for (size_t i = 0; i < length; i++)
+	for (size_t i = 0; i < length; ++i)
 		hash = ((hash << 5) + hash) + *str++;
 
 	return hash;

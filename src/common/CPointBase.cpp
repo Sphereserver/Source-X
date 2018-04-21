@@ -859,7 +859,7 @@ size_t CPointBase::Read( tchar * pszVal )
     
     if (!ptTest.IsValidPoint())
     {
-        g_Log.EventError("Trying to set a point to invalid coordinates.\n");
+        InitPoint();
         return 0;
     }
 

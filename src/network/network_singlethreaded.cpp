@@ -426,7 +426,11 @@ void NetworkIn::tick(void)
 
 		// decrypt the client data and add it to queue
 		EXC_SET("decrypt messages");
-		client->m_client->m_Crypt.Decrypt(m_decryptBuffer, buffer, received);
+		if (!client->m_client->m_Crypt.Decrypt(m_decryptBuffer, buffer, received))
+        {
+            g_Log.EventError("NET-IN (ST): NetworkIn::tick() ignored received client data (Decrypt).\n");
+            return false;
+        }
 
 		if (client->m_incoming.buffer == NULL)
 		{
@@ -1373,10 +1377,21 @@ bool NetworkOut::sendPacketNow(CClient* client, PacketSend* packet)
 
 				// compress
 				size_t compressLength = client->xCompress(m_encryptBuffer, packet->getData(), packet->getLength());
+                if (compressLength == 0)
+                {
+                    g_Log.EventError("NET-OUT (ST): Trying to compress (Huffman) too much data. Packet will not be sent. (Probably it's a dialog with a lot of data inside).\n");
+                    return false;
+                }
 
 				// encrypt
 				if (client->m_Crypt.GetEncryptionType() == ENC_TFISH)
-					client->m_Crypt.Encrypt(m_encryptBuffer, m_encryptBuffer, compressLength);
+                {
+					if (!client->m_Crypt.Encrypt(m_encryptBuffer, m_encryptBuffer, compressLength))
+                    {
+                        g_Log.EventError("NET-OUT (ST): Trying to compress (TFISH/MD5) too much data. Packet will not be sent. (Probably it's a dialog with a lot of data inside).\n");
+                        return false;
+                    }
+                }
 
 				sendBuffer = m_encryptBuffer;
 				sendBufferLength = compressLength;

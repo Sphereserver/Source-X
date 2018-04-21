@@ -75,29 +75,38 @@ void CCrypto::InitBlowFish()
 	InitSeed(0);
 }
 
-void CCrypto::DecryptBlowFish( byte * pOutput, const byte * pInput, size_t iLen )
+bool CCrypto::DecryptBlowFish( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen )
 {
 	ADDTOCALLSTACK("CCrypto::DecryptBlowFish");
-	while ( (m_gameStreamPos + iLen) > CRYPT_GAMETABLE_TRIGGER)
+    size_t outputStartIdx = 0;
+	while ( (m_gameStreamPos + inLen) > CRYPT_GAMETABLE_TRIGGER)
 	{
+        if (outputStartIdx >= outLen)
+            return false;
+
 		size_t lenOld = CRYPT_GAMETABLE_TRIGGER - m_gameStreamPos;
 
-		DecryptBlowFish(pOutput, pInput, lenOld);
+		DecryptBlowFish(pOutput, pInput, outLen, lenOld);
 
 		m_gameTable = (m_gameTable + CRYPT_GAMETABLE_STEP) % CRYPT_GAMETABLE_MODULO;
 		InitSeed(1);
 
 		pInput += lenOld;
+        outputStartIdx += lenOld;
 		pOutput += lenOld;
-		iLen -= lenOld;
+		inLen -= lenOld;
 	}
 
-	for ( size_t i = 0; i < iLen; i++ )
+	for ( size_t i = 0; i < inLen; ++i )
 	{
+        if (i >= outLen)
+            return false;
+
 		pOutput[i] = DecryptBFByte( pInput[i] );
 	}
 
-	m_gameStreamPos += iLen;
+	m_gameStreamPos += inLen;
+    return true;
 }
 
 byte CCrypto::DecryptBFByte( byte bEnc )

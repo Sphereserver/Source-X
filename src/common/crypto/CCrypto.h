@@ -122,7 +122,7 @@ protected:
 	int tf_position;
 private:
 	void InitTwoFish();
-	void DecryptTwoFish( byte * pOutput, const byte * pInput, size_t iLen );
+	bool DecryptTwoFish( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
 	// --------------- EOF TwoFish ----------------------------
 	
 	
@@ -149,7 +149,7 @@ private:
 	void InitSeed( int iTable );
 	static void InitTables();
 	static void PrepareKey( CCrypto::CCryptoKey & key, int iTable );
-	void DecryptBlowFish( byte * pOutput, const byte * pInput, size_t iLen );
+	bool DecryptBlowFish( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
 	byte DecryptBFByte( byte bEnc );
 	void InitBlowFish();
 	// -------------- EOF BlowFish -----------------------
@@ -161,13 +161,13 @@ protected:
 	uint md5_position;
 	byte md5_digest[16];
 protected:
-	void EncryptMD5( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
+	bool EncryptMD5( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
 	void InitMD5(byte * ucInitialize);
 	// ------------------ EOF MD5 ----------------------------
 
 private:
 	// ------------- Login Encryption ----------------------
-	void DecryptLogin( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
+	bool DecryptLogin( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
 	// ------------- EOF Login Encryption ------------------
 
 private:
@@ -208,12 +208,12 @@ private:
 public:
 	bool Init( dword dwIP, byte * pEvent, size_t inLen, bool isclientKr = false );
 	void InitFast( dword dwIP, CONNECT_TYPE ctInit, bool fRelay = true );
-	void Decrypt( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
-	void Encrypt( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
+	bool Decrypt( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
+	bool Encrypt( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
 protected:
-	void LoginCryptStart( dword dwIP, byte * pEvent, size_t inLen );
-	void GameCryptStart( dword dwIP, byte * pEvent, size_t inLen );
-	void RelayGameCryptStart( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
+	bool LoginCryptStart( dword dwIP, byte * pEvent, size_t inLen );
+	bool GameCryptStart( dword dwIP, byte * pEvent, size_t inLen );
+	bool RelayGameCryptStart( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen );
 };
 
 #endif // _INC_CENCRYPT_H

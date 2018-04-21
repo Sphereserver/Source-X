@@ -2,7 +2,7 @@
 #include "CCrypto.h"
 
 // Encryption used when logging in, to access the server list
-void CCrypto::DecryptLogin( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen  )
+bool CCrypto::DecryptLogin( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen  )
 {
 	ADDTOCALLSTACK("CCrypto::DecryptLogin");
 
@@ -10,7 +10,8 @@ void CCrypto::DecryptLogin( byte * pOutput, const byte * pInput, size_t outLen, 
 	{
 		for ( size_t i = 0; i < inLen; ++i )
 		{
-            PERSISTANT_ASSERT(i < outLen);   // am i trying to write more bytes than the output buffer length?
+            if (i >= outLen)
+                return false; // error: i'm trying to write more bytes than the output buffer length
 			pOutput[i] = pInput[i] ^ (byte) m_CryptMaskLo;
 			dword MaskLo = m_CryptMaskLo;
 			dword MaskHi = m_CryptMaskHi;
@@ -18,14 +19,15 @@ void CCrypto::DecryptLogin( byte * pOutput, const byte * pInput, size_t outLen, 
 			MaskHi = ((MaskHi >> 1) | (MaskLo << 31)) ^ m_MasterHi;
 			m_CryptMaskHi = ((MaskHi >> 1) | (MaskLo << 31)) ^ m_MasterHi;
 		}
-		return;
+		return true;
 	}
 
 	if ( GetClientVer() == 0x125360 )
 	{
 		for ( size_t i = 0; i < inLen; ++i )
 		{
-            PERSISTANT_ASSERT(i < outLen);   // am i trying to write more bytes than the output buffer length?
+            if (i >= outLen)
+                return false; // error: i'm trying to write more bytes than the output buffer length
 			pOutput[i] = pInput[i] ^ (byte) m_CryptMaskLo;
 			dword MaskLo = m_CryptMaskLo;
 			dword MaskHi = m_CryptMaskHi;
@@ -40,25 +42,26 @@ void CCrypto::DecryptLogin( byte * pOutput, const byte * pInput, size_t outLen, 
 				- (m_CryptMaskHi * m_CryptMaskHi * 0x4c3a1353)
 				+ 0x16ef783f;
 		}
-		return;
+		return true;
 	}
 
 	if ( GetClientVer() ) // CLIENT_VER <= 0x125350
 	{
 		for ( size_t i = 0; i < inLen; ++i )
 		{
-            PERSISTANT_ASSERT(i < outLen);   // am i trying to write more bytes than the output buffer length?
+            if (i >= outLen)
+                return false; // error: i'm trying to write more bytes than the output buffer length
 			pOutput[i] = pInput[i] ^ (byte) m_CryptMaskLo;
 			dword MaskLo = m_CryptMaskLo;
 			dword MaskHi = m_CryptMaskHi;
 			m_CryptMaskLo = ((MaskLo >> 1) | (MaskHi << 31)) ^ m_MasterLo;
 			m_CryptMaskHi = ((MaskHi >> 1) | (MaskLo << 31)) ^ m_MasterHi;
 		}
-		return;
+		return true;
 	}
 
 	if ( pOutput != pInput )
-	{
 		memcpy( pOutput, pInput, inLen );
-	}
+
+    return true;
 }

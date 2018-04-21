@@ -386,7 +386,7 @@ void CCrypto::InitFast( dword dwIP, CONNECT_TYPE ctInit, bool fRelay)
 /*		Encryption utility methods		*/
 
 
-void CCrypto::RelayGameCryptStart( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen )
+bool CCrypto::RelayGameCryptStart( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen )
 {
 	/**
 	* When the client switches between login and game server without opening a new connection, the first game packet
@@ -409,8 +409,12 @@ void CCrypto::RelayGameCryptStart( byte * pOutput, const byte * pInput, size_t o
 	{
 		InitBlowFish();
 		InitTwoFish();
-		Decrypt(pOutput, pInput, outLen, inLen);
-		return;
+		if (!Decrypt(pOutput, pInput, outLen, inLen))
+        {
+            g_Log.EventError("NET-IN: RelayGameCryptStart failed (Decrypt, ClientVer < 0x200040).\n");
+            return false;
+        }
+        return true;
 	}
 
 	// calculate new seed
@@ -438,7 +442,11 @@ void CCrypto::RelayGameCryptStart( byte * pOutput, const byte * pInput, size_t o
 
 			InitBlowFish();
 			InitTwoFish();
-			Decrypt(pOutput, pInput, outLen, inLen);
+			if (!Decrypt(pOutput, pInput, outLen, inLen))
+            {
+                g_Log.EventError("NET-IN: RelayGameCryptStart failed (Decrypt, autodetect).\n");
+                return false;
+            }
 
 			if ((pOutput[0] ^ (byte) m_CryptMaskLo) == 0x91)
 			{
@@ -455,67 +463,105 @@ void CCrypto::RelayGameCryptStart( byte * pOutput, const byte * pInput, size_t o
 
 		InitBlowFish();
 		InitTwoFish();
-		Decrypt(pOutput, pInput, outLen, inLen);
+		if (!Decrypt(pOutput, pInput, outLen, inLen))
+        {
+            g_Log.EventError("NET-IN: RelayGameCryptStart failed (Decrypt, not autodetected).\n");
+            return false;
+        }
 	}
 
 	// decrypt decrypted packet as login
-	DecryptLogin( pOutput, pOutput, outLen, inLen );
+	if (!DecryptLogin( pOutput, pOutput, outLen, inLen ))
+    {
+        g_Log.EventError("NET-IN: RelayGameCryptStart failed (DecryptLogin).\n");
+        return false;
+    }
+    return true;
 }
 
-void CCrypto::Encrypt( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen )
+bool CCrypto::Encrypt( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen )
 {
 	ADDTOCALLSTACK("CCrypto::Encrypt");
 	if ( ! inLen )
-		return;
+		return false;
 
 	if ( m_ConnectType == CONNECT_LOGIN )
-		return;
+		return false;
 
 	if ( GetEncryptionType() == ENC_TFISH )
 	{
-		EncryptMD5( pOutput, pInput, outLen, inLen );
-		return;
+		if (!EncryptMD5( pOutput, pInput, outLen, inLen ))
+            return false;
 	}
 
 	memcpy( pOutput, pInput, inLen );
+    return true;
 }
 
 
-void CCrypto::Decrypt( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen  )
+bool CCrypto::Decrypt( byte * pOutput, const byte * pInput, size_t outLen, size_t inLen  )
 {
 	ADDTOCALLSTACK("CCrypto::Decrypt");
 	if ( ! inLen )
-		return;
+		return false;
 
 	if ( m_ConnectType == CONNECT_LOGIN )
 	{
-		DecryptLogin( pOutput, pInput, outLen, inLen );
-		return;
+		if (!DecryptLogin( pOutput, pInput, outLen, inLen ))
+        {
+            g_Log.EventError("NET-IN: Trying to decrypt (Login) too much data. Packet will not be parsed further.\n");
+            return false;
+        }
+		return true;
 	}
 
 	if ( m_fRelayPacket == true )
 	{
-		RelayGameCryptStart(pOutput, pInput, outLen, inLen );
-		return;
+		if (!RelayGameCryptStart(pOutput, pInput, outLen, inLen ))
+        {
+            g_Log.EventError("NET-IN: RelayGameCryptStart returned an error. Packet will not be parsed further.\n");
+            return false;
+        }
+        return true;
 	}
 
 	if ( GetEncryptionType() == ENC_NONE )
 	{
 		memcpy( pOutput, pInput, inLen );
-		return;
+		return true;
 	}
 
-	if ( GetEncryptionType() == ENC_TFISH || GetEncryptionType() == ENC_BTFISH )
-		DecryptTwoFish( pOutput, pInput, inLen );
+    if (GetEncryptionType() == ENC_TFISH || GetEncryptionType() == ENC_BTFISH)
+    {
+        if (!DecryptTwoFish( pOutput, pInput, outLen, inLen ))
+        {
+            g_Log.EventError("NET-IN: Trying to decrypt (TFISH/BTFISH=%s) too much data. Packet will not be parsed further.\n", (GetEncryptionType() == ENC_TFISH) ? "TFISH" : "BTFISH");
+            return false;
+        }
+    }
 
 	if ( GetEncryptionType() == ENC_BFISH || GetEncryptionType() == ENC_BTFISH )
 	{
 
 		if ( GetEncryptionType() == ENC_BTFISH )
-			DecryptBlowFish( pOutput, pOutput, inLen );
+        {
+            if (!DecryptBlowFish( pOutput, pOutput, outLen, inLen ))
+            {
+                g_Log.EventError("NET-IN: Trying to decrypt (BTFISH) too much data. Packet will not be parsed further.\n");
+                return false;
+            }
+        }
 		else
-			DecryptBlowFish( pOutput, pInput, inLen );
+        {
+			if (!DecryptBlowFish( pOutput, pInput, outLen, inLen ))
+            {
+                g_Log.EventError("NET-IN: Trying to decrypt (BFISH) too much data. Packet will not be parsed further.\n");
+                return false;
+            }
+        }
 	}
+
+    return true;
 }
 
 
@@ -525,7 +571,7 @@ void CCrypto::Decrypt( byte * pOutput, const byte * pInput, size_t outLen, size_
 
 /*		Handle login encryption		*/
 
-void CCrypto::LoginCryptStart( dword dwIP, byte * pEvent, size_t inLen )
+bool CCrypto::LoginCryptStart( dword dwIP, byte * pEvent, size_t inLen )
 {
 	ADDTOCALLSTACK("CCrypto::LoginCryptStart");
 	ASSERT(pEvent != NULL);
@@ -562,7 +608,11 @@ void CCrypto::LoginCryptStart( dword dwIP, byte * pEvent, size_t inLen )
 		SetClientVerIndex(i);
 
 		// Test Decrypt
-		Decrypt( m_Raw, pEvent, MAX_BUFFER, inLen );
+		if (!Decrypt( m_Raw, pEvent, MAX_BUFFER, inLen ))
+        {
+            g_Log.EventError("NET-IN: LoginCryptStart failed (decrypt).\n");
+            return false;
+        }
 
 #ifdef DEBUG_CRYPT_MSGS
 		DEBUG_MSG(("LoginCrypt %" PRIuSIZE_T " (%" PRIu32 ") type %" PRIx8 "-%" PRIx8 "\n", i, GetClientVer(), m_Raw[0], pEvent[0]));
@@ -575,7 +625,7 @@ void CCrypto::LoginCryptStart( dword dwIP, byte * pEvent, size_t inLen )
 			// a login packet. When is decrypted it is done not correctly (strange chars after
 			// regular account name/password). This prevents that fact, choosing the right keys
 			// to decrypt it correctly :)
-			for (int toCheck = 21; toCheck <= 30; toCheck++)
+			for (int toCheck = 21; toCheck <= 30; ++toCheck)
 			{
 				// no official client allows the account name or password to
 				// exceed 20 chars (2d=16,kr=20), meaning that chars 21-30 must
@@ -600,7 +650,7 @@ void CCrypto::LoginCryptStart( dword dwIP, byte * pEvent, size_t inLen )
 				if (sRawAccountName && (iAccountNameLen != strlen(sRawAccountName)))
 				{
 					iAccountNameLen = 0;
-					i++;
+					++i;
 
 					continue;
 				}
@@ -613,13 +663,14 @@ void CCrypto::LoginCryptStart( dword dwIP, byte * pEvent, size_t inLen )
 		}
 
 		// Next one
-		i++;
+		++i;
 	}
 
 	m_fInit = true;
+    return true;
 }
 
-void CCrypto::GameCryptStart( dword dwIP, byte * pEvent, size_t inLen )
+bool CCrypto::GameCryptStart( dword dwIP, byte * pEvent, size_t inLen )
 {
 	ADDTOCALLSTACK("CCrypto::GameCryptStart");
 	ASSERT( pEvent != NULL );
@@ -643,7 +694,11 @@ void CCrypto::GameCryptStart( dword dwIP, byte * pEvent, size_t inLen )
 		if ( GetEncryptionType() == ENC_BFISH || GetEncryptionType() == ENC_BTFISH )
 			InitBlowFish();
 
-		Decrypt( m_Raw, pEvent, MAX_BUFFER, inLen );
+		if (!Decrypt( m_Raw, pEvent, MAX_BUFFER, inLen ))
+        {
+            g_Log.EventError("NET-IN: GameCryptStart failed (decrypt).\n");
+            return false;
+        }
 
 #ifdef DEBUG_CRYPT_MSGS
 		DEBUG_MSG(("GameCrypt %" PRIuSIZE_T " (%" PRIu32 ") type %" PRIx8 "-%" PRIx8 "\n", i, GetClientVer(), m_Raw[0], pEvent[0]));
@@ -672,6 +727,7 @@ void CCrypto::GameCryptStart( dword dwIP, byte * pEvent, size_t inLen )
 	}
 
 	m_fInit = true;
+    return true;
 }
 
 

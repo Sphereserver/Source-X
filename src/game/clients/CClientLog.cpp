@@ -838,7 +838,11 @@ bool CClient::xProcessClientSetup( CEvent * pEvent, size_t iLen )
 	
 	byte lErr = PacketLoginError::EncUnknown;
 	
-	m_Crypt.Decrypt( pEvent->m_Raw, bincopy.m_Raw, MAX_BUFFER, iLen );
+	if (!m_Crypt.Decrypt( pEvent->m_Raw, bincopy.m_Raw, MAX_BUFFER, iLen ))
+    {
+        g_Log.EventError("NET-IN: xProcessClientSetup failed (Decrypt).\n");
+        return false;
+    }
 	
 	tchar szAccount[MAX_ACCOUNT_NAME_SIZE+3];
 
