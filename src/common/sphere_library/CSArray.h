@@ -78,7 +78,7 @@ private:
 };
 
 /**
-* @brief Generic list of objects.
+* @brief Generic list of objects (not thread safe).
 */
 class CSObjList
 {
@@ -198,7 +198,7 @@ private:
 };
 
 /**
-* @brief Typed Array.
+* @brief Typed Array (not thread safe).
 *
 * NOTE: This will not call true constructors or destructors !
 * TODO: Really needed two types in template?
@@ -369,7 +369,7 @@ private:
 };
 
 /**
-* @brief An Array of pointers.
+* @brief An Array of pointers (not thread safe).
 */
 template<class TYPE>
 class CSPtrTypeArray : public CSTypedArray<TYPE, TYPE>
@@ -427,7 +427,7 @@ public:
 };
 
 /**
-* @brief Array of objects.
+* @brief Array of objects (not thread safe).
 *
 * The point of this type is that the array now OWNS the element.
 * It will get deleted when the array is deleted.
@@ -468,7 +468,7 @@ public:
 };
 
 /**
-* @brief Array of objects (sorted).
+* @brief Array of objects (sorted) (not thread safe).
 *
 * The point of this type is that the array now OWNS the element.
 * It will get deleted when the array is deleted.
@@ -675,7 +675,7 @@ void CSTypedArray<TYPE,ARG_TYPE>::Copy(const CSTypedArray<TYPE, ARG_TYPE> * pArr
 template<class TYPE, class ARG_TYPE>
 void CSTypedArray<TYPE,ARG_TYPE>::InsertAt( size_t nIndex, ARG_TYPE newElement )
 {	// Bump the existing entry here forward.
-	ASSERT(nIndex != BadIndex());
+	ASSERT(nIndex != this->BadIndex());
 
 	SetCount( (nIndex >= m_nCount) ? (nIndex + 1) : (m_nCount + 1) );
     if (nIndex != m_nCount-1)
@@ -713,7 +713,7 @@ void CSTypedArray<TYPE,ARG_TYPE>::SetAt( size_t nIndex, ARG_TYPE newElement )
 template<class TYPE, class ARG_TYPE>
 void CSTypedArray<TYPE,ARG_TYPE>::SetAtGrow( size_t nIndex, ARG_TYPE newElement)
 {
-	ASSERT(nIndex != BadIndex());
+	ASSERT(nIndex != this->BadIndex());
 
 	if ( nIndex >= m_nCount )
 		SetCount(nIndex + 1);
@@ -723,7 +723,7 @@ void CSTypedArray<TYPE,ARG_TYPE>::SetAtGrow( size_t nIndex, ARG_TYPE newElement)
 template<class TYPE, class ARG_TYPE>
 void CSTypedArray<TYPE, ARG_TYPE>::SetCount( size_t nNewCount )
 {
-	ASSERT(nNewCount != BadIndex()); // to hopefully catch integer underflows (-1)
+	ASSERT(nNewCount != this->BadIndex()); // to hopefully catch integer underflows (-1)
 	if (nNewCount == 0)
 	{
 		// shrink to nothing
@@ -787,7 +787,7 @@ template<class TYPE>
 bool CSPtrTypeArray<TYPE>::RemovePtr( TYPE pData )
 {
 	size_t nIndex = FindPtr( pData );
-	if ( nIndex == BadIndex() )
+	if ( nIndex == this->BadIndex() )
 		return false;
 
 	ASSERT( IsValidIndex(nIndex) );
@@ -799,15 +799,15 @@ template<class TYPE>
 bool CSPtrTypeArray<TYPE>::ContainsPtr( TYPE pData ) const
 {
 	size_t nIndex = FindPtr(pData);
-	ASSERT((nIndex == BadIndex()) || IsValidIndex(nIndex));
-	return nIndex != BadIndex();
+	ASSERT((nIndex == this->BadIndex()) || IsValidIndex(nIndex));
+	return nIndex != this->BadIndex();
 }
 
 template<class TYPE>
 size_t CSPtrTypeArray<TYPE>::FindPtr( TYPE pData ) const
 {
 	if ( !pData )
-		return BadIndex();
+		return this->BadIndex();
 
 	for ( size_t nIndex = 0; nIndex < GetCount(); ++nIndex )
 	{
@@ -815,7 +815,7 @@ size_t CSPtrTypeArray<TYPE>::FindPtr( TYPE pData ) const
 			return nIndex;
 	}
 
-	return BadIndex();
+	return this->BadIndex();
 }
 
 template<class TYPE>
@@ -874,7 +874,7 @@ inline void CSObjSortArray<TYPE,KEY_TYPE>::DeleteKey( KEY_TYPE key )
 template<class TYPE,class KEY_TYPE>
 inline bool CSObjSortArray<TYPE,KEY_TYPE>::ContainsKey( KEY_TYPE key ) const
 {
-	return FindKey(key) != BadIndex();
+	return FindKey(key) != this->BadIndex();
 }
 
 template<class TYPE,class KEY_TYPE>
@@ -883,7 +883,7 @@ size_t CSObjSortArray<TYPE,KEY_TYPE>::FindKey( KEY_TYPE key ) const
 	// Find exact key
 	int iCompareRes;
 	size_t index = FindKeyNear(key, iCompareRes, false);
-	return (iCompareRes != 0 ? BadIndex() : index);
+	return (iCompareRes != 0 ? this->BadIndex() : index);
 }
 
 template<class TYPE, class KEY_TYPE>
