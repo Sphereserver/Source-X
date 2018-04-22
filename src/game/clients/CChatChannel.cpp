@@ -255,12 +255,12 @@ void CChatChannel::SetModerator(lpctstr pszMember, bool fFlag)
 {
     ADDTOCALLSTACK("CChatChannel::SetModerator");
     // See if they are already a moderator
-    for (size_t i = 0; i < m_Moderators.GetCount(); i++)
+    for (size_t i = 0; i < m_Moderators.GetCount(); ++i)
     {
         if (m_Moderators[i]->Compare(pszMember) == 0)
         {
             if (fFlag == false)
-                m_Moderators.DeleteAt(i);
+                m_Moderators.RemoveAt(i);
             return;
         }
     }
@@ -368,12 +368,12 @@ void CChatChannel::SetVoice(lpctstr pszName, bool fFlag)
 {
     ADDTOCALLSTACK("CChatChannel::SetVoice");
     // See if they have no voice already
-    for (size_t i = 0; i < m_NoVoices.GetCount(); i++)
+    for (size_t i = 0; i < m_NoVoices.GetCount(); ++i)
     {
         if (m_NoVoices[i]->Compare(pszName) == 0)
         {
             if (fFlag == true)
-                m_NoVoices.DeleteAt(i);
+                m_NoVoices.RemoveAt(i);
             return;
         }
     }

@@ -9,17 +9,6 @@
 #include <cstring>
 #include "../common.h"
 
-#ifdef _MSC_VER
-	#define STANDARD_CPLUSPLUS_THIS(_x_) _x_
-	#pragma warning(disable:4505)
-#else
-	#define STANDARD_CPLUSPLUS_THIS(_x_) this->_x_
-	#include <cstddef>
-#endif
-#ifdef __linux
-	#define STANDARD_CPLUSPLUS_THIS(_x_) this->_x_
-#endif
-
 
 class CSObjList;
 
@@ -475,12 +464,6 @@ public:
     * @return true if data is removed, false otherwise.
     */
 	bool DeleteObj( TYPE pData );
-	/**
-    * @brief Remove the nth element.
-    * @param nIndex position of the element to remove.
-    * @return true if index is valid and object is removed, false otherwise.
-    */
-	void DeleteAt( size_t nIndex );
 	///@}
 };
 
@@ -692,10 +675,11 @@ void CSTypedArray<TYPE,ARG_TYPE>::Copy(const CSTypedArray<TYPE, ARG_TYPE> * pArr
 template<class TYPE, class ARG_TYPE>
 void CSTypedArray<TYPE,ARG_TYPE>::InsertAt( size_t nIndex, ARG_TYPE newElement )
 {	// Bump the existing entry here forward.
-	ASSERT(nIndex != STANDARD_CPLUSPLUS_THIS(BadIndex()));
+	ASSERT(nIndex != BadIndex());
 
 	SetCount( (nIndex >= m_nCount) ? (nIndex + 1) : (m_nCount + 1) );
-	memmove( &m_pData[nIndex + 1], &m_pData[nIndex], sizeof(TYPE) * (m_nCount - nIndex - 1));
+    if (nIndex != m_nCount-1)
+	    memmove(&m_pData[nIndex + 1], &m_pData[nIndex], sizeof(TYPE) * (m_nCount - nIndex - 1));
 	m_pData[nIndex] = newElement;
 }
 
@@ -713,7 +697,8 @@ void CSTypedArray<TYPE,ARG_TYPE>::RemoveAt( size_t nIndex )
 	if ( !IsValidIndex(nIndex) )
 		return;
 
-	memmove(&m_pData[nIndex], &m_pData[nIndex + 1], sizeof(TYPE) * (m_nCount - nIndex - 1));
+    if (nIndex < m_nCount-1)
+	    memmove(&m_pData[nIndex], &m_pData[nIndex + 1], sizeof(TYPE) * (m_nCount - nIndex - 1));
 	SetCount(m_nCount - 1);
 }
 
@@ -728,7 +713,7 @@ void CSTypedArray<TYPE,ARG_TYPE>::SetAt( size_t nIndex, ARG_TYPE newElement )
 template<class TYPE, class ARG_TYPE>
 void CSTypedArray<TYPE,ARG_TYPE>::SetAtGrow( size_t nIndex, ARG_TYPE newElement)
 {
-	ASSERT(nIndex != STANDARD_CPLUSPLUS_THIS(BadIndex()));
+	ASSERT(nIndex != BadIndex());
 
 	if ( nIndex >= m_nCount )
 		SetCount(nIndex + 1);
@@ -738,7 +723,7 @@ void CSTypedArray<TYPE,ARG_TYPE>::SetAtGrow( size_t nIndex, ARG_TYPE newElement)
 template<class TYPE, class ARG_TYPE>
 void CSTypedArray<TYPE, ARG_TYPE>::SetCount( size_t nNewCount )
 {
-	ASSERT(nNewCount != STANDARD_CPLUSPLUS_THIS(BadIndex())); // to hopefully catch integer underflows (-1)
+	ASSERT(nNewCount != BadIndex()); // to hopefully catch integer underflows (-1)
 	if (nNewCount == 0)
 	{
 		// shrink to nothing
@@ -802,11 +787,11 @@ template<class TYPE>
 bool CSPtrTypeArray<TYPE>::RemovePtr( TYPE pData )
 {
 	size_t nIndex = FindPtr( pData );
-	if ( nIndex == STANDARD_CPLUSPLUS_THIS(BadIndex()) )
+	if ( nIndex == BadIndex() )
 		return false;
 
 	ASSERT( IsValidIndex(nIndex) );
-	STANDARD_CPLUSPLUS_THIS(RemoveAt(nIndex));
+	RemoveAt(nIndex);
 	return true;
 }
 
@@ -814,31 +799,31 @@ template<class TYPE>
 bool CSPtrTypeArray<TYPE>::ContainsPtr( TYPE pData ) const
 {
 	size_t nIndex = FindPtr(pData);
-	ASSERT(nIndex == STANDARD_CPLUSPLUS_THIS(BadIndex()) || IsValidIndex(nIndex));
-	return nIndex != STANDARD_CPLUSPLUS_THIS(BadIndex());
+	ASSERT((nIndex == BadIndex()) || IsValidIndex(nIndex));
+	return nIndex != BadIndex();
 }
 
 template<class TYPE>
 size_t CSPtrTypeArray<TYPE>::FindPtr( TYPE pData ) const
 {
 	if ( !pData )
-		return STANDARD_CPLUSPLUS_THIS(BadIndex());
+		return BadIndex();
 
-	for ( size_t nIndex = 0; nIndex < STANDARD_CPLUSPLUS_THIS(GetCount()); ++nIndex )
+	for ( size_t nIndex = 0; nIndex < GetCount(); ++nIndex )
 	{
-		if ( STANDARD_CPLUSPLUS_THIS(GetAt(nIndex)) == pData )
+		if ( GetAt(nIndex) == pData )
 			return nIndex;
 	}
 
-	return STANDARD_CPLUSPLUS_THIS(BadIndex());
+	return BadIndex();
 }
 
 template<class TYPE>
 bool CSPtrTypeArray<TYPE>::IsValidIndex( size_t i ) const
 {
-	if ( i >= STANDARD_CPLUSPLUS_THIS(GetCount()) )
+	if ( i >= GetCount() )
 		return false;
-	return ( STANDARD_CPLUSPLUS_THIS(GetAt(i)) != NULL );
+	return ( GetAt(i) != NULL );
 }
 
 
@@ -850,12 +835,6 @@ inline bool CSObjArray<TYPE>::DeleteObj( TYPE pData )
 	return this->RemovePtr(pData);
 }
 
-template<class TYPE>
-inline void CSObjArray<TYPE>::DeleteAt( size_t nIndex )
-{
-	STANDARD_CPLUSPLUS_THIS(RemoveAt(nIndex));
-}
-
 
 // CSObjSortArray:: Modifiers.
 
@@ -865,7 +844,7 @@ size_t CSObjSortArray<TYPE,KEY_TYPE>::AddPresorted( size_t index, int iCompareRe
 	if ( iCompareRes > 0 )
 		++index;
 
-	this->InsertAt(index, pNew);
+	InsertAt(index, pNew);
 	return index;
 }
 
@@ -878,7 +857,7 @@ size_t CSObjSortArray<TYPE, KEY_TYPE>::AddSortKey( TYPE pNew, KEY_TYPE key )
 	if ( iCompareRes == 0 )
 	{
 		// duplicate should not happen ?!?
-		this->SetAt(index, pNew);
+		SetAt(index, pNew);
 		return index;
 	}
 	return AddPresorted(index, iCompareRes, pNew);
@@ -887,7 +866,7 @@ size_t CSObjSortArray<TYPE, KEY_TYPE>::AddSortKey( TYPE pNew, KEY_TYPE key )
 template<class TYPE,class KEY_TYPE>
 inline void CSObjSortArray<TYPE,KEY_TYPE>::DeleteKey( KEY_TYPE key )
 {
-	DeleteAt(FindKey(key));
+	RemoveAt(FindKey(key));
 }
 
 // CSObjSortArray:: Operations.
@@ -895,7 +874,7 @@ inline void CSObjSortArray<TYPE,KEY_TYPE>::DeleteKey( KEY_TYPE key )
 template<class TYPE,class KEY_TYPE>
 inline bool CSObjSortArray<TYPE,KEY_TYPE>::ContainsKey( KEY_TYPE key ) const
 {
-	return FindKey(key) != STANDARD_CPLUSPLUS_THIS(BadIndex());
+	return FindKey(key) != BadIndex();
 }
 
 template<class TYPE,class KEY_TYPE>
@@ -904,7 +883,7 @@ size_t CSObjSortArray<TYPE,KEY_TYPE>::FindKey( KEY_TYPE key ) const
 	// Find exact key
 	int iCompareRes;
 	size_t index = FindKeyNear(key, iCompareRes, false);
-	return (iCompareRes != 0 ? STANDARD_CPLUSPLUS_THIS(BadIndex()) : index);
+	return (iCompareRes != 0 ? BadIndex() : index);
 }
 
 template<class TYPE, class KEY_TYPE>
@@ -918,20 +897,20 @@ size_t CSObjSortArray<TYPE, KEY_TYPE>::FindKeyNear( KEY_TYPE key, int & iCompare
 	//		-1 = key should be less than index.
 	//		+1 = key should be greater than index
 	//
-	if ( STANDARD_CPLUSPLUS_THIS(GetCount()) <= 0 )
+	if ( GetCount() <= 0 )
 	{
 		iCompareRes = -1;
 		return 0;
 	}
 
-	size_t iHigh = STANDARD_CPLUSPLUS_THIS(GetCount()) - 1;
+	size_t iHigh = GetCount() - 1;
 	size_t iLow = 0;
 	size_t i = 0;
 
 	while ( iLow <= iHigh )
 	{
 		i = (iHigh + iLow) >> 1;
-		iCompareRes = CompareKey( key, STANDARD_CPLUSPLUS_THIS(GetAt(i)), fNoSpaces );
+		iCompareRes = CompareKey( key, GetAt(i), fNoSpaces );
 		if ( iCompareRes == 0 )
 			break;
 		if ( iCompareRes > 0 )
@@ -964,7 +943,5 @@ CSObjListRec * CSObjListRec::GetPrev() const
 	return m_pPrev;
 }
 
-
-#undef STANDARD_CPLUSPLUS_THIS
 
 #endif	// _INC_CSARRAY_H

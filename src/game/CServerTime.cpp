@@ -55,7 +55,3 @@ CServerTime CServerTime::operator-( int64 llTimeDiff ) const
 	return time;
 }
 
-static CServerTime GetCurrentTime()
-{
-	return g_World.GetCurrentTime();
-}//inlined in CWorld.h

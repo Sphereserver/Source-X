@@ -816,7 +816,7 @@ ITEMID_TYPE CItemBase::GetNextFlipID( ITEMID_TYPE id ) const
 	if ( m_flip_id.GetCount() > 0 )
 	{
 		ITEMID_TYPE idprev = GetDispID();
-		for ( size_t i = 0; i < m_flip_id.GetCount(); i++ )
+		for ( size_t i = 0; i < m_flip_id.GetCount(); ++i )
 		{
 			ITEMID_TYPE idnext = m_flip_id[i];
 			if ( idprev == id )
@@ -839,7 +839,7 @@ bool CItemBase::IsSameDispID( ITEMID_TYPE id ) const
 	if ( id == GetDispID())
 		return true;
 
-	for ( size_t i = 0; i < m_flip_id.GetCount(); i ++ )
+	for ( size_t i = 0; i < m_flip_id.GetCount(); ++i )
 	{
 		if ( m_flip_id[i] == id )
 			return true;
@@ -874,7 +874,7 @@ int CItemBase::CalculateMakeValue( int iQualityLevel ) const
 	int lValue = 0;
 
 	// add value based on the base resources making this up.
-	for ( size_t i = 0; i < m_BaseResources.GetCount(); i++ )
+	for ( size_t i = 0; i < m_BaseResources.GetCount(); ++i )
 	{
 		CResourceID rid = m_BaseResources[i].GetResourceID();
 		if ( rid.GetResType() != RES_ITEMDEF )
@@ -888,7 +888,7 @@ int CItemBase::CalculateMakeValue( int iQualityLevel ) const
 	}
 
 	// add some value based on the skill required to create it.
-	for ( size_t i = 0; i < m_SkillMake.GetCount(); i++ )
+	for ( size_t i = 0; i < m_SkillMake.GetCount(); ++i )
 	{
 		CResourceID rid = m_SkillMake[i].GetResourceID();
 		if ( rid.GetResType() != RES_SKILL )

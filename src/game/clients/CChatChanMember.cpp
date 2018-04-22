@@ -107,7 +107,7 @@ void CChatChanMember::ToggleIgnore(lpctstr pszName)
     if ( i != m_IgnoredMembers.BadIndex() )
     {
         ASSERT( m_IgnoredMembers.IsValidIndex(i) );
-        m_IgnoredMembers.DeleteAt(i);
+        m_IgnoredMembers.RemoveAt(i);
 
         SendChatMsg(CHATMSG_NoLongerIgnoring, pszName);
 
@@ -130,9 +130,9 @@ void CChatChanMember::ToggleIgnore(lpctstr pszName)
 void CChatChanMember::ClearIgnoreList()
 {
     ADDTOCALLSTACK("CChatChanMember::ClearIgnoreList");
-    for (size_t i = 0; i < m_IgnoredMembers.GetCount(); i++)
+    for (size_t i = 0; i < m_IgnoredMembers.GetCount(); ++i)
     {
-        m_IgnoredMembers.DeleteAt(i);
+        m_IgnoredMembers.RemoveAt(i);
     }
     SendChatMsg(CHATMSG_NoLongerIgnoringAnyone);
 }

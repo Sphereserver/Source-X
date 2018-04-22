@@ -468,7 +468,10 @@ int CVarDefMap::SetNumNew( lpctstr pszName, int64 iVal )
 	if ( res.second )
 		return (int)(std::distance(m_Container.begin(), res.first));
 	else
+    {
+        delete pVarNum;
 		return -1;
+    }
 }
 
 int CVarDefMap::SetNumOverride( lpctstr pszKey, int64 iVal )
@@ -527,7 +530,10 @@ int CVarDefMap::SetStrNew( lpctstr pszName, lpctstr pszVal )
 	if ( res.second )
 		return (int)(std::distance(m_Container.begin(), res.first));
 	else
+    {
+        delete pVarStr;
 		return -1;
+    }
 }
 
 int CVarDefMap::SetStrOverride( lpctstr pszKey, lpctstr pszVal )
