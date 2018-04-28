@@ -622,7 +622,7 @@ bool CChar::NPC_LookAtCharGuard( CChar * pChar, bool bFromTrigger )
 	ASSERT(m_pNPC);
 	// Does the guard hate the target ?
 	//	do not waste time on invul+dead, non-criminal and jailed chars
-	if ( (pChar->IsStatFlag(STATF_INVUL|STATF_DEAD) || pChar->IsPriv(PRIV_JAILED) && !bFromTrigger) || !(pChar->Noto_IsCriminal() || pChar->Noto_IsEvil()) )
+	if ( ((pChar->IsStatFlag(STATF_INVUL|STATF_DEAD) || pChar->IsPriv(PRIV_JAILED)) && !bFromTrigger) || !(pChar->Noto_IsCriminal() || pChar->Noto_IsEvil()) )
 		return false;
 
 

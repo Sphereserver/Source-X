@@ -3590,7 +3590,7 @@ bool CChar::MoveToChar(CPointMap pt, bool bForceFix)
 	{
 		if ( IsTrigUsed(TRIGGER_ENVIRONCHANGE) )
 		{
-			CScriptTriggerArgs	Args(ptOld.m_x, ptOld.m_y, ptOld.m_z << 16 | ptOld.m_map);
+			CScriptTriggerArgs	Args(ptOld.m_x, ptOld.m_y, ((uchar)ptOld.m_z << 16) | ptOld.m_map);
 			OnTrigger(CTRIG_EnvironChange, this, &Args);
 		}
 	}

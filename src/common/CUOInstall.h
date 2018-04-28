@@ -58,7 +58,7 @@ public:
 public:
 	bool FindInstall();
 	void DetectMulVersions();
-	VERFILE_TYPE OpenFiles( dword dwMask );
+	VERFILE_TYPE OpenFiles( ullong ullMask );
 	bool OpenFile( CSFile & file, lpctstr pszName, word wFlags );
 	bool OpenFile( VERFILE_TYPE i );
 	void CloseFiles();

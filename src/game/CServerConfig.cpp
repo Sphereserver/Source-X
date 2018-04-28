@@ -143,6 +143,7 @@ CServerConfig::CServerConfig()
 	m_iCombatDamageEra		= 0;
 	m_iCombatHitChanceEra	= 0;
 	m_iCombatSpeedEra		= 3;
+    m_iCombatParryingEra    = 0x1|0x10;
 	m_iMagicFlags			= 0;
 	m_iMaxPolyStats			= 150;
 	m_iRacialFlags			= 0;
@@ -420,6 +421,7 @@ enum RC_TYPE
 	RC_COMBATDAMAGEERA,			// m_iCombatDamageEra
 	RC_COMBATFLAGS,				// m_iCombatFlags
 	RC_COMBATHITCHANCEERA,		// m_iCombatHitChanceEra
+	RC_COMBATPARRYINGERA,       // m_iCombatParryingEra
 	RC_COMBATSPEEDERA,			// m_iCombatSpeedEra
 	RC_COMMANDLOG,
 	RC_COMMANDPREFIX,
@@ -652,6 +654,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "COMBATDAMAGEERA",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCombatDamageEra),		0 }},
 	{ "COMBATFLAGS",			{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iCombatFlags),			0 }},
 	{ "COMBATHITCHANCEERA",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCombatHitChanceEra),	0 }},
+    { "COMBATPARRYINGERA",		{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iCombatParryingEra),	0 }},
 	{ "COMBATSPEEDERA",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCombatSpeedEra),		0 }},
 	{ "COMMANDLOG",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iCommandLog),			0 }},
 	{ "COMMANDPREFIX",			{ ELEM_BYTE,	OFFSETOF(CServerConfig,m_cCommandPrefix),		0 }},
@@ -868,7 +871,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			}
 			if ( ok && str.size() > 0 )
 				return g_MapList.Load(ATOI(str.c_str()), s.GetArgRaw());
-			
+
 			size_t length = str.size();
 
 			if ( length >= 2 /*at least .X*/ && str[0] == '.' && isdigit(str[1]) )
@@ -1538,7 +1541,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 		if ( !strnicmp(pszKey, "TILEDATA.", 9) )
 		{
 			pszKey += 9;
-			
+
 			bool bTerrain = false;
 			if (!strnicmp(pszKey, "TERRAIN(", 8))
 			{
@@ -1568,7 +1571,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 				// Invalid id
 				return false;
 			}
-			
+
 			pszKey = pszArgsNext;
 			if (pszKey[0] != '.')
 				return false;
@@ -2417,7 +2420,7 @@ int CServerConfig::GetPacketFlag( bool bCharlist, RESDISPLAY_VERSION res, uchar 
 		0x04:		enable third dawn features
 		0x08:		enable LBR features:			skills, map, monsters, bufficon, plays MP3 instead of midis
 		0x10:		enable AOS features 1:			skills, map, monsters?, spells, fightbook?, housing tiles
-		0x20:		enable AOS features 2, 
+		0x20:		enable AOS features 2,
 		0x40:		enable SE features:				skills, map, monsters?, spells, housing tiles
 		0x80:		enable ML features:				elven race, skills, monsters?, spells, housing tiles
 		0x100:		enable 8th age splash screen
@@ -3426,7 +3429,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 				// For a REGIONTYPE block, the page (pArg2) is the landtile type associated with the REGIONTYPE
 				iPage = RES_GET_INDEX(Exp_GetVal(pArg2));
 			}
-				
+
 			if ( iPage > RES_PAGE_MASK )
 				DEBUG_ERR(( "Bad resource index page %d for Resource named %s\n", iPage, pszName ));
 		}

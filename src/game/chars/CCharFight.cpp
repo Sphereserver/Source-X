@@ -2025,27 +2025,90 @@ bool CChar::Fight_Parry(CItem * &pItemParry)
 {
 	// Check if target will block the hit
 	// Legacy pre-SE formula
-	int ParryChance = 0;
-	if (IsStatFlag(STATF_HASSHIELD))	// parry using shield
-	{
-		pItemParry = LayerFind(LAYER_HAND2);
-		ParryChance = Skill_GetBase(SKILL_PARRYING) / 40;
-	}
-	else if (m_uidWeapon.IsItem())		// parry using weapon
-	{
-		pItemParry = m_uidWeapon.ItemFind();
-		ParryChance = Skill_GetBase(SKILL_PARRYING) / 80;
-	}
+    bool bCanShield = g_Cfg.m_iCombatParryingEra & 0x10;
+    bool bCanOneHanded = g_Cfg.m_iCombatParryingEra & 0x20;
+    bool bCanTwoHanded = g_Cfg.m_iCombatParryingEra & 0x40;
 
-	if (Skill_GetBase(SKILL_PARRYING) >= 1000)
-		ParryChance += 5;
+    int iParrying = Skill_GetBase(SKILL_PARRYING);
+    int iParryChance = 0;   // 0-100 difficulty! without the decimal!
+    if (g_Cfg.m_iCombatParryingEra & 0x2)   // Samurai Empire formula
+    {
+        int iBushido = Skill_GetBase(SKILL_BUSHIDO);
+        int iChanceSE = 0, iChanceLegacy = 0;
 
-	int Dex = Stat_GetAdjusted(STAT_DEX);
-	if (Dex < 80)
-		ParryChance = ParryChance * (20 + Dex) / 100;
+        if (bCanShield && IsStatFlag(STATF_HASSHIELD))	// parry using shield
+        {
+            pItemParry = LayerFind(LAYER_HAND2);
+            iParryChance = (iParrying - iBushido) / 40;
+            if ((iParrying >= 1000) || (iBushido >= 1000))
+                iParryChance += 5;
+            if (iParryChance < 0)
+                iParryChance = 0;
+        }
+        else if (m_uidWeapon.IsItem())		// parry using weapon
+        {
+            CItem* pTempItemParry = m_uidWeapon.ItemFind();
+            if (bCanOneHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND1))
+            {
+                pItemParry = pTempItemParry;
 
-	if (Skill_UseQuick(SKILL_PARRYING, ParryChance, true, false))
-		return true;
+                iChanceSE = iParrying * iBushido / 48000;
+                if ((iParrying >= 1000) || (iBushido >= 1000))
+                    iChanceSE += 5;
+
+                iChanceLegacy = iParrying / 80;
+                if (iParrying >= 1000)
+                    iChanceLegacy += 5;
+
+                iParryChance = maximum(iChanceSE, iChanceLegacy);
+            }
+            else if (bCanTwoHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND2))
+            {
+                pItemParry = pTempItemParry;
+
+                iChanceSE = iParrying * iBushido / 41140;
+                if ((iParrying >= 1000) || (iBushido >= 1000))
+                    iChanceSE += 5;
+
+                iChanceLegacy = iParrying / 80;
+                if (iParrying >= 1000)
+                    iChanceLegacy += 5;
+
+                iParryChance = maximum(iChanceSE, iChanceLegacy);
+            }
+        }
+    }
+    else    // Legacy formula (pre Samurai Empire)
+    {
+        if (bCanShield && IsStatFlag(STATF_HASSHIELD))	// parry using shield
+        {
+            pItemParry = LayerFind(LAYER_HAND2);
+            iParryChance = iParrying / 40;
+        }
+        else if (m_uidWeapon.IsItem())		// parry using weapon
+        {
+            CItem* pTempItemParry =  m_uidWeapon.ItemFind();
+            if ( (bCanOneHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND1)) ||
+                 (bCanTwoHanded && (pTempItemParry->GetEquipLayer() == LAYER_HAND2)) )
+            {
+                pItemParry = pTempItemParry;
+                iParryChance = iParrying / 80;
+            }
+        }
+
+        if (iParryChance && (iParrying >= 1000))
+            iParryChance += 5;
+    }
+
+    //if (iParryChance <= 0)
+    //    return false;
+	
+    int iDex = Stat_GetAdjusted(STAT_DEX);
+    if (iDex < 80)
+        iParryChance = iParryChance * (20 + iDex) / 100;
+
+    if (Skill_UseQuick(SKILL_PARRYING, iParryChance, true, false))
+        return true;
 
 	return false;
 }

@@ -391,6 +391,7 @@ public:
 #define PAUSECALLSTACK static_cast<AbstractSphereThread *>(ThreadHolder::current())->freezeCallStack(true)
 #define UNPAUSECALLSTACK static_cast<AbstractSphereThread *>(ThreadHolder::current())->freezeCallStack(false)
 
+// Remember, call stack is disabled on Release builds!
 #define ADDTOCALLSTACK(_function_)	StackDebugInformation debugStack(_function_)
 
 // Add to the call stack these functions only in debug mode, to have the most precise call stack

@@ -369,7 +369,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
 						*s	= '\0';
 						fQuotes = false;
 					}
-					else if (( *s == '"' ))
+					else if ( *s == '"' )
 					{
 						fInerQuotes = !fInerQuotes;
 					}

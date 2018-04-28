@@ -551,3 +551,12 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 20-04-2018, Nolok
 - Fixed: some functions (like SKILLCHECK, TEXTF and others) didn't parse the arguments correctly.
 - Fixed: setting P for an item or a char didn't send an updated position to clients.
+
+28-04-2018, Nolok
+- Added: CombatParryingEra ini flag. It controls the parrying behaviour:
+   01 = pre-SE parrying chance formula (not using the Bushido skill). Mutually exclusive with 02 flag.
+   02 = SE parrying chance formula (using the Bushido skill). Mutually exclusive with 01 flag.
+   010 = can parry with a shield
+   020 = can parry with a one-handed weapon without a shield
+   040 = can parry with two handed weapons
+- Fixed: parrying chance was too high if the Parrying skill was > 100.0.

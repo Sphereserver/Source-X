@@ -509,9 +509,11 @@ int Sphere_OnTick()
 	g_NetworkManager.processAllOutput();
 #endif
 
+#ifdef _MTNETWORK
 	// don't put the network-tick between in.tick and out.tick, otherwise it will clean the out queue!
 	EXC_SET("network-tick");
 	g_NetworkManager.tick();	// then this thread has to call the network tick
+#endif
 
 	EXC_CATCH;
 	return g_Serv.m_iExitFlag.load(std::memory_order_acquire);

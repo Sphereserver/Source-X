@@ -144,13 +144,14 @@ lpctstr const CFaction::sm_szLoadKeys[CHF_QTY + 1] =
 
 CFaction::CFaction(FACTION_TYPE type)
 {
-    ADDTOCALLSTACK("CFaction::CFaction");
+    ADDTOCALLSTACK_INTENSIVE("CFaction::CFaction(FACTION_TYPE)");
     _iType = type;
     _iFaction = FACTION_NONE;
 }
 
 CFaction::CFaction(CFaction *faction)
 {
+    ADDTOCALLSTACK_INTENSIVE("CFaction::CFaction(CFaction*)");
     Copy(faction);
 }
 
@@ -279,68 +280,68 @@ NPC_GROUP CFaction::GetGroupID()
 
 NPC_FACTION CFaction::GetFactionID()
 {
-    ADDTOCALLSTACK("CFaction::GetFactionID");
+    ADDTOCALLSTACK_INTENSIVE("CFaction::GetFactionID");
     return _iFaction;
 }
 
 FACTION_TYPE CFaction::GetType()
 {
-    ADDTOCALLSTACK("CFaction::GetType");
+    ADDTOCALLSTACK_INTENSIVE("CFaction::GetType");
     return _iType;
 }
 
 void CFaction::SetFactionID(NPC_FACTION faction)
 {
-    ADDTOCALLSTACK("CFaction::SetFactionID");
+    ADDTOCALLSTACK_INTENSIVE("CFaction::SetFactionID");
     ASSERT(faction < FACTION_QTY);
     _iFaction = faction;
 }
 
 bool CFaction::IsGroupElemental()
 {
-    ADDTOCALLSTACK("CFaction::IsGroupElemental");
+    ADDTOCALLSTACK_INTENSIVE("CFaction::IsGroupElemental");
     return ((_iFaction >= FACTION_ELEMENTAL) && (_iFaction < FACTION_ELEMENTAL_QTY));
 }
 
 bool CFaction::IsGroupFey()
 {
-    ADDTOCALLSTACK("CFaction::IsGroupFey");
+    ADDTOCALLSTACK_INTENSIVE("CFaction::IsGroupFey");
     return (_iFaction == NPCGROUP_FEY);
 }
 
 bool CFaction::IsGroupAbyss()
 {
-    ADDTOCALLSTACK("CFaction::IsGroupAbyss");
+    ADDTOCALLSTACK_INTENSIVE("CFaction::IsGroupAbyss");
     return ((_iFaction >= FACTION_DEMON) && (_iFaction < FACTION_ABYSS_QTY));
 }
 
 bool CFaction::IsGroupHumanoid()
 {
-    ADDTOCALLSTACK("CFaction::IsGroupHumanoid");
+    ADDTOCALLSTACK_INTENSIVE("CFaction::IsGroupHumanoid");
     return ((_iFaction >= FACTION_REPOND) && (_iFaction < FACTION_HUMANOID_QTY));
 }
 
 bool CFaction::IsGroupUndead()
 {
-    ADDTOCALLSTACK("CFaction::IsGroupUndead");
+    ADDTOCALLSTACK_INTENSIVE("CFaction::IsGroupUndead");
     return ((_iFaction >= FACTION_UNDEAD) && (_iFaction < FACTION_UNDEAD_QTY));
 }
 
 bool CFaction::IsGroupArachnid()
 {
-    ADDTOCALLSTACK("CFaction::IsGroupArachnid");
+    ADDTOCALLSTACK_INTENSIVE("CFaction::IsGroupArachnid");
     return ((_iFaction >= FACTION_ARACHNID) && (_iFaction < FACTION_ARACHNID_QTY));
 }
 
 bool CFaction::IsGroupReptilian()
 {
-    ADDTOCALLSTACK("CFaction::IsGroupReptilian");
+    ADDTOCALLSTACK_INTENSIVE("CFaction::IsGroupReptilian");
     return ((_iFaction >= FACTION_REPTILE) && (_iFaction < FACTION_REPTILIAN_QTY));
 }
 
 bool CFaction::IsSuperSlayer()
 {
-    ADDTOCALLSTACK("CFaction::IsSuperSlayer");
+    ADDTOCALLSTACK_INTENSIVE("CFaction::IsSuperSlayer");
     switch (_iFaction)
     {
         case FACTION_FEY:
@@ -359,7 +360,7 @@ bool CFaction::IsSuperSlayer()
 
 bool CFaction::IsLesserSlayer()
 {
-    ADDTOCALLSTACK("CFaction::IsLesserSlayer");
+    ADDTOCALLSTACK_INTENSIVE("CFaction::IsLesserSlayer");
     if ((_iFaction > FACTION_NONE) && (_iFaction < FACTION_QTY) && (!IsSuperSlayer()))
         return true;
     return false;
@@ -367,7 +368,7 @@ bool CFaction::IsLesserSlayer()
 
 int CFaction::GetSlayerDamageBonus(CFaction *target)
 {
-    ADDTOCALLSTACK("CFaction::GetSlayerDamageBonus");
+    ADDTOCALLSTACK_INTENSIVE("CFaction::GetSlayerDamageBonus");
     if (IsOppositeLesserSlayer(target))
         return DAMAGE_SLAYER_LESSER;
     else if (IsOppositeSuperSlayer(target))
@@ -377,7 +378,7 @@ int CFaction::GetSlayerDamageBonus(CFaction *target)
 
 int CFaction::GetSlayerDamagePenalty(CFaction * target)
 {
-    ADDTOCALLSTACK("CFaction::GetSlayerDamagePenalty");
+    ADDTOCALLSTACK_INTENSIVE("CFaction::GetSlayerDamagePenalty");
     if (IsOppositeGroup(target))
         return DAMAGE_SLAYER_OPPOSITE;
     return 1;

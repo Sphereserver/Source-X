@@ -19,8 +19,8 @@ uint HashString(lpctstr str, size_t length)
 	return hash;
 }
 
-#define PUSH_FRONT_TOOLTIP(pObj, t) pObj->m_TooltipData.insert(pObj->m_TooltipData.begin(),std::move(std::unique_ptr<CClientTooltip>(t)))
-#define PUSH_BACK_TOOLTIP(pObj, t) pObj->m_TooltipData.push_back(std::move(std::unique_ptr<CClientTooltip>(t)))
+#define PUSH_FRONT_TOOLTIP(pObj, t) pObj->m_TooltipData.emplace(pObj->m_TooltipData.begin(),t)
+#define PUSH_BACK_TOOLTIP(pObj, t) pObj->m_TooltipData.emplace_back(t)
 
 void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
 {

@@ -80,7 +80,7 @@ bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 	UNREFERENCED_PARAMETER(pSrc);
 	ADDTOCALLSTACK("CBaseBaseDef::r_WriteVal");
 	EXC_TRY("WriteVal");
-	bool	fZero	= false;
+	bool fZero = false;
 	int index = FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 
 	switch ( index )
@@ -324,8 +324,8 @@ bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 			sVal.FormatHex( GetResDispDnHue() );
 			break;
 		case OBC_TAG0:
-			fZero	= true;
-			pszKey++;
+			fZero = true;
+			++pszKey;
 		case OBC_TAG:			// "TAG" = get/set a local tag.
 			if ( pszKey[3] != '.' )
 				return false;

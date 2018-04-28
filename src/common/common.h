@@ -14,8 +14,9 @@
 #define SCRIPT_MAX_LINE_LEN		4096		// default size.
 
 
+#include <memory>   // for smart pointers
 #include <cstdlib>
-#include "sassertion.h"
+#include "assertion.h"
 #include "basic_threading.h"
 
 #ifdef _WIN32

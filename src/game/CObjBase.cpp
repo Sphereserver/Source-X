@@ -2019,7 +2019,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
                 if ( g_Cfg.m_iDebugFlags & DEBUGF_SCRIPTS )
                     g_Log.EventDebug("SCRIPT: addcliloc(%u,'%s')\n", clilocid, sLocArgs.GetPtr());
-                m_TooltipData.push_back(std::move(std::unique_ptr<CClientTooltip>(new CClientTooltip(clilocid, sLocArgs.GetPtr()))));
+                m_TooltipData.emplace_back(new CClientTooltip(clilocid, sLocArgs.GetPtr()));
             }
             break;
 		case OV_DAMAGE:	//	"Dmg, SourceFlags, SourceCharUid, DmgPhysical(%), DmgFire(%), DmgCold(%), DmgPoison(%), DmgEnergy(%)" = do me some damage.

@@ -26,28 +26,36 @@ Most notable changes (right now) are:
 
 ## Building
 
+### Generating the project files
 The compilation of the code is possible only using recent compilers, since C++17 features are used: Visual Studio 2017 or 2015 Update 3, GCC 7.1 and later (even if GCC 6 can work, 7 is reccomended), MinGW distributions using GCC 7.1 and later (like nuwen's).<br>
 You need to build makefiles (and project files if you wish) with CMake for both Linux (GCC) and Windows (MSVC and MinGW).<br>
 Both 32 and 64 bits compilation are supported.<br>
 No pre-built project files included.<br>
-When generating project files, if you don't specify a toolchain (setting the `CMAKE_TOOLCHAIN_FILE` variable in the GUI or passing the CLI parameter `-DCMAKE_TOOLCHAIN_FILE="..."`),
- the CMake script will pick the 32 bits one as default.<br>
 Does CMake give you an error? Ensure that you have Git installed, and if you are on Windows ensure also that the Git executable was added to the PATH environmental variable
  (you'll need to add it manually if you are using Git Desktop,
  <a href="https://stackoverflow.com/questions/26620312/installing-git-in-path-with-github-client-for-windows?answertab=votes#tab-top">here's a quick guide</a>).<br>
+
+#### Toolchains and custom CMake variables
+When generating project files, if you don't specify a toolchain (setting the `CMAKE_TOOLCHAIN_FILE` variable in the GUI or passing the CLI parameter `-DCMAKE_TOOLCHAIN_FILE="..."`),
+ the CMake script will pick the 32 bits one as default.<br>
 When using Unix Makefiles, you can specify a build type by setting (also this via GUI or CLI) `CMAKE_BUILD_TYPE="build"`, where build is Nightly, Debug or Release. If the build type
  was not set, by default the makefiles for all of the three build types are generated.<br>
+<br>
+You can also add other compiler flags, like optimization flags, with the custom variables C_FLAGS_EXTRA and CXX_FLAGS_EXTRA.<br>
+Example of CMake CLI additional parameters:<br>
+```-DC_FLAGS_EXTRA="-mtune=native" -DCXX_FLAGS_EXTRA="-mtune=native"```<br>
+(Use the -mtune=native flag only if you are compiling on the same machine on which you will execute Sphere!)
+
 Example to build on Linux a 64 bits Nightly version inside the "build" directory (run it inside the src folder): <br>
 ```
 mkdir build
 cmake -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/Linux-GNU-64.cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" --build ./build .
 make -j8
 ```
-You can also add other compiler flags, like optimization flags: <br>
-```-DC_FLAGS_EXTRA="-mtune=native" -DCXX_FLAGS_EXTRA="-mtune=native"```<br>
-(Use the -mtune=native flag only if you are compiling on the same machine on which you will execute Sphere!)
 
-### Ubuntu 12.x to 16.x
+### Compiling
+
+#### Ubuntu 12.x to 16.x
 Install the following packages:
 ```
 sudo apt-get install git
@@ -56,7 +64,7 @@ sudo apt-get install libmysql++ libmysql++-dev libmysqld-dev libmysqlclient-dev
 If you are on a 64 bits architecture but you want to compile (or execute) a 32 bits binary, you will need to
  install the MySQL packages adding the postfix `:i386` to each package name.
 
-### CentOS 6 / 7 - Red Hat 6 / 7 - Fedora 26
+#### CentOS 6 / 7 - Red Hat 6 / 7 - Fedora 26
 If you're using CentOS 7, Red Hat 7 or Fedora 26, the default package repository only have support to MariaDB instead MySQL. So you need to add the repo for MySQL:<br>
 For CentOS and Red Hat: `sudo rpm -Uvh https://dev.mysql.com/get/mysql57-community-release-el7-9.noarch.rpm`<br>
 For Fedora: `sudo rpm -Uvh https://dev.mysql.com/get/mysql57-community-release-fc26-10.noarch.rpm`<br>
@@ -64,6 +72,20 @@ Then install the required packages via yum (CentOS or RH) or dnf (Fedora): `git 
 <br>If you are on a 64 bits architecture but you want to compile (or execute) a 32 bits binary, you will need to install the appropriate gcc package
  and to install the MySQL packages adding the postfix `.i686` to each package name.
 
+#### Compiling with Clang
+At the moment, clang was tested only on Windows and in combination with Visual Studio 2017.<br>
+
+##### On Windows
+1. Install via the Visual Studio installer the package "Clang/C2".
+2. Install the 3rd party Visual Studio 2017 toolset for Clang from <a href="https://github.com/arves100/llvm-vs2017-integration">here</a>.
+3. Run CMake using the Visual Studio 15 2017 (Win64) generator, "Windows-clang-MSVC-*.cmake" toolchain and toolset "LLVM-vs2017".
+
+###### Address Sanitizer
+You can enable Address Sanitizer with the ENABLE_SANITIZERS checkbox via the GUI, or via the CLI flag "-DENABLE_SANITIZERS=true".
+ Due to limitations of Clang's Address Sanitizer on Windows, it doesn't work with the Debug build. This repository ships only the 64 bits libraries
+ for LLVM 6.0's ASan.<br>
+Since ASan redirects the error output to stderr, you can retrieve its output by launching sphere from cmd (Command Prompt) with the following command:<br>
+```SphereSvrX64_nightly > Sphere_ASan_log.txt 2>&1```
 
 ## Running
 

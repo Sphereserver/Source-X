@@ -54,6 +54,7 @@ struct CSocketAddress;
 	class NetworkThread;
 	class NetworkInput;
 	class NetworkOutput;
+    extern NetworkManager g_NetworkManager;
 #endif
 struct HistoryIP;
 typedef std::deque<HistoryIP> IPHistoryList;
@@ -764,8 +765,6 @@ public:
 	NetState* next(void); // find next state
 };
 
-// todo: eliminate globals!
-extern NetworkManager g_NetworkManager;
 
 #endif //_MTNETWORK
 

@@ -262,7 +262,7 @@ void SetExceptionTranslator()
 		g_Serv.SetExitFlag(SIGABRT);
 		for (size_t i = 0; i < ThreadHolder::getActiveThreads(); ++i)
 			ThreadHolder::getThreadAt(i)->terminate(false);
-		exit(EXIT_FAILURE);
+		//exit(EXIT_FAILURE);
 	}
 
 	void _cdecl Signal_Break( int sig = 0 )		// signal handler attached when using secure mode
@@ -314,7 +314,7 @@ void SetExceptionTranslator()
 	}
 #endif
 
-void SetUnixSignals( bool bSet )
+void SetUnixSignals( bool bSet )    // Signal handlers are installed only in secure mode
 {
 #ifndef _WIN32
 	signal( SIGHUP,		bSet ? &Signal_Hangup : SIG_DFL );

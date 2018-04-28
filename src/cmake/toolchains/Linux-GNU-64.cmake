@@ -52,7 +52,10 @@ function (toolchain_exe_stuff)
 		TARGET_COMPILE_OPTIONS ( spheresvr_nightly	PUBLIC -s -O3    )
 	ENDIF (TARGET spheresvr_nightly)
 	IF (TARGET spheresvr_debug)
-		TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og -fno-omit-frame-pointer	)
+		IF (${ENABLE_SANITIZERS})
+			SET (SANITIZERS "-fsanitize=address,undefined")
+		ENDIF (${ENABLE_SANITIZERS})
+		TARGET_COMPILE_OPTIONS ( spheresvr_debug	PUBLIC -ggdb3 -Og -fno-omit-frame-pointer ${SANITIZERS} )
 	ENDIF (TARGET spheresvr_debug)
 
 
@@ -98,7 +101,7 @@ function (toolchain_exe_stuff)
 	#-- Set per-build define macros.
 
 	IF (TARGET spheresvr_release)
-		TARGET_COMPILE_DEFINITIONS ( spheresvr_release	PUBLIC NDEBUG THREAD_TRACK_CALLSTACK )
+		TARGET_COMPILE_DEFINITIONS ( spheresvr_release	PUBLIC NDEBUG )
 	ENDIF (TARGET spheresvr_release)
 	IF (TARGET spheresvr_nightly)
 		TARGET_COMPILE_DEFINITIONS ( spheresvr_nightly	PUBLIC NDEBUG THREAD_TRACK_CALLSTACK _NIGHTLYBUILD )

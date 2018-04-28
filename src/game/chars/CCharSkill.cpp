@@ -416,7 +416,7 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 		if ( IsStatFlag( STATF_POLYMORPH ) && i != STAT_INT )
 			continue;
 
-		if ( !Stat_GetLock((STAT_TYPE)i) == SKILLLOCK_UP)
+		if ( Stat_GetLock((STAT_TYPE)i) != SKILLLOCK_UP)
 			continue;
 
 		short iStatVal = Stat_GetBase((STAT_TYPE)i);

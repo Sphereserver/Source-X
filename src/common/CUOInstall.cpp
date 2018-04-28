@@ -219,16 +219,16 @@ bool CUOInstall::OpenFile( VERFILE_TYPE i )
 	return OpenFile(m_File[i], pszTitle, OF_READ|OF_SHARE_DENY_WRITE);
 }
 
-VERFILE_TYPE CUOInstall::OpenFiles( dword dwMask )
+VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
 {
 	ADDTOCALLSTACK("CUOInstall::OpenFiles");
 	// Now open all the required files.
 	// RETURN: VERFILE_QTY = all open success.
-	int i(0);
 
+    int i;
 	for ( i = 0; i < VERFILE_QTY; ++i )
 	{
-		if ( ! ( dwMask & ( 1 << i )) )
+		if ( ! ( ullMask & ( (ullong)1 << i )) )
 			continue;
 		if ( GetBaseFileName(static_cast<VERFILE_TYPE>(i)) == NULL )
 			continue;

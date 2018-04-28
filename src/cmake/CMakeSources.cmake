@@ -89,6 +89,7 @@ SOURCE_GROUP (game\\uo_files FILES ${uofiles_SRCS})
 
 # Files containing 'background work'
 SET (common_SRCS
+common/assertion.h
 common/basic_threading.h
 common/CacheableScriptFile.cpp
 common/CacheableScriptFile.h
@@ -132,7 +133,6 @@ common/CVarDefMap.h
 common/CVarFloat.cpp
 common/CVarFloat.h
 common/datatypes.h
-common/sassertion.h
 common/sphereproto.h
 common/sphereversion.h
 common/ListDefContMap.cpp
@@ -147,6 +147,8 @@ SOURCE_GROUP (common FILES ${common_SRCS})
 SET (spherelibrary_SRCS
 common/sphere_library/CSArray.cpp
 common/sphere_library/CSArray.h
+common/sphere_library/CSArray_CSTypedArray.hh
+common/sphere_library/CSArray_CSTypedArray_ptr.hh
 common/sphere_library/CSAssoc.cpp
 common/sphere_library/CSAssoc.h
 common/sphere_library/CSFile.cpp
