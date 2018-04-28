@@ -2,7 +2,7 @@
 #define _INC_CSARRAY_CSTYPEDARRAY_HH
 
 #include <cstring>
-#include <cinttypes>
+#include <cstdint>
 #include "../assertion.h"
 
 /**
@@ -294,7 +294,7 @@ void CSTypedArray<TYPE,ARG_TYPE>::InsertAt( size_t nIndex, ARG_TYPE newElement )
 template<class TYPE, class ARG_TYPE>
 inline void CSTypedArray<TYPE,ARG_TYPE>::Clear()
 {
-    delete[] reinterpret_cast<byte *>(m_pData);
+    delete[] reinterpret_cast<uint8_t *>(m_pData);
     m_pData = NULL;
     m_nCount = m_nRealCount = 0;
 }
@@ -346,12 +346,12 @@ void CSTypedArray<TYPE, ARG_TYPE>::SetCount( size_t nNewCount )
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Walloc-size-larger-than="
 #endif
-        byte* pNewData = new byte[nNewCount * sizeof(TYPE)];
+        uint8_t* pNewData = new uint8_t[nNewCount * sizeof(TYPE)];
         if ( m_nCount )
         {
             // copy the old stuff to the new array.
-            memcpy( pNewData, reinterpret_cast<byte*>(m_pData), sizeof(TYPE)*m_nCount );
-            delete[] reinterpret_cast<byte *>(m_pData);	// don't call any destructors.
+            memcpy( pNewData, reinterpret_cast<uint8_t*>(m_pData), sizeof(TYPE)*m_nCount );
+            delete[] reinterpret_cast<uint8_t *>(m_pData);	// don't call any destructors.
         }
 #if __GNUC__ >= 7
 #pragma GCC diagnostic pop
