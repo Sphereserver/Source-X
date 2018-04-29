@@ -2845,7 +2845,7 @@ dword CObjBase::UpdatePropertyRevision(dword hash)
 	{
 		// the property list has changed, increment the revision number
 		m_PropertyHash = hash;
-		m_PropertyRevision++;
+		++m_PropertyRevision;
 	}
 
 	return m_PropertyRevision;
@@ -2859,9 +2859,9 @@ void CObjBase::UpdatePropertyFlag(int mask)
 
 	m_fStatusUpdate |= SU_UPDATE_TOOLTIP;
 
-	// Items equipped or inside containers doesn't receive ticks and need to be added to a list of items to be processed separately
-	if ( !IsTopLevel() && !g_World.m_ObjStatusUpdates.ContainsPtr(this) )
-		g_World.m_ObjStatusUpdates.Add(this);
+    // Items equipped, inside containers or with timer expired doesn't receive ticks and need to be added to a list of items to be processed separately
+    if ( (!IsTopLevel() || IsTimerExpired()) && !g_World.m_ObjStatusUpdates.ContainsPtr(this) )
+        g_World.m_ObjStatusUpdates.Add(this);
 }
 
 void CObjBase::OnTickStatusUpdate()

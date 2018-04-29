@@ -560,3 +560,8 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
    020 = can parry with a one-handed weapon without a shield
    040 = can parry with two handed weapons
 - Fixed: parrying chance was too high if the Parrying skill was > 100.0.
+
+29-04-2018, Nolok
+- Fixed: parrying chance didn't scale correctly with Dexterity.
+- [Port from Source, 18-04-2018, Coruja] Changed: Small improvements on tooltip engine (containers weren't resending their tooltip after their weight changed,
+    and some tooltips weren't updated for items with an expired timer).

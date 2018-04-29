@@ -1627,11 +1627,9 @@ bool CItemBase::r_LoadVal( CScript &s )
 			// Read in the weight but it may not be decimalized correctly
 			{
 				bool fDecimal = ( strchr( s.GetArgStr(), '.' ) != NULL );
-				m_weight = (word)(s.GetArgVal());
+				m_weight = s.GetArgWVal();
 				if ( ! fDecimal )
-				{
 					m_weight *= WEIGHT_UNITS;
-				}
 			}
 			break;
 		default:

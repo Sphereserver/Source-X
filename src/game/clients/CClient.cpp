@@ -70,6 +70,9 @@ CClient::CClient(NetState* state)
 	m_pPopupPacket = NULL;
 	m_pHouseDesign = NULL;
 	m_fUpdateStats = 0;
+
+    m_timeLastSkillThrowing.Init();
+    m_pSkillThrowingTarg = NULL;
 }
 
 

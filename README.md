@@ -76,9 +76,10 @@ Then install the required packages via yum (CentOS or RH) or dnf (Fedora): `git 
 At the moment, clang was tested only on Windows and in combination with Visual Studio 2017.<br>
 
 ##### On Windows
-1. Install via the Visual Studio installer the package "Clang/C2".
-2. Install the 3rd party Visual Studio 2017 toolset for Clang from <a href="https://github.com/arves100/llvm-vs2017-integration">here</a>.
-3. Run CMake using the Visual Studio 15 2017 (Win64) generator, "Windows-clang-MSVC-*.cmake" toolchain and toolset "LLVM-vs2017".
+1. Install Clang for LLVM 6.0 (<a href="http://releases.llvm.org/download.html">here</a>) and select the option to add the bin folder to the PATH environmental variable.
+2. Install via the Visual Studio installer the package "Clang/C2".
+3. Install the 3rd party Visual Studio 2017 toolset for Clang from <a href="https://github.com/arves100/llvm-vs2017-integration">here</a>.
+4. Run CMake using the Visual Studio 15 2017 (Win64) generator, "Windows-clang-MSVC-*.cmake" toolchain and toolset "LLVM-vs2017".
 
 ###### Address Sanitizer
 You can enable Address Sanitizer with the ENABLE_SANITIZERS checkbox via the GUI, or via the CLI flag "-DENABLE_SANITIZERS=true".

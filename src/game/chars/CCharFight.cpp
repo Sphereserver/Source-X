@@ -2105,8 +2105,11 @@ bool CChar::Fight_Parry(CItem * &pItemParry)
 	
     int iDex = Stat_GetAdjusted(STAT_DEX);
     if (iDex < 80)
-        iParryChance = iParryChance * (20 + iDex) / 100;
-
+    {
+        float fDexMod = (80 - iDex)/100.0f;
+        iParryChance = int((float)iParryChance * (1.0f - fDexMod));
+    }
+        
     if (Skill_UseQuick(SKILL_PARRYING, iParryChance, true, false))
         return true;
 

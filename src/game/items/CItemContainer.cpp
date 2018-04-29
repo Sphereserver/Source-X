@@ -580,6 +580,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 	}
 
 	pItem->Update();
+    UpdatePropertyFlag(AUTOTOOLTIP_FLAG_WEIGHT);
 }
 
 void CItemContainer::ContentAdd( CItem *pItem, bool bForceNoStack )
@@ -656,6 +657,8 @@ void CItemContainer::OnRemoveObj( CSObjListRec *pObRec )	// Override this = call
 	}
 
 	CContainer::OnRemoveObj(pObRec);
+    UpdatePropertyFlag(AUTOTOOLTIP_FLAG_WEIGHT);
+
 	if ( IsType(IT_KEYRING) )	// key ring.
 		SetKeyRing();
 }

@@ -853,7 +853,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 
 		if (!pItem->GetDefNum("USEBESTWEAPONSKILL", true, true))
 		{
-			switch (pItem->Item_GetDef()->m_iSkill)
+			switch (pItem->Weapon_GetSkill())
 			{
 			case SKILL_SWORDSMANSHIP:	PUSH_FRONT_TOOLTIP(pItem, new CClientTooltip(1061172));	break; // skill required: swordsmanship
 			case SKILL_MACEFIGHTING:	PUSH_FRONT_TOOLTIP(pItem, new CClientTooltip(1061173));	break; // skill required: mace fighting
