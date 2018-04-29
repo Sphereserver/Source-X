@@ -8,7 +8,7 @@
 #include "../game/chars/CCharPlayer.h"
 #include "../game/chars/CCharNPC.h"
 #include "../game/clients/CClient.h"
-#include "../game/items/CItemSpawn.h"
+#include "../game/items/CSpawn.h"
 #include "../game/items/CItemShip.h"
 #include "../common/sqlite/SQLite.h"
 
@@ -49,7 +49,6 @@ ADD(CServerConfig,			"CServerConfig");
 ADD(CObjBase,				"CObjBase");
 ADD(CContainer,				"CContainer");
 ADD(CItemContainer,			"CItemContainer");
-ADD(CItemChampion,			"CItemChampion");
 ADD(CGMPage,				"CGMPage");
 ADD(CItemBase,				"CItemBase");
 ADD(CItem,					"CItem");
@@ -59,7 +58,7 @@ ADD(CItemMap,				"CItemMap");
 ADD(CItemMessage,			"CItemMessage");
 ADD(CItemVendable,			"CItemVendable");
 ADD(CItemShip,				"CItemShip");
-ADD(CItemSpawn,				"CItemSpawn");
+ADD(CSpawn,					"CSpawn");
 ADD(CItemStone,				"CItemStone");
 ADD(CDataBase,				"CDataBase");
 ADD(CItemBaseMulti,			"CItemBaseMulti");

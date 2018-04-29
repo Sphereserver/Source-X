@@ -3058,13 +3058,10 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
         }
         else
         {
-            ASSERT(_CrtCheckMemory());
             pNewLink = new CChampionDef(rid);
-            ASSERT(_CrtCheckMemory());
             if (pNewLink) 
             {
                 CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);
-                ASSERT(_CrtCheckMemory());
                 if (pLinkResScript != NULL)
                     pNewLink->SetLink(pLinkResScript);	// So later i can retrieve m_iResourceFileIndex and m_iLineNum from the CResourceScript
                 m_ResHash.AddSortKey(rid, pNewLink);

@@ -8,7 +8,7 @@
 #include "../../sphere/ProfileTask.h"
 #include "../clients/CClient.h"
 #include "../items/CItem.h"
-#include "../items/CItemSpawn.h"
+#include "../items/CSpawn.h"
 #include "../CContainer.h"
 #include "../CServerTime.h"
 #include "../spheresvr.h"
@@ -1534,7 +1534,7 @@ void CChar::SoundChar( CRESND_TYPE type )
 			{
 				case SOUND_NONE:
 					// some creatures have no base sounds, in this case i shouldn't even attempt to play them...
-					DEBUG_MSG(("CHARDEF %s has no base SOUND!\n", GetResourceName()));
+					//DEBUG_MSG(("CHARDEF %s has no base SOUND!\n", GetResourceName()));
 					return;
 				
 				// Special (hardcoded) sounds
@@ -1856,7 +1856,7 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 
 	// Pick it up.
 	pItem->SetDecayTime(-1);	// Kill any decay timer.
-	CItemSpawn * pSpawn = static_cast<CItemSpawn*>(pItem->m_uidSpawnItem.ItemFind());
+	CSpawn * pSpawn = GetSpawn();
 	if (pSpawn)
 		pSpawn->DelObj(pItem->GetUID());
 	LayerAdd( pItem, LAYER_DRAGGING );
@@ -4016,10 +4016,16 @@ bool CChar::OnTick()
         }
 
         EXC_SET("last attackers");
-        Attacker_CheckTimeout();
+        if (g_Cfg.m_iAttackerTimeout > 0)
+        {
+            Attacker_CheckTimeout();
+        }
 
         EXC_SET("NOTO timeout");
-        NotoSave_CheckTimeout();
+        if (g_Cfg.m_iNotoTimeout > 0)
+        {
+            NotoSave_CheckTimeout();
+        }
     }
 
     if (IsDisconnected())		// mounted horses can still get a tick.
@@ -4055,17 +4061,23 @@ bool CChar::OnTick()
 			case -SKTRIG_QTY:	EXC_SET("skill cleanup");	Skill_Cleanup();	break;
         }
 
-        if (m_pNPC)		// What to do next ?
+        if (m_pNPC)
         {
             ProfileTask aiTask(PROFILE_NPC_AI);
             EXC_SET("NPC action");
-            NPC_OnTickAction();
+            if (!IsStatFlag(STATF_FREEZE))
+            {
+                NPC_OnTickAction();
 
-            //	Some NPC AI actions
-            if ((g_Cfg.m_iNpcAi&NPC_AI_FOOD) && !(g_Cfg.m_iNpcAi&NPC_AI_INTFOOD))
-                NPC_Food();
-            if (g_Cfg.m_iNpcAi&NPC_AI_EXTRA)
-                NPC_ExtraAI();
+                if (!IsStatFlag(STATF_DEAD))
+                {
+                    int iFlags = NPC_GetAiFlags();
+                    if ((iFlags & NPC_AI_FOOD) && !(iFlags & NPC_AI_INTFOOD))
+                        NPC_Food();
+                    if (iFlags & NPC_AI_EXTRA)
+                        NPC_ExtraAI();
+                }
+            }
         }
     }
 

@@ -829,7 +829,6 @@ void CResourceLock::AttachObj( const CScriptObj * pObj )
 CResourceLink::CResourceLink( CResourceID rid, const CVarDefContNum * pDef ) :
 	CResourceDef( rid, pDef )
 {
-    ASSERT(_CrtCheckMemory());
 	m_pScript = NULL;
 	m_Context.Init(); // not yet tested.
 	m_lRefInstances = 0;

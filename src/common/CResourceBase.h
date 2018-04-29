@@ -442,7 +442,6 @@ public:
 	}
 	CResourceDef(CResourceID rid, const CVarDefContNum * pDefName = NULL) : m_rid(rid), m_pDefName(pDefName)
 	{
-        ASSERT(_CrtCheckMemory());
 	}
 	virtual ~CResourceDef()
 	{// need a virtual for the dynamic_cast to work.

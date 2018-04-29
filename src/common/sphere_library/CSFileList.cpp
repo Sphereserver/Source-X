@@ -5,7 +5,6 @@
 #include <time.h>
 #if defined(_WIN32)
 	#include <io.h> 		// findfirst
-	#include "../../sphere/threads.h"
 #else	// LINUX
 	#include <sys/stat.h>
 	#include <dirent.h>

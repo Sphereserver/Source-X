@@ -5,7 +5,7 @@
 #include "chars/CCharNPC.h"
 #include "clients/CClient.h"
 #include "items/CItem.h"
-#include "items/CItemSpawn.h"
+#include "items/CSpawn.h"
 #include "../common/CLog.h"
 #include "CObjBase.h"
 #include "CSector.h"
@@ -943,29 +943,33 @@ void CSector::RespawnDeadNPCs()
 
 void CSector::Restock()
 {
-	ADDTOCALLSTACK("CSector::Restock");
-	// ARGS: iTime = time in seconds
-	// set restock time of all vendors in Sector.
-	// set the respawn time of all spawns in Sector.
+    ADDTOCALLSTACK("CSector::Restock");
+    // ARGS: iTime = time in seconds
+    // set restock time of all vendors in Sector.
+    // set the respawn time of all spawns in Sector.
 
-	CChar * pCharNext;
-	CChar * pChar = dynamic_cast <CChar*>( m_Chars_Active.GetHead());
-	for ( ; pChar; pChar = pCharNext )
-	{
-		pCharNext = pChar->GetNext();
-		pChar->NPC_Vendor_Restock(true);
-	}
+    CChar * pCharNext;
+    CChar * pChar = dynamic_cast <CChar*>(m_Chars_Active.GetHead());
+    for (; pChar; pChar = pCharNext)
+    {
+        pCharNext = pChar->GetNext();
+        pChar->NPC_Vendor_Restock(true);
+    }
 
-	CItem * pItemNext;
-	CItem * pItem = dynamic_cast <CItem*>( m_Items_Timer.GetHead());
-	for ( ; pItem; pItem = pItemNext )
-	{
-		pItemNext = pItem->GetNext();
-		if (pItem->IsType(IT_SPAWN_ITEM) || pItem->IsType(IT_SPAWN_CHAR))
-		{
-			static_cast<CItemSpawn*>(pItem)->OnTick(true);
-		}
-	}
+    CItem * pItemNext;
+    CItem * pItem = dynamic_cast <CItem*>(m_Items_Timer.GetHead());
+    for (; pItem; pItem = pItemNext)
+    {
+        pItemNext = pItem->GetNext();
+        if (pItem->IsType(IT_SPAWN_ITEM) || pItem->IsType(IT_SPAWN_CHAR))
+        {
+            CSpawn *pSpawn = pItem->GetSpawn();
+            if (pSpawn)
+            {
+                pSpawn->OnTick(true);
+            }
+        }
+    }
 }
 
 void CSector::OnTick(int iPulseCount)

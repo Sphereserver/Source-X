@@ -15,6 +15,7 @@
 #include "../CServerConfig.h"
 #include "../CObjBase.h"
 #include "../CFaction.h"
+#include "../CEntity.h"
 #include "CItemBase.h"
 
 
@@ -641,11 +642,11 @@ public:
 
 	CREID_TYPE GetCorpseType() const;
 	void  SetCorpseType( CREID_TYPE id );
-	virtual void SetAmount( word amount );					// virtual for override in CItemSpawn
+	virtual void SetAmount( word amount );
 	word GetMaxAmount();
 	bool SetMaxAmount( word amount );
 	void SetAmountUpdate( word amount );
-	virtual word GetAmount() const							// virtual for override in CItemSpawn
+	virtual word GetAmount() const
 	{
 		return m_amount;
 	}
