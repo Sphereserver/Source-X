@@ -7,7 +7,7 @@
 #include "../sphere/ProfileTask.h"
 #include "chars/CChar.h"
 #include "clients/CClient.h"
-#include "items/CItemSpawn.h"
+#include "items/CSpawn.h"
 #include "../common/CLog.h"
 #include "CObjBase.h"
 #include "spheresvr.h"
@@ -79,7 +79,8 @@ CObjBase::CObjBase( bool fItem )
 	m_CanMask = 0;
 	m_ModAr = 0;
 	m_ModMaxWeight = 0;
-	m_uidSpawnItem = UID_UNUSED;
+    _uidSpawn.InitUID();
+
 	m_fStatusUpdate = 0;
 	m_PropertyList = NULL;
 	m_PropertyHash = 0;
@@ -699,9 +700,15 @@ bool CObjBase::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 				pRef = GetTopLevelObj()->GetTopSector();
 				return true;
 			case OBR_SPAWNITEM:
-				if (m_uidSpawnItem != static_cast<CUID>(UID_UNUSED) && pszKey[-1] != '.')
-					break;
-				pRef = m_uidSpawnItem.ItemFind();
+            {
+                if (_uidSpawn != UID_UNUSED && pszKey[-1] != '.')
+                    break;
+                CItem *pItem = static_cast<CItem*>(_uidSpawn.ItemFind());
+                if (pItem)
+                {
+                    pRef = pItem;
+                }
+            }
 				return true;
 			case OBR_TOPOBJ:
 				if ( pszKey[-1] != '.' )	// only used as a ref !
@@ -714,7 +721,10 @@ bool CObjBase::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 		}
 
 	}
-
+    if (static_cast<CEntity*>(this)->r_GetRef(pszKey, pRef))
+    {
+        return true;
+    }
 	return CScriptObj::r_GetRef(pszKey, pRef);
 }
 
@@ -739,34 +749,44 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 	ADDTOCALLSTACK("CObjBase::r_WriteVal");
 	EXC_TRY("WriteVal");
 
-	int index = FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
-	if ( index < 0 )
-	{
-		// RES_FUNCTION call
-		// Is it a function returning a value ? Parse args ?
-		lpctstr pszArgs = strchr(pszKey, ' ');
-		if ( pszArgs != NULL )
-		{
-			pszArgs++;
-			SKIP_SEPARATORS(pszArgs);
-		}
+    int index = FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
+    if ( index < 0 )
+        {
+        // RES_FUNCTION call
+        // Is it a function returning a value ? Parse args ?
+            lpctstr pszArgs = strchr(pszKey, ' ');
+        if ( pszArgs != NULL )
+        {
+            pszArgs++;
+            SKIP_SEPARATORS(pszArgs);
+        }
 
-		CScriptTriggerArgs Args( pszArgs != NULL ? pszArgs : "" );
-		if ( r_Call( pszKey, pSrc, &Args, &sVal ) )
-			return true;
+        CScriptTriggerArgs Args( pszArgs != NULL ? pszArgs : "" );
+        if (r_Call(pszKey, pSrc, &Args, &sVal))
+        {
+            return true;
+        }
 
-		// Just try to default to something reasonable ?
-		// Even though we have not really specified it correctly !
+        // Just try to default to something reasonable ?
+        // Even though we have not really specified it correctly !
 
-		// WORLD. ?
-		if ( g_World.r_WriteVal( pszKey, sVal, pSrc ) )
-			return true;
+        // WORLD. ?
+        if (g_World.r_WriteVal(pszKey, sVal, pSrc))
+        {
+            return true;
+        }
 
 
-		// TYPEDEF. ?
-		if ( Base_GetDef()->r_WriteVal( pszKey, sVal, pSrc ) )
-			return true;
+        // TYPEDEF. ?
+        if (Base_GetDef()->r_WriteVal(pszKey, sVal, pSrc))
+        {
+            return true;
+        }
 
+        if (static_cast<CEntity*>(this)->r_WriteVal(pszKey, sVal, pSrc))
+        {
+            return true;
+        }
 		return CScriptObj::r_WriteVal( pszKey, sVal, pSrc );
 	}
 
@@ -1464,7 +1484,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 		case OC_SPAWNITEM:
 			if (pszKey[9] == '.')
 				return CScriptObj::r_WriteVal(pszKey, sVal, pSrc);
-			sVal.FormatHex(m_uidSpawnItem);
+			sVal.FormatHex(GetSpawn()->GetSpawnItem()->GetUID());
 			break;
 		case OC_SEXTANTP:
 			{
@@ -1615,7 +1635,11 @@ bool CObjBase::r_LoadVal( CScript & s )
 	int index = FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( index < 0 )
 	{
-		return CScriptObj::r_LoadVal(s);
+        if (static_cast<CEntity*>(this)->r_LoadVal(s))
+        {
+            return true;
+        }
+        return CScriptObj::r_LoadVal(s);
 	}
 
 	switch ( index )
@@ -1906,7 +1930,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 		case OC_SPAWNITEM:
 			if ( !g_Serv.IsLoading() )	// SPAWNITEM is read-only
 				return false;
-			m_uidSpawnItem = static_cast<CUID>(s.GetArgVal());
+			//SetSpawn(static_cast<CSpawn*>(static_cast<CUID>(s.GetArgVal()).ItemFind()->GetComponent(COMP_SPAWN)));  //FIXME: Using the uid to load a CSpawn that may have not yet created may lead to a nullptr.
 			break;
 		case OC_UID:
 		case OC_SERIAL:
@@ -1938,8 +1962,8 @@ void CObjBase::r_Write( CScript & s )
 		s.WriteKeyVal( "TIMER", GetTimerAdjusted());
 	if ( m_timestamp.IsTimeValid() )
 		s.WriteKeyVal( "TIMESTAMP", GetTimeStamp().GetTimeRaw());
-	if ( m_uidSpawnItem.IsValidUID() )
-		s.WriteKeyHex("SPAWNITEM", m_uidSpawnItem);
+	if ( GetSpawn() )
+		s.WriteKeyHex("SPAWNITEM", GetSpawn()->GetSpawnItem()->GetUID());
 	if ( m_ModAr )
 		s.WriteKeyVal("MODAR", m_ModAr);
 	if ( m_ModMaxWeight )
@@ -1950,6 +1974,7 @@ void CObjBase::r_Write( CScript & s )
 
 	m_TagDefs.r_WritePrefix(s, "TAG");
 	m_OEvents.r_Write(s, "EVENTS");
+    static_cast<CEntity*>(this)->r_Write(s);
 }
 
 enum OV_TYPE
@@ -1993,9 +2018,14 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		index = OV_TARGET;
 	else
 		index = FindTableSorted( pszKey, sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
-
-	if ( index < 0 )
-		return CScriptObj::r_Verb(s, pSrc);
+    if (index < 0)
+    {
+        if (static_cast<CEntity*>(this)->r_Verb(s, pSrc))
+        {
+            return true;
+        }
+        return CScriptObj::r_Verb(s, pSrc);
+    }
 
 	CChar * pCharSrc = pSrc->GetChar();
 	CClient * pClientSrc = (pCharSrc && pCharSrc->IsClient()) ? (pCharSrc->GetClient()) : NULL ;
@@ -2926,6 +2956,27 @@ CVarDefMap * CObjBase::GetTagDefs()
 	return( &m_TagDefs );
 }
 
+CSpawn * CObjBase::GetSpawn()
+{
+    if (_uidSpawn != UID_UNUSED)
+    {
+        CItem *pItem = _uidSpawn.ItemFind();
+        if (pItem)
+        {
+            CSpawn *pSpawn = static_cast<CSpawn*>(pItem->GetComponent(COMP_SPAWN));
+            if (pSpawn)
+                return pSpawn;
+        }
+        _uidSpawn.InitUID();    // for some reason there is an UID assigned but not related to a CItem or CSpawn, clear it.
+    }
+    return nullptr;
+}
+
+void CObjBase::SetSpawn(CSpawn * spawn)
+{
+    _uidSpawn = spawn->GetLink()->GetUID();
+}
+
 byte CObjBase::RangeL() const
 {
 	CVarDefCont * pRange = GetDefKey("RANGE", true);
@@ -3074,8 +3125,8 @@ void CObjBase::Delete(bool bforce)
 	ADDTOCALLSTACK("CObjBase::Delete");
 	UNREFERENCED_PARAMETER(bforce);	// CObjBase doesnt use it, but CItem and CChar does use it, do not remove.
 
-	if ( m_uidSpawnItem.ItemFind() )    // If I was created from a Spawn
-		static_cast<CItemSpawn*>( m_uidSpawnItem.ItemFind() )->DelObj( GetUID() );  // Then I should be removed from it's list.
+	if ( GetSpawn() )    // If I was created from a Spawn
+        GetSpawn()->DelObj( GetUID() );  // Then I should be removed from it's list.
 
 	DeletePrepare();
 	g_World.m_TimedFunctions.Erase( GetUID() );

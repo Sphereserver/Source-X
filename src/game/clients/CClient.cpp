@@ -7,7 +7,7 @@
 #include "../../network/packet.h"
 #include "../../sphere/ProfileTask.h"
 #include "../chars/CChar.h"
-#include "../items/CItemSpawn.h"
+#include "../items/CSpawn.h"
 #include "../CServerTime.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
@@ -972,18 +972,21 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 
 							if ( pItem->IsType(IT_SPAWN_ITEM) || pItem->IsType(IT_SPAWN_CHAR) )
 							{
-								CItemSpawn *pSpawn = static_cast<CItemSpawn*>(pItem);
-								CResourceDef *pDef = pSpawn->FixDef();
-								if ( !pDef )
-								{
-									CResourceIDBase	rid = ( pItem->IsType(IT_SPAWN_ITEM) ? pItem->m_itSpawnItem.m_ItemID : pItem->m_itSpawnChar.m_CharID);
+                                CSpawn *pSpawn = pItem->GetSpawn();
+                                if (pSpawn)
+                                {
+                                    CResourceDef *pDef = pSpawn->FixDef();
+                                    if (!pDef)
+                                    {
+                                        CResourceIDBase	rid = (pItem->IsType(IT_SPAWN_ITEM) ? pItem->m_itSpawnItem.m_ItemID : pItem->m_itSpawnChar.m_CharID);
 
-									CPointMap pt = pItem->GetTopPoint();
-									m_pChar->Spell_Teleport(pt, true, false);
-									m_pChar->m_Act_UID = pItem->GetUID();
-									SysMessagef("Bad spawn (0%x, id=%s). Set as ACT", (dword)pItem->GetUID(), g_Cfg.ResourceGetName(rid));
-									fFound = true;
-								}
+                                        CPointMap pt = pItem->GetTopPoint();
+                                        m_pChar->Spell_Teleport(pt, true, false);
+                                        m_pChar->m_Act_UID = pItem->GetUID();
+                                        SysMessagef("Bad spawn (0%x, id=%s). Set as ACT", (dword)pItem->GetUID(), g_Cfg.ResourceGetName(rid));
+                                        fFound = true;
+                                    }
+                                }
 							}
 						}
 					}

@@ -929,12 +929,11 @@ effect_bounce:
 
     if (IsSetCombatFlags(COMBAT_SLAYER))
     {
-        //CFaction *pFaction = NULL;
 		CItem *pWeapon = NULL;
 		if (uType & DAMAGE_MAGIC)	// If the damage is magic
 		{
 			pWeapon = pSrc->LayerFind(LAYER_HAND1);	// Search for an equipped spellbook
-			if ((!pWeapon) && (!pWeapon->IsTypeSpellbook()))	// If there is nothing on the hand, or the item is not a spellbook.
+			if ((pWeapon) && (!pWeapon->IsTypeSpellbook()))	// If there is nothing on the hand, or the item is not a spellbook.
 			{
 				pWeapon = pSrc->m_uidWeapon.ItemFind();	// then force a weapon find.
 			}
@@ -1366,10 +1365,14 @@ bool CChar::Fight_Attack( const CChar *pCharTarg, bool btoldByMaster )
 		threat = Args.m_iN1;
 	}
 
-	if ( !Attacker_Add(pTarget, threat) )
-		return false;
-	if ( Attacker_GetIgnore(pTarget) )
-		return false;
+    if (!Attacker_Add(pTarget, threat))
+    {
+        return false;
+    }
+    if (Attacker_GetIgnore(pTarget))
+    {
+        return false;
+    }
 
 	// I'm attacking (or defending)
 	if ( !IsStatFlag(STATF_WAR) )
@@ -1383,13 +1386,19 @@ bool CChar::Fight_Attack( const CChar *pCharTarg, bool btoldByMaster )
 	SKILL_TYPE skillWeapon = Fight_GetWeaponSkill();
 	SKILL_TYPE skillActive = Skill_GetActive();
 
-	if ( (skillActive == skillWeapon) && (m_Fight_Targ_UID == pCharTarg->GetUID()) )	// already attacking this same target using the same skill
-		return true;
-	else if (g_Cfg.IsSkillFlag(skillActive, SKF_MAGIC))	// don't start another fight skill when already casting spells
-		return true;
+    if ((skillActive == skillWeapon) && (m_Fight_Targ_UID == pCharTarg->GetUID()))	// already attacking this same target using the same skill
+    {
+        return true;
+    }
+    else if (g_Cfg.IsSkillFlag(skillActive, SKF_MAGIC))	// don't start another fight skill when already casting spells
+    {
+        return true;
+    }
 
-	if ( m_pNPC && !btoldByMaster )		// call FindBestTarget when this CChar is a NPC and was not commanded to attack, otherwise it attack directly
-		pTarget = NPC_FightFindBestTarget();
+    if (m_pNPC && !btoldByMaster)		// call FindBestTarget when this CChar is a NPC and was not commanded to attack, otherwise it attack directly
+    {
+        pTarget = NPC_FightFindBestTarget();
+    }
 
 	m_Fight_Targ_UID = pTarget ? pTarget->GetUID() : static_cast<CUID>(UID_UNUSED);
 	Skill_Start(skillWeapon);

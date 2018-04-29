@@ -6,7 +6,7 @@
 #ifndef _INC_SMUTEX_H
 #define _INC_SMUTEX_H
 
-#include "../../common/common.h"
+#include "../common.h"
 #ifndef _WIN32
 	#include <pthread.h>
 #endif

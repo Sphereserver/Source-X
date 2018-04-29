@@ -185,8 +185,14 @@ SOURCE_GROUP (common\\sphere_library FILES ${spherelibrary_SRCS})
 SET (game_SRCS
 game/CBase.cpp
 game/CBase.h
+game/CChampion.cpp
+game/CChampion.h
 game/CContainer.cpp
 game/CContainer.h
+game/CComponent.cpp
+game/CComponent.h
+game/CEntity.cpp
+game/CEntity.h
 game/CFaction.cpp
 game/CFaction.h
 game/CObjBase.cpp
@@ -252,8 +258,8 @@ game/items/CItemScript.cpp
 game/items/CItemScript.h
 game/items/CItemShip.cpp
 game/items/CItemShip.h
-game/items/CItemSpawn.cpp
-game/items/CItemSpawn.h
+game/items/CSpawn.cpp
+game/items/CSpawn.h
 game/items/CItemScript.cpp
 game/items/CItemScript.h
 game/items/CItemStone.cpp

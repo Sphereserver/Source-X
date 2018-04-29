@@ -2,7 +2,7 @@
 
 #include "../../common/CUIDExtra.h"
 #include "../clients/CClient.h"
-#include "../items/CItemSpawn.h"
+#include "../items/CSpawn.h"
 #include "../items/CItemVendable.h"
 #include "../triggers.h"
 #include "CChar.h"
@@ -608,7 +608,7 @@ bool CChar::NPC_PetSetOwner( CChar * pChar )
 
 	NPC_PetClearOwners();	// clear previous owner before set the new owner
 	m_ptHome.InitPoint();	// no longer homed
-	CItemSpawn * pSpawn = static_cast<CItemSpawn*>( m_uidSpawnItem.ItemFind() );
+	CSpawn * pSpawn = static_cast<CSpawn*>( GetComponent(COMP_SPAWN));
 	if ( pSpawn )
 		pSpawn->DelObj( GetUID() );
 	Memory_AddObjTypes(pChar, MEMORY_IPET);

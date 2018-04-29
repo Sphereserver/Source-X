@@ -15,6 +15,7 @@
 #include "../CServerConfig.h"
 #include "../CObjBase.h"
 #include "../CFaction.h"
+#include "../CEntity.h"
 #include "CItemBase.h"
 
 
@@ -308,9 +309,8 @@ public:
 		// IT_EQ_TRADE_WINDOW
 		struct
 		{
-			int64	m_iWaitTime;	// more1|more2
 			dword	m_iGold;		// morex|morey
-			byte	m_iPlatinum;	// morez		// a platinum coin is 1 million gold, we'll ever want to trade 256 millions+ currency?
+			dword	m_iPlatinum;	// morez		// a platinum coin is 1 million gold, we'll ever want to trade 256 millions+ currency?
 			byte	m_bCheck;		// morem = Check box for trade window.
             // We can make m_iPlatinum to be a dword (the packet uses a dword for this amount),
             //  but doing so we'll increase the union size for every item... not worth it.
@@ -642,11 +642,11 @@ public:
 
 	CREID_TYPE GetCorpseType() const;
 	void  SetCorpseType( CREID_TYPE id );
-	virtual void SetAmount( word amount );					// virtual for override in CItemSpawn
+	virtual void SetAmount( word amount );
 	word GetMaxAmount();
 	bool SetMaxAmount( word amount );
 	void SetAmountUpdate( word amount );
-	virtual word GetAmount() const							// virtual for override in CItemSpawn
+	virtual word GetAmount() const
 	{
 		return m_amount;
 	}

@@ -14,7 +14,7 @@
 #include "../items/CItemContainer.h"
 #include "../items/CItemMemory.h"
 #include "../items/CItemShip.h"
-#include "../items/CItemSpawn.h"
+#include "../items/CSpawn.h"
 #include "../CContainer.h"
 #include "../CServer.h"
 #include "../CServerTime.h"
@@ -686,7 +686,7 @@ int CChar::FixWeirdness()
 	}
 	if ( IsStatFlag( STATF_SPAWNED ))
 	{
-		if ( !m_uidSpawnItem.ItemFind() )
+		if (!GetSpawn())
 			StatFlag_Clear( STATF_SPAWNED );
 	}
 	if ( IsStatFlag( STATF_PET ))
@@ -735,12 +735,12 @@ int CChar::FixWeirdness()
 	CItemMemory *pMemory = Memory_FindTypes(MEMORY_ISPAWNED);
 	if ( pMemory )
 	{
-		CItemSpawn *pSpawn = static_cast<CItemSpawn*>(pMemory->m_uidLink.ItemFind());
+        CSpawn *pSpawn = static_cast<CSpawn*>(pMemory->m_uidLink.ItemFind()->GetComponent(COMP_SPAWN));
 		pMemory->Delete();
 		if ( pSpawn )
 		{
 			pSpawn->AddObj(GetUID());
-			m_uidSpawnItem = pSpawn->GetUID();
+			SetSpawn(pSpawn);
 		}
 	}
 

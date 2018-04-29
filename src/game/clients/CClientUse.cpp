@@ -3,7 +3,7 @@
 #include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../items/CItemMap.h"
-#include "../items/CItemSpawn.h"
+#include "../items/CSpawn.h"
 #include "../../common/CLog.h"
 #include "../triggers.h"
 #include "CClient.h"
@@ -119,7 +119,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		}
 	}
 
-	CItemSpawn *pSpawn = static_cast<CItemSpawn *>(pItem->m_uidSpawnItem.ItemFind());	// remove this item from its spawn when players DClick it from ground, no other way to take it out.
+	CSpawn *pSpawn = pItem->GetSpawn();	// remove this item from its spawn when players DClick it from ground, no other way to take it out.
 	if ( pSpawn )
 		pSpawn->DelObj(pItem->GetUID());
 
@@ -285,11 +285,11 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		case IT_SPAWN_ITEM:
 		case IT_SPAWN_CHAR:
 		{
-			pSpawn = static_cast<CItemSpawn *>(pItem);
+			pSpawn = pItem->GetSpawn();
 			if ( !pSpawn )
 				return false;
 
-			if ( pSpawn->m_currentSpawned )
+			if ( pSpawn->GetCurrentSpawned() )
 			{
 				SysMessageDefault(DEFMSG_ITEMUSE_SPAWN_NEG);
 				pSpawn->KillChildren();		// Removing existing objects spawned from it ( RESET ).
@@ -1318,14 +1318,12 @@ bool CClient::Cmd_SecureTrade( CChar *pChar, CItem *pItem )
 
 	pCont1->SetName("Trade Window");
 	pCont1->SetType(IT_EQ_TRADE_WINDOW);
-	pCont1->m_itEqTradeWindow.m_iWaitTime = 0;
 	pCont1->m_itEqTradeWindow.m_bCheck = 0;
 	pCont1->m_uidLink = pCont2->GetUID();
 	m_pChar->LayerAdd(pCont1, LAYER_SPECIAL);
 
 	pCont2->SetName("Trade Window");
 	pCont2->SetType(IT_EQ_TRADE_WINDOW);
-	pCont2->m_itEqTradeWindow.m_iWaitTime = 0;
 	pCont2->m_itEqTradeWindow.m_bCheck = 0;
 	pCont2->m_uidLink = pCont1->GetUID();
 	pChar->LayerAdd(pCont2, LAYER_SPECIAL);

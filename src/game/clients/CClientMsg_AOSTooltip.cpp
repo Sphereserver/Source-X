@@ -2,7 +2,7 @@
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
 #include "../items/CItem.h"
-#include "../items/CItemSpawn.h"
+#include "../items/CSpawn.h"
 #include "../items/CItemStone.h"
 #include "CClient.h"
 
@@ -932,7 +932,10 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 
 	case IT_SPAWN_CHAR:
 	{
-		CResourceDef * pSpawnCharDef = g_Cfg.ResourceGetDef(pItem->m_itSpawnChar.m_CharID);
+        CSpawn *pSpawn = pItem->GetSpawn();
+        if (!pSpawn)
+            break;
+        CResourceDef * pSpawnCharDef = g_Cfg.ResourceGetDef(pSpawn->GetSpawnID());
 		lpctstr pszName = NULL;
 		if (pSpawnCharDef)
 		{
@@ -951,25 +954,28 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 		PUSH_FRONT_TOOLTIP(pItem, t = new CClientTooltip(1061169)); // range ~1_val~
 		t->FormatArgs("%hhu", pItem->m_itSpawnChar.m_DistMax);
 		PUSH_FRONT_TOOLTIP(pItem, t = new CClientTooltip(1074247)); // Live Creatures: ~1_NUM~ / ~2_MAX~
-		t->FormatArgs("%hhu\t%hu", static_cast<const CItemSpawn *>(pItem)->m_currentSpawned, pItem->GetAmount());
+		t->FormatArgs("%hhu\t%hu", pSpawn->GetCurrentSpawned(), pSpawn->GetAmount());
 		PUSH_FRONT_TOOLTIP(pItem, t = new CClientTooltip(1060659)); // ~1_val~: ~2_val~
-		t->FormatArgs("Time range\t%hu min / %hu max", pItem->m_itSpawnChar.m_TimeLoMin, pItem->m_itSpawnChar.m_TimeHiMin);
+		t->FormatArgs("Time range\t%hu min / %hu max", pSpawn->GetTimeLo(), pSpawn->GetTimeHi());
 		PUSH_FRONT_TOOLTIP(pItem, t = new CClientTooltip(1060660)); // ~1_val~: ~2_val~
 		t->FormatArgs("Time until next spawn\t%" PRId64 " sec", pItem->GetTimerAdjusted());
 	} break;
 
 	case IT_SPAWN_ITEM:
 	{
-		CResourceDef * pSpawnItemDef = g_Cfg.ResourceGetDef(pItem->m_itSpawnItem.m_ItemID);
+        CSpawn *pSpawn = pItem->GetSpawn();
+        if (!pSpawn)
+            break;
+		CResourceDef * pSpawnItemDef = g_Cfg.ResourceGetDef(pSpawn->GetSpawnID());
 
 		PUSH_FRONT_TOOLTIP(pItem, t = new CClientTooltip(1060658)); // ~1_val~: ~2_val~
 		t->FormatArgs("Item\t%u %s", maximum(1, pItem->m_itSpawnItem.m_pile), pSpawnItemDef ? pSpawnItemDef->GetName() : "none");
 		PUSH_FRONT_TOOLTIP(pItem, t = new CClientTooltip(1061169)); // range ~1_val~
 		t->FormatArgs("%hhu", pItem->m_itSpawnItem.m_DistMax);
 		PUSH_FRONT_TOOLTIP(pItem, t = new CClientTooltip(1074247)); // Live Creatures: ~1_NUM~ / ~2_MAX~
-		t->FormatArgs("%hhu\t%hu", static_cast<const CItemSpawn *>(pItem)->m_currentSpawned, pItem->GetAmount());
+		t->FormatArgs("%hhu\t%hu", pSpawn->GetCurrentSpawned(), pSpawn->GetAmount());
 		PUSH_FRONT_TOOLTIP(pItem, t = new CClientTooltip(1060659)); // ~1_val~: ~2_val~
-		t->FormatArgs("Time range\t%hu min / %hu max", pItem->m_itSpawnItem.m_TimeLoMin, pItem->m_itSpawnItem.m_TimeHiMin);
+		t->FormatArgs("Time range\t%hu min / %hu max", pSpawn->GetTimeLo(), pSpawn->GetTimeHi());
 		PUSH_FRONT_TOOLTIP(pItem, t = new CClientTooltip(1060660)); // ~1_val~: ~2_val~
 		t->FormatArgs("Time until next spawn\t%" PRId64 " sec", pItem->GetTimerAdjusted());
 	} break;

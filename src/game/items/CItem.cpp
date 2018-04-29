@@ -8,6 +8,7 @@
 #include "../chars/CCharNPC.h"
 #include "../clients/CClient.h"
 #include "../triggers.h"
+#include "../CChampion.h"
 #include "CItem.h"
 #include "CItemCommCrystal.h"
 #include "CItemContainer.h"
@@ -18,9 +19,9 @@
 #include "CItemMultiCustom.h"
 #include "CItemScript.h"
 #include "CItemShip.h"
-#include "CItemSpawn.h"
 #include "CItemStone.h"
 #include "CItemVendable.h"
+#include "CSpawn.h"
 
 
 /*
@@ -124,9 +125,11 @@ CItem::~CItem()
 		case IT_SPAWN_CHAR:
 		case IT_SPAWN_ITEM:
 			{
-				CItemSpawn *pSpawn = static_cast<CItemSpawn*>(this);
-				if ( pSpawn )
-					pSpawn->KillChildren();
+                CSpawn *pSpawn = GetSpawn();
+                if (pSpawn)
+                {
+                    pSpawn->KillChildren();
+                }
 			}
 			break;
 		case IT_FIGURINE:
@@ -221,14 +224,26 @@ CItem * CItem::CreateBase( ITEMID_TYPE id )	// static
 			break;
 		case IT_SPAWN_CHAR:
 		case IT_SPAWN_ITEM:
-			pItem = new CItemSpawn(id ,pItemDef);
-			break;
+        {
+            pItem = new CItem(id, pItemDef);
+            pItem->Suscribe(new CSpawn(pItem));
+            break;
+        }
+        case IT_SPAWN_CHAMPION:
+        {
+            pItem = new CItem(id, pItemDef);
+            pItem->Suscribe(new CSpawn(pItem));
+            pItem->Suscribe(new CChampion(pItem));
+            break;
+        }
 		default:
-			if ( pItemDef->GetMakeValue(0))
-				pItem = new CItemVendable( id, pItemDef );
-			else
-				pItem = new CItem( id, pItemDef );
-			break;
+        {
+            if (pItemDef->GetMakeValue(0))
+                pItem = new CItemVendable(id, pItemDef);
+            else
+                pItem = new CItem(id, pItemDef);
+            break;
+        }
 	}
 
 	ASSERT( pItem );
@@ -888,11 +903,11 @@ int CItem::FixWeirdness()
 		case IT_SPAWN_CHAR:
 		case IT_SPAWN_ITEM:
 			{
-				CItemSpawn *pSpawn = static_cast<CItemSpawn*>(this);
-				if (pSpawn)
+                CSpawn *pSpawn = GetSpawn();
+                if (pSpawn)
 				{
-					pSpawn->FixDef();
-					pSpawn->SetTrackID();
+                    pSpawn->FixDef();
+                    pSpawn->SetTrackID();
 				}
 			}
 			break;
@@ -1978,6 +1993,9 @@ void CItem::r_WriteMore1( CSString & sVal )
 		case IT_SPAWN_ITEM:
 			sVal = g_Cfg.ResourceGetName( m_itSpawnItem.m_ItemID );
 			return;
+		case IT_SPAWN_CHAMPION:
+			sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHAMPION, m_itSpawnChar.m_CharID));
+			return;
 		case IT_TREE:
 		case IT_GRASS:
 		case IT_ROCK:
@@ -2937,11 +2955,11 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			m_itNormal.m_more1 = s.GetArgVal();
 			if ( !g_Serv.IsLoading() && ( IsType(IT_SPAWN_CHAR) || IsType(IT_SPAWN_ITEM) ) )
 			{
-				CItemSpawn *pSpawn = static_cast<CItemSpawn*>(this);
-				if (pSpawn)
+                CSpawn *pSpawn = GetSpawn();
+                if (pSpawn)
 				{
-					pSpawn->FixDef();
-					pSpawn->SetTrackID();
+                    pSpawn->FixDef();
+                    pSpawn->SetTrackID();
 					RemoveFromView();
 					Update();
 				}
@@ -5626,11 +5644,14 @@ bool CItem::OnTick()
 
 		case IT_SPAWN_CHAR:	// Spawn a creature (if we are under count).
 		case IT_SPAWN_ITEM:	// Spawn an item (if we are under count).
+        case IT_SPAWN_CHAMPION:
 			{
-				EXC_SET("default behaviour::IT_SPAWN");
-				CItemSpawn * pSpawn = static_cast<CItemSpawn*>(this);
-				if ( pSpawn )
-					pSpawn->OnTick(true);
+				EXC_SET("default behaviour::IT_SPAWN"); // TODO: CSpawn is a CComponent and so, it should be moved out of this switch to a loop running this CEntity's CComponents.
+                CSpawn *pSpawn = GetSpawn();
+                if (pSpawn)
+                {
+                    pSpawn->OnTick(true);
+                }
 			}
 			return true;
 

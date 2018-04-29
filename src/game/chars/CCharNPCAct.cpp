@@ -1822,14 +1822,8 @@ void CChar::NPC_Act_Idle()
 			return;
 	}
 
-	// Look around for things to do.
-	if ( !Calc_GetRandVal(1 + TICK_PER_SEC/3) )
-	{
-		// NPC_LookAround() is very expensive, so since NPC_Act_Wander is called every tick for every char with ACTION == NPCACT_IDLE,
-		//	don't look around every time.
-		if ( NPC_LookAround() )
-			return;			// found something interesting
-	}
+	if ( NPC_LookAround() )
+		return;			// found something interesting
 
 	// ---------- If we found nothing else to do. do this. -----------
 
@@ -2118,6 +2112,14 @@ void CChar::NPC_OnTickAction()
 				EXC_SET("fight");
 				NPC_Act_Fight();
 				break;
+            case SKILL_MAGERY:
+            case SKILL_NECROMANCY:
+            case SKILL_MYSTICISM:
+            case SKILL_CHIVALRY:
+            case SKILL_SPELLWEAVING:
+                EXC_SET("magic");
+                NPC_Act_Fight();    // May be we can split Fight and Magic from here?
+                break;
 
 			case NPCACT_GUARD_TARG:
 				// fight with the target, or follow it

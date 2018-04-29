@@ -7,8 +7,6 @@
 #define _INC_CSTACK_H
 
 #include <shared_mutex>
-
-#include "../common.h"
 #include "../CException.h"
 
 #define _SPHERE_STACK_DEFAULT_SIZE 10
@@ -16,7 +14,7 @@
 template<typename T>
 class fixedstack {
 public:
-    fixedstack(dword size=_SPHERE_STACK_DEFAULT_SIZE);
+    fixedstack(unsigned int size=_SPHERE_STACK_DEFAULT_SIZE);
     fixedstack(const fixedstack<T> & o);
     ~fixedstack();
 
@@ -28,17 +26,17 @@ public:
 
     void clear();
     bool empty();
-    dword size();
+    unsigned int size();
 
 private:
     T * _stack;
-    dword _top, _size;
+    unsigned int _top, _size;
 };
 
 template <typename T>
 class fixedgrowingstack {
 public:
-    fixedgrowingstack(dword size=_SPHERE_STACK_DEFAULT_SIZE);
+    fixedgrowingstack(unsigned int size=_SPHERE_STACK_DEFAULT_SIZE);
     fixedgrowingstack(const fixedgrowingstack<T> & o);
     ~fixedgrowingstack();
 
@@ -50,10 +48,10 @@ public:
 
     void clear();
     bool empty();
-    dword size();
+    unsigned int size();
 private:
     T * _stack;
-    dword _top, _size;
+    unsigned int _top, _size;
 };
 
 template<typename T>
@@ -61,7 +59,7 @@ class dynamicstack {
 public:
     dynamicstack();
     // To allow thread secure wrapper constructor.
-    dynamicstack(dword _);
+    dynamicstack(unsigned int _);
     dynamicstack(const dynamicstack<T> & o);
     ~dynamicstack();
 
@@ -73,7 +71,7 @@ public:
 
     void clear();
     bool empty();
-    dword size();
+    unsigned int size();
 
 private:
     struct _dynamicstackitem {
@@ -83,13 +81,13 @@ private:
         _dynamicstackitem * _next;
     };
     _dynamicstackitem * _top;
-    dword _size;
+    unsigned int _size;
 };
 
 template <typename T, class S>
 class tsstack {
 public:
-    tsstack(dword size=_SPHERE_STACK_DEFAULT_SIZE);
+    tsstack(unsigned int size=_SPHERE_STACK_DEFAULT_SIZE);
     tsstack(const tsstack<T, S> & o);
 
     tsstack & operator=(const tsstack<T, S> & o);
@@ -100,7 +98,7 @@ public:
 
     void clear();
     bool empty();
-    dword size();
+    unsigned int size();
 private:
     std::shared_mutex _mutex;
     S _s;
@@ -120,7 +118,7 @@ using tsdynamicstack = tsstack<T, dynamicstack<T>>;
 */
 
 template <typename T>
-fixedstack<T>::fixedstack(dword size) {
+fixedstack<T>::fixedstack(unsigned int size) {
     _stack = new T[size];
     _top = 0;
     _size = size;
@@ -131,7 +129,7 @@ fixedstack<T>::fixedstack(const fixedstack<T> & o) {
     _stack = new T[o._size];
     _top = o._top;
     _size = o._size;
-    for(dword i = 0; i < _top; ++i) _stack[i] = o._stack[i];
+    for(unsigned int i = 0; i < _top; ++i) _stack[i] = o._stack[i];
 }
 
 template <typename T>
@@ -145,7 +143,7 @@ fixedstack<T> & fixedstack<T>::operator=(const fixedstack<T> & o) {
     _stack = new T[o._size];
     _top = o._top;
     _size = o._size;
-    for(dword i = 0; i < _top; ++i) _stack[i] = o._stack[i];
+    for(unsigned int i = 0; i < _top; ++i) _stack[i] = o._stack[i];
     return *this;
 }
 
@@ -186,12 +184,12 @@ bool fixedstack<T>::empty() {
 }
 
 template <typename T>
-dword fixedstack<T>::size() {
+unsigned int fixedstack<T>::size() {
     return _top;
 }
 
 template <typename T>
-fixedgrowingstack<T>::fixedgrowingstack(dword size) {
+fixedgrowingstack<T>::fixedgrowingstack(unsigned int size) {
 _stack = new T[size];
 _top = 0;
 _size = size;
@@ -202,7 +200,7 @@ fixedgrowingstack<T>::fixedgrowingstack(const fixedgrowingstack<T> & o) {
     _stack = new T[o._size];
     _top = o._top;
     _size = o._size;
-    for(dword i = 0; i < _top; ++i) _stack[i] = o._stack[i];
+    for(unsigned int i = 0; i < _top; ++i) _stack[i] = o._stack[i];
 }
 
 template <typename T>
@@ -215,7 +213,7 @@ fixedgrowingstack<T> & fixedgrowingstack<T>::operator=(const fixedgrowingstack<T
     _stack = new T[o._size];
     _top = o._top;
     _size = o._size;
-    for(dword i = 0; i < _top; ++i) _stack[i] = o._stack[i];
+    for(unsigned int i = 0; i < _top; ++i) _stack[i] = o._stack[i];
     return *this;
 }
 
@@ -223,7 +221,7 @@ template <typename T>
 void fixedgrowingstack<T>::push(T t) {
     if (_top == _size) {
         T * nstack = new T[_size + _SPHERE_STACK_DEFAULT_SIZE];
-        for(dword i = 0; i < _top; ++i) nstack[i] = _stack[i];
+        for(unsigned int i = 0; i < _top; ++i) nstack[i] = _stack[i];
         delete[] _stack;
         _stack = nstack;
         _size += _SPHERE_STACK_DEFAULT_SIZE;
@@ -260,7 +258,7 @@ bool fixedgrowingstack<T>::empty() {
 }
 
 template <typename T>
-dword fixedgrowingstack<T>::size() {
+unsigned int fixedgrowingstack<T>::size() {
     return _top;
 }
 
@@ -271,7 +269,7 @@ dynamicstack<T>::dynamicstack() {
 }
 
 template <typename T>
-dynamicstack<T>::dynamicstack(dword _) : dynamicstack<T>() { UNREFERENCED_PARAMETER(_); }
+dynamicstack<T>::dynamicstack(unsigned int _) : dynamicstack<T>() { UNREFERENCED_PARAMETER(_); }
 
 template <typename T>
 dynamicstack<T>::dynamicstack(const dynamicstack<T> & o) {
@@ -352,7 +350,7 @@ bool dynamicstack<T>::empty() {
 }
 
 template <typename T>
-dword dynamicstack<T>::size(){
+unsigned int dynamicstack<T>::size(){
     return _size;
 }
 
@@ -363,7 +361,7 @@ dynamicstack<T>::_dynamicstackitem::_dynamicstackitem(T item, _dynamicstackitem 
 }
 
 template<typename T, class S>
-tsstack<T, S>::tsstack(dword size) : _s(size) {}
+tsstack<T, S>::tsstack(unsigned int size) : _s(size) {}
 
 template<typename T, class S>
 tsstack<T, S>::tsstack(const tsstack<T, S> & o) {
@@ -419,9 +417,9 @@ bool tsstack<T, S>::empty() {
 }
 
 template<typename T, class S>
-dword tsstack<T, S>::size() {
+unsigned int tsstack<T, S>::size() {
     _mutex.lock();
-    dword s = _s.size();
+    unsigned int s = _s.size();
     _mutex.unlock();
     return s;
 }

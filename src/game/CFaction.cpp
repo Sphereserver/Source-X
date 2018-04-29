@@ -306,7 +306,7 @@ bool CFaction::IsGroupElemental()
 bool CFaction::IsGroupFey()
 {
     ADDTOCALLSTACK_INTENSIVE("CFaction::IsGroupFey");
-    return (_iFaction == NPCGROUP_FEY);
+    return (_iFaction == FACTION_FEY);
 }
 
 bool CFaction::IsGroupAbyss()

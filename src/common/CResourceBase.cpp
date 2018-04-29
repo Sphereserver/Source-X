@@ -22,6 +22,7 @@ lpctstr const CResourceBase::sm_szResourceBlocks[RES_QTY] =	// static
 	"AREA",			// Complex region. (w/ extra tags)
 	"BLOCKIP",		// (SL) A list of IP's to block.
 	"BOOK",			// A book or a page from a book.
+	"CHAMPION",		// A Champion definition.
 	"CHARDEF",		// Define a char type.
 	"COMMENT",		// A commented out block type.
 	"DEFNAME",		// (SL) Just add a bunch of new defs and equivs str/values.

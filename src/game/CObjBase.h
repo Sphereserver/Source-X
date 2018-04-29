@@ -10,6 +10,7 @@
 #include "../common/CScriptObj.h"
 #include "../common/CResourceBase.h"
 #include "CServerTime.h"
+#include "CEntity.h"
 #include "CBase.h"
 #include "CServerConfig.h"
 #include "CWorld.h"
@@ -20,8 +21,9 @@
 class CBaseBase;
 class PacketSend;
 class PacketPropertyList;
+class CSpawn;
 
-class CObjBase : public CObjBaseTemplate, public CScriptObj
+class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity
 {
 	static lpctstr const sm_szLoadKeys[];   // All Instances of CItem or CChar have these base attributes.
 	static lpctstr const sm_szVerbKeys[];   // All Instances of CItem or CChar have these base attributes.
@@ -44,25 +46,25 @@ protected:
 	}
 
 public:
-	static const char *m_sClassName;
+    static const char *m_sClassName;
 
-	size_t m_iCreatedResScriptIdx;	// index in g_Cfg.m_ResourceFiles of the script file where this obj was created
-	int m_iCreatedResScriptLine;	// line in the script file where this obj was created
+    size_t m_iCreatedResScriptIdx;	// index in g_Cfg.m_ResourceFiles of the script file where this obj was created
+    int m_iCreatedResScriptLine;	// line in the script file where this obj was created
 
-	CVarDefMap m_TagDefs;		// attach extra tags here.
-	CVarDefMap m_BaseDefs;		// New Variable storage system
-	dword	m_CanMask;			// Mask to be XORed to Can: enable or disable some Can Flags
+    CVarDefMap m_TagDefs;		// attach extra tags here.
+    CVarDefMap m_BaseDefs;		// New Variable storage system
+    dword	m_CanMask;			// Mask to be XORed to Can: enable or disable some Can Flags
 
-	word	m_attackBase;       // dam for weapons
-	word	m_attackRange;      // variable range of attack damage.
+    word	m_attackBase;       // dam for weapons
+    word	m_attackRange;      // variable range of attack damage.
 
-	word	m_defenseBase;	    // Armor for IsArmor items
-	word	m_defenseRange;     // variable range of defense.
-	int 	m_ModMaxWeight;		// ModMaxWeight prop.
-	CUID 	m_uidSpawnItem;		// SpawnItem for this item
+    word	m_defenseBase;	    // Armor for IsArmor items
+    word	m_defenseRange;     // variable range of defense.
+    int 	m_ModMaxWeight;		// ModMaxWeight prop.
+    CUID 	_uidSpawn;          // SpawnItem for this item
 
-	CResourceRefArray m_OEvents;
-	static size_t sm_iCount;    // how many total objects in the world ?
+    CResourceRefArray m_OEvents;
+    static size_t sm_iCount;    // how many total objects in the world ?
 
 	/**
 	* @fn  CBaseBaseDef * CObjBase::Base_GetDef() const;
@@ -157,6 +159,24 @@ public:
 public:
 
     /**
+    * @fn  CSpawn *CObjBase::GetSpawn();
+    *
+    * @brief   Returns Spawn item.
+    *
+    * @return  The CItem.
+    */
+    CSpawn *GetSpawn();
+
+    /**
+    * @fn  CSpawn *CObjBase::SetSpawn(CSpawn *spawn);
+    *
+    * @brief   sets the Spawn item.
+    *
+    * @param  The CSpawn.
+    */
+    void SetSpawn(CSpawn *spawn);
+
+    /**
      * @fn  byte CObjBase::RangeL() const;
      *
      * @brief   Returns RangeLow.
@@ -184,13 +204,13 @@ public:
 	CServerTime GetTimeStamp() const;
 
     /**
-     * @fn  void CObjBase::SetTimeStamp( int64 t_time);
+     * @fn  void CObjBase::SetTimeStamp(int64 t_time);
      *
      * @brief   Sets time stamp.
      *
      * @param   t_time  The time.
      */
-	void SetTimeStamp( int64 t_time);
+	void SetTimeStamp(int64 t_time);
 
     /**
      * @fn  lpctstr CObjBase::GetDefStr( lpctstr pszKey, bool fZero = false, bool fDef = false ) const;
