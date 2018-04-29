@@ -3027,7 +3027,7 @@ int CChar::Spell_CastStart()
 		// So to avoid this problem we must use TALKMODE_SAY, which is not the correct type but with this type the client only show last 3 messages on screen.
 		if ( pSpellDef->m_sRunes[0] == '.' )
 		{
-			Speak((pSpellDef->m_sRunes.GetPtr()) + 1, (HUE_TYPE)WOPColor, TALKMODE_SAY, static_cast<FONT_TYPE>(WOPFont));
+			Speak((pSpellDef->m_sRunes.GetPtr()) + 1, (HUE_TYPE)WOPColor, TALKMODE_SAY, (FONT_TYPE)WOPFont);
 		}
 		else
 		{
@@ -3045,7 +3045,7 @@ int CChar::Spell_CastStart()
 			if ( len > 0 )
 			{
 				pszTemp[len] = 0;
-				Speak(pszTemp, (HUE_TYPE)WOPColor, TALKMODE_SAY, static_cast<FONT_TYPE>(WOPFont));
+				Speak(pszTemp, (HUE_TYPE)WOPColor, TALKMODE_SAY, (FONT_TYPE)(WOPFont));
 			}
 		}
 	}

@@ -42,14 +42,14 @@ const CRectMap & CRegionBase::GetRegionRect(size_t i) const
 	return( m_Rects.ElementAt(i));
 }
 
-CPointBase CRegionBase::GetRegionCorner( DIR_TYPE dir ) const
+CPointMap CRegionBase::GetRegionCorner( DIR_TYPE dir ) const
 {
 	ADDTOCALLSTACK("CRegionBase::GetRegionCorner");
 	// NOTE: DIR_QTY = center.
 	return( m_rectUnion.GetRectCorner(dir));
 }
 
-bool CRegionBase::IsInside2d( const CPointBase & pt ) const
+bool CRegionBase::IsInside2d( const CPointMap & pt ) const
 {
 	ADDTOCALLSTACK("CRegionBase::IsInside2d");
 	if ( ! m_rectUnion.IsInside2d( pt ))

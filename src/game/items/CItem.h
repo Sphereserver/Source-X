@@ -667,11 +667,11 @@ public:
 	bool MoveToCheck( const CPointMap & pt, CChar * pCharMover = NULL );
 	virtual bool MoveNearObj( const CObjBaseTemplate *pItem, word iSteps = 0 );
 
-	CItem* GetNext() const
+	inline CItem* GetNext() const
 	{
 		return static_cast <CItem*>(CObjBase::GetNext());
 	}
-	CItem* GetPrev() const
+	inline CItem* GetPrev() const
 	{
 		return static_cast <CItem*>(CObjBase::GetPrev());
 	}
@@ -681,9 +681,9 @@ public:
 	uchar GetContainedGridIndex() const;
 	void SetContainedGridIndex(uchar index);
 
-	void  Update( const CClient * pClientExclude = NULL );		// send this new item to everyone.
-	void  Flip();
-	bool  LoadSetContainer( CUID uid, LAYER_TYPE layer );
+	void Update( const CClient * pClientExclude = NULL );		// send this new item to everyone.
+	void Flip();
+	bool LoadSetContainer( CUID uid, LAYER_TYPE layer );
 
 	void WriteUOX( CScript & s, int index );
 

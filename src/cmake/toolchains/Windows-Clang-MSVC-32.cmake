@@ -1,10 +1,10 @@
 SET (TOOLCHAIN 1)
 
-SET(ARCH_BITS			64)
+SET(ARCH_BITS			32)
 SET(ENABLE_SANITIZERS	true CACHE BOOL "Use sanitizers for the nightly build. ONLY FOR TESTING PURPOSES!")
 
 function (toolchain_after_project)
-	MESSAGE (STATUS "Toolchain: Windows-clang-MSVC-64.cmake.")
+	MESSAGE (STATUS "Toolchain: Windows-clang-MSVC-32.cmake.")
 	SET(CMAKE_SYSTEM_NAME	"Windows"	PARENT_SCOPE)
 	ENABLE_LANGUAGE(RC)
 
@@ -26,9 +26,9 @@ function (toolchain_after_project)
 	#-- Release compiler and linker flags.
 	
 	IF (${ENABLE_SANITIZERS})
-		SET (SANITIZERS_OPTS_R "/Od /Oy- /Zi -fsanitize=address,undefined")
+		SET (SANITIZERS_OPTS_R "/Od /Oy- /Zi -gcodeview -gdwarf -fsanitize=address,undefined")
 	ELSE (${ENABLE_SANITIZERS})
-		SET (SANITIZERS_OPTS_R "/O2 /Gy")
+		SET (SANITIZERS_OPTS_R "/O2 /Gy /flto=full -fwhole-program-vtables")
 	ENDIF (${ENABLE_SANITIZERS})
 	SET (CMAKE_C_FLAGS_RELEASE			"${C_FLAGS_COMMON}   /EHsc /GA /Gw ${SANITIZERS_OPTS_R}"	PARENT_SCOPE)
 	SET (CMAKE_CXX_FLAGS_RELEASE		"${CXX_FLAGS_COMMON} /EHsc /GA /Gw ${SANITIZERS_OPTS_R}"	PARENT_SCOPE)
@@ -38,9 +38,9 @@ function (toolchain_after_project)
 	#-- Nightly compiler and linker flags.
 
 	IF (${ENABLE_SANITIZERS})
-		SET (SANITIZERS_OPTS_N "/Od /Oy- /Zi -fsanitize=address,undefined")
+		SET (SANITIZERS_OPTS_N "/Od /Oy- /Zi -gcodeview -gdwarf -fsanitize=address,undefined")
 	ELSE (${ENABLE_SANITIZERS})
-		SET (SANITIZERS_OPTS_N "/O2 /Gy")
+		SET (SANITIZERS_OPTS_N "/O2 /Gy /flto=full -fwhole-program-vtables")
 	ENDIF (${ENABLE_SANITIZERS})
 	SET (CMAKE_C_FLAGS_NIGHTLY			"${C_FLAGS_COMMON}   ${SANITIZERS_OPTS_N} /EHsc /GA /Gw"		PARENT_SCOPE)
 	SET (CMAKE_CXX_FLAGS_NIGHTLY		"${CXX_FLAGS_COMMON} ${SANITIZERS_OPTS_N} /EHsc /GA /Gw"		PARENT_SCOPE)
@@ -55,12 +55,14 @@ function (toolchain_after_project)
 		SET (SANITIZERS_OPTS_D "/Od /Oy-")
 	ENDIF (${ENABLE_SANITIZERS})
 	SET (CMAKE_C_FLAGS_DEBUG			"${C_FLAGS_COMMON}   /EHsc ${SANITIZERS_OPTS_D}"			PARENT_SCOPE)
-	SET (CMAKE_CXX_FLAGS_DEBUG			"${CXX_FLAGS_COMMON} /EHsc /MDd /ZI ${SANITIZERS_OPTS_D}"	PARENT_SCOPE)
+	SET (CMAKE_CXX_FLAGS_DEBUG			"${CXX_FLAGS_COMMON} /EHsc /MDd /Zi -gcodeview -gdwarf\
+										 ${SANITIZERS_OPTS_D}"										PARENT_SCOPE)
 	SET (CMAKE_EXE_LINKER_FLAGS_DEBUG	"${LINKER_FLAGS_COMMON} /DEBUG"								PARENT_SCOPE)
-	
-	#-- Set mysql .lib directory for the linker.
 
-	LINK_DIRECTORIES ("${CMAKE_SOURCE_DIR}/../DLLs/64/")
+
+	#-- Set .lib directory for the linker.
+
+	LINK_DIRECTORIES ("${CMAKE_SOURCE_DIR}/../DLLs/32/")
 	
 endfunction()
 
@@ -77,7 +79,7 @@ function (toolchain_exe_stuff)
 	#-- Set define macros.
 
 	 # Architecture defines
-	TARGET_COMPILE_DEFINITIONS ( spheresvr 	PUBLIC _64BITS _WIN64	)
+	TARGET_COMPILE_DEFINITIONS ( spheresvr 	PUBLIC _32BITS		)
 
 	 # Common defines
 	TARGET_COMPILE_DEFINITIONS ( spheresvr PUBLIC
@@ -104,13 +106,13 @@ function (toolchain_exe_stuff)
 
 		$<$<CONFIG:Nightly>: _NIGHTLYBUILD $<$<NOT:$<BOOL:${ENABLE_SANITIZERS}>>:THREAD_TRACK_CALLSTACK> >
 
-		$<$<CONFIG:Debug>:	 _DEBUG THREAD_TRACK_CALLSTACK _PACKETDUMP >
+		$<$<CONFIG:Debug>:	 _DEBUG THREAD_TRACK_CALLSTACK _PACKETDUMP>
 	)
 
 
 	#-- Custom output directory.
 
-	SET(OUTDIR "${CMAKE_BINARY_DIR}/bin64/")
+	SET(OUTDIR "${CMAKE_BINARY_DIR}/bin/")
 	SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_DIRECTORY	"${OUTDIR}"		)
 	SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_RELEASE	"${OUTDIR}/Release"	)
 	SET_TARGET_PROPERTIES(spheresvr PROPERTIES RUNTIME_OUTPUT_DEBUG		"${OUTDIR}/Debug"	)

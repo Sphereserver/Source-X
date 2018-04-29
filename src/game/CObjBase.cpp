@@ -556,7 +556,7 @@ bool CObjBase::MoveNear( CPointMap pt, word iSteps )
 	// Actually move it within +/- iSteps
 
 	CPointBase ptOld = pt;
-	for ( int i = 0; i < iSteps; i++ )
+	for ( uint i = 0; i < iSteps; ++i )
 	{
 		pt = ptOld;
 		pt.m_x += (short)Calc_GetRandVal2(-iSteps, iSteps);
@@ -2170,7 +2170,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				pClientSrc->addBarkUNICODE( ncBuffer, this,
 					(HUE_TYPE)( pszArgs[0][0] ? Exp_GetVal(pszArgs[0]) : HUE_TEXT_DEF ),
 					static_cast<TALKMODE_TYPE>( pszArgs[1][0] ? Exp_GetVal(pszArgs[1]) : TALKMODE_SAY ),
-					static_cast<FONT_TYPE>( pszArgs[2][0] ? Exp_GetVal(pszArgs[2]) : FONT_NORMAL ),
+					(FONT_TYPE)( pszArgs[2][0] ? Exp_GetVal(pszArgs[2]) : FONT_NORMAL ),
 					CLanguageID(pszArgs[3]));
 				break;
 			}
@@ -2312,7 +2312,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				SpeakUTF8( pszArgs[4],
 					(HUE_TYPE)( pszArgs[0][0] ? Exp_GetVal(pszArgs[0]) : HUE_TEXT_DEF ),
 					static_cast<TALKMODE_TYPE>( pszArgs[1][0] ? Exp_GetVal(pszArgs[1]) : TALKMODE_SAY ),
-					static_cast<FONT_TYPE>( pszArgs[2][0] ? Exp_GetVal(pszArgs[2]) : FONT_NORMAL ),
+					(FONT_TYPE)( pszArgs[2][0] ? Exp_GetVal(pszArgs[2]) : FONT_NORMAL ),
 					CLanguageID(pszArgs[3]));
 			}
 			break;

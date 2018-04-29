@@ -559,7 +559,7 @@ bool CImportFile::ImportWSC( CScript & s, word wModeFlags )
 			}
 			else if ( s.IsKey("FONT" ))
 			{
-				pChar->m_fonttype = static_cast<FONT_TYPE>(ATOI(pArg));
+				pChar->m_fonttype = (FONT_TYPE)(ATOI(pArg));
 				continue;
 			}
 			else if ( s.IsKey("KARMA" ))

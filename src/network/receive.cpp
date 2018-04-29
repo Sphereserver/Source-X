@@ -2088,7 +2088,7 @@ bool PacketSpeakReqUNICODE::onReceive(NetState* net)
 	size_t packetLength = readInt16();
 	TALKMODE_TYPE mode = static_cast<TALKMODE_TYPE>(readByte());
 	HUE_TYPE hue = (HUE_TYPE)(readInt16());
-	FONT_TYPE font = static_cast<FONT_TYPE>(readInt16());
+	FONT_TYPE font = (FONT_TYPE)(readInt16());
 	tchar language[4];
 	readStringASCII(language, CountOf(language));
 

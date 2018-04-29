@@ -209,7 +209,7 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@UserWarmode",
 
 	// War mode ?
-	 NULL,
+	NULL
 };
 
 
@@ -3104,22 +3104,22 @@ do_default:
 			NotoSave_Update();
 			break;
 		case CHC_FONT:
-			m_fonttype = static_cast<FONT_TYPE>(s.GetArgVal());
+			m_fonttype = (FONT_TYPE)s.GetArgVal();
 			if ( m_fonttype < 0 || m_fonttype >= FONT_QTY )
 				m_fonttype = FONT_NORMAL;
 			break;
 		case CHC_SPEECHCOLOR:
 			if ( m_pPlayer )	// read-only on players, set SPEECHCOLOROVERRIDE instead
 				return false;
-			m_SpeechHue = (HUE_TYPE)(s.GetArgWVal());
+			m_SpeechHue = (HUE_TYPE)s.GetArgWVal();
 			break;
 		case CHC_SPEECHCOLOROVERRIDE:
 			if ( !m_pPlayer )	// valid only for players
 				return false;
-			m_SpeechHueOverride = (HUE_TYPE)(s.GetArgWVal());
+			m_SpeechHueOverride = (HUE_TYPE)s.GetArgWVal();
 			break;
 		case CHC_FOOD:
-			Stat_SetVal(STAT_FOOD, (short)s.GetArgVal());
+			Stat_SetVal(STAT_FOOD, s.GetArgSVal());
 			break;
 		case CHC_GOLD:
 		{

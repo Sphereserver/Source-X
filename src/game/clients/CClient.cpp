@@ -1485,7 +1485,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 						CArgs += ( !strncmp(ppArgs[i], "NULL", 4) ? " " : ppArgs[i] );
 					}
 
-					addBarkLocalizedEx( iClilocId, NULL, (HUE_TYPE)(hue), TALKMODE_SYSTEM, FONT_NORMAL, static_cast<AFFIX_TYPE>(affix), ppArgs[3], CArgs.GetPtr() );
+					addBarkLocalizedEx( iClilocId, NULL, (HUE_TYPE)(hue), TALKMODE_SYSTEM, FONT_NORMAL, (AFFIX_TYPE)(affix), ppArgs[3], CArgs.GetPtr() );
 				}
 			}
 			break;

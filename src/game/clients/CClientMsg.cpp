@@ -684,9 +684,8 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 	FONT_TYPE defaultFont = FONT_NORMAL;
 	bool defaultUnicode = false;
 	const CChar * pSrcChar = NULL;
-	if (pSrc)
-		if (pSrc->IsChar())
-			pSrcChar = static_cast<const CChar *>(pSrc);
+	if (pSrc && pSrc->IsChar())
+	    pSrcChar = static_cast<const CChar *>(pSrc);
 
 	switch ( mode )
 	{
@@ -698,14 +697,14 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 				if (GetNetState()->isClientEnhanced() && pSrcChar->m_pNPC)
 					goto forcesay;
 			defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("SMSG_DEF_COLOR"));
-			defaultFont = static_cast<FONT_TYPE>(g_Exp.m_VarDefs.GetKeyNum("SMSG_DEF_FONT"));
+			defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("SMSG_DEF_FONT"));
 			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("SMSG_DEF_UNICODE", true) > 0 ? true : false;
 			break;
 		}
 		case TALKMODE_EMOTE:
 		{
 			defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_COLOR"));
-			defaultFont = static_cast<FONT_TYPE>(g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_FONT"));
+			defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_FONT"));
 			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_UNICODE", true) > 0 ? true : false;
 			break;
 		}
@@ -713,14 +712,14 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		{
 			forcesay:
 			defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("SAY_DEF_COLOR"));
-			defaultFont = static_cast<FONT_TYPE>(g_Exp.m_VarDefs.GetKeyNum("SAY_DEF_FONT"));
+			defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("SAY_DEF_FONT"));
 			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("SAY_DEF_UNICODE", true) > 0 ? true : false;
 			break;
 		}
 		case TALKMODE_OBJ:
 		{
 			defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("MSG_DEF_COLOR"));
-			defaultFont = static_cast<FONT_TYPE>(g_Exp.m_VarDefs.GetKeyNum("MSG_DEF_FONT"));
+			defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("MSG_DEF_FONT"));
 			defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("MSG_DEF_UNICODE", true) > 0 ? true : false;
 			break;
 		}
@@ -728,13 +727,13 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		{
 			if ( pSrc->IsChar() )
 			{
-				defaultFont = static_cast<FONT_TYPE>(g_Exp.m_VarDefs.GetKeyNum("CMSG_DEF_FONT"));
+				defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("CMSG_DEF_FONT"));
 				defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("CMSG_DEF_UNICODE", true) > 0 ? true : false;
 			}
 			else
 			{
 				defaultHue = (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("IMSG_DEF_COLOR"));
-				defaultFont = static_cast<FONT_TYPE>(g_Exp.m_VarDefs.GetKeyNum("IMSG_DEF_FONT"));
+				defaultFont = (FONT_TYPE)(g_Exp.m_VarDefs.GetKeyNum("IMSG_DEF_FONT"));
 				defaultUnicode = g_Exp.m_VarDefs.GetKeyNum("IMSG_DEF_UNICODE", true) > 0 ? true : false;
 			}
 		}
@@ -746,7 +745,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 
 	if ( *pszText == '@' )
 	{
-		pszText++;
+		++pszText;
 		if ( *pszText == '@' ) // @@ = just a @ symbol
 			goto bark_default;
 
@@ -760,19 +759,19 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		{
 			if ( *s == ',' ) // default value, skip it
 			{
-				i++;
-				s++;
+				++i;
+				++s;
 				continue;
 			}
 			Args[i] = (Exp_GetWVal(s));
-			i++;
+			++i;
 
 			if ( *s == ',' )
 				s++;
 			else
 				break;	// no more args here!
 		}
-		pszText++;
+		++pszText;
 		if ( Args[1] > FONT_QTY )
 			Args[1] = (word)FONT_NORMAL;
 	}
@@ -818,14 +817,14 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 			int iClilocId = Exp_GetVal( ppArgs[0] );
 			int iAffixType = Exp_GetVal( ppArgs[1] );
 			CSString CArgs;
-			for ( size_t i = 3; i < iQty; i++ )
+			for ( size_t i = 3; i < iQty; ++i )
 			{
 				if ( CArgs.GetLength() )
 					CArgs += "\t";
 				CArgs += ( !strcmp(ppArgs[i], "NULL") ? " " : ppArgs[i] );
 			}
 
-			addBarkLocalizedEx( iClilocId, pSrc, (HUE_TYPE)(Args[0]), mode, static_cast<FONT_TYPE>(Args[1]), static_cast<AFFIX_TYPE>(iAffixType), ppArgs[2], CArgs.GetPtr());
+			addBarkLocalizedEx( iClilocId, pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]), (AFFIX_TYPE)(iAffixType), ppArgs[2], CArgs.GetPtr());
 			break;
 		}
 
@@ -835,14 +834,14 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 			size_t iQty = Str_ParseCmds(const_cast<tchar *>(m_BarkBuffer.GetPtr()), ppArgs, CountOf(ppArgs), "," );
 			int iClilocId = Exp_GetVal( ppArgs[0] );
 			CSString CArgs;
-			for ( size_t i = 1; i < iQty; i++ )
+			for ( size_t i = 1; i < iQty; ++i )
 			{
 				if ( CArgs.GetLength() )
 					CArgs += "\t";
 				CArgs += ( !strcmp(ppArgs[i], "NULL") ? " " : ppArgs[i] );
 			}
 
-			addBarkLocalized( iClilocId, pSrc, (HUE_TYPE)(Args[0]), mode, static_cast<FONT_TYPE>(Args[1]), CArgs.GetPtr());
+			addBarkLocalized( iClilocId, pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]), CArgs.GetPtr());
 			break;
 		}
 
@@ -850,7 +849,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		{
 			nchar szBuffer[ MAX_TALK_BUFFER ];
 			CvtSystemToNUNICODE( szBuffer, CountOf(szBuffer), m_BarkBuffer.GetPtr(), -1 );
-			addBarkUNICODE( szBuffer, pSrc, (HUE_TYPE)(Args[0]), mode, static_cast<FONT_TYPE>(Args[1]), 0 );
+			addBarkUNICODE( szBuffer, pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]), 0 );
 			break;
 		}
 
@@ -861,7 +860,7 @@ bark_default:
 			if ( m_BarkBuffer.IsEmpty())
 				m_BarkBuffer.Format("%s%s", name, pszText);
 
-			addBark( m_BarkBuffer.GetPtr(), pSrc, (HUE_TYPE)(Args[0]), mode, static_cast<FONT_TYPE>(Args[1]));
+			addBark( m_BarkBuffer.GetPtr(), pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]));
 			break;
 		}
 	}

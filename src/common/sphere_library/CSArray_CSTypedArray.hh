@@ -319,7 +319,7 @@ void CSTypedArray<TYPE,ARG_TYPE>::SetAt( size_t nIndex, ARG_TYPE newElement )
 {
     ASSERT(IsValidIndex(nIndex));
 
-    memmove(&m_pData[nIndex], &newElement, sizeof(TYPE));
+    memcpy(&m_pData[nIndex], &newElement, sizeof(TYPE));
 }
 
 template<class TYPE, class ARG_TYPE>

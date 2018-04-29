@@ -33,8 +33,8 @@ public:
 	const CRectMap & GetRegionRect(size_t i) const;
 	virtual bool AddRegionRect( const CRectMap & rect );
 
-	CPointBase GetRegionCorner( DIR_TYPE dir = DIR_QTY ) const;
-	bool IsInside2d( const CPointBase & pt ) const;
+    CPointMap GetRegionCorner( DIR_TYPE dir = DIR_QTY ) const;
+	bool IsInside2d( const CPointMap & pt ) const;
 
 	bool IsOverlapped( const CRectMap & rect ) const;
 	bool IsInside( const CRectMap & rect ) const;
