@@ -2953,7 +2953,7 @@ lpctstr CObjBase::GetTriggerActive()
 
 CVarDefMap * CObjBase::GetTagDefs()
 {
-	return( &m_TagDefs );
+	return &m_TagDefs;
 }
 
 CSpawn * CObjBase::GetSpawn()
@@ -3145,9 +3145,7 @@ TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CCh
 		// RES_SKILL
 		CResourceLock s;
 		if ( pSpellDef->ResourceLock( s ))
-		{
 			return CScriptObj::OnTriggerScript( s, CSpellDef::sm_szTrigName[stage], pSrc, pArgs );
-		}
 	}
 	return TRIGRET_RET_DEFAULT;
 }

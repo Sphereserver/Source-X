@@ -80,7 +80,6 @@ CItemBase *CSpawn::TryItem(ITEMID_TYPE &id)
 	CItemBase *pItemDef = CItemBase::FindItemBase(id);
 	if ( pItemDef )
 	{
-		
         _SpawnID = CResourceID(RES_ITEMDEF, id);
 		return pItemDef;
 	}
@@ -173,7 +172,7 @@ void CSpawn::GenerateItem(CResourceDef *pDef)
 	if ( pItem->CreateTemplate(id) == NULL )
 		return;
 
-    uint16 iAmountPile = (uint16)(minimum(UINT16_MAX,m_pile));
+    word iAmountPile = (word)(minimum(UINT16_MAX,m_pile));
 	if ( iAmountPile > 1 )
 	{
 		CItemBase *pItemDef = pItem->Item_GetDef();
@@ -262,9 +261,7 @@ void CSpawn::DelObj(CUID uid)
             {
                 CChar *pChar = uid.CharFind();
                 if (pChar)
-                {
                     pChar->StatFlag_Clear(STATF_SPAWNED);
-                }
             }
 
             m_objs.erase(it);
@@ -286,9 +283,8 @@ void CSpawn::AddObj(CUID uid)
     const CItem *pItem = static_cast<const CItem*>(GetLink());
     bool fIsSpawnChar = (pItem->IsType(IT_SPAWN_CHAR) || pItem->IsType(IT_SPAWN_CHAMPION));
     if (!uid.IsValidUID())
-    {
         return;
-    }
+
 	if ( !g_Serv.IsLoading() )
 	{
 		if (fIsSpawnChar)				// IT_SPAWN_CHAR and IT_SPAWN_CHAMPION can only spawn NPCs.

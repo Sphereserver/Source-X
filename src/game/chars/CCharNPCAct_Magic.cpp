@@ -6,19 +6,20 @@
 int CCharNPC::Spells_GetCount()
 {
     ADDTOCALLSTACK("CCharNPC::Spells_GetAll");
-    if (m_spells.size() < 1)
+    if (m_spells.empty())
         return -1;
     return (int)m_spells.size();
 
     // This code was meant to check if found spells does really exist
     /*
     int total = 0;
-    for (int count = 0; count < m_spells.size() ; count++)
+    size_t size = m_spells.size();
+    for (int count = 0; count < size; ++count)
     {
-        Spells refSpell = m_spells.at(count);
+        Spells refSpell = m_spells[count];
         if (!refSpell.id)
             continue;
-        total++;
+        ++total;
     }
     return total;
     */
@@ -30,9 +31,9 @@ SPELL_TYPE CCharNPC::Spells_GetAt(uchar id)
     ADDTOCALLSTACK("CCharNPC::Spells_GetAt");
     if (m_spells.empty())
         return SPELL_NONE;
-    if (id >= m_spells.size())
+    if (m_spells.size() <= id)
         return SPELL_NONE;
-    Spells refSpell = m_spells.at(id);
+    Spells refSpell = m_spells[id];
     if (refSpell.id)
         return refSpell.id;
     return SPELL_NONE;
@@ -44,7 +45,9 @@ bool CCharNPC::Spells_DelAt(uchar id)
     ADDTOCALLSTACK("CCharNPC::Spells_DelAt");
     if (m_spells.empty())
         return false;
-    Spells refSpell = m_spells.at(id);
+    if (m_spells.size() <= id)
+        return SPELL_NONE;
+    Spells refSpell = m_spells[id];
     if (refSpell.id)
     {
         std::vector<Spells>::iterator it = m_spells.begin() + id;
@@ -79,10 +82,10 @@ int CCharNPC::Spells_FindSpell(SPELL_TYPE spellID)
     uint count = 0;
     while (count < m_spells.size())
     {
-        Spells spell = m_spells.at(count);
+        Spells spell = m_spells[count];
         if (spell.id == spellID)
             return count;
-        count++;
+        ++count;
     }
     return -1;
 }
@@ -153,16 +156,12 @@ bool CChar::NPC_FightMagery(CChar * pChar)
         if (pWand->GetType() != IT_WAND || pWand->m_itWeapon.m_spellcharges <= 0)// If the item is really a wand and have it charges it's a valid wand, if not ... we get rid of it.
             pWand = NULL;
     }
-    if (iSpellCount < 1 && !pWand)
-    {
+    if ((iSpellCount < 1) && !pWand)
         return false;
-    }
 
     int iDist = GetTopDist3D(pChar);
     if (iDist > ((UO_MAP_VIEW_SIGHT * 3) / 4))	// way too far away . close in.
-    {
         return false;
-    }
 
     if ((iDist <= 1) && (Skill_GetBase(SKILL_TACTICS) > 200) && (!Calc_GetRandVal(2)))
     {
@@ -170,9 +169,9 @@ bool CChar::NPC_FightMagery(CChar * pChar)
         // Stand and fight for a bit.
         return false;
     }
-    int skill = SKILL_NONE;
-    int iStatInt = Stat_GetBase(STAT_INT);
-    int mana = Stat_GetVal(STAT_INT);
+    int skill = (int)SKILL_NONE;
+    short iStatInt = Stat_GetBase(STAT_INT);
+    short mana = Stat_GetVal(STAT_INT);
     int iChance = ((mana >= (iStatInt / 2)) ? mana : (iStatInt - mana));
 
     CObjBase * pSrc = this;
@@ -183,9 +182,8 @@ bool CChar::NPC_FightMagery(CChar * pChar)
         if (mana > (iStatInt / 3) && Calc_GetRandVal(iStatInt))
         {
             if (iDist < 4 || iDist > 8)	// Here is fine?
-            {
                 NPC_Act_Follow(false, Calc_GetRandVal(3) + 2, true);
-            }
+            
             return true;
         }
         return false;
@@ -193,21 +191,18 @@ bool CChar::NPC_FightMagery(CChar * pChar)
 
     // We have the total count of spells inside iSpellCount, so we use 'iRandSpell' to store a rand representing the spell that will be casted
     uchar iRandSpell = pWand ? 1 : 0;	// Having wand adding +1 spell to the total count
-    iRandSpell += static_cast<uchar>(Calc_GetRandVal2(0, iSpellCount - 1));	// spells are being stored using a vector, so it's assumed to be zero-based.
+    iRandSpell += (uchar)(Calc_GetRandVal2(0, iSpellCount - 1));	// spells are being stored using a vector, so it's assumed to be zero-based.
 
     if (iRandSpell > iSpellCount)	// if iRandSpell > iSpellCount then we've got the roll pointing to use the wand's spell.
     {
         SPELL_TYPE spell = (SPELL_TYPE)(pWand->m_itWeapon.m_spell);
         const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
         if (!pSpellDef)	// wand check failed ... we go on melee, next cast try might select another type of spell :)
-        {
             return false;
-        }
+        
         pSrc = pWand;	// Seting pWand as SRC, this will force @SpellCast to have the wand as ARGO.
         if (NPC_FightCast(pTarg, pWand, spell))
-        {
             goto BeginCast;	//if can cast this spell we jump the for() and go directly to it's casting.
-        }
     }
 
     for (; iRandSpell < iSpellCount; ++iRandSpell)
@@ -215,41 +210,29 @@ bool CChar::NPC_FightMagery(CChar * pChar)
         SPELL_TYPE spell = m_pNPC->Spells_GetAt(iRandSpell);
         const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
         if (!pSpellDef)	//If it reached here it should exist, checking anyway.
-        {
             continue;
-        }
 
         int iSkillReq = 0;
         if (!pSpellDef->GetPrimarySkill(&skill, &iSkillReq))
-        {
             skill = SKILL_MAGERY;
-        }
 
-        if (Skill_GetBase((SKILL_TYPE)(skill)) < iSkillReq)
-        {
+        if (Skill_GetBase((SKILL_TYPE)skill) < iSkillReq)
             continue;
-        }
         if (NPC_FightCast(pTarg, this, spell, (SKILL_TYPE)skill))
-        {
             goto BeginCast;	//if can cast this spell we jump the for() and go directly to it's casting.
-        }
     }
     return false;	// No castable spell found, go back on melee.
 
 BeginCast:	//Start casting
             // KRJ - give us some distance
             // if the opponent is close, get away from him
-    if (mana > iStatInt / 3 && Calc_GetRandVal(iStatInt << 1))
+    if ((mana > iStatInt / 3) && Calc_GetRandVal(iStatInt << 1))
     {
         if (iDist < 4 || iDist > 8)	// Here is fine?
-        {
             NPC_Act_Follow(false, 5, true);
-        }
     }
     else
-    {
         NPC_Act_Follow();
-    }
 
     Reveal();
 
@@ -312,7 +295,8 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
                         if (pMemory && pMemory->IsMemoryTypes(MEMORY_FIGHT | MEMORY_HARMEDBY | MEMORY_IRRITATEDBY))
                         {
                             pFriend[iFriendIndex++] = pTarget;
-                            if (iFriendIndex >= 4) break;
+                            if (iFriendIndex >= 4)
+                                break;
                         }
                     }
                 }
@@ -429,6 +413,7 @@ bool CChar::NPC_FightCast(CObjBase * &pTarg, CObjBase * pSrc, SPELL_TYPE &spell,
 
                 if (!bSpellSuits)
                     return false;
+
                 pTarg = this;
                 m_atMagery.m_Spell = spell;
                 return true;
