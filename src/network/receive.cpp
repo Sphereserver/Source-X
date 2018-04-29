@@ -3440,19 +3440,28 @@ bool PacketAOSTooltipReq::onReceive(NetState* net)
 		if (object == NULL)
 			continue;
 		
-		// Check if this item is shown from a shop gump: for shop items we need to always send the tooltip!
-		bool bShop = false;
-		CItem* pObjItem = static_cast<CItem*>(const_cast<CObjBase*>(object));
-		CObjBase* pObjCont;
-		while ( (pObjCont = pObjItem->GetContainer()) != NULL )
-		{
-			if (!pObjCont->IsItem())
-				break;
-			pObjItem = static_cast<CItem*>(pObjCont);
-			LAYER_TYPE objItemLayer = pObjItem->GetEquipLayer();
-			if (objItemLayer >= 26 && objItemLayer <= 28)
-				bShop = true;	// Shop item (sending it because we are buying or selling items from/to a vendor)
-		}
+        bool bShop = false;
+        const CItem* pObjItem = dynamic_cast<const CItem*>(object);
+        if (pObjItem)
+        {
+            // Check if this item is shown from a shop gump: for shop items we need to always send the tooltip!
+            const CObjBase* pObjCont;
+            while ( (pObjCont = pObjItem->GetContainer()) != NULL )
+            {
+                // Get the top container
+                const CItem* pObjContItem = dynamic_cast<const CItem*>(pObjCont);
+                if (!pObjContItem)
+                    break;
+                
+                LAYER_TYPE objContItemLayer = pObjContItem->GetEquipLayer();
+                if (objContItemLayer >= 26 && objContItemLayer <= 28)
+                {
+                    // If this container is equipped in the shop layers, it's a shop item
+                    bShop = true;
+                    break;
+                }
+            }
+        }	
 
 		if (bShop)	// shop item
 			client->addAOSTooltip(object, true, true);

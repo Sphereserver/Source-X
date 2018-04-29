@@ -9,7 +9,8 @@
 * @brief Typed Array (not thread safe).
 *
 * NOTE: This will not call true constructors or destructors !
-* TODO: Really needed two types in template?
+* TODOC: Really needed two types in template? Answer: yes. If we are storing instances instead of pointers,
+*  we can set ARG_TYPE to be a reference of TYPE.
 */
 template<class TYPE, class ARG_TYPE>
 class CSTypedArray
@@ -276,6 +277,9 @@ void CSTypedArray<TYPE,ARG_TYPE>::Copy(const CSTypedArray<TYPE, ARG_TYPE> * pArr
         return;
 
     Clear();
+    if (!pArray->GetCount())
+        return;
+    
     SetCount(pArray->GetCount());
     memcpy(GetBasePtr(), pArray->GetBasePtr(), GetCount() * sizeof(TYPE));
 }

@@ -211,6 +211,9 @@ CServerConfig::CServerConfig()
 	m_bMySql				= false;
 	m_bMySqlTicks			= false;
 
+    m_bAutoResDisp          = true;
+    m_iAutoPrivFlags        = 0x10;
+
 	m_cCommandPrefix		= '.';
 
 	m_iDefaultCommandLevel	= 7;	// PLevel 7 default for command levels.

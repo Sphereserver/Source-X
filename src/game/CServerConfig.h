@@ -1164,7 +1164,7 @@ private:
 
 public:
 	CServerConfig();
-	~CServerConfig();
+	virtual ~CServerConfig();
 
 private:
 	CServerConfig(const CServerConfig& copy);

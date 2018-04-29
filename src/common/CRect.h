@@ -163,7 +163,7 @@ public:
 		NormalizeRect();
 	}
 
-	void NormalizeRectMax( int cx, int cy )
+	virtual void NormalizeRectMax( int cx, int cy )
 	{
 		if ( m_left < 0 )
 			m_left = 0;
@@ -212,8 +212,8 @@ public:
 		return true;
 	}
 
-	void NormalizeRect();
-	void NormalizeRectMax();
+	virtual void NormalizeRect();
+	virtual void NormalizeRectMax();
 };
 
 

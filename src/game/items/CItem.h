@@ -705,8 +705,12 @@ public:
 	TRIGRET_TYPE OnTrigger( ITRIG_TYPE trigger, CTextConsole * pSrc, CScriptTriggerArgs * pArgs = NULL );
 
 	// Item type specific stuff.
-	bool IsType( IT_TYPE type ) const;
-	IT_TYPE GetType() const;
+    inline bool IsType(IT_TYPE type) const {
+        return ( m_type == type );
+    }
+    inline IT_TYPE GetType() const {
+        return m_type;
+    }
 	CItem * SetType( IT_TYPE type );
 	bool IsTypeLit() const;
 	bool IsTypeBook() const;

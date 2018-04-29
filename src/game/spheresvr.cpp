@@ -121,8 +121,8 @@ CWorld			g_World;			// the world. (we save this stuff)
 #endif
 
 // Again, game servers stuff.
-CServer			g_Serv;				// current state, stuff not saved.
 CServerConfig	g_Cfg;
+CServer			g_Serv;				// current state, stuff not saved.
 CUOInstall		g_Install;
 CVerDataMul		g_VerData;
 CExpression		g_Exp;				// Global script variables.

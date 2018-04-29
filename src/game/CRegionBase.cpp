@@ -23,7 +23,7 @@ size_t CRegionBase::GetRegionRectCount() const
 	return( iQty );
 }
 
-CRect & CRegionBase::GetRegionRect(size_t i)
+CRectMap & CRegionBase::GetRegionRect(size_t i)
 {
 	ADDTOCALLSTACK("CRegionBase::GetRegionRect");
 	// Get a particular rectangle.
@@ -33,7 +33,7 @@ CRect & CRegionBase::GetRegionRect(size_t i)
 	return( m_Rects.ElementAt(i));
 }
 
-const CRect & CRegionBase::GetRegionRect(size_t i) const
+const CRectMap & CRegionBase::GetRegionRect(size_t i) const
 {
 	ADDTOCALLSTACK("CRegionBase::GetRegionRect");
 	size_t iQty = m_Rects.GetCount();
@@ -58,7 +58,7 @@ bool CRegionBase::IsInside2d( const CPointBase & pt ) const
 	size_t iQty = m_Rects.GetCount();
 	if ( iQty > 0 )
 	{
-		for ( size_t i = 0; i < iQty; i++ )
+		for ( size_t i = 0; i < iQty; ++i )
 		{
 			if ( m_Rects[i].IsInside2d( pt ))
 				return true;
@@ -68,7 +68,7 @@ bool CRegionBase::IsInside2d( const CPointBase & pt ) const
 	return true;
 }
 
-bool CRegionBase::AddRegionRect( const CRect & rect )
+bool CRegionBase::AddRegionRect( const CRectMap & rect )
 {
 	ADDTOCALLSTACK("CRegionBase::AddRegionRect");
 	if ( rect.IsRectEmpty() )
@@ -88,7 +88,7 @@ bool CRegionBase::AddRegionRect( const CRect & rect )
 		}
 
 		// Make sure it is not inside or equal to a previous rect !
-		for ( size_t j = 0; j < iQty; j++ )
+		for ( size_t j = 0; j < iQty; ++j )
 		{
 			if ( rect.IsInside( m_Rects[j] ))
 				return true;
@@ -107,7 +107,7 @@ bool CRegionBase::AddRegionRect( const CRect & rect )
 	return true;
 }
 
-bool CRegionBase::IsOverlapped( const CRect & rect ) const
+bool CRegionBase::IsOverlapped( const CRectMap & rect ) const
 {
 	ADDTOCALLSTACK("CRegionBase::IsOverlapped");
 	// Does the region overlap this rectangle.
@@ -117,7 +117,7 @@ bool CRegionBase::IsOverlapped( const CRect & rect ) const
 	size_t iQty = m_Rects.GetCount();
 	if ( iQty <= 0 )
 		return true;
-	for ( size_t i = 0; i < iQty; i++ )
+	for ( size_t i = 0; i < iQty; ++i )
 	{
 		if ( rect.IsOverlapped(m_Rects[i]))
 			return true;
@@ -125,7 +125,7 @@ bool CRegionBase::IsOverlapped( const CRect & rect ) const
 	return false;
 }
 
-bool CRegionBase::IsInside( const CRect & rect ) const
+bool CRegionBase::IsInside( const CRectMap & rect ) const
 {
 	ADDTOCALLSTACK("CRegionBase::IsInside");
 	// NOTE: This is NOT 100% true !!
@@ -137,7 +137,7 @@ bool CRegionBase::IsInside( const CRect & rect ) const
 	if ( iQty <= 0 )
 		return true;
 
-	for ( size_t i = 0; i < iQty; i++ )
+	for ( size_t i = 0; i < iQty; ++i )
 	{
 		if ( m_Rects[i].IsInside( rect ))
 			return true;
@@ -156,7 +156,7 @@ bool CRegionBase::IsInside( const CRegionBase * pRegionTest ) const
 		return false;
 
 	size_t iQtyTest = pRegionTest->m_Rects.GetCount();
-	for ( size_t j = 0; j < iQtyTest; j++ )
+	for ( size_t j = 0; j < iQtyTest; ++j )
 	{
 		if ( ! IsInside( pRegionTest->m_Rects[j] ))
 			return false;
@@ -206,9 +206,9 @@ bool CRegionBase::IsEqualRegion( const CRegionBase * pRegionTest ) const
 	if ( iQty != iQtyTest )
 		return false;
 
-	for ( size_t j = 0; j < iQty; j++ )
+	for ( size_t j = 0; j < iQty; ++j )
 	{
-		for ( size_t i = 0; ; i++ )
+		for ( size_t i = 0; ; ++i )
 		{
 			if ( i >= iQtyTest )
 				return false;

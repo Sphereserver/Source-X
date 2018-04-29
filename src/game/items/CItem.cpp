@@ -3505,16 +3505,6 @@ TRIGRET_TYPE CItem::OnTrigger( ITRIG_TYPE trigger, CTextConsole * pSrc, CScriptT
 }
 
 // Item type specific stuff.
-bool CItem::IsType( IT_TYPE type ) const
-{
-	return ( m_type == type );
-}
-
-IT_TYPE CItem::GetType() const
-{
-	return m_type;
-}
-
 CItem * CItem::SetType(IT_TYPE type)
 {
 	ADDTOCALLSTACK("CItem::SetType");

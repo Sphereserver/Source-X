@@ -15,8 +15,8 @@ class CRegionBase
 	// A bunch of rectangles forming an area.
 public:
 	static const char *m_sClassName;
-	CRect m_rectUnion;	// The union rectangle.
-	CSTypedArray<CRect, const CRect&> m_Rects;
+	CRectMap m_rectUnion;	// The union rectangle.
+	CSTypedArray<CRectMap, const CRectMap&> m_Rects;
 	bool IsRegionEmpty() const
 	{
 		return( m_rectUnion.IsRectEmpty());
@@ -27,15 +27,15 @@ public:
 		m_Rects.Clear();
 	}
 	size_t GetRegionRectCount() const;
-	CRect & GetRegionRect(size_t i);
-	const CRect & GetRegionRect(size_t i) const;
-	virtual bool AddRegionRect( const CRect & rect );
+    CRectMap & GetRegionRect(size_t i);
+	const CRectMap & GetRegionRect(size_t i) const;
+	virtual bool AddRegionRect( const CRectMap & rect );
 
 	CPointBase GetRegionCorner( DIR_TYPE dir = DIR_QTY ) const;
 	bool IsInside2d( const CPointBase & pt ) const;
 
-	bool IsOverlapped( const CRect & rect ) const;
-	bool IsInside( const CRect & rect ) const;
+	bool IsOverlapped( const CRectMap & rect ) const;
+	bool IsInside( const CRectMap & rect ) const;
 
 	bool IsInside( const CRegionBase * pRegionIsSmaller ) const;
 	bool IsOverlapped( const CRegionBase * pRegionTest ) const;
