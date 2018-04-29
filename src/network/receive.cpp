@@ -3441,19 +3441,19 @@ bool PacketAOSTooltipReq::onReceive(NetState* net)
 			continue;
 		
         bool bShop = false;
-        const CItem* pObjItem = dynamic_cast<const CItem*>(object);
-        if (pObjItem)
+        const CItem* pSearchObjItem = dynamic_cast<const CItem*>(object);
+        if (pSearchObjItem)
         {
             // Check if this item is shown from a shop gump: for shop items we need to always send the tooltip!
-            const CObjBase* pObjCont;
-            while ( (pObjCont = pObjItem->GetContainer()) != NULL )
+            const CObjBase* pSearchObj;
+            while ( (pSearchObj = pSearchObjItem->GetContainer()) != NULL )
             {
                 // Get the top container
-                const CItem* pObjContItem = dynamic_cast<const CItem*>(pObjCont);
-                if (!pObjContItem)
+                pSearchObjItem = dynamic_cast<const CItem*>(pSearchObj);
+                if (!pSearchObjItem)
                     break;
                 
-                LAYER_TYPE objContItemLayer = pObjContItem->GetEquipLayer();
+                LAYER_TYPE objContItemLayer = pSearchObjItem->GetEquipLayer();
                 if (objContItemLayer >= 26 && objContItemLayer <= 28)
                 {
                     // If this container is equipped in the shop layers, it's a shop item

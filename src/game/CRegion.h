@@ -137,7 +137,7 @@ public:
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
 	virtual void r_Write( CScript & s );
 
-	bool AddRegionRect( const CRectMap & rect );
+	virtual bool AddRegionRect( const CRectMap & rect );
 	bool SetRegionRect( const CRectMap & rect )
 	{
 		EmptyRegion();

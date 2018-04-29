@@ -57,8 +57,7 @@ public:
 	*/
 	CSString(lpctstr pStr)
 	{
-		m_iMaxLength = m_iLength = 0;
-		m_pchData = NULL;
+		Init();
 		Copy(pStr);
 	}
 	/**
@@ -69,8 +68,7 @@ public:
 	*/
 	CSString(const CSString &s)
 	{
-		m_iMaxLength = m_iLength = 0;
-		m_pchData = NULL;
+        Init();
 		Copy(s.GetPtr());
 	}
 	/**

@@ -15,11 +15,13 @@ class CRegionBase
 	// A bunch of rectangles forming an area.
 public:
 	static const char *m_sClassName;
+
 	CRectMap m_rectUnion;	// The union rectangle.
 	CSTypedArray<CRectMap, const CRectMap&> m_Rects;
+
 	bool IsRegionEmpty() const
 	{
-		return( m_rectUnion.IsRectEmpty());
+		return m_rectUnion.IsRectEmpty();
 	}
 	void EmptyRegion()
 	{

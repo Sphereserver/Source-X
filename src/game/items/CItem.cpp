@@ -76,6 +76,7 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CObjBase( true )
 	ASSERT( pItemDef );
 
 	g_Serv.StatInc(SERV_STAT_ITEMS);
+    m_type = IT_NORMAL;
 	m_Attr = 0;
 	m_CanUse = pItemDef->m_CanUse;
 	m_amount = 1;

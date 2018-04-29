@@ -349,7 +349,7 @@ CSString CSFile::GetMergedFileName( lpctstr pszBase, lpctstr pszName ) // static
 	{
 		strcat( szFilePath, pszName );
 	}
-	return static_cast<CSString>(szFilePath);
+	return CSString(szFilePath);
 }
 
 // CSFile:: Mode operations.

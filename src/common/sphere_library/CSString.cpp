@@ -83,6 +83,7 @@ int CSString::SetLength(int iNewLength)
 		ASSERT(pNewData);
 
 		int iMinLength = minimum(iNewLength, m_iLength);
+        ASSERT(m_pchData);
 		strncpy(pNewData, m_pchData, iMinLength);
 		pNewData[m_iLength] = 0;
 
