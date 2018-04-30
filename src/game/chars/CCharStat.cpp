@@ -365,6 +365,29 @@ bool CChar::Stats_Regen(int64 iTimeDiff)
 		if ((i == STAT_STR) && (g_Cfg.m_iRacialFlags & RACIALF_HUMAN_TOUGH) && IsHuman())
 			mod += 2;		// Humans always have +2 hitpoint regeneration (Tough racial trait)
 
+		/*
+		The Focus skill is used passively and it works automatically only if FEATURES_AOS_UPDATE_B is enabled.
+		The skill increase the amount of stamina gained by 1 for each 10% points of Focus and increase the amount
+		of mana by 1 for each 20%  points of Focus.
+		*/
+		if (g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B)
+		{
+			int iFocusValue = Skill_GetAdjusted(SKILL_FOCUS);
+			switch (i)
+			{
+				case STAT_DEX:
+					mod += (iFocusValue / 100);
+					break;
+				case STAT_INT:
+					mod += (iFocusValue / 200 );
+					break;
+			}
+			/*
+			By using the player skill value as difficulty, the chance to get an increase will be 50% because
+			the bell curva formula is used.
+			*/
+			Skill_Experience(SKILL_FOCUS, iFocusValue);
+		}
 		short StatLimit = Stat_GetMax(i);
 
 		if (IsTrigUsed(TRIGGER_REGENSTAT))
