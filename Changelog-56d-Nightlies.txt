@@ -565,3 +565,8 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Fixed: parrying chance didn't scale correctly with Dexterity.
 - [Port from Source, 18-04-2018, Coruja] Changed: Small improvements on tooltip engine (containers weren't resending their tooltip after their weight changed,
     and some tooltips weren't updated for items with an expired timer).
+	
+30-04-2018, Drk84
+- Added behaviour for the Focus skill, the skill is used automatically and only when FEATURE_AOS_UPDATE_B is enabled.
+  The Focus skill increase, passively, the amount of stamina gained by 1 for each 10% points of skill value and increase by 1 the amount of mana gained for 
+  each 20% points of skill value.
