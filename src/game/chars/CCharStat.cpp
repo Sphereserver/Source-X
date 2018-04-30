@@ -366,9 +366,9 @@ bool CChar::Stats_Regen(int64 iTimeDiff)
 			mod += 2;		// Humans always have +2 hitpoint regeneration (Tough racial trait)
 
 		/*
-			The Focus skill is used passively and it works automatically only if FEATURES_AOS_UPDATE_B is enabled.
-			The skill increase the amount of stamina gained by 1 for each 10% points of Focus and increase the amount
-			of mana by 1 for each 20%  points of Focus.
+		The Focus skill is used passively and it works automatically only if FEATURES_AOS_UPDATE_B is enabled.
+		The skill increase the amount of stamina gained by 1 for each 10% points of Focus and increase the amount
+		of mana by 1 for each 20%  points of Focus.
 		*/
 		if (g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B)
 		{
