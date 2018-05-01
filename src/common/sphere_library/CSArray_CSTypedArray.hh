@@ -5,6 +5,39 @@
 #include <cstdint>
 #include "../assertion.h"
 
+#include <type_traits>
+template<class TYPE>
+struct CSTypedArrayHelper
+{
+    static const bool _kIsTypePointer = false;
+    static constexpr bool typeNeedsDelete()
+    {
+        if (std::is_class_v<TYPE> == false)
+            return false;
+        else
+            return true;
+    }
+    template<class DESTROY_TYPE> inline static void destructorExplicitCall(DESTROY_TYPE& p)
+    {
+        p.~DESTROY_TYPE();
+    }
+};
+template<class TYPE>
+struct CSTypedArrayHelper<TYPE*>
+{
+    static const bool _kIsTypePointer = true;
+    static constexpr bool typeNeedsDelete()
+    {
+        return false;
+    }
+    //template<class DESTROY_TYPE> inline static void destructorExplicitCall(DESTROY_TYPE* p)
+    //{
+    //    if (p)
+    //        p->~DESTROY_TYPE();
+    //}
+};
+
+
 /**
 * @brief Typed Array (not thread safe).
 *
@@ -12,8 +45,9 @@
 * TODOC: Really needed two types in template? Answer: yes. If we are storing instances instead of pointers,
 *  we can set ARG_TYPE to be a reference of TYPE.
 */
+
 template<class TYPE, class ARG_TYPE>
-class CSTypedArray
+class CSTypedArray : public CSTypedArrayHelper<TYPE>
 {
 public:
     static const char *m_sClassName;
@@ -296,8 +330,13 @@ void CSTypedArray<TYPE,ARG_TYPE>::InsertAt( size_t nIndex, ARG_TYPE newElement )
 }
 
 template<class TYPE, class ARG_TYPE>
-inline void CSTypedArray<TYPE,ARG_TYPE>::Clear()
+void CSTypedArray<TYPE,ARG_TYPE>::Clear()
 {
+    if constexpr (this->typeNeedsDelete())
+    {
+        for (size_t i = 0; i < m_nCount; ++i)
+            this->destructorExplicitCall(m_pData[i]);
+    }
     delete[] reinterpret_cast<uint8_t *>(m_pData);
     m_pData = NULL;
     m_nCount = m_nRealCount = 0;
@@ -309,8 +348,12 @@ void CSTypedArray<TYPE,ARG_TYPE>::RemoveAt( size_t nIndex )
     if ( !IsValidIndex(nIndex) )
         return;
 
+    if constexpr (this->typeNeedsDelete())
+        this->destructorExplicitCall(m_pData[nIndex]);
+
     if (nIndex < m_nCount-1)
         memmove(&m_pData[nIndex], &m_pData[nIndex + 1], sizeof(TYPE) * (m_nCount - nIndex - 1));
+
     SetCount(m_nCount - 1);
 }
 
@@ -319,7 +362,17 @@ void CSTypedArray<TYPE,ARG_TYPE>::SetAt( size_t nIndex, ARG_TYPE newElement )
 {
     ASSERT(IsValidIndex(nIndex));
 
+    if constexpr (this->typeNeedsDelete())
+        this->destructorExplicitCall(m_pData[nIndex]);
+
+#ifdef __clang__
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wdynamic-class-memaccess"
+#endif
     memcpy(&m_pData[nIndex], &newElement, sizeof(TYPE));
+#ifdef __clang__
+    #pragma clang diagnostic pop
+#endif
 }
 
 template<class TYPE, class ARG_TYPE>
@@ -347,8 +400,8 @@ void CSTypedArray<TYPE, ARG_TYPE>::SetCount( size_t nNewCount )
     if ( nNewCount > m_nCount )
     {
 #if __GNUC__ >= 7
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Walloc-size-larger-than="
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Walloc-size-larger-than="
 #endif
         uint8_t* pNewData = new uint8_t[nNewCount * sizeof(TYPE)];
         if ( m_nCount )
@@ -358,7 +411,7 @@ void CSTypedArray<TYPE, ARG_TYPE>::SetCount( size_t nNewCount )
             delete[] reinterpret_cast<uint8_t *>(m_pData);	// don't call any destructors.
         }
 #if __GNUC__ >= 7
-#pragma GCC diagnostic pop
+    #pragma GCC diagnostic pop
 #endif
 
         // Just construct or init the new stuff.

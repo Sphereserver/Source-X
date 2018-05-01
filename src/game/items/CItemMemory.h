@@ -8,6 +8,8 @@
 
 #include "CItem.h"
 
+class CItemStone;
+
 
 class CItemMemory : public CItem
 {

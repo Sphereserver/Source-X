@@ -99,17 +99,33 @@ struct CPointMap : public CPointBase
 	// A point in the world (or in a container) (initialized)
 	CPointMap() {};
 	CPointMap( short x, short y, char z = 0, uchar map = 0 );
-	CPointMap & operator = ( const CPointBase & pt );
-	CPointMap( const CPointBase & pt );
-	CPointMap( tchar * pVal );
+    inline CPointMap & operator = (const CPointBase & pt)
+    {
+        Set( pt );
+        return ( * this );
+    }
+    inline CPointMap(const CPointBase & pt)
+    {
+        Set( pt );
+    }
+    inline CPointMap(tchar * pVal)
+    {
+        Read( pVal );
+    }
 };
 
 struct CPointSort : public CPointMap
 {
-	CPointSort();
+    inline CPointSort()
+    {
+        InitPoint();
+    }
 	CPointSort( word x, word y, char z = 0, uchar map = 0 );
-	CPointSort( const CPointBase & pt );
-	virtual ~CPointSort(); // just to make this dynamic
+    inline CPointSort(const CPointBase & pt)
+    {
+        Set( pt );
+    }
+    virtual ~CPointSort() {}; // just to make this dynamic
 };
 
 

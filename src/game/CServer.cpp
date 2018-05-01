@@ -21,6 +21,7 @@
 #include "clients/CClient.h"
 #include "items/CItemShip.h"
 #include "../common/CLog.h"
+#include "CWorld.h"
 #include "CServerTime.h"
 #include "spheresvr.h"
 #include "triggers.h"

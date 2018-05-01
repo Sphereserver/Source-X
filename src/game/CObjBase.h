@@ -13,7 +13,6 @@
 #include "CEntity.h"
 #include "CBase.h"
 #include "CServerConfig.h"
-#include "CWorld.h"
 #include "clients/CClientTooltip.h"
 #include <memory>
 
@@ -1265,13 +1264,6 @@ inline CObjBase* CObjBase::GetPrev() const
 inline CObjBase* CObjBase::GetNext() const
 {
 	return static_cast <CObjBase*>(CSObjListRec::GetNext());
-}
-
-inline int64 CObjBase::GetTimerDiff() const
-{
-	// How long till this will expire ?
-	return g_World.GetTimeDiff( m_timeout );
-	// return: < 0 = in the past ( m_timeout - CServerTime::GetCurrentTime() )
 }
 
 inline bool CObjBase::IsTimerSet() const

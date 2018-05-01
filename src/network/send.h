@@ -912,7 +912,6 @@ class PacketCorpseEquipment : public PacketSend
 {
 private:
 	CUID m_corpse;
-	int m_count;
 
 public:
 	PacketCorpseEquipment(CClient* target, const CItemContainer* corpse);

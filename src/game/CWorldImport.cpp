@@ -4,6 +4,7 @@
 #include "chars/CChar.h"
 #include "items/CItem.h"
 #include "CObjBase.h"
+#include "CWorld.h"
 
 struct CImportSer : public CSObjListRec
 {

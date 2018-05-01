@@ -1,11 +1,3 @@
-
-
-#include "CChampion.h"	// predef header.
-#include "chars/CChar.h"
-#include "../common/CScript.h"
-#include "../common/CResourceBase.h"
-#include "../common/CException.h"
-
 /*
 * @file Champion.cpp
 *
@@ -18,6 +10,14 @@
 * this data is read by CChampion to know Champion's type, npcs to spawn at each level, boss id....
 * class is declared inside CResource.h
 */
+
+#include "CChampion.h"	// predef header.
+#include "CWorld.h"
+#include "chars/CChar.h"
+#include "../common/CScript.h"
+#include "../common/CResourceBase.h"
+#include "../common/CException.h"
+
 
 CChampion::CChampion(CItem *pLink) : CComponent(COMP_CHAMPION, pLink)
 {

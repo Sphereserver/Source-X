@@ -913,3 +913,26 @@ int CPointBase::GetPointSortIndex() const
 {
 	return (int)MAKEDWORD( m_x, m_y );
 }
+
+
+//*************************************************************************
+// -CPointMap
+
+CPointMap::CPointMap( short x, short y, char z, uchar map )
+{
+    m_x = x;
+    m_y = y;
+    m_z = z;
+    m_map = map;
+}
+
+//*************************************************************************
+// -CPointSort
+
+CPointSort::CPointSort( word x, word y, char z, uchar map )
+{
+    m_x = x;
+    m_y = y;
+    m_z = z;
+    m_map = map;
+}

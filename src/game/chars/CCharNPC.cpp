@@ -4,6 +4,7 @@
 #include "../../common/CException.h"
 #include "../clients/CClient.h"
 #include "../CServerTime.h"
+#include "../CWorld.h"
 #include "../triggers.h"
 #include "CCharNPC.h"
 

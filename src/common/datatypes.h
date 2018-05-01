@@ -73,7 +73,7 @@ typedef	uint16_t		uint16;
 typedef	uint32_t		uint32;
 typedef	uint64_t		uint64;
 
-// We have INTPTR_MAX and INTPTR_MIN
+// We have UINTPTR_MAX and UINTPTR_MIN
 /*
 #ifdef _32BITS
 	#define POINTER_MAX		UINT32_MAX

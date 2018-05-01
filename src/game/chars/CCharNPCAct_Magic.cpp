@@ -1,5 +1,6 @@
 // Actions specific to an NPC.
 
+#include "../CWorld.h"
 #include "CCharNPC.h"
 
 // Retrieves all the spells this character has to spells[x] list

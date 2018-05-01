@@ -9,6 +9,133 @@
 //*************************************************************************
 // -CRect
 
+
+void CRect::SetRectEmpty()
+{
+    m_left = m_top = 0;	// 0x7ffe
+    m_right = m_bottom = 0;
+    m_map = 0;
+}
+
+void CRect::OffsetRect( int x, int y )
+{
+    m_left += x;
+    m_top += y;
+    m_right += x;
+    m_bottom += y;
+}
+void CRect::UnionPoint( int x, int y )
+{
+    // Inflate this rect to include this point.
+    // NON inclusive rect!
+    if ( x	< m_left	) m_left = x;
+    if ( y	< m_top		) m_top = y;
+    if ( x	>= m_right	) m_right = x+1;
+    if ( y	>= m_bottom	) m_bottom = y+1;
+}
+
+void CRect::UnionRect( const CRect & rect )
+{
+    // Inflate this rect to include both rectangles.
+    // ASSUME: Normalized rect
+    if ( rect.IsRectEmpty())
+        return;
+    if ( IsRectEmpty())
+    {
+        *this = rect;
+        return;
+    }
+    if ( rect.m_left	< m_left	) m_left = rect.m_left;
+    if ( rect.m_top		< m_top		) m_top = rect.m_top;
+    if ( rect.m_right	> m_right	) m_right = rect.m_right;
+    if ( rect.m_bottom	> m_bottom	) m_bottom = rect.m_bottom;
+    if ( m_map != rect.m_map )
+    {
+        DEBUG_ERR(("Uniting regions from different maps!\n"));
+    }
+}
+bool CRect::IsInside( const CRect & rect ) const
+{
+    // Is &rect inside me ?
+    // ASSUME: Normalized rect
+    if ( rect.m_map != m_map )
+        return false;
+    if ( rect.m_left	< m_left	)
+        return false;
+    if ( rect.m_top		< m_top		)
+        return false;
+    if ( rect.m_right	> m_right	)
+        return false;
+    if ( rect.m_bottom	> m_bottom	)
+        return false;
+    return true;
+}
+bool CRect::IsOverlapped( const CRect & rect ) const
+{
+    // are the 2 rects overlapped at all ?
+    // NON inclusive rect.
+    // ASSUME: Normalized rect
+    //		if ( rect.m_map != m_map ) return false;
+    if ( rect.m_left	>= m_right	)
+        return false;
+    if ( rect.m_top		>= m_bottom	)
+        return false;
+    if ( rect.m_right	<= m_left	)
+        return false;
+    if ( rect.m_bottom	<= m_top	)
+        return false;
+    return true;
+}
+
+bool CRect::IsEqual( const CRect & rect ) const
+{
+    return m_left == rect.m_left &&
+        m_top == rect.m_top &&
+        m_right == rect.m_right &&
+        m_bottom == rect.m_bottom &&
+        m_map == rect.m_map;
+}
+
+void CRect::NormalizeRect()
+{
+    if ( m_bottom < m_top )
+    {
+        int wtmp = m_bottom;
+        m_bottom = m_top;
+        m_top = wtmp;
+    }
+    if ( m_right < m_left )
+    {
+        int wtmp = m_right;
+        m_right = m_left;
+        m_left = wtmp;
+    }
+    if (( m_map < 0 ) || ( m_map >= 256 )) m_map = 0;
+    if ( !g_MapList.m_maps[m_map] ) m_map = 0;
+}
+
+void CRect::SetRect( int left, int top, int right, int bottom, int map )
+{
+    m_left = left;
+    m_top = top;
+    m_right = right;
+    m_bottom = bottom;
+    m_map = map;
+    NormalizeRect();
+}
+
+void CRect::NormalizeRectMax( int cx, int cy )
+{
+    if ( m_left < 0 )
+        m_left = 0;
+    if ( m_top < 0 )
+        m_top = 0;
+    if ( m_right > cx )
+        m_right = cx;
+    if ( m_bottom > cy )
+        m_bottom = cy;
+}
+
 size_t CRect::Read( lpctstr pszVal )
 {
 	ADDTOCALLSTACK("CRect::Read");
@@ -64,10 +191,26 @@ size_t CRect::Read( lpctstr pszVal )
 	return i;
 }
 
+tchar * CRect::Write( tchar * pBuffer ) const
+{
+    sprintf(pBuffer, "%d,%d,%d,%d,%d", m_left, m_top, m_right, m_bottom, m_map);
+    return pBuffer;
+}
+
 lpctstr CRect::Write() const
 {
 	ADDTOCALLSTACK("CRect::Write");
 	return Write( Str_GetTemp() );
+}
+
+CPointBase CRect::GetCenter() const
+{
+    CPointBase pt;
+    pt.m_x = (short)(( m_left + m_right ) / 2);
+    pt.m_y = (short)((m_top + m_bottom) / 2);
+    pt.m_z = 0;
+    pt.m_map = (uchar)(m_map);
+    return( pt );
 }
 
 CPointBase CRect::GetRectCorner( DIR_TYPE dir ) const
@@ -117,7 +260,7 @@ CPointBase CRect::GetRectCorner( DIR_TYPE dir ) const
 		default:
 			break;
 	}
-	return( pt );
+	return pt;
 }
 
 CSector * CRect::GetSector( int i ) const	// ge all the sectors that make up this rect.
@@ -154,59 +297,19 @@ CSector * CRect::GetSector( int i ) const	// ge all the sectors that make up thi
 	return g_World.GetSector(m_map, iBase+indexoffset);
 }
 
-
-//CPointMap::CPointMap()
-//{
-//}
-
-CPointMap::CPointMap( short x, short y, char z, uchar map )
-{
-	m_x = x;
-	m_y = y;
-	m_z = z;
-	m_map = map;
-}
-
-CPointMap & CPointMap::operator= ( const CPointBase & pt )
-{
-	Set( pt );
-	return ( * this );
-}
-
-CPointMap::CPointMap( const CPointBase & pt )
-{
-	Set( pt );
-}
-
-CPointMap::CPointMap( tchar * pVal )
-{
-	Read( pVal );
-}
-
-CPointSort::CPointSort()
-{
-	InitPoint();
-}
-
-CPointSort::CPointSort( word x, word y, char z, uchar map )
-{
-	m_x = x;
-	m_y = y;
-	m_z = z;
-	m_map = map;
-}
-
-CPointSort::CPointSort( const CPointBase & pt )
-{
-	Set( pt );
-}
-
-CPointSort::~CPointSort()	// just to make this dynamic
-{
-}
-
 //*************************************************************************
 // -CRectMap
+
+bool CRectMap::IsValid() const
+{
+    int iSizeX = GetWidth();
+    if ( iSizeX < 0 || iSizeX > g_MapList.GetX(m_map) )
+        return false;
+    int iSizeY = GetHeight();
+    if ( iSizeY < 0 || iSizeY > g_MapList.GetY(m_map) )
+        return false;
+    return true;
+}
 
 void CRectMap::NormalizeRect()
 {

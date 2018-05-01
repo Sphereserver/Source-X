@@ -1,6 +1,7 @@
 
 #include <cmath>
 #include "../uo_files/CUOTerrainInfo.h"
+#include "../CWorld.h"
 #include "CChar.h"
 
 

@@ -17,16 +17,20 @@ function (toolchain_after_project)
 	SET (C_FLAGS_COMMON		"${C_FLAGS_EXTRA} /W4 /MP /GR\
 					-Wno-unused-value -Wno-tautological-undefined-compare -Wno-overloaded-virtual"		)
 
-	SET (CXX_FLAGS_COMMON		"${CXX_FLAGS_EXTRA} /W4 /MP /GR\
+	SET (CXX_FLAGS_COMMON	"${CXX_FLAGS_EXTRA} /W4 /MP /GR /std:c++17\
 					-Wno-unused-value -Wno-tautological-undefined-compare -Wno-overloaded-virtual"		)
 
 	 # Setting the exe to be a GUI application and not a console one.
-	SET (LINKER_FLAGS_COMMON	"/SUBSYSTEM:WINDOWS"		)
+	SET (LINKER_FLAGS_COMMON		"/SUBSYSTEM:WINDOWS /OPT:REF,ICF"		)
+	IF (${ENABLE_SANITIZERS})
+		SET (LINKER_FLAGS_COMMON 	"${LINKER_FLAGS_COMMON} /DEBUG")
+	ENDIF (${ENABLE_SANITIZERS})
 
 	#-- Release compiler and linker flags.
 	
 	IF (${ENABLE_SANITIZERS})
-		SET (SANITIZERS_OPTS_R "/Od /Oy- /Zi -gcodeview -gdwarf -fsanitize=address,undefined")
+		# We need to optimize for speed (/O2) when using sanitizers otherwise the execution will be too slow
+		SET (SANITIZERS_OPTS_R "/O2 /Oy- -Xclang -fno-inline /Zo -gcodeview -gdwarf -fsanitize=address,undefined")
 	ELSE (${ENABLE_SANITIZERS})
 		SET (SANITIZERS_OPTS_R "/O2 /Gy /flto=full -fwhole-program-vtables")
 	ENDIF (${ENABLE_SANITIZERS})
@@ -38,7 +42,8 @@ function (toolchain_after_project)
 	#-- Nightly compiler and linker flags.
 
 	IF (${ENABLE_SANITIZERS})
-		SET (SANITIZERS_OPTS_N "/Od /Oy- /Zi -gcodeview -gdwarf -fsanitize=address,undefined")
+		# We need to optimize for speed (/O2) when using sanitizers otherwise the execution will be too slow
+		SET (SANITIZERS_OPTS_N "/O2 /Oy- -Xclang -fno-inline /Zo -gcodeview -gdwarf -fsanitize=address,undefined")
 	ELSE (${ENABLE_SANITIZERS})
 		SET (SANITIZERS_OPTS_N "/O2 /Gy /flto=full -fwhole-program-vtables")
 	ENDIF (${ENABLE_SANITIZERS})
@@ -50,7 +55,8 @@ function (toolchain_after_project)
 	#-- Debug compiler and linker flags.
 
 	IF (${ENABLE_SANITIZERS})
-		SET (SANITIZERS_OPTS_D "/Od /Oy- -fsanitize=address,undefined")
+		# We need to optimize for speed (/O2) when using sanitizers otherwise the execution will be too slow
+		SET (SANITIZERS_OPTS_D "/O2 /Oy- -Xclang -fno-inline -fsanitize=address,undefined")
 	ELSE (${ENABLE_SANITIZERS})
 		SET (SANITIZERS_OPTS_D "/Od /Oy-")
 	ENDIF (${ENABLE_SANITIZERS})

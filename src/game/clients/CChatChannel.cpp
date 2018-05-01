@@ -1,5 +1,6 @@
 
 #include "../chars/CChar.h"
+#include "../CWorld.h"
 #include "CChatChannel.h"
 #include "CChatChanMember.h"
 #include "CClient.h"

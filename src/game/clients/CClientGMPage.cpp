@@ -3,6 +3,7 @@
 #include "../../network/network.h"
 #include "../chars/CChar.h"
 #include "../CServerTime.h"
+#include "../CWorld.h"
 #include "CClient.h"
 
 /////////////////////////////////////////////

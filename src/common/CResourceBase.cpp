@@ -5,6 +5,7 @@
 #include "../game/CObjBase.h"
 #include "../game/CServerConfig.h"
 #include "../game/triggers.h"
+#include "../game/CWorld.h"
 #include "CException.h"
 #include "CExpression.h"
 #include "sphere_library/CSFileList.h"

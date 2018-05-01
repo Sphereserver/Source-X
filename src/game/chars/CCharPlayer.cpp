@@ -5,6 +5,7 @@
 #include "../../common/CException.h"
 #include "../clients/CClient.h"
 #include "../CServerTime.h"
+#include "../CWorld.h"
 #include "CChar.h"
 #include "CCharNPC.h"
 #include "CCharPlayer.h"

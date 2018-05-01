@@ -7,7 +7,7 @@
 #define _INC_SMAP_H
 
 #include <shared_mutex>
-
+#include <cstdint>
 #include "../CException.h"
 
 #define _SPHERE_MAP_DEFAULT_SIZE 10
@@ -21,41 +21,41 @@ public:
         operator V ();
         friend class staticmap;
     private:
-        CellPosition(staticmap * m, bool e, K k, unsigned int p);
+        CellPosition(staticmap * m, bool e, K k, size_t p);
         staticmap * _map;
         bool _exists;
         K _key;
-        unsigned int _position;
+        size_t _position;
     };
 
-    staticmap(unsigned int size=_SPHERE_MAP_DEFAULT_SIZE);
+    staticmap(size_t size=_SPHERE_MAP_DEFAULT_SIZE);
     staticmap(const staticmap & o);
 
     ~staticmap();
 
     staticmap & operator=(const staticmap & o);
 
-    bool empty();
-    unsigned int size();
-    unsigned int max_size();
+    bool empty() const;
+    size_t size() const;
+    size_t max_size() const;
 
     CellPosition operator[](K key);
     void erase(K key);
     void swap(staticmap & o);
     void clear();
-    unsigned int count(K key);
+    size_t count(K key) const;
 protected:
     class Cell {
     public:
         K key;
         V value;
     };
-    void _reserve(unsigned int n);
-    void _resize(unsigned int s);
+    void _reserve(size_t n);
+    void _resize(size_t s);
 
     Cell * _map;
-    unsigned int _capacity;
-    unsigned int _size;
+    size_t _capacity;
+    size_t _size;
 };
 
 template<typename K, typename V>
@@ -69,12 +69,12 @@ protected:
         Node();
         Node(Node & o);
         ~Node();
-        unsigned int child_count();
+        size_t child_count() const;
         void replace_by_child();
         void remove_child(Node * n);
     };
     Node * _root;
-    unsigned int _size;
+    size_t _size;
 public:
     class CellPosition {
     public:
@@ -90,14 +90,15 @@ public:
     };
 
     dynamicmap();
-    dynamicmap(unsigned int size);
+    dynamicmap(size_t size);
     dynamicmap(const dynamicmap & o);
     ~dynamicmap();
 
     dynamicmap & operator=(const dynamicmap & o);
 
-    bool empty();
-    unsigned int size();
+    bool empty() const;
+    size_t size() const;
+    size_t count(K key) const;
 
     CellPosition operator[](K key);
 
@@ -105,7 +106,6 @@ public:
 
     void swap(dynamicmap & o);
     void clear();
-    unsigned int count(K key);
 };
 
 
@@ -124,13 +124,14 @@ public:
         bool _unlocked;
     };
 
-    tsmap(unsigned int size=_SPHERE_MAP_DEFAULT_SIZE);
+    tsmap(size_t size=_SPHERE_MAP_DEFAULT_SIZE);
     tsmap(const tsmap & o);
 
     tsmap & operator=(const tsmap & o);
 
-    bool empty();
-    unsigned int size();
+    bool empty() const;
+    size_t size() const;
+    size_t count(K key) const;
 
     CellPosition operator[](K key);
 
@@ -138,10 +139,9 @@ public:
 
     void swap(tsmap & o);
     void clear();
-    unsigned int count(K key);
 private:
+    mutable std::shared_mutex _mutex;
     M _map;
-    std::shared_mutex _mutex;
 };
 
 template <typename K, typename V>
@@ -155,7 +155,7 @@ using tsdynamicmap = tsmap<K, V, dynamicmap<K, V> >;
 */
 
 template<typename K, typename V>
-staticmap<K,V>::CellPosition::CellPosition(staticmap * m, bool e, K k, unsigned int p) {
+staticmap<K,V>::CellPosition::CellPosition(staticmap * m, bool e, K k, size_t p) {
     _map = m;
     _exists = e;
     _key = k;
@@ -183,7 +183,7 @@ staticmap<K,V>::CellPosition::operator V () {
 }
 
 template<typename K, typename V>
-staticmap<K,V>::staticmap(unsigned int size) {
+staticmap<K,V>::staticmap(size_t size) {
     _capacity = size;
     _size = 0;
     _map = new Cell[_capacity];
@@ -213,23 +213,23 @@ staticmap<K,V> & staticmap<K,V>::operator=(const staticmap<K,V> & o) {
 }
 
 template<typename K, typename V>
-bool staticmap<K,V>::empty() {
+bool staticmap<K,V>::empty() const {
     return _size == 0;
 }
 
 template<typename K, typename V>
-unsigned int staticmap<K,V>::size() {
+size_t staticmap<K,V>::size() const {
     return _size;
 }
 
 template<typename K, typename V>
-unsigned int staticmap<K,V>::max_size() {
-    return unsigned int32_MAX;
+size_t staticmap<K,V>::max_size() const {
+    return UINTPTR_MAX;
 }
 
 template<typename K, typename V>
 typename staticmap<K,V>::CellPosition staticmap<K,V>::operator[](K key) {
-    unsigned int init = 0, end = _size - 1, pivot = 0;
+    size_t init = 0, end = _size - 1, pivot = 0;
     K pivot_key;
     bool stop = false;
     while ( init > end && !stop) {
@@ -260,8 +260,8 @@ void staticmap<K,V>::erase(K key) {
 template<typename K, typename V>
 void staticmap<K,V>::swap(staticmap & o) {
     Cell * map = _map;
-    unsigned int size = _size;
-    unsigned int capacity = _capacity;
+    size_t size = _size;
+    size_t capacity = _capacity;
     _map = o._map;
     _size = o._size;
     _capacity = o._capacity;
@@ -277,23 +277,23 @@ void staticmap<K,V>::clear() {
 }
 
 template<typename K, typename V>
-unsigned int staticmap<K,V>::count(K key) {
+size_t staticmap<K,V>::count(K key) const {
     CellPosition p = (*this)[key];
     if (p._exists) { return 1; }
     return 0;
 }
 
 template<typename K, typename V>
-void staticmap<K,V>::_reserve(unsigned int n) {
+void staticmap<K,V>::_reserve(size_t n) {
     if (_capacity < n) {
         _resize(n + _SPHERE_MAP_DEFAULT_SIZE);
     }
 }
 
 template<typename K, typename V>
-void staticmap<K,V>::_resize(unsigned int s) {
+void staticmap<K,V>::_resize(size_t s) {
     Cell * n = new Cell[s];
-    unsigned int nsize = _size;
+    size_t nsize = _size;
     if (s < _size) nsize = s;
     memcpy(n, _map, sizeof(Cell) * nsize);
     _size = nsize;
@@ -323,8 +323,8 @@ dynamicmap<K,V>::Node::~Node() {
 }
 
 template<typename K, typename V>
-unsigned int dynamicmap<K,V>::Node::child_count() {
-    unsigned int count = 0;
+size_t dynamicmap<K,V>::Node::child_count() const {
+    size_t count = 0;
     if (l != NULL) count++;
     if (r != NULL) count++;
     return count;
@@ -398,7 +398,7 @@ dynamicmap<K,V>::dynamicmap() {
 }
 
 template<typename K, typename V>
-dynamicmap<K,V>::dynamicmap(unsigned int size) : dynamicmap<K,V>() { UNREFERENCED_PARAMETER(size); }
+dynamicmap<K,V>::dynamicmap(size_t size) : dynamicmap<K,V>() { UNREFERENCED_PARAMETER(size); }
 
 template<typename K, typename V>
 dynamicmap<K,V>::dynamicmap(const dynamicmap & o) {
@@ -419,12 +419,12 @@ dynamicmap<K,V> & dynamicmap<K,V>::operator=(const dynamicmap<K,V> & o) {
 }
 
 template<typename K, typename V>
-bool dynamicmap<K,V>::empty() {
+bool dynamicmap<K,V>::empty() const {
     return _size == 0;
 }
 
 template<typename K, typename V>
-unsigned int dynamicmap<K,V>::size() {
+size_t dynamicmap<K,V>::size() const {
     return _size;
 }
 
@@ -455,7 +455,7 @@ void dynamicmap<K,V>::erase(K key) {
     }
     Node * n = p._n;
     // Case leaf:
-    unsigned int childs = n->child_count();
+    size_t childs = n->child_count();
     if (childs == 0) {
         n->p->remove_child(n);
         delete n;
@@ -483,7 +483,7 @@ void dynamicmap<K,V>::erase(K key) {
 template<typename K, typename V>
 void dynamicmap<K,V>::swap(dynamicmap & o) {
     Node * tmproot = _root;
-    unsigned int tmpsize = _size;
+    size_t tmpsize = _size;
     _root = o._root;
     _size = o._size;
     o._root = tmproot;
@@ -497,7 +497,7 @@ void dynamicmap<K,V>::clear() {
 }
 
 template<typename K, typename V>
-unsigned int dynamicmap<K,V>::count(K key) {
+size_t dynamicmap<K,V>::count(K key) const {
     CellPosition p = (*this)[key];
     if (p._exists) { return 1; }
     return 0;
@@ -531,30 +531,30 @@ tsmap<K,V,M>::CellPosition::operator V () {
 
 
 template<typename K, typename V, typename M>
-tsmap<K,V,M>::tsmap(unsigned int size) : _map(size) {}
+tsmap<K,V,M>::tsmap(size_t size) : _map(size) {}
 
 
 template<typename K, typename V, typename M>
 tsmap<K,V,M>::tsmap(const tsmap & o) {
     _mutex.lock();
-    o._mutex.lock();
+    o._mutex.lock_shared();
     _map = o._map;
-    o._mutex.unlock();
+    o._mutex.unlock_shared();
     _mutex.unlock();
 }
 
 template<typename K, typename V, typename M>
 tsmap<K,V,M> & tsmap<K,V,M>::operator=(const tsmap<K,V,M> & o) {
     _mutex.lock();
-    o._mutex.lock();
+    o._mutex.lock_shared();
     _map = o._map;
-    o._mutex.unlock();
+    o._mutex.unlock_shared();
     _mutex.unlock();
     return *this;
 }
 
 template<typename K, typename V, typename M>
-bool tsmap<K,V,M>::empty() {
+bool tsmap<K,V,M>::empty() const {
     bool e;
     _mutex.lock_shared();
     e = _map.empty();
@@ -563,8 +563,8 @@ bool tsmap<K,V,M>::empty() {
 }
 
 template<typename K, typename V, typename M>
-unsigned int tsmap<K,V,M>::size() {
-    unsigned int s;
+size_t tsmap<K,V,M>::size() const {
+    size_t s;
     _mutex.lock_shared();
     s = _map.size();
     _mutex.unlock_shared();
@@ -601,8 +601,8 @@ void tsmap<K,V,M>::clear() {
 }
 
 template<typename K, typename V, typename M>
-unsigned int tsmap<K,V,M>::count(K key) {
-    unsigned int c;
+size_t tsmap<K,V,M>::count(K key) const {
+    size_t c;
     _mutex.lock_shared();
     c = _map.count(key);
     _mutex.unlock_shared();

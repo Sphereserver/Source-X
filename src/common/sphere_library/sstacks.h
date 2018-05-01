@@ -14,7 +14,7 @@
 template<typename T>
 class fixedstack {
 public:
-    fixedstack(unsigned int size=_SPHERE_STACK_DEFAULT_SIZE);
+    fixedstack(size_t size=_SPHERE_STACK_DEFAULT_SIZE);
     fixedstack(const fixedstack<T> & o);
     ~fixedstack();
 
@@ -22,21 +22,21 @@ public:
 
     void push(T t);
     void pop();
-    T top();
+    T top() const;
 
     void clear();
-    bool empty();
-    unsigned int size();
+    bool empty() const;
+    size_t size() const;
 
 private:
     T * _stack;
-    unsigned int _top, _size;
+    size_t _top, _size;
 };
 
 template <typename T>
 class fixedgrowingstack {
 public:
-    fixedgrowingstack(unsigned int size=_SPHERE_STACK_DEFAULT_SIZE);
+    fixedgrowingstack(size_t size=_SPHERE_STACK_DEFAULT_SIZE);
     fixedgrowingstack(const fixedgrowingstack<T> & o);
     ~fixedgrowingstack();
 
@@ -44,14 +44,14 @@ public:
 
     void push(T t);
     void pop();
-    T top();
+    T top() const;
 
     void clear();
-    bool empty();
-    unsigned int size();
+    bool empty() const;
+    size_t size() const;
 private:
     T * _stack;
-    unsigned int _top, _size;
+    size_t _top, _size;
 };
 
 template<typename T>
@@ -59,7 +59,7 @@ class dynamicstack {
 public:
     dynamicstack();
     // To allow thread secure wrapper constructor.
-    dynamicstack(unsigned int _);
+    dynamicstack(size_t _);
     dynamicstack(const dynamicstack<T> & o);
     ~dynamicstack();
 
@@ -67,11 +67,11 @@ public:
 
     void push(T t);
     void pop();
-    T top();
+    T top() const;
 
     void clear();
-    bool empty();
-    unsigned int size();
+    bool empty() const;
+    size_t size() const;
 
 private:
     struct _dynamicstackitem {
@@ -81,26 +81,26 @@ private:
         _dynamicstackitem * _next;
     };
     _dynamicstackitem * _top;
-    unsigned int _size;
+    size_t _size;
 };
 
 template <typename T, class S>
 class tsstack {
 public:
-    tsstack(unsigned int size=_SPHERE_STACK_DEFAULT_SIZE);
+    tsstack(size_t size=_SPHERE_STACK_DEFAULT_SIZE);
     tsstack(const tsstack<T, S> & o);
 
     tsstack & operator=(const tsstack<T, S> & o);
 
     void push(T t);
     void pop();
-    T top();
+    T top() const;
 
     void clear();
-    bool empty();
-    unsigned int size();
+    bool empty() const;
+    size_t size() const;
 private:
-    std::shared_mutex _mutex;
+    mutable std::shared_mutex _mutex;
     S _s;
 };
 
@@ -118,7 +118,7 @@ using tsdynamicstack = tsstack<T, dynamicstack<T>>;
 */
 
 template <typename T>
-fixedstack<T>::fixedstack(unsigned int size) {
+fixedstack<T>::fixedstack(size_t size) {
     _stack = new T[size];
     _top = 0;
     _size = size;
@@ -129,7 +129,7 @@ fixedstack<T>::fixedstack(const fixedstack<T> & o) {
     _stack = new T[o._size];
     _top = o._top;
     _size = o._size;
-    for(unsigned int i = 0; i < _top; ++i) _stack[i] = o._stack[i];
+    for(size_t i = 0; i < _top; ++i) _stack[i] = o._stack[i];
 }
 
 template <typename T>
@@ -143,7 +143,7 @@ fixedstack<T> & fixedstack<T>::operator=(const fixedstack<T> & o) {
     _stack = new T[o._size];
     _top = o._top;
     _size = o._size;
-    for(unsigned int i = 0; i < _top; ++i) _stack[i] = o._stack[i];
+    for(size_t i = 0; i < _top; ++i) _stack[i] = o._stack[i];
     return *this;
 }
 
@@ -164,7 +164,7 @@ void fixedstack<T>::pop() {
 }
 
 template <typename T>
-T fixedstack<T>::top() {
+T fixedstack<T>::top() const {
     if (!_top) {
         throw CSError(LOGL_FATAL, 0, "stack is empty.");
     }
@@ -179,17 +179,17 @@ void fixedstack<T>::clear() {
 }
 
 template <typename T>
-bool fixedstack<T>::empty() {
+bool fixedstack<T>::empty() const {
     return _top == 0;
 }
 
 template <typename T>
-unsigned int fixedstack<T>::size() {
+size_t fixedstack<T>::size() const {
     return _top;
 }
 
 template <typename T>
-fixedgrowingstack<T>::fixedgrowingstack(unsigned int size) {
+fixedgrowingstack<T>::fixedgrowingstack(size_t size) {
 _stack = new T[size];
 _top = 0;
 _size = size;
@@ -200,7 +200,7 @@ fixedgrowingstack<T>::fixedgrowingstack(const fixedgrowingstack<T> & o) {
     _stack = new T[o._size];
     _top = o._top;
     _size = o._size;
-    for(unsigned int i = 0; i < _top; ++i) _stack[i] = o._stack[i];
+    for(size_t i = 0; i < _top; ++i) _stack[i] = o._stack[i];
 }
 
 template <typename T>
@@ -213,7 +213,7 @@ fixedgrowingstack<T> & fixedgrowingstack<T>::operator=(const fixedgrowingstack<T
     _stack = new T[o._size];
     _top = o._top;
     _size = o._size;
-    for(unsigned int i = 0; i < _top; ++i) _stack[i] = o._stack[i];
+    for(size_t i = 0; i < _top; ++i) _stack[i] = o._stack[i];
     return *this;
 }
 
@@ -221,7 +221,7 @@ template <typename T>
 void fixedgrowingstack<T>::push(T t) {
     if (_top == _size) {
         T * nstack = new T[_size + _SPHERE_STACK_DEFAULT_SIZE];
-        for(unsigned int i = 0; i < _top; ++i) nstack[i] = _stack[i];
+        for(size_t i = 0; i < _top; ++i) nstack[i] = _stack[i];
         delete[] _stack;
         _stack = nstack;
         _size += _SPHERE_STACK_DEFAULT_SIZE;
@@ -238,7 +238,7 @@ void fixedgrowingstack<T>::pop() {
 }
 
 template <typename T>
-T fixedgrowingstack<T>::top() {
+T fixedgrowingstack<T>::top() const {
     if (!_top) {
         throw CSError(LOGL_FATAL, 0, "stack is empty.");
     }
@@ -253,12 +253,12 @@ void fixedgrowingstack<T>::clear() {
 }
 
 template <typename T>
-bool fixedgrowingstack<T>::empty() {
+bool fixedgrowingstack<T>::empty() const {
     return _top == 0;
 }
 
 template <typename T>
-unsigned int fixedgrowingstack<T>::size() {
+size_t fixedgrowingstack<T>::size() const {
     return _top;
 }
 
@@ -269,7 +269,7 @@ dynamicstack<T>::dynamicstack() {
 }
 
 template <typename T>
-dynamicstack<T>::dynamicstack(unsigned int _) : dynamicstack<T>() { UNREFERENCED_PARAMETER(_); }
+dynamicstack<T>::dynamicstack(size_t _) : dynamicstack<T>() { UNREFERENCED_PARAMETER(_); }
 
 template <typename T>
 dynamicstack<T>::dynamicstack(const dynamicstack<T> & o) {
@@ -330,7 +330,7 @@ void dynamicstack<T>::pop() {
 }
 
 template <typename T>
-T dynamicstack<T>::top() {
+T dynamicstack<T>::top() const {
     if (_top == NULL) {
         throw CSError(LOGL_FATAL, 0, "stack is empty.");
     }
@@ -345,12 +345,12 @@ void dynamicstack<T>::clear() {
 }
 
 template <typename T>
-bool dynamicstack<T>::empty() {
+bool dynamicstack<T>::empty() const {
     return _top == NULL;
 }
 
 template <typename T>
-unsigned int dynamicstack<T>::size(){
+size_t dynamicstack<T>::size() const {
     return _size;
 }
 
@@ -361,7 +361,7 @@ dynamicstack<T>::_dynamicstackitem::_dynamicstackitem(T item, _dynamicstackitem 
 }
 
 template<typename T, class S>
-tsstack<T, S>::tsstack(unsigned int size) : _s(size) {}
+tsstack<T, S>::tsstack(size_t size) : _s(size) {}
 
 template<typename T, class S>
 tsstack<T, S>::tsstack(const tsstack<T, S> & o) {
@@ -373,9 +373,9 @@ tsstack<T, S>::tsstack(const tsstack<T, S> & o) {
 template<typename T, class S>
 tsstack<T, S> & tsstack<T, S>::operator=(const tsstack<T, S> & o) {
     _mutex.lock();
-    o._mutex.lock();
+    o._mutex.shared_lock();
     _s = o._s;
-    o._mutex.unlock();
+    o._mutex.shared_unlock();
     _mutex.unlock();
 }
 
@@ -394,10 +394,10 @@ void tsstack<T, S>::pop() {
 }
 
 template<typename T, class S>
-T tsstack<T, S>::top() {
-    _mutex.lock();
+T tsstack<T, S>::top() const {
+    _mutex.shared_lock();
     T x = _s.top();
-    _mutex.unlock();
+    _mutex.shared_unlock();
     return x;
 }
 
@@ -409,18 +409,18 @@ void tsstack<T, S>::clear() {
 }
 
 template<typename T, class S>
-bool tsstack<T, S>::empty() {
-    _mutex.lock();
+bool tsstack<T, S>::empty() const {
+    _mutex.shared_lock();
     bool b = _s.empty();
-    _mutex.unlock();
+    _mutex.shared_unlock();
     return b;
 }
 
 template<typename T, class S>
-unsigned int tsstack<T, S>::size() {
-    _mutex.lock();
-    unsigned int s = _s.size();
-    _mutex.unlock();
+size_t tsstack<T, S>::size() const {
+    _mutex.shared_lock();
+    size_t s = _s.size();
+    _mutex.shared_unlock();
     return s;
 }
 

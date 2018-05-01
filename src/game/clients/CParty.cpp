@@ -6,6 +6,7 @@
 #include "../../sphere/ProfileTask.h"
 #include "../chars/CChar.h"
 #include "../CServer.h"
+#include "../CWorld.h"
 #include "../triggers.h"
 #include "CClient.h"
 #include "CParty.h"

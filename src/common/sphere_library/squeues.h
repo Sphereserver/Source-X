@@ -1,10 +1,10 @@
 /**
-* @file CSArray.h
+* @file squeues.h
 * @brief Queue custom implementations.
 */
 
-#ifndef _INC_CQUEUE_H
-#define _INC_CQUEUE_H
+#ifndef _INC_SQUEUES_H
+#define _INC_SQUEUES_H
 
 #include <shared_mutex>
 #include "../CException.h"
@@ -14,7 +14,7 @@
 template <typename T>
 class fixedqueue {
 public:
-    fixedqueue(unsigned int size=_SPHERE_QUEUE_DEFAULT_SIZE);
+    fixedqueue(size_t size=_SPHERE_QUEUE_DEFAULT_SIZE);
     fixedqueue(const fixedqueue<T> & o);
     ~fixedqueue();
 
@@ -22,21 +22,21 @@ public:
 
     void push(T t);
     void pop();
-    T front();
+    T front() const;
 
-    bool empty();
     void clear();
-	unsigned int size();
+    bool empty() const;
+	size_t size() const;
 private:
     T * _queue;
-	unsigned int _front, _end, _size;
+	size_t _front, _end, _size;
     bool _empty;
 };
 
 template <typename T>
 class fixedgrowingqueue {
 public:
-    fixedgrowingqueue(unsigned int size=_SPHERE_QUEUE_DEFAULT_SIZE);
+    fixedgrowingqueue(size_t size=_SPHERE_QUEUE_DEFAULT_SIZE);
     fixedgrowingqueue(const fixedgrowingqueue<T> & o);
     ~fixedgrowingqueue();
 
@@ -44,15 +44,15 @@ public:
 
     void push(T t);
     void pop();
-    T front();
+    T front() const;
 
-    bool empty();
     void clear();
-	unsigned int size();
+    bool empty() const;
+	size_t size() const;
 
 private:
     T * _queue;
-	unsigned int _front, _end, _size;
+	size_t _front, _end, _size;
     bool _empty;
 };
 
@@ -61,7 +61,7 @@ class dynamicqueue {
 public:
     dynamicqueue();
     // To allow thread secure wrapper constructor.
-    dynamicqueue(unsigned int _);
+    dynamicqueue(size_t _);
     dynamicqueue(const dynamicqueue<T> & o);
     ~dynamicqueue();
 
@@ -69,11 +69,11 @@ public:
 
     void push(T t);
     void pop();
-    T front();
+    T front() const;
 
     void clear();
-    bool empty();
-	unsigned int size();
+    bool empty() const;
+	size_t size() const;
 private:
     struct _dynamicqueueitem {
     public:
@@ -82,27 +82,27 @@ private:
         _dynamicqueueitem * _next;
     };
     _dynamicqueueitem * _front, *_end;
-	unsigned int _size;
+	size_t _size;
 };
 
 template <typename T, class Q>
 class tsqueue {
 public:
-    tsqueue(unsigned int size=_SPHERE_QUEUE_DEFAULT_SIZE);
+    tsqueue(size_t size=_SPHERE_QUEUE_DEFAULT_SIZE);
     tsqueue(const tsqueue<T, Q> & o);
 
     tsqueue & operator=(const tsqueue<T, Q> & o);
 
     void push(T t);
     void pop();
-    T front();
+    T front() const;
     T front_and_pop();
 
     void clear();
-    bool empty();
-	unsigned int size();
+    bool empty() const;
+	size_t size() const;
 private:
-    std::shared_mutex _mutex;
+    mutable std::shared_mutex _mutex;
     Q _q;
 };
 
@@ -120,7 +120,7 @@ using tsdynamicqueue = tsqueue<T, dynamicqueue<T>>;
 */
 
 template <typename T>
-fixedqueue<T>::fixedqueue(unsigned int size) {
+fixedqueue<T>::fixedqueue(size_t size) {
     _queue = new T[size];
     _size = size;
     _front = 0;
@@ -137,7 +137,7 @@ fixedqueue<T>::fixedqueue(const fixedqueue<T> & o) {
     _queue = new T[_size];
     if (!_empty) {
         _queue[0] = o._queue[o._front];
-        for (unsigned int i = 1; i % _size != _end; ++i) _queue[i] = o._queue[(i + o._front) % _size];
+        for (size_t i = 1; i % _size != _end; ++i) _queue[i] = o._queue[(i + o._front) % _size];
     }
 }
 
@@ -156,7 +156,7 @@ fixedqueue<T> & fixedqueue<T>::operator=(const fixedqueue<T> & o) {
     _queue = new T[_size];
     if (!_empty) {
         _queue[0] = o._queue[o._front];
-        for(unsigned int i = 1; i % _size != _end; ++i) _queue[i] = o._queue[(i + o._front) % _size];
+        for(size_t i = 1; i % _size != _end; ++i) _queue[i] = o._queue[(i + o._front) % _size];
     }
     return *this;
 }
@@ -185,16 +185,11 @@ void fixedqueue<T>::pop() {
 }
 
 template <typename T>
-T fixedqueue<T>::front() {
+T fixedqueue<T>::front() const {
     if (_empty) {
         throw CSError(LOGL_FATAL, 0, "queue is empty.");
     }
     return _queue[_front];
-}
-
-template <typename T>
-bool fixedqueue<T>::empty() {
-    return _empty;
 }
 
 template <typename T>
@@ -205,12 +200,17 @@ void fixedqueue<T>::clear() {
 }
 
 template <typename T>
-unsigned int fixedqueue<T>::size() {
+bool fixedqueue<T>::empty() const {
+    return _empty;
+}
+
+template <typename T>
+size_t fixedqueue<T>::size() const {
     return _size;
 }
 
 template <typename T>
-fixedgrowingqueue<T>::fixedgrowingqueue(unsigned int size) {
+fixedgrowingqueue<T>::fixedgrowingqueue(size_t size) {
 	_queue = new T[size];
 	_size = size;
 	_front = 0;
@@ -227,7 +227,7 @@ fixedgrowingqueue<T>::fixedgrowingqueue(const fixedgrowingqueue<T> & o) {
     _queue = new T[_size];
     if (!_empty) {
         _queue[0] = o._queue[o._front];
-        for(unsigned int i = 1; i % _size != _end; ++i) _queue[i] = o._queue[(i + o._front) % _size];
+        for(size_t i = 1; i % _size != _end; ++i) _queue[i] = o._queue[(i + o._front) % _size];
     }
 }
 
@@ -246,7 +246,7 @@ fixedgrowingqueue<T> & fixedgrowingqueue<T>::operator=(const fixedgrowingqueue<T
     _queue = new T[_size];
     if (!_empty) {
         _queue[0] = o._queue[o._front];
-        for(unsigned int i = 1; i % _size != _end; ++i) _queue[i] = o._queue[(i + o._front) % _size];
+        for(size_t i = 1; i % _size != _end; ++i) _queue[i] = o._queue[(i + o._front) % _size];
     }
     return *this;
 }
@@ -256,7 +256,7 @@ void fixedgrowingqueue<T>::push(T t) {
     if (_end == _front && !_empty) {
         T * nqueue = new T[_size + _SPHERE_QUEUE_DEFAULT_SIZE];
         nqueue[0] = _queue[_front];
-        for(unsigned int i = 1; i % _size != _end; ++i) nqueue[i] = _queue[(i + _front) % _size];
+        for(size_t i = 1; i % _size != _end; ++i) nqueue[i] = _queue[(i + _front) % _size];
         _end = _size - 1;
         _front = 0;
         delete[] _queue;
@@ -282,16 +282,11 @@ void fixedgrowingqueue<T>::pop() {
 }
 
 template <typename T>
-T fixedgrowingqueue<T>::front() {
+T fixedgrowingqueue<T>::front() const {
     if (_empty) {
         throw CSError(LOGL_FATAL, 0, "queue is empty.");
     }
     return _queue[_front];
-}
-
-template <typename T>
-bool fixedgrowingqueue<T>::empty() {
-    return _empty;
 }
 
 template <typename T>
@@ -302,7 +297,12 @@ void fixedgrowingqueue<T>::clear() {
 }
 
 template <typename T>
-unsigned int fixedgrowingqueue<T>::size() {
+bool fixedgrowingqueue<T>::empty() const {
+    return _empty;
+}
+
+template <typename T>
+size_t fixedgrowingqueue<T>::size() const {
     return _size;
 }
 
@@ -314,7 +314,7 @@ dynamicqueue<T>::dynamicqueue() {
 }
 
 template <typename T>
-dynamicqueue<T>::dynamicqueue(unsigned int _) : dynamicqueue<T>() { UNREFERENCED_PARAMETER(_); }
+dynamicqueue<T>::dynamicqueue(size_t _) : dynamicqueue<T>() { UNREFERENCED_PARAMETER(_); }
 
 template <typename T>
 dynamicqueue<T>::dynamicqueue(const dynamicqueue<T> & o) {
@@ -376,7 +376,7 @@ void dynamicqueue<T>::pop() {
 }
 
 template <typename T>
-T dynamicqueue<T>::front() {
+T dynamicqueue<T>::front() const {
     if (!_size) throw CSError(LOGL_FATAL, 0, "Queue is empty");
     return _front->_item;
 }
@@ -389,12 +389,12 @@ void dynamicqueue<T>::clear() {
 }
 
 template <typename T>
-bool dynamicqueue<T>::empty() {
+bool dynamicqueue<T>::empty() const {
     return _size == 0;
 }
 
 template <typename T>
-unsigned int dynamicqueue<T>::size() {
+size_t dynamicqueue<T>::size() const {
     return _size;
 }
 
@@ -405,7 +405,7 @@ dynamicqueue<T>::_dynamicqueueitem::_dynamicqueueitem(T item) {
 }
 
 template <typename T, class Q>
-tsqueue<T, Q>::tsqueue(unsigned int size) : _q(size) {}
+tsqueue<T, Q>::tsqueue(size_t size) : _q(size) {}
 
 template <typename T, class Q>
 tsqueue<T, Q>::tsqueue(const tsqueue<T, Q> & o) {
@@ -439,7 +439,7 @@ void tsqueue<T, Q>::pop() {
 }
 
 template <typename T, class Q>
-T tsqueue<T, Q>::front() {
+T tsqueue<T, Q>::front() const {
     _mutex.lock_shared();
     T x = _q.front();
     _mutex.unlock_shared();
@@ -463,7 +463,7 @@ void tsqueue<T, Q>::clear() {
 }
 
 template <typename T, class Q>
-bool tsqueue<T, Q>::empty() {
+bool tsqueue<T, Q>::empty() const {
     _mutex.lock_shared();
     bool b = _q.empty();
     _mutex.unlock_shared();
@@ -471,11 +471,11 @@ bool tsqueue<T, Q>::empty() {
 }
 
 template <typename T, class Q>
-unsigned int tsqueue<T, Q>::size() {
+size_t tsqueue<T, Q>::size() const {
     _mutex.lock_shared();
-    unsigned int s = _q.size();
+    size_t s = _q.size();
     _mutex.unlock_shared();
     return s;
 }
 
-#endif //_INC_CQUEUE_H
+#endif //_INC_SQUEUES_H

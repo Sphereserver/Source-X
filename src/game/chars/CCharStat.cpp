@@ -2,6 +2,7 @@
 
 #include "../../common/CException.h"
 #include "../triggers.h"
+#include "../CWorld.h"
 #include "CChar.h"
 
 //----------------------------------------------------------------------

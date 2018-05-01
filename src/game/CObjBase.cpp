@@ -366,6 +366,13 @@ void CObjBase::SetTimeout( int64 iDelayInTicks )
 		m_timeout = CServerTime::GetCurrentTime() + iDelayInTicks;
 }
 
+int64 CObjBase::GetTimerDiff() const
+{
+    // How long till this will expire ?
+    return g_World.GetTimeDiff( m_timeout );
+    // return: < 0 = in the past ( m_timeout - CServerTime::GetCurrentTime() )
+}
+
 int64 CObjBase::GetTimerAdjusted() const
 {
 	// RETURN: time in seconds from now.

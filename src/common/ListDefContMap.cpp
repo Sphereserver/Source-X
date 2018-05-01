@@ -326,7 +326,7 @@ int CListDefCont::FindValNum( int64 iVal, size_t nStartIndex /* = 0 */ ) const
 bool CListDefCont::AddElementNum(int64 iVal)
 {
 	ADDTOCALLSTACK("CListDefCont::AddElementNum");
-	if ( (m_listElements.size() + 1) >= INTPTR_MAX )
+	if ( (m_listElements.size() + 1) >= INTPTR_MAX )	// overflow? is it even useful?
 		return false;
 
 	m_listElements.push_back( new CListDefContNum(m_Key.GetPtr(), iVal) );
@@ -337,7 +337,7 @@ bool CListDefCont::AddElementNum(int64 iVal)
 bool CListDefCont::AddElementStr(lpctstr pszKey)
 {
 	ADDTOCALLSTACK("CListDefCont::AddElementStr");
-	if ( (m_listElements.size() + 1) >= INTPTR_MAX )
+	if ( (m_listElements.size() + 1) >= INTPTR_MAX )	// overflow? is it even useful?
 		return false;
 
 	REMOVE_QUOTES( pszKey );

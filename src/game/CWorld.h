@@ -11,12 +11,11 @@
 #include "../common/CScript.h"
 #include "../common/CScriptObj.h"
 #include "../common/CUID.h"
-#include "items/CItemBase.h"
+#include "items/CItemStone.h"
 #include "CServerTime.h"
 #include "CSector.h"
 
 class CObjBase;
-class CItemStone;
 class CItemTypeDef;
 class CObjBaseTemplate;
 
@@ -70,8 +69,8 @@ public:
 	bool IsSaving() const;
 
 	// UID Managenent
+    #define UID_PLACE_HOLDER (reinterpret_cast<CObjBase*>(INTPTR_MAX))
 	dword GetUIDCount() const;
-#define UID_PLACE_HOLDER (reinterpret_cast<CObjBase*>(INTPTR_MAX))
 	CObjBase * FindUID(dword dwIndex) const;
 	void FreeUID(dword dwIndex);
 	dword AllocUID( dword dwIndex, CObjBase * pObj );

@@ -8,6 +8,7 @@
 #include "clients/CClient.h"
 #include "CServer.h"
 #include "CServerTime.h"
+#include "CWorld.h"
 
 
 enum WV_TYPE

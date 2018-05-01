@@ -516,18 +516,18 @@ public:
 #define XTRIG_UNKNOWN 0	// bit 0 is reserved to say there are triggers here that do not conform.
 
 public:
-	void AddRefInstance()
+	inline void AddRefInstance()
 	{
 		++m_lRefInstances;
 	}
-	void DelRefInstance()
+    inline void DelRefInstance()
 	{
 #ifdef _DEBUG
-		ASSERT(m_lRefInstances > 0);
+		ASSERT(m_lRefInstances != (word)-1);    // catching underflows
 #endif
 		--m_lRefInstances;
 	}
-	dword GetRefInstances() const
+    inline dword GetRefInstances() const
 	{
 		return m_lRefInstances;
 	}
