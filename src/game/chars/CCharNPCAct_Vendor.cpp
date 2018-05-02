@@ -2,7 +2,7 @@
 
 #include "../../network/receive.h"
 #include "../clients/CClient.h"
-#include "../CServerTime.h"
+#include "../CWorld.h"
 #include "../CPathFinder.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
