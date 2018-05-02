@@ -371,23 +371,23 @@ bool CChar::Stats_Regen(int64 iTimeDiff)
 		The skill increase the amount of stamina gained by 1 for each 10% points of Focus and increase the amount
 		of mana by 1 for each 20%  points of Focus.
 		*/
-		if (g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B)
+		if ( g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B && !(g_Cfg.IsSkillFlag(SKILL_FOCUS,SKF_SCRIPTED)) )
 		{
-			int iFocusValue = Skill_GetAdjusted(SKILL_FOCUS);
+			ushort uFocusValue = Skill_GetAdjusted(SKILL_FOCUS);
 			switch (i)
 			{
 				case STAT_DEX:
-					mod += (iFocusValue / 100);
+					mod += (uFocusValue / 100);
 					break;
 				case STAT_INT:
-					mod += (iFocusValue / 200 );
+					mod += (uFocusValue / 200 );
 					break;
 			}
 			/*
 			By using the player skill value as difficulty, the chance to get an increase will be 50% because
 			the bell curva formula is used.
 			*/
-			Skill_Experience(SKILL_FOCUS, iFocusValue);
+			Skill_Experience(SKILL_FOCUS, uFocusValue);
 		}
 		short StatLimit = Stat_GetMax(i);
 
