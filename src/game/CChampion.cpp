@@ -1,3 +1,5 @@
+
+#define CANDLESNEXTRED 4
 /*
 * @file Champion.cpp
 *
@@ -22,29 +24,12 @@
 CChampion::CChampion(CItem *pLink) : CComponent(COMP_CHAMPION, pLink)
 {
     ADDTOCALLSTACK("CChampion::CChampion");
-    g_Log.EventDebug("Constructor 1\n");
     _pLink = pLink;
-    _fActive = false;
-    _iLevel = 0;
-    _iSpawnsCur = 0;
-    _iDeathCount = 0;
-    _iSpawnsNextWhite = 0;
-    _iSpawnsNextRed = 0;
-    _iCandlesNextRed = 0;
-    _iCandlesNextLevel = 0;
-    _iLastActivationTime = 0;
-
-    CChampionDef *pChampDef = static_cast<CChampionDef*>(g_Cfg.ResourceGetDef(CResourceID(RES_CHAMPION, _pLink->m_itSpawnChar.m_CharID)));
-    _iLevelMax = pChampDef->_iLevelMax;
-    _iSpawnsMax = pChampDef->_iSpawnsMax;
-    _idChampion = pChampDef->_idChampion;
-    _iSpawn.insert(pChampDef->_iSpawn.begin(), pChampDef->_iSpawn.end());
+    Init();
 };
 
 CChampion::~CChampion()
 {
-    ADDTOCALLSTACK("CChampion::~CChampion");;
-    Stop();
 };
 
 bool CChampion::OnTick()
@@ -61,10 +46,36 @@ bool CChampion::OnTick()
 void CChampion::Init()
 {
     ADDTOCALLSTACK("CChampion::Init");
+    _fActive = false;
+    _iLevel = 0;
+    _iSpawnsCur = 0;
+    _iDeathCount = 0;
+    _iSpawnsNextWhite = 0;
+    _iSpawnsNextRed = GetCandlesPerLevel();
+    _iCandlesNextRed = CANDLESNEXTRED;
+    _iCandlesNextLevel = 0;
+    _iLastActivationTime = 0;
+
+    CSpawn *pSpawn = static_cast<CSpawn*>(const_cast<CObjBase*>(GetLink())->GetComponent(COMP_SPAWN));
+    ASSERT(pSpawn);
+    CChampionDef *pChampDef = static_cast<CChampionDef*>(g_Cfg.ResourceGetDef(pSpawn->GetSpawnID()));
+    ASSERT(pChampDef);
+    _iLevelMax = pChampDef->_iLevelMax;
+    _iSpawnsMax = pChampDef->_iSpawnsMax;
+    _idChampion = pChampDef->_idChampion;
+    _idSpawn.insert(pChampDef->_idSpawn.begin(), pChampDef->_idSpawn.end());
+}
+
+void CChampion::Start()
+{
+    ADDTOCALLSTACK("CChampion::Start");
     // TODO store light in the area
-    g_Log.EventDebug("CChampion::Init");
     _fActive = true;
     _iLastActivationTime = g_World.GetCurrentTime().GetTimeRaw();
+
+    _iSpawnsNextRed = GetCandlesPerLevel();
+    _iCandlesNextRed = CANDLESNEXTRED;
+
     SetLevel(1);
     for (unsigned char i = 0; i < _iSpawnsNextWhite; i++)   // Spawn all the monsters required to get the next White candle. // TODO: a way to prevent this from script.
         SpawnNPC();
@@ -81,6 +92,8 @@ void CChampion::Stop()
     _iCandlesNextRed = 0;
     _iCandlesNextLevel = 0;
     _pLink->SetTimeout((_iLastActivationTime - g_World.GetCurrentTime().GetTimeRaw()) / TICK_PER_SEC);
+    ClearWhiteCandles();
+    ClearRedCandles();
 };
 
 void CChampion::Complete()
@@ -94,19 +107,19 @@ void CChampion::OnKill()
 {
     ADDTOCALLSTACK("CChampion::OnKill");
     if (_iSpawnsNextWhite == 0)
+    {
         AddWhiteCandle();
-    else
-        SpawnNPC();
+    }
+    SpawnNPC();
 }
+
 void CChampion::SpawnNPC()
 {
     ADDTOCALLSTACK("CChampion::SpawnNPC");
 
     if (_iLevel == _iLevelMax)	// Already summoned the Champion, stop
         return;
-
-    CResourceIDBase	rid = _pLink->m_itSpawnChar.m_CharID;
-    g_Log.EventDebug("SpawnNPC = %d\n", rid);
+    
     CREID_TYPE pNpc = CREID_INVALID;
     if (_pRedCandles.size() == _iLevelMax && _iSpawnsNextWhite == 0) // Reached 16th red candle and spawned all the normal npcs, so next one should be the champion
     {
@@ -114,29 +127,25 @@ void CChampion::SpawnNPC()
     }
     else
     {
-        _iSpawnsNextWhite--;
-        if (rid.GetResType() == RES_CHAMPION)
-            g_Log.EventDebug("champion!!!!!!!!! = %d - 0%lx - 0%lx\n", rid.GetResIndex(), rid.GetObjUID(), rid.GetPrivateUID());
-        else
-            g_Log.EventDebug("type = %d - %d - 0%lx - 0%lx\n", rid.GetResType(), rid.GetResIndex(), rid.GetObjUID(), rid.GetPrivateUID());
+        if (_idSpawn[_iLevel].size() <= 0)
+        {
+            g_Log.EventError("CChampion:: Trying to create NPCs for undefined NPCGROUP[%d]\n", _iLevel);
+            return;
+        }
+        uchar iRand = (uchar)Calc_GetRandVal2(1, (int)_idSpawn[_iLevel].size() - 1);
+        pNpc = _idSpawn[_iLevel][iRand];	//Find out the random npc.
+        CResourceIDBase rid = CResourceID(RES_CHARDEF, pNpc);
+        --_iSpawnsNextWhite;
         CResourceDef * pDef = g_Cfg.ResourceGetDef(rid);
         if (!pDef)
         {
-            g_Log.EventDebug("nanai1\n");
             return;
         }
         CChampionDef * pChamp = static_cast<CChampionDef*>(pDef);
         if (!pChamp)
         {
-            g_Log.EventDebug("nanai2\n");
             return;
         }
-        uchar iLevel = _iLevel;
-        uchar iRand = (uchar)Calc_GetRandVal2(1, _iLevelMax);
-        while (iRand > 0 && !_iSpawn[iLevel][iRand])
-            iRand--;	//Decrease iRand to 1 in case not all spots are filled
-        pNpc = _iSpawn[iLevel][iRand];	//Find out the random npc.
-        g_Log.EventDebug("pNpc = %s", rid.CharFind()->GetName());
         if (!pNpc)	// At least one NPC per level should be added, check just in case.
             return;
     }
@@ -144,7 +153,9 @@ void CChampion::SpawnNPC()
     if (!pChar)
         return;
     pChar->SetTopPoint(_pLink->GetTopPoint());
-    pChar->MoveNear(_pLink->GetTopPoint(), _pLink->m_itNormal.m_morep.m_z);
+    pChar->MoveNear(_pLink->GetTopPoint(), 10);
+    pChar->Update();
+    pChar->NPC_LoadScript(true);
     AddObj(pChar->GetUID());
 
 };
@@ -153,7 +164,7 @@ void CChampion::AddWhiteCandle(CUID uid)
 {
     ADDTOCALLSTACK("CChampion::AddWhiteCandle");
     //TODO Trigger @AddWhiteCandle(uid)
-    if (_pWhiteCandles.size() == 4)
+    if (_pWhiteCandles.size() >= _iCandlesNextRed)
     {
         AddRedCandle();
         return;
@@ -171,7 +182,7 @@ void CChampion::AddWhiteCandle(CUID uid)
         if (!pCandle)
             return;
         CPointMap pt = _pLink->GetTopPoint();
-        switch (_pWhiteCandles.size())
+        switch (_pWhiteCandles.size()+1)    // +1 here because the candle is post placed.
         {
             case 1:
                 pt.MoveN(DIR_SW, 1);
@@ -194,7 +205,7 @@ void CChampion::AddWhiteCandle(CUID uid)
         pCandle->Update();
         pCandle->GenerateScript(NULL);
     }
-    _pWhiteCandles.push_back(pCandle);
+    _pWhiteCandles.push_back(pCandle->GetUID());
     pCandle->m_uidLink = _pLink->GetUID();	// Link it to the champion, so if it gets removed the candle will be removed too
 };
 
@@ -204,7 +215,6 @@ void CChampion::AddRedCandle(CUID uid)
     CItem * pCandle = NULL;
     if (uid != static_cast<CUID>(UID_UNUSED))
         pCandle = uid.ItemFind();
-    //TODO Trigger @AddRedCandle (pCandle)
 
     if (_pRedCandles.size() >= 14 && _iLevel < 4)
         SetLevel(4);
@@ -222,7 +232,8 @@ void CChampion::AddRedCandle(CUID uid)
         if (!pCandle)
             return;
         CPointMap pt = _pLink->GetTopPoint();
-        switch (_pRedCandles.size())
+        _iCandlesNextRed = CANDLESNEXTRED;
+        switch (_pRedCandles.size()+1)  // +1 here because the candle is post placed.
         {
             case 1:
                 pt.MoveN(DIR_NW, 2);
@@ -283,14 +294,17 @@ void CChampion::AddRedCandle(CUID uid)
             default:
                 break;
         }
+        //TODO Trigger @AddRedCandle (pCandle, pt, _iCandlesNextRed,)
+
         pCandle->SetAttr(ATTR_MOVE_NEVER);
         pCandle->MoveTo(pt);
         pCandle->SetTopZ(pCandle->GetTopZ() + 4);
         pCandle->SetHue(static_cast<HUE_TYPE>(33));
         pCandle->Update();
         pCandle->GenerateScript(NULL);
+        ClearWhiteCandles();
     }
-    _pRedCandles.push_back(pCandle);
+    _pRedCandles.push_back(pCandle->GetUID());
     pCandle->m_uidLink = _pLink->GetUID();	// Link it to the champion, so if it gets removed the candle will be removed too
 
 };
@@ -303,9 +317,10 @@ void CChampion::SetLevel(byte iLevel)
     else if (iLevel < 1)
         iLevel = 1;
     ushort iLevelMonsters = GetMonstersPerLevel(_iSpawnsMax);
-    _pLink->m_itNormal.m_morep.m_x = GetCandlesPerLevel();
-    ushort iRedMonsters = iLevelMonsters / _pLink->m_itNormal.m_morep.m_x;
-    ushort iWhiteMonsters = iRedMonsters / 5;
+    _iCandlesNextLevel = GetCandlesPerLevel();
+    _iCandlesNextRed = 4;
+    ushort iRedMonsters = iLevelMonsters / _iCandlesNextLevel;
+    ushort iWhiteMonsters = iRedMonsters / _iCandlesNextRed;
 
     // TODO: Trigger @Level (old level, new level, GetMonstersPerLevel, _iCandlesNextLevel)
     // TODO: As the level increases, the light on the area decreases.
@@ -360,12 +375,12 @@ void CChampion::DelWhiteCandle()
 
     //TODO Trigger @DelWhiteCandle
 
-    CItem * pCandle = _pWhiteCandles[_pWhiteCandles.size()];
+    CItem * pCandle = _pWhiteCandles[_pWhiteCandles.size()-1].ItemFind();
     if (pCandle)
     {
         pCandle->Delete();
     }
-    return;
+    _pWhiteCandles.pop_back();
 };
 
 // Delete the last created red candle.
@@ -377,11 +392,12 @@ void CChampion::DelRedCandle()
 
     //TODO Trigger @DelRedCandle
 
-    CItem * pCandle = _pRedCandles[_pRedCandles.size()];
+    CItem * pCandle = _pRedCandles[_pRedCandles.size() - 1].ItemFind();
     if (pCandle)
     {
         pCandle->Delete();
     }
+    _pRedCandles.pop_back();
 };
 
 // Clear all white candles.
@@ -390,6 +406,18 @@ void CChampion::ClearWhiteCandles()
     ADDTOCALLSTACK("CChampion::ClearWhiteCandles");
     if (_pWhiteCandles.size() == 0)
         return;
+    do
+    {
+        DelRedCandle();
+    } while (_pWhiteCandles.size() > 0);
+    /*for (std::vector<CUID>::iterator it = _pWhiteCandles.begin(); it != _pWhiteCandles.end(); ++it)
+    {
+        CItem * pCandle = it->ItemFind();;
+        if (pCandle)
+        {
+            pCandle->Delete();
+        }
+    }*/
     _pWhiteCandles.clear();
 };
 
@@ -399,6 +427,14 @@ void CChampion::ClearRedCandles()
     ADDTOCALLSTACK("CChampion::ClearRedCandles");
     if (_pRedCandles.size() == 0)
         return;
+    for (std::vector<CUID>::iterator it = _pRedCandles.begin(); it != _pRedCandles.end(); ++it)
+    {
+        CItem * pCandle = it->ItemFind();;
+        if (pCandle)
+        {
+            pCandle->Delete();
+        }
+    }
     _pRedCandles.clear();
 };
 
@@ -502,6 +538,7 @@ enum ICHMPL_TYPE
     ICHMPL_LASTACTIVATIONTIME,
     ICHMPL_LEVEL,
     ICHMPL_LEVELMAX,
+    ICHMPL_NPCGROUP,
     ICHMPL_REDCANDLES,
     ICHMPL_SPAWNSCUR,
     ICHMPL_SPAWNSMAX,
@@ -515,6 +552,7 @@ lpctstr const CChampion::sm_szLoadKeys[ICHMPL_QTY + 1] =
     "LASTACTIVATIONTIME",
     "LEVEL",
     "LEVELMAX",
+    "NPCGROUP",
     "REDCANDLES",
     "SPAWNSCUR",
     "SPAWNSMAX",
@@ -556,27 +594,22 @@ lpctstr const CChampion::sm_szVerbKeys[ICHMPV_QTY + 1] =
 void CChampion::r_Write(CScript & s)
 {
     ADDTOCALLSTACK("CChampion::r_Write");
-    //_pLink->r_Write(s);
-    /*if (_pLink->m_pRegion)    // FIXME: ECS link with CItemMulti.
-    {
-        m_pRegion->r_WriteBody( s, "REGION." );
-    }*/
     s.WriteKeyVal("DEATHCOUNT", _iDeathCount);
     s.WriteKeyVal("SPAWNSCUR", _iSpawnsCur);
     s.WriteKeyVal("LEVEL", _iLevel);
     s.WriteKeyVal("LASTACTIVATIONTIME", _iLastActivationTime);
     
-    for (std::vector<CItem*>::iterator it = _pRedCandles.begin(); it != _pRedCandles.end()  ; ++it)
+    for (std::vector<CUID>::iterator it = _pRedCandles.begin(); it != _pRedCandles.end()  ; ++it)
     {
-        CItem * pCandle = *it;
+        CItem * pCandle = static_cast<CUID&>(*it).ItemFind();
         if (!pCandle)
             continue;   // ??
         s.WriteKeyHex("ADDREDCANDLE", pCandle->GetUID());
     }
 
-    for (std::vector<CItem*>::iterator it = _pWhiteCandles.begin(); it != _pWhiteCandles.end(); ++it)
+    for (std::vector<CUID>::iterator it = _pWhiteCandles.begin(); it != _pWhiteCandles.end(); ++it)
     {
-        CItem * pCandle = *it;
+        CItem * pCandle = static_cast<CUID&>(*it).ItemFind();
         if (!pCandle)
             continue;   // ??
         s.WriteKeyHex("ADDWHITECANDLE", pCandle->GetUID());
@@ -610,6 +643,25 @@ bool CChampion::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
         case ICHMPL_DEATHCOUNT:
             sVal.FormatUSVal(_iDeathCount);
             return true;
+        case ICHMPL_NPCGROUP:
+        {
+            pszKey += 8;
+            uchar iGroup = (uchar)Exp_GetSingle(pszKey);
+            if (_idSpawn[iGroup].empty() || iGroup > UCHAR_MAX)
+            {
+                return false;
+            }
+            ++pszKey;
+            uchar iNpc = (uchar)Exp_GetSingle(pszKey);
+            if (iNpc && iNpc < 0 || iNpc >= _idSpawn[iGroup].size())
+                return false;
+            if (_idSpawn[iGroup].size() >= iNpc)
+            {
+                sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, _idSpawn[iGroup][iNpc]));
+                return true;
+            }
+            return false;
+        }
         case ICHMPL_SPAWNSCUR:
             sVal.FormatUSVal(_iSpawnsCur);
             return true;
@@ -620,13 +672,12 @@ bool CChampion::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
             return false;
     }
     return false;
-    //return _pLink->r_WriteVal(pszKey, sVal, pSrc);  //CItemMulti::r_WriteVal(pszKey, sVal, pSrc); //FIXME: ECS link with CItemMulti
 };
 
 bool CChampion::r_LoadVal(CScript & s)
 {
     ADDTOCALLSTACK("CChampion::r_LoadVal");
-    int iCmd = FindTable(s.GetKey(), sm_szLoadKeys, (int)CountOf(sm_szLoadKeys) - 1);
+    int iCmd = FindTableSorted(s.GetKey(), sm_szLoadKeys, (int)CountOf(sm_szLoadKeys) - 1);
 
     switch (iCmd)
     {
@@ -649,10 +700,19 @@ bool CChampion::r_LoadVal(CScript & s)
             _iSpawnsMax = s.GetArgUSVal();
             return true;
         default:
-            break; //return _pLink->r_LoadVal(s);    // CItemMulti::r_LoadVal(s); // FIXME: ECS Link with CItemMulti
+            break;
     }
     return false;
 };
+
+void CChampion::Delete(bool fForce)
+{
+    ADDTOCALLSTACK("CChampion::Delete");
+    UNREFERENCED_PARAMETER(fForce);
+    // KillChildren is being called from CSpawn, must not call it twice.
+    ClearWhiteCandles();
+    ClearRedCandles();
+}
 
 bool CChampion::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
 {
@@ -662,7 +722,7 @@ bool CChampion::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
         pszKey += 11;
         int iCandle = Exp_GetVal(pszKey);
         SKIP_SEPARATORS(pszKey);
-        CItem * pCandle = _pWhiteCandles[iCandle];
+        CItem * pCandle = _pWhiteCandles[iCandle].ItemFind();
         if (pCandle)
         {
             pRef = pCandle;
@@ -674,7 +734,7 @@ bool CChampion::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
         pszKey += 9;
         int iCandle = Exp_GetVal(pszKey);
         SKIP_SEPARATORS(pszKey);
-        CItem * pCandle = _pRedCandles[iCandle];
+        CItem * pCandle = _pRedCandles[iCandle].ItemFind();
         if (pCandle)
         {
             pRef = pCandle;
@@ -694,15 +754,14 @@ bool CChampion::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
         return true;
     }
 
-    return false;// return _pLink->r_GetRef(pszKey, pRef);  // CItemMulti::r_GetRef(pszKey, pRef);// FIXME: ECS Link with CItemMulti
+    return false;
 };
 
 bool CChampion::r_Verb(CScript & s, CTextConsole * pSrc)
 {
     ADDTOCALLSTACK("CChampion::r_Verb");
     UNREFERENCED_PARAMETER(pSrc);
-    lpctstr key = s.GetKey();
-    int iCmd = FindTableSorted(key, sm_szVerbKeys, (int)CountOf(sm_szVerbKeys) - 1);
+    int iCmd = FindTableSorted(s.GetKey(), sm_szVerbKeys, (int)CountOf(sm_szVerbKeys) - 1);
     switch (iCmd)
     {
         case ICHMPV_ADDOBJ:
@@ -755,20 +814,29 @@ bool CChampion::r_Verb(CScript & s, CTextConsole * pSrc)
             return true;
 
         default:
-            return false;// return _pLink->r_Verb(s, pSrc);
+            return false;
     }
     return false;
-};
+}
+
+void CChampion::Copy(CComponent * target)
+{
+    ADDTOCALLSTACK("CChampion::Copy");
+    UNREFERENCED_PARAMETER(target);
+    /*I don't see the point of duping a Champion, its insane and makes no sense,
+    * if someone wants to totally dupe a champion it can be done from scripts.
+    */
+}
 
 
 enum CHAMPIONDEF_TYPE
 {
     CHAMPIONDEF_CHAMPION,	///< Champion ID: _iChampion.
-    CHAMPIONDEF_DEFNAME,	///< Champion's DEFNAME
+    CHAMPIONDEF_DEFNAME,	///< Champion's DEFNAME.
+    CHAMPIONDEF_LEVELMAX,   ///< Max Level for this champion.
     CHAMPIONDEF_NAME,		///< Champion name: m_sName.
     CHAMPIONDEF_NPCGROUP,	///< Monster level / group: _iSpawn[n][n].
     CHAMPIONDEF_SPAWNS,		///< Total amount of monsters: _iSpawnsMax.
-    CHAMPIONDEF_LEVELMAX,   ///< Max Level for this champion.
     CHAMPIONDEF_QTY
 };
 
@@ -776,11 +844,11 @@ lpctstr const CChampionDef::sm_szLoadKeys[] =
 {
     "CHAMPION",
     "DEFNAME",
+    "LEVEL",
     "NAME",
     "NPCGROUP",
     "SPAWNS",
     "TYPE",
-    "LEVEL",
     NULL
 };
 
@@ -788,13 +856,12 @@ lpctstr const CChampionDef::sm_szLoadKeys[] =
 CChampionDef::CChampionDef(CResourceID rid) : CResourceLink(rid)
 {
     ADDTOCALLSTACK("CChampionDef::CChampionDef");
-    _iSpawnsMax = 0;
+    _iSpawnsMax = 2368;
     _iLevelMax = 16;
 };
 
 CChampionDef::~CChampionDef()
 {
-    ADDTOCALLSTACK("CChampionDef::~CChampionDef");
 };
 
 bool CChampionDef::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
@@ -818,17 +885,22 @@ bool CChampionDef::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pS
         {
             pszKey += 8;
             int8 iGroup = (int8)Exp_GetSingle(pszKey);
-            if (iGroup < 1 || iGroup > 4)
-                return false;
-            ++pszKey;
-            int8 iNpc = (int8)Exp_GetSingle(pszKey);
-            if (iNpc < 1 || iNpc > 4)
-                return false;
-            g_Log.EventDebug("npcgroup %d - %d\n",iGroup, iNpc);
-            if (_iSpawn[iGroup][iNpc])
+            if (_idSpawn.size())
             {
-                sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, _iSpawn[iGroup][iNpc]));
-                return true;
+                return false;
+            }
+            ++pszKey;
+            int8 iNPC = (int8)Exp_GetSingle(pszKey);
+            if (iNPC && iNPC < 0 || iNPC >= _idSpawn.size())
+                return false;
+            if (_idSpawn[iGroup].size() >= iNPC)
+            {
+                CREID_TYPE idNPC = (CREID_TYPE)iNPC;
+                if (idNPC != CREID_INVALID)
+                {
+                    sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, _idSpawn[iGroup][idNPC]));
+                    return true;
+                }
             }
             return false;
         }
@@ -865,17 +937,17 @@ bool CChampionDef::r_LoadVal(CScript & s)
         {
             pszKey += 8;
             uchar iGroup = (uchar)Exp_GetVal(pszKey);
-            if (iGroup < 1)
+            if (iGroup < 0)
                 return false;
             tchar * piCmd[4];
             size_t iArgQty = Str_ParseCmds(s.GetArgRaw(), piCmd, (int)CountOf(piCmd), ",");
+            _idSpawn[iGroup].clear();
             for (uchar i = 0; i < iArgQty; i++)
             {
                 CREID_TYPE pCharDef = static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType(RES_CHARDEF, piCmd[i]));
                 if (pCharDef)
                 {
-                    g_Log.EventDebug("loaded NPCGROUP[%d] = %lld\n", iGroup, piCmd[i]);
-                    _iSpawn[iGroup].emplace_back(pCharDef);
+                    _idSpawn[iGroup].emplace_back(pCharDef);
                 }
             }
             return true;

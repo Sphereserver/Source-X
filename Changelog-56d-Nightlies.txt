@@ -570,3 +570,60 @@ Note: More needs to be switched over and I am trying to get this and the Base Pa
 - Added behaviour for the Focus skill, the skill is used automatically and only when FEATURE_AOS_UPDATE_B is enabled.
   The Focus skill increase, passively, the amount of stamina gained by 1 for each 10% points of skill value and increase by 1 the amount of mana gained for 
   each 20% points of skill value.
+
+02-05-2018, XuN
+(Source)
+Added the basics of an ECS: CEntity and CComponent so we can split into modules (components) the core of the current big classes (CObjBase, CItem, CChar).
+
+ - CEntity act as a wrapper for CObjBase (ATM) storing a list of CComponent* inside and redirecting some basic code to all of them (r_Write, r_WriteVal, r_Load, r_LoadVal, r_Verb and r_GetRef) and provides also a GetComponent(COMP_TYPE) for external interaction.
+ - CComponent acts as a wrapper for each module of code and, as abstract, class requires the above functions to be on them for overriding (these must return true if something was executed on them, so CEntity will stop to try them on other CComponents or false if not so the loop continues). For items these components must be added on CItem::CreateBase, eg:
+         case IT_SPAWN_CHAMPION:
+        {
+            pItem = new CItem(id, pItemDef);
+            pItem->Suscribe(new CSpawn(pItem));
+            pItem->Suscribe(new CChampion(pItem));
+            break;
+        }
+Changed CItemSpawn into a CComponent 'CSpawn'
+Changed CItemChampion into a CComponent 'CChampion'
+Changed CFaction into a CComponent.
+
+(Server)
+Fixed NPCs not casting/fighting continuously and going to wander randomly (CChar::NPC_Act_Idle()), also reformatted some files.
+Fixed some Spell's related stuff not returning correctly the spell required for NPCs.
+(Scripts)
+SPAWNS:
+	-Added Keywords SpawnID, TimeLo, TimeHi and MaxDist, explained bellow.
+	-Changed AT* to r_GetRef so it finds out the object on the n position and works over it.
+
+*There were no major changes on Spawns however i'll leave here a brief explanation of how they work along the new keywords and the updated AT* behaviour.
+
+-TYPES = t_spawn_item, t_spawn_char. Each one generates a different type of objects in the game (it may be revised in the future to merge both*, not soon anyway).
+-SPAWNID/MORE/MORE1(R/W) = spawn's ID (can be an Item/Template of items(for t_spawn_item) or a Char/Template of chars(for t_spawn_char)).
+NOTE:MORE2 works different for each spawn type.
+--MORE2/COUNT(R) on t_spawn_char: returns the total spawned characters.
+--MORE2/PILE(R/W) on t_spawn_item: Total amount of items that may be generated at once.
+
+-MOREX/TIMELO(R/W) = Minimum spawn time in minutes.
+-MOREY/TIMEHI(R/W) = Maximum spawn time in minutes.
+-MOREZ/MAXDIST(R/W) = Maximum spawn distance (for both distance away of the spawn (for Items and Chars) when created and max distance to get away from spawn(for NPCs)).
+-MOREP(R/W) = the three MOREX,MOREY,MOREZ grouped as one prop (same as TIMELO,TIMEHI,MAXDIST).
+
+-AT*(R/W) = Access the object in the N position and reads/writes/executes the given text, eg: at.0.remove, <at.0.str>...
+-AMOUNT(R/W) = Total amount of objects this spawn can have at the same time.
+-ADDOBJ(W) = Adds to the spawn an object with the given uid (must be a valid uid).
+-DELOBJ(W) = Deletes from the spawn an object with the given uid (must be a valid uid).
+-START(W) = Forces the spawn to start spawning.
+-STOP(W) = Stops the spawn and removes everything it created.
+-RESET(W) = Froces an STOP and then START it again.
+
+Simple explanation:
+1) When double clicking on an STOPPED spawn (nothing has yet spawned from it) START is called.
+2) One object is generated within a distance of MOREZ/MAXDIST.
+	-For t_spawn_item the amount of items generated each time is equal to a random value between 1 and PILE.
+	-for t_spawn_item the maximum distance the NPC can wander away is set equal to MAXDIST
+3) The spawn's timer is set to a value (in minutes) between MOREX and MOREY (TIMELO and TIMEHI).
+4) 2 and 3 are repeated while COUNT < AMOUNT, when COUNT reachs or surpases (it may happen with custom behaviours added from scripts) AMOUNT only 3 will be repeated (nothing will be spawned but the timer will be set again).
+
+
+

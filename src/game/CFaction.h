@@ -9,6 +9,7 @@
 #include "../common/datatypes.h"
 #include "../common/CScript.h"
 #include "../common/CTextConsole.h"
+#include "CComponent.h"
 
 /*
     The Original Slayers fall into 6 groups. Abyss, Arachnid, Elemental, Humanoid, Reptilian and Undead.
@@ -31,13 +32,6 @@
 #define DAMAGE_SLAYER_LESSER    3   // Lesser Slayer does x3 damage.
 #define DAMAGE_SLAYER_SUPER     2   // Super Slayer does x2 damage.
 #define DAMAGE_SLAYER_OPPOSITE  2   // Opposite Slayer does x2 damage.
-
-
-enum FACTION_TYPE
-{
-    FT_ITEM,
-    FT_CHAR
-};
 
 /*
     Groups of NPC_FACTION
@@ -127,26 +121,33 @@ class CChar;
     Initially involved in the Slayer system it handles Super Slayer,
     Lesser Slayer and Opposites to increase damage dealt/received
 */
-class CFaction
+
+class CFactionDef
+{
+protected:
+    NPC_FACTION _iFaction;
+public:
+    CFactionDef() {}
+    NPC_FACTION GetFactionID();
+    void SetFactionID(NPC_FACTION faction);
+};
+
+class CFaction : public CFactionDef, public CComponent
 {
     static lpctstr const sm_szLoadKeys[];
-    NPC_FACTION _iFaction;
-    FACTION_TYPE _iType;
 
 public:
-    CFaction(FACTION_TYPE type);
-    CFaction(CFaction *copy);
+    CFaction(const CObjBase* pLink);
+    CFaction(CFaction *copy, const CObjBase* pLink);
 	virtual ~CFaction(){}
-    void Copy(CFaction *copy);
-    virtual bool r_LoadVal(CScript & s);
-    virtual bool r_Load(CScript & s);  // Load a character from Script
-    virtual bool r_WriteVal(lpctstr pszKey, CSString & s, CTextConsole * pSrc = NULL);
-    virtual void r_Write(CScript & s);
-
-    /*
-        returns the type (FACTION or SLAYER).
-    */
-    FACTION_TYPE GetType();
+    void Delete(bool fForced = false);
+    bool r_LoadVal(CScript & s);
+    bool r_Load(CScript & s);  // Load a character from Script
+    bool r_WriteVal(lpctstr pszKey, CSString & s, CTextConsole * pSrc = NULL);
+    void r_Write(CScript & s);
+    bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef);
+    bool r_Verb(CScript & s, CTextConsole * pSrc);
+    void Copy(CComponent *target);
     /*
         Sets the Group to the specified type.
     */

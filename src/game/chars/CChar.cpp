@@ -269,7 +269,6 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false ),
 	SetID( baseID );
 	CCharBase* pCharDef = Char_GetDef();
 	ASSERT(pCharDef);
-    _pFaction = new CFaction(pCharDef->GetFaction());
 	m_attackBase = pCharDef->m_attackBase;
 	m_attackRange = pCharDef->m_attackRange;
 	m_defenseBase = pCharDef->m_defenseBase;
@@ -338,7 +337,6 @@ CChar::~CChar()
     Clear();                    // Remove me early so virtuals will work
     ClearNPC();
     ClearPlayer();
-    delete _pFaction;
     g_Serv.StatDec( SERV_STAT_CHARS );
 }
 
@@ -527,12 +525,6 @@ int CChar::IsWeird() const
 	return 0;
 }
 
-CFaction * CChar::GetFaction()
-{
-	ADDTOCALLSTACK("CChar::GetFaction");
-    return _pFaction;
-}
-
 // Get the Z we should be at
 char CChar::GetFixZ( CPointMap pt, dword dwBlockFlags)
 {
@@ -659,8 +651,7 @@ void CChar::SetVisualRange(byte newSight)
 // RETURN: false = i can't fix this.
 int CChar::FixWeirdness()
 {
-	ADDTOCALLSTACK("CChar::FixWeirdness");
-
+    ADDTOCALLSTACK("CChar::FixWeirdness");
 	int iResultCode = CObjBase::IsWeird();
 	if ( iResultCode )
 		// Not recoverable - must try to delete the object.
@@ -736,11 +727,11 @@ int CChar::FixWeirdness()
 	if ( pMemory )
 	{
         CSpawn *pSpawn = static_cast<CSpawn*>(pMemory->m_uidLink.ItemFind()->GetComponent(COMP_SPAWN));
+        _uidSpawn = pMemory->m_uidLink;
 		pMemory->Delete();
 		if ( pSpawn )
 		{
 			pSpawn->AddObj(GetUID());
-			SetSpawn(pSpawn);
 		}
 	}
 
@@ -941,11 +932,11 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 	m_TagDefs.Copy( &( pChar->m_TagDefs ) );
 	m_BaseDefs.Copy( &( pChar->m_BaseDefs ) );
 	m_OEvents.Copy(&(pChar->m_OEvents));
-    _pFaction->Copy(pChar->GetFaction());
 	//NPC_LoadScript( false );	//Calling it now so everything above can be accessed and overrided in the @Create
 	//Not calling NPC_LoadScript() because, in some part, it's breaking the name and looking for template names.
 	// end of CChar
 
+    static_cast<CEntity*>(this)->Copy(static_cast<CEntity*>(pChar));
 	// Begin copying items.
 	LAYER_TYPE layer;
 	for ( int i = 0 ; i < LAYER_QTY; i++)
@@ -1807,6 +1798,12 @@ lpctstr const CChar::sm_szRefKeys[CHR_QTY+1] =
 bool CChar::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CChar::r_GetRef");
+
+    if (static_cast<CEntity*>(this)->r_GetRef(pszKey, pRef))
+    {
+        return true;
+    }
+
 	int i = FindTableHeadSorted( pszKey, sm_szRefKeys, CountOf(sm_szRefKeys)-1 );
 	if ( i >= 0 )
 	{
@@ -1877,6 +1874,11 @@ bool CChar::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 	if ( IsClient() && GetClient()->r_WriteVal(pszKey, sVal, pSrc) )
 		return true;
 
+    if (static_cast<CEntity*>(this)->r_WriteVal(pszKey, sVal, pSrc)) // Checking CComponents first.
+    {
+        return true;
+    }
+
 	EXC_TRY("WriteVal");
 
 	CCharBase * pCharDef = Char_GetDef();
@@ -1901,11 +1903,6 @@ do_default:
 		if ( r_WriteValContainer(pszKey, sVal, pSrc))
 			return true;
 
-        if (GetFaction())
-        {
-            if (GetFaction()->r_WriteVal(pszKey, sVal, pSrc))
-                return true;
-        }
 		// special write values
 		int i;
 
@@ -2794,6 +2791,12 @@ bool CChar::r_LoadVal( CScript & s )
 {
 	ADDTOCALLSTACK("CChar::r_LoadVal");
 	EXC_TRY("LoadVal");
+
+    if (static_cast<CEntity*>(this)->r_LoadVal(s))
+    {
+        return true;
+    }
+
 	lpctstr	pszKey	=  s.GetKey();
 	CHC_TYPE iKeyNum = (CHC_TYPE) FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( iKeyNum < 0 )
@@ -2809,11 +2812,6 @@ do_default:
 			if ( m_pNPC->r_LoadVal( this, s ))
 				return true;
 		}
-        if (GetFaction())
-        {
-            if (GetFaction()->r_LoadVal(s))
-                return true;
-        }
 
 		{
 			int i = g_Cfg.FindSkillKey( pszKey );
@@ -3328,7 +3326,6 @@ void CChar::r_Write( CScript & s )
 		m_pPlayer->r_WriteChar(this, s);
 	if ( m_pNPC )
 		m_pNPC->r_WriteChar(this, s);
-    GetFaction()->r_Write(s);
 
 	if ( GetTopPoint().IsValidPoint() )
 		s.WriteKey("P", GetTopPoint().WriteUsed());
@@ -3435,6 +3432,7 @@ void CChar::r_Write( CScript & s )
 			continue;
 		s.WriteKeyVal(g_Cfg.GetSkillDef((SKILL_TYPE)j)->GetKey(), Skill_GetBase((SKILL_TYPE)j) );
 	}
+    static_cast<CEntity*>(this)->r_Write(s);
 
 	r_WriteContent(s);
 	EXC_CATCH;
@@ -3465,8 +3463,6 @@ bool CChar::r_Load( CScript & s ) // Load a character from script
 
 	if (m_pNPC)
 		NPC_GetAllSpellbookSpells();
-
-    GetFaction()->r_Load(s);
 
 	// Init the STATF_SAVEPARITY flag.
 	// StatFlag_Mod( STATF_SAVEPARITY, g_World.m_fSaveParity );
@@ -3511,6 +3507,11 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 
 	if ( IsClient() && GetClient()->r_Verb(s, pSrc) )
 		return true;
+
+    if (static_cast<CEntity*>(this)->r_Verb(s, pSrc))
+    {
+        return true;
+    }
 
 	EXC_TRY("Verb");
 

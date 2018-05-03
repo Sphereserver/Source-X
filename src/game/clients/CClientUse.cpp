@@ -285,11 +285,11 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		case IT_SPAWN_ITEM:
 		case IT_SPAWN_CHAR:
 		{
-			pSpawn = pItem->GetSpawn();
+			pSpawn = dynamic_cast<CSpawn*>(pItem->GetComponent(COMP_SPAWN));
 			if ( !pSpawn )
 				return false;
 
-			if ( pSpawn->GetCurrentSpawned() )
+			if ( pSpawn->GetCurrentSpawned() > 0 )
 			{
 				SysMessageDefault(DEFMSG_ITEMUSE_SPAWN_NEG);
 				pSpawn->KillChildren();		// Removing existing objects spawned from it ( RESET ).

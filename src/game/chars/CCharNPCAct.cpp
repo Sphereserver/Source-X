@@ -2062,8 +2062,6 @@ void CChar::NPC_OnTickAction()
 	// What action should we take now ?
 	EXC_TRY("NPC_TickAction");
 
-	if ( !m_pNPC )
-		return;
 	SKILL_TYPE iSkillActive = Skill_GetActive();
 	if ( g_Cfg.IsSkillFlag( iSkillActive, SKF_SCRIPTED ) )
 	{

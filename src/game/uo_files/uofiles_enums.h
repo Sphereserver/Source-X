@@ -431,6 +431,7 @@ enum LAYER_TYPE		// defined by UO. Only one item can be in a slot.
     LAYER_ROBE,		// 22 = robe over all.
     LAYER_SKIRT,	// 23 = skirt or kilt.
     LAYER_LEGS,		// 24= 0x18 = plate legs.
+    LAYER_EQUIP_QTY = LAYER_LEGS,   // Equipment layers.
 
     // These are not part of the paper doll (but get sent to the client)
     LAYER_HORSE,		// 25 = 0x19 = ride this object. (horse objects are strange?)

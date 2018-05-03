@@ -15,7 +15,19 @@ class CEntity
     std::map<COMP_TYPE, CComponent*> _List;
 
 public:
+    CEntity();
     ~CEntity();
+    /**
+    * @brief Calls Delete on contained CComponents.
+    *
+    * @param fForce.
+    */
+    void Delete(bool fForce = false);
+
+    /**
+    * @brief Removes all contained CComponents.
+    */
+    void ClearComponents();
 
     /**
     * @brief Suscribes a CComponent.
@@ -85,7 +97,7 @@ public:
     /**
     * @brief Wrapper of base method.
     *
-    * Sets a value from script name=xx or ingame '.xname = xx /.set name = xx'
+    * Sets a value from scripts name=xx or ingame '.xname = xx /.set name = xx'
     *
     * @param s the container with the keys and values to set.
     * @return true if there was a key to change.
@@ -100,6 +112,11 @@ public:
     * @return true if there was a key which could be executed.
     */
     bool r_Verb(CScript & s, CTextConsole * pSrc);                          ///< Execute command from script.
+
+    /**
+    * @brief Copies contents of the components from the target
+    */
+    void Copy(CEntity *base);
 
 };
 

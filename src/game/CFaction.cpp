@@ -142,24 +142,21 @@ lpctstr const CFaction::sm_szLoadKeys[CHF_QTY + 1] =
     NULL
 };
 
-CFaction::CFaction(FACTION_TYPE type)
+CFaction::CFaction( const CObjBase* pLink) : CFactionDef(), CComponent(COMP_FACTION, pLink)
 {
     ADDTOCALLSTACK_INTENSIVE("CFaction::CFaction(FACTION_TYPE)");
-    _iType = type;
     _iFaction = FACTION_NONE;
 }
 
-CFaction::CFaction(CFaction *faction)
+CFaction::CFaction(CFaction *copy, const CObjBase* pLink) : CFactionDef(), CComponent(COMP_FACTION, pLink)
 {
     ADDTOCALLSTACK_INTENSIVE("CFaction::CFaction(CFaction*)");
-    Copy(faction);
+    Copy(copy);
 }
 
-void CFaction::Copy(CFaction * copy)
+void CFaction::Delete(bool fForced)
 {
-    ADDTOCALLSTACK("CFaction::Copy");
-    _iType = copy->GetType();
-    _iFaction = copy->GetFactionID();
+    UNREFERENCED_PARAMETER(fForced);
 }
 
 bool CFaction::r_LoadVal(CScript & s)
@@ -170,27 +167,15 @@ bool CFaction::r_LoadVal(CScript & s)
     switch (iKeyNum)
     {
         case CHF_FACTION:
-        {
-            if (_iType == FT_CHAR)
-            {
-                SetFactionID(static_cast<NPC_FACTION>(s.GetArgULLVal()));
-                return true;
-            }
-            return false;
-        }
         case CHF_SLAYER:
         {
-            if (_iType == FT_ITEM)
-            {
-                SetFactionID(static_cast<NPC_FACTION>(s.GetArgULLVal()));
-                return true;
-            }
-            return false;
+            SetFactionID(static_cast<NPC_FACTION>(s.GetArgULLVal()));
+            return true;
         }
         default:
             return false;
     }
-    return true;
+    return false;
 }
 
 bool CFaction::r_Load(CScript & s)
@@ -207,53 +192,53 @@ bool CFaction::r_WriteVal(lpctstr pszKey, CSString & s, CTextConsole * pSrc)
     UNREFERENCED_PARAMETER(pSrc);
     switch (iKeyNum)
     {
+        case CHF_SLAYER:
         case CHF_FACTION:
         {
-            if (_iType == FT_CHAR)
-            {
-                s.FormatLLHex(GetFactionID());
-                return true;
-            }
-            return false;
-        }
-        case CHF_SLAYER:
-        {
-            if (_iType == FT_ITEM)
-            {
-                s.FormatLLHex(GetFactionID());
-                return true;
-            }
-            return false;
+            s.FormatLLHex(GetFactionID());
+            return true;
         }
         case CHF_SLAYERGROUP:
-        {
-            if (_iType == FT_CHAR)
-            {
-                s.FormatHex(GetGroupID());
-                return true;
-            }
-            return false;
-        }
         case CHF_FACTIONGROUP:
-        {
-            if (_iType == FT_ITEM)
-            {
-                s.FormatHex(GetGroupID());
-                return true;
-            }
-            return false;
+    {
+            s.FormatHex(GetGroupID());
+            return true;
         }
         default:
-            return false;
+            break;
     }
-    return true;
+    return false;
 }
 
 void CFaction::r_Write(CScript & s)
 {
     ADDTOCALLSTACK("CFaction::r_Write");
     if (GetFactionID() != FACTION_NONE){
-        s.WriteKeyVal(_iType == FT_CHAR ? "FACTION" : "SLAYER", (int)GetFactionID()); // Same value stored with different names for CChars and CItems.
+        s.WriteKeyVal("FACTION", (int)GetFactionID()); // Same value stored with different names for CChars and CItems.
+    }
+}
+
+bool CFaction::r_GetRef(lpctstr & pszKey, CScriptObj *& pRef)
+{
+    UNREFERENCED_PARAMETER(pszKey);
+    UNREFERENCED_PARAMETER(pRef);
+    return false;
+}
+
+bool CFaction::r_Verb(CScript & s, CTextConsole * pSrc)
+{
+    UNREFERENCED_PARAMETER(s);
+    UNREFERENCED_PARAMETER(pSrc);
+    return false;
+}
+
+void CFaction::Copy(CComponent * target)
+{
+    ADDTOCALLSTACK("CFaction::Copy");
+    CFaction *pTarget = static_cast<CFaction*>(target);
+    if (pTarget)
+    {
+        _iFaction = pTarget->GetFactionID();
     }
 }
 
@@ -282,12 +267,6 @@ NPC_FACTION CFaction::GetFactionID()
 {
     ADDTOCALLSTACK_INTENSIVE("CFaction::GetFactionID");
     return _iFaction;
-}
-
-FACTION_TYPE CFaction::GetType()
-{
-    ADDTOCALLSTACK_INTENSIVE("CFaction::GetType");
-    return _iType;
 }
 
 void CFaction::SetFactionID(NPC_FACTION faction)
@@ -382,4 +361,14 @@ int CFaction::GetSlayerDamagePenalty(CFaction * target)
     if (IsOppositeGroup(target))
         return DAMAGE_SLAYER_OPPOSITE;
     return 1;
+}
+
+NPC_FACTION CFactionDef::GetFactionID()
+{
+    return _iFaction;
+}
+
+void CFactionDef::SetFactionID(NPC_FACTION faction)
+{
+    _iFaction = faction;
 }

@@ -84,7 +84,6 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CObjBase( true )
 	m_containedGridIndex = 0;
 	m_dwDispIndex = ITEMID_NOTHING;
 
-    _pSlayer = new CFaction(pItemDef->GetSlayer());
 
 	m_itNormal.m_more1 = 0;
 	m_itNormal.m_more2 = 0;
@@ -113,25 +112,17 @@ void CItem::Delete(bool bforce)
 	if (( NotifyDelete() == false ) && !bforce)
 		return;
 
+    static_cast<CEntity*>(this)->Delete();
 	CObjBase::Delete();
 }
 
 CItem::~CItem()
 {
 	DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
+
 	if ( ! g_Serv.IsLoading() )
 	switch ( m_type )
 	{
-		case IT_SPAWN_CHAR:
-		case IT_SPAWN_ITEM:
-			{
-                CSpawn *pSpawn = GetSpawn();
-                if (pSpawn)
-                {
-                    pSpawn->KillChildren();
-                }
-			}
-			break;
 		case IT_FIGURINE:
 		case IT_EQ_HORSE:
 			{	// remove the ridden or linked char.
@@ -146,7 +137,6 @@ CItem::~CItem()
 		default:
 			break;
 	}
-    delete _pSlayer;
 	g_Serv.StatDec(SERV_STAT_ITEMS);
 }
 
@@ -241,7 +231,9 @@ CItem * CItem::CreateBase( ITEMID_TYPE id )	// static
             if (pItemDef->GetMakeValue(0))
                 pItem = new CItemVendable(id, pItemDef);
             else
+            {
                 pItem = new CItem(id, pItemDef);
+            }
             break;
         }
 	}
@@ -1987,15 +1979,6 @@ void CItem::r_WriteMore1( CSString & sVal )
 	// do special processing to represent this.
 	switch ( GetType() )
 	{
-		case IT_SPAWN_CHAR:
-			sVal = g_Cfg.ResourceGetName( m_itSpawnChar.m_CharID );
-			return;
-		case IT_SPAWN_ITEM:
-			sVal = g_Cfg.ResourceGetName( m_itSpawnItem.m_ItemID );
-			return;
-		case IT_SPAWN_CHAMPION:
-			sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHAMPION, m_itSpawnChar.m_CharID));
-			return;
 		case IT_TREE:
 		case IT_GRASS:
 		case IT_ROCK:
@@ -2085,9 +2068,7 @@ void CItem::r_Write( CScript & s )
 	s.WriteSection("WORLDITEM %s", GetResourceName());
 
 	CObjBase::r_Write(s);
-
-    if (GetSlayer())
-        GetSlayer()->r_Write(s);
+    static_cast<CEntity*>(this)->r_Write(s);
 
 	if ( GetDispID() != GetID() )	// the item is flipped.
 		s.WriteKey("DISPID", g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, GetDispID())));
@@ -2209,6 +2190,12 @@ lpctstr const CItem::sm_szRefKeys[ICR_QTY+1] =
 bool CItem::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
 	ADDTOCALLSTACK("CItem::r_GetRef");
+
+    if (static_cast<CEntity*>(this)->r_GetRef(pszKey, pRef))
+    {
+        return true;
+    }
+
 	int i = FindTableHeadSorted( pszKey, sm_szRefKeys, CountOf(sm_szRefKeys)-1 );
 	if ( i >= 0 )
 	{
@@ -2256,6 +2243,12 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 {
 	ADDTOCALLSTACK("CItem::r_WriteVal");
 	EXC_TRY("WriteVal");
+
+    if (static_cast<CEntity*>(this)->r_WriteVal(pszKey, sVal, pSrc)) // Checking CComponents first.
+    {
+        return true;
+    }
+
 	int index;
 	if ( !strnicmp( CItem::sm_szLoadKeys[IC_ADDSPELL], pszKey, 8 ) )
 		index	= IC_ADDSPELL;
@@ -2365,8 +2358,18 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			sVal.FormatVal( IsSpellInBook((SPELL_TYPE)(g_Cfg.ResourceGetIndexType( RES_SPELL, pszKey ))));
 			break;
 		case IC_AMOUNT:
-			sVal.FormatVal( GetAmount());
-			break;
+        {
+            CSpawn * pSpawn = static_cast<CSpawn*>(GetComponent(COMP_SPAWN));
+            if (pSpawn)
+            {
+                sVal.FormatVal(pSpawn->GetAmount());
+            }
+            else
+            {
+                sVal.FormatVal(GetAmount());
+            }
+            break;
+        }
 		case IC_BASEWEIGHT:
 			sVal.FormatVal(m_weight);
 			break;
@@ -2548,11 +2551,6 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 	}
     if (fDoDefault)
     {
-        if (GetSlayer())
-        {
-            if (GetSlayer()->r_WriteVal(pszKey, sVal, pSrc))
-                return true;
-        }
         return CObjBase::r_WriteVal(pszKey, sVal, pSrc);
     }
 	return true;
@@ -2568,7 +2566,14 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 {
 	ADDTOCALLSTACK("CItem::r_LoadVal");
 	EXC_TRY("LoadVal");
-	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
+
+    if (static_cast<CEntity*>(this)->r_LoadVal(s))
+    {
+        return true;
+    }
+    int index = FindTableSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+
+	switch (index)
 	{
 		//Set as Strings
 		case IC_CRAFTEDBY:
@@ -2816,8 +2821,18 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 				return true;
 			}
 		case IC_AMOUNT:
-			SetAmountUpdate( s.GetArgWVal() );
-			return true;
+        {
+            CSpawn * pSpawn = static_cast<CSpawn*>(GetComponent(COMP_SPAWN));
+            if (pSpawn)
+            {
+                pSpawn->SetAmount(s.GetArgWVal());
+            }
+            else
+            {
+                SetAmountUpdate(s.GetArgWVal());
+            }
+            return true;
+        }
 		case IC_ATTR:
 			m_Attr = s.GetArgVal();
 			break;
@@ -2973,8 +2988,6 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			break;
 		case IC_MORE2:
 			m_itNormal.m_more2 = s.GetArgVal();
-			if ( IsType(IT_SPAWN_ITEM) )
-				m_itSpawnItem.m_pile = minimum(UINT16_MAX, m_itNormal.m_more2);
 			return true;
 		case IC_MORE2h:
 			m_itNormal.m_more2 = MAKEDWORD( LOWORD(m_itNormal.m_more2), s.GetArgVal());
@@ -3050,11 +3063,6 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			break;
 		default:
         {
-            if (GetSlayer())
-            {
-                if (GetSlayer()->r_LoadVal(s))
-                    return true;
-            }
             return CObjBase::r_LoadVal(s);
         }
 	}
@@ -3076,9 +3084,6 @@ bool CItem::r_Load( CScript & s ) // Load an item from script
 {
 	ADDTOCALLSTACK("CItem::r_Load");
 	CScriptObj::r_Load( s );
-
-    if (GetSlayer())
-        GetSlayer()->r_Load(s);
 
 	if ( GetContainer() == NULL )	// Place into the world.
 	{
@@ -3117,6 +3122,11 @@ bool CItem::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from s
 	ADDTOCALLSTACK("CItem::r_Verb");
 	EXC_TRY("Verb");
 	ASSERT(pSrc);
+
+    if (static_cast<CEntity*>(this)->r_Verb(s, pSrc))
+    {
+        return true;
+    }
 
 	int index = FindTableSorted( s.GetKey(), sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
 	if ( index < 0 )
@@ -3653,7 +3663,7 @@ void CItem::DupeCopy( const CItem * pItem )
 	m_TagDefs.Copy(&(pItem->m_TagDefs));
 	m_BaseDefs.Copy(&(pItem->m_BaseDefs));
 	m_OEvents.Copy(&(pItem->m_OEvents));
-    _pSlayer->Copy(const_cast<CItem*>(pItem)->GetSlayer());
+    static_cast<CEntity*>(this)->Copy(static_cast<CEntity*>(const_cast<CItem*>(pItem)));
 }
 
 void CItem::SetAnim( ITEMID_TYPE id, int iTime )
@@ -5497,7 +5507,7 @@ bool CItem::IsResourceMatch( CResourceIDBase rid, dword dwArg )
 CFaction * CItem::GetSlayer()
 {
     ADDTOCALLSTACK("CItem::GetSlayer");
-    return _pSlayer;
+    return static_cast<CFaction*>(GetComponent(COMP_FACTION));
 }
 
 bool CItem::OnTick()
@@ -5644,16 +5654,25 @@ bool CItem::OnTick()
 
 		case IT_SPAWN_CHAR:	// Spawn a creature (if we are under count).
 		case IT_SPAWN_ITEM:	// Spawn an item (if we are under count).
-        case IT_SPAWN_CHAMPION:
 			{
 				EXC_SET("default behaviour::IT_SPAWN"); // TODO: CSpawn is a CComponent and so, it should be moved out of this switch to a loop running this CEntity's CComponents.
-                CSpawn *pSpawn = GetSpawn();
+                CSpawn *pSpawn = static_cast<CSpawn*>(GetComponent(COMP_SPAWN));
                 if (pSpawn)
                 {
                     pSpawn->OnTick(true);
                 }
 			}
 			return true;
+        case IT_SPAWN_CHAMPION:
+        {
+            EXC_SET("default behaviour::IT_SPAWN"); // TODO: CSpawn is a CComponent and so, it should be moved out of this switch to a loop running this CEntity's CComponents.
+            CSpawn *pSpawn = static_cast<CSpawn*>(GetComponent(COMP_CHAMPION));
+            if (pSpawn)
+            {
+                pSpawn->OnTick(true);
+            }
+        }
+        return true;
 
 		case IT_CROPS:
 		case IT_FOLIAGE:

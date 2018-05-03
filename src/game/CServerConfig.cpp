@@ -3726,6 +3726,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
     case RES_CHAMPION:
         iHashRange = 100;
         index = 10000;	// RES_SPAWN +10k, no reason to have 100k [SPAWN ] templates ... but leaving this huge margin.
+        break;
 	case RES_WEBPAGE:		// Define a web page template.
 		index = (dword)m_WebPages.GetCount() + 1;
 		break;

@@ -176,6 +176,15 @@ public:
     void SetSpawn(CSpawn *spawn);
 
     /**
+    * @fn  CSpawn *CObjBase::GetFaction();
+    *
+    * @brief   Returns Faction CComponent.
+    *
+    * @return  The CFaction.
+    */
+    CFaction *GetFaction();
+
+    /**
      * @fn  byte CObjBase::RangeL() const;
      *
      * @brief   Returns RangeLow.

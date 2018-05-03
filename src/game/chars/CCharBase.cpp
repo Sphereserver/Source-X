@@ -24,7 +24,6 @@ CCharBase::CCharBase( CREID_TYPE id ) :
 	m_Str = 0;
 	m_Dex = 0;
 	m_Int = 0;
-    _pFaction = new CFaction(FT_CHAR);
 
 	m_iMoveRate = (short)(g_Cfg.m_iMoveRate);
 
@@ -39,7 +38,6 @@ CCharBase::CCharBase( CREID_TYPE id ) :
 CCharBase::~CCharBase()
 {
     ADDTOCALLSTACK("CCharBase::~CCharBase");
-    delete _pFaction;
 }
 
 // From "Bill the carpenter" or "#HUMANMALE the Carpenter",
@@ -85,12 +83,6 @@ void CCharBase::CopyBasic( const CCharBase * pCharDef )
     _pFaction = pCharDef->_pFaction;
 
 	CBaseBaseDef::CopyBasic( pCharDef );	// This will overwrite the CResourceLink!!
-}
-
-CFaction * CCharBase::GetFaction()
-{
-    ADDTOCALLSTACK("CCharBase::GetFaction");
-    return _pFaction;
 }
 
 // Setting the visual "ID" for this.
@@ -259,7 +251,6 @@ bool CCharBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			break;
 		default:
         {
-            _pFaction->r_WriteVal(pszKey, sVal);
             return(CBaseBaseDef::r_WriteVal(pszKey, sVal));
         }
 	}
@@ -373,7 +364,6 @@ bool CCharBase::r_LoadVal( CScript & s )
 			return( m_Speech.r_LoadVal( s, RES_SPEECH ));
 		default:
         {
-            _pFaction->r_LoadVal(s);
             return(CBaseBaseDef::r_LoadVal(s));
         }
 	}
@@ -391,7 +381,6 @@ bool CCharBase::r_Load( CScript & s )
 	ADDTOCALLSTACK("CCharBase::r_Load");
 	// Do a prelim read from the script file.
 	CScriptObj::r_Load(s);
-    _pFaction->r_Load(s);
 
 	if ( m_sName.IsEmpty() )
 	{

@@ -939,41 +939,52 @@ effect_bounce:
 			}
 		}
         int iDmgBonus = 1;
-        if (pWeapon && pWeapon->GetSlayer()->GetFactionID() != FACTION_NONE)
+        CFaction *pSlayer = nullptr;
+        CFaction *pFaction = GetFaction();
+        CFaction *pSrcFaction = pSrc->GetFaction();
+        if (pWeapon)
         {
-            if (m_pNPC) // I'm an NPC attacked (Should the attacker be a player to get the bonus?).
+            pSlayer = pWeapon->GetFaction();
+            if (pSlayer && pWeapon->GetSlayer()->GetFactionID() != FACTION_NONE)
             {
-				if (GetFaction()->GetFactionID() != FACTION_NONE)
-				{
-					iDmgBonus = GetFaction()->GetSlayerDamageBonus(pWeapon->GetSlayer());
-				}
-            }
-            else if (m_pPlayer && pSrc->m_pNPC) // Wielding a slayer type against its opposite will cause the attacker to take more damage
-            {
-				if (pSrc->GetFaction()->GetFactionID() != FACTION_NONE)
-				{
-					iDmgBonus = GetFaction()->GetSlayerDamagePenalty(pSrc->GetFaction());
-				}
+                if (m_pNPC) // I'm an NPC attacked (Should the attacker be a player to get the bonus?).
+                {
+                    if (pSlayer->GetFactionID() != FACTION_NONE)
+                    {
+                        iDmgBonus = pSlayer->GetSlayerDamageBonus(pWeapon->GetSlayer());
+                    }
+                }
+                else if (m_pPlayer && pSrc->m_pNPC) // Wielding a slayer type against its opposite will cause the attacker to take more damage
+                {
+                    if (pSrcFaction->GetFactionID() != FACTION_NONE)
+                    {
+                        iDmgBonus = pSlayer->GetSlayerDamagePenalty(pSrcFaction);
+                    }
+                }
             }
         }
         if (iDmgBonus == 1) // Couldn't find a weapon, a Slayer flag or a suitable flag for the target...
         {
             CItem *pTalisman = pSrc->LayerFind(LAYER_TALISMAN); // then lets try with a Talisman
-            if (pTalisman && pTalisman->GetSlayer()->GetFactionID() != FACTION_NONE)
+            if (pTalisman)
             {
-                if (m_pNPC) // I'm an NPC attacked (Should the attacker be a player to get the bonus?).
+                pSlayer = pTalisman->GetSlayer();
+                if (pSlayer  && pSlayer->GetFactionID() != FACTION_NONE)
                 {
-					if (GetFaction()->GetFactionID() != FACTION_NONE)
-					{
-						iDmgBonus = GetFaction()->GetSlayerDamageBonus(pTalisman->GetSlayer());
-					}
-                }
-                else if (m_pPlayer && pSrc->m_pNPC) // Wielding a slayer type against its opposite will cause the attacker to take more damage
-                {
-					if (pSrc->GetFaction()->GetFactionID() != FACTION_NONE)
-					{
-						iDmgBonus = GetFaction()->GetSlayerDamagePenalty(pSrc->GetFaction());
-					}
+                    if (m_pNPC) // I'm an NPC attacked (Should the attacker be a player to get the bonus?).
+                    {
+                        if (pFaction->GetFactionID() != FACTION_NONE)
+                        {
+                            iDmgBonus = pFaction->GetSlayerDamageBonus(pSlayer);
+                        }
+                    }
+                    else if (m_pPlayer && pSrc->m_pNPC) // Wielding a slayer type against its opposite will cause the attacker to take more damage
+                    {
+                        if (pSrcFaction->GetFactionID() != FACTION_NONE)
+                        {
+                            iDmgBonus = pFaction->GetSlayerDamagePenalty(pSrcFaction);
+                        }
+                    }
                 }
             }
         }

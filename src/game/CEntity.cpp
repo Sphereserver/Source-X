@@ -2,42 +2,82 @@
 #include "CEntity.h"
 #include "CComponent.h"
 #include "../CLog.h"
+#include "CObjBase.h"
+#include "chars/CChar.h"
+#include "items/CItem.h"
 
+
+CEntity::CEntity()
+{
+    _List.clear();
+}
 
 CEntity::~CEntity()
 {
+    ClearComponents();
+}
+
+void CEntity::Delete(bool fForce)
+{
+    if (_List.empty())
+        return;
+    for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
+    {
+        CComponent *pComponent = it->second;
+        if (pComponent)
+        {
+            Unsuscribe(pComponent);
+            pComponent->Delete(fForce);
+        }
+    }
+    _List.clear();
+}
+
+void CEntity::ClearComponents()
+{
+    if (_List.empty())
+        return;
+    for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
+    {
+        CComponent *pComponent = it->second;
+        if (pComponent)
+        {
+            delete _List[pComponent->GetType()];
+            _List[pComponent->GetType()] = nullptr;
+        }
+    }
+    _List.clear();
+}
+
+void CEntity::Suscribe(CComponent * pComponent)
+{
+    if (_List[pComponent->GetType()])
+    {
+        g_Log.EventError("Trying to duplicate component (%d) for %s '0x%08x'\n", (int)pComponent->GetType(), pComponent->GetLink()->GetName(), pComponent->GetLink()->GetUID());
+        delete pComponent;
+        return;
+    }
+    _List[pComponent->GetType()] = pComponent;
+}
+
+void CEntity::Unsuscribe(CComponent *pComponent)
+{
     if (!_List.size())
-        return;
-    _List.clear();  // Clearing the map will also destruct it's CComponents.
-}
-
-void CEntity::Suscribe(CComponent * pEntity)
-{
-    if (_List[pEntity->GetType()])
-    {
-        g_Log.EventError("Trying to duplicate component (%d)", (int)pEntity->GetType());
-        return;
-    }
-    _List[pEntity->GetType()] = pEntity;
-}
-
-void CEntity::Unsuscribe(CComponent *pEntity)
-{
-    if (!_List.size())
     {
         return;
     }
-    if (!_List[pEntity->GetType()])
+    if (!_List[pComponent->GetType()])
     {
-        g_Log.EventError("Trying to unsuscribe not suscribed component (%d)", (int)pEntity->GetType());
+        g_Log.EventError("Trying to unsuscribe not suscribed component (%d)\n", (int)pComponent->GetType());    // Should never happen?
+        delete pComponent;
         return;
     }
-    _List[pEntity->GetType()];
+    _List[pComponent->GetType()];
 }
 
-bool CEntity::IsSuscribed(CComponent *pEntity)
+bool CEntity::IsSuscribed(CComponent *pComponent)
 {
-    if (_List.size() && _List[pEntity->GetType()])
+    if (_List.size() && _List[pComponent->GetType()])
     {
         return true;
     }
@@ -73,14 +113,14 @@ bool CEntity::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
 
 void CEntity::r_Write(CScript & s) ///< Storing data in the worldsave.
 {
-    if (!_List.size())
+    if (!_List.size() && !s.IsWriteMode())
         return;
     for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
     {
-        CComponent *pEntity = it->second;
-        if (pEntity)
+        CComponent *pComponent = it->second;
+        if (pComponent)
         {
-            pEntity->r_Write(s);
+            pComponent->r_Write(s);
         }
     }
 }
@@ -91,10 +131,10 @@ bool CEntity::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
         return false;
     for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
     {
-        CComponent *pEntity = it->second;
-        if (pEntity)
+        CComponent *pComponent = it->second;
+        if (pComponent)
         {
-            if (pEntity->r_WriteVal(pszKey, sVal, pSrc))   // Returns true if there is a match.
+            if (pComponent->r_WriteVal(pszKey, sVal, pSrc))   // Returns true if there is a match.
             {
                 return true;
             }
@@ -109,10 +149,10 @@ bool CEntity::r_LoadVal(CScript & s)
         return false;
     for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
     {
-        CComponent *pEntity = it->second;
-        if (pEntity)
+        CComponent *pComponent = it->second;
+        if (pComponent)
         {
-            if (pEntity->r_LoadVal(s))  // Returns true if there is a match.
+            if (pComponent->r_LoadVal(s))  // Returns true if there is a match.
             {
                 return true;
             }
@@ -127,14 +167,32 @@ bool CEntity::r_Verb(CScript & s, CTextConsole * pSrc) ///< Execute command from
         return false;
     for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
     {
-        CComponent *pEntity = it->second;
-        if (pEntity)
+        CComponent *pComponent = it->second;
+        if (pComponent)
         {
-            if (pEntity->r_Verb(s, pSrc))   // Returns true if there is a match.
+            if (pComponent->r_Verb(s, pSrc))   // Returns true if there is a match.
             {
                 return true;
             }
         }
     }
     return false;
+}
+
+void CEntity::Copy(CEntity *target)
+{
+    if (!_List.size())
+        return;
+    for (std::map<COMP_TYPE, CComponent*>::iterator it = target->_List.begin(); it != target->_List.end(); ++it)
+    {
+        CComponent *pTarget = it->second;    // the CComponent to copy from
+        if (pTarget)
+        {
+            CComponent *pCopy = GetComponent(pTarget->GetType());    // the CComponent to copy to.
+            if (pCopy)
+            {
+                pCopy->Copy(pTarget);
+            }
+        }
+    }
 }

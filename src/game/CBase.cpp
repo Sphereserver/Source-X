@@ -21,6 +21,11 @@ lpctstr const CBaseBaseDef::sm_szLoadKeys[OBC_QTY+1] =
 };
 
 
+CFactionDef CBaseBaseDef::GetFaction()
+{
+    return _pFaction;
+}
+
 CBaseBaseDef::CBaseBaseDef( CResourceID id ) :
 	CResourceLink( id )
 {
@@ -90,10 +95,6 @@ bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 		case OBC_DESCRIPTION:
 		case OBC_SUBSECTION:
 		case OBC_HITSPELL:
-		case OBC_SLAYER:
-		case OBC_SLAYERLESSER:
-		case OBC_SLAYERMISC:
-		case OBC_SLAYERSUPER:
 		case OBC_ABILITYPRIMARY:
 		case OBC_ABILITYSECONDARY:
 		case OBC_MANABURST:
@@ -201,7 +202,10 @@ bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 		case OBC_DEFNAME:
 			sVal = GetResourceName();
 			break;
-
+        case OBC_FACTION:
+        case OBC_SLAYER:
+            sVal.FormatHex((dword)GetFaction().GetFactionID());
+            break;
 		case OBC_ARMOR:
 			{
 				pszKey += strlen(sm_szLoadKeys[index]); // 9;
@@ -368,10 +372,6 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 	{
 		//Set as Strings
 		case OBC_HITSPELL:
-		case OBC_SLAYER:
-		case OBC_SLAYERLESSER:
-		case OBC_SLAYERMISC:
-		case OBC_SLAYERSUPER:
 		case OBC_ABILITYPRIMARY:
 		case OBC_ABILITYSECONDARY:
 		case OBC_MANABURST:
@@ -380,6 +380,10 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
 				SetDefStr(s.GetKey(), s.GetArgStr( &fQuoted ), fQuoted);
 			}
 			break;
+        case OBC_FACTION:
+        case OBC_SLAYER:
+            GetFaction().SetFactionID(NPC_FACTION(s.GetArgVal()));
+            break;
 		//Set as number only
 		case OBC_CASTINGFOCUS:
 		case OBC_DAMCHAOS:
@@ -593,6 +597,7 @@ void CBaseBaseDef::CopyBasic( const CBaseBaseDef * pBase )
 	m_defenseBase = pBase->m_defenseBase;
 	m_defenseRange = pBase->m_defenseRange;
 	m_Can = pBase->m_Can;
+    _pFaction.SetFactionID(const_cast<CBaseBaseDef*>(pBase)->_pFaction.GetFactionID());
 }
 
 void CBaseBaseDef::CopyTransfer( CBaseBaseDef * pBase )

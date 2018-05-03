@@ -52,7 +52,9 @@ private:
     CItem *_pLink;                  ///< Link this object to it's parent CItem.
 
     // Retrieved from CChampionDef
-    std::map<uchar, std::vector<CREID_TYPE>> _iSpawn;    ///< Defining how many uchar (or levels) this Champion has and the group of monsters for each level.
+    typedef std::vector<CREID_TYPE> idNPC;
+    typedef std::map<uchar, idNPC> idSpawn;
+    idSpawn _idSpawn;    ///< Defining how many uchar (or levels) this Champion has and the group of monsters for each level.
     CREID_TYPE _idChampion;               ///< Boss id
 
     // Ingame Spawn behaviour.
@@ -87,18 +89,25 @@ private:
     ushort _iDeathCount;                ///< Keeping track of how many monsters died already.
     uchar _iCandlesNextRed;             ///< Required amount of White candles to get the next Red one.
     uchar _iCandlesNextLevel;           ///< Required amount of Red candles to reach the next level.
-    std::vector<CItem*> _pRedCandles;   ///< Storing the Red Candles, reaching a certain amount of these increases the Champion's Level (refer to _iLevel).
-    std::vector<CItem*> _pWhiteCandles; ///< Storing the White Candles (sublevel): 4 white candles = 1 red candle (Default max = 4).
+    std::vector<CUID> _pRedCandles;   ///< Storing the Red Candles, reaching a certain amount of these increases the Champion's Level (refer to _iLevel).
+    std::vector<CUID> _pWhiteCandles; ///< Storing the White Candles (sublevel): 4 white candles = 1 red candle (Default max = 4).
 
 public:
     //static const char *m_sClassName;    ///< Class definition
+
     /**
     * @brief Start the champion, setup everything needed.
+    *
+    * Retrieves relevant data from [CHAMPION ] definition.
+    */
+    void Init();
+    /**
+    * @brief Start the champion.
     *
     * Calls SetLevel(1), which automatically set the relevant data to work from now.
     * SetTimeout( TICK_PER_SEC * 60 * 10 ) // 10 minutes.
     */
-    void Init();
+    void Start();
     /**
     * @brief Stop the champion, cleaning everything.
     *
@@ -200,8 +209,8 @@ public:
     * Called from AddRedCandle() when RedCandles > GetCandlesPerLevel()
     * Sets the new amount of Red Candles needed for the next level ( GetCandlesPerLevel() )
     * Checks how many monsters are needed for each White Candles and the total for the next Red Candle.
-    * Set m_iSpawnsNextWhite to the amount of killed monsters needed for next white candle.
-    * Set m_iSpawnsNextRed to the amount of monsters needed to kill to reach next red candle.
+    * Set _iSpawnsNextWhite to the amount of killed monsters needed for next white candle.
+    * Set _iSpawnsNextRed to the amount of monsters needed to kill to reach next red candle.
     * Reset timeout to 10 minutes.
     * @param iLevel the new Level for the champion.
     */
@@ -210,11 +219,13 @@ public:
     /************************************************************************
     * SCP related section.
     ************************************************************************/
+    void Delete(bool fForce = false);
     bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef);
     void r_Write(CScript & s);
     bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc);
     bool r_LoadVal(CScript & s);
     bool r_Verb(CScript & s, CTextConsole * pSrc); // Execute command from script
+    void Copy(CComponent *target);
 
     /************************************************************************
     * CItem related section.
@@ -247,11 +258,13 @@ class CChampionDef : public CResourceLink
     static const char *m_sClassName;
 private:
     CSString m_sKey;                    ///< script keyword for champion.
+    typedef std::vector<CREID_TYPE> idNPC;
+    typedef std::map<uchar, idNPC> idSpawn;    ///< Defining how many uchar (or levels) this Champion has and the group of monsters for each level.
 public:
     CSString m_sName;                   ///< Champion name
     ushort _iSpawnsMax;                 ///< Max amount of monsters OSI default value = 480.
     uchar _iLevelMax;                  ///< Max level this champion can have
-    std::map<uchar, std::vector<CREID_TYPE>> _iSpawn;    ///< Defining how many uchar (or levels) this Champion has and the group of monsters for each level.
+    idSpawn _idSpawn;
     CREID_TYPE _idChampion;             ///< Boss id
 
     explicit CChampionDef(CResourceID rid);

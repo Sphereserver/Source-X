@@ -10,7 +10,7 @@
 #include "../common/CVarDefMap.h"
 #include "../common/sphere_library/CSString.h"
 #include "uo_files/uofiles_types.h"
-
+#include "CFaction.h"
 
 struct CBaseBaseDef : public CResourceLink
 {
@@ -47,8 +47,11 @@ public:
 
 	dword   m_Can;          // Base attribute flags. CAN_C_GHOST, etc
     dword	m_CanUse;		// Base attribute flags. can_u_all/male/female..
+    CFactionDef _pFaction;
 
 public:
+
+    CFactionDef GetFaction();
 
     /**
      * @fn  lpctstr GetDefStr( lpctstr pszKey, bool fZero = false ) const

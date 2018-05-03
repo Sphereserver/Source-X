@@ -99,6 +99,7 @@ CObjBase::CObjBase( bool fItem )
 		ASSERT(IsValidUID());
 		SetContainerFlags(UID_O_DISCONNECT);	// it is no place for now
 	}
+    Suscribe(new CFaction(this));
 
 	// Put in the idle list by default. (til placed in the world)
 	g_World.m_ObjNew.InsertHead( this );
@@ -728,10 +729,6 @@ bool CObjBase::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 		}
 
 	}
-    if (static_cast<CEntity*>(this)->r_GetRef(pszKey, pRef))
-    {
-        return true;
-    }
 	return CScriptObj::r_GetRef(pszKey, pRef);
 }
 
@@ -786,11 +783,6 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 
         // TYPEDEF. ?
         if (Base_GetDef()->r_WriteVal(pszKey, sVal, pSrc))
-        {
-            return true;
-        }
-
-        if (static_cast<CEntity*>(this)->r_WriteVal(pszKey, sVal, pSrc))
         {
             return true;
         }
@@ -1489,9 +1481,16 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			sVal.FormatHex( GetUID() );
 			break;
 		case OC_SPAWNITEM:
-			if (pszKey[9] == '.')
-				return CScriptObj::r_WriteVal(pszKey, sVal, pSrc);
-			sVal.FormatHex(GetSpawn()->GetSpawnItem()->GetUID());
+            if (GetSpawn())
+            {
+                if (pszKey[9] == '.')
+                    return CScriptObj::r_WriteVal(pszKey, sVal, pSrc);
+                sVal.FormatHex(GetSpawn()->GetLink()->GetUID());
+            }
+            else
+            {
+                sVal.FormatHex(0);
+            }
 			break;
 		case OC_SEXTANTP:
 			{
@@ -1642,13 +1641,10 @@ bool CObjBase::r_LoadVal( CScript & s )
 	int index = FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
 	if ( index < 0 )
 	{
-        if (static_cast<CEntity*>(this)->r_LoadVal(s))
-        {
-            return true;
-        }
         return CScriptObj::r_LoadVal(s);
 	}
 
+    bool fResendTooltip = false;
 	switch ( index )
 	{
 		//Set as Strings
@@ -1663,6 +1659,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 			{
 				bool fQuoted = false;
 				SetDefStr(s.GetKey(), s.GetArgStr( &fQuoted ), fQuoted);
+                fResendTooltip = true;
 			}
 			break;
 		//Set as number only
@@ -1730,9 +1727,11 @@ bool CObjBase::r_LoadVal( CScript & s )
 		case OC_SPELLFOCUSING:
 		case OC_VELOCITY:
 		case OC_NAMELOC:
-			SetDefNum(s.GetKey(),s.GetArgVal(), false);
-			break;
-
+        {
+            SetDefNum(s.GetKey(), s.GetArgVal(), false);
+            fResendTooltip = true;
+            break;
+        }
 		case OC_INCREASESWINGSPEED:
 		case OC_INCREASEDAM:
 		case OC_LOWERREAGENTCOST:
@@ -1774,6 +1773,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 					if (pChar)
 						pChar->UpdateStatsFlag();
 				}
+                fResendTooltip = true;
 				break;
 			}
         case OC_RECIPEALCHEMY:
@@ -1789,6 +1789,7 @@ bool CObjBase::r_LoadVal( CScript & s )
         case OC_RECIPETINKERING:
         {
             SetDefNum(s.GetKey(), s.GetArgLLVal());
+            fResendTooltip = true;
             break;
         }
 		case OC_ARMOR:
@@ -1806,6 +1807,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 				CChar * pChar = dynamic_cast <CChar*>(GetTopLevelObj());
 				if ( pChar )
 					pChar->UpdateStatsFlag();
+                fResendTooltip = true;
 				break;
 			}
 		case OC_DAM:
@@ -1820,6 +1822,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 				CChar * pChar = dynamic_cast <CChar*>(GetTopLevelObj());
 				if (pChar)
 					pChar->UpdateStatsFlag();
+                fResendTooltip = true;
 			}
 			break;
 		case OC_WEIGHTREDUCTION:
@@ -1832,6 +1835,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 					ASSERT( IsItemEquipped() || IsItemInContainer());
 					pCont->OnWeightChange(GetWeight() - oldweight);
 				}
+                fResendTooltip = true;
 			}
 			return true;
 
@@ -1849,6 +1853,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 				{
 					SetDefNum(s.GetKey(),piVal[0], false);
 				}
+                fResendTooltip = true;
 			}
 			break;
 
@@ -1859,6 +1864,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 			break;
 		case OC_MODMAXWEIGHT:
 			m_ModMaxWeight = s.GetArgVal();
+            fResendTooltip = true;
 			break;
 		case OC_COLOR:
 			if ( !strnicmp( s.GetArgStr(), "match_shirt", 11 ) || !strnicmp( s.GetArgStr(), "match_hair", 10 ))
@@ -1909,10 +1915,12 @@ bool CObjBase::r_LoadVal( CScript & s )
 					pChar->m_defense = (word)(pChar->CalcArmorDefense());
 					pChar->UpdateStatsFlag();
 				}
+                fResendTooltip = true;
 			}
 			break;
 		case OC_NAME:
 			SetName( s.GetArgStr());
+            fResendTooltip = true;
 			break;
 		case OC_P:	// Must set the point via the CItem or CChar methods.
 			return false;
@@ -1927,18 +1935,22 @@ bool CObjBase::r_LoadVal( CScript & s )
 		}
 		case OC_TIMER:
 			SetTimeout( s.GetArgLLVal() * TICK_PER_SEC );
+            fResendTooltip = true;
 			break;
 		case OC_TIMERD:
 			SetTimeout( s.GetArgLLVal());
+            fResendTooltip = true;
 			break;
 		case OC_TIMESTAMP:
 			SetTimeStamp( s.GetArgLLVal());
 			break;
 		case OC_SPAWNITEM:
-			if ( !g_Serv.IsLoading() )	// SPAWNITEM is read-only
-				return false;
-			//SetSpawn(static_cast<CSpawn*>(static_cast<CUID>(s.GetArgVal()).ItemFind()->GetComponent(COMP_SPAWN)));  //FIXME: Using the uid to load a CSpawn that may have not yet created may lead to a nullptr.
-			break;
+        {
+            if ( !g_Serv.IsLoading() )	// SPAWNITEM is read-only
+                return false;
+            _uidSpawn = s.GetArgDWVal();
+            break;
+        }
 		case OC_UID:
 		case OC_SERIAL:
 			// Don't set container flags through this.
@@ -1947,7 +1959,10 @@ bool CObjBase::r_LoadVal( CScript & s )
 		default:
 			return false;
 	}
-	ResendTooltip();
+    if (fResendTooltip)
+    {
+        ResendTooltip();
+    }
 	return true;
 	EXC_CATCH;
 
@@ -1970,7 +1985,7 @@ void CObjBase::r_Write( CScript & s )
 	if ( m_timestamp.IsTimeValid() )
 		s.WriteKeyVal( "TIMESTAMP", GetTimeStamp().GetTimeRaw());
 	if ( GetSpawn() )
-		s.WriteKeyHex("SPAWNITEM", GetSpawn()->GetSpawnItem()->GetUID());
+		s.WriteKeyHex("SPAWNITEM", GetSpawn()->GetLink()->GetUID());
 	if ( m_ModAr )
 		s.WriteKeyVal("MODAR", m_ModAr);
 	if ( m_ModMaxWeight )
@@ -1981,7 +1996,6 @@ void CObjBase::r_Write( CScript & s )
 
 	m_TagDefs.r_WritePrefix(s, "TAG");
 	m_OEvents.r_Write(s, "EVENTS");
-    static_cast<CEntity*>(this)->r_Write(s);
 }
 
 enum OV_TYPE
@@ -2027,10 +2041,6 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		index = FindTableSorted( pszKey, sm_szVerbKeys, CountOf(sm_szVerbKeys)-1 );
     if (index < 0)
     {
-        if (static_cast<CEntity*>(this)->r_Verb(s, pSrc))
-        {
-            return true;
-        }
         return CScriptObj::r_Verb(s, pSrc);
     }
 
@@ -2981,7 +2991,15 @@ CSpawn * CObjBase::GetSpawn()
 
 void CObjBase::SetSpawn(CSpawn * spawn)
 {
-    _uidSpawn = spawn->GetLink()->GetUID();
+    if (spawn)
+        _uidSpawn = spawn->GetLink()->GetUID();
+    else
+        _uidSpawn.InitUID();
+}
+
+CFaction * CObjBase::GetFaction()
+{
+    return static_cast<CFaction*>(GetComponent(COMP_FACTION));
 }
 
 byte CObjBase::RangeL() const
@@ -3132,8 +3150,13 @@ void CObjBase::Delete(bool bforce)
 	ADDTOCALLSTACK("CObjBase::Delete");
 	UNREFERENCED_PARAMETER(bforce);	// CObjBase doesnt use it, but CItem and CChar does use it, do not remove.
 
-	if ( GetSpawn() )    // If I was created from a Spawn
-        GetSpawn()->DelObj( GetUID() );  // Then I should be removed from it's list.
+    CEntity *pEntity = static_cast<CEntity*>(this);
+    if (GetSpawn())    // If I was created from a Spawn
+    {
+        pEntity->Unsuscribe(GetSpawn());    // Avoiding recursive calls from CSpawn::DelObj when forcing the pChar/pItem to Delete();
+        GetSpawn()->DelObj(GetUID());  // Then I should be removed from it's list.
+    }
+    pEntity->Delete(bforce);
 
 	DeletePrepare();
 	g_World.m_TimedFunctions.Erase( GetUID() );
@@ -3152,7 +3175,9 @@ TRIGRET_TYPE CObjBase::Spell_OnTrigger( SPELL_TYPE spell, SPTRIG_TYPE stage, CCh
 		// RES_SKILL
 		CResourceLock s;
 		if ( pSpellDef->ResourceLock( s ))
+		{
 			return CScriptObj::OnTriggerScript( s, CSpellDef::sm_szTrigName[stage], pSrc, pArgs );
+		}
 	}
 	return TRIGRET_RET_DEFAULT;
 }
