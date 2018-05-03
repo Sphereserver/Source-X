@@ -474,7 +474,7 @@ bool CSpawn::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole *pSrc)
             return true;
         }
         default:
-            return true;    // Match but no code executed.
+            return false;    //No match, let the code continue.
             break;
     }
 	EXC_CATCH;
