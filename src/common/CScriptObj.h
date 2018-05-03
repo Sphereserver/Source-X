@@ -6,7 +6,6 @@
 #ifndef _INC_CSCRIPTOBJ_H
 #define _INC_CSCRIPTOBJ_H
 
-#include "sphere_library/CSArray.h"
 #include "../sphere/threads.h"
 #include "CVarDefMap.h"
 #include "CVarFloat.h"
@@ -90,21 +89,21 @@ class CScriptTriggerArgs : public CScriptObj
 	static lpctstr const sm_szLoadKeys[];
 public:
 	static const char *m_sClassName;
-	int64							m_iN1;		// "ARGN" or "ARGN1" = a modifying numeric arg to the current trigger.
-	int64							m_iN2;		// "ARGN2" = a modifying numeric arg to the current trigger.
-	int64							m_iN3;		// "ARGN3" = a modifying numeric arg to the current trigger.
+	int64                   m_iN1;		// "ARGN" or "ARGN1" = a modifying numeric arg to the current trigger.
+	int64					m_iN2;		// "ARGN2" = a modifying numeric arg to the current trigger.
+	int64					m_iN3;		// "ARGN3" = a modifying numeric arg to the current trigger.
 
-	CScriptObj *					m_pO1;		// "ARGO" or "ARGO1" = object 1
+	CScriptObj *			m_pO1;		// "ARGO" or "ARGO1" = object 1
 												// these can go out of date ! get deleted etc.
 
-	CSString					m_s1;			// ""ARGS" or "ARGS1" = string 1
-	CSString					m_s1_raw;		// RAW, used to build argv in runtime
+	CSString				m_s1;			// ""ARGS" or "ARGS1" = string 1
+	CSString				m_s1_raw;		// RAW, used to build argv in runtime
 
-	CSPtrTypeArray	<lpctstr>	m_v;
+	std::vector<lpctstr>	m_v;
 
-	CVarDefMap 					m_VarsLocal;	// "LOCAL.x" = local variable x
-	CVarFloat					m_VarsFloat;	// "FLOAT.x" = float local variable x
-	CLocalObjMap				m_VarObjs;		// "REFx" = local object x
+	CVarDefMap 				m_VarsLocal;	// "LOCAL.x" = local variable x
+	CVarFloat				m_VarsFloat;	// "FLOAT.x" = float local variable x
+	CLocalObjMap			m_VarObjs;		// "REFx" = local object x
 
 public:
 

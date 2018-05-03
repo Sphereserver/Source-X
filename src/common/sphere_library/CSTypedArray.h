@@ -1,5 +1,10 @@
-#ifndef _INC_CSARRAY_CSTYPEDARRAY_HH
-#define _INC_CSARRAY_CSTYPEDARRAY_HH
+/**
+* @file  CSTypedArray.h
+* @brief Dynamic array (not thread safe).
+*/
+
+#ifndef _INC_CSTYPEDARRAY_H
+#define _INC_CSTYPEDARRAY_H
 
 #include <cstring>
 #include <cstdint>
@@ -51,10 +56,8 @@ struct CSTypedArrayHelper<TYPE*>
 };
 
 /**
-* @brief Typed Array (not thread safe).
-*
 * NOTE: This will not call true constructors or destructors !
-* TODOC: Really needed two types in template? Answer: yes. If we are storing instances instead of pointers,
+* Question: Really needed two types in template? Answer: yes. If we are storing instances instead of pointers,
 *  we can set ARG_TYPE to be a reference of TYPE.
 */
 template<class TYPE, class ARG_TYPE>
@@ -304,7 +307,7 @@ inline size_t CSTypedArray<TYPE,ARG_TYPE>::Add( ARG_TYPE newElement )
 template<class TYPE, class ARG_TYPE>
 void CSTypedArray<TYPE,ARG_TYPE>::Copy(const CSTypedArray<TYPE, ARG_TYPE> * pArray)
 {
-    if ( !pArray || pArray == this )	// it was !=
+    if ( !pArray || (pArray == this) )
         return;
 
     Clear();
@@ -349,7 +352,6 @@ template<class TYPE, class ARG_TYPE>
 void CSTypedArray<TYPE,ARG_TYPE>::SetAt( size_t nIndex, ARG_TYPE newElement )
 {
     ASSERT(IsValidIndex(nIndex));
-
 
 #ifdef __clang__
     #pragma clang diagnostic push
@@ -453,7 +455,6 @@ inline TYPE * CSTypedArray<TYPE,ARG_TYPE>::GetBasePtr() const
     return m_pData;
 }
 
-
 template<class TYPE, class ARG_TYPE>
 inline bool CSTypedArray<TYPE,ARG_TYPE>::IsValidIndex( size_t i ) const
 {
@@ -461,4 +462,4 @@ inline bool CSTypedArray<TYPE,ARG_TYPE>::IsValidIndex( size_t i ) const
 }
 
 
-#endif //_INC_CSARRAY_CSTYPEDARRAY_HH
+#endif //_INC_CSTYPEDARRAY_H

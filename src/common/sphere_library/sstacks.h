@@ -1,6 +1,6 @@
 /**
-* @file CSArray.h
-* @brief Queue custom implementations.
+* @file sstacks.h
+* @brief Stack custom implementations.
 */
 
 #ifndef _INC_CSTACK_H

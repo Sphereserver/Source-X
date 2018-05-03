@@ -10,7 +10,7 @@
 #include "CSocket.h"
 #include "packet.h"
 #include "../common/common.h"
-#include "../common/sphere_library/CSArray.h"
+#include "../common/sphere_library/CSObjList.h"
 #include "../common/sphere_library/CSQueue.h"
 #include "../common/sphereproto.h"
 #include "../sphere/containers.h"

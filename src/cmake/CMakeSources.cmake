@@ -145,10 +145,6 @@ SOURCE_GROUP (common FILES ${common_SRCS})
 
 # Sphere library files
 SET (spherelibrary_SRCS
-common/sphere_library/CSArray.cpp
-common/sphere_library/CSArray.h
-common/sphere_library/CSArray_CSTypedArray.hh
-common/sphere_library/CSArray_CSTypedArray_ptr.hh
 common/sphere_library/CSAssoc.cpp
 common/sphere_library/CSAssoc.h
 common/sphere_library/CSFile.cpp
@@ -157,6 +153,13 @@ common/sphere_library/CSFileList.cpp
 common/sphere_library/CSFileList.h
 common/sphere_library/CSMemBlock.cpp
 common/sphere_library/CSMemBlock.h
+common/sphere_library/CSObjArray.h
+common/sphere_library/CSObjList.cpp
+common/sphere_library/CSObjList.h
+common/sphere_library/CSObjListRec.h
+common/sphere_library/CSObjSortArray.h
+common/sphere_library/CSPtrTypeArray.h
+common/sphere_library/CSTypedArray.h
 common/sphere_library/CSQueue.cpp
 common/sphere_library/CSQueue.h
 common/sphere_library/CSRand.cpp

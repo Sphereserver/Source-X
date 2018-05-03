@@ -79,7 +79,7 @@ void CScriptTriggerArgs::Init( lpctstr pszStr )
 	}
 
 	// ensure argv will be recalculated next time it is accessed
-	m_v.SetCount(0);
+	m_v.clear();
 }
 
 
@@ -325,7 +325,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
 		pszKey += 4;
 		SKIP_SEPARATORS(pszKey);
 
-		size_t iQty = m_v.GetCount();
+		size_t iQty = m_v.size();
 		if ( iQty <= 0 )
 		{
 			// PARSE IT HERE
@@ -346,7 +346,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
 				if ( (*s == ',') && !fQuotes)
 				{
 					lpctstr pszZero = "\0";
-					m_v.Add( pszZero );
+					m_v.emplace_back( pszZero );
 					++s;
 					continue;
 				}
@@ -394,9 +394,9 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
 					}
 					++s;
 				}
-				m_v.Add( pszArg );
+				m_v.emplace_back( pszArg );
 			}
-			iQty = m_v.GetCount();
+			iQty = m_v.size();
 		}
 
 		if ( *pszKey == '\0' )
@@ -407,12 +407,12 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
 
 		size_t iNum = (size_t)(Exp_GetSingle(pszKey));
 		SKIP_SEPARATORS(pszKey);
-		if ( !m_v.IsValidIndex(iNum) )
+		if ( iNum < m_v.size() )
 		{
 			sVal = "";
 			return true;
 		}
-		sVal = m_v.GetAt(iNum);
+		sVal = m_v[iNum];
 		return true;
 	}
 
@@ -2638,7 +2638,7 @@ jump_in:
 								CScriptObj *pO1 = pArgs->m_pO1;
 								CSString s1 = pArgs->m_s1;
 								CSString s1_raw = pArgs->m_s1_raw;
-								pArgs->m_v.SetCount(0);
+								pArgs->m_v.clear();
 								pArgs->Init(z);
 
 								fRes = pRef->r_Call(argRaw, pSrc, pArgs, &sVal);
@@ -2649,7 +2649,7 @@ jump_in:
 								pArgs->m_pO1 = pO1;
 								pArgs->m_s1 = s1;
 								pArgs->m_s1_raw = s1_raw;
-								pArgs->m_v.SetCount(0);
+								pArgs->m_v.clear();
 							}
 							else
 								fRes = pRef->r_Call(argRaw, pSrc, pArgs, &sVal);
@@ -2704,7 +2704,7 @@ jump_in:
 								CScriptObj *pO1 = pArgs->m_pO1;
 								CSString s1 = pArgs->m_s1;
 								CSString s1_raw = pArgs->m_s1_raw;
-								pArgs->m_v.SetCount(0);
+								pArgs->m_v.clear();
 								pArgs->Init(z);
 
 								tRet = pRef->OnTrigger( psTmp, pSrc, pArgs);
@@ -2715,7 +2715,7 @@ jump_in:
 								pArgs->m_pO1 = pO1;
 								pArgs->m_s1 = s1;
 								pArgs->m_s1_raw = s1_raw;
-								pArgs->m_v.SetCount(0);
+								pArgs->m_v.clear();
 							}
 							else
 								tRet = pRef->OnTrigger( psTmp, pSrc, pArgs);

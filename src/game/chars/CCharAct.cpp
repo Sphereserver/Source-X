@@ -1,6 +1,5 @@
 
 #include "../../common/CLog.h"
-#include "../../common/sphere_library/CSArray.h"
 #include "../../common/CException.h"
 #include "../../common/CUIDExtra.h"
 #include "../../network/network.h"

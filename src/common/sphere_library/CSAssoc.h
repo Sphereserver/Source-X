@@ -6,7 +6,7 @@
 #ifndef _INC_CSASSOC_H
 #define _INC_CSASSOC_H
 
-#include "CSArray.h"
+#include "CSObjList.h"
 #include "CSFile.h"
 
 #ifndef PT_REG_STRMAX

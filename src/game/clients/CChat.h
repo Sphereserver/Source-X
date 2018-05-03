@@ -7,7 +7,7 @@
 #define _INC_CCHAT_H
 
 #include "../../common/sphere_library/CSString.h"
-#include "../../common/sphere_library/CSArray.h"
+#include "../../common/sphere_library/CSObjList.h"
 #include "../../common/sphereproto.h"
 
 

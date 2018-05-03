@@ -7,7 +7,7 @@
 #define _INC_CPARTY_H
 
 #include "../../common/sphere_library/CSString.h"
-#include "../../common/sphere_library/CSArray.h"
+#include "../../common/sphere_library/CSObjListRec.h"
 #include "../../common/CRect.h"
 #include "../../common/CScriptObj.h"
 #include "../../common/CVarDefMap.h"

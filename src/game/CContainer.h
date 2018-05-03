@@ -6,7 +6,7 @@
 #ifndef _INC_CCONTAINER_H
 #define _INC_CCONTAINER_H
 
-#include "../common/sphere_library/CSArray.h"
+#include "../common/sphere_library/CSObjList.h"
 #include "../common/CUID.h"
 #include "../common/CRect.h"
 #include "../common/CResourceBase.h"

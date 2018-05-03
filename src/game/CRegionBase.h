@@ -6,7 +6,7 @@
 #ifndef _INC_CREGIONBASE_H
 #define _INC_CREGIONBASE_H
 
-#include "../common/sphere_library/CSArray.h"
+#include "../common/sphere_library/CSTypedArray.h"
 #include "../common/CRect.h"
 
 

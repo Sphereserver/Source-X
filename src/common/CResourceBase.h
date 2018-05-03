@@ -6,7 +6,7 @@
 #ifndef _INC_CRESOURCEBASE_H
 #define _INC_CRESOURCEBASE_H
 
-#include "sphere_library/CSArray.h"
+#include "sphere_library/CSObjSortArray.h"
 #include "sphere_library/CSTime.h"
 #include "../game/CServerTime.h"
 #include "../game/game_enums.h"

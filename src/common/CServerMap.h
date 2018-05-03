@@ -2,8 +2,8 @@
 * @file CServerMap.h
 */
 
-#ifndef _INC_CSPHEREMAP_H
-#define _INC_CSPHEREMAP_H
+#ifndef _INC_CSERVERMAP_H
+#define _INC_CSERVERMAP_H
 
 #include "../game/uo_files/CUOMapBlock.h"
 #include "../game/uo_files/CUOStaticItemRec.h"
@@ -11,7 +11,7 @@
 #include "../game/uo_files/uofiles_macros.h"
 #include "../game/uo_files/uofiles_types.h"
 #include "../game/CServerTime.h"
-#include "sphere_library/CSArray.h"
+#include "sphere_library/CSObjSortArray.h"
 #include "CRect.h"
 
 class CCachedMulItem
@@ -52,7 +52,7 @@ private:
 	CServerStaticsBlock& operator=(const CServerStaticsBlock& other);
 
 public:
-	size_t GetStaticQty() const { 
+	inline size_t GetStaticQty() const { 
 		return m_iStatics;
 	}
 	const CUOStaticItemRec * GetStatic( size_t i ) const;
@@ -165,7 +165,7 @@ class CServerMapBlock :	// Cache this from the MUL files. 8x8 block of the world
 	public CPointSort	// The upper left corner. (ignore z) sort by this
 {
 protected:
-	int		m_map;
+	int	m_map;
 
 private:
 	static size_t sm_iCount;	// count number of loaded blocks.
@@ -187,7 +187,7 @@ public:
 
 	virtual ~CServerMapBlock()
 	{ 
-		sm_iCount--;
+		--sm_iCount;
 	}
 
 private:
@@ -245,4 +245,4 @@ public:
 	const CUOMultiItemRec_HS * GetItem( size_t i ) const;
 };
 
-#endif // _INC_CServerMap_H
+#endif // _INC_CSERVERMAP_H

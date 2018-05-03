@@ -7,7 +7,6 @@
 #define _INC_CRESOURCE_H
 
 #include "../common/sphere_library/CSAssoc.h"
-#include "../common/sphere_library/CSArray.h"
 #include "../common/CExpression.h"
 #include "../common/CServerMap.h"
 #include "../common/CResourceBase.h"

@@ -6,7 +6,8 @@
 #ifndef _INC_CCHATCHANNEL_H
 #define _INC_CCHATCHANNEL_H
 
-#include "../../common/sphere_library/CSArray.h"
+#include "../../common/sphere_library/CSObjListRec.h"
+#include "../../common/sphere_library/CSObjArray.h"
 #include "../../common/sphere_library/CSString.h"
 #include "../../common/sphereproto.h"
 

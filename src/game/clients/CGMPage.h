@@ -6,7 +6,6 @@
 #ifndef _INC_CGMPAGE_H
 #define _INC_CGMPAGE_H
 
-#include "../../common/sphere_library/CSArray.h"
 #include "../../common/sphere_library/CSString.h"
 #include "../../common/CScriptObj.h"
 #include "../../common/CRect.h"

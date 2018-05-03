@@ -7,7 +7,6 @@
 #define _INC_CWORLD_H
 
 #include "../common/common.h"
-#include "../common/sphere_library/CSArray.h"
 #include "../common/CScript.h"
 #include "../common/CScriptObj.h"
 #include "../common/CUID.h"

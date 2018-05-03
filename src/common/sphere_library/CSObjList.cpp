@@ -1,13 +1,16 @@
-#include "CSArray.h"
+#include "CSObjList.h"
+#include "../assertion.h"
 
-// CObListRec:: Constructors, Destructor, Assign operator.
 
-CSObjListRec::CSObjListRec()
+// CSObjListRec:: Capacity.
+
+inline void CSObjListRec::RemoveSelf()
 {
-	m_pParent = NULL;
-	m_pNext = m_pPrev = NULL;
+    if (GetParent())
+        m_pParent->OnRemoveObj(this);	// call any approriate virtuals.
 }
 
+//---
 
 // CSObjList:: Constructors, Destructor, Assign operator.
 
@@ -16,7 +19,6 @@ CSObjList::CSObjList()
 	m_pHead = m_pTail = NULL;
 	m_iCount = 0;
 }
-
 
 // CSObjList:: Element access.
 
@@ -48,7 +50,6 @@ void CSObjList::Clear()
 	m_pHead = NULL;
 	m_pTail = NULL;
 }
-
 
 void CSObjList::InsertAfter( CSObjListRec * pNewRec, CSObjListRec * pPrev )
 {
