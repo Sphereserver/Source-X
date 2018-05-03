@@ -6,8 +6,6 @@
 #ifndef _INC_CSARRAY_H
 #define _INC_CSARRAY_H
 
-//#include "../common.h"
-//#include "CSArray_CSTypedArray_ptr.hh" // It doesn't work yet!
 #include "CSArray_CSTypedArray.hh"
 
 class CSObjList;
