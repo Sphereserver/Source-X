@@ -407,7 +407,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
 
 		size_t iNum = (size_t)(Exp_GetSingle(pszKey));
 		SKIP_SEPARATORS(pszKey);
-		if ( iNum <= m_v.size() )
+		if ( iNum >= m_v.size() )
 		{
 			sVal = "";
 			return true;
