@@ -51,7 +51,7 @@ enum NPC_GROUP
 /*
     Faction IDs
 */
-enum NPC_FACTION : ullong
+enum NPC_FACTION : llong
 {
     FACTION_NONE                   = 0,
     // Fey Group (opposed to Abyss Group)
@@ -139,15 +139,15 @@ class CFaction : public CFactionDef, public CComponent
 public:
     CFaction(const CObjBase* pLink);
     CFaction(CFaction *copy, const CObjBase* pLink);
-	virtual ~CFaction(){}
-    void Delete(bool fForced = false);
-    bool r_LoadVal(CScript & s);
+	virtual ~CFaction() {}
+    virtual void Delete(bool fForced = false) override;
+    virtual bool r_LoadVal(CScript & s) override;
+    virtual bool r_WriteVal(lpctstr pszKey, CSString & s, CTextConsole * pSrc = NULL) override;
+    virtual void r_Write(CScript & s) override;
+    virtual bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef) override;
+    virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override;
+    virtual void Copy(CComponent *target) override;
     bool r_Load(CScript & s);  // Load a character from Script
-    bool r_WriteVal(lpctstr pszKey, CSString & s, CTextConsole * pSrc = NULL);
-    void r_Write(CScript & s);
-    bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef);
-    bool r_Verb(CScript & s, CTextConsole * pSrc);
-    void Copy(CComponent *target);
     /*
         Sets the Group to the specified type.
     */

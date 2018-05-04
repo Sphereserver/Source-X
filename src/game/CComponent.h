@@ -16,7 +16,7 @@ enum COMP_TYPE
     COMP_SPAWN,
     COMP_MULTI,
     COMP_FACTION,
-    COM_QTY
+    COMP_QTY
 };
 
 class CObjBase;
@@ -31,7 +31,7 @@ protected:
 
 public:
     COMP_TYPE GetType();
-    const CObjBase *GetLink();
+    virtual const CObjBase *GetLink();
 
     /* Script's compatibility
     * All methods here are meant to be proccessed from CEntity so they may behave a little different

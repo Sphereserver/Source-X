@@ -219,13 +219,13 @@ public:
     /************************************************************************
     * SCP related section.
     ************************************************************************/
-    void Delete(bool fForce = false);
-    bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef);
-    void r_Write(CScript & s);
-    bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc);
-    bool r_LoadVal(CScript & s);
-    bool r_Verb(CScript & s, CTextConsole * pSrc); // Execute command from script
-    void Copy(CComponent *target);
+    virtual void Delete(bool fForce = false) override;
+    virtual bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef) override;
+    virtual void r_Write(CScript & s) override;
+    virtual bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc) override;
+    virtual bool r_LoadVal(CScript & s) override;
+    virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override; // Execute command from script
+    virtual void Copy(CComponent *target) override;
 
     /************************************************************************
     * CItem related section.

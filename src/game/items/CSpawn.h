@@ -166,16 +166,16 @@ public:
     */
     uint WriteName(tchar * pszOut) const;
 
-    CItem *GetLink();
+    virtual CItem *GetLink() override;
     CSpawn(const CObjBase *pLink);
-    ~CSpawn();
-    void Delete(bool fForce = false);
-    bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc);
-    bool r_LoadVal(CScript & s);
-    void r_Write(CScript & s);
-    bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef);
-    bool r_Verb(CScript & s, CTextConsole * pSrc);
-    void Copy(CComponent *target);
+    virtual ~CSpawn();
+    virtual void Delete(bool fForce = false) override;
+    virtual bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc) override;
+    virtual bool r_LoadVal(CScript & s) override;
+    virtual void r_Write(CScript & s) override;
+    virtual bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef) override;
+    virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override;
+    virtual void Copy(CComponent *target) override;
 };
 
 #endif // _INC_CSPAWN_H

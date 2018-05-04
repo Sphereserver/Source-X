@@ -200,7 +200,7 @@ bool CFaction::r_WriteVal(lpctstr pszKey, CSString & s, CTextConsole * pSrc)
         }
         case CHF_SLAYERGROUP:
         case CHF_FACTIONGROUP:
-    {
+        {
             s.FormatHex(GetGroupID());
             return true;
         }
@@ -214,7 +214,7 @@ void CFaction::r_Write(CScript & s)
 {
     ADDTOCALLSTACK("CFaction::r_Write");
     if (GetFactionID() != FACTION_NONE){
-        s.WriteKeyVal("FACTION", (int)GetFactionID()); // Same value stored with different names for CChars and CItems.
+        s.WriteKeyVal("FACTION", (llong)GetFactionID()); // Same value stored with different names for CChars and CItems.
     }
 }
 

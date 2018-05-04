@@ -48,11 +48,11 @@ struct CSTypedArrayHelper<TYPE*>
     {
         return false;
     }
-    //static constexpr inline void destructorExplicitCall(TYPE& p)
-    //{
-    //    if (p != NULL)
-    //        p->~TYPE();
-    //}
+    static constexpr inline void destructorExplicitCall(TYPE& p)
+    {
+        if (p != NULL)
+            p->~TYPE();
+    }
 };
 
 /**

@@ -26,9 +26,9 @@ void CEntity::Delete(bool fForce)
         CComponent *pComponent = it->second;
         if (pComponent)
         {
-            Unsuscribe(pComponent);
             pComponent->Delete(fForce);
         }
+        Unsuscribe(it, false);
     }
     _List.clear();
 }
@@ -43,7 +43,6 @@ void CEntity::ClearComponents()
         if (pComponent)
         {
             delete _List[pComponent->GetType()];
-            _List[pComponent->GetType()] = nullptr;
         }
     }
     _List.clear();
@@ -51,33 +50,44 @@ void CEntity::ClearComponents()
 
 void CEntity::Suscribe(CComponent * pComponent)
 {
-    if (_List[pComponent->GetType()])
+    COMP_TYPE compType = pComponent->GetType();
+    if (_List.count(compType))
     {
         g_Log.EventError("Trying to duplicate component (%d) for %s '0x%08x'\n", (int)pComponent->GetType(), pComponent->GetLink()->GetName(), pComponent->GetLink()->GetUID());
         delete pComponent;
         return;
     }
-    _List[pComponent->GetType()] = pComponent;
+    _List[compType] = pComponent;
+}
+
+void CEntity::Unsuscribe(std::map<COMP_TYPE, CComponent*>::iterator& it, bool fEraseFromMap)
+{
+    delete it->second;
+    if (fEraseFromMap)
+    {
+        it = _List.erase(it);
+    }
 }
 
 void CEntity::Unsuscribe(CComponent *pComponent)
 {
-    if (!_List.size())
+    if (_List.empty())
     {
         return;
     }
-    if (!_List[pComponent->GetType()])
+    COMP_TYPE compType = pComponent->GetType();
+    if (!_List.count(compType))
     {
         g_Log.EventError("Trying to unsuscribe not suscribed component (%d)\n", (int)pComponent->GetType());    // Should never happen?
         delete pComponent;
         return;
     }
-    _List[pComponent->GetType()];
+    _List.erase(compType);  // iterator invalidation!
 }
 
-bool CEntity::IsSuscribed(CComponent *pComponent)
+bool CEntity::IsSuscribed(CComponent *pComponent) const
 {
-    if (_List.size() && _List[pComponent->GetType()])
+    if (!_List.empty() && _List.count(pComponent->GetType()))
     {
         return true;
     }
@@ -86,7 +96,7 @@ bool CEntity::IsSuscribed(CComponent *pComponent)
 
 CComponent * CEntity::GetComponent(COMP_TYPE type)
 {
-    if (_List.size() && _List[type])
+    if (!_List.empty() && _List.count(type))
     {
         return _List[type];
     }
@@ -95,7 +105,7 @@ CComponent * CEntity::GetComponent(COMP_TYPE type)
 
 bool CEntity::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
 {
-    if (!_List.size())
+    if (_List.empty())
         return false;
     for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
     {
@@ -113,7 +123,7 @@ bool CEntity::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
 
 void CEntity::r_Write(CScript & s) ///< Storing data in the worldsave.
 {
-    if (!_List.size() && !s.IsWriteMode())
+    if (_List.empty() && !s.IsWriteMode())
         return;
     for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
     {
@@ -127,7 +137,7 @@ void CEntity::r_Write(CScript & s) ///< Storing data in the worldsave.
 
 bool CEntity::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
 {
-    if (!_List.size())
+    if (_List.empty())
         return false;
     for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
     {
@@ -145,7 +155,7 @@ bool CEntity::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
 
 bool CEntity::r_LoadVal(CScript & s)
 {
-    if (!_List.size())
+    if (_List.empty())
         return false;
     for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
     {
@@ -163,7 +173,7 @@ bool CEntity::r_LoadVal(CScript & s)
 
 bool CEntity::r_Verb(CScript & s, CTextConsole * pSrc) ///< Execute command from script.
 {
-    if (!_List.size())
+    if (_List.empty())
         return false;
     for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
     {
@@ -181,7 +191,7 @@ bool CEntity::r_Verb(CScript & s, CTextConsole * pSrc) ///< Execute command from
 
 void CEntity::Copy(CEntity *target)
 {
-    if (!_List.size())
+    if (_List.empty())
         return;
     for (std::map<COMP_TYPE, CComponent*>::iterator it = target->_List.begin(); it != target->_List.end(); ++it)
     {
