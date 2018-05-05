@@ -1228,7 +1228,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
             int64 piVal[2];
             Str_ParseCmds(s.GetArgRaw(), piVal, CountOf(piVal));
 
-            CObjBase *pObj = static_cast<CUID>(piVal[0]).ObjFind();
+            CObjBase *pObj = static_cast<CUID>((dword)piVal[0]).ObjFind();
             if (pObj)
             {
                 addMapWaypoint(pObj, (MAPWAYPOINT_TYPE)((dword)piVal[1]));

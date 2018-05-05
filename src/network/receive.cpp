@@ -4507,7 +4507,7 @@ bool PacketUltimaStoreButton::onReceive(NetState *net)
 {
     ADDTOCALLSTACK("PacketUltimaStoreButton::onReceive");
 
-    CClient *client = net->m_client;
+    CClient *client = net->getClient();
     ASSERT(client);
     CChar *character = client->GetChar();
     if (!character)
