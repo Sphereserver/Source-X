@@ -4,7 +4,7 @@
 
 // CSObjListRec:: Capacity.
 
-inline void CSObjListRec::RemoveSelf()
+void CSObjListRec::RemoveSelf()
 {
     if (GetParent())
         m_pParent->OnRemoveObj(this);	// call any approriate virtuals.

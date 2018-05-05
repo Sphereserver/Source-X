@@ -30,6 +30,7 @@ protected:
     CComponent(COMP_TYPE type, const CObjBase *pLink);
 
 public:
+    virtual ~CComponent() {}
     COMP_TYPE GetType();
     virtual const CObjBase *GetLink();
 

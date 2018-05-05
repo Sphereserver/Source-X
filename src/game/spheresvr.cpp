@@ -4,9 +4,9 @@
 	#include "../sphere/UnixTerminal.h"
 #endif
 
-#if !defined(pid_t)
-	#define pid_t int
-#endif
+//#if !defined(pid_t)
+//	#define pid_t int
+//#endif
 
 #ifdef _WIN32
 	#include "../sphere/ntservice.h"	// g_Service

@@ -12,8 +12,13 @@
 
 #include <type_traits>
 template<class TYPE>
-struct CSTypedArrayHelper
+class CSTypedArrayHelper
 {
+    static constexpr inline TYPE* refToPtr(TYPE& p)
+    {
+        return &p;
+    }
+public:
     static const bool _kIsTypePointer = false;
 #if defined(__GNUC__) && (__cpp_if_constexpr < 201606)  // std::is_class_v<T> is a C++17 feature and not available in GCC versions prior to 7.
     static inline bool typeNeedsDelete()
@@ -34,21 +39,22 @@ struct CSTypedArrayHelper
 #endif
     static constexpr inline void destructorExplicitCall(TYPE& p)
     {
-        // Is p a reference to a valid class instance in the data buffer,
-        //  or is it pointing to a zero-initialized memory in which isn't stored a valid class instance yet?
-        if (&p != NULL)
-            p.~TYPE();
+        TYPE* ptr = refToPtr(p);
+        // Is it pointing to a zero-initialized memory in which isn't stored a valid class instance yet?
+        if (ptr != NULL)
+            ptr->~TYPE();
     }
 };
 template<class TYPE>
-struct CSTypedArrayHelper<TYPE*>
+class CSTypedArrayHelper<TYPE*>
 {
+public:
     static const bool _kIsTypePointer = true;
     static constexpr inline bool typeNeedsDelete()
     {
         return false;
     }
-    static constexpr inline void destructorExplicitCall(TYPE& p)
+    static constexpr inline void destructorExplicitCall(TYPE* p)
     {
         if (p != NULL)
             p->~TYPE();
@@ -313,7 +319,7 @@ void CSTypedArray<TYPE,ARG_TYPE>::Copy(const CSTypedArray<TYPE, ARG_TYPE> * pArr
     Clear();
     if (!pArray->GetCount())
         return;
-    
+
     SetCount(pArray->GetCount());
     memcpy(GetBasePtr(), pArray->GetBasePtr(), GetCount() * sizeof(TYPE));
 }

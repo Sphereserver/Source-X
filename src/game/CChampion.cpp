@@ -1,5 +1,3 @@
-
-#define CANDLESNEXTRED 4
 /*
 * @file Champion.cpp
 *
@@ -21,6 +19,8 @@
 #include "../common/CException.h"
 
 
+#define CANDLESNEXTRED 4
+
 CChampion::CChampion(CItem *pLink) : CComponent(COMP_CHAMPION, pLink)
 {
     ADDTOCALLSTACK("CChampion::CChampion");
@@ -35,7 +35,7 @@ CChampion::~CChampion()
 bool CChampion::OnTick()
 {
     ADDTOCALLSTACK("CChampion::OnTick");
-    if (_pRedCandles.size() > 0)
+    if (!_pRedCandles.empty())
         DelRedCandle();
     else
         Stop();
@@ -119,7 +119,7 @@ void CChampion::SpawnNPC()
 
     if (_iLevel == _iLevelMax)	// Already summoned the Champion, stop
         return;
-    
+
     CREID_TYPE pNpc = CREID_INVALID;
     if (_pRedCandles.size() == _iLevelMax && _iSpawnsNextWhite == 0) // Reached 16th red candle and spawned all the normal npcs, so next one should be the champion
     {
@@ -598,7 +598,7 @@ void CChampion::r_Write(CScript & s)
     s.WriteKeyVal("SPAWNSCUR", _iSpawnsCur);
     s.WriteKeyVal("LEVEL", _iLevel);
     s.WriteKeyVal("LASTACTIVATIONTIME", _iLastActivationTime);
-    
+
     for (std::vector<CUID>::iterator it = _pRedCandles.begin(); it != _pRedCandles.end()  ; ++it)
     {
         CItem * pCandle = static_cast<CUID&>(*it).ItemFind();
@@ -646,18 +646,19 @@ bool CChampion::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
         case ICHMPL_NPCGROUP:
         {
             pszKey += 8;
-            uchar iGroup = (uchar)Exp_GetSingle(pszKey);
-            if (_idSpawn[iGroup].empty() || iGroup > UCHAR_MAX)
+            uchar uiGroup = (uchar)Exp_GetSingle(pszKey);
+            if (_idSpawn[uiGroup].empty() || uiGroup > UCHAR_MAX)
             {
                 return false;
             }
             ++pszKey;
-            uchar iNpc = (uchar)Exp_GetSingle(pszKey);
-            if (iNpc && iNpc < 0 || iNpc >= _idSpawn[iGroup].size())
+            uchar uiNpc = (uchar)Exp_GetSingle(pszKey);
+            size_t uiGroupSize = _idSpawn[uiGroup].size();
+            if (uiNpc && (uiNpc >= uiGroupSize))
                 return false;
-            if (_idSpawn[iGroup].size() >= iNpc)
+            if (uiGroupSize >= uiNpc)
             {
-                sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, _idSpawn[iGroup][iNpc]));
+                sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, _idSpawn[uiGroup][uiNpc]));
                 return true;
             }
             return false;
@@ -883,22 +884,22 @@ bool CChampionDef::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pS
             return true;
         case CHAMPIONDEF_NPCGROUP:
         {
-            pszKey += 8;
-            int8 iGroup = (int8)Exp_GetSingle(pszKey);
-            if (_idSpawn.size())
+            if (_idSpawn.empty())
             {
                 return false;
             }
+            pszKey += 8;
+            uchar uiGroup = (uchar)Exp_GetSingle(pszKey);
             ++pszKey;
-            int8 iNPC = (int8)Exp_GetSingle(pszKey);
-            if (iNPC && iNPC < 0 || iNPC >= _idSpawn.size())
+            uchar uiNPC = (uchar)Exp_GetSingle(pszKey);
+            if (uiNPC && (uiGroup >= _idSpawn.size()))
                 return false;
-            if (_idSpawn[iGroup].size() >= iNPC)
+            if (_idSpawn[uiGroup].size() >= uiNPC)
             {
-                CREID_TYPE idNPC = (CREID_TYPE)iNPC;
+                CREID_TYPE idNPC = (CREID_TYPE)uiNPC;
                 if (idNPC != CREID_INVALID)
                 {
-                    sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, _idSpawn[iGroup][idNPC]));
+                    sVal = g_Cfg.ResourceGetName(CResourceID(RES_CHARDEF, _idSpawn[uiGroup][idNPC]));
                     return true;
                 }
             }
@@ -937,12 +938,10 @@ bool CChampionDef::r_LoadVal(CScript & s)
         {
             pszKey += 8;
             uchar iGroup = (uchar)Exp_GetVal(pszKey);
-            if (iGroup < 0)
-                return false;
             tchar * piCmd[4];
             size_t iArgQty = Str_ParseCmds(s.GetArgRaw(), piCmd, (int)CountOf(piCmd), ",");
             _idSpawn[iGroup].clear();
-            for (uchar i = 0; i < iArgQty; i++)
+            for (uchar i = 0; i < iArgQty; ++i)
             {
                 CREID_TYPE pCharDef = static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType(RES_CHARDEF, piCmd[i]));
                 if (pCharDef)

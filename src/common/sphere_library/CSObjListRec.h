@@ -31,10 +31,7 @@ public:
         m_pParent = NULL;
         m_pNext = m_pPrev = NULL;
     }
-    virtual inline ~CSObjListRec()
-    {
-        RemoveSelf();
-    }
+    virtual inline ~CSObjListRec();
 private:
     /**
     * @brief No copies allowed.
@@ -71,7 +68,7 @@ public:
     /**
     * @brief Removes from the parent CSObjList.
     */
-    inline void RemoveSelf();
+    void RemoveSelf();
     ///@}
 
 private:
@@ -82,6 +79,11 @@ private:
 
 
 /* Inline Methods Definitions */
+
+inline CSObjListRec::~CSObjListRec()
+{
+    RemoveSelf();
+}
 
 // CSObjListRec:: Capacity.
 
