@@ -102,17 +102,15 @@ CResourceDef *CSpawn::FixDef()
 	ADDTOCALLSTACK("CSpawn:FixDef");
 
     const CItem *pItem = GetLink();
-    if (_idSpawn.GetResType() != RES_UNKNOWN)
-    {
-        return g_Cfg.ResourceGetDef(_idSpawn);
-    }
 
 	// No type info here !?
 	if (pItem->IsType(IT_SPAWN_CHAR) )
 	{
 		CREID_TYPE id = static_cast<CREID_TYPE>(_idSpawn.GetResIndex());
-		if ( id < SPAWNTYPE_START )
-			return TryChar(id);
+        if (id < SPAWNTYPE_START)
+        {
+            return TryChar(id);
+        }
 
 		// try a spawn group.
 		CResourceIDBase rid = CResourceID(RES_SPAWN, id);
@@ -393,7 +391,7 @@ void CSpawn::OnTick(bool fExec)
     CResourceDef *pDef = FixDef();
     if (!pDef)
     {
-        //g_Log.EventError("Bad Spawn point uid=0%08x. Invalid id=%s %s\n", GetLink() ? (dword)GetLink()->GetUID() : 0, g_Cfg.ResourceGetName(_idSpawn), !GetLink() ? "PREMIO" : "");
+        g_Log.EventError("Bad Spawn point uid=0%08x. Invalid id=%s %s\n", (dword)GetLink()->GetUID(), g_Cfg.ResourceGetName(_idSpawn));
         return;
     }
 
