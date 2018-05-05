@@ -642,3 +642,6 @@ Added: New function MAPWAYPOINT to add/remove waypoints on client radar map (enh
 		12 = Moongate
 		14 = Green Dot
 		15 = Green Dot (flashing)
+
+[Port from Source, 02-04-2018, Coruja]
+Added: New char trigger @UserUltimaStoreButton, fired when click on 'Ultima Store' button on new clients 7.0.62+

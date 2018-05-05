@@ -1233,6 +1233,7 @@ enum CTRIG_TYPE
 	CTRIG_UserSkills,       // (Client iteraction) Opened Skills' dialog.
 	CTRIG_UserSpecialMove,  // (Client iteraction) Performing an special action from books.
 	CTRIG_UserStats,        // (Client iteraction) Opening Stats' dialog.
+    CTRIG_UserUltimaStoreButton,    // (Client iteraction) Using Ultima Store button.
 	CTRIG_UserVirtue,       // (Client iteraction) Opening Virtue gump.
 	CTRIG_UserVirtueInvoke, // (Client iteraction) Invoquing a Virtue.
 	CTRIG_UserWarmode,      // (Client iteraction) Switching between War/Peace.

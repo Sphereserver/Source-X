@@ -4412,17 +4412,17 @@ bool PacketCrashReport::onReceive(NetState* net)
 /***************************************************************************
  *
  *
- *	Packet 0xF8 : PacketCreate70016					create new character request (only by CC 7.0.16+)
+ *	Packet 0xF8 : PacketCreateHS					create new character request (only by CC 7.0.16+)
  *
  *
  ***************************************************************************/
-PacketCreate70016::PacketCreate70016() : PacketCreate(106)
+PacketCreateHS::PacketCreateHS() : PacketCreate(106)
 {
 }
 
-bool PacketCreate70016::onReceive(NetState* net)
+bool PacketCreateHS::onReceive(NetState* net)
 {
-	ADDTOCALLSTACK("PacketCreate70016::onReceive");
+	ADDTOCALLSTACK("PacketCreateHS::onReceive");
 	// standard character creation packet, but with 4 skills and different handling of race and sex.
 	
 	tchar charname[MAX_NAME_SIZE];
@@ -4492,3 +4492,28 @@ bool PacketCreate70016::onReceive(NetState* net)
 		hue, hairid, hairhue, beardid, beardhue, shirthue, pantshue, ITEMID_NOTHING, startloc, flags);
 }
 
+/***************************************************************************
+*
+*
+*	Packet 0xFA : PacketUltimaStoreButton			ultima store button pressed (SA)
+*
+*
+***************************************************************************/
+PacketUltimaStoreButton::PacketUltimaStoreButton() : Packet(1)
+{
+}
+
+bool PacketUltimaStoreButton::onReceive(NetState *net)
+{
+    ADDTOCALLSTACK("PacketUltimaStoreButton::onReceive");
+
+    CClient *client = net->m_client;
+    ASSERT(client);
+    CChar *character = client->GetChar();
+    if (!character)
+        return false;
+
+    if (IsTrigUsed(TRIGGER_USERULTIMASTOREBUTTON))
+        character->OnTrigger(CTRIG_UserUltimaStoreButton, character, NULL);
+    return true;
+}

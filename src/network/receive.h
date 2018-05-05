@@ -1461,16 +1461,30 @@ public:
 /***************************************************************************
  *
  *
- *	Packet 0xF8 : PacketCreate70016					create new character request (only by CC 7.0.16+)
+ *	Packet 0xF8 : PacketCreateHS					create new character request (only by CC 7.0.16+)
  *
  *
  ***************************************************************************/
-class PacketCreate70016 : public PacketCreate
+class PacketCreateHS : public PacketCreate
 {
 public:
-	PacketCreate70016();
+	PacketCreateHS();
 	virtual bool onReceive(NetState* net);
 };
 
+
+/***************************************************************************
+*
+*
+*	Packet 0xFA : PacketUltimaStoreButton			ultima store button pressed
+*
+*
+***************************************************************************/
+class PacketUltimaStoreButton : public Packet
+{
+public:
+    PacketUltimaStoreButton();
+    virtual bool onReceive(NetState* net);
+};
 
 #endif // _INC_RECEIVE_H
