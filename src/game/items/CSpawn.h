@@ -20,6 +20,7 @@ private:
     static lpctstr const sm_szVerbKeys[];
     static lpctstr const sm_szRefKeys[];
     std::vector<CUID> _uidList; // Storing UIDs of the created items/chars.
+    bool _fKillingChildren;     // For internal usage, set to true when KillChildren() is in proccess to prevent DelObj() being called from CObjBase when deleteing the objs.
 
     uint16 _iAmount;            // Maximum of objects to spawn.
     CResourceIDBase _idSpawn;   // ID of the Object to Spawn.

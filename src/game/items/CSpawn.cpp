@@ -61,14 +61,6 @@ uint8 CSpawn::GetMaxDist()
 {
     return _iMaxDist;
 }
-/*
-CItem * CSpawn::GetSpawnItem()
-{
-    ADDTOCALLSTACK("CSpawn::SetAmount");
-    const CItem *pLink = static_cast<const CItem*>(GetLink());
-    CItem *pItem = const_cast<CItem*>(pLink);
-    return pItem;
-}*/
 
 CResourceIDBase CSpawn::GetSpawnID()
 {
@@ -90,7 +82,7 @@ CCharBase *CSpawn::TryChar(CREID_TYPE &id)
         _idSpawn = CResourceID(RES_CHARDEF, id);
 		return pCharDef;
 	}
-	return NULL;
+	return nullptr;
 }
 
 CItemBase *CSpawn::TryItem(ITEMID_TYPE &id)
@@ -102,7 +94,7 @@ CItemBase *CSpawn::TryItem(ITEMID_TYPE &id)
         _idSpawn = CResourceID(RES_ITEMDEF, id);
 		return pItemDef;
 	}
-	return NULL;
+	return nullptr;
 }
 
 CResourceDef *CSpawn::FixDef()
@@ -155,9 +147,9 @@ uint CSpawn::WriteName(tchar *pszOut) const
 	ADDTOCALLSTACK("CSpawn::GetName");
 	lpctstr pszName = NULL;
 	CResourceDef *pDef = g_Cfg.ResourceGetDef(_idSpawn);
-	if ( pDef != NULL )
+	if ( pDef != nullptr)
 		pszName = pDef->GetName();
-	if ( pDef == NULL || pszName == NULL || pszName[0] == '\0' )
+	if ( pDef == nullptr || pszName == NULL || pszName[0] == '\0' )
 		pszName = g_Cfg.ResourceGetName(_idSpawn);
 
 	return sprintf(pszOut, " (%s)", pszName);
@@ -190,7 +182,7 @@ void CSpawn::GenerateItem(CResourceDef *pDef)
 		return;
 
 	CItem *pItem = pSpawnItem->CreateTemplate(id);
-	if ( pItem->CreateTemplate(id) == NULL )
+	if ( pItem->CreateTemplate(id) == nullptr)
 		return;
 
     uint16 iAmountPile = (uint16)(minimum(UINT16_MAX,_iPile));
@@ -267,8 +259,15 @@ void CSpawn::GenerateChar(CResourceDef *pDef)
 void CSpawn::DelObj(CUID uid)
 {
 	ADDTOCALLSTACK("CSpawn::DelObj");
-	if ( !uid.IsValidUID() )
-		return;
+    if (_fKillingChildren)
+    {
+        return; // Speeding up the KillChildren proccess and avoiding not needed code called on 'childrens'.
+    }
+
+    if (!uid.IsValidUID())
+    {
+        return;
+    }
 
     if (_uidList.empty())
     {
@@ -362,17 +361,22 @@ void CSpawn::AddObj(CUID uid)
 void CSpawn::OnTick(bool fExec)
 {
     ADDTOCALLSTACK("CSpawn::OnTick");
-    ASSERT(GetLink());
-
     int64 iMinutes;
 
     if (_iTimeHi <= 0)
+    {
         iMinutes = Calc_GetRandLLVal(30) + 1;
+    }
     else
+    {
         iMinutes = minimum(_iTimeHi, _iTimeLo) + Calc_GetRandVal(abs(_iTimeHi - _iTimeLo));
+    }
 
     if (iMinutes <= 0)
+    {
         iMinutes = 1;
+    }
+
     if (!fExec)
     {
         if (GetLink()->IsTimerExpired())
@@ -389,7 +393,7 @@ void CSpawn::OnTick(bool fExec)
     CResourceDef *pDef = FixDef();
     if (!pDef)
     {
-        g_Log.EventError("Bad Spawn point uid=0%08x. Invalid id=%s %s\n", GetLink() ? (dword)GetLink()->GetUID() : 0, g_Cfg.ResourceGetName(_idSpawn), !GetLink() ? "PREMIO" : "");
+        //g_Log.EventError("Bad Spawn point uid=0%08x. Invalid id=%s %s\n", GetLink() ? (dword)GetLink()->GetUID() : 0, g_Cfg.ResourceGetName(_idSpawn), !GetLink() ? "PREMIO" : "");
         return;
     }
 
@@ -434,16 +438,18 @@ CCharBase *CSpawn::SetTrackID()
 	ADDTOCALLSTACK("CSpawn::SetTrackID");
 
     GetLink()->SetAttr(ATTR_INVIS);	// Indicate to GM's that it is invis.
-	if (GetLink()->GetHue() == 0)
+    if (GetLink()->GetHue() == 0)
+    {
         GetLink()->SetHue(HUE_RED_DARK);
+    }
 
 	if ( !GetLink()->IsType(IT_SPAWN_CHAR) )
 	{
         GetLink()->SetDispID(ITEMID_WorldGem_lg);
-		return NULL;
+		return nullptr;
 	}
 
-	CCharBase *pCharDef = NULL;
+	CCharBase *pCharDef = nullptr;
 	CResourceIDBase rid = _idSpawn;
 
 	if ( rid.GetResType() == RES_CHARDEF )
@@ -575,8 +581,10 @@ bool CSpawn::r_LoadVal(CScript & s)
 	EXC_TRY("LoadVal");
 
 	int iCmd = FindTableSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
-	if ( iCmd < 0 )
-		return false;
+    if (iCmd < 0)
+    {
+        return false;
+    }
 
 	switch ( iCmd )
 	{
@@ -694,8 +702,10 @@ void CSpawn::r_Write(CScript & s)
 	ADDTOCALLSTACK("CSpawn:r_Write");
 	EXC_TRY("Write");
 
-	if ( GetAmount() != 1 )
-		s.WriteKeyVal("AMOUNT", GetAmount());
+    if (GetAmount() != 1)
+    {
+        s.WriteKeyVal("AMOUNT", GetAmount());
+    }
 
     s.WriteKey("SPAWNID", g_Cfg.ResourceGetName(_idSpawn));
     if (GetLink()->GetType() == IT_SPAWN_ITEM)
@@ -706,8 +716,10 @@ void CSpawn::r_Write(CScript & s)
     s.WriteKeyVal("TIMEHI", GetTimeHi());
     s.WriteKeyVal("MAXDIST", GetMaxDist());
 
-	if (GetCurrentSpawned() <= 0 )
-		return;
+    if (GetCurrentSpawned() <= 0)
+    {
+        return;
+    }
 
 	for ( std::vector<CUID>::iterator it = _uidList.begin(); it != _uidList.end(); ++it )
 	{
@@ -808,7 +820,9 @@ bool CSpawn::r_Verb(CScript & s, CTextConsole * pSrc)
     UNREFERENCED_PARAMETER(pSrc);
     int iCmd = FindTableSorted(s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys) - 1);
     if (iCmd < 0)
+    {
         return false;
+    }
     switch (iCmd)
     {
         case ISPV_DELOBJ:

@@ -5664,14 +5664,14 @@ bool CItem::OnTick()
 			}
 			return true;
         case IT_SPAWN_CHAMPION:
-        {
-            EXC_SET("default behaviour::IT_SPAWN"); // TODO: CSpawn is a CComponent and so, it should be moved out of this switch to a loop running this CEntity's CComponents.
-            CSpawn *pSpawn = static_cast<CSpawn*>(GetComponent(COMP_CHAMPION));
-            if (pSpawn)
             {
-                pSpawn->OnTick(true);
+                EXC_SET("default behaviour::IT_SPAWN_CHAMPION");
+                CChampion *pChampion = static_cast<CChampion*>(GetComponent(COMP_CHAMPION));
+                if (pChampion)
+                {
+                    pChampion->OnTick();
+                }
             }
-        }
         return true;
 
 		case IT_CROPS:

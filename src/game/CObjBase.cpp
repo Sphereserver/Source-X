@@ -3153,7 +3153,7 @@ void CObjBase::Delete(bool bforce)
     CEntity *pEntity = static_cast<CEntity*>(this);
     if (GetSpawn())    // If I was created from a Spawn
     {
-        pEntity->Unsuscribe(GetSpawn());    // Avoiding recursive calls from CSpawn::DelObj when forcing the pChar/pItem to Delete();
+        //pEntity->Unsuscribe(GetSpawn());    // Avoiding recursive calls from CSpawn::DelObj when forcing the pChar/pItem to Delete();
         GetSpawn()->DelObj(GetUID());  // Then I should be removed from it's list.
     }
     pEntity->Delete(bforce);
