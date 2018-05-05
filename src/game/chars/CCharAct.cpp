@@ -2954,21 +2954,25 @@ bool CChar::Death()
 				pClient->addPlayerUpdate();
 				pClient->addContainerSetup(GetPack());	// update backpack contents
 			}
-		}
 
-		// Remove the characters which I can't see as dead from the screen
-		if ( g_Cfg.m_fDeadCannotSeeLiving )
-		{
-			CWorldSearch AreaChars(GetTopPoint(), pClient->GetChar()->GetVisualRange());
-			AreaChars.SetSearchSquare(true);
-			for (;;)
-			{
-				CChar *pChar = AreaChars.GetChar();
-				if ( !pChar )
-					break;
-				if ( !CanSeeAsDead(pChar) )
-					pClient->addObjectRemove(pChar);
-			}
+            m_pClient->addSeason(SEASON_Desolate);
+            m_pClient->addMapWaypoint(pCorpse, Corpse);		// add corpse map waypoint on enhanced clients
+
+		    // Remove the characters which I can't see as dead from the screen
+            if (g_Cfg.m_fDeadCannotSeeLiving)
+            {
+                CWorldSearch AreaChars(GetTopPoint(), pClient->GetChar()->GetVisualRange());
+                AreaChars.SetSearchSquare(true);
+                for (;;)
+                {
+                    CChar *pChar = AreaChars.GetChar();
+                    if (!pChar)
+                        break;
+                    if (!CanSeeAsDead(pChar))
+                        pClient->addObjectRemove(pChar);
+                }
+            }
+
 		}
 	}
 	return true;

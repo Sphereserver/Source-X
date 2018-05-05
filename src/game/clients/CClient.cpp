@@ -1223,6 +1223,19 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 			addTarget( CLIMODE_TARG_LINK, g_Cfg.GetDefaultMsg( DEFMSG_SELECT_LINK_ITEM ) );
 			break;
 
+        case CV_MAPWAYPOINT:
+        {
+            int64 piVal[2];
+            Str_ParseCmds(s.GetArgRaw(), piVal, CountOf(piVal));
+
+            CObjBase *pObj = static_cast<CUID>(piVal[0]).ObjFind();
+            if (pObj)
+            {
+                addMapWaypoint(pObj, (MAPWAYPOINT_TYPE)((dword)piVal[1]));
+            }
+            break;
+        }
+
 		case CV_MENU:
 			Menu_Setup( g_Cfg.ResourceGetIDType( RES_MENU, s.GetArgStr()));
 			break;

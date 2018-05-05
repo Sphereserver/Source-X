@@ -76,6 +76,7 @@ public:
 	// bool MessageMember( CUID uidDst, CUID uidSrc, const nchar * pText, int ilenmsg );
 	// Sysmessage sending wrappers
 	void SysMessageAll( lpctstr pText );
+    void UpdateWaypointAll(CChar *pCharSrc, MAPWAYPOINT_TYPE type);
 
 	// Commands
 	bool Disband( CUID uidMaster );

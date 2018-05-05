@@ -112,6 +112,16 @@ void CItem::Delete(bool bforce)
 	if (( NotifyDelete() == false ) && !bforce)
 		return;
 
+    // Remove corpse map waypoint on enhanced clients
+    if (IsType(IT_CORPSE) && m_uidLink)
+    {
+        CChar *pChar = m_uidLink.CharFind();
+        if (pChar && pChar->GetClient())
+        {
+            pChar->GetClient()->addMapWaypoint(this, Remove);
+        }
+    }
+
     static_cast<CEntity*>(this)->Delete();
 	CObjBase::Delete();
 }
@@ -5542,6 +5552,10 @@ bool CItem::OnTick()
 				CChar * pSrc = m_uidLink.CharFind();
 				if ( pSrc && pSrc->m_pPlayer )
 				{
+                    if (pSrc->GetClient())
+                    {
+                        pSrc->GetClient()->addMapWaypoint(this, Remove);	// remove corpse map waypoint on enhanced clients
+                    }
 					SetID((ITEMID_TYPE)(Calc_GetRandVal2(ITEMID_SKELETON_1, ITEMID_SKELETON_9)));
 					SetHue((HUE_TYPE)(HUE_DEFAULT));
 					SetTimeout((llong)(g_Cfg.m_iDecay_CorpsePlayer));

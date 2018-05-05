@@ -480,6 +480,7 @@ public:
 	void addReSync();
 	void addMap();
 	void addMapDiff();
+    void addMapWaypoint(CObjBase *pObj, MAPWAYPOINT_TYPE type);
 	void addChangeServer();
 	void addPlayerUpdate() const;
 

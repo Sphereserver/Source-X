@@ -15,17 +15,18 @@
 //*****************************************************************
 // -CPartyDef
 
-CPartyDef::CPartyDef( CChar *pChar1, CChar *pChar2 )
+CPartyDef::CPartyDef( CChar *pCharInvite, CChar *pCharAccept)
 {
 	// pChar1 = the master.
-	ASSERT(pChar1);
-	ASSERT(pChar2);
-	pChar1->m_pParty = this;
-	pChar2->m_pParty = this;
-	AttachChar(pChar1);
-	AttachChar(pChar2);
+	ASSERT(pCharInvite);
+	ASSERT(pCharAccept);
+    pCharInvite->m_pParty = this;
+    pCharAccept->m_pParty = this;
+	AttachChar(pCharInvite);
+	AttachChar(pCharAccept);
 	SendAddList(NULL);		// send full list to all
-	m_sName.Format("Party_0%x", (dword)pChar1->GetUID());
+	m_sName.Format("Party_0%x", (dword)pCharAccept->GetUID());
+    //UpdateWaypointAll(pCharInvite, PartyMember);
 }
 
 // ---------------------------------------------------------
@@ -36,6 +37,7 @@ size_t CPartyDef::AttachChar( CChar *pChar )
 	//  index of the char in the group. BadIndex = not in group.
 	size_t i = m_Chars.AttachChar(pChar);
 	pChar->NotoSave_Update();
+    UpdateWaypointAll(pChar, PartyMember);
 	return i;
 }
 
@@ -47,7 +49,8 @@ size_t CPartyDef::DetachChar( CChar *pChar )
 	size_t i = m_Chars.DetachChar(pChar);
 	if ( i != m_Chars.BadIndex() )
 	{
-		pChar->m_pParty = NULL;
+        UpdateWaypointAll(pChar, Remove);
+		pChar->m_pParty = nullptr;
 		pChar->DeleteKey("PARTY_LASTINVITE");
 		pChar->DeleteKey("PARTY_LASTINVITETIME");
 		pChar->NotoSave_Update();
@@ -118,6 +121,24 @@ void CPartyDef::SysMessageAll( lpctstr pText )
 		CChar *pChar = m_Chars.GetChar(i).CharFind();
 		pChar->SysMessage(pText);
 	}
+}
+
+void CPartyDef::UpdateWaypointAll(CChar * pCharSrc, MAPWAYPOINT_TYPE type)
+{
+    ADDTOCALLSTACK("CPartyDef::UpdateWaypointAll");
+    // Send pCharSrc map waypoint location to all party members (enhanced client only)
+    size_t iQty = m_Chars.GetCharCount();
+    if (iQty <= 0)
+        return;
+
+    CChar *pChar = NULL;
+    for (size_t i = 0; i < iQty; i++)
+    {
+        pChar = m_Chars.GetChar(i).CharFind();
+        if (!pChar || !pChar->GetClient() || (pChar == pCharSrc))
+            continue;
+        pChar->GetClient()->addMapWaypoint(pCharSrc, type);
+    }
 }
 
 // ---------------------------------------------------------

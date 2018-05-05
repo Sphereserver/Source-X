@@ -4783,6 +4783,58 @@ PacketKREncryption::PacketKREncryption(const CClient* target) : PacketSend(XCMD_
 	push(target);
 }
 
+/***************************************************************************
+*
+*
+*	Packet 0xE5 : PacketWaypointAdd			Add waypoint on KR/SA radar map
+*
+*
+***************************************************************************/
+PacketWaypointAdd::PacketWaypointAdd(const CClient *target, CObjBase *object, MAPWAYPOINT_TYPE type) : PacketSend(XCMD_WaypointShow, 25, g_Cfg.m_fUsePacketPriorities ? PRI_LOW : PRI_NORMAL)
+{
+    ADDTOCALLSTACK("PacketWaypointAdd::PacketWaypointAdd");
+
+    if (!object)
+        return;
+
+    CPointMap pt = object->GetTopPoint();
+    dword cliloc = (type == Corpse) ? 1028198 : 1062613;	// corpse : "~1_NAME~"
+
+    initLength();
+    writeInt32(object->GetUID());
+
+    writeInt16(pt.m_x);
+    writeInt16(pt.m_y);
+    writeByte(pt.m_z);
+    writeByte(pt.m_map);
+
+    writeInt16((word)type);
+    writeInt16(0);
+
+    writeInt32(cliloc);
+    writeStringUNICODE(object->GetName());
+
+    push(target);
+}
+
+/***************************************************************************
+*
+*
+*	Packet 0xE6 : PacketWaypointRemove		Remove waypoint on KR/SA radar map
+*
+*
+***************************************************************************/
+PacketWaypointRemove::PacketWaypointRemove(const CClient *target, CObjBase *object) : PacketSend(XCMD_WaypointHide, 5, g_Cfg.m_fUsePacketPriorities ? PRI_LOW : PRI_NORMAL)
+{
+    ADDTOCALLSTACK("PacketWaypointRemove::PacketWaypointRemove");
+
+    if (!object)
+        return;
+
+    writeInt32(object->GetUID());
+
+    push(target);
+}
 
 /***************************************************************************
  *

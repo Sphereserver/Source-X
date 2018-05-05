@@ -626,4 +626,19 @@ Simple explanation:
 4) 2 and 3 are repeated while COUNT < AMOUNT, when COUNT reachs or surpases (it may happen with custom behaviours added from scripts) AMOUNT only 3 will be repeated (nothing will be spawned but the timer will be set again).
 
 
+05-05-2018, XuN:
 
+[Port from Source, 20-01-2017, Coruja}
+Added: New function MAPWAYPOINT to add/remove waypoints on client radar map (enhanced clients only).
+	Sintax: MAPWAYPOINT ObjectUID, WaypointType
+	Waypoint types:
+		0 = Remove waypoint
+		1 = Corpse
+		2 = Party Member
+		4 = Quest Giver
+		5 = New Player Quest
+		6 = Healer
+		11 = Shrine
+		12 = Moongate
+		14 = Green Dot
+		15 = Green Dot (flashing)

@@ -1812,6 +1812,44 @@ public:
 };
 
 /***************************************************************************
+*
+*
+*	Packet 0xE5 : PacketWaypointAdd			add waypoint on KR/SA radar map (LOW)
+*
+*
+***************************************************************************/
+class PacketWaypointAdd : public PacketSend
+{
+public:
+    PacketWaypointAdd(const CClient *target, CObjBase *object, MAPWAYPOINT_TYPE type);
+
+    virtual bool canSendTo(const NetState *state) const { return CanSendTo(state); }
+    static bool CanSendTo(const NetState *state)
+    {
+        return state->isClientKR() || state->isClientEnhanced();
+    }
+};
+
+/***************************************************************************
+*
+*
+*	Packet 0xE6 : PacketWaypointRemove		remove waypoint on KR/SA radar map (LOW)
+*
+*
+***************************************************************************/
+class PacketWaypointRemove : public PacketSend
+{
+public:
+    PacketWaypointRemove(const CClient *target, CObjBase *object);
+
+    virtual bool canSendTo(const NetState *state) const { return CanSendTo(state); }
+    static bool CanSendTo(const NetState *state)
+    {
+        return state->isClientKR() || state->isClientEnhanced();
+    }
+};
+
+/***************************************************************************
  *
  *
  *	Packet 0xEA : PacketToggleHotbar		toggle kr hotbar (NORMAL)
