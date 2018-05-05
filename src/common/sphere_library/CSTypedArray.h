@@ -349,6 +349,15 @@ void CSTypedArray<TYPE,ARG_TYPE>::RemoveAt( size_t nIndex )
     if ( !IsValidIndex(nIndex) )
         return;
 
+#if defined(__GNUC__) && (__cpp_if_constexpr < 201606)  // if constexpr is a C++17 feature and not available in GCC versions prior to 7.
+    if (this->typeNeedsDelete())
+#else
+    if constexpr (this->typeNeedsDelete())
+#endif
+    {
+        destructorExplicitCall(m_pData[nIndex]);
+    }
+
     if (nIndex < m_nCount-1)
         memmove(&m_pData[nIndex], &m_pData[nIndex + 1], sizeof(TYPE) * (m_nCount - nIndex - 1));
     SetCount(m_nCount - 1);
@@ -358,6 +367,15 @@ template<class TYPE, class ARG_TYPE>
 void CSTypedArray<TYPE,ARG_TYPE>::SetAt( size_t nIndex, ARG_TYPE newElement )
 {
     ASSERT(IsValidIndex(nIndex));
+
+#if defined(__GNUC__) && (__cpp_if_constexpr < 201606)  // if constexpr is a C++17 feature and not available in GCC versions prior to 7.
+    if (this->typeNeedsDelete())
+#else
+    if constexpr (this->typeNeedsDelete())
+#endif
+    {
+        destructorExplicitCall(m_pData[nIndex]);
+    }
 
 #ifdef __clang__
     #pragma clang diagnostic push
@@ -404,7 +422,7 @@ void CSTypedArray<TYPE, ARG_TYPE>::SetCount( size_t nNewCount )
     #endif
         {
             for (size_t i = nNewCount; i < m_nCount; ++i)
-                this->destructorExplicitCall(m_pData[i]);
+                destructorExplicitCall(m_pData[i]);
         }
         ReallocateMemory(nNewCount);
         //m_nCount = nNewCount; // if someone decides to not reallocate the memory when the size decreases, ensure that you manually update the count! (it's normally done inside ReallocateMemory)
