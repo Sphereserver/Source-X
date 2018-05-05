@@ -10,64 +10,14 @@
 #include <cstdint>
 #include "../assertion.h"
 
-#include <type_traits>
-template<class TYPE>
-class CSTypedArrayHelper
-{
-    static constexpr inline TYPE* refToPtr(TYPE& p)
-    {
-        return &p;
-    }
-public:
-    static const bool _kIsTypePointer = false;
-#if defined(__GNUC__) && (__cpp_if_constexpr < 201606)  // std::is_class_v<T> is a C++17 feature and not available in GCC versions prior to 7.
-    static inline bool typeNeedsDelete()
-    {
-        if (std::is_class<TYPE>::value == false)
-            return false;
-        else
-            return true;
-    }
-#else
-    static constexpr inline bool typeNeedsDelete()
-    {
-        if (std::is_class_v<TYPE> == false)
-            return false;
-        else
-            return true;
-    }
-#endif
-    static constexpr inline void destructorExplicitCall(TYPE& p)
-    {
-        TYPE* ptr = refToPtr(p);
-        // Is it pointing to a zero-initialized memory in which isn't stored a valid class instance yet?
-        if (ptr != NULL)
-            ptr->~TYPE();
-    }
-};
-template<class TYPE>
-class CSTypedArrayHelper<TYPE*>
-{
-public:
-    static const bool _kIsTypePointer = true;
-    static constexpr inline bool typeNeedsDelete()
-    {
-        return false;
-    }
-    static constexpr inline void destructorExplicitCall(TYPE* p)
-    {
-        if (p != NULL)
-            p->~TYPE();
-    }
-};
-
 /**
+* @brief Typed Array (not thread safe).
+*
 * NOTE: This will not call true constructors or destructors !
-* Question: Really needed two types in template? Answer: yes. If we are storing instances instead of pointers,
-*  we can set ARG_TYPE to be a reference of TYPE.
+* TODO: Really needed two types in template?
 */
 template<class TYPE, class ARG_TYPE>
-class CSTypedArray : public CSTypedArrayHelper<TYPE>
+class CSTypedArray
 {
 public:
     static const char *m_sClassName;
@@ -98,6 +48,11 @@ public:
     * @return get the element count in array.
     */
     size_t GetCount() const;
+    /**
+    * @brief Get the total element that fits in allocated mem.
+    * @return get the total element that fits in allocated mem.
+    */
+    size_t GetRealCount() const;
     ///@}
     /** @name Element access:
     */
@@ -154,6 +109,12 @@ public:
     * @return the element count of the array.
     */
     size_t Add( ARG_TYPE newElement );
+    /**
+    * @brief TODOC
+    * @param pElements TODOC
+    * @param nCount TODOC
+    */
+    virtual void ConstructElements(TYPE* pElements, size_t nCount );
     /**
     * @brief Copy an CSTypedArray into this.
     * @param pArray array to copy.
@@ -217,18 +178,7 @@ public:
 private:
     TYPE* m_pData;			// Pointer to allocated mem.
     size_t m_nCount;		// count of elements stored.
-
-    /**
-    * @brief Realloc the internal data into a new size.
-    * @param nNewCount new size of the mem.
-    */
-    void ReallocateMemory( size_t nCount );
-    /**
-    * @brief Zero-initialize elements
-    * @param pElements base data pointer to the position where to start the initialization
-    * @param nCount zero-initialize this much elements starting from the pElements pointer
-    */
-    virtual void ConstructElements(TYPE* pElements, size_t nCount );
+    size_t m_nRealCount;	// Size of allocated mem.
 };
 
 
@@ -242,6 +192,7 @@ CSTypedArray<TYPE,ARG_TYPE>::CSTypedArray()
 {
     m_pData = NULL;
     m_nCount = 0;
+    m_nRealCount = 0;
 }
 
 template<class TYPE, class ARG_TYPE>
@@ -263,6 +214,12 @@ template<class TYPE, class ARG_TYPE>
 inline size_t CSTypedArray<TYPE,ARG_TYPE>::GetCount() const
 {
     return m_nCount;
+}
+
+template<class TYPE, class ARG_TYPE>
+inline size_t CSTypedArray<TYPE,ARG_TYPE>::GetRealCount() const
+{
+    return m_nRealCount;
 }
 
 // CSTypedArray:: Element access.
@@ -311,15 +268,19 @@ inline size_t CSTypedArray<TYPE,ARG_TYPE>::Add( ARG_TYPE newElement )
 }
 
 template<class TYPE, class ARG_TYPE>
+inline void CSTypedArray<TYPE,ARG_TYPE>::ConstructElements(TYPE* pElements, size_t nCount )
+{
+    // first do bit-wise zero initialization
+    memset(static_cast<void *>(pElements), 0, nCount * sizeof(TYPE));
+}
+
+template<class TYPE, class ARG_TYPE>
 void CSTypedArray<TYPE,ARG_TYPE>::Copy(const CSTypedArray<TYPE, ARG_TYPE> * pArray)
 {
-    if ( !pArray || (pArray == this) )
+    if ( !pArray || pArray == this )	// it was !=
         return;
 
     Clear();
-    if (!pArray->GetCount())
-        return;
-
     SetCount(pArray->GetCount());
     memcpy(GetBasePtr(), pArray->GetBasePtr(), GetCount() * sizeof(TYPE));
 }
@@ -328,11 +289,11 @@ template<class TYPE, class ARG_TYPE>
 void CSTypedArray<TYPE,ARG_TYPE>::InsertAt( size_t nIndex, ARG_TYPE newElement )
 {	// Bump the existing entry here forward.
     ASSERT(nIndex != this->BadIndex());
-    size_t nOldCount = m_nCount;
+
     SetCount( (nIndex >= m_nCount) ? (nIndex + 1) : (m_nCount + 1) );
-    if (nIndex < nOldCount)
+    if (nIndex != m_nCount-1)
         memmove(&m_pData[nIndex + 1], &m_pData[nIndex], sizeof(TYPE) * (m_nCount - nIndex - 1));
-	memcpy(&m_pData[nIndex], &newElement, sizeof(TYPE));
+    m_pData[nIndex] = newElement;
 }
 
 template<class TYPE, class ARG_TYPE>
@@ -340,7 +301,7 @@ inline void CSTypedArray<TYPE,ARG_TYPE>::Clear()
 {
     delete[] reinterpret_cast<uint8_t *>(m_pData);
     m_pData = NULL;
-    m_nCount = 0;
+    m_nCount = m_nRealCount = 0;
 }
 
 template<class TYPE, class ARG_TYPE>
@@ -348,15 +309,6 @@ void CSTypedArray<TYPE,ARG_TYPE>::RemoveAt( size_t nIndex )
 {
     if ( !IsValidIndex(nIndex) )
         return;
-
-#if defined(__GNUC__) && (__cpp_if_constexpr < 201606)  // if constexpr is a C++17 feature and not available in GCC versions prior to 7.
-    if (this->typeNeedsDelete())
-#else
-    if constexpr (this->typeNeedsDelete())
-#endif
-    {
-        destructorExplicitCall(m_pData[nIndex]);
-    }
 
     if (nIndex < m_nCount-1)
         memmove(&m_pData[nIndex], &m_pData[nIndex + 1], sizeof(TYPE) * (m_nCount - nIndex - 1));
@@ -368,23 +320,7 @@ void CSTypedArray<TYPE,ARG_TYPE>::SetAt( size_t nIndex, ARG_TYPE newElement )
 {
     ASSERT(IsValidIndex(nIndex));
 
-#if defined(__GNUC__) && (__cpp_if_constexpr < 201606)  // if constexpr is a C++17 feature and not available in GCC versions prior to 7.
-    if (this->typeNeedsDelete())
-#else
-    if constexpr (this->typeNeedsDelete())
-#endif
-    {
-        destructorExplicitCall(m_pData[nIndex]);
-    }
-
-#ifdef __clang__
-    #pragma clang diagnostic push
-    #pragma clang diagnostic ignored "-Wdynamic-class-memaccess"
-#endif
-    memcpy(&m_pData[nIndex], &newElement, sizeof(TYPE));
-#ifdef __clang__
-    #pragma clang diagnostic pop
-#endif
+    m_pData[nIndex] = newElement;
 }
 
 template<class TYPE, class ARG_TYPE>
@@ -411,58 +347,29 @@ void CSTypedArray<TYPE, ARG_TYPE>::SetCount( size_t nNewCount )
 
     if ( nNewCount > m_nCount )
     {
-        ReallocateMemory(nNewCount);
-    }
-    else if ( nNewCount < m_nCount )
-    {
-    #if defined(__GNUC__) && (__cpp_if_constexpr < 201606)  // if constexpr is a C++17 feature and not available in GCC versions prior to 7.
-        if (this->typeNeedsDelete())
-    #else
-        if constexpr (this->typeNeedsDelete())
-    #endif
+#if __GNUC__ >= 7
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Walloc-size-larger-than="
+#endif
+        uint8_t* pNewData = new uint8_t[nNewCount * sizeof(TYPE)];
+        if ( m_nCount )
         {
-            for (size_t i = nNewCount; i < m_nCount; ++i)
-                destructorExplicitCall(m_pData[i]);
+            // copy the old stuff to the new array.
+            memcpy( pNewData, reinterpret_cast<uint8_t*>(m_pData), sizeof(TYPE)*m_nCount );
+            delete[] reinterpret_cast<uint8_t *>(m_pData);	// don't call any destructors.
         }
-        ReallocateMemory(nNewCount);
-        //m_nCount = nNewCount; // if someone decides to not reallocate the memory when the size decreases, ensure that you manually update the count! (it's normally done inside ReallocateMemory)
-    }
-}
-
-template<class TYPE, class ARG_TYPE>
-void CSTypedArray<TYPE, ARG_TYPE>::ReallocateMemory( size_t nCount )
-{
 #if __GNUC__ >= 7
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Walloc-size-larger-than="
-#endif
-    bool fShrinkMemory = (nCount < m_nCount);
-    uint8_t* pNewData = new uint8_t[nCount * sizeof(TYPE)];
-    if ( m_nCount )
-    {
-        // copy the old stuff to the new array.
-        memcpy( pNewData, reinterpret_cast<uint8_t*>(m_pData), sizeof(TYPE)*(fShrinkMemory ? nCount : m_nCount ) );
-        delete[] reinterpret_cast<uint8_t *>(m_pData);	// don't call any destructors.
-    }
-#if __GNUC__ >= 7
-    #pragma GCC diagnostic pop
+#pragma GCC diagnostic pop
 #endif
 
-    if (!fShrinkMemory)
-    {
-        size_t nElementsToConstruct = (nCount - m_nCount);
-        if (nElementsToConstruct > 0)
-            ConstructElements( reinterpret_cast<TYPE*>(pNewData + sizeof(TYPE)*m_nCount), nElementsToConstruct );
-    }
-    m_pData = reinterpret_cast<TYPE*>(pNewData);
-    m_nCount = nCount;
-}
+        // Just construct or init the new stuff.
+        ConstructElements( reinterpret_cast<TYPE*>(pNewData + sizeof(TYPE)*m_nCount), nNewCount - m_nCount );
+        m_pData = reinterpret_cast<TYPE*>(pNewData);
 
-template<class TYPE, class ARG_TYPE>
-inline void CSTypedArray<TYPE,ARG_TYPE>::ConstructElements(TYPE* pElements, size_t nCount )
-{
-    // first do bit-wise zero initialization
-    memset(static_cast<void *>(pElements), 0, nCount * sizeof(TYPE));
+        m_nRealCount = nNewCount;
+    }
+
+    m_nCount = nNewCount;
 }
 
 // CSTypedArray:: Operations.
@@ -470,7 +377,7 @@ inline void CSTypedArray<TYPE,ARG_TYPE>::ConstructElements(TYPE* pElements, size
 template<class TYPE, class ARG_TYPE>
 inline size_t CSTypedArray<TYPE, ARG_TYPE>::BadIndex() const
 {
-    return UINTPTR_MAX;
+    return INTPTR_MAX;
 }
 
 template<class TYPE, class ARG_TYPE>
@@ -478,6 +385,7 @@ inline TYPE * CSTypedArray<TYPE,ARG_TYPE>::GetBasePtr() const
 {
     return m_pData;
 }
+
 
 template<class TYPE, class ARG_TYPE>
 inline bool CSTypedArray<TYPE,ARG_TYPE>::IsValidIndex( size_t i ) const
