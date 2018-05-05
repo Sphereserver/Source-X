@@ -2078,7 +2078,6 @@ void CItem::r_Write( CScript & s )
 	s.WriteSection("WORLDITEM %s", GetResourceName());
 
 	CObjBase::r_Write(s);
-    static_cast<CEntity*>(this)->r_Write(s);
 
 	if ( GetDispID() != GetID() )	// the item is flipped.
 		s.WriteKey("DISPID", g_Cfg.ResourceGetName(CResourceID(RES_ITEMDEF, GetDispID())));
@@ -2127,6 +2126,7 @@ void CItem::r_Write( CScript & s )
 	}
 	else
 		s.WriteKey("P", GetTopPoint().WriteUsed());
+    static_cast<CEntity*>(this)->r_Write(s);
 }
 
 bool CItem::LoadSetContainer( CUID uid, LAYER_TYPE layer )

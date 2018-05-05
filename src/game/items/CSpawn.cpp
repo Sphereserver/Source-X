@@ -706,7 +706,7 @@ void CSpawn::r_Write(CScript & s)
     }
 
     s.WriteKey("SPAWNID", g_Cfg.ResourceGetName(_idSpawn));
-    if (GetLink()->GetType() == IT_SPAWN_ITEM)
+    if ( GetPile() != 1 && GetLink()->GetType() == IT_SPAWN_ITEM)
     {
         s.WriteKeyVal("PILE", GetPile());
     }
