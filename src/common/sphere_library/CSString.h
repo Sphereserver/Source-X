@@ -296,16 +296,16 @@ public:
 	*/
 	inline void FormatCVal(char iVal)
 	{
-		Format("%" PRId8, iVal);
+		Format("%hhd", iVal);
 	}
 	/**
 	* @brief Print a unsigned char value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	inline void FormatUCVal(uchar iVal)
+	inline void FormatUCVal(uchar uiVal)
 	{
-		Format("%" PRIu8, iVal);
+		Format("%hhu", uiVal);
 	}
 	/**
 	* @brief Print a short value into the string.
@@ -314,16 +314,16 @@ public:
 	*/
 	inline void FormatSVal(short iVal)
 	{
-		Format("%" PRId16, iVal);
+		Format("%hd", iVal);
 	}
 	/**
 	* @brief Print a unsigned short value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	inline void FormatUSVal(ushort iVal)
+	inline void FormatUSVal(ushort uiVal)
 	{
-		Format("%" PRIu16, iVal);
+		Format("%hu", uiVal);
 	}
 	/**
 	* @brief Print a long value into the string.
@@ -332,16 +332,16 @@ public:
 	*/
 	inline void FormatVal(int iVal)
 	{
-		Format("%" PRId32, iVal);
+		Format("%d", iVal);
 	}
 	/**
 	* @brief Print a unsigned int value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	inline void FormatUVal(uint iVal)
+	inline void FormatUVal(uint uiVal)
 	{
-		Format("%" PRIu32, iVal);
+		Format("%u", uiVal);
 	}
 	/**
 	* @brief Print a llong value into the string.
@@ -350,16 +350,16 @@ public:
 	*/
 	inline void FormatLLVal(llong iVal)
 	{
-		Format("%" PRId64, iVal);
+		Format("%lld", iVal);
 	}
 	/**
 	* @brief Print a ullong value into the string.
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	inline void FormatULLVal(ullong iVal)
+	inline void FormatULLVal(ullong uiVal)
 	{
-		Format("%" PRIu64, iVal);
+		Format("%llu", uiVal);
 	}
 	/**
 	* @brief Print a size_t (unsigned) value into the string.
@@ -375,7 +375,7 @@ public:
 	* @see Format()
 	* @param iVal value to print.
 	*/
-	inline void FormatBVal(word iVal)
+	inline void FormatBVal(byte iVal)
 	{
 		Format("0%" PRIx8, iVal);
 	}
@@ -397,6 +397,78 @@ public:
 	{
 		Format("0%" PRIx32, iVal);
 	}
+    /**
+    * @brief Print a char value into the string.
+    * @see Format()
+    * @param iVal value to print.
+    */
+    inline void Format8Val(int8 iVal)
+    {
+        Format("%" PRId8, iVal);
+    }
+    /**
+    * @brief Print a unsigned char value into the string.
+    * @see Format()
+    * @param iVal value to print.
+    */
+    inline void FormatU8Val(uint8 uiVal)
+    {
+        Format("%" PRIu8, uiVal);
+    }
+    /**
+    * @brief Print a short value into the string.
+    * @see Format()
+    * @param iVal value to print.
+    */
+    inline void Format16al(int16 iVal)
+    {
+        Format("%" PRId16, iVal);
+    }
+    /**
+    * @brief Print a unsigned short value into the string.
+    * @see Format()
+    * @param iVal value to print.
+    */
+    inline void FormatU16Val(uint16 uiVal)
+    {
+        Format("%" PRIu16, uiVal);
+    }
+    /**
+    * @brief Print a long value into the string.
+    * @see Format()
+    * @param iVal value to print.
+    */
+    inline void Format32Val(int32 iVal)
+    {
+        Format("%" PRId32, iVal);
+    }
+    /**
+    * @brief Print a unsigned int value into the string.
+    * @see Format()
+    * @param iVal value to print.
+    */
+    inline void FormatU32Val(uint32 uiVal)
+    {
+        Format("%" PRIu32, uiVal);
+    }
+    /**
+    * @brief Print a llong value into the string.
+    * @see Format()
+    * @param iVal value to print.
+    */
+    inline void Format64Val(int64 iVal)
+    {
+        Format("%" PRId64, iVal);
+    }
+    /**
+    * @brief Print a ullong value into the string.
+    * @see Format()
+    * @param iVal value to print.
+    */
+    inline void FormatU64Val(uint64 uiVal)
+    {
+        Format("%" PRIu64, uiVal);
+    }
 	///@}
 	/** @name String operations:
 	 */

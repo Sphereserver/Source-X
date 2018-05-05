@@ -31,18 +31,18 @@ CSpawn::~CSpawn()
 {
 }
 
-word CSpawn::GetAmount()
+uint16 CSpawn::GetAmount()
 {
 	//ADDTOCALLSTACK_INTENSIVE("CSpawn::GetAmount");
 	return _iAmount;
 }
 
-word CSpawn::GetCurrentSpawned()
+uint16 CSpawn::GetCurrentSpawned()
 {
     return (uint16)_uidList.size();
 }
 
-word CSpawn::GetPile()
+uint16 CSpawn::GetPile()
 {
     return _iPile;
 }
@@ -67,7 +67,7 @@ CResourceIDBase CSpawn::GetSpawnID()
     return _idSpawn;
 }
 
-void CSpawn::SetAmount(word iAmount)
+void CSpawn::SetAmount(uint16 iAmount)
 {
 	ADDTOCALLSTACK("CSpawn::SetAmount");
 	_iAmount = iAmount;
@@ -174,7 +174,7 @@ void CSpawn::GenerateItem(CResourceDef *pDef)
 
     CItem *pSpawnItem = GetLink();
 	CItemContainer *pCont = dynamic_cast<CItemContainer *>(pSpawnItem->GetParent());
-	uchar iCount = pCont ? ((uchar)pCont->ContentCount(rid)) : (uchar)GetCurrentSpawned();
+	uint16 iCount = pCont ? ((uint16)pCont->ContentCount(rid)) : GetCurrentSpawned();
 
 	if ( iCount >= GetAmount() )
 		return;
@@ -189,7 +189,7 @@ void CSpawn::GenerateItem(CResourceDef *pDef)
 		CItemBase *pItemDef = pItem->Item_GetDef();
 		ASSERT(pItemDef);
 		if ( pItemDef->IsStackableType() )
-			SetAmount((word)Calc_GetRandVal(iAmountPile));
+			SetAmount((uint16)Calc_GetRandVal(iAmountPile));
 	}
 
 	const_cast<CItem*>(pItem)->ClrAttr(pItem->m_Attr & (ATTR_OWNED | ATTR_MOVE_ALWAYS));
@@ -306,7 +306,7 @@ void CSpawn::AddObj(CUID uid)
 	// (not loaded yet) so just proceed without any checks.
 
     uint16 iMax = maximum(GetAmount(), 1);
-    if (_uidList.size() >= iMax && GetLink()->IsType(IT_SPAWN_CHAR))  // char spawns have a limit, champions may spawn a lot of npcs
+    if ((_uidList.size() >= iMax) && GetLink()->IsType(IT_SPAWN_CHAR))  // char spawns have a limit, champions may spawn a lot of npcs
     {
         return;
     }
@@ -391,7 +391,7 @@ void CSpawn::OnTick(bool fExec)
     CResourceDef *pDef = FixDef();
     if (!pDef)
     {
-        g_Log.EventError("Bad Spawn point uid=0%08x. Invalid id=%s %s\n", (dword)GetLink()->GetUID(), g_Cfg.ResourceGetName(_idSpawn));
+        g_Log.EventError("Bad Spawn point uid=0%08x. Invalid id=%s\n", (dword)GetLink()->GetUID(), g_Cfg.ResourceGetName(_idSpawn));
         return;
     }
 
@@ -413,14 +413,15 @@ void CSpawn::KillChildren()
 
     for (std::vector<CUID>::iterator it = _uidList.begin(); it != _uidList.end(); ++it)
     {
-        CChar *pChar = it->CharFind();
+        CObjBase* pObj = it->ObjFind();
+        CChar *pChar = dynamic_cast<CChar*>(pObj);
         if (pChar)
         {
             pChar->SetSpawn(nullptr);   // Just to prevent CObjBase to call DelObj.
             pChar->Delete();
             continue;
         }
-        CItem *pItem = it->ItemFind();
+        CItem *pItem = dynamic_cast<CItem*>(pObj);
         if (pItem)
         {
             pItem->SetSpawn(nullptr);   // Just to prevent CObjBase to call DelObj.
@@ -511,12 +512,12 @@ bool CSpawn::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole *pSrc)
     {
         case ISPW_AMOUNT:
         {
-            sVal.FormatVal(GetAmount());
+            sVal.FormatU16Val(GetAmount());
             return true;
         }
         case ISPW_COUNT:
         {
-            sVal.FormatVal(GetCurrentSpawned());
+            sVal.FormatU16Val(GetCurrentSpawned());
             return true;
         }
         case ISPW_SPAWNID:
@@ -531,37 +532,36 @@ bool CSpawn::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole *pSrc)
         {
             if (GetLink()->GetType() == IT_SPAWN_ITEM)
             {
-                sVal.FormatUSVal(_iPile);
+                sVal.FormatU16Val(_iPile);
             }
             else
             {
-                sVal.FormatWVal(GetCurrentSpawned());
+                sVal.FormatU16Val(GetCurrentSpawned());
             }
             return true;
         }
         case ISPW_MAXDIST:
         case ISPW_MOREZ:
         {
-            sVal.FormatUCVal(_iMaxDist);
+            sVal.FormatU8Val(_iMaxDist);
             return true;
         }
         case ISPW_TIMELO:
         case ISPW_MOREX:
         {
-            sVal.FormatUSVal(_iTimeLo);
+            sVal.FormatU16Val(_iTimeLo);
             return true;
         }
         case ISPW_TIMEHI:
         case ISPW_MOREY:
         {
-            sVal.FormatUSVal(_iTimeHi);
+            sVal.FormatU16Val(_iTimeHi);
             return true;
         }
         case ISPW_MOREP:
         {
-
             tchar * pszBuffer = Str_GetTemp();
-            sprintf(pszBuffer, "%" PRId16 ",%" PRId16 ",%" PRId8, _iTimeLo, _iTimeHi, _iMaxDist);
+            sprintf(pszBuffer, "%" PRIu16 ",%" PRIu16 ",%" PRIu8, _iTimeLo, _iTimeHi, _iMaxDist);
 
             sVal.Format(pszBuffer);
             return true;
@@ -588,12 +588,12 @@ bool CSpawn::r_LoadVal(CScript & s)
 	{
         case ISPW_ADDOBJ:
         {
-            AddObj(static_cast<CUID>(s.GetArgVal()));
+            AddObj(CUID(s.GetArgDWVal()));
             return true;
         }
         case ISPW_AMOUNT:
         {
-            SetAmount(s.GetArgUSVal());
+            SetAmount(s.GetArgU16Val());
             return true;
         }
         case ISPW_SPAWNID:
@@ -604,17 +604,17 @@ bool CSpawn::r_LoadVal(CScript & s)
             {
                 case IT_SPAWN_CHAR:
                 {
-                    _idSpawn = CResourceID(RES_CHARDEF, s.GetArgUVal());   // Ensuring there's no negative value
+                    _idSpawn = CResourceID(RES_CHARDEF, s.GetArgVal());   // Ensuring there's no negative value
                     break;
                 }
                 case IT_SPAWN_ITEM:
                 {
-                    _idSpawn = CResourceID(RES_ITEMDEF, s.GetArgUVal());
+                    _idSpawn = CResourceID(RES_ITEMDEF, s.GetArgVal());
                     break;
                 }
                 case IT_SPAWN_CHAMPION: // handled on CChampion
                 {
-                    _idSpawn = CResourceID(RES_CHAMPION, s.GetArgUVal());
+                    _idSpawn = CResourceID(RES_CHAMPION, s.GetArgVal());
                     CChampion *pChampion = static_cast<CChampion*>(GetLink()->GetComponent(COMP_CHAMPION));
                     ASSERT(pChampion);
                     pChampion->Init();
@@ -639,7 +639,7 @@ bool CSpawn::r_LoadVal(CScript & s)
         {
             if (GetLink()->GetType() == IT_SPAWN_ITEM)
             {
-                _iPile = s.GetArgUSVal();
+                _iPile = s.GetArgU16Val();
                 return true;
             }
             return false;   // More2 on char's spawns refers to GetCurrentSpawned() (for backwards) but it should not be modified, for that purpose use AddObj();
@@ -647,19 +647,19 @@ bool CSpawn::r_LoadVal(CScript & s)
         case ISPW_MAXDIST:
         case ISPW_MOREZ:
         {
-            _iMaxDist = s.GetArgUCVal();
+            _iMaxDist = s.GetArgU8Val();
             return true;
         }
         case ISPW_TIMELO:
         case ISPW_MOREX:
         {
-            _iTimeLo = s.GetArgSVal();
+            _iTimeLo = s.GetArgU16Val();
             return true;
         }
         case ISPW_TIMEHI:
         case ISPW_MOREY:
         {
-            _iTimeHi = s.GetArgSVal();
+            _iTimeHi = s.GetArgU16Val();
             return true;
         }
         case ISPW_MOREP:
@@ -675,7 +675,7 @@ bool CSpawn::r_LoadVal(CScript & s)
                 switch (iArgs)
                 {
                     case 3: // m_z
-                        _iMaxDist = (uchar)(ATOI(ppVal[2]));
+                        _iMaxDist = (uint8)(ATOI(ppVal[2]));
                     case 2: // m_y
                         _iTimeHi = (uint16)(ATOI(ppVal[1]));
                     case 1: // m_x
@@ -726,7 +726,7 @@ void CSpawn::r_Write(CScript & s)
 		CObjBase *pObj = it->ObjFind();
         if (pObj)
         {
-            s.WriteKeyHex("ADDOBJ", pObj->GetUID());
+            s.WriteKeyHex("ADDOBJ", pObj->GetUID().GetObjUID());
         }
 	}
 
@@ -825,7 +825,7 @@ bool CSpawn::r_Verb(CScript & s, CTextConsole * pSrc)
     {
         case ISPV_DELOBJ:
         {
-            DelObj(static_cast<CUID>(s.GetArgVal()));
+            DelObj(CUID(s.GetArgDWVal()));
             return true;
         }
         case ISPV_RESET:

@@ -1185,17 +1185,17 @@ bool CItemShip::r_LoadVal( CScript & s  )
 	{
 		if ( s.IsKey("HATCH") )
 		{
-			m_uidHold = s.GetArgVal();
+			m_uidHold = s.GetArgDWVal();
 			return true;
 		}
 		else if ( s.IsKey("TILLER") )
 		{
-			m_uidLink = s.GetArgVal();
+			m_uidLink = s.GetArgDWVal();
 			return true;
 		}
 		else if ( s.IsKey("PLANK") )
 		{
-			CUID uid = s.GetArgVal();
+			CUID uid = s.GetArgDWVal();
 			m_uidPlanks.push_back( uid );
 			return true;
 		}

@@ -39,22 +39,22 @@ public:
     *   from pile the spawn item. Plus, since the max amount of spawnable objects per single spawn item is the max size of a byte, we can change
     *   the data type accepted/returned.
     */
-    void SetAmount(word iAmount);
-    word GetAmount();
+    void SetAmount(uint16 iAmount);
+    uint16 GetAmount();
 
     /**
     * @brief Returns how many Items/Chars are currently spawned.
     *
     * @return count
     */
-    word GetCurrentSpawned();
+    uint16 GetCurrentSpawned();
 
     /**
     * @brief Returns the pile's size (Only for IT_SPAWN_ITEM).
     *
     * @return count
     */
-    word GetPile();
+    uint16 GetPile();
 
     /**
     * @brief Returns how many Items/Chars are currently spawned from me.

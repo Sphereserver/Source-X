@@ -1560,14 +1560,14 @@ bool CItemBase::r_LoadVal( CScript &s )
 			break;
 
 		case IBC_LAYER:
-			m_layer = (uchar)s.GetArgVal();
+			m_layer = s.GetArgUCVal();
 			break;
 		case IBC_PILE:
 			break;
 		case IBC_REQSTR:
 			if ( ! IsTypeEquippable())
 				return false;
-			m_ttEquippable.m_iStrReq = s.GetArgVal();
+			m_ttEquippable.m_iStrReq = s.GetArgDWVal();
 			break;
 
 		case IBC_RESDISPDNID:
@@ -1575,7 +1575,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 			break;
 
 		case IBC_SPEED:
-			m_speed = s.GetArgUCVal();
+			m_speed = s.GetArgBVal();
 			break;
 
 		case IBC_SKILL:		// Skill to use.

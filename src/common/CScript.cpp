@@ -217,6 +217,69 @@ dword CScriptKey::GetArgDWVal()
 	return Exp_GetDWVal( m_pszArg );
 }
 
+int8 CScriptKey::GetArg8Val()
+{
+    ADDTOCALLSTACK("CScriptKey::GetArg8Val");
+    ASSERT(m_pszKey);
+    ASSERT(m_pszArg);
+    return Exp_Get8Val( m_pszArg );
+}
+
+int16 CScriptKey::GetArg16Val()
+{
+    ADDTOCALLSTACK("CScriptKey::GetArg16Val");
+    ASSERT(m_pszKey);
+    ASSERT(m_pszArg);
+    return Exp_Get16Val( m_pszArg );
+}
+
+int32 CScriptKey::GetArg32Val()
+{
+    ADDTOCALLSTACK("CScriptKey::GetArg32Val");
+    ASSERT(m_pszKey);
+    ASSERT(m_pszArg);
+    return Exp_Get32Val( m_pszArg );
+}
+
+int64 CScriptKey::GetArg64Val()
+{
+    ADDTOCALLSTACK("CScriptKey::GetArg64Val");
+    ASSERT(m_pszKey);
+    ASSERT(m_pszArg);
+    return Exp_Get64Val( m_pszArg );
+}
+
+uint8 CScriptKey::GetArgU8Val()
+{
+    ADDTOCALLSTACK("CScriptKey::GetArgU8Val");
+    ASSERT(m_pszKey);
+    ASSERT(m_pszArg);
+    return Exp_Get8Val( m_pszArg );
+}
+
+uint16 CScriptKey::GetArgU16Val()
+{
+    ADDTOCALLSTACK("CScriptKey::GetArgU16Val");
+    ASSERT(m_pszKey);
+    ASSERT(m_pszArg);
+    return Exp_GetU16Val( m_pszArg );
+}
+
+uint32 CScriptKey::GetArgU32Val()
+{
+    ADDTOCALLSTACK("CScriptKey::GetArgU32Val");
+    ASSERT(m_pszKey);
+    ASSERT(m_pszArg);
+    return Exp_GetU32Val( m_pszArg );
+}
+
+uint64 CScriptKey::GetArgU64Val()
+{
+    ADDTOCALLSTACK("CScriptKey::GetArgU64Val");
+    ASSERT(m_pszKey);
+    ASSERT(m_pszArg);
+    return Exp_GetU64Val( m_pszArg );
+}
 
 int64 CScriptKey::GetArgLLRange()
 {

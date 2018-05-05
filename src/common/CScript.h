@@ -61,6 +61,14 @@ public:
 	byte GetArgBVal();
 	word GetArgWVal();
 	dword GetArgDWVal();
+    int8 GetArg8Val();
+    int16 GetArg16Val();
+    int32 GetArg32Val();
+    int64 GetArg64Val();
+    uint8 GetArgU8Val();
+    uint16 GetArgU16Val();
+    uint32 GetArgU32Val();
+    uint64 GetArgU64Val();
 
 	int64 GetArgLLRange();
 	int GetArgRange();
