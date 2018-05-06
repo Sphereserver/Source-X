@@ -16,6 +16,7 @@
 #include "../game/items/CItemMultiCustom.h"
 #include "../game/items/CItemShip.h"
 #include "../game/items/CItemVendable.h"
+#include "../game/components/CCItemDamageable.h"
 #include "../common/CLog.h"
 #include "../game/CObjBase.h"
 #include "../game/CWorld.h"
@@ -163,21 +164,35 @@ PacketObjectStatus::PacketObjectStatus(const CClient* target, CObjBase* object) 
 	}
 	else
 	{
+        word iHitsCurrent = 0;
+        word iHitsMax = 100;
 		if ( objectChar )
 		{
 			canRename = objectChar->IsOwnedBy(character);
-			short iStatMax = objectChar->Stat_GetMax(STAT_STR);
-			writeInt16((word)((objectChar->Stat_GetVal(STAT_STR) * 100) / maximum(iStatMax, 1)));
+			iHitsCurrent = (word)objectChar->Stat_GetVal(STAT_STR);
+            iHitsMax = (word)objectChar->Stat_GetMax(STAT_STR);
 		}
 		else
 		{
-			const CItem *objectItem = object->IsItem() ? static_cast<const CItem *>(object) : NULL;
-			if ( objectItem )
-				writeInt16((word)((objectItem->m_itArmor.m_Hits_Cur * 100) / maximum(objectItem->m_itArmor.m_Hits_Max, 1)));
+			const CItem *objectItem = object->IsItem() ? static_cast<const CItem *>(object) : nullptr;
+            if (objectItem)
+            {
+                CCItemDamageable *pItem = static_cast<CCItemDamageable*>(object->GetComponent(COMP_ITEMDAMAGEABLE));
+                if (pItem)
+                {
+                    iHitsCurrent = pItem->GetCurHits();
+                    iHitsMax = pItem->GetMaxHits();
+                }
+                else
+                {
+                    iHitsCurrent = iHitsMax;  // Can't get hitpoints, asume 100%
+                }
+            }
 		}
 
 		// Send percentual hitpoints
-		writeInt16(100);		// Max hit points
+        writeInt16(iHitsCurrent);		// Max hit points
+		writeInt16(iHitsMax);		// Max hit points
 		writeBool(canRename);
 		writeByte(version);
 		if (target->GetNetState()->isClientEnhanced() && objectChar && objectChar->IsPlayableCharacter())

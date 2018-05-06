@@ -8,6 +8,7 @@
 #include "chars/CChar.h"
 #include "clients/CClient.h"
 #include "components/CCSpawn.h"
+#include "components/CCItemDamageable.h"
 #include "../common/CLog.h"
 #include "CObjBase.h"
 #include "spheresvr.h"
@@ -1860,8 +1861,23 @@ bool CObjBase::r_LoadVal( CScript & s )
 		case OC_CAN:
 			return false;
 		case OC_CANMASK:
-			m_CanMask = s.GetArgVal();
-			break;
+        {
+            dword dwFlags = s.GetArgDWVal();
+            m_CanMask = dwFlags;
+            if (IsItem())
+            {
+                CCItemDamageable *pItemDmg = static_cast<CCItemDamageable*>(GetComponent(COMP_ITEMDAMAGEABLE));
+                if ((dwFlags & CAN_I_DAMAGEABLE) && !pItemDmg)
+                {
+                    Suscribe(new CCItemDamageable(this));
+                }
+                else if (!(dwFlags & CAN_I_DAMAGEABLE) && pItemDmg)
+                {
+                    Unsuscribe(pItemDmg);
+                }
+            }
+            break;
+        }
 		case OC_MODMAXWEIGHT:
 			m_ModMaxWeight = s.GetArgVal();
             fResendTooltip = true;

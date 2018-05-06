@@ -625,23 +625,22 @@ bool PacketDeathStatus::onReceive(NetState* net)
 /***************************************************************************
  *
  *
- *	Packet 0x34 : PacketCharStatusReq	request information on the mobile
+ *	Packet 0x34 : PacketObjStatusReq	request information on the object
  *
  *
  ***************************************************************************/
-PacketCharStatusReq::PacketCharStatusReq() : Packet(10)
+PacketObjStatusReq::PacketObjStatusReq() : Packet(10)
 {
 }
 
-bool PacketCharStatusReq::onReceive(NetState* net)
+bool PacketObjStatusReq::onReceive(NetState* net)
 {
-	ADDTOCALLSTACK("PacketCharStatusReq::onReceive");
+	ADDTOCALLSTACK("PacketObjStatusReq::onReceive");
 
 	CClient* client = net->getClient();
 	ASSERT(client);
 	if ( !client->GetChar() )
 		return false;
-
 	skip(4);	// 0xedededed
 	byte requestType = readByte();
 	CUID targetSerial = static_cast<CUID>(readInt32());

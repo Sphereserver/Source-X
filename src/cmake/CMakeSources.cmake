@@ -332,6 +332,8 @@ game/components/CCChampion.cpp
 game/components/CCChampion.h
 game/components/CCFaction.cpp
 game/components/CCFaction.h
+game/components/CCItemDamageable.cpp
+game/components/CCItemDamageable.h
 game/components/CCSpawn.cpp
 game/components/CCSpawn.h
 )

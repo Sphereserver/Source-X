@@ -621,7 +621,7 @@ void PacketManager::registerStandardPackets(void)
 	registerPacket(XCMD_ItemEquipReq, new PacketItemEquipReq());				// equip item
 	registerPacket(XCMD_WalkAck, new PacketResynchronize());					//
 	registerPacket(XCMD_DeathMenu, new PacketDeathStatus());					//
-	registerPacket(XCMD_CharStatReq, new PacketCharStatusReq());				// status request
+	registerPacket(XCMD_CharStatReq, new PacketObjStatusReq());				// status request
 	registerPacket(XCMD_Skill, new PacketSkillLockChange());					// change skill lock
 	registerPacket(XCMD_VendorBuy, new PacketVendorBuyReq());					// buy items from vendor
 	registerPacket(XCMD_StaticUpdate, new PacketStaticUpdate());				// UltimaLive Packet

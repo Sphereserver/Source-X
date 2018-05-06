@@ -207,14 +207,14 @@ public:
 /***************************************************************************
  *
  *
- *	Packet 0x34 : PacketCharStatusReq				request information on the mobile
+ *	Packet 0x34 : PacketObjStatusReq				request information on the object
  *
  *
  ***************************************************************************/
-class PacketCharStatusReq : public Packet
+class PacketObjStatusReq : public Packet
 {
 public:
-	PacketCharStatusReq();
+	PacketObjStatusReq();
 	virtual bool onReceive(NetState* net);
 };
 
