@@ -24,15 +24,15 @@ class CObjBase;
 class CComponent
 {
     COMP_TYPE _iType;
-    const CObjBase *_pLink;
+    CObjBase *_pLink;
 
 protected:
-    CComponent(COMP_TYPE type, const CObjBase *pLink);
+    CComponent(COMP_TYPE type, CObjBase *pLink);
 
 public:
     virtual ~CComponent() {}
     COMP_TYPE GetType();
-    virtual const CObjBase *GetLink();
+    virtual CObjBase *GetLink();
 
     /* Script's compatibility
     * All methods here are meant to be proccessed from CEntity so they may behave a little different

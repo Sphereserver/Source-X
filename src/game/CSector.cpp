@@ -5,7 +5,7 @@
 #include "chars/CCharNPC.h"
 #include "clients/CClient.h"
 #include "items/CItem.h"
-#include "items/CSpawn.h"
+#include "components/CCSpawn.h"
 #include "../common/CLog.h"
 #include "CObjBase.h"
 #include "CSector.h"
@@ -963,7 +963,7 @@ void CSector::Restock()
         pItemNext = pItem->GetNext();
         if (pItem->IsType(IT_SPAWN_ITEM) || pItem->IsType(IT_SPAWN_CHAR))
         {
-            CSpawn *pSpawn = pItem->GetSpawn();
+            CCSpawn *pSpawn = pItem->GetSpawn();
             if (pSpawn)
             {
                 pSpawn->OnTick(true);

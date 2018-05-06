@@ -4,7 +4,7 @@
 #include "../clients/CClient.h"
 #include "../items/CItem.h"
 #include "../items/CItemCorpse.h"
-#include "../items/CSpawn.h"
+#include "../components/CCSpawn.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"
@@ -1343,7 +1343,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 			return false;
 	}
 
-    CSpawn *pSpawn = GetSpawn();
+    CCSpawn *pSpawn = GetSpawn();
 	if (pSpawn)
 		pSpawn->DelObj(pItem->GetUID());    // remove this item from it's spawn when DClicks it
 

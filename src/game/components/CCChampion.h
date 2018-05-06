@@ -1,17 +1,17 @@
 /**
-* @file CChampion.h
+* @file CCChampion.h
 */
 
-#ifndef _INC_CCHAMPION_H
-#define _INC_CCHAMPION_H
+#ifndef _INC_CCChampion_H
+#define _INC_CCChampion_H
 
-#include "items/CItemMulti.h"
-#include "items/CSpawn.h"
-#include "chars/CChar.h"
-#include "uo_files/uofiles_enums_creid.h"
-#include "../common/sphere_library/CSString.h"
-#include "../common/datatypes.h"
-#include "../common/CResourceBase.h"
+#include "CCSpawn.h"
+#include "../items/CItemMulti.h"
+#include "../chars/CChar.h"
+#include "../uo_files/uofiles_enums_creid.h"
+#include "../../common/sphere_library/CSString.h"
+#include "../../common/datatypes.h"
+#include "../../common/CResourceBase.h"
 
 enum CHAMPION_ID
 {
@@ -39,7 +39,7 @@ enum CHAMPION_ID
 /**
 * @brief This class manages a CItem making it to work as a Champion.
 */
-class CChampion : public CComponent
+class CCChampion : public CComponent
 {
     // IT_CHAMPION
     // Champion Spawn
@@ -48,10 +48,7 @@ private:
     static lpctstr const sm_szLoadKeys[];   ///< Script fields.
     static lpctstr const sm_szVerbKeys[];   ///< Action list.
 
-    // CItem connection
-    CItem *_pLink;                  ///< Link this object to it's parent CItem.
-
-    // Retrieved from CChampionDef
+    // Retrieved from CCChampionDef
     typedef std::vector<CREID_TYPE> idNPC;
     typedef std::map<uchar, idNPC> idSpawn;
     idSpawn _idSpawn;    ///< Defining how many uchar (or levels) this Champion has and the group of monsters for each level.
@@ -169,17 +166,17 @@ public:
     */
     void ClearRedCandles();
     /**
-    * @brief CSpawn's replica: Remove all spawned characters.
+    * @brief CCSpawn's replica: Remove all spawned characters.
     */
     void KillChildren();
     /**
-    * @brief CSpawn's replica: Add one char to this 'spawn'.
+    * @brief CCSpawn's replica: Add one char to this 'spawn'.
     *
     * @param uid UID of the character to add to the 'spawn'.
     */
     void AddObj(CUID uid);
     /**
-    * @brief CSpawn's replica: Remove one char from this 'spawn'.
+    * @brief CCSpawn's replica: Remove one char from this 'spawn'.
     *
     * @param uid UID of the character to remove from the 'spawn'.
     */
@@ -230,11 +227,11 @@ public:
     /************************************************************************
     * CItem related section.
     ************************************************************************/
-    CChampion(CItem *pLink);
+    CCChampion(CObjBase *pLink);
     /**
     @brief Champion is being removed, spawns and candles must be removed too!
     */
-    virtual ~CChampion();
+    virtual ~CCChampion();
     /**
     * @brief Timer expired, overriding default tick:
     *
@@ -250,7 +247,7 @@ public:
 /**
 * @brief Storing information from scripted [CHAMPION ] resource
 */
-class CChampionDef : public CResourceLink
+class CCChampionDef : public CResourceLink
 {
 
     //static lpctstr const sm_szTrigName[CHAMPIONTRIG_QTY+1];
@@ -267,11 +264,11 @@ public:
     idSpawn _idSpawn;
     CREID_TYPE _idChampion;             ///< Boss id
 
-    explicit CChampionDef(CResourceID rid);
-    virtual ~CChampionDef();
+    explicit CCChampionDef(CResourceID rid);
+    virtual ~CCChampionDef();
     lpctstr GetName() const { return(m_sName); }
     bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc);
     bool r_LoadVal(CScript & s);
 };
 
-#endif //_INC_CCHAMPION_H
+#endif //_INC_CCChampion_H

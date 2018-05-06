@@ -10,7 +10,7 @@
 #include "../common/CVarDefMap.h"
 #include "../common/sphere_library/CSString.h"
 #include "uo_files/uofiles_types.h"
-#include "CFaction.h"
+#include "components/CCFaction.h"
 
 struct CBaseBaseDef : public CResourceLink
 {

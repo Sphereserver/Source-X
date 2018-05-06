@@ -3,7 +3,7 @@
 #include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../items/CItemMap.h"
-#include "../items/CSpawn.h"
+#include "../components/CCSpawn.h"
 #include "../../common/CLog.h"
 #include "../triggers.h"
 #include "CClient.h"
@@ -119,7 +119,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		}
 	}
 
-	CSpawn *pSpawn = pItem->GetSpawn();	// remove this item from its spawn when players DClick it from ground, no other way to take it out.
+	CCSpawn *pSpawn = pItem->GetSpawn();	// remove this item from its spawn when players DClick it from ground, no other way to take it out.
 	if ( pSpawn )
 		pSpawn->DelObj(pItem->GetUID());
 
@@ -285,7 +285,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		case IT_SPAWN_ITEM:
 		case IT_SPAWN_CHAR:
 		{
-			pSpawn = dynamic_cast<CSpawn*>(pItem->GetComponent(COMP_SPAWN));
+			pSpawn = dynamic_cast<CCSpawn*>(pItem->GetComponent(COMP_SPAWN));
 			if ( !pSpawn )
 				return false;
 

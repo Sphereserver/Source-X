@@ -22,7 +22,7 @@
 #include "clients/CAccount.h"
 #include "items/CItemMap.h"
 #include "items/CItemMessage.h"
-#include "CChampion.h"
+#include "components/CCChampion.h"
 #include "../common/CLog.h"
 #include "CScriptProfiler.h"
 #include "CServer.h"

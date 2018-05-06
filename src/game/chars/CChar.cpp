@@ -14,7 +14,7 @@
 #include "../items/CItemContainer.h"
 #include "../items/CItemMemory.h"
 #include "../items/CItemShip.h"
-#include "../items/CSpawn.h"
+#include "../components/CCSpawn.h"
 #include "../CContainer.h"
 #include "../CServer.h"
 #include "../CServerTime.h"
@@ -727,7 +727,7 @@ int CChar::FixWeirdness()
 	CItemMemory *pMemory = Memory_FindTypes(MEMORY_ISPAWNED);
 	if ( pMemory )
 	{
-        CSpawn *pSpawn = static_cast<CSpawn*>(pMemory->m_uidLink.ItemFind()->GetComponent(COMP_SPAWN));
+        CCSpawn *pSpawn = static_cast<CCSpawn*>(pMemory->m_uidLink.ItemFind()->GetComponent(COMP_SPAWN));
         _uidSpawn = pMemory->m_uidLink;
 		pMemory->Delete();
 		if ( pSpawn )

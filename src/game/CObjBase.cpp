@@ -7,7 +7,7 @@
 #include "../sphere/ProfileTask.h"
 #include "chars/CChar.h"
 #include "clients/CClient.h"
-#include "items/CSpawn.h"
+#include "components/CCSpawn.h"
 #include "../common/CLog.h"
 #include "CObjBase.h"
 #include "spheresvr.h"
@@ -99,7 +99,7 @@ CObjBase::CObjBase( bool fItem )
 		ASSERT(IsValidUID());
 		SetContainerFlags(UID_O_DISCONNECT);	// it is no place for now
 	}
-    Suscribe(new CFaction(this));
+    Suscribe(new CCFaction(this));
 
 	// Put in the idle list by default. (til placed in the world)
 	g_World.m_ObjNew.InsertHead( this );
@@ -2973,23 +2973,23 @@ CVarDefMap * CObjBase::GetTagDefs()
 	return &m_TagDefs;
 }
 
-CSpawn * CObjBase::GetSpawn()
+CCSpawn * CObjBase::GetSpawn()
 {
     if (_uidSpawn != UID_UNUSED)
     {
         CItem *pItem = _uidSpawn.ItemFind();
         if (pItem)
         {
-            CSpawn *pSpawn = static_cast<CSpawn*>(pItem->GetComponent(COMP_SPAWN));
+            CCSpawn *pSpawn = static_cast<CCSpawn*>(pItem->GetComponent(COMP_SPAWN));
             if (pSpawn)
                 return pSpawn;
         }
-        _uidSpawn.InitUID();    // for some reason there is an UID assigned but not related to a CItem or CSpawn, clear it.
+        _uidSpawn.InitUID();    // for some reason there is an UID assigned but not related to a CItem or CCSpawn, clear it.
     }
     return nullptr;
 }
 
-void CObjBase::SetSpawn(CSpawn * spawn)
+void CObjBase::SetSpawn(CCSpawn * spawn)
 {
     if (spawn)
         _uidSpawn = spawn->GetLink()->GetUID();
@@ -2997,9 +2997,9 @@ void CObjBase::SetSpawn(CSpawn * spawn)
         _uidSpawn.InitUID();
 }
 
-CFaction * CObjBase::GetFaction()
+CCFaction * CObjBase::GetFaction()
 {
-    return static_cast<CFaction*>(GetComponent(COMP_FACTION));
+    return static_cast<CCFaction*>(GetComponent(COMP_FACTION));
 }
 
 byte CObjBase::RangeL() const
@@ -3153,7 +3153,7 @@ void CObjBase::Delete(bool bforce)
     CEntity *pEntity = static_cast<CEntity*>(this);
     if (GetSpawn())    // If I was created from a Spawn
     {
-        //pEntity->Unsuscribe(GetSpawn());    // Avoiding recursive calls from CSpawn::DelObj when forcing the pChar/pItem to Delete();
+        //pEntity->Unsuscribe(GetSpawn());    // Avoiding recursive calls from CCSpawn::DelObj when forcing the pChar/pItem to Delete();
         GetSpawn()->DelObj(GetUID());  // Then I should be removed from it's list.
     }
     pEntity->Delete(bforce);

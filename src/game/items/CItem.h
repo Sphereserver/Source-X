@@ -14,8 +14,8 @@
 #include "../CBase.h"
 #include "../CServerConfig.h"
 #include "../CObjBase.h"
-#include "../CFaction.h"
 #include "../CEntity.h"
+#include "../components/CCFaction.h"
 #include "CItemBase.h"
 
 
@@ -575,7 +575,7 @@ protected:
 	virtual int FixWeirdness();
 
 public:
-    CFaction *GetSlayer();
+    CCFaction *GetSlayer();
 	virtual bool OnTick();
 	virtual void OnHear( lpctstr pszCmd, CChar * pSrc );
 	CItemBase * Item_GetDef() const;

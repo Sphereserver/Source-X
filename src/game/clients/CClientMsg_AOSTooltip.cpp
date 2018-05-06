@@ -2,8 +2,8 @@
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
 #include "../items/CItem.h"
-#include "../items/CSpawn.h"
 #include "../items/CItemStone.h"
+#include "../components/CCSpawn.h"
 #include "CClient.h"
 
 
@@ -932,7 +932,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 
 	case IT_SPAWN_CHAR:
 	{
-        CSpawn *pSpawn = pItem->GetSpawn();
+        CCSpawn *pSpawn = pItem->GetSpawn();
         if (!pSpawn)
             break;
         CResourceDef * pSpawnCharDef = g_Cfg.ResourceGetDef(pSpawn->GetSpawnID());
@@ -963,7 +963,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 
 	case IT_SPAWN_ITEM:
 	{
-        CSpawn *pSpawn = pItem->GetSpawn();
+        CCSpawn *pSpawn = pItem->GetSpawn();
         if (!pSpawn)
             break;
 		CResourceDef * pSpawnItemDef = g_Cfg.ResourceGetDef(pSpawn->GetSpawnID());

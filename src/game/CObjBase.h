@@ -20,7 +20,7 @@
 class CBaseBase;
 class PacketSend;
 class PacketPropertyList;
-class CSpawn;
+class CCSpawn;
 
 class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity
 {
@@ -158,31 +158,31 @@ public:
 public:
 
     /**
-    * @fn  CSpawn *CObjBase::GetSpawn();
+    * @fn  CCSpawn *CObjBase::GetSpawn();
     *
     * @brief   Returns Spawn item.
     *
     * @return  The CItem.
     */
-    CSpawn *GetSpawn();
+    CCSpawn *GetSpawn();
 
     /**
-    * @fn  CSpawn *CObjBase::SetSpawn(CSpawn *spawn);
+    * @fn  CCSpawn *CObjBase::SetSpawn(CCSpawn *spawn);
     *
     * @brief   sets the Spawn item.
     *
-    * @param  The CSpawn.
+    * @param  The CCSpawn.
     */
-    void SetSpawn(CSpawn *spawn);
+    void SetSpawn(CCSpawn *spawn);
 
     /**
-    * @fn  CSpawn *CObjBase::GetFaction();
+    * @fn  CCSpawn *CObjBase::GetFaction();
     *
     * @brief   Returns Faction CComponent.
     *
-    * @return  The CFaction.
+    * @return  The CCFaction.
     */
-    CFaction *GetFaction();
+    CCFaction *GetFaction();
 
     /**
      * @fn  byte CObjBase::RangeL() const;

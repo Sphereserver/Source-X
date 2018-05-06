@@ -1,18 +1,24 @@
 /**
-* @file CSpawn.h
+* @file CCSpawn.h
 *
 */
 
-#ifndef _INC_CSPAWN_H
-#define _INC_CSPAWN_H
+#ifndef _INC_CCSpawn_H
+#define _INC_CCSpawn_H
 
 //#include "CItem.h"
 #include "../CComponent.h"
+#include "../CResourceBase.h"
+#include "../items/CItemBase.h"
+#include "../uo_files/uofiles_enums_itemid.h"
+#include "../uo_files/uofiles_enums_creid.h"
 
 
 class CCharBase;
+class CItem;
+class CUID;
 
-class CSpawn : public CComponent
+class CCSpawn : public CComponent
 {
 private:
     CItem * _pLink;             ///< Link this object to it's parent CItem.
@@ -33,7 +39,7 @@ private:
 public:
     static const char *m_sClassName;
 
-    /*  I don't want to inherit SetAmount, GetAmount and _iAmount from the parent CItem class. I need to redefine them for CSpawn class
+    /*  I don't want to inherit SetAmount, GetAmount and _iAmount from the parent CItem class. I need to redefine them for CCSpawn class
     *   so that when i set AMOUNT to the spawn item, i don't really set the "item amount/quantity" property, but the "spawn item AMOUNT" property.
     *   This way, even if there is a stackable spawn item (default in Enhanced Client), i won't increase the item stack quantity and i can't pick
     *   from pile the spawn item. Plus, since the max amount of spawnable objects per single spawn item is the max size of a byte, we can change
@@ -78,7 +84,7 @@ public:
     uint8 GetMaxDist();
 
     /**
-    * @brief CSpawn's custom alternative of CComponent::GetLink retrieving a direct link for the CItem, without const.
+    * @brief CCSpawn's custom alternative of CComponent::GetLink retrieving a direct link for the CItem, without const.
     *
     * @return *SpawnItem
     */
@@ -167,9 +173,8 @@ public:
     */
     uint WriteName(tchar * pszOut) const;
 
-    virtual CItem *GetLink() override;
-    CSpawn(const CObjBase *pLink);
-    virtual ~CSpawn();
+    CCSpawn(CObjBase *pLink);
+    virtual ~CCSpawn();
     virtual void Delete(bool fForce = false) override;
     virtual bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc) override;
     virtual bool r_LoadVal(CScript & s) override;
@@ -179,4 +184,4 @@ public:
     virtual void Copy(CComponent *target) override;
 };
 
-#endif // _INC_CSPAWN_H
+#endif // _INC_CCSpawn_H

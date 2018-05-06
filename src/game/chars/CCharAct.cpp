@@ -7,7 +7,7 @@
 #include "../../sphere/ProfileTask.h"
 #include "../clients/CClient.h"
 #include "../items/CItem.h"
-#include "../items/CSpawn.h"
+#include "../components/CCSpawn.h"
 #include "../CContainer.h"
 #include "../CServerTime.h"
 #include "../spheresvr.h"
@@ -1863,7 +1863,7 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 
 	// Pick it up.
 	pItem->SetDecayTime(-1);	// Kill any decay timer.
-	CSpawn * pSpawn = GetSpawn();
+	CCSpawn * pSpawn = GetSpawn();
 	if (pSpawn)
 		pSpawn->DelObj(pItem->GetUID());
 	LayerAdd( pItem, LAYER_DRAGGING );

@@ -939,9 +939,9 @@ effect_bounce:
 			}
 		}
         int iDmgBonus = 1;
-        CFaction *pSlayer = nullptr;
-        CFaction *pFaction = GetFaction();
-        CFaction *pSrcFaction = pSrc->GetFaction();
+        CCFaction *pSlayer = nullptr;
+        CCFaction *pFaction = GetFaction();
+        CCFaction *pSrCCFaction = pSrc->GetFaction();
         if (pWeapon)
         {
             pSlayer = pWeapon->GetFaction();
@@ -956,9 +956,9 @@ effect_bounce:
                 }
                 else if (m_pPlayer && pSrc->m_pNPC) // Wielding a slayer type against its opposite will cause the attacker to take more damage
                 {
-                    if (pSrcFaction->GetFactionID() != FACTION_NONE)
+                    if (pSrCCFaction->GetFactionID() != FACTION_NONE)
                     {
-                        iDmgBonus = pSlayer->GetSlayerDamagePenalty(pSrcFaction);
+                        iDmgBonus = pSlayer->GetSlayerDamagePenalty(pSrCCFaction);
                     }
                 }
             }
@@ -980,9 +980,9 @@ effect_bounce:
                     }
                     else if (m_pPlayer && pSrc->m_pNPC) // Wielding a slayer type against its opposite will cause the attacker to take more damage
                     {
-                        if (pSrcFaction->GetFactionID() != FACTION_NONE)
+                        if (pSrCCFaction->GetFactionID() != FACTION_NONE)
                         {
-                            iDmgBonus = pFaction->GetSlayerDamagePenalty(pSrcFaction);
+                            iDmgBonus = pFaction->GetSlayerDamagePenalty(pSrCCFaction);
                         }
                     }
                 }

@@ -7,7 +7,7 @@
 #include "../../network/packet.h"
 #include "../../sphere/ProfileTask.h"
 #include "../chars/CChar.h"
-#include "../items/CSpawn.h"
+#include "../components/CCSpawn.h"
 #include "../CServerTime.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
@@ -972,7 +972,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 
 							if ( pItem->IsType(IT_SPAWN_ITEM) || pItem->IsType(IT_SPAWN_CHAR) )
 							{
-                                CSpawn *pSpawn = pItem->GetSpawn();
+                                CCSpawn *pSpawn = pItem->GetSpawn();
                                 if (pSpawn)
                                 {
                                     CResourceDef *pDef = pSpawn->FixDef();

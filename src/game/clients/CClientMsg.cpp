@@ -10,7 +10,7 @@
 #include "../chars/CCharNPC.h"
 #include "../items/CItemMap.h"
 #include "../items/CItemMessage.h"
-#include "../items/CSpawn.h"
+#include "../components/CCSpawn.h"
 #include "../CServerTime.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
@@ -1169,7 +1169,7 @@ void CClient::addItemName( const CItem * pItem )
 			case IT_SPAWN_CHAR:
 			case IT_SPAWN_ITEM:
 				{
-					CSpawn *pSpawn = const_cast<CItem*>(pItem)->GetSpawn();
+					CCSpawn *pSpawn = const_cast<CItem*>(pItem)->GetSpawn();
 					if ( pSpawn )
 						len += pSpawn->WriteName(szName + len);
 				}

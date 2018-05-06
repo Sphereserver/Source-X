@@ -14,7 +14,7 @@
 #include "../../common/CTextConsole.h"
 #include "../uo_files/uofiles_enums_creid.h"
 #include "../CBase.h"
-#include "../CFaction.h"
+#include "../components/CCFaction.h"
 
 
 class CCharBase : public CBaseBaseDef // define basic info about each "TYPE" of monster/creature.

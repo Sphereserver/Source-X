@@ -13,7 +13,7 @@
 #include "../items/CItemMemory.h"
 #include "../items/CItemStone.h"
 #include "../CObjBase.h"
-#include "../CFaction.h"
+#include "../components/CCFaction.h"
 #include "CCharBase.h"
 #include "CCharPlayer.h"
 

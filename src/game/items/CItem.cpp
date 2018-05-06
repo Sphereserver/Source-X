@@ -8,7 +8,7 @@
 #include "../chars/CCharNPC.h"
 #include "../clients/CClient.h"
 #include "../triggers.h"
-#include "../CChampion.h"
+#include "../components/CCChampion.h"
 #include "CItem.h"
 #include "CItemCommCrystal.h"
 #include "CItemContainer.h"
@@ -21,7 +21,7 @@
 #include "CItemShip.h"
 #include "CItemStone.h"
 #include "CItemVendable.h"
-#include "CSpawn.h"
+#include "../components/CCSpawn.h"
 
 
 /*
@@ -226,14 +226,14 @@ CItem * CItem::CreateBase( ITEMID_TYPE id )	// static
 		case IT_SPAWN_ITEM:
         {
             pItem = new CItem(id, pItemDef);
-            pItem->Suscribe(new CSpawn(pItem));
+            pItem->Suscribe(new CCSpawn(pItem));
             break;
         }
         case IT_SPAWN_CHAMPION:
         {
             pItem = new CItem(id, pItemDef);
-            pItem->Suscribe(new CSpawn(pItem));
-            pItem->Suscribe(new CChampion(pItem));
+            pItem->Suscribe(new CCSpawn(pItem));
+            pItem->Suscribe(new CCChampion(pItem));
             break;
         }
 		default:
@@ -905,7 +905,7 @@ int CItem::FixWeirdness()
 		case IT_SPAWN_CHAR:
 		case IT_SPAWN_ITEM:
 			{
-                CSpawn *pSpawn = GetSpawn();
+                CCSpawn *pSpawn = GetSpawn();
                 if (pSpawn)
 				{
                     pSpawn->FixDef();
@@ -2369,7 +2369,7 @@ bool CItem::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			break;
 		case IC_AMOUNT:
         {
-            CSpawn * pSpawn = static_cast<CSpawn*>(GetComponent(COMP_SPAWN));
+            CCSpawn * pSpawn = static_cast<CCSpawn*>(GetComponent(COMP_SPAWN));
             if (pSpawn)
             {
                 sVal.FormatVal(pSpawn->GetAmount());
@@ -2832,7 +2832,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			}
 		case IC_AMOUNT:
         {
-            CSpawn * pSpawn = static_cast<CSpawn*>(GetComponent(COMP_SPAWN));
+            CCSpawn * pSpawn = static_cast<CCSpawn*>(GetComponent(COMP_SPAWN));
             if (pSpawn)
             {
                 pSpawn->SetAmount(s.GetArgWVal());
@@ -2980,7 +2980,7 @@ bool CItem::r_LoadVal( CScript & s ) // Load an item Script
 			m_itNormal.m_more1 = s.GetArgVal();
 			if ( !g_Serv.IsLoading() && ( IsType(IT_SPAWN_CHAR) || IsType(IT_SPAWN_ITEM) ) )
 			{
-                CSpawn *pSpawn = GetSpawn();
+                CCSpawn *pSpawn = GetSpawn();
                 if (pSpawn)
 				{
                     pSpawn->FixDef();
@@ -5514,10 +5514,10 @@ bool CItem::IsResourceMatch( CResourceIDBase rid, dword dwArg )
 	return false;
 }
 
-CFaction * CItem::GetSlayer()
+CCFaction * CItem::GetSlayer()
 {
     ADDTOCALLSTACK("CItem::GetSlayer");
-    return static_cast<CFaction*>(GetComponent(COMP_FACTION));
+    return static_cast<CCFaction*>(GetComponent(COMP_FACTION));
 }
 
 bool CItem::OnTick()
@@ -5669,8 +5669,8 @@ bool CItem::OnTick()
 		case IT_SPAWN_CHAR:	// Spawn a creature (if we are under count).
 		case IT_SPAWN_ITEM:	// Spawn an item (if we are under count).
 			{
-				EXC_SET("default behaviour::IT_SPAWN"); // TODO: CSpawn is a CComponent and so, it should be moved out of this switch to a loop running this CEntity's CComponents.
-                CSpawn *pSpawn = static_cast<CSpawn*>(GetComponent(COMP_SPAWN));
+				EXC_SET("default behaviour::IT_SPAWN"); // TODO: CCSpawn is a CComponent and so, it should be moved out of this switch to a loop running this CEntity's CComponents.
+                CCSpawn *pSpawn = static_cast<CCSpawn*>(GetComponent(COMP_SPAWN));
                 if (pSpawn)
                 {
                     pSpawn->OnTick(true);
@@ -5680,7 +5680,7 @@ bool CItem::OnTick()
         case IT_SPAWN_CHAMPION:
             {
                 EXC_SET("default behaviour::IT_SPAWN_CHAMPION");
-                CChampion *pChampion = static_cast<CChampion*>(GetComponent(COMP_CHAMPION));
+                CCChampion *pChampion = static_cast<CCChampion*>(GetComponent(COMP_CHAMPION));
                 if (pChampion)
                 {
                     pChampion->OnTick();

@@ -1,14 +1,14 @@
 /**
-* @file CFaction.cpp
+* @file CCFaction.cpp
 *
 */
 
-#include "CFaction.h"
-#include "CObjBase.h"
+#include "CCFaction.h"
+#include "../CObjBase.h"
 
-bool CFaction::IsOppositeGroup(CFaction *target)
+bool CCFaction::IsOppositeGroup(CCFaction *target)
 {
-    ADDTOCALLSTACK("CFaction::IsOppositeGroup");
+    ADDTOCALLSTACK("CCFaction::IsOppositeGroup");
     if (IsGroupElemental() && target->IsGroupAbyss())
         return true;
     else if (IsGroupAbyss() && (target->IsGroupElemental() || target->IsGroupFey()))
@@ -26,9 +26,9 @@ bool CFaction::IsOppositeGroup(CFaction *target)
     return false;
 }
 
-bool CFaction::IsOppositeSuperSlayer(CFaction *target)
+bool CCFaction::IsOppositeSuperSlayer(CCFaction *target)
 {
-    ADDTOCALLSTACK("CFaction::IsOppositeSuperSlayer");
+    ADDTOCALLSTACK("CCFaction::IsOppositeSuperSlayer");
     if ((IsGroupFey()) && (target->GetFactionID() & FACTION_FEY))
         return true;
     else if ((IsGroupElemental()) && (target->GetFactionID() & FACTION_ELEMENTAL))
@@ -46,9 +46,9 @@ bool CFaction::IsOppositeSuperSlayer(CFaction *target)
     return false;
 }
 
-bool CFaction::IsOppositeLesserSlayer(CFaction *target)
+bool CCFaction::IsOppositeLesserSlayer(CCFaction *target)
 {
-    ADDTOCALLSTACK("CFaction::IsOppositeLesserSlayer");
+    ADDTOCALLSTACK("CCFaction::IsOppositeLesserSlayer");
     // Start Elemental Lesser Slayers
     if ((GetFactionID() & FACTION_BLOODELEMENTAL) && (target->GetFactionID() & FACTION_BLOODELEMENTAL))
         return true;
@@ -133,7 +133,7 @@ enum CHF_TYPE
     CHF_QTY
 };
 
-lpctstr const CFaction::sm_szLoadKeys[CHF_QTY + 1] =
+lpctstr const CCFaction::sm_szLoadKeys[CHF_QTY + 1] =
 {
     "FACTION",
     "SLAYER",
@@ -142,26 +142,27 @@ lpctstr const CFaction::sm_szLoadKeys[CHF_QTY + 1] =
     NULL
 };
 
-CFaction::CFaction( const CObjBase* pLink) : CFactionDef(), CComponent(COMP_FACTION, pLink)
+CCFaction::CCFaction(CObjBase* pLink) : CFactionDef(), CComponent(COMP_FACTION, pLink)
 {
-    ADDTOCALLSTACK_INTENSIVE("CFaction::CFaction(FACTION_TYPE)");
+    ADDTOCALLSTACK_INTENSIVE("CCFaction::CCFaction(FACTION_TYPE)");
     _iFaction = FACTION_NONE;
+    _pLink = pLink;
 }
 
-CFaction::CFaction(CFaction *copy, const CObjBase* pLink) : CFactionDef(), CComponent(COMP_FACTION, pLink)
+CCFaction::CCFaction(CCFaction *copy, CObjBase* pLink) : CFactionDef(), CComponent(COMP_FACTION, pLink)
 {
-    ADDTOCALLSTACK_INTENSIVE("CFaction::CFaction(CFaction*)");
+    ADDTOCALLSTACK_INTENSIVE("CCFaction::CCFaction(CCFaction*)");
     Copy(copy);
 }
 
-void CFaction::Delete(bool fForced)
+void CCFaction::Delete(bool fForced)
 {
     UNREFERENCED_PARAMETER(fForced);
 }
 
-bool CFaction::r_LoadVal(CScript & s)
+bool CCFaction::r_LoadVal(CScript & s)
 {
-    ADDTOCALLSTACK("CFaction::r_LoadVal");
+    ADDTOCALLSTACK("CCFaction::r_LoadVal");
     lpctstr	pszKey = s.GetKey();
     CHF_TYPE iKeyNum = (CHF_TYPE)FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
     switch (iKeyNum)
@@ -178,16 +179,16 @@ bool CFaction::r_LoadVal(CScript & s)
     return false;
 }
 
-bool CFaction::r_Load(CScript & s)
+bool CCFaction::r_Load(CScript & s)
 {
-    ADDTOCALLSTACK("CFaction::r_Load");
+    ADDTOCALLSTACK("CCFaction::r_Load");
     UNREFERENCED_PARAMETER(s);
     return true;
 }
 
-bool CFaction::r_WriteVal(lpctstr pszKey, CSString & s, CTextConsole * pSrc)
+bool CCFaction::r_WriteVal(lpctstr pszKey, CSString & s, CTextConsole * pSrc)
 {
-    ADDTOCALLSTACK("CFaction::CFaction");
+    ADDTOCALLSTACK("CCFaction::CCFaction");
     CHF_TYPE iKeyNum = (CHF_TYPE)FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
     UNREFERENCED_PARAMETER(pSrc);
     switch (iKeyNum)
@@ -210,41 +211,41 @@ bool CFaction::r_WriteVal(lpctstr pszKey, CSString & s, CTextConsole * pSrc)
     return false;
 }
 
-void CFaction::r_Write(CScript & s)
+void CCFaction::r_Write(CScript & s)
 {
-    ADDTOCALLSTACK("CFaction::r_Write");
+    ADDTOCALLSTACK("CCFaction::r_Write");
     if (GetFactionID() != FACTION_NONE){
         s.WriteKeyVal("FACTION", (llong)GetFactionID()); // Same value stored with different names for CChars and CItems.
     }
 }
 
-bool CFaction::r_GetRef(lpctstr & pszKey, CScriptObj *& pRef)
+bool CCFaction::r_GetRef(lpctstr & pszKey, CScriptObj *& pRef)
 {
     UNREFERENCED_PARAMETER(pszKey);
     UNREFERENCED_PARAMETER(pRef);
     return false;
 }
 
-bool CFaction::r_Verb(CScript & s, CTextConsole * pSrc)
+bool CCFaction::r_Verb(CScript & s, CTextConsole * pSrc)
 {
     UNREFERENCED_PARAMETER(s);
     UNREFERENCED_PARAMETER(pSrc);
     return false;
 }
 
-void CFaction::Copy(CComponent * target)
+void CCFaction::Copy(CComponent * target)
 {
-    ADDTOCALLSTACK("CFaction::Copy");
-    CFaction *pTarget = static_cast<CFaction*>(target);
+    ADDTOCALLSTACK("CCFaction::Copy");
+    CCFaction *pTarget = static_cast<CCFaction*>(target);
     if (pTarget)
     {
         _iFaction = pTarget->GetFactionID();
     }
 }
 
-NPC_GROUP CFaction::GetGroupID()
+NPC_GROUP CCFaction::GetGroupID()
 {
-    ADDTOCALLSTACK("CFaction::GetGroupID");
+    ADDTOCALLSTACK("CCFaction::GetGroupID");
     if (IsGroupElemental())
         return NPCGROUP_ELEMENTAL;
     else if (IsGroupAbyss())
@@ -263,64 +264,64 @@ NPC_GROUP CFaction::GetGroupID()
         return NPCGROUP_NONE;
 }
 
-NPC_FACTION CFaction::GetFactionID()
+NPC_FACTION CCFaction::GetFactionID()
 {
-    ADDTOCALLSTACK_INTENSIVE("CFaction::GetFactionID");
+    ADDTOCALLSTACK_INTENSIVE("CCFaction::GetFactionID");
     return _iFaction;
 }
 
-void CFaction::SetFactionID(NPC_FACTION faction)
+void CCFaction::SetFactionID(NPC_FACTION faction)
 {
-    ADDTOCALLSTACK_INTENSIVE("CFaction::SetFactionID");
+    ADDTOCALLSTACK_INTENSIVE("CCFaction::SetFactionID");
     ASSERT(faction < FACTION_QTY);
     _iFaction = faction;
 }
 
-bool CFaction::IsGroupElemental()
+bool CCFaction::IsGroupElemental()
 {
-    ADDTOCALLSTACK_INTENSIVE("CFaction::IsGroupElemental");
+    ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupElemental");
     return ((_iFaction >= FACTION_ELEMENTAL) && (_iFaction < FACTION_ELEMENTAL_QTY));
 }
 
-bool CFaction::IsGroupFey()
+bool CCFaction::IsGroupFey()
 {
-    ADDTOCALLSTACK_INTENSIVE("CFaction::IsGroupFey");
+    ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupFey");
     return (_iFaction == FACTION_FEY);
 }
 
-bool CFaction::IsGroupAbyss()
+bool CCFaction::IsGroupAbyss()
 {
-    ADDTOCALLSTACK_INTENSIVE("CFaction::IsGroupAbyss");
+    ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupAbyss");
     return ((_iFaction >= FACTION_DEMON) && (_iFaction < FACTION_ABYSS_QTY));
 }
 
-bool CFaction::IsGroupHumanoid()
+bool CCFaction::IsGroupHumanoid()
 {
-    ADDTOCALLSTACK_INTENSIVE("CFaction::IsGroupHumanoid");
+    ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupHumanoid");
     return ((_iFaction >= FACTION_REPOND) && (_iFaction < FACTION_HUMANOID_QTY));
 }
 
-bool CFaction::IsGroupUndead()
+bool CCFaction::IsGroupUndead()
 {
-    ADDTOCALLSTACK_INTENSIVE("CFaction::IsGroupUndead");
+    ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupUndead");
     return ((_iFaction >= FACTION_UNDEAD) && (_iFaction < FACTION_UNDEAD_QTY));
 }
 
-bool CFaction::IsGroupArachnid()
+bool CCFaction::IsGroupArachnid()
 {
-    ADDTOCALLSTACK_INTENSIVE("CFaction::IsGroupArachnid");
+    ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupArachnid");
     return ((_iFaction >= FACTION_ARACHNID) && (_iFaction < FACTION_ARACHNID_QTY));
 }
 
-bool CFaction::IsGroupReptilian()
+bool CCFaction::IsGroupReptilian()
 {
-    ADDTOCALLSTACK_INTENSIVE("CFaction::IsGroupReptilian");
+    ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupReptilian");
     return ((_iFaction >= FACTION_REPTILE) && (_iFaction < FACTION_REPTILIAN_QTY));
 }
 
-bool CFaction::IsSuperSlayer()
+bool CCFaction::IsSuperSlayer()
 {
-    ADDTOCALLSTACK_INTENSIVE("CFaction::IsSuperSlayer");
+    ADDTOCALLSTACK_INTENSIVE("CCFaction::IsSuperSlayer");
     switch (_iFaction)
     {
         case FACTION_FEY:
@@ -337,17 +338,17 @@ bool CFaction::IsSuperSlayer()
     return false;
 }
 
-bool CFaction::IsLesserSlayer()
+bool CCFaction::IsLesserSlayer()
 {
-    ADDTOCALLSTACK_INTENSIVE("CFaction::IsLesserSlayer");
+    ADDTOCALLSTACK_INTENSIVE("CCFaction::IsLesserSlayer");
     if ((_iFaction > FACTION_NONE) && (_iFaction < FACTION_QTY) && (!IsSuperSlayer()))
         return true;
     return false;
 }
 
-int CFaction::GetSlayerDamageBonus(CFaction *target)
+int CCFaction::GetSlayerDamageBonus(CCFaction *target)
 {
-    ADDTOCALLSTACK_INTENSIVE("CFaction::GetSlayerDamageBonus");
+    ADDTOCALLSTACK_INTENSIVE("CCFaction::GetSlayerDamageBonus");
     if (IsOppositeLesserSlayer(target))
         return DAMAGE_SLAYER_LESSER;
     else if (IsOppositeSuperSlayer(target))
@@ -355,9 +356,9 @@ int CFaction::GetSlayerDamageBonus(CFaction *target)
     return 1;
 }
 
-int CFaction::GetSlayerDamagePenalty(CFaction * target)
+int CCFaction::GetSlayerDamagePenalty(CCFaction * target)
 {
-    ADDTOCALLSTACK_INTENSIVE("CFaction::GetSlayerDamagePenalty");
+    ADDTOCALLSTACK_INTENSIVE("CCFaction::GetSlayerDamagePenalty");
     if (IsOppositeGroup(target))
         return DAMAGE_SLAYER_OPPOSITE;
     return 1;

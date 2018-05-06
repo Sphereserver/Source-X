@@ -18,7 +18,7 @@
 #include "spheresvr.h"
 #include "triggers.h"
 #include "CServerConfig.h"
-#include "CChampion.h"
+#include "components/CCChampion.h"
 
 
 CServerConfig::CServerConfig()
@@ -3053,12 +3053,12 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
         pPrvDef = ResourceGetDef(rid);
         if (pPrvDef)
         {
-            pNewLink = dynamic_cast <CChampionDef*>(pPrvDef);
+            pNewLink = dynamic_cast <CCChampionDef*>(pPrvDef);
             ASSERT(pNewLink);
         }
         else
         {
-            pNewLink = new CChampionDef(rid);
+            pNewLink = new CCChampionDef(rid);
             if (pNewLink) 
             {
                 CResourceScript* pLinkResScript = dynamic_cast<CResourceScript*>(pScript);

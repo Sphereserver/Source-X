@@ -12,7 +12,7 @@
 #include "../uo_files/CUOItemTypeRec.h"
 #include "../CBase.h"
 #include "../CServerConfig.h"
-#include "../CFaction.h"
+#include "../components/CCFaction.h"
 
 
 enum IT_TYPE		// double click type action.

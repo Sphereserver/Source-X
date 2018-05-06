@@ -111,6 +111,7 @@ IF (SINGLE_TARGET)
 					${items_SRCS}
 					${chars_SRCS}
 					${clients_SRCS}
+					${components_SRCS}
 					${uofiles_SRCS}
 					${common_SRCS}
 					${network_SRCS}
@@ -133,6 +134,7 @@ IF (SINGLE_TARGET)
 					${items_SRCS}
 					${chars_SRCS}
 					${clients_SRCS}
+					${components_SRCS}
 					${uofiles_SRCS}
 					${common_SRCS}
 					${network_SRCS}
@@ -155,6 +157,7 @@ IF (SINGLE_TARGET)
 					${items_SRCS}
 					${chars_SRCS}
 					${clients_SRCS}
+					${components_SRCS}
 					${uofiles_SRCS}
 					${common_SRCS}
 					${network_SRCS}
@@ -179,10 +182,11 @@ ELSE (SINGLE_TARGET)
             ${items_SRCS}
             ${chars_SRCS}
             ${clients_SRCS}
+			${components_SRCS}
             ${uofiles_SRCS}
             ${common_SRCS}
             ${network_SRCS}
-	    ${crypto_SRCS}
+			${crypto_SRCS}
             ${sphere_SRCS}
             ${crashdump_SRCS}
             ${libev_SRCS}

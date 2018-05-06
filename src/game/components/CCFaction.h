@@ -1,15 +1,15 @@
 /**
-* @file CFaction.h
+* @file CCFaction.h
 *
 */
 
-#ifndef _INC_CFACTION_H
-#define _INC_CFACTION_H
+#ifndef _INC_CCFaction_H
+#define _INC_CCFaction_H
 
-#include "../common/datatypes.h"
-#include "../common/CScript.h"
-#include "../common/CTextConsole.h"
-#include "CComponent.h"
+#include "../../common/datatypes.h"
+#include "../../common/CScript.h"
+#include "../../common/CTextConsole.h"
+#include "../CComponent.h"
 
 /*
     The Original Slayers fall into 6 groups. Abyss, Arachnid, Elemental, Humanoid, Reptilian and Undead.
@@ -132,14 +132,15 @@ public:
     void SetFactionID(NPC_FACTION faction);
 };
 
-class CFaction : public CFactionDef, public CComponent
+class CCFaction : public CFactionDef, public CComponent
 {
     static lpctstr const sm_szLoadKeys[];
+    CObjBase *_pLink;
 
 public:
-    CFaction(const CObjBase* pLink);
-    CFaction(CFaction *copy, const CObjBase* pLink);
-	virtual ~CFaction() {}
+    CCFaction(CObjBase* pLink);
+    CCFaction(CCFaction *copy, CObjBase* pLink);
+	virtual ~CCFaction() {}
     virtual void Delete(bool fForced = false) override;
     virtual bool r_LoadVal(CScript & s) override;
     virtual bool r_WriteVal(lpctstr pszKey, CSString & s, CTextConsole * pSrc = NULL) override;
@@ -194,16 +195,16 @@ public:
     /*
         Checks my group and the target's one and return true if we are enemies.
     */
-    bool IsOppositeGroup(CFaction *target);
+    bool IsOppositeGroup(CCFaction *target);
 
     /*
     Returns true if I'm a Super Slayer and the target has also the same type
     */
-    bool IsOppositeSuperSlayer(CFaction *target);
+    bool IsOppositeSuperSlayer(CCFaction *target);
     /*
     Returns true if I'm a Lesser Slayer and the target has also the same type
     */
-    bool IsOppositeLesserSlayer(CFaction *target);
+    bool IsOppositeLesserSlayer(CCFaction *target);
     /*
         Returns true if I'm a Super Slayer
     */
@@ -219,14 +220,14 @@ public:
         with ours because we may both have more than one Group (even if we shouldn't,
         Sphere's 'versatility' forces us to do so).
     */
-    int GetSlayerDamageBonus(CFaction *target);
+    int GetSlayerDamageBonus(CCFaction *target);
 
     /*
         Wielding a slayer type against its opposite will cause the attacker to take more damage
         returns the penalty damage.
     */
-    int GetSlayerDamagePenalty(CFaction *target);
+    int GetSlayerDamagePenalty(CCFaction *target);
 
 };
 
-#endif // _INC_CFACTION_H
+#endif // _INC_CCFaction_H

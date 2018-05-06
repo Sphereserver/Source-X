@@ -580,13 +580,13 @@ Added the basics of an ECS: CEntity and CComponent so we can split into modules 
          case IT_SPAWN_CHAMPION:
         {
             pItem = new CItem(id, pItemDef);
-            pItem->Suscribe(new CSpawn(pItem));
-            pItem->Suscribe(new CChampion(pItem));
+            pItem->Suscribe(new CCSpawn(pItem));
+            pItem->Suscribe(new CCChampion(pItem));
             break;
         }
-Changed CItemSpawn into a CComponent 'CSpawn'
-Changed CItemChampion into a CComponent 'CChampion'
-Changed CFaction into a CComponent.
+Changed CItemSpawn into a CComponent 'CCSpawn'
+Changed CItemChampion into a CComponent 'CCChampion'
+Changed CCFaction into a CComponent.
 
 (Server)
 Fixed NPCs not casting/fighting continuously and going to wander randomly (CChar::NPC_Act_Idle()), also reformatted some files.
