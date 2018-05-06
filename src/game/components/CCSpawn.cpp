@@ -98,45 +98,45 @@ CItemBase *CCSpawn::TryItem(ITEMID_TYPE &id)
 
 CResourceDef *CCSpawn::FixDef()
 {
-	ADDTOCALLSTACK("CCSpawn:FixDef");
+    ADDTOCALLSTACK("CCSpawn:FixDef");
 
     CItem *pItem = static_cast<CItem*>(GetLink());
 
-	// No type info here !?
-	if (pItem->IsType(IT_SPAWN_CHAR) )
-	{
-		CREID_TYPE id = static_cast<CREID_TYPE>(_idSpawn.GetResIndex());
+    // No type info here !?
+    if (pItem->IsType(IT_SPAWN_CHAR))
+    {
+        CREID_TYPE id = static_cast<CREID_TYPE>(_idSpawn.GetResIndex());
         if (id < SPAWNTYPE_START)
         {
             return TryChar(id);
         }
 
-		// try a spawn group.
-		CResourceIDBase rid = CResourceID(RES_SPAWN, id);
-		CResourceDef *pDef = g_Cfg.ResourceGetDef(rid);
-		if ( pDef )
-		{
+        // try a spawn group.
+        CResourceIDBase rid = CResourceID(RES_SPAWN, id);
+        CResourceDef *pDef = g_Cfg.ResourceGetDef(rid);
+        if (pDef)
+        {
             _idSpawn = rid;
-			return pDef;
-		}
-		return TryChar(id);
-	}
-	else
-	{
-		ITEMID_TYPE id = (ITEMID_TYPE)(_idSpawn.GetResIndex());
-		if ( id < ITEMID_TEMPLATE )
-			return TryItem(id);
+            return pDef;
+        }
+        return TryChar(id);
+    }
+    else
+    {
+        ITEMID_TYPE id = (ITEMID_TYPE)(_idSpawn.GetResIndex());
+        if (id < ITEMID_TEMPLATE)
+            return TryItem(id);
 
-		// try a template.
-		CResourceIDBase rid = CResourceID(RES_TEMPLATE, id);
-		CResourceDef *pDef = g_Cfg.ResourceGetDef(rid);
-		if ( pDef )
-		{
+        // try a template.
+        CResourceIDBase rid = CResourceID(RES_TEMPLATE, id);
+        CResourceDef *pDef = g_Cfg.ResourceGetDef(rid);
+        if (pDef)
+        {
             _idSpawn = rid;
-			return pDef;
-		}
-		return TryItem(id);
-	}
+            return pDef;
+        }
+        return TryItem(id);
+    }
 }
 
 uint CCSpawn::WriteName(tchar *pszOut) const
@@ -371,17 +371,14 @@ void CCSpawn::OnTick(bool fExec)
         iMinutes = 1;
     }
 
-    if (!fExec)
+    if (pItem->IsTimerExpired())
     {
-        if (pItem->IsTimerExpired())
-        {
-            pItem->SetTimeout(iMinutes * 60 * TICK_PER_SEC);	// set time to check again.
-        }
+        pItem->SetTimeout(iMinutes * 60 * TICK_PER_SEC);	// set time to check again.
+    }
 
-        if (GetCurrentSpawned() >= GetAmount())
-        {
-            return;
-        }
+    if (GetCurrentSpawned() >= GetAmount())
+    {
+        return;
     }
 
     CResourceDef *pDef = FixDef();
