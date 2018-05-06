@@ -333,6 +333,10 @@ void CChar::LayerAdd( CItem * pItem, LAYER_TYPE layer )
 		case LAYER_FLAG_Criminal:
 			StatFlag_Set( STATF_CRIMINAL );
 			NotoSave_Update();
+            if (m_pClient)
+            {
+                m_pClient->addBuff(BI_CRIMINALSTATUS, 1153802, 1153828);
+            }
 			return;
 		case LAYER_FLAG_SpiritSpeak:
 			StatFlag_Set( STATF_SPIRITSPEAK );
@@ -435,6 +439,10 @@ void CChar::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when r
 		case LAYER_FLAG_Criminal:
 			StatFlag_Clear( STATF_CRIMINAL );
 			NotoSave_Update();
+            if (m_pClient)
+            {
+                m_pClient->removeBuff(BI_CRIMINALSTATUS);
+            }
 			break;
 		case LAYER_FLAG_SpiritSpeak:
 			StatFlag_Clear( STATF_SPIRITSPEAK );
@@ -2952,6 +2960,7 @@ bool CChar::Death()
 			else
 			{
 				pClient->addPlayerUpdate();
+                pClient->addPlayerWarMode();
 				pClient->addContainerSetup(GetPack());	// update backpack contents
 			}
 
