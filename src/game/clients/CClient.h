@@ -292,7 +292,7 @@ private:
 	bool OnTarg_Use_Deed( CItem * pDeed, CPointMap &pt );
 	bool OnTarg_Use_Item( CObjBase * pObj, CPointMap & pt, ITEMID_TYPE id );
 	bool OnTarg_Party_Add( CChar * pChar );
-	CItem* OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, uint64 iAttr, HUE_TYPE wHue );
+	CItem* OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, CItem *pDeed );
 
 	int OnSkill_AnimalLore( CUID uid, int iTestLevel, bool fTest );
 	int OnSkill_Anatomy( CUID uid, int iTestLevel, bool fTest );

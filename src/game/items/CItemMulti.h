@@ -59,6 +59,8 @@ public:
     CItem *GenerateKey(CChar *pTarget, bool fDupeOnBank = false);
     void RemoveKeys(CChar *pTarget);
     void SetMovingCrate(CUID uidCrate);
+    void Redeed(bool fDisplayMsg = true, bool fMoveToBank = true);
+    void TransferAllItemsToMovingCrate(CUID uidTargetContainer);
 
 protected:
 	virtual void OnComponentCreate( const CItem * pComponent );

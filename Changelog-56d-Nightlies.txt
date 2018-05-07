@@ -698,4 +698,12 @@ Now Owner, Coowners and Friends' uids are stored internally
 -Added MOVINGCRATE(RW) with basic support for Moving Crates:
  When setting to a container's UID, if there was any other MovingCrate before it's contents will be transfered to newer crate.
  When the multi is being deleted all linked items will be transfered to the crate (if any, if not they will be deleted) and the crate to the owner's bank (if any),
- a TAG.MULTIUID with the multi's uid will be set on the crate.
+ a TAG.MULTI_UID with the multi's uid will be set on the crate.
+-Added MOVETOCRATE uid(WO): (Only working if MovingCrate is set).
+	Moves to the Moving Crate all the items inside the multi that meets the following requirements:
+		A) Are linked to it
+		B) Are not multi's components (eg: doors, sign, etc).
+	If a container's uid is given, the Moving Crate will be transfered to that container.
+-Added Redeed(WO) fShowMsg, fMoveToCrate: Redeeds the multi to the OWNER's backpack (if there is no owner, there is no redeed).
+	fShowMsg: if true shows the Bounce Msg
+	fMoveToCrate: if true executes MoveToCrate with the owner's bank uid.

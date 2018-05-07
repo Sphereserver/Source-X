@@ -33,35 +33,6 @@ CItemMulti::~CItemMulti()
 	if ( ! m_pRegion )
 		return;
 
-    CItemContainer *pCrate = static_cast<CItemContainer*>(_uidMovingCrate.ItemFind());
-	CWorldSearch Area( m_pRegion->m_pt, Multi_GetMaxDist() );	// largest area.
-	Area.SetSearchSquare( true );
-	for (;;)
-	{
-		CItem * pItem = Area.GetItem();
-		if ( pItem == NULL )
-			break;
-		if ( pItem == this )	// this gets deleted seperately.
-			continue;
-		if ( ! Multi_IsPartOf( pItem ))
-			continue;
-        if (pCrate)
-        {
-            pCrate->ContentAdd(pItem);
-        }
-        else
-        {
-            pItem->Delete();		// delete the key id for the door/key/sign.
-            Area.RestartSearch();	// we removed an item and this will mess the search loop, so restart to fix it
-        }
-	}
-    CChar *pOwner = _uidOwner.CharFind();
-    if (pCrate && pOwner)
-    {
-        pCrate->ClrAttr(ATTR_MOVE_NEVER|ATTR_STATIC|ATTR_SECURE);   //Clear all attrs
-        pCrate->SetKeyNum("MULTIUID",GetUID());
-        pOwner->GetBank()->ContentAdd(pCrate);
-    }
 
 	delete m_pRegion;
 }
@@ -597,16 +568,75 @@ void CItemMulti::SetMovingCrate(CUID uidCrate)
     pNewCrate->m_uidLink = GetUID();
 }
 
+void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank)
+{
+    CChar *pOwner = _uidOwner.CharFind();
+    if (fMoveToBank)
+    {
+        TransferAllItemsToMovingCrate(pOwner ? pOwner->GetBank()->GetUID() : NULL);
+    }
+    if (!pOwner)
+    {
+        return;
+    }
+    CItem *pDeed = CItem::CreateBase((ITEMID_TYPE)(GetKeyNum("MULTI_ID",true)));
+    if (pDeed)
+    {
+        pDeed->SetHue(GetHue());
+        if (m_Attr & ATTR_MAGIC) {
+            pDeed->SetAttr(ATTR_MAGIC);
+        }
+    }
+    pOwner->ItemBounce(pDeed, fDisplayMsg);
+}
+
+void CItemMulti::TransferAllItemsToMovingCrate(CUID uidTargetContainer)
+{
+    CItemContainer *pCrate = static_cast<CItemContainer*>(_uidMovingCrate.ItemFind());
+    CWorldSearch Area(m_pRegion->m_pt, Multi_GetMaxDist());	// largest area.
+    Area.SetSearchSquare(true);
+    for (;;)
+    {
+        CItem * pItem = Area.GetItem();
+        if (pItem == NULL)
+            break;
+        if (pItem == this)	// this gets deleted seperately.
+            continue;
+        if (!Multi_IsPartOf(pItem) || pItem->GetKeyNum("COMPONENT",true) != 0)  // Do not transfer items not linked to this multi or Components (doors, signs, etc).
+            continue;
+        if (pCrate)
+        {
+            pCrate->ContentAdd(pItem);
+        }
+        else
+        {
+            pItem->Delete();		// delete the key id for the door/key/sign.
+            Area.RestartSearch();	// we removed an item and this will mess the search loop, so restart to fix it
+        }
+    }
+    CItemContainer *pTargCont = static_cast<CItemContainer*>(uidTargetContainer.ItemFind());
+    if (pCrate && pTargCont)
+    {
+        pCrate->ClrAttr(ATTR_MOVE_NEVER | ATTR_STATIC | ATTR_SECURE);   //Clear all attrs
+        pCrate->SetKeyNum("MULTI_UID", GetUID());
+        pTargCont->ContentAdd(pCrate);
+    }
+}
+
 enum
 {
+    SHV_MOVETOCRATE,
     SHV_MULTICREATE,
+    SHV_REDEED,
     SHV_REMOVEKEYS,
     SHV_QTY
 };
 
 lpctstr const CItemMulti::sm_szVerbKeys[SHV_QTY + 1] =
 {
+    "MOVETOCRATE",
     "MULTICREATE",
+    "REDEED",
     "REMOVEKEYS",
     NULL
 };
@@ -645,11 +675,26 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
     int iCmd = FindTableSorted(s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys) - 1);
     switch (iCmd)
     {
+        case SHV_MOVETOCRATE:
+        {
+            CUID uid(s.GetArgVal());
+            TransferAllItemsToMovingCrate(uid);
+            return true;
+        }
         case SHV_MULTICREATE:
         {
             CUID	uid(s.GetArgVal());
             CChar *	pCharSrc = uid.CharFind();
             Multi_Create(pCharSrc, 0);
+            return true;
+        }
+        case SHV_REDEED:
+        {
+            int64 piCmd[2];
+            Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
+            bool fShowMsg = piCmd[0] ? true : false;
+            bool fMoveToBank = piCmd[1] ? true : false;
+            Redeed(fShowMsg, fMoveToBank);
             return true;
         }
         case SHV_REMOVEKEYS:
@@ -927,4 +972,5 @@ bool CItemMulti::CanPlace(CChar *pChar)
 void CItemMulti::OnComponentCreate( const CItem * pComponent )
 {
 	UNREFERENCED_PARAMETER(pComponent);
+    const_cast<CItem*>(pComponent)->SetKeyNum("COMPONENT",1);
 }

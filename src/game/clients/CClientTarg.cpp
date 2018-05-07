@@ -349,7 +349,7 @@ bool CClient::OnTarg_Item_Add( CObjBase * pObj, CPointMap & pt )
 
 	if ( pItem->IsTypeMulti() )
 	{
-		CItem *pMulti = OnTarg_Use_Multi(pItem->Item_GetDef(), pt, pItem->m_Attr, pItem->GetHue());
+		CItem *pMulti = OnTarg_Use_Multi(pItem->Item_GetDef(), pt, pItem);
 		pItem->Delete();
 		return pMulti ? true : false;
 	}
@@ -1588,141 +1588,160 @@ bool CClient::OnTarg_Use_Deed( CItem * pDeed, CPointMap & pt )
 	// IT_DEED
 	//
 
-	if ( ! m_pChar->CanUse(pDeed, true ))
-		return false;
+    if (!m_pChar->CanUse(pDeed, true))
+    {
+        return false;
+    }
 
 	const CItemBase * pItemDef = CItemBase::FindItemBase((ITEMID_TYPE)(RES_GET_INDEX(pDeed->m_itDeed.m_Type)));
 
-	if ( ! OnTarg_Use_Multi( pItemDef, pt, pDeed->m_Attr, pDeed->GetHue() ))
-		return false;
+    if (!OnTarg_Use_Multi(pItemDef, pt, pDeed))
+    {
+        return false;
+    }
 
 	pDeed->Delete();	// consume the deed.
 	return true;
 }
 
-CItem * CClient::OnTarg_Use_Multi( const CItemBase * pItemDef, CPointMap & pt, uint64 iAttr, HUE_TYPE wHue )
+CItem * CClient::OnTarg_Use_Multi(const CItemBase * pItemDef, CPointMap & pt, CItem *pDeed)
 {
-	ADDTOCALLSTACK("CClient::OnTarg_Use_Multi");
-	// Might be a IT_MULTI or it might not. place it anyhow.
+    ADDTOCALLSTACK("CClient::OnTarg_Use_Multi");
+    // Might be a IT_MULTI or it might not. place it anyhow.
 
-	if ( (pItemDef == NULL) || !pt.GetRegion(REGION_TYPE_AREA) )
-		return NULL;
+    if ((pItemDef == nullptr) || !pt.GetRegion(REGION_TYPE_AREA))
+        return nullptr;
 
-	bool fShip = ( pItemDef->IsType(IT_SHIP));	// must be in water.
+    bool fShip = (pItemDef->IsType(IT_SHIP));	// must be in water.
 
-	const CItemBaseMulti * pMultiDef = dynamic_cast <const CItemBaseMulti *> ( pItemDef );
+    const CItemBaseMulti * pMultiDef = dynamic_cast <const CItemBaseMulti *> (pItemDef);
 
-	// Check water/mountains/etc.
-	if ( (pMultiDef != NULL) && !(iAttr&ATTR_MAGIC) )
-	{
-		//if ( pMultiDef->m_rect.m_bottom > 0 && (pMultiDef->IsType(IT_MULTI) || pMultiDef->IsType(IT_MULTI_CUSTOM)) )
-		if ( CItemBase::IsID_Multi(pItemDef->GetID()) )
-			pt.m_y -= (short)(pMultiDef->m_rect.m_bottom - 1);
+    // Check water/mountains/etc.
+    if ((pMultiDef != nullptr) && !(pDeed->IsAttr(ATTR_MAGIC)))
+    {
+        //if ( pMultiDef->m_rect.m_bottom > 0 && (pMultiDef->IsType(IT_MULTI) || pMultiDef->IsType(IT_MULTI_CUSTOM)) )
+        if (CItemBase::IsID_Multi(pItemDef->GetID()))
+            pt.m_y -= (short)(pMultiDef->m_rect.m_bottom - 1);
 
-		// Check for items in the way and bumpy terrain.
+        // Check for items in the way and bumpy terrain.
 
-		CRect rect = pMultiDef->m_rect;
-		rect.m_map = pt.m_map;
-		rect.OffsetRect( pt.m_x, pt.m_y );
-		CPointMap ptn = pt;
+        CRect rect = pMultiDef->m_rect;
+        rect.m_map = pt.m_map;
+        rect.OffsetRect(pt.m_x, pt.m_y);
+        CPointMap ptn = pt;
 
-		int x = rect.m_left;
-		for ( ; x < rect.m_right; ++x )
-		{
-			ptn.m_x = (short)x;
-			int y = rect.m_top;
-			for ( ; y < rect.m_bottom; ++y )
-			{
-				ptn.m_y = (short)y;
+        int x = rect.m_left;
+        for (; x < rect.m_right; ++x)
+        {
+            ptn.m_x = (short)x;
+            int y = rect.m_top;
+            for (; y < rect.m_bottom; ++y)
+            {
+                ptn.m_y = (short)y;
 
-				if ( !ptn.IsValidPoint() )
-				{
-					SysMessageDefault( DEFMSG_ITEMUSE_MULTI_FAIL );
-					return NULL;
-				}
+                if (!ptn.IsValidPoint())
+                {
+                    SysMessageDefault(DEFMSG_ITEMUSE_MULTI_FAIL);
+                    return nullptr;
+                }
 
-				CRegion * pRegion = ptn.GetRegion( REGION_TYPE_MULTI | REGION_TYPE_AREA | REGION_TYPE_ROOM );
-				if ( (pRegion == NULL) || ( pRegion->IsFlag(REGION_FLAG_NOBUILDING) && ! fShip ))
-				{
-					SysMessageDefault( DEFMSG_ITEMUSE_MULTI_FAIL );
-					if ( !IsPriv( PRIV_GM ))
-						return NULL;
-				}
+                CRegion * pRegion = ptn.GetRegion(REGION_TYPE_MULTI | REGION_TYPE_AREA | REGION_TYPE_ROOM);
+                if ((pRegion == nullptr) || (pRegion->IsFlag(REGION_FLAG_NOBUILDING) && !fShip))
+                {
+                    SysMessageDefault(DEFMSG_ITEMUSE_MULTI_FAIL);
+                    if (!IsPriv(PRIV_GM))
+                        return nullptr;
+                }
 
-				dword dwBlockFlags = ( fShip ) ? CAN_C_SWIM : CAN_C_WALK;
-				ptn.m_z = g_World.GetHeightPoint2( ptn, dwBlockFlags, true ); //hm...should really use the 2nd function ? it does fixed #2373
-				if ( abs( ptn.m_z - pt.m_z ) > 4 )
-				{
-					SysMessageDefault( DEFMSG_ITEMUSE_MULTI_BUMP );
-					if ( ! IsPriv( PRIV_GM ))
-						return NULL;
-				}
-				if ( fShip )
-				{
-					if ( ! ( dwBlockFlags & CAN_I_WATER ))
-					{
-						SysMessageDefault( DEFMSG_ITEMUSE_MULTI_SHIPW );
-						if ( ! IsPriv( PRIV_GM ))
-							return NULL;
-					}
-				}
-				else if ( dwBlockFlags & ( CAN_I_WATER | CAN_I_BLOCK | CAN_I_CLIMB ))
-				{
-					SysMessageDefault( DEFMSG_ITEMUSE_MULTI_BLOCKED );
-					if ( ! IsPriv( PRIV_GM ))
-						return NULL;
-				}
-			}
-		}
+                dword dwBlockFlags = (fShip) ? CAN_C_SWIM : CAN_C_WALK;
+                ptn.m_z = g_World.GetHeightPoint2(ptn, dwBlockFlags, true); //hm...should really use the 2nd function ? it does fixed #2373
+                if (abs(ptn.m_z - pt.m_z) > 4)
+                {
+                    SysMessageDefault(DEFMSG_ITEMUSE_MULTI_BUMP);
+                    if (!IsPriv(PRIV_GM))
+                        return nullptr;
+                }
+                if (fShip)
+                {
+                    if (!(dwBlockFlags & CAN_I_WATER))
+                    {
+                        SysMessageDefault(DEFMSG_ITEMUSE_MULTI_SHIPW);
+                        if (!IsPriv(PRIV_GM))
+                            return nullptr;
+                    }
+                }
+                else if (dwBlockFlags & (CAN_I_WATER | CAN_I_BLOCK | CAN_I_CLIMB))
+                {
+                    SysMessageDefault(DEFMSG_ITEMUSE_MULTI_BLOCKED);
+                    if (!IsPriv(PRIV_GM))
+                        return nullptr;
+                }
+            }
+        }
 
-		// Check for chars in the way.
+        // Check for chars in the way.
 
-		CWorldSearch Area( pt, maximum(rect.GetWidth(), rect.GetHeight()) );
-		Area.SetSearchSquare( true );
-		for (;;)
-		{
-			CChar * pChar = Area.GetChar();
-			if ( pChar == NULL )
-				break;
-			if ( !rect.IsInside2d(pChar->GetTopPoint()) )
-				continue;
-			if ( pChar->IsPriv(PRIV_GM) && !CanSee(pChar) )
-				continue;
+        CWorldSearch Area(pt, maximum(rect.GetWidth(), rect.GetHeight()));
+        Area.SetSearchSquare(true);
+        for (;;)
+        {
+            CChar * pChar = Area.GetChar();
+            if (pChar == nullptr)
+            {
+                break;
+            }
+            if (!rect.IsInside2d(pChar->GetTopPoint()))
+            {
+                continue;
+            }
+            if (pChar->IsPriv(PRIV_GM) && !CanSee(pChar))
+            {
+                continue;
+            }
 
-			SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_MULTI_INTWAY), pChar->GetName());
-			if ( !IsPriv(PRIV_GM) )
-				return NULL;
-			if ( pChar != m_pChar )
-				pChar->Spell_Teleport(m_pChar->GetTopPoint(), false, false);
-		}
-	}
+            SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_MULTI_INTWAY), pChar->GetName());
+            if (!IsPriv(PRIV_GM))
+            {
+                return nullptr;
+            }
+            if (pChar != m_pChar)
+            {
+                pChar->Spell_Teleport(m_pChar->GetTopPoint(), false, false);
+            }
+        }
+    }
 
-	CItem * pItemNew = CItem::CreateTemplate( pItemDef->GetID(), NULL, m_pChar );
-	if ( pItemNew == NULL )
-	{
-		SysMessageDefault( DEFMSG_ITEMUSE_MULTI_COLLAPSE );
-		return NULL;
-	}
+    CItem * pItemNew = CItem::CreateTemplate(pItemDef->GetID(), nullptr, m_pChar);
+    if (pItemNew == nullptr)
+    {
+        SysMessageDefault(DEFMSG_ITEMUSE_MULTI_COLLAPSE);
+        return nullptr;
+    }
 
-	pItemNew->SetAttr(ATTR_MOVE_NEVER | (iAttr & (ATTR_MAGIC|ATTR_INVIS)));
-	pItemNew->SetHue( wHue );
-	pItemNew->MoveToUpdate( pt );
+    pItemNew->SetAttr(ATTR_MOVE_NEVER | (pDeed->m_Attr & (ATTR_MAGIC | ATTR_INVIS)));
+    pItemNew->SetHue(pDeed->GetHue());
+    pItemNew->MoveToUpdate(pt);
+    pItemNew->SetKeyNum("DEED_ID", pDeed->GetID());
 
-	CItemMulti * pMultiItem = dynamic_cast <CItemMulti*>(pItemNew);
-	if ( pMultiItem )
-		pMultiItem->Multi_Create( m_pChar, UID_CLEAR );
+    CItemMulti * pMultiItem = dynamic_cast <CItemMulti*>(pItemNew);
+    if (pMultiItem)
+    {
+        pMultiItem->Multi_Create(m_pChar, UID_CLEAR);
+    }
 
-	if ( pItemDef->IsType(IT_STONE_GUILD))
-	{
-		// Now name the guild
-		CItemStone * pStone = dynamic_cast <CItemStone*>(pItemNew);
-		pStone->AddRecruit( m_pChar, STONEPRIV_MASTER );
-		addPromptConsole( CLIMODE_PROMPT_STONE_NAME, g_Cfg.GetDefaultMsg( DEFMSG_ITEMUSE_GUILDSTONE_NEW ), pItemNew->GetUID() );
-	}
-	else if ( fShip )
-		pItemNew->Sound( Calc_GetRandVal(2)? 0x12:0x13 );
+    if (pItemDef->IsType(IT_STONE_GUILD))
+    {
+        // Now name the guild
+        CItemStone * pStone = dynamic_cast <CItemStone*>(pItemNew);
+        pStone->AddRecruit(m_pChar, STONEPRIV_MASTER);
+        addPromptConsole(CLIMODE_PROMPT_STONE_NAME, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_GUILDSTONE_NEW), pItemNew->GetUID());
+    }
+    else if (fShip)
+    {
+        pItemNew->Sound(Calc_GetRandVal(2) ? 0x12 : 0x13);
+    }
 
-	return pItemNew;
+    return pItemNew;
 }
 
 bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE id )
