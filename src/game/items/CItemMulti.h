@@ -19,6 +19,10 @@ class CItemMulti : public CItem
 private:
 	static lpctstr const sm_szLoadKeys[];
 	static lpctstr const sm_szVerbKeys[];
+    CUID _uidOwner;     // Owner's UID
+    std::vector<CUID> _lCoowners;   // List of Coowners' UID.
+    std::vector<CUID> _lFriends;    // List of Friends' UID.
+    CUID _uidMovingCrate;   // Moving Crate's UID.
 
 protected:
 	CRegionWorld * m_pRegion;		// we own this region.
@@ -39,6 +43,22 @@ public:
 	};
 	ShipSpeed m_shipSpeed; // Speed of ships (IT_SHIP)
 	byte m_SpeedMode;
+
+    bool CanPlace(CChar *pChar);
+
+    void SetOwner(CUID uidOwner);
+    void AddCoowner(CUID uidCoowner);
+    void DelCoowner(CUID uidCoowner);
+    void AddFriend(CUID uidFriend);
+    void DelFriend(CUID uidFriend);
+    int GetCoownerCount();
+    int GetFriendCount();
+    bool IsOwner(CUID uidTarget);
+    bool IsCoowner(CUID uidTarget);
+    bool IsFriend(CUID uidTarget);
+    CItem *GenerateKey(CChar *pTarget, bool fDupeOnBank = false);
+    void RemoveKeys(CChar *pTarget);
+    void SetMovingCrate(CUID uidCrate);
 
 protected:
 	virtual void OnComponentCreate( const CItem * pComponent );

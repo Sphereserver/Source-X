@@ -2853,8 +2853,7 @@ bool CChar::Death()
 			{
 				CScriptTriggerArgs args(this);
 				args.m_iN1 = GetAttackersCount();
-                args.m_pO1 = pKiller;
-				if ( pKiller->OnTrigger(CTRIG_Kill, pKiller, &args) == TRIGRET_RET_TRUE )
+				if ( pKiller->OnTrigger(CTRIG_Kill, this, &args) == TRIGRET_RET_TRUE )
 					continue;
 			}
 

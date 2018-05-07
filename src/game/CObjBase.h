@@ -1099,7 +1099,8 @@ enum CTRIG_TYPE
 	CTRIG_HitIgnore,        // I should ignore this target, just giving a record to scripts.
 	CTRIG_HitMiss,          // I just missed.
 	CTRIG_HitTry,           // I am trying to hit someone. starting swing.,
-	CTRIG_HouseDesignCommit,// I committed a new house design
+    CTRIG_HouseDesignCommit,// I committed a new house design
+    CTRIG_HouseDesignCommitItem,// I committed an Item to the house design.
 	CTRIG_HouseDesignExit,  // I exited house design mode
 
 	CTRIG_itemAfterClick,       // I'm going to click one item.

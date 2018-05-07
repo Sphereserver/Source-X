@@ -151,6 +151,10 @@ public:
 	// Client's local light (might be useful in the future for NPCs also? keep it here for now)
 	byte m_LocalLight;
 
+    // Houses
+    uint8 _iMaxHouses;      // Max houses this player (Client?) can have (Overriding CAccount::_iMaxHouses)
+    std::vector<CUID> _lHouses;	// List of houses.
+
 	// When events happen to the char. check here for reaction scripts.
 
 	// Skills, Stats and health
@@ -303,6 +307,8 @@ private:
 	CChar& operator=(const CChar& other);
 
 public:
+    void AddHouse(CUID uidHouse);
+    void DelHouse(CUID uidHouse);
 	// Status and attributes ------------------------------------
 	int IsWeird() const;
 	char GetFixZ( CPointMap pt, dword dwBlockFlags = 0);

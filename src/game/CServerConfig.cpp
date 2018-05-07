@@ -74,6 +74,8 @@ CServerConfig::CServerConfig()
 	m_iMinCharDeleteTime	= 7*24*60*60 * TICK_PER_SEC;
 	m_iMaxCharsPerAccount	= 5;
 	m_fLocalIPAdmin			= true;
+    _iMaxHousesAccount      = 1;
+    _iMaxHousesPlayer       = 1;
 
 	// Save
 	m_iSaveNPCSkills			= 10;
@@ -130,6 +132,7 @@ CServerConfig::CServerConfig()
 	m_fHelpingCriminalsIsACrime	= true;
 	m_fGenericSounds		= true;
 	m_fAutoNewbieKeys 		= true;
+    _fAutoHouseKeys         = true;
 	m_iMaxBaseSkill			= 200;
 	m_iStamRunningPenalty 	= 50;
 	m_iStaminaLossAtWeight 	= 150;
@@ -394,6 +397,7 @@ enum RC_TYPE
 	RC_ARRIVEDEPARTMSG,
 	RC_ATTACKERTIMEOUT,			// m_iAttackerTimeout
 	RC_ATTACKINGISACRIME,		// m_fAttackingIsACrime
+    RC_AUTOHOUSEKEYS,           // _fAutoHouseKeys
 	RC_AUTONEWBIEKEYS,			// m_fAutoNewbieKeys
 	RC_AUTOPRIVFLAGS,			// m_iAutoPrivFlags
 	RC_AUTORESDISP,				// m_bAutoResDisp
@@ -499,9 +503,11 @@ enum RC_TYPE
 	RC_MAGICUNLOCKDOOR,			// m_iMagicUnlockDoor
 	RC_MAPCACHETIME,
 	RC_MAXBASESKILL,			// m_iMaxBaseSkill
-	RC_MAXCHARSPERACCOUNT,		// m_iMaxCharsPerAccount
+	RC_MAXCHARSPERACCOUNT,		//  
 	RC_MAXCOMPLEXITY,			// m_iMaxCharComplexity
 	RC_MAXFAME,					// m_iMaxFame
+    RC_MAXHOUSESACCOUNT,        // _iMaxHousesAccount
+    RC_MAXHOUSESPLAYER,         // _iMaxHousesPlayer
 	RC_MAXITEMCOMPLEXITY,		// m_iMaxItemComplexity
 	RC_MAXKARMA,				// m_iMaxKarma
 	RC_MAXLOOPTIMES,			// m_iMaxLoopTimes
@@ -628,6 +634,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "ARRIVEDEPARTMSG",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iArriveDepartMsg),		0 }},
 	{ "ATTACKERTIMEOUT",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iAttackerTimeout),		0 }},
 	{ "ATTACKINGISACRIME",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fAttackingIsACrime),	0 }},
+    { "AUTOHOUSEKEYS",          { ELEM_BOOL,	OFFSETOF(CServerConfig,_fAutoHouseKeys),		0 }},
 	{ "AUTONEWBIEKEYS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fAutoNewbieKeys),		0 }},
 	{ "AUTOPRIVFLAGS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iAutoPrivFlags),		0 }},
 	{ "AUTORESDISP",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAutoResDisp),			0 }},
@@ -735,8 +742,10 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "MAXBASESKILL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxBaseSkill),		0 }},
 	{ "MAXCHARSPERACCOUNT",		{ ELEM_BYTE,	OFFSETOF(CServerConfig,m_iMaxCharsPerAccount),	0 }},
 	{ "MAXCOMPLEXITY",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxCharComplexity),	0 }},
-	{ "MAXFAME",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxFame),				0 }},
-	{ "MAXITEMCOMPLEXITY",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxItemComplexity),	0 }},
+    { "MAXFAME",                { ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxFame),				0 }},
+    { "MAXHOUSESACCOUNT",       { ELEM_INT,		OFFSETOF(CServerConfig,_iMaxHousesAccount),     0 }},
+    { "MAXHOUSESPLAYER",        { ELEM_INT,		OFFSETOF(CServerConfig,_iMaxHousesPlayer),      0 }},
+	{ "MAXITEMCOMPLEXITY",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxItemComplexity),   0 }},
 	{ "MAXKARMA",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxKarma),			0 }},
 	{ "MAXLOOPTIMES",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxLoopTimes),		0 }},
 	{ "MAXPACKETSPERTICK",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetMaxPacketsPerTick),0 }},
@@ -1080,6 +1089,12 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			if ( m_iMaxCharsPerAccount > MAX_CHARS_PER_ACCT )
 				m_iMaxCharsPerAccount = MAX_CHARS_PER_ACCT;
 			break;
+        case RC_MAXHOUSESACCOUNT:
+            _iMaxHousesAccount = s.GetArgUCVal();
+            break;
+        case RC_MAXHOUSESPLAYER:
+            _iMaxHousesPlayer = s.GetArgUCVal();
+            break;
 		case RC_MAXFAME:
 			m_iMaxFame = s.GetArgVal();
 			if (m_iMaxFame < 0)
@@ -1720,6 +1735,12 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 		case RC_NOTOTIMEOUT:
 			sVal.FormatVal(m_iNotoTimeout / TICK_PER_SEC);
 			break;
+        case RC_MAXHOUSESACCOUNT:
+            sVal.FormatUCVal(_iMaxHousesAccount);
+            break;
+        case RC_MAXHOUSESPLAYER:
+            sVal.FormatUCVal(_iMaxHousesPlayer);
+            break;
 		case RC_MAXFAME:
 			sVal.FormatVal( m_iMaxFame );
 			break;

@@ -849,6 +849,8 @@ public:
 	byte m_iMaxCharsPerAccount; // Maximum characters allowed on an account.
 	bool m_fLocalIPAdmin;       // The local ip is the admin ?
 	bool m_fMd5Passwords;       // Should MD5 hashed passwords be used?
+    uint8 _iMaxHousesAccount;   // Max houses per account.
+    uint8 _iMaxHousesPlayer;    // Max houses per player.
 
 	// Magic
 	bool m_fReagentsRequired;   // Do spells require reagents to be casted?
@@ -887,7 +889,8 @@ public:
 	uint m_iMaxItemComplexity;		// How many items per meter.
 	uint m_iMaxSectorComplexity;	// How many items per sector.
 	bool m_fGenericSounds;			// Do players receive generic (not them-devoted) sounds.
-	bool m_fAutoNewbieKeys;			// Are house and boat keys newbied automatically?
+    bool m_fAutoNewbieKeys;			// Are house and boat keys newbied automatically?
+    bool _fAutoHouseKeys;			// Do houses and boat create keys automaticall?
 	int  m_iStamRunningPenalty;		// Weight penalty for running (+N% of max carry weight)
 	int  m_iStaminaLossAtWeight;	// %Weight at which characters begin to lose stamina.
 	int  m_iHitpointPercentOnRez;	// How many hitpoints do they get when they are rez'd?

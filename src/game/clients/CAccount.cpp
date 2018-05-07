@@ -564,6 +564,7 @@ CAccount::CAccount( lpctstr pszName, bool fGuest )
 	m_PrivFlags = (word)(g_Cfg.m_iAutoPrivFlags);
     SetResDisp(RDS_T2A);
 	m_MaxChars = 0;
+    _iMaxHouses = g_Cfg._iMaxHousesAccount;
 
 	m_Total_Connect_Time = 0;
 	m_Last_Connect_Time = 0;
@@ -1057,6 +1058,7 @@ enum AC_TYPE
 	AC_LASTCONNECTTIME,
 	AC_LASTIP,
 	AC_MAXCHARS,
+    AC_MAXHOUSES,
 	AC_MD5PASSWORD,
 	AC_NAME,
 	AC_NEWPASSWORD,
@@ -1088,6 +1090,7 @@ lpctstr const CAccount::sm_szLoadKeys[AC_QTY+1] = // static
 	"LASTCONNECTTIME",
 	"LASTIP",
 	"MAXCHARS",
+    "MAXHOUSES",
 	"MD5PASSWORD",
 	"NAME",
 	"NEWPASSWORD",
@@ -1177,6 +1180,9 @@ bool CAccount::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 		case AC_MAXCHARS:
 			sVal.FormatVal( GetMaxChars() );
 			break;
+        case AC_MAXHOUSES:
+            sVal.FormatUCVal(_iMaxHouses);
+            break;
 		case AC_PLEVEL:
 			sVal.FormatVal( m_PrivLevel );
 			break;
@@ -1321,6 +1327,9 @@ bool CAccount::r_LoadVal( CScript & s )
 		case AC_MAXCHARS:
 			SetMaxChars( (uchar)(s.GetArgVal()) );
 			break;
+        case AC_MAXHOUSES:
+            _iMaxHouses = s.GetArgUCVal();
+            break;
 		case AC_MD5PASSWORD:
 			SetPassword( s.GetArgStr(), true);
 			break;
@@ -1426,6 +1435,10 @@ void CAccount::r_Write(CScript &s)
 	{
 		s.WriteKeyHex( "LASTCHARUID", m_uidLastChar );
 	}
+    if (_iMaxHouses != g_Cfg._iMaxHousesAccount)
+    {
+        s.WriteKeyVal("MaxHouses", _iMaxHouses);
+    }
 
 	m_Chars.WritePartyChars(s);
 

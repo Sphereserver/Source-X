@@ -651,3 +651,51 @@ Added Damageable Items functionality allowing them to have HP bars, only for ite
 To modify their HP use HITS and MAXHITS on them
 [Sphere.ini]
 -Added RegenItemHits to control the update period of those items' hp.
+
+07-05-2018, XuN
+House trigger updates:
+-Added @HouseDesignCommitItem for each commited item, with args:
+	local.id=ID of the item
+	local.p.x=x location
+	local.p.y=y location
+	local.p.z=z location
+	local.visible=0 or 1 (non-visible items are things like doors and signs)
+	return false will remove this item from the commit.*
+*if not return false a local.MaxZ will check the P.Z value of the item and update it if it's higher than the old one.
+-Added local.MAXZ to @HouseDesignCommit.
+
+-Added ini features:
+	MaxHousesAccount= Max houses an account can have (default 1).
+	MaxHousesPlayer= Max houses one player can have (default 1).
+-Added MaxHouses property for accounts, Default = Serv.MaxHousesAccount.
+-Added MaxHouses property for chars (meant for players), Default = Serv.MaxHousesPlayer.
+* Setting MaxHouses = 0 for Players will skip the setting and read it from it's Account.
+* Setting MaxHouses = 0 for Players and Accounts will allow to build without limit.
+-Added house list for players and functions for it:
+	ADDHOUSE uid, will add the item with the given UID as this player's house.
+	DELHOUSE uid, will delete the house with the given UID from this player's list.
+*Houses generated before this change will not be updated, instead the player will still have the memory with color=MEMORY_GUARD (0x100) linked to the house,
+since there was no default behaviour other than this and each house script handles it differently, there will be no hardcoded update to the new system,
+each house system should be updated according to it's behaviour (ie: removing the memory and setting AddHouse <HouseUID>)
+-Added char property HOUSES(RO) returning the total count of houses it has.
+-Added char reference HOUSE.n.Key allowing to access to the house at this slot.
+
+These changes affect only Houses for now, when some testing is done and the code is full working with all required features this will be expanded to Ships.
+
+Houses:
+Now Owner, Coowners and Friends' uids are stored internally
+ - Added SetOwner uid(WO): Sets the owner's uid to the new one (will remove the House from previous owner (if any) and delete his keys for this house).
+ - Added AddCoowner uid(WO): Adds the given character uid to the coowner's list (there's no hardcoded limit), also executes AddHouse on the player.
+ - Added AddFriend uid(WO): Adds the given character uid to the friends list (there is no hardcoded limit).
+ - Added IsOwner uid(RO): Returns 1 if the given uid is the owner.
+ - Added IsCoowner uid(RO): Returns 1 if the given uid is in the coowner's list.
+ - Added IsFriend uid(RO): Returns 1 if the given uid is in the friend's list.
+ - Added AddKey uid(RW),fDupeOnBank:
+		uid: The uid of the char to give this key to.
+		fPlaceOnBank: if set to 1 will place the key in the char's bank, otherwise it will be bounced to the backpack.
+		(When reading it, eg: ref1=<AddKey uid>) returns the UID of the generated key.
+ - Added RemoveKeys uid(WO): Removes all the keys linked to this house for the character with the given uid.
+-Added MOVINGCRATE(RW) with basic support for Moving Crates:
+ When setting to a container's UID, if there was any other MovingCrate before it's contents will be transfered to newer crate.
+ When the multi is being deleted all linked items will be transfered to the crate (if any, if not they will be deleted) and the crate to the owner's bank (if any),
+ a TAG.MULTIUID with the multi's uid will be set on the crate.

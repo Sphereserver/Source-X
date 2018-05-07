@@ -247,19 +247,49 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
 	if ( m_designWorking.m_iRevision == m_designMain.m_iRevision )
 		return;
 
-	if (( pClientSrc != NULL && pClientSrc->GetChar() != NULL ) && ( IsTrigUsed(TRIGGER_HOUSEDESIGNCOMMIT) ))
-	{
-		CScriptTriggerArgs Args;
-		Args.m_iN1 = m_designMain.m_vectorComponents.size();
-		Args.m_iN2 = m_designWorking.m_vectorComponents.size();
-		Args.m_iN3 = m_designWorking.m_iRevision;
-		Args.m_pO1 = this;
-		Args.m_VarsLocal.SetNum("FIXTURES.OLD", GetFixtureCount(&m_designMain));
-		Args.m_VarsLocal.SetNum("FIXTURES.NEW", GetFixtureCount(&m_designWorking));
+    if ((pClientSrc != NULL && pClientSrc->GetChar() != NULL))
+    {
+        short iMaxZ = 0;
+        bool fSendFullTrigger = IsTrigUsed(TRIGGER_HOUSEDESIGNCOMMITITEM);
 
-		if (pClientSrc->GetChar()->OnTrigger(CTRIG_HouseDesignCommit, pClientSrc->GetChar(), &Args) == TRIGRET_RET_TRUE)
-			return;
-	}
+        for (ComponentsContainer::iterator i = m_designWorking.m_vectorComponents.begin(); i != m_designWorking.m_vectorComponents.end(); ++i)
+        {
+            if (fSendFullTrigger)
+            {
+                CScriptTriggerArgs Args;
+                Args.m_VarsLocal.SetNum("ID", (*i)->m_item.m_wTileID);
+                Args.m_VarsLocal.SetNum("P.X", (*i)->m_item.m_dx);
+                Args.m_VarsLocal.SetNum("P.Y", (*i)->m_item.m_dy);
+                Args.m_VarsLocal.SetNum("P.Z", (*i)->m_item.m_dz);
+                Args.m_VarsLocal.SetNum("VISIBLE", (*i)->m_item.m_visible);
+
+                TRIGRET_TYPE iRet = pClientSrc->GetChar()->OnTrigger(CTRIG_HouseDesignCommitItem, pClientSrc->GetChar(), &Args);
+                if (iRet == TRIGRET_RET_FALSE)
+                {
+                    m_designMain.m_vectorComponents.erase(i);
+                    continue;
+                }
+            }
+            if ((*i)->m_item.m_dz > iMaxZ)
+            {
+                iMaxZ = (*i)->m_item.m_dz;
+            }
+        }
+        if (IsTrigUsed(TRIGGER_HOUSEDESIGNCOMMIT))
+        {
+            CScriptTriggerArgs Args;
+            Args.m_iN1 = m_designMain.m_vectorComponents.size();
+            Args.m_iN2 = m_designWorking.m_vectorComponents.size();
+            Args.m_iN3 = m_designWorking.m_iRevision;
+            Args.m_pO1 = this;
+            Args.m_VarsLocal.SetNum("FIXTURES.OLD", GetFixtureCount(&m_designMain));
+            Args.m_VarsLocal.SetNum("FIXTURES.NEW", GetFixtureCount(&m_designWorking));
+            Args.m_VarsLocal.SetNum("MAXZ", iMaxZ);
+
+            if (pClientSrc->GetChar()->OnTrigger(CTRIG_HouseDesignCommit, pClientSrc->GetChar(), &Args) == TRIGRET_RET_TRUE)
+                return;
+        }
+    }
 
 	// replace the main design with the working design
 	CopyDesign(&m_designWorking, &m_designMain);

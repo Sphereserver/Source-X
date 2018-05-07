@@ -72,7 +72,8 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@HitIgnore",			// I'm going to avoid a target (attacker.n.ignore=1) , should I un-ignore him?.
 	"@HitMiss",				// I just missed.
 	"@HitTry",				// I am trying to hit someone. starting swing.
-	"@HouseDesignCommit",	// I committed a new house design.
+    "@HouseDesignCommit",	// I committed a new house design.
+    "@HouseDesignCommitItem",// I committed an item to the house design.
 	"@HouseDesignExit",		// I exited house design mode.
 
 	// ITRIG_QTY
@@ -245,7 +246,7 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false ),
 	m_fonttype = FONT_NORMAL;
 	m_SpeechHue = HUE_TEXT_DEF;
 	m_SpeechHueOverride = HUE_SAY_DEF;
-
+    _iMaxHouses = g_Cfg._iMaxHousesPlayer;
 	m_height = 0;
 	m_ModMaxWeight = 0;
 
@@ -459,6 +460,64 @@ void CChar::Delete(bool bforce)
 	ClearPlayer();
 
 	CObjBase::Delete();
+}
+
+void CChar::AddHouse(CUID uidHouse)
+{
+    ADDTOCALLSTACK("CChar::AddHouse");
+    if (!g_Serv.IsLoading())
+    {
+        uint8 iMaxHouses = _iMaxHouses;
+        if (iMaxHouses == 0)
+        {
+            if (GetClient())
+            {
+                iMaxHouses = GetClient()->GetAccount()->_iMaxHouses;
+            }
+        }
+        if (iMaxHouses > 0 && iMaxHouses <= _lHouses.size())
+        {
+            return;
+        }
+        if (!uidHouse.IsValidUID())
+        {
+            g_Log.EventDebug("Char '%#08x' trying to add house with invalid uid '%#08x'.", GetUID(), uidHouse);
+            return;
+        }
+        for (std::vector<CUID>::iterator it = _lHouses.begin(); it != _lHouses.end(); ++it)
+        {
+            if ((*it) == uidHouse)
+            {
+                g_Log.EventDebug("Char '%#08x' trying to add duplicate house with uid '%#08x'.", GetUID(), uidHouse);
+                return;
+            }
+        }
+    }
+    _lHouses.emplace_back(uidHouse);
+}
+
+void CChar::DelHouse(CUID uidHouse)
+{
+    ADDTOCALLSTACK("CChar::DelHouse");
+    if (_lHouses.empty())
+    {
+        return;
+    }
+
+    if (!uidHouse.IsValidUID())
+    {
+        g_Log.EventDebug("Char '%#08x' trying to delete house with invalid uid '%#08x'.", GetUID(), uidHouse);
+        return;
+    }
+
+    for (std::vector<CUID>::iterator it = _lHouses.begin(); it != _lHouses.end(); ++it)
+    {
+        if ((*it) == uidHouse)
+        {
+            _lHouses.erase(it);
+            return;
+        }
+    }
 }
 
 // Is there something wrong with this char?
@@ -1775,6 +1834,7 @@ enum CHR_TYPE
 	CHR_ACCOUNT,
 	CHR_ACT,
 	CHR_FINDLAYER,
+    CHR_HOUSE,
 	CHR_MEMORYFIND,
 	CHR_MEMORYFINDTYPE,
 	CHR_OWNER,
@@ -1788,6 +1848,7 @@ lpctstr const CChar::sm_szRefKeys[CHR_QTY+1] =
 	"ACCOUNT",
 	"ACT",
 	"FINDLAYER",
+    "HOUSE",
 	"MEMORYFIND",
 	"MEMORYFINDTYPE",
 	"OWNER",
@@ -1826,6 +1887,17 @@ bool CChar::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 				pRef = LayerFind( (LAYER_TYPE) Exp_GetSingle( pszKey ));
 				SKIP_SEPARATORS(pszKey);
 				return true;
+            case CHR_HOUSE:
+            {
+                int iPos = Exp_GetSingle(pszKey);
+                if (_lHouses.empty() || iPos >= _lHouses.size())
+                {
+                    return false;
+                }
+                pRef = _lHouses.at(iPos).ItemFind();
+                SKIP_SEPARATORS(pszKey);
+                return true;
+            }
 			case CHR_MEMORYFINDTYPE:	// FInd a type of memory.
 				pRef = Memory_FindTypes((word)(Exp_GetSingle(pszKey)));
 				SKIP_SEPARATORS(pszKey);
@@ -2573,6 +2645,12 @@ do_default:
 		case CHC_MAXWEIGHT:
 			sVal.FormatVal( g_Cfg.Calc_MaxCarryWeight(this));
 			return true;
+        case CHC_MAXHOUSES:
+            sVal.FormatUCVal(_iMaxHouses);
+            return true;
+        case CHC_HOUSES:
+            sVal.FormatVal((int)_lHouses.size());
+            return true;
 		case CHC_ACCOUNT:
 			if ( pszKey[7] == '.' )	// used as a ref ?
 			{
@@ -2861,6 +2939,12 @@ do_default:
 
 	switch (iKeyNum)
 	{
+        case CHC_ADDHOUSE:
+            AddHouse(s.GetArgDWVal());
+            break;
+        case CHC_DELHOUSE:
+            DelHouse(s.GetArgDWVal());
+            break;
 		//Status Update Variables
 		case CHC_REGENHITS:
 			{
@@ -2938,6 +3022,9 @@ do_default:
 			break;
 		case CHC_ACCOUNT:
 			return SetPlayerAccount( s.GetArgStr() );
+        case CHC_MAXHOUSES:
+            _iMaxHouses = s.GetArgUCVal();
+            break;
 		case CHC_ACT:
 			m_Act_UID = s.GetArgVal();
 			break;
@@ -3356,6 +3443,13 @@ void CChar::r_Write( CScript & s )
 		s.WriteKeyHex("ACT", m_Act_UID.GetObjUID());
 	if ( m_Act_p.IsValidPoint() )
 		s.WriteKey("ACTP", m_Act_p.WriteUsed());
+    if (!_lHouses.empty())
+    {
+        for (std::vector<CUID>::iterator it = _lHouses.begin(); it != _lHouses.end(); ++it)
+        {
+            s.WriteKeyHex("ADDHOUSE", *it);
+        }
+    }
 	if ( Skill_GetActive() != SKILL_NONE )
 	{
 		const CSkillDef* pSkillDef = g_Cfg.GetSkillDef(Skill_GetActive());
