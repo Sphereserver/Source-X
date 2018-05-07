@@ -221,6 +221,7 @@ CItem * CItem::CreateBase( ITEMID_TYPE id )	// static
 			pItem = new CItemStone( id, pItemDef );
 			break;
 		case IT_MULTI:
+        case IT_MULTI_ADDON:
 			pItem = new CItemMulti( id, pItemDef );
 			break;
 		case IT_MULTI_CUSTOM:

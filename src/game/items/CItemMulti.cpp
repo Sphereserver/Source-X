@@ -19,6 +19,7 @@ CItemMulti::CItemMulti( ITEMID_TYPE id, CItemBase * pItemDef ) :	// CItemBaseMul
 	m_pRegion = nullptr;
     _uidOwner.InitUID();
     _uidMovingCrate.InitUID();
+    _fIsAddon = false;
 }
 
 CItemMulti::~CItemMulti()
@@ -32,7 +33,7 @@ CItemMulti::~CItemMulti()
 
 	if ( ! m_pRegion )
 		return;
-
+    Redeed(false, true);
 
 	delete m_pRegion;
 }
@@ -63,7 +64,7 @@ bool CItemMulti::MultiRealizeRegion()
 	// Add/move a region for the multi so we know when we are in it.
 	// RETURN: ignored.
 
-	if ( !IsTopLevel() )
+	if ( !IsTopLevel() || _fIsAddon)
 		return false;
 
 	const CItemBaseMulti * pMultiDef = Multi_GetDef();
@@ -130,7 +131,7 @@ void CItemMulti::MultiUnRealizeRegion()
 	}
 }
 
-bool CItemMulti::Multi_CreateComponent( ITEMID_TYPE id, short dx, short dy, char dz, dword dwKeyCode )
+bool CItemMulti::Multi_CreateComponent(ITEMID_TYPE id, short dx, short dy, char dz, dword dwKeyCode, bool fIsAddon)
 {
 	ADDTOCALLSTACK("CItemMulti::Multi_CreateComponent");
 	CItem * pItem = CreateTemplate( id );
@@ -170,8 +171,10 @@ bool CItemMulti::Multi_CreateComponent( ITEMID_TYPE id, short dx, short dy, char
 			break;
 	}
 
-	if ( pItem->GetHue() == HUE_DEFAULT )
-		pItem->SetHue( GetHue());
+    if (pItem->GetHue() == HUE_DEFAULT)
+    {
+        pItem->SetHue(GetHue());
+    }
 
 	pItem->SetAttr( ATTR_MOVE_NEVER | (m_Attr&(ATTR_MAGIC|ATTR_INVIS)));
 	pItem->m_uidLink = GetUID();	// lock it down with the structure.
@@ -184,10 +187,14 @@ bool CItemMulti::Multi_CreateComponent( ITEMID_TYPE id, short dx, short dy, char
 
 	pItem->MoveToUpdate( pt );
 	OnComponentCreate( pItem );
-	return( fNeedKey );
+    if (fIsAddon)
+    {
+        fNeedKey = false;
+    }
+	return fNeedKey;
 }
 
-void CItemMulti::Multi_Create( CChar * pChar, dword dwKeyCode )
+void CItemMulti::Multi_Create( CChar * pChar, dword dwKeyCode, bool fIsAddon)
 {
 	ADDTOCALLSTACK("CItemMulti::Multi_Create");
 	// Create house or Ship extra stuff.
@@ -212,15 +219,21 @@ void CItemMulti::Multi_Create( CChar * pChar, dword dwKeyCode )
 	for ( size_t i = 0; i < iQty; i++ )
 	{
 		const CItemBaseMulti::CMultiComponentItem &component = pMultiDef->m_Components.ElementAt(i);
-		fNeedKey |= Multi_CreateComponent(component.m_id, component.m_dx, component.m_dy, component.m_dz, dwKeyCode);
+		fNeedKey |= Multi_CreateComponent(component.m_id, component.m_dx, component.m_dy, component.m_dz, dwKeyCode, fIsAddon);
 	}
+    if (fIsAddon)   // Addons doesn't require keys.
+    {
+        _fIsAddon = true;
+        return;
+    }
 
 	Multi_GetSign();	// set the m_uidLink
 
 	if ( pChar != NULL )
 	{
+        SetOwner(pChar->GetUID());
+        pChar->AddHouse(GetUID());
 		m_itShip.m_UIDCreator = pChar->GetUID();
-		pChar->AddHouse(GetUID());
         if (g_Cfg._fAutoHouseKeys)
         {
             GenerateKey(pChar, true);
@@ -357,7 +370,6 @@ void CItemMulti::SetOwner(CUID uidOwner)
             pOldOwner->DelHouse(uidHouse);
             RemoveKeys(pOldOwner);
         }
-        pNewOwner->AddHouse(uidHouse);
     }
     _uidOwner = uidOwner;
 }
@@ -381,7 +393,6 @@ void CItemMulti::AddCoowner(CUID uidCoowner)
             return; // Already added
         }
     }
-    //GenerateKey(pCoowner);
 }
 
 void CItemMulti::DelCoowner(CUID uidCoowner)
@@ -561,7 +572,7 @@ void CItemMulti::SetMovingCrate(CUID uidCrate)
     CItemContainer *pCurrentCrate = static_cast<CItemContainer*>(_uidMovingCrate.ItemFind());
     if (pCurrentCrate && pCurrentCrate->GetCount() > 0)
     {
-        pCurrentCrate->ContentsTransfer(pNewCrate, false);
+        pNewCrate->ContentsTransfer(pCurrentCrate, false);
         pCurrentCrate->Delete();
     }
     _uidMovingCrate = uidCrate;
@@ -571,28 +582,38 @@ void CItemMulti::SetMovingCrate(CUID uidCrate)
 void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank)
 {
     CChar *pOwner = _uidOwner.CharFind();
-    if (fMoveToBank)
+    CUID uidTransfer;
+    uidTransfer.InitUID();
+    TransferAllItemsToMovingCrate(uidTransfer, true);
+    if (fMoveToBank && _uidMovingCrate.IsValidUID())
     {
-        TransferAllItemsToMovingCrate(pOwner ? pOwner->GetBank()->GetUID() : NULL);
+        pOwner->GetBank()->ContentAdd(_uidMovingCrate.ItemFind());
     }
     if (!pOwner)
     {
         return;
     }
-    CItem *pDeed = CItem::CreateBase((ITEMID_TYPE)(GetKeyNum("MULTI_ID",true)));
+    CItem *pDeed = CItem::CreateBase((ITEMID_TYPE)(GetKeyNum("DEED_ID",true)));
     if (pDeed)
     {
         pDeed->SetHue(GetHue());
-        if (m_Attr & ATTR_MAGIC) {
+        pDeed->m_itDeed.m_Type = GetID();
+        if (m_Attr & ATTR_MAGIC)
+        {
             pDeed->SetAttr(ATTR_MAGIC);
         }
+        pOwner->ItemBounce(pDeed, fDisplayMsg);
     }
-    pOwner->ItemBounce(pDeed, fDisplayMsg);
+    if (!IsType(IT_MULTI_ADDON))
+    {
+        pOwner->DelHouse(GetUID());
+    }
+    Delete();
 }
 
-void CItemMulti::TransferAllItemsToMovingCrate(CUID uidTargetContainer)
+void CItemMulti::TransferAllItemsToMovingCrate(CUID uidTargetContainer, bool fRemoveComponents)
 {
-    CItemContainer *pCrate = static_cast<CItemContainer*>(_uidMovingCrate.ItemFind());
+    CItemContainer *pCrate = static_cast<CItemContainer*>(uidTargetContainer.ItemFind());
     CWorldSearch Area(m_pRegion->m_pt, Multi_GetMaxDist());	// largest area.
     Area.SetSearchSquare(true);
     for (;;)
@@ -600,18 +621,30 @@ void CItemMulti::TransferAllItemsToMovingCrate(CUID uidTargetContainer)
         CItem * pItem = Area.GetItem();
         if (pItem == NULL)
             break;
-        if (pItem == this)	// this gets deleted seperately.
+        if (pItem->GetUID() == GetUID())	// this gets deleted seperately.
             continue;
-        if (!Multi_IsPartOf(pItem) || pItem->GetKeyNum("COMPONENT",true) != 0)  // Do not transfer items not linked to this multi or Components (doors, signs, etc).
-            continue;
-        if (pCrate)
+        if (pItem->IsType(IT_MULTI_ADDON) || pItem->IsType(IT_MULTI))  // If the item is a house Addon, redeed it.
         {
-            pCrate->ContentAdd(pItem);
-        }
-        else
-        {
-            pItem->Delete();		// delete the key id for the door/key/sign.
+            //static_cast<CItemMulti*>(pItem)->Redeed(false, false);
+            pItem->Delete();
             Area.RestartSearch();	// we removed an item and this will mess the search loop, so restart to fix it
+            continue;
+        }
+        if (!Multi_IsPartOf(pItem))  // Do not transfer items not linked to this multi.
+            continue;
+        if (pItem->GetKeyNum("COMPONENT", true))
+        {
+            if (fRemoveComponents)
+            {
+                pItem->Delete();		// delete the key id for the door/key/sign.
+                Area.RestartSearch();	// we removed an item and this will mess the search loop, so restart to fix it
+            }
+            continue;
+        }
+        if (pCrate) // Transfer items if there is a target and they are not Components (doors, signs, etc).
+        {
+            pItem->Speak("1a");
+            pCrate->ContentAdd(pItem);
         }
     }
     CItemContainer *pTargCont = static_cast<CItemContainer*>(uidTargetContainer.ItemFind());
@@ -677,15 +710,18 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
     {
         case SHV_MOVETOCRATE:
         {
-            CUID uid(s.GetArgVal());
-            TransferAllItemsToMovingCrate(uid);
+            int64 piCmd[2];
+            Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
+            CUID uid(piCmd[0]);
+            bool fRemoveComponents = piCmd[1] ? true : false;
+            TransferAllItemsToMovingCrate(uid, fRemoveComponents);
             return true;
         }
         case SHV_MULTICREATE:
         {
             CUID	uid(s.GetArgVal());
             CChar *	pCharSrc = uid.CharFind();
-            Multi_Create(pCharSrc, 0);
+            Multi_Create(pCharSrc, 0, IsType(IT_MULTI_ADDON));
             return true;
         }
         case SHV_REDEED:
@@ -969,8 +1005,14 @@ bool CItemMulti::CanPlace(CChar *pChar)
     // Location Checks
 }
 
-void CItemMulti::OnComponentCreate( const CItem * pComponent )
+void CItemMulti::OnComponentCreate(const CItem * pComponent, bool fIsAddon)
 {
 	UNREFERENCED_PARAMETER(pComponent);
-    const_cast<CItem*>(pComponent)->SetKeyNum("COMPONENT",1);
+    if (fIsAddon)
+    {
+        const_cast<CItem*>(pComponent)->SetKeyNum("IsAddon", 1);
+    }
+    else{
+        const_cast<CItem*>(pComponent)->SetKeyNum("COMPONENT", 1);
+    }
 }

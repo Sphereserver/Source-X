@@ -475,7 +475,7 @@ void CChar::AddHouse(CUID uidHouse)
                 iMaxHouses = GetClient()->GetAccount()->_iMaxHouses;
             }
         }
-        if (iMaxHouses > 0 && iMaxHouses <= _lHouses.size())
+        if (iMaxHouses > 0 && _lHouses.size() >= iMaxHouses)
         {
             return;
         }
@@ -498,7 +498,6 @@ void CChar::AddHouse(CUID uidHouse)
 
 void CChar::DelHouse(CUID uidHouse)
 {
-    ADDTOCALLSTACK("CChar::DelHouse");
     if (_lHouses.empty())
     {
         return;
@@ -2943,8 +2942,18 @@ do_default:
             AddHouse(s.GetArgDWVal());
             break;
         case CHC_DELHOUSE:
-            DelHouse(s.GetArgDWVal());
+        {
+            dword dwUID = s.GetArgDWVal();
+            if (dwUID == UINT_MAX)
+            {
+                _lHouses.clear();
+            }
+            else
+            {
+                DelHouse((CUID)dwUID);
+            }
             break;
+        }
 		//Status Update Variables
 		case CHC_REGENHITS:
 			{

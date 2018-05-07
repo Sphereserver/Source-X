@@ -673,7 +673,7 @@ House trigger updates:
 * Setting MaxHouses = 0 for Players and Accounts will allow to build without limit.
 -Added house list for players and functions for it:
 	ADDHOUSE uid, will add the item with the given UID as this player's house.
-	DELHOUSE uid, will delete the house with the given UID from this player's list.
+	DELHOUSE uid, will delete the house with the given UID from this player's list. DELHOUSE -1 will remove all your stored houses (but will do nothing on the linked houses).
 *Houses generated before this change will not be updated, instead the player will still have the memory with color=MEMORY_GUARD (0x100) linked to the house,
 since there was no default behaviour other than this and each house script handles it differently, there will be no hardcoded update to the new system,
 each house system should be updated according to it's behaviour (ie: removing the memory and setting AddHouse <HouseUID>)
@@ -705,5 +705,7 @@ Now Owner, Coowners and Friends' uids are stored internally
 		B) Are not multi's components (eg: doors, sign, etc).
 	If a container's uid is given, the Moving Crate will be transfered to that container.
 -Added Redeed(WO) fShowMsg, fMoveToCrate: Redeeds the multi to the OWNER's backpack (if there is no owner, there is no redeed).
-	fShowMsg: if true shows the Bounce Msg
-	fMoveToCrate: if true executes MoveToCrate with the owner's bank uid.
+	fShowMsg: if true shows the Bounce Msg for the deed.
+	fMoveToCrate: if true places the Moving Crate item in the owner's bank.
+-Added t_multi_addon: Works like current multis&addons but will not be stored on the Houses List.
+-Removing a t_multi or t_multi_addon will Redeed it to it's owner's backpack.

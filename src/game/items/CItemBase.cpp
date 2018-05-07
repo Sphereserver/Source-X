@@ -312,6 +312,7 @@ bool CItemBase::IsTypeMulti( IT_TYPE type )	// static
 		case IT_MULTI:
 		case IT_MULTI_CUSTOM:
 		case IT_SHIP:
+        case IT_MULTI_ADDON:
 			return true;
 
 		default:

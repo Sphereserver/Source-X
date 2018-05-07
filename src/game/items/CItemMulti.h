@@ -23,6 +23,7 @@ private:
     std::vector<CUID> _lCoowners;   // List of Coowners' UID.
     std::vector<CUID> _lFriends;    // List of Friends' UID.
     CUID _uidMovingCrate;   // Moving Crate's UID.
+    bool _fIsAddon;         // House AddOns are also multis
 
 protected:
 	CRegionWorld * m_pRegion;		// we own this region.
@@ -32,7 +33,7 @@ protected:
 	CItem * Multi_FindItemType( IT_TYPE type ) const;
 	CItem * Multi_FindItemComponent( int iComp ) const;
 	const CItemBaseMulti * Multi_GetDef() const;
-	bool Multi_CreateComponent( ITEMID_TYPE id, short dx, short dy, char dz, dword dwKeyCode );
+	bool Multi_CreateComponent( ITEMID_TYPE id, short dx, short dy, char dz, dword dwKeyCode, bool fIsAddon = false);
 
 public:
 	int Multi_GetMaxDist() const;
@@ -60,10 +61,10 @@ public:
     void RemoveKeys(CChar *pTarget);
     void SetMovingCrate(CUID uidCrate);
     void Redeed(bool fDisplayMsg = true, bool fMoveToBank = true);
-    void TransferAllItemsToMovingCrate(CUID uidTargetContainer);
+    void TransferAllItemsToMovingCrate(CUID uidTargetContainer, bool fRemoveComponents = false);
 
 protected:
-	virtual void OnComponentCreate( const CItem * pComponent );
+	virtual void OnComponentCreate(const CItem * pComponent, bool fIsAddon = false);
 
 
 public:
@@ -82,7 +83,7 @@ public:
 	void OnHearRegion( lpctstr pszCmd, CChar * pSrc );
 	CItem * Multi_GetSign();	// or Tiller
 
-	void Multi_Create( CChar * pChar, dword dwKeyCode );
+	void Multi_Create(CChar * pChar, dword dwKeyCode, bool fIsAddon = false);
 	static const CItemBaseMulti * Multi_GetDef( ITEMID_TYPE id );
 
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );

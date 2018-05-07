@@ -1612,7 +1612,8 @@ CItem * CClient::OnTarg_Use_Multi(const CItemBase * pItemDef, CPointMap & pt, CI
     if ((pItemDef == nullptr) || !pt.GetRegion(REGION_TYPE_AREA))
         return nullptr;
 
-    bool fShip = (pItemDef->IsType(IT_SHIP));	// must be in water.
+    bool fShip = pItemDef->IsType(IT_SHIP);	// must be in water.
+    bool fIsAddon = pItemDef->IsType(IT_MULTI_ADDON);
 
     const CItemBaseMulti * pMultiDef = dynamic_cast <const CItemBaseMulti *> (pItemDef);
 
@@ -1620,7 +1621,7 @@ CItem * CClient::OnTarg_Use_Multi(const CItemBase * pItemDef, CPointMap & pt, CI
     if ((pMultiDef != nullptr) && !(pDeed->IsAttr(ATTR_MAGIC)))
     {
         //if ( pMultiDef->m_rect.m_bottom > 0 && (pMultiDef->IsType(IT_MULTI) || pMultiDef->IsType(IT_MULTI_CUSTOM)) )
-        if (CItemBase::IsID_Multi(pItemDef->GetID()))
+        if (CItemBase::IsID_Multi(pItemDef->GetID()) || pMultiDef->IsType(IT_MULTI_ADDON))
             pt.m_y -= (short)(pMultiDef->m_rect.m_bottom - 1);
 
         // Check for items in the way and bumpy terrain.
@@ -1721,12 +1722,12 @@ CItem * CClient::OnTarg_Use_Multi(const CItemBase * pItemDef, CPointMap & pt, CI
     pItemNew->SetAttr(ATTR_MOVE_NEVER | (pDeed->m_Attr & (ATTR_MAGIC | ATTR_INVIS)));
     pItemNew->SetHue(pDeed->GetHue());
     pItemNew->MoveToUpdate(pt);
-    pItemNew->SetKeyNum("DEED_ID", pDeed->GetID());
 
     CItemMulti * pMultiItem = dynamic_cast <CItemMulti*>(pItemNew);
     if (pMultiItem)
     {
-        pMultiItem->Multi_Create(m_pChar, UID_CLEAR);
+        pMultiItem->Multi_Create(m_pChar, UID_CLEAR, fIsAddon);
+        pMultiItem->SetKeyNum("DEED_ID", pDeed->GetID());
     }
 
     if (pItemDef->IsType(IT_STONE_GUILD))
