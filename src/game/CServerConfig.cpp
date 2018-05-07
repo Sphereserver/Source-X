@@ -223,6 +223,7 @@ CServerConfig::CServerConfig()
 	m_iRegenRate[STAT_INT]	= 20 * TICK_PER_SEC;		// Seconds to heal ONE mn
 	m_iRegenRate[STAT_DEX]	= 10 * TICK_PER_SEC;		// Seconds to heal ONE stm
 	m_iRegenRate[STAT_FOOD] = 60*60 * TICK_PER_SEC;		// Food usage (1 time per 60 minutes)
+    m_iRegenItemHits = 10;
 
 	m_iTimerCall			= 0;
 	m_bAllowLightOverride	= true;
@@ -552,6 +553,7 @@ enum RC_TYPE
 	RC_PLAYERNEUTRAL,			// m_iPlayerKarmaNeutral
 	RC_PROFILE,
 	RC_RACIALFLAGS,				// m_iRacialFlags
+    RC_REGENITEMHITS,           // m_iRegenItemHits
 	RC_REAGENTLOSSFAIL,			// m_fReagentLossFail
 	RC_REAGENTSREQUIRED,
 	RC_REVEALFLAGS,				// m_iRevealFlags
@@ -785,6 +787,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "PLAYERNEUTRAL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iPlayerKarmaNeutral),	0 }},
 	{ "PROFILE",				{ ELEM_VOID,	0,											0 }},
 	{ "RACIALFLAGS",			{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iRacialFlags),			0 }},
+    { "REGENITEMHITS",          { ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iRegenItemHits),       0 }},
 	{ "REAGENTLOSSFAIL",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fReagentLossFail),		0 }},
 	{ "REAGENTSREQUIRED",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fReagentsRequired),	0 }},
 	{ "REVEALFLAGS",			{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iRevealFlags),			0 }},
@@ -1104,6 +1107,9 @@ bool CServerConfig::r_LoadVal( CScript &s )
 		case RC_WOOLGROWTHTIME:
 			m_iWoolGrowthTime = s.GetArgVal() * 60 * TICK_PER_SEC;
 			break;
+        case RC_REGENITEMHITS:
+            m_iRegenItemHits = s.GetArgVal();
+            break;
 		case RC_PROFILE:
 			{
 				int seconds = s.GetArgVal();
@@ -1732,6 +1738,9 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 		case RC_WOOLGROWTHTIME:
 			sVal.FormatVal( m_iWoolGrowthTime /( 60*TICK_PER_SEC ));
 			break;
+        case RC_REGENITEMHITS:
+            sVal.FormatVal(m_iRegenItemHits);
+            break;
 		case RC_PROFILE:
 			sVal.FormatVal(CurrentProfileData.GetActiveWindow());
 			break;

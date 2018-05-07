@@ -126,6 +126,21 @@ public:
     */
     void Copy(CEntity *base);
 
+    /**
+    * @brief Calls OnTick on all components.
+    *
+    * This should commonly return CCRET_CONTINUE to allow other CComponents
+    * and default behaviour to control another basic aspects, but on some cases
+    * CCRET_TRUE can be used to skip the rest of the code or CCRET_FALSE to stop
+    * the ticking and remove the object on the main OnTick().
+    *
+    * @return The return type:
+    * -CCRET_TRUE,     // True: code done, stop the loop.
+    * -CCRET_FALSE,    // False: code done, stop the loop.
+    * -CCRET_CONTINUE  // Continue: just continue the loop.
+    */
+    CCRET_TYPE OnTick();
+
 };
 
 #endif // _INC_CENTITY_H

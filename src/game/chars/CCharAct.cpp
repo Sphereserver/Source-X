@@ -4001,6 +4001,19 @@ bool CChar::OnTick()
     if (!iTimeDiff)
         return true;
 
+    /*
+    * CComponent's ticking:
+    * Be aware that return CCRET_CONTINUE will return true here and
+    * CCRET_FALSE will return false (and delete the char), but take in mind
+    * that both returns will prevent this char's items from ticking and stats,
+    *  attacker, notoriety, death status, etc from happening.
+    */
+    CCRET_TYPE iCompRet = static_cast<CEntity*>(this)->OnTick();
+    if (iCompRet != CCRET_CONTINUE) // if return = CCRET_TRUE or CCRET_FALSE
+    {
+        return iCompRet;    // Stop here
+    }
+
     if (iTimeDiff >= TICK_PER_SEC)	// don't bother with < 1 sec times.
     {
         // decay equipped items

@@ -238,7 +238,7 @@ public:
     * timeout is set to 10 minutes when a new Level is gained or when Champion starts.
     * if players don't gain the needed candles for a new Level before timer expires, a red candle is removed.
     */
-    virtual bool OnTick();
+    virtual CCRET_TYPE OnTick() override;
 
 };
 

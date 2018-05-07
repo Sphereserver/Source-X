@@ -20,6 +20,13 @@ enum COMP_TYPE
     COMP_QTY
 };
 
+enum CCRET_TYPE
+{
+    CCRET_TRUE,     // True: code done, stop the loop.
+    CCRET_FALSE,    // False: code done, stop the loop.
+    CCRET_CONTINUE  // Continue: just continue the loop.
+};
+
 class CObjBase;
 
 class CComponent
@@ -52,6 +59,7 @@ public:
     virtual bool r_LoadVal(CScript & s) = 0;                                            ///< Sets a value from scripts or game commands.
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) = 0;                          ///< Execute command from script.
     virtual void Copy(CComponent* copy) = 0;                                            ///< Copy the contents to a new object.
+    virtual CCRET_TYPE OnTick() = 0;                                                    ///< Custom implementation of OnTick.
 };
 
 #endif // _INC_CCOMPONENT_H

@@ -645,3 +645,9 @@ Added: New function MAPWAYPOINT to add/remove waypoints on client radar map (enh
 
 [Port from Source, 02-04-2018, Coruja]
 Added: New char trigger @UserUltimaStoreButton, fired when click on 'Ultima Store' button on new clients 7.0.62+
+
+06-05-2018, XuN
+Added Damageable Items functionality allowing them to have HP bars, only for items that have CAN_I_DAMAGEABLE flag on CAN or CANMASK properties and for clients 7.0.30+
+To modify their HP use HITS and MAXHITS on them
+[Sphere.ini]
+-Added RegenItemHits to control the update period of those items' hp.

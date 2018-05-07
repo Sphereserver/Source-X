@@ -100,7 +100,18 @@ CObjBase::CObjBase( bool fItem )
 		ASSERT(IsValidUID());
 		SetContainerFlags(UID_O_DISCONNECT);	// it is no place for now
 	}
-    Suscribe(new CCFaction(this));
+    if (IsChar())
+    {
+        Suscribe(new CCFaction(this));
+    }
+    else if (IsItem())
+    {
+        CItem *pItem = static_cast<CItem*>(this);
+        if (GetEquipLayer() < LAYER_EQUIP_QTY || pItem->IsType(IT_MUSICAL))
+        {
+            Suscribe(new CCFaction(this));  // Adding it only to equippable items
+        }
+    }
 
 	// Put in the idle list by default. (til placed in the world)
 	g_World.m_ObjNew.InsertHead( this );
@@ -1866,15 +1877,19 @@ bool CObjBase::r_LoadVal( CScript & s )
             m_CanMask = dwFlags;
             if (IsItem())
             {
+                g_Log.EventDebug("CObjBase::r_LoadVal(OC_CANMASK)\n");
                 CCItemDamageable *pItemDmg = static_cast<CCItemDamageable*>(GetComponent(COMP_ITEMDAMAGEABLE));
                 if ((dwFlags & CAN_I_DAMAGEABLE) && !pItemDmg)
                 {
+                    g_Log.EventDebug("CObjBase::r_LoadVal(OC_CANMASK) 1\n");
                     Suscribe(new CCItemDamageable(this));
                 }
                 else if (!(dwFlags & CAN_I_DAMAGEABLE) && pItemDmg)
                 {
+                    g_Log.EventDebug("CObjBase::r_LoadVal(OC_CANMASK) 2\n");
                     Unsuscribe(pItemDmg);
                 }
+                Update();   // Required to force the client to allow dragging the item's bar or to do not allow it anymore before trying to do it.
             }
             break;
         }
@@ -2932,8 +2947,16 @@ void CObjBase::OnTickStatusUpdate()
 	ADDTOCALLSTACK("CObjBase::OnTickStatusUpdate");
 	// process m_fStatusUpdate flags
 
-	if (m_fStatusUpdate & SU_UPDATE_TOOLTIP)
-		ResendTooltip();
+    if (m_fStatusUpdate & SU_UPDATE_TOOLTIP)
+    {
+        ResendTooltip();
+    }
+
+    CCItemDamageable *pItemDmg = static_cast<CCItemDamageable*>(GetComponent(COMP_ITEMDAMAGEABLE));
+    if (pItemDmg)
+    {
+        pItemDmg->OnTickStatsUpdate();
+    }
 }
 
 void CObjBase::ResendTooltip(bool bSendFull, bool bUseCache)

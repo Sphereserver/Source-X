@@ -206,3 +206,26 @@ void CEntity::Copy(CEntity *target)
         }
     }
 }
+
+CCRET_TYPE CEntity::OnTick()
+{
+    if (_List.empty())
+        return CCRET_CONTINUE;
+    for (std::map<COMP_TYPE, CComponent*>::iterator it = _List.begin(); it != _List.end(); ++it)
+    {
+        CComponent *pComponent = it->second;
+        if (pComponent)
+        {
+            CCRET_TYPE iRet = pComponent->OnTick();
+            if (iRet == CCRET_CONTINUE)   // Continue the loop.
+            {
+                continue;
+            }
+            else    // Stop the loop and return whatever return is needed.
+            {
+                return iRet;
+            }
+        }
+    }
+    return CCRET_CONTINUE;
+}

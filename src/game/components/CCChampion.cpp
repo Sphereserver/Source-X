@@ -31,7 +31,7 @@ CCChampion::~CCChampion()
 {
 };
 
-bool CCChampion::OnTick()
+CCRET_TYPE CCChampion::OnTick()
 {
     ADDTOCALLSTACK("CCChampion::OnTick");
     if (!_pRedCandles.empty())
@@ -39,7 +39,7 @@ bool CCChampion::OnTick()
     else
         Stop();
     GetLink()->SetTimeout(TICK_PER_SEC * 60 * 10);	//10 minutes
-    return true;
+    return CCRET_CONTINUE;
 };
 
 void CCChampion::Init()

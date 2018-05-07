@@ -9,6 +9,8 @@
 #include "../clients/CClient.h"
 #include "../triggers.h"
 #include "../components/CCChampion.h"
+#include "../components/CCItemDamageable.h"
+#include "../components/CCSpawn.h"
 #include "CItem.h"
 #include "CItemCommCrystal.h"
 #include "CItemContainer.h"
@@ -21,7 +23,6 @@
 #include "CItemShip.h"
 #include "CItemStone.h"
 #include "CItemVendable.h"
-#include "../components/CCSpawn.h"
 
 
 /*
@@ -94,6 +95,18 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CObjBase( true )
 
 	g_World.m_uidLastNewItem = GetUID();	// for script access.
 	ASSERT( IsDisconnected() );
+
+
+    // Manual CComponents addition
+
+    /* CCItemDamageable is also added from CObjBase::r_LoadVal(OC_CANMASK) for manual override of can flags
+    * but it's required to add it also on item's creation depending on it's CItemBase can flags.
+    */
+    bool fCanIDamageable = pItemDef->Can(CAN_I_DAMAGEABLE);
+    if (fCanIDamageable)
+    {
+        Suscribe(new CCItemDamageable(this));
+    }
 }
 
 bool CItem::NotifyDelete()
@@ -171,8 +184,9 @@ CItem * CItem::CreateBase( ITEMID_TYPE id )	// static
 		ASSERT(pItemDef);
 	}
 
-	CItem * pItem;
-	switch ( pItemDef->GetType() )
+	CItem * pItem = nullptr;
+    IT_TYPE iType = pItemDef->GetType();
+	switch (iType)
 	{
 		case IT_MAP:
 		case IT_MAP_BLANK:
@@ -247,6 +261,49 @@ CItem * CItem::CreateBase( ITEMID_TYPE id )	// static
             break;
         }
 	}
+
+    if (pItem)
+    {
+        return pItem;
+    }
+
+    /*
+    * Post CComponent's type check.
+    * In the future, when all CItem* classes are moved to CComponents all will be passed
+    * from here and the first switch can be removed, and so this comment.
+    */
+
+    pItem = new CItem(id, pItemDef);    // The item should be created always.
+    switch (iType)  // and the CComponents creation & subscription begins here.
+    {
+        case IT_SPAWN_CHAR:
+        case IT_SPAWN_ITEM:
+        {
+            pItem->Suscribe(new CCSpawn(pItem));
+            break;
+        }
+        case IT_SPAWN_CHAMPION:
+        {
+            pItem->Suscribe(new CCSpawn(pItem));
+            pItem->Suscribe(new CCChampion(pItem));
+            break;
+        }
+        case IT_MUSICAL:
+            pItem->Suscribe(new CCItemDamageable(pItem));
+            break;
+        default:
+        {
+            break;
+        }
+    }
+
+    /* CCItemDamageable is also added from CObjBase::r_LoadVal(OC_CANMASK) for manual override of can flags
+    * but it's required to add it also on item's creation depending on it's CItemBase can flags.
+    */
+    if (pItemDef->Can(CAN_I_DAMAGEABLE))
+    {
+        pItem->Suscribe(new CCItemDamageable(pItem));
+    }
 
 	ASSERT( pItem );
 	if (idErrorMsg && idErrorMsg != -1)
@@ -5530,6 +5587,7 @@ bool CItem::OnTick()
 
 	EXC_SET("timer trigger");
 	SetTimeout(-1);
+
 	TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
 
 	if (( IsTrigUsed(TRIGGER_TIMER) ) || ( IsTrigUsed(TRIGGER_ITEMTIMER) ))
@@ -5538,6 +5596,19 @@ bool CItem::OnTick()
 		if( iRet == TRIGRET_RET_TRUE )
 			return true;
 	}
+
+    /*
+    * CComponent's ticking:
+    * Note that CCRET_TRUE will force a return true and skip default behaviour,
+    * CCRET_FALSE will force a return false and delete the item without it's default
+    * timer checks.
+    * CCRET_CONTINUE will allow the normal ticking proccess to happen.
+    */
+    CCRET_TYPE iCompRet = static_cast<CEntity*>(this)->OnTick();
+    if (iCompRet != CCRET_CONTINUE) // if return = CCRET_TRUE or CCRET_FALSE
+    {
+        return iCompRet;    // Stop here
+    }
 
 	EXC_SET("GetType");
 	IT_TYPE type = m_type;
@@ -5673,7 +5744,7 @@ bool CItem::OnTick()
                 CCSpawn *pSpawn = static_cast<CCSpawn*>(GetComponent(COMP_SPAWN));
                 if (pSpawn)
                 {
-                    pSpawn->OnTick(true);
+                    pSpawn->OnTick();
                 }
 			}
 			return true;

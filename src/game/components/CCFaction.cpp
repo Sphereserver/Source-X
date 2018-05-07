@@ -186,6 +186,11 @@ bool CCFaction::r_Load(CScript & s)
     return true;
 }
 
+CCRET_TYPE CCFaction::OnTick()
+{
+    return CCRET_CONTINUE;
+}
+
 bool CCFaction::r_WriteVal(lpctstr pszKey, CSString & s, CTextConsole * pSrc)
 {
     ADDTOCALLSTACK("CCFaction::CCFaction");

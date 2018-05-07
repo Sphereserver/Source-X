@@ -105,7 +105,7 @@ public:
     * more1 Resource Check
     * resource (item/char) generation
     */
-    void OnTick(bool fExec);
+    virtual CCRET_TYPE OnTick() override;
 
     /**
     * @brief Removes everything created by this spawn, if still belongs to the spawn.

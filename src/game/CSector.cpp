@@ -6,6 +6,7 @@
 #include "clients/CClient.h"
 #include "items/CItem.h"
 #include "components/CCSpawn.h"
+#include "components/CCItemDamageable.h"
 #include "../common/CLog.h"
 #include "CObjBase.h"
 #include "CSector.h"
@@ -966,7 +967,7 @@ void CSector::Restock()
             CCSpawn *pSpawn = pItem->GetSpawn();
             if (pSpawn)
             {
-                pSpawn->OnTick(true);
+                pSpawn->OnTick();
             }
         }
     }

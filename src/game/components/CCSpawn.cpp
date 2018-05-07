@@ -352,7 +352,7 @@ void CCSpawn::AddObj(CUID uid)
         pItem->ResendTooltip();
 }
 
-void CCSpawn::OnTick(bool fExec)
+CCRET_TYPE CCSpawn::OnTick()
 {
     ADDTOCALLSTACK("CCSpawn::OnTick");
     int64 iMinutes;
@@ -378,14 +378,14 @@ void CCSpawn::OnTick(bool fExec)
 
     if (GetCurrentSpawned() >= GetAmount())
     {
-        return;
+        return CCRET_CONTINUE;
     }
 
     CResourceDef *pDef = FixDef();
     if (!pDef)
     {
         g_Log.EventError("Bad Spawn point uid=0%08x. Invalid id=%s\n", (dword)pItem->GetUID(), g_Cfg.ResourceGetName(_idSpawn));
-        return;
+        return CCRET_CONTINUE;
     }
 
     if (pItem->IsType(IT_SPAWN_CHAR))
@@ -396,6 +396,7 @@ void CCSpawn::OnTick(bool fExec)
     {
         GenerateItem(pDef);
     }
+    return CCRET_CONTINUE;
 }
 
 void CCSpawn::KillChildren()
@@ -836,7 +837,7 @@ bool CCSpawn::r_Verb(CScript & s, CTextConsole * pSrc)
         }
         case ISPV_RESET:
             KillChildren();
-            OnTick(false);
+            OnTick();
             return true;
         case ISPV_START:
             pItem->SetTimeout(0);
