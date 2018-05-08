@@ -38,8 +38,10 @@ private:
     CUID _uidOwner;     // Owner's UID
     std::vector<CUID> _lCoowners;   // List of Coowners.
     std::vector<CUID> _lFriends;    // List of Friends.
-    std::vector<CUID> _lLockDowns;  // List of Locked Down items.
     std::vector<CUID> _lVendors;    // List of Vendors.
+protected:
+    std::vector<CUID> _lLockDowns;  // List of Locked Down items.
+private:
 
     // house general
     CUID _uidMovingCrate;   // Moving Crate's UID.

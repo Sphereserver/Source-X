@@ -40,8 +40,14 @@ CItemMulti::~CItemMulti()
 
 	if ( ! m_pRegion )
 		return;
-    Redeed(false, true);    // Force a redeed (if possible).
-
+    if (_uidMovingCrate.IsValidUID() && _uidOwner.IsValidUID())
+    {
+        CChar *pOwner = _uidOwner.CharFind();
+        if (pOwner)
+        {
+            pOwner->GetBank()->ContentAdd(_uidMovingCrate.ItemFind());
+        }
+    }
 	delete m_pRegion;
 }
 
@@ -666,10 +672,7 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank)
     {
         pOwner->DelHouse(GetUID());
     }
-    if (!IsDeleted())   // Delete is executed also from ~CItemMulti, so we have to prevent call it twice.
-    {
-        Delete();
-    }
+    Delete();
 }
 
 void CItemMulti::TransferAllItemsToMovingCrate(CUID uidTargetContainer, bool fRemoveComponents, TRANSFER_TYPE iType)

@@ -110,6 +110,19 @@ void CItemMultiCustom::BeginCustomize(CClient * pClientSrc)
 	CopyDesign(&m_designMain, &m_designWorking);
 	m_designWorking.m_iRevision++;
 
+    _pLockDowns.clear();
+    if (!_lLockDowns.empty())
+    {
+        for (std::vector<CUID>::iterator it = _lLockDowns.begin(); it != _lLockDowns.end(); ++it)
+        {
+            CItem *pItem = it->ItemFind();
+            if (pItem)
+            {
+                _pLockDowns.push_back(pItem);
+            }
+        }
+    }
+
 	// client will silently close all open dialogs and let the server think they're still open, so we need to update opened gump counts here
 	CDialogDef* pDlg = NULL;
 	for (CClient::OpenedGumpsMap_t::iterator it = pClientSrc->m_mapOpenedGumps.begin(), end = pClientSrc->m_mapOpenedGumps.end(); it != end; ++it)
@@ -484,6 +497,20 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, sh
 
 	m_designWorking.m_vectorComponents.push_back(pComponent);
 	m_designWorking.m_iRevision++;
+    CItem *pLockedItem = GetLockdownAt(x, y, z);
+    if (pLockedItem)
+    {
+        CItem *pCrate = GetMovingCrate(true).ItemFind();
+        if (pCrate)
+        {
+            CItemContainer *pContCrate = static_cast<CItemContainer*>(pCrate);
+            if (pCrate)
+            {
+                pContCrate->ContentAdd(pLockedItem);
+                pLockedItem->RemoveFromView();
+            }
+        }
+    }
 }
 
 void CItemMultiCustom::AddStairs(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z, short iStairID)
@@ -1047,89 +1074,116 @@ const CItemMultiCustom::CSphereMultiCustom * CItemMultiCustom::GetMultiItemDefs(
 
 const CRect CItemMultiCustom::GetDesignArea()
 {
-	ADDTOCALLSTACK("CItemMultiCustom::GetDesignArea");
-	// return the foundation dimensions, which is the design
-	// area editable by clients
+    ADDTOCALLSTACK("CItemMultiCustom::GetDesignArea");
+    // return the foundation dimensions, which is the design
+    // area editable by clients
 
-	if ( m_rectDesignArea.IsRectEmpty() )
-	{
-		m_rectDesignArea.SetRect(0, 0, 1, 1, GetTopMap());
+    if (m_rectDesignArea.IsRectEmpty())
+    {
+        m_rectDesignArea.SetRect(0, 0, 1, 1, GetTopMap());
 
-		const CSphereMulti * pMulti = g_Cfg.GetMultiItemDefs(GetID());
-		if ( pMulti != NULL )
-		{
-			// the client uses the multi items to determine the area
-			// that's editable
-			size_t iQty = pMulti->GetItemCount();
-			for ( size_t i = 0; i < iQty; i++ )
-			{
-				const CUOMultiItemRec_HS * pMultiItem = pMulti->GetItem(i);
-				if ( pMultiItem == NULL )
-					continue;
+        const CSphereMulti * pMulti = g_Cfg.GetMultiItemDefs(GetID());
+        if (pMulti != NULL)
+        {
+            // the client uses the multi items to determine the area
+            // that's editable
+            size_t iQty = pMulti->GetItemCount();
+            for (size_t i = 0; i < iQty; i++)
+            {
+                const CUOMultiItemRec_HS * pMultiItem = pMulti->GetItem(i);
+                if (pMultiItem == NULL)
+                    continue;
 
-				if ( !pMultiItem->m_visible )
-					continue;
+                if (!pMultiItem->m_visible)
+                    continue;
 
-				m_rectDesignArea.UnionPoint( pMultiItem->m_dx, pMultiItem->m_dy );
-			}
-		}
-		else
-		{
-			// multi data is not available, so assume the region boundaries
-			// are correct
-			CRect rectRegion = m_pRegion->GetRegionRect(0);
-			m_rectDesignArea.SetRect(rectRegion.m_left, rectRegion.m_top, rectRegion.m_right, rectRegion.m_top, rectRegion.m_map);
+                m_rectDesignArea.UnionPoint(pMultiItem->m_dx, pMultiItem->m_dy);
+            }
+        }
+        else
+        {
+            // multi data is not available, so assume the region boundaries
+            // are correct
+            CRect rectRegion = m_pRegion->GetRegionRect(0);
+            m_rectDesignArea.SetRect(rectRegion.m_left, rectRegion.m_top, rectRegion.m_right, rectRegion.m_top, rectRegion.m_map);
 
-			const CPointMap pt = GetTopPoint();
-			m_rectDesignArea.OffsetRect(-pt.m_x, -pt.m_y);
+            const CPointMap pt = GetTopPoint();
+            m_rectDesignArea.OffsetRect(-pt.m_x, -pt.m_y);
 
-			DEBUG_WARN(("Multi data is not available for customizable building 0%x.", GetID()));
-		}
-	}
+            DEBUG_WARN(("Multi data is not available for customizable building 0%x.", GetID()));
+        }
+    }
 
-	CRect rect;
-	const CPointMap pt = GetTopPoint();
+    CRect rect;
+    const CPointMap pt = GetTopPoint();
 
-	rect.SetRect(m_rectDesignArea.m_left, m_rectDesignArea.m_top, m_rectDesignArea.m_right, m_rectDesignArea.m_bottom, GetTopMap());
-	rect.OffsetRect(pt.m_x, pt.m_y);
+    rect.SetRect(m_rectDesignArea.m_left, m_rectDesignArea.m_top, m_rectDesignArea.m_right, m_rectDesignArea.m_bottom, GetTopMap());
+    rect.OffsetRect(pt.m_x, pt.m_y);
 
-	return rect;
+    return rect;
 }
 
 void CItemMultiCustom::CopyDesign(DesignDetails * designFrom, DesignDetails * designTo)
 {
-	ADDTOCALLSTACK("CItemMultiCustom::CopyComponents");
-	// overwrite the details of one design with the details
-	// of another
-	Component * pComponent;
+    ADDTOCALLSTACK("CItemMultiCustom::CopyComponents");
+    // overwrite the details of one design with the details
+    // of another
+    Component * pComponent;
 
-	// copy components
-	designTo->m_vectorComponents.clear();
-	for ( ComponentsContainer::iterator i = designFrom->m_vectorComponents.begin(); i != designFrom->m_vectorComponents.end(); ++i)
-	{
-		pComponent = new Component;
-		*pComponent = **i;
+    // copy components
+    designTo->m_vectorComponents.clear();
+    for (ComponentsContainer::iterator i = designFrom->m_vectorComponents.begin(); i != designFrom->m_vectorComponents.end(); ++i)
+    {
+        pComponent = new Component;
+        *pComponent = **i;
 
-		designTo->m_vectorComponents.push_back(pComponent);
-	}
+        designTo->m_vectorComponents.push_back(pComponent);
+    }
 
-	// copy revision
-	designTo->m_iRevision = designFrom->m_iRevision;
+    // copy revision
+    designTo->m_iRevision = designFrom->m_iRevision;
 
-	// copy saved packet
-	if ( designTo->m_pData != NULL )
-		delete designTo->m_pData;
+    // copy saved packet
+    if (designTo->m_pData != NULL)
+        delete designTo->m_pData;
 
-	if ( designFrom->m_pData != NULL )
-	{
-		designTo->m_pData = new PacketHouseDesign(designFrom->m_pData);
-		designTo->m_iDataRevision = designFrom->m_iDataRevision;
-	}
-	else
-	{
-		designTo->m_pData = NULL;
-		designTo->m_iDataRevision = 0;
-	}
+    if (designFrom->m_pData != NULL)
+    {
+        designTo->m_pData = new PacketHouseDesign(designFrom->m_pData);
+        designTo->m_iDataRevision = designFrom->m_iDataRevision;
+    }
+    else
+    {
+        designTo->m_pData = NULL;
+        designTo->m_iDataRevision = 0;
+    }
+}
+
+CItem * CItemMultiCustom::GetLockdownAt(short dx, short dy, char dz)
+{
+    if (_pLockDowns.empty())
+    {
+        return nullptr;
+    }
+    char fixedZ = CalculateLevel(dz);  // get the Diff Z from the Multi's Z
+    for (std::vector<CItem*>::iterator it = _pLockDowns.begin(); it != _pLockDowns.end(); ++it)
+    {
+        if (((*it)->GetTopPoint().m_x == dx) 
+            && ((*it)->GetTopPoint().m_y == dy)
+            && (CalculateLevel((*it)->GetTopPoint().m_z) == fixedZ))
+        {
+            return (*it);
+        }
+    }
+    return nullptr;
+}
+
+char CItemMultiCustom::CalculateLevel(char z)
+{
+    z -= GetTopPoint().m_z; // Take out the Multi Z level.
+    z -= 6; // Customizable's Houses have a +6 level from the foundation.
+    z /= 20;    // Each floor 
+    return z;
 }
 
 enum

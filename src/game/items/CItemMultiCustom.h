@@ -33,6 +33,8 @@ private:
 		int m_iDataRevision;
 	};
 
+    std::vector<CItem*> _pLockDowns;
+
 	class CSphereMultiCustom : public CSphereMulti
 	{
 	public:
@@ -67,6 +69,8 @@ private:
 	const CPointMap GetComponentPoint(Component * pComponent) const;
 	const CPointMap GetComponentPoint(short dx, short dy, char dz) const;
 	void CopyDesign(DesignDetails * designFrom, DesignDetails * designTo);
+    CItem *GetLockdownAt(short dx, short dy, char dz);
+    char CalculateLevel(char z);
 
 private:
 	typedef std::map<ITEMID_TYPE,int> ValidItemsContainer;	// ItemID, FeatureMask
