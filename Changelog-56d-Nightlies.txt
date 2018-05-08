@@ -652,7 +652,10 @@ To modify their HP use HITS and MAXHITS on them
 [Sphere.ini]
 -Added RegenItemHits to control the update period of those items' hp.
 
-07-05-2018, XuN
+08-05-2018, Drk84
+- Fixed #79: Protection spell AR stacking when COMBAT_ELEMENTAL_ENGINE is disabled. 
+
+08-05-2018, XuN
 House triggers:
     -Added @HouseDesignCommitItem for each commited item, with args:
         local.id=ID of the item
