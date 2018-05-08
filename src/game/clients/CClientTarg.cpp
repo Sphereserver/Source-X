@@ -1718,15 +1718,19 @@ CItem * CClient::OnTarg_Use_Multi(const CItemBase * pItemDef, CPointMap & pt, CI
         SysMessageDefault(DEFMSG_ITEMUSE_MULTI_COLLAPSE);
         return nullptr;
     }
+    CItemMulti * pMultiItem = dynamic_cast <CItemMulti*>(pItemNew);
+    if (pMultiItem)
+    {
+        pMultiItem->SetAddon(fIsAddon);
+    }
 
     pItemNew->SetAttr(ATTR_MOVE_NEVER | (pDeed->m_Attr & (ATTR_MAGIC | ATTR_INVIS)));
     pItemNew->SetHue(pDeed->GetHue());
     pItemNew->MoveToUpdate(pt);
 
-    CItemMulti * pMultiItem = dynamic_cast <CItemMulti*>(pItemNew);
     if (pMultiItem)
     {
-        pMultiItem->Multi_Create(m_pChar, UID_CLEAR, fIsAddon);
+        pMultiItem->Multi_Create(m_pChar, UID_CLEAR);
         pMultiItem->SetKeyNum("DEED_ID", pDeed->GetID());
     }
 

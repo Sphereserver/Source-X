@@ -1744,6 +1744,11 @@ CItemBaseMulti::CItemBaseMulti( CItemBase* pBase ) :
 	m_shipSpeed.period = (1 * TICK_PER_SEC) / 2;
 	m_shipSpeed.tiles = 1;
 	m_SpeedMode = 3;
+
+    _iBaseStorage = 489;    // Minimum possible value from 7x7 houses.
+    _iBaseVendors = 10;     // Minimum possible value from 7x7 houses.
+    _iLockdownsPercent = 50;// Default value
+
 	// copy the stuff from the pBase
 	CopyTransfer(pBase);
 }
@@ -1814,7 +1819,10 @@ int CItemBaseMulti::GetMaxDist() const
 enum MLC_TYPE
 {
 	MLC_BASECOMPONENT,
+    MLC_BASESTORAGE,
+    MLC_BASEVENDORS,
 	MLC_COMPONENT,
+    MLC_LOCKDOWNSPERCENT,
 	MLC_MULTIREGION,
 	MLC_REGIONFLAGS,
 	MLC_SHIPSPEED,
@@ -1825,7 +1833,10 @@ enum MLC_TYPE
 lpctstr const CItemBaseMulti::sm_szLoadKeys[] =
 {
 	"BASECOMPONENT",
+    "BASESTORAGE",
+    "BASEVENDORS",
 	"COMPONENT",
+    "LOCKDOWNSPERCENT",
 	"MULTIREGION",
 	"REGIONFLAGS",
 	"SHIPSPEED",
@@ -1833,159 +1844,178 @@ lpctstr const CItemBaseMulti::sm_szLoadKeys[] =
 	NULL
 };
 
-bool CItemBaseMulti::r_LoadVal( CScript &s )
+bool CItemBaseMulti::r_LoadVal(CScript &s)
 {
-	ADDTOCALLSTACK("CItemBaseMulti::r_LoadVal");
-	EXC_TRY("LoadVal");
-	switch ( FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ))
-	{
-	case MLC_COMPONENT:
-		return AddComponent( s.GetArgStr());
-	case MLC_MULTIREGION:
-		MakeMultiRegion( this, s );
-		break;
-	case MLC_REGIONFLAGS:
-        m_dwRegionFlags = s.GetArgDWVal();
-		return true;
-	case MLC_SHIPSPEED:
-	{
-		if (!IsType(IT_SHIP))	// only valid for ships
-			return false;
+    ADDTOCALLSTACK("CItemBaseMulti::r_LoadVal");
+    EXC_TRY("LoadVal");
+    switch (FindTableSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1))
+    {
+        case MLC_BASESTORAGE:
+            _iBaseStorage = s.GetArgU16Val();
+            break;
+        case MLC_BASEVENDORS:
+            _iBaseVendors = s.GetArgU8Val();
+            break;
+        case MLC_LOCKDOWNSPERCENT:
+            _iLockdownsPercent = s.GetArgU8Val();
+            break;
+        case MLC_COMPONENT:
+            return AddComponent(s.GetArgStr());
+        case MLC_MULTIREGION:
+            MakeMultiRegion(this, s);
+            break;
+        case MLC_REGIONFLAGS:
+            m_dwRegionFlags = s.GetArgDWVal();
+            break;
+        case MLC_SHIPSPEED:
+        {
+            if (!IsType(IT_SHIP))	// only valid for ships
+                return false;
 
-		// SHIPSPEED x[,y]
-		int64 ppArgs[2];
-		size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, CountOf(ppArgs));
-		if (iQty < 1)
-			return false;
+            // SHIPSPEED x[,y]
+            int64 ppArgs[2];
+            size_t iQty = Str_ParseCmds(s.GetArgRaw(), ppArgs, CountOf(ppArgs));
+            if (iQty < 1)
+                return false;
 
-		m_shipSpeed.period = (uchar)(ppArgs[0]);
+            m_shipSpeed.period = (uchar)(ppArgs[0]);
 
-		if (iQty >= 2)
-			m_shipSpeed.tiles = (uchar)(ppArgs[1]);
-	} break;
-	case MLC_TSPEECH:
-		return( m_Speech.r_LoadVal( s, RES_SPEECH ));
-	default:
-		return( CItemBase::r_LoadVal( s ));
-	}
-	return true;
-	EXC_CATCH;
+            if (iQty >= 2)
+                m_shipSpeed.tiles = (uchar)(ppArgs[1]);
+        }
+        break;
+        case MLC_TSPEECH:
+            return(m_Speech.r_LoadVal(s, RES_SPEECH));
+        default:
+            return(CItemBase::r_LoadVal(s));
+    }
+    return true;
+    EXC_CATCH;
 
-	EXC_DEBUG_START;
-	EXC_ADD_SCRIPT;
-	EXC_DEBUG_END;
-	return false;
+    EXC_DEBUG_START;
+    EXC_ADD_SCRIPT;
+    EXC_DEBUG_END;
+    return false;
 }
 
-bool CItemBaseMulti::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pChar )
+bool CItemBaseMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pChar)
 {
-	ADDTOCALLSTACK("CItemBaseMulti::r_WriteVal");
-	EXC_TRY("WriteVal");
-	switch ( FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 ) )
-	{
-	case MLC_BASECOMPONENT:
-	{
-		pszKey += 13;
-		const CSphereMulti* pMulti = g_Cfg.GetMultiItemDefs(GetDispID());
-		if (pMulti == NULL)
-			return false;
+    ADDTOCALLSTACK("CItemBaseMulti::r_WriteVal");
+    EXC_TRY("WriteVal");
+    switch (FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1))
+    {
+        case MLC_BASESTORAGE:
+            sVal.FormatU16Val(_iBaseStorage);
+            break;
+        case MLC_BASEVENDORS:
+            sVal.FormatU8Val(_iBaseVendors);
+            break;
+        case MLC_LOCKDOWNSPERCENT:
+            sVal.FormatU8Val(_iLockdownsPercent);
+            break;
+        case MLC_BASECOMPONENT:
+        {
+            pszKey += 13;
+            const CSphereMulti* pMulti = g_Cfg.GetMultiItemDefs(GetDispID());
+            if (pMulti == NULL)
+                return false;
 
-		if (*pszKey == '\0')
-		{
-			sVal.FormatSTVal(pMulti->GetItemCount());
-		}
-		else if (*pszKey == '.')
-		{
-			SKIP_SEPARATORS( pszKey );
-			size_t index = Exp_GetVal( pszKey );
-			if (index >= pMulti->GetItemCount())
-				return false;
-			SKIP_SEPARATORS( pszKey );
-			const CUOMultiItemRec_HS* item = pMulti->GetItem(index);
+            if (*pszKey == '\0')
+            {
+                sVal.FormatSTVal(pMulti->GetItemCount());
+            }
+            else if (*pszKey == '.')
+            {
+                SKIP_SEPARATORS(pszKey);
+                size_t index = Exp_GetVal(pszKey);
+                if (index >= pMulti->GetItemCount())
+                    return false;
+                SKIP_SEPARATORS(pszKey);
+                const CUOMultiItemRec_HS* item = pMulti->GetItem(index);
 
-			if ( *pszKey == '\0' )						{		sVal.Format("%u,%i,%i,%i", item->m_wTileID, item->m_dx, item->m_dy, item->m_dz); return true; }
-			else if ( !strnicmp(pszKey, "ID", 2) )		{		sVal.FormatVal(item->m_wTileID); return true; }
-			else if ( !strnicmp(pszKey, "DX", 2) )		{		sVal.FormatVal(item->m_dx); return true; }
-			else if ( !strnicmp(pszKey, "DY", 2) )		{		sVal.FormatVal(item->m_dy); return true; }
-			else if ( !strnicmp(pszKey, "DZ", 2) )		{		sVal.FormatVal(item->m_dz); return true; }
-			else if ( !strnicmp(pszKey, "D", 1) )		{		sVal.Format("%i,%i,%i", item->m_dx, item->m_dy, item->m_dz); return true; }
-			else if (!strnicmp(pszKey, "VISIBLE", 7))	{ sVal.FormatVal(item->m_visible); return true; }
-			else return false;
-		}
-		else
-			return false;
+                if (*pszKey == '\0') { sVal.Format("%u,%i,%i,%i", item->m_wTileID, item->m_dx, item->m_dy, item->m_dz); return true; }
+                else if (!strnicmp(pszKey, "ID", 2)) { sVal.FormatVal(item->m_wTileID); return true; }
+                else if (!strnicmp(pszKey, "DX", 2)) { sVal.FormatVal(item->m_dx); return true; }
+                else if (!strnicmp(pszKey, "DY", 2)) { sVal.FormatVal(item->m_dy); return true; }
+                else if (!strnicmp(pszKey, "DZ", 2)) { sVal.FormatVal(item->m_dz); return true; }
+                else if (!strnicmp(pszKey, "D", 1)) { sVal.Format("%i,%i,%i", item->m_dx, item->m_dy, item->m_dz); return true; }
+                else if (!strnicmp(pszKey, "VISIBLE", 7)) { sVal.FormatVal(item->m_visible); return true; }
+                else return false;
+            }
+            else
+                return false;
 
-		return true;
-	}
-	case MLC_COMPONENT:
-		{
-			pszKey += 9;
-			if ( *pszKey == '\0' )
-			{
-				sVal.FormatSTVal( m_Components.GetCount() );
-			}
-			else if ( *pszKey == '.' )
-			{
-				SKIP_SEPARATORS( pszKey );
-				size_t index = Exp_GetVal( pszKey );
-				if ( m_Components.IsValidIndex(index) == false )
-					return false;
+            return true;
+        }
+        case MLC_COMPONENT:
+        {
+            pszKey += 9;
+            if (*pszKey == '\0')
+            {
+                sVal.FormatSTVal(m_Components.GetCount());
+            }
+            else if (*pszKey == '.')
+            {
+                SKIP_SEPARATORS(pszKey);
+                size_t index = Exp_GetVal(pszKey);
+                if (m_Components.IsValidIndex(index) == false)
+                    return false;
 
-				SKIP_SEPARATORS( pszKey );
-				CMultiComponentItem item = m_Components.GetAt( index );
+                SKIP_SEPARATORS(pszKey);
+                CMultiComponentItem item = m_Components.GetAt(index);
 
-				if ( !strnicmp(pszKey, "ID", 2) ) sVal.FormatVal(item.m_id);
-				else if ( !strnicmp(pszKey, "DX", 2) ) sVal.FormatVal(item.m_dx);
-				else if ( !strnicmp(pszKey, "DY", 2) ) sVal.FormatVal(item.m_dy);
-				else if ( !strnicmp(pszKey, "DZ", 2) ) sVal.FormatVal(item.m_dz);
-				else if ( !strnicmp(pszKey, "D", 1) ) sVal.Format("%i,%i,%i", item.m_dx, item.m_dy, item.m_dz);
-				else sVal.Format("%u,%i,%i,%i", item.m_id, item.m_dx, item.m_dy, item.m_dz);
-			}
-			else
-				return false;
-			return true;
-		}
-	case MLC_MULTIREGION:
-		sVal.Format( "%d,%d,%d,%d", m_rect.m_left, m_rect.m_top, m_rect.m_right-1, m_rect.m_bottom-1 );
-		return true;
-	case MLC_REGIONFLAGS:
-		sVal.FormatLLHex(m_dwRegionFlags);
-		return true;
-	case MLC_SHIPSPEED:
-	{
-		if (!IsType(IT_SHIP))
-			return false;
+                if (!strnicmp(pszKey, "ID", 2)) sVal.FormatVal(item.m_id);
+                else if (!strnicmp(pszKey, "DX", 2)) sVal.FormatVal(item.m_dx);
+                else if (!strnicmp(pszKey, "DY", 2)) sVal.FormatVal(item.m_dy);
+                else if (!strnicmp(pszKey, "DZ", 2)) sVal.FormatVal(item.m_dz);
+                else if (!strnicmp(pszKey, "D", 1)) sVal.Format("%i,%i,%i", item.m_dx, item.m_dy, item.m_dz);
+                else sVal.Format("%u,%i,%i,%i", item.m_id, item.m_dx, item.m_dy, item.m_dz);
+            }
+            else
+                return false;
+            return true;
+        }
+        case MLC_MULTIREGION:
+            sVal.Format("%d,%d,%d,%d", m_rect.m_left, m_rect.m_top, m_rect.m_right - 1, m_rect.m_bottom - 1);
+            return true;
+        case MLC_REGIONFLAGS:
+            sVal.FormatLLHex(m_dwRegionFlags);
+            return true;
+        case MLC_SHIPSPEED:
+        {
+            if (!IsType(IT_SHIP))
+                return false;
 
-		pszKey += 9;
-		if (*pszKey == '.')
-		{
-			pszKey++;
-			if ( !strnicmp(pszKey, "TILES", 5) )
-			{
-				sVal.FormatVal(m_shipSpeed.tiles);
-				break;
-			}
-			else if (!strnicmp(pszKey, "PERIOD", 6) )
-			{
-				sVal.FormatVal(m_shipSpeed.period);
-				break;
-			}
-			return false;
-		}
+            pszKey += 9;
+            if (*pszKey == '.')
+            {
+                pszKey++;
+                if (!strnicmp(pszKey, "TILES", 5))
+                {
+                    sVal.FormatVal(m_shipSpeed.tiles);
+                    break;
+                }
+                else if (!strnicmp(pszKey, "PERIOD", 6))
+                {
+                    sVal.FormatVal(m_shipSpeed.period);
+                    break;
+                }
+                return false;
+            }
 
-		sVal.Format("%d,%d", m_shipSpeed.period, m_shipSpeed.tiles);
-		break;
-	}
-	default:
-		return CItemBase::r_WriteVal( pszKey, sVal, pChar );
-	}
-	return true;
-	EXC_CATCH;
+            sVal.Format("%d,%d", m_shipSpeed.period, m_shipSpeed.tiles);
+            break;
+        }
+        default:
+            return CItemBase::r_WriteVal(pszKey, sVal, pChar);
+    }
+    return true;
+    EXC_CATCH;
 
-	EXC_DEBUG_START;
-	EXC_ADD_KEYRET(pChar);
-	EXC_DEBUG_END;
-	return false;
+    EXC_DEBUG_START;
+    EXC_ADD_KEYRET(pChar);
+    EXC_DEBUG_END;
+    return false;
 }
 
 //**************************************************

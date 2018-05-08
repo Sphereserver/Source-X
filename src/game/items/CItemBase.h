@@ -630,6 +630,9 @@ public:
 	CResourceRefArray m_Speech;	// Speech fragment list (other stuff we know)
 	ShipSpeed m_shipSpeed; // Speed of ships (IT_SHIP)
 	byte m_SpeedMode;
+    uint16 _iBaseStorage;
+    uint8 _iBaseVendors;
+    uint8 _iLockdownsPercent;
 
 public:
 	explicit CItemBaseMulti( CItemBase* pBase );
