@@ -685,7 +685,7 @@ Players props:
 -House Permissions:
     Now Owner, Coowners and Friends' uids are stored internally.
     - Added SetOwner uid(WO): Sets the owner's uid to the new one (will remove the House from previous owner (if any) and delete his keys for this house).
-    - Added AddCoowner uid(WO): Adds the given character uid to the coowner's list (there's no hardcoded limit), also executes AddHouse on the player.
+    - Added AddCoowner uid(WO): Adds the given character uid to the coowner's list (there's no hardcoded limit).
     - Added AddFriend uid(WO): Adds the given character uid to the friends list (there is no hardcoded limit).
     - Added IsOwner uid(RO): Returns 1 if the given uid is the owner.
     - Added IsCoowner uid(RO): Returns 1 if the given uid is in the coowner's list.
@@ -779,11 +779,5 @@ Added to [MULTIDEF ]:
 -BaseVendors (RW): Homologue to the House property BaseVendors.
 -LockdownsPercent (RW): Homologue to the House property LockdownsPercent.
 
-Todo
-
-Trigger @HouseDesignBegin:
-    argn1=1 Move only locked items
-    argn1=2 Move only Addons
-    argn1=3 Move locked items and Addons
-    argn1=4 Move every item that is not a component of the multi
-    argn1=0 Don't move anything
+Houses with TAG.DEED_ID will generate a deed with that ID when redeeded, if not i_deed will be used.
+TAG.COMPONENT=1 is being set to any house component

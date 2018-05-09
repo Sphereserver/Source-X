@@ -467,6 +467,11 @@ void CChar::AddHouse(CUID uidHouse)
     ADDTOCALLSTACK("CChar::AddHouse");
     if (!g_Serv.IsLoading())
     {
+        if (!uidHouse.IsValidUID())
+        {
+            g_Log.EventDebug("Char '%#08x' trying to add house with invalid uid '%#08x'.", GetUID(), uidHouse);
+            return;
+        }
         uint8 iMaxHouses = _iMaxHouses;
         if (iMaxHouses == 0)
         {
@@ -477,11 +482,15 @@ void CChar::AddHouse(CUID uidHouse)
         }
         if (iMaxHouses > 0 && _lHouses.size() >= iMaxHouses)
         {
-            return;
-        }
-        if (!uidHouse.IsValidUID())
-        {
-            g_Log.EventDebug("Char '%#08x' trying to add house with invalid uid '%#08x'.", GetUID(), uidHouse);
+            CItem *pItem = uidHouse.ItemFind();
+            if (pItem)
+            {
+                CItemMulti *pMulti = static_cast<CItemMulti*>(pItem);
+                if (pMulti)
+                {
+                    pMulti->Redeed(true, false);
+                }
+            }
             return;
         }
         for (std::vector<CUID>::iterator it = _lHouses.begin(); it != _lHouses.end(); ++it)

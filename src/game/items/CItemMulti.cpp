@@ -40,12 +40,21 @@ CItemMulti::~CItemMulti()
 
 	if ( ! m_pRegion )
 		return;
-    if (_uidMovingCrate.IsValidUID() && _uidOwner.IsValidUID())
+    CItem *pCrate = GetMovingCrate(false).ItemFind();
+    if (pCrate && _uidOwner.IsValidUID())
     {
-        CChar *pOwner = _uidOwner.CharFind();
-        if (pOwner)
+        CItemContainer *pCont = static_cast<CItemContainer*>(pCrate);
+        if (pCont->GetCount() > 0)
         {
-            pOwner->GetBank()->ContentAdd(_uidMovingCrate.ItemFind());
+            CChar *pOwner = _uidOwner.CharFind();
+            if (pOwner)
+            {
+                pOwner->GetBank()->ContentAdd(_uidMovingCrate.ItemFind());
+            }
+        }
+        else
+        {
+            pCrate->Delete();
         }
     }
 	delete m_pRegion;
@@ -235,6 +244,8 @@ void CItemMulti::Multi_Create( CChar * pChar, dword dwKeyCode)
 		const CItemBaseMulti::CMultiComponentItem &component = pMultiDef->m_Components.ElementAt(i);
 		fNeedKey |= Multi_CreateComponent(component.m_id, component.m_dx, component.m_dy, component.m_dz, dwKeyCode, fIsAddon);
 	}
+
+    Multi_GetSign();	// set the m_uidLink
     if (pChar)
     {
         SetOwner(pChar->GetUID());
@@ -246,8 +257,6 @@ void CItemMulti::Multi_Create( CChar * pChar, dword dwKeyCode)
         _fIsAddon = true;
         return;
     }
-
-	Multi_GetSign();	// set the m_uidLink
 
 	if (pChar)
 	{
@@ -657,7 +666,9 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank)
     {
         pOwner->GetBank()->ContentAdd(pCrate);
     }
-    CItem *pDeed = CItem::CreateBase((ITEMID_TYPE)(GetKeyNum("DEED_ID",true)));
+
+    ITEMID_TYPE itDeed = (ITEMID_TYPE)(GetKeyNum("DEED_ID", true));
+    CItem *pDeed = CItem::CreateBase(itDeed != ITEMID_NOTHING ? itDeed : ITEMID_DEED1);
     if (pDeed)
     {
         pDeed->SetHue(GetHue());
@@ -795,7 +806,7 @@ uint8 CItemMulti::GetBaseVendors()
 
 uint8 CItemMulti::GetMaxVendors()
 {
-    return (uint8)(_iBaseVendors + (_iBaseVendors * GetIncreasedStorage()));
+    return (uint8)(_iBaseVendors + (_iBaseVendors * GetIncreasedStorage()) / 100);
 }
 
 uint8 CItemMulti::GetCurrentVendors()
@@ -815,7 +826,7 @@ uint16 CItemMulti::GetIncreasedStorage()
 
 uint16 CItemMulti::GetMaxStorage()
 {
-    return _iBaseStorage + (_iBaseStorage * _iIncreasedStorage);
+    return _iBaseStorage + ((_iBaseStorage * _iIncreasedStorage) / 100);
 }
 
 uint16 CItemMulti::GetCurrentStorage()
