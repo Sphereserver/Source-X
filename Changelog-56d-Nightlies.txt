@@ -666,100 +666,164 @@ House triggers:
         return false will remove this item from the commit.*
     *if not return false a local.MaxZ will check the P.Z value of the item and update it if it's higher than the old one.
     -Changed @HouseDesignCommit: added local.MAXZ(Read Only) returning the value of the top placed item.
+    
+Added character storage for it's own houses:
+	- Added AddHouse uid(WO): Adds the given uid to the player's house.
+		If the player current count of houses is greater than the limit he has, the house will be redeeded.
+	- Added DelHouse uid(WO): Deletes the given uid from the player's list (Will not delete the house)(-1 clears the whole list).
+	- Added Houses(RO): Return the houses on the player's list.
+	- Added MaxHouses(RW) to Accounts and Chars, when created they read this new setting from the sphere.ini (if values on sphere.ini change, they will not reflect on already created accounts/chars).
+	- Added REF to 'HOUSE.x' to access the house in the Nth position, eg: house.3.Redeed, local.house_p=<house.1.p>
+    Note: Houses generated before this change will not be updated on the player's list, instead the player will still have the memory with color=MEMORY_GUARD (0x100)
+    linked to the house,since there was no default behaviour other than this and each house script handles it differently, there will be no hardcoded update
+    to the new system, each house system should be updated according to it's behaviour (ie: removing the memory and setting AddHouse <HouseUID>)
 
-Players props:
-    -Added MaxHouses property for accounts, Default = Serv.MaxHousesAccount.
-    -Added MaxHouses property for chars (meant for players), Default = Serv.MaxHousesPlayer.
+    -Added MaxHouses(RW) property for accounts, Default = Serv.MaxHousesAccount.
+    -Added MaxHouses(RW) property for chars (meant for players), Default = Serv.MaxHousesPlayer.
     * Setting MaxHouses = 0 for Players will skip the setting and read it from it's Account.
     * Setting MaxHouses = 0 for Players and Accounts will allow to build without limit.
-    -Added house list for players and functions for it:
-        ADDHOUSE uid, will add the item with the given UID as this player's house.
-        DELHOUSE uid, will delete the house with the given UID from this player's list (-1 clears the whole list).*
-    *Houses generated before this change will not be updated, instead the player will still have the memory with color=MEMORY_GUARD (0x100) linked to the house,
-    since there was no default behaviour other than this and each house script handles it differently, there will be no hardcoded update to the new system,
-    each house system should be updated according to it's behaviour (ie: removing the memory and setting AddHouse <HouseUID>)
-    -Added char property HOUSES(RO) returning the total count of houses it has.
-    -Added char reference HOUSE.n.Key allowing to access to the house at this slot.
-    This affects only Houses for now, when some testing is done and the code is full working with all required features this should be expanded to Ships.
+
+Massive changes on multis (houses for now).
+
+[sphere.ini]:
+    - Added MaxHousesAccount = Max houses an account can have (default 1).
+    - Added MaxHousesPlayer = Max houses one player can have (default 1).
+    - Added AutoHouseKeys = 1 to generate keys for multis on creation, 0 to disable.
+	
+Updated [sphere_def.scp]:
+    [DEFNAME house_types]
+    house_private=0
+    house_public=1
+    house_guild=2
+    [DEFNAME house_transfer_types]
+    transfer_nothing	= 0		// Do not transfer any item to the Moving Crate, the crate will still be moved if uid is given.
+    transfer_lockdowns	= 01	// Transfer LockDowns
+    transfer_addon		= 02	// Transfer Addons
+    transfer_all		= 04	// Transfer LockDowns, Addons and every other item found inside a house that is not a component of it.
+	
+Updated [sphere_defs_types_hardcoded.scp]
+    [TYPEDEFS]:
+    t_multi_addon=201   // AddOns, the deed must have attr_magic to bypass placement checks and allow the addon to be placed inside houses.
+	
+New keys added to [MULTIDEF ] (and updated [multis_houses.scp] with them):
+-BaseStorage (RW): Base limit of item storage for this multi.
+-BaseVendors (RW): Base limit of vendor capacity for this multi.
+-LockdownsPercent (RW): Base LockdownsPercent value for this multi.
+(Read the House Storage support revisions for more info.)
+	
+Added internal storage for Owner, Coowners, Friends, Bans, Locked down items (Lockdowns), Vendors and House Components.
 
 -House Permissions:
-    Now Owner, Coowners and Friends' uids are stored internally.
+	// Owner
     - Added SetOwner uid(WO): Sets the owner's uid to the new one (will remove the House from previous owner (if any) and delete his keys for this house).
-    - Added AddCoowner uid(WO): Adds the given character uid to the coowner's list (there's no hardcoded limit), also executes AddHouse on the player.
-    - Added AddFriend uid(WO): Adds the given character uid to the friends list (there is no hardcoded limit).
+		Forces AddHouse <multi_uid> on the Owner
     - Added IsOwner uid(RO): Returns 1 if the given uid is the owner.
-    - Added IsCoowner uid(RO): Returns 1 if the given uid is in the coowner's list.
-    - Added IsFriend uid(RO): Returns 1 if the given uid is in the friend's list.
+	// Coowners
+    - Added AddCoowner uid(WO): Adds the given character uid to the coowner list.
+	- Added DelCoowner uid(WO): Deletes from the coowners list the given uid (-1 to clear the whole list)*.
+    - Added GetCoownerPos uid(RO): Returns the position of the given UID on the coowners list (-1 if not found).
+	- Added Coowners(R): Returns the total count of Coowners.
+	// Friends
+    - Added AddFriend uid(WO): Adds the given character uid to the friend list.
+	- Added DelFriend uid(WO): Deletes from the friend list the given uid (-1 to clear the whole list).
+    - Added GetFriendPos uid(RO): Returns the position of the given UID on the friend list (-1 if not found).
+	- Added Friends(R): Returns the total count of friends.
+	// Bans
+	- Added AddBan uid(W): Adds a char with the given UID to the Ban list.
+	- Added DelBan uid(W): Deletes from the Ban list the given UID (-1 clears the whole list)*.
+	- Added GetBanPos uid(R): Returns the position of the given uid on the Bans list (-1 if not found).
+	- Added Bans(R): Returns the total count of Components.
+	// Locked down items
+    - Added LockItem uid, fUpdateFlags: Adds the given UID to the LockDown*
+    - Added UnlockItem uid, fUpdateFlags: Removes the given UID from the LockDown list (-1 clears the whole list)*.
+        fUpdateFlags = Link and ATTR_SECURE are applied/removed to the item when Locking/Unlocking it.
+    - Added GetLockedItemPos uid(R): Returns the position of the given UID on the Components list (-1 if not found).
+	- Added Lockdowns(R): Returns the total count of Lockdowns.
+	// Vendors
+    - Added AddVendor uid: Adds the given UID to the Vendors' list.
+    - Added DelVendor uid: Removes the given UID from the Vendors' list (-1 clears the whole list)*.
+    - Added GetVendorPos uid(R): Returns the position of the given UID on the Vendors list (-1 if not found).
+	- Added Vendors(R): Returns the total count of Vendors.
+	// Components
+	- Added AddComponent uid(W): Adds a Component with the given UID.
+	- Added DelComponent uid(W): Deletes from the Components list the given UID (-1 clears the whole list)*.
+	- Added GetComponentPos uid(R): Returns the position of the given UID on the Components list (-1 if not found).
+	- Added Components(R): Returns the total count of Components.
+	- Added GenerateBaseComponents(W): Regenerates the components the house has on the [MULTIDEF ] (this does NOT delete current components nor recode/remove current keys).
+	- Added DeleteAllComponents(W): Removes all current components.
+	
+	
+* Passing as param -1 (or 0FFFFFFF) will clear those lists but nothing more, it won't remove the objects, clear; attrs, props, events, etc; applied, it must be done before clearing the list.
+- Added REF to OWNER, COOWNER.x, FRIEND.x, BAN.x, LOCKDOWN.x, VENDOR.x, COMPONENT.x, to access the objects inside and work on them, eg: OWNER.say I'm da Boss!, local.coowner=<coowner.13.uid>, etc
+
+-Keys management:
+	- Added AutoHouseKeys setting on sphere.ini to set wether the multis should generate keys automatically or not.
     - Added AddKey uid(RW),fDupeOnBank:
         uid: The uid of the char to give this key to.
         fPlaceOnBank: if set to 1 will place the key in the char's bank, otherwise it will be bounced to the backpack.
         (When reading it, eg: ref1=<AddKey uid>) returns the UID of the generated key.
     - Added RemoveKeys uid(WO): Removes all the keys linked to this house for the character with the given uid.
 
-House Misc:
-    -Added MOVINGCRATE(RW) with basic support for Moving Crates:
-     When setting to a container's UID, if there was any other MovingCrate before it's contents will be transfered to newer crate.
-     When the multi is being deleted all linked items will be transfered to the crate (if any, if not they will be deleted) and the crate to the owner's bank (if any),
+-Moving Crate support:
+    - Added MovingCrate(RW):
+     When setting to a container's UID, if there was any other existing MovingCrate, it's contents will be transfered to new crate.
+     When the multi is being deleted all linked items will be transfered to the current Moving Crate and the crate to the owner's bank (if any),
      a TAG.MULTI_UID with the multi's uid will be set on the crate.
-    -Added MOVETOCRATE uid,fRemoveComponents,iTransferType(WO): (Only working if MovingCrate is set).
+	 When accessing to the Moving Crate via script a new one will be created if the existing does not exist.
+	 Moving Crates created by the server will have 't_moving_crate' TYPEDEF event applied.
+	- Added MoveLocksToCrate: Moves all Locked Down items to the Moving Crate (Faster than MoveAllToCrate uid,x,TRANSFER_LOCKDOWNS).
+	- Added MoveAllToCrate uid,fRemoveComponents,iTransferType(WO):
         Moves to the Moving Crate all the items inside the multi that meets the following requirements:
-            A) Are linked to it
-            B) Are not multi's components (eg: doors, sign, etc).
+            A) Are linked to the multi.
+            B) Are not multi's components.
         If a container's uid is given, the Moving Crate will be transfered to that container.
-        fRemoveComponents: if set to 1 will remove house components on the proccess.
         iTransferType: Type of items being transfered:
             TRANSFER_NOTHING  = 0x0 // Do not transfer any item to the Moving Crate, the crate will still be moved if uid is given.
-            TRANSFER_LOCKDOWNS= 0x1 // Transfer LockDowns
+            TRANSFER_LOCKDOWNS= 0x1 // Transfer LockDowns, if there's only need of transfering lockdowns use MoveLocksToCrate)
             TRANSFER_ADDON    = 0x2 // Transfer Addons
             TRANSFER_ALL      = 0x4 // Transfer LockDowns, Addons and every other item found inside a house that is not a component of it.
+			
+
+AddOns support:
+    -Added t_multi_addon: Works like current multis&addons but will not count towards the House's limit.
+	It's just a type definition to alter how these items works inside 'real' multis, but the current items using it (ie: m_fountain_white) will work the same excepting that they won't create keys by default.
+	
+- Redeeding
+	-Houses with search for TAG.DEED_ID to generate the new deed, if not value is set i_deed will be used, i_deed will be set by default on new placed multis.
     -Added Redeed(WO) fShowMsg, fMoveToCrate: Redeeds the multi to the OWNER's backpack (if there is no owner, there is no redeed).
         fShowMsg: if true shows the Bounce Msg for the deed.
-        fMoveToCrate: if true places the Moving Crate item in the owner's bank.
-    -Added t_multi_addon: Works like current multis&addons but will not be stored on the Houses List.
-    -Removing a t_multi or t_multi_addon will Redeed it to it's owner's backpack.
+        fMoveToCrate: if true places the Moving Crate item in the owner's bank instead of on his backpack.
+    -Removing a t_multi or t_multi_addon will move all of it's items to the Moving Crate, move it to owner's Bank and Redeed the multi to it's owner's backpack.
 
--Storage:
-    -Added a vector list for Locked Down items.
-    -Added a vector list for Player Vendors.
-    House Props:
-    
-    -IncreasedStorage(RW): Increased % of storage allowed (Max 65535%).
-
+-House Storage support:
     -BaseStorage(RW): Limit of storage allowed by default = 489 (Max 65535).
-    -MaxStorage(R): Returns the maximum storage allowed: BaseStorage * (BaseStorage / IncreasedStorage) (Max 65535).
-    -CurrentStorage(R): Returns the current storage used.
+    -IncreasedStorage(RW): Increased % of storage allowed (Max 65535%).
+    -MaxStorage(RO): Returns the maximum storage allowed: BaseStorage + ((BaseStorage / IncreasedStorage)/100) (Max 65535).
+    -CurrentStorage(RO): Returns the current storage used.
 
-    -BaseVendors(RW): Limite of Vendors allowed by default = 10 (Max 255).
-    -MaxVendors(R): Returns the maximum Vendors allowed: BaseVendors * (BaseVendors / IncreasedStorage) (Max 255).
-    -CurrentVendors(R): Returns the current count of placed Vendors.
+    -BaseVendors(RW): Limit of Vendors allowed by default = 10 (Max 255).
+    -MaxVendors(RO): Returns the maximum Vendors allowed: BaseVendors + ((BaseVendors / IncreasedStorage)/100) (Max 255).
+    -CurrentVendors(RO): Returns the current count of placed Vendors.
 
     -LockdownsPercent(RW): Base percent of allowed Lockdowns (Max 255).
-    -MaxLockdowns(RW): Total Lockdowns allowed based on TotalStorage: (TotalStorage / LockdownsPercent) (Max 65535).
+    -MaxLockdowns(RW): Total Lockdowns allowed based on MaxStorage: + ((MaxStorage / LockdownsPercent)/100) (Max 65535).
     -CurrentLockdowns(R): Returns the count of Locked Down items on this house.
     eg:
         - Base Storage = 400
         - IncreasedStorage = 20%
-        - MaxStorage = 480 (BaseStorage + (BaseStorage / IncreasedStorage))
+        - MaxStorage = 480 (BaseStorage + ((BaseStorage / IncreasedStorage)/100))
 
-        - LockdownsPercent = 50
-        - TotalLockdowns = 240 (MaxStorage / LockdownsPercent)
+        - LockdownsPercent = 25
+        - MaxLockdowns = 240 MaxStorage - ( MaxStorage - ((MaxStorage * LockdownsPercent)/100))
 
-    House cms:
-    -LockItem uid, fUpdateFlags: Adds the given UID to the LockDown*
-    -UnlockItem uid, fUpdateFlags: Removes the given UID from the LockDown list (-1 clears the whole list)*
-        fUpdateFlags = Link and ATTR_SECURE are applied/removed to the item when Locking/Unlocking it.
-    -IsLocked returns true if the item is already locked.
 
-    -AddVendor uid: Adds the given UID to the Vendors' list.
-    -DelVendor uid: Removes the given UID from the Vendors' list (-1 clears the whole list).*
-    -IsHouseVendor uid: returns true if the given UID is on the Vendors' list.
+-Added HouseType(RW): Set/Gets the house type (0 = private, 1 = public, 2 = guild)
 
-DelVendor -1, UnlockItem -1 and DelHouse -1 (or 0FFFFFFF) will clear the lists but nothing more; attrs, props, etc assigned to the houses, items or vendors must be managed apart.
-
-Added to [sphere.ini]:
-    -MaxHousesAccount = Max houses an account can have (default 1).
-    -MaxHousesPlayer = Max houses one player can have (default 1).
-    -AutoHouseKeys = 1 to generate keys for multis on creation, 0 to disable.
+-Doors placed as components now have t_house_door TYPEDEF applied as event.
+-Containers placed as components now have t_house_container TYPEDEF applied as event.
+-All components of each house now have t_house_component TYPEDEF applied as event.
+-t_house_lockdown is added/removed from items when locking/unlocking them from the house.
+Note: These events are applied on house COMPONENTS read from [MULTIDEF ], if you add any component ingame with AddComponent you will have to set them too.
 
 Updated [sphere_def.scp]:
     [TYPEDEFS]:
@@ -779,15 +843,8 @@ Added to [MULTIDEF ]:
 -BaseVendors (RW): Homologue to the House property BaseVendors.
 -LockdownsPercent (RW): Homologue to the House property LockdownsPercent.
 
-Todo
+-Changed: now t_multis will be saved too in spheremultis.scp along with t_multi_custom.
 
-Trigger @HouseDesignBegin:
-    argn1=1 Move only locked items
-    argn1=2 Move only Addons
-    argn1=3 Move locked items and Addons
-    argn1=4 Move every item that is not a component of the multi
-    argn1=0 Don't move anything
-	
 10-05-2018, Drk84
 - Added @EffectRemove trigger for characters, 
 	Argo: the spell item.
