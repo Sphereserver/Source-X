@@ -825,4 +825,40 @@ AddOns support:
 -t_house_lockdown is added/removed from items when locking/unlocking them from the house.
 Note: These events are applied on house COMPONENTS read from [MULTIDEF ], if you add any component ingame with AddComponent you will have to set them too.
 
+Updated [sphere_def.scp]:
+    [TYPEDEFS]:
+    t_multi_addon=201   // AddOns, the deed must have attr_magic to bypass placement checks and allow the addon to be placed inside houses.
+    [DEFNAME house_types]
+    house_private=0
+    house_public=1
+    house_guild=2
+    [DEFNAME house_transfer_types]
+    transfer_nothing	= 0		// Do not transfer any item to the Moving Crate, the crate will still be moved if uid is given.
+    transfer_lockdowns	= 01	// Transfer LockDowns
+    transfer_addon		= 02	// Transfer Addons
+    transfer_all		= 04	// Transfer LockDowns, Addons and every other item found inside a house that is not a component of it.
+        
+Added to [MULTIDEF ]:
+-BaseStorage (RW): Homologue to the House property BaseStorage.
+-BaseVendors (RW): Homologue to the House property BaseVendors.
+-LockdownsPercent (RW): Homologue to the House property LockdownsPercent.
+
 -Changed: now t_multis will be saved too in spheremultis.scp along with t_multi_custom.
+
+10-05-2018, Drk84
+- Added @EffectRemove trigger for characters, 
+	Argo: the spell item.
+	Src: the caster.
+	Default object: the target of the spell.
+	Argn1: the spell number.
+	Return 0: remove the spell memory item but don't execute the default spell behaviour when the spell item is removed.
+	
+  The trigger works similarly to @EffectAdd but is fired  when a spell memory item is removed (and after the @Destroy trigger of the item) 
+  The trigger is needed if you plan to use return 0 in the @EffectAdd trigger, otherwise the default spell behaviour will be executed when the spell item get removed.
+  Example
+	I cast a curse spell and I have a return 0 in my @EffectAdd trigger, no default curse effect are applied but when the spell expires the curse item 
+	will be removed and the spell target will get the additional stats from the expired curse! Using return 0 in @EffectRemove will prevent this
+  Additional notes:
+	Both @EffectAdd and @EffectRemove with return 0 can conflict with Poison and Poison Fields spells or scripts that call the poison function, that's because the
+	poison status and effect is applied no matter what.
+	For Summoning spells, returning 0 in @EffectRemove will prevent the summon to disappear. 

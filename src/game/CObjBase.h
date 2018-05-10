@@ -1085,6 +1085,7 @@ enum CTRIG_TYPE
 	//CTRIG_DYE,
 	CTRIG_Eat,              // I'm eating something.
 	CTRIG_EffectAdd,        // A spell effected me, i'm getting bonus/penalties from it.
+	CTRIG_EffectRemove,		// Removing spell item from character.
 	CTRIG_EnvironChange,    // my environment changed somehow (light,weather,season,region)
 	CTRIG_ExpChange,        // EXP is going to change
 	CTRIG_ExpLevelChange,   // Experience LEVEL is going to change

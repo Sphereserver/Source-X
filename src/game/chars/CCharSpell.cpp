@@ -483,7 +483,18 @@ void CChar::Spell_Effect_Remove(CItem * pSpell)
 		return;
 
 	CClient *pClient = GetClient();
+	CChar *pCaster = pSpell->m_uidLink.CharFind();
 	short iStatEffect = (short)(pSpell->m_itSpell.m_spelllevel);
+
+	if (IsTrigUsed(TRIGGER_EFFECTREMOVE))
+	{
+		CScriptTriggerArgs Args;
+		Args.m_pO1 = pSpell;
+		Args.m_iN1 = spell;
+		TRIGRET_TYPE iRet = OnTrigger(CTRIG_EffectRemove, pCaster, &Args);
+		if (iRet == TRIGRET_RET_FALSE)	// Return 0: remove the spell memory item but don't execute the default spell behaviour.
+			return;
+	}
 
 	switch (pSpellDef->m_idLayer)	// spell effects that are common for the same layer fits here
 	{
