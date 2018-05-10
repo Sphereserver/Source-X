@@ -40,6 +40,7 @@ private:
     std::vector<CUID> _lCoowners;   // List of Coowners.
     std::vector<CUID> _lFriends;    // List of Friends.
     std::vector<CUID> _lVendors;    // List of Vendors.
+    std::vector<CUID> _lBans;        // List of Banned chars.
 protected:
     std::vector<CUID> _lLockDowns;  // List of Locked Down items.
 private:
@@ -79,54 +80,76 @@ public:
 
     // House permissions
     bool CanPlace(CChar *pChar);
+    // Owner
     void SetOwner(CUID uidOwner);
+    bool IsOwner(CUID uidTarget);
+    // Coowner
     void AddCoowner(CUID uidCoowner);
     void DelCoowner(CUID uidCoowner);
+    size_t GetCoownerCount();
+    int GetCoownerPos(CUID uidTarget);
+    // Friend
     void AddFriend(CUID uidFriend);
     void DelFriend(CUID uidFriend);
-    uint16 GetCoownerCount();
-    uint16 GetFriendCount();
-    bool IsOwner(CUID uidTarget);
-    bool IsCoowner(CUID uidTarget);
-    bool IsFriend(CUID uidTarget);
+    size_t GetFriendCount();
+    int GetFriendPos(CUID uidTarget);
+    // Ban
+    void AddBan(CUID uidBan);
+    void DelBan(CUID uidBan);
+    size_t GetBanCount();
+    int GetBanPos(CUID uidBan);
 
-    // House general
+    // House general:
+    // Keys:
     CItem *GenerateKey(CChar *pTarget, bool fDupeOnBank = false);
     void RemoveKeys(CChar *pTarget);
+    // Redeed
+    void Redeed(bool fDisplayMsg = true, bool fMoveToBank = true);
+    //Moving Crate
     void SetMovingCrate(CUID uidCrate);
     CUID GetMovingCrate(bool fCreate);
-    void Redeed(bool fDisplayMsg = true, bool fMoveToBank = true);
-    void TransferAllItemsToMovingCrate(CUID uidTargetContainer = UID_UNUSED, bool fRemoveComponents = false, TRANSFER_TYPE iType = TRANSFER_ALL);
+    void TransferAllItemsToMovingCrate(TRANSFER_TYPE iType = TRANSFER_ALL);
     void TransferLockdownsToMovingCrate();
     void TransferMovingCrateToBank();
+    // AddOn
     void SetAddon(bool fIsAddon);
     bool IsAddon();
+    // Components
     void AddComponent(CUID uidComponent);
     void DelComponent(CUID uidComponent);
-    bool IsComponent(CUID uidComponent);
+    int GetComponentPos(CUID uidComponent);
+    size_t GetComponentCount();
     void RemoveAllComponents();
+    void GenerateBaseComponents(bool &fNeedKey, dword &dwKeyCode);
 
-    // House storage
+    // House storage:
+    // - Limits & values
+    // -- (Limits & values) Base Storage
     void SetBaseStorage(uint16 iLimit);
     uint16 GetBaseStorage();
-    void SetBaseVendors(uint8 iLimit);
-    uint8 GetBaseVendors();
-    uint8 GetMaxVendors();
-    uint8 GetCurrentVendors();
     void SetIncreasedStorage(uint16 iIncrease);
     uint16 GetIncreasedStorage();
     uint16 GetMaxStorage();
     uint16 GetCurrentStorage();
+
+    // -- (Limits & values)Vendors
+    void SetBaseVendors(uint8 iLimit);
+    uint8 GetBaseVendors();
+    uint8 GetMaxVendors();
+    // -- (Limits & values)LockDowns
     uint16 GetMaxLockdowns();
     uint8 GetLockdownsPercent();
     void SetLockdownsPercent(uint8 iPercent);
-    uint16 GetCurrentLockdowns();
+    // -Lockdowns
     void LockItem(CUID uidItem, bool fUpdateFlags);
     void UnlockItem(CUID uidItem, bool fUpdateFlags);
-    bool IsLockedItem(CUID uidItem);
+    int GetLockedItemPos(CUID uidItem);
+    size_t GetLockdownCount();
+    //  -Vendors
     void AddVendor(CUID uidVendor);
     void DelVendor(CUID uidVendor);
-    bool IsHouseVendor(CUID uidVendor);
+    int GetHouseVendorPos(CUID uidVendor);
+    size_t GetVendorCount();
 
 protected:
 	virtual void OnComponentCreate(const CItem * pComponent, bool fIsAddon = false);
