@@ -32,7 +32,8 @@ class CItemMulti : public CItem
 	// A ship or house etc.
 private:
 	static lpctstr const sm_szLoadKeys[];
-	static lpctstr const sm_szVerbKeys[];
+    static lpctstr const sm_szVerbKeys[];
+    static lpctstr const sm_szRefKeys[];
 
     // house permissions
     CUID _uidOwner;     // Owner's UID
@@ -47,6 +48,7 @@ private:
     CUID _uidMovingCrate;   // Moving Crate's UID.
     bool _fIsAddon;         // House AddOns are also multis
     HOUSE_TYPE _iHouseType; 
+    std::vector<CUID> _lComponents; // List of Components.
 
     // house storage
     uint16 _iBaseStorage;       // Base limit for secure storage (Max = 65535).
@@ -94,10 +96,15 @@ public:
     void SetMovingCrate(CUID uidCrate);
     CUID GetMovingCrate(bool fCreate);
     void Redeed(bool fDisplayMsg = true, bool fMoveToBank = true);
-    void TransferAllItemsToMovingCrate(CUID uidTargetContainer, bool fRemoveComponents = false, TRANSFER_TYPE iType = TRANSFER_NOTHING);
+    void TransferAllItemsToMovingCrate(CUID uidTargetContainer = UID_UNUSED, bool fRemoveComponents = false, TRANSFER_TYPE iType = TRANSFER_ALL);
     void TransferLockdownsToMovingCrate();
+    void TransferMovingCrateToBank();
     void SetAddon(bool fIsAddon);
     bool IsAddon();
+    void AddComponent(CUID uidComponent);
+    void DelComponent(CUID uidComponent);
+    bool IsComponent(CUID uidComponent);
+    void RemoveAllComponents();
 
     // House storage
     void SetBaseStorage(uint16 iLimit);
