@@ -787,3 +787,21 @@ Trigger @HouseDesignBegin:
     argn1=3 Move locked items and Addons
     argn1=4 Move every item that is not a component of the multi
     argn1=0 Don't move anything
+	
+10-05-2018, Drk84
+- Added @EffectRemove trigger for characters, 
+	Argo: the spell item.
+	Src: the caster.
+	Default object: the target of the spell.
+	Argn1: the spell number.
+	Return 0: remove the spell memory item but don't execute the default spell behaviour when the spell item is removed.
+	
+  The trigger works similarly to @EffectAdd but is fired  when a spell memory item is removed (and after the @Destroy trigger of the item) 
+  The trigger is needed if you plan to use return 0 in the @EffectAdd trigger, otherwise the default spell behaviour will be executed when the spell item get removed.
+  Example
+	I cast a curse spell and I have a return 0 in my @EffectAdd trigger, no default curse effect are applied but when the spell expires the curse item 
+	will be removed and the spell target will get the additional stats from the expired curse! Using return 0 in @EffectRemove will prevent this
+  Additional notes:
+	Both @EffectAdd and @EffectRemove with return 0 can conflict with Poison and Poison Fields spells or scripts that call the poison function, that's because the
+	poison status and effect is applied no matter what.
+	For Summoning spells, returning 0 in @EffectRemove will prevent the summon to disappear. 
