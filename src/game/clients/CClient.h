@@ -115,8 +115,8 @@ private:
 	uchar m_fUpdateStats;	// update our own status (weight change) when done with the cycle.
 
 	// Walk limiting code
-	int	m_iWalkTimeAvg;
-	int m_iWalkStepCount;	// Count the actual steps . Turning does not count.
+	int m_iWalkStepCount;	// Count the actual steps. Turning does not count.
+    llong m_iWalkTimeAvg;
 	int64 m_timeWalkStep;	// the last %8 walk step time.
 
 	// Screensize

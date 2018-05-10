@@ -627,7 +627,6 @@ Simple explanation:
 
 
 05-05-2018, XuN:
-
 [Port from Source, 20-01-2017, Coruja}
 Added: New function MAPWAYPOINT to add/remove waypoints on client radar map (enhanced clients only).
 	Sintax: MAPWAYPOINT ObjectUID, WaypointType
@@ -825,7 +824,7 @@ AddOns support:
 -t_house_lockdown is added/removed from items when locking/unlocking them from the house.
 Note: These events are applied on house COMPONENTS read from [MULTIDEF ], if you add any component ingame with AddComponent you will have to set them too.
 
-Updated [sphere_def.scp]:
+Updated [sphere_defs.scp]:
     [TYPEDEFS]:
     t_multi_addon=201   // AddOns, the deed must have attr_magic to bypass placement checks and allow the addon to be placed inside houses.
     [DEFNAME house_types]
@@ -862,3 +861,6 @@ Added to [MULTIDEF ]:
 	Both @EffectAdd and @EffectRemove with return 0 can conflict with Poison and Poison Fields spells or scripts that call the poison function, that's because the
 	poison status and effect is applied no matter what.
 	For Summoning spells, returning 0 in @EffectRemove will prevent the summon to disappear. 
+
+10-05-2018, Nolok
+- Fixed: false-positive speedhack check when trying to walk on a disabled map.

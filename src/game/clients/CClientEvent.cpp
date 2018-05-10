@@ -707,8 +707,8 @@ bool CClient::Event_CheckWalkBuffer()
 
 	// Client only allows 4 steps of walk ahead.
 	llong CurrTime = GetSupportedTickCount();
-	int iTimeDiff = abs((int)((CurrTime - m_timeWalkStep) / 10));	// use absolute value to prevent overflows
-	int iTimeMin = m_pChar->IsStatFlag(STATF_ONHORSE|STATF_HOVERING) ? 70 : 140; // minimum time to move 8 steps
+	llong iTimeDiff = llabs(((CurrTime - m_timeWalkStep) / 10));	// use absolute value to prevent overflows
+	llong iTimeMin = m_pChar->IsStatFlag(STATF_ONHORSE|STATF_HOVERING) ? 70 : 140; // minimum time to move 8 steps
 
 	if ( m_pChar->m_pPlayer && (m_pChar->m_pPlayer->m_speedMode != 0) )
 	{
@@ -727,7 +727,7 @@ bool CClient::Event_CheckWalkBuffer()
 
 	if ( iTimeDiff > iTimeMin )
 	{
-		int	iRegen = ((iTimeDiff - iTimeMin) * g_Cfg.m_iWalkRegen) / 150;
+		llong iRegen = ((iTimeDiff - iTimeMin) * g_Cfg.m_iWalkRegen) / 150;
 		if ( iRegen > g_Cfg.m_iWalkBuffer )
 			iRegen = g_Cfg.m_iWalkBuffer;
 		else if ( iRegen < -((g_Cfg.m_iWalkBuffer * g_Cfg.m_iWalkRegen) / 100) )
@@ -736,7 +736,7 @@ bool CClient::Event_CheckWalkBuffer()
 	}
 
 	m_iWalkTimeAvg += iTimeDiff;
-	int	oldAvg = m_iWalkTimeAvg;
+	llong oldAvg = m_iWalkTimeAvg;
 	m_iWalkTimeAvg -= iTimeMin;
 
 	if ( m_iWalkTimeAvg > g_Cfg.m_iWalkBuffer )
@@ -745,7 +745,7 @@ bool CClient::Event_CheckWalkBuffer()
 		m_iWalkTimeAvg = -g_Cfg.m_iWalkBuffer;
 
 	if ( IsPriv(PRIV_DETAIL) && IsPriv(PRIV_DEBUG) )
-		SysMessagef("Walkcheck trace: %i / %i (%i) :: %i", iTimeDiff, iTimeMin, oldAvg, m_iWalkTimeAvg);
+		SysMessagef("Walkcheck trace: %lld / %lld (%lld) :: %lld", iTimeDiff, iTimeMin, oldAvg, m_iWalkTimeAvg);
 
 	if ( m_iWalkTimeAvg < 0 && iTimeDiff >= 0 )	// TICK_PER_SEC
 	{
@@ -793,33 +793,6 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 
 	if ( dir == m_pChar->m_dirFace )
 	{
-		if ( IsSetEF(EF_FastWalkPrevention) )
-		{
-			// The fastest way to get system clock is using g_World.GetCurrentTime().GetTimeRaw() to
-			// read the value already stored by Sphere main timer. But this value is only updated at
-			// tenths of second precision, which won't work here because we need milliseconds precision.
-			// So to get this precision we must get the system clock manually at each walk request.
-			int64 iCurTime = CWorldClock::GetSystemClock();
-			if ( iCurTime < m_timeNextEventWalk )		// fastwalk detected
-			{
-				new PacketMovementRej(this, sequence);
-				return false;
-			}
-
-			int64 iDelay = 0;
-			if ( m_pChar->IsStatFlag(STATF_ONHORSE|STATF_HOVERING) )
-				iDelay = (rawdir & 0x80) ? 70 : 170;	// 100ms : 200ms
-			else
-				iDelay = (rawdir & 0x80) ? 170 : 370;	// 200ms : 400ms
-
-			m_timeNextEventWalk = iCurTime + iDelay;
-		}
-		else if ( !Event_CheckWalkBuffer() )
-		{
-			new PacketMovementRej(this, sequence);
-			return false;
-		}
-
 		// Move in this dir.
 		pt.Move(dir);
 
@@ -830,6 +803,33 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 			new PacketMovementRej(this, sequence);
 			return false;
 		}
+
+        if ( IsSetEF(EF_FastWalkPrevention) )
+        {
+            // The fastest way to get system clock is using g_World.GetCurrentTime().GetTimeRaw() to
+            // read the value already stored by Sphere main timer. But this value is only updated at
+            // tenths of second precision, which won't work here because we need milliseconds precision.
+            // So to get this precision we must get the system clock manually at each walk request.
+            int64 iCurTime = CWorldClock::GetSystemClock();
+            if ( iCurTime < m_timeNextEventWalk )		// fastwalk detected
+            {
+                new PacketMovementRej(this, sequence);
+                return false;
+            }
+
+            int64 iDelay = 0;
+            if ( m_pChar->IsStatFlag(STATF_ONHORSE|STATF_HOVERING) )
+                iDelay = (rawdir & 0x80) ? 70 : 170;	// 100ms : 200ms
+            else
+                iDelay = (rawdir & 0x80) ? 170 : 370;	// 200ms : 400ms
+
+            m_timeNextEventWalk = iCurTime + iDelay;
+        }
+        else if ( !Event_CheckWalkBuffer() )
+        {
+            new PacketMovementRej(this, sequence);
+            return false;
+        }
 
 		if ( !m_pChar->MoveToChar(pt) )
 		{

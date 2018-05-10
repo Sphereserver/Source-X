@@ -148,7 +148,7 @@ public:
 		return( m_dwFlags );
 	}
 	bool IsFlag( dword dwFlags ) const
-	{	// REGION_FLAG_GUARDED
+	{
 		return(( m_dwFlags & dwFlags ) ? true : false );
 	}
 	bool IsGuarded() const;
