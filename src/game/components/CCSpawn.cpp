@@ -101,7 +101,10 @@ CResourceDef *CCSpawn::FixDef()
     ADDTOCALLSTACK("CCSpawn:FixDef");
 
     CItem *pItem = static_cast<CItem*>(GetLink());
-
+    if (!_idSpawn.IsValidUID())
+    {
+        return nullptr;
+    }
     // No type info here !?
     if (pItem->IsType(IT_SPAWN_CHAR))
     {
@@ -112,7 +115,7 @@ CResourceDef *CCSpawn::FixDef()
         }
 
         // try a spawn group.
-        CResourceIDBase rid = CResourceID(RES_SPAWN, id);
+        CResourceIDBase rid = CResourceID(RES_SPAWN, _idSpawn.GetResIndex());
         CResourceDef *pDef = g_Cfg.ResourceGetDef(rid);
         if (pDef)
         {
@@ -128,7 +131,7 @@ CResourceDef *CCSpawn::FixDef()
             return TryItem(id);
 
         // try a template.
-        CResourceIDBase rid = CResourceID(RES_TEMPLATE, id);
+        CResourceIDBase rid = CResourceID(RES_TEMPLATE, _idSpawn.GetResIndex());
         CResourceDef *pDef = g_Cfg.ResourceGetDef(rid);
         if (pDef)
         {
@@ -188,7 +191,17 @@ void CCSpawn::GenerateItem(CResourceDef *pDef)
 
 	pItem->ClrAttr(pItem->m_Attr & (ATTR_OWNED | ATTR_MOVE_ALWAYS));
 	pItem->SetDecayTime(g_Cfg.m_iDecay_Item);	// it will decay eventually to be replaced later
-	pItem->MoveNearObj(pItem, _iMaxDist);
+    if (!pItem->MoveNearObj(pSpawnItem, _iMaxDist ? (word)(Calc_GetRandVal(_iMaxDist) + 1) : 1))
+    {
+        // If this fails, try placing the char ON the spawn
+        if (!pItem->MoveTo(pSpawnItem->GetTopPoint()))
+        {
+            DEBUG_ERR(("Spawner UID:0%" PRIx32 " is unable to place an item inside the world, deleted the character", (dword)pItem->GetUID()));
+            pItem->Delete();
+            return;
+        }
+    }
+    pItem->Update();
 	AddObj(pItem->GetUID());
 }
 
@@ -220,7 +233,7 @@ void CCSpawn::GenerateChar(CResourceDef *pDef)
 	pChar->NPC_LoadScript(true);
 	pChar->StatFlag_Set(STATF_SPAWNED);
 	// Try placing this char near the spawn
-	if ( !pChar->MoveNearObj(pItem, _iMaxDist ? (word)(Calc_GetRandVal(_iMaxDist) + 1) : 1), true )
+	if ( !pChar->MoveNearObj(pItem, _iMaxDist ? (word)(Calc_GetRandVal(_iMaxDist) + 1) : 1) )
 	{
 		// If this fails, try placing the char ON the spawn
 		if (!pChar->MoveTo(pt))
