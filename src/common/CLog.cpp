@@ -310,7 +310,7 @@ void _cdecl CLog::CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ...
 		else
 		{
 			eSeverity = LOGL_CRIT;
-			strcpy(szMsg, "Exception");
+			strcpy(szMsg, "Generic exception");
 			stLen = strlen(szMsg);
 		}
 
@@ -331,4 +331,18 @@ void _cdecl CLog::CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ...
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 	}
 	sm_prevCatchTick = timeCurrent;
+}
+
+void _cdecl CLog::CatchStdException(const std::exception * pExc, lpctstr pszCatchContext, ...)
+{
+    tchar szMsg[512];
+
+    va_list vargs;
+    va_start(vargs, pszCatchContext);
+    vsnprintf(szMsg, sizeof(szMsg), pszCatchContext, vargs);
+    va_end(vargs);
+    EventStr(LOGL_CRIT, szMsg);
+
+    snprintf(szMsg, sizeof(szMsg), "exception.what(): %s\n", pExc->what());
+    EventStr(LOGL_CRIT, szMsg);
 }

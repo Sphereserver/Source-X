@@ -1964,11 +1964,16 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 		}
 		else
 		{
-			const CObjBase * pObj = dynamic_cast <CObjBase*>(this);
+            g_Log.EventError("FORINSTANCES called without argument.\n");
+
+            // This usage is not allowed anymore, it's an ambiguous and error prone usage
+			/*
+            const CObjBase * pObj = dynamic_cast <CObjBase*>(this);
 			if ( pObj && pObj->Base_GetDef() )
 			{
 				rid = pObj->Base_GetDef()->GetResourceID();
 			}
+            */
 		}
 
 		// No need to loop if there is no valid resource id
@@ -2363,13 +2368,13 @@ jump_in:
 						{
 							ParseText(s.GetArgRaw(), pSrc, 0, pArgs);
 							if ( iCmd == SK_FORCHARLAYER )
-								iRet = pCharThis->OnCharTrigForLayerLoop(s, pSrc, pArgs, pResult, static_cast<LAYER_TYPE>(s.GetArgVal()));
+								iRet = pCharThis->OnCharTrigForLayerLoop(s, pSrc, pArgs, pResult, (LAYER_TYPE)s.GetArgVal() );
 							else
-								iRet = pCharThis->OnCharTrigForMemTypeLoop(s, pSrc, pArgs, pResult, (word)(s.GetArgVal()));
+								iRet = pCharThis->OnCharTrigForMemTypeLoop(s, pSrc, pArgs, pResult, s.GetArgWVal() );
 						}
 						else
 						{
-							DEBUG_ERR(( "FORCHAR[layer/memorytype] called on char 0%x (%s) without arguments.\n", (dword)(pCharThis->GetUID()), pCharThis->GetName() ));
+							DEBUG_ERR(( "FORCHAR[layer/memorytype] called on char 0%" PRIx32 " (%s) without arguments.\n", (dword)(pCharThis->GetUID()), pCharThis->GetName() ));
 							iRet = OnTriggerRun( s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult );
 						}
 					}

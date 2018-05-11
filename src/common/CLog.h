@@ -11,6 +11,7 @@
 #include "sphere_library/smutex.h"
 #include "common.h"
 #include "../sphere/UnixTerminal.h"
+#include <exception>
 
 
 // -----------------------------
@@ -174,6 +175,7 @@ public:
 
 	virtual int EventStr( dword dwMask, lpctstr pszMsg );
 	void _cdecl CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ...  ) __printfargs(3,4);
+    void _cdecl CatchStdException( const std::exception * pExc, lpctstr pszCatchContext, ...  ) __printfargs(3,4);
 
 public:
 	CLog();
