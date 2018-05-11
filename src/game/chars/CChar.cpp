@@ -1909,12 +1909,12 @@ bool CChar::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 				return true;
             case CHR_HOUSE:
             {
-                int iPos = Exp_GetSingle(pszKey);
-                if (_lHouses.empty() || iPos >= _lHouses.size())
+                size_t uiPos = (size_t)Exp_GetSingle(pszKey);
+                if (_lHouses.empty() || uiPos >= _lHouses.size())
                 {
                     return false;
                 }
-                pRef = _lHouses.at(iPos).ItemFind();
+                pRef = _lHouses.at(uiPos).ItemFind();
                 SKIP_SEPARATORS(pszKey);
                 return true;
             }
