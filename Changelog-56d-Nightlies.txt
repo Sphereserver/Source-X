@@ -863,3 +863,8 @@ Added to [MULTIDEF ]:
 
 10-05-2018, Nolok
 - Fixed: false-positive speedhack check when trying to walk on a disabled map.
+
+
+11-05-2018, XuN
+- [Port from Source, 07-02-2017, Coruja]:
+Fixed: Char flag 'statf_hovering' (gargoyle fly ability) not clearing when gargoyle chars polymorph into non-gargoyle char ID.

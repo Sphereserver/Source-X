@@ -1315,11 +1315,11 @@ void CChar::SetID( CREID_TYPE id )
 	if ( pCharDef == NULL )
 	{
 		if ( id != -1 && id != CREID_INVALID )
-			DEBUG_ERR(("Create Invalid Char 0%x\n", id));
+			DEBUG_ERR(("Create Invalid chardef 0%x\n", id));
 
 		id = static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType(RES_CHARDEF, "DEFAULTCHAR"));
-		if ( id < 0 )
-			id = CREID_OGRE;
+		if ( id < CREID_INVALID )
+			id = CREID_MAN;
 
 		pCharDef = CCharBase::FindCharBase(id);
 	}
@@ -1333,6 +1333,11 @@ void CChar::SetID( CREID_TYPE id )
 
 	if ( !IsMountCapable() )	// new body may not be capable of riding mounts
 		Horse_UnMount();
+
+    if (!IsGargoyle())		// new body may not be capable of use gargoyle fly ability
+    {
+        StatFlag_Clear(STATF_HOVERING);
+    }
 
 	if ( !Can(CAN_C_EQUIP) )	// new body may not be capable of equipping items (except maybe on hands)
 	{
