@@ -1176,38 +1176,13 @@ void CSector::OnTick(int iPulseCount)
 		EXC_SETSUB("UpdateFlags");
 		pItem->OnTickStatusUpdate();
 
-#ifdef _WIN32
 		EXC_CATCHSUB("Sector");
 
 		EXC_DEBUGSUB_START;
 		CPointMap pt = GetBasePoint();
 		g_Log.EventError("#1 item 0%x '%s' [timer=%" PRId64 ", type=%" PRId32 "]\n", (dword)pItem->GetUID(), pItem->GetName(), pItem->GetTimerAdjusted(), (int)pItem->GetType());
 		g_Log.EventError("#1 sector #%d [%d,%d,%d,%d]\n", GetIndex(),  pt.m_x, pt.m_y, pt.m_z, pt.m_map);
-
 		EXC_DEBUGSUB_END;
-#else
-		}
-#ifdef _EXCEPTIONS_DEBUG
-		catch ( const CSError& e )
-		{
-			PAUSECALLSTACK;
-			CPointMap pt = GetBasePoint();
-			g_Log.EventError("#2 CSError: item 0%x '%s' [timer=%" PRId64 ", type=%d]\n", (dword)(pItem->GetUID()), pItem->GetName(), pItem->GetTimerAdjusted(), (int)(pItem->GetType()));
-			g_Log.EventError("#2 sector #%d [%d,%d,%d,%d]\n", GetIndex(),  pt.m_x, pt.m_y, pt.m_z, pt.m_map);
-			UNPAUSECALLSTACK;
-			EXC_CATCH_SUB_EXCEPTION_SPHERE(&e, "Sector");
-			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
-		}
-		catch (...)
-		{
-			CPointMap pt = GetBasePoint();
-			g_Log.EventError("#3 ...: item 0%x '%s' [timer=%" PRId64 ", type=%d]\n", (dword)(pItem->GetUID()), pItem->GetName(), pItem->GetTimerAdjusted(), (int)(pItem->GetType()));\
-			g_Log.EventError("#3 sector #%d [%d,%d,%d,%d]\n", GetIndex(),  pt.m_x, pt.m_y, pt.m_z, pt.m_map);
-			EXC_CATCH_SUB_EXCEPTION_SPHERE(NULL, "Sector");
-			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
-		}
-#endif //_EXCEPTIONS_DEBUG
-#endif //_WIN32
 	}
 
 	ProfileTask overheadTask(PROFILE_OVERHEAD);

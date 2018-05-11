@@ -5810,31 +5810,13 @@ bool CItem::OnTick()
 
 	EXC_SET("default behaviour4");
 	DEBUG_ERR(( "Timer expired without DECAY flag '%s' (UID=0%x)?\n", GetName(), (dword)GetUID()));
-
-#ifndef _WIN32
-	}
-#ifdef _EXCEPTIONS_DEBUG
-	catch ( const CSError& e )
-	{
-		EXC_CATCH_EXCEPTION(&e);
-		g_Log.EventError("'%s' item [0%x] - CSError\n", GetName(), (dword)GetUID());
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
-	}
-	catch (...)
-	{
-		EXC_CATCH_EXCEPTION(NULL);
-		g_Log.EventError("'%s' item [0%x] - ...\n", GetName(), (dword)GetUID());
-		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
-	}
-#endif //_EXCEPTIONS_DEBUG
-#else //_WIN32
-	EXC_CATCH;
+	
+    EXC_CATCH;
 
 	EXC_DEBUG_START;
 	g_Log.EventDebug("CItem::OnTick: '%s' item [0%x]\n", GetName(), (dword)GetUID());
 	//g_Log.EventError("'%s' item [0%x]\n", GetName(), GetUID());
 	EXC_DEBUG_END;
-#endif //_WIN32
 
 	return true;
 }

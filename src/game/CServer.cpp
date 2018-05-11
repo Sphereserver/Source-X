@@ -587,7 +587,7 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 						// the following call will destroy the stack trace on linux due to
 						// a call to CSFile::Close fromn CLog::EventStr.
 						g_Log.Event( LOGM_DEBUG, "Caught exception\n" );
-						EXC_CATCH_EXCEPTION(&e);
+                        EXC_CATCH_EXCEPTION_SPHERE(&e);
 					}
 				}
 
@@ -602,7 +602,7 @@ bool CServer::OnConsoleCmd( CSString & sText, CTextConsole * pSrc )
 						// with pausecallstack, the following call won't be recorded
 						g_Log.Event( LOGM_DEBUG, "Caught exception\n" );
 						UNPAUSECALLSTACK;
-						EXC_CATCH_EXCEPTION(&e);
+                        EXC_CATCH_EXCEPTION_SPHERE(&e);
 					}
 				}
 	#else
