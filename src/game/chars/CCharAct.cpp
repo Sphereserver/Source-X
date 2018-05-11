@@ -2589,12 +2589,6 @@ bool CChar::OnTickEquip( CItem * pItem )
 				return true;
 			}
 
-		case LAYER_FLAG_Criminal:
-			// update char notoriety when criminal timer goes off
-			StatFlag_Clear( STATF_CRIMINAL );
-			NotoSave_Update();
-			return false;
-
 		case LAYER_FLAG_Murders:
 			// decay the murder count.
 			{

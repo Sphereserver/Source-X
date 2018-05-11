@@ -3741,8 +3741,20 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 			{
 				StatFlag_Clear(STATF_CRIMINAL);
 				CItem * pMemoryCriminal = LayerFind(LAYER_FLAG_Criminal);
-				if (pMemoryCriminal)
-					pMemoryCriminal->Delete();
+                if (pMemoryCriminal)
+                {
+                    pMemoryCriminal->Delete();
+                }
+                else
+                {
+                    // Otherwise clear it manually if there's no memory set
+                    StatFlag_Clear(STATF_CRIMINAL);
+                    NotoSave_Update();
+                    if (m_pClient)
+                    {
+                        m_pClient->removeBuff(BI_CRIMINALSTATUS);
+                    }
+                }
 			}
 			else
 				Noto_Criminal();
