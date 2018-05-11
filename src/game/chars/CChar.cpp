@@ -494,13 +494,10 @@ void CChar::AddHouse(CUID uidHouse)
             }
             return;
         }
-        for (std::vector<CUID>::iterator it = _lHouses.begin(); it != _lHouses.end(); ++it)
+        if (GetHousePos(uidHouse) >= 0)
         {
-            if ((*it) == uidHouse)
-            {
-                g_Log.EventDebug("Char '%#08x' trying to add duplicate house with uid '%#08x'.", GetUID(), uidHouse);
-                return;
-            }
+            g_Log.EventDebug("Char '%#08x' trying to add duplicate house with uid '%#08x'.\n", GetUID(), uidHouse);
+            return;
         }
     }
     _lHouses.emplace_back(uidHouse);
@@ -512,13 +509,6 @@ void CChar::DelHouse(CUID uidHouse)
     {
         return;
     }
-
-    if (!uidHouse.IsValidUID())
-    {
-        g_Log.EventDebug("Char '%#08x' trying to delete house with invalid uid '%#08x'.", GetUID(), uidHouse);
-        return;
-    }
-
     for (std::vector<CUID>::iterator it = _lHouses.begin(); it != _lHouses.end(); ++it)
     {
         if ((*it) == uidHouse)
@@ -527,6 +517,22 @@ void CChar::DelHouse(CUID uidHouse)
             return;
         }
     }
+}
+
+int CChar::GetHousePos(CUID uidHouse)
+{
+    if (_lHouses.empty())
+    {
+        return -1;
+    }
+    for (size_t i = 0; i < _lHouses.size(); ++i)
+    {
+        if (_lHouses[i] == uidHouse)
+        {
+            return (int)i;
+        }
+    }
+    return -1;
 }
 
 // Is there something wrong with this char?
@@ -2655,11 +2661,17 @@ do_default:
 			sVal.FormatVal( g_Cfg.Calc_MaxCarryWeight(this));
 			return true;
         case CHC_MAXHOUSES:
-            sVal.FormatUCVal(_iMaxHouses);
+            sVal.FormatU8Val(_iMaxHouses);
             return true;
         case CHC_HOUSES:
             sVal.FormatVal((int)_lHouses.size());
             return true;
+        case CHC_GETHOUSEPOS:
+        {
+            pszKey += 11;
+            sVal.FormatVal(GetHousePos((CUID)Exp_GetDWVal(pszKey)));
+            return true;
+        }
 		case CHC_ACCOUNT:
 			if ( pszKey[7] == '.' )	// used as a ref ?
 			{

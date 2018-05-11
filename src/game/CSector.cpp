@@ -330,19 +330,27 @@ void CSector::r_Write()
 	for ( CItem *pItem = static_cast<CItem*>(m_Items_Inert.GetHead()); pItem != NULL; pItem = pItemNext )
 	{
 		pItemNext = pItem->GetNext();
-		if ( pItem->IsType(IT_MULTI) || pItem->IsType(IT_MULTI_CUSTOM))
-			pItem->r_WriteSafe(g_World.m_FileMultis);
-		else if ( !pItem->IsAttr(ATTR_STATIC) )
-			pItem->r_WriteSafe(g_World.m_FileWorld);
+        if (pItem->IsTypeMulti())
+        {
+            pItem->r_WriteSafe(g_World.m_FileMultis);
+        }
+        else if (!pItem->IsAttr(ATTR_STATIC))
+        {
+            pItem->r_WriteSafe(g_World.m_FileWorld);
+        }
 	}
 
 	for ( CItem *pItem = static_cast<CItem*>(m_Items_Timer.GetHead()); pItem != NULL; pItem = pItemNext )
 	{
 		pItemNext = pItem->GetNext();
-		if ( pItem->IsType(IT_MULTI_CUSTOM) )
-			pItem->r_WriteSafe(g_World.m_FileMultis);
-		else if ( !pItem->IsAttr(ATTR_STATIC) )
-			pItem->r_WriteSafe(g_World.m_FileWorld);
+        if (pItem->IsTypeMulti())
+        {
+            pItem->r_WriteSafe(g_World.m_FileMultis);
+        }
+        else if (!pItem->IsAttr(ATTR_STATIC))
+        {
+            pItem->r_WriteSafe(g_World.m_FileWorld);
+        }
 	}
 }
 

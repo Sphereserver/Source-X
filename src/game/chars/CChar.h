@@ -309,6 +309,7 @@ private:
 public:
     void AddHouse(CUID uidHouse);
     void DelHouse(CUID uidHouse);
+    int GetHousePos(CUID uidHouse);
 	// Status and attributes ------------------------------------
 	int IsWeird() const;
 	char GetFixZ( CPointMap pt, dword dwBlockFlags = 0);

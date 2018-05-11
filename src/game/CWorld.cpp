@@ -1599,7 +1599,7 @@ void CWorld::SaveStatics()
 				for ( ; pItem != NULL; pItem = pNext )
 				{
 					pNext = pItem->GetNext();
-					if ( pItem->IsType(IT_MULTI_CUSTOM) )
+                    if (pItem->IsTypeMulti())
 						continue;
 					if ( !pItem->IsAttr(ATTR_STATIC) )
 						continue;
@@ -1611,7 +1611,7 @@ void CWorld::SaveStatics()
 				for ( ; pItem != NULL; pItem = pNext )
 				{
 					pNext = pItem->GetNext();
-					if ( pItem->IsType(IT_MULTI_CUSTOM) )
+					if ( pItem->IsTypeMulti() )
 						continue;
 					if ( !pItem->IsAttr(ATTR_STATIC) )
 						continue;
@@ -1722,12 +1722,12 @@ bool CWorld::LoadWorld() // Load world from script
 	{
 		LoadFile(sDataName, false);
 		LoadFile(sStaticsName, false);
-		LoadFile(sMultisName, false);
 		if ( LoadFile(sWorldName) )
 		{
 			if ( LoadFile(sCharsName) )
 				return true;
 		}
+        LoadFile(sMultisName, false);
 
 		// If we could not open the file at all then it was a bust!
 		if ( m_iSaveCountID == iPrevSaveCount ) break;

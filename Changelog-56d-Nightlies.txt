@@ -671,6 +671,7 @@ Added character storage for it's own houses:
 		If the player current count of houses is greater than the limit he has, the house will be redeeded.
 	- Added DelHouse uid(WO): Deletes the given uid from the player's list (Will not delete the house)(-1 clears the whole list).
 	- Added Houses(RO): Return the houses on the player's list.
+    - Added GetHousePos uid(RO): Returns the position of the given UID on the houses list (-1 if not found).
 	- Added MaxHouses(RW) to Accounts and Chars, when created they read this new setting from the sphere.ini (if values on sphere.ini change, they will not reflect on already created accounts/chars).
 	- Added REF to 'HOUSE.x' to access the house in the Nth position, eg: house.3.Redeed, local.house_p=<house.1.p>
     Note: Houses generated before this change will not be updated on the player's list, instead the player will still have the memory with color=MEMORY_GUARD (0x100)
@@ -802,11 +803,9 @@ AddOns support:
 
     -BaseVendors(RW): Limit of Vendors allowed by default = 10 (Max 255).
     -MaxVendors(RO): Returns the maximum Vendors allowed: BaseVendors + ((BaseVendors / IncreasedStorage)/100) (Max 255).
-    -CurrentVendors(RO): Returns the current count of placed Vendors.
 
     -LockdownsPercent(RW): Base percent of allowed Lockdowns (Max 255).
     -MaxLockdowns(RW): Total Lockdowns allowed based on MaxStorage: + ((MaxStorage / LockdownsPercent)/100) (Max 65535).
-    -CurrentLockdowns(R): Returns the count of Locked Down items on this house.
     eg:
         - Base Storage = 400
         - IncreasedStorage = 20%

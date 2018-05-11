@@ -418,6 +418,11 @@ void CItemMulti::OnHearRegion(lpctstr pszCmd, CChar * pSrc)
 void CItemMulti::SetOwner(CUID uidOwner)
 {
     ADDTOCALLSTACK("CItemMulti::SetOwner");
+    if (!uidOwner.IsValidUID())
+    {
+        g_Log.EventError("Setting wrong Owner UID '0x#08x' to multi with UID '0x#08x'\n",uidOwner, GetUID());
+        return;
+    }
     CChar *pOldOwner = _uidOwner.CharFind();
     CChar *pNewOwner = uidOwner.CharFind();
     CUID uidHouse = GetUID();
@@ -433,6 +438,7 @@ void CItemMulti::SetOwner(CUID uidOwner)
             RemoveKeys(pOldOwner);
         }
     }
+    pNewOwner->AddHouse(uidHouse);
     _uidOwner = uidOwner;
 }
 
@@ -444,14 +450,14 @@ bool CItemMulti::IsOwner(CUID uidTarget)
 void CItemMulti::AddCoowner(CUID uidCoowner)
 {
     ADDTOCALLSTACK("CItemMulti::AddCoowner");
-    if (GetCoownerPos(uidCoowner) >= 0)
-    {
-        return;
-    }
     if (!g_Serv.IsLoading())
     {
         CChar *pCoowner = uidCoowner.CharFind();
         if (!pCoowner)
+        {
+            return;
+        }
+        if (GetCoownerPos(uidCoowner) >= 0)
         {
             return;
         }
@@ -501,14 +507,14 @@ int CItemMulti::GetCoownerPos(CUID uidTarget)
 void CItemMulti::AddFriend(CUID uidFriend)
 {
     ADDTOCALLSTACK("CItemMulti::AddFriend");
-    if (GetFriendPos(uidFriend) >= 0)
-    {
-        return;
-    }
     if (!g_Serv.IsLoading())
     {
         CChar *pFriend = uidFriend.CharFind();
         if (!pFriend)
+        {
+            return;
+        }
+        if (GetFriendPos(uidFriend) >= 0)
         {
             return;
         }
@@ -557,14 +563,14 @@ int CItemMulti::GetFriendPos(CUID uidTarget)
 
 void CItemMulti::AddBan(CUID uidBan)
 {
-    if (GetBanPos(uidBan) >= 0)
-    {
-        return;
-    }
     if (!g_Serv.IsLoading())
     {
         CChar *pBan = uidBan.CharFind();
         if (!pBan)
+        {
+            return;
+        }
+        if (GetBanPos(uidBan) >= 0)
         {
             return;
         }
@@ -575,10 +581,6 @@ void CItemMulti::AddBan(CUID uidBan)
 void CItemMulti::DelBan(CUID uidBan)
 {
     ADDTOCALLSTACK("CItemMulti::DelFriend");
-    if (!uidBan.IsValidUID())
-    {
-        return;
-    }
     for (std::vector<CUID>::iterator it = _lBans.begin(); it != _lBans.end(); ++it)
     {
         if (*it == uidBan)
@@ -749,7 +751,8 @@ CUID CItemMulti::GetMovingCrate(bool fCreate)
         CItem *pCrate = CItem::CreateBase(ITEMID_CRATE1);
         ASSERT(pCrate);
         pCrate->MoveTo(GetTopPoint());
-        SetMovingCrate(_uidMovingCrate);
+        pCrate->Update();
+        SetMovingCrate(pCrate->GetUID());
         CScript event("events +t_moving_crate");
         pCrate->r_LoadVal(event);
         return pCrate->GetUID();
@@ -762,6 +765,11 @@ void CItemMulti::TransferAllItemsToMovingCrate(TRANSFER_TYPE iType)
     ADDTOCALLSTACK("CItemMulti::TransferAllItemsToMovingCrate");
     CItemContainer *pCrate = static_cast<CItemContainer*>(GetMovingCrate(true).ItemFind());
 
+    if (!pCrate)
+    {
+        g_Log.EventError("No Moving Crate could be created, aborting TransferAllItemsToMovingCrate()\n");
+        return;
+    }
     //Transfer Types
     bool fTransferAddons = (((iType & TRANSFER_ADDONS) || (iType & TRANSFER_ALL)));
     bool fTransferAll = (iType & TRANSFER_ALL);
@@ -811,13 +819,20 @@ void CItemMulti::TransferAllItemsToMovingCrate(TRANSFER_TYPE iType)
             }
         }
     }
+    if (pCrate->GetCount() == 0)
+    {
+        pCrate->Delete();
+    }
 }
 
 void CItemMulti::TransferLockdownsToMovingCrate()
 {
-    CItemContainer *pCrate = static_cast<CItemContainer*>(GetMovingCrate(true).ItemFind());
-    ASSERT(pCrate);
     if (_lLockDowns.empty())
+    {
+        return;
+    }
+    CItemContainer *pCrate = static_cast<CItemContainer*>(GetMovingCrate(true).ItemFind());
+    if (!pCrate)
     {
         return;
     }
@@ -839,16 +854,16 @@ void CItemMulti::TransferLockdownsToMovingCrate()
 void CItemMulti::TransferMovingCrateToBank()
 {
     ADDTOCALLSTACK("CItemMulti::TransferMovingCrateToBank");
-    CItem *pCrate = GetMovingCrate(false).ItemFind();
+    CItemContainer *pCrate = static_cast<CItemContainer*>(GetMovingCrate(false).ItemFind());
     if (pCrate && _uidOwner.IsValidUID())
     {
-        CItemContainer *pCont = static_cast<CItemContainer*>(pCrate);
-        if (pCont->GetCount() > 0)
+        if (pCrate->GetCount() > 0)
         {
             CChar *pOwner = _uidOwner.CharFind();
             if (pOwner)
             {
-                pOwner->GetBank()->ContentAdd(_uidMovingCrate.ItemFind());
+                pCrate->RemoveFromView();
+                pOwner->GetBank()->ContentAdd(pCrate);
             }
         }
         else
@@ -871,14 +886,14 @@ bool CItemMulti::IsAddon()
 void CItemMulti::AddComponent(CUID uidComponent)
 {
     ADDTOCALLSTACK("CItemMulti::AddComponent");
-    if (GetComponentPos(uidComponent) >= 0)
-    {
-        return;
-    }
     if (!g_Serv.IsLoading())
     {
         CItem *pComponent = uidComponent.ItemFind();
         if (!pComponent)
+        {
+            return;
+        }
+        if (GetComponentPos(uidComponent) >= 0)
         {
             return;
         }
@@ -907,7 +922,7 @@ int CItemMulti::GetComponentPos(CUID uidComponent)
 {
     if (_lComponents.empty())
     {
-        return false;
+        return -1;
     }
 
     for (size_t i = 0; i < _lComponents.size(); ++i)
@@ -917,7 +932,7 @@ int CItemMulti::GetComponentPos(CUID uidComponent)
             return (int)i;
         }
     }
-    return false;
+    return -1;
 }
 
 size_t CItemMulti::GetComponentCount()
@@ -1037,22 +1052,27 @@ void CItemMulti::SetLockdownsPercent(uint8 iPercent)
 
 void CItemMulti::LockItem(CUID uidItem, bool fUpdateFlags)
 {
-    if (GetLockedItemPos(uidItem))
-    {
-        return;
-    }
-    _lLockDowns.emplace_back(uidItem);
-    if (fUpdateFlags)
+    if (!g_Serv.IsLoading())
     {
         CItem *pItem = uidItem.ItemFind();
-        if (pItem)
+        if (!pItem)
+        {
+            return;
+        }
+        if (GetLockedItemPos(uidItem) >= 0)
+        {
+            return;
+        }
+        if (fUpdateFlags)
         {
             pItem->SetAttr(ATTR_LOCKEDDOWN);
             pItem->m_uidLink = GetUID();
             CScript event("events +t_house_lockdown");
             pItem->r_LoadVal(event);
         }
+
     }
+    _lLockDowns.push_back(uidItem);
 }
 
 void CItemMulti::UnlockItem(CUID uidItem, bool fUpdateFlags)
@@ -1101,10 +1121,6 @@ size_t CItemMulti::GetLockdownCount()
 
 void CItemMulti::AddVendor(CUID uidVendor)
 {
-    if (GetHouseVendorPos(uidVendor) >= 0)
-    {
-        return;
-    }
     if (!g_Serv.IsLoading())
     {
         CChar *pVendor = uidVendor.CharFind();
@@ -1112,6 +1128,10 @@ void CItemMulti::AddVendor(CUID uidVendor)
         {
             return;
         }
+    }
+    if (GetHouseVendorPos(uidVendor) >= 0)
+    {
+        return;
     }
     _lVendors.emplace_back(uidVendor);
 }
@@ -1484,8 +1504,8 @@ const lpctstr CItemMulti::sm_szLoadKeys[SHL_QTY + 1] =
     "GETFRIENDPOS",
     "GETHOUSEVENDORPOS",
     "GETLOCKEDITEMPOS",
-    "INCREASEDSTORAGE",
     "HOUSETYPE",
+    "INCREASEDSTORAGE",
     "ISOWNER",
     "LOCKDOWNS",
     "LOCKDOWNSPERCENT",
