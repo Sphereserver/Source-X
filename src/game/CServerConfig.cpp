@@ -226,7 +226,7 @@ CServerConfig::CServerConfig()
 	m_iRegenRate[STAT_INT]	= 20 * TICK_PER_SEC;		// Seconds to heal ONE mn
 	m_iRegenRate[STAT_DEX]	= 10 * TICK_PER_SEC;		// Seconds to heal ONE stm
 	m_iRegenRate[STAT_FOOD] = 60*60 * TICK_PER_SEC;		// Food usage (1 time per 60 minutes)
-    m_iRegenItemHits = 10;
+    _iItemHitpointsUpdate   = 10;
 
 	m_iTimerCall			= 0;
 	m_bAllowLightOverride	= true;
@@ -488,6 +488,7 @@ enum RC_TYPE
 	RC_HITPOINTPERCENTONREZ,	// m_iHitpointPercentOnRez
 	RC_HITSHUNGERLOSS,			// m_iHitsHungerLoss
 	RC_HITSUPDATERATE,
+    RC_ITEMHITPOINTSUPDATE,     // _iItemHitpointsUpdate
 	RC_ITEMSMAXAMOUNT,			// m_iItemsMaxAmount
 	RC_LEVELMODE,				// m_iLevelMode
 	RC_LEVELNEXTAT,				// m_iLevelNextAt
@@ -559,7 +560,6 @@ enum RC_TYPE
 	RC_PLAYERNEUTRAL,			// m_iPlayerKarmaNeutral
 	RC_PROFILE,
 	RC_RACIALFLAGS,				// m_iRacialFlags
-    RC_REGENITEMHITS,           // m_iRegenItemHits
 	RC_REAGENTLOSSFAIL,			// m_fReagentLossFail
 	RC_REAGENTSREQUIRED,
 	RC_REVEALFLAGS,				// m_iRevealFlags
@@ -725,6 +725,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "HITPOINTPERCENTONREZ",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iHitpointPercentOnRez),0 }},
 	{ "HITSHUNGERLOSS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iHitsHungerLoss),		0 }},
 	{ "HITSUPDATERATE",			{ ELEM_VOID,	0,											0 }},
+    { "ITEMHITPOINTSUPDATE",    { ELEM_MASK_INT,OFFSETOF(CServerConfig,_iItemHitpointsUpdate),  0 }},
 	{ "ITEMSMAXAMOUNT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iItemsMaxAmount),		0 }},
 	{ "LEVELMODE",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iLevelMode),			0 }},
 	{ "LEVELNEXTAT",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iLevelNextAt),			0 }},
@@ -796,7 +797,6 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "PLAYERNEUTRAL",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iPlayerKarmaNeutral),	0 }},
 	{ "PROFILE",				{ ELEM_VOID,	0,											0 }},
 	{ "RACIALFLAGS",			{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iRacialFlags),			0 }},
-    { "REGENITEMHITS",          { ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iRegenItemHits),       0 }},
 	{ "REAGENTLOSSFAIL",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fReagentLossFail),		0 }},
 	{ "REAGENTSREQUIRED",		{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fReagentsRequired),	0 }},
 	{ "REVEALFLAGS",			{ ELEM_MASK_INT,OFFSETOF(CServerConfig,m_iRevealFlags),			0 }},
@@ -1122,8 +1122,8 @@ bool CServerConfig::r_LoadVal( CScript &s )
 		case RC_WOOLGROWTHTIME:
 			m_iWoolGrowthTime = s.GetArgVal() * 60 * TICK_PER_SEC;
 			break;
-        case RC_REGENITEMHITS:
-            m_iRegenItemHits = s.GetArgVal();
+        case RC_ITEMHITPOINTSUPDATE:
+            _iItemHitpointsUpdate = s.GetArgVal();
             break;
 		case RC_PROFILE:
 			{
@@ -1759,8 +1759,8 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 		case RC_WOOLGROWTHTIME:
 			sVal.FormatVal( m_iWoolGrowthTime /( 60*TICK_PER_SEC ));
 			break;
-        case RC_REGENITEMHITS:
-            sVal.FormatVal(m_iRegenItemHits);
+        case RC_ITEMHITPOINTSUPDATE:
+            sVal.FormatVal(_iItemHitpointsUpdate);
             break;
 		case RC_PROFILE:
 			sVal.FormatVal(CurrentProfileData.GetActiveWindow());

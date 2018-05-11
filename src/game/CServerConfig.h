@@ -1109,7 +1109,7 @@ public:
 	uint m_iAutoTooltipResend;       // automatically resend tooltip
 
 	int     m_iRegenRate[STAT_QTY]; // Regen's delay for each stat.
-    int     m_iRegenItemHits;       // Update period for CCItemDamageable
+    int     _iItemHitpointsUpdate;  // Update period for CCItemDamageable
 	int     m_iTimerCall;           // Amount of minutes to call f_onserver_timer (0 disables this, default).
 	bool    m_bAllowLightOverride;  // Allow manual sector light override?
 	CSString m_sZeroPoint;          // Zero point for sextant coordinates counting. Comment this line out if you are not using ML-sized maps.

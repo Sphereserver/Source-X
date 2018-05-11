@@ -3739,22 +3739,21 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 		case CHV_CRIMINAL:
 			if (s.HasArgs() && !s.GetArgVal()) 
 			{
-				StatFlag_Clear(STATF_CRIMINAL);
 				CItem * pMemoryCriminal = LayerFind(LAYER_FLAG_Criminal);
                 if (pMemoryCriminal)
                 {
                     pMemoryCriminal->Delete();
                 }
-                else
+                else //if (IsStatFlag(STATF_CRIMINAL))
                 {
                     // Otherwise clear it manually if there's no memory set
-                    StatFlag_Clear(STATF_CRIMINAL);
                     NotoSave_Update();
                     if (m_pClient)
                     {
                         m_pClient->removeBuff(BI_CRIMINALSTATUS);
                     }
                 }
+                StatFlag_Clear(STATF_CRIMINAL);
 			}
 			else
 				Noto_Criminal();
