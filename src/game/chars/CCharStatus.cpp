@@ -1674,8 +1674,8 @@ CRegion *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DIR_TY
 	if ( GetTopPoint().IsValidPoint() && !fPathFinding && (dir % 2) )
 	{
 		CPointMap ptTest;
-		DIR_TYPE dirTest1 = static_cast<DIR_TYPE>(dir - 1); // get 1st ortogonal
-		DIR_TYPE dirTest2 = static_cast<DIR_TYPE>(dir + 1); // get 2nd ortogonal
+		DIR_TYPE dirTest1 = (DIR_TYPE)(dir - 1); // get 1st ortogonal
+		DIR_TYPE dirTest2 = (DIR_TYPE)(dir + 1); // get 2nd ortogonal
 		if ( dirTest2 == DIR_QTY )		// roll over
 			dirTest2 = DIR_N;
 
@@ -1693,14 +1693,14 @@ CRegion *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DIR_TY
 	CRegion *pArea = ptDest.GetRegion(REGION_TYPE_MULTI|REGION_TYPE_AREA|REGION_TYPE_ROOM);
 	if ( !pArea )
 	{
-		if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
-			g_pLog->EventWarn("Failed to get region\n");
+		//if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
+		g_pLog->EventWarn("WalkCheck: failed to get the destination region (UID: 0x%x, name: %s).\n", GetUID().GetObjUID(), GetName());
 		return NULL;
 	}
 
 	dword dwCan = GetMoveBlockFlags();
 	if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
-		g_pLog->EventWarn("GetMoveBlockFlags() (0x%x)\n", dwCan);
+		g_pLog->EventWarn("GetMoveBlockFlags() (0x%" PRIx32 ").\n", dwCan);
 	if ( !(dwCan & (CAN_C_SWIM| CAN_C_WALK|CAN_C_FLY|CAN_C_RUN|CAN_C_HOVER)) )
 		return NULL;	// cannot move at all, so WTF?
 
@@ -1714,7 +1714,7 @@ CRegion *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DIR_TY
 
 	CServerMapBlockState block(dwBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 3, GetHeightMount());
 	if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
-		g_pLog->EventWarn("\t\tCServerMapBlockState block( 0%x, %d, %d, %d );ptDest.m_z(%d) m_zClimbHeight(%d)\n",
+		g_pLog->EventWarn("\t\tCServerMapBlockState block( 0%x, %d, %d, %d );ptDest.m_z(%d) m_zClimbHeight(%d).\n",
 					dwBlockFlags, ptDest.m_z, ptDest.m_z + m_zClimbHeight + GetHeightMount(), ptDest.m_z + m_zClimbHeight + 2, ptDest.m_z, m_zClimbHeight);
 
 	if ( !ptDest.IsValidPoint() )
@@ -1732,8 +1732,8 @@ CRegion *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DIR_TY
 	{
 		dwBlockFlags |= CAN_I_ROOF;	// we are covered by something.
 		if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
-			g_pLog->EventWarn("block.m_Top.m_z (%d) > ptDest.m_z (%d) + m_zClimbHeight (%d) + (block.m_Top.m_dwTile (0x%x) > TERRAIN_QTY ? PLAYER_HEIGHT : PLAYER_HEIGHT/2 )(%d)\n",
-				block.m_Top.m_z, ptDest.m_z, m_zClimbHeight, block.m_Top.m_dwTile, ptDest.m_z - (m_zClimbHeight + (block.m_Top.m_dwTile > TERRAIN_QTY ? PLAYER_HEIGHT : PLAYER_HEIGHT / 2)));
+			g_pLog->EventWarn("block.m_Top.m_z (%hhd) > ptDest.m_z (%hhd) + m_zClimbHeight (%hhu) + (block.m_Top.m_dwTile (0x%" PRIx32 ") > TERRAIN_QTY ? PLAYER_HEIGHT : PLAYER_HEIGHT/2 )(%hhu).\n",
+				block.m_Top.m_z, ptDest.m_z, m_zClimbHeight, block.m_Top.m_dwTile, (height_t)(ptDest.m_z - (m_zClimbHeight + (block.m_Top.m_dwTile > TERRAIN_QTY ? PLAYER_HEIGHT : PLAYER_HEIGHT / 2))) );
 		if ( block.m_Top.m_z < block.m_Bottom.m_z + (m_zClimbHeight + (block.m_Top.m_dwTile > TERRAIN_QTY ? GetHeightMount() : GetHeightMount() / 2)) )
 			dwBlockFlags |= CAN_I_BLOCK;		// we can't fit under this!
 	}
@@ -1741,7 +1741,7 @@ CRegion *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DIR_TY
 	if ( (dwCan != 0xFFFFFFFF) && (dwBlockFlags != 0x0) )
 	{
 		if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
-			g_pLog->EventWarn("BOTTOMitemID (0%x) TOPitemID (0%x)\n", (block.m_Bottom.m_dwTile - TERRAIN_QTY), (block.m_Top.m_dwTile - TERRAIN_QTY));
+			g_pLog->EventWarn("BOTTOMitemID (0%" PRIx32 ") TOPitemID (0%" PRIx32 ").\n", (block.m_Bottom.m_dwTile - TERRAIN_QTY), (block.m_Top.m_dwTile - TERRAIN_QTY));
 
 		if ( (dwBlockFlags & CAN_I_DOOR) && !Can(CAN_C_GHOST) )
 			dwBlockFlags |= CAN_I_BLOCK;
@@ -1769,7 +1769,7 @@ CRegion *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DIR_TY
 			if ( !(dwBlockFlags & CAN_I_CLIMB) ) // we can climb anywhere
 			{
 				if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
-					g_pLog->EventWarn("block.m_Lowest.m_z %d  block.m_Bottom.m_z %d  block.m_Top.m_z %d\n", block.m_Lowest.m_z, block.m_Bottom.m_z, block.m_Top.m_z);
+					g_pLog->EventWarn("block.m_Lowest.m_z %hhd, block.m_Bottom.m_z %hhd, block.m_Top.m_z %hhd.\n", block.m_Lowest.m_z, block.m_Bottom.m_z, block.m_Top.m_z);
 				if ( block.m_Bottom.m_dwTile > TERRAIN_QTY )
 				{
 					if ( block.m_Bottom.m_z > ptDest.m_z + m_zClimbHeight + 2 ) // Too high to climb.
@@ -1792,7 +1792,7 @@ CRegion *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DIR_TY
 	}
 
 	if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
-		g_pLog->EventWarn("GetHeightMount() %d  block.m_Top.m_z  %d ptDest.m_z  %d\n", GetHeightMount(), block.m_Top.m_z, ptDest.m_z);
+		g_pLog->EventWarn("GetHeightMount() %hhu, block.m_Top.m_z %hhd, ptDest.m_z %hhd.\n", GetHeightMount(), block.m_Top.m_z, ptDest.m_z);
 	if ( (GetHeightMount() + ptDest.m_z >= block.m_Top.m_z) && g_Cfg.m_iMountHeight && !IsPriv(PRIV_GM) && !IsPriv(PRIV_ALLMOVE) )
 	{
 		SysMessageDefault(DEFMSG_MSG_MOUNT_CEILING);
