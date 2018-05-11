@@ -1195,7 +1195,7 @@ void CSector::OnTick(int iPulseCount)
 			g_Log.EventError("#2 CSError: item 0%x '%s' [timer=%" PRId64 ", type=%d]\n", (dword)(pItem->GetUID()), pItem->GetName(), pItem->GetTimerAdjusted(), (int)(pItem->GetType()));
 			g_Log.EventError("#2 sector #%d [%d,%d,%d,%d]\n", GetIndex(),  pt.m_x, pt.m_y, pt.m_z, pt.m_map);
 			UNPAUSECALLSTACK;
-			EXC_CATCH_SUB(&e, "Sector");
+			EXC_CATCH_SUB_EXCEPTION_SPHERE(&e, "Sector");
 			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 		}
 		catch (...)
@@ -1203,7 +1203,7 @@ void CSector::OnTick(int iPulseCount)
 			CPointMap pt = GetBasePoint();
 			g_Log.EventError("#3 ...: item 0%x '%s' [timer=%" PRId64 ", type=%d]\n", (dword)(pItem->GetUID()), pItem->GetName(), pItem->GetTimerAdjusted(), (int)(pItem->GetType()));\
 			g_Log.EventError("#3 sector #%d [%d,%d,%d,%d]\n", GetIndex(),  pt.m_x, pt.m_y, pt.m_z, pt.m_map);
-			EXC_CATCH_SUB(NULL, "Sector");
+			EXC_CATCH_SUB_EXCEPTION_SPHERE(NULL, "Sector");
 			CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 		}
 #endif //_EXCEPTIONS_DEBUG
