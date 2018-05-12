@@ -1180,8 +1180,8 @@ void CSector::OnTick(int iPulseCount)
 
 		EXC_DEBUGSUB_START;
 		CPointMap pt = GetBasePoint();
-		g_Log.EventError("#1 item 0%x '%s' [timer=%" PRId64 ", type=%" PRId32 "]\n", (dword)pItem->GetUID(), pItem->GetName(), pItem->GetTimerAdjusted(), (int)pItem->GetType());
-		g_Log.EventError("#1 sector #%d [%d,%d,%d,%d]\n", GetIndex(),  pt.m_x, pt.m_y, pt.m_z, pt.m_map);
+		g_Log.EventError("#1 item 0%" PRIx32 " '%s' [timer=%" PRId64 ", type=%d]\n", (dword)pItem->GetUID(), pItem->GetName(), pItem->GetTimerAdjusted(), (int)pItem->GetType());
+		g_Log.EventError("#1 sector #%d [%hd,%hd,%hhd,%hhu]\n", GetIndex(), pt.m_x, pt.m_y, pt.m_z, pt.m_map);
 		EXC_DEBUGSUB_END;
 	}
 
@@ -1198,7 +1198,7 @@ void CSector::OnTick(int iPulseCount)
 
 	EXC_DEBUG_START;
 	CPointMap pt = GetBasePoint();
-	g_Log.EventError("#4 sector #%d [%d,%d,%d,%d]\n", GetIndex(),  pt.m_x, pt.m_y, pt.m_z, pt.m_map);
+	g_Log.EventError("#4 sector #%d [%hd,%hd,%hhd,%hhu]\n", GetIndex(), pt.m_x, pt.m_y, pt.m_z, pt.m_map);
 	EXC_DEBUG_END;
 }
 

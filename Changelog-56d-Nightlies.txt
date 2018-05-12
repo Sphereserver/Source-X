@@ -869,5 +869,5 @@ Added to [MULTIDEF ]:
 - Fixed: Char flag 'statf_hovering' (gargoyle fly ability) not clearing when gargoyle chars polymorph into non-gargoyle char ID.
 
 11-05-2018, Nolok
-- Changed: disabled the usage of FORINSTANCES without an argoment, since that's an unclear and error prone way to use it.
+- Changed: disabled the usage of FORINSTANCES without an argument, since that's an unclear and error prone way to use it.
 - Updated: Sphere now has a better logging of standard C++ exceptions, meaning better informations in the case of a pure C++ error.
