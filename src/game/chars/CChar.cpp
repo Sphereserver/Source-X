@@ -1006,7 +1006,8 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 	// We copy tags,etc first and place it because of NPC_LoadScript and @Create trigger, so it have information before calling it
 	m_TagDefs.Copy( &( pChar->m_TagDefs ) );
 	m_BaseDefs.Copy( &( pChar->m_BaseDefs ) );
-	m_OEvents.Copy(&(pChar->m_OEvents));
+	//m_OEvents.Copy(&(pChar->m_OEvents));
+	m_OEvents = pChar->m_OEvents;
 	//NPC_LoadScript( false );	//Calling it now so everything above can be accessed and overrided in the @Create
 	//Not calling NPC_LoadScript() because, in some part, it's breaking the name and looking for template names.
 	// end of CChar
@@ -2275,7 +2276,7 @@ do_default:
 				if ( pszKey[4] != '.' )
 					goto do_default;
 
-				if ( g_Cfg.m_Fame.GetCount() <= 0 )
+				if (g_Cfg.m_Fame.size() <= 0 )
 				{
 					DEBUG_ERR(("FAME ranges have not been defined.\n"));
 					sVal.FormatVal( 0 );
@@ -2283,7 +2284,7 @@ do_default:
 				}
 
 				tchar * ppLevel_sep[100];
-				const CSString* pFameAt0 = g_Cfg.m_Fame.GetAt(0);
+				const CSString* pFameAt0 = g_Cfg.m_Fame.at(0);
 
 				tchar * pszFameAt0 = new tchar[pFameAt0->GetLength() + 1];
 				strcpylen(pszFameAt0, pFameAt0->GetPtr());
@@ -2298,7 +2299,7 @@ do_default:
 					}
 					else if ( iFame >= ATOI(ppLevel_sep[ i ]) )
 					{
-						sVal = ( ! g_Cfg.m_Fame.GetAt(i + 1)->CompareNoCase( pszKey + 5 )) ? "1" : "0";
+						sVal = ( !g_Cfg.m_Fame.at(i + 1)->CompareNoCase( pszKey + 5 )) ? "1" : "0";
 						delete[] pszFameAt0;
 						return true;
 					}
@@ -2366,7 +2367,7 @@ do_default:
 				if ( pszKey[5] != '.' )
 					goto do_default;
 
-				if ( g_Cfg.m_Karma.GetCount() <= 0 )
+				if (g_Cfg.m_Karma.size() <= 0 )
 				{
 					DEBUG_ERR(("KARMA ranges have not been defined.\n"));
 					sVal.FormatVal( 0 );
@@ -2374,7 +2375,7 @@ do_default:
 				}
 
 				tchar * ppLevel_sep[100];
-				const CSString* pKarmaAt0 = g_Cfg.m_Karma.GetAt(0);
+				const CSString* pKarmaAt0 = g_Cfg.m_Karma.at(0);
 
 				tchar * pszKarmaAt0 = new tchar[pKarmaAt0->GetLength() + 1];
 				strcpylen(pszKarmaAt0, pKarmaAt0->GetPtr());
@@ -2390,7 +2391,7 @@ do_default:
 					}
 					else if ( iKarma >= ATOI(ppLevel_sep[ i ]) )
 					{
-						sVal = ( ! g_Cfg.m_Karma.GetAt(i + 1)->CompareNoCase( pszKey + 6 )) ? "1" : "0";
+						sVal = ( !g_Cfg.m_Karma.at(i + 1)->CompareNoCase( pszKey + 6 )) ? "1" : "0";
 						delete[] pszKarmaAt0;
 						return true;
 					}
@@ -4243,9 +4244,9 @@ lbl_cchar_ontriggerspeech:
 	if ( !m_pPlayer )
 		return false;
 
-	if ( m_pPlayer->m_Speech.GetCount() > 0 )
+	if (m_pPlayer->m_Speech.size() > 0 )
 	{
-		for ( size_t i = 0; i < m_pPlayer->m_Speech.GetCount(); i++ )
+		for ( size_t i = 0; i < m_pPlayer->m_Speech.size(); i++ )
 		{
 			CResourceLink * pLinkDSpeech = m_pPlayer->m_Speech[i];
 			if ( !pLinkDSpeech )

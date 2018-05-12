@@ -855,7 +855,7 @@ int CClient::OnSkill_ItemID( CUID uid, int iSkillLevel, bool fTest )
 	CItemBase * pItemDef = pItem->Item_GetDef();
 	ASSERT(pItemDef);
 
-	if ( iSkillLevel > 40 && pItemDef->m_BaseResources.GetCount() > 0)
+	if ( iSkillLevel > 40 && pItemDef->m_BaseResources.size() > 0)
 	{
 		tchar *pszTemp = Str_GetTemp();
 		strcpy(pszTemp, g_Cfg.GetDefaultMsg( DEFMSG_ITEMID_MADEOF ));

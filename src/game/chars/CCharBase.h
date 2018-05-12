@@ -70,9 +70,9 @@ public:
 	virtual void UnLink()
 	{
 		// We are being reloaded .
-		m_Speech.Clear();
-		m_FoodType.Clear();
-		m_Desires.Clear();
+        m_Speech.clear();
+        m_FoodType.clear();
+        m_Desires.clear();
 		CBaseBaseDef::UnLink();
 	}
 

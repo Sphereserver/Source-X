@@ -123,7 +123,7 @@ CCharPlayer::CCharPlayer(CChar *pChar, CAccount *pAccount) : m_pAccount(pAccount
 
 CCharPlayer::~CCharPlayer()
 {
-	m_Speech.Clear();
+	m_Speech.clear();
 }
 
 CAccountRef CCharPlayer::GetAccount() const
@@ -153,12 +153,12 @@ bool CCharPlayer::SetSkillClass( CChar * pChar, CResourceID rid )
 	// Remove any previous skillclass from the Events block.
 	size_t i = pChar->m_OEvents.FindResourceType(RES_SKILLCLASS);
 	if ( i != pChar->m_OEvents.BadIndex() )
-		pChar->m_OEvents.RemoveAt(i);
+		pChar->m_OEvents.erase(i);
 
 	m_SkillClass.SetRef(pLink);
 
 	// set it as m_Events block as well.
-	pChar->m_OEvents.Add(pLink);
+    pChar->m_OEvents.push_back(pLink);
 	return true;
 }
 
@@ -522,7 +522,7 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 		s.WriteKeyVal("KRTOOLBARSTATUS", m_bKrToolbarEnabled);
 
 	EXC_SET("saving dynamic speech");
-	if ( m_Speech.GetCount() > 0 )
+	if (m_Speech.size() > 0 )
 	{
 		CSString sVal;
 		m_Speech.WriteResourceRefList( sVal );

@@ -707,7 +707,7 @@ void CWorldThread::CloseAllUIDs()
 	ADDTOCALLSTACK("CWorldThread::CloseAllUIDs");
 	m_ObjDelete.Clear();	// empty our list of unplaced objects (and delete the objects in the list)
 	m_ObjNew.Clear();		// empty our list of objects to delete (and delete the objects in the list)
-	m_UIDs.Clear();
+	m_UIDs.clear();
 
 	if ( m_FreeUIDs != NULL )
 	{
@@ -724,7 +724,7 @@ bool CWorldThread::IsSaving() const
 
 dword CWorldThread::GetUIDCount() const
 {
-	return (dword)m_UIDs.GetCount();
+	return (dword) m_UIDs.size();
 }
 
 CObjBase *CWorldThread::FindUID(dword dwIndex) const
@@ -789,7 +789,7 @@ dword CWorldThread::AllocUID( dword dwIndex, CObjBase * pObj )
 	{
 setcount:
 		// We have run out of free UID's !!! Grow the array
-		m_UIDs.SetCount(( dwIndex + 0x1000 ) &~ 0xFFF );
+		m_UIDs.resize((dwIndex + 0x1000) & ~0xFFF);
 	}
 
 successalloc:
@@ -1281,10 +1281,10 @@ bool CWorld::SaveStage() // Save world state in stages.
 
 		g_Exp.m_ListGlobals.r_WriteSave(m_FileData);
 
-		size_t iQty = g_Cfg.m_RegionDefs.GetCount();
+		size_t iQty = g_Cfg.m_RegionDefs.size();
 		for ( size_t i = 0; i < iQty; i++ )
 		{
-			CRegion *pRegion = dynamic_cast <CRegion*> (g_Cfg.m_RegionDefs.GetAt(i));
+			CRegion *pRegion = dynamic_cast <CRegion*> (g_Cfg.m_RegionDefs.at(i));
 			if ( !pRegion || !pRegion->HasResourceName() || !pRegion->m_iModified )
 				continue;
 
@@ -1733,8 +1733,8 @@ bool CWorld::LoadWorld() // Load world from script
 		if ( m_iSaveCountID == iPrevSaveCount ) break;
 
 		// Reset everything that has been loaded
-		m_Stones.Clear();
-		m_ObjStatusUpdates.Clear();
+		m_Stones.clear();
+		m_ObjStatusUpdates.clear();
 		m_Parties.Clear();
 		m_GMPages.Clear();
 
@@ -1749,7 +1749,7 @@ bool CWorld::LoadWorld() // Load world from script
 
 		CloseAllUIDs();
 		m_Clock.Init();
-		m_UIDs.SetCount(8 * 1024);
+		m_UIDs.resize(8 * 1024);
 
 		// Get the name of the previous backups.
 		CSString sArchive;
@@ -1783,7 +1783,7 @@ bool CWorld::LoadWorld() // Load world from script
 bool CWorld::LoadAll() // Load world from script
 {
 	// start count. (will grow as needed)
-	m_UIDs.SetCount(8 * 1024);
+	m_UIDs.resize(8 * 1024);
 	m_Clock.Init();		// will be loaded from the world file.
 
 	// Load all the accounts.
@@ -2030,7 +2030,7 @@ void CWorld::Restock()
 
 	for ( size_t i = 0; i < CountOf(g_Cfg.m_ResHash.m_Array); ++i )
 	{
-		for ( size_t j = 0; j < g_Cfg.m_ResHash.m_Array[i].GetCount(); ++j )
+		for ( size_t j = 0; j < g_Cfg.m_ResHash.m_Array[i].size(); ++j )
 		{
 			CResourceDef * pResDef = g_Cfg.m_ResHash.m_Array[i][j];
 			if ( pResDef == NULL || ( pResDef->GetResType() != RES_ITEMDEF ))
@@ -2065,8 +2065,8 @@ void CWorld::Close()
 	if ( IsSaving() )
 		Save(true);
 
-	m_Stones.Clear();
-	m_ObjStatusUpdates.Clear();
+	m_Stones.clear();
+	m_ObjStatusUpdates.clear();
 	m_Parties.Clear();
 	m_GMPages.Clear();
 
@@ -2443,21 +2443,21 @@ void CWorld::OnTick()
 		// called (whereas other items can receive the OnTickStatusUpdate() call via their normal
 		// tick method).
 		// note: ideally, a better solution to accomplish this should be found if possible
-		if (m_ObjStatusUpdates.GetCount() > 0)
+		if (m_ObjStatusUpdates.size() > 0)
 		{
 			EXC_TRYSUB("Tick");
 
 			// loop backwards to avoid possible infinite loop if a status update is triggered
 			// as part of the status update (e.g. property changed under tooltip trigger)
-			size_t i = m_ObjStatusUpdates.GetCount();
+			size_t i = m_ObjStatusUpdates.size();
 			while ( i > 0 )
 			{
-				CObjBase * pObj = m_ObjStatusUpdates.GetAt(--i);
+				CObjBase * pObj = m_ObjStatusUpdates.at(--i);
 				if (pObj != NULL)
 					pObj->OnTickStatusUpdate();
 			}
 
-			m_ObjStatusUpdates.Clear();
+				m_ObjStatusUpdates.clear();
 
 			EXC_CATCHSUB("StatusUpdates");
 		}
@@ -2554,21 +2554,21 @@ void CWorld::OnTickMySQL()
 		// called (whereas other items can receive the OnTickStatusUpdate() call via their normal
 		// tick method).
 		// note: ideally, a better solution to accomplish this should be found if possible
-		if (m_ObjStatusUpdates.GetCount() > 0)
+		if (m_ObjStatusUpdates.size() > 0)
 		{
 			EXC_TRYSUB("Tick");
 
 			// loop backwards to avoid possible infinite loop if a status update is triggered
 			// as part of the status update (e.g. property changed under tooltip trigger)
-			size_t i = m_ObjStatusUpdates.GetCount();
+			size_t i = m_ObjStatusUpdates.size();
 			while ( i > 0 )
 			{
-				CObjBase * pObj = m_ObjStatusUpdates.GetAt(--i);
+				CObjBase * pObj = m_ObjStatusUpdates.at(--i);
 				if (pObj != NULL)
 					pObj->OnTickStatusUpdate();
 			}
 
-			m_ObjStatusUpdates.Clear();
+				m_ObjStatusUpdates.clear();
 
 			EXC_CATCHSUB("StatusUpdates");
 		}

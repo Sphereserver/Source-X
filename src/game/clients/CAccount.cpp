@@ -21,7 +21,7 @@ extern "C"
 
 size_t CAccounts::Account_GetCount() const
 {
-	return m_Accounts.GetCount();
+	return m_Accounts.size();
 }
 
 bool CAccounts::Account_Load( lpctstr pszNameRaw, CScript & s, bool fChanges )
@@ -143,7 +143,7 @@ bool CAccounts::Account_SaveAll()
 		"// Any file changes must be made to " SPHERE_FILE "accu" SPHERE_SCRIPT ". This is read in at save time.\n",
 		g_Serv.GetName());
 
-	for ( size_t i = 0; i < m_Accounts.GetCount(); i++ )
+	for ( size_t i = 0; i < m_Accounts.size(); i++ )
 	{
 		CAccountRef pAccount = Account_Get(i);
 		if ( pAccount )
@@ -159,7 +159,7 @@ bool CAccounts::Account_SaveAll()
 CAccountRef CAccounts::Account_FindChat( lpctstr pszChatName )
 {
 	ADDTOCALLSTACK("CAccounts::Account_FindChat");
-	for ( size_t i = 0; i < m_Accounts.GetCount(); i++ )
+	for ( size_t i = 0; i < m_Accounts.size(); i++ )
 	{
 		CAccountRef pAccount = Account_Get(i);
 		if ( pAccount != NULL && pAccount->m_sChatName.CompareNoCase(pszChatName) == 0 )

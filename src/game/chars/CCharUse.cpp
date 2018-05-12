@@ -61,7 +61,7 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 	}
 
 	size_t iItems = 0;
-	for ( size_t i = 0; i < pCorpseDef->m_BaseResources.GetCount(); i++ )
+	for ( size_t i = 0; i < pCorpseDef->m_BaseResources.size(); i++ )
 	{
 		llong iQty = pCorpseDef->m_BaseResources[i].GetResQty();
 		CResourceID rid = pCorpseDef->m_BaseResources[i].GetResourceID();
@@ -143,7 +143,7 @@ void CChar::Use_MoonGate( CItem * pItem )
 		// RES_MOONGATES
 		// What gate are we at ?
 		size_t i = 0;
-		size_t iCount = g_Cfg.m_MoonGates.GetCount();
+		size_t iCount = g_Cfg.m_MoonGates.size();
 		for ( ; i < iCount; ++i )
 		{
 			if ( GetTopPoint().GetDist(g_Cfg.m_MoonGates[i]) <= UO_MAP_VIEW_SIZE_DEFAULT )
@@ -705,7 +705,7 @@ bool CChar::Use_Repair( CItem * pItemArmor )
 	if ( iMissing != pItemDef->m_BaseResources.BadIndex() )
 	{
 		// Need this to repair.
-		const CResourceDef *pCompDef = g_Cfg.ResourceGetDef(pItemDef->m_BaseResources.GetAt(iMissing).GetResourceID());
+		const CResourceDef *pCompDef = g_Cfg.ResourceGetDef(pItemDef->m_BaseResources.at(iMissing).GetResourceID());
 		SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_LACK_1), pCompDef ? pCompDef->GetName() : g_Cfg.GetDefaultMsg(DEFMSG_REPAIR_LACK_2));
 		return false;
 	}

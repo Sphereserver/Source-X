@@ -3789,7 +3789,7 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 	if ( IsTrigUsed(pszTrigName) )
 	{
 		EXC_SET("events");
-		size_t origEvents = m_OEvents.GetCount();
+		size_t origEvents = m_OEvents.size();
 		size_t curEvents = origEvents;
 		for ( size_t i = 0; i < curEvents; ++i ) // EVENTS (could be modifyed ingame!)
 		{
@@ -3804,7 +3804,7 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 			if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
 				goto stopandret;//return iRet;
 
-			curEvents = m_OEvents.GetCount();
+			curEvents = m_OEvents.size();
 			if ( curEvents < origEvents ) // the event has been deleted, modify the counter for other trigs to work
 			{
 				--i;
@@ -3816,7 +3816,7 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 		{
 			// 3) TEVENTS
 			EXC_SET("NPC triggers"); // TEVENTS (constant events of NPCs)
-			for ( size_t i = 0; i < pCharDef->m_TEvents.GetCount(); ++i )
+			for ( size_t i = 0; i < pCharDef->m_TEvents.size(); ++i )
 			{
 				CResourceLink * pLink = pCharDef->m_TEvents[i];
 				if ( !pLink || !pLink->HasTrigger(iAction) )
@@ -3851,7 +3851,7 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 		if (m_pNPC != NULL)
 		{
 			EXC_SET("NPC triggers - EVENTSPET"); // EVENTSPET (constant events of NPCs set from sphere.ini)
-			for (size_t i = 0; i < g_Cfg.m_pEventsPetLink.GetCount(); ++i)
+			for (size_t i = 0; i < g_Cfg.m_pEventsPetLink.size(); ++i)
 			{
 				CResourceLink * pLink = g_Cfg.m_pEventsPetLink[i];
 				if (!pLink || !pLink->HasTrigger(iAction))
@@ -3869,7 +3869,7 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 		{
 			//	EVENTSPLAYER triggers (constant events of players set from sphere.ini)
 			EXC_SET("chardef triggers - EVENTSPLAYER");
-			for ( size_t i = 0; i < g_Cfg.m_pEventsPlayerLink.GetCount(); ++i )
+			for ( size_t i = 0; i < g_Cfg.m_pEventsPlayerLink.size(); ++i )
 			{
 				CResourceLink	*pLink = g_Cfg.m_pEventsPlayerLink[i];
 				if ( !pLink || !pLink->HasTrigger(iAction) )

@@ -401,7 +401,7 @@ void CItemMulti::OnHearRegion(lpctstr pszCmd, CChar * pSrc)
         return;
     TALKMODE_TYPE		mode = TALKMODE_SAY;
 
-    for (size_t i = 0; i < pMultiDef->m_Speech.GetCount(); i++)
+    for (size_t i = 0; i < pMultiDef->m_Speech.size(); i++)
     {
         CResourceLink * pLink = pMultiDef->m_Speech[i];
         ASSERT(pLink);
@@ -1588,7 +1588,7 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
             // no component uid
             if (*pszKey == '\0')
             {
-                sVal.FormatSTVal(pMultiDef->m_Components.GetCount());
+                sVal.FormatSTVal(pMultiDef->m_Components.size());
             }
             else if (*pszKey == '.')
             {
@@ -1600,7 +1600,7 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
                     return false;
 
                 SKIP_SEPARATORS(pszKey);
-                item = pMultiDef->m_Components.GetAt(iQty);
+                item = pMultiDef->m_Components.at(iQty);
 
                 if (!strnicmp(pszKey, "ID", 2)) sVal.FormatVal(item.m_id);
                 else if (!strnicmp(pszKey, "DX", 2)) sVal.FormatVal(item.m_dx);

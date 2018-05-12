@@ -282,7 +282,7 @@ CServerConfig::~CServerConfig()
 {
 	for ( size_t i = 0; i < CountOf(m_ResHash.m_Array); ++i )
 	{
-		for ( size_t j = 0; j < m_ResHash.m_Array[i].GetCount(); ++j )
+		for ( size_t j = 0; j < m_ResHash.m_Array[i].size(); ++j )
 		{
 			CResourceDef* pResDef = m_ResHash.m_Array[i][j];
 			if ( pResDef != NULL )
@@ -1286,7 +1286,7 @@ const CSkillDef * CServerConfig::SkillLookup( lpctstr pszKey )
 
 	size_t iLen = strlen( pszKey );
     const CSkillDef * pDef;
-	for ( size_t i = 0; i < m_SkillIndexDefs.GetCount(); ++i )
+	for ( size_t i = 0; i < m_SkillIndexDefs.size(); ++i )
 	{
 		pDef = static_cast<const CSkillDef *>(m_SkillIndexDefs[i]);
 		if ( pDef->m_sName.IsEmpty() ?
@@ -1450,7 +1450,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 
 			if ( !strnicmp( pszCmd, "COUNT", 5 ))
 			{
-				sVal.FormatSTVal(m_Functions.GetCount());
+				sVal.FormatSTVal(m_Functions.size());
 				return true;
 			}
 			else if ( m_Functions.ContainsKey(pszCmd) )
@@ -1463,7 +1463,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			SKIP_SEPARATORS(pszCmd);
 			sVal.FormatVal(0);
 
-			if (iNumber < 0 || iNumber >= (int)m_Functions.GetCount()) //invalid index can potentially crash the server, this check is strongly needed
+			if (iNumber < 0 || iNumber >= (int) m_Functions.size()) //invalid index can potentially crash the server, this check is strongly needed
 			{
 				g_Log.EventError("Invalid command index %d\n",iNumber);
 				return false;
@@ -1471,12 +1471,12 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 
 			if ( *pszCmd == '\0')
 			{
-				sVal = m_Functions.GetAt(iNumber)->GetName();
+				sVal = m_Functions.at(iNumber)->GetName();
 				return true;
 			}
 			else if ( !strnicmp( pszCmd, "PLEVEL", 5 ))
 			{
-				sVal.FormatVal((int)(GetPrivCommandLevel(m_Functions.GetAt(iNumber)->GetName())));
+				sVal.FormatVal((int)(GetPrivCommandLevel(m_Functions.at(iNumber)->GetName())));
 				return true;
 			}
 		}
@@ -1490,7 +1490,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 
 			if (!strnicmp(pszCmd,"COUNT", 5))
 			{
-				for ( size_t i = 0; i < g_World.m_Stones.GetCount(); ++i )
+				for ( size_t i = 0; i < g_World.m_Stones.size(); ++i )
 				{
 					pStone = g_World.m_Stones[i];
 					if ( pStone == NULL )
@@ -1510,7 +1510,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			SKIP_SEPARATORS(pszCmd);
 			sVal.FormatVal(0);
 
-			for ( size_t i = 0; i < g_World.m_Stones.GetCount(); ++i )
+			for ( size_t i = 0; i < g_World.m_Stones.size(); ++i )
 			{
 				pStone = g_World.m_Stones[i];
 				if ( pStone == NULL )
@@ -1850,7 +1850,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			sVal.FormatVal(m_iSpellTimeout / TICK_PER_SEC);
 			break;
 		case RC_GUILDS:
-			sVal.FormatSTVal( g_World.m_Stones.GetCount());
+			sVal.FormatSTVal(g_World.m_Stones.size());
 			return true;
 		case RC_TIMEUP:
 			sVal.FormatLLVal( ( - g_World.GetTimeDiff( g_World.m_timeStartup )) / TICK_PER_SEC );
@@ -2023,7 +2023,7 @@ CWebPageDef * CServerConfig::FindWebPage( lpctstr pszPath ) const
 	ADDTOCALLSTACK("CServerConfig::FindWebPage");
 	if ( pszPath == NULL )
 	{
-		if ( m_WebPages.GetCount() <= 0 )
+		if (m_WebPages.size() <= 0 )
 			return NULL;
 		// Take this as the default page.
 		return static_cast <CWebPageDef*>( m_WebPages[0] );
@@ -2034,13 +2034,13 @@ CWebPageDef * CServerConfig::FindWebPage( lpctstr pszPath ) const
 	if ( pszTitle == NULL || pszTitle[0] == '\0' )
 	{
 		// This is just the root index.
-		if ( m_WebPages.GetCount() <= 0 )
+		if (m_WebPages.size() <= 0 )
 			return NULL;
 		// Take this as the default page.
 		return static_cast <CWebPageDef*>( m_WebPages[0] );
 	}
 
-	for ( size_t i = 0; i < m_WebPages.GetCount(); i++ )
+	for ( size_t i = 0; i < m_WebPages.size(); i++ )
 	{
 		if ( m_WebPages[i] == NULL )	// not sure why this would happen
 			continue;
@@ -2059,7 +2059,7 @@ bool CServerConfig::IsObscene( lpctstr pszText ) const
 	// does this text contain obscene content?
 	// NOTE: allow partial match syntax *fuck* or ass (alone)
 
-	for ( size_t i = 0; i < m_Obscene.GetCount(); i++ )
+	for ( size_t i = 0; i < m_Obscene.size(); i++ )
 	{
 		tchar* match = new tchar[ strlen(m_Obscene[i])+3 ];
 		sprintf(match,"%s%s%s","*",m_Obscene[i],"*");
@@ -2173,8 +2173,8 @@ PLEVEL_TYPE CServerConfig::GetPrivCommandLevel( lpctstr pszCmd ) const
 	while ( ilevel > 0 )
 	{
 		--ilevel;
-		lpctstr const * pszTable = m_PrivCommands[ilevel].GetBasePtr();
-		size_t iCount = m_PrivCommands[ilevel].GetCount();
+		lpctstr const * pszTable = m_PrivCommands[ilevel].data();
+		size_t iCount = m_PrivCommands[ilevel].size();
 		if ( FindTableHeadSorted( pszCmd, pszTable, (int)iCount ) >= 0 )
 			return( static_cast<PLEVEL_TYPE>(ilevel) );
 	}
@@ -2275,7 +2275,7 @@ CPointMap CServerConfig::GetRegionPoint( lpctstr pCmd ) const // Decode a telepo
 		size_t i = ( - ATOI(pCmd)) - 1;
 		if ( ! m_StartDefs.IsValidIndex( i ))
 		{
-			if ( m_StartDefs.GetCount() <= 0 )
+			if (m_StartDefs.size() <= 0 )
 				return CPointMap();
 
 			i = 0;
@@ -2313,7 +2313,7 @@ CRegion * CServerConfig::GetRegion( lpctstr pKey ) const
 	GETNONWHITESPACE( pKey );
 	for ( size_t i = 0; i < CountOf(m_ResHash.m_Array); i++ )
 	{
-		for ( size_t j = 0; j < m_ResHash.m_Array[i].GetCount(); j++ )
+		for ( size_t j = 0; j < m_ResHash.m_Array[i].size(); j++ )
 		{
 			CResourceDef * pResDef = m_ResHash.m_Array[i][j];
 			ASSERT(pResDef);
@@ -2336,12 +2336,12 @@ CRegion * CServerConfig::GetRegion( lpctstr pKey ) const
 
 void CServerConfig::LoadSortSpells()
 {
-	size_t iQtySpells = m_SpellDefs.GetCount();
+	size_t iQtySpells = m_SpellDefs.size();
 	if ( iQtySpells <= 0 )
 		return;
 
-	m_SpellDefs_Sorted.Clear();
-	m_SpellDefs_Sorted.Add( m_SpellDefs[0] );		// the null spell
+	m_SpellDefs_Sorted.clear();
+	m_SpellDefs_Sorted.push_back(m_SpellDefs[0]);		// the null spell
 
 	for ( size_t i = 1; i < iQtySpells; ++i )
 	{
@@ -2351,7 +2351,7 @@ void CServerConfig::LoadSortSpells()
 		int	iVal = 0;
 		m_SpellDefs[i]->GetPrimarySkill( NULL, &iVal );
 
-		size_t iQty = m_SpellDefs_Sorted.GetCount();
+		size_t iQty = m_SpellDefs_Sorted.size();
 		size_t k = 1;
 		while ( k < iQty )
 		{
@@ -2361,7 +2361,7 @@ void CServerConfig::LoadSortSpells()
 				break;
 			++k;
 		}
-		m_SpellDefs_Sorted.InsertAt( k, m_SpellDefs[i] );
+		m_SpellDefs_Sorted.insert(k, m_SpellDefs[i]);
 	}
 }
 
@@ -2727,7 +2727,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 				if ( *pName == '<' )
 					pName = "";
 
-				m_Fame.SetAtGrow( i, new CSString(pName) );
+				m_Fame.assign_at_grow(i, new CSString(pName));
 				++i;
 			}
 		}
@@ -2741,7 +2741,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 				if ( *pName == '<' )
 					pName = "";
 
-				m_Karma.SetAtGrow( i, new CSString(pName) );
+				m_Karma.assign_at_grow(i, new CSString(pName));
 				++i;
 			}
 		}
@@ -2760,9 +2760,9 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			// read karma levels
 			iQty = Str_ParseCmds(pScript->GetKeyBuffer(), piNotoLevels, CountOf(piNotoLevels));
 			for (i = 0; i < iQty; i++)
-				m_NotoKarmaLevels.SetAtGrow(i, (int)(piNotoLevels[i]));
+				m_NotoKarmaLevels.assign_at_grow(i, (int) (piNotoLevels[i]));
 
-			m_NotoKarmaLevels.SetCount(i);
+			m_NotoKarmaLevels.resize(i);
 
 			if (pScript->ReadKey() == false)
 			{
@@ -2773,9 +2773,9 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			// read fame levels
 			iQty = Str_ParseCmds(pScript->GetKeyBuffer(), piNotoLevels, CountOf(piNotoLevels));
 			for (i = 0; i < iQty; i++)
-				m_NotoFameLevels.SetAtGrow(i, (int)(piNotoLevels[i]));
+				m_NotoFameLevels.assign_at_grow(i, (int) (piNotoLevels[i]));
 
-			m_NotoFameLevels.SetCount(i);
+			m_NotoFameLevels.resize(i);
 
 			// read noto titles
 			i = 0;
@@ -2785,12 +2785,13 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 				if ( *pName == '<' )
 					pName = "";
 
-				m_NotoTitles.SetAtGrow( i, new CSString(pName) );
+				m_NotoTitles.assign_at_grow(i, new CSString(pName));
 				++i;
 			}
 
-			if (m_NotoTitles.GetCount() != ((m_NotoKarmaLevels.GetCount() + 1) * (m_NotoFameLevels.GetCount() + 1)))
-				g_Log.Event(LOGM_INIT|LOGL_WARN, "Expected %" PRIuSIZE_T " titles in NOTOTITLES section but found %" PRIuSIZE_T ".\n", (m_NotoKarmaLevels.GetCount() + 1) * (m_NotoFameLevels.GetCount() + 1), m_NotoTitles.GetCount());
+			if (m_NotoTitles.size() != ((m_NotoKarmaLevels.size() + 1) * (m_NotoFameLevels.size() + 1)))
+				g_Log.Event(LOGM_INIT|LOGL_WARN, "Expected %" PRIuSIZE_T " titles in NOTOTITLES section but found %" PRIuSIZE_T ".\n", (m_NotoKarmaLevels.size() + 1) * (m_NotoFameLevels.size() + 1),
+							m_NotoTitles.size());
 		}
 		return true;
 	case RES_OBSCENE:
@@ -2820,10 +2821,10 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 		return true;
 	case RES_RUNES:
 		// The full names of the magic runes.
-		m_Runes.Clear();
+		m_Runes.clear();
 		while ( pScript->ReadKey() )
 		{
-			m_Runes.Add( new CSString(pScript->GetKey()) );
+			m_Runes.push_back(new CSString(pScript->GetKey()));
 		}
 		return true;
 	case RES_SECTOR: // saved in world file.
@@ -2847,7 +2848,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			pScript->SeekContext( LineContext );
 
 			if ( !pPrvDef )
-				m_SpellDefs.SetAtGrow( rid.GetResIndex(), pSpell );
+				m_SpellDefs.assign_at_grow(rid.GetResIndex(), pSpell);
 		}
 		break;
 
@@ -2880,7 +2881,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 				// build a name sorted list.
 				m_SkillNameDefs.AddSortKey( pSkill, pSkill->GetKey());
 				// Hard coded value for skill index.
-				m_SkillIndexDefs.SetAtGrow( rid.GetResIndex(), pSkill );
+				m_SkillIndexDefs.assign_at_grow(rid.GetResIndex(), pSkill);
 			}
 		}
 		break;
@@ -2897,11 +2898,11 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 			ASSERT(pNewLink);
 
 			// clear old tile links to this type
-			size_t iQty = g_World.m_TileTypes.GetCount();
+			size_t iQty = g_World.m_TileTypes.size();
 			for ( size_t i = 0; i < iQty; i++ )
 			{
-				if ( g_World.m_TileTypes.GetAt(i) == pTypeDef )
-					g_World.m_TileTypes.SetAt( i, NULL );
+				if (g_World.m_TileTypes.at(i) == pTypeDef )
+					g_World.m_TileTypes.assign(i, NULL);
 			}
 
 		}
@@ -3019,7 +3020,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 				// so this will do nothing, which is good
 				// if ( !fNewStyleDef )
 				//	pRegion->MakeRegionName();
-				m_RegionDefs.Add( pRegion );
+				m_RegionDefs.push_back(pRegion);
 			}
 		}
 		break;
@@ -3049,7 +3050,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 				// so this will do nothing, which is good
 				// if ( !fNewStyleDef )
 				//	pRegion->MakeRegionName();
-				m_RegionDefs.Add( pRegion );
+				m_RegionDefs.push_back(pRegion);
 			}
 		}
 		break;
@@ -3267,7 +3268,7 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 	case RES_STARTS:
 		{
 			int iStartVersion = pScript->GetArgVal();
-			m_StartDefs.Clear();
+			m_StartDefs.clear();
 			while ( pScript->ReadKey())
 			{
 				CStartLoc * pStart = new CStartLoc( pScript->GetKey());
@@ -3283,17 +3284,17 @@ bool CServerConfig::LoadResourceSection( CScript * pScript )
 							pStart->iClilocDescription = ATOI(pScript->GetKey());
 					}
 				}
-				m_StartDefs.Add( pStart );
+				m_StartDefs.push_back(pStart);
 			}
 
 			return true;
 		}
 	case RES_MOONGATES:
-		m_MoonGates.Clear();
+		m_MoonGates.clear();
 		while ( pScript->ReadKey())
 		{
 			CPointMap pt = GetRegionPoint( pScript->GetKey());
-			m_MoonGates.Add( pt );
+			m_MoonGates.push_back(pt);
 		}
 		return true;
 	case RES_WORLDVARS:
@@ -3758,7 +3759,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
         index = 10000;	// RES_SPAWN +10k, no reason to have 100k [SPAWN ] templates ... but leaving this huge margin.
         break;
 	case RES_WEBPAGE:		// Define a web page template.
-		index = (dword)m_WebPages.GetCount() + 1;
+		index = (dword) m_WebPages.size() + 1;
 		break;
 
 	default:
@@ -3816,7 +3817,7 @@ CResourceDef * CServerConfig::ResourceGetDef( CResourceIDBase rid ) const
 			index = m_WebPages.FindKey( rid );
 			if ( ! m_WebPages.IsValidIndex(index) )
 				return NULL;
-			return m_WebPages.GetAt( index );
+			return m_WebPages.at(index);
 
 		case RES_SKILL:
 			if ( ! m_SkillIndexDefs.IsValidIndex(index) )
@@ -3873,7 +3874,7 @@ void CServerConfig::OnTick( bool fNow )
 	if ( this->m_fUseHTTP )
 	{
 		// Update WEBPAGES resources
-		for ( size_t i = 0; i < m_WebPages.GetCount(); i++ )
+		for ( size_t i = 0; i < m_WebPages.size(); i++ )
 		{
 			EXC_TRY("WebTick");
 			if ( !m_WebPages[i] )
@@ -3890,7 +3891,7 @@ void CServerConfig::OnTick( bool fNow )
 			CWebPageDef * pWeb = static_cast <CWebPageDef *>(m_WebPages[i]);
 			g_Log.EventDebug("web '%s' dest '%s' now '%d' index '%" PRIuSIZE_T "'/'%" PRIuSIZE_T "'\n",
 				pWeb ? pWeb->GetName() : "", pWeb ? pWeb->GetDstName() : "",
-				fNow? 1 : 0, i, m_WebPages.GetCount());
+				fNow? 1 : 0, i, m_WebPages.size());
 			EXC_DEBUG_END;
 		}
 	}
@@ -4026,32 +4027,32 @@ void CServerConfig::Unload( bool fResync )
 		return;
 	}
 
-	m_ResourceFiles.Clear();
+	m_ResourceFiles.clear();
 
 	// m_ResHash.Clear();
 
-	m_Obscene.Clear();
-	m_Fame.Clear();
-	m_Karma.Clear();
-	m_NotoTitles.Clear();
-	m_NotoKarmaLevels.Clear();
-	m_NotoFameLevels.Clear();
-	m_Runes.Clear();	// Words of power. (A-Z)
+	m_Obscene.clear();
+	m_Fame.clear();
+	m_Karma.clear();
+	m_NotoTitles.clear();
+	m_NotoKarmaLevels.clear();
+	m_NotoFameLevels.clear();
+	m_Runes.clear();	// Words of power. (A-Z)
 	// m_MultiDefs
-	m_SkillNameDefs.Clear();	// Defined Skills
-	m_SkillIndexDefs.Clear();
+	m_SkillNameDefs.clear();	// Defined Skills
+	m_SkillIndexDefs.clear();
 	// m_Servers
-	m_Functions.Clear();
-	m_StartDefs.Clear(); // Start points list
+	m_Functions.clear();
+	m_StartDefs.clear(); // Start points list
 	// m_StatAdv
 	for ( int j=0; j<PLEVEL_QTY; ++j )
 	{
-		m_PrivCommands[j].Clear();
+		m_PrivCommands[j].clear();
 	}
-	m_MoonGates.Clear();
+	m_MoonGates.clear();
 	// m_WebPages
-	m_SpellDefs.Clear();	// Defined Spells
-	m_SpellDefs_Sorted.Clear();
+	m_SpellDefs.clear();	// Defined Spells
+	m_SpellDefs_Sorted.clear();
 }
 
 bool CServerConfig::Load( bool fResync )
@@ -4133,7 +4134,7 @@ bool CServerConfig::Load( bool fResync )
 	// open and index all my script files i'm going to use.
 	AddResourceDir( m_sSCPBaseDir );		// if we want to get *.SCP files from elsewhere.
 
-	size_t count = m_ResourceFiles.GetCount();
+	size_t count = m_ResourceFiles.size();
 	g_Log.Event(LOGM_INIT, "\nIndexing %" PRIuSIZE_T " script files...\n", count);
 
 	for ( size_t j = 0; ; ++j )
@@ -4178,7 +4179,7 @@ bool CServerConfig::Load( bool fResync )
 	else
 		g_Log.Event(LOGM_INIT, "Done loading scripts.\n");
 
-	if ( m_StartDefs.GetCount() <= 0 )
+	if (m_StartDefs.size() <= 0 )
 	{
 		g_Log.Event(LOGM_INIT|LOGL_ERROR, "No START locations specified. Add them and try again.\n");
 		return false;
@@ -4186,10 +4187,10 @@ bool CServerConfig::Load( bool fResync )
 
 	// Make region DEFNAMEs
 	{
-		size_t iMax = g_Cfg.m_RegionDefs.GetCount();
+		size_t iMax = g_Cfg.m_RegionDefs.size();
 		for ( size_t k = 0; k < iMax; k++ )
 		{
-			CRegion * pRegion = dynamic_cast <CRegion*> (g_Cfg.m_RegionDefs.GetAt(i));
+			CRegion * pRegion = dynamic_cast <CRegion*> (g_Cfg.m_RegionDefs.at(i));
 			if ( !pRegion )
 				continue;
 			pRegion->MakeRegionName();
@@ -4197,7 +4198,7 @@ bool CServerConfig::Load( bool fResync )
 	}
 
 	// parse eventsitem
-	m_iEventsItemLink.Clear();
+	m_iEventsItemLink.clear();
 	if ( ! m_sEventsItem.IsEmpty() )
 	{
 		CScript script("EVENTSITEM", m_sEventsItem);
@@ -4205,7 +4206,7 @@ bool CServerConfig::Load( bool fResync )
 	}
 
 	// parse eventspet
-	m_pEventsPetLink.Clear();
+	m_pEventsPetLink.clear();
 	if ( ! m_sEventsPet.IsEmpty() )
 	{
 		CScript script("EVENTSPET", m_sEventsPet);
@@ -4213,7 +4214,7 @@ bool CServerConfig::Load( bool fResync )
 	}
 
 	// parse eventsplayer
-	m_pEventsPlayerLink.Clear();
+	m_pEventsPlayerLink.clear();
 	if ( ! m_sEventsPlayer.IsEmpty() )
 	{
 		CScript script("EVENTSPLAYER", m_sEventsPlayer);
@@ -4221,7 +4222,7 @@ bool CServerConfig::Load( bool fResync )
 	}
 
 	// parse eventsregion
-	m_pEventsRegionLink.Clear();
+	m_pEventsRegionLink.clear();
 	if ( ! m_sEventsRegion.IsEmpty() )
 	{
 		CScript script("EVENTSREGION", m_sEventsRegion);
@@ -4469,7 +4470,7 @@ bool CItemTypeDef::r_LoadVal( CScript & s )
 
 		for ( size_t i = iLo; i <= iHi; i++ )
 		{
-			g_World.m_TileTypes.SetAtGrow( i, this );
+			g_World.m_TileTypes.assign_at_grow(i, this);
 		}
 		return true;
 	}

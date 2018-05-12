@@ -42,7 +42,7 @@ void CItemCommCrystal::OnHear(lpctstr pszCmd, CChar *pSrc)
     // IT_COMM_CRYSTAL
     // STATF_COMM_CRYSTAL = if i am on a person.
     TALKMODE_TYPE mode = TALKMODE_SAY;
-    for ( size_t i = 0; i < m_Speech.GetCount(); i++ )
+    for ( size_t i = 0; i < m_Speech.size(); i++ )
     {
         CResourceLink *pLink = m_Speech[i];
         ASSERT(pLink);
@@ -67,7 +67,7 @@ void CItemCommCrystal::OnHear(lpctstr pszCmd, CChar *pSrc)
         if ( pItem && pItem->IsType(IT_COMM_CRYSTAL) )
             pItem->Speak(pszCmd);
     }
-    else if ( m_Speech.GetCount() <= 0 )
+    else if (m_Speech.size() <= 0 )
         Speak(pszCmd);
 }
 
@@ -113,5 +113,5 @@ void CItemCommCrystal::DupeCopy(const CItem *pItem)
     if ( !pItemCrystal )
         return;
 
-    m_Speech.Copy(&pItemCrystal->m_Speech);
+    m_Speech = pItemCrystal->m_Speech;
 }

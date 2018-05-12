@@ -10,7 +10,7 @@
 CItemStone::CItemStone( ITEMID_TYPE id, CItemBase * pItemDef ) : CItem( id, pItemDef )
 {
 	m_itStone.m_iAlign = STONEALIGN_STANDARD;
-	g_World.m_Stones.Add( this );
+    g_World.m_Stones.push_back(this);
 }
 
 CItemStone::~CItemStone()
@@ -1145,7 +1145,7 @@ void CItemStone::ElectMaster()
 bool CItemStone::IsUniqueName( lpctstr pName ) // static
 {
 	ADDTOCALLSTACK("CItemStone::IsUniqueName");
-	for ( size_t i = 0; i < g_World.m_Stones.GetCount(); ++i )
+	for ( size_t i = 0; i < g_World.m_Stones.size(); ++i )
 	{
 		if ( ! strcmpi( pName, g_World.m_Stones[i]->GetName()))
 			return false;

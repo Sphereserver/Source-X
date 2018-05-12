@@ -707,10 +707,10 @@ bool CWorld::DumpAreas( CTextConsole * pSrc, lpctstr pszFilename )
 	if ( ! s.Open( pszFilename, OF_WRITE|OF_TEXT|OF_DEFAULTMODE ))
 		return false;
 
-	size_t iMax = g_Cfg.m_RegionDefs.GetCount();
+	size_t iMax = g_Cfg.m_RegionDefs.size();
 	for ( size_t i = 0; i < iMax; i++ )
 	{
-		CRegion * pRegion = g_Cfg.m_RegionDefs.GetAt(i);
+		CRegion * pRegion = g_Cfg.m_RegionDefs.at(i);
 		if ( !pRegion  )
 			continue;
 		pRegion->r_Write( s );

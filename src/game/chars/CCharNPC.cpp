@@ -311,7 +311,7 @@ void CChar::NPC_CreateTrigger()
 	CTRIG_TYPE iAction = (CTRIG_TYPE)FindTableSorted(pszTrigName, sm_szTrigName, CountOf(sm_szTrigName) - 1);
 
 	// 2) TEVENTS
-	for (size_t i = 0; i < pCharDef->m_TEvents.GetCount(); ++i)
+	for (size_t i = 0; i < pCharDef->m_TEvents.size(); ++i)
 	{
 		CResourceLink * pLink = pCharDef->m_TEvents[i];
 		if (!pLink || !pLink->HasTrigger(iAction))
@@ -325,7 +325,7 @@ void CChar::NPC_CreateTrigger()
 	}
 
 	// 4) EVENTSPET triggers
-	for (size_t i = 0; i < g_Cfg.m_pEventsPetLink.GetCount(); ++i)
+	for (size_t i = 0; i < g_Cfg.m_pEventsPetLink.size(); ++i)
 	{
 		CResourceLink * pLink = g_Cfg.m_pEventsPetLink[i];
 		if (!pLink || !pLink->HasTrigger(iAction))

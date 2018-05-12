@@ -719,9 +719,9 @@ CServerMapDiffCollection::~CServerMapDiffCollection()
 	// Remove all of the loaded dif data
 	for ( uint m = 0; m < 256; ++m )
 	{
-		while ( m_pMapDiffBlocks[m].GetCount() > 0 )
+		while (m_pMapDiffBlocks[m].size() > 0 )
 		{
-			m_pMapDiffBlocks[m].RemoveAt(0);
+			m_pMapDiffBlocks[m].erase(0);
 		}
 	}
 }
@@ -897,7 +897,7 @@ CServerMapDiffBlock * CServerMapDiffCollection::GetAtBlock(dword dwBlockId, int 
 	if ( index == m_pMapDiffBlocks[map].BadIndex() )
 		return NULL;
 
-	return m_pMapDiffBlocks[map].GetAt( index );
+	return m_pMapDiffBlocks[map].at(index);
 }
 
 /*

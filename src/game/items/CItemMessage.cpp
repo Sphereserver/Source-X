@@ -93,7 +93,7 @@ bool CItemMessage::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc
             case CIC_BODY:		// handled above
                 return false;
             case CIC_PAGES:		// not settable (used for resource stuff)
-                sVal.FormatSTVal(m_sBodyLines.GetCount());
+                sVal.FormatSTVal(m_sBodyLines.size());
                 return true;
             case CIC_TITLE:
                 sVal = GetName();
@@ -126,12 +126,12 @@ bool CItemMessage::r_Verb(CScript & s, CTextConsole *pSrc)
             size_t iPage = (s.GetArgStr()[0] && toupper(s.GetArgStr()[0]) != 'A') ? s.GetArgVal() : 0;
             if ( iPage <= 0 )
             {
-                m_sBodyLines.Clear();
+                m_sBodyLines.clear();
                 return true;
             }
-            else if ( iPage <= m_sBodyLines.GetCount() )
+            else if ( iPage <= m_sBodyLines.size() )
             {
-                m_sBodyLines.RemoveAt(iPage - 1);
+                m_sBodyLines.erase(iPage - 1);
                 return true;
             }
         }
@@ -169,7 +169,7 @@ void CItemMessage::DupeCopy(const CItem *pItem)
 
 size_t CItemMessage::GetPageCount() const
 {
-    return m_sBodyLines.GetCount();
+    return m_sBodyLines.size();
 }
 
 lpctstr CItemMessage::GetPageText( size_t iPage ) const
@@ -185,15 +185,15 @@ void CItemMessage::SetPageText( size_t iPage, lpctstr pszText )
 {
     if ( pszText == NULL )
         return;
-    m_sBodyLines.SetAtGrow( iPage, new CSString( pszText ));
+    m_sBodyLines.assign_at_grow(iPage, new CSString(pszText));
 }
 void CItemMessage::AddPageText( lpctstr pszText )
 {
-    m_sBodyLines.Add( new CSString( pszText ));
+    m_sBodyLines.push_back(new CSString(pszText));
 }
 
 void CItemMessage::UnLoadSystemPages()
 {
     m_sAuthor.Empty();
-    m_sBodyLines.Clear();
+    m_sBodyLines.clear();
 }

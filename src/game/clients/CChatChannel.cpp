@@ -170,7 +170,7 @@ void CChatChannel::RenameChannel(CChatChanMember * pBy, lpctstr pszName)
 void CChatChannel::KickAll(CChatChanMember * pMemberException)
 {
     ADDTOCALLSTACK("CChatChannel::KickAll");
-    for (size_t i = 0; i < m_Members.GetCount(); i++)
+    for (size_t i = 0; i < m_Members.size(); i++)
     {
         if ( m_Members[i] == pMemberException) // If it's not me, then kick them
             continue;
@@ -181,7 +181,7 @@ void CChatChannel::KickAll(CChatChanMember * pMemberException)
 void CChatChannel::RemoveMember(CChatChanMember * pMember)
 {
     ADDTOCALLSTACK("CChatChannel::RemoveMember");
-    for ( size_t i = 0; i < m_Members.GetCount(); )
+    for ( size_t i = 0; i < m_Members.size(); )
     {
         // Tell the other clients in this channel (if any) you are leaving (including yourself)
         CClient * pClient = m_Members[i]->GetClient();
@@ -189,14 +189,14 @@ void CChatChannel::RemoveMember(CChatChanMember * pMember)
         if ( pClient == NULL )		//	auto-remove offline clients
         {
             m_Members[i]->SetChannel(NULL);
-            m_Members.RemoveAt(i);
+            m_Members.erase(i);
             continue;
         }
 
         pClient->addChatSystemMessage(CHATMSG_RemoveMember, pMember->GetChatName());
         if (m_Members[i] == pMember)	// disjoin
         {
-            m_Members.RemoveAt(i);
+            m_Members.erase(i);
             break;
         }
 
@@ -233,7 +233,7 @@ void CChatChannel::SetName(lpctstr pszName)
 bool CChatChannel::IsModerator(lpctstr pszMember) const
 {
     ADDTOCALLSTACK("CChatChannel::IsModerator");
-    for (size_t i = 0; i < m_Moderators.GetCount(); i++)
+    for (size_t i = 0; i < m_Moderators.size(); i++)
     {
         if (m_Moderators[i]->Compare(pszMember) == 0)
             return true;
@@ -244,7 +244,7 @@ bool CChatChannel::IsModerator(lpctstr pszMember) const
 bool CChatChannel::HasVoice(lpctstr pszMember) const
 {
     ADDTOCALLSTACK("CChatChannel::HasVoice");
-    for (size_t i = 0; i < m_NoVoices.GetCount(); i++)
+    for (size_t i = 0; i < m_NoVoices.size(); i++)
     {
         if (m_NoVoices[i]->Compare(pszMember) == 0)
             return false;
@@ -256,18 +256,18 @@ void CChatChannel::SetModerator(lpctstr pszMember, bool fFlag)
 {
     ADDTOCALLSTACK("CChatChannel::SetModerator");
     // See if they are already a moderator
-    for (size_t i = 0; i < m_Moderators.GetCount(); ++i)
+    for (size_t i = 0; i < m_Moderators.size(); ++i)
     {
         if (m_Moderators[i]->Compare(pszMember) == 0)
         {
             if (fFlag == false)
-                m_Moderators.RemoveAt(i);
+                m_Moderators.erase(i);
             return;
         }
     }
     if (fFlag)
     {
-        m_Moderators.Add( new CSString(pszMember) );
+        m_Moderators.push_back(new CSString(pszMember));
     }
 }
 
@@ -303,7 +303,7 @@ void CChatChannel::KickMember(CChatChanMember *pByMember, CChatChanMember * pMem
     }
 
     // Now kick them
-    if (m_Members.GetCount() == 1) // If kicking yourself, send out to all clients in a chat that the channel is gone
+    if (m_Members.size() == 1) // If kicking yourself, send out to all clients in a chat that the channel is gone
         g_Serv.m_Chats.SendDeleteChannel(this);
     // Remove them from the channels list of members
     RemoveMember(pMember);
@@ -319,7 +319,7 @@ bool CChatChannel::AddMember(CChatChanMember * pMember)
 {
     ADDTOCALLSTACK("CChatChannel::AddMember");
     pMember->SetChannel(this);
-    m_Members.Add( pMember );
+    m_Members.push_back(pMember);
     // See if only moderators have a voice by default
     lpctstr pszName = pMember->GetChatName();
     if (!GetVoiceDefault() && !IsModerator(pszName))
@@ -332,7 +332,7 @@ bool CChatChannel::AddMember(CChatChanMember * pMember)
 void CChatChannel::SendMembers(CChatChanMember * pMember)
 {
     ADDTOCALLSTACK("CChatChannel::SendMembers");
-    for (size_t i = 0; i < m_Members.GetCount(); i++)
+    for (size_t i = 0; i < m_Members.size(); i++)
     {
         CSString sName;
         g_Serv.m_Chats.DecorateName(sName, m_Members[i]);
@@ -350,7 +350,7 @@ void CChatChannel::SendThisMember(CChatChanMember * pMember, CChatChanMember * p
     // If no particular member is specified in pToMember, then send it out to all members
     if (pToMember == NULL)
     {
-        for (size_t i = 0; i < m_Members.GetCount(); i++)
+        for (size_t i = 0; i < m_Members.size(); i++)
         {
             // Don't send out members if they are ignored by someone
             if (!m_Members[i]->IsIgnoring(pMember->GetChatName()))
@@ -369,18 +369,18 @@ void CChatChannel::SetVoice(lpctstr pszName, bool fFlag)
 {
     ADDTOCALLSTACK("CChatChannel::SetVoice");
     // See if they have no voice already
-    for (size_t i = 0; i < m_NoVoices.GetCount(); ++i)
+    for (size_t i = 0; i < m_NoVoices.size(); ++i)
     {
         if (m_NoVoices[i]->Compare(pszName) == 0)
         {
             if (fFlag == true)
-                m_NoVoices.RemoveAt(i);
+                m_NoVoices.erase(i);
             return;
         }
     }
     if (fFlag == false)
     {
-        m_NoVoices.Add( new CSString(pszName) );
+        m_NoVoices.push_back(new CSString(pszName));
         return;
     }
 }
@@ -423,7 +423,7 @@ void CChatChannel::Broadcast(CHATMSG_TYPE iType, lpctstr pszName, lpctstr pszTex
     else
         sName = pszName;
 
-    for (size_t i = 0; i < m_Members.GetCount(); i++)
+    for (size_t i = 0; i < m_Members.size(); i++)
     {
         // Check to see if the recipient is ignoring messages from the sender
         // Just pass over it if it's a regular talk message
@@ -496,7 +496,7 @@ void CChatChannel::ToggleVoice(CChatChanMember * pByMember, lpctstr pszName)
 size_t CChatChannel::FindMemberIndex(lpctstr pszName) const
 {
     ADDTOCALLSTACK("CChatChannel::FindMemberIndex");
-    for (size_t i = 0; i < m_Members.GetCount(); i++)
+    for (size_t i = 0; i < m_Members.size(); i++)
     {
         if ( strcmp( m_Members[i]->GetChatName(), pszName) == 0)
             return i;

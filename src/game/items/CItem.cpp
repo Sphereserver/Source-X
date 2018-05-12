@@ -3356,7 +3356,7 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 
 		//	2) EVENTS
 		EXC_SET("events");
-		size_t origEvents = m_OEvents.GetCount();
+		size_t origEvents = m_OEvents.size();
 		size_t curEvents = origEvents;
 		for ( size_t i = 0; i < curEvents; ++i )			//	2) EVENTS (could be modified ingame!)
 		{
@@ -3371,7 +3371,7 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 			if ( iRet != TRIGRET_RET_FALSE && iRet != TRIGRET_RET_DEFAULT )
 				goto stopandret;//return iRet;
 
-			curEvents = m_OEvents.GetCount();
+			curEvents = m_OEvents.size();
 			if ( curEvents < origEvents ) // the event has been deleted, modify the counter for other trigs to work
 			{
 				--i;
@@ -3381,7 +3381,7 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 
 		// 3) TEVENTS on the item
 		EXC_SET("tevents");
-		for ( size_t i = 0; i < pItemDef->m_TEvents.GetCount(); ++i )
+		for ( size_t i = 0; i < pItemDef->m_TEvents.size(); ++i )
 		{
 			CResourceLink * pLink = pItemDef->m_TEvents[i];
 			ASSERT(pLink);
@@ -3397,7 +3397,7 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 
 		// 4) EVENTSITEM triggers
 		EXC_SET("Item triggers - EVENTSITEM"); // EVENTSITEM (constant events of Items set from sphere.ini)
-		for ( size_t i = 0; i < g_Cfg.m_iEventsItemLink.GetCount(); ++i )
+		for ( size_t i = 0; i < g_Cfg.m_iEventsItemLink.size(); ++i )
 		{
 			CResourceLink * pLink = g_Cfg.m_iEventsItemLink[i];
 			if ( !pLink || !pLink->HasTrigger(iAction) )
@@ -3529,7 +3529,7 @@ TRIGRET_TYPE CItem::OnTriggerCreate( CTextConsole * pSrc, CScriptTriggerArgs * p
 	{
 		// 3) TEVENTS on the item
 		EXC_SET("tevents");
-		for ( size_t i = 0; i < pItemDef->m_TEvents.GetCount(); ++i )
+		for ( size_t i = 0; i < pItemDef->m_TEvents.size(); ++i )
 		{
 			CResourceLink * pLink = pItemDef->m_TEvents[i];
 			ASSERT(pLink);
@@ -3545,7 +3545,7 @@ TRIGRET_TYPE CItem::OnTriggerCreate( CTextConsole * pSrc, CScriptTriggerArgs * p
 
 		// 4) EVENTSITEM triggers
 		EXC_SET("Item triggers - EVENTSITEM"); // EVENTSITEM (constant events of Items set from sphere.ini)
-		for ( size_t i = 0; i < g_Cfg.m_iEventsItemLink.GetCount(); ++i )
+		for ( size_t i = 0; i < g_Cfg.m_iEventsItemLink.size(); ++i )
 		{
 			CResourceLink * pLink = g_Cfg.m_iEventsItemLink[i];
 			if ( !pLink || !pLink->HasTrigger(iAction) )
@@ -3730,7 +3730,7 @@ void CItem::DupeCopy( const CItem * pItem )
 
 	m_TagDefs.Copy(&(pItem->m_TagDefs));
 	m_BaseDefs.Copy(&(pItem->m_BaseDefs));
-	m_OEvents.Copy(&(pItem->m_OEvents));
+	m_OEvents = pItem->m_OEvents;
     static_cast<CEntity*>(this)->Copy(static_cast<CEntity*>(const_cast<CItem*>(pItem)));
 }
 
@@ -3875,7 +3875,7 @@ void CItem::ConvertBolttoCloth()
 
 	// Prevent the action if there's no resources to be created
 	CItemBase * pDefCloth = Item_GetDef();
-	if ( ! pDefCloth || ! pDefCloth->m_BaseResources.GetCount() )
+	if ( ! pDefCloth || !pDefCloth->m_BaseResources.size() )
 		return;
 
 	// Start the conversion
@@ -3883,7 +3883,7 @@ void CItem::ConvertBolttoCloth()
 	CItemContainer * pCont = dynamic_cast <CItemContainer*> ( GetContainer() );
 	Delete();
 
-	for ( size_t i = 0; i < pDefCloth->m_BaseResources.GetCount(); i++ )
+	for ( size_t i = 0; i < pDefCloth->m_BaseResources.size(); i++ )
 	{
 		CResourceID rid = pDefCloth->m_BaseResources[i].GetResourceID();
 		if ( rid.GetResType() != RES_ITEMDEF )
@@ -3951,7 +3951,7 @@ SPELL_TYPE CItem::GetScrollSpell() const
 {
 	ADDTOCALLSTACK("CItem::GetScrollSpell");
 	// Given a scroll type. what spell is this ?
-	for (size_t i = SPELL_Clumsy; i < g_Cfg.m_SpellDefs.GetCount(); i++)
+	for (size_t i = SPELL_Clumsy; i < g_Cfg.m_SpellDefs.size(); i++)
 	{
 		const CSpellDef * pSpellDef = g_Cfg.GetSpellDef((SPELL_TYPE)i);
 		if ( pSpellDef == NULL || pSpellDef->m_idScroll == ITEMID_NOTHING )

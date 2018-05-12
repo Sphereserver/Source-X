@@ -183,12 +183,12 @@ public:
 struct CValueCurveDef
 {
 public:
-	CSTypedArray<int,int> m_aiValues;		// 0 to 100.0 skill levels
+	CSTypedArray<int> m_aiValues;		// 0 to 100.0 skill levels
 
 public:
 	void Init()
 	{
-		m_aiValues.Clear();
+        m_aiValues.clear();
 	}
 
     /**
@@ -1137,8 +1137,8 @@ public:
 	CSObjArray< CSString* > m_Karma;    // karma titles (karma.wicked).
 	CSObjArray< CSString* > m_Runes;    // Words of power (A-Z).
 
-	CSTypedArray< int, int > m_NotoKarmaLevels;		// karma levels for noto titles.
-	CSTypedArray< int, int > m_NotoFameLevels;		// fame levels for noto titles.
+	CSTypedArray<int> m_NotoKarmaLevels;		// karma levels for noto titles.
+	CSTypedArray<int> m_NotoFameLevels;		// fame levels for noto titles.
 	CSObjArray< CSString* >  m_NotoTitles;			// Noto titles.
 
 	CMultiDefArray m_MultiDefs;		// read from the MUL files. Cached here on demand.
@@ -1158,7 +1158,7 @@ public:
 	// static definition stuff from *TABLE.SCP mostly.
 	CSObjArray< const CStartLoc* > m_StartDefs;			// Start points list
 	CValueCurveDef m_StatAdv[STAT_BASE_QTY];			// "skill curve"
-	CSTypedArray<CPointMap,CPointMap&> m_MoonGates;	// The array of moongates.
+	CSTypedArray<CPointMap> m_MoonGates;	// The array of moongates.
 
 	CResourceHashArray m_WebPages;		// These can be linked back to the script.
 

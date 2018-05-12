@@ -2221,7 +2221,7 @@ bool CChar::Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool 
 					{
 						if ( fFailMsg )
 						{
-							CResourceDef * pReagDef = g_Cfg.ResourceGetDef( pRegs->GetAt(iMissing).GetResourceID() );
+							CResourceDef * pReagDef = g_Cfg.ResourceGetDef(pRegs->at(iMissing).GetResourceID() );
 							SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_SPELL_TRY_NOREGS ), pReagDef ? pReagDef->GetName() : g_Cfg.GetDefaultMsg( DEFMSG_SPELL_TRY_THEREG ) );
 						}
 						return false;

@@ -64,7 +64,7 @@ public:
 		TResponseString& operator=( const TResponseString& other );
 	};
 
-	CSTypedArray<dword, dword>		m_CheckArray;
+	CSTypedArray<dword>		m_CheckArray;
 	CSObjArray<TResponseString *>	m_TextArray;
 public:
 	void AddText( word id, lpctstr pszText );

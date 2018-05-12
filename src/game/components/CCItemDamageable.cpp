@@ -9,7 +9,7 @@ CCItemDamageable::CCItemDamageable(CObjBase * pLink) : CComponent(COMP_ITEMDAMAG
 {
     _iCurHits = 0;
     _iMaxHits = 0;
-    g_World.m_ObjStatusUpdates.Add(pLink);
+    g_World.m_ObjStatusUpdates.push_back(pLink);
 }
 
 CCItemDamageable::~CCItemDamageable()

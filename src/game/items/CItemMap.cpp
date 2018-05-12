@@ -11,11 +11,11 @@ bool CItemMap::IsSameType(const CObjBase *pObj) const
     if ( pItemMap )
     {
         // Maps can only stack on top of each other if the pins match
-        if ( m_Pins.GetCount() != pItemMap->m_Pins.GetCount() )
+        if (m_Pins.size() != pItemMap->m_Pins.size() )
             return false;
 
         // Check individual pins in the same place
-        for ( size_t i = 0; i < m_Pins.GetCount(); i++ )
+        for ( size_t i = 0; i < m_Pins.size(); i++ )
         {
             if ( m_Pins[i].m_x != pItemMap->m_Pins[i].m_x )
                 return false;
@@ -36,7 +36,7 @@ bool CItemMap::r_LoadVal(CScript & s)	// load an item script
             CPointMap pntTemp;
             pntTemp.Read(s.GetArgStr());
             CMapPinRec pin(pntTemp.m_x, pntTemp.m_y);
-            m_Pins.Add(pin);
+            m_Pins.push_back(pin);
             return true;
         }
         return CItem::r_LoadVal(s);
@@ -54,7 +54,7 @@ bool CItemMap::r_WriteVal(lpctstr pszKey, CSString &sVal, CTextConsole *pSrc)
     EXC_TRY("WriteVal");
         if ( !strnicmp(pszKey, "PINS", 4) )
         {
-            sVal.FormatSTVal(m_Pins.GetCount());
+            sVal.FormatSTVal(m_Pins.size());
             return true;
         }
         if ( !strnicmp(pszKey, "PIN.", 4) )
@@ -80,7 +80,7 @@ void CItemMap::r_Write(CScript & s)
 {
     ADDTOCALLSTACK_INTENSIVE("CItemMap::r_Write");
     CItemVendable::r_Write(s);
-    for ( size_t i = 0; i < m_Pins.GetCount(); i++ )
+    for ( size_t i = 0; i < m_Pins.size(); i++ )
         s.WriteKeyFormat("PIN", "%i,%i", m_Pins[i].m_x, m_Pins[i].m_y);
 }
 
@@ -92,7 +92,7 @@ void CItemMap::DupeCopy(const CItem *pItem)
     const CItemMap *pMapItem = dynamic_cast<const CItemMap *>(pItem);
     if ( pMapItem == NULL )
         return;
-    m_Pins.Copy(&(pMapItem->m_Pins));
+    m_Pins = pMapItem->m_Pins;
 }
 
 CItemMap::CItemMap( ITEMID_TYPE id, CItemBase * pItemDef ) : CItemVendable( id, pItemDef ) {

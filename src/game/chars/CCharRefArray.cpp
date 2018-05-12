@@ -13,7 +13,7 @@ size_t CCharRefArray::FindChar( const CChar *pChar ) const
         return m_uidCharArray.BadIndex();
 
     CUID uid(pChar->GetUID());
-    size_t iQty = m_uidCharArray.GetCount();
+    size_t iQty = m_uidCharArray.size();
     for ( size_t i = 0; i < iQty; i++ )
     {
         if ( uid == m_uidCharArray[i] )
@@ -33,7 +33,7 @@ size_t CCharRefArray::AttachChar( const CChar *pChar )
     size_t i = FindChar(pChar);
     if ( i != m_uidCharArray.BadIndex() )
         return i;
-    return m_uidCharArray.Add(pChar->GetUID());
+    return m_uidCharArray.push_back(pChar->GetUID());
 }
 
 size_t CCharRefArray::InsertChar( const CChar *pChar, size_t i )
@@ -50,14 +50,14 @@ size_t CCharRefArray::InsertChar( const CChar *pChar, size_t i )
     if ( !IsValidIndex(i) )		// prevent from being inserted too high
         i = GetCharCount();
 
-    m_uidCharArray.InsertAt(i, pChar->GetUID() );
+    m_uidCharArray.insert(i, pChar->GetUID());
     return i;
 }
 
 void CCharRefArray::DetachChar( size_t i )
 {
     ADDTOCALLSTACK("CCharRefArray::DetachChar");
-    m_uidCharArray.RemoveAt(i);
+    m_uidCharArray.erase(i);
 }
 
 size_t CCharRefArray::DetachChar( const CChar *pChar )
@@ -72,21 +72,21 @@ size_t CCharRefArray::DetachChar( const CChar *pChar )
 void CCharRefArray::DeleteChars()
 {
     ADDTOCALLSTACK("CCharRefArray::DeleteChars");
-    size_t iQty = m_uidCharArray.GetCount();
+    size_t iQty = m_uidCharArray.size();
     while ( iQty > 0 )
     {
         CChar *pChar = m_uidCharArray[--iQty].CharFind();
         if ( pChar )
             pChar->Delete();
     }
-    m_uidCharArray.Clear();
+    m_uidCharArray.clear();
 }
 
 
 void CCharRefArray::WritePartyChars( CScript &s )
 {
     ADDTOCALLSTACK("CCharRefArray::WritePartyChars");
-    size_t iQty = m_uidCharArray.GetCount();
+    size_t iQty = m_uidCharArray.size();
     for ( size_t j = 0; j < iQty; j++ )		// write out links to all my chars
         s.WriteKeyHex("CHARUID", m_uidCharArray[j]);
 }

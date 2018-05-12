@@ -17,7 +17,7 @@ class CCharRefArray
 {
 private:
 	// List of Players and NPC's involved in the quest/party/account etc..
-	CSTypedArray<CUID, CUID> m_uidCharArray;
+	CSTypedArray<CUID> m_uidCharArray;
 
 public:
 	static const char *m_sClassName;
@@ -30,7 +30,7 @@ public:
 	void DeleteChars();
 	inline size_t GetCharCount() const
 	{
-		return m_uidCharArray.GetCount();
+		return m_uidCharArray.size();
 	}
 	inline CUID GetChar( size_t i ) const
 	{

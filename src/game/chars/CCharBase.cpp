@@ -119,7 +119,7 @@ void CCharBase::SetFoodType( lpctstr pszFood )
 
   	// Try to determine the real value
 	m_MaxFood = 0;
-	for ( size_t i = 0; i < m_FoodType.GetCount(); i++ )
+	for ( size_t i = 0; i < m_FoodType.size(); i++ )
 	{
 		if ( m_MaxFood < m_FoodType[i].GetResQty())
 			m_MaxFood = (short)(m_FoodType[i].GetResQty());

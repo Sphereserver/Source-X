@@ -50,7 +50,7 @@ const tchar * CValueCurveDef::Write() const
 	ADDTOCALLSTACK("CValueCurveDef::Write");
 	tchar * pszOut = Str_GetTemp();
 	size_t j = 0;
-	size_t iQty = m_aiValues.GetCount();
+	size_t iQty = m_aiValues.size();
 	for ( size_t i = 0; i < iQty; i++ )
 	{
 		if ( i > 0 )
@@ -68,7 +68,7 @@ bool CValueCurveDef::Load( tchar * pszDef )
 	// ADV_RATE = Chance at 0, to 100.0
 	int64 Arg_piCmd[101];
 	size_t iQty = Str_ParseCmds( pszDef, Arg_piCmd, CountOf(Arg_piCmd));
-	m_aiValues.SetCount( iQty );
+	m_aiValues.resize(iQty);
 	if ( iQty == 0 )
 	{
 		return false;
@@ -94,7 +94,7 @@ int CValueCurveDef::GetLinear( int iSkillPercent ) const
 	int iSegSize;
 	int iLoIdx;
 
-	int iQty = (int)m_aiValues.GetCount();
+	int iQty = (int) m_aiValues.size();
 	switch (iQty)
 	{
 	case 0:
@@ -614,7 +614,7 @@ CSpellDef::CSpellDef( SPELL_TYPE id ) :
 	m_wTithingUse = 0;
 	m_CastTime.Init();
 	m_Interrupt.Init();
-	m_Interrupt.m_aiValues.SetCount( 1 );
+	m_Interrupt.m_aiValues.resize(1);
 	m_Interrupt.m_aiValues[0] = 1000;
 }
 
@@ -867,7 +867,7 @@ int CSRandGroupDef::CalcTotalWeight()
 {
 	ADDTOCALLSTACK("CSRandGroupDef::CalcTotalWeight");
 	int iTotal = 0;
-	size_t iQty = m_Members.GetCount();
+	size_t iQty = m_Members.size();
 	for ( size_t i = 0; i < iQty; i++ )
 	{
 		iTotal += (int)(m_Members[i].GetResQty());
@@ -908,7 +908,7 @@ bool CSRandGroupDef::r_LoadVal( CScript &s )
 					g_Cfg.ResourceGetID(RES_CHARDEF, const_cast<lpctstr &>(reinterpret_cast<lptstr &>(ppCmd[0]))),
 					( iArgs > 1 && ppCmd[1][0] ) ? Exp_GetVal(ppCmd[1]) : 1 );
 				m_iTotalWeight += (int)(rec.GetResQty());
-				m_Members.Add(rec);
+                m_Members.push_back(rec);
 			}
 			break;
 
@@ -918,10 +918,10 @@ bool CSRandGroupDef::r_LoadVal( CScript &s )
 			break;
 
 		case RGC_WEIGHT: // Modify the weight of the last item.
-			if ( m_Members.GetCount() > 0 )
+			if (m_Members.size() > 0 )
 			{
 				int iWeight = s.GetArgVal();
-				m_Members[m_Members.GetCount() - 1].SetResQty(iWeight);
+				m_Members[m_Members.size() - 1].SetResQty(iWeight);
 				CalcTotalWeight();
 			}
 			break;
@@ -996,7 +996,7 @@ bool CSRandGroupDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * 
 
 				if ( !strnicmp( pszKey, "COUNT", 5 ))
 				{
-					sVal.FormatSTVal(m_Members.GetCount());
+					sVal.FormatSTVal(m_Members.size());
 				}
 				else
 				{
@@ -1043,7 +1043,7 @@ size_t CSRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool bTrigger ) con
 {
 	ADDTOCALLSTACK("CSRandGroupDef::GetRandMemberIndex");
 	int rid;
-	size_t iCount = m_Members.GetCount();
+	size_t iCount = m_Members.size();
 	if ( iCount <= 0 )
 		return m_Members.BadIndex();
 
@@ -1086,11 +1086,11 @@ size_t CSRandGroupDef::GetRandMemberIndex( CChar * pCharSrc, bool bTrigger ) con
 				}
 			}
 		}
-		members.Add(i);
+        members.push_back(i);
 		iTotalWeight += (int)(m_Members[i].GetResQty());
 	}
 	iWeight = Calc_GetRandVal( iTotalWeight ) + 1;
-	iCount = members.GetCount();
+	iCount = members.size();
 
 	for ( i = 0; iWeight > 0 && i < iCount; i++ )
 	{

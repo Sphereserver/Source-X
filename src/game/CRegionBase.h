@@ -17,7 +17,7 @@ public:
 	static const char *m_sClassName;
 
 	CRectMap m_rectUnion;	// The union rectangle.
-	CSTypedArray<CRectMap, const CRectMap&> m_Rects;
+	CSTypedArray<CRectMap> m_Rects;
 
 	bool IsRegionEmpty() const
 	{
@@ -26,7 +26,7 @@ public:
 	void EmptyRegion()
 	{
 		m_rectUnion.SetRectEmpty();
-		m_Rects.Clear();
+        m_Rects.clear();
 	}
 	size_t GetRegionRectCount() const;
     CRectMap & GetRegionRect(size_t i);

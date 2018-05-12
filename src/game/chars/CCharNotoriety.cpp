@@ -319,15 +319,15 @@ int CChar::Noto_GetLevel() const
 
 	size_t i = 0;
 	short iKarma = Stat_GetAdjusted(STAT_KARMA);
-	for ( ; i < g_Cfg.m_NotoKarmaLevels.GetCount() && iKarma < g_Cfg.m_NotoKarmaLevels.GetAt(i); i++ )
+	for ( ; i < g_Cfg.m_NotoKarmaLevels.size() && iKarma < g_Cfg.m_NotoKarmaLevels.at(i); i++ )
 		;
 
 	size_t j = 0;
 	short iFame = Stat_GetAdjusted(STAT_FAME);
-	for ( ; j < g_Cfg.m_NotoFameLevels.GetCount() && iFame > g_Cfg.m_NotoFameLevels.GetAt(j); j++ )
+	for ( ; j < g_Cfg.m_NotoFameLevels.size() && iFame > g_Cfg.m_NotoFameLevels.at(j); j++ )
 		;
 
-	return (int)( ( i * (g_Cfg.m_NotoFameLevels.GetCount() + 1) ) + j );
+	return (int)( ( i * (g_Cfg.m_NotoFameLevels.size() + 1) ) + j );
 }
 
 lpctstr CChar::Noto_GetTitle() const

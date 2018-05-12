@@ -2329,7 +2329,7 @@ blank_map:
 
 	// Now show all the pins
 	PacketMapPlot plot(pMap, MAP_ADD, false);
-	for ( size_t i = 0; i < pMap->m_Pins.GetCount(); i++ )
+	for ( size_t i = 0; i < pMap->m_Pins.size(); i++ )
 	{
 		plot.setPin(pMap->m_Pins[i].m_x, pMap->m_Pins[i].m_y);
 		plot.send(this);
