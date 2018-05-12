@@ -962,10 +962,10 @@ void CItemMulti::GenerateBaseComponents(bool & fNeedKey, dword &dwKeyCode)
 {
     ASSERT("CItemMulti::GenerateBaseComponents");
     const CItemBaseMulti * pMultiDef = Multi_GetDef();
-    size_t iQty = pMultiDef->m_Components.GetCount();
+    size_t iQty = pMultiDef->m_Components.size();
     for (size_t i = 0; i < iQty; i++)
     {
-        const CItemBaseMulti::CMultiComponentItem &component = pMultiDef->m_Components.ElementAt(i);
+        const CItemBaseMulti::CMultiComponentItem &component = pMultiDef->m_Components.at(i);
         fNeedKey |= Multi_CreateComponent(component.m_id, component.m_dx, component.m_dy, component.m_dz, dwKeyCode, IsAddon());
     }
 }
