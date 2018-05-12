@@ -893,3 +893,9 @@ to the new system, each ship system should be updated according to it's behaviou
 
 Houses and Ships:
 Added a new ITEMDEF property MultiCount. Setting it to 0 will add no value towards the house limit (the house will be still present but not counted) and setting it to 3 (eg for castles) will count more for placement checks, etc
+
+Cleaned up multi's placement checks and commented them.
+Updated the checks too to work OSI like:
+ - No chars can be inside the multi's rectangle.
+ - The multi must have nothing blocking it in a +1 radius of its base rectangle
+ - Additionally a +5 tiles check must be done on Top and Bottom preventing this house to block the entry of others (or the others to block this).

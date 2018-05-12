@@ -1930,6 +1930,10 @@ CItemMulti *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, C
 
     const CItemBaseMulti * pMultiDef = dynamic_cast <const CItemBaseMulti *> (pItemDef);
     bool fShip = pItemDef->IsType(IT_SHIP);	// must be in water.
+
+    /*
+    * First thing to do is to check if the character creating the multi is allowed to have it
+    */
     if (fShip)
     {
         if (!pChar->GetMultiStorage()->CanAddShip(pChar, pMultiDef->_iMultiCount))
@@ -1945,76 +1949,27 @@ CItemMulti *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, C
         }
     }
 
-    // Check water/mountains/etc.
+    /*
+    * There is a small difference in the coordinates where the mouse is in the screen and the ones received,
+    * let's remove that difference.
+    * Note: this fix is added here, before GM check, because otherwise they will place houses on wrong position.
+    */
+    if (CItemBase::IsID_Multi(pItemDef->GetID()) || pMultiDef->IsType(IT_MULTI_ADDON))  
+    {
+        pt.m_y -= (short)(pMultiDef->m_rect.m_bottom - 1);
+        pt.m_x += 1;
+    }
+
     if (!pChar->IsPriv(PRIV_GM))
     {
         if ((pMultiDef != nullptr) && !(pDeed->IsAttr(ATTR_MAGIC)))
         {
-            //if ( pMultiDef->m_rect.m_bottom > 0 && (pMultiDef->IsType(IT_MULTI) || pMultiDef->IsType(IT_MULTI_CUSTOM)) )
-            if (CItemBase::IsID_Multi(pItemDef->GetID()) || pMultiDef->IsType(IT_MULTI_ADDON))
-            {
-                pt.m_y -= (short)(pMultiDef->m_rect.m_bottom - 1);
-                pt.m_x += 1;
-            }
+            CRect rect = pMultiDef->m_rect; // Create a rect equal to the multi's one.
+            rect.m_map = pt.m_map;          // set it's map to the current map.
+            rect.OffsetRect(pt.m_x, pt.m_y);// fill the rect.
+            CPointMap ptn = pt;             // A copy to work on.
 
-            // Check for items in the way and bumpy terrain.
-
-            CRect rect = pMultiDef->m_rect;
-            rect.m_map = pt.m_map;
-            rect.m_top -= 2;
-            rect.m_right += 2;
-            rect.m_left -= 2;
-            rect.m_bottom += 2;
-            rect.OffsetRect(pt.m_x, pt.m_y);
-            CPointMap ptn = pt;
-
-            int x = rect.m_left;
-            for (; x < rect.m_right; ++x)
-            {
-                ptn.m_x = (short)x;
-                int y = rect.m_top;
-                for (; y < rect.m_bottom; ++y)
-                {
-                    ptn.m_y = (short)y;
-
-                    if (!ptn.IsValidPoint())
-                    {
-                        pChar->SysMessageDefault(DEFMSG_ITEMUSE_MULTI_FAIL);
-                        return nullptr;
-                    }
-
-                    CRegion * pRegion = ptn.GetRegion(REGION_TYPE_MULTI | REGION_TYPE_AREA | REGION_TYPE_ROOM);
-                    if ((pRegion == nullptr) || (pRegion->IsFlag(REGION_FLAG_NOBUILDING) && !fShip))
-                    {
-                        pChar->SysMessageDefault(DEFMSG_ITEMUSE_MULTI_FAIL);
-                        return nullptr;
-                    }
-
-                    dword dwBlockFlags = (fShip) ? CAN_C_SWIM : CAN_C_WALK;
-                    ptn.m_z = g_World.GetHeightPoint2(ptn, dwBlockFlags, true); //hm...should really use the 2nd function ? it does fixed #2373
-                    if (abs(ptn.m_z - pt.m_z) > 4)
-                    {
-                        pChar->SysMessageDefault(DEFMSG_ITEMUSE_MULTI_BUMP);
-                        return nullptr;
-                    }
-                    if (fShip)
-                    {
-                        if (!(dwBlockFlags & CAN_I_WATER))
-                        {
-                            pChar->SysMessageDefault(DEFMSG_ITEMUSE_MULTI_SHIPW);
-                            return nullptr;
-                        }
-                    }
-                    else if (dwBlockFlags & (CAN_I_WATER | CAN_I_BLOCK | CAN_I_CLIMB))
-                    {
-                        pChar->SysMessageDefault(DEFMSG_ITEMUSE_MULTI_BLOCKED);
-                        return nullptr;
-                    }
-                }
-            }
-
-            // Check for chars in the way.
-
+            // Check for chars in the way, just search for any char in the house area, no extra tiles, it's enough for them to do not be inside the house.
             CWorldSearch Area(pt, maximum(rect.GetWidth(), rect.GetHeight()));
             Area.SetSearchSquare(true);
             for (;;)
@@ -2024,17 +1979,110 @@ CItemMulti *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, C
                 {
                     break;
                 }
-                if (!rect.IsInside2d(pCharSearch->GetTopPoint()))
+                if (!rect.IsInside2d(pCharSearch->GetTopPoint()))   // if the char is not inside the rec, ignore him.
                 {
                     continue;
                 }
-                if (pCharSearch->IsPriv(PRIV_GM) && !pChar->CanSee(pCharSearch))
+                if (pCharSearch->IsPriv(PRIV_GM) && !pChar->CanSee(pCharSearch)) // There is a GM in my way? get through him!
                 {
                     continue;
                 }
 
-                pChar->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_MULTI_INTWAY), pCharSearch->GetName());
+                pChar->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_MULTI_INTWAY), pCharSearch->GetName()); // Did not met any of the above exceptions so i'm blocking the placement, return.
                 return nullptr;
+            }
+
+            /* Char's check passed.
+            * Intensive checks are done now:
+            *   - The area of search gets increased by 1 tile: There must be no blocking items from a 1x1 gap outside the house.
+            *   - All coord points inside that rect must be valid and have, as much, a Z difference of +-4.
+            */
+            rect.m_top -= 1;    // 1 tile at each side to leave a gap between houses, checking also that this gap doesn't have any blocking object
+            rect.m_right += 1;
+            rect.m_left -= 1;   
+            rect.m_bottom += 1;
+            int x = rect.m_left;
+
+            /*
+            * Loop through all the positions of the rect.
+            */
+            for (; x < rect.m_right; ++x)   // X loop
+            {
+                // Setting the Top-Left point of the CRect*
+                ptn.m_x = (short)x; // *point Left
+                int y = rect.m_top; // Reset North for each loop.
+                for (; y < rect.m_bottom; ++y)  // Y loop
+                {
+                    ptn.m_y = (short)y; // *point North
+
+                    if (!ptn.IsValidPoint())    // Invalid point (out of map bounds).
+                    {
+                        pChar->SysMessageDefault(DEFMSG_ITEMUSE_MULTI_FAIL);
+                        return nullptr;
+                    }
+
+                    dword dwBlockFlags = (fShip) ? CAN_C_SWIM : CAN_C_WALK; // Flags to check: Ships should check for swimable tiles.
+                    /*
+                    * Intensive check returning the top Z point of the given X, Y coords
+                    * It uses the dwBlockBlacks passed to check the new Z level.
+                    * Also update those dwBlockFlags with all the flags found at the given location.
+                    * 3rd param is set to also update Z with any house component found in the proccess.
+                    */
+                    ptn.m_z = g_World.GetHeightPoint2(ptn, dwBlockFlags, true);
+                    if (abs(ptn.m_z - pt.m_z) > 4)  // Difference of Z > 4? so much, stop.
+                    {
+                        pChar->SysMessageDefault(DEFMSG_ITEMUSE_MULTI_BUMP);
+                        return nullptr;
+                    }
+                    if (fShip)
+                    {
+                        if (!(dwBlockFlags & CAN_I_WATER))  // Ships must be placed on water.
+                        {
+                            pChar->SysMessageDefault(DEFMSG_ITEMUSE_MULTI_SHIPW);
+                            return nullptr;
+                        }
+                    }
+                    else if (dwBlockFlags & (CAN_I_WATER | CAN_I_BLOCK | CAN_I_CLIMB))  // Did the intensive check find some undesired flags? Stop.
+                    {
+                        pChar->SysMessageDefault(DEFMSG_ITEMUSE_MULTI_BLOCKED);
+                        return nullptr;
+                    }
+                }
+            }     
+
+
+
+            /*
+            * The above loop did not find any blocking item/char, now another loop is done to check for another multis with extended limitations:
+            * You can't place your house within a range of 5 tiles bottom of the stairs of any house.
+            * Additionally your house can't have it's bottom blocked by another multi in a 5 tiles margin.
+            * Simplifying it: the Rect must have an additional +5 tiles of radious on both TOP and BOTTOM points.
+            */
+            rect.m_top -= 4; // 1 was already added before, so a +4 now is enough.
+            rect.m_bottom += 4;
+            
+            x = rect.m_left;
+            for (; x < rect.m_right; ++x)
+            {
+                ptn.m_x = (short)x;
+                int y = rect.m_top;
+                for (; y < rect.m_bottom; ++y)
+                {
+                    ptn.m_y = (short)y;
+                    /*
+                    * Search for any multi region on that point.
+                    */
+                    CRegion * pRegion = ptn.GetRegion(REGION_TYPE_MULTI | REGION_TYPE_AREA | REGION_TYPE_ROOM); 
+                    /*
+                    * If there is no region on that point (invalid point?) or the region has the NOBUILDING flag, stop
+                    * Ships are allowed to bypass this check??
+                    */
+                    if ((pRegion == nullptr) || (pRegion->IsFlag(REGION_FLAG_NOBUILDING) && !fShip))
+                    {
+                        pChar->SysMessageDefault(DEFMSG_ITEMUSE_MULTI_FAIL);
+                        return nullptr;
+                    }
+                }
             }
         }
     }
