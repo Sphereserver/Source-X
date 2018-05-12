@@ -99,52 +99,6 @@ public:
 
 /* Template methods (inlined or not) are defined here */
 
-// CSPtrTypeArray:: Modifiers.
-
-template<class TYPE>
-bool CSPtrTypeArray<TYPE>::RemovePtr( TYPE pData )
-{
-	size_t nIndex = FindPtr( pData );
-	if ( nIndex == this->BadIndex() )
-		return false;
-
-	ASSERT( IsValidIndex(nIndex) );
-    this->RemoveAt(nIndex);
-	return true;
-}
-
-template<class TYPE>
-bool CSPtrTypeArray<TYPE>::ContainsPtr( TYPE pData ) const
-{
-	size_t nIndex = FindPtr(pData);
-	ASSERT((nIndex == this->BadIndex()) || IsValidIndex(nIndex));
-	return nIndex != this->BadIndex();
-}
-
-template<class TYPE>
-size_t CSPtrTypeArray<TYPE>::FindPtr( TYPE pData ) const
-{
-	if ( !pData )
-		return this->BadIndex();
-
-	for ( size_t nIndex = 0; nIndex < this->GetCount(); ++nIndex )
-	{
-		if ( this->GetAt(nIndex) == pData )
-			return nIndex;
-	}
-
-	return this->BadIndex();
-}
-
-template<class TYPE>
-bool CSPtrTypeArray<TYPE>::IsValidIndex( size_t i ) const
-{
-	if ( i >= this->GetCount() )
-		return false;
-	return ( this->GetAt(i) != NULL );
-}
-
-
 // CSObjArray:: Modifiers.
 
 template<class TYPE>
@@ -162,7 +116,7 @@ size_t CSObjSortArray<TYPE,KEY_TYPE>::AddPresorted( size_t index, int iCompareRe
 	if ( iCompareRes > 0 )
 		++index;
 
-    this->InsertAt(index, pNew);
+	this->insert(index, pNew);
 	return index;
 }
 
@@ -175,7 +129,7 @@ size_t CSObjSortArray<TYPE, KEY_TYPE>::AddSortKey( TYPE pNew, KEY_TYPE key )
 	if ( iCompareRes == 0 )
 	{
 		// duplicate should not happen ?!?
-        this->SetAt(index, pNew);
+		this->assign(index, pNew);
 		return index;
 	}
 	return AddPresorted(index, iCompareRes, pNew);
@@ -184,7 +138,7 @@ size_t CSObjSortArray<TYPE, KEY_TYPE>::AddSortKey( TYPE pNew, KEY_TYPE key )
 template<class TYPE,class KEY_TYPE>
 inline void CSObjSortArray<TYPE,KEY_TYPE>::DeleteKey( KEY_TYPE key )
 {
-	RemoveAt(FindKey(key));
+	erase(FindKey(key));
 }
 
 // CSObjSortArray:: Operations.
@@ -215,20 +169,20 @@ size_t CSObjSortArray<TYPE, KEY_TYPE>::FindKeyNear( KEY_TYPE key, int & iCompare
 	//		-1 = key should be less than index.
 	//		+1 = key should be greater than index
 	//
-	if ( this->GetCount() <= 0 )
+	if (this->size() <= 0 )
 	{
 		iCompareRes = -1;
 		return 0;
 	}
 
-	size_t iHigh = this->GetCount() - 1;
+	size_t iHigh = this->size() - 1;
 	size_t iLow = 0;
 	size_t i = 0;
 
 	while ( iLow <= iHigh )
 	{
 		i = (iHigh + iLow) >> 1;
-		iCompareRes = CompareKey( key, this->GetAt(i), fNoSpaces );
+		iCompareRes = CompareKey( key, this->at(i), fNoSpaces );
 		if ( iCompareRes == 0 )
 			break;
 		if ( iCompareRes > 0 )

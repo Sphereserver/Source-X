@@ -869,24 +869,24 @@ bool PacketMapEdit::onReceive(NetState* net)
 	{
 		case MAP_ADD: // add pin
 		{
-			if (map->m_Pins.GetCount() > CItemMap::MAX_PINS)
+			if (map->m_Pins.size() > CItemMap::MAX_PINS)
 				return true;
 
 			CMapPinRec mapPin(x, y);
-			map->m_Pins.Add(mapPin);
+			map->m_Pins.push_back(mapPin);
 		} break;
 
 		case MAP_INSERT: // insert between 2 pins
 		{
-			if (map->m_Pins.GetCount() > CItemMap::MAX_PINS)
+			if (map->m_Pins.size() > CItemMap::MAX_PINS)
 				return true;
 
 			CMapPinRec mapPin(x, y);
-			map->m_Pins.InsertAt(pin, mapPin);
+			map->m_Pins.insert(pin, mapPin);
 		} break;
 
 		case MAP_MOVE: // move pin
-			if (pin >= map->m_Pins.GetCount())
+			if (pin >= map->m_Pins.size())
 			{
 				client->SysMessage("That's strange... (bad pin)");
 				return true;
@@ -896,16 +896,16 @@ bool PacketMapEdit::onReceive(NetState* net)
 			break;
 
 		case MAP_DELETE: // delete pin
-			if (pin >= map->m_Pins.GetCount())
+			if (pin >= map->m_Pins.size())
 			{
 				client->SysMessage("That's strange... (bad pin)");
 				return true;
 			}
-			map->m_Pins.RemoveAt(pin);
+			map->m_Pins.erase(pin);
 			break;
 
 		case MAP_CLEAR: // clear all pins
-			map->m_Pins.Clear();
+			map->m_Pins.clear();
 			break;
 
 		case MAP_TOGGLE: // edit req/cancel
@@ -2226,7 +2226,7 @@ bool PacketGumpDialogRet::onReceive(NetState* net)
 
 	// store the returned checked boxes' ids for possible later use
 	for (size_t i = 0; i < checkCount; i++)
-		resp.m_CheckArray.Add(readInt32());
+		resp.m_CheckArray.push_back(readInt32());
 
 
 	dword textCount = readInt32();

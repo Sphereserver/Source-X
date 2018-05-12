@@ -21,7 +21,7 @@ extern "C"
 
 size_t CAccounts::Account_GetCount() const
 {
-	return m_Accounts.GetCount();
+	return m_Accounts.size();
 }
 
 bool CAccounts::Account_Load( lpctstr pszNameRaw, CScript & s, bool fChanges )
@@ -143,7 +143,7 @@ bool CAccounts::Account_SaveAll()
 		"// Any file changes must be made to " SPHERE_FILE "accu" SPHERE_SCRIPT ". This is read in at save time.\n",
 		g_Serv.GetName());
 
-	for ( size_t i = 0; i < m_Accounts.GetCount(); i++ )
+	for ( size_t i = 0; i < m_Accounts.size(); i++ )
 	{
 		CAccountRef pAccount = Account_Get(i);
 		if ( pAccount )
@@ -159,7 +159,7 @@ bool CAccounts::Account_SaveAll()
 CAccountRef CAccounts::Account_FindChat( lpctstr pszChatName )
 {
 	ADDTOCALLSTACK("CAccounts::Account_FindChat");
-	for ( size_t i = 0; i < m_Accounts.GetCount(); i++ )
+	for ( size_t i = 0; i < m_Accounts.size(); i++ )
 	{
 		CAccountRef pAccount = Account_Get(i);
 		if ( pAccount != NULL && pAccount->m_sChatName.CompareNoCase(pszChatName) == 0 )
@@ -565,6 +565,7 @@ CAccount::CAccount( lpctstr pszName, bool fGuest )
     SetResDisp(RDS_T2A);
 	m_MaxChars = 0;
     _iMaxHouses = g_Cfg._iMaxHousesAccount;
+    _iMaxShips = g_Cfg._iMaxShipsAccount;
 
 	m_Total_Connect_Time = 0;
 	m_Last_Connect_Time = 0;
@@ -1438,6 +1439,10 @@ void CAccount::r_Write(CScript &s)
     if (_iMaxHouses != g_Cfg._iMaxHousesAccount)
     {
         s.WriteKeyVal("MaxHouses", _iMaxHouses);
+    }
+    if (_iMaxShips != g_Cfg._iMaxShipsAccount)
+    {
+        s.WriteKeyVal("MaxShips", _iMaxShips);
     }
 
 	m_Chars.WritePartyChars(s);

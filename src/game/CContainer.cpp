@@ -393,10 +393,10 @@ size_t CContainer::ResourceConsumePart( const CResourceQtyArray *pResources, int
 		return pResources->BadIndex();
 
 	size_t iMissing = pResources->BadIndex();
-	size_t iQtyRes = pResources->GetCount();
+	size_t iQtyRes = pResources->size();
 	for ( size_t i = 0; i < iQtyRes; i++ )
 	{
-		int iResQty = (int)(pResources->GetAt(i).GetResQty());
+		int iResQty = (int)(pResources->at(i).GetResQty());
 		if ( iResQty <= 0 ) // not sure why this would be true
 			continue;
 
@@ -407,7 +407,7 @@ size_t CContainer::ResourceConsumePart( const CResourceQtyArray *pResources, int
 		if ( iQtyTotal <= 0 )
 			continue;
 
-		CResourceID rid = pResources->GetAt(i).GetResourceID();
+		CResourceID rid = pResources->at(i).GetResourceID();
 		int iRet = ContentConsume(rid, iQtyTotal, fTest, dwArg);
 		if ( iRet )
 			iMissing = i;
@@ -436,14 +436,14 @@ int CContainer::ResourceConsume( const CResourceQtyArray *pResources, int iRepli
 
 	CChar *pChar = dynamic_cast<CChar *>(this);
 	int iQtyMin = INT32_MAX;
-	for ( size_t i = 0; i < pResources->GetCount(); i++ )
+	for ( size_t i = 0; i < pResources->size(); i++ )
 	{
-		int iResQty = (int)(pResources->GetAt(i).GetResQty());
+		int iResQty = (int)(pResources->at(i).GetResQty());
 		if ( iResQty <= 0 ) // not sure why this would be true
 			continue;
 
 		int iQtyTotal = (iResQty * iReplicationQty);
-		CResourceID rid = pResources->GetAt(i).GetResourceID();
+		CResourceID rid = pResources->at(i).GetResourceID();
 		if ( rid.GetResType() == RES_SKILL )
 		{
 			if ( !pChar )

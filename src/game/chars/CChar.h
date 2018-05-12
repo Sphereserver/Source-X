@@ -19,7 +19,7 @@
 
 
 class CCharNPC;
-
+class CMultiStorage;
 
 enum NPCBRAIN_TYPE	// General AI type.
 {
@@ -151,9 +151,10 @@ public:
 	// Client's local light (might be useful in the future for NPCs also? keep it here for now)
 	byte m_LocalLight;
 
-    // Houses
-    uint8 _iMaxHouses;      // Max houses this player (Client?) can have (Overriding CAccount::_iMaxHouses)
-    std::vector<CUID> _lHouses;	// List of houses.
+    // Multis
+    uint8 _iMaxHouses;              // Max houses this player (Client?) can have (Overriding CAccount::_iMaxHouses)
+    uint8 _iMaxShips;               // Max ships this player (Client?) can have (Overriding CAccount::_iMaxShips)
+    CMultiStorage *_pMultiStorage;	// List of houses.
 
 	// When events happen to the char. check here for reaction scripts.
 
@@ -307,9 +308,8 @@ private:
 	CChar& operator=(const CChar& other);
 
 public:
-    void AddHouse(CUID uidHouse);
-    void DelHouse(CUID uidHouse);
-    int GetHousePos(CUID uidHouse);
+    CMultiStorage *GetMultiStorage();
+
 	// Status and attributes ------------------------------------
 	int IsWeird() const;
 	char GetFixZ( CPointMap pt, dword dwBlockFlags = 0);
@@ -799,7 +799,8 @@ public:
 	lpctstr Skill_GetName( bool fUse = false ) const;
 	ushort Skill_GetBase( SKILL_TYPE skill ) const;
 	ushort Skill_GetMax( SKILL_TYPE skill, bool ignoreLock = false ) const;
-	uint Skill_GetSum() const;
+    uint Skill_GetSum() const;
+    uint Skill_GetSumMax() const;
 	SKILLLOCK_TYPE Skill_GetLock( SKILL_TYPE skill ) const;
 	ushort Skill_GetAdjusted(SKILL_TYPE skill) const;
 	SKILL_TYPE Skill_GetMagicRandom(ushort uiMinValue = 0);

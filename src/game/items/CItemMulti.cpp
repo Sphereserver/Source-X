@@ -23,6 +23,7 @@ CItemMulti::CItemMulti(ITEMID_TYPE id, CItemBase * pItemDef) :	// CItemBaseMulti
 
     _fIsAddon = false;
     _iHouseType = HOUSE_PRIVATE;
+    _iMultiCount = pItemBase->_iMultiCount;
 
     _iBaseStorage = 0;
     _iIncreasedStorage = 0;
@@ -232,9 +233,9 @@ bool CItemMulti::Multi_CreateComponent(ITEMID_TYPE id, short dx, short dy, char 
     return fNeedKey;
 }
 
-void CItemMulti::Multi_Create(CChar * pChar, dword dwKeyCode)
+void CItemMulti::Multi_Setup(CChar * pChar, dword dwKeyCode)
 {
-    ADDTOCALLSTACK("CItemMulti::Multi_Create");
+    ADDTOCALLSTACK("CItemMulti::Multi_Setup");
     // Create house or Ship extra stuff.
     // ARGS:
     //  dwKeyCode = set the key code for the doors/sides to this in case it's a drydocked ship.
@@ -259,15 +260,16 @@ void CItemMulti::Multi_Create(CChar * pChar, dword dwKeyCode)
     GenerateBaseComponents(fNeedKey, dwKeyCode);
 
     Multi_GetSign();	// set the m_uidLink
+
+    if (IsAddon())   // Addons doesn't require keys and are not added to any list.
+    {
+        return;
+    }
+
     if (pChar)
     {
         SetOwner(pChar->GetUID());
-        pChar->AddHouse(GetUID());
-    }
-
-    if (IsAddon())   // Addons doesn't require keys.
-    {
-        return;
+        pChar->GetMultiStorage()->AddMulti(this);
     }
 
     if (pChar)
@@ -401,7 +403,7 @@ void CItemMulti::OnHearRegion(lpctstr pszCmd, CChar * pSrc)
         return;
     TALKMODE_TYPE		mode = TALKMODE_SAY;
 
-    for (size_t i = 0; i < pMultiDef->m_Speech.GetCount(); i++)
+    for (size_t i = 0; i < pMultiDef->m_Speech.size(); i++)
     {
         CResourceLink * pLink = pMultiDef->m_Speech[i];
         ASSERT(pLink);
@@ -434,11 +436,11 @@ void CItemMulti::SetOwner(CUID uidOwner)
         }
         if (pOldOwner)  // Old Owner may not exist, ie being removed?
         {
-            pOldOwner->DelHouse(uidHouse);
+            pOldOwner->GetMultiStorage()->DelMulti(this);
             RemoveKeys(pOldOwner);
         }
     }
-    pNewOwner->AddHouse(uidHouse);
+    pNewOwner->GetMultiStorage()->AddMulti(this);
     _uidOwner = uidOwner;
 }
 
@@ -676,6 +678,11 @@ void CItemMulti::RemoveKeys(CChar *pTarget)
     }
 }
 
+int16 CItemMulti::GetMultiCount()
+{
+    return _iMultiCount;
+}
+
 void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank)
 {
     ADDTOCALLSTACK("CItemMulti::Redeed");
@@ -694,7 +701,7 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank)
     }
     if (!IsAddon())
     {
-        pOwner->DelHouse(GetUID());
+        pOwner->GetMultiStorage()->DelMulti(this);
     }
 
 
@@ -712,7 +719,14 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank)
         {
             pDeed->SetAttr(ATTR_MAGIC);
         }
-        pOwner->ItemBounce(pDeed, fDisplayMsg);
+        if (fMoveToBank)
+        {
+            pOwner->GetBank(LAYER_BANKBOX)->ContentAdd(pDeed);
+        }
+        else
+        {
+            pOwner->ItemBounce(pDeed, fDisplayMsg);
+        }
     }
     SetKeyNum("REMOVED", 1);
     Delete();
@@ -962,10 +976,10 @@ void CItemMulti::GenerateBaseComponents(bool & fNeedKey, dword &dwKeyCode)
 {
     ASSERT("CItemMulti::GenerateBaseComponents");
     const CItemBaseMulti * pMultiDef = Multi_GetDef();
-    size_t iQty = pMultiDef->m_Components.GetCount();
+    size_t iQty = pMultiDef->m_Components.size();
     for (size_t i = 0; i < iQty; i++)
     {
-        const CItemBaseMulti::CMultiComponentItem &component = pMultiDef->m_Components.ElementAt(i);
+        const CItemBaseMulti::CMultiComponentItem &component = pMultiDef->m_Components.at(i);
         fNeedKey |= Multi_CreateComponent(component.m_id, component.m_dx, component.m_dy, component.m_dz, dwKeyCode, IsAddon());
     }
 }
@@ -1206,8 +1220,7 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
     }
 
     pszKey += strlen(sm_szRefKeys[iCmd]);
-    SKIP_SEPARATORS(pszKey);
-
+    
     switch (iCmd)
     {
         case SHR_BAN:
@@ -1270,7 +1283,7 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
         case SHR_REGION:
         {
             SKIP_SEPARATORS(pszKey);
-            if (m_pRegion)
+            if (!_fIsAddon)
             {
                 pRef = m_pRegion; // Addons do not have region so return it only when not nullptr.
                 return true;
@@ -1391,7 +1404,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
         {
             CUID uidChar = s.GetArgDWVal();
             CChar *	pCharSrc = uidChar.CharFind();
-            Multi_Create(pCharSrc, 0);
+            Multi_Setup(pCharSrc, 0);
             break;
         }
         case SHV_REDEED:
@@ -1588,7 +1601,7 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
             // no component uid
             if (*pszKey == '\0')
             {
-                sVal.FormatSTVal(pMultiDef->m_Components.GetCount());
+                sVal.FormatSTVal(pMultiDef->m_Components.size());
             }
             else if (*pszKey == '.')
             {
@@ -1600,7 +1613,7 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
                     return false;
 
                 SKIP_SEPARATORS(pszKey);
-                item = pMultiDef->m_Components.GetAt(iQty);
+                item = pMultiDef->m_Components.at(iQty);
 
                 if (!strnicmp(pszKey, "ID", 2)) sVal.FormatVal(item.m_id);
                 else if (!strnicmp(pszKey, "DX", 2)) sVal.FormatVal(item.m_dx);
@@ -1901,17 +1914,290 @@ bool CItemMulti::r_LoadVal(CScript & s)
     EXC_DEBUG_END;
     return true;
 }
+
 void CItemMulti::DupeCopy(const CItem * pItem)
 {
     ADDTOCALLSTACK("CItemMulti::DupeCopy");
     CItem::DupeCopy(pItem);
 }
 
-bool CItemMulti::CanPlace(CChar *pChar)
+CItemMulti *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPointMap & pt, CItem *pDeed)
 {
     if (!pChar)
     {
-        return false;
+        return nullptr;
+    }
+
+    const CItemBaseMulti * pMultiDef = dynamic_cast <const CItemBaseMulti *> (pItemDef);
+    bool fShip = pItemDef->IsType(IT_SHIP);	// must be in water.
+
+    /*
+    * First thing to do is to check if the character creating the multi is allowed to have it
+    */
+    if (fShip)
+    {
+        if (!pChar->GetMultiStorage()->CanAddShip(pChar, pMultiDef->_iMultiCount))
+        {
+            return nullptr;
+        }
+    }
+    else
+    {
+        if (!pChar->GetMultiStorage()->CanAddHouse(pChar, pMultiDef->_iMultiCount))
+        {
+            return nullptr;
+        }
+    }
+
+    /*
+    * There is a small difference in the coordinates where the mouse is in the screen and the ones received,
+    * let's remove that difference.
+    * Note: this fix is added here, before GM check, because otherwise they will place houses on wrong position.
+    */
+    if (CItemBase::IsID_Multi(pItemDef->GetID()) || pMultiDef->IsType(IT_MULTI_ADDON))  
+    {
+        pt.m_y -= (short)(pMultiDef->m_rect.m_bottom - 1);
+        pt.m_x += 1;
+    }
+
+    if (!pChar->IsPriv(PRIV_GM))
+    {
+        if ((pMultiDef != nullptr) && !(pDeed->IsAttr(ATTR_MAGIC)))
+        {
+            CRect rect = pMultiDef->m_rect; // Create a rect equal to the multi's one.
+            rect.m_map = pt.m_map;          // set it's map to the current map.
+            rect.OffsetRect(pt.m_x, pt.m_y);// fill the rect.
+            CPointMap ptn = pt;             // A copy to work on.
+
+            // Check for chars in the way, just search for any char in the house area, no extra tiles, it's enough for them to do not be inside the house.
+            CWorldSearch Area(pt, maximum(rect.GetWidth(), rect.GetHeight()));
+            Area.SetSearchSquare(true);
+            for (;;)
+            {
+                CChar * pCharSearch = Area.GetChar();
+                if (pCharSearch == nullptr)
+                {
+                    break;
+                }
+                if (!rect.IsInside2d(pCharSearch->GetTopPoint()))   // if the char is not inside the rec, ignore him.
+                {
+                    continue;
+                }
+                if (pCharSearch->IsPriv(PRIV_GM) && !pChar->CanSee(pCharSearch)) // There is a GM in my way? get through him!
+                {
+                    continue;
+                }
+
+                pChar->SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_MULTI_INTWAY), pCharSearch->GetName()); // Did not met any of the above exceptions so i'm blocking the placement, return.
+                return nullptr;
+            }
+
+            /* Char's check passed.
+            * Intensive checks are done now:
+            *   - The area of search gets increased by 1 tile: There must be no blocking items from a 1x1 gap outside the house.
+            *   - All coord points inside that rect must be valid and have, as much, a Z difference of +-4.
+            */
+            rect.m_top -= 1;    // 1 tile at each side to leave a gap between houses, checking also that this gap doesn't have any blocking object
+            rect.m_right += 1;
+            rect.m_left -= 1;   
+            rect.m_bottom += 1;
+            int x = rect.m_left;
+
+            /*
+            * Loop through all the positions of the rect.
+            */
+            for (; x < rect.m_right; ++x)   // X loop
+            {
+                // Setting the Top-Left point of the CRect*
+                ptn.m_x = (short)x; // *point Left
+                int y = rect.m_top; // Reset North for each loop.
+                for (; y < rect.m_bottom; ++y)  // Y loop
+                {
+                    ptn.m_y = (short)y; // *point North
+
+                    if (!ptn.IsValidPoint())    // Invalid point (out of map bounds).
+                    {
+                        pChar->SysMessageDefault(DEFMSG_ITEMUSE_MULTI_FAIL);
+                        return nullptr;
+                    }
+
+                    dword dwBlockFlags = (fShip) ? CAN_C_SWIM : CAN_C_WALK; // Flags to check: Ships should check for swimable tiles.
+                    /*
+                    * Intensive check returning the top Z point of the given X, Y coords
+                    * It uses the dwBlockBlacks passed to check the new Z level.
+                    * Also update those dwBlockFlags with all the flags found at the given location.
+                    * 3rd param is set to also update Z with any house component found in the proccess.
+                    */
+                    ptn.m_z = g_World.GetHeightPoint2(ptn, dwBlockFlags, true);
+                    if (abs(ptn.m_z - pt.m_z) > 4)  // Difference of Z > 4? so much, stop.
+                    {
+                        pChar->SysMessageDefault(DEFMSG_ITEMUSE_MULTI_BUMP);
+                        return nullptr;
+                    }
+                    if (fShip)
+                    {
+                        if (!(dwBlockFlags & CAN_I_WATER))  // Ships must be placed on water.
+                        {
+                            pChar->SysMessageDefault(DEFMSG_ITEMUSE_MULTI_SHIPW);
+                            return nullptr;
+                        }
+                    }
+                    else if (dwBlockFlags & (CAN_I_WATER | CAN_I_BLOCK | CAN_I_CLIMB))  // Did the intensive check find some undesired flags? Stop.
+                    {
+                        pChar->SysMessageDefault(DEFMSG_ITEMUSE_MULTI_BLOCKED);
+                        return nullptr;
+                    }
+                }
+            }     
+
+
+
+            /*
+            * The above loop did not find any blocking item/char, now another loop is done to check for another multis with extended limitations:
+            * You can't place your house within a range of 5 tiles bottom of the stairs of any house.
+            * Additionally your house can't have it's bottom blocked by another multi in a 5 tiles margin.
+            * Simplifying it: the Rect must have an additional +5 tiles of radious on both TOP and BOTTOM points.
+            */
+            rect.m_top -= 4; // 1 was already added before, so a +4 now is enough.
+            rect.m_bottom += 4;
+            
+            x = rect.m_left;
+            for (; x < rect.m_right; ++x)
+            {
+                ptn.m_x = (short)x;
+                int y = rect.m_top;
+                for (; y < rect.m_bottom; ++y)
+                {
+                    ptn.m_y = (short)y;
+                    /*
+                    * Search for any multi region on that point.
+                    */
+                    CRegion * pRegion = ptn.GetRegion(REGION_TYPE_MULTI | REGION_TYPE_AREA | REGION_TYPE_ROOM); 
+                    /*
+                    * If there is no region on that point (invalid point?) or the region has the NOBUILDING flag, stop
+                    * Ships are allowed to bypass this check??
+                    */
+                    if ((pRegion == nullptr) || (pRegion->IsFlag(REGION_FLAG_NOBUILDING) && !fShip))
+                    {
+                        pChar->SysMessageDefault(DEFMSG_ITEMUSE_MULTI_FAIL);
+                        return nullptr;
+                    }
+                }
+            }
+        }
+    }
+    
+    CItem * pItemNew = CItem::CreateTemplate(pItemDef->GetID(), nullptr, pChar);
+    if (pItemNew == nullptr)
+    {
+        pChar->SysMessageDefault(DEFMSG_ITEMUSE_MULTI_COLLAPSE);
+        return nullptr;
+    }
+    CItemMulti * pMultiItem = dynamic_cast <CItemMulti*>(pItemNew);
+
+    pItemNew->SetAttr(ATTR_MOVE_NEVER | (pDeed->m_Attr & (ATTR_MAGIC | ATTR_INVIS)));
+    pItemNew->SetHue(pDeed->GetHue());
+    pItemNew->MoveToUpdate(pt);
+
+    if (pMultiItem)
+    {
+        pMultiItem->Multi_Setup(pChar, UID_CLEAR);
+        pMultiItem->SetKeyNum("DEED_ID", pDeed->GetID());
+    }
+
+    if (pItemDef->IsType(IT_STONE_GUILD))
+    {
+        // Now name the guild
+        CItemStone * pStone = dynamic_cast <CItemStone*>(pItemNew);
+        pStone->AddRecruit(pChar, STONEPRIV_MASTER);
+        pChar->GetClient()->addPromptConsole(CLIMODE_PROMPT_STONE_NAME, g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_GUILDSTONE_NEW), pItemNew->GetUID());
+    }
+    else if (pItemDef->IsType(IT_SHIP))
+    {
+        pItemNew->Sound(Calc_GetRandVal(2) ? 0x12 : 0x13);
+    }
+    return pMultiItem;
+}
+
+void CItemMulti::OnComponentCreate(const CItem * pComponent, bool fIsAddon)
+{
+    UNREFERENCED_PARAMETER(fIsAddon);
+    CScript event("+t_house_component");
+    const_cast<CItem*>(pComponent)->m_OEvents.r_LoadVal(event, RES_EVENTS);
+    AddComponent(pComponent->GetUID());
+}
+
+CMultiStorage::CMultiStorage()
+{
+}
+
+CMultiStorage::~CMultiStorage()
+{
+}
+
+void CMultiStorage::AddMulti(CItemMulti * pMulti)
+{
+    if (pMulti->IsType(IT_SHIP))
+    {
+        AddShip(pMulti);
+    }
+    else
+    {
+        AddHouse(pMulti);
+    }
+}
+
+void CMultiStorage::DelMulti(CItemMulti * pMulti)
+{
+    if (pMulti->IsType(IT_SHIP))
+    {
+        DelShip(pMulti);
+    }
+    else
+    {
+        DelHouse(pMulti);
+    }
+}
+
+void CMultiStorage::AddHouse(CItemMulti *pHouse)
+{
+    ADDTOCALLSTACK("CMultiStorage::AddHouse");
+    if (!pHouse)
+    {
+        return;
+    }
+    if (GetHousePos(pHouse) >= 0)
+    {
+        return;
+    }
+    _iHousesTotal += pHouse->GetMultiCount();
+    _lHouses.emplace_back(pHouse);
+}
+
+void CMultiStorage::DelHouse(CItemMulti *pHouse)
+{
+    ADDTOCALLSTACK("CMultiStorage::DelHouse");
+    if (_lHouses.empty())
+    {
+        return;
+    }
+    for (std::vector<CItemMulti*>::iterator it = _lHouses.begin(); it != _lHouses.end(); ++it)
+    {
+        if (*it == pHouse)
+        {
+            _iHousesTotal -= pHouse->GetMultiCount();
+            _lHouses.erase(it);
+            return;
+        }
+    }
+}
+
+bool CMultiStorage::CanAddHouse(CChar *pChar, int16 iHouseCount)
+{
+    ADDTOCALLSTACK("CMultiStorage::CanAddHouse");
+    if (iHouseCount == 0 || pChar->IsPriv(PRIV_GM))
+    {
+        return true;
     }
     uint8 iMaxHouses = pChar->_iMaxHouses;
     if (iMaxHouses == 0)
@@ -1921,19 +2207,180 @@ bool CItemMulti::CanPlace(CChar *pChar)
             iMaxHouses = pChar->GetClient()->GetAccount()->_iMaxHouses;
         }
     }
-    if (iMaxHouses > 0 && iMaxHouses >= pChar->_lHouses.size())
+    if (iMaxHouses == 0)
     {
-        return false;
+        return true;
     }
-    return true;
-
-    // Location Checks
+    if (GetHouseCountTotal() + iHouseCount <= iMaxHouses)
+    {
+        return true;
+    }
+    pChar->SysMessageDefault(DEFMSG_HOUSE_ADD_LIMIT);
+    return false;
 }
 
-void CItemMulti::OnComponentCreate(const CItem * pComponent, bool fIsAddon)
+bool CMultiStorage::CanAddHouse(CItemStone * pStone, int16 iHouseCount)
 {
-    UNREFERENCED_PARAMETER(fIsAddon);
-    CScript event("+t_house_component");
-    const_cast<CItem*>(pComponent)->m_OEvents.r_LoadVal(event, RES_EVENTS);
-    AddComponent(pComponent->GetUID());
+    UNREFERENCED_PARAMETER(pStone);
+    UNREFERENCED_PARAMETER(iHouseCount);
+    return true;
+}
+
+int16 CMultiStorage::GetHousePos(CItemMulti *pHouse)
+{
+    if (_lHouses.empty())
+    {
+        return -1;
+    }
+    for (size_t i = 0; i < _lHouses.size(); ++i)
+    {
+        if (_lHouses[i] == pHouse)
+        {
+            return (int16)i;
+        }
+    }
+    return -1;
+}
+
+int16 CMultiStorage::GetHouseCountTotal()
+{
+    return _iHousesTotal;
+}
+
+int16 CMultiStorage::GetHouseCountReal()
+{
+    return (int16)_lHouses.size();
+}
+
+CItemMulti * CMultiStorage::GetHouseAt(int16 iPos)
+{
+    return _lHouses[iPos];
+}
+
+void CMultiStorage::ClearHouses()
+{
+    _lHouses.clear();
+}
+
+void CMultiStorage::r_Write(CScript & s)
+{
+    ADDTOCALLSTACK("CMultiStorage::r_Write");
+    if (!_lHouses.empty())
+    {
+        for (std::vector<CItemMulti*>::iterator it = _lHouses.begin(); it != _lHouses.end(); ++it)
+        {
+            s.WriteKeyHex("ADDHOUSE", (*it)->GetUID());
+        }
+    }
+    if (!_lShips.empty())
+    {
+        for (std::vector<CItemMulti*>::iterator it = _lShips.begin(); it != _lShips.end(); ++it)
+        {
+            s.WriteKeyHex("ADDShip", (*it)->GetUID());
+        }
+    }
+}
+
+
+void CMultiStorage::AddShip(CItemMulti *pShip)
+{
+    ADDTOCALLSTACK("CMultiStorage::AddShip");
+    if (!pShip)
+    {
+        return;
+    }
+    if (GetShipPos(pShip) >= 0)
+    {
+        return;
+    }
+    _iShipsTotal += pShip->GetMultiCount();
+    _lShips.emplace_back(pShip);
+}
+
+void CMultiStorage::DelShip(CItemMulti *pShip)
+{
+    ADDTOCALLSTACK("CMultiStorage::DelShip");
+    if (_lShips.empty())
+    {
+        return;
+    }
+    for (std::vector<CItemMulti*>::iterator it = _lShips.begin(); it != _lShips.end(); ++it)
+    {
+        if (*it == pShip)
+        {
+            _iShipsTotal -= pShip->GetMultiCount();
+            _lShips.erase(it);
+            return;
+        }
+    }
+}
+
+bool CMultiStorage::CanAddShip(CChar *pChar, int16 iShipCount)
+{
+    ADDTOCALLSTACK("CMultiStorage::CanAddShip");
+    if (iShipCount == 0 || pChar->IsPriv(PRIV_GM))
+    {
+        return true;
+    }
+    uint8 iMaxShips = pChar->_iMaxShips;
+    if (iMaxShips == 0)
+    {
+        if (pChar->GetClient())
+        {
+            iMaxShips = pChar->GetClient()->GetAccount()->_iMaxShips;
+        }
+    }
+    if (iMaxShips == 0)
+    {
+        return true;
+    }
+    if (GetShipCountTotal() + iShipCount <= iMaxShips)
+    {
+        return true;
+    }
+    pChar->SysMessageDefault(DEFMSG_HOUSE_ADD_LIMIT);
+    return false;
+}
+
+bool CMultiStorage::CanAddShip(CItemStone * pStone, int16 iShipCount)
+{
+    UNREFERENCED_PARAMETER(pStone);
+    UNREFERENCED_PARAMETER(iShipCount);
+    return true;
+}
+
+int16 CMultiStorage::GetShipPos(CItemMulti *pShip)
+{
+    if (_lShips.empty())
+    {
+        return -1;
+    }
+    for (size_t i = 0; i < _lShips.size(); ++i)
+    {
+        if (_lShips[i] == pShip)
+        {
+            return (int16)i;
+        }
+    }
+    return -1;
+}
+
+int16 CMultiStorage::GetShipCountTotal()
+{
+    return _iShipsTotal;
+}
+
+int16 CMultiStorage::GetShipCountReal()
+{
+    return (int16)_lShips.size();
+}
+
+CItemMulti * CMultiStorage::GetShipAt(int16 iPos)
+{
+    return _lShips[iPos];
+}
+
+void CMultiStorage::ClearShips()
+{
+    _lShips.clear();
 }

@@ -85,7 +85,7 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fT
 	}
 
 	// just use the background (default) region for this
-	if ( pRegion->m_Events.GetCount() <= 0 )
+	if (pRegion->m_Events.size() <= 0 )
 	{
 		CPointMap ptZero(0,0,0,pt.m_map);
 		pRegion = dynamic_cast<CRegionWorld*>(ptZero.GetRegion(REGION_TYPE_AREA));
@@ -265,7 +265,7 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 		const CUOMultiItemRec_HS *pMultiItem = NULL;	// Multi item iterator
 		for ( size_t iRegion = 0; iRegion < iRegionQty; pMulti = NULL, ++iRegion )
 		{
-			pRegion = rlinks.GetAt(iRegion);
+			pRegion = rlinks.at(iRegion);
 			pItem = pRegion->GetResourceID().ItemFind();
 			if ( !pItem )
 				continue;
@@ -641,7 +641,7 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 				{
 					for (size_t iRegion = 0; iRegion < iRegionQty; iRegion++)
 					{
-						CRegion* pRegion = rlinks.GetAt(iRegion);
+						CRegion* pRegion = rlinks.at(iRegion);
 						CItem* pItem = pRegion->GetResourceID().ItemFind();
 						if (pItem == NULL)
 							continue;
@@ -800,7 +800,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 
 		for ( size_t iRegion = 0; iRegion < iRegionQty; ++iRegion, pRegion = NULL, pItem = NULL, pMulti = NULL, x2 = 0, y2 = 0 )
 		{
-			pRegion = rlinks.GetAt(iRegion);
+			pRegion = rlinks.at(iRegion);
 			if ( pRegion != NULL )
 				pItem = pRegion->GetResourceID().ItemFind();
 
@@ -1098,7 +1098,7 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block,
 
 			for ( size_t iRegion = 0; iRegion < iRegionQty; ++iRegion, pRegion = NULL, pItem = NULL, pMulti = NULL, x2 = 0, y2 = 0 )
 			{
-				pRegion = rlinks.GetAt(iRegion);
+				pRegion = rlinks.at(iRegion);
 				if ( pRegion != NULL )
 					pItem = pRegion->GetResourceID().ItemFind();
 
@@ -1345,7 +1345,7 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block
 		{
 			for ( size_t i = 0; i < iRegionQty; i++)
 			{
-				CRegion * pRegion = rlinks.GetAt(i);
+				CRegion * pRegion = rlinks.at(i);
 				CItem * pItem = pRegion->GetResourceID().ItemFind();
 				if ( pItem != NULL )
 				{

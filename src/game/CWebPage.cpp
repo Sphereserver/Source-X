@@ -230,7 +230,7 @@ bool CWebPageDef::r_Verb( CScript & s, CTextConsole * pSrc )	// some command on 
 
 				IT_TYPE	needtype = ( iHeadKey == WV_GUILDLIST ) ? IT_STONE_GUILD : IT_STONE_TOWN;
 
-				for ( size_t i = 0; i < g_World.m_Stones.GetCount(); i++ )
+				for ( size_t i = 0; i < g_World.m_Stones.size(); i++ )
 				{
 					CItemStone * pStone = g_World.m_Stones[i];
 					if ( !pStone || !pStone->IsType(needtype) )
@@ -735,7 +735,7 @@ bool CWebPageDef::ServPagePost( CClient * pClient, lpctstr pszURLArgs, tchar * p
 					continue;
 				if ( ATOI(pszNum) )
 				{
-					resp.m_CheckArray.Add( iNum );
+                    resp.m_CheckArray.push_back(iNum);
 				}
 				break;
 			case 'T':

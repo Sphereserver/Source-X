@@ -420,7 +420,7 @@ public:
     * @see Format()
     * @param iVal value to print.
     */
-    inline void Format16al(int16 iVal)
+    inline void Format16Val(int16 iVal)
     {
         Format("%" PRId16, iVal);
     }

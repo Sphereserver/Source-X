@@ -868,7 +868,7 @@ bool CChar::Skill_MakeItem( ITEMID_TYPE id, CUID uidTarg, SKTRIG_TYPE stage, boo
 		if ( i != pItemDef->m_SkillMake.BadIndex() )
 		{
 			CSkillDef *pSkillDef = g_Cfg.GetSkillDef((SKILL_TYPE)(pItemDef->m_SkillMake[i].GetResIndex()));
-			if ( pSkillDef && pSkillDef->m_Effect.m_aiValues.GetCount() > 0 )
+			if ( pSkillDef && pSkillDef->m_Effect.m_aiValues.size() > 0 )
 				iConsumePercent = pSkillDef->m_Effect.GetRandom();
 		}
 
@@ -1063,7 +1063,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	{
 		// Smelting something like armor etc.
 		// find the ingot type resources.
-		for ( size_t i = 0; i < pOreDef->m_BaseResources.GetCount(); ++i )
+		for ( size_t i = 0; i < pOreDef->m_BaseResources.size(); ++i )
 		{
 			CResourceID rid = pOreDef->m_BaseResources[i].GetResourceID();
 			if ( rid.GetResType() != RES_ITEMDEF )

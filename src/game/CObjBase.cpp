@@ -2939,7 +2939,7 @@ void CObjBase::UpdatePropertyFlag(int mask)
 
     // Items equipped, inside containers or with timer expired doesn't receive ticks and need to be added to a list of items to be processed separately
     if ( (!IsTopLevel() || IsTimerExpired()) && !g_World.m_ObjStatusUpdates.ContainsPtr(this) )
-        g_World.m_ObjStatusUpdates.Add(this);
+        g_World.m_ObjStatusUpdates.push_back(this);
 }
 
 void CObjBase::OnTickStatusUpdate()

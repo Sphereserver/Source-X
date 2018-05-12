@@ -75,8 +75,8 @@ bool CBaseBaseDef::Can( dword wCan ) const
 
 void CBaseBaseDef::UnLink()
 {
-	m_BaseResources.Clear();
-	m_TEvents.Clear();
+    m_BaseResources.clear();
+    m_TEvents.clear();
 	CResourceLink::UnLink();
 }
 
@@ -291,7 +291,7 @@ bool CBaseBaseDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * p
 
 					if ( !strnicmp( pszKey, "COUNT", 5 ))
 					{
-						sVal.FormatSTVal(m_BaseResources.GetCount());
+						sVal.FormatSTVal(m_BaseResources.size());
 					}
 					else
 					{

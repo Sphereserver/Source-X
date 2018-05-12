@@ -309,7 +309,7 @@ bool CRegion::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			break;
 		case RC_RECT:
 			{
-				size_t iQty = m_Rects.GetCount();
+				size_t iQty = m_Rects.size();
 				pszKey += 4;
 				if ( *pszKey == '\0' )
 				{
@@ -547,7 +547,7 @@ void CRegion::r_WriteBody( CScript & s, lpctstr pszPrefix )
 		s.WriteKeyHex(z, GetRegionFlags());
 	}
 
-	if ( m_Events.GetCount() > 0 )
+	if (m_Events.size() > 0 )
 	{
 		CSString sVal;
 		m_Events.WriteResourceRefList( sVal );
@@ -795,7 +795,7 @@ TRIGRET_TYPE CRegion::OnRegionTrigger( CTextConsole * pSrc, RTRIG_TYPE iAction )
 
 	TRIGRET_TYPE iRet;
 
-	for ( size_t i = 0; i < m_Events.GetCount(); ++i )
+	for ( size_t i = 0; i < m_Events.size(); ++i )
 	{
 		CResourceLink * pLink = m_Events[i];
 		if ( !pLink || ( pLink->GetResType() != RES_REGIONTYPE ) || !pLink->HasTrigger(iAction) )
@@ -810,7 +810,7 @@ TRIGRET_TYPE CRegion::OnRegionTrigger( CTextConsole * pSrc, RTRIG_TYPE iAction )
 	}
 
 	//	EVENTSREGION triggers (constant events of regions set from sphere.ini)
-	for ( size_t i = 0; i < g_Cfg.m_pEventsRegionLink.GetCount(); ++i )
+	for ( size_t i = 0; i < g_Cfg.m_pEventsRegionLink.size(); ++i )
 	{
 		CResourceLink * pLink = g_Cfg.m_pEventsRegionLink[i];
 		if ( !pLink || ( pLink->GetResType() != RES_REGIONTYPE ) || !pLink->HasTrigger(iAction) )
@@ -1011,7 +1011,7 @@ const CSRandGroupDef * CRegionWorld::FindNaturalResource(int type) const
 	// Find the natural resources assinged to this region.
 	// ARGS: type = IT_TYPE
 
-	for ( size_t i = 0; i < m_Events.GetCount(); i++ )
+	for ( size_t i = 0; i < m_Events.size(); i++ )
 	{
 		CResourceLink * pLink = m_Events[i];
 		if ( !pLink || ( pLink->GetResType() != RES_REGIONTYPE ))

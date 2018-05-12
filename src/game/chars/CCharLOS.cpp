@@ -514,7 +514,7 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 				{
 					for ( size_t ii = 0; ii < iQtyr; pMulti = NULL, ++ii, pItem = NULL, pRegion = NULL )
 					{
-						pRegion = rlinks.GetAt(ii);
+						pRegion = rlinks.at(ii);
 						if ( pRegion )
 							pItem = pRegion->GetResourceID().ItemFind();
 

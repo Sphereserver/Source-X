@@ -412,11 +412,11 @@ bool CChar::NPC_CanSpeak() const
 	ADDTOCALLSTACK("CChar::NPC_CanSpeak");
 	ASSERT(m_pNPC);
 	//	players and chars with speech can
-	if ( m_pNPC == NULL || m_pNPC->m_Speech.GetCount() > 0 )
+	if ( m_pNPC == NULL || m_pNPC->m_Speech.size() > 0 )
 		return true;
 
 	CCharBase * pCharDef = Char_GetDef();
-	return ( pCharDef != NULL && (pCharDef->m_Speech.GetCount() > 0) );
+	return ( pCharDef != NULL && (pCharDef->m_Speech.size() > 0) );
 }
 
 bool CChar::NPC_FightMayCast(bool fCheckSkill) const

@@ -572,7 +572,7 @@ void CVerDataMul::QSort(size_t left, size_t right)
 
 	do
 	{
-		while (j < m_Data.GetCount() && QCompare(j, dwRefIndex) < 0)
+		while (j < m_Data.size() && QCompare(j, dwRefIndex) < 0)
 			j++;
 		while (i > 0 && QCompare(i, dwRefIndex) > 0)
 			i--;
@@ -581,15 +581,15 @@ void CVerDataMul::QSort(size_t left, size_t right)
 		{
 			if (i != j)
 			{
-				CUOVersionBlock Tmp = m_Data.GetAt(i);
-				CUOVersionBlock block = m_Data.GetAt(j);
-				m_Data.SetAt(i, block);
-				m_Data.SetAt(j, Tmp);
+				CUOVersionBlock Tmp = m_Data.at(i);
+				CUOVersionBlock block = m_Data.at(j);
+				m_Data.assign(i, block);
+				m_Data.assign(j, Tmp);
 			}
 
 			if (i > 0)
 				i--;
-			if (j < m_Data.GetCount())
+			if (j < m_Data.size())
 				j++;
 		}
 
@@ -625,9 +625,9 @@ void CVerDataMul::Load(CSFile & file)
 	}
 
 	Unload();
-	m_Data.SetCount(dwQty);
+	m_Data.resize(dwQty);
 
-	if (file.Read(static_cast<void *>(m_Data.GetBasePtr()), dwQty * sizeof(CUOVersionBlock)) <= 0)
+	if (file.Read(static_cast<void *>(m_Data.data()), dwQty * sizeof(CUOVersionBlock)) <= 0)
 	{
 		throw CSError(LOGL_CRIT, CSFile::GetLastError(), "VerData: Read");
 	}
@@ -656,17 +656,17 @@ void CVerDataMul::Load(CSFile & file)
 
 size_t CVerDataMul::GetCount() const
 {
-	return(m_Data.GetCount());
+	return(m_Data.size());
 }
 
 const CUOVersionBlock * CVerDataMul::GetEntry(size_t i) const
 {
-	return(&m_Data.ElementAt(i));
+	return(&m_Data.at(i));
 }
 
 void CVerDataMul::Unload()
 {
-	m_Data.Clear();
+	m_Data.clear();
 }
 
 bool CVerDataMul::FindVerDataBlock(VERFILE_TYPE type, dword id, CUOIndexRec & Index) const
@@ -683,7 +683,7 @@ bool CVerDataMul::FindVerDataBlock(VERFILE_TYPE type, dword id, CUOIndexRec & In
 	}
 
 	dword dwIndex = VERDATA_MAKE_INDEX(type, id);
-	const CUOVersionBlock * pArray = m_Data.GetBasePtr();
+	const CUOVersionBlock * pArray = m_Data.data();
 	int iLow = 0;
 	while (iLow <= iHigh)
 	{

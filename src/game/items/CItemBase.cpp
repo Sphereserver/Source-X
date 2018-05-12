@@ -811,10 +811,10 @@ IT_TYPE CItemBase::GetTypeBase( ITEMID_TYPE id, const CUOItemTypeRec_HS &tiledat
 ITEMID_TYPE CItemBase::GetNextFlipID( ITEMID_TYPE id ) const
 {
 	ADDTOCALLSTACK("CItemBase::GetNextFlipID");
-	if ( m_flip_id.GetCount() > 0 )
+	if (m_flip_id.size() > 0 )
 	{
 		ITEMID_TYPE idprev = GetDispID();
-		for ( size_t i = 0; i < m_flip_id.GetCount(); ++i )
+		for ( size_t i = 0; i < m_flip_id.size(); ++i )
 		{
 			ITEMID_TYPE idnext = m_flip_id[i];
 			if ( idprev == id )
@@ -837,7 +837,7 @@ bool CItemBase::IsSameDispID( ITEMID_TYPE id ) const
 	if ( id == GetDispID())
 		return true;
 
-	for ( size_t i = 0; i < m_flip_id.GetCount(); ++i )
+	for ( size_t i = 0; i < m_flip_id.size(); ++i )
 	{
 		if ( m_flip_id[i] == id )
 			return true;
@@ -872,7 +872,7 @@ int CItemBase::CalculateMakeValue( int iQualityLevel ) const
 	int lValue = 0;
 
 	// add value based on the base resources making this up.
-	for ( size_t i = 0; i < m_BaseResources.GetCount(); ++i )
+	for ( size_t i = 0; i < m_BaseResources.size(); ++i )
 	{
 		CResourceID rid = m_BaseResources[i].GetResourceID();
 		if ( rid.GetResType() != RES_ITEMDEF )
@@ -886,7 +886,7 @@ int CItemBase::CalculateMakeValue( int iQualityLevel ) const
 	}
 
 	// add some value based on the skill required to create it.
-	for ( size_t i = 0; i < m_SkillMake.GetCount(); ++i )
+	for ( size_t i = 0; i < m_SkillMake.size(); ++i )
 	{
 		CResourceID rid = m_SkillMake[i].GetResourceID();
 		if ( rid.GetResType() != RES_SKILL )
@@ -1072,6 +1072,15 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 
 			sVal.Format("%d,%d", pItemMulti->m_shipSpeed.period, pItemMulti->m_shipSpeed.tiles);
 		} break;
+        case IBC_MULTICOUNT:
+        {
+            if (!IsTypeMulti(GetType()))
+            {
+                return false;
+            }
+            CItemBaseMulti * pItemMulti = dynamic_cast<CItemBaseMulti*>(this);
+            sVal.FormatU8Val(pItemMulti->_iMultiCount);
+        }break;
 		case IBC_DISPID:
 			sVal = g_Cfg.ResourceGetName( CResourceID( RES_ITEMDEF, GetDispID()));
 			break;
@@ -1080,7 +1089,7 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 				tchar *pszTemp = Str_GetTemp();
 				size_t iLen = 0;
 				*pszTemp = '\0';
-				for ( size_t i = 0; i < m_flip_id.GetCount(); i++ )
+				for ( size_t i = 0; i < m_flip_id.size(); i++ )
 				{
 					if ( i > 0 )
 						iLen += strcpylen( pszTemp+iLen, "," );
@@ -1406,6 +1415,15 @@ bool CItemBase::r_LoadVal( CScript &s )
 					return false;
 			}
 		} break;
+        case IBC_MULTICOUNT:
+        {
+            if (!IsTypeMulti(GetType()))
+            {
+                return false;
+            }
+            CItemBaseMulti * pItemMulti = dynamic_cast<CItemBaseMulti*>(this);
+            pItemMulti->_iMultiCount = s.GetArgU8Val();
+        }break;
 		case IBC_CANUSE:
 			m_CanUse = s.GetArgVal();
 			break;
@@ -1422,7 +1440,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 				int iArgQty = Str_ParseCmds( s.GetArgStr(), ppArgs, CountOf(ppArgs));
 				if ( iArgQty <= 0 )
 					return false;
-				m_flip_id.Clear();
+				m_flip_id.clear();
 				for ( int i = 0; i < iArgQty; ++i )
 				{
 					ITEMID_TYPE id = (ITEMID_TYPE)(g_Cfg.ResourceGetIndexType( RES_ITEMDEF, ppArgs[i] ));
@@ -1430,7 +1448,7 @@ bool CItemBase::r_LoadVal( CScript &s )
 						continue;
 					if ( IsSameDispID(id))
 						continue;
-					m_flip_id.Add(id);
+					m_flip_id.push_back(id);
 				}
 			}
 			break;
@@ -1678,7 +1696,7 @@ CItemBase * CItemBase::MakeDupeReplacement( CItemBase * pBase, ITEMID_TYPE idmas
 	}
 
 	if ( ! pBaseNew->IsSameDispID(id))	// already here ?!
-		pBaseNew->m_flip_id.Add(id);
+		pBaseNew->m_flip_id.push_back(id);
 
 	// create the dupe stub.
 	CUOItemTypeRec_HS tiledata;
@@ -1748,6 +1766,7 @@ CItemBaseMulti::CItemBaseMulti( CItemBase* pBase ) :
     _iBaseStorage = 489;    // Minimum possible value from 7x7 houses.
     _iBaseVendors = 10;     // Minimum possible value from 7x7 houses.
     _iLockdownsPercent = 50;// Default value
+    _iMultiCount = 1;       // All Multis have a default 'weight' of 1.
 
 	// copy the stuff from the pBase
 	CopyTransfer(pBase);
@@ -1771,7 +1790,7 @@ bool CItemBaseMulti::AddComponent( ITEMID_TYPE id, short dx, short dy, char dz )
 		comp.m_dx = dx;
 		comp.m_dy = dy;
 		comp.m_dz = dz;
-		m_Components.Add( comp );
+		m_Components.push_back(comp);
 	}
 
 	return true;
@@ -1786,7 +1805,7 @@ void CItemBaseMulti::SetMultiRegion( tchar * pArgs )
 	size_t iQty = Str_ParseCmds( pArgs, piArgs, CountOf(piArgs));
 	if ( iQty <= 1 )
 		return;
-	m_Components.Clear();	// might be after a resync
+	m_Components.clear();	// might be after a resync
 	m_rect.SetRect( (int)(piArgs[0]), (int)(piArgs[1]), (int)(piArgs[2]+1), (int)(piArgs[3]+1), (int)(piArgs[4]) );
 }
 
@@ -1952,7 +1971,7 @@ bool CItemBaseMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * 
             pszKey += 9;
             if (*pszKey == '\0')
             {
-                sVal.FormatSTVal(m_Components.GetCount());
+                sVal.FormatSTVal(m_Components.size());
             }
             else if (*pszKey == '.')
             {
@@ -1962,7 +1981,7 @@ bool CItemBaseMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * 
                     return false;
 
                 SKIP_SEPARATORS(pszKey);
-                CMultiComponentItem item = m_Components.GetAt(index);
+                CMultiComponentItem item = m_Components.at(index);
 
                 if (!strnicmp(pszKey, "ID", 2)) sVal.FormatVal(item.m_id);
                 else if (!strnicmp(pszKey, "DX", 2)) sVal.FormatVal(item.m_dx);

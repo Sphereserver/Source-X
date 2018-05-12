@@ -219,7 +219,7 @@ public:
 	CResourceQty() : m_iQty(0) { };
 };
 
-class CResourceQtyArray : public CSTypedArray<CResourceQty, CResourceQty&>
+class CResourceQtyArray : public CSTypedArray<CResourceQty>
 {
 	// Define a list of index id's (not references) to resource objects. (Not owned by the list)
 public:
@@ -227,7 +227,7 @@ public:
 	CResourceQtyArray();
 	explicit CResourceQtyArray(lpctstr pszCmds);
 	bool operator == ( const CResourceQtyArray & array ) const;
-	CResourceQtyArray& operator=(const CResourceQtyArray& other);
+	//CResourceQtyArray& operator=(const CResourceQtyArray& other);
 
 private:
 	CResourceQtyArray(const CResourceQtyArray& copy);
@@ -644,11 +644,8 @@ public:
 	CResourceRefArray()
 	{
 	}
-private:
 	CResourceRefArray(const CResourceRefArray& copy);
 	CResourceRefArray& operator=(const CResourceRefArray& other);
-
-public:
 	size_t FindResourceType( RES_TYPE type ) const;
 	size_t FindResourceID( CResourceIDBase rid ) const;
 	size_t FindResourceName( RES_TYPE restype, lpctstr pszKey ) const;
@@ -711,7 +708,7 @@ public:
 	}
 	CResourceDef* GetAt(CResourceIDBase rid, size_t index) const
 	{
-		return m_Array[GetHashArray(rid)].GetAt(index);
+		return m_Array[GetHashArray(rid)].at(index);
 	}
 	size_t AddSortKey(CResourceIDBase rid, CResourceDef* pNew)
 	{
@@ -719,7 +716,7 @@ public:
 	}
 	void SetAt(CResourceIDBase rid, size_t index, CResourceDef* pNew)
 	{
-		m_Array[GetHashArray(rid)].SetAt(index, pNew);
+        m_Array[GetHashArray(rid)].assign(index, pNew);
 	}
 };
 

@@ -419,12 +419,12 @@ bool CItemShip::Ship_Face( DIR_TYPE dir )
 			}
 			else if ( Multi_IsPartOf(pItem) )
 			{
-				for ( size_t j = 0; j < pMultiOld->m_Components.GetCount(); j++ )
+				for ( size_t j = 0; j < pMultiOld->m_Components.size(); j++ )
 				{
-					const CItemBaseMulti::CMultiComponentItem & component = pMultiOld->m_Components.ElementAt(j);
+					const CItemBaseMulti::CMultiComponentItem & component = pMultiOld->m_Components.at(j);
 					if ((xdiff == component.m_dx) && (ydiff == component.m_dy) && ((pItem->GetTopZ()-GetTopZ()) == component.m_dz))
 					{
-						const CItemBaseMulti::CMultiComponentItem & componentnew = pMultiNew->m_Components.ElementAt(j);
+						const CItemBaseMulti::CMultiComponentItem & componentnew = pMultiNew->m_Components.at(j);
 						pItem->SetID(componentnew.m_id);
 						pt.m_x = GetTopPoint().m_x + componentnew.m_dx;
 						pt.m_y = GetTopPoint().m_y + componentnew.m_dy;

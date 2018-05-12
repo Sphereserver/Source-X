@@ -3171,7 +3171,7 @@ PacketCharacterList::PacketCharacterList(CClient* target) : PacketSend(XCMD_Char
 	writeByte((byte)count);
 	skip(count * 60);
 
-	size_t startCount = g_Cfg.m_StartDefs.GetCount();
+	size_t startCount = g_Cfg.m_StartDefs.size();
 	writeByte((byte)startCount);
 
 	// since 7.0.13.0, start locations have extra information

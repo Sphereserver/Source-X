@@ -74,7 +74,7 @@ void CChatChanMember::SetChatInactive()
 size_t CChatChanMember::FindIgnoringIndex(lpctstr pszName) const
 {
     ADDTOCALLSTACK("CChatChanMember::FindIgnoringIndex");
-    for ( size_t i = 0; i < m_IgnoredMembers.GetCount(); i++)
+    for ( size_t i = 0; i < m_IgnoredMembers.size(); i++)
     {
         if (m_IgnoredMembers[i]->Compare(pszName) == 0)
             return i;
@@ -107,7 +107,7 @@ void CChatChanMember::ToggleIgnore(lpctstr pszName)
     if ( i != m_IgnoredMembers.BadIndex() )
     {
         ASSERT( m_IgnoredMembers.IsValidIndex(i) );
-        m_IgnoredMembers.RemoveAt(i);
+        m_IgnoredMembers.erase(i);
 
         SendChatMsg(CHATMSG_NoLongerIgnoring, pszName);
 
@@ -122,7 +122,7 @@ void CChatChanMember::ToggleIgnore(lpctstr pszName)
     else
     {
         CSString * name = new CSString(pszName);
-        m_IgnoredMembers.Add( name );
+        m_IgnoredMembers.push_back(name);
         SendChatMsg(CHATMSG_NowIgnoring, pszName); // This message also takes the ignored person off the clients local list of channel members
     }
 }
@@ -130,9 +130,9 @@ void CChatChanMember::ToggleIgnore(lpctstr pszName)
 void CChatChanMember::ClearIgnoreList()
 {
     ADDTOCALLSTACK("CChatChanMember::ClearIgnoreList");
-    for (size_t i = 0; i < m_IgnoredMembers.GetCount(); ++i)
+    for (size_t i = 0; i < m_IgnoredMembers.size(); ++i)
     {
-        m_IgnoredMembers.RemoveAt(i);
+        m_IgnoredMembers.erase(i);
     }
     SendChatMsg(CHATMSG_NoLongerIgnoringAnyone);
 }

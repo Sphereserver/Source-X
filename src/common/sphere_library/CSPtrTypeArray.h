@@ -9,7 +9,7 @@
 #include "CSTypedArray.h"
 
 template<class TYPE>
-class CSPtrTypeArray : public CSTypedArray<TYPE, TYPE>
+class CSPtrTypeArray : public CSTypedArray<TYPE>
 {
 public:
     static const char * m_sClassName;
@@ -19,15 +19,15 @@ public:
     ///@{
     CSPtrTypeArray() {}
     virtual ~CSPtrTypeArray() {}
-private:
     /**
-    * @brief No copy on construction allowed.
+    * @brief Copy constructor.
     */
     CSPtrTypeArray<TYPE>(const CSPtrTypeArray<TYPE> & copy);
     /**
-    * @brief No copy allowed.
+    * @brief Assign operator
     */
     CSPtrTypeArray<TYPE>& operator=(const CSPtrTypeArray<TYPE> & other);
+private:
     ///@}
     /** @name Modifiers:
     */
@@ -54,6 +54,10 @@ public:
     * @return position of the data if data is in the array, BadIndex otherwise.
     */
     size_t FindPtr( TYPE pData ) const;
+    ///@}
+    /** @name Index Validation:
+    */
+    ///@{
     /**
     * @brief Check if an index is between 0 and element count.
     * @param i index to check.
@@ -63,6 +67,60 @@ public:
     ///@}
 };
 
+template<class TYPE>
+CSPtrTypeArray<TYPE>::CSPtrTypeArray(const CSPtrTypeArray<TYPE> & copy) : CSTypedArray<TYPE>(static_cast<CSTypedArray<TYPE> >(copy)){
+}
+
+template<class TYPE>
+CSPtrTypeArray<TYPE>& CSPtrTypeArray<TYPE>::operator=(const CSPtrTypeArray<TYPE> & other) {
+    static_cast<CSTypedArray<TYPE> >(*this) = static_cast<CSTypedArray<TYPE> >(other);
+    return *this;
+}
+
+// CSPtrTypeArray:: Modifiers.
+
+template<class TYPE>
+bool CSPtrTypeArray<TYPE>::RemovePtr( TYPE pData )
+{
+    size_t nIndex = FindPtr( pData );
+    if ( nIndex == this->BadIndex() )
+        return false;
+
+    ASSERT( IsValidIndex(nIndex) );
+    this->erase(nIndex);
+    return true;
+}
+
+template<class TYPE>
+bool CSPtrTypeArray<TYPE>::ContainsPtr( TYPE pData ) const
+{
+    size_t nIndex = FindPtr(pData);
+    ASSERT((nIndex == this->BadIndex()) || IsValidIndex(nIndex));
+    return nIndex != this->BadIndex();
+}
+
+template<class TYPE>
+size_t CSPtrTypeArray<TYPE>::FindPtr( TYPE pData ) const
+{
+    if ( !pData )
+        return this->BadIndex();
+
+    for ( size_t nIndex = 0; nIndex < this->size(); ++nIndex )
+    {
+        if (this->at(nIndex) == pData )
+            return nIndex;
+    }
+
+    return this->BadIndex();
+}
+
+template<class TYPE>
+bool CSPtrTypeArray<TYPE>::IsValidIndex( size_t i ) const
+{
+    if ( i >= this->size() )
+        return false;
+    return (this->at(i) != NULL );
+}
 
 #endif // _INC_CSPTRTYPEARRAY_H
 

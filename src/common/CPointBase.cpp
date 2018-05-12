@@ -405,7 +405,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 			int iComponentQty = 0;
 			for (size_t i = 0; i < iMultiQty; i++)
 			{
-				pRegion = rlinks.GetAt(i);
+				pRegion = rlinks.at(i);
 				if (pRegion == NULL)
 					continue;
 
@@ -471,7 +471,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 
 			for (size_t i = 0; i < iMultiQty; i++)
 			{
-				pRegion = rlinks.GetAt(i);
+				pRegion = rlinks.at(i);
 				if (pRegion == NULL)
 					continue;
 
@@ -509,7 +509,7 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 		{
 			for (size_t i = 0; i < iMultiQty; i++)
 			{
-				pRegion = rlinks.GetAt(i);
+				pRegion = rlinks.at(i);
 				if (pRegion == NULL)
 					continue;
 

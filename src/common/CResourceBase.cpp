@@ -145,7 +145,7 @@ CResourceScript * CResourceBase::AddResourceFile( lpctstr pszName )
 		return NULL;
 
 	pNewRes = new CResourceScript( s.GetFilePath() );
-	pNewRes->m_iResourceFileIndex = m_ResourceFiles.Add(pNewRes);
+	pNewRes->m_iResourceFileIndex = m_ResourceFiles.push_back(pNewRes);
 	return pNewRes;
 }
 
@@ -583,13 +583,13 @@ bool CRegion::MakeRegionName()
 	*(++pszDef)	= '\0';
 
 
-	size_t iMax = g_Cfg.m_RegionDefs.GetCount();
+	size_t iMax = g_Cfg.m_RegionDefs.size();
 	int iVar = 1;
 	size_t iLen = strlen( pbuf );
 
 	for ( size_t i = 0; i < iMax; i++ )
 	{
-		CRegion * pRegion = dynamic_cast <CRegion*> (g_Cfg.m_RegionDefs.GetAt(i));
+		CRegion * pRegion = dynamic_cast <CRegion*> (g_Cfg.m_RegionDefs.at(i));
 		if ( !pRegion )
 			continue;
 		pszKey = pRegion->GetResourceName();
@@ -1084,7 +1084,7 @@ void CScriptObjectContext::Close()
 lpctstr CResourceRefArray::GetResourceName( size_t iIndex ) const
 {
 	// look up the name of the fragment given it's index.
-	CResourceLink * pResourceLink = GetAt( iIndex );
+	CResourceLink * pResourceLink = at(iIndex);
 	ASSERT(pResourceLink);
 	return pResourceLink->GetResourceName();
 }
@@ -1115,7 +1115,7 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
 			pszCmd ++;
 			if ( pszCmd[0] == '0' || pszCmd[0] == '*' )
 			{
-				Clear();
+				clear();
 				fRet = true;
 				continue;
 			}
@@ -1172,7 +1172,7 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
 				continue;
 			}
 
-			Add( pResourceLink );
+			push_back(pResourceLink);
 		}
 	}
 	return fRet;
@@ -1190,7 +1190,7 @@ void CResourceRefArray::WriteResourceRefList( CSString & sVal ) const
 	TemporaryString tsVal;
 	tchar * pszVal = static_cast<tchar *>(tsVal);
 	size_t len = 0;
-	for ( size_t j = 0; j < GetCount(); ++j )
+	for ( size_t j = 0; j < size(); ++j )
 	{
 		if ( j > 0 )
 			pszVal[len++] = ',';
@@ -1203,14 +1203,22 @@ void CResourceRefArray::WriteResourceRefList( CSString & sVal ) const
 	sVal = pszVal;
 }
 
+CResourceRefArray::CResourceRefArray(const CResourceRefArray& copy) : CSPtrTypeArray<CResourceRef>(static_cast<const CSPtrTypeArray<CResourceRef> &>(copy)) {
+}
+
+CResourceRefArray& CResourceRefArray::operator=(const CResourceRefArray& other) {
+	static_cast<CSPtrTypeArray<CResourceRef> &>(*this) = static_cast<const CSPtrTypeArray<CResourceRef> &>(other);
+	return *this;
+}
+
 size_t CResourceRefArray::FindResourceType( RES_TYPE restype ) const
 {
 	ADDTOCALLSTACK("CResourceRefArray::FindResourceType");
 	// Is this resource already in the list ?
-	size_t iQty = GetCount();
+	size_t iQty = size();
 	for ( size_t i = 0; i < iQty; ++i )
 	{
-		CResourceID ridtest = GetAt(i).GetRef()->GetResourceID();
+		CResourceID ridtest = at(i).GetRef()->GetResourceID();
 		if ( ridtest.GetResType() == restype )
 			return( i );
 	}
@@ -1221,10 +1229,10 @@ size_t CResourceRefArray::FindResourceID( CResourceIDBase rid ) const
 {
 	ADDTOCALLSTACK("CResourceRefArray::FindResourceID");
 	// Is this resource already in the list ?
-	size_t iQty = GetCount();
+	size_t iQty = size();
 	for ( size_t i = 0; i < iQty; i++ )
 	{
-		CResourceID ridtest = GetAt(i).GetRef()->GetResourceID();
+		CResourceID ridtest = at(i).GetRef()->GetResourceID();
 		if ( ridtest == rid )
 			return i;
 	}
@@ -1244,7 +1252,7 @@ size_t CResourceRefArray::FindResourceName( RES_TYPE restype, lpctstr pszKey ) c
 void CResourceRefArray::r_Write( CScript & s, lpctstr pszKey ) const
 {
 	ADDTOCALLSTACK_INTENSIVE("CResourceRefArray::r_Write");
-	for ( size_t j = 0; j < GetCount(); j++ )
+	for ( size_t j = 0; j < size(); j++ )
 	{
 		s.WriteKey( pszKey, GetResourceName( j ));
 	}
@@ -1410,16 +1418,16 @@ CResourceQtyArray::CResourceQtyArray(lpctstr pszCmds)
 	m_mergeOnLoad = true;
 	Load(pszCmds);
 }
-
-CResourceQtyArray& CResourceQtyArray::operator=(const CResourceQtyArray& other)
-{
-	if (this != &other)
-	{
-		m_mergeOnLoad = other.m_mergeOnLoad;
-		Copy(&other);
-	}
-	return *this;
-}
+//
+//CResourceQtyArray& CResourceQtyArray::operator=(const CResourceQtyArray& other)
+//{
+//	if (this != &other)
+//	{
+//		m_mergeOnLoad = other.m_mergeOnLoad;
+//		Copy(&other);
+//	}
+//	return *this;
+//}
 
 void CResourceQtyArray::setNoMergeOnLoad()
 {
@@ -1432,9 +1440,9 @@ size_t CResourceQtyArray::FindResourceType( RES_TYPE type ) const
 	ADDTOCALLSTACK("CResourceQtyArray::FindResourceType");
 	// is this RES_TYPE in the array ?
 	// BadIndex = fail
-	for ( size_t i = 0; i < GetCount(); i++ )
+	for ( size_t i = 0; i < size(); i++ )
 	{
-		CResourceID ridtest = GetAt(i).GetResourceID();
+		CResourceID ridtest = at(i).GetResourceID();
 		if ( type == ridtest.GetResType() )
 			return i;
 	}
@@ -1446,9 +1454,9 @@ size_t CResourceQtyArray::FindResourceID( CResourceIDBase rid ) const
 	ADDTOCALLSTACK("CResourceQtyArray::FindResourceID");
 	// is this RESOURCE_ID in the array ?
 	// BadIndex = fail
-	for ( size_t i = 0; i < GetCount(); i++ )
+	for ( size_t i = 0; i < size(); i++ )
 	{
-		CResourceID ridtest = GetAt(i).GetResourceID();
+		CResourceID ridtest = at(i).GetResourceID();
 		if ( rid == ridtest )
 			return i;
 	}
@@ -1460,9 +1468,9 @@ size_t CResourceQtyArray::FindResourceMatch( CObjBase * pObj ) const
 	ADDTOCALLSTACK("CResourceQtyArray::FindResourceMatch");
 	// Is there a more vague match in the array ?
 	// Use to find intersection with this pOBj raw material and BaseResource creation elements.
-	for ( size_t i = 0; i < GetCount(); i++ )
+	for ( size_t i = 0; i < size(); i++ )
 	{
-		CResourceID ridtest = GetAt(i).GetResourceID();
+		CResourceID ridtest = at(i).GetResourceID();
 		if ( pObj->IsResourceMatch( ridtest, 0 ))
 			return i;
 	}
@@ -1477,11 +1485,11 @@ bool CResourceQtyArray::IsResourceMatchAll( CChar * pChar ) const
 	//  false = failed.
 	ASSERT(pChar != NULL);
 
-	for ( size_t i = 0; i < GetCount(); i++ )
+	for ( size_t i = 0; i < size(); i++ )
 	{
-		CResourceID ridtest = GetAt(i).GetResourceID();
+		CResourceID ridtest = at(i).GetResourceID();
 
-		if ( ! pChar->IsResourceMatch( ridtest, (uint)(GetAt(i).GetResQty()) ))
+		if ( ! pChar->IsResourceMatch( ridtest, (uint)(at(i).GetResQty()) ))
 			return false;
 	}
 
@@ -1494,7 +1502,7 @@ size_t CResourceQtyArray::Load(lpctstr pszCmds)
 	//	clear-before-load in order not to mess with the previous data
 	if ( !m_mergeOnLoad )
 	{
-		Clear();
+		clear();
 	}
 
 	// 0 = clear the list.
@@ -1505,7 +1513,7 @@ size_t CResourceQtyArray::Load(lpctstr pszCmds)
 		if ( *pszCmds == '0' &&
 			( pszCmds[1] == '\0' || pszCmds[1] == ',' ))
 		{
-			Clear();	// clear any previous stuff.
+			clear();	// clear any previous stuff.
 			++pszCmds;
 		}
 		else
@@ -1520,11 +1528,11 @@ size_t CResourceQtyArray::Load(lpctstr pszCmds)
 				size_t i = FindResourceID( res.GetResourceID() );
 				if ( i != BadIndex() )
 				{
-					SetAt(i, res);
+					assign(i, res);
 				}
 				else
 				{
-					Add(res);
+					push_back(res);
 				}
 				iValid++;
 			}
@@ -1542,7 +1550,7 @@ size_t CResourceQtyArray::Load(lpctstr pszCmds)
 void CResourceQtyArray::WriteKeys( tchar * pszArgs, size_t index, bool fQtyOnly, bool fKeyOnly ) const
 {
 	ADDTOCALLSTACK("CResourceQtyArray::WriteKeys");
-	size_t max = GetCount();
+	size_t max = size();
 	if ( index > 0 && index < max )
 		max = index;
 
@@ -1552,7 +1560,7 @@ void CResourceQtyArray::WriteKeys( tchar * pszArgs, size_t index, bool fQtyOnly,
 		{
 			pszArgs += sprintf( pszArgs, "," );
 		}
-		pszArgs += GetAt(i).WriteKey( pszArgs, fQtyOnly, fKeyOnly );
+		pszArgs += at(i).WriteKey( pszArgs, fQtyOnly, fKeyOnly );
 	}
 	*pszArgs = '\0';
 }
@@ -1561,7 +1569,7 @@ void CResourceQtyArray::WriteKeys( tchar * pszArgs, size_t index, bool fQtyOnly,
 void CResourceQtyArray::WriteNames( tchar * pszArgs, size_t index ) const
 {
 	ADDTOCALLSTACK("CResourceQtyArray::WriteNames");
-	size_t max = GetCount();
+	size_t max = size();
 	if ( index > 0 && index < max )
 		max = index;
 
@@ -1572,10 +1580,10 @@ void CResourceQtyArray::WriteNames( tchar * pszArgs, size_t index ) const
 			pszArgs += sprintf( pszArgs, ", " );
 		}
 
-		int64 iQty = GetAt(i).GetResQty();
+		int64 iQty = at(i).GetResQty();
 		if ( iQty )
 		{
-			if ( GetAt(i).GetResType() == RES_SKILL )
+			if (at(i).GetResType() == RES_SKILL )
 			{
 				pszArgs += sprintf( pszArgs, "%" PRId64 ".%" PRId64 ,
 						iQty / 10, iQty % 10 );
@@ -1584,7 +1592,7 @@ void CResourceQtyArray::WriteNames( tchar * pszArgs, size_t index ) const
 				pszArgs += sprintf( pszArgs, "%" PRId64 " ", iQty);
 		}
 
-		pszArgs += GetAt(i).WriteNameSingle( pszArgs, (int)iQty );
+		pszArgs += at(i).WriteNameSingle( pszArgs, (int)iQty );
 	}
 	*pszArgs = '\0';
 }
@@ -1592,18 +1600,18 @@ void CResourceQtyArray::WriteNames( tchar * pszArgs, size_t index ) const
 bool CResourceQtyArray::operator == ( const CResourceQtyArray & array ) const
 {
 	ADDTOCALLSTACK("CResourceQtyArray::operator == ");
-	if ( GetCount() != array.GetCount())
+	if (size() != array.size())
 		return false;
 
-	for ( size_t i = 0; i < GetCount(); i++ )
+	for ( size_t i = 0; i < size(); i++ )
 	{
 		for ( size_t j = 0; ; j++ )
 		{
-			if ( j >= array.GetCount() )
+			if ( j >= array.size() )
 				return false;
-			if ( ! ( GetAt(i).GetResourceID() == array[j].GetResourceID() ) )
+			if ( ! (at(i).GetResourceID() == array[j].GetResourceID() ) )
 				continue;
-			if ( GetAt(i).GetResQty() != array[j].GetResQty() )
+			if (at(i).GetResQty() != array[j].GetResQty() )
 				continue;
 			break;
 		}

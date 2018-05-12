@@ -240,7 +240,7 @@ not_in_a_channel:
 		pChannel->KickMember(pMe, pMember);
 		// If noone is left, tell the chat system to
 		// delete it from memory (you can kick yourself)
-		if (pChannel->m_Members.GetCount() <= 0) // Kicked self
+		if (pChannel->m_Members.size() <= 0) // Kicked self
 		{
 			DeleteChannel(pChannel);
 		}
@@ -284,7 +284,7 @@ void CChat::QuitChat(CChatChanMember * pClient)
 		pCurrentChannel->RemoveMember( pClient );
 
 		// Am I the last one here? Delete it from all other clients?
-		if (pCurrentChannel->m_Members.GetCount() <= 0)
+		if (pCurrentChannel->m_Members.size() <= 0)
 		{
 			// If noone is left, tell the chat system to delete it from memory
 			DeleteChannel(pCurrentChannel);
@@ -694,7 +694,7 @@ bool CChat::JoinChannel(CChatChanMember * pMember, lpctstr pszChannel, lpctstr p
 		pCurrentChannel->RemoveMember(pMember);
 
 		// If noone is left, tell the chat system to delete it from memory
-		if (pCurrentChannel->m_Members.GetCount() <= 0)
+		if (pCurrentChannel->m_Members.size() <= 0)
 		{
 			// Am I the last one here? Delete it from all other clients?
 			DeleteChannel(pCurrentChannel);

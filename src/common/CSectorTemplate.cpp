@@ -276,7 +276,7 @@ CRegion * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) const
 	// REGION_TYPE_ROOM => RES_ROOM = NPC House areas only = CRegion.
 	// REGION_TYPE_MULTI => RES_WORLDITEM = UID linked types in general = CRegionWorld
 
-	size_t iQty = m_RegionLinks.GetCount();
+	size_t iQty = m_RegionLinks.size();
 	for ( size_t i = 0; i < iQty; i++ )
 	{
 		CRegion * pRegion = m_RegionLinks[i];
@@ -318,7 +318,7 @@ CRegion * CSectorBase::GetRegion( const CPointBase & pt, dword dwType ) const
 size_t CSectorBase::GetRegions( const CPointBase & pt, dword dwType, CRegionLinks & rlist ) const
 {
 	ADDTOCALLSTACK("CSectorBase::GetRegions");
-	size_t iQty = m_RegionLinks.GetCount();
+	size_t iQty = m_RegionLinks.size();
 	for ( size_t i = 0; i < iQty; i++ )
 	{
 		CRegion * pRegion = m_RegionLinks[i];
@@ -351,9 +351,9 @@ size_t CSectorBase::GetRegions( const CPointBase & pt, dword dwType, CRegionLink
 			continue;
 		if ( ! pRegion->IsInside2d( pt ))
 			continue;
-		rlist.Add( pRegion );
+		rlist.push_back(pRegion);
 	}
-	return( rlist.GetCount() );
+	return(rlist.size() );
 }
 
 bool CSectorBase::UnLinkRegion( CRegion * pRegionOld )
@@ -373,7 +373,7 @@ bool CSectorBase::LinkRegion( CRegion * pRegionNew )
 	//  according to the old rules.
 	ASSERT(pRegionNew);
 	ASSERT( pRegionNew->IsOverlapped( GetRect()));
-	size_t iQty = m_RegionLinks.GetCount();
+	size_t iQty = m_RegionLinks.size();
 
 	for ( size_t i = 0; i < iQty; i++ )
 	{
@@ -403,12 +403,12 @@ bool CSectorBase::LinkRegion( CRegion * pRegionNew )
 				continue;
 
 			// must insert before this.
-			m_RegionLinks.InsertAt( i, pRegionNew );
+			m_RegionLinks.insert(i, pRegionNew);
 			return true;
 		}
 	}
 
-	m_RegionLinks.Add( pRegionNew );
+	m_RegionLinks.push_back(pRegionNew);
 	return true;
 }
 

@@ -1960,7 +1960,7 @@ void CClient::Event_SetName( CUID uid, const char * pszCharName )
 
 void CDialogResponseArgs::AddText( word id, lpctstr pszText )
 {
-	m_TextArray.Add(new TResponseString(id, pszText));
+    m_TextArray.push_back(new TResponseString(id, pszText));
 }
 
 lpctstr CDialogResponseArgs::GetName() const
@@ -1978,7 +1978,7 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConso
 		pszKey += 6;
 		SKIP_SEPARATORS(pszKey);
 
-		size_t iQty = m_CheckArray.GetCount();
+		size_t iQty = m_CheckArray.size();
 		if ( pszKey[0] == '\0' )
 		{
 			sVal.FormatSTVal(iQty);
@@ -2014,7 +2014,7 @@ bool CDialogResponseArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConso
 		pszKey += 6;
 		SKIP_SEPARATORS(pszKey);
 
-		size_t iQty = m_TextArray.GetCount();
+		size_t iQty = m_TextArray.size();
 		if ( pszKey[0] == '\0' )
 		{
 			sVal.FormatSTVal(iQty);

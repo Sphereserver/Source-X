@@ -14,7 +14,7 @@ size_t CRegionBase::GetRegionRectCount() const
 {
 	ADDTOCALLSTACK("CRegionBase::GetRegionRectCount");
 	// How many rectangles in this region ?
-	size_t iQty = m_Rects.GetCount();
+	size_t iQty = m_Rects.size();
 	if ( iQty <= 0 )
 	{
 		if ( ! IsRegionEmpty())
@@ -27,19 +27,19 @@ CRectMap & CRegionBase::GetRegionRect(size_t i)
 {
 	ADDTOCALLSTACK("CRegionBase::GetRegionRect");
 	// Get a particular rectangle.
-	size_t iQty = m_Rects.GetCount();
+	size_t iQty = m_Rects.size();
 	if ( iQty <= 0 )
 		return m_rectUnion;
-	return( m_Rects.ElementAt(i));
+	return(m_Rects.at(i));
 }
 
 const CRectMap & CRegionBase::GetRegionRect(size_t i) const
 {
 	ADDTOCALLSTACK("CRegionBase::GetRegionRect");
-	size_t iQty = m_Rects.GetCount();
+	size_t iQty = m_Rects.size();
 	if ( iQty <= 0 )
 		return m_rectUnion;
-	return( m_Rects.ElementAt(i));
+	return(m_Rects.at(i));
 }
 
 CPointMap CRegionBase::GetRegionCorner( DIR_TYPE dir ) const
@@ -55,7 +55,7 @@ bool CRegionBase::IsInside2d( const CPointMap & pt ) const
 	if ( ! m_rectUnion.IsInside2d( pt ))
 		return false;
 
-	size_t iQty = m_Rects.GetCount();
+	size_t iQty = m_Rects.size();
 	if ( iQty > 0 )
 	{
 		for ( size_t i = 0; i < iQty; ++i )
@@ -74,7 +74,7 @@ bool CRegionBase::AddRegionRect( const CRectMap & rect )
 	if ( rect.IsRectEmpty() )
 		return false;
 
-	size_t iQty = m_Rects.GetCount();
+	size_t iQty = m_Rects.size();
 	if ( iQty <= 0 && IsRegionEmpty())
 	{
 		m_rectUnion = rect;
@@ -98,10 +98,10 @@ bool CRegionBase::AddRegionRect( const CRectMap & rect )
 		{
 			if ( rect.IsInside( m_rectUnion ))
 				return true;
-			m_Rects.Add( m_rectUnion );
+			m_Rects.push_back(m_rectUnion);
 		}
 
-		m_Rects.Add( rect );
+		m_Rects.push_back(rect);
 		m_rectUnion.UnionRect( rect );
 	}
 	return true;
@@ -114,7 +114,7 @@ bool CRegionBase::IsOverlapped( const CRectMap & rect ) const
 	if ( !m_rectUnion.IsOverlapped(rect) )
 		return false;
 
-	size_t iQty = m_Rects.GetCount();
+	size_t iQty = m_Rects.size();
 	if ( iQty <= 0 )
 		return true;
 	for ( size_t i = 0; i < iQty; ++i )
@@ -133,7 +133,7 @@ bool CRegionBase::IsInside( const CRectMap & rect ) const
 	if ( ! m_rectUnion.IsInside( rect ))
 		return false;
 
-	size_t iQty = m_Rects.GetCount();
+	size_t iQty = m_Rects.size();
 	if ( iQty <= 0 )
 		return true;
 
@@ -155,7 +155,7 @@ bool CRegionBase::IsInside( const CRegionBase * pRegionTest ) const
 	if ( ! m_rectUnion.IsInside( pRegionTest->m_rectUnion ))
 		return false;
 
-	size_t iQtyTest = pRegionTest->m_Rects.GetCount();
+	size_t iQtyTest = pRegionTest->m_Rects.size();
 	for ( size_t j = 0; j < iQtyTest; ++j )
 	{
 		if ( ! IsInside( pRegionTest->m_Rects[j] ))
@@ -171,8 +171,8 @@ bool CRegionBase::IsOverlapped( const CRegionBase * pRegionTest ) const
 	// Does the region overlap this rectangle.
 	if ( ! m_rectUnion.IsOverlapped( pRegionTest->m_rectUnion ))
 		return false;
-	size_t iQty = m_Rects.GetCount();
-	size_t iQtyTest = pRegionTest->m_Rects.GetCount();
+	size_t iQty = m_Rects.size();
+	size_t iQtyTest = pRegionTest->m_Rects.size();
 	if ( iQty == 0 )
 	{
 		if ( iQtyTest == 0 )
@@ -201,8 +201,8 @@ bool CRegionBase::IsEqualRegion( const CRegionBase * pRegionTest ) const
 	if ( ! m_rectUnion.IsEqual( pRegionTest->m_rectUnion ))
 		return false;
 
-	size_t iQty = m_Rects.GetCount();
-	size_t iQtyTest = pRegionTest->m_Rects.GetCount();
+	size_t iQty = m_Rects.size();
+	size_t iQtyTest = pRegionTest->m_Rects.size();
 	if ( iQty != iQtyTest )
 		return false;
 

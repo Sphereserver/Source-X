@@ -33,7 +33,7 @@ public:
     };
 
     bool m_fPlotMode;	// should really be per-client based but oh well.
-    CSTypedArray<CMapPinRec,CMapPinRec&> m_Pins;
+    CSTypedArray<CMapPinRec> m_Pins;
 
 public:
     CItemMap( ITEMID_TYPE id, CItemBase * pItemDef );
