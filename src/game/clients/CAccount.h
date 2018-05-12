@@ -77,7 +77,8 @@ public:
 	CCharRefArray m_Chars;		// CChars attached to this CAccount.
 	CVarDefMap m_TagDefs;		// Tags storage system.
 	CVarDefMap m_BaseDefs;		// New Variable storage system.
-    uint8 _iMaxHouses;
+    uint8 _iMaxHouses;          // g_Cfg._iMaxHousesAccount
+    uint8 _iMaxShips;           // g_Cfg._iMaxShipsAccount
 
 public:
 	/**

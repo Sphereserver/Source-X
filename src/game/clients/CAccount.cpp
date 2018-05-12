@@ -565,6 +565,7 @@ CAccount::CAccount( lpctstr pszName, bool fGuest )
     SetResDisp(RDS_T2A);
 	m_MaxChars = 0;
     _iMaxHouses = g_Cfg._iMaxHousesAccount;
+    _iMaxShips = g_Cfg._iMaxShipsAccount;
 
 	m_Total_Connect_Time = 0;
 	m_Last_Connect_Time = 0;
@@ -1438,6 +1439,10 @@ void CAccount::r_Write(CScript &s)
     if (_iMaxHouses != g_Cfg._iMaxHousesAccount)
     {
         s.WriteKeyVal("MaxHouses", _iMaxHouses);
+    }
+    if (_iMaxShips != g_Cfg._iMaxShipsAccount)
+    {
+        s.WriteKeyVal("MaxShips", _iMaxShips);
     }
 
 	m_Chars.WritePartyChars(s);

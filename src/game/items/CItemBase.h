@@ -633,6 +633,7 @@ public:
     uint16 _iBaseStorage;
     uint8 _iBaseVendors;
     uint8 _iLockdownsPercent;
+    uint8 _iMultiCount;     // Count towards char House's count, 0 = no count, 3 = count like 3 houses.
 
 public:
 	explicit CItemBaseMulti( CItemBase* pBase );

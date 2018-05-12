@@ -871,3 +871,25 @@ Added to [MULTIDEF ]:
 11-05-2018, Nolok
 - Changed: disabled the usage of FORINSTANCES without an argoment, since that's an unclear and error prone way to use it.
 - Updated: Sphere now has a better logging of standard C++ exceptions, meaning better informations in the case of a pure C++ error.
+
+12-05-2018, XuN
+Expanded some Ship new features to Ships:
+- Added AddShip uid(WO): Adds the given uid to the player's ship.
+	If the player current count of ships is greater than the limit he has, the ship will be redeeded.
+- Added DelShip uid(WO): Deletes the given uid from the player's list (Will not delete the ship)(-1 clears the whole list).
+- Added Ships(RO): Return the ships on the player's list.
+- Added GetShipPos uid(RO): Returns the position of the given UID on the ships list (-1 if not found).
+- Added MaxShips(RW) to Accounts and Chars, when created they read this new setting from the sphere.ini (if values on sphere.ini change, they will not reflect on already created accounts/chars).
+- Added REF to 'SHIP.x' to access the ship in the Nth position, eg: ship.3.Redeed, local.ship_p=<ship.1.p>
+Note: Ships generated before this change will not be updated on the player's list, instead the player will still have the memory with color=MEMORY_GUARD (0x100)
+linked to the ship,since there was no default behaviour other than this and each ship script handles it differently, there will be no hardcoded update
+to the new system, each ship system should be updated according to it's behaviour (ie: removing the memory and setting AddShip <ShipUID>)
+
+-Added MaxShips(RW) property for accounts, Default = Serv.MaxShipsAccount.
+-Added MaxShips(RW) property for chars (meant for players), Default = Serv.MaxShipsPlayer.
+* Setting MaxShips = 0 for Players will skip the setting and read it from it's Account.
+* Setting MaxShips = 0 for Players and Accounts will allow to build without limit.
+
+
+Houses and Ships:
+Added a new ITEMDEF property MultiCount. Setting it to 0 will add no value towards the house limit (the house will be still present but not counted) and setting it to 3 (eg for castles) will count more for placement checks, etc

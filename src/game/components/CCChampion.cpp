@@ -816,7 +816,7 @@ bool CCChampion::r_Verb(CScript & s, CTextConsole * pSrc)
         {
             /*CUID	uid( s.GetArgVal() );   // FIXME: ECS link with CItemMulti.
             CChar *	pCharSrc = uid.CharFind();
-            Multi_Create( pCharSrc, 0 );*/
+            Multi_Setup( pCharSrc, 0 );*/
             return true;
         }
         case ICHMPV_STOP:

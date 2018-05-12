@@ -74,8 +74,10 @@ CServerConfig::CServerConfig()
 	m_iMinCharDeleteTime	= 7*24*60*60 * TICK_PER_SEC;
 	m_iMaxCharsPerAccount	= 5;
 	m_fLocalIPAdmin			= true;
-    _iMaxHousesAccount      = 1;
-    _iMaxHousesPlayer       = 1;
+    _iMaxHousesAccount = 1;
+    _iMaxHousesPlayer = 1;
+    _iMaxShipsAccount = 1;
+    _iMaxShipsPlayer = 1;
 
 	// Save
 	m_iSaveNPCSkills			= 10;
@@ -518,6 +520,8 @@ enum RC_TYPE
 	RC_MAXQUEUESIZE,			// m_iNetMaxQueueSize
 	RC_MAXSECTORCOMPLEXITY,		// m_iMaxSectorComplexity
 	RC_MAXSHIPPLANKTELEPORT,	// m_iMaxShipPlankTeleport
+    RC_MAXSHIPSACCOUNT,         // _iMaxShipsAccount
+    RC_MAXSHIPSPLAYER,          // _iMaxShipsPlayer
 	RC_MAXSIZEPERTICK,			// m_iNetMaxLengthPerTick
 	RC_MD5PASSWORDS,			// m_fMd5Passwords
 	RC_MEDIUMCANHEARGHOSTS,		// m_iMediumCanHearGhosts
@@ -755,6 +759,8 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "MAXQUEUESIZE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetMaxQueueSize),		0 }},
 	{ "MAXSECTORCOMPLEXITY",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxSectorComplexity),	0 }},
 	{ "MAXSHIPPLANKTELEPORT",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxShipPlankTeleport),0 }},
+    { "MAXSHIPSACCOUNT",        { ELEM_INT,		OFFSETOF(CServerConfig,_iMaxShipsAccount),      0 }},
+    { "MAXSHIPSPLAYER",         { ELEM_INT,		OFFSETOF(CServerConfig,_iMaxShipsPlayer),       0 }},
 	{ "MAXSIZEPERTICK",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetMaxLengthPerTick),	0 }},
 	{ "MD5PASSWORDS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fMd5Passwords),		0 }},
 	{ "MEDIUMCANHEARGHOSTS",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMediumCanHearGhosts),	0 }},

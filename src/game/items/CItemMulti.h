@@ -26,6 +26,8 @@ enum TRANSFER_TYPE
     TRANSFER_ALL        = 0x4   // Transfer Locked Down, Addons and normal items placed on ground (Not Components).
 };
 
+class CChar;
+class CItemStone;
 class CItemMulti : public CItem
 {
 	// IT_MULTI IT_SHIP
@@ -50,6 +52,7 @@ private:
     bool _fIsAddon;         // House AddOns are also multis
     HOUSE_TYPE _iHouseType; 
     std::vector<CUID> _lComponents; // List of Components.
+    uint8 _iMultiCount;         // Does this counts towars the char's house limit
 
     // house storage
     uint16 _iBaseStorage;       // Base limit for secure storage (Max = 65535).
@@ -79,7 +82,7 @@ public:
 	byte m_SpeedMode;
 
     // House permissions
-    bool CanPlace(CChar *pChar);
+    static CItemMulti *Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPointMap & pt, CItem *pDeed);
     // Owner
     void SetOwner(CUID uidOwner);
     bool IsOwner(CUID uidTarget);
@@ -103,6 +106,7 @@ public:
     // Keys:
     CItem *GenerateKey(CChar *pTarget, bool fDupeOnBank = false);
     void RemoveKeys(CChar *pTarget);
+    int16 GetMultiCount();
     // Redeed
     void Redeed(bool fDisplayMsg = true, bool fMoveToBank = true);
     //Moving Crate
@@ -171,17 +175,59 @@ public:
 	void OnHearRegion( lpctstr pszCmd, CChar * pSrc );
 	CItem * Multi_GetSign();	// or Tiller
 
-	void Multi_Create(CChar * pChar, dword dwKeyCode);
+	void Multi_Setup(CChar * pChar, dword dwKeyCode);
 	static const CItemBaseMulti * Multi_GetDef( ITEMID_TYPE id );
 
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
 
-	virtual void  r_Write( CScript & s );
+	virtual void r_Write( CScript & s );
 	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc );
-	virtual bool  r_LoadVal( CScript & s  );
+	virtual bool r_LoadVal( CScript & s  );
 	virtual void DupeCopy( const CItem * pItem );
 };
 
+/*
+* Class related to storage/access the multis owned by the holder entity.
+* This class adds multis to it's lists only checking for UID validity, nothing more,
+* further checks must be added on multi placement, etc
+*/
+class CMultiStorage
+{
+private:
+    std::vector<CItemMulti*> _lHouses; // List of stored houses.
+    std::vector<CItemMulti*> _lShips;  // List of stored ships.
+    int16 _iHousesTotal;        // 
+    int16 _iShipsTotal;
 
+public:
+    CMultiStorage();
+    ~CMultiStorage();
+
+    void AddMulti(CItemMulti *pMulti);
+    void DelMulti(CItemMulti *pMulti);
+
+    void AddHouse(CItemMulti *pHouse);
+    void DelHouse(CItemMulti *pHouse);
+    bool CanAddHouse(CChar *pChar, int16 iHouseCount);
+    bool CanAddHouse(CItemStone *pStone, int16 iHouseCount);
+    int16 GetHousePos(CItemMulti *pHouse);
+    int16 GetHouseCountTotal();
+    int16 GetHouseCountReal();
+    CItemMulti *GetHouseAt(int16 iPos);
+    void ClearHouses();
+
+    void AddShip(CItemMulti *pShip);
+    void DelShip(CItemMulti *pShip);
+    bool CanAddShip(CChar *pChar, int16 iShipCount);
+    bool CanAddShip(CItemStone *pStone, int16 iShipCount);
+    int16 GetShipPos(CItemMulti *pShip);
+    int16 GetShipCountTotal();
+    int16 GetShipCountReal();
+    CItemMulti *GetShipAt(int16 iPos);
+    void ClearShips();
+
+
+    virtual void r_Write(CScript & s);
+};
 #endif // _INC_CITEMMULTI_H

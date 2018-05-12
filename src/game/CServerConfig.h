@@ -851,6 +851,8 @@ public:
 	bool m_fMd5Passwords;       // Should MD5 hashed passwords be used?
     uint8 _iMaxHousesAccount;   // Max houses per account.
     uint8 _iMaxHousesPlayer;    // Max houses per player.
+    uint8 _iMaxShipsAccount;    // Max ships per account.
+    uint8 _iMaxShipsPlayer;     // Max ships per player.
 
 	// Magic
 	bool m_fReagentsRequired;   // Do spells require reagents to be casted?

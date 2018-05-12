@@ -14,6 +14,7 @@
 #include "../items/CItemContainer.h"
 #include "../items/CItemMemory.h"
 #include "../items/CItemShip.h"
+#include "../items/CItemMulti.h"
 #include "../components/CCSpawn.h"
 #include "../CContainer.h"
 #include "../CServer.h"
@@ -248,6 +249,8 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false ),
 	m_SpeechHue = HUE_TEXT_DEF;
 	m_SpeechHueOverride = HUE_SAY_DEF;
     _iMaxHouses = g_Cfg._iMaxHousesPlayer;
+    _iMaxShips = g_Cfg._iMaxShipsPlayer;
+    _pMultiStorage = new CMultiStorage();
 	m_height = 0;
 	m_ModMaxWeight = 0;
 
@@ -332,7 +335,7 @@ CChar::~CChar()
     if ( m_pParty )
     {
         m_pParty->RemoveMember( GetUID(), (dword) GetUID() );
-        m_pParty = NULL;
+        m_pParty = nullptr;
     }
     Attacker_RemoveChar();      // Removing me from enemy's attacker list (I asume that if he is on my list, I'm on his one and no one have me on their list if I dont have them)
     if (m_pNPC)
@@ -341,6 +344,8 @@ CChar::~CChar()
     ClearNPC();
     ClearPlayer();
     g_Serv.StatDec( SERV_STAT_CHARS );
+    delete _pMultiStorage;
+    _pMultiStorage = nullptr;
 }
 
 // Client is detaching from this CChar.
@@ -463,76 +468,9 @@ void CChar::Delete(bool bforce)
 	CObjBase::Delete();
 }
 
-void CChar::AddHouse(CUID uidHouse)
+CMultiStorage *CChar::GetMultiStorage()
 {
-    ADDTOCALLSTACK("CChar::AddHouse");
-    if (!g_Serv.IsLoading())
-    {
-        if (!uidHouse.IsValidUID())
-        {
-            g_Log.EventDebug("Char '%#08x' trying to add house with invalid uid '%#08x'.", GetUID(), uidHouse);
-            return;
-        }
-        uint8 iMaxHouses = _iMaxHouses;
-        if (iMaxHouses == 0)
-        {
-            if (GetClient())
-            {
-                iMaxHouses = GetClient()->GetAccount()->_iMaxHouses;
-            }
-        }
-        if (iMaxHouses > 0 && _lHouses.size() >= iMaxHouses)
-        {
-            CItem *pItem = uidHouse.ItemFind();
-            if (pItem)
-            {
-                CItemMulti *pMulti = static_cast<CItemMulti*>(pItem);
-                if (pMulti)
-                {
-                    pMulti->Redeed(true, false);
-                }
-            }
-            return;
-        }
-        if (GetHousePos(uidHouse) >= 0)
-        {
-            g_Log.EventDebug("Char '%#08x' trying to add duplicate house with uid '%#08x'.\n", GetUID(), uidHouse);
-            return;
-        }
-    }
-    _lHouses.emplace_back(uidHouse);
-}
-
-void CChar::DelHouse(CUID uidHouse)
-{
-    if (_lHouses.empty())
-    {
-        return;
-    }
-    for (std::vector<CUID>::iterator it = _lHouses.begin(); it != _lHouses.end(); ++it)
-    {
-        if ((*it) == uidHouse)
-        {
-            _lHouses.erase(it);
-            return;
-        }
-    }
-}
-
-int CChar::GetHousePos(CUID uidHouse)
-{
-    if (_lHouses.empty())
-    {
-        return -1;
-    }
-    for (size_t i = 0; i < _lHouses.size(); ++i)
-    {
-        if (_lHouses[i] == uidHouse)
-        {
-            return (int)i;
-        }
-    }
-    return -1;
+    return _pMultiStorage;
 }
 
 // Is there something wrong with this char?
@@ -1860,6 +1798,7 @@ enum CHR_TYPE
 	CHR_MEMORYFINDTYPE,
 	CHR_OWNER,
 	CHR_REGION,
+    CHR_SHIP,
 	CHR_WEAPON,
 	CHR_QTY
 };
@@ -1910,12 +1849,23 @@ bool CChar::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 				return true;
             case CHR_HOUSE:
             {
-                size_t uiPos = (size_t)Exp_GetSingle(pszKey);
-                if (_lHouses.empty() || uiPos >= _lHouses.size())
+                int16 iPos = (int16)Exp_GetSingle(pszKey);
+                if (GetMultiStorage()->GetHouseCountReal() <= iPos)
                 {
                     return false;
                 }
-                pRef = _lHouses.at(uiPos).ItemFind();
+                pRef = GetMultiStorage()->GetHouseAt(iPos);
+                SKIP_SEPARATORS(pszKey);
+                return true;
+            }
+            case CHR_SHIP:
+            {
+                int16 iPos = (int16)Exp_GetSingle(pszKey);
+                if (GetMultiStorage()->GetShipCountReal() <= iPos)
+                {
+                    return false;
+                }
+                pRef = GetMultiStorage()->GetShipAt(iPos);
                 SKIP_SEPARATORS(pszKey);
                 return true;
             }
@@ -2670,12 +2620,23 @@ do_default:
             sVal.FormatU8Val(_iMaxHouses);
             return true;
         case CHC_HOUSES:
-            sVal.FormatVal((int)_lHouses.size());
+            sVal.Format16Val((int)GetMultiStorage()->GetHouseCountReal());
             return true;
         case CHC_GETHOUSEPOS:
         {
             pszKey += 11;
-            sVal.FormatVal(GetHousePos((CUID)Exp_GetDWVal(pszKey)));
+            CItem *pItem = ((CUID)Exp_GetDWVal(pszKey)).ItemFind();
+            sVal.Format16Val(GetMultiStorage()->GetHousePos(static_cast<CItemMulti*>(pItem)));
+            return true;
+        }
+        case CHC_SHIPS:
+            sVal.Format16Val((int)GetMultiStorage()->GetShipCountReal());
+            return true;
+        case CHC_GETSHIPPOS:
+        {
+            pszKey += 11;
+            CItem *pItem = ((CUID)Exp_GetDWVal(pszKey)).ItemFind();
+            sVal.Format16Val(GetMultiStorage()->GetShipPos(static_cast<CItemMulti*>(pItem)));
             return true;
         }
 		case CHC_ACCOUNT:
@@ -2967,18 +2928,34 @@ do_default:
 	switch (iKeyNum)
 	{
         case CHC_ADDHOUSE:
-            AddHouse(s.GetArgDWVal());
+            GetMultiStorage()->AddHouse(static_cast<CItemMulti*>(((CUID)s.GetArgDWVal()).ItemFind()));
             break;
         case CHC_DELHOUSE:
         {
             dword dwUID = s.GetArgDWVal();
             if (dwUID == UINT_MAX)
             {
-                _lHouses.clear();
+                GetMultiStorage()->ClearHouses();
             }
             else
             {
-                DelHouse((CUID)dwUID);
+                GetMultiStorage()->DelHouse(static_cast<CItemMulti*>(((CUID)dwUID).ItemFind()));
+            }
+            break;
+        }
+        case CHC_ADDSHIP:
+            GetMultiStorage()->AddShip(static_cast<CItemMulti*>(((CUID)s.GetArgDWVal()).ItemFind()));
+            break;
+        case CHC_DELSHIP:
+        {
+            dword dwUID = s.GetArgDWVal();
+            if (dwUID == UINT_MAX)
+            {
+                GetMultiStorage()->ClearShips();
+            }
+            else
+            {
+                GetMultiStorage()->DelShip(static_cast<CItemMulti*>(((CUID)dwUID).ItemFind()));
             }
             break;
         }
@@ -3480,13 +3457,15 @@ void CChar::r_Write( CScript & s )
 		s.WriteKeyHex("ACT", m_Act_UID.GetObjUID());
 	if ( m_Act_p.IsValidPoint() )
 		s.WriteKey("ACTP", m_Act_p.WriteUsed());
-    if (!_lHouses.empty())
+    if (_iMaxHouses != g_Cfg._iMaxHousesPlayer)
     {
-        for (std::vector<CUID>::iterator it = _lHouses.begin(); it != _lHouses.end(); ++it)
-        {
-            s.WriteKeyHex("ADDHOUSE", *it);
-        }
+        s.WriteKeyVal("MaxHouses", _iMaxHouses);
     }
+    if (_iMaxShips != g_Cfg._iMaxShipsPlayer)
+    {
+        s.WriteKeyVal("MaxShips", _iMaxShips);
+    }
+    GetMultiStorage()->r_Write(s);
 	if ( Skill_GetActive() != SKILL_NONE )
 	{
 		const CSkillDef* pSkillDef = g_Cfg.GetSkillDef(Skill_GetActive());
@@ -4131,7 +4110,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 				CPointMap pt = pCharSrc->GetTopPoint();
 				pt.MoveN( pCharSrc->m_dirFace, 3 );
 				pItem->MoveToDecay( pt, 10*60*TICK_PER_SEC );	// make the cage vanish after 10 minutes.
-				pItem->Multi_Create( NULL, UID_CLEAR );
+				pItem->Multi_Setup( NULL, UID_CLEAR );
 				Spell_Teleport( pt, true, false );
 				break;
 			}

@@ -1072,6 +1072,15 @@ bool CItemBase::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pCha
 
 			sVal.Format("%d,%d", pItemMulti->m_shipSpeed.period, pItemMulti->m_shipSpeed.tiles);
 		} break;
+        case IBC_MULTICOUNT:
+        {
+            if (!IsTypeMulti(GetType()))
+            {
+                return false;
+            }
+            CItemBaseMulti * pItemMulti = dynamic_cast<CItemBaseMulti*>(this);
+            sVal.FormatU8Val(pItemMulti->_iMultiCount);
+        }break;
 		case IBC_DISPID:
 			sVal = g_Cfg.ResourceGetName( CResourceID( RES_ITEMDEF, GetDispID()));
 			break;
@@ -1406,6 +1415,15 @@ bool CItemBase::r_LoadVal( CScript &s )
 					return false;
 			}
 		} break;
+        case IBC_MULTICOUNT:
+        {
+            if (!IsTypeMulti(GetType()))
+            {
+                return false;
+            }
+            CItemBaseMulti * pItemMulti = dynamic_cast<CItemBaseMulti*>(this);
+            pItemMulti->_iMultiCount = s.GetArgU8Val();
+        }break;
 		case IBC_CANUSE:
 			m_CanUse = s.GetArgVal();
 			break;
@@ -1748,6 +1766,7 @@ CItemBaseMulti::CItemBaseMulti( CItemBase* pBase ) :
     _iBaseStorage = 489;    // Minimum possible value from 7x7 houses.
     _iBaseVendors = 10;     // Minimum possible value from 7x7 houses.
     _iLockdownsPercent = 50;// Default value
+    _iMultiCount = 1;       // All Multis have a default 'weight' of 1.
 
 	// copy the stuff from the pBase
 	CopyTransfer(pBase);
