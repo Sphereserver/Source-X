@@ -617,7 +617,7 @@ void CItemMulti::AddBan(CChar* pBan)
 
 void CItemMulti::DelBan(CChar* pBan)
 {
-    ADDTOCALLSTACK("CItemMulti::DelFriend");
+    ADDTOCALLSTACK("CItemMulti::DelBan");
     for (std::vector<CChar*>::iterator it = _lBans.begin(); it != _lBans.end(); ++it)
     {
         if (*it == pBan)
@@ -648,6 +648,57 @@ int CItemMulti::GetBanPos(CChar* pBan)
         }
     }
     return -1;
+}
+
+void CItemMulti::AddAccess(CChar* pAccess)
+{
+	if (!g_Serv.IsLoading())
+	{
+		if (!pAccess)
+		{
+			return;
+		}
+		if (GetAccessPos(pAccess) >= 0)
+		{
+			return;
+		}
+	}
+	_lAccesses.emplace_back(pAccess);
+}
+
+void CItemMulti::DelAccess(CChar* pAccess)
+{
+	ADDTOCALLSTACK("CItemMulti::DelAccess");
+	for (std::vector<CChar*>::iterator it = _lAccesses.begin(); it != _lAccesses.end(); ++it)
+	{
+		if (*it == pAccess)
+		{
+			_lAccesses.erase(it);
+			return;
+		}
+	}
+}
+
+size_t CItemMulti::GetAccessCount()
+{
+	return _lAccesses.size();
+}
+
+int CItemMulti::GetAccessPos(CChar* pAccess)
+{
+	if (_lAccesses.empty())
+	{
+		return -1;
+	}
+
+	for (size_t i = 0; i < _lAccesses.size(); ++i)
+	{
+		if (_lAccesses[i] == pAccess)
+		{
+			return (int)i;
+		}
+	}
+	return -1;
 }
 
 CItem *CItemMulti::GenerateKey(CChar *pTarget, bool fPlaceOnBank)
@@ -1209,6 +1260,7 @@ size_t CItemMulti::GetVendorCount()
 
 enum MULTIREF_REF
 {
+	SHR_ACCESS,
     SHR_BAN,
     SHR_COMPONENT,
     SHR_COOWNER,
@@ -1223,6 +1275,7 @@ enum MULTIREF_REF
 
 lpctstr const CItemMulti::sm_szRefKeys[SHR_QTY + 1] =
 {
+	"ACCESS",
     "BAN",
     "COMPONENT",
     "COOWNER",
@@ -1247,6 +1300,21 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
 
     switch (iCmd)
     {
+		case SHR_ACCESS:
+		{
+			int i = Exp_GetVal(pszKey);
+			SKIP_SEPARATORS(pszKey);
+			if ((int)_lAccesses.size() > i)
+			{
+				CChar *pAccess = _lAccesses[i];
+				if (pAccess)
+				{
+					pRef = pAccess;
+					return true;
+				}
+			}
+			return false;
+		}
         case SHR_BAN:
         {
             int i = Exp_GetVal(pszKey);
@@ -1367,6 +1435,7 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
 
 enum
 {
+	SHV_DELACCESS,
     SHV_DELBAN,
     SHV_DELCOMPONENT,
     SHV_DELCOOWNER,
@@ -1385,6 +1454,7 @@ enum
 
 lpctstr const CItemMulti::sm_szVerbKeys[SHV_QTY + 1] =
 {
+	"DELACCESS",
     "DELBAN",
     "DELCOMPONENT",
     "DELCOOWNER",
@@ -1411,6 +1481,20 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
     int iCmd = FindTableSorted(s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys) - 1);
     switch (iCmd)
     {
+		case SHV_DELACCESS:
+		{
+			CUID uidAccess = s.GetArgDWVal();
+			if (!uidAccess.IsValidUID())
+			{
+				_lAccesses.clear();
+			}
+			else
+			{
+				CChar *pAccess = uidAccess.CharFind();
+				DelAccess(pAccess);
+			}
+			break;
+		}
         case SHV_DELBAN:
         {
             CUID uidBan = s.GetArgDWVal();
@@ -1558,6 +1642,8 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
 
 enum SHL_TYPE
 {
+	SHL_ACCESSES,
+	SHL_ADDACCESS,
     SHL_ADDBAN,
     SHL_ADDCOMPONENT,
     SHL_ADDCOOWNER,
@@ -1572,6 +1658,7 @@ enum SHL_TYPE
     SHL_COOWNERS,
     SHL_CURRENTSTORAGE,
     SHL_FRIENDS,
+	SHL_GETACCESSPOS,
     SHL_GETBANPOS,
     SHL_GETCOMPONENTPOS,
     SHL_GETCOOWNERPOS,
@@ -1598,6 +1685,8 @@ enum SHL_TYPE
 
 const lpctstr CItemMulti::sm_szLoadKeys[SHL_QTY + 1] =
 {
+	"ACCESSES",
+	"ADDACCESS",
     "ADDBAN",
     "ADDCOMPONENT",
     "ADDCOOWNER",
@@ -1612,6 +1701,7 @@ const lpctstr CItemMulti::sm_szLoadKeys[SHL_QTY + 1] =
     "COOWNERS",
     "CURRENTSTORAGE",
     "FRIENDS",
+	"GETACCESSPOS",
     "GETBANPOS",
     "GETCOMPONENTPOS",
     "GETCOOWNERPOS",
@@ -1821,6 +1911,18 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
             sVal.FormatSTVal(GetFriendCount());
             break;
         }
+		case SHL_ACCESSES:
+		{
+			sVal.FormatSTVal(GetAccessCount());
+			break;
+		}
+		case SHL_GETACCESSPOS:
+		{
+			CUID uidAccess = static_cast<CUID>(Exp_GetVal(pszKey));
+			CChar *pAccess = uidAccess.CharFind();
+			sVal.FormatVal(GetAccessPos(pAccess));
+			break;
+		}
         case SHL_BANS:
         {
             sVal.FormatSTVal(GetBanCount());
@@ -2055,6 +2157,11 @@ bool CItemMulti::r_LoadVal(CScript & s)
             AddBan(static_cast<CUID>(s.GetArgDWVal()).CharFind());
             break;
         }
+		case SHL_ADDACCESS:
+		{
+			AddAccess(static_cast<CUID>(s.GetArgDWVal()).CharFind());
+			break;
+		}
 
             // House Storage
         case SHL_ADDCOMPONENT:
