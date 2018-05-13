@@ -1300,6 +1300,21 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
 
     switch (iCmd)
     {
+		case SHR_ACCESS:
+		{
+			int i = Exp_GetVal(pszKey);
+			SKIP_SEPARATORS(pszKey);
+			if ((int)_lAccesses.size() > i)
+			{
+				CChar *pAccess = _lAccesses[i];
+				if (pAccess)
+				{
+					pRef = pAccess;
+					return true;
+				}
+			}
+			return false;
+		}
         case SHR_BAN:
         {
             int i = Exp_GetVal(pszKey);
@@ -1466,6 +1481,20 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
     int iCmd = FindTableSorted(s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys) - 1);
     switch (iCmd)
     {
+		case SHV_DELACCESS:
+		{
+			CUID uidAccess = s.GetArgDWVal();
+			if (!uidAccess.IsValidUID())
+			{
+				_lAccesses.clear();
+			}
+			else
+			{
+				CChar *pAccess = uidAccess.CharFind();
+				DelAccess(pAccess);
+			}
+			break;
+		}
         case SHV_DELBAN:
         {
             CUID uidBan = s.GetArgDWVal();
@@ -1882,6 +1911,18 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
             sVal.FormatSTVal(GetFriendCount());
             break;
         }
+		case SHL_ACCESSES:
+		{
+			sVal.FormatSTVal(GetAccessCount());
+			break;
+		}
+		case SHL_GETACCESSPOS:
+		{
+			CUID uidAccess = static_cast<CUID>(Exp_GetVal(pszKey));
+			CChar *pAccess = uidAccess.CharFind();
+			sVal.FormatVal(GetAccessPos(pAccess));
+			break;
+		}
         case SHL_BANS:
         {
             sVal.FormatSTVal(GetBanCount());
@@ -2116,6 +2157,11 @@ bool CItemMulti::r_LoadVal(CScript & s)
             AddBan(static_cast<CUID>(s.GetArgDWVal()).CharFind());
             break;
         }
+		case SHL_ADDACCESS:
+		{
+			AddAccess(static_cast<CUID>(s.GetArgDWVal()).CharFind());
+			break;
+		}
 
             // House Storage
         case SHL_ADDCOMPONENT:
