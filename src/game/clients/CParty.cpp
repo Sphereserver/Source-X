@@ -99,7 +99,7 @@ void CPartyDef::AddStatsUpdate( CChar *pChar, PacketSend *pPacket )
 	if ( iQty <= 0 )
 		return;
 
-	for ( size_t i = 0; i < iQty; i++ )
+	for ( size_t i = 0; i < iQty; ++i )
 	{
 		CChar *pCharNow = m_Chars.GetChar(i).CharFind();
 		if ( pCharNow && pCharNow != pChar )
@@ -369,9 +369,9 @@ bool CPartyDef::Disband( CUID uidMaster )
 	CChar *pSrc = uidMaster.CharFind();
 	size_t iQty = m_Chars.GetCharCount();
 	ASSERT(iQty > 0);
-	for ( size_t i = iQty-1; i > 0; --i )
+	for ( size_t i = iQty; i > 0; --i )
 	{
-		CChar *pChar = m_Chars.GetChar(i).CharFind();
+		CChar *pChar = m_Chars.GetChar(i-1).CharFind();
 		if ( !pChar )
 			continue;
 
