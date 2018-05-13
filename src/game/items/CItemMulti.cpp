@@ -83,13 +83,13 @@ bool CItemMulti::MultiRealizeRegion()
     }
 
     const CItemBaseMulti * pMultiDef = Multi_GetDef();
-    if (pMultiDef == NULL)
+    if (pMultiDef == nullptr)
     {
         DEBUG_ERR(("Bad Multi type 0%x, uid=0%x\n", GetID(), (dword)GetUID()));
         return false;
     }
 
-    if (m_pRegion == NULL)
+    if (m_pRegion == nullptr)
     {
         CResourceID rid;
         rid.SetPrivateUID(GetUID());
@@ -174,10 +174,12 @@ bool CItemMulti::Multi_CreateComponent(ITEMID_TYPE id, short dx, short dy, char 
         case IT_KEY:	// it will get locked down with the house ?
         case IT_SIGN_GUMP:
         case IT_SHIP_TILLER:
+        {
             pItem->m_itKey.m_UIDLock.SetPrivateUID(dwKeyCode);	// Set the key id for the key/sign.
             m_uidLink.SetPrivateUID(pItem->GetUID());
             fNeedKey = true;
             break;
+        }
         case IT_DOOR:
         {
             CScript event("events +t_house_door");
@@ -244,7 +246,7 @@ void CItemMulti::Multi_Setup(CChar * pChar, dword dwKeyCode)
 
     const CItemBaseMulti * pMultiDef = Multi_GetDef();
     // We are top level.
-    if (pMultiDef == NULL || !IsTopLevel())
+    if (pMultiDef == nullptr || !IsTopLevel())
     {
         return;
     }
@@ -369,7 +371,7 @@ bool CItemMulti::MoveTo(CPointMap pt, bool bForceFix) // Put item on the ground 
 
     // Multis need special region info to track when u are inside them.
     // Add new region info.
-    if (!IsAddon()) // Addons doesn't have region, don't try to unrealize it.
+    if (!IsAddon()) // Addons doesn't have region, don't try to realize it.
     {
         MultiRealizeRegion();
     }
@@ -388,7 +390,7 @@ CItem * CItemMulti::Multi_GetSign()
         {
             return(this);
         }
-        m_uidLink = pTiller->GetUID();
+        m_uidLink = pTiller->GetUID();  // Link the multi to it's sign/tiller
     }
     return pTiller;
 }
@@ -399,7 +401,7 @@ void CItemMulti::OnHearRegion(lpctstr pszCmd, CChar * pSrc)
     // IT_SHIP or IT_MULTI
 
     const CItemBaseMulti * pMultiDef = Multi_GetDef();
-    if (pMultiDef == NULL)
+    if (pMultiDef == nullptr)
         return;
     TALKMODE_TYPE		mode = TALKMODE_SAY;
 
@@ -806,8 +808,10 @@ void CItemMulti::TransferAllItemsToMovingCrate(TRANSFER_TYPE iType)
     for (;;)
     {
         CItem * pItem = Area.GetItem();
-        if (pItem == NULL)
+        if (pItem == nullptr)
+        {
             break;
+        }
         if (pItem->GetUID() == GetUID() || pItem->GetUID() == pCrate->GetUID())	// this gets deleted seperately.
             continue;
         if (fTransferAddons && (pItem->IsType(IT_MULTI_ADDON) || pItem->IsType(IT_MULTI)))  // If the item is a house Addon, redeed it.
@@ -976,8 +980,8 @@ void CItemMulti::GenerateBaseComponents(bool & fNeedKey, dword &dwKeyCode)
 {
     ASSERT("CItemMulti::GenerateBaseComponents");
     const CItemBaseMulti * pMultiDef = Multi_GetDef();
-    size_t iQty = pMultiDef->m_Components.size();
-    for (size_t i = 0; i < iQty; i++)
+    ASSERT(pMultiDef);
+    for (size_t i = 0; i < pMultiDef->m_Components.size(); i++)
     {
         const CItemBaseMulti::CMultiComponentItem &component = pMultiDef->m_Components.at(i);
         fNeedKey |= Multi_CreateComponent(component.m_id, component.m_dx, component.m_dy, component.m_dz, dwKeyCode, IsAddon());
@@ -1051,7 +1055,7 @@ uint8 CItemMulti::GetMaxVendors()
 
 uint16 CItemMulti::GetMaxLockdowns()
 {
-    return (GetMaxStorage() - (GetMaxStorage() - (GetMaxStorage() * GetLockdownsPercent())/100));
+    return (GetMaxStorage() - (GetMaxStorage() - (GetMaxStorage() * (uint16)GetLockdownsPercent())/100));
 }
 
 uint8 CItemMulti::GetLockdownsPercent()
@@ -1086,7 +1090,7 @@ void CItemMulti::LockItem(CUID uidItem, bool fUpdateFlags)
         }
 
     }
-    _lLockDowns.push_back(uidItem);
+    _lLockDowns.emplace_back(uidItem);
 }
 
 void CItemMulti::UnlockItem(CUID uidItem, bool fUpdateFlags)
@@ -1214,13 +1218,11 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
     ADDTOCALLSTACK("CItemMulti::r_GetRef");
     int iCmd = FindTableHeadSorted(pszKey, sm_szRefKeys, CountOf(sm_szRefKeys) - 1);
 
-    if (iCmd < 0)
+    if (iCmd >= 0)
     {
-        return false;
+        pszKey += strlen(sm_szRefKeys[iCmd]);
     }
 
-    pszKey += strlen(sm_szRefKeys[iCmd]);
-    
     switch (iCmd)
     {
         case SHR_BAN:
@@ -1277,13 +1279,14 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
         }
         case SHR_OWNER:
         {
+            SKIP_SEPARATORS(pszKey);
             pRef = _uidOwner.CharFind();
             return true;
         }
         case SHR_REGION:
         {
             SKIP_SEPARATORS(pszKey);
-            if (!_fIsAddon)
+            if (m_pRegion != nullptr)
             {
                 pRef = m_pRegion; // Addons do not have region so return it only when not nullptr.
                 return true;
@@ -1584,12 +1587,10 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 {
     ADDTOCALLSTACK("CItemMulti::r_WriteVal");
     int iCmd = FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
-    if (iCmd < 0)
+    if (iCmd >= 0)
     {
-        return CItem::r_WriteVal(pszKey, sVal, pSrc);
+        pszKey += strlen(sm_szLoadKeys[iCmd]);
     }
-
-    pszKey += strlen(sm_szLoadKeys[iCmd]);
     SKIP_SEPARATORS(pszKey);
     switch (iCmd)
     {
@@ -1615,12 +1616,30 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
                 SKIP_SEPARATORS(pszKey);
                 item = pMultiDef->m_Components.at(iQty);
 
-                if (!strnicmp(pszKey, "ID", 2)) sVal.FormatVal(item.m_id);
-                else if (!strnicmp(pszKey, "DX", 2)) sVal.FormatVal(item.m_dx);
-                else if (!strnicmp(pszKey, "DY", 2)) sVal.FormatVal(item.m_dy);
-                else if (!strnicmp(pszKey, "DZ", 2)) sVal.FormatVal(item.m_dz);
-                else if (!strnicmp(pszKey, "D", 1)) sVal.Format("%i,%i,%i", item.m_dx, item.m_dy, item.m_dz);
-                else sVal.Format("%u,%i,%i,%i", item.m_id, item.m_dx, item.m_dy, item.m_dz);
+                if (!strnicmp(pszKey, "ID", 2))
+                {
+                    sVal.FormatVal(item.m_id);
+                }
+                else if (!strnicmp(pszKey, "DX", 2))
+                {
+                    sVal.FormatVal(item.m_dx);
+                }
+                else if (!strnicmp(pszKey, "DY", 2))
+                {
+                    sVal.FormatVal(item.m_dy);
+                }
+                else if (!strnicmp(pszKey, "DZ", 2))
+                {
+                    sVal.FormatVal(item.m_dz);
+                }
+                else if (!strnicmp(pszKey, "D", 1))
+                {
+                    sVal.Format("%i,%i,%i", item.m_dx, item.m_dy, item.m_dz);
+                }
+                else
+                {
+                    sVal.Format("%u,%i,%i,%i", item.m_id, item.m_dx, item.m_dy, item.m_dz);
+                }
             }
             else
             {
@@ -1629,15 +1648,25 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
             break;
         }
         // House Permissions
+        case SHL_OWNER:
+        {
+            if (!IsStrEmpty(pszKey))
+            {
+                CChar *pOwner = _uidOwner.CharFind();
+                if (pOwner)
+                {
+                    return pOwner->r_WriteVal(pszKey, sVal, pSrc);
+                }
+            }
+            sVal.FormatDWVal(_uidOwner);
+            break;
+        }
         case SHL_ISOWNER:
         {
             CUID uidOwner = static_cast<CUID>(Exp_GetVal(pszKey));
             sVal.FormatBVal(IsOwner(uidOwner));
             break;
         }
-        case SHL_OWNER:
-            sVal.FormatDWVal(_uidOwner);
-            break;
         case SHL_GETCOOWNERPOS:
         {
             CUID uidCoowner = static_cast<CUID>(Exp_GetVal(pszKey));
@@ -1645,8 +1674,10 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
             break;
         }
         case SHL_COOWNERS:
+        {
             sVal.FormatSTVal(GetCoownerCount());
             break;
+        }
         case SHL_GETFRIENDPOS:
         {
             CUID uidFriend = static_cast<CUID>(Exp_GetVal(pszKey));
@@ -1654,11 +1685,15 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
             break;
         }
         case SHL_FRIENDS:
+        {
             sVal.FormatSTVal(GetFriendCount());
             break;
+        }
         case SHL_BANS:
+        {
             sVal.FormatSTVal(GetBanCount());
             break;
+        }
         case SHL_GETBANPOS:
         {
             CUID uidBan = static_cast<CUID>(Exp_GetVal(pszKey));
@@ -1668,8 +1703,10 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 
         // House General
         case SHL_HOUSETYPE:
+        {
             sVal.FormatU8Val((uint8)_iHouseType);
             break;
+        }
         case SHL_GETCOMPONENTPOS:
         {
             CUID uidComp = static_cast<CUID>(Exp_GetVal(pszKey));
@@ -1677,8 +1714,10 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
             break;
         }
         case SHL_MOVINGCRATE:
+        {
             sVal.FormatDWVal(GetMovingCrate(true));
             break;
+        }
         case SHL_ADDKEY:
         {
             pszKey += 6;
@@ -1766,7 +1805,7 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
             break;
         }
         default:
-            break;
+            return CItem::r_WriteVal(pszKey, sVal, pSrc);
     }
     return true;
 }
@@ -1777,10 +1816,6 @@ bool CItemMulti::r_LoadVal(CScript & s)
     EXC_TRY("LoadVal");
 
     int iCmd = FindTableHeadSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
-    if (iCmd < 0)
-    {
-        return CItem::r_LoadVal(s);
-    }
 
     switch (iCmd)
     {
@@ -1797,7 +1832,6 @@ bool CItemMulti::r_LoadVal(CScript & s)
             script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
             return m_pRegion->r_LoadVal(script);
         }
-
         // misc
         case SHL_HOUSETYPE:
         {
@@ -1830,6 +1864,12 @@ bool CItemMulti::r_LoadVal(CScript & s)
         // House Permissions.
         case SHL_OWNER:
         {
+            lpctstr pszKey = s.GetKey();
+            pszKey += 5;
+            if (*pszKey == '.')
+            {
+                return _uidOwner.CharFind()->r_LoadVal(s);
+            }
             SetOwner(static_cast<CUID>(s.GetArgDWVal()));
             break;
         }
@@ -1905,7 +1945,7 @@ bool CItemMulti::r_LoadVal(CScript & s)
             break;
         }
         default:
-            break;
+            return CItem::r_LoadVal(s);
     }
     EXC_CATCH;
 
@@ -2276,7 +2316,7 @@ void CMultiStorage::r_Write(CScript & s)
     {
         for (std::vector<CItemMulti*>::iterator it = _lShips.begin(); it != _lShips.end(); ++it)
         {
-            s.WriteKeyHex("ADDShip", (*it)->GetUID());
+            s.WriteKeyHex("ADDSHIP", (*it)->GetUID());
         }
     }
 }

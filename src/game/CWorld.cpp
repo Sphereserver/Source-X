@@ -1722,12 +1722,10 @@ bool CWorld::LoadWorld() // Load world from script
 	{
 		LoadFile(sDataName, false);
 		LoadFile(sStaticsName, false);
-		if ( LoadFile(sWorldName) )
+		if ( LoadFile(sWorldName) && LoadFile(sCharsName) && LoadFile(sMultisName, false))
 		{
-			if ( LoadFile(sCharsName) )
 				return true;
 		}
-        LoadFile(sMultisName, false);
 
 		// If we could not open the file at all then it was a bust!
 		if ( m_iSaveCountID == iPrevSaveCount ) break;
