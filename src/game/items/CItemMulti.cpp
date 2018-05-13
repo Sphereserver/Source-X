@@ -607,6 +607,57 @@ int CItemMulti::GetBanPos(CChar* pBan)
     return -1;
 }
 
+void CItemMulti::AddAccess(CChar* pAccess)
+{
+	if (!g_Serv.IsLoading())
+	{
+		if (!pAccess)
+		{
+			return;
+		}
+		if (GetAccessPos(pAccess) >= 0)
+		{
+			return;
+		}
+	}
+	_lAccesses.emplace_back(pAccess);
+}
+
+void CItemMulti::DelAccess(CChar* pAccess)
+{
+	ADDTOCALLSTACK("CItemMulti::DelFriend");
+	for (std::vector<CChar*>::iterator it = _lAccesses.begin(); it != _lAccesses.end(); ++it)
+	{
+		if (*it == pAccess)
+		{
+			_lAccesses.erase(it);
+			return;
+		}
+	}
+}
+
+size_t CItemMulti::GetAccessCount()
+{
+	return _lAccesses.size();
+}
+
+int CItemMulti::GetAccessPos(CChar* pAccess)
+{
+	if (_lAccesses.empty())
+	{
+		return -1;
+	}
+
+	for (size_t i = 0; i < _lAccesses.size(); ++i)
+	{
+		if (_lAccesses[i] == pAccess)
+		{
+			return (int)i;
+		}
+	}
+	return -1;
+}
+
 CItem *CItemMulti::GenerateKey(CChar *pTarget, bool fPlaceOnBank)
 {
     ADDTOCALLSTACK("CItemMulti::GenerateKey");
