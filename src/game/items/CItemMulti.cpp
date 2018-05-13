@@ -1341,6 +1341,7 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
 
 enum
 {
+	SHL_DELACCESS,
     SHL_DELBAN,
     SVH_DELCOMPONENT,
     SHL_DELCOOWNER,
@@ -1359,6 +1360,7 @@ enum
 
 lpctstr const CItemMulti::sm_szVerbKeys[SHV_QTY + 1] =
 {
+	"DELACCESS",
     "DELBAN",
     "DELCOMPONENT",
     "DELCOOWNER",
@@ -1532,6 +1534,8 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
 
 enum SHL_TYPE
 {
+	SHL_ACCESSES,
+	SHL_ADDACCESS,
     SHL_ADDBAN,
     SHL_ADDCOMPONENT,
     SHL_ADDCOOWNER,
@@ -1546,6 +1550,7 @@ enum SHL_TYPE
     SHL_COOWNERS,
     SHL_CURRENTSTORAGE,
     SHL_FRIENDS,
+	SHL_GETACCESSPOS,
     SHL_GETBANPOS,
     SHL_GETCOMPONENTPOS,
     SHL_GETCOOWNERPOS,
@@ -1571,6 +1576,8 @@ enum SHL_TYPE
 
 const lpctstr CItemMulti::sm_szLoadKeys[SHL_QTY + 1] =
 {
+	"ACCESSES",
+	"ADDACCESS",
     "ADDBAN",
     "ADDCOMPONENT",
     "ADDCOOWNER",
@@ -1585,6 +1592,7 @@ const lpctstr CItemMulti::sm_szLoadKeys[SHL_QTY + 1] =
     "COOWNERS",
     "CURRENTSTORAGE",
     "FRIENDS",
+	"GETACCESSPOS",
     "GETBANPOS",
     "GETCOMPONENTPOS",
     "GETCOOWNERPOS",
