@@ -29,6 +29,7 @@ enum TRANSFER_TYPE
 class CChar;
 class CItemStone;
 class CItemContainer;
+class CItemShip;
 class CItemMulti : public CItem
 {
 	// IT_MULTI IT_SHIP
@@ -40,6 +41,7 @@ private:
 
     // house permissions
     CChar* _pOwner;     // Owner's UID
+    CItemStone *_pGuild; // Linked Guild.
     std::vector<CChar*> _lCoowners;   // List of Coowners.
     std::vector<CChar*> _lFriends;    // List of Friends.
     std::vector<CChar*> _lVendors;    // List of Vendors.
@@ -88,6 +90,10 @@ public:
     void SetOwner(CChar* pOwner);
     bool IsOwner(CChar* uidTarget);
     CChar *GetOwner();
+    // Guild
+    void SetGuild(CItemStone* pGuild);
+    bool IsGuild(CItemStone* pGuild);
+    CItemStone *GetGuild();
     // Coowner
     void AddCoowner(CChar* uidCoowner);
     void DelCoowner(CChar* uidCoowner);
@@ -198,7 +204,7 @@ class CMultiStorage
 {
 private:
     std::vector<CItemMulti*> _lHouses; // List of stored houses.
-    std::vector<CItemMulti*> _lShips;  // List of stored ships.
+    std::vector<CItemShip*> _lShips;  // List of stored ships.
     int16 _iHousesTotal;        // 
     int16 _iShipsTotal;
 
@@ -219,14 +225,14 @@ public:
     CItemMulti *GetHouseAt(int16 iPos);
     void ClearHouses();
 
-    void AddShip(CItemMulti *pShip);
-    void DelShip(CItemMulti *pShip);
+    void AddShip(CItemShip *pShip);
+    void DelShip(CItemShip *pShip);
     bool CanAddShip(CChar *pChar, int16 iShipCount);
     bool CanAddShip(CItemStone *pStone, int16 iShipCount);
-    int16 GetShipPos(CItemMulti *pShip);
+    int16 GetShipPos(CItemShip *pShip);
     int16 GetShipCountTotal();
     int16 GetShipCountReal();
-    CItemMulti *GetShipAt(int16 iPos);
+    CItemShip *GetShipAt(int16 iPos);
     void ClearShips();
 
 

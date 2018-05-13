@@ -30,6 +30,8 @@ enum STONEDISP_TYPE	// Hard coded Menus
 	STONEDISP_BANISHMEMBER
 };
 
+class CMultiStorage;
+
 class CItemStone : public CItem, public CSObjList
 {
 	// IT_STONE_GUILD
@@ -45,7 +47,9 @@ private:
 	CSString m_sCharter[6];
 	CSString m_sWebPageURL;
 	CSString m_sAbbrev;
-
+    CMultiStorage *_pMultiStorage;
+    int16 _iMaxShips;
+    int16 _iMaxHouses;
 private:
 
 	void SetTownName();
@@ -62,6 +66,7 @@ private:
 public:
 	static const char *m_sClassName;
 	CStoneMember * AddRecruit(const CChar * pChar, STONEPRIV_TYPE iPriv, bool bFull = false);
+    CMultiStorage *GetMultiStorage();
 
 	// War
 private:

@@ -6,6 +6,7 @@
 #include "../clients/CClient.h"
 #include "../CWorld.h"
 #include "CItemMulti.h"
+#include "CItemShip.h"
 #include "CItemContainer.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -21,6 +22,7 @@ CItemMulti::CItemMulti(ITEMID_TYPE id, CItemBase * pItemDef) :	// CItemBaseMulti
     m_pRegion = nullptr;
     _pOwner = nullptr;
     _pMovingCrate = nullptr;
+    _pGuild = nullptr;
 
     _fIsAddon = false;
     _iHouseType = HOUSE_PRIVATE;
@@ -278,9 +280,19 @@ void CItemMulti::Multi_Setup(CChar * pChar, dword dwKeyCode)
     if (pChar)
     {
         m_itShip.m_UIDCreator = pChar->GetUID();
-        if (g_Cfg._fAutoHouseKeys)
+        if (IsType(IT_SHIP))
         {
-            GenerateKey(pChar, true);
+            if (g_Cfg._fAutoShipKeys)
+            {
+                GenerateKey(pChar, true);
+            }
+        }
+        else
+        {
+            if (g_Cfg._fAutoHouseKeys)
+            {
+                GenerateKey(pChar, true);
+            }
         }
     }
 }
@@ -423,20 +435,19 @@ void CItemMulti::OnHearRegion(lpctstr pszCmd, CChar * pSrc)
 void CItemMulti::SetOwner(CChar* pOwner)
 {
     ADDTOCALLSTACK("CItemMulti::SetOwner");
-    if (!pOwner)
-    {
-        g_Log.EventError("Setting invalid Owner to multi'0x%#08x'\n", GetUID());
-        return;
-    }
-    CChar *pOldOwner = _pOwner;
-    CUID uidHouse = GetUID();
     if (!g_Serv.IsLoading())
     {
-        if (pOldOwner)  // Old Owner may not exist, ie being removed?
+        CChar *pOldOwner = _pOwner;
+        if (pOldOwner)  // Old Owner may not exist, was removed?
         {
             pOldOwner->GetMultiStorage()->DelMulti(this);
             RemoveKeys(pOldOwner);
         }
+    }
+    if (!pOwner)
+    {
+        _pOwner = nullptr;
+        return;
     }
     pOwner->GetMultiStorage()->AddMulti(this);
     _pOwner = pOwner;
@@ -450,6 +461,38 @@ bool CItemMulti::IsOwner(CChar* pTarget)
 CChar * CItemMulti::GetOwner()
 {
     return _pOwner;
+}
+
+void CItemMulti::SetGuild(CItemStone* pGuild)
+{
+    ADDTOCALLSTACK("CItemMulti::SetGuild");
+    /*if (!g_Serv.IsLoading())
+    {
+        CItemStone *pOldGuild = GetGuild();
+        if (pOldGuild)  // Old Guild may not exist, was removed?
+        {
+            pOldGuild->GetMultiStorage()->DelMulti(this);
+        }
+    }
+    if (pGuild == nullptr)
+    {
+        _pGuild = nullptr;
+        return;
+    }
+    ASSERT(_pGuild);
+    ASSERT(_pGuild->GetMultiStorage());
+    _pGuild->GetMultiStorage()->AddMulti(this);
+    _pGuild = pGuild;*/
+}
+
+bool CItemMulti::IsGuild(CItemStone* pTarget)
+{
+    return (_pGuild == pTarget);
+}
+
+CItemStone * CItemMulti::GetGuild()
+{
+    return _pGuild;
 }
 
 void CItemMulti::AddCoowner(CChar* pCoowner)
@@ -702,7 +745,7 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank)
         return;
     }
     ITEMID_TYPE itDeed = (ITEMID_TYPE)(GetKeyNum("DEED_ID", true));
-    CItem *pDeed = CItem::CreateBase(itDeed != ITEMID_NOTHING ? itDeed : ITEMID_DEED1);
+    CItem *pDeed = CItem::CreateBase(itDeed <= ITEMID_NOTHING ? itDeed : ITEMID_DEED1);
     if (pDeed)
     {
         pDeed->SetHue(GetHue());
@@ -1170,6 +1213,7 @@ enum MULTIREF_REF
     SHR_COMPONENT,
     SHR_COOWNER,
     SHR_FRIEND,
+    SHR_GUILD,
     SHR_LOCKDOWN,
     SHR_OWNER,
     SHR_REGION,
@@ -1183,6 +1227,7 @@ lpctstr const CItemMulti::sm_szRefKeys[SHR_QTY + 1] =
     "COMPONENT",
     "COOWNER",
     "FRIEND",
+    "GUILD",
     "LOCKDOWN",
     "OWNER",
     "REGION",
@@ -1208,8 +1253,12 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
             SKIP_SEPARATORS(pszKey);
             if ((int)_lBans.size() > i)
             {
-                pRef = _lBans[i];
-                return true;
+                CChar *pBan = _lBans[i];
+                if (pBan)
+                {
+                    pRef = pBan;
+                    return true;
+                }
             }
             return false;
         }
@@ -1217,7 +1266,12 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
         {
             int i = Exp_GetVal(pszKey);
             SKIP_SEPARATORS(pszKey);
-            pRef = Multi_FindItemComponent(i);
+            CItem *pComp = Multi_FindItemComponent(i);
+            if (pComp)
+            {
+                pRef = pComp;
+                return true;
+            }
             return false;
             break;
         }
@@ -1227,8 +1281,12 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
             SKIP_SEPARATORS(pszKey);
             if ((int)_lCoowners.size() > i)
             {
-                pRef = _lCoowners[i];
-                return true;
+                CChar *pCoowner = _lCoowners[i];
+                if (pCoowner)
+                {
+                    pRef = pCoowner;
+                    return true;
+                }
             }
             return false;
         }
@@ -1238,8 +1296,12 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
             SKIP_SEPARATORS(pszKey);
             if ((int)_lFriends.size() > i)
             {
-                pRef = _lFriends[i];
-                return true;
+                CChar *pFriend = _lFriends[i];
+                if (pFriend)
+                {
+                    pRef = pFriend;
+                    return true;
+                }
             }
             return false;
         }
@@ -1249,8 +1311,12 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
             SKIP_SEPARATORS(pszKey);
             if ((int)_lLockDowns.size() > i)
             {
-                pRef = _lLockDowns[i];
-                return true;
+                CItem *plockdown = _lLockDowns[i];
+                if (plockdown)
+                {
+                    pRef = plockdown;
+                    return true;
+                }
             }
             return false;
         }
@@ -1260,8 +1326,15 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
             pRef = _pOwner;
             return true;
         }
+        case SHR_GUILD:
+        {
+            SKIP_SEPARATORS(pszKey);
+            pRef = _pGuild;
+            return true;
+        }
         case SHR_REGION:
         {
+            g_Log.EventDebug("Region.%s\n",pszKey);
             SKIP_SEPARATORS(pszKey);
             if (m_pRegion != nullptr)
             {
@@ -1276,8 +1349,12 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
             SKIP_SEPARATORS(pszKey);
             if ((int)_lVendors.size() > i)
             {
-                pRef = _lVendors[i];
-                return true;
+                CChar *pVendor = _lVendors[i];
+                if (pVendor)
+                {
+                    pRef = pVendor;
+                    return true;
+                }
             }
             return false;
         }
@@ -1290,10 +1367,10 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
 
 enum
 {
-    SHL_DELBAN,
-    SVH_DELCOMPONENT,
-    SHL_DELCOOWNER,
-    SHL_DELFRIEND,
+    SHV_DELBAN,
+    SHV_DELCOMPONENT,
+    SHV_DELCOOWNER,
+    SHV_DELFRIEND,
     SHV_DELVENDOR,
     SHV_GENERATEBASECOMPONENTS,
     SHV_MOVEALLTOCRATE,
@@ -1334,7 +1411,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
     int iCmd = FindTableSorted(s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys) - 1);
     switch (iCmd)
     {
-        case SHL_DELBAN:
+        case SHV_DELBAN:
         {
             CUID uidBan = s.GetArgDWVal();
             if (!uidBan.IsValidUID())
@@ -1348,7 +1425,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
             }
             break;
         }
-        case SVH_DELCOMPONENT:
+        case SHV_DELCOMPONENT:
         {
             CUID uidComponent = s.GetArgDWVal();
             if (!uidComponent.IsValidUID())
@@ -1362,7 +1439,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
             }
             break;
         }
-        case SHL_DELCOOWNER:
+        case SHV_DELCOOWNER:
         {
             CUID uidCoowner = s.GetArgDWVal();
             if (!uidCoowner.IsValidUID())
@@ -1376,7 +1453,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
             }
             break;
         }
-        case SHL_DELFRIEND:
+        case SHV_DELFRIEND:
         {
             CUID uidFriend = s.GetArgDWVal();
             if (!uidFriend.IsValidUID())
@@ -1501,6 +1578,7 @@ enum SHL_TYPE
     SHL_GETFRIENDPOS,
     SHL_GETHOUSEVENDORPOS,
     SHL_GETLOCKEDITEMPOS,
+    SHL_GUILD,
     SHL_HOUSETYPE,
     SHL_INCREASEDSTORAGE,
     SHL_ISOWNER,
@@ -1540,6 +1618,7 @@ const lpctstr CItemMulti::sm_szLoadKeys[SHL_QTY + 1] =
     "GETFRIENDPOS",
     "GETHOUSEVENDORPOS",
     "GETLOCKEDITEMPOS",
+    "GUILD",
     "HOUSETYPE",
     "INCREASEDSTORAGE",
     "ISOWNER",
@@ -1673,15 +1752,42 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
         // House Permissions
         case SHL_OWNER:
         {
+            CChar *pOwner = GetOwner();
             if (!IsStrEmpty(pszKey))
             {
-                CChar *pOwner = GetOwner();
                 if (pOwner)
                 {
                     return pOwner->r_WriteVal(pszKey, sVal, pSrc);
                 }
             }
-            sVal.FormatDWVal(_pOwner->GetUID());
+            if (pOwner)
+            {
+                sVal.FormatDWVal(pOwner->GetUID());
+            }
+            else
+            {
+                sVal.FormatDWVal(0);
+            }
+            break;
+        }
+        case SHL_GUILD:
+        {
+            CItemStone *pGuild = GetGuild();
+            if (!IsStrEmpty(pszKey))
+            {
+                if (pGuild)
+                {
+                    return pGuild->r_WriteVal(pszKey, sVal, pSrc);
+                }
+            }
+            if (pGuild)
+            {
+                sVal.FormatDWVal(pGuild->GetUID());
+            }
+            else
+            {
+                sVal.FormatDWVal(0);
+            }
             break;
         }
         case SHL_ISOWNER:
@@ -1896,9 +2002,42 @@ bool CItemMulti::r_LoadVal(CScript & s)
             pszKey += 5;
             if (*pszKey == '.')
             {
-                return _pOwner->r_LoadVal(s);
+                CChar *pOwner = GetOwner();
+                if (pOwner)
+                {
+                    return pOwner->r_LoadVal(s);
+                }
+                return false;
             }
             SetOwner(static_cast<CUID>(s.GetArgDWVal()).CharFind());
+            break;
+        }
+        case SHL_GUILD:
+        {
+            lpctstr pszKey = s.GetKey();
+            pszKey += 5;
+            if (*pszKey == '.')
+            {
+                CItemStone *pGuild = GetGuild();
+                if (pGuild)
+                {
+                    return pGuild->r_LoadVal(s);
+                }
+                return false;
+            }
+            CItem *pItem = static_cast<CUID>(s.GetArgDWVal()).ItemFind();
+            if (pItem)
+            {
+                CItemStone *pStone = static_cast<CItemStone*>(pItem);
+                if (pStone)
+                {
+                    SetGuild(pStone);
+                }
+                else
+                {
+                    return false;
+                }
+            }
             break;
         }
         case SHL_ADDCOOWNER:
@@ -2192,7 +2331,7 @@ void CMultiStorage::AddMulti(CItemMulti * pMulti)
 {
     if (pMulti->IsType(IT_SHIP))
     {
-        AddShip(pMulti);
+        AddShip(static_cast<CItemShip*>(pMulti));
     }
     else
     {
@@ -2204,7 +2343,7 @@ void CMultiStorage::DelMulti(CItemMulti * pMulti)
 {
     if (pMulti->IsType(IT_SHIP))
     {
-        DelShip(pMulti);
+        DelShip(static_cast<CItemShip*>(pMulti));
     }
     else
     {
@@ -2327,7 +2466,7 @@ void CMultiStorage::r_Write(CScript & s)
     }
     if (!_lShips.empty())
     {
-        for (std::vector<CItemMulti*>::iterator it = _lShips.begin(); it != _lShips.end(); ++it)
+        for (std::vector<CItemShip*>::iterator it = _lShips.begin(); it != _lShips.end(); ++it)
         {
             s.WriteKeyHex("ADDSHIP", (*it)->GetUID());
         }
@@ -2335,7 +2474,7 @@ void CMultiStorage::r_Write(CScript & s)
 }
 
 
-void CMultiStorage::AddShip(CItemMulti *pShip)
+void CMultiStorage::AddShip(CItemShip *pShip)
 {
     ADDTOCALLSTACK("CMultiStorage::AddShip");
     if (!pShip)
@@ -2350,14 +2489,14 @@ void CMultiStorage::AddShip(CItemMulti *pShip)
     _lShips.emplace_back(pShip);
 }
 
-void CMultiStorage::DelShip(CItemMulti *pShip)
+void CMultiStorage::DelShip(CItemShip *pShip)
 {
     ADDTOCALLSTACK("CMultiStorage::DelShip");
     if (_lShips.empty())
     {
         return;
     }
-    for (std::vector<CItemMulti*>::iterator it = _lShips.begin(); it != _lShips.end(); ++it)
+    for (std::vector<CItemShip*>::iterator it = _lShips.begin(); it != _lShips.end(); ++it)
     {
         if (*it == pShip)
         {
@@ -2402,7 +2541,7 @@ bool CMultiStorage::CanAddShip(CItemStone * pStone, int16 iShipCount)
     return true;
 }
 
-int16 CMultiStorage::GetShipPos(CItemMulti *pShip)
+int16 CMultiStorage::GetShipPos(CItemShip *pShip)
 {
     if (_lShips.empty())
     {
@@ -2428,7 +2567,7 @@ int16 CMultiStorage::GetShipCountReal()
     return (int16)_lShips.size();
 }
 
-CItemMulti * CMultiStorage::GetShipAt(int16 iPos)
+CItemShip * CMultiStorage::GetShipAt(int16 iPos)
 {
     return _lShips[iPos];
 }

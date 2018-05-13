@@ -2620,7 +2620,7 @@ do_default:
             sVal.FormatU8Val(_iMaxHouses);
             return true;
         case CHC_HOUSES:
-            sVal.Format16Val((int)GetMultiStorage()->GetHouseCountReal());
+            sVal.Format16Val(GetMultiStorage()->GetHouseCountReal());
             return true;
         case CHC_GETHOUSEPOS:
         {
@@ -2630,13 +2630,15 @@ do_default:
             return true;
         }
         case CHC_SHIPS:
-            sVal.Format16Val((int)GetMultiStorage()->GetShipCountReal());
+        {
+            sVal.Format16Val(GetMultiStorage()->GetShipCountReal());
             return true;
+        }
         case CHC_GETSHIPPOS:
         {
             pszKey += 11;
             CItem *pItem = ((CUID)Exp_GetDWVal(pszKey)).ItemFind();
-            sVal.Format16Val(GetMultiStorage()->GetShipPos(static_cast<CItemMulti*>(pItem)));
+            sVal.Format16Val(GetMultiStorage()->GetShipPos(static_cast<CItemShip*>(pItem)));
             return true;
         }
 		case CHC_ACCOUNT:
@@ -2944,7 +2946,7 @@ do_default:
             break;
         }
         case CHC_ADDSHIP:
-            GetMultiStorage()->AddShip(static_cast<CItemMulti*>(((CUID)s.GetArgDWVal()).ItemFind()));
+            GetMultiStorage()->AddShip(static_cast<CItemShip*>(((CUID)s.GetArgDWVal()).ItemFind()));
             break;
         case CHC_DELSHIP:
         {
@@ -2955,7 +2957,7 @@ do_default:
             }
             else
             {
-                GetMultiStorage()->DelShip(static_cast<CItemMulti*>(((CUID)dwUID).ItemFind()));
+                GetMultiStorage()->DelShip(static_cast<CItemShip*>(((CUID)dwUID).ItemFind()));
             }
             break;
         }

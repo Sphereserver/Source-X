@@ -5,12 +5,17 @@
 #include "../../common/CLog.h"
 #include "../CWorld.h"
 #include "CItemStone.h"
+#include "CItemMulti.h"
+#include "CItemShip.h"
 
 
 CItemStone::CItemStone( ITEMID_TYPE id, CItemBase * pItemDef ) : CItem( id, pItemDef )
 {
 	m_itStone.m_iAlign = STONEALIGN_STANDARD;
     g_World.m_Stones.push_back(this);
+    _pMultiStorage = new CMultiStorage();
+    _iMaxShips = g_Cfg._iMaxShipsGuild;
+    _iMaxHouses = g_Cfg._iMaxHousesGuild;
 }
 
 CItemStone::~CItemStone()
@@ -21,6 +26,7 @@ CItemStone::~CItemStone()
 	// Remove this stone from the links of guilds in the world
 	g_World.m_Stones.RemovePtr( this );
 
+    delete _pMultiStorage;
 	// all members are deleted automatically.
 	Clear();	// do this manually to preserve the parents type cast
 }
@@ -288,6 +294,36 @@ bool CItemStone::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 			}
 		}
 	}
+    else if (!strnicmp("house.", pszKey, 6))
+    {
+        pszKey = pszKey + 6;
+        if (!pszKey[0])
+            return false;
+
+        int16 nNumber = (int16)Exp_GetVal(pszKey);
+        SKIP_SEPARATORS(pszKey);
+
+        if (nNumber < GetMultiStorage()->GetHouseCountReal())
+        {
+            pRef = GetMultiStorage()->GetHouseAt(nNumber);
+            return true;
+        }
+    }
+    else if (!strnicmp("ship.", pszKey, 5))
+    {
+        pszKey = pszKey + 5;
+        if (!pszKey[0])
+            return false;
+
+        int16 nNumber = (int16)Exp_GetVal(pszKey);
+        SKIP_SEPARATORS(pszKey);
+
+        if (nNumber < GetMultiStorage()->GetShipCountReal())
+        {
+            pRef = GetMultiStorage()->GetShipAt(nNumber);
+            return true;
+        }
+    }
 
 	return CItem::r_GetRef( pszKey, pRef );
 }
@@ -302,6 +338,12 @@ bool CItemStone::r_LoadVal( CScript & s ) // Load an item Script
 		case STC_ABBREV: // "ABBREV"
 			m_sAbbrev = s.GetArgStr();
 			return true;
+        case STC_ADDHOUSE:
+        case STC_ADDSHIP:
+        {
+            GetMultiStorage()->AddMulti(static_cast<CItemMulti*>(((CUID)s.GetArgDWVal()).ItemFind()));
+            return true;
+        }
 		case STC_ALIGN: // "ALIGN"
 			SetALIGNTYPE(static_cast<STONEALIGN_TYPE>(s.GetArgVal()));
 			return true;
@@ -365,6 +407,12 @@ bool CItemStone::r_LoadVal( CScript & s ) // Load an item Script
 		case STC_WEBPAGE: // "WEBPAGE"
 			m_sWebPageURL = s.GetArgStr();
 			return true;
+        case STC_MAXHOUSES:
+            _iMaxHouses = s.GetArg16Val();
+            return true;
+        case STC_MAXSHIPS:
+            _iMaxShips = s.GetArg16Val();
+            return true;
 	}
 
 	if ( s.IsKeyHead( sm_szLoadKeys[STC_CHARTER], 7 ))
@@ -593,6 +641,18 @@ bool CItemStone::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSr
 		case STC_WEBPAGE: // "WEBPAGE"
 			sVal = GetWebPageURL();
 			return true;
+        case STC_MAXHOUSES:
+            sVal.Format16Val(_iMaxHouses);
+            return true;
+        case STC_MAXSHIPS:
+            sVal.Format16Val(_iMaxShips);
+            return true;
+        case STC_HOUSES:
+            sVal.Format16Val(GetMultiStorage()->GetHouseCountReal());
+            return true;
+        case STC_SHIPS:
+            sVal.Format16Val(GetMultiStorage()->GetShipCountReal());
+            return true;
 		case STC_ABBREVIATIONTOGGLE:
 			{
 				CStoneMember * pMember = GetMember(pCharSrc);
@@ -708,6 +768,12 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 
 	switch ( index )
 	{
+        case ISV_DELHOUSE:
+        case ISV_DELSHIP:
+        {
+            GetMultiStorage()->DelMulti(static_cast<CItemMulti*>(((CUID)s.GetArgDWVal()).ItemFind()));
+            return true;
+        }
 		case ISV_ALLGUILDS:
 			{
 				if ( s.HasArgs() )
@@ -1040,6 +1106,11 @@ CStoneMember * CItemStone::AddRecruit(const CChar * pChar, STONEPRIV_TYPE iPriv,
 	sprintf(z, "%s is now %s %s", pChar->GetName(), pMember->GetPrivName(), GetName());
 	Speak(z);
 	return pMember;
+}
+
+CMultiStorage * CItemStone::GetMultiStorage()
+{
+    return _pMultiStorage;
 }
 
 void CItemStone::ElectMaster()

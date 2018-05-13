@@ -853,6 +853,8 @@ public:
     uint8 _iMaxHousesPlayer;    // Max houses per player.
     uint8 _iMaxShipsAccount;    // Max ships per account.
     uint8 _iMaxShipsPlayer;     // Max ships per player.
+    uint8 _iMaxHousesGuild;     // Max houses per guild.
+    uint8 _iMaxShipsGuild;      // Max ships per guild.
 
 	// Magic
 	bool m_fReagentsRequired;   // Do spells require reagents to be casted?
@@ -892,7 +894,8 @@ public:
 	uint m_iMaxSectorComplexity;	// How many items per sector.
 	bool m_fGenericSounds;			// Do players receive generic (not them-devoted) sounds.
     bool m_fAutoNewbieKeys;			// Are house and boat keys newbied automatically?
-    bool _fAutoHouseKeys;			// Do houses and boat create keys automaticall?
+    bool _fAutoHouseKeys;			// Do houses create keys automatically?
+    bool _fAutoShipKeys;			// Do ships create keys automatically?
 	int  m_iStamRunningPenalty;		// Weight penalty for running (+N% of max carry weight)
 	int  m_iStaminaLossAtWeight;	// %Weight at which characters begin to lose stamina.
 	int  m_iHitpointPercentOnRez;	// How many hitpoints do they get when they are rez'd?

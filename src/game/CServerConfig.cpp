@@ -75,8 +75,10 @@ CServerConfig::CServerConfig()
 	m_iMaxCharsPerAccount	= 5;
 	m_fLocalIPAdmin			= true;
     _iMaxHousesAccount = 1;
+    _iMaxHousesGuild = 1;
     _iMaxHousesPlayer = 1;
     _iMaxShipsAccount = 1;
+    _iMaxShipsGuild = 1;
     _iMaxShipsPlayer = 1;
 
 	// Save
@@ -135,6 +137,7 @@ CServerConfig::CServerConfig()
 	m_fGenericSounds		= true;
 	m_fAutoNewbieKeys 		= true;
     _fAutoHouseKeys         = true;
+    _fAutoShipKeys          = true;
 	m_iMaxBaseSkill			= 200;
 	m_iStamRunningPenalty 	= 50;
 	m_iStaminaLossAtWeight 	= 150;
@@ -403,6 +406,7 @@ enum RC_TYPE
 	RC_AUTONEWBIEKEYS,			// m_fAutoNewbieKeys
 	RC_AUTOPRIVFLAGS,			// m_iAutoPrivFlags
 	RC_AUTORESDISP,				// m_bAutoResDisp
+    RC_AUTOSHIPKEYS,            // _fAutoShipKeys
 	RC_AUTOTOOLTIPRESEND,		// m_iAutoTooltipResend
 	RC_BACKUPLEVELS,			// m_iSaveBackupLevels
 	RC_BANKMAXITEMS,
@@ -510,6 +514,7 @@ enum RC_TYPE
 	RC_MAXCOMPLEXITY,			// m_iMaxCharComplexity
 	RC_MAXFAME,					// m_iMaxFame
     RC_MAXHOUSESACCOUNT,        // _iMaxHousesAccount
+    RC_MAXHOUSESGUILD,          // _iMaxHousesGuild
     RC_MAXHOUSESPLAYER,         // _iMaxHousesPlayer
 	RC_MAXITEMCOMPLEXITY,		// m_iMaxItemComplexity
 	RC_MAXKARMA,				// m_iMaxKarma
@@ -521,6 +526,7 @@ enum RC_TYPE
 	RC_MAXSECTORCOMPLEXITY,		// m_iMaxSectorComplexity
 	RC_MAXSHIPPLANKTELEPORT,	// m_iMaxShipPlankTeleport
     RC_MAXSHIPSACCOUNT,         // _iMaxShipsAccount
+    RC_MAXSHIPSGUILD,           // _iMaxShipsGuild
     RC_MAXSHIPSPLAYER,          // _iMaxShipsPlayer
 	RC_MAXSIZEPERTICK,			// m_iNetMaxLengthPerTick
 	RC_MD5PASSWORDS,			// m_fMd5Passwords
@@ -642,6 +648,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "AUTONEWBIEKEYS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fAutoNewbieKeys),		0 }},
 	{ "AUTOPRIVFLAGS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iAutoPrivFlags),		0 }},
 	{ "AUTORESDISP",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_bAutoResDisp),			0 }},
+    { "AUTOSHIPKEYS",           { ELEM_BOOL,	OFFSETOF(CServerConfig,_fAutoShipKeys),		    0 }},
 	{ "AUTOTOOLTIPRESEND",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iAutoTooltipResend),	0 }},
 	{ "BACKUPLEVELS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSaveBackupLevels),	0 }},
 	{ "BANKMAXITEMS",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iBankIMax),			0 }},
@@ -748,8 +755,9 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "MAXCHARSPERACCOUNT",		{ ELEM_BYTE,	OFFSETOF(CServerConfig,m_iMaxCharsPerAccount),	0 }},
 	{ "MAXCOMPLEXITY",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxCharComplexity),	0 }},
     { "MAXFAME",                { ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxFame),				0 }},
-    { "MAXHOUSESACCOUNT",       { ELEM_INT,		OFFSETOF(CServerConfig,_iMaxHousesAccount),     0 }},
-    { "MAXHOUSESPLAYER",        { ELEM_INT,		OFFSETOF(CServerConfig,_iMaxHousesPlayer),      0 }},
+    { "MAXHOUSESACCOUNT",       { ELEM_BYTE,    OFFSETOF(CServerConfig,_iMaxHousesAccount),     0 }},
+    { "MAXHOUSESGUILD",         { ELEM_BYTE,    OFFSETOF(CServerConfig,_iMaxHousesGuild),       0 }},
+    { "MAXHOUSESPLAYER",        { ELEM_BYTE,    OFFSETOF(CServerConfig,_iMaxHousesPlayer),      0 }},
 	{ "MAXITEMCOMPLEXITY",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxItemComplexity),   0 }},
 	{ "MAXKARMA",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxKarma),			0 }},
 	{ "MAXLOOPTIMES",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxLoopTimes),		0 }},
@@ -759,8 +767,9 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "MAXQUEUESIZE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetMaxQueueSize),		0 }},
 	{ "MAXSECTORCOMPLEXITY",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxSectorComplexity),	0 }},
 	{ "MAXSHIPPLANKTELEPORT",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMaxShipPlankTeleport),0 }},
-    { "MAXSHIPSACCOUNT",        { ELEM_INT,		OFFSETOF(CServerConfig,_iMaxShipsAccount),      0 }},
-    { "MAXSHIPSPLAYER",         { ELEM_INT,		OFFSETOF(CServerConfig,_iMaxShipsPlayer),       0 }},
+    { "MAXSHIPSACCOUNT",        { ELEM_BYTE,    OFFSETOF(CServerConfig,_iMaxShipsAccount),      0 }},
+    { "MAXSHIPSGUILD",          { ELEM_BYTE,    OFFSETOF(CServerConfig,_iMaxShipsGuild),        0 }},
+    { "MAXSHIPSPLAYER",         { ELEM_BYTE,    OFFSETOF(CServerConfig,_iMaxShipsPlayer),       0 }},
 	{ "MAXSIZEPERTICK",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iNetMaxLengthPerTick),	0 }},
 	{ "MD5PASSWORDS",			{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fMd5Passwords),		0 }},
 	{ "MEDIUMCANHEARGHOSTS",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iMediumCanHearGhosts),	0 }},
