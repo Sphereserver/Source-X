@@ -1260,6 +1260,7 @@ size_t CItemMulti::GetVendorCount()
 
 enum MULTIREF_REF
 {
+	SHR_ACCESS,
     SHR_BAN,
     SHR_COMPONENT,
     SHR_COOWNER,
@@ -1274,6 +1275,7 @@ enum MULTIREF_REF
 
 lpctstr const CItemMulti::sm_szRefKeys[SHR_QTY + 1] =
 {
+	"ACCESS",
     "BAN",
     "COMPONENT",
     "COOWNER",
