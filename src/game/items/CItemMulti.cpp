@@ -574,7 +574,7 @@ void CItemMulti::AddBan(CChar* pBan)
 
 void CItemMulti::DelBan(CChar* pBan)
 {
-    ADDTOCALLSTACK("CItemMulti::DelFriend");
+    ADDTOCALLSTACK("CItemMulti::DelBan");
     for (std::vector<CChar*>::iterator it = _lBans.begin(); it != _lBans.end(); ++it)
     {
         if (*it == pBan)
@@ -605,6 +605,57 @@ int CItemMulti::GetBanPos(CChar* pBan)
         }
     }
     return -1;
+}
+
+void CItemMulti::AddAccess(CChar* pAccess)
+{
+	if (!g_Serv.IsLoading())
+	{
+		if (!pAccess)
+		{
+			return;
+		}
+		if (GetAccessPos(pAccess) >= 0)
+		{
+			return;
+		}
+	}
+	_lAccesses.emplace_back(pAccess);
+}
+
+void CItemMulti::DelAccess(CChar* pAccess)
+{
+	ADDTOCALLSTACK("CItemMulti::DelAccess");
+	for (std::vector<CChar*>::iterator it = _lAccesses.begin(); it != _lAccesses.end(); ++it)
+	{
+		if (*it == pAccess)
+		{
+			_lAccesses.erase(it);
+			return;
+		}
+	}
+}
+
+size_t CItemMulti::GetAccessCount()
+{
+	return _lAccesses.size();
+}
+
+int CItemMulti::GetAccessPos(CChar* pAccess)
+{
+	if (_lAccesses.empty())
+	{
+		return -1;
+	}
+
+	for (size_t i = 0; i < _lAccesses.size(); ++i)
+	{
+		if (_lAccesses[i] == pAccess)
+		{
+			return (int)i;
+		}
+	}
+	return -1;
 }
 
 CItem *CItemMulti::GenerateKey(CChar *pTarget, bool fPlaceOnBank)
@@ -1290,6 +1341,7 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
 
 enum
 {
+	SHL_DELACCESS,
     SHL_DELBAN,
     SVH_DELCOMPONENT,
     SHL_DELCOOWNER,
@@ -1308,6 +1360,7 @@ enum
 
 lpctstr const CItemMulti::sm_szVerbKeys[SHV_QTY + 1] =
 {
+	"DELACCESS",
     "DELBAN",
     "DELCOMPONENT",
     "DELCOOWNER",
@@ -1481,6 +1534,8 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
 
 enum SHL_TYPE
 {
+	SHL_ACCESSES,
+	SHL_ADDACCESS,
     SHL_ADDBAN,
     SHL_ADDCOMPONENT,
     SHL_ADDCOOWNER,
@@ -1495,6 +1550,7 @@ enum SHL_TYPE
     SHL_COOWNERS,
     SHL_CURRENTSTORAGE,
     SHL_FRIENDS,
+	SHL_GETACCESSPOS,
     SHL_GETBANPOS,
     SHL_GETCOMPONENTPOS,
     SHL_GETCOOWNERPOS,
@@ -1520,6 +1576,8 @@ enum SHL_TYPE
 
 const lpctstr CItemMulti::sm_szLoadKeys[SHL_QTY + 1] =
 {
+	"ACCESSES",
+	"ADDACCESS",
     "ADDBAN",
     "ADDCOMPONENT",
     "ADDCOOWNER",
@@ -1534,6 +1592,7 @@ const lpctstr CItemMulti::sm_szLoadKeys[SHL_QTY + 1] =
     "COOWNERS",
     "CURRENTSTORAGE",
     "FRIENDS",
+	"GETACCESSPOS",
     "GETBANPOS",
     "GETCOMPONENTPOS",
     "GETCOOWNERPOS",
