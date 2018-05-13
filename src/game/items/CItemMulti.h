@@ -46,6 +46,7 @@ private:
     std::vector<CChar*> _lFriends;    // List of Friends.
     std::vector<CChar*> _lVendors;    // List of Vendors.
     std::vector<CChar*> _lBans;        // List of Banned chars.
+	std::vector<CChar*> _lAccesses;    // List of Accesses chars.
 protected:
     std::vector<CItem*> _lLockDowns;  // List of Locked Down items.
 private:
@@ -109,6 +110,11 @@ public:
     void DelBan(CChar* uidBan);
     size_t GetBanCount();
     int GetBanPos(CChar* uidBan);
+	// Access
+	void AddAccess(CChar* uidAccess);
+	void DelAccess(CChar* uidAccess);
+	size_t GetAccessCount();
+	int GetAccessPos(CChar* uidAccess);
 
     // House general:
     // Keys:
