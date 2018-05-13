@@ -15,7 +15,7 @@ https://discord.gg/ZrMTXrs
 This is an experimental branch of SphereServer. Since we are doing so many (and sometimes radical) changes, it is impossible to work on the main branch.<br>
 This branch will preserve scripts compatibility with the main one.<br>
 Most notable changes (right now) are:
-* Bug fixes and heavy changing of some internal behaviours, with the aim to achieve truly better <b>speed</b> and <b>stability</b>;
+* Bug fixes and heavy changing of some internal behaviours, with the aim to achieve truly better **speed** and **stability**;
 * Support for 64 bits architecture and MinGW compiler for Windows;
 * Experimental support for multi-threaded and async networking;
 * Support for CMake, which is now the standard way to generate updated build and project files;
@@ -27,9 +27,9 @@ Most notable changes (right now) are:
 ## Running
 
 ### Required libraries (Windows):
-`libmysql.dll`: Placed on /DLLs/32/libmysql.dll for 32 bits builds or in /DLLs/64/libmysql.dll for 64 bits builds.
-`dbghelp.dll`: Newer OS versions have it by default on system folders so don't mess with it, but for some old OS you may need it, 
- so there is an old one (32 bits) in /dlls/dbghelp.dll.<br>
+* `libmysql.dll`: Placed on /DLLs/32/libmysql.dll for 32 bits builds or in /DLLs/64/libmysql.dll for 64 bits builds.
+* `dbghelp.dll`: Newer OS versions have it by default on system folders so don't mess with it, but for some old OS you may need it, 
+ so there is an old one (32 bits) in /dlls/dbghelp.dll.
 
 ### Required libraries (Linux):
 
@@ -78,7 +78,7 @@ How to set a toolchain:
 <br>
 You can also add other compiler flags, like optimization flags, with the custom variables C_FLAGS_EXTRA and CXX_FLAGS_EXTRA.<br>
 Example of CMake CLI additional parameters:<br>
-`-DC_FLAGS_EXTRA="-mtune=native" -DCXX_FLAGS_EXTRA="-mtune=native"`<br>
+```-DC_FLAGS_EXTRA="-mtune=native" -DCXX_FLAGS_EXTRA="-mtune=native"```<br>
 (Use the -mtune=native flag only if you are compiling on the same machine on which you will execute Sphere!)
 
 Example to build makefiles on Linux for a 64 bits Nightly version, inside the "build" directory (run it inside the project's root folder, not inside "src"): <br>
@@ -115,10 +115,10 @@ At the moment, Clang was tested only on Windows and in combination with Visual S
 4. Run CMake using the Visual Studio 15 2017 (Win64) generator, "Windows-clang-MSVC-*.cmake" toolchain and toolset "LLVM-vs2017".
 
 ###### Address Sanitizer and Undefined Behaviour Sanitizer
-You can enable Address Sanitizer (ASan) and Undefined Behaviour Sanitizer (UBSan) with the ENABLE_SANITIZERS checkbox via the GUI, or via the CLI flag "-DENABLE_SANITIZERS=true".
+You can enable Address Sanitizer (ASan) and Undefined Behaviour Sanitizer (UBSan) with the ENABLE_SANITIZERS checkbox via the GUI, or via the CLI flag `-DENABLE_SANITIZERS=true`.
  Due to limitations of Clang's ASan and UBSan on Windows, it doesn't work with the Debug build. This repository ships only the 64 bits libraries
  for LLVM 6.0's ASan and UBSan.<br>
-Since ASan redirects the error output to stderr, you can retrieve its output by launching sphere from cmd (Command Prompt) with the following command:<br>
+Since ASan redirects the error output to stderr, you can retrieve its output by launching sphere from cmd (Command Prompt) with the following command: 
 `SphereSvrX64_nightly > Sphere_ASan_log.txt 2>&1`
 
 
@@ -142,31 +142,31 @@ Since ASan redirects the error output to stderr, you can retrieve its output by 
 
 
 ### Naming Conventions
-These are meant to be applied to new code and, if there's some old code not following them, it would be nice to update it.<br>
+These are meant to be applied to new code and, if there's some old code not following them, it would be nice to update it.
 * Pointer variables should have as first prefix "p".
 * Unsigned variables should have as first (or second to "p") prefix "u".
 * Boolean variables should have the prefix "f".
 * Classes need to have the first letter uppercase and the prefix "C".
-* Internal (mostly private) variables of a class or struct need to have the prefix "_". This is a new convention, the old one used the "m_" prefix.
+* Internal (mostly private) variables of a class or struct need to have the prefix "\_". This is a new convention, the old one used the "m_" prefix.
 * After the prefix, the descriptive name should begin with an upper letter.
 <br>
-<b>Variables meant to hold numerical values:</b><br>
+**Variables meant to hold numerical values:**
 * For char, short, int, long, llong, use the prefix: "i".
 * For byte, word and dword use respectively the prefixes: "b", "w", "dw". Do not add the unsigned prefix.
 * For float and double, use the prefix: "r".
 <br>
-<b>Variables meant to hold characters (also strings):</b><br>
+**Variables meant to hold characters (also strings):**
 * For char, wchar, tchar use respectively the prefixes "c", "wc", "tc".
 * "lpstr", "lpcstr", "lpwstr", "lpcwstr", "lptstr", "lpctstr" data types are preferred aliases when handling strings.
 <br>
-Examples:<br>
+Examples:
 * Class or Struct: "CChar".
 * Class internal variable, integer: "_iAmount".
 * Tchar pointer: "ptcName".
 * Dword: "dwUID".
 
 ### Coding Style Conventions
-* Indent with <b>spaces</b> of size 4.
+* Indent with **spaces** of size 4.
 * Use the Allman indentation style:<br>
 while (x == y)<br>
 {<br>
