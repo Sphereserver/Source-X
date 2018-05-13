@@ -574,7 +574,7 @@ void CItemMulti::AddBan(CChar* pBan)
 
 void CItemMulti::DelBan(CChar* pBan)
 {
-    ADDTOCALLSTACK("CItemMulti::DelFriend");
+    ADDTOCALLSTACK("CItemMulti::DelBan");
     for (std::vector<CChar*>::iterator it = _lBans.begin(); it != _lBans.end(); ++it)
     {
         if (*it == pBan)
@@ -625,7 +625,7 @@ void CItemMulti::AddAccess(CChar* pAccess)
 
 void CItemMulti::DelAccess(CChar* pAccess)
 {
-	ADDTOCALLSTACK("CItemMulti::DelFriend");
+	ADDTOCALLSTACK("CItemMulti::DelAccess");
 	for (std::vector<CChar*>::iterator it = _lAccesses.begin(); it != _lAccesses.end(); ++it)
 	{
 		if (*it == pAccess)
