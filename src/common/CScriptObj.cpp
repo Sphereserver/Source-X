@@ -1552,7 +1552,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 	                }
 	            }
 
-	            pChar->OnSpellEffect(SPELL_Summon, pCharSrc, pCharSrc->Skill_GetAdjusted(SKILL_MAGERY), NULL, false);
+	            pChar->OnSpellEffect(SPELL_Summon, pCharSrc, pChar->Skill_GetAdjusted(SKILL_MAGERY), NULL, false);
 	            g_World.m_uidNew = pChar->GetUID();
 	            int iDuration = Exp_GetVal(ppCmd[1]);
 	            if (iDuration)
