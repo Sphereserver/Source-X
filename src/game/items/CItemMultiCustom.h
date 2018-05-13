@@ -69,7 +69,7 @@ private:
 	const CPointMap GetComponentPoint(Component * pComponent) const;
 	const CPointMap GetComponentPoint(short dx, short dy, char dz) const;
 	void CopyDesign(DesignDetails * designFrom, DesignDetails * designTo);
-    CItem *GetLockdownAt(short dx, short dy, char dz);
+    CItem *GetLockdownAt(short dx, short dy, char dz, std::vector<CItem*>::iterator &itPos);
     char CalculateLevel(char z);
 
 private:

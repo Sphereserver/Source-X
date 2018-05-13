@@ -37,7 +37,7 @@ private:
 	virtual bool r_LoadVal( CScript & s  );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
 	virtual int FixWeirdness();
-	virtual void OnComponentCreate( const CItem * pComponent );
+	virtual void OnComponentCreate( CItem * pComponent );
 
 public:
 	bool Ship_SetMoveDir(DIR_TYPE dir, byte speed = 0, bool bWheelMove = false);

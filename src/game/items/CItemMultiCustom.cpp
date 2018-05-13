@@ -111,17 +111,7 @@ void CItemMultiCustom::BeginCustomize(CClient * pClientSrc)
 	m_designWorking.m_iRevision++;
 
     _pLockDowns.clear();
-    if (!_lLockDowns.empty())
-    {
-        for (std::vector<CUID>::iterator it = _lLockDowns.begin(); it != _lLockDowns.end(); ++it)
-        {
-            CItem *pItem = it->ItemFind();
-            if (pItem)
-            {
-                _pLockDowns.push_back(pItem);
-            }
-        }
-    }
+    _pLockDowns = _lLockDowns;  // Create a copy of the CItemMulti's LockDowns to work on it.
 
 	// client will silently close all open dialogs and let the server think they're still open, so we need to update opened gump counts here
 	CDialogDef* pDlg = NULL;
@@ -497,18 +487,17 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, sh
 
 	m_designWorking.m_vectorComponents.push_back(pComponent);
 	m_designWorking.m_iRevision++;
-    CItem *pLockedItem = GetLockdownAt(x, y, z);
+    std::vector<CItem*>::iterator it;
+    CItem *pLockedItem = GetLockdownAt(x, y, z, it);
     if (pLockedItem)
     {
-        CItem *pCrate = GetMovingCrate(true).ItemFind();
-        if (pCrate)
+        CItemContainer *pMovingCrate = GetMovingCrate(true);
+        if (pMovingCrate)
         {
-            CItemContainer *pContCrate = static_cast<CItemContainer*>(pCrate);
-            if (pCrate)
-            {
-                pContCrate->ContentAdd(pLockedItem);
-                pLockedItem->RemoveFromView();
-            }
+            UnlockItem(pLockedItem, 1);
+            _pLockDowns.erase(it);
+            pMovingCrate->ContentAdd(pLockedItem);
+            pLockedItem->RemoveFromView();
         }
     }
 }
@@ -1159,7 +1148,7 @@ void CItemMultiCustom::CopyDesign(DesignDetails * designFrom, DesignDetails * de
     }
 }
 
-CItem * CItemMultiCustom::GetLockdownAt(short dx, short dy, char dz)
+CItem * CItemMultiCustom::GetLockdownAt(short dx, short dy, char dz, std::vector<CItem*>::iterator &itPos)
 {
     if (_pLockDowns.empty())
     {
@@ -1172,6 +1161,7 @@ CItem * CItemMultiCustom::GetLockdownAt(short dx, short dy, char dz)
             && ((*it)->GetTopPoint().m_y == dy)
             && (CalculateLevel((*it)->GetTopPoint().m_z) == fixedZ))
         {
+            itPos = it;
             return (*it);
         }
     }

@@ -1364,7 +1364,7 @@ CItem * CItemShip::GetShipPlank(size_t index)
 	return uid.ItemFind();
 }
 
-void CItemShip::OnComponentCreate( const CItem * pComponent )
+void CItemShip::OnComponentCreate( CItem * pComponent )
 {
 	ADDTOCALLSTACK("CItemShip::OnComponentCreate");
 	switch ( pComponent->GetType() )
