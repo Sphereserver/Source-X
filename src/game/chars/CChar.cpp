@@ -1813,6 +1813,7 @@ lpctstr const CChar::sm_szRefKeys[CHR_QTY+1] =
 	"MEMORYFINDTYPE",
 	"OWNER",
 	"REGION",
+    "SHIP",
 	"WEAPON",
 	NULL
 };
