@@ -28,9 +28,10 @@ CItemMulti::CItemMulti(ITEMID_TYPE id, CItemBase * pItemDef) :	// CItemBaseMulti
     _iHouseType = HOUSE_PRIVATE;
     _iMultiCount = pItemBase->_iMultiCount;
 
-    _iBaseStorage = 0;
+    _iBaseStorage = pItemBase->_iBaseStorage;
+    _iBaseVendors = pItemBase->_iBaseVendors;
+    _iLockdownsPercent = pItemBase->_iLockdownsPercent;
     _iIncreasedStorage = 0;
-    _iLockdownsPercent = 50;
 }
 
 CItemMulti::~CItemMulti()
@@ -1099,11 +1100,14 @@ uint16 CItemMulti::GetCurrentStorage()
         CItem *pItem = *it;
         if (pItem)
         {
-            CItemContainer *pCont = static_cast<CItemContainer*>(pItem);
-            if (pCont)
+            if (pItem->IsType(IT_CONTAINER) || pItem->IsType(IT_CONTAINER_LOCKED))
             {
-                iCount += (uint16)pCont->GetCount();
-                continue;
+                CItemContainer *pCont = static_cast<CItemContainer*>(pItem);
+                if (pCont)
+                {
+                    iCount += (uint16)pCont->GetCount();
+                    continue;
+                }
             }
             ++iCount;
         }
@@ -1402,7 +1406,6 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
         }
         case SHR_REGION:
         {
-            g_Log.EventDebug("Region.%s\n",pszKey);
             SKIP_SEPARATORS(pszKey);
             if (m_pRegion != nullptr)
             {
