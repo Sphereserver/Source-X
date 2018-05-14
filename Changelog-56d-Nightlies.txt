@@ -905,7 +905,7 @@ Updated the checks too to work OSI like:
 - Added CMultiStorage to CItemStone so guilds/towns can have houses and ships (same syntax than for chars).
 - Expanded key's generation to ships with a new ini setting.
 
--Added to sphere.ini:
+- Added to sphere.ini:
 // Do ships generate keys automatically?
 AutoShipKeys=1
 
@@ -914,3 +914,7 @@ MaxHousesGuild = 1
 
 // Max ships a guild can have (default 1).
 MaxShipsGuild = 1
+
+14-05-2018, Nolok
+- Fixed: multiple party related exceptions.
+- Fixed: calling RESTEST on a container item caused an exception.

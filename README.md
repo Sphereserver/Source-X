@@ -78,7 +78,10 @@ How to set a toolchain:
 <br>
 You can also add other compiler flags, like optimization flags, with the custom variables C_FLAGS_EXTRA and CXX_FLAGS_EXTRA.<br>
 Example of CMake CLI additional parameters:<br>
-```-DC_FLAGS_EXTRA="-mtune=native" -DCXX_FLAGS_EXTRA="-mtune=native"```<br>
+```
+-DC_FLAGS_EXTRA="-mtune=native" -DCXX_FLAGS_EXTRA="-mtune=native"
+```
+<br>
 (Use the -mtune=native flag only if you are compiling on the same machine on which you will execute Sphere!)
 
 Example to build makefiles on Linux for a 64 bits Nightly version, inside the "build" directory (run it inside the project's root folder, not inside "src"): <br>
@@ -147,7 +150,7 @@ These are meant to be applied to new code and, if there's some old code not foll
 * Unsigned variables should have as first (or second to "p") prefix "u".
 * Boolean variables should have the prefix "f".
 * Classes need to have the first letter uppercase and the prefix "C".
-* Internal (mostly private) variables of a class or struct need to have the prefix "\_". This is a new convention, the old one used the "m_" prefix.
+* Internal (mostly private) variables of a class or struct need to have the prefix "\_". This is a new convention, the old one used the "m\_" prefix.
 * After the prefix, the descriptive name should begin with an upper letter.
 <br>
 **Variables meant to hold numerical values:**

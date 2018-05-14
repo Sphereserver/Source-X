@@ -216,7 +216,7 @@ private:
 
 public:
     CMultiStorage();
-    ~CMultiStorage();
+    virtual ~CMultiStorage();
 
     void AddMulti(CItemMulti *pMulti);
     void DelMulti(CItemMulti *pMulti);
