@@ -1109,7 +1109,6 @@ uint16 CItemMulti::GetCurrentStorage()
                     continue;
                 }
             }
-            ++iCount;
         }
     }
     return iCount;
