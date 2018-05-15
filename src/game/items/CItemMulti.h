@@ -40,7 +40,7 @@ private:
     static lpctstr const sm_szRefKeys[];
 
     // house permissions
-    CChar* _pOwner;     // Owner's UID
+    CChar* _pOwner;     // Owner's character
     CItemStone *_pGuild; // Linked Guild.
     std::vector<CChar*> _lCoowners;   // List of Coowners.
     std::vector<CChar*> _lFriends;    // List of Friends.
@@ -53,7 +53,7 @@ private:
     std::vector<CItem*> _lComponents; // List of Components.
 
     // house general
-    CItemContainer* _pMovingCrate;   // Moving Crate's UID.
+    CItemContainer* _pMovingCrate;   // Moving Crate's container.
     bool _fIsAddon;         // House AddOns are also multis
     HOUSE_TYPE _iHouseType; 
     uint8 _iMultiCount;         // Does this counts towars the char's house limit
@@ -89,32 +89,32 @@ public:
     static CItemMulti *Multi_Create(CChar *pChar, const CItemBase * pItemDef, CPointMap & pt, CItem *pDeed);
     // Owner
     void SetOwner(CChar* pOwner);
-    bool IsOwner(CChar* uidTarget);
+    bool IsOwner(CChar* pTarget);
     CChar *GetOwner();
     // Guild
     void SetGuild(CItemStone* pGuild);
     bool IsGuild(CItemStone* pGuild);
     CItemStone *GetGuild();
     // Coowner
-    void AddCoowner(CChar* uidCoowner);
-    void DelCoowner(CChar* uidCoowner);
+    void AddCoowner(CChar* pCoowner);
+    void DelCoowner(CChar* pCoowner);
     size_t GetCoownerCount();
-    int GetCoownerPos(CChar* uidTarget);
+    int GetCoownerPos(CChar* pTarget);
     // Friend
-    void AddFriend(CChar* uidFriend);
-    void DelFriend(CChar* uidFriend);
+    void AddFriend(CChar* pFriend);
+    void DelFriend(CChar* pFriend);
     size_t GetFriendCount();
-    int GetFriendPos(CChar* uidTarget);
+    int GetFriendPos(CChar* pTarget);
     // Ban
-    void AddBan(CChar* uidBan);
-    void DelBan(CChar* uidBan);
+    void AddBan(CChar* pBan);
+    void DelBan(CChar* pBan);
     size_t GetBanCount();
-    int GetBanPos(CChar* uidBan);
+    int GetBanPos(CChar* pBan);
 	// Access
-	void AddAccess(CChar* uidAccess);
-	void DelAccess(CChar* uidAccess);
+	void AddAccess(CChar* pAccess);
+	void DelAccess(CChar* pAccess);
 	size_t GetAccessCount();
-	int GetAccessPos(CChar* uidAccess);
+	int GetAccessPos(CChar* pAccess);
 
     // House general:
     // Keys:
@@ -124,7 +124,7 @@ public:
     // Redeed
     void Redeed(bool fDisplayMsg = true, bool fMoveToBank = true);
     //Moving Crate
-    void SetMovingCrate(CItemContainer* uidCrate);
+    void SetMovingCrate(CItemContainer* pCrate);
     CItemContainer* GetMovingCrate(bool fCreate);
     void TransferAllItemsToMovingCrate(TRANSFER_TYPE iType = TRANSFER_ALL);
     void TransferLockdownsToMovingCrate();
@@ -133,9 +133,9 @@ public:
     void SetAddon(bool fIsAddon);
     bool IsAddon();
     // Components
-    void AddComponent(CItem* uidComponent);
-    void DelComponent(CItem* uidComponent);
-    int GetComponentPos(CItem* uidComponent);
+    void AddComponent(CItem* pComponent);
+    void DelComponent(CItem* pComponent);
+    int GetComponentPos(CItem* pComponent);
     size_t GetComponentCount();
     void RemoveAllComponents();
     void GenerateBaseComponents(bool &fNeedKey, dword &dwKeyCode);
@@ -159,14 +159,14 @@ public:
     uint8 GetLockdownsPercent();
     void SetLockdownsPercent(uint8 iPercent);
     // -Lockdowns
-    void LockItem(CItem* uidItem, bool fUpdateFlags);
-    void UnlockItem(CItem* uidItem, bool fUpdateFlags);
-    int GetLockedItemPos(CItem* uidItem);
+    void LockItem(CItem* pItem, bool fUpdateFlags);
+    void UnlockItem(CItem* pItem, bool fUpdateFlags);
+    int GetLockedItemPos(CItem* pItem);
     size_t GetLockdownCount();
-    //  -Vendors
-    void AddVendor(CChar* uidVendor);
-    void DelVendor(CChar* uidVendor);
-    int GetHouseVendorPos(CChar* uidVendor);
+    // -Vendors
+    void AddVendor(CChar* pVendor);
+    void DelVendor(CChar* pVendor);
+    int GetHouseVendorPos(CChar* pVendor);
     size_t GetVendorCount();
 
 protected:

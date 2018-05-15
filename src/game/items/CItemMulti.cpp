@@ -467,7 +467,7 @@ CChar * CItemMulti::GetOwner()
 void CItemMulti::SetGuild(CItemStone* pGuild)
 {
     ADDTOCALLSTACK("CItemMulti::SetGuild");
-    /*if (!g_Serv.IsLoading())
+    if (!g_Serv.IsLoading())
     {
         CItemStone *pOldGuild = GetGuild();
         if (pOldGuild)  // Old Guild may not exist, was removed?
@@ -480,10 +480,8 @@ void CItemMulti::SetGuild(CItemStone* pGuild)
         _pGuild = nullptr;
         return;
     }
-    ASSERT(_pGuild);
-    ASSERT(_pGuild->GetMultiStorage());
+    _pGuild = pGuild;
     _pGuild->GetMultiStorage()->AddMulti(this);
-    _pGuild = pGuild;*/
 }
 
 bool CItemMulti::IsGuild(CItemStone* pTarget)
@@ -498,13 +496,13 @@ CItemStone * CItemMulti::GetGuild()
 
 void CItemMulti::AddCoowner(CChar* pCoowner)
 {
+    if (!pCoowner)
+    {
+        return;
+    }
     ADDTOCALLSTACK("CItemMulti::AddCoowner");
     if (!g_Serv.IsLoading())
     {
-        if (!pCoowner)
-        {
-            return;
-        }
         if (GetCoownerPos(pCoowner) >= 0)
         {
             return;
@@ -551,12 +549,12 @@ int CItemMulti::GetCoownerPos(CChar* pTarget)
 void CItemMulti::AddFriend(CChar* pFriend)
 {
     ADDTOCALLSTACK("CItemMulti::AddFriend");
+    if (!pFriend)
+    {
+        return;
+    }
     if (!g_Serv.IsLoading())
     {
-        if (!pFriend)
-        {
-            return;
-        }
         if (GetFriendPos(pFriend) >= 0)
         {
             return;
@@ -602,12 +600,12 @@ int CItemMulti::GetFriendPos(CChar* pTarget)
 
 void CItemMulti::AddBan(CChar* pBan)
 {
+    if (!pBan)
+    {
+        return;
+    }
     if (!g_Serv.IsLoading())
     {
-        if (!pBan)
-        {
-            return;
-        }
         if (GetBanPos(pBan) >= 0)
         {
             return;
@@ -653,12 +651,12 @@ int CItemMulti::GetBanPos(CChar* pBan)
 
 void CItemMulti::AddAccess(CChar* pAccess)
 {
+    if (!pAccess)
+    {
+        return;
+    }
 	if (!g_Serv.IsLoading())
 	{
-		if (!pAccess)
-		{
-			return;
-		}
 		if (GetAccessPos(pAccess) >= 0)
 		{
 			return;
@@ -983,13 +981,13 @@ bool CItemMulti::IsAddon()
 
 void CItemMulti::AddComponent(CItem* pComponent)
 {
+    if (!pComponent)
+    {
+        return;
+    }
     ADDTOCALLSTACK("CItemMulti::AddComponent");
     if (!g_Serv.IsLoading())
     {
-        if (!pComponent)
-        {
-            return;
-        }
         if (GetComponentPos(pComponent) >= 0)
         {
             return;
@@ -1148,12 +1146,12 @@ void CItemMulti::SetLockdownsPercent(uint8 iPercent)
 
 void CItemMulti::LockItem(CItem *pItem, bool fUpdateFlags)
 {
+    if (!pItem)
+    {
+        return;
+    }
     if (!g_Serv.IsLoading())
     {
-        if (!pItem)
-        {
-            return;
-        }
         if (GetLockedItemPos(pItem) >= 0)
         {
             return;
@@ -1184,7 +1182,7 @@ void CItemMulti::UnlockItem(CItem *pItem, bool fUpdateFlags)
     {
         if (pItem)
         {
-            pItem->ClrAttr(ATTR_SECURE);
+            pItem->ClrAttr(ATTR_LOCKEDDOWN);
             pItem->m_uidLink.InitUID();
             CScript event("events -t_house_lockdown");
             pItem->r_LoadVal(event);
@@ -1215,14 +1213,11 @@ size_t CItemMulti::GetLockdownCount()
 
 void CItemMulti::AddVendor(CChar *pVendor)
 {
-    if (!g_Serv.IsLoading())
+    if (!pVendor)
     {
-        if (!pVendor)
-        {
-            return;
-        }
+        return;
     }
-    if (GetHouseVendorPos(pVendor) >= 0)
+    if ((g_Serv.IsLoading() == false) && (GetHouseVendorPos(pVendor) >= 0))
     {
         return;
     }
@@ -2130,13 +2125,20 @@ bool CItemMulti::r_LoadVal(CScript & s)
                 }
                 return false;
             }
-            CItem *pItem = static_cast<CUID>(s.GetArgDWVal()).ItemFind();
+            CUID uid = (CUID)s.GetArgDWVal();
+            if (!uid.IsValidUID())
+            {
+                SetGuild(nullptr);
+                break;
+            }
+            CItem *pItem = uid.ItemFind();
             if (pItem)
             {
-                CItemStone *pStone = static_cast<CItemStone*>(pItem);
-                if (pStone)
+                if (pItem->IsType(IT_STONE_GUILD))
                 {
+                    CItemStone *pStone = static_cast<CItemStone*>(pItem);
                     SetGuild(pStone);
+                    return true;
                 }
                 else
                 {
