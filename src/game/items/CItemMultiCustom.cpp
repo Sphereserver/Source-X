@@ -341,12 +341,7 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
 		pItem->SetAttr(ATTR_MOVE_NEVER);
 		pItem->GetTagDefs()->SetNum("FIXTURE", (int64)(GetUID()));
 
-		if ( pItem->IsType(IT_DOOR) )
-		{
-			// house doors are locked by default
-			pItem->SetType(IT_DOOR_LOCKED);
-		}
-		else if ( pItem->IsType(IT_TELEPAD) )
+		if ( pItem->IsType(IT_TELEPAD) )
 		{
 			// link telepads
 			for ( ComponentsContainer::iterator j = i+1; j != i; ++j )
@@ -361,8 +356,8 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
 				break;
 			}
 		}
-
 		pItem->MoveToUpdate(pt);
+        OnComponentCreate(pItem);
 	}
 
 	rectNew.OffsetRect(GetTopPoint().m_x, GetTopPoint().m_y);
@@ -494,7 +489,7 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, sh
         CItemContainer *pMovingCrate = GetMovingCrate(true);
         if (pMovingCrate)
         {
-            UnlockItem(pLockedItem, 1);
+            UnlockItem(pLockedItem);
             _pLockDowns.erase(it);
             pMovingCrate->ContentAdd(pLockedItem);
             pLockedItem->RemoveFromView();
@@ -1154,12 +1149,12 @@ CItem * CItemMultiCustom::GetLockdownAt(short dx, short dy, char dz, std::vector
     {
         return nullptr;
     }
-    char fixedZ = CalculateLevel(dz);  // get the Diff Z from the Multi's Z
+    char iFloor = CalculateLevel(dz);  // get the Diff Z from the Multi's Z
     for (std::vector<CItem*>::iterator it = _pLockDowns.begin(); it != _pLockDowns.end(); ++it)
     {
         if (((*it)->GetTopPoint().m_x == dx) 
             && ((*it)->GetTopPoint().m_y == dy)
-            && (CalculateLevel((*it)->GetTopPoint().m_z) == fixedZ))
+            && (CalculateLevel((*it)->GetTopPoint().m_z) == iFloor))
         {
             itPos = it;
             return (*it);

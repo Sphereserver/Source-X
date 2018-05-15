@@ -50,6 +50,7 @@ private:
 protected:
     std::vector<CItem*> _lLockDowns;  // List of Locked Down items.
 private:
+    std::vector<CItemContainer*> _lSecureContainers; // List of Secured containers.
     std::vector<CItem*> _lComponents; // List of Components.
 
     // house general
@@ -159,10 +160,16 @@ public:
     uint8 GetLockdownsPercent();
     void SetLockdownsPercent(uint8 iPercent);
     // -Lockdowns
-    void LockItem(CItem* pItem, bool fUpdateFlags);
-    void UnlockItem(CItem* pItem, bool fUpdateFlags);
+    void LockItem(CItem* pItem);
+    void UnlockItem(CItem* pItem);
     int GetLockedItemPos(CItem* pItem);
     size_t GetLockdownCount();
+    // -Secured storage (Containers + items).
+    void Secure(CItemContainer *pContainer);
+    void Release(CItemContainer *pContainer);
+    int GetSecuredContainerPos(CItemContainer *pContainer);
+    int16 GetSecuredItemsCount();
+    size_t GetSecuredContainersCount();
     // -Vendors
     void AddVendor(CChar* pVendor);
     void DelVendor(CChar* pVendor);
