@@ -1150,10 +1150,13 @@ CItem * CItemMultiCustom::GetLockdownAt(short dx, short dy, char dz, std::vector
         return nullptr;
     }
     char iFloor = CalculateLevel(dz);  // get the Diff Z from the Multi's Z
+    short findX = 0;
+    short findY = 0;
     for (std::vector<CItem*>::iterator it = _pLockDowns.begin(); it != _pLockDowns.end(); ++it)
     {
-        if (((*it)->GetTopPoint().m_x == dx) 
-            && ((*it)->GetTopPoint().m_y == dy)
+        findX = abs(GetTopPoint().m_x - ((*it)->GetTopPoint().m_x));
+        findY = abs(GetTopPoint().m_y - ((*it)->GetTopPoint().m_y));
+        if (findX == dx && findY == dy
             && (CalculateLevel((*it)->GetTopPoint().m_z) == iFloor))
         {
             itPos = it;

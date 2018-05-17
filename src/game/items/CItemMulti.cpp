@@ -1117,6 +1117,7 @@ void CItemMulti::LockItem(CItem *pItem)
             return;
         }
         pItem->SetAttr(ATTR_LOCKEDDOWN);
+        pItem->ClrAttr(ATTR_DECAY | ATTR_CAN_DECAY);
         pItem->m_uidLink = GetUID();
         CScript event("events +t_house_lockdown");
         pItem->r_LoadVal(event);
@@ -1179,6 +1180,7 @@ void CItemMulti::Secure(CItemContainer * pContainer)
             return;
         }
         pContainer->SetAttr(ATTR_SECURE);
+        pContainer->ClrAttr(ATTR_DECAY | ATTR_CAN_DECAY);
         pContainer->m_uidLink = GetUID();
         CScript event("events +t_house_secure");
         pContainer->r_LoadVal(event);
@@ -2075,12 +2077,12 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
         }
         case SHL_SECUREDCONTAINERS:
         {
-            sVal.Format16Val(GetSecuredItemsCount());
+            sVal.Format16Val(GetSecuredContainersCount());
             break;
         }
         case SHL_SECUREDITEMS:
         {
-            sVal.FormatSTVal(GetLockdownCount());
+            sVal.FormatSTVal(GetSecuredItemsCount());
             break;
         }
         case SHL_VENDORS:

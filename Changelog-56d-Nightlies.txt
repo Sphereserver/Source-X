@@ -734,9 +734,8 @@ Added internal storage for Owner, Coowners, Friends, Bans, Locked down items (Lo
 	- Added GetBanPos uid(R): Returns the position of the given uid on the Bans list (-1 if not found).
 	- Added Bans(R): Returns the total count of Components.
 	// Locked down items
-    - Added LockItem uid, fUpdateFlags: Adds the given UID to the LockDown*
-    - Added UnlockItem uid, fUpdateFlags: Removes the given UID from the LockDown list (-1 clears the whole list)*.
-        fUpdateFlags = Link and ATTR_SECURE are applied/removed to the item when Locking/Unlocking it.
+    - Added LockItem uid: Adds the given UID to the LockDown*
+    - Added UnlockItem uid: Removes the given UID from the LockDown list (-1 clears the whole list)*.
     - Added GetLockedItemPos uid(R): Returns the position of the given UID on the Components list (-1 if not found).
 	- Added Lockdowns(R): Returns the total count of Lockdowns.
 	// Vendors
@@ -918,3 +917,18 @@ MaxShipsGuild = 1
 14-05-2018, Nolok
 - Fixed: multiple party related exceptions.
 - Fixed: calling RESTEST on a container item caused an exception.
+
+15-05-2018, XuN
+- Added suport for Secured Containers, added some ADDTOCALLSTACKs and removed fUpdateFlags from Un/LockItem.
+
+- added t_house_secure to Secured containers.
+
+- Added Secure uid(WO): Adds the given uid to the Secure Containers list.
+- Added Release(RO): Deletes the guiven uid from the Secure Containers' list (Will not delete the container)(-1 clears the whole list).
+- Added GetSecuredContainerPos uid(RO): Returns the position of the given UID on the secure containers list (-1 if not found).
+- Added GetSecuredContainers(RO): Returns the total count of secured containers.
+- Added GetSecuredItems(RO): Returns the count of items inside all the secured containers (Just inside secured containers, not on locked containers).
+- Added REF to 'SECURED.x' to access the secured container in the Nth position, eg: secured.3.count, local.access=<secured.1.tag0.access>
+
+17-05-2018, XuN
+Fixed attr decay not being removed from locked/secured items, fixed wrong cals for SecuredContainersCount and SecuredItemsCount from their script counterpars and now locked items that are placed where a component is added via customize are moved to the Moving Crate.
