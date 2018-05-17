@@ -5,6 +5,7 @@
 #include "../chars/CChar.h"
 #include "../clients/CClient.h"
 #include "../CWorld.h"
+#include "../triggers.h"
 #include "CItemMulti.h"
 #include "CItemShip.h"
 #include "CItemContainer.h"
@@ -678,6 +679,38 @@ int CItemMulti::GetAccessPos(CChar* pAccess)
 	return -1;
 }
 
+void CItemMulti::Eject(CChar * pChar)
+{
+    if (pChar == nullptr)
+    {
+        return;
+    }
+    pChar->Spell_Teleport(m_uidLink.ItemFind()->GetTopPoint(), true, false);
+}
+
+void CItemMulti::EjectAll(CChar * pCharNoTp)
+{
+    CWorldSearch Area(m_pRegion->m_pt, Multi_GetMaxDist());
+    Area.SetSearchSquare(true);
+    for (;;)
+    {
+        CChar * pChar = Area.GetChar();
+        if (pChar == nullptr)
+        {
+            break;
+        }
+        if (pChar->m_pArea != m_pRegion)
+        {
+            continue;
+        }
+        if (pChar == pCharNoTp) // Eject all but owner? ie enter customize
+        {
+            continue;
+        }
+        Eject(pChar);
+    }
+}
+
 CItem *CItemMulti::GenerateKey(CChar *pTarget, bool fPlaceOnBank)
 {
     ADDTOCALLSTACK("CItemMulti::GenerateKey");
@@ -746,49 +779,82 @@ int16 CItemMulti::GetMultiCount()
     return _iMultiCount;
 }
 
-void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank)
+void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CChar *pChar)
 {
     ADDTOCALLSTACK("CItemMulti::Redeed");
     CChar *pOwner = GetOwner();
-
-    TransferLockdownsToMovingCrate();
-    RemoveAllComponents();
-    TransferAllItemsToMovingCrate();
-    if (!pOwner)
-    {
-        return;
-    }
-    if (fMoveToBank)
-    {
-        TransferMovingCrateToBank();
-    }
-    if (!IsAddon())
-    {
-        pOwner->GetMultiStorage()->DelMulti(this);
-    }
-
 
     if (GetKeyNum("REMOVED", true) > 0) // Just don't pass from here again, to avoid duplicated deeds.
     {
         return;
     }
-    ITEMID_TYPE itDeed = (ITEMID_TYPE)(GetKeyNum("DEED_ID", true));
-    CItem *pDeed = CItem::CreateBase(itDeed <= ITEMID_NOTHING ? itDeed : ITEMID_DEED1);
-    if (pDeed)
+
+    ITEMID_TYPE itDeed = ITEMID_DEED1;
+    TRIGRET_TYPE tRet;
+
+    if (IsAddon())
     {
-        pDeed->SetHue(GetHue());
-        pDeed->m_itDeed.m_Type = GetID();
-        if (m_Attr & ATTR_MAGIC)
+        CItemMulti *pMulti = static_cast<CItemMulti*>(m_uidLink.ItemFind());
+        if (pMulti)
         {
-            pDeed->SetAttr(ATTR_MAGIC);
+            pMulti->DelAddon(this);
+        }
+    }
+    else
+    {
+        CScriptTriggerArgs args;
+        args.m_iN1 = itDeed;
+        args.m_iN2 = 1; // Transfer / Redeed all items to the moving crate.
+        args.m_iN3 = fMoveToBank; // Transfer the Moving Crate to the owner's bank.
+        if (IsTrigUsed(TRIGGER_REDEED))
+        {
+            tRet = OnTrigger(ITRIG_Redeed, pChar, &args);
+            if (args.m_iN2 == 0)
+            {
+                fMoveToBank = false;
+            }
+            else
+            {
+                fMoveToBank = args.m_iN3;
+            }
+        }
+        if (args.m_iN2 == 1)
+        {
+            TransferLockdownsToMovingCrate();
+            TransferSecuredToMovingCrate();
+            RemoveAllComponents();
+            RedeedAddons();
+            TransferAllItemsToMovingCrate();    // Whatever is left unlisted.
+        }
+        if (!pOwner)
+        {
+            return;
         }
         if (fMoveToBank)
         {
-            pOwner->GetBank(LAYER_BANKBOX)->ContentAdd(pDeed);
+            TransferMovingCrateToBank();
         }
-        else
+        pOwner->GetMultiStorage()->DelMulti(this);
+    }
+    if (tRet == TRIGRET_RET_FALSE)
+    {
+        CItem *pDeed = CItem::CreateBase(itDeed <= ITEMID_NOTHING ? itDeed : ITEMID_DEED1);
+        if (pDeed)
         {
-            pOwner->ItemBounce(pDeed, fDisplayMsg);
+            pDeed->SetHue(GetHue());
+            pDeed->m_itDeed.m_Type = GetID();
+            if (m_Attr & ATTR_MAGIC)
+            {
+                pDeed->SetAttr(ATTR_MAGIC);
+            }
+            if (fMoveToBank)
+            {
+                pOwner->GetBank(LAYER_BANKBOX)->ContentAdd(pDeed);
+            }
+            else
+            {
+                pOwner->ItemBounce(pDeed, fDisplayMsg);
+            }
         }
     }
     SetKeyNum("REMOVED", 1);
@@ -927,6 +993,58 @@ void CItemMulti::TransferLockdownsToMovingCrate()
     _lLockDowns.clear();    // Clear the list, asume invalid items should be cleared too.
 }
 
+void CItemMulti::TransferSecuredToMovingCrate()
+{
+    ADDTOCALLSTACK("CItemMulti::TransferSecuredToMovingCrate");
+    if (_lSecureContainers.empty())
+    {
+        return;
+    }
+    CItemContainer *pCrate = GetMovingCrate(true);
+    if (!pCrate)
+    {
+        return;
+    }
+    for (std::vector<CItemContainer*>::iterator it = _lSecureContainers.begin(); it != _lSecureContainers.end(); ++it)
+    {
+        CItemContainer *pItem = *it;
+        if (pItem)  // Move all valid items.
+        {
+            CScript event("events -t_house_secure");
+            pItem->r_LoadVal(event);
+            pCrate->ContentAdd(pItem);
+            pItem->ClrAttr(ATTR_SECURE);
+            pItem->m_uidLink.InitUID();
+        }
+    }
+    _lLockDowns.clear();    // Clear the list, asume invalid items should be cleared too.
+}
+
+void CItemMulti::RedeedAddons()
+{
+    ADDTOCALLSTACK("CItemMulti::RedeedAddons");
+    if (_lAddons.empty())
+    {
+        return;
+    }
+    CItemContainer *pCrate = GetMovingCrate(true);
+    if (!pCrate)
+    {
+        return;
+    }
+    std::vector<CItemMulti*> vAddons = _lAddons;
+    for (std::vector<CItemMulti*>::iterator it = vAddons.begin(); it != vAddons.end(); ++it)
+    {
+        CItemMulti *pAddon = *it;
+        if (pAddon)  // Move all valid items.
+        {
+            pAddon->Redeed(false, false);
+        }
+    }
+    vAddons.clear();
+    _lAddons.clear();    // Clear the list, asume invalid items should be cleared too.
+}
+
 void CItemMulti::TransferMovingCrateToBank()
 {
     ADDTOCALLSTACK("CItemMulti::TransferMovingCrateToBank");
@@ -957,6 +1075,62 @@ void CItemMulti::SetAddon(bool fIsAddon)
 bool CItemMulti::IsAddon()
 {
     return _fIsAddon;
+}
+
+void CItemMulti::AddAddon(CItemMulti * pAddon)
+{
+    ADDTOCALLSTACK("CItemMulti::AddAddon");
+    if (!pAddon)
+    {
+        return;
+    }
+    if (!g_Serv.IsLoading())
+    {
+        if (!pAddon->IsType(IT_MULTI_ADDON))
+        {
+            return;
+        }
+        if (GetAddonPos(pAddon) >= 0)
+        {
+            return;
+        }
+    }
+    _lAddons.emplace_back(pAddon);
+}
+
+void CItemMulti::DelAddon(CItemMulti * pAddon)
+{
+    ADDTOCALLSTACK("CItemMulti::DelAddon");
+    for (std::vector<CItemMulti*>::iterator it = _lAddons.begin(); it != _lAddons.end(); ++it)
+    {
+        if (*it == pAddon)
+        {
+            _lAddons.erase(it);
+            return;
+        }
+    }
+}
+
+int CItemMulti::GetAddonPos(CItemMulti * pAddon)
+{
+    if (_lAddons.empty())
+    {
+        return -1;
+    }
+
+    for (size_t i = 0; i < _lAddons.size(); ++i)
+    {
+        if (_lAddons[i] == pAddon)
+        {
+            return (int)i;
+        }
+    }
+    return -1;
+}
+
+size_t CItemMulti::GetAddonCount()
+{
+    return _lAddons.size();
 }
 
 void CItemMulti::AddComponent(CItem* pComponent)
@@ -1294,12 +1468,14 @@ size_t CItemMulti::GetVendorCount()
 enum MULTIREF_REF
 {
 	SHR_ACCESS,
+    SHR_ADDON,
     SHR_BAN,
     SHR_COMPONENT,
     SHR_COOWNER,
     SHR_FRIEND,
     SHR_GUILD,
     SHR_LOCKDOWN,
+    SHR_MOVINGCRATE,
     SHR_OWNER,
     SHR_REGION,
     SHR_SECURED,
@@ -1310,12 +1486,14 @@ enum MULTIREF_REF
 lpctstr const CItemMulti::sm_szRefKeys[SHR_QTY + 1] =
 {
 	"ACCESS",
+    "ADDON",
     "BAN",
     "COMPONENT",
     "COOWNER",
     "FRIEND",
     "GUILD",
     "LOCKDOWN",
+    "MOVINGCRATE",
     "OWNER",
     "REGION",
     "SECURED",
@@ -1350,6 +1528,21 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
 			}
 			return false;
 		}
+        case SHR_ADDON:
+        {
+            int i = Exp_GetVal(pszKey);
+            SKIP_SEPARATORS(pszKey);
+            if ((int)_lAddons.size() > i)
+            {
+                CItemMulti *pAddon = _lAddons[i];
+                if (pAddon)
+                {
+                    pRef = pAddon;
+                    return true;
+                }
+            }
+            return false;
+        }
         case SHR_BAN:
         {
             int i = Exp_GetVal(pszKey);
@@ -1423,6 +1616,12 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
             }
             return false;
         }
+        case SHR_MOVINGCRATE:
+        {
+            SKIP_SEPARATORS(pszKey);
+            pRef = GetMovingCrate(true);
+            return true;
+        }
         case SHR_OWNER:
         {
             SKIP_SEPARATORS(pszKey);
@@ -1486,6 +1685,7 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
 enum
 {
 	SHV_DELACCESS,
+    SHV_DELADDON,
     SHV_DELBAN,
     SHV_DELCOMPONENT,
     SHV_DELCOOWNER,
@@ -1506,6 +1706,7 @@ enum
 lpctstr const CItemMulti::sm_szVerbKeys[SHV_QTY + 1] =
 {
 	"DELACCESS",
+    "DELADDON",
     "DELBAN",
     "DELCOMPONENT",
     "DELCOOWNER",
@@ -1533,20 +1734,37 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
     int iCmd = FindTableSorted(s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys) - 1);
     switch (iCmd)
     {
-		case SHV_DELACCESS:
-		{
-			CUID uidAccess = s.GetArgDWVal();
-			if (!uidAccess.IsValidUID())
-			{
-				_lAccesses.clear();
-			}
-			else
-			{
-				CChar *pAccess = uidAccess.CharFind();
-				DelAccess(pAccess);
-			}
-			break;
-		}
+        case SHV_DELACCESS:
+        {
+            CUID uidAccess = s.GetArgDWVal();
+            if (!uidAccess.IsValidUID())
+            {
+                _lAccesses.clear();
+            }
+            else
+            {
+                CChar *pAccess = uidAccess.CharFind();
+                DelAccess(pAccess);
+            }
+            break;
+        }
+        case SHV_DELADDON:
+        {
+            CUID uidAddon = s.GetArgDWVal();
+            if (!uidAddon.IsValidUID())
+            {
+                _lAddons.clear();
+            }
+            else
+            {
+                CItemMulti *pMulti = static_cast<CItemMulti*>(uidAddon.ItemFind());
+                if (pMulti && pMulti->IsType(IT_MULTI_ADDON))
+                {
+                    DelAddon(pMulti);
+                }
+            }
+            break;
+        }
         case SHV_DELBAN:
         {
             CUID uidBan = s.GetArgDWVal();
@@ -1654,7 +1872,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
             Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
             bool fShowMsg = piCmd[0] ? true : false;
             bool fMoveToBank = piCmd[1] ? true : false;
-            Redeed(fShowMsg, fMoveToBank);
+            Redeed(fShowMsg, fMoveToBank, pSrc->GetChar());
             break;
         }
         case SHV_RELEASE:
@@ -1707,11 +1925,13 @@ enum SHL_TYPE
 {
 	SHL_ACCESSES,
 	SHL_ADDACCESS,
+    SHL_ADDADDON,
     SHL_ADDBAN,
     SHL_ADDCOMPONENT,
     SHL_ADDCOOWNER,
     SHL_ADDFRIEND,
     SHL_ADDKEY,
+    SHL_ADDONS,
     SHL_ADDVENDOR,
     SHL_BANS,
     SHL_BASESTORAGE,
@@ -1722,12 +1942,14 @@ enum SHL_TYPE
     SHL_CURRENTSTORAGE,
     SHL_FRIENDS,
 	SHL_GETACCESSPOS,
+    SHL_GETADDONPOS,
     SHL_GETBANPOS,
     SHL_GETCOMPONENTPOS,
     SHL_GETCOOWNERPOS,
     SHL_GETFRIENDPOS,
     SHL_GETHOUSEVENDORPOS,
     SHL_GETLOCKEDITEMPOS,
+    SHL_GETSECUREDCONTAINERPOS,
     SHL_GUILD,
     SHL_HOUSETYPE,
     SHL_INCREASEDSTORAGE,
@@ -1743,7 +1965,6 @@ enum SHL_TYPE
     SHL_REGION,
     SHL_REMOVEKEYS,
     SHL_SECURE,
-    SHL_SECUREDCONTAINERPOS,
     SHL_SECUREDCONTAINERS,
     SHL_SECUREDITEMS,
     SHL_VENDORS,
@@ -1754,11 +1975,13 @@ const lpctstr CItemMulti::sm_szLoadKeys[SHL_QTY + 1] =
 {
 	"ACCESSES",
 	"ADDACCESS",
+    "ADDADDON",
     "ADDBAN",
     "ADDCOMPONENT",
     "ADDCOOWNER",
     "ADDFRIEND",
     "ADDKEY",
+    "ADDONS",
     "ADDVENDOR",
     "BANS",
     "BASESTORAGE",
@@ -1769,12 +1992,14 @@ const lpctstr CItemMulti::sm_szLoadKeys[SHL_QTY + 1] =
     "CURRENTSTORAGE",
     "FRIENDS",
 	"GETACCESSPOS",
+    "GETADDONPOS",
     "GETBANPOS",
     "GETCOMPONENTPOS",
     "GETCOOWNERPOS",
     "GETFRIENDPOS",
     "GETHOUSEVENDORPOS",
     "GETLOCKEDITEMPOS",
+    "GETSECUREDCONTAINERPOS",
     "GUILD",
     "HOUSETYPE",
     "INCREASEDSTORAGE",
@@ -1790,7 +2015,6 @@ const lpctstr CItemMulti::sm_szLoadKeys[SHL_QTY + 1] =
     "REGION",
     "REMOVEKEYS",
     "SECURE",
-    "SECUREDCONTAINERPOS",
     "SECUREDCONTAINERS",
     "SECUREDITEMS",
     "VENDORS",
@@ -1849,6 +2073,13 @@ void CItemMulti::r_Write(CScript & s)
         for (std::vector<CItemContainer*>::iterator it = _lSecureContainers.begin(); it != _lSecureContainers.end(); ++it)
         {
             s.WriteKeyHex("SECURE", (*it)->GetUID());
+        }
+    }
+    if (!_lAddons.empty())
+    {
+        for (std::vector<CItemMulti*>::iterator it = _lAddons.begin(); it != _lAddons.end(); ++it)
+        {
+            s.WriteKeyHex("ADDADDON", (*it)->GetUID());
         }
     }
 }
@@ -2001,6 +2232,18 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
 			sVal.FormatVal(GetAccessPos(pAccess));
 			break;
 		}
+        case SHL_ADDONS:
+        {
+            sVal.FormatSTVal(GetAddonCount());
+            break;
+        }
+        case SHL_GETADDONPOS:
+        {
+            CUID uidAddon = static_cast<CUID>(Exp_GetVal(pszKey));
+            CItemMulti *pMulti = static_cast<CItemMulti*>(uidAddon.ItemFind());
+            sVal.FormatVal(GetAddonPos(pMulti));
+            break;
+        }
         case SHL_BANS:
         {
             sVal.FormatSTVal(GetBanCount());
@@ -2063,7 +2306,7 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
             sVal.FormatSTVal(GetLockdownCount());
             break;
         }
-        case SHL_SECUREDCONTAINERPOS:
+        case SHL_GETSECUREDCONTAINERPOS:
         {
             CUID uidCont = static_cast<CUID>(Exp_GetVal(pszKey));
             CItem *pCont = uidCont.ItemFind();
@@ -2077,12 +2320,12 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
         }
         case SHL_SECUREDCONTAINERS:
         {
-            sVal.Format16Val(GetSecuredContainersCount());
+            sVal.FormatSTVal(GetSecuredContainersCount());
             break;
         }
         case SHL_SECUREDITEMS:
         {
-            sVal.FormatSTVal(GetSecuredItemsCount());
+            sVal.Format16Val(GetSecuredItemsCount());
             break;
         }
         case SHL_VENDORS:
@@ -2269,6 +2512,11 @@ bool CItemMulti::r_LoadVal(CScript & s)
 			AddAccess(static_cast<CUID>(s.GetArgDWVal()).CharFind());
 			break;
 		}
+        case SHL_ADDADDON:
+        {
+            AddAddon(static_cast<CItemMulti*>(static_cast<CUID>(s.GetArgDWVal()).ItemFind()));
+            break;
+        }
 
             // House Storage
         case SHL_ADDCOMPONENT:

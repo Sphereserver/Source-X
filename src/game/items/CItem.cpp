@@ -56,6 +56,7 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 	"@PICKUP_PACK",	// picked up from inside some container.
 	"@PICKUP_SELF", // picked up from here
 	"@PICKUP_STACK",	// was picked up from a stack
+    "@Redeed",
 	"@SELL",
 	"@Ship_Turn",
 	"@SpellEffect",		// cast some spell on me.

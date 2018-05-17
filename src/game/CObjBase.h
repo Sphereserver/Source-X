@@ -1030,6 +1030,7 @@ enum ITRIG_TYPE
 	ITRIG_PICKUP_PACK,          // picked up from inside some container.
 	ITRIG_PICKUP_SELF,          // picked up from this container
 	ITRIG_PICKUP_STACK,         // picked up from a stack (ARGO)
+    ITRIG_Redeed,               // Redeeding a multi.
 	ITRIG_Sell,                 // I'm being sold.
 	ITRIG_Ship_Turn,            // I'm a ship and i'm turning around.
 	ITRIG_SPELLEFFECT,          // cast some spell on me.
@@ -1099,7 +1100,8 @@ enum CTRIG_TYPE
 	CTRIG_HitCheck,         // A check made before anything else in the Hit proccess, meant to completelly override combat system.
 	CTRIG_HitIgnore,        // I should ignore this target, just giving a record to scripts.
 	CTRIG_HitMiss,          // I just missed.
-	CTRIG_HitTry,           // I am trying to hit someone. starting swing.,
+	CTRIG_HitTry,           // I am trying to hit someone. starting swing.
+    CTRIG_HouseDesignBegin, // Starting to customize.
     CTRIG_HouseDesignCommit,// I committed a new house design
     CTRIG_HouseDesignCommitItem,// I committed an Item to the house design.
 	CTRIG_HouseDesignExit,  // I exited house design mode

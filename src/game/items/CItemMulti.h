@@ -52,6 +52,7 @@ protected:
 private:
     std::vector<CItemContainer*> _lSecureContainers; // List of Secured containers.
     std::vector<CItem*> _lComponents; // List of Components.
+    std::vector<CItemMulti*> _lAddons;  // List of AddOns.
 
     // house general
     CItemContainer* _pMovingCrate;   // Moving Crate's container.
@@ -116,6 +117,8 @@ public:
 	void DelAccess(CChar* pAccess);
 	size_t GetAccessCount();
 	int GetAccessPos(CChar* pAccess);
+    void Eject(CChar* pChar);
+    void EjectAll(CChar* pChar = nullptr);
 
     // House general:
     // Keys:
@@ -123,16 +126,22 @@ public:
     void RemoveKeys(CChar *pTarget);
     int16 GetMultiCount();
     // Redeed
-    void Redeed(bool fDisplayMsg = true, bool fMoveToBank = true);
+    void Redeed(bool fDisplayMsg = true, bool fMoveToBank = true, CChar *pChar = nullptr);
     //Moving Crate
     void SetMovingCrate(CItemContainer* pCrate);
     CItemContainer* GetMovingCrate(bool fCreate);
     void TransferAllItemsToMovingCrate(TRANSFER_TYPE iType = TRANSFER_ALL);
     void TransferLockdownsToMovingCrate();
+    void TransferSecuredToMovingCrate();
     void TransferMovingCrateToBank();
-    // AddOn
+    // AddOns
     void SetAddon(bool fIsAddon);
     bool IsAddon();
+    void AddAddon(CItemMulti *pAddon);
+    void DelAddon(CItemMulti *pAddon);
+    int GetAddonPos(CItemMulti *pAddon);
+    size_t GetAddonCount();
+    void RedeedAddons();
     // Components
     void AddComponent(CItem* pComponent);
     void DelComponent(CItem* pComponent);

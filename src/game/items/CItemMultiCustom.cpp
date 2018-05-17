@@ -124,6 +124,39 @@ void CItemMultiCustom::BeginCustomize(CClient * pClientSrc)
 
 		it->second = 0;
 	}
+    CChar * pChar = pClientSrc->GetChar();
+
+    if (IsTrigUsed(TRIGGER_HOUSEDESIGNBEGIN))
+    {
+        CScriptTriggerArgs args;
+        args.m_pO1 = this;
+        args.m_iN1 = 1; // Redeed AddOns
+        args.m_iN2 = 0; // Transfer Lockdowns and Secured containers to Moving Crate.
+        args.m_iN3 = 2; // Eject everyone from house.
+        if (pChar->OnTrigger(CTRIG_HouseDesignBegin, pChar, &args) == TRIGRET_RET_TRUE)
+        {
+            EndCustomize(true);
+            return;
+        }
+
+        if (args.m_iN1 == 1)
+        {
+            RedeedAddons();
+        }
+        if (args.m_iN2 == 1)
+        {
+            TransferSecuredToMovingCrate();
+            TransferLockdownsToMovingCrate();
+        }
+        if (args.m_iN3 == 1)
+        {
+            EjectAll(pChar);
+        }
+        else if (args.m_iN3 == 2)
+        {
+            EjectAll();
+        }
+    }
 
 	// copy the working design to revert
 	CopyDesign(&m_designWorking, &m_designRevert);
@@ -141,7 +174,6 @@ void CItemMultiCustom::BeginCustomize(CClient * pClientSrc)
 	SendStructureTo(pClientSrc);
 
 	// move client to building and hide it
-	CChar * pChar = pClientSrc->GetChar();
 	pChar->StatFlag_Set(STATF_HIDDEN);
 
 	CPointMap ptOld = pChar->GetTopPoint();
@@ -1154,8 +1186,8 @@ CItem * CItemMultiCustom::GetLockdownAt(short dx, short dy, char dz, std::vector
     short findY = 0;
     for (std::vector<CItem*>::iterator it = _pLockDowns.begin(); it != _pLockDowns.end(); ++it)
     {
-        findX = abs(GetTopPoint().m_x - ((*it)->GetTopPoint().m_x));
-        findY = abs(GetTopPoint().m_y - ((*it)->GetTopPoint().m_y));
+        findX = (short)abs(GetTopPoint().m_x - ((*it)->GetTopPoint().m_x));
+        findY = (short)abs(GetTopPoint().m_y - ((*it)->GetTopPoint().m_y));
         if (findX == dx && findY == dy
             && (CalculateLevel((*it)->GetTopPoint().m_z) == iFloor))
         {
