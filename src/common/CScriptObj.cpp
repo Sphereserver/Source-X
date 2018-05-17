@@ -2459,11 +2459,13 @@ jump_in:
 								{
 									TemporaryString tsParsedArg1;
 									tchar* pszParsedArg1 = static_cast<tchar *>(tsParsedArg1);
-									strcpy(pszParsedArg1, ppArgs[1]);
-									if ( ppArgs[1] != NULL)
-										if (ParseText(pszParsedArg1, pSrc, 0, pArgs) <= 0)
-											goto forcont_incorrect_args;
-
+                                    if (ppArgs[1] != NULL)
+                                    {
+                                        strcpy(pszParsedArg1, ppArgs[1]);
+                                        if (ParseText(pszParsedArg1, pSrc, 0, pArgs) <= 0)
+                                            goto forcont_incorrect_args;
+                                    }
+									
 									CScriptLineContext StartContext = s.GetContext();
 									CScriptLineContext EndContext = StartContext;
 									lpctstr castedParsedArg0 = pszParsedArg0;

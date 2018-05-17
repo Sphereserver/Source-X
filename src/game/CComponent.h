@@ -39,8 +39,8 @@ protected:
 
 public:
     virtual ~CComponent() {}
-    COMP_TYPE GetType();
-    virtual CObjBase *GetLink();
+    COMP_TYPE GetType() const;
+    virtual CObjBase *GetLink() const;
 
     /* Script's compatibility
     * All methods here are meant to be proccessed from CEntity so they may behave a little different

@@ -8,12 +8,12 @@ CComponent::CComponent(COMP_TYPE type, CObjBase *pLink)
     _pLink = pLink;
 }
 
-COMP_TYPE CComponent::GetType()
+COMP_TYPE CComponent::GetType() const
 {
     return _iType;
 }
 
-CObjBase * CComponent::GetLink()
+CObjBase * CComponent::GetLink() const
 {
     return _pLink;
 }

@@ -921,7 +921,7 @@ MaxShipsGuild = 1
 15-05-2018, XuN
 - Added suport for Secured Containers, added some ADDTOCALLSTACKs and removed fUpdateFlags from Un/LockItem.
 
-- added t_house_secure to Secured containers.
+- Added t_house_secure to Secured containers.
 
 - Added Secure uid(WO): Adds the given uid to the Secure Containers list.
 - Added Release(RO): Deletes the given uid from the Secure Containers' list (Will not delete the container)(-1 clears the whole list).
@@ -958,3 +958,5 @@ Added @HouseDesignBegin trigger for t_multi_custom, called when the player enter
     return 1: Forces the char to exit Customize mode.
     WARNING: Forcing the char to exit here and setting argn1=0 in @HouseDesignExit will make it enter in customize mode, exit, enter... infinitelly, hence crashing the server with an infinite loop.
 
+17-05-2018, Nolok
+- Fixed: FORCONTTYPE wasn't working (issue #100).
