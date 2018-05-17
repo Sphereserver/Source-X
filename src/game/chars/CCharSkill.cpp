@@ -202,13 +202,6 @@ ushort CChar::Skill_GetMax( SKILL_TYPE skill, bool ignoreLock ) const
 	{
 		const CSkillClassDef * pSkillClass = m_pPlayer->GetSkillClass();
 		ASSERT(pSkillClass);
-
-		if ( skill == (SKILL_TYPE)(g_Cfg.m_iMaxSkill) )
-		{
-			pTagStorage = GetKey("OVERRIDE.SKILLSUM", true);
-			return pTagStorage ? (ushort)(pTagStorage->GetValNum()) : (ushort)(pSkillClass->m_SkillSumMax);
-		}
-
 		ASSERT( IsSkillBase(skill) );
 
 		sprintf(pszSkillName, "OVERRIDE.SKILLCAP_%d", (int)skill);
@@ -255,6 +248,14 @@ uint CChar::Skill_GetSum() const
 		iSkillSum += Skill_GetBase((SKILL_TYPE)i);
 
 	return iSkillSum;
+}
+
+uint CChar::Skill_GetSumMax() const
+{
+    ADDTOCALLSTACK("CChar::Skill_GetSumMax");
+    const CSkillClassDef * pSkillClass = m_pPlayer->GetSkillClass();
+    CVarDefCont *pTagStorage = GetKey("OVERRIDE.SKILLSUM", true);
+    return (pTagStorage ? (uint)pTagStorage->GetValNum() : pSkillClass->m_SkillSumMax);
 }
 
 void CChar::Skill_Decay()
@@ -328,12 +329,10 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 
 	if ( m_pPlayer )
 	{
-		uint iSkillSum = 0;
-		for ( uint i = 0; i < g_Cfg.m_iMaxSkill; ++i )
-			iSkillSum += Skill_GetBase((SKILL_TYPE)i);
-
-		if ( iSkillSum >= Skill_GetMax((SKILL_TYPE)(g_Cfg.m_iMaxSkill)) )
-			difficulty = 0;
+        if (Skill_GetSum() >= Skill_GetSumMax())
+        {
+            difficulty = 0;
+        }
 	}
 
 	// ex. ADV_RATE=2000,500,25 -> easy
