@@ -23,6 +23,7 @@ CCSpawn::CCSpawn(CObjBase *pLink) : CComponent(COMP_SPAWN, pLink)
     _iTimeLo = 15;
     _iTimeHi = 30;
     _idSpawn.InitUID();
+    _fKillingChildren = false;
     _uidList.clear();
 }
 
@@ -264,7 +265,6 @@ void CCSpawn::GenerateChar(CResourceDef *pDef)
 void CCSpawn::DelObj(CUID uid)
 {
 	ADDTOCALLSTACK("CCSpawn::DelObj");
-    CItem *pItem = static_cast<CItem*>(GetLink());
     if (_fKillingChildren)
     {
         return; // Speeding up the KillChildren proccess and avoiding not needed code called on 'childrens'.
@@ -280,6 +280,7 @@ void CCSpawn::DelObj(CUID uid)
         return;
     }
 
+    CItem *pItem = static_cast<CItem*>(GetLink());
 	for ( std::vector<CUID>::iterator it = _uidList.begin(); it != _uidList.end(); ++it )
 	{
         if (*it == uid)
@@ -418,6 +419,7 @@ void CCSpawn::KillChildren()
 	if (_uidList.empty())
 		return;
 
+    _fKillingChildren = true;
     for (std::vector<CUID>::iterator it = _uidList.begin(); it != _uidList.end(); ++it)
     {
         CObjBase* pObj = it->ObjFind();
@@ -437,6 +439,7 @@ void CCSpawn::KillChildren()
         }
     }
     _uidList.clear();
+    _fKillingChildren = false;
 }
 
 CCharBase *CCSpawn::SetTrackID()
