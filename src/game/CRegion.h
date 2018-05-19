@@ -9,6 +9,7 @@
 #include "../common/CResourceBase.h"
 #include "CRegionBase.h"
 
+class CItemMulti;
 
 class CRegionLinks : public CSPtrTypeArray<CRegion*>
 {
@@ -76,6 +77,7 @@ public:
 	CResourceRefArray		m_Events;	// trigger [REGION x] when entered or exited RES_REGIONTYPE
 	CVarDefMap				m_TagDefs;		// attach extra tags here.
 	CVarDefMap				m_BaseDefs;		// New Variable storage system
+    CItemMulti* _pMultiLink;    // Does this region belong to a multi?
 
 	TRIGRET_TYPE OnRegionTrigger( CTextConsole * pChar, RTRIG_TYPE trig );
 

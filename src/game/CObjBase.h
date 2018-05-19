@@ -1242,7 +1242,7 @@ enum CTRIG_TYPE
 	CTRIG_UserVirtueInvoke, // (Client iteraction) Invoquing a Virtue.
 	CTRIG_UserWarmode,      // (Client iteraction) Switching between War/Peace.
 
-	CTRIG_QTY				// 130
+	CTRIG_QTY				// 164
 };
 
 
