@@ -2112,9 +2112,9 @@ void CItemMulti::r_Write(CScript & s)
         }
     }
 
-    if (GetMovingCrate(false))
+    if (GetMovingCrate(true))
     {
-        s.WriteKeyHex("MOVINGCRATE", GetMovingCrate(false)->GetUID());
+        s.WriteKeyHex("MOVINGCRATE", GetMovingCrate(true)->GetUID());
     }
 }
 
