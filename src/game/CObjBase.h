@@ -1090,9 +1090,7 @@ enum CTRIG_TYPE
 	CTRIG_EnvironChange,    // my environment changed somehow (light,weather,season,region)
 	CTRIG_ExpChange,        // EXP is going to change
 	CTRIG_ExpLevelChange,   // Experience LEVEL is going to change
-
 	CTRIG_FameChange,       // Fame chaged
-
 	CTRIG_FollowersUpdate,  // Adding or removing CurFollowers.
 
 	CTRIG_GetHit,           // I just got hit.
@@ -1106,6 +1104,7 @@ enum CTRIG_TYPE
     CTRIG_HouseDesignCommitItem,// I committed an Item to the house design.
 	CTRIG_HouseDesignExit,  // I exited house design mode
 
+    // ITRIG_QTY
 	CTRIG_itemAfterClick,       // I'm going to click one item.
 	CTRIG_itemBuy,              // I'm going to buy one item.
 	CTRIG_itemClick,            // I clicked one item
@@ -1140,9 +1139,7 @@ enum CTRIG_TYPE
 	CTRIG_itemUNEQUIP,          // i have unequipped (or try to unequip) an item.
 
 	CTRIG_Jailed,               // I'm up to be send to jail, or to be forgiven.
-
 	CTRIG_KarmaChange,          // Karma chaged
-
 	CTRIG_Kill,         // I have just killed someone.
 	CTRIG_LogIn,        // Client logs in.
 	CTRIG_LogOut,       // Client logs out (21).
@@ -1185,9 +1182,7 @@ enum CTRIG_TYPE
 	CTRIG_RegionResourceGather, // I'm gathering a resource.
 
 	CTRIG_Rename,       // Changing my name or pets one.
-
 	CTRIG_Resurrect,    // I'm going to resurrect via function or spell.
-
 	CTRIG_SeeCrime,     // I am seeing a crime.
 	CTRIG_SeeHidden,    // I'm about to see a hidden char.
 	CTRIG_SeeSnoop,     // I see someone Snooping something.
@@ -1198,7 +1193,7 @@ enum CTRIG_TYPE
 	CTRIG_SkillFail,        // SKTRIG_FAIL
 	CTRIG_SkillGain,        // SKTRIG_GAIN
 	CTRIG_SkillMakeItem,    // An item is being created by a skill.
-	CTRIG_SkillMemu,        // A skillmenu is being called.
+	CTRIG_SkillMenu,        // A skillmenu is being called.
 	CTRIG_SkillPreStart,    // SKTRIG_PRESTART
 	CTRIG_SkillSelect,      // SKTRIG_SELECT
 	CTRIG_SkillStart,       // SKTRIG_START
@@ -1242,7 +1237,7 @@ enum CTRIG_TYPE
 	CTRIG_UserVirtueInvoke, // (Client iteraction) Invoquing a Virtue.
 	CTRIG_UserWarmode,      // (Client iteraction) Switching between War/Peace.
 
-	CTRIG_QTY				// 130
+	CTRIG_QTY
 };
 
 

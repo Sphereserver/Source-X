@@ -880,7 +880,7 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 	{
 		if ( !IsIndividualName() )
 			return "";	// same as type anyhow.
-		sprintf(pTemp, "%s %s", pCharDef->IsFemale() ? g_Cfg.GetDefaultMsg(DEFMSG_TRADETITLE_ARTICLE_FEMALE) : g_Cfg.GetDefaultMsg(DEFMSG_TRADETITLE_ARTICLE_MALE), pCharDef->GetTradeName());
+		snprintf(pTemp, STR_TEMPLENGTH, "%s %s", pCharDef->IsFemale() ? g_Cfg.GetDefaultMsg(DEFMSG_TRADETITLE_ARTICLE_FEMALE) : g_Cfg.GetDefaultMsg(DEFMSG_TRADETITLE_ARTICLE_MALE), pCharDef->GetTradeName());
 		return pTemp;
 	}
 
@@ -907,7 +907,7 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY_NINJITSU), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY", true)) },
 			{ NULL, INT32_MAX }
 		};
-		len = sprintf(pTemp, "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
+		len = snprintf(pTemp, STR_TEMPLENGTH, "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
 	}
 	else if ( skill == SKILL_BUSHIDO )
 	{
@@ -926,7 +926,7 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY_BUSHIDO), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY", true)) },
 			{ NULL, INT32_MAX }
 		};
-		len = sprintf(pTemp, "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
+		len = snprintf(pTemp, STR_TEMPLENGTH, "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
 	}
 	else
 	{
@@ -945,10 +945,10 @@ lpctstr CChar::GetTradeTitle() const // Paperdoll title for character p (2)
 			{ g_Cfg.GetDefaultMsg(DEFMSG_SKILLTITLE_LEGENDARY), (int)(g_Exp.m_VarDefs.GetKeyNum("SKILLTITLE_LEGENDARY", true)) },
 			{ NULL, INT32_MAX }
 		};
-		len = sprintf(pTemp, "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
+		len = snprintf(pTemp, STR_TEMPLENGTH, "%s ", sm_SkillTitles->FindName(Skill_GetBase(skill)));
 	}
 
-	sprintf(pTemp + len, g_Cfg.GetSkillDef(skill)->m_sTitle);
+	snprintf(pTemp + len, STR_TEMPLENGTH - len, "%s", g_Cfg.GetSkillDef(skill)->m_sTitle.GetPtr());
 	return pTemp;
 }
 
@@ -1694,7 +1694,7 @@ CRegion *CChar::CheckValidMove( CPointBase &ptDest, dword *pdwBlockFlags, DIR_TY
 	if ( !pArea )
 	{
 		//if (g_Cfg.m_iDebugFlags & DEBUGF_WALK)
-		g_pLog->EventWarn("WalkCheck: failed to get the destination region (UID: 0x%x, name: %s).\n", GetUID().GetObjUID(), GetName());
+		g_pLog->EventWarn("WalkCheck: failed to get the destination region (UID: 0%x, name: %s).\n", GetUID().GetObjUID(), GetName());
 		return NULL;
 	}
 

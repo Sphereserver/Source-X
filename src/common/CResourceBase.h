@@ -496,7 +496,7 @@ public:
 	bool MakeResourceName();
 };
 
-#define MAX_TRIGGERS_ARRAY	5
+#define MAX_TRIGGERS_ARRAY	6
 
 class CResourceLink : public CResourceDef
 {

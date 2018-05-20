@@ -960,3 +960,6 @@ Added @HouseDesignBegin trigger for t_multi_custom, called when the player enter
 
 17-05-2018, Nolok
 - Fixed: FORCONTTYPE wasn't working (issue #100).
+
+20-05-2018, Nolok
+- Fixed: triggers @UserUltimaStoreButton, @UserVirtue, @UserVirtueInvoke and @UserWarMode weren't firing (issue #102).

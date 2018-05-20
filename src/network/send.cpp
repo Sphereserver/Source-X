@@ -2449,7 +2449,7 @@ PacketPaperdoll::PacketPaperdoll(const CClient* target, const CChar* character) 
 	if (target->GetNetState()->isClientVersion(MINCLIVER_ML))
 	{
 		if (character == target->GetChar() ||
-		(g_Cfg.m_fCanUndressPets ? (character->IsOwnedBy(target->GetChar())) : (target->IsPriv(PRIV_GM) && target->GetPrivLevel() > character->GetPrivLevel())) )
+		    (g_Cfg.m_fCanUndressPets ? (character->IsOwnedBy(target->GetChar())) : (target->IsPriv(PRIV_GM) && target->GetPrivLevel() > character->GetPrivLevel())) )
 		mode |= 0x2;
 	}
 

@@ -974,7 +974,7 @@ void CResourceLink::SetTrigger(int i)
 	ADDTOCALLSTACK("CResourceLink::SetTrigger");
 	if ( i >= 0 )
 	{
-		for ( int j = 0; j < MAX_TRIGGERS_ARRAY; j++ )
+		for ( int j = 0; j < MAX_TRIGGERS_ARRAY; ++j )
 		{
 			if ( i < 32 )
 			{
@@ -994,7 +994,7 @@ bool CResourceLink::HasTrigger(int i) const
 	if ( i < XTRIG_UNKNOWN )
 		i = XTRIG_UNKNOWN;
 
-	for ( int j = 0; j < MAX_TRIGGERS_ARRAY; j++ )
+	for ( int j = 0; j < MAX_TRIGGERS_ARRAY; ++j )
 	{
 		if ( i < 32 )
 		{
