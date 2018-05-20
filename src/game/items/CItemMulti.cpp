@@ -25,7 +25,6 @@ CItemMulti::CItemMulti(ITEMID_TYPE id, CItemBase * pItemDef) :	// CItemBaseMulti
     _pMovingCrate = nullptr;
     _pGuild = nullptr;
 
-    _fIsAddon = false;
     _iHouseType = HOUSE_PRIVATE;
     _iMultiCount = pItemBase->_iMultiCount;
 
@@ -45,12 +44,12 @@ CItemMulti::~CItemMulti()
     // NOTE: assume we have already been removed from Top Level
 
 
+    Redeed(false, true);
     if (!m_pRegion)
     {
         return;
     }
 
-    Redeed(false, true);
     delete m_pRegion;
 }
 
@@ -82,7 +81,7 @@ bool CItemMulti::MultiRealizeRegion()
     // Add/move a region for the multi so we know when we are in it.
     // RETURN: ignored.
 
-    if (!IsTopLevel() || _fIsAddon)
+    if (!IsTopLevel() || IsType(IT_MULTI_ADDON))
     {
         return false;
     }
@@ -129,6 +128,7 @@ bool CItemMulti::MultiRealizeRegion()
     tchar *pszTemp = Str_GetTemp();
     sprintf(pszTemp, "%s (%s)", pRegionBack->GetName(), GetName());
     m_pRegion->SetName(pszTemp);
+    m_pRegion->_pMultiLink = this;
 
     return m_pRegion->RealizeRegion();
 }
@@ -140,6 +140,7 @@ void CItemMulti::MultiUnRealizeRegion()
     {
         return;
     }
+    m_pRegion->_pMultiLink = nullptr;
 
     m_pRegion->UnRealizeRegion();
 
@@ -239,12 +240,12 @@ void CItemMulti::Multi_Setup(CChar * pChar, dword dwKeyCode)
     bool fNeedKey = false;
     GenerateBaseComponents(fNeedKey, dwKeyCode);
 
-    Multi_GetSign();	// set the m_uidLink
-
-    if (IsAddon())   // Addons doesn't require keys and are not added to any list.
+    if (IsType(IT_MULTI_ADDON))   // Addons doesn't require keys and are not added to any list.
     {
         return;
     }
+
+    Multi_GetSign();	// set the m_uidLink
 
     if (pChar)
     {
@@ -341,7 +342,16 @@ void CItemMulti::OnMoveFrom()
     // Being removed from the top level.
     // Might just be moving.
 
-    if (!IsAddon()) // Addons doesn't have region, don't try to unrealize it.
+    if (IsType(IT_MULTI_ADDON)) // Addons doesn't have region, don't try to unrealize it.
+    {
+        CItemMulti *pMulti = m_pRegion->_pMultiLink;
+        if (pMulti)
+        {
+            pMulti->DelAddon(this);
+        }
+        m_pRegion = nullptr;
+    }
+    else
     {
         ASSERT(m_pRegion);
         m_pRegion->UnRealizeRegion();
@@ -359,7 +369,23 @@ bool CItemMulti::MoveTo(CPointMap pt, bool bForceFix) // Put item on the ground 
 
     // Multis need special region info to track when u are inside them.
     // Add new region info.
-    if (!IsAddon()) // Addons doesn't have region, don't try to realize it.
+    if (IsType(IT_MULTI_ADDON)) // Addons doesn't have region, don't try to realize it.
+    {
+        CRegionWorld *pRegion = dynamic_cast<CRegionWorld*>(GetTopPoint().GetRegion(REGION_TYPE_HOUSE));
+        if (!pRegion)
+        {
+            pRegion = dynamic_cast<CRegionWorld*>(GetTopPoint().GetRegion(REGION_TYPE_AREA));
+        }
+        ASSERT(pRegion);
+        m_pRegion = pRegion;
+
+        CItemMulti *pMulti = m_pRegion->_pMultiLink;
+        if (pMulti)
+        {
+            pMulti->AddAddon(this);
+        }
+    }
+    else
     {
         MultiRealizeRegion();
     }
@@ -790,9 +816,10 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CChar *pChar)
     }
 
     ITEMID_TYPE itDeed = ITEMID_DEED1;
-    TRIGRET_TYPE tRet;
+    TRIGRET_TYPE tRet = TRIGRET_RET_FALSE;
+    bool fTransferAll = false;
 
-    if (IsAddon())
+    if (IsType(IT_MULTI_ADDON))
     {
         CItemMulti *pMulti = static_cast<CItemMulti*>(m_uidLink.ItemFind());
         if (pMulti)
@@ -815,27 +842,28 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CChar *pChar)
             }
             else
             {
-                fMoveToBank = args.m_iN3;
+                fTransferAll = true;
+                fMoveToBank = args.m_iN3 ? true : false;
             }
         }
-        if (args.m_iN2 == 1)
-        {
-            TransferLockdownsToMovingCrate();
-            TransferSecuredToMovingCrate();
-            RemoveAllComponents();
-            RedeedAddons();
-            TransferAllItemsToMovingCrate();    // Whatever is left unlisted.
-        }
-        if (!pOwner)
-        {
-            return;
-        }
-        if (fMoveToBank)
-        {
-            TransferMovingCrateToBank();
-        }
-        pOwner->GetMultiStorage()->DelMulti(this);
     }
+    if (fTransferAll)
+    {
+        TransferLockdownsToMovingCrate();
+        TransferSecuredToMovingCrate();
+        RemoveAllComponents();
+        RedeedAddons();
+        TransferAllItemsToMovingCrate();    // Whatever is left unlisted.
+    }
+    if (!pOwner)
+    {
+        return;
+    }
+    if (fMoveToBank)
+    {
+        TransferMovingCrateToBank();
+    }
+    pOwner->GetMultiStorage()->DelMulti(this);
     if (tRet == TRIGRET_RET_FALSE)
     {
         CItem *pDeed = CItem::CreateBase(itDeed <= ITEMID_NOTHING ? itDeed : ITEMID_DEED1);
@@ -918,7 +946,7 @@ void CItemMulti::TransferAllItemsToMovingCrate(TRANSFER_TYPE iType)
         TransferLockdownsToMovingCrate();
     }
     CPointMap ptArea;
-    if (IsAddon())
+    if (IsType(IT_MULTI_ADDON))
     {
         ptArea = GetTopPoint().GetRegion(REGION_TYPE_HOUSE)->m_pt;  // Addons doesnt have Area, search in the above region.
     }
@@ -1067,16 +1095,6 @@ void CItemMulti::TransferMovingCrateToBank()
     }
 }
 
-void CItemMulti::SetAddon(bool fIsAddon)
-{
-    _fIsAddon = fIsAddon;
-}
-
-bool CItemMulti::IsAddon()
-{
-    return _fIsAddon;
-}
-
 void CItemMulti::AddAddon(CItemMulti * pAddon)
 {
     ADDTOCALLSTACK("CItemMulti::AddAddon");
@@ -1212,7 +1230,7 @@ void CItemMulti::GenerateBaseComponents(bool & fNeedKey, dword &dwKeyCode)
     for (size_t i = 0; i < pMultiDef->m_Components.size(); i++)
     {
         const CItemBaseMulti::CMultiComponentItem &component = pMultiDef->m_Components.at(i);
-        fNeedKey |= Multi_CreateComponent(component.m_id, component.m_dx, component.m_dy, component.m_dz, dwKeyCode, IsAddon());
+        fNeedKey |= Multi_CreateComponent(component.m_id, component.m_dx, component.m_dy, component.m_dz, dwKeyCode, IsType(IT_MULTI_ADDON));
     }
 }
 
@@ -1291,7 +1309,6 @@ void CItemMulti::LockItem(CItem *pItem)
             return;
         }
         pItem->SetAttr(ATTR_LOCKEDDOWN);
-        pItem->ClrAttr(ATTR_DECAY | ATTR_CAN_DECAY);
         pItem->m_uidLink = GetUID();
         CScript event("events +t_house_lockdown");
         pItem->r_LoadVal(event);
@@ -1354,7 +1371,6 @@ void CItemMulti::Secure(CItemContainer * pContainer)
             return;
         }
         pContainer->SetAttr(ATTR_SECURE);
-        pContainer->ClrAttr(ATTR_DECAY | ATTR_CAN_DECAY);
         pContainer->m_uidLink = GetUID();
         CScript event("events +t_house_secure");
         pContainer->r_LoadVal(event);
@@ -1949,7 +1965,9 @@ enum SHL_TYPE
     SHL_GETFRIENDPOS,
     SHL_GETHOUSEVENDORPOS,
     SHL_GETLOCKEDITEMPOS,
+    SHL_GETSECUREDCONTAINERS,
     SHL_GETSECUREDCONTAINERPOS,
+    SHL_GETSECUREDITEMS,
     SHL_GUILD,
     SHL_HOUSETYPE,
     SHL_INCREASEDSTORAGE,
@@ -1965,8 +1983,6 @@ enum SHL_TYPE
     SHL_REGION,
     SHL_REMOVEKEYS,
     SHL_SECURE,
-    SHL_SECUREDCONTAINERS,
-    SHL_SECUREDITEMS,
     SHL_VENDORS,
     SHL_QTY
 };
@@ -1999,7 +2015,9 @@ const lpctstr CItemMulti::sm_szLoadKeys[SHL_QTY + 1] =
     "GETFRIENDPOS",
     "GETHOUSEVENDORPOS",
     "GETLOCKEDITEMPOS",
+    "GETSECUREDCONTAINERS",
     "GETSECUREDCONTAINERPOS",
+    "GETSECUREDITEMS",
     "GUILD",
     "HOUSETYPE",
     "INCREASEDSTORAGE",
@@ -2015,8 +2033,6 @@ const lpctstr CItemMulti::sm_szLoadKeys[SHL_QTY + 1] =
     "REGION",
     "REMOVEKEYS",
     "SECURE",
-    "SECUREDCONTAINERS",
-    "SECUREDITEMS",
     "VENDORS",
     NULL
 };
@@ -2272,7 +2288,16 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
         }
         case SHL_MOVINGCRATE:
         {
-            sVal.FormatDWVal(GetMovingCrate(true)->GetUID());
+            bool fCreate = Exp_GetVal(pszKey);
+            CItemContainer *pCrate = GetMovingCrate(fCreate);
+            if (pCrate)
+            {
+                sVal.FormatDWVal(pCrate->GetUID());
+            }
+            else
+            {
+                sVal.FormatDWVal(0);
+            }
             break;
         }
         case SHL_ADDKEY:
@@ -2318,12 +2343,12 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
             }
             return false;
         }
-        case SHL_SECUREDCONTAINERS:
+        case SHL_GETSECUREDCONTAINERS:
         {
             sVal.FormatSTVal(GetSecuredContainersCount());
             break;
         }
-        case SHL_SECUREDITEMS:
+        case SHL_GETSECUREDITEMS:
         {
             sVal.Format16Val(GetSecuredItemsCount());
             break;
@@ -2769,7 +2794,6 @@ CItemMulti *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, C
     if (pMultiItem)
     {
         pMultiItem->Multi_Setup(pChar, UID_CLEAR);
-        pMultiItem->SetKeyNum("DEED_ID", pDeed->GetID());
     }
 
     if (pItemDef->IsType(IT_STONE_GUILD))

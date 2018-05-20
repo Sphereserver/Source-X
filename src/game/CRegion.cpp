@@ -55,6 +55,7 @@ CRegion::CRegion( CResourceID rid, lpctstr pszName ) :
 	m_iLinkedSectors = 0;
 	if ( pszName )
 		SetName( pszName );
+    _pMultiLink = nullptr;
 }
 
 CRegion::~CRegion()
