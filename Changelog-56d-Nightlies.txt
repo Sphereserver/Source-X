@@ -946,6 +946,7 @@ Added @Redeed trigger for multis (t_multi, t_ship, t_multi_custom, t_addon)
         Note: the crate is moved to the OWNER's bank, not SRC.
         If argn2 = 0 then argn3 will be not used regardless of the value it has.
     SRC = Player doing the redeed (If Any). When the multi is being removed there is no SRC (also when an Addon is being redeeded from internal functions).
+    ARGO = The deed.
     return 1 will prevent the deed from being created, but will not block the code from argn2 and argn3
 
 Added @HouseDesignBegin trigger for t_multi_custom, called when the player enters on design mode
@@ -963,3 +964,10 @@ Added @HouseDesignBegin trigger for t_multi_custom, called when the player enter
 
 20-05-2018, Nolok
 - Fixed: triggers @UserUltimaStoreButton, @UserVirtue, @UserVirtueInvoke and @UserWarMode weren't firing (issue #102).
+
+20-05-2018, XuN
+Redeed now creates the deed before calling the @Redeed trigger and the deed gets renamed automatically.
+- Added ARGO to @Redeed trigger, being argo the deed.
+- added to sphere_msgs 'DEED_NAME': "Deed to a %s"
+- Fixed placed houses being moved 1 tile east from where they should.
+- Placing house componentes on house should now move all locked items and also secured containers in that X,Y and floor level to the moving crate

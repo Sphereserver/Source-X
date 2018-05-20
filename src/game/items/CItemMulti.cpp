@@ -818,8 +818,14 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CChar *pChar)
     ITEMID_TYPE itDeed = ITEMID_DEED1;
     TRIGRET_TYPE tRet = TRIGRET_RET_FALSE;
     bool fTransferAll = false;
+    CItem *pDeed = CItem::CreateBase(itDeed <= ITEMID_NOTHING ? itDeed : ITEMID_DEED1);
+    tchar *pszName = Str_GetTemp();
+    CItemBaseMulti * pItemBase = static_cast<CItemBaseMulti*>(Base_GetDef());
+    sprintf(pszName,g_Cfg.GetDefaultMsg(DEFMSG_DEED_NAME),pItemBase->GetName());
+    pDeed->SetName(pszName);
 
-    if (IsType(IT_MULTI_ADDON))
+    bool fIsAddon = IsType(IT_MULTI_ADDON);
+    if (fIsAddon)
     {
         CItemMulti *pMulti = static_cast<CItemMulti*>(m_uidLink.ItemFind());
         if (pMulti)
@@ -827,64 +833,71 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CChar *pChar)
             pMulti->DelAddon(this);
         }
     }
-    else
+    CScriptTriggerArgs args(pDeed);
+    args.m_iN1 = itDeed;
+    args.m_iN2 = 1; // Transfer / Redeed all items to the moving crate.
+    args.m_iN3 = fMoveToBank; // Transfer the Moving Crate to the owner's bank.
+    if (IsTrigUsed(TRIGGER_REDEED))
     {
-        CScriptTriggerArgs args;
-        args.m_iN1 = itDeed;
-        args.m_iN2 = 1; // Transfer / Redeed all items to the moving crate.
-        args.m_iN3 = fMoveToBank; // Transfer the Moving Crate to the owner's bank.
-        if (IsTrigUsed(TRIGGER_REDEED))
+        tRet = OnTrigger(ITRIG_Redeed, pChar, &args);
+        if (args.m_iN2 == 0)
         {
-            tRet = OnTrigger(ITRIG_Redeed, pChar, &args);
-            if (args.m_iN2 == 0)
-            {
-                fMoveToBank = false;
-            }
-            else
-            {
-                fTransferAll = true;
-                fMoveToBank = args.m_iN3 ? true : false;
-            }
+            fMoveToBank = false;
+        }
+        else
+        {
+            fTransferAll = true;
+            fMoveToBank = args.m_iN3 ? true : false;
         }
     }
-    if (fTransferAll)
+    RemoveAllComponents();
+    if (!fIsAddon)
     {
-        TransferLockdownsToMovingCrate();
-        TransferSecuredToMovingCrate();
-        RemoveAllComponents();
-        RedeedAddons();
-        TransferAllItemsToMovingCrate();    // Whatever is left unlisted.
+        if (fTransferAll)
+        {
+            TransferLockdownsToMovingCrate();
+            TransferSecuredToMovingCrate();
+            RedeedAddons();
+            TransferAllItemsToMovingCrate();    // Whatever is left unlisted.
+        }
     }
+
     if (!pOwner)
     {
         return;
     }
-    if (fMoveToBank)
+
+    if (!fIsAddon)
     {
-        TransferMovingCrateToBank();
-    }
-    pOwner->GetMultiStorage()->DelMulti(this);
-    if (tRet == TRIGRET_RET_FALSE)
-    {
-        CItem *pDeed = CItem::CreateBase(itDeed <= ITEMID_NOTHING ? itDeed : ITEMID_DEED1);
-        if (pDeed)
+        if (fMoveToBank)
         {
-            pDeed->SetHue(GetHue());
-            pDeed->m_itDeed.m_Type = GetID();
-            if (m_Attr & ATTR_MAGIC)
-            {
-                pDeed->SetAttr(ATTR_MAGIC);
-            }
-            if (fMoveToBank)
-            {
-                pOwner->GetBank(LAYER_BANKBOX)->ContentAdd(pDeed);
-            }
-            else
-            {
-                pOwner->ItemBounce(pDeed, fDisplayMsg);
-            }
+            TransferMovingCrateToBank();
+        }
+        pOwner->GetMultiStorage()->DelMulti(this);
+    }
+    if (tRet == TRIGRET_RET_TRUE)
+    {
+        pDeed->Delete();
+        return;
+    }
+    if (pDeed)
+    {
+        pDeed->SetHue(GetHue());
+        pDeed->m_itDeed.m_Type = GetID();
+        if (m_Attr & ATTR_MAGIC)
+        {
+            pDeed->SetAttr(ATTR_MAGIC);
+        }
+        if (fMoveToBank)
+        {
+            pOwner->GetBank(LAYER_BANKBOX)->ContentAdd(pDeed);
+        }
+        else
+        {
+            pOwner->ItemBounce(pDeed, fDisplayMsg);
         }
     }
+    
     SetKeyNum("REMOVED", 1);
     Delete();
 }
@@ -2649,7 +2662,6 @@ CItemMulti *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, C
     if (CItemBase::IsID_Multi(pItemDef->GetID()) || pMultiDef->IsType(IT_MULTI_ADDON))  
     {
         pt.m_y -= (short)(pMultiDef->m_rect.m_bottom - 1);
-        pt.m_x += 1;
     }
 
     if (!pChar->IsPriv(PRIV_GM))

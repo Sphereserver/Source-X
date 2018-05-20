@@ -49,8 +49,8 @@ private:
 	std::vector<CChar*> _lAccesses;    // List of Accesses chars.
 protected:
     std::vector<CItem*> _lLockDowns;  // List of Locked Down items.
-private:
     std::vector<CItemContainer*> _lSecureContainers; // List of Secured containers.
+private:
     std::vector<CItem*> _lComponents; // List of Components.
     std::vector<CItemMulti*> _lAddons;  // List of AddOns.
 
@@ -562,17 +562,51 @@ private:
 	CItemMulti& operator=(const CItemMulti& other);
 
 public:
+    /**
+    * @brief Tick override.
+    * @return true
+    */
 	virtual bool OnTick();
-	virtual bool MoveTo(CPointMap pt, bool bForceFix = false); // Put item on the ground here.
-	virtual void OnMoveFrom();	// Moving from current location.
+    /**
+    * @brief Place the multi.
+    * @param pt Position.
+    * @param bForceFix force a fix.
+    * @return bool if can be moved.
+    */
+	virtual bool MoveTo(CPointMap pt, bool bForceFix = false);
+    /**
+    * @brief Moving from current location.
+    */
+	virtual void OnMoveFrom();
+    /**
+    * @brief Speech commands on the multi.
+    * @param pszCmd the speech.
+    * @param pSrc who talked.
+    */
 	void OnHearRegion( lpctstr pszCmd, CChar * pSrc );
-	CItem * Multi_GetSign();	// or Tiller
-
+    /**
+    * @brief Gets the Sign or Tiller item
+    * @return the item
+    */
+	CItem * Multi_GetSign();
+    
+    /**
+    * @brief General setup.
+    * @param pChar the char placing the multi.
+    * @param dwKeyCode code hash for keys.
+    */
 	void Multi_Setup(CChar * pChar, dword dwKeyCode);
+    /**
+    * @brief Gets the CItemBaseMulti linked to the given id
+    * @param id the id.
+    * @return the CItemBaseMulti
+    */
 	static const CItemBaseMulti * Multi_GetDef( ITEMID_TYPE id );
 
+    // Scripts virtuals.
+
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
-	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
+	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
 
 	virtual void r_Write( CScript & s );
 	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc );
@@ -588,39 +622,138 @@ public:
 class CMultiStorage
 {
 private:
-    std::vector<CItemMulti*> _lHouses; // List of stored houses.
-    std::vector<CItemShip*> _lShips;  // List of stored ships.
-    int16 _iHousesTotal;        // 
-    int16 _iShipsTotal;
+    std::vector<CItemMulti*> _lHouses;  // List of stored houses.
+    std::vector<CItemShip*> _lShips;    // List of stored ships.
+    int16 _iHousesTotal;    // Max of houses.
+    int16 _iShipsTotal;     // Max of ships.
 
 public:
     CMultiStorage();
     virtual ~CMultiStorage();
 
+    /**
+    * @brief Adds a multi
+    * @param pMulti the multi
+    */
     void AddMulti(CItemMulti *pMulti);
+    /**
+    * @brief Removes a multi
+    * @param pMulti the multi
+    */
     void DelMulti(CItemMulti *pMulti);
 
+    /**
+    * @brief Adds a house multi.
+    * @param pHouse the house.
+    */
     void AddHouse(CItemMulti *pHouse);
+    /**
+    * @brief Removes a house multi.
+    * @param pHouse the house.
+    */
     void DelHouse(CItemMulti *pHouse);
+    /**
+    * @brief Checks if the char can place a house.
+    * @param pChar the char.
+    * @param iHouseCount the MultiCount of the house.
+    * @return true if the char has space for the house.
+    */
     bool CanAddHouse(CChar *pChar, int16 iHouseCount);
+    /**
+    * @brief Checks if the Guild/Town Stone can place a house.
+    * @param pStone the stone.
+    * @param iHouseCount the MultiCount of the house.
+    * @return true if the stone has space for the house.
+    */
     bool CanAddHouse(CItemStone *pStone, int16 iHouseCount);
+    /**
+    * @brief Returns the position of the given house.
+    * @return the position.
+    */
     int16 GetHousePos(CItemMulti *pHouse);
+    /**
+    * @brief Returns the total count of houses.
+    *
+    * This method counts the real houses and the value each one
+    * adds with MultiCount.
+    * @return the count.
+    */
     int16 GetHouseCountTotal();
+    /**
+    * @brief Returns the real count of houses.
+    * @return the count.
+    */
     int16 GetHouseCountReal();
+    /**
+    * @brief Returns the house at the given position.
+    * @param iPos the position
+    * @return the house
+    */
     CItemMulti *GetHouseAt(int16 iPos);
+    /**
+    * @brief Clears the list of houses.
+    */
     void ClearHouses();
 
+
+    /**
+    * @brief Adds a ship.
+    * @param pShip the ship.
+    */
     void AddShip(CItemShip *pShip);
+    /**
+    * @brief Removes a ship.
+    * @param pShip the ship.
+    */
     void DelShip(CItemShip *pShip);
+    /**
+    * @brief Checks if the char can place a ship.
+    * @param pChar the char.
+    * @param iHouseCount the MultiCount of the ship.
+    * @return true if the char has space for the ship.
+    */
     bool CanAddShip(CChar *pChar, int16 iShipCount);
+    /**
+    * @brief Checks if the Guild/Town Stone can place a ship.
+    * @param pStone the stone.
+    * @param iHouseCount the MultiCount of the ship.
+    * @return true if the stone has space for the ship.
+    */
     bool CanAddShip(CItemStone *pStone, int16 iShipCount);
+    /**
+    * @brief Returns the position of the given ship.
+    * @param pShip the ship.
+    * @return the position.
+    */
     int16 GetShipPos(CItemShip *pShip);
+    /**
+    * @brief Returns the total count of ships.
+    *
+    * This method counts the real ships and the value each one
+    * adds with MultiCount.
+    * @return the count.
+    */
     int16 GetShipCountTotal();
+    /**
+    * @brief The real count of ships.
+    * @return the count.
+    */
     int16 GetShipCountReal();
+    /**
+    * @brief Gets the ship at the given position.
+    * @param iPos the position.
+    * @return the ship.
+    */
     CItemShip *GetShipAt(int16 iPos);
+    /**
+    * @brief Clears the ships list.
+    */
     void ClearShips();
 
-
+    /**
+    * @brief Writes the houses/ships on the worldsave.
+    * @param s The datastream.
+    */
     virtual void r_Write(CScript & s);
 };
 #endif // _INC_CITEMMULTI_H
