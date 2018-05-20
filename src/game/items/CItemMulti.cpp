@@ -821,7 +821,7 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CChar *pChar)
     CItem *pDeed = CItem::CreateBase(itDeed <= ITEMID_NOTHING ? itDeed : ITEMID_DEED1);
     tchar *pszName = Str_GetTemp();
     CItemBaseMulti * pItemBase = static_cast<CItemBaseMulti*>(Base_GetDef());
-    sprintf(pszName,g_Cfg.GetDefaultMsg(DEFMSG_DEED_NAME),pItemBase->GetName());
+    snprintf(pszName, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_DEED_NAME),pItemBase->GetName());
     pDeed->SetName(pszName);
 
     bool fIsAddon = IsType(IT_MULTI_ADDON);
@@ -2110,6 +2110,11 @@ void CItemMulti::r_Write(CScript & s)
         {
             s.WriteKeyHex("ADDADDON", (*it)->GetUID());
         }
+    }
+
+    if (GetMovingCrate(false))
+    {
+        s.WriteKeyHex("MOVINGCRATE", GetMovingCrate(false)->GetUID());
     }
 }
 

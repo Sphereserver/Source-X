@@ -247,6 +247,7 @@ void CItemMultiCustom::EndCustomize(bool bForced)
 
 			pChar->MoveToChar(ptDest);
 			pChar->UpdateMove(ptOld);
+            pChar->Update();
 		}
 
 		SendStructureTo(pClient);
