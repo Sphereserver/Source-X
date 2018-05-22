@@ -11,12 +11,13 @@
 * class is declared inside CResource.h
 */
 
-#include "CCChampion.h"	// predef header.
-#include "../CWorld.h"
-#include "../chars/CChar.h"
+#include "../../common/CException.h"
 #include "../../common/CScript.h"
 #include "../../common/CResourceBase.h"
-#include "../../common/CException.h"
+#include "../../common/CUIDExtra.h"
+#include "../chars/CChar.h"
+#include "../CWorld.h"
+#include "CCChampion.h"	// predef header.
 
 
 #define CANDLESNEXTRED 4

@@ -520,6 +520,11 @@ MATCH_TYPE Str_Match(lpctstr pPattern, lpctstr pText)
         return MATCH_VALID;
 }
 
+#ifdef _MSC_VER
+    // /GL + /LTCG flags inline in linking phase this function, but probably in a wrong way, so that
+    // something gets corrupted on the memory and an exception is generated later
+    #pragma auto_inline(off)
+#endif
 bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
 {
     // Parse a list of args. Just get the next arg.
@@ -576,44 +581,52 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
             // Here we track opened and closed brackets.
             //	we'll ignore items inside brackets, if the bracket isn't a separator in the list
             if (ch == '{') {
-                if (!bSepHasCurly)
+                if (!bSepHasCurly) {
                     if (!iSquare && !iRound && !iAngle)
                         ++iCurly;
+                }
             }
             else if (ch == '[') {
-                if (!bSepHasSquare)
+                if (!bSepHasSquare) {
                     if (!iCurly && !iRound && !iAngle)
                         ++iSquare;
+                }
             }
             else if (ch == '(') {
-                if (!bSepHasRound)
+                if (!bSepHasRound) {
                     if (!iCurly && !iSquare && !iAngle)
                         ++iRound;
+                }
             }
             else if (ch == '<') {
-                if (!bSepHasAngle)
+                if (!bSepHasAngle) {
                     if (!iCurly && !iSquare && !iRound)
                         ++iAngle;
+                }
             }
             else if (ch == '}') {
-                if (!bSepHasCurly)
+                if (!bSepHasCurly) {
                     if (iCurly)
                         --iCurly;
+                }
             }
             else if (ch == ']') {
-                if (!bSepHasSquare)
+                if (!bSepHasSquare) {
                     if (iSquare)
                         --iSquare;
+                }
             }
             else if (ch == ')') {
-                if (!bSepHasRound)
+                if (!bSepHasRound) {
                     if (iRound)
                         --iRound;
+                }
             }
             else if (ch == '>') {
-                if (!bSepHasAngle)
+                if (!bSepHasAngle) {
                     if (iAngle)
                         --iAngle;
+                }
             }
 
             // separate the string when i encounter a separator, but only if at this point of the string we aren't inside an argument
@@ -622,8 +635,10 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
             //	don't turn this if into an else if!
             //	We can choose as a separator also one of {[(< >)]} and they have to be treated as such!
             if ((iCurly<=0) && (iSquare<=0) && (iRound<=0))
+            {
                 if (strchr(pszSep, ch))		// if ch is a separator
                     break;
+            }
         }	// end of the quotes if clause
 
     }	// end of the for loop
@@ -653,6 +668,9 @@ bool Str_Parse(tchar * pLine, tchar ** ppArg, lpctstr pszSep)
 
     return true;
 }
+#ifdef _MSC_VER
+    #pragma auto_inline(on)
+#endif
 
 int Str_ParseCmds(tchar * pszCmdLine, tchar ** ppCmd, int iMax, lpctstr pszSep)
 {

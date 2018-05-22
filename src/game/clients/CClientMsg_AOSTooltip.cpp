@@ -1,9 +1,10 @@
-#include "../triggers.h"
+#include "../../common/CUIDExtra.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
 #include "../items/CItem.h"
 #include "../items/CItemStone.h"
 #include "../components/CCSpawn.h"
+#include "../triggers.h"
 #include "CClient.h"
 
 

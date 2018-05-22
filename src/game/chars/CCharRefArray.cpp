@@ -1,5 +1,6 @@
 
 #include "../../sphere/threads.h"
+#include "../../common/CUIDExtra.h"
 #include "CChar.h"
 #include "CCharRefArray.h"
 

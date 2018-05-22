@@ -1,8 +1,9 @@
 
-#include <cmath>
+#include "../../common/CUIDExtra.h"
 #include "../uo_files/CUOTerrainInfo.h"
 #include "../CWorld.h"
 #include "CChar.h"
+#include <cmath>
 
 
 bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist, word wFlags, bool bCombatCheck ) const

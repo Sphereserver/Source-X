@@ -1,5 +1,5 @@
-
 #include "../../common/sphereproto.h"
+#include "../../common/CUIDExtra.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
 #include "../CServerTime.h"

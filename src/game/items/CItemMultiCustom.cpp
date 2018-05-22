@@ -5,6 +5,7 @@
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
 #include "../../common/CUOInstall.h"
+#include "../../common/CUIDExtra.h"
 #include "../../network/network.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"

@@ -9,11 +9,11 @@
 #include "../common/CObjBaseTemplate.h"
 #include "../common/CScriptObj.h"
 #include "../common/CResourceBase.h"
+#include "clients/CClientTooltip.h"
 #include "CServerTime.h"
 #include "CEntity.h"
 #include "CBase.h"
 #include "CServerConfig.h"
-#include "clients/CClientTooltip.h"
 #include <memory>
 
 
@@ -63,7 +63,7 @@ public:
     CUID 	_uidSpawn;          // SpawnItem for this item
 
     CResourceRefArray m_OEvents;
-    static size_t sm_iCount;    // how many total objects in the world ?
+    static dword sm_iCount;    // how many total objects in the world ?
 
 	/**
 	* @fn  CBaseBaseDef * CObjBase::Base_GetDef() const;

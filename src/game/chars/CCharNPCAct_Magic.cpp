@@ -1,5 +1,6 @@
 // Actions specific to an NPC.
 
+#include "../../common/CUIDExtra.h"
 #include "../CWorld.h"
 #include "CCharNPC.h"
 

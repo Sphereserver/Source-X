@@ -6,11 +6,11 @@
 #include "../network/network.h"
 #include "../network/send.h"
 #include "../sphere/ProfileTask.h"
+#include "../common/CLog.h"
 #include "chars/CChar.h"
 #include "clients/CClient.h"
 #include "clients/CGMPage.h"
 #include "items/CItem.h"
-#include "../common/CLog.h"
 #include "CObjBase.h"
 #include "CServer.h"
 #include "CServerTime.h"
@@ -977,7 +977,7 @@ void CWorldThread::GarbageCollection_UIDs()
 
 			if ((iCount & 0x1FF ) == 0)
 				g_Serv.PrintPercent(iCount, GetUIDCount());
-			iCount ++;
+			++iCount;
 		}
 		catch ( const CSError& e )
 		{
@@ -994,7 +994,7 @@ void CWorldThread::GarbageCollection_UIDs()
 	GarbageCollection_New();
 
 	if ( iCount != CObjBase::sm_iCount )	// All objects must be accounted for.
-		g_Log.Event(LOGL_ERROR|LOGM_NOCONTEXT, "Garbage Collection: done. Object memory leak %" PRIu32 "!=%" PRIuSIZE_T ".\n", iCount, CObjBase::sm_iCount);
+		g_Log.Event(LOGL_ERROR|LOGM_NOCONTEXT, "Garbage Collection: done. Object memory leak %" PRIu32 "!=%" PRIu32 ".\n", iCount, CObjBase::sm_iCount);
 	else
 		g_Log.Event(LOGL_EVENT|LOGM_NOCONTEXT, "Garbage Collection: done. %" PRIu32 " Objects accounted for.\n", iCount);
 
@@ -1004,7 +1004,7 @@ void CWorldThread::GarbageCollection_UIDs()
 		memset(m_FreeUIDs, 0, FREE_UIDS_SIZE * sizeof(dword));
 		m_FreeOffset = 0;
 
-		for ( dword d = 1; d < GetUIDCount(); d++ )
+		for ( dword d = 1; d < GetUIDCount(); ++d )
 		{
 			CObjBase *pObj = m_UIDs[d];
 

@@ -1,6 +1,7 @@
 // Test things to judge what an NPC might be thinking. (want to do)
 // But take no actions here.
 
+#include "../../common/CUIDExtra.h"
 #include "../items/CItemVendable.h"
 #include "../CWorld.h"
 #include "../spheresvr.h"

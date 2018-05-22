@@ -15,27 +15,26 @@
 #include "ListDefContMap.h"
 
 
-#define SKIP_SEPARATORS(p)			while ( *(p)=='.' ) { ++(p); }	// || ISWHITESPACE(*(p))
-#define SKIP_ARGSEP(p)				while ( *(p)== ',' || IsSpace(*p) ){ ++(p); }
-#define SKIP_IDENTIFIERSTRING(p)	while ( _ISCSYM(*p) ){ ++(p); }
+#define ISWHITESPACE(ch)	(IsSpace(ch) || ((uchar)(ch)==0xa0))// IsSpace
+#define _IS_SWITCH(ch)		((ch) == '-' || (ch) == '/')	    // command line switch.
+#define _ISCSYMF(ch)        (IsAlpha(ch) || (ch)=='_')	        // __iscsym or __iscsymf
+#define _ISCSYM(ch)         (isalnum(ch) || (ch)=='_')		    // __iscsym or __iscsymf
 
-#define ISWHITESPACE(ch)			(IsSpace(ch) || ((uchar)ch==0xa0))	// IsSpace
-#define GETNONWHITESPACE( pStr )	while ( ISWHITESPACE( (pStr)[0] )) { ++(pStr); }
-#define _IS_SWITCH(c)				((c) == '-' || (c) == '/' )	// command line switch.
+#define SKIP_SEPARATORS(pStr)		while (*(pStr)=='.') { ++(pStr); }	// || ISWHITESPACE(*(pStr))
+#define SKIP_ARGSEP(pStr)		    while ((*(pStr)==',' || IsSpace(*(pStr)))) { ++(pStr); }
+#define SKIP_IDENTIFIERSTRING(pStr) while (_ISCSYM(*(pStr))) { ++(pStr); }
 
-#define REMOVE_QUOTES( x )			\
+#define GETNONWHITESPACE(pStr)	    while (ISWHITESPACE(*(pStr))) { ++(pStr); }
+
+#define REMOVE_QUOTES(x)			\
 {									\
-	GETNONWHITESPACE( x );			\
-	if ( *x == '"' )				\
+	GETNONWHITESPACE(x);			\
+	if (*x == '"')				    \
 		++x;						\
-	tchar * psX	= const_cast<tchar*>(strchr( x, '"' ));	\
-	if ( psX )						\
-		*psX	= '\0';				\
+	tchar * psX	= const_cast<tchar*>(strchr(x,'"'));	\
+	if (psX)						\
+		*psX = '\0';				\
 }
-
-#define _ISCSYMF(ch) ( IsAlpha(ch) || (ch)=='_')	// __iscsym or __iscsymf
-#define _ISCSYM(ch) ( isalnum(ch) || (ch)=='_')		// __iscsym or __iscsymf
-
 
 #ifndef M_PI 
 	#define M_PI 3.14159265358979323846

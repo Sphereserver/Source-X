@@ -103,7 +103,7 @@ lpctstr g_szServerDescription =	SPHERE_TITLE " Version " SPHERE_VERSION " " SPHE
 
 int g_szServerBuild = 0;
 
-size_t CObjBase::sm_iCount = 0;			// UID table.
+dword CObjBase::sm_iCount = 0;			// UID table.
 llong llTimeProfileFrequency = 1000;	// time profiler
 
 // Game servers stuff.

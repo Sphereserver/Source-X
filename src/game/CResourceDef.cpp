@@ -2,6 +2,7 @@
 
 #include "../common/sphere_library/CSAssoc.h"
 #include "../common/CException.h"
+#include "../common/CUIDExtra.h"
 #include "chars/CChar.h"
 #include "items/CItemBase.h"
 #include "CServerConfig.h"
