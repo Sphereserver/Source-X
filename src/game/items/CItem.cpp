@@ -108,6 +108,11 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CObjBase( true )
     {
         Suscribe(new CCItemDamageable(this));
     }
+    LAYER_TYPE iLayer = GetEquipLayer();
+    if ( (iLayer > LAYER_NONE && iLayer < LAYER_EQUIP_QTY) || IsType(IT_MUSICAL))
+    {
+        Suscribe(new CCFaction(this));  // Adding it only to equippable items
+    }
 }
 
 bool CItem::NotifyDelete()

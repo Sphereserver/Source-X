@@ -383,7 +383,7 @@ bool CBaseBaseDef::r_LoadVal( CScript & s )
         case OBC_FACTION:
         case OBC_SLAYER:
             GetFaction().SetFactionID(NPC_FACTION(s.GetArgVal()));
-            break;
+            return true;
 		//Set as number only
 		case OBC_CASTINGFOCUS:
 		case OBC_DAMCHAOS:

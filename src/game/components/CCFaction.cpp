@@ -163,8 +163,7 @@ void CCFaction::Delete(bool fForced)
 bool CCFaction::r_LoadVal(CScript & s)
 {
     ADDTOCALLSTACK("CCFaction::r_LoadVal");
-    lpctstr	pszKey = s.GetKey();
-    CHF_TYPE iKeyNum = (CHF_TYPE)FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    CHF_TYPE iKeyNum = (CHF_TYPE)FindTableHeadSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
     switch (iKeyNum)
     {
         case CHF_FACTION:
@@ -220,7 +219,7 @@ void CCFaction::r_Write(CScript & s)
 {
     ADDTOCALLSTACK("CCFaction::r_Write");
     if (GetFactionID() != FACTION_NONE){
-        s.WriteKeyVal("FACTION", (llong)GetFactionID()); // Same value stored with different names for CChars and CItems.
+        s.WriteKeyHex("FACTION", (llong)GetFactionID()); // Same value stored with different names for CChars and CItems.
     }
 }
 
@@ -367,6 +366,11 @@ int CCFaction::GetSlayerDamagePenalty(CCFaction * target)
     if (IsOppositeGroup(target))
         return DAMAGE_SLAYER_OPPOSITE;
     return 1;
+}
+
+CFactionDef::CFactionDef()
+{
+    _iFaction = FACTION_NONE;
 }
 
 NPC_FACTION CFactionDef::GetFactionID()

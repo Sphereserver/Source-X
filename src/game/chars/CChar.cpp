@@ -303,6 +303,8 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false ),
 	m_LocalLight = 0;
 	m_fClimbUpdated = false;
 
+    Suscribe(new CCFaction(this));
+
 	ASSERT(IsDisconnected());
 }
 

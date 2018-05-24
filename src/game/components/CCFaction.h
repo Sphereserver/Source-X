@@ -127,7 +127,7 @@ class CFactionDef
 protected:
     NPC_FACTION _iFaction;
 public:
-    CFactionDef() {}
+    CFactionDef();
     NPC_FACTION GetFactionID();
     void SetFactionID(NPC_FACTION faction);
 };

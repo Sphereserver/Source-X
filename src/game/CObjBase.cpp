@@ -100,18 +100,6 @@ CObjBase::CObjBase( bool fItem )
 		ASSERT(IsValidUID());
 		SetContainerFlags(UID_O_DISCONNECT);	// it is no place for now
 	}
-    if (IsChar())
-    {
-        Suscribe(new CCFaction(this));
-    }
-    else if (IsItem())
-    {
-        CItem *pItem = static_cast<CItem*>(this);
-        if (GetEquipLayer() < LAYER_EQUIP_QTY || pItem->IsType(IT_MUSICAL))
-        {
-            Suscribe(new CCFaction(this));  // Adding it only to equippable items
-        }
-    }
 
 	// Put in the idle list by default. (til placed in the world)
 	g_World.m_ObjNew.InsertHead( this );
