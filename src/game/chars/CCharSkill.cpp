@@ -3566,6 +3566,308 @@ bool CChar::Skill_Wait( SKILL_TYPE skilltry )
 	return true;
 }
 
+// Assume the container is not locked.
+// return: true = snoop or can't open at all.
+//  false = instant open.
+bool CChar::Skill_Snoop_Check(const CItemContainer * pItem)
+{
+	ADDTOCALLSTACK("CChar::Skill_Snoop_Check");
+
+	if (pItem == NULL)
+		return true;
+
+	if (pItem->IsContainer())
+	{
+		if ((g_Cfg.m_iTradeWindowSnooping == false) && (pItem->IsItemInTrade() == true))
+			return false;
+	}
+
+	if (!IsPriv(PRIV_GM))
+	{
+		switch (pItem->GetType())
+		{
+		case IT_SHIP_HOLD_LOCK:
+		case IT_SHIP_HOLD:
+			// Must be on board a ship to open the hatch.
+			ASSERT(m_pArea);
+			if (m_pArea->GetResourceID() != pItem->m_uidLink)
+			{
+				SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_ITEMUSE_HATCH_FAIL));
+				return true;
+			}
+			break;
+		case IT_EQ_BANK_BOX:
+			// Some sort of cheater.
+			return false;
+		default:
+			break;
+		}
+	}
+
+	CChar * pCharMark = NULL;
+	if (!IsTakeCrime(pItem, &pCharMark) || pCharMark == NULL)
+		return false;
+
+	if (Skill_Wait(SKILL_SNOOPING))
+		return true;
+
+	m_Act_UID = pItem->GetUID();
+	Skill_Start(SKILL_SNOOPING);
+	return true;
+}
+
+// SKILL_SNOOPING
+// m_Act_UID = object to snoop into.
+// RETURN:
+// -SKTRIG_QTY = no chance. and not a crime
+// -SKTRIG_FAIL = no chance and caught.
+// 0-100 = difficulty = percent chance of failure.
+int CChar::Skill_Snooping(SKTRIG_TYPE stage)
+{
+	ADDTOCALLSTACK("CChar::Skill_Snooping");
+
+	if (stage == SKTRIG_STROKE)
+		return 0;
+
+	// Assume the container is not locked.
+	CItemContainer * pCont = dynamic_cast <CItemContainer *>(m_Act_UID.ItemFind());
+	if (pCont == NULL)
+		return (-SKTRIG_QTY);
+
+	CChar * pCharMark;
+	if (!IsTakeCrime(pCont, &pCharMark) || pCharMark == NULL)
+		return 0;	// Not a crime really.
+
+	if (GetTopDist3D(pCharMark) > 1)
+	{
+		SysMessageDefault(DEFMSG_SNOOPING_REACH);
+		return (-SKTRIG_QTY);
+	}
+
+	if (!CanTouch(pCont))
+	{
+		SysMessageDefault(DEFMSG_SNOOPING_CANT);
+		return (-SKTRIG_QTY);
+	}
+
+	if (stage == SKTRIG_START)
+	{
+		PLEVEL_TYPE plevel = GetPrivLevel();
+		if (plevel < pCharMark->GetPrivLevel())
+		{
+			SysMessageDefault(DEFMSG_SNOOPING_CANT);
+			return -SKTRIG_QTY;
+		}
+
+		// return the difficulty.
+		return ((Skill_GetAdjusted(SKILL_SNOOPING) < Calc_GetRandVal(1000)) ? 100 : 0);
+	}
+
+	// did anyone see this ?
+	CheckCrimeSeen(SKILL_SNOOPING, pCharMark, pCont, g_Cfg.GetDefaultMsg(DEFMSG_SNOOPING_ATTEMPTING));
+	Noto_Karma(-4, INT32_MIN, true);
+
+	if (stage == SKTRIG_FAIL)
+	{
+		SysMessageDefault(DEFMSG_SNOOPING_FAILED);
+		if ((Skill_GetAdjusted(SKILL_HIDING) / 2) < Calc_GetRandVal(1000))
+			Reveal();
+	}
+
+	if (stage == SKTRIG_SUCCESS)
+	{
+		if (IsClient())
+			m_pClient->addContainerSetup(pCont);	// open the container
+	}
+	return 0;
+}
+
+// m_Act_UID = object to steal.
+// RETURN:
+// -SKTRIG_QTY = no chance. and not a crime
+// -SKTRIG_FAIL = no chance and caught.
+// 0-100 = difficulty = percent chance of failure.
+int CChar::Skill_Stealing(SKTRIG_TYPE stage)
+{
+	ADDTOCALLSTACK("CChar::Skill_Stealing");
+	if (stage == SKTRIG_STROKE)
+		return 0;
+
+	CItem * pItem = m_Act_UID.ItemFind();
+	CChar * pCharMark = NULL;
+	if (pItem == NULL)	// on a chars head ? = random steal.
+	{
+		pCharMark = m_Act_UID.CharFind();
+		if (pCharMark == NULL)
+		{
+			SysMessageDefault(DEFMSG_STEALING_NOTHING);
+			return (-SKTRIG_QTY);
+		}
+		CItemContainer * pPack = pCharMark->GetPack();
+		if (pPack == NULL)
+		{
+		cantsteal:
+			SysMessageDefault(DEFMSG_STEALING_EMPTY);
+			return (-SKTRIG_QTY);
+		}
+		pItem = pPack->ContentFindRandom();
+		if (pItem == NULL)
+		{
+			goto cantsteal;
+		}
+		m_Act_UID = pItem->GetUID();
+	}
+
+	// Special cases.
+	CContainer * pContainer = dynamic_cast <CContainer *> (pItem->GetContainer());
+	if (pContainer)
+	{
+		CItemCorpse * pCorpse = dynamic_cast <CItemCorpse *> (pContainer);
+		if (pCorpse)
+		{
+			SysMessageDefault(DEFMSG_STEALING_CORPSE);
+			return -SKTRIG_ABORT;
+		}
+	}
+	CItem * pCItem = dynamic_cast <CItem *> (pItem->GetContainer());
+	if (pCItem)
+	{
+		if (pCItem->GetType() == IT_GAME_BOARD)
+		{
+			SysMessageDefault(DEFMSG_STEALING_GAMEBOARD);
+			return -SKTRIG_ABORT;
+		}
+		if (pCItem->GetType() == IT_EQ_TRADE_WINDOW)
+		{
+			SysMessageDefault(DEFMSG_STEALING_TRADE);
+			return -SKTRIG_ABORT;
+		}
+	}
+	CItemCorpse * pCorpse = dynamic_cast <CItemCorpse *> (pItem);
+	if (pCorpse)
+	{
+		SysMessageDefault(DEFMSG_STEALING_CORPSE);
+		return -SKTRIG_ABORT;
+	}
+	if (pItem->IsType(IT_TRAIN_PICKPOCKET))
+	{
+		SysMessageDefault(DEFMSG_STEALING_PICKPOCKET);
+		return -SKTRIG_QTY;
+	}
+	if (pItem->IsType(IT_GAME_PIECE))
+	{
+		return -SKTRIG_QTY;
+	}
+	if (!CanTouch(pItem))
+	{
+		SysMessageDefault(DEFMSG_STEALING_REACH);
+		return -SKTRIG_ABORT;
+	}
+	if (!CanMove(pItem) || !CanCarry(pItem))
+	{
+		SysMessageDefault(DEFMSG_STEALING_HEAVY);
+		return -SKTRIG_ABORT;
+	}
+	if (!IsTakeCrime(pItem, &pCharMark))
+	{
+		SysMessageDefault(DEFMSG_STEALING_NONEED);
+
+		// Just pick it up ?
+		return -SKTRIG_QTY;
+	}
+	if (m_pArea->IsFlag(REGION_FLAG_SAFE))
+	{
+		SysMessageDefault(DEFMSG_STEALING_STOP);
+		return -SKTRIG_QTY;
+	}
+
+	Reveal();	// If we take an item off the ground we are revealed.
+
+	bool fGround = false;
+	if (pCharMark != NULL)
+	{
+		if (GetTopDist3D(pCharMark) > 2)
+		{
+			SysMessageDefault(DEFMSG_STEALING_MARK);
+			return -SKTRIG_QTY;
+		}
+		if (m_pArea->IsFlag(REGION_FLAG_NO_PVP) && pCharMark->m_pPlayer && !IsPriv(PRIV_GM))
+		{
+			SysMessageDefault(DEFMSG_STEALING_SAFE);
+			return -1;
+		}
+		if (GetPrivLevel() < pCharMark->GetPrivLevel())
+			return -SKTRIG_FAIL;
+		if (stage == SKTRIG_START)
+			return g_Cfg.Calc_StealingItem(this, pItem, pCharMark);
+	}
+	else
+	{
+		// stealing off the ground should always succeed.
+		// it's just a matter of getting caught.
+		if (stage == SKTRIG_START)
+			return 1;	// town stuff on the ground is too easy.
+
+		fGround = true;
+	}
+
+	// Deliver the goods.
+
+	if ((stage == SKTRIG_SUCCESS) || fGround)
+	{
+		pItem->ClrAttr(ATTR_OWNED);	// Now it's mine
+		CItemContainer * pPack = GetPack();
+		if (pItem->GetParent() != pPack && pPack)
+		{
+			pItem->RemoveFromView();
+			// Put in my invent.
+			pPack->ContentAdd(pItem);
+		}
+	}
+
+	if (m_Act_Difficulty == 0)
+		return 0;	// Too easy to be bad. hehe
+
+					// You should only be able to go down to -1000 karma by stealing.
+	if (CheckCrimeSeen(SKILL_STEALING, pCharMark, pItem, (stage == SKTRIG_FAIL) ? g_Cfg.GetDefaultMsg(DEFMSG_STEALING_YOUR) : g_Cfg.GetDefaultMsg(DEFMSG_STEALING_SOMEONE)))
+		Noto_Karma(-100, -1000, true);
+
+	return 0;
+}
+
+/*
+The Focus skill is used passively and it works automatically only if FEATURES_AOS_UPDATE_B is enabled.
+The skill increase the amount of stamina gained by 1 for each 10% points of Focus and increase the amount
+of mana by 1 for each 20%  points of Focus.
+The Skill_Focus method is called from Stats_Regen64 method  found in CCharStat.cpp
+*/
+ushort CChar::Skill_Focus(STAT_TYPE stat)
+{
+	ADDTOCALLSTACK("CChar::Skill_Focus");
+
+	if (g_Cfg.IsSkillFlag(SKILL_FOCUS, SKF_SCRIPTED))
+		return 0;
+
+	ushort uFocusValue = Skill_GetAdjusted(SKILL_FOCUS);
+	ushort uGain;
+	switch (stat)
+	{
+		case STAT_DEX:
+			uGain =  uFocusValue / 100;
+			break;
+		case STAT_INT:
+			uGain =  uFocusValue / 200;
+			break;
+		default:
+			return 0;
+	}
+	/*
+	By using the player skill value as difficulty, the chance to get an increase will be 50% because
+	the bell curva formula is used.
+	*/
+	Skill_Experience(SKILL_FOCUS, uFocusValue);
+	return uGain;
+}
 bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 {
 	ADDTOCALLSTACK("CChar::Skill_Start");

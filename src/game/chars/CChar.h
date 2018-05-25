@@ -887,6 +887,7 @@ private:
 	int Skill_Fighting( SKTRIG_TYPE stage );
 	int Skill_Musicianship( SKTRIG_TYPE stage );
 	int Skill_Tailoring( SKTRIG_TYPE stage );
+	ushort Skill_Focus(STAT_TYPE stat); //The focus skill is used passively, so it doesn't have any skill stage.
 
 	int Skill_Act_Napping(SKTRIG_TYPE stage);
 	int Skill_Act_Throwing(SKTRIG_TYPE stage);

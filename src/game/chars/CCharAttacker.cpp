@@ -56,7 +56,7 @@ bool CChar::Attacker_Add(CChar * pChar, int64 threat)
         //if ( GetTopSector()->GetCharComplexity() < 7 )
         //{
         sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_COMBAT_ATTACKO), GetName(), pChar->GetName());
-        UpdateObjMessage(z, NULL, pChar->GetClient(), HUE_TEXT_DEF, TALKMODE_EMOTE);
+        UpdateObjMessage(z, NULL, pChar->GetClient(), (HUE_TYPE)(g_Exp.m_VarDefs.GetKeyNum("EMOTE_DEF_COLOR")), TALKMODE_EMOTE);
         //}
 
         if (pChar->IsClient() && pChar->CanSee(this))
