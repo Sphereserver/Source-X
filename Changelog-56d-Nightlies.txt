@@ -970,7 +970,17 @@ Redeed now creates the deed before calling the @Redeed trigger and the deed gets
 - Added ARGO to @Redeed trigger, being argo the deed.
 - added to sphere_msgs 'DEED_NAME': "Deed to a %s"
 - Fixed placed houses being moved 1 tile east from where they should.
-- Placing house componentes on house should now move all locked items and also secured containers in that X,Y and floor level to the moving crate
+
+22-05-2018, Nolok
+- Fixed: FORINSTANCES caused an exception in Nightly builds, but not in the Debug ones (issue #88).
 
 25-05-2018, Drk84
-The following message: DEFMSG_COMBAT_ATTACKO (*%s is attacking %s!*) will use the EMOTE_DEF_COLOR setting found in sphere_msgs.scp instead of always use the gray color hue.
+- Changed: The defmessage DEFMSG_COMBAT_ATTACKO (*%s is attacking %s!*) will use the EMOTE_DEF_COLOR setting found in sphere_msgs.scp instead of always use the gray color hue.
+
+26-05-2018, Nolok
+- Fixed: COMBATF_PREHIT didn't fire the triggers in the correct order, also fixed a possible exploit while using PreHit (issue #108)
+- Added: COMBATF_PREHIT_NORANGE to allow starting the close-combat swing at distance; the blow will still be landed only when entering in range.
+- Fixed: After each combat hit the current combat skill was halted (actually it failed), then the same action was started again. This resulted in
+	the @Fail, @SkillFail, @Start, @SkillStart triggers to be fired at each hit.
+	- Fixed: NPCs doing extra AI actions (wandering, food, etc checks) after each hit in combat. This caused sometimes the current combat action to be resetted
+	and then forced again, erasing the NPC combat data, which ultimately results in the NPC hitting twice in a few tenths of seconds.

@@ -355,7 +355,7 @@ void CChar::NPC_OnHear( lpctstr pszCmd, CChar * pSrc, bool fAllPets )
 	}
 }
 
-void CChar::NPC_OnNoticeSnoop( CChar * pCharThief, CChar * pCharMark )
+void CChar::NPC_OnNoticeSnoop( CChar * pCharThief, const CChar * pCharMark )
 {
 	ADDTOCALLSTACK("CChar::NPC_OnNoticeSnoop");
 	ASSERT(m_pNPC);
@@ -2191,7 +2191,7 @@ void CChar::NPC_OnTickAction()
 	}
 
 	EXC_SET("timer expired (NPC)");
-	if ( IsTimerExpired() && IsStatFlag(STATF_WAR) && !(IsSetCombatFlags(COMBAT_PREHIT) && m_atFight.m_War_Swing_State == WAR_SWING_SWINGING))	// Was not reset? PREHIT forces timer to be 0, so it get's defaulted here breaking NPC's speed when PREHIT is enabled. Must not check in this case.
+	if ( IsTimerExpired() && IsStatFlag(STATF_WAR))
 	{
 		int64 timeout = (150-Stat_GetAdjusted(STAT_DEX))/2;
 		timeout = maximum(timeout, 0);

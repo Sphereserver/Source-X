@@ -4072,14 +4072,28 @@ bool CChar::OnTick()
     {
         EXC_SET("timer expired");
         // My turn to do some action.
+        bool bSkillEnded = true;
         switch (Skill_Done())
         {
-			case -SKTRIG_ABORT:	EXC_SET("skill abort");		Skill_Fail(true);	break;	// fail with no message or credit.
-			case -SKTRIG_FAIL:	EXC_SET("skill fail");		Skill_Fail(false);	break;
-			case -SKTRIG_QTY:	EXC_SET("skill cleanup");	Skill_Cleanup();	break;
+			case -SKTRIG_ABORT:
+                EXC_SET("skill abort");
+                Skill_Fail(true);   // fail with no message or credit.
+                break;
+			case -SKTRIG_FAIL:
+                EXC_SET("skill fail");
+                Skill_Fail(false);
+                break;
+			case -SKTRIG_QTY:
+                EXC_SET("skill cleanup");
+                Skill_Cleanup();
+                break;
+            case -SKTRIG_STROKE:
+                //EXC_SET("skill stroked");
+                bSkillEnded = false;
+                break;
         }
 
-        if (m_pNPC)
+        if (m_pNPC && bSkillEnded)
         {
             ProfileTask aiTask(PROFILE_NPC_AI);
             EXC_SET("NPC action");

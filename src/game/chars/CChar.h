@@ -247,9 +247,8 @@ public:
 		// SKILL_THROWING
 		struct
 		{
-			WAR_SWING_TYPE m_War_Swing_State;		// ACTARG1 = We are in the war mode swing.
-			//int64 m_timeNextCombatSwing;			// (ACTARG2 << 32) | ACTARG3 = Time to wait before starting another combat swing.
-			//										//	(the time variable here is signed because Sphere's time class stores it internally as an int64, not uint64)
+			WAR_SWING_TYPE m_War_Swing_State;	// ACTARG1 = We are in the war mode swing.
+			dword m_iLastSwingDelay;			// ACTARG2 = Duration (in msecs) of the previous swing.
 		} m_atFight;
 
 		// SKILL_ENTICEMENT
@@ -1012,7 +1011,7 @@ public:
 	void	Attacker_SetIgnore(size_t pChar, bool fIgnore);
 	void	Attacker_SetIgnore(CChar * pChar, bool fIgnore);
 	int64	Attacker_GetHighestThreat();
-	int		Attacker_GetID(CChar * pChar) const;
+	int		Attacker_GetID(const CChar * pChar) const;
 	int		Attacker_GetID(CUID pChar);
 
 	//
@@ -1151,7 +1150,7 @@ public:
     int PayGold(CChar * pCharSrc, int iGold, CItem * pGold, ePayGold iReason);
 private:
 	bool NPC_CheckWalkHere( const CPointBase & pt, const CRegion * pArea, dword dwBlockFlags ) const;
-	void NPC_OnNoticeSnoop( CChar * pCharThief, CChar * pCharMark );
+	void NPC_OnNoticeSnoop( CChar * pCharThief, const CChar * pCharMark );
 
 	void NPC_LootMemory( CItem * pItem );
 	bool NPC_LookAtCharGuard( CChar * pChar, bool bFromTrigger = false );

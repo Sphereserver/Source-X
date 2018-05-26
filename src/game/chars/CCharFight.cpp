@@ -112,9 +112,9 @@ bool CChar::CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObj
 		if ( pItem && pAction )
 		{
 			if ( pCharMark )
-				sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_YOUNOTICE_2), GetName(), pAction, fYour ? g_Cfg.GetDefaultMsg(DEFMSG_MSG_YOUNOTICE_YOUR) : pCharMark->GetName(), fYour ? "" : g_Cfg.GetDefaultMsg(DEFMSG_MSG_YOUNOTICE_S), pItem->GetName());
+				snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_YOUNOTICE_2), GetName(), pAction, fYour ? g_Cfg.GetDefaultMsg(DEFMSG_MSG_YOUNOTICE_YOUR) : pCharMark->GetName(), fYour ? "" : g_Cfg.GetDefaultMsg(DEFMSG_MSG_YOUNOTICE_S), pItem->GetName());
 			else
-				sprintf(z, g_Cfg.GetDefaultMsg(DEFMSG_MSG_YOUNOTICE_1), GetName(), pAction, pItem->GetName());
+				snprintf(z, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_MSG_YOUNOTICE_1), GetName(), pAction, pItem->GetName());
 			pChar->ObjMessage(z, this);
 		}
 		fSeen = true;
@@ -1031,6 +1031,7 @@ void CChar::Fight_ClearAll()
 		Skill_Start(SKILL_NONE);
 		m_Fight_Targ_UID.InitUID();
 	}
+    m_atFight.m_iLastSwingDelay = 0;
 
 	UpdateModeFlag();
 }
@@ -1041,6 +1042,8 @@ bool CChar::Fight_Clear(const CChar *pChar, bool bForced)
 	ADDTOCALLSTACK("CChar::Fight_Clear");
 	if ( !pChar || !Attacker_Delete(const_cast<CChar*>(pChar), bForced, ATTACKER_CLEAR_FORCED) )
 		return false;
+
+    m_atFight.m_iLastSwingDelay = 0;
 
 	// Go to my next target.
 	if (m_Fight_Targ_UID == pChar->GetUID())
@@ -1184,7 +1187,6 @@ void CChar::Fight_HitTry()
 		}
 		case WAR_SWING_EQUIPPING:	// keep hitting the same target
 		{
-			Skill_Start(Skill_GetActive());
 			return;
 		}
 		case WAR_SWING_READY:		// probably too far away, can't take my swing right now
@@ -1272,35 +1274,35 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	if ( !pCharTarg || pCharTarg == this )
 		return WAR_SWING_INVALID;
 
-	DAMAGE_TYPE iTyp = DAMAGE_HIT_BLUNT;
+	DAMAGE_TYPE iDmgType = DAMAGE_HIT_BLUNT;
 
 	if ( IsTrigUsed(TRIGGER_HITCHECK) )
 	{
 		CScriptTriggerArgs pArgs;
 		pArgs.m_iN1 = m_atFight.m_War_Swing_State;
-		pArgs.m_iN2 = iTyp;
+		pArgs.m_iN2 = iDmgType;
 		TRIGRET_TYPE tRet = OnTrigger(CTRIG_HitCheck, pCharTarg, &pArgs);
 		if ( tRet == TRIGRET_RET_TRUE )
 			return (WAR_SWING_TYPE)pArgs.m_iN1;
 		if ( tRet == -1 )
 			return WAR_SWING_INVALID;
 
-		m_atFight.m_War_Swing_State = static_cast<WAR_SWING_TYPE>(pArgs.m_iN1);
-		iTyp = (DAMAGE_TYPE)(pArgs.m_iN2);
+		m_atFight.m_War_Swing_State = (WAR_SWING_TYPE)(pArgs.m_iN1);
+        iDmgType = (DAMAGE_TYPE)(pArgs.m_iN2);
 
-		if ( (m_atFight.m_War_Swing_State == WAR_SWING_SWINGING) && (iTyp & DAMAGE_FIXED) )
+		if ( (m_atFight.m_War_Swing_State == WAR_SWING_SWINGING) && (iDmgType & DAMAGE_FIXED) )
 		{
 			if ( tRet == TRIGRET_RET_DEFAULT )
 				return WAR_SWING_EQUIPPING;
 
-			if ( iTyp == DAMAGE_HIT_BLUNT )		// if type did not change in the trigger, default iTyp is set
+			if ( iDmgType == DAMAGE_HIT_BLUNT )		// if type did not change in the trigger, default iTyp is set
 			{
 				CItem *pWeapon = m_uidWeapon.ItemFind();
 				if ( pWeapon )
 				{
 					CVarDefCont *pDamTypeOverride = pWeapon->GetKey("OVERRIDE.DAMAGETYPE", true);
 					if ( pDamTypeOverride )
-						iTyp = (DAMAGE_TYPE)(pDamTypeOverride->GetValNum());
+                        iDmgType = (DAMAGE_TYPE)(pDamTypeOverride->GetValNum());
 					else
 					{
 						CItemBase *pWeaponDef = pWeapon->Item_GetDef();
@@ -1309,12 +1311,12 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 							case IT_WEAPON_SWORD:
 							case IT_WEAPON_AXE:
 							case IT_WEAPON_THROWING:
-								iTyp |= DAMAGE_HIT_SLASH;
+                                iDmgType |= DAMAGE_HIT_SLASH;
 								break;
 							case IT_WEAPON_FENCE:
 							case IT_WEAPON_BOW:
 							case IT_WEAPON_XBOW:
-								iTyp |= DAMAGE_HIT_PIERCE;
+                                iDmgType |= DAMAGE_HIT_PIERCE;
 								break;
 							default:
 								break;
@@ -1322,13 +1324,13 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 					}
 				}
 			}
-			if ( iTyp & DAMAGE_FIXED )
-				iTyp &= ~DAMAGE_FIXED;
+			if ( iDmgType & DAMAGE_FIXED )
+                iDmgType &= ~DAMAGE_FIXED;
 
 			pCharTarg->OnTakeDamage(
 				Fight_CalcDamage(m_uidWeapon.ItemFind()),
 				this,
-				iTyp,
+                iDmgType,
 				(int)(GetDefNum("DAMPHYSICAL", true)),
 				(int)(GetDefNum("DAMFIRE", true)),
 				(int)(GetDefNum("DAMCOLD", true)),
@@ -1359,16 +1361,14 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 			return WAR_SWING_READY;
 	}
 
-	if ( IsSetCombatFlags(COMBAT_PREHIT) && (m_atFight.m_War_Swing_State == WAR_SWING_READY) )
-	{
-		int64 diff = GetKeyNum("LastHit", true) - g_World.GetCurrentTime().GetTimeRaw();
-		if ( diff > 0 )
-		{
-			diff = (diff > 50) ? 50 : diff;
-			SetTimeout(diff);
-			return WAR_SWING_READY;
-		}
-	}
+    if ( IsSetCombatFlags(COMBAT_PREHIT) && (m_atFight.m_War_Swing_State == WAR_SWING_READY) )
+    {
+        int64 diff = g_World.GetCurrentTime().GetTimeRaw() - GetKeyNum("LastHit", true);
+        if (diff < 0)
+        {
+            return WAR_SWING_EQUIPPING;
+        }
+    }
 
 	CItem *pWeapon = m_uidWeapon.ItemFind();
 	CItem *pAmmo = NULL;
@@ -1376,7 +1376,9 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	{
 		CVarDefCont *pDamTypeOverride = pWeapon->GetKey("OVERRIDE.DAMAGETYPE", true);
 		if ( pDamTypeOverride )
-			iTyp = (DAMAGE_TYPE)(pDamTypeOverride->GetValNum());
+        {
+            iDmgType = (DAMAGE_TYPE)(pDamTypeOverride->GetValNum());
+        }
 		else
 		{
 			CItemBase *pWeaponDef = pWeapon->Item_GetDef();
@@ -1385,12 +1387,12 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 				case IT_WEAPON_SWORD:
 				case IT_WEAPON_AXE:
 				case IT_WEAPON_THROWING:
-					iTyp |= DAMAGE_HIT_SLASH;
+                    iDmgType |= DAMAGE_HIT_SLASH;
 					break;
 				case IT_WEAPON_FENCE:
 				case IT_WEAPON_BOW:
 				case IT_WEAPON_XBOW:
-					iTyp |= DAMAGE_HIT_PIERCE;
+                    iDmgType |= DAMAGE_HIT_PIERCE;
 					break;
 				default:
 					break;
@@ -1418,60 +1420,71 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 				return WAR_SWING_EQUIPPING;
 		}
 
-		int	iMinDist = pWeapon ? pWeapon->RangeH() : g_Cfg.m_iArcheryMinDist;
-		int	iMaxDist = pWeapon ? pWeapon->RangeL() : g_Cfg.m_iArcheryMaxDist;
-		if ( !iMaxDist || (iMinDist == 0 && iMaxDist == 1) )
-			iMaxDist = g_Cfg.m_iArcheryMaxDist;
-		if ( !iMinDist )
-			iMinDist = g_Cfg.m_iArcheryMinDist;
+        if ( pWeapon )
+        {
+            CResourceIDBase ridAmmo = pWeapon->Weapon_GetRangedAmmoRes();
+            if ( ridAmmo )
+            {
+                pAmmo = pWeapon->Weapon_FindRangedAmmo(ridAmmo);
+                if ( !pAmmo && m_pPlayer )
+                {
+                    SysMessageDefault(DEFMSG_COMBAT_ARCH_NOAMMO);
+                    return WAR_SWING_INVALID;
+                }
+            }
+        }
 
-		if ( dist < iMinDist )
-		{
-			SysMessageDefault(DEFMSG_COMBAT_ARCH_TOOCLOSE);
-			if ( !IsSetCombatFlags(COMBAT_STAYINRANGE) || (m_atFight.m_War_Swing_State != WAR_SWING_SWINGING) )
-				return WAR_SWING_READY;
-			return WAR_SWING_EQUIPPING;
-		}
-		else if ( dist > iMaxDist )
-		{
-			if ( !IsSetCombatFlags(COMBAT_STAYINRANGE) || (m_atFight.m_War_Swing_State != WAR_SWING_SWINGING) )
-				return WAR_SWING_READY;
-			return WAR_SWING_EQUIPPING;
-		}
+        if (!IsSetCombatFlags(COMBAT_PREHIT_NORANGE) || (m_atFight.m_War_Swing_State != WAR_SWING_READY))
+        {
+            // If we are using PreHit_NoRange, we can start the swing regardless of the distance, but we can land the hit only when we are at the right distance
+            const WAR_SWING_TYPE swingTypeHold = IsSetCombatFlags(COMBAT_PREHIT_NORANGE) ? m_atFight.m_War_Swing_State : WAR_SWING_READY;
 
-		if ( pWeapon )
-		{
-			CResourceIDBase ridAmmo = pWeapon->Weapon_GetRangedAmmoRes();
-			if ( ridAmmo )
-			{
-				pAmmo = pWeapon->Weapon_FindRangedAmmo(ridAmmo);
-				if ( !pAmmo && m_pPlayer )
-				{
-					SysMessageDefault(DEFMSG_COMBAT_ARCH_NOAMMO);
-					return WAR_SWING_INVALID;
-				}
-			}
-		}
+            int	iMinDist = pWeapon ? pWeapon->RangeH() : g_Cfg.m_iArcheryMinDist;
+            int	iMaxDist = pWeapon ? pWeapon->RangeL() : g_Cfg.m_iArcheryMaxDist;
+            if ( !iMaxDist || (iMinDist == 0 && iMaxDist == 1) )
+                iMaxDist = g_Cfg.m_iArcheryMaxDist;
+            if ( !iMinDist )
+                iMinDist = g_Cfg.m_iArcheryMinDist;
+
+            if ( dist < iMinDist )
+            {
+                SysMessageDefault(DEFMSG_COMBAT_ARCH_TOOCLOSE);
+                if ( !IsSetCombatFlags(COMBAT_STAYINRANGE) || (m_atFight.m_War_Swing_State != WAR_SWING_SWINGING) )
+                    return swingTypeHold;
+                return WAR_SWING_EQUIPPING;
+            }
+            else if ( dist > iMaxDist )
+            {
+                if ( !IsSetCombatFlags(COMBAT_STAYINRANGE) || (m_atFight.m_War_Swing_State != WAR_SWING_SWINGING) )
+                    return swingTypeHold;
+                return WAR_SWING_EQUIPPING;
+            }
+        }		
 	}
 	else
 	{
-		int	iMinDist = pWeapon ? pWeapon->RangeH() : 0;
-		int	iMaxDist = CalcFightRange(pWeapon);
-		if ( (dist < iMinDist) || (dist > iMaxDist) )
-		{
-			if ( !IsSetCombatFlags(COMBAT_STAYINRANGE) || (m_atFight.m_War_Swing_State != WAR_SWING_SWINGING) )
-				return WAR_SWING_READY;
-			return WAR_SWING_EQUIPPING;
-		}
+        if (!IsSetCombatFlags(COMBAT_PREHIT_NORANGE) || (m_atFight.m_War_Swing_State != WAR_SWING_READY))
+        {
+            // If we are using PreHit_NoRange, we can start the swing regardless of the distance, but we can land the hit only when we are at the right distance
+            const WAR_SWING_TYPE swingTypeHold = IsSetCombatFlags(COMBAT_PREHIT_NORANGE) ? m_atFight.m_War_Swing_State : WAR_SWING_READY;
+
+		    int	iMinDist = pWeapon ? pWeapon->RangeH() : 0;
+		    int	iMaxDist = CalcFightRange(pWeapon);
+		    if ( (dist < iMinDist) || (dist > iMaxDist) )
+		    {
+			    if ( !IsSetCombatFlags(COMBAT_STAYINRANGE) || (m_atFight.m_War_Swing_State != WAR_SWING_SWINGING) )
+				    return swingTypeHold;
+			    return WAR_SWING_EQUIPPING;
+		    }
+        }
 	}
 
 	// Start the swing
 	if ( m_atFight.m_War_Swing_State == WAR_SWING_READY )
 	{
-
 		ANIM_TYPE anim = GenerateAnimate(ANIM_ATTACK_WEAPON);
 		int iSwingDelay = g_Cfg.Calc_CombatAttackSpeed(this, pWeapon);
-		int iAnimDelay = iSwingDelay; 	// with newer clients the anim speed ("delay") is always 7ms, no matter the value we send, and then the char keep waiting the remaining time
+		int iAnimDelay = iSwingDelay; 	// with the new animation packet the anim speed ("delay") is always 7ms, no matter the value we send, and then the char keep waiting the remaining time
 
 		if ( IsTrigUsed(TRIGGER_HITTRY) )
 		{
@@ -1491,20 +1504,23 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		}
 
 		m_atFight.m_War_Swing_State = WAR_SWING_SWINGING;
-		//m_atFight.m_timeNextCombatSwing = CServerTime::GetCurrentTime().GetTimeRaw() + iSwingDelay;
-		int64 iTimeNextCombatSwing = CServerTime::GetCurrentTime().GetTimeRaw() + iSwingDelay;
-
-		if ( IsSetCombatFlags(COMBAT_PREHIT) )
-		{
-			SetKeyNum("LastHit", iTimeNextCombatSwing);
-			SetTimeout(0);
-		}
-		else
-			SetTimeout(iSwingDelay - 1);	// swings are started only on the next tick, so substract -1 to compensate that
-
+        if (IsSetCombatFlags(COMBAT_PREHIT))
+        {
+            if (m_atFight.m_iLastSwingDelay == 0)   // First hit
+            {
+                iSwingDelay = 1;
+            }
+            int64 iTimeNextCombatSwing = CServerTime::GetCurrentTime().GetTimeRaw() + iSwingDelay;
+            SetKeyNum("LastHit", iTimeNextCombatSwing);
+        }
+        m_atFight.m_iLastSwingDelay = iSwingDelay;
+        SetTimeout(iSwingDelay - 1);	// swings are started only on the next tick, so substract 1 to compensate that
+        
 		Reveal();
 		if ( !IsSetCombatFlags(COMBAT_NODIRCHANGE) )
+        {
 			UpdateDir(pCharTarg);
+        }
 		UpdateAnimate(anim, false, false, (byte)maximum(0,(iAnimDelay-1) / 10) );
 		return WAR_SWING_SWINGING;
 	}
@@ -1578,7 +1594,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	}
 
 	// We hit
-	if ( !(iTyp & DAMAGE_GOD) )
+	if ( !(iDmgType & DAMAGE_GOD) )
 	{
 		CItem * pItemHit = NULL;
 		if (pCharTarg->Fight_Parry(pItemHit))
@@ -1586,7 +1602,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 			if ( IsPriv(PRIV_DETAIL) )
 				SysMessageDefault(DEFMSG_COMBAT_PARRY);
 			if ( pItemHit )
-				pItemHit->OnTakeDamage(1, this, iTyp);
+				pItemHit->OnTakeDamage(1, this, iDmgType);
 
 			//Effect(EFFECT_OBJ, ITEMID_FX_GLOW, this, 10, 16);		// moved to scripts (@UseQuick on Parrying skill)
 			return WAR_SWING_EQUIPPING;
@@ -1596,7 +1612,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	// Calculate base damage
 	int	iDmg = Fight_CalcDamage(pWeapon);
 
-	CScriptTriggerArgs Args(iDmg, iTyp, pWeapon);
+	CScriptTriggerArgs Args(iDmg, iDmgType, pWeapon);
 	Args.m_VarsLocal.SetNum("ItemDamageChance", 40);
 	if ( pAmmo )
 		Args.m_VarsLocal.SetNum("Arrow", pAmmo->GetUID());
@@ -1627,7 +1643,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 			pAmmo = NULL;
 
 		iDmg = (int)(Args.m_iN1);
-		iTyp = (DAMAGE_TYPE)(Args.m_iN2);
+        iDmgType = (DAMAGE_TYPE)(Args.m_iN2);
 	}
 
 	// BAD BAD Healing fix.. Cant think of something else -- Radiant
@@ -1683,7 +1699,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	iDmg = pCharTarg->OnTakeDamage(
 		iDmg,
 		this,
-		iTyp,
+        iDmgType,
 		(int)(GetDefNum("DAMPHYSICAL", true, true)),
 		(int)(GetDefNum("DAMFIRE", true, true)),
 		(int)(GetDefNum("DAMCOLD", true, true)),

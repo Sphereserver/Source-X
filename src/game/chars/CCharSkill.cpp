@@ -2694,6 +2694,11 @@ int CChar::Skill_Fighting( SKTRIG_TYPE stage )
 		return -SKTRIG_STROKE;	// Stay in the skill till we hit.
 	}
 
+    if (stage == SKTRIG_FAIL)
+    {
+        m_atFight.m_iLastSwingDelay = 0;
+    }
+
 	return -SKTRIG_QTY;
 }
 

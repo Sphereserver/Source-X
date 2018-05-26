@@ -371,7 +371,7 @@ bool CChar::Stats_Regen(int64 iTimeDiff)
 		{
 			int iGain = Skill_Focus(i);
 			if (iGain > 0)
-			     mod += iGain;
+			     mod += (short)iGain;
 		}
 		short StatLimit = Stat_GetMax(i);
 

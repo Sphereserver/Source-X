@@ -257,7 +257,7 @@ void CChar::Attacker_Clear()
 }
 
 // Get nID value of attacker list from the given pChar
-int CChar::Attacker_GetID(CChar * pChar) const
+int CChar::Attacker_GetID(const CChar * pChar) const
 {
     ADDTOCALLSTACK("CChar::Attacker_GetID(CChar)");
     if (!pChar)
