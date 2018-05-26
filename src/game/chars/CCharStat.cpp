@@ -369,8 +369,9 @@ bool CChar::Stats_Regen(int64 iTimeDiff)
 		
 		if (g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B)
 		{
-			short uGain = Skill_Focus(i);
-			mod += (uGain > 0) ? uGain : 0;
+			int iGain = Skill_Focus(i);
+			if (iGain > 0)
+			     mod += iGain;
 		}
 		short StatLimit = Stat_GetMax(i);
 
