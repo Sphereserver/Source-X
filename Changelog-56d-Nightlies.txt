@@ -974,5 +974,3 @@ Redeed now creates the deed before calling the @Redeed trigger and the deed gets
 
 25-05-2018, Drk84
 The following message: DEFMSG_COMBAT_ATTACKO (*%s is attacking %s!*) will use the EMOTE_DEF_COLOR setting found in sphere_msgs.scp instead of always use the gray color hue.
-Moved methods Skill_Snoop_Check, Skill_Snooping, Skill_Stealing from CCharFight.cpp to CCharSkills.cpp
-Moved the code related to the Focus skill from method Stat_Regen (CCharStat.cpp) to new method Skill_Focus (CCharSkills.cpp)
