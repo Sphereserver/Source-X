@@ -367,9 +367,11 @@ bool CChar::Stats_Regen(int64 iTimeDiff)
 			mod += 2;		// Humans always have +2 hitpoint regeneration (Tough racial trait)
 
 		
-		if ( g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B )
-			mod += Skill_Focus(i);
-
+		if (g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B)
+		{
+			short uGain = Skill_Focus(i);
+			mod += (uGain > 0) ? uGain : 0;
+		}
 		short StatLimit = Stat_GetMax(i);
 
 		if (IsTrigUsed(TRIGGER_REGENSTAT))

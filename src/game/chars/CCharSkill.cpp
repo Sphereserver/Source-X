@@ -3841,12 +3841,12 @@ The skill increase the amount of stamina gained by 1 for each 10% points of Focu
 of mana by 1 for each 20%  points of Focus.
 The Skill_Focus method is called from Stats_Regen64 method  found in CCharStat.cpp
 */
-ushort CChar::Skill_Focus(STAT_TYPE stat)
+int CChar::Skill_Focus(STAT_TYPE stat)
 {
 	ADDTOCALLSTACK("CChar::Skill_Focus");
 
 	if (g_Cfg.IsSkillFlag(SKILL_FOCUS, SKF_SCRIPTED))
-		return 0;
+		return -SKTRIG_QTY;;
 
 	ushort uFocusValue = Skill_GetAdjusted(SKILL_FOCUS);
 	ushort uGain;
@@ -3859,7 +3859,7 @@ ushort CChar::Skill_Focus(STAT_TYPE stat)
 			uGain =  uFocusValue / 200;
 			break;
 		default:
-			return 0;
+			return -SKTRIG_QTY;
 	}
 	/*
 	By using the player skill value as difficulty, the chance to get an increase will be 50% because
