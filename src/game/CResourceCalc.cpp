@@ -202,7 +202,7 @@ int CServerConfig::Calc_CombatChanceToHit(CChar * pChar, CChar * pCharTarg)
 		{
 			// AOS formula
 			int iAttackerSkill = pChar->Skill_GetBase(skillAttacker);
-			int iAttackerHitChance = static_cast<int>(pChar->GetDefNum("INCREASEHITCHANCE", true));
+			int iAttackerHitChance = (int)(pChar->GetDefNum("INCREASEHITCHANCE", true));
 			if ((g_Cfg.m_iRacialFlags & RACIALF_GARG_DEADLYAIM) && pChar->IsGargoyle())
 			{
 				// Racial traits: Deadly Aim. Gargoyles always have +5 Hit Chance Increase and a minimum of 20.0 Throwing skill (not shown in skills gump)

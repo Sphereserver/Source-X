@@ -1521,7 +1521,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
         {
 			UpdateDir(pCharTarg);
         }
-		UpdateAnimate(anim, false, false, (byte)maximum(0,(iAnimDelay-1) / 10) );
+		UpdateAnimate(anim, false, false, (byte)maximum(0,(iAnimDelay-1) / 10)+1 );
 		return WAR_SWING_SWINGING;
 	}
 

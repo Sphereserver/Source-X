@@ -4072,7 +4072,7 @@ bool CChar::OnTick()
     {
         EXC_SET("timer expired");
         // My turn to do some action.
-        bool bSkillEnded = true;
+        bool fSkillEnded = true;
         switch (Skill_Done())
         {
 			case -SKTRIG_ABORT:
@@ -4089,11 +4089,13 @@ bool CChar::OnTick()
                 break;
             case -SKTRIG_STROKE:
                 //EXC_SET("skill stroked");
-                bSkillEnded = false;
+                fSkillEnded = false;
                 break;
         }
 
-        if (m_pNPC && bSkillEnded)
+        SKILL_TYPE activeSkill = Skill_GetActive();
+        bool fAISkill = ((activeSkill == SKILL_NONE) || (activeSkill > SKILL_QTY)) ? true : false;
+        if (m_pNPC && (fSkillEnded || fAISkill))
         {
             ProfileTask aiTask(PROFILE_NPC_AI);
             EXC_SET("NPC action");

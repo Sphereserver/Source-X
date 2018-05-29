@@ -469,7 +469,7 @@ bool CChar::Skill_CheckSuccess( SKILL_TYPE skill, int difficulty, bool bUseBellC
 	// RETURN:
 	//	true = success in skill.
 
-	if  ( IsPriv(PRIV_GM) && skill != SKILL_PARRYING )	// GM's can't always succeed Parrying or they won't receive any damage on combat even without STATF_Invul set
+	if ( IsPriv(PRIV_GM) && skill != SKILL_PARRYING )	// GM's can't always succeed Parrying or they won't receive any damage on combat even without STATF_Invul set
 		return true;
 
 	if ( !IsSkillBase(skill) || (difficulty < 0) )	// auto failure.
@@ -2690,6 +2690,10 @@ int CChar::Skill_Fighting( SKTRIG_TYPE stage )
 		if ( m_atFight.m_War_Swing_State != WAR_SWING_SWINGING )
 			m_atFight.m_War_Swing_State = WAR_SWING_READY;  // Waited my recoil time. So I'm ready.
 
+        m_Act_Difficulty = g_Cfg.Calc_CombatChanceToHit(this, m_Fight_Targ_UID.CharFind()); // calculate the chance at every hit
+        if ( !Skill_CheckSuccess(Skill_GetActive(), m_Act_Difficulty, false) )
+            m_Act_Difficulty = -m_Act_Difficulty;	// will result in failure
+
 		Fight_HitTry();	// this cleans up itself.
 		return -SKTRIG_STROKE;	// Stay in the skill till we hit.
 	}
@@ -3927,7 +3931,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 			}
 		}
 
-		m_Act_Difficulty =	Skill_Stage(SKTRIG_START);
+		m_Act_Difficulty = Skill_Stage(SKTRIG_START);
 		if (m_Act_Difficulty >= 0)	// If m_Act_Difficulty == -1 then the skill stage has failed, so preserve this result for later.
 			m_Act_Difficulty += iDifficultyIncrease;
 
