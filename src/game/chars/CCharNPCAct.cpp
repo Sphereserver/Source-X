@@ -2063,6 +2063,7 @@ void CChar::NPC_OnTickAction()
 	EXC_TRY("NPC_TickAction");
 
 	SKILL_TYPE iSkillActive = Skill_GetActive();
+    bool fSkillFight = false;
 	if ( g_Cfg.IsSkillFlag( iSkillActive, SKF_SCRIPTED ) )
 	{
 		// SCRIPTED SKILL OnTickAction
@@ -2070,6 +2071,7 @@ void CChar::NPC_OnTickAction()
 	else if (g_Cfg.IsSkillFlag(iSkillActive, SKF_FIGHT))
 	{
 		EXC_SET("fighting");
+        fSkillFight = true;
 		NPC_Act_Fight();
 	}
 	else if (g_Cfg.IsSkillFlag(iSkillActive, SKF_MAGIC))
@@ -2191,7 +2193,7 @@ void CChar::NPC_OnTickAction()
 	}
 
 	EXC_SET("timer expired (NPC)");
-	if ( IsTimerExpired() && IsStatFlag(STATF_WAR))
+	if ( IsTimerExpired() && !fSkillFight) // If i'm fighting, i don't want to wait to start another swing
 	{
 		int64 timeout = (150-Stat_GetAdjusted(STAT_DEX))/2;
 		timeout = maximum(timeout, 0);
@@ -2293,15 +2295,17 @@ void CChar::NPC_Food()
 
 	int		iFood = Stat_GetVal(STAT_FOOD);
 	int		iFoodLevel = Food_GetLevelPercent();
-	short		iEatAmount = 1;
+	short	iEatAmount = 1;
 	int		iSearchDistance = 2;
 	CItem	*pClosestFood = NULL;
 	int		iClosestFood = 100;
 	int		iMyZ = GetTopPoint().m_z;
 	bool	bSearchGrass = false;
 
-	if ( iFood >= 10 ) return;							//	search for food is starving or very hungry
-	if ( iFoodLevel > 40 ) return;						// and it is at least 60% hungry
+	if ( iFood >= 10 )
+        return;						//	search for food is starving or very hungry
+	if ( iFoodLevel > 40 )
+        return;						// and it is at least 60% hungry
 
 	CItemContainer	*pPack = GetPack();
 	if ( pPack )
@@ -2325,12 +2329,14 @@ void CChar::NPC_Food()
 	// Search for food nearby
 	EXC_SET("searching nearby");
 	iSearchDistance = (UO_MAP_VIEW_SIGHT * ( 100 - iFoodLevel ) ) / 100;
-	CWorldSearch	AreaItems(GetTopPoint(), minimum(iSearchDistance,m_pNPC->m_Home_Dist_Wander));
+	CWorldSearch AreaItems(GetTopPoint(), minimum(iSearchDistance,m_pNPC->m_Home_Dist_Wander));
 	for (;;)
 	{
-		CItem	*pItem = AreaItems.GetItem();
-		if ( !pItem ) break;
-		if ( !CanSee(pItem) || pItem->IsAttr(ATTR_MOVE_NEVER|ATTR_STATIC|ATTR_LOCKEDDOWN|ATTR_SECURE) ) continue;
+		CItem *pItem = AreaItems.GetItem();
+		if ( !pItem )
+            break;
+		if ( !CanSee(pItem) || pItem->IsAttr(ATTR_MOVE_NEVER|ATTR_STATIC|ATTR_LOCKEDDOWN|ATTR_SECURE) )
+            continue;
 		if ( (pItem->GetTopPoint().m_z < iMyZ) || (pItem->GetTopPoint().m_z > (iMyZ + (m_height / 2))) )
 			continue;
 

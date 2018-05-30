@@ -2690,9 +2690,9 @@ int CChar::Skill_Fighting( SKTRIG_TYPE stage )
 		if ( m_atFight.m_War_Swing_State != WAR_SWING_SWINGING )
 			m_atFight.m_War_Swing_State = WAR_SWING_READY;  // Waited my recoil time. So I'm ready.
 
-        m_Act_Difficulty = g_Cfg.Calc_CombatChanceToHit(this, m_Fight_Targ_UID.CharFind()); // calculate the chance at every hit
-        if ( !Skill_CheckSuccess(Skill_GetActive(), m_Act_Difficulty, false) )
-            m_Act_Difficulty = -m_Act_Difficulty;	// will result in failure
+        //m_Act_Difficulty = g_Cfg.Calc_CombatChanceToHit(this, m_Fight_Targ_UID.CharFind()); // calculate the chance at every hit
+        //if ( !Skill_CheckSuccess(Skill_GetActive(), m_Act_Difficulty, false) )
+        //    m_Act_Difficulty = -m_Act_Difficulty;	// will result in failure
 
 		Fight_HitTry();	// this cleans up itself.
 		return -SKTRIG_STROKE;	// Stay in the skill till we hit.

@@ -198,7 +198,6 @@ void CChar::NPC_Act_Fight()
         NPC_LookAtChar(pChar, iDist);
     }
 
-
     // If i'm horribly damaged and smart enough to know it.
     int iMotivation = NPC_GetAttackMotivation(pChar);
 
@@ -208,9 +207,12 @@ void CChar::NPC_Act_Fight()
         CScriptTriggerArgs Args(iDist, iMotivation);
         switch (OnTrigger(CTRIG_NPCActFight, pChar, &Args))
         {
-        case TRIGRET_RET_TRUE:	return;
-        case TRIGRET_RET_FALSE:	fSkipHardcoded = true;	break;
-        case static_cast<TRIGRET_TYPE>(2) :
+        case TRIGRET_RET_TRUE:
+            return;
+        case TRIGRET_RET_FALSE:
+            fSkipHardcoded = true;
+            break;
+        case (TRIGRET_TYPE)(2) :
         {
             SKILL_TYPE iSkillforced = (SKILL_TYPE)(Args.m_VarsLocal.GetKeyNum("skill", false));
             if (iSkillforced)
@@ -223,7 +225,8 @@ void CChar::NPC_Act_Fight()
                 return;
             }
         }
-        default:				break;
+        default:
+            break;
         }
 
         iDist = (int)(Args.m_iN1);
@@ -241,10 +244,8 @@ void CChar::NPC_Act_Fight()
         }
     }
 
-
-
     // Can only do that with full stamina !
-    if (!fSkipHardcoded && Stat_GetVal(STAT_DEX) >= Stat_GetAdjusted(STAT_DEX))
+    if (!fSkipHardcoded && (Stat_GetVal(STAT_DEX) >= Stat_GetAdjusted(STAT_DEX)))
     {
         // If I am a dragon maybe I will breath fire.
         // NPCACT_BREATH
@@ -258,7 +259,6 @@ void CChar::NPC_Act_Fight()
             Skill_Start(NPCACT_BREATH);
             return;
         }
-
 
         // any special ammunition defined?
 
@@ -323,6 +323,11 @@ void CChar::NPC_Act_Fight()
     {
         return;
     }
+
     // Move in for melee type combat.
-    NPC_Act_Follow(false, CalcFightRange(m_uidWeapon.ItemFind()), false);
+    int iRange = CalcFightRange(m_uidWeapon.ItemFind());
+    //if ((iDist > iRange) || !CanSeeLOS(pChar))
+    //{
+        NPC_Act_Follow(false, iRange, false);
+    //}
 }

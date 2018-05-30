@@ -1230,7 +1230,7 @@ WAR_SWING_TYPE CChar::Fight_CanHit(CChar * pCharSrc)
 		return WAR_SWING_INVALID;
 
 	int dist = GetTopDist3D(pCharSrc);
-	if (dist > UO_MAP_VIEW_RADAR)
+	if (dist > GetVisualRange())
 	{
 		if (!IsSetCombatFlags(COMBAT_STAYINRANGE))
 			return WAR_SWING_SWINGING; //Keep loading the hit or keep it loaded and ready.
@@ -1347,7 +1347,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		return iHitCheck;
 
 	// Guards should remove conjured NPCs
-	if ( m_pNPC && m_pNPC->m_Brain == NPCBRAIN_GUARD && pCharTarg->m_pNPC && pCharTarg->IsStatFlag(STATF_CONJURED) )
+	if ( m_pNPC && (m_pNPC->m_Brain == NPCBRAIN_GUARD) && pCharTarg->m_pNPC && pCharTarg->IsStatFlag(STATF_CONJURED) )
 	{
 		pCharTarg->Delete();
 		return WAR_SWING_EQUIPPING;

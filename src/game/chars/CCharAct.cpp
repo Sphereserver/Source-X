@@ -4093,9 +4093,7 @@ bool CChar::OnTick()
                 break;
         }
 
-        SKILL_TYPE activeSkill = Skill_GetActive();
-        bool fAISkill = ((activeSkill == SKILL_NONE) || (activeSkill > SKILL_QTY)) ? true : false;
-        if (m_pNPC && (fSkillEnded || fAISkill))
+        if (m_pNPC)
         {
             ProfileTask aiTask(PROFILE_NPC_AI);
             EXC_SET("NPC action");
