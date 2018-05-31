@@ -44,7 +44,7 @@ CItemMulti::~CItemMulti()
     // NOTE: assume we have already been removed from Top Level
 
 
-    Redeed(false, true);
+    Redeed(false, false);
     if (!m_pRegion)
     {
         return;
@@ -930,9 +930,11 @@ CItemContainer* CItemMulti::GetMovingCrate(bool fCreate)
     }
     if (fCreate)
     {
-        CItemContainer *pCrate = static_cast<CItemContainer*>(CItem::CreateBase(ITEMID_CRATE1));
+        CItemContainer *pCrate = dynamic_cast<CItemContainer*>(CItem::CreateBase(ITEMID_CRATE1));
         ASSERT(pCrate);
-        pCrate->MoveTo(GetTopPoint());
+        CPointMap pt = GetTopPoint();
+        pt.m_z -= 20;
+        pCrate->MoveTo(pt); // Move the crate to z -20
         pCrate->Update();
         SetMovingCrate(pCrate);
         return pCrate;
@@ -944,12 +946,7 @@ void CItemMulti::TransferAllItemsToMovingCrate(TRANSFER_TYPE iType)
 {
     ADDTOCALLSTACK("CItemMulti::TransferAllItemsToMovingCrate");
     CItemContainer *pCrate = GetMovingCrate(true);
-
-    if (!pCrate)
-    {
-        g_Log.EventError("No Moving Crate could be created, aborting TransferAllItemsToMovingCrate()\n");
-        return;
-    }
+    ASSERT(pCrate);
     //Transfer Types
     bool fTransferAddons = (((iType & TRANSFER_ADDONS) || (iType & TRANSFER_ALL)));
     bool fTransferAll = (iType & TRANSFER_ALL);
