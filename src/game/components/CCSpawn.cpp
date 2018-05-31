@@ -165,45 +165,48 @@ void CCSpawn::Delete(bool fForce)
 
 void CCSpawn::GenerateItem(CResourceDef *pDef)
 {
-	ADDTOCALLSTACK("CCSpawn::GenerateItem");
+    ADDTOCALLSTACK("CCSpawn::GenerateItem");
 
-	CResourceIDBase rid = pDef->GetResourceID();
-	ITEMID_TYPE id = (ITEMID_TYPE)(rid.GetResIndex());
-
+    CResourceIDBase rid = pDef->GetResourceID();
+    ITEMID_TYPE id = (ITEMID_TYPE)(rid.GetResIndex());
     CItem *pSpawnItem = static_cast<CItem*>(GetLink());
-	CItemContainer *pCont = dynamic_cast<CItemContainer *>(pSpawnItem->GetParent());
-	uint16 iCount = pCont ? ((uint16)pCont->ContentCount(rid)) : GetCurrentSpawned();
 
-	if ( iCount >= GetAmount() )
-		return;
+    if (GetCurrentSpawned() >= GetAmount())
+    {
+        return;
+    }
 
-	CItem *pItem = pSpawnItem->CreateTemplate(id);
-	if ( pItem->CreateTemplate(id) == nullptr)
-		return;
+    CItem *pItem = pSpawnItem->CreateTemplate(id);
+    if (!pItem)
+    {
+        return;
+    }
 
-    uint16 iAmountPile = (uint16)(minimum(UINT16_MAX,_iPile));
-	if ( iAmountPile > 1 )
-	{
-		CItemBase *pItemDef = pItem->Item_GetDef();
-		ASSERT(pItemDef);
-		if ( pItemDef->IsStackableType() )
-			SetAmount((uint16)Calc_GetRandVal(iAmountPile));
-	}
+    uint16 iAmountPile = (uint16)(minimum(UINT16_MAX, _iPile));
+    if (iAmountPile > 1)
+    {
+        CItemBase *pItemDef = pItem->Item_GetDef();
+        ASSERT(pItemDef);
+        if (pItemDef->IsStackableType())
+        {
+            SetAmount((uint16)Calc_GetRandVal(iAmountPile));
+        }
+    }
 
-	pItem->ClrAttr(pItem->m_Attr & (ATTR_OWNED | ATTR_MOVE_ALWAYS));
-	pItem->SetDecayTime(g_Cfg.m_iDecay_Item);	// it will decay eventually to be replaced later
+    pItem->ClrAttr(pItem->m_Attr & (ATTR_OWNED | ATTR_MOVE_ALWAYS));
+    pItem->SetDecayTime(g_Cfg.m_iDecay_Item);	// it will decay eventually to be replaced later
     if (!pItem->MoveNearObj(pSpawnItem, _iMaxDist ? (word)(Calc_GetRandVal(_iMaxDist) + 1) : 1))
     {
         // If this fails, try placing the char ON the spawn
         if (!pItem->MoveTo(pSpawnItem->GetTopPoint()))
         {
-            DEBUG_ERR(("Spawner UID:0%" PRIx32 " is unable to place an item inside the world, deleted the character", (dword)pItem->GetUID()));
+            DEBUG_ERR(("Spawner UID:0%" PRIx32 " is unable to place an item inside the world, deleted the item.", (dword)pItem->GetUID()));
             pItem->Delete();
             return;
         }
     }
     pItem->Update();
-	AddObj(pItem->GetUID());
+    AddObj(pItem->GetUID());
 }
 
 void CCSpawn::GenerateChar(CResourceDef *pDef)
@@ -239,7 +242,7 @@ void CCSpawn::GenerateChar(CResourceDef *pDef)
 		// If this fails, try placing the char ON the spawn
 		if (!pChar->MoveTo(pt))
 		{
-			DEBUG_ERR(("Spawner UID:0%" PRIx32 " is unable to place a character inside the world, deleted the character", (dword)pItem->GetUID()));
+			DEBUG_ERR(("Spawner UID:0%" PRIx32 " is unable to place a character inside the world, deleted the character.", (dword)pItem->GetUID()));
 			pChar->Delete();
 			return;
 		}
