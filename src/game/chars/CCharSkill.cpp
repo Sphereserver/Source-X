@@ -2668,16 +2668,7 @@ int CChar::Skill_Fighting( SKTRIG_TYPE stage )
 	if ( stage == SKTRIG_START )
 	{
 		m_atFight.m_War_Swing_State = WAR_SWING_EQUIPPING;
-
-		/*The following 4 lines should fix an exploit related to combat, but because they cause problem with
-		combat swings timer and we don't know what the exploit is I have commented them.
-		int64 iRemainingDelay = g_World.GetCurrentTime().GetTimeRaw() - m_atFight.m_timeNextCombatSwing;
-		if (iRemainingDelay < 0 || iRemainingDelay > 255)
-			iRemainingDelay = 0;
-		SetTimeout(iRemainingDelay);
-		*/
-
-		SetTimeout(0);
+        Fight_HitTry();	// this cleans up itself, executes the code related to the current m_War_Swing_State and sets the needed timers.
 		return g_Cfg.Calc_CombatChanceToHit(this, m_Fight_Targ_UID.CharFind());	// How difficult? 1-10000
 	}
 
@@ -2685,22 +2676,27 @@ int CChar::Skill_Fighting( SKTRIG_TYPE stage )
 	{
 		// Hit or miss my current target.
 		if ( !IsStatFlag(STATF_WAR) )
+        {
 			return -SKTRIG_ABORT;
+        }
 
-		if ( m_atFight.m_War_Swing_State != WAR_SWING_SWINGING )
-			m_atFight.m_War_Swing_State = WAR_SWING_READY;  // Waited my recoil time. So I'm ready.
+		Fight_HitTry();	// this cleans up itself, executes the code related to the current m_War_Swing_State and sets the needed timers.
 
-        //m_Act_Difficulty = g_Cfg.Calc_CombatChanceToHit(this, m_Fight_Targ_UID.CharFind()); // calculate the chance at every hit
-        //if ( !Skill_CheckSuccess(Skill_GetActive(), m_Act_Difficulty, false) )
-        //    m_Act_Difficulty = -m_Act_Difficulty;	// will result in failure
-
-		Fight_HitTry();	// this cleans up itself.
+        //if (m_atFight.m_War_Swing_State == WAR_SWING_EQUIPPING)
+        //{
+        //  m_Act_Difficulty = g_Cfg.Calc_CombatChanceToHit(this, m_Fight_Targ_UID.CharFind()); // calculate the chance at every hit
+        //  if ( !Skill_CheckSuccess(Skill_GetActive(), m_Act_Difficulty, false) )
+        //      m_Act_Difficulty = -m_Act_Difficulty;	// will result in failure
+        //}
 		return -SKTRIG_STROKE;	// Stay in the skill till we hit.
 	}
 
     if (stage == SKTRIG_FAIL)
     {
-        m_atFight.m_iLastSwingDelay = 0;
+        m_atFight.m_iRecoilDelay = 0;
+        m_atFight.m_iSwingAnimationDelay = 0;
+        m_atFight.m_iSwingAnimation = 0;
+        m_atFight.m_iSwingIgnoreLastHitTag = 0;
     }
 
 	return -SKTRIG_QTY;

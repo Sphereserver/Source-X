@@ -833,7 +833,7 @@ bool CScriptObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
 			if ( *pszKey && (( *pszKey < '0' ) || ( *pszKey > '9' )) && *pszKey != '-' )
 				goto badcmd;
 
-			int64	min = 1000, max = INT64_MIN;
+			int64 min = 1000, max = INT64_MIN;
 
 			if ( *pszKey )
 			{

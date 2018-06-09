@@ -984,3 +984,16 @@ Redeed now creates the deed before calling the @Redeed trigger and the deed gets
 	the @Fail, @SkillFail, @Start, @SkillStart triggers to be fired at each hit.
 	- Fixed: NPCs doing extra AI actions (wandering, food, etc checks) after each hit in combat. This caused sometimes the current combat action to be resetted
 	and then forced again, erasing the NPC combat data, which ultimately results in the NPC hitting twice in a few tenths of seconds.
+
+13-06-2018, Nolok
+- Changed: reverted the combat animation to not being "smooth". Now by default the swing animation has a fixed duration of 1 second (minimum anim delay/duration possible) and then the char waits the recoil time
+	before being able to start again the combat swing. This is done to match OSI style. The "underground" work is different now and it is working in this way: first a timer is started to wait for
+	the recoil time	(ARGN1 in @HitTry). When the timer has ended, the combat swing animation starts, also the timer is started again, but to wait for the animation to end (anim and timer duration are equal to
+	LOCAL.AnimDelay in @HitTry, and the default value is 1 second). Ended this second timer, the damage is dealt (Issue #111).
+- Added: .ini CombatFlag COMBAT_ANIM_HIT_SMOOTH to enable the old smooth combat. There's no delay between hits (in @HitTry LOCAL.AnimDelay is = 0), but the swing animation duration
+	(ARGN1 in @HitTry) is in this case equal to the delay you should have waited before starting a new swing.
+- Fixed: COMBATF_PREHIT wasn't working correctly (Issue #113, #108).
+- Changed: .ini CombatFlag COMBAT_PREHIT_NORANGE renamed to COMBAT_SWING_NORANGE, to avoid confusion with COMBATF_PREHIT.
+- Added: LOCAL.Swing_NoRange to @HitCheck trigger. -1 force disables the Swing_NoRange behaviour for the current hit, 0 leaves it dependent to the COMBAT_SWING_NORANGE ini CombatFlag,
+	while 1 force enables the Swing_NoRange behaviour (Issue #112).
+- Added: RETURN -2 into @HitCheck trigger continues the execution of the default combat code. This is useful if you want to use @HitCheck to only change LOCAL.Swing_NoRange.

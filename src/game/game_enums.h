@@ -134,7 +134,8 @@ enum COMBATFLAGS_TYPE
     COMBAT_STACKARMOR           = 0x1000,   // if a region is covered by more than one armor part, all AR will count
     COMBAT_NOPOISONHIT          = 0x2000,   // Disables old (55i like) poisoning style: Poisoning > 30.0 && (RAND(100.0)> Poisoning) for monsters OR weapon.morez && (RAND(100) < weapon.morez ) for poisoned weapons.
     COMBAT_SLAYER               = 0x4000,    // Enables Slayer damage on PVM combat.
-    COMBAT_PREHIT_NORANGE       = 0x8000
+    COMBAT_SWING_NORANGE       = 0x8000,
+    COMBAT_ANIM_HIT_SMOOTH      = 0x10000
 };
 
 

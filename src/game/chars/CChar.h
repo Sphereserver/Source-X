@@ -247,8 +247,11 @@ public:
 		// SKILL_THROWING
 		struct
 		{
-			WAR_SWING_TYPE m_War_Swing_State;	// ACTARG1 = We are in the war mode swing.
-			dword m_iLastSwingDelay;			// ACTARG2 = Duration (in msecs) of the previous swing.
+			WAR_SWING_TYPE m_War_Swing_State;   // ACTARG1 = We are in the war mode swing.
+			int16 m_iRecoilDelay;		        // ACTARG2 & 0x0000FFFF = Duration (in tenth of secs) of the previous swing recoil time.
+            int16 m_iSwingAnimationDelay;       // ACTARG2 & 0xFFFF0000 = Duration (in tenth of secs) of the previous swing animation duration.
+            int16 m_iSwingAnimation;            // ACTARG3 & 0x0000FFFF = hit animation id.
+            int16 m_iSwingIgnoreLastHitTag;     // ACTARG3 & 0xFFFF0000. Internally used by PreHit. If == 1 (which happens only for the hit after the first instahit), for this hit TAG.LastHit delay checking will be ignored.
 		} m_atFight;
 
 		// SKILL_ENTICEMENT
@@ -952,8 +955,11 @@ public:
 
 private:
 	// Armor, weapons and combat ------------------------------------
-	int	CalcFightRange( CItem * pWeapon = NULL );
-
+	int	Fight_CalcRange( CItem * pWeapon = nullptr ) const;
+    // 1.0 seconds is the minimum animation duration ("delay"), but we have to subtract the tenths of seconds that will pass until the next tick, since
+    //  the timer will start on the next tick
+    #define COMBAT_MIN_SWING_ANIMATION_DELAY (10 - (TICK_PER_SEC/10))
+    void Fight_SetDefaultSwingDelays();
 	
 	bool Fight_IsActive() const;
 public:
@@ -969,8 +975,9 @@ public:
 	void Fight_HitTry();
 	WAR_SWING_TYPE Fight_Hit( CChar * pCharTarg );
 	bool Fight_Parry(CItem * &pItemParry);
-	WAR_SWING_TYPE Fight_CanHit(CChar * pCharTarg);
+	WAR_SWING_TYPE Fight_CanHit(CChar * pCharTarg, bool fIgnoreDistance = false);
 	SKILL_TYPE Fight_GetWeaponSkill() const;
+    DAMAGE_TYPE Fight_GetWeaponDamType(const CItem* pWeapon = nullptr) const;
 	int Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom = false, bool bGetMax = true ) const;
 	bool Fight_IsAttackable();
 

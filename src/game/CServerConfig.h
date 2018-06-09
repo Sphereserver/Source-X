@@ -1560,7 +1560,7 @@ public:
      *
      * @return  The calculated combat attack speed.
      */
-	int Calc_CombatAttackSpeed( CChar * pChar, CItem * pWeapon );
+	int Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pWeapon ) const;
 
     /**
      * @fn  int CServerConfig::Calc_CombatChanceToHit( CChar * pChar, CChar * pCharTarg, SKILL_TYPE skill );

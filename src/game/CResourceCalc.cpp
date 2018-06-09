@@ -28,7 +28,7 @@ int CServerConfig::Calc_MaxCarryWeight( const CChar * pChar ) const
 //********************************
 // Combat
 
-int CServerConfig::Calc_CombatAttackSpeed( CChar * pChar, CItem * pWeapon )
+int CServerConfig::Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pWeapon ) const
 {
 	ADDTOCALLSTACK("CServerConfig::Calc_CombatAttackSpeed");
 	// Calculate the swing speed value on chars

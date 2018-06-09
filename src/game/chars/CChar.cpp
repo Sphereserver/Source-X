@@ -2214,7 +2214,7 @@ do_default:
 			}
 
 		case CHC_FIGHTRANGE: //RANGE is now writable so this is changed to FIGHTRANGE as readable only
-			sVal.FormatVal( CalcFightRange( m_uidWeapon.ItemFind() ) );
+			sVal.FormatVal( Fight_CalcRange( m_uidWeapon.ItemFind() ) );
 			return true;
 		case CHC_BLOODCOLOR:
 			sVal.FormatHex( m_wBloodHue );
