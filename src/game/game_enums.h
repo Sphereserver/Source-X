@@ -103,6 +103,7 @@ enum BODYPART_TYPE
     ARMOR_HANDS,
     ARMOR_LEGS,
     ARMOR_FEET,
+	ARMOR_SHIELD,
     ARMOR_QTY,      // All the parts that armor will cover.
 
     BODYPART_LEGS2, // Alternate set of legs (spider)
@@ -138,7 +139,17 @@ enum COMBATFLAGS_TYPE
     COMBAT_ANIM_HIT_SMOOTH      = 0x10000
 };
 
-
+//////////////////////////////////////////////////////////////////////////
+//Parrying behaviour
+enum PARRYFLAGS_TYPE
+{
+	PARRYERA_PRESEFORMULA = 0x1,	// pre - SE parrying chance formula(not using the Bushido skill).Mutually exclusive with 02 flag.
+	PARRYERA_SEFORMULA = 0x2,		// SE parrying chance formula (using also the Bushido skill). Mutually exclusive with 01 flag.
+	PARRYERA_SHIELDBLOCK = 0x10,	// can parry with a shield
+	PARRYERA_ONEHANDBLOCK = 0x20,	// can parry with a one-handed weapon without a shield
+	PARRYERA_TWOHANDBLOCK = 0x40,	// can parry with two handed weapons
+	PARRYERA_ARSCALING = 0x80 // Shields AR scales with Parrying skill, not compatible with Combat Elemental Engine.
+};
 //////////////////////////////////////////////////////////////////////////
 //Magic
 

@@ -438,6 +438,30 @@ void CObjBase::Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSour
 	}
 }
 
+void CObjBase::Effect(EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap & pt ,const CObjBase * pSource, byte bSpeedSeconds, byte bLoop, bool fExplode, dword color, dword render, word effectid, word explodeid, word explodesound, dword effectuid, byte type) const
+{
+	ADDTOCALLSTACK("CObjBase::Effect");
+	// show for everyone near by.
+	//
+	// bSpeedSeconds
+	// bLoop
+	// fExplode
+
+	ClientIterator it;
+	for (CClient* pClient = it.next(); pClient != NULL; pClient = it.next())
+	{
+		if (!pClient->CanSee(this))
+			continue;
+
+		// Given the same bLoop, Enhanced Client shows the effect for a much shorter amount of time than Classic Client,
+		//	so it may be a nice idea to adjust it automatically.
+		byte bLoopAdjusted = bLoop;
+		if (pClient->GetNetState()->isClientEnhanced())
+			bLoopAdjusted *= 3;
+
+		pClient->addEffect(motion, id, pt, pSource, bSpeedSeconds, bLoopAdjusted, fExplode, color, render, effectid, explodeid, explodesound, effectuid, type);
+	}
+}
 
 void CObjBase::Emote(lpctstr pText, CClient * pClientExclude, bool fForcePossessive)
 {
@@ -2201,6 +2225,47 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					iMaxLength,	sPrompt, sOrgValue, this );
 			}
 			break;
+		case OV_LOCATIONEFFECT: // visual effect at map point.
+		{
+			EXC_SET("LOCATIONEFFECT");
+			int64 piCmd[15];
+			int iArgQty = Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
+			if (iArgQty < 2)
+				return false;
+			CObjBase *	pThis = this;
+
+			CPointMap pt(piCmd[0], piCmd[1], piCmd[2]);
+			if (!pt.IsValidPoint())
+				return false;
+
+			//DEBUG_ERR(("this->GetUID() 0%x \n", (dword)this->GetUID()));
+			if (piCmd[3] == -1)
+			{
+				if (pCharSrc)
+				{
+					piCmd[3] = EFFECT_BOLT;
+					pThis = pCharSrc;
+					pCharSrc = dynamic_cast <CChar*>(this);
+				}
+
+			}
+			//DEBUG_ERR(("this->GetUID() 0%x pThis->GetUID() 0%x pCharSrc->GetUID() 0%x\n",(dword)this->GetUID(),(dword)pThis->GetUID(),(dword)pCharSrc->GetUID()));
+			pThis->Effect(static_cast<EFFECT_TYPE>(piCmd[3]), (ITEMID_TYPE)(RES_GET_INDEX(piCmd[4])),
+				pt,
+				pCharSrc,
+				(iArgQty >= 3) ? (uchar)(piCmd[5]) : 5,		// byte bSpeedSeconds = 5,
+				(iArgQty >= 4) ? (uchar)(piCmd[6]) : 1,		// byte bLoop = 1,
+				(iArgQty >= 5) ? (piCmd[7] != 0) : false,	// bool fExplode = false
+				(iArgQty >= 6) ? (uint)(piCmd[8]) : 0,		// hue
+				(iArgQty >= 7) ? (uint)(piCmd[9]) : 0,		// render mode,
+				(iArgQty >= 8) ? (word)(piCmd[10]) : 0,		// EffectID	//New Packet 0xc7
+				(iArgQty >= 9) ? (word)(piCmd[11]) : 0,		// ExplodeID
+				(iArgQty >= 10) ? (word)(piCmd[12]) : 0,		// ExplodeSound
+				(iArgQty >= 11) ? (dword)(piCmd[13]) : 0,	// EffectUID
+				(iArgQty >= 12) ? (uchar)(piCmd[14]) : 0	// Type
+			);
+		}
+		break;
 		case OV_MENU:
 			{
 				EXC_SET("MENU");

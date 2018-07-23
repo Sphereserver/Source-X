@@ -929,7 +929,26 @@ void CClient::addEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTempla
 	else
 		new PacketEffect(this, motion, id, pDst, pSrc, bSpeedSeconds, bLoop, fExplode);
 }
+/*Effect at a Map Point instead of an Object*/
+void CClient::addEffect(EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap & pt, const CObjBaseTemplate * pSrc, byte bSpeedSeconds, byte bLoop, bool fExplode, dword color, dword render, word effectid, dword explodeid, word explodesound, dword effectuid, byte type)
+{
+	ADDTOCALLSTACK("CClient::addEffect");
+	// bSpeedSeconds = seconds = 0=very fast, 7=slow.
+	// wHue =
 
+	ASSERT(m_pChar);
+	ASSERT(&pt);
+
+	if ((pSrc == NULL) && (motion == EFFECT_BOLT)) // source required for bolt effect
+		return;
+
+	if (effectid || explodeid)
+		new PacketEffect(this, motion, id, pt, pSrc, bSpeedSeconds, bLoop, fExplode, color, render, effectid, explodeid, explodesound, effectuid, type);
+	else if (color || render)
+		new PacketEffect(this, motion, id, pt, pSrc, bSpeedSeconds, bLoop, fExplode, color, render);
+	else
+		new PacketEffect(this, motion, id, pt, pSrc, bSpeedSeconds, bLoop, fExplode);
+}
 
 void CClient::GetAdjustedItemID( const CChar * pChar, const CItem * pItem, ITEMID_TYPE & id, HUE_TYPE & wHue ) const
 {

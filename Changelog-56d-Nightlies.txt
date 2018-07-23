@@ -997,3 +997,45 @@ Redeed now creates the deed before calling the @Redeed trigger and the deed gets
 - Added: LOCAL.Swing_NoRange to @HitCheck trigger. -1 force disables the Swing_NoRange behaviour for the current hit, 0 leaves it dependent to the COMBAT_SWING_NORANGE ini CombatFlag,
 	while 1 force enables the Swing_NoRange behaviour (Issue #112).
 - Added: RETURN -2 into @HitCheck trigger continues the execution of the default combat code. This is useful if you want to use @HitCheck to only change LOCAL.Swing_NoRange.
+
+23-07-2018, Drk84
+- Added: LocationEffect command, similar to the EFFECT command but instead of an object it takes a terrain location as a target.(Thanks to XuN for the help)
+	Some of the new spells use effects that are placed  on the ground (not field items) for simulating an area of effect. 
+	Usage: locationEffect x,y,z,type,itemid,speed,loop,explode,color,render
+	Examples: 
+	//Simulate the Consacrate Weapon Chivalry spell effect, a sword appearing from the ground and going upward.
+	[FUNCTION testLocationZ]
+	locationEffect <p.x>,<p.y>,<height>+1,0,i_sword_long,1,0,0,colors_red,3
+	
+	//Simulate a field of energy centered at the target.
+	//argv0 x offset, argv1 y offset
+	[FUNCTION testLocationField]
+	if <isempty <args>>
+		args = 1,1
+	endif
+	local.pX = <p.x>
+	local.pY = <p.y>
+	local.pZ = <p.z>
+	FOR X <eval <local.pX> - <argv0>> <eval <local.pX> + <argv1>>
+		FOR Y <eval <local.pY> - <argv0>> <eval <local.pY> + <argv1>>
+			locationEffect <local.x>,<local.Y>,<local.pZ>+<argv2>,2,i_fx_energy_field,1,0,0,colors_red,3
+		ENDFOR
+	ENDFOR
+  Notes:
+  If the effect Type is 1 (Lightning) or 3 (Effect at object level) the effect will not be played, only effect 0(bolt) and 2(ground level) seems valid, probably
+  cause they don't accept a map point.
+  
+- Added: Spells with the LAYER property set to >= LAYER_SPELL_STATS will automatically equip the spell memory item found in the RUNE_ITEM property.
+	Currently, if you want to make a custom spell (or scripts the chivalry, mysticm, spelleweaving spells) you had to manually equip the memory item 
+	causing the triggers @EffectAdd  and @EffectRemove to never be fired.
+- Changed: Meditation skill now take in consideration the EFFECT property of the skill, if the EFFECT property is not present the default value of 1 is used.
+- Added: Added new flag value 080 for CombatParryingEra, setting this flag will allow to use the following parrying skill behaviour:
+	The flag will enable the old AR parrying formula, instead of gaining  a flat 7% of the Shield Armor value the Parrying skill of the character is taken in consideration according to the 
+	following formula:
+	Displayed AR = ((Parrying Skill * Base AR of Shield) ÷ 200) + 1 
+	The maximum AR reachable is: Base AR of Shield / 2. 
+	More information: http://web.archive.org/web/20000306210936/http://uo.stratics.com:80/parr.htm
+	Notes
+	By default the ARMOR value of the Shields item is commented, so you need to uncomment them.
+	The formula works only with Combat Elemental Engine disabled.
+	Setting or unsetting this flag while the server is running will update the character armour value only when the Parrying skill changes or the shield item is equipped/unequiped.
