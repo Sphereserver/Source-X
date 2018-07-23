@@ -2192,42 +2192,9 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 					);
 			}
 			break;
-		case OV_EMOTE:
-			EXC_SET("EMOTE");
-			Emote( s.GetArgStr() );
-			break;
-		case OV_FLIP:
-			EXC_SET("FLIP");
-			Flip();
-			break;
-		case OV_INPDLG:
-			// "INPDLG" verb maxchars
-			// else assume it was a property button.
-			{
-				EXC_SET("INPDLG");
-				if ( pClientSrc == NULL )
-					return false;
-
-				tchar *Arg_ppCmd[2];		// Maximum parameters in one line
-				size_t iQty = Str_ParseCmds( s.GetArgStr(), Arg_ppCmd, CountOf( Arg_ppCmd ));
-
-				CSString sOrgValue;
-				if ( ! r_WriteVal( Arg_ppCmd[0], sOrgValue, pSrc ))
-					sOrgValue = ".";
-
-				pClientSrc->m_Targ_Text = Arg_ppCmd[0];	// The attribute we want to edit.
-
-				int iMaxLength = iQty > 1 ? ATOI(Arg_ppCmd[1]) : 1;
-
-				CSString sPrompt;
-				sPrompt.Format("%s (# = default)", static_cast<lpctstr>(Arg_ppCmd[0]));
-				pClientSrc->addGumpInpVal( true, INPVAL_STYLE_TEXTEDIT,
-					iMaxLength,	sPrompt, sOrgValue, this );
-			}
-			break;
-		case OV_LOCATIONEFFECT: // visual effect at map point.
+		case OV_EFFECTLOCATION: // visual effect at map point.
 		{
-			EXC_SET("LOCATIONEFFECT");
+			EXC_SET("EFFECTLOCATION");
 			int64 piCmd[15];
 			int iArgQty = Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
 			if (iArgQty < 2)
@@ -2266,6 +2233,40 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			);
 		}
 		break;
+		case OV_EMOTE:
+			EXC_SET("EMOTE");
+			Emote( s.GetArgStr() );
+			break;
+		case OV_FLIP:
+			EXC_SET("FLIP");
+			Flip();
+			break;
+		case OV_INPDLG:
+			// "INPDLG" verb maxchars
+			// else assume it was a property button.
+			{
+				EXC_SET("INPDLG");
+				if ( pClientSrc == NULL )
+					return false;
+
+				tchar *Arg_ppCmd[2];		// Maximum parameters in one line
+				size_t iQty = Str_ParseCmds( s.GetArgStr(), Arg_ppCmd, CountOf( Arg_ppCmd ));
+
+				CSString sOrgValue;
+				if ( ! r_WriteVal( Arg_ppCmd[0], sOrgValue, pSrc ))
+					sOrgValue = ".";
+
+				pClientSrc->m_Targ_Text = Arg_ppCmd[0];	// The attribute we want to edit.
+
+				int iMaxLength = iQty > 1 ? ATOI(Arg_ppCmd[1]) : 1;
+
+				CSString sPrompt;
+				sPrompt.Format("%s (# = default)", static_cast<lpctstr>(Arg_ppCmd[0]));
+				pClientSrc->addGumpInpVal( true, INPVAL_STYLE_TEXTEDIT,
+					iMaxLength,	sPrompt, sOrgValue, this );
+			}
+			break;
+		
 		case OV_MENU:
 			{
 				EXC_SET("MENU");
