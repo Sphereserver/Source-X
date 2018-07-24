@@ -16,6 +16,7 @@ CItemContainer::CItemContainer( ITEMID_TYPE id, CItemBase *pItemDef ) :	CItemVen
 {
 	// m_fTinkerTrapped = false;
     _pMultiSecured = nullptr;
+    _pMultiCrate = nullptr;
 }
 
 CItemContainer::~CItemContainer()
