@@ -14,6 +14,8 @@ class CItemContainer : public CItemVendable, public CContainer
 {
 	// This item has other items inside it.
 	static lpctstr const sm_szVerbKeys[];
+    CItemMulti *_pMultiSecured;
+    CItemMulti *_pMultiCrate;
 public:
 	static const char *m_sClassName;
 
@@ -22,13 +24,12 @@ public:
 	bool NotifyDelete();
 	void DeletePrepare();
 
+    void SetSecuredOfMulti(CItemMulti *pMulti);
+    void SetCrateOfMulti(CItemMulti *pMulti);
+
 public:
 	CItemContainer( ITEMID_TYPE id, CItemBase * pItemDef );
-	virtual ~CItemContainer()
-	{
-		Clear();		// get rid of my contents first to protect against weight calc errors.
-		DeletePrepare();
-	}
+    virtual ~CItemContainer();
 
 private:
 	CItemContainer(const CItemContainer& copy);

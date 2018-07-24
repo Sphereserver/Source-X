@@ -74,7 +74,17 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 /////////////////////////////////////////////////////////////////
 // -CItem
 
-CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CObjBase( true )
+    void CItem::SetComponentOfMulti(CItemMulti * pMulti)
+    {
+        _pMultiComponent = pMulti;
+    }
+
+    void CItem::SetLockDownOfMulti(CItemMulti * pMulti)
+    {
+        _pMultiLockDown = pMulti;
+    }
+
+    CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CObjBase( true )
 {
 	ASSERT( pItemDef );
 
@@ -97,6 +107,8 @@ CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CObjBase( true )
 	g_World.m_uidLastNewItem = GetUID();	// for script access.
 	ASSERT( IsDisconnected() );
 
+    _pMultiComponent = nullptr;
+    _pMultiLockDown = nullptr;
 
     // Manual CComponents addition
 
@@ -149,7 +161,6 @@ CItem::~CItem()
 {
 	DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
 
-	if ( ! g_Serv.IsLoading() )
 	switch ( m_type )
 	{
 		case IT_FIGURINE:
@@ -166,6 +177,14 @@ CItem::~CItem()
 		default:
 			break;
 	}
+    if (_pMultiComponent)
+    {
+        _pMultiComponent->DelComp(this);
+    }
+    if (_pMultiLockDown)
+    {
+        _pMultiLockDown->UnlockItem(this);
+    }
 	g_Serv.StatDec(SERV_STAT_ITEMS);
 }
 

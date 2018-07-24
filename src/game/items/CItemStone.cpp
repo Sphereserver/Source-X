@@ -13,7 +13,7 @@ CItemStone::CItemStone( ITEMID_TYPE id, CItemBase * pItemDef ) : CItem( id, pIte
 {
 	m_itStone.m_iAlign = STONEALIGN_STANDARD;
     g_World.m_Stones.push_back(this);
-    _pMultiStorage = new CMultiStorage();
+    _pMultiStorage = new CMultiStorage(nullptr);
     _iMaxShips = g_Cfg._iMaxShipsGuild;
     _iMaxHouses = g_Cfg._iMaxHousesGuild;
 }
@@ -341,7 +341,7 @@ bool CItemStone::r_LoadVal( CScript & s ) // Load an item Script
         case STC_ADDHOUSE:
         case STC_ADDSHIP:
         {
-            GetMultiStorage()->AddMulti(static_cast<CItemMulti*>(((CUID)s.GetArgDWVal()).ItemFind()));
+            GetMultiStorage()->AddMulti(static_cast<CItemMulti*>(((CUID)s.GetArgDWVal()).ItemFind()), HP_GUILD);
             return true;
         }
 		case STC_ALIGN: // "ALIGN"
