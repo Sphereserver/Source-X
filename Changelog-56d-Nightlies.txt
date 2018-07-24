@@ -1028,7 +1028,7 @@ Multis:
 	Examples: 
 	//Simulate the Consacrate Weapon Chivalry spell effect, a sword appearing from the ground and going upward.
 	[FUNCTION testLocationZ]
-	locationEffect <p.x>,<p.y>,<height>+1,0,i_sword_long,1,0,0,colors_red,3
+	effectLocation <p.x>,<p.y>,<height>+1,0,i_sword_long,1,0,0,colors_red,3
 	
 	//Simulate a field of energy centered at the target.
 	//argv0 x offset, argv1 y offset
@@ -1041,7 +1041,7 @@ Multis:
 	local.pZ = <p.z>
 	FOR X <eval <local.pX> - <argv0>> <eval <local.pX> + <argv1>>
 		FOR Y <eval <local.pY> - <argv0>> <eval <local.pY> + <argv1>>
-			locationEffect <local.x>,<local.Y>,<local.pZ>+<argv2>,2,i_fx_energy_field,1,0,0,colors_red,3
+			effectLocation <local.x>,<local.Y>,<local.pZ>+<argv2>,2,i_fx_energy_field,1,0,0,colors_red,3
 		ENDFOR
 	ENDFOR
   Notes:
