@@ -997,3 +997,26 @@ Redeed now creates the deed before calling the @Redeed trigger and the deed gets
 - Added: LOCAL.Swing_NoRange to @HitCheck trigger. -1 force disables the Swing_NoRange behaviour for the current hit, 0 leaves it dependent to the COMBAT_SWING_NORANGE ini CombatFlag,
 	while 1 force enables the Swing_NoRange behaviour (Issue #112).
 - Added: RETURN -2 into @HitCheck trigger continues the execution of the default combat code. This is useful if you want to use @HitCheck to only change LOCAL.Swing_NoRange.
+
+20-07-2018, XuN
+Multis:
+- Changed COMPONENTS to COMPS (and all the relative keywords: getcomponentpos -> getcomppos, component.x -> comp.x, etc)
+- Fixed Components from multis messing with Components from multidefs, hence crashing when trying to access them(like when deleting the multi).
+- Fixed nuke/remove doing random crashes on multis: Redeed is not being called when removing the multi anymore, if you want a full redeed call it before removing.
+- Added House_Priv defnames:
+    HP_NONE         = 0
+    HP_OWNER        = 1
+    HP_COOWNER      = 2
+    HP_FRIEND       = 3
+    HP_ACCESSONLY   = 4
+    HP_BAN          = 5
+    HP_VENDOR       = 6
+    HP_GUILD        = 7
+- Changed AddHouse and AddShip to accept a second parameter as HOUSE_PRIV, default HP_OWNER, to have control over the privileges (this affects new saves).
+    To change a priv from OWNER to COOWNER (as example) use AddHouse house_uid, HP_COOWNER (or AddShip), it will replace the current value with the new one.
+- Changed Seting MovingCrate / Owner / Guild to 0 will empty the house value also for list-based values: Coowners, Friends, Bans, Vendors, Accesses ...
+- Removed the needing of @Destroy for several house related items (Comps, MovingCrate, LockDowns, Secured Containers...) to delete the item from the house list by adding pointers back on CItem,
+    CItemStone and the update to CHouseStorage
+- Added 'e_house_priv' for chars who have any kind of priv on any house, also e_ship_priv for ships.
+- Added RevokePrivs char_uid for multis (house and ships) to revoke any House_Priv to that char on the multi (excepting, of course HP_GUILD).
+- Fixed when setting a new priv RevokePrivs will be called and then the privs will be added, in order to remove the char from previous list (if had any privilege before on this multi).

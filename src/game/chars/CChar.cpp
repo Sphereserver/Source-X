@@ -247,7 +247,7 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false ),
 	m_SpeechHueOverride = HUE_SAY_DEF;
     _iMaxHouses = g_Cfg._iMaxHousesPlayer;
     _iMaxShips = g_Cfg._iMaxShipsPlayer;
-    _pMultiStorage = new CMultiStorage();
+    _pMultiStorage = new CMultiStorage(this);
 	m_height = 0;
 	m_ModMaxWeight = 0;
 
@@ -2930,8 +2930,18 @@ do_default:
 	switch (iKeyNum)
 	{
         case CHC_ADDHOUSE:
-            GetMultiStorage()->AddHouse(static_cast<CItemMulti*>(((CUID)s.GetArgDWVal()).ItemFind()));
+        {
+            int64 piCmd[2];
+            Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
+            CItemMulti *pHouse = static_cast<CItemMulti*>(((CUID)((dword)piCmd[0])).ItemFind());
+            HOUSE_PRIV ePriv = HP_OWNER;
+            if (piCmd[1] > 0 && piCmd[1] < HP_QTY)
+            {
+                ePriv = (HOUSE_PRIV)piCmd[1];
+            }
+            GetMultiStorage()->AddHouse(pHouse, ePriv);
             break;
+        }
         case CHC_DELHOUSE:
         {
             dword dwUID = s.GetArgDWVal();
@@ -2946,8 +2956,18 @@ do_default:
             break;
         }
         case CHC_ADDSHIP:
-            GetMultiStorage()->AddShip(static_cast<CItemShip*>(((CUID)s.GetArgDWVal()).ItemFind()));
+        {
+            int64 piCmd[2];
+            Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
+            CItemShip *pShip = static_cast<CItemShip*>(((CUID)((dword)piCmd[0])).ItemFind());
+            HOUSE_PRIV ePriv = HP_OWNER;
+            if (piCmd[1] > 0 && piCmd[1] < HP_QTY)
+            {
+                ePriv = (HOUSE_PRIV)piCmd[1];
+            }
+            GetMultiStorage()->AddShip(pShip, ePriv);
             break;
+        }
         case CHC_DELSHIP:
         {
             dword dwUID = s.GetArgDWVal();

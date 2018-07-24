@@ -51,7 +51,7 @@ protected:
     std::vector<CItem*> _lLockDowns;  // List of Locked Down items.
     std::vector<CItemContainer*> _lSecureContainers; // List of Secured containers.
 private:
-    std::vector<CItem*> _lComponents; // List of Components.
+    std::vector<CItem*> _lComps; // List of Components.
     std::vector<CItemMulti*> _lAddons;  // List of AddOns.
 
     // house general
@@ -110,7 +110,7 @@ protected:
     * @param fIsAddon true when the created component is an addon.
     * @return true if the component need a key (wether the key is created or not is not checked here).
     */
-	bool Multi_CreateComponent( ITEMID_TYPE id, short dx, short dy, char dz, dword dwKeyCode, bool fIsAddon = false);
+	bool Multi_CreateComponent( ITEMID_TYPE id, short dx, short dy, char dz, dword dwKeyCode);
 
 public:
     /**
@@ -143,6 +143,11 @@ public:
     */
     ///@{
 
+    /**
+    * @brief Revokes any privileges from this house.
+    * @param pSrc the object whom privileges to revoke.
+    */
+    void RevokePrivs(CChar *pSrc);
     //Owner
     /**
     * @brief Set's the owner.
@@ -377,27 +382,27 @@ public:
     * @brief Adds a Component to the components list.
     * @param pComponent the component.
     */
-    void AddComponent(CItem* pComponent);
+    void AddComp(CItem* pComponent);
     /**
     * @brief Removes a Component from the components list.
     * @param pComponent the component.
     */
-    void DelComponent(CItem* pComponent);
+    void DelComp(CItem* pComponent);
     /**
     * @brief Returns the position of a given Component.
     * @param pComponent the component
     * @return the position
     */
-    int GetComponentPos(CItem* pComponent);
+    int GetCompPos(CItem* pComponent);
     /**
     * @brief Returns the total count of Components.
     * @return the count.
     */
-    size_t GetComponentCount();
+    size_t GetCompCount();
     /**
     * @brief Removes all Components.
     */
-    void RemoveAllComponents();
+    void RemoveAllComps();
     /**
     * @brief Generates the base components of the multi.
     * @param fNeedKey wether a key is required or not.
@@ -615,6 +620,22 @@ public:
 };
 
 /*
+* Privileges/Access type for multis, mutually exclusive.
+*/
+enum HOUSE_PRIV
+{
+    HP_NONE,
+    HP_OWNER,
+    HP_COOWNER,
+    HP_FRIEND,
+    HP_ACCESSONLY,
+    HP_BAN,
+    HP_VENDOR,
+    HP_GUILD,
+    HP_QTY
+};
+
+/*
 * Class related to storage/access the multis owned by the holder entity.
 * This class adds multis to it's lists only checking for UID validity, nothing more,
 * further checks must be added on multi placement, etc
@@ -622,31 +643,36 @@ public:
 class CMultiStorage
 {
 private:
-    std::vector<CItemMulti*> _lHouses;  // List of stored houses.
-    std::vector<CItemShip*> _lShips;    // List of stored ships.
+    std::map<CItemMulti*,HOUSE_PRIV> _lHouses;  // List of stored houses.
+    std::map<CItemShip*,HOUSE_PRIV> _lShips;    // List of stored ships.
     int16 _iHousesTotal;    // Max of houses.
     int16 _iShipsTotal;     // Max of ships.
-
+    CObjBase *_pSrc;
 public:
-    CMultiStorage();
+    CMultiStorage(CObjBase *pSrc);
     virtual ~CMultiStorage();
 
     /**
     * @brief Adds a multi
     * @param pMulti the multi
     */
-    void AddMulti(CItemMulti *pMulti);
+    void AddMulti(CItemMulti *pMulti, HOUSE_PRIV ePriv);
     /**
     * @brief Removes a multi
     * @param pMulti the multi
     */
     void DelMulti(CItemMulti *pMulti);
+    /**
+    * @brief Gets the priv
+    * @param pMulti the multi to retrieve my privs.
+    */
+    HOUSE_PRIV GetPriv(CItemMulti* pMulti);
 
     /**
     * @brief Adds a house multi.
     * @param pHouse the house.
     */
-    void AddHouse(CItemMulti *pHouse);
+    void AddHouse(CItemMulti *pHouse, HOUSE_PRIV ePriv);
     /**
     * @brief Removes a house multi.
     * @param pHouse the house.
@@ -700,7 +726,7 @@ public:
     * @brief Adds a ship.
     * @param pShip the ship.
     */
-    void AddShip(CItemShip *pShip);
+    void AddShip(CItemShip *pShip, HOUSE_PRIV ePriv);
     /**
     * @brief Removes a ship.
     * @param pShip the ship.

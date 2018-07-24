@@ -43,13 +43,102 @@ CItemMulti::~CItemMulti()
     // Attempt to remove all the accessory junk.
     // NOTE: assume we have already been removed from Top Level
 
-
-    Redeed(false, false);
     if (!m_pRegion)
     {
         return;
     }
 
+    if (_pGuild)
+    {
+        SetGuild(nullptr);
+    }
+    if (_pOwner)
+    {
+        SetOwner(nullptr);
+    }
+    if (!_lCoowners.empty())
+    {
+        for (size_t i = 0; i < _lCoowners.size(); ++i)
+        {
+            CChar *pChar = _lCoowners[i];
+            if (pChar)
+            {
+                DelCoowner(pChar);
+            }
+        }
+    }
+    if (!_lFriends.empty())
+    {
+        for (size_t i = 0; i < _lFriends.size(); ++i)
+        {
+            CChar *pChar = _lFriends[i];
+            if (pChar)
+            {
+                DelFriend(pChar);
+            }
+        }
+    }
+    if (!_lVendors.empty())
+    {
+        for (size_t i = 0; i < _lVendors.size(); ++i)
+        {
+            CChar *pChar = _lVendors[i];
+            if (pChar)
+            {
+                DelVendor(pChar);
+            }
+        }
+    }
+    if (!_lLockDowns.empty())
+    {
+        for (size_t i = 0; i < _lLockDowns.size(); ++i)
+        {
+            CItem *pItem = _lLockDowns[i];
+            if (pItem)
+            {
+                UnlockItem(pItem);
+            }
+        }
+    }
+    if (!_lComps.empty())
+    {
+        for (size_t i = 0; i < _lComps.size(); ++i)
+        {
+            CItem *pItem = _lComps[i];
+            if (pItem)
+            {
+                DelComp(pItem);
+            }
+        }
+    }
+    if (!_lSecureContainers.empty())
+    {
+        for (size_t i = 0; i < _lSecureContainers.size(); ++i)
+        {
+            CItemContainer *pItem = _lSecureContainers[i];
+            if (pItem)
+            {
+                Release(pItem);
+            }
+        }
+    }
+    if (!_lAddons.empty())
+    {
+        for (size_t i = 0; i < _lAddons.size(); ++i)
+        {
+            CItemMulti *pItem = _lAddons[i];
+            if (pItem)
+            {
+                DelAddon(pItem);
+            }
+        }
+    }
+
+    CItemContainer *pMovingCrate = GetMovingCrate(false);
+    if (pMovingCrate)
+    {
+        SetMovingCrate(nullptr);
+    }
     delete m_pRegion;
 }
 
@@ -162,7 +251,7 @@ void CItemMulti::MultiUnRealizeRegion()
     }
 }
 
-bool CItemMulti::Multi_CreateComponent(ITEMID_TYPE id, short dx, short dy, char dz, dword dwKeyCode, bool fIsAddon)
+bool CItemMulti::Multi_CreateComponent(ITEMID_TYPE id, short dx, short dy, char dz, dword dwKeyCode)
 {
     ADDTOCALLSTACK("CItemMulti::Multi_CreateComponent");
     CItem * pItem = CreateTemplate(id);
@@ -206,8 +295,8 @@ bool CItemMulti::Multi_CreateComponent(ITEMID_TYPE id, short dx, short dy, char 
     pItem->r_LoadVal(event);
     pItem->MoveToUpdate(pt);
     OnComponentCreate(pItem);
-    AddComponent(pItem);
-    if (fIsAddon)
+    AddComp(pItem);
+    if (IsType(IT_MULTI_ADDON))
     {
         fNeedKey = false;
     }
@@ -250,7 +339,6 @@ void CItemMulti::Multi_Setup(CChar * pChar, dword dwKeyCode)
     if (pChar)
     {
         SetOwner(pChar);
-        pChar->GetMultiStorage()->AddMulti(this);
     }
 
     if (pChar)
@@ -294,9 +382,9 @@ CItem * CItemMulti::Multi_FindItemComponent(int iComp) const
 {
     ADDTOCALLSTACK("CItemMulti::Multi_FindItemComponent");
 
-    if ((int)_lComponents.size() > iComp)
+    if ((int)_lComps.size() > iComp)
     {
-        return _lComponents[iComp];
+        return _lComps[iComp];
     }
     return nullptr;
 }
@@ -433,24 +521,55 @@ void CItemMulti::OnHearRegion(lpctstr pszCmd, CChar * pSrc)
     }
 }
 
+void CItemMulti::RevokePrivs(CChar * pSrc)
+{
+    ADDTOCALLSTACK("CItemMulti::RevokePrivs");
+    if (!pSrc)
+    {
+        return;
+    }
+    if (IsOwner(pSrc))
+    {
+        SetOwner(nullptr);
+    }
+    else if (GetCoownerPos(pSrc) >= 0)
+    {
+        DelCoowner(pSrc);
+    }
+    else if (GetFriendPos(pSrc) >= 0)
+    {
+        DelFriend(pSrc);
+    }
+    else if (GetBanPos(pSrc) >= 0)
+    {
+        DelBan(pSrc);
+    }
+    else if (GetAccessPos(pSrc) >= 0)
+    {
+        DelAccess(pSrc);
+    }
+    else if (GetHouseVendorPos(pSrc) >= 0)
+    {
+        DelVendor(pSrc);
+    }
+}
+
 void CItemMulti::SetOwner(CChar* pOwner)
 {
     ADDTOCALLSTACK("CItemMulti::SetOwner");
-    if (!g_Serv.IsLoading())
+    CChar *pOldOwner = _pOwner;
+    _pOwner = nullptr;
+    if (pOldOwner)  // Old Owner may not exist, was removed?
     {
-        CChar *pOldOwner = _pOwner;
-        if (pOldOwner)  // Old Owner may not exist, was removed?
-        {
-            pOldOwner->GetMultiStorage()->DelMulti(this);
-            RemoveKeys(pOldOwner);
-        }
+        pOldOwner->GetMultiStorage()->DelMulti(this);
+        RemoveKeys(pOldOwner);
     }
     if (!pOwner)
     {
-        _pOwner = nullptr;
         return;
     }
-    pOwner->GetMultiStorage()->AddMulti(this);
+    RevokePrivs(pOwner);
+    pOwner->GetMultiStorage()->AddMulti(this, HP_OWNER);
     _pOwner = pOwner;
 }
 
@@ -461,27 +580,28 @@ bool CItemMulti::IsOwner(CChar* pTarget)
 
 CChar * CItemMulti::GetOwner()
 {
-    return _pOwner;
+    if (_pOwner && _pOwner->IsValidUID())
+    {
+        return _pOwner;
+    }
+    return nullptr;
 }
 
 void CItemMulti::SetGuild(CItemStone* pGuild)
 {
     ADDTOCALLSTACK("CItemMulti::SetGuild");
-    if (!g_Serv.IsLoading())
+    CItemStone *pOldGuild = GetGuild();
+    _pGuild = nullptr;
+    if (pOldGuild)  // Old Guild may not exist, was it removed...?
     {
-        CItemStone *pOldGuild = GetGuild();
-        if (pOldGuild)  // Old Guild may not exist, was removed?
-        {
-            pOldGuild->GetMultiStorage()->DelMulti(this);
-        }
+        pOldGuild->GetMultiStorage()->DelMulti(this);   // ... if not, unlink it from this multi.
     }
-    if (pGuild == nullptr)
+    if (!pGuild)  // Just clearing it
     {
-        _pGuild = nullptr;
         return;
     }
-    _pGuild = pGuild;
-    _pGuild->GetMultiStorage()->AddMulti(this);
+    _pGuild = pGuild;   // Set the Guild* to a new guildstone.
+    _pGuild->GetMultiStorage()->AddMulti(this, HP_GUILD);
 }
 
 bool CItemMulti::IsGuild(CItemStone* pTarget)
@@ -491,7 +611,11 @@ bool CItemMulti::IsGuild(CItemStone* pTarget)
 
 CItemStone * CItemMulti::GetGuild()
 {
-    return _pGuild;
+    if (_pGuild && _pGuild->IsValidUID())
+    {
+        return _pGuild;
+    }
+    return nullptr;
 }
 
 void CItemMulti::AddCoowner(CChar* pCoowner)
@@ -508,18 +632,22 @@ void CItemMulti::AddCoowner(CChar* pCoowner)
             return;
         }
     }
+    RevokePrivs(pCoowner);
+    pCoowner->GetMultiStorage()->AddMulti(this, HP_COOWNER);
     _lCoowners.emplace_back(pCoowner);
 }
 
 void CItemMulti::DelCoowner(CChar* pCoowner)
 {
     ADDTOCALLSTACK("CItemMulti::DelCoowner");
-    for (std::vector<CChar*>::iterator it = _lCoowners.begin(); it != _lCoowners.end(); ++it)
+    for (size_t i = 0; i < _lCoowners.size(); ++i)
     {
-        if (*it == pCoowner)
+        CChar *it = _lCoowners[i];
+        if (it == pCoowner)
         {
-            RemoveKeys(*it);
-            _lCoowners.erase(it);
+            pCoowner->GetMultiStorage()->DelMulti(this);
+            RemoveKeys(it);
+            _lCoowners.erase(_lCoowners.begin() + i);
             return;
         }
     }
@@ -532,7 +660,7 @@ size_t CItemMulti::GetCoownerCount()
 
 int CItemMulti::GetCoownerPos(CChar* pTarget)
 {
-    ADDTOCALLSTACK("CItemMulti::GetMovingCrate");
+    ADDTOCALLSTACK("CItemMulti::GetCoownerPos");
     if (_lCoowners.empty())
     {
         return -1;
@@ -561,18 +689,22 @@ void CItemMulti::AddFriend(CChar* pFriend)
             return;
         }
     }
+    RevokePrivs(pFriend);
+    pFriend->GetMultiStorage()->AddMulti(this, HP_FRIEND);
     _lFriends.emplace_back(pFriend);
 }
 
 void CItemMulti::DelFriend(CChar* pFriend)
 {
     ADDTOCALLSTACK("CItemMulti::DelFriend");
-    for (std::vector<CChar*>::iterator it = _lFriends.begin(); it != _lFriends.end(); ++it)
+    for (size_t i = 0; i < _lFriends.size(); ++i)
     {
-        if (*it == pFriend)
+        CChar *it = _lFriends[i];
+        if (it == pFriend)
         {
-            RemoveKeys(*it);
-            _lFriends.erase(it);
+            pFriend->GetMultiStorage()->DelMulti(this);
+            RemoveKeys(it);
+            _lFriends.erase(_lFriends.begin() + i);
             return;
         }
     }
@@ -585,7 +717,7 @@ size_t CItemMulti::GetFriendCount()
 
 int CItemMulti::GetFriendPos(CChar* pTarget)
 {
-    ADDTOCALLSTACK("CItemMulti::GetMovingCrate");
+    ADDTOCALLSTACK("CItemMulti::GetFriendPos");
     if (_lFriends.empty())
     {
         return -1;
@@ -602,7 +734,7 @@ int CItemMulti::GetFriendPos(CChar* pTarget)
 
 void CItemMulti::AddBan(CChar* pBan)
 {
-    ADDTOCALLSTACK("CItemMulti::GetMovingCrate");
+    ADDTOCALLSTACK("CItemMulti::AddBan");
     if (!pBan)
     {
         return;
@@ -614,17 +746,21 @@ void CItemMulti::AddBan(CChar* pBan)
             return;
         }
     }
+    RevokePrivs(pBan);
+    pBan->GetMultiStorage()->AddMulti(this, HP_BAN);
     _lBans.emplace_back(pBan);
 }
 
 void CItemMulti::DelBan(CChar* pBan)
 {
     ADDTOCALLSTACK("CItemMulti::DelBan");
-    for (std::vector<CChar*>::iterator it = _lBans.begin(); it != _lBans.end(); ++it)
+    for (size_t i = 0; i < _lBans.size(); ++i)
     {
-        if (*it == pBan)
+        CChar *it = _lBans[i];
+        if (it == pBan)
         {
-            _lBans.erase(it);
+            pBan->GetMultiStorage()->DelMulti(this);
+            _lBans.erase(_lBans.begin() + i);
             return;
         }
     }
@@ -637,7 +773,7 @@ size_t CItemMulti::GetBanCount()
 
 int CItemMulti::GetBanPos(CChar* pBan)
 {
-    ADDTOCALLSTACK("CItemMulti::GetMovingCrate");
+    ADDTOCALLSTACK("CItemMulti::GetBanPos");
     if (_lBans.empty())
     {
         return -1;
@@ -655,7 +791,7 @@ int CItemMulti::GetBanPos(CChar* pBan)
 
 void CItemMulti::AddAccess(CChar* pAccess)
 {
-    ADDTOCALLSTACK("CItemMulti::GetMovingCrate");
+    ADDTOCALLSTACK("CItemMulti::AddAccess");
     if (!pAccess)
     {
         return;
@@ -667,17 +803,21 @@ void CItemMulti::AddAccess(CChar* pAccess)
 			return;
 		}
 	}
+    RevokePrivs(pAccess);
+    pAccess->GetMultiStorage()->AddMulti(this, HP_ACCESSONLY);
 	_lAccesses.emplace_back(pAccess);
 }
 
 void CItemMulti::DelAccess(CChar* pAccess)
 {
 	ADDTOCALLSTACK("CItemMulti::DelAccess");
-	for (std::vector<CChar*>::iterator it = _lAccesses.begin(); it != _lAccesses.end(); ++it)
+	for (size_t i = 0; i < _lAccesses.size(); ++i)
 	{
-		if (*it == pAccess)
+        CChar *it = _lAccesses[i];
+		if (it == pAccess)
 		{
-			_lAccesses.erase(it);
+            pAccess->GetMultiStorage()->DelMulti(this);
+			_lAccesses.erase(_lAccesses.begin() + i);
 			return;
 		}
 	}
@@ -808,13 +948,12 @@ int16 CItemMulti::GetMultiCount()
 void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CChar *pChar)
 {
     ADDTOCALLSTACK("CItemMulti::Redeed");
-    CChar *pOwner = GetOwner();
-
     if (GetKeyNum("REMOVED", true) > 0) // Just don't pass from here again, to avoid duplicated deeds.
     {
         return;
     }
 
+    CChar *pOwner = GetOwner();
     ITEMID_TYPE itDeed = ITEMID_DEED1;
     TRIGRET_TYPE tRet = TRIGRET_RET_FALSE;
     bool fTransferAll = false;
@@ -850,7 +989,7 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CChar *pChar)
             fMoveToBank = args.m_iN3 ? true : false;
         }
     }
-    RemoveAllComponents();
+    RemoveAllComps();
     if (!fIsAddon)
     {
         if (fTransferAll)
@@ -907,6 +1046,11 @@ void CItemMulti::SetMovingCrate(CItemContainer* pCrate)
     ADDTOCALLSTACK("CItemMulti::SetMovingCrate");
     if (!pCrate)
     {
+        if (_pMovingCrate)
+        {
+            _pMovingCrate->SetCrateOfMulti(nullptr);
+        }
+        _pMovingCrate = nullptr;
         return;
     }
     CItemContainer *pCurrentCrate = GetMovingCrate(false);
@@ -919,6 +1063,7 @@ void CItemMulti::SetMovingCrate(CItemContainer* pCrate)
     pCrate->m_uidLink = GetUID();
     CScript event("events +t_moving_crate");
     pCrate->r_LoadVal(event);
+    pCrate->SetCrateOfMulti(this);
 }
 
 CItemContainer* CItemMulti::GetMovingCrate(bool fCreate)
@@ -928,18 +1073,18 @@ CItemContainer* CItemMulti::GetMovingCrate(bool fCreate)
     {
         return _pMovingCrate;
     }
-    if (fCreate)
+    if (!fCreate)
     {
-        CItemContainer *pCrate = dynamic_cast<CItemContainer*>(CItem::CreateBase(ITEMID_CRATE1));
-        ASSERT(pCrate);
-        CPointMap pt = GetTopPoint();
-        pt.m_z -= 20;
-        pCrate->MoveTo(pt); // Move the crate to z -20
-        pCrate->Update();
-        SetMovingCrate(pCrate);
-        return pCrate;
+        return nullptr;
     }
-    return nullptr;
+    CItemContainer *pCrate = static_cast<CItemContainer*>(CItem::CreateBase(ITEMID_CRATE1));
+    ASSERT(pCrate);
+    CPointMap pt = GetTopPoint();
+    pt.m_z -= 20;
+    pCrate->MoveTo(pt); // Move the crate to z -20
+    pCrate->Update();
+    SetMovingCrate(pCrate);
+    return pCrate;
 }
 
 void CItemMulti::TransferAllItemsToMovingCrate(TRANSFER_TYPE iType)
@@ -985,7 +1130,7 @@ void CItemMulti::TransferAllItemsToMovingCrate(TRANSFER_TYPE iType)
         {
             continue;
         }
-        if (GetComponentPos(pItem))   // Components should never be transfered.
+        if (GetCompPos(pItem))   // Components should never be transfered.
         {
             continue;
         }
@@ -1016,9 +1161,9 @@ void CItemMulti::TransferLockdownsToMovingCrate()
     {
         return;
     }
-    for (std::vector<CItem*>::iterator it = _lLockDowns.begin(); it != _lLockDowns.end(); ++it)
+    for (size_t i = 0; i < _lLockDowns.size(); ++i)
     {
-        CItem *pItem = *it;
+        CItem *pItem = _lLockDowns[i];
         if (pItem)  // Move all valid items.
         {
             CScript event("events -t_house_lockdown");
@@ -1043,9 +1188,9 @@ void CItemMulti::TransferSecuredToMovingCrate()
     {
         return;
     }
-    for (std::vector<CItemContainer*>::iterator it = _lSecureContainers.begin(); it != _lSecureContainers.end(); ++it)
+    for (size_t i = 0; i < _lSecureContainers.size(); ++i)
     {
-        CItemContainer *pItem = *it;
+        CItemContainer *pItem = _lSecureContainers[i];
         if (pItem)  // Move all valid items.
         {
             CScript event("events -t_house_secure");
@@ -1071,9 +1216,9 @@ void CItemMulti::RedeedAddons()
         return;
     }
     std::vector<CItemMulti*> vAddons = _lAddons;
-    for (std::vector<CItemMulti*>::iterator it = vAddons.begin(); it != vAddons.end(); ++it)
+    for (size_t i = 0; i < vAddons.size(); ++i)
     {
-        CItemMulti *pAddon = *it;
+        CItemMulti *pAddon = vAddons[i];
         if (pAddon)  // Move all valid items.
         {
             pAddon->Redeed(false, false);
@@ -1129,11 +1274,12 @@ void CItemMulti::AddAddon(CItemMulti * pAddon)
 void CItemMulti::DelAddon(CItemMulti * pAddon)
 {
     ADDTOCALLSTACK("CItemMulti::DelAddon");
-    for (std::vector<CItemMulti*>::iterator it = _lAddons.begin(); it != _lAddons.end(); ++it)
+    for (size_t i = 0; i < _lAddons.size(); ++i)
     {
-        if (*it == pAddon)
+        CItemMulti *it = _lAddons[i];
+        if (it == pAddon)
         {
-            _lAddons.erase(it);
+            _lAddons.erase(_lAddons.begin() + i);
             return;
         }
     }
@@ -1161,46 +1307,53 @@ size_t CItemMulti::GetAddonCount()
     return _lAddons.size();
 }
 
-void CItemMulti::AddComponent(CItem* pComponent)
+void CItemMulti::AddComp(CItem* pComponent)
 {
-    ADDTOCALLSTACK("CItemMulti::AddComponent");
+    ADDTOCALLSTACK("CItemMulti::AddComp");
     if (!pComponent)
     {
         return;
     }
     if (!g_Serv.IsLoading())
     {
-        if (GetComponentPos(pComponent) >= 0)
+        if (GetCompPos(pComponent) >= 0)
         {
             return;
         }
     }
-    _lComponents.emplace_back(pComponent);
+    pComponent->SetComponentOfMulti(this);
+    _lComps.emplace_back(pComponent);
 }
 
-void CItemMulti::DelComponent(CItem* pComponent)
+void CItemMulti::DelComp(CItem* pComponent)
 {
     ADDTOCALLSTACK("CItemMulti::DelComponent");
-    for (std::vector<CItem*>::iterator it = _lComponents.begin(); it != _lComponents.end(); ++it)
+    for (size_t i = 0; i < _lComps.size(); ++i)
     {
-        if (*it == pComponent)
+        CItem *it = _lComps[i];
+        if (it == pComponent)
         {
-            _lComponents.erase(it);
+            _lComps.erase(_lComps.begin() + i);
             return;
         }
     }
+    if (!pComponent)
+    {
+        return;
+    }
+    pComponent->SetComponentOfMulti(nullptr);
 }
 
-int CItemMulti::GetComponentPos(CItem* pComponent)
+int CItemMulti::GetCompPos(CItem* pComponent)
 {
-    if (_lComponents.empty())
+    if (_lComps.empty())
     {
         return -1;
     }
 
-    for (size_t i = 0; i < _lComponents.size(); ++i)
+    for (size_t i = 0; i < _lComps.size(); ++i)
     {
-        if (_lComponents[i] == pComponent)
+        if (_lComps[i] == pComponent)
         {
             return (int)i;
         }
@@ -1208,28 +1361,28 @@ int CItemMulti::GetComponentPos(CItem* pComponent)
     return -1;
 }
 
-size_t CItemMulti::GetComponentCount()
+size_t CItemMulti::GetCompCount()
 {
-    return _lComponents.size();
+    return _lComps.size();
 }
 
-void CItemMulti::RemoveAllComponents()
+void CItemMulti::RemoveAllComps()
 {
-    ADDTOCALLSTACK("CItemMulti::RemoveAllComponents");
-    if (_lComponents.empty())
+    ADDTOCALLSTACK("CItemMulti::RemoveAllComps");
+    if (_lComps.empty())
     {
         return;
     }
-    std::vector<CItem*> _lCopy = _lComponents;
-    for (std::vector<CItem*>::iterator it = _lCopy.begin(); it != _lCopy.end(); ++it)
+    std::vector<CItem*> lCopy = _lComps;
+    for (size_t i = 0; i < lCopy.size(); ++i)
     {
-        CItem *pComp = *it;
+        CItem *pComp = lCopy[i];
         if (pComp)
         {
             pComp->Delete();
         }
     }
-    _lComponents.clear();
+    _lComps.clear();
 }
 
 void CItemMulti::GenerateBaseComponents(bool & fNeedKey, dword &dwKeyCode)
@@ -1240,7 +1393,7 @@ void CItemMulti::GenerateBaseComponents(bool & fNeedKey, dword &dwKeyCode)
     for (size_t i = 0; i < pMultiDef->m_Components.size(); i++)
     {
         const CItemBaseMulti::CMultiComponentItem &component = pMultiDef->m_Components.at(i);
-        fNeedKey |= Multi_CreateComponent(component.m_id, component.m_dx, component.m_dy, component.m_dz, dwKeyCode, IsType(IT_MULTI_ADDON));
+        fNeedKey |= Multi_CreateComponent(component.m_id, component.m_dx, component.m_dy, component.m_dz, dwKeyCode);
     }
 }
 
@@ -1323,27 +1476,31 @@ void CItemMulti::LockItem(CItem *pItem)
         CScript event("events +t_house_lockdown");
         pItem->r_LoadVal(event);
     }
+    pItem->SetLockDownOfMulti(this);
     _lLockDowns.emplace_back(pItem);
 }
 
 void CItemMulti::UnlockItem(CItem *pItem)
 {
     ADDTOCALLSTACK("CItemMulti::UnlockItem");
-    for (std::vector<CItem*>::iterator it = _lLockDowns.begin(); it != _lLockDowns.end(); ++it)
+    for (size_t i = 0; i < _lLockDowns.size(); ++i)
     {
-        if (*it == pItem)
+        CItem * it = _lLockDowns[i];
+        if (it == pItem)
         {
-            _lLockDowns.erase(it);
+            _lLockDowns.erase(_lLockDowns.begin() + i);
             break;
         }
     }
-    if (pItem)
+    if (!pItem)
     {
-        pItem->ClrAttr(ATTR_LOCKEDDOWN);
-        pItem->m_uidLink.InitUID();
-        CScript event("events -t_house_lockdown");
-        pItem->r_LoadVal(event);
+        return;
     }
+    pItem->ClrAttr(ATTR_LOCKEDDOWN);
+    pItem->m_uidLink.InitUID();
+    CScript event("events -t_house_lockdown");
+    pItem->r_LoadVal(event);
+    pItem->SetLockDownOfMulti(nullptr);
 }
 
 int CItemMulti::GetLockedItemPos(CItem *pItem)
@@ -1386,27 +1543,31 @@ void CItemMulti::Secure(CItemContainer * pContainer)
         pContainer->r_LoadVal(event);
 
     }
+    pContainer->SetSecuredOfMulti(this);
     _lSecureContainers.emplace_back(pContainer);
 }
 
 void CItemMulti::Release(CItemContainer * pContainer)
 {
     ADDTOCALLSTACK("CItemMulti::Release");
-    for (std::vector<CItemContainer*>::iterator it = _lSecureContainers.begin(); it != _lSecureContainers.end(); ++it)
+    for (size_t i = 0; i < _lSecureContainers.size(); ++i)
     {
-        if (*it == pContainer)
+        CItemContainer *it = _lSecureContainers[i];
+        if (it == pContainer)
         {
-            _lSecureContainers.erase(it);
+            _lSecureContainers.erase(_lSecureContainers.begin() + i);
             break;
         }
     }
-    if (pContainer)
+    if (!pContainer)
     {
-        pContainer->ClrAttr(ATTR_SECURE);
-        pContainer->m_uidLink.InitUID();
-        CScript event("events -t_house_secure");
-        pContainer->r_LoadVal(event);
+        return;
     }
+    pContainer->ClrAttr(ATTR_SECURE);
+    pContainer->m_uidLink.InitUID();
+    CScript event("events -t_house_secure");
+    pContainer->r_LoadVal(event);
+    pContainer->SetSecuredOfMulti(nullptr);
 }
 
 int CItemMulti::GetSecuredContainerPos(CItemContainer * pContainer)
@@ -1429,12 +1590,13 @@ int CItemMulti::GetSecuredContainerPos(CItemContainer * pContainer)
 int16 CItemMulti::GetSecuredItemsCount()
 {
     ADDTOCALLSTACK("CItemMulti::GetSecuredItemsCount");
-    int16 iCount = 0;
-    for (std::vector<CItemContainer*>::iterator it = _lSecureContainers.begin(); it != _lSecureContainers.end(); ++it)
+    size_t iCount = 0;
+    for (size_t i = 0; i < _lSecureContainers.size(); ++i)
     {
-        iCount += (int16)((*it)->GetCount());
+        CItemContainer *it = _lSecureContainers[i];
+        iCount += it->GetCount();
     }
-    return iCount;
+    return (int16)iCount;
 }
 
 size_t CItemMulti::GetSecuredContainersCount()
@@ -1453,17 +1615,21 @@ void CItemMulti::AddVendor(CChar *pVendor)
     {
         return;
     }
+    RevokePrivs(pVendor);
+    pVendor->GetMultiStorage()->AddMulti(this, HP_VENDOR);
     _lVendors.emplace_back(pVendor);
 }
 
 void CItemMulti::DelVendor(CChar *pVendor)
 {
     ADDTOCALLSTACK("CItemMulti::DelVendor");
-    for (std::vector<CChar*>::iterator it = _lVendors.begin(); it != _lVendors.end(); ++it)
+    for (size_t i = 0; i < _lVendors.size(); ++i)
     {
-        if (*it == pVendor)
+        CChar *it = _lVendors[i];
+        if (it == pVendor)
         {
-            _lVendors.erase(it);
+            pVendor->GetMultiStorage()->DelMulti(this);
+            _lVendors.erase(_lVendors.begin() + i);
             break;
         }
     }
@@ -1496,7 +1662,7 @@ enum MULTIREF_REF
 	SHR_ACCESS,
     SHR_ADDON,
     SHR_BAN,
-    SHR_COMPONENT,
+    SHR_COMP,
     SHR_COOWNER,
     SHR_FRIEND,
     SHR_GUILD,
@@ -1514,7 +1680,7 @@ lpctstr const CItemMulti::sm_szRefKeys[SHR_QTY + 1] =
 	"ACCESS",
     "ADDON",
     "BAN",
-    "COMPONENT",
+    "COMP",
     "COOWNER",
     "FRIEND",
     "GUILD",
@@ -1584,7 +1750,7 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
             }
             return false;
         }
-        case SHR_COMPONENT:
+        case SHR_COMP:
         {
             int i = Exp_GetVal(pszKey);
             SKIP_SEPARATORS(pszKey);
@@ -1595,7 +1761,6 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
                 return true;
             }
             return false;
-            break;
         }
         case SHR_COOWNER:
         {
@@ -1645,7 +1810,7 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
         case SHR_MOVINGCRATE:
         {
             SKIP_SEPARATORS(pszKey);
-            pRef = GetMovingCrate(true);
+            pRef = GetMovingCrate(false);
             return true;
         }
         case SHR_OWNER:
@@ -1723,7 +1888,7 @@ enum
     SHV_MULTICREATE,
     SHV_REDEED,
     SHV_RELEASE,
-    SHV_REMOVEALLCOMPONENTS,
+    SHV_REMOVEALLCOMPS,
     SHV_REMOVEKEYS,
     SHV_UNLOCKITEM,
     SHV_QTY
@@ -1744,7 +1909,7 @@ lpctstr const CItemMulti::sm_szVerbKeys[SHV_QTY + 1] =
     "MULTICREATE",
     "REDEED",
     "RELEASE",
-    "REMOVEALLCOMPONENTS",
+    "REMOVEALLCOMPS",
     "REMOVEKEYS",
     "UNLOCKITEM",
     NULL
@@ -1810,12 +1975,12 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
             CUID uidComponent = s.GetArgDWVal();
             if (!uidComponent.IsValidUID())
             {
-                _lComponents.clear();
+                _lComps.clear();
             }
             else
             {
                 CItem *pComponent = uidComponent.ItemFind();
-                DelComponent(pComponent);
+                DelComp(pComponent);
             }
             break;
         }
@@ -1922,9 +2087,9 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
             RemoveKeys(pCharSrc);
             break;
         }
-        case SHV_REMOVEALLCOMPONENTS:
+        case SHV_REMOVEALLCOMPS:
         {
-            RemoveAllComponents();
+            RemoveAllComps();
             break;
         }
         case SHV_GENERATEBASECOMPONENTS:
@@ -1953,7 +2118,7 @@ enum SHL_TYPE
 	SHL_ADDACCESS,
     SHL_ADDADDON,
     SHL_ADDBAN,
-    SHL_ADDCOMPONENT,
+    SHL_ADDCOMP,
     SHL_ADDCOOWNER,
     SHL_ADDFRIEND,
     SHL_ADDKEY,
@@ -1962,15 +2127,14 @@ enum SHL_TYPE
     SHL_BANS,
     SHL_BASESTORAGE,
     SHL_BASEVENDORS,
-    SHL_COMP,
-    SHL_COMPONENTS,
+    SHL_COMPS,
     SHL_COOWNERS,
     SHL_CURRENTSTORAGE,
     SHL_FRIENDS,
 	SHL_GETACCESSPOS,
     SHL_GETADDONPOS,
     SHL_GETBANPOS,
-    SHL_GETCOMPONENTPOS,
+    SHL_GETCOMPPOS,
     SHL_GETCOOWNERPOS,
     SHL_GETFRIENDPOS,
     SHL_GETHOUSEVENDORPOS,
@@ -1990,6 +2154,7 @@ enum SHL_TYPE
     SHL_MAXVENDORS,
     SHL_MOVINGCRATE,
     SHL_OWNER,
+    SHL_PRIV,
     SHL_REGION,
     SHL_REMOVEKEYS,
     SHL_SECURE,
@@ -2003,7 +2168,7 @@ const lpctstr CItemMulti::sm_szLoadKeys[SHL_QTY + 1] =
 	"ADDACCESS",
     "ADDADDON",
     "ADDBAN",
-    "ADDCOMPONENT",
+    "ADDCOMP",
     "ADDCOOWNER",
     "ADDFRIEND",
     "ADDKEY",
@@ -2012,15 +2177,14 @@ const lpctstr CItemMulti::sm_szLoadKeys[SHL_QTY + 1] =
     "BANS",
     "BASESTORAGE",
     "BASEVENDORS",
-    "COMP",
-    "COMPONENTS",
+    "COMPS",
     "COOWNERS",
     "CURRENTSTORAGE",
     "FRIENDS",
 	"GETACCESSPOS",
     "GETADDONPOS",
     "GETBANPOS",
-    "GETCOMPONENTPOS",
+    "GETCOMPPOS",
     "GETCOOWNERPOS",
     "GETFRIENDPOS",
     "GETHOUSEVENDORPOS",
@@ -2040,6 +2204,7 @@ const lpctstr CItemMulti::sm_szLoadKeys[SHL_QTY + 1] =
     "MAXVENDORS",
     "MOVINGCRATE",
     "OWNER",
+    "PRIV",
     "REGION",
     "REMOVEKEYS",
     "SECURE",
@@ -2055,57 +2220,89 @@ void CItemMulti::r_Write(CScript & s)
     {
         m_pRegion->r_WriteBody(s, "REGION.");
     }
+    if (_pGuild)
+    {
+        s.WriteKeyHex("GUILD", _pGuild->GetUID());
+    }
     if (_pOwner)
     {
         s.WriteKeyHex("OWNER", _pOwner->GetUID());
     }
     if (!_lCoowners.empty())
     {
-        for (std::vector<CChar*>::iterator it = _lCoowners.begin(); it != _lCoowners.end(); ++it)
+        for (size_t i = 0; i < _lCoowners.size(); ++i)
         {
-            s.WriteKeyHex("ADDCOOWNER", (*it)->GetUID());
+            CChar *pChar = _lCoowners[i];
+            if (pChar)
+            {
+                s.WriteKeyHex("ADDCOOWNER", pChar->GetUID());
+            }
         }
     }
     if (!_lFriends.empty())
     {
-        for (std::vector<CChar*>::iterator it = _lFriends.begin(); it != _lFriends.end(); ++it)
+        for (size_t i = 0; i < _lFriends.size(); ++i)
         {
-            s.WriteKeyHex("ADDFRIEND", (*it)->GetUID());
+            CChar *pChar = _lFriends[i];
+            if (pChar)
+            {
+                s.WriteKeyHex("ADDFRIEND", pChar->GetUID());
+            }
         }
     }
     if (!_lVendors.empty())
     {
-        for (std::vector<CChar*>::iterator it = _lVendors.begin(); it != _lVendors.end(); ++it)
+        for (size_t i = 0; i < _lVendors.size(); ++i)
         {
-            s.WriteKeyHex("ADDVENDOR", (*it)->GetUID());
+            CChar *pChar = _lVendors[i];
+            if (pChar)
+            {
+                s.WriteKeyHex("ADDVENDOR", pChar->GetUID());
+            }
         }
     }
     if (!_lLockDowns.empty())
     {
-        for (std::vector<CItem*>::iterator it = _lLockDowns.begin(); it != _lLockDowns.end(); ++it)
+        for (size_t i = 0; i < _lLockDowns.size(); ++i)
         {
-            s.WriteKeyHex("LOCKITEM", (*it)->GetUID());
+            CItem *pItem = _lLockDowns[i];
+            if (pItem)
+            {
+                s.WriteKeyHex("LOCKITEM", pItem->GetUID());
+            }
         }
     }
-    if (!_lComponents.empty())
+    if (!_lComps.empty())
     {
-        for (std::vector<CItem*>::iterator it = _lComponents.begin(); it != _lComponents.end(); ++it)
+        for (size_t i = 0; i < _lComps.size(); ++i)
         {
-            s.WriteKeyHex("ADDCOMPONENT", (*it)->GetUID());
+            CItem *pItem = _lComps[i];
+            if (pItem)
+            {
+                s.WriteKeyHex("ADDCOMP", pItem->GetUID());
+            }
         }
     }
     if (!_lSecureContainers.empty())
     {
-        for (std::vector<CItemContainer*>::iterator it = _lSecureContainers.begin(); it != _lSecureContainers.end(); ++it)
+        for (size_t i = 0; i < _lSecureContainers.size(); ++i)
         {
-            s.WriteKeyHex("SECURE", (*it)->GetUID());
+            CItemContainer *pItem = _lSecureContainers[i];
+            if (pItem)
+            {
+                s.WriteKeyHex("SECURE", pItem->GetUID());
+            }
         }
     }
     if (!_lAddons.empty())
     {
-        for (std::vector<CItemMulti*>::iterator it = _lAddons.begin(); it != _lAddons.end(); ++it)
+        for (size_t i = 0; i < _lAddons.size(); ++i)
         {
-            s.WriteKeyHex("ADDADDON", (*it)->GetUID());
+            CItemMulti *pItem = _lAddons[i];
+            if (pItem)
+            {
+                s.WriteKeyHex("ADDADDON", pItem->GetUID());
+            }
         }
     }
 
@@ -2126,60 +2323,10 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
     SKIP_SEPARATORS(pszKey);
     switch (iCmd)
     {
-        case SHL_COMP:
-        {
-            const CItemBaseMulti *pMultiDef = Multi_GetDef();
-            pszKey += 4;
-
-            // no component uid
-            if (*pszKey == '\0')
-            {
-                sVal.FormatSTVal(pMultiDef->m_Components.size());
-            }
-            else if (*pszKey == '.')
-            {
-                CItemBaseMulti::CMultiComponentItem	item;
-
-                SKIP_SEPARATORS(pszKey);
-                size_t iQty = Exp_GetVal(pszKey);
-                if (pMultiDef->m_Components.IsValidIndex(iQty) == false)
-                    return false;
-
-                SKIP_SEPARATORS(pszKey);
-                item = pMultiDef->m_Components.at(iQty);
-
-                if (!strnicmp(pszKey, "ID", 2))
-                {
-                    sVal.FormatVal(item.m_id);
-                }
-                else if (!strnicmp(pszKey, "DX", 2))
-                {
-                    sVal.FormatVal(item.m_dx);
-                }
-                else if (!strnicmp(pszKey, "DY", 2))
-                {
-                    sVal.FormatVal(item.m_dy);
-                }
-                else if (!strnicmp(pszKey, "DZ", 2))
-                {
-                    sVal.FormatVal(item.m_dz);
-                }
-                else if (!strnicmp(pszKey, "D", 1))
-                {
-                    sVal.Format("%i,%i,%i", item.m_dx, item.m_dy, item.m_dz);
-                }
-                else
-                {
-                    sVal.Format("%u,%i,%i,%i", item.m_id, item.m_dx, item.m_dy, item.m_dz);
-                }
-            }
-            else
-            {
-                return false;
-            }
-            break;
-        }
         // House Permissions
+        case SHL_PRIV:
+            sVal.FormatU8Val((uint8)pSrc->GetChar()->GetMultiStorage()->GetPriv(this));
+            break;
         case SHL_OWNER:
         {
             CChar *pOwner = GetOwner();
@@ -2294,17 +2441,25 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
             sVal.FormatU8Val((uint8)_iHouseType);
             break;
         }
-        case SHL_GETCOMPONENTPOS:
+        case SHL_GETCOMPPOS:
         {
             CUID uidComp = static_cast<CUID>(Exp_GetVal(pszKey));
             CItem *pComp = uidComp.ItemFind();
-            sVal.FormatVal(GetComponentPos(pComp));
+            sVal.FormatVal(GetCompPos(pComp));
             break;
         }
         case SHL_MOVINGCRATE:
         {
+            CItemContainer *pCrate = GetMovingCrate(false);
+            if (!IsStrEmpty(pszKey) && pCrate)
+            {
+                return pCrate->r_WriteVal(pszKey, sVal, pSrc);
+            }
             bool fCreate = Exp_GetVal(pszKey);
-            CItemContainer *pCrate = GetMovingCrate(fCreate);
+            if (fCreate)
+            {
+                pCrate = GetMovingCrate(true);
+            }
             if (pCrate)
             {
                 sVal.FormatDWVal(pCrate->GetUID());
@@ -2336,9 +2491,9 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
         }
 
         // House Storage
-        case SHL_COMPONENTS:
+        case SHL_COMPS:
         {
-            sVal.FormatSTVal(GetComponentCount());
+            sVal.FormatSTVal(GetCompCount());
             break;
         }
         case SHL_LOCKDOWNS:
@@ -2459,7 +2614,15 @@ bool CItemMulti::r_LoadVal(CScript & s)
         }
         case SHL_MOVINGCRATE:
         {
-            SetMovingCrate(static_cast<CItemContainer*>(static_cast<CUID>(s.GetArgDWVal()).ItemFind()));
+            dword dwCrate = s.GetArgDWVal();
+            if (dwCrate == 0)
+            {
+                SetMovingCrate(nullptr);
+            }
+            else
+            {
+                SetMovingCrate(static_cast<CItemContainer*>(static_cast<CUID>(dwCrate).ItemFind()));
+            }
             break;
         }
         case SHL_ADDKEY:
@@ -2494,7 +2657,15 @@ bool CItemMulti::r_LoadVal(CScript & s)
                 }
                 return false;
             }
-            SetOwner(static_cast<CUID>(s.GetArgDWVal()).CharFind());
+            dword dwUID = s.GetArgDWVal();
+            if (dwUID == 0)
+            {
+                SetOwner(nullptr);
+            }
+            else
+            {
+                SetOwner(static_cast<CUID>(dwUID).CharFind());
+            }
             break;
         }
         case SHL_GUILD:
@@ -2510,13 +2681,13 @@ bool CItemMulti::r_LoadVal(CScript & s)
                 }
                 return false;
             }
-            CUID uid = (CUID)s.GetArgDWVal();
-            if (!uid.IsValidUID())
+            dword dwUID = s.GetArgDWVal();
+            if (dwUID == 0)
             {
                 SetGuild(nullptr);
                 break;
             }
-            CItem *pItem = uid.ItemFind();
+            CItem *pItem = ((CUID)dwUID).ItemFind();
             if (pItem)
             {
                 if (pItem->IsType(IT_STONE_GUILD))
@@ -2559,9 +2730,9 @@ bool CItemMulti::r_LoadVal(CScript & s)
         }
 
             // House Storage
-        case SHL_ADDCOMPONENT:
+        case SHL_ADDCOMP:
         {
-            AddComponent(((CUID)s.GetArgDWVal()).ItemFind());
+            AddComp(((CUID)s.GetArgDWVal()).ItemFind());
             break;
         }
         case SHL_ADDVENDOR:
@@ -2871,23 +3042,59 @@ void CItemMulti::OnComponentCreate(CItem * pComponent, bool fIsAddon)
     }
 }
 
-CMultiStorage::CMultiStorage()
+CMultiStorage::CMultiStorage(CObjBase *pSrc)
 {
+    _pSrc = pSrc;
 }
 
 CMultiStorage::~CMultiStorage()
 {
+    for (std::map<CItemMulti*, HOUSE_PRIV>::iterator it = _lHouses.begin(); it != _lHouses.end(); ++it)
+    {
+        CItemMulti *pMulti = (*it).first;
+        if (_pSrc->IsChar())
+        {
+            pMulti->RevokePrivs(dynamic_cast<CChar*>(_pSrc));
+        }
+        else if (_pSrc->IsItem())   //Only guild/town stones
+        {
+            pMulti->SetGuild(nullptr);
+        }
+    }
+    for (std::map<CItemShip*, HOUSE_PRIV>::iterator it = _lShips.begin(); it != _lShips.end(); ++it)
+    {
+        CItemShip *pShip = (*it).first;
+        if (_pSrc->IsChar())
+        {
+            pShip->RevokePrivs(dynamic_cast<CChar*>(_pSrc));
+        }
+        else if (_pSrc->IsItem())   //Only guild/town stones
+        {
+            pShip->SetGuild(nullptr);
+        }
+    }
+    _pSrc = nullptr;
 }
 
-void CMultiStorage::AddMulti(CItemMulti * pMulti)
+void CMultiStorage::AddMulti(CItemMulti * pMulti, HOUSE_PRIV ePriv)
 {
     if (pMulti->IsType(IT_SHIP))
     {
-        AddShip(static_cast<CItemShip*>(pMulti));
+        if (_lShips.empty())
+        {
+            CScript event("events +e_ship_priv");
+            _pSrc->r_LoadVal(event);
+        }
+        AddShip(static_cast<CItemShip*>(pMulti), ePriv);
     }
     else
     {
-        AddHouse(pMulti);
+        if (_lHouses.empty())
+        {
+            CScript event("events +e_house_priv");
+            _pSrc->r_LoadVal(event);
+        }
+        AddHouse(pMulti, ePriv);
     }
 }
 
@@ -2896,14 +3103,25 @@ void CMultiStorage::DelMulti(CItemMulti * pMulti)
     if (pMulti->IsType(IT_SHIP))
     {
         DelShip(static_cast<CItemShip*>(pMulti));
+        if (_lShips.empty())
+        {
+            CScript event("events -e_ship_priv");
+            _pSrc->r_LoadVal(event);
+        }
     }
     else
     {
         DelHouse(pMulti);
+        if (_lHouses.empty())
+        {
+            CScript event("events -e_house_priv");
+            _pSrc->r_LoadVal(event);
+        }
     }
+    pMulti->RevokePrivs(static_cast<CChar*>(_pSrc));
 }
 
-void CMultiStorage::AddHouse(CItemMulti *pHouse)
+void CMultiStorage::AddHouse(CItemMulti *pHouse, HOUSE_PRIV ePriv)
 {
     ADDTOCALLSTACK("CMultiStorage::AddHouse");
     if (!pHouse)
@@ -2915,7 +3133,7 @@ void CMultiStorage::AddHouse(CItemMulti *pHouse)
         return;
     }
     _iHousesTotal += pHouse->GetMultiCount();
-    _lHouses.emplace_back(pHouse);
+    _lHouses[pHouse] = ePriv;
 }
 
 void CMultiStorage::DelHouse(CItemMulti *pHouse)
@@ -2925,15 +3143,29 @@ void CMultiStorage::DelHouse(CItemMulti *pHouse)
     {
         return;
     }
-    for (std::vector<CItemMulti*>::iterator it = _lHouses.begin(); it != _lHouses.end(); ++it)
+
+    if (_lHouses.find(pHouse) != _lHouses.end())
     {
-        if (*it == pHouse)
-        {
-            _iHousesTotal -= pHouse->GetMultiCount();
-            _lHouses.erase(it);
-            return;
-        }
+        _iHousesTotal -= pHouse->GetMultiCount();
+        _lHouses.erase(pHouse);
+        return;
     }
+}
+
+HOUSE_PRIV CMultiStorage::GetPriv(CItemMulti * pMulti)
+{
+    ADDTOCALLSTACK("CMultiStorage::GetPrivMulti");
+    if (pMulti->IsType(IT_MULTI))
+    {
+        return _lHouses[pMulti];
+    }
+    else if (pMulti->IsType(IT_SHIP))
+    {
+        CItemShip *pShip = static_cast<CItemShip*>(pMulti);
+        ASSERT(pShip);
+        return _lShips[pShip];
+    }
+    return HP_NONE;
 }
 
 bool CMultiStorage::CanAddHouse(CChar *pChar, int16 iHouseCount)
@@ -2977,12 +3209,14 @@ int16 CMultiStorage::GetHousePos(CItemMulti *pHouse)
     {
         return -1;
     }
-    for (size_t i = 0; i < _lHouses.size(); ++i)
+    int16 i = 0;
+    for (std::map<CItemMulti*, HOUSE_PRIV>::iterator it = _lHouses.begin(); it != _lHouses.end(); ++it)
     {
-        if (_lHouses[i] == pHouse)
+        if ((*it).first == pHouse)
         {
-            return (int16)i;
+            return i;
         }
+        ++i;
     }
     return -1;
 }
@@ -2999,7 +3233,9 @@ int16 CMultiStorage::GetHouseCountReal()
 
 CItemMulti * CMultiStorage::GetHouseAt(int16 iPos)
 {
-    return _lHouses[iPos];
+    std::map<CItemMulti*, HOUSE_PRIV>::iterator it = _lHouses.begin();
+    std::advance(it, iPos);
+    return (*it).first;
 }
 
 void CMultiStorage::ClearHouses()
@@ -3012,22 +3248,27 @@ void CMultiStorage::r_Write(CScript & s)
     ADDTOCALLSTACK("CMultiStorage::r_Write");
     if (!_lHouses.empty())
     {
-        for (std::vector<CItemMulti*>::iterator it = _lHouses.begin(); it != _lHouses.end(); ++it)
+        for (std::map<CItemMulti*, HOUSE_PRIV>::iterator it = _lHouses.begin(); it != _lHouses.end(); ++it)
         {
-            s.WriteKeyHex("ADDHOUSE", (*it)->GetUID());
+            char buffer[15];
+            CItemMulti *pMulti = (*it).first;
+            sprintf(buffer, "0%08x, %d", (dword)pMulti->GetUID(), (*it).second);
+            s.WriteKeyFormat("ADDHOUSE", buffer);
         }
     }
     if (!_lShips.empty())
     {
-        for (std::vector<CItemShip*>::iterator it = _lShips.begin(); it != _lShips.end(); ++it)
+        for (std::map<CItemShip*, HOUSE_PRIV>::iterator it = _lShips.begin(); it != _lShips.end(); ++it)
         {
-            s.WriteKeyHex("ADDSHIP", (*it)->GetUID());
+            char buffer[15];
+            CItemShip *pShip = (*it).first;
+            sprintf(buffer, "0%08x, %d", (dword)pShip->GetUID(), (*it).second);
+            s.WriteKeyFormat("ADDSHIP",buffer);
         }
     }
 }
 
-
-void CMultiStorage::AddShip(CItemShip *pShip)
+void CMultiStorage::AddShip(CItemShip *pShip, HOUSE_PRIV ePriv)
 {
     ADDTOCALLSTACK("CMultiStorage::AddShip");
     if (!pShip)
@@ -3039,7 +3280,7 @@ void CMultiStorage::AddShip(CItemShip *pShip)
         return;
     }
     _iShipsTotal += pShip->GetMultiCount();
-    _lShips.emplace_back(pShip);
+    _lShips[pShip] = ePriv;
 }
 
 void CMultiStorage::DelShip(CItemShip *pShip)
@@ -3049,14 +3290,12 @@ void CMultiStorage::DelShip(CItemShip *pShip)
     {
         return;
     }
-    for (std::vector<CItemShip*>::iterator it = _lShips.begin(); it != _lShips.end(); ++it)
+
+    if (_lShips.find(pShip) != _lShips.end())
     {
-        if (*it == pShip)
-        {
-            _iShipsTotal -= pShip->GetMultiCount();
-            _lShips.erase(it);
-            return;
-        }
+        _iShipsTotal -= pShip->GetMultiCount();
+        _lShips.erase(pShip);
+        return;
     }
 }
 
@@ -3100,12 +3339,14 @@ int16 CMultiStorage::GetShipPos(CItemShip *pShip)
     {
         return -1;
     }
-    for (size_t i = 0; i < _lShips.size(); ++i)
+    int16 i = 0;
+    for (std::map<CItemShip*, HOUSE_PRIV>::iterator it = _lShips.begin(); it != _lShips.end(); ++it)
     {
-        if (_lShips[i] == pShip)
+        if ((*it).first == pShip)
         {
-            return (int16)i;
+            return i;
         }
+        ++i;
     }
     return -1;
 }
@@ -3122,7 +3363,9 @@ int16 CMultiStorage::GetShipCountReal()
 
 CItemShip * CMultiStorage::GetShipAt(int16 iPos)
 {
-    return _lShips[iPos];
+    std::map<CItemShip*, HOUSE_PRIV>::iterator it = _lShips.begin();
+    std::advance(it, iPos);
+    return (*it).first;
 }
 
 void CMultiStorage::ClearShips()

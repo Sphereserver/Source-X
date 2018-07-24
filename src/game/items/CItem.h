@@ -51,7 +51,11 @@ private:
 	dword	m_CanUse;		// Base attribute flags. can_u_all/male/female..
 	word	m_weight;
 
+    CItemMulti *_pMultiComponent;   ///< I'm a Component of a CMulti
+    CItemMulti *_pMultiLockDown;    ///< I'm locked down in a CMulti
 public:
+    void SetComponentOfMulti(CItemMulti *pMulti);
+    void SetLockDownOfMulti(CItemMulti *pMulti);
 	byte	m_speed;
 	// Attribute flags.
 #define ATTR_IDENTIFIED			0x0001				// This is the identified name. ???
