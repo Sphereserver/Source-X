@@ -168,6 +168,7 @@ void CChar::Skill_SetBase( SKILL_TYPE skill, ushort uiValue )
 	ADDTOCALLSTACK("CChar::Skill_SetBase");
 	ASSERT( IsSkillBase(skill));
 
+	bool bUpdateStats = false;
 	if ( IsTrigUsed(TRIGGER_SKILLCHANGE) )
 	{
 		CScriptTriggerArgs args;
@@ -186,8 +187,19 @@ void CChar::Skill_SetBase( SKILL_TYPE skill, ushort uiValue )
 	if ( g_Cfg.m_iCombatDamageEra )
 	{
 		if ( skill == SKILL_ANATOMY || skill == SKILL_TACTICS || skill == SKILL_LUMBERJACKING )
-			UpdateStatsFlag();		// those skills are used to calculate the char damage bonus, so we must update the client status gump
+			bUpdateStats = true;		// those skills are used to calculate the char damage bonus, so we must update the client status gump
 	}
+
+	// We need to update the AC given by the Shield when parrying increase.
+	if (skill == SKILL_PARRYING && g_Cfg.m_iCombatParryingEra & PARRYERA_ARSCALING)
+	{
+		
+		m_defense = (word)CalcArmorDefense();
+		bUpdateStats = true;
+	}
+	
+	if (bUpdateStats)
+		UpdateStatsFlag();
 }
 
 ushort CChar::Skill_GetMax( SKILL_TYPE skill, bool ignoreLock ) const
@@ -2367,7 +2379,12 @@ int CChar::Skill_Meditation( SKTRIG_TYPE stage )
 				Sound( 0x0f9 );
 		}
 		m_atTaming.m_Stroke_Count++;
-		UpdateStatVal( STAT_INT, 1 );
+
+		CSkillDef * pSkillDef = g_Cfg.GetSkillDef(SKILL_MEDITATION);
+		if (pSkillDef->m_Effect.m_aiValues.size() > 0)
+			UpdateStatVal(STAT_INT,pSkillDef->m_Effect.GetLinear(Skill_GetBase(SKILL_MEDITATION)));
+		else
+			UpdateStatVal( STAT_INT, 1 );
 		Skill_SetTimeout();		// next update (depends on skill)
 
 		// Set a new possibility for failure ?

@@ -3563,6 +3563,8 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			case SPELL_Wither:
 			case SPELL_Exorcism:*/
 		default:
+			if (pSpellDef->m_idLayer >= LAYER_SPELL_STATS) //Equip a spell item in the appropriate layer 
+				Spell_Effect_Create(spell, fPotion ? LAYER_FLAG_Potion : pSpellDef->m_idLayer, iEffect, iDuration, pCharSrc);
 			break;
 	}
 	return true;

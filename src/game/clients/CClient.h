@@ -476,6 +476,8 @@ public:
 	void addMusic( MIDI_TYPE id );
 	void addArrowQuest( int x, int y, int id );
 	void addEffect( EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate * pDst, const CObjBaseTemplate * pSrc, byte speed = 5, byte loop = 1, bool explode = false, dword color = 0, dword render = 0, word effectid = 0, dword explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0 );
+	void addEffect(EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap &pt, const CObjBaseTemplate * pSrc, byte speed = 5, byte loop = 1, bool explode = false, dword color = 0, dword render = 0, word effectid = 0, dword explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0);
+
 	void addSound( SOUND_TYPE id, const CObjBaseTemplate * pBase = NULL, int iRepeat = 1 );
 	void addReSync();
 	void addMap();

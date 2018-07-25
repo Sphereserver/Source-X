@@ -1851,6 +1851,8 @@ PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYP
 	push(target);
 }
 
+
+
 PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate* dst, const CObjBaseTemplate* src, byte speed, byte loop, bool explode, dword hue, dword render) : PacketSend(XCMD_EffectEx, 28, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketEffect::PacketEffect(2)");
@@ -1938,6 +1940,107 @@ void PacketEffect::writeBasicEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CO
 
 }
 
+
+/*The following 3 PacketEffect method send the effect to a map point instead to an object.*/
+PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap & pt, const CObjBaseTemplate* src, byte speed, byte loop, bool explode) : PacketSend(XCMD_Effect, 20, PRI_NORMAL)
+{
+	ADDTOCALLSTACK("PacketEffect::PacketEffect");
+
+	writeBasicEffect(motion, id, pt, src, speed, loop, explode);
+
+	push(target);
+}
+
+PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap & pt, const CObjBaseTemplate* src, byte speed, byte loop, bool explode, dword hue, dword render) : PacketSend(XCMD_EffectEx, 28, PRI_NORMAL)
+{
+	ADDTOCALLSTACK("PacketEffect::PacketEffect(2)");
+
+	writeBasicEffect(motion, id, pt, src, speed, loop, explode);
+	writeHuedEffect(hue, render);
+
+	push(target);
+}
+
+PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap & pt, const CObjBaseTemplate* src, byte speed, byte loop, bool explode, dword hue, dword render, word effectid, dword explodeid, word explodesound, dword effectuid, byte type) : PacketSend(XCMD_EffectParticle, 49, PRI_NORMAL)
+{
+	ADDTOCALLSTACK("PacketEffect::PacketEffect(3)");
+
+	writeBasicEffect(motion, id, pt, src, speed, loop, explode);
+	writeHuedEffect(hue, render);
+
+	writeInt16(effectid);
+	writeInt16((word)explodeid);
+	writeInt16(explodesound);
+	writeInt32(effectuid);
+	writeByte(type == 0 ? 0xFF : 0x03);	// (0xFF or 0x03)
+	writeInt16(0x0);
+	push(target);
+}
+
+/*This method take as parameter a map point instead of an object*/
+void PacketEffect::writeBasicEffect(EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap & pt, const CObjBaseTemplate* src, byte speed, byte loop, bool explode)
+{
+	ADDTOCALLSTACK("PacketEffect::writeBasicEffect");
+
+	bool oneDirection = true;
+	//dst = dst->GetTopLevelObj();
+	CPointMap dstpos = pt;
+	
+	CPointMap srcpos;
+	if (src != NULL && motion == EFFECT_BOLT)
+	{
+		src = src->GetTopLevelObj();
+		srcpos = src->GetTopPoint();
+	}
+	else
+		srcpos = dstpos;
+
+
+	writeByte((byte)motion);
+
+	switch (motion)
+	{
+	case EFFECT_BOLT: // a targeted bolt
+		if (src == NULL)
+			writeInt32(src->GetUID()); //source
+		else
+			writeInt32(0);
+
+		oneDirection = false;
+		loop = 0; // does not apply.
+
+		//writeInt32(src->GetUID()); // source
+		//writeInt32(dst->GetUID());
+		writeInt32(0);
+		break;
+
+	case EFFECT_LIGHTNING: // lightning bolt.
+	case EFFECT_XYZ: // stay at current xyz
+	case EFFECT_OBJ: // effect at single object.
+		writeInt32(0);
+		writeInt32(0);
+		break;
+
+	default: // unknown (should never happen)
+		writeInt32(0);
+		writeInt32(0);
+		break;
+	}
+
+	writeInt16((word)id);
+	writeInt16(srcpos.m_x);
+	writeInt16(srcpos.m_y);
+	writeByte(srcpos.m_z);
+	writeInt16(dstpos.m_x);
+	writeInt16(dstpos.m_y);
+	writeByte(dstpos.m_z);
+	writeByte(speed); // 0=very fast, 7=slow
+	writeByte(loop); // 0=really long, 1=shortest, 6=longer
+	writeInt16(0);
+	writeByte(oneDirection);
+	writeByte(explode);
+
+}
 void PacketEffect::writeHuedEffect(dword hue, dword render)
 {
 	ADDTOCALLSTACK("PacketEffect::writeHuedEffect");
