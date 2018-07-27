@@ -123,7 +123,7 @@ size_t CItemShip::Ship_ListObjs( CObjBase ** ppObjList )
 		return 0;
 
 	int iMaxDist = Multi_GetMaxDist();
-	int iShipHeight = GetTopZ() + maximum(3,Item_GetDef()->GetHeight());
+	int iShipHeight = GetTopZ() + maximum(3, GetHeight());
 
 	// always list myself first. All other items must see my new region !
 	size_t iCount = 0;
@@ -250,8 +250,8 @@ bool CItemShip::Ship_MoveDelta(CPointBase pdelta)
 
 							//If client is on Ship
 							if (tMe->GetRegion()->GetResourceID().GetObjUID() == GetUID())
-							{
-								pClient->addPlayerSee(CPointMap());
+							{                                
+								pClient->addPlayerView(CPointMap(), true);
 								break; //skip to next client
 							}
 						}
@@ -495,13 +495,14 @@ bool CItemShip::Ship_Move( DIR_TYPE dir, int distance )
 
 #ifdef _DEBUG
 		// In debug builds, this flashes some spots over tiles as they are checked for valid movement
-		CItem* pItemDebug = NULL;
+        CItem* pItemDebug = NULL;
 #define SPAWNSHIPTRACK(a,b)		pItemDebug = CItem::CreateBase(ITEMID_WorldGem);	\
 								pItemDebug->SetType(IT_NORMAL);						\
-								pItemDebug->SetAttr(ATTR_MOVE_NEVER|ATTR_DECAY);	\
+								pItemDebug->SetAttr(ATTR_MOVE_NEVER|ATTR_DECAY|ATTR_INVIS);	\
 								pItemDebug->SetHue(b);								\
-								pItemDebug->MoveToDecay(a, TICK_PER_SEC / 2);						\
-								a.GetSector()->SetSectorWakeStatus();
+								pItemDebug->MoveTo(a);						\
+								a.GetSector()->SetSectorWakeStatus();       \
+                                pItemDebug->Delete();
 #else
 #define SPAWNSHIPTRACK(a,b)
 #endif

@@ -2819,7 +2819,7 @@ CItemMulti *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, C
             return nullptr;
         }
     }
-    else
+    else if (pItemDef->IsType(IT_MULTI) || pItemDef->IsType(IT_MULTI_CUSTOM))
     {
         if (!pChar->GetMultiStorage()->CanAddHouse(pChar, pMultiDef->_iMultiCount))
         {
@@ -2832,7 +2832,7 @@ CItemMulti *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, C
     * let's remove that difference.
     * Note: this fix is added here, before GM check, because otherwise they will place houses on wrong position.
     */
-    if (CItemBase::IsID_Multi(pItemDef->GetID()) || pMultiDef->IsType(IT_MULTI_ADDON))  
+    if (CItemBase::IsID_Multi(pItemDef->GetID()) || pItemDef->IsType(IT_MULTI_ADDON))  
     {
         pt.m_y -= (short)(pMultiDef->m_rect.m_bottom - 1);
     }
@@ -2841,7 +2841,15 @@ CItemMulti *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, C
     {
         if ((pMultiDef != nullptr) && !(pDeed->IsAttr(ATTR_MAGIC)))
         {
-            CRect rect = pMultiDef->m_rect; // Create a rect equal to the multi's one.
+            CRect rect;
+            if (pMultiDef)
+            {
+                rect = pMultiDef->m_rect; // Create a rect equal to the multi's one.
+            }
+            else
+            {
+                rect.OffsetRect(1, 1);  // Guildstones pass through here, also other non multi items placed from deeds.
+            }
             rect.m_map = pt.m_map;          // set it's map to the current map.
             rect.OffsetRect(pt.m_x, pt.m_y);// fill the rect.
             CPointMap ptn = pt;             // A copy to work on.
