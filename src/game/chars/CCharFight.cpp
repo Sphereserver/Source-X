@@ -345,6 +345,7 @@ static const LAYER_TYPE sm_ArmorLayerArms[] = { LAYER_ARMS, LAYER_CAPE, LAYER_RO
 static const LAYER_TYPE sm_ArmorLayerHands[] = { LAYER_GLOVES };														// ARMOR_HANDS
 static const LAYER_TYPE sm_ArmorLayerLegs[] = { LAYER_PANTS, LAYER_SKIRT, LAYER_HALF_APRON, LAYER_ROBE, LAYER_LEGS };	// ARMOR_LEGS
 static const LAYER_TYPE sm_ArmorLayerFeet[] = { LAYER_SHOES, LAYER_LEGS };												// ARMOR_FEET
+static const LAYER_TYPE sm_ArmorLayerShield[] = { LAYER_HAND2 };
 
 struct CArmorLayerType
 {
@@ -354,14 +355,15 @@ struct CArmorLayerType
 
 static const CArmorLayerType sm_ArmorLayers[ARMOR_QTY] =
 {
-	{ 15,	sm_ArmorLayerHead },	// ARMOR_HEAD
-	{ 7,	sm_ArmorLayerNeck },	// ARMOR_NECK
-	{ 0,	sm_ArmorLayerBack },	// ARMOR_BACK
-	{ 35,	sm_ArmorLayerChest },	// ARMOR_CHEST
-	{ 14,	sm_ArmorLayerArms },	// ARMOR_ARMS
-	{ 7,	sm_ArmorLayerHands },	// ARMOR_HANDS
-	{ 22,	sm_ArmorLayerLegs },	// ARMOR_LEGS
-	{ 0,	sm_ArmorLayerFeet }		// ARMOR_FEET
+	{ 15,	sm_ArmorLayerHead },	// ARMOR_HEAD, 15% of the armour value will be applied.
+	{ 7,	sm_ArmorLayerNeck },	// ARMOR_NECK, 7% of the armour value will be applied.
+	{ 0,	sm_ArmorLayerBack },	// ARMOR_BACK, 0% of the armour value will be applied.
+	{ 35,	sm_ArmorLayerChest },	// ARMOR_CHEST, 35% of the armour value will be applied.
+	{ 14,	sm_ArmorLayerArms },	// ARMOR_ARMS, 14% of the armour value will be applied.
+	{ 7,	sm_ArmorLayerHands },	// ARMOR_HANDS, 7% of the armour value will be applied.
+	{ 22,	sm_ArmorLayerLegs },	// ARMOR_LEGS, 22% of the armour value will be applied.
+	{ 0,	sm_ArmorLayerFeet },	// ARMOR_FEET, 0% of the armour value will be applied.
+	{100,	sm_ArmorLayerShield }	// ARMOR_SHIELD, 100% of the armour value will be applied, this only used if CombatParryEra flag PARRYERA_ARSCALING is enabled
 };
 
 // When armor is added or subtracted check this.
@@ -370,6 +372,10 @@ static const CArmorLayerType sm_ArmorLayers[ARMOR_QTY] =
 int CChar::CalcArmorDefense() const
 {
 	ADDTOCALLSTACK("CChar::CalcArmorDefense");
+
+	// If Combat Elemental Engine is enabled, we don't need to calculate the AC because RESPHYSICAL is used.
+	if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
+		 return 0;
 
 	int iDefenseTotal = 0;
 	int iArmorCount = 0;
@@ -469,10 +475,25 @@ int CChar::CalcArmorDefense() const
 			case LAYER_HAND2:
 				if ( pItem->IsType( IT_SHIELD ))
 				{
-					if ( IsSetCombatFlags(COMBAT_STACKARMOR) )
-						ArmorRegionMax[ ARMOR_HANDS ] += iDefense;
+					/*
+					If CombatParryingEra flag PARRYERA_SCALING is enabled:
+					Displayed AR = ((Parrying Skill * Base AR of Shield) ÷ 200) + 1
+					For all shields the maximum AR will be reached before your parry skill reaches GM level.
+					Also note that the maximum displayed AR for a shield cannot exceed Base AR ÷ 2.
+					See: http://web.archive.org/web/20000306210936/http://uo.stratics.com:80/parr.htm
+					Else, CombatParryingEra flag PARRYERA_SCALING is disabled and only a flat 7% AR of the shield will be used.
+					*/
+					BODYPART_TYPE shieldZone = ARMOR_HANDS;
+					if (g_Cfg.m_iCombatParryingEra & PARRYERA_ARSCALING)
+					{
+						shieldZone = ARMOR_SHIELD;
+						int uShieldAC = ((Skill_GetBase(SKILL_PARRYING) * iDefense) / 2000) + 1;
+						iDefense = minimum(iDefense / 2, uShieldAC);
+					}
+					if (IsSetCombatFlags(COMBAT_STACKARMOR)) //Don't understand, you can't stack shields
+						ArmorRegionMax[shieldZone] += iDefense;
 					else
-						ArmorRegionMax[ ARMOR_HANDS ] = maximum( ArmorRegionMax[ ARMOR_HANDS ], iDefense );
+						ArmorRegionMax[shieldZone] = maximum(ArmorRegionMax[shieldZone], iDefense);
 				}
 				break;
 			case LAYER_SPELL_Protection:
@@ -1868,13 +1889,13 @@ bool CChar::Fight_Parry(CItem * &pItemParry)
 {
 	// Check if target will block the hit
 	// Legacy pre-SE formula
-    bool bCanShield = g_Cfg.m_iCombatParryingEra & 0x10;
-    bool bCanOneHanded = g_Cfg.m_iCombatParryingEra & 0x20;
-    bool bCanTwoHanded = g_Cfg.m_iCombatParryingEra & 0x40;
+    bool bCanShield = g_Cfg.m_iCombatParryingEra & PARRYERA_SHIELDBLOCK;
+    bool bCanOneHanded = g_Cfg.m_iCombatParryingEra & PARRYERA_ONEHANDBLOCK;
+    bool bCanTwoHanded = g_Cfg.m_iCombatParryingEra & PARRYERA_TWOHANDBLOCK;
 
     int iParrying = Skill_GetBase(SKILL_PARRYING);
     int iParryChance = 0;   // 0-100 difficulty! without the decimal!
-    if (g_Cfg.m_iCombatParryingEra & 0x2)   // Samurai Empire formula
+    if (g_Cfg.m_iCombatParryingEra & PARRYERA_SEFORMULA)   // Samurai Empire formula
     {
         int iBushido = Skill_GetBase(SKILL_BUSHIDO);
         int iChanceSE = 0, iChanceLegacy = 0;
