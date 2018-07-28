@@ -1053,9 +1053,9 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			break;
         case RC_CONTAINERMAXITEMS:
         {
-            int iVal = s.GetArgVal();
-            if ((iVal > 0) && (iVal < MAX_ITEMS_CONT))
-                m_iContainerMaxItems = iVal;
+            uint uiVal = s.GetArgUVal();
+            if ((uiVal > 0) && (uiVal < MAX_ITEMS_CONT))
+                m_iContainerMaxItems = uiVal;
         }
 		case RC_CORPSENPCDECAY:
 			m_iDecay_CorpseNPC = s.GetArgVal()*60*TICK_PER_SEC;

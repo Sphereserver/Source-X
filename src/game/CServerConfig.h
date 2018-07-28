@@ -886,7 +886,7 @@ public:
 	bool m_fCanUndressPets;			// Can players undress their pets?
 	bool m_fMonsterFight;			// Will creatures fight amoung themselves.
 	bool m_fMonsterFear;			// will they run away if hurt ?
-    int  m_iContainerMaxItems;      // Maximum number of items allowed in a container item.
+    uint m_iContainerMaxItems;      // Maximum number of items allowed in a container item.
 	int	 m_iBankIMax;				// Maximum number of items allowed in bank.
 	int  m_iBankWMax;				// Maximum weight in WEIGHT_UNITS stones allowed in bank.
 	int  m_iVendorMaxSell;			// Max things a vendor will sell in one shot.

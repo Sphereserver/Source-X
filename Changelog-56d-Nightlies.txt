@@ -1068,3 +1068,4 @@ Multis:
 - Added: CONTAINERMAXITEMS ini setting. It holds the maximum number of items inside a container, which is by default (and can be at most) 255. Higher values are unsupported by the Classic Client
 	and the older 2D client versions. The Enhanced Client supports a maximum af 125 items per container, so it's suggested to update this setting if you are going to use that client.
 - Fixed: Switching weapon while attacking didn't abort the previous swing (Issue #108).
+- Fixed: Hit chance (ACTDIFF) wasn't recalculated after each combat swing (Issue #116).

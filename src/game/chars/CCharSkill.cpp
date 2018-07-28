@@ -395,12 +395,10 @@ void CChar::Skill_Experience( SKILL_TYPE skill, int difficulty )
 		if ( difficulty > 0 )
 		{
 //#ifdef _DEBUG
-			if ( IsPriv( PRIV_DETAIL ) &&
-				GetPrivLevel() >= PLEVEL_GM &&
-				( g_Cfg.m_iDebugFlags & DEBUGF_ADVANCE_STATS ))
+			if ( IsPriv(PRIV_DETAIL) && (GetPrivLevel() >= PLEVEL_GM) && (g_Cfg.m_iDebugFlags & DEBUGF_ADVANCE_STATS) )
 			{
 				SysMessagef( "%s=%hu.%hu Difficult=%d Gain Chance=%" PRId64 ".%" PRId64 "%% Roll=%d%%",
-					(lpctstr) pSkillDef->GetKey(),
+					pSkillDef->GetKey(),
 					uiSkillLevel/10, (uiSkillLevel)%10,
 					difficulty/10, iChance/10, iChance%10, iRoll/10 );
 			}
@@ -569,7 +567,7 @@ lpctstr CChar::Skill_GetName( bool fUse ) const
 	if ( IsSkillBase(skill))
 	{
 		if ( !fUse )
-			return( g_Cfg.GetSkillKey(skill));
+			return g_Cfg.GetSkillKey(skill);
 
 		tchar * pszText = Str_GetTemp();
 		sprintf( pszText, "%s %s", g_Cfg.GetDefaultMsg(DEFMSG_SKILLACT_USING), g_Cfg.GetSkillKey(skill));
@@ -943,29 +941,29 @@ CItem * CChar::Skill_NaturalResource_Create( CItem * pResBit, SKILL_TYPE skill )
 
 	// Find the ore type located here based on color.
 	CRegionResourceDef * pOreDef = dynamic_cast<CRegionResourceDef *>(g_Cfg.ResourceGetDef(pResBit->m_itResource.m_ridRes));
-	if ( pOreDef == NULL )
-		return NULL;
+	if ( !pOreDef )
+		return nullptr;
 
 	// Skill effects how much of the ore i can get all at once.
 	if ( pOreDef->m_ReapItem == ITEMID_NOTHING )
-		return NULL;		// I intended for there to be nothing here
+		return nullptr;		// I intended for there to be nothing here
 
 	// Reap amount is semi-random
-	word iAmount = (word)pOreDef->m_ReapAmount.GetRandomLinear( Skill_GetBase(skill) );
-	if ( !iAmount )		// if REAPAMOUNT wasn't defined
+	word wAmount = (word)pOreDef->m_ReapAmount.GetRandomLinear( Skill_GetBase(skill) );
+	if ( !wAmount )		// if REAPAMOUNT wasn't defined
 	{
-		iAmount = (word)pOreDef->m_Amount.GetRandomLinear( Skill_GetBase(skill) ) / 2;
-		word	maxAmount = pResBit->GetAmount();
-		if ( iAmount < 1 )
-			iAmount = 1;
-		if ( iAmount > maxAmount )
-			iAmount = maxAmount;
+		wAmount = (word)(pOreDef->m_Amount.GetRandomLinear( Skill_GetBase(skill) ) / 2);
+		word wMaxAmount = pResBit->GetAmount();
+		if ( wAmount < 1 )
+			wAmount = 1;
+		if ( wAmount > wMaxAmount )
+			wAmount = wMaxAmount;
 	}
 
 	//(Region)ResourceGather behaviour
 	CScriptTriggerArgs	Args(0, 0, pResBit);
 	Args.m_VarsLocal.SetNum("ResourceID",pOreDef->m_ReapItem);
-	Args.m_iN1 = iAmount;
+	Args.m_iN1 = wAmount;
 	TRIGRET_TYPE tRet = TRIGRET_RET_DEFAULT;
 	if ( IsTrigUsed(TRIGGER_REGIONRESOURCEGATHER) )
 		tRet = this->OnTrigger(CTRIG_RegionResourceGather, this, &Args);
@@ -973,19 +971,19 @@ CItem * CChar::Skill_NaturalResource_Create( CItem * pResBit, SKILL_TYPE skill )
 		tRet = pOreDef->OnTrigger("@ResourceGather", this, &Args);
 
 	if ( tRet == TRIGRET_RET_TRUE )
-		return NULL;
+		return nullptr;
 
 	//Creating the 'id' variable with the local given through->by the trigger(s) instead on top of method
 	ITEMID_TYPE id = (ITEMID_TYPE)(RES_GET_INDEX( Args.m_VarsLocal.GetKeyNum("ResourceID")));
 
-	iAmount = pResBit->ConsumeAmount( (word)(Args.m_iN1) );	// amount i used up.
-	if ( iAmount <= 0 )
-		return NULL;
+	wAmount = pResBit->ConsumeAmount( (word)(Args.m_iN1) );	// amount i used up.
+	if ( wAmount <= 0 )
+		return nullptr;
 
 	CItem * pItem = CItem::CreateScript( id, this );
 	ASSERT(pItem);
 
-	pItem->SetAmount( iAmount );
+	pItem->SetAmount( wAmount );
 	return pItem;
 }
 
@@ -2089,7 +2087,7 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 			g_Cfg.GetDefaultMsg( DEFMSG_TAMING_4 )
 		};
 
-		if ( m_atTaming.m_Stroke_Count <= 0 || IsPriv( PRIV_GM ))
+		if ( (m_atTaming.m_Stroke_Count <= 0) || IsPriv( PRIV_GM ))
 			return 0;
 
 		tchar * pszMsg = Str_GetTemp();
@@ -2097,7 +2095,7 @@ int CChar::Skill_Taming( SKTRIG_TYPE stage )
 		Speak(pszMsg);
 
 		// Keep trying and updating the animation
-		m_atTaming.m_Stroke_Count --;
+		--m_atTaming.m_Stroke_Count;
 		Skill_SetTimeout();
 		return -SKTRIG_STROKE;
 	}
@@ -2175,7 +2173,7 @@ int CChar::Skill_Lockpicking( SKTRIG_TYPE stage )
 		return -SKTRIG_QTY;
 	}
 
-	if (  stage == SKTRIG_START )
+	if ( stage == SKTRIG_START )
 		return pLock->Use_LockPick( this, true, false );	// How difficult? 1-1000
 
 	ASSERT( stage == SKTRIG_SUCCESS );
@@ -2699,12 +2697,13 @@ int CChar::Skill_Fighting( SKTRIG_TYPE stage )
 
 		Fight_HitTry();	// this cleans up itself, executes the code related to the current m_War_Swing_State and sets the needed timers.
 
-        //if (m_atFight.m_War_Swing_State == WAR_SWING_EQUIPPING)
-        //{
-        //  m_Act_Difficulty = g_Cfg.Calc_CombatChanceToHit(this, m_Fight_Targ_UID.CharFind()); // calculate the chance at every hit
-        //  if ( !Skill_CheckSuccess(Skill_GetActive(), m_Act_Difficulty, false) )
-        //      m_Act_Difficulty = -m_Act_Difficulty;	// will result in failure
-        //}
+        if (m_atFight.m_War_Swing_State == WAR_SWING_EQUIPPING)
+        {
+            // calculate the chance at every hit
+            m_Act_Difficulty = g_Cfg.Calc_CombatChanceToHit(this, m_Fight_Targ_UID.CharFind());
+            if ( !Skill_CheckSuccess(Skill_GetActive(), m_Act_Difficulty, false) )
+                m_Act_Difficulty = -m_Act_Difficulty;	// will result in failure
+        }
 		return -SKTRIG_STROKE;	// Stay in the skill till we hit.
 	}
 
@@ -3871,15 +3870,15 @@ int CChar::Skill_Focus(STAT_TYPE stat)
 	if (g_Cfg.IsSkillFlag(SKILL_FOCUS, SKF_SCRIPTED))
 		return -SKTRIG_QTY;;
 
-	ushort uFocusValue = Skill_GetAdjusted(SKILL_FOCUS);
-	ushort uGain;
+	ushort uiFocusValue = Skill_GetAdjusted(SKILL_FOCUS);
+	ushort uiGain;
 	switch (stat)
 	{
 		case STAT_DEX:
-			uGain =  uFocusValue / 100;
+			uiGain = uiFocusValue / 100;
 			break;
 		case STAT_INT:
-			uGain =  uFocusValue / 200;
+			uiGain = uiFocusValue / 200;
 			break;
 		default:
 			return -SKTRIG_QTY;
@@ -3888,8 +3887,8 @@ int CChar::Skill_Focus(STAT_TYPE stat)
 	By using the player skill value as difficulty, the chance to get an increase will be 50% because
 	the bell curva formula is used.
 	*/
-	Skill_Experience(SKILL_FOCUS, uFocusValue);
-	return uGain;
+	Skill_Experience(SKILL_FOCUS, uiFocusValue);
+	return uiGain;
 }
 bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 {
