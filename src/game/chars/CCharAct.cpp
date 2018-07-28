@@ -4060,7 +4060,7 @@ bool CChar::OnTick()
     if (IsClient())
     {
         // Players have a silly "always run" flag that gets stuck on.
-        if (-g_World.GetTimeDiff(GetClient()->m_timeLastEventWalk) > 2)
+        if (-(g_World.GetTimeDiff(GetClient()->m_timeLastEventWalk)) > 2)
             StatFlag_Clear(STATF_FLY);
 
         // Check targeting timeout, if set
@@ -4072,7 +4072,6 @@ bool CChar::OnTick()
     {
         EXC_SET("timer expired");
         // My turn to do some action.
-        bool fSkillEnded = true;
         switch (Skill_Done())
         {
 			case -SKTRIG_ABORT:
@@ -4089,7 +4088,6 @@ bool CChar::OnTick()
                 break;
             case -SKTRIG_STROKE:
                 //EXC_SET("skill stroked");
-                fSkillEnded = false;
                 break;
         }
 

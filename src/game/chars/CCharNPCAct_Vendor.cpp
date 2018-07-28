@@ -114,7 +114,7 @@ bool CChar::NPC_StablePetSelect( CChar * pCharPlayer )
 	// Might have too many pets already ?
 	int iCount = 0;
 	CItemContainer * pBank = GetBank();
-	if ( pBank->GetCount() >= MAX_ITEMS_CONT )
+	if ( pBank->GetCount() >= g_Cfg.m_iContainerMaxItems )
 	{
 		Speak( g_Cfg.GetDefaultMsg( DEFMSG_NPC_STABLEMASTER_FULL ) );
 		return false;

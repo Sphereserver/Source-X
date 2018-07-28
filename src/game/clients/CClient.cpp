@@ -552,7 +552,7 @@ bool CClient::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 	else if ( !strnicmp( "REPORTEDCLIVER", pszKey, 14 ) && ( pszKey[14] == '\0' || pszKey[14] == '.' ) )
 		index = CC_REPORTEDCLIVER;
 	else
-		index	= FindTableSorted( pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
+		index = FindTableSorted( pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
 
 	switch (index)
 	{
@@ -592,6 +592,9 @@ bool CClient::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 		case CC_LASTEVENT:
 			sVal.FormatLLVal( m_timeLastEvent.GetTimeRaw() );
 			break;
+        case CC_LASTEVENTWALK:
+            sVal.FormatLLVal( m_timeLastEventWalk.GetTimeRaw() );
+            break;
 		case CC_PRIVSHOW:
 			// Show my priv title.
 			sVal.FormatVal( ! IsPriv( PRIV_PRIV_NOSHOW ));

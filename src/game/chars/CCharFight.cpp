@@ -1238,23 +1238,23 @@ void CChar::Fight_HitTry()
 		return;
 	}
 
-    bool fPreHit_HadInstaHit = false, fPreHit_LastHit_Newer = false;
-    int64 iPreHit_LastHit_FullHit = 0;  // Time required to perform a normal hit, without the PreHit delay reduction.
-    if (IsSetCombatFlags(COMBAT_PREHIT))
+    bool fPreHit_HadInstaHit = false, fPreHit_LastHitTag_Newer = false;
+    int64 iPreHit_LastHitTag_FullHit = 0;  // Time required to perform a normal hit, without the PreHit delay reduction.
+    if (m_atFight.m_War_Swing_State == WAR_SWING_EQUIPPING)
     {
-        if (m_atFight.m_War_Swing_State == WAR_SWING_EQUIPPING)
+        if (IsSetCombatFlags(COMBAT_PREHIT))
         {
             fPreHit_HadInstaHit = (!m_atFight.m_iRecoilDelay && !m_atFight.m_iSwingAnimationDelay);
             Fight_SetDefaultSwingDelays();
             const int64 iTimeCur = CServerTime::GetCurrentTime().GetTimeRaw();
             // Time required to perform the previous normal hit, without the PreHit delay reduction.
-            const int64 iPreHit_LastHit_FullHit_Prev = GetKeyNum("LastHit", true);
+            const int64 iPreHit_LastHitTag_FullHit_Prev = GetKeyNum("LastHit", true);
             // Time required to perform the shortened hit with PreHit.
-            const int64 iPreHit_LastHit_PreHit = iTimeCur + COMBAT_MIN_SWING_ANIMATION_DELAY;   // it's the new m_iRecoilDelay (0) + the new m_iSwingAnimationDelay (COMBAT_MIN_SWING_ANIMATION_DELAY)
-            iPreHit_LastHit_FullHit = iTimeCur + m_atFight.m_iRecoilDelay + m_atFight.m_iSwingAnimationDelay;
-            if (iPreHit_LastHit_PreHit > iPreHit_LastHit_FullHit_Prev)
+            const int64 iPreHit_LastHitTag_PreHit = iTimeCur + COMBAT_MIN_SWING_ANIMATION_DELAY;   // it's the new m_iRecoilDelay (0) + the new m_iSwingAnimationDelay (COMBAT_MIN_SWING_ANIMATION_DELAY)
+            iPreHit_LastHitTag_FullHit = iTimeCur + m_atFight.m_iRecoilDelay + m_atFight.m_iSwingAnimationDelay;
+            if (iPreHit_LastHitTag_PreHit > iPreHit_LastHitTag_FullHit_Prev)
             {
-                fPreHit_LastHit_Newer = true;
+                fPreHit_LastHitTag_Newer = true;
                 if (fPreHit_HadInstaHit)
                 {
                     // First hit with PreHit -> no recoil, only the minimum swing animation delay
@@ -1264,10 +1264,10 @@ void CChar::Fight_HitTry()
                 }
             }
         }
-    }
-    else
-    {
-        Fight_SetDefaultSwingDelays();
+        else
+        {
+            Fight_SetDefaultSwingDelays();
+        }
     }
 
     WAR_SWING_TYPE retHit = Fight_Hit(pCharTarg);
@@ -1277,10 +1277,10 @@ void CChar::Fight_HitTry()
         // This needs to be set after the @HitTry call, because we may want to change the default iRecoilDelay and iSwingAnimationDelay in that trigger.
         if ((m_atFight.m_War_Swing_State == WAR_SWING_READY) && (retHit == WAR_SWING_READY))
         {
-            if (fPreHit_LastHit_Newer)
+            if (fPreHit_LastHitTag_Newer)
             {
                 // This protects against allowing shortened hits every time a char stops and starts attacking again, independently of this being the first, second, third or whatever hit.
-                SetKeyNum("LastHit", iPreHit_LastHit_FullHit);
+                SetKeyNum("LastHit", iPreHit_LastHitTag_FullHit);
             }
             if (!fPreHit_HadInstaHit)
             {

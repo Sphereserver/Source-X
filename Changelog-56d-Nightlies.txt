@@ -627,7 +627,7 @@ Simple explanation:
 
 
 05-05-2018, XuN:
-[Port from Source, 20-01-2017, Coruja}
+[Port from Source, 20-01-2017, Coruja]
 Added: New function MAPWAYPOINT to add/remove waypoints on client radar map (enhanced clients only).
 	Sintax: MAPWAYPOINT ObjectUID, WaypointType
 	Waypoint types:
@@ -982,7 +982,7 @@ Redeed now creates the deed before calling the @Redeed trigger and the deed gets
 - Added: COMBATF_PREHIT_NORANGE to allow starting the close-combat swing at distance; the blow will still be landed only when entering in range.
 - Fixed: After each combat hit the current combat skill was halted (actually it failed), then the same action was started again. This resulted in
 	the @Fail, @SkillFail, @Start, @SkillStart triggers to be fired at each hit.
-	- Fixed: NPCs doing extra AI actions (wandering, food, etc checks) after each hit in combat. This caused sometimes the current combat action to be resetted
+- Fixed: NPCs doing extra AI actions (wandering, food, etc checks) after each hit in combat. This caused sometimes the current combat action to be resetted
 	and then forced again, erasing the NPC combat data, which ultimately results in the NPC hitting twice in a few tenths of seconds.
 
 13-06-2018, Nolok
@@ -992,7 +992,7 @@ Redeed now creates the deed before calling the @Redeed trigger and the deed gets
 	LOCAL.AnimDelay in @HitTry, and the default value is 1 second). Ended this second timer, the damage is dealt (Issue #111).
 - Added: .ini CombatFlag COMBAT_ANIM_HIT_SMOOTH to enable the old smooth combat. There's no delay between hits (in @HitTry LOCAL.AnimDelay is = 0), but the swing animation duration
 	(ARGN1 in @HitTry) is in this case equal to the delay you should have waited before starting a new swing.
-- Fixed: COMBATF_PREHIT wasn't working correctly (Issue #113, #108).
+- Fixed: COMBAT_PREHIT wasn't working correctly (Issue #113, #108).
 - Changed: .ini CombatFlag COMBAT_PREHIT_NORANGE renamed to COMBAT_SWING_NORANGE, to avoid confusion with COMBATF_PREHIT.
 - Added: LOCAL.Swing_NoRange to @HitCheck trigger. -1 force disables the Swing_NoRange behaviour for the current hit, 0 leaves it dependent to the COMBAT_SWING_NORANGE ini CombatFlag,
 	while 1 force enables the Swing_NoRange behaviour (Issue #112).
@@ -1022,9 +1022,9 @@ Multis:
 - Fixed when setting a new priv RevokePrivs will be called and then the privs will be added, in order to remove the char from previous list (if had any privilege before on this multi).
 
 23-07-2018, Drk84
-- Added: LocationEffect command, similar to the EFFECT command but instead of an object it takes a terrain location as a target.(Thanks to XuN for the help)
+- Added: effectLocation command, similar to the EFFECT command but instead of an object it takes a terrain location as a target.(Thanks to XuN for the help)
 	Some of the new spells use effects that are placed  on the ground (not field items) for simulating an area of effect. 
-	Usage: locationEffect x,y,z,type,itemid,speed,loop,explode,color,render
+	Usage: effectLocation x,y,z,type,itemid,speed,loop,explode,color,render
 	Examples: 
 	//Simulate the Consacrate Weapon Chivalry spell effect, a sword appearing from the ground and going upward.
 	[FUNCTION testLocationZ]
@@ -1049,7 +1049,7 @@ Multis:
   cause they don't accept a map point.
   
 - Added: Spells with the LAYER property set to >= LAYER_SPELL_STATS will automatically equip the spell memory item found in the RUNE_ITEM property.
-	Currently, if you want to make a custom spell (or scripts the chivalry, mysticm, spelleweaving spells) you had to manually equip the memory item 
+	Before this commit, if you wanted to make a custom spell (or scripts the chivalry, mysticm, spelleweaving spells) you had to manually equip the memory item 
 	causing the triggers @EffectAdd  and @EffectRemove to never be fired.
 - Changed: Meditation skill now take in consideration the EFFECT property of the skill, if the EFFECT property is not present the default value of 1 is used.
 - Added: Added new flag value 080 for CombatParryingEra, setting this flag will allow to use the following parrying skill behaviour:
@@ -1063,3 +1063,8 @@ Multis:
 	The formula works only with Combat Elemental Engine disabled.
 	Setting or unsetting this flag while the server is running will update the character armour value only when the Parrying skill changes or the shield item is equipped/unequiped.
 
+28-07-2018, Nolok
+- Added: LASTEVENTWALK read-only client property, to retrieve the time in ticks (SERV.TIME) of the last allowed walk request from the client.
+- Added: CONTAINERMAXITEMS ini setting. It holds the maximum number of items inside a container, which is by default (and can be at most) 255. Higher values are unsupported by the Classic Client
+	and the older 2D client versions. The Enhanced Client supports a maximum af 125 items per container, so it's suggested to update this setting if you are going to use that client.
+- Fixed: Switching weapon while attacking didn't abort the previous swing (Issue #108).

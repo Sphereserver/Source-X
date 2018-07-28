@@ -741,7 +741,7 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 
 	VendorItem items[MAX_ITEMS_CONT];
 	memset(items, 0, sizeof(items));
-	size_t itemCount = minimum((packetLength - 8) / 7, MAX_ITEMS_CONT);
+	size_t itemCount = minimum((packetLength - 8) / 7, g_Cfg.m_iContainerMaxItems);
 
 	// check buying speed
 	const CVarDefCont* vardef = g_Cfg.m_bAllowBuySellAgent ? NULL : client->m_TagDefs.GetKey("BUYSELLTIME");
@@ -758,7 +758,7 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 
 	// combine goods into one list
 	CItemVendable *item = NULL;
-	for (size_t i = 0; i < itemCount; i++)
+	for (size_t i = 0; i < itemCount; ++i)
 	{
 		skip(1); // layer
 		CUID serial(readInt32());
@@ -773,7 +773,7 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 
 		// search for it in the list
 		size_t index;
-		for (index = 0; index < itemCount; index++)
+		for (index = 0; index < itemCount; ++index)
 		{
 			if (serial == items[index].m_serial)
 				break;
@@ -1873,7 +1873,7 @@ bool PacketVendorSellReq::onReceive(NetState* net)
 		client->addVendorClose(vendor);
 		return true;
 	}
-	else if (itemCount >= MAX_ITEMS_CONT)
+	else if (itemCount >= g_Cfg.m_iContainerMaxItems)
 	{
 		client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_SELLMUCH));
 		return true;
@@ -1895,7 +1895,7 @@ bool PacketVendorSellReq::onReceive(NetState* net)
 	VendorItem items[MAX_ITEMS_CONT];
 	memset(items, 0, sizeof(items));
 
-	for (size_t i = 0; i < itemCount; i++)
+	for (size_t i = 0; i < itemCount; ++i)
 	{
 		items[i].m_serial = CUID(readInt32());
 		items[i].m_amount = readInt16();

@@ -575,12 +575,12 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 				if ( pItem->m_ModMaxWeight )
 				{
                     PUSH_FRONT_TOOLTIP(pItem, t = new CClientTooltip(1072241)); // Contents: ~1_COUNT~/~2_MAXCOUNT~ items, ~3_WEIGHT~/~4_MAXWEIGHT~ stones
-					t->FormatArgs("%" PRIuSIZE_T "\t%d\t%d\t%d", pContainer->GetCount(), MAX_ITEMS_CONT, pContainer->GetTotalWeight() / WEIGHT_UNITS, pItem->m_ModMaxWeight / WEIGHT_UNITS);
+					t->FormatArgs("%" PRIuSIZE_T "\t%d\t%d\t%d", pContainer->GetCount(), g_Cfg.m_iContainerMaxItems, pContainer->GetTotalWeight() / WEIGHT_UNITS, pItem->m_ModMaxWeight / WEIGHT_UNITS);
 				}
 				else
 				{
                     PUSH_FRONT_TOOLTIP(pItem, t = new CClientTooltip(1073841)); // Contents: ~1_COUNT~/~2_MAXCOUNT~ items, ~3_WEIGHT~ stones
-					t->FormatArgs("%" PRIuSIZE_T "\t%d\t%d", pContainer->GetCount(), MAX_ITEMS_CONT, pContainer->GetTotalWeight() / WEIGHT_UNITS);
+					t->FormatArgs("%" PRIuSIZE_T "\t%d\t%d", pContainer->GetCount(), g_Cfg.m_iContainerMaxItems, pContainer->GetTotalWeight() / WEIGHT_UNITS);
 				}
 			}
 			else

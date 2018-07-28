@@ -1151,7 +1151,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 	// Classic Client wants the container items sent with order a->z, Enhanced Client with order z->a;
 	// Classic client wants the prices sent (in PacketVendorBuyList::fillBuyData) with order a->z, Enhanced Client with order a->z.
 	for ( CItem* item = ( target->GetNetState()->isClientEnhanced() ? container->GetContentTail() : container->GetContentHead() );
-		item != NULL && m_count < MAX_ITEMS_CONT;
+		item != NULL && m_count < g_Cfg.m_iContainerMaxItems;
 		item = (target->GetNetState()->isClientEnhanced() ? item->GetPrev() : item->GetNext()) )
 	{
 		word wAmount = item->GetAmount();
@@ -1221,7 +1221,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 
 		items.push_back(item);
 
-		if ( ++m_count >= MAX_ITEMS_CONT )
+		if ( ++m_count >= g_Cfg.m_iContainerMaxItems )
 			break;
 	}
 
@@ -2244,7 +2244,7 @@ size_t PacketVendorBuyList::fillBuyData(const CItemContainer* container, int iCo
 		writeByte((byte)len);
 		writeStringFixedASCII(name, len);
 
-		if ( ++count > MAX_ITEMS_CONT )
+		if ( ++count > g_Cfg.m_iContainerMaxItems )
 			break;
 	}
 
@@ -2644,7 +2644,7 @@ PacketCorpseEquipment::PacketCorpseEquipment(CClient* target, const CItemContain
 		// include tooltip
 		target->addAOSTooltip(item);
 
-		if (++count > MAX_ITEMS_CONT)
+		if (++count > g_Cfg.m_iContainerMaxItems)
 			break;
 	}
 
@@ -2993,7 +2993,7 @@ size_t PacketVendorSellList::fillSellList(CClient* target, const CItemContainer*
 						writeInt16((word)len);
 						writeStringFixedASCII(name, len);
 
-						if (++count >= MAX_ITEMS_CONT)
+						if (++count >= g_Cfg.m_iContainerMaxItems)
 							break;
 					}
 				}

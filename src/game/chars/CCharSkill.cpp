@@ -2378,18 +2378,18 @@ int CChar::Skill_Meditation( SKTRIG_TYPE stage )
 			if ( !g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_NOSFX ) )
 				Sound( 0x0f9 );
 		}
-		m_atTaming.m_Stroke_Count++;
+		++m_atTaming.m_Stroke_Count;
 
 		CSkillDef * pSkillDef = g_Cfg.GetSkillDef(SKILL_MEDITATION);
-		if (pSkillDef->m_Effect.m_aiValues.size() > 0)
-			UpdateStatVal(STAT_INT,pSkillDef->m_Effect.GetLinear(Skill_GetBase(SKILL_MEDITATION)));
+		if (!pSkillDef->m_Effect.m_aiValues.empty())
+			UpdateStatVal(STAT_INT, (short)pSkillDef->m_Effect.GetLinear(Skill_GetBase(SKILL_MEDITATION)));
 		else
 			UpdateStatVal( STAT_INT, 1 );
 		Skill_SetTimeout();		// next update (depends on skill)
 
 		// Set a new possibility for failure ?
 		// iDifficulty = Calc_GetRandVal(100);
-		return( -SKTRIG_STROKE );
+		return -SKTRIG_STROKE;
 	}
 	return -SKTRIG_QTY;
 }
@@ -2708,12 +2708,13 @@ int CChar::Skill_Fighting( SKTRIG_TYPE stage )
 		return -SKTRIG_STROKE;	// Stay in the skill till we hit.
 	}
 
-    if (stage == SKTRIG_FAIL)
+    if ((stage == SKTRIG_FAIL) || (stage == SKTRIG_ABORT))
     {
         m_atFight.m_iRecoilDelay = 0;
         m_atFight.m_iSwingAnimationDelay = 0;
         m_atFight.m_iSwingAnimation = 0;
         m_atFight.m_iSwingIgnoreLastHitTag = 0;
+        return 0;
     }
 
 	return -SKTRIG_QTY;
@@ -4013,7 +4014,7 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 			if ( pSkillDef )
 			{
 				int iWaitTime = pSkillDef->m_Delay.GetLinear(Skill_GetBase(skill));
-				if ( iWaitTime != 0 )
+				if ( iWaitTime > 0 )
 					SetTimeout(iWaitTime);		// How long before complete skill.
 			}
 		}

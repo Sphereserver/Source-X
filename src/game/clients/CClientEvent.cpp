@@ -865,7 +865,7 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 		}
 
 		m_timeLastEventWalk = CServerTime::GetCurrentTime();
-		m_iWalkStepCount++;					// Increase step count to use on walk buffer checks
+		++m_iWalkStepCount;					// Increase step count to use on walk buffer checks
 	}
 	else
 	{

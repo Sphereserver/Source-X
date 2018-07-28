@@ -3345,7 +3345,9 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 		case SPELL_Poison:
 		case SPELL_Poison_Field:
 			if ( pCharSrc && IsSetMagicFlags(MAGICF_OSIFORMULAS) )
+            {
 				iEffect = (iSkillLevel + pCharSrc->Skill_GetBase(SKILL_POISONING)) / 2;		// (magery + poisoning) / 2
+            }
 			SetPoison(iEffect, iEffect / 50, pCharSrc);
 			break;
 

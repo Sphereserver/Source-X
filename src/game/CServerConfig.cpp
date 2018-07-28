@@ -97,6 +97,7 @@ CServerConfig::CServerConfig()
 	m_iLightDungeon			= 27;
 	m_iLightNight			= 25;	// dark before t2a.
 	m_iLightDay				= LIGHT_BRIGHT;
+    m_iContainerMaxItems    = MAX_ITEMS_CONT;
 	m_iBankIMax				= 1000;
 	m_iBankWMax				= 1000 * WEIGHT_UNITS;
 	m_fAttackingIsACrime	= true;
@@ -443,6 +444,7 @@ enum RC_TYPE
 	RC_COMMANDTRIGGER,			// m_sCommandTrigger
 	RC_CONNECTINGMAX,			// m_iConnectingMax
 	RC_CONNECTINGMAXIP,			// m_iConnectingMaxIP
+    RC_CONTAINERMAXITEMS,       // m_iContainerMaxItems
 	RC_CONTEXTMENULIMIT,		// m_iContextMenuLimit
 	RC_CORPSENPCDECAY,
 	RC_CORPSEPLAYERDECAY,
@@ -685,6 +687,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "COMMANDTRIGGER",			{ ELEM_CSTRING,	OFFSETOF(CServerConfig,m_sCommandTrigger),		0 }},
 	{ "CONNECTINGMAX",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iConnectingMax),		0 }},
 	{ "CONNECTINGMAXIP",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iConnectingMaxIP),		0 }},
+    { "CONTAINERMAXITEMS",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iContainerMaxItems),	0 }},
 	{ "CONTEXTMENULIMIT",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iContextMenuLimit),	0 }},
 	{ "CORPSENPCDECAY",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDecay_CorpseNPC),		0 }},
 	{ "CORPSEPLAYERDECAY",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iDecay_CorpsePlayer),	0 }},
@@ -1048,6 +1051,12 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			m_iCombatArcheryMovementDelay = maximum(iVal, 0);
 		}
 			break;
+        case RC_CONTAINERMAXITEMS:
+        {
+            int iVal = s.GetArgVal();
+            if ((iVal > 0) && (iVal < MAX_ITEMS_CONT))
+                m_iContainerMaxItems = iVal;
+        }
 		case RC_CORPSENPCDECAY:
 			m_iDecay_CorpseNPC = s.GetArgVal()*60*TICK_PER_SEC;
 			break;

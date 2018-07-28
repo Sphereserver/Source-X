@@ -2199,9 +2199,9 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			int iArgQty = Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
 			if (iArgQty < 2)
 				return false;
-			CObjBase *	pThis = this;
+			CObjBase *pThis = this;
 
-			CPointMap pt(piCmd[0], piCmd[1], piCmd[2]);
+			CPointMap pt((short)piCmd[0], (short)piCmd[1], (char)piCmd[2]);
 			if (!pt.IsValidPoint())
 				return false;
 
@@ -2227,7 +2227,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				(iArgQty >= 7) ? (uint)(piCmd[9]) : 0,		// render mode,
 				(iArgQty >= 8) ? (word)(piCmd[10]) : 0,		// EffectID	//New Packet 0xc7
 				(iArgQty >= 9) ? (word)(piCmd[11]) : 0,		// ExplodeID
-				(iArgQty >= 10) ? (word)(piCmd[12]) : 0,		// ExplodeSound
+				(iArgQty >= 10) ? (word)(piCmd[12]) : 0,	// ExplodeSound
 				(iArgQty >= 11) ? (dword)(piCmd[13]) : 0,	// EffectUID
 				(iArgQty >= 12) ? (uchar)(piCmd[14]) : 0	// Type
 			);
@@ -3243,12 +3243,12 @@ void CObjBase::Delete(bool bforce)
 	ADDTOCALLSTACK("CObjBase::Delete");
 	UNREFERENCED_PARAMETER(bforce);	// CObjBase doesnt use it, but CItem and CChar does use it, do not remove.
 
-    CEntity *pEntity = static_cast<CEntity*>(this);
     if (GetSpawn())    // If I was created from a Spawn
     {
         //pEntity->Unsuscribe(GetSpawn());    // Avoiding recursive calls from CCSpawn::DelObj when forcing the pChar/pItem to Delete();
         GetSpawn()->DelObj(GetUID());  // Then I should be removed from it's list.
     }
+    CEntity *pEntity = static_cast<CEntity*>(this);
     pEntity->Delete(bforce);
 
 	DeletePrepare();

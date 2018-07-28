@@ -759,7 +759,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 	}
 
 	size_t pTagTmp = (size_t)(GetKeyNum("OVERRIDE.MAXITEMS", true));
-	size_t tMaxItemsCont = pTagTmp ? pTagTmp : MAX_ITEMS_CONT;
+	size_t tMaxItemsCont = pTagTmp ? pTagTmp : g_Cfg.m_iContainerMaxItems;
 	if ( GetCount() >= tMaxItemsCont )
 	{
 		pCharMsg->SysMessageDefault(DEFMSG_CONT_FULL);
@@ -870,7 +870,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 			}
 
 			// Check that this vendor box hasn't already reached its content limit
-			if ( GetCount() >= MAX_ITEMS_CONT )
+			if ( GetCount() >= g_Cfg.m_iContainerMaxItems )
 			{
 				pCharMsg->SysMessageDefault(DEFMSG_CONT_FULL);
 				return false;
