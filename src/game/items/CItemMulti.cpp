@@ -954,7 +954,15 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CChar *pChar)
     }
 
     CChar *pOwner = GetOwner();
-    ITEMID_TYPE itDeed = ITEMID_DEED1;
+    ITEMID_TYPE itDeed;
+    if (IsType(IT_SHIP))
+    {
+       itDeed = ITEMID_SHIP_PLANS1;
+    }
+    else
+    {
+        itDeed = ITEMID_DEED1;
+    }
     TRIGRET_TYPE tRet = TRIGRET_RET_FALSE;
     bool fTransferAll = false;
     CItem *pDeed = CItem::CreateBase(itDeed <= ITEMID_NOTHING ? itDeed : ITEMID_DEED1);

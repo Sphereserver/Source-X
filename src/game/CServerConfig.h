@@ -3,8 +3,8 @@
 *
 */
 
-#ifndef _INC_CRESOURCE_H
-#define _INC_CRESOURCE_H
+#ifndef _INC_CSERVERCONFIG_H
+#define _INC_CSERVERCONFIG_H
 
 #include "../common/sphere_library/CSAssoc.h"
 #include "../common/CExpression.h"
@@ -886,7 +886,7 @@ public:
 	bool m_fCanUndressPets;			// Can players undress their pets?
 	bool m_fMonsterFight;			// Will creatures fight amoung themselves.
 	bool m_fMonsterFear;			// will they run away if hurt ?
-    int  m_iContainerMaxItems;      // Maximum number of items allowed in a container item.
+    uint m_iContainerMaxItems;      // Maximum number of items allowed in a container item.
 	int	 m_iBankIMax;				// Maximum number of items allowed in bank.
 	int  m_iBankWMax;				// Maximum weight in WEIGHT_UNITS stones allowed in bank.
 	int  m_iVendorMaxSell;			// Max things a vendor will sell in one shot.
@@ -1751,4 +1751,4 @@ public:
 #define IsSetMagicFlags(of)		((g_Cfg.m_iMagicFlags & of) != 0)
 
 
-#endif	// _INC_CRESOURCE_H
+#endif	// _INC_CSERVERCONFIG_H
