@@ -7,7 +7,7 @@
 #define _INC_CCLIENT_H
 
 #include "../../common/crypto/CCrypto.h"
-#include "../../common/CScriptObj.h"
+#include "../../common/CScriptTriggerArgs.h"
 #include "../../common/CTextConsole.h"
 #include "../../network/network.h"
 #include "../../network/receive.h"

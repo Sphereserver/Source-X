@@ -7,7 +7,7 @@
 #define _INC_CSERVER_H
 
 #include "../network/CSocket.h"
-#include "../common/sphere_library/CSFile.h"
+#include "../common/CSFileObj.h"
 #include "../common/CTextConsole.h"
 #include "../common/CDataBase.h"
 #include "../common/sqlite/SQLite.h"

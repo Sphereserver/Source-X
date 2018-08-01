@@ -120,8 +120,14 @@ common/CScript.cpp
 common/CScript.h
 common/CScriptObj.cpp
 common/CScriptObj.h
+common/CScriptTriggerArgs.cpp
+common/CScriptTriggerArgs.h
 common/CSectorTemplate.cpp
 common/CSectorTemplate.h
+common/CSFileObj.cpp
+common/CSFileObj.h
+common/CSFileObjContainer.cpp
+common/CSFileObjContainer.h
 common/CSVFile.cpp
 common/CSVFile.h
 common/CTextConsole.cpp

@@ -12,6 +12,7 @@
 #include "../game/components/CCChampion.h"
 #include "../game/items/CItemShip.h"
 #include "../common/sqlite/SQLite.h"
+#include "../common/CSFileObjContainer.h"
 
 #define ADD(a,b) const char * a::m_sClassName = b
 
