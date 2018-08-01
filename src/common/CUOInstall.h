@@ -8,7 +8,7 @@
 
 #include "sphere_library/CSTypedArray.h"
 #include "sphere_library/CSFile.h"
-#include "CsvFile.h"
+#include "CSVFile.h"
 #include "../game/uo_files/CUOIndexRec.h"
 #include "../game/uo_files/CUOVersionBlock.h"
 #include "../game/uo_files/uofiles_enums.h"

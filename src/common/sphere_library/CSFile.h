@@ -41,8 +41,6 @@
 #endif
 
 
-class CSError;
-
 /**
 * @brief Class that dupes the MFC functionality we need
 */
@@ -103,11 +101,10 @@ public:
 	/**
 	* @brief Open a file in a specified mode.
 	* @param pszName file to open.
-	* @param uMode open mode.
-	* @param e TODOC.
+	* @param uiMode open mode.
 	* @return true if file is open, false otherwise.
 	*/
-	virtual bool Open( lpctstr pszName = NULL, uint uMode = OF_READ | OF_SHARE_DENY_NONE, CSError * e = NULL );
+	virtual bool Open( lpctstr pszName, uint uiMode = OF_READ | OF_SHARE_DENY_NONE );
 	///@}
 	/** @name Content Management:
 	 */
@@ -159,7 +156,7 @@ public:
 
 protected:
 	CSString m_strFileName;	// File name (with path).
-	uint m_uMode;   // MMSYSTEM may use 32 bit flags.
+	uint m_uiMode;   // MMSYSTEM may use 32 bit flags.
 };
 
 
@@ -214,18 +211,16 @@ public:
 	/**
 	* @brief Open a file in a specified mode.
 	* @param pszName file to open.
-	* @param uMode open mode.
-	* @param pExtra TODOC.
+	* @param uiMode open mode.
 	* @return true if file is open, false otherwise.
 	*/
-	virtual bool Open( lpctstr pszName = NULL, uint uMode = OF_READ | OF_SHARE_DENY_NONE, void * pExtra = NULL );
+	virtual bool Open( lpctstr pszName, uint uiMode = OF_READ | OF_SHARE_DENY_NONE );
 private:
 	/**
 	* @brief Open file with CFile method.
-	* @param pExtra unused.
 	* @return true if file is open, false otherwise.
 	*/
-	virtual bool OpenBase( void * pExtra );
+	virtual bool OpenBase();
 	///@}
 public:
 	/** @name File name operations:
@@ -319,7 +314,7 @@ public:
 	*/
 	bool IsFileOpen() const;
 protected:
-	virtual bool OpenBase( void * pExtra );
+	virtual bool OpenBase();
 	virtual void CloseBase();
 	///@}
 	/** @name Content management:

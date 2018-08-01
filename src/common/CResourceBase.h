@@ -401,7 +401,7 @@ private:
 	}
 
 protected:
-	virtual bool OpenBase( void * pExtra );
+	virtual bool OpenBase();
 	virtual void CloseBase();
 	virtual bool ReadTextLine( bool fRemoveBlanks );
 

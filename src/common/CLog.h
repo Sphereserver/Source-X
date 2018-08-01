@@ -49,6 +49,7 @@ enum LOG_TYPE
 	LOGM_DEBUG			= 0x080000	// debug kind of message with "DEBUG:" prefix	
 };
 
+class CSError;
 class CScript;
 class CScriptObj;
 

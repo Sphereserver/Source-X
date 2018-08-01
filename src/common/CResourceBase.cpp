@@ -89,22 +89,22 @@ CResourceScript * CResourceBase::FindResourceFile( lpctstr pszPath )
 
 	lpctstr pszTitle = CScript::GetFilesTitle( pszPath );
 
-	for ( size_t i = 0; ; i++ )
+	for ( size_t i = 0; ; ++i )
 	{
 		CResourceScript * pResFile = GetResourceFile(i);
-		if ( pResFile == NULL )
+		if ( pResFile == nullptr )
 			break;
 		lpctstr pszTitle2 = pResFile->GetFileTitle();
 		if ( ! strcmpi( pszTitle2, pszTitle ))
 			return pResFile;
 	}
-	return NULL;
+	return nullptr;
 }
 
 CResourceScript * CResourceBase::AddResourceFile( lpctstr pszName )
 {
 	ADDTOCALLSTACK("CResourceBase::AddResourceFile");
-	ASSERT(pszName != NULL);
+	ASSERT(pszName != nullptr);
 	// Is this really just a dir name ?
 
 	tchar szName[_MAX_PATH];
@@ -117,11 +117,11 @@ CResourceScript * CResourceBase::AddResourceFile( lpctstr pszName )
 	if ( szTitle[0] == '\0' )
 	{
 		AddResourceDir( pszName );
-		return NULL;
+		return nullptr;
 	}
 
 	lpctstr pszExt = CScript::GetFilesExt( szTitle );
-	if ( pszExt == NULL )
+	if ( pszExt == nullptr )
 	{
 		// No file extension provided, so append .scp to the filename
 		strcat( szName, SPHERE_SCRIPT );
@@ -131,7 +131,7 @@ CResourceScript * CResourceBase::AddResourceFile( lpctstr pszName )
 	if ( ! strnicmp( szTitle, SPHERE_FILE "tables", strlen(SPHERE_FILE "tables")))
 	{
 		// Don't dupe this.
-		return NULL;
+		return nullptr;
 	}
 
 	// Try to prevent dupes
@@ -142,7 +142,7 @@ CResourceScript * CResourceBase::AddResourceFile( lpctstr pszName )
 	// Find correct path
 	CScript s;
 	if ( ! OpenResourceFind( s, szName ))
-		return NULL;
+		return nullptr;
 
 	pNewRes = new CResourceScript( s.GetFilePath() );
 	pNewRes->m_iResourceFileIndex = m_ResourceFiles.push_back(pNewRes);
@@ -206,7 +206,7 @@ bool CResourceBase::LoadResources( CResourceScript * pScript )
 {
 	ADDTOCALLSTACK("CResourceBase::LoadResources");
 	// Open the file then load it.
-	if ( pScript == NULL )
+	if ( pScript == nullptr )
 		return false;
 
 	if ( ! pScript->Open())
@@ -231,7 +231,7 @@ CResourceScript * CResourceBase::LoadResourcesAdd( lpctstr pszNewFileName )
 
 	CResourceScript * pScript = AddResourceFile( pszNewFileName );
 	if ( ! LoadResources(pScript) )
-		return NULL;
+		return nullptr;
 	return pScript;
 }
 
@@ -241,7 +241,7 @@ bool CResourceBase::OpenResourceFind( CScript &s, lpctstr pszFilename, bool bCri
 	// Open a single resource script file.
 	// Look in the specified path.
 
-	if ( pszFilename == NULL )
+	if ( pszFilename == nullptr )
 		pszFilename = s.GetFilePath();
 
 	// search the local dir or full path first.
@@ -298,7 +298,7 @@ lpctstr CResourceBase::GetName() const
 CResourceScript * CResourceBase::GetResourceFile( size_t i )
 {
 	if ( ! m_ResourceFiles.IsValidIndex(i) )
-		return NULL;	// All resource files we need to get blocks from later.
+		return nullptr;	// All resource files we need to get blocks from later.
 	return m_ResourceFiles[i];
 }
 
@@ -367,10 +367,10 @@ CResourceDef * CResourceBase::ResourceGetDef( CResourceIDBase rid ) const
 {
 	ADDTOCALLSTACK("CResourceBase::ResourceGetDef");
 	if ( ! rid.IsValidUID() )
-		return NULL;
+		return nullptr;
 	size_t index = m_ResHash.FindKey( rid );
 	if ( index == m_ResHash.BadIndex() )
-		return NULL;
+		return nullptr;
 	return m_ResHash.GetAt( rid, index );
 }
 
@@ -481,10 +481,10 @@ bool CResourceDef::MakeResourceName()
 
 	strcpy(pbuf, "a_");
 
-	lpctstr pszKey = NULL;	// auxiliary, the key of a similar CVarDef, if any found
+	lpctstr pszKey = nullptr;	// auxiliary, the key of a similar CVarDef, if any found
 	pszDef = pbuf + 2;
 
-	for ( ; *pszName; pszName++ )
+	for ( ; *pszName; ++pszName )
 	{
 		ch	= *pszName;
 		if ( ch == ' ' || ch == '\t' || ch == '-' )
@@ -544,7 +544,7 @@ bool CRegion::MakeRegionName()
 		return true;
 
 	tchar ch;
-	lpctstr pszKey = NULL;	// auxiliary, the key of a similar CVarDef, if any found
+	lpctstr pszKey = nullptr;	// auxiliary, the key of a similar CVarDef, if any found
 	tchar * pbuf = Str_GetTemp();
 	tchar * pszDef = pbuf + 2;
 	strcpy(pbuf, "a_");
@@ -728,10 +728,9 @@ void CResourceScript::Close()
 //	CResourceLock
 //
 
-bool CResourceLock::OpenBase( void * pExtra )
+bool CResourceLock::OpenBase()
 {
 	ADDTOCALLSTACK("CResourceLock::OpenBase");
-	UNREFERENCED_PARAMETER(pExtra);
 	ASSERT(m_pLock);
 
 	if ( m_pLock->IsFileOpen() )
@@ -740,7 +739,7 @@ bool CResourceLock::OpenBase( void * pExtra )
 	if ( ! m_pLock->Open() )	// make sure the original is open.
 		return false;
 
-	// Open a seperate copy of an already opend file.
+	// Open a seperate copy of an already opened file.
 	m_pStream = m_pLock->m_pStream;
 	m_llFile = m_pLock->m_llFile;
 #ifndef _NOSCRIPTCACHE
@@ -757,7 +756,7 @@ void CResourceLock::CloseBase()
 {
 	ADDTOCALLSTACK("CResourceLock::CloseBase");
 	ASSERT(m_pLock);
-	m_pStream = NULL;
+	m_pStream = nullptr;
 
 	// Assume this is not the context anymore.
 	m_PrvScriptContext.Close();
@@ -830,7 +829,7 @@ void CResourceLock::AttachObj( const CScriptObj * pObj )
 CResourceLink::CResourceLink( CResourceID rid, const CVarDefContNum * pDef ) :
 	CResourceDef( rid, pDef )
 {
-	m_pScript = NULL;
+	m_pScript = nullptr;
 	m_Context.Init(); // not yet tested.
 	m_lRefInstances = 0;
 	ClearTriggers();
@@ -845,7 +844,7 @@ void CResourceLink::ScanSection( RES_TYPE restype )
 	ADDTOCALLSTACK("CResourceLink::ScanSection");
 	// Scan the section we are linking to for useful stuff.
 	ASSERT(m_pScript);
-	lpctstr const * ppTable = NULL;
+	lpctstr const * ppTable = nullptr;
 	int iQty = 0;
 
 	switch (restype)
@@ -1121,7 +1120,7 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
 			}
 
 			CResourceLink * pResourceLink = dynamic_cast<CResourceLink *>( g_Cfg.ResourceGetDefByName( restype, pszCmd ));
-			if ( pResourceLink == NULL )
+			if ( pResourceLink == nullptr )
 			{
 				fRet = false;
 				continue;
@@ -1138,7 +1137,7 @@ bool CResourceRefArray::r_LoadVal( CScript & s, RES_TYPE restype )
 				pszCmd ++;
 
 			CResourceLink * pResourceLink = dynamic_cast<CResourceLink *>( g_Cfg.ResourceGetDefByName( restype, pszCmd ));
-			if ( pResourceLink == NULL )
+			if ( pResourceLink == nullptr )
 			{
 				fRet = false;
 				DEBUG_ERR(( "Unknown '%s' Resource '%s'\n", CResourceBase::GetResourceBlockName(restype), pszCmd ));
@@ -1244,7 +1243,7 @@ size_t CResourceRefArray::FindResourceName( RES_TYPE restype, lpctstr pszKey ) c
 	ADDTOCALLSTACK("CResourceRefArray::FindResourceName");
 	// Is this resource already in the list ?
 	CResourceLink * pResourceLink = dynamic_cast <CResourceLink *>( g_Cfg.ResourceGetDefByName( restype, pszKey ));
-	if ( pResourceLink == NULL )
+	if ( pResourceLink == nullptr )
 		return BadIndex();
 	return FindPtr(pResourceLink);
 }
@@ -1303,7 +1302,7 @@ int CObjNameSortArray::CompareKey( lpctstr pszID, CScriptObj* pObj, bool fNoSpac
 	if ( fNoSpaces )
 	{
 		const char * p = strchr( pszID, ' ' );
-		if (p != NULL)
+		if (p != nullptr)
 		{
 			size_t iLen = p - pszID;
 			// return( strnicmp( pszID, pObj->GetName(), iLen ) );
@@ -1354,7 +1353,7 @@ size_t CResourceQty::WriteNameSingle( tchar * pszArgs, int iQty ) const
 			return( strcpylen( pszArgs, pItemBase->GetNamePluralize(pItemBase->GetTypeName(),(( iQty > 1 ) ? true : false))) );
 	}
 	const CScriptObj * pResourceDef = g_Cfg.ResourceGetDef( m_rid );
-	if ( pResourceDef != NULL )
+	if ( pResourceDef != nullptr )
 		return( strcpylen( pszArgs, pResourceDef->GetName()) );
 	else
 		return( strcpylen( pszArgs, g_Cfg.ResourceGetName( m_rid )) );
@@ -1483,9 +1482,9 @@ bool CResourceQtyArray::IsResourceMatchAll( CChar * pChar ) const
 	// Check all required skills and non-consumable items.
 	// RETURN:
 	//  false = failed.
-	ASSERT(pChar != NULL);
+	ASSERT(pChar != nullptr);
 
-	for ( size_t i = 0; i < size(); i++ )
+	for ( size_t i = 0; i < size(); ++i )
 	{
 		CResourceID ridtest = at(i).GetResourceID();
 

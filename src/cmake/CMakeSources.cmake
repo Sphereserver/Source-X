@@ -122,8 +122,8 @@ common/CScriptObj.cpp
 common/CScriptObj.h
 common/CSectorTemplate.cpp
 common/CSectorTemplate.h
-common/CsvFile.cpp
-common/CsvFile.h
+common/CSVFile.cpp
+common/CSVFile.h
 common/CTextConsole.cpp
 common/CTextConsole.h
 common/CUOInstall.cpp
@@ -404,8 +404,8 @@ tables/CCharPlayer_functions.tbl
 tables/CCharPlayer_props.tbl
 tables/CClient_functions.tbl
 tables/CClient_props.tbl
-tables/CSFile_functions.tbl
-tables/CSFile_props.tbl
+tables/CSFileObj_functions.tbl
+tables/CSFileObj_props.tbl
 tables/CSFileObjContainer_functions.tbl
 tables/CSFileObjContainer_props.tbl
 tables/CItem_functions.tbl

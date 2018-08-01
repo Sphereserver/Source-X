@@ -14,7 +14,7 @@
 class CacheableScriptFile : public CSFileText
 {
 protected:
-	virtual bool OpenBase(void *pExtra);
+	virtual bool OpenBase();
 	virtual void CloseBase();
 	void dupeFrom(CacheableScriptFile *other);
 
@@ -38,7 +38,7 @@ private:
 	size_t m_currentLine;
 
 protected:
-	std::vector<std::string> * m_fileContent;
+	std::vector<std::string> m_fileContent;
 
 private:
 	bool useDefaultFile() const;
