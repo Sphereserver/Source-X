@@ -33,7 +33,7 @@ private:
 		int m_iDataRevision;
 	};
 
-    std::vector<CItem*> _pLockDowns;
+    std::vector<CUID> _pLockDowns;
 
 	class CSphereMultiCustom : public CSphereMulti
 	{
@@ -69,8 +69,8 @@ private:
 	const CPointMap GetComponentPoint(Component * pComponent) const;
 	const CPointMap GetComponentPoint(short dx, short dy, char dz) const;
 	void CopyDesign(DesignDetails * designFrom, DesignDetails * designTo);
-    void GetLockdownsAt(short dx, short dy, char dz, std::vector<CItem*> &vList);
-    void GetSecuredAt(short dx, short dy, char dz, std::vector<CItemContainer*> &vList);
+    void GetLockdownsAt(short dx, short dy, char dz, std::vector<CUID> &vList);
+    void GetSecuredAt(short dx, short dy, char dz, std::vector<CUID> &vList);
     char CalculateLevel(char z);
 
 private:

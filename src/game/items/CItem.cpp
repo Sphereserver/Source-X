@@ -74,14 +74,14 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 /////////////////////////////////////////////////////////////////
 // -CItem
 
-    void CItem::SetComponentOfMulti(CItemMulti * pMulti)
+    void CItem::SetComponentOfMulti(CUID uidMulti)
     {
-        _pMultiComponent = pMulti;
+        _uidMultiComponent = uidMulti;
     }
 
-    void CItem::SetLockDownOfMulti(CItemMulti * pMulti)
+    void CItem::SetLockDownOfMulti(CUID uidMulti)
     {
-        _pMultiLockDown = pMulti;
+        _uidMultiLockDown = uidMulti;
     }
 
     CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CObjBase( true )
@@ -107,8 +107,8 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
 	g_World.m_uidLastNewItem = GetUID();	// for script access.
 	ASSERT( IsDisconnected() );
 
-    _pMultiComponent = nullptr;
-    _pMultiLockDown = nullptr;
+    _uidMultiComponent.InitUID();
+    _uidMultiLockDown.InitUID();
 
     // Manual CComponents addition
 
@@ -177,13 +177,21 @@ CItem::~CItem()
 		default:
 			break;
 	}
-    if (_pMultiComponent)
+    if (_uidMultiComponent.IsValidUID())
     {
-        _pMultiComponent->DelComp(this);
+        CItemMulti *pMulti = static_cast<CItemMulti*>(_uidMultiComponent.ItemFind());
+        if (pMulti)
+        {
+            pMulti->DelComp(GetUID());
+        }
     }
-    if (_pMultiLockDown)
+    if (_uidMultiLockDown.IsValidUID())
     {
-        _pMultiLockDown->UnlockItem(this);
+        CItemMulti *pMulti = static_cast<CItemMulti*>(_uidMultiLockDown.ItemFind());
+        if (pMulti)
+        {
+            pMulti->UnlockItem(GetUID());
+        }
     }
 	g_Serv.StatDec(SERV_STAT_ITEMS);
 }

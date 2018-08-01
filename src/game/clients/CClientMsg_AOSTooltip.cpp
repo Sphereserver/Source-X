@@ -195,7 +195,6 @@ void CClient::AOSTooltip_addName(const CObjBase* pObj)
 {
 	CItem *pItem = pObj->IsItem() ? const_cast<CItem *>(static_cast<const CItem *>(pObj)) : NULL;
 	CChar *pChar = pObj->IsChar() ? const_cast<CChar *>(static_cast<const CChar *>(pObj)) : NULL;
-	CChar *pClientChar = GetChar();
 	CClientTooltip* t = NULL;
 
 	dword dwClilocName = (dword)(pObj->GetDefNum("NAMELOC", true, true));

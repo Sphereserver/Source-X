@@ -13,7 +13,7 @@ CItemStone::CItemStone( ITEMID_TYPE id, CItemBase * pItemDef ) : CItem( id, pIte
 {
 	m_itStone.m_iAlign = STONEALIGN_STANDARD;
     g_World.m_Stones.push_back(this);
-    _pMultiStorage = new CMultiStorage(nullptr);
+    _pMultiStorage = new CMultiStorage(UID_UNUSED);
     _iMaxShips = g_Cfg._iMaxShipsGuild;
     _iMaxHouses = g_Cfg._iMaxHousesGuild;
 }
@@ -305,7 +305,7 @@ bool CItemStone::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 
         if (nNumber < GetMultiStorage()->GetHouseCountReal())
         {
-            pRef = GetMultiStorage()->GetHouseAt(nNumber);
+            pRef = static_cast<CItemMulti*>(GetMultiStorage()->GetHouseAt(nNumber).ItemFind());
             return true;
         }
     }
@@ -320,7 +320,7 @@ bool CItemStone::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 
         if (nNumber < GetMultiStorage()->GetShipCountReal())
         {
-            pRef = GetMultiStorage()->GetShipAt(nNumber);
+            pRef = static_cast<CItemShip*>(GetMultiStorage()->GetShipAt(nNumber).ItemFind());
             return true;
         }
     }
@@ -341,7 +341,7 @@ bool CItemStone::r_LoadVal( CScript & s ) // Load an item Script
         case STC_ADDHOUSE:
         case STC_ADDSHIP:
         {
-            GetMultiStorage()->AddMulti(static_cast<CItemMulti*>(((CUID)s.GetArgDWVal()).ItemFind()), HP_GUILD);
+            GetMultiStorage()->AddMulti(((CUID)s.GetArgDWVal()), HP_GUILD);
             return true;
         }
 		case STC_ALIGN: // "ALIGN"
@@ -771,7 +771,7 @@ bool CItemStone::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
         case ISV_DELHOUSE:
         case ISV_DELSHIP:
         {
-            GetMultiStorage()->DelMulti(static_cast<CItemMulti*>(((CUID)s.GetArgDWVal()).ItemFind()));
+            GetMultiStorage()->DelMulti((CUID)s.GetArgDWVal());
             return true;
         }
 		case ISV_ALLGUILDS:
