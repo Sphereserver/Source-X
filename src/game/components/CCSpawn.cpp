@@ -33,8 +33,8 @@ CCSpawn::~CCSpawn()
 
 uint16 CCSpawn::GetAmount()
 {
-	//ADDTOCALLSTACK_INTENSIVE("CCSpawn::GetAmount");
-	return _iAmount;
+    //ADDTOCALLSTACK_INTENSIVE("CCSpawn::GetAmount");
+    return _iAmount;
 }
 
 uint16 CCSpawn::GetCurrentSpawned()
@@ -69,32 +69,32 @@ CResourceIDBase CCSpawn::GetSpawnID()
 
 void CCSpawn::SetAmount(uint16 iAmount)
 {
-	ADDTOCALLSTACK("CCSpawn::SetAmount");
-	_iAmount = iAmount;
+    ADDTOCALLSTACK("CCSpawn::SetAmount");
+    _iAmount = iAmount;
 }
 
 CCharBase *CCSpawn::TryChar(CREID_TYPE &id)
 {
-	ADDTOCALLSTACK("CCSpawn:TryChar");
-	CCharBase *pCharDef = CCharBase::FindCharBase(id);
-	if ( pCharDef )
-	{
+    ADDTOCALLSTACK("CCSpawn:TryChar");
+    CCharBase *pCharDef = CCharBase::FindCharBase(id);
+    if (pCharDef)
+    {
         _idSpawn = CResourceID(RES_CHARDEF, id);
-		return pCharDef;
-	}
-	return nullptr;
+        return pCharDef;
+    }
+    return nullptr;
 }
 
 CItemBase *CCSpawn::TryItem(ITEMID_TYPE &id)
 {
-	ADDTOCALLSTACK("CCSpawn:TryItem");
-	CItemBase *pItemDef = CItemBase::FindItemBase(id);
-	if ( pItemDef )
-	{
+    ADDTOCALLSTACK("CCSpawn:TryItem");
+    CItemBase *pItemDef = CItemBase::FindItemBase(id);
+    if (pItemDef)
+    {
         _idSpawn = CResourceID(RES_ITEMDEF, id);
-		return pItemDef;
-	}
-	return nullptr;
+        return pItemDef;
+    }
+    return nullptr;
 }
 
 CResourceDef *CCSpawn::FixDef()
@@ -145,15 +145,15 @@ CResourceDef *CCSpawn::FixDef()
 
 uint CCSpawn::WriteName(tchar *pszOut) const
 {
-	ADDTOCALLSTACK("CCSpawn::GetName");
-	lpctstr pszName = NULL;
-	CResourceDef *pDef = g_Cfg.ResourceGetDef(_idSpawn);
-	if ( pDef != nullptr)
-		pszName = pDef->GetName();
-	if ( pDef == nullptr || pszName == NULL || pszName[0] == '\0' )
-		pszName = g_Cfg.ResourceGetName(_idSpawn);
+    ADDTOCALLSTACK("CCSpawn::GetName");
+    lpctstr pszName = NULL;
+    CResourceDef *pDef = g_Cfg.ResourceGetDef(_idSpawn);
+    if (pDef != nullptr)
+        pszName = pDef->GetName();
+    if (pDef == nullptr || pszName == NULL || pszName[0] == '\0')
+        pszName = g_Cfg.ResourceGetName(_idSpawn);
 
-	return sprintf(pszOut, " (%s)", pszName);
+    return sprintf(pszOut, " (%s)", pszName);
 }
 
 void CCSpawn::Delete(bool fForce)
@@ -211,63 +211,63 @@ void CCSpawn::GenerateItem(CResourceDef *pDef)
 
 void CCSpawn::GenerateChar(CResourceDef *pDef)
 {
-	ADDTOCALLSTACK("CCSpawn::GenerateChar");
+    ADDTOCALLSTACK("CCSpawn::GenerateChar");
     const CItem *pItem = static_cast<const CItem*>(GetLink());
-	if ( !pItem->IsTopLevel() )
-		return;
+    if (!pItem->IsTopLevel())
+        return;
 
-	CResourceIDBase rid = pDef->GetResourceID();
-	if ( rid.GetResType() == RES_SPAWN )
-	{
-		const CSRandGroupDef *pSpawnGroup = static_cast<const CSRandGroupDef *>(pDef);
-		ASSERT(pSpawnGroup);
-		size_t i = pSpawnGroup->GetRandMemberIndex();
-		if ( i != pSpawnGroup->BadMemberIndex() )
-			rid = pSpawnGroup->GetMemberID(i);
-	}
+    CResourceIDBase rid = pDef->GetResourceID();
+    if (rid.GetResType() == RES_SPAWN)
+    {
+        const CSRandGroupDef *pSpawnGroup = static_cast<const CSRandGroupDef *>(pDef);
+        ASSERT(pSpawnGroup);
+        size_t i = pSpawnGroup->GetRandMemberIndex();
+        if (i != pSpawnGroup->BadMemberIndex())
+            rid = pSpawnGroup->GetMemberID(i);
+    }
 
-	if ( (rid.GetResType() != RES_CHARDEF) && (rid.GetResType() != RES_UNKNOWN) )
-		return;
+    if ((rid.GetResType() != RES_CHARDEF) && (rid.GetResType() != RES_UNKNOWN))
+        return;
 
-	CChar *pChar = CChar::CreateBasic(static_cast<CREID_TYPE>(rid.GetResIndex()));
-	if ( !pChar )
-		return;
+    CChar *pChar = CChar::CreateBasic(static_cast<CREID_TYPE>(rid.GetResIndex()));
+    if (!pChar)
+        return;
 
-	CPointMap pt = pItem->GetTopPoint();
-	pChar->NPC_LoadScript(true);
-	pChar->StatFlag_Set(STATF_SPAWNED);
-	// Try placing this char near the spawn
-	if ( !pChar->MoveNearObj(pItem, _iMaxDist ? (word)(Calc_GetRandVal(_iMaxDist) + 1) : 1) )
-	{
-		// If this fails, try placing the char ON the spawn
-		if (!pChar->MoveTo(pt))
-		{
-			DEBUG_ERR(("Spawner UID:0%" PRIx32 " is unable to place a character inside the world, deleted the character.", (dword)pItem->GetUID()));
-			pChar->Delete();
-			return;
-		}
-	}
+    CPointMap pt = pItem->GetTopPoint();
+    pChar->NPC_LoadScript(true);
+    pChar->StatFlag_Set(STATF_SPAWNED);
+    // Try placing this char near the spawn
+    if (!pChar->MoveNearObj(pItem, _iMaxDist ? (word)(Calc_GetRandVal(_iMaxDist) + 1) : 1))
+    {
+        // If this fails, try placing the char ON the spawn
+        if (!pChar->MoveTo(pt))
+        {
+            DEBUG_ERR(("Spawner UID:0%" PRIx32 " is unable to place a character inside the world, deleted the character.", (dword)pItem->GetUID()));
+            pChar->Delete();
+            return;
+        }
+    }
 
-	// Check if the NPC can spawn in this region
-	CRegion *pRegion = pt.GetRegion(REGION_TYPE_AREA);
-	if ( !pRegion || (pRegion->IsGuarded() && pChar->Noto_IsEvil()) )
-	{
-		pChar->Delete();
-		return;
-	}
+    // Check if the NPC can spawn in this region
+    CRegion *pRegion = pt.GetRegion(REGION_TYPE_AREA);
+    if (!pRegion || (pRegion->IsGuarded() && pChar->Noto_IsEvil()))
+    {
+        pChar->Delete();
+        return;
+    }
 
-	AddObj(pChar->GetUID());
-	pChar->NPC_CreateTrigger();		// removed from NPC_LoadScript() and triggered after char placement and attachment to the spawnitem
-	pChar->Update();
+    AddObj(pChar->GetUID());
+    pChar->NPC_CreateTrigger();		// removed from NPC_LoadScript() and triggered after char placement and attachment to the spawnitem
+    pChar->Update();
 
-	size_t iCount = pItem->GetTopSector()->GetCharComplexity();
-	if ( iCount > g_Cfg.m_iMaxCharComplexity )
-		g_Log.Event(LOGL_WARN, "%" PRIuSIZE_T " chars at %s. Sector too complex!\n", iCount, pItem->GetTopSector()->GetBasePoint().WriteUsed());
+    size_t iCount = pItem->GetTopSector()->GetCharComplexity();
+    if (iCount > g_Cfg.m_iMaxCharComplexity)
+        g_Log.Event(LOGL_WARN, "%" PRIuSIZE_T " chars at %s. Sector too complex!\n", iCount, pItem->GetTopSector()->GetBasePoint().WriteUsed());
 }
 
 void CCSpawn::DelObj(CUID uid)
 {
-	ADDTOCALLSTACK("CCSpawn::DelObj");
+    ADDTOCALLSTACK("CCSpawn::DelObj");
     if (_fKillingChildren)
     {
         return; // Speeding up the KillChildren proccess and avoiding not needed code called on 'childrens'.
@@ -284,8 +284,8 @@ void CCSpawn::DelObj(CUID uid)
     }
 
     CItem *pItem = static_cast<CItem*>(GetLink());
-	for ( std::vector<CUID>::iterator it = _uidList.begin(); it != _uidList.end(); ++it )
-	{
+    for (std::vector<CUID>::iterator it = _uidList.begin(); it != _uidList.end(); ++it)
+    {
         if (*it == uid)
         {
             CObjBase *pObj = uid.ObjFind();
@@ -306,16 +306,16 @@ void CCSpawn::DelObj(CUID uid)
             _uidList.erase(it);
             break;
         }
-	}
+    }
     pItem->ResendTooltip();
 }
 
 void CCSpawn::AddObj(CUID uid)
 {
-	ADDTOCALLSTACK("CCSpawn::AddObj");
-	// NOTE: This function is also called when loading spawn items
-	// on server startup. In this case, some objs UID still invalid
-	// (not loaded yet) so just proceed without any checks.
+    ADDTOCALLSTACK("CCSpawn::AddObj");
+    // NOTE: This function is also called when loading spawn items
+    // on server startup. In this case, some objs UID still invalid
+    // (not loaded yet) so just proceed without any checks.
 
     uint16 iMax = maximum(GetAmount(), 1);
     CItem *pItem = static_cast<CItem*>(GetLink());
@@ -326,46 +326,46 @@ void CCSpawn::AddObj(CUID uid)
 
     bool fIsSpawnChar = (pItem->IsType(IT_SPAWN_CHAR) || pItem->IsType(IT_SPAWN_CHAMPION));
 
-	if ( !g_Serv.IsLoading() )
-	{
+    if (!g_Serv.IsLoading())
+    {
         if (!uid.IsValidUID())  // Only checking UIDs when server is running because some uids may no yet exist when loading worldsave.
         {
             return;
         }
-		if (fIsSpawnChar)				// IT_SPAWN_CHAR and IT_SPAWN_CHAMPION can only spawn NPCs.
-		{
-			CChar *pChar = uid.CharFind();
-			if ( !pChar || !pChar->m_pNPC )
-				return;
-		}
+        if (fIsSpawnChar)				// IT_SPAWN_CHAR and IT_SPAWN_CHAMPION can only spawn NPCs.
+        {
+            CChar *pChar = uid.CharFind();
+            if (!pChar || !pChar->m_pNPC)
+                return;
+        }
         else if (pItem->IsType(IT_SPAWN_ITEM) && !uid.ItemFind())		// IT_SPAWN_ITEM can only spawn items
         {
             return;
         }
 
-		CCSpawn *pPrevSpawn = static_cast<CCSpawn*>(uid.ObjFind()->GetComponent(COMP_SPAWN));
-		if ( pPrevSpawn )
-		{
-			if ( pPrevSpawn == this )		// obj already linked to this spawn
-				return;
-			pPrevSpawn->DelObj(uid);		// obj linked to other spawn, remove the link before proceed
-		}
-	}
+        CCSpawn *pPrevSpawn = static_cast<CCSpawn*>(uid.ObjFind()->GetComponent(COMP_SPAWN));
+        if (pPrevSpawn)
+        {
+            if (pPrevSpawn == this)		// obj already linked to this spawn
+                return;
+            pPrevSpawn->DelObj(uid);		// obj linked to other spawn, remove the link before proceed
+        }
+    }
     _uidList.emplace_back(uid);
 
-	if ( !g_Serv.IsLoading() )  // Objs are linked to the spawn at each server start and must not be linked from here, since the Obj may not yet exist.
-	{
-		uid.ObjFind()->SetSpawn(this);
-		if (fIsSpawnChar)
-		{
-			CChar *pChar = uid.CharFind();
-			ASSERT(pChar->m_pNPC);
-			pChar->StatFlag_Set(STATF_SPAWNED);
-			pChar->m_ptHome = pItem->GetTopPoint();
-			pChar->m_pNPC->m_Home_Dist_Wander = (word)_iMaxDist;
-		}
-	}
-	if ( !g_Serv.IsLoading() )
+    if (!g_Serv.IsLoading())  // Objs are linked to the spawn at each server start and must not be linked from here, since the Obj may not yet exist.
+    {
+        uid.ObjFind()->SetSpawn(this);
+        if (fIsSpawnChar)
+        {
+            CChar *pChar = uid.CharFind();
+            ASSERT(pChar->m_pNPC);
+            pChar->StatFlag_Set(STATF_SPAWNED);
+            pChar->m_ptHome = pItem->GetTopPoint();
+            pChar->m_pNPC->m_Home_Dist_Wander = (word)_iMaxDist;
+        }
+    }
+    if (!g_Serv.IsLoading())
         pItem->ResendTooltip();
 }
 
@@ -418,9 +418,11 @@ CCRET_TYPE CCSpawn::OnTick()
 
 void CCSpawn::KillChildren()
 {
-	ADDTOCALLSTACK("CCSpawn::KillChildren");
-	if (_uidList.empty())
-		return;
+    ADDTOCALLSTACK("CCSpawn::KillChildren");
+    if (_uidList.empty())
+    {
+        return;
+    }
 
     _fKillingChildren = true;
     for (std::vector<CUID>::iterator it = _uidList.begin(); it != _uidList.end(); ++it)
@@ -447,7 +449,7 @@ void CCSpawn::KillChildren()
 
 CCharBase *CCSpawn::SetTrackID()
 {
-	ADDTOCALLSTACK("CCSpawn::SetTrackID");
+    ADDTOCALLSTACK("CCSpawn::SetTrackID");
 
     CItem *pItem = static_cast<CItem*>(GetLink());
     pItem->SetAttr(ATTR_INVIS);	// Indicate to GM's that it is invis.
@@ -456,30 +458,30 @@ CCharBase *CCSpawn::SetTrackID()
         pItem->SetHue(HUE_RED_DARK);
     }
 
-	if ( !pItem->IsType(IT_SPAWN_CHAR) )
-	{
+    if (!pItem->IsType(IT_SPAWN_CHAR))
+    {
         pItem->SetDispID(ITEMID_WorldGem_lg);
-		return nullptr;
-	}
+        return nullptr;
+    }
 
-	CCharBase *pCharDef = nullptr;
-	CResourceIDBase rid = _idSpawn;
+    CCharBase *pCharDef = nullptr;
+    CResourceIDBase rid = _idSpawn;
 
-	if ( rid.GetResType() == RES_CHARDEF )
-	{
-		CREID_TYPE id = static_cast<CREID_TYPE>(rid.GetResIndex());
-		pCharDef = CCharBase::FindCharBase(id);
-	}
+    if (rid.GetResType() == RES_CHARDEF)
+    {
+        CREID_TYPE id = static_cast<CREID_TYPE>(rid.GetResIndex());
+        pCharDef = CCharBase::FindCharBase(id);
+    }
     pItem->SetDispID(pCharDef ? pCharDef->m_trackID : ITEMID_TRACK_WISP);	// They must want it to look like this.
 
-	return pCharDef;
+    return pCharDef;
 }
 
 enum ISPW_TYPE
 {
     ISPW_ADDOBJ,
-	ISPW_AMOUNT,
-	ISPW_COUNT,
+    ISPW_AMOUNT,
+    ISPW_COUNT,
     ISPW_MAXDIST,
     ISPW_MORE,
     ISPW_MORE1,
@@ -492,7 +494,7 @@ enum ISPW_TYPE
     ISPW_SPAWNID,
     ISPW_TIMEHI,
     ISPW_TIMELO,
-	ISPW_QTY
+    ISPW_QTY
 };
 
 lpctstr const CCSpawn::sm_szLoadKeys[ISPW_QTY + 1] =
@@ -512,14 +514,14 @@ lpctstr const CCSpawn::sm_szLoadKeys[ISPW_QTY + 1] =
     "SPAWNID",
     "TIMEHI",
     "TIMELO",
-	NULL
+    NULL
 };
 
 bool CCSpawn::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole *pSrc)
 {
-	ADDTOCALLSTACK("CCSpawn::r_WriteVal");
+    ADDTOCALLSTACK("CCSpawn::r_WriteVal");
     UNREFERENCED_PARAMETER(pSrc);
-	EXC_TRY("WriteVal");
+    EXC_TRY("WriteVal");
 
     int iCmd = FindTableSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
     if (iCmd < 0)
@@ -588,24 +590,24 @@ bool CCSpawn::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole *pSrc)
         default:
             return false;    // Match but no code executed.
     }
-	EXC_CATCH;
-	return false;   // No match, let the code continue.
+    EXC_CATCH;
+    return false;   // No match, let the code continue.
 }
 
 bool CCSpawn::r_LoadVal(CScript & s)
 {
-	ADDTOCALLSTACK("CCSpawn::r_LoadVal");
-	EXC_TRY("LoadVal");
+    ADDTOCALLSTACK("CCSpawn::r_LoadVal");
+    EXC_TRY("LoadVal");
 
-	int iCmd = FindTableSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
+    int iCmd = FindTableSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
     if (iCmd < 0)
     {
         return false;
     }
     CItem *pItem = static_cast<CItem*>(GetLink());
 
-	switch ( iCmd )
-	{
+    switch (iCmd)
+    {
         case ISPW_ADDOBJ:
         {
             AddObj(CUID(s.GetArgDWVal()));
@@ -708,17 +710,17 @@ bool CCSpawn::r_LoadVal(CScript & s)
             }
             return true;
         }
-		default:
+        default:
             return false;
-	}
-	EXC_CATCH;
-	return false;
+    }
+    EXC_CATCH;
+    return false;
 }
 
 void CCSpawn::r_Write(CScript & s)
 {
-	ADDTOCALLSTACK("CCSpawn:r_Write");
-	EXC_TRY("Write");
+    ADDTOCALLSTACK("CCSpawn:r_Write");
+    EXC_TRY("Write");
     CItem *pItem = static_cast<CItem*>(GetLink());
 
     if (GetAmount() != 1)
@@ -727,7 +729,7 @@ void CCSpawn::r_Write(CScript & s)
     }
 
     s.WriteKey("SPAWNID", g_Cfg.ResourceGetName(_idSpawn));
-    if ( GetPile() != 1 && pItem->GetType() == IT_SPAWN_ITEM)
+    if (GetPile() != 1 && pItem->GetType() == IT_SPAWN_ITEM)
     {
         s.WriteKeyVal("PILE", GetPile());
     }
@@ -740,18 +742,18 @@ void CCSpawn::r_Write(CScript & s)
         return;
     }
 
-	for ( std::vector<CUID>::iterator it = _uidList.begin(); it != _uidList.end(); ++it )
-	{
-		if ( !it->IsValidUID() )
-			continue;
-		CObjBase *pObj = it->ObjFind();
+    for (std::vector<CUID>::iterator it = _uidList.begin(); it != _uidList.end(); ++it)
+    {
+        if (!it->IsValidUID())
+            continue;
+        CObjBase *pObj = it->ObjFind();
         if (pObj)
         {
             s.WriteKeyHex("ADDOBJ", pObj->GetUID().GetObjUID());
         }
-	}
+    }
 
-	EXC_CATCH;
+    EXC_CATCH;
 }
 
 enum SPAWN_REF

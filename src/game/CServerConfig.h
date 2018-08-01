@@ -3,8 +3,8 @@
 *
 */
 
-#ifndef _INC_CRESOURCE_H
-#define _INC_CRESOURCE_H
+#ifndef _INC_CSERVERCONFIG_H
+#define _INC_CSERVERCONFIG_H
 
 #include "../common/sphere_library/CSAssoc.h"
 #include "../common/CExpression.h"
@@ -1751,4 +1751,4 @@ public:
 #define IsSetMagicFlags(of)		((g_Cfg.m_iMagicFlags & of) != 0)
 
 
-#endif	// _INC_CRESOURCE_H
+#endif	// _INC_CSERVERCONFIG_H

@@ -1069,3 +1069,8 @@ Multis:
 	and the older 2D client versions. The Enhanced Client supports a maximum af 125 items per container, so it's suggested to update this setting if you are going to use that client.
 - Fixed: Switching weapon while attacking didn't abort the previous swing (Issue #108).
 - Fixed: Hit chance (ACTDIFF) wasn't recalculated after each combat swing (Issue #116).
+
+01-08-2018, XuN
+- Changed BonusHits/Stam/Mana to increase ModHits/Stam/Mana instead of the real stats
+- Fixed tooltips not sending data
+- Fixed ship redeeds creating normal deeds instead of ship plans.
