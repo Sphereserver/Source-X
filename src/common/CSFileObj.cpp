@@ -39,64 +39,68 @@ lpctstr const CSFileObj::sm_szVerbKeys[FOV_QTY+1] =
 
 CSFileObj::CSFileObj()
 {
-    sWrite = new CSFileText();
-    tBuffer = new tchar [SCRIPT_MAX_LINE_LEN];
-    cgWriteBuffer = new CSString();
+    _pFile = new CSFileText();
+    _ptcReadBuffer = new tchar [SCRIPT_MAX_LINE_LEN];
+    _psWriteBuffer = new CSString();
     SetDefaultMode();
 }
 
 CSFileObj::~CSFileObj()
 {
-    if (sWrite->IsFileOpen())
-        sWrite->Close();
+    if (_pFile->IsFileOpen())
+        _pFile->Close();
 
-    delete cgWriteBuffer;
-    delete[] tBuffer;
-    delete sWrite;
+    delete _psWriteBuffer;
+    delete[] _ptcReadBuffer;
+    delete _pFile;
 }
 
-void CSFileObj::SetDefaultMode(void)
+void CSFileObj::SetDefaultMode()
 {
     ADDTOCALLSTACK("CSFileObj::SetDefaultMode");
-    bAppend = true; bCreate = false;
-    bRead = true; bWrite = true;
+    _fAppend = true; _fCreate = false;
+    _fRead = true; _fWrite = true;
 }
 
-tchar * CSFileObj::GetReadBuffer(bool bDelete = false)
+tchar * CSFileObj::GetReadBuffer(bool fDelete)
 {
     ADDTOCALLSTACK("CSFileObj::GetReadBuffer");
-    if ( bDelete )
-        memset(this->tBuffer, 0, SCRIPT_MAX_LINE_LEN);
+    if ( fDelete )
+    {
+        memset(this->_ptcReadBuffer, 0, SCRIPT_MAX_LINE_LEN);
+    }
     else
-        *tBuffer = 0;
+    {
+        *_ptcReadBuffer = 0;
+    }
 
-    return tBuffer;
+    return _ptcReadBuffer;
 }
 
-CSString * CSFileObj::GetWriteBuffer(void)
+CSString * CSFileObj::GetWriteBuffer()
 {
     ADDTOCALLSTACK("CSFileObj::GetWriteBuffer");
-    if ( !cgWriteBuffer )
-        cgWriteBuffer = new CSString();
+    if ( !_psWriteBuffer )
+        _psWriteBuffer = new CSString();
 
-    cgWriteBuffer->Empty( ( cgWriteBuffer->GetLength() > (SCRIPT_MAX_LINE_LEN/4) ) );
+    _psWriteBuffer->Empty( ( _psWriteBuffer->GetLength() > (SCRIPT_MAX_LINE_LEN/4) ) );
 
-    return cgWriteBuffer;
+    return _psWriteBuffer;
 }
 
 bool CSFileObj::IsInUse()
 {
     ADDTOCALLSTACK("CSFileObj::IsInUse");
-    return sWrite->IsFileOpen();
+    return _pFile->IsFileOpen();
 }
 
 void CSFileObj::FlushAndClose()
 {
     ADDTOCALLSTACK("CSFileObj::FlushAndClose");
-    if ( sWrite->IsFileOpen() )
+    if ( _pFile->IsFileOpen() )
     {
-        sWrite->Flush();
-        sWrite->Close();
+        _pFile->Flush();
+        _pFile->Close();
     }
 }
 
@@ -119,22 +123,22 @@ bool CSFileObj::r_LoadVal( CScript & s )
     if ( !strnicmp("MODE.",pszKey,5) )
     {
         pszKey += 5;
-        if ( ! sWrite->IsFileOpen() )
+        if ( ! _pFile->IsFileOpen() )
         {
             if ( !strnicmp("APPEND",pszKey,6) )
             {
-                bAppend = (s.GetArgVal() != 0);
-                bCreate = false;
+                _fAppend = (s.GetArgVal() != 0);
+                _fCreate = false;
             }
             else if ( !strnicmp("CREATE",pszKey,6) )
             {
-                bCreate = (s.GetArgVal() != 0);
-                bAppend = false;
+                _fCreate = (s.GetArgVal() != 0);
+                _fAppend = false;
             }
             else if ( !strnicmp("READFLAG",pszKey,8) )
-                bRead = (s.GetArgVal() != 0);
+                _fRead = (s.GetArgVal() != 0);
             else if ( !strnicmp("WRITEFLAG",pszKey,9) )
-                bWrite = (s.GetArgVal() != 0);
+                _fWrite = (s.GetArgVal() != 0);
             else if ( !strnicmp("SETDEFAULT",pszKey,7) )
                 SetDefaultMode();
             else
@@ -144,7 +148,7 @@ bool CSFileObj::r_LoadVal( CScript & s )
         }
         else
         {
-            g_Log.Event(LOGL_ERROR, "FILE (%s): Cannot set mode after file opening\n", static_cast<lpctstr>(sWrite->GetFilePath()));
+            g_Log.Event(LOGL_ERROR, "FILE (%s): Cannot set mode after file opening\n", static_cast<lpctstr>(_pFile->GetFilePath()));
         }
         return false;
     }
@@ -157,10 +161,10 @@ bool CSFileObj::r_LoadVal( CScript & s )
         case FO_WRITECHR:
         case FO_WRITELINE:
         {
-            bool bLine = (index == FO_WRITELINE);
-            bool bChr = (index == FO_WRITECHR);
+            bool fLine = (index == FO_WRITELINE);
+            bool fChr = (index == FO_WRITECHR);
 
-            if ( !sWrite->IsFileOpen() )
+            if ( !_pFile->IsFileOpen() )
             {
                 g_Log.Event(LOGL_ERROR, "FILE: Cannot write content. Open the file first.\n");
                 return false;
@@ -171,7 +175,7 @@ bool CSFileObj::r_LoadVal( CScript & s )
 
             CSString * pcsWriteBuf = this->GetWriteBuffer();
 
-            if ( bLine )
+            if ( fLine )
             {
                 pcsWriteBuf->Copy( s.GetArgStr() );
 #ifdef _WIN32
@@ -180,23 +184,29 @@ bool CSFileObj::r_LoadVal( CScript & s )
                 pcsWriteBuf->Add( "\n" );
 #endif
             }
-            else if ( bChr )
+            else if ( fChr )
             {
                 pcsWriteBuf->Format( "%c", static_cast<tchar>(s.GetArgVal()) );
             }
             else
-                pcsWriteBuf->Copy( s.GetArgStr() );
-
-            bool bSuccess = false;
-
-            if ( bChr )
-                bSuccess = sWrite->Write(pcsWriteBuf->GetPtr(), 1);
-            else
-                bSuccess = sWrite->WriteString( pcsWriteBuf->GetPtr() );
-
-            if ( !bSuccess )
             {
-                g_Log.Event(LOGL_ERROR, "FILE: Failed writing to \"%s\".\n", static_cast<lpctstr>(sWrite->GetFilePath()));
+                pcsWriteBuf->Copy( s.GetArgStr() );
+            }
+
+            bool fSuccess = false;
+
+            if ( fChr )
+            {
+                fSuccess = _pFile->Write(pcsWriteBuf->GetPtr(), 1);
+            }
+            else
+            {
+                fSuccess = _pFile->WriteString( pcsWriteBuf->GetPtr() );
+            }
+
+            if ( !fSuccess )
+            {
+                g_Log.Event(LOGL_ERROR, "FILE: Failed writing to \"%s\".\n", static_cast<lpctstr>(_pFile->GetFilePath()));
                 return false;
             }
         } break;
@@ -225,13 +235,13 @@ bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc 
     {
         pszKey += 5;
         if ( !strnicmp("APPEND",pszKey,6) )
-            sVal.FormatVal( bAppend );
+            sVal.FormatVal( _fAppend );
         else if ( !strnicmp("CREATE",pszKey,6) )
-            sVal.FormatVal( bCreate );
+            sVal.FormatVal( _fCreate );
         else if ( !strnicmp("READFLAG",pszKey,8) )
-            sVal.FormatVal( bRead );
+            sVal.FormatVal( _fRead );
         else if ( !strnicmp("WRITEFLAG",pszKey,9) )
-            sVal.FormatVal( bWrite );
+            sVal.FormatVal( _fWrite );
         else
             return false;
 
@@ -289,19 +299,19 @@ bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc 
         } break;
 
         case FO_FILEPATH:
-            sVal.Format("%s", sWrite->IsFileOpen() ? static_cast<lpctstr>(sWrite->GetFilePath()) : "" );
+            sVal.Format("%s", _pFile->IsFileOpen() ? static_cast<lpctstr>(_pFile->GetFilePath()) : "" );
             break;
 
         case FO_INUSE:
-            sVal.FormatVal( sWrite->IsFileOpen() );
+            sVal.FormatVal( _pFile->IsFileOpen() );
             break;
 
         case FO_ISEOF:
-            sVal.FormatVal( sWrite->IsEOF() );
+            sVal.FormatVal( _pFile->IsEOF() );
             break;
 
         case FO_LENGTH:
-            sVal.FormatSTVal( sWrite->IsFileOpen() ? sWrite->GetLength() : -1 );
+            sVal.FormatSTVal( _pFile->IsFileOpen() ? _pFile->GetLength() : -1 );
             break;
 
         case FO_OPEN:
@@ -313,9 +323,9 @@ bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc 
             if ( !( ppCmd && strlen(ppCmd) ))
                 return false;
 
-            if ( sWrite->IsFileOpen() )
+            if ( _pFile->IsFileOpen() )
             {
-                g_Log.Event(LOGL_ERROR, "FILE: Cannot open file (%s). First close \"%s\".\n", ppCmd, static_cast<lpctstr>(sWrite->GetFilePath()));
+                g_Log.Event(LOGL_ERROR, "FILE: Cannot open file (%s). First close \"%s\".\n", ppCmd, static_cast<lpctstr>(_pFile->GetFilePath()));
                 return false;
             }
 
@@ -323,7 +333,7 @@ bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc 
         } break;
 
         case FO_POSITION:
-            sVal.FormatSTVal( sWrite->GetPosition() );
+            sVal.FormatSTVal( _pFile->GetPosition() );
             break;
 
         case FO_READBYTE:
@@ -342,17 +352,17 @@ bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc 
                     return false;
             }
 
-            if ( ( ( sWrite->GetPosition() + iRead ) > sWrite->GetLength() ) || ( sWrite->IsEOF() ) )
+            if ( ( ( _pFile->GetPosition() + iRead ) > _pFile->GetLength() ) || ( _pFile->IsEOF() ) )
             {
-                g_Log.Event(LOGL_ERROR, "FILE: Failed reading %" PRIuSIZE_T " byte from \"%s\". Too near to EOF.\n", iRead, static_cast<lpctstr>(sWrite->GetFilePath()));
+                g_Log.Event(LOGL_ERROR, "FILE: Failed reading %" PRIuSIZE_T " byte from \"%s\". Too near to EOF.\n", iRead, static_cast<lpctstr>(_pFile->GetFilePath()));
                 return false;
             }
 
             tchar * psReadBuf = this->GetReadBuffer(true);
 
-            if ( iRead != sWrite->Read(psReadBuf, iRead) )
+            if ( iRead != _pFile->Read(psReadBuf, iRead) )
             {
-                g_Log.Event(LOGL_ERROR, "FILE: Failed reading %" PRIuSIZE_T " byte from \"%s\".\n", iRead, static_cast<lpctstr>(sWrite->GetFilePath()));
+                g_Log.Event(LOGL_ERROR, "FILE: Failed reading %" PRIuSIZE_T " byte from \"%s\".\n", iRead, static_cast<lpctstr>(_pFile->GetFilePath()));
                 return false;
             }
 
@@ -374,27 +384,29 @@ bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc 
             if ( iLines < 0 )
                 return false;
 
-            size_t uiSeek = sWrite->GetPosition();
-            sWrite->SeekToBegin();
+            size_t uiSeek = _pFile->GetPosition();
+            _pFile->SeekToBegin();
 
             if ( iLines == 0 )
             {
-                while ( ! sWrite->IsEOF() )
-                    sWrite->ReadString( psReadBuf, SCRIPT_MAX_LINE_LEN );
+                while ( ! _pFile->IsEOF() )
+                {
+                    _pFile->ReadString( psReadBuf, SCRIPT_MAX_LINE_LEN );
+                }
             }
             else
             {
                 for ( int64 x = 1; x <= iLines; ++x )
                 {
-                    if ( sWrite->IsEOF() )
+                    if ( _pFile->IsEOF() )
                         break;
 
                     psReadBuf = this->GetReadBuffer();
-                    sWrite->ReadString( psReadBuf, SCRIPT_MAX_LINE_LEN );
+                    _pFile->ReadString( psReadBuf, SCRIPT_MAX_LINE_LEN );
                 }
             }
 
-            sWrite->Seek(uiSeek);
+            _pFile->Seek(uiSeek);
 
             size_t uiLinelen = strlen(psReadBuf);
             while ( uiLinelen > 0 )
@@ -421,15 +433,15 @@ bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc 
 
             if ( !strnicmp("BEGIN", pszKey, 5) )
             {
-                sVal.FormatSTVal( sWrite->Seek(0, SEEK_SET) );
+                sVal.FormatSTVal( _pFile->Seek(0, SEEK_SET) );
             }
             else if ( !strnicmp("END", pszKey, 3) )
             {
-                sVal.FormatSTVal( sWrite->Seek(0, SEEK_END) );
+                sVal.FormatSTVal( _pFile->Seek(0, SEEK_END) );
             }
             else
             {
-                sVal.FormatSTVal( sWrite->Seek(Exp_GetSTVal(pszKey), SEEK_SET) );
+                sVal.FormatSTVal( _pFile->Seek(Exp_GetSTVal(pszKey), SEEK_SET) );
             }
         } break;
 
@@ -464,8 +476,8 @@ bool CSFileObj::r_Verb( CScript & s, CTextConsole * pSrc )
     switch ( index )
     {
         case FOV_CLOSE:
-            if ( sWrite->IsFileOpen() )
-                sWrite->Close();
+            if ( _pFile->IsFileOpen() )
+                _pFile->Close();
             break;
 
         case FOV_DELETEFILE:
@@ -473,15 +485,15 @@ bool CSFileObj::r_Verb( CScript & s, CTextConsole * pSrc )
             if ( !s.GetArgStr() )
                 return false;
 
-            if ( sWrite->IsFileOpen() && !strcmp(s.GetArgStr(),sWrite->GetFileTitle()) )
+            if ( _pFile->IsFileOpen() && !strcmp(s.GetArgStr(),_pFile->GetFileTitle()) )
                 return false;
 
             STDFUNC_UNLINK(s.GetArgRaw());
         } break;
 
         case FOV_FLUSH:
-            if ( sWrite->IsFileOpen() )
-                sWrite->Flush();
+            if ( _pFile->IsFileOpen() )
+                _pFile->Flush();
             break;
 
         default:
@@ -500,25 +512,29 @@ bool CSFileObj::r_Verb( CScript & s, CTextConsole * pSrc )
 bool CSFileObj::FileOpen( lpctstr sPath )
 {
     ADDTOCALLSTACK("CSFileObj::FileOpen");
-    if ( sWrite->IsFileOpen() )
+    if ( _pFile->IsFileOpen() )
         return false;
 
-    uint uMode = OF_SHARE_DENY_NONE | OF_TEXT;
+    uint uiMode = OF_SHARE_DENY_NONE | OF_TEXT;
 
-    if ( bCreate )	// if we create, we can't append or read
-        uMode |= OF_CREATE;
+    if ( _fCreate )	// if we create, we can't append or read
+    {
+        uiMode |= OF_CREATE;
+    }
     else
     {
-        if (( bRead && bWrite ) || bAppend )
-            uMode |= OF_READWRITE;
+        if (( _fRead && _fWrite ) || _fAppend )
+        {
+            uiMode |= OF_READWRITE;
+        }
         else
         {
-            if ( bRead )
-                uMode |= OF_READ;
-            else if ( bWrite )
-                uMode |= OF_WRITE;
+            if ( _fRead )
+                uiMode |= OF_READ;
+            else if ( _fWrite )
+                uiMode |= OF_WRITE;
         }
     }
 
-    return( sWrite->Open(sPath, uMode) );
+    return ( _pFile->Open(sPath, uiMode) );
 }

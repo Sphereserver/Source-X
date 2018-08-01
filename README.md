@@ -148,23 +148,27 @@ Since ASan redirects the error output to stderr, you can retrieve its output by 
 These are meant to be applied to new code and, if there's some old code not following them, it would be nice to update it.
 * Pointer variables should have as first prefix "p".
 * Unsigned variables should have as first (or second to "p") prefix "u".
-* Boolean variables should have the prefix "f".
+* Boolean variables should have the prefix "f" (it stands for flag).
 * Classes need to have the first letter uppercase and the prefix "C".
 * Internal (mostly private) variables of a class or struct need to have the prefix "\_". This is a new convention, the old one used the "m\_" prefix.
 * After the prefix, the descriptive name should begin with an upper letter.
 <br>
-**Variables meant to hold numerical values:**
-* For char, short, int, long, llong, use the prefix: "i".
+** Variables meant to hold numerical values: **
+* For char, short, int, long, llong, use the prefix: "i" (stands for integer).
 * For byte, word and dword use respectively the prefixes: "b", "w", "dw". Do not add the unsigned prefix.
-* For float and double, use the prefix: "r".
+* For float and double, use the prefix: "r" (stands for real number).
 <br>
-**Variables meant to hold characters (also strings):**
+** Variables meant to hold characters (also strings): **
 * For char, wchar, tchar use respectively the prefixes "c", "wc", "tc".
-* "lpstr", "lpcstr", "lpwstr", "lpcwstr", "lptstr", "lpctstr" data types are preferred aliases when handling strings.
+* When handling strings, "lpstr", "lpcstr", "lpwstr", "lpcwstr", "lptstr", "lpctstr" data types are preferred aliases.<br>
+  You'll find a lot of "psz" prefixes for strings: the reason is that in the past Sphere coders wanted to be consistent with Microsoft's Hungarian Notation.<br>
+  The correct and up to date notation is "pc" for lpstr/lpcstr (which are respectively char* and const char*), "pwc" (wchar* and const wchar*),
+  "ptc" for lptstr/lpctstr (tchar* and const tchar*).<br>
+  Use the "s" or "ps" (if pointer) when using CString or std::string. Always prefer CString over std::string, unless in your case there are obvious advantages for using the latter.
 <br>
 Examples:
 * Class or Struct: "CChar".
-* Class internal variable, integer: "_iAmount".
+* Class internal variable, signed integer: "_iAmount".
 * Tchar pointer: "ptcName".
 * Dword: "dwUID".
 
@@ -176,9 +180,11 @@ while (x == y)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;something();<br>
 &nbsp;&nbsp;&nbsp;&nbsp;somethingelse();<br>
 }
-* When a single statement follows the if/else clauses, avoid the use of brackets:<br>
-if (bTrue)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;g_Log.EventWarn("True!\n");
+* Even if a single statement follows the if/else/while... clauses, use the brackets:<br>
+if (fTrue)<br>
+{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;g_Log.EventWarn("True!\n");<br>
+}
 
 
 ## Licensing

@@ -14,22 +14,22 @@ class CSFileText;
 class CSFileObj : public CScriptObj
 {
 private:
-    CSFileText * sWrite;
-    bool bAppend;
-    bool bCreate;
-    bool bRead;
-    bool bWrite;
-    tchar * tBuffer;
-    CSString * cgWriteBuffer;
+    CSFileText * _pFile;
+    bool _fAppend;
+    bool _fCreate;
+    bool _fRead;
+    bool _fWrite;
+    tchar * _ptcReadBuffer;
+    CSString * _psWriteBuffer;
     // ----------- //
     static lpctstr const sm_szLoadKeys[];
     static lpctstr const sm_szVerbKeys[];
 
 private:
-    void SetDefaultMode(void);
+    void SetDefaultMode();
     bool FileOpen( lpctstr sPath );
-    tchar * GetReadBuffer(bool);
-    CSString * GetWriteBuffer(void);
+    tchar * GetReadBuffer(bool fDelete = false);
+    CSString * GetWriteBuffer();
 
 public:
     static const char *m_sClassName;

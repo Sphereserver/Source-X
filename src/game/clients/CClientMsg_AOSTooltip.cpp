@@ -65,18 +65,18 @@ void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
 
 	PacketPropertyList* propertyList = pObj->GetPropertyList();
 
-	if (propertyList == NULL || propertyList->hasExpired(g_Cfg.m_iTooltipCache))
+	if (propertyList == nullptr || propertyList->hasExpired(g_Cfg.m_iTooltipCache))
 	{
-		CItem *pItem = pObj->IsItem() ? const_cast<CItem *>(static_cast<const CItem *>(pObj)) : NULL;
-		CChar *pChar = pObj->IsChar() ? const_cast<CChar *>(static_cast<const CChar *>(pObj)) : NULL;
+		CItem *pItem = pObj->IsItem() ? const_cast<CItem *>(static_cast<const CItem *>(pObj)) : nullptr;
+		CChar *pChar = pObj->IsChar() ? const_cast<CChar *>(static_cast<const CChar *>(pObj)) : nullptr;
         CChar *pClientChar = GetChar();
 
-		if (pItem != NULL)
+		if (pItem != nullptr)
 			pItem->FreePropertyList();
-		else if (pChar != NULL)
+		else if (pChar != nullptr)
 			pChar->FreePropertyList();
 
-		CClientTooltip* t = NULL;
+		CClientTooltip* t = nullptr;
         pClientChar->m_TooltipData.clear();
 
 		//DEBUG_MSG(("Preparing tooltip for 0%x (%s)\n", (dword)pObj->GetUID(), pObj->GetName()));
@@ -141,9 +141,9 @@ void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
 		// we still want to generate a hash though, so we don't have to increment
 		// the revision number if the tooltip hasn't actually been changed
 		dword revision = 0;
-		if (pItem != NULL)
+		if (pItem != nullptr)
 			revision = pItem->UpdatePropertyRevision(hash);
-		else if (pChar != NULL)
+		else if (pChar != nullptr)
 			revision = pChar->UpdatePropertyRevision(hash);
 
 		propertyList = new PacketPropertyList(pObj, revision, pObj->m_TooltipData);
@@ -152,9 +152,9 @@ void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
 		// incomplete (name only) or caching is disabled
 		if (bNameOnly == false && g_Cfg.m_iTooltipCache > 0)
 		{
-			if (pItem != NULL)
+			if (pItem != nullptr)
 				pItem->SetPropertyList(propertyList);
-			else if (pChar != NULL)
+			else if (pChar != nullptr)
 				pChar->SetPropertyList(propertyList);
 		}
 	}
@@ -193,10 +193,9 @@ void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
 
 void CClient::AOSTooltip_addName(const CObjBase* pObj)
 {
-	CItem *pItem = pObj->IsItem() ? const_cast<CItem *>(static_cast<const CItem *>(pObj)) : NULL;
-	CChar *pChar = pObj->IsChar() ? const_cast<CChar *>(static_cast<const CChar *>(pObj)) : NULL;
-	CChar *pClientChar = GetChar();
-	CClientTooltip* t = NULL;
+	CItem *pItem = pObj->IsItem() ? const_cast<CItem *>(static_cast<const CItem *>(pObj)) : nullptr;
+	CChar *pChar = pObj->IsChar() ? const_cast<CChar *>(static_cast<const CChar *>(pObj)) : nullptr;
+	CClientTooltip* t = nullptr;
 
 	dword dwClilocName = (dword)(pObj->GetDefNum("NAMELOC", true, true));
 
@@ -235,7 +234,7 @@ void CClient::AOSTooltip_addName(const CObjBase* pObj)
 		if (pGuildMember && (!pChar->IsStatFlag(STATF_INCOGNITO) || GetPrivLevel() > pChar->GetPrivLevel()))
 		{
 			const CItemStone * pParentStone = pGuildMember->GetParentStone();
-			ASSERT(pParentStone != NULL);
+			ASSERT(pParentStone != nullptr);
 
 			if (pGuildMember->IsAbbrevOn() && pParentStone->GetAbbrev()[0])
 			{
@@ -280,7 +279,7 @@ void CClient::AOSTooltip_addName(const CObjBase* pObj)
 
 void CClient::AOSTooltip_addDefaultCharData(CChar * pChar)
 {
-	CClientTooltip* t = NULL;
+	CClientTooltip* t = nullptr;
 
 	if (pChar->m_pPlayer)
 	{
@@ -314,7 +313,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 {
 	// TODO: add check to ATTR_IDENTIFIED, then add tooltips: stolen, BonusSkill1/2/3/4/5, minlevel/maxlevel, shurikencount
 
-	CClientTooltip* t = NULL;
+	CClientTooltip* t = nullptr;
 
 	if (pItem->IsAttr(ATTR_LOCKEDDOWN))
         PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(501643)); // Locked Down
@@ -893,7 +892,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
 		lpctstr regionName = g_Cfg.GetDefaultMsg(DEFMSG_RUNE_LOCATION_UNK);
 		if (pt.GetRegion(REGION_TYPE_AREA))
 			regionName = pt.GetRegion(REGION_TYPE_AREA)->GetName();
-		bool regionMulti = (pt.GetRegion(REGION_TYPE_MULTI) != NULL);
+		bool regionMulti = (pt.GetRegion(REGION_TYPE_MULTI) != nullptr);
 
 		if (pt.m_map == 0)
 			PUSH_BACK_TOOLTIP(pItem, t = new CClientTooltip(regionMulti ? 1062452 : 1060805)); // ~1_val~ (Felucca)[(House)]
@@ -937,7 +936,7 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
         if (!pSpawn)
             break;
         CResourceDef * pSpawnCharDef = g_Cfg.ResourceGetDef(pSpawn->GetSpawnID());
-		lpctstr pszName = NULL;
+		lpctstr pszName = nullptr;
 		if (pSpawnCharDef)
 		{
 			CCharBase *pCharBase = dynamic_cast<CCharBase*>(pSpawnCharDef);

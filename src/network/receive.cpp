@@ -741,7 +741,7 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 
 	VendorItem items[MAX_ITEMS_CONT];
 	memset(items, 0, sizeof(items));
-	size_t itemCount = minimum((packetLength - 8) / 7, g_Cfg.m_iContainerMaxItems);
+	size_t itemCount = minimum((packetLength - 8u) / 7u, g_Cfg.m_iContainerMaxItems);
 
 	// check buying speed
 	const CVarDefCont* vardef = g_Cfg.m_bAllowBuySellAgent ? NULL : client->m_TagDefs.GetKey("BUYSELLTIME");
