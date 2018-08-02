@@ -1607,7 +1607,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 
 			TRIGRET_TYPE iRet = g_World.m_TimedFunctions.Loop(funcname, LoopsMade, StartContext, EndContext, s, pSrc, pArgs, pResult);
 			if ((iRet != TRIGRET_ENDIF) && (iRet != TRIGRET_CONTINUE))
-				return(iRet);
+				return iRet;
 		}
 	}
 
@@ -1618,17 +1618,17 @@ toomanyloops:
 			g_Log.EventError("Terminating loop cycle since it seems being dead-locked (%d iterations already passed)\n", LoopsMade);
 	}
 
-	if ( EndContext.m_stOffset <= StartContext.m_stOffset )
+	if ( EndContext.m_iOffset <= StartContext.m_iOffset )
 	{
 		// just skip to the end.
 		TRIGRET_TYPE iRet = OnTriggerRun( s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult );
 		if ( iRet != TRIGRET_ENDIF )
-			return( iRet );
+			return iRet;
 	}
 	else
 		s.SeekContext( EndContext );
 
-	return( TRIGRET_ENDIF );
+	return TRIGRET_ENDIF;
 }
 
 bool CScriptObj::OnTriggerFind( CScript & s, lpctstr pszTrigName )

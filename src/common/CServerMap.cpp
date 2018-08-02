@@ -559,7 +559,7 @@ void CServerMapBlock::Load( int bx, int by )
 		}
 
 		// seek to position in file
-		if ( pFile->Seek( fileOffset, SEEK_SET ) != fileOffset )
+		if ( (uint)pFile->Seek( fileOffset, SEEK_SET ) != fileOffset )
 		{
 			memset( &m_Terrain, 0, sizeof(m_Terrain));
 			throw CSError(LOGL_CRIT, CSFile::GetLastError(), "CServerMapBlock: Seek Ver");
@@ -768,15 +768,15 @@ void CServerMapDiffCollection::LoadMapDiffs()
 						delete pMapDiffBlock->m_pTerrainBlock;
 
 					CUOMapBlock * pTerrain = new CUOMapBlock();
-					if ( pFileMapdif->Seek( dwOffset ) != dwOffset )
+					if ( (uint)pFileMapdif->Seek( dwOffset ) != dwOffset )
 					{
 						g_Log.EventError("Reading mapdif%d.mul FAILED.\n", map);
 						delete pTerrain;
 						break;
 					}
-					else if ( pFileMapdif->Read( pTerrain, sizeof(CUOMapBlock) ) != sizeof(CUOMapBlock) )
+					else if ( (uint)pFileMapdif->Read( pTerrain, sizeof(CUOMapBlock) ) != sizeof(CUOMapBlock) )
 					{
-						g_Log.EventError("Reading mapdif%d.mul FAILED. [index=%u offset=%u]\n", map, dwBlockId, dwOffset);
+						g_Log.EventError("Reading mapdif%d.mul FAILED. [index=%" PRIu32 " offset=%" PRIu32 "]\n", map, dwBlockId, dwOffset);
 						delete pTerrain;
 						break;
 					}
@@ -815,7 +815,7 @@ void CServerMapDiffCollection::LoadMapDiffs()
 				pMapDiffBlock->m_iStaticsCount = 0;
 				pMapDiffBlock->m_pStaticsBlock = NULL;
 
-				if ( pFileStadifi->Seek( dwOffset ) != dwOffset )
+				if ( (uint)pFileStadifi->Seek( dwOffset ) != dwOffset )
 				{
 					g_Log.EventError("Reading stadifi%d.mul FAILED.\n", map);
 					break;

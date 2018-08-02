@@ -11,13 +11,13 @@
 
 void CScriptLineContext::Init()
 {
-	m_stOffset = (size_t)-1;
+	m_iOffset = -1;
 	m_iLineNum = -1;
 }
 
 bool CScriptLineContext::IsValid() const
 {
-	return ( m_stOffset != (size_t)-1 );
+	return ( m_iOffset != -1 );
 }
 
 CScriptLineContext::CScriptLineContext()
@@ -451,10 +451,10 @@ CScript::CScript( lpctstr pszKey, lpctstr pszVal )
 void CScript::InitBase()
 {
 	ADDTOCALLSTACK("CScript::InitBase");
-	m_iResourceFileIndex = (size_t)-1;
+	m_iResourceFileIndex = -1;
 	m_iLineNum		= 0;
 	m_fSectionHead	= false;
-	m_pSectionData	= 0;
+	m_iSectionData	= 0;
 	InitKey();
 }
 
@@ -544,15 +544,15 @@ bool CScript::FindTextHeader( lpctstr pszName ) // Find a section in the current
 	return true;
 }
 
-size_t CScript::Seek( size_t offset, int iOrigin )
+int CScript::Seek( int offset, int iOrigin )
 {
 	ADDTOCALLSTACK("CScript::Seek");
 	// Go to the start of a new section.
 	// RETURN: the new offset in bytes from start of file.
 	if ( offset == 0 && iOrigin == SEEK_SET )
 		m_iLineNum = 0;	// so we don't have to override SeekToBegin
-	m_fSectionHead = false;		// unknown , so start at the beginning.
-	m_pSectionData = offset;
+	m_fSectionHead = false;		// unknown, so start at the beginning.
+	m_iSectionData = offset;
 	return ( PhysicalScriptFile::Seek(offset,iOrigin) );
 }
 
@@ -576,7 +576,7 @@ bool CScript::FindNextSection()
 	{
 		if ( !ReadTextLine(true) )
 		{
-			m_pSectionData = GetPosition();
+			m_iSectionData = GetPosition();
 			return false;
 		}
 		if ( m_pszKey[0] == '[' )
@@ -596,7 +596,7 @@ foundit:
 		}
 	}
 
-	m_pSectionData = GetPosition();
+	m_iSectionData = GetPosition();
 	if ( IsSectionType( "EOF" ))
 		return false;
 
@@ -625,7 +625,7 @@ bool CScript::FindSection( lpctstr pszName, uint uModeFlags )
 	if ( FindTextHeader(pszSec) )
 	{
 		// Success
-		m_pSectionData = GetPosition();
+		m_iSectionData = GetPosition();
 		return true;
 	}
 
@@ -741,7 +741,7 @@ bool CScript::FindKey( lpctstr pszName ) // Find a key in the current section
 		DEBUG_ERR(( "Bad script key name\n" ));
 		return false;
 	}
-	Seek( m_pSectionData );
+	Seek( m_iSectionData );
 	while ( ReadKeyParse() )
 	{
 		if ( IsKey( pszName ) )
@@ -768,14 +768,14 @@ void CScript::CloseForce()
 bool CScript::SeekContext( CScriptLineContext LineContext )
 {
 	m_iLineNum = LineContext.m_iLineNum;
-	return (Seek( LineContext.m_stOffset, SEEK_SET ) == LineContext.m_stOffset);
+	return (Seek( LineContext.m_iOffset, SEEK_SET ) == LineContext.m_iOffset);
 }
 
 CScriptLineContext CScript::GetContext() const
 {
 	CScriptLineContext LineContext;
 	LineContext.m_iLineNum = m_iLineNum;
-	LineContext.m_stOffset = GetPosition();
+	LineContext.m_iOffset = GetPosition();
 	return ( LineContext );
 }
 

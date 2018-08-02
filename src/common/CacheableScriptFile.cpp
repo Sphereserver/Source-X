@@ -2,6 +2,11 @@
 #include "../sphere/threads.h"
 #include "CacheableScriptFile.h"
 
+#ifdef _WIN32
+    #include <io.h> // for _get_osfhandle (used by STDFUNC_FILENO)
+#endif
+
+
 CacheableScriptFile::CacheableScriptFile()
 {
 	m_closed = true;
@@ -30,24 +35,26 @@ bool CacheableScriptFile::OpenBase()
 	m_closed = false;
 	TemporaryString buf;
 	size_t nStrLen;
-	bool bUTF = false, bFirstLine = true;
+	bool fUTF = false, fFirstLine = true;
 	
 	while ( !feof(m_pStream) ) 
 	{
 		buf.setAt(0, '\0');
 		fgets(buf, SCRIPT_MAX_LINE_LEN, m_pStream);
 		nStrLen = strlen(buf);
+        if (nStrLen > INT_MAX)
+            nStrLen = INT_MAX;
 
 		// first line may contain utf marker
-		if ( bFirstLine && nStrLen >= 3 &&
+		if ( fFirstLine && nStrLen >= 3 &&
 			(uchar)(buf[0]) == 0xEF &&
 			(uchar)(buf[1]) == 0xBB &&
 			(uchar)(buf[2]) == 0xBF )
-			bUTF = true;
+			fUTF = true;
 
-		m_fileContent.emplace_back( (bUTF ? &buf[3]:buf), nStrLen - (bUTF ? 3:0) );
-		bFirstLine = false;
-		bUTF = false;
+		m_fileContent.emplace_back( (fUTF ? &buf[3]:buf), nStrLen - (fUTF ? 3:0) );
+		fFirstLine = false;
+		fUTF = false;
 	}
 
 	fclose(m_pStream);
@@ -99,7 +106,7 @@ bool CacheableScriptFile::IsEOF() const
 	return ( m_fileContent.empty() || m_currentLine == m_fileContent.size() );
 }
 
-tchar * CacheableScriptFile::ReadString(tchar *pBuffer, size_t sizemax) 
+tchar * CacheableScriptFile::ReadString(tchar *pBuffer, int sizemax) 
 {
     ADDTOCALLSTACK("CacheableScriptFile::ReadString");
 
@@ -113,8 +120,10 @@ tchar * CacheableScriptFile::ReadString(tchar *pBuffer, size_t sizemax)
 		strcpy(pBuffer, m_fileContent[m_currentLine].c_str() );
 		++m_currentLine;
 	}
-	else 
+	else
+    {
 		return nullptr;
+    }
 
 	return pBuffer;
 }
@@ -137,13 +146,13 @@ bool CacheableScriptFile::useDefaultFile() const
 	return false;
 }
 
-size_t CacheableScriptFile::Seek(size_t offset, int origin)
+int CacheableScriptFile::Seek(int offset, int origin)
 {
 	ADDTOCALLSTACK("CacheableScriptFile::Seek");
 	if (useDefaultFile())
 		return CSFileText::Seek(offset, origin);
 
-	size_t linenum = offset;
+	int linenum = offset;
 
 	if (origin != SEEK_SET)
 		linenum = 0;	//	do not support not SEEK_SET rotation
@@ -157,7 +166,7 @@ size_t CacheableScriptFile::Seek(size_t offset, int origin)
 	return 0;
 }
 
-size_t CacheableScriptFile::GetPosition() const
+int CacheableScriptFile::GetPosition() const
 {
 	ADDTOCALLSTACK("CacheableScriptFile::GetPosition");
 	if (useDefaultFile())

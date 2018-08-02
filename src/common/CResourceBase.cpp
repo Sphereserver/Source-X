@@ -145,7 +145,7 @@ CResourceScript * CResourceBase::AddResourceFile( lpctstr pszName )
 		return nullptr;
 
 	pNewRes = new CResourceScript( s.GetFilePath() );
-	pNewRes->m_iResourceFileIndex = m_ResourceFiles.push_back(pNewRes);
+	pNewRes->m_iResourceFileIndex = (int)m_ResourceFiles.push_back(pNewRes);
 	return pNewRes;
 }
 
@@ -937,10 +937,10 @@ CResourceScript *CResourceLink::GetLinkFile() const
 	return m_pScript;
 }
 
-size_t CResourceLink::GetLinkOffset() const
+int CResourceLink::GetLinkOffset() const
 {
 	ADDTOCALLSTACK("CResourceLink::GetLinkOffset");
-	return m_Context.m_stOffset;
+	return m_Context.m_iOffset;
 }
 
 void CResourceLink::SetLink(CResourceScript *pScript)
@@ -1026,7 +1026,7 @@ bool CResourceLink::ResourceLock( CResourceLock &s )
 
 	// ret = -2 or -3
 	lpctstr pszName = GetResourceName();
-	DEBUG_ERR(("ResourceLock '%s':%" PRIuSIZE_T " id=%s FAILED\n", static_cast<lpctstr>(s.GetFilePath()), m_Context.m_stOffset, pszName));
+	DEBUG_ERR(("ResourceLock '%s':%" PRIuSIZE_T " id=%s FAILED\n", static_cast<lpctstr>(s.GetFilePath()), m_Context.m_iOffset, pszName));
 
 	return false;
 }

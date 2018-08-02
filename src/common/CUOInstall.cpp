@@ -296,7 +296,7 @@ VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
 									qwUOPPtr = ((uint64)dwHashHi << 32) + dwHashLo;
 									m_Maps[index].Seek( sizeof(dword), SEEK_CUR );
 									m_Maps[index].Read( &dwTotalFiles, sizeof(dword) );
-									m_Maps[index].Seek( (size_t)qwUOPPtr, SEEK_SET );
+									m_Maps[index].Seek( (int)qwUOPPtr, SEEK_SET );
 									dwLoop = dwTotalFiles;
 
 									while (qwUOPPtr > 0)
@@ -338,7 +338,7 @@ VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
 											}
 										}
 
-										m_Maps[index].Seek( (size_t)qwUOPPtr, SEEK_SET );
+										m_Maps[index].Seek( (int)qwUOPPtr, SEEK_SET );
 									}
 								}//End of UOP Map parsing
 								else if (index == 0) // neither file exists, map0 is required
@@ -495,12 +495,12 @@ void CUOInstall::CloseFiles()
 bool CUOInstall::ReadMulIndex(CSFile &file, dword id, CUOIndexRec &Index)
 {
 	ADDTOCALLSTACK("CUOInstall::ReadMulIndex");
-	size_t stOffset = id * sizeof(CUOIndexRec);
+	int iOffset = (int)(id * sizeof(CUOIndexRec));
 
-	if ( file.Seek(stOffset, SEEK_SET) != stOffset )
+	if ( file.Seek(iOffset, SEEK_SET) != iOffset )
 		return false;
 
-	if ( file.Read(static_cast<void *>(&Index), sizeof(CUOIndexRec)) != sizeof(CUOIndexRec) )
+	if ( (uint)file.Read(static_cast<void *>(&Index), sizeof(CUOIndexRec)) != sizeof(CUOIndexRec) )
 		return false;
 
 	return Index.HasData();
@@ -509,11 +509,11 @@ bool CUOInstall::ReadMulIndex(CSFile &file, dword id, CUOIndexRec &Index)
 bool CUOInstall::ReadMulData(CSFile &file, const CUOIndexRec &Index, void * pData)
 {
 	ADDTOCALLSTACK("CUOInstall::ReadMulData");
-	if ( file.Seek(Index.GetFileOffset(), SEEK_SET) != Index.GetFileOffset() )
+	if ( (uint)file.Seek(Index.GetFileOffset(), SEEK_SET) != Index.GetFileOffset() )
 		return false;
 
 	dword dwLength = Index.GetBlockLength();
-	if ( file.Read(pData, dwLength) != dwLength )
+	if ( (uint)file.Read(pData, dwLength) != dwLength )
 		return false;
 
 	return true;

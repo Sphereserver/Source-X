@@ -5,7 +5,7 @@
 
 CSMemBlock::CSMemBlock()
 {
-    m_pData = NULL;
+    m_pData = nullptr;
 }
 
 CSMemBlock::~CSMemBlock()
@@ -15,33 +15,33 @@ CSMemBlock::~CSMemBlock()
 
 // CSMemBlock:: Modifiers.
 
-void CSMemBlock::Alloc( size_t dwSize )
+void CSMemBlock::Alloc( size_t uiSize )
 {
     Free();
-    if ( dwSize > 0 )
-        m_pData = AllocBase(dwSize);
+    if ( uiSize > 0 )
+        m_pData = AllocBase(uiSize);
 }
 
-byte * CSMemBlock::AllocBase( size_t dwSize )
+byte * CSMemBlock::AllocBase( size_t uiSize )
 {
-    ASSERT(dwSize > 0);
-    byte * pData = new byte[ dwSize ];
-    ASSERT( pData != NULL );
+    ASSERT(uiSize > 0);
+    byte * pData = new byte[ uiSize ];
+    ASSERT( pData != nullptr );
     return( pData );
 }
 
 void CSMemBlock::Free()
 {
-    if ( m_pData != NULL )
+    if ( m_pData != nullptr )
     {
         delete[] m_pData;
-        m_pData = NULL;
+        m_pData = nullptr;
     }
 }
 
 void CSMemBlock::MemLink( byte * pData )
 {
-    ASSERT( m_pData == NULL );
+    ASSERT( m_pData == nullptr );
     m_pData = pData;
 }
 
@@ -50,40 +50,40 @@ void CSMemBlock::MemLink( byte * pData )
 
 CSMemLenBlock::CSMemLenBlock()
 {
-    m_dwLength = 0;
+    m_uiLength = 0;
 }
 
 // CSMemLenBlock:: Modifiers.
 
-void CSMemLenBlock::Alloc( size_t dwSize )
+void CSMemLenBlock::Alloc( size_t uiSize )
 {
-    m_dwLength = dwSize;
-    CSMemBlock::Alloc(dwSize);
+    m_uiLength = uiSize;
+    CSMemBlock::Alloc(uiSize);
 }
 
 void CSMemLenBlock::Free()
 {
-    m_dwLength = 0;
+    m_uiLength = 0;
     CSMemBlock::Free();
 }
 
-void CSMemLenBlock::Resize( size_t dwSizeNew )
+void CSMemLenBlock::Resize( size_t uiSizeNew )
 {
-    ASSERT( dwSizeNew != m_dwLength );
-    byte * pDataNew = AllocBase( dwSizeNew );
+    ASSERT( uiSizeNew != m_uiLength );
+    byte * pDataNew = AllocBase( uiSizeNew );
     ASSERT(pDataNew);
     if ( GetData())
     {
         // move any existing data.
-        ASSERT(m_dwLength);
-        memcpy( pDataNew, GetData(), minimum( dwSizeNew, m_dwLength ));
+        ASSERT(m_uiLength);
+        memcpy( pDataNew, GetData(), minimum( uiSizeNew, m_uiLength ));
         CSMemBlock::Free();
     }
     else
     {
-        ASSERT(!m_dwLength);
+        ASSERT(!m_uiLength);
     }
-    m_dwLength = dwSizeNew;
+    m_uiLength = uiSizeNew;
     MemLink( pDataNew );
 }
 

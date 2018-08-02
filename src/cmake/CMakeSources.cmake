@@ -157,6 +157,8 @@ common/sphere_library/CSFile.cpp
 common/sphere_library/CSFile.h
 common/sphere_library/CSFileList.cpp
 common/sphere_library/CSFileList.h
+common/sphere_library/CSFileText.cpp
+common/sphere_library/CSFileText.h
 common/sphere_library/CSMemBlock.cpp
 common/sphere_library/CSMemBlock.h
 common/sphere_library/CSObjArray.h

@@ -57,13 +57,16 @@ void STRREV(char* string);
 #endif
 /*  */
 
+/*	file handling definitions  */
+#define STDFUNC_FILENO			fileno
+#define STDFUNC_UNLINK			unlink
+// unix flushing works perfectly, so we do not need disabling buffer
+#define	FILE_SETNOCACHE(_x_)
+#define FILE_FLUSH(_x_)			fflush(_x_)
 
 /*	thread-specific definitions  */
-
 #define THREAD_ENTRY_RET		void *
-#define STDFUNC_FILENO			fileno
 #define STDFUNC_GETPID			getpid
-#define STDFUNC_UNLINK			unlink
 #define CRITICAL_SECTION		pthread_mutex_t
 #define Sleep(mSec)				usleep(mSec*1000)	// arg is microseconds = 1/1000000
 #define SleepEx(mSec, unused)	usleep(mSec*1000)	// arg is microseconds = 1/1000000
@@ -72,10 +75,6 @@ void STRREV(char* string);
 #define ERROR_SUCCESS	0
 #define UNREFERENCED_PARAMETER(P)	(void)(P)
 #define HKEY_LOCAL_MACHINE			(( HKEY ) 0x80000002 )
-
-// unix flushing works perfectly, so we do not need disabling buffer
-#define	FILE_SETNOCACHE(_x_)
-#define FILE_FLUSH(_x_)			fflush(_x_)
 
 
 /*  No portable UNIX/LINUX equiv to this.  */

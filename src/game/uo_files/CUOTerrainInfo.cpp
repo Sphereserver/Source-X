@@ -13,7 +13,7 @@ CUOTerrainInfo::CUOTerrainInfo( TERRAIN_TYPE id )
     ASSERT( id < TERRAIN_QTY );
 
     VERFILE_TYPE filedata;
-    size_t offset;
+    uint offset;
     CUOIndexRec Index;
     VERFILE_FORMAT format;
     if ( g_VerData.FindVerDataBlock( VERFILE_TILEDATA, id/UOTILE_BLOCK_QTY, Index ))
@@ -41,7 +41,7 @@ CUOTerrainInfo::CUOTerrainInfo( TERRAIN_TYPE id )
         }
     }
 
-    if ( g_Install.m_File[filedata].Seek( offset, SEEK_SET ) != offset )
+    if ( (uint)g_Install.m_File[filedata].Seek( offset, SEEK_SET ) != offset )
     {
         throw CSError(LOGL_CRIT, CSFile::GetLastError(), "CTileTerrainType.ReadInfo: TileData Seek");
     }

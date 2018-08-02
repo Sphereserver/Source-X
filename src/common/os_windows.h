@@ -42,11 +42,13 @@
 #define LTOA		_ltoa
 #define STRREV		_strrev
 
-/*	thread-specific definitions  */
-#define THREAD_ENTRY_RET		void
-#define STDFUNC_FILENO			_fileno
-#define STDFUNC_GETPID			_getpid
+/*	file handling definitions  */
+#define STDFUNC_FILENO(_x_)		_get_osfhandle(_fileno(_x_))
 #define STDFUNC_UNLINK			_unlink
+
+/*	threading definitions  */
+#define THREAD_ENTRY_RET		void
+#define STDFUNC_GETPID			_getpid
 
 // since the only way to make windows not to buffer file is to remove buffer, we
 // use this instead flushing

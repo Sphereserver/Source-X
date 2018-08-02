@@ -340,7 +340,7 @@ bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc 
         case FO_READCHAR:
         {
             bool bChr = ( index == FO_READCHAR );
-            size_t iRead = 1;
+            int iRead = 1;
 
             if ( !bChr )
             {
@@ -384,7 +384,7 @@ bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc 
             if ( iLines < 0 )
                 return false;
 
-            size_t uiSeek = _pFile->GetPosition();
+            int iSeek = _pFile->GetPosition();
             _pFile->SeekToBegin();
 
             if ( iLines == 0 )
@@ -406,7 +406,7 @@ bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc 
                 }
             }
 
-            _pFile->Seek(uiSeek);
+            _pFile->Seek(iSeek);
 
             size_t uiLinelen = strlen(psReadBuf);
             while ( uiLinelen > 0 )
@@ -433,15 +433,15 @@ bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc 
 
             if ( !strnicmp("BEGIN", pszKey, 5) )
             {
-                sVal.FormatSTVal( _pFile->Seek(0, SEEK_SET) );
+                sVal.FormatVal( _pFile->Seek(0, SEEK_SET) );
             }
             else if ( !strnicmp("END", pszKey, 3) )
             {
-                sVal.FormatSTVal( _pFile->Seek(0, SEEK_END) );
+                sVal.FormatVal( _pFile->Seek(0, SEEK_END) );
             }
             else
             {
-                sVal.FormatSTVal( _pFile->Seek(Exp_GetSTVal(pszKey), SEEK_SET) );
+                sVal.FormatVal( _pFile->Seek(Exp_GetVal(pszKey), SEEK_SET) );
             }
         } break;
 

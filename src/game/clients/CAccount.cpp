@@ -72,7 +72,7 @@ bool CAccounts::Account_LoadAll( bool fChanges, bool fClearChanges )
 	ADDTOCALLSTACK("CAccounts::Account_LoadAll");
 	lpctstr pszBaseDir;
 	lpctstr pszBaseName;
-	char	*z = Str_GetTemp();
+	char *z = Str_GetTemp();
 
 	pszBaseDir = g_Cfg.m_sAcctBaseDir.IsEmpty() ? g_Cfg.m_sWorldBaseDir : g_Cfg.m_sAcctBaseDir;
 	pszBaseName = ( fChanges ) ? (SPHERE_FILE "acct") : (SPHERE_FILE "accu");
@@ -116,7 +116,8 @@ bool CAccounts::Account_LoadAll( bool fChanges, bool fClearChanges )
 		Account_Load(s.GetKey(), s, fChanges);
 	}
 
-	if ( !fChanges ) Account_LoadAll(true);
+	if ( !fChanges )
+        Account_LoadAll(true);
 
 	return true;
 }

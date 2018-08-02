@@ -4,8 +4,8 @@
 	#include <sys/types.h>
 	#include <sys/stat.h>
 #endif
-#include "../../common/CLog.h"
 #include "../../sphere/threads.h"
+#include "../CLog.h"
 #include "CSFile.h"
 
 
@@ -64,18 +64,33 @@ lpctstr CFile::GetFileTitle() const
 	return CSFile::GetFilesTitle( GetFilePath() );
 }
 
-void CFile::NotifyIOError( lpctstr szMessage ) const
+int CFile::GetLastError()
 {
 #ifdef _WIN32
-	LPVOID lpMsgBuf;
-	FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, GetLastError(), 0, reinterpret_cast<lptstr>(&lpMsgBuf), 0, NULL );
-	DEBUG_ERR(( "File I/O \"%s\" failed on file \"%s\" (%lX): %s\n", szMessage, static_cast<lpctstr>(GetFilePath()), GetLastError(), static_cast<lptstr>(lpMsgBuf) ));
-	LocalFree( lpMsgBuf );
+    return ::GetLastError();
 #else
-    DEBUG_ERR(( "File I/O \"%s\" failed on file \"%s\" (%lX): %s\n", szMessage, static_cast<lpctstr>(GetFilePath()), GetLastError(), strerror(GetLastError) ));
+    return errno;
 #endif
 }
 
+void CFile::NotifyIOError( lpctstr szMessage ) const
+{
+    int iErrorCode = this->GetLastError();
+#ifdef _WIN32
+    lpctstr pMsg;
+    LPVOID lpMsgBuf;
+    FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, iErrorCode, 0, reinterpret_cast<LPTSTR>(&lpMsgBuf), 0, NULL );
+    if (lpMsgBuf == NULL)
+        pMsg = "No System Error";
+    else
+        pMsg = static_cast<lptstr>(lpMsgBuf);
+    DEBUG_ERR(( "File I/O \"%s\" failed on file \"%s\" (%lX): %s\n", szMessage, static_cast<lpctstr>(GetFilePath()), iErrorCode, pMsg ));
+    if (lpMsgBuf != NULL)
+        LocalFree( lpMsgBuf );
+#else
+    DEBUG_ERR(( "File I/O \"%s\" failed on file \"%s\" (%lX): %s\n", szMessage, static_cast<lpctstr>(GetFilePath()), iErrorCode, strerror(iErrorCode) ));
+#endif
+}
 
 bool CFile::Open( lpctstr pszName, uint uiMode )
 {
@@ -118,54 +133,83 @@ bool CFile::Open( lpctstr pszName, uint uiMode )
 
 // CFile:: Content management.
 
-size_t CFile::GetLength()
+int CFile::GetLength()
 {
 	// Get the size of the file.
-	size_t pPos = GetPosition();	// save current pos.
-	size_t pSize = SeekToEnd();
-	Seek( pPos, SEEK_SET );	// restore previous pos.
-	return pSize;
+    int iPos = GetPosition();   // save current pos.
+    int iSize = SeekToEnd();
+	Seek( iPos, SEEK_SET );     // restore previous pos.
+	return iSize;
 }
 
-size_t CFile::GetPosition() const
+int CFile::GetPosition() const
 {
 #ifdef _WIN32
-	return SetFilePointer( (HANDLE)m_llFile, 0, NULL, FILE_CURRENT );
+    DWORD ret = SetFilePointer( (HANDLE)m_llFile, 0, NULL, FILE_CURRENT );
+    if (ret == INVALID_SET_FILE_POINTER)
+    {
+        NotifyIOError("CFile::GetPosition");
+        return 0;
+    }
 #else
-	return lseek( m_llFile, 0, SEEK_CUR );
+	off_t ret = lseek( m_llFile, 0, SEEK_CUR );
+    if (ret == (off_t)-1)
+    {
+        NotifyIOError("CFile::GetPosition");
+        return 0;
+    }
 #endif
+    if (ret > INT_MAX)
+    {
+        NotifyIOError("CFile::GetPosition (length)");
+        return 0;
+    }
+    return ret;
 }
 
-size_t CFile::Read( void * pData, size_t stLength ) const
+int CFile::Read( void * pData, int iLength ) const
 {
 #ifdef _WIN32
-	DWORD dwRead;
-	if ( !ReadFile( (HANDLE)m_llFile, pData, (DWORD)stLength, &dwRead, NULL ) )
+	DWORD ret;
+	if ( !ReadFile( (HANDLE)m_llFile, pData, (DWORD)iLength, &ret, NULL ) )
 	{
-		NotifyIOError("read");
+		NotifyIOError("CFile::Read");
 		return 0;
 	}
-	return dwRead;
 #else
-	ssize_t ret = read(m_llFile, pData, stLength);
+	ssize_t ret = read(m_llFile, pData, iLength);
 	if (ret == -1)
     {
-        NotifyIOError("read");
+        NotifyIOError("CFile::Read");
 		return 0;
     }
-	return (size_t)ret;
 #endif
+    if (ret > INT_MAX)
+    {
+        NotifyIOError("CFile::Read (length)");
+        return 0;
+    }
+    return (int)ret;
 }
 
-size_t CFile::Seek( size_t stOffset, int iOrigin )
+int CFile::Seek( int iOffset, int iOrigin )
 {
-//	if ( m_llFile <= 0 )
-//		return -1;
+	if ( m_llFile <= 0 )
+    {
+        NotifyIOError("CFile::Seek");
+        return -1;
+    }
 #ifdef _WIN32
-	return SetFilePointer( (HANDLE)m_llFile, (LONG)stOffset, NULL, (DWORD)iOrigin );
+	DWORD ret = SetFilePointer( (HANDLE)m_llFile, (LONG)iOffset, NULL, (DWORD)iOrigin );
 #else
-	return (size_t)lseek( m_llFile, stOffset, iOrigin );
+	off_t ret = lseek( m_llFile, iOffset, iOrigin );
 #endif
+    if (ret > INT_MAX)
+    {
+        NotifyIOError("CFile::Seek (length)");
+        return 0;
+    }
+    return (int)ret;
 }
 
 void CFile::SeekToBegin()
@@ -173,27 +217,27 @@ void CFile::SeekToBegin()
 	Seek( 0, SEEK_SET );
 }
 
-size_t CFile::SeekToEnd()
+int CFile::SeekToEnd()
 {
 	return Seek( 0, SEEK_END );
 }
 
-bool CFile::Write( const void * pData, size_t stLength ) const
+bool CFile::Write( const void * pData, int iLength ) const
 {
 #ifdef _WIN32
 	DWORD dwWritten;
-	BOOL ret = ::WriteFile( (HANDLE)m_llFile, pData, (DWORD)stLength, &dwWritten, NULL );
+	BOOL ret = ::WriteFile( (HANDLE)m_llFile, pData, (DWORD)iLength, &dwWritten, NULL );
 	if ( ret == FALSE )
 	{
-		NotifyIOError("write");
+		NotifyIOError("CFile::Write");
 		return false;
 	}
 	return true;
 #else
-	ssize_t ret = write(m_llFile, (const char *)pData, stLength);
-	if (ret == (ssize_t)-1 || (size_t)ret != stLength)
+	ssize_t ret = write(m_llFile, (const char *)pData, iLength);
+	if (ret == (ssize_t)-1 || ret != iLength)
     {
-        NotifyIOError("write");
+        NotifyIOError("CFile::Write");
 		return false;
     }
 	return true;
@@ -230,15 +274,6 @@ void CSFile::CloseBase()
 	CFile::Close();
 }
 
-int CSFile::GetLastError()
-{
-#ifdef _WIN32
-	return ::GetLastError();
-#else
-	return errno;
-#endif
-}
-
 bool CSFile::IsFileOpen() const
 {
 	return ( m_llFile != -1 );
@@ -255,7 +290,9 @@ bool CSFile::Open( lpctstr pszFilename, uint uiModeFlags )
 			return true;
 	}
 	else
+    {
 		Close();	// Make sure it's closed first.
+    }
 
 	if ( pszFilename == nullptr )
 		pszFilename = GetFilePath();
@@ -266,16 +303,14 @@ bool CSFile::Open( lpctstr pszFilename, uint uiModeFlags )
 		return false;
 
 	m_uiMode = uiModeFlags;
-	if ( !OpenBase() )
-		return false;
 
-	return true;
+	return OpenBase();
 }
 
 bool CSFile::OpenBase()
 {
 	ADDTOCALLSTACK("CSFile::OpenBase");
-	return static_cast<CFile *>(this)->Open(GetFilePath(), GetMode());
+	return CFile::Open(GetFilePath(), GetMode());
 }
 
 // CSFile:: File name operations.
@@ -288,10 +323,10 @@ lpctstr CSFile::GetFilesTitle( lpctstr pszPath )
 	size_t len = strlen(pszPath);
 	while ( len > 0 )
 	{
-		len--;
+		--len;
 		if ( pszPath[len] == '\\' || pszPath[len] == '/' )
 		{
-			len++;
+			++len;
 			break;
 		}
 	}
@@ -308,12 +343,12 @@ lpctstr CSFile::GetFileExt() const
 lpctstr CSFile::GetFilesExt( lpctstr pszName )	// static
 {
 	ADDTOCALLSTACK("CSFile::GetFilesExt");
-// get the EXTension including the .
+    // get the EXTension including the .
 	size_t lenall = strlen( pszName );
 	size_t len = lenall;
 	while ( len > 0 )
 	{
-		len--;
+		--len;
 		if ( pszName[len] == '\\' || pszName[len] == '/' )
 			break;
 		if ( pszName[len] == '.' )
@@ -363,7 +398,7 @@ uint CSFile::GetFullMode() const
 
 uint CSFile::GetMode() const
 {
-	return( m_uiMode & 0x0FFFFFFF );
+	return ( m_uiMode & 0x0FFFFFFF );
 }
 
 bool CSFile::IsBinaryMode() const
@@ -374,162 +409,4 @@ bool CSFile::IsBinaryMode() const
 bool CSFile::IsWriteMode() const
 {
 	return ( m_uiMode & OF_WRITE );
-}
-
-// CSFileText:: Constructors, Destructor, Asign operator.
-
-CSFileText::CSFileText()
-{
-	m_pStream = nullptr;
-#ifdef _WIN32
-	bNoBuffer = false;
-#endif
-}
-
-CSFileText::~CSFileText()
-{
-	Close();
-}
-
-// CSFileText:: File management.
-
-bool CSFileText::IsFileOpen() const
-{
-	return ( m_pStream != nullptr );
-}
-
-bool CSFileText::OpenBase()
-{
-	ADDTOCALLSTACK("CSFileText::OpenBase");
-
-	// Open a file.
-	m_pStream = fopen( GetFilePath(), GetModeStr() );
-	if ( m_pStream == nullptr )
-		return false;
-
-	// Get the file descriptor for it.
-	m_llFile = STDFUNC_FILENO(m_pStream);
-
-	return true;
-}
-
-void CSFileText::CloseBase()
-{
-	ADDTOCALLSTACK("CSFileText::CloseBase");
-	if ( IsWriteMode() )
-		fflush(m_pStream);
-
-	fclose(m_pStream);
-	m_pStream = nullptr;
-}
-
-// CSFileText:: Content management.
-
-void CSFileText::Flush() const
-{
-	if ( !IsFileOpen() )
-		return;
-	ASSERT(m_pStream);
-	fflush(m_pStream);
-}
-
-bool CSFileText::IsEOF() const
-{
-	if ( !IsFileOpen() )
-		return true;
-	return feof(m_pStream) ? true : false;
-}
-
-size_t _cdecl CSFileText::Printf( lpctstr pFormat, ... )
-{
-	ASSERT(pFormat);
-	va_list vargs;
-	va_start( vargs, pFormat );
-	size_t iRet = VPrintf( pFormat, vargs );
-	va_end( vargs );
-	return iRet;
-}
-
-size_t CSFileText::Read( void * pBuffer, size_t sizemax ) const
-{
-	// This can return: EOF(-1) constant.
-	// returns the number of full items actually read
-	ASSERT(pBuffer);
-	if ( IsEOF() )
-		return 0;	// LINUX will ASSERT if we read past end.
-	return fread( pBuffer, 1, sizemax, m_pStream );
-}
-
-tchar * CSFileText::ReadString( tchar * pBuffer, size_t sizemax ) const
-{
-    // Read a line of text. NULL/nullptr = EOF
-	ASSERT(pBuffer);
-	if ( IsEOF() )
-		return nullptr;	// LINUX will ASSERT if we read past end.
-	return fgets( pBuffer, (int)sizemax, m_pStream );
-}
-
-size_t CSFileText::VPrintf( lpctstr pFormat, va_list args )
-{
-	ASSERT(pFormat);
-	if ( !IsFileOpen() )
-		return (size_t)(-1);
-
-	size_t lenret = vfprintf( m_pStream, pFormat, args );
-	return lenret;
-}
-
-#ifndef _WIN32
-bool CSFileText::Write( const void * pData, size_t stLen ) const
-#else
-bool CSFileText::Write( const void * pData, size_t stLen )
-#endif
-{
-// RETURN: 1 = success else fail.
-	ASSERT(pData);
-	if ( !IsFileOpen() )
-		return false;
-#ifdef _WIN32 //	Windows flushing, the only safe mode to cancel it ;)
-	if ( !bNoBuffer )
-	{
-		setvbuf(m_pStream, NULL, _IONBF, 0);
-		bNoBuffer = true;
-	}
-#endif
-	size_t iStatus = fwrite( pData, stLen, 1, m_pStream );
-#ifndef _WIN32	// However, in unix, it works
-	fflush( m_pStream );
-#endif
-	return ( iStatus == 1 );
-}
-
-bool CSFileText::WriteString( lpctstr pStr )
-{
-// RETURN: < 0 = failed.
-	ASSERT(pStr);
-	return Write( pStr, (dword)strlen( pStr ) );
-}
-
-// CSFileText:: Mode operations.
-
-lpctstr CSFileText::GetModeStr() const
-{
-	ADDTOCALLSTACK("CSFileText::GetModeStr");
-// end of line translation is crap. ftell and fseek don't work correctly when you use it.
-// fopen() args
-	if ( IsBinaryMode())
-		return ( IsWriteMode() ? "wb" : "rb" );
-	if ( GetMode() & OF_READWRITE )
-		return "a+b";
-	if ( GetMode() & OF_CREATE )
-		return "w";
-	if ( IsWriteMode() )
-		return "w";
-	else
-		return "rb";	// don't parse out the \n\r
-}
-
-bool CSFileText::IsBinaryMode() const
-{
-	return false;
 }
