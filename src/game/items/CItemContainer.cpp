@@ -25,11 +25,11 @@ CItemContainer::~CItemContainer()
     DeletePrepare();
     if (_pMultiSecured)
     {
-        _pMultiSecured->Release(this);
+        _pMultiSecured->Release(GetUID());
     }
     if (_pMultiCrate)
     {
-        _pMultiCrate->SetMovingCrate(nullptr);
+        _pMultiCrate->SetMovingCrate(UID_UNUSED);
     }
 }
 

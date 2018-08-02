@@ -222,7 +222,9 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 CChar * CChar::CreateBasic(CREID_TYPE baseID) // static
 {
 	ADDTOCALLSTACK("CChar::CreateBasic");
-	return new CChar(baseID);
+    CChar *pChar = new CChar(baseID);
+    pChar->_pMultiStorage = new CMultiStorage(pChar->GetUID());
+	return pChar;
 }
 
 CChar::CChar( CREID_TYPE baseID ) : CObjBase( false ),
@@ -247,7 +249,7 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false ),
 	m_SpeechHueOverride = HUE_SAY_DEF;
     _iMaxHouses = g_Cfg._iMaxHousesPlayer;
     _iMaxShips = g_Cfg._iMaxShipsPlayer;
-    _pMultiStorage = new CMultiStorage(this);
+    _pMultiStorage = nullptr;
 	m_height = 0;
 	m_ModMaxWeight = 0;
 
@@ -1854,7 +1856,7 @@ bool CChar::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
                 {
                     return false;
                 }
-                pRef = GetMultiStorage()->GetHouseAt(iPos);
+                pRef = static_cast<CItemMulti*>(GetMultiStorage()->GetHouseAt(iPos).ItemFind());
                 SKIP_SEPARATORS(pszKey);
                 return true;
             }
@@ -1865,7 +1867,7 @@ bool CChar::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
                 {
                     return false;
                 }
-                pRef = GetMultiStorage()->GetShipAt(iPos);
+                pRef = static_cast<CItemShip*>(GetMultiStorage()->GetShipAt(iPos).ItemFind());
                 SKIP_SEPARATORS(pszKey);
                 return true;
             }
@@ -2625,8 +2627,7 @@ do_default:
         case CHC_GETHOUSEPOS:
         {
             pszKey += 11;
-            CItem *pItem = ((CUID)Exp_GetDWVal(pszKey)).ItemFind();
-            sVal.Format16Val(GetMultiStorage()->GetHousePos(static_cast<CItemMulti*>(pItem)));
+            sVal.Format16Val(GetMultiStorage()->GetHousePos((CUID)Exp_GetDWVal(pszKey)));
             return true;
         }
         case CHC_SHIPS:
@@ -2637,8 +2638,7 @@ do_default:
         case CHC_GETSHIPPOS:
         {
             pszKey += 11;
-            CItem *pItem = ((CUID)Exp_GetDWVal(pszKey)).ItemFind();
-            sVal.Format16Val(GetMultiStorage()->GetShipPos(static_cast<CItemShip*>(pItem)));
+            sVal.Format16Val(GetMultiStorage()->GetShipPos((CUID)Exp_GetDWVal(pszKey)));
             return true;
         }
 		case CHC_ACCOUNT:
@@ -2933,13 +2933,12 @@ do_default:
         {
             int64 piCmd[2];
             Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
-            CItemMulti *pHouse = static_cast<CItemMulti*>(((CUID)((dword)piCmd[0])).ItemFind());
             HOUSE_PRIV ePriv = HP_OWNER;
             if (piCmd[1] > 0 && piCmd[1] < HP_QTY)
             {
                 ePriv = (HOUSE_PRIV)piCmd[1];
             }
-            GetMultiStorage()->AddHouse(pHouse, ePriv);
+            GetMultiStorage()->AddHouse((CUID((dword)piCmd[0])), ePriv);
             break;
         }
         case CHC_DELHOUSE:
@@ -2951,7 +2950,7 @@ do_default:
             }
             else
             {
-                GetMultiStorage()->DelHouse(static_cast<CItemMulti*>(((CUID)dwUID).ItemFind()));
+                GetMultiStorage()->DelHouse((CUID)dwUID);
             }
             break;
         }
@@ -2959,13 +2958,12 @@ do_default:
         {
             int64 piCmd[2];
             Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
-            CItemShip *pShip = static_cast<CItemShip*>(((CUID)((dword)piCmd[0])).ItemFind());
             HOUSE_PRIV ePriv = HP_OWNER;
             if (piCmd[1] > 0 && piCmd[1] < HP_QTY)
             {
                 ePriv = (HOUSE_PRIV)piCmd[1];
             }
-            GetMultiStorage()->AddShip(pShip, ePriv);
+            GetMultiStorage()->AddShip((CUID((dword)piCmd[0])), ePriv);
             break;
         }
         case CHC_DELSHIP:
@@ -2977,7 +2975,7 @@ do_default:
             }
             else
             {
-                GetMultiStorage()->DelShip(static_cast<CItemShip*>(((CUID)dwUID).ItemFind()));
+                GetMultiStorage()->DelShip((CUID)dwUID);
             }
             break;
         }

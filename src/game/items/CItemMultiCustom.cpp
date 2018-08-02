@@ -151,7 +151,7 @@ void CItemMultiCustom::BeginCustomize(CClient * pClientSrc)
         }
         if (args.m_iN3 == 1)
         {
-            EjectAll(pChar);
+            EjectAll(pChar->GetUID());
         }
         else if (args.m_iN3 == 2)
         {
@@ -517,29 +517,37 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, sh
 	m_designWorking.m_vectorComponents.push_back(pComponent);
 	m_designWorking.m_iRevision++;
 
-    CItemContainer *pMovingCrate = GetMovingCrate(true);
-    std::vector<CItem*> vListLocks;
+    CItemContainer *pMovingCrate = static_cast<CItemContainer*>(GetMovingCrate(true).ItemFind());
+    std::vector<CUID> vListLocks;
     GetLockdownsAt(x, y, z, vListLocks);
     if (!vListLocks.empty())
     {
-        for (std::vector<CItem*>::iterator it = vListLocks.begin(); it != vListLocks.end(); ++it)
+        for (std::vector<CUID>::iterator it = vListLocks.begin(); it != vListLocks.end(); ++it)
         {
-            UnlockItem(*it);
-            pMovingCrate->ContentAdd(*it);
-            (*it)->RemoveFromView();
+            CItem *pItem = static_cast<CItem*>((*it).ItemFind());
+            if (pItem)
+            {
+                UnlockItem((*it));
+                pMovingCrate->ContentAdd(pItem);
+                pItem->RemoveFromView();
+            }
         }
     }
     vListLocks.clear();
 
-    std::vector<CItemContainer*> vListConts;
+    std::vector<CUID> vListConts;
     GetSecuredAt(x, y, z, vListConts);
     if (!vListConts.empty())
     {
-        for (std::vector<CItemContainer*>::iterator it = vListConts.begin(); it != vListConts.end(); ++it)
+        for (std::vector<CUID>::iterator it = vListConts.begin(); it != vListConts.end(); ++it)
         {
-            Release(*it);
-            pMovingCrate->ContentAdd(*it);
-            (*it)->RemoveFromView();
+            CItemContainer *pCont = static_cast<CItemContainer*>((*it).ItemFind());
+            if (pCont)
+            {
+                Release((*it));
+                pMovingCrate->ContentAdd(pCont);
+                pCont->RemoveFromView();
+            }
         }
     }
     vListConts.clear();
@@ -1191,7 +1199,7 @@ void CItemMultiCustom::CopyDesign(DesignDetails * designFrom, DesignDetails * de
     }
 }
 
-void CItemMultiCustom::GetLockdownsAt(short dx, short dy, char dz, std::vector<CItem*> &vList)
+void CItemMultiCustom::GetLockdownsAt(short dx, short dy, char dz, std::vector<CUID> &vList)
 {
     if (_pLockDowns.empty())
     {
@@ -1200,19 +1208,20 @@ void CItemMultiCustom::GetLockdownsAt(short dx, short dy, char dz, std::vector<C
     short iFixedX = GetTopPoint().m_x + dx;
     short iFixedY = GetTopPoint().m_y + dy;
     char iFloor = CalculateLevel(GetTopPoint().m_z + dz);  // get the Diff Z from the Multi's Z
-    for (std::vector<CItem*>::iterator it = _pLockDowns.begin(); it != _pLockDowns.end(); ++it)
+    for (std::vector<CUID>::iterator it = _pLockDowns.begin(); it != _pLockDowns.end(); ++it)
     {
-        if ( ((*it)->GetTopPoint().m_x == iFixedX)
-            && (*it)->GetTopPoint().m_y == iFixedY
-            && (CalculateLevel((*it)->GetTopPoint().m_z) == iFloor))
+        CItem *pItem = (*it).ItemFind();
+        if ( (pItem->GetTopPoint().m_x == iFixedX)
+            && pItem->GetTopPoint().m_y == iFixedY
+            && (CalculateLevel(pItem->GetTopPoint().m_z) == iFloor))
         {
-            vList.push_back(*it);
+            vList.push_back((*it));
         }
     }
     return;
 }
 
-void CItemMultiCustom::GetSecuredAt(short dx, short dy, char dz, std::vector<CItemContainer*> &vList)
+void CItemMultiCustom::GetSecuredAt(short dx, short dy, char dz, std::vector<CUID> &vList)
 {
     if (_lSecureContainers.empty())
     {
@@ -1221,11 +1230,12 @@ void CItemMultiCustom::GetSecuredAt(short dx, short dy, char dz, std::vector<CIt
     short iFixedX = GetTopPoint().m_x + dx;
     short iFixedY = GetTopPoint().m_y + dy;
     char iFloor = CalculateLevel(GetTopPoint().m_z + dz);  // get the Diff Z from the Multi's Z
-    for (std::vector<CItemContainer*>::iterator it = _lSecureContainers.begin(); it != _lSecureContainers.end(); ++it)
+    for (std::vector<CUID>::iterator it = _lSecureContainers.begin(); it != _lSecureContainers.end(); ++it)
     {
-        if (((*it)->GetTopPoint().m_x == iFixedX)
-            && (*it)->GetTopPoint().m_y == iFixedY
-            && (CalculateLevel((*it)->GetTopPoint().m_z) == iFloor))
+        CItemContainer *pCont = static_cast<CItemContainer*>((*it).ItemFind());
+        if ((pCont->GetTopPoint().m_x == iFixedX)
+            && pCont->GetTopPoint().m_y == iFixedY
+            && (CalculateLevel(pCont->GetTopPoint().m_z) == iFloor))
         {
             vList.push_back(*it);
         }

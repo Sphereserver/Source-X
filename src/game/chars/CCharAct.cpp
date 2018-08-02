@@ -519,15 +519,15 @@ void CChar::OnRemoveObj( CSObjListRec* pObRec )	// Override this = called when r
 
 		short iHitpointIncrease = (short)(pItem->GetDefNum("BONUSHITS", true, true));
 		if (iHitpointIncrease != 0)
-			Stat_SetMod(STAT_STR, Stat_GetMax(STAT_STR) - iHitpointIncrease);
+			Stat_SetMax(STAT_STR, Stat_GetMax(STAT_STR) - iHitpointIncrease);
 
 		short iStaminaIncrease = (short)(pItem->GetDefNum("BONUSSTAM", true, true));
 		if (iStaminaIncrease != 0)
-            Stat_SetMod(STAT_DEX, Stat_GetMax(STAT_DEX) - iStaminaIncrease);
+            Stat_SetMax(STAT_DEX, Stat_GetMax(STAT_DEX) - iStaminaIncrease);
 
 		short iManaIncrease = (short)(pItem->GetDefNum("BONUSMANA", true, true));
 		if (iManaIncrease != 0)
-            Stat_SetMod(STAT_INT, Stat_GetMax(STAT_INT) - iManaIncrease);
+            Stat_SetMax(STAT_INT, Stat_GetMax(STAT_INT) - iManaIncrease);
 
 		int64 iDamageIncrease = pItem->GetDefNum("INCREASEDAM", true, true);
 		if ( iDamageIncrease != 0 )
@@ -2102,15 +2102,15 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 
 	short iHitpointIncrease = (short)(pItem->GetDefNum("BONUSHITS", true, true));
 	if (iHitpointIncrease != 0)
-		Stat_SetMax(STAT_STR, Stat_GetMax(STAT_STR) + iHitpointIncrease);
+        Stat_SetMax(STAT_STR, Stat_GetMax(STAT_STR) + iHitpointIncrease);
 
 	short iStaminaIncrease = (short)(pItem->GetDefNum("BONUSSTAM", true, true));
 	if (iStaminaIncrease != 0)
-		Stat_SetMax(STAT_DEX, Stat_GetMax(STAT_DEX) + iStaminaIncrease);
+        Stat_SetMax(STAT_DEX, Stat_GetMax(STAT_DEX) + iStaminaIncrease);
 
 	short iManaIncrease = (short)(pItem->GetDefNum("BONUSMANA", true, true));
 	if (iManaIncrease != 0)
-		Stat_SetMax(STAT_INT, Stat_GetMax(STAT_INT) + iManaIncrease);
+        Stat_SetMax(STAT_INT, Stat_GetMax(STAT_INT) + iManaIncrease);
 
 	int64 iDamageIncrease = pItem->GetDefNum("INCREASEDAM", true, true);
 	if (iDamageIncrease != 0)
