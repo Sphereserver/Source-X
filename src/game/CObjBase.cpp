@@ -2962,11 +2962,11 @@ void CObjBase::FreePropertyList()
 	ADDTOCALLSTACK("CObjBase::FreePropertyList");
 	// free m_PropertyList
 
-	if (m_PropertyList == NULL)
+	if (m_PropertyList == nullptr)
 		return;
 
 	delete m_PropertyList;
-	m_PropertyList = NULL;
+	m_PropertyList = nullptr;
 }
 
 dword CObjBase::UpdatePropertyRevision(dword hash)

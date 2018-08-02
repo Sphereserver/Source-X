@@ -2856,7 +2856,7 @@ bool PacketAosTooltipInfo::onReceive(NetState* net)
 	CClient* client = net->getClient();
 	ASSERT(client);
 	const CChar* character = client->GetChar();
-	if (character == NULL)
+	if (character == nullptr)
 		return false;
 
 	if (net->isClientVersion(MINCLIVER_TOOLTIP) == false)
@@ -2864,8 +2864,8 @@ bool PacketAosTooltipInfo::onReceive(NetState* net)
 	else if (client->GetResDisp() < RDS_AOS || !IsAosFlagEnabled(FEATURE_AOS_UPDATE_B))
 		return true;
 
-	const CObjBase* object = CUID(readInt32()).ObjFind();
-	if (object != NULL && character->CanSee(object))
+	CObjBase* object = CUID(readInt32()).ObjFind();
+	if (object != nullptr && character->CanSee(object))
 		client->addAOSTooltip(object, true);
 
 	return true;
@@ -3417,7 +3417,7 @@ bool PacketAOSTooltipReq::onReceive(NetState* net)
 	CClient* client = net->getClient();
 	ASSERT(client);
 	const CChar* character = client->GetChar();
-	if (character == NULL)
+	if (character == nullptr)
 		return false;
 
 	if (net->isClientVersion(MINCLIVER_TOOLTIP) == false)
@@ -3427,8 +3427,8 @@ bool PacketAOSTooltipReq::onReceive(NetState* net)
 
 	for (word length = readInt16(); length > sizeof(dword); length -= sizeof(dword))
 	{
-		const CObjBase* object = CUID(readInt32()).ObjFind();
-		if (object == NULL)
+		CObjBase* object = CUID(readInt32()).ObjFind();
+		if (object == nullptr)
 			continue;
 		
         bool bShop = false;
@@ -3437,7 +3437,7 @@ bool PacketAOSTooltipReq::onReceive(NetState* net)
         {
             // Check if this item is shown from a shop gump: for shop items we need to always send the tooltip!
             const CObjBase* pSearchObj;
-            while ( (pSearchObj = pSearchObjItem->GetContainer()) != NULL )
+            while ( (pSearchObj = pSearchObjItem->GetContainer()) != nullptr )
             {
                 // Get the top container
                 pSearchObjItem = dynamic_cast<const CItem*>(pSearchObj);

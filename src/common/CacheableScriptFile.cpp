@@ -103,7 +103,7 @@ bool CacheableScriptFile::IsEOF() const
 		return CSFileText::IsEOF();
 
 	ADDTOCALLSTACK("CacheableScriptFile::IsEOF");
-	return ( m_fileContent.empty() || m_currentLine == m_fileContent.size() );
+	return ( m_fileContent.empty() || ((uint)m_currentLine == m_fileContent.size()) );
 }
 
 tchar * CacheableScriptFile::ReadString(tchar *pBuffer, int sizemax) 
@@ -115,7 +115,7 @@ tchar * CacheableScriptFile::ReadString(tchar *pBuffer, int sizemax)
 
 	*pBuffer = '\0';
 
-	if ( !m_fileContent.empty() && m_currentLine < m_fileContent.size() )
+	if ( !m_fileContent.empty() && ((uint)m_currentLine < m_fileContent.size()) )
 	{
 		strcpy(pBuffer, m_fileContent[m_currentLine].c_str() );
 		++m_currentLine;
@@ -157,7 +157,7 @@ int CacheableScriptFile::Seek(int offset, int origin)
 	if (origin != SEEK_SET)
 		linenum = 0;	//	do not support not SEEK_SET rotation
 
-	if (linenum <= m_fileContent.size())
+	if ((uint)linenum <= m_fileContent.size())
 	{
 		m_currentLine = linenum;
 		return linenum;

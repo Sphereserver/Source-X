@@ -23,7 +23,7 @@ uint HashString(lpctstr str, size_t length)
 #define PUSH_FRONT_TOOLTIP(pObj, t) pObj->m_TooltipData.emplace(pObj->m_TooltipData.begin(),t)
 #define PUSH_BACK_TOOLTIP(pObj, t) pObj->m_TooltipData.emplace_back(t)
 
-void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
+void CClient::addAOSTooltip(CObjBase * pObj, bool bRequested, bool bShop)
 {
 	ADDTOCALLSTACK("CClient::addAOSTooltip");
 	if (!pObj)
@@ -67,17 +67,12 @@ void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
 
 	if (propertyList == nullptr || propertyList->hasExpired(g_Cfg.m_iTooltipCache))
 	{
-		CItem *pItem = pObj->IsItem() ? const_cast<CItem *>(static_cast<const CItem *>(pObj)) : nullptr;
-		CChar *pChar = pObj->IsChar() ? const_cast<CChar *>(static_cast<const CChar *>(pObj)) : nullptr;
-        CChar *pClientChar = GetChar();
+        pObj->m_TooltipData.clear();
+		pObj->FreePropertyList();
 
-		if (pItem != nullptr)
-			pItem->FreePropertyList();
-		else if (pChar != nullptr)
-			pChar->FreePropertyList();
-
-		CClientTooltip* t = nullptr;
-        pClientChar->m_TooltipData.clear();
+        CClientTooltip* t = nullptr;
+        CItem *pItem = pObj->IsItem() ? static_cast<CItem *>(pObj) : nullptr;
+        CChar *pChar = pObj->IsChar() ? static_cast<CChar *>(pObj) : nullptr;
 
 		//DEBUG_MSG(("Preparing tooltip for 0%x (%s)\n", (dword)pObj->GetUID(), pObj->GetName()));
 		if (bNameOnly) // if we only want to display the name
@@ -85,10 +80,10 @@ void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
 			dword ClilocName = (dword)(pObj->GetDefNum("NAMELOC", false, true));
 
 			if (ClilocName)
-                PUSH_BACK_TOOLTIP(const_cast<CObjBase*>(pObj), new CClientTooltip(ClilocName));
+                PUSH_BACK_TOOLTIP(pObj, new CClientTooltip(ClilocName));
 			else
 			{
-                PUSH_BACK_TOOLTIP(const_cast<CObjBase*>(pObj), t = new CClientTooltip(1042971)); // ~1_NOTHING~
+                PUSH_BACK_TOOLTIP(pObj, t = new CClientTooltip(1042971)); // ~1_NOTHING~
 				t->FormatArgs("%s", pObj->GetName());
 			}
 		}
@@ -98,9 +93,9 @@ void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
 
 			if (IsTrigUsed(TRIGGER_CLIENTTOOLTIP) || (pItem && IsTrigUsed(TRIGGER_ITEMCLIENTTOOLTIP)) || (pChar && IsTrigUsed(TRIGGER_CHARCLIENTTOOLTIP)))
 			{
-				CScriptTriggerArgs args(const_cast<CObjBase *>(pObj));
+				CScriptTriggerArgs args(pObj);
 				args.m_iN1 = bRequested;
-				iRet = const_cast<CObjBase *>(pObj)->OnTrigger("@ClientTooltip", this->GetChar(), &args); //ITRIG_CLIENTTOOLTIP , CTRIG_ClientTooltip
+				iRet = pObj->OnTrigger("@ClientTooltip", this->GetChar(), &args); //ITRIG_CLIENTTOOLTIP , CTRIG_ClientTooltip
 			}
 
 			if (iRet != TRIGRET_RET_TRUE)
@@ -191,10 +186,10 @@ void CClient::addAOSTooltip(const CObjBase * pObj, bool bRequested, bool bShop)
 		delete propertyList;
 }
 
-void CClient::AOSTooltip_addName(const CObjBase* pObj)
+void CClient::AOSTooltip_addName( CObjBase* pObj)
 {
-	CItem *pItem = pObj->IsItem() ? const_cast<CItem *>(static_cast<const CItem *>(pObj)) : nullptr;
-	CChar *pChar = pObj->IsChar() ? const_cast<CChar *>(static_cast<const CChar *>(pObj)) : nullptr;
+	CItem *pItem = pObj->IsItem() ? static_cast<CItem *>(pObj) : nullptr;
+	CChar *pChar = pObj->IsChar() ? static_cast<CChar *>(pObj) : nullptr;
 	CClientTooltip* t = nullptr;
 
 	dword dwClilocName = (dword)(pObj->GetDefNum("NAMELOC", true, true));
