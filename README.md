@@ -152,13 +152,13 @@ These are meant to be applied to new code and, if there's some old code not foll
 * Classes need to have the first letter uppercase and the prefix "C".
 * Internal (mostly private) variables of a class or struct need to have the prefix "\_". This is a new convention, the old one used the "m\_" prefix.
 * After the prefix, the descriptive name should begin with an upper letter.
-<br>
-** Variables meant to hold numerical values: **
+
+**Variables meant to hold numerical values:**
 * For char, short, int, long, llong, use the prefix: "i" (stands for integer).
 * For byte, word and dword use respectively the prefixes: "b", "w", "dw". Do not add the unsigned prefix.
 * For float and double, use the prefix: "r" (stands for real number).
-<br>
-** Variables meant to hold characters (also strings): **
+
+**Variables meant to hold characters (also strings):**
 * For char, wchar, tchar use respectively the prefixes "c", "wc", "tc".
 * When handling strings, "lpstr", "lpcstr", "lpwstr", "lpcwstr", "lptstr", "lpctstr" data types are preferred aliases.<br>
   You'll find a lot of "psz" prefixes for strings: the reason is that in the past Sphere coders wanted to be consistent with Microsoft's Hungarian Notation.<br>

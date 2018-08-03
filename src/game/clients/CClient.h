@@ -551,7 +551,7 @@ public:
 
 	void addCharPaperdoll( CChar * pChar );
 
-	void addAOSTooltip( CObjBase * pObj, bool bRequested = false, bool bShop = false );
+	void addAOSTooltip( CObjBase * pObj, bool fRequested = false, bool fShop = false );
 private:
 	void AOSTooltip_addName(CObjBase* pObj);
 	void AOSTooltip_addDefaultCharData(CChar * pChar);

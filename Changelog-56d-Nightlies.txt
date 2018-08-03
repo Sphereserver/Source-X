@@ -1074,3 +1074,6 @@ Multis:
 - Changed BonusHits/Stam/Mana to increase ModHits/Stam/Mana instead of the real stats
 - Fixed tooltips not sending data
 - Fixed ship redeeds creating normal deeds instead of ship plans.
+
+02-08-2018, Nolok
+- Fixed: File I/O functions messing up line numbers, for example reading the wrong line (Issue #95).

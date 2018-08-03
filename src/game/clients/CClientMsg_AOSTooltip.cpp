@@ -8,8 +8,7 @@
 #include "CClient.h"
 
 
-// Simple string hashing algorithm function
-// Founded by D. J. Bernstein
+// Simple string hashing algorithm function by D. J. Bernstein
 // Original code found at: http://www.cse.yorku.ca/~oz/hash.html
 uint HashString(lpctstr str, size_t length)
 {
@@ -23,7 +22,7 @@ uint HashString(lpctstr str, size_t length)
 #define PUSH_FRONT_TOOLTIP(pObj, t) pObj->m_TooltipData.emplace(pObj->m_TooltipData.begin(),t)
 #define PUSH_BACK_TOOLTIP(pObj, t) pObj->m_TooltipData.emplace_back(t)
 
-void CClient::addAOSTooltip(CObjBase * pObj, bool bRequested, bool bShop)
+void CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 {
 	ADDTOCALLSTACK("CClient::addAOSTooltip");
 	if (!pObj)
@@ -35,19 +34,19 @@ void CClient::addAOSTooltip(CObjBase * pObj, bool bRequested, bool bShop)
 	// Enhanced and KR clients always need the tooltips (but they can't be enabled without FEATURE_AOS_UPDATE_B, since this has to be sent to the client via the packet 0xB9).
 	// Shop items use tooltips whether they're disabled or not,
 	//  so we can just send a basic tooltip with the item name
-	bool bNameOnly = false;
+	bool fNameOnly = false;
 	if (!IsResClient(RDS_AOS) || !IsAosFlagEnabled(FEATURE_AOS_UPDATE_B))
 	{
-		if (!bShop)
+		if (!fShop)
 			return;
 
-		bNameOnly = true;
+		fNameOnly = true;
 	}
 
 	// we do not need to send tooltips for items not in LOS (multis/ships)
 	//DEBUG_MSG(("(( m_pChar->GetTopPoint().GetDistSight(pObj->GetTopPoint()) (%x) > UO_MAP_VIEW_SIZE_DEFAULT (%x) ) && ( !bShop ) (%x) )", m_pChar->GetTopPoint().GetDistSight(pObj->GetTopPoint()), UO_MAP_VIEW_SIZE_DEFAULT, ( !bShop )));
 	int iDist = m_pChar->GetTopPoint().GetDistSight(pObj->GetTopPoint());
-	if ( (iDist > m_pChar->GetVisualRange()) && (iDist <= UO_MAP_VIEW_RADAR) && !bShop ) //(iDist <= UO_MAP_VIEW_RADAR) is needed because items equipped or in a container have invalid GetTopPoint (and a very high iDist)
+	if ( (iDist > m_pChar->GetVisualRange()) && (iDist <= UO_MAP_VIEW_RADAR) && !fShop ) //(iDist <= UO_MAP_VIEW_RADAR) is needed because items equipped or in a container have invalid GetTopPoint (and a very high iDist)
 		return;
 
 	// We check here if we are sending a tooltip for a static/non-movable items
@@ -75,7 +74,7 @@ void CClient::addAOSTooltip(CObjBase * pObj, bool bRequested, bool bShop)
         CChar *pChar = pObj->IsChar() ? static_cast<CChar *>(pObj) : nullptr;
 
 		//DEBUG_MSG(("Preparing tooltip for 0%x (%s)\n", (dword)pObj->GetUID(), pObj->GetName()));
-		if (bNameOnly) // if we only want to display the name
+		if (fNameOnly) // if we only want to display the name
 		{
 			dword ClilocName = (dword)(pObj->GetDefNum("NAMELOC", false, true));
 
@@ -91,12 +90,14 @@ void CClient::addAOSTooltip(CObjBase * pObj, bool bRequested, bool bShop)
 		{
 			TRIGRET_TYPE iRet = TRIGRET_RET_FALSE;
 
+
 			if (IsTrigUsed(TRIGGER_CLIENTTOOLTIP) || (pItem && IsTrigUsed(TRIGGER_ITEMCLIENTTOOLTIP)) || (pChar && IsTrigUsed(TRIGGER_CHARCLIENTTOOLTIP)))
 			{
 				CScriptTriggerArgs args(pObj);
-				args.m_iN1 = bRequested;
+				args.m_iN1 = fRequested;
 				iRet = pObj->OnTrigger("@ClientTooltip", this->GetChar(), &args); //ITRIG_CLIENTTOOLTIP , CTRIG_ClientTooltip
 			}
+
 
 			if (iRet != TRIGRET_RET_TRUE)
 			{
@@ -135,22 +136,14 @@ void CClient::addAOSTooltip(CObjBase * pObj, bool bRequested, bool bShop)
 		//
 		// we still want to generate a hash though, so we don't have to increment
 		// the revision number if the tooltip hasn't actually been changed
-		dword revision = 0;
-		if (pItem != nullptr)
-			revision = pItem->UpdatePropertyRevision(hash);
-		else if (pChar != nullptr)
-			revision = pChar->UpdatePropertyRevision(hash);
-
+		dword revision = pObj->UpdatePropertyRevision(hash);
 		propertyList = new PacketPropertyList(pObj, revision, pObj->m_TooltipData);
 
 		// cache the property list for next time, unless property list is
 		// incomplete (name only) or caching is disabled
-		if (bNameOnly == false && g_Cfg.m_iTooltipCache > 0)
+		if ((fNameOnly == false) && (g_Cfg.m_iTooltipCache > 0))
 		{
-			if (pItem != nullptr)
-				pItem->SetPropertyList(propertyList);
-			else if (pChar != nullptr)
-				pChar->SetPropertyList(propertyList);
+			pObj->SetPropertyList(propertyList);
 		}
 	}
 	
@@ -159,7 +152,7 @@ void CClient::addAOSTooltip(CObjBase * pObj, bool bRequested, bool bShop)
 		switch (g_Cfg.m_iTooltipMode)
 		{
 		case TOOLTIPMODE_SENDVERSION:
-			if (!bRequested)
+			if (!fRequested)
 			{
 				// send property list version (client will send a request for the full tooltip if needed)
 				if (PacketPropertyListVersion::CanSendTo(GetNetState()) == false)
@@ -186,7 +179,7 @@ void CClient::addAOSTooltip(CObjBase * pObj, bool bRequested, bool bShop)
 		delete propertyList;
 }
 
-void CClient::AOSTooltip_addName( CObjBase* pObj)
+void CClient::AOSTooltip_addName(CObjBase* pObj)
 {
 	CItem *pItem = pObj->IsItem() ? static_cast<CItem *>(pObj) : nullptr;
 	CChar *pChar = pObj->IsChar() ? static_cast<CChar *>(pObj) : nullptr;
