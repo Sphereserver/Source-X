@@ -2931,6 +2931,10 @@ do_default:
 	{
         case CHC_ADDHOUSE:
         {
+            if (g_Serv.IsLoading()) //Prevent to load it from saves, it may cause a crash when accessing to a non-yet existant multi
+            {
+                break;
+            }
             int64 piCmd[2];
             Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
             HOUSE_PRIV ePriv = HP_OWNER;
@@ -2956,6 +2960,10 @@ do_default:
         }
         case CHC_ADDSHIP:
         {
+            if (g_Serv.IsLoading()) //Prevent to load it from saves, it may cause a crash when accessing to a non-yet existant multi
+            {
+                break;
+            }
             int64 piCmd[2];
             Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
             HOUSE_PRIV ePriv = HP_OWNER;
