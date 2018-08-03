@@ -436,14 +436,16 @@ public:
 		m_fUpdateStats |= SF_UPDATE_STAM;
 	}
 	void UpdateStats();
-	bool addDeleteErr(byte code, dword iSlot);
+	bool addDeleteErr(byte code, dword iSlot) const;
 	void addSeason(SEASON_TYPE season);
-	void addTime( bool bCurrent = false );
-	void addObjectRemoveCantSee( CUID uid, lpctstr pszName = NULL );
-	void closeContainer( const CObjBase * pObj );
-	void closeUIWindow( const CChar* character, dword command );
-	void addObjectRemove( CUID uid );
-	void addObjectRemove( const CObjBase * pObj );
+    void addWeather( WEATHER_TYPE weather = WEATHER_DEFAULT ); // Send new weather to player
+    void addLight() const;
+	void addTime( bool fCurrent = false ) const;
+	void addObjectRemoveCantSee( CUID uid, lpctstr pszName = nullptr ) const;
+	void closeContainer( const CObjBase * pObj ) const;
+	void closeUIWindow( const CChar* character, dword command ) const;
+	void addObjectRemove( CUID uid ) const;
+	void addObjectRemove( const CObjBase * pObj ) const;
 	void addRemoveAll( bool fItems, bool fChars );
 
 	void addItem_OnGround( CItem * pItem ); // Send items (on ground)
@@ -451,45 +453,47 @@ public:
 	void addItem_InContainer( const CItem * pItem );
 	void addItem( CItem * pItem );
 
-	void addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dword ClilocTwo, const word Time = 0, lpctstr* pArgs = 0, size_t iArgCount = 0);
-	void removeBuff(const BUFF_ICONS IconId);
-	void resendBuffs();
+	void addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dword ClilocTwo, const word Time = 0, lpctstr* pArgs = 0, size_t iArgCount = 0) const;
+	void removeBuff(const BUFF_ICONS IconId) const;
+	void resendBuffs() const;
 
-	void addOpenGump( const CObjBase * pCont, GUMP_TYPE gump );
-	void addContainerContents( const CItemContainer * pCont, bool boCorpseEquip = false, bool boCorpseFilter = false, bool boShop = false ); // Send items
+	void addOpenGump( const CObjBase * pCont, GUMP_TYPE gump ) const;
+	void addContainerContents( const CItemContainer * pCont, bool fCorpseEquip = false, bool fCorpseFilter = false, bool fShop = false ); // Send items
 	bool addContainerSetup( const CItemContainer * pCont ); // Send Backpack (with items)
 
 	void addPlayerStart( CChar * pChar );
 	void addPlayerSee( const CPointMap & pt ); // Send objects the player can now see
 	void addPlayerView( const CPointMap & pt, bool bFull = true );
-	void addPlayerWarMode();
+	void addPlayerWarMode() const;
 
-	void addCharMove( const CChar * pChar );
-	void addCharMove( const CChar * pChar, byte iCharDirFlag );
+	void addCharMove( const CChar * pChar ) const;
+	void addCharMove( const CChar * pChar, byte iCharDirFlag ) const;
 	void addChar( CChar * pChar );
 	void addCharName( const CChar * pChar ); // Singleclick text for a character
 	void addItemName( const CItem * pItem );
 
 	bool addKick( CTextConsole * pSrc, bool fBlock = true );
-	void addWeather( WEATHER_TYPE weather = WEATHER_DEFAULT ); // Send new weather to player
-	void addLight();
-	void addMusic( MIDI_TYPE id );
-	void addArrowQuest( int x, int y, int id );
-	void addEffect( EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate * pDst, const CObjBaseTemplate * pSrc, byte speed = 5, byte loop = 1, bool explode = false, dword color = 0, dword render = 0, word effectid = 0, dword explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0 );
-	void addEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap &pt, const CObjBaseTemplate * pSrc, byte speed = 5, byte loop = 1, bool explode = false, dword color = 0, dword render = 0, word effectid = 0, dword explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0);
+	void addMusic( MIDI_TYPE id ) const;
+	void addArrowQuest( int x, int y, int id ) const;
+	void addEffect( EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate * pDst, const CObjBaseTemplate * pSrc,
+        byte speed = 5, byte loop = 1, bool explode = false, dword color = 0, dword render = 0, word effectid = 0,
+        dword explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0 ) const;
+	void addEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap &pt, const CObjBaseTemplate * pSrc,
+        byte speed = 5, byte loop = 1, bool explode = false, dword color = 0, dword render = 0, word effectid = 0,
+        dword explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0) const;
 
-	void addSound( SOUND_TYPE id, const CObjBaseTemplate * pBase = NULL, int iRepeat = 1 );
+	void addSound( SOUND_TYPE id, const CObjBaseTemplate * pBase = nullptr, int iRepeat = 1 ) const;
 	void addReSync();
-	void addMap();
-	void addMapDiff();
-    void addMapWaypoint(CObjBase *pObj, MAPWAYPOINT_TYPE type);
-	void addChangeServer();
+	void addMap() const;
+	void addMapDiff() const;
+    void addMapWaypoint(CObjBase *pObj, MAPWAYPOINT_TYPE type) const;
+	void addChangeServer() const;
 	void addPlayerUpdate() const;
 
-	void addBark( lpctstr pText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_DEFAULT, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD );
-	void addBarkUNICODE( const nchar * pText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang = 0 );
-	void addBarkLocalized( int iClilocId, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_DEFAULT, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD, lpctstr pArgs = NULL );
-	void addBarkLocalizedEx( int iClilocId, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_DEFAULT, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD, AFFIX_TYPE affix = AFFIX_APPEND, lpctstr pAffix = NULL, lpctstr pArgs = NULL );
+	void addBark( lpctstr pText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_DEFAULT, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD ) const;
+	void addBarkUNICODE( const nchar * pText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang = 0 ) const;
+	void addBarkLocalized( int iClilocId, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_DEFAULT, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD, lpctstr pArgs = nullptr ) const;
+	void addBarkLocalizedEx( int iClilocId, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_DEFAULT, TALKMODE_TYPE mode = TALKMODE_SAY, FONT_TYPE font = FONT_BOLD, AFFIX_TYPE affix = AFFIX_APPEND, lpctstr pAffix = nullptr, lpctstr pArgs = nullptr ) const;
 	void addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font = FONT_NORMAL, bool bUnicode = false, lpctstr name = "" );
 	void addSysMessage( lpctstr pMsg ); // System message (In lower left corner)
 	void addObjMessage( lpctstr pMsg, const CObjBaseTemplate * pSrc, HUE_TYPE wHue = HUE_TEXT_DEF, TALKMODE_TYPE mode = TALKMODE_OBJ ); // The message when an item is clicked
@@ -518,19 +522,19 @@ public:
 
 	void addSpellbookOpen( CItem * pBook );
 	void addCustomSpellbookOpen( CItem * pBook, dword gumpID );
-	bool addBookOpen( CItem * pBook );
-	void addBookPage( const CItem * pBook, size_t iPage, size_t iCount );
+	bool addBookOpen( CItem * pBook ) const;
+	void addBookPage( const CItem * pBook, size_t iPage, size_t iCount ) const;
 	void addStatusWindow( CObjBase * pObj, bool fRequested = false ); // Opens the status window
 	void addHitsUpdate( CChar * pChar );
 	void addManaUpdate( CChar * pChar );
 	void addStamUpdate( CChar * pChar );
-	void addHealthBarUpdate( const CChar * pChar );
-	void addBondedStatus( const CChar * pChar, bool bIsDead );
-	void addSkillWindow(SKILL_TYPE skill, bool bFromInfo = false); // Opens the skills list
+	void addHealthBarUpdate( const CChar * pChar ) const;
+	void addBondedStatus( const CChar * pChar, bool fIsDead ) const;
+	void addSkillWindow(SKILL_TYPE skill, bool fFromInfo = false) const; // Opens the skills list
 	void addBulletinBoard( const CItemContainer * pBoard );
 	bool addBBoardMessage( const CItemContainer * pBoard, BBOARDF_TYPE flag, CUID uidMsg );
 
-	void addToolTip( const CObjBase * pObj, lpctstr psztext );
+	void addToolTip( const CObjBase * pObj, lpctstr psztext ) const;
 	void addDrawMap( CItemMap * pItem );
 	void addMapMode( CItemMap * pItem, MAPCMD_TYPE iType, bool fEdit = false );
 
