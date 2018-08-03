@@ -1,17 +1,19 @@
 
-#include "../common/CDataBase.h"
-#include "../common/CLog.h"
 #include "../game/CServerConfig.h"
 #include "../game/CServer.h"
 #include "../sphere/asyncdb.h"
+#include "CLog.h"
 #include "CException.h"
+#include "CScriptTriggerArgs.h"
+#include "CDataBase.h"
 
 extern CDataBaseAsyncHelper g_asyncHdb;
+
 
 CDataBase::CDataBase()
 {
 	m_bConnected = false;
-	_myData = NULL;
+	_myData = nullptr;
 }
 
 CDataBase::~CDataBase()
@@ -129,9 +131,9 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
 		char	*zStore = Str_GetTemp();
 		while ( (trow = mysql_fetch_row(m_res)) != NULL )
 		{
-			for ( int i = 0; i < num_fields; i++ )
+			for ( int i = 0; i < num_fields; ++i )
 			{
-				char	*z = trow[i];
+				char *z = trow[i];
 				if ( !rownum )
 				{
 					mapQueryResult.SetStr(ITOA(i, key, 10), true, z);
@@ -143,7 +145,7 @@ bool CDataBase::query(const char *query, CVarDefMap & mapQueryResult)
 				sprintf(zStore, "%d.%s", rownum, fields[i].name);
 				mapQueryResult.SetStr(zStore, true, z);
 			}
-			rownum++;
+			++rownum;
 		}
 
 		mysql_free_result(m_res);
@@ -294,7 +296,7 @@ bool CDataBase::OnTick()
 			// error
 		}
 
-		ASSERT(currentPair.second != NULL);
+		ASSERT(currentPair.second != nullptr);
 		delete currentPair.second;
 	}
 

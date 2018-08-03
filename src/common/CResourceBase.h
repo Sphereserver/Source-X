@@ -401,7 +401,7 @@ private:
 	}
 
 protected:
-	virtual bool OpenBase( void * pExtra );
+	virtual bool OpenBase();
 	virtual void CloseBase();
 	virtual bool ReadTextLine( bool fRemoveBlanks );
 
@@ -534,7 +534,7 @@ public:
 
 	bool IsLinked() const;	// been loaded from the scripts ?
 	CResourceScript * GetLinkFile() const;
-	size_t GetLinkOffset() const;
+	int GetLinkOffset() const;
 	void SetLink( CResourceScript * pScript );
     void CopyTransfer( CResourceLink * pLink );
 	void ScanSection( RES_TYPE restype );

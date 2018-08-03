@@ -2,7 +2,7 @@
 #include "../sphere/threads.h"
 #include "CException.h"
 #include "CExpression.h"
-#include "CsvFile.h"
+#include "CSVFile.h"
 #include "CScript.h"
 #include "common.h"
 
@@ -10,34 +10,34 @@ CSVFile::CSVFile()
 {
 	m_iColumnCount = 0;
 	m_iCurrentRow = 0;
-	m_pszColumnTypes[0] = NULL;
-	m_pszColumnNames[0] = NULL;
+	m_pszColumnTypes[0] = nullptr;
+	m_pszColumnNames[0] = nullptr;
 }
 
 CSVFile::~CSVFile()
 {
-	for (int i = 0; m_pszColumnTypes[i] != NULL; i++)
+	for (int i = 0; m_pszColumnTypes[i] != nullptr; ++i)
 		delete[] m_pszColumnTypes[i];
 
-	for (int i = 0; m_pszColumnNames[i] != NULL; i++)
+	for (int i = 0; m_pszColumnNames[i] != nullptr; ++i)
 		delete[] m_pszColumnNames[i];
 }
 
-bool CSVFile::OpenBase(void * pExtra)
+bool CSVFile::OpenBase()
 {
 	ADDTOCALLSTACK("CSVFile::OpenBase");
-	if ( !PhysicalScriptFile::OpenBase(pExtra) )
+	if ( !PhysicalScriptFile::OpenBase() )
 		return false;
 
 	m_iCurrentRow = 0;
 
 	// remove all empty lines so that we just have data rows stored
-	for (std::vector<std::string>::iterator i = m_fileContent->begin(); i != m_fileContent->end(); )
+	for (std::vector<std::string>::iterator i = m_fileContent.begin(); i != m_fileContent.end(); )
 	{
 		lpctstr pszLine = i->c_str();
 		GETNONWHITESPACE(pszLine);
 		if ( *pszLine == '\0' )
-			i = m_fileContent->erase(i);
+			i = m_fileContent.erase(i);
 		else
 			++i;
 	}
@@ -64,7 +64,7 @@ bool CSVFile::OpenBase(void * pExtra)
 	}
 
 	// copy the names
-	for (int i = 0; i < m_iColumnCount; i++)
+	for (int i = 0; i < m_iColumnCount; ++i)
 	{
 		m_pszColumnTypes[i] = new tchar[128];
 		strcpy(m_pszColumnTypes[i], ppColumnTypes[i]);
@@ -73,8 +73,8 @@ bool CSVFile::OpenBase(void * pExtra)
 		strcpy(m_pszColumnNames[i], ppColumnNames[i]);
 	}
 
-	m_pszColumnTypes[m_iColumnCount] = NULL;
-	m_pszColumnNames[m_iColumnCount] = NULL;
+	m_pszColumnTypes[m_iColumnCount] = nullptr;
+	m_pszColumnNames[m_iColumnCount] = nullptr;
 	return true;
 }
 
@@ -86,7 +86,7 @@ int CSVFile::ReadRowContent(tchar ** ppOutput, int rowIndex, int columns)
 		Seek(rowIndex, SEEK_SET);
 
 	tchar * pszLine = Str_GetTemp();
-	if ( ReadString(pszLine, THREAD_STRING_LENGTH) == NULL )
+	if ( ReadString(pszLine, THREAD_STRING_LENGTH) == nullptr )
 		return 0;
 
 	return Str_ParseCmds(pszLine, ppOutput, columns, "\t");
@@ -110,7 +110,7 @@ bool CSVFile::ReadRowContent(int rowIndex, CSVRowData& target)
 
 	// copy to target
 	target.clear();
-	for (int i = 0; i < columns; i++)
+	for (int i = 0; i < columns; ++i)
 		target[m_pszColumnNames[i]] = ppRowContent[i];
 
 	return ! target.empty();

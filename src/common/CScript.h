@@ -16,7 +16,7 @@
 struct CScriptLineContext
 {
 public:
-	size_t m_stOffset;
+	int m_iOffset;
 	int m_iLineNum;		// for debug purposes if there is an error.
 public:
 	void Init();
@@ -120,15 +120,15 @@ class CScript : public PhysicalScriptFile, public CScriptKeyAlloc
 {
 private:
 	bool m_fSectionHead;	// Does the File Offset point to current section header? [HEADER]
-	size_t  m_pSectionData;	// File Offset to current section data, under section header.
+	int  m_iSectionData;	// File Offset to current section data, under section header.
 
 public:
 	static const char *m_sClassName;
 	int m_iLineNum;					// for debug purposes if there is an error.
-	size_t	m_iResourceFileIndex;	// index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
+	int	m_iResourceFileIndex;	// index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
 protected:
 	void InitBase();
-	virtual size_t Seek( size_t offset = 0, int iOrigin = SEEK_SET );
+	virtual int Seek( int offset = 0, int iOrigin = SEEK_SET );
 
 public:
 	// text only functions:
@@ -136,7 +136,7 @@ public:
 	bool FindTextHeader( lpctstr pszName ); // Find a section in the current script
 
 public:
-	virtual bool Open( lpctstr szFilename = NULL, uint Flags = OF_READ|OF_TEXT );
+	virtual bool Open( lpctstr szFilename, uint Flags = OF_READ|OF_TEXT );
 	virtual void Close();
 	virtual void CloseForce();
 	bool SeekContext( CScriptLineContext LineContext );
@@ -144,7 +144,7 @@ public:
 
 	// Find sections.
 	bool FindNextSection();
-	virtual bool FindSection( lpctstr pszName, uint uModeFlags ); // Find a section in the current script
+	virtual bool FindSection( lpctstr pszName, uint uiModeFlags ); // Find a section in the current script
 	lpctstr GetSection() const;
 	bool IsSectionType( lpctstr pszName );
 	// Find specific keys in the current section.

@@ -1,7 +1,3 @@
-//
-// CScriptObj.cpp
-// A scriptable object.
-//
 
 #ifdef _WIN32
 	#include <process.h>
@@ -10,453 +6,18 @@
 #endif
 
 #include "../game/clients/CAccount.h"
-#include "../game/chars/CChar.h"
 #include "../game/clients/CClient.h"
-#include "../game/items/CItemStone.h"
-#include "../game/spheresvr.h"
 #include "../game/CScriptProfiler.h"
-#include "../game/CWorld.h"
 #include "../sphere/ProfileTask.h"
-#include "sphere_library/CSString.h"
 #include "crypto/CMD5.h"
-
-#include "CLog.h"
-#include "CException.h"
 #include "CExpression.h"
-#include "CUID.h"
 #include "CUIDExtra.h"
-#include "CScript.h"
-#include "CScriptObj.h"
-#include "CTextConsole.h"
+#include "CSFileObjContainer.h"
+#include "CScriptTriggerArgs.h"
+//#include "CScriptObj.h" // already included by "CScriptTriggerArgs.h"
 
+class CStoneMember;
 
-////////////////////////////////////////////////////////////////////////////////////////
-// -CScriptTriggerArgs
-
-void CScriptTriggerArgs::Init( lpctstr pszStr )
-{
-	ADDTOCALLSTACK("CScriptTriggerArgs::Init");
-	m_pO1 = NULL;
-
-	if ( pszStr == NULL )
-		pszStr	= "";
-	// raw is left untouched for now - it'll be split the 1st time argv is accessed
-	m_s1_raw = pszStr;
-	bool fQuote = false;
-	if ( *pszStr == '"' )
-	{
-		fQuote = true;
-		++pszStr;
-	}
-
-	m_s1 = pszStr ;
-
-	// take quote if present.
-	if (fQuote)
-	{
-		tchar * str = const_cast<tchar*>( strchr(m_s1.GetPtr(), '"') );
-		if ( str != NULL )
-			*str	= '\0';
-	}
-
-	m_iN1	= 0;
-	m_iN2	= 0;
-	m_iN3	= 0;
-
-	// attempt to parse this.
-	if ( IsDigit(*pszStr) || ((*pszStr == '-') && IsDigit(*(pszStr+1))) )
-	{
-		m_iN1 = Exp_GetSingle(pszStr);
-		SKIP_ARGSEP( pszStr );
-		if ( IsDigit(*pszStr) || ((*pszStr == '-') && IsDigit(*(pszStr+1))) )
-		{
-			m_iN2 = Exp_GetSingle(pszStr);
-			SKIP_ARGSEP( pszStr );
-			if ( IsDigit(*pszStr) || ((*pszStr == '-') && IsDigit(*(pszStr+1))) )
-			{
-				m_iN3 = Exp_GetSingle(pszStr);
-			}
-		}
-	}
-
-	// ensure argv will be recalculated next time it is accessed
-	m_v.clear();
-}
-
-
-
-CScriptTriggerArgs::CScriptTriggerArgs( lpctstr pszStr )
-{
-	Init( pszStr );
-}
-
-
-
-bool CScriptTriggerArgs::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
-{
-	ADDTOCALLSTACK("CScriptTriggerArgs::r_GetRef");
-
-	if ( !strnicmp(pszKey, "ARGO.", 5) )		// ARGO.NAME
-	{
-		pszKey += 5;
-		if ( *pszKey == '1' )
-			++pszKey;
-		pRef = m_pO1;
-		return true;
-	}
-	else if ( !strnicmp(pszKey, "REF", 3) )		// REF[1-65535].NAME
-	{
-		lpctstr pszTemp = pszKey;
-		pszTemp += 3;
-		if (*pszTemp && IsDigit( *pszTemp ))
-		{
-			char * pEnd;
-			ushort number = (ushort)strtol( pszTemp, &pEnd, 10 );
-			if ( number > 0 ) // Can only use 1 to 65535 as REFs
-			{
-				pszTemp = pEnd;
-				// Make sure REFx or REFx.KEY is being used
-				if (( !*pszTemp ) || ( *pszTemp == '.' ))
-				{
-					if ( *pszTemp == '.' )
-						pszTemp++;
-
-					pRef = m_VarObjs.Get( number );
-					pszKey = pszTemp;
-					return true;
-				}
-			}
-		}
-	}
-	return false;
-}
-
-
-enum AGC_TYPE
-{
-	AGC_N,
-	AGC_N1,
-	AGC_N2,
-	AGC_N3,
-	AGC_O,
-	AGC_S,
-	AGC_V,
-	AGC_LVAR,
-	AGC_TRY,
-	AGC_TRYSRV,
-	AGC_QTY
-};
-
-lpctstr const CScriptTriggerArgs::sm_szLoadKeys[AGC_QTY+1] =
-{
-	"ARGN",
-	"ARGN1",
-	"ARGN2",
-	"ARGN3",
-	"ARGO",
-	"ARGS",
-	"ARGV",
-	"LOCAL",
-	"TRY",
-	"TRYSRV",
-	NULL
-};
-
-
-bool CScriptTriggerArgs::r_Verb( CScript & s, CTextConsole * pSrc )
-{
-	ADDTOCALLSTACK("CScriptTriggerArgs::r_Verb");
-	EXC_TRY("Verb");
-	int	index = -1;
-	lpctstr pszKey = s.GetKey();
-
-	if ( !strnicmp( "FLOAT.", pszKey, 6 ) )
-	{
-		return( m_VarsFloat.Insert( (pszKey+6), s.GetArgStr(), true ) );
-	}
-	else if ( !strnicmp( "LOCAL.", pszKey, 6 ) )
-	{
-		bool fQuoted = false;
-		m_VarsLocal.SetStr( s.GetKey()+6, fQuoted, s.GetArgStr( &fQuoted ), false );
-		return true;
-	}
-	else if ( !strnicmp( "REF", pszKey, 3 ) )
-	{
-		lpctstr pszTemp = pszKey;
-		pszTemp += 3;
-		if (*pszTemp && IsDigit( *pszTemp ))
-		{
-			char * pEnd;
-			ushort number = (ushort)(strtol( pszTemp, &pEnd, 10 ));
-			if ( number > 0 ) // Can only use 1 to 65535 as REFs
-			{
-				pszTemp = pEnd;
-				if ( !*pszTemp ) // setting REFx to a new object
-				{
-					CUID uid = s.GetArgVal();
-					CObjBase * pObj = uid.ObjFind();
-					m_VarObjs.Insert( number, pObj, true );
-					pszKey = pszTemp;
-					return true;
-				}
-				else if ( *pszTemp == '.' ) // accessing REFx object
-				{
-					pszKey = ++pszTemp;
-					CObjBase * pObj = m_VarObjs.Get( number );
-					if ( !pObj )
-						return false;
-
-					CScript script( pszKey, s.GetArgStr());
-					script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
-					script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
-					return pObj->r_Verb( script, pSrc );
-				}
-			}
-		}
-	}
-	else if ( !strnicmp(pszKey, "ARGO", 4) )
-	{
-		pszKey += 4;
-		if ( *pszKey == '.' )
-			index = AGC_O;
-		else
-		{
-			pszKey ++;
-			CObjBase * pObj = static_cast<CObjBase*>(static_cast<CUID>(Exp_GetSingle(pszKey)).ObjFind());
-			if (!pObj)
-				m_pO1 = NULL;	// no pObj = cleaning argo
-			else
-				m_pO1 = pObj;
-			return true;
-		}
-	}
-	else
-		index = FindTableSorted( s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys)-1 );
-
-	switch (index)
-	{
-		case AGC_N:
-		case AGC_N1:
-			m_iN1	= s.GetArgVal();
-			return true;
-		case AGC_N2:
-			m_iN2	= s.GetArgVal();
-			return true;
-		case AGC_N3:
-			m_iN3	= s.GetArgVal();
-			return true;
-		case AGC_S:
-			Init( s.GetArgStr() );
-			return true;
-		case AGC_O:
-			{
-				lpctstr pszTemp = s.GetKey() + strlen(sm_szLoadKeys[AGC_O]);
-				if ( *pszTemp == '.' )
-				{
-					++pszTemp;
-					if ( !m_pO1 )
-						return false;
-
-					CScript script( pszTemp, s.GetArgStr() );
-					script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
-					script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
-					return m_pO1->r_Verb( script, pSrc );
-				}
-			} return false;
-		case AGC_TRY:
-		case AGC_TRYSRV:
-			{
-				CScript script(s.GetArgStr());
-				script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// If s is a CResourceFile, it should have valid m_iResourceFileIndex
-				script.m_iLineNum = s.m_iLineNum;						// Line where Key/Arg were read
-				if (r_Verb(script, pSrc))
-					return true;
-			}
-		default:
-			return false;
-	}
-	EXC_CATCH;
-
-	EXC_DEBUG_START;
-	EXC_ADD_SCRIPTSRC;
-	EXC_DEBUG_END;
-	return false;
-}
-
-bool CScriptTriggerArgs::r_LoadVal( CScript & s )
-{
-	ADDTOCALLSTACK("CScriptTriggerArgs::r_LoadVal");
-	UNREFERENCED_PARAMETER(s);
-	return false;
-}
-
-bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
-{
-	ADDTOCALLSTACK("CScriptTriggerArgs::r_WriteVal");
-	EXC_TRY("WriteVal");
-	if ( IsSetEF( EF_Intrinsic_Locals ) )
-	{
-		EXC_SET("intrinsic");
-		CVarDefCont * pVar = m_VarsLocal.GetKey( pszKey );
-
-		if ( pVar )
-		{
-			sVal = pVar->GetValStr();
-			return true;
-		}
-	}
-	else if ( !strnicmp("LOCAL.", pszKey, 6) )
-	{
-		EXC_SET("local");
-		pszKey	+= 6;
-		sVal = m_VarsLocal.GetKeyStr(pszKey, true);
-		return true;
-	}
-
-	if ( !strnicmp( "FLOAT.", pszKey, 6 ) )
-	{
-		EXC_SET("float");
-		pszKey += 6;
-		sVal = m_VarsFloat.Get( pszKey );
-		return true;
-	}
-	else if ( !strnicmp(pszKey, "ARGV", 4) )
-	{
-		EXC_SET("argv");
-		pszKey += 4;
-		SKIP_SEPARATORS(pszKey);
-
-		size_t iQty = m_v.size();
-		if ( iQty <= 0 )
-		{
-			// PARSE IT HERE
-			tchar * pszArg = const_cast<tchar *>(m_s1_raw.GetPtr());
-			tchar * s = pszArg;
-			bool fQuotes = false;
-			bool fInerQuotes = false;
-			while ( *s )
-			{
-				// ignore leading spaces
-				if ( IsSpace(*s ) )
-				{
-					++s;
-					continue;
-				}
-
-				// add empty arguments if they are provided
-				if ( (*s == ',') && !fQuotes)
-				{
-					lpctstr pszZero = "\0";
-					m_v.emplace_back( pszZero );
-					++s;
-					continue;
-				}
-
-				// check to see if the argument is quoted (incase it contains commas)
-				if ( *s == '"' )
-				{
-					++s;
-					fQuotes = true;
-					fInerQuotes = false;
-				}
-
-				pszArg	= s;	// arg starts here
-				++s;
-
-				while (*s)
-				{
-					if ( (*s == '"' ) && fQuotes )
-					{
-						*s	= '\0';
-						fQuotes = false;
-					}
-					else if ( *s == '"' )
-					{
-						fInerQuotes = !fInerQuotes;
-					}
-					/*if ( *s == '"' )
-					{
-						if ( fQuotes )
-						{
-							*s	= '\0';
-							fQuotes = false;
-							break;
-						}
-						*s = '\0';
-						++s;
-						fQuotes	= true;	// maintain
-						break;
-					}*/
-					if ( !fQuotes && !fInerQuotes && (*s == ',') )
-					{
-						*s = '\0';
-						++s;
-						break;
-					}
-					++s;
-				}
-				m_v.emplace_back( pszArg );
-			}
-			iQty = m_v.size();
-		}
-
-		if ( *pszKey == '\0' )
-		{
-			sVal.FormatVal((int)iQty);
-			return true;
-		}
-
-		size_t iNum = (size_t)(Exp_GetSingle(pszKey));
-		SKIP_SEPARATORS(pszKey);
-		if ( iNum >= m_v.size() )
-		{
-			sVal = "";
-			return true;
-		}
-		sVal = m_v[iNum];
-		return true;
-	}
-
-	EXC_SET("generic");
-	int index = FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
-	switch (index)
-	{
-		case AGC_N:
-		case AGC_N1:
-			sVal.FormatLLVal(m_iN1);
-			break;
-		case AGC_N2:
-			sVal.FormatLLVal(m_iN2);
-			break;
-		case AGC_N3:
-			sVal.FormatLLVal(m_iN3);
-			break;
-		case AGC_O:
-			{
-				CObjBase *pObj = dynamic_cast <CObjBase*> (m_pO1);
-				if ( pObj )
-					sVal.FormatHex(pObj->GetUID());
-				else
-					sVal.FormatVal(0);
-			}
-			break;
-		case AGC_S:
-			sVal = m_s1;
-			break;
-		default:
-			return CScriptObj::r_WriteVal(pszKey, sVal, pSrc);
-	}
-	return true;
-	EXC_CATCH;
-
-	EXC_DEBUG_START;
-	EXC_ADD_KEYRET(pSrc);
-	EXC_DEBUG_END;
-	return false;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-// -CScriptObj
 
 bool CScriptObj::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 {
@@ -479,13 +40,13 @@ bool CScriptObj::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
 	else if ( ! strnicmp( pszKey, "OBJ.", 4 ))
 	{
 		pszKey += 4;
-		pRef = ( (dword)g_World.m_uidObj ) ? g_World.m_uidObj.ObjFind() : NULL;
+		pRef = ( (dword)g_World.m_uidObj ) ? g_World.m_uidObj.ObjFind() : nullptr;
 		return true;
 	}
 	else if ( !strnicmp(pszKey, "NEW.", 4) )
 	{
 		pszKey += 4;
-		pRef = ( (dword)g_World.m_uidNew ) ? g_World.m_uidNew.ObjFind() : NULL;
+		pRef = ( (dword)g_World.m_uidNew ) ? g_World.m_uidNew.ObjFind() : nullptr;
 		return true;
 	}
 	else if ( !strnicmp(pszKey, "I.", 2) )
@@ -551,7 +112,7 @@ bool CScriptObj::r_Call( lpctstr pszFunction, CTextConsole * pSrc, CScriptTrigge
 	CResourceLock sFunction;
 	if ( pFunction->ResourceLock(sFunction) )
 	{
-		CScriptProfiler::CScriptProfilerFunction *pFun = NULL;
+		CScriptProfiler::CScriptProfilerFunction *pFun = nullptr;
 		TIME_PROFILE_INIT;
 
 		//	If functions profiler is on, search this function record and get pointer to it
@@ -563,7 +124,8 @@ bool CScriptObj::r_Call( lpctstr pszFunction, CTextConsole * pSrc, CScriptTrigge
 
 			//	lowercase for speed, and strip arguments
 			strcpy(pName, pszFunction);
-			if ( (pSpace = strchr(pName, ' ')) != NULL ) *pSpace = 0;
+			if ( (pSpace = strchr(pName, ' ')) != nullptr )
+                *pSpace = 0;
 			_strlwr(pName);
 
 			if ( g_profiler.initstate != 0xf1 )	// it is not initalised
@@ -571,13 +133,13 @@ bool CScriptObj::r_Call( lpctstr pszFunction, CTextConsole * pSrc, CScriptTrigge
 				memset(&g_profiler, 0, sizeof(g_profiler));
 				g_profiler.initstate = (uchar)(0xf1); // ''
 			}
-			for ( pFun = g_profiler.FunctionsHead; pFun != NULL; pFun = pFun->next )
+			for ( pFun = g_profiler.FunctionsHead; pFun != nullptr; pFun = pFun->next )
 			{
 				if ( !strcmp(pFun->name, pName) ) break;
 			}
 
 			// first time function called. so create a record for it
-			if ( pFun == NULL )
+			if ( pFun == nullptr )
 			{
 				pFun = new CScriptProfiler::CScriptProfilerFunction;
 				memset(pFun, 0, sizeof(CScriptProfiler::CScriptProfilerFunction));
@@ -733,7 +295,7 @@ bool CScriptObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
 	ADDTOCALLSTACK("CScriptObj::r_WriteVal");
 	EXC_TRY("WriteVal");
 	CObjBase * pObj;
-	CScriptObj * pRef = NULL;
+	CScriptObj * pRef = nullptr;
 	bool fGetRef = r_GetRef( pszKey, pRef );
 
 	if ( !strnicmp(pszKey, "GetRefType", 10) )
@@ -778,7 +340,7 @@ bool CScriptObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
 			sVal.FormatHex( 0x08000 );
 		else if ( dynamic_cast<CClient*>(pTmpRef) )
 			sVal.FormatHex( 0x10000 );
-		else if ( (pObj = dynamic_cast<CObjBase*>(pTmpRef)) != NULL )
+		else if ( (pObj = dynamic_cast<CObjBase*>(pTmpRef)) != nullptr )
 		{
 			if ( dynamic_cast<CChar*>(pObj) )
 				sVal.FormatHex( 0x40000 );
@@ -794,7 +356,7 @@ bool CScriptObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
 
 	if ( fGetRef )
 	{
-		if ( pRef == NULL )	// good command but bad link.
+		if ( pRef == nullptr )	// good command but bad link.
 		{
 			sVal = "0";
 			return true;
@@ -908,8 +470,8 @@ badcmd:
 			sVal.FormatHex((dword)g_World.m_uidNew);
 			return true;
 		case SSC_SRC:
-			if ( pSrc == NULL )
-				pRef = NULL;
+			if ( pSrc == nullptr )
+				pRef = nullptr;
 			else
 			{
 				pRef = pSrc->GetChar();	// if it can be converted .
@@ -1190,7 +752,7 @@ badcmd:
 					Arg_ppCmd[0], Arg_ppCmd[0], Arg_ppCmd[1],
 					Arg_ppCmd[2], Arg_ppCmd[3], Arg_ppCmd[4],
 					Arg_ppCmd[5], Arg_ppCmd[6], Arg_ppCmd[7],
-					Arg_ppCmd[8], Arg_ppCmd[9], NULL );
+					Arg_ppCmd[8], Arg_ppCmd[9], nullptr );
 #else
 				// I think fork will cause problems.. we'll see.. if yes new thread + execlp is required.
 				int child_pid = vfork();
@@ -1204,7 +766,7 @@ badcmd:
 					//Don't touch this :P
 					execlp( Arg_ppCmd[0], Arg_ppCmd[0], Arg_ppCmd[1], Arg_ppCmd[2],
 										Arg_ppCmd[3], Arg_ppCmd[4], Arg_ppCmd[5], Arg_ppCmd[6],
-										Arg_ppCmd[7], Arg_ppCmd[8], Arg_ppCmd[9], NULL );
+										Arg_ppCmd[7], Arg_ppCmd[8], Arg_ppCmd[9], nullptr );
 
 					g_Log.EventError("SYSSPAWN failed with error %d (\"%s\") when executing %s.\n", errno, strerror(errno), pszKey);
 					raise(SIGKILL);
@@ -1358,7 +920,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 	lpctstr pszKey = s.GetKey();
 
 	ASSERT( pSrc );
-	CScriptObj * pRef = NULL;
+	CScriptObj * pRef = nullptr;
 	if ( r_GetRef( pszKey, pRef ))
 	{
 		if ( pszKey[0] )
@@ -1411,7 +973,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 			{
 				CUID uid(s.GetArgVal());
 				CObjBase *pObj = uid.ObjFind();
-				if (pObj == NULL)
+				if (pObj == nullptr)
 				{
 					g_World.m_uidNew = 0;
 					return false;
@@ -1445,7 +1007,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 				if ( iQty <= 0 )
 					return false;
 
-				CItem *pItem = CItem::CreateHeader(ppCmd[0], NULL, false, pSrc->GetChar());
+				CItem *pItem = CItem::CreateHeader(ppCmd[0], nullptr, false, pSrc->GetChar());
 				if ( !pItem )
 				{
 					g_World.m_uidNew = (dword)0;
@@ -1460,7 +1022,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 				if ( ppCmd[2] )
 				{
 					CUID uidEquipper = Exp_GetVal(ppCmd[2]);
-					bool bTriggerEquip = ppCmd[3] != NULL ? (Exp_GetVal(ppCmd[3]) != 0) : false;
+					bool bTriggerEquip = ppCmd[3] != nullptr ? (Exp_GetVal(ppCmd[3]) != 0) : false;
 
 					if ( !bTriggerEquip || uidEquipper.IsItem() )
 						pItem->LoadSetContainer(uidEquipper, LAYER_NONE);
@@ -1469,7 +1031,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 						if ( bTriggerEquip )
 						{
 							CChar * pCharEquipper = uidEquipper.CharFind();
-							if ( pCharEquipper != NULL )
+							if ( pCharEquipper != nullptr )
 								pCharEquipper->ItemEquip(pItem);
 						}
 					}
@@ -1530,7 +1092,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 
 	            CREID_TYPE id = static_cast<CREID_TYPE>(g_Cfg.ResourceGetIndexType(RES_CHARDEF, ppCmd[0]));
 	            CChar * pChar = CChar::CreateNPC(id);
-	            CChar * pCharSrc = NULL;
+	            CChar * pCharSrc = nullptr;
 	            if (!pChar)
 	            {
 	                g_World.m_uidNew = (dword)0;
@@ -1553,7 +1115,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 	                }
 	            }
 
-	            pChar->OnSpellEffect(SPELL_Summon, pCharSrc, pChar->Skill_GetAdjusted(SKILL_MAGERY), NULL, false);
+	            pChar->OnSpellEffect(SPELL_Summon, pCharSrc, pChar->Skill_GetAdjusted(SKILL_MAGERY), nullptr, false);
 	            g_World.m_uidNew = pChar->GetUID();
 	            int iDuration = Exp_GetVal(ppCmd[1]);
 	            if (iDuration)
@@ -1695,7 +1257,7 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 			{
 				EXC_SET("writeval");
 				// write the value of functions or triggers variables/objects like ARGO, ARGN1/2/3, LOCALs...
-				if ( pArgs != NULL && pArgs->r_WriteVal( pszKey, sVal, pSrc ) )
+				if ( pArgs != nullptr && pArgs->r_WriteVal( pszKey, sVal, pSrc ) )
 					fRes = true;
 			}
 
@@ -1883,7 +1445,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 			iDist = UO_MAP_VIEW_SIZE_DEFAULT;
 
 		CObjBaseTemplate * pObj = dynamic_cast <CObjBaseTemplate *>(this);
-		if ( pObj == NULL )
+		if ( pObj == nullptr )
 		{
 			iType = 0;
 			DEBUG_ERR(( "FOR Loop trigger on non-world object '%s'\n", GetName()));
@@ -1902,7 +1464,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 						goto toomanyloops;
 
 					CItem * pItem = AreaItems.GetItem();
-					if ( pItem == NULL )
+					if ( pItem == nullptr )
 						break;
 					TRIGRET_TYPE iRet = pItem->OnTriggerRun( s, TRIGRUN_SECTION_TRUE, pSrc, pArgs, pResult );
 					if ( iRet == TRIGRET_BREAK )
@@ -1930,11 +1492,11 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 						goto toomanyloops;
 
 					CChar * pChar = AreaChars.GetChar();
-					if ( pChar == NULL )
+					if ( pChar == nullptr )
 						break;
 					if ( ( iType & 0x10 ) && ( ! pChar->IsClient() ) )	// FORCLIENTS
 						continue;
-					if ( ( iType & 0x20 ) && ( pChar->m_pPlayer == NULL ) )	// FORPLAYERS
+					if ( ( iType & 0x20 ) && ( pChar->m_pPlayer == nullptr ) )	// FORPLAYERS
 						continue;
 					TRIGRET_TYPE iRet = pChar->OnTriggerRun( s, TRIGRUN_SECTION_TRUE, pSrc, pArgs, pResult );
 					if ( iRet == TRIGRET_BREAK )
@@ -1994,7 +1556,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 
 				// Acquire the object with this UID and check it exists
 				CObjBase * pObj = g_World.FindUID( dwUID );
-				if ( pObj == NULL )
+				if ( pObj == nullptr )
 					continue;
 
 				// Check to see if the object resource id matches what we're looking for
@@ -2022,7 +1584,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 				s.SeekContext( StartContext );
 
 				// Acquire the total instances that exist for this item if we can
-				if ( dwTotalInstances == 0 && pObj->Base_GetDef() != NULL )
+				if ( dwTotalInstances == 0 && pObj->Base_GetDef() != nullptr )
 					dwTotalInstances = pObj->Base_GetDef()->GetRefInstances();
 
 				++dwFound;
@@ -2045,7 +1607,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerForLoop( CScript &s, int iType, CTextConsole *
 
 			TRIGRET_TYPE iRet = g_World.m_TimedFunctions.Loop(funcname, LoopsMade, StartContext, EndContext, s, pSrc, pArgs, pResult);
 			if ((iRet != TRIGRET_ENDIF) && (iRet != TRIGRET_CONTINUE))
-				return(iRet);
+				return iRet;
 		}
 	}
 
@@ -2056,17 +1618,17 @@ toomanyloops:
 			g_Log.EventError("Terminating loop cycle since it seems being dead-locked (%d iterations already passed)\n", LoopsMade);
 	}
 
-	if ( EndContext.m_stOffset <= StartContext.m_stOffset )
+	if ( EndContext.m_iOffset <= StartContext.m_iOffset )
 	{
 		// just skip to the end.
 		TRIGRET_TYPE iRet = OnTriggerRun( s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult );
 		if ( iRet != TRIGRET_ENDIF )
-			return( iRet );
+			return iRet;
 	}
 	else
 		s.SeekContext( EndContext );
 
-	return( TRIGRET_ENDIF );
+	return TRIGRET_ENDIF;
 }
 
 bool CScriptObj::OnTriggerFind( CScript & s, lpctstr pszTrigName )
@@ -2095,7 +1657,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerScript( CScript & s, lpctstr pszTrigName, CTex
 
 	ProfileTask scriptsTask(PROFILE_SCRIPTS);
 
-	CScriptProfiler::CScriptProfilerTrigger	*pTrig = NULL;
+	CScriptProfiler::CScriptProfilerTrigger	*pTrig = nullptr;
 	TIME_PROFILE_INIT;
 
 	//	If script profiler is on, search this trigger record and get pointer to it
@@ -2114,14 +1676,14 @@ TRIGRET_TYPE CScriptObj::OnTriggerScript( CScript & s, lpctstr pszTrigName, CTex
 			g_profiler.initstate = (uchar)(0xf1); // ''
 		}
 
-		for ( pTrig = g_profiler.TriggersHead; pTrig != NULL; pTrig = pTrig->next )
+		for ( pTrig = g_profiler.TriggersHead; pTrig != nullptr; pTrig = pTrig->next )
 		{
 			if ( !strcmp(pTrig->name, pName) )
 				break;
 		}
 
 		// first time function called. so create a record for it
-		if ( pTrig == NULL )
+		if ( pTrig == nullptr )
 		{
 			pTrig = new CScriptProfiler::CScriptProfilerTrigger;
 			memset(pTrig, 0, sizeof(CScriptProfiler::CScriptProfilerTrigger));
@@ -2134,14 +1696,14 @@ TRIGRET_TYPE CScriptObj::OnTriggerScript( CScript & s, lpctstr pszTrigName, CTex
 		}
 
 		//	prepare the informational block
-		pTrig->called++;
-		g_profiler.called++;
+		++ pTrig->called;
+		++ g_profiler.called;
 		TIME_PROFILE_START;
 	}
 
 	TRIGRET_TYPE iRet = OnTriggerRunVal(s, TRIGRUN_SECTION_TRUE, pSrc, pArgs);
 
-	if ( IsSetEF(EF_Script_Profiler) && pTrig != NULL )
+	if ( IsSetEF(EF_Script_Profiler) && pTrig != nullptr )
 	{
 		//	update the time call information
 		TIME_PROFILE_END;
@@ -2240,7 +1802,6 @@ lpctstr const CScriptObj::sm_szScriptKeys[SK_QTY+1] =
 	"WHILE",
 	NULL
 };
-
 
 
 TRIGRET_TYPE CScriptObj::OnTriggerRun( CScript &s, TRIGRUN_TYPE trigrun, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult )
@@ -2410,7 +1971,7 @@ jump_in:
 
 									CScriptLineContext StartContext = s.GetContext();
 									CScriptLineContext EndContext = StartContext;
-									iRet = pContThis->OnGenericContTriggerForLoop(s, pSrc, pArgs, pResult, StartContext, EndContext, ppArgs[1] != NULL ? Exp_GetVal(ppArgs[1]) : 255);
+									iRet = pContThis->OnGenericContTriggerForLoop(s, pSrc, pArgs, pResult, StartContext, EndContext, ppArgs[1] != nullptr ? Exp_GetVal(ppArgs[1]) : 255);
 								}
 								else
 								{
@@ -2460,7 +2021,7 @@ jump_in:
 								{
 									TemporaryString tsParsedArg1;
 									tchar* pszParsedArg1 = static_cast<tchar *>(tsParsedArg1);
-                                    if (ppArgs[1] != NULL)
+                                    if (ppArgs[1] != nullptr)
                                     {
                                         strcpy(pszParsedArg1, ppArgs[1]);
                                         if (ParseText(pszParsedArg1, pSrc, 0, pArgs) <= 0)
@@ -2473,7 +2034,7 @@ jump_in:
 									iRet = pCont->OnContTriggerForLoop( s, pSrc, pArgs, pResult, StartContext, EndContext,
 										g_Cfg.ResourceGetID( ( iCmd == SK_FORCONTID ) ? RES_ITEMDEF : RES_TYPEDEF,
 											static_cast<lpctstr &>(castedParsedArg0)),
-										0, ppArgs[1] != NULL ? Exp_GetVal(pszParsedArg1) : 255 );
+										0, ppArgs[1] != nullptr ? Exp_GetVal(pszParsedArg1) : 255 );
 								}
 								else
 								{
@@ -2626,7 +2187,7 @@ jump_in:
 						}
 
 						// Check that an object is referenced
-						if (pRef != NULL)
+						if (pRef != nullptr)
 						{
 							// Locate arguments for the called function
 							tchar *z = strchr(argRaw, ' ');
@@ -2691,7 +2252,7 @@ jump_in:
 						}
 
 						// Check that an object is referenced
-						if (pRef != NULL)
+						if (pRef != nullptr)
 						{
 							// Locate arguments for the called function
 							TRIGRET_TYPE tRet;
@@ -2753,7 +2314,7 @@ jump_in:
 
 	EXC_DEBUG_START;
 	g_Log.EventDebug("key '%s' runtype '%d' pargs '%p' ret '%s' [%p]\n",
-		s.GetKey(), trigrun, static_cast<void *>(pArgs), pResult == NULL? "" : pResult->GetPtr(), static_cast<void *>(pSrc));
+		s.GetKey(), trigrun, static_cast<void *>(pArgs), (pResult == nullptr ? "" : pResult->GetPtr()), static_cast<void *>(pSrc));
 	EXC_DEBUG_END;
 	return TRIGRET_RET_DEFAULT;
 }
@@ -2776,906 +2337,3 @@ TRIGRET_TYPE CScriptObj::OnTriggerRunVal( CScript &s, TRIGRUN_TYPE trigrun, CTex
 	return tr;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-// -CSFileObj
-
-enum FO_TYPE
-{
-	#define ADD(a,b) FO_##a,
-	#include "../tables/CSFile_props.tbl"
-	#undef ADD
-	FO_QTY
-};
-
-lpctstr const CSFileObj::sm_szLoadKeys[FO_QTY+1] =
-{
-	#define ADD(a,b) b,
-	#include "../tables/CSFile_props.tbl"
-	#undef ADD
-	NULL
-};
-
-enum FOV_TYPE
-{
-	#define ADD(a,b) FOV_##a,
-	#include "../tables/CSFile_functions.tbl"
-	#undef ADD
-	FOV_QTY
-};
-
-lpctstr const CSFileObj::sm_szVerbKeys[FOV_QTY+1] =
-{
-	#define ADD(a,b) b,
-	#include "../tables/CSFile_functions.tbl"
-	#undef ADD
-	NULL
-};
-
-CSFileObj::CSFileObj()
-{
-	sWrite = new CSFileText();
-	tBuffer = new tchar [SCRIPT_MAX_LINE_LEN];
-	cgWriteBuffer = new CSString();
-	SetDefaultMode();
-}
-
-CSFileObj::~CSFileObj()
-{
-	if (sWrite->IsFileOpen())
-		sWrite->Close();
-
-	delete cgWriteBuffer;
-	delete[] tBuffer;
-	delete sWrite;
-}
-
-void CSFileObj::SetDefaultMode(void)
-{
-	ADDTOCALLSTACK("CSFileObj::SetDefaultMode");
-	bAppend = true; bCreate = false;
-	bRead = true; bWrite = true;
-}
-
-tchar * CSFileObj::GetReadBuffer(bool bDelete = false)
-{
-	ADDTOCALLSTACK("CSFileObj::GetReadBuffer");
-	if ( bDelete )
-		memset(this->tBuffer, 0, SCRIPT_MAX_LINE_LEN);
-	else
-		*tBuffer = 0;
-
-	return tBuffer;
-}
-
-CSString * CSFileObj::GetWriteBuffer(void)
-{
-	ADDTOCALLSTACK("CSFileObj::GetWriteBuffer");
-	if ( !cgWriteBuffer )
-		cgWriteBuffer = new CSString();
-
-	cgWriteBuffer->Empty( ( cgWriteBuffer->GetLength() > (SCRIPT_MAX_LINE_LEN/4) ) );
-
-	return cgWriteBuffer;
-}
-
-bool CSFileObj::IsInUse()
-{
-	ADDTOCALLSTACK("CSFileObj::IsInUse");
-	return sWrite->IsFileOpen();
-}
-
-void CSFileObj::FlushAndClose()
-{
-	ADDTOCALLSTACK("CSFileObj::FlushAndClose");
-	if ( sWrite->IsFileOpen() )
-	{
-		sWrite->Flush();
-		sWrite->Close();
-	}
-}
-
-bool CSFileObj::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
-{
-	UNREFERENCED_PARAMETER(pszKey);
-	UNREFERENCED_PARAMETER(pRef);
-	return false;
-}
-
-bool CSFileObj::OnTick()		{ return true; }
-int CSFileObj::FixWeirdness()	{ return 0; }
-
-bool CSFileObj::r_LoadVal( CScript & s )
-{
-	ADDTOCALLSTACK("CSFileObj::r_LoadVal");
-	EXC_TRY("LoadVal");
-	lpctstr pszKey = s.GetKey();
-
-	if ( !strnicmp("MODE.",pszKey,5) )
-	{
-		pszKey += 5;
-		if ( ! sWrite->IsFileOpen() )
-		{
-			if ( !strnicmp("APPEND",pszKey,6) )
-			{
-				bAppend = (s.GetArgVal() != 0);
-				bCreate = false;
-			}
-			else if ( !strnicmp("CREATE",pszKey,6) )
-			{
-				bCreate = (s.GetArgVal() != 0);
-				bAppend = false;
-			}
-			else if ( !strnicmp("READFLAG",pszKey,8) )
-				bRead = (s.GetArgVal() != 0);
-			else if ( !strnicmp("WRITEFLAG",pszKey,9) )
-				bWrite = (s.GetArgVal() != 0);
-			else if ( !strnicmp("SETDEFAULT",pszKey,7) )
-				SetDefaultMode();
-			else
-				return false;
-
-			return true;
-		}
-		else
-		{
-			g_Log.Event(LOGL_ERROR, "FILE (%s): Cannot set mode after file opening\n", static_cast<lpctstr>(sWrite->GetFilePath()));
-		}
-		return false;
-	}
-
-	int index = FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
-
-	switch ( index )
-	{
-		case FO_WRITE:
-		case FO_WRITECHR:
-		case FO_WRITELINE:
-			{
-				bool bLine = (index == FO_WRITELINE);
-				bool bChr = (index == FO_WRITECHR);
-
-				if ( !sWrite->IsFileOpen() )
-				{
-					g_Log.Event(LOGL_ERROR, "FILE: Cannot write content. Open the file first.\n");
-					return false;
-				}
-
-				if ( !s.HasArgs() )
-					return false;
-
-				CSString * ppArgs = this->GetWriteBuffer();
-
-				if ( bLine )
-				{
-					ppArgs->Copy( s.GetArgStr() );
-#ifdef _WIN32
-					ppArgs->Add( "\r\n" );
-#else
-					ppArgs->Add( "\n" );
-#endif
-				}
-				else if ( bChr )
-				{
-					ppArgs->Format( "%c", static_cast<tchar>(s.GetArgVal()) );
-				}
-				else
-					ppArgs->Copy( s.GetArgStr() );
-
-				bool bSuccess = false;
-
-				if ( bChr )
-					bSuccess = sWrite->Write(ppArgs->GetPtr(), 1);
-				else
-					bSuccess = sWrite->WriteString( ppArgs->GetPtr() );
-
-				if ( !bSuccess )
-				{
-					g_Log.Event(LOGL_ERROR, "FILE: Failed writing to \"%s\".\n", static_cast<lpctstr>(sWrite->GetFilePath()));
-					return false;
-				}
-			} break;
-
-		default:
-			return false;
-	}
-
-	return true;
-	EXC_CATCH;
-
-	EXC_DEBUG_START;
-	EXC_ADD_SCRIPT;
-	EXC_DEBUG_END;
-	return false;
-}
-
-bool CSFileObj::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
-{
-	UNREFERENCED_PARAMETER(pSrc);
-	ADDTOCALLSTACK("CSFileObj::r_WriteVal");
-	EXC_TRY("WriteVal");
-	ASSERT(pszKey != NULL);
-
-	if ( !strnicmp("MODE.",pszKey,5) )
-	{
-		pszKey += 5;
-		if ( !strnicmp("APPEND",pszKey,6) )
-			sVal.FormatVal( bAppend );
-		else if ( !strnicmp("CREATE",pszKey,6) )
-			sVal.FormatVal( bCreate );
-		else if ( !strnicmp("READFLAG",pszKey,8) )
-			sVal.FormatVal( bRead );
-		else if ( !strnicmp("WRITEFLAG",pszKey,9) )
-			sVal.FormatVal( bWrite );
-		else
-			return false;
-
-		return true;
-	}
-
-	int index = FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
-
-	switch ( index )
-	{
-		case FO_FILEEXIST:
-			{
-				pszKey += strlen(sm_szLoadKeys[index]);
-				GETNONWHITESPACE( pszKey );
-
-				tchar * ppCmd = Str_TrimWhitespace(const_cast<tchar *>(pszKey));
-				if ( !( ppCmd && strlen(ppCmd) ))
-					return false;
-
-				CSFile * pFileTest = new CSFile();
-				sVal.FormatVal(pFileTest->Open(ppCmd));
-
-				delete pFileTest;
-			} break;
-
-		case FO_FILELINES:
-			{
-				pszKey += strlen(sm_szLoadKeys[index]);
-				GETNONWHITESPACE( pszKey );
-
-				tchar * ppCmd = Str_TrimWhitespace(const_cast<tchar *>(pszKey));
-				if ( !( ppCmd && strlen(ppCmd) ))
-					return false;
-
-				CSFileText * sFileLine = new CSFileText();
-				if ( !sFileLine->Open(ppCmd, OF_READ|OF_TEXT) )
-				{
-					delete sFileLine;
-					return false;
-				}
-
-				tchar * ppArg = this->GetReadBuffer();
-				int iLines = 0;
-
-				while ( ! sFileLine->IsEOF() )
-				{
-					sFileLine->ReadString( ppArg, SCRIPT_MAX_LINE_LEN );
-					++iLines;
-				}
-				sFileLine->Close();
-
-				sVal.FormatVal( iLines );
-
-				delete sFileLine;
-			} break;
-
-		case FO_FILEPATH:
-			sVal.Format("%s", sWrite->IsFileOpen() ? static_cast<lpctstr>(sWrite->GetFilePath()) : "" );
-			break;
-
-		case FO_INUSE:
-			sVal.FormatVal( sWrite->IsFileOpen() );
-			break;
-
-		case FO_ISEOF:
-			sVal.FormatVal( sWrite->IsEOF() );
-			break;
-
-		case FO_LENGTH:
-			sVal.FormatSTVal( sWrite->IsFileOpen() ? sWrite->GetLength() : -1 );
-			break;
-
-		case FO_OPEN:
-			{
-				pszKey += strlen(sm_szLoadKeys[index]);
-				GETNONWHITESPACE( pszKey );
-
-				tchar * ppCmd = Str_TrimWhitespace(const_cast<tchar *>(pszKey));
-				if ( !( ppCmd && strlen(ppCmd) ))
-					return false;
-
-				if ( sWrite->IsFileOpen() )
-				{
-					g_Log.Event(LOGL_ERROR, "FILE: Cannot open file (%s). First close \"%s\".\n", ppCmd, static_cast<lpctstr>(sWrite->GetFilePath()));
-					return false;
-				}
-
-				sVal.FormatVal( FileOpen(ppCmd) );
-			} break;
-
-		case FO_POSITION:
-			sVal.FormatSTVal( sWrite->GetPosition() );
-			break;
-
-		case FO_READBYTE:
-		case FO_READCHAR:
-			{
-				bool bChr = ( index == FO_READCHAR );
-				size_t iRead = 1;
-
-				if ( !bChr )
-				{
-					pszKey += strlen(sm_szLoadKeys[index]);
-					GETNONWHITESPACE( pszKey );
-
-					iRead = Exp_GetVal(pszKey);
-					if ( iRead <= 0 || iRead >= SCRIPT_MAX_LINE_LEN)
-						return false;
-				}
-
-				if ( ( ( sWrite->GetPosition() + iRead ) > sWrite->GetLength() ) || ( sWrite->IsEOF() ) )
-				{
-					g_Log.Event(LOGL_ERROR, "FILE: Failed reading %" PRIuSIZE_T " byte from \"%s\". Too near to EOF.\n", iRead, static_cast<lpctstr>(sWrite->GetFilePath()));
-					return false;
-				}
-
-				tchar * ppArg = this->GetReadBuffer(true);
-
-				if ( iRead != sWrite->Read(ppArg, iRead) )
-				{
-					g_Log.Event(LOGL_ERROR, "FILE: Failed reading %" PRIuSIZE_T " byte from \"%s\".\n", iRead, static_cast<lpctstr>(sWrite->GetFilePath()));
-					return false;
-				}
-
-				if ( bChr )
-					sVal.FormatVal( *ppArg );
-				else
-					sVal.Format( "%s", ppArg );
-			} break;
-
-		case FO_READLINE:
-			{
-				pszKey += strlen(sm_szLoadKeys[index]);
-				GETNONWHITESPACE( pszKey );
-
-				tchar * ppArg = this->GetReadBuffer();
-				ASSERT(ppArg != NULL);
-
-				int64 iLines = Exp_GetVal(pszKey);
-				if ( iLines < 0 )
-					return false;
-
-				size_t stSeek = sWrite->GetPosition();
-				sWrite->SeekToBegin();
-
-				if ( iLines == 0 )
-				{
-					while ( ! sWrite->IsEOF() )
-						sWrite->ReadString( ppArg, SCRIPT_MAX_LINE_LEN );
-				}
-				else
-				{
-					for ( int64 x = 1; x <= iLines; ++x )
-					{
-						if ( sWrite->IsEOF() )
-							break;
-
-						ppArg = this->GetReadBuffer();
-						sWrite->ReadString( ppArg, SCRIPT_MAX_LINE_LEN );
-					}
-				}
-
-				sWrite->Seek(stSeek);
-
-				if ( size_t iLinelen = strlen(ppArg) )
-				{
-					while ( iLinelen > 0 )
-					{
-						--iLinelen;
-						if ( isgraph(ppArg[iLinelen]) || (ppArg[iLinelen] == 0x20) || (ppArg[iLinelen] == '\t') )
-						{
-							++iLinelen;
-							ppArg[iLinelen] = '\0';
-							break;
-						}
-					}
-				}
-
-				sVal.Format( "%s", ppArg );
-			} break;
-
-		case FO_SEEK:
-			{
-				pszKey += strlen(sm_szLoadKeys[index]);
-				GETNONWHITESPACE(pszKey);
-
-				if (pszKey[0] == '\0')
-					return false;
-
-				if ( !strnicmp("BEGIN", pszKey, 5) )
-				{
-					sVal.FormatSTVal( sWrite->Seek(0, SEEK_SET) );
-				}
-				else if ( !strnicmp("END", pszKey, 3) )
-				{
-					sVal.FormatSTVal( sWrite->Seek(0, SEEK_END) );
-				}
-				else
-				{
-					sVal.FormatSTVal( sWrite->Seek(Exp_GetSTVal(pszKey), SEEK_SET) );
-				}
-			} break;
-
-		default:
-			return false;
-	}
-
-	return true;
-	EXC_CATCH;
-
-	EXC_DEBUG_START;
-	EXC_ADD_KEYRET(pSrc);
-	EXC_DEBUG_END;
-	return false;
-}
-
-
-bool CSFileObj::r_Verb( CScript & s, CTextConsole * pSrc )
-{
-	UNREFERENCED_PARAMETER(pSrc);
-	ADDTOCALLSTACK("CSFileObj::r_Verb");
-	EXC_TRY("Verb");
-	ASSERT(pSrc);
-
-	lpctstr pszKey = s.GetKey();
-
-	int index = FindTableSorted( pszKey, sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
-
-	if ( index < 0 )
-		return( this->r_LoadVal( s ) );
-
-	switch ( index )
-	{
-		case FOV_CLOSE:
-			if ( sWrite->IsFileOpen() )
-					sWrite->Close();
-			break;
-
-		case FOV_DELETEFILE:
-			{
-				if ( !s.GetArgStr() )
-					return false;
-
-				if ( sWrite->IsFileOpen() && !strcmp(s.GetArgStr(),sWrite->GetFileTitle()) )
-					return false;
-
-				STDFUNC_UNLINK(s.GetArgRaw());
-			} break;
-
-		case FOV_FLUSH:
-			if ( sWrite->IsFileOpen() )
-				sWrite->Flush();
-			break;
-
-		default:
-			return false;
-	}
-
-	return true;
-	EXC_CATCH;
-
-	EXC_DEBUG_START;
-	EXC_ADD_SCRIPTSRC;
-	EXC_DEBUG_END;
-	return false;
-}
-
-bool CSFileObj::FileOpen( lpctstr sPath )
-{
-	ADDTOCALLSTACK("CSFileObj::FileOpen");
-	if ( sWrite->IsFileOpen() )
-		return false;
-
-	uint uMode = OF_SHARE_DENY_NONE | OF_TEXT;
-
-	if ( bCreate )	// if we create, we can't append or read
-		uMode |= OF_CREATE;
-	else
-	{
-		if (( bRead && bWrite ) || bAppend )
-			uMode |= OF_READWRITE;
-		else
-		{
-			if ( bRead )
-				uMode |= OF_READ;
-			else if ( bWrite )
-				uMode |= OF_WRITE;
-		}
-	}
-
-	return( sWrite->Open(sPath, uMode) );
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-// -CSFileObjCollection
-
-enum CFO_TYPE
-{
-#define ADD(a,b) CFO_##a,
-#include "../tables/CSFileObjContainer_props.tbl"
-#undef ADD
-	CFO_QTY
-};
-
-lpctstr const CSFileObjContainer::sm_szLoadKeys[CFO_QTY+1] =
-{
-#define ADD(a,b) b,
-#include "../tables/CSFileObjContainer_props.tbl"
-#undef ADD
-	NULL
-};
-
-enum CFOV_TYPE
-{
-#define ADD(a,b) CFOV_##a,
-#include "../tables/CSFileObjContainer_functions.tbl"
-#undef ADD
-	CFOV_QTY
-};
-
-lpctstr const CSFileObjContainer::sm_szVerbKeys[CFOV_QTY+1] =
-{
-#define ADD(a,b) b,
-#include "../tables/CSFileObjContainer_functions.tbl"
-#undef ADD
-	NULL
-};
-
-void CSFileObjContainer::ResizeContainer( size_t iNewRange )
-{
-	ADDTOCALLSTACK("CSFileObjContainer::ResizeContainer");
-	if ( iNewRange == sFileList.size() )
-	{
-		return;
-	}
-
-	bool bDeleting = ( iNewRange < sFileList.size() );
-	int howMuch = (int)(iNewRange) - (int)(sFileList.size());
-	if ( howMuch < 0 )
-	{
-		howMuch = (-howMuch);
-	}
-
-	if ( bDeleting )
-	{
-		if ( sFileList.empty() )
-		{
-			return;
-		}
-
-		CSFileObj * pObjHolder = NULL;
-
-		for ( size_t i = (sFileList.size() - 1); howMuch > 0; --howMuch, --i )
-		{
-			pObjHolder = sFileList.at(i);
-			sFileList.pop_back();
-
-			if ( pObjHolder )
-			{
-				delete pObjHolder;
-			}
-		}
-	}
-	else
-	{
-		for ( int i = 0; i < howMuch; ++i )
-		{
-			sFileList.push_back(new CSFileObj());
-		}
-	}
-}
-
-CSFileObjContainer::CSFileObjContainer()
-{
-	iGlobalTimeout = iCurrentTick = 0;
-	SetFilenumber(0);
-}
-
-CSFileObjContainer::~CSFileObjContainer()
-{
-	ResizeContainer(0);
-	sFileList.clear();
-}
-
-int CSFileObjContainer::GetFilenumber()
-{
-	ADDTOCALLSTACK("CSFileObjContainer::GetFilenumber");
-	return iFilenumber;
-}
-
-void CSFileObjContainer::SetFilenumber( int iHowMuch )
-{
-	ADDTOCALLSTACK("CSFileObjContainer::SetFilenumber");
-	ResizeContainer(iHowMuch);
-	iFilenumber = iHowMuch;
-}
-
-bool CSFileObjContainer::OnTick()
-{
-	ADDTOCALLSTACK("CSFileObjContainer::OnTick");
-	EXC_TRY("Tick");
-
-	if ( !iGlobalTimeout )
-		return true;
-
-	if ( ++iCurrentTick >= iGlobalTimeout )
-	{
-		iCurrentTick = 0;
-
-		for ( std::vector<CSFileObj *>::iterator i = sFileList.begin(); i != sFileList.end(); ++i )
-		{
-			if ( !(*i)->OnTick() )
-			{
-				// Error and fixweirdness
-			}
-		}
-	}
-
-	return true;
-	EXC_CATCH;
-
-	//EXC_DEBUG_START;
-	//EXC_DEBUG_END;
-	return false;
-}
-
-int CSFileObjContainer::FixWeirdness()
-{
-	ADDTOCALLSTACK("CSFileObjContainer::FixWeirdness");
-	return 0;
-}
-
-bool CSFileObjContainer::r_GetRef( lpctstr & pszKey, CScriptObj * & pRef )
-{
-	ADDTOCALLSTACK("CSFileObjContainer::r_GetRef");
-	if ( !strnicmp("FIRSTUSED.",pszKey,10) )
-	{
-		pszKey += 10;
-
-		CSFileObj * pFirstUsed = NULL;
-		for ( std::vector<CSFileObj *>::iterator i = sFileList.begin(); i != sFileList.end(); ++i )
-		{
-			if ( (*i)->IsInUse() )
-			{
-				pFirstUsed = (*i);
-				break;
-			}
-		}
-
-		if ( pFirstUsed != NULL )
-		{
-			pRef = pFirstUsed;
-			return true;
-		}
-	}
-	else
-	{
-		size_t nNumber = (size_t)( Exp_GetVal(pszKey) );
-		SKIP_SEPARATORS(pszKey);
-
-		if ( nNumber >= sFileList.size() )
-			return false;
-
-		CSFileObj * pFile = sFileList.at(nNumber);
-
-		if ( pFile != NULL )
-		{
-			pRef = pFile;
-			return true;
-		}
-	}
-
-	return false;
-}
-
-bool CSFileObjContainer::r_LoadVal( CScript & s )
-{
-	ADDTOCALLSTACK("CSFileObjContainer::r_LoadVal");
-	EXC_TRY("LoadVal");
-	lpctstr pszKey = s.GetKey();
-
-	int index = FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
-
-	switch ( index )
-	{
-		case CFO_OBJECTPOOL:
-			SetFilenumber(s.GetArgVal());
-			break;
-
-		case CFO_GLOBALTIMEOUT:
-			iGlobalTimeout = labs(s.GetArgVal()*TICK_PER_SEC);
-			break;
-
-		default:
-			return false;
-	}
-
-	return true;
-	EXC_CATCH;
-
-	EXC_DEBUG_START;
-	EXC_ADD_SCRIPT;
-	EXC_DEBUG_END;
-	return false;
-}
-
-bool CSFileObjContainer::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
-{
-	ADDTOCALLSTACK("CSFileObjContainer::r_WriteVal");
-	EXC_TRY("WriteVal");
-
-	if ( !strnicmp("FIRSTUSED.",pszKey,10) )
-	{
-		pszKey += 10;
-
-		CSFileObj * pFirstUsed = NULL;
-		for ( std::vector<CSFileObj *>::iterator i = sFileList.begin(); i != sFileList.end(); ++i )
-		{
-			if ( (*i)->IsInUse() )
-			{
-				pFirstUsed = (*i);
-				break;
-			}
-		}
-
-		if ( pFirstUsed != NULL )
-		{
-			return static_cast<CScriptObj *>(pFirstUsed)->r_WriteVal(pszKey, sVal, pSrc);
-		}
-
-		return false;
-	}
-
-	int iIndex = FindTableHeadSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
-
-	if ( iIndex < 0 )
-	{
-		size_t nNumber = (size_t)( Exp_GetVal(pszKey) );
-		SKIP_SEPARATORS(pszKey);
-
-		if ( nNumber >= sFileList.size() )
-			return false;
-
-		CSFileObj * pFile = sFileList.at(nNumber);
-
-		if ( pFile != NULL )
-		{
-			CScriptObj * pObj = dynamic_cast<CScriptObj*>( pFile );
-			if (pObj != NULL)
-				return pObj->r_WriteVal(pszKey, sVal, pSrc);
-		}
-
-		return false;
-	}
-
-	switch ( iIndex )
-	{
-		case CFO_OBJECTPOOL:
-			sVal.FormatVal( GetFilenumber() );
-			break;
-
-		case CFO_GLOBALTIMEOUT:
-			sVal.FormatVal(iGlobalTimeout/TICK_PER_SEC);
-			break;
-
-		default:
-			return false;
-	}
-
-	return true;
-	EXC_CATCH;
-
-	EXC_DEBUG_START;
-	EXC_ADD_KEYRET(pSrc);
-	EXC_DEBUG_END;
-	return false;
-}
-
-bool CSFileObjContainer::r_Verb( CScript & s, CTextConsole * pSrc )
-{
-	ADDTOCALLSTACK("CSFileObjContainer::r_Verb");
-	EXC_TRY("Verb");
-	ASSERT(pSrc);
-
-	lpctstr pszKey = s.GetKey();
-
-	if ( !strnicmp("FIRSTUSED.",pszKey,10) )
-	{
-		pszKey += 10;
-
-		CSFileObj * pFirstUsed = NULL;
-		for ( std::vector<CSFileObj *>::iterator i = sFileList.begin(); i != sFileList.end(); ++i )
-		{
-			if ( (*i)->IsInUse() )
-			{
-				pFirstUsed = (*i);
-				break;
-			}
-		}
-
-		if ( pFirstUsed != NULL )
-			return static_cast<CScriptObj *>(pFirstUsed)->r_Verb(s,pSrc);
-
-		return false;
-	}
-
-	int index = FindTableSorted( pszKey, sm_szVerbKeys, CountOf( sm_szVerbKeys )-1 );
-
-	if ( index < 0 )
-	{
-		if ( strchr( pszKey, '.') ) // 0.blah format
-		{
-			size_t nNumber = Exp_GetSTVal(pszKey);
-			if ( nNumber < sFileList.size() )
-			{
-				CSFileObj * pFile = sFileList.at(nNumber);
-				if ( pFile != NULL )
-				{
-					CScriptObj* pObj = dynamic_cast<CScriptObj*>(pFile);
-					if (pObj != NULL)
-					{
-						SKIP_SEPARATORS(pszKey);
-						CScript script(pszKey, s.GetArgStr());
-						script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
-						script.m_iLineNum = s.m_iLineNum;						// Line in the script file where Key/Arg were read
-						return pObj->r_Verb(script, pSrc);
-					}
-				}
-
-				return false;
-			}
-		}
-
-		return ( this->r_LoadVal( s ) );
-	}
-
-	switch ( index )
-	{
-		case CFOV_CLOSEOBJECT:
-		case CFOV_RESETOBJECT:
-		{
-			bool bResetObject = ( index == CFOV_RESETOBJECT );
-			if ( s.HasArgs() )
-			{
-				size_t nNumber = (size_t)( s.GetArgVal() );
-				if ( nNumber >= sFileList.size() )
-					return false;
-
-				CSFileObj * pObjVerb = sFileList.at(nNumber);
-				if ( bResetObject )
-				{
-					delete pObjVerb;
-					sFileList.at(nNumber) = new CSFileObj();
-				}
-				else
-				{
-					pObjVerb->FlushAndClose();
-				}
-			}
-		} break;
-
-		default:
-			return false;
-	}
-
-	return true;
-	EXC_CATCH;
-
-	EXC_DEBUG_START;
-	EXC_ADD_SCRIPTSRC;
-	EXC_DEBUG_END;
-	return false;
-}

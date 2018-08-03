@@ -1140,9 +1140,9 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 	initLength();
 	skip(2);
 
-	bool boIncludeGrid = ( target->GetNetState()->isClientVersion(MINCLIVER_ITEMGRID) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced() );
-	bool boIsLayerSent[LAYER_HORSE];
-	memset( boIsLayerSent, 0, sizeof(boIsLayerSent) );
+	bool fIncludeGrid = ( target->GetNetState()->isClientVersion(MINCLIVER_ITEMGRID) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced() );
+	bool fIsLayerSent[LAYER_HORSE];
+	memset( fIsLayerSent, 0, sizeof(fIsLayerSent) );
 
 	const CChar* viewer = target->GetChar();
 	std::vector<CItem*> items;
@@ -1151,7 +1151,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 	// Classic Client wants the container items sent with order a->z, Enhanced Client with order z->a;
 	// Classic client wants the prices sent (in PacketVendorBuyList::fillBuyData) with order a->z, Enhanced Client with order a->z.
 	for ( CItem* item = ( target->GetNetState()->isClientEnhanced() ? container->GetContentTail() : container->GetContentHead() );
-		item != NULL && m_count < g_Cfg.m_iContainerMaxItems;
+		item != nullptr && m_count < g_Cfg.m_iContainerMaxItems;
 		item = (target->GetNetState()->isClientEnhanced() ? item->GetPrev() : item->GetNext()) )
 	{
 		word wAmount = item->GetAmount();
@@ -1160,7 +1160,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 		if ( boIsShop )
 		{
 			const CItemVendable* vendorItem = static_cast<const CItemVendable *>(item);
-			if ( vendorItem == NULL || vendorItem->GetAmount() == 0 || vendorItem->IsType(IT_GOLD) )
+			if ( vendorItem == nullptr || vendorItem->GetAmount() == 0 || vendorItem->IsType(IT_GOLD) )
 				continue;
 
 			wAmount = minimum((word)g_Cfg.m_iVendorMaxSell, wAmount);
@@ -1189,14 +1189,14 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 
 				default:
 					// Make sure that no more than one of each layer goes out to client....crashes otherwise!!
-					if ( boIsLayerSent[layer] )
+					if ( fIsLayerSent[layer] )
 						continue;
-					boIsLayerSent[layer] = true;
+					fIsLayerSent[layer] = true;
 					break;
 			}
 		}
 
-		if ( itemDefinition != NULL && target->GetResDisp() < itemDefinition->GetResLevel() )
+		if ( itemDefinition != nullptr && target->GetResDisp() < itemDefinition->GetResLevel() )
 		{
 			id = (ITEMID_TYPE)(itemDefinition->GetResDispDnId());
 
@@ -1214,7 +1214,7 @@ PacketItemContents::PacketItemContents(CClient* target, const CItemContainer* co
 		writeInt16(wAmount);
 		writeInt16(pos.m_x);
 		writeInt16(pos.m_y);
-		if ( boIncludeGrid )
+		if ( fIncludeGrid )
 			writeByte(item->GetContainedGridIndex());
 		writeInt32(container->GetUID());
 		writeInt16((word)hue);
@@ -1246,14 +1246,14 @@ PacketItemContents::PacketItemContents(const CClient* target, const CItem* spell
 {
 	ADDTOCALLSTACK("PacketItemContents::PacketItemContents(2)");
 
-	bool includeGrid = ( target->GetNetState()->isClientVersion(MINCLIVER_ITEMGRID) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced()) ;
+	bool fIncludeGrid = ( target->GetNetState()->isClientVersion(MINCLIVER_ITEMGRID) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced()) ;
 
 	initLength();
 	skip(2);
 
-	for (int i = SPELL_Clumsy; i <= SPELL_MAGERY_QTY; i++)
+	for (int i = SPELL_Clumsy; i <= SPELL_MAGERY_QTY; ++i)
 	{
-		if (spellbook->IsSpellInBook((SPELL_TYPE)(i)) == false)
+		if (spellbook->IsSpellInBook((SPELL_TYPE)i) == false)
 			continue;
 
 		writeInt32(UID_F_ITEM + UID_O_INDEX_FREE + i);
@@ -1262,12 +1262,12 @@ PacketItemContents::PacketItemContents(const CClient* target, const CItem* spell
 		writeInt16((word)i);
 		writeInt16(0);
 		writeInt16(0);
-		if (includeGrid)
+		if (fIncludeGrid)
 			writeByte((byte)m_count);
 		writeInt32(spellbook->GetUID());
 		writeInt16(HUE_DEFAULT);
 
-		m_count++;
+		++m_count;
 	}
 
 	// write item count
@@ -1284,19 +1284,19 @@ PacketItemContents::PacketItemContents(const CClient* target, const CItemContain
 {
 	ADDTOCALLSTACK("PacketItemContents::PacketItemContents(3)");
 
-	bool includeGrid = ( target->GetNetState()->isClientVersion(MINCLIVER_ITEMGRID) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced() );
+	bool fIncludeGrid = ( target->GetNetState()->isClientVersion(MINCLIVER_ITEMGRID) || target->GetNetState()->isClientKR() || target->GetNetState()->isClientEnhanced() );
 	const CSpellDef* spellDefinition;
 
 	initLength();
 	skip(2);
 
-	for (CItem* item = spellbook->GetContentHead(); item != NULL; item = item->GetNext())
+	for (CItem* item = spellbook->GetContentHead(); item != nullptr; item = item->GetNext())
 	{
 		if (item->IsType(IT_SCROLL) == false)
 			continue;
 
 		spellDefinition = g_Cfg.GetSpellDef((SPELL_TYPE)(item->m_itSpell.m_spell));
-		if (spellDefinition == NULL)
+		if (spellDefinition == nullptr)
 			continue;
 
 		writeInt32(item->GetUID());
@@ -1305,12 +1305,12 @@ PacketItemContents::PacketItemContents(const CClient* target, const CItemContain
 		writeInt16(item->m_itSpell.m_spell);
 		writeInt16(0);
 		writeInt16(0);
-		if (includeGrid)
+		if (fIncludeGrid)
 			writeByte((byte)m_count);
 		writeInt32(spellbook->GetUID());
 		writeInt16((word)HUE_DEFAULT);
 
-		m_count++;
+		++m_count;
 	}
 
 	// write item count
@@ -1357,7 +1357,7 @@ PacketQueryClient::PacketQueryClient(CClient* target, byte bCmd) : PacketSend(XC
             int padding = 0;
             if (length - (count * 7) > 0)
             {
-                count++;
+                ++count;
                 padding = (count * 7) - length;
             }
 
@@ -1367,16 +1367,16 @@ PacketQueryClient::PacketQueryClient(CClient* target, byte bCmd) : PacketSend(XC
 			writeByte(0x01);
 			writeByte(0);
 
-			for (int i = 0; i < 2; i++)
+			for (int i = 0; i < 2; ++i)
 			{
-				writeByte((byte)(i));
+				writeByte((byte)i);
 				writeInt16((word)(g_MapList.GetX(i)));
 				writeInt16((word)(g_MapList.GetY(i)));
 				writeInt16((word)(g_MapList.GetX(i)));
 				writeInt16((word)(g_MapList.GetY(i)));
             }
 
-            for (int i = 0; i < padding; i++)
+            for (int i = 0; i < padding; ++i)
                 writeByte(0);
 
 		}
@@ -1942,7 +1942,7 @@ void PacketEffect::writeBasicEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CO
 
 
 /*The following 3 PacketEffect method send the effect to a map point instead to an object.*/
-PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap & pt, const CObjBaseTemplate* src, byte speed, byte loop, bool explode) : PacketSend(XCMD_Effect, 20, PRI_NORMAL)
+PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap & pt, const CObjBaseTemplate* src, byte speed, byte loop, bool explode) : PacketSend(XCMD_Effect, 20, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketEffect::PacketEffect");
 
@@ -1951,7 +1951,7 @@ PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYP
 	push(target);
 }
 
-PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap & pt, const CObjBaseTemplate* src, byte speed, byte loop, bool explode, dword hue, dword render) : PacketSend(XCMD_EffectEx, 28, PRI_NORMAL)
+PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap & pt, const CObjBaseTemplate* src, byte speed, byte loop, bool explode, dword hue, dword render) : PacketSend(XCMD_EffectEx, 28, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketEffect::PacketEffect(2)");
 
@@ -1961,7 +1961,7 @@ PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYP
 	push(target);
 }
 
-PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap & pt, const CObjBaseTemplate* src, byte speed, byte loop, bool explode, dword hue, dword render, word effectid, dword explodeid, word explodesound, dword effectuid, byte type) : PacketSend(XCMD_EffectParticle, 49, PRI_NORMAL)
+PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap & pt, const CObjBaseTemplate* src, byte speed, byte loop, bool explode, dword hue, dword render, word effectid, dword explodeid, word explodesound, dword effectuid, byte type) : PacketSend(XCMD_EffectParticle, 49, PRI_NORMAL)
 {
 	ADDTOCALLSTACK("PacketEffect::PacketEffect(3)");
 
@@ -1978,7 +1978,7 @@ PacketEffect::PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYP
 }
 
 /*This method take as parameter a map point instead of an object*/
-void PacketEffect::writeBasicEffect(EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap & pt, const CObjBaseTemplate* src, byte speed, byte loop, bool explode)
+void PacketEffect::writeBasicEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap & pt, const CObjBaseTemplate* src, byte speed, byte loop, bool explode)
 {
 	ADDTOCALLSTACK("PacketEffect::writeBasicEffect");
 
@@ -2351,7 +2351,7 @@ PacketCharacter::PacketCharacter(CClient* target, const CChar* character) : Pack
 		bool isLayerSent[LAYER_HORSE + 1];
 		memset(isLayerSent, 0, sizeof(isLayerSent));
 
-		for (const CItem* item = character->GetContentHead(); item != NULL; item = item->GetNext())
+		for (CItem* item = character->GetContentHead(); item != nullptr; item = item->GetNext())
 		{
 			LAYER_TYPE layer = item->GetEquipLayer();
 			if (CItemBase::IsVisibleLayer(layer) == false)
@@ -2615,7 +2615,7 @@ PacketCorpseEquipment::PacketCorpseEquipment(CClient* target, const CItemContain
 	LAYER_TYPE layer;
 	size_t count = 0;
 
-	for (const CItem* item = corpse->GetContentHead(); item != NULL; item = item->GetNext())
+	for (CItem* item = corpse->GetContentHead(); item != nullptr; item = item->GetNext())
 	{
 		if (item->IsAttr(ATTR_INVIS) && viewer->CanSee(item) == false)
 			continue;

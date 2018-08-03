@@ -675,10 +675,10 @@ public:
 	void writeBasicEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate* dst, const CObjBaseTemplate* src, byte speed, byte loop, bool explode);
 	
 	/*Effect at a Map Point instead of an Object*/
-	PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap & pt, const CObjBaseTemplate* src, byte speed, byte loop, bool explode);
-	PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap & pt, const CObjBaseTemplate* src, byte speed, byte loop, bool explode, dword hue, dword render);
-	PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap & pt, const CObjBaseTemplate* src, byte speed, byte loop, bool explode, dword hue, dword render, word effectid, dword explodeid, word explodesound, dword effectuid, byte type);
-	void writeBasicEffect(EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap & pt, const CObjBaseTemplate* src, byte speed, byte loop, bool explode);
+	PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap & pt, const CObjBaseTemplate* src, byte speed, byte loop, bool explode);
+	PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap & pt, const CObjBaseTemplate* src, byte speed, byte loop, bool explode, dword hue, dword render);
+	PacketEffect(const CClient* target, EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap & pt, const CObjBaseTemplate* src, byte speed, byte loop, bool explode, dword hue, dword render, word effectid, dword explodeid, word explodesound, dword effectuid, byte type);
+	void writeBasicEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap & pt, const CObjBaseTemplate* src, byte speed, byte loop, bool explode);
 	
 	void writeHuedEffect(dword hue, dword render);
 };

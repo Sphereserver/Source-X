@@ -36,14 +36,14 @@ public:
 	* @brief Clear internal data pointer and, if size is valid, alloc mem, updating internal data pointer.
 	* @param dwSize size to alloc.
 	*/
-	void Alloc( size_t dwSize );
+	void Alloc( size_t uiSize );
 protected:
 	/**
 	* @brief Alloc mem (new byte[*] wrapper). Fails if can not alloc or if size is invalid.
 	* @param dwSize size to alloc.
 	* @return pointer to the allocated data.
 	*/
-	byte * AllocBase( size_t dwSize );
+	byte * AllocBase( size_t uiSize );
 public:
 	/**
 	* @brief Clear internal data pointer if it is not NULL.
@@ -100,7 +100,7 @@ public:
 	* @brief Set the size of the buffer and alloc mem.
 	+ @param dwSize new size of the buffer.
     */
-	void Alloc( size_t dwSize );
+	void Alloc( size_t uiSize );
 	/**
 	* @brief Clears the buffer.
     */
@@ -109,7 +109,7 @@ public:
 	* @brief Resizes the buffer, maintaining the current data.
 	+ @param dwSizeNew new size of the buffer.
     */
-	void Resize( size_t dwSizeNew );
+	void Resize( size_t uiSizeNew );
 	///@}
 	/** @name Operations:
 	 */
@@ -119,12 +119,12 @@ public:
 	+ @return Length of the buffer.
     */
 	size_t GetDataLength() const {
-		return m_dwLength;
+		return m_uiLength;
 	}
 	///@}
 
 private:
-	size_t m_dwLength;  // Buffer len.
+	size_t m_uiLength;  // Buffer len.
 };
 
 

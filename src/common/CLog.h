@@ -6,7 +6,7 @@
 #ifndef _INC_CLOG_H
 #define _INC_CLOG_H
 
-#include "sphere_library/CSFile.h"
+#include "sphere_library/CSFileText.h"
 #include "sphere_library/CSTime.h"
 #include "sphere_library/smutex.h"
 #include "common.h"
@@ -49,6 +49,7 @@ enum LOG_TYPE
 	LOGM_DEBUG			= 0x080000	// debug kind of message with "DEBUG:" prefix	
 };
 
+class CSError;
 class CScript;
 class CScriptObj;
 

@@ -1,5 +1,5 @@
 /**
-* @file CsvFile.h
+* @file CSVFile.h
 *
 */
 
@@ -23,7 +23,7 @@ private:
 	int m_iCurrentRow;
 
 private:
-	virtual bool OpenBase(void *pExtra);
+	virtual bool OpenBase();
 
 public:
 	CSVFile();

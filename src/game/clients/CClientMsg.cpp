@@ -20,7 +20,7 @@
 /////////////////////////////////////////////////////////////////
 // -CClient stuff.
 
-void CClient::resendBuffs()
+void CClient::resendBuffs() const
 {
 	// These checks are in addBuff too, but it would be useless to call it so many times
 	if ( !IsSetOF(OF_Buffs) )
@@ -206,7 +206,7 @@ void CClient::resendBuffs()
 	}
 }
 
-void CClient::addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dword ClilocTwo, const word Time, lpctstr* pArgs, size_t iArgCount)
+void CClient::addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dword ClilocTwo, const word Time, lpctstr* pArgs, size_t iArgCount) const
 {
 	ADDTOCALLSTACK("CClient::addBuff");
 	if ( !IsSetOF(OF_Buffs) )
@@ -217,7 +217,7 @@ void CClient::addBuff( const BUFF_ICONS IconId, const dword ClilocOne, const dwo
 	new PacketBuff(this, IconId, ClilocOne, ClilocTwo, Time, pArgs, iArgCount);
 }
 
-void CClient::removeBuff(const BUFF_ICONS IconId)
+void CClient::removeBuff(const BUFF_ICONS IconId) const
 {
 	ADDTOCALLSTACK("CClient::removeBuff");
 	if ( !IsSetOF(OF_Buffs) )
@@ -229,7 +229,7 @@ void CClient::removeBuff(const BUFF_ICONS IconId)
 }
 
 
-bool CClient::addDeleteErr(byte code, dword iSlot)
+bool CClient::addDeleteErr(byte code, dword iSlot) const
 {
 	ADDTOCALLSTACK("CClient::addDeleteErr");
 	// code
@@ -241,12 +241,12 @@ bool CClient::addDeleteErr(byte code, dword iSlot)
 	return false;
 }
 
-void CClient::addTime( bool bCurrent )
+void CClient::addTime( bool fCurrent ) const
 {
 	ADDTOCALLSTACK("CClient::addTime");
 	// Send time. (real or game time ??? why ?)
 
-	if ( bCurrent )
+	if ( fCurrent )
 	{
 		llong lCurrentTime = (CServerTime::GetCurrentTime()).GetTimeRaw();
 		new PacketGameTime(this,
@@ -260,35 +260,36 @@ void CClient::addTime( bool bCurrent )
 	}
 }
 
-void CClient::addObjectRemoveCantSee( CUID uid, lpctstr pszName )
+void CClient::addObjectRemoveCantSee( CUID uid, lpctstr pszName ) const
 {
 	ADDTOCALLSTACK("CClient::addObjectRemoveCantSee");
 	// Seems this object got out of sync some how.
-	if ( pszName == NULL ) pszName = "it";
+	if ( pszName == nullptr )
+        pszName = "it";
 	SysMessagef( "You can't see %s", pszName );
 	addObjectRemove( uid );
 }
 
-void CClient::closeContainer( const CObjBase * pObj )
+void CClient::closeContainer( const CObjBase * pObj ) const
 {
 	ADDTOCALLSTACK("CClient::closeContainer");
 	new PacketCloseContainer(this, pObj);
 }
 
-void CClient::closeUIWindow( const CChar* character, dword command )
+void CClient::closeUIWindow( const CChar* character, dword command ) const
 {
 	ADDTOCALLSTACK("CClient::closeUIWindow");
 	new PacketCloseUIWindow(this, character, command);
 }
 
-void CClient::addObjectRemove( CUID uid )
+void CClient::addObjectRemove( CUID uid ) const
 {
 	ADDTOCALLSTACK("CClient::addObjectRemove");
 	// Tell the client to remove the item or char
 	new PacketRemoveObject(this, uid);
 }
 
-void CClient::addObjectRemove( const CObjBase * pObj )
+void CClient::addObjectRemove( const CObjBase * pObj ) const
 {
 	ADDTOCALLSTACK("CClient::addObjectRemove");
 	addObjectRemove( pObj->GetUID());
@@ -305,7 +306,7 @@ void CClient::addRemoveAll( bool fItems, bool fChars )
 		for (;;)
 		{
 			CItem * pItem = AreaItems.GetItem();
-			if ( pItem == NULL )
+			if ( pItem == nullptr )
 				break;
 			addObjectRemove(pItem);
 		}
@@ -319,7 +320,7 @@ void CClient::addRemoveAll( bool fItems, bool fChars )
 		for (;;)
 		{
 			CChar * pChar = AreaChars.GetChar();
-			if ( pChar == NULL )
+			if ( pChar == nullptr )
 				break;
 			if ( pChar == pCharSrc )
 				continue;
@@ -405,7 +406,7 @@ void CClient::addItem_InContainer( const CItem * pItem )
 void CClient::addItem( CItem * pItem )
 {
 	ADDTOCALLSTACK("CClient::addItem");
-	if ( pItem == NULL )
+	if ( pItem == nullptr )
 		return;
 	if ( pItem->IsTopLevel())
 		addItem_OnGround( pItem );
@@ -415,24 +416,22 @@ void CClient::addItem( CItem * pItem )
 		addItem_InContainer( pItem );
 }
 
-void CClient::addContainerContents( const CItemContainer * pContainer, bool boCorpseEquip, bool boCorpseFilter, bool boShop ) // Send Backpack (with items)
+void CClient::addContainerContents( const CItemContainer * pContainer, bool fCorpseEquip, bool fCorpseFilter, bool fShop ) // Send Backpack (with items)
 {
 	ADDTOCALLSTACK("CClient::addContainerContents");
 	// NOTE: We needed to send the header for this FIRST !!!
 	// 1 = equip a corpse
 	// 0 = contents.
 
-	if (boCorpseEquip == true)
+	if (fCorpseEquip == true)
 		new PacketCorpseEquipment(this, pContainer);
 	else
-		new PacketItemContents(this, pContainer, boShop, boCorpseFilter);
+		new PacketItemContents(this, pContainer, fShop, fCorpseFilter);
 
 	return;
 }
 
-
-
-void CClient::addOpenGump( const CObjBase * pContainer, GUMP_TYPE gump )
+void CClient::addOpenGump( const CObjBase * pContainer, GUMP_TYPE gump ) const
 {
 	ADDTOCALLSTACK("CClient::addOpenGump");
 	// NOTE: if pContainer has not already been sent to the client
@@ -522,7 +521,7 @@ void CClient::addWeather( WEATHER_TYPE weather ) // Send new weather to player
 	new PacketWeather(this, weather, Calc_GetRandVal2(10, 70), 0x10);
 }
 
-void CClient::addLight()
+void CClient::addLight() const
 {
 	ADDTOCALLSTACK("CClient::addLight");
 	// NOTE: This could just be a flash of light.
@@ -555,14 +554,14 @@ void CClient::addLight()
 	new PacketGlobalLight(this, iLight);
 }
 
-void CClient::addArrowQuest( int x, int y, int id )
+void CClient::addArrowQuest( int x, int y, int id ) const
 {
 	ADDTOCALLSTACK("CClient::addArrowQuest");
 
 	new PacketArrowQuest(this, x, y, id);
 }
 
-void CClient::addMusic( MIDI_TYPE id )
+void CClient::addMusic( MIDI_TYPE id ) const
 {
 	ADDTOCALLSTACK("CClient::addMusic");
 	// Music is ussually appropriate for the region.
@@ -595,7 +594,7 @@ bool CClient::addKick( CTextConsole * pSrc, bool fBlock )
 	return true;
 }
 
-void CClient::addSound( SOUND_TYPE id, const CObjBaseTemplate * pBase, int iOnce )
+void CClient::addSound( SOUND_TYPE id, const CObjBaseTemplate * pBase, int iOnce ) const
 {
 	ADDTOCALLSTACK("CClient::addSound");
 	if ( !g_Cfg.m_fGenericSounds )
@@ -616,10 +615,10 @@ void CClient::addSound( SOUND_TYPE id, const CObjBaseTemplate * pBase, int iOnce
 	new PacketPlaySound(this, id, iOnce, 0, pt);
 }
 
-void CClient::addBarkUNICODE( const nchar * pwText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang )
+void CClient::addBarkUNICODE( const nchar * pwText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, CLanguageID lang ) const
 {
 	ADDTOCALLSTACK("CClient::addBarkUNICODE");
-	if ( pwText == NULL )
+	if ( pwText == nullptr )
 		return;
 
 	if ( ! IsConnectTypePacket() )
@@ -632,13 +631,13 @@ void CClient::addBarkUNICODE( const nchar * pwText, const CObjBaseTemplate * pSr
 	if ( mode == TALKMODE_BROADCAST )
 	{
 		mode = TALKMODE_SYSTEM;
-		pSrc = NULL;
+		pSrc = nullptr;
 	}
 
 	new PacketMessageUNICODE(this, pwText, pSrc, wHue, mode, font, lang);
 }
 
-void CClient::addBarkLocalized( int iClilocId, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, lpctstr pArgs )
+void CClient::addBarkLocalized( int iClilocId, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, lpctstr pArgs ) const
 {
 	ADDTOCALLSTACK("CClient::addBarkLocalized");
 	if ( iClilocId <= 0 )
@@ -650,13 +649,13 @@ void CClient::addBarkLocalized( int iClilocId, const CObjBaseTemplate * pSrc, HU
 	if ( mode == TALKMODE_BROADCAST )
 	{
 		mode = TALKMODE_SYSTEM;
-		pSrc = NULL;
+		pSrc = nullptr;
 	}
 
 	new PacketMessageLocalised(this, iClilocId, pSrc, wHue, mode, font, pArgs);
 }
 
-void CClient::addBarkLocalizedEx( int iClilocId, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, AFFIX_TYPE affix, lpctstr pAffix, lpctstr pArgs )
+void CClient::addBarkLocalizedEx( int iClilocId, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, AFFIX_TYPE affix, lpctstr pAffix, lpctstr pArgs ) const
 {
 	ADDTOCALLSTACK("CClient::addBarkLocalizedEx");
 	if ( iClilocId <= 0 )
@@ -668,7 +667,7 @@ void CClient::addBarkLocalizedEx( int iClilocId, const CObjBaseTemplate * pSrc, 
 	if ( mode == TALKMODE_BROADCAST )
 	{
 		mode = TALKMODE_SYSTEM;
-		pSrc = NULL;
+		pSrc = nullptr;
 	}
 
 	new PacketMessageLocalisedEx(this, iClilocId, pSrc, wHue, mode, font, affix, pAffix, pArgs);
@@ -683,7 +682,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 	HUE_TYPE defaultHue = HUE_TEXT_DEF;
 	FONT_TYPE defaultFont = FONT_NORMAL;
 	bool defaultUnicode = false;
-	const CChar * pSrcChar = NULL;
+	const CChar * pSrcChar = nullptr;
 	if (pSrc && pSrc->IsChar())
 	    pSrcChar = static_cast<const CChar *>(pSrc);
 
@@ -749,8 +748,8 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		if ( *pszText == '@' ) // @@ = just a @ symbol
 			goto bark_default;
 
-		const char *s	= pszText;
-		pszText		= strchr( s, ' ' );
+		const char *s = pszText;
+		pszText	= strchr( s, ' ' );
 
 		if ( !pszText )
 			return;
@@ -871,7 +870,7 @@ bark_default:
 
 
 
-void CClient::addBark( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font )
+void CClient::addBark( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font ) const
 {
 	ADDTOCALLSTACK("CClient::addBark");
 	if ( pszText == NULL )
@@ -886,7 +885,7 @@ void CClient::addBark( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_TYPE 
 	if ( mode == TALKMODE_BROADCAST )
 	{
 		mode = TALKMODE_SYSTEM;
-		pSrc = NULL;
+		pSrc = nullptr;
 	}
 
 	new PacketMessageASCII(this, pszText, pSrc, wHue, mode, font);
@@ -910,16 +909,16 @@ void CClient::addObjMessage( lpctstr pMsg, const CObjBaseTemplate * pSrc, HUE_TY
 	addBarkParse(pMsg, pSrc, wHue, mode);
 }
 
-void CClient::addEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate * pDst, const CObjBaseTemplate * pSrc, byte bSpeedSeconds, byte bLoop, bool fExplode, dword color, dword render, word effectid, dword explodeid, word explodesound, dword effectuid, byte type)
+void CClient::addEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTemplate * pDst, const CObjBaseTemplate * pSrc,
+    byte bSpeedSeconds, byte bLoop, bool fExplode, dword color, dword render, word effectid, dword explodeid, word explodesound, dword effectuid, byte type) const
 {
 	ADDTOCALLSTACK("CClient::addEffect");
-	// bSpeedSeconds = seconds = 0=very fast, 7=slow.
-	// wHue =
+	// bSpeedSeconds = tenths of second = 0=very fast, 7=slow.
 
 	ASSERT(m_pChar);
 	ASSERT(pDst);
 
-	if ( (pSrc == NULL) && (motion == EFFECT_BOLT) ) // source required for bolt effect
+	if ( (pSrc == nullptr) && (motion == EFFECT_BOLT) ) // source required for bolt effect
 		return;
 
 	if (effectid || explodeid)
@@ -929,17 +928,17 @@ void CClient::addEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBaseTempla
 	else
 		new PacketEffect(this, motion, id, pDst, pSrc, bSpeedSeconds, bLoop, fExplode);
 }
-/*Effect at a Map Point instead of an Object*/
-void CClient::addEffect(EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap & pt, const CObjBaseTemplate * pSrc, byte bSpeedSeconds, byte bLoop, bool fExplode, dword color, dword render, word effectid, dword explodeid, word explodesound, dword effectuid, byte type)
+
+/* Effect at a Map Point instead of an Object */
+void CClient::addEffect(EFFECT_TYPE motion, ITEMID_TYPE id, const CPointMap & pt, const CObjBaseTemplate * pSrc,
+    byte bSpeedSeconds, byte bLoop, bool fExplode, dword color, dword render, word effectid, dword explodeid, word explodesound, dword effectuid, byte type) const
 {
 	ADDTOCALLSTACK("CClient::addEffect");
-	// bSpeedSeconds = seconds = 0=very fast, 7=slow.
-	// wHue =
+	// bSpeedSeconds = tenth of second = 0=very fast, 7=slow.
 
 	ASSERT(m_pChar);
-	ASSERT(&pt);
 
-	if ((pSrc == NULL) && (motion == EFFECT_BOLT)) // source required for bolt effect
+	if ((pSrc == nullptr) && (motion == EFFECT_BOLT)) // source required for bolt effect
 		return;
 
 	if (effectid || explodeid)
@@ -1073,14 +1072,14 @@ void CClient::GetAdjustedCharID( const CChar * pChar, CREID_TYPE &id, HUE_TYPE &
 	}
 }
 
-void CClient::addCharMove( const CChar * pChar )
+void CClient::addCharMove( const CChar * pChar ) const
 {
 	ADDTOCALLSTACK("CClient::addCharMove");
 
 	addCharMove(pChar, pChar->GetDirFlag());
 }
 
-void CClient::addCharMove( const CChar * pChar, byte iCharDirFlag )
+void CClient::addCharMove( const CChar * pChar, byte iCharDirFlag ) const
 {
 	ADDTOCALLSTACK("CClient::addCharMove");
 	// This char has just moved on screen.
@@ -1090,7 +1089,7 @@ void CClient::addCharMove( const CChar * pChar, byte iCharDirFlag )
 	new PacketCharacterMove(this, pChar, iCharDirFlag);
 }
 
-void CClient::addChar( const CChar * pChar )
+void CClient::addChar( CChar * pChar )
 {
 	ADDTOCALLSTACK("CClient::addChar");
 	// Full update about a char.
@@ -1396,7 +1395,7 @@ void CClient::addPlayerStart( CChar * pChar )
 	addPlayerWarMode();
 	addLoginComplete();
 	addTime(true);
-	if ( pSector != NULL )
+	if ( pSector != nullptr )
 		addSeason(pSector->GetSeason());
 	if (pChar->m_pParty)
 		pChar->m_pParty->SendAddList(NULL);
@@ -1405,17 +1404,17 @@ void CClient::addPlayerStart( CChar * pChar )
 	resendBuffs();
 }
 
-void CClient::addPlayerWarMode()
+void CClient::addPlayerWarMode() const
 {
 	ADDTOCALLSTACK("CClient::addPlayerWarMode");
 
 	new PacketWarMode(this, m_pChar);
 }
 
-void CClient::addToolTip( const CObjBase * pObj, lpctstr pszText )
+void CClient::addToolTip( const CObjBase * pObj, lpctstr pszText ) const
 {
 	ADDTOCALLSTACK("CClient::addToolTip");
-	if ( pObj == NULL )
+	if ( pObj == nullptr )
 		return;
 	if ( pObj->IsChar())
 		return; // no tips on chars.
@@ -1423,7 +1422,7 @@ void CClient::addToolTip( const CObjBase * pObj, lpctstr pszText )
 	new PacketTooltip(this, pObj, pszText);
 }
 
-bool CClient::addBookOpen( CItem * pBook )
+bool CClient::addBookOpen( CItem * pBook ) const
 {
 	ADDTOCALLSTACK("CClient::addBookOpen");
 	// word wrap is done when typed in the client. (it has a var size font)
@@ -1437,7 +1436,7 @@ bool CClient::addBookOpen( CItem * pBook )
 	{
 		// User written book.
 		CItemMessage *pMsgItem = static_cast<CItemMessage *>(pBook);
-		if (pMsgItem == NULL)
+		if (pMsgItem == nullptr)
 			return false;
 
 		if (pMsgItem->IsBookWritable())
@@ -1456,7 +1455,7 @@ bool CClient::addBookOpen( CItem * pBook )
 	return true;
 }
 
-void CClient::addBookPage( const CItem * pBook, size_t iPage, size_t iCount )
+void CClient::addBookPage( const CItem * pBook, size_t iPage, size_t iCount ) const
 {
 	ADDTOCALLSTACK("CClient::addBookPage");
 	// ARGS:
@@ -1787,26 +1786,26 @@ void CClient::addDyeOption( const CObjBase * pObj )
 	SetTargMode( CLIMODE_DYE );
 }
 
-void CClient::addSkillWindow(SKILL_TYPE skill, bool bFromInfo) // Opens the skills list
+void CClient::addSkillWindow(SKILL_TYPE skill, bool fFromInfo) const // Opens the skills list
 {
 	ADDTOCALLSTACK("CClient::addSkillWindow");
 	// Whos skills do we want to look at ?
 	CChar* pChar = m_Prop_UID.CharFind();
-	if (pChar == NULL)
+	if (pChar == nullptr)
 		pChar = m_pChar;
 
-	bool bAllSkills = (skill >= (SKILL_TYPE)(g_Cfg.m_iMaxSkill));
-	if (bAllSkills == false && g_Cfg.m_SkillIndexDefs.IsValidIndex(skill) == false)
+	bool fAllSkills = (skill >= (SKILL_TYPE)(g_Cfg.m_iMaxSkill));
+	if (fAllSkills == false && g_Cfg.m_SkillIndexDefs.IsValidIndex(skill) == false)
 		return;
 
 	if ( IsTrigUsed(TRIGGER_USERSKILLS) )
 	{
-		CScriptTriggerArgs Args(bAllSkills? -1 : skill, bFromInfo);
+		CScriptTriggerArgs Args(fAllSkills? -1 : skill, fFromInfo);
 		if (m_pChar->OnTrigger(CTRIG_UserSkills, pChar, &Args) == TRIGRET_RET_TRUE)
 			return;
 	}
 
-	if (bAllSkills == false && skill >= SKILL_QTY)
+	if (fAllSkills == false && skill >= SKILL_QTY)
 		return;
 
 	new PacketSkills(this, pChar, skill);
@@ -1921,7 +1920,7 @@ void CClient::addReSync()
 {
 	ADDTOCALLSTACK("CClient::addReSync");
     CChar* pChar = GetChar();
-	if ( pChar == NULL )
+	if ( pChar == nullptr )
 		return;
 	// Reloads the client with all it needs.
 	addMap();
@@ -1933,7 +1932,7 @@ void CClient::addReSync()
 	addStatusWindow(pChar);
 }
 
-void CClient::addMap()
+void CClient::addMap() const
 {
 	ADDTOCALLSTACK("CClient::addMap");
 	if ( m_pChar == NULL )
@@ -1943,7 +1942,7 @@ void CClient::addMap()
 	new PacketMapChange(this, g_MapList.m_mapid[pt.m_map]);
 }
 
-void CClient::addMapDiff()
+void CClient::addMapDiff() const
 {
 	ADDTOCALLSTACK("CClient::addMapDiff");
 	// Enables map diff usage on the client. If the client is told to
@@ -1954,7 +1953,7 @@ void CClient::addMapDiff()
 	new PacketEnableMapDiffs(this);
 }
 
-void CClient::addMapWaypoint(CObjBase *pObj, MAPWAYPOINT_TYPE type)
+void CClient::addMapWaypoint(CObjBase *pObj, MAPWAYPOINT_TYPE type) const
 {
     ADDTOCALLSTACK("CClient::addMapWaypoint");
     // Add/remove map waypoints on enhanced clients
@@ -1971,7 +1970,7 @@ void CClient::addMapWaypoint(CObjBase *pObj, MAPWAYPOINT_TYPE type)
     }
 }
 
-void CClient::addChangeServer()
+void CClient::addChangeServer() const
 {
 	ADDTOCALLSTACK("CClient::addChangeServer");
 	CPointMap pt = m_pChar->GetTopPoint();
@@ -2088,20 +2087,20 @@ void CClient::addStamUpdate( CChar *pChar )
 	}
 }
 
-void CClient::addHealthBarUpdate( const CChar * pChar )
+void CClient::addHealthBarUpdate( const CChar * pChar ) const
 {
 	ADDTOCALLSTACK("CClient::addHealthBarUpdate");
-	if ( pChar == NULL )
+	if ( pChar == nullptr )
 		return;
 
 	if ( PacketHealthBarUpdate::CanSendTo(GetNetState()) )
 		new PacketHealthBarUpdate(this, pChar);
 }
 
-void CClient::addBondedStatus( const CChar * pChar, bool bIsDead )
+void CClient::addBondedStatus( const CChar * pChar, bool bIsDead ) const
 {
 	ADDTOCALLSTACK("CClient::addBondedStatus");
-	if ( pChar == NULL )
+	if ( pChar == nullptr )
 		return;
 
 	new PacketBondedStatus(this, pChar, bIsDead);
@@ -2395,7 +2394,7 @@ bool CClient::addBBoardMessage( const CItemContainer * pBoard, BBOARDF_TYPE flag
 		return false;
 
 	// check author is properly linked
-	if (pMsgItem->m_sAuthor.IsEmpty() == false && pMsgItem->m_uidLink.CharFind() == NULL)
+	if (pMsgItem->m_sAuthor.IsEmpty() == false && pMsgItem->m_uidLink.CharFind() == nullptr)
 	{
 		pMsgItem->Delete();
 		return false;

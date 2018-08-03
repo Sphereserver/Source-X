@@ -51,7 +51,7 @@ CUOItemInfo::CUOItemInfo( ITEMID_TYPE id )
         }
     }
 
-    if ( g_Install.m_File[filedata].Seek( offset, SEEK_SET ) != offset )
+    if ( (uint)g_Install.m_File[filedata].Seek( offset, SEEK_SET ) != offset )
     {
         throw CSError(LOGL_CRIT, CSFile::GetLastError(), "CTileItemType.ReadInfo: TileData Seek");
     }

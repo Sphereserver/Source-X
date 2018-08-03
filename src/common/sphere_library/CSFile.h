@@ -41,8 +41,6 @@
 #endif
 
 
-class CSError;
-
 /**
 * @brief Class that dupes the MFC functionality we need
 */
@@ -93,21 +91,23 @@ public:
 	* @return the basename of the file (name withouth paths).
 	*/
 	lpctstr GetFileTitle() const;
-#ifdef _WIN32
+    /**
+    * @brief Return the last IO error code.
+    * @return IO error code.
+    */
+    static int GetLastError();
 	/**
 	* @brief Notify a file input / output error (win32 only).
 	* @param szMessage error to notify.
 	*/
 	void NotifyIOError( lpctstr szMessage ) const;
-#endif
 	/**
 	* @brief Open a file in a specified mode.
 	* @param pszName file to open.
-	* @param uMode open mode.
-	* @param e TODOC.
+	* @param uiMode open mode.
 	* @return true if file is open, false otherwise.
 	*/
-	virtual bool Open( lpctstr pszName = NULL, uint uMode = OF_READ | OF_SHARE_DENY_NONE, CSError * e = NULL );
+	virtual bool Open( lpctstr pszName, uint uiMode = OF_READ | OF_SHARE_DENY_NONE );
 	///@}
 	/** @name Content Management:
 	 */
@@ -116,26 +116,26 @@ public:
 	* @brief Get the length of the file.
 	* @return the length of the file.
 	*/
-	size_t GetLength();
+	int GetLength();
 	/**
 	* @brief Gets the position indicator of the file.
 	* @return The position indicator of the file.
 	*/
-	virtual size_t GetPosition() const;
+	virtual int GetPosition() const;
 	/**
 	* @brief Reads data from the file.
 	* @param pData buffer where store the readed data.
 	* @param stLength count of bytes to read.
 	* @return count of bytes readed.
 	*/
-	virtual size_t Read( void * pData, size_t stLength ) const;
+	virtual int Read( void * pData, int iLength ) const;
 	/**
 	* @brief Set the position indicator.
 	* @param stOffset position to set.
 	* @param stOrigin origin (current position or init of the file).
 	* @return position where the position indicator is set on success, -1 on error.
 	*/
-	virtual size_t Seek( size_t stOffset = 0, int iOrigin = SEEK_SET );
+	virtual int Seek( int iOffset = 0, int iOrigin = SEEK_SET );
 	/**
 	* @brief Sets the position indicator at the begin of the file.
 	*/
@@ -144,14 +144,14 @@ public:
 	* @brief Sets the position indicator at the end of the file.
 	* @return The length of the file on success, -1 on error.
 	*/
-	size_t SeekToEnd();
+    int SeekToEnd();
 	/**
 	* @brief writes supplied data into file.
 	* @param pData data to write.
 	* @param dwLength lenght of the data to write.
 	* @return true is success, false otherwise.
 	*/
-	virtual bool Write( const void * pData, size_t stLength ) const;
+	virtual bool Write( const void * pData, int iLength ) const;
 	///@}
 
 public:
@@ -159,7 +159,7 @@ public:
 
 protected:
 	CSString m_strFileName;	// File name (with path).
-	uint m_uMode;   // MMSYSTEM may use 32 bit flags.
+	uint m_uiMode;   // MMSYSTEM may use 32 bit flags.
 };
 
 
@@ -202,11 +202,6 @@ private:
 	virtual void CloseBase();
 public:
 	/**
-	* @brief Return the last IO error code.
-	* @return IO error code.
-	*/
-	static int GetLastError();
-	/**
 	* @brief Check if file is open.
 	* @return true if file is open, false otherwise.
 	*/
@@ -214,18 +209,16 @@ public:
 	/**
 	* @brief Open a file in a specified mode.
 	* @param pszName file to open.
-	* @param uMode open mode.
-	* @param pExtra TODOC.
+	* @param uiMode open mode.
 	* @return true if file is open, false otherwise.
 	*/
-	virtual bool Open( lpctstr pszName = NULL, uint uMode = OF_READ | OF_SHARE_DENY_NONE, void * pExtra = NULL );
+	virtual bool Open( lpctstr pszName, uint uiMode = OF_READ | OF_SHARE_DENY_NONE );
 private:
 	/**
 	* @brief Open file with CFile method.
-	* @param pExtra unused.
 	* @return true if file is open, false otherwise.
 	*/
-	virtual bool OpenBase( void * pExtra );
+	virtual bool OpenBase();
 	///@}
 public:
 	/** @name File name operations:
@@ -282,132 +275,6 @@ public:
 	*/
 	bool IsWriteMode() const;
 	///@}
-};
-
-
-/**
-* @brief Text files. Try to be compatible with MFC CFile class.
-*/
-class CSFileText : public CSFile
-{
-public:
-	static const char *m_sClassName;
-
-	/** @name Constructors, Destructor, Asign operator:
-	 */
-	///@{
-public:
-	CSFileText();
-	virtual ~CSFileText();
-private:
-	/**
-	* @brief No copy on construction allowed.
-	*/
-	CSFileText(const CSFileText& copy);
-	/**
-	* @brief No copy allowed.
-	*/
-	CSFileText& operator=(const CSFileText& other);
-	///@}
-	/** @name File management:
-	 */
-	///@{
-public:
-	/**
-	* @brief Check if file is open.
-	* @return true if is open, false otherwise.
-	*/
-	bool IsFileOpen() const;
-protected:
-	virtual bool OpenBase( void * pExtra );
-	virtual void CloseBase();
-	///@}
-	/** @name Content management:
-	 */
-	///@{
-public:
-	/**
-	* @brief Write changes to disk.
-	*/
-	void Flush() const;
-	/**
-	* @brief Check if EOF is reached.
-	* @return true if EOF is reached, false otherwise.
-	*/
-	bool IsEOF() const;
-	/**
-	* @brief print in file a string with arguments (printf like).
-	* @param pFormat string in "printf like" format.
-	* @param ... argument list.
-	* @return total chars of the output.
-	*/
-	size_t _cdecl Printf( lpctstr pFormat, ... ) __printfargs(2,3);
-	/**
-	* @brief Reads data from the file.
-	* @param pBuffer buffer where store the readed data.
-	* @param sizemax count of bytes to read.
-	* @return count of bytes readed.
-	*/
-	size_t Read( void * pBuffer, size_t sizemax ) const;
-	/**
-	* @brief Reads from a file a line (up to sizemax - 1 characters).
-	* @param pBuffer buffer where store the readed data.
-	* @param sizemax count of characters to read.
-	* @return the str readed if success, NULL on errors.
-	*/
-	tchar * ReadString( tchar * pBuffer, size_t sizemax ) const;
-	/**
-	* @brief print in file a string with arguments (printf like).
-	* @param pFormat string in "printf like" format.
-	* @param args argument list.
-	* @return total chars of the output.
-	*/
-	size_t VPrintf( lpctstr pFormat, va_list args );
-	/**
-	* @brief writes supplied data into file.
-	* @param pData data to write.
-	* @param iLen lenght of the data to write.
-	* @return true is success, false otherwise.
-	*/
-#ifndef _WIN32
-	bool Write( const void * pData, size_t stLen ) const;
-#else
-	bool Write( const void * pData, size_t stLen );
-#endif
-	/**
-	* @brief write string into file.
-	* @return true is success, false otherwise.
-	*/
-	bool WriteString( lpctstr pStr );
-	///@}
-	/** @name Mode operations:
-	 */
-	///@{
-protected:
-	/**
-	* @brief Get open mode in string format.
-	*
-	* Formats:
-	* - "rb"
-	* - "w"
-	* - "wb"
-	* - "a+b"
-	* @return string that describes the open mode.
-	*/
-	lpctstr GetModeStr() const;
-public:
-	/**
-	* @brief Check if file is open in binary mode.
-	* @return false always.
-	*/
-	bool IsBinaryMode() const;
-	///@}
-public:
-	FILE * m_pStream;		// The current open script type file.
-protected:
-#ifdef _WIN32
-	bool	bNoBuffer;		// TODOC.
-#endif
 };
 
 #endif // _INC_CSFILE_H

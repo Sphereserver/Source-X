@@ -843,7 +843,7 @@ void defragSphere(char *path)
 				}
 			}
 			//	output the resulting line
-			ouf.Write(buf, strlen(buf));
+			ouf.Write(buf, (int)strlen(buf));
 		}
 		inf.Close();
 		ouf.Close();
