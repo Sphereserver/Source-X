@@ -1077,3 +1077,6 @@ Multis:
 
 02-08-2018, Nolok
 - Fixed: File I/O functions messing up line numbers, for example reading the wrong line (Issue #95).
+
+04-08-2018, Nolok
+- Fixed: shop items' name shown with the wrong language if the client localization wasn't english.

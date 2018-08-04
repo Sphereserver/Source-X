@@ -61,14 +61,14 @@ public:
 
 protected:
 	// not implemented, should take care that newLength should fit in the buffer
-	virtual void ensureLength(size_t newLength);
+	virtual void ensureLength(size_t newLength) = 0;
 	// not implemented, should free up occupied resources
-	virtual void destroy();
+	virtual void destroy() = 0;
 
 protected:
 	char	*m_buf;
-	size_t	m_length;
-	size_t	m_realLength;
+	size_t	m_length;       // length of the string (which is the part of the buffer we're actually using)
+	size_t	m_realLength;   // length of the buffer
 };
 
 // Common string implementation, implementing AbstractString and working on heap

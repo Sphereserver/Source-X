@@ -45,8 +45,8 @@ void CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 
 	// we do not need to send tooltips for items not in LOS (multis/ships)
 	//DEBUG_MSG(("(( m_pChar->GetTopPoint().GetDistSight(pObj->GetTopPoint()) (%x) > UO_MAP_VIEW_SIZE_DEFAULT (%x) ) && ( !bShop ) (%x) )", m_pChar->GetTopPoint().GetDistSight(pObj->GetTopPoint()), UO_MAP_VIEW_SIZE_DEFAULT, ( !bShop )));
-	int iDist = m_pChar->GetTopPoint().GetDistSight(pObj->GetTopPoint());
-	if ( (iDist > m_pChar->GetVisualRange()) && (iDist <= UO_MAP_VIEW_RADAR) && !fShop ) //(iDist <= UO_MAP_VIEW_RADAR) is needed because items equipped or in a container have invalid GetTopPoint (and a very high iDist)
+	int iDist = GetChar()->GetTopPoint().GetDistSight(pObj->GetTopPoint());
+	if ( (iDist > GetChar()->GetVisualRange()) && (iDist <= UO_MAP_VIEW_RADAR) && !fShop ) //(iDist <= UO_MAP_VIEW_RADAR) fShop is needed because items equipped or in a container have invalid GetTopPoint (and a very high iDist)
 		return;
 
 	// We check here if we are sending a tooltip for a static/non-movable items
@@ -57,7 +57,7 @@ void CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 
 		if (!pItem->GetContainer() && pItem->IsAttr(/*ATTR_MOVE_NEVER|*/ATTR_STATIC))
 		{
-			if ((!this->GetChar()->IsPriv(PRIV_GM)) && (!this->GetChar()->IsPriv(PRIV_ALLMOVE)))
+			if ((!GetChar()->IsPriv(PRIV_GM)) && (!GetChar()->IsPriv(PRIV_ALLMOVE)))
 				return;
 		}
 	}
@@ -90,14 +90,12 @@ void CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 		{
 			TRIGRET_TYPE iRet = TRIGRET_RET_FALSE;
 
-
 			if (IsTrigUsed(TRIGGER_CLIENTTOOLTIP) || (pItem && IsTrigUsed(TRIGGER_ITEMCLIENTTOOLTIP)) || (pChar && IsTrigUsed(TRIGGER_CHARCLIENTTOOLTIP)))
 			{
 				CScriptTriggerArgs args(pObj);
 				args.m_iN1 = fRequested;
 				iRet = pObj->OnTrigger("@ClientTooltip", this->GetChar(), &args); //ITRIG_CLIENTTOOLTIP , CTRIG_ClientTooltip
 			}
-
 
 			if (iRet != TRIGRET_RET_TRUE)
 			{
@@ -152,7 +150,12 @@ void CClient::addAOSTooltip(CObjBase * pObj, bool fRequested, bool fShop)
 		switch (g_Cfg.m_iTooltipMode)
 		{
 		case TOOLTIPMODE_SENDVERSION:
-			if (!fRequested)
+            // If a full tooltip was requested (fRequested), or this object is in a shop window (fNameOnly), we need to
+            // send the full tooltip and not the version. In the fRequested case, we may have been asked for the full tooltip via scripts,
+            // or forcing in the source the full tooltip or because the client asked it because we sent him a newer tooltip version.
+            // In the shop window case, if we send the property version instead of the list, sometimes the wrong names are shown. This
+            // happens especially when using a client localization other than english.
+			if (!fRequested && !fNameOnly)
 			{
 				// send property list version (client will send a request for the full tooltip if needed)
 				if (PacketPropertyListVersion::CanSendTo(GetNetState()) == false)

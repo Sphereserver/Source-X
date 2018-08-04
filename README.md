@@ -165,7 +165,7 @@ These are meant to be applied to new code and, if there's some old code not foll
   The correct and up to date notation is "pc" for lpstr/lpcstr (which are respectively char* and const char*), "pwc" (wchar* and const wchar*),
   "ptc" for lptstr/lpctstr (tchar* and const tchar*).<br>
   Use the "s" or "ps" (if pointer) when using CString or std::string. Always prefer CString over std::string, unless in your case there are obvious advantages for using the latter.
-<br>
+<br />
 Examples:
 * Class or Struct: "CChar".
 * Class internal variable, signed integer: "_iAmount".

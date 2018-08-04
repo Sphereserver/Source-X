@@ -673,7 +673,7 @@ void CClient::addBarkLocalizedEx( int iClilocId, const CObjBaseTemplate * pSrc, 
 	new PacketMessageLocalisedEx(this, iClilocId, pSrc, wHue, mode, font, affix, pAffix, pArgs);
 }
 
-void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, bool bUnicode, lpctstr name)
+void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_TYPE wHue, TALKMODE_TYPE mode, FONT_TYPE font, bool fUnicode, lpctstr name) const
 {
 	ADDTOCALLSTACK("CClient::addBarkParse");
 	if ( !pszText )
@@ -740,7 +740,8 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 			break;
 	}
 
-	word Args[] = { (word)wHue, (word)font, (word)bUnicode };
+	word Args[] = { (word)wHue, (word)font, (word)fUnicode };
+    CSString sBarkBuffer;
 
 	if ( *pszText == '@' )
 	{
@@ -804,15 +805,14 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 	if ( Args[2] == 0 )
 		Args[2] = (word)defaultUnicode;
 
-	if ( m_BarkBuffer.IsEmpty() )
-		m_BarkBuffer.Format( "%s%s", name, pszText);
+    sBarkBuffer.Format( "%s%s", name, pszText);
 
 	switch ( Args[2] )
 	{
 		case 3:	// Extended localized message (with affixed ASCII text)
 		{
             tchar * ppArgs[256];
-			size_t iQty = Str_ParseCmds(const_cast<tchar *>(m_BarkBuffer.GetPtr()), ppArgs, CountOf(ppArgs), "," );
+			size_t iQty = Str_ParseCmds(const_cast<tchar *>(sBarkBuffer.GetPtr()), ppArgs, CountOf(ppArgs), "," );
 			int iClilocId = Exp_GetVal( ppArgs[0] );
 			int iAffixType = Exp_GetVal( ppArgs[1] );
 			CSString CArgs;
@@ -830,7 +830,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		case 2:	// Localized
 		{
             tchar * ppArgs[256];
-			size_t iQty = Str_ParseCmds(const_cast<tchar *>(m_BarkBuffer.GetPtr()), ppArgs, CountOf(ppArgs), "," );
+			size_t iQty = Str_ParseCmds(const_cast<tchar *>(sBarkBuffer.GetPtr()), ppArgs, CountOf(ppArgs), "," );
 			int iClilocId = Exp_GetVal( ppArgs[0] );
 			CSString CArgs;
 			for ( size_t i = 1; i < iQty; ++i )
@@ -847,7 +847,7 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		case 1:	// Unicode
 		{
 			nchar szBuffer[ MAX_TALK_BUFFER ];
-			CvtSystemToNUNICODE( szBuffer, CountOf(szBuffer), m_BarkBuffer.GetPtr(), -1 );
+			CvtSystemToNUNICODE( szBuffer, CountOf(szBuffer), sBarkBuffer.GetPtr(), -1 );
 			addBarkUNICODE( szBuffer, pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]), 0 );
 			break;
 		}
@@ -856,16 +856,13 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 		default:
 		{
 bark_default:
-			if ( m_BarkBuffer.IsEmpty())
-				m_BarkBuffer.Format("%s%s", name, pszText);
+			if ( sBarkBuffer.IsEmpty())
+                sBarkBuffer.Format("%s%s", name, pszText);
 
-			addBark( m_BarkBuffer.GetPtr(), pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]));
+			addBark( sBarkBuffer.GetPtr(), pSrc, (HUE_TYPE)(Args[0]), mode, (FONT_TYPE)(Args[1]));
 			break;
 		}
 	}
-
-	// Empty the buffer.
-	m_BarkBuffer.Empty();
 }
 
 
