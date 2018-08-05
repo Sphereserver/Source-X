@@ -83,10 +83,10 @@ bool CLog::OpenLog( lpctstr pszBaseDirName )	// name set previously.
 	if ( m_fLockOpen )	// the log is already locked open
 		return false;
 
-	if ( m_sBaseDir == NULL )
+	if ( m_sBaseDir == nullptr )
 		return false;
 
-	if ( pszBaseDirName != NULL )
+	if ( pszBaseDirName != nullptr )
 	{
 		if ( pszBaseDirName[0] && pszBaseDirName[1] == '\0' )
 		{
@@ -97,20 +97,23 @@ bool CLog::OpenLog( lpctstr pszBaseDirName )	// name set previously.
 			}
 		}
 		else
+        {
 			m_sBaseDir = pszBaseDirName;
+        }
 	}
 
 	// Get the new name based on date.
 	m_dateStamp = CSTime::GetCurrentTime();
 	tchar *pszTemp = Str_GetTemp();
-	sprintf(pszTemp, SPHERE_FILE "%d-%02d-%02d.log",
+	snprintf(pszTemp, STR_TEMPLENGTH, SPHERE_FILE "%d-%02d-%02d.log",
 		m_dateStamp.GetYear(), m_dateStamp.GetMonth(), m_dateStamp.GetDay());
 	CSString sFileName = GetMergedFileName(m_sBaseDir, pszTemp);
 
 	// Use the OF_READWRITE to append to an existing file.
-	if ( CSFileText::Open( sFileName, OF_SHARE_DENY_NONE|OF_READWRITE|OF_TEXT ) )
+	if ( CSFileText::Open( sFileName.GetPtr(), OF_SHARE_DENY_NONE|OF_READWRITE|OF_TEXT ) )
 	{
 		setvbuf(m_pStream, NULL, _IONBF, 0);
+        Printf("Log date: %s\n", datetime.Format(NULL));
 		return true;
 	}
 	return false;
@@ -167,10 +170,10 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg )
 		CSTime datetime = CSTime::GetCurrentTime();	// last real time stamp.
 
 		tchar szTime[32];
-		sprintf(szTime, "%02d:%02d:", datetime.GetHour(), datetime.GetMinute());
+		snprintf(szTime, sizeof(szTime), "%02d:%02d:", datetime.GetHour(), datetime.GetMinute());
 		m_dateStamp = datetime;
 
-		lpctstr pszLabel = NULL;
+		lpctstr pszLabel = nullptr;
 
 		switch (dwMask & LOGL_QTY)
 		{
@@ -193,7 +196,7 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg )
 		if ( !( dwMask&LOGM_NOCONTEXT ) && m_pScriptContext )
 		{
 			CScriptLineContext LineContext = m_pScriptContext->GetContext();
-			sprintf( szScriptContext, "(%s,%d)", m_pScriptContext->GetFileTitle(), LineContext.m_iLineNum );
+			snprintf( szScriptContext, sizeof(szScriptContext),"(%s,%d)", m_pScriptContext->GetFileTitle(), LineContext.m_iLineNum );
 		}
 		else
 			szScriptContext[0] = '\0';
@@ -244,13 +247,12 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg )
 			{
 				// it's a new day, open a log file with new day name.
 				Close();	// LINUX should alrady be closed.
-
-				OpenLog( NULL );
-				Printf( "%s", datetime.Format(NULL) );
+				OpenLog();
 			}
 #ifndef _WIN32
 			else
 			{
+                Close(); // The log file is opened for the first time by the OpenLog call done when reading the sphere.ini.
 				uint mode = OF_READWRITE|OF_TEXT|OF_SHARE_DENY_WRITE;
 				Open(NULL, mode);	// LINUX needs to close and re-open for each log line !
 			}
@@ -280,7 +282,6 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg )
 	}
 
 	m_mutex.unlock();
-
 	return iRet;
 }
 

@@ -165,7 +165,7 @@ public:
 	bool SetFilePath( lpctstr pszName );
 
 	lpctstr GetLogDir() const;
-	bool OpenLog( lpctstr pszName = NULL );	// name set previously.
+	bool OpenLog( lpctstr pszName = nullptr );	// name set previously.
 	dword GetLogMask() const;
 	void SetLogMask( dword dwMask );
 	bool IsLoggedMask( dword dwMask ) const;

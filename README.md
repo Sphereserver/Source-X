@@ -81,10 +81,9 @@ Example of CMake CLI additional parameters:<br>
 ```
 -DC_FLAGS_EXTRA="-mtune=native" -DCXX_FLAGS_EXTRA="-mtune=native"
 ```
-<br>
-(Use the -mtune=native flag only if you are compiling on the same machine on which you will execute Sphere!)
+<br />(Use the -mtune=native flag only if you are compiling on the same machine on which you will execute Sphere!)
 
-Example to build makefiles on Linux for a 64 bits Nightly version, inside the "build" directory (run it inside the project's root folder, not inside "src"): <br>
+Example to build makefiles on Linux for a 64 bits Nightly version, inside the "build" directory (run it inside the project's root folder, not inside "src"):<br>
 ```
 mkdir build && cd build
 cmake -DCMAKE_TOOLCHAIN_FILE=../src/cmake/toolchains/Linux-GNU-64.cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Nightly" --build ./ ../src
@@ -165,8 +164,8 @@ These are meant to be applied to new code and, if there's some old code not foll
   The correct and up to date notation is "pc" for lpstr/lpcstr (which are respectively char* and const char*), "pwc" (wchar* and const wchar*),
   "ptc" for lptstr/lpctstr (tchar* and const tchar*).<br>
   Use the "s" or "ps" (if pointer) when using CString or std::string. Always prefer CString over std::string, unless in your case there are obvious advantages for using the latter.
-<br />
-Examples:
+
+<br />Examples:
 * Class or Struct: "CChar".
 * Class internal variable, signed integer: "_iAmount".
 * Tchar pointer: "ptcName".

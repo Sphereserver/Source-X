@@ -284,7 +284,7 @@ bool CSFile::Open( lpctstr pszFilename, uint uiModeFlags )
 	ADDTOCALLSTACK("CSFile::Open");
 	// RETURN: true = success.
 	// OF_BINARY | OF_WRITE
-	if ( pszFilename == nullptr )
+	if ( !pszFilename )
 	{
 		if ( IsFileOpen() )
 			return true;
@@ -294,7 +294,7 @@ bool CSFile::Open( lpctstr pszFilename, uint uiModeFlags )
 		Close();	// Make sure it's closed first.
     }
 
-	if ( pszFilename == nullptr )
+	if ( !pszFilename )
 		pszFilename = GetFilePath();
 	else
 		m_strFileName = pszFilename;
