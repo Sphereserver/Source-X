@@ -113,7 +113,7 @@ bool CLog::OpenLog( lpctstr pszBaseDirName )	// name set previously.
 	if ( CSFileText::Open( sFileName.GetPtr(), OF_SHARE_DENY_NONE|OF_READWRITE|OF_TEXT ) )
 	{
 		setvbuf(m_pStream, NULL, _IONBF, 0);
-        Printf("Log date: %s\n", datetime.Format(NULL));
+        Printf("Log date: %s\n", m_dateStamp.Format(NULL));
 		return true;
 	}
 	return false;
