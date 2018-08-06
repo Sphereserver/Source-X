@@ -361,8 +361,8 @@ public:
 	bool CanSeeInContainer( const CItemContainer * pContItem ) const;
 	bool CanSee( const CObjBaseTemplate * pObj ) const;
 	inline bool CanSeeLOS_New_Failed( CPointMap * pptBlock, CPointMap &ptNow ) const;
-	bool CanSeeLOS_New( const CPointMap & pd, CPointMap * pBlock = NULL, int iMaxDist = UO_MAP_VIEW_SIGHT, word wFlags = 0, bool bCombatCheck = false ) const;
-	bool CanSeeLOS( const CPointMap & pd, CPointMap * pBlock = NULL, int iMaxDist = UO_MAP_VIEW_SIGHT, word wFlags = 0, bool bCombatCheck = false ) const;
+	bool CanSeeLOS_New( const CPointMap & pd, CPointMap * pBlock = nullptr, int iMaxDist = UO_MAP_VIEW_SIGHT, word wFlags = 0, bool bCombatCheck = false ) const;
+	bool CanSeeLOS( const CPointMap & pd, CPointMap * pBlock = nullptr, int iMaxDist = UO_MAP_VIEW_SIGHT, word wFlags = 0, bool bCombatCheck = false ) const;
 	bool CanSeeLOS( const CObjBaseTemplate * pObj, word wFlags = 0, bool bCombatCheck = false) const;
 
 #define LOS_NB_LOCAL_TERRAIN	0x00001 // Terrain inside a region I am standing in does not block LOS

@@ -2329,7 +2329,7 @@ bool CChar::Spell_TargCheck()
 	// Need a target.
 	if ( pSpellDef->IsSpellType( SPELLFLAG_TARG_OBJ ) && !( !pObj && pSpellDef->IsSpellType( SPELLFLAG_TARG_XYZ ) ) )
 	{
-		if ( pObj == NULL || pObjTop == NULL )
+		if (!pObj || !pObjTop)
 		{
 			SysMessageDefault( DEFMSG_SPELL_TARG_OBJ );
 			return false;
@@ -2339,7 +2339,7 @@ bool CChar::Spell_TargCheck()
 			SysMessageDefault(DEFMSG_SPELL_TARG_LOS);
 			return false;
 		}
-		if ( !IsPriv(PRIV_GM) && pObjTop != this && pObjTop != pObj && pObjTop->IsChar() )
+		if ( !IsPriv(PRIV_GM) && (pObjTop != this) && (pObjTop != pObj) && pObjTop->IsChar() )
 		{
 			SysMessageDefault( DEFMSG_SPELL_TARG_CONT );
 			return false;
@@ -2347,7 +2347,7 @@ bool CChar::Spell_TargCheck()
 
 		m_Act_p = pObjTop->GetTopPoint();
 
-		if ( ! Spell_TargCheck_Face() )
+		if ( !Spell_TargCheck_Face() )
 			return false;
 
 	}
@@ -2357,7 +2357,7 @@ bool CChar::Spell_TargCheck()
 		{
 			m_Act_p = pObjTop->GetTopPoint();
 		}
-		if ( ! CanSeeLOS( m_Act_p, NULL, UO_MAP_VIEW_SIGHT, LOS_NB_WINDOWS )) //we should be able to cast through a window
+		if ( ! CanSeeLOS( m_Act_p, nullptr, GetVisualRange(), LOS_NB_WINDOWS )) //we should be able to cast through a window
 		{
 			SysMessageDefault( DEFMSG_SPELL_TARG_LOS );
 			return false;

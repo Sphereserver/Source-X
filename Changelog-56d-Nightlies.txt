@@ -1080,3 +1080,6 @@ Multis:
 
 04-08-2018, Nolok
 - Fixed: shop items' name shown with the wrong language if the client localization wasn't english.
+
+06-08-2018, Nolok
+- Fixed: Spells with SPELLFLAG_TARG_XYZ had a different target maximum range (14) than spells with other TARG spellflags (caster's VisualRange) (Issue #117).
