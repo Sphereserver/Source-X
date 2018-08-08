@@ -322,6 +322,10 @@ void CClient::AOSTooltip_addDefaultItemData(CItem * pItem)
         PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(3010064)); // Magic
 	if (pItem->IsAttr(ATTR_NEWBIE))
         PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(1070722, g_Cfg.GetDefaultMsg(DEFMSG_TOOLTIP_TAG_NEWBIE))); // ~1_NOTHING~
+    if (pItem->IsAttr(ATTR_NODROP))
+        PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(1076253)); // NO-DROP
+    if (pItem->IsAttr(ATTR_NOTRADE))
+        PUSH_BACK_TOOLTIP(pItem, new CClientTooltip(1076255)); // NO-TRADE
 
 	if (g_Cfg.m_iFeatureML & FEATURE_ML_UPDATE)
 	{

@@ -388,16 +388,16 @@ bool CChar::Spell_Recall(CItem * pRune, bool fGate)
 	return true;
 }
 
-bool CChar::Spell_Resurrection(CItemCorpse * pCorpse, CChar * pCharSrc, bool bNoFail)
+bool CChar::Spell_Resurrection(CItemCorpse * pCorpse, CChar * pCharSrc, bool fNoFail)
 {
 	ADDTOCALLSTACK("CChar::Spell_Resurrection");
 	if (!IsStatFlag(STATF_DEAD))
 		return false;
 
 	if (IsPriv(PRIV_GM) || (pCharSrc && pCharSrc->IsPriv(PRIV_GM)))
-		bNoFail = true;
+		fNoFail = true;
 
-	if (!bNoFail && m_pArea && m_pArea->IsFlag(REGION_ANTIMAGIC_ALL))
+	if (!fNoFail && m_pArea && m_pArea->IsFlag(REGION_ANTIMAGIC_ALL))
 	{
 		SysMessageDefault(DEFMSG_SPELL_RES_AM);
 		return false;
@@ -424,7 +424,7 @@ bool CChar::Spell_Resurrection(CItemCorpse * pCorpse, CChar * pCharSrc, bool bNo
 		m_CanMask &= ~CAN_C_GHOST;
 
 	ClientIterator it;
-	for (CClient* pClient = it.next(); pClient != NULL; pClient = it.next())
+	for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
 	{
 		if (!pClient->CanSee(this))
 			continue;
@@ -437,23 +437,23 @@ bool CChar::Spell_Resurrection(CItemCorpse * pCorpse, CChar * pCharSrc, bool bNo
 			pClient->addBondedStatus(this, false);
 	}
 
-	bool bRaisedCorpse = false;
-	if (pCorpse != NULL)
+	bool fRaisedCorpse = false;
+	if (pCorpse != nullptr)
 	{
 		if (RaiseCorpse(pCorpse))
 		{
 			SysMessageDefault(DEFMSG_SPELL_RES_REJOIN);
-			bRaisedCorpse = true;
+			fRaisedCorpse = true;
 		}
 	}
 
 	if (m_pPlayer)
 	{
 		CItem *pDeathShroud = ContentFind(CResourceID(RES_ITEMDEF, ITEMID_DEATHSHROUD));
-		if (pDeathShroud != NULL)
+		if (pDeathShroud)
 			pDeathShroud->Delete();
 
-		if (!bRaisedCorpse && !g_Cfg.m_fNoResRobe)
+		if (!fRaisedCorpse && !g_Cfg.m_fNoResRobe)
 		{
 			CItem *pRobe = CItem::CreateBase(ITEMID_ROBE);
 			ASSERT(pRobe);
@@ -2394,10 +2394,10 @@ bool CChar::Spell_Unequip( LAYER_TYPE layer )
 	return true;
 }
 
-inline bool CChar::Spell_SimpleEffect( CObjBase * pObj, CObjBase * pObjSrc, SPELL_TYPE &spell, int &iSkillLevel )
+bool CChar::Spell_SimpleEffect( CObjBase * pObj, CObjBase * pObjSrc, SPELL_TYPE &spell, int &iSkillLevel )
 {
 	ADDTOCALLSTACK("CChar::Spell_SimpleEffect");
-	if ( pObj == NULL )
+	if ( pObj == nullptr )
 		return false;
 	pObj->OnSpellEffect( spell, this, iSkillLevel, dynamic_cast <CItem*>( pObjSrc ));
 	return true;
@@ -3065,7 +3065,7 @@ int CChar::Spell_CastStart()
 	return iDifficulty;
 }
 
-bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool bReflecting )
+bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool fReflecting )
 {
 	ADDTOCALLSTACK("CChar::OnSpellEffect");
 	// Spell has a direct effect on this char.
@@ -3077,7 +3077,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	//  false = the spell did not work. (should we get credit ?)
 
 	const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
-	if ( pSpellDef == NULL )
+	if ( !pSpellDef )
 		return false;
 	if ( iSkillLevel <= 0 )		// spell died or fizzled
 		return false;
@@ -3102,20 +3102,20 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 
 	// Check if the spell is being resisted
-	ushort iResist = 0;
+	ushort uiResist = 0;
 	if ( pSpellDef->IsSpellType(SPELLFLAG_RESIST) && pCharSrc && !fPotion )
 	{
-		iResist = Skill_GetBase(SKILL_MAGICRESISTANCE);
-		ushort iFirst = iResist / 50;
-		ushort iSecond = iResist - (((pCharSrc->Skill_GetBase(SKILL_MAGERY) - 200) / 50) + (ushort)((1 + (spell / 8)) * 50));
-		uchar iResistChance = (uchar)(maximum(iFirst, iSecond) / 30);
-		iResist = Skill_UseQuick(SKILL_MAGICRESISTANCE, iResistChance, true, false) ? 25 : 0;	// If we successfully resist then we have a 25% damage reduction, 0 if we don't.
+		uiResist = Skill_GetBase(SKILL_MAGICRESISTANCE);
+		ushort uiFirst = uiResist / 50;
+		ushort uiSecond = uiResist - (((pCharSrc->Skill_GetBase(SKILL_MAGERY) - 200) / 50) + (ushort)((1 + (spell / 8)) * 50));
+		uchar uiResistChance = (uchar)(maximum(uiFirst, uiSecond) / 30);
+		uiResist = Skill_UseQuick(SKILL_MAGICRESISTANCE, uiResistChance, true, false) ? 25 : 0;	// If we successfully resist then we have a 25% damage reduction, 0 if we don't.
 
 		if ( IsAosFlagEnabled(FEATURE_AOS_UPDATE_B) )
 		{
 			CItem *pEvilOmen = LayerFind(LAYER_SPELL_Evil_Omen);
 			if ( pEvilOmen )
-				iResist /= 2;	// Effect 3: Only 50% of magic resistance used in next resistable spell.
+				uiResist /= 2;	// Effect 3: Only 50% of magic resistance used in next resistable spell.
 		}
 	}
 
@@ -3123,7 +3123,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	{
 		if ( IsSetMagicFlags(MAGICF_OSIFORMULAS) )
 		{
-			if (pCharSrc == NULL)
+			if (!pCharSrc)
 				iEffect *= ((iSkillLevel * 3) / 1000) + 1;
 			else
 			{
@@ -3159,7 +3159,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	Args.m_VarsLocal.SetNum("Explode", fExplode);
 	Args.m_VarsLocal.SetNum("Sound", iSound);
 	Args.m_VarsLocal.SetNum("Effect", iEffect);
-	Args.m_VarsLocal.SetNum("Resist", iResist);
+	Args.m_VarsLocal.SetNum("Resist", uiResist);
 	Args.m_VarsLocal.SetNum("Duration", iDuration);
 
 	if ( IsTrigUsed(TRIGGER_SPELLEFFECT) )
@@ -3189,7 +3189,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 	fExplode = Args.m_VarsLocal.GetKeyNum("EffectExplode", true) > 0 ? true : false;
 	iSound = (SOUND_TYPE)(Args.m_VarsLocal.GetKeyNum("Sound", true));
 	iEffect = (int)(Args.m_VarsLocal.GetKeyNum("Effect", true));
-	iResist = (ushort)(Args.m_VarsLocal.GetKeyNum("Resist", true));
+	uiResist = (ushort)(Args.m_VarsLocal.GetKeyNum("Resist", true));
 	iDuration = (int)(Args.m_VarsLocal.GetKeyNum("Duration", true));
 
 	HUE_TYPE iColor = (HUE_TYPE)Args.m_VarsLocal.GetKeyNum("EffectColor", true);
@@ -3200,7 +3200,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 	if ( pSpellDef->IsSpellType(SPELLFLAG_HARM) )
 	{
-		if ( pCharSrc == this && !IsSetMagicFlags(MAGICF_CANHARMSELF) && !bReflecting )
+		if ( pCharSrc == this && !IsSetMagicFlags(MAGICF_CANHARMSELF) && !fReflecting )
 			return false;
 
 		if ( IsStatFlag(STATF_INVUL) )
@@ -3215,11 +3215,11 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 			return false;
 		}
 
-		if ( !OnAttackedBy(pCharSrc, 1, false, !pSpellDef->IsSpellType(SPELLFLAG_FIELD)) && !bReflecting )
+		if ( !OnAttackedBy(pCharSrc, 1, false, !pSpellDef->IsSpellType(SPELLFLAG_FIELD)) && !fReflecting )
 			return false;
 
 		// Check if the spell can be reflected
-		if ( pSpellDef->IsSpellType(SPELLFLAG_TARG_CHAR) && pCharSrc && pCharSrc != this )		// only spells with direct target can be reflected
+		if ( pSpellDef->IsSpellType(SPELLFLAG_TARG_CHAR) && pCharSrc && (pCharSrc != this) )		// only spells with direct target can be reflected
 		{
 			if ( IsStatFlag(STATF_REFLECTION) )
 			{
@@ -3256,10 +3256,10 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 	if ( pSpellDef->IsSpellType( SPELLFLAG_DAMAGE ) )
 	{
-		if ( iResist > 0 )
+		if ( uiResist > 0 )
 		{
 			SysMessageDefault( DEFMSG_RESISTMAGIC );
-			iEffect -= iEffect * iResist / 100;
+			iEffect -= iEffect * uiResist / 100;
 			if ( iEffect < 0 )
 				iEffect = 0;	//May not do damage, but aversion should be created from the target.
 		}

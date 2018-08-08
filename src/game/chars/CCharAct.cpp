@@ -2053,15 +2053,19 @@ bool CChar::ItemEquip( CItem * pItem, CChar * pCharMsg, bool fFromDClick )
 
 	Spell_Effect_Add(pItem);	// if it has a magic effect.
 
-	SOUND_TYPE iSound = 0x57;
-	CVarDefCont * pVar = GetDefKey("EQUIPSOUND", true);
-	if ( pVar )
-	{
-		if ( pVar->GetValNum() )
-			iSound = (SOUND_TYPE)(pVar->GetValNum());
-	}
-	if ( CItemBase::IsVisibleLayer(layer) )	// visible layer ?
-		Sound(iSound);
+	
+    if (CItemBase::IsVisibleLayer(layer))	// visible layer ?
+    {
+        SOUND_TYPE iSound = 0x57;
+        CVarDefCont * pVar = GetDefKey("EQUIPSOUND", true);
+        if ( pVar )
+        {
+            int64 iVal = pVar->GetValNum();
+            if ( iVal )
+                iSound = (SOUND_TYPE)iVal;
+        }
+        Sound(iSound);
+    }
 
 	if ( fFromDClick )
 		pItem->ResendOnEquip();
@@ -3228,12 +3232,12 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 	}
 
 	bool fStepCancel = false;
-	bool bSpellHit = false;
+	bool fSpellHit = false;
 	CWorldSearch AreaItems( GetTopPoint() );
 	for (;;)
 	{
 		CItem *pItem = AreaItems.GetItem();
-		if ( pItem == NULL )
+		if ( !pItem )
 			break;
 
 		int zdiff = pItem->GetTopZ() - GetTopZ();
@@ -3241,7 +3245,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 		if ( height < 3 )
 			height = 3;
 
-		if ( zdiff > height || zdiff < -3 )
+		if ( (zdiff > height) || (zdiff < -3) )
 			continue;
 		if ( IsTrigUsed(TRIGGER_STEP) || IsTrigUsed(TRIGGER_ITEMSTEP) )
 		{
@@ -3271,13 +3275,16 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 					if ( IsStatFlag(STATF_FLY) )
 						iSkillLevel /= 2;
 
-					OnTakeDamage( g_Cfg.GetSpellEffect(SPELL_Fire_Field, iSkillLevel), NULL, DAMAGE_FIRE|DAMAGE_GENERAL, 0, 100, 0, 0, 0 );
-					Sound(0x15f);	// fire noise
-					if ( m_pNPC && fStanding )
-					{
-						m_Act_p.Move(static_cast<DIR_TYPE>(Calc_GetRandVal(DIR_QTY)));
-						NPC_WalkToPoint(true);		// run away from the threat
-					}
+					int iDmg = OnTakeDamage( g_Cfg.GetSpellEffect(SPELL_Fire_Field, iSkillLevel), NULL, DAMAGE_FIRE|DAMAGE_GENERAL, 0, 100, 0, 0, 0 );
+                    if (iDmg > 0)
+                    {
+                        Sound(0x15f);	// fire noise
+                        if ( m_pNPC && fStanding )
+                        {
+                            m_Act_p.Move((DIR_TYPE)(Calc_GetRandVal(DIR_QTY)));
+                            NPC_WalkToPoint(true);		// run away from the threat
+                        }
+                    }
 				}
 				continue;
 			case IT_SPELL:
@@ -3288,26 +3295,28 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 				// will immediately paralyze again with 0ms delay at each damage tick.
 				// On OSI if the player cast multiple fields on the same tile, it will remove the previous field
 				// tile that got overlapped. But Sphere doesn't use this method, so this workaround is needed.
-				if ( !bSpellHit )
-				{
-					OnSpellEffect((SPELL_TYPE)(RES_GET_INDEX(pItem->m_itSpell.m_spell)), pItem->m_uidLink.CharFind(), (int)(pItem->m_itSpell.m_spelllevel), pItem);
-					bSpellHit = true;
-					if ( m_pNPC && fStanding )
-					{
-						m_Act_p.Move(static_cast<DIR_TYPE>(Calc_GetRandVal(DIR_QTY)));
-						NPC_WalkToPoint(true);		// run away from the threat
-					}
-				}
+				if (fSpellHit)
+                    continue;
+			    
+                fSpellHit = OnSpellEffect((SPELL_TYPE)(RES_GET_INDEX(pItem->m_itSpell.m_spell)),
+                    pItem->m_uidLink.CharFind(), (int)(pItem->m_itSpell.m_spelllevel), pItem);
+                if (fSpellHit && m_pNPC && fStanding)
+                {
+                    m_Act_p.Move((DIR_TYPE)(Calc_GetRandVal(DIR_QTY)));
+                    NPC_WalkToPoint(true);		// run away from the threat
+                }
 				continue;
 			case IT_TRAP:
 			case IT_TRAP_ACTIVE:
-				OnTakeDamage( pItem->Use_Trap(), NULL, DAMAGE_HIT_BLUNT|DAMAGE_GENERAL );
-				if ( m_pNPC && fStanding )
-				{
-					m_Act_p.Move(static_cast<DIR_TYPE>(Calc_GetRandVal(DIR_QTY)));
-					NPC_WalkToPoint(true);		// run away from the threat
-				}
-				continue;
+            {
+                int iDmg = OnTakeDamage( pItem->Use_Trap(), NULL, DAMAGE_HIT_BLUNT|DAMAGE_GENERAL );
+                if ( (iDmg > 0) && m_pNPC && fStanding )
+                {
+                    m_Act_p.Move((DIR_TYPE)(Calc_GetRandVal(DIR_QTY)));
+                    NPC_WalkToPoint(true);		// run away from the threat
+                }
+                continue;
+            }
 			case IT_SWITCH:
 				if ( pItem->m_itSwitch.m_fStep )
 					Use_Item(pItem);
@@ -4011,9 +4020,9 @@ bool CChar::OnTick()
     {
         // decay equipped items
 
-		CItem * pItemNext = NULL;
-		CItem * pItem = static_cast <CItem*>( GetHead());
-		for ( ; pItem != NULL; pItem = pItemNext )
+		CItem * pItemNext = nullptr;
+		CItem * pItem = static_cast <CItem*>(GetHead());
+		for ( ; pItem != nullptr; pItem = pItemNext )
 		{
 			EXC_TRYSUB("Ticking items");
 			pItemNext = pItem->GetNext();
@@ -4027,9 +4036,13 @@ bool CChar::OnTick()
 
             pItem->OnTickStatusUpdate();
             if (!pItem->IsTimerSet() || !pItem->IsTimerExpired())
+            {
                 continue;
+            }
             else if (!OnTickEquip(pItem))
+            {
                 pItem->Delete();
+            }
             EXC_CATCHSUB("Char");
         }
 
@@ -4050,7 +4063,7 @@ bool CChar::OnTick()
         return true;
 
     // NOTE: Summon flags can kill our hp here. check again.
-    if (!IsStatFlag(STATF_DEAD) && Stat_GetVal(STAT_STR) <= 0)	// We can only die on our own tick.
+    if (!IsStatFlag(STATF_DEAD) && (Stat_GetVal(STAT_STR) <= 0))	// We can only die on our own tick.
     {
         m_timeLastRegen = g_World.GetCurrentTime();
         EXC_SET("death");
@@ -4103,9 +4116,13 @@ bool CChar::OnTick()
                 {
                     int iFlags = NPC_GetAiFlags();
                     if ((iFlags & NPC_AI_FOOD) && !(iFlags & NPC_AI_INTFOOD))
+                    {
                         NPC_Food();
+                    }
                     if (iFlags & NPC_AI_EXTRA)
+                    {
                         NPC_ExtraAI();
+                    }
                 }
             }
         }

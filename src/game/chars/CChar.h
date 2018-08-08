@@ -899,12 +899,14 @@ private:
 	void Spell_Dispel( int iskilllevel );
 	CChar * Spell_Summon( CREID_TYPE id, CPointMap pt );
 	bool Spell_Recall(CItem * pRune, bool fGate);
+    CItem * Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEffect, int iTicksDuration, CObjBase * pSrc = nullptr, bool bEquip = true );
 	SPELL_TYPE Spell_GetIndex(SKILL_TYPE skill = SKILL_NONE);	//gets first spell for the magic skill given.
 	SPELL_TYPE Spell_GetMax(SKILL_TYPE skill = SKILL_NONE);	//gets first spell for the magic skill given.
-	CItem * Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEffect, int iTicksDuration, CObjBase * pSrc = NULL, bool bEquip = true );
 	bool Spell_Equip_OnTick( CItem * pItem );
 
-	void Spell_Field(CPointMap pt, ITEMID_TYPE idEW, ITEMID_TYPE idNS, uint fieldWidth, uint fieldGauge, int iSkill, CChar * pCharSrc = NULL, ITEMID_TYPE idnewEW = (ITEMID_TYPE)0, ITEMID_TYPE idnewNS = (ITEMID_TYPE)0, int iDuration = 0, HUE_TYPE iColor = HUE_DEFAULT);
+	void Spell_Field(CPointMap pt, ITEMID_TYPE idEW, ITEMID_TYPE idNS, uint fieldWidth, uint fieldGauge, int iSkill,
+        CChar * pCharSrc = nullptr, ITEMID_TYPE idnewEW = (ITEMID_TYPE)0, ITEMID_TYPE idnewNS = (ITEMID_TYPE)0,
+        int iDuration = 0, HUE_TYPE iColor = HUE_DEFAULT);
 	void Spell_Area( CPointMap pt, int iDist, int iSkill );
 	bool Spell_TargCheck_Face();
 	bool Spell_TargCheck();
@@ -914,13 +916,14 @@ private:
 	void Spell_CastFail();
 
 public:
-	inline bool Spell_SimpleEffect( CObjBase * pObj, CObjBase * pObjSrc, SPELL_TYPE &spell, int &iSkillLevel );
+    bool Spell_Resurrection(CItemCorpse * pCorpse = nullptr, CChar * pCharSrc = nullptr, bool fNoFail = false);
+    bool Spell_Teleport( CPointMap pt, bool fTakePets = false, bool fCheckAntiMagic = true, bool fDisplayEffect = true,
+        ITEMID_TYPE iEffect = ITEMID_NOTHING, SOUND_TYPE iSound = SOUND_NONE );
+	bool Spell_SimpleEffect( CObjBase * pObj, CObjBase * pObjSrc, SPELL_TYPE &spell, int &iSkillLevel );
 	bool Spell_CastDone();
-	bool OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool bReflecting = false );
-	bool Spell_Resurrection(CItemCorpse * pCorpse = NULL, CChar * pCharSrc = NULL, bool bNoFail = false);
-	bool Spell_Teleport( CPointMap pt, bool bTakePets = false, bool bCheckAntiMagic = true, bool bDisplayEffect = true, ITEMID_TYPE iEffect = ITEMID_NOTHING, SOUND_TYPE iSound = SOUND_NONE );
+	bool OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, CItem * pSourceItem, bool fReflecting = false );
 	bool Spell_CanCast( SPELL_TYPE &spell, bool fTest, CObjBase * pSrc, bool fFailMsg, bool fCheckAntiMagic = true );
-	int	GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharSrc = NULL );
+	int	GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharSrc = nullptr );
 
 	// Memories about objects in the world. -------------------
 	bool Memory_OnTick( CItemMemory * pMemory );
@@ -1044,7 +1047,7 @@ public:
 	CChar * Use_Figurine( CItem * pItem, bool bCheckFollowerSlots = true );
 	CItem * Make_Figurine( CUID uidOwner, ITEMID_TYPE id = ITEMID_NOTHING );
 	CItem * NPC_Shrink();
-	bool FollowersUpdate( CChar * pChar, short iFollowerSlots = 0, bool bCheckOnly = false );
+	bool FollowersUpdate( CChar * pChar, short iFollowerSlots = 0, bool fCheckOnly = false );
 
 	int  ItemPickup( CItem * pItem, word amount );
 	bool ItemEquip( CItem * pItem, CChar * pCharMsg = NULL, bool fFromDClick = false );

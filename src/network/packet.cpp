@@ -267,10 +267,10 @@ void Packet::writeInt64(const dword hi, const dword lo)
 
 void Packet::writeStringASCII(const char* value, bool terminate)
 {
-	while (value != NULL && *value)
+	while ((value != nullptr) && *value)
 	{
 		writeCharASCII(*value);
-		value++;
+		++value;
 	}
 
 	if (terminate)
@@ -282,7 +282,7 @@ void Packet::writeStringFixedASCII(const char* value, size_t size, bool terminat
 	if (size <= 0)
 		return;
 
-	size_t valueLength = value != NULL ? strlen(value) : 0;
+	size_t valueLength = (value != nullptr) ? strlen(value) : 0;
 	if (terminate && valueLength >= size)
 		valueLength = size - 1;
 
@@ -406,7 +406,7 @@ void Packet::writeStringFixedUNICODE(const char* value, size_t size, bool termin
 		return;
 
 	wchar c;
-	size_t valueLength = value != NULL ? strlen(value) : 0;
+	size_t valueLength = (value != nullptr) ? strlen(value) : 0;
 	if (terminate && valueLength >= size)
 		valueLength = size - 1;
 
@@ -422,7 +422,7 @@ void Packet::writeStringFixedUNICODE(const char* value, size_t size, bool termin
 	}
 #else
 	
-	ASSERT(value != NULL);
+	ASSERT(value != nullptr);
 
 	wchar * buffer = reinterpret_cast<wchar *>(Str_GetTemp());
 	CvtSystemToNUNICODE(reinterpret_cast<nword *>(buffer), THREAD_STRING_LENGTH / sizeof(wchar), value, (int)(strlen(value)));
@@ -433,10 +433,10 @@ void Packet::writeStringFixedUNICODE(const char* value, size_t size, bool termin
 
 void Packet::writeStringUNICODE(const wchar* value, bool terminate)
 {
-	while (value != NULL && *value)
+	while ((value != nullptr) && *value)
 	{
 		writeCharUNICODE(*value);
-		value++;
+		++value;
 	}
 
 	if (terminate)
@@ -462,12 +462,12 @@ void Packet::writeStringFixedUNICODE(const wchar* value, size_t size, bool termi
 	}
 #else
 
-	ASSERT(value != NULL);
+	ASSERT(value != nullptr);
 
 	if (size <= 0)
 		return;
 	else if (terminate)
-		size--;
+		--size;
 
 	bool zero = false;
 	for (size_t i = 0; i < size; ++i)
@@ -493,18 +493,18 @@ void Packet::writeStringNUNICODE(const char* value, bool terminate)
 #ifdef USE_UNICODE_LIB
 
 	wchar c;
-	while (value != NULL && *value)
+	while ((value != nullptr) && *value)
 	{
 		mbtowc(&c, value, MB_CUR_MAX);
 		writeCharNUNICODE(c);
-		value++;
+		++value;
 	}
 
 	if (terminate)
 		writeCharNUNICODE('\0');
 #else
 
-	ASSERT(value != NULL);
+	ASSERT(value != nullptr);
 
 	wchar* buffer = reinterpret_cast<wchar *>(Str_GetTemp());
 	CvtSystemToNUNICODE(reinterpret_cast<nword *>(buffer), THREAD_STRING_LENGTH / sizeof(wchar), value, (int)(strlen(value)));
@@ -520,7 +520,7 @@ void Packet::writeStringFixedNUNICODE(const char* value, size_t size, bool termi
 		return;
 
 	wchar c;
-	size_t valueLength = value != NULL ? strlen(value) : 0;
+	size_t valueLength = (value != nullptr) ? strlen(value) : 0;
 	if (terminate && valueLength >= size)
 		valueLength = size - 1;
 
@@ -536,7 +536,7 @@ void Packet::writeStringFixedNUNICODE(const char* value, size_t size, bool termi
 	}
 #else
 
-	ASSERT(value != NULL);
+	ASSERT(value != nullptr);
 	
 	wchar* buffer = reinterpret_cast<wchar *>(Str_GetTemp());
 	CvtSystemToNUNICODE(reinterpret_cast<nword *>(buffer), THREAD_STRING_LENGTH / sizeof(wchar), value, (int)(strlen(value)));
@@ -547,10 +547,10 @@ void Packet::writeStringFixedNUNICODE(const char* value, size_t size, bool termi
 
 void Packet::writeStringNUNICODE(const wchar* value, bool terminate)
 {
-	while (value != NULL && *value)
+	while ((value != nullptr) && *value)
 	{
 		writeCharNUNICODE(*value);
-		value++;
+		++value;
 	}
 
 	if (terminate)
@@ -563,8 +563,8 @@ void Packet::writeStringFixedNUNICODE(const wchar* value, size_t size, bool term
 	if (size <= 0)
 		return;
 
-	size_t valueLength = value != NULL ? wcslen(value) : 0;
-	if (terminate && valueLength >= size)
+	size_t valueLength = (value != nullptr) ? wcslen(value) : 0;
+	if (terminate && (valueLength >= size))
 		valueLength = size - 1;
 
 	for (size_t i = 0; i < size; ++i)
@@ -576,12 +576,12 @@ void Packet::writeStringFixedNUNICODE(const wchar* value, size_t size, bool term
 	}
 #else
 
-	ASSERT(value != NULL);
+	ASSERT(value != nullptr);
 
 	if (size <= 0)
 		return;
 	else if (terminate)
-		size--;
+		--size;
 
 	bool zero = false;
 	for (size_t i = 0; i < size; ++i)
@@ -709,7 +709,7 @@ int64 Packet::readInt64(void)
 
 void Packet::readStringASCII(char* buffer, size_t length, bool includeNull)
 {
-	ASSERT(buffer != NULL);
+	ASSERT(buffer != nullptr);
 
 	if (length < 1)
 	{
@@ -730,7 +730,7 @@ void Packet::readStringASCII(char* buffer, size_t length, bool includeNull)
 
 void Packet::readStringASCII(wchar* buffer, size_t length, bool includeNull)
 {
-	ASSERT(buffer != NULL);
+	ASSERT(buffer != nullptr);
 
 	if (length < 1)
 	{
@@ -1007,17 +1007,17 @@ void Packet::dump(AbstractString& output) const
 	tchar bytes[50];
 	tchar chars[17];
 
-	for (size_t i = 0; i < whole; i++, byteIndex += 16 )
+	for (size_t i = 0; i < whole; ++i, byteIndex += 16 )
 	{
 		memset(bytes, 0, sizeof(bytes));
 		memset(chars, 0, sizeof(chars));
 
-		for (size_t j = 0; j < 16; j++)
+		for (size_t j = 0; j < 16; ++j)
 		{
 			byte c = m_buffer[idx++];
 			PROTECT_BYTE(c);
 
-			sprintf(z, "%02x", (int)(c));
+			sprintf(z, "%02x", (int)c);
 			strcat(bytes, z);
 			strcat(bytes, (j == 7) ? "  " : " ");
 
@@ -1044,7 +1044,7 @@ void Packet::dump(AbstractString& output) const
 		memset(bytes, 0, sizeof(bytes));
 		memset(chars, 0, sizeof(chars));
 
-		for (size_t j = 0; j < 16; j++)
+		for (size_t j = 0; j < 16; ++j)
 		{
 			if (j < rem)
 			{
@@ -1080,8 +1080,8 @@ void Packet::dump(AbstractString& output) const
 
 size_t Packet::checkLength(NetState* client, Packet* packet)
 {
-	ASSERT(client != NULL);
-	ASSERT(packet != NULL);
+	ASSERT(client != nullptr);
+	ASSERT(packet != nullptr);
 
 	size_t packetLength = getExpectedLength(client, packet);
 
@@ -1178,11 +1178,11 @@ void PacketSend::send(const CClient *client, bool appendTransaction)
 	ADDTOCALLSTACK("PacketSend::send");
 
 	fixLength();
-	if (client != NULL)
+	if (client != nullptr)
 		target(client);
 	
 	// check target is set and can receive this packet
-	if (m_target == NULL || canSendTo(m_target) == false)
+	if (m_target == nullptr || canSendTo(m_target) == false)
 		return;
 
 	if (sync() > NETWORK_MAXPACKETLEN)
@@ -1200,11 +1200,11 @@ void PacketSend::push(const CClient *client, bool appendTransaction)
 	ADDTOCALLSTACK("PacketSend::push");
 
 	fixLength();
-	if (client != NULL)
+	if (client != nullptr)
 		target(client);
 
 	// check target is set and can receive this packet
-	if (m_target == NULL || canSendTo(m_target) == false)
+	if (m_target == nullptr || canSendTo(m_target) == false)
 	{
 		delete this;
 		return;
@@ -1230,10 +1230,10 @@ void PacketSend::target(const CClient* client)
 {
 	ADDTOCALLSTACK("PacketSend::target");
 
-	m_target = NULL;
+	m_target = nullptr;
 
 	//	validate that the current slot is still taken by this client
-	if (client != NULL && client->GetNetState()->isInUse(client))
+	if (client != nullptr && client->GetNetState()->isInUse(client))
 		m_target = client->GetNetState();
 }
 
@@ -1264,7 +1264,7 @@ bool PacketSend::canSendTo(const NetState* state) const
  ***************************************************************************/
 SimplePacketTransaction::~SimplePacketTransaction(void)
 {
-	if (m_packet != NULL)
+	if (m_packet != nullptr)
 		delete m_packet;
 }
 
@@ -1294,15 +1294,15 @@ ExtendedPacketTransaction::~ExtendedPacketTransaction(void)
  ***************************************************************************/
 OpenPacketTransaction::OpenPacketTransaction(const CClient* client, int priority)
 {
-	ASSERT(client != NULL);
+	ASSERT(client != nullptr);
 
 	m_client = client->GetNetState();
-	if (m_client != NULL)
+	if (m_client != nullptr)
 		m_client->beginTransaction(priority);
 }
 
 OpenPacketTransaction::~OpenPacketTransaction(void)
 {
-	if (m_client != NULL)
+	if (m_client != nullptr)
 		m_client->endTransaction();
 }

@@ -2062,6 +2062,12 @@ void CChar::NPC_OnTickAction()
 	// What action should we take now ?
 	EXC_TRY("NPC_TickAction");
 
+    if (!m_pArea)
+    {
+        DEBUG_WARN(("Trying to Tick Action on unplaced NPC. UID=0% " PRIx32 ", defname=%s.", GetUID().GetObjUID(), GetResourceName()));
+        return;
+    }
+
 	SKILL_TYPE iSkillActive = Skill_GetActive();
     bool fSkillFight = false;
 	if ( g_Cfg.IsSkillFlag( iSkillActive, SKF_SCRIPTED ) )

@@ -302,7 +302,7 @@ bool CClient::CanSee( const CObjBaseTemplate * pObj ) const
 {
 	ADDTOCALLSTACK("CClient::CanSee");
 	// Can player see item b
-	if ( m_pChar == NULL || pObj == NULL )
+	if ( !m_pChar || !pObj )
 		return false;
 
 	if (!IsPriv(PRIV_ALLSHOW) && pObj->IsChar())
@@ -311,7 +311,7 @@ bool CClient::CanSee( const CObjBaseTemplate * pObj ) const
 		if (pChar->IsDisconnected())
 			return false;
 	}
-	return( m_pChar->CanSee( pObj ));
+	return m_pChar->CanSee( pObj );
 }
 
 bool CClient::CanHear( const CObjBaseTemplate * pSrc, TALKMODE_TYPE mode ) const
@@ -321,9 +321,9 @@ bool CClient::CanHear( const CObjBaseTemplate * pSrc, TALKMODE_TYPE mode ) const
 
 	if ( !IsConnectTypePacket() )
 		return false;
-	if ( mode == TALKMODE_BROADCAST || pSrc == NULL )
+	if ( (mode == TALKMODE_BROADCAST) || !pSrc )
 		return true;
-	if ( m_pChar == NULL )
+	if ( !m_pChar )
 		return false;
 
 	if ( IsPriv( PRIV_HEARALL ) &&
@@ -372,7 +372,7 @@ void CClient::addTargetVerb( lpctstr pszCmd, lpctstr pszArg )
 	addTarget(CLIMODE_TARG_OBJ_SET, pszMsg);
 }
 
-void CClient::addTargetFunctionMulti( lpctstr pszFunction, ITEMID_TYPE itemid, bool fGround )
+void CClient::addTargetFunctionMulti( lpctstr pszFunction, ITEMID_TYPE itemid, HUE_TYPE color, bool fAllowGround )
 {
 	ADDTOCALLSTACK("CClient::addTargetFunctionMulti");
 	// Target a verb at some object .
@@ -383,10 +383,11 @@ void CClient::addTargetFunctionMulti( lpctstr pszFunction, ITEMID_TYPE itemid, b
 	m_Targ_Text = pszFunction;
 	if ( CItemBase::IsID_Multi( itemid ))	// a multi we get from Multi.mul
 	{
-		SetTargMode(CLIMODE_TARG_OBJ_FUNC, "");
-		new PacketAddTarget(this, fGround? PacketAddTarget::Ground : PacketAddTarget::Object, CLIMODE_TARG_OBJ_FUNC, PacketAddTarget::None, itemid);
+		SetTargMode(CLIMODE_TARG_OBJ_FUNC);
+		new PacketAddTarget(this, fAllowGround ? PacketAddTarget::Ground : PacketAddTarget::Object,
+            CLIMODE_TARG_OBJ_FUNC, PacketAddTarget::None, itemid, color);
 	}
-	addTargetFunction( pszFunction, fGround, false );
+	addTargetFunction( pszFunction, fAllowGround, false );
 }
 
 void CClient::addTargetFunction( lpctstr pszFunction, bool fAllowGround, bool fCheckCrime )
@@ -398,7 +399,7 @@ void CClient::addTargetFunction( lpctstr pszFunction, bool fAllowGround, bool fC
 	SKIP_SEPARATORS(pszFunction);
 
 	m_Targ_Text = pszFunction;
-	addTarget( CLIMODE_TARG_OBJ_FUNC, "", fAllowGround, fCheckCrime );
+	addTarget( CLIMODE_TARG_OBJ_FUNC, nullptr, fAllowGround, fCheckCrime );
 }
 
 void CClient::addPromptConsoleFunction( lpctstr pszFunction, lpctstr pszSysmessage, bool bUnicode )

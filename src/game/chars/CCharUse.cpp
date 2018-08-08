@@ -1042,14 +1042,14 @@ CChar * CChar::Use_Figurine( CItem * pItem, bool bCheckFollowerSlots )
 	return pPet;
 }
 
-bool CChar::FollowersUpdate( CChar * pChar, short iFollowerSlots, bool bCheckOnly )
+bool CChar::FollowersUpdate( CChar * pChar, short iFollowerSlots, bool fCheckOnly )
 {
 	ADDTOCALLSTACK("CChar::FollowersUpdate");
 	// Attemp to update followers on this character based on pChar
 	// bSustract = true for pet's release, shrink, etc ...
 	// This is supossed to be called only when OF_PetSlots is enabled, so no need to check it here.
 
-	if ( !bCheckOnly && IsTrigUsed(TRIGGER_FOLLOWERSUPDATE) )
+	if ( !fCheckOnly && IsTrigUsed(TRIGGER_FOLLOWERSUPDATE) )
 	{
 		CScriptTriggerArgs Args;
 		Args.m_iN1 = (iFollowerSlots > 0) ? 0 : 1;
@@ -1067,7 +1067,7 @@ bool CChar::FollowersUpdate( CChar * pChar, short iFollowerSlots, bool bCheckOnl
 	if ( (iSetFollower > iMaxFollower) && !IsPriv(PRIV_GM) )
 		return false;
 
-	if ( !bCheckOnly )
+	if ( !fCheckOnly )
 	{
 		SetDefNum("CURFOLLOWER", maximum(iSetFollower, 0));
 		UpdateStatsFlag();

@@ -501,18 +501,18 @@ public:
 	void addDyeOption( const CObjBase * pBase );
 	void addWebLaunch( lpctstr pMsg ); // Direct client to a web page
 
-	void addPromptConsole( CLIMODE_TYPE mode, lpctstr pMsg, CUID context1 = 0, CUID context2 = 0, bool bUnicode = false );
+	void addPromptConsole( CLIMODE_TYPE mode, lpctstr pMsg, CUID context1 = UID_CLEAR, CUID context2 = UID_CLEAR, bool fUnicode = false );
 	void addTarget( CLIMODE_TYPE targmode, lpctstr pMsg, bool fAllowGround = false, bool fCheckCrime = false, int iTimeout = 0 ); // Send targetting cursor to client
 	void addTargetDeed( const CItem * pDeed );
-	bool addTargetItems( CLIMODE_TYPE targmode, ITEMID_TYPE id, bool fGround = true );
+	bool addTargetItems( CLIMODE_TYPE targmode, ITEMID_TYPE id, HUE_TYPE color = HUE_DEFAULT, bool fAllowGround = true );
 	bool addTargetChars( CLIMODE_TYPE mode, CREID_TYPE id, bool fNoto, int iTimeout = 0 );
 	void addTargetVerb( lpctstr pCmd, lpctstr pArg );
-	void addTargetFunctionMulti( lpctstr pszFunction, ITEMID_TYPE itemid, bool fGround );
+	void addTargetFunctionMulti( lpctstr pszFunction, ITEMID_TYPE itemid, HUE_TYPE color = HUE_DEFAULT, bool fAllowGround = true );
 	void addTargetFunction( lpctstr pszFunction, bool fAllowGround, bool fCheckCrime );
 	void addTargetCancel();
 	void addPromptConsoleFunction( lpctstr pszFunction, lpctstr pszSysmessage, bool bUnicode = false );
 
-	void addScrollScript( CResourceLock &s, SCROLL_TYPE type, dword dwcontext = 0, lpctstr pszHeader = NULL );
+	void addScrollScript( CResourceLock &s, SCROLL_TYPE type, dword dwcontext = 0, lpctstr pszHeader = nullptr );
 	void addScrollResource( lpctstr szResourceName, SCROLL_TYPE type, dword dwcontext = 0 );
 
 	void addVendorClose( const CChar * pVendor );
@@ -710,7 +710,7 @@ public:
 	{
 		return m_Targ_Mode ;
 	}
-	void SetTargMode( CLIMODE_TYPE targmode = CLIMODE_NORMAL, lpctstr pszPrompt = NULL, int iTimeout = 0 );
+	void SetTargMode( CLIMODE_TYPE targmode = CLIMODE_NORMAL, lpctstr pszPrompt = nullptr, int iTimeout = 0 );
 	void ClearTargMode()
 	{
 		// done with the last mode.

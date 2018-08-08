@@ -532,7 +532,7 @@ public:
 	PacketMapPlot(const CClient* target, const CItem* map, MAPCMD_TYPE mode, bool edit);
 	PacketMapPlot(const CItem* map, MAPCMD_TYPE mode, bool edit);
 
-	void setPin(int x, int y);
+	void setPin(short x, short y);
 };
 
 /***************************************************************************
@@ -604,7 +604,7 @@ public:
 	};
 
 	PacketAddTarget(const CClient* target, TargetType type, dword context, Flags flags);
-	PacketAddTarget(const CClient* target, TargetType type, dword context, Flags flags, ITEMID_TYPE id);
+	PacketAddTarget(const CClient* target, TargetType type, dword context, Flags flags, ITEMID_TYPE id, HUE_TYPE color);
 };
 
 /***************************************************************************

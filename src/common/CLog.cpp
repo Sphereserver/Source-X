@@ -9,8 +9,8 @@
 CLog::CLog()
 {
 	m_fLockOpen = false;
-	m_pScriptContext = NULL;
-	m_pObjectContext = NULL;
+	m_pScriptContext = nullptr;
+	m_pObjectContext = nullptr;
 	m_dwMsgMask = LOGL_ERROR |
 				  LOGM_INIT | LOGM_CLIENTS_LOG | LOGM_GM_PAGE;
 	SetFilePath( SPHERE_FILE "log.log" );	// default name to go to.
@@ -58,7 +58,7 @@ bool CLog::IsLoggedMask( dword dwMask ) const
 
 LOG_TYPE CLog::GetLogLevel() const
 {
-	return static_cast<LOG_TYPE>(m_dwMsgMask & LOGL_QTY);
+	return (LOG_TYPE)(m_dwMsgMask & LOGL_QTY);
 }
 
 void CLog::SetLogLevel( LOG_TYPE level )
@@ -171,10 +171,8 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg )
 
 		tchar szTime[32];
 		snprintf(szTime, sizeof(szTime), "%02d:%02d:", datetime.GetHour(), datetime.GetMinute());
-		m_dateStamp = datetime;
 
 		lpctstr pszLabel = nullptr;
-
 		switch (dwMask & LOGL_QTY)
 		{
 			case LOGL_FATAL:	// fatal error !
@@ -193,13 +191,15 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg )
 
 		// Get the script context. (if there is one)
 		tchar szScriptContext[ _MAX_PATH + 16 ];
-		if ( !( dwMask&LOGM_NOCONTEXT ) && m_pScriptContext )
+		if ( !(dwMask & LOGM_NOCONTEXT) && m_pScriptContext )
 		{
 			CScriptLineContext LineContext = m_pScriptContext->GetContext();
 			snprintf( szScriptContext, sizeof(szScriptContext),"(%s,%d)", m_pScriptContext->GetFileTitle(), LineContext.m_iLineNum );
 		}
 		else
+        {
 			szScriptContext[0] = '\0';
+        }
 
 		// Print to screen.
 		if ( !(dwMask & LOGF_LOGFILE_ONLY) )
@@ -243,7 +243,7 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg )
 		// Print to log file.
 		if ( !(dwMask & LOGF_CONSOLE_ONLY) )
 		{
-			if ( datetime.GetDaysTotal() != m_dateStamp.GetDaysTotal())
+			if ( datetime.GetDay() != m_dateStamp.GetDay())
 			{
 				// it's a new day, open a log file with new day name.
 				Close();	// LINUX should alrady be closed.
@@ -298,7 +298,7 @@ void _cdecl CLog::CatchEvent( const CSError * pErr, lpctstr pszCatchContext, ...
 		tchar szMsg[512];
 		LOG_TYPE eSeverity;
 		size_t stLen = 0;
-		if ( pErr != NULL )
+		if ( pErr != nullptr )
 		{
 			eSeverity = pErr->m_eSeverity;
 			const CAssert * pAssertErr = dynamic_cast<const CAssert*>(pErr);

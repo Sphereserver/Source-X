@@ -1673,7 +1673,8 @@ void CClient::addPromptConsole( CLIMODE_TYPE mode, lpctstr pPrompt, CUID context
 void CClient::addTarget( CLIMODE_TYPE targmode, lpctstr pPrompt, bool fAllowGround, bool fCheckCrime, int iTimeout ) // Send targetting cursor to client
 {
 	ADDTOCALLSTACK("CClient::addTarget");
-	// Expect XCMD_Target back.
+	// Send targetting cursor to client.
+    // Expect XCMD_Target back.
 	// ??? will this be selective for us ? objects only or chars only ? not on the ground (statics) ?
 
 	SetTargMode( targmode, pPrompt, iTimeout );
@@ -1692,24 +1693,24 @@ void CClient::addTargetDeed( const CItem * pDeed )
 	ASSERT( m_Targ_UID == pDeed->GetUID());
 	ITEMID_TYPE iddef = (ITEMID_TYPE)(RES_GET_INDEX(pDeed->m_itDeed.m_Type));
 	m_tmUseItem.m_pParent = pDeed->GetParent();	// Cheat Verify.
-	addTargetItems( CLIMODE_TARG_USE_ITEM, iddef );
+	addTargetItems( CLIMODE_TARG_USE_ITEM, iddef, pDeed->GetHue() );
 }
 
 bool CClient::addTargetChars( CLIMODE_TYPE mode, CREID_TYPE baseID, bool fNotoCheck, int iTimeout )
 {
 	ADDTOCALLSTACK("CClient::addTargetChars");
 	CCharBase * pBase = CCharBase::FindCharBase( baseID );
-	if ( pBase == NULL )
+	if ( !pBase )
 		return false;
 
 	tchar * pszTemp = Str_GetTemp();
-	sprintf(pszTemp, "%s '%s'?", g_Cfg.GetDefaultMsg(DEFMSG_WHERE_TO_SUMMON), pBase->GetTradeName());
+	snprintf(pszTemp, STR_TEMPLENGTH, "%s '%s'?", g_Cfg.GetDefaultMsg(DEFMSG_WHERE_TO_SUMMON), pBase->GetTradeName());
 
 	addTarget(mode, pszTemp, true, fNotoCheck, iTimeout);
 	return true;
 }
 
-bool CClient::addTargetItems( CLIMODE_TYPE targmode, ITEMID_TYPE id, bool fGround )
+bool CClient::addTargetItems( CLIMODE_TYPE targmode, ITEMID_TYPE id, HUE_TYPE color, bool fAllowGround )
 {
 	ADDTOCALLSTACK("CClient::addTargetItems");
 	// Add a list of items to place at target.
@@ -1722,7 +1723,7 @@ bool CClient::addTargetItems( CLIMODE_TYPE targmode, ITEMID_TYPE id, bool fGroun
 	if ( id < ITEMID_TEMPLATE )
 	{
 		pItemDef = CItemBase::FindItemBase( id );
-		if ( pItemDef == NULL )
+		if ( pItemDef == nullptr )
 			return false;
 		pszName = pItemDef->GetName();
 
@@ -1739,17 +1740,17 @@ bool CClient::addTargetItems( CLIMODE_TYPE targmode, ITEMID_TYPE id, bool fGroun
 	}
 	else
 	{
-		pItemDef = NULL;
+		pItemDef = nullptr;
 		pszName = "template";
 	}
 
 	tchar *pszTemp = Str_GetTemp();
-	sprintf(pszTemp, "%s %s?", g_Cfg.GetDefaultMsg(DEFMSG_WHERE_TO_PLACE), pszName);
+	snprintf(pszTemp, STR_TEMPLENGTH, "%s %s?", g_Cfg.GetDefaultMsg(DEFMSG_WHERE_TO_PLACE), pszName);
 
 	if ( CItemBase::IsID_Multi( id ) )	// a multi we get from Multi.mul
 	{
 		SetTargMode(targmode, pszTemp);
-		new PacketAddTarget(this, fGround? PacketAddTarget::Ground : PacketAddTarget::Object, targmode, PacketAddTarget::None, id);
+		new PacketAddTarget(this, fAllowGround? PacketAddTarget::Ground : PacketAddTarget::Object, targmode, PacketAddTarget::None, id, color);
 		return true;
 	}
 
@@ -2314,7 +2315,7 @@ void CClient::addDrawMap( CItemMap * pMap )
 	ADDTOCALLSTACK("CClient::addDrawMap");
 	// Make player drawn maps possible. (m_map_type=0) ???
 
-	if ( pMap == NULL )
+	if ( pMap == nullptr )
 	{
 blank_map:
 		addSysMessage( g_Cfg.GetDefaultMsg(DEFMSG_MAP_IS_BLANK) );
@@ -2344,7 +2345,7 @@ blank_map:
 
 	// Now show all the pins
 	PacketMapPlot plot(pMap, MAP_ADD, false);
-	for ( size_t i = 0; i < pMap->m_Pins.size(); i++ )
+	for ( size_t i = 0; i < pMap->m_Pins.size(); ++i )
 	{
 		plot.setPin(pMap->m_Pins[i].m_x, pMap->m_Pins[i].m_y);
 		plot.send(this);
