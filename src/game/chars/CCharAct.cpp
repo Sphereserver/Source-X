@@ -1,6 +1,7 @@
 
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
+#include "../../common/CResourceLock.h"
 #include "../../common/CUIDExtra.h"
 #include "../../network/network.h"
 #include "../../network/send.h"

@@ -1,13 +1,13 @@
 
 #include "../sphere/threads.h"
-#include "CacheableScriptFile.h"
+#include "CCacheableScriptFile.h"
 
 #ifdef _WIN32
 #include <io.h> // for _get_osfhandle (used by STDFUNC_FILENO)
 #endif
 
 
-CacheableScriptFile::CacheableScriptFile()
+CCacheableScriptFile::CCacheableScriptFile()
 {
     _fileContent = nullptr;
     _fClosed = true;
@@ -15,7 +15,7 @@ CacheableScriptFile::CacheableScriptFile()
     _iCurrentLine = 0;
 }
 
-CacheableScriptFile::~CacheableScriptFile() 
+CCacheableScriptFile::~CCacheableScriptFile() 
 {
     Close();
     if ( _fRealFile && _fileContent )   // be sure that i'm the original file and not a copy/link
@@ -25,9 +25,9 @@ CacheableScriptFile::~CacheableScriptFile()
     }
 }
 
-bool CacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags) 
+bool CCacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags) 
 {
-    ADDTOCALLSTACK("CacheableScriptFile::_Open");
+    ADDTOCALLSTACK("CCacheableScriptFile::_Open");
 
     if ( _useDefaultFile() ) 
         return CSFileText::_Open(ptcFilename, uiModeFlags);
@@ -51,7 +51,7 @@ bool CacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
 
     _fileDescriptor = (file_descriptor_t)STDFUNC_FILENO(_pStream);
     _fClosed = false;
-    _fRealFile = true;  // this is the original CacheableScriptFile that will be referenced from others
+    _fRealFile = true;  // this is the original CCacheableScriptFile that will be referenced from others
 
     // If the file is opened in read mode, it's opened, cached and closed. No need to close it manually unless
     //  you want to delete the cached file content.
@@ -103,15 +103,15 @@ bool CacheableScriptFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
 
     return true;
 }
-bool CacheableScriptFile::Open(lpctstr ptcFilename, uint uiModeFlags) 
+bool CCacheableScriptFile::Open(lpctstr ptcFilename, uint uiModeFlags) 
 {
-    ADDTOCALLSTACK("CacheableScriptFile::Open");
-    THREAD_UNIQUE_LOCK_RETURN(CacheableScriptFile::_Open(ptcFilename, uiModeFlags));
+    ADDTOCALLSTACK("CCacheableScriptFile::Open");
+    THREAD_UNIQUE_LOCK_RETURN(CCacheableScriptFile::_Open(ptcFilename, uiModeFlags));
 }
 
-void CacheableScriptFile::_Close()
+void CCacheableScriptFile::_Close()
 {
-    ADDTOCALLSTACK("CacheableScriptFile::_Close");
+    ADDTOCALLSTACK("CCacheableScriptFile::_Close");
     if ( _useDefaultFile() )
     {
         CSFileText::_Close();
@@ -122,25 +122,25 @@ void CacheableScriptFile::_Close()
         _fClosed = true;
     }
 }
-void CacheableScriptFile::Close()
+void CCacheableScriptFile::Close()
 {
-    ADDTOCALLSTACK("CacheableScriptFile::Close");
+    ADDTOCALLSTACK("CCacheableScriptFile::Close");
     THREAD_UNIQUE_LOCK_SET;
     _Close();
 }
 
-bool CacheableScriptFile::_IsFileOpen() const 
+bool CCacheableScriptFile::_IsFileOpen() const 
 {
-    ADDTOCALLSTACK("CacheableScriptFile::_IsFileOpen");
+    ADDTOCALLSTACK("CCacheableScriptFile::_IsFileOpen");
 
     if ( _useDefaultFile() ) 
         return CSFileText::_IsFileOpen();
 
     return (!_fClosed);
 }
-bool CacheableScriptFile::IsFileOpen() const 
+bool CCacheableScriptFile::IsFileOpen() const 
 {
-    ADDTOCALLSTACK("CacheableScriptFile::IsFileOpen");
+    ADDTOCALLSTACK("CCacheableScriptFile::IsFileOpen");
 
     THREAD_SHARED_LOCK_SET;
     if ( _useDefaultFile() ) 
@@ -149,23 +149,23 @@ bool CacheableScriptFile::IsFileOpen() const
     TS_RETURN(!_fClosed);
 }
 
-bool CacheableScriptFile::_IsEOF() const 
+bool CCacheableScriptFile::_IsEOF() const 
 {
-    ADDTOCALLSTACK_INTENSIVE("CacheableScriptFile::_IsEOF");
+    ADDTOCALLSTACK_INTENSIVE("CCacheableScriptFile::_IsEOF");
     if ( _useDefaultFile() ) 
         return CSFileText::_IsEOF();
 
     return (_fileContent->empty() || ((uint)_iCurrentLine == _fileContent->size()) );
 }
-bool CacheableScriptFile::IsEOF() const 
+bool CCacheableScriptFile::IsEOF() const 
 {
-    ADDTOCALLSTACK_INTENSIVE("CacheableScriptFile::IsEOF");
+    ADDTOCALLSTACK_INTENSIVE("CCacheableScriptFile::IsEOF");
     THREAD_SHARED_LOCK_RETURN(_IsEOF());
 }
 
-tchar * CacheableScriptFile::_ReadString(tchar *pBuffer, int sizemax) 
+tchar * CCacheableScriptFile::_ReadString(tchar *pBuffer, int sizemax) 
 {
-    ADDTOCALLSTACK("CacheableScriptFile::_ReadString");
+    ADDTOCALLSTACK("CCacheableScriptFile::_ReadString");
 
     if ( _useDefaultFile() ) 
         return CSFileText::_ReadString(pBuffer, sizemax);
@@ -185,13 +185,13 @@ tchar * CacheableScriptFile::_ReadString(tchar *pBuffer, int sizemax)
     return pBuffer;
 }
 
-tchar * CacheableScriptFile::ReadString(tchar *pBuffer, int sizemax) 
+tchar * CCacheableScriptFile::ReadString(tchar *pBuffer, int sizemax) 
 {
-    ADDTOCALLSTACK("CacheableScriptFile::ReadString");
+    ADDTOCALLSTACK("CCacheableScriptFile::ReadString");
     THREAD_UNIQUE_LOCK_RETURN(_ReadString(pBuffer, sizemax));
 }
 
-void CacheableScriptFile::_dupeFrom(CacheableScriptFile *other) 
+void CCacheableScriptFile::_dupeFrom(CCacheableScriptFile *other) 
 {
     if ( _useDefaultFile() ) 
         return;
@@ -200,38 +200,38 @@ void CacheableScriptFile::_dupeFrom(CacheableScriptFile *other)
     _fRealFile = false;
     _fileContent = other->_fileContent;
 }
-void CacheableScriptFile::dupeFrom(CacheableScriptFile *other) 
+void CCacheableScriptFile::dupeFrom(CCacheableScriptFile *other) 
 {
     THREAD_UNIQUE_LOCK_SET;
     _dupeFrom(other);
 }
 
-bool CacheableScriptFile::_HasCache() const
+bool CCacheableScriptFile::_HasCache() const
 {
     if ((_fileContent == nullptr) || _fileContent->empty())
         return false;
     return true;
 }
-bool CacheableScriptFile::HasCache() const
+bool CCacheableScriptFile::HasCache() const
 {
     THREAD_SHARED_LOCK_RETURN(_HasCache());
 }
 
-bool CacheableScriptFile::_useDefaultFile() const 
+bool CCacheableScriptFile::_useDefaultFile() const 
 {
     if ( _IsWriteMode() || ( _GetFullMode() & OF_DEFAULTMODE )) 
         return true;
     return false;
 }
 /*
-bool CacheableScriptFile::useDefaultFile() const 
+bool CCacheableScriptFile::useDefaultFile() const 
 {
     THREAD_SHARED_LOCK_RETURN(_useDefaultFile());
 }*/
 
-int CacheableScriptFile::_Seek(int iOffset, int iOrigin)
+int CCacheableScriptFile::_Seek(int iOffset, int iOrigin)
 {
-    ADDTOCALLSTACK("CacheableScriptFile::_Seek");
+    ADDTOCALLSTACK("CCacheableScriptFile::_Seek");
     if (_useDefaultFile())
         return CSFileText::_Seek(iOffset, iOrigin);
 
@@ -247,22 +247,22 @@ int CacheableScriptFile::_Seek(int iOffset, int iOrigin)
 
     return 0;
 }
-int CacheableScriptFile::Seek(int iOffset, int iOrigin)
+int CCacheableScriptFile::Seek(int iOffset, int iOrigin)
 {
-    ADDTOCALLSTACK("CacheableScriptFile::Seek");
-    THREAD_UNIQUE_LOCK_RETURN(CacheableScriptFile::_Seek(iOffset, iOrigin));
+    ADDTOCALLSTACK("CCacheableScriptFile::Seek");
+    THREAD_UNIQUE_LOCK_RETURN(CCacheableScriptFile::_Seek(iOffset, iOrigin));
 }
 
-int CacheableScriptFile::_GetPosition() const
+int CCacheableScriptFile::_GetPosition() const
 {
-    ADDTOCALLSTACK("CacheableScriptFile::_GetPosition");
+    ADDTOCALLSTACK("CCacheableScriptFile::_GetPosition");
     if (_useDefaultFile())
         return CSFileText::_GetPosition();  // this requires a unique lock
 
     return _iCurrentLine;
 }
-int CacheableScriptFile::GetPosition() const
+int CCacheableScriptFile::GetPosition() const
 {
-    ADDTOCALLSTACK("CacheableScriptFile::GetPosition");
+    ADDTOCALLSTACK("CCacheableScriptFile::GetPosition");
     THREAD_UNIQUE_LOCK_RETURN(_GetPosition());
 }

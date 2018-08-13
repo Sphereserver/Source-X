@@ -11,6 +11,7 @@
 #include "../sphere/ProfileTask.h"
 #include "crypto/CMD5.h"
 #include "CExpression.h"
+#include "CResourceLock.h"
 #include "CUIDExtra.h"
 #include "CSFileObjContainer.h"
 #include "CScriptTriggerArgs.h"

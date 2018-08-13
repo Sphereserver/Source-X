@@ -1,10 +1,11 @@
 
 // define the base types of an item (rather than the instance)
 
-#include "../../common/CLog.h"
-#include "../../common/CException.h"
 #include "../../sphere/ProfileTask.h"
 #include "../uo_files/CUOItemInfo.h"
+#include "../CLog.h"
+#include "../CException.h"
+#include "../CResourceLock.h"
 #include "CItemBase.h"
 
 

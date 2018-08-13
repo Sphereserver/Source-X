@@ -1,6 +1,7 @@
 
 #include "../common/sphere_library/CSFileList.h"
 #include "../common/CException.h"
+#include "../common/CResourceLock.h"
 #include "../common/sphereversion.h"
 #include "../network/network.h"
 #include "../network/send.h"

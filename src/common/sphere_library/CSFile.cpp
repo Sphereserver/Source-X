@@ -196,7 +196,7 @@ int CSFile::_GetLength()
     bool fOpenClose = false;
     if ( _fileDescriptor == _kInvalidFD )
     {
-        // Happens with a CacheableScriptFile
+        // Happens with a CCacheableScriptFile
         fOpenClose = true;
         CSFile::_Open();
     }

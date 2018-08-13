@@ -1,7 +1,8 @@
 
-#include "../../common/CUIDExtra.h"
-#include "CItemCommCrystal.h"
+#include "../CUIDExtra.h"
+#include "../CResourceLock.h"
 #include "CItemVendable.h"
+#include "CItemCommCrystal.h"
 
 CItemCommCrystal::CItemCommCrystal( ITEMID_TYPE id, CItemBase * pItemDef ) : CItemVendable( id, pItemDef ) {
 }

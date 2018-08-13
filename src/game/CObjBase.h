@@ -9,6 +9,7 @@
 #include "../common/CObjBaseTemplate.h"
 #include "../common/CScriptObj.h"
 #include "../common/CResourceBase.h"
+#include "../common/CResourceRef.h"
 #include "clients/CClientTooltip.h"
 #include "CServerTime.h"
 #include "CEntity.h"

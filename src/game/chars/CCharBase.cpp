@@ -2,6 +2,7 @@
 #include "../../common/CException.h"
 #include "../../common/CLog.h"
 #include "../CServerConfig.h"
+#include "../CResourceLock.h"
 #include "CCharBase.h"
 
 /////////////////////////////////////////////////////////////////

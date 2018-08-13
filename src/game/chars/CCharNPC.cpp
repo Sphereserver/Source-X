@@ -2,6 +2,7 @@
 // Actions specific to an NPC.
 
 #include "../../common/CException.h"
+#include "../../common/CResourceLock.h"
 #include "../clients/CClient.h"
 #include "../CServerTime.h"
 #include "../CWorld.h"

@@ -1,8 +1,9 @@
 // A variety of resource blocks.
 
-#include "../common/sphere_library/CSAssoc.h"
-#include "../common/CException.h"
-#include "../common/CUIDExtra.h"
+#include "../sphere_library/CSAssoc.h"
+#include "../CException.h"
+#include "../CUIDExtra.h"
+#include "../CResourceLock.h"
 #include "chars/CChar.h"
 #include "items/CItemBase.h"
 #include "CServerConfig.h"

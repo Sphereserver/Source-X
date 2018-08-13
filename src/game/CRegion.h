@@ -7,6 +7,7 @@
 #define _INC_CREGION_H
 
 #include "../common/CResourceBase.h"
+#include "../common/CResourceRef.h"
 #include "CRegionBase.h"
 
 class CItemMulti;

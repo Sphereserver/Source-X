@@ -7,7 +7,7 @@
 #define _INC_CSCRIPT_H
 
 #include "sphere_library/CSMemBlock.h"
-#include "CacheableScriptFile.h"
+#include "CCacheableScriptFile.h"
 
 #define SPHERE_SCRIPT		".scp"
 #define SCRIPT_MAX_SECTION_LEN 128
@@ -114,7 +114,7 @@ private:
 #ifdef _NOSCRIPTCACHE
  #define PhysicalScriptFile CSFileText
 #else
- #define PhysicalScriptFile CacheableScriptFile
+ #define PhysicalScriptFile CCacheableScriptFile
 #endif
 
 class CResourceLock;

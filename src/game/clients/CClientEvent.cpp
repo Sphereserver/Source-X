@@ -1,6 +1,4 @@
 
-#include "../../common/CException.h"
-#include "../../common/CUIDExtra.h"
 #include "../../network/network.h"
 #include "../../network/receive.h"
 #include "../../network/send.h"
@@ -10,6 +8,9 @@
 #include "../items/CItemMessage.h"
 #include "../items/CItemMulti.h"
 #include "../items/CItemVendable.h"
+#include "../CException.h"
+#include "../CUIDExtra.h"
+#include "../CResourceLock.h"
 #include "../CServerTime.h"
 #include "../spheresvr.h"
 #include "../triggers.h"

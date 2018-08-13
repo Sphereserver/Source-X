@@ -7,14 +7,14 @@
 #define _INC_CSVFILE_H
 
 #include <map>
-#include "CacheableScriptFile.h"
+#include "CCacheableScriptFile.h"
 
 #define MAX_COLUMNS	64	// maximum number of columns in a file
 
 
 typedef std::map<std::string, std::string> CSVRowData;
 
-class CSVFile : public CacheableScriptFile
+class CSVFile : public CCacheableScriptFile
 {
 private:
 	tchar * _pszColumnTypes[MAX_COLUMNS];

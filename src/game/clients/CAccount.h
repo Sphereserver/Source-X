@@ -11,6 +11,7 @@
 #include "../../common/CScriptObj.h"
 #include "../chars/CCharRefArray.h"
 #include "../CServerConfig.h"
+#include "../game_enums.h"
 
 #define PRIV_UNUSED0		0x0001
 #define PRIV_GM				0x0002	// Acts as a GM (dif from having GM level)

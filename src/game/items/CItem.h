@@ -6,16 +6,18 @@
 #ifndef _INC_CITEM_H
 #define _INC_CITEM_H
 
-#include "../../common/CRect.h"
-#include "../../common/CResourceBase.h"
-#include "../../common/CObjBaseTemplate.h"
-#include "../../common/CServerMap.h"
-#include "../../common/CUID.h"
-#include "../CBase.h"
-#include "../CServerConfig.h"
-#include "../CObjBase.h"
-#include "../CEntity.h"
 #include "../components/CCFaction.h"
+#include "../CBase.h"
+#include "../CRect.h"
+#include "../CResourceBase.h"
+#include "../CObjBase.h"
+#include "../CObjBaseTemplate.h"
+#include "../CServerMap.h"
+//#include "../CUID.h"
+#include "../game_enums.h"
+#include "../game_macros.h"
+#include "../CServerConfig.h"
+#include "../CEntity.h"
 #include "CItemBase.h"
 
 

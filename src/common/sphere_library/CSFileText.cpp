@@ -60,7 +60,7 @@ void CSFileText::_Close()
 {
     ADDTOCALLSTACK_INTENSIVE("CSFileText::_Close");
 
-    // CacheableScriptFile opens the file, reads and closes it. It should never be opened, so pStream should be always nullptr.
+    // CCacheableScriptFile opens the file, reads and closes it. It should never be opened, so pStream should be always nullptr.
     if ((_pStream != nullptr) /*&& (_pStream != _kInvalidFD)*/)
     {
         if (_IsWriteMode())
@@ -185,7 +185,7 @@ tchar * CSFileText::_ReadString( tchar * pBuffer, int sizemax )
     ADDTOCALLSTACK_INTENSIVE("CSFileText::_ReadString");
     ASSERT(pBuffer);
 
-    if ( IsEOF() )
+    if ( _IsEOF() )
         return nullptr;	// LINUX will ASSERT if we read past end.
 
     return fgets( pBuffer, sizemax, _pStream );

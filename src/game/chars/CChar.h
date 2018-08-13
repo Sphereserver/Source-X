@@ -7,13 +7,14 @@
 #define _INC_CCHAR_H
 
 #include "../../common/sphereproto.h"
+#include "../components/CCFaction.h"
 #include "../clients/CParty.h"
 #include "../items/CItemContainer.h"
 #include "../items/CItemCorpse.h"
 #include "../items/CItemMemory.h"
 #include "../items/CItemStone.h"
+#include "../game_macros.h"
 #include "../CObjBase.h"
-#include "../components/CCFaction.h"
 #include "CCharBase.h"
 #include "CCharPlayer.h"
 

@@ -3,6 +3,7 @@
 
 #include "../../common/CException.h"
 #include "../../common/CUIDExtra.h"
+#include "../../common/CResourceLock.h"
 #include "../../network/network.h"
 #include "../../network/send.h"
 #include "../../sphere/ProfileTask.h"

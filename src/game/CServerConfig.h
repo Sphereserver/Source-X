@@ -10,16 +10,19 @@
 #include "../common/CExpression.h"
 #include "../common/CServerMap.h"
 #include "../common/CResourceBase.h"
+#include "../common/CResourceRef.h"
+#include "../common/CResourceScript.h"
+#include "../common/CResourceSortedArrays.h"
 #include "../common/sphereproto.h"
 #include "../game/CRegion.h"
+#include "../game/game_enums.h"
 
 
 class CAccount;
-
 class CClient;
 class CServerDef;
+using CServerRef = CServerDef*;
 
-typedef CServerDef * CServerRef;
 
 /**
  * @enum    OF_TYPE

@@ -1,6 +1,8 @@
 // Common for client and server.
 
 #include "../common/CUIDExtra.h"
+#include "../common/CResourceLock.h"
+#include "../common/CScript.h"
 #include "../sphere/threads.h"
 #include "chars/CChar.h"
 #include "clients/CClient.h"

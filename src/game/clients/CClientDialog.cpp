@@ -1,11 +1,12 @@
 
-#include "../../common/CException.h"
-#include "../../common/CUIDExtra.h"
 #include "../../network/network.h"
 #include "../../network/receive.h"
 #include "../../network/send.h"
 #include "../chars/CChar.h"
-#include "../../common/CLog.h"
+#include "../CException.h"
+#include "../CResourceLock.h"
+#include "../CUIDExtra.h"
+#include "../CLog.h"
 #include "CClient.h"
 
 // endgroup, master, hue ????
