@@ -36,7 +36,7 @@ int CSFile::GetLastError()
 
 void CSFile::_NotifyIOError( lpctstr szMessage ) const
 {
-    ADDTOCALLSTACK("CSFile::NotifyIOError");
+    ADDTOCALLSTACK("CSFile::_NotifyIOError");
     int iErrorCode = GetLastError();
 #ifdef _WIN32
     lpctstr pMsg;
@@ -134,7 +134,7 @@ bool CSFile::_Open( lpctstr ptcFilename, uint uiModeFlags )
 
     _fileDescriptor = CreateFile( ptcFilename, dwDesiredAccess, dwShareMode, NULL, dwCreationDisposition, FILE_ATTRIBUTE_NORMAL, NULL );
 #else
-    _fileDescriptor = open( ptcFilename, uiMode );
+    _fileDescriptor = open( ptcFilename, uiModeFlags );
 #endif // _WIN32
 
     return (_fileDescriptor != _kInvalidFD);
@@ -261,10 +261,10 @@ int CSFile::Read( void * pData, int iLength ) const
 		return 0;
 	}
 #else
-	ssize_t ret = read(m_llFile, pData, iLength);
+	ssize_t ret = read(_fileDescriptor, pData, iLength);
 	if (ret == -1)
     {
-        NotifyIOError("CFile::Read");
+        _NotifyIOError("CFile::Read");
 		return 0;
     }
 #endif

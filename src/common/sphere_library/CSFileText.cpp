@@ -61,7 +61,7 @@ void CSFileText::_Close()
     ADDTOCALLSTACK_INTENSIVE("CSFileText::_Close");
 
     // CacheableScriptFile opens the file, reads and closes it. It should never be opened, so pStream should be always nullptr.
-    if ((_pStream != nullptr) /*&& (m_llFile != _kInvalidFD)*/)
+    if ((_pStream != nullptr) /*&& (_pStream != _kInvalidFD)*/)
     {
         if (_IsWriteMode())
         {
@@ -229,7 +229,7 @@ bool CSFileText::Write( const void * pData, int iLen )
 #endif
     size_t uiStatus = fwrite( pData, iLen, 1, _pStream );
 #ifndef _WIN32	// However, in unix, it works
-    fflush( m_pStream );
+    fflush( _pStream );
 #endif
     return ( uiStatus == 1 );
 }
