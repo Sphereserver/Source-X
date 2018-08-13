@@ -489,7 +489,7 @@ public:
 	* pairs until the characters differ or until a terminating null-character
 	* is reached. This function performs a binary comparison of the characters.
 	* @param pStr string to compare.
-	* @return <0 if te first character that not match has lower value in CSString than in pStr. 0 if hte contents of both are equal. >0 if the first character that does not match has greater value in CSString than pStr.
+	* @return <0 if the first character that not match has lower value in CSString than in pStr. 0 if the contents of both are equal. >0 if the first character that does not match has greater value in CSString than pStr.
 	*/
 	inline int Compare(lpctstr pStr) const
 	{
@@ -503,7 +503,7 @@ public:
 	* pairs until the characters differ or until a terminating null-character
 	* is reached. This function performs a case insensitive comparison of the characters.
 	* @param pStr string to compare.
-	* @return <0 if te first character that not match has lower value in CSString than in pStr. 0 if hte contents of both are equal. >0 if the first character that does not match has greater value in CSString than pStr.
+	* @return <0 if the first character that not match has lower value in CSString than in pStr. 0 if the contents of both are equal. >0 if the first character that does not match has greater value in CSString than pStr.
 	*/
 	inline int CompareNoCase(lpctstr pStr) const
 	{

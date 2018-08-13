@@ -339,12 +339,12 @@ CPointMap CWorld::FindTypeNear_Top( const CPointMap & pt, IT_TYPE iType, int iDi
 	const CServerMapBlock * pMapBlock = GetMapBlock( pt );
 	ASSERT( pMapBlock );
 
-	size_t iStaticQty = pMapBlock->m_Statics.GetStaticQty();
+	uint iStaticQty = pMapBlock->m_Statics.GetStaticQty();
 	if ( iStaticQty > 0 )  // no static items here.
 	{
 		const CUOStaticItemRec * pStatic = nullptr;
 
-		for ( size_t i = 0; i < iStaticQty; ++i, pStatic = nullptr, Height = 0, pItemDef = nullptr )
+		for ( uint i = 0; i < iStaticQty; ++i, pStatic = nullptr, Height = 0, pItemDef = nullptr )
 		{
 			pStatic = pMapBlock->m_Statics.GetStatic( i );
 
@@ -590,7 +590,7 @@ CPointMap CWorld::FindItemTypeNearby(const CPointMap & pt, IT_TYPE iType, int iD
 			pStatic = nullptr;
 			pItemDef = nullptr;
 
-			for ( size_t i = 0; i < iQty; ++i, pStatic = nullptr, pItemDef = nullptr )
+			for ( uint i = 0; i < iQty; ++i, pStatic = nullptr, pItemDef = nullptr )
 			{
 				pStatic = pMapBlock->m_Statics.GetStatic( i );
 				if ( bLimitZ && ( pStatic->m_z != ptTest.m_z ) )
@@ -721,7 +721,7 @@ void CWorld::GetFixPoint( const CPointMap & pt, CServerMapBlockState & block)
 		x2 = pMapBlock->GetOffsetX(pt.m_x);
 		y2 = pMapBlock->GetOffsetY(pt.m_y);
 		const CUOStaticItemRec * pStatic = nullptr;
-		for ( size_t i = 0; i < iQty; ++i, z = 0, pStatic = nullptr, pDupeDef = nullptr )
+		for ( uint i = 0; i < iQty; ++i, z = 0, pStatic = nullptr, pDupeDef = nullptr )
 		{
 			if ( ! pMapBlock->m_Statics.IsStaticPoint( i, x2, y2 ))
 				continue;
@@ -1016,13 +1016,13 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block,
 	if (pMapBlock == nullptr)
 		return;
 
-	size_t iQty = pMapBlock->m_Statics.GetStaticQty();
+	uint iQty = pMapBlock->m_Statics.GetStaticQty();
 	if ( iQty > 0 )  // no static items here.
 	{
 		x2 = pMapBlock->GetOffsetX(pt.m_x);
 		y2 = pMapBlock->GetOffsetY(pt.m_y);
 		const CUOStaticItemRec * pStatic = nullptr;
-		for ( size_t i = 0; i < iQty; ++i, z = 0, zHeight = 0, pStatic = nullptr, pDupeDef = nullptr )
+		for ( uint i = 0; i < iQty; ++i, z = 0, zHeight = 0, pStatic = nullptr, pDupeDef = nullptr )
 		{
 			if ( ! pMapBlock->m_Statics.IsStaticPoint( i, x2, y2 ))
 				continue;
@@ -1097,7 +1097,7 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block,
 			y2 = 0;
 			//  ------------ For variables --------------------
 
-			for ( size_t iRegion = 0; iRegion < iRegionQty; ++iRegion, pRegion = nullptr, pItem = nullptr, pMulti = nullptr, x2 = 0, y2 = 0 )
+			for ( uint iRegion = 0; iRegion < iRegionQty; ++iRegion, pRegion = nullptr, pItem = nullptr, pMulti = nullptr, x2 = 0, y2 = 0 )
 			{
 				pRegion = rlinks.at(iRegion);
 				if ( pRegion != nullptr )
@@ -1112,7 +1112,7 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block,
 						y2 = pt.m_y - pItem->GetTopPoint().m_y;
 
 						iQty = pMulti->GetItemCount();
-						for ( size_t ii = 0; ii < iQty; ++ii, pMultiItem = nullptr, z = 0, zHeight = 0 )
+						for ( uint ii = 0; ii < iQty; ++ii, pMultiItem = nullptr, z = 0, zHeight = 0 )
 						{
 							pMultiItem = pMulti->GetItem(ii);
 
@@ -1267,7 +1267,7 @@ void CWorld::GetHeightPoint( const CPointMap & pt, CServerMapBlockState & block,
 
 char CWorld::GetHeightPoint( const CPointBase & pt, dword & dwBlockFlags, bool fHouseCheck )
 {
-	ADDTOCALLSTACK("CWorld::GetHeightPoint");
+	ADDTOCALLSTACK_INTENSIVE("CWorld::GetHeightPoint");
 	dword dwCan = dwBlockFlags;
 	CServerMapBlockState block( dwBlockFlags, pt.m_z + (PLAYER_HEIGHT / 2), pt.m_z + PLAYER_HEIGHT );
 
@@ -1301,7 +1301,7 @@ char CWorld::GetHeightPoint( const CPointBase & pt, dword & dwBlockFlags, bool f
 
 void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block, bool fHouseCheck )
 {
-	ADDTOCALLSTACK("CWorld::GetHeightPoint2");
+	ADDTOCALLSTACK_INTENSIVE("CWorld::GetHeightPoint2");
 	// Height of statics at/above given coordinates
 	// do gravity here for the z.
 
@@ -1313,29 +1313,27 @@ void CWorld::GetHeightPoint2( const CPointMap & pt, CServerMapBlockState & block
 		return;
 	}
 
+	uint iStaticQty = pMapBlock->m_Statics.GetStaticQty();
+	if ( iStaticQty > 0 )  // no static items here.
 	{
-		size_t iStaticQty = pMapBlock->m_Statics.GetStaticQty();
-		if ( iStaticQty > 0 )  // no static items here.
+		int x2 = pMapBlock->GetOffsetX(pt.m_x);
+		int y2 = pMapBlock->GetOffsetY(pt.m_y);
+		for ( uint i = 0; i < iStaticQty; ++i )
 		{
-			int x2 = pMapBlock->GetOffsetX(pt.m_x);
-			int y2 = pMapBlock->GetOffsetY(pt.m_y);
-			for ( size_t i = 0; i < iStaticQty; ++i )
-			{
-				if ( ! pMapBlock->m_Statics.IsStaticPoint( i, x2, y2 ))
-					continue;
-				const CUOStaticItemRec * pStatic = pMapBlock->m_Statics.GetStatic( i );
-				char z = pStatic->m_z;
-				if ( ! block.IsUsableZ(z,PLAYER_HEIGHT))
-					continue;
+			if ( ! pMapBlock->m_Statics.IsStaticPoint( i, x2, y2 ))
+				continue;
+			const CUOStaticItemRec * pStatic = pMapBlock->m_Statics.GetStatic( i );
+			char z = pStatic->m_z;
+			if ( ! block.IsUsableZ(z,PLAYER_HEIGHT))
+				continue;
 
-				// This static is at the coordinates in question.
-				// enough room for me to stand here ?
-				dwBlockThis = 0;
-				height_t zHeight = CItemBase::GetItemHeight( pStatic->GetDispID(), dwBlockThis );
-				block.CheckTile( dwBlockThis, z, zHeight, pStatic->GetDispID() + TERRAIN_QTY );
-			}
-		}
-	}
+			// This static is at the coordinates in question.
+			// enough room for me to stand here ?
+			dwBlockThis = 0;
+			height_t zHeight = CItemBase::GetItemHeight( pStatic->GetDispID(), dwBlockThis );
+			block.CheckTile( dwBlockThis, z, zHeight, pStatic->GetDispID() + TERRAIN_QTY );
+	    }
+    }
 
 	// Any multi items here ?
 	if ( fHouseCheck )

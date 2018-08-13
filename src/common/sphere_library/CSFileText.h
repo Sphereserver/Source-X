@@ -39,10 +39,21 @@ public:
     * @brief Check if file is open.
     * @return true if is open, false otherwise.
     */
-    virtual bool IsFileOpen() const;
-protected:
-    virtual bool OpenBase();
-    virtual void CloseBase();
+protected:  virtual bool _IsFileOpen() const override;
+public:     virtual bool IsFileOpen() const override;
+    /**
+    * @brief Open a file in a specified mode.
+    * @param ptcName file to open.
+    * @param uiMode open mode.
+    * @return true if file is open, false otherwise.
+    */
+protected:  virtual bool _Open(lpctstr ptcFilename = nullptr, uint uiModeFlags = OF_READ|OF_SHARE_DENY_NONE) override;
+public:     virtual bool Open(lpctstr ptcFilename = nullptr, uint uiModeFlags = OF_READ|OF_SHARE_DENY_NONE) override;
+    /**
+    * @brief Closes the file if is open.
+    */
+protected:  virtual void _Close() override;
+public:     virtual void Close() override;
     ///@}
     /** @name Content management:
     */
@@ -50,20 +61,23 @@ protected:
 public:
     /**
     * @brief Set the position indicator.
-    * @param stOffset position to set.
-    * @param stOrigin origin (current position or init of the file).
+    * @param iOffset position to set.
+    * @param iOrigin origin (current position or init of the file).
     * @return position where the position indicator is set on success, -1 on error.
     */
-    virtual int Seek( int iOffset = 0, int iOrigin = SEEK_SET );
+protected:  virtual int _Seek( int iOffset = 0, int iOrigin = SEEK_SET ) override;
+public:     virtual int Seek( int iOffset = 0, int iOrigin = SEEK_SET ) override;
     /**
     * @brief Write changes to disk.
     */
-    virtual void Flush() const;
+protected:  void _Flush() const;
+public:     void Flush() const;
     /**
     * @brief Check if EOF is reached.
     * @return true if EOF is reached, false otherwise.
     */
-    virtual bool IsEOF() const;
+protected:  virtual bool _IsEOF() const;
+public:     virtual bool IsEOF() const;
     /**
     * @brief print in file a string with arguments (printf like).
     * @param pFormat string in "printf like" format.
@@ -84,7 +98,8 @@ public:
     * @param sizemax count of characters to read.
     * @return the str readed if success, NULL on errors.
     */
-    virtual tchar * ReadString( tchar * pBuffer, int sizemax ) const;
+protected:  virtual tchar * _ReadString( tchar * pBuffer, int sizemax );
+public:     virtual tchar * ReadString( tchar * pBuffer, int sizemax );
     /**
     * @brief print in file a string with arguments (printf like).
     * @param pFormat string in "printf like" format.
@@ -98,11 +113,7 @@ public:
     * @param iLen lenght of the data to write.
     * @return true is success, false otherwise.
     */
-#ifndef _WIN32
-    virtual bool Write( const void * pData, int iLen ) const;
-#else
-    virtual bool Write( const void * pData, int iLen );
-#endif
+    virtual bool Write( const void * pData, int iLen ) override;
     /**
     * @brief write string into file.
     * @return true is success, false otherwise.
@@ -123,18 +134,18 @@ protected:
     * - "a+b"
     * @return string that describes the open mode.
     */
-    lpctstr GetModeStr() const;
+    lpctstr _GetModeStr() const;
 public:
     /**
     * @brief Check if file is open in binary mode.
     * @return false always.
     */
-    virtual bool IsBinaryMode() const;
+    virtual bool IsBinaryMode() const { return false; };
     ///@}
 public:
-    FILE * m_pStream;		// The current open script type file.
-protected:
+    FILE * _pStream;		// The current open script type file.
 #ifdef _WIN32
+protected:
     bool _fNoBuffer;		// TODOC.
 #endif
 };

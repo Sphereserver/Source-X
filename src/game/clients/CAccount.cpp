@@ -75,7 +75,7 @@ bool CAccounts::Account_LoadAll( bool fChanges, bool fClearChanges )
 	char *z = Str_GetTemp();
 
 	pszBaseDir = g_Cfg.m_sAcctBaseDir.IsEmpty() ? g_Cfg.m_sWorldBaseDir : g_Cfg.m_sAcctBaseDir;
-	pszBaseName = ( fChanges ) ? (SPHERE_FILE "acct") : (SPHERE_FILE "accu");
+	pszBaseName = ( fChanges ) ? (SPHERE_FILE "acct" SPHERE_SCRIPT) : (SPHERE_FILE "accu" SPHERE_SCRIPT);
 
 	strcpy(z, pszBaseDir);
 	strcat(z, pszBaseName);

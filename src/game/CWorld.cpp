@@ -1642,6 +1642,7 @@ void CWorld::SaveStatics()
 bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from script
 {
 	CScript s;
+    g_Log.Event(LOGM_INIT, "Loading %s...\n", pszLoadName);
 	if ( ! s.Open( pszLoadName, OF_READ|OF_TEXT|OF_DEFAULTMODE ) )
 	{
 		if ( fError )
@@ -1651,10 +1652,8 @@ bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from scr
 		return false;
 	}
 
-	g_Log.Event(LOGM_INIT, "Loading %s...\n", static_cast<lpctstr>(pszLoadName));
-
 	// Find the size of the file.
-	size_t stLoadSize = s.GetLength();
+	size_t uiLoadSize = s.GetLength();
 	int iLoadStage = 0;
 
 	CScriptFileContext ScriptContext( &s );
@@ -1665,7 +1664,7 @@ bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from scr
 	while ( s.FindNextSection() )
 	{
 		if (! ( ++iLoadStage & 0x1FF ))	// don't update too often
-			g_Serv.PrintPercent( s.GetPosition(), stLoadSize );
+			g_Serv.PrintPercent( s.GetPosition(), uiLoadSize );
 
 		try
 		{
@@ -1703,19 +1702,19 @@ bool CWorld::LoadWorld() // Load world from script
 	// NOTE: WE MUST Sync these files ! CHAR and WORLD !!!
 
 	CSString sStaticsName;
-	sStaticsName.Format("%s" SPHERE_FILE "statics", static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
+	sStaticsName.Format("%s" SPHERE_FILE "statics" SPHERE_SCRIPT, static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
 	CSString sWorldName;
-	sWorldName.Format("%s" SPHERE_FILE "world", static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
+	sWorldName.Format("%s" SPHERE_FILE "world" SPHERE_SCRIPT, static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
 	CSString sMultisName;
-	sMultisName.Format("%s" SPHERE_FILE "multis", static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
+	sMultisName.Format("%s" SPHERE_FILE "multis" SPHERE_SCRIPT, static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
 	CSString sCharsName;
-	sCharsName.Format("%s" SPHERE_FILE "chars", static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
+	sCharsName.Format("%s" SPHERE_FILE "chars" SPHERE_SCRIPT, static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
 	CSString sDataName;
-	sDataName.Format("%s" SPHERE_FILE "data",	static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
+	sDataName.Format("%s" SPHERE_FILE "data" SPHERE_SCRIPT,	static_cast<lpctstr>(g_Cfg.m_sWorldBaseDir));
 
 	int iPrevSaveCount = m_iSaveCountID;
 	for (;;)
@@ -1798,12 +1797,12 @@ bool CWorld::LoadAll() // Load world from script
 	// Set all the sector light levels now that we know the time.
 	// This should not look like part of the load. (CTRIG_EnvironChange triggers should run)
 	size_t iCount;
-	for ( uint s = 0; s < m_SectorsQty; s++ )
+	for ( uint s = 0; s < m_SectorsQty; ++s )
 	{
 		EXC_TRYSUB("Load");
 		CSector *pSector = m_Sectors[s];
 
-		if ( pSector != NULL )
+		if ( pSector != nullptr )
 		{
 			if ( !pSector->IsLightOverriden() )
 				pSector->SetLight(-1);

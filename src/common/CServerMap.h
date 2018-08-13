@@ -37,11 +37,11 @@ public:
 class CServerStaticsBlock
 {
 private:
-	size_t m_iStatics;
+	uint m_iStatics;
 	CUOStaticItemRec * m_pStatics;	// dyn alloc array block.
 public:
 	void LoadStatics(dword dwBlockIndex, int map);
-	void LoadStatics(size_t iCount, CUOStaticItemRec * pStatics);
+	void LoadStatics(uint uiCount, CUOStaticItemRec * pStatics);
 public:
 	static const char *m_sClassName;
 	CServerStaticsBlock();
@@ -52,11 +52,22 @@ private:
 	CServerStaticsBlock& operator=(const CServerStaticsBlock& other);
 
 public:
-	inline size_t GetStaticQty() const { 
+    // These methods are called so frequently but in so few pieces of code that's very important to inline them
+	inline uint GetStaticQty() const { 
 		return m_iStatics;
 	}
-	const CUOStaticItemRec * GetStatic( size_t i ) const;
-	bool IsStaticPoint( size_t i, int xo, int yo ) const;
+    inline const CUOStaticItemRec * GetStatic( uint i ) const
+    {
+        ASSERT( i < m_iStatics );
+        return( &m_pStatics[i] );
+    }
+    inline bool IsStaticPoint( uint i, int xo, int yo ) const
+    {
+        ASSERT( (xo >= 0) && (xo < UO_BLOCK_SIZE) );
+        ASSERT( (yo >= 0) && (yo < UO_BLOCK_SIZE) );
+        ASSERT( i < m_iStatics );
+        return( (m_pStatics[i].m_x == xo) && (m_pStatics[i].m_y == yo) );
+    }
 };
 
 struct CServerMapBlocker
@@ -223,7 +234,7 @@ private:
 	MULTI_TYPE m_id;
 protected:
 	CUOMultiItemRec_HS * m_pItems;
-	size_t m_iItemQty;
+	uint m_iItemQty;
 private:
 	void Init();
 	void Release();
@@ -240,8 +251,12 @@ private:
 public:
 	size_t Load( MULTI_TYPE id );
 
-	MULTI_TYPE GetMultiID() const;
-	size_t GetItemCount() const;
+    inline MULTI_TYPE GetMultiID() const {
+        return m_id;
+    }
+    inline uint GetItemCount() const {
+        return m_iItemQty;
+    }
 	const CUOMultiItemRec_HS * GetItem( size_t i ) const;
 };
 

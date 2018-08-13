@@ -393,7 +393,7 @@ void CServerStaticsBlock::LoadStatics( dword ulBlockIndex, int map )
 	ADDTOCALLSTACK("CServerStaticsBlock::LoadStatics");
 	// long ulBlockIndex = (bx*(UO_SIZE_Y/UO_BLOCK_SIZE) + by);
 	// NOTE: What is index.m_wVal3 and index.m_wVal4 in VERFILE_STAIDX ?
-	ASSERT( m_iStatics <= 0 );
+	ASSERT( m_iStatics == 0 );
 
 	CUOIndexRec index;
 	if ( g_Install.ReadMulIndex(g_Install.m_Staidx[g_MapList.m_mapnum[map]], ulBlockIndex, index) )
@@ -405,7 +405,7 @@ void CServerStaticsBlock::LoadStatics( dword ulBlockIndex, int map )
 			sprintf(pszTemp, "CServerStaticsBlock: Read Statics - Block Length of %u", index.GetBlockLength());
 			throw CSError(LOGL_CRIT, CSFile::GetLastError(), pszTemp);
 		}
-		m_iStatics = index.GetBlockLength()/sizeof(CUOStaticItemRec);
+		m_iStatics = (uint)(index.GetBlockLength()/sizeof(CUOStaticItemRec));
 		ASSERT(m_iStatics);
 		m_pStatics = new CUOStaticItemRec[m_iStatics];
 		ASSERT(m_pStatics);
@@ -416,11 +416,11 @@ void CServerStaticsBlock::LoadStatics( dword ulBlockIndex, int map )
 	}
 }
 
-void CServerStaticsBlock::LoadStatics( size_t iCount, CUOStaticItemRec * pStatics )
+void CServerStaticsBlock::LoadStatics( uint uiCount, CUOStaticItemRec * pStatics )
 {
 	ADDTOCALLSTACK("CServerStaticsBlock::LoadStatics2");
 	// Load statics information directly (normally from difs)
-	m_iStatics = iCount;
+	m_iStatics = uiCount;
 	if ( m_iStatics > 0 )
 	{
 		m_pStatics = new CUOStaticItemRec[m_iStatics];
@@ -444,21 +444,6 @@ CServerStaticsBlock::~CServerStaticsBlock()
 {
 	if ( m_pStatics != NULL )
 		delete[] m_pStatics;
-}
-
-const CUOStaticItemRec * CServerStaticsBlock::GetStatic( size_t i ) const
-{
-	ASSERT( i < m_iStatics );
-	return( &m_pStatics[i] );
-}
-
-bool CServerStaticsBlock::IsStaticPoint( size_t i, int xo, int yo ) const
-{
-	//ADDTOCALLSTACK("CServerStaticsBlock::IsStaticPoint");		// this function is called very frequently, so it's better to avoid the cpu cost of ADDCALLTOSTACK
-	ASSERT( xo >= 0 && xo < UO_BLOCK_SIZE );
-	ASSERT( yo >= 0 && yo < UO_BLOCK_SIZE );
-	ASSERT( i < m_iStatics );
-	return( m_pStatics[i].m_x == xo && m_pStatics[i].m_y == yo );
 }
 
 //////////////////////////////////////////////////////////////////
@@ -631,14 +616,6 @@ CSphereMulti::~CSphereMulti()
 	Release();
 }
 
-MULTI_TYPE CSphereMulti::GetMultiID() const
-{
-	return m_id;
-}
-size_t CSphereMulti::GetItemCount() const
-{
-	return m_iItemQty;
-}
 const CUOMultiItemRec_HS * CSphereMulti::GetItem( size_t i ) const
 {
 	ASSERT( i<m_iItemQty );
@@ -664,7 +641,7 @@ size_t CSphereMulti::Load(MULTI_TYPE id)
 	switch (g_Install.GetMulFormat(VERFILE_MULTIIDX))
 	{
 	case VERFORMAT_HIGHSEAS: // high seas multi format (CUOMultiItemRec_HS)
-		m_iItemQty = Index.GetBlockLength() / sizeof(CUOMultiItemRec_HS);
+		m_iItemQty = (uint)(Index.GetBlockLength() / sizeof(CUOMultiItemRec_HS));
 		m_pItems = new CUOMultiItemRec_HS[m_iItemQty];
 		ASSERT(m_pItems);
 
@@ -675,7 +652,7 @@ size_t CSphereMulti::Load(MULTI_TYPE id)
 
 	case VERFORMAT_ORIGINAL: // old format (CUOMultiItemRec)
 	default:
-		m_iItemQty = Index.GetBlockLength() / sizeof(CUOMultiItemRec);
+		m_iItemQty = (uint)(Index.GetBlockLength() / sizeof(CUOMultiItemRec));
 		m_pItems = new CUOMultiItemRec_HS[m_iItemQty];
 		ASSERT(m_pItems);
 
@@ -688,7 +665,7 @@ size_t CSphereMulti::Load(MULTI_TYPE id)
 		}
 
 		// copy to new format
-		for (size_t i = 0; i < m_iItemQty; i++)
+		for (uint i = 0; i < m_iItemQty; ++i)
 		{
 			m_pItems[i].m_wTileID = pItems[i].m_wTileID;
 			m_pItems[i].m_dx = pItems[i].m_dx;

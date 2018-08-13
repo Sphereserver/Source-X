@@ -19,7 +19,7 @@ int64 CSRand::genRandInt64(int64 min, int64 max)
 {
 	std::uniform_int_distribution<int64> distr(min, max);
 	std::random_device rd;
-	std::mt19937 rand_engine(rd());
+	std::mt19937_64 rand_engine(rd());
 	return distr(rand_engine);
 }
 
@@ -35,6 +35,6 @@ realtype CSRand::genRandReal64(realtype min, realtype max)
 {
 	std::uniform_real_distribution<realtype> distr(min, max);
 	std::random_device rd;
-	std::mt19937 rand_engine(rd());
+	std::mt19937_64 rand_engine(rd());
 	return distr(rand_engine);
 }

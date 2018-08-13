@@ -1329,8 +1329,8 @@ IT_TYPE CChar::CanTouchStatic( CPointMap &pt, ITEMID_TYPE id, CItem *pItem )
 	int x2 = pMapBlock->GetOffsetX(pt.m_x);
 	int y2 = pMapBlock->GetOffsetY(pt.m_y);
 
-	size_t iQty = pMapBlock->m_Statics.GetStaticQty();
-	for ( size_t i = 0; i < iQty; ++i )
+	uint iQty = pMapBlock->m_Statics.GetStaticQty();
+	for ( uint i = 0; i < iQty; ++i )
 	{
 		if ( !pMapBlock->m_Statics.IsStaticPoint(i, x2, y2) )
 			continue;

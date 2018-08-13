@@ -4135,7 +4135,7 @@ bool CServerConfig::Load( bool fResync )
 	// Now load the *TABLES.SCP file.
 	if ( ! fResync )
 	{
-		if ( ! OpenResourceFind( m_scpTables, SPHERE_FILE "tables" ))
+		if ( ! OpenResourceFind( m_scpTables, SPHERE_FILE "tables" SPHERE_SCRIPT ))
 		{
 			g_Log.Event( LOGL_FATAL|LOGM_INIT, "Error opening table definitions file (" SPHERE_FILE "tables." SPHERE_SCRIPT ")...\n" );
 			return false;

@@ -8,36 +8,36 @@
 
 CSVFile::CSVFile()
 {
-	m_iColumnCount = 0;
-	m_iCurrentRow = 0;
-	m_pszColumnTypes[0] = nullptr;
-	m_pszColumnNames[0] = nullptr;
+	_iColumnCount = 0;
+	_iCurrentRow = 0;
+	_pszColumnTypes[0] = nullptr;
+	_pszColumnNames[0] = nullptr;
 }
 
 CSVFile::~CSVFile()
 {
-	for (int i = 0; m_pszColumnTypes[i] != nullptr; ++i)
-		delete[] m_pszColumnTypes[i];
+	for (int i = 0; _pszColumnTypes[i] != nullptr; ++i)
+		delete[] _pszColumnTypes[i];
 
-	for (int i = 0; m_pszColumnNames[i] != nullptr; ++i)
-		delete[] m_pszColumnNames[i];
+	for (int i = 0; _pszColumnNames[i] != nullptr; ++i)
+		delete[] _pszColumnNames[i];
 }
 
-bool CSVFile::OpenBase()
+bool CSVFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
 {
-	ADDTOCALLSTACK("CSVFile::OpenBase");
-	if ( !PhysicalScriptFile::OpenBase() )
+	ADDTOCALLSTACK("CSVFile::_Open");
+	if ( !PhysicalScriptFile::_Open(ptcFilename, uiModeFlags) )
 		return false;
 
-	m_iCurrentRow = 0;
+	_iCurrentRow = 0;
 
 	// remove all empty lines so that we just have data rows stored
-	for (std::vector<std::string>::iterator i = m_fileContent.begin(); i != m_fileContent.end(); )
+	for (std::vector<std::string>::iterator i = _fileContent->begin(); i != _fileContent->end(); )
 	{
 		lpctstr pszLine = i->c_str();
 		GETNONWHITESPACE(pszLine);
 		if ( *pszLine == '\0' )
-			i = m_fileContent.erase(i);
+			i = _fileContent->erase(i);
 		else
 			++i;
 	}
@@ -47,43 +47,48 @@ bool CSVFile::OpenBase()
 	tchar * ppColumnNames[MAX_COLUMNS];
 
 	// first row tells us how many columns there are
-	m_iColumnCount = ReadRowContent(ppColumnTypes, 0);
-	if ( m_iColumnCount <= 0 )
+	_iColumnCount = _ReadRowContent(ppColumnTypes, 0);
+	if ( _iColumnCount <= 0 )
 	{
-		m_iColumnCount = 0;
-		Close();
+		_iColumnCount = 0;
+		_Close();
 		return false;
 	}
 	
 	// second row lets us validate the column count
-	if ( ReadRowContent(ppColumnNames, 1) != m_iColumnCount )
+	if ( _ReadRowContent(ppColumnNames, 1) != _iColumnCount )
 	{
-		m_iColumnCount = 0;
-		Close();
+		_iColumnCount = 0;
+		_Close();
 		return false;
 	}
 
 	// copy the names
-	for (int i = 0; i < m_iColumnCount; ++i)
+	for (int i = 0; i < _iColumnCount; ++i)
 	{
-		m_pszColumnTypes[i] = new tchar[128];
-		strcpy(m_pszColumnTypes[i], ppColumnTypes[i]);
+		_pszColumnTypes[i] = new tchar[128];
+		strcpy(_pszColumnTypes[i], ppColumnTypes[i]);
 
-		m_pszColumnNames[i] = new tchar[128];
-		strcpy(m_pszColumnNames[i], ppColumnNames[i]);
+		_pszColumnNames[i] = new tchar[128];
+		strcpy(_pszColumnNames[i], ppColumnNames[i]);
 	}
 
-	m_pszColumnTypes[m_iColumnCount] = nullptr;
-	m_pszColumnNames[m_iColumnCount] = nullptr;
+	_pszColumnTypes[_iColumnCount] = nullptr;
+	_pszColumnNames[_iColumnCount] = nullptr;
 	return true;
 }
-
-int CSVFile::ReadRowContent(tchar ** ppOutput, int rowIndex, int columns)
+bool CSVFile::Open(lpctstr ptcFilename, uint uiModeFlags)
 {
-	ADDTOCALLSTACK("CSVFile::ReadRowContent");
+    ADDTOCALLSTACK("CSVFile::Open");
+    THREAD_UNIQUE_LOCK_RETURN(CSVFile::_Open(ptcFilename, uiModeFlags));
+}
+
+int CSVFile::_ReadRowContent(tchar ** ppOutput, int rowIndex, int columns)
+{
+	ADDTOCALLSTACK("CSVFile::_ReadRowContent");
 	ASSERT(columns > 0 && columns <= MAX_COLUMNS);
-	if ( (int)GetPosition() != rowIndex )
-		Seek(rowIndex, SEEK_SET);
+	if ( GetPosition() != rowIndex )
+		_Seek(rowIndex, SEEK_SET);
 
 	tchar * pszLine = Str_GetTemp();
 	if ( ReadString(pszLine, THREAD_STRING_LENGTH) == nullptr )
@@ -92,33 +97,40 @@ int CSVFile::ReadRowContent(tchar ** ppOutput, int rowIndex, int columns)
 	return Str_ParseCmds(pszLine, ppOutput, columns, "\t");
 }
 
-int CSVFile::ReadNextRowContent(tchar ** ppOutput)
+int CSVFile::_ReadNextRowContent(tchar ** ppOutput)
 {
-	ADDTOCALLSTACK("CSVFile::ReadNextRowContent");
-	++m_iCurrentRow;
-	return ReadRowContent(ppOutput, m_iCurrentRow);
+	ADDTOCALLSTACK("CSVFile::_ReadNextRowContent");
+	++_iCurrentRow;
+	return _ReadRowContent(ppOutput, _iCurrentRow);
 }
 
-bool CSVFile::ReadRowContent(int rowIndex, CSVRowData& target)
+bool CSVFile::_ReadRowContent(int rowIndex, CSVRowData& target)
 {
-	ADDTOCALLSTACK("CSVFile::ReadRowContent");
+	ADDTOCALLSTACK("CSVFile::_ReadRowContent");
 	// get row data
 	tchar * ppRowContent[MAX_COLUMNS];
-	int columns = ReadRowContent(ppRowContent, rowIndex);
-	if ( columns != m_iColumnCount )
+	int columns = _ReadRowContent(ppRowContent, rowIndex);
+	if ( columns != _iColumnCount )
 		return false;
 
 	// copy to target
 	target.clear();
 	for (int i = 0; i < columns; ++i)
-		target[m_pszColumnNames[i]] = ppRowContent[i];
+		target[_pszColumnNames[i]] = ppRowContent[i];
 
 	return ! target.empty();
 }
 
+bool CSVFile::_ReadNextRowContent(CSVRowData& target)
+{
+	ADDTOCALLSTACK("CSVFile::_ReadNextRowContent");
+	++_iCurrentRow;
+	return _ReadRowContent(_iCurrentRow, target);
+}
+
 bool CSVFile::ReadNextRowContent(CSVRowData& target)
 {
-	ADDTOCALLSTACK("CSVFile::ReadNextRowContent");
-	++m_iCurrentRow;
-	return ReadRowContent(m_iCurrentRow, target);
+    ADDTOCALLSTACK("CSVFile::ReadNextRowContent");
+    THREAD_UNIQUE_LOCK_RETURN(_ReadNextRowContent(target));
 }
+

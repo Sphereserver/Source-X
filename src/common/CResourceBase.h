@@ -259,35 +259,42 @@ private:
 
 //*********************************************************
 
+class CResourceLock;
+
 class CScriptFileContext
 {
+    THREAD_CMUTEX_DEF;
+    friend class CResourceLock;
 	// Track a temporary context into a script.
 	// NOTE: This should ONLY be stack based !
 private:
 	bool m_fOpenScript;	// NULL context may be legit.
 	const CScript * m_pPrvScriptContext;	// previous general context before this was opened.
 private:
-	void Init()
+	void _Init()
 	{
 		m_fOpenScript = false;
 	}
 
 public:
 	static const char *m_sClassName;
-	void OpenScript( const CScript * pScriptContext );
-	void Close();
-	CScriptFileContext() : m_pPrvScriptContext(NULL)
+	
+private:    void _OpenScript( const CScript * pScriptContext );
+public:     void OpenScript( const CScript * pScriptContext );
+private:	void _Close();
+public:     void Close();
+	CScriptFileContext() : m_pPrvScriptContext(nullptr)
 	{
-		Init();
+		_Init();
 	}
 	explicit CScriptFileContext(const CScript * pScriptContext)
 	{
-		Init();
-		OpenScript(pScriptContext);
+		_Init();
+		_OpenScript(pScriptContext);
 	}
 	~CScriptFileContext()
 	{
-		Close();
+		_Close();
 	}
 
 private:
@@ -346,26 +353,28 @@ private:
 	CSTime m_dateChange;	// real world time/date of last change.
 
 private:
-	void Init()
+	void _Init()
 	{
 		m_iOpenCount = 0;
 		m_timeLastAccess.Init();
 		m_dwSize = UINT32_MAX;			// Compare to see if this has changed.
 	}
-	bool CheckForChange();
 
 public:
 	static const char *m_sClassName;
 	explicit CResourceScript(lpctstr pszFileName)
 	{
-		Init();
-		SetFilePath(pszFileName);
+		_Init();
+		_SetFilePath(pszFileName);
 	}
 	CResourceScript()
 	{
-		Init();
+		_Init();
 	}
     virtual ~CResourceScript() { }
+
+private:    bool _CheckForChange();
+public:     bool CheckForChange();
 
 private:
 	CResourceScript(const CResourceScript& copy);
@@ -394,22 +403,25 @@ private:
 	CScriptFileContext m_PrvScriptContext;		// where was i before (context wise) opening this. (for error tracking)
 	CScriptObjectContext m_PrvObjectContext;	// object context (for error tracking)
 private:
-	void Init()
+	void _Init()
 	{
-		m_pLock = NULL;
+		m_pLock = nullptr;
 		m_PrvLockContext.Init();	// means the script was NOT open when we started.
 	}
 
 protected:
-	virtual bool OpenBase();
-	virtual void CloseBase();
-	virtual bool ReadTextLine( bool fRemoveBlanks );
+	virtual bool _Open(lpctstr = nullptr, uint = 0) override;
+    virtual bool Open(lpctstr = nullptr, uint = 0) override;
+	virtual void _Close() override;
+    virtual void Close() override;
+	virtual bool _ReadTextLine( bool fRemoveBlanks ) override;
+    virtual bool ReadTextLine( bool fRemoveBlanks ) override;
 
 public:
 	static const char *m_sClassName;
 	CResourceLock()
 	{
-		Init();
+		_Init();
 	}
 	~CResourceLock()
 	{

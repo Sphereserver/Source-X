@@ -91,7 +91,8 @@ protected:
 	CSMemLenBlock m_Mem;	// the buffer to hold data read.
 
 protected:
-	tchar * GetKeyBufferRaw( size_t iSize );
+	tchar * _GetKeyBufferRaw( size_t iSize );
+    //tchar * GetKeyBufferRaw( size_t iSize );
 	size_t ParseKeyEnd();
 
 public:
@@ -116,6 +117,8 @@ private:
  #define PhysicalScriptFile CacheableScriptFile
 #endif
 
+class CResourceLock;
+
 class CScript : public PhysicalScriptFile, public CScriptKeyAlloc
 {
 private:
@@ -126,25 +129,33 @@ public:
 	static const char *m_sClassName;
 	int m_iLineNum;					// for debug purposes if there is an error.
 	int	m_iResourceFileIndex;	// index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
+    bool _fCacheToBeUpdated;
+
 protected:
-	void InitBase();
-	virtual int Seek( int offset = 0, int iOrigin = SEEK_SET );
+	void _InitBase();
 
-public:
 	// text only functions:
-	virtual bool ReadTextLine( bool fRemoveBlanks );	// looking for a section or reading strangly formated section.
-	bool FindTextHeader( lpctstr pszName ); // Find a section in the current script
+    friend class CResourceLock;
+protected:  virtual bool _ReadTextLine( bool fRemoveBlanks );	// looking for a section or reading strangly formated section.
+public:     virtual bool ReadTextLine( bool fRemoveBlanks );
+public:     bool FindTextHeader( lpctstr pszName ); // Find a section in the current script
+
+private:    virtual bool _Open( lpctstr ptcFilename = nullptr, uint uiFlags = OF_READ|OF_TEXT ) override;
+public:     virtual bool Open( lpctstr ptcFilename = nullptr, uint uiFlags = OF_READ|OF_TEXT ) override;
+private:	virtual void _Close() override;
+public:     virtual void Close() override;
+private:    virtual int _Seek( int iOffset = 0, int iOrigin = SEEK_SET ) override;
+public:     virtual int Seek( int iOffset = 0, int iOrigin = SEEK_SET ) override;
+private:    bool _SeekContext( CScriptLineContext LineContext );
+public:     bool SeekContext( CScriptLineContext LineContext );
+private:	CScriptLineContext _GetContext() const;
+public:     CScriptLineContext GetContext() const;
 
 public:
-	virtual bool Open( lpctstr szFilename, uint Flags = OF_READ|OF_TEXT );
-	virtual void Close();
-	virtual void CloseForce();
-	bool SeekContext( CScriptLineContext LineContext );
-	CScriptLineContext GetContext() const;
-
+    virtual void CloseForce();
 	// Find sections.
 	bool FindNextSection();
-	virtual bool FindSection( lpctstr pszName, uint uiModeFlags ); // Find a section in the current script
+	bool FindSection( lpctstr pszName, uint uiModeFlags ); // Find a section in the current script
 	lpctstr GetSection() const;
 	bool IsSectionType( lpctstr pszName );
 	// Find specific keys in the current section.

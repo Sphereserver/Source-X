@@ -13,6 +13,7 @@
 #include "../common/CException.h"
 #include "../common/sphere_library/CSFileList.h"
 #include "../common/CTextConsole.h"
+#include "../common/CLog.h"
 #include "../common/sphereversion.h"	// sphere version
 #include "../network/network.h"
 #include "../sphere/ProfileTask.h"
@@ -20,7 +21,6 @@
 #include "clients/CAccount.h"
 #include "clients/CClient.h"
 #include "items/CItemShip.h"
-#include "../common/CLog.h"
 #include "CWorld.h"
 #include "CServerTime.h"
 #include "spheresvr.h"

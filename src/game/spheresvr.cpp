@@ -628,7 +628,7 @@ void defragSphere(char *path)
 		"After finished, you will have your '" SPHERE_FILE "*.scp' files converted and saved as '" SPHERE_FILE "*.scp.new'.\n");
 
 	uids = (dword*)calloc(MAX_UID, sizeof(dword));
-	for ( i = 0; i < 3; i++ )
+	for ( i = 0; i < 3; ++i )
 	{
 		strcpy(z, path);
 		if ( i == 0 )		strcat(z, SPHERE_FILE "statics" SPHERE_SCRIPT);
@@ -642,9 +642,9 @@ void defragSphere(char *path)
 			continue;
 		}
 		dBytesRead = dTotalMb = 0;
-		while ( !feof(inf.m_pStream) )
+		while ( !feof(inf._pStream) )
 		{
-			fgets(buf, sizeof(buf), inf.m_pStream);
+			fgets(buf, sizeof(buf), inf._pStream);
 			dBytesRead += strlen(buf);
 			if ( dBytesRead > mb10 )
 			{
@@ -675,7 +675,7 @@ void defragSphere(char *path)
 	g_Log.Event(LOGM_INIT, "Quick-Sorting the UIDs array...\n");
 	dword_q_sort(uids, 0, dTotalUIDs-1);
 
-	for ( i = 0; i < 5; i++ )
+	for ( i = 0; i < 5; ++i )
 	{
 		strcpy(z, path);
 		if ( !i )			strcat(z, SPHERE_FILE "accu.scp");
@@ -742,18 +742,22 @@ void defragSphere(char *path)
 			else if ((( buf[0] == 'T' ) && ( strstr(buf, "TAG.") == buf )) ||		// TAG.=
 					 (( buf[0] == 'R' ) && ( strstr(buf, "REGION.TAG") == buf )))
 			{
-				while ( *p && ( *p != '=' )) p++;
-				p++;
+				while ( *p && ( *p != '=' ))
+                    ++p;
+				++p;
 			}
 			else if (( i == 2 ) && strchr(buf, '='))	// spheredata.scp - plain VARs
 			{
-				while ( *p && ( *p != '=' )) p++;
-				p++;
+				while ( *p && ( *p != '=' ))
+                    ++p;
+				++p;
 			}
-			else p = NULL;
+			else
+                p = nullptr;
 
 			//	UIDs are always hex, so prefixed by 0
-			if ( p && ( *p != '0' )) p = NULL;
+			if ( p && ( *p != '0' ))
+                p = nullptr;
 
 			//	here we got potentialy UID-contained variable
 			//	check if it really is only UID-like var containing
@@ -762,11 +766,12 @@ void defragSphere(char *path)
 				p1 = p;
 				while ( *p1 &&
 					((( *p1 >= '0' ) && ( *p1 <= '9' )) ||
-					 (( *p1 >= 'a' ) && ( *p1 <= 'f' )))) p1++;
+					 (( *p1 >= 'a' ) && ( *p1 <= 'f' ))) )
+                    ++p1;
 				if ( !bSpecial )
 				{
 					if ( *p1 && ( *p1 != '\r' ) && ( *p1 != '\n' )) // some more text in line
-						p = NULL;
+						p = nullptr;
 				}
 			}
 
@@ -784,9 +789,9 @@ void defragSphere(char *path)
 				c2 = *p;
 				*(p-1) = '0';
 				*p = 'x';
-				p--;
+				--p;
 				uid = strtoul(p, &p1, 16);
-				p++;
+				++p;
 				*(p-1) = c1;
 				*p = c2;
 				//	Note 28-Jun-2004

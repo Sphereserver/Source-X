@@ -207,7 +207,8 @@ bool CUOInstall::OpenFile( VERFILE_TYPE i )
 	if ( pFile->IsFileOpen())
 		return true;
 
-	if ( !pFile->GetFilePath().IsEmpty() )
+    lpctstr ptcFilePath = pFile->GetFilePath();
+	if ( !ptcFilePath || !strlen(ptcFilePath) )
 	{
 		if ( pFile->Open(pFile->GetFilePath(), OF_READ|OF_SHARE_DENY_WRITE) )
 			return true;

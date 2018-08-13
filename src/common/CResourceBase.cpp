@@ -140,13 +140,22 @@ CResourceScript * CResourceBase::AddResourceFile( lpctstr pszName )
 		return pNewRes;
 
 	// Find correct path
-	CScript s;
-	if ( ! OpenResourceFind( s, szName ))
-		return nullptr;
+    pNewRes = new CResourceScript();
+    if (! OpenResourceFind(static_cast<CScript&>(*pNewRes), szName))
+    {
+        delete pNewRes;
+        return nullptr;
+    }
+    /*
+    CScript s;
+    if ( ! OpenResourceFind( s, szName ))
+        return nullptr;
 
-	pNewRes = new CResourceScript( s.GetFilePath() );
-	pNewRes->m_iResourceFileIndex = (int)m_ResourceFiles.push_back(pNewRes);
-	return pNewRes;
+    pNewRes = new CResourceScript( s.GetFilePath() );
+    */
+
+    pNewRes->m_iResourceFileIndex = (int)m_ResourceFiles.push_back(pNewRes);
+    return pNewRes;
 }
 
 void CResourceBase::AddResourceDir( lpctstr pszDirName )
@@ -167,7 +176,7 @@ void CResourceBase::AddResourceDir( lpctstr pszDirName )
 		iRet = filelist.ReadDir( sFilePath, true );
 		if ( iRet < 0 )
 		{
-			DEBUG_ERR(( "DirList=%d for '%s'\n", iRet, static_cast<lpctstr>(pszDirName) ));
+			DEBUG_ERR(( "DirList=%d for '%s'\n", iRet, pszDirName ));
 			return;
 		}
 	}
@@ -189,7 +198,7 @@ void CResourceBase::LoadResourcesOpen( CScript * pScript )
 	// Load an already open resource file.
 
 	ASSERT(pScript);
-	ASSERT( pScript->IsFileOpen() );
+    ASSERT( pScript->HasCache() );
 
 	int iSections = 0;
 	while ( pScript->FindNextSection() )
@@ -199,7 +208,7 @@ void CResourceBase::LoadResourcesOpen( CScript * pScript )
 	}
 
 	if ( ! iSections )
-		DEBUG_WARN(( "No resource sections in '%s'\n", (lpctstr)pScript->GetFilePath()));
+		DEBUG_WARN(( "No resource sections in '%s'\n", pScript->GetFilePath()));
 }
 
 bool CResourceBase::LoadResources( CResourceScript * pScript )
@@ -211,11 +220,11 @@ bool CResourceBase::LoadResources( CResourceScript * pScript )
 
 	if ( ! pScript->Open())
 	{
-		g_Log.Event(LOGL_CRIT|LOGM_INIT, "[RESOURCES] '%s' not found...\n", static_cast<lpctstr>(pScript->GetFilePath()));
+		g_Log.Event(LOGL_CRIT|LOGM_INIT, "[RESOURCES] '%s' not found...\n", pScript->GetFilePath());
 		return false;
 	}
 
-	g_Log.Event(LOGM_INIT, "Loading %s\n", static_cast<lpctstr>(pScript->GetFilePath()));
+	g_Log.Event(LOGM_INIT, "Loading %s\n", pScript->GetFilePath());
 
 	LoadResourcesOpen( pScript );
 	pScript->Close();
@@ -627,16 +636,17 @@ bool CRegion::MakeRegionName()
 //***************************************************************************
 // -CResourceScript
 
-bool CResourceScript::CheckForChange()
+bool CResourceScript::_CheckForChange()
 {
-	ADDTOCALLSTACK("CResourceScript::CheckForChange");
+	ADDTOCALLSTACK("CResourceScript::_CheckForChange");
 	// Get Size/Date info on the file to see if it has changed.
 	time_t dateChange;
 	dword dwSize;
+    lpctstr ptcFilePath = _GetFilePath();
 
-	if ( ! CSFileList::ReadFileInfo( GetFilePath(), dateChange, dwSize ))
+	if ( !CSFileList::ReadFileInfo(ptcFilePath, dateChange, dwSize) )
 	{
-		DEBUG_ERR(( "Can't get stats info for file '%s'\n", static_cast<lpctstr>(GetFilePath()) ));
+		DEBUG_ERR(( "Can't get stats info for file '%s'\n", ptcFilePath ));
 		return false;
 	}
 
@@ -645,30 +655,32 @@ bool CResourceScript::CheckForChange()
 	// See If the script has changed
 	if ( ! IsFirstCheck() )
 	{
-		if ( m_dwSize != dwSize || m_dateChange != dateChange )
+		if ( (m_dwSize != dwSize) || (m_dateChange != dateChange) )
 		{
-			g_Log.Event(LOGL_WARN, "Resource '%s' changed, resync.\n", static_cast<lpctstr>(GetFilePath()));
+			g_Log.Event(LOGL_WARN, "Resource '%s' changed, resync.\n", ptcFilePath);
 			fChange = true;
 		}
 	}
 
 	m_dwSize = dwSize;			// Compare to see if this has changed.
-
 	m_dateChange = dateChange;	// real world time/date of last change.
 	return fChange;
+}
+bool CResourceScript::CheckForChange()
+{
+    ADDTOCALLSTACK("CResourceScript::CheckForChange");
+    THREAD_UNIQUE_LOCK_RETURN(_CheckForChange());
 }
 
 
 void CResourceScript::ReSync()
 {
 	ADDTOCALLSTACK("CResourceScript::ReSync");
-	if ( ! IsFirstCheck() )
-	{
-		if ( ! CheckForChange() )
-			return;
-	}
-	if ( ! Open() )
+	if ( !IsFirstCheck() && !CheckForChange() )
+        return;
+	if ( !Open() )
 		return;
+    _fCacheToBeUpdated = true;
 	g_Cfg.LoadResourcesOpen( this );
 	Close();
 }
@@ -678,24 +690,25 @@ bool CResourceScript::Open( lpctstr pszFilename, uint wFlags )
 	ADDTOCALLSTACK("CResourceScript::Open");
 	// Open the file if it is not already open for use.
 
-	if ( !IsFileOpen() )
+	if ( !IsFileOpen() && !(wFlags & OF_READWRITE))
 	{
-		uint	mode = 0;
-		mode |= OF_SHARE_DENY_WRITE;
-
-		if ( ! CScript::Open( pszFilename, wFlags|mode))	// OF_READ
-			return false;
-		if ( !( wFlags & OF_READWRITE ) && CheckForChange() )
+        if (_strFileName.Compare(pszFilename) || !HasCache())
+        {
+            if ( ! CScript::Open( pszFilename, wFlags|OF_SHARE_DENY_WRITE))	// OF_READ
+                return false;
+        }
+        if ( CheckForChange() )
 		{
+            _fCacheToBeUpdated = true;
 			//  what should we do about it ? reload it of course !
 			g_Serv.SetServerMode(SERVMODE_ResyncLoad);
 			g_Cfg.LoadResourcesOpen( this );
 			g_Serv.SetServerMode(SERVMODE_Run);
 		}
 	}
+    ASSERT(HasCache());
 
-	m_iOpenCount++;
-	ASSERT( IsFileOpen() );
+	++m_iOpenCount;
 	return true;
 }
 
@@ -713,7 +726,7 @@ void CResourceScript::Close()
 	// Close it later when we know it has not been used for a bit.
 	if ( ! IsFileOpen())
 		return;
-	m_iOpenCount--;
+	--m_iOpenCount;
 
 	if ( ! m_iOpenCount )
 	{
@@ -728,60 +741,75 @@ void CResourceScript::Close()
 //	CResourceLock
 //
 
-bool CResourceLock::OpenBase()
+bool CResourceLock::_Open(lpctstr ptcUnused, uint uiUnused)
 {
-	ADDTOCALLSTACK("CResourceLock::OpenBase");
+	ADDTOCALLSTACK("CResourceLock::_Open");
+    UNREFERENCED_PARAMETER(ptcUnused);
+    UNREFERENCED_PARAMETER(uiUnused);
 	ASSERT(m_pLock);
 
-	if ( m_pLock->IsFileOpen() )
-		m_PrvLockContext = m_pLock->GetContext();
+	if ( m_pLock->_IsFileOpen() )
+		m_PrvLockContext = m_pLock->_GetContext();
 
-	if ( ! m_pLock->Open() )	// make sure the original is open.
-		return false;
-
+    ASSERT(m_pLock->_HasCache());
+ 
 	// Open a seperate copy of an already opened file.
-	m_pStream = m_pLock->m_pStream;
-	m_llFile = m_pLock->m_llFile;
+	_pStream = m_pLock->_pStream;
+	_fileDescriptor = m_pLock->_fileDescriptor;
 #ifndef _NOSCRIPTCACHE
-	PhysicalScriptFile::dupeFrom(m_pLock);
+	PhysicalScriptFile::_dupeFrom(m_pLock);
 //#else
-//	dupeFrom(m_pLock);
+//	_dupeFrom(m_pLock);
 #endif
 	// Assume this is the new error context !
-	m_PrvScriptContext.OpenScript( this );
+	m_PrvScriptContext._OpenScript( this );
 	return true;
 }
-
-void CResourceLock::CloseBase()
+bool CResourceLock::Open(lpctstr ptcUnused, uint uiUnused)
 {
-	ADDTOCALLSTACK("CResourceLock::CloseBase");
-	ASSERT(m_pLock);
-	m_pStream = nullptr;
-
-	// Assume this is not the context anymore.
-	m_PrvScriptContext.Close();
-
-	if ( m_PrvLockContext.IsValid())
-		m_pLock->SeekContext(m_PrvLockContext);	// no need to set the line number as it should not have changed.
-
-	// Restore old position in the file (if there was one)
-	m_pLock->Close();	// decrement open count on the orig.
-
-	if ( IsWriteMode() || ( GetFullMode() & OF_DEFAULTMODE ))
-		Init();
+    ADDTOCALLSTACK("CResourceLock::Open");
+    THREAD_UNIQUE_LOCK_RETURN(CResourceLock::_Open(ptcUnused, uiUnused));
 }
 
-bool CResourceLock::ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
+void CResourceLock::_Close()
 {
-	ADDTOCALLSTACK("CResourceLock::ReadTextLine");
+	ADDTOCALLSTACK("CResourceLock::_Close");
+	
+    if (!m_pLock)
+        return;
+
+	_pStream = nullptr;
+
+	// Assume this is not the context anymore.
+	m_PrvScriptContext._Close();
+
+	if ( m_PrvLockContext.IsValid())
+		m_pLock->_SeekContext(m_PrvLockContext);	// no need to set the line number as it should not have changed.
+
+	// Restore old position in the file (if there was one)
+	m_pLock->_Close();	// decrement open count on the orig.
+
+	if ( _IsWriteMode() || ( _GetFullMode() & OF_DEFAULTMODE ))
+		_Init();
+}
+void CResourceLock::Close()
+{
+    ADDTOCALLSTACK("CResourceLock::Close");
+    THREAD_UNIQUE_LOCK_SET;
+    CResourceLock::_Close();
+}
+
+bool CResourceLock::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
+{
+	ADDTOCALLSTACK("CResourceLock::_ReadTextLine");
 	// ARGS:
 	// fRemoveBlanks = Don't report any blank lines, (just keep reading)
-	//
 
 	ASSERT(m_pLock);
 	ASSERT( ! IsBinaryMode() );
 
-	while ( PhysicalScriptFile::ReadString( GetKeyBufferRaw(SCRIPT_MAX_LINE_LEN), SCRIPT_MAX_LINE_LEN ))
+    tchar* ptcBuf = _GetKeyBufferRaw(SCRIPT_MAX_LINE_LEN);
+	while ( PhysicalScriptFile::_ReadString( ptcBuf, SCRIPT_MAX_LINE_LEN ))
 	{
 		m_pLock->m_iLineNum = ++m_iLineNum;	// share this with original open.
 		if ( fRemoveBlanks )
@@ -795,6 +823,11 @@ bool CResourceLock::ReadTextLine( bool fRemoveBlanks ) // Read a line from the o
 	m_pszKey[0] = '\0';
 	return false;
 }
+bool CResourceLock::ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
+{
+    ADDTOCALLSTACK("CResourceLock::ReadTextLine");
+    THREAD_UNIQUE_LOCK_RETURN(_ReadTextLine(fRemoveBlanks));
+}
 
 int CResourceLock::OpenLock( CResourceScript * pLock, CScriptLineContext context )
 {
@@ -805,10 +838,10 @@ int CResourceLock::OpenLock( CResourceScript * pLock, CScriptLineContext context
 	Close();
 	m_pLock = pLock;
 
-	if ( ! Open( m_pLock->GetFilePath(), m_pLock->GetMode() ) )	// open my copy.
-		return -2;
+    if ( ! Open() )	    // open my copy.
+        return -2;
 
-	if ( ! SeekContext( context ) )
+	if (!SeekContext(context))
 		return -3;
 
 	// Propagate m_iResourceFileIndex from the CResourceScript to this CResourceLock
@@ -1026,7 +1059,7 @@ bool CResourceLink::ResourceLock( CResourceLock &s )
 
 	// ret = -2 or -3
 	lpctstr pszName = GetResourceName();
-	DEBUG_ERR(("ResourceLock '%s':%" PRIuSIZE_T " id=%s FAILED\n", static_cast<lpctstr>(s.GetFilePath()), m_Context.m_iOffset, pszName));
+	DEBUG_ERR(("ResourceLock '%s':%d id=%s FAILED\n", s.GetFilePath(), m_Context.m_iOffset, pszName));
 
 	return false;
 }
@@ -1035,12 +1068,18 @@ bool CResourceLink::ResourceLock( CResourceLock &s )
 //***************************************************************************
 //	CScriptFileContext
 
-void CScriptFileContext::OpenScript( const CScript * pScriptContext )
+void CScriptFileContext::_OpenScript( const CScript * pScriptContext )
 {
-	ADDTOCALLSTACK("CScriptFileContext::OpenScript");
-	Close();
+	ADDTOCALLSTACK("CScriptFileContext::_OpenScript");
+	_Close();
 	m_fOpenScript = true;
 	m_pPrvScriptContext = g_Log.SetScriptContext( pScriptContext );
+}
+void CScriptFileContext::OpenScript( const CScript * pScriptContext )
+{
+    ADDTOCALLSTACK("CScriptFileContext::OpenScript");
+    THREAD_UNIQUE_LOCK_SET;
+    _OpenScript(pScriptContext);
 }
 
 void CScriptFileContext::Close()
@@ -1051,6 +1090,12 @@ void CScriptFileContext::Close()
 		m_fOpenScript = false;
 		g_Log.SetScriptContext( m_pPrvScriptContext );
 	}
+}
+void CScriptFileContext::_Close()
+{
+    ADDTOCALLSTACK("CScriptFileContext::_Close");
+    THREAD_UNIQUE_LOCK_SET;
+    Close();
 }
 
 

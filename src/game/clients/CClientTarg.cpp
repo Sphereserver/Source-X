@@ -453,7 +453,7 @@ int CClient::Cmd_Extract( CScript * pScript, CRectMap &rect, int & zlowest )
 
 			int x2 = pBlock->GetOffsetX(mx);
 			int y2 = pBlock->GetOffsetY(my);
-			for ( size_t i = 0; i < iQty; i++ )
+			for ( uint i = 0; i < iQty; ++i )
 			{
 				if ( ! pBlock->m_Statics.IsStaticPoint( i, x2, y2 ))
 					continue;

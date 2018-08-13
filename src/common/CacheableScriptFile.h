@@ -13,11 +13,6 @@
 
 class CacheableScriptFile : public CSFileText
 {
-protected:
-	virtual bool OpenBase();
-	virtual void CloseBase();
-	void dupeFrom(CacheableScriptFile *other);
-
 public:
 	CacheableScriptFile();
 	~CacheableScriptFile();
@@ -25,23 +20,40 @@ private:
 	CacheableScriptFile(const CacheableScriptFile& copy);
 	CacheableScriptFile& operator=(const CacheableScriptFile& other);
 
-public:
-	virtual bool IsFileOpen() const;
-	virtual bool IsEOF() const;
-	virtual tchar * ReadString(tchar *pBuffer, int sizemax);
-	virtual int Seek(int offset = 0, int origin = SEEK_SET);
-	virtual int GetPosition() const;
+protected:  virtual bool _Open(lpctstr ptcFilename = nullptr, uint uiModeFlags = OF_READ|OF_SHARE_DENY_NONE) override;
+public:     virtual bool Open(lpctstr ptcFilename = nullptr, uint uiModeFlags = OF_READ|OF_SHARE_DENY_NONE) override;
+protected:  virtual void _Close() override;
+public:     virtual void Close() override;
+            virtual bool _IsFileOpen() const override;
+            virtual bool IsFileOpen() const override;
+protected:  virtual int _Seek(int iOffset = 0, int iOrigin = SEEK_SET) override;
+public:     virtual int Seek(int iOffset = 0, int iOrigin = SEEK_SET) override;
+
+protected:  virtual bool _IsEOF() const override;
+public:     virtual bool IsEOF() const override;
+protected:  virtual int _GetPosition() const override;
+public:     virtual int GetPosition() const override;
+
+protected:  virtual tchar * _ReadString(tchar *pBuffer, int sizemax) override;
+public:     virtual tchar * ReadString(tchar *pBuffer, int sizemax) override;
+
+protected: 
+    void _dupeFrom(CacheableScriptFile *other);
+    void dupeFrom(CacheableScriptFile *other);
+    
+protected:  bool _HasCache() const;
+public:     bool HasCache() const;
 
 private:
-	bool m_closed;
-	bool m_realFile;
-	int m_currentLine;
+	bool _fClosed;
+	bool _fRealFile;
+	int _iCurrentLine;
 
 protected:
-	std::vector<std::string> m_fileContent;
+	std::vector<std::string>* _fileContent; // It's better to have a pointer so that CResourceLock can access to this
 
-private:
-	bool useDefaultFile() const;
+private:    bool _useDefaultFile() const;
+//public:     bool useDefaultFile() const;
 };
 
 #endif // _INC_CACHEABLESCRIPTFILE_H

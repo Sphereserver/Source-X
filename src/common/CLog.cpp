@@ -112,7 +112,7 @@ bool CLog::OpenLog( lpctstr pszBaseDirName )	// name set previously.
 	// Use the OF_READWRITE to append to an existing file.
 	if ( CSFileText::Open( sFileName.GetPtr(), OF_SHARE_DENY_NONE|OF_READWRITE|OF_TEXT ) )
 	{
-		setvbuf(m_pStream, NULL, _IONBF, 0);
+		setvbuf(_pStream, NULL, _IONBF, 0);
         Printf("Log date: %s\n", m_dateStamp.Format(NULL));
 		return true;
 	}

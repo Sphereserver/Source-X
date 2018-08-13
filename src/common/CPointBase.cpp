@@ -283,17 +283,17 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 
 		if ( *pszKey == '\0' )
 		{
-			int iStaticQty = 0;
-			for ( size_t i = 0; i < pBlock->m_Statics.GetStaticQty(); ++i )
+			uint uiStaticQty = 0, uiStaticMaxQty = pBlock->m_Statics.GetStaticQty();
+			for ( uint i = 0; i < uiStaticMaxQty; ++i )
 			{
 				const CUOStaticItemRec * pStatic = pBlock->m_Statics.GetStatic( i );
 				CPointMap ptTest( pStatic->m_x+pBlock->m_x, pStatic->m_y+pBlock->m_y, pStatic->m_z, this->m_map );
 				if ( this->GetDist( ptTest ) > 0 )
 					continue;
-				++iStaticQty;
+				++uiStaticQty;
 			}
 
-			sVal.FormatVal( iStaticQty );
+			sVal.FormatUVal( uiStaticQty );
 			return true;
 		}
 
@@ -327,7 +327,8 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 				sVal.FormatVal( 0 );
 				return false;
 			}
-			for ( size_t i = 0; i < pBlock->m_Statics.GetStaticQty(); pStatic = NULL, ++i )
+            uint uiStaticMaxQty = pBlock->m_Statics.GetStaticQty();
+			for ( uint i = 0; i < uiStaticMaxQty; pStatic = NULL, ++i )
 			{
 				pStatic = pBlock->m_Statics.GetStatic( i );
 				CPointMap ptTest( pStatic->m_x+pBlock->m_x, pStatic->m_y+pBlock->m_y, pStatic->m_z, this->m_map);
@@ -339,7 +340,8 @@ bool CPointBase::r_WriteVal( lpctstr pszKey, CSString & sVal ) const
 		}
 		else
 		{
-			for ( size_t i = 0; i < pBlock->m_Statics.GetStaticQty(); pStatic = NULL, ++i )
+            uint uiStaticMaxQty = pBlock->m_Statics.GetStaticQty();
+			for ( uint i = 0; i < uiStaticMaxQty; pStatic = NULL, ++i )
 			{
 				pStatic = pBlock->m_Statics.GetStatic( i );
 				CPointMap ptTest( pStatic->m_x+pBlock->m_x, pStatic->m_y+pBlock->m_y, pStatic->m_z, this->m_map);

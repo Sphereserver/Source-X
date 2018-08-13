@@ -1733,9 +1733,9 @@ bool CItemMultiCustom::LoadValidItems()
 
 void CItemMultiCustom::CSphereMultiCustom::LoadFrom( CItemMultiCustom::DesignDetails * pDesign )
 {
-	m_iItemQty = pDesign->m_vectorComponents.size();
+	m_iItemQty = (uint)pDesign->m_vectorComponents.size();
 
 	m_pItems = new CUOMultiItemRec_HS[m_iItemQty];
-	for ( size_t i = 0; i < m_iItemQty; i++ )
+	for ( uint i = 0; i < m_iItemQty; ++i )
 		memcpy(&m_pItems[i], &pDesign->m_vectorComponents.at(i)->m_item, sizeof(CUOMultiItemRec_HS));
 }

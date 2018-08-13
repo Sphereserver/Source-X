@@ -41,8 +41,8 @@ bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist
 		if ( dir % 2 && !IsSetEF(EF_NoDiagonalCheckLOS) )	// test only diagonal dirs
 		{
 			CPointMap ptTest = ptSrc;
-			DIR_TYPE dirTest1 = static_cast<DIR_TYPE>(dir - 1);	// get 1st ortogonal
-			DIR_TYPE dirTest2 = static_cast<DIR_TYPE>(dir + 1);	// get 2nd ortogonal
+			DIR_TYPE dirTest1 = (DIR_TYPE)(dir - 1);	// get 1st ortogonal
+			DIR_TYPE dirTest2 = (DIR_TYPE)(dir + 1);	// get 2nd ortogonal
 			if ( dirTest2 == DIR_QTY )		// roll over
 				dirTest2 = DIR_N;
 
@@ -93,8 +93,8 @@ bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist
 }
 
 // a - gradient < x < b + gradient
-#define BETWEENPOINT(coord, coordt, coords) ( (coord > ((double)minimum(coordt, coords) - 0.5)) && (coord < ((double)maximum(coordt, coords) + 0.5)) )
-#define APPROX(num) ((double)((num - floor(num)) > 0.5)? ceil(num) : floor(num))
+#define BETWEENPOINT(coord, coordt, coords) ( (coord > ((float)minimum(coordt, coords) - 0.5)) && (coord < ((float)maximum(coordt, coords) + 0.5)) )
+#define APPROX(num) ((float)((num - floor(num)) > 0.5)? ceil(num) : floor(num))
 //#define CALCITEMHEIGHT(num) num + ((pItemDef->GetTFlags() & 0x400)? pItemDef->GetHeight() / 2 : pItemDef->GetHeight())
 #define WARNLOS(_x_)		if ( g_Cfg.m_iDebugFlags & DEBUGF_LOS ) { g_pLog->EventWarn _x_; }
 
@@ -135,25 +135,25 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 	dy = ptDst.m_y - ptSrc.m_y;
 	dz = ptDst.m_z - ptSrc.m_z;
 
-	double dist2d, dist3d;
-	dist2d = sqrt(static_cast<double>(dx*dx + dy*dy));
+    float dist2d, dist3d;
+	dist2d = sqrt((float)(dx*dx + dy*dy));
 	if ( dz )
-		dist3d = sqrt(static_cast<double>(dist2d*dist2d + dz*dz));
+		dist3d = sqrt((float)(dist2d*dist2d + dz*dz));
 	else
 		dist3d = dist2d;
 
-	if ( APPROX(dist2d) > static_cast<double>(iMaxDist) )
+	if ( APPROX(dist2d) > (float)iMaxDist )
 	{
-		WARNLOS(("( APPROX(dist2d)(%f) > ((double)iMaxDist)(%f) ) --> NOLOS\n", APPROX(dist2d), (double)iMaxDist));
+		WARNLOS(("( APPROX(dist2d)(%f) > ((double)iMaxDist)(%f) ) --> NOLOS\n", APPROX(dist2d), (float)iMaxDist));
 		return CanSeeLOS_New_Failed(pptBlock, ptNow);
 	}
 
-	double dFactorX, dFactorY, dFactorZ;
+	float dFactorX, dFactorY, dFactorZ;
 	dFactorX = dx / dist3d;
 	dFactorY = dy / dist3d;
 	dFactorZ = dz / dist3d;
 
-	double nPx, nPy, nPz;
+    float nPx, nPy, nPz;
 	nPx = ptSrc.m_x;
 	nPy = ptSrc.m_y;
 	nPz = ptSrc.m_z;
@@ -331,7 +331,8 @@ bool CChar::CanSeeLOS_New( const CPointMap &ptDst, CPointMap *pptBlock, int iMax
 		{
 			if ( !((flags & LOS_NB_LOCAL_STATIC) && (pSrcRegion == pNowRegion)) )
 			{
-				for ( size_t s = 0; s < pBlock->m_Statics.GetStaticQty(); pStatic = NULL, pItemDef = NULL, ++s )
+                uint uiStaticMaxQty = pBlock->m_Statics.GetStaticQty();
+				for ( uint s = 0; s < uiStaticMaxQty; pStatic = NULL, pItemDef = NULL, ++s )
 				{
 					pStatic = pBlock->m_Statics.GetStatic(s);
 					if ( (pStatic->m_x + pBlock->m_x != ptNow.m_x) || (pStatic->m_y + pBlock->m_y != ptNow.m_y) )

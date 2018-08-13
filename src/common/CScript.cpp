@@ -312,9 +312,9 @@ CScriptKey::~CScriptKey()
 ///////////////////////////////////////////////////////////////
 // -CScriptKeyAlloc
 
-tchar * CScriptKeyAlloc::GetKeyBufferRaw( size_t iLen )
+tchar * CScriptKeyAlloc::_GetKeyBufferRaw( size_t iLen )
 {
-	ADDTOCALLSTACK("CScriptKeyAlloc::GetKeyBufferRaw");
+	ADDTOCALLSTACK("CScriptKeyAlloc::_GetKeyBufferRaw");
 	// iLen = length of the string we want to hold.
 	if ( iLen > SCRIPT_MAX_LINE_LEN )
 		iLen = SCRIPT_MAX_LINE_LEN;
@@ -328,6 +328,13 @@ tchar * CScriptKeyAlloc::GetKeyBufferRaw( size_t iLen )
 
 	return m_pszKey;
 }
+/*
+tchar * CScriptKeyAlloc::GetKeyBufferRaw( size_t iLen )
+{
+    ADDTOCALLSTACK("CScriptKeyAlloc::GetKeyBufferRaw");
+    THREAD_UNIQUE_LOCK_RETURN(_GetKeyBufferRaw(iLen));
+}
+*/
 
 tchar * CScriptKeyAlloc::GetKeyBuffer()
 {
@@ -342,13 +349,13 @@ bool CScriptKeyAlloc::ParseKey( lpctstr pszKey )
 	// Skip leading white space
 	if ( ! pszKey )
 	{
-		GetKeyBufferRaw(0);
+		_GetKeyBufferRaw(0);
 		return false;
 	}
 
 	GETNONWHITESPACE( pszKey );
 
-	tchar * pBuffer = GetKeyBufferRaw( strlen( pszKey ));
+	tchar * pBuffer = _GetKeyBufferRaw( strlen( pszKey ));
 	ASSERT(pBuffer);
 
 	size_t iLen = m_Mem.GetDataLength() - 1;
@@ -374,7 +381,7 @@ bool CScriptKeyAlloc::ParseKey( lpctstr pszKey, lpctstr pszVal )
 	if ( pszVal )
 		lenval = strlen( pszVal );
 
-	m_pszKey = GetKeyBufferRaw( lenkey + lenval + 1 );
+	m_pszKey = _GetKeyBufferRaw( lenkey + lenval + 1 );
 
 	strcpy( m_pszKey, pszKey );
 	m_pszArg = m_pszKey + lenkey;
@@ -433,77 +440,88 @@ void CScriptKeyAlloc::ParseKeyLate()
 
 CScript::CScript()
 {
-	InitBase();
+	_InitBase();
 }
 
 CScript::CScript( lpctstr pszKey )
 {
-	InitBase();
+	_InitBase();
 	ParseKey(pszKey);
 }
 
 CScript::CScript( lpctstr pszKey, lpctstr pszVal )
 {
-	InitBase();
+	_InitBase();
 	ParseKey( pszKey, pszVal );
 }
 
-void CScript::InitBase()
+void CScript::_InitBase()
 {
-	ADDTOCALLSTACK("CScript::InitBase");
+	//ADDTOCALLSTACK("CScript::InitBase");
 	m_iResourceFileIndex = -1;
 	m_iLineNum		= 0;
 	m_fSectionHead	= false;
 	m_iSectionData	= 0;
+    _fCacheToBeUpdated = false;
 	InitKey();
 }
 
-bool CScript::Open( lpctstr pszFilename, uint wFlags )
+bool CScript::_Open( lpctstr ptcFilename, uint uiFlags )
 {
-	ADDTOCALLSTACK("CScript::Open");
+	ADDTOCALLSTACK("CScript::_Open");
 	// If we are in read mode and we have no script file.
 	// ARGS: wFlags = OF_READ, OF_NONCRIT etc
 	// RETURN: true = success.
 
-	InitBase();
+	_InitBase();
 
-	if ( pszFilename == NULL )
-		pszFilename = GetFilePath();
-	else
-		SetFilePath( pszFilename );
+	if ( ptcFilename == nullptr )
+		ptcFilename = _strFileName.GetPtr();
+	else if (_strFileName.Compare(ptcFilename))
+		_SetFilePath( ptcFilename );
 
-	lpctstr pszTitle = GetFileTitle();
-	if ( pszTitle == NULL || pszTitle[0] == '\0' )
+	lpctstr ptcTitle = _GetFileTitle();
+	if ( !ptcTitle || (ptcTitle[0] == '\0') )
 		return false;
 
-	lpctstr pszExt = GetFilesExt( GetFilePath() );
-	if ( pszExt == NULL )
+	lpctstr ptcExt = GetFilesExt(ptcFilename);
+	if ( !ptcExt )
 	{
-		tchar szTemp[ _MAX_PATH ];
-		strcpy( szTemp, GetFilePath() );
-		strcat( szTemp, SPHERE_SCRIPT );
-		SetFilePath( szTemp );
-		wFlags |= OF_TEXT;
+		tchar ptcTemp[_MAX_PATH];
+		strncpy(ptcTemp, ptcFilename, _MAX_PATH-4); // -4 beause of SPHERE_SCRIPT, which is = ".scp"
+		strcat(ptcTemp, SPHERE_SCRIPT);
+		_SetFilePath(ptcTemp);
+		uiFlags |= OF_TEXT;
 	}
 
-	if ( !PhysicalScriptFile::Open( GetFilePath(), wFlags ))
+	if ( (_fCacheToBeUpdated || !_HasCache()))
 	{
-		if ( ! ( wFlags & OF_NONCRIT ))
-			g_Log.Event(LOGL_WARN, "'%s' not found...\n", static_cast<lpctstr>(GetFilePath()));
-		return false;
+        if (!PhysicalScriptFile::_Open(ptcFilename, uiFlags))
+        {
+            if ( ! ( uiFlags & OF_NONCRIT ))
+                g_Log.Event(LOGL_WARN, "'%s' not found...\n", _strFileName.GetPtr());
+            return false;
+        }
+        _fCacheToBeUpdated = false;
 	}
 
 	return true;
 }
 
-bool CScript::ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
+bool CScript::Open( lpctstr ptcFilename, uint uiFlags )
 {
-	ADDTOCALLSTACK("CScript::ReadTextLine");
+    ADDTOCALLSTACK("CScript::Open");
+    THREAD_UNIQUE_LOCK_RETURN(CScript::_Open(ptcFilename, uiFlags));
+}
+
+bool CScript::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
+{
+	ADDTOCALLSTACK("CScript::_ReadTextLine");
 	// ARGS:
 	// fRemoveBlanks = Don't report any blank lines, (just keep reading)
-	//
 
-	while ( PhysicalScriptFile::ReadString( GetKeyBufferRaw(SCRIPT_MAX_LINE_LEN), SCRIPT_MAX_LINE_LEN ))
+    tchar* ptcBuf = _GetKeyBufferRaw(SCRIPT_MAX_LINE_LEN);
+	while ( PhysicalScriptFile::_ReadString( ptcBuf, SCRIPT_MAX_LINE_LEN ))
 	{
 		++m_iLineNum;
 		if ( fRemoveBlanks )
@@ -516,6 +534,11 @@ bool CScript::ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened 
 
 	m_pszKey[0] = '\0';
 	return false;
+}
+bool CScript::ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened script file
+{
+    ADDTOCALLSTACK("CScript::ReadTextLine");
+    THREAD_UNIQUE_LOCK_RETURN(_ReadTextLine(fRemoveBlanks));
 }
 
 bool CScript::FindTextHeader( lpctstr pszName ) // Find a section in the current script
@@ -544,16 +567,21 @@ bool CScript::FindTextHeader( lpctstr pszName ) // Find a section in the current
 	return true;
 }
 
-int CScript::Seek( int offset, int iOrigin )
+int CScript::_Seek( int iOffset, int iOrigin )
 {
-	ADDTOCALLSTACK("CScript::Seek");
+	ADDTOCALLSTACK("CScript::_Seek");
 	// Go to the start of a new section.
 	// RETURN: the new offset in bytes from start of file.
-	if ( offset == 0 && iOrigin == SEEK_SET )
+	if ( (iOffset == 0) && (iOrigin == SEEK_SET) )
 		m_iLineNum = 0;	// so we don't have to override SeekToBegin
 	m_fSectionHead = false;		// unknown, so start at the beginning.
-	m_iSectionData = offset;
-	return ( PhysicalScriptFile::Seek(offset,iOrigin) );
+	m_iSectionData = iOffset;
+	return PhysicalScriptFile::_Seek(iOffset,iOrigin);
+}
+int CScript::Seek( int iOffset, int iOrigin )
+{
+    ADDTOCALLSTACK("CScript::Seek");
+    THREAD_UNIQUE_LOCK_RETURN(CScript::_Seek(iOffset, iOrigin));
 }
 
 bool CScript::FindNextSection()
@@ -753,30 +781,50 @@ bool CScript::FindKey( lpctstr pszName ) // Find a key in the current section
 	return false;
 }
 
+void CScript::_Close()
+{
+	ADDTOCALLSTACK("CScript::_Close");
+	// EndSection();
+	PhysicalScriptFile::_Close();
+}
 void CScript::Close()
 {
-	ADDTOCALLSTACK("CScript::Close");
-	// EndSection();
-	PhysicalScriptFile::Close();
+    ADDTOCALLSTACK("CScript::Close");
+    // EndSection();
+    PhysicalScriptFile::Close();
 }
 
 void CScript::CloseForce()
 {
+    ADDTOCALLSTACK("CScript::CloseForce");
 	CScript::Close();
 }
 
-bool CScript::SeekContext( CScriptLineContext LineContext )
+bool CScript::_SeekContext( CScriptLineContext LineContext )
 {
 	m_iLineNum = LineContext.m_iLineNum;
-	return (Seek( LineContext.m_iOffset, SEEK_SET ) == LineContext.m_iOffset);
+	return (_Seek( LineContext.m_iOffset, SEEK_SET ) == LineContext.m_iOffset);
+}
+bool CScript::SeekContext( CScriptLineContext LineContext )
+{
+    THREAD_UNIQUE_LOCK_RETURN(_SeekContext(LineContext));
+}
+
+CScriptLineContext CScript::_GetContext() const
+{
+	CScriptLineContext LineContext;
+	LineContext.m_iLineNum = m_iLineNum;
+	LineContext.m_iOffset = _GetPosition();
+	return LineContext;
 }
 
 CScriptLineContext CScript::GetContext() const
 {
-	CScriptLineContext LineContext;
-	LineContext.m_iLineNum = m_iLineNum;
-	LineContext.m_iOffset = GetPosition();
-	return ( LineContext );
+    THREAD_UNIQUE_LOCK_SET;
+    CScriptLineContext LineContext;
+    LineContext.m_iLineNum = m_iLineNum;
+    LineContext.m_iOffset = _GetPosition();
+    TS_RETURN(LineContext);
 }
 
 bool _cdecl CScript::WriteSection( lpctstr pszSection, ... )

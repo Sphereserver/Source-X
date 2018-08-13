@@ -733,7 +733,7 @@ inline height_t CItemBase::GetItemHeightFlags( const CUOItemTypeRec_HS & tiledat
 
 height_t CItemBase::GetItemHeight( ITEMID_TYPE id, dword & wBlockThis ) // static
 {
-	ADDTOCALLSTACK("CItemBase::GetItemHeight");
+	ADDTOCALLSTACK_INTENSIVE("CItemBase::GetItemHeight");
 	// Get just the height and the blocking flags for the item by id.
 	// used for walk block checking.
 

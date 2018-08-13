@@ -9,62 +9,23 @@
 #include "CSFile.h"
 
 
-// CFile:: Constructors, Destructor, Asign operator.
+// CSFile:: Constructors, Destructor, Asign operator.
 
-CFile::CFile()
+CSFile::CSFile()
 {
-	m_llFile = -1;
+    _fileDescriptor = _kInvalidFD;
+    _uiMode = 0;
 }
 
-CFile::~CFile()
+CSFile::~CSFile()
 {
-	Close();
+    CSFile::Close();
 }
 
-// CFile:: File Management.
 
-void CFile::Close()
-{
-	if ( m_llFile != -1)
-	{
-#ifdef _WIN32
-		CloseHandle( (HANDLE)m_llFile );
-#else
-		close( m_llFile );
-#endif
-		m_llFile = -1;
-	}
-}
+// CSFile:: Error Logging.
 
-const CSString & CFile::GetFilePath() const
-{
-	return m_strFileName;
-}
-
-bool CFile::SetFilePath( lpctstr pszName )
-{
-	ADDTOCALLSTACK("CFile::SetFilePath");
-	if ( pszName == nullptr )
-		return false;
-	if ( ! m_strFileName.CompareNoCase( pszName ))
-		return true;
-
-	bool fIsOpen = ( m_llFile != -1);
-	if ( fIsOpen )
-		Close();
-	m_strFileName = pszName;
-	if ( fIsOpen )
-		return Open( NULL, OF_READ|OF_BINARY ); // GetMode()	// open it back up. (in same mode as before)
-	return true;
-}
-
-lpctstr CFile::GetFileTitle() const
-{
-	ADDTOCALLSTACK("CFile::GetFileTitle");
-	return CSFile::GetFilesTitle( GetFilePath() );
-}
-
-int CFile::GetLastError()
+int CSFile::GetLastError()
 {
 #ifdef _WIN32
     return ::GetLastError();
@@ -73,107 +34,230 @@ int CFile::GetLastError()
 #endif
 }
 
-void CFile::NotifyIOError( lpctstr szMessage ) const
+void CSFile::_NotifyIOError( lpctstr szMessage ) const
 {
-    int iErrorCode = this->GetLastError();
+    ADDTOCALLSTACK("CSFile::NotifyIOError");
+    int iErrorCode = GetLastError();
 #ifdef _WIN32
     lpctstr pMsg;
     LPVOID lpMsgBuf;
-    FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, iErrorCode, 0, reinterpret_cast<LPTSTR>(&lpMsgBuf), 0, NULL );
-    if (lpMsgBuf == NULL)
+    //FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER| FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS, NULL, iErrorCode, 0, reinterpret_cast<LPTSTR>(&lpMsgBuf), 0, NULL );
+    FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS, NULL, iErrorCode, MAKELANGID(0x9,0x1), //en-US
+        reinterpret_cast<LPTSTR>(&lpMsgBuf), 0, NULL );
+    if (lpMsgBuf == nullptr)
         pMsg = "No System Error";
     else
         pMsg = static_cast<lptstr>(lpMsgBuf);
-    DEBUG_ERR(( "File I/O \"%s\" failed on file \"%s\" (%lX): %s\n", szMessage, static_cast<lpctstr>(GetFilePath()), iErrorCode, pMsg ));
-    if (lpMsgBuf != NULL)
+    DEBUG_ERR(( "File I/O \"%s\" failed on file \"%s\" (%lX): %s", szMessage, static_cast<lpctstr>(_strFileName), iErrorCode, pMsg ));
+    if (lpMsgBuf != nullptr)
         LocalFree( lpMsgBuf );
 #else
-    DEBUG_ERR(( "File I/O \"%s\" failed on file \"%s\" (%lX): %s\n", szMessage, static_cast<lpctstr>(GetFilePath()), iErrorCode, strerror(iErrorCode) ));
+    DEBUG_ERR(( "File I/O \"%s\" failed on file \"%s\" (%lX): %s", szMessage, static_cast<lpctstr>(_strFileName), iErrorCode, strerror(iErrorCode) ));
 #endif
 }
 
-bool CFile::Open( lpctstr pszName, uint uiMode )
+// CSFile:: File Management.
+
+void CSFile::_Close()
 {
-	ASSERT( m_llFile == -1 );
-	SetFilePath( pszName );
+    ADDTOCALLSTACK_INTENSIVE("CSFile::_Close");
+    if ( ! CSFile::_IsFileOpen() )
+        return;
 
 #ifdef _WIN32
-	DWORD dwShareMode, dwCreationDisposition, dwDesiredAccess;
-
-	dwDesiredAccess = GENERIC_READ;
-	if ( uiMode & OF_WRITE )
-		dwDesiredAccess |= GENERIC_WRITE;
-	if ( uiMode & OF_READWRITE )
-		dwDesiredAccess |= (GENERIC_READ | GENERIC_WRITE);
-
-	if ( uiMode & OF_SHARE_COMPAT )
-		dwShareMode = (FILE_SHARE_READ | FILE_SHARE_WRITE);
-	else if ( uiMode & OF_SHARE_EXCLUSIVE )
-		dwShareMode = 0;
-	else if ( uiMode & OF_SHARE_DENY_WRITE )
-		dwShareMode = FILE_SHARE_READ;
-	else if ( uiMode & OF_SHARE_DENY_READ )
-		dwShareMode = FILE_SHARE_WRITE;
-	else if ( uiMode & OF_SHARE_DENY_NONE )
-		dwShareMode = (FILE_SHARE_READ | FILE_SHARE_WRITE);
-	else
-		dwShareMode = 0;
-
-	if ( uiMode & OF_CREATE )
-		dwCreationDisposition = (OPEN_ALWAYS|CREATE_NEW);
-	else
-		dwCreationDisposition = OPEN_EXISTING;
-
-	m_llFile = (llong)CreateFile( GetFilePath(), dwDesiredAccess, dwShareMode, NULL, dwCreationDisposition, FILE_ATTRIBUTE_NORMAL, NULL );
+    CloseHandle( _fileDescriptor );
 #else
-	m_llFile = open( GetFilePath(), uiMode );
-#endif // _WIN32
-	return (m_llFile != -1);
+    close( _fileDescriptor );
+#endif
+    _fileDescriptor = _kInvalidFD;
 }
+
+void CSFile::Close()
+{
+    ADDTOCALLSTACK_INTENSIVE("CSFile::Close");
+
+    THREAD_UNIQUE_LOCK_SET;
+    CSFile::_Close();
+}
+
+bool CSFile::_Open( lpctstr ptcFilename, uint uiModeFlags )
+{
+    ADDTOCALLSTACK_INTENSIVE("CSFile::_Open");
+    // RETURN: true = success.
+    // OF_BINARY | OF_WRITE
+    if ( !ptcFilename )
+    {
+        if ( CSFile::_IsFileOpen() )
+            return true;
+    }
+    else
+    {
+        CSFile::_Close();	// Make sure it's closed first.
+    }
+
+    if ( !ptcFilename )
+        ptcFilename = _strFileName.GetPtr();
+    else
+        _strFileName = ptcFilename;
+
+    if ( _strFileName.IsEmpty() )
+        return false;
+
+    _uiMode = uiModeFlags;
+
+#ifdef _WIN32
+    DWORD dwShareMode, dwCreationDisposition, dwDesiredAccess;
+
+    dwDesiredAccess = GENERIC_READ;
+    if ( uiModeFlags & OF_WRITE )
+        dwDesiredAccess |= GENERIC_WRITE;
+    if ( uiModeFlags & OF_READWRITE )
+        dwDesiredAccess |= (GENERIC_READ | GENERIC_WRITE);
+
+    if ( uiModeFlags & OF_SHARE_COMPAT )
+        dwShareMode = (FILE_SHARE_READ | FILE_SHARE_WRITE);
+    else if ( uiModeFlags & OF_SHARE_EXCLUSIVE )
+        dwShareMode = 0;
+    else if ( uiModeFlags & OF_SHARE_DENY_WRITE )
+        dwShareMode = FILE_SHARE_READ;
+    else if ( uiModeFlags & OF_SHARE_DENY_READ )
+        dwShareMode = FILE_SHARE_WRITE;
+    else if ( uiModeFlags & OF_SHARE_DENY_NONE )
+        dwShareMode = (FILE_SHARE_READ | FILE_SHARE_WRITE);
+    else
+        dwShareMode = 0;
+
+    if ( uiModeFlags & OF_CREATE )
+        dwCreationDisposition = (OPEN_ALWAYS|CREATE_NEW);
+    else
+        dwCreationDisposition = OPEN_EXISTING;
+
+    _fileDescriptor = CreateFile( ptcFilename, dwDesiredAccess, dwShareMode, NULL, dwCreationDisposition, FILE_ATTRIBUTE_NORMAL, NULL );
+#else
+    _fileDescriptor = open( ptcFilename, uiMode );
+#endif // _WIN32
+
+    return (_fileDescriptor != _kInvalidFD);
+}
+
+bool CSFile::Open( lpctstr ptcFilename, uint uiModeFlags )
+{
+    ADDTOCALLSTACK_INTENSIVE("CSFile::Open");
+    THREAD_UNIQUE_LOCK_RETURN(CSFile::_Open(ptcFilename, uiModeFlags));
+}
+
+bool CSFile::_IsFileOpen() const
+{
+    return (_fileDescriptor != _kInvalidFD);
+}
+bool CSFile::IsFileOpen() const
+{
+    THREAD_SHARED_LOCK_RETURN(_fileDescriptor != _kInvalidFD);
+}
+
+lpctstr CSFile::_GetFilePath() const
+{
+    return _strFileName.GetPtr();
+}
+lpctstr CSFile::GetFilePath() const
+{
+    THREAD_SHARED_LOCK_RETURN(_strFileName.GetPtr());
+}
+
+bool CSFile::_SetFilePath( lpctstr pszName )
+{
+    ADDTOCALLSTACK_INTENSIVE("CFile::_SetFilePath");
+    if ( pszName == nullptr )
+        return false;
+    if ( ! _strFileName.CompareNoCase( pszName ))
+        return true;
+
+    bool fIsOpen = ( _fileDescriptor != _kInvalidFD);
+    if ( fIsOpen )
+        _Close();
+    _strFileName = pszName;
+    if ( fIsOpen )
+        return _Open(); // _GetMode()	// open it back up. (in same mode as before)
+    return true;
+}
+
+bool CSFile::SetFilePath( lpctstr pszName )
+{
+    ADDTOCALLSTACK_INTENSIVE("CFile::SetFilePath");
+    THREAD_UNIQUE_LOCK_RETURN(CSFile::_SetFilePath(pszName));
+}
+
 
 // CFile:: Content management.
 
-int CFile::GetLength()
+int CSFile::_GetLength()
 {
+    ADDTOCALLSTACK_INTENSIVE("CSFile::_GetLength");
+    bool fOpenClose = false;
+    if ( _fileDescriptor == _kInvalidFD )
+    {
+        // Happens with a CacheableScriptFile
+        fOpenClose = true;
+        CSFile::_Open();
+    }
 	// Get the size of the file.
-    int iPos = GetPosition();   // save current pos.
-    int iSize = SeekToEnd();
-	Seek( iPos, SEEK_SET );     // restore previous pos.
+    int iPos = CSFile::_GetPosition();   // save current pos.
+    int iSize = CSFile::_SeekToEnd();
+	CSFile::_Seek( iPos, SEEK_SET );     // restore previous pos.
+    if (fOpenClose)
+    {
+        CSFile::_Close();
+    }
 	return iSize;
 }
 
-int CFile::GetPosition() const
+int CSFile::GetLength()
 {
+    ADDTOCALLSTACK_INTENSIVE("CSFile::GetLength");
+    THREAD_UNIQUE_LOCK_RETURN(CSFile::_GetLength());
+}
+
+int CSFile::_GetPosition() const
+{
+    ADDTOCALLSTACK_INTENSIVE("CSFile::_GetPosition");
 #ifdef _WIN32
-    DWORD ret = SetFilePointer( (HANDLE)m_llFile, 0, NULL, FILE_CURRENT );
+    DWORD ret = SetFilePointer( _fileDescriptor, 0, NULL, FILE_CURRENT );
     if (ret == INVALID_SET_FILE_POINTER)
     {
-        NotifyIOError("CFile::GetPosition");
+        _NotifyIOError("CFile::GetPosition");
         return 0;
     }
 #else
-	off_t ret = lseek( m_llFile, 0, SEEK_CUR );
+	off_t ret = lseek( _fileDescriptor, 0, SEEK_CUR );
     if (ret == (off_t)-1)
     {
-        NotifyIOError("CFile::GetPosition");
+        _NotifyIOError("CFile::GetPosition");
         return 0;
     }
 #endif
     if (ret > INT_MAX)
     {
-        NotifyIOError("CFile::GetPosition (length)");
+        _NotifyIOError("CFile::GetPosition (length)");
         return 0;
     }
-    return ret;
+    return (int)ret;
+}
+int CSFile::GetPosition() const
+{
+    ADDTOCALLSTACK_INTENSIVE("CSFile::GetPosition");
+    THREAD_UNIQUE_LOCK_RETURN(CSFile::_GetPosition());
 }
 
-int CFile::Read( void * pData, int iLength ) const
+int CSFile::Read( void * pData, int iLength ) const
 {
+    ADDTOCALLSTACK_INTENSIVE("CSFile::Read");
+    THREAD_UNIQUE_LOCK_SET;
+
 #ifdef _WIN32
 	DWORD ret;
-	if ( !ReadFile( (HANDLE)m_llFile, pData, (DWORD)iLength, &ret, NULL ) )
+	if ( !::ReadFile( _fileDescriptor, pData, (DWORD)iLength, &ret, NULL ) )
 	{
-		NotifyIOError("CFile::Read");
+		_NotifyIOError("CFile::Read");
 		return 0;
 	}
 #else
@@ -186,139 +270,92 @@ int CFile::Read( void * pData, int iLength ) const
 #endif
     if (ret > INT_MAX)
     {
-        NotifyIOError("CFile::Read (length)");
+        _NotifyIOError("CFile::Read (length)");
         return 0;
     }
     return (int)ret;
 }
 
-int CFile::Seek( int iOffset, int iOrigin )
+int CSFile::_Seek( int iOffset, int iOrigin )
 {
-	if ( m_llFile <= 0 )
+    ADDTOCALLSTACK_INTENSIVE("CSFile::_Seek");
+	if ( _fileDescriptor == _kInvalidFD )
     {
-        NotifyIOError("CFile::Seek");
+        _NotifyIOError("CFile::Seek");
         return -1;
     }
+
 #ifdef _WIN32
-	DWORD ret = SetFilePointer( (HANDLE)m_llFile, (LONG)iOffset, NULL, (DWORD)iOrigin );
+	DWORD ret = SetFilePointer( _fileDescriptor, (LONG)iOffset, NULL, (DWORD)iOrigin );
 #else
-	off_t ret = lseek( m_llFile, iOffset, iOrigin );
+	off_t ret = lseek( _fileDescriptor, iOffset, iOrigin );
 #endif
     if (ret > INT_MAX)
     {
-        NotifyIOError("CFile::Seek (length)");
+        _NotifyIOError("CFile::Seek (length)");
         return 0;
     }
     return (int)ret;
 }
 
-void CFile::SeekToBegin()
+int CSFile::Seek( int iOffset, int iOrigin )
 {
+    ADDTOCALLSTACK_INTENSIVE("CSFile::Seek");
+    THREAD_UNIQUE_LOCK_RETURN(CSFile::_Seek(iOffset, iOrigin));
+}
+
+void CSFile::_SeekToBegin()
+{
+    ADDTOCALLSTACK_INTENSIVE("CSFile::_SeekToBegin");
+    _Seek( 0, SEEK_SET );
+}
+void CSFile::SeekToBegin()
+{
+    ADDTOCALLSTACK_INTENSIVE("CSFile::SeekToBegin");
 	Seek( 0, SEEK_SET );
 }
 
-int CFile::SeekToEnd()
+int CSFile::_SeekToEnd()
 {
+    ADDTOCALLSTACK_INTENSIVE("CSFile::_SeekToEnd");
+    return _Seek( 0, SEEK_END );
+}
+int CSFile::SeekToEnd()
+{
+    ADDTOCALLSTACK_INTENSIVE("CSFile::SeekToEnd");
 	return Seek( 0, SEEK_END );
 }
 
-bool CFile::Write( const void * pData, int iLength ) const
+bool CSFile::Write( const void * pData, int iLength )
 {
+    ADDTOCALLSTACK_INTENSIVE("CSFile::Write");
+    THREAD_UNIQUE_LOCK_SET;
+
 #ifdef _WIN32
 	DWORD dwWritten;
-	BOOL ret = ::WriteFile( (HANDLE)m_llFile, pData, (DWORD)iLength, &dwWritten, NULL );
+	BOOL ret = ::WriteFile( _fileDescriptor, pData, (DWORD)iLength, &dwWritten, NULL );
 	if ( ret == FALSE )
 	{
-		NotifyIOError("CFile::Write");
+		_NotifyIOError("CFile::Write");
 		return false;
 	}
 	return true;
 #else
-	ssize_t ret = write(m_llFile, (const char *)pData, iLength);
+	ssize_t ret = write(_fileDescriptor, (const char *)pData, iLength);
 	if (ret == (ssize_t)-1 || ret != iLength)
     {
-        NotifyIOError("CFile::Write");
+        _NotifyIOError("CFile::Write");
 		return false;
     }
 	return true;
 #endif
-}
-
-// CSFile:: Constructors, Destructor, Asign operator.
-
-CSFile::CSFile()
-{
-    m_uiMode = 0;
-}
-
-CSFile::~CSFile()
-{
-    Close();
-}
-
-// CSFile:: File Management.
-
-void CSFile::Close()
-{
-	ADDTOCALLSTACK("CSFile::Close");
-	if ( ! IsFileOpen() )
-		return;
-
-	CloseBase();
-	m_llFile = -1;
-}
-
-void CSFile::CloseBase()
-{
-	ADDTOCALLSTACK("CSFile::CloseBase");
-	CFile::Close();
-}
-
-bool CSFile::IsFileOpen() const
-{
-	return ( m_llFile != -1 );
-}
-
-bool CSFile::Open( lpctstr pszFilename, uint uiModeFlags )
-{
-	ADDTOCALLSTACK("CSFile::Open");
-	// RETURN: true = success.
-	// OF_BINARY | OF_WRITE
-	if ( !pszFilename )
-	{
-		if ( IsFileOpen() )
-			return true;
-	}
-	else
-    {
-		Close();	// Make sure it's closed first.
-    }
-
-	if ( !pszFilename )
-		pszFilename = GetFilePath();
-	else
-		m_strFileName = pszFilename;
-
-	if ( m_strFileName.IsEmpty() )
-		return false;
-
-	m_uiMode = uiModeFlags;
-
-	return OpenBase();
-}
-
-bool CSFile::OpenBase()
-{
-	ADDTOCALLSTACK("CSFile::OpenBase");
-	return CFile::Open(GetFilePath(), GetMode());
 }
 
 // CSFile:: File name operations.
 
-lpctstr CSFile::GetFilesTitle( lpctstr pszPath )
+lpctstr CSFile::GetFilesTitle( lpctstr pszPath )  // static
 {
-	ADDTOCALLSTACK("CSFile::GetFilesTitle");
-	// Just use COMMDLG.H GetFileTitle(lpctstr, lptstr, word) instead ?
+	ADDTOCALLSTACK_INTENSIVE("CSFile::GetFilesTitle");
 	// strrchr
 	size_t len = strlen(pszPath);
 	while ( len > 0 )
@@ -333,19 +370,22 @@ lpctstr CSFile::GetFilesTitle( lpctstr pszPath )
 	return (pszPath + len);
 }
 
-lpctstr CSFile::GetFileExt() const
+lpctstr CSFile::_GetFileTitle() const
 {
-	ADDTOCALLSTACK("CSFile::GetFileExt");
-	// get the EXTension including the .
-	return GetFilesExt( GetFilePath() );
+    ADDTOCALLSTACK("CFile::_GetFileTitle");
+    return CSFile::GetFilesTitle(_strFileName.GetPtr());
+}
+lpctstr CSFile::GetFileTitle() const
+{
+    ADDTOCALLSTACK("CFile::GetFileTitle");
+    return CSFile::GetFilesTitle( GetFilePath() );
 }
 
 lpctstr CSFile::GetFilesExt( lpctstr pszName )	// static
 {
 	ADDTOCALLSTACK("CSFile::GetFilesExt");
     // get the EXTension including the .
-	size_t lenall = strlen( pszName );
-	size_t len = lenall;
+	size_t len = strlen( pszName );
 	while ( len > 0 )
 	{
 		--len;
@@ -359,54 +399,70 @@ lpctstr CSFile::GetFilesExt( lpctstr pszName )	// static
 	return nullptr;	// has no ext.
 }
 
+lpctstr CSFile::GetFileExt() const
+{
+    ADDTOCALLSTACK("CSFile::GetFileExt");
+    // get the EXTension including the .
+    return GetFilesExt(GetFilePath());
+}
+
+
 CSString CSFile::GetMergedFileName( lpctstr pszBase, lpctstr pszName ) // static
 {
 	ADDTOCALLSTACK("CSFile::GetMergedFileName");
     // Merge path and file name.
 
-	tchar szFilePath[ _MAX_PATH ];
+	tchar ptcFilePath[ _MAX_PATH ];
+    size_t len = 0;
 	if ( pszBase && pszBase[0] )
 	{
-		strcpy( szFilePath, pszBase );
-		int len = (int)(strlen( szFilePath ));
-		if (len && szFilePath[len - 1] != '\\' && szFilePath[len - 1] != '/')
+		strncpy( ptcFilePath, pszBase, sizeof(ptcFilePath) );
+		len = strlen(ptcFilePath);
+		if (len && ptcFilePath[len - 1] != '\\' && ptcFilePath[len - 1] != '/')
 		{
 #ifdef _WIN32
-			strcat(szFilePath, "\\");
+			strcat(ptcFilePath, "\\");
 #else
-			strcat(szFilePath, "/");
+			strcat(ptcFilePath, "/");
 #endif
 		}
 	}
 	else
 	{
-		szFilePath[0] = '\0';
+        ptcFilePath[0] = '\0';
 	}
 	if ( pszName )
 	{
-		strcat( szFilePath, pszName );
+		strncat(ptcFilePath, pszName, sizeof(ptcFilePath)-len);
 	}
-	return CSString(szFilePath);
+	return CSString(ptcFilePath);
 }
 
 // CSFile:: Mode operations.
 
+uint CSFile::_GetFullMode() const
+{
+    return _uiMode;
+}
 uint CSFile::GetFullMode() const
 {
-	return m_uiMode;
+    THREAD_SHARED_LOCK_RETURN(_uiMode);
 }
 
+uint CSFile::_GetMode() const
+{
+    return (_uiMode & 0x0FFFFFFF);
+}
 uint CSFile::GetMode() const
 {
-	return ( m_uiMode & 0x0FFFFFFF );
+    THREAD_SHARED_LOCK_RETURN(_uiMode & 0x0FFFFFFF);
 }
 
-bool CSFile::IsBinaryMode() const
+bool CSFile::_IsWriteMode() const
 {
-	return true;
+    return (_uiMode & OF_WRITE);
 }
-
 bool CSFile::IsWriteMode() const
 {
-	return ( m_uiMode & OF_WRITE );
+    THREAD_SHARED_LOCK_RETURN(_uiMode & OF_WRITE);
 }

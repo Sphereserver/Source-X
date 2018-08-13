@@ -149,7 +149,8 @@ These are meant to be applied to new code and, if there's some old code not foll
 * Unsigned variables should have as first (or second to "p") prefix "u".
 * Boolean variables should have the prefix "f" (it stands for flag).
 * Classes need to have the first letter uppercase and the prefix "C".
-* Internal (mostly private) variables of a class or struct need to have the prefix "\_". This is a new convention, the old one used the "m\_" prefix.
+* Private or protected methods (functions) and members (variables) of a class or struct need to have the prefix "\_". This is a new convention, the old one used the "m\_" prefix for the members.
+* Constants (static const class members, to be preferred to preprocessor macros) should have the prefix "k".
 * After the prefix, the descriptive name should begin with an upper letter.
 
 **Variables meant to hold numerical values:**
