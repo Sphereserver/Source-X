@@ -496,7 +496,7 @@ bool CScript::_Open( lpctstr ptcFilename, uint uiFlags )
 
 	if ( (_fCacheToBeUpdated || !_HasCache()))
 	{
-        if (!PhysicalScriptFile::_Open(ptcFilename, uiFlags))
+        if (!CCacheableScriptFile::_Open(ptcFilename, uiFlags))
         {
             if ( ! ( uiFlags & OF_NONCRIT ))
                 g_Log.Event(LOGL_WARN, "'%s' not found...\n", _strFileName.GetPtr());
@@ -521,7 +521,7 @@ bool CScript::_ReadTextLine( bool fRemoveBlanks ) // Read a line from the opened
 	// fRemoveBlanks = Don't report any blank lines, (just keep reading)
 
     tchar* ptcBuf = _GetKeyBufferRaw(SCRIPT_MAX_LINE_LEN);
-	while ( PhysicalScriptFile::_ReadString( ptcBuf, SCRIPT_MAX_LINE_LEN ))
+	while ( CCacheableScriptFile::_ReadString( ptcBuf, SCRIPT_MAX_LINE_LEN ))
 	{
 		++m_iLineNum;
 		if ( fRemoveBlanks )
@@ -576,7 +576,7 @@ int CScript::_Seek( int iOffset, int iOrigin )
 		m_iLineNum = 0;	// so we don't have to override SeekToBegin
 	m_fSectionHead = false;		// unknown, so start at the beginning.
 	m_iSectionData = iOffset;
-	return PhysicalScriptFile::_Seek(iOffset,iOrigin);
+	return CCacheableScriptFile::_Seek(iOffset,iOrigin);
 }
 int CScript::Seek( int iOffset, int iOrigin )
 {
@@ -785,13 +785,13 @@ void CScript::_Close()
 {
 	ADDTOCALLSTACK("CScript::_Close");
 	// EndSection();
-	PhysicalScriptFile::_Close();
+    CCacheableScriptFile::_Close();
 }
 void CScript::Close()
 {
     ADDTOCALLSTACK("CScript::Close");
     // EndSection();
-    PhysicalScriptFile::Close();
+    CCacheableScriptFile::Close();
 }
 
 void CScript::CloseForce()

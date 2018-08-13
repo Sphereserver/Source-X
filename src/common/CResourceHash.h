@@ -6,7 +6,7 @@
 #ifndef _INC_CRESOURCEHASH_H
 #define _INC_CRESOURCEHASH_H
 
-#include "sphere_library\CSObjSortArray.h"
+#include "sphere_library/CSObjSortArray.h"
 #include "CResourceID.h"
 
 class CResourceDef;

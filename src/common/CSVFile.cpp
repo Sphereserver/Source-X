@@ -26,7 +26,7 @@ CSVFile::~CSVFile()
 bool CSVFile::_Open(lpctstr ptcFilename, uint uiModeFlags)
 {
 	ADDTOCALLSTACK("CSVFile::_Open");
-	if ( !PhysicalScriptFile::_Open(ptcFilename, uiModeFlags) )
+	if ( !CCacheableScriptFile::_Open(ptcFilename, uiModeFlags) )
 		return false;
 
 	_iCurrentRow = 0;

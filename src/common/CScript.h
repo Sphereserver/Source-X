@@ -111,15 +111,10 @@ private:
 	CScriptKeyAlloc& operator=(const CScriptKeyAlloc& other);
 };
 
-#ifdef _NOSCRIPTCACHE
- #define PhysicalScriptFile CSFileText
-#else
- #define PhysicalScriptFile CCacheableScriptFile
-#endif
 
 class CResourceLock;
 
-class CScript : public PhysicalScriptFile, public CScriptKeyAlloc
+class CScript : public CCacheableScriptFile, public CScriptKeyAlloc
 {
 private:
 	bool m_fSectionHead;	// Does the File Offset point to current section header? [HEADER]

@@ -66,7 +66,7 @@ bool CResourceScript::Open( lpctstr pszFilename, uint wFlags )
 
     if ( !IsFileOpen() && !(wFlags & OF_READWRITE))
     {
-        if (_strFileName.Compare(pszFilename) || !HasCache())
+        if ((pszFilename && _strFileName.Compare(pszFilename)) || !HasCache())
         {
             if ( ! CScript::Open( pszFilename, wFlags|OF_SHARE_DENY_WRITE))	// OF_READ
                 return false;
