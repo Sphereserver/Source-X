@@ -6,7 +6,7 @@
 #ifndef _INC_CRESOURCEREF_H
 #define _INC_CRESOURCEREF_H
 
-#include "sphere_library\CSPtrTypeArray.h"
+#include "sphere_library/CSPtrTypeArray.h"
 #include "CResourceLink.h"
 #include "CResourceID.h"
 
