@@ -473,7 +473,9 @@ bool CScript::_Open( lpctstr ptcFilename, uint uiFlags )
 	// ARGS: wFlags = OF_READ, OF_NONCRIT etc
 	// RETURN: true = success.
 
+    bool fCacheToBeUpdated = _fCacheToBeUpdated;
 	_InitBase();
+    _fCacheToBeUpdated = fCacheToBeUpdated;
 
 	if ( ptcFilename == nullptr )
 		ptcFilename = _strFileName.GetPtr();

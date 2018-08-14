@@ -196,6 +196,7 @@ void CCacheableScriptFile::_dupeFrom(CCacheableScriptFile *other)
     if ( _useDefaultFile() ) 
         return;
 
+    _strFileName = other->_strFileName;
     _fClosed = other->_fClosed;
     _fRealFile = false;
     _fileContent = other->_fileContent;

@@ -1338,7 +1338,7 @@ bool CServer::r_Verb( CScript &s, CTextConsole * pSrc )
 		case SV_LOG:
 			{
 				lpctstr	pszArgs = s.GetArgStr();
-				int		mask = LOGL_EVENT;
+				int	 mask = LOGL_EVENT;
 				if ( pszArgs && ( *pszArgs == '@' ))
 				{
 					++pszArgs;

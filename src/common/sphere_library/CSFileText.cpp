@@ -205,9 +205,7 @@ int CSFileText::VPrintf( lpctstr pFormat, va_list args )
     if ( !IsFileOpen() )
         return -1;
 
-    THREAD_UNIQUE_LOCK_SET;
-    int lenret = vfprintf( _pStream, pFormat, args );
-    return lenret;
+    THREAD_UNIQUE_LOCK_RETURN(vfprintf( _pStream, pFormat, args ));
 }
 
 bool CSFileText::Write( const void * pData, int iLen )

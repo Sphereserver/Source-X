@@ -52,9 +52,9 @@ void CResourceScript::ReSync()
     ADDTOCALLSTACK("CResourceScript::ReSync");
     if ( !IsFirstCheck() && !CheckForChange() )
         return;
+    _fCacheToBeUpdated = true;
     if ( !Open() )
         return;
-    _fCacheToBeUpdated = true;
     g_Cfg.LoadResourcesOpen( this );
     Close();
 }
@@ -66,14 +66,13 @@ bool CResourceScript::Open( lpctstr pszFilename, uint wFlags )
 
     if ( !IsFileOpen() && !(wFlags & OF_READWRITE))
     {
-        if ((pszFilename && _strFileName.Compare(pszFilename)) || !HasCache())
+        if (_fCacheToBeUpdated || (pszFilename && _strFileName.Compare(pszFilename)) || !HasCache())
         {
             if ( ! CScript::Open( pszFilename, wFlags|OF_SHARE_DENY_WRITE))	// OF_READ
                 return false;
         }
         if ( CheckForChange() )
         {
-            _fCacheToBeUpdated = true;
             //  what should we do about it ? reload it of course !
             g_Serv.SetServerMode(SERVMODE_ResyncLoad);
             g_Cfg.LoadResourcesOpen( this );
