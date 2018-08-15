@@ -33,26 +33,6 @@ void AbstractString::destroy()
 	// child class implements this
 }
 
-size_t AbstractString::length()
-{
-	return m_length;
-}
-
-size_t AbstractString::realLength()
-{
-	return m_realLength;
-}
-
-bool AbstractString::isEmpty()
-{
-	return m_length != 0;
-}
-
-const char *AbstractString::toBuffer()
-{
-	return m_buf;
-}
-
 char AbstractString::charAt(size_t index)
 {
 	return m_buf[index];
@@ -140,20 +120,6 @@ size_t AbstractString::lastIndexOf(char c)
 	return (size_t)((pos == NULL) ? -1 : pos - m_buf);
 }
 
-AbstractString::operator lpctstr() const
-{
-	return m_buf;
-}
-
-AbstractString::operator char*()
-{
-	return m_buf;
-}
-
-AbstractString::operator const char*&() const
-{
-	return const_cast<const char *&>(m_buf);
-}
 
 /*
  * String

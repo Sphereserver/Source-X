@@ -4,8 +4,9 @@
 */
 
 #include "../sphere/threads.h"
-#include "../game/CServerConfig.h"
 #include "../game/CServer.h"
+#include "../game/CServerConfig.h"
+#include "../game/CServerTime.h"
 #include "sphere_library/CSFileList.h"
 #include "CLog.h"
 #include "CResourceScript.h"

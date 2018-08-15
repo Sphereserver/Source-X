@@ -28,10 +28,18 @@ private:
 
 public:
 	// information
-	size_t length();
-	size_t realLength();
-	bool isEmpty();
-	const char *toBuffer();
+    size_t length() {
+        return m_length;
+    }
+    size_t realLength() {
+        return m_realLength;
+    }
+    bool isEmpty() {
+        return m_length != 0;
+    }
+    const char *toBuffer() {
+        return m_buf;
+    }
 
 	// character operations
 	char charAt(size_t index);
@@ -55,15 +63,21 @@ public:
 	size_t lastIndexOf(char c);
 
 	// operator
-	operator lpctstr() const;       // as a C string
-	operator char*();				// as a C string
-	operator const char*&() const;	// as a C string
+	operator lpctstr() const {      // as a C string
+        return m_buf;
+    }
+	operator char*() {              // as a C string
+        return m_buf;
+    }
+	operator const char*&() const { // as a C string
+        return const_cast<const char *&>(m_buf);
+    }
 
 protected:
 	// not implemented, should take care that newLength should fit in the buffer
-	virtual void ensureLength(size_t newLength) = 0;
+	virtual void ensureLength(size_t newLength);
 	// not implemented, should free up occupied resources
-	virtual void destroy() = 0;
+	virtual void destroy();
 
 protected:
 	char	*m_buf;
