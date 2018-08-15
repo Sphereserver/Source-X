@@ -107,14 +107,14 @@ struct CResourceIDBase : public CUIDBase
 #define RES_INDEX_MASK	0x3FFFF	//  0x3FFFF = 18 bits.
     // Size: 6 + 8 + 18 = 32 --> it's a 32 bits number.
     // WARNING: when adding new resource types, make sure that the last bit (31) doesn't overlap with UID_F_RESOURCE!
-#define RES_GET_TYPE(dw)	( ( dw >> RES_TYPE_SHIFT ) & RES_TYPE_MASK )
-#define RES_GET_INDEX(dw)	( dw & (dword)RES_INDEX_MASK )
+#define RES_GET_TYPE(dw)	( ( (dw) >> RES_TYPE_SHIFT ) & RES_TYPE_MASK )
+#define RES_GET_INDEX(dw)	( (dw) & (dword)RES_INDEX_MASK )
+#define RES_GET_PAGE(dw)    ( ( (dw) >> RES_PAGE_SHIFT ) & RES_PAGE_MASK )
 
 public:
     RES_TYPE GetResType() const
     {
-        dword dwVal = RES_GET_TYPE(m_dwInternalVal);
-        return static_cast<RES_TYPE>(dwVal);
+        return (RES_TYPE)(RES_GET_TYPE(m_dwInternalVal));
     }
     int GetResIndex() const
     {
@@ -122,9 +122,7 @@ public:
     }
     int GetResPage() const
     {
-        dword dwVal = m_dwInternalVal >> RES_PAGE_SHIFT;
-        dwVal &= RES_PAGE_MASK;
-        return dwVal;
+        return RES_GET_PAGE(m_dwInternalVal);;
     }
     bool operator == (const CResourceIDBase & rid) const
     {

@@ -58,16 +58,16 @@ SOURCE_GROUP (common\\crypto FILES ${crypto_SRCS})
 
 # Handle UO Client files
 SET (uofiles_SRCS
-game/uo_files/CUOMapList.h
-game/uo_files/CUOMapList.cpp
-game/uo_files/CUOItemInfo.h
-game/uo_files/CUOItemInfo.cpp
 game/uo_files/CUOHuesRec.h
 game/uo_files/CUOHuesRec.cpp
 game/uo_files/CUOIndexRec.h
 game/uo_files/CUOIndexRec.cpp
+game/uo_files/CUOItemInfo.h
+game/uo_files/CUOItemInfo.cpp
 game/uo_files/CUOItemTypeRec.h
 game/uo_files/CUOMapBlock.h
+game/uo_files/CUOMapList.h
+game/uo_files/CUOMapList.cpp
 game/uo_files/CUOMapMeter.h
 game/uo_files/CUOMapMeter.cpp
 game/uo_files/CUOMultiItemRec.h
@@ -77,6 +77,8 @@ game/uo_files/CUOStaticItemRec.cpp
 game/uo_files/CUOTerrainInfo.h
 game/uo_files/CUOTerrainInfo.cpp
 game/uo_files/CUOTerrainTypeRec.h
+game/uo_files/CUOTiledata.h
+game/uo_files/CUOTiledata.cpp
 game/uo_files/CUOVersionBlock.h
 game/uo_files/CUOVersionBlock.cpp
 game/uo_files/uofiles_enums.h

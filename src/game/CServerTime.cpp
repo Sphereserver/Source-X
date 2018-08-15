@@ -1,8 +1,6 @@
 
-#include "CObjBase.h"
-#include "CServerTime.h"
 #include "CWorld.h"
-
+#include "CServerTime.h"
 
 int64 CServerTime::GetTimeRaw() const
 {
@@ -10,11 +8,6 @@ int64 CServerTime::GetTimeRaw() const
 		return 0;
 
 	return m_llPrivateTime;
-}
-
-int64 CServerTime::GetTimeDiff( const CServerTime & time ) const
-{
-	return ( m_llPrivateTime - time.m_llPrivateTime );
 }
 
 void CServerTime::Init()
@@ -55,3 +48,7 @@ CServerTime CServerTime::operator-( int64 llTimeDiff ) const
 	return time;
 }
 
+CServerTime CServerTime::GetCurrentTime()	// static
+{
+    return g_World.GetCurrentTime();
+}

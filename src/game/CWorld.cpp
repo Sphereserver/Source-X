@@ -1140,7 +1140,7 @@ void CWorld::Init()
 		if ( !g_MapList.m_maps[m] )
 			continue;
 
-		sprintf(z1, " %d=%d", m, g_MapList.GetSectorQty(m));
+		sprintf(z1, " map%d=%d", m, g_MapList.GetSectorQty(m));
 		strcat(z, z1);
 		for ( int s = 0; s < g_MapList.GetSectorQty(m); ++s )
 		{
@@ -1150,9 +1150,9 @@ void CWorld::Init()
 			m_Sectors[m_SectorsQty++] = pSector;
 		}
 	}
+    g_Log.Event(LOGM_INIT, "Allocated map sectors:%s\n", static_cast<lpctstr>(z));
 	ASSERT(m_SectorsQty);
 
-	g_Log.Event(LOGM_INIT, "Allocating map sectors:%s\n", static_cast<lpctstr>(z));
 	EXC_CATCH;
 }
 

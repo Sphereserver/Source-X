@@ -39,27 +39,27 @@ private:
     CResourceDef& operator=(const CResourceDef& other);
 
 public:
-    CResourceID GetResourceID() const
+    inline CResourceID GetResourceID() const
     {
         return m_rid;
     }
-    RES_TYPE GetResType() const
+    inline RES_TYPE GetResType() const
     {
         return m_rid.GetResType();
     }
-    int GetResPage() const
+    inline int GetResPage() const
     {
         return m_rid.GetResPage();
     }
 
-    void CopyDef(const CResourceDef * pLink)
+    inline void CopyDef(const CResourceDef * pLink)
     {
         m_pDefName = pLink->m_pDefName;
     }
 
     // Get the name of the resource item. (Used for saving) may be number or name
     lpctstr GetResourceName() const;
-    virtual lpctstr GetName() const	// default to same as the DEFNAME name.
+    virtual inline lpctstr GetName() const	// default to same as the DEFNAME name.
     {
         return GetResourceName();
     }
@@ -68,7 +68,7 @@ public:
     bool SetResourceName( lpctstr pszName );
     void SetResourceVar( const CVarDefContNum* pVarNum )
     {
-        if (pVarNum != NULL && m_pDefName == NULL)
+        if (pVarNum != nullptr && m_pDefName == nullptr)
             m_pDefName = pVarNum;
     }
 

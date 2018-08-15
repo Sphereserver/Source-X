@@ -357,10 +357,5 @@ public:
 	CItem * GetItem();
 };
 
-inline CServerTime CServerTime::GetCurrentTime()	// static
-{
-	return g_World.GetCurrentTime();
-}
-
 
 #endif // _INC_CWORLD_H

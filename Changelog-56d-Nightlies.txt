@@ -1091,3 +1091,8 @@ Multis:
 - [Port #54 from Source, 22-06-2016, Coruja] Added: Support for colored multis on target functions (only compatible with HS clients 7.0.9.0+)
 	-Target functions can set the multi color using TARGETM [multiID, color] and TARGETFM [function, multiID, color]
 	-Target will inherit the deed color when got triggered from a deed
+
+15-08-2018, Nolok
+- Added: now sphere caches tiledata.mul content into memory at startup. This avoids reading an enormous amount of times the file on the disk, which is a slow operation,
+	giving a significant performance boost. This is especially true in crowded areas, where a lot of Line of Sight checks are done.
+- Fixed: the script caching wasn't working as intended, now the scripts and saves loading and the scripts execution is a lot faster. Technical details are on git commits descriptions.

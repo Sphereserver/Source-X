@@ -22,7 +22,7 @@ public:
 	int64 m_llPrivateTime;
 public:
 	int64 GetTimeRaw() const;
-	int64 GetTimeDiff( const CServerTime & time ) const;
+	inline int64 GetTimeDiff( const CServerTime & time ) const;
 	void Init();
 	void InitTime( int64 lTimeBase );
 	bool IsTimeValid() const;
@@ -41,6 +41,11 @@ public:
 
 
 /* Inline Methods Definitions */
+
+int64 CServerTime::GetTimeDiff( const CServerTime & time ) const
+{
+    return ( m_llPrivateTime - time.m_llPrivateTime );
+}
 
 int64 CServerTime::operator-(CServerTime time) const
 {

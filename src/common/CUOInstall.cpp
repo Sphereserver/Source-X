@@ -214,8 +214,9 @@ bool CUOInstall::OpenFile( VERFILE_TYPE i )
 			return true;
 	}
 
-	lpctstr pszTitle = GetBaseFileName(static_cast<VERFILE_TYPE>(i));
-	if ( !pszTitle ) return false;
+	lpctstr pszTitle = GetBaseFileName((VERFILE_TYPE)i);
+	if ( !pszTitle )
+        return false;
 
 	return OpenFile(m_File[i], pszTitle, OF_READ|OF_SHARE_DENY_WRITE);
 }
@@ -231,14 +232,14 @@ VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
 	{
 		if ( ! ( ullMask & ( (ullong)1 << i )) )
 			continue;
-		if ( GetBaseFileName(static_cast<VERFILE_TYPE>(i)) == NULL )
+		if ( GetBaseFileName((VERFILE_TYPE)i) == nullptr )
 			continue;
 
 		bool bFileLoaded = true;
 		switch (i)
 		{
 			default:
-				if ( !OpenFile(static_cast<VERFILE_TYPE>(i)))
+				if ( !OpenFile((VERFILE_TYPE)i))
 				{
 					//	make some MULs optional
 					switch ( i )
@@ -326,7 +327,7 @@ VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
 											uint64 qwHash = ((uint64)dwHashHi << 32) + dwHashLo;
 											m_Maps[index].Seek( sizeof(dword)+sizeof(word), SEEK_CUR );
 					
-											for (dword x = 0; x < dwLoop; x++)
+											for (dword x = 0; x < dwLoop; ++x)
 											{
 												sprintf(z, "build/map%dlegacymul/%.8u.dat", index, x);
 												if (HashFileName(z) == qwHash)
@@ -394,9 +395,12 @@ VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
 							 !m_Staidx[index].IsFileOpen() ||
 							 !m_Statics[index].IsFileOpen() )
 						{
-							if ( m_Maps[index].IsFileOpen() )		m_Maps[index].Close();
-							if ( m_Staidx[index].IsFileOpen() )		m_Staidx[index].Close();
-							if ( m_Statics[index].IsFileOpen() )	m_Statics[index].Close();
+							if ( m_Maps[index].IsFileOpen() )
+                                m_Maps[index].Close();
+							if ( m_Staidx[index].IsFileOpen() )
+                                m_Staidx[index].Close();
+							if ( m_Statics[index].IsFileOpen() )
+                                m_Statics[index].Close();
 						
 							if (index == 1 && m_Maps[0].IsFileOpen())
 								g_MapList.m_mapnum[m] = 0;
@@ -408,17 +412,22 @@ VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
 						//	the other
 						if ( m_Mapdif[index].IsFileOpen() != m_Mapdifl[index].IsFileOpen() )
 						{
-							if ( m_Mapdif[index].IsFileOpen() )		m_Mapdif[index].Close();
-							if ( m_Mapdifl[index].IsFileOpen() )	m_Mapdifl[index].Close();
+							if ( m_Mapdif[index].IsFileOpen() )
+                                m_Mapdif[index].Close();
+							if ( m_Mapdifl[index].IsFileOpen() )
+                                m_Mapdifl[index].Close();
 						}
 
 						//	if one of the stadif files exissts, so should the others
 						if ( m_Stadif[index].IsFileOpen() != m_Stadifi[index].IsFileOpen() ||
 							 m_Stadif[index].IsFileOpen() != m_Stadifl[index].IsFileOpen() )
 						{
-							if ( m_Stadif[index].IsFileOpen() )		m_Stadif[index].Close();
-							if ( m_Stadifi[index].IsFileOpen() )	m_Stadifi[index].Close();
-							if ( m_Stadifl[index].IsFileOpen() )	m_Stadifl[index].Close();
+							if ( m_Stadif[index].IsFileOpen() )	
+                                m_Stadif[index].Close();
+							if ( m_Stadifi[index].IsFileOpen() )
+                                m_Stadifi[index].Close();
+							if ( m_Stadifl[index].IsFileOpen() )
+                                m_Stadifl[index].Close();
 						}
 					}
 				}
@@ -430,7 +439,12 @@ VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
 			break;
 	}
 
+    // --
+
 	DetectMulVersions();
+
+    // --
+
 	g_MapList.Init();
 
 	tchar * z = Str_GetTemp();
@@ -466,7 +480,11 @@ VERFILE_TYPE CUOInstall::OpenFiles( ullong ullMask )
 	if ( *z )
 		g_Log.Event(LOGM_INIT, "Expansion maps supported: %s\n", z);
 
-	return static_cast<VERFILE_TYPE>(i);
+    // --
+
+    m_tiledata.Load();
+
+	return (VERFILE_TYPE)i;
 }
 
 void CUOInstall::CloseFiles()

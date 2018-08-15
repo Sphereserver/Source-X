@@ -1564,7 +1564,7 @@ bool CItemMultiCustom::r_LoadVal( CScript & s  )
 			if ( iQty != 5 )
 				return false;
 
-			AddItem(NULL,
+			AddItem(nullptr,
 					(ITEMID_TYPE)(ATOI(ppArgs[0])),
 					(short)(ATOI(ppArgs[1])),
 					(short)(ATOI(ppArgs[2])),

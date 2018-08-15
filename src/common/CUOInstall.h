@@ -6,12 +6,12 @@
 #ifndef _INC_CUOINSTALL_H
 #define _INC_CUOINSTALL_H
 
+#include "../game/uo_files/CUOVersionBlock.h"
+#include "../game/uo_files/CUOTiledata.h"
+#include "../game/uo_files/CUOIndexRec.h"
 #include "sphere_library/CSTypedArray.h"
 #include "sphere_library/CSFile.h"
 #include "CSVFile.h"
-#include "../game/uo_files/CUOIndexRec.h"
-#include "../game/uo_files/CUOVersionBlock.h"
-#include "../game/uo_files/uofiles_enums.h"
 
 
 ////////////////////////////////////////////////////////
@@ -48,6 +48,7 @@ public:
 	CSFile	m_Stadifl[256];		// stadiflX.mul
 	bool m_IsMapUopFormat[256]; // true for maps that are uop format
 	MapAddress m_UopMapAddress[256][256]; //For uop parsing. Note: might need to be ajusted later if format changes.
+    CUOTiledata m_tiledata;
 
 	CSVFile m_CsvFiles[8];		// doors.txt, stairs.txt (x2), roof.txt, misc.txt, teleprts.txt, floors.txt, walls.txt
 
