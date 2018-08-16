@@ -18,7 +18,10 @@
 
 #ifndef _WIN32
 	#include <time.h>
+    #include <sys/statvfs.h>
 #endif
+#include <sys/stat.h>
+
 
 static const SOUND_TYPE sm_Sounds_Ghost[] =
 {
@@ -1493,9 +1496,94 @@ bool CWorld::SaveTry( bool fForceImmediate ) // Save world state
 	return false;
 }
 
+bool CWorld::CheckAvailableSpaceForSave(bool fStatics)
+{
+    //-- Do i have enough disk space to write the save file?
+
+    // Get the available disk space
+    ullong uiFreeSpace;     // in bytes
+    lpctstr ptcSaveDir = g_Cfg.m_sWorldBaseDir.GetPtr();
+#ifndef _WIN32
+    struct statvfs stat;
+    if (statvfs(ptcSaveDir, &stat) != 0)
+    {
+        throw CSError(LOGL_CRIT, 0, "Can't statvfs the \"save\" folder! Save aborted!");
+    }
+    uiFreeSpace = stat.f_bsize * stat.f_bavail;
+#else
+    ULARGE_INTEGER liFreeBytesAvailable, liTotalNumberOfBytes, liTotalNumberOfFreeBytes;
+    if (! ::GetDiskFreeSpaceEx(ptcSaveDir,  // directory name
+        &liFreeBytesAvailable,              // bytes available to caller
+        &liTotalNumberOfBytes,              // bytes on disk
+        &liTotalNumberOfFreeBytes))         // free bytes on disk
+    {
+        throw CSError(LOGL_CRIT, 0, "GetDiskFreeSpaceEx failed for the \"save\" folder! Save aborted!");
+    }
+    uiFreeSpace = (ullong)liTotalNumberOfFreeBytes.QuadPart;
+#endif
+    uiFreeSpace /= 1024;    // from bytes to kilobytes (or to be more precise, kibibytes)
+
+                            // Calculate the previous save file size
+    bool fSizeErr = false;
+    ullong uiPreviousSaveSize = 0;
+    auto CalcPrevSavesSize = [&fSizeErr, &uiPreviousSaveSize](lpctstr ptcSaveName)
+    {
+        struct stat st;
+        CSString strSaveFile = g_Cfg.m_sWorldBaseDir + SPHERE_FILE + ptcSaveName + SPHERE_SCRIPT;
+        stat(strSaveFile.GetPtr(), &st);
+        ullong uiCurSavefileSize = (ullong)st.st_size;
+        if (uiCurSavefileSize == 0)
+            fSizeErr = true;
+        else
+            uiPreviousSaveSize += uiCurSavefileSize;
+    };
+
+    if (fStatics)
+    {
+        CalcPrevSavesSize("statics");
+    }
+    else
+    {
+        CalcPrevSavesSize("data");
+        CalcPrevSavesSize("world");
+        CalcPrevSavesSize("chars");
+        CalcPrevSavesSize("multis");
+    }
+
+    uiPreviousSaveSize /= 1024;
+    uiPreviousSaveSize += (uiPreviousSaveSize*20)/100;  // Just to be sure increase the space requirement by 20%
+    ullong uiServMem = (ullong)g_Serv.StatGet(SERV_STAT_MEM);   // In KB
+    if (fSizeErr)
+    {
+        // In case we have corrupted or unexistant previous save files, check for this arbitrary amount of free space.
+        uiPreviousSaveSize = maximum(uiPreviousSaveSize, (uiServMem/8));
+    }
+    else
+    {
+        // Work around suspiciously low previous save files sizes
+        uiPreviousSaveSize = maximum(uiPreviousSaveSize, (uiServMem/20));
+    }
+
+    if (uiFreeSpace < uiPreviousSaveSize)
+    {
+        g_Log.Event(LOGL_CRIT, "-----------------------------");
+        g_Log.Event(LOGL_CRIT, "Save ABORTED! Disk space low!");
+        g_Log.Event(LOGL_CRIT, "-----------------------------");
+        Broadcast("Save ABORTED! Warn the administrator!");
+        return false;
+    }
+    return true;
+}
+
 bool CWorld::Save( bool fForceImmediate ) // Save world state
 {
 	ADDTOCALLSTACK("CWorld::Save");
+
+    if (!CheckAvailableSpaceForSave(false))
+        return false;
+
+    //-- Ok we can start the save process, in which we eventually remove the previous saves and create the other.
+
 	bool bSaved = false;
 	try
 	{
@@ -1512,21 +1600,19 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 		//to flush on any conditions?
 
 #ifndef _MTNETWORK
-		if (g_NetworkOut.isActive() == false) {
+		if (g_NetworkOut.isActive() == false)
 #else
-		if (g_NetworkManager.isOutputThreaded() == false) {
+		if (g_NetworkManager.isOutputThreaded() == false)
 #endif
-
+        {
 #ifdef _DEBUG
 			g_Log.EventDebug("Flushing %" PRIuSIZE_T " client(s) output data...\n", g_Serv.StatGet(SERV_STAT_CLIENTS));
 #endif
-
 #ifndef _MTNETWORK
 			g_NetworkOut.flushAll();
 #else
 			g_NetworkManager.flushAllClients();
 #endif
-
 #ifdef _DEBUG
 			g_Log.EventDebug("Done flushing clients output data.\n");
 #endif
@@ -1564,6 +1650,10 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 void CWorld::SaveStatics()
 {
 	ADDTOCALLSTACK("CWorld::SaveStatics");
+
+    if (!CheckAvailableSpaceForSave(true))
+        return;
+
 	try
 	{
 		if ( !g_Cfg.m_fSaveGarbageCollect )
@@ -1586,14 +1676,16 @@ void CWorld::SaveStatics()
 		//	loop through all sectors and save static items
 		for ( int m = 0; m < 256; m++ )
 		{
-			if ( !g_MapList.m_maps[m] ) continue;
+			if ( !g_MapList.m_maps[m] )
+                continue;
 
 			for ( int d = 0; d < g_MapList.GetSectorQty(m); d++ )
 			{
 				CItem	*pNext, *pItem;
 				CSector	*pSector = GetSector(m, d);
 
-				if ( !pSector ) continue;
+				if ( !pSector )
+                    continue;
 
 				pItem = static_cast <CItem*>(pSector->m_Items_Inert.GetHead());
 				for ( ; pItem != NULL; pItem = pNext )

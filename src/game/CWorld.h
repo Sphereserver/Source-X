@@ -314,6 +314,7 @@ public:
 
 	bool Export( lpctstr pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, int dx = 0, int dy = 0 );
 	bool Import( lpctstr pszFilename, const CChar* pSrc, word iModeFlags = IMPFLAGS_ITEMS, int iDist = INT16_MAX, tchar *pszAgs1 = NULL, tchar *pszAgs2 = NULL );
+    bool CheckAvailableSpaceForSave(bool fStatics);
 	bool Save( bool fForceImmediate ); // Save world state
 	void SaveStatics();
 	bool LoadAll();

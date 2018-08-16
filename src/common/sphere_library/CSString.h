@@ -191,14 +191,24 @@ public:
 	///@{
 	/**
 	* @brief Concatenate CSString with a string.
-	* @param psz string to concatenate with.
-	* @return The result of concatenate the CSString with psz.
+	* @param pointer to zero-terminated tchar string to concatenate with.
+	* @return The result of concatenate the CSString with string.
 	*/
-	inline const CSString& operator+=(lpctstr psz)
+	inline const CSString& operator+=(lpctstr string)
 	{
-		Add(psz);
+		Add(string);
 		return(*this);
 	}
+    /**
+    * @brief Concatenate CSString with a string.
+    * @param pointer to zero-terminated tchar string to concatenate with.
+    * @return The result of concatenate the CSString with string.
+    */
+    inline CSString& operator+(lpctstr string)
+    {
+        Add(string);
+        return(*this);
+    }
 	/**
 	* @brief Concatenate CSString with a character.
 	* @param ch character to concatenate with.
