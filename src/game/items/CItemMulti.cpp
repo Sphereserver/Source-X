@@ -935,10 +935,10 @@ CItem *CItemMulti::GenerateKey(CUID uidTarget, bool fDupeOnBank)
     {
         return nullptr;
     }
-    CItem * pKey = nullptr;
+    
     // Create the key to the door.
     ITEMID_TYPE id = IsAttr(ATTR_MAGIC) ? ITEMID_KEY_MAGIC : ITEMID_KEY_COPPER;
-    pKey = CreateScript(id, pTarget);
+    CItem *pKey = CreateScript(id, pTarget);
     ASSERT(pKey);
     pKey->SetType(IT_KEY);
     if (g_Cfg.m_fAutoNewbieKeys)
@@ -951,12 +951,32 @@ CItem *CItemMulti::GenerateKey(CUID uidTarget, bool fDupeOnBank)
 
     if (fDupeOnBank)
     {
+        // Put in your bankbox
         CItem* pKeyDupe = CItem::CreateDupeItem(pKey);
-        pTarget->GetBank()->ContentAdd(pKeyDupe);
-        pTarget->SysMessageDefault(DEFMSG_MSG_KEY_DUPEBANK);
+        CItemContainer* pContBank = pTarget->GetBank();
+        if (pContBank)
+        {
+            pContBank->ContentAdd(pKeyDupe);
+            pTarget->SysMessageDefault(DEFMSG_MSG_KEY_DUPEBANK);
+        }
+        else	// it should never happen...
+        {
+            delete pKeyDupe;
+            g_Log.EventWarn("Can't add multi key to char '%s' (UID 0x" PRIx32 "): no bank box!", pTarget->GetName(), (dword)pTarget->GetUID());
+        }
     }
+
     // Put in your pack
-    pTarget->GetPackSafe()->ContentAdd(pKey);
+    CItemContainer* pContPack = pTarget->GetPackSafe();
+    if (pContPack)
+    {
+        pContPack->ContentAdd(pKey);
+    }
+    else	// it should never happen...
+    {
+        delete pKey;
+        g_Log.EventWarn("Can't add multi key to char '%s' (UID 0x" PRIx32 "): no backpack!", pTarget->GetName(), (dword)pTarget->GetUID());
+    }
 
     return pKey;
 }

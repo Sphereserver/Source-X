@@ -1504,12 +1504,12 @@ bool CWorld::CheckAvailableSpaceForSave(bool fStatics)
     ullong uiFreeSpace;     // in bytes
     lpctstr ptcSaveDir = g_Cfg.m_sWorldBaseDir.GetPtr();
 #ifndef _WIN32
-    struct statvfs stat;
-    if (statvfs(ptcSaveDir, &stat) != 0)
+    struct statvfs stvfs;
+    if (statvfs(ptcSaveDir, &stvfs) != 0)
     {
         throw CSError(LOGL_CRIT, 0, "Can't statvfs the \"save\" folder! Save aborted!");
     }
-    uiFreeSpace = stat.f_bsize * stat.f_bavail;
+    uiFreeSpace = stvfs.f_bsize * stvfs.f_bavail;
 #else
     ULARGE_INTEGER liFreeBytesAvailable, liTotalNumberOfBytes, liTotalNumberOfFreeBytes;
     if (! ::GetDiskFreeSpaceEx(ptcSaveDir,  // directory name
