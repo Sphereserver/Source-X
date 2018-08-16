@@ -6,7 +6,24 @@
 #include "CCFaction.h"
 #include "../CObjBase.h"
 
-bool CCFaction::IsOppositeGroup(CCFaction *target)
+CFactionDef::CFactionDef()
+{
+    _iFaction = FACTION_NONE;
+}
+
+NPC_FACTION CFactionDef::GetFactionID() const
+{
+    return _iFaction;
+}
+
+void CFactionDef::SetFactionID(NPC_FACTION faction)
+{
+    _iFaction = faction;
+}
+
+//---
+
+bool CCFaction::IsOppositeGroup(const CCFaction *target) const
 {
     ADDTOCALLSTACK("CCFaction::IsOppositeGroup");
     if (IsGroupElemental() && target->IsGroupAbyss())
@@ -26,7 +43,7 @@ bool CCFaction::IsOppositeGroup(CCFaction *target)
     return false;
 }
 
-bool CCFaction::IsOppositeSuperSlayer(CCFaction *target)
+bool CCFaction::IsOppositeSuperSlayer(const CCFaction *target) const
 {
     ADDTOCALLSTACK("CCFaction::IsOppositeSuperSlayer");
     if ((IsGroupFey()) && (target->GetFactionID() & FACTION_FEY))
@@ -46,7 +63,7 @@ bool CCFaction::IsOppositeSuperSlayer(CCFaction *target)
     return false;
 }
 
-bool CCFaction::IsOppositeLesserSlayer(CCFaction *target)
+bool CCFaction::IsOppositeLesserSlayer(const CCFaction *target) const
 {
     ADDTOCALLSTACK("CCFaction::IsOppositeLesserSlayer");
     // Start Elemental Lesser Slayers
@@ -237,17 +254,17 @@ bool CCFaction::r_Verb(CScript & s, CTextConsole * pSrc)
     return false;
 }
 
-void CCFaction::Copy(CComponent * target)
+void CCFaction::Copy(const CComponent * target)
 {
     ADDTOCALLSTACK("CCFaction::Copy");
-    CCFaction *pTarget = static_cast<CCFaction*>(target);
+    const CCFaction *pTarget = static_cast<const CCFaction*>(target);
     if (pTarget)
     {
         _iFaction = pTarget->GetFactionID();
     }
 }
 
-NPC_GROUP CCFaction::GetGroupID()
+NPC_GROUP CCFaction::GetGroupID() const
 {
     ADDTOCALLSTACK("CCFaction::GetGroupID");
     if (IsGroupElemental())
@@ -268,7 +285,7 @@ NPC_GROUP CCFaction::GetGroupID()
         return NPCGROUP_NONE;
 }
 
-NPC_FACTION CCFaction::GetFactionID()
+NPC_FACTION CCFaction::GetFactionID() const
 {
     ADDTOCALLSTACK_INTENSIVE("CCFaction::GetFactionID");
     return _iFaction;
@@ -281,49 +298,49 @@ void CCFaction::SetFactionID(NPC_FACTION faction)
     _iFaction = faction;
 }
 
-bool CCFaction::IsGroupElemental()
+bool CCFaction::IsGroupElemental() const
 {
     ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupElemental");
     return ((_iFaction >= FACTION_ELEMENTAL) && (_iFaction < FACTION_ELEMENTAL_QTY));
 }
 
-bool CCFaction::IsGroupFey()
+bool CCFaction::IsGroupFey() const
 {
     ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupFey");
     return (_iFaction == FACTION_FEY);
 }
 
-bool CCFaction::IsGroupAbyss()
+bool CCFaction::IsGroupAbyss() const
 {
     ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupAbyss");
     return ((_iFaction >= FACTION_DEMON) && (_iFaction < FACTION_ABYSS_QTY));
 }
 
-bool CCFaction::IsGroupHumanoid()
+bool CCFaction::IsGroupHumanoid() const
 {
     ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupHumanoid");
     return ((_iFaction >= FACTION_REPOND) && (_iFaction < FACTION_HUMANOID_QTY));
 }
 
-bool CCFaction::IsGroupUndead()
+bool CCFaction::IsGroupUndead() const
 {
     ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupUndead");
     return ((_iFaction >= FACTION_UNDEAD) && (_iFaction < FACTION_UNDEAD_QTY));
 }
 
-bool CCFaction::IsGroupArachnid()
+bool CCFaction::IsGroupArachnid() const
 {
     ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupArachnid");
     return ((_iFaction >= FACTION_ARACHNID) && (_iFaction < FACTION_ARACHNID_QTY));
 }
 
-bool CCFaction::IsGroupReptilian()
+bool CCFaction::IsGroupReptilian() const
 {
     ADDTOCALLSTACK_INTENSIVE("CCFaction::IsGroupReptilian");
     return ((_iFaction >= FACTION_REPTILE) && (_iFaction < FACTION_REPTILIAN_QTY));
 }
 
-bool CCFaction::IsSuperSlayer()
+bool CCFaction::IsSuperSlayer() const
 {
     ADDTOCALLSTACK_INTENSIVE("CCFaction::IsSuperSlayer");
     switch (_iFaction)
@@ -342,7 +359,7 @@ bool CCFaction::IsSuperSlayer()
     return false;
 }
 
-bool CCFaction::IsLesserSlayer()
+bool CCFaction::IsLesserSlayer() const
 {
     ADDTOCALLSTACK_INTENSIVE("CCFaction::IsLesserSlayer");
     if ((_iFaction > FACTION_NONE) && (_iFaction < FACTION_QTY) && (!IsSuperSlayer()))
@@ -350,7 +367,7 @@ bool CCFaction::IsLesserSlayer()
     return false;
 }
 
-int CCFaction::GetSlayerDamageBonus(CCFaction *target)
+int CCFaction::GetSlayerDamageBonus(const CCFaction *target) const
 {
     ADDTOCALLSTACK_INTENSIVE("CCFaction::GetSlayerDamageBonus");
     if (IsOppositeLesserSlayer(target))
@@ -360,7 +377,7 @@ int CCFaction::GetSlayerDamageBonus(CCFaction *target)
     return 1;
 }
 
-int CCFaction::GetSlayerDamagePenalty(CCFaction * target)
+int CCFaction::GetSlayerDamagePenalty(const CCFaction * target) const
 {
     ADDTOCALLSTACK_INTENSIVE("CCFaction::GetSlayerDamagePenalty");
     if (IsOppositeGroup(target))
@@ -368,17 +385,3 @@ int CCFaction::GetSlayerDamagePenalty(CCFaction * target)
     return 1;
 }
 
-CFactionDef::CFactionDef()
-{
-    _iFaction = FACTION_NONE;
-}
-
-NPC_FACTION CFactionDef::GetFactionID()
-{
-    return _iFaction;
-}
-
-void CFactionDef::SetFactionID(NPC_FACTION faction)
-{
-    _iFaction = faction;
-}

@@ -60,7 +60,7 @@ void CSFile::_NotifyIOError( lpctstr szMessage ) const
 
 void CSFile::_Close()
 {
-    ADDTOCALLSTACK_INTENSIVE("CSFile::_Close");
+    ADDTOCALLSTACK("CSFile::_Close");
     if ( ! CSFile::_IsFileOpen() )
         return;
 
@@ -74,7 +74,7 @@ void CSFile::_Close()
 
 void CSFile::Close()
 {
-    ADDTOCALLSTACK_INTENSIVE("CSFile::Close");
+    ADDTOCALLSTACK("CSFile::Close");
 
     THREAD_UNIQUE_LOCK_SET;
     CSFile::_Close();
@@ -82,7 +82,7 @@ void CSFile::Close()
 
 bool CSFile::_Open( lpctstr ptcFilename, uint uiModeFlags )
 {
-    ADDTOCALLSTACK_INTENSIVE("CSFile::_Open");
+    ADDTOCALLSTACK("CSFile::_Open");
     // RETURN: true = success.
     // OF_BINARY | OF_WRITE
     if ( !ptcFilename )
@@ -142,7 +142,7 @@ bool CSFile::_Open( lpctstr ptcFilename, uint uiModeFlags )
 
 bool CSFile::Open( lpctstr ptcFilename, uint uiModeFlags )
 {
-    ADDTOCALLSTACK_INTENSIVE("CSFile::Open");
+    ADDTOCALLSTACK("CSFile::Open");
     THREAD_UNIQUE_LOCK_RETURN(CSFile::_Open(ptcFilename, uiModeFlags));
 }
 
@@ -166,7 +166,7 @@ lpctstr CSFile::GetFilePath() const
 
 bool CSFile::_SetFilePath( lpctstr pszName )
 {
-    ADDTOCALLSTACK_INTENSIVE("CFile::_SetFilePath");
+    ADDTOCALLSTACK("CFile::_SetFilePath");
     if ( pszName == nullptr )
         return false;
     if ( ! _strFileName.CompareNoCase( pszName ))
@@ -183,7 +183,7 @@ bool CSFile::_SetFilePath( lpctstr pszName )
 
 bool CSFile::SetFilePath( lpctstr pszName )
 {
-    ADDTOCALLSTACK_INTENSIVE("CFile::SetFilePath");
+    ADDTOCALLSTACK("CFile::SetFilePath");
     THREAD_UNIQUE_LOCK_RETURN(CSFile::_SetFilePath(pszName));
 }
 
@@ -192,7 +192,7 @@ bool CSFile::SetFilePath( lpctstr pszName )
 
 int CSFile::_GetLength()
 {
-    ADDTOCALLSTACK_INTENSIVE("CSFile::_GetLength");
+    ADDTOCALLSTACK("CSFile::_GetLength");
     bool fOpenClose = false;
     if ( _fileDescriptor == _kInvalidFD )
     {
@@ -213,13 +213,13 @@ int CSFile::_GetLength()
 
 int CSFile::GetLength()
 {
-    ADDTOCALLSTACK_INTENSIVE("CSFile::GetLength");
+    ADDTOCALLSTACK("CSFile::GetLength");
     THREAD_UNIQUE_LOCK_RETURN(CSFile::_GetLength());
 }
 
 int CSFile::_GetPosition() const
 {
-    ADDTOCALLSTACK_INTENSIVE("CSFile::_GetPosition");
+    ADDTOCALLSTACK("CSFile::_GetPosition");
 #ifdef _WIN32
     DWORD ret = SetFilePointer( _fileDescriptor, 0, NULL, FILE_CURRENT );
     if (ret == INVALID_SET_FILE_POINTER)
@@ -244,13 +244,13 @@ int CSFile::_GetPosition() const
 }
 int CSFile::GetPosition() const
 {
-    ADDTOCALLSTACK_INTENSIVE("CSFile::GetPosition");
+    ADDTOCALLSTACK("CSFile::GetPosition");
     THREAD_UNIQUE_LOCK_RETURN(CSFile::_GetPosition());
 }
 
 int CSFile::Read( void * pData, int iLength ) const
 {
-    ADDTOCALLSTACK_INTENSIVE("CSFile::Read");
+    ADDTOCALLSTACK("CSFile::Read");
     THREAD_UNIQUE_LOCK_SET;
 
 #ifdef _WIN32
@@ -278,7 +278,7 @@ int CSFile::Read( void * pData, int iLength ) const
 
 int CSFile::_Seek( int iOffset, int iOrigin )
 {
-    ADDTOCALLSTACK_INTENSIVE("CSFile::_Seek");
+    ADDTOCALLSTACK("CSFile::_Seek");
 	if ( _fileDescriptor == _kInvalidFD )
     {
         _NotifyIOError("CFile::Seek");
@@ -300,35 +300,35 @@ int CSFile::_Seek( int iOffset, int iOrigin )
 
 int CSFile::Seek( int iOffset, int iOrigin )
 {
-    ADDTOCALLSTACK_INTENSIVE("CSFile::Seek");
+    ADDTOCALLSTACK("CSFile::Seek");
     THREAD_UNIQUE_LOCK_RETURN(CSFile::_Seek(iOffset, iOrigin));
 }
 
 void CSFile::_SeekToBegin()
 {
-    ADDTOCALLSTACK_INTENSIVE("CSFile::_SeekToBegin");
+    ADDTOCALLSTACK("CSFile::_SeekToBegin");
     _Seek( 0, SEEK_SET );
 }
 void CSFile::SeekToBegin()
 {
-    ADDTOCALLSTACK_INTENSIVE("CSFile::SeekToBegin");
+    ADDTOCALLSTACK("CSFile::SeekToBegin");
 	Seek( 0, SEEK_SET );
 }
 
 int CSFile::_SeekToEnd()
 {
-    ADDTOCALLSTACK_INTENSIVE("CSFile::_SeekToEnd");
+    ADDTOCALLSTACK("CSFile::_SeekToEnd");
     return _Seek( 0, SEEK_END );
 }
 int CSFile::SeekToEnd()
 {
-    ADDTOCALLSTACK_INTENSIVE("CSFile::SeekToEnd");
+    ADDTOCALLSTACK("CSFile::SeekToEnd");
 	return Seek( 0, SEEK_END );
 }
 
 bool CSFile::Write( const void * pData, int iLength )
 {
-    ADDTOCALLSTACK_INTENSIVE("CSFile::Write");
+    ADDTOCALLSTACK("CSFile::Write");
     THREAD_UNIQUE_LOCK_SET;
 
 #ifdef _WIN32
@@ -355,7 +355,7 @@ bool CSFile::Write( const void * pData, int iLength )
 
 lpctstr CSFile::GetFilesTitle( lpctstr pszPath )  // static
 {
-	ADDTOCALLSTACK_INTENSIVE("CSFile::GetFilesTitle");
+	ADDTOCALLSTACK("CSFile::GetFilesTitle");
 	// strrchr
 	size_t len = strlen(pszPath);
 	while ( len > 0 )

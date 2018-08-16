@@ -189,11 +189,11 @@ bool CEntity::r_Verb(CScript & s, CTextConsole * pSrc) ///< Execute command from
     return false;
 }
 
-void CEntity::Copy(CEntity *target)
+void CEntity::Copy(const CEntity *target)
 {
     if (_List.empty())
         return;
-    for (std::map<COMP_TYPE, CComponent*>::iterator it = target->_List.begin(); it != target->_List.end(); ++it)
+    for (std::map<COMP_TYPE, CComponent*>::const_iterator it = target->_List.begin(); it != target->_List.end(); ++it)
     {
         CComponent *pTarget = it->second;    // the CComponent to copy from
         if (pTarget)

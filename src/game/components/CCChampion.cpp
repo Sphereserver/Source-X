@@ -341,7 +341,7 @@ void CCChampion::SetLevel(byte iLevel)
     GetLink()->SetTimeout(TICK_PER_SEC * 60 * 10);	//10 minutes
 };
 
-byte CCChampion::GetCandlesPerLevel()
+byte CCChampion::GetCandlesPerLevel() const
 {
     ADDTOCALLSTACK("CCChampion::GetCandlesPerLevel");
     switch (_iLevel)
@@ -359,7 +359,7 @@ byte CCChampion::GetCandlesPerLevel()
     return 2;
 };
 
-ushort CCChampion::GetMonstersPerLevel(ushort iMonsters)
+ushort CCChampion::GetMonstersPerLevel(ushort iMonsters) const
 {
     ADDTOCALLSTACK("CCChampion::GetMonstersPerLevel");
     switch (_iLevel)
@@ -830,7 +830,7 @@ bool CCChampion::r_Verb(CScript & s, CTextConsole * pSrc)
     return false;
 }
 
-void CCChampion::Copy(CComponent * target)
+void CCChampion::Copy(const CComponent * target)
 {
     ADDTOCALLSTACK("CCChampion::Copy");
     UNREFERENCED_PARAMETER(target);

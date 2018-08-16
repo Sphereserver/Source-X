@@ -22,8 +22,8 @@ public:
 
     void SetCurHits(word iCurHits);
     void SetMaxHits(word iMaxHits);
-    word GetCurHits();
-    word GetMaxHits();
+    word GetCurHits() const;
+    word GetMaxHits() const;
     void OnTickStatsUpdate();
 
     virtual void Delete(bool fForced = false) override;
@@ -32,7 +32,7 @@ public:
     virtual void r_Write(CScript & s) override;
     virtual bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef) override;
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override;
-    virtual void Copy(CComponent *target) override;
+    virtual void Copy(const CComponent *target) override;
     virtual CCRET_TYPE OnTick() override;
 };
 #endif //_INC_CCItemDamageable_H

@@ -1526,7 +1526,7 @@ bool CWorld::CheckAvailableSpaceForSave(bool fStatics)
                             // Calculate the previous save file size
     bool fSizeErr = false;
     ullong uiPreviousSaveSize = 0;
-    auto CalcPrevSavesSize = [&fSizeErr, &uiPreviousSaveSize](lpctstr ptcSaveName)
+    auto CalcPrevSavesSize = [=,&fSizeErr, &uiPreviousSaveSize](lpctstr ptcSaveName) -> void
     {
         struct stat st;
         CSString strSaveFile = g_Cfg.m_sWorldBaseDir + SPHERE_FILE + ptcSaveName + SPHERE_SCRIPT;
@@ -1579,8 +1579,8 @@ bool CWorld::Save( bool fForceImmediate ) // Save world state
 {
 	ADDTOCALLSTACK("CWorld::Save");
 
-    if (!CheckAvailableSpaceForSave(false))
-        return false;
+    //if (!CheckAvailableSpaceForSave(false))
+    //    return false;
 
     //-- Ok we can start the save process, in which we eventually remove the previous saves and create the other.
 

@@ -923,7 +923,7 @@ void CItemMulti::EjectAll(CUID uidCharNoTp)
     }
 }
 
-CItem *CItemMulti::GenerateKey(CUID uidTarget, bool fPlaceOnBank)
+CItem *CItemMulti::GenerateKey(CUID uidTarget, bool fDupeOnBank)
 {
     ADDTOCALLSTACK("CItemMulti::GenerateKey");
     if (!uidTarget.IsValidUID())
@@ -949,17 +949,15 @@ CItem *CItemMulti::GenerateKey(CUID uidTarget, bool fPlaceOnBank)
     pKey->m_itKey.m_UIDLock.SetPrivateUID(GetUID());
     pKey->m_uidLink = GetUID();
 
-
-    if (fPlaceOnBank)
+    if (fDupeOnBank)
     {
-        pTarget->GetBank()->ContentAdd(pKey);
+        CItem* pKeyDupe = CItem::CreateDupeItem(pKey);
+        pTarget->GetBank()->ContentAdd(pKeyDupe);
         pTarget->SysMessageDefault(DEFMSG_MSG_KEY_DUPEBANK);
     }
-    else
-    {
-        // Put in your pack
-        pTarget->GetPackSafe()->ContentAdd(pKey);
-    }
+    // Put in your pack
+    pTarget->GetPackSafe()->ContentAdd(pKey);
+
     return pKey;
 }
 

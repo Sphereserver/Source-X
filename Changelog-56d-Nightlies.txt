@@ -1098,4 +1098,6 @@ Multis:
 - Fixed: the script caching wasn't working as intended, now the scripts and saves loading and the scripts execution is a lot faster. Technical details are on git commits descriptions.
 
 16-08-2018, Nolok
-- Added: the world save and the deletion of the previous save is now skipped if there's not enough available space (20% of the previous saves size).
+- Added: the world save and the deletion of the previous save is now skipped if there's not enough available space (at least 20% of the previous saves size).
+	This avoids the corruption or loss of old saves if there's not enough space on the disk.
+- Fixed: multi (ships or houses) keys were only added to the bank, without adding a copy on the backpack.

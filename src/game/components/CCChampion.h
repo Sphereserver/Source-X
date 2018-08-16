@@ -188,7 +188,7 @@ public:
     * @param iMonsters total amount of monsters of the champion.
     * @return amount of killed monsters needed to reach the next level.
     */
-    uint16 GetMonstersPerLevel(uint16 iMonsters);
+    uint16 GetMonstersPerLevel(uint16 iMonsters) const;
 
     /**
     * @brief Retrieves how much Red Candles are needed to reach next Champion's Level.
@@ -198,7 +198,7 @@ public:
     * Value stored in morex (m_itNormal.m_morep.m_x).
     * @return how much red candles are needed to reach the next level
     */
-    byte GetCandlesPerLevel();
+    byte GetCandlesPerLevel() const;
     /**
     * @brief Set a new Level for this champion.
     *
@@ -222,7 +222,7 @@ public:
     virtual bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc) override;
     virtual bool r_LoadVal(CScript & s) override;
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override; // Execute command from script
-    virtual void Copy(CComponent *target) override;
+    virtual void Copy(const CComponent *target) override;
 
     /************************************************************************
     * CItem related section.

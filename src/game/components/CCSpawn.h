@@ -46,42 +46,42 @@ public:
     *   the data type accepted/returned.
     */
     void SetAmount(uint16 iAmount);
-    uint16 GetAmount();
+    uint16 GetAmount() const;
 
     /**
     * @brief Returns how many Items/Chars are currently spawned.
     *
     * @return count
     */
-    uint16 GetCurrentSpawned();
+    uint16 GetCurrentSpawned() const;
 
     /**
     * @brief Returns the pile's size (Only for IT_SPAWN_ITEM).
     *
     * @return count
     */
-    uint16 GetPile();
+    uint16 GetPile() const;
 
     /**
     * @brief Returns how many Items/Chars are currently spawned from me.
     *
     * @return count
     */
-    uint16 GetTimeLo();
+    uint16 GetTimeLo() const;
 
     /**
     * @brief Returns how many Items/Chars are currently spawned from me.
     *
     * @return count
     */
-    uint16 GetTimeHi();
+    uint16 GetTimeHi() const;
 
     /**
     * @brief Returns how many Items/Chars are currently spawned from me.
     *
     * @return count
     */
-    uint8 GetMaxDist();
+    uint8 GetMaxDist() const;
 
     /**
     * @brief CCSpawn's custom alternative of CComponent::GetLink retrieving a direct link for the CItem, without const.
@@ -95,7 +95,7 @@ public:
     *
     * @return *CResourceIDBase
     */
-    CResourceIDBase GetSpawnID();
+    CResourceIDBase GetSpawnID() const;
 
     /**
     * @brief Overrides onTick for this class.
@@ -181,7 +181,7 @@ public:
     virtual void r_Write(CScript & s) override;
     virtual bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef) override;
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override;
-    virtual void Copy(CComponent *target) override;
+    virtual void Copy(const CComponent *target) override;
 };
 
 #endif // _INC_CCSpawn_H

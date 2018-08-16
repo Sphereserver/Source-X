@@ -128,7 +128,7 @@ protected:
     NPC_FACTION _iFaction;
 public:
     CFactionDef();
-    NPC_FACTION GetFactionID();
+    NPC_FACTION GetFactionID() const;
     void SetFactionID(NPC_FACTION faction);
 };
 
@@ -147,7 +147,7 @@ public:
     virtual void r_Write(CScript & s) override;
     virtual bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef) override;
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc) override;
-    virtual void Copy(CComponent *target) override;
+    virtual void Copy(const CComponent *target) override;
     bool r_Load(CScript & s);  // Load a character from Script
     virtual CCRET_TYPE OnTick();
     /*
@@ -157,77 +157,77 @@ public:
     /*
         Return true if I'm in the 'Elemental' group.
     */
-    bool IsGroupElemental();
+    bool IsGroupElemental() const;
     /*
     Return true if I'm in the 'Fey' group.
     */
-    bool IsGroupFey();
+    bool IsGroupFey() const;
     /*
     Return true if I'm in the 'Abyss' group.
     */
-    bool IsGroupAbyss();
+    bool IsGroupAbyss() const;
     /*
     Return true if I'm in the 'Humaoind' group.
     */
-    bool IsGroupHumanoid();
+    bool IsGroupHumanoid() const;
     /*
     Return true if I'm in the 'Undead' group.
     */
-    bool IsGroupUndead();
+    bool IsGroupUndead() const;
     /*
     Return true if I'm in the 'Arachnid' group.
     */
-    bool IsGroupArachnid();
+    bool IsGroupArachnid() const;
     /*
     Return true if I'm in the 'Reptilian' group.
     */
-    bool IsGroupReptilian();
+    bool IsGroupReptilian() const;
 
     /*
         Checks for an specific Group and returns it I fit in anyone or FACTION_QTY if not.
     */
-    NPC_GROUP GetGroupID();
+    NPC_GROUP GetGroupID() const;
 
     /*
     Checks for an specific Faction and returns it I fit in anyone or FACTION_QTY if not.
     */
-    NPC_FACTION GetFactionID();
+    NPC_FACTION GetFactionID() const;
 
     /*
         Checks my group and the target's one and return true if we are enemies.
     */
-    bool IsOppositeGroup(CCFaction *target);
+    bool IsOppositeGroup(const CCFaction *target) const;
 
     /*
     Returns true if I'm a Super Slayer and the target has also the same type
     */
-    bool IsOppositeSuperSlayer(CCFaction *target);
+    bool IsOppositeSuperSlayer(const CCFaction *target) const;
     /*
     Returns true if I'm a Lesser Slayer and the target has also the same type
     */
-    bool IsOppositeLesserSlayer(CCFaction *target);
+    bool IsOppositeLesserSlayer(const CCFaction *target) const;
     /*
         Returns true if I'm a Super Slayer
     */
-    bool IsSuperSlayer();
+    bool IsSuperSlayer() const;
 
     /*
         Returns true if I'm a Lesser Slayer
     */
-    bool IsLesserSlayer();
+    bool IsLesserSlayer() const;
     /*
         Returns the Slayers's damage bonus (if any).
         NOTE: We can't direct check for target's Super Slayer or Lesser Slayer and compare
         with ours because we may both have more than one Group (even if we shouldn't,
         Sphere's 'versatility' forces us to do so).
     */
-    int GetSlayerDamageBonus(CCFaction *target);
+    int GetSlayerDamageBonus(const CCFaction *target) const;
 
     /*
         Wielding a slayer type against its opposite will cause the attacker to take more damage
         returns the penalty damage.
     */
-    int GetSlayerDamagePenalty(CCFaction *target);
+    int GetSlayerDamagePenalty(const CCFaction *target) const;
 
 };
 

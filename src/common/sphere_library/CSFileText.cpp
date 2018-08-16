@@ -34,7 +34,7 @@ bool CSFileText::IsFileOpen() const
 
 bool CSFileText::_Open(lpctstr ptcFilename, uint uiModeFlags)
 {
-    ADDTOCALLSTACK_INTENSIVE("CSFileText::_Open");
+    ADDTOCALLSTACK("CSFileText::_Open");
 
     // Open a file.
     _strFileName = ptcFilename;
@@ -52,13 +52,13 @@ bool CSFileText::_Open(lpctstr ptcFilename, uint uiModeFlags)
 }
 bool CSFileText::Open(lpctstr ptcFilename, uint uiModeFlags)
 {
-    ADDTOCALLSTACK_INTENSIVE("CSFileText::Open");
+    ADDTOCALLSTACK("CSFileText::Open");
     THREAD_UNIQUE_LOCK_RETURN(CSFileText::_Open(ptcFilename, uiModeFlags));
 }
 
 void CSFileText::_Close()
 {
-    ADDTOCALLSTACK_INTENSIVE("CSFileText::_Close");
+    ADDTOCALLSTACK("CSFileText::_Close");
 
     // CCacheableScriptFile opens the file, reads and closes it. It should never be opened, so pStream should be always nullptr.
     if ((_pStream != nullptr) /*&& (_pStream != _kInvalidFD)*/)
@@ -75,7 +75,7 @@ void CSFileText::_Close()
 }
 void CSFileText::Close()
 {
-    ADDTOCALLSTACK_INTENSIVE("CSFileText::Close");
+    ADDTOCALLSTACK("CSFileText::Close");
     THREAD_UNIQUE_LOCK_SET;
     _Close();
 }
@@ -85,7 +85,7 @@ int CSFileText::_Seek( int iOffset, int iOrigin )
 {
     // RETURN:
     //  true = success
-    ADDTOCALLSTACK_INTENSIVE("CSFileText::_Seek");
+    ADDTOCALLSTACK("CSFileText::_Seek");
 
     if ( !_IsFileOpen() )
         return 0;
@@ -111,13 +111,13 @@ int CSFileText::Seek( int iOffset, int iOrigin )
 {
     // RETURN:
     //  true = success
-    ADDTOCALLSTACK_INTENSIVE("CSFileText::Seek");
+    ADDTOCALLSTACK("CSFileText::Seek");
     THREAD_UNIQUE_LOCK_RETURN(CSFileText::_Seek(iOffset, iOrigin));
 }
 
 void CSFileText::_Flush() const
 {
-    ADDTOCALLSTACK_INTENSIVE("CSFileText::_Flush");
+    ADDTOCALLSTACK("CSFileText::_Flush");
 
     if ( !_IsFileOpen() )
         return;
@@ -127,7 +127,7 @@ void CSFileText::_Flush() const
 }
 void CSFileText::Flush() const
 {
-    ADDTOCALLSTACK_INTENSIVE("CSFileText::Flush");
+    ADDTOCALLSTACK("CSFileText::Flush");
     THREAD_UNIQUE_LOCK_SET;
     CSFileText::_Flush();
 }
@@ -149,7 +149,7 @@ bool CSFileText::IsEOF() const
 
 int _cdecl CSFileText::Printf( lpctstr pFormat, ... )
 {
-    ADDTOCALLSTACK_INTENSIVE("CSFileText::Printf");
+    ADDTOCALLSTACK("CSFileText::Printf");
     ASSERT(pFormat);
 
     va_list vargs;
@@ -163,7 +163,7 @@ int CSFileText::Read( void * pBuffer, int sizemax ) const
 {
     // This can return: EOF(-1) constant.
     // returns the number of full items actually read
-    ADDTOCALLSTACK_INTENSIVE("CSFileText::Read");
+    ADDTOCALLSTACK("CSFileText::Read");
     ASSERT(pBuffer);
 
     if ( IsEOF() )
@@ -182,7 +182,7 @@ int CSFileText::Read( void * pBuffer, int sizemax ) const
 tchar * CSFileText::_ReadString( tchar * pBuffer, int sizemax )
 {
     // Read a line of text. NULL/nullptr = EOF
-    ADDTOCALLSTACK_INTENSIVE("CSFileText::_ReadString");
+    ADDTOCALLSTACK("CSFileText::_ReadString");
     ASSERT(pBuffer);
 
     if ( _IsEOF() )
@@ -193,13 +193,13 @@ tchar * CSFileText::_ReadString( tchar * pBuffer, int sizemax )
 
 tchar * CSFileText::ReadString( tchar * pBuffer, int sizemax )
 {
-    ADDTOCALLSTACK_INTENSIVE("CSFileText::ReadString");
+    ADDTOCALLSTACK("CSFileText::ReadString");
     THREAD_UNIQUE_LOCK_RETURN(_ReadString(pBuffer, sizemax));
 }
 
 int CSFileText::VPrintf( lpctstr pFormat, va_list args )
 {
-    ADDTOCALLSTACK_INTENSIVE("CSFileText::VPrintf");
+    ADDTOCALLSTACK("CSFileText::VPrintf");
     ASSERT(pFormat);
 
     if ( !IsFileOpen() )
@@ -211,7 +211,7 @@ int CSFileText::VPrintf( lpctstr pFormat, va_list args )
 bool CSFileText::Write( const void * pData, int iLen )
 {
     // RETURN: 1 = success else fail.
-    ADDTOCALLSTACK_INTENSIVE("CSFileText::Write");
+    ADDTOCALLSTACK("CSFileText::Write");
     ASSERT(pData);
 
     THREAD_UNIQUE_LOCK_SET;
@@ -235,7 +235,7 @@ bool CSFileText::Write( const void * pData, int iLen )
 bool CSFileText::WriteString( lpctstr pStr )
 {
     // RETURN: < 0 = failed.
-    ADDTOCALLSTACK_INTENSIVE("CSFileText::WriteString");
+    ADDTOCALLSTACK("CSFileText::WriteString");
     ASSERT(pStr);
 
     return Write( pStr, (int)strlen( pStr ) );
@@ -245,7 +245,7 @@ bool CSFileText::WriteString( lpctstr pStr )
 
 lpctstr CSFileText::_GetModeStr() const
 {
-    ADDTOCALLSTACK_INTENSIVE("CSFileText::GetModeStr");
+    ADDTOCALLSTACK("CSFileText::GetModeStr");
     // end of line translation is crap. ftell and fseek don't work correctly when you use it.
     // fopen() args
     if ( IsBinaryMode())

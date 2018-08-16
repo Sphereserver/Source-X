@@ -35,12 +35,12 @@ void CCItemDamageable::SetMaxHits(word iMaxHits)
     _iMaxHits = iMaxHits;
 }
 
-word CCItemDamageable::GetCurHits()
+word CCItemDamageable::GetCurHits() const
 {
     return _iCurHits;
 }
 
-word CCItemDamageable::GetMaxHits()
+word CCItemDamageable::GetMaxHits() const
 {
     return _iMaxHits;
 }
@@ -185,10 +185,10 @@ bool CCItemDamageable::r_Verb(CScript & s, CTextConsole * pSrc)
     return false;
 }
 
-void CCItemDamageable::Copy(CComponent * target)
+void CCItemDamageable::Copy(const CComponent * target)
 {
     ADDTOCALLSTACK("CCItemDamageable::Copy");
-    CCItemDamageable *pTarget = static_cast<CCItemDamageable*>(target);
+    const CCItemDamageable *pTarget = static_cast<const CCItemDamageable*>(target);
     if (!pTarget)
     {
         return;

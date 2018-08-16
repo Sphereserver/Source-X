@@ -31,38 +31,38 @@ CCSpawn::~CCSpawn()
 {
 }
 
-uint16 CCSpawn::GetAmount()
+uint16 CCSpawn::GetAmount() const
 {
     //ADDTOCALLSTACK_INTENSIVE("CCSpawn::GetAmount");
     return _iAmount;
 }
 
-uint16 CCSpawn::GetCurrentSpawned()
+uint16 CCSpawn::GetCurrentSpawned() const
 {
     return (uint16)_uidList.size();
 }
 
-uint16 CCSpawn::GetPile()
+uint16 CCSpawn::GetPile() const
 {
     return _iPile;
 }
 
-uint16 CCSpawn::GetTimeLo()
+uint16 CCSpawn::GetTimeLo() const
 {
     return _iTimeLo;
 }
 
-uint16 CCSpawn::GetTimeHi()
+uint16 CCSpawn::GetTimeHi() const
 {
     return _iTimeHi;
 }
 
-uint8 CCSpawn::GetMaxDist()
+uint8 CCSpawn::GetMaxDist() const
 {
     return _iMaxDist;
 }
 
-CResourceIDBase CCSpawn::GetSpawnID()
+CResourceIDBase CCSpawn::GetSpawnID() const
 {
     return _idSpawn;
 }
@@ -873,10 +873,10 @@ bool CCSpawn::r_Verb(CScript & s, CTextConsole * pSrc)
     return false;
 }
 
-void CCSpawn::Copy(CComponent * target)
+void CCSpawn::Copy(const CComponent * target)
 {
     ADDTOCALLSTACK("CCSpawn::Copy");
-    CCSpawn *pTarget = static_cast<CCSpawn*>(target);
+    const CCSpawn *pTarget = static_cast<const CCSpawn*>(target);
     if (!pTarget)
     {
         return;
