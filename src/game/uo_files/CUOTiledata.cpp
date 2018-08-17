@@ -169,16 +169,16 @@ void CUOTiledata::Load()
                 if ( g_Install.m_File[filedata].Read( static_cast <CUOItemTypeRec *>(&record), sizeof(CUOItemTypeRec)) <= 0 )
                     throw CSError(LOGL_CRIT, CSFile::GetLastError(), "CUOTiledata.Item.Load: TileData Read");
 
-                CUOItemTypeRec_HS cachedEntry = _tiledataItemEntries[id];
-                cachedEntry.m_flags = record.m_flags;
-                cachedEntry.m_weight = record.m_weight;
-                cachedEntry.m_layer = record.m_layer;
-                cachedEntry.m_dwAnim = record.m_dwAnim;
-                cachedEntry.m_height = record.m_height;
-                cachedEntry.m_wUnk19 = record.m_wUnk14;
-                cachedEntry.m_dwUnk11 = record.m_dwUnk6;
-                cachedEntry.m_dwUnk5 = 0;
-                strncpynull(cachedEntry.m_name, record.m_name, CountOf(cachedEntry.m_name));
+                CUOItemTypeRec_HS* cachedEntry = &_tiledataItemEntries[id];
+                cachedEntry->m_flags = record.m_flags;
+                cachedEntry->m_weight = record.m_weight;
+                cachedEntry->m_layer = record.m_layer;
+                cachedEntry->m_dwAnim = record.m_dwAnim;
+                cachedEntry->m_height = record.m_height;
+                cachedEntry->m_wUnk19 = record.m_wUnk14;
+                cachedEntry->m_dwUnk11 = record.m_dwUnk6;
+                cachedEntry->m_dwUnk5 = 0;
+                strncpynull(cachedEntry->m_name, record.m_name, CountOf(cachedEntry->m_name));
                 break;
             }
         }
