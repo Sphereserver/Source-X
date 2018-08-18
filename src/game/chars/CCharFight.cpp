@@ -1576,12 +1576,12 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
     // Do i have to wait for the recoil time?
     if (m_atFight.m_War_Swing_State == WAR_SWING_EQUIPPING)
     {
-        ANIM_TYPE animSwingDefault = GenerateAnimate(ANIM_ATTACK_WEAPON);
+        m_atFight.m_iSwingAnimation = GenerateAnimate(ANIM_ATTACK_WEAPON);
 
         if ( IsTrigUsed(TRIGGER_HITTRY) )
         {
             CScriptTriggerArgs Args(m_atFight.m_iRecoilDelay, 0, pWeapon);
-            Args.m_VarsLocal.SetNum("Anim", (int)animSwingDefault);
+            Args.m_VarsLocal.SetNum("Anim", (int)m_atFight.m_iSwingAnimation);
             Args.m_VarsLocal.SetNum("AnimDelay", m_atFight.m_iSwingAnimationDelay);
             if ( OnTrigger(CTRIG_HitTry, pCharTarg, &Args) == TRIGRET_RET_TRUE )
                 return WAR_SWING_READY;
