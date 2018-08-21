@@ -2192,6 +2192,7 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
             bool fNeedKey = false;
             dword uid = UID_CLEAR;
             GenerateBaseComponents(fNeedKey, uid);
+            break;
         }
         default:
         {

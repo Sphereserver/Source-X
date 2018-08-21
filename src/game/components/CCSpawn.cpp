@@ -727,9 +727,9 @@ void CCSpawn::r_Write(CScript & s)
     {
         s.WriteKeyVal("AMOUNT", GetAmount());
     }
-
-    s.WriteKey("SPAWNID", g_Cfg.ResourceGetName(_idSpawn));
-    if (GetPile() != 1 && pItem->GetType() == IT_SPAWN_ITEM)
+    CSString sVal = g_Cfg.ResourceGetName(_idSpawn);    // need to create the CSString to get the name, otherwise the index is used for [SPAWN ] groups
+    s.WriteKey("SPAWNID", sVal);
+    if (GetPile() > 1 && pItem->GetType() == IT_SPAWN_ITEM)
     {
         s.WriteKeyVal("PILE", GetPile());
     }
