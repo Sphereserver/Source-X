@@ -150,6 +150,12 @@ CItemMulti::~CItemMulti()
     delete m_pRegion;
 }
 
+void CItemMulti::Delete(bool bforce)
+{
+    RemoveAllComps();
+    CObjBase::Delete(bforce);
+}
+
 const CItemBaseMulti * CItemMulti::Multi_GetDef() const
 {
     return(static_cast <const CItemBaseMulti *>(Base_GetDef()));
