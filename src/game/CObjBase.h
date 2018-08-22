@@ -584,13 +584,13 @@ public:
 	int64 GetTimerAdjusted() const;
 
     /**
-     * @fn  int64 CObjBase::GetTimerDAdjusted() const;
+     * @fn  int64 CObjBase::GetTimerTAdjusted() const;
      *
-     * @brief   Gets timer in tenths of second.
+     * @brief   Gets timer in ticks.
      *
-     * @return  The timer d adjusted.
+     * @return  The timer t adjusted.
      */
-	int64 GetTimerDAdjusted() const;
+	int64 GetTimerTAdjusted() const;
 
 public:
 

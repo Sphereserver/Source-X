@@ -14,7 +14,7 @@ class CServerTime
 	// A time stamp in the server/game world.
 
 	#undef GetCurrentTime
-	#define TICK_PER_SEC 10
+	#define TICK_PER_SEC 4
 	#define TENTHS_PER_SEC 1
 	
 public:

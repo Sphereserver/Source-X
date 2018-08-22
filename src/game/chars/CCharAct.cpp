@@ -1810,7 +1810,7 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 		{
 			// create left over item.
 			CItem * pItemNew = pItem->UnStackSplit(amount, this);
-			pItemNew->SetTimeout( pItem->GetTimerDAdjusted() ); //since this was commented in DupeCopy
+			pItemNew->SetTimeout( pItem->GetTimerTAdjusted() ); //since this was commented in DupeCopy
 
 			if (( IsTrigUsed(TRIGGER_PICKUP_STACK) ) || ( IsTrigUsed(TRIGGER_ITEMPICKUP_STACK) ))
 			{

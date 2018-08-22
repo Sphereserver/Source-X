@@ -962,7 +962,7 @@ private:
 	int	Fight_CalcRange( CItem * pWeapon = nullptr ) const;
     // 1.0 seconds is the minimum animation duration ("delay"), but we have to subtract the tenths of seconds that will pass until the next tick, since
     //  the timer will start on the next tick
-    #define COMBAT_MIN_SWING_ANIMATION_DELAY (10 - (TICK_PER_SEC/10))
+    #define COMBAT_MIN_SWING_ANIMATION_DELAY (int16)(10 - (TICK_PER_SEC/10))
     void Fight_SetDefaultSwingDelays();
 	
 	bool Fight_IsActive() const;

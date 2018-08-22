@@ -2971,7 +2971,7 @@ int CChar::Spell_CastStart()
 		}
 	}
 
-	int64 iWaitTime = pSpellDef->m_CastTime.GetLinear(Skill_GetBase((SKILL_TYPE)(iSkill)));
+    int64 iWaitTime = IsPriv(PRIV_GM) ? 1 : (int64)(pSpellDef->m_CastTime.GetLinear(Skill_GetBase(static_cast<SKILL_TYPE>(iSkill)))* TICK_PER_SEC) / 10;
 	iWaitTime -= GetDefNum("FASTERCASTING", true, true) * 2;	//correct value is 0.25, but sphere can handle only 0.2.
 	if ( iWaitTime < 1 || IsPriv(PRIV_GM) )
 		iWaitTime = 1;

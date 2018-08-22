@@ -44,7 +44,7 @@ int CServerConfig::Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pW
 	int iBaseSpeed = 50;	// Base Wrestling speed (on ML formula it's 2.50)
 	if ( pWeapon )			// If we have a weapon, base speed should match weapon's value.
 		iBaseSpeed = pWeapon->GetSpeed();
-
+    int iSwingSpeed = 100;
 	switch ( g_Cfg.m_iCombatSpeedEra )
 	{
 		case 0:
@@ -52,15 +52,15 @@ int CServerConfig::Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pW
 			// pre-AOS formula (Sphere custom)		(default m_iSpeedScaleFactor = 15000, uses DEX instead STAM and calculate delay using weapon WEIGHT if weapon SPEED is not set)
 			if ( pWeapon && iBaseSpeed )
 			{
-				int iSwingSpeed = (pChar->Stat_GetAdjusted(STAT_DEX) + 100) * iBaseSpeed;
+				iSwingSpeed = (pChar->Stat_GetAdjusted(STAT_DEX) + 100) * iBaseSpeed;
 				iSwingSpeed = maximum(1, iSwingSpeed);
 				iSwingSpeed = (g_Cfg.m_iSpeedScaleFactor * TICK_PER_SEC) / iSwingSpeed;
 				if ( iSwingSpeed < 5 )
 					iSwingSpeed = 5;
-				return iSwingSpeed;
+				break;
 			}
 
-			int iSwingSpeed = IMulDiv(100 - pChar->Stat_GetAdjusted(STAT_DEX), 40, 100);	// base speed is just the char DEX range (0 ~ 40)
+			iSwingSpeed = IMulDiv(100 - pChar->Stat_GetAdjusted(STAT_DEX), 40, 100);	// base speed is just the char DEX range (0 ~ 40)
 			if ( iSwingSpeed < 5 )
 				iSwingSpeed = 5;
 			else
@@ -75,55 +75,57 @@ int CServerConfig::Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pW
 			}
 			else
 				iSwingSpeed += 2;
-			return iSwingSpeed;
+			break;
 		}
 
 		case 1:
 		{
 			// pre-AOS formula	(default m_iSpeedScaleFactor = 15000)
-			int iSwingSpeed = (pChar->Stat_GetVal(STAT_DEX) + 100) * iBaseSpeed;
+			iSwingSpeed = (pChar->Stat_GetVal(STAT_DEX) + 100) * iBaseSpeed;
 			iSwingSpeed = maximum(1, iSwingSpeed);
 			iSwingSpeed = (g_Cfg.m_iSpeedScaleFactor * TICK_PER_SEC) / iSwingSpeed;
 			if ( iSwingSpeed < 1 )
 				iSwingSpeed = 1;
-			return iSwingSpeed;
+			break;
 		}
 
 		case 2:
 		{
 			// AOS formula		(default m_iSpeedScaleFactor = 40000)
-			int iSwingSpeed = (pChar->Stat_GetVal(STAT_DEX) + 100) * iBaseSpeed;
+			iSwingSpeed = (pChar->Stat_GetVal(STAT_DEX) + 100) * iBaseSpeed;
 			iSwingSpeed = iSwingSpeed * (100 + iSwingSpeedIncrease) / 100;
 			iSwingSpeed = maximum(1, iSwingSpeed);
 			iSwingSpeed = ((g_Cfg.m_iSpeedScaleFactor * TICK_PER_SEC) / iSwingSpeed) / 2;
 			if ( iSwingSpeed < 12 )		//1.25
 				iSwingSpeed = 12;
-			return iSwingSpeed;
+			break;
 		}
 
 		default:
 		case 3:
 		{
 			// SE formula		(default m_iSpeedScaleFactor = 80000)
-			int iSwingSpeed = iBaseSpeed * (100 + iSwingSpeedIncrease) / 100;
+			iSwingSpeed = iBaseSpeed * (100 + iSwingSpeedIncrease) / 100;
 			iSwingSpeed = maximum(1, iSwingSpeed);
 			iSwingSpeed = (g_Cfg.m_iSpeedScaleFactor / ((pChar->Stat_GetVal(STAT_DEX) + 100) * iSwingSpeed)) - 2;	// get speed in ticks of 0.25s each
 			if ( iSwingSpeed < 5 )
 				iSwingSpeed = 5;
 			iSwingSpeed = (iSwingSpeed * TICK_PER_SEC) / 4;		// convert 0.25s ticks into ms
-			return iSwingSpeed;
+			break;
 		}
 
 		case 4:
 		{
 			// ML formula		(doesn't use m_iSpeedScaleFactor and it's only compatible with ML speed format eg. 0.25 ~ 5.00 instead 0 ~ 50)
-			int iSwingSpeed = ((iBaseSpeed * 4) - (pChar->Stat_GetVal(STAT_DEX) / 30)) * (100 / (100 + iSwingSpeedIncrease));	// get speed in ticks of 0.25s each
+			iSwingSpeed = ((iBaseSpeed * 4) - (pChar->Stat_GetVal(STAT_DEX) / 30)) * (100 / (100 + iSwingSpeedIncrease));	// get speed in ticks of 0.25s each
 			if ( iSwingSpeed < 5 )
 				iSwingSpeed = 5;
 			iSwingSpeed = (iSwingSpeed * TICK_PER_SEC) / 4;		// convert 0.25s ticks into ms
-			return iSwingSpeed;
+			break;
 		}
 	}
+    iSwingSpeed = (iSwingSpeed * TICK_PER_SEC) / 10; // Convert from tenths of second to ticks.
+    return iSwingSpeed;
 }
 
 int CServerConfig::Calc_CombatChanceToHit(CChar * pChar, CChar * pCharTarg)

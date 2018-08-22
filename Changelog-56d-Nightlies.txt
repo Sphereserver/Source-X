@@ -1101,3 +1101,11 @@ Multis:
 - Added: the world save and the deletion of the previous save is now skipped if there's not enough available space (at least 20% of the previous saves size).
 	This avoids the corruption or loss of old saves if there's not enough space on the disk.
 - Fixed: multi (ships or houses) keys were only added to the bank, without adding a copy on the backpack.
+
+22-08-2018, XuN
+- Changed tick periods from 0.1s to 0.25s, read https://github.com/Sphereserver/Source-experimental/issues/125 for more information.
+- DEPRECATED TIMERD, a warning will be shown each time it's used.
+- ADDED TIMERT timing each TICK.
+WARNING TIMERD is NOT the same as TIMERT, while TIMERD=10 was meant to tick in one second, TIMERT=10 will tick in 4 seconds, so it should be TIMERT=4 to tick in a second (0.25*4)
+
+- Removing multis now removes all of it's components by default (doors, signs, tiller, etc) but not lockdowns or other personal items.

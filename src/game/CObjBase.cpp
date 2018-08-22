@@ -386,9 +386,9 @@ int64 CObjBase::GetTimerAdjusted() const
 	return ( iDiffInTicks / TICK_PER_SEC );
 }
 
-int64 CObjBase::GetTimerDAdjusted() const
+int64 CObjBase::GetTimerTAdjusted() const
 {
-	// RETURN: time in seconds from now.
+	// RETURN: time in ticks from now.
 	if ( ! IsTimerSet())
 		return -1;
 	int64 iDiffInTicks = GetTimerDiff();
@@ -1475,8 +1475,10 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			sVal.FormatLLVal( GetTimerAdjusted() );
 			break;
 		case OC_TIMERD:
-			sVal.FormatLLVal( GetTimerDAdjusted() );
-			break;
+            g_Log.EventError("TIMERD was deprecated, read revisions about TIMERT\n");
+        case OC_TIMERT:
+            sVal.FormatLLVal(GetTimerTAdjusted());
+            break;
 		case OC_TRIGGER:
 			{
 				pszKey += 7;
@@ -1981,10 +1983,12 @@ bool CObjBase::r_LoadVal( CScript & s )
 			SetTimeout( s.GetArgLLVal() * TICK_PER_SEC );
             fResendTooltip = true;
 			break;
-		case OC_TIMERD:
-			SetTimeout( s.GetArgLLVal());
+        case OC_TIMERD:
+            g_Log.EventError("TIMERD was deprecated, read revisions about TIMERT\n");
+        case OC_TIMERT:
+            SetTimeout(s.GetArgLLVal());
             fResendTooltip = true;
-			break;
+            break;
 		case OC_TIMESTAMP:
 			SetTimeStamp( s.GetArgLLVal());
 			break;

@@ -1576,7 +1576,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
     // Do i have to wait for the recoil time?
     if (m_atFight.m_War_Swing_State == WAR_SWING_EQUIPPING)
     {
-        m_atFight.m_iSwingAnimation = GenerateAnimate(ANIM_ATTACK_WEAPON);
+        m_atFight.m_iSwingAnimation = (int16)GenerateAnimate(ANIM_ATTACK_WEAPON);
 
         if ( IsTrigUsed(TRIGGER_HITTRY) )
         {
