@@ -328,7 +328,7 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 		{
 			CChar * pChar = dynamic_cast <CChar*>( pObjTop );
 			ASSERT(pChar);
-			if ( ! pChar->IsOwnedBy( m_pChar ))
+			if ( ! pChar->IsOwnedBy( m_pChar ) && !IsPriv(PRIV_GM))
 			{
 				// Slyly dropping item in someone elses pack.
 				// or just dropping on their trade window.

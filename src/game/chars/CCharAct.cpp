@@ -1754,12 +1754,18 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 	if ( pChar != NULL )
 	{
 		bool bCanTake = false;
-		if (pChar == this) // we can always take our own items
-			bCanTake = true;
-		else if ( (pItem->GetContainer() != pChar) || (g_Cfg.m_fCanUndressPets == true) ) // our owners can take items from us (with CanUndressPets=true, they can undress us too)
-			bCanTake = pChar->IsOwnedBy(this);
-		else  // higher priv players can take items and undress us
-			bCanTake = ( IsPriv(PRIV_GM) && (GetPrivLevel() > pChar->GetPrivLevel()) );
+        if (IsPriv(PRIV_GM))// higher priv players can take items and undress us
+        {
+            bCanTake = (pChar == this) || (GetPrivLevel() > pChar->GetPrivLevel());
+        }
+        else if (pChar == this) // we can always take our own items
+        {
+            bCanTake = true;         
+        }
+        else if ((pItem->GetContainer() != pChar) || (g_Cfg.m_fCanUndressPets == true)) // our owners can take items from us (with CanUndressPets=true, they can undress us too)
+        {
+            bCanTake = pChar->IsOwnedBy(this);
+        }
 
 		if (bCanTake == false)
 		{
