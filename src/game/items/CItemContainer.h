@@ -14,8 +14,8 @@ class CItemContainer : public CItemVendable, public CContainer
 {
 	// This item has other items inside it.
 	static lpctstr const sm_szVerbKeys[];
-    CItemMulti *_pMultiSecured;
-    CItemMulti *_pMultiCrate;
+    CUID _uidMultiSecured;
+    CUID _uidMultiCrate;
 public:
 	static const char *m_sClassName;
 
@@ -24,8 +24,8 @@ public:
 	bool NotifyDelete();
 	void DeletePrepare();
 
-    void SetSecuredOfMulti(CItemMulti *pMulti);
-    void SetCrateOfMulti(CItemMulti *pMulti);
+    void SetSecuredOfMulti(CUID uidMulti);
+    void SetCrateOfMulti(CUID uidMulti);
 
 public:
 	CItemContainer( ITEMID_TYPE id, CItemBase * pItemDef );

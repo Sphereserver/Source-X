@@ -1132,7 +1132,7 @@ void CItemMulti::SetMovingCrate(CUID uidCrate)
     {
         if (pCurrentCrate)
         {
-            pCurrentCrate->SetCrateOfMulti(nullptr);
+            pCurrentCrate->SetCrateOfMulti(UID_UNUSED);
         }
         _pMovingCrate.InitUID();
         return;
@@ -1146,7 +1146,7 @@ void CItemMulti::SetMovingCrate(CUID uidCrate)
     pNewCrate->m_uidLink = GetUID();
     CScript event("events +t_moving_crate");
     pNewCrate->r_LoadVal(event);
-    pNewCrate->SetCrateOfMulti(this);
+    pNewCrate->SetCrateOfMulti(GetUID());
 }
 
 CUID CItemMulti::GetMovingCrate(bool fCreate)
@@ -1642,7 +1642,7 @@ void CItemMulti::Secure(CUID uidContainer)
         pContainer->r_LoadVal(event);
 
     }
-    pContainer->SetSecuredOfMulti(this);
+    pContainer->SetSecuredOfMulti(GetUID());
     _lSecureContainers.emplace_back(uidContainer);
 }
 
@@ -1666,7 +1666,7 @@ void CItemMulti::Release(CUID uidContainer)
     pContainer->m_uidLink.InitUID();
     CScript event("events -t_house_secure");
     pContainer->r_LoadVal(event);
-    pContainer->SetSecuredOfMulti(nullptr);
+    pContainer->SetSecuredOfMulti(UID_UNUSED);
 }
 
 int CItemMulti::GetSecuredContainerPos(CUID uidContainer)
@@ -2235,8 +2235,8 @@ enum SHL_TYPE
     SHL_GETFRIENDPOS,
     SHL_GETHOUSEVENDORPOS,
     SHL_GETLOCKEDITEMPOS,
-    SHL_GETSECUREDCONTAINERS,
     SHL_GETSECUREDCONTAINERPOS,
+    SHL_GETSECUREDCONTAINERS,
     SHL_GETSECUREDITEMS,
     SHL_GUILD,
     SHL_HOUSETYPE,
@@ -2285,8 +2285,8 @@ const lpctstr CItemMulti::sm_szLoadKeys[SHL_QTY + 1] =
     "GETFRIENDPOS",
     "GETHOUSEVENDORPOS",
     "GETLOCKEDITEMPOS",
-    "GETSECUREDCONTAINERS",
     "GETSECUREDCONTAINERPOS",
+    "GETSECUREDCONTAINERS",
     "GETSECUREDITEMS",
     "GUILD",
     "HOUSETYPE",
@@ -2592,7 +2592,9 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
         }
         case SHL_GETSECUREDCONTAINERPOS:
         {
-            CUID uidCont = static_cast<CUID>(Exp_GetVal(pszKey));
+            g_Log.EventDebug("bla\n");
+            CUID uidCont = (CUID)Exp_GetDWVal(pszKey);
+            g_Log.EventDebug("GSP %08\n", (dword)uidCont);
             if (uidCont.IsValidUID())
             {
                 sVal.FormatVal(GetSecuredContainerPos(uidCont));

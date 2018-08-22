@@ -15,21 +15,30 @@
 CItemContainer::CItemContainer( ITEMID_TYPE id, CItemBase *pItemDef ) :	CItemVendable( id, pItemDef )
 {
 	// m_fTinkerTrapped = false;
-    _pMultiSecured = nullptr;
-    _pMultiCrate = nullptr;
+    _uidMultiSecured.InitUID();
+    _uidMultiCrate.InitUID();
 }
 
 CItemContainer::~CItemContainer()
 {
     Clear();		// get rid of my contents first to protect against weight calc errors.
     DeletePrepare();
-    if (_pMultiSecured)
+    CItemMulti *pMulti = nullptr;
+    if (_uidMultiSecured.IsValidUID())
     {
-        _pMultiSecured->Release(GetUID());
+        pMulti = static_cast<CItemMulti*>(_uidMultiSecured.ItemFind());
+        if (pMulti)
+        {
+            pMulti->Release(GetUID());
+        }
     }
-    if (_pMultiCrate)
+    if (_uidMultiCrate.IsValidUID())
     {
-        _pMultiCrate->SetMovingCrate(UID_UNUSED);
+        pMulti = static_cast<CItemMulti*>(_uidMultiCrate.ItemFind());
+        if (pMulti)
+        {
+            pMulti->SetMovingCrate(UID_UNUSED);
+        }
     }
 }
 
@@ -54,14 +63,14 @@ void CItemContainer::DeletePrepare()
 	CItem::DeletePrepare();
 }
 
-void CItemContainer::SetSecuredOfMulti(CItemMulti * pMulti)
+void CItemContainer::SetSecuredOfMulti(CUID uidMulti)
 {
-    _pMultiSecured = pMulti;
+    _uidMultiSecured = uidMulti;
 }
 
-void CItemContainer::SetCrateOfMulti(CItemMulti * pMulti)
+void CItemContainer::SetCrateOfMulti(CUID uidMulti)
 {
-    _pMultiCrate = pMulti;
+    _uidMultiCrate = uidMulti;
 }
 
 void CItemContainer::r_Write( CScript &s )

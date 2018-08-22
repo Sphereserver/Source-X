@@ -87,11 +87,11 @@ int CSVFile::_ReadRowContent(tchar ** ppOutput, int rowIndex, int columns)
 {
 	ADDTOCALLSTACK("CSVFile::_ReadRowContent");
 	ASSERT(columns > 0 && columns <= MAX_COLUMNS);
-	if ( GetPosition() != rowIndex )
+	if ( _GetPosition() != rowIndex )
 		_Seek(rowIndex, SEEK_SET);
 
 	tchar * pszLine = Str_GetTemp();
-	if ( ReadString(pszLine, THREAD_STRING_LENGTH) == nullptr )
+	if ( _ReadString(pszLine, THREAD_STRING_LENGTH) == nullptr )
 		return 0;
 
 	return Str_ParseCmds(pszLine, ppOutput, columns, "\t");
