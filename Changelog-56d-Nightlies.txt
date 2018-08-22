@@ -627,7 +627,7 @@ Simple explanation:
 
 
 05-05-2018, XuN:
-[Port from Source, 20-01-2017, Coruja]
+[Port from Source, 20-01-2017, Coruja}
 Added: New function MAPWAYPOINT to add/remove waypoints on client radar map (enhanced clients only).
 	Sintax: MAPWAYPOINT ObjectUID, WaypointType
 	Waypoint types:
@@ -1023,13 +1023,13 @@ Multis:
 
 23-07-2018, Drk84
 - Added: effectLocation command, similar to the EFFECT command but instead of an object it takes a terrain location as a target.(Thanks to XuN for the help)
-	Some of the new spells use effects that are placed  on the ground (not field items) for simulating an area of effect. 
+	Some of the new spells use effects that are placed  on the ground (not field items) for simulating an area of effect.
 	Usage: effectLocation x,y,z,type,itemid,speed,loop,explode,color,render
-	Examples: 
+	Examples:
 	//Simulate the Consacrate Weapon Chivalry spell effect, a sword appearing from the ground and going upward.
 	[FUNCTION testLocationZ]
 	effectLocation <p.x>,<p.y>,<height>+1,0,i_sword_long,1,0,0,colors_red,3
-	
+
 	//Simulate a field of energy centered at the target.
 	//argv0 x offset, argv1 y offset
 	[FUNCTION testLocationField]
@@ -1047,16 +1047,16 @@ Multis:
   Notes:
   If the effect Type is 1 (Lightning) or 3 (Effect at object level) the effect will not be played, only effect 0(bolt) and 2(ground level) seems valid, probably
   cause they don't accept a map point.
-  
+
 - Added: Spells with the LAYER property set to >= LAYER_SPELL_STATS will automatically equip the spell memory item found in the RUNE_ITEM property.
-	Before this commit, if you wanted to make a custom spell (or scripts the chivalry, mysticm, spelleweaving spells) you had to manually equip the memory item 
+	Before this commit, if you wanted to make a custom spell (or scripts the chivalry, mysticm, spelleweaving spells) you had to manually equip the memory item
 	causing the triggers @EffectAdd  and @EffectRemove to never be fired.
 - Changed: Meditation skill now take in consideration the EFFECT property of the skill, if the EFFECT property is not present the default value of 1 is used.
 - Added: Added new flag value 080 for CombatParryingEra, setting this flag will allow to use the following parrying skill behaviour:
-	The flag will enable the old AR parrying formula, instead of gaining  a flat 7% of the Shield Armor value the Parrying skill of the character is taken in consideration according to the 
+	The flag will enable the old AR parrying formula, instead of gaining  a flat 7% of the Shield Armor value the Parrying skill of the character is taken in consideration according to the
 	following formula:
-	Displayed AR = ((Parrying Skill * Base AR of Shield) ÷ 200) + 1 
-	The maximum AR reachable is: Base AR of Shield / 2. 
+	Displayed AR = ((Parrying Skill * Base AR of Shield) ÷ 200) + 1
+	The maximum AR reachable is: Base AR of Shield / 2.
 	More information: http://web.archive.org/web/20000306210936/http://uo.stratics.com:80/parr.htm
 	Notes
 	By default the ARMOR value of the Shields item is commented, so you need to uncomment them.
@@ -1109,3 +1109,6 @@ Multis:
 WARNING TIMERD is NOT the same as TIMERT, while TIMERD=10 was meant to tick in one second, TIMERT=10 will tick in 4 seconds, so it should be TIMERT=4 to tick in a second (0.25*4)
 
 - Removing multis now removes all of it's components by default (doors, signs, tiller, etc) but not lockdowns or other personal items.
+
+22-08-2018, roberpot
+- Added REVEALF_OSILIKEPERSONALSPACE: If set, invis characters will be not revealed when another character enters personal space, and no message will be sended to character who entered.

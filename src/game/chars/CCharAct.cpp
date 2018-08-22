@@ -3136,10 +3136,14 @@ CRegion * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool fChec
 				SysMessage(pszMsg);
 				return NULL;
 			}
-			else if ( pChar->IsStatFlag(STATF_INVISIBLE|STATF_HIDDEN) )
+			else if (pChar->IsStatFlag(STATF_INVISIBLE) && !(g_Cfg.m_iRevealFlags & REVEALF_OSILIKEPERSONALSPACE) ) {
+                sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_HIDING_STUMBLE), pChar->GetName());
+                pChar->Reveal(STATF_INVISIBLE | STATF_HIDDEN);
+			}
+			else if ( pChar->IsStatFlag(STATF_HIDDEN) )
 			{
-				sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_HIDING_STUMBLE), pChar->GetName());
-				pChar->Reveal(STATF_INVISIBLE|STATF_HIDDEN);
+                sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_HIDING_STUMBLE), pChar->GetName());
+                pChar->Reveal(STATF_INVISIBLE | STATF_HIDDEN);
 			}
 			else if ( pChar->IsStatFlag(STATF_SLEEPING) )
 				sprintf(pszMsg, g_Cfg.GetDefaultMsg(DEFMSG_MSG_STEPON_BODY), pChar->GetName());
