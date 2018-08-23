@@ -517,40 +517,44 @@ void CItemMultiCustom::AddItem(CClient * pClientSrc, ITEMID_TYPE id, short x, sh
 	m_designWorking.m_vectorComponents.push_back(pComponent);
 	m_designWorking.m_iRevision++;
 
-    CItemContainer *pMovingCrate = static_cast<CItemContainer*>(GetMovingCrate(true).ItemFind());
-    std::vector<CUID> vListLocks;
-    GetLockdownsAt(x, y, z, vListLocks);
-    if (!vListLocks.empty())
-    {
-        for (std::vector<CUID>::iterator it = vListLocks.begin(); it != vListLocks.end(); ++it)
-        {
-            CItem *pItem = static_cast<CItem*>((*it).ItemFind());
-            if (pItem)
-            {
-                UnlockItem((*it));
-                pMovingCrate->ContentAdd(pItem);
-                pItem->RemoveFromView();
-            }
-        }
-    }
-    vListLocks.clear();
+    if (!g_Serv.IsLoading()) // quick fix, change it to execute only on customize mode
 
-    std::vector<CUID> vListConts;
-    GetSecuredAt(x, y, z, vListConts);
-    if (!vListConts.empty())
     {
-        for (std::vector<CUID>::iterator it = vListConts.begin(); it != vListConts.end(); ++it)
+        CItemContainer *pMovingCrate = static_cast<CItemContainer*>(GetMovingCrate(true).ItemFind());
+        std::vector<CUID> vListLocks;
+        GetLockdownsAt(x, y, z, vListLocks);
+        if (!vListLocks.empty())
         {
-            CItemContainer *pCont = static_cast<CItemContainer*>((*it).ItemFind());
-            if (pCont)
+            for (std::vector<CUID>::iterator it = vListLocks.begin(); it != vListLocks.end(); ++it)
             {
-                Release((*it));
-                pMovingCrate->ContentAdd(pCont);
-                pCont->RemoveFromView();
+                CItem *pItem = static_cast<CItem*>((*it).ItemFind());
+                if (pItem)
+                {
+                    UnlockItem((*it));
+                    pMovingCrate->ContentAdd(pItem);
+                    pItem->RemoveFromView();
+                }
             }
         }
+        vListLocks.clear();
+
+        std::vector<CUID> vListConts;
+        GetSecuredAt(x, y, z, vListConts);
+        if (!vListConts.empty())
+        {
+            for (std::vector<CUID>::iterator it = vListConts.begin(); it != vListConts.end(); ++it)
+            {
+                CItemContainer *pCont = static_cast<CItemContainer*>((*it).ItemFind());
+                if (pCont)
+                {
+                    Release((*it));
+                    pMovingCrate->ContentAdd(pCont);
+                    pCont->RemoveFromView();
+                }
+            }
+        }
+        vListConts.clear();
     }
-    vListConts.clear();
 }
 
 void CItemMultiCustom::AddStairs(CClient * pClientSrc, ITEMID_TYPE id, short x, short y, char z, short iStairID)

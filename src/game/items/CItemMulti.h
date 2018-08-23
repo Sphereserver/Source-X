@@ -21,9 +21,10 @@ enum HOUSE_TYPE
 enum TRANSFER_TYPE
 {
     TRANSFER_NOTHING    = 0x0,
-    TRANSFER_LOCKDOWNS  = 0x1,  // Transfer Locked Down items
-    TRANSFER_ADDONS     = 0x2,  // Transfer Addons
-    TRANSFER_ALL        = 0x4   // Transfer Locked Down, Addons and normal items placed on ground (Not Components).
+    TRANSFER_ALL        = 0x1,  // Transfer Locked Down, Addons and normal items placed on ground (Not Components).
+    TRANSFER_LOCKDOWNS  = 0x2,  // Transfer Locked Down items
+    TRANSFER_ADDONS     = 0x4,  // Transfer Addons
+    TRANSFER_SECURED    = 0x8   // Transfer Secured Containers
 };
 
 class CChar;

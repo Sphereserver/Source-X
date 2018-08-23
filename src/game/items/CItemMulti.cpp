@@ -389,7 +389,29 @@ bool CItemMulti::Multi_IsPartOf(const CItem * pItem) const
     {
         return true;
     }
-    return (pItem->m_uidLink == GetUID());
+    if (pItem->m_uidLink == GetUID())
+    {
+        return true;
+    }
+    CItemMulti *pMulti = const_cast<CItemMulti*>(this);
+    CUID uidItem = pItem->GetUID();
+    if (pMulti->GetLockedItemPos(uidItem) != -1)
+    {
+        return true;
+    }
+    if (pMulti->GetSecuredContainerPos(uidItem) != -1)
+    {
+        return true;
+    }
+    if (pMulti->GetAddonPos(uidItem) != -1)
+    {
+        return true;
+    }
+    if (pMulti->GetCompPos(uidItem) != -1)
+    {
+        return true;
+    }
+    return false;
 }
 
 CItem * CItemMulti::Multi_FindItemComponent(int iComp) const
@@ -1078,14 +1100,11 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
         }
     }
     RemoveAllComps();
-    if (!fIsAddon)
+    if (!fIsAddon) // Addons doesn't have to transfer anything but themselves.
     {
         if (fTransferAll)
         {
-            TransferLockdownsToMovingCrate();
-            TransferSecuredToMovingCrate();
-            RedeedAddons();
-            TransferAllItemsToMovingCrate();    // Whatever is left unlisted.
+            TransferAllItemsToMovingCrate(TRANSFER_ALL);    // Whatever is left unlisted.
         }
     }
 
@@ -1158,12 +1177,14 @@ void CItemMulti::SetMovingCrate(CUID uidCrate)
 CUID CItemMulti::GetMovingCrate(bool fCreate)
 {
     ADDTOCALLSTACK("CItemMulti::GetMovingCrate");
-    if (_pMovingCrate)
+    if (_pMovingCrate.IsValidUID())
     {
+        g_Log.EventDebug("asd = %d\n", 1);
         return _pMovingCrate;
     }
     if (!fCreate)
     {
+        g_Log.EventDebug("asd2 = %d\n");
         return UID_UNUSED;
     }
     CItemContainer *pCrate = static_cast<CItemContainer*>(CItem::CreateBase(ITEMID_CRATE1));
@@ -1183,12 +1204,21 @@ void CItemMulti::TransferAllItemsToMovingCrate(TRANSFER_TYPE iType)
     CItemContainer *pCrate = static_cast<CItemContainer*>(GetMovingCrate(true).ItemFind());
     ASSERT(pCrate);
     //Transfer Types
-    bool fTransferAddons = (((iType & TRANSFER_ADDONS) || (iType & TRANSFER_ALL)));
+    bool fTransferAddons = ((iType & TRANSFER_ADDONS) || (iType & TRANSFER_ALL));
     bool fTransferAll = (iType & TRANSFER_ALL);
-    bool fTransferLockDowns = (((iType & TRANSFER_LOCKDOWNS) || (iType & TRANSFER_ALL)));
+    bool fTransferLockDowns = ((iType & TRANSFER_LOCKDOWNS) || (iType & TRANSFER_ALL));
+    bool fTransferSecuredContainers = ((iType &TRANSFER_SECURED) || (iType & TRANSFER_ALL));
     if (fTransferLockDowns) // Try to move locked down items, also to reduce the CWorldSearch impact.
     {
         TransferLockdownsToMovingCrate();
+    }
+    if (fTransferSecuredContainers)
+    {
+        TransferSecuredToMovingCrate();
+    }
+    if (fTransferAddons)
+    {
+        RedeedAddons();
     }
     CPointMap ptArea;
     if (IsType(IT_MULTI_ADDON))
@@ -1201,6 +1231,7 @@ void CItemMulti::TransferAllItemsToMovingCrate(TRANSFER_TYPE iType)
     }
     CWorldSearch Area(ptArea, Multi_GetMaxDist());	// largest area.
     Area.SetSearchSquare(true);
+    bool fIsAddon = false;
     for (;;)
     {
         CItem * pItem = Area.GetItem();
@@ -1208,15 +1239,7 @@ void CItemMulti::TransferAllItemsToMovingCrate(TRANSFER_TYPE iType)
         {
             break;
         }
-        if (pItem->GetUID() == GetUID() || pItem->GetUID() == pCrate->GetUID())	// this gets deleted seperately.
-            continue;
-        if (fTransferAddons && (pItem->IsType(IT_MULTI_ADDON) || pItem->IsType(IT_MULTI)))  // If the item is a house Addon, redeed it.
-        {
-            static_cast<CItemMulti*>(pItem)->Redeed(false, false);
-            Area.RestartSearch();	// we removed an item and this will mess the search loop, so restart to fix it
-            continue;
-        }
-        if (!Multi_IsPartOf(pItem) && !fTransferAll)  // Items not linked to this multi.
+        if (pItem->GetUID() == GetUID() || pItem->GetUID() == pCrate->GetUID()) // Multi itself or the Moving Crate, neither is not handled here.
         {
             continue;
         }
@@ -1224,14 +1247,36 @@ void CItemMulti::TransferAllItemsToMovingCrate(TRANSFER_TYPE iType)
         {
             continue;
         }
-        if (pCrate) // Transfer items if there is a target and they are not Components (doors, signs, etc).
+        if (!fTransferAll)
         {
-            if (!pItem->IsAttr(ATTR_LOCKEDDOWN) || fTransferLockDowns) // Only transfer Locked down items if fTransferLockDowns is true.
+            if (!fTransferLockDowns && pItem->IsAttr(ATTR_LOCKEDDOWN)) // Skip this item if its locked down and we don't want to TRANSFER_LOCKDOWNS.
             {
-                pCrate->ContentAdd(pItem);
-                pItem->RemoveFromView();
+                continue;
+            }
+            else if (!fTransferSecuredContainers && pItem->IsAttr(ATTR_SECURE))  // Skip this item if it's secured (container) and we don't want to TRANSFER_SECURED.
+            {
+                continue;
+            }
+            else if (pItem->IsType(IT_MULTI_ADDON) || pItem->IsType(IT_MULTI))  // If the item is a house Addon, redeed it.
+            {
+                if (fTransferAddons)    // Shall be transfered, but addons needs an special transfer code by redeeding.
+                {
+                    static_cast<CItemMulti*>(pItem)->Redeed(false, false);
+                    Area.RestartSearch();	// we removed an item and this will mess the search loop, so restart to fix it.
+                    continue;
+                }
+                else
+                {
+                    continue;
+                }
+            }
+            else if (!Multi_IsPartOf(pItem) && !fTransferAll)  // Items not linked to, or listed on, this multi.
+            {
+                continue;
             }
         }
+        pItem->RemoveFromView();
+        pCrate->ContentAdd(pItem);
     }
     if (pCrate->GetCount() == 0)
     {
@@ -2545,19 +2590,25 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
         }
         case SHL_MOVINGCRATE:
         {
-            CItemContainer *pCrate = static_cast<CItemContainer*>(GetMovingCrate(false).ItemFind());
-            if (!IsStrEmpty(pszKey) && pCrate)
+            bool fCreate = false;
+
+            if (strlen(pszKey) <= 2) // check for <MovingCrate 0/1> (whitespace + number = 2 len)
             {
+                fCreate = Exp_GetVal(pszKey);
+            }
+            else if (!IsStrEmpty(pszKey) && _pMovingCrate.IsValidUID())    // If there's an already existing Moving Crate and args len is greater than 1, it should have a keyword to send to the crate.
+            {
+                CItemContainer *pCrate = static_cast<CItemContainer*>(_pMovingCrate.ItemFind());
+                ASSERT(pCrate); // Removed crates should init _pMovingCrate's uid?
                 return pCrate->r_WriteVal(pszKey, sVal, pSrc);
             }
-            bool fCreate = Exp_GetVal(pszKey);
             if (fCreate)
             {
-                pCrate = static_cast<CItemContainer*>(GetMovingCrate(true).ItemFind());
+                GetMovingCrate(true).ItemFind();
             }
-            if (pCrate)
+            if (_pMovingCrate.IsValidUID())
             {
-                sVal.FormatDWVal(pCrate->GetUID());
+                sVal.FormatDWVal(_pMovingCrate);
             }
             else
             {

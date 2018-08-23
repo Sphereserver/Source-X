@@ -1112,3 +1112,20 @@ WARNING TIMERD is NOT the same as TIMERT, while TIMERD=10 was meant to tick in o
 
 22-08-2018, roberpot
 - Added REVEALF_OSILIKEPERSONALSPACE: If set, invis characters will be not revealed when another character enters personal space, and no message will be sended to character who entered.
+
+23-08-2018, XuN
+- Changed HOUSE_TRANSFER definitions, reordered them for better compatibility over time and added a new TRANSFER_SECURED for secured containers:
+[DEFNAME house_transfer_types]
+transfer_nothing	= 0		// Do not transfer any item to the Moving Crate, the crate will still be moved if uid is given.
+transfer_all		= 01	// Transfer LockDowns, Addons and every other item found inside a house that is not a component of it.
+transfer_lockdowns	= 02	// Transfer LockDowns.
+transfer_addon		= 04	// Transfer Addons.
+transfer_secured	= 08	// Transfer Secured Containers.
+
+- Extended Multi_IsPartOf() method to accept items on lists and not only linked items.
+- Improved TransferToCrate function:
+    -It now moves every item stored in all lists before doing the raw area search (some new lists added before the method were not added).
+    -Also improved the checks on the search function to do the most probable finds first.
+    -Added new param TRANSFER_SECURED for Secured Containers.
+- Fixed <MovingCrate 1> not creating a new Moving Crate, hence all the custom <MovingCrate*> code not working because there's no way to create a new one.
+- Fixed Custom Multis crashing the server on loading.

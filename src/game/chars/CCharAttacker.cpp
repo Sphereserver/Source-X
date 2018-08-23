@@ -387,9 +387,6 @@ void CChar::Attacker_CheckTimeout()
             CChar *pEnemy = CUID(refAttacker.charUID).CharFind();
             if (pEnemy && (++(refAttacker.elapsed) > g_Cfg.m_iAttackerTimeout) && (g_Cfg.m_iAttackerTimeout > 0))
             {
-                DEBUG_MSG(("AttackerTimeout elapsed for char '%s' (UID: 0%" PRIx32 "): "
-                    "deleted attacker '%s' (index: %d, UID: 0%" PRIx32 ")\n",
-                    GetName(), GetUID().GetObjUID(), pEnemy->GetName(), count, pEnemy->GetUID().GetObjUID()));
                 if (!Attacker_Delete(count, true, ATTACKER_CLEAR_ELAPSED))
                     ++count;
             }
