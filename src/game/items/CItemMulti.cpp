@@ -862,13 +862,13 @@ void CItemMulti::AddAccess(CUID uidAccess)
     {
         return;
     }
-	if (!g_Serv.IsLoading())
-	{
-		if (GetAccessPos(uidAccess) >= 0)
-		{
-			return;
-		}
-	}
+    if (!g_Serv.IsLoading())
+    {
+        if (GetAccessPos(uidAccess) >= 0)
+        {
+            return;
+        }
+    }
     CChar *pAccess = uidAccess.CharFind();
     if (!pAccess)
     {
@@ -876,44 +876,44 @@ void CItemMulti::AddAccess(CUID uidAccess)
     }
     RevokePrivs(uidAccess);
     pAccess->GetMultiStorage()->AddMulti(GetUID(), HP_ACCESSONLY);
-	_lAccesses.emplace_back(uidAccess);
+    _lAccesses.emplace_back(uidAccess);
 }
 
 void CItemMulti::DelAccess(CUID uidAccess)
 {
-	ADDTOCALLSTACK("CItemMulti::DelAccess");
-	for (size_t i = 0; i < _lAccesses.size(); ++i)
-	{
-		if (_lAccesses[i] == uidAccess)
-		{
+    ADDTOCALLSTACK("CItemMulti::DelAccess");
+    for (size_t i = 0; i < _lAccesses.size(); ++i)
+    {
+        if (_lAccesses[i] == uidAccess)
+        {
             CChar *pAccess = uidAccess.CharFind();
             pAccess->GetMultiStorage()->DelMulti(GetUID());
-			_lAccesses.erase(_lAccesses.begin() + i);
-			return;
-		}
-	}
+            _lAccesses.erase(_lAccesses.begin() + i);
+            return;
+        }
+    }
 }
 
 size_t CItemMulti::GetAccessCount()
 {
-	return _lAccesses.size();
+    return _lAccesses.size();
 }
 
 int CItemMulti::GetAccessPos(CUID uidAccess)
 {
-	if (_lAccesses.empty())
-	{
-		return -1;
-	}
+    if (_lAccesses.empty())
+    {
+        return -1;
+    }
 
-	for (size_t i = 0; i < _lAccesses.size(); ++i)
-	{
-		if (_lAccesses[i] == uidAccess)
-		{
-			return (int)i;
-		}
-	}
-	return -1;
+    for (size_t i = 0; i < _lAccesses.size(); ++i)
+    {
+        if (_lAccesses[i] == uidAccess)
+        {
+            return (int)i;
+        }
+    }
+    return -1;
 }
 
 void CItemMulti::Eject(CUID uidChar)
@@ -963,7 +963,7 @@ CItem *CItemMulti::GenerateKey(CUID uidTarget, bool fDupeOnBank)
     {
         return nullptr;
     }
-    
+
     // Create the key to the door.
     ITEMID_TYPE id = IsAttr(ATTR_MAGIC) ? ITEMID_KEY_MAGIC : ITEMID_KEY_COPPER;
     CItem *pKey = CreateScript(id, pTarget);
@@ -1059,7 +1059,7 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
     ITEMID_TYPE itDeed;
     if (IsType(IT_SHIP))
     {
-       itDeed = ITEMID_SHIP_PLANS1;
+        itDeed = ITEMID_SHIP_PLANS1;
     }
     else
     {
@@ -1070,7 +1070,7 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
     CItem *pDeed = CItem::CreateBase(itDeed <= ITEMID_NOTHING ? itDeed : ITEMID_DEED1);
     tchar *pszName = Str_GetTemp();
     CItemBaseMulti * pItemBase = static_cast<CItemBaseMulti*>(Base_GetDef());
-    snprintf(pszName, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_DEED_NAME),pItemBase->GetName());
+    snprintf(pszName, STR_TEMPLENGTH, g_Cfg.GetDefaultMsg(DEFMSG_DEED_NAME), pItemBase->GetName());
     pDeed->SetName(pszName);
 
     bool fIsAddon = IsType(IT_MULTI_ADDON);
@@ -1143,7 +1143,7 @@ void CItemMulti::Redeed(bool fDisplayMsg, bool fMoveToBank, CUID uidChar)
             pOwner->ItemBounce(pDeed, fDisplayMsg);
         }
     }
-    
+
     SetKeyNum("REMOVED", 1);
     Delete();
 }
@@ -1388,7 +1388,7 @@ void CItemMulti::TransferMovingCrateToBank()
 void CItemMulti::AddAddon(CUID uidAddon)
 {
     ADDTOCALLSTACK("CItemMulti::AddAddon");
-    if (!uidAddon.IsValidUID() )
+    if (!uidAddon.IsValidUID())
     {
         return;
     }
@@ -1570,7 +1570,7 @@ uint16 CItemMulti::GetMaxStorage()
 
 uint16 CItemMulti::GetCurrentStorage()
 {
-    return (int16)(_lLockDowns.size() +_lSecureContainers.size());
+    return (int16)(_lLockDowns.size() + _lSecureContainers.size());
 }
 
 void CItemMulti::SetBaseVendors(uint8 iLimit)
@@ -1591,7 +1591,7 @@ uint8 CItemMulti::GetMaxVendors()
 
 uint16 CItemMulti::GetMaxLockdowns()
 {
-    return (GetMaxStorage() - (GetMaxStorage() - (GetMaxStorage() * (uint16)GetLockdownsPercent())/100));
+    return (GetMaxStorage() - (GetMaxStorage() - (GetMaxStorage() * (uint16)GetLockdownsPercent()) / 100));
 }
 
 uint8 CItemMulti::GetLockdownsPercent()
@@ -1818,7 +1818,7 @@ size_t CItemMulti::GetVendorCount()
 
 enum MULTIREF_REF
 {
-	SHR_ACCESS,
+    SHR_ACCESS,
     SHR_ADDON,
     SHR_BAN,
     SHR_COMP,
@@ -1836,7 +1836,7 @@ enum MULTIREF_REF
 
 lpctstr const CItemMulti::sm_szRefKeys[SHR_QTY + 1] =
 {
-	"ACCESS",
+    "ACCESS",
     "ADDON",
     "BAN",
     "COMP",
@@ -1864,21 +1864,21 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
 
     switch (iCmd)
     {
-		case SHR_ACCESS:
-		{
-			int i = Exp_GetVal(pszKey);
-			SKIP_SEPARATORS(pszKey);
-			if ((int)_lAccesses.size() > i)
-			{
-				CChar *pAccess = _lAccesses[i].CharFind();
-				if (pAccess)
-				{
-					pRef = pAccess;
-					return true;
-				}
-			}
-			return false;
-		}
+        case SHR_ACCESS:
+        {
+            int i = Exp_GetVal(pszKey);
+            SKIP_SEPARATORS(pszKey);
+            if ((int)_lAccesses.size() > i)
+            {
+                CChar *pAccess = _lAccesses[i].CharFind();
+                if (pAccess)
+                {
+                    pRef = pAccess;
+                    return true;
+                }
+            }
+            return false;
+        }
         case SHR_ADDON:
         {
             int i = Exp_GetVal(pszKey);
@@ -2034,7 +2034,7 @@ bool CItemMulti::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
 
 enum
 {
-	SHV_DELACCESS,
+    SHV_DELACCESS,
     SHV_DELADDON,
     SHV_DELBAN,
     SHV_DELCOMPONENT,
@@ -2055,7 +2055,7 @@ enum
 
 lpctstr const CItemMulti::sm_szVerbKeys[SHV_QTY + 1] =
 {
-	"DELACCESS",
+    "DELACCESS",
     "DELADDON",
     "DELBAN",
     "DELCOMPONENT",
@@ -2183,7 +2183,8 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
                 _lLockDowns.clear();
             }
             else
-            {;
+            {
+                ;
                 UnlockItem(uidItem);
             }
             break;
@@ -2261,8 +2262,8 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
 
 enum SHL_TYPE
 {
-	SHL_ACCESSES,
-	SHL_ADDACCESS,
+    SHL_ACCESSES,
+    SHL_ADDACCESS,
     SHL_ADDADDON,
     SHL_ADDBAN,
     SHL_ADDCOMP,
@@ -2278,7 +2279,7 @@ enum SHL_TYPE
     SHL_COOWNERS,
     SHL_CURRENTSTORAGE,
     SHL_FRIENDS,
-	SHL_GETACCESSPOS,
+    SHL_GETACCESSPOS,
     SHL_GETADDONPOS,
     SHL_GETBANPOS,
     SHL_GETCOMPPOS,
@@ -2311,8 +2312,8 @@ enum SHL_TYPE
 
 const lpctstr CItemMulti::sm_szLoadKeys[SHL_QTY + 1] =
 {
-	"ACCESSES",
-	"ADDACCESS",
+    "ACCESSES",
+    "ADDACCESS",
     "ADDADDON",
     "ADDBAN",
     "ADDCOMP",
@@ -2328,7 +2329,7 @@ const lpctstr CItemMulti::sm_szLoadKeys[SHL_QTY + 1] =
     "COOWNERS",
     "CURRENTSTORAGE",
     "FRIENDS",
-	"GETACCESSPOS",
+    "GETACCESSPOS",
     "GETADDONPOS",
     "GETBANPOS",
     "GETCOMPPOS",
@@ -2542,17 +2543,17 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
             sVal.FormatSTVal(GetFriendCount());
             break;
         }
-		case SHL_ACCESSES:
-		{
-			sVal.FormatSTVal(GetAccessCount());
-			break;
-		}
-		case SHL_GETACCESSPOS:
-		{
-			CUID uidAccess = static_cast<CUID>(Exp_GetVal(pszKey));
-			sVal.FormatVal(GetAccessPos(uidAccess));
-			break;
-		}
+        case SHL_ACCESSES:
+        {
+            sVal.FormatSTVal(GetAccessCount());
+            break;
+        }
+        case SHL_GETACCESSPOS:
+        {
+            CUID uidAccess = static_cast<CUID>(Exp_GetVal(pszKey));
+            sVal.FormatVal(GetAccessPos(uidAccess));
+            break;
+        }
         case SHL_ADDONS:
         {
             sVal.FormatSTVal(GetAddonCount());
@@ -2863,18 +2864,18 @@ bool CItemMulti::r_LoadVal(CScript & s)
             AddBan(static_cast<CUID>(s.GetArgDWVal()));
             break;
         }
-		case SHL_ADDACCESS:
-		{
-			AddAccess(static_cast<CUID>(s.GetArgDWVal()));
-			break;
-		}
+        case SHL_ADDACCESS:
+        {
+            AddAccess(static_cast<CUID>(s.GetArgDWVal()));
+            break;
+        }
         case SHL_ADDADDON:
         {
             AddAddon(static_cast<CUID>(s.GetArgDWVal()));
             break;
         }
 
-            // House Storage
+        // House Storage
         case SHL_ADDCOMP:
         {
             AddComp(((CUID)s.GetArgDWVal()));
@@ -2979,7 +2980,7 @@ CItemMulti *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, C
     * let's remove that difference.
     * Note: this fix is added here, before GM check, because otherwise they will place houses on wrong position.
     */
-    if (CItemBase::IsID_Multi(pItemDef->GetID()) || pItemDef->IsType(IT_MULTI_ADDON))  
+    if (CItemBase::IsID_Multi(pItemDef->GetID()) || pItemDef->IsType(IT_MULTI_ADDON))
     {
         pt.m_y -= (short)(pMultiDef->m_rect.m_bottom - 1);
     }
@@ -3031,7 +3032,7 @@ CItemMulti *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, C
             */
             rect.m_top -= 1;    // 1 tile at each side to leave a gap between houses, checking also that this gap doesn't have any blocking object
             rect.m_right += 1;
-            rect.m_left -= 1;   
+            rect.m_left -= 1;
             rect.m_bottom += 1;
             int x = rect.m_left;
 
@@ -3080,7 +3081,7 @@ CItemMulti *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, C
                         return nullptr;
                     }
                 }
-            }     
+            }
 
 
 
@@ -3092,7 +3093,7 @@ CItemMulti *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, C
             */
             rect.m_top -= 4; // 1 was already added before, so a +4 now is enough.
             rect.m_bottom += 4;
-            
+
             x = rect.m_left;
             for (; x < rect.m_right; ++x)
             {
@@ -3104,7 +3105,7 @@ CItemMulti *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, C
                     /*
                     * Search for any multi region on that point.
                     */
-                    CRegion * pRegion = ptn.GetRegion(REGION_TYPE_MULTI | REGION_TYPE_AREA | REGION_TYPE_ROOM); 
+                    CRegion * pRegion = ptn.GetRegion(REGION_TYPE_MULTI | REGION_TYPE_AREA | REGION_TYPE_ROOM);
                     /*
                     * If there is no region on that point (invalid point?) or the region has the NOBUILDING flag, stop
                     * Ships are allowed to bypass this check??
@@ -3118,7 +3119,7 @@ CItemMulti *CItemMulti::Multi_Create(CChar *pChar, const CItemBase * pItemDef, C
             }
         }
     }
-    
+
     CItem * pItemNew = CItem::CreateTemplate(pItemDef->GetID(), nullptr, pChar);
     if (pItemNew == nullptr)
     {

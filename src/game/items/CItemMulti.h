@@ -20,11 +20,11 @@ enum HOUSE_TYPE
 
 enum TRANSFER_TYPE
 {
-    TRANSFER_NOTHING    = 0x0,
-    TRANSFER_ALL        = 0x1,  // Transfer Locked Down, Addons and normal items placed on ground (Not Components).
-    TRANSFER_LOCKDOWNS  = 0x2,  // Transfer Locked Down items
-    TRANSFER_ADDONS     = 0x4,  // Transfer Addons
-    TRANSFER_SECURED    = 0x8   // Transfer Secured Containers
+    TRANSFER_NOTHING = 0x0,
+    TRANSFER_ALL = 0x1,  // Transfer Locked Down, Addons and normal items placed on ground (Not Components).
+    TRANSFER_LOCKDOWNS = 0x2,  // Transfer Locked Down items
+    TRANSFER_ADDONS = 0x4,  // Transfer Addons
+    TRANSFER_SECURED = 0x8   // Transfer Secured Containers
 };
 
 class CChar;
@@ -33,10 +33,10 @@ class CItemContainer;
 class CItemShip;
 class CItemMulti : public CItem
 {
-	// IT_MULTI IT_SHIP
-	// A ship or house etc.
+// IT_MULTI IT_SHIP
+// A ship or house etc.
 private:
-	static lpctstr const sm_szLoadKeys[];
+    static lpctstr const sm_szLoadKeys[];
     static lpctstr const sm_szVerbKeys[];
     static lpctstr const sm_szRefKeys[];
 
@@ -47,7 +47,7 @@ private:
     std::vector<CUID> _lFriends;    // List of Friends.
     std::vector<CUID> _lVendors;    // List of Vendors.
     std::vector<CUID> _lBans;        // List of Banned chars.
-	std::vector<CUID> _lAccesses;    // List of Accesses chars.
+    std::vector<CUID> _lAccesses;    // List of Accesses chars.
 protected:
     std::vector<CUID > _lLockDowns;  // List of Locked Down items.
     std::vector<CUID > _lSecureContainers; // List of Secured containers.
@@ -58,7 +58,7 @@ private:
     // house general
     CUID  _pMovingCrate;   // Moving Crate's container.
     bool _fIsAddon;         // House AddOns are also multis
-    HOUSE_TYPE _iHouseType; 
+    HOUSE_TYPE _iHouseType;
     uint8 _iMultiCount;         // Does this counts towars the char's house limit
 
     // house storage
@@ -69,38 +69,38 @@ private:
     uint8 _iLockdownsPercent;   // % of Total Storage reserved for locked down items. (Default = 50%)
 
 protected:
-	CRegionWorld * m_pRegion;		// we own this region.
+    CRegionWorld * m_pRegion;		// we own this region.
     /**
     * @brief Checks if the given item is part of this multi.
     * @param pItem the item to check
     * @return true if the pItem is part of this multi.
     */
-	bool Multi_IsPartOf( const CItem * pItem ) const;
+    bool Multi_IsPartOf(const CItem * pItem) const;
     /**
     * @brief Removes the region created by this multi and updates inside char's region
     */
-	void MultiUnRealizeRegion();
+    void MultiUnRealizeRegion();
     /**
     * @brief Creates a new region for this multi and update the world with it.
     */
-	bool MultiRealizeRegion();
+    bool MultiRealizeRegion();
     /**
     * @brief Searchs for any item of the given type.
     * @param type The type of item to search.
     * @return the CItem (if any).
     */
-	CItem * Multi_FindItemType( IT_TYPE type ) const;
+    CItem * Multi_FindItemType(IT_TYPE type) const;
     /**
     * @brief Searchs for any item with the given id.
     * @param iComp The id of the item to search.
     * @return the CItem (if any).
     */
-	CItem * Multi_FindItemComponent( int iComp ) const;
+    CItem * Multi_FindItemComponent(int iComp) const;
     /**
     * @brief Searchs for the CItemBase of this multi.
     * @return the CItemBaseMulti.
     */
-	const CItemBaseMulti * Multi_GetDef() const;
+    const CItemBaseMulti * Multi_GetDef() const;
     /**
     * @brief Components creation.
     * @param id The id of the item
@@ -111,22 +111,22 @@ protected:
     * @param fIsAddon true when the created component is an addon.
     * @return true if the component need a key (wether the key is created or not is not checked here).
     */
-	bool Multi_CreateComponent( ITEMID_TYPE id, short dx, short dy, char dz, dword dwKeyCode);
+    bool Multi_CreateComponent(ITEMID_TYPE id, short dx, short dy, char dz, dword dwKeyCode);
 
 public:
     /**
     * @brief Calculates the largest part of the multi.
     * @return the value.
     */
-	int Multi_GetMaxDist() const;
+    int Multi_GetMaxDist() const;
 
-	struct ShipSpeed // speed of a ship
-	{
-		uchar period;	// time between movement
-		uchar tiles;	// distance to move
-	};
-	ShipSpeed m_shipSpeed; // Speed of ships (IT_SHIP)
-	byte m_SpeedMode;
+    struct ShipSpeed // speed of a ship
+    {
+        uchar period;	// time between movement
+        uchar tiles;	// distance to move
+    };
+    ShipSpeed m_shipSpeed; // Speed of ships (IT_SHIP)
+    byte m_SpeedMode;
 
     /**
     * @brief Checks if a the multi can be created and create it if so.
@@ -252,30 +252,30 @@ public:
     * @return the pos.
     */
     int GetBanPos(CUID pBan);
-	// Access
+    // Access
     /**
     * @brief Adds access to this house to the given char.
     * @param pAccess the char.
     */
-	void AddAccess(CUID pAccess);
+    void AddAccess(CUID pAccess);
     /**
     * @brief Revokes the access to this house to the given char.
     *
     * Note: This removes the char from the list, but won't prevent it from enter like a Ban.
     * @param pAccess the char.
     */
-	void DelAccess(CUID pAccess);
+    void DelAccess(CUID pAccess);
     /**
     * @brief Returns the count of chars with access.
     * @return the count.
     */
-	size_t GetAccessCount();
+    size_t GetAccessCount();
     /**
     * @brief Returns the position on the _lAccess list of the given char.
     * @param pAccess the char.
     * @return the position.
     */
-	int GetAccessPos(CUID pAccess);
+    int GetAccessPos(CUID pAccess);
     /**
     * @brief Ejects a char from inside the house to the House Sign.
     * @param pChar the char.
@@ -555,69 +555,69 @@ protected:
     * @param pComponent the component
     * @param fIsAddon true if the component is an addon.
     */
-	virtual void OnComponentCreate(CItem * pComponent, bool fIsAddon = false);
+    virtual void OnComponentCreate(CItem * pComponent, bool fIsAddon = false);
 
 
 public:
-	static const char *m_sClassName;
-	CItemMulti( ITEMID_TYPE id, CItemBase * pItemDef );
-	virtual ~CItemMulti();
+    static const char *m_sClassName;
+    CItemMulti(ITEMID_TYPE id, CItemBase * pItemDef);
+    virtual ~CItemMulti();
 
 private:
-	CItemMulti(const CItemMulti& copy);
-	CItemMulti& operator=(const CItemMulti& other);
+    CItemMulti(const CItemMulti& copy);
+    CItemMulti& operator=(const CItemMulti& other);
 
 public:
     /**
     * @brief Tick override.
     * @return true
     */
-	virtual bool OnTick();
+    virtual bool OnTick();
     /**
     * @brief Place the multi.
     * @param pt Position.
     * @param bForceFix force a fix.
     * @return bool if can be moved.
     */
-	virtual bool MoveTo(CPointMap pt, bool bForceFix = false);
+    virtual bool MoveTo(CPointMap pt, bool bForceFix = false);
     /**
     * @brief Moving from current location.
     */
-	virtual void OnMoveFrom();
+    virtual void OnMoveFrom();
     /**
     * @brief Speech commands on the multi.
     * @param pszCmd the speech.
     * @param pSrc who talked.
     */
-	void OnHearRegion( lpctstr pszCmd, CChar * pSrc );
+    void OnHearRegion(lpctstr pszCmd, CChar * pSrc);
     /**
     * @brief Gets the Sign or Tiller item
     * @return the item
     */
-	CItem * Multi_GetSign();
-    
+    CItem * Multi_GetSign();
+
     /**
     * @brief General setup.
     * @param pChar the char placing the multi.
     * @param dwKeyCode code hash for keys.
     */
-	void Multi_Setup(CChar * pChar, dword dwKeyCode);
+    void Multi_Setup(CChar * pChar, dword dwKeyCode);
     /**
     * @brief Gets the CItemBaseMulti linked to the given id
     * @param id the id.
     * @return the CItemBaseMulti
     */
-	static const CItemBaseMulti * Multi_GetDef( ITEMID_TYPE id );
+    static const CItemBaseMulti * Multi_GetDef(ITEMID_TYPE id);
 
     // Scripts virtuals.
 
-	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
-	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );
+    virtual bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef);
+    virtual bool r_Verb(CScript & s, CTextConsole * pSrc);
 
-	virtual void r_Write( CScript & s );
-	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc );
-	virtual bool r_LoadVal( CScript & s  );
-	virtual void DupeCopy( const CItem * pItem );
+    virtual void r_Write(CScript & s);
+    virtual bool r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc);
+    virtual bool r_LoadVal(CScript & s);
+    virtual void DupeCopy(const CItem * pItem);
     virtual void Delete(bool bforce = false);
 };
 
@@ -645,8 +645,8 @@ enum HOUSE_PRIV
 class CMultiStorage
 {
 private:
-    std::map<CUID ,HOUSE_PRIV> _lHouses;  // List of stored houses.
-    std::map<CUID ,HOUSE_PRIV> _lShips;    // List of stored ships.
+    std::map<CUID, HOUSE_PRIV> _lHouses;  // List of stored houses.
+    std::map<CUID, HOUSE_PRIV> _lShips;    // List of stored ships.
     int16 _iHousesTotal;    // Max of houses.
     int16 _iShipsTotal;     // Max of ships.
     CUID _uidSrc;
