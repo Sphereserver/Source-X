@@ -33,8 +33,6 @@ private:
         int m_iDataRevision;
     };
 
-    std::vector<CUID> _pLockDowns;
-
     class CSphereMultiCustom : public CSphereMulti
     {
     public:
@@ -61,6 +59,7 @@ private:
     CClient * m_pArchitect;
     CRectMap m_rectDesignArea;
     CSphereMultiCustom * m_pSphereMulti;
+    int _iMaxPlane;
 
     virtual bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef);
     virtual void r_Write(CScript & s);
@@ -74,6 +73,7 @@ private:
     void GetLockdownsAt(short dx, short dy, char dz, std::vector<CUID> &vList);
     void GetSecuredAt(short dx, short dy, char dz, std::vector<CUID> &vList);
     char CalculateLevel(char z);
+    void ClearFloor(char iFloor, CClient *pClient);
 
 private:
     typedef std::map<ITEMID_TYPE, int> ValidItemsContainer;	// ItemID, FeatureMask

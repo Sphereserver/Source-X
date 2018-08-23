@@ -33,6 +33,7 @@ CItemMultiCustom::CItemMultiCustom(ITEMID_TYPE id, CItemBase * pItemDef) : CItem
     m_pArchitect = NULL;
     m_pSphereMulti = NULL;
     m_rectDesignArea.SetRectEmpty();
+    _iMaxPlane = -1;
 
     if (!g_Serv.IsLoading())
     {
@@ -110,9 +111,6 @@ void CItemMultiCustom::BeginCustomize(CClient * pClientSrc)
     // copy the main design to working, ready for editing
     CopyDesign(&m_designMain, &m_designWorking);
     m_designWorking.m_iRevision++;
-
-    _pLockDowns.clear();
-    _pLockDowns = _lLockDowns;  // Create a copy of the CItemMulti's LockDowns to work on it.
 
     // client will silently close all open dialogs and let the server think they're still open, so we need to update opened gump counts here
     CDialogDef* pDlg = NULL;
@@ -284,6 +282,7 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
     if (m_designWorking.m_iRevision == m_designMain.m_iRevision)
         return;
 
+    int iOldPlane = _iMaxPlane;
     if ((pClientSrc != NULL && pClientSrc->GetChar() != NULL))
     {
         short iMaxZ = 0;
@@ -310,6 +309,7 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
             if ((*i)->m_item.m_dz > iMaxZ)
             {
                 iMaxZ = (*i)->m_item.m_dz;
+                _iMaxPlane = GetPlane((uchar)(*i)->m_item.m_dz);
             }
         }
         if (IsTrigUsed(TRIGGER_HOUSEDESIGNCOMMIT))
@@ -326,6 +326,11 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
             if (pClientSrc->GetChar()->OnTrigger(CTRIG_HouseDesignCommit, pClientSrc->GetChar(), &Args) == TRIGRET_RET_TRUE)
                 return;
         }
+    }
+    while (_iMaxPlane < iOldPlane)
+    {
+        ClearFloor((char)iOldPlane, pClientSrc);
+        --iOldPlane;
     }
 
     // replace the main design with the working design
@@ -834,23 +839,26 @@ void CItemMultiCustom::SendStructureTo(CClient * pClientSrc)
         int iWidth = rectDesign.GetWidth();
         int iHeight = rectDesign.GetHeight();
 
-        int iMaxPlane = 0;
         ComponentsContainer vectorStairs;
         Component * pComp;
         CItemBase * pItemBase;
 
-        // find the highest plane/floor
-        for (ComponentsContainer::iterator i = pDesign->m_vectorComponents.begin(); i != pDesign->m_vectorComponents.end(); ++i)
+        if (_iMaxPlane < 0)
         {
-            if (GetPlane(*i) <= iMaxPlane)
-                continue;
 
-            iMaxPlane = GetPlane(*i);
+            // find the highest plane/floor
+            for (ComponentsContainer::iterator i = pDesign->m_vectorComponents.begin(); i != pDesign->m_vectorComponents.end(); ++i)
+            {
+                if (GetPlane(*i) <= _iMaxPlane)
+                    continue;
+
+                _iMaxPlane = GetPlane(*i);
+            }
         }
 
         nword wPlaneBuffer[PLANEDATA_BUFFER];
 
-        for (int iCurrentPlane = 0; iCurrentPlane <= iMaxPlane; iCurrentPlane++)
+        for (int iCurrentPlane = 0; iCurrentPlane <= _iMaxPlane; iCurrentPlane++)
         {
             // for each plane, generate a list of items
             bool bFoundItems = false;
@@ -1205,14 +1213,14 @@ void CItemMultiCustom::CopyDesign(DesignDetails * designFrom, DesignDetails * de
 
 void CItemMultiCustom::GetLockdownsAt(short dx, short dy, char dz, std::vector<CUID> &vList)
 {
-    if (_pLockDowns.empty())
+    if (_lLockDowns.empty())
     {
         return;
     }
     short iFixedX = GetTopPoint().m_x + dx;
     short iFixedY = GetTopPoint().m_y + dy;
     char iFloor = CalculateLevel(GetTopPoint().m_z + dz);  // get the Diff Z from the Multi's Z
-    for (std::vector<CUID>::iterator it = _pLockDowns.begin(); it != _pLockDowns.end(); ++it)
+    for (std::vector<CUID>::iterator it = _lLockDowns.begin(); it != _lLockDowns.end(); ++it)
     {
         CItem *pItem = (*it).ItemFind();
         if ((pItem->GetTopPoint().m_x == iFixedX)
@@ -1253,6 +1261,125 @@ char CItemMultiCustom::CalculateLevel(char z)
     z -= 6; // Customizable's Houses have a +6 level from the foundation.
     z /= 20;    // Each floor 
     return z;
+}
+
+void CItemMultiCustom::ClearFloor(char iFloor, CClient *pClient)
+{
+    char iBaseZ = GetTopPoint().m_z + (iFloor * 20) + 6;
+    short iMaxZ = iBaseZ + 19;
+    short iMinZ = iBaseZ;
+    CItemContainer *pCrate = static_cast<CItemContainer*>(GetMovingCrate(true).ItemFind());
+    int i = 0;
+    // Removing Secured Containers.
+    int max = (int)_lSecureContainers.size();
+    if (max > 0)
+    {
+        for (i = 0; i < max; ++i)
+        {
+            CUID uid = _lSecureContainers[i];
+            CItemContainer *pCont = static_cast<CItemContainer*>(uid.ItemFind());
+            if ((pCont->GetTopPoint().m_z >= iMinZ) && (pCont->GetTopPoint().m_z <= iMaxZ))
+            {
+                Release(uid);
+                pCont->RemoveFromView();
+                pCrate->ContentAdd(pCont);
+            }
+        }
+    }
+    // Removing Lockdowns
+    max = (int)_lLockDowns.size();
+    if (max > 0)
+    {
+        for (i = 0; i < max; ++i)
+        {
+            CUID uid = _lLockDowns[i];
+            CItem *pItem = uid.ItemFind();
+            if ((pItem->GetTopPoint().m_z >= iMinZ) && (pItem->GetTopPoint().m_z <= iMaxZ))
+            {
+                UnlockItem(uid);
+                pItem->RemoveFromView();
+                pCrate->ContentAdd(pItem);
+            }
+        }
+    }
+    // Redeeding Addons.
+    max = (int)_lAddons.size();
+    if (max > 0)
+    {
+        for (i = 0; i < max; ++i)
+        {
+            CUID uid = _lLockDowns[i];
+            CItemMulti *pAddon = static_cast<CItemMulti*>(uid.ItemFind());
+            if ((pAddon->GetTopPoint().m_z >= iMinZ) && (pAddon->GetTopPoint().m_z <= iMaxZ))
+            {
+                pAddon->Redeed(false, false);
+            }
+        }
+    }
+
+    CWorldSearch Area(m_pRegion->m_pt, Multi_GetMaxDist());	// largest area.
+    Area.SetSearchSquare(true);
+    for (;;)
+    {
+        CItem * pItem = Area.GetItem();
+        if (pItem == nullptr)
+        {
+            break;
+        }
+        if (pItem->GetUID() == GetUID() || pItem->GetUID() == pCrate->GetUID()) // Multi itself or the Moving Crate, neither is not handled here.
+        {
+            continue;
+        }
+        if (GetCompPos(pItem->GetUID()) != -1) // Components are not moved, Custom Multis only have sign and post as components and we are not going to remove them
+        {
+            continue;
+        }
+        if (pItem->GetTopPoint().m_z < iMinZ || pItem->GetTopPoint().m_z > iMaxZ || GetPlane(pItem->GetTopPoint().m_z) <= iFloor)
+        {
+            continue;
+        }
+        if (pItem->GetTopPoint().m_y == GetDesignArea().m_bottom)   // Do not mess with items outside the exterior of the multi (the extra +1 Y on the entrance).
+        {
+            continue;
+        }
+        if (pItem->IsType(IT_MULTI_ADDON) || pItem->IsType(IT_MULTI))  // If the item is a house Addon, redeed it.
+        {
+            static_cast<CItemMulti*>(pItem)->Redeed(false, false);
+            Area.RestartSearch();	// we removed an item and this will mess the search loop, so restart to fix it.
+            continue;
+        }
+        pItem->RemoveFromView();
+        pCrate->ContentAdd(pItem);
+    }
+    
+    Component *comp;
+
+    // Reset Main Design
+    i = (int)m_designMain.m_vectorComponents.size()-1; 
+
+    for (;i >= 0;--i)   //decreasing iteration.
+    {
+        comp = m_designMain.m_vectorComponents[i];
+        if (comp->m_item.m_wTileID == ITEMID_DIRT_TILE)
+        {
+            continue;
+        }
+        if (comp->m_item.m_dz >= iMinZ && comp->m_item.m_dz <= iMaxZ)
+        {
+            m_designMain.m_vectorComponents.erase(m_designMain.m_vectorComponents.begin()+i);
+            m_designMain.m_iRevision++;
+            continue;
+        }
+    }
+    if (m_pSphereMulti != NULL)
+    {
+        // multi object needs to be recreated
+        delete m_pSphereMulti;
+        m_pSphereMulti = NULL;
+    }
+
+    // update to all
+    Update();
 }
 
 enum
@@ -1360,6 +1487,23 @@ bool CItemMultiCustom::r_Verb(CScript & s, CTextConsole * pSrc) // Execute comma
         {
             m_designWorking.m_vectorComponents.clear();
             m_designWorking.m_iRevision++;
+        }
+        break;
+
+        case IMCV_CLEARFLOOR:
+        {
+            char iFloor = s.GetArgCVal();
+            if (iFloor == -1)
+            {
+                for (int i = 0; i < _iMaxPlane; ++i)
+                {
+                    ClearFloor((char)i, pSrc->GetChar()->GetClient());
+                }
+            }
+            else
+            {
+                ClearFloor(s.GetArgCVal(), pSrc->GetChar()->GetClient());
+            }
         }
         break;
 

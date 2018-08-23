@@ -51,9 +51,9 @@ private:
 protected:
     std::vector<CUID > _lLockDowns;  // List of Locked Down items.
     std::vector<CUID > _lSecureContainers; // List of Secured containers.
+    std::vector<CUID > _lAddons;  // List of AddOns.
 private:
     std::vector<CUID > _lComps; // List of Components.
-    std::vector<CUID > _lAddons;  // List of AddOns.
 
     // house general
     CUID  _pMovingCrate;   // Moving Crate's container.

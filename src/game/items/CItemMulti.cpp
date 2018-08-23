@@ -1153,17 +1153,15 @@ void CItemMulti::SetMovingCrate(CUID uidCrate)
     ADDTOCALLSTACK("CItemMulti::SetMovingCrate");
     CItemContainer *pCurrentCrate = static_cast<CItemContainer*>(GetMovingCrate(false).ItemFind());
     CItemContainer *pNewCrate = static_cast<CItemContainer*>(uidCrate.ItemFind());
-    if (!uidCrate.IsValidUID())
+    
+    if (!uidCrate.IsValidUID() || !pNewCrate)
     {
-        if (pCurrentCrate)
-        {
-            pCurrentCrate->SetCrateOfMulti(UID_UNUSED);
-        }
         _pMovingCrate.InitUID();
         return;
     }
     if (pCurrentCrate && pCurrentCrate->GetCount() > 0)
     {
+        pCurrentCrate->SetCrateOfMulti(UID_UNUSED);
         pNewCrate->ContentsTransfer(pCurrentCrate, false);
         pCurrentCrate->Delete();
     }
@@ -1179,12 +1177,10 @@ CUID CItemMulti::GetMovingCrate(bool fCreate)
     ADDTOCALLSTACK("CItemMulti::GetMovingCrate");
     if (_pMovingCrate.IsValidUID())
     {
-        g_Log.EventDebug("asd = %d\n", 1);
         return _pMovingCrate;
     }
     if (!fCreate)
     {
-        g_Log.EventDebug("asd2 = %d\n");
         return UID_UNUSED;
     }
     CItemContainer *pCrate = static_cast<CItemContainer*>(CItem::CreateBase(ITEMID_CRATE1));
@@ -1231,7 +1227,6 @@ void CItemMulti::TransferAllItemsToMovingCrate(TRANSFER_TYPE iType)
     }
     CWorldSearch Area(ptArea, Multi_GetMaxDist());	// largest area.
     Area.SetSearchSquare(true);
-    bool fIsAddon = false;
     for (;;)
     {
         CItem * pItem = Area.GetItem();
@@ -1243,7 +1238,7 @@ void CItemMulti::TransferAllItemsToMovingCrate(TRANSFER_TYPE iType)
         {
             continue;
         }
-        if (GetCompPos(pItem->GetUID()))   // Components should never be transfered.
+        if (GetCompPos(pItem->GetUID()) != -1)   // Components should never be transfered.
         {
             continue;
         }
@@ -1270,7 +1265,7 @@ void CItemMulti::TransferAllItemsToMovingCrate(TRANSFER_TYPE iType)
                     continue;
                 }
             }
-            else if (!Multi_IsPartOf(pItem) && !fTransferAll)  // Items not linked to, or listed on, this multi.
+            else if (!Multi_IsPartOf(pItem))  // Items not linked to, or listed on, this multi.
             {
                 continue;
             }
@@ -2650,9 +2645,7 @@ bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc
         }
         case SHL_GETSECUREDCONTAINERPOS:
         {
-            g_Log.EventDebug("bla\n");
             CUID uidCont = (CUID)Exp_GetDWVal(pszKey);
-            g_Log.EventDebug("GSP %08\n", (dword)uidCont);
             if (uidCont.IsValidUID())
             {
                 sVal.FormatVal(GetSecuredContainerPos(uidCont));
@@ -2761,14 +2754,21 @@ bool CItemMulti::r_LoadVal(CScript & s)
         }
         case SHL_MOVINGCRATE:
         {
-            dword dwCrate = s.GetArgDWVal();
-            if (dwCrate == 0)
+            CUID dwCrate = s.GetArgDWVal();
+            if (dwCrate.IsValidUID())
             {
-                SetMovingCrate(UID_UNUSED);
+                if ((int)dwCrate == 1) // fix for 'movingcrate 1'
+                {
+                    GetMovingCrate(true);
+                }
+                else
+                {
+                    SetMovingCrate(static_cast<CUID>(dwCrate));
+                }
             }
             else
             {
-                SetMovingCrate(static_cast<CUID>(dwCrate));
+                SetMovingCrate(UID_UNUSED);
             }
             break;
         }
