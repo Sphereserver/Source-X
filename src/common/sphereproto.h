@@ -132,7 +132,7 @@ public:
 		{
 			memcpy( m_codes, pszLang, 3 );
 			m_codes[3] = 0;
-			if ( isalnum(m_codes[0]))
+			if ( iswalnum(m_codes[0]))
 				return true;
 			// not valid !
 		}

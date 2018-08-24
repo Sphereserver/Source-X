@@ -103,7 +103,7 @@ bool CResourceDef::MakeResourceName()
         ch	= *pszName;
         if ( ch == ' ' || ch == '\t' || ch == '-' )
             ch	= '_';
-        else if ( !isalnum( ch ) )
+        else if ( !iswalnum( ch ) )
             continue;
         // collapse multiple spaces together
         if ( ch == '_' && *(pszDef-1) == '_' )

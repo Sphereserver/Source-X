@@ -208,6 +208,7 @@ void CharToMultiByteNonNull(byte * Dest, const char * Src, int MBytes);
 
 // extern tchar * Str_GetTemporary(int amount = 1);
 #define Str_GetTemp static_cast<AbstractSphereThread *>(ThreadHolder::current())->allocateBuffer
+#define Str_GetWTemp static_cast<AbstractSphereThread *>(ThreadHolder::current())->allocateWBuffer
 #define STR_TEMPLENGTH THREAD_STRING_LENGTH
 
 

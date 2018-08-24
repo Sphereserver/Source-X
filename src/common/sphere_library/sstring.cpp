@@ -216,7 +216,7 @@ static int Str_CmpHeadI(lpctstr pszFind, lpctstr pszTable)
         tchar ch2 = static_cast<tchar>(tolower(pszTable[i]));
         if (ch2 == 0)
         {
-            if ( (!isalnum(ch1)) && (ch1 != ch0) )
+            if ( (!iswalnum(ch1)) && (ch1 != ch0) )
                 return 0;
             return (ch1 - ch2);
         }
