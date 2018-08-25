@@ -12,7 +12,6 @@
 #ifdef _WIN32
 	#include <winsock2.h>	// this needs to be included after common.h, which sets some defines and then includes windows.h, since winsock2.h needs windows.h
 #endif
-#include <cwctype>  // for iswalnum
 
 
 //---------------------------PROTOCOL DEFS---------------------------

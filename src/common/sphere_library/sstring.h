@@ -2,6 +2,7 @@
 #define _INC_SSTRING_H
 
 #include <cstring>
+#include <cwctype>  // for iswalnum
 #include "../common.h"
 
 /**

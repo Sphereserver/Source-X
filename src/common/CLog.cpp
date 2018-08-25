@@ -103,7 +103,6 @@ bool CLog::OpenLog( lpctstr pszBaseDirName )	// name set previously.
 	}
 
 	// Get the new name based on date.
-	m_dateStamp = CSTime::GetCurrentTime();
 	tchar *pszTemp = Str_GetTemp();
 	snprintf(pszTemp, STR_TEMPLENGTH, SPHERE_FILE "%d-%02d-%02d.log",
 		m_dateStamp.GetYear(), m_dateStamp.GetMonth(), m_dateStamp.GetDay());
@@ -113,7 +112,6 @@ bool CLog::OpenLog( lpctstr pszBaseDirName )	// name set previously.
 	if ( CSFileText::Open( sFileName.GetPtr(), OF_SHARE_DENY_NONE|OF_READWRITE|OF_TEXT ) )
 	{
 		setvbuf(_pStream, NULL, _IONBF, 0);
-        Printf("Log date: %s\n", m_dateStamp.Format(NULL));
 		return true;
 	}
 	return false;
@@ -248,15 +246,17 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg )
 				// it's a new day, open a log file with new day name.
 				Close();	// LINUX should alrady be closed.
 				OpenLog();
+                Printf("Log date: %s\n", m_dateStamp.Format(nullptr));
 			}
 #ifndef _WIN32
 			else
 			{
                 Close(); // The log file is opened for the first time by the OpenLog call done when reading the sphere.ini.
-				uint mode = OF_READWRITE|OF_TEXT|OF_SHARE_DENY_WRITE;
-				Open(NULL, mode);	// LINUX needs to close and re-open for each log line !
+				uint mode = OF_READWRITE|OF_TEXT|OF_SHARE_DENY_NONE;
+				Open(nullptr, mode);	// LINUX needs to close and re-open for each log line !
 			}
 #endif
+            m_dateStamp = datetime;
 
 			WriteString( szTime );
 			if ( pszLabel )
