@@ -12,6 +12,7 @@
 #ifdef _WIN32
 	#include <winsock2.h>	// this needs to be included after common.h, which sets some defines and then includes windows.h, since winsock2.h needs windows.h
 #endif
+#include <cwctype>  // for iswalnum
 
 
 //---------------------------PROTOCOL DEFS---------------------------
@@ -47,7 +48,7 @@ struct nword
 		return (* this);
 	}
 
-#define PACKWORD(p,w)	(p)[0]=HIBYTE(w);(p)[1]=LOBYTE(w)
+#define PACKWORD(p,w)	(p)[0]=HIBYTE(w); (p)[1]=LOBYTE(w)
 #define UNPACKWORD(p)	MAKEWORD((p)[1],(p)[0])	// low,high
 
 } PACK_NEEDED;
@@ -65,7 +66,7 @@ struct ndword
 		return (* this);
 	}
 
-#define PACKDWORD(p,d)	(p)[0]=((d)>>24)&0xFF;(p)[1]=((d)>>16)&0xFF;(p)[2]=HIBYTE(d);(p)[3]=LOBYTE(d)
+#define PACKDWORD(p,d)	(p)[0]=((d)>>24)&0xFF; (p)[1]=((d)>>16)&0xFF; (p)[2]=HIBYTE(d); (p)[3]=LOBYTE(d)
 #define UNPACKDWORD(p)	MAKEDWORD( MAKEWORD((p)[3],(p)[2]), MAKEWORD((p)[1],(p)[0]))
 
 } PACK_NEEDED;

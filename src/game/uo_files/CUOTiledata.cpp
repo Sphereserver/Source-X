@@ -108,11 +108,11 @@ void CUOTiledata::Load()
                 if ( g_Install.m_File[filedata].Read(static_cast <CUOTerrainTypeRec *>(&record), sizeof(CUOTerrainTypeRec)) <= 0 )
                     throw CSError(LOGL_CRIT, CSFile::GetLastError(), "CUOTiledata.Item.ReadInfo: TileData Read");
 
-                CUOTerrainTypeRec_HS cachedEntry = _tiledataTerrainEntries[id];
-                cachedEntry.m_flags = record.m_flags;
-                cachedEntry.m_unknown = 0;
-                cachedEntry.m_index = record.m_index;
-                strncpynull(cachedEntry.m_name, record.m_name, CountOf(cachedEntry.m_name));
+                CUOTerrainTypeRec_HS* cachedEntry = &_tiledataTerrainEntries[id];
+                cachedEntry->m_flags = record.m_flags;
+                cachedEntry->m_unknown = 0;
+                cachedEntry->m_index = record.m_index;
+                strncpynull(cachedEntry->m_name, record.m_name, CountOf(cachedEntry->m_name));
                 break;
             }
         }
