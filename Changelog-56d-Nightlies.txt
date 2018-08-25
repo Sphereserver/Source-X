@@ -1129,3 +1129,10 @@ transfer_secured	= 08	// Transfer Secured Containers.
     -Added new param TRANSFER_SECURED for Secured Containers.
 - Fixed <MovingCrate 1> not creating a new Moving Crate, hence all the custom <MovingCrate*> code not working because there's no way to create a new one.
 - Fixed Custom Multis crashing the server on loading.
+
+24-08-2018, XuN
+- Added missing VirtualGold currency on status when FEATURE_TOL_VIRTUALGOLD is enabled.
+- GOLD and <GOLD> will work as VirtualGold and <VirtualGold> when FEATURE_TOL_VIRTUALGOLD is enabled (but the real money chars had before, if any, will not be removed).
+- Fixed wrong char sent on PacketObjectStatus when opening a new shop menu, hence not correctly showing the player's gold until a new packet updated the status.
+- Added region change support for ships, @Enter and @Exit will be fired on the regions they enter and leave (only them not characters inside, as always they will get it when landing from the ship)
+- Added @RegionEnter and @RegionLeave trigger for ships and the homologue @itemRegionEnter and @itemRegionLeave for chars BUT only working for ships.

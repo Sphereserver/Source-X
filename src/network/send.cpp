@@ -229,10 +229,18 @@ void PacketObjectStatus::WriteVersionSpecific(const CClient* target, CChar* othe
 	writeInt16((word)(other->Stat_GetVal(STAT_INT)));
 	writeInt16((word)(other->Stat_GetMax(STAT_INT)));
 
-	if (g_Cfg.m_fPayFromPackOnly)
-		writeInt32(other->GetPackSafe()->ContentCount(CResourceID(RES_TYPEDEF, IT_GOLD)));
-	else
-		writeInt32(other->ContentCount(CResourceID(RES_TYPEDEF, IT_GOLD)));
+    if (g_Cfg.m_iFeatureTOL & FEATURE_TOL_VIRTUALGOLD)
+    {
+        writeInt32((dword)other->m_virtualGold);
+    }
+    else if (g_Cfg.m_fPayFromPackOnly)
+    {
+        writeInt32(other->GetPackSafe()->ContentCount(CResourceID(RES_TYPEDEF, IT_GOLD)));
+    }
+    else
+    {
+        writeInt32(other->ContentCount(CResourceID(RES_TYPEDEF, IT_GOLD)));
+    }
 
 	if (IsSetCombatFlags(COMBAT_ELEMENTAL_ENGINE))
 		writeInt16((word)(other->GetDefNum("RESPHYSICAL", true, true)));

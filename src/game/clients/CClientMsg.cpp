@@ -2227,9 +2227,6 @@ bool CClient::addShopMenuBuy( CChar * pVendor )
 		return false;
 	}
 
-	// The Enhanced Client needs it always, for the Classic Client we send it always too, but we do that to have the updated 'Gold Available' value.
-	new PacketObjectStatus(this, pVendor);
-
 	// Send NPC layers 26 and 27 content
 	new PacketItemEquipped(this, pContainer);
 	new PacketItemEquipped(this, pContainerExtra);
@@ -2250,6 +2247,9 @@ bool CClient::addShopMenuBuy( CChar * pVendor )
 
 	// Open gump
 	addOpenGump(pVendor, GUMP_VENDOR_RECT);
+
+    // The Enhanced Client needs it always, for the Classic Client we send it always too, but we do that to have the updated 'Gold Available' value.
+    new PacketObjectStatus(this, m_pChar);// the player is who needs to be sent.
 
 	return true;
 }

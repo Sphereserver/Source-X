@@ -622,21 +622,26 @@ bool CCSpawn::r_LoadVal(CScript & s)
         case ISPW_MORE:
         case ISPW_MORE1:
         {
+            int ridIndex = s.GetArgVal();
+            if (ridIndex == -1) // if no value, we can skip everything else, just return true to allow the keyword to be proccessed.
+            {
+                return true;
+            }
             switch (pItem->GetType())
             {
                 case IT_SPAWN_CHAR:
                 {
-                    _idSpawn = CResourceID(RES_CHARDEF, s.GetArgVal());   // Ensuring there's no negative value
+                    _idSpawn = CResourceID(RES_CHARDEF, ridIndex);   // Ensuring there's no negative value
                     break;
                 }
                 case IT_SPAWN_ITEM:
                 {
-                    _idSpawn = CResourceID(RES_ITEMDEF, s.GetArgVal());
+                    _idSpawn = CResourceID(RES_ITEMDEF, ridIndex);
                     break;
                 }
                 case IT_SPAWN_CHAMPION: // handled on CCChampion
                 {
-                    _idSpawn = CResourceID(RES_CHAMPION, s.GetArgVal());
+                    _idSpawn = CResourceID(RES_CHAMPION, ridIndex);
                     CCChampion *pChampion = static_cast<CCChampion*>(pItem->GetComponent(COMP_CHAMPION));
                     ASSERT(pChampion);
                     pChampion->Init();

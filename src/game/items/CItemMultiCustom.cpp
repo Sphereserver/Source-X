@@ -329,7 +329,7 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
     }
     while (_iMaxPlane < iOldPlane)
     {
-        ClearFloor((char)iOldPlane, pClientSrc);
+        ClearFloor((char)iOldPlane);
         --iOldPlane;
     }
 
@@ -1263,7 +1263,7 @@ char CItemMultiCustom::CalculateLevel(char z)
     return z;
 }
 
-void CItemMultiCustom::ClearFloor(char iFloor, CClient *pClient)
+void CItemMultiCustom::ClearFloor(char iFloor)
 {
     char iBaseZ = GetTopPoint().m_z + (iFloor * 20) + 6;
     short iMaxZ = iBaseZ + 19;
@@ -1497,12 +1497,12 @@ bool CItemMultiCustom::r_Verb(CScript & s, CTextConsole * pSrc) // Execute comma
             {
                 for (int i = 0; i < _iMaxPlane; ++i)
                 {
-                    ClearFloor((char)i, pSrc->GetChar()->GetClient());
+                    ClearFloor((char)i);
                 }
             }
             else
             {
-                ClearFloor(s.GetArgCVal(), pSrc->GetChar()->GetClient());
+                ClearFloor(s.GetArgCVal());
             }
         }
         break;

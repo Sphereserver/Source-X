@@ -14,6 +14,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+
 CItemShip::CItemShip(ITEMID_TYPE id, CItemBase * pItemDef) : CItemMulti(id, pItemDef)
 {
     m_NextMove = CServerTime::GetCurrentTime();
@@ -72,6 +73,8 @@ void CItemShip::Ship_Stop()
     ADDTOCALLSTACK("CItemShip::Ship_Stop");
     // Make sure we have stopped.
     m_itShip.m_fSail = 0;
+
+    pCaptain = nullptr;
 }
 
 bool CItemShip::Ship_SetMoveDir(DIR_TYPE dir, byte speed, bool bWheelMove)
@@ -195,6 +198,14 @@ bool CItemShip::Ship_MoveDelta(CPointBase pdelta)
         if (znew <= (UO_SIZE_MIN_Z + 3))
             return false;
     }
+    CPointBase ptTemp = GetTopPoint();
+    CRegionWorld *pRegionOld = dynamic_cast<CRegionWorld*>(ptTemp.GetRegion(REGION_TYPE_AREA));
+    ptTemp += pdelta;
+    CRegionWorld *pRegionNew = dynamic_cast<CRegionWorld*>(ptTemp.GetRegion(REGION_TYPE_AREA));
+    if (!Ship_MoveToRegion(pRegionOld, pRegionNew))
+    {
+        return false;
+    }
 
     // Move the ship and everything on the deck
     CObjBase * ppObjs[MAX_MULTI_LIST_OBJS + 1];
@@ -290,6 +301,62 @@ bool CItemShip::Ship_MoveDelta(CPointBase pdelta)
         }
     }
 
+    return true;
+}
+
+bool CItemShip::Ship_MoveToRegion(CRegionWorld * pRegionOld, CRegionWorld *pRegionNew) const
+{
+    if (pRegionOld == pRegionNew)
+    {
+        return true;
+    }
+    if (!pRegionNew)
+    {
+        return false;
+    }
+    if (!g_Serv.IsLoading())
+    {
+        // Leaving region trigger. (may not be allowed to leave ?)
+        CItemShip *pShip = const_cast<CItemShip*>(this);
+        if (pRegionOld)
+        {
+            if (IsTrigUsed(TRIGGER_EXIT))
+            {
+                if (pRegionOld->OnRegionTrigger(pCaptain, RTRIG_EXIT) == TRIGRET_RET_TRUE)
+                {
+                    return false;
+                }
+            }
+
+            if (IsTrigUsed(TRIGGER_REGIONLEAVE))
+            {
+                CScriptTriggerArgs Args(pRegionOld);
+                if (pShip->OnTrigger(ITRIG_RegionLeave, pCaptain, &Args) == TRIGRET_RET_TRUE)
+                {
+                    return false;
+                }
+            }
+        }
+        if (pRegionNew)
+        {
+            if (IsTrigUsed(TRIGGER_ENTER))
+            {
+                if (pRegionNew->OnRegionTrigger(pCaptain, RTRIG_ENTER) == TRIGRET_RET_TRUE)
+                {
+                    return false;
+                }
+            }
+
+            if (IsTrigUsed(TRIGGER_REGIONENTER))
+            {
+                CScriptTriggerArgs Args(pRegionNew);
+                if (pShip->OnTrigger(ITRIG_RegionEnter, pCaptain, &Args) == TRIGRET_RET_TRUE)
+                {
+                    return false;
+                }
+            }
+        }
+    }
     return true;
 }
 
@@ -795,6 +862,7 @@ bool CItemShip::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command from
                 return false;
             m_itShip.m_DirMove = (uchar)(GetDirStr(s.GetArgStr()));
             CItemMulti * pItemMulti = dynamic_cast<CItemMulti*>(this);
+            pCaptain = pSrc;
             return Ship_Move(static_cast<DIR_TYPE>(m_itShip.m_DirMove), pItemMulti->m_shipSpeed.tiles);
         }
 
@@ -867,6 +935,7 @@ bool CItemShip::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command from
             // "Back",			// Move ship backwards
             // "Backward",		// Move ship backwards
             // "Backwards",	// Move ship backwards
+            pCaptain = pSrc;
             DirMoveChange = 4;
             goto dodirmovechange;
         }
@@ -877,18 +946,21 @@ bool CItemShip::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command from
             // "Foreward",		// Moves ship forward.
             // "Unfurl sail",	// Moves ship forward.
             DirMoveChange = 0;
+            pCaptain = pSrc;
             goto dodirmovechange;
         }
 
         case SHV_SHIPFORELEFT: // "Forward left",
         {
             DirMoveChange = -1;
+            pCaptain = pSrc;
             goto dodirmovechange;
         }
 
         case SHV_SHIPFORERIGHT: // "forward right",
         {
             DirMoveChange = 1;
+            pCaptain = pSrc;
             goto dodirmovechange;
         }
 
@@ -897,6 +969,7 @@ bool CItemShip::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command from
             // "backward left",
             // "back left",
             DirMoveChange = -3;
+            pCaptain = pSrc;
             goto dodirmovechange;
         }
 
@@ -905,6 +978,7 @@ bool CItemShip::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command from
             // "backward right",
             // "back right",
             DirMoveChange = 3;
+            pCaptain = pSrc;
             goto dodirmovechange;
         }
 

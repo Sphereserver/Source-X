@@ -20,6 +20,7 @@ private:
     CUID m_uidHold;
     std::vector<CUID> m_uidPlanks;
     CServerTime m_NextMove;
+    CTextConsole *pCaptain;
 
 
     int Ship_GetFaceOffset() const
@@ -29,6 +30,7 @@ private:
     size_t  Ship_ListObjs(CObjBase ** ppObjList);
     bool Ship_CanMoveTo(const CPointMap & pt) const;
     bool Ship_MoveDelta(CPointBase pdelta);
+    bool Ship_MoveToRegion(CRegionWorld *pRegionOld, CRegionWorld* pRegionNew) const;
     bool Ship_OnMoveTick();
 
     virtual bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef);

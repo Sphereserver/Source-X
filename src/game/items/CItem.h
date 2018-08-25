@@ -699,7 +699,7 @@ public:
 	virtual bool r_Load( CScript & s ); // Load an item from script
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
 
-private:
+protected:
 	TRIGRET_TYPE OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
 	TRIGRET_TYPE OnTriggerCreate(CTextConsole * pSrc, CScriptTriggerArgs * pArgs );
 

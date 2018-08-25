@@ -102,6 +102,9 @@ lpctstr const CChar::sm_szTrigName[CTRIG_QTY+1] =	// static
 	"@itemPICKUP_PACK",		// picked up from inside some container.
 	"@itemPICKUP_SELF",		// picked up from this container
 	"@itemPICKUP_STACK",	// picked up from a stack
+    "@itemRedeed",
+    "@ItemRegionEnter",
+    "@ItemRegionLeave",
 	"@itemSELL",
 	"@itemSPELL",			// cast some spell on the item.
 	"@itemSTEP",			// stepped on an item
@@ -2457,10 +2460,6 @@ do_default:
 			}
 			return true;
 
-		case CHC_GOLD:
-			sVal.FormatVal(ContentCount(CResourceID(RES_TYPEDEF, IT_GOLD)));
-			break;
-
 		case CHC_MOUNT:
 			{
 				CItem *pItem = LayerFind(LAYER_HORSE);
@@ -2837,6 +2836,14 @@ do_default:
 		case CHC_LEVEL:
 			sVal.FormatVal(m_level);
 			break;
+
+        case CHC_GOLD:
+            if (!(g_Cfg.m_iFeatureTOL & FEATURE_TOL_VIRTUALGOLD))
+            {
+                sVal.FormatVal(ContentCount(CResourceID(RES_TYPEDEF, IT_GOLD)));
+                break;
+            }
+            // not break, just run down to VIRTUALGOLD
 		case CHC_VIRTUALGOLD:
 			sVal.FormatLLVal(m_virtualGold);
 			break;
@@ -3250,23 +3257,6 @@ do_default:
 		case CHC_FOOD:
 			Stat_SetVal(STAT_FOOD, s.GetArgSVal());
 			break;
-		case CHC_GOLD:
-		{
-			int currentGold = ContentCount(CResourceID(RES_TYPEDEF, IT_GOLD));
-			int newGold = s.GetArgVal();
-
-			if ( newGold < currentGold )
-				ContentConsume(CResourceID(RES_TYPEDEF, IT_GOLD), currentGold - newGold);
-			else if ( newGold > currentGold )
-			{
-				CItemContainer *pBank = GetBank();
-				if ( !pBank )
-					return false;
-				AddGoldToPack(newGold - currentGold, pBank);
-			}
-			UpdateStatsFlag();
-			break;
-		}
 		case CHC_HITPOINTS:
 		case CHC_HITS:
 			Stat_SetVal(STAT_STR, s.GetArgSVal());
@@ -3425,6 +3415,27 @@ do_default:
 			m_level = s.GetArgVal();
 			ChangeExperience();
 			break;
+        case CHC_GOLD:
+        {
+            if (!(g_Cfg.m_iFeatureTOL & FEATURE_TOL_VIRTUALGOLD))
+            {
+                int currentGold = ContentCount(CResourceID(RES_TYPEDEF, IT_GOLD));
+                int newGold = s.GetArgVal();
+
+                if (newGold < currentGold)
+                    ContentConsume(CResourceID(RES_TYPEDEF, IT_GOLD), currentGold - newGold);
+                else if (newGold > currentGold)
+                {
+                    CItemContainer *pBank = GetBank();
+                    if (!pBank)
+                        return false;
+                    AddGoldToPack(newGold - currentGold, pBank);
+                }
+                UpdateStatsFlag();
+                break;
+            }
+            // not break, just run down to VIRTUALGOLD
+        }
 		case CHC_VIRTUALGOLD:
 			m_virtualGold = s.GetArgLLVal();
 			UpdateStatsFlag();

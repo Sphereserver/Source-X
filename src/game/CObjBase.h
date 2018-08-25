@@ -1053,6 +1053,8 @@ enum ITRIG_TYPE
 	ITRIG_PICKUP_SELF,          // picked up from this container
 	ITRIG_PICKUP_STACK,         // picked up from a stack (ARGO)
     ITRIG_Redeed,               // Redeeding a multi.
+    ITRIG_RegionEnter,          // Ship entering a new region.
+    ITRIG_RegionLeave,          // Ship leaving the region.
 	ITRIG_Sell,                 // I'm being sold.
 	ITRIG_Ship_Turn,            // I'm a ship and i'm turning around.
 	ITRIG_SPELLEFFECT,          // cast some spell on me.
@@ -1149,6 +1151,9 @@ enum CTRIG_TYPE
 	CTRIG_itemPICKUP_PACK,      // picked up from inside some container.
 	CTRIG_itemPICKUP_SELF,      // picked up from this (ACT) container.
 	CTRIG_itemPICKUP_STACK,     // was picked up from a stack.
+    CTRIG_itemRedeed,           // was redeeded (multis)
+    CTRIG_itemRegionEnter,      // enter a region (ships)
+    CTRIG_itemRegionLeave,      // leave a region (ships)
 	CTRIG_itemSell,             // I'l selling an item.
 	CTRIG_itemSPELL,            // cast some spell on the item.
 	CTRIG_itemSTEP,             // stepped on an item

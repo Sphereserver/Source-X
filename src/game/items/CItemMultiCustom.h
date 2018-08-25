@@ -73,7 +73,7 @@ private:
     void GetLockdownsAt(short dx, short dy, char dz, std::vector<CUID> &vList);
     void GetSecuredAt(short dx, short dy, char dz, std::vector<CUID> &vList);
     char CalculateLevel(char z);
-    void ClearFloor(char iFloor, CClient *pClient);
+    void ClearFloor(char iFloor);
 
 private:
     typedef std::map<ITEMID_TYPE, int> ValidItemsContainer;	// ItemID, FeatureMask
