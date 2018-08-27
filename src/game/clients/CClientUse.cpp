@@ -486,8 +486,14 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 		case IT_SPELLBOOK_ARCANIST:
 		case IT_SPELLBOOK_MYSTIC:
 		case IT_SPELLBOOK_BARD:
-			addSpellbookOpen(pItem);
-			return true;
+        {
+            {
+                addItem(m_pChar->GetPackSafe());
+            }
+            addItem(pItem);
+            addSpellbookOpen(pItem);
+            return true;
+        }
 
 		case IT_HAIR_DYE:
 		{
