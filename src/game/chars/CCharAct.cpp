@@ -2841,7 +2841,7 @@ bool CChar::Death()
 
 		// Remove every memory, with some exceptions
 		if ( pItem->IsType(IT_EQ_MEMORY_OBJ) )
-			Memory_ClearTypes( static_cast<CItemMemory *>(pItem), 0xFFFF & ~(MEMORY_IPET|MEMORY_TOWN|MEMORY_GUILD) );
+			Memory_ClearTypes( static_cast<CItemMemory *>(pItem), (MEMORY_FIGHT | MEMORY_HARMEDBY));
 	}
 
 	// Give credit for the kill to my attacker(s)
