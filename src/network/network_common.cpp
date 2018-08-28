@@ -555,8 +555,7 @@ HistoryIP& IPHistoryManager::getHistoryForIP(const CSocketAddressIP& ip)
 	//}
 
 	// create a new entry
-	HistoryIP hist;
-	memset(&hist, 0, sizeof(hist));
+	HistoryIP hist = {};
 	hist.m_ip = ip;
 	hist.m_pingDecay = NETHISTORY_PINGDECAY;
 	hist.update();

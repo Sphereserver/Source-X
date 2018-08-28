@@ -4001,8 +4001,8 @@ bool CServerConfig::LoadIni( bool fTest )
 	{
 		if( !fTest )
 		{
-			g_Log.Event(LOGL_FATAL|LOGM_INIT, SPHERE_FILE ".ini has not been found, server probably would be not usable.\n");
-			g_Log.Event(LOGL_FATAL|LOGM_INIT, "Navigate to http://prerelease.sphereserver.net/ to download sample config.\n");
+			g_Log.Event(LOGL_FATAL|LOGM_INIT, SPHERE_FILE ".ini has not been found.\n");
+			g_Log.Event(LOGL_FATAL|LOGM_INIT, "Download a sample sphere.ini from https://github.com/Sphereserver/Source-experimental/tree/master/src\n");
 		}
 		return false;
 	}
@@ -4152,14 +4152,18 @@ bool CServerConfig::Load( bool fResync )
 
 	//	Initialize the world sectors
 	if (!fResync)
-		g_Log.Event(LOGM_INIT, "\nInitializing the world...\n");
+	{
+		g_Log.Printf("\n");
+		g_Log.Event(LOGM_INIT, "Initializing the world...\n");
+	}
 	g_World.Init();
 
 	// open and index all my script files i'm going to use.
 	AddResourceDir( m_sSCPBaseDir );		// if we want to get *.SCP files from elsewhere.
 
 	size_t count = m_ResourceFiles.size();
-	g_Log.Event(LOGM_INIT, "\nIndexing %" PRIuSIZE_T " script files...\n", count);
+	g_Log.Printf("\n");
+	g_Log.Event(LOGM_INIT, "Indexing %" PRIuSIZE_T " script files...\n", count);
 
 	for ( size_t j = 0; ; ++j )
 	{

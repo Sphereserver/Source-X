@@ -103,6 +103,7 @@ bool CLog::OpenLog( lpctstr pszBaseDirName )	// name set previously.
 	}
 
 	// Get the new name based on date.
+	m_dateStamp = CSTime::GetCurrentTime();
 	tchar *pszTemp = Str_GetTemp();
 	snprintf(pszTemp, STR_TEMPLENGTH, SPHERE_FILE "%d-%02d-%02d.log",
 		m_dateStamp.GetYear(), m_dateStamp.GetMonth(), m_dateStamp.GetDay());
@@ -256,7 +257,6 @@ int CLog::EventStr( dword dwMask, lpctstr pszMsg )
 				Open(nullptr, mode);	// LINUX needs to close and re-open for each log line !
 			}
 #endif
-            m_dateStamp = datetime;
 
 			WriteString( szTime );
 			if ( pszLabel )

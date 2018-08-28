@@ -1778,11 +1778,11 @@ bool CServer::Load()
 	EXC_TRY("Load");
 
 	EXC_SET("print sphere infos");
-	g_Log.Event(LOGM_INIT|LOGF_CONSOLE_ONLY, "%s.\n", g_szServerDescription);
+	g_Log.Event(LOGM_INIT, "%s.\n", g_szServerDescription);
 #ifdef __GITREVISION__
-	g_Log.Event(LOGM_INIT|LOGF_CONSOLE_ONLY, "Compiled at %s (%s) [build %d / GIT hash %s]\n\n", __DATE__, __TIME__, __GITREVISION__, __GITHASH__);
+	g_Log.Event(LOGM_INIT, "Compiled at %s (%s) [build %d / GIT hash %s]\n\n", __DATE__, __TIME__, __GITREVISION__, __GITHASH__);
 #else
-	g_Log.Event(LOGM_INIT|LOGF_CONSOLE_ONLY, "Compiled at %s (%s)\n\n", __DATE__, __TIME__);
+	g_Log.Event(LOGM_INIT, "Compiled at %s (%s)\n\n", __DATE__, __TIME__);
 #endif
 #ifdef _NIGHTLYBUILD
 	static lpctstr pszNightlyMsg = "\r\n"
@@ -1822,15 +1822,8 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 #endif
 
 	EXC_SET("loading ini");
-	g_Cfg.LoadIni(false);
-
-	// Now that we have read the ini file, the folder for the log files has been set and i can write the msgs
-	g_Log.Event(LOGM_INIT|LOGF_LOGFILE_ONLY, "%s.\n", g_szServerDescription);
-#ifdef __GITREVISION__
-	g_Log.Event(LOGM_INIT|LOGF_LOGFILE_ONLY, "Compiled at %s (%s) [build %d / GIT hash %s]\n\n", __DATE__, __TIME__, __GITREVISION__, __GITHASH__);
-#else
-	g_Log.Event(LOGM_INIT|LOGF_LOGFILE_ONLY, "Compiled at %s (%s)\n\n", __DATE__, __TIME__);
-#endif
+	if (!g_Cfg.LoadIni(false))
+		return false;
 
 #ifdef _NIGHTLYBUILD
 	g_Log.Event(LOGL_WARN|LOGF_LOGFILE_ONLY, pszNightlyMsg);

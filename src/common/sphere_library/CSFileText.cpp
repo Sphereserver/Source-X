@@ -36,8 +36,16 @@ bool CSFileText::_Open(lpctstr ptcFilename, uint uiModeFlags)
 {
     ADDTOCALLSTACK("CSFileText::_Open");
 
-    // Open a file.
-    _strFileName = ptcFilename;
+    // Open a text file.
+    
+	if ( !ptcFilename )
+        ptcFilename = _strFileName.GetPtr();
+    else
+        _strFileName = ptcFilename;
+
+    if ( _strFileName.IsEmpty() )
+        return false;
+	
     _uiMode = uiModeFlags;
     lpctstr ptcModeStr = _GetModeStr();
   
@@ -77,7 +85,7 @@ void CSFileText::Close()
 {
     ADDTOCALLSTACK("CSFileText::Close");
     THREAD_UNIQUE_LOCK_SET;
-    _Close();
+    CSFileText::_Close();
 }
 
 // CSFileText:: Content management.
@@ -87,7 +95,7 @@ int CSFileText::_Seek( int iOffset, int iOrigin )
     //  true = success
     ADDTOCALLSTACK("CSFileText::_Seek");
 
-    if ( !_IsFileOpen() )
+    if ( !CSFileText::_IsFileOpen() )
         return 0;
     if ( iOffset < 0 )
         return 0;

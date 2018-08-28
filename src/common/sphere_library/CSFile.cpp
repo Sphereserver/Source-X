@@ -48,11 +48,11 @@ void CSFile::_NotifyIOError( lpctstr szMessage ) const
         pMsg = "No System Error";
     else
         pMsg = static_cast<lptstr>(lpMsgBuf);
-    DEBUG_ERR(( "File I/O \"%s\" failed on file \"%s\" (%lX): %s", szMessage, static_cast<lpctstr>(_strFileName), iErrorCode, pMsg ));
+    DEBUG_ERR(( "File I/O \"%s\" failed on file \"%s\" (%lX): %s\n", szMessage, static_cast<lpctstr>(_strFileName), iErrorCode, pMsg ));
     if (lpMsgBuf != nullptr)
         LocalFree( lpMsgBuf );
 #else
-    DEBUG_ERR(( "File I/O \"%s\" failed on file \"%s\" (%lX): %s", szMessage, static_cast<lpctstr>(_strFileName), iErrorCode, strerror(iErrorCode) ));
+    DEBUG_ERR(( "File I/O \"%s\" failed on file \"%s\" (%lX): %s\n", szMessage, static_cast<lpctstr>(_strFileName), iErrorCode, strerror(iErrorCode) ));
 #endif
 }
 
