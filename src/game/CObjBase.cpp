@@ -1464,7 +1464,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 					return false;
 				pszKey += 4;
 
-				CVarDefCont * pVarKey	= m_TagDefs.GetKey( pszKey );
+				CVarDefCont * pVarKey = m_TagDefs.GetKey( pszKey );
 				if ( !pVarKey )
 					sVal = Base_GetDef()->m_TagDefs.GetKeyStr( pszKey, fZero );
 				else
@@ -1475,7 +1475,9 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			sVal.FormatLLVal( GetTimerAdjusted() );
 			break;
 		case OC_TIMERD:
-            g_Log.EventError("TIMERD was deprecated, read revisions about TIMERT\n");
+            g_Log.EventError("TIMERD was deprecated, read revisions about TIMERT.\n");
+            sVal.FormatLLVal((GetTimerTAdjusted()*10)/TICK_PER_SEC);
+            break;
         case OC_TIMERT:
             sVal.FormatLLVal(GetTimerTAdjusted());
             break;
@@ -1980,17 +1982,20 @@ bool CObjBase::r_LoadVal( CScript & s )
 			return true;
 		}
 		case OC_TIMER:
-			SetTimeout( s.GetArgLLVal() * TICK_PER_SEC );
+			SetTimeout(s.GetArgLLVal() * TICK_PER_SEC);
             fResendTooltip = true;
 			break;
         case OC_TIMERD:
-            g_Log.EventError("TIMERD was deprecated, read revisions about TIMERT\n");
+            g_Log.EventError("TIMERD was deprecated, read revisions about TIMERT.\n");
+            SetTimeout((s.GetArgLLVal()*TICK_PER_SEC)/10);
+            fResendTooltip = true;
+            break;
         case OC_TIMERT:
             SetTimeout(s.GetArgLLVal());
             fResendTooltip = true;
             break;
 		case OC_TIMESTAMP:
-			SetTimeStamp( s.GetArgLLVal());
+			SetTimeStamp(s.GetArgLLVal());
 			break;
 		case OC_SPAWNITEM:
         {

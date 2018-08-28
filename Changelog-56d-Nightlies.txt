@@ -1106,7 +1106,7 @@ Multis:
 - Changed tick periods from 0.1s to 0.25s, read https://github.com/Sphereserver/Source-experimental/issues/125 for more information.
 - DEPRECATED TIMERD, a warning will be shown each time it's used.
 - ADDED TIMERT timing each TICK.
-WARNING TIMERD is NOT the same as TIMERT, while TIMERD=10 was meant to tick in one second, TIMERT=10 will tick in 4 seconds, so it should be TIMERT=4 to tick in a second (0.25*4)
+	WARNING! TIMERD is NOT the same as TIMERT, while TIMERD=10 was meant to tick in one second, TIMERT=10 will tick in 4 seconds, so it should be TIMERT=4 to tick in a second (0.25*4)
 
 - Removing multis now removes all of it's components by default (doors, signs, tiller, etc) but not lockdowns or other personal items.
 
@@ -1136,3 +1136,8 @@ transfer_secured	= 08	// Transfer Secured Containers.
 - Fixed wrong char sent on PacketObjectStatus when opening a new shop menu, hence not correctly showing the player's gold until a new packet updated the status.
 - Added region change support for ships, @Enter and @Exit will be fired on the regions they enter and leave (only them not characters inside, as always they will get it when landing from the ship)
 - Added @RegionEnter and @RegionLeave trigger for ships and the homologue @itemRegionEnter and @itemRegionLeave for chars BUT only working for ships.
+
+28-08-2018, XuN & Nolok
+- Changed: IMPORTANT! Due to a recent change of the tooltip engine, which grants better performance, the tooltips are now cached on the character or item instead of being
+	generated each time for each player. This means that ADDCLILOC needs to be called on the object, instead of on the player. So in the scripts, in the @ClientTooltip trigger,
+	calls to SRC.ADDCLILOC have to be changed to ADDCLILOC; in @ItemClientTooltip and @CharClientTooltip, ACT.ADDCLILOC has to be used instead.
