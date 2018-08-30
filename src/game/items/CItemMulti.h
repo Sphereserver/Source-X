@@ -122,11 +122,11 @@ public:
 
     struct ShipSpeed // speed of a ship
     {
-        uchar period;	// time between movement
-        uchar tiles;	// distance to move
+        uchar period;	// time between movement in tenths of second
+        uchar tiles;	// distance to move in tiles
     };
-    ShipSpeed m_shipSpeed; // Speed of ships (IT_SHIP)
-    byte m_SpeedMode;
+    ShipSpeed m_shipSpeed;  // Speed of ships (IT_SHIP)
+    byte m_SpeedMode;       // (0x01 = one tile, 0x02 = rowboat, 0x03 = slow, 0x04 = fast)
 
     /**
     * @brief Checks if a the multi can be created and create it if so.

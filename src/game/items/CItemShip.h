@@ -20,14 +20,15 @@ private:
     CUID m_uidHold;
     std::vector<CUID> m_uidPlanks;
     CServerTime m_NextMove;
-    CTextConsole *pCaptain;
+    CTextConsole *m_pCaptain;
 
 
-    int Ship_GetFaceOffset() const
+    inline int Ship_GetFaceOffset() const
     {
         return (GetID() & 3);
     }
-    size_t  Ship_ListObjs(CObjBase ** ppObjList);
+    void Ship_SetNextMove();
+    size_t Ship_ListObjs(CObjBase ** ppObjList);
     bool Ship_CanMoveTo(const CPointMap & pt) const;
     bool Ship_MoveDelta(CPointBase pdelta);
     bool Ship_MoveToRegion(CRegionWorld *pRegionOld, CRegionWorld* pRegionNew) const;
@@ -42,7 +43,7 @@ private:
     virtual void OnComponentCreate(CItem * pComponent);
 
 public:
-    bool Ship_SetMoveDir(DIR_TYPE dir, byte speed = 0, bool bWheelMove = false);
+    bool Ship_SetMoveDir(DIR_TYPE dir, byte bMovementType = 0, bool fWheelMove = false);
     bool Ship_Face(DIR_TYPE dir);
     bool Ship_Move(DIR_TYPE dir, int distance);
     static const char *m_sClassName;

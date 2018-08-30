@@ -1760,7 +1760,7 @@ CItemBaseMulti::CItemBaseMulti( CItemBase* pBase ) :
 {
     m_dwRegionFlags = REGION_FLAG_NODECAY | REGION_ANTIMAGIC_TELEPORT | REGION_ANTIMAGIC_RECALL_IN | REGION_FLAG_NOBUILDING;
 	m_rect.SetRectEmpty();
-	m_shipSpeed.period = (1 * TICK_PER_SEC) / 2;
+	m_shipSpeed.period = (1 * TICK_PER_SEC) / 2;    // half a second
 	m_shipSpeed.tiles = 1;
 	m_SpeedMode = 3;
 

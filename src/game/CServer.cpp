@@ -1887,19 +1887,13 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 void CServer::ShipTimers_Tick()
 {
 	ADDTOCALLSTACK("CServer::ShipTimers_Tick");
-	std::vector<CItemShip *>::iterator it;
-	for ( it = m_ShipTimers.begin(); it != m_ShipTimers.end(); )
+	for (std::vector<CItemShip *>::iterator it = m_ShipTimers.begin(); it != m_ShipTimers.end(); )
 	{
 		CItemShip * pShip = *it;
-		if (pShip && pShip->m_itShip.m_fSail != 0)
+		if (pShip && pShip->m_itShip.m_bMovementType != 0)
 		{
 			pShip->OnTick();
 			++it;
-		}
-		else if ( m_ShipTimers.size() == 1 )
-		{
-			m_ShipTimers.pop_back();
-			break;
 		}
 		else
 			it = m_ShipTimers.erase(it);

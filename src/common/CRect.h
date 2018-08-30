@@ -24,7 +24,8 @@ struct CRect		// Basic rectangle, similar to _WIN32 RECT (May not be on the map)
 	int m_bottom;	// South ( NON INCLUSIVE !)
 	int m_map;
 
-    virtual ~CRect() {}
+    CRect() = default;
+    virtual ~CRect() = default;
 
     inline int GetWidth() const
     {
@@ -82,7 +83,9 @@ struct CRect		// Basic rectangle, similar to _WIN32 RECT (May not be on the map)
 
 struct CRectMap : public CRect
 {
-    virtual ~CRectMap() {}
+    CRectMap() = default;
+    virtual ~CRectMap() = default;
+    CRectMap(const CRect& rect) : CRect(rect) {} // special copy constructor, valid because CRectMap hasn't additional members compared to CRect, it only has more methods
 
 	bool IsValid() const;
 

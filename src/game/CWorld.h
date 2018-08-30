@@ -94,16 +94,9 @@ private:
 
 class CWorldClock
 {
-#ifndef _WIN32
-	#ifdef CLOCKS_PER_SEC
-		#undef CLOCKS_PER_SEC
-	#endif	// CLOCKS_PER_SEC
-	#define CLOCKS_PER_SEC 1000	// must be converted from some internal clock.
-#endif
-
 private:
-	CServerTime m_timeClock;		// the current relative tick time (in TICK_PER_SEC)
-	int64 m_Clock_SysPrev;		// System time of the last OnTick() (in CLOCKS_PER_SEC)
+	CServerTime m_timeClock;    // the current relative tick time (in TICK_PER_SEC)
+	int64 m_Clock_SysPrev;	    // System time of the last OnTick() (in CLOCKS_PER_SEC)
 public:
 	static const char *m_sClassName;
 	CWorldClock()

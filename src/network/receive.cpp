@@ -3228,7 +3228,7 @@ bool PacketGargoyleFly::onReceive(NetState* net)
 /***************************************************************************
  *
  *
- *	Packet 0xBF.0x33 : PacketWheelBoatMove			gargoyle toggle flying
+ *	Packet 0xBF.0x33 : PacketWheelBoatMove			Move the ship through the mouse wheel
  *
  *
  ***************************************************************************/
@@ -3246,7 +3246,7 @@ bool PacketWheelBoatMove::onReceive(NetState* net)
 	CClient* client = net->getClient();
 	ASSERT(client);
 	CChar* character = client->GetChar();
-	if (character == NULL)
+	if (!character)
 		return false;
 
 	skip(4);
@@ -3256,13 +3256,13 @@ bool PacketWheelBoatMove::onReceive(NetState* net)
 	DIR_TYPE facing = static_cast<DIR_TYPE>(readByte()); //new boat facing, yes client send it
 	DIR_TYPE moving = static_cast<DIR_TYPE>(readByte()); //the boat movement
 	//skip(1);
-	byte speed = readByte(); //(0 = Stop Movement, 1 = One Tile Movement, 2 = Normal Movement) ***These speeds are NOT the same as 0xF6 packet
+	byte bMovementType = readByte(); //(0 = Stop Movement, 1 = One Tile Movement, 2 = Normal Movement) ***These speeds are NOT the same as 0xF6 packet
 
 	CRegionWorld *area = character->m_pArea;
 	if (area && area->IsFlag(REGION_FLAG_SHIP))
 	{
 		CItemShip *pShipItem = dynamic_cast<CItemShip *>(area->GetResourceID().ItemFind());
-		if (pShipItem && pShipItem->m_itShip.m_Pilot == character->GetUID())
+		if (pShipItem && (pShipItem->m_itShip.m_Pilot == character->GetUID()))
 		{
 			//direction of movement = moving - ship_face
 			//	moving = read from packet
@@ -3274,8 +3274,8 @@ bool PacketWheelBoatMove::onReceive(NetState* net)
 			if ((facing == DIR_N || facing == DIR_E || facing == DIR_S || facing == DIR_W) && pShipItem->m_itShip.m_DirFace != facing) //boat cannot face intermediate directions
 				pShipItem->Ship_Face(moving);
 
-			if (pShipItem->Ship_SetMoveDir(facing, speed, true))//pShipItem->m_itShip.m_DirMove = (byte)(facing);
-				pShipItem->Ship_Move(moving, speed);
+			if (pShipItem->Ship_SetMoveDir(facing, bMovementType, true)) //pShipItem->m_itShip.m_DirMove = (byte)(facing);
+				pShipItem->Ship_Move(moving, bMovementType);
 		}
 		else
 			return false;
