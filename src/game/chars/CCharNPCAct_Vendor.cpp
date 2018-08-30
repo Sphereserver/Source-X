@@ -43,19 +43,18 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 
 	if ( !bForce && m_pNPC->m_timeRestock.IsTimeValid() )
 	{
-		// Restock occurs every 10 minutes of inactivity (unless
-		// region tag specifies different time)
+		// Restock occurs every 10 minutes of inactivity (unless region tag specifies different time)
 		CRegionWorld *region = GetRegion();
-		int64 restockIn = 10 * 60 * TICK_PER_SEC;
-		if( region != NULL )
+		int64 restockIn = 10 * 60 * 1000; // CServerTime internal value is in milliseconds
+		if( region != nullptr )
 		{
 			CVarDefCont *vardef = region->m_TagDefs.GetKey("RestockVendors");
-			if( vardef != NULL )
+			if( vardef != nullptr )
 				restockIn = vardef->GetValNum();
-			if ( region->m_TagDefs.GetKey("NoRestock") != NULL )
+			if ( region->m_TagDefs.GetKey("NoRestock") != nullptr )
 				bRestockNow = false;
 		}
-		if ( m_TagDefs.GetKey("NoRestock") != NULL )
+		if ( m_TagDefs.GetKey("NoRestock") != nullptr )
 			bRestockNow = false;
 		
 		if (bRestockNow)

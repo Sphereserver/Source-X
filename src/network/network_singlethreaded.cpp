@@ -1123,7 +1123,6 @@ int NetworkOut::proceedQueue(CClient* client, int priority)
 
 	int maxClientPackets = NETWORK_MAXPACKETS;
 	int maxClientLength = NETWORK_MAXPACKETLEN;
-	CServerTime time = CServerTime::GetCurrentTime();
 
 	NetState* state = client->GetNetState();
 	ASSERT(state != NULL);

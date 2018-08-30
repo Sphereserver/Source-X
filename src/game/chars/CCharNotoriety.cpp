@@ -358,7 +358,7 @@ void CChar::Noto_Murder()
 		SysMessageDefault(DEFMSG_MSG_MURDERER);
 
 	if ( m_pPlayer && m_pPlayer->m_wMurders )
-		Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_Murders, g_Cfg.GetSpellEffect(SPELL_NONE, 0), g_Cfg.m_iMurderDecayTime, NULL);
+		Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_Murders, g_Cfg.GetSpellEffect(SPELL_NONE, 0), int(g_Cfg.m_iMurderDecayTime/1000), NULL);
 }
 
 bool CChar::Noto_Criminal( CChar * pChar )
@@ -367,7 +367,7 @@ bool CChar::Noto_Criminal( CChar * pChar )
 	if ( m_pNPC || IsPriv(PRIV_GM) )
 		return false;
 
-	int decay = g_Cfg.m_iCriminalTimer;
+	int decay = (int)(g_Cfg.m_iCriminalTimer/1000);
 
 	if ( IsTrigUsed(TRIGGER_CRIMINAL) )
 	{

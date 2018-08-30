@@ -17,10 +17,11 @@
 #include "CScriptProfiler.h"
 
 #ifndef _WIN32
-	#include <time.h>
     #include <sys/statvfs.h>
 #endif
 #include <sys/stat.h>
+#include <ctime>
+#include <chrono>
 
 
 static const SOUND_TYPE sm_Sounds_Ghost[] =
@@ -1025,19 +1026,12 @@ void CWorldThread::GarbageCollection_UIDs()
 //////////////////////////////////////////////////////////////////
 // -CWorldClock
 
-int64 CWorldClock::GetSystemClock()
+int64 CWorldClock::GetSystemClock() // static
 {
 	ADDTOCALLSTACK("CWorldClock::GetSystemClock");
 	// Return system wall-clock using high resolution value (milliseconds)
-#ifdef _WIN32
-	FILETIME ft;
-	GetSystemTimeAsFileTime(&ft);
-	return (((int64)(ft.dwHighDateTime) << 32) + ft.dwLowDateTime) / 10000;
-#else
-	struct timespec ts;
-	clock_gettime(CLOCK_REALTIME, &ts);
-	return ((ts.tv_sec * 10000) + (ts.tv_nsec / 100000)) / 10;
-#endif
+    auto timeMaxResolution = std::chrono::high_resolution_clock::now().time_since_epoch();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(timeMaxResolution).count();
 }
 
 void CWorldClock::InitTime( int64 lTimeBase )
@@ -1057,11 +1051,9 @@ void CWorldClock::Init()
 bool CWorldClock::Advance()
 {
 	ADDTOCALLSTACK("CWorldClock::Advance");
-	int64 Clock_Sys = GetSystemClock();
-
-	int64 iTimeDiff = Clock_Sys - m_Clock_SysPrev;
-	iTimeDiff = IMulDivDownLL(TICK_PER_SEC, iTimeDiff, CLOCKS_PER_SEC);
-	if ( !iTimeDiff )
+	const int64 Clock_Sys = GetSystemClock();
+	const int64 iTimeDiff = Clock_Sys - m_Clock_SysPrev;
+	if ( iTimeDiff == 0 )
 		return false;
 	else if ( iTimeDiff < 0 )
 	{
@@ -1073,7 +1065,7 @@ bool CWorldClock::Advance()
 	}
 
 	m_Clock_SysPrev = Clock_Sys;
-	CServerTime Clock_New = m_timeClock + iTimeDiff;
+	const CServerTime Clock_New = m_timeClock + iTimeDiff;
 
 	// CServerTime is signed !
 	// NOTE: This will overflow after 7 or so years of run time !
@@ -1348,9 +1340,9 @@ bool CWorld::SaveStage() // Save world state in stages.
 
 	if ( g_Cfg.m_iSaveBackgroundTime )
 	{
-		int iNextTime = g_Cfg.m_iSaveBackgroundTime / m_SectorsQty;
-		if ( iNextTime > TICK_PER_SEC/2 )
-			iNextTime = TICK_PER_SEC/2;	// max out at 30 minutes or so.
+		int64 iNextTime = g_Cfg.m_iSaveBackgroundTime / m_SectorsQty;
+		if ( iNextTime > 1000/2 )
+			iNextTime = 1000/2;	// max out at 30 minutes or so.
 		m_timeSave = GetCurrentTime() + iNextTime;
 	}
 	++m_iSaveStage;
@@ -1362,7 +1354,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 	g_Log.EventDebug("stage '%d' qty '%d' time '%" PRId64 "'\n", m_iSaveStage, m_SectorsQty, m_timeSave.GetTimeRaw());
 	EXC_DEBUG_END;
 
-	m_iSaveStage++;	// to avoid loops, we need to skip the current operation in world save
+	++m_iSaveStage;	// to avoid loops, we need to skip the current operation in world save
 	return false;
 }
 
@@ -1965,6 +1957,7 @@ enum WC_TYPE
 	WC_PREVBUILD,
 	WC_SAVECOUNT,
 	WC_TIME,
+    WC_TIMEHIRES,
 	WC_TITLE,
 	WC_VERSION,
 	WC_QTY
@@ -1975,6 +1968,7 @@ lpctstr const CWorld::sm_szLoadKeys[WC_QTY+1] =	// static
 	"PREVBUILD",
 	"SAVECOUNT",
 	"TIME",
+    "TIMEHIRES",
 	"TITLE",
 	"VERSION",
 	NULL
@@ -2030,16 +2024,19 @@ bool CWorld::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 		case WC_PREVBUILD:
 			sVal.FormatVal(m_iPrevBuild);
 			break;
-		case WC_SAVECOUNT: // "SAVECOUNT"
+		case WC_SAVECOUNT:  // "SAVECOUNT"
 			sVal.FormatVal( m_iSaveCountID );
 			break;
-		case WC_TIME:	// "TIME"
-			sVal.FormatLLVal( GetCurrentTime().GetTimeRaw() );
+		case WC_TIME:	    // "TIME"
+			sVal.FormatLLVal( GetCurrentTime().GetTimeRaw()/100 );  // in tenths of second, for backwards compatibility
 			break;
-		case WC_TITLE: // 	"TITLE",
+        case WC_TIMEHIRES:	// "TIMEHIRES"
+            sVal.FormatLLVal( GetCurrentTime().GetTimeRaw() );      // in milliseconds
+            break;
+		case WC_TITLE:      // "TITLE",
 			sVal = (SPHERE_TITLE " World Script");
 			break;
-		case WC_VERSION: // "VERSION"
+		case WC_VERSION:    // "VERSION"
 			sVal = SPHERE_VERSION;
 			break;
 		default:
@@ -2441,11 +2438,12 @@ void __cdecl CWorld::Broadcastf(lpctstr pMsg, ...) // System broadcast in bold t
 dword CWorld::GetGameWorldTime( CServerTime basetime ) const
 {
 	ADDTOCALLSTACK("CWorld::GetGameWorldTime");
-	// basetime = TICK_PER_SEC time.
-	// Get the time of the day in GameWorld minutes
+	// Get the time of the day in GameWorld minutes.
+    // basetime = milliseconds.
 	// 8 real world seconds = 1 game minute.
 	// 1 real minute = 7.5 game minutes
 	// 3.2 hours = 1 game day.
+    
 	return( (uint)(basetime.GetTimeRaw() / g_Cfg.m_iGameMinuteLength) );
 }
 
@@ -2454,17 +2452,16 @@ CServerTime CWorld::GetNextNewMoon( bool bMoonIndex ) const
 	ADDTOCALLSTACK("CWorld::GetNextNewMoon");
 	// "Predict" the next new moon for this moon
 	// Get the period
-	dword iSynodic = bMoonIndex ? FELUCCA_SYNODIC_PERIOD : TRAMMEL_SYNODIC_PERIOD;
+	int64 iSynodic = bMoonIndex ? FELUCCA_SYNODIC_PERIOD : TRAMMEL_SYNODIC_PERIOD;
 
 	// Add a "month" to the current game time
-	dword iNextMonth = GetGameWorldTime() + iSynodic;
+	int64 iNextMonth = GetGameWorldTime() + iSynodic;
 
 	// Get the game time when this cycle will start
-	dword iNewStart = (dword)(iNextMonth - static_cast<double>(iNextMonth % iSynodic));
+	int64 iNewStart = (int64)(iNextMonth - (double)(iNextMonth % iSynodic));
 
-	// Convert to TICK_PER_SEC ticks
 	CServerTime time;
-	time.InitTime( iNewStart * g_Cfg.m_iGameMinuteLength );
+	time.InitTime( iNewStart * (g_Cfg.m_iGameMinuteLength/1000) ); // CServerTime and iGameMinuteLength are in milliseconds
 	return time;
 }
 
@@ -2505,15 +2502,16 @@ void CWorld::OnTick()
 	if ( m_nextTickTime <= GetCurrentTime())
 	{
 		// Only need a SECTOR_TICK_PERIOD tick to do world stuff.
-		m_nextTickTime = GetCurrentTime() + SECTOR_TICK_PERIOD;	// Next hit time.
-		m_Sector_Pulse ++;
+		m_nextTickTime = GetCurrentTime() + (SECTOR_TICK_PERIOD*MSECS_PER_TICK);	// Next hit time.
+		++m_Sector_Pulse;
 		int	m, s;
 
-		for ( m = 0; m < 256; m++ )
+		for ( m = 0; m < 256; ++m )
 		{
-			if ( !g_MapList.m_maps[m] ) continue;
+			if ( !g_MapList.m_maps[m] )
+                continue;
 
-			for ( s = 0; s < g_MapList.GetSectorQty(m); s++ )
+			for ( s = 0; s < g_MapList.GetSectorQty(m); ++s )
 			{
 				EXC_TRYSUB("Tick");
 
@@ -2532,7 +2530,7 @@ void CWorld::OnTick()
 		// called (whereas other items can receive the OnTickStatusUpdate() call via their normal
 		// tick method).
 		// note: ideally, a better solution to accomplish this should be found if possible
-		if (m_ObjStatusUpdates.size() > 0)
+		if (!m_ObjStatusUpdates.empty())
 		{
 			EXC_TRYSUB("Tick");
 
@@ -2541,12 +2539,11 @@ void CWorld::OnTick()
 			size_t i = m_ObjStatusUpdates.size();
 			while ( i > 0 )
 			{
-				CObjBase * pObj = m_ObjStatusUpdates.at(--i);
-				if (pObj != NULL)
+				CObjBase * pObj = m_ObjStatusUpdates[--i];
+				if (pObj != nullptr)
 					pObj->OnTickStatusUpdate();
 			}
-
-				m_ObjStatusUpdates.clear();
+			m_ObjStatusUpdates.clear();
 
 			EXC_CATCHSUB("StatusUpdates");
 		}
@@ -2558,7 +2555,7 @@ void CWorld::OnTick()
 	m_TimedFunctions.OnTick();
 	EXC_CATCHSUB("TimerFunction");
 
-	if ( (m_bSaveNotificationSent == false) && ((m_timeSave - (10 * TICK_PER_SEC)) <= GetCurrentTime()) )
+	if ( (m_bSaveNotificationSent == false) && ((m_timeSave - (10 * 1000)) <= GetCurrentTime()) )
 	{
 		Broadcast( g_Cfg.GetDefaultMsg( DEFMSG_SERVER_WORLDSAVE_NOTIFY ) );
 		m_bSaveNotificationSent = true;
@@ -2574,7 +2571,7 @@ void CWorld::OnTick()
 	if ( m_timeRespawn <= GetCurrentTime())
 	{
 		// Time to regen all the dead NPC's in the world.
-		m_timeRespawn = GetCurrentTime() + (20*60*TICK_PER_SEC);
+		m_timeRespawn = GetCurrentTime() + (20*60*1000);
 		RespawnDeadNPCs();
 	}
 	if ( m_timeCallUserFunc < GetCurrentTime() )
@@ -2582,7 +2579,7 @@ void CWorld::OnTick()
 		if ( g_Cfg.m_iTimerCall )
 		{
 			m_timeCallUserFunc = GetCurrentTime() + g_Cfg.m_iTimerCall;
-			CScriptTriggerArgs args(g_Cfg.m_iTimerCall / (60 * TICK_PER_SEC));
+			CScriptTriggerArgs args(g_Cfg.m_iTimerCall/(60*1000));
 			g_Serv.r_Call("f_onserver_timer", &g_Serv, &args);
 		}
 	}
@@ -2605,7 +2602,7 @@ void CWorld::OnTickMySQL()
 				g_World.Save( true );
 				g_World.SaveStatics();
 			}
-			m_ticksWithoutMySQL++;
+			++m_ticksWithoutMySQL;
 			return;
 		}
 	}
@@ -2669,7 +2666,7 @@ void CWorld::OnTickMySQL()
 	m_TimedFunctions.OnTick();
 	EXC_CATCHSUB("TimerFunction");
 
-	if ( (m_bSaveNotificationSent == false) && ((m_timeSave - (10 * TICK_PER_SEC)) <= GetCurrentTime()) )
+	if ( (m_bSaveNotificationSent == false) && ((m_timeSave - (10 * 1000)) <= GetCurrentTime()) )
 	{
 		Broadcast( g_Cfg.GetDefaultMsg( DEFMSG_SERVER_WORLDSAVE_NOTIFY ) );
 		m_bSaveNotificationSent = true;
@@ -2685,15 +2682,15 @@ void CWorld::OnTickMySQL()
 	if ( m_timeRespawn <= GetCurrentTime())
 	{
 		// Time to regen all the dead NPC's in the world.
-		m_timeRespawn = GetCurrentTime() + (20*60*TICK_PER_SEC);
+		m_timeRespawn = GetCurrentTime() + (20*60*1000);
 		RespawnDeadNPCs();
 	}
 	if ( m_timeCallUserFunc < GetCurrentTime() )
 	{
 		if ( g_Cfg.m_iTimerCall )
 		{
-			m_timeCallUserFunc = GetCurrentTime() + g_Cfg.m_iTimerCall*60*TICK_PER_SEC;
-			CScriptTriggerArgs args(g_Cfg.m_iTimerCall);
+			m_timeCallUserFunc = GetCurrentTime() + g_Cfg.m_iTimerCall;
+			CScriptTriggerArgs args(g_Cfg.m_iTimerCall/(60*1000));
 			g_Serv.r_Call("f_onserver_timer", &g_Serv, &args);
 		}
 	}

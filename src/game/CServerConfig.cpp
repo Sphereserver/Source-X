@@ -28,7 +28,7 @@ CServerConfig::CServerConfig()
 	m_fUseNTService		= false;
 	m_fUseHTTP			= 2;
 	m_fUseAuthID		= true;
-	m_iMapCacheTime		= 2*60 * TICK_PER_SEC;
+	m_iMapCacheTime		= 2*60 * 1000;
 	m_iSectorSleepMask	= (1 << 10) - 1;
 	m_fUseMapDiffs		= false;
 
@@ -57,9 +57,9 @@ CServerConfig::CServerConfig()
 	m_iSpell_Teleport_Sound_NPC			= 0x01fe;
 
 	// Decay
-	m_iDecay_Item			= 30*60 * TICK_PER_SEC;
-	m_iDecay_CorpsePlayer	= 7*60 * TICK_PER_SEC;
-	m_iDecay_CorpseNPC		= 7*60 * TICK_PER_SEC;
+	m_iDecay_Item			= 30*60 * 1000;
+	m_iDecay_CorpsePlayer	= 7*60 * 1000;
+	m_iDecay_CorpseNPC		= 7*60 * 1000;
 
 	// Accounts
 	m_iClientsMax		= FD_SETSIZE-1;
@@ -69,9 +69,9 @@ CServerConfig::CServerConfig()
 
 	m_iGuestsMax			= 0;
 	m_iArriveDepartMsg		= 1;
-	m_iClientLingerTime		= 10*60 * TICK_PER_SEC;
-	m_iDeadSocketTime		= 5*60 * TICK_PER_SEC;
-	m_iMinCharDeleteTime	= 7*24*60*60 * TICK_PER_SEC;
+	m_iClientLingerTime		= 10*60 * 1000;
+	m_iDeadSocketTime		= 5*60 * 1000;
+	m_iMinCharDeleteTime	= 7*24*60*60 * 1000;
 	m_iMaxCharsPerAccount	= 5;
 	m_fLocalIPAdmin			= true;
     _iMaxHousesAccount = 1;
@@ -86,7 +86,7 @@ CServerConfig::CServerConfig()
 	m_iSaveBackupLevels			= 10;
 	m_iSaveBackgroundTime		= 0;		// Use the new background save.
 	m_fSaveGarbageCollect		= true;		// Always force a full garbage collection.
-	m_iSavePeriod				= 20*60 * TICK_PER_SEC;
+	m_iSavePeriod				= 20*60 * 1000;
 	m_iSaveSectorsPerTick		= 1;
 	m_iSaveStepMaxComplexity	= 500;
 
@@ -115,12 +115,12 @@ CServerConfig::CServerConfig()
 	m_fCharTags				= false;
 	m_fVendorTradeTitle		= true;
 	m_iVendorMaxSell		= 255;
-	m_iGameMinuteLength		= 20 * TICK_PER_SEC;
+	m_iGameMinuteLength		= 20 * 1000; // 20 seconds
 	m_fNoWeather			= true;
 	m_fFlipDroppedItems		= true;
 	m_iItemsMaxAmount		= 60000;
 	m_iMurderMinCount		= 5;
-	m_iMurderDecayTime		= 8*60*60 * TICK_PER_SEC;
+	m_iMurderDecayTime		= 8*60*60 * 1000;
 	m_iMaxCharComplexity	= 32;
 	m_iMaxItemComplexity	= 25;
 	m_iMaxSectorComplexity	= 1024;
@@ -129,8 +129,8 @@ CServerConfig::CServerConfig()
 	m_iMinKarma				= -10000;
 	m_iMaxKarma				= 10000;
 	m_iMaxFame				= 10000;
-	m_iGuardLingerTime		= 3*60 * TICK_PER_SEC;
-	m_iCriminalTimer		= 3*60 * TICK_PER_SEC;
+	m_iGuardLingerTime		= 3*60 * 1000;
+	m_iCriminalTimer		= 3*60 * 1000;
 	m_iHitpointPercentOnRez	= 10;
 	m_iHitsHungerLoss		= 0;
 	m_fLootingIsACrime		= true;
@@ -146,10 +146,10 @@ CServerConfig::CServerConfig()
 	m_iMoveRate				= 100;
 	m_iArcheryMinDist		= 2;
 	m_iArcheryMaxDist		= 15;
-	m_iHitsUpdateRate		= TICK_PER_SEC;
+	m_iHitsUpdateRate		= 1000;
 	m_iSpeedScaleFactor		= 80000;
 	m_iCombatFlags			= 0;
-	m_iCombatArcheryMovementDelay = TICK_PER_SEC;
+	m_iCombatArcheryMovementDelay = 1*1000;
 	m_iCombatDamageEra		= 0;
 	m_iCombatHitChanceEra	= 0;
 	m_iCombatSpeedEra		= 3;
@@ -170,7 +170,7 @@ CServerConfig::CServerConfig()
 	m_iMaxSkill			= SKILL_QTY;
 	m_iWalkBuffer		= 75;
 	m_iWalkRegen		= 25;
-	m_iWoolGrowthTime	= 30*60 * TICK_PER_SEC;
+	m_iWoolGrowthTime	= 30*60 * 1000;
 	m_iAttackerTimeout	= 30;
 
 	m_iCommandLog		= 0;
@@ -228,10 +228,10 @@ CServerConfig::CServerConfig()
 
 	m_iDefaultCommandLevel	= 7;	// PLevel 7 default for command levels.
 
-	m_iRegenRate[STAT_STR]	= 40 * TICK_PER_SEC;		// Seconds to heal ONE hp (before stam/food adjust)
-	m_iRegenRate[STAT_INT]	= 20 * TICK_PER_SEC;		// Seconds to heal ONE mn
-	m_iRegenRate[STAT_DEX]	= 10 * TICK_PER_SEC;		// Seconds to heal ONE stm
-	m_iRegenRate[STAT_FOOD] = 60*60 * TICK_PER_SEC;		// Food usage (1 time per 60 minutes)
+	m_iRegenRate[STAT_STR]	= 40 * 1000;		// Seconds to heal ONE hp (before stam/food adjust)
+	m_iRegenRate[STAT_INT]	= 20 * 1000;		// Seconds to heal ONE mn
+	m_iRegenRate[STAT_DEX]	= 10 * 1000;		// Seconds to heal ONE stm
+	m_iRegenRate[STAT_FOOD] = 60*60 * 1000;		// Food usage (1 time per 60 minutes)
     _iItemHitpointsUpdate   = 10;
 
 	m_iTimerCall			= 0;
@@ -271,14 +271,14 @@ CServerConfig::CServerConfig()
 	m_fUsePacketPriorities	= false;
 	m_fUseExtraBuffer		= true;
 
-	m_iTooltipCache			= 30 * TICK_PER_SEC;
+	m_iTooltipCache			= 30 * 1000;
 	m_iTooltipMode			= TOOLTIPMODE_SENDVERSION;
 	m_iAutoTooltipResend	= (AUTOTOOLTIP_FLAG_NAME|AUTOTOOLTIP_FLAG_AMOUNT|AUTOTOOLTIP_FLAG_WEIGHT|AUTOTOOLTIP_FLAG_DURABILITY|
 								AUTOTOOLTIP_FLAG_POISON|AUTOTOOLTIP_FLAG_WANDCHARGES|AUTOTOOLTIP_FLAG_SPELLBOOK);
 	m_iContextMenuLimit		= 15;
 
 	m_iClientLoginMaxTries	= 0;		// maximum bad password tries before a temp ip ban
-	m_iClientLoginTempBan	= 3*60 * TICK_PER_SEC;
+	m_iClientLoginTempBan	= 3*60 * 1000;
 	m_iMaxShipPlankTeleport = UO_MAP_VIEW_SIZE_DEFAULT;
 
 	m_NPCNoFameTitle = false;
@@ -603,6 +603,7 @@ enum RC_TYPE
 	RC_TELEPORTSOUNDPLAYERS,	// m_iSpell_Teleport_Sound_Players
 	RC_TELEPORTSOUNDSTAFF,		// m_iSpell_Teleport_Sound_Staff
 	RC_TELNETLOG,				// m_fTelnetLog
+    RC_TICKPERIOD,
 	RC_TIMERCALL,				// m_iTimerCall
 	RC_TIMEUP,
 	RC_TOOLTIPCACHE,			// m_iTooltipCache
@@ -846,6 +847,7 @@ const CAssocReg CServerConfig::sm_szLoadKeys[RC_QTY+1] =
 	{ "TELEPORTSOUNDPLAYERS",	{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpell_Teleport_Sound_Players),	0 }},
 	{ "TELEPORTSOUNDSTAFF",		{ ELEM_INT,		OFFSETOF(CServerConfig,m_iSpell_Teleport_Sound_Staff),		0 }},
 	{ "TELNETLOG",				{ ELEM_BOOL,	OFFSETOF(CServerConfig,m_fTelnetLog),			0 }},
+    { "TICKPERIOD",				{ ELEM_INT,	    0,			                                    0 }},
 	{ "TIMERCALL",				{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTimerCall),			0 }},
 	{ "TIMEUP",					{ ELEM_VOID,	0,											0 }},
 	{ "TOOLTIPCACHE",			{ ELEM_INT,		OFFSETOF(CServerConfig,m_iTooltipCache),		0 }},
@@ -888,7 +890,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			int index = ATOI(s.GetKey()+5);
 			if (index < 0 || index >= STAT_QTY)
 				return false;
-			g_Cfg.m_iRegenRate[index] = (s.GetArgVal() * TICK_PER_SEC);
+			g_Cfg.m_iRegenRate[index] = (s.GetArgVal() * 1000);
 			return true;
 		}
 		else if ( s.IsKeyHead("MAP", 3) )		//	MAPx=settings
@@ -1017,7 +1019,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			m_iBankWMax = s.GetArgVal() * WEIGHT_UNITS;
 			break;
 		case RC_CLIENTLINGER:
-			m_iClientLingerTime = s.GetArgVal() * TICK_PER_SEC;
+			m_iClientLingerTime = s.GetArgVal() * 1000;
 			break;
 		case RC_CLIENTLOGINMAXTRIES:
 			{
@@ -1026,7 +1028,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 					m_iClientLoginMaxTries = 0;
 			} break;
 		case RC_CLIENTLOGINTEMPBAN:
-			m_iClientLoginTempBan = s.GetArgVal() * 60 * TICK_PER_SEC;
+			m_iClientLoginTempBan = s.GetArgVal() * 60 * 1000;
 			break;
 		case RC_CLIENTMAX:
 		case RC_CLIENTS:
@@ -1058,37 +1060,37 @@ bool CServerConfig::r_LoadVal( CScript &s )
                 m_iContainerMaxItems = uiVal;
         }
 		case RC_CORPSENPCDECAY:
-			m_iDecay_CorpseNPC = s.GetArgVal()*60*TICK_PER_SEC;
+			m_iDecay_CorpseNPC = s.GetArgVal()*60*1000;
 			break;
 		case RC_CORPSEPLAYERDECAY:
-			m_iDecay_CorpsePlayer = s.GetArgVal()*60*TICK_PER_SEC ;
+			m_iDecay_CorpsePlayer = s.GetArgVal()*60*1000;
 			break;
 		case RC_CRIMINALTIMER:
-			m_iCriminalTimer = s.GetArgVal() * 60 * TICK_PER_SEC;
+			m_iCriminalTimer = s.GetArgVal() * 60 * 1000;
 			break;
 		case RC_STRIPPATH:	// Put TNG or Axis stripped files here.
 			m_sStripPath = CSFile::GetMergedFileName( s.GetArgStr(), "" );
 			break;
 		case RC_DEADSOCKETTIME:
-			m_iDeadSocketTime = s.GetArgVal()*60*TICK_PER_SEC;
+			m_iDeadSocketTime = s.GetArgVal()*60*1000;
 			break;
 		case RC_DECAYTIMER:
-			m_iDecay_Item = s.GetArgVal() *60*TICK_PER_SEC;
+			m_iDecay_Item = s.GetArgVal() *60*1000;
 			break;
 		case RC_FREEZERESTARTTIME:
-			m_iFreezeRestartTime = s.GetArgVal() * TICK_PER_SEC;
+			m_iFreezeRestartTime = s.GetArgVal() * 1000;
 			break;
 		case RC_GAMEMINUTELENGTH:
-			m_iGameMinuteLength = s.GetArgVal() * TICK_PER_SEC;
+			m_iGameMinuteLength = s.GetArgVal() * 1000;
 			break;
 		case RC_GUARDLINGER:
-			m_iGuardLingerTime = s.GetArgVal() * 60 * TICK_PER_SEC;
+			m_iGuardLingerTime = s.GetArgVal() * 60 * 1000;
 			break;
 		case RC_HEARALL:
 			g_Log.SetLogMask( s.GetArgFlag( g_Log.GetLogMask(), LOGM_PLAYER_SPEAK ));
 			break;
 		case RC_HITSUPDATERATE:
-			m_iHitsUpdateRate = s.GetArgVal() * TICK_PER_SEC;
+			m_iHitsUpdateRate = s.GetArgVal() * 1000;
 			break;
 		case RC_ITEMSMAXAMOUNT:
 		{
@@ -1106,7 +1108,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			g_Install.SetPreferPath( CSFile::GetMergedFileName( s.GetArgStr(), "" ));
 			break;
 		case RC_MAPCACHETIME:
-			m_iMapCacheTime = s.GetArgVal() * TICK_PER_SEC;
+			m_iMapCacheTime = s.GetArgVal() * 1000;
 			break;
 		case RC_MAXCHARSPERACCOUNT:
 			m_iMaxCharsPerAccount = (uchar)(s.GetArgVal());
@@ -1130,7 +1132,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 				m_iMaxKarma = m_iMinKarma;
 			break;
 		case RC_MINCHARDELETETIME:
-			m_iMinCharDeleteTime = s.GetArgVal() * TICK_PER_SEC;
+			m_iMinCharDeleteTime = s.GetArgVal() * 1000;
 			break;
 		case RC_MINKARMA:
 			m_iMinKarma = s.GetArgVal();
@@ -1138,13 +1140,13 @@ bool CServerConfig::r_LoadVal( CScript &s )
 				m_iMinKarma = m_iMaxKarma;
 			break;
 		case RC_MURDERDECAYTIME:
-			m_iMurderDecayTime = s.GetArgVal() * TICK_PER_SEC;
+			m_iMurderDecayTime = s.GetArgVal() * 1000;
 			break;
 		case RC_NOTOTIMEOUT:
-			m_iNotoTimeout = s.GetArgVal() * TICK_PER_SEC;
+			m_iNotoTimeout = s.GetArgVal() * 1000;
 			break;
 		case RC_WOOLGROWTHTIME:
-			m_iWoolGrowthTime = s.GetArgVal() * 60 * TICK_PER_SEC;
+			m_iWoolGrowthTime = s.GetArgVal() * 60 * 1000;
 			break;
         case RC_ITEMHITPOINTSUPDATE:
             _iItemHitpointsUpdate = s.GetArgVal();
@@ -1153,10 +1155,10 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			{
 				int seconds = s.GetArgVal();
 				size_t threadCount = ThreadHolder::getActiveThreads();
-				for (size_t j = 0; j < threadCount; j++)
+				for (size_t j = 0; j < threadCount; ++j)
 				{
 					AbstractSphereThread* thread = static_cast<AbstractSphereThread*>(ThreadHolder::getThreadAt(j));
-					if (thread != NULL)
+					if (thread != nullptr)
 						thread->m_profile.SetActive(seconds);
 				}
 			}
@@ -1205,10 +1207,11 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			break;
 
 		case RC_SAVEPERIOD:
-			m_iSavePeriod = s.GetArgVal()*60*TICK_PER_SEC;
+			m_iSavePeriod = s.GetArgVal()*60*1000;
 			break;
+
 		case RC_SPELLTIMEOUT:
-			m_iSpellTimeout = s.GetArgVal() * TICK_PER_SEC;
+			m_iSpellTimeout = s.GetArgVal() * 1000;
 			break;
 
 		case RC_SECTORSLEEP:
@@ -1219,18 +1222,18 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			break;
 
 		case RC_SAVEBACKGROUND:
-			m_iSaveBackgroundTime = s.GetArgVal() * 60 * TICK_PER_SEC;
+			m_iSaveBackgroundTime = s.GetArgVal() * 60 * 1000;
 			break;
 
-                case RC_SAVESECTORSPERTICK:
-                        m_iSaveSectorsPerTick = s.GetArgVal();
-                        if( m_iSaveSectorsPerTick <= 0 )
-                                m_iSaveSectorsPerTick = 1;
-                        break;
-                case RC_SAVESTEPMAXCOMPLEXITY:
-                        m_iSaveStepMaxComplexity = s.GetArgVal();
-                        break;
+        case RC_SAVESECTORSPERTICK:
+            m_iSaveSectorsPerTick = s.GetArgVal();
+            if( m_iSaveSectorsPerTick <= 0 )
+                m_iSaveSectorsPerTick = 1;
+            break;
 
+        case RC_SAVESTEPMAXCOMPLEXITY:
+            m_iSaveStepMaxComplexity = s.GetArgVal();
+            break;
 
 		case RC_WORLDSAVE: // Put save files here.
 			m_sWorldBaseDir = CSFile::GetMergedFileName( s.GetArgStr(), "" );
@@ -1249,12 +1252,13 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			g_Cfg.m_iOptionFlags = s.GetArgUVal();
 			//PrintEFOFFlags(false, true);
 			break;
+
 		case RC_TIMERCALL:
-			m_iTimerCall = s.GetArgVal() * 60 * TICK_PER_SEC;
+			m_iTimerCall = s.GetArgVal() * 60 * 1000;
 			break;
 
 		case RC_TOOLTIPCACHE:
-			g_Cfg.m_iTooltipCache = s.GetArgVal() * TICK_PER_SEC;
+			g_Cfg.m_iTooltipCache = s.GetArgVal() * 1000;
 			break;
 
 #ifdef _MTNETWORK
@@ -1287,7 +1291,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			break;
 #endif
 		case RC_WALKBUFFER:
-			m_iWalkBuffer = s.GetArgVal() * TICK_PER_SEC;
+			m_iWalkBuffer = s.GetArgVal() * 100; // tenths of second to milliseconds
 			break;
 
 
@@ -1335,7 +1339,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			index = ATOI(pszKey+5);
 			if (( index < 0 ) || ( index >= STAT_QTY ))
 				return false;
-			sVal.FormatVal(g_Cfg.m_iRegenRate[index] / TICK_PER_SEC);
+			sVal.FormatLLVal(g_Cfg.m_iRegenRate[index] / 1000);
 			return true;
 		}
 
@@ -1703,7 +1707,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			#endif
 			break;
 		case RC_CLIENTLINGER:
-			sVal.FormatVal( m_iClientLingerTime / TICK_PER_SEC );
+			sVal.FormatLLVal( m_iClientLingerTime / 1000 );
 			break;
 		case RC_COLORHIDDEN:
 			sVal.FormatHex( m_iColorHidden );
@@ -1715,34 +1719,34 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			sVal.FormatHex( m_iColorInvisSpell );
 			break;
 		case RC_CORPSENPCDECAY:
-			sVal.FormatVal( m_iDecay_CorpseNPC / (60*TICK_PER_SEC));
+			sVal.FormatLLVal( m_iDecay_CorpseNPC / (60*1000));
 			break;
 		case RC_CORPSEPLAYERDECAY:
-			sVal.FormatVal( m_iDecay_CorpsePlayer / (60*TICK_PER_SEC));
+			sVal.FormatLLVal( m_iDecay_CorpsePlayer / (60*1000));
 			break;
 		case RC_CRIMINALTIMER:
-			sVal.FormatVal( m_iCriminalTimer / (60*TICK_PER_SEC));
+			sVal.FormatLLVal( m_iCriminalTimer / (60*1000));
 			break;
 		case RC_DEADSOCKETTIME:
-			sVal.FormatVal( m_iDeadSocketTime / (60*TICK_PER_SEC));
+			sVal.FormatLLVal( m_iDeadSocketTime / (60*1000));
 			break;
 		case RC_DECAYTIMER:
-			sVal.FormatVal( m_iDecay_Item / (60*TICK_PER_SEC));
+			sVal.FormatLLVal( m_iDecay_Item / (60*1000));
 			break;
 		case RC_FREEZERESTARTTIME:
-			sVal.FormatVal(m_iFreezeRestartTime / TICK_PER_SEC);
+			sVal.FormatLLVal(m_iFreezeRestartTime / 1000);
 			break;
 		case RC_GAMEMINUTELENGTH:
-			sVal.FormatVal(m_iGameMinuteLength / TICK_PER_SEC);
+			sVal.FormatLLVal(m_iGameMinuteLength / 1000);
 			break;
 		case RC_GUARDLINGER:
-			sVal.FormatVal( m_iGuardLingerTime / (60*TICK_PER_SEC));
+			sVal.FormatLLVal( m_iGuardLingerTime / (60*1000));
 			break;
 		case RC_HEARALL:
 			sVal.FormatVal( g_Log.GetLogMask() & LOGM_PLAYER_SPEAK );
 			break;
 		case RC_HITSUPDATERATE:
-			sVal.FormatVal( m_iHitsUpdateRate / TICK_PER_SEC );
+			sVal.FormatLLVal( m_iHitsUpdateRate / 1000 );
 			break;
 		case RC_LOG:
 			sVal = g_Log.GetLogDir();
@@ -1754,10 +1758,10 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			sVal = g_Install.GetPreferPath(NULL);
 			break;
 		case RC_MAPCACHETIME:
-			sVal.FormatVal( m_iMapCacheTime / TICK_PER_SEC );
+			sVal.FormatLLVal( m_iMapCacheTime / 1000 );
 			break;
 		case RC_NOTOTIMEOUT:
-			sVal.FormatVal(m_iNotoTimeout / TICK_PER_SEC);
+			sVal.FormatLLVal(m_iNotoTimeout / 1000);
 			break;
         case RC_MAXHOUSESACCOUNT:
             sVal.FormatUCVal(_iMaxHousesAccount);
@@ -1772,16 +1776,16 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			sVal.FormatVal( m_iMaxKarma );
 			break;
 		case RC_MINCHARDELETETIME:
-			sVal.FormatVal( m_iMinCharDeleteTime / TICK_PER_SEC );
+			sVal.FormatLLVal( m_iMinCharDeleteTime / 1000 );
 			break;
 		case RC_MINKARMA:
 			sVal.FormatVal( m_iMinKarma );
 			break;
 		case RC_MURDERDECAYTIME:
-			sVal.FormatVal( m_iMurderDecayTime / (TICK_PER_SEC ));
+			sVal.FormatLLVal( m_iMurderDecayTime / (60*1000 ));
 			break;
 		case RC_WOOLGROWTHTIME:
-			sVal.FormatVal( m_iWoolGrowthTime /( 60*TICK_PER_SEC ));
+			sVal.FormatLLVal( m_iWoolGrowthTime /( 60*1000 ));
 			break;
         case RC_ITEMHITPOINTSUPDATE:
             sVal.FormatVal(_iItemHitpointsUpdate);
@@ -1856,31 +1860,34 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 				}
 			} break;
 		case RC_SAVEPERIOD:
-			sVal.FormatVal( m_iSavePeriod / (60*TICK_PER_SEC));
+			sVal.FormatLLVal( m_iSavePeriod / (60*1000));
 			break;
 		case RC_SECTORSLEEP:
 			sVal.FormatVal(m_iSectorSleepMask ? (Calc_GetLog2(m_iSectorSleepMask+1)-1) : 0);
 			break;
 		case RC_SAVEBACKGROUND:
-			sVal.FormatVal( m_iSaveBackgroundTime / (60 * TICK_PER_SEC));
+			sVal.FormatLLVal( m_iSaveBackgroundTime / (60 * 1000));
 			break;
-                case RC_SAVESECTORSPERTICK:
-                        sVal.FormatVal( m_iSaveSectorsPerTick );
-                        break;
-                case RC_SAVESTEPMAXCOMPLEXITY:
-                        sVal.FormatVal( m_iSaveStepMaxComplexity );
-                        break;
+        case RC_SAVESECTORSPERTICK:
+            sVal.FormatVal( m_iSaveSectorsPerTick );
+            break;
+        case RC_SAVESTEPMAXCOMPLEXITY:
+            sVal.FormatVal( m_iSaveStepMaxComplexity );
+            break;
 		case RC_SPELLTIMEOUT:
-			sVal.FormatVal(m_iSpellTimeout / TICK_PER_SEC);
+			sVal.FormatLLVal(m_iSpellTimeout / 1000);
 			break;
 		case RC_GUILDS:
 			sVal.FormatSTVal(g_World.m_Stones.size());
-			return true;
+			break;
+        case RC_TICKPERIOD:
+            sVal.FormatVal( TICK_PER_SEC );
+            break;
 		case RC_TIMEUP:
-			sVal.FormatLLVal( ( - g_World.GetTimeDiff( g_World.m_timeStartup )) / TICK_PER_SEC );
-			return true;
+			sVal.FormatLLVal( ( - g_World.GetTimeDiff( g_World.m_timeStartup )) / 1000 );
+			break;
 		case RC_TIMERCALL:
-			sVal.FormatVal(m_iTimerCall / ( 60 * TICK_PER_SEC));
+			sVal.FormatVal(m_iTimerCall / (60*1000));
 			break;
 		case RC_VERSION:
 			sVal = g_szServerDescription;
@@ -1902,22 +1909,19 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			sVal.FormatVal( m_iPlayerKarmaNeutral );
 			break;
 		case RC_TOOLTIPCACHE:
-			sVal.FormatVal( m_iTooltipCache / (TICK_PER_SEC) );
+			sVal.FormatLLVal( m_iTooltipCache / 1000 );
 			break;
-
 		case RC_GUARDSINSTANTKILL:
 			sVal.FormatVal(g_Cfg.m_fGuardsInstantKill);
 			break;
-
 		case RC_GUARDSONMURDERERS:
 			sVal.FormatVal(g_Cfg.m_fGuardsOnMurderers);
 			break;
-
 		case RC_CONTEXTMENULIMIT:
 			sVal.FormatVal(g_Cfg.m_iContextMenuLimit);
 			break;
 		case RC_WALKBUFFER:
-			sVal.FormatVal(m_iWalkBuffer / TICK_PER_SEC);
+			sVal.FormatLLVal(m_iWalkBuffer / 100); // tenths of second to milliseconds
 			break;
 		default:
 			return( sm_szLoadKeys[index].m_elem.GetValStr( this, sVal ));
@@ -3920,7 +3924,7 @@ void CServerConfig::OnTick( bool fNow )
 		}
 	}
 
-	m_timePeriodic = CServerTime::GetCurrentTime() + ( 60 * TICK_PER_SEC );
+	m_timePeriodic = CServerTime::GetCurrentTime() + ( 60 * 1000 ); // CServerTime is in milliseconds
 }
 
 #define catresname(a,b)	\

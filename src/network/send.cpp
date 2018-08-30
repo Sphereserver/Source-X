@@ -4567,24 +4567,24 @@ bool PacketPropertyList::onSend(const CClient* client)
 		return true;
 
 	const CChar* character = client->GetChar();
-	if (character == NULL)
+	if (!character)
 		return false;
 
 	const CObjBase* object = m_object.ObjFind();
 	int iCharVisualRange = character->GetVisualRange();
-	if (object == NULL || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(iCharVisualRange, UO_MAP_VIEW_SIZE_DEFAULT))
+	if (!object || character->GetTopDistSight(object->GetTopLevelObj()) > maximum(iCharVisualRange, UO_MAP_VIEW_SIZE_DEFAULT))
 		return false;
 
-	if (hasExpired(TICK_PER_SEC * 30))
+	if (hasExpired(30 * 1000))
 		return false;
 
 	return true;
 }
 
-bool PacketPropertyList::hasExpired(int timeout) const
+bool PacketPropertyList::hasExpired(int64 iTimeout) const
 {
 	ADDTOCALLSTACK("PacketPropertyList::hasExpired");
-	return (llong)(m_time + timeout) < g_World.GetCurrentTime().GetTimeRaw();
+	return (m_time + iTimeout) < g_World.GetCurrentTime().GetTimeRaw();
 }
 
 

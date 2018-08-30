@@ -54,7 +54,7 @@ int CServerConfig::Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pW
 			{
 				iSwingSpeed = (pChar->Stat_GetAdjusted(STAT_DEX) + 100) * iBaseSpeed;
 				iSwingSpeed = maximum(1, iSwingSpeed);
-				iSwingSpeed = (g_Cfg.m_iSpeedScaleFactor * TICK_PER_SEC) / iSwingSpeed;
+				iSwingSpeed = (g_Cfg.m_iSpeedScaleFactor * 10) / iSwingSpeed;
 				if ( iSwingSpeed < 5 )
 					iSwingSpeed = 5;
 				break;
@@ -83,7 +83,7 @@ int CServerConfig::Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pW
 			// pre-AOS formula	(default m_iSpeedScaleFactor = 15000)
 			iSwingSpeed = (pChar->Stat_GetVal(STAT_DEX) + 100) * iBaseSpeed;
 			iSwingSpeed = maximum(1, iSwingSpeed);
-			iSwingSpeed = (g_Cfg.m_iSpeedScaleFactor * TICK_PER_SEC) / iSwingSpeed;
+			iSwingSpeed = (g_Cfg.m_iSpeedScaleFactor * 10) / iSwingSpeed;
 			if ( iSwingSpeed < 1 )
 				iSwingSpeed = 1;
 			break;
@@ -95,7 +95,7 @@ int CServerConfig::Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pW
 			iSwingSpeed = (pChar->Stat_GetVal(STAT_DEX) + 100) * iBaseSpeed;
 			iSwingSpeed = iSwingSpeed * (100 + iSwingSpeedIncrease) / 100;
 			iSwingSpeed = maximum(1, iSwingSpeed);
-			iSwingSpeed = ((g_Cfg.m_iSpeedScaleFactor * TICK_PER_SEC) / iSwingSpeed) / 2;
+			iSwingSpeed = ((g_Cfg.m_iSpeedScaleFactor * 10) / iSwingSpeed) / 2;
 			if ( iSwingSpeed < 12 )		//1.25
 				iSwingSpeed = 12;
 			break;
@@ -110,7 +110,7 @@ int CServerConfig::Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pW
 			iSwingSpeed = (g_Cfg.m_iSpeedScaleFactor / ((pChar->Stat_GetVal(STAT_DEX) + 100) * iSwingSpeed)) - 2;	// get speed in ticks of 0.25s each
 			if ( iSwingSpeed < 5 )
 				iSwingSpeed = 5;
-			iSwingSpeed = (iSwingSpeed * TICK_PER_SEC) / 4;		// convert 0.25s ticks into ms
+			iSwingSpeed = (iSwingSpeed * 10) / 4;		// convert 0.25s ticks into ms
 			break;
 		}
 
@@ -120,11 +120,11 @@ int CServerConfig::Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pW
 			iSwingSpeed = ((iBaseSpeed * 4) - (pChar->Stat_GetVal(STAT_DEX) / 30)) * (100 / (100 + iSwingSpeedIncrease));	// get speed in ticks of 0.25s each
 			if ( iSwingSpeed < 5 )
 				iSwingSpeed = 5;
-			iSwingSpeed = (iSwingSpeed * TICK_PER_SEC) / 4;		// convert 0.25s ticks into ms
+			iSwingSpeed = (iSwingSpeed * 10) / 4;		// convert 0.25s ticks into ms
 			break;
 		}
 	}
-    iSwingSpeed = (iSwingSpeed * TICK_PER_SEC) / 10; // Convert from tenths of second to ticks.
+    iSwingSpeed = (iSwingSpeed * 10) / 10; // Convert from tenths of second to ticks.
     return iSwingSpeed;
 }
 

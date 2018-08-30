@@ -2366,7 +2366,7 @@ do_default:
 			sVal.FormatVal( m_defense + pCharDef->m_defense );
 			return true;
 		case CHC_AGE:
-			sVal.FormatLLVal( -( g_World.GetTimeDiff(m_timeCreate) / ( TICK_PER_SEC * 60 * 60 *24 ) )); //displayed in days
+			sVal.FormatLLVal( -( g_World.GetTimeDiff(m_timeCreate) / ( 1000 * 60 * 60 *24 ) )); //displayed in days
 			return true;
 		case CHC_BANKBALANCE:
 			sVal.FormatVal( GetBank()->ContentCount( CResourceID(RES_TYPEDEF,IT_GOLD)));
@@ -2709,7 +2709,7 @@ do_default:
 			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, GetDispID()) );
 			break;
 		case CHC_CREATE:
-			sVal.FormatLLVal( -( g_World.GetTimeDiff(m_timeCreate) / TICK_PER_SEC ));
+			sVal.FormatLLVal( -( g_World.GetTimeDiff(m_timeCreate) / 1000 ));
 			break;
 		case CHC_DIR:
 			{
@@ -3203,9 +3203,9 @@ do_default:
 				}
 				return false;
 			}break;
-		case CHC_CREATE:
-			m_timeCreate = CServerTime::GetCurrentTime() - ( s.GetArgLLVal() * TICK_PER_SEC );
-			break;
+		//case CHC_CREATE:
+		//	m_timeCreate.InitTime(s.GetArgLLVal() * 1000);  // arg is in seconds, CServerTime is in milliseconds
+		//	break;
 		case CHC_DIR:
 			{
 				DIR_TYPE dir = static_cast<DIR_TYPE>(s.GetArgVal());
@@ -3461,7 +3461,7 @@ void CChar::r_Write( CScript & s )
 	EXC_TRY("r_Write");
 
 	s.WriteSection("WORLDCHAR %s", GetResourceName());
-	s.WriteKeyVal("CREATE", -(g_World.GetTimeDiff(m_timeCreate) / TICK_PER_SEC));
+	s.WriteKeyVal("CREATE", -(g_World.GetTimeDiff(m_timeCreate) / 1000));
 
 	CObjBase::r_Write(s);
 	if ( m_pPlayer )
@@ -4149,7 +4149,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 					return false;
 				CPointMap pt = pCharSrc->GetTopPoint();
 				pt.MoveN( pCharSrc->m_dirFace, 3 );
-				pItem->MoveToDecay( pt, 10*60*TICK_PER_SEC );	// make the cage vanish after 10 minutes.
+				pItem->MoveToDecay( pt, 10*60*1000 );	// make the cage vanish after 10 minutes.
 				pItem->Multi_Setup( NULL, UID_CLEAR );
 				Spell_Teleport( pt, true, false );
 				break;

@@ -251,9 +251,9 @@ void CClient::addTime( bool fCurrent ) const
 	{
 		llong lCurrentTime = (CServerTime::GetCurrentTime()).GetTimeRaw();
 		new PacketGameTime(this,
-								( lCurrentTime / ( 60*60*TICK_PER_SEC )) % 24,
-								( lCurrentTime / ( 60*TICK_PER_SEC )) % 60,
-								( lCurrentTime / ( TICK_PER_SEC )) % 60);
+								( lCurrentTime / ( 60*60*1000 )) % 24,
+								( lCurrentTime / ( 60*1000 )) % 60,
+								( lCurrentTime / ( 1000 )) % 60);
 	}
 	else
 	{
@@ -1526,7 +1526,7 @@ size_t CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
 	return count;
 }
 
-void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int iTimeout )
+void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iMsecsTimeout )
 {
 	ADDTOCALLSTACK("CClient::SetTargMode");
 	// ??? Get rid of menu stuff if previous targ mode.
@@ -1628,8 +1628,8 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int iTimeout 
 	}
 
 	// determine timeout time
-	if (iTimeout > 0)
-		m_Targ_Timeout = CServerTime::GetCurrentTime() + iTimeout;
+	if (iMsecsTimeout > 0)
+		m_Targ_Timeout = CServerTime::GetCurrentTime() + iMsecsTimeout;
 	else
 		m_Targ_Timeout.Init();
 
@@ -1671,14 +1671,14 @@ void CClient::addPromptConsole( CLIMODE_TYPE mode, lpctstr pPrompt, CUID context
 	new PacketAddPrompt(this, context1, context2, bUnicode);
 }
 
-void CClient::addTarget( CLIMODE_TYPE targmode, lpctstr pPrompt, bool fAllowGround, bool fCheckCrime, int iTimeout ) // Send targetting cursor to client
+void CClient::addTarget( CLIMODE_TYPE targmode, lpctstr pPrompt, bool fAllowGround, bool fCheckCrime, int64 iMsecsTimeout ) // Send targetting cursor to client
 {
 	ADDTOCALLSTACK("CClient::addTarget");
 	// Send targetting cursor to client.
     // Expect XCMD_Target back.
 	// ??? will this be selective for us ? objects only or chars only ? not on the ground (statics) ?
 
-	SetTargMode( targmode, pPrompt, iTimeout );
+	SetTargMode( targmode, pPrompt, iMsecsTimeout );
 
 	new PacketAddTarget(this,
 						fAllowGround? PacketAddTarget::Ground : PacketAddTarget::Object,
@@ -1697,7 +1697,7 @@ void CClient::addTargetDeed( const CItem * pDeed )
 	addTargetItems( CLIMODE_TARG_USE_ITEM, iddef, pDeed->GetHue() );
 }
 
-bool CClient::addTargetChars( CLIMODE_TYPE mode, CREID_TYPE baseID, bool fNotoCheck, int iTimeout )
+bool CClient::addTargetChars( CLIMODE_TYPE mode, CREID_TYPE baseID, bool fNotoCheck, int64 iMsecsTimeout )
 {
 	ADDTOCALLSTACK("CClient::addTargetChars");
 	CCharBase * pBase = CCharBase::FindCharBase( baseID );
@@ -1707,7 +1707,7 @@ bool CClient::addTargetChars( CLIMODE_TYPE mode, CREID_TYPE baseID, bool fNotoCh
 	tchar * pszTemp = Str_GetTemp();
 	snprintf(pszTemp, STR_TEMPLENGTH, "%s '%s'?", g_Cfg.GetDefaultMsg(DEFMSG_WHERE_TO_SUMMON), pBase->GetTradeName());
 
-	addTarget(mode, pszTemp, true, fNotoCheck, iTimeout);
+	addTarget(mode, pszTemp, true, fNotoCheck, iMsecsTimeout);
 	return true;
 }
 

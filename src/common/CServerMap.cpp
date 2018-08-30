@@ -46,7 +46,7 @@ void CCachedMulItem::HitCacheTime()
 
 int64 CCachedMulItem::GetCacheAge() const
 {
-	// In TICK_PER_SEC or milliseconds
+	// In milliseconds
 	return ( CServerTime::GetCurrentTime() - m_timeRef );
 }
 

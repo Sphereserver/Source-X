@@ -275,9 +275,9 @@ bool CServerDef::r_LoadVal( CScript & s )
 			m_sClientVersion = s.GetArgRaw();
 			// m_ClientVersion.SetClientVer( s.GetArgRaw());
 			break;
-		case SC_CREATE:
-			m_timeCreate = CServerTime::GetCurrentTime() - ( s.GetArgLLVal() * TICK_PER_SEC );
-			break;
+		//case SC_CREATE:
+		//	m_timeCreate.InitTime(s.GetArgLLVal() * 1000);  // arg is in seconds, CServerTime is in milliseconds
+		//	break;
 		case SC_ADMINEMAIL:
 			if ( this != &g_Serv && !g_Serv.m_sEMail.IsEmpty() && strstr(s.GetArgStr(), g_Serv.m_sEMail) )
 				return false;
@@ -296,18 +296,12 @@ bool CServerDef::r_LoadVal( CScript & s )
 				m_sLang = szLang;
 			}
 			break;
-		case SC_LASTVALIDDATE:
-			m_dateLastValid.Read( s.GetArgStr() );
-			break;
-		case SC_LASTVALIDTIME:
-			{
-				int iVal = s.GetArgVal() * TICK_PER_SEC;
-				if ( iVal < 0 )
-					m_timeLastValid = CServerTime::GetCurrentTime() + iVal;
-				else
-					m_timeLastValid = CServerTime::GetCurrentTime() - iVal;
-			}
-			break;
+		//case SC_LASTVALIDDATE:
+		//	m_dateLastValid.Read( s.GetArgStr() );
+		//	break;
+		//case SC_LASTVALIDTIME:
+		//	m_timeLastValid = CServerTime::GetCurrentTime() + (s.GetArgLLVal() * 1000);  // arg is in seconds, CServerTime is in milliseconds
+		//	break;
 		case SC_SERVIP:
 			m_ip.SetHostPortStr( s.GetArgStr() );
 			break;
@@ -397,7 +391,7 @@ bool CServerDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
 		}
 		break;
 	case SC_CREATE:
-		sVal.FormatLLVal( -( g_World.GetTimeDiff(m_timeCreate) / TICK_PER_SEC ) );
+		sVal.FormatLLVal( -( g_World.GetTimeDiff(m_timeCreate) / 1000 ) );
 		break;
 	case SC_LANG:
 		sVal = m_sLang;
@@ -405,13 +399,13 @@ bool CServerDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
 
 	case SC_LASTVALIDDATE:
 		if ( m_timeLastValid.IsTimeValid() )
-			sVal.FormatLLVal( GetTimeSinceLastValid() / ( TICK_PER_SEC * 60 ) );
+			sVal.FormatLLVal( GetTimeSinceLastValid() / ( 1000 * 60 ) );
 		else
 			sVal = "NA";
 		break;
 	case SC_LASTVALIDTIME:
 		// How many seconds ago.
-		sVal.FormatLLVal( m_timeLastValid.IsTimeValid() ? ( GetTimeSinceLastValid() / TICK_PER_SEC ) : -1 );
+		sVal.FormatLLVal( m_timeLastValid.IsTimeValid() ? ( GetTimeSinceLastValid() / 1000 ) : -1 );
 		break;
 	case SC_SERVIP:
 		sVal = m_ip.GetAddrStr();
@@ -482,5 +476,5 @@ int64 CServerDef::GetAgeHours() const
 {
 	ADDTOCALLSTACK("CServerDef::GetAgeHours");
 	// This is just the amount of time it has been listed.
-	return (( - g_World.GetTimeDiff( m_timeCreate )) / ( TICK_PER_SEC * 60 * 60 ));
+	return (( - g_World.GetTimeDiff( m_timeCreate )) / ( 1000 * 60 * 60 ));
 }

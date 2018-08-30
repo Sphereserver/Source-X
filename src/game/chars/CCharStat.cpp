@@ -359,14 +359,13 @@ bool CChar::Stats_Regen(int64 iTimeDiff)
 
 		ushort iRate = Stats_GetRegenVal(i, true);
 
-		m_Stat[i].m_regen += (short)(iTimeDiff);
+		m_Stat[i].m_regen += (short)(iTimeDiff/100); // in tenths of second
 		if ( m_Stat[i].m_regen < iRate )
 			continue;
 
-		short mod = Stats_GetRegenVal(i,false);
+		short mod = (short)Stats_GetRegenVal(i,false);
 		if ((i == STAT_STR) && (g_Cfg.m_iRacialFlags & RACIALF_HUMAN_TOUGH) && IsHuman())
 			mod += 2;		// Humans always have +2 hitpoint regeneration (Tough racial trait)
-
 		
 		if (g_Cfg.m_iFeatureAOS & FEATURE_AOS_UPDATE_B)
 		{
@@ -444,12 +443,12 @@ ushort CChar::Stats_GetRegenVal(STAT_TYPE iStat, bool bGetTicks)
 		char sRegen[21];
 		if ( bGetTicks )
 		{
-			sprintf(sRegen, "REGEN%s", stat);
-			ushort iRate = (ushort)(GetDefNum(sRegen, true) * TICK_PER_SEC);
+			sprintf(sRegen, "REGEN%s", stat);   // in seconds
+			ushort iRate = (ushort)(GetDefNum(sRegen, true) * 10); // to tenths of second
 			if ( iRate )
 				return iRate; //maximum(0, iRate);
 
-			return (ushort)(maximum(0, g_Cfg.m_iRegenRate[iStat]));
+			return (ushort)(maximum(0, g_Cfg.m_iRegenRate[iStat])); // tenths of second
 		}
 		else
 		{

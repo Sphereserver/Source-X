@@ -95,8 +95,8 @@ private:
 class CWorldClock
 {
 private:
-	CServerTime m_timeClock;    // the current relative tick time (in TICK_PER_SEC)
-	int64 m_Clock_SysPrev;	    // System time of the last OnTick() (in CLOCKS_PER_SEC)
+	CServerTime m_timeClock;    // The current SERVER time, measured in milliseconds from the first start of the server
+	int64 m_Clock_SysPrev;	    // SERVER time (in milliseconds) of the last OnTick()
 public:
 	static const char *m_sClassName;
 	CWorldClock()
@@ -112,11 +112,11 @@ public:
 	void Init();
 	void InitTime( int64 lTimeBase );
 	bool Advance();
-	CServerTime GetCurrentTime() const	// TICK_PER_SEC
+	inline CServerTime GetCurrentTime() const // in milliseconds
 	{
 		return m_timeClock;
 	}
-	static int64 GetSystemClock();		// CLOCKS_PER_SEC
+	static int64 GetSystemClock(); // in milliseconds
 };
 
 class CTimedFunctionHandler
@@ -153,7 +153,8 @@ class CTimedFunctionHandler
 		void Add( CUID uid, int numSeconds, lpctstr funcname );
 		void Erase( CUID uid );
 		void Stop( CUID uid, lpctstr funcname );
-		TRIGRET_TYPE Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext, CScriptLineContext EndContext, CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult);
+		TRIGRET_TYPE Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext, CScriptLineContext EndContext,
+            CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult);
 		int IsTimer( CUID uid, lpctstr funcname );
 };
 
@@ -162,7 +163,7 @@ extern class CWorld : public CScriptObj, public CWorldThread
 	// the world. Stuff saved in *World.SCP
 private:
 	// Clock stuff. how long have we been running ? all i care about.
-	CWorldClock m_Clock;		// the current relative tick time  (in TICK_PER_SEC)
+	CWorldClock m_Clock;		// the current relative tick time (in milliseconds)
 
 	// Special purpose timers.
 	CServerTime	m_nextTickTime;			// next time to do sector stuff.
@@ -230,15 +231,15 @@ public:
 
 	// Time
 
-	CServerTime GetCurrentTime() const
+	inline CServerTime GetCurrentTime() const
 	{
-		return m_Clock.GetCurrentTime();  // Time in TICK_PER_SEC
+		return m_Clock.GetCurrentTime();  // Time in milliseconds
 	}
-	int64 GetTimeDiff( CServerTime time ) const
+	inline int64 GetTimeDiff( CServerTime time ) const
 	{
 		// How long till this event
 		// negative = in the past.
-		return time.GetTimeDiff( GetCurrentTime() ); // Time in TICK_PER_SEC
+		return time.GetTimeDiff( GetCurrentTime() ); // Time in milliseconds
 	}
 
 #define TRAMMEL_SYNODIC_PERIOD 105 // in game world minutes

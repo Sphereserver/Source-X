@@ -552,7 +552,7 @@ void CChar::Skill_Cleanup()
 	// We are starting the skill or ended dealing with it (started / succeeded / failed / aborted)
 	m_Act_Difficulty = 0;
 	m_Act_SkillCurrent = SKILL_NONE;
-	SetTimeout( m_pPlayer ? -1 : TICK_PER_SEC );	// we should get a brain tick next time
+	SetTimeout( m_pPlayer ? -1 : MSECS_PER_TICK );	// we should get a brain tick next time
 }
 
 lpctstr CChar::Skill_GetName( bool fUse ) const
@@ -613,7 +613,7 @@ void CChar::Skill_SetTimeout()
 		return;
 
 	int iSkillLevel = Skill_GetBase(skill);
-    int64 iDelay = (int64)(pSkillDef->m_Delay.GetLinear(iSkillLevel)* TICK_PER_SEC) / 10;
+    int64 iDelay = (int64)(pSkillDef->m_Delay.GetLinear(iSkillLevel) * 1000) / 10;
 	SetTimeout(iDelay);
 }
 
@@ -1043,7 +1043,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	CPointMap pt = m_Act_p;
 	pt.m_z += 8;	// on top of the forge.
 	pItemEffect->SetAttr( ATTR_MOVE_NEVER );
-	pItemEffect->MoveToDecay( pt, TICK_PER_SEC );
+	pItemEffect->MoveToDecay( pt, 1000 );
 	if ( !g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_NOSFX ) )
 		Sound( 0x2b );
 
@@ -2323,7 +2323,7 @@ int CChar::Skill_SpiritSpeak( SKTRIG_TYPE stage )
 			Sound( 0x24a );
 
 		SysMessageDefault( DEFMSG_SPIRITSPEAK_SUCCESS );
-		Spell_Effect_Create( SPELL_NONE, LAYER_FLAG_SpiritSpeak, g_Cfg.GetSpellEffect(SPELL_NONE, 1), 4*60*TICK_PER_SEC, this );
+		Spell_Effect_Create( SPELL_NONE, LAYER_FLAG_SpiritSpeak, g_Cfg.GetSpellEffect(SPELL_NONE, 1), 4*60, this );
 		return 0;
 	}
 
@@ -2876,7 +2876,7 @@ int CChar::Skill_Act_Napping( SKTRIG_TYPE stage )
 
 	if ( stage == SKTRIG_START )
 	{
-		SetTimeout( 2*TICK_PER_SEC );
+		SetTimeout( 2*1000 );
 		return 0;
 	}
 
@@ -2884,7 +2884,7 @@ int CChar::Skill_Act_Napping( SKTRIG_TYPE stage )
 	{
 		if ( m_Act_p != GetTopPoint())
 			return -SKTRIG_QTY;	// we moved.
-		SetTimeout( 8*TICK_PER_SEC );
+		SetTimeout( 8*1000 );
 		Speak( "z", HUE_WHITE, TALKMODE_WHISPER );
 		return -SKTRIG_STROKE;	// Stay in the skill till we hit.
 	}
@@ -2916,7 +2916,7 @@ int CChar::Skill_Act_Breath( SKTRIG_TYPE stage )
 		if ( !g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_NOANIM ) )
 			UpdateAnimate( ANIM_MON_Stomp );
 
-		SetTimeout( 3*TICK_PER_SEC );
+		SetTimeout( 3*1000 );
 		return 0;
 	}
 
@@ -3056,7 +3056,7 @@ int CChar::Skill_Act_Training( SKTRIG_TYPE stage )
 
 	if ( stage == SKTRIG_START )
 	{
-		SetTimeout(1 * TICK_PER_SEC);
+		SetTimeout(1 * 1000);
 		return 0;	// How difficult? 1-1000
 	}
 	if ( stage == SKTRIG_STROKE )

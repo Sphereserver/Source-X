@@ -1174,7 +1174,7 @@ bool CRegionResourceDef::r_LoadVal( CScript & s )
 		case RMC_REAPAMOUNT:
 			m_ReapAmount.Load( s.GetArgRaw() );
 			break;
-		case RMC_REGEN:	// TICK_PER_SEC once found how long to regen this type.
+		case RMC_REGEN:	// Tenths of second once found how long to regen this type.
 			m_iRegenerateTime.Load( s.GetArgRaw() );
 			break;
 		case RMC_SKILL:

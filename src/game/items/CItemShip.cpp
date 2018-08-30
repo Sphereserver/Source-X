@@ -130,7 +130,8 @@ void CItemShip::Ship_SetNextMove()
         uiDelay = (m_itShip.m_bMovementType == 1) ? (m_shipSpeed.period * 2) : m_shipSpeed.period;
     else
         uiDelay = (m_itShip.m_bMovementType == 1) ? m_shipSpeed.period : (m_shipSpeed.period / 2);
-    m_NextMove = CServerTime::GetCurrentTime() + maximum(1, uiDelay);
+    // ShipSpeed.period is in tenths of second (so also the delay is); CServerTime is in milliseconds, so i need to multiply * 100
+    m_NextMove = CServerTime::GetCurrentTime() + (maximum(1, uiDelay) * 100);
 }
 
 size_t CItemShip::Ship_ListObjs(CObjBase ** ppObjList)
@@ -586,7 +587,7 @@ bool CItemShip::Ship_Move(DIR_TYPE dir, int distance)
 								pItemDebug->SetType(IT_NORMAL);						\
 								pItemDebug->SetAttr(ATTR_MOVE_NEVER|ATTR_DECAY|ATTR_INVIS);	\
 								pItemDebug->SetHue(b);								\
-								pItemDebug->MoveToDecay(a, 2);				\
+								pItemDebug->MoveToDecay(a, 1);				\
 								a.GetSector()->SetSectorWakeStatus();
 #else
     #define SPAWNSHIPTRACK(a,b)

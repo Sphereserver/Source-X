@@ -299,7 +299,7 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr pszKey, CSString & sVal )
 			sVal = m_Speech.ContainsResourceName(RES_SPEECH, pszKey) ? "1" : "0";
 			return true;
 		case CPC_LASTUSED:
-			sVal.FormatLLVal( - g_World.GetTimeDiff( m_timeLastUsed ) / TICK_PER_SEC );
+			sVal.FormatLLVal( - g_World.GetTimeDiff( m_timeLastUsed ) / 1000 );
 			return true;
 		case CPC_PFLAG:
 			sVal.FormatVal(m_pflag);
@@ -442,7 +442,7 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 				pChar->GetClient()->addKRToolbar( m_bKrToolbarEnabled );
 			return true;
 		case CPC_LASTUSED:
-			m_timeLastUsed = CServerTime::GetCurrentTime() - ( s.GetArgVal() * TICK_PER_SEC );
+			m_timeLastUsed.InitTime(s.GetArgLLVal() * 1000);  // arg is in seconds, CServerTime is in milliseconds
 			return true;
 		case CPC_PFLAG:
 			{

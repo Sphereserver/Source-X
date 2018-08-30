@@ -1142,3 +1142,14 @@ transfer_secured	= 08	// Transfer Secured Containers.
 - Changed: IMPORTANT! Due to a recent change of the tooltip engine, which grants better performance, the tooltips are now cached on the character or item instead of being
 	generated each time for each player. This means that ADDCLILOC needs to be called on the object, instead of on the player. So in the scripts, in the @ClientTooltip trigger,
 	calls to SRC.ADDCLILOC have to be changed to ADDCLILOC; in @ItemClientTooltip and @CharClientTooltip, ACT.ADDCLILOC has to be used instead.
+
+30-08-2018, Nolok
+- Changed: Sphere internal clock now stores the time in milliseconds, instead of in tenth of second (which was good until the amount of ticks per second was fixed to 10).
+	This makes the internal timer independent from the ticks per second and also should solve Issue #132.
+	SERV.TIME is still returning the internal time in tenth of seconds, to keep backwards compatibility.
+- Added: SERV.TIMEHIRES, which returns the internal timer in milliseconds.
+- Added: SERV.TICKPERIOD, to show how much server ticks are in a real-world second (right now it's 4, so that the server ticks every 0.25 seconds).
+- Fixed: ShipSpeed.period (tenths of second between each ship movement) not working as expected.
+- Fixed: While sailing on the debug build, flashing spots were supposed to be shown where the next movement would move the ship
+	(so, if moving on those tiles would make a valid movement).
+- Changed: Made Read-Only SERV.CREATE, SERV.LASTVALIDDATE, SERV.LASTVALIDTIME, CREATE char and item property.

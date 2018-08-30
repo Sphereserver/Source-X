@@ -47,7 +47,7 @@ int64 CGMPage::GetAge() const
 {
 	ADDTOCALLSTACK("CGMPage::GetAge");
 	// How old in seconds.
-	return( (-g_World.GetTimeDiff( m_timePage )) / TICK_PER_SEC );
+	return( (-g_World.GetTimeDiff( m_timePage )) / 1000 );
 }
 
 void CGMPage::ClearGMHandler()
@@ -149,7 +149,7 @@ bool CGMPage::r_LoadVal( CScript & s )
 		SetReason( s.GetArgStr());
 		break;
 	case GC_TIME:	// "TIME"
-		m_timePage = CServerTime::GetCurrentTime() - ( s.GetArgVal() * TICK_PER_SEC );
+		m_timePage = CServerTime::GetCurrentTime() - ( s.GetArgLLVal() * 1000 );
 		break;
 	default:
 		return( CScriptObj::r_LoadVal( s ));

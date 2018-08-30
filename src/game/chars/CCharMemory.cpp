@@ -122,13 +122,13 @@ bool CChar::Memory_UpdateFlags(CItemMemory * pMemory)
 		StatFlag_Set(STATF_PET);
 
 	if (wMemTypes & MEMORY_FIGHT)	// update more often to check for retreat.
-		iCheckTime = 30 * TICK_PER_SEC;
+		iCheckTime = 30 * 1000;
 	else if (wMemTypes & (MEMORY_IPET | MEMORY_GUARD | MEMORY_GUILD | MEMORY_TOWN))
 		iCheckTime = -1;	// never go away.
 	else if (m_pNPC)	// MEMORY_SPEAK
-		iCheckTime = 5 * 60 * TICK_PER_SEC;
+		iCheckTime = 5 * 60 * 1000;
 	else
-		iCheckTime = 20 * 60 * TICK_PER_SEC;
+		iCheckTime = 20 * 60 * 1000;
 
 	pMemory->SetTimeout(iCheckTime);	// update its decay time.	
 	CChar * pCharLink = pMemory->m_uidLink.CharFind();
@@ -429,12 +429,12 @@ bool CChar::Memory_Fight_OnTick( CItemMemory * pMemory )
 	int64 iTimeDiff = - g_World.GetTimeDiff( pMemory->GetTimeStamp() );
 
 	// If am fully healthy then it's not much of a fight.
-	if ( iTimeDiff > 60*60*TICK_PER_SEC )
+	if ( iTimeDiff > 60*60*100 )
 		goto clearit;
-	if ( (pTarg->GetHealthPercent() >= 100) && (iTimeDiff > 2*60*TICK_PER_SEC) )
+	if ( (pTarg->GetHealthPercent() >= 100) && (iTimeDiff > 2*60*100) )
 		goto clearit;
 
-	pMemory->SetTimeout(20*TICK_PER_SEC);
+	pMemory->SetTimeout(20*100);
 	return true;	// reschedule it.
 }
 

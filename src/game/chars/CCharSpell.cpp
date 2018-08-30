@@ -1594,7 +1594,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 			}
 
 			// We will have this effect again
-			pItem->SetTimeout(5 * TICK_PER_SEC);
+			pItem->SetTimeout(5 * 1000);
 		}
 		break;
 
@@ -1605,7 +1605,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 
 			// Gain HP.
 			UpdateStatVal(STAT_STR, (short)(g_Cfg.GetSpellEffect(spell, iLevel)));
-			pItem->SetTimeout(2 * TICK_PER_SEC);
+			pItem->SetTimeout(2 * 1000);
 		}	break;
 
 		case SPELL_Hallucination:
@@ -1620,7 +1620,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 				m_pClient->addChar(this);
 				m_pClient->addPlayerSee(CPointMap());
 			}
-			pItem->SetTimeout(Calc_GetRandLLVal2(15, 30) * TICK_PER_SEC);
+			pItem->SetTimeout(Calc_GetRandLLVal2(15, 30) * 1000);
 		}
 		break;
 
@@ -1640,24 +1640,24 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 				{
 					case 4:
 						iDmg = IMulDiv(Stat_GetMax(STAT_STR), Calc_GetRandVal2(16, 33), 100);
-						pItem->SetTimeout(5*TICK_PER_SEC);
+						pItem->SetTimeout(5*1000);
 						break;
 					case 3:
 						iDmg = IMulDiv(Stat_GetMax(STAT_STR), Calc_GetRandVal2(15, 30), 100);
-						pItem->SetTimeout(5*TICK_PER_SEC);
+						pItem->SetTimeout(5*1000);
 						break;
 					case 2:
 						iDmg = IMulDiv(Stat_GetMax(STAT_STR), Calc_GetRandVal2(7, 15), 100);
-						pItem->SetTimeout(4*TICK_PER_SEC);
+						pItem->SetTimeout(4*1000);
 						break;
 					case 1:
 						iDmg = IMulDiv(Stat_GetMax(STAT_STR), Calc_GetRandVal2(5, 10), 100);;
-						pItem->SetTimeout(3*TICK_PER_SEC);
+						pItem->SetTimeout(3*1000);
 						break;
 					default:
 					case 0:
 						iDmg = IMulDiv(Stat_GetVal(STAT_STR), Calc_GetRandVal2(4, 7), 100);
-						pItem->SetTimeout(2*TICK_PER_SEC);
+						pItem->SetTimeout(2*1000);
 						break;
 				}
 
@@ -1698,7 +1698,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 
 				pItem->m_itSpell.m_spelllevel -= 50;	// gets weaker too.	Only on old formulas
 				iDmg = IMulDiv(Stat_GetMax(STAT_STR), iLevel * 2, 100);
-				pItem->SetTimeout((5 + Calc_GetRandLLVal(4)) * TICK_PER_SEC);
+				pItem->SetTimeout((5 + Calc_GetRandLLVal(4)) * 1000);
 
 				static lpctstr const sm_Poison_Message[] =
 				{
@@ -1732,16 +1732,16 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 			switch (iDiff) //First tick is in 5 seconds (when mem was created), second one in 4, next one in 3, 2 ... and following ones in each second.
 			{
 				case 0:
-					pItem->SetTimeout(4 * TICK_PER_SEC);
+					pItem->SetTimeout(4 * 1000);
 					break;
 				case 1:
-					pItem->SetTimeout(3 * TICK_PER_SEC);
+					pItem->SetTimeout(3 * 1000);
 					break;
 				case 2:
-					pItem->SetTimeout(2 * TICK_PER_SEC);
+					pItem->SetTimeout(2 * 1000);
 					break;
 				default:
-					pItem->SetTimeout(TICK_PER_SEC);
+					pItem->SetTimeout(1000);
 					break;
 			}
 
@@ -1762,7 +1762,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 		{
 			// Receives x amount (stored in pItem->m_itSpell.m_spelllevel) of damage in 10 seconds, so damage each second is equal to total / 10
 			OnTakeDamage(pItem->m_itSpell.m_spelllevel / 10, pItem->m_uidLink.CharFind(), DAMAGE_MAGIC | DAMAGE_GOD);	// DIRECT? damage
-			pItem->SetTimeout(TICK_PER_SEC);
+			pItem->SetTimeout(1000);
 		}
 		break;
 
@@ -1776,7 +1776,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 	return false;
 }
 
-CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEffect, int iTicksDuration, CObjBase * pSrc, bool bEquip )
+CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEffect, int iDuration, CObjBase * pSrc, bool bEquip )
 {
 	ADDTOCALLSTACK("CChar::Spell_Effect_Create");
 	// Attach an effect to the Character.
@@ -1785,7 +1785,7 @@ CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEff
 	// spell = SPELL_Invis, etc.
 	// layer == LAYER_FLAG_Potion, etc.
 	// iEffect = The effect value, for spells is usually calculated by using g_Cfg.GetSpellEffect(spell, iSkillLevel) but other specific values can be used. 
-	// iTicksDuration = how much the spell will last, in TICK_PER_SEC
+	// iDuration = how much the spell will last, in seconds
 	// bEquip automatically equips the memory, false requires manual equipment... usefull to setup everything before calling @MemoryEquip
 	//
 	// NOTE:
@@ -1831,7 +1831,7 @@ CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEff
 	g_World.m_uidNew = pSpell->GetUID();
 	pSpell->SetAttr(pSpellDef ? ATTR_NEWBIE|ATTR_MAGIC : ATTR_NEWBIE);
 	pSpell->SetType(IT_SPELL);
-	pSpell->SetDecayTime(iTicksDuration);
+	pSpell->SetDecayTime(iDuration*1000);
 	pSpell->m_itSpell.m_spell = (word)spell;
 	pSpell->m_itSpell.m_spelllevel = (word)iEffect;
 	pSpell->m_itSpell.m_spellcharges = 1;
@@ -2725,7 +2725,7 @@ bool CChar::Spell_CastDone()
 					ASSERT(pItem);
 					pItem->SetType(IT_SPELL);
 					pItem->m_itSpell.m_spell = SPELL_Flame_Strike;
-					pItem->MoveToDecay(m_Act_p, 2 * TICK_PER_SEC);
+					pItem->MoveToDecay(m_Act_p, 2 * 1000);
 				}
 				else
 				{
@@ -2971,8 +2971,8 @@ int CChar::Spell_CastStart()
 		}
 	}
 
-    int64 iWaitTime = IsPriv(PRIV_GM) ? 1 : (int64)(pSpellDef->m_CastTime.GetLinear(Skill_GetBase(static_cast<SKILL_TYPE>(iSkill)))* TICK_PER_SEC) / 10;
-	iWaitTime -= GetDefNum("FASTERCASTING", true, true) * 2;	//correct value is 0.25, but sphere can handle only 0.2.
+    int64 iWaitTime = IsPriv(PRIV_GM) ? 1 : (int64)(pSpellDef->m_CastTime.GetLinear(Skill_GetBase((SKILL_TYPE)iSkill))); // in tenths of second
+	iWaitTime -= GetDefNum("FASTERCASTING", true, true) * 2;	//correct value is 0.25, but for backwards compatibility let's handle only 0.2.
 	if ( iWaitTime < 1 || IsPriv(PRIV_GM) )
 		iWaitTime = 1;
 
@@ -3013,7 +3013,7 @@ int CChar::Spell_CastStart()
 
 	m_atMagery.m_Spell = (SPELL_TYPE)(Args.m_iN1);
 	iDifficulty = (int)Args.m_iN2;
-	iWaitTime = (int64)Args.m_iN3;
+	iWaitTime = (int64)(Args.m_iN3*100); // from tenths of second to milliseconds
 
 	pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
 	if ( !pSpellDef )
@@ -3440,7 +3440,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 		case SPELL_Hallucination:
 		{
-			CItem * pItem = Spell_Effect_Create( spell, LAYER_FLAG_Hallucination, iEffect, 10*TICK_PER_SEC, pCharSrc );
+			CItem * pItem = Spell_Effect_Create( spell, LAYER_FLAG_Hallucination, iEffect, 10, pCharSrc );
 			pItem->m_itSpell.m_spellcharges = Calc_GetRandVal(30);
 		}
 		break;
@@ -3521,10 +3521,10 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 		case SPELL_Regenerate:		// Set number of charges based on effect level.
 		{
-			iDuration /= (2*TICK_PER_SEC);
+			iDuration /= (2*10); // *10 -> tenths of seconds to seconds
 			if ( iDuration <= 0 )
 				iDuration = 1;
-			CItem * pSpell = Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_STATS, iEffect, iDuration, pCharSrc );
+			CItem * pSpell = Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_STATS, iEffect, iDuration*1000, pCharSrc );
 			ASSERT(pSpell);
 			pSpell->m_itSpell.m_spellcharges = iDuration;
 		}
@@ -3709,5 +3709,5 @@ int CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharSrc
 		iDuration = pSpellDef->m_Duration.GetLinear(iSkillLevel) / 10;
 	}
 
-	return iDuration * TICK_PER_SEC;
+	return iDuration * 10; // tenths of seconds
 }

@@ -9,6 +9,9 @@
 #include "CChar.h"
 #include "CCharNPC.h"
 
+// 1.0 seconds is the minimum animation duration ("delay"), but we have to subtract the tenths of seconds that will pass until the next tick, since
+//  the timer will start on the next tick
+#define COMBAT_MIN_SWING_ANIMATION_DELAY (int16)(10 - (TICK_PER_SEC/10))
 
 // I noticed a crime.
 void CChar::OnNoticeCrime( CChar * pCriminal, const CChar * pCharMark )
@@ -158,13 +161,13 @@ void CChar::CallGuards()
 	if (!m_pArea || !m_pArea->IsGuarded() || IsStatFlag(STATF_DEAD))
 		return;
 
-	if ((CServerTime::GetCurrentTime().GetTimeRaw() - m_timeLastCallGuards) < TICK_PER_SEC)	// Spam check, not calling this more than once per tick, which will cause an excess of calls and checks on crowded areas because of the 2 CWorldSearch.
+	if ((CServerTime::GetCurrentTime().GetTimeRaw() - m_timeLastCallGuards) < MSECS_PER_TICK)	// Spam check, not calling this more than once per tick, which will cause an excess of calls and checks on crowded areas because of the 2 CWorldSearch.
 		return;
 
 	// We don't have any target yet, let's check everyone nearby
 	CChar * pCriminal;
 	CWorldSearch AreaCrime(GetTopPoint(), UO_MAP_VIEW_SIZE_DEFAULT);
-	while ((pCriminal = AreaCrime.GetChar()) != NULL)
+	while ((pCriminal = AreaCrime.GetChar()) != nullptr)
 	{
 		if (pCriminal == this)
 			continue;
@@ -245,7 +248,7 @@ void CChar::CallGuards( CChar * pCriminal )
 
 		if (pCriminal->m_pArea->m_TagDefs.GetKeyNum("RED", true))
 			pGuard->m_TagDefs.SetNum("NAME.HUE", g_Cfg.m_iColorNotoEvil, true);
-		pGuard->Spell_Effect_Create(SPELL_Summon, LAYER_SPELL_Summon, g_Cfg.GetSpellEffect(SPELL_Summon, 1000), g_Cfg.m_iGuardLingerTime);
+		pGuard->Spell_Effect_Create(SPELL_Summon, LAYER_SPELL_Summon, g_Cfg.GetSpellEffect(SPELL_Summon, 1000), int(g_Cfg.m_iGuardLingerTime/1000));
 		pGuard->Spell_Teleport(pCriminal->GetTopPoint(), false, false);
 	}
 	pGuard->NPC_LookAtCharGuard(pCriminal, true);
@@ -1870,7 +1873,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 				ASSERT(pBlood);
 				pBlood->SetHue(pCharTarg->m_wBloodHue);
 				pBlood->MoveNear(pCharTarg->GetTopPoint(), 1);
-				pBlood->SetDecayTime(5 * TICK_PER_SEC);
+				pBlood->SetDecayTime(5 * 1000);
 			}
 		}
 

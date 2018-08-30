@@ -83,7 +83,7 @@ void CChar::Action_StartSpecial( CREID_TYPE id )
 			pItem->m_itSpell.m_spelllevel = (word)(100 + Calc_GetRandVal(500));
 			pItem->m_itSpell.m_spellcharges = 1;
 			pItem->m_uidLink = GetUID();
-			pItem->MoveToDecay( GetTopPoint(), 10 + Calc_GetRandVal(50)*TICK_PER_SEC );
+			pItem->MoveToDecay( GetTopPoint(), 10 + Calc_GetRandVal(50)*1000 );
 		}
 		break;
 
@@ -93,7 +93,7 @@ void CChar::Action_StartSpecial( CREID_TYPE id )
 			CItem * pItem = CItem::CreateScript( (ITEMID_TYPE)(Calc_GetRandVal2(ITEMID_WEB1_1, ITEMID_WEB1_4)), this );
 			ASSERT(pItem);
 			pItem->SetType(IT_WEB);
-			pItem->MoveToDecay( GetTopPoint(), 10 + Calc_GetRandVal(170)*TICK_PER_SEC );
+			pItem->MoveToDecay( GetTopPoint(), 10 + Calc_GetRandVal(170)*1000 );
 		}
 		break;
 
@@ -222,7 +222,7 @@ void CChar::NPC_ActStart_SpeakTo( CChar * pSrc )
 	m_atTalk.m_HearUnknown = 0;
 
 	Skill_Start( ( pSrc->Stat_GetAdjusted(STAT_FAME) > 7000 ) ? NPCACT_TALK_FOLLOW : NPCACT_TALK );
-	SetTimeout(3*TICK_PER_SEC);
+	SetTimeout(3*1000);
 	UpdateDir(pSrc);
 }
 
@@ -473,7 +473,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 			// whilst pathfinding we should keep trying to find new ways to our destination
 			if ( bUsePathfinding == true )
 			{
-				SetTimeout( TICK_PER_SEC ); // wait a moment before finding a new route
+				SetTimeout( 500 ); // wait a moment before finding a new route
 				return 1;
 			}
 			return 2;
@@ -544,7 +544,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 				// whilst pathfinding we should keep trying to find new ways to our destination
 				if ( bUsePathfinding == true )
 				{
-					SetTimeout( TICK_PER_SEC ); // wait a moment before finding a new route
+					SetTimeout( 500 ); // wait a moment before finding a new route
 					return 1;
 				}
 				return 2;
@@ -602,10 +602,10 @@ int CChar::NPC_WalkToPoint( bool fRun )
 			if (iDex < 75)
 				iDex = 75;
 		}
-		iTickNext = TICK_PER_SEC / 4 + Calc_GetRandLLVal((100 - (iDex*tTick) / 100) / 5) * TICK_PER_SEC / 10;
+		iTickNext = 1000 / 4 + Calc_GetRandLLVal((100 - (iDex*tTick) / 100) / 5) * 1000 / 10;
 	}
 	else
-		iTickNext = TICK_PER_SEC + Calc_GetRandLLVal((100 - (iDex*tTick) / 100) / 3) * TICK_PER_SEC / 10;
+		iTickNext = 1000 + Calc_GetRandLLVal((100 - (iDex*tTick) / 100) / 3) * 1000 / 10;
 
 	if (iTickNext < 1)
 		iTickNext = 1;
@@ -1778,10 +1778,10 @@ bool CChar::NPC_Act_Food()
 
 				//	the bit is not needed in a worldsave, timeout of 10 minutes
 				pResBit->m_TagDefs.SetNum("NOSAVE", 1);
-				pResBit->SetTimeout(60*10*TICK_PER_SEC);
+				pResBit->SetTimeout(60*10*1000);
 				//DEBUG_ERR(("Starting skill food\n"));
 				Skill_Start( NPCACT_FOOD );
-				SetTimeout(5*TICK_PER_SEC);
+				SetTimeout(5*1000);
 				return true;
 			}
 			else									//	search for grass nearby
@@ -1904,7 +1904,7 @@ void CChar::NPC_Act_Idle()
 
 	// just stand here for a bit.
 	Skill_Start(SKILL_NONE);
-	SetTimeout(TICK_PER_SEC * 1 + Calc_GetRandLLVal(TICK_PER_SEC*2));
+	SetTimeout(1000 * (1 + Calc_GetRandLLVal(2)));
 }
 
 bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
@@ -2206,7 +2206,7 @@ void CChar::NPC_OnTickAction()
 		timeout = maximum(timeout, 0);
 		timeout = Calc_GetRandLLVal2(timeout/2, timeout);
 		// default next brain/move tick
-		SetTimeout( TICK_PER_SEC + timeout * TICK_PER_SEC / 10 );
+		SetTimeout( (1 + timeout) * 1000 );
 	}
 
 	//	vendors restock periodically
@@ -2434,7 +2434,7 @@ void CChar::NPC_Food()
 
 				//	the bit is not needed in a worldsave, timeout of 10 minutes
 				pResBit->m_TagDefs.SetNum("NOSAVE", 1);
-				pResBit->SetTimeout(60*10*TICK_PER_SEC);
+				pResBit->SetTimeout(60*10*1000);
 				return;
 			}
 			else									//	search for grass nearby
@@ -2460,7 +2460,7 @@ void CChar::NPC_Food()
 								{
 									EXC_SET("walking to grass");
 									pResBit->m_TagDefs.SetNum("NOSAVE", 1);
-									pResBit->SetTimeout(60*10*TICK_PER_SEC);
+									pResBit->SetTimeout(60*10*1000);
 									m_Act_p = pt;
 									Skill_Start(NPCACT_GOTO);
 									return;

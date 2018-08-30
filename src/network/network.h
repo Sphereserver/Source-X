@@ -236,7 +236,7 @@ struct HistoryIP
 
 	void update(void);
 	bool checkPing(void); // IP is blocked -or- too many pings to it?
-	void setBlocked(bool isBlocked, int timeout = -1);
+	void setBlocked(bool isBlocked, int timeout = -1); // timeout in seconds
 };
 
 

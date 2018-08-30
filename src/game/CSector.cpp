@@ -18,7 +18,7 @@
 //////////////////////////////////////////////////////////////////
 // -CSector
 
-int CSectorBase::m_iMapBlockCacheTime = 0;
+int64 CSectorBase::m_iMapBlockCacheTime = 0;
 
 CSector::CSector()
 {
@@ -896,7 +896,7 @@ inline bool CSector::IsSectorSleeping() const
 	}
 
 	//default behaviour
-	return (-g_World.GetTimeDiff(GetLastClientTime()) > 10 * 60 * TICK_PER_SEC); // Sector Sleep timeout.
+	return (-g_World.GetTimeDiff(GetLastClientTime()) > 10 * 60 * 1000); // Sector Sleep timeout.
 }
 
 void CSector::SetSectorWakeStatus()
@@ -999,7 +999,7 @@ void CSector::OnTick(int iPulseCount)
 	bool fLightChange = false;
 	bool fSleeping = false;
 
-	if ( ! ( iPulseCount & 0x7f ))	// 30 seconds or so.
+	if ( (iPulseCount % (30*TICK_PER_SEC)) == 0)	// 30 seconds or so.
 	{
 		// check for local light level change ?
 		byte blightprv = m_Env.m_Light;
@@ -1031,9 +1031,9 @@ void CSector::OnTick(int iPulseCount)
 	bool fWeatherChange = false;
 	int iRegionPeriodic = 0;
 
-	if ( ! ( iPulseCount & 0x7f ))	// 30 seconds or so.
+	if ( ( (iPulseCount % (30*TICK_PER_SEC)) == 0) )	// 30 seconds or so.
 	{
-		// Only do this every x minutes or so (TICK_PER_SEC)
+		// Only do this every x minutes or so
 		// check for local weather change ?
 		WEATHER_TYPE weatherprv = m_Env.m_Weather;
 		if ( ! Calc_GetRandVal( 30 ))	// change less often

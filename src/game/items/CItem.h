@@ -592,7 +592,7 @@ public:
 	ITEMID_TYPE GetDispID() const;
 	bool IsSameDispID( ITEMID_TYPE id ) const;	// account for flipped types ?
 	bool SetDispID( ITEMID_TYPE id );
-	void SetAnim( ITEMID_TYPE id, int iTime );
+	void SetAnim( ITEMID_TYPE id, int64 iMsecsTime ); // time in milliseconds
 
 	int IsWeird() const;
 	char GetFixZ(CPointMap pt, dword dwBlockFlags = 0 );
@@ -624,7 +624,7 @@ public:
 
 	height_t GetHeight() const;
 	int64  GetDecayTime() const;
-	void SetDecayTime( int64 iTime = 0 );
+	void SetDecayTime( int64 iTimeInMsecs = 0 );
 	SOUND_TYPE GetDropSound( const CObjBase * pObjOn ) const;
 	bool IsTopLevelMultiLocked() const;
 	bool IsMovableType() const;
@@ -660,12 +660,12 @@ public:
 
 	virtual int GetWeight(word amount = 0) const;
 
-	void SetTimeout( int64 iDelay );
+	void SetTimeout( int64 iTimeInMsecs );
 
 	virtual void OnMoveFrom();
 	virtual bool MoveTo(CPointMap pt, bool bForceFix = false); // Put item on the ground here.
 	bool MoveToUpdate(CPointMap pt, bool bForceFix = false);
-	bool MoveToDecay(const CPointMap & pt, int64 iDecayTime, bool bForceFix = false);
+	bool MoveToDecay(const CPointMap & pt, int64 iDecayTimeMsecs, bool bForceFix = false);
 	bool MoveToCheck( const CPointMap & pt, CChar * pCharMover = NULL );
 	virtual bool MoveNearObj( const CObjBaseTemplate *pItem, word iSteps = 0 );
 

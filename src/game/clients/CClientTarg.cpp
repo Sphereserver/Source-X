@@ -1178,7 +1178,7 @@ int CClient::OnSkill_Forensics( CUID uid, int iSkillLevel, bool fTest )
 	}
 	else if ( pCorpse->GetTimeStamp().IsTimeValid() )
 	{
-		int len = sprintf( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_TIMER), pCorpse->GetName(), -g_World.GetTimeDiff(pCorpse->GetTimeStamp()) / TICK_PER_SEC );
+		int len = sprintf( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_TIMER), pCorpse->GetName(), -g_World.GetTimeDiff(pCorpse->GetTimeStamp()) / 1000 ); // /1000 because CServerTime is in milliseconds
 		if ( pName )
 			sprintf( pszTemp + len, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_NAME), pName );
 		else
@@ -1973,7 +1973,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		if ( ! m_pChar->CanUse( pItemTarg, false ))
 			return false;
 
-		pItemTarg->SetAnim((ITEMID_TYPE)( pItemTarg->GetID() + 1 ), 2 * TICK_PER_SEC);
+		pItemTarg->SetAnim((ITEMID_TYPE)( pItemTarg->GetID() + 1 ), 2 * 1000);
 		pItemUse->ConsumeAmount( 1 );
 
 		{
@@ -2116,7 +2116,7 @@ static lpctstr const sm_Txt_LoomUse[] =
 	g_Cfg.GetDefaultMsg( DEFMSG_ITEMUSE_BOLT_5 )
 };
 
-		// pItemTarg->SetAnim((ITEMID_TYPE)(pItemTarg->GetID() + 1), 2 * TICK_PER_SEC );
+		// pItemTarg->SetAnim((ITEMID_TYPE)(pItemTarg->GetID() + 1), 2 * 1000 );
 
 		// Use more1 to record the type of resource last used on this object
 		// Use more2 to record the number of resources used so far
@@ -2432,7 +2432,7 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 	pChar->SysMessage( sTemp );
 
 	m_pChar->SetKeyNum("PARTY_LASTINVITE", (dword)(pChar->GetUID()));
-	m_pChar->SetKeyNum("PARTY_LASTINVITETIME", g_World.GetCurrentTime().GetTimeRaw() + (Calc_GetRandVal2(2,5) * TICK_PER_SEC));
+	m_pChar->SetKeyNum("PARTY_LASTINVITETIME", g_World.GetCurrentTime().GetTimeRaw() + (Calc_GetRandVal2(2,5) * 1000));
 
 	new PacketPartyInvite(pChar->GetClient(), m_pChar);
 

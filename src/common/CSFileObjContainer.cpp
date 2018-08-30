@@ -200,7 +200,7 @@ bool CSFileObjContainer::r_LoadVal( CScript & s )
             break;
 
         case CFO_GLOBALTIMEOUT:
-            iGlobalTimeout = (int)labs(s.GetArgVal()*TICK_PER_SEC);
+            iGlobalTimeout = (int64)llabs(s.GetArgLLVal()*1000);
             break;
 
         default:
@@ -272,7 +272,7 @@ bool CSFileObjContainer::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
             break;
 
         case CFO_GLOBALTIMEOUT:
-            sVal.FormatVal(iGlobalTimeout/TICK_PER_SEC);
+            sVal.FormatLLVal(iGlobalTimeout/1000);
             break;
 
         default:

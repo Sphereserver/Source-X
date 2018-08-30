@@ -130,7 +130,7 @@ CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 	if (fFrontFall)
 		pCorpse->m_itCorpse.m_facing_dir = static_cast<DIR_TYPE>(m_dirFace|0x80);
 
-	int iDecayTimer = -1;	// never decay
+	int64 iDecayTimer = -1;	// never decay
 	if (IsStatFlag(STATF_DEAD))
 	{
 		iDecayTimer = (m_pPlayer) ? g_Cfg.m_iDecay_CorpsePlayer : g_Cfg.m_iDecay_CorpseNPC;

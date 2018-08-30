@@ -358,14 +358,14 @@ void CObjBase::r_WriteSafe( CScript & s )
 	}
 }
 
-void CObjBase::SetTimeout( int64 iDelayInTicks )
+void CObjBase::SetTimeout( int64 iTimeInMsecs )
 {
 	ADDTOCALLSTACK("CObjBase::SetTimeout");
-	// Set delay in TICK_PER_SEC of a sec. -1 = never.
-	if ( iDelayInTicks < 0 )
+	// Set delay in milliseconds. -1 = never.
+	if ( iTimeInMsecs < 0 )
 		m_timeout.Init();
 	else
-		m_timeout = CServerTime::GetCurrentTime() + iDelayInTicks;
+		m_timeout = CServerTime::GetCurrentTime() + iTimeInMsecs;
 }
 
 int64 CObjBase::GetTimerDiff() const
@@ -383,7 +383,7 @@ int64 CObjBase::GetTimerAdjusted() const
 	int64 iDiffInTicks = GetTimerDiff();
 	if ( iDiffInTicks < 0 )
 		return 0;
-	return ( iDiffInTicks / TICK_PER_SEC );
+	return ( iDiffInTicks / 1000 );
 }
 
 int64 CObjBase::GetTimerTAdjusted() const
@@ -394,7 +394,18 @@ int64 CObjBase::GetTimerTAdjusted() const
 	int64 iDiffInTicks = GetTimerDiff();
 	if ( iDiffInTicks < 0 )
 		return 0;
-	return iDiffInTicks;
+	return (iDiffInTicks / MSECS_PER_TICK);
+}
+
+int64 CObjBase::GetTimerDAdjusted() const
+{
+    // RETURN: time in ticks from now.
+    if ( ! IsTimerSet())
+        return -1;
+    int64 iDiffInTicks = GetTimerDiff();
+    if ( iDiffInTicks < 0 )
+        return 0;
+    return (iDiffInTicks / 100);
 }
 
 void CObjBase::Sound( SOUND_TYPE id, int iOnce ) const // Play sound effect for player
@@ -1476,7 +1487,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			break;
 		case OC_TIMERD:
             g_Log.EventError("TIMERD was deprecated, read revisions about TIMERT.\n");
-            sVal.FormatLLVal((GetTimerTAdjusted()*10)/TICK_PER_SEC);
+            sVal.FormatLLVal(GetTimerDAdjusted());
             break;
         case OC_TIMERT:
             sVal.FormatLLVal(GetTimerTAdjusted());
@@ -1982,16 +1993,16 @@ bool CObjBase::r_LoadVal( CScript & s )
 			return true;
 		}
 		case OC_TIMER:
-			SetTimeout(s.GetArgLLVal() * TICK_PER_SEC);
+			SetTimeout(s.GetArgLLVal() * 1000);
             fResendTooltip = true;
 			break;
         case OC_TIMERD:
             g_Log.EventError("TIMERD was deprecated, read revisions about TIMERT.\n");
-            SetTimeout((s.GetArgLLVal()*TICK_PER_SEC)/10);
+            SetTimeout(s.GetArgLLVal() * 100);
             fResendTooltip = true;
             break;
         case OC_TIMERT:
-            SetTimeout(s.GetArgLLVal());
+            SetTimeout(s.GetArgLLVal() / MSECS_PER_TICK);
             fResendTooltip = true;
             break;
 		case OC_TIMESTAMP:

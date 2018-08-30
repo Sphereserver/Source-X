@@ -1217,7 +1217,7 @@ bool PacketBulletinBoardReq::onReceive(NetState* net)
 
 			// if
 			CItemMessage* newMessage = dynamic_cast<CItemMessage*>( CItem::CreateBase(ITEMID_BBOARD_MSG) );
-			if (newMessage == NULL)
+			if (newMessage == nullptr)
 			{
 				DEBUG_ERR(("%x:BBoard can't create message item\n", net->id()));
 				return true;

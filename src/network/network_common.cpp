@@ -465,7 +465,7 @@ void HistoryIP::setBlocked(bool isBlocked, int timeout)
 	m_blocked = isBlocked;
 
 	if (isBlocked && timeout >= 0)
-		m_blockExpire = CServerTime::GetCurrentTime() + (timeout * TICK_PER_SEC);
+		m_blockExpire = CServerTime::GetCurrentTime() + (timeout * 1000); // CServerTime is in milliseconds
 	else
 		m_blockExpire.Init();
 }
@@ -493,7 +493,7 @@ void IPHistoryManager::tick(void)
 	ADDTOCALLSTACK("IPHistoryManager::tick");
 
 	// check if ttl should decay (only do this once every second)
-	bool decayTTL = ( !m_lastDecayTime.IsTimeValid() || (-g_World.GetTimeDiff(m_lastDecayTime)) >= TICK_PER_SEC );
+	bool decayTTL = ( !m_lastDecayTime.IsTimeValid() || (-g_World.GetTimeDiff(m_lastDecayTime)) >= 1000 );
 	if (decayTTL)
 		m_lastDecayTime = CServerTime::GetCurrentTime();
 

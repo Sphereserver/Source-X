@@ -81,7 +81,7 @@ CWebPageDef::CWebPageDef( CResourceID rid ) : CResourceLink( rid )
 	m_privlevel=PLEVEL_Guest;
 
 	m_timeNextUpdate.Init();
-	m_iUpdatePeriod = 2*60 * TICK_PER_SEC;
+	m_iUpdatePeriod = 2*60; // in seconds
 	m_iUpdateLog = 0;
 
 	// default source name
@@ -130,7 +130,7 @@ bool CWebPageDef::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pS
 			sVal = m_sSrcFilePath;
 			break;
 		case WC_WEBPAGEUPDATE:	// (seconds)
-			sVal.FormatVal( m_iUpdatePeriod / TICK_PER_SEC );
+			sVal.FormatVal( m_iUpdatePeriod );
 			break;
 		default:
 			return( g_Serv.r_WriteVal( pszKey, sVal, pSrc ));
@@ -160,10 +160,10 @@ bool CWebPageDef::r_LoadVal( CScript & s ) // Load an item Script
 			m_iUpdateLog = s.GetArgVal();
 			break;
 		case WC_WEBPAGESRC:
-			return SetSourceFile( s.GetArgStr(), NULL );
+			return SetSourceFile( s.GetArgStr(), nullptr );
 		case WC_WEBPAGEUPDATE:	// (seconds)
-			m_iUpdatePeriod = s.GetArgVal() * TICK_PER_SEC;
-			if ( m_iUpdatePeriod && m_type == WEBPAGE_TEXT )
+			m_iUpdatePeriod = s.GetArgVal();
+			if ( m_iUpdatePeriod && (m_type == WEBPAGE_TEXT) )
 			{
 				m_type = WEBPAGE_TEMPLATE;
 			}
@@ -289,12 +289,12 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 		if ( m_iUpdatePeriod <= 0 )
 			return false;
 		if ( CServerTime::GetCurrentTime() < m_timeNextUpdate )
-			return true;	// should stilll be valid
+			return true;	// should still be valid
 	}
 
 	ASSERT(pSrc);
-	m_timeNextUpdate = CServerTime::GetCurrentTime() + m_iUpdatePeriod;
-	if ( pszDstName == NULL )
+	m_timeNextUpdate = CServerTime::GetCurrentTime() + m_iUpdatePeriod * 1000; // CServerTime is in milliseconds
+	if ( pszDstName == nullptr )
 		pszDstName = m_sDstFilePath;
 
 	if ( m_type != WEBPAGE_TEMPLATE ||
@@ -311,7 +311,7 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 	CSFileConsole FileOut;
 	if ( ! FileOut.m_FileOut.Open( pszDstName, OF_WRITE|OF_TEXT ))
 	{
-		DEBUG_ERR(( "Can't open web page output '%s'\n", static_cast<lpctstr>(pszDstName) ));
+		DEBUG_ERR(( "Can't open web page output '%s'\n", pszDstName ));
 		return false;
 	}
 

@@ -57,7 +57,7 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 		CItem *pBlood = CItem::CreateBase(ITEMID_BLOOD4);
 		ASSERT(pBlood);
 		pBlood->SetHue(pCorpseDef->m_wBloodHue);
-		pBlood->MoveToDecay(pnt, 5 * TICK_PER_SEC);
+		pBlood->MoveToDecay(pnt, 5 * 1000);
 	}
 
 	size_t iItems = 0;
@@ -203,7 +203,7 @@ bool CChar::Use_Kindling( CItem * pKindling )
 
 	pKindling->SetID(ITEMID_CAMPFIRE);
 	pKindling->SetAttr(ATTR_MOVE_NEVER|ATTR_CAN_DECAY);
-	pKindling->SetTimeout((4 + pKindling->GetAmount()) * 60 * TICK_PER_SEC);
+	pKindling->SetTimeout((4 + pKindling->GetAmount()) * 60 * 1000);
 	pKindling->SetAmount(1);	// all kindling is set to one fire
 	pKindling->m_itLight.m_pattern = LIGHT_LARGE;
 	pKindling->Update();
@@ -303,7 +303,7 @@ bool CChar::Use_Train_Dummy( CItem * pItem, bool fSetup )
 	if ( Skill_GetActive() != NPCACT_TRAINING )
 		return false;
 
-	pItem->SetAnim((ITEMID_TYPE)(pItem->GetDispID() + 1), 3 * TICK_PER_SEC);
+	pItem->SetAnim((ITEMID_TYPE)(pItem->GetDispID() + 1), 3 * 1000);
 	static const SOUND_TYPE sm_TrainingDummySounds[] = { 0x3A4, 0x3A6, 0x3A9, 0x3AE, 0x3B4, 0x3B6 };
 	pItem->Sound(sm_TrainingDummySounds[Calc_GetRandVal(CountOf(sm_TrainingDummySounds))]);
 	Skill_Experience(skill, Calc_GetRandVal(40));
@@ -354,13 +354,13 @@ bool CChar::Use_Train_PickPocketDip( CItem * pItem, bool fSetup )
 	if ( Skill_UseQuick(SKILL_STEALING, Calc_GetRandVal(40)) )
 	{
 		SysMessageDefault(DEFMSG_ITEMUSE_PICKPOCKET_SUCCESS);
-		pItem->SetAnim(pItem->GetDispID(), 3 * TICK_PER_SEC);
+		pItem->SetAnim(pItem->GetDispID(), 3 * 1000);
 	}
 	else
 	{
 		SysMessageDefault(DEFMSG_ITEMUSE_PICKPOCKET_FAIL);
 		pItem->Sound(SOUND_GLASS_BREAK4);
-		pItem->SetAnim((ITEMID_TYPE)(pItem->GetDispID() + 1), 3 * TICK_PER_SEC);
+		pItem->SetAnim((ITEMID_TYPE)(pItem->GetDispID() + 1), 3 * 1000);
 	}
 	Skill_Experience(SKILL_STEALING, Calc_GetRandVal(40));
 	return true;
@@ -923,7 +923,7 @@ void CChar::Use_Drink( CItem * pItem )
 		}
 		else
 		{
-			CItem *pSpell = Spell_Effect_Create(SPELL_Liquor, LAYER_FLAG_Drunk, g_Cfg.GetSpellEffect(SPELL_Liquor, iStrength), 15 * TICK_PER_SEC, this);
+			CItem *pSpell = Spell_Effect_Create(SPELL_Liquor, LAYER_FLAG_Drunk, g_Cfg.GetSpellEffect(SPELL_Liquor, iStrength), 15, this);
 			pSpell->m_itSpell.m_spellcharges = 10;	// how long to last.
 		}
 	}
@@ -945,7 +945,7 @@ void CChar::Use_Drink( CItem * pItem )
 		OnSpellEffect((SPELL_TYPE)(RES_GET_INDEX(pItem->m_itPotion.m_Type)), this, iSkillQuality, pItem);
 
 		// Give me the marker that i've used a potion.
-		Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_PotionUsed, g_Cfg.GetSpellEffect(SPELL_NONE, iSkillQuality), 15 * TICK_PER_SEC, this);
+		Spell_Effect_Create(SPELL_NONE, LAYER_FLAG_PotionUsed, g_Cfg.GetSpellEffect(SPELL_NONE, iSkillQuality), 15, this);
 	}
 	else if ( pItem->IsType(IT_DRINK) && IsSetOF(OF_DrinkIsFood) )
 	{
@@ -1362,10 +1362,10 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 			{
 				if (pItem->IsTimerSet())
 				{
-					SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_STONEREG_TIME), pItem->GetTimerDiff() / TICK_PER_SEC);
+					SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_STONEREG_TIME), pItem->GetTimerDiff() / 1000);
 					return true;
 				}
-				pItem->SetTimeout(pItem->m_itItemStone.m_wRegenTime * TICK_PER_SEC);
+				pItem->SetTimeout(pItem->m_itItemStone.m_wRegenTime * 1000);
 			}
 			ItemBounce(CItem::CreateTemplate(pItem->m_itItemStone.m_ItemID, GetPackSafe(), this));
 			if (pItem->m_itItemStone.m_wAmount != 0)
@@ -1407,7 +1407,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 				id += 1;
 				break;
 			}
-			pItem->SetAnim((ITEMID_TYPE)id, 2 * TICK_PER_SEC);
+			pItem->SetAnim((ITEMID_TYPE)id, 2 * 1000);
 			SysMessageDefault(DEFMSG_ITEMUSE_SPINWHEEL);
 			return true;
 		}
@@ -1478,7 +1478,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 				SysMessageDefault(DEFMSG_ITEMUSE_BEEHIVE_STING);
 				OnTakeDamage(Calc_GetRandVal(5), this, DAMAGE_POISON | DAMAGE_GENERAL);
 			}
-			pItem->SetTimeout(15 * 60 * TICK_PER_SEC);
+			pItem->SetTimeout(15 * 60 * 1000);
 			return true;
 		}
 
@@ -1549,7 +1549,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 					                                                 : ITEMID_DOOR_MAGIC_SI_EW;
 					CItem *pFace = CItem::CreateBase(id);
 					ASSERT(pFace);
-					pFace->MoveToDecay(pItem->GetTopPoint(), 4 * TICK_PER_SEC);
+					pFace->MoveToDecay(pItem->GetTopPoint(), 4 * 1000);
 				}
 				if (!IsPriv(PRIV_GM))
 					return true;

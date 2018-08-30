@@ -390,7 +390,7 @@ CCRET_TYPE CCSpawn::OnTick()
 
     if (pItem->IsTimerExpired())
     {
-        pItem->SetTimeout(iMinutes * 60 * TICK_PER_SEC);	// set time to check again.
+        pItem->SetTimeout(iMinutes * 60 * 1000);	// set time to check again.
     }
 
     if (GetCurrentSpawned() >= GetAmount())

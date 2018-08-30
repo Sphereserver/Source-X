@@ -166,7 +166,7 @@ public:
 		short	m_mod;			// signed for modifier
 		short	m_val;			// signed for karma
 		short	m_max;			// max
-		ushort m_regen;	// Tick time since last regen.
+		ushort m_regen;	        // Tenths of second since last regen.
 	} m_Stat[STAT_QTY];
 
 	CServerTime m_timeLastRegen;	// When did i get my last regen tick ?
@@ -900,7 +900,7 @@ private:
 	void Spell_Dispel( int iskilllevel );
 	CChar * Spell_Summon( CREID_TYPE id, CPointMap pt );
 	bool Spell_Recall(CItem * pRune, bool fGate);
-    CItem * Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEffect, int iTicksDuration, CObjBase * pSrc = nullptr, bool bEquip = true );
+    CItem * Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEffect, int iDuration, CObjBase * pSrc = nullptr, bool bEquip = true );
 	SPELL_TYPE Spell_GetIndex(SKILL_TYPE skill = SKILL_NONE);	//gets first spell for the magic skill given.
 	SPELL_TYPE Spell_GetMax(SKILL_TYPE skill = SKILL_NONE);	//gets first spell for the magic skill given.
 	bool Spell_Equip_OnTick( CItem * pItem );
@@ -960,9 +960,6 @@ public:
 private:
 	// Armor, weapons and combat ------------------------------------
 	int	Fight_CalcRange( CItem * pWeapon = nullptr ) const;
-    // 1.0 seconds is the minimum animation duration ("delay"), but we have to subtract the tenths of seconds that will pass until the next tick, since
-    //  the timer will start on the next tick
-    #define COMBAT_MIN_SWING_ANIMATION_DELAY (int16)(10 - (TICK_PER_SEC/10))
     void Fight_SetDefaultSwingDelays();
 	
 	bool Fight_IsActive() const;

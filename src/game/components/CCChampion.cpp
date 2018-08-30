@@ -39,7 +39,7 @@ CCRET_TYPE CCChampion::OnTick()
         DelRedCandle();
     else
         Stop();
-    GetLink()->SetTimeout(TICK_PER_SEC * 60 * 10);	//10 minutes
+    GetLink()->SetTimeout(1000 * 60 * 10);	//10 minutes
     return CCRET_CONTINUE;
 };
 
@@ -81,7 +81,7 @@ void CCChampion::Start()
     _iCandlesNextRed = CANDLESNEXTRED;
 
     SetLevel(1);
-    for (unsigned char i = 0; i < _iSpawnsNextWhite; i++)   // Spawn all the monsters required to get the next White candle. // TODO: a way to prevent this from script.
+    for (unsigned char i = 0; i < _iSpawnsNextWhite; ++i)   // Spawn all the monsters required to get the next White candle. // TODO: a way to prevent this from script.
         SpawnNPC();
 };
 
@@ -95,7 +95,7 @@ void CCChampion::Stop()
     _iLevel = 0;
     _iCandlesNextRed = 0;
     _iCandlesNextLevel = 0;
-    GetLink()->SetTimeout((_iLastActivationTime - g_World.GetCurrentTime().GetTimeRaw()) / TICK_PER_SEC);
+    GetLink()->SetTimeout(_iLastActivationTime - g_World.GetCurrentTime().GetTimeRaw());
     ClearWhiteCandles();
     ClearRedCandles();
 };
@@ -338,7 +338,7 @@ void CCChampion::SetLevel(byte iLevel)
     _iLevel = iLevel;
     _iSpawnsNextWhite = iWhiteMonsters;
     _iSpawnsNextRed = iRedMonsters;
-    GetLink()->SetTimeout(TICK_PER_SEC * 60 * 10);	//10 minutes
+    GetLink()->SetTimeout(1000 * 60 * 10);	//10 minutes
 };
 
 byte CCChampion::GetCandlesPerLevel() const

@@ -720,7 +720,7 @@ void CAccount::OnLogin( CClient * pClient )
 	if ( pClient->GetConnectType() == CONNECT_TELNET )
 	{
 		// link the admin client.
-		g_Serv.m_iAdminClients++;
+		++g_Serv.m_iAdminClients;
 	}
 
 	g_Log.Event( LOGM_CLIENTS_LOG, "%x:Login for account '%s'. IP='%s'. ConnectionType: %s.\n",
@@ -744,7 +744,7 @@ void CAccount::OnLogout(CClient *pClient, bool bWasChar)
 	// so we should check whatever player is attached to a char
 	if ( pClient->IsConnectTypePacket() && bWasChar )
 	{
-		m_Last_Connect_Time = ( -g_World.GetTimeDiff(pClient->m_timeLogin) ) / ( TICK_PER_SEC * 60 );
+		m_Last_Connect_Time = ( -g_World.GetTimeDiff(pClient->m_timeLogin) ) / ( 1000 * 60 ); // CServerTime is in milliseconds
 		if ( m_Last_Connect_Time < 0 )
 			m_Last_Connect_Time = 0;
 
@@ -802,7 +802,7 @@ bool CAccount::CheckPasswordTries(CSocketAddress csaPeerName)
 		}
 		else
 		{
-			if ((( ttsData.m_Last - ttsData.m_First ) > 15*TICK_PER_SEC ) && (itResult.second < iAccountMaxTries))
+			if ((( ttsData.m_Last - ttsData.m_First ) > 15*1000 ) && (itResult.second < iAccountMaxTries))
 			{
 				ttsData.m_First = timeCurrent.GetTimeRaw();
 				ttsData.m_Delay = 0;

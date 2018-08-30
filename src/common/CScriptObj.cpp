@@ -1123,7 +1123,7 @@ bool CScriptObj::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command f
 	            {
 	                CItem * pItemRune = pChar->LayerFind(LAYER_SPELL_Summon);
 	                if (pItemRune)
-	                    pItemRune->SetTimeout(iDuration * TICK_PER_SEC);
+	                    pItemRune->SetTimeout(iDuration * 1000);
 	            }
 	        }
 			break;

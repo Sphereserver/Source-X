@@ -135,7 +135,7 @@ bool CClient::CanInstantLogOut() const
 		return true;
 
 	const CRegion * pRoom = m_pChar->GetRoom(); //Allows Room flag to work!
-	if ( pRoom != NULL && pRoom->IsFlag( REGION_FLAG_INSTA_LOGOUT )) //sanity check for null rooms // Can C++ guarantee short-circuit evaluation for CRegion ?
+	if ( pRoom && pRoom->IsFlag( REGION_FLAG_INSTA_LOGOUT )) //sanity check for null rooms // Can C++ guarantee short-circuit evaluation for CRegion ?
 		return true;
 
 	return false;
@@ -146,9 +146,9 @@ void CClient::CharDisconnect()
 	ADDTOCALLSTACK("CClient::CharDisconnect");
 	// Disconnect the CChar from the client.
 	// Even tho the CClient might stay active.
-	if ( m_pChar == NULL )
+	if ( !m_pChar )
 		return;
-	int	iLingerTime = g_Cfg.m_iClientLingerTime;
+	int64 iLingerTime = g_Cfg.m_iClientLingerTime;
 
 	Announce(false);
 	bool fCanInstaLogOut = CanInstantLogOut();
@@ -156,7 +156,7 @@ void CClient::CharDisconnect()
 	//	stoned chars cannot logout if they are not privileged of course
 	if ( m_pChar->IsStatFlag(STATF_STONE) )
 	{
-		iLingerTime = 60*60*TICK_PER_SEC;	// 1 hour of linger time
+		iLingerTime = 60*60*1000;	// 1 hour of linger time
 		fCanInstaLogOut = false;
 	}
 
@@ -285,7 +285,7 @@ void CClient::Announce( bool fArrive ) const
 	if ( pMurders )
 	{
 		if ( fArrive )	// on client login, set active timer on murder memory
-			pMurders->SetTimeout(pMurders->m_itEqMurderCount.m_Decay_Balance * TICK_PER_SEC);
+			pMurders->SetTimeout(pMurders->m_itEqMurderCount.m_Decay_Balance * 1000);
 		else			// or make it inactive on logout
 		{
 			pMurders->m_itEqMurderCount.m_Decay_Balance = (dword)(pMurders->GetTimerAdjusted());
@@ -1379,9 +1379,9 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 				if ( !pSpellDef->m_sTargetPrompt.IsEmpty() )
 					pPrompt = pSpellDef->m_sTargetPrompt;
 
-				int SpellTimeout = g_Cfg.m_iSpellTimeout * TICK_PER_SEC;
+				int64 SpellTimeout = g_Cfg.m_iSpellTimeout;
 				if ( GetDefNum("SPELLTIMEOUT", true) )
-					SpellTimeout = (int)(GetDefNum("SPELLTIMEOUT", true));
+					SpellTimeout = GetDefNum("SPELLTIMEOUT", true)*100; // tenths of second to milliseconds
 
 				addTarget(CLIMODE_TARG_SKILL_MAGERY, pPrompt, pSpellDef->IsSpellType(SPELLFLAG_TARG_XYZ), pSpellDef->IsSpellType(SPELLFLAG_HARM), SpellTimeout);
 				break;

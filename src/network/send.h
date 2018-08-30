@@ -1699,18 +1699,15 @@ public:
 	PacketPropertyList(const CClient* target, const PacketPropertyList* other);
 	virtual bool onSend(const CClient* client);
 
-	CUID getObject(void) const { return m_object; }
-	dword getVersion(void) const { return m_version; }
-	int getEntryCount(void) const { return m_entryCount; }
-	bool isEmpty(void) const { return m_entryCount == 0; }
+	inline CUID getObject(void) const       { return m_object; }
+	inline dword getVersion(void) const     { return m_version; }
+	inline int getEntryCount(void) const    { return m_entryCount; }
+	inline bool isEmpty(void) const         { return m_entryCount == 0; }
 
-	bool hasExpired(int timeout) const;
+	bool hasExpired(int64 iTimeout) const;
 
-	virtual bool canSendTo(const NetState* state) const { return CanSendTo(state); }
-	static bool CanSendTo(const NetState* state)
-	{
-		return state->isClientVersion(MINCLIVER_TOOLTIP);
-	}
+	virtual inline bool canSendTo(const NetState* state) const  { return CanSendTo(state); }
+	static inline bool CanSendTo(const NetState* state)         { return state->isClientVersion(MINCLIVER_TOOLTIP);	}
 };
 
 /***************************************************************************

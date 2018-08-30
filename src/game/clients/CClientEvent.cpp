@@ -707,18 +707,18 @@ bool CClient::Event_CheckWalkBuffer()
 		return true;
 
 	// Client only allows 4 steps of walk ahead.
-	llong CurrTime = GetSupportedTickCount();
-	llong iTimeDiff = llabs(((CurrTime - m_timeWalkStep) / 10));	// use absolute value to prevent overflows
-	llong iTimeMin = m_pChar->IsStatFlag(STATF_ONHORSE|STATF_HOVERING) ? 70 : 140; // minimum time to move 8 steps
+	const int64 iCurTime = CWorldClock::GetSystemClock();
+    int64 iTimeDiff = (int64)llabs(iCurTime - m_timeWalkStep);	// use absolute value to prevent overflows
+    int64 iTimeMin = m_pChar->IsStatFlag(STATF_ONHORSE|STATF_HOVERING) ? 700 : 1400; // minimum time to move 8 steps in milliseconds
 
 	if ( m_pChar->m_pPlayer && (m_pChar->m_pPlayer->m_speedMode != 0) )
 	{
 		// Speed Modes:
-		// 0 = Foot=Normal, Mount=Normal                         140 -  70
-		// 1 = Foot=Double Speed, Mount=Normal                    70 -  70    = 70
-		// 2 = Foot=Always Walk, Mount=Always Walk (Half Speed)  280 - 140    = x2
-		// 3 = Foot=Always Run, Mount=Always Walk                140 - 140    = 70|x2 (1|2)
-		// 4 = No Movement                                       N/A - N/A    = (handled by OnFreezeCheck)
+		// 0 = Foot=Normal, Mount=Normal                         1,4s - 0,7s
+		// 1 = Foot=Double Speed, Mount=Normal                   0,7s - 0,7s = 0,7s
+		// 2 = Foot=Always Walk, Mount=Always Walk (Half Speed)  2,8s - 1,4s = x2
+		// 3 = Foot=Always Run, Mount=Always Walk                1,4s - 1,4  = 0,7|x2 (1|2)
+		// 4 = No Movement                                       N/A  - N/A  = (handled by OnFreezeCheck)
 
 		if ( m_pChar->m_pPlayer->m_speedMode & 0x01 )
 			iTimeMin = 70;
@@ -737,7 +737,7 @@ bool CClient::Event_CheckWalkBuffer()
 	}
 
 	m_iWalkTimeAvg += iTimeDiff;
-	llong oldAvg = m_iWalkTimeAvg;
+	const llong oldAvg = m_iWalkTimeAvg;
 	m_iWalkTimeAvg -= iTimeMin;
 
 	if ( m_iWalkTimeAvg > g_Cfg.m_iWalkBuffer )
@@ -746,9 +746,9 @@ bool CClient::Event_CheckWalkBuffer()
 		m_iWalkTimeAvg = -g_Cfg.m_iWalkBuffer;
 
 	if ( IsPriv(PRIV_DETAIL) && IsPriv(PRIV_DEBUG) )
-		SysMessagef("Walkcheck trace: %lld / %lld (%lld) :: %lld", iTimeDiff, iTimeMin, oldAvg, m_iWalkTimeAvg);
+		SysMessagef("Walkcheck trace: timeDiff(%lld) / timeMin(%lld). oldAvg(%lld) :: curAvg(%lld)", iTimeDiff, iTimeMin, oldAvg, m_iWalkTimeAvg);
 
-	if ( m_iWalkTimeAvg < 0 && iTimeDiff >= 0 )	// TICK_PER_SEC
+	if ( m_iWalkTimeAvg < 0 && iTimeDiff >= 0 )
 	{
 		// Walking too fast.
 		DEBUG_WARN(("%s (%x): Fast Walk ?\n", GetName(), GetSocketID()));
@@ -759,7 +759,7 @@ bool CClient::Event_CheckWalkBuffer()
 		}
 	}
 
-	m_timeWalkStep = CurrTime;
+	m_timeWalkStep = iCurTime;
 	return true;
 }
 
@@ -807,10 +807,7 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
 
         if ( IsSetEF(EF_FastWalkPrevention) )
         {
-            // The fastest way to get system clock is using g_World.GetCurrentTime().GetTimeRaw() to
-            // read the value already stored by Sphere main timer. But this value is only updated at
-            // tenths of second precision, which won't work here because we need milliseconds precision.
-            // So to get this precision we must get the system clock manually at each walk request.
+            // To get milliseconds precision we must get the system clock manually at each walk request (the server clock advances only at every tick).
             int64 iCurTime = CWorldClock::GetSystemClock();
             if ( iCurTime < m_timeNextEventWalk )		// fastwalk detected
             {
@@ -1172,7 +1169,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t it
 						CItem * pItemNew = CItem::CreateDupeItem( pItem );
 						m_pChar->LayerAdd(pItemNew);
 						pItemNew->m_TagDefs.SetNum("NOSAVE", 0, true);
-						pItemNew->SetTimeout( 55000*TICK_PER_SEC );	// set the grow timer.
+						pItemNew->SetTimeout( 55000*1000 );	// set the grow timer.
 						pVendor->UpdateAnimate(ANIM_ATTACK_1H_SLASH);
 						m_pChar->Sound( SOUND_SNIP );	// snip noise.
 					}

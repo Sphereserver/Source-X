@@ -545,7 +545,7 @@ public:
      *
      * @param   iDelayInTicks   Zero-based index of the delay in ticks.
      */
-	virtual void SetTimeout( int64 iDelayInTicks );
+	virtual void SetTimeout( int64 iTimeInMsecs );
 
     /**
      * @fn  bool CObjBase::IsTimerSet() const;
@@ -591,6 +591,15 @@ public:
      * @return  The timer t adjusted.
      */
 	int64 GetTimerTAdjusted() const;
+
+    /**
+    * @fn  int64 CObjBase::GetTimerDAdjusted() const;
+    *
+    * @brief   DEPRECATED!! Gets timer in tenths of seconds.
+    *
+    * @return  The timer t adjusted.
+    */
+    int64 GetTimerDAdjusted() const;
 
 public:
 

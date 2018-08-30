@@ -122,7 +122,7 @@ public:
 	bool static CheckMapBlockTime( const MapBlockCache::value_type& Elem );
 	void ClearMapBlockCache();
 	void CheckMapBlockCache();
-	static int m_iMapBlockCacheTime;
+	static int64 m_iMapBlockCacheTime;
 	const CServerMapBlock * GetMapBlock( const CPointMap & pt );
 
 	// CRegion

@@ -2508,7 +2508,7 @@ bool CChar::Horse_Mount(CChar *pHorse)
 
 	Horse_UnMount();					// unmount if already mounted
 	pItem->SetType(IT_EQ_HORSE);
-	pItem->SetTimeout(TICK_PER_SEC);	// the first time we give it immediately a tick, then give the horse a tick everyone once in a while.
+	pItem->SetTimeout(MSECS_PER_TICK);	    // the first time we give it immediately a tick, then give the horse a tick everyone once in a while.
 	LayerAdd(pItem, LAYER_HORSE);		// equip the horse item
 	pHorse->StatFlag_Set(STATF_RIDDEN);
 	pHorse->Skill_Start(NPCACT_RIDDEN);
@@ -2595,8 +2595,8 @@ bool CChar::OnTickEquip( CItem * pItem )
 				if ( pHorse == NULL )
 					return false;
 				if ( pHorse != this )				//Some scripts can force mounts to have as 'mount' the rider itself (like old ethereal scripts)
-					return pHorse->OnTick();	// if we call OnTick again on them we'll have an infinite loop.
-				pItem->SetTimeout( TICK_PER_SEC );
+					return pHorse->OnTick();	    // if we call OnTick again on them we'll have an infinite loop.
+				pItem->SetTimeout( MSECS_PER_TICK );
 				return true;
 			}
 
@@ -2689,13 +2689,13 @@ bool CChar::SetPoison( int iSkill, int iHits, CChar * pCharSrc )
 	}
 	else
 	{
-		pPoison = Spell_Effect_Create(SPELL_Poison, LAYER_FLAG_Poison, iSkill, (1 + Calc_GetRandVal(2)) * TICK_PER_SEC, pCharSrc, false);
+		pPoison = Spell_Effect_Create(SPELL_Poison, LAYER_FLAG_Poison, iSkill, (1 + Calc_GetRandVal(2)), pCharSrc, false);
 		if ( !pPoison )
 			return false;
 		LayerAdd(pPoison, LAYER_FLAG_Poison);
 	}
 
-	pPoison->SetTimeout((5 + Calc_GetRandLLVal(4)) * TICK_PER_SEC);
+	pPoison->SetTimeout((5 + Calc_GetRandLLVal(4)) * 1000);
 
 	if (!IsSetMagicFlags(MAGICF_OSIFORMULAS))
 	{
@@ -2999,7 +2999,7 @@ bool CChar::OnFreezeCheck()
 
 	if ( IsStatFlag(STATF_FREEZE|STATF_STONE) && !IsPriv(PRIV_GM) )
 		return true;
-	if ( GetKeyNum("NoMoveTill", true) > g_World.GetCurrentTime().GetTimeRaw() )
+	if ( GetKeyNum("NoMoveTill", true) > g_World.GetCurrentTime().GetTimeRaw()/100 ) // convert tenths of second to milliseconds for backwards compatibility
 		return true;
 
 	if ( m_pPlayer )
@@ -3227,7 +3227,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 		{
 			// Keep timer active holding the swing action until the char stops moving
 			m_atFight.m_War_Swing_State = WAR_SWING_EQUIPPING;
-			SetTimeout(TICK_PER_SEC);
+			SetTimeout(MSECS_PER_TICK);
 		}
 
 		// This could get REALLY EXPENSIVE !
@@ -3345,7 +3345,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 					// Check if we can go out of the ship (in the same direction of plank)
 					if ( MoveToValidSpot(m_dirFace, g_Cfg.m_iMaxShipPlankTeleport, 1, true) )
 					{
-						//pItem->SetTimeout(5 * TICK_PER_SEC);	// autoclose the plank behind us
+						//pItem->SetTimeout(5 * 1000);	// autoclose the plank behind us
 						return TRIGRET_RET_TRUE;
 					}
 				}
@@ -4027,7 +4027,7 @@ bool CChar::OnTick()
         return iCompRet;    // Stop here
     }
 
-    if (iTimeDiff >= TICK_PER_SEC)	// don't bother with < 1 sec times.
+    if (iTimeDiff >= 1000)	// don't bother with < 1 sec times.
     {
         // decay equipped items
 
@@ -4139,7 +4139,7 @@ bool CChar::OnTick()
         }
     }
 
-    if (iTimeDiff >= TICK_PER_SEC)
+    if (iTimeDiff >= 1000)
     {
         // Check location periodically for standing in fire fields, traps, etc.
         EXC_SET("check location");
