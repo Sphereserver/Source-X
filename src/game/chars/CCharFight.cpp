@@ -1362,12 +1362,20 @@ WAR_SWING_TYPE CChar::Fight_CanHit(CChar * pCharSrc, bool fIgnoreDistance)
 	//return:
 	//  WAR_SWING_INVALID	= target is invalid
 	//	WAR_SWING_EQUIPPING	= recoiling weapon / swing made
-	//  WAR_SWING_READY		= RETURN 1 // Won't have any effect on Fight_Hit() function other than allowing the hit. The rest of returns in here will stop the hit.
+	//  WAR_SWING_READY		= Ready to hit, will switch to WAR_SWING_SWINGING ASAP.
 	//  WAR_SWING_SWINGING	= taking my swing now
-	if (IsStatFlag(STATF_DEAD | STATF_SLEEPING | STATF_FREEZE | STATF_STONE) || !pCharSrc->Fight_IsAttackable() )
-		return WAR_SWING_INVALID;
-	if (pCharSrc->m_pArea && pCharSrc->m_pArea->IsFlag(REGION_FLAG_SAFE))
-		return WAR_SWING_INVALID;
+    if (IsStatFlag(STATF_DEAD) || !pCharSrc->Fight_IsAttackable())
+    {
+        return WAR_SWING_INVALID;
+    }
+    else if (IsStatFlag(STATF_SLEEPING | STATF_FREEZE | STATF_STONE))
+    {
+        return WAR_SWING_EQUIPPING; // Can't hit now, but may want to hit later.
+    }
+    if (pCharSrc->m_pArea && pCharSrc->m_pArea->IsFlag(REGION_FLAG_SAFE))
+    {
+        return WAR_SWING_INVALID;
+    }
 
     if (!fIgnoreDistance)
     {
