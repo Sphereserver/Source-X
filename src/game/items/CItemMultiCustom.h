@@ -68,7 +68,11 @@ private:
     virtual bool r_Verb(CScript & s, CTextConsole * pSrc); // Execute command from script
 
     const CPointMap GetComponentPoint(Component * pComponent) const;
-    const CPointMap GetComponentPoint(short dx, short dy, char dz) const;
+    const CPointMap GetComponentPoint(short dx, short dy, char dz) const;/**
+    * @brief Removes a Component from the components list.
+    * @param pComponent the component.
+    */
+    virtual void DelComp(CUID  pComponent);
     void CopyDesign(DesignDetails * designFrom, DesignDetails * designTo);
     void GetLockdownsAt(short dx, short dy, char dz, std::vector<CUID> &vList);
     void GetSecuredAt(short dx, short dy, char dz, std::vector<CUID> &vList);

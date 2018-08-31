@@ -388,7 +388,7 @@ public:
     * @brief Removes a Component from the components list.
     * @param pComponent the component.
     */
-    void DelComp(CUID  pComponent);
+    virtual void DelComp(CUID  pComponent);
     /**
     * @brief Returns the position of a given Component.
     * @param pComponent the component

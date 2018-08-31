@@ -397,6 +397,7 @@ void CItemMultiCustom::CommitChanges(CClient * pClientSrc)
         }
         pItem->MoveToUpdate(pt);
         OnComponentCreate(pItem);
+        AddComp(pItem->GetUID());
     }
 
     rectNew.OffsetRect(GetTopPoint().m_x, GetTopPoint().m_y);
@@ -1173,6 +1174,25 @@ const CRect CItemMultiCustom::GetDesignArea()
     rect.OffsetRect(pt.m_x, pt.m_y);
 
     return rect;
+}
+
+void CItemMultiCustom::DelComp(CUID uidComponent)
+{
+    /* The code bellow should remove the item from the m_mainDesign, however it's not being deleted from there even if the world item is
+        So, in the next customize, the item will appear again.
+        TODO: Make the whole customizing system more flexible to allow 'enter' and 'exit' customize mode and tweak the items without involving 
+        any heavy load, trigger, or player iteraction/notifications.
+    */
+    /*CItem *pComp = uidComponent.ItemFind();
+    if (pComp->GetTagDefs()->GetKeyNum("FIXTURE", true) > 0)
+    {
+        CPointMap pt = pComp->GetTopPoint();
+        pt.m_x -= GetTopPoint().m_x;
+        pt.m_y -= GetTopPoint().m_y;
+        pt.m_z -= GetTopPoint().m_z;
+        RemoveItem(GetOwner().CharFind()->GetClient(), pComp->GetDispID(), pt.m_x, pt.m_y, pt.m_z);
+    }*/
+    CItemMulti::DelComp(uidComponent);
 }
 
 void CItemMultiCustom::CopyDesign(DesignDetails * designFrom, DesignDetails * designTo)

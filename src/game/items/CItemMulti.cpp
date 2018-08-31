@@ -1234,6 +1234,14 @@ void CItemMulti::TransferAllItemsToMovingCrate(TRANSFER_TYPE iType)
         {
             break;
         }
+        if (pItem->GetTopPoint().GetRegion(REGION_TYPE_HOUSE) != GetTopPoint().GetRegion(REGION_TYPE_HOUSE))
+        {
+            continue;
+        }
+        if (pItem->IsType(IT_STONE_GUILD))
+        {
+            continue;
+        }
         if (pItem->GetUID() == GetUID() || pItem->GetUID() == pCrate->GetUID()) // Multi itself or the Moving Crate, neither is not handled here.
         {
             continue;
@@ -1471,7 +1479,7 @@ void CItemMulti::DelComp(CUID uidComponent)
         if (_lComps[i] == uidComponent)
         {
             _lComps.erase(_lComps.begin() + i);
-            return;
+            break;
         }
     }
     if (!uidComponent.IsValidUID()) // Doing this after the erase to force check the vector, just in case...
