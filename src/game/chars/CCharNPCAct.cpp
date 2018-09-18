@@ -7,7 +7,6 @@
 #include "../../network/receive.h"
 #include "../clients/CClient.h"
 #include "../CPathFinder.h"
-#include "../CServerTime.h"
 #include "../CResourceLock.h"
 #include "../triggers.h"
 #include "CCharNPC.h"

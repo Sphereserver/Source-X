@@ -4,7 +4,6 @@
 #include "../../common/CUIDExtra.h"
 #include "../../network/receive.h"
 #include "../CPathFinder.h"
-#include "../CServerTime.h"
 #include "../triggers.h"
 #include "CChar.h"
 #include "CCharNPC.h"

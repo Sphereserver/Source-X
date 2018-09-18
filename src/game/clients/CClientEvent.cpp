@@ -11,7 +11,6 @@
 #include "../CException.h"
 #include "../CUIDExtra.h"
 #include "../CResourceLock.h"
-#include "../CServerTime.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CClient.h"
