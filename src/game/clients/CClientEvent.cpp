@@ -216,13 +216,13 @@ void CClient::Event_Item_Pickup(CUID uid, word amount) // Client grabs an item
 
 	EXC_SET("FastLoot");
 	//	fastloot (,emptycontainer) protection
-	if ( m_tNextPickup > m_tNextPickup.GetCurrentTime() )
+	if ( m_tNextPickup > g_World.GetCurrentTick())
 	{
 		EXC_SET("FastLoot - addItemDragCancel(0)");
 		new PacketDragCancel(this, PacketDragCancel::CannotLift);
 		return;
 	}
-	m_tNextPickup = m_tNextPickup.GetCurrentTime() + 3;
+	m_tNextPickup = g_World.GetCurrentTime().GetTimeRaw() + (MSECS_PER_SEC/3);    // Using time in MSECS to work with this packet.
 
 	EXC_SET("Origin");
 	// Where is the item coming from ? (just in case we have to toss it back)
@@ -862,7 +862,7 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
             }
 		}
 
-		m_timeLastEventWalk = CServerTime::GetCurrentTime();
+		m_timeLastEventWalk = g_World.GetCurrentTick();
 		++m_iWalkStepCount;					// Increase step count to use on walk buffer checks
 	}
 	else
@@ -1169,7 +1169,7 @@ void CClient::Event_VendorBuy(CChar* pVendor, const VendorItem* items, size_t it
 						CItem * pItemNew = CItem::CreateDupeItem( pItem );
 						m_pChar->LayerAdd(pItemNew);
 						pItemNew->m_TagDefs.SetNum("NOSAVE", 0, true);
-						pItemNew->SetTimeout( 55000*1000 );	// set the grow timer.
+						pItemNew->SetTimeoutS(55000);	// set the grow timer.
 						pVendor->UpdateAnimate(ANIM_ATTACK_1H_SLASH);
 						m_pChar->Sound( SOUND_SNIP );	// snip noise.
 					}

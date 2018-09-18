@@ -1594,7 +1594,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 			}
 
 			// We will have this effect again
-			pItem->SetTimeout(5 * 1000);
+			pItem->SetTimeoutS(5);
 		}
 		break;
 
@@ -1605,7 +1605,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 
 			// Gain HP.
 			UpdateStatVal(STAT_STR, (short)(g_Cfg.GetSpellEffect(spell, iLevel)));
-			pItem->SetTimeout(2 * 1000);
+			pItem->SetTimeoutS(2);
 		}	break;
 
 		case SPELL_Hallucination:
@@ -1636,30 +1636,32 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 			if (IsSetMagicFlags(MAGICF_OSIFORMULAS))
 			{
 				// m_itSpell.m_spelllevel = level of the poison ! 0-4
+                int64 iSecondsDelay = 5;
 				switch (pItem->m_itSpell.m_spelllevel)
 				{
 					case 4:
 						iDmg = IMulDiv(Stat_GetMax(STAT_STR), Calc_GetRandVal2(16, 33), 100);
-						pItem->SetTimeout(5*1000);
+                        iSecondsDelay = 5;
 						break;
 					case 3:
 						iDmg = IMulDiv(Stat_GetMax(STAT_STR), Calc_GetRandVal2(15, 30), 100);
-						pItem->SetTimeout(5*1000);
+                        iSecondsDelay = 5;
 						break;
 					case 2:
 						iDmg = IMulDiv(Stat_GetMax(STAT_STR), Calc_GetRandVal2(7, 15), 100);
-						pItem->SetTimeout(4*1000);
+                        iSecondsDelay = 4;
 						break;
 					case 1:
 						iDmg = IMulDiv(Stat_GetMax(STAT_STR), Calc_GetRandVal2(5, 10), 100);;
-						pItem->SetTimeout(3*1000);
+                        iSecondsDelay = 3;
 						break;
 					default:
 					case 0:
 						iDmg = IMulDiv(Stat_GetVal(STAT_STR), Calc_GetRandVal2(4, 7), 100);
-						pItem->SetTimeout(2*1000);
+                        iSecondsDelay = 2;
 						break;
 				}
+                SetTimeoutS(iSecondsDelay);
 
 				static lpctstr const sm_Poison_MessageOSI[] =
 				{
@@ -1698,7 +1700,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 
 				pItem->m_itSpell.m_spelllevel -= 50;	// gets weaker too.	Only on old formulas
 				iDmg = IMulDiv(Stat_GetMax(STAT_STR), iLevel * 2, 100);
-				pItem->SetTimeout((5 + Calc_GetRandLLVal(4)) * 1000);
+				pItem->SetTimeout((5 + Calc_GetRandLLVal(4)) * MSECS_PER_SEC);
 
 				static lpctstr const sm_Poison_Message[] =
 				{
@@ -1732,16 +1734,16 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 			switch (iDiff) //First tick is in 5 seconds (when mem was created), second one in 4, next one in 3, 2 ... and following ones in each second.
 			{
 				case 0:
-					pItem->SetTimeout(4 * 1000);
+					pItem->SetTimeoutS(4);
 					break;
 				case 1:
-					pItem->SetTimeout(3 * 1000);
+					pItem->SetTimeoutS(3);
 					break;
 				case 2:
-					pItem->SetTimeout(2 * 1000);
+					pItem->SetTimeoutS(2);
 					break;
 				default:
-					pItem->SetTimeout(1000);
+					pItem->SetTimeoutS(1);
 					break;
 			}
 
@@ -1762,7 +1764,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 		{
 			// Receives x amount (stored in pItem->m_itSpell.m_spelllevel) of damage in 10 seconds, so damage each second is equal to total / 10
 			OnTakeDamage(pItem->m_itSpell.m_spelllevel / 10, pItem->m_uidLink.CharFind(), DAMAGE_MAGIC | DAMAGE_GOD);	// DIRECT? damage
-			pItem->SetTimeout(1000);
+			pItem->SetTimeoutS(1);
 		}
 		break;
 
@@ -1776,7 +1778,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 	return false;
 }
 
-CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEffect, int iDuration, CObjBase * pSrc, bool bEquip )
+CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEffect, int64 iDuration, CObjBase * pSrc, bool bEquip )
 {
 	ADDTOCALLSTACK("CChar::Spell_Effect_Create");
 	// Attach an effect to the Character.
@@ -1831,7 +1833,7 @@ CItem * CChar::Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEff
 	g_World.m_uidNew = pSpell->GetUID();
 	pSpell->SetAttr(pSpellDef ? ATTR_NEWBIE|ATTR_MAGIC : ATTR_NEWBIE);
 	pSpell->SetType(IT_SPELL);
-	pSpell->SetDecayTime(iDuration*1000);
+	pSpell->SetDecayTime(iDuration*MSECS_PER_SEC);
 	pSpell->m_itSpell.m_spell = (word)spell;
 	pSpell->m_itSpell.m_spelllevel = (word)iEffect;
 	pSpell->m_itSpell.m_spellcharges = 1;
@@ -1885,7 +1887,7 @@ void CChar::Spell_Area( CPointMap pntTarg, int iDist, int iSkillLevel )
 	}
 }
 
-void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, uint fieldWidth, uint fieldGauge, int iSkillLevel, CChar * pCharSrc, ITEMID_TYPE idnewEW, ITEMID_TYPE idnewNS, int iDuration, HUE_TYPE iColor)
+void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, uint fieldWidth, uint fieldGauge, int iSkillLevel, CChar * pCharSrc, ITEMID_TYPE idnewEW, ITEMID_TYPE idnewNS, int64 iDuration, HUE_TYPE iColor)
 {
 	ADDTOCALLSTACK("CChar::Spell_Field");
 	// Cast the field spell to here.
@@ -2725,7 +2727,7 @@ bool CChar::Spell_CastDone()
 					ASSERT(pItem);
 					pItem->SetType(IT_SPELL);
 					pItem->m_itSpell.m_spell = SPELL_Flame_Strike;
-					pItem->MoveToDecay(m_Act_p, 2 * 1000);
+					pItem->MoveToDecay(m_Act_p, 2 * MSECS_PER_SEC);
 				}
 				else
 				{
@@ -2971,7 +2973,7 @@ int CChar::Spell_CastStart()
 		}
 	}
 
-    int64 iWaitTime = IsPriv(PRIV_GM) ? 1 : (int64)(pSpellDef->m_CastTime.GetLinear(Skill_GetBase((SKILL_TYPE)iSkill))); // in tenths of second
+    int64 iWaitTime = IsPriv(PRIV_GM) ? 1 : (int64)(pSpellDef->m_CastTime.GetLinear(Skill_GetBase((SKILL_TYPE)iSkill)) * TENTHS_PER_SEC); // in tenths of second, converted to MSECS.
 	iWaitTime -= GetDefNum("FASTERCASTING", true, true) * 2;	//correct value is 0.25, but for backwards compatibility let's handle only 0.2.
 	if ( iWaitTime < 1 || IsPriv(PRIV_GM) )
 		iWaitTime = 1;
@@ -3013,7 +3015,7 @@ int CChar::Spell_CastStart()
 
 	m_atMagery.m_Spell = (SPELL_TYPE)(Args.m_iN1);
 	iDifficulty = (int)Args.m_iN2;
-	iWaitTime = (int64)(Args.m_iN3*100); // from tenths of second to milliseconds
+	iWaitTime = (int64)(Args.m_iN3);
 
 	pSpellDef = g_Cfg.GetSpellDef(m_atMagery.m_Spell);
 	if ( !pSpellDef )

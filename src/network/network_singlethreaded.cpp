@@ -5,7 +5,6 @@
 #include "../game/chars/CChar.h"
 #include "../common/CLog.h"
 #include "../game/CServer.h"
-#include "../game/CServerTime.h"
 #include "../game/CWorld.h"
 #include "../sphere/containers.h"
 #include "../sphere/ProfileTask.h"
@@ -337,7 +336,7 @@ void NetworkIn::tick(void)
 			continue;
 		}
 
-		client->m_client->m_timeLastEvent = CServerTime::GetCurrentTime();
+		client->m_client->m_timeLastEvent = g_World.GetCurrentTick();
 
 		// first data on a new connection - find out what should come next
 		if ( client->m_client->m_Crypt.IsInit() == false )

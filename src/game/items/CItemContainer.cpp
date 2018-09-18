@@ -889,7 +889,7 @@ bool CItemContainer::CanContainerHold( const CItem *pItem, const CChar *pCharMsg
 		case IT_TRASH_CAN:
 			Sound(0x235); // a little sound so we know it "ate" it.
 			pCharMsg->SysMessageDefault(DEFMSG_ITEMUSE_TRASHCAN);
-			SetTimeout(15 * 1000);
+			SetTimeoutS(15);
 			break;
 
 		default:

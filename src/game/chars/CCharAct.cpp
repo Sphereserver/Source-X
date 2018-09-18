@@ -10,7 +10,6 @@
 #include "../items/CItem.h"
 #include "../components/CCSpawn.h"
 #include "../CContainer.h"
-#include "../CServerTime.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CChar.h"
@@ -2508,7 +2507,7 @@ bool CChar::Horse_Mount(CChar *pHorse)
 
 	Horse_UnMount();					// unmount if already mounted
 	pItem->SetType(IT_EQ_HORSE);
-	pItem->SetTimeout(MSECS_PER_TICK);	    // the first time we give it immediately a tick, then give the horse a tick everyone once in a while.
+	pItem->SetTimeout(1);	    // the first time we give it immediately a tick, then give the horse a tick everyone once in a while.
 	LayerAdd(pItem, LAYER_HORSE);		// equip the horse item
 	pHorse->StatFlag_Set(STATF_RIDDEN);
 	pHorse->Skill_Start(NPCACT_RIDDEN);
@@ -2596,7 +2595,7 @@ bool CChar::OnTickEquip( CItem * pItem )
 					return false;
 				if ( pHorse != this )				//Some scripts can force mounts to have as 'mount' the rider itself (like old ethereal scripts)
 					return pHorse->OnTick();	    // if we call OnTick again on them we'll have an infinite loop.
-				pItem->SetTimeout( MSECS_PER_TICK );
+				pItem->SetTimeout( 1 );
 				return true;
 			}
 
@@ -2695,7 +2694,7 @@ bool CChar::SetPoison( int iSkill, int iHits, CChar * pCharSrc )
 		LayerAdd(pPoison, LAYER_FLAG_Poison);
 	}
 
-	pPoison->SetTimeout((5 + Calc_GetRandLLVal(4)) * 1000);
+	pPoison->SetTimeoutS(5 + Calc_GetRandLLVal(4));
 
 	if (!IsSetMagicFlags(MAGICF_OSIFORMULAS))
 	{
@@ -2999,7 +2998,7 @@ bool CChar::OnFreezeCheck()
 
 	if ( IsStatFlag(STATF_FREEZE|STATF_STONE) && !IsPriv(PRIV_GM) )
 		return true;
-	if ( GetKeyNum("NoMoveTill", true) > g_World.GetCurrentTime().GetTimeRaw()/100 ) // convert tenths of second to milliseconds for backwards compatibility
+	if ( GetKeyNum("NoMoveTill", true) > g_World.GetCurrentTick() )
 		return true;
 
 	if ( m_pPlayer )
@@ -3227,7 +3226,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 		{
 			// Keep timer active holding the swing action until the char stops moving
 			m_atFight.m_War_Swing_State = WAR_SWING_EQUIPPING;
-			SetTimeout(MSECS_PER_TICK);
+			SetTimeout(1);
 		}
 
 		// This could get REALLY EXPENSIVE !
@@ -3345,7 +3344,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 					// Check if we can go out of the ship (in the same direction of plank)
 					if ( MoveToValidSpot(m_dirFace, g_Cfg.m_iMaxShipPlankTeleport, 1, true) )
 					{
-						//pItem->SetTimeout(5 * 1000);	// autoclose the plank behind us
+						//pItem->SetTimeoutS(5);	// autoclose the plank behind us
 						return TRIGRET_RET_TRUE;
 					}
 				}
@@ -3939,7 +3938,7 @@ void CChar::OnTickStatusUpdate()
 			UpdateCanSee(cmd, m_pClient);		// send hits update to all nearby clients
 			m_fStatusUpdate &= ~SU_UPDATE_HITS;
 		}
-		m_timeLastHitsUpdate = CServerTime::GetCurrentTime();
+		m_timeLastHitsUpdate = g_World.GetCurrentTick();
 	}
 
 	if ( m_fStatusUpdate & SU_UPDATE_MODE )
@@ -4027,7 +4026,7 @@ bool CChar::OnTick()
         return iCompRet;    // Stop here
     }
 
-    if (iTimeDiff >= 1000)	// don't bother with < 1 sec times.
+    if (iTimeDiff >= TICKS_PER_SEC)	// don't bother with < 1 sec times.
     {
         // decay equipped items
 
@@ -4076,7 +4075,7 @@ bool CChar::OnTick()
     // NOTE: Summon flags can kill our hp here. check again.
     if (!IsStatFlag(STATF_DEAD) && (Stat_GetVal(STAT_STR) <= 0))	// We can only die on our own tick.
     {
-        m_timeLastRegen = g_World.GetCurrentTime();
+        m_timeLastRegen = g_World.GetCurrentTick();
         EXC_SET("death");
         return Death();
     }
@@ -4088,7 +4087,7 @@ bool CChar::OnTick()
             StatFlag_Clear(STATF_FLY);
 
         // Check targeting timeout, if set
-        if (GetClient()->m_Targ_Timeout.IsTimeValid() && (g_World.GetTimeDiff(GetClient()->m_Targ_Timeout) <= 0) )
+        if (GetClient()->m_Targ_Timeout > 0 && (g_World.GetTickDiff(GetClient()->m_Targ_Timeout) <= 0) )
             GetClient()->addTargetCancel();
     }
 
@@ -4139,13 +4138,13 @@ bool CChar::OnTick()
         }
     }
 
-    if (iTimeDiff >= 1000)
+    if (iTimeDiff >= TICKS_PER_SEC)
     {
         // Check location periodically for standing in fire fields, traps, etc.
         EXC_SET("check location");
         CheckLocation(true);
         Stats_Regen(iTimeDiff);
-        m_timeLastRegen = g_World.GetCurrentTime();
+        m_timeLastRegen = g_World.GetCurrentTime().GetTimeRaw();
     }
 
     EXC_SET("update stats");

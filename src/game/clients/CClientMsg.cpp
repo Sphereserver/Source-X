@@ -12,7 +12,6 @@
 #include "../items/CItemMap.h"
 #include "../items/CItemMessage.h"
 #include "../components/CCSpawn.h"
-#include "../CServerTime.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CClient.h"
@@ -249,11 +248,11 @@ void CClient::addTime( bool fCurrent ) const
 
 	if ( fCurrent )
 	{
-		llong lCurrentTime = (CServerTime::GetCurrentTime()).GetTimeRaw();
+		llong lCurrentTime = g_World.GetCurrentTick();
 		new PacketGameTime(this,
-								( lCurrentTime / ( 60*60*1000 )) % 24,
-								( lCurrentTime / ( 60*1000 )) % 60,
-								( lCurrentTime / ( 1000 )) % 60);
+								( lCurrentTime / ( 60*60*MSECS_PER_SEC)) % 24,
+								( lCurrentTime / ( 60*MSECS_PER_SEC)) % 60,
+								( lCurrentTime / (MSECS_PER_SEC)) % 60);
 	}
 	else
 	{
@@ -1526,7 +1525,7 @@ size_t CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
 	return count;
 }
 
-void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iMsecsTimeout )
+void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTickTimeout )
 {
 	ADDTOCALLSTACK("CClient::SetTargMode");
 	// ??? Get rid of menu stuff if previous targ mode.
@@ -1628,10 +1627,10 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iMsecsT
 	}
 
 	// determine timeout time
-	if (iMsecsTimeout > 0)
-		m_Targ_Timeout = CServerTime::GetCurrentTime() + iMsecsTimeout;
-	else
-		m_Targ_Timeout.Init();
+    if (iTickTimeout > 0)
+        m_Targ_Timeout = g_World.GetCurrentTick() + iTickTimeout;
+    else
+        m_Targ_Timeout = 0;
 
 	if ( GetTargMode() == targmode )
 		return;
@@ -1671,14 +1670,14 @@ void CClient::addPromptConsole( CLIMODE_TYPE mode, lpctstr pPrompt, CUID context
 	new PacketAddPrompt(this, context1, context2, bUnicode);
 }
 
-void CClient::addTarget( CLIMODE_TYPE targmode, lpctstr pPrompt, bool fAllowGround, bool fCheckCrime, int64 iMsecsTimeout ) // Send targetting cursor to client
+void CClient::addTarget( CLIMODE_TYPE targmode, lpctstr pPrompt, bool fAllowGround, bool fCheckCrime, int64 iTicksTimeout) // Send targetting cursor to client
 {
 	ADDTOCALLSTACK("CClient::addTarget");
 	// Send targetting cursor to client.
     // Expect XCMD_Target back.
 	// ??? will this be selective for us ? objects only or chars only ? not on the ground (statics) ?
 
-	SetTargMode( targmode, pPrompt, iMsecsTimeout );
+	SetTargMode( targmode, pPrompt, iTicksTimeout);
 
 	new PacketAddTarget(this,
 						fAllowGround? PacketAddTarget::Ground : PacketAddTarget::Object,
@@ -1697,7 +1696,7 @@ void CClient::addTargetDeed( const CItem * pDeed )
 	addTargetItems( CLIMODE_TARG_USE_ITEM, iddef, pDeed->GetHue() );
 }
 
-bool CClient::addTargetChars( CLIMODE_TYPE mode, CREID_TYPE baseID, bool fNotoCheck, int64 iMsecsTimeout )
+bool CClient::addTargetChars( CLIMODE_TYPE mode, CREID_TYPE baseID, bool fNotoCheck, int64 iTicksTimeout)
 {
 	ADDTOCALLSTACK("CClient::addTargetChars");
 	CCharBase * pBase = CCharBase::FindCharBase( baseID );
@@ -1707,7 +1706,7 @@ bool CClient::addTargetChars( CLIMODE_TYPE mode, CREID_TYPE baseID, bool fNotoCh
 	tchar * pszTemp = Str_GetTemp();
 	snprintf(pszTemp, STR_TEMPLENGTH, "%s '%s'?", g_Cfg.GetDefaultMsg(DEFMSG_WHERE_TO_SUMMON), pBase->GetTradeName());
 
-	addTarget(mode, pszTemp, true, fNotoCheck, iMsecsTimeout);
+	addTarget(mode, pszTemp, true, fNotoCheck, iTicksTimeout);
 	return true;
 }
 
@@ -2616,7 +2615,7 @@ byte CClient::Setup_Start( CChar * pChar ) // Send character startup stuff to pl
 	}
 	if ( IsPriv(PRIV_JAILED) )
 		m_pChar->Jail(&g_Serv, true, (int)(GetAccount()->m_TagDefs.GetKeyNum("JailCell", true)));
-	if ( g_Serv.m_timeShutdown.IsTimeValid() )
+	if ( g_Serv.m_timeShutdown > 0 )
 		addBarkParse(g_Cfg.GetDefaultMsg(DEFMSG_MSG_SERV_SHUTDOWN_SOON), NULL, HUE_TEXT_DEF, TALKMODE_SYSTEM, FONT_BOLD);
 
 	GetAccount()->m_TagDefs.DeleteKey("LastLogged");

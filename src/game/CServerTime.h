@@ -8,13 +8,21 @@
 
 #include "../common/datatypes.h"	// only the numeric data types
 
-
+/*
+* A time stamp in the server/game world, starting from server's Creation (not from the Epoch).
+* The time is advanced in each server's tick, so all the code executed in this tick will use
+* the same time value, to adjust timers and so.
+*/
 struct CServerTime
 {
-	// A time stamp in the server/game world, starting from server's Creation (not from the Epoch).
+	// 
 
-	#define TICK_PER_SEC    4   // how much ticks are in a second
-    #define MSECS_PER_TICK     (1000 / TICK_PER_SEC) // how much milliseconds are between a tick and another
+	#define TICKS_PER_SEC    4      // Amount of ticks to advance in a second.
+    #define TENTHS_PER_SEC  10      // Tenths of a second (backwards).
+    #define MSECS_PER_SEC   1000    // Msecs of a second (to avoid magic numbers).
+
+    #define MSECS_PER_TENTH (MSECS_PER_SEC / TENTHS_PER_SEC)
+    #define MSECS_PER_TICK  (MSECS_PER_SEC / TICKS_PER_SEC) // Milliseconds lapse between one tick and another.
 
 	static const char *m_sClassName;
 	int64 m_llPrivateTime;

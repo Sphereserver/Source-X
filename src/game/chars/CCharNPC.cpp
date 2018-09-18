@@ -56,7 +56,7 @@ CCharNPC::CCharNPC( CChar * pChar, NPCBRAIN_TYPE NPCBrain )
 	memset(m_nextX, 0, sizeof(m_nextX));
 	memset(m_nextY, 0, sizeof(m_nextY));
 #endif
-	m_timeRestock.Init();
+	m_timeRestock = 0;
 }
 
 CCharNPC::~CCharNPC()

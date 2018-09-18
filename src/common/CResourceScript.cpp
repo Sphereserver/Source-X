@@ -103,7 +103,6 @@ void CResourceScript::Close()
 
     if ( ! m_iOpenCount )
     {
-        m_timeLastAccess = CServerTime::GetCurrentTime();
         // Just leave it open for caching purposes
         //CloseForce();
     }

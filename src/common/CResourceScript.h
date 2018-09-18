@@ -6,7 +6,6 @@
 #ifndef _INC_CRESOURCESCRIPT_H
 #define _INC_CRESOURCESCRIPT_H
 
-#include "../game/CServerTime.h"
 #include "sphere_library/CSTime.h"
 #include "CScript.h"
 
@@ -18,7 +17,6 @@ class CResourceScript : public CScript
 
 private:
     int		m_iOpenCount;		    // How many CResourceLock(s) have this open ?
-    CServerTime m_timeLastAccess;	// CWorld time of last access/Open.
 
     // Last time it was closed. What did the file params look like ?
     dword m_dwSize;			// Compare to see if this has changed.
@@ -28,7 +26,6 @@ private:
     void _Init()
     {
         m_iOpenCount = 0;
-        m_timeLastAccess.Init();
         m_dwSize = UINT32_MAX;			// Compare to see if this has changed.
     }
 

@@ -282,7 +282,7 @@ bool CDataBase::OnTick()
 		}
 	}
 
-	if ( !m_QueryArgs.empty() && !(tickcnt % TICK_PER_SEC) )
+	if ( !m_QueryArgs.empty() && !(tickcnt % TICKS_PER_SEC) )
 	{
 		FunctionArgsPair_t currentPair;
 		{

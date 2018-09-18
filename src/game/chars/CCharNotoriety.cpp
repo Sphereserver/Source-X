@@ -367,7 +367,7 @@ bool CChar::Noto_Criminal( CChar * pChar )
 	if ( m_pNPC || IsPriv(PRIV_GM) )
 		return false;
 
-	int decay = (int)(g_Cfg.m_iCriminalTimer/1000);
+	int64 decay = (int)(g_Cfg.m_iCriminalTimer/ MSECS_PER_SEC);
 
 	if ( IsTrigUsed(TRIGGER_CRIMINAL) )
 	{

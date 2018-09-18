@@ -83,7 +83,7 @@ void CChar::Action_StartSpecial( CREID_TYPE id )
 			pItem->m_itSpell.m_spelllevel = (word)(100 + Calc_GetRandVal(500));
 			pItem->m_itSpell.m_spellcharges = 1;
 			pItem->m_uidLink = GetUID();
-			pItem->MoveToDecay( GetTopPoint(), 10 + Calc_GetRandVal(50)*1000 );
+			pItem->MoveToDecay( GetTopPoint(), 10 + Calc_GetRandVal(50)*MSECS_PER_SEC);
 		}
 		break;
 
@@ -93,7 +93,7 @@ void CChar::Action_StartSpecial( CREID_TYPE id )
 			CItem * pItem = CItem::CreateScript( (ITEMID_TYPE)(Calc_GetRandVal2(ITEMID_WEB1_1, ITEMID_WEB1_4)), this );
 			ASSERT(pItem);
 			pItem->SetType(IT_WEB);
-			pItem->MoveToDecay( GetTopPoint(), 10 + Calc_GetRandVal(170)*1000 );
+			pItem->MoveToDecay( GetTopPoint(), 10 + Calc_GetRandVal(170)*MSECS_PER_SEC);
 		}
 		break;
 
@@ -126,7 +126,7 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 		if ( !pClientSrc->addShopMenuBuy(this) )
 			Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_NO_GOODS));
 		else
-			pClientSrc->m_TagDefs.SetNum("BUYSELLTIME", g_World.GetCurrentTime().GetTimeRaw());
+			pClientSrc->m_TagDefs.SetNum("BUYSELLTIME", g_World.GetCurrentTick());
 		break;
 	}
 	case NV_BYE:
@@ -180,7 +180,7 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 		if ( ! pClientSrc->addShopMenuSell( this ))
 			Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_NOTHING_BUY));
 		else
-			pClientSrc->m_TagDefs.SetNum("BUYSELLTIME", g_World.GetCurrentTime().GetTimeRaw());
+			pClientSrc->m_TagDefs.SetNum("BUYSELLTIME", g_World.GetCurrentTick());
 		break;
 	}
 	case NV_SHRINK:
@@ -222,7 +222,7 @@ void CChar::NPC_ActStart_SpeakTo( CChar * pSrc )
 	m_atTalk.m_HearUnknown = 0;
 
 	Skill_Start( ( pSrc->Stat_GetAdjusted(STAT_FAME) > 7000 ) ? NPCACT_TALK_FOLLOW : NPCACT_TALK );
-	SetTimeout(3*1000);
+	SetTimeoutS(3);
 	UpdateDir(pSrc);
 }
 
@@ -602,15 +602,15 @@ int CChar::NPC_WalkToPoint( bool fRun )
 			if (iDex < 75)
 				iDex = 75;
 		}
-		iTickNext = 1000 / 4 + Calc_GetRandLLVal((100 - (iDex*tTick) / 100) / 5) * 1000 / 10;
+		iTickNext = MSECS_PER_TICK / 4 + Calc_GetRandLLVal((100 - (iDex*tTick) / 100) / 5) * MSECS_PER_TICK / 10;   // TODO MSEC to TICK? custom timers for npc's movement?
 	}
 	else
-		iTickNext = 1000 + Calc_GetRandLLVal((100 - (iDex*tTick) / 100) / 3) * 1000 / 10;
+		iTickNext = MSECS_PER_TICK + Calc_GetRandLLVal((100 - (iDex*tTick) / 100) / 3) * MSECS_PER_TICK / 10;
 
-	if (iTickNext < 1)
-		iTickNext = 1;
-	else if (iTickNext > 50)
-		iTickNext = 50;
+	if (iTickNext < TENTHS_PER_SEC) // Do not allow less than a tenth of second. This may be decreased in the future to allow more precise timers, at the cost of cpu.
+		iTickNext = TENTHS_PER_SEC;
+	else if (iTickNext > 5 * MSECS_PER_SEC)  // neither more than 5 seconds.
+		iTickNext = 5 * MSECS_PER_SEC;
 
 	SetTimeout(iTickNext);
 	EXC_CATCH;
@@ -1168,7 +1168,7 @@ void CChar::NPC_Act_Wander()
 	if ( ! Calc_GetRandVal( 7 + (Stat_GetVal(STAT_DEX) / 30)) )
 		iStopWandering = 1;			// i'm stopping to wander "for the dexterity". 
 
-	if ( !Calc_GetRandVal(2 + TICK_PER_SEC/2) )
+	if ( !Calc_GetRandVal(2 + TENTHS_PER_SEC/2) )
 	{
 		// NPC_LookAround() is very expensive, so since NPC_Act_Wander is called every tick for every char with ACTION == NPCACT_WANDER,
 		//	don't look around every time.
@@ -1778,10 +1778,10 @@ bool CChar::NPC_Act_Food()
 
 				//	the bit is not needed in a worldsave, timeout of 10 minutes
 				pResBit->m_TagDefs.SetNum("NOSAVE", 1);
-				pResBit->SetTimeout(60*10*1000);
+				pResBit->SetTimeoutS(60*10);
 				//DEBUG_ERR(("Starting skill food\n"));
 				Skill_Start( NPCACT_FOOD );
-				SetTimeout(5*1000);
+				SetTimeoutS(5);
 				return true;
 			}
 			else									//	search for grass nearby
@@ -1904,7 +1904,7 @@ void CChar::NPC_Act_Idle()
 
 	// just stand here for a bit.
 	Skill_Start(SKILL_NONE);
-	SetTimeout(1000 * (1 + Calc_GetRandLLVal(2)));
+	SetTimeoutS(1 + Calc_GetRandLLVal(2));
 }
 
 bool CChar::NPC_OnItemGive( CChar *pCharSrc, CItem *pItem )
@@ -2206,7 +2206,7 @@ void CChar::NPC_OnTickAction()
 		timeout = maximum(timeout, 0);
 		timeout = Calc_GetRandLLVal2(timeout/2, timeout);
 		// default next brain/move tick
-		SetTimeout( (1 + timeout) * 1000 );
+		SetTimeoutD(1 + timeout);   // In Tenths of Second.
 	}
 
 	//	vendors restock periodically
@@ -2434,7 +2434,7 @@ void CChar::NPC_Food()
 
 				//	the bit is not needed in a worldsave, timeout of 10 minutes
 				pResBit->m_TagDefs.SetNum("NOSAVE", 1);
-				pResBit->SetTimeout(60*10*1000);
+				pResBit->SetTimeoutS(60*10);
 				return;
 			}
 			else									//	search for grass nearby
@@ -2460,7 +2460,7 @@ void CChar::NPC_Food()
 								{
 									EXC_SET("walking to grass");
 									pResBit->m_TagDefs.SetNum("NOSAVE", 1);
-									pResBit->SetTimeout(60*10*1000);
+									pResBit->SetTimeoutS(60*10);
 									m_Act_p = pt;
 									Skill_Start(NPCACT_GOTO);
 									return;

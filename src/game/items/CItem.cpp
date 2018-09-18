@@ -1281,7 +1281,7 @@ bool CItem::Stack( CItem * pItem )
 int64 CItem::GetDecayTime() const
 {
 	ADDTOCALLSTACK("CItem::GetDecayTime");
-	// Return time in seconds that it will take to decay this item.
+	// Return time in minutes that it will take to decay this item.
 	// -1 = never decays.
 
 	switch (GetType())
@@ -1289,16 +1289,16 @@ int64 CItem::GetDecayTime() const
 		case IT_FOLIAGE:
 		case IT_CROPS:		// crops "decay" as they grow
         {
-            CServerTime timeNextNewMoon(g_World.GetNextNewMoon((GetTopPoint().m_map == 1) ? false : true));
-            int64 iMinutesDelayInMilliseconds = Calc_GetRandLLVal(20) * g_Cfg.m_iGameMinuteLength;
-			return g_World.GetTimeDiff(timeNextNewMoon + iMinutesDelayInMilliseconds);
+            int64 timeNextNewMoon = g_World.GetNextNewMoon((GetTopPoint().m_map == 1) ? false : true);
+            int64 iMinutesDelay = Calc_GetRandLLVal(20) * g_Cfg.m_iGameMinuteLength;
+			return g_World.GetTickDiff(timeNextNewMoon + iMinutesDelay);
         }
 		case IT_MULTI:
 		case IT_SHIP:
 		case IT_MULTI_CUSTOM:
-			return( 14*24*60*60*1000 );		// very long decay updated as people use it
+			return( 14*24*60*60* MSECS_PER_SEC);		// very long decay updated as people use it
 		case IT_TRASH_CAN:
-			return( 180*1000 );		// empties in 3 minutes
+			return( 3*60* MSECS_PER_SEC);		// empties in 3 minutes
 		default:
 			break;
 	}
@@ -1309,16 +1309,16 @@ int64 CItem::GetDecayTime() const
 	return g_Cfg.m_iDecay_Item;
 }
 
-void CItem::SetTimeout( int64 iTimeInMsecs )
+void CItem::SetTimeout( int64 iMsecs )
 {
 	ADDTOCALLSTACK("CItem::SetTimeout");
 	// PURPOSE:
-	//  Set delay in milliseconds.
+	//  Set delay in msecs.
 	//  -1 = never.
 	// NOTE:
 	//  It may be a decay timer or it might be a trigger timer
 
-	CObjBase::SetTimeout( iTimeInMsecs );
+	CObjBase::SetTimeout(iMsecs);
 
 	// Items on the ground must be put in sector list correctly.
 	if ( !IsTopLevel() )
@@ -1329,9 +1329,24 @@ void CItem::SetTimeout( int64 iTimeInMsecs )
 		return;
 
 	CItemsList::sm_fNotAMove = true;
-	pSector->MoveItemToSector( this, iTimeInMsecs >= 0 );
+	pSector->MoveItemToSector( this, iMsecs >= 0 );
 	CItemsList::sm_fNotAMove = false;
 	SetContainerFlags(0);
+}
+
+void CItem::SetTimeoutS(int64 iSeconds)
+{
+    SetTimeout(iSeconds * MSECS_PER_SEC);
+}
+
+void CItem::SetTimeoutT(int64 iTicks)
+{
+    SetTimeout(iTicks * TICKS_PER_SEC);
+}
+
+void CItem::SetTimeoutD(int64 iTenths)
+{
+    SetTimeout(iTenths * TENTHS_PER_SEC);
 }
 
 void CItem::OnMoveFrom()	// Moving from current location.
@@ -1345,13 +1360,13 @@ bool CItem::MoveToUpdate(CPointMap pt, bool bForceFix)
 	return bReturn;
 }
 
-bool CItem::MoveToDecay(const CPointMap & pt, int64 iDecayTimeMsecs, bool bForceFix)
+bool CItem::MoveToDecay(const CPointMap & pt, int64 iMsecsTimeout, bool bForceFix)
 {
-	SetDecayTime( iDecayTimeMsecs );
+	SetDecayTime(iMsecsTimeout);
 	return MoveToUpdate( pt, bForceFix);
 }
 
-void CItem::SetDecayTime( int64 iTimeInMsecs )
+void CItem::SetDecayTime( int64 iMsecsTimeout)
 {
 	ADDTOCALLSTACK("CItem::SetDecayTime");
 	// 0 = default (decay on the next tick)
@@ -1361,15 +1376,15 @@ void CItem::SetDecayTime( int64 iTimeInMsecs )
 	{
 		return;	// already a timer here. let it expire on it's own
 	}
-	if ( ! iTimeInMsecs )
+	if ( !iMsecsTimeout)
 	{
 		if ( IsTopLevel())
-            iTimeInMsecs = GetDecayTime();
+            iMsecsTimeout = GetDecayTime();
 		else
-            iTimeInMsecs = -1;
+            iMsecsTimeout = -1;
 	}
-	SetTimeout( iTimeInMsecs );
-	if ( iTimeInMsecs != -1 )
+	SetTimeout(iMsecsTimeout);
+	if (iMsecsTimeout != -1 )
 		SetAttr(ATTR_DECAY);
 	else
 		ClrAttr(ATTR_DECAY);
@@ -1508,7 +1523,7 @@ bool CItem::MoveToCheck( const CPointMap & pt, CChar * pCharMover )
 			if ( iItemCount > g_Cfg.m_iMaxItemComplexity )
 			{
 				Speak("Too many items here!");
-				iDecayTime = 60 * 1000;		// force decay (even when REGION_FLAG_NODECAY is set)
+				iDecayTime = 60 * MSECS_PER_SEC;		// force decay (even when REGION_FLAG_NODECAY is set)
 				break;
 			}
 		}
@@ -3774,7 +3789,7 @@ void CItem::DupeCopy( const CItem * pItem )
     static_cast<CEntity*>(this)->Copy(static_cast<CEntity*>(const_cast<CItem*>(pItem)));
 }
 
-void CItem::SetAnim( ITEMID_TYPE id, int64 iMsecsTime )
+void CItem::SetAnim( ITEMID_TYPE id, int64 iTicksTimeout)
 {
 	ADDTOCALLSTACK("CItem::SetAnim");
 	// Set this to an active anim that will revert to old form when done.
@@ -3783,7 +3798,7 @@ void CItem::SetAnim( ITEMID_TYPE id, int64 iMsecsTime )
 	m_itAnim.m_PrevType = m_type;
 	SetDispID( id );
 	m_type = IT_ANIM_ACTIVE;
-	SetTimeout( iMsecsTime );
+	SetTimeout(iTicksTimeout);
 	//RemoveFromView();
 	Update();
 }
@@ -4297,7 +4312,7 @@ bool CItem::Use_DoorNew( bool bJustOpen )
 
 	MoveToUpdate(pt);
 	Sound( bClosing ? iCloseSnd : iOpenSnd );
-	SetTimeout( bClosing ? -1 : 20*1000 );
+	SetTimeoutS( bClosing ? -1 : 20);
 	bClosing ? ClrAttr(ATTR_OPENED) : SetAttr(ATTR_OPENED);
 	return( ! bClosing );
 }
@@ -4449,7 +4464,7 @@ bool CItem::Use_Door( bool fJustOpen )
 	Sound( fClosing ? iCloseSnd : iOpenSnd );
 
 	// Auto close the door in n seconds.
-	SetTimeout( fClosing ? -1 : 60*1000 );
+	SetTimeoutS( fClosing ? -1 : 60);
 	return ( ! fClosing );
 }
 
@@ -4892,7 +4907,7 @@ lpctstr CItem::Use_Sextant( CPointMap pntCoords ) const
 
 bool CItem::IsBookWritable() const
 {
-	return ( (m_itBook.m_ResID.GetPrivateUID() == 0) && (GetTimeStamp().GetTimeRaw() == 0) );
+	return ( (m_itBook.m_ResID.GetPrivateUID() == 0) && (GetTimeStamp() == 0) );
 }
 
 bool CItem::IsBookSystem() const	// stored in RES_BOOK
@@ -4923,7 +4938,7 @@ bool CItem::Use_Light()
 	if ( IsType(IT_LIGHT_LIT) )
 	{
 		Sound(0x47);
-		SetTimeout(60 * 1000);
+		SetTimeoutS(60);
 		if ( !m_itLight.m_charges )
 			m_itLight.m_charges = 20;
 	}
@@ -5034,9 +5049,9 @@ void CItem::SetTrapState( IT_TYPE state, ITEMID_TYPE id, int iTimeSec )
 			id = (ITEMID_TYPE)( GetDispID() + 1 );
 	}
 	if ( ! iTimeSec )
-		iTimeSec = 3*1000;
+		iTimeSec = 3* MSECS_PER_SEC;
 	else if ( iTimeSec > 0 && iTimeSec < UINT16_MAX )
-		iTimeSec *= 1000;
+		iTimeSec *= MSECS_PER_SEC;
 	else
 		iTimeSec = -1;
 
@@ -5688,7 +5703,7 @@ bool CItem::OnTick()
 
 				m_itLight.m_charges--;
 				if ( m_itLight.m_charges > 0 )
-					SetTimeout(60 * 1000);
+					SetTimeoutS(60);
 				else
 				{
 					// Burn out the light
@@ -5771,7 +5786,7 @@ bool CItem::OnTick()
 						CObjBase* pObj = static_cast<CObjBase*>(GetTopLevelObj());
 						ASSERT(pObj);
 						pObj->Speak(ITOA(m_itPotion.m_tick, pszMsg, 10), HUE_RED);
-						SetTimeout( 1000 );
+						SetTimeoutS(1);
 					}
 					return true;
 				}
@@ -5815,7 +5830,7 @@ bool CItem::OnTick()
 				// Regenerate honey count
 				if ( m_itBeeHive.m_honeycount < 5 )
 					++m_itBeeHive.m_honeycount;
-				SetTimeout( 15*60*1000 );
+				SetTimeoutS( 15 * 60);
 			}
 			return true;
 
@@ -5825,7 +5840,7 @@ bool CItem::OnTick()
 				if ( GetID() == ITEMID_EMBERS )
 					break;
 				SetID( ITEMID_EMBERS );
-				SetDecayTime( 2*60*1000 );
+				SetDecayTime( 2 * 60 * MSECS_PER_SEC);
 				Update();
 			}
 			return true;

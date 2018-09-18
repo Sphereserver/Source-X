@@ -30,7 +30,7 @@ private:
 	size_t m_iClients; // How many clients in this sector now?
 public:
 	static const char *m_sClassName;
-	CServerTime m_timeLastClient;	// age the sector based on last client here.
+	int64 m_timeLastClient;	// age the sector based on last client here.
 
 protected:
 	void OnRemoveObj( CSObjListRec* pObRec );	// Override this = called when removed from list.

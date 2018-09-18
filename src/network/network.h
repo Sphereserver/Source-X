@@ -14,7 +14,6 @@
 #include "../common/sphere_library/CSQueue.h"
 #include "../common/sphereproto.h"
 #include "../sphere/containers.h"
-#include "../game/CServerTime.h"
 
 #ifdef _LIBEV
 	#include "../sphere/linuxev.h"
@@ -231,7 +230,7 @@ struct HistoryIP
 	int m_connected;
 	bool m_blocked;
 	int m_ttl;
-	CServerTime m_blockExpire;
+	int64 m_blockExpire;
 	int m_pingDecay;
 
 	void update(void);
@@ -251,7 +250,7 @@ class IPHistoryManager
 {
 private:
 	IPHistoryList m_ips;		// list of known ips
-	CServerTime m_lastDecayTime;	// last decay time
+	int64 m_lastDecayTime;	// last decay time
 
 public:
 	IPHistoryManager(void);

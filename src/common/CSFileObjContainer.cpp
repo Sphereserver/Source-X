@@ -1,4 +1,3 @@
-#include "../game/CServerTime.h"
 #include "CException.h"
 #include "CExpression.h"
 #include "CScript.h"
@@ -200,7 +199,7 @@ bool CSFileObjContainer::r_LoadVal( CScript & s )
             break;
 
         case CFO_GLOBALTIMEOUT:
-            iGlobalTimeout = (int64)llabs(s.GetArgLLVal()*1000);
+            iGlobalTimeout = (int64)llabs(s.GetArgLLVal()*MSECS_PER_SEC);
             break;
 
         default:
@@ -272,7 +271,7 @@ bool CSFileObjContainer::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
             break;
 
         case CFO_GLOBALTIMEOUT:
-            sVal.FormatLLVal(iGlobalTimeout/1000);
+            sVal.FormatLLVal(iGlobalTimeout/MSECS_PER_SEC);
             break;
 
         default:

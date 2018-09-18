@@ -8,7 +8,6 @@
 #include "chars/CChar.h"
 #include "clients/CClient.h"
 #include "CServer.h"
-#include "CServerTime.h"
 #include "CWorld.h"
 
 
@@ -80,7 +79,7 @@ CWebPageDef::CWebPageDef( CResourceID rid ) : CResourceLink( rid )
 	m_type = WEBPAGE_TEMPLATE;
 	m_privlevel=PLEVEL_Guest;
 
-	m_timeNextUpdate.Init();
+	m_timeNextUpdate = 0;
 	m_iUpdatePeriod = 2*60; // in seconds
 	m_iUpdateLog = 0;
 
@@ -288,12 +287,12 @@ bool CWebPageDef::WebPageUpdate( bool fNow, lpctstr pszDstName, CTextConsole * p
 	{
 		if ( m_iUpdatePeriod <= 0 )
 			return false;
-		if ( CServerTime::GetCurrentTime() < m_timeNextUpdate )
+		if (g_World.GetCurrentTick() < m_timeNextUpdate )
 			return true;	// should still be valid
 	}
 
 	ASSERT(pSrc);
-	m_timeNextUpdate = CServerTime::GetCurrentTime() + m_iUpdatePeriod * 1000; // CServerTime is in milliseconds
+	m_timeNextUpdate = g_World.GetCurrentTick() + (m_iUpdatePeriod * MSECS_PER_SEC);
 	if ( pszDstName == nullptr )
 		pszDstName = m_sDstFilePath;
 

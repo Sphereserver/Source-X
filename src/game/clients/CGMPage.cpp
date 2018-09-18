@@ -1,7 +1,6 @@
 
 #include "../../common/CException.h"
 #include "../chars/CChar.h"
-#include "../CServerTime.h"
 #include "../CWorld.h"
 #include "CClient.h"
 #include "CGMPage.h"
@@ -13,7 +12,7 @@ CGMPage::CGMPage( lpctstr pszAccount ) :
 	m_sAccount( pszAccount )
 {
 	m_pGMClient = NULL;
-	m_timePage = CServerTime::GetCurrentTime();
+	m_timePage = g_World.GetCurrentTick();
 	// Put at the end of the list.
 	g_World.m_GMPages.InsertTail( this );
 }
@@ -47,7 +46,7 @@ int64 CGMPage::GetAge() const
 {
 	ADDTOCALLSTACK("CGMPage::GetAge");
 	// How old in seconds.
-	return( (-g_World.GetTimeDiff( m_timePage )) / 1000 );
+	return (-g_World.GetTickDiff( m_timePage ));
 }
 
 void CGMPage::ClearGMHandler()
@@ -149,7 +148,7 @@ bool CGMPage::r_LoadVal( CScript & s )
 		SetReason( s.GetArgStr());
 		break;
 	case GC_TIME:	// "TIME"
-		m_timePage = CServerTime::GetCurrentTime() - ( s.GetArgLLVal() * 1000 );
+		m_timePage = g_World.GetCurrentTime().GetTimeRaw() - ( s.GetArgLLVal() * MSECS_PER_SEC);
 		break;
 	default:
 		return( CScriptObj::r_LoadVal( s ));

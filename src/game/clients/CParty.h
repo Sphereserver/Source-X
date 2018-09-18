@@ -13,7 +13,6 @@
 #include "../../common/CVarDefMap.h"
 #include "../../common/sphereproto.h"
 #include "../chars/CCharRefArray.h"
-#include "../CServerTime.h"
 
 
 class PacketSend;

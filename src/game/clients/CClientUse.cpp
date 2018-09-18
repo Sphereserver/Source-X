@@ -268,7 +268,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 				pItem->m_uidLink = m_pChar->GetUID();
 				pItem->SetTimeout(1000);
 				m_tmUseItem.m_pParent = pItem->GetParent();
-				addTarget(CLIMODE_TARG_USE_ITEM, g_Cfg.GetDefaultMsg(DEFMSG_SELECT_POTION_TARGET), true, true, pItem->m_itPotion.m_tick * 1000);
+				addTarget(CLIMODE_TARG_USE_ITEM, g_Cfg.GetDefaultMsg(DEFMSG_SELECT_POTION_TARGET), true, true, pItem->m_itPotion.m_tick * MSECS_PER_SEC);
 				return true;
 			}
 			m_pChar->Use_Drink(pItem);
@@ -985,7 +985,7 @@ bool CClient::Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase *pSrc )
 
 		int64 SpellTimeout = g_Cfg.m_iSpellTimeout;
 		if ( m_pChar->GetDefNum("SPELLTIMEOUT", true) )
-			SpellTimeout = m_pChar->GetDefNum("SPELLTIMEOUT", true) * 100; // from tenths of second to milliseconds
+			SpellTimeout = m_pChar->GetDefNum("SPELLTIMEOUT", true); // ticks
 
 		addTarget(CLIMODE_TARG_SKILL_MAGERY, pPrompt, pSpellDef->IsSpellType(SPELLFLAG_TARG_XYZ), pSpellDef->IsSpellType(SPELLFLAG_HARM), SpellTimeout);
 		return true;
@@ -1051,7 +1051,7 @@ bool CClient::Cmd_Skill_Tracking( uint track_sel, bool fExec )
 		if ( fExec )
 		{
 			// Tracking menu got us here. Start tracking the selected creature.
-			m_pChar->SetTimeout(1 * 1000);
+			m_pChar->SetTimeoutS(1);
 			m_pChar->m_Act_UID = m_tmMenu.m_Item[track_sel];	// selected UID
 			m_pChar->Skill_Start(SKILL_TRACKING);
 			return true;

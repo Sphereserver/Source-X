@@ -19,7 +19,7 @@ private:
 
     CUID m_uidHold;
     std::vector<CUID> m_uidPlanks;
-    CServerTime m_NextMove;
+    int64 m_NextMove;
     CTextConsole *m_pCaptain;
 
 

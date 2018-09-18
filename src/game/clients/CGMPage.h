@@ -9,7 +9,6 @@
 #include "../../common/sphere_library/CSString.h"
 #include "../../common/CScriptObj.h"
 #include "../../common/CRect.h"
-#include "../CServerTime.h"
 #include "CAccount.h"
 
 
@@ -28,8 +27,8 @@ private:
 public:
 	static const char *m_sClassName;
 	// Queue a GM page. (based on account)
-	CServerTime  m_timePage;	// Time of the last call.
-	CPointMap  m_ptOrigin;		// Origin Point of call.
+	int64  m_timePage;      // Time of the last call.
+	CPointMap  m_ptOrigin;  // Origin Point of call.
 
 public:
 	CGMPage( lpctstr pszAccount );

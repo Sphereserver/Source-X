@@ -351,7 +351,7 @@ private:
 	CSString m_sDstFilePath;		// where is the page served from ?
 	int m_iUpdatePeriod;			// How often to update the web page in seconds. 0 = never.
 	int m_iUpdateLog;				// create a daily log of the page.
-	CServerTime  m_timeNextUpdate;	// The time at will be done the next web update.
+	int64  m_timeNextUpdate;	// The time at will be done the next web update.
 
 public:
 	static const char *m_sClassName;
@@ -798,13 +798,13 @@ extern class CServerConfig : public CResourceBase
 
 public:
 	static const char *m_sClassName;
-	CServerTime m_timePeriodic; // When to perform the next periodic update
+	int64 m_timePeriodic; // When to perform the next periodic update
 
 	// Begin INI file options.
 	bool m_fUseNTService;       // Start this as a system service on Win2000, XP, NT
 	int	 m_fUseHTTP;            // Use the built in http server
 	bool m_fUseAuthID;          // Use the OSI AuthID to avoid possible hijack to game server.
-	int64  m_iMapCacheTime;     // Time in sec to keep unused map data (internally converted to milliseconds, to match CServerTime format)..
+	int64  m_iMapCacheTime;     // Time in sec to keep unused map data..
 	int	 m_iSectorSleepMask;    // The mask for how long sectors will sleep.
 	bool m_fUseMapDiffs;        // Whether or not to use map diff files.
 
@@ -812,7 +812,7 @@ public:
 	CSString m_sAcctBaseDir;    // Where do the account files go/come from ?
 
 	bool m_fSecure;             // Secure mode. (will trap exceptions)
-	int64  m_iFreezeRestartTime;  // # seconds before restarting (internally converted to milliseconds, to match CServerTime format).
+	int64  m_iFreezeRestartTime;  // # seconds before restarting.
 #define DEBUGF_NPC_EMOTE		0x0001  // NPCs emote their actions.
 #define DEBUGF_ADVANCE_STATS	0x0002  // prints stat % skill changes (only for _DEBUG builds).
 #define DEBUGF_EXP				0x0200  // experience gain/loss.
@@ -825,21 +825,21 @@ public:
 	uint m_iDebugFlags;         // DEBUG In game effects to turn on and off.
 
 	// Decay
-	int64  m_iDecay_Item;         // Base decay time in minutes (internally converted to milliseconds, to match CServerTime format).
-	int64  m_iDecay_CorpsePlayer; // Time in minutes for a playercorpse to decay (internally converted to milliseconds, to match CServerTime format).
-	int64  m_iDecay_CorpseNPC;    // Time in minutes for a NPC corpse to decay (internally converted to milliseconds, to match CServerTime format).
+	int64  m_iDecay_Item;         // Base decay time in minutes.
+	int64  m_iDecay_CorpsePlayer; // Time in minutes for a playercorpse to decay.
+	int64  m_iDecay_CorpseNPC;    // Time in minutes for a NPC corpse to decay.
 
 	// Save
 	int  m_iSaveNPCSkills;			// Only save NPC skills above this
-	int64 m_iSavePeriod;				// Minutes between saves (internally converted to milliseconds, to match CServerTime format).
+	int64 m_iSavePeriod;			// Minutes between saves.
 	int  m_iSaveBackupLevels;		// How many backup levels.
-	int64 m_iSaveBackgroundTime;	// Speed of the background save in minutes (internally converted to milliseconds, to match CServerTime format).
+	int64 m_iSaveBackgroundTime;	// Speed of the background save in minutes.
 	uint m_iSaveSectorsPerTick;		// max number of sectors per dynamic background save step
 	uint m_iSaveStepMaxComplexity;	// maximum "number of items+characters" saved at once during dynamic background save
 	bool m_fSaveGarbageCollect;		// Always force a full garbage collection.
 
 	// Account
-	int64 m_iDeadSocketTime;    // Disconnect inactive socket in x min (internally converted to milliseconds, to match CServerTime format).
+	int64 m_iDeadSocketTime;    // Disconnect inactive socket in x min.
 	int	 m_iArriveDepartMsg;    // General switch to turn on/off arrival/depart messages.
 	uint m_iClientsMax;         // Maximum (FD_SETSIZE) open connections to server
 	int  m_iClientsMaxIP;       // Maximum (FD_SETSIZE) open connections to server per IP
@@ -847,8 +847,8 @@ public:
 	int  m_iConnectingMaxIP;    // max clients connecting
 
 	int  m_iGuestsMax;          // Allow guests who have no accounts ?
-	int64 m_iClientLingerTime;   // How long logged out clients linger in seconds (internally converted to milliseconds, to match CServerTime format).
-	int64 m_iMinCharDeleteTime; // How old must a char be ? (seconds) (internally converted to milliseconds, to match CServerTime format).
+	int64 m_iClientLingerTime;   // How long logged out clients linger in seconds.
+	int64 m_iMinCharDeleteTime; // How old must a char be ? (seconds).
 	byte m_iMaxCharsPerAccount; // Maximum characters allowed on an account.
 	bool m_fLocalIPAdmin;       // The local ip is the admin ?
 	bool m_fMd5Passwords;       // Should MD5 hashed passwords be used?
@@ -874,13 +874,13 @@ public:
 	SOUND_TYPE  m_iSpell_Teleport_Sound_Players;    // Sound sent when a Player teleports.
 	ITEMID_TYPE m_iSpell_Teleport_Effect_Staff;     // ID of the item shown when a Staff member teleports.
 	SOUND_TYPE  m_iSpell_Teleport_Sound_Staff;      // Sound sent when a Staff member teleports.
-	int64 m_iSpellTimeout; // Timeout for spell targeting in seconds (internally converted to milliseconds, to match CServerTime format).
+	int64 m_iSpellTimeout; // Timeout for spell targeting in seconds.
 
 	// In Game Effects
 	int	 m_iLightDungeon;			// InDungeon light level.
 	int  m_iLightDay;				// Outdoor light level.
 	int  m_iLightNight;				// Outdoor light level.
-	int64  m_iGameMinuteLength;		// Length of the game world minute in (real world) seconds (internally converted to milliseconds, to match CServerTime format).
+	int64  m_iGameMinuteLength;		// Length of the game world minute in (real world) seconds.
 	bool m_fNoWeather;				// Turn off all weather.
 	bool m_fCharTags;				// Show [NPC] tags over chars.
 	bool m_fVendorTradeTitle;		// Show job title on vendor names.
@@ -914,8 +914,8 @@ public:
 	int	 m_iMoveRate;				// The percent rate of NPC movement.
 	int  m_iArcheryMaxDist;			// Max distance allowed for archery.
 	int  m_iArcheryMinDist;			// Min distance required for archery.
-	int64 m_iHitsUpdateRate;			// how often (seconds) send my hits updates to visible clients (internally converted to milliseconds, to match CServerTime format)..
-	int64 m_iCombatArcheryMovementDelay; // If COMBAT_ARCHERYCANMOVE is not enabled, wait this much tenth of seconds (minimum=0) after the player stopped moving before starting a new attack. (internally converted to milliseconds, to match CServerTime format).
+	int64 m_iHitsUpdateRate;			// how often (seconds) send my hits updates to visible clients..
+	int64 m_iCombatArcheryMovementDelay; // If COMBAT_ARCHERYCANMOVE is not enabled, wait this much tenth of seconds (minimum=0) after the player stopped moving before starting a new attack..
 	int  m_iCombatDamageEra;		// define damage formula to use on physical combat.
 	int  m_iCombatHitChanceEra;		// define hit chance formula to use on physical combat.
 	int  m_iCombatSpeedEra;			// define swing speed formula to use on physical combat.
@@ -935,14 +935,14 @@ public:
 	bool m_fAttackingIsACrime;		// Is attacking (even before hitting) a crime?
 	bool m_fGuardsInstantKill;		// Will guards kill instantly or follow normal combat rules?
 	bool m_fGuardsOnMurderers;		// should guards be only called on criminals ?
-	int64 m_iGuardLingerTime;		// How many seconds do guards linger about (internally converted to milliseconds, to match CServerTime format).
+	int64 m_iGuardLingerTime;		// How many seconds do guards linger about.
 	int  m_iSnoopCriminal;			// 1 in # chance of getting criminal flagged when succesfully snooping.
 	bool m_iTradeWindowSnooping;	// 1 means opening a container in trade window needs to use snooping, 0 direct open.
 	int  m_iMurderMinCount;			// amount of murders before we get title.
-	int64 m_iMurderDecayTime;		// (minutes) Roll murder counts off this often (internally converted to milliseconds, to match CServerTime format).
+	int64 m_iMurderDecayTime;		// (minutes) Roll murder counts off this often.
 	bool m_fHelpingCriminalsIsACrime;// If I help (rez, heal, etc) a criminal, do I become one too?
 	bool m_fLootingIsACrime;		// Looting a blue corpse is bad.
-	int64  m_iCriminalTimer;		// How many minutes are criminals flagged for? (internally converted to milliseconds, to match CServerTime format).
+	int64  m_iCriminalTimer;		// How many minutes are criminals flagged for?.
 	int	 m_iPlayerKarmaNeutral;		// How much bad karma makes a player neutral?
 	int	 m_iPlayerKarmaEvil;		// How much bad karma makes a player evil?
 	int  m_iMinKarma;				// Minimum karma level
@@ -954,9 +954,9 @@ public:
 	int	 m_iLostNPCTeleport;    // if Distance from HOME is greater than this, NPC will teleport to it instead of walking.
 	uint m_iExperimentalFlags;	// Experimental Flags.
 	uint m_iOptionFlags;		// Option Flags.
-	int64 m_iWoolGrowthTime;     // how long till wool grows back on sheared sheep, in minutes (internally converted to milliseconds, to match CServerTime format).
+	int64 m_iWoolGrowthTime;     // how long till wool grows back on sheared sheep, in minutes.
 	uint m_iAttackerTimeout;    // Timeout for attacker.
-	int64 m_iNotoTimeout;       // Timeout for NOTOriety checks (internally converted to milliseconds, to match CServerTime format).
+	int64 m_iNotoTimeout;       // Timeout for NOTOriety checks.
 	uint m_iMaxSkill;           // Records the higher [SKILL ] index.
 
 	int	m_iDistanceYell;        // Max distance at which Yells can be readed.
@@ -989,7 +989,7 @@ public:
 	bool m_fCUOStatus;      // Enable or disable the response to ConnectUO pings
 	bool m_fUOGStatus;      // Enable or disable the response to UOGateway pings
 
-	int64 m_iWalkBuffer;	// Walk limiting code: buffer size (in tenths of second) (internally converted to milliseconds, to match CServerTime format).
+	int64 m_iWalkBuffer;	// Walk limiting code: buffer size (in tenths of second).
 	int m_iWalkRegen;		// Walk limiting code: regen speed (%)
 
 	int m_iCommandLog;		// Only commands issued by this plevel and higher will be logged
@@ -1080,7 +1080,7 @@ public:
 	int m_iPetsInheritNotoriety;// Which notoriety flags do pets inherit from their masters? (default 0).
 
 	int m_iClientLoginMaxTries; // Max wrong password tries on client login screen before temporary ban client IP (0 is disabled).
-	int64 m_iClientLoginTempBan;  // Duration (in minutes) of temporary ban to client IPs that reach max wrong password tries (internally converted to milliseconds, to match CServerTime format).
+	int64 m_iClientLoginTempBan;  // Duration (in minutes) of temporary ban to client IPs that reach max wrong password tries.
 	int m_iMaxShipPlankTeleport;// How far from land i can be to take off a ship.
 
 	//	MySQL features
@@ -1105,7 +1105,7 @@ public:
 	bool m_fUsePacketPriorities;    // true to prioritise sending packets
 	bool m_fUseExtraBuffer;         // true to queue packet data in an extra buffer
 
-	int64 m_iTooltipCache;            // time in seconds to cache tooltip for (internally converted to milliseconds, to match CServerTime format).
+	int64 m_iTooltipCache;            // time in seconds to cache tooltip for.
 	int	m_iTooltipMode;             // tooltip mode (TOOLTIP_TYPE)
 	int	m_iContextMenuLimit;        // max amount of options per context menu
 #define AUTOTOOLTIP_FLAG_NAME          0x0001   // item or character name changes
@@ -1119,7 +1119,7 @@ public:
 
 	int64   m_iRegenRate[STAT_QTY]; // Regen's delay for each stat.
     int     _iItemHitpointsUpdate;  // Update period for CCItemDamageable
-	int64   m_iTimerCall;           // Amount of minutes to call f_onserver_timer (0 disables this, default) (internally converted to milliseconds, to match CServerTime format).
+	int64   _iTimerCall;            // Amount of minutes (converted to ticks internally) to call f_onserver_timer (0 disables this, default).
 	bool    m_bAllowLightOverride;  // Allow manual sector light override?
 	CSString m_sZeroPoint;          // Zero point for sextant coordinates counting. Comment this line out if you are not using ML-sized maps.
 	bool    m_bAllowBuySellAgent;   // Allow rapid Buy/Sell through Buy/Sell agent.

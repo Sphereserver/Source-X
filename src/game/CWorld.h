@@ -95,8 +95,10 @@ private:
 class CWorldClock
 {
 private:
-	CServerTime m_timeClock;    // The current SERVER time, measured in milliseconds from the first start of the server
-	int64 m_Clock_SysPrev;	    // SERVER time (in milliseconds) of the last OnTick()
+    uint64 _iCurTick;               // Current TICK count of the server from it's first start.
+	CServerTime m_timeClock;        // Internal clock record, on msecs, used to advance the ticks.
+	uint64 m_Clock_SysPrev;	        // SERVER time (in milliseconds) of the last OnTick()
+    CServerTime	m_nextTickTime;	    // next time to do sector stuff.
 public:
 	static const char *m_sClassName;
 	CWorldClock()
@@ -110,13 +112,21 @@ private:
 
 public:
 	void Init();
-	void InitTime( int64 lTimeBase );
+	void InitTime( uint64 lTimeBase );
 	bool Advance();
+    inline void AdvanceTick()
+    {
+        ++_iCurTick;
+    }
 	inline CServerTime GetCurrentTime() const // in milliseconds
 	{
 		return m_timeClock;
 	}
-	static int64 GetSystemClock(); // in milliseconds
+    inline uint64 GetCurrentTick() const
+    {
+        return _iCurTick;
+    }
+	static uint64 GetSystemClock(); // in milliseconds
 };
 
 class CTimedFunctionHandler
@@ -130,7 +140,7 @@ class CTimedFunctionHandler
 		};
 
 	private:
-		std::vector<TimedFunction *> m_timedFunctions[TICK_PER_SEC];
+		std::vector<TimedFunction *> m_timedFunctions[MSECS_PER_SEC];
 		int m_curTick;
 		int m_processedFunctionsPerTick;
 		std::vector<TimedFunction *> m_tfRecycled;
@@ -166,13 +176,13 @@ private:
 	CWorldClock m_Clock;		// the current relative tick time (in milliseconds)
 
 	// Special purpose timers.
-	CServerTime	m_nextTickTime;			// next time to do sector stuff.
-	CServerTime	m_timeSave;				// when to auto save ?
+	int64	m_timeSave;				// when to auto save ?
 	bool		m_bSaveNotificationSent;// has notification been sent?
-	CServerTime	m_timeRespawn;			// when to res dead NPC's ?
-	CServerTime	m_timeCallUserFunc;		// when to call next user func
+	int64	m_timeRespawn;			// when to res dead NPC's ?
+	int64	m_timeCallUserFunc;		// when to call next user func
 	uint		m_Sector_Pulse;			// Slow some stuff down that doesn't need constant processing.
 	ullong		m_ticksWithoutMySQL;	// MySQL should be running constantly if MySQLTicks is true, keep here record of how much ticks since Sphere is not connected.
+    int64       _iLastTick;             // Last tick done.
 
 	int m_iSaveStage;	// Current stage of the background save.
 	llong	m_savetimer; // Time it takes to save
@@ -187,7 +197,7 @@ public:
 	int m_iSaveCountID;			// Current archival backup id. Whole World must have this same stage id
 	int m_iLoadVersion;			// Previous load version. (only used during load of course)
 	int m_iPrevBuild;			// Previous __GITREVISION__
-	CServerTime m_timeStartup;	// When did the system restore load/save ?
+	int64 m_timeStartup;	// When did the system restore load/save ?
 
 	CUID m_uidLastNewItem;	// for script access.
 	CUID m_uidLastNewChar;	// for script access.
@@ -235,24 +245,38 @@ public:
 	{
 		return m_Clock.GetCurrentTime();  // Time in milliseconds
 	}
-	inline int64 GetTimeDiff( CServerTime time ) const
-	{
-		// How long till this event
-		// negative = in the past.
-		return time.GetTimeDiff( GetCurrentTime() ); // Time in milliseconds
-	}
+    inline int64 GetTimeDiff(CServerTime time) const
+    {
+        // How long till this event
+        // negative = in the past.
+        return time.GetTimeDiff(GetCurrentTime()); // Time in milliseconds
+    }
+    inline int64 GetTimeDiff(int64 time) const
+    {
+        // How long till this event
+        // negative = in the past.
+        return time - GetCurrentTime().GetTimeRaw(); // Time in milliseconds
+    }
+    inline int64 GetTickDiff(int64 iTick) const
+    {
+        return _iLastTick - iTick;
+    }
+    inline int64 GetCurrentTick() const
+    {
+        return m_Clock.GetCurrentTick();
+    }
 
 #define TRAMMEL_SYNODIC_PERIOD 105 // in game world minutes
 #define FELUCCA_SYNODIC_PERIOD 840 // in game world minutes
 #define TRAMMEL_FULL_BRIGHTNESS 2 // light units LIGHT_BRIGHT
 #define FELUCCA_FULL_BRIGHTNESS 6 // light units LIGHT_BRIGHT
 	uint GetMoonPhase( bool bMoonIndex = false ) const;
-	CServerTime GetNextNewMoon( bool bMoonIndex ) const;
+	int64 GetNextNewMoon( bool bMoonIndex ) const;
 
-	dword GetGameWorldTime( CServerTime basetime ) const;
-	dword GetGameWorldTime() const	// return game world minutes
+	int64 GetGameWorldTime( int64 basetime ) const;
+    int64 GetGameWorldTime() const	// return game world minutes
 	{
-		return( GetGameWorldTime( GetCurrentTime()));
+		return( GetGameWorldTime(GetCurrentTick()));
 	}
 
 	// CSector World Map stuff.
@@ -294,7 +318,6 @@ public:
 	bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 
 	void OnTick();
-	void OnTickMySQL();
 
 	void GarbageCollection();
 	void Restock();

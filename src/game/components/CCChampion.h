@@ -102,7 +102,7 @@ public:
     * @brief Start the champion.
     *
     * Calls SetLevel(1), which automatically set the relevant data to work from now.
-    * SetTimeout( 1000 * 60 * 10 ) // 10 minutes.
+    * SetTimeoutS( 60 * 10 ) // 10 minutes.
     */
     void Start();
     /**

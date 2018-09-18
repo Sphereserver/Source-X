@@ -3,7 +3,6 @@
 #include "../game/chars/CChar.h"
 #include "../game/items/CItemShip.h"
 #include "../common/CLog.h"
-#include "../game/CServerTime.h"
 #include "../sphere/ProfileTask.h"
 #include "CException.h"
 #include "CRect.h"
@@ -21,7 +20,7 @@ CCharsDisconnectList::CCharsDisconnectList()
 
 CCharsActiveList::CCharsActiveList()
 {
-	m_timeLastClient.Init();
+	m_timeLastClient = 0;
 	m_iClients = 0;
 }
 
@@ -34,7 +33,7 @@ void CCharsActiveList::OnRemoveObj( CSObjListRec * pObRec )
 	if ( pChar->IsClient())
 	{
 		ClientDetach();
-		m_timeLastClient = CServerTime::GetCurrentTime();	// mark time in case it's the last client
+        m_timeLastClient = g_World.GetCurrentTick();	// mark time in case it's the last client
 	}
 	CSObjList::OnRemoveObj(pObRec);
 	pChar->SetContainerFlags(UID_O_DISCONNECT);

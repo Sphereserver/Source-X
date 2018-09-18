@@ -11,7 +11,7 @@
 
 // 1.0 seconds is the minimum animation duration ("delay"), but we have to subtract the tenths of seconds that will pass until the next tick, since
 //  the timer will start on the next tick
-#define COMBAT_MIN_SWING_ANIMATION_DELAY (int16)(10 - (TICK_PER_SEC/10))
+#define COMBAT_MIN_SWING_ANIMATION_DELAY (int16)(TICKS_PER_SEC - 1)
 
 // I noticed a crime.
 void CChar::OnNoticeCrime( CChar * pCriminal, const CChar * pCharMark )
@@ -161,7 +161,7 @@ void CChar::CallGuards()
 	if (!m_pArea || !m_pArea->IsGuarded() || IsStatFlag(STATF_DEAD))
 		return;
 
-	if ((CServerTime::GetCurrentTime().GetTimeRaw() - m_timeLastCallGuards) < MSECS_PER_TICK)	// Spam check, not calling this more than once per tick, which will cause an excess of calls and checks on crowded areas because of the 2 CWorldSearch.
+	if ((g_World.GetCurrentTick() - m_timeLastCallGuards) < 1)	// Spam check, not calling this more than once per tick, which will cause an excess of calls and checks on crowded areas because of the 2 CWorldSearch.
 		return;
 
 	// We don't have any target yet, let's check everyone nearby
@@ -186,7 +186,7 @@ void CChar::CallGuards()
 
 		CallGuards(pCriminal);
 	}
-	m_timeLastCallGuards = CServerTime::GetCurrentTime().GetTimeRaw();
+	m_timeLastCallGuards = g_World.GetCurrentTick();
 	return;
 }
 
@@ -1249,7 +1249,7 @@ void CChar::Fight_HitTry()
         {
             fPreHit_HadInstaHit = (!m_atFight.m_iRecoilDelay && !m_atFight.m_iSwingAnimationDelay);
             Fight_SetDefaultSwingDelays();
-            const int64 iTimeCur = CServerTime::GetCurrentTime().GetTimeRaw();
+            const int64 iTimeCur = g_World.GetCurrentTick();
             // Time required to perform the previous normal hit, without the PreHit delay reduction.
             const int64 iPreHit_LastHitTag_FullHit_Prev = GetKeyNum("LastHit", true);
             // Time required to perform the shortened hit with PreHit.
@@ -1498,7 +1498,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
     if ( IsSetCombatFlags(COMBAT_PREHIT) && (m_atFight.m_War_Swing_State == WAR_SWING_EQUIPPING) && (!m_atFight.m_iSwingIgnoreLastHitTag) )
     {
-        int64 iTimeDiff = (g_World.GetCurrentTime().GetTimeRaw() - GetKeyNum("LastHit", true));
+        int64 iTimeDiff = (g_World.GetCurrentTick() - GetKeyNum("LastHit", true));
         if (iTimeDiff < 0)
         {
             return WAR_SWING_EQUIPPING;
@@ -1643,7 +1643,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 		if ( m_pClient && (skill == SKILL_THROWING) )		// throwing weapons also have anim of the weapon returning after throw it
 		{
-			m_pClient->m_timeLastSkillThrowing = CServerTime::GetCurrentTime();
+			m_pClient->m_timeLastSkillThrowing = g_World.GetCurrentTick();
 			m_pClient->m_pSkillThrowingTarg = pCharTarg;
 			m_pClient->m_SkillThrowingAnimID = AnimID;
 			m_pClient->m_SkillThrowingAnimHue = AnimHue;
@@ -1881,7 +1881,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 				ASSERT(pBlood);
 				pBlood->SetHue(pCharTarg->m_wBloodHue);
 				pBlood->MoveNear(pCharTarg->GetTopPoint(), 1);
-				pBlood->SetDecayTime(5 * 1000);
+				pBlood->SetDecayTime(5 * MSECS_PER_SEC);
 			}
 		}
 

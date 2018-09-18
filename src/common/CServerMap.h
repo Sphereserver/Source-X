@@ -10,14 +10,13 @@
 #include "../game/uo_files/CUOMultiItemRec.h"
 #include "../game/uo_files/uofiles_macros.h"
 #include "../game/uo_files/uofiles_types.h"
-#include "../game/CServerTime.h"
 #include "sphere_library/CSObjSortArray.h"
 #include "CRect.h"
 
 class CCachedMulItem
 {
 private:
-	CServerTime m_timeRef;		// When in world.GetTime() was this last referenced.
+	int64 m_timeRef;		// When in world.GetTime() was this last referenced.
 public:
 	static const char *m_sClassName;
 	CCachedMulItem();

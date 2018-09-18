@@ -701,7 +701,7 @@ void CAccount::OnLogin( CClient * pClient )
 	ADDTOCALLSTACK("CAccount::OnLogin");
 
 	ASSERT(pClient);
-	pClient->m_timeLogin = CServerTime::GetCurrentTime();	// g_World clock of login time. "LASTCONNECTTIME"
+	pClient->m_timeLogin = g_World.GetCurrentTick();	// g_World clock of login time. "LASTCONNECTTIME"
 
 	if ( GetPrivLevel() >= PLEVEL_Counsel )	// ON by default.
 	{
@@ -744,7 +744,7 @@ void CAccount::OnLogout(CClient *pClient, bool bWasChar)
 	// so we should check whatever player is attached to a char
 	if ( pClient->IsConnectTypePacket() && bWasChar )
 	{
-		m_Last_Connect_Time = ( -g_World.GetTimeDiff(pClient->m_timeLogin) ) / ( 1000 * 60 ); // CServerTime is in milliseconds
+		m_Last_Connect_Time = ( -g_World.GetTimeDiff(pClient->m_timeLogin) ) / (MSECS_PER_SEC * 60 );
 		if ( m_Last_Connect_Time < 0 )
 			m_Last_Connect_Time = 0;
 
@@ -787,24 +787,24 @@ bool CAccount::CheckPasswordTries(CSocketAddress csaPeerName)
 	int iAccountMaxTries = g_Cfg.m_iClientLoginMaxTries;
 	bool bReturn = true;
 	dword dwCurrentIP = csaPeerName.GetAddrIP();
-	CServerTime timeCurrent = CServerTime::GetCurrentTime();
+	int64 timeCurrent = g_World.GetCurrentTime().GetTimeRaw();
 
 	BlockLocalTime_t::iterator itData = m_BlockIP.find(dwCurrentIP);
 	if ( itData != m_BlockIP.end() )
 	{
 		BlockLocalTimePair_t itResult = (*itData).second;
 		TimeTriesStruct_t & ttsData = itResult.first;
-		ttsData.m_Last = timeCurrent.GetTimeRaw();
+		ttsData.m_Last = timeCurrent;
 
-		if ( ttsData.m_Delay > timeCurrent.GetTimeRaw() )
+		if ( ttsData.m_Delay > timeCurrent )
 		{
 			bReturn = false;
 		}
 		else
 		{
-			if ((( ttsData.m_Last - ttsData.m_First ) > 15*1000 ) && (itResult.second < iAccountMaxTries))
+			if ((( ttsData.m_Last - ttsData.m_First ) > 15* MSECS_PER_SEC) && (itResult.second < iAccountMaxTries))
 			{
-				ttsData.m_First = timeCurrent.GetTimeRaw();
+				ttsData.m_First = timeCurrent;
 				ttsData.m_Delay = 0;
 				itResult.second = 0;
 			}
@@ -831,8 +831,8 @@ bool CAccount::CheckPasswordTries(CSocketAddress csaPeerName)
 	else
 	{
 		TimeTriesStruct_t ttsData;
-		ttsData.m_First = timeCurrent.GetTimeRaw();
-		ttsData.m_Last = timeCurrent.GetTimeRaw();
+		ttsData.m_First = timeCurrent;
+		ttsData.m_Last = timeCurrent;
 		ttsData.m_Delay = 0;
 
 		m_BlockIP[dwCurrentIP] = std::make_pair(ttsData, 0);
@@ -855,7 +855,7 @@ void CAccount::ClearPasswordTries(bool bAll)
 		return;
 	}
 
-	llong timeCurrent = CServerTime::GetCurrentTime().GetTimeRaw();
+	llong timeCurrent = g_World.GetCurrentTick();
 	for ( BlockLocalTime_t::iterator itData = m_BlockIP.begin(), end = m_BlockIP.end(); itData != end; )
 	{
 		BlockLocalTimePair_t itResult = (*itData).second;

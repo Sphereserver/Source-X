@@ -13,7 +13,6 @@
 #include "../common/sqlite/SQLite.h"
 #include "clients/CChat.h"
 #include "CServerDef.h"
-#include "CServerTime.h"
 #include <atomic>
 
 
@@ -52,7 +51,7 @@ public:
 	CSString m_sConsoleText;
 	bool m_fConsoleTextReadyFlag;	// interlocking flag for moving between tasks.
 
-	CServerTime m_timeShutdown;	// When to perform the shutdowm (g_World.clock)
+	int64 m_timeShutdown;	// When to perform the shutdowm (g_World.clock)
 	CChat m_Chats;	// keep all the active chats
 
 	std::vector<CItemShip *> m_ShipTimers;

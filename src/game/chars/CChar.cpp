@@ -19,7 +19,6 @@
 #include "../components/CCSpawn.h"
 #include "../CContainer.h"
 #include "../CServer.h"
-#include "../CServerTime.h"
 #include "../CWorld.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
@@ -268,7 +267,7 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false ),
 	m_atUnk.m_Arg2 = 0;
 	m_atUnk.m_Arg3 = 0;
 
-	m_timeLastRegen = m_timeCreate = CServerTime::GetCurrentTime();
+	m_timeLastRegen = m_timeCreate = g_World.GetCurrentTick();
 	m_timeLastHitsUpdate = m_timeLastRegen;
 	m_timeLastCallGuards = 0;
 
@@ -399,7 +398,7 @@ void CChar::ClientAttach( CClient * pClient )
 		return;
 
 	ASSERT(m_pPlayer);
-	m_pPlayer->m_timeLastUsed = CServerTime::GetCurrentTime();
+	m_pPlayer->m_timeLastUsed = g_World.GetCurrentTick();
 
 	m_pClient = pClient;
 	GetTopSector()->ClientAttach( this );
@@ -2366,7 +2365,7 @@ do_default:
 			sVal.FormatVal( m_defense + pCharDef->m_defense );
 			return true;
 		case CHC_AGE:
-			sVal.FormatLLVal( -( g_World.GetTimeDiff(m_timeCreate) / ( 1000 * 60 * 60 *24 ) )); //displayed in days
+			sVal.FormatLLVal( -( g_World.GetTickDiff(m_timeCreate) / ( MSECS_PER_SEC * 60 * 60 *24 ) )); //displayed in days
 			return true;
 		case CHC_BANKBALANCE:
 			sVal.FormatVal( GetBank()->ContentCount( CResourceID(RES_TYPEDEF,IT_GOLD)));
@@ -2709,7 +2708,7 @@ do_default:
 			sVal = g_Cfg.ResourceGetName( CResourceID( RES_CHARDEF, GetDispID()) );
 			break;
 		case CHC_CREATE:
-			sVal.FormatLLVal( -( g_World.GetTimeDiff(m_timeCreate) / 1000 ));
+			sVal.FormatLLVal( -( g_World.GetTimeDiff(m_timeCreate) / TENTHS_PER_SEC));  // Displayed in Tenths of Second.
 			break;
 		case CHC_DIR:
 			{
@@ -3203,9 +3202,6 @@ do_default:
 				}
 				return false;
 			}break;
-		//case CHC_CREATE:
-		//	m_timeCreate.InitTime(s.GetArgLLVal() * 1000);  // arg is in seconds, CServerTime is in milliseconds
-		//	break;
 		case CHC_DIR:
 			{
 				DIR_TYPE dir = static_cast<DIR_TYPE>(s.GetArgVal());
@@ -3461,7 +3457,7 @@ void CChar::r_Write( CScript & s )
 	EXC_TRY("r_Write");
 
 	s.WriteSection("WORLDCHAR %s", GetResourceName());
-	s.WriteKeyVal("CREATE", -(g_World.GetTimeDiff(m_timeCreate) / 1000));
+	//s.WriteKeyVal("CREATE", -(g_World.GetTimeDiff(m_timeCreate) / 1000)); // Do we need to save it?
 
 	CObjBase::r_Write(s);
 	if ( m_pPlayer )
@@ -4149,7 +4145,7 @@ bool CChar::r_Verb( CScript &s, CTextConsole * pSrc ) // Execute command from sc
 					return false;
 				CPointMap pt = pCharSrc->GetTopPoint();
 				pt.MoveN( pCharSrc->m_dirFace, 3 );
-				pItem->MoveToDecay( pt, 10*60*1000 );	// make the cage vanish after 10 minutes.
+				pItem->MoveToDecay( pt, 10*60* MSECS_PER_SEC);	// make the cage vanish after 10 minutes.
 				pItem->Multi_Setup( NULL, UID_CLEAR );
 				Spell_Teleport( pt, true, false );
 				break;

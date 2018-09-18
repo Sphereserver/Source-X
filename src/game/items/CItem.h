@@ -355,7 +355,6 @@ public:
 		struct
 		{
 			CResourceIDBase m_ResID;	// more1 = preconfigured book id from RES_BOOK or Time date stamp for the book/message creation. (if |0x80000000)
-										//CServerTime   	 m_Time;	// more2= Time date stamp for the book/message creation. (Now Placed inside TIMESTAMP for int64 support)
 		} m_itBook;
 
 		// IT_DEED
@@ -592,7 +591,7 @@ public:
 	ITEMID_TYPE GetDispID() const;
 	bool IsSameDispID( ITEMID_TYPE id ) const;	// account for flipped types ?
 	bool SetDispID( ITEMID_TYPE id );
-	void SetAnim( ITEMID_TYPE id, int64 iMsecsTime ); // time in milliseconds
+	void SetAnim( ITEMID_TYPE id, int64 iTicksTimeout); // time in ticks
 
 	int IsWeird() const;
 	char GetFixZ(CPointMap pt, dword dwBlockFlags = 0 );
@@ -624,7 +623,7 @@ public:
 
 	height_t GetHeight() const;
 	int64  GetDecayTime() const;
-	void SetDecayTime( int64 iTimeInMsecs = 0 );
+	void SetDecayTime( int64 iMsecsTimeout = 0 );
 	SOUND_TYPE GetDropSound( const CObjBase * pObjOn ) const;
 	bool IsTopLevelMultiLocked() const;
 	bool IsMovableType() const;
@@ -660,12 +659,15 @@ public:
 
 	virtual int GetWeight(word amount = 0) const;
 
-	void SetTimeout( int64 iTimeInMsecs );
+    void SetTimeout(int64 iMsecs);
+    void SetTimeoutS(int64 iSeconds);
+    void SetTimeoutT(int64 iTicks);
+    void SetTimeoutD(int64 iTenths);
 
 	virtual void OnMoveFrom();
 	virtual bool MoveTo(CPointMap pt, bool bForceFix = false); // Put item on the ground here.
 	bool MoveToUpdate(CPointMap pt, bool bForceFix = false);
-	bool MoveToDecay(const CPointMap & pt, int64 iDecayTimeMsecs, bool bForceFix = false);
+	bool MoveToDecay(const CPointMap & pt, int64 iMsecsTimeout, bool bForceFix = false);
 	bool MoveToCheck( const CPointMap & pt, CChar * pCharMover = NULL );
 	virtual bool MoveNearObj( const CObjBaseTemplate *pItem, word iSteps = 0 );
 

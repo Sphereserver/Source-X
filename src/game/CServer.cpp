@@ -22,7 +22,6 @@
 #include "clients/CClient.h"
 #include "items/CItemShip.h"
 #include "CWorld.h"
-#include "CServerTime.h"
 #include "spheresvr.h"
 #include "triggers.h"
 #include "CScriptProfiler.h"
@@ -40,7 +39,7 @@ CServer::CServer() : CServerDef( SPHERE_TITLE, CSocketAddressIP( SOCKET_LOCAL_AD
 
 	m_iAdminClients = 0;
 
-	m_timeShutdown.Init();
+	m_timeShutdown = 0;
 
 	m_fConsoleTextReadyFlag = false;
 
@@ -124,20 +123,20 @@ void CServer::Shutdown( int64 iMinutes ) // If shutdown is initialized
 	ADDTOCALLSTACK("CServer::Shutdown");
 	if ( iMinutes == 0 )
 	{
-		if ( ! m_timeShutdown.IsTimeValid() )
+		if ( ! (m_timeShutdown > 0) )
 			return;
-		m_timeShutdown.Init();
+		m_timeShutdown = 0;
 		g_World.Broadcast( g_Cfg.GetDefaultMsg( DEFMSG_MSG_SERV_SHUTDOWN_CANCEL ) );
 		return;
 	}
 
 	if ( iMinutes < 0 )
 	{
-		iMinutes = g_World.GetTimeDiff( m_timeShutdown ) / ( 60 * 1000 ); // CServerTime is in milliseconds
+		iMinutes = g_World.GetTimeDiff( m_timeShutdown ) / ( 60 * MSECS_PER_SEC);
 	}
 	else
 	{
-		m_timeShutdown = CServerTime::GetCurrentTime() + ( iMinutes * 60 * 1000 ); // CServerTime is in milliseconds
+		m_timeShutdown = g_World.GetCurrentTick() + ( iMinutes * 60 * MSECS_PER_SEC);
 	}
 
 	g_World.Broadcastf(g_Cfg.GetDefaultMsg( DEFMSG_MSG_SERV_SHUTDOWN ), iMinutes);
@@ -219,7 +218,7 @@ ssize_t CServer::PrintPercent( ssize_t iCount, ssize_t iTotal )
 int64 CServer::GetAgeHours() const
 {
 	ADDTOCALLSTACK("CServer::GetAgeHours");
-	return (CServerTime::GetCurrentTime().GetTimeRaw() / (60*60*1000)); // CServerTime is in milliseconds
+	return (g_World.GetCurrentTick() / (60 * 60 * MSECS_PER_SEC));
 }
 
 lpctstr CServer::GetStatusString( byte iIndex ) const
@@ -1760,7 +1759,7 @@ void CServer::OnTick()
 
 	ProfileTask overheadTask(PROFILE_OVERHEAD);
 
-	if ( m_timeShutdown.IsTimeValid() )
+	if ( m_timeShutdown > 0 )
 	{
 		EXC_SET("shutdown");
 		if ( g_World.GetTimeDiff(m_timeShutdown) <= 0 )

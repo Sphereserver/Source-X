@@ -8,7 +8,6 @@
 #include "../../sphere/ProfileTask.h"
 #include "../chars/CChar.h"
 #include "../components/CCSpawn.h"
-#include "../CServerTime.h"
 #include "../spheresvr.h"
 #include "../triggers.h"
 #include "CClient.h"
@@ -39,16 +38,16 @@ CClient::CClient(NetState* state)
 	m_pChar = NULL;
 	m_pGMPage = NULL;
 
-	m_timeLogin.Init();
-	m_timeLastEvent = CServerTime::GetCurrentTime();
-	m_timeLastEventWalk = CServerTime::GetCurrentTime();
+	m_timeLogin = 0;
+	m_timeLastEvent = g_World.GetCurrentTick();
+	m_timeLastEventWalk = g_World.GetCurrentTick();
 	m_timeNextEventWalk = 0;
 
 	m_iWalkStepCount = 0;
 	m_iWalkTimeAvg	= 100;
 	m_timeWalkStep = GetSupportedTickCount();
 
-	m_Targ_Timeout.Init();
+	m_Targ_Timeout = 0;
 	m_Targ_Mode = CLIMODE_SETUP_CONNECTING;
 	m_Prompt_Mode = CLIMODE_NORMAL;
 
@@ -63,7 +62,7 @@ CClient::CClient(NetState* state)
 
 	m_zLastMessage[0] = 0;
 	m_zLastObjMessage[0] = 0;
-	m_tNextPickup.Init();
+	m_tNextPickup = 0;
 
 	m_BfAntiCheat.lastvalue = m_BfAntiCheat.count = 0x0;
 	m_ScreenSize.x = m_ScreenSize.y = 0x0;
@@ -71,7 +70,7 @@ CClient::CClient(NetState* state)
 	m_pHouseDesign = NULL;
 	m_fUpdateStats = 0;
 
-    m_timeLastSkillThrowing.Init();
+    m_timeLastSkillThrowing = 0;
     m_pSkillThrowingTarg = NULL;
 }
 
@@ -148,7 +147,7 @@ void CClient::CharDisconnect()
 	// Even tho the CClient might stay active.
 	if ( !m_pChar )
 		return;
-	int64 iLingerTime = g_Cfg.m_iClientLingerTime;
+	int64 iLingerTime = g_Cfg.m_iClientLingerTime / MSECS_PER_SEC;
 
 	Announce(false);
 	bool fCanInstaLogOut = CanInstantLogOut();
@@ -156,7 +155,7 @@ void CClient::CharDisconnect()
 	//	stoned chars cannot logout if they are not privileged of course
 	if ( m_pChar->IsStatFlag(STATF_STONE) )
 	{
-		iLingerTime = 60*60*1000;	// 1 hour of linger time
+		iLingerTime = 60*60;	// 1 hour of linger time
 		fCanInstaLogOut = false;
 	}
 
@@ -196,7 +195,7 @@ void CClient::CharDisconnect()
 		ASSERT(pItemChange);
 		pItemChange->SetName("Client Linger");
 		pItemChange->SetType(IT_EQ_CLIENT_LINGER);
-		pItemChange->SetTimeout(iLingerTime);
+		pItemChange->SetTimeoutS(iLingerTime);
 		m_pChar->LayerAdd(pItemChange, LAYER_FLAG_ClientLinger);
 	}
 	else
@@ -285,7 +284,7 @@ void CClient::Announce( bool fArrive ) const
 	if ( pMurders )
 	{
 		if ( fArrive )	// on client login, set active timer on murder memory
-			pMurders->SetTimeout(pMurders->m_itEqMurderCount.m_Decay_Balance * 1000);
+			pMurders->SetTimeoutS(pMurders->m_itEqMurderCount.m_Decay_Balance);
 		else			// or make it inactive on logout
 		{
 			pMurders->m_itEqMurderCount.m_Decay_Balance = (dword)(pMurders->GetTimerAdjusted());
@@ -591,10 +590,10 @@ bool CClient::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 			sVal.FormatVal( IsPriv( PRIV_HEARALL ));
 			break;
 		case CC_LASTEVENT:
-			sVal.FormatLLVal( m_timeLastEvent.GetTimeRaw() );
+			sVal.FormatLLVal( m_timeLastEvent );
 			break;
         case CC_LASTEVENTWALK:
-            sVal.FormatLLVal( m_timeLastEventWalk.GetTimeRaw() );
+            sVal.FormatLLVal( m_timeLastEventWalk );
             break;
 		case CC_PRIVSHOW:
 			// Show my priv title.
@@ -1381,7 +1380,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 
 				int64 SpellTimeout = g_Cfg.m_iSpellTimeout;
 				if ( GetDefNum("SPELLTIMEOUT", true) )
-					SpellTimeout = GetDefNum("SPELLTIMEOUT", true)*100; // tenths of second to milliseconds
+					SpellTimeout = GetDefNum("SPELLTIMEOUT", true);
 
 				addTarget(CLIMODE_TARG_SKILL_MAGERY, pPrompt, pSpellDef->IsSpellType(SPELLFLAG_TARG_XYZ), pSpellDef->IsSpellType(SPELLFLAG_HARM), SpellTimeout);
 				break;

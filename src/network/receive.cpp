@@ -747,9 +747,8 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 	const CVarDefCont* vardef = g_Cfg.m_bAllowBuySellAgent ? NULL : client->m_TagDefs.GetKey("BUYSELLTIME");
 	if (vardef != NULL)
 	{
-		CServerTime allowsell;
-		allowsell.InitTime(vardef->GetValNum() + (itemCount * 3));
-		if (g_World.GetCurrentTime() < allowsell)
+		int64 allowsell = vardef->GetValNum() + (itemCount * 3);
+		if (g_World.GetCurrentTime().GetTimeRaw() < allowsell)
 		{
 			client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_BUYFAST));
 			return true;
@@ -1225,7 +1224,7 @@ bool PacketBulletinBoardReq::onReceive(NetState* net)
 
 			newMessage->SetAttr(ATTR_MOVE_NEVER);
 			newMessage->SetName(str);
-			newMessage->SetTimeStamp(CServerTime::GetCurrentTime().GetTimeRaw());
+			newMessage->SetTimeStamp(g_World.GetCurrentTick());
 			newMessage->m_sAuthor = character->GetName();
 			newMessage->m_uidLink = character->GetUID();
 
@@ -1883,8 +1882,7 @@ bool PacketVendorSellReq::onReceive(NetState* net)
 	const CVarDefCont* vardef = g_Cfg.m_bAllowBuySellAgent ? NULL : client->m_TagDefs.GetKey("BUYSELLTIME");
 	if (vardef != NULL)
 	{
-		CServerTime allowsell;
-		allowsell.InitTime(vardef->GetValNum() + (itemCount * 3));
+		int64 allowsell = vardef->GetValNum() + (itemCount * 3);
 		if (g_World.GetCurrentTime() < allowsell)
 		{
 			client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_SELLFAST));

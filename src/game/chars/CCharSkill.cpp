@@ -552,7 +552,7 @@ void CChar::Skill_Cleanup()
 	// We are starting the skill or ended dealing with it (started / succeeded / failed / aborted)
 	m_Act_Difficulty = 0;
 	m_Act_SkillCurrent = SKILL_NONE;
-	SetTimeout( m_pPlayer ? -1 : MSECS_PER_TICK );	// we should get a brain tick next time
+	SetTimeout( m_pPlayer ? -1 : 1 );	// we should get a brain tick next time
 }
 
 lpctstr CChar::Skill_GetName( bool fUse ) const
@@ -605,21 +605,12 @@ ushort CChar::Skill_GetBase( SKILL_TYPE skill ) const
 void CChar::Skill_SetTimeout()
 {
 	ADDTOCALLSTACK("CChar::Skill_SetTimeout");
-	SKILL_TYPE skill = Skill_GetActive();
-	ASSERT( IsSkillBase(skill));
-
-	const CSkillDef * pSkillDef = g_Cfg.GetSkillDef(skill);
-	if (pSkillDef == NULL)
-		return;
-
-	int iSkillLevel = Skill_GetBase(skill);
-    int64 iDelay = (int64)(pSkillDef->m_Delay.GetLinear(iSkillLevel) * 1000) / 10;
-	SetTimeout(iDelay);
+	SetTimeout(Skill_GetTimeout());
 }
 
 int64 CChar::Skill_GetTimeout()
 {
-	ADDTOCALLSTACK("CChar::Skill_SetTimeout");
+	ADDTOCALLSTACK("CChar::Skill_GetTimeout");
 	SKILL_TYPE skill = Skill_GetActive();
 	ASSERT( IsSkillBase(skill));
 
@@ -628,7 +619,7 @@ int64 CChar::Skill_GetTimeout()
 		return 0;
 
 	int iSkillLevel = Skill_GetBase(skill);
-	return (int64)(pSkillDef->m_Delay.GetLinear(iSkillLevel));
+	return pSkillDef->m_Delay.GetLinear(iSkillLevel) * TENTHS_PER_SEC;
 }
 
 
@@ -1043,7 +1034,7 @@ bool CChar::Skill_Mining_Smelt( CItem * pItemOre, CItem * pItemTarg )
 	CPointMap pt = m_Act_p;
 	pt.m_z += 8;	// on top of the forge.
 	pItemEffect->SetAttr( ATTR_MOVE_NEVER );
-	pItemEffect->MoveToDecay( pt, 1000 );
+	pItemEffect->MoveToDecay( pt, MSECS_PER_SEC);
 	if ( !g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_NOSFX ) )
 		Sound( 0x2b );
 
@@ -2876,7 +2867,7 @@ int CChar::Skill_Act_Napping( SKTRIG_TYPE stage )
 
 	if ( stage == SKTRIG_START )
 	{
-		SetTimeout( 2*1000 );
+		SetTimeoutS(2);
 		return 0;
 	}
 
@@ -2884,7 +2875,7 @@ int CChar::Skill_Act_Napping( SKTRIG_TYPE stage )
 	{
 		if ( m_Act_p != GetTopPoint())
 			return -SKTRIG_QTY;	// we moved.
-		SetTimeout( 8*1000 );
+		SetTimeoutS(8);
 		Speak( "z", HUE_WHITE, TALKMODE_WHISPER );
 		return -SKTRIG_STROKE;	// Stay in the skill till we hit.
 	}
@@ -2916,7 +2907,7 @@ int CChar::Skill_Act_Breath( SKTRIG_TYPE stage )
 		if ( !g_Cfg.IsSkillFlag( Skill_GetActive(), SKF_NOANIM ) )
 			UpdateAnimate( ANIM_MON_Stomp );
 
-		SetTimeout( 3*1000 );
+		SetTimeoutS(3);
 		return 0;
 	}
 
@@ -3056,7 +3047,7 @@ int CChar::Skill_Act_Training( SKTRIG_TYPE stage )
 
 	if ( stage == SKTRIG_START )
 	{
-		SetTimeout(1 * 1000);
+		SetTimeout(MSECS_PER_SEC);
 		return 0;	// How difficult? 1-1000
 	}
 	if ( stage == SKTRIG_STROKE )

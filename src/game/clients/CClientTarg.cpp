@@ -1176,9 +1176,9 @@ int CClient::OnSkill_Forensics( CUID uid, int iSkillLevel, bool fTest )
 			strcpy( pszTemp + len, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_FAILNAME) );
 
 	}
-	else if ( pCorpse->GetTimeStamp().IsTimeValid() )
+	else if ( pCorpse->GetTimeStamp() > 0 )
 	{
-		int len = sprintf( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_TIMER), pCorpse->GetName(), -g_World.GetTimeDiff(pCorpse->GetTimeStamp()) / 1000 ); // /1000 because CServerTime is in milliseconds
+		int len = sprintf( pszTemp, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_TIMER), pCorpse->GetName(), -g_World.GetTimeDiff(pCorpse->GetTimeStamp()) / MSECS_PER_SEC);
 		if ( pName )
 			sprintf( pszTemp + len, g_Cfg.GetDefaultMsg(DEFMSG_FORENSICS_NAME), pName );
 		else
@@ -1973,7 +1973,7 @@ bool CClient::OnTarg_Use_Item( CObjBase * pObjTarg, CPointMap & pt, ITEMID_TYPE 
 		if ( ! m_pChar->CanUse( pItemTarg, false ))
 			return false;
 
-		pItemTarg->SetAnim((ITEMID_TYPE)( pItemTarg->GetID() + 1 ), 2 * 1000);
+		pItemTarg->SetAnim((ITEMID_TYPE)( pItemTarg->GetID() + 1 ), 2 * MSECS_PER_SEC);
 		pItemUse->ConsumeAmount( 1 );
 
 		{
@@ -2116,7 +2116,7 @@ static lpctstr const sm_Txt_LoomUse[] =
 	g_Cfg.GetDefaultMsg( DEFMSG_ITEMUSE_BOLT_5 )
 };
 
-		// pItemTarg->SetAnim((ITEMID_TYPE)(pItemTarg->GetID() + 1), 2 * 1000 );
+		// pItemTarg->SetAnim((ITEMID_TYPE)(pItemTarg->GetID() + 1), 2 * MSECS_PER_SEC );
 
 		// Use more1 to record the type of resource last used on this object
 		// Use more2 to record the number of resources used so far
@@ -2411,7 +2411,7 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 	}
 
 	CVarDefCont * pTagInvitetime = m_pChar->m_TagDefs.GetKey("PARTY_LASTINVITETIME");
-	if ( pTagInvitetime && ( g_World.GetCurrentTime().GetTimeRaw() < pTagInvitetime->GetValNum() ) )
+	if ( pTagInvitetime && (g_World.GetCurrentTick() < pTagInvitetime->GetValNum() ) )
 	{
 		SysMessageDefault( DEFMSG_PARTY_ADD_TOO_FAST );
 		return false;
@@ -2432,7 +2432,7 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 	pChar->SysMessage( sTemp );
 
 	m_pChar->SetKeyNum("PARTY_LASTINVITE", (dword)(pChar->GetUID()));
-	m_pChar->SetKeyNum("PARTY_LASTINVITETIME", g_World.GetCurrentTime().GetTimeRaw() + (Calc_GetRandVal2(2,5) * 1000));
+	m_pChar->SetKeyNum("PARTY_LASTINVITETIME", g_World.GetCurrentTime().GetTimeRaw() + (Calc_GetRandVal2(2,5) * MSECS_PER_SEC));
 
 	new PacketPartyInvite(pChar->GetClient(), m_pChar);
 

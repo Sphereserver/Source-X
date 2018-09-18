@@ -4,7 +4,6 @@
 #include "../../common/CLog.h"
 #include "../../common/CException.h"
 #include "../clients/CClient.h"
-#include "../CServerTime.h"
 #include "../CWorld.h"
 #include "CChar.h"
 #include "CCharNPC.h"
@@ -114,7 +113,7 @@ CCharPlayer::CCharPlayer(CChar *pChar, CAccount *pAccount) : m_pAccount(pAccount
 	m_speedMode = 0;
 	m_pflag = 0;
 	m_bKrToolbarEnabled = false;
-	m_timeLastUsed.Init();
+	m_timeLastUsed = CServerTime::GetCurrentTime().GetTimeRaw();
 
 	memset(m_SkillLock, 0, sizeof(m_SkillLock));
 	memset(m_StatLock, 0, sizeof(m_StatLock));
@@ -299,7 +298,7 @@ bool CCharPlayer::r_WriteVal( CChar * pChar, lpctstr pszKey, CSString & sVal )
 			sVal = m_Speech.ContainsResourceName(RES_SPEECH, pszKey) ? "1" : "0";
 			return true;
 		case CPC_LASTUSED:
-			sVal.FormatLLVal( - g_World.GetTimeDiff( m_timeLastUsed ) / 1000 );
+			sVal.FormatLLVal( - g_World.GetTimeDiff( m_timeLastUsed ) / MSECS_PER_SEC);  //seconds
 			return true;
 		case CPC_PFLAG:
 			sVal.FormatVal(m_pflag);
@@ -442,7 +441,7 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 				pChar->GetClient()->addKRToolbar( m_bKrToolbarEnabled );
 			return true;
 		case CPC_LASTUSED:
-			m_timeLastUsed.InitTime(s.GetArgLLVal() * 1000);  // arg is in seconds, CServerTime is in milliseconds
+			m_timeLastUsed.InitTime(s.GetArgLLVal() * MSECS_PER_SEC);
 			return true;
 		case CPC_PFLAG:
 			{

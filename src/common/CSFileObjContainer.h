@@ -16,7 +16,7 @@ class CSFileObjContainer : public CScriptObj
 private:
     std::vector<CSFileObj *> sFileList;
     int iFilenumber;
-    int64 iGlobalTimeout;   // in milliseconds
+    int64 iGlobalTimeout;   // in ticks
     int iCurrentTick;
     // ----------- //
     static lpctstr const sm_szLoadKeys[];

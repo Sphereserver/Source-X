@@ -17,7 +17,7 @@ class CItemStone;
 class CSector : public CScriptObj, public CSectorBase	// square region of the world.
 {
 	// A square region of the world. ex: MAP0.MUL Dungeon Sectors are 256 by 256 meters
-#define SECTOR_TICK_PERIOD (TICK_PER_SEC/2) // after how much ticks do we start a pulse.
+#define SECTOR_TICK_PERIOD (TICKS_PER_SEC/2) // after how much ticks do we start a pulse.
 
 public:
 	static const char *m_sClassName;
@@ -91,7 +91,7 @@ public:
 	size_t GetCharComplexity() const;
 	size_t GetInactiveChars() const;
 	size_t HasClients() const;
-	CServerTime GetLastClientTime() const;
+	int64 GetLastClientTime() const;
 	bool IsSectorSleeping() const;
 	void SetSectorWakeStatus();	// Ships may enter a sector before it's riders !
 	void ClientAttach( CChar * pChar );

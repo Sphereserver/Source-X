@@ -169,10 +169,10 @@ public:
 		ushort m_regen;	        // Tenths of second since last regen.
 	} m_Stat[STAT_QTY];
 
-	CServerTime m_timeLastRegen;	// When did i get my last regen tick ?
-	CServerTime m_timeCreate;		// When was i created ?
+	int64 m_timeLastRegen;	// When did i get my last regen tick ?
+	int64 m_timeCreate;		// When was i created ?
 
-	CServerTime m_timeLastHitsUpdate;
+	int64 m_timeLastHitsUpdate;
 	int64 m_timeLastCallGuards;
 
 	// Some character action in progress.
@@ -900,14 +900,14 @@ private:
 	void Spell_Dispel( int iskilllevel );
 	CChar * Spell_Summon( CREID_TYPE id, CPointMap pt );
 	bool Spell_Recall(CItem * pRune, bool fGate);
-    CItem * Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEffect, int iDuration, CObjBase * pSrc = nullptr, bool bEquip = true );
+    CItem * Spell_Effect_Create( SPELL_TYPE spell, LAYER_TYPE layer, int iEffect, int64 iDuration, CObjBase * pSrc = nullptr, bool bEquip = true );
 	SPELL_TYPE Spell_GetIndex(SKILL_TYPE skill = SKILL_NONE);	//gets first spell for the magic skill given.
 	SPELL_TYPE Spell_GetMax(SKILL_TYPE skill = SKILL_NONE);	//gets first spell for the magic skill given.
 	bool Spell_Equip_OnTick( CItem * pItem );
 
 	void Spell_Field(CPointMap pt, ITEMID_TYPE idEW, ITEMID_TYPE idNS, uint fieldWidth, uint fieldGauge, int iSkill,
         CChar * pCharSrc = nullptr, ITEMID_TYPE idnewEW = (ITEMID_TYPE)0, ITEMID_TYPE idnewNS = (ITEMID_TYPE)0,
-        int iDuration = 0, HUE_TYPE iColor = HUE_DEFAULT);
+        int64 iDuration = 0, HUE_TYPE iColor = HUE_DEFAULT);
 	void Spell_Area( CPointMap pt, int iDist, int iSkill );
 	bool Spell_TargCheck_Face();
 	bool Spell_TargCheck();

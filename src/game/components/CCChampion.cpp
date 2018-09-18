@@ -39,7 +39,7 @@ CCRET_TYPE CCChampion::OnTick()
         DelRedCandle();
     else
         Stop();
-    GetLink()->SetTimeout(1000 * 60 * 10);	//10 minutes
+    GetLink()->SetTimeoutS(60 * 10);	//10 minutes
     return CCRET_CONTINUE;
 };
 
@@ -75,7 +75,7 @@ void CCChampion::Start()
     ADDTOCALLSTACK("CCChampion::Start");
     // TODO store light in the area
     _fActive = true;
-    _iLastActivationTime = g_World.GetCurrentTime().GetTimeRaw();
+    _iLastActivationTime = g_World.GetCurrentTick();
 
     _iSpawnsNextRed = GetCandlesPerLevel();
     _iCandlesNextRed = CANDLESNEXTRED;
@@ -95,7 +95,7 @@ void CCChampion::Stop()
     _iLevel = 0;
     _iCandlesNextRed = 0;
     _iCandlesNextLevel = 0;
-    GetLink()->SetTimeout(_iLastActivationTime - g_World.GetCurrentTime().GetTimeRaw());
+    GetLink()->SetTimeout(_iLastActivationTime - g_World.GetCurrentTick());
     ClearWhiteCandles();
     ClearRedCandles();
 };
@@ -338,7 +338,7 @@ void CCChampion::SetLevel(byte iLevel)
     _iLevel = iLevel;
     _iSpawnsNextWhite = iWhiteMonsters;
     _iSpawnsNextRed = iRedMonsters;
-    GetLink()->SetTimeout(1000 * 60 * 10);	//10 minutes
+    GetLink()->SetTimeoutS(60 * 10);	//10 minutes
 };
 
 byte CCChampion::GetCandlesPerLevel() const

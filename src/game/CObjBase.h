@@ -11,7 +11,6 @@
 #include "../common/CResourceBase.h"
 #include "../common/CResourceRef.h"
 #include "clients/CClientTooltip.h"
-#include "CServerTime.h"
 #include "CEntity.h"
 #include "CBase.h"
 #include "CServerConfig.h"
@@ -30,8 +29,8 @@ class CObjBase : public CObjBaseTemplate, public CScriptObj, public CEntity
 	static lpctstr const sm_szRefKeys[];    // All Instances of CItem or CChar have these base attributes.
 
 private:
-	CServerTime m_timeout;		// when does this rot away ? or other action. 0 = never, else system time
-	CServerTime m_timestamp;    // TimeStam
+	int64 m_timeout;        // when does this rot away ? or other action. 0 = never, else system time
+	int64 m_timestamp;      // TimeStamp
 	HUE_TYPE m_wHue;			// Hue or skin color. (CItems must be < 0x4ff or so)
 	lpctstr m_RunningTrigger;   // Current trigger being run on this object. Used to prevent the same trigger being called over and over.
 	lpctstr m_CallingObjTrigger;// I am running a trigger called via TRIGGER (CallPersonalTrigger method). In which trigger (OF THIS SAME OBJECT) was this call executed?
@@ -204,13 +203,13 @@ public:
 	byte	RangeH() const;
 
     /**
-     * @fn  CServerTime CObjBase::GetTimeStamp() const;
+     * @fn  int64 CObjBase::GetTimeStamp() const;
      *
      * @brief   Gets time stamp.
      *
      * @return  The time stamp.
      */
-	CServerTime GetTimeStamp() const;
+	int64 GetTimeStamp() const;
 
     /**
      * @fn  void CObjBase::SetTimeStamp(int64 t_time);
@@ -539,13 +538,40 @@ protected:
 public:
 
     /**
-     * @fn  virtual void CObjBase::SetTimeout( int64 iDelayInTicks );
+     * @fn  virtual void CObjBase::SetTimeout( int64 iDelayInMsecs );
      *
      * @brief   &lt; Timer.
      *
-     * @param   iDelayInTicks   Zero-based index of the delay in ticks.
+     * @param   iDelayInMsecs   Zero-based index of the delay in milliseconds.
      */
-	virtual void SetTimeout( int64 iTimeInMsecs );
+	virtual void SetTimeout( int64 iDelayInMsecs );
+
+    /**
+    * @fn  virtual void CObjBase::SetTimeoutS( int64 iDelayInSecs );
+    *
+    * @brief   &lt; Timer.
+    *
+    * @param   iDelayInSecs   Zero-based index of the delay in seconds.
+    */
+    void SetTimeoutS(int64 iSeconds);
+
+    /**
+    * @fn  virtual void CObjBase::SetTimeoutT( int64 iDelayInTicks );
+    *
+    * @brief   &lt; Timer.
+    *
+    * @param   iDelayInTicks   Zero-based index of the delay in ticks.
+    */
+    void SetTimeoutT(int64 iTicks);
+
+    /**
+    * @fn  virtual void CObjBase::SetTimeoutD( int64 iDelayInTenths );
+    *
+    * @brief   &lt; Timer.
+    *
+    * @param   iDelayInTenths   Zero-based index of the delay in tenths of second.
+    */
+    void SetTimeoutD(int64 iTenths);
 
     /**
      * @fn  bool CObjBase::IsTimerSet() const;
@@ -595,11 +621,20 @@ public:
     /**
     * @fn  int64 CObjBase::GetTimerDAdjusted() const;
     *
-    * @brief   DEPRECATED!! Gets timer in tenths of seconds.
+    * @brief    Gets timer in tenths of seconds.
     *
-    * @return  The timer t adjusted.
+    * @return  The timer d adjusted.
     */
     int64 GetTimerDAdjusted() const;
+
+    /**
+    * @fn  int64 CObjBase::GetTimerSAdjusted() const;
+    *
+    * @brief    Gets timer in seconds.
+    *
+    * @return   The timer s adjusted.
+    */
+    int64 GetTimerSAdjusted() const;
 
 public:
 
@@ -1313,7 +1348,7 @@ inline CObjBase* CObjBase::GetNext() const
 
 inline bool CObjBase::IsTimerSet() const
 {
-	return m_timeout.IsTimeValid();
+	return m_timeout > 0;
 }
 
 inline bool CObjBase::IsTimerExpired() const

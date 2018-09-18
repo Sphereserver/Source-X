@@ -10,7 +10,6 @@
 #include "../common/crypto/CCrypto.h"
 #include "../common/sphere_library/CSTime.h"
 #include "../common/CScriptObj.h"
-#include "CServerTime.h"
 
 
 class CTextConsole;
@@ -45,10 +44,10 @@ class CServerDef : public CScriptObj
 
 private:
 	CSString m_sName;	// What the name should be. Fill in from ping.
-	CServerTime  m_timeLastValid;	// Last valid poll time in CServerTime::GetCurrentTime()
+	int64  m_timeLastValid;	// Last valid poll time
 	CSTime	m_dateLastValid;
 
-	CServerTime  m_timeCreate;	// When added to the list ? 0 = at start up.
+	int64  m_timeCreate;	// When added to the list ? 0 = at start up.
 
 	// Status read from returned string.
 	CSString m_sStatus;	// last returned status string.
@@ -121,7 +120,7 @@ public:
 	virtual bool r_WriteVal( lpctstr pKey, CSString &sVal, CTextConsole * pSrc = NULL );
 
 	bool IsConnected() const {
-		return m_timeLastValid.IsTimeValid();
+		return m_timeLastValid > 0;
 	}
 
 	void SetCryptVersion(void) {

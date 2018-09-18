@@ -10,7 +10,6 @@
 #include "../common/CLog.h"
 #include "CObjBase.h"
 #include "CSector.h"
-#include "CServerTime.h"
 #include "CWorld.h"
 #include "spheresvr.h"
 #include "triggers.h"
@@ -484,7 +483,7 @@ int CSector::GetLocalTime() const
 	ADDTOCALLSTACK("CSector::GetLocalTime");
 	//	Get local time of the day (in minutes)
 	CPointMap pt = GetBasePoint();
-	int iLocalTime = g_World.GetGameWorldTime();
+	int64 iLocalTime = g_World.GetGameWorldTime();
 
 	if ( !g_Cfg.m_bAllowLightOverride )
 	{
@@ -903,7 +902,7 @@ void CSector::SetSectorWakeStatus()
 {
 	ADDTOCALLSTACK("CSector::SetSectorWakeStatus");
 	// Ships may enter a sector before it's riders ! ships need working timers to move !
-	m_Chars_Active.m_timeLastClient = CServerTime::GetCurrentTime();
+	m_Chars_Active.m_timeLastClient = g_World.GetCurrentTick();
 }
 
 void CSector::Close()
@@ -999,7 +998,7 @@ void CSector::OnTick(int iPulseCount)
 	bool fLightChange = false;
 	bool fSleeping = false;
 
-	if ( (iPulseCount % (30*TICK_PER_SEC)) == 0)	// 30 seconds or so.
+	if ( (iPulseCount % (30*MSECS_PER_SEC)) == 0)	// 30 seconds or so.
 	{
 		// check for local light level change ?
 		byte blightprv = m_Env.m_Light;
@@ -1031,7 +1030,7 @@ void CSector::OnTick(int iPulseCount)
 	bool fWeatherChange = false;
 	int iRegionPeriodic = 0;
 
-	if ( ( (iPulseCount % (30*TICK_PER_SEC)) == 0) )	// 30 seconds or so.
+	if ( ( (iPulseCount % (30 * MSECS_PER_SEC)) == 0) )	// 30 seconds or so.
 	{
 		// Only do this every x minutes or so
 		// check for local weather change ?
@@ -1317,7 +1316,7 @@ size_t CSector::HasClients() const
 	return( m_Chars_Active.HasClients());
 }
 
-CServerTime CSector::GetLastClientTime() const
+int64 CSector::GetLastClientTime() const
 {
 	return( m_Chars_Active.m_timeLastClient );
 }

@@ -2,7 +2,6 @@
 #include "../../common/CUIDExtra.h"
 #include "../chars/CChar.h"
 #include "../chars/CCharNPC.h"
-#include "../CServerTime.h"
 #include "../CWorld.h"
 #include "CItem.h"
 #include "CItemCorpse.h"
@@ -31,7 +30,7 @@ CChar *CItemCorpse::IsCorpseSleeping() const
 	}
 
 	CChar *pCharCorpse = m_uidLink.CharFind();
-	if ( pCharCorpse && pCharCorpse->IsStatFlag(STATF_SLEEPING) && !GetTimeStamp().IsTimeValid() )
+	if ( pCharCorpse && pCharCorpse->IsStatFlag(STATF_SLEEPING) && !GetTimeStamp() )
 		return pCharCorpse;
 
 	return NULL;
@@ -134,7 +133,7 @@ CItemCorpse * CChar::MakeCorpse( bool fFrontFall )
 	if (IsStatFlag(STATF_DEAD))
 	{
 		iDecayTimer = (m_pPlayer) ? g_Cfg.m_iDecay_CorpsePlayer : g_Cfg.m_iDecay_CorpseNPC;
-		pCorpse->SetTimeStamp(CServerTime::GetCurrentTime().GetTimeRaw());	// death time
+		pCorpse->SetTimeStamp(g_World.GetCurrentTick());	// death time
 		if (Attacker_GetLast())
 			pCorpse->m_itCorpse.m_uidKiller = Attacker_GetLast()->GetUID();
 		else

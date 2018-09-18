@@ -6,7 +6,6 @@
 #ifndef _INC_CRESOURCEBASE_H
 #define _INC_CRESOURCEBASE_H
 
-#include "../game/CServerTime.h"
 #include "sphere_library/CSTime.h"
 #include "CScriptContexts.h"
 #include "CResourceDef.h"

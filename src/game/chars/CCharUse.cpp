@@ -57,7 +57,7 @@ void CChar::Use_CarveCorpse( CItemCorpse * pCorpse )
 		CItem *pBlood = CItem::CreateBase(ITEMID_BLOOD4);
 		ASSERT(pBlood);
 		pBlood->SetHue(pCorpseDef->m_wBloodHue);
-		pBlood->MoveToDecay(pnt, 5 * 1000);
+		pBlood->MoveToDecay(pnt, 5 * MSECS_PER_SEC);
 	}
 
 	size_t iItems = 0;
@@ -203,7 +203,7 @@ bool CChar::Use_Kindling( CItem * pKindling )
 
 	pKindling->SetID(ITEMID_CAMPFIRE);
 	pKindling->SetAttr(ATTR_MOVE_NEVER|ATTR_CAN_DECAY);
-	pKindling->SetTimeout((4 + pKindling->GetAmount()) * 60 * 1000);
+	pKindling->SetTimeoutS((4 + pKindling->GetAmount()) * 60);
 	pKindling->SetAmount(1);	// all kindling is set to one fire
 	pKindling->m_itLight.m_pattern = LIGHT_LARGE;
 	pKindling->Update();
@@ -499,7 +499,7 @@ bool CChar::Use_Train_ArcheryButte( CItem * pButte, bool fSetup )
 
 	if ( m_pClient && (skill == SKILL_THROWING) )		// throwing weapons also have anim of the weapon returning after throw it
 	{
-		m_pClient->m_timeLastSkillThrowing = CServerTime::GetCurrentTime();
+		m_pClient->m_timeLastSkillThrowing = g_World.GetCurrentTick();
 		m_pClient->m_pSkillThrowingTarg = pButte;
 		m_pClient->m_SkillThrowingAnimID = AnimID;
 		m_pClient->m_SkillThrowingAnimHue = AnimHue;
@@ -1362,10 +1362,10 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 			{
 				if (pItem->IsTimerSet())
 				{
-					SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_STONEREG_TIME), pItem->GetTimerDiff() / 1000);
+					SysMessagef(g_Cfg.GetDefaultMsg(DEFMSG_MSG_STONEREG_TIME), GetTimerSAdjusted());
 					return true;
 				}
-				pItem->SetTimeout(pItem->m_itItemStone.m_wRegenTime * 1000);
+				pItem->SetTimeoutS(pItem->m_itItemStone.m_wRegenTime);
 			}
 			ItemBounce(CItem::CreateTemplate(pItem->m_itItemStone.m_ItemID, GetPackSafe(), this));
 			if (pItem->m_itItemStone.m_wAmount != 0)
@@ -1478,7 +1478,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 				SysMessageDefault(DEFMSG_ITEMUSE_BEEHIVE_STING);
 				OnTakeDamage(Calc_GetRandVal(5), this, DAMAGE_POISON | DAMAGE_GENERAL);
 			}
-			pItem->SetTimeout(15 * 60 * 1000);
+			pItem->SetTimeoutS(15 * 60);
 			return true;
 		}
 
@@ -1549,7 +1549,7 @@ int CChar::Do_Use_Item(CItem *pItem, bool fLink)
 					                                                 : ITEMID_DOOR_MAGIC_SI_EW;
 					CItem *pFace = CItem::CreateBase(id);
 					ASSERT(pFace);
-					pFace->MoveToDecay(pItem->GetTopPoint(), 4 * 1000);
+					pFace->MoveToDecay(pItem->GetTopPoint(), 4 * MSECS_PER_SEC);
 				}
 				if (!IsPriv(PRIV_GM))
 					return true;

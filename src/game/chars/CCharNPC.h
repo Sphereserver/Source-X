@@ -41,7 +41,7 @@ public:
 	word	m_nextX[MAX_NPC_PATH_STORAGE_SIZE];	// array of X coords of the next step
 	word	m_nextY[MAX_NPC_PATH_STORAGE_SIZE];	// array of Y coords of the next step
 	CPointMap m_nextPt;							// where the array(^^) wants to go, if changed, recount the path
-	CServerTime	m_timeRestock;		//	when last restock happened in sell/buy container
+	int64	m_timeRestock;		//	when last restock happened in sell/buy container
 
 	struct Spells {
 		SPELL_TYPE	id;

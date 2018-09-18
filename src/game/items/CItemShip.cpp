@@ -7,7 +7,6 @@
 #include "../../network/send.h"
 #include "../chars/CChar.h"
 #include "../clients/CClient.h"
-#include "../CServerTime.h"
 #include "../triggers.h"
 #include "CItemContainer.h"
 #include "CItemShip.h"
@@ -17,7 +16,7 @@
 
 CItemShip::CItemShip(ITEMID_TYPE id, CItemBase * pItemDef) : CItemMulti(id, pItemDef)
 {
-    m_NextMove = CServerTime::GetCurrentTime();
+    m_NextMove = g_World.GetCurrentTick();
 }
 
 CItemShip::~CItemShip()
@@ -93,7 +92,7 @@ bool CItemShip::Ship_SetMoveDir(DIR_TYPE dir, byte bMovementType, bool fWheelMov
         return true;
     }
 
-    if (fWheelMove && (m_NextMove > CServerTime::GetCurrentTime()))
+    if (fWheelMove && (m_NextMove > g_World.GetCurrentTick()))
         return false;
 
     if ((m_itShip.m_DirMove == dir) && (m_itShip.m_bMovementType != 0))
@@ -126,12 +125,12 @@ void CItemShip::Ship_SetNextMove()
     // add TAG.OVERRIDE.SHIPSPEED.PERIOD
     // add TAG.OVERRIDE.SHIPSPEED.SPEED
     uchar uiDelay;
-    if (IsSetOF(OF_NoSmoothSailing))
+    if (IsSetOF(OF_NoSmoothSailing) || TICKS_PER_SEC == 4)
         uiDelay = (m_itShip.m_bMovementType == 1) ? (m_shipSpeed.period * 2) : m_shipSpeed.period;
     else
         uiDelay = (m_itShip.m_bMovementType == 1) ? m_shipSpeed.period : (m_shipSpeed.period / 2);
-    // ShipSpeed.period is in tenths of second (so also the delay is); CServerTime is in milliseconds, so i need to multiply * 100
-    m_NextMove = CServerTime::GetCurrentTime() + (maximum(1, uiDelay) * 100);
+    // ShipSpeed.period is in tenths of second (so also the delay is);
+    m_NextMove = g_World.GetCurrentTick() + (maximum(1, uiDelay));
 }
 
 size_t CItemShip::Ship_ListObjs(CObjBase ** ppObjList)
@@ -733,7 +732,7 @@ bool CItemShip::OnTick()
 {
     ADDTOCALLSTACK("CItemShip::OnTick");
     // Ships move on their tick.
-    if (m_NextMove <= CServerTime::GetCurrentTime())
+    if (m_NextMove <= g_World.GetCurrentTick())
         Ship_OnMoveTick();
     return true;
 }

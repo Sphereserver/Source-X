@@ -41,11 +41,11 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 
 	bool bRestockNow = true;
 
-	if ( !bForce && m_pNPC->m_timeRestock.IsTimeValid() )
+	if ( !bForce && m_pNPC->m_timeRestock > 0 )
 	{
 		// Restock occurs every 10 minutes of inactivity (unless region tag specifies different time)
 		CRegionWorld *region = GetRegion();
-		int64 restockIn = 10 * 60 * 1000; // CServerTime internal value is in milliseconds
+		int64 restockIn = 10 * 60 * MSECS_PER_SEC;
 		if( region != nullptr )
 		{
 			CVarDefCont *vardef = region->m_TagDefs.GetKey("RestockVendors");
@@ -58,13 +58,13 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 			bRestockNow = false;
 		
 		if (bRestockNow)
-			bRestockNow = ( CServerTime::GetCurrentTime().GetTimeDiff(m_pNPC->m_timeRestock) > restockIn );
+			bRestockNow = ( m_pNPC->m_timeRestock > restockIn );
 	}
 
 	// At restock the containers are actually emptied
 	if ( bRestockNow )
 	{
-		m_pNPC->m_timeRestock.Init();
+		m_pNPC->m_timeRestock = g_World.GetCurrentTick();
 
 		for ( size_t i = 0; i < CountOf(sm_VendorLayers); ++i )
 		{
@@ -80,7 +80,7 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 	{
 		// An invalid restock time means that the containers are
 		// waiting to be filled
-		if ( !m_pNPC->m_timeRestock.IsTimeValid() )
+		if ( !(m_pNPC->m_timeRestock > 0) )
 		{
 			if ( IsTrigUsed(TRIGGER_NPCRESTOCK) )
 			{
@@ -93,7 +93,7 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 		}
 
 		// remember that the stock was filled (or considered up-to-date)
-		m_pNPC->m_timeRestock.SetCurrentTime();
+		m_pNPC->m_timeRestock = g_World.GetCurrentTick();
 	}
 	return true;
 }

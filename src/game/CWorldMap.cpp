@@ -134,7 +134,7 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fT
 			amount += 2;	// Workhorse racial bonus, giving +2 logs to humans in Trammel.
 	}
 	pResBit->SetAmount( amount );
-	pResBit->MoveToDecay(pt, pOreDef->m_iRegenerateTime.GetRandom() * 1000);	// Delete myself in this amount of time.
+	pResBit->MoveToDecay(pt, pOreDef->m_iRegenerateTime.GetRandom() * MSECS_PER_SEC);	// Delete myself in this amount of time.
 
 	EXC_SET("resourcefound");
 

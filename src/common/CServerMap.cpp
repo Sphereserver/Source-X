@@ -30,24 +30,24 @@ CCachedMulItem::~CCachedMulItem()
 
 void CCachedMulItem::InitCacheTime()
 {
-	m_timeRef.Init();
+	m_timeRef = 0;
 }
 
 bool CCachedMulItem::IsTimeValid() const
 {
-	return m_timeRef.IsTimeValid();
+	return (m_timeRef > 0);
 }
 
 void CCachedMulItem::HitCacheTime()
 {
-	// When in g_World.GetTime() was this last referenced.
-	m_timeRef = CServerTime::GetCurrentTime();
+	// When was this last referenced.
+	m_timeRef = g_World.GetCurrentTick();
 }
 
 int64 CCachedMulItem::GetCacheAge() const
 {
-	// In milliseconds
-	return ( CServerTime::GetCurrentTime() - m_timeRef );
+	// In ticks
+	return (g_World.GetCurrentTick() - m_timeRef );
 }
 
 CServerMapBlockState::CServerMapBlockState( dword dwBlockFlags, char z, int iHeight, height_t zHeight ) :

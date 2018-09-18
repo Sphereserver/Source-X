@@ -5,7 +5,6 @@
 #include "../game/chars/CChar.h"
 #include "../common/CLog.h"
 #include "../game/CServer.h"
-#include "../game/CServerTime.h"
 #include "../game/CWorld.h"
 #include "../sphere/containers.h"
 #include "../sphere/ProfileTask.h"
@@ -783,7 +782,7 @@ void NetworkInput::processData()
 			{
 				// check for timeout
 				EXC_SET("check frozen");
-				int64 iLastEventDiff = -g_World.GetTimeDiff( client->m_timeLastEvent );
+				int64 iLastEventDiff = -g_World.GetTickDiff( client->m_timeLastEvent );
 				if ( g_Cfg.m_iDeadSocketTime > 0 && iLastEventDiff > g_Cfg.m_iDeadSocketTime )
 				{
 					g_Log.Event(LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Frozen client disconnected (DeadSocketTime reached).\n", state->id());
@@ -907,7 +906,7 @@ bool NetworkInput::processData(NetState* state, Packet* buffer)
 	if (client->GetConnectType() == CONNECT_UNK)
 		return processUnknownClientData(state, buffer);
 
-	client->m_timeLastEvent = CServerTime::GetCurrentTime();
+	client->m_timeLastEvent = g_World.GetCurrentTick();
 
 	if ( client->m_Crypt.IsInit() == false )
 		return processOtherClientData(state, buffer);

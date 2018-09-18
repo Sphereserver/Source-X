@@ -75,8 +75,8 @@ CObjBase::CObjBase( bool fItem )
 	m_CallingObjTrigger = NULL;
 
 	m_wHue = HUE_DEFAULT;
-	m_timeout.Init();
-	m_timestamp.Init();
+	m_timeout = 0;
+	m_timestamp = 0;
 
 	m_CanMask = 0;
 	m_ModAr = 0;
@@ -358,32 +358,48 @@ void CObjBase::r_WriteSafe( CScript & s )
 	}
 }
 
-void CObjBase::SetTimeout( int64 iTimeInMsecs )
+void CObjBase::SetTimeout( int64 iDelayInMsecs)
 {
 	ADDTOCALLSTACK("CObjBase::SetTimeout");
-	// Set delay in milliseconds. -1 = never.
-	if ( iTimeInMsecs < 0 )
-		m_timeout.Init();
+	// Set delay in ticks. -1 = never.
+	if (iDelayInMsecs < 0 )
+		m_timeout = 0;
 	else
-		m_timeout = CServerTime::GetCurrentTime() + iTimeInMsecs;
+		m_timeout = g_World.GetCurrentTime().GetTimeRaw() + iDelayInMsecs;
+}
+
+
+void CObjBase::SetTimeoutS(int64 iSeconds)
+{
+    SetTimeout(iSeconds * MSECS_PER_SEC);
+}
+
+void CObjBase::SetTimeoutT(int64 iTicks)
+{
+    SetTimeout(iTicks * TICKS_PER_SEC);
+}
+
+void CObjBase::SetTimeoutD(int64 iTenths)
+{
+    SetTimeout(iTenths * TENTHS_PER_SEC);
 }
 
 int64 CObjBase::GetTimerDiff() const
 {
     // How long till this will expire ?
     return g_World.GetTimeDiff( m_timeout );
-    // return: < 0 = in the past ( m_timeout - CServerTime::GetCurrentTime() )
+    // return: < 0 = in the past ( m_timeout - g_World.GetCurrentTick() )
 }
 
 int64 CObjBase::GetTimerAdjusted() const
 {
-	// RETURN: time in seconds from now.
+	// RETURN: time in msecs from now.
 	if ( ! IsTimerSet())
 		return -1;
-	int64 iDiffInTicks = GetTimerDiff();
-	if ( iDiffInTicks < 0 )
+	int64 iDiffInMsecs = GetTimerDiff();
+	if (iDiffInMsecs < 0 )
 		return 0;
-	return ( iDiffInTicks / 1000 );
+	return (iDiffInMsecs);
 }
 
 int64 CObjBase::GetTimerTAdjusted() const
@@ -391,21 +407,32 @@ int64 CObjBase::GetTimerTAdjusted() const
 	// RETURN: time in ticks from now.
 	if ( ! IsTimerSet())
 		return -1;
-	int64 iDiffInTicks = GetTimerDiff();
-	if ( iDiffInTicks < 0 )
+	int64 iDiffInMsecs = GetTimerDiff();
+	if (iDiffInMsecs < 0 )
 		return 0;
-	return (iDiffInTicks / MSECS_PER_TICK);
+	return (iDiffInMsecs / TICKS_PER_SEC);
 }
 
 int64 CObjBase::GetTimerDAdjusted() const
 {
-    // RETURN: time in ticks from now.
+    // RETURN: time in tenths of second from now.
     if ( ! IsTimerSet())
         return -1;
-    int64 iDiffInTicks = GetTimerDiff();
-    if ( iDiffInTicks < 0 )
+    int64 iDiffInMsecs = GetTimerDiff();
+    if (iDiffInMsecs < 0 )
         return 0;
-    return (iDiffInTicks / 100);
+    return (iDiffInMsecs / TENTHS_PER_SEC);
+}
+
+int64 CObjBase::GetTimerSAdjusted() const
+{
+    // RETURN: time in seconds from now.
+    if (!IsTimerSet())
+        return -1;
+    int64 iDiffInMsecs = GetTimerDiff();
+    if (iDiffInMsecs < 0)
+        return 0;
+    return (iDiffInMsecs / MSECS_PER_SEC);
 }
 
 void CObjBase::Sound( SOUND_TYPE id, int iOnce ) const // Play sound effect for player
@@ -1483,11 +1510,13 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			}
 			return true;
 		case OC_TIMER:
-			sVal.FormatLLVal( GetTimerAdjusted() );
+			sVal.FormatLLVal( GetTimerSAdjusted() );
 			break;
 		case OC_TIMERD:
-            g_Log.EventError("TIMERD was deprecated, read revisions about TIMERT.\n");
             sVal.FormatLLVal(GetTimerDAdjusted());
+            break;
+        case OC_TIMERMS:
+            sVal.FormatLLVal(GetTimerAdjusted());
             break;
         case OC_TIMERT:
             sVal.FormatLLVal(GetTimerTAdjusted());
@@ -1557,7 +1586,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			sVal.FormatVal( pItem->GetSpeed() );
 		}	break;
 		case OC_TIMESTAMP:
-			sVal.FormatLLVal( GetTimeStamp().GetTimeRaw() );
+			sVal.FormatLLVal( GetTimeStamp() );
 			break;
 		case OC_VERSION:
 			sVal = SPHERE_VERSION;
@@ -1993,16 +2022,19 @@ bool CObjBase::r_LoadVal( CScript & s )
 			return true;
 		}
 		case OC_TIMER:
-			SetTimeout(s.GetArgLLVal() * 1000);
+			SetTimeoutS(s.GetArgLLVal());
             fResendTooltip = true;
 			break;
         case OC_TIMERD:
-            g_Log.EventError("TIMERD was deprecated, read revisions about TIMERT.\n");
-            SetTimeout(s.GetArgLLVal() * 100);
+            SetTimeoutD(s.GetArgLLVal());
+            fResendTooltip = true;
+            break;
+        case OC_TIMERMS:
+            SetTimeout(s.GetArgLLVal());
             fResendTooltip = true;
             break;
         case OC_TIMERT:
-            SetTimeout(s.GetArgLLVal() / MSECS_PER_TICK);
+            SetTimeoutT(s.GetArgLLVal());
             fResendTooltip = true;
             break;
 		case OC_TIMESTAMP:
@@ -2044,10 +2076,10 @@ void CObjBase::r_Write( CScript & s )
 		s.WriteKey( "NAME", GetIndividualName());
 	if ( m_wHue != HUE_DEFAULT )
 		s.WriteKeyHex( "COLOR", GetHue());
-	if ( m_timeout.IsTimeValid() )
+	if ( m_timeout > 0 )
 		s.WriteKeyVal( "TIMER", GetTimerAdjusted());
-	if ( m_timestamp.IsTimeValid() )
-		s.WriteKeyVal( "TIMESTAMP", GetTimeStamp().GetTimeRaw());
+	if ( m_timestamp > 0 )
+		s.WriteKeyVal( "TIMESTAMP", GetTimeStamp());
 	if ( GetSpawn() )
 		s.WriteKeyHex("SPAWNITEM", GetSpawn()->GetLink()->GetUID());
 	if ( m_ModAr )
@@ -3131,14 +3163,14 @@ byte CObjBase::RangeH() const
 	return (byte)(((pRange ? pRange->GetValNum() : 0)>>8) & 0xff);
 }
 
-CServerTime CObjBase::GetTimeStamp() const
+int64 CObjBase::GetTimeStamp() const
 {
 	return m_timestamp;
 }
 
 void CObjBase::SetTimeStamp( int64 t_time)
 {
-	m_timestamp.InitTime(t_time);
+	m_timestamp = t_time;
 }
 
 lpctstr CObjBase::GetDefStr( lpctstr pszKey, bool fZero, bool fDef ) const

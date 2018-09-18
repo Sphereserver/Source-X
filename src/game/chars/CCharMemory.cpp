@@ -122,13 +122,13 @@ bool CChar::Memory_UpdateFlags(CItemMemory * pMemory)
 		StatFlag_Set(STATF_PET);
 
 	if (wMemTypes & MEMORY_FIGHT)	// update more often to check for retreat.
-		iCheckTime = 30 * 1000;
+		iCheckTime = 30 * MSECS_PER_SEC;
 	else if (wMemTypes & (MEMORY_IPET | MEMORY_GUARD | MEMORY_GUILD | MEMORY_TOWN))
 		iCheckTime = -1;	// never go away.
 	else if (m_pNPC)	// MEMORY_SPEAK
-		iCheckTime = 5 * 60 * 1000;
+		iCheckTime = 5 * 60 * MSECS_PER_SEC;
 	else
-		iCheckTime = 20 * 60 * 1000;
+		iCheckTime = 20 * 60 * MSECS_PER_SEC;
 
 	pMemory->SetTimeout(iCheckTime);	// update its decay time.	
 	CChar * pCharLink = pMemory->m_uidLink.CharFind();
@@ -172,7 +172,7 @@ void CChar::Memory_AddTypes( CItemMemory * pMemory, word MemTypes )
 	{
 		pMemory->SetMemoryTypes( pMemory->GetMemoryTypes() | MemTypes );
 		pMemory->m_itEqMemory.m_pt = GetTopPoint();	// Where did the fight start ?
-		pMemory->SetTimeStamp(CServerTime::GetCurrentTime().GetTimeRaw());
+		pMemory->SetTimeStamp(g_World.GetCurrentTick());
 		Memory_UpdateFlags( pMemory );
 	}
 }

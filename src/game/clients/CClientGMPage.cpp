@@ -2,7 +2,6 @@
 #include "../../common/CLog.h"
 #include "../../network/network.h"
 #include "../chars/CChar.h"
-#include "../CServerTime.h"
 #include "../CWorld.h"
 #include "CClient.h"
 
@@ -64,7 +63,7 @@ void CClient::Cmd_GM_Page( lpctstr pszReason ) // Help button (Calls GM Call Men
 	{
 		SysMessageDefault( DEFMSG_MSG_GMPAGE_UPDATE );
 		pPage->SetReason( pszReason );
-		pPage->m_timePage = CServerTime::GetCurrentTime();
+		pPage->m_timePage = g_World.GetCurrentTick();
 	}
 	else
 	{

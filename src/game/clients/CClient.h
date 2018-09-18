@@ -142,9 +142,9 @@ public:
 	CONNECT_TYPE m_iConnectType;		// what sort of a connection is this ?
 	CAccount * m_pAccount;				// The account name. we logged in on
 
-	CServerTime m_timeLogin;			// World clock of login time. "LASTCONNECTTIME"
-	CServerTime m_timeLastEvent;		// Last time we got event from client.
-	CServerTime m_timeLastEventWalk;	// Last time we got a walk event from client
+	int64 m_timeLogin;			// World clock of login time. "LASTCONNECTTIME"
+	int64 m_timeLastEvent;		// Last time we got event from client.
+	int64 m_timeLastEventWalk;	// Last time we got a walk event from client
 	int64 m_timeNextEventWalk;			// Fastwalk prevention: only allow more walk requests after this timer
 
 	// GM only stuff.
@@ -156,7 +156,7 @@ public:
 	OpenedGumpsMap_t m_mapOpenedGumps;
 
 	// Throwing weapons stuff (this is used to play weapon returning anim after throw it)
-	CServerTime m_timeLastSkillThrowing;	// Last time we throw the weapon
+	int64 m_timeLastSkillThrowing;          // Last time we throw the weapon
 	CObjBase *m_pSkillThrowingTarg;			// Object from where the anim will return from
 	ITEMID_TYPE m_SkillThrowingAnimID;		// Weapon anim ID (AMMOANIM)
 	dword m_SkillThrowingAnimHue;			// Weapon anim hue (AMMOANIMHUE)
@@ -170,8 +170,8 @@ public:
 	CUID m_Targ_UID;			// The object of interest to apply to the target.
 	CUID m_Targ_Prv_UID;		// The object of interest before this.
 	CSString m_Targ_Text;		// Text transfered up from client.
-	CPointMap  m_Targ_p;			// For script targeting,
-	CServerTime m_Targ_Timeout;	// timeout time for targeting
+	CPointMap  m_Targ_p;		// For script targeting,
+	int64 m_Targ_Timeout;       // timeout time for targeting
 
 								// Context of the targetting setup. depends on CLIMODE_TYPE m_Targ_Mode
 	union
@@ -502,10 +502,10 @@ public:
 	void addWebLaunch( lpctstr pMsg ); // Direct client to a web page
 
 	void addPromptConsole( CLIMODE_TYPE mode, lpctstr pMsg, CUID context1 = UID_CLEAR, CUID context2 = UID_CLEAR, bool fUnicode = false );
-	void addTarget( CLIMODE_TYPE targmode, lpctstr pMsg, bool fAllowGround = false, bool fCheckCrime = false, int64 iMsecsTimeout = 0 ); // Send targetting cursor to client
+	void addTarget( CLIMODE_TYPE targmode, lpctstr pMsg, bool fAllowGround = false, bool fCheckCrime = false, int64 iTicksTimeout = 0 ); // Send targetting cursor to client
 	void addTargetDeed( const CItem * pDeed );
 	bool addTargetItems( CLIMODE_TYPE targmode, ITEMID_TYPE id, HUE_TYPE color = HUE_DEFAULT, bool fAllowGround = true );
-	bool addTargetChars( CLIMODE_TYPE mode, CREID_TYPE id, bool fNoto, int64 iMsecsTimeout = 0 );
+	bool addTargetChars( CLIMODE_TYPE mode, CREID_TYPE id, bool fNoto, int64 iTicksTimeout = 0 );
 	void addTargetVerb( lpctstr pCmd, lpctstr pArg );
 	void addTargetFunctionMulti( lpctstr pszFunction, ITEMID_TYPE itemid, HUE_TYPE color = HUE_DEFAULT, bool fAllowGround = true );
 	void addTargetFunction( lpctstr pszFunction, bool fAllowGround, bool fCheckCrime );
@@ -710,12 +710,12 @@ public:
 	{
 		return m_Targ_Mode ;
 	}
-	void SetTargMode( CLIMODE_TYPE targmode = CLIMODE_NORMAL, lpctstr pszPrompt = nullptr, int64 iMsecsTimeout = 0 );
+	void SetTargMode( CLIMODE_TYPE targmode = CLIMODE_NORMAL, lpctstr pszPrompt = nullptr, int64 iTickTimeout = 0 );
 	void ClearTargMode()
 	{
 		// done with the last mode.
 		m_Targ_Mode = CLIMODE_NORMAL;
-		m_Targ_Timeout.Init();
+		m_Targ_Timeout = 0;
 	}
 
 	bool IsConnecting() const;
@@ -726,7 +726,7 @@ public:
 	char		m_zLastMessage[SCRIPT_MAX_LINE_LEN];	// last sysmessage
 	char		m_zLastObjMessage[SCRIPT_MAX_LINE_LEN];	// last message
 	char		m_zLogin[64];
-	CServerTime	m_tNextPickup;
+	int64       m_tNextPickup;
 	CVarDefMap	m_TagDefs;
 	CVarDefMap	m_BaseDefs;		// New Variable storage system
 	typedef std::map<dword, std::pair<std::pair<dword,dword>, CPointMap> > OpenedContainerMap_t;
