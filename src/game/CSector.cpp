@@ -1078,7 +1078,7 @@ bool CSector::OnTick()
 	if ( clients <= 0 ) // having no clients inside
 	{
 		// Put the sector to sleep if no clients been here in a while.
-		if (fCanSleep && g_Cfg.m_iSectorSleepMask > 0 && m_active)
+		if (fCanSleep && g_Cfg.m_iSectorSleepMask > 0)
 		{
             if (!IsSleeping())
             {
