@@ -87,7 +87,7 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
         _uidMultiLockDown = uidMulti;
     }
 
-    CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CObjBase( true )
+    CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CObjBase( true ), CTimedObject(PROFILE_ITEMS)
 {
 	ASSERT( pItemDef );
 
@@ -156,7 +156,6 @@ void CItem::Delete(bool bforce)
         }
     }
 
-    static_cast<CEntity*>(this)->Delete();
 	CObjBase::Delete();
 }
 
@@ -5642,7 +5641,6 @@ bool CItem::OnTick()
 	EXC_TRY("Tick");
 
 	EXC_SET("timer trigger");
-	SetTimeout(-1);
 
 	TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
 

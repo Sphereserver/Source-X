@@ -264,14 +264,18 @@ size_t FindStrWord( lpctstr pTextSearch, lpctstr pszKeyWord )
 MainThread::MainThread()
 	: AbstractSphereThread("T_Main", IThread::RealTime)
 {
-	m_profile.EnableProfile(PROFILE_NETWORK_RX);
-	m_profile.EnableProfile(PROFILE_CLIENTS);
-	//m_profile.EnableProfile(PROFILE_NETWORK_TX);
-	m_profile.EnableProfile(PROFILE_CHARS);
-	m_profile.EnableProfile(PROFILE_ITEMS);
-	m_profile.EnableProfile(PROFILE_MAP);
-	m_profile.EnableProfile(PROFILE_NPC_AI);
-	m_profile.EnableProfile(PROFILE_SCRIPTS);
+    m_profile.EnableProfile(PROFILE_NETWORK_RX);
+    m_profile.EnableProfile(PROFILE_CLIENTS);
+    //m_profile.EnableProfile(PROFILE_NETWORK_TX);
+    m_profile.EnableProfile(PROFILE_CHARS);
+    m_profile.EnableProfile(PROFILE_ITEMS);
+    m_profile.EnableProfile(PROFILE_MAP);
+    m_profile.EnableProfile(PROFILE_MULTIS);
+    m_profile.EnableProfile(PROFILE_NPC_AI);
+    m_profile.EnableProfile(PROFILE_SCRIPTS);
+    m_profile.EnableProfile(PROFILE_SHIPS);
+    m_profile.EnableProfile(PROFILE_TIMEDFUNCTIONS);
+    m_profile.EnableProfile(PROFILE_TIMERS);
 #ifndef _MTNETWORK
 	//m_profile.EnableProfile(PROFILE_DATA_TX);
 	m_profile.EnableProfile(PROFILE_DATA_RX);

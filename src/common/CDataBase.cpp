@@ -1,6 +1,7 @@
 
 #include "../game/CServerConfig.h"
 #include "../game/CServer.h"
+#include "../game/CServerTime.h"
 #include "../sphere/asyncdb.h"
 #include "CLog.h"
 #include "CException.h"

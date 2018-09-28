@@ -14,7 +14,8 @@
 /////////////////////////////////////////////////////////////////////////////
 
 CItemMulti::CItemMulti(ITEMID_TYPE id, CItemBase * pItemDef) :	// CItemBaseMulti
-    CItem(id, pItemDef)
+    CItem(id, pItemDef),
+    CTimedObject(PROFILE_ITEMS)
 {
     CItemBaseMulti * pItemBase = static_cast<CItemBaseMulti*>(Base_GetDef());
     m_shipSpeed.period = pItemBase->m_shipSpeed.period;

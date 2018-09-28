@@ -18,8 +18,13 @@ enum PROFILE_TYPE
 	PROFILE_CHARS,		// ticking characters
 	PROFILE_ITEMS,		// ticking items
 	PROFILE_MAP,		// reading map data
+    PROFILE_MULTIS,     // Multi's stuff
 	PROFILE_NPC_AI,		// processing npc ai
 	PROFILE_SCRIPTS,	// running scripts
+    PROFILE_SECTORS,    // sector stuff
+    PROFILE_SHIPS,      // sips moving
+    PROFILE_TIMEDFUNCTIONS, // TimerF
+    PROFILE_TIMERS,
 	PROFILE_TIME_QTY,
 
 	// Qty of bytes. Not Time.

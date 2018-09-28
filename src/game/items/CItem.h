@@ -7,6 +7,7 @@
 #define _INC_CITEM_H
 
 #include "../components/CCFaction.h"
+#include "../components/CTimedObject.h"
 #include "../CBase.h"
 #include "../CRect.h"
 #include "../CResourceBase.h"
@@ -34,7 +35,7 @@ enum ITC_TYPE	// Item Template commands
 	ITC_QTY
 };
 
-class CItem : public CObjBase
+class CItem : public CObjBase, public virtual CTimedObject
 {
 	// RES_WORLDITEM
 public:
@@ -659,10 +660,10 @@ public:
 
 	virtual int GetWeight(word amount = 0) const;
 
-    void SetTimeout(int64 iMsecs);
-    void SetTimeoutS(int64 iSeconds);
-    void SetTimeoutT(int64 iTicks);
-    void SetTimeoutD(int64 iTenths);
+    virtual void SetTimeout(int64 iMsecs);
+    virtual void SetTimeoutS(int64 iSeconds);
+    virtual void SetTimeoutT(int64 iTicks);
+    virtual void SetTimeoutD(int64 iTenths);
 
 	virtual void OnMoveFrom();
 	virtual bool MoveTo(CPointMap pt, bool bForceFix = false); // Put item on the ground here.

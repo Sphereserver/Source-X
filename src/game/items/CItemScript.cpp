@@ -6,7 +6,10 @@
 //////////////////////////////////////
 // -CItemScript
 
-CItemScript::CItemScript( ITEMID_TYPE id, CItemBase * pItemDef ) : CItemVendable( id, pItemDef ) {
+CItemScript::CItemScript( ITEMID_TYPE id, CItemBase * pItemDef ) :
+    CItemVendable( id, pItemDef ),
+    CTimedObject(PROFILE_ITEMS)
+{
 }
 
 CItemScript::~CItemScript() {

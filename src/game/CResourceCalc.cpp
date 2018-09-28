@@ -1,6 +1,7 @@
 // The physics calculations of the world.
 
 #include "CServerConfig.h"
+#include "CServerTime.h"
 #include "chars/CChar.h"
 #include "chars/CCharNPC.h"
 
@@ -124,7 +125,7 @@ int CServerConfig::Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pW
 			break;
 		}
 	}
-    iSwingSpeed = (iSwingSpeed * 10) / 10; // Convert from tenths of second to ticks.
+    iSwingSpeed = iSwingSpeed * MSECS_PER_TENTH; // Convert from tenths of second to msecs.
     return iSwingSpeed;
 }
 

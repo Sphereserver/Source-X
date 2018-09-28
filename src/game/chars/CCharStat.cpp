@@ -343,25 +343,27 @@ short CChar::Stat_GetLimit( STAT_TYPE i ) const
 	}
 }
 
-bool CChar::Stats_Regen(int64 iTimeDiff)
+bool CChar::Stats_Regen()
 {
 	ADDTOCALLSTACK("CChar::Stats_Regen");
 	// Calling regens in all stats and checking REGEN%s/REGEN%sVAL where %s is hits/stam... to check values/delays
 	// Food decay called here too.
 	// calling @RegenStat for each stat if proceed.
-	// iTimeDiff is the next tick the stats are going to regen.
 
 	int HitsHungerLoss = g_Cfg.m_iHitsHungerLoss ? g_Cfg.m_iHitsHungerLoss : 0;
+    int64 iCurTime = CServerTime::GetCurrentTime().GetTimeRaw();
 	for (STAT_TYPE i = STAT_STR; i <= STAT_FOOD; i = (STAT_TYPE)(i + 1))
 	{
-		if (g_Cfg.m_iRegenRate[i] < 0)
-			continue;
-
-		ushort iRate = Stats_GetRegenVal(i, true);
-
-		m_Stat[i].m_regen += (short)(iTimeDiff/100); // in tenths of second
-		if ( m_Stat[i].m_regen < iRate )
-			continue;
+        int64 iRegenDelay = Stats_GetRegenVal(i, true) * MSECS_PER_SEC; // Get chars regen[n] delay (if none, check's for sphere.ini's value)
+        if (iRegenDelay < 0)    // No value (on both char & ini)? then do not regen this stat.
+        {
+            continue;
+        }
+        if (m_Stat[i].m_regen > iCurTime) // Check if enough time elapsed till the next regen.
+        {
+            continue;
+        }
+        m_Stat[i].m_regen = iCurTime + iRegenDelay; // in msecs
 
 		short mod = (short)Stats_GetRegenVal(i,false);
 		if ((i == STAT_STR) && (g_Cfg.m_iRacialFlags & RACIALF_HUMAN_TOUGH) && IsHuman())
@@ -403,8 +405,6 @@ bool CChar::Stats_Regen(int64 iTimeDiff)
 		if (mod == 0)
 			continue;
 
-		m_Stat[i].m_regen = 0;
-
 		if (i == STAT_FOOD)
 			OnTickFood(mod, HitsHungerLoss);
 		else
@@ -444,11 +444,11 @@ ushort CChar::Stats_GetRegenVal(STAT_TYPE iStat, bool bGetTicks)
 		if ( bGetTicks )
 		{
 			sprintf(sRegen, "REGEN%s", stat);   // in seconds
-			ushort iRate = (ushort)(GetDefNum(sRegen, true) * 10); // to tenths of second
+			ushort iRate = (ushort)(GetDefNum(sRegen, true)); // in seconds
 			if ( iRate )
 				return iRate; //maximum(0, iRate);
 
-			return (ushort)(maximum(0, g_Cfg.m_iRegenRate[iStat])); // tenths of second
+			return (ushort)(maximum(0, g_Cfg.m_iRegenRate[iStat])); // in seconds
 		}
 		else
 		{

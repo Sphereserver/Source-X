@@ -10,7 +10,9 @@
 #include "CItemShip.h"
 
 
-CItemStone::CItemStone( ITEMID_TYPE id, CItemBase * pItemDef ) : CItem( id, pItemDef )
+CItemStone::CItemStone( ITEMID_TYPE id, CItemBase * pItemDef ) :
+    CItem( id, pItemDef ),
+    CTimedObject(PROFILE_ITEMS)
 {
 	m_itStone.m_iAlign = STONEALIGN_STANDARD;
     g_World.m_Stones.push_back(this);

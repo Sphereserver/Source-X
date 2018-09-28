@@ -29,12 +29,12 @@ bool CChar::Noto_IsEvil() const
 
 		if ( m_pPlayer )
 		{
-			if ( iKarma > g_Cfg.m_iPlayerKarmaEvil )
+			if ( iKarma < g_Cfg.m_iPlayerKarmaEvil )
 				return true;
 		}
 		else
 		{
-			if ( iKarma > 0 )
+			if ( iKarma < 0 )
 				return true;
 		}
 
@@ -730,16 +730,15 @@ int CChar::NotoSave_GetID( CChar * pChar )
 	ADDTOCALLSTACK("CChar::NotoSave_GetID(CChar)");
 	if ( !pChar || m_notoSaves.empty() )
 		return -1;
-	if ( NotoSave() )
+	if ( !m_notoSaves.empty() )
 	{
-		int count = 0;
-		for (std::vector<NotoSaves>::iterator it = m_notoSaves.begin(), end = m_notoSaves.end(); it != end; ++it)
+		int id = 0;
+		for (auto it : m_notoSaves)
 		{
-			NotoSaves & refNotoSave = m_notoSaves[count];
-			CUID uid = refNotoSave.charUID;
+			CUID uid = it.charUID;
 			if ( uid.CharFind() && uid == (dword)(pChar->GetUID()) )
-				return count;
-			++count;
+				return id;
+			++id;
 		}
 	}
 	return -1;

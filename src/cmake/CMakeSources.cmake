@@ -246,6 +246,8 @@ game/CServerDef.cpp
 game/CServerDef.h
 game/CServerTime.cpp
 game/CServerTime.h
+game/CTimedFunction.cpp
+game/CTimedFunction.h
 game/CWebPage.cpp
 game/CWorld.cpp
 game/CWorld.h
@@ -365,6 +367,8 @@ game/components/CCItemDamageable.cpp
 game/components/CCItemDamageable.h
 game/components/CCSpawn.cpp
 game/components/CCSpawn.h
+game/components/CTimedObject.cpp
+game/components/CTimedObject.h
 )
 SOURCE_GROUP (game\\components FILES ${components_SRCS})
 

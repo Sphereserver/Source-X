@@ -8,7 +8,8 @@
 
 
 CItemCorpse::CItemCorpse( ITEMID_TYPE id, CItemBase * pItemDef ) :
-	CItemContainer( id, pItemDef )
+	CItemContainer( id, pItemDef ),
+    CTimedObject(PROFILE_ITEMS)
 {
 	ADDTOCALLSTACK("CItemCorpse::CItemCorpse");
 }

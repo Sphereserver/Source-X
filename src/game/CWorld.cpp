@@ -10,6 +10,7 @@
 #include "chars/CChar.h"
 #include "clients/CClient.h"
 #include "clients/CGMPage.h"
+#include "chars/CChar.h"
 #include "items/CItem.h"
 #include "CObjBase.h"
 #include "CServer.h"
@@ -217,295 +218,6 @@ void ReportGarbageCollection(CObjBase * pObj, int iResultCode)
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////
-// -CTimedFunctionHandler
-
-CTimedFunctionHandler::CTimedFunctionHandler()
-{
-	m_curTick = 0;
-	m_processedFunctionsPerTick = 0;
-	m_isBeingProcessed = false;
-}
-
-void CTimedFunctionHandler::OnTick()
-{
-	ADDTOCALLSTACK("CTimedFunctionHandler::OnTick");
-	m_isBeingProcessed = true;
-
-	++m_curTick;
-
-	if ( m_curTick >= MSECS_PER_SEC)
-		m_curTick = 0;
-
-	int tick = m_curTick;
-	ProfileTask scriptsTask(PROFILE_SCRIPTS);
-
-
-	if ( !m_timedFunctions[tick].empty() )
-	{
-		for ( auto it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); )	
-		{
-			++m_processedFunctionsPerTick;
-			if (g_Cfg.m_iMaxLoopTimes && (m_processedFunctionsPerTick >= g_Cfg.m_iMaxLoopTimes))
-			{
-				g_Log.EventError("Terminating TIMERF executions for this tick, since it seems being dead-locked (%d iterations already passed)\n", m_processedFunctionsPerTick);
-				break;
-			}
-			TimedFunction* tf = *it;
-			tf->elapsed -= 1;
-			if ( tf->elapsed <= 0 )
-			{
-				CScript s(tf->funcname);
-				CObjBase * obj = tf->uid.ObjFind();
-
-				if ( obj != NULL ) //just in case
-				{
-					CObjBaseTemplate * topobj = obj->GetTopLevelObj();
-					CTextConsole* src;
-
-					if ( topobj->IsChar() )
-						src = dynamic_cast <CTextConsole*> ( topobj );
-					else
-						src = &g_Serv;
-
-					m_tfRecycled.push_back( tf );
-					it = m_timedFunctions[tick].erase( it );
-
-					obj->r_Verb( s, src );
-				}
-				else
-				{
-					m_tfRecycled.push_back( tf );
-					it = m_timedFunctions[tick].erase( it );
-				}
-			}
-			else
-			{
-				++it;
-			}
-		}
-	}
-
-	m_isBeingProcessed = false;
-	m_processedFunctionsPerTick = 0;
-
-	while ( !m_tfQueuedToBeAdded.empty() )
-	{
-		TimedFunction *tf = m_tfQueuedToBeAdded.back();
-		m_tfQueuedToBeAdded.pop_back();
-		m_timedFunctions[tick].push_back( tf );
-	}
-}
-
-void CTimedFunctionHandler::Erase( CUID uid )
-{
-	ADDTOCALLSTACK("CTimedFunctionHandler::Erase");
-	for ( int tick = 0; tick < MSECS_PER_SEC; ++tick )
-	{
-		for ( auto it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); )	// the end iterator changes at each stl container erase call
-		{
-			TimedFunction* tf = *it;
-			if ( tf->uid == uid)
-			{
-				m_tfRecycled.push_back( tf );
-				it = m_timedFunctions[tick].erase( it );
-			}
-			else
-				++it;
-		}
-	}
-}
-
-int CTimedFunctionHandler::IsTimer( CUID uid, lpctstr funcname )
-{
-	ADDTOCALLSTACK("CTimedFunctionHandler::IsTimer");
-	for ( int tick = 0; tick < MSECS_PER_SEC; ++tick )
-	{
-		for ( auto it = m_timedFunctions[tick].begin(), end = m_timedFunctions[tick].end(); it != end; )
-		{
-			TimedFunction* tf = *it;
-			if ( (tf->uid == uid) && (!strcmpi( tf->funcname, funcname)) )
-				return tf->elapsed;
-
-			++it;
-		}
-	}
-	return 0;
-}
-
-void CTimedFunctionHandler::Stop( CUID uid, lpctstr funcname )
-{
-	ADDTOCALLSTACK("CTimedFunctionHandler::Stop");
-	for ( int tick = 0; tick < MSECS_PER_SEC; ++tick )
-	{
-		for ( auto it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); )	// the end iterator changes at each erase call
-		{
-			TimedFunction* tf = *it;
-			if (( tf->uid == uid) && (!strcmpi( tf->funcname, funcname)))
-			{
-				m_tfRecycled.push_back( tf );
-				it = m_timedFunctions[tick].erase( it );
-			}
-			else
-				++it;
-		}
-	}
-}
-
-TRIGRET_TYPE CTimedFunctionHandler::Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext, CScriptLineContext EndContext, CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult)
-{
-	ADDTOCALLSTACK("CTimedFunctionHandler::Loop");
-	bool endLooping = false;
-	for (int tick = 0; (tick < MSECS_PER_SEC) && !endLooping; ++tick)
-	{
-		for (auto it = m_timedFunctions[tick].begin(); it != m_timedFunctions[tick].end(); )
-		{
-			++LoopsMade;
-			if (g_Cfg.m_iMaxLoopTimes && (LoopsMade >= g_Cfg.m_iMaxLoopTimes))
-			{
-				g_Log.EventError("Terminating loop cycle since it seems being dead-locked (%d iterations already passed)\n", LoopsMade);
-				return TRIGRET_ENDIF;
-			}
-
-			TimedFunction* tf = *it;
-			if (!strcmpi(tf->funcname, funcname))
-			{
-				CObjBase * pObj = tf->uid.ObjFind();
-				TRIGRET_TYPE iRet = pObj->OnTriggerRun(s, TRIGRUN_SECTION_TRUE, pSrc, pArgs, pResult);
-				if (iRet == TRIGRET_BREAK)
-				{
-					EndContext = StartContext;
-					endLooping = true;
-					break;
-				}
-				if ((iRet != TRIGRET_ENDIF) && (iRet != TRIGRET_CONTINUE))
-					return iRet;
-				if (iRet == TRIGRET_CONTINUE)
-					EndContext = StartContext;
-				else
-					EndContext = s.GetContext();
-				s.SeekContext(StartContext);
-			}
-			++it;
-		}
-	}
-	return TRIGRET_ENDIF;
-}
-
-void CTimedFunctionHandler::Add( CUID uid, int numSeconds, lpctstr funcname )
-{
-	ADDTOCALLSTACK("CTimedFunctionHandler::Add");
-	ASSERT(funcname != NULL);
-	ASSERT(strlen(funcname) < 1024);
-
-	int tick = m_curTick;
-	TimedFunction *tf;
-	if ( !m_tfRecycled.empty() )
-	{
-		tf = m_tfRecycled.back();
-		m_tfRecycled.pop_back();
-	}
-	else
-	{
-		tf = new TimedFunction;
-	}
-	tf->uid = uid;
-	tf->elapsed = numSeconds;
-	strcpy( tf->funcname, funcname );
-	if ( m_isBeingProcessed )
-		m_tfQueuedToBeAdded.push_back( tf );
-	else
-		m_timedFunctions[tick].push_back( tf );
-}
-
-int CTimedFunctionHandler::Load( const char *pszName, bool fQuoted, const char *pszVal)
-{
-	ADDTOCALLSTACK("CTimedFunctionHandler::Load");
-	UNREFERENCED_PARAMETER(fQuoted);
-	static char tempBuffer[1024];
-	static TimedFunction *tf = NULL;
-
-	if ( !pszName )
-		return -1;
-
-	if ( !strnicmp( pszName, "CurTick", 7 ) )
-	{
-		if ( IsDigit(pszVal[0] ) )
-			m_curTick = ATOI(pszVal);
-		else
-			g_Log.Event( LOGM_INIT|LOGL_ERROR,	"Invalid NextTick line in save file: %s=%s\n", pszName, pszVal );
-	}
-	else if ( !strnicmp( pszName, "TimerFNumbers", 13 ) )
-	{
-		tchar * ppVal[4];
-		strcpy( tempBuffer, pszVal );	//because pszVal is constant and Str_ParseCmds wants a non-constant string
-		size_t iArgs = Str_ParseCmds( tempBuffer, ppVal, CountOf( ppVal ), " ,\t" );
-		if ( iArgs == 3 )
-		{
-			if ( IsDigit( ppVal[0][0] ) && IsDigit( ppVal[1][0] ) && IsDigit( ppVal[2][0] ) )
-			{
-				int tick = ATOI(ppVal[0]);
-				int uid = ATOI(ppVal[1]);
-				int elapsed = ATOI(ppVal[2]);
-				int isNew = 0;
-				if ( tf == NULL )
-				{
-					tf = new TimedFunction;
-					tf->funcname[0] = 0;
-					isNew = 1;
-				}
-				tf->elapsed = elapsed;
-				tf->uid.SetPrivateUID( uid );
-				if ( !isNew )
-				{
-					m_timedFunctions[tick].push_back( tf );
-					tf = NULL;
-				}
-				else
-				{
-					g_Log.Event( LOGM_INIT|LOGL_ERROR, "Invalid Timerf in %sdata.scp. Each TimerFCall and TimerFNumbers pair must be in that order.\n", SPHERE_FILE );
-				}
-			}
-			else
-			{
-				g_Log.Event( LOGM_INIT|LOGL_ERROR, "Invalid Timerf line in %sdata.scp: %s=%s\n", SPHERE_FILE, pszName, pszVal );
-			}
-		}
-	}
-	else if ( !strnicmp( pszName, "TimerFCall", 11 ) )
-	{
-		int isNew = 0;
-		if ( tf == NULL )
-		{
-			tf = new TimedFunction;
-			isNew = 1;
-		}
-		strcpy( tf->funcname, pszVal );
-		if ( !isNew )
-			g_Log.Event( LOGM_INIT|LOGL_ERROR, "Invalid Timerf in %sdata.scp. Each TimerFCall and TimerFNumbers pair must be in that order.\n", SPHERE_FILE );
-	}
-
-	return 0;
-}
-
-void CTimedFunctionHandler::r_Write( CScript & s )
-{
-	ADDTOCALLSTACK("CTimedFunctionHandler::r_Write");
-	s.WriteKeyFormat( "CurTick", "%i", m_curTick );
-	for ( int tick = 0; tick < MSECS_PER_SEC; ++tick )
-	{
-		for ( auto it = m_timedFunctions[tick].begin(), end = m_timedFunctions[tick].end(); it != end; ++it )
-		{
-			TimedFunction* tf = *it;
-			if ( tf->uid.IsValidUID() )
-			{
-				s.WriteKeyFormat( "TimerFCall", "%s", tf->funcname );
-				s.WriteKeyFormat( "TimerFNumbers", "%i,%u,%i", tick, tf->uid.GetObjUID(), tf->elapsed );
-			}
-		}
-	}
-}
 
 
 //////////////////////////////////////////////////////////////////
@@ -1106,7 +818,6 @@ CWorld::CWorld()
 	m_timeCallUserFunc = 0;
 	m_Sectors = NULL;
 	m_SectorsQty = 0;
-	m_Sector_Pulse = 0;
 }
 
 void CWorld::Init()
@@ -1728,6 +1439,72 @@ void CWorld::SaveStatics()
 }
 
 /////////////////////////////////////////////////////////////////////
+
+void CWorld::AddTimedObject(int64 iTimeout, CTimedObject * pTimedObject)
+{
+    ADDTOCALLSTACK("CWorld::AddTimedObject");
+    ProfileTask timersTask(PROFILE_TIMERS);
+    _mWorldTickList._mTimedObjects[iTimeout]._mutex.lock();
+    _mWorldTickList._mTimedObjects[iTimeout]._TimedObjectsContainer.push_back(pTimedObject);
+    _mWorldTickList._mTimedObjects[iTimeout]._mutex.unlock();
+}
+
+void CWorld::DelTimedObject(int64 iTimeout, CTimedObject * pTimedObject)
+{
+    ADDTOCALLSTACK("CWorld::DelTimedObject");
+    ProfileTask timersTask(PROFILE_TIMERS);
+    if (iTimeout <= 0)
+    {
+        return;
+    }
+    _mWorldTickList._mTimedObjects[iTimeout]._mutex.lock();
+    TimedObjectsContainer &cont = _mWorldTickList._mTimedObjects[iTimeout];  // direct access to the container.
+    TimedObjectsContainer newcont;   // new container.
+    if (cont._TimedObjectsContainer.size() > 1) // if the old container only has 1 entry we don't need to create a new one.
+    {
+        for (auto pObj : cont._TimedObjectsContainer)    // Loop until the old container is empty
+        {
+            if (pObj == pTimedObject)   // if pTimedObject is this entry skip it to remove it from the container.
+            {
+                continue;
+            }
+            newcont._TimedObjectsContainer.push_back(pObj);  // otherwise add it to the new container.
+        }
+    }
+    _mWorldTickList._mTimedObjects[iTimeout]._TimedObjectsContainer.clear();
+    _mWorldTickList._mTimedObjects[iTimeout]._mutex.unlock();
+    /*
+    * All references to the given CTimedObject have been taken out from the container
+    * and the new one have been populated ? so let's add the new container to the main
+    * container, if it has any entry, or clear the top container recursivelly.
+    */
+    if (!newcont._TimedObjectsContainer.empty())
+    {
+        _mWorldTickList._mTimedObjects[iTimeout]._mutex.lock();
+        for (auto pObj : newcont._TimedObjectsContainer)
+        {
+            _mWorldTickList._mTimedObjects[iTimeout]._TimedObjectsContainer.push_back(pObj);
+        }
+        _mWorldTickList._mTimedObjects[iTimeout]._mutex.unlock();
+    }
+}
+
+void CWorld::AddCharTicking(CChar * pChar)
+{
+    int64 iTickNext = pChar->_timeNextRegen;
+    _mCharTickList._mTimedChars[iTickNext]._mutex.lock();
+    _mCharTickList._mTimedChars[iTickNext]._TimedCharsContainer.push_back(pChar);
+    _mCharTickList._mTimedChars[iTickNext]._mutex.unlock();
+}
+
+void CWorld::DelCharTicking(CChar * pChar)
+{
+    int64 iTickNext = pChar->_timeNextRegen;
+    _mCharTickList._mTimedChars[iTickNext]._mutex.lock();
+    std::vector<CChar*> &vec = _mCharTickList._mTimedChars[pChar->_timeNextRegen]._TimedCharsContainer;
+    vec.erase(std::remove(vec.begin(), vec.end(), pChar), vec.end());
+    _mCharTickList._mTimedChars[iTickNext]._mutex.unlock();
+}
 
 bool CWorld::LoadFile( lpctstr pszLoadName, bool fError ) // Load world from script
 {
@@ -2503,73 +2280,180 @@ uint CWorld::GetMoonPhase (bool bMoonIndex) const
 void CWorld::OnTick()
 {
 	ADDTOCALLSTACK("CWorld::OnTick");
-	// Do this once per tick.
 	// 256 real secs = 1 server hour. 19 light levels. check every 10 minutes or so.
 
+    // Do not tick while loading (startup, resync, exiting...) or when double ticking in the same msec?.
 	if ( g_Serv.IsLoading() || !m_Clock.Advance() )
 		return;
 
-	if ( _iLastTick <= GetCurrentTick())
-	{
-        ++_iLastTick;
-		++m_Sector_Pulse;
-		int	m, s;
 
-		for ( m = 0; m < 256; ++m )
-		{
-			if ( !g_MapList.m_maps[m] )
+    // Do this once per tick.
+    // Update status flags from objects, update current tick.
+    if (_iLastTick <= GetCurrentTick())
+    {
+        ++_iLastTick;   // Update current tick.
+
+        /* process objects that need status updates
+        * these objects will normally be in containers which don't have any period OnTick method
+        * called (whereas other items can receive the OnTickStatusUpdate() call via their normal
+        * tick method).
+        * note: ideally, a better solution to accomplish this should be found if possible
+        * TODO: implement a new class inheriting from CTimedObject to get rid of this code.
+        */
+        if (!m_ObjStatusUpdates.empty())
+        {
+            EXC_TRYSUB("Tick::StatusUpdates");
+
+            // loop backwards to avoid possible infinite loop if a status update is triggered
+            // as part of the status update (e.g. property changed under tooltip trigger)
+            size_t i = m_ObjStatusUpdates.size();
+            while (i > 0)
+            {
+                CObjBase * pObj = m_ObjStatusUpdates[--i];
+                if (pObj != nullptr)
+                    pObj->OnTickStatusUpdate();
+            }
+            m_ObjStatusUpdates.clear();
+
+            EXC_CATCHSUB("StatusUpdates");
+        }
+
+
+        // TimerF
+        EXC_TRYSUB("Tick::TimerF");
+        m_TimedFunctions.OnTick();
+        EXC_CATCHSUB("CTimedFunction");
+
+    }
+
+    // World's tick
+    // Items, Chars ... Everything relying on CTimedObject (excepting CObjBase, which inherit is only virtual)
+    int64 iCurTime = CServerTime::GetCurrentTime().GetTimeRaw();    // Current timestamp, a few msecs will advance in the current tick ... avoid them until the following tick(s).
+    
+    std::map<int64, TimedObjectsContainer>::iterator it = _mWorldTickList._mTimedObjects.begin();
+    std::map<int64, std::vector<CTimedObject*>> tmpMap;
+    int64 iTime;
+    while ( it != _mWorldTickList._mTimedObjects.end() && iCurTime > (iTime = it->first))
+    {
+        _mWorldTickList._mutex.lock();
+        _mWorldTickList._mTimedObjects[iTime]._mutex.lock();
+        for (auto *pObj : it->second._TimedObjectsContainer)
+        {
+            tmpMap[iTime].push_back(pObj);
+        }
+        ++it;
+        _mWorldTickList._mTimedObjects[iTime]._mutex.unlock();
+        _mWorldTickList._mutex.unlock();
+    }
+    for ( auto objMap : tmpMap)    // Loop through all msecs stored, unless we passed the timestamp.
+    {
+        for (auto *pObj : objMap.second)
+        {
+            PROFILE_TYPE profile = pObj->GetProfileType();
+            ProfileTask profileTask(profile);
+            /*
+            * Doing a SetTimeout() in the object's tick will force CWorld to search for that object's
+            * current timeout to remove it from any list, prevent that to happen here since it should
+            * not belong to any other tick than the current one.
+            */
+            if (pObj->IsSleeping()) // Ignore what is sleeping.
+            {
                 continue;
+            }
+            pObj->ClearTimeout();
+            bool fRemove = true;    // Default to true, so if any error occurs it gets deleted for safety.
+            switch (profile)
+            {
+                case PROFILE_ITEMS:
+                {
+                    CItem *pItem = dynamic_cast<CItem*>(pObj);
+                    ASSERT(pItem);
+                    if (pItem->IsItemEquipped())
+                    {
+                        CChar *pChar = static_cast<CChar*>(pItem->GetTopLevelObj());
+                        ASSERT(pChar);
+                        fRemove = pChar->OnTickEquip(pItem);
+                    }
+                    else
+                    {
+                        fRemove = !pItem->OnTick();
+                    }
+                    break;
+                }
+                case PROFILE_CHARS:
+                {
+                    fRemove = !pObj->OnTick();
+                    if (!pObj->IsTimerSet())
+                    {
+                        pObj->SetTimeoutS(1);   //1 second timeout to keep NPCs 'alive'
+                    }
+                    break;
+                }
+                case PROFILE_SECTORS:
+                    fRemove = false;    // sectors should NEVER be deleted.
+                    g_Log.EventDebug("tocktacktick\n");
+                    pObj->OnTick();
+                    break;
+                default:
+                    fRemove = !pObj->OnTick(); // do tick.
+                    break;
+            }
+            if (fRemove)
+            {
+                pObj->Delete();
+            }
+        }
+        _mWorldTickList._mutex.lock();
+        _mWorldTickList._mTimedObjects.erase(objMap.first);  // entirelly remove this map's entry.
+        _mWorldTickList._mutex.unlock();
+    }
 
-			for ( s = 0; s < g_MapList.GetSectorQty(m); ++s )
-			{
-				EXC_TRYSUB("Tick");
+    ProfileTask taskChars(PROFILE_CHARS);
+    std::map<int64, TimedCharsContainer>::iterator mapit = _mCharTickList._mTimedChars.begin();
+    std::map<int64, std::vector<CChar*>> tmpCharMap;
+    while (mapit != _mCharTickList._mTimedChars.end() && iCurTime > (iTime = mapit->first))
+    {
+        _mCharTickList._mutex.lock();
+        _mCharTickList._mTimedChars[iTime]._mutex.lock();
+        for (auto pChar : mapit->second._TimedCharsContainer)
+        {
+            tmpCharMap[iTime].push_back(pChar);
+        }
+        ++mapit;
+        _mCharTickList._mTimedChars[iTime]._mutex.unlock();
+        _mCharTickList._mutex.unlock();
+    }
 
-				CSector	*pSector = GetSector(m, s);
-				if ( !pSector )
-					g_Log.EventError("Ticking NULL sector %d on map %d.\n", s, m);
-				else
-					pSector->OnTick( m_Sector_Pulse );
+    for (auto charit : tmpCharMap)    // Loop through all msecs stored, unless we passed the timestamp.
+    {
+        for (auto *pChar : charit.second)
+        {
+            if (pChar->OnTickPeriodic())
+            {
+                AddCharTicking(pChar);
+            }
+            else
+            {
+                pChar->Delete();
+            }
+        }
 
-				EXC_CATCHSUB("Sector");
-			}
-		}
+        _mCharTickList._mutex.lock();
+        _mCharTickList._mTimedChars.erase(charit.first);
+        _mCharTickList._mutex.unlock();
+    }
 
-		// process objects that need status updates
-		// these objects will normally be in containers which don't have any period OnTick method
-		// called (whereas other items can receive the OnTickStatusUpdate() call via their normal
-		// tick method).
-		// note: ideally, a better solution to accomplish this should be found if possible
-		if (!m_ObjStatusUpdates.empty())
-		{
-			EXC_TRYSUB("Tick");
+    m_ObjDelete.Clear();	// clean up our delete list (this DOES delete the objects, thanks to the virtual destructors).
 
-			// loop backwards to avoid possible infinite loop if a status update is triggered
-			// as part of the status update (e.g. property changed under tooltip trigger)
-			size_t i = m_ObjStatusUpdates.size();
-			while ( i > 0 )
-			{
-				CObjBase * pObj = m_ObjStatusUpdates[--i];
-				if (pObj != nullptr)
-					pObj->OnTickStatusUpdate();
-			}
-			m_ObjStatusUpdates.clear();
-
-			EXC_CATCHSUB("StatusUpdates");
-		}
-
-		m_ObjDelete.Clear();	// clean up our delete list (this DOES delete the objects, thanks to the virtual destructors).
-	}
-
-	EXC_TRYSUB("Tick");
-	m_TimedFunctions.OnTick();
-	EXC_CATCHSUB("TimerFunction");
-
+    // Save state checks
+    // Notifications
 	if ( (m_bSaveNotificationSent == false) && ((m_timeSave - (10 * MSECS_PER_SEC)) <= GetCurrentTick()) )
 	{
 		Broadcast( g_Cfg.GetDefaultMsg( DEFMSG_SERVER_WORLDSAVE_NOTIFY ) );
 		m_bSaveNotificationSent = true;
 	}
 
+    // Save
 	if ( m_timeSave <= GetCurrentTick())
 	{
 		// Auto save world
@@ -2577,12 +2461,17 @@ void CWorld::OnTick()
 		g_Log.Flush();
 		Save( false );
 	}
+
+    // Global (ini) stuff.
+    // Respawn Dead NPCs
 	if ( m_timeRespawn <= GetCurrentTick())
 	{
 		// Time to regen all the dead NPC's in the world.
 		m_timeRespawn = GetCurrentTick() + (20 * 60 * MSECS_PER_SEC);
 		RespawnDeadNPCs();
 	}
+
+    // f_onserver_timer function.
 	if ( m_timeCallUserFunc < GetCurrentTick())
 	{
 		if ( g_Cfg._iTimerCall )

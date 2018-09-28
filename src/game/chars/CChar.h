@@ -15,6 +15,7 @@
 #include "../items/CItemStone.h"
 #include "../game_macros.h"
 #include "../CObjBase.h"
+#include "../components/CTimedObject.h"
 #include "CCharBase.h"
 #include "CCharPlayer.h"
 
@@ -38,7 +39,7 @@ enum NPCBRAIN_TYPE	// General AI type.
 	NPCBRAIN_QTY
 };
 
-class CChar : public CObjBase, public CContainer, public CTextConsole
+class CChar : public CObjBase, public CContainer, public CTextConsole, public virtual CTimedObject
 {
 	// RES_WORLDCHAR
 private:
@@ -166,10 +167,11 @@ public:
 		short	m_mod;			// signed for modifier
 		short	m_val;			// signed for karma
 		short	m_max;			// max
-		ushort m_regen;	        // Tenths of second since last regen.
+		int64   m_regen;	    // msecs for the next regen.
 	} m_Stat[STAT_QTY];
 
-	int64 m_timeLastRegen;	// When did i get my last regen tick ?
+	int64 _timeNextRegen;	// When did i get my last regen tick ?
+    int16 _iRegenTickCount; // ticks until next regen.
 	int64 m_timeCreate;		// When was i created ?
 
 	int64 m_timeLastHitsUpdate;
@@ -312,7 +314,8 @@ private:
 
 public:
     CMultiStorage *GetMultiStorage();
-
+    virtual void Sleep();
+    virtual void Awake();
 	// Status and attributes ------------------------------------
 	int IsWeird() const;
 	char GetFixZ( CPointMap pt, dword dwBlockFlags = 0);
@@ -409,7 +412,7 @@ public:
 	short	Stat_GetSum() const;
 	short	Stat_GetLimit( STAT_TYPE i ) const;
 	bool Stat_Decrease( STAT_TYPE stat, SKILL_TYPE skill = (SKILL_TYPE)NULL);
-	bool Stats_Regen(int64 iTimeDiff);
+	bool Stats_Regen();
 	ushort Stats_GetRegenVal(STAT_TYPE iStat, bool bGetTicks);
 	SKILLLOCK_TYPE Stat_GetLock(STAT_TYPE stat);
 	void Stat_SetLock(STAT_TYPE stat, SKILLLOCK_TYPE state);
@@ -1231,7 +1234,8 @@ public:
 	bool OnTickEquip( CItem * pItem );
 	void OnTickFood( short iVal, int HitsHungerLoss );
 	void OnTickStatusUpdate();
-	bool OnTick();
+	bool OnTick();  // OnTick timeout for skills, AI, etc
+    bool OnTickPeriodic();  // Periodic tick calls (update stats, status bar, notoriety & attackers, death check, etc)
 
 	static CChar * CreateBasic( CREID_TYPE baseID );
 	static CChar * CreateNPC( CREID_TYPE id );

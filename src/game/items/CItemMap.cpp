@@ -95,7 +95,10 @@ void CItemMap::DupeCopy(const CItem *pItem)
     m_Pins = pMapItem->m_Pins;
 }
 
-CItemMap::CItemMap( ITEMID_TYPE id, CItemBase * pItemDef ) : CItemVendable( id, pItemDef ) {
+CItemMap::CItemMap( ITEMID_TYPE id, CItemBase * pItemDef ) :
+    CItemVendable( id, pItemDef ),
+    CTimedObject(PROFILE_ITEMS)
+{
     m_fPlotMode = false;
 }
 

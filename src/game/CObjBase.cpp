@@ -66,7 +66,7 @@ bool GetDeltaStr( CPointMap & pt, tchar * pszDir )
 // -CObjBase stuff
 // Either a player, npc or item.
 
-CObjBase::CObjBase( bool fItem )
+CObjBase::CObjBase( bool fItem )  // PROFILE_TIME_QTY is unused, CObjBase is not a real CTimedObject, it just needs it's virtual inheritance.
 {
 	sm_iCount ++;
 	m_iCreatedResScriptIdx = (size_t)-1;
@@ -356,83 +356,6 @@ void CObjBase::r_WriteSafe( CScript & s )
 		g_Log.CatchEvent(NULL, "Write Object 0%x", uid);
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1);
 	}
-}
-
-void CObjBase::SetTimeout( int64 iDelayInMsecs)
-{
-	ADDTOCALLSTACK("CObjBase::SetTimeout");
-	// Set delay in ticks. -1 = never.
-	if (iDelayInMsecs < 0 )
-		m_timeout = 0;
-	else
-		m_timeout = g_World.GetCurrentTime().GetTimeRaw() + iDelayInMsecs;
-}
-
-
-void CObjBase::SetTimeoutS(int64 iSeconds)
-{
-    SetTimeout(iSeconds * MSECS_PER_SEC);
-}
-
-void CObjBase::SetTimeoutT(int64 iTicks)
-{
-    SetTimeout(iTicks * TICKS_PER_SEC);
-}
-
-void CObjBase::SetTimeoutD(int64 iTenths)
-{
-    SetTimeout(iTenths * TENTHS_PER_SEC);
-}
-
-int64 CObjBase::GetTimerDiff() const
-{
-    // How long till this will expire ?
-    return g_World.GetTimeDiff( m_timeout );
-    // return: < 0 = in the past ( m_timeout - g_World.GetCurrentTick() )
-}
-
-int64 CObjBase::GetTimerAdjusted() const
-{
-	// RETURN: time in msecs from now.
-	if ( ! IsTimerSet())
-		return -1;
-	int64 iDiffInMsecs = GetTimerDiff();
-	if (iDiffInMsecs < 0 )
-		return 0;
-	return (iDiffInMsecs);
-}
-
-int64 CObjBase::GetTimerTAdjusted() const
-{
-	// RETURN: time in ticks from now.
-	if ( ! IsTimerSet())
-		return -1;
-	int64 iDiffInMsecs = GetTimerDiff();
-	if (iDiffInMsecs < 0 )
-		return 0;
-	return (iDiffInMsecs / TICKS_PER_SEC);
-}
-
-int64 CObjBase::GetTimerDAdjusted() const
-{
-    // RETURN: time in tenths of second from now.
-    if ( ! IsTimerSet())
-        return -1;
-    int64 iDiffInMsecs = GetTimerDiff();
-    if (iDiffInMsecs < 0 )
-        return 0;
-    return (iDiffInMsecs / TENTHS_PER_SEC);
-}
-
-int64 CObjBase::GetTimerSAdjusted() const
-{
-    // RETURN: time in seconds from now.
-    if (!IsTimerSet())
-        return -1;
-    int64 iDiffInMsecs = GetTimerDiff();
-    if (iDiffInMsecs < 0)
-        return 0;
-    return (iDiffInMsecs / MSECS_PER_SEC);
 }
 
 void CObjBase::Sound( SOUND_TYPE id, int iOnce ) const // Play sound effect for player
@@ -3307,6 +3230,7 @@ void CObjBase::Delete(bool bforce)
     CEntity *pEntity = static_cast<CEntity*>(this);
     pEntity->Delete(bforce);
 
+    CTimedObject::Delete(bforce);
 	DeletePrepare();
 	g_World.m_TimedFunctions.Erase( GetUID() );
 	g_World.m_ObjDelete.InsertHead(this);

@@ -3,7 +3,10 @@
 #include "CItemMessage.h"
 #include "CItemVendable.h"
 
-CItemMessage::CItemMessage( ITEMID_TYPE id, CItemBase * pItemDef ) : CItemVendable( id, pItemDef ) {
+CItemMessage::CItemMessage( ITEMID_TYPE id, CItemBase * pItemDef ) :
+    CItemVendable( id, pItemDef ),
+    CTimedObject(PROFILE_ITEMS)
+{
 }
 
 CItemMessage::~CItemMessage() {

@@ -4,7 +4,9 @@
 #include "CItemVendable.h"
 #include "CItemCommCrystal.h"
 
-CItemCommCrystal::CItemCommCrystal( ITEMID_TYPE id, CItemBase * pItemDef ) : CItemVendable( id, pItemDef ) {
+CItemCommCrystal::CItemCommCrystal( ITEMID_TYPE id, CItemBase * pItemDef ) :
+    CItemVendable( id, pItemDef ),
+    CTimedObject(PROFILE_ITEMS) {
 }
 
 CItemCommCrystal::~CItemCommCrystal()

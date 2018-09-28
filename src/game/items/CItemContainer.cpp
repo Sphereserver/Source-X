@@ -12,7 +12,9 @@
 //----------------------------------------------------
 // -CItemContainer
 
-CItemContainer::CItemContainer( ITEMID_TYPE id, CItemBase *pItemDef ) :	CItemVendable( id, pItemDef )
+CItemContainer::CItemContainer( ITEMID_TYPE id, CItemBase *pItemDef ) :
+    CItemVendable( id, pItemDef ),
+    CTimedObject(PROFILE_ITEMS)
 {
 	// m_fTinkerTrapped = false;
     _uidMultiSecured.InitUID();

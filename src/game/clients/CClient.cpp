@@ -203,6 +203,7 @@ void CClient::CharDisconnect()
 		// remove me from other clients screens now.
 		m_pChar->SetDisconnected();
 	}
+    g_World.DelCharTicking(m_pChar);
 
 	m_pChar = NULL;
 }

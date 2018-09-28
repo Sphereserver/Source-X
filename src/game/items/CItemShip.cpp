@@ -14,7 +14,9 @@
 /////////////////////////////////////////////////////////////////////////////
 
 
-CItemShip::CItemShip(ITEMID_TYPE id, CItemBase * pItemDef) : CItemMulti(id, pItemDef)
+CItemShip::CItemShip(ITEMID_TYPE id, CItemBase * pItemDef) :
+    CItemMulti(id, pItemDef),
+    CTimedObject(PROFILE_SHIPS)
 {
     m_NextMove = g_World.GetCurrentTick();
 }

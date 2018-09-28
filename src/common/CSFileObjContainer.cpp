@@ -3,6 +3,7 @@
 #include "CScript.h"
 #include "CSFileObj.h"
 #include "CSFileObjContainer.h"
+#include "../game/CServerTime.h"
 
 
 enum CFO_TYPE

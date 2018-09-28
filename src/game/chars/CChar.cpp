@@ -230,7 +230,8 @@ CChar * CChar::CreateBasic(CREID_TYPE baseID) // static
 	return pChar;
 }
 
-CChar::CChar( CREID_TYPE baseID ) : CObjBase( false ),
+CChar::CChar( CREID_TYPE baseID ) : CObjBase( false ), 
+    CTimedObject(PROFILE_CHARS),
 	m_Stat()
 {
 	g_Serv.StatInc( SERV_STAT_CHARS );	// Count created CChars.
@@ -267,8 +268,10 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false ),
 	m_atUnk.m_Arg2 = 0;
 	m_atUnk.m_Arg3 = 0;
 
-	m_timeLastRegen = m_timeCreate = g_World.GetCurrentTick();
-	m_timeLastHitsUpdate = m_timeLastRegen;
+	m_timeCreate = g_World.GetCurrentTime().GetTimeRaw();
+    m_timeLastHitsUpdate = g_World.GetCurrentTime().GetTimeRaw();
+    _timeNextRegen = m_timeLastHitsUpdate + MSECS_PER_TICK;
+    _iRegenTickCount = 0;
 	m_timeLastCallGuards = 0;
 
     m_zClimbHeight = 0;
@@ -310,6 +313,10 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false ),
 
     Suscribe(new CCFaction(this));
 
+    if (m_pNPC)
+    {
+        g_World.AddCharTicking(this);
+    }
 	ASSERT(IsDisconnected());
 }
 
@@ -469,12 +476,26 @@ void CChar::Delete(bool bforce)
 	// Detach from account now
 	ClearPlayer();
 
+    g_World.DelCharTicking(this);
+
 	CObjBase::Delete();
 }
 
 CMultiStorage *CChar::GetMultiStorage()
 {
     return _pMultiStorage;
+}
+
+void CChar::Sleep()
+{
+    g_World.DelCharTicking(this);
+    CTimedObject::Sleep();
+}
+
+void CChar::Awake()
+{
+    g_World.AddCharTicking(this);
+    CTimedObject::Awake();
 }
 
 // Is there something wrong with this char?
@@ -893,7 +914,7 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 	m_atUnk.m_Arg2 = pChar->m_atUnk.m_Arg2;
 	m_atUnk.m_Arg3 = pChar->m_atUnk.m_Arg3;
 
-	m_timeLastRegen = pChar->m_timeLastRegen;
+	_timeNextRegen = pChar->_timeNextRegen;
 	m_timeCreate = pChar->m_timeCreate;
 
 	m_timeLastHitsUpdate = pChar->m_timeLastHitsUpdate;
@@ -1026,6 +1047,7 @@ bool CChar::DupeFrom( CChar * pChar, bool fNewbieItems )
 	// End copying items.
 	FixWeight();
 	Update();
+    g_World.AddCharTicking(this);
 	return true;
 }
 

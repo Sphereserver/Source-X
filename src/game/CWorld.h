@@ -6,13 +6,16 @@
 #ifndef _INC_CWORLD_H
 #define _INC_CWORLD_H
 
+#include <shared_mutex>
 #include "../common/common.h"
 #include "../common/CScript.h"
 #include "../common/CScriptObj.h"
 #include "../common/CUID.h"
 #include "items/CItemStone.h"
+#include "components/CTimedObject.h"
 #include "CServerTime.h"
 #include "CSector.h"
+#include "CTimedFunction.h"
 
 class CObjBase;
 class CItemTypeDef;
@@ -129,43 +132,27 @@ public:
 	static uint64 GetSystemClock(); // in milliseconds
 };
 
-class CTimedFunctionHandler
+struct TimedObjectsContainer
 {
-	public:
-		struct TimedFunction
-		{
-			int		elapsed;
-			char	funcname[1024];
-			CUID 	uid;
-		};
+    mutable std::shared_mutex _mutex;
+    std::vector<CTimedObject*> _TimedObjectsContainer;};
 
-	private:
-		std::vector<TimedFunction *> m_timedFunctions[MSECS_PER_SEC];
-		int m_curTick;
-		int m_processedFunctionsPerTick;
-		std::vector<TimedFunction *> m_tfRecycled;
-		std::vector<TimedFunction *> m_tfQueuedToBeAdded;
-		bool m_isBeingProcessed;
+struct WorldTickList
+{
+    mutable std::shared_mutex _mutex;
+    std::map<int64, TimedObjectsContainer> _mTimedObjects;
+};
 
-	public:
-		static const char *m_sClassName;
-		CTimedFunctionHandler();
+struct TimedCharsContainer
+{
+    mutable std::shared_mutex _mutex;
+    std::vector<CChar*> _TimedCharsContainer;
+};
 
-	private:
-		CTimedFunctionHandler(const CTimedFunctionHandler& copy);
-		CTimedFunctionHandler& operator=(const CTimedFunctionHandler& other);
-
-	public:
-		void OnTick();
-		void r_Write( CScript & s );
-		
-		int Load( const char *pszName, bool fQuoted, const char *pszVal );
-		void Add( CUID uid, int numSeconds, lpctstr funcname );
-		void Erase( CUID uid );
-		void Stop( CUID uid, lpctstr funcname );
-		TRIGRET_TYPE Loop(lpctstr funcname, int LoopsMade, CScriptLineContext StartContext, CScriptLineContext EndContext,
-            CScript &s, CTextConsole * pSrc, CScriptTriggerArgs * pArgs, CSString * pResult);
-		int IsTimer( CUID uid, lpctstr funcname );
+struct CharTickList
+{
+    mutable std::shared_mutex _mutex;
+    std::map<int64, TimedCharsContainer> _mTimedChars;
 };
 
 extern class CWorld : public CScriptObj, public CWorldThread
@@ -180,14 +167,20 @@ private:
 	bool		m_bSaveNotificationSent;// has notification been sent?
 	int64	m_timeRespawn;			// when to res dead NPC's ?
 	int64	m_timeCallUserFunc;		// when to call next user func
-	uint		m_Sector_Pulse;			// Slow some stuff down that doesn't need constant processing.
 	ullong		m_ticksWithoutMySQL;	// MySQL should be running constantly if MySQLTicks is true, keep here record of how much ticks since Sphere is not connected.
     int64       _iLastTick;             // Last tick done.
 
 	int m_iSaveStage;	// Current stage of the background save.
 	llong	m_savetimer; // Time it takes to save
 
+    WorldTickList _mWorldTickList;
+    CharTickList _mCharTickList;
+
 public:
+    void AddTimedObject(int64 iTimeout, CTimedObject *pTimedObject);
+    void DelTimedObject(int64 iTimeout, CTimedObject* pTimedObject);
+    void AddCharTicking(CChar *pChar);
+    void DelCharTicking(CChar *pChar);
 	static const char *m_sClassName;
 	// World data.
 	CSector **m_Sectors;

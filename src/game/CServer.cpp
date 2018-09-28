@@ -1886,6 +1886,7 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 void CServer::ShipTimers_Tick()
 {
 	ADDTOCALLSTACK("CServer::ShipTimers_Tick");
+    ProfileTask shipsTask(PROFILE_SHIPS);
 	for (std::vector<CItemShip *>::iterator it = m_ShipTimers.begin(); it != m_ShipTimers.end(); )
 	{
 		CItemShip * pShip = *it;

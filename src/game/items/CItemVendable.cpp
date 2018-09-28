@@ -2,7 +2,9 @@
 #include "../../common/CException.h"
 #include "CItemVendable.h"
 
-CItemVendable::CItemVendable( ITEMID_TYPE id, CItemBase * pDef ) : CItem( id, pDef )
+CItemVendable::CItemVendable( ITEMID_TYPE id, CItemBase * pDef ) :
+    CItem( id, pDef ),
+    CTimedObject(PROFILE_ITEMS)
 {
 	// Constructor
 	m_price = 0;

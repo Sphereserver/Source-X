@@ -1,13 +1,14 @@
 
 #include "../common/CException.h"
+#include "../common/CLog.h"
 #include "../sphere/ProfileTask.h"
+#include "../sphere/ProfileData.h"
 #include "chars/CChar.h"
 #include "chars/CCharNPC.h"
 #include "clients/CClient.h"
-#include "items/CItem.h"
 #include "components/CCSpawn.h"
 #include "components/CCItemDamageable.h"
-#include "../common/CLog.h"
+#include "items/CItem.h"
 #include "CObjBase.h"
 #include "CSector.h"
 #include "CWorld.h"
@@ -19,9 +20,10 @@
 
 int64 CSectorBase::m_iMapBlockCacheTime = 0;
 
-CSector::CSector()
+CSector::CSector() : CTimedObject(PROFILE_SECTORS)
 {
 	m_ListenItems = 0;
+    _fIsSleeping = true;    // Every sector is sleeping at start, they only awake when any player enter (this eases the load at startup).
 
 	m_RainChance = 0;		// 0 to 100%
 	m_ColdChance = 0;		// Will be snow if rain chance success.
@@ -147,6 +149,49 @@ bool CSector::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 	EXC_ADD_KEYRET(pSrc);
 	EXC_DEBUG_END;
 	return false;
+}
+
+void CSector::Sleep()
+{
+    ADDTOCALLSTACK("CSector::Sleep");
+    ProfileTask charactersTask(PROFILE_TIMERS);
+    _fIsSleeping = true;
+
+    CChar * pCharNext = NULL;
+    CChar * pChar = static_cast <CChar*>(m_Chars_Active.GetHead());
+    for (; pChar != NULL; pChar = pCharNext)
+    {
+        pChar->Sleep();
+    }
+
+    CItem * pItemNext = NULL;
+    CItem * pItem = static_cast <CItem*>( m_Items_Timer.GetHead());
+    for (; pItem != NULL; pItem = pItemNext)
+    {
+        pItem->Sleep();
+    }
+}
+
+void CSector::Awake()
+{
+    ADDTOCALLSTACK("CSector::Awake");
+    ProfileTask charactersTask(PROFILE_TIMERS);
+    _fIsSleeping = false;
+
+    CChar * pCharNext = NULL;
+    CChar * pChar = static_cast <CChar*>(m_Chars_Active.GetHead());
+    for (; pChar != NULL; pChar = pCharNext)
+    {
+        pChar->Awake();
+    }
+
+    CItem * pItemNext = NULL;
+    CItem * pItem = static_cast <CItem*>(m_Items_Timer.GetHead());
+    for (; pItem != NULL; pItem = pItemNext)
+    {
+        pItem->Awake();
+    }
+    g_World.AddTimedObject(CServerTime::GetCurrentTime().GetTimeRaw() + (30 * MSECS_PER_SEC), this);
 }
 
 bool CSector::r_LoadVal( CScript &s )
@@ -876,13 +921,17 @@ bool CSector::MoveCharToSector( CChar * pChar )
 		}
 	}
 
+    if (IsSleeping())
+    {
+        Awake();
+    }
 	m_Chars_Active.AddCharToSector(pChar);	// remove from previous spot.
 	return true;
 }
 
-inline bool CSector::IsSectorSleeping() const
+inline bool CSector::CanSleep() const
 {
-	ADDTOCALLSTACK_INTENSIVE("CSector::IsSectorSleeping");
+	ADDTOCALLSTACK_INTENSIVE("CSector::CanSleep");
 	if ( IsFlagSet(SECF_NoSleep) )
 		return false;	// never sleep
 
@@ -895,14 +944,23 @@ inline bool CSector::IsSectorSleeping() const
 	}
 
 	//default behaviour
-	return (-g_World.GetTimeDiff(GetLastClientTime()) > 10 * 60 * 1000); // Sector Sleep timeout.
+	return (-g_World.GetTimeDiff(GetLastClientTime()) > g_Cfg.m_iSectorSleepMask); // Sector Sleep timeout.
+}
+
+bool CSector::IsSleeping() const
+{
+    return _fIsSleeping;
 }
 
 void CSector::SetSectorWakeStatus()
 {
 	ADDTOCALLSTACK("CSector::SetSectorWakeStatus");
 	// Ships may enter a sector before it's riders ! ships need working timers to move !
-	m_Chars_Active.m_timeLastClient = g_World.GetCurrentTick();
+	m_Chars_Active.m_timeLastClient = g_World.GetCurrentTime().GetTimeRaw();
+    if (IsSleeping())
+    {
+        Awake();
+    }
 }
 
 void CSector::Close()
@@ -980,34 +1038,38 @@ void CSector::Restock()
     }
 }
 
-void CSector::OnTick(int iPulseCount)
+bool CSector::OnTick()
 {
 	ADDTOCALLSTACK_INTENSIVE("CSector::OnTick");
-	// CWorld gives OnTick() to all CSectors.
+	/*Ticking sectors from CWorld
+    * Timer is automatically updated at the end with a 30 seconds default delay
+    * Any return before it will threat this CSector as Sleep and will make it
+    * not tick again until a new player enters (WARNING: even if there are
+    * players already inside).
+    */
+
 
 	EXC_TRY("Tick");
 	EXC_SET("light change");
 
 	//	do not tick sectors on maps not supported by server
 	if ( !g_MapList.m_maps[m_map] )
-		return;
+		return true;
 
 	// Check for light change before putting the sector to sleep, since in other case the
 	// world light levels will be shitty
 	bool fEnvironChange = false;
 	bool fLightChange = false;
-	bool fSleeping = false;
+	bool fCanSleep = CanSleep();
+    int64 iCurTime = CServerTime::GetCurrentTime().GetTimeRaw();
 
-	if ( (iPulseCount % (30*MSECS_PER_SEC)) == 0)	// 30 seconds or so.
+	// check for local light level change ?
+	byte blightprv = m_Env.m_Light;
+	m_Env.m_Light = GetLightCalc( false );
+	if ( m_Env.m_Light != blightprv )
 	{
-		// check for local light level change ?
-		byte blightprv = m_Env.m_Light;
-		m_Env.m_Light = GetLightCalc( false );
-		if ( m_Env.m_Light != blightprv )
-		{
-			fEnvironChange = true;
-			fLightChange = true;
-		}
+		fEnvironChange = true;
+		fLightChange = true;
 	}
 
 	EXC_SET("sector sleeping?");
@@ -1016,11 +1078,13 @@ void CSector::OnTick(int iPulseCount)
 	if ( clients <= 0 ) // having no clients inside
 	{
 		// Put the sector to sleep if no clients been here in a while.
-		fSleeping = IsSectorSleeping();
-		if ( fSleeping && g_Cfg.m_iSectorSleepMask > 0)
+		if (fCanSleep && g_Cfg.m_iSectorSleepMask > 0 && m_active)
 		{
-			if (( iPulseCount & g_Cfg.m_iSectorSleepMask ) != ( GetIndex() & g_Cfg.m_iSectorSleepMask ))
-				return;
+            if (!IsSleeping())
+            {
+                Sleep();
+            }
+			return true;
 		}
 	}
 
@@ -1030,65 +1094,59 @@ void CSector::OnTick(int iPulseCount)
 	bool fWeatherChange = false;
 	int iRegionPeriodic = 0;
 
-	if ( ( (iPulseCount % (30 * MSECS_PER_SEC)) == 0) )	// 30 seconds or so.
+	WEATHER_TYPE weatherprv = m_Env.m_Weather;
+	if ( ! Calc_GetRandVal( 30 ))	// change less often
 	{
-		// Only do this every x minutes or so
-		// check for local weather change ?
-		WEATHER_TYPE weatherprv = m_Env.m_Weather;
-		if ( ! Calc_GetRandVal( 30 ))	// change less often
+		m_Env.m_Weather = GetWeatherCalc();
+		if ( weatherprv != m_Env.m_Weather )
 		{
-			m_Env.m_Weather = GetWeatherCalc();
-			if ( weatherprv != m_Env.m_Weather )
-			{
-				fWeatherChange = true;
-				fEnvironChange = true;
-			}
-		}
-
-		// Random area noises. Only do if clients about.
-		if ( clients > 0 )
-		{
-			iRegionPeriodic = 2;
-
-			static const SOUND_TYPE sm_SfxRain[] = { 0x10, 0x11 };
-			static const SOUND_TYPE sm_SfxWind[] = { 0x14, 0x15, 0x16 };
-			static const SOUND_TYPE sm_SfxThunder[] = { 0x28, 0x29 , 0x206 };
-
-			// Lightning ?	// wind, rain,
-			switch ( GetWeather() )
-			{
-				case WEATHER_CLOUDY:
-					break;
-
-				case WEATHER_SNOW:
-					if ( ! Calc_GetRandVal(5) )
-						sound = sm_SfxWind[ Calc_GetRandVal( CountOf( sm_SfxWind )) ];
-					break;
-
-				case WEATHER_RAIN:
-					{
-						int iVal = Calc_GetRandVal(30);
-						if ( iVal < 5 )
-						{
-							// Mess up the light levels for a sec..
-							LightFlash();
-							sound = sm_SfxThunder[ Calc_GetRandVal( CountOf( sm_SfxThunder )) ];
-						}
-						else if ( iVal < 10 )
-							sound = sm_SfxRain[ Calc_GetRandVal( CountOf( sm_SfxRain )) ];
-						else if ( iVal < 15 )
-							sound = sm_SfxWind[ Calc_GetRandVal( CountOf( sm_SfxWind )) ];
-					}
-					break;
-
-				default:
-					break;
-			}
+			fWeatherChange = true;
+			fEnvironChange = true;
 		}
 	}
 
-	// regen all creatures and do AI
+	// Random area noises. Only do if clients about.
+	if ( clients > 0 )
+	{
+		iRegionPeriodic = 2;
 
+		static const SOUND_TYPE sm_SfxRain[] = { 0x10, 0x11 };
+		static const SOUND_TYPE sm_SfxWind[] = { 0x14, 0x15, 0x16 };
+		static const SOUND_TYPE sm_SfxThunder[] = { 0x28, 0x29 , 0x206 };
+
+		// Lightning ?	// wind, rain,
+		switch ( GetWeather() )
+		{
+			case WEATHER_CLOUDY:
+				break;
+
+			case WEATHER_SNOW:
+				if ( ! Calc_GetRandVal(5) )
+					sound = sm_SfxWind[ Calc_GetRandVal( CountOf( sm_SfxWind )) ];
+				break;
+
+			case WEATHER_RAIN:
+				{
+					int iVal = Calc_GetRandVal(30);
+					if ( iVal < 5 )
+					{
+						// Mess up the light levels for a sec..
+						LightFlash();
+						sound = sm_SfxThunder[ Calc_GetRandVal( CountOf( sm_SfxThunder )) ];
+					}
+					else if ( iVal < 10 )
+						sound = sm_SfxRain[ Calc_GetRandVal( CountOf( sm_SfxRain )) ];
+					else if ( iVal < 15 )
+						sound = sm_SfxWind[ Calc_GetRandVal( CountOf( sm_SfxWind )) ];
+				}
+				break;
+
+			default:
+				break;
+		}
+	}
+
+    // Check environ changes and inform clients of it.
 	ProfileTask charactersTask(PROFILE_CHARS);
 
 	CChar * pCharNext = NULL;
@@ -1126,9 +1184,6 @@ void CSector::OnTick(int iPulseCount)
 					pChar->m_pArea->OnRegionTrigger( pChar, RTRIG_CLIPERIODIC );
 			}
 		}
-		// Can only die on your own tick.
-		if ( !pChar->OnTick() )
-			pChar->Delete();
 
 		EXC_CATCHSUB("Sector");
 
@@ -1139,66 +1194,24 @@ void CSector::OnTick(int iPulseCount)
 		EXC_DEBUGSUB_END;
 	}
 
-	// decay items on ground = time out spells / gates etc.. etc..
-	// No need to check these so often !
-
-	ProfileTask itemsTask(PROFILE_ITEMS);
-
-	CItem * pItemNext = NULL;
-	CItem * pItem = static_cast <CItem*>( m_Items_Timer.GetHead());
-	for ( ; pItem != NULL; pItem = pItemNext )
-	{
-		EXC_TRYSUB("TickItem");
-		pItemNext = pItem->GetNext();
-
-		EXC_SETSUB("TimerExpired");
-		if ( pItem->IsTimerExpired() )
-		{
-			EXC_SETSUB("ItemTick");
-			if ( !pItem->OnTick() )
-			{
-				EXC_SETSUB("ItemDelete");
-				pItem->Delete();
-                continue;
-			}
-			else
-			{
-				EXC_SETSUB("TimerExpired2");
-				if ( pItem->IsTimerExpired() )	// forgot to clear the timer.? strange.
-				{
-					EXC_SETSUB("SetTimeout");
-					pItem->SetTimeout(-1);
-				}
-			}
-		}
-
-		EXC_SETSUB("UpdateFlags");
-		pItem->OnTickStatusUpdate();
-
-		EXC_CATCHSUB("Sector");
-
-		EXC_DEBUGSUB_START;
-		CPointMap pt = GetBasePoint();
-		g_Log.EventError("#1 item 0%" PRIx32 " '%s' [timer=%" PRId64 ", type=%d]\n", (dword)pItem->GetUID(), pItem->GetName(), pItem->GetTimerAdjusted(), (int)pItem->GetType());
-		g_Log.EventError("#1 sector #%d [%hd,%hd,%hhd,%hhu]\n", GetIndex(), pt.m_x, pt.m_y, pt.m_z, pt.m_map);
-		EXC_DEBUGSUB_END;
-	}
-
 	ProfileTask overheadTask(PROFILE_OVERHEAD);
 
 	EXC_SET("check map cache");
-	if ( fSleeping || ! ( iPulseCount & 0x7f ))	// 30 seconds or so.
+	if (fCanSleep && m_iMapBlockCacheTime < iCurTime)     // Only if the sector can sleep.
 	{
 		// delete the static CServerMapBlock items that have not been used recently.
-		m_iMapBlockCacheTime = ( fSleeping ? 0 : g_Cfg.m_iMapCacheTime );
+		m_iMapBlockCacheTime = CServerTime::GetCurrentTime().GetTimeRaw() + g_Cfg.m_iMapCacheTime ;
 		CheckMapBlockCache();
 	}
 	EXC_CATCH;
+
+    g_World.AddTimedObject(CServerTime::GetCurrentTime().GetTimeRaw() + 30 * MSECS_PER_SEC, this);  // Sector is Awake, make it tick after 30 seconds.
 
 	EXC_DEBUG_START;
 	CPointMap pt = GetBasePoint();
 	g_Log.EventError("#4 sector #%d [%hd,%hd,%hhd,%hhu]\n", GetIndex(), pt.m_x, pt.m_y, pt.m_z, pt.m_map);
 	EXC_DEBUG_END;
+    return true;
 }
 
 

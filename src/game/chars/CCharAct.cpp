@@ -2998,7 +2998,7 @@ bool CChar::OnFreezeCheck()
 
 	if ( IsStatFlag(STATF_FREEZE|STATF_STONE) && !IsPriv(PRIV_GM) )
 		return true;
-	if ( GetKeyNum("NoMoveTill", true) > g_World.GetCurrentTick() )
+	if ( GetKeyNum("NoMoveTill", true) > (g_World.GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH)) // in tenths of second.
 		return true;
 
 	if ( m_pPlayer )
@@ -4009,89 +4009,22 @@ bool CChar::OnTick()
     // RETURN: false = delete this.
     EXC_TRY("Tick");
 
-    int64 iTimeDiff = -g_World.GetTimeDiff(m_timeLastRegen);
-    if (!iTimeDiff)
-        return true;
-
     /*
     * CComponent's ticking:
-    * Be aware that return CCRET_CONTINUE will return true here and
-    * CCRET_FALSE will return false (and delete the char), but take in mind
-    * that both returns will prevent this char's items from ticking and stats,
+    * Be aware that return CCRET_FALSE will return false (and delete the char),
+    * take in mind that return will prevent this char's stats updates,
     *  attacker, notoriety, death status, etc from happening.
     */
     CCRET_TYPE iCompRet = static_cast<CEntity*>(this)->OnTick();
-    if (iCompRet != CCRET_CONTINUE) // if return = CCRET_TRUE or CCRET_FALSE
+    if (iCompRet != CCRET_CONTINUE) // if return != CCRET_TRUE
     {
         return iCompRet;    // Stop here
-    }
-
-    if (iTimeDiff >= TICKS_PER_SEC)	// don't bother with < 1 sec times.
-    {
-        // decay equipped items
-
-		CItem * pItemNext = nullptr;
-		CItem * pItem = static_cast <CItem*>(GetHead());
-		for ( ; pItem != nullptr; pItem = pItemNext )
-		{
-			EXC_TRYSUB("Ticking items");
-			pItemNext = pItem->GetNext();
-
-            // always check the validity of the memory objects
-            if (pItem->IsType(IT_EQ_MEMORY_OBJ) && !pItem->m_uidLink.ObjFind())
-            {
-                pItem->Delete();
-                continue;
-            }
-
-            pItem->OnTickStatusUpdate();
-            if (!pItem->IsTimerSet() || !pItem->IsTimerExpired())
-            {
-                continue;
-            }
-            else if (!OnTickEquip(pItem))
-            {
-                pItem->Delete();
-            }
-            EXC_CATCHSUB("Char");
-        }
-
-        EXC_SET("last attackers");
-        if (g_Cfg.m_iAttackerTimeout > 0)
-        {
-            Attacker_CheckTimeout();
-        }
-
-        EXC_SET("NOTO timeout");
-        if (g_Cfg.m_iNotoTimeout > 0)
-        {
-            NotoSave_CheckTimeout();
-        }
     }
 
     if (IsDisconnected())		// mounted horses can still get a tick.
         return true;
 
-    // NOTE: Summon flags can kill our hp here. check again.
-    if (!IsStatFlag(STATF_DEAD) && (Stat_GetVal(STAT_STR) <= 0))	// We can only die on our own tick.
-    {
-        m_timeLastRegen = g_World.GetCurrentTick();
-        EXC_SET("death");
-        return Death();
-    }
-
-    if (IsClient())
-    {
-        // Players have a silly "always run" flag that gets stuck on.
-        if (-(g_World.GetTimeDiff(GetClient()->m_timeLastEventWalk)) > 2)
-            StatFlag_Clear(STATF_FLY);
-
-        // Check targeting timeout, if set
-        if (GetClient()->m_Targ_Timeout > 0 && (g_World.GetTickDiff(GetClient()->m_Targ_Timeout) <= 0) )
-            GetClient()->addTargetCancel();
-    }
-
-    if (IsTimerExpired() && IsTimerSet())
+    if (IsTimerExpired())
     {
         EXC_SET("timer expired");
         // My turn to do some action.
@@ -4138,18 +4071,6 @@ bool CChar::OnTick()
         }
     }
 
-    if (iTimeDiff >= TICKS_PER_SEC)
-    {
-        // Check location periodically for standing in fire fields, traps, etc.
-        EXC_SET("check location");
-        CheckLocation(true);
-        Stats_Regen(iTimeDiff);
-        m_timeLastRegen = g_World.GetCurrentTime().GetTimeRaw();
-    }
-
-    EXC_SET("update stats");
-    OnTickStatusUpdate();
-
     EXC_CATCH;
 
 //#ifdef _DEBUG
@@ -4159,6 +4080,67 @@ bool CChar::OnTick()
 //    EXC_DEBUG_END;
 //#endif
 
+    return true;
+}
+
+bool CChar::OnTickPeriodic()
+{
+    EXC_TRY("OnTickPeriodic");
+    ++_iRegenTickCount;
+    _timeNextRegen = g_World.GetCurrentTime().GetTimeRaw() + MSECS_PER_TICK;
+    bool fRegen = _iRegenTickCount == TICKS_PER_SEC;
+    if (fRegen)
+    {
+        _iRegenTickCount = 0;
+    }
+    if (fRegen)
+    {
+        EXC_SET("last attackers");
+        if (g_Cfg.m_iAttackerTimeout >= 0)
+        {
+            Attacker_CheckTimeout();
+        }
+
+        EXC_SET("NOTO timeout");
+        if (g_Cfg.m_iNotoTimeout > 0)
+        {
+            NotoSave_CheckTimeout();
+        }
+    }
+
+    if (IsDisconnected())		// mounted horses can still get a tick.
+        return true;
+
+
+    // NOTE: Summon flags can kill our hp here. check again.
+    if (!IsStatFlag(STATF_DEAD) && (Stat_GetVal(STAT_STR) <= 0))	// We can only die on our own tick.
+    {
+        EXC_SET("death");
+        return Death();
+    }
+
+    if (IsClient())
+    {
+        // Players have a silly "always run" flag that gets stuck on.
+        if (-(g_World.GetTimeDiff(GetClient()->m_timeLastEventWalk)) > 2)
+            StatFlag_Clear(STATF_FLY);
+
+        // Check targeting timeout, if set
+        if (GetClient()->m_Targ_Timeout > 0 && (g_World.GetTickDiff(GetClient()->m_Targ_Timeout) <= 0))
+            GetClient()->addTargetCancel();
+    }
+
+    if (fRegen)
+    {
+        // Check location periodically for standing in fire fields, traps, etc.
+        EXC_SET("check location");
+        CheckLocation(true);
+        Stats_Regen();
+    }
+
+    EXC_SET("update stats");
+    OnTickStatusUpdate();
+    EXC_CATCH;
     return true;
 }
 

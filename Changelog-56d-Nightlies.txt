@@ -1153,3 +1153,16 @@ transfer_secured	= 08	// Transfer Secured Containers.
 - Fixed: While sailing on the debug build, flashing spots were supposed to be shown where the next movement would move the ship
 	(so, if moving on those tiles would make a valid movement).
 - Changed: Made Read-Only SERV.CREATE, SERV.LASTVALIDDATE, SERV.LASTVALIDTIME, CREATE char and item property.
+
+-09-2018, XuN
+- Updated the whole code to cleanup latest changes regarding timers.
+- Added new CTimedObject class to control the whole timer's behaviours from now on.
+- Updated some classes (CObjBase, CChar, CItem (and it's childrens)) to inherit from CTimedObject (still more to come ... CTimedFunction, CMapBlockCache, etc).
+- Updated world's ticking procedure:
+    Removed the old world->maps->sectors->items/chars huge loop for ticks
+    CTimedOBject add/deletes the objects into a new listing with msec precission timers which CWorld reads constantly looping only throught what really needs to tick.
+- Updated some code messing with timers on latest commits and making them behave wrongly.
+- Changed sector's behaviour to be ticked until their SectorSleep period (if any) has passed and pausing/resuming all items/chars timers inside (similar to what it did before).
+- Splitted CChar's ticks into the real ticks (the code relying on SetTimeout) and the periodic tickings (into a new OnTickPeriodic) involving stats regens, death check, steps on items, etc
+- Added a new list on CWorld for chars inserting all npcs by default on their create and players when login, and removing them when procceed, to do constant updates on hits, etc.
+- Fixed regens ignoring the delay set.

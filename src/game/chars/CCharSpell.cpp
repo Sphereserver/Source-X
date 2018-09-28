@@ -206,6 +206,13 @@ bool CChar::Spell_Teleport( CPointMap ptNew, bool bTakePets, bool bCheckAntiMagi
 		pClientIgnore = pClient;	// we don't need update this client again
 	}
 
+    if (bDisplayEffect)
+    {
+        if (iEffect != ITEMID_NOTHING)
+        {
+            Effect(EFFECT_XYZ, iEffect, this, 10, 10);
+        }
+    }
 	UpdateMove(ptOld, pClientIgnore, true);
 	Reveal();
 
@@ -213,17 +220,6 @@ bool CChar::Spell_Teleport( CPointMap ptNew, bool bTakePets, bool bCheckAntiMagi
 	{
 		if ( iEffect != ITEMID_NOTHING )
 		{
-			// Departing effect
-			if ( ptOld.IsValidPoint() )
-			{
-				CItem *pItem = CItem::CreateBase(ITEMID_NODRAW);
-				ASSERT(pItem);
-				pItem->SetAttr(ATTR_MOVE_NEVER);
-				pItem->MoveTo(ptOld);
-				pItem->Effect(EFFECT_XYZ, iEffect, this, 10, 10);
-				pItem->Delete();
-			}
-
 			// Entering effect
 			Effect(EFFECT_XYZ, iEffect, this, 10, 10);
 		}
@@ -347,7 +343,7 @@ bool CChar::Spell_Recall(CItem * pRune, bool fGate)
 
 		const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(SPELL_Gate_Travel);
 		ASSERT(pSpellDef);
-		int iDuration = pSpellDef->m_Duration.GetLinear(0);
+		int iDuration = GetSpellDuration(SPELL_Gate_Travel, Skill_GetBase(SKILL_MAGERY), nullptr) * MSECS_PER_SEC;
 
 		CItem * pGate = CItem::CreateBase(pSpellDef->m_idEffect);
 		ASSERT(pGate);
@@ -1620,7 +1616,7 @@ bool CChar::Spell_Equip_OnTick( CItem * pItem )
 				m_pClient->addChar(this);
 				m_pClient->addPlayerSee(CPointMap());
 			}
-			pItem->SetTimeout(Calc_GetRandLLVal2(15, 30) * 1000);
+			pItem->SetTimeoutS(Calc_GetRandLLVal2(15, 30));
 		}
 		break;
 
@@ -2973,7 +2969,7 @@ int CChar::Spell_CastStart()
 		}
 	}
 
-    int64 iWaitTime = IsPriv(PRIV_GM) ? 1 : (int64)(pSpellDef->m_CastTime.GetLinear(Skill_GetBase((SKILL_TYPE)iSkill)) * TENTHS_PER_SEC); // in tenths of second, converted to MSECS.
+    int64 iWaitTime = IsPriv(PRIV_GM) ? 1 : (int64)(pSpellDef->m_CastTime.GetLinear(Skill_GetBase((SKILL_TYPE)iSkill)) * MSECS_PER_TENTH); // in tenths of second, converted to MSECS.
 	iWaitTime -= GetDefNum("FASTERCASTING", true, true) * 2;	//correct value is 0.25, but for backwards compatibility let's handle only 0.2.
 	if ( iWaitTime < 1 || IsPriv(PRIV_GM) )
 		iWaitTime = 1;
@@ -3523,7 +3519,7 @@ bool CChar::OnSpellEffect( SPELL_TYPE spell, CChar * pCharSrc, int iSkillLevel, 
 
 		case SPELL_Regenerate:		// Set number of charges based on effect level.
 		{
-			iDuration /= (2*10); // *10 -> tenths of seconds to seconds
+			iDuration /= (2*TENTHS_PER_SEC); // tenths of seconds to seconds
 			if ( iDuration <= 0 )
 				iDuration = 1;
 			CItem * pSpell = Spell_Effect_Create( spell, fPotion ? LAYER_FLAG_Potion : LAYER_SPELL_STATS, iEffect, iDuration*1000, pCharSrc );
@@ -3578,6 +3574,10 @@ int CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharSrc
 {
 	ADDTOCALLSTACK("CChar::GetSpellDuration");
 	int iDuration = -1;
+    /*
+    * Duration calcs, do selective durations for magery spells if MagicF_OSIFormulas is enabled
+    * or for newer spells (only magery spells needs backwards compat
+    */
 	if (pCharSrc != NULL && (IsSetMagicFlags(MAGICF_OSIFORMULAS) || spell >= SPELL_Animate_Dead_AOS))
 	{
 		switch ( spell )
@@ -3660,6 +3660,10 @@ int CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharSrc
 				iDuration = (15 + (pCharSrc->Skill_GetBase(SKILL_MAGERY) / 5)) / 7;
 				break;
 
+            case SPELL_Gate_Travel:
+                iDuration = 60; //Fixed time: 60 seconds
+                break;
+
 			case SPELL_Polymorph:
 			{
 				iDuration = pCharSrc->Skill_GetBase(SKILL_MAGERY) / 10;
@@ -3704,12 +3708,13 @@ int CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharSrc
 		}
 	}
 
+    // Spells not defined get the old duration check (regardless of the ini setting).
 	if ( iDuration == -1 )
 	{
 		const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(spell);
 		ASSERT(pSpellDef);
-		iDuration = pSpellDef->m_Duration.GetLinear(iSkillLevel) / 10;
+		iDuration = pSpellDef->m_Duration.GetLinear(iSkillLevel) / TENTHS_PER_SEC;
 	}
 
-	return iDuration * 10; // tenths of seconds
+	return iDuration; // tenths of seconds
 }

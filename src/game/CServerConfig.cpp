@@ -227,11 +227,11 @@ CServerConfig::CServerConfig()
 
 	m_iDefaultCommandLevel	= 7;	// PLevel 7 default for command levels.
 
-	m_iRegenRate[STAT_STR]	= 40 * MSECS_PER_SEC;		// Seconds to heal ONE hp (before stam/food adjust)
-	m_iRegenRate[STAT_INT]	= 20 * MSECS_PER_SEC;		// Seconds to heal ONE mn
-	m_iRegenRate[STAT_DEX]	= 10 * MSECS_PER_SEC;		// Seconds to heal ONE stm
-	m_iRegenRate[STAT_FOOD] = 60*60 * MSECS_PER_SEC;		// Food usage (1 time per 60 minutes)
-    _iItemHitpointsUpdate   = 10;
+	m_iRegenRate[STAT_STR]	= 40;       // Seconds to heal ONE hp (before stam/food adjust)
+	m_iRegenRate[STAT_INT]	= 20;       // Seconds to heal ONE mn
+	m_iRegenRate[STAT_DEX]	= 10;       // Seconds to heal ONE stm
+	m_iRegenRate[STAT_FOOD] = 60*60;    // Food usage (1 time per 60 minutes)
+    _iItemHitpointsUpdate   = 10;       // Delay to send hitpoints update packet for items.
 
 	_iTimerCall			= 0;
 	m_bAllowLightOverride	= true;
@@ -1215,8 +1215,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 
 		case RC_SECTORSLEEP:
 			{
-				int sleep = s.GetArgVal();
-				m_iSectorSleepMask = sleep ? (( 1 << sleep) - 1) : 0;
+				m_iSectorSleepMask = s.GetArgVal() * MSECS_PER_SEC;
 			}
 			break;
 
@@ -1290,7 +1289,7 @@ bool CServerConfig::r_LoadVal( CScript &s )
 			break;
 #endif
 		case RC_WALKBUFFER:
-			m_iWalkBuffer = s.GetArgVal(); // tenths of second
+			m_iWalkBuffer = s.GetArgVal() * MSECS_PER_TENTH;
 			break;
 
 
@@ -1862,7 +1861,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			sVal.FormatLLVal( m_iSavePeriod / (60*MSECS_PER_SEC));
 			break;
 		case RC_SECTORSLEEP:
-			sVal.FormatVal(m_iSectorSleepMask ? (Calc_GetLog2(m_iSectorSleepMask+1)-1) : 0);
+			sVal.FormatVal(m_iSectorSleepMask / MSECS_PER_SEC);
 			break;
 		case RC_SAVEBACKGROUND:
 			sVal.FormatLLVal( m_iSaveBackgroundTime / (60 * MSECS_PER_SEC));
@@ -1920,7 +1919,7 @@ bool CServerConfig::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * 
 			sVal.FormatVal(g_Cfg.m_iContextMenuLimit);
 			break;
 		case RC_WALKBUFFER:
-			sVal.FormatLLVal(m_iWalkBuffer); // tenths of second
+			sVal.FormatLLVal(m_iWalkBuffer);
 			break;
 		default:
 			return( sm_szLoadKeys[index].m_elem.GetValStr( this, sVal ));

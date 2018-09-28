@@ -14,7 +14,7 @@
 class CChar;
 class CItemStone;
 
-class CSector : public CScriptObj, public CSectorBase	// square region of the world.
+class CSector : public CScriptObj, public CSectorBase, public CTimedObject	// square region of the world.
 {
 	// A square region of the world. ex: MAP0.MUL Dungeon Sectors are 256 by 256 meters
 #define SECTOR_TICK_PERIOD (TICKS_PER_SEC/2) // after how much ticks do we start a pulse.
@@ -31,6 +31,7 @@ private:
 	byte m_RainChance;		// 0 to 100%
 	byte m_ColdChance;		// Will be snow if rain chance success.
 	byte m_ListenItems;		// Items on the ground that listen ?
+    bool _fIsSleeping;      // Is this sector in sleep mode?
 
 private:
 	WEATHER_TYPE GetWeatherCalc() const;
@@ -48,7 +49,11 @@ private:
 	CSector& operator=(const CSector& other);
 
 public:
-	void OnTick( int iPulse );
+	virtual bool OnTick();
+    virtual void Delete(bool bForce = false) // virtual for CTimedObject compat, this should never be called!!!
+    {
+        UNREFERENCED_PARAMETER(bForce);
+    };
 
 	// Time
 	int GetLocalTime() const;
@@ -92,13 +97,16 @@ public:
 	size_t GetInactiveChars() const;
 	size_t HasClients() const;
 	int64 GetLastClientTime() const;
-	bool IsSectorSleeping() const;
+	bool CanSleep() const;
+    bool IsSleeping() const;
 	void SetSectorWakeStatus();	// Ships may enter a sector before it's riders !
 	void ClientAttach( CChar * pChar );
 	void ClientDetach( CChar * pChar );
 	bool MoveCharToSector( CChar * pChar );
 
 	// General.
+    void Sleep();
+    void Awake();
 	virtual bool r_LoadVal( CScript & s );
 	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc );
 	virtual void r_Write();

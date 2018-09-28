@@ -441,7 +441,7 @@ bool CCharPlayer::r_LoadVal( CChar * pChar, CScript &s )
 				pChar->GetClient()->addKRToolbar( m_bKrToolbarEnabled );
 			return true;
 		case CPC_LASTUSED:
-			m_timeLastUsed.InitTime(s.GetArgLLVal() * MSECS_PER_SEC);
+			m_timeLastUsed = s.GetArgLLVal() * MSECS_PER_SEC;
 			return true;
 		case CPC_PFLAG:
 			{

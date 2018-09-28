@@ -157,8 +157,13 @@ lpctstr ProfileData::GetName(PROFILE_TYPE id) const
 		"CHARS",
 		"ITEMS",
 		"MAP",
+        "MULTIS",
 		"NPC_AI",
 		"SCRIPTS",
+        "SECTORS",
+        "SHIPS",
+        "TIMEDFUNCTIONS",
+        "TIMERS",
 		"DATA_TX",
 		"DATA_RX",
 		"FAULTS"
