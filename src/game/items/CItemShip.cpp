@@ -4,32 +4,29 @@
 
 #include "../../common/CException.h"
 #include "../../common/CUIDExtra.h"
-#include "../../network/send.h"
 #include "../chars/CChar.h"
-#include "../clients/CClient.h"
 #include "../triggers.h"
 #include "CItemContainer.h"
 #include "CItemShip.h"
+#include "CItem.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
 
 CItemShip::CItemShip(ITEMID_TYPE id, CItemBase * pItemDef) :
-    CItemMulti(id, pItemDef),
+    CItemMulti(id, pItemDef, true),
     CTimedObject(PROFILE_SHIPS)
 {
-    m_NextMove = g_World.GetCurrentTick();
 }
 
 CItemShip::~CItemShip()
 {
-    g_Serv.ShipTimers_Delete(this);
 }
 
 bool CItem::Ship_Plank(bool fOpen)
 {
-    ADDTOCALLSTACK("CItem::Ship_Plank");
-    // IT_SHIP_PLANK to IT_SHIP_SIDE and IT_SHIP_SIDE_LOCKED
+    ADDTOCALLSTACK("CItem::Plank");
+    // IT_PLANK to IT_SIDE and IT_SIDE_LOCKED
     // This item is the ships plank.
 
     CItemBase * pItemDef = Item_GetDef();
@@ -69,726 +66,6 @@ bool CItem::Ship_Plank(bool fOpen)
     return true;
 }
 
-void CItemShip::Ship_Stop()
-{
-    ADDTOCALLSTACK("CItemShip::Ship_Stop");
-    // Make sure we have stopped.
-
-    m_itShip.m_bMovementType = 0;
-    m_pCaptain = nullptr;
-}
-
-bool CItemShip::Ship_SetMoveDir(DIR_TYPE dir, byte bMovementType, bool fWheelMove)
-{
-    ADDTOCALLSTACK("CItemShip::Ship_SetMoveDir");
-    // Set the direction we will move next time we get a tick.
-    // bMovementType: from the packet above -> (0 = Stop Movement, 1 = One Tile Movement, 2 = Normal Movement) ***These speeds are NOT the same as 0xF6 packet
-    // Can be called from Packet 0xBF.0x32 : PacketWheelBoatMove to check if ship can move while setting dir and checking times in the proccess,
-    //  otherwise for each click with mouse it will do 1 move.
-
-    // We set new direction regardless of click limitations, so click in another direction means changing dir but makes not more moves until ship's timer moves it.
-    m_itShip.m_DirMove = (byte)dir;
-    if (bMovementType == 0)
-    {
-        Ship_Stop();
-        return true;
-    }
-
-    if (fWheelMove && (m_NextMove > g_World.GetCurrentTick()))
-        return false;
-
-    if ((m_itShip.m_DirMove == dir) && (m_itShip.m_bMovementType != 0))
-    {
-        if ((m_itShip.m_DirFace == m_itShip.m_DirMove) && (m_itShip.m_bMovementType == 1))
-            bMovementType = 2;
-        /*else
-            return false; */ // no need to return, bMovementType different than 1 or 2 is handled below, so it's safe to let it pass.
-    }
-
-    if (!IsAttr(ATTR_MAGIC))	// make sound.
-    {
-        if (!Calc_GetRandVal(10))
-            Sound(Calc_GetRandVal(2) ? 0x12 : 0x13);
-    }
-
-    m_itShip.m_bMovementType = (bMovementType > 2) ? 2 : bMovementType;	//checking here that packet is legit from client and not modified by 3rd party tools to send speed > 2.
-    GetTopSector()->SetSectorWakeStatus();	        // may get here before my client does.
-
-    // SpeedMode, as supported by the 0xF6 packet (sent from server): 0x01 = one tile, 0x02 = rowboat, 0x03 = slow, 0x04 = fast
-    m_SpeedMode = (bMovementType == 1) ? 3 : 4;
-    g_Serv.ShipTimers_Delete(this);
-    Ship_SetNextMove();
-    g_Serv.ShipTimers_Add(this);
-    return true;
-}
-
-void CItemShip::Ship_SetNextMove()
-{
-    // add TAG.OVERRIDE.SHIPSPEED.PERIOD
-    // add TAG.OVERRIDE.SHIPSPEED.SPEED
-    uchar uiDelay;
-    if (IsSetOF(OF_NoSmoothSailing) || TICKS_PER_SEC == 4)
-        uiDelay = (m_itShip.m_bMovementType == 1) ? (m_shipSpeed.period * 2) : m_shipSpeed.period;
-    else
-        uiDelay = (m_itShip.m_bMovementType == 1) ? m_shipSpeed.period : (m_shipSpeed.period / 2);
-    // ShipSpeed.period is in tenths of second (so also the delay is);
-    m_NextMove = g_World.GetCurrentTick() + (maximum(1, uiDelay));
-}
-
-size_t CItemShip::Ship_ListObjs(CObjBase ** ppObjList)
-{
-    ADDTOCALLSTACK("CItemShip::Ship_ListObjs");
-    // List all the objects in the structure.
-    // Move the ship and everything on the deck
-    // If too much stuff. then some will fall overboard. hehe.
-
-    if (!IsTopLevel())
-        return 0;
-
-    int iMaxDist = Multi_GetMaxDist();
-    int iShipHeight = GetTopZ() + maximum(3, GetHeight());
-
-    // always list myself first. All other items must see my new region !
-    size_t iCount = 0;
-    ppObjList[iCount++] = this;
-
-    CWorldSearch AreaChar(GetTopPoint(), iMaxDist);
-    AreaChar.SetAllShow(true);
-    AreaChar.SetSearchSquare(true);
-    while (iCount < MAX_MULTI_LIST_OBJS)
-    {
-        CChar * pChar = AreaChar.GetChar();
-        if (pChar == nullptr)
-            break;
-        if (!m_pRegion->IsInside2d(pChar->GetTopPoint()))
-            continue;
-        if (pChar->IsDisconnected() && pChar->m_pNPC)
-            continue;
-
-        int zdiff = pChar->GetTopZ() - iShipHeight;
-        if ((zdiff < -2) || (zdiff > PLAYER_HEIGHT))
-            continue;
-
-        ppObjList[iCount++] = pChar;
-    }
-
-    CWorldSearch AreaItem(GetTopPoint(), iMaxDist);
-    AreaItem.SetSearchSquare(true);
-    while (iCount < MAX_MULTI_LIST_OBJS)
-    {
-        CItem * pItem = AreaItem.GetItem();
-        if (pItem == nullptr)
-            break;
-        if (pItem == this)	// already listed.
-            continue;
-        if (!Multi_IsPartOf(pItem))
-        {
-            if (!m_pRegion->IsInside2d(pItem->GetTopPoint()))
-                continue;
-
-            //I guess we can allow items to be locked on the ships and still move... but disallow attr_static from moving
-            //if ( ! pItem->IsMovable() && !pItem->IsType(IT_CORPSE))
-            if (IsAttr(ATTR_STATIC))
-                continue;
-
-            int zdiff = pItem->GetTopZ() - iShipHeight;
-            if ((zdiff < -2) || (zdiff > PLAYER_HEIGHT))
-                continue;
-        }
-        ppObjList[iCount++] = pItem;
-    }
-    return iCount;
-}
-
-bool CItemShip::Ship_MoveDelta(CPointBase pdelta)
-{
-    ADDTOCALLSTACK("CItemShip::Ship_MoveDelta");
-    // Move the ship one space in some direction.
-
-    ASSERT(m_pRegion->m_iLinkedSectors);
-
-    int znew = GetTopZ() + pdelta.m_z;
-    if (pdelta.m_z > 0)
-    {
-        if (znew >= (UO_SIZE_Z - PLAYER_HEIGHT) - 1)
-            return false;
-    }
-    else if (pdelta.m_z < 0)
-    {
-        if (znew <= (UO_SIZE_MIN_Z + 3))
-            return false;
-    }
-    CPointBase ptTemp = GetTopPoint();
-    CRegionWorld *pRegionOld = dynamic_cast<CRegionWorld*>(ptTemp.GetRegion(REGION_TYPE_AREA));
-    ptTemp += pdelta;
-    CRegionWorld *pRegionNew = dynamic_cast<CRegionWorld*>(ptTemp.GetRegion(REGION_TYPE_AREA));
-    if (!Ship_MoveToRegion(pRegionOld, pRegionNew))
-    {
-        return false;
-    }
-
-    // Move the ship and everything on the deck
-    CObjBase * ppObjs[MAX_MULTI_LIST_OBJS + 1];
-    size_t iCount = Ship_ListObjs(ppObjs);
-
-    for (size_t i = 0; i < iCount; ++i)
-    {
-        CObjBase * pObj = ppObjs[i];
-        if (!pObj)
-            continue;
-        CPointMap pt = pObj->GetTopPoint();
-        pt += pdelta;
-
-        if (!pt.IsValidPoint())  // boat goes out of bounds !
-        {
-            DEBUG_ERR(("Ship uid=0%x out of bounds\n", (dword)GetUID()));
-            continue;
-        }
-        pObj->MoveTo(pt);
-    }
-
-    ClientIterator it;
-    for (CClient* pClient = it.next(); pClient != nullptr; pClient = it.next())
-    {
-        CChar * tMe = pClient->GetChar();
-        if (tMe == nullptr)
-            continue;
-
-        byte tViewDist = (uchar)(tMe->GetVisualRange());
-        for (size_t i = 0; i < iCount; ++i)
-        {
-            CObjBase * pObj = ppObjs[i];
-            if (!pObj) continue; //no object anymore? skip!
-            CPointMap pt = pObj->GetTopPoint();
-            CPointMap ptOld(pt);
-            ptOld -= pdelta;
-
-            //Remove objects that just moved out of sight
-            if ((tMe->GetTopPoint().GetDistSight(pt) >= tViewDist) && (tMe->GetTopPoint().GetDistSight(ptOld) < tViewDist))
-            {
-                pClient->addObjectRemove(pObj);
-                continue; //no need to keep going. skip!
-            }
-
-            if (pClient->CanSee(pObj))
-            {
-                if (pObj == this) //This is the ship (usually the first item in the list)
-                {
-                    if (pClient->GetNetState()->isClientVersion(MINCLIVER_HS) || pClient->GetNetState()->isClientEnhanced())
-                    {
-                        if (!IsSetOF(OF_NoSmoothSailing))
-                        {
-                            new PacketMoveShip(pClient, this, ppObjs, iCount, m_itShip.m_DirMove, m_itShip.m_DirFace, Multi_GetDef()->m_SpeedMode);
-
-                            //If client is on Ship
-                            if (tMe->GetRegion()->GetResourceID().GetObjUID() == GetUID())
-                            {
-                                pClient->addPlayerView(CPointMap(), true);
-                                break; //skip to next client
-                            }
-                        }
-                        else if (pClient->GetNetState()->isClientEnhanced())
-                            pClient->addObjectRemove(pObj);	//it will be added again in the if clause below
-                    }
-                }
-                if (pObj->IsItem())
-                {
-                    if ((tMe->GetTopPoint().GetDistSight(pt) < tViewDist)
-                        && ((tMe->GetTopPoint().GetDistSight(ptOld) >= tViewDist) || !(pClient->GetNetState()->isClientVersion(MINCLIVER_HS) || pClient->GetNetState()->isClientEnhanced()) || IsSetOF(OF_NoSmoothSailing)))
-                    {
-                        CItem *pItem = dynamic_cast <CItem *>(pObj);
-                        pClient->addItem(pItem);
-                    }
-
-                }
-                else
-                {
-                    CChar *pChar = dynamic_cast <CChar *>(pObj);
-                    if (pClient == pChar->GetClient())
-                        pClient->addPlayerView(ptOld);
-                    else if ((tMe->GetTopPoint().GetDistSight(pt) <= tViewDist)
-                        && ((tMe->GetTopPoint().GetDistSight(ptOld) > tViewDist) || !(pClient->GetNetState()->isClientVersion(MINCLIVER_HS) || pClient->GetNetState()->isClientEnhanced()) || IsSetOF(OF_NoSmoothSailing)))
-                    {
-                        if ((pt.GetDist(ptOld) > 1) && (pClient->GetNetState()->isClientLessVersion(MINCLIVER_HS)) && (pChar->GetTopPoint().GetDistSight(ptOld) < tViewDist))
-                            pClient->addCharMove(pChar);
-                        else
-                        {
-                            pClient->addObjectRemove(pChar);
-                            pClient->addChar(pChar);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    return true;
-}
-
-bool CItemShip::Ship_MoveToRegion(CRegionWorld * pRegionOld, CRegionWorld *pRegionNew) const
-{
-    if (pRegionOld == pRegionNew)
-    {
-        return true;
-    }
-    if (!pRegionNew)
-    {
-        return false;
-    }
-    if (!g_Serv.IsLoading())
-    {
-        // Leaving region trigger. (may not be allowed to leave ?)
-        CItemShip *pShip = const_cast<CItemShip*>(this);
-        if (pRegionOld)
-        {
-            if (IsTrigUsed(TRIGGER_EXIT))
-            {
-                if (pRegionOld->OnRegionTrigger(m_pCaptain, RTRIG_EXIT) == TRIGRET_RET_TRUE)
-                {
-                    return false;
-                }
-            }
-
-            if (IsTrigUsed(TRIGGER_REGIONLEAVE))
-            {
-                CScriptTriggerArgs Args(pRegionOld);
-                if (pShip->OnTrigger(ITRIG_RegionLeave, m_pCaptain, &Args) == TRIGRET_RET_TRUE)
-                {
-                    return false;
-                }
-            }
-        }
-        if (pRegionNew)
-        {
-            if (IsTrigUsed(TRIGGER_ENTER))
-            {
-                if (pRegionNew->OnRegionTrigger(m_pCaptain, RTRIG_ENTER) == TRIGRET_RET_TRUE)
-                {
-                    return false;
-                }
-            }
-
-            if (IsTrigUsed(TRIGGER_REGIONENTER))
-            {
-                CScriptTriggerArgs Args(pRegionNew);
-                if (pShip->OnTrigger(ITRIG_RegionEnter, m_pCaptain, &Args) == TRIGRET_RET_TRUE)
-                {
-                    return false;
-                }
-            }
-        }
-    }
-    return true;
-}
-
-bool CItemShip::Ship_CanMoveTo(const CPointMap & pt) const
-{
-    ADDTOCALLSTACK("CItemShip::Ship_CanMoveTo");
-    // Can we move to the new location ? all water type ?
-    if (IsAttr(ATTR_MAGIC))
-        return true;
-
-    dword dwBlockFlags = CAN_I_WATER;
-
-    g_World.GetHeightPoint2(pt, dwBlockFlags, true);
-    if (dwBlockFlags & CAN_I_WATER)
-        return true;
-
-    return false;
-}
-
-static const DIR_TYPE sm_Ship_FaceDir[] =
-{
-    DIR_N,
-    DIR_E,
-    DIR_S,
-    DIR_W
-};
-
-bool CItemShip::Ship_Face(DIR_TYPE dir)
-{
-    ADDTOCALLSTACK("CItemShip::Ship_Face");
-    // Change the direction of the ship.
-
-    if (!IsTopLevel() || !m_pRegion)
-    {
-        return false;
-    }
-
-    uint iDirection = 0;
-    for (; ; ++iDirection)
-    {
-        if (iDirection >= CountOf(sm_Ship_FaceDir))
-            return false;
-        if (dir == sm_Ship_FaceDir[iDirection])
-            break;
-    }
-
-    int iFaceOffset = Ship_GetFaceOffset();
-    ITEMID_TYPE idnew = (ITEMID_TYPE)(GetID() - iFaceOffset + iDirection);
-    const CItemBaseMulti * pMultiNew = Multi_GetDef(idnew);
-    if (pMultiNew == nullptr)
-    {
-        return false;
-    }
-
-    int iTurn = dir - sm_Ship_FaceDir[iFaceOffset];
-
-    // ?? Are there blocking items in the way of the turn ?
-
-    // Acquire the CRect for the new direction of the ship
-    CRectMap rect(pMultiNew->m_rect);
-    rect.m_map = GetTopPoint().m_map;
-    rect.OffsetRect(GetTopPoint().m_x, GetTopPoint().m_y);
-
-    // Check that we can fit into this space.
-    CPointMap ptTmp;
-    ptTmp.m_z = GetTopPoint().m_z;
-    ptTmp.m_map = (uchar)(rect.m_map);
-    for (ptTmp.m_x = (short)(rect.m_left); ptTmp.m_x < (short)(rect.m_right); ++ptTmp.m_x)
-    {
-        for (ptTmp.m_y = (short)(rect.m_top); ptTmp.m_y < (short)(rect.m_bottom); ++ptTmp.m_y)
-        {
-            if (m_pRegion->IsInside2d(ptTmp))
-                continue;
-            // If the ship already overlaps a point then we must
-            // already be allowed there.
-            if ((!ptTmp.IsValidPoint()) || (!Ship_CanMoveTo(ptTmp)))
-            {
-                CItem *pTiller = Multi_GetSign();
-                ASSERT(pTiller);
-                pTiller->Speak(g_Cfg.GetDefaultMsg(DEFMSG_TILLER_CANT_TURN), HUE_TEXT_DEF, TALKMODE_SAY, FONT_NORMAL);
-                return false;
-            }
-        }
-    }
-
-    const CItemBaseMulti * pMultiOld = Multi_GetDef(GetID());
-
-    // Reorient everything on the deck
-    CObjBase * ppObjs[MAX_MULTI_LIST_OBJS + 1];
-    size_t iCount = Ship_ListObjs(ppObjs);
-    for (size_t i = 0; i < iCount; ++i)
-    {
-        CObjBase *pObj = ppObjs[i];
-        CPointMap pt = pObj->GetTopPoint();
-
-        int xdiff = pt.m_x - GetTopPoint().m_x;
-        int ydiff = pt.m_y - GetTopPoint().m_y;
-        int xd = xdiff;
-        int yd = ydiff;
-        switch (iTurn)
-        {
-            case 2: // right
-            case (2 - DIR_QTY):
-                xd = -ydiff;
-                yd = xdiff;
-                break;
-            case -2: // left.
-            case (DIR_QTY - 2):
-                xd = ydiff;
-                yd = -xdiff;
-                break;
-            default: // u turn.
-                xd = -xdiff;
-                yd = -ydiff;
-                break;
-        }
-        pt.m_x = (short)(GetTopPoint().m_x + xd);
-        pt.m_y = (short)(GetTopPoint().m_y + yd);
-        if (pObj->IsItem())
-        {
-            CItem * pItem = static_cast<CItem*>(pObj);
-            if (pItem == this)
-            {
-                m_pRegion->UnRealizeRegion();
-                SetID(idnew);
-                MultiRealizeRegion();
-            }
-            else if (Multi_IsPartOf(pItem))
-            {
-                for (size_t j = 0; j < pMultiOld->m_Components.size(); ++j)
-                {
-                    const CItemBaseMulti::CMultiComponentItem & component = pMultiOld->m_Components[j];
-                    if ((xdiff == component.m_dx) && (ydiff == component.m_dy) && ((pItem->GetTopZ() - GetTopZ()) == component.m_dz))
-                    {
-                        const CItemBaseMulti::CMultiComponentItem & componentnew = pMultiNew->m_Components[j];
-                        pItem->SetID(componentnew.m_id);
-                        pt.m_x = GetTopPoint().m_x + componentnew.m_dx;
-                        pt.m_y = GetTopPoint().m_y + componentnew.m_dy;
-                    }
-                }
-            }
-
-            if (IsTrigUsed(TRIGGER_SHIPTURN))
-            {
-                CScriptTriggerArgs Args(dir, sm_Ship_FaceDir[iFaceOffset]);
-                pItem->OnTrigger(ITRIG_Ship_Turn, &g_Serv, &Args);
-            }
-        }
-        else if (pObj->IsChar())
-        {
-            CChar *pChar = static_cast<CChar*>(pObj);
-            pChar->m_dirFace = GetDirTurn(pChar->m_dirFace, iTurn);
-            pChar->RemoveFromView();
-        }
-        pObj->MoveTo(pt);
-    }
-
-    for (size_t i = 0; i < iCount; ++i)
-    {
-        CObjBase * pObj = ppObjs[i];
-        pObj->Update();
-    }
-
-    m_itShip.m_DirFace = (uchar)(dir);
-    return true;
-}
-
-bool CItemShip::Ship_Move(DIR_TYPE dir, int distance)
-{
-    ADDTOCALLSTACK("CItemShip::Ship_Move");
-    if (dir >= DIR_QTY)
-        return false;
-
-    if (m_pRegion == nullptr)
-    {
-        DEBUG_ERR(("Ship bad region\n"));
-        return false;
-    }
-
-    CPointMap ptDelta;
-    ptDelta.ZeroPoint();
-
-    CPointMap ptFore(m_pRegion->GetRegionCorner(dir));
-    CPointMap ptLeft(m_pRegion->GetRegionCorner(GetDirTurn(dir, -1 - (dir % 2))));	// acquiring the flat edges requires two 'turns' for diagonal movement
-    CPointMap ptRight(m_pRegion->GetRegionCorner(GetDirTurn(dir, 1 + (dir % 2))));
-    CPointMap ptTest(ptLeft.m_x, ptLeft.m_y, GetTopZ(), GetTopMap());
-
-    bool fStopped = false, fTurbulent = false;
-
-    for (int i = 0; i < distance; ++i)
-    {
-        // Check that we aren't sailing off the edge of the world
-        ptFore.Move(dir);
-        ptFore.m_z = GetTopZ();
-        if (!ptFore.IsValidPoint())
-        {
-            // Circle the globe
-            // Fall off edge of world ?
-            fStopped = true;
-            fTurbulent = true;
-            break;
-        }
-
-#ifdef _DEBUG
-        // In debug builds, this flashes some spots over tiles as they are checked for valid movement
-        CItem* pItemDebug = nullptr;
-#define SPAWNSHIPTRACK(a,b)		pItemDebug = CItem::CreateBase(ITEMID_WorldGem);	\
-								pItemDebug->SetType(IT_NORMAL);						\
-								pItemDebug->SetAttr(ATTR_MOVE_NEVER|ATTR_DECAY|ATTR_INVIS);	\
-								pItemDebug->SetHue(b);								\
-								pItemDebug->MoveToDecay(a, 1);				\
-								a.GetSector()->SetSectorWakeStatus();
-#else
-    #define SPAWNSHIPTRACK(a,b)
-#endif
-
-        // Test along the ship's edge to make sure nothing is blocking movement, this is split into two switch
-        // statements (n/s and e/w) since moving diagonally requires the testing of both edges (i.e. 'north+east')
-        ptLeft.Move(dir);
-        ptRight.Move(dir);
-
-        // test north/south edge (as needed)
-        switch (dir)
-        {
-            case DIR_N:
-            case DIR_NE:
-            case DIR_NW:
-                ptTest.m_y = ptFore.m_y; // align y coordinate
-                for (int x = ptLeft.m_x; x <= ptRight.m_x; ++x)
-                {
-                    ptTest.m_x = (short)(x);
-                    SPAWNSHIPTRACK(ptTest, 0x40);
-                    if (Ship_CanMoveTo(ptTest) == false)
-                    {
-                        fStopped = true;
-                        break;
-                    }
-                }
-                break;
-
-            case DIR_S:
-            case DIR_SE:
-            case DIR_SW:
-                ptTest.m_y = ptFore.m_y;
-                for (int x = ptRight.m_x; x <= ptLeft.m_x; x++)
-                {
-                    ptTest.m_x = (short)(x);
-                    SPAWNSHIPTRACK(ptTest, 0x40);
-                    if (Ship_CanMoveTo(ptTest) == false)
-                    {
-                        fStopped = true;
-                        break;
-                    }
-                }
-                break;
-
-            default:
-                break;
-        }
-
-        // test east/west edge (as needed)
-        switch (dir)
-        {
-            case DIR_E:
-            case DIR_NE:
-            case DIR_SE:
-                ptTest.m_x = ptFore.m_x; // align x coordinate
-                for (int y = ptLeft.m_y; y <= ptRight.m_y; ++y)
-                {
-                    ptTest.m_y = (short)(y);
-                    SPAWNSHIPTRACK(ptTest, 0xe0);
-                    if (Ship_CanMoveTo(ptTest) == false)
-                    {
-                        fStopped = true;
-                        break;
-                    }
-                }
-                break;
-
-            case DIR_W:
-            case DIR_NW:
-            case DIR_SW:
-                ptTest.m_x = ptFore.m_x;
-                for (int y = ptRight.m_y; y <= ptLeft.m_y; ++y)
-                {
-                    ptTest.m_y = (short)(y);
-                    SPAWNSHIPTRACK(ptTest, 0xe0);
-                    if (Ship_CanMoveTo(ptTest) == false)
-                    {
-                        fStopped = true;
-                        break;
-                    }
-                }
-                break;
-
-            default:
-                break;
-        }
-
-#undef SHIPSPAWNTRACK // macro no longer needed
-
-        // If the ship has been flagged as stopped, then abort movement here
-        if (fStopped == true)
-            break;
-
-        // Move delta one space
-        ptDelta.Move(dir);
-    }
-
-    if (ptDelta.m_x != 0 || ptDelta.m_y != 0 || ptDelta.m_z != 0)
-    {
-        Ship_MoveDelta(ptDelta);
-
-        // Move again
-        GetTopSector()->SetSectorWakeStatus();	// may get here b4 my client does.
-    }
-
-    if (fStopped == true)
-    {
-        CItem * pTiller = Multi_GetSign();
-        ASSERT(pTiller);
-        if (fTurbulent == true)
-            pTiller->Speak(g_Cfg.GetDefaultMsg(DEFMSG_TILLER_TURB_WATER), HUE_TEXT_DEF, TALKMODE_SAY, FONT_NORMAL);
-        else
-            pTiller->Speak(g_Cfg.GetDefaultMsg(DEFMSG_TILLER_STOPPED), HUE_TEXT_DEF, TALKMODE_SAY, FONT_NORMAL);
-        return false;
-    }
-
-    return true;
-}
-
-bool CItemShip::Ship_OnMoveTick()
-{
-    ADDTOCALLSTACK("CItemShip::Ship_OnMoveTick");
-    // We just got a move tick.
-    // RETURN: false = delete the boat.
-
-    if (m_itShip.m_bMovementType == 0)	// decay the ship instead ???
-        return true;
-
-    // Calculate the leading point.
-    DIR_TYPE dir = (DIR_TYPE)(m_itShip.m_DirMove);
-
-    if (!Ship_Move(dir, m_shipSpeed.tiles))
-    {
-        Ship_Stop();
-        return true;
-    }
-    Ship_SetNextMove();
-    return true;
-}
-
-bool CItemShip::OnTick()
-{
-    ADDTOCALLSTACK("CItemShip::OnTick");
-    // Ships move on their tick.
-    if (m_NextMove <= g_World.GetCurrentTick())
-        Ship_OnMoveTick();
-    return true;
-}
-
-enum
-{
-    SHV_SHIPANCHORDROP,
-    SHV_SHIPANCHORRAISE,
-    SHV_SHIPBACK,
-    SHV_SHIPBACKLEFT,
-    SHV_SHIPBACKRIGHT,
-    SHV_SHIPDOWN,
-    SHV_SHIPDRIFTLEFT,
-    SHV_SHIPDRIFTRIGHT,
-    SHV_SHIPFACE,
-    SHV_SHIPFORE,
-    SHV_SHIPFORELEFT,
-    SHV_SHIPFORERIGHT,
-    SHV_SHIPGATE,
-    SHV_SHIPLAND,
-    SHV_SHIPMOVE,
-    SHV_SHIPSTOP,
-    SHV_SHIPTURN,
-    SHV_SHIPTURNLEFT,
-    SHV_SHIPTURNRIGHT,
-    SHV_SHIPUP,
-    SHV_QTY
-};
-
-lpctstr const CItemShip::sm_szVerbKeys[SHV_QTY + 1] =
-{
-    "SHIPANCHORDROP",
-    "SHIPANCHORRAISE",
-    "SHIPBACK",
-    "SHIPBACKLEFT",
-    "SHIPBACKRIGHT",
-    "SHIPDOWN",		// down one space.
-    "SHIPDRIFTLEFT",
-    "SHIPDRIFTRIGHT",
-    "SHIPFACE",		// set the ships facing direction.
-    "SHIPFORE",
-    "SHIPFORELEFT",
-    "SHIPFORERIGHT",
-    "SHIPGATE",		// Moves the whole ship to some new point location.
-    "SHIPLAND",
-    "SHIPMOVE",		// move in a specified direction.
-    "SHIPSTOP",
-    "SHIPTURN",
-    "SHIPTURNLEFT",
-    "SHIPTURNRIGHT",
-    "SHIPUP",		// up one space.
-    NULL
-};
-
 bool CItemShip::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
 {
     ADDTOCALLSTACK("CItemShip::r_GetRef");
@@ -819,305 +96,8 @@ bool CItemShip::r_GetRef(lpctstr & pszKey, CScriptObj * & pRef)
 
 bool CItemShip::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command from script
 {
-    ADDTOCALLSTACK("CItemShip::r_Verb");
-    EXC_TRY("Verb");
-    // Speaking in this ships region.
-    // return: true = command for the ship.
+    return CItemMulti::r_Verb(s, pSrc);
 
-    //"One (direction*)", " (Direction*), one" Moves ship one tile in desired direction and stops.
-    //"Slow (direction*)" Moves ship slowly in desired direction (see below for possible directions).
-
-    int iCmd = FindTableSorted(s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys) - 1);
-    if (iCmd < 0)
-        return CItemMulti::r_Verb(s, pSrc);
-
-    if (!pSrc || !IsTopLevel())
-        return false;
-
-    CChar * pChar = pSrc->GetChar();
-
-    // Only key holders can command the ship ???
-    // if ( pChar && pChar->ContentFindKeyFor( pItem ))
-
-    // Find the tiller man object.
-    CItem * pTiller = Multi_GetSign();
-    ASSERT(pTiller);
-
-    // Get current facing dir.
-    DIR_TYPE DirFace = sm_Ship_FaceDir[Ship_GetFaceOffset()];
-    int DirMoveChange;
-    lpctstr pszSpeak = nullptr;
-
-    switch (iCmd)
-    {
-        case SHV_SHIPSTOP:
-        {
-            // "Furl sail"
-            // "Stop" Stops current ship movement.
-            if (m_itShip.m_bMovementType == 0)
-                return false;
-            Ship_Stop();
-            break;
-        }
-
-        case SHV_SHIPFACE:
-        {
-            // Face this direction. do not change the direction of movement.
-            if (!s.HasArgs())
-                return false;
-            return Ship_Face(GetDirStr(s.GetArgStr()));
-        }
-
-        case SHV_SHIPMOVE:
-        {
-            // Move one space in this direction.
-            // Does NOT protect against exploits !
-            if (!s.HasArgs())
-                return false;
-            m_itShip.m_DirMove = (byte)(GetDirStr(s.GetArgStr()));
-            m_pCaptain = pSrc;
-            return Ship_Move((DIR_TYPE)(m_itShip.m_DirMove), m_shipSpeed.tiles);
-        }
-
-        case SHV_SHIPGATE:
-        {
-            // Move the whole ship and contents to another place.
-            if (!s.HasArgs())
-                return false;
-
-            CPointMap ptdelta = g_Cfg.GetRegionPoint(s.GetArgStr());
-            if (!ptdelta.IsValidPoint())
-                return false;
-            ptdelta -= GetTopPoint();
-            return Ship_MoveDelta(ptdelta);
-        }
-
-        case SHV_SHIPTURNLEFT:
-        {
-            // "Port",
-            // "Turn Left",
-            DirMoveChange = -2;
-        doturn:
-            if (m_itShip.m_fAnchored != 0)
-            {
-            anchored:
-                pszSpeak = g_Cfg.GetDefaultMsg(DEFMSG_TILLER_ANCHOR_IS_DOWN);
-                break;
-            }
-            DIR_TYPE DirMove = static_cast<DIR_TYPE>(m_itShip.m_DirMove);
-            m_itShip.m_DirMove = (uchar)(GetDirTurn(DirFace, DirMoveChange));
-            if (!Ship_Face(static_cast<DIR_TYPE>(m_itShip.m_DirMove)))
-            {
-                m_itShip.m_DirMove = (uchar)(DirMove);
-                return false;
-            }
-            break;
-        }
-
-        case SHV_SHIPTURNRIGHT:
-        {
-            // "Starboard",
-            // "Turn Right",
-            DirMoveChange = 2;
-            goto doturn;
-        }
-
-        case SHV_SHIPDRIFTLEFT:
-        {
-            // "Left",
-            // "Drift Left",
-            DirMoveChange = -2;
-        dodirmovechange:
-            if (m_itShip.m_fAnchored != 0)
-                goto anchored;
-            if (!Ship_SetMoveDir(GetDirTurn(DirFace, DirMoveChange), 2))
-                return false;
-            break;
-        }
-
-        case SHV_SHIPDRIFTRIGHT:
-        {
-            // "Right",
-            // "Drift Right",
-            DirMoveChange = 2;
-            goto dodirmovechange;
-        }
-
-        case SHV_SHIPBACK:
-        {
-            // "Back",			// Move ship backwards
-            // "Backward",		// Move ship backwards
-            // "Backwards",	// Move ship backwards
-            m_pCaptain = pSrc;
-            DirMoveChange = 4;
-            goto dodirmovechange;
-        }
-
-        case SHV_SHIPFORE:
-        {
-            // "Forward"
-            // "Foreward",		// Moves ship forward.
-            // "Unfurl sail",	// Moves ship forward.
-            DirMoveChange = 0;
-            m_pCaptain = pSrc;
-            goto dodirmovechange;
-        }
-
-        case SHV_SHIPFORELEFT: // "Forward left",
-        {
-            DirMoveChange = -1;
-            m_pCaptain = pSrc;
-            goto dodirmovechange;
-        }
-
-        case SHV_SHIPFORERIGHT: // "forward right",
-        {
-            DirMoveChange = 1;
-            m_pCaptain = pSrc;
-            goto dodirmovechange;
-        }
-
-        case SHV_SHIPBACKLEFT:
-        {
-            // "backward left",
-            // "back left",
-            DirMoveChange = -3;
-            m_pCaptain = pSrc;
-            goto dodirmovechange;
-        }
-
-        case SHV_SHIPBACKRIGHT:
-        {
-            // "backward right",
-            // "back right",
-            DirMoveChange = 3;
-            m_pCaptain = pSrc;
-            goto dodirmovechange;
-        }
-
-        case SHV_SHIPANCHORRAISE: // "Raise Anchor",
-        {
-            if (m_itShip.m_fAnchored == 0)
-            {
-                pszSpeak = g_Cfg.GetDefaultMsg(DEFMSG_TILLER_ANCHOR_IS_ALL_UP);
-                break;
-            }
-            m_itShip.m_fAnchored = 0;
-            break;
-        }
-
-        case SHV_SHIPANCHORDROP: // "Drop Anchor",
-        {
-            if (m_itShip.m_fAnchored != 0)
-            {
-                pszSpeak = g_Cfg.GetDefaultMsg(DEFMSG_TILLER_ANCHOR_IS_ALL_DOWN);
-                break;
-            }
-            m_itShip.m_fAnchored = 1;
-            Ship_Stop();
-            break;
-        }
-
-        case SHV_SHIPTURN:
-        {
-            //	"Turn around",	// Turns ship around and proceeds.
-            // "Come about",	// Turns ship around and proceeds.
-            DirMoveChange = 4;
-            goto doturn;
-        }
-
-        case SHV_SHIPUP: // "Up"
-        {
-            if (!IsAttr(ATTR_MAGIC))
-                return false;
-
-            CPointMap pt;
-            pt.m_z = PLAYER_HEIGHT;
-            if (Ship_MoveDelta(pt))
-            {
-                pszSpeak = g_Cfg.GetDefaultMsg(DEFMSG_TILLER_CONFIRM);
-            }
-            else
-            {
-                pszSpeak = g_Cfg.GetDefaultMsg(DEFMSG_TILLER_DENY);
-            }
-            break;
-        }
-
-        case SHV_SHIPDOWN: // "Down"
-        {
-            if (!IsAttr(ATTR_MAGIC))
-                return false;
-            CPointMap pt;
-            pt.m_z = -PLAYER_HEIGHT;
-            if (Ship_MoveDelta(pt))
-                pszSpeak = g_Cfg.GetDefaultMsg(DEFMSG_TILLER_CONFIRM);
-            else
-                pszSpeak = g_Cfg.GetDefaultMsg(DEFMSG_TILLER_DENY);
-            break;
-        }
-
-        case SHV_SHIPLAND: // "Land"
-        {
-            if (!IsAttr(ATTR_MAGIC))
-                return false;
-            char zold = GetTopZ();
-            CPointMap pt = GetTopPoint();
-            pt.m_z = zold;
-            SetTopZ(-UO_SIZE_Z);	// bottom of the world where i won't get in the way.
-            dword dwBlockFlags = CAN_I_WATER;
-            char z = g_World.GetHeightPoint2(pt, dwBlockFlags);
-            SetTopZ(zold);	// restore z for now.
-            pt.InitPoint();
-            pt.m_z = z - zold;
-            if (pt.m_z)
-            {
-                Ship_MoveDelta(pt);
-                pszSpeak = g_Cfg.GetDefaultMsg(DEFMSG_TILLER_CONFIRM);
-            }
-            else
-            {
-                pszSpeak = g_Cfg.GetDefaultMsg(DEFMSG_TILLER_DENY);
-            }
-            break;
-        }
-
-        default:
-        {
-            return false;
-        }
-    }
-
-    if (pChar)
-    {
-        if (pszSpeak == nullptr)
-        {
-            switch (Calc_GetRandVal(3))
-            {
-                case 1:
-                    pszSpeak = g_Cfg.GetDefaultMsg(DEFMSG_TILLER_REPLY_1);
-                    break;
-                case 2:
-                    pszSpeak = g_Cfg.GetDefaultMsg(DEFMSG_TILLER_REPLY_2);
-                    break;
-                default:
-                    pszSpeak = g_Cfg.GetDefaultMsg(DEFMSG_TILLER_REPLY_3);
-                    break;
-            }
-        }
-
-        tchar szText[MAX_TALK_BUFFER];
-        strcpy(szText, pszSpeak);
-        pChar->ParseText(szText, &g_Serv);
-        pTiller->Speak(szText, HUE_TEXT_DEF, TALKMODE_SAY, FONT_NORMAL);
-    }
-    return true;
-    EXC_CATCH;
-
-    EXC_DEBUG_START;
-    EXC_ADD_SCRIPTSRC;
-    EXC_DEBUG_END;
-    return true;
 }
 
 void CItemShip::r_Write(CScript & s)
@@ -1131,17 +111,12 @@ void CItemShip::r_Write(CScript & s)
         for (size_t i = 0; i < m_uidPlanks.size(); i++)
             s.WriteKeyHex("PLANK", m_uidPlanks.at(i));
     }
-    if (m_itShip.m_Pilot)
-        s.WriteKeyHex("PILOT", m_itShip.m_Pilot);
 }
 
 enum IMCS_TYPE
 {
     IMCS_HATCH,
-    IMCS_PILOT,
     IMCS_PLANKS,
-    IMCS_SHIPSPEED,
-    IMCS_SPEEDMODE,
     IMCS_TILLER,
     IMCS_QTY
 };
@@ -1149,10 +124,7 @@ enum IMCS_TYPE
 lpctstr const CItemShip::sm_szLoadKeys[IMCS_QTY + 1] = // static
 {
     "HATCH",
-    "PILOT",
     "PLANKS",
-    "SHIPSPEED",
-    "SPEEDMODE",
     "TILLER",
     NULL
 };
@@ -1163,22 +135,9 @@ bool CItemShip::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
     EXC_TRY("WriteVal");
 
     int index = FindTableSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
-    if (index == -1)
-    {
-        if (!strnicmp(pszKey, "SHIPSPEED.", 10))
-            index = IMCS_SHIPSPEED;
-    }
 
     switch (index)
     {
-        case IMCS_PILOT:
-        {
-            if (m_itShip.m_Pilot)
-                sVal.FormatHex(m_itShip.m_Pilot);
-            else
-                sVal.FormatVal(0);
-        } break;
-
         case IMCS_HATCH:
         {
             pszKey += 5;
@@ -1194,51 +153,6 @@ bool CItemShip::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
             pszKey += 6;
             sVal.FormatSTVal(GetShipPlankCount());
         } break;
-
-        case IMCS_SHIPSPEED:
-        {	/*
-            * Intervals:
-            *       drift forward
-            * fast | 0.25|   0.25
-            * slow | 0.50|   0.50
-            *
-            * Speed:
-            *       drift forward
-            * fast |  0x4|    0x4
-            * slow |  0x3|    0x3
-            *
-            * Tiles (per interval):
-            *       drift forward
-            * fast |    1|      1
-            * slow |    1|      1
-            *
-            * 'walking' in piloting mode has a 1s interval, speed 0x2
-            */
-            pszKey += 9;
-
-            if (*pszKey == '.')
-            {
-                ++pszKey;
-                if (!strnicmp(pszKey, "TILES", 5))
-                {
-                    sVal.FormatVal(m_shipSpeed.tiles);
-                    break;
-                }
-                else if (!strnicmp(pszKey, "PERIOD", 6))
-                {
-                    sVal.FormatVal(m_shipSpeed.period);
-                    break;
-                }
-                return false;
-            }
-
-            sVal.Format("%d,%d", m_shipSpeed.period, m_shipSpeed.tiles);
-        } break;
-
-        case IMCS_SPEEDMODE:
-        {
-            sVal.FormatVal(m_SpeedMode);
-        }	break;
 
         case IMCS_TILLER:
         {
@@ -1271,84 +185,32 @@ bool CItemShip::r_LoadVal(CScript & s)
     IMCS_TYPE index = (IMCS_TYPE)FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
     if (g_Serv.IsLoading())
     {
-        if (s.IsKey("HATCH"))
+        switch (index)
         {
-            m_uidHold = s.GetArgDWVal();
-            return true;
-        }
-        else if (s.IsKey("TILLER"))
-        {
-            m_uidLink = s.GetArgDWVal();
-            return true;
-        }
-        else if (s.IsKey("PLANK"))
-        {
-            CUID uid = s.GetArgDWVal();
-            m_uidPlanks.push_back(uid);
-            return true;
-        }
-        else if (s.IsKey("PILOT"))
-        {
-            m_itShip.m_Pilot.SetObjUID(s.GetArgVal());
+            case IMCS_HATCH:
+            {
+                m_uidHold = s.GetArgDWVal();
+                return true;
+            }
+            case IMCS_TILLER:
+            {
+                m_uidLink = s.GetArgDWVal();
+                return true;
+            }
+            case IMCS_PLANKS:
+            {
+                CUID uid = s.GetArgDWVal();
+                m_uidPlanks.push_back(uid);
+                return true;
+            }
+            default:
+            {
+                break;
+            }
         }
     }
+    return CItemMulti::r_LoadVal(s);
 
-    switch (index)
-    {
-        case IMCS_SPEEDMODE:
-        {
-            byte speed = (byte)(s.GetArgVal());
-            if (speed > 4)
-                speed = 4;
-            else if (speed < 1)
-                speed = 1;	//Max = 4, Min = 1.
-            m_SpeedMode = speed;
-            return true;
-        }
-
-        case IMCS_SHIPSPEED:
-        {
-            pszKey += 9;
-            if (*pszKey == '.')
-            {
-                ++pszKey;
-                if (!strnicmp(pszKey, "TILES", 5))
-                {
-                    m_shipSpeed.tiles = (uchar)(s.GetArgVal());
-                    return true;
-                }
-                else if (!strnicmp(pszKey, "PERIOD", 6))
-                {
-                    m_shipSpeed.period = (uchar)(s.GetArgVal());
-                    return true;
-                }
-                int64 piVal[2];
-                size_t iQty = Str_ParseCmds(s.GetArgStr(), piVal, CountOf(piVal));
-                if (iQty == 2)
-                {
-                    m_shipSpeed.period = (uchar)(piVal[0]);
-                    m_shipSpeed.tiles = (uchar)(piVal[1]);
-                    return true;
-                }
-                else
-                    return false;
-            }
-        } break;
-        case IMCS_PILOT:
-        {
-            CChar * pChar = static_cast<CChar*>(static_cast<CUID>(s.GetArgVal()).CharFind());
-            if (pChar)
-                m_itShip.m_Pilot = pChar->GetUID();
-            else
-            {
-                m_itShip.m_Pilot.InitUID();
-                Ship_Stop();
-            }
-            return 1;
-        } break;
-        default:
-            return CItemMulti::r_LoadVal(s);
-    }
     EXC_CATCH;
 
     EXC_DEBUG_START;
@@ -1372,6 +234,12 @@ int CItemShip::FixWeirdness()
     // CItemShip::GetShipPlank() updates/corrects the list of planks
     GetShipPlank(0);
     return iResultCode;
+}
+
+bool CItemShip::OnTick()
+{
+    CMultiMovable::OnTick();
+    return true;    // Ships always return true, can't 'decay'
 }
 
 CItemContainer * CItemShip::GetShipHold()

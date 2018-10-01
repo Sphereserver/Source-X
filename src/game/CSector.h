@@ -98,7 +98,6 @@ public:
 	size_t HasClients() const;
 	int64 GetLastClientTime() const;
 	bool CanSleep() const;
-    bool IsSleeping() const;
 	void SetSectorWakeStatus();	// Ships may enter a sector before it's riders !
 	void ClientAttach( CChar * pChar );
 	void ClientDetach( CChar * pChar );

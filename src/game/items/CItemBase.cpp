@@ -1380,11 +1380,11 @@ bool CItemBase::r_LoadVal( CScript &s )
 			if (!IsType(IT_SHIP))
 				return false;
 			CItemBaseMulti *pItemMulti = dynamic_cast<CItemBaseMulti*>(this);
-			byte speed = s.GetArgBVal();
-			if (speed > 4)
-				speed = 4;
-			else if (speed < 1)
-				speed = 1;	//Max = 4, Min = 1.
+            ShipMovementSpeed speed = (ShipMovementSpeed)s.GetArgBVal();
+			if (speed > SMS_FAST)
+				speed = SMS_FAST;
+			else if (speed < SMS_NORMAL)
+				speed = SMS_NORMAL;	//Max = 4, Min = 1.
 			pItemMulti->m_SpeedMode = speed;
 		}break;
 		case IBC_SHIPSPEED:
@@ -1760,9 +1760,9 @@ CItemBaseMulti::CItemBaseMulti( CItemBase* pBase ) :
 {
     m_dwRegionFlags = REGION_FLAG_NODECAY | REGION_ANTIMAGIC_TELEPORT | REGION_ANTIMAGIC_RECALL_IN | REGION_FLAG_NOBUILDING;
 	m_rect.SetRectEmpty();
-	m_shipSpeed.period = 5;    // half a second (in tenth of seconds)
-	m_shipSpeed.tiles = 1;
-	m_SpeedMode = 3;
+	m_shipSpeed.period = 0;
+	m_shipSpeed.tiles = 0;
+	m_SpeedMode = SMS_SLOW;
 
     _iBaseStorage = 489;    // Minimum possible value from 7x7 houses.
     _iBaseVendors = 10;     // Minimum possible value from 7x7 houses.

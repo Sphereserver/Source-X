@@ -3270,10 +3270,10 @@ bool PacketWheelBoatMove::onReceive(NetState* net)
 			//pShipItem->Ship_Move(static_cast<DIR_TYPE>((moving - pShipItem->m_itShip.m_DirFace)), pShipItem->m_shipSpeed.tiles);
 
 			if ((facing == DIR_N || facing == DIR_E || facing == DIR_S || facing == DIR_W) && pShipItem->m_itShip.m_DirFace != facing) //boat cannot face intermediate directions
-				pShipItem->Ship_Face(moving);
+				pShipItem->Face(moving);
 
-			if (pShipItem->Ship_SetMoveDir(facing, bMovementType, true)) //pShipItem->m_itShip.m_DirMove = (byte)(facing);
-				pShipItem->Ship_Move(moving, bMovementType);
+			if (pShipItem->SetMoveDir(facing, (ShipMovementType)bMovementType, true)) //pShipItem->m_itShip.m_DirMove = (byte)(facing);
+				pShipItem->Move(moving, bMovementType);
 		}
 		else
 			return false;

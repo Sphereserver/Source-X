@@ -13,14 +13,15 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-CItemMulti::CItemMulti(ITEMID_TYPE id, CItemBase * pItemDef) :	// CItemBaseMulti
+CItemMulti::CItemMulti(ITEMID_TYPE id, CItemBase * pItemDef, bool fTurnable) :	// CItemBaseMulti
     CItem(id, pItemDef),
-    CTimedObject(PROFILE_ITEMS)
+    CTimedObject(PROFILE_MULTIS),
+    CMultiMovable(fTurnable)
 {
     CItemBaseMulti * pItemBase = static_cast<CItemBaseMulti*>(Base_GetDef());
     m_shipSpeed.period = pItemBase->m_shipSpeed.period;
     m_shipSpeed.tiles = pItemBase->m_shipSpeed.tiles;
-    m_SpeedMode = pItemBase->m_SpeedMode;
+    _eSpeedMode = pItemBase->m_SpeedMode;
 
     m_pRegion = nullptr;
     _pOwner.InitUID();
@@ -160,6 +161,11 @@ void CItemMulti::Delete(bool bforce)
 const CItemBaseMulti * CItemMulti::Multi_GetDef() const
 {
     return(static_cast <const CItemBaseMulti *>(Base_GetDef()));
+}
+
+CRegion * CItemMulti::GetRegion() const
+{
+    return m_pRegion;
 }
 
 int CItemMulti::Multi_GetMaxDist() const
@@ -457,7 +463,10 @@ CItem * CItemMulti::Multi_FindItemType(IT_TYPE type) const
 
 bool CItemMulti::OnTick()
 {
-    ADDTOCALLSTACK("CItemMulti::OnTick");
+    if (!CMultiMovable::OnTick())
+    {
+        return CItem::OnTick();
+    }
     return true;
 }
 
@@ -2085,6 +2094,10 @@ bool CItemMulti::r_Verb(CScript & s, CTextConsole * pSrc) // Execute command fro
     // Speaking in this multis region.
     // return: true = command for the multi.
 
+    if (CMultiMovable::r_Verb(s, pSrc))
+    {
+        return true;
+    }
     int iCmd = FindTableSorted(s.GetKey(), sm_szVerbKeys, CountOf(sm_szVerbKeys) - 1);
     switch (iCmd)
     {
@@ -2467,6 +2480,10 @@ void CItemMulti::r_Write(CScript & s)
 bool CItemMulti::r_WriteVal(lpctstr pszKey, CSString & sVal, CTextConsole * pSrc)
 {
     ADDTOCALLSTACK("CItemMulti::r_WriteVal");
+    if (CMultiMovable::r_WriteVal(pszKey, sVal, pSrc))
+    {
+        return true;
+    }
     int iCmd = FindTableHeadSorted(pszKey, sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
     if (iCmd >= 0)
     {
@@ -2738,6 +2755,10 @@ bool CItemMulti::r_LoadVal(CScript & s)
     ADDTOCALLSTACK("CItemMulti::r_LoadVal");
     EXC_TRY("LoadVal");
 
+    if (CMultiMovable::r_LoadVal(s))
+    {
+        return true;
+    }
     int iCmd = FindTableHeadSorted(s.GetKey(), sm_szLoadKeys, CountOf(sm_szLoadKeys) - 1);
 
     switch (iCmd)

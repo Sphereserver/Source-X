@@ -6,6 +6,29 @@
 #ifndef _INC_UOFILES_ENUMS_H
 #define _INC_UOFILES_ENUMS_H
 
+/*
+* @brief Movement type for ships
+* From packet 0xBF.0x32: 0 = Stop Movement, 1 = One Tile Movement, 2 = Normal Movement
+*/
+enum ShipMovementType
+{
+    SMT_STOP,   // No movement
+    SMT_SLOW,   // 1 tile movement
+    SMT_NORMAL  // normal movement
+};
+
+/*
+* @Speed type for ships
+* this has to sync with the outgoing 0xF6 packet
+*/
+enum ShipMovementSpeed
+{
+    SMS_STOP,    // 0x0 = no movement
+    SMS_NORMAL,  // 0x01 = one tile
+    SMS_ROWBOAT, // 0x02 = rowboat
+    SMS_SLOW,    // 0x03 = slow
+    SMS_FAST     // 0x04 = fast
+};
 
 // 20 colors of 10 hues and 5 brightnesses, which gives us 1000 colors.
 //  plus black, and default.

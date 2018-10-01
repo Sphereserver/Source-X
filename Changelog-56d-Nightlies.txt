@@ -1154,7 +1154,7 @@ transfer_secured	= 08	// Transfer Secured Containers.
 	(so, if moving on those tiles would make a valid movement).
 - Changed: Made Read-Only SERV.CREATE, SERV.LASTVALIDDATE, SERV.LASTVALIDTIME, CREATE char and item property.
 
--09-2018, XuN
+28-09-2018, XuN
 - Updated the whole code to cleanup latest changes regarding timers.
 - Added new CTimedObject class to control the whole timer's behaviours from now on.
 - Updated some classes (CObjBase, CChar, CItem (and it's childrens)) to inherit from CTimedObject (still more to come ... CTimedFunction, CMapBlockCache, etc).
@@ -1166,3 +1166,15 @@ transfer_secured	= 08	// Transfer Secured Containers.
 - Splitted CChar's ticks into the real ticks (the code relying on SetTimeout) and the periodic tickings (into a new OnTickPeriodic) involving stats regens, death check, steps on items, etc
 - Added a new list on CWorld for chars inserting all npcs by default on their create and players when login, and removing them when procceed, to do constant updates on hits, etc.
 - Fixed regens ignoring the delay set.
+
+01-10-2018, XuN
+- Fixed some crashes and removed some debug msgs from last commit(s).
+- Changed Ship's movement to a new CMultiMovable class
+- Added CMultiMovable class to all multi objects so now every multi can move like a ship without external scripts.
+    - In order to move, all movable multis need ShipSpeed.period and ShipSpeed.tiles to be higher than 0.
+    - Also the house that can move needs the spk_ship_cmds speech on them for player speech (if giving support for speech) also since the multis doesnt have direction like ships, it's direction is inverted:
+        Forward will move to the south
+        Left will move to the right
+        Right will move to the left
+        Back will move to the north
+    - Since the movement is set via 'timer', any house that can move will try to move instead of expire on it's ON=@Timer, so if you want a house that move and decay use timerf for the decay.

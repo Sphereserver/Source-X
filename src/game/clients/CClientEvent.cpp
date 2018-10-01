@@ -215,7 +215,7 @@ void CClient::Event_Item_Pickup(CUID uid, word amount) // Client grabs an item
 
 	EXC_SET("FastLoot");
 	//	fastloot (,emptycontainer) protection
-	if ( m_tNextPickup > g_World.GetCurrentTick())
+	if ( m_tNextPickup > g_World.GetCurrentTime().GetTimeRaw())
 	{
 		EXC_SET("FastLoot - addItemDragCancel(0)");
 		new PacketDragCancel(this, PacketDragCancel::CannotLift);

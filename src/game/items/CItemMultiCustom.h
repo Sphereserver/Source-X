@@ -7,6 +7,7 @@
 #define _INC_CITEMMULTICUSTOM_H
 
 #include "CItemMulti.h"
+#include "../components/CMultiMovable.h"
 
 
 class PacketHouseDesign;

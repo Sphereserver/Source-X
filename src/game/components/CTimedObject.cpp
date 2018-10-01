@@ -29,9 +29,13 @@ void CTimedObject::Sleep()
 void CTimedObject::Awake()
 {
     _fIsSleeping = false;
+    /*
+    * if the timeout did expire then it got ignored on it's tick and removed from the tick's list add it again,
+    * otherwise it's not needed since the timer is already there
+    */
     if (_timeout < CServerTime::GetCurrentTime().GetTimeRaw())
     {
-        SetTimeout(_timeout);// if the timeout did expire then it got ignored on it's tick and removed from the tick's list, add it again.
+        SetTimeout(_timeout);
     }
 }
 
@@ -69,7 +73,8 @@ void CTimedObject::SetTimeout(int64 iDelayInMsecs)
     {
         g_World.DelTimedObject(_timeout, this);
     }
-    if (dynamic_cast<CObjBase*>(this)->IsDeleted()) //prevent deleted objects from setting new timers
+    CObjBase *pObj = dynamic_cast<CObjBase*>(this); // TODO: create a method on this class to create a good check for each type of object.
+    if (pObj && pObj->IsDeleted()) //prevent deleted objects from setting new timers
     {
         return;
     }

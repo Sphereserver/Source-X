@@ -424,7 +424,7 @@ public:
 		struct
 		{
 			CUIDBase m_UIDCreator;	// more1 = who created this house or ship ?
-			byte m_bMovementType;	// more2 & 0x000000FF. From packet 0xBF.0x32: 0 = Stop Movement, 1 = One Tile Movement, 2 = Normal Movement
+            ShipMovementType _eMovementType;	// more2 & 0x000000FF. From packet 0xBF.0x32: 0 = Stop Movement, 1 = One Tile Movement, 2 = Normal Movement
 			byte m_fAnchored;
 			byte m_DirMove;			// DIR_TYPE
 			byte m_DirFace;

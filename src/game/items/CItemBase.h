@@ -620,7 +620,7 @@ public:
 	};
 	struct ShipSpeed // speed of a ship
 	{
-		uchar period;	// time between movement
+		ushort period;	// time between movement
 		uchar tiles;	// distance to move
 	};
 
@@ -629,7 +629,7 @@ public:
 	dword m_dwRegionFlags;	// Base region flags (REGION_FLAG_GUARDED etc)
 	CResourceRefArray m_Speech;	// Speech fragment list (other stuff we know)
 	ShipSpeed m_shipSpeed; // Speed of ships (IT_SHIP)
-	byte m_SpeedMode;
+    ShipMovementSpeed m_SpeedMode;
     uint16 _iBaseStorage;
     uint8 _iBaseVendors;
     uint8 _iLockdownsPercent;

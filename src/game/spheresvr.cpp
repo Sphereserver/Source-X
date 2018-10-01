@@ -482,8 +482,6 @@ int Sphere_OnTick()
 	EXC_SET("service");
 	g_Service.OnTick();
 #endif
-	EXC_SET("ships_tick");
-	g_Serv.ShipTimers_Tick();
 
 	EXC_SET("world");
 	g_World.OnTick();

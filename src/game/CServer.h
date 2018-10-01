@@ -54,11 +54,6 @@ public:
 	int64 m_timeShutdown;	// When to perform the shutdowm (g_World.clock)
 	CChat m_Chats;	// keep all the active chats
 
-	std::vector<CItemShip *> m_ShipTimers;
-	void ShipTimers_Tick();
-	void ShipTimers_Add(CItemShip * ship);
-	void ShipTimers_Delete(CItemShip * ship);
-
 	char	m_PacketFilter[255][32];	// list of packet filtering functions
 	char	m_OutPacketFilter[255][32];	// list of outgoing packet filtering functions
 

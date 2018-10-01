@@ -7,6 +7,7 @@
 #define _INC_CITEMMULTI_H
 
 #include "CItem.h"
+#include "../components/CMultiMovable.h"
 
 #define MAX_MULTI_LIST_OBJS 128
 #define MAX_MULTI_CONTENT 1024
@@ -31,8 +32,9 @@ class CChar;
 class CItemStone;
 class CItemContainer;
 class CItemShip;
-class CItemMulti : public CItem
+class CItemMulti : public CItem, public CMultiMovable
 {
+    friend class CMultiMovable;
 // IT_MULTI IT_SHIP
 // A ship or house etc.
 private:
@@ -115,18 +117,16 @@ protected:
 
 public:
     /**
+    * @brief Retrieves the CRegion*
+    * @return the region.
+    */
+    CRegion* GetRegion() const;
+
+    /**
     * @brief Calculates the largest part of the multi.
     * @return the value.
     */
     int Multi_GetMaxDist() const;
-
-    struct ShipSpeed // speed of a ship
-    {
-        uchar period;	// time between movement in tenths of second
-        uchar tiles;	// distance to move in tiles
-    };
-    ShipSpeed m_shipSpeed;  // Speed of ships (IT_SHIP)
-    byte m_SpeedMode;       // (0x01 = one tile, 0x02 = rowboat, 0x03 = slow, 0x04 = fast)
 
     /**
     * @brief Checks if a the multi can be created and create it if so.
@@ -560,7 +560,7 @@ protected:
 
 public:
     static const char *m_sClassName;
-    CItemMulti(ITEMID_TYPE id, CItemBase * pItemDef);
+    CItemMulti(ITEMID_TYPE id, CItemBase * pItemDef, bool fTurnable = false);
     virtual ~CItemMulti();
 
 private:

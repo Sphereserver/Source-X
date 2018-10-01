@@ -387,7 +387,7 @@ void CChar::ClientDetach()
 	{
 		CItemShip * pShipItem = dynamic_cast <CItemShip *>( m_pArea->GetResourceID().ItemFind());
 		if ( pShipItem )
-			pShipItem->Ship_Stop();
+			pShipItem->Stop();
 	}
 
     CSector * pSector = GetTopSector();

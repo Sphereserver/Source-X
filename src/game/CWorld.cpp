@@ -12,6 +12,7 @@
 #include "clients/CGMPage.h"
 #include "chars/CChar.h"
 #include "items/CItem.h"
+#include "items/CItemShip.h"
 #include "CObjBase.h"
 #include "CServer.h"
 #include "CServerTime.h"
@@ -2345,7 +2346,7 @@ void CWorld::OnTick()
         _mWorldTickList._mTimedObjects[iTime]._mutex.unlock();
         _mWorldTickList._mutex.unlock();
     }
-    for ( auto objMap : tmpMap)    // Loop through all msecs stored, unless we passed the timestamp.
+    for ( auto &objMap : tmpMap)    // Loop through all msecs stored, unless we passed the timestamp.
     {
         for (auto *pObj : objMap.second)
         {
@@ -2390,10 +2391,29 @@ void CWorld::OnTick()
                     break;
                 }
                 case PROFILE_SECTORS:
+                {
                     fRemove = false;    // sectors should NEVER be deleted.
-                    g_Log.EventDebug("tocktacktick\n");
                     pObj->OnTick();
                     break;
+                }
+                case PROFILE_MULTIS:
+                {
+                    CItemMulti *pMulti = dynamic_cast<CItemMulti*>(const_cast<CTimedObject*>(pObj));
+                    if (pMulti)
+                    {
+                        fRemove = pMulti->OnTick();
+                    }
+                    break;
+                }
+                case PROFILE_SHIPS:
+                {
+                    CItemShip *pShip = static_cast<CItemShip*>(dynamic_cast<CItem*>(const_cast<CTimedObject*>(pObj)));
+                    if (pShip)
+                    {
+                        fRemove = pShip->OnTick();
+                    }
+                    break;
+                }
                 default:
                     fRemove = !pObj->OnTick(); // do tick.
                     break;
@@ -2424,7 +2444,7 @@ void CWorld::OnTick()
         _mCharTickList._mutex.unlock();
     }
 
-    for (auto charit : tmpCharMap)    // Loop through all msecs stored, unless we passed the timestamp.
+    for (auto &charit : tmpCharMap)    // Loop through all msecs stored, unless we passed the timestamp.
     {
         for (auto *pChar : charit.second)
         {

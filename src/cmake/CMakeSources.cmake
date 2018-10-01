@@ -369,6 +369,8 @@ game/components/CCSpawn.cpp
 game/components/CCSpawn.h
 game/components/CTimedObject.cpp
 game/components/CTimedObject.h
+game/components/CMultiMovable.cpp
+game/components/CMultiMovable.h
 )
 SOURCE_GROUP (game\\components FILES ${components_SRCS})
 

@@ -23,7 +23,6 @@ int64 CSectorBase::m_iMapBlockCacheTime = 0;
 CSector::CSector() : CTimedObject(PROFILE_SECTORS)
 {
 	m_ListenItems = 0;
-    _fIsSleeping = true;    // Every sector is sleeping at start, they only awake when any player enter (this eases the load at startup).
 
 	m_RainChance = 0;		// 0 to 100%
 	m_ColdChance = 0;		// Will be snow if rain chance success.
@@ -31,6 +30,7 @@ CSector::CSector() : CTimedObject(PROFILE_SECTORS)
 
 	m_dwFlags = 0;
 	m_fSaveParity = false;
+    Sleep();    // Every sector is sleeping at start, they only awake when any player enter (this eases the load at startup).
 }
 
 CSector::~CSector()
@@ -155,7 +155,7 @@ void CSector::Sleep()
 {
     ADDTOCALLSTACK("CSector::Sleep");
     ProfileTask charactersTask(PROFILE_TIMERS);
-    _fIsSleeping = true;
+    CTimedObject::Sleep();
 
     CChar * pCharNext = NULL;
     CChar * pChar = static_cast <CChar*>(m_Chars_Active.GetHead());
@@ -176,7 +176,7 @@ void CSector::Awake()
 {
     ADDTOCALLSTACK("CSector::Awake");
     ProfileTask charactersTask(PROFILE_TIMERS);
-    _fIsSleeping = false;
+    CTimedObject::Awake();
 
     CChar * pCharNext = NULL;
     CChar * pChar = static_cast <CChar*>(m_Chars_Active.GetHead());
@@ -945,11 +945,6 @@ inline bool CSector::CanSleep() const
 
 	//default behaviour
 	return (-g_World.GetTimeDiff(GetLastClientTime()) > g_Cfg.m_iSectorSleepMask); // Sector Sleep timeout.
-}
-
-bool CSector::IsSleeping() const
-{
-    return _fIsSleeping;
 }
 
 void CSector::SetSectorWakeStatus()

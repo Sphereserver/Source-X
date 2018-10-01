@@ -469,8 +469,18 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
 
 	if ( !g_Serv.IsLoading() )
 	{
-		if ( IsType(IT_EQ_TRADE_WINDOW) )
-			Trade_Status(false);	// drop into a trade window
+        switch (GetType())
+        {
+            case IT_EQ_TRADE_WINDOW:
+                Trade_Status(false);
+                break;
+
+            case IT_CONTAINER:
+            case IT_CONTAINER_LOCKED:
+            {
+                pItem->Sleep();
+            }
+        }
 
 		switch ( pItem->GetType() )
 		{
@@ -692,12 +702,12 @@ void CItemContainer::OnRemoveObj( CSObjListRec *pObRec )	// Override this = call
 		if ( pItemVend )
 			pItemVend->SetPlayerVendorPrice(0);
 	}
-
 	CContainer::OnRemoveObj(pObRec);
     UpdatePropertyFlag(AUTOTOOLTIP_FLAG_WEIGHT);
 
 	if ( IsType(IT_KEYRING) )	// key ring.
 		SetKeyRing();
+    pItem->Awake();
 }
 
 void CItemContainer::DupeCopy( const CItem *pItem )

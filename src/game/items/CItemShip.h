@@ -7,6 +7,7 @@
 #define _INC_CITEMSHIP_H
 
 #include "CItemMulti.h"
+#include "../components/CMultiMovable.h"
 
 
 class CItemShip : public CItemMulti
@@ -19,20 +20,6 @@ private:
 
     CUID m_uidHold;
     std::vector<CUID> m_uidPlanks;
-    int64 m_NextMove;
-    CTextConsole *m_pCaptain;
-
-
-    inline int Ship_GetFaceOffset() const
-    {
-        return (GetID() & 3);
-    }
-    void Ship_SetNextMove();
-    size_t Ship_ListObjs(CObjBase ** ppObjList);
-    bool Ship_CanMoveTo(const CPointMap & pt) const;
-    bool Ship_MoveDelta(CPointBase pdelta);
-    bool Ship_MoveToRegion(CRegionWorld *pRegionOld, CRegionWorld* pRegionNew) const;
-    bool Ship_OnMoveTick();
 
     virtual bool r_GetRef(lpctstr & pszKey, CScriptObj * & pRef);
     virtual void r_Write(CScript & s);
@@ -43,9 +30,6 @@ private:
     virtual void OnComponentCreate(CItem * pComponent);
 
 public:
-    bool Ship_SetMoveDir(DIR_TYPE dir, byte bMovementType = 0, bool fWheelMove = false);
-    bool Ship_Face(DIR_TYPE dir);
-    bool Ship_Move(DIR_TYPE dir, int distance);
     static const char *m_sClassName;
     CItemShip(ITEMID_TYPE id, CItemBase * pItemDef);
     virtual ~CItemShip();
@@ -56,7 +40,6 @@ private:
 
 public:
     virtual bool OnTick();
-    void Ship_Stop();
     CItemContainer * GetShipHold();
     size_t GetShipPlankCount();
     CItem * GetShipPlank(size_t index);
