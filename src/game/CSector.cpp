@@ -885,6 +885,10 @@ void CSector::MoveItemToSector( CItem * pItem, bool fActive )
 	// remove from previous list and put in new.
 	// May just be setting a timer. SetTimer or MoveTo()
 	ASSERT( pItem );
+    if (IsSleeping())
+    {
+        pItem->Sleep();
+    }
 	if ( fActive )
 		m_Items_Timer.AddItemToSector( pItem );
 	else
@@ -921,9 +925,17 @@ bool CSector::MoveCharToSector( CChar * pChar )
 		}
 	}
 
-    if (IsSleeping())
+    CClient *pClient = pChar->GetClient();
+    if (IsSleeping() && pClient)
     {
-        Awake();
+        if (pClient)    // A client just entered
+        {
+            Awake();    // Awake the sector
+        }
+        else    // An NPC entered, but the sector is sleeping
+        {
+            pChar->Sleep(); // then make the NPC sleep too.
+        }
     }
 	m_Chars_Active.AddCharToSector(pChar);	// remove from previous spot.
 	return true;
