@@ -1492,6 +1492,10 @@ void CWorld::DelTimedObject(int64 iTimeout, CTimedObject * pTimedObject)
 
 void CWorld::AddCharTicking(CChar * pChar)
 {
+    if (pChar->GetTopSector()->IsSleeping())
+    {
+        return; // Do not allow ticks on sleeping sectors;
+    }
     int64 iTickNext = pChar->_timeNextRegen;
     _mCharTickList._mTimedChars[iTickNext]._mutex.lock();
     _mCharTickList._mTimedChars[iTickNext]._TimedCharsContainer.push_back(pChar);
@@ -2338,11 +2342,12 @@ void CWorld::OnTick()
     {
         _mWorldTickList._mutex.lock();
         _mWorldTickList._mTimedObjects[iTime]._mutex.lock();
-        for (auto *pObj : it->second._TimedObjectsContainer)
-        {
-            tmpMap[iTime].push_back(pObj);
-        }
-        ++it;
+
+        {   // Copying code
+            tmpMap[iTime] = _mWorldTickList._mTimedObjects[iTime]._TimedObjectsContainer;
+            ++it;
+        }   // end of copying code
+        
         _mWorldTickList._mTimedObjects[iTime]._mutex.unlock();
         _mWorldTickList._mutex.unlock();
     }
@@ -2373,14 +2378,16 @@ void CWorld::OnTick()
                     {
                         CChar *pChar = static_cast<CChar*>(pItem->GetTopLevelObj());
                         ASSERT(pChar);
-                        fRemove = pChar->OnTickEquip(pItem);
+                        fRemove = !pChar->OnTickEquip(pItem);
+                        break;
                     }
                     else
                     {
                         fRemove = !pItem->OnTick();
+                        break;
                     }
-                    break;
                 }
+                break;
                 case PROFILE_CHARS:
                 {
                     fRemove = !pObj->OnTick();
@@ -2388,14 +2395,14 @@ void CWorld::OnTick()
                     {
                         pObj->SetTimeoutS(1);   //1 second timeout to keep NPCs 'alive'
                     }
-                    break;
                 }
+                break;
                 case PROFILE_SECTORS:
                 {
                     fRemove = false;    // sectors should NEVER be deleted.
                     pObj->OnTick();
-                    break;
                 }
+                break;
                 case PROFILE_MULTIS:
                 {
                     CItemMulti *pMulti = dynamic_cast<CItemMulti*>(const_cast<CTimedObject*>(pObj));
@@ -2403,8 +2410,8 @@ void CWorld::OnTick()
                     {
                         fRemove = pMulti->OnTick();
                     }
-                    break;
                 }
+                break;
                 case PROFILE_SHIPS:
                 {
                     CItemShip *pShip = static_cast<CItemShip*>(dynamic_cast<CItem*>(const_cast<CTimedObject*>(pObj)));
@@ -2412,11 +2419,13 @@ void CWorld::OnTick()
                     {
                         fRemove = pShip->OnTick();
                     }
-                    break;
                 }
+                break;
                 default:
+                {
                     fRemove = !pObj->OnTick(); // do tick.
-                    break;
+                }
+                break;
             }
             if (fRemove)
             {
@@ -2435,9 +2444,9 @@ void CWorld::OnTick()
     {
         _mCharTickList._mutex.lock();
         _mCharTickList._mTimedChars[iTime]._mutex.lock();
-        for (auto pChar : mapit->second._TimedCharsContainer)
+
         {
-            tmpCharMap[iTime].push_back(pChar);
+            tmpCharMap[iTime] = mapit->second._TimedCharsContainer;
         }
         ++mapit;
         _mCharTickList._mTimedChars[iTime]._mutex.unlock();

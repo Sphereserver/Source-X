@@ -313,10 +313,8 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false ),
 
     Suscribe(new CCFaction(this));
 
-    if (m_pNPC)
-    {
-        g_World.AddCharTicking(this);
-    }
+    CTimedObject::Sleep();  // Make it be sleeping at first, to awake it when placing it in the world (errors will show up otherwise).
+
 	ASSERT(IsDisconnected());
 }
 
@@ -494,8 +492,11 @@ void CChar::Sleep()
 
 void CChar::Awake()
 {
-    g_World.AddCharTicking(this);
-    CTimedObject::Awake();
+    if (IsSleeping())   //assert?
+    {
+        g_World.AddCharTicking(this);
+        CTimedObject::Awake();
+    }
 }
 
 // Is there something wrong with this char?

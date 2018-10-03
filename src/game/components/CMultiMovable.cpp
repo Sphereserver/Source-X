@@ -86,8 +86,6 @@ bool CMultiMovable::SetMoveDir(DIR_TYPE dir, ShipMovementType eMovementType, boo
 
 void CMultiMovable::SetNextMove()
 {
-    // add TAG.OVERRIDE.SHIPSPEED.PERIOD
-    // add TAG.OVERRIDE.SHIPSPEED.SPEED
     int64 uiDelay;
     CItem *pItemThis = dynamic_cast<CItem*>(const_cast<CMultiMovable*>(this));
     if (pItemThis->m_itShip._eMovementType == SMT_STOP)
@@ -102,7 +100,6 @@ void CMultiMovable::SetNextMove()
     {
         uiDelay = (_eSpeedMode == SMS_SLOW) ? m_shipSpeed.period : (m_shipSpeed.period / 2);
     }
-    // ShipSpeed.period is in tenths of second (so also the delay is);
     pItemThis->SetTimeout(uiDelay);
 }
 

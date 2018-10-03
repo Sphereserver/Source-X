@@ -14,6 +14,7 @@ CTimedObject::CTimedObject(PROFILE_TYPE profile)
 {
     _profileType = profile;
     _fIsSleeping = false;
+    _timeout = 0;
 }
 
 bool CTimedObject::IsSleeping()
@@ -28,15 +29,15 @@ void CTimedObject::Sleep()
 
 void CTimedObject::Awake()
 {
-    _fIsSleeping = false;
     /*
     * if the timeout did expire then it got ignored on it's tick and removed from the tick's list add it again,
     * otherwise it's not needed since the timer is already there
     */
-    if (_timeout < CServerTime::GetCurrentTime().GetTimeRaw())
+    if (_timeout > 0)
     {
         SetTimeout(_timeout);
     }
+    _fIsSleeping = false;
 }
 
 PROFILE_TYPE CTimedObject::GetProfileType()
@@ -64,7 +65,7 @@ void CTimedObject::SetTimeout(int64 iDelayInMsecs)
 {
     ADDTOCALLSTACK("CTimedObject::SetTimeout");
     ProfileTask timersTask(PROFILE_TIMERS); // profile the settimeout proccess.
-    if (g_Serv.IsLoading())
+    if (g_Serv.IsLoading() || IsSleeping())
     {
         _timeout = CServerTime::GetCurrentTime().GetTimeRaw() - iDelayInMsecs;   // get the diff in msecs between the saved timeout and the current time
     }
@@ -98,12 +99,12 @@ void CTimedObject::SetTimeoutS(int64 iSeconds)
 
 void CTimedObject::SetTimeoutT(int64 iTicks)
 {
-    SetTimeout(iTicks * TICKS_PER_SEC);
+    SetTimeout(iTicks * MSECS_PER_TICK);
 }
 
 void CTimedObject::SetTimeoutD(int64 iTenths)
 {
-    SetTimeout(iTenths * TENTHS_PER_SEC);
+    SetTimeout(iTenths * MSECS_PER_TENTH);
 }
 
 int64 CTimedObject::GetTimerDiff() const

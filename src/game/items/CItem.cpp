@@ -5642,6 +5642,13 @@ bool CItem::OnTick()
 
 	EXC_SET("timer trigger");
 
+    if (GetTopSector()->IsSleeping())
+    {
+        SetTimeout(1);      //Make it tick after sector's awakening.
+        Sleep();
+        return true;
+    }
+
 	TRIGRET_TYPE iRet = TRIGRET_RET_DEFAULT;
 
 	if (( IsTrigUsed(TRIGGER_TIMER) ) || ( IsTrigUsed(TRIGGER_ITEMTIMER) ))

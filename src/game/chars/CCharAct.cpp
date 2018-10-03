@@ -3606,6 +3606,7 @@ bool CChar::MoveToChar(CPointMap pt, bool bForceFix)
 	CPointMap ptOld = GetUnkPoint();
 	bool fSectorChange = pt.GetSector()->MoveCharToSector(this);
 	SetTopPoint(pt);
+    Awake(); //Try to awake it if it's not already.
 
 	if ( !m_fClimbUpdated || bForceFix )
 		FixClimbHeight();
@@ -4009,6 +4010,12 @@ bool CChar::OnTick()
     // RETURN: false = delete this.
     EXC_TRY("Tick");
 
+    if (GetTopSector()->IsSleeping())
+    {
+        SetTimeout(1);      //Make it tick after sector's awakening.
+        Sleep();
+        return true;
+    }
     /*
     * CComponent's ticking:
     * Be aware that return CCRET_FALSE will return false (and delete the char),

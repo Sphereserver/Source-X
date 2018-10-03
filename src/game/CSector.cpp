@@ -162,6 +162,10 @@ void CSector::Sleep()
     for (; pChar != NULL; pChar = pCharNext)
     {
         pChar->Sleep();
+        if (pChar->m_pNPC)
+        {
+            g_World.DelCharTicking(pChar);
+        }
     }
 
     CItem * pItemNext = NULL;
@@ -182,6 +186,14 @@ void CSector::Awake()
     CChar * pChar = static_cast <CChar*>(m_Chars_Active.GetHead());
     for (; pChar != NULL; pChar = pCharNext)
     {
+        pCharNext = pChar->GetNext();
+        pChar->Awake();
+    }
+
+    pChar = static_cast<CChar*>(m_Chars_Disconnect.GetHead());
+    for (; pChar != NULL; pChar = pCharNext)
+    {
+        pCharNext = pChar->GetNext();
         pChar->Awake();
     }
 
@@ -189,9 +201,16 @@ void CSector::Awake()
     CItem * pItem = static_cast <CItem*>(m_Items_Timer.GetHead());
     for (; pItem != NULL; pItem = pItemNext)
     {
+        pItemNext = pItem->GetNext();
         pItem->Awake();
     }
-    g_World.AddTimedObject(CServerTime::GetCurrentTime().GetTimeRaw() + (30 * MSECS_PER_SEC), this);
+    pItem = static_cast <CItem*>(m_Items_Inert.GetHead());
+    for (; pItem != NULL; pItem = pItemNext)
+    {
+        pItemNext = pItem->GetNext();
+        pItem->Awake();
+    }
+    OnTick();   // Unknown time passed, make the sector tick now to reflect any possible environ changes.
 }
 
 bool CSector::r_LoadVal( CScript &s )
