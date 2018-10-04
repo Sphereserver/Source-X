@@ -306,6 +306,10 @@ public:
 public:
 	CChar( CREID_TYPE id );
 	virtual ~CChar(); // Delete character
+    virtual bool IsDeleted()
+    {
+        return CObjBase::IsDeleted();
+    }
 	bool DupeFrom( CChar * pChar, bool fNewbieItems);
 
 private:

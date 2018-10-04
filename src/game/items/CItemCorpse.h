@@ -20,6 +20,10 @@ public:
 	static const char *m_sClassName;
 	CItemCorpse( ITEMID_TYPE id, CItemBase * pItemDef );
 	virtual ~CItemCorpse();
+    virtual bool IsDeleted()
+    {
+        return CItem::IsDeleted();
+    }
 
 private:
 	CItemCorpse(const CItemCorpse& copy);

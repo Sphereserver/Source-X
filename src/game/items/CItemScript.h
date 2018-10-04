@@ -30,6 +30,10 @@ public:
     virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc = NULL );
     virtual bool r_LoadVal( CScript & s );
     virtual void DupeCopy( const CItem * pItem );
+    virtual bool IsDeleted()
+    {
+        return CItem::IsDeleted();
+    }
 };
 
 

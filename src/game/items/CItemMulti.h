@@ -562,6 +562,10 @@ public:
     static const char *m_sClassName;
     CItemMulti(ITEMID_TYPE id, CItemBase * pItemDef, bool fTurnable = false);
     virtual ~CItemMulti();
+    virtual bool IsDeleted()
+    {
+        return CItem::IsDeleted();
+    }
 
 private:
     CItemMulti(const CItemMulti& copy);

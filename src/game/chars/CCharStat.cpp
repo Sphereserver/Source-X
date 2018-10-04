@@ -349,7 +349,6 @@ bool CChar::Stats_Regen()
 	// Calling regens in all stats and checking REGEN%s/REGEN%sVAL where %s is hits/stam... to check values/delays
 	// Food decay called here too.
 	// calling @RegenStat for each stat if proceed.
-
 	int HitsHungerLoss = g_Cfg.m_iHitsHungerLoss ? g_Cfg.m_iHitsHungerLoss : 0;
     int64 iCurTime = CServerTime::GetCurrentTime().GetTimeRaw();
 	for (STAT_TYPE i = STAT_STR; i <= STAT_FOOD; i = (STAT_TYPE)(i + 1))

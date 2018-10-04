@@ -804,6 +804,10 @@ public:
 
 	virtual void Delete(bool bforce = false);
 	virtual bool NotifyDelete();
+    virtual bool IsDeleted()
+    {
+        return CObjBase::IsDeleted();
+    }
 };
 
 #endif // _INC_CITEM_H

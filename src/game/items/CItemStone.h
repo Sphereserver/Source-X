@@ -95,6 +95,10 @@ public:
 	virtual bool r_GetRef( lpctstr & pszKey, CScriptObj * & pRef );
 	virtual bool r_LoadVal( CScript & s );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc ); // Execute command from script
+    virtual bool IsDeleted()
+    {
+        return CItem::IsDeleted();
+    }
 
 	lpctstr GetTypeName() const;
 	static bool IsUniqueName( lpctstr pName );

@@ -180,7 +180,7 @@ void CSector::Awake()
 {
     ADDTOCALLSTACK("CSector::Awake");
     ProfileTask charactersTask(PROFILE_TIMERS);
-    CTimedObject::Awake();
+    CTimedObject::Awake();  // Awake it first, otherwise other things won't work.
 
     CChar * pCharNext = NULL;
     CChar * pChar = static_cast <CChar*>(m_Chars_Active.GetHead());

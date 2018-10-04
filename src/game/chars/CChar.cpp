@@ -486,16 +486,20 @@ CMultiStorage *CChar::GetMultiStorage()
 
 void CChar::Sleep()
 {
-    g_World.DelCharTicking(this);
-    CTimedObject::Sleep();
+    if (!IsSleeping())
+    {
+        g_World.DelCharTicking(this);
+        CTimedObject::Sleep();
+    }
 }
 
 void CChar::Awake()
 {
     if (IsSleeping())   //assert?
     {
+        CTimedObject::Awake();// Awake it first, otherwise some other things won't work
         g_World.AddCharTicking(this);
-        CTimedObject::Awake();
+        SetTimeout(Calc_GetRandVal(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
     }
 }
 

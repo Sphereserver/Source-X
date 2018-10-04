@@ -20,6 +20,10 @@ public:
 	CItemMemory( ITEMID_TYPE id, CItemBase * pItemDef );
 
 	virtual ~CItemMemory();
+    virtual bool IsDeleted()
+    {
+        return CItem::IsDeleted();
+    }
 
 private:
 	CItemMemory(const CItemMemory& copy);

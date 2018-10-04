@@ -30,12 +30,12 @@ void CTimedObject::Sleep()
 void CTimedObject::Awake()
 {
     /*
-    * if the timeout did expire then it got ignored on it's tick and removed from the tick's list add it again,
-    * otherwise it's not needed since the timer is already there
+    * if the timeout did expire then it got ignored on it's tick and removed from the tick's map so we add it again,
+    * otherwise it's not needed since the timer is already there.
     */
     if (_timeout > 0)
     {
-        SetTimeout(_timeout);
+        SetTimer(_timeout);
     }
     _fIsSleeping = false;
 }
@@ -61,32 +61,47 @@ void CTimedObject::Delete(bool bForce)
     }
 }
 
+void CTimedObject::SetTimer(int64 iDelayInMsecs)
+{
+    /*
+    * Only called from CObjBase::r_LoadVal when server is loading to set the raw timer
+    * instead of doing conversions to msecs.
+    */
+    _timeout = iDelayInMsecs;
+}
+
 void CTimedObject::SetTimeout(int64 iDelayInMsecs)
 {
     ADDTOCALLSTACK("CTimedObject::SetTimeout");
     ProfileTask timersTask(PROFILE_TIMERS); // profile the settimeout proccess.
-    if (g_Serv.IsLoading() || IsSleeping())
-    {
-        _timeout = CServerTime::GetCurrentTime().GetTimeRaw() - iDelayInMsecs;   // get the diff in msecs between the saved timeout and the current time
-    }
-    // if there's a timer already, clear it before setting the new one.
-    else if (_timeout > 0)    // should not happen during Serv.Load()
+    
+    /*
+    * Setting the new timer must remove any entry from the current world tick's map
+    * Should never happen if g_Serv.IsLoading()
+    */
+    if (_timeout > 0)
     {
         g_World.DelTimedObject(_timeout, this);
     }
-    CObjBase *pObj = dynamic_cast<CObjBase*>(this); // TODO: create a method on this class to create a good check for each type of object.
-    if (pObj && pObj->IsDeleted()) //prevent deleted objects from setting new timers
+    if (IsDeleted()) //prevent deleted objects from setting new timers to avoid nullptr calls
     {
         return;
     }
-    // Set delay to -1 = never timeout.
+
+    /*
+    * Setting the new timer:
+    *   Values lower than 0 just clear the timer (Note that this must happen after the 'if (_timeout > 0)' 
+    *       check deleting this object from tick's map) to clear it's timer.
+    *   New timer will be the current server's time (not CPU's time, just the server's one) + the given delay.
+    *   Adding the object to the tick's map.
+    */
     if (iDelayInMsecs < 0)
     {
-        _timeout = 0;
+        SetTimer(0);
     }
     else
     {
-        _timeout = g_World.GetCurrentTime().GetTimeRaw() + iDelayInMsecs;   // Setting the new Timeout value
+        SetTimer(CServerTime::GetCurrentTime().GetTimeRaw() + iDelayInMsecs);   // Setting the new Timeout value
         g_World.AddTimedObject(_timeout, this); // Adding this object to the tick's list.
     }
 }
@@ -132,7 +147,7 @@ int64 CTimedObject::GetTimerTAdjusted() const
     int64 iDiffInMsecs = GetTimerDiff();
     if (iDiffInMsecs < 0)
         return 0;
-    return (iDiffInMsecs / TICKS_PER_SEC);
+    return (iDiffInMsecs / MSECS_PER_TICK);
 }
 
 int64 CTimedObject::GetTimerDAdjusted() const
@@ -143,7 +158,7 @@ int64 CTimedObject::GetTimerDAdjusted() const
     int64 iDiffInMsecs = GetTimerDiff();
     if (iDiffInMsecs < 0)
         return 0;
-    return (iDiffInMsecs / TENTHS_PER_SEC);
+    return (iDiffInMsecs / MSECS_PER_TENTH);
 }
 
 int64 CTimedObject::GetTimerSAdjusted() const

@@ -54,6 +54,10 @@ public:
     {
         UNREFERENCED_PARAMETER(bForce);
     };
+    virtual bool IsDeleted()
+    {
+        return false;   // Sectors should never be deleted in runtime.
+    }
 
 	// Time
 	int GetLocalTime() const;

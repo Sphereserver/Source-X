@@ -606,8 +606,8 @@ int CChar::NPC_WalkToPoint( bool fRun )
 	else
 		iTickNext = MSECS_PER_TICK + Calc_GetRandLLVal((100 - (iDex*tTick) / 100) / 3) * MSECS_PER_TICK / 10;
 
-	if (iTickNext < TENTHS_PER_SEC) // Do not allow less than a tenth of second. This may be decreased in the future to allow more precise timers, at the cost of cpu.
-		iTickNext = TENTHS_PER_SEC;
+	if (iTickNext < MSECS_PER_TENTH) // Do not allow less than a tenth of second. This may be decreased in the future to allow more precise timers, at the cost of cpu.
+		iTickNext = MSECS_PER_TENTH;
 	else if (iTickNext > 5 * MSECS_PER_SEC)  // neither more than 5 seconds.
 		iTickNext = 5 * MSECS_PER_SEC;
 

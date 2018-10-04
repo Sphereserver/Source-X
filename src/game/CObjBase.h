@@ -646,6 +646,10 @@ public:
 	virtual bool r_LoadVal( CScript & s );
 	virtual bool r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc );
 	virtual bool r_Verb( CScript & s, CTextConsole * pSrc );	// some command on this object as a target
+    virtual bool IsDeleted()
+    {
+        return CObjBaseTemplate::IsDeleted();
+    }
 
     /**
      * @fn  void CObjBase::Emote(lpctstr pText, CClient * pClientExclude = NULL, bool fPossessive = false);

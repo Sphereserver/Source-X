@@ -2393,7 +2393,7 @@ void CWorld::OnTick()
                     fRemove = !pObj->OnTick();
                     if (!pObj->IsTimerSet())
                     {
-                        pObj->SetTimeoutS(1);   //1 second timeout to keep NPCs 'alive'
+                        pObj->SetTimeoutS(3 * MSECS_PER_SEC);   //3 seconds timeout to keep NPCs 'alive'
                     }
                 }
                 break;

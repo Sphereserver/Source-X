@@ -1945,9 +1945,28 @@ bool CObjBase::r_LoadVal( CScript & s )
 			return true;
 		}
 		case OC_TIMER:
-			SetTimeoutS(s.GetArgLLVal());
-            fResendTooltip = true;
-			break;
+        {
+            int64 iTimeout = s.GetArg64Val();
+            if (g_Serv.IsLoading())
+            {
+                int iPrevBuild = g_World.m_iPrevBuild;
+                /*
+                * Newer builds have a different timer stored on saves (storing the msec in which it is going to tick instead of the seconds until it ticks)
+                *
+                * So the new timer will be the current time in msecs (SetTimeout)
+                *
+                * For older builds, the timer is stored in seconds (SetTimeoutD)
+                */
+                if (iPrevBuild && (iPrevBuild >= 2866)) // commit #e08723c54b0a4a3b1601eba6f34a6118891f1313
+                {
+                    SetTimeout(iTimeout);   // new timer: set msecs timer
+                    break;
+                }
+            }
+            fResendTooltip = true;  // not really need to even try to resend it on load, but resend otherwise.
+            SetTimeoutS(iTimeout);   // old timer: in seconds.
+            break;
+        }
         case OC_TIMERD:
             SetTimeoutD(s.GetArgLLVal());
             fResendTooltip = true;
@@ -1999,7 +2018,7 @@ void CObjBase::r_Write( CScript & s )
 		s.WriteKey( "NAME", GetIndividualName());
 	if ( m_wHue != HUE_DEFAULT )
 		s.WriteKeyHex( "COLOR", GetHue());
-	if ( m_timeout > 0 )
+	if ( IsTimerSet() )
 		s.WriteKeyVal( "TIMER", GetTimerAdjusted());
 	if ( m_timestamp > 0 )
 		s.WriteKeyVal( "TIMESTAMP", GetTimeStamp());
