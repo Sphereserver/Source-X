@@ -1178,3 +1178,6 @@ transfer_secured	= 08	// Transfer Secured Containers.
         Right will move to the left
         Back will move to the north
     - Since the movement is set via 'timer', any house that can move will try to move instead of expire on it's ON=@Timer, so if you want a house that move and decay use timerf for the decay.
+
+03-10-2018, Ben
+-Fixed emote messages for players using wrong hue.

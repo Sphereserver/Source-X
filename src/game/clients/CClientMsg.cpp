@@ -793,6 +793,8 @@ void CClient::addBarkParse( lpctstr pszText, const CObjBaseTemplate * pSrc, HUE_
 			{
 				if (pSrcChar->m_SpeechHueOverride != HUE_SAY_DEF)
 					Args[0] = pSrcChar->m_SpeechHueOverride;
+				else if ((Args[0] == HUE_TEXT_DEF) && (mode == TALKMODE_EMOTE))
+					Args[0] = (word)defaultHue;
 				else if (Args[0] == HUE_SAY_DEF)
 					Args[0] = (word)defaultHue;
 			}
