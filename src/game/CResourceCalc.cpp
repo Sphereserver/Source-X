@@ -46,6 +46,7 @@ int CServerConfig::Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pW
 	if ( pWeapon )			// If we have a weapon, base speed should match weapon's value.
 		iBaseSpeed = pWeapon->GetSpeed();
     int iSwingSpeed = 100;
+    int iSpeedScaleFactor = g_Cfg.m_iSpeedScaleFactor * MSECS_PER_SEC;  // need this to be converted to msecs.
 	switch ( g_Cfg.m_iCombatSpeedEra )
 	{
 		case 0:
@@ -55,7 +56,7 @@ int CServerConfig::Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pW
 			{
 				iSwingSpeed = (pChar->Stat_GetAdjusted(STAT_DEX) + 100) * iBaseSpeed;
 				iSwingSpeed = maximum(1, iSwingSpeed);
-				iSwingSpeed = (g_Cfg.m_iSpeedScaleFactor * 10) / iSwingSpeed;
+				iSwingSpeed = (iSpeedScaleFactor * 10) / iSwingSpeed;
 				if ( iSwingSpeed < 5 )
 					iSwingSpeed = 5;
 				break;
@@ -84,7 +85,7 @@ int CServerConfig::Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pW
 			// pre-AOS formula	(default m_iSpeedScaleFactor = 15000)
 			iSwingSpeed = (pChar->Stat_GetVal(STAT_DEX) + 100) * iBaseSpeed;
 			iSwingSpeed = maximum(1, iSwingSpeed);
-			iSwingSpeed = (g_Cfg.m_iSpeedScaleFactor * 10) / iSwingSpeed;
+			iSwingSpeed = (iSpeedScaleFactor * 10) / iSwingSpeed;
 			if ( iSwingSpeed < 1 )
 				iSwingSpeed = 1;
 			break;
@@ -96,7 +97,7 @@ int CServerConfig::Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pW
 			iSwingSpeed = (pChar->Stat_GetVal(STAT_DEX) + 100) * iBaseSpeed;
 			iSwingSpeed = iSwingSpeed * (100 + iSwingSpeedIncrease) / 100;
 			iSwingSpeed = maximum(1, iSwingSpeed);
-			iSwingSpeed = ((g_Cfg.m_iSpeedScaleFactor * 10) / iSwingSpeed) / 2;
+			iSwingSpeed = ((iSpeedScaleFactor * 10) / iSwingSpeed) / 2;
 			if ( iSwingSpeed < 12 )		//1.25
 				iSwingSpeed = 12;
 			break;
@@ -108,7 +109,7 @@ int CServerConfig::Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pW
 			// SE formula		(default m_iSpeedScaleFactor = 80000)
 			iSwingSpeed = iBaseSpeed * (100 + iSwingSpeedIncrease) / 100;
 			iSwingSpeed = maximum(1, iSwingSpeed);
-			iSwingSpeed = (g_Cfg.m_iSpeedScaleFactor / ((pChar->Stat_GetVal(STAT_DEX) + 100) * iSwingSpeed)) - 2;	// get speed in ticks of 0.25s each
+			iSwingSpeed = (iSpeedScaleFactor / ((pChar->Stat_GetVal(STAT_DEX) + 100) * iSwingSpeed)) - 2;	// get speed in ticks of 0.25s each
 			if ( iSwingSpeed < 5 )
 				iSwingSpeed = 5;
 			iSwingSpeed = (iSwingSpeed * 10) / 4;		// convert 0.25s ticks into ms
@@ -125,7 +126,6 @@ int CServerConfig::Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pW
 			break;
 		}
 	}
-    iSwingSpeed = iSwingSpeed * MSECS_PER_TENTH; // Convert from tenths of second to msecs.
     return iSwingSpeed;
 }
 

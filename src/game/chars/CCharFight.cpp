@@ -10,7 +10,7 @@
 
 // 1.0 seconds is the minimum animation duration ("delay"), but we have to subtract the tenths of seconds that will pass until the next tick, since
 //  the timer will start on the next tick
-#define COMBAT_MIN_SWING_ANIMATION_DELAY (int16)(TICKS_PER_SEC - 1)
+#define COMBAT_MIN_SWING_ANIMATION_DELAY (int16)(MSECS_PER_SEC - 1)
 
 // I noticed a crime.
 void CChar::OnNoticeCrime( CChar * pCriminal, const CChar * pCharMark )

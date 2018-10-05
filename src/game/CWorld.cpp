@@ -2333,6 +2333,7 @@ void CWorld::OnTick()
 
     // World's tick
     // Items, Chars ... Everything relying on CTimedObject (excepting CObjBase, which inherit is only virtual)
+    ProfileTask timersTask(PROFILE_TIMERS);
     int64 iCurTime = CServerTime::GetCurrentTime().GetTimeRaw();    // Current timestamp, a few msecs will advance in the current tick ... avoid them until the following tick(s).
     
     std::map<int64, TimedObjectsContainer>::iterator it = _mWorldTickList._mTimedObjects.begin();
