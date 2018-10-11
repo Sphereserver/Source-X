@@ -1,3 +1,4 @@
+#include <algorithm>    // for std::vector.erase(std::remove())
 
 #include "../common/CDataBase.h"
 #include "../common/CException.h"
