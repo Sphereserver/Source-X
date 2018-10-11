@@ -46,7 +46,7 @@ int CServerConfig::Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pW
 	if ( pWeapon )			// If we have a weapon, base speed should match weapon's value.
 		iBaseSpeed = pWeapon->GetSpeed();
     int iSwingSpeed = 100;
-    int iSpeedScaleFactor = g_Cfg.m_iSpeedScaleFactor * MSECS_PER_SEC;  // need this to be converted to msecs.
+    int iSpeedScaleFactor = g_Cfg.m_iSpeedScaleFactor;  // Old maths were done in tenths, so I convert them to msecs.
 	switch ( g_Cfg.m_iCombatSpeedEra )
 	{
 		case 0:

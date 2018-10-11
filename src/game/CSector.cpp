@@ -30,7 +30,7 @@ CSector::CSector() : CTimedObject(PROFILE_SECTORS)
 
 	m_dwFlags = 0;
 	m_fSaveParity = false;
-    Sleep();    // Every sector is sleeping at start, they only awake when any player enter (this eases the load at startup).
+    GoSleep();    // Every sector is sleeping at start, they only awake when any player enter (this eases the load at startup).
 }
 
 CSector::~CSector()
@@ -151,17 +151,17 @@ bool CSector::r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc )
 	return false;
 }
 
-void CSector::Sleep()
+void CSector::GoSleep()
 {
     ADDTOCALLSTACK("CSector::Sleep");
     ProfileTask charactersTask(PROFILE_TIMERS);
-    CTimedObject::Sleep();
+    CTimedObject::GoSleep();
 
     CChar * pCharNext = NULL;
     CChar * pChar = static_cast <CChar*>(m_Chars_Active.GetHead());
     for (; pChar != NULL; pChar = pCharNext)
     {
-        pChar->Sleep();
+        pChar->GoSleep();
         if (pChar->m_pNPC)
         {
             g_World.DelCharTicking(pChar);
@@ -172,29 +172,29 @@ void CSector::Sleep()
     CItem * pItem = static_cast <CItem*>( m_Items_Timer.GetHead());
     for (; pItem != NULL; pItem = pItemNext)
     {
-        pItem->Sleep();
+        pItem->GoSleep();
     }
 }
 
-void CSector::Awake()
+void CSector::GoAwake()
 {
-    ADDTOCALLSTACK("CSector::Awake");
+    ADDTOCALLSTACK("CSector::GoAwake");
     ProfileTask charactersTask(PROFILE_TIMERS);
-    CTimedObject::Awake();  // Awake it first, otherwise other things won't work.
+    CTimedObject::GoAwake();  // Awake it first, otherwise other things won't work.
 
     CChar * pCharNext = NULL;
     CChar * pChar = static_cast <CChar*>(m_Chars_Active.GetHead());
     for (; pChar != NULL; pChar = pCharNext)
     {
         pCharNext = pChar->GetNext();
-        pChar->Awake();
+        pChar->GoAwake();
     }
 
     pChar = static_cast<CChar*>(m_Chars_Disconnect.GetHead());
     for (; pChar != NULL; pChar = pCharNext)
     {
         pCharNext = pChar->GetNext();
-        pChar->Awake();
+        pChar->GoAwake();
     }
 
     CItem * pItemNext = NULL;
@@ -202,13 +202,13 @@ void CSector::Awake()
     for (; pItem != NULL; pItem = pItemNext)
     {
         pItemNext = pItem->GetNext();
-        pItem->Awake();
+        pItem->GoAwake();
     }
     pItem = static_cast <CItem*>(m_Items_Inert.GetHead());
     for (; pItem != NULL; pItem = pItemNext)
     {
         pItemNext = pItem->GetNext();
-        pItem->Awake();
+        pItem->GoAwake();
     }
     OnTick();   // Unknown time passed, make the sector tick now to reflect any possible environ changes.
 }
@@ -906,7 +906,7 @@ void CSector::MoveItemToSector( CItem * pItem, bool fActive )
 	ASSERT( pItem );
     if (IsSleeping())
     {
-        pItem->Sleep();
+        pItem->GoSleep();
     }
 	if ( fActive )
 		m_Items_Timer.AddItemToSector( pItem );
@@ -949,11 +949,11 @@ bool CSector::MoveCharToSector( CChar * pChar )
     {
         if (pClient)    // A client just entered
         {
-            Awake();    // Awake the sector
+            GoAwake();    // Awake the sector
         }
         else    // An NPC entered, but the sector is sleeping
         {
-            pChar->Sleep(); // then make the NPC sleep too.
+            pChar->GoSleep(); // then make the NPC sleep too.
         }
     }
 	m_Chars_Active.AddCharToSector(pChar);	// remove from previous spot.
@@ -985,7 +985,7 @@ void CSector::SetSectorWakeStatus()
 	m_Chars_Active.m_timeLastClient = g_World.GetCurrentTime().GetTimeRaw();
     if (IsSleeping())
     {
-        Awake();
+        GoAwake();
     }
 }
 
@@ -1108,7 +1108,7 @@ bool CSector::OnTick()
 		{
             if (!IsSleeping())
             {
-                Sleep();
+                GoSleep();
             }
 			return true;
 		}

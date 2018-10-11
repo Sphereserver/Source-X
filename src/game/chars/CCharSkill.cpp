@@ -3047,7 +3047,7 @@ int CChar::Skill_Act_Training( SKTRIG_TYPE stage )
 
 	if ( stage == SKTRIG_START )
 	{
-		SetTimeout(MSECS_PER_SEC);
+		SetTimeoutS(1);
 		return 0;	// How difficult? 1-1000
 	}
 	if ( stage == SKTRIG_STROKE )
@@ -4005,13 +4005,17 @@ bool CChar::Skill_Start( SKILL_TYPE skill, int iDifficultyIncrease )
 			if ( pSkillDef )
 			{
 				int iWaitTime = pSkillDef->m_Delay.GetLinear(Skill_GetBase(skill));
-				if ( iWaitTime > 0 )
-					SetTimeout(iWaitTime);		// How long before complete skill.
+                if (iWaitTime > 0)
+                {
+                    SetTimeoutD(iWaitTime);		// How long before complete skill.
+                }
 			}
 		}
 
-		if ( IsTimerExpired() )
-			SetTimeout(1);		// the skill should have set it's own delay!?
+        if (IsTimerExpired())
+        {
+            SetTimeoutD(1);		// the skill should have set it's own delay!?
+        }
 
 		if ( m_Act_Difficulty > 0 )
 		{

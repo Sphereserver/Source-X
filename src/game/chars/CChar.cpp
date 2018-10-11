@@ -313,7 +313,7 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false ),
 
     Suscribe(new CCFaction(this));
 
-    CTimedObject::Sleep();  // Make it be sleeping at first, to awake it when placing it in the world (errors will show up otherwise).
+    CTimedObject::GoSleep();  // Make it be sleeping at first, to awake it when placing it in the world (errors will show up otherwise).
 
 	ASSERT(IsDisconnected());
 }
@@ -484,22 +484,26 @@ CMultiStorage *CChar::GetMultiStorage()
     return _pMultiStorage;
 }
 
-void CChar::Sleep()
+void CChar::GoSleep()
 {
     if (!IsSleeping())
     {
-        g_World.DelCharTicking(this);
-        CTimedObject::Sleep();
+        g_World.DelCharTicking(this);   // do not insert into the mutex' lock, it access back to this char.
+        _mutex.lock();
+        CTimedObject::GoSleep();
+        _mutex.unlock();
     }
 }
 
-void CChar::Awake()
+void CChar::GoAwake()
 {
     if (IsSleeping())   //assert?
     {
-        CTimedObject::Awake();// Awake it first, otherwise some other things won't work
+        _mutex.lock();
+        CTimedObject::GoAwake();// Awake it first, otherwise some other things won't work
         g_World.AddCharTicking(this);
         SetTimeout(Calc_GetRandVal(1 * MSECS_PER_SEC));  // make it tick randomly in the next sector, so all awaken NPCs get a different tick time.
+        _mutex.unlock();
     }
 }
 
@@ -627,20 +631,26 @@ bool CChar::IsStatFlag( uint64 iStatFlag ) const
 
 void CChar::StatFlag_Set( uint64 iStatFlag)
 {
+    _mutex.lock();
     m_iStatFlag |= iStatFlag;
+    _mutex.unlock();
 }
 
 void CChar::StatFlag_Clear( uint64 iStatFlag)
 {
+    _mutex.lock();
     m_iStatFlag &= ~iStatFlag;
+    _mutex.unlock();
 }
 
 void CChar::StatFlag_Mod(uint64 iStatFlag, bool fMod )
 {
+    _mutex.lock();
 	if ( fMod )
         m_iStatFlag |= iStatFlag;
 	else
         m_iStatFlag &= ~iStatFlag;
+    _mutex.unlock();
 }
 
 bool CChar::IsPriv( word flag ) const
@@ -680,10 +690,12 @@ int CChar::GetVisualRange() const
 
 void CChar::SetVisualRange(byte newSight)
 {
+    _mutex.lock();
 	// max value is 18 on classic clients prior 7.0.55.27 version and 24 on enhanced clients and latest classic clients
 	m_iVisualRange = minimum(newSight, UO_MAP_VIEW_SIZE_MAX);
 	if ( IsClient() )
 		GetClient()->addVisualRange(m_iVisualRange);
+    _mutex.unlock();
 }
 
 // Clean up weird flags.

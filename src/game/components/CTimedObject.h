@@ -32,8 +32,8 @@ public:
     CTimedObject(PROFILE_TYPE profile);
     virtual ~CTimedObject(){};
     bool IsSleeping();
-    virtual void Sleep();
-    virtual void Awake();
+    virtual void GoSleep();
+    virtual void GoAwake();
     /**
     * @fm PROFILE_TYPE CTimedObject::GetProfileType();
     *

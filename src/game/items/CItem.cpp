@@ -5645,7 +5645,7 @@ bool CItem::OnTick()
     if (GetTopSector()->IsSleeping())
     {
         SetTimeout(1);      //Make it tick after sector's awakening.
-        Sleep();
+        GoSleep();
         return true;
     }
 

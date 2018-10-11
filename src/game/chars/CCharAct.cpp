@@ -3226,7 +3226,7 @@ TRIGRET_TYPE CChar::CheckLocation( bool fStanding )
 		{
 			// Keep timer active holding the swing action until the char stops moving
 			m_atFight.m_War_Swing_State = WAR_SWING_EQUIPPING;
-			SetTimeout(1);
+			SetTimeoutD(1);
 		}
 
 		// This could get REALLY EXPENSIVE !
@@ -3606,7 +3606,7 @@ bool CChar::MoveToChar(CPointMap pt, bool bForceFix)
 	CPointMap ptOld = GetUnkPoint();
 	bool fSectorChange = pt.GetSector()->MoveCharToSector(this);
 	SetTopPoint(pt);
-    Awake(); //Try to awake it if it's not already.
+    GoAwake(); //Try to awake it if it's not already.
 
 	if ( !m_fClimbUpdated || bForceFix )
 		FixClimbHeight();
@@ -4013,7 +4013,7 @@ bool CChar::OnTick()
     if (GetTopSector()->IsSleeping())
     {
         SetTimeout(1);      //Make it tick after sector's awakening.
-        Sleep();
+        GoSleep();
         return true;
     }
     /*
@@ -4031,48 +4031,45 @@ bool CChar::OnTick()
     if (IsDisconnected())		// mounted horses can still get a tick.
         return true;
 
-    if (IsTimerExpired())
+    EXC_SET("timer expired");
+    // My turn to do some action.
+    switch (Skill_Done())
     {
-        EXC_SET("timer expired");
-        // My turn to do some action.
-        switch (Skill_Done())
-        {
-			case -SKTRIG_ABORT:
-                EXC_SET("skill abort");
-                Skill_Fail(true);   // fail with no message or credit.
-                break;
-			case -SKTRIG_FAIL:
-                EXC_SET("skill fail");
-                Skill_Fail(false);
-                break;
-			case -SKTRIG_QTY:
-                EXC_SET("skill cleanup");
-                Skill_Cleanup();
-                break;
-            case -SKTRIG_STROKE:
-                //EXC_SET("skill stroked");
-                break;
-        }
+		case -SKTRIG_ABORT:
+            EXC_SET("skill abort");
+            Skill_Fail(true);   // fail with no message or credit.
+            break;
+		case -SKTRIG_FAIL:
+            EXC_SET("skill fail");
+            Skill_Fail(false);
+            break;
+		case -SKTRIG_QTY:
+            EXC_SET("skill cleanup");
+            Skill_Cleanup();
+            break;
+        case -SKTRIG_STROKE:
+            //EXC_SET("skill stroked");
+            break;
+    }
 
-        if (m_pNPC)
+    if (m_pNPC)
+    {
+        ProfileTask aiTask(PROFILE_NPC_AI);
+        EXC_SET("NPC action");
+        if (!IsStatFlag(STATF_FREEZE))
         {
-            ProfileTask aiTask(PROFILE_NPC_AI);
-            EXC_SET("NPC action");
-            if (!IsStatFlag(STATF_FREEZE))
+            NPC_OnTickAction();
+
+            if (!IsStatFlag(STATF_DEAD))
             {
-                NPC_OnTickAction();
-
-                if (!IsStatFlag(STATF_DEAD))
+                int iFlags = NPC_GetAiFlags();
+                if ((iFlags & NPC_AI_FOOD) && !(iFlags & NPC_AI_INTFOOD))
                 {
-                    int iFlags = NPC_GetAiFlags();
-                    if ((iFlags & NPC_AI_FOOD) && !(iFlags & NPC_AI_INTFOOD))
-                    {
-                        NPC_Food();
-                    }
-                    if (iFlags & NPC_AI_EXTRA)
-                    {
-                        NPC_ExtraAI();
-                    }
+                    NPC_Food();
+                }
+                if (iFlags & NPC_AI_EXTRA)
+                {
+                    NPC_ExtraAI();
                 }
             }
         }

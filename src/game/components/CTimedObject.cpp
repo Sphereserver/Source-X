@@ -22,12 +22,12 @@ bool CTimedObject::IsSleeping()
     return _fIsSleeping;
 }
 
-void CTimedObject::Sleep()
+void CTimedObject::GoSleep()
 {
     _fIsSleeping = true;
 }
 
-void CTimedObject::Awake()
+void CTimedObject::GoAwake()
 {
     /*
     * if the timeout did expire then it got ignored on it's tick and removed from the tick's map so we add it again,

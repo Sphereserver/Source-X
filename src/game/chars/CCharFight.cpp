@@ -10,7 +10,7 @@
 
 // 1.0 seconds is the minimum animation duration ("delay"), but we have to subtract the tenths of seconds that will pass until the next tick, since
 //  the timer will start on the next tick
-#define COMBAT_MIN_SWING_ANIMATION_DELAY (int16)(MSECS_PER_SEC - 1)
+#define COMBAT_MIN_SWING_ANIMATION_DELAY (int16)(TENTHS_PER_SEC)
 
 // I noticed a crime.
 void CChar::OnNoticeCrime( CChar * pCriminal, const CChar * pCharMark )
@@ -1601,13 +1601,13 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
             m_atFight.m_iSwingAnimationDelay = (int16)(Args.m_VarsLocal.GetKeyNum("AnimDelay", true));
             //if (m_atFight.m_iSwingAnimation < (ANIM_TYPE)-1)
             //    m_atFight.m_iSwingAnimation = (int16)animSwingDefault;
-            if ( m_atFight.m_iRecoilDelay < 0 )
-                m_atFight.m_iRecoilDelay = 0;
+            if ( m_atFight.m_iRecoilDelay < 1 )
+                m_atFight.m_iRecoilDelay = 1;
             if ( m_atFight.m_iSwingAnimationDelay < 0 )
                 m_atFight.m_iSwingAnimationDelay = 0;
         }
 
-        SetTimeout(m_atFight.m_iRecoilDelay);   // Wait for the recoil time.
+        SetTimeoutD(m_atFight.m_iRecoilDelay);   // Wait for the recoil time.
         m_atFight.m_War_Swing_State = WAR_SWING_READY;
         return WAR_SWING_READY;
     }
@@ -1628,7 +1628,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		UpdateAnimate((ANIM_TYPE)m_atFight.m_iSwingAnimation, false, false, maximum(0,iSwingAnimationDelayInSeconds) );
 
         // Now that i have waited the recoil time, start the hit animation and wait for it to end
-        SetTimeout(m_atFight.m_iSwingAnimationDelay);	
+        SetTimeoutD(m_atFight.m_iSwingAnimationDelay);
 		return WAR_SWING_SWINGING;
 	}
 

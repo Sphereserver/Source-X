@@ -478,7 +478,7 @@ void CItemContainer::ContentAdd( CItem *pItem, CPointMap pt, bool bForceNoStack,
             case IT_CONTAINER:
             case IT_CONTAINER_LOCKED:
             {
-                pItem->Sleep();
+                pItem->GoSleep();
             }
         }
 
@@ -707,7 +707,7 @@ void CItemContainer::OnRemoveObj( CSObjListRec *pObRec )	// Override this = call
 
 	if ( IsType(IT_KEYRING) )	// key ring.
 		SetKeyRing();
-    pItem->Awake();
+    pItem->GoAwake();
 }
 
 void CItemContainer::DupeCopy( const CItem *pItem )

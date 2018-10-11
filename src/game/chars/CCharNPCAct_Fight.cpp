@@ -156,6 +156,7 @@ void CChar::NPC_Act_Fight()
     // I am in an attack mode.
     if (!Fight_IsActive())
     {
+        Fight_ClearAll();
         return;
     }
 
@@ -167,7 +168,7 @@ void CChar::NPC_Act_Fight()
         {
             if (NPC_LookAround())
             {
-                SetTimeout(1);
+                SetTimeoutD(5); // half of a second until the next check
                 return;
             }
         }
@@ -326,8 +327,14 @@ void CChar::NPC_Act_Fight()
 
     // Move in for melee type combat.
     int iRange = Fight_CalcRange(m_uidWeapon.ItemFind());
-    //if ((iDist > iRange) || !CanSeeLOS(pChar))
-    //{
-        NPC_Act_Follow(false, iRange, false);
-    //}
+    if (!NPC_Act_Follow(false, iRange, false))
+    {
+        m_Act_UID.InitUID();
+        SetTimeoutD(1);
+    }
+    if (!IsTimerSet())// Nothing could be done, tick again in a while
+    {
+        g_Log.EventWarn("%s [0x%04x] found nothing to do in the fight routines.\n", GetName(), GetUID());
+        SetTimeoutS(1);
+    }
 }

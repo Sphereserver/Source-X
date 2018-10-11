@@ -83,6 +83,7 @@ private:
 	ushort m_Skill[SKILL_QTY];	// List of skills ( skill * 10 )
 
 	CClient * m_pClient;	// is the char a logged in m_pPlayer ?
+    mutable std::shared_mutex _mutex;
 
 public:
 	struct LastAttackers
@@ -318,8 +319,8 @@ private:
 
 public:
     CMultiStorage *GetMultiStorage();
-    virtual void Sleep();
-    virtual void Awake();
+    virtual void GoSleep();
+    virtual void GoAwake();
 	// Status and attributes ------------------------------------
 	int IsWeird() const;
 	char GetFixZ( CPointMap pt, dword dwBlockFlags = 0);
