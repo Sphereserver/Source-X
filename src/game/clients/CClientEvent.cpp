@@ -861,7 +861,7 @@ bool CClient::Event_Walk( byte rawdir, byte sequence ) // Player moves
             }
 		}
 
-		m_timeLastEventWalk = g_World.GetCurrentTick();
+		m_timeLastEventWalk = g_World.GetCurrentTime().GetTimeRaw();
 		++m_iWalkStepCount;					// Increase step count to use on walk buffer checks
 	}
 	else

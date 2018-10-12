@@ -33,7 +33,7 @@ void CCharsActiveList::OnRemoveObj( CSObjListRec * pObRec )
 	if ( pChar->IsClient())
 	{
 		ClientDetach();
-        m_timeLastClient = g_World.GetCurrentTick();	// mark time in case it's the last client
+        m_timeLastClient = g_World.GetCurrentTime().GetTimeRaw();	// mark time in case it's the last client
 	}
 	CSObjList::OnRemoveObj(pObRec);
 	pChar->SetContainerFlags(UID_O_DISCONNECT);

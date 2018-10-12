@@ -52,7 +52,7 @@ void CCItemDamageable::OnTickStatsUpdate()
     {
         return;
     }
-    int64 iCurtime = g_World.GetCurrentTick();
+    int64 iCurtime = g_World.GetCurrentTime().GetTimeRaw();
 
     if (_iTimeLastUpdate + g_Cfg.m_iRegenRate[0] < iCurtime)
     {

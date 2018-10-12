@@ -2120,7 +2120,7 @@ PacketBulletinBoard::PacketBulletinBoard(const CClient* target, BBOARDF_TYPE act
 	writeStringFixedASCII(message->GetName(), lenstr);
 
 	// message time
-	sprintf(tempstr, "Day %lld", (g_World.GetGameWorldTime(message->GetTimeStamp()) / (24 * 60)) % 365);
+	sprintf(tempstr, "Day %lld", (g_World.GetGameWorldTime(message->GetTimeStamp()) / (MSECS_PER_TENTH * 24 * 60)) % 365);
 	lenstr = strlen(tempstr) + 1;
 
 	writeByte((byte)lenstr);
@@ -4520,7 +4520,7 @@ PacketPropertyList::PacketPropertyList(const CObjBase* object, dword version, co
 {
 	ADDTOCALLSTACK("PacketPropertyList::PacketPropertyList");
 
-	m_time = g_World.GetCurrentTick();
+	m_time = g_World.GetCurrentTime().GetTimeRaw();
 	m_object = object->GetUID();
 	m_version = version;
 	m_entryCount = (int)data.size();
@@ -4548,7 +4548,7 @@ PacketPropertyList::PacketPropertyList(const CClient* target, const PacketProper
 {
 	ADDTOCALLSTACK("PacketPropertyList::PacketPropertyList2");
 
-	m_time = g_World.GetCurrentTick();
+	m_time = g_World.GetCurrentTime().GetTimeRaw();
 	m_object = other->getObject();
 	m_version = other->getVersion();
 	m_entryCount = other->getEntryCount();
@@ -4584,7 +4584,7 @@ bool PacketPropertyList::onSend(const CClient* client)
 bool PacketPropertyList::hasExpired(int64 iTimeout) const
 {
 	ADDTOCALLSTACK("PacketPropertyList::hasExpired");
-	return (m_time + iTimeout) < g_World.GetCurrentTick();
+	return (m_time + iTimeout) < g_World.GetCurrentTime().GetTimeRaw();
 }
 
 

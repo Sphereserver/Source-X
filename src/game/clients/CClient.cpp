@@ -39,8 +39,8 @@ CClient::CClient(NetState* state)
 	m_pGMPage = NULL;
 
 	m_timeLogin = 0;
-	m_timeLastEvent = g_World.GetCurrentTick();
-	m_timeLastEventWalk = g_World.GetCurrentTick();
+	m_timeLastEvent = g_World.GetCurrentTime().GetTimeRaw();
+	m_timeLastEventWalk = g_World.GetCurrentTime().GetTimeRaw();
 	m_timeNextEventWalk = 0;
 
 	m_iWalkStepCount = 0;
@@ -1381,7 +1381,7 @@ bool CClient::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command from
 
 				int64 SpellTimeout = g_Cfg.m_iSpellTimeout;
 				if ( GetDefNum("SPELLTIMEOUT", true) )
-					SpellTimeout = GetDefNum("SPELLTIMEOUT", true);
+					SpellTimeout = GetDefNum("SPELLTIMEOUT", true) * MSECS_PER_SEC; //tenths to msecs.
 
 				addTarget(CLIMODE_TARG_SKILL_MAGERY, pPrompt, pSpellDef->IsSpellType(SPELLFLAG_TARG_XYZ), pSpellDef->IsSpellType(SPELLFLAG_HARM), SpellTimeout);
 				break;

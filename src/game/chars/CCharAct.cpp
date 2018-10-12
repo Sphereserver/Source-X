@@ -3939,7 +3939,7 @@ void CChar::OnTickStatusUpdate()
 			UpdateCanSee(cmd, m_pClient);		// send hits update to all nearby clients
 			m_fStatusUpdate &= ~SU_UPDATE_HITS;
 		}
-		m_timeLastHitsUpdate = g_World.GetCurrentTick();
+		m_timeLastHitsUpdate = g_World.GetCurrentTime().GetTimeRaw();
 	}
 
 	if ( m_fStatusUpdate & SU_UPDATE_MODE )
@@ -4092,13 +4092,11 @@ bool CChar::OnTickPeriodic()
     EXC_TRY("OnTickPeriodic");
     ++_iRegenTickCount;
     _timeNextRegen = g_World.GetCurrentTime().GetTimeRaw() + MSECS_PER_TICK;
-    bool fRegen = _iRegenTickCount == TICKS_PER_SEC;
+    bool fRegen = (_iRegenTickCount == TICKS_PER_SEC);
+
     if (fRegen)
     {
         _iRegenTickCount = 0;
-    }
-    if (fRegen)
-    {
         EXC_SET("last attackers");
         if (g_Cfg.m_iAttackerTimeout >= 0)
         {
@@ -4115,7 +4113,6 @@ bool CChar::OnTickPeriodic()
     if (IsDisconnected())		// mounted horses can still get a tick.
         return true;
 
-
     // NOTE: Summon flags can kill our hp here. check again.
     if (!IsStatFlag(STATF_DEAD) && (Stat_GetVal(STAT_STR) <= 0))	// We can only die on our own tick.
     {
@@ -4126,11 +4123,11 @@ bool CChar::OnTickPeriodic()
     if (IsClient())
     {
         // Players have a silly "always run" flag that gets stuck on.
-        if (-(g_World.GetTimeDiff(GetClient()->m_timeLastEventWalk)) > 2)
+        if (-(g_World.GetTimeDiff(GetClient()->m_timeLastEventWalk)) > 2 * MSECS_PER_TENTH)
             StatFlag_Clear(STATF_FLY);
 
         // Check targeting timeout, if set
-        if (GetClient()->m_Targ_Timeout > 0 && (g_World.GetTickDiff(GetClient()->m_Targ_Timeout) <= 0))
+        if (GetClient()->m_Targ_Timeout > 0 && (g_World.GetTimeDiff(GetClient()->m_Targ_Timeout) <= 0))
             GetClient()->addTargetCancel();
     }
 

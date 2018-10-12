@@ -125,7 +125,7 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 		if ( !pClientSrc->addShopMenuBuy(this) )
 			Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_NO_GOODS));
 		else
-			pClientSrc->m_TagDefs.SetNum("BUYSELLTIME", g_World.GetCurrentTick());
+			pClientSrc->m_TagDefs.SetNum("BUYSELLTIME", g_World.GetCurrentTime().GetTimeRaw());
 		break;
 	}
 	case NV_BYE:
@@ -179,7 +179,7 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 		if ( ! pClientSrc->addShopMenuSell( this ))
 			Speak(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_NOTHING_BUY));
 		else
-			pClientSrc->m_TagDefs.SetNum("BUYSELLTIME", g_World.GetCurrentTick());
+			pClientSrc->m_TagDefs.SetNum("BUYSELLTIME", g_World.GetCurrentTime().GetTimeRaw());
 		break;
 	}
 	case NV_SHRINK:
@@ -588,23 +588,49 @@ int CChar::NPC_WalkToPoint( bool fRun )
 
 	// TAG.OVERRIDE.MOVERATE
 	int64 tTick;
-	CVarDefCont * pValue = GetKey("OVERRIDE.MOVERATE", true);
-	if (pValue)
-		tTick = pValue->GetValNum();	//Taking value from tag.override.moverate
-	else
-		tTick = pCharDef->m_iMoveRate;	//no tag.override.moverate, we get default moverate (created from ini's one).
-	// END TAG.OVERRIDE.MOVERATE
-	if (fRun)
-	{
-		if (IsStatFlag(STATF_PET))	// pets run a little faster.
-		{
-			if (iDex < 75)
-				iDex = 75;
-		}
-		iTickNext = MSECS_PER_TICK / 4 + Calc_GetRandLLVal((100 - (iDex*tTick) / 100) / 5) * MSECS_PER_TICK / 10;   // TODO MSEC to TICK? custom timers for npc's movement?
-	}
-	else
-		iTickNext = MSECS_PER_TICK + Calc_GetRandLLVal((100 - (iDex*tTick) / 100) / 3) * MSECS_PER_TICK / 10;
+    CVarDefCont * pVal = GetKey("OVERRIDE.MOVEDELAY", true);
+    if (pVal)
+    {
+        iTickNext = pVal->GetValNum();  // foot walking speed
+        if (IsStatFlag(STATF_ONHORSE | STATF_HOVERING)) // On Mount
+        {
+            if (IsStatFlag(STATF_FLY))  // Running
+            {
+                iTickNext /= 4; // 4 times faster when running while it's on a mount
+            }
+            else
+            {
+                iTickNext /= 2; // 2 times faster when walking while it's on a mount
+            }
+        }
+        else
+        {
+            if (IsStatFlag(STATF_FLY))
+            {
+                iTickNext /= 2; // 2 times faster when running.
+            }
+        }
+    }
+    else
+    {
+        CVarDefCont * pValue = GetKey("OVERRIDE.MOVERATE", true);
+        if (pValue)
+            tTick = pValue->GetValNum();	//Taking value from tag.override.moverate
+        else
+            tTick = pCharDef->m_iMoveRate;	//no tag.override.moverate, we get default moverate (created from ini's one).
+        // END TAG.OVERRIDE.MOVERATE
+        if (fRun)
+        {
+            if (IsStatFlag(STATF_PET))	// pets run a little faster.
+            {
+                if (iDex < 75)
+                    iDex = 75;
+            }
+            iTickNext = MSECS_PER_SEC / 4 + Calc_GetRandLLVal((100 - (iDex*tTick) / 100) / 5) * MSECS_PER_SEC / 10;   // TODO MSEC to TICK? custom timers for npc's movement?
+        }
+        else
+            iTickNext = MSECS_PER_SEC + Calc_GetRandLLVal((100 - (iDex*tTick) / 100) / 3) * MSECS_PER_SEC / 10;
+    }
 
 	if (iTickNext < MSECS_PER_TENTH) // Do not allow less than a tenth of second. This may be decreased in the future to allow more precise timers, at the cost of cpu.
 		iTickNext = MSECS_PER_TENTH;
@@ -743,13 +769,13 @@ bool CChar::NPC_LookAtCharHuman( CChar * pChar )
 			return NPC_LookAtCharGuard(pChar);
 		else if (NPC_CanSpeak() && !Calc_GetRandVal(3))
 		{
-
-			Speak(pChar->IsStatFlag(STATF_CRIMINAL) ?
-				g_Cfg.GetDefaultMsg(DEFMSG_NPC_GENERIC_SEECRIM) :
-				g_Cfg.GetDefaultMsg(DEFMSG_NPC_GENERIC_SEEMONS));
-
 			// Find a guard.
-			CallGuards(pChar);
+            if (CallGuards(pChar))
+            {
+                Speak(pChar->IsStatFlag(STATF_CRIMINAL) ?
+                    g_Cfg.GetDefaultMsg(DEFMSG_NPC_GENERIC_SEECRIM) :
+                    g_Cfg.GetDefaultMsg(DEFMSG_NPC_GENERIC_SEEMONS));   // only speak if can really call the guards.
+            }
 			if (IsStatFlag(STATF_WAR))
 				return false;
 

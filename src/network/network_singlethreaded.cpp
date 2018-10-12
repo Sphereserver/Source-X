@@ -336,7 +336,7 @@ void NetworkIn::tick(void)
 			continue;
 		}
 
-		client->m_client->m_timeLastEvent = g_World.GetCurrentTick();
+		client->m_client->m_timeLastEvent = g_World.GetCurrentTime().GetTimeRaw();
 
 		// first data on a new connection - find out what should come next
 		if ( client->m_client->m_Crypt.IsInit() == false )

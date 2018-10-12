@@ -2411,7 +2411,7 @@ bool CClient::OnTarg_Party_Add( CChar * pChar )
 	}
 
 	CVarDefCont * pTagInvitetime = m_pChar->m_TagDefs.GetKey("PARTY_LASTINVITETIME");
-	if ( pTagInvitetime && (g_World.GetCurrentTick() < pTagInvitetime->GetValNum() ) )
+	if ( pTagInvitetime && (g_World.GetTimeDiff(pTagInvitetime->GetValNum()) > 0) )
 	{
 		SysMessageDefault( DEFMSG_PARTY_ADD_TOO_FAST );
 		return false;

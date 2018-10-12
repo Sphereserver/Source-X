@@ -1224,7 +1224,7 @@ bool PacketBulletinBoardReq::onReceive(NetState* net)
 
 			newMessage->SetAttr(ATTR_MOVE_NEVER);
 			newMessage->SetName(str);
-			newMessage->SetTimeStamp(g_World.GetCurrentTick());
+			newMessage->SetTimeStamp(g_World.GetCurrentTime().GetTimeRaw());
 			newMessage->m_sAuthor = character->GetName();
 			newMessage->m_uidLink = character->GetUID();
 
@@ -1882,7 +1882,7 @@ bool PacketVendorSellReq::onReceive(NetState* net)
 	const CVarDefCont* vardef = g_Cfg.m_bAllowBuySellAgent ? NULL : client->m_TagDefs.GetKey("BUYSELLTIME");
 	if (vardef != NULL)
 	{
-		int64 allowsell = vardef->GetValNum() + (itemCount * 3);
+		int64 allowsell = vardef->GetValNum() + ((itemCount * 3) * MSECS_PER_TENTH);
 		if (g_World.GetCurrentTime() < allowsell)
 		{
 			client->SysMessage(g_Cfg.GetDefaultMsg(DEFMSG_NPC_VENDOR_SELLFAST));

@@ -494,14 +494,14 @@ void IPHistoryManager::tick(void)
 	// check if ttl should decay (only do this once every second)
 	bool decayTTL = ( !(m_lastDecayTime > 0) || (-g_World.GetTimeDiff(m_lastDecayTime)) >= MSECS_PER_SEC);
 	if (decayTTL)
-		m_lastDecayTime = g_World.GetCurrentTick();
+		m_lastDecayTime = g_World.GetCurrentTime().GetTimeRaw();
 
 	for (IPHistoryList::iterator it = m_ips.begin(), end = m_ips.end(); it != end; ++it)
 	{
 		if (it->m_blocked)
 		{
 			// blocked ips don't decay, but check if the ban has expired
-			if (it->m_blockExpire > 0 && (g_World.GetCurrentTick() > it->m_blockExpire))
+			if (it->m_blockExpire > 0 && (g_World.GetCurrentTime().GetTimeRaw() > it->m_blockExpire))
 				it->setBlocked(false);
 		}
 		else if (decayTTL)

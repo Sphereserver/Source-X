@@ -248,7 +248,7 @@ void CClient::addTime( bool fCurrent ) const
 
 	if ( fCurrent )
 	{
-		llong lCurrentTime = g_World.GetCurrentTick();
+		llong lCurrentTime = g_World.GetCurrentTime().GetTimeRaw();
 		new PacketGameTime(this,
 								( lCurrentTime / ( 60*60*MSECS_PER_SEC)) % 24,
 								( lCurrentTime / ( 60*MSECS_PER_SEC)) % 60,
@@ -1527,7 +1527,7 @@ size_t CClient::Setup_FillCharList(Packet* pPacket, const CChar * pCharFirst)
 	return count;
 }
 
-void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTickTimeout )
+void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTimeout )
 {
 	ADDTOCALLSTACK("CClient::SetTargMode");
 	// ??? Get rid of menu stuff if previous targ mode.
@@ -1629,8 +1629,8 @@ void CClient::SetTargMode( CLIMODE_TYPE targmode, lpctstr pPrompt, int64 iTickTi
 	}
 
 	// determine timeout time
-    if (iTickTimeout > 0)
-        m_Targ_Timeout = g_World.GetCurrentTick() + iTickTimeout;
+    if (iTimeout > 0)
+        m_Targ_Timeout = g_World.GetCurrentTime().GetTimeRaw() + iTimeout;
     else
         m_Targ_Timeout = 0;
 
@@ -1672,14 +1672,14 @@ void CClient::addPromptConsole( CLIMODE_TYPE mode, lpctstr pPrompt, CUID context
 	new PacketAddPrompt(this, context1, context2, bUnicode);
 }
 
-void CClient::addTarget( CLIMODE_TYPE targmode, lpctstr pPrompt, bool fAllowGround, bool fCheckCrime, int64 iTicksTimeout) // Send targetting cursor to client
+void CClient::addTarget( CLIMODE_TYPE targmode, lpctstr pPrompt, bool fAllowGround, bool fCheckCrime, int64 iTimeout) // Send targetting cursor to client
 {
 	ADDTOCALLSTACK("CClient::addTarget");
 	// Send targetting cursor to client.
     // Expect XCMD_Target back.
 	// ??? will this be selective for us ? objects only or chars only ? not on the ground (statics) ?
 
-	SetTargMode( targmode, pPrompt, iTicksTimeout);
+	SetTargMode( targmode, pPrompt, iTimeout);
 
 	new PacketAddTarget(this,
 						fAllowGround? PacketAddTarget::Ground : PacketAddTarget::Object,
@@ -1698,7 +1698,7 @@ void CClient::addTargetDeed( const CItem * pDeed )
 	addTargetItems( CLIMODE_TARG_USE_ITEM, iddef, pDeed->GetHue() );
 }
 
-bool CClient::addTargetChars( CLIMODE_TYPE mode, CREID_TYPE baseID, bool fNotoCheck, int64 iTicksTimeout)
+bool CClient::addTargetChars( CLIMODE_TYPE mode, CREID_TYPE baseID, bool fNotoCheck, int64 iTimeout)
 {
 	ADDTOCALLSTACK("CClient::addTargetChars");
 	CCharBase * pBase = CCharBase::FindCharBase( baseID );
@@ -1708,7 +1708,7 @@ bool CClient::addTargetChars( CLIMODE_TYPE mode, CREID_TYPE baseID, bool fNotoCh
 	tchar * pszTemp = Str_GetTemp();
 	snprintf(pszTemp, STR_TEMPLENGTH, "%s '%s'?", g_Cfg.GetDefaultMsg(DEFMSG_WHERE_TO_SUMMON), pBase->GetTradeName());
 
-	addTarget(mode, pszTemp, true, fNotoCheck, iTicksTimeout);
+	addTarget(mode, pszTemp, true, fNotoCheck, iTimeout);
 	return true;
 }
 

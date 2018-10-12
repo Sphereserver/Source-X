@@ -75,7 +75,7 @@ void CCChampion::Start()
     ADDTOCALLSTACK("CCChampion::Start");
     // TODO store light in the area
     _fActive = true;
-    _iLastActivationTime = g_World.GetCurrentTick();
+    _iLastActivationTime = g_World.GetCurrentTime().GetTimeRaw();
 
     _iSpawnsNextRed = GetCandlesPerLevel();
     _iCandlesNextRed = CANDLESNEXTRED;
@@ -95,7 +95,7 @@ void CCChampion::Stop()
     _iLevel = 0;
     _iCandlesNextRed = 0;
     _iCandlesNextLevel = 0;
-    GetLink()->SetTimeout(_iLastActivationTime - g_World.GetCurrentTick());
+    GetLink()->SetTimeout(_iLastActivationTime - g_World.GetCurrentTime().GetTimeRaw());
     ClearWhiteCandles();
     ClearRedCandles();
 };

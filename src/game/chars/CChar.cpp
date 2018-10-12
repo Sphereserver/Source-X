@@ -270,7 +270,7 @@ CChar::CChar( CREID_TYPE baseID ) : CObjBase( false ),
 
 	m_timeCreate = g_World.GetCurrentTime().GetTimeRaw();
     m_timeLastHitsUpdate = g_World.GetCurrentTime().GetTimeRaw();
-    _timeNextRegen = m_timeLastHitsUpdate + MSECS_PER_TICK;
+    _timeNextRegen = m_timeLastHitsUpdate + MSECS_PER_SEC;  // make it regen in one second from now, no need to instant regen.
     _iRegenTickCount = 0;
 	m_timeLastCallGuards = 0;
 
@@ -403,7 +403,7 @@ void CChar::ClientAttach( CClient * pClient )
 		return;
 
 	ASSERT(m_pPlayer);
-	m_pPlayer->m_timeLastUsed = g_World.GetCurrentTick();
+	m_pPlayer->m_timeLastUsed = g_World.GetCurrentTime().GetTimeRaw();
 
 	m_pClient = pClient;
 	GetTopSector()->ClientAttach( this );
@@ -2404,7 +2404,7 @@ do_default:
 			sVal.FormatVal( m_defense + pCharDef->m_defense );
 			return true;
 		case CHC_AGE:
-			sVal.FormatLLVal( -( g_World.GetTickDiff(m_timeCreate) / ( MSECS_PER_SEC * 60 * 60 *24 ) )); //displayed in days
+			sVal.FormatLLVal( -( g_World.GetTimeDiff(m_timeCreate) / ( MSECS_PER_SEC * 60 * 60 *24 ) )); //displayed in days
 			return true;
 		case CHC_BANKBALANCE:
 			sVal.FormatVal( GetBank()->ContentCount( CResourceID(RES_TYPEDEF,IT_GOLD)));

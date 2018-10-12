@@ -12,7 +12,7 @@ CGMPage::CGMPage( lpctstr pszAccount ) :
 	m_sAccount( pszAccount )
 {
 	m_pGMClient = NULL;
-	m_timePage = g_World.GetCurrentTick();
+	m_timePage = g_World.GetCurrentTime().GetTimeRaw();
 	// Put at the end of the list.
 	g_World.m_GMPages.InsertTail( this );
 }
@@ -46,7 +46,7 @@ int64 CGMPage::GetAge() const
 {
 	ADDTOCALLSTACK("CGMPage::GetAge");
 	// How old in seconds.
-	return (-g_World.GetTickDiff( m_timePage ));
+	return (-g_World.GetTimeDiff( m_timePage ) / MSECS_PER_SEC);
 }
 
 void CGMPage::ClearGMHandler()

@@ -160,7 +160,7 @@ void CChar::CallGuards()
 	if (!m_pArea || !m_pArea->IsGuarded() || IsStatFlag(STATF_DEAD))
 		return;
 
-	if ((g_World.GetCurrentTick() - m_timeLastCallGuards) < 1)	// Spam check, not calling this more than once per tick, which will cause an excess of calls and checks on crowded areas because of the 2 CWorldSearch.
+	if (g_World.GetTimeDiff(m_timeLastCallGuards + (1 * MSECS_PER_SEC)) > 0)	// Spam check, not calling this more than once per second, which will cause an excess of calls and checks on crowded areas because of the 2 CWorldSearch.
 		return;
 
 	// We don't have any target yet, let's check everyone nearby
@@ -185,18 +185,22 @@ void CChar::CallGuards()
 
 		CallGuards(pCriminal);
 	}
-	m_timeLastCallGuards = g_World.GetCurrentTick();
 	return;
 }
 
 // I just yelled for guards.
-void CChar::CallGuards( CChar * pCriminal )
+bool CChar::CallGuards( CChar * pCriminal )
 {
 	ADDTOCALLSTACK("CChar::CallGuards2");
 	if ( !m_pArea || (pCriminal == this) )
-		return;
+		return false;
 	if (IsStatFlag(STATF_DEAD) || (pCriminal && (pCriminal->IsStatFlag(STATF_DEAD | STATF_INVUL) || pCriminal->IsPriv(PRIV_GM) || !pCriminal->m_pArea->IsGuarded())))
-		return;
+		return false;
+
+    if (g_World.GetTimeDiff(m_timeLastCallGuards + (1 * MSECS_PER_SEC)) > 0)	// Spam check, not calling this more than once per second
+        return false;
+
+    m_timeLastCallGuards = g_World.GetCurrentTime().GetTimeRaw();
 
 	CChar *pGuard = NULL;
 	if (m_pNPC && m_pNPC->m_Brain == NPCBRAIN_GUARD)
@@ -230,7 +234,7 @@ void CChar::CallGuards( CChar * pCriminal )
 		Args.m_VarObjs.Insert(1, pCriminal, true);
 
 		if (OnTrigger(CTRIG_CallGuards, pCriminal, &Args) == TRIGRET_RET_TRUE)
-			return;
+			return false;
 
 		if ( (int)Args.m_iN1 != rid.GetResIndex())
 			rid = CResourceID(RES_CHARDEF, (int)Args.m_iN1);
@@ -240,10 +244,10 @@ void CChar::CallGuards( CChar * pCriminal )
 	if (!pGuard)		//	spawn a new guard
 	{
 		if (!rid.IsValidUID())
-			return;
+			return false;
 		pGuard = CChar::CreateNPC((CREID_TYPE)rid.GetResIndex());
 		if (!pGuard)
-			return;
+			return false;
 
 		if (pCriminal->m_pArea->m_TagDefs.GetKeyNum("RED", true))
 			pGuard->m_TagDefs.SetNum("NAME.HUE", g_Cfg.m_iColorNotoEvil, true);
@@ -251,6 +255,7 @@ void CChar::CallGuards( CChar * pCriminal )
 		pGuard->Spell_Teleport(pCriminal->GetTopPoint(), false, false);
 	}
 	pGuard->NPC_LookAtCharGuard(pCriminal, true);
+    return true;
 }
 
 // i notice a Crime or attack against me ..
@@ -1248,7 +1253,7 @@ void CChar::Fight_HitTry()
         {
             fPreHit_HadInstaHit = (!m_atFight.m_iRecoilDelay && !m_atFight.m_iSwingAnimationDelay);
             Fight_SetDefaultSwingDelays();
-            const int64 iTimeCur = g_World.GetCurrentTick();
+            const int64 iTimeCur = g_World.GetCurrentTime().GetTimeRaw();
             // Time required to perform the previous normal hit, without the PreHit delay reduction.
             const int64 iPreHit_LastHitTag_FullHit_Prev = GetKeyNum("LastHit", true);
             // Time required to perform the shortened hit with PreHit.
@@ -1497,7 +1502,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
     if ( IsSetCombatFlags(COMBAT_PREHIT) && (m_atFight.m_War_Swing_State == WAR_SWING_EQUIPPING) && (!m_atFight.m_iSwingIgnoreLastHitTag) )
     {
-        int64 iTimeDiff = (g_World.GetCurrentTick() - GetKeyNum("LastHit", true));
+        int64 iTimeDiff = (g_World.GetCurrentTime().GetTimeRaw() - GetKeyNum("LastHit", true));
         if (iTimeDiff < 0)
         {
             return WAR_SWING_EQUIPPING;
@@ -1518,9 +1523,9 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		}
 		else if ( !IsSetCombatFlags(COMBAT_ARCHERYCANMOVE) && !IsStatFlag(STATF_ARCHERCANMOVE) )
 		{
-			// Only start the swing this much seconds after the char stopped moving.
+			// Only start the swing this much tenths of second after the char stopped moving.
 			//  (Values changed between expansions. SE:250ms / AOS:500ms / pre-AOS:1000ms)
-			if ( m_pClient && ( -g_World.GetTimeDiff(m_pClient->m_timeLastEventWalk) < g_Cfg.m_iCombatArcheryMovementDelay) )
+			if ( m_pClient && ( -(g_World.GetTimeDiff(m_pClient->m_timeLastEventWalk) * MSECS_PER_TENTH) < g_Cfg.m_iCombatArcheryMovementDelay) )
 				return WAR_SWING_EQUIPPING;
 		}
 
@@ -1642,7 +1647,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
 		if ( m_pClient && (skill == SKILL_THROWING) )		// throwing weapons also have anim of the weapon returning after throw it
 		{
-			m_pClient->m_timeLastSkillThrowing = g_World.GetCurrentTick();
+			m_pClient->m_timeLastSkillThrowing = g_World.GetCurrentTime().GetTimeRaw();
 			m_pClient->m_pSkillThrowingTarg = pCharTarg;
 			m_pClient->m_SkillThrowingAnimID = AnimID;
 			m_pClient->m_SkillThrowingAnimHue = AnimHue;

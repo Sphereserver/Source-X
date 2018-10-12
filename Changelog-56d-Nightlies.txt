@@ -1181,3 +1181,40 @@ transfer_secured	= 08	// Transfer Secured Containers.
 
 03-10-2018, Ben
 -Fixed emote messages for players using wrong hue.
+
+12-10-2018, XuN
+- Fixed more time related issues.
+- ADDED: tag.override.movedelay (msec) for NPCS overriding completelly the moverate checks and setting the next movement to the given timer, eg 'tag.override.moverate=250' makes the npc move each 250 milliseconds when walking.
+    Notes:  * The final value, with or without tags, running or walking, can't be lower than 1 tenth of second or higher than 5 seconds for the moment until we check the performance impact of lower values (Since walking is direcly engaged with NPC's AI, lowering this value can cause an extreme impact on performance)
+            * This is the walking speed, running speed and walking speed while mounted is the half (125 instead of 250 msecs using the previous example), running while mounted is 4 times faster (62.5msecs (rounded to 62), defaulted to 100 because of the tenth's limit)).
+            * Settig this tag completelly overrides default moverate checks, TAG.OVERIDE.MOVERATE gets ignored too.
+
+Here's the code to make NPCs move with the old formula (before 2014) (it's also an example of how to make custom movement formulas):
+// function setting the tag to the desired value
+[function f_adjust_movement_delay]
+local.dex=<dex>
+if ((<flags> & STATF_pet) && (<local.dex> < 75))    // for pets ...
+    local.dex = 75  // ... set the lowest movement delay to this dex value.
+endif
+local.newdelay = (10 + <r(100-iDex)/3>) * 100   // * 100 because the old formula worked in tenths of second, this tag works in msecs (100 msecs = 1 tenth = 0.1s)
+//If you want enable support for tag.override.moverate in this formula uncomment the bellow lines:
+
+//local.mod = <tag0.override.moverate>
+//if (<local.mod> < 1)
+//    local.mod = 1
+//endif
+//local.newdelay = (<local.newdelay> * <local.mod>) / 100
+
+//end of tag.override.moverate code
+//setting the new value:
+tag.override.movedelay = <dlocal.newdelay>
+
+Now we set the tag like this:
+ON=@Create
+STR=xx  (custom npc's values)
+DEX=xx
+INT=xx
+f_adjust_movement_delay
+
+It would be recommended to apply this function also on Taming's success, because pets will never have a base movement value calculated with less than 75 dex
+The lower calls to this function, the better (as for any other), but other formulas (like AI reworks) may need to call it in each @SkillStart/Success/Fail or other cirtumstances.

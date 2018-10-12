@@ -171,7 +171,7 @@ void CChar::Memory_AddTypes( CItemMemory * pMemory, word MemTypes )
 	{
 		pMemory->SetMemoryTypes( pMemory->GetMemoryTypes() | MemTypes );
 		pMemory->m_itEqMemory.m_pt = GetTopPoint();	// Where did the fight start ?
-		pMemory->SetTimeStamp(g_World.GetCurrentTick());
+		pMemory->SetTimeStamp(g_World.GetCurrentTime().GetTimeRaw());
 		Memory_UpdateFlags( pMemory );
 	}
 }
@@ -428,12 +428,12 @@ bool CChar::Memory_Fight_OnTick( CItemMemory * pMemory )
 	int64 iTimeDiff = - g_World.GetTimeDiff( pMemory->GetTimeStamp() );
 
 	// If am fully healthy then it's not much of a fight.
-	if ( iTimeDiff > 60*60*100 )
+	if ( iTimeDiff > 60*60*MSECS_PER_TENTH )
 		goto clearit;
-	if ( (pTarg->GetHealthPercent() >= 100) && (iTimeDiff > 2*60*100) )
+	if ( (pTarg->GetHealthPercent() >= 100) && (iTimeDiff > 2*60*MSECS_PER_TENTH) )
 		goto clearit;
 
-	pMemory->SetTimeout(20*100);
+	pMemory->SetTimeoutD(20);
 	return true;	// reschedule it.
 }
 

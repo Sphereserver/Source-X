@@ -1045,7 +1045,10 @@ void CSector::Restock()
     for (; pChar; pChar = pCharNext)
     {
         pCharNext = pChar->GetNext();
-        pChar->NPC_Vendor_Restock(true);
+        if (pChar->m_pNPC)
+        {
+            pChar->NPC_Vendor_Restock(true);
+        }
     }
 
     CItem * pItemNext;

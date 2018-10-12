@@ -1031,7 +1031,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		m_FileMultis.WriteSection("EOF");
 
 		m_iSaveCountID++;	// Save only counts if we get to the end winout trapping.
-		m_timeSave = g_World.GetCurrentTick() + g_Cfg.m_iSavePeriod;	// next save time.
+		m_timeSave = g_World.GetCurrentTime().GetTimeRaw() + g_Cfg.m_iSavePeriod;	// next save time.
 
 		g_Log.Event(LOGM_SAVE, "World data saved   (%s).\n", static_cast<lpctstr>(m_FileWorld.GetFilePath()));
 		g_Log.Event(LOGM_SAVE, "Player data saved  (%s).\n", static_cast<lpctstr>(m_FilePlayers.GetFilePath()));
@@ -1062,7 +1062,7 @@ bool CWorld::SaveStage() // Save world state in stages.
 		int64 iNextTime = g_Cfg.m_iSaveBackgroundTime / m_SectorsQty;
 		if ( iNextTime > MSECS_PER_SEC *30 * 60 )
 			iNextTime = MSECS_PER_SEC * 30 * 60;	// max out at 30 minutes or so.
-		m_timeSave = g_World.GetCurrentTick() + iNextTime;
+		m_timeSave = g_World.GetCurrentTime().GetTimeRaw() + iNextTime;
 	}
 	++m_iSaveStage;
 	return bRc;
@@ -1664,8 +1664,8 @@ bool CWorld::LoadAll() // Load world from script
 	if ( !LoadWorld() )
 		return false;
 
-	m_timeStartup = g_World.GetCurrentTick();
-	m_timeSave = g_World.GetCurrentTick() + g_Cfg.m_iSavePeriod;	// next save time.
+	m_timeStartup = g_World.GetCurrentTime().GetTimeRaw();
+	m_timeSave = g_World.GetCurrentTime().GetTimeRaw() + g_Cfg.m_iSavePeriod;	// next save time.
 
 	// Set all the sector light levels now that we know the time.
 	// This should not look like part of the load. (CTRIG_EnvironChange triggers should run)
@@ -2478,36 +2478,36 @@ void CWorld::OnTick()
 
     // Save state checks
     // Notifications
-	if ( (m_bSaveNotificationSent == false) && ((m_timeSave - (10 * MSECS_PER_SEC)) <= GetCurrentTick()) )
+	if ( (m_bSaveNotificationSent == false) && ((m_timeSave - (10 * MSECS_PER_SEC)) <= GetCurrentTime().GetTimeRaw()) )
 	{
 		Broadcast( g_Cfg.GetDefaultMsg( DEFMSG_SERVER_WORLDSAVE_NOTIFY ) );
 		m_bSaveNotificationSent = true;
 	}
 
     // Save
-	if ( m_timeSave <= GetCurrentTick())
+	if ( m_timeSave <= GetCurrentTime().GetTimeRaw())
 	{
 		// Auto save world
-		m_timeSave = GetCurrentTick() + g_Cfg.m_iSavePeriod;
+		m_timeSave = GetCurrentTime().GetTimeRaw() + g_Cfg.m_iSavePeriod;
 		g_Log.Flush();
 		Save( false );
 	}
 
     // Global (ini) stuff.
     // Respawn Dead NPCs
-	if ( m_timeRespawn <= GetCurrentTick())
+	if ( m_timeRespawn <= GetCurrentTime().GetTimeRaw())
 	{
 		// Time to regen all the dead NPC's in the world.
-		m_timeRespawn = GetCurrentTick() + (20 * 60 * MSECS_PER_SEC);
+		m_timeRespawn = GetCurrentTime().GetTimeRaw() + (20 * 60 * MSECS_PER_SEC);
 		RespawnDeadNPCs();
 	}
 
     // f_onserver_timer function.
-	if ( m_timeCallUserFunc < GetCurrentTick())
+	if ( m_timeCallUserFunc < GetCurrentTime().GetTimeRaw())
 	{
 		if ( g_Cfg._iTimerCall )
 		{
-			m_timeCallUserFunc = GetCurrentTick() + g_Cfg._iTimerCall;
+			m_timeCallUserFunc = GetCurrentTime().GetTimeRaw() + g_Cfg._iTimerCall;
 			CScriptTriggerArgs args(g_Cfg._iTimerCall/(60 * MSECS_PER_SEC));
 			g_Serv.r_Call("f_onserver_timer", &g_Serv, &args);
 		}

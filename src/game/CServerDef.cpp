@@ -49,7 +49,7 @@ CServerDef::CServerDef( lpctstr pszName, CSocketAddressIP dwIP ) :
 
 	SetName( pszName );
 	m_timeLastValid = 0;
-	m_timeCreate = g_World.GetCurrentTick();
+	m_timeCreate = g_World.GetCurrentTime().GetTimeRaw();
 
 	// Set default time zone from UTC
 	m_TimeZone = (char)( _timezone / (60 * 60) );	// Greenwich mean time.
@@ -173,7 +173,7 @@ void CServerDef::SetName( lpctstr pszName )
 void CServerDef::SetValidTime()
 {
 	ADDTOCALLSTACK("CServerDef::SetValidTime");
-	m_timeLastValid = g_World.GetCurrentTick();
+	m_timeLastValid = g_World.GetCurrentTime().GetTimeRaw();
 }
 
 int64 CServerDef::GetTimeSinceLastValid() const
@@ -381,7 +381,7 @@ bool CServerDef::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc
 		}
 		break;
 	case SC_CREATE:
-		sVal.FormatLLVal( -( g_World.GetTickDiff(m_timeCreate)) );
+		sVal.FormatLLVal( -( g_World.GetTimeDiff(m_timeCreate)) );
 		break;
 	case SC_LANG:
 		sVal = m_sLang;
@@ -466,5 +466,5 @@ int64 CServerDef::GetAgeHours() const
 {
 	ADDTOCALLSTACK("CServerDef::GetAgeHours");
 	// This is just the amount of time it has been listed.
-	return (( - g_World.GetTickDiff( m_timeCreate )) / ( 60 * 60 ));
+	return (( - g_World.GetTimeDiff( m_timeCreate )) / ( 60 * 60 ));
 }

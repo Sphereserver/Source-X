@@ -36,35 +36,34 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 	// Then Set the next restock time for this .
 
 	// Make sure that we're a vendor and not a pet
+
 	if ( IsStatFlag(STATF_PET) || !NPC_IsVendor() )
 		return false;
 
-	bool bRestockNow = true;
+	bool bRestockNow = false;
+    int64 iTimeDiff = g_World.GetTimeDiff(m_pNPC->m_timeRestock);
+    int64 iRestockDelay = 10 * 60;  // 10 Minutes delay
 
-	if ( !bForce && m_pNPC->m_timeRestock > 0 )
+	if ( !bForce && iTimeDiff < 0)
 	{
-		// Restock occurs every 10 minutes of inactivity (unless region tag specifies different time)
+        bRestockNow = true; // restock timeout has expired, make it restock again (unless it's declared to do not restock in the bellow lines).
 		CRegionWorld *region = GetRegion();
-		int64 restockIn = 10 * 60 * MSECS_PER_SEC;
 		if( region != nullptr )
 		{
 			CVarDefCont *vardef = region->m_TagDefs.GetKey("RestockVendors");
 			if( vardef != nullptr )
-				restockIn = vardef->GetValNum();
+                iRestockDelay = vardef->GetValNum();
 			if ( region->m_TagDefs.GetKey("NoRestock") != nullptr )
 				bRestockNow = false;
 		}
 		if ( m_TagDefs.GetKey("NoRestock") != nullptr )
 			bRestockNow = false;
-		
-		if (bRestockNow)
-			bRestockNow = ( m_pNPC->m_timeRestock > restockIn );
 	}
-
+    int64 iNextRestock = g_World.GetCurrentTime().GetTimeRaw() + (iRestockDelay * MSECS_PER_TENTH); // backwards: it was working on tenths in scripts before, keep it like that and update it to seconds.
+    
 	// At restock the containers are actually emptied
 	if ( bRestockNow )
 	{
-		m_pNPC->m_timeRestock = g_World.GetCurrentTick();
 
 		for ( size_t i = 0; i < CountOf(sm_VendorLayers); ++i )
 		{
@@ -74,26 +73,24 @@ bool CChar::NPC_Vendor_Restock(bool bForce, bool bFillStock)
 
 			pCont->Clear();
 		}
+        bFillStock = true;  // force the vendor to restock.
 	}
 
 	if ( bFillStock )
 	{
 		// An invalid restock time means that the containers are
 		// waiting to be filled
-		if ( !(m_pNPC->m_timeRestock > 0) )
+		if ( IsTrigUsed(TRIGGER_NPCRESTOCK) )
 		{
-			if ( IsTrigUsed(TRIGGER_NPCRESTOCK) )
-			{
-				CCharBase *pCharDef = Char_GetDef();
-				ReadScriptTrig(pCharDef, CTRIG_NPCRestock, true);
-			}
-
-			//	we need restock vendor money as well
-			GetBank()->Restock();
+			CCharBase *pCharDef = Char_GetDef();
+			ReadScriptTrig(pCharDef, CTRIG_NPCRestock, true);
 		}
 
+		//	we need restock vendor money as well
+		GetBank()->Restock();
+
 		// remember that the stock was filled (or considered up-to-date)
-		m_pNPC->m_timeRestock = g_World.GetCurrentTick();
+        m_pNPC->m_timeRestock = iNextRestock;
 	}
 	return true;
 }

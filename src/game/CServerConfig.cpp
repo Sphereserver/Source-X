@@ -227,11 +227,11 @@ CServerConfig::CServerConfig()
 
 	m_iDefaultCommandLevel	= 7;	// PLevel 7 default for command levels.
 
-	m_iRegenRate[STAT_STR]	= 40;       // Seconds to heal ONE hp (before stam/food adjust)
-	m_iRegenRate[STAT_INT]	= 20;       // Seconds to heal ONE mn
-	m_iRegenRate[STAT_DEX]	= 10;       // Seconds to heal ONE stm
-	m_iRegenRate[STAT_FOOD] = 60*60;    // Food usage (1 time per 60 minutes)
-    _iItemHitpointsUpdate   = 10;       // Delay to send hitpoints update packet for items.
+	m_iRegenRate[STAT_STR]	= 40 * MSECS_PER_SEC;       // Seconds to heal ONE hp (before stam/food adjust)
+	m_iRegenRate[STAT_INT]	= 20 * MSECS_PER_SEC;       // Seconds to heal ONE mn
+	m_iRegenRate[STAT_DEX]	= 10 * MSECS_PER_SEC;       // Seconds to heal ONE stm
+	m_iRegenRate[STAT_FOOD] = 60*60 * MSECS_PER_SEC;    // Food usage (1 time per 60 minutes)
+    _iItemHitpointsUpdate   = 10 * MSECS_PER_SEC;       // Delay to send hitpoints update packet for items.
 
 	_iTimerCall			= 0;
 	m_bAllowLightOverride	= true;
@@ -3894,7 +3894,7 @@ void CServerConfig::OnTick( bool fNow )
 {
 	ADDTOCALLSTACK("CServerConfig::OnTick");
 	// Give a tick to the less critical stuff.
-	if ( !fNow && ( g_Serv.IsLoading() || ( m_timePeriodic > g_World.GetCurrentTick()) ) ) 
+	if ( !fNow && ( g_Serv.IsLoading() || ( m_timePeriodic > g_World.GetCurrentTime().GetTimeRaw()) ) )
 		return;
 
 	if ( this->m_fUseHTTP )
@@ -3922,7 +3922,7 @@ void CServerConfig::OnTick( bool fNow )
 		}
 	}
 
-	m_timePeriodic = g_World.GetCurrentTick() + ( 60 * MSECS_PER_SEC );
+	m_timePeriodic = g_World.GetCurrentTime().GetTimeRaw() + ( 60 * MSECS_PER_SEC );
 }
 
 #define catresname(a,b)	\

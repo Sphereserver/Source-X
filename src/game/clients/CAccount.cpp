@@ -701,7 +701,7 @@ void CAccount::OnLogin( CClient * pClient )
 	ADDTOCALLSTACK("CAccount::OnLogin");
 
 	ASSERT(pClient);
-	pClient->m_timeLogin = g_World.GetCurrentTick();	// g_World clock of login time. "LASTCONNECTTIME"
+	pClient->m_timeLogin = g_World.GetCurrentTime().GetTimeRaw();	// g_World clock of login time. "LASTCONNECTTIME"
 
 	if ( GetPrivLevel() >= PLEVEL_Counsel )	// ON by default.
 	{
@@ -855,7 +855,7 @@ void CAccount::ClearPasswordTries(bool bAll)
 		return;
 	}
 
-	llong timeCurrent = g_World.GetCurrentTick();
+	llong timeCurrent = g_World.GetCurrentTime().GetTimeRaw();
 	for ( BlockLocalTime_t::iterator itData = m_BlockIP.begin(), end = m_BlockIP.end(); itData != end; )
 	{
 		BlockLocalTimePair_t itResult = (*itData).second;

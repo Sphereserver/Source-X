@@ -782,7 +782,7 @@ void NetworkInput::processData()
 			{
 				// check for timeout
 				EXC_SET("check frozen");
-				int64 iLastEventDiff = -g_World.GetTickDiff( client->m_timeLastEvent );
+				int64 iLastEventDiff = -g_World.GetTimeDiff( client->m_timeLastEvent );
 				if ( g_Cfg.m_iDeadSocketTime > 0 && iLastEventDiff > g_Cfg.m_iDeadSocketTime )
 				{
 					g_Log.Event(LOGM_CLIENTS_LOG|LOGL_EVENT, "%x:Frozen client disconnected (DeadSocketTime reached).\n", state->id());
@@ -906,7 +906,7 @@ bool NetworkInput::processData(NetState* state, Packet* buffer)
 	if (client->GetConnectType() == CONNECT_UNK)
 		return processUnknownClientData(state, buffer);
 
-	client->m_timeLastEvent = g_World.GetCurrentTick();
+	client->m_timeLastEvent = g_World.GetCurrentTime().GetTimeRaw();
 
 	if ( client->m_Crypt.IsInit() == false )
 		return processOtherClientData(state, buffer);
