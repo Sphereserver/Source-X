@@ -269,7 +269,7 @@ public:
 	int64 GetGameWorldTime( int64 basetime ) const;
     int64 GetGameWorldTime() const	// return game world minutes
 	{
-		return( GetGameWorldTime(GetCurrentTick()));
+		return( GetGameWorldTime(GetCurrentTime().GetTimeRaw()));
 	}
 
 	// CSector World Map stuff.

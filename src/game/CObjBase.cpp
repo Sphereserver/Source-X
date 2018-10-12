@@ -1509,7 +1509,7 @@ bool CObjBase::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsole * pSrc )
 			sVal.FormatVal( pItem->GetSpeed() );
 		}	break;
 		case OC_TIMESTAMP:
-			sVal.FormatLLVal( GetTimeStamp() );
+			sVal.FormatLLVal( GetTimeStamp() / MSECS_PER_TENTH ); // in tenths of second.
 			break;
 		case OC_VERSION:
 			sVal = SPHERE_VERSION;

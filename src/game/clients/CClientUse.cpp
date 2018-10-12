@@ -266,7 +266,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 				pItem->m_itPotion.m_tick = 4;		// countdown to explode
 				pItem->m_itPotion.m_ignited = 1;	// ignite it
 				pItem->m_uidLink = m_pChar->GetUID();
-				pItem->SetTimeout(1000);
+				pItem->SetTimeoutS(1);
 				m_tmUseItem.m_pParent = pItem->GetParent();
 				addTarget(CLIMODE_TARG_USE_ITEM, g_Cfg.GetDefaultMsg(DEFMSG_SELECT_POTION_TARGET), true, true, pItem->m_itPotion.m_tick * MSECS_PER_SEC);
 				return true;
@@ -985,7 +985,7 @@ bool CClient::Cmd_Skill_Magery( SPELL_TYPE iSpell, CObjBase *pSrc )
 
 		int64 SpellTimeout = g_Cfg.m_iSpellTimeout;
 		if ( m_pChar->GetDefNum("SPELLTIMEOUT", true) )
-			SpellTimeout = m_pChar->GetDefNum("SPELLTIMEOUT", true); // ticks
+			SpellTimeout = m_pChar->GetDefNum("SPELLTIMEOUT", true) * MSECS_PER_SEC; // tenths to msec
 
 		addTarget(CLIMODE_TARG_SKILL_MAGERY, pPrompt, pSpellDef->IsSpellType(SPELLFLAG_TARG_XYZ), pSpellDef->IsSpellType(SPELLFLAG_HARM), SpellTimeout);
 		return true;

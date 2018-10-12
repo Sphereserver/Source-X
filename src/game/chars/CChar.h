@@ -1084,8 +1084,9 @@ public:
 	* @Brief I'm calling guards on pCriminal
 	*
 	* @param pCriminal: character who shall be punished by guards
+    * @return true if the call succeed
 	*/
-	void CallGuards( CChar * pCriminal );
+	bool CallGuards( CChar * pCriminal );
 
 #define DEATH_NOFAMECHANGE 0x01
 #define DEATH_NOCORPSE 0x02
