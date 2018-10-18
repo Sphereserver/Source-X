@@ -1378,7 +1378,11 @@ WAR_SWING_TYPE CChar::Fight_CanHit(CChar * pCharSrc, bool fIgnoreDistance)
 	//	WAR_SWING_EQUIPPING	= recoiling weapon / swing made
 	//  WAR_SWING_READY		= Ready to hit, will switch to WAR_SWING_SWINGING ASAP.
 	//  WAR_SWING_SWINGING	= taking my swing now
-    if (IsStatFlag(STATF_DEAD) || !pCharSrc->Fight_IsAttackable())
+    if (IsDisconnected()) // Was the char deleted? (without this check, the server would crash!)
+    {
+        return WAR_SWING_INVALID;
+    }
+    else if (IsStatFlag(STATF_DEAD) || !pCharSrc->Fight_IsAttackable())
     {
         return WAR_SWING_INVALID;
     }

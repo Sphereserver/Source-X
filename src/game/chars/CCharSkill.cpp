@@ -619,11 +619,9 @@ int64 CChar::Skill_GetTimeout()
 		return 0;
 
 	int iSkillLevel = Skill_GetBase(skill);
-    int64 iTimeout = pSkillDef->m_Delay.GetLinear(iSkillLevel) * MSECS_PER_TENTH;
-	return maximum(iTimeout, MSECS_PER_TICK);
+    int64 iTimeoutInTenths = pSkillDef->m_Delay.GetLinear(iSkillLevel);
+	return (maximum(1, iTimeoutInTenths) * MSECS_PER_TENTH);
 }
-
-
 
 bool CChar::Skill_MakeItem_Success()
 {
