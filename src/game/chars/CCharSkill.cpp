@@ -605,7 +605,7 @@ ushort CChar::Skill_GetBase( SKILL_TYPE skill ) const
 void CChar::Skill_SetTimeout()
 {
 	ADDTOCALLSTACK("CChar::Skill_SetTimeout");
-	SetTimeoutD(Skill_GetTimeout());
+	SetTimeout(Skill_GetTimeout());
 }
 
 int64 CChar::Skill_GetTimeout()
@@ -615,11 +615,12 @@ int64 CChar::Skill_GetTimeout()
 	ASSERT( IsSkillBase(skill));
 
 	const CSkillDef * pSkillDef = g_Cfg.GetSkillDef(skill);
-	if (pSkillDef == NULL)
+	if (!pSkillDef)
 		return 0;
 
 	int iSkillLevel = Skill_GetBase(skill);
-	return pSkillDef->m_Delay.GetLinear(iSkillLevel) * MSECS_PER_TENTH;
+    int64 iTimeout = pSkillDef->m_Delay.GetLinear(iSkillLevel) * MSECS_PER_TENTH;
+	return maximum(iTimeout, MSECS_PER_TICK);
 }
 
 

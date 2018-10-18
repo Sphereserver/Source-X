@@ -30,7 +30,7 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fT
 
 	if ( fTest )	// Is the resource avail at all here ?
 	{
-		EXC_SET("is item near type");
+		EXC_SET_BLOCK("is item near type");
 		if ((Type != IT_TREE) && (Type != IT_ROCK) )
 		{
 			if ( !g_World.IsTypeNear_Top(pt, Type, 0) )
@@ -44,7 +44,7 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fT
 	}
 
 	// Find the resource object.
-	EXC_SET("find existant bit");
+	EXC_SET_BLOCK("find existant bit");
 	CItem * pResBit;
 	CWorldSearch Area(pt);
 	for (;;)
@@ -69,7 +69,7 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fT
 	// Odds of my finding it are.
 	// RES_REGIONRESOURCE from RES_REGIONTYPE linked to RES_AREA
 
-	EXC_SET("get region");
+	EXC_SET_BLOCK("get region");
 	CRegionWorld* pRegion = dynamic_cast<CRegionWorld*>( pt.GetRegion( REGION_TYPE_AREA ));
 	if ( !pRegion )
 		return nullptr;
@@ -93,13 +93,13 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fT
 	}
 
 	// Find RES_REGIONTYPE
-	EXC_SET("resource group");
+	EXC_SET_BLOCK("resource group");
 	const CSRandGroupDef * pResGroup = pRegion->FindNaturalResource(Type);
 	if ( !pResGroup )
 		return nullptr;
 
 	// Find RES_REGIONRESOURCE
-	EXC_SET("get random group element");
+	EXC_SET_BLOCK("get random group element");
 	size_t id = pResGroup->GetRandMemberIndex(pCharSrc);
 	CRegionResourceDef * pOreDef;
 	if ( id == pResGroup->BadMemberIndex() )
@@ -115,7 +115,7 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fT
 	if ( !pOreDef )
 		return nullptr;
 
-	EXC_SET("create bit");
+	EXC_SET_BLOCK("create bit");
 	pResBit = CItem::CreateScript(ITEMID_WorldGem, pCharSrc);
 	if ( !pResBit )
 		return nullptr;
@@ -136,7 +136,7 @@ CItem * CWorld::CheckNaturalResource(const CPointMap & pt, IT_TYPE Type, bool fT
 	pResBit->SetAmount( amount );
 	pResBit->MoveToDecay(pt, pOreDef->m_iRegenerateTime.GetRandom() * MSECS_PER_SEC);	// Delete myself in this amount of time.
 
-	EXC_SET("resourcefound");
+	EXC_SET_BLOCK("resourcefound");
 
 	if ( pCharSrc != nullptr )
 	{

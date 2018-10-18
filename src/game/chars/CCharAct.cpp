@@ -1086,11 +1086,11 @@ bool CChar::UpdateAnimate(ANIM_TYPE action, bool fTranslate, bool fBackward , by
 	if (action < 0 || action >= ANIM_QTY)
 		return false;
 
-	ANIM_TYPE_NEW subaction = static_cast<ANIM_TYPE_NEW>(-1);
+	ANIM_TYPE_NEW subaction = (ANIM_TYPE_NEW)(-1);
 	byte variation = 0;		//Seems to have some effect for humans/elfs vs gargoyles
 	if (fTranslate)
 		action = GenerateAnimate( action, true, fBackward);
-	ANIM_TYPE_NEW action1 = static_cast<ANIM_TYPE_NEW>(action);
+	ANIM_TYPE_NEW action1 = (ANIM_TYPE_NEW)(action);
 
 	if (IsPlayableCharacter())		//Perform these checks only for Gargoyles or in Enhanced Client
 	{
@@ -1311,7 +1311,7 @@ void CChar::UpdateMove( const CPointMap & ptOld, CClient * pExcludeClient, bool 
 		m_fStatusUpdate &= ~SU_UPDATE_MODE;
 
 	EXC_TRY("UpdateMove");
-	EXC_SET("FOR LOOP");
+	EXC_SET_BLOCK("FOR LOOP");
 	ClientIterator it;
 	for ( CClient* pClient = it.next(); pClient != NULL; pClient = it.next() )
 	{
@@ -1320,34 +1320,34 @@ void CChar::UpdateMove( const CPointMap & ptOld, CClient * pExcludeClient, bool 
 
 		if ( pClient == m_pClient )
 		{
-			EXC_SET("AddPlayerView");
+			EXC_SET_BLOCK("AddPlayerView");
 			pClient->addPlayerView(ptOld, bFull);
 			continue;
 		}
 
-		EXC_SET("GetChar");
+		EXC_SET_BLOCK("GetChar");
 		CChar * pChar = pClient->GetChar();
 		if ( pChar == NULL )
 			continue;
 
 		bool fCouldSee = (ptOld.GetDistSight(pChar->GetTopPoint()) <= pChar->GetVisualRange());
-		EXC_SET("CanSee");
+		EXC_SET_BLOCK("CanSee");
 		if ( !pClient->CanSee(this) )
 		{
 			if ( fCouldSee )
 			{
-				EXC_SET("AddObjRem");
+				EXC_SET_BLOCK("AddObjRem");
 				pClient->addObjectRemove(this);		// this client can't see me anymore
 			}
 		}
 		else if ( fCouldSee )
 		{
-			EXC_SET("AddcharMove");
+			EXC_SET_BLOCK("AddcharMove");
 			pClient->addCharMove(this);		// this client already saw me, just send the movement packet
 		}
 		else
 		{
-			EXC_SET("AddChar");
+			EXC_SET_BLOCK("AddChar");
 			pClient->addChar(this);			// first time this client has seen me, send complete packet
 		}
 	}
@@ -3076,7 +3076,7 @@ CRegion * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool fChec
 
 	EXC_TRY("CanMoveWalkTo");
 
-	EXC_SET("Check Valid Move");
+	EXC_SET_BLOCK("Check Valid Move");
 	pArea = CheckValidMove(ptDst, &dwBlockFlags, dir, &ClimbHeight, fPathFinding);
 	if ( !pArea )
 	{
@@ -3085,11 +3085,11 @@ CRegion * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool fChec
 		return NULL;
 	}
 
-	EXC_SET("NPC's will");
+	EXC_SET_BLOCK("NPC's will");
 	if ( !fCheckOnly && m_pNPC && !NPC_CheckWalkHere(ptDst, pArea, dwBlockFlags) )	// does the NPC want to walk here?
 		return NULL;
 
-	EXC_SET("Creature bumping");
+	EXC_SET_BLOCK("Creature bumping");
 	short iStamReq = 0;
 	if ( fCheckChars && !IsStatFlag(STATF_DEAD|STATF_SLEEPING|STATF_INSUBSTANTIAL) )
 	{
@@ -3158,7 +3158,7 @@ CRegion * CChar::CanMoveWalkTo( CPointBase & ptDst, bool fCheckChars, bool fChec
 
 	if ( !fCheckOnly )
 	{
-		EXC_SET("Stamina penalty");
+		EXC_SET_BLOCK("Stamina penalty");
 		// Chance to drop more stamina if running or overloaded
 		CVarDefCont *pVal = GetKey("OVERRIDE.RUNNINGPENALTY", true);
 		if ( IsStatFlag(STATF_FLY|STATF_HOVERING) )
@@ -3792,7 +3792,7 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 		CChar * pChar = pSrc->GetChar();
 		if ( pChar != NULL && this != pChar )
 		{
-			EXC_SET("chardef");
+			EXC_SET_BLOCK("chardef");
 			CUID uidOldAct = pChar->m_Act_UID;
 			pChar->m_Act_UID = GetUID();
 			iRet = pChar->OnTrigger(pszCharTrigName, pSrc, pArgs );
@@ -3808,7 +3808,7 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 	//
 	if ( IsTrigUsed(pszTrigName) )
 	{
-		EXC_SET("events");
+		EXC_SET_BLOCK("events");
 		size_t origEvents = m_OEvents.size();
 		size_t curEvents = origEvents;
 		for ( size_t i = 0; i < curEvents; ++i ) // EVENTS (could be modifyed ingame!)
@@ -3835,7 +3835,7 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 		if ( m_pNPC != NULL )
 		{
 			// 3) TEVENTS
-			EXC_SET("NPC triggers"); // TEVENTS (constant events of NPCs)
+			EXC_SET_BLOCK("NPC triggers"); // TEVENTS (constant events of NPCs)
 			for ( size_t i = 0; i < pCharDef->m_TEvents.size(); ++i )
 			{
 				CResourceLink * pLink = pCharDef->m_TEvents[i];
@@ -3853,7 +3853,7 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 		// 4) CHARDEF triggers
 		if ( m_pPlayer == NULL ) //	CHARDEF triggers (based on body type)
 		{
-			EXC_SET("chardef triggers");
+			EXC_SET_BLOCK("chardef triggers");
 			if ( pCharDef->HasTrigger(iAction) )
 			{
 				CResourceLock s;
@@ -3870,7 +3870,7 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 		// 5) EVENTSPET triggers for npcs
 		if (m_pNPC != NULL)
 		{
-			EXC_SET("NPC triggers - EVENTSPET"); // EVENTSPET (constant events of NPCs set from sphere.ini)
+			EXC_SET_BLOCK("NPC triggers - EVENTSPET"); // EVENTSPET (constant events of NPCs set from sphere.ini)
 			for (size_t i = 0; i < g_Cfg.m_pEventsPetLink.size(); ++i)
 			{
 				CResourceLink * pLink = g_Cfg.m_pEventsPetLink[i];
@@ -3888,7 +3888,7 @@ TRIGRET_TYPE CChar::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 		if ( m_pPlayer != NULL )
 		{
 			//	EVENTSPLAYER triggers (constant events of players set from sphere.ini)
-			EXC_SET("chardef triggers - EVENTSPLAYER");
+			EXC_SET_BLOCK("chardef triggers - EVENTSPLAYER");
 			for ( size_t i = 0; i < g_Cfg.m_pEventsPlayerLink.size(); ++i )
 			{
 				CResourceLink	*pLink = g_Cfg.m_pEventsPlayerLink[i];
@@ -3998,6 +3998,30 @@ void CChar::OnTickFood(short iVal, int HitsHungerLoss)
 	}
 }
 
+void CChar::OnTickSkill()
+{
+    EXC_TRYSUB("OnTickSkill");
+    switch (Skill_Done())
+    {
+        case -SKTRIG_ABORT:
+            EXC_SETSUB_BLOCK("skill abort");
+            Skill_Fail(true);   // fail with no message or credit.
+            break;
+        case -SKTRIG_FAIL:
+            EXC_SETSUB_BLOCK("skill fail");
+            Skill_Fail(false);
+            break;
+        case -SKTRIG_QTY:
+            EXC_SETSUB_BLOCK("skill cleanup");
+            Skill_Cleanup();
+            break;
+        case -SKTRIG_STROKE:
+            //EXC_SET_BLOCK("skill stroked");
+            break;
+    }
+    EXC_CATCHSUB("Skill tick");
+}
+
 // Assume this is only called 1 time per sec.
 // Get a timer tick when our timer expires.
 // RETURN: false = delete this.
@@ -4016,13 +4040,14 @@ bool CChar::OnTick()
         GoSleep();
         return true;
     }
+
     /*
     * CComponent's ticking:
     * Be aware that return CCRET_FALSE will return false (and delete the char),
     * take in mind that return will prevent this char's stats updates,
     *  attacker, notoriety, death status, etc from happening.
     */
-    CCRET_TYPE iCompRet = static_cast<CEntity*>(this)->OnTick();
+    CCRET_TYPE iCompRet = CEntity::OnTick();
     if (iCompRet != CCRET_CONTINUE) // if return != CCRET_TRUE
     {
         return iCompRet;    // Stop here
@@ -4031,31 +4056,14 @@ bool CChar::OnTick()
     if (IsDisconnected())		// mounted horses can still get a tick.
         return true;
 
-    EXC_SET("timer expired");
     // My turn to do some action.
-    switch (Skill_Done())
-    {
-		case -SKTRIG_ABORT:
-            EXC_SET("skill abort");
-            Skill_Fail(true);   // fail with no message or credit.
-            break;
-		case -SKTRIG_FAIL:
-            EXC_SET("skill fail");
-            Skill_Fail(false);
-            break;
-		case -SKTRIG_QTY:
-            EXC_SET("skill cleanup");
-            Skill_Cleanup();
-            break;
-        case -SKTRIG_STROKE:
-            //EXC_SET("skill stroked");
-            break;
-    }
+    EXC_SET_BLOCK("Timer expired");
+    OnTickSkill();
 
     if (m_pNPC)
     {
         ProfileTask aiTask(PROFILE_NPC_AI);
-        EXC_SET("NPC action");
+        EXC_SET_BLOCK("NPC action");
         if (!IsStatFlag(STATF_FREEZE))
         {
             NPC_OnTickAction();
@@ -4097,13 +4105,13 @@ bool CChar::OnTickPeriodic()
     if (fRegen)
     {
         _iRegenTickCount = 0;
-        EXC_SET("last attackers");
+        EXC_SET_BLOCK("last attackers");
         if (g_Cfg.m_iAttackerTimeout >= 0)
         {
             Attacker_CheckTimeout();
         }
 
-        EXC_SET("NOTO timeout");
+        EXC_SET_BLOCK("NOTO timeout");
         if (g_Cfg.m_iNotoTimeout > 0)
         {
             NotoSave_CheckTimeout();
@@ -4116,7 +4124,7 @@ bool CChar::OnTickPeriodic()
     // NOTE: Summon flags can kill our hp here. check again.
     if (!IsStatFlag(STATF_DEAD) && (Stat_GetVal(STAT_STR) <= 0))	// We can only die on our own tick.
     {
-        EXC_SET("death");
+        EXC_SET_BLOCK("death");
         return Death();
     }
 
@@ -4134,12 +4142,12 @@ bool CChar::OnTickPeriodic()
     if (fRegen)
     {
         // Check location periodically for standing in fire fields, traps, etc.
-        EXC_SET("check location");
+        EXC_SET_BLOCK("check location");
         CheckLocation(true);
         Stats_Regen();
     }
 
-    EXC_SET("update stats");
+    EXC_SET_BLOCK("update stats");
     OnTickStatusUpdate();
     EXC_CATCH;
     return true;

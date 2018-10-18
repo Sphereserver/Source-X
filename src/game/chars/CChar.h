@@ -1241,6 +1241,7 @@ public:
 	void OnTickFood( short iVal, int HitsHungerLoss );
 	void OnTickStatusUpdate();
 	bool OnTick();  // OnTick timeout for skills, AI, etc
+    void OnTickSkill(); // OnTick timeout specific for the skill behavior
     bool OnTickPeriodic();  // Periodic tick calls (update stats, status bar, notoriety & attackers, death check, etc)
 
 	static CChar * CreateBasic( CREID_TYPE baseID );

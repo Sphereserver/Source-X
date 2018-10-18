@@ -264,7 +264,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
     EXC_TRY("WriteVal");
     if ( IsSetEF( EF_Intrinsic_Locals ) )
     {
-        EXC_SET("intrinsic");
+        EXC_SET_BLOCK("intrinsic");
         CVarDefCont * pVar = m_VarsLocal.GetKey( pszKey );
 
         if ( pVar )
@@ -275,7 +275,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
     }
     else if ( !strnicmp("LOCAL.", pszKey, 6) )
     {
-        EXC_SET("local");
+        EXC_SET_BLOCK("local");
         pszKey	+= 6;
         sVal = m_VarsLocal.GetKeyStr(pszKey, true);
         return true;
@@ -283,14 +283,14 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
 
     if ( !strnicmp( "FLOAT.", pszKey, 6 ) )
     {
-        EXC_SET("float");
+        EXC_SET_BLOCK("float");
         pszKey += 6;
         sVal = m_VarsFloat.Get( pszKey );
         return true;
     }
     else if ( !strnicmp(pszKey, "ARGV", 4) )
     {
-        EXC_SET("argv");
+        EXC_SET_BLOCK("argv");
         pszKey += 4;
         SKIP_SEPARATORS(pszKey);
 
@@ -385,7 +385,7 @@ bool CScriptTriggerArgs::r_WriteVal( lpctstr pszKey, CSString &sVal, CTextConsol
         return true;
     }
 
-    EXC_SET("generic");
+    EXC_SET_BLOCK("generic");
     int index = FindTableSorted( pszKey, sm_szLoadKeys, CountOf( sm_szLoadKeys )-1 );
     switch (index)
     {

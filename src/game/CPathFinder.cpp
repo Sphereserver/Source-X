@@ -92,7 +92,7 @@ CPathFinder::CPathFinder(CChar *pChar, CPointMap ptTarget)
 	m_Target.m_x -= (short)(m_RealX);
 	m_Target.m_y -= (short)(m_RealY);
 
-	EXC_SET("FillMap");
+	EXC_SET_BLOCK("FillMap");
 
 	FillMap();
 

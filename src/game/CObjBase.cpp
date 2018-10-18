@@ -2109,7 +2109,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
             break;
 		case OV_DAMAGE:	//	"Dmg, SourceFlags, SourceCharUid, DmgPhysical(%), DmgFire(%), DmgCold(%), DmgPoison(%), DmgEnergy(%)" = do me some damage.
 			{
-				EXC_SET("DAMAGE");
+				EXC_SET_BLOCK("DAMAGE");
 				int64 piCmd[8];
 				int iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd));
 				if ( iArgQty < 1 )
@@ -2144,7 +2144,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 		case OV_EDIT:
 			{
-				EXC_SET("EDIT");
+				EXC_SET_BLOCK("EDIT");
 				// Put up a list of items in the container. (if it is a container)
 				if ( pClientSrc == NULL )
 					return false;
@@ -2154,7 +2154,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			break;
 		case OV_EFFECT: // some visual effect.
 			{
-				EXC_SET("EFFECT");
+				EXC_SET_BLOCK("EFFECT");
 				int64 piCmd[12];
 				int iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd) );
 				if ( iArgQty < 2 )
@@ -2189,7 +2189,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			break;
 		case OV_EFFECTLOCATION: // visual effect at map point.
 		{
-			EXC_SET("EFFECTLOCATION");
+			EXC_SET_BLOCK("EFFECTLOCATION");
 			int64 piCmd[15];
 			int iArgQty = Str_ParseCmds(s.GetArgStr(), piCmd, CountOf(piCmd));
 			if (iArgQty < 2)
@@ -2229,18 +2229,18 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		}
 		break;
 		case OV_EMOTE:
-			EXC_SET("EMOTE");
+			EXC_SET_BLOCK("EMOTE");
 			Emote( s.GetArgStr() );
 			break;
 		case OV_FLIP:
-			EXC_SET("FLIP");
+			EXC_SET_BLOCK("FLIP");
 			Flip();
 			break;
 		case OV_INPDLG:
 			// "INPDLG" verb maxchars
 			// else assume it was a property button.
 			{
-				EXC_SET("INPDLG");
+				EXC_SET_BLOCK("INPDLG");
 				if ( pClientSrc == NULL )
 					return false;
 
@@ -2264,7 +2264,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		
 		case OV_MENU:
 			{
-				EXC_SET("MENU");
+				EXC_SET_BLOCK("MENU");
 				if ( pClientSrc == NULL )
 					return false;
 				pClientSrc->Menu_Setup( g_Cfg.ResourceGetIDType( RES_MENU, s.GetArgStr()), this );
@@ -2273,7 +2273,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		case OV_MESSAGE:	//put info message (for pSrc client only) over item.
 		case OV_MSG:
 			{
-				EXC_SET("MESSAGE or MSG");
+				EXC_SET_BLOCK("MESSAGE or MSG");
 				if ( pCharSrc == NULL )
 					UpdateObjMessage(s.GetArgStr(), s.GetArgStr(), NULL, HUE_TEXT_DEF, TALKMODE_OBJ);
 				else
@@ -2282,7 +2282,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			break;
 		case OV_MESSAGEUA:
 			{
-				EXC_SET("MESSAGEUA");
+				EXC_SET_BLOCK("MESSAGEUA");
 				if ( pClientSrc == NULL )
 					break;	// We show the message only to players
 
@@ -2303,7 +2303,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			}
 		case OV_MOVE:
 			// move without restriction. east,west,etc. (?up,down,)
-			EXC_SET("MOVE");
+			EXC_SET_BLOCK("MOVE");
 			if ( IsTopLevel())
 			{
 				CPointMap pt = GetTopPoint();
@@ -2315,7 +2315,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			break;
 		case OV_MOVENEAR:
 			{
-				EXC_SET("MOVENEAR");
+				EXC_SET_BLOCK("MOVENEAR");
 				CObjBase *	pObjNear;
 				int64 piCmd[4];
 
@@ -2337,7 +2337,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			}
 			break;
 		case OV_NUDGEDOWN:
-			EXC_SET("NUDGEDOWN");
+			EXC_SET_BLOCK("NUDGEDOWN");
 			if ( IsTopLevel())
 			{
 				char zdiff = (char)(s.GetArgVal());
@@ -2346,7 +2346,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			}
 			break;
 		case OV_NUDGEUP:
-			EXC_SET("NUDGEUP");
+			EXC_SET_BLOCK("NUDGEUP");
 			if ( IsTopLevel())
 			{
 				char zdiff = (char)(s.GetArgVal());
@@ -2357,7 +2357,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		case OV_MOVETO:
 		case OV_P:
         {
-			EXC_SET("P or MOVETO");
+			EXC_SET_BLOCK("P or MOVETO");
             CPointMap pt( g_Cfg.GetRegionPoint(s.GetArgStr()) );
             if (pt.IsValidPoint())
             {
@@ -2372,7 +2372,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		case OV_PROMPTCONSOLE:
 		case OV_PROMPTCONSOLEU:
 			{
-				EXC_SET("PROMPTCONSOLE/U");
+				EXC_SET_BLOCK("PROMPTCONSOLE/U");
 				if ( pClientSrc == NULL )
 					return false;
 
@@ -2386,21 +2386,21 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			}
 			break;
 		case OV_INFO:
-			EXC_SET("INFO");
+			EXC_SET_BLOCK("INFO");
 			if ( ! pClientSrc )
 				return false;
 			return pClientSrc->addGumpDialogProps( GetUID() );
 		case OV_REMOVE:	//remove this object now.
-			EXC_SET("REMOVE");
+			EXC_SET_BLOCK("REMOVE");
 			Delete();
 			return true;
 		case OV_REMOVEFROMVIEW:
-			EXC_SET("REMOVEFROMVIEW");
+			EXC_SET_BLOCK("REMOVEFROMVIEW");
 			RemoveFromView( NULL, false );	// remove this item from all clients.
 			return true;
 		case OV_RESENDTOOLTIP:
 			{
-				EXC_SET("RESENDTOOLTIP");
+				EXC_SET_BLOCK("RESENDTOOLTIP");
 
 				int64 piCmd[2];
 				int iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd) );
@@ -2417,20 +2417,20 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				return true;
 			}
 		case OV_SAY: //speak so everyone can here
-			EXC_SET("SAY");
+			EXC_SET_BLOCK("SAY");
 			Speak( s.GetArgStr() );
 			break;
 
 		case OV_SAYU:
 			// Speak in unicode from the UTF8 system format.
-			EXC_SET("SAYU");
+			EXC_SET_BLOCK("SAYU");
 			SpeakUTF8( s.GetArgStr(), HUE_TEXT_DEF, TALKMODE_SAY, FONT_NORMAL );
 			break;
 
 		case OV_SAYUA:
 			// This can have full args. SAYUA Color, Mode, Font, Lang, Text Text
 			{
-				EXC_SET("SAYUA");
+				EXC_SET_BLOCK("SAYUA");
 				tchar * pszArgs[5];
 				int iArgQty = Str_ParseCmds( s.GetArgRaw(), pszArgs, CountOf(pszArgs) );
 				if ( iArgQty < 5 )
@@ -2446,7 +2446,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 		case OV_SOUND:
 			{
-				EXC_SET("SOUND");
+				EXC_SET_BLOCK("SOUND");
 				int64 piCmd[2];
 				int iArgQty = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd));
 				if (!iArgQty)
@@ -2456,7 +2456,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			break;
 		case OV_SPELLEFFECT:	// spell, strength, noresist
 			{
-				EXC_SET("SPELLEFFECT");
+				EXC_SET_BLOCK("SPELLEFFECT");
 				int64 piCmd[4];
 				size_t iArgs = Str_ParseCmds( s.GetArgStr(), piCmd, CountOf(piCmd));
 				CItem * pItemSrc = NULL;
@@ -2486,7 +2486,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			break;
 		case OV_TAGLIST:
 			{
-				EXC_SET("TAGLIST");
+				EXC_SET_BLOCK("TAGLIST");
 				if ( ! strcmpi( s.GetArgStr(), "log" ))
 					pSrc = &g_Serv;
 				m_TagDefs.DumpKeys(pSrc, "TAG.");
@@ -2494,7 +2494,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 		case OC_PROPSLIST:
 			{
-				EXC_SET("PROPSLIST");
+				EXC_SET_BLOCK("PROPSLIST");
 				if ( ! strcmpi( s.GetArgStr(), "log" ))
 					pSrc = &g_Serv;
 				m_BaseDefs.DumpKeys(pSrc, nullptr);
@@ -2502,7 +2502,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 		case OV_TARGET:
 			{
-				EXC_SET("TARGET");
+				EXC_SET_BLOCK("TARGET");
 				if ( !pClientSrc )
 					return false;
 				pszKey	+= 6;
@@ -2566,7 +2566,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 		case OV_TIMERF:
 			{
-				EXC_SET("TIMERF");
+				EXC_SET_BLOCK("TIMERF");
 				if ( !strnicmp( s.GetArgStr(), "CLEAR", 5 ) )
 				{
 					g_World.m_TimedFunctions.Erase(GetUID());
@@ -2613,7 +2613,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		case OV_DIALOG:
 		case OV_SDIALOG:
 			{
-				EXC_SET("DIALOG or SDIALOG");
+				EXC_SET_BLOCK("DIALOG or SDIALOG");
 				if ( pClientSrc == NULL )
 					return false;
 
@@ -2647,7 +2647,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			break;
 		case OV_DIALOGCLOSE:
 			{
-				EXC_SET("DIALOGCLOSE");
+				EXC_SET_BLOCK("DIALOGCLOSE");
 				if ( pClientSrc == NULL )
 					return false;
 
@@ -2665,7 +2665,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			break;
 		case OV_TRYP:
 			{
-				EXC_SET("TRYP");
+				EXC_SET_BLOCK("TRYP");
 				int iMinPriv = s.GetArgVal();
 
 				if ( iMinPriv >= PLEVEL_QTY )
@@ -2693,7 +2693,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			// no break here, TRYP only does extra checks
 		case OV_TRY:
 			{
-				EXC_SET("TRY or TRYP");
+				EXC_SET_BLOCK("TRY or TRYP");
 				lpctstr pszVerb = s.GetArgStr();
 				CScript script(pszVerb);
 				script.m_iResourceFileIndex = s.m_iResourceFileIndex;	// Index in g_Cfg.m_ResourceFiles of the CResourceScript (script file) where the CScript originated
@@ -2708,7 +2708,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		case OV_TRYSRC:
 		case OV_TRYSRV:
 			{
-				EXC_SET("TRYSRC or TRYSRV");
+				EXC_SET_BLOCK("TRYSRC or TRYSRV");
 				CUID NewSrc;
 				CTextConsole * pNewSrc = NULL;
 
@@ -2747,7 +2747,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			return true;
 
 		case OV_UID:
-			EXC_SET("UID");
+			EXC_SET_BLOCK("UID");
 			// block anyone from ever doing this.
 			if ( pSrc )
 			{
@@ -2756,18 +2756,18 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			return false;
 
 		case OV_UPDATE:
-			EXC_SET("UPDATE");
+			EXC_SET_BLOCK("UPDATE");
 			Update();
 			break;
 		case OV_UPDATEX:
-			EXC_SET("UPDATEX");
+			EXC_SET_BLOCK("UPDATEX");
 			// Some things like equipped items need to be removed before they can be updated !
 			RemoveFromView();
 			Update();
 			break;
 
 		case OV_CLICK:
-			EXC_SET("CLICK");
+			EXC_SET_BLOCK("CLICK");
 
 			if (!pCharSrc)
 				return false;
@@ -2787,7 +2787,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			return true;
 
 		case OV_DCLICK:
-			EXC_SET("DCLICK");
+			EXC_SET_BLOCK("DCLICK");
 			if (!pCharSrc)
 				return false;
 			if (s.HasArgs())
@@ -2805,7 +2805,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				return pCharSrc->Use_Obj(this, true, true);
 
 		case OV_USEITEM:
-			EXC_SET("USEITEM");
+			EXC_SET_BLOCK("USEITEM");
 			if ( ! pCharSrc )
 				return false;
 			if ( s.HasArgs() )
@@ -2825,7 +2825,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 		case OV_FIX:
 			s.GetArgStr()[0] = '\0';
 		case OV_Z:	//	ussually in "SETZ" form
-			EXC_SET("FIX or Z");
+			EXC_SET_BLOCK("FIX or Z");
 			if ( IsItemEquipped())
 				return false;
 			if ( s.HasArgs())

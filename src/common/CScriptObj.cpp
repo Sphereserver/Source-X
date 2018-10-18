@@ -1223,7 +1223,7 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 
 			if (sm_iReentrant > 32 )
 			{
-				EXC_SET("reentrant limit");
+				EXC_SET_BLOCK("reentrant limit");
 				ASSERT( sm_iReentrant < 32 );
 			}
 			++sm_iReentrant;
@@ -1252,11 +1252,11 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 			CSString sVal;
 			pszKey = static_cast<lpctstr>(pszResponse) + iBegin + 1;
 
-			EXC_SET("writeval");
+			EXC_SET_BLOCK("writeval");
 			fRes = r_WriteVal( pszKey, sVal, pSrc );
 			if ( fRes == false )
 			{
-				EXC_SET("writeval");
+				EXC_SET_BLOCK("writeval");
 				// write the value of functions or triggers variables/objects like ARGO, ARGN1/2/3, LOCALs...
 				if ( pArgs != nullptr && pArgs->r_WriteVal( pszKey, sVal, pSrc ) )
 					fRes = true;
@@ -1276,7 +1276,7 @@ size_t CScriptObj::ParseText( tchar * pszResponse, CTextConsole * pSrc, int iFla
 
 			size_t len = sVal.GetLength();
 
-			EXC_SET("mem shifting");
+			EXC_SET_BLOCK("mem shifting");
 
 			memmove( pszResponse + iBegin + len, pszResponse + i + 1, strlen( pszResponse + i + 1 ) + 1 );
 			memcpy( pszResponse + iBegin, static_cast<lpctstr>(sVal), len );
@@ -1830,7 +1830,7 @@ TRIGRET_TYPE CScriptObj::OnTriggerRun( CScript &s, TRIGRUN_TYPE trigrun, CTextCo
 	if ( trigrun == TRIGRUN_SECTION_EXEC || trigrun == TRIGRUN_SINGLE_EXEC )	// header was already read in.
 		goto jump_in;
 
-	EXC_SET("parsing");
+	EXC_SET_BLOCK("parsing");
 	while ( s.ReadKeyParse())
 	{
 		// Hit the end of the next trigger.
@@ -1869,7 +1869,7 @@ jump_in:
 			switch ( iCmd )
 			{
 				case SK_IF:
-					EXC_SET("if statement");
+					EXC_SET_BLOCK("if statement");
 					do
 					{
 						iRet = OnTriggerRun( s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult );
@@ -1892,7 +1892,7 @@ jump_in:
 				case SK_DORAND:
 				case SK_DOSWITCH:
 				case SK_BEGIN:
-					EXC_SET("begin/loop cycle");
+					EXC_SET_BLOCK("begin/loop cycle");
 					iRet = OnTriggerRun( s, TRIGRUN_SECTION_FALSE, pSrc, pArgs, pResult );
 					break;
 				default:
@@ -1911,19 +1911,19 @@ jump_in:
 			case SK_CONTINUE:
 				return TRIGRET_CONTINUE;
 
-			case SK_FORITEM:		EXC_SET("foritem");		iRet = OnTriggerForLoop( s, 1, pSrc, pArgs, pResult );			break;
-			case SK_FORCHAR:		EXC_SET("forchar");		iRet = OnTriggerForLoop( s, 2, pSrc, pArgs, pResult );			break;
-			case SK_FORCLIENTS:		EXC_SET("forclients");	iRet = OnTriggerForLoop( s, 0x12, pSrc, pArgs, pResult );		break;
-			case SK_FOROBJ:			EXC_SET("forobjs");		iRet = OnTriggerForLoop( s, 3, pSrc, pArgs, pResult );			break;
-			case SK_FORPLAYERS:		EXC_SET("forplayers");	iRet = OnTriggerForLoop( s, 0x22, pSrc, pArgs, pResult );		break;
-			case SK_FOR:			EXC_SET("for");			iRet = OnTriggerForLoop( s, 4, pSrc, pArgs, pResult );			break;
-			case SK_WHILE:			EXC_SET("while");		iRet = OnTriggerForLoop( s, 8, pSrc, pArgs, pResult );			break;
-			case SK_FORINSTANCE:	EXC_SET("forinstance");	iRet = OnTriggerForLoop( s, 0x40, pSrc, pArgs, pResult );		break;
-			case SK_FORTIMERF:		EXC_SET("fortimerf");	iRet = OnTriggerForLoop(s, 0x100, pSrc, pArgs, pResult);		break;
+			case SK_FORITEM:		EXC_SET_BLOCK("foritem");		iRet = OnTriggerForLoop( s, 1, pSrc, pArgs, pResult );			break;
+			case SK_FORCHAR:		EXC_SET_BLOCK("forchar");		iRet = OnTriggerForLoop( s, 2, pSrc, pArgs, pResult );			break;
+			case SK_FORCLIENTS:		EXC_SET_BLOCK("forclients");	iRet = OnTriggerForLoop( s, 0x12, pSrc, pArgs, pResult );		break;
+			case SK_FOROBJ:			EXC_SET_BLOCK("forobjs");		iRet = OnTriggerForLoop( s, 3, pSrc, pArgs, pResult );			break;
+			case SK_FORPLAYERS:		EXC_SET_BLOCK("forplayers");	iRet = OnTriggerForLoop( s, 0x22, pSrc, pArgs, pResult );		break;
+			case SK_FOR:			EXC_SET_BLOCK("for");			iRet = OnTriggerForLoop( s, 4, pSrc, pArgs, pResult );			break;
+			case SK_WHILE:			EXC_SET_BLOCK("while");		iRet = OnTriggerForLoop( s, 8, pSrc, pArgs, pResult );			break;
+			case SK_FORINSTANCE:	EXC_SET_BLOCK("forinstance");	iRet = OnTriggerForLoop( s, 0x40, pSrc, pArgs, pResult );		break;
+			case SK_FORTIMERF:		EXC_SET_BLOCK("fortimerf");	iRet = OnTriggerForLoop(s, 0x100, pSrc, pArgs, pResult);		break;
 			case SK_FORCHARLAYER:
 			case SK_FORCHARMEMORYTYPE:
 				{
-					EXC_SET("forchar[layer/memorytype]");
+					EXC_SET_BLOCK("forchar[layer/memorytype]");
 					CChar * pCharThis = dynamic_cast <CChar *> (this);
 					if ( pCharThis )
 					{
@@ -1949,7 +1949,7 @@ jump_in:
 				} break;
 			case SK_FORCONT:
 				{
-					EXC_SET("forcont");
+					EXC_SET_BLOCK("forcont");
 					if ( s.HasArgs() )
 					{
 						tchar * ppArgs[2];
@@ -2001,7 +2001,7 @@ jump_in:
 			case SK_FORCONTID:
 			case SK_FORCONTTYPE:
 				{
-					EXC_SET("forcont[id/type]");
+					EXC_SET_BLOCK("forcont[id/type]");
 					CObjBase * pObjCont = dynamic_cast <CObjBase *> (this);
 					CContainer * pCont = dynamic_cast <CContainer *> (this);
 					if ( pObjCont && pCont )
@@ -2065,10 +2065,10 @@ jump_in:
 			default:
 				{
 					// Parse out any variables in it. (may act like a verb sometimes?)
-					EXC_SET("parsing");
+					EXC_SET_BLOCK("parsing");
 					if( strchr(s.GetKey(), '<') )
 					{
-						EXC_SET("parsing <> in a key");
+						EXC_SET_BLOCK("parsing <> in a key");
 						TemporaryString tsBuf;
 						tchar* pszBuf = static_cast<tchar *>(tsBuf);
 						strcpy(pszBuf, s.GetKey());
@@ -2107,7 +2107,7 @@ jump_in:
 			case SK_DORAND:	// Do a random line in here.
 			case SK_DOSWITCH:
 				{
-					EXC_SET("dorand/doswitch");
+					EXC_SET_BLOCK("dorand/doswitch");
 					int64 iVal = s.GetArgLLVal();
 					if ( iCmd == SK_DORAND )
 						iVal = Calc_GetRandLLVal(iVal);
@@ -2123,7 +2123,7 @@ jump_in:
 				}
 				break;
 			case SK_RETURN:		// Process the trigger.
-				EXC_SET("return");
+				EXC_SET_BLOCK("return");
 				if ( pResult )
 				{
 					pResult->Copy( s.GetArgStr() );
@@ -2132,7 +2132,7 @@ jump_in:
 				return static_cast<TRIGRET_TYPE>(s.GetArgVal());
 			case SK_IF:
 				{
-					EXC_SET("if statement");
+					EXC_SET_BLOCK("if statement");
 					bool fTrigger = s.GetArgVal() ? true : false;
 					bool fBeenTrue = false;
 					for (;;)
@@ -2159,7 +2159,7 @@ jump_in:
 			case SK_BEGIN:
 				// Do this block here.
 				{
-					EXC_SET("begin/loop cycle");
+					EXC_SET_BLOCK("begin/loop cycle");
 					iRet = OnTriggerRun( s, TRIGRUN_SECTION_TRUE, pSrc, pArgs, pResult );
 					if ( iRet != TRIGRET_ENDIF )
 						return iRet;
@@ -2167,13 +2167,13 @@ jump_in:
 				break;
 
 			default:
-				EXC_SET("parsing");
+				EXC_SET_BLOCK("parsing");
 				if ( !pArgs->r_Verb(s, pSrc) )
 				{
 					bool	fRes;
 					if ( !strnicmp(s.GetKey(), "call", 4 ) )
 					{
-						EXC_SET("call");
+						EXC_SET_BLOCK("call");
 						CSString sVal;
 						tchar * argRaw = s.GetArgRaw();
 						CScriptObj *pRef = this;
@@ -2229,7 +2229,7 @@ jump_in:
 					}
 					else if ( !strnicmp(s.GetKey(), "FullTrigger", 11 ) )
 					{
-						EXC_SET("FullTrigger");
+						EXC_SET_BLOCK("FullTrigger");
 						CSString sVal;
 						tchar * piCmd[7];
 						tchar *psTmp = Str_GetTemp();
@@ -2298,7 +2298,7 @@ jump_in:
 					}
 					else
 					{
-						EXC_SET("verb");
+						EXC_SET_BLOCK("verb");
 						fRes = r_Verb(s, pSrc);
 					}
 

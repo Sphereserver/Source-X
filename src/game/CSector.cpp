@@ -1079,7 +1079,7 @@ bool CSector::OnTick()
 
 
 	EXC_TRY("Tick");
-	EXC_SET("light change");
+	EXC_SET_BLOCK("light change");
 
 	//	do not tick sectors on maps not supported by server
 	if ( !g_MapList.m_maps[m_map] )
@@ -1101,7 +1101,7 @@ bool CSector::OnTick()
 		fLightChange = true;
 	}
 
-	EXC_SET("sector sleeping?");
+	EXC_SET_BLOCK("sector sleeping?");
 	size_t clients = m_Chars_Active.HasClients();
 
 	if ( clients <= 0 ) // having no clients inside
@@ -1117,7 +1117,7 @@ bool CSector::OnTick()
 		}
 	}
 
-	EXC_SET("sound effects");
+	EXC_SET_BLOCK("sound effects");
 	// random weather noises and effects.
 	SOUND_TYPE sound = 0;
 	bool fWeatherChange = false;
@@ -1225,7 +1225,7 @@ bool CSector::OnTick()
 
 	ProfileTask overheadTask(PROFILE_OVERHEAD);
 
-	EXC_SET("check map cache");
+	EXC_SET_BLOCK("check map cache");
 	if (fCanSleep && m_iMapBlockCacheTime < iCurTime)     // Only if the sector can sleep.
 	{
 		// delete the static CServerMapBlock items that have not been used recently.

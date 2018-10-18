@@ -218,7 +218,7 @@ bool CClient::addRelay( const CServerDef * pServ )
 		ipAddr.SetAddrIP( SOCKET_LOCAL_ADDRESS );
 	}
 
-	EXC_SET("customer id");
+	EXC_SET_BLOCK("customer id");
 	dword dwAddr = ipAddr.GetAddrIP();
 	dword dwCustomerId = 0x7f000001;
 	if ( g_Cfg.m_fUseAuthID )
@@ -234,7 +234,7 @@ bool CClient::addRelay( const CServerDef * pServ )
 
 	DEBUG_MSG(( "%x:Login_Relay to server %s with AuthId %u\n", GetSocketID(), ipAddr.GetAddrStr(), dwCustomerId ));
 
-	EXC_SET("server relay packet");
+	EXC_SET_BLOCK("server relay packet");
 	new PacketServerRelay(this, dwAddr, pServ->m_ip.GetPort(), dwCustomerId);
 	
 	m_Targ_Mode = CLIMODE_SETUP_RELAY;

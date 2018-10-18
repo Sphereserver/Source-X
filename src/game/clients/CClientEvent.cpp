@@ -202,38 +202,38 @@ void CClient::Event_Item_Pickup(CUID uid, word amount) // Client grabs an item
 	if ( m_pChar == NULL )
 		return;
 
-	EXC_SET("Item");
+	EXC_SET_BLOCK("Item");
 	CItem	*pItem = uid.ItemFind();
 	if ( !pItem || pItem->IsWeird() )
 	{
-		EXC_SET("Item - addObjectRemove(uid)");
+		EXC_SET_BLOCK("Item - addObjectRemove(uid)");
 		addObjectRemove(uid);
-		EXC_SET("Item - addItemDragCancel(0)");
+		EXC_SET_BLOCK("Item - addItemDragCancel(0)");
 		new PacketDragCancel(this, PacketDragCancel::CannotLift);
 		return;
 	}
 
-	EXC_SET("FastLoot");
+	EXC_SET_BLOCK("FastLoot");
 	//	fastloot (,emptycontainer) protection
 	if ( m_tNextPickup > g_World.GetCurrentTime().GetTimeRaw())
 	{
-		EXC_SET("FastLoot - addItemDragCancel(0)");
+		EXC_SET_BLOCK("FastLoot - addItemDragCancel(0)");
 		new PacketDragCancel(this, PacketDragCancel::CannotLift);
 		return;
 	}
 	m_tNextPickup = g_World.GetCurrentTime().GetTimeRaw() + (MSECS_PER_SEC/3);    // Using time in MSECS to work with this packet.
 
-	EXC_SET("Origin");
+	EXC_SET_BLOCK("Origin");
 	// Where is the item coming from ? (just in case we have to toss it back)
 	CObjBase * pObjParent = dynamic_cast <CObjBase *>(pItem->GetParent());
 	m_Targ_Prv_UID = pObjParent ? pObjParent->GetUID() : CUID(UID_CLEAR);
 	m_Targ_p = pItem->GetUnkPoint();
 
-	EXC_SET("ItemPickup");
+	EXC_SET_BLOCK("ItemPickup");
 	int tempamount = m_pChar->ItemPickup(pItem, amount);
 	if ( tempamount < 0 )
 	{
-		EXC_SET("ItemPickup - addItemDragCancel(0)");
+		EXC_SET_BLOCK("ItemPickup - addItemDragCancel(0)");
 		new PacketDragCancel(this, PacketDragCancel::CannotLift);
 		return;
 	}
@@ -243,7 +243,7 @@ void CClient::Event_Item_Pickup(CUID uid, word amount) // Client grabs an item
 	SOUND_TYPE iSnd = (SOUND_TYPE)(pItem->GetDefNum("PICKUPSOUND", true));
 	addSound(iSnd ? iSnd : (SOUND_TYPE)SOUND_USE_CLOTH);
 
-	EXC_SET("TargMode");
+	EXC_SET_BLOCK("TargMode");
 	SetTargMode(CLIMODE_DRAG);
 	m_Targ_UID = uid;
 	EXC_CATCH;

@@ -1298,6 +1298,7 @@ void CChar::Fight_HitTry()
             }
         }
     }
+
 	switch ( retHit )
 	{
 		case WAR_SWING_INVALID:		// target is invalid
@@ -1311,6 +1312,15 @@ void CChar::Fight_HitTry()
 		}
 		case WAR_SWING_EQUIPPING:	// keep hitting the same target
 		{
+            if (m_atFight.m_War_Swing_State == WAR_SWING_EQUIPPING) // Ready to start a new swing
+            {
+                // Reactivate as soon as possible (without waiting for a new tick) the fighting routines, which are normally called by OnTick(), which in turn calls
+                //  OnTickSkill() -> Skill_Done() -> Skill_Stage() -> Skill_Fighting() ->
+                //  -> Fight_HitTry() (which is this method) -> Fight_Hit() (which sets the recoil and swing delays and more) ...
+                OnTickSkill();
+
+                // If i use SetTimeout(1), i will lose a tick, since i'll start to set the timers for the new swing only on the next tick, not on the current.
+            }
 			return;
 		}
 		case WAR_SWING_READY:		// probably too far away, can't take my swing right now
@@ -1525,7 +1535,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		{
 			// Only start the swing this much tenths of second after the char stopped moving.
 			//  (Values changed between expansions. SE:250ms / AOS:500ms / pre-AOS:1000ms)
-			if ( m_pClient && ( -(g_World.GetTimeDiff(m_pClient->m_timeLastEventWalk) * MSECS_PER_TENTH) < g_Cfg.m_iCombatArcheryMovementDelay) )
+			if ( m_pClient && ( -(g_World.GetTimeDiff(m_pClient->m_timeLastEventWalk) / MSECS_PER_TENTH) < g_Cfg.m_iCombatArcheryMovementDelay) )
 				return WAR_SWING_EQUIPPING;
 		}
 
@@ -1617,7 +1627,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
         return WAR_SWING_READY;
     }
 
-	// Start the swing
+	// I have waited for the recoil time, then i can start the swing
 	if ( m_atFight.m_War_Swing_State == WAR_SWING_READY )
 	{
 		m_atFight.m_War_Swing_State = WAR_SWING_SWINGING;
@@ -1782,7 +1792,8 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	if ( pWeapon )
 	{
 		// Check if the weapon is poisoned
-		if ( !IsSetCombatFlags(COMBAT_NOPOISONHIT) && pWeapon->m_itWeapon.m_poison_skill && (pWeapon->m_itWeapon.m_poison_skill > Calc_GetRandVal(100) || pWeapon->m_itWeapon.m_poison_skill < 10))
+		if ( !IsSetCombatFlags(COMBAT_NOPOISONHIT) && pWeapon->m_itWeapon.m_poison_skill && 
+            (pWeapon->m_itWeapon.m_poison_skill > Calc_GetRandVal(100) || pWeapon->m_itWeapon.m_poison_skill < 10))
 		{
 			byte iPoisonDeliver = (byte)(Calc_GetRandVal(pWeapon->m_itWeapon.m_poison_skill));
 			pCharTarg->SetPoison(10 * iPoisonDeliver, iPoisonDeliver / 5, this);

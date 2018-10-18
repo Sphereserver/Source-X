@@ -1095,19 +1095,19 @@ void CClient::addChar( CChar * pChar )
 	EXC_TRY("addChar");
 	new PacketCharacter( this, pChar );
 
-	EXC_SET("Wake sector");
+	EXC_SET_BLOCK("Wake sector");
 	pChar->GetTopPoint().GetSector()->SetSectorWakeStatus();	// if it can be seen then wake it.
 
-	EXC_SET("Health bar color");
+	EXC_SET_BLOCK("Health bar color");
 	addHealthBarUpdate( pChar );
 
 	if ( pChar->m_pNPC && pChar->m_pNPC->m_bonded && pChar->IsStatFlag(STATF_DEAD) )
 	{
-		EXC_SET("Bonded status");
+		EXC_SET_BLOCK("Bonded status");
 		addBondedStatus(pChar, true);
 	}
 
-	EXC_SET("AOSToolTip adding (end)");
+	EXC_SET_BLOCK("AOSToolTip adding (end)");
 	addAOSTooltip( pChar );
 
 	EXC_CATCH;

@@ -725,7 +725,7 @@ bool PacketVendorBuyReq::onReceive(NetState* net)
 		return true;
 
 	CChar* vendor = vendorSerial.CharFind();
-	if (vendor == NULL || vendor->m_pNPC == NULL || !vendor->NPC_IsVendor())
+	if (!vendor || !vendor->m_pNPC || !vendor->NPC_IsVendor())
 	{
 		client->Event_VendorBuy_Cheater(0x1);
 		return true;
@@ -815,7 +815,7 @@ bool PacketStaticUpdate::onReceive(NetState* net)
     byte UlCmd = readByte();*/
 	TemporaryString tsDump;
 	this->dump(tsDump);
-	g_Log.EventDebug("%x:Parsing %s", net->id(), static_cast<lpctstr>(tsDump));
+	g_Log.EventDebug("%x:Parsing %s", net->id(), tsDump.toBuffer());
 	return true;
 }
 

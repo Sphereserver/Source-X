@@ -520,7 +520,7 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 	if (( GetAccount()->GetResDisp() >= RDS_KR ) && m_bKrToolbarEnabled )
 		s.WriteKeyVal("KRTOOLBARSTATUS", m_bKrToolbarEnabled);
 
-	EXC_SET("saving dynamic speech");
+	EXC_SET_BLOCK("saving dynamic speech");
 	if (m_Speech.size() > 0 )
 	{
 		CSString sVal;
@@ -528,7 +528,7 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 		s.WriteKey("DSPEECH", sVal);
 	}
 
-	EXC_SET("saving profile");
+	EXC_SET_BLOCK("saving profile");
 	if ( ! m_sProfile.IsEmpty())
 	{
 		tchar szLine[SCRIPT_MAX_LINE_LEN-16];
@@ -536,7 +536,7 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 		s.WriteKey( "PROFILE", szLine );
 	}
 
-	EXC_SET("saving stats locks");
+	EXC_SET_BLOCK("saving stats locks");
 	for ( int x = 0; x < STAT_BASE_QTY; x++)	// Don't write all lock states!
 	{
 		if ( ! m_StatLock[x] )
@@ -546,7 +546,7 @@ void CCharPlayer::r_WriteChar( CChar * pChar, CScript & s )
 		s.WriteKeyVal( szTemp, m_StatLock[x] );
 	}
 
-	EXC_SET("saving skill locks");
+	EXC_SET_BLOCK("saving skill locks");
 	for ( size_t j = 0; j < g_Cfg.m_iMaxSkill; j++ )	// Don't write all lock states!
 	{
 		ASSERT(j < CountOf(m_SkillLock));

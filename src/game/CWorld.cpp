@@ -2333,7 +2333,7 @@ void CWorld::OnTick()
     }
 
     // World's tick
-    // Items, Chars ... Everything relying on CTimedObject (excepting CObjBase, which inherit is only virtual)
+    // Items, Chars ... Everything relying on CTimedObject (excepting CObjBase, which inheritance is only virtual)
     ProfileTask timersTask(PROFILE_TIMERS);
     int64 iCurTime = CServerTime::GetCurrentTime().GetTimeRaw();    // Current timestamp, a few msecs will advance in the current tick ... avoid them until the following tick(s).
     
@@ -2393,9 +2393,11 @@ void CWorld::OnTick()
                 case PROFILE_CHARS:
                 {
                     fRemove = !pObj->OnTick();
-                    if (!pObj->IsTimerSet())
+                    CChar* pChar = dynamic_cast<CChar*>(pObj);
+                    ASSERT(pChar);
+                    if (pChar->m_pNPC && !pObj->IsTimerSet())
                     {
-                        pObj->SetTimeoutS(3 * MSECS_PER_SEC);   //3 seconds timeout to keep NPCs 'alive'
+                        pObj->SetTimeoutS(3);   //3 seconds timeout to keep NPCs 'alive'
                     }
                 }
                 break;

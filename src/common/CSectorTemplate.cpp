@@ -186,7 +186,7 @@ void CSectorBase::CheckMapBlockCache()
 			if ( m_iMapBlockCacheTime <= 0 || it->second->m_CacheTime.GetCacheAge() >= m_iMapBlockCacheTime )
 			{
 				//DEBUG_ERR(("removing...\n"));
-				EXC_SET("CacheTime up - Deleting");
+				EXC_SET_BLOCK("CacheTime up - Deleting");
                 iBlock = it->first;
 				delete it->second;
 				m_MapBlockCache.erase(it);

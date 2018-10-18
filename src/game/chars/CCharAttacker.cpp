@@ -384,13 +384,18 @@ void CChar::Attacker_CheckTimeout()
         {
             LastAttackers & refAttacker = m_lastAttackers[count];
             CChar *pEnemy = CUID(refAttacker.charUID).CharFind();
-            if (pEnemy && (++(refAttacker.elapsed) > g_Cfg.m_iAttackerTimeout) && (g_Cfg.m_iAttackerTimeout > 0))
+            if (pEnemy)
             {
-                if (!Attacker_Delete(count, true, ATTACKER_CLEAR_ELAPSED))
-                    ++count;
+                if ( (g_Cfg.m_iAttackerTimeout > 0) && (++(refAttacker.elapsed) > g_Cfg.m_iAttackerTimeout) )
+                {
+                    if (!Attacker_Delete(count, true, ATTACKER_CLEAR_ELAPSED))
+                    {
+                        ++count;
+                        continue;
+                    }
+                }
             }
-            else
-                ++count;
+            ++count;
         }
     }
 }

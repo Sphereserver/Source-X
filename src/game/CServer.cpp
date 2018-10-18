@@ -1732,17 +1732,17 @@ void CServer::OnTick()
 	}
 #endif
 
-	EXC_SET("ConsoleInput");
+	EXC_SET_BLOCK("ConsoleInput");
 	if ( m_fConsoleTextReadyFlag )
 	{
-		EXC_SET("console input");
+		EXC_SET_BLOCK("console input");
 		CSString sText = m_sConsoleText;	// make a copy.
 		m_sConsoleText.Empty();				// done using this.
 		m_fConsoleTextReadyFlag = false;	// ready to use again
 		OnConsoleCmd( sText, this );
 	}
 
-	EXC_SET("ResyncCommand");
+	EXC_SET_BLOCK("ResyncCommand");
 	if ( m_fResyncRequested != NULL )
 	{
 		if ( !m_fResyncPause )
@@ -1754,19 +1754,19 @@ void CServer::OnTick()
 		m_fResyncRequested = NULL;
 	}
 
-	EXC_SET("SetTime");
+	EXC_SET_BLOCK("SetTime");
 	SetValidTime();	// we are a valid game server.
 
 	ProfileTask overheadTask(PROFILE_OVERHEAD);
 
 	if ( m_timeShutdown > 0 )
 	{
-		EXC_SET("shutdown");
+		EXC_SET_BLOCK("shutdown");
 		if ( g_World.GetTimeDiff(m_timeShutdown) <= 0 )
 			SetExitFlag(2);
 	}
 
-	EXC_SET("generic");
+	EXC_SET_BLOCK("generic");
 	g_Cfg.OnTick(false);
 	m_hdb.OnTick();
 	EXC_CATCH;
@@ -1776,7 +1776,7 @@ bool CServer::Load()
 {
 	EXC_TRY("Load");
 
-	EXC_SET("print sphere infos");
+	EXC_SET_BLOCK("print sphere infos");
 	g_Log.Event(LOGM_INIT, "%s.\n", g_szServerDescription);
 #ifdef __GITREVISION__
 	g_Log.Event(LOGM_INIT, "Compiled at %s (%s) [build %d / GIT hash %s]\n\n", __DATE__, __TIME__, __GITREVISION__, __GITHASH__);
@@ -1796,7 +1796,7 @@ bool CServer::Load()
 #endif
 
 #ifdef _WIN32
-	EXC_SET("init winsock");
+	EXC_SET_BLOCK("init winsock");
 	tchar * wSockInfo = Str_GetTemp();
 	if ( !m_SocketMain.IsOpen() )
 	{
@@ -1820,7 +1820,7 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 	}
 #endif
 
-	EXC_SET("loading ini");
+	EXC_SET_BLOCK("loading ini");
 	if (!g_Cfg.LoadIni(false))
 		return false;
 
@@ -1840,7 +1840,7 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 
 	if (g_Cfg.m_bMySql && g_Cfg.m_bMySqlTicks)
 	{
-		EXC_SET( "Connecting to MySQL server" );
+		EXC_SET_BLOCK( "Connecting to MySQL server" );
 		if (m_hdb.Connect())
 			g_Log.Event( LOGM_NOCONTEXT, "MySQL connected to server: '%s'.\n", g_Cfg.m_sMySqlHost.GetPtr() );
 		else
@@ -1850,15 +1850,15 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 		}
 	}
 
-	EXC_SET("setting signals");
+	EXC_SET_BLOCK("setting signals");
 	SetSignals();
 
-	EXC_SET("loading scripts");
+	EXC_SET_BLOCK("loading scripts");
 	TriglistInit();
 	if ( !g_Cfg.Load(false) )
 		return false;
 
-	EXC_SET("init encryption");
+	EXC_SET_BLOCK("init encryption");
 	if ( m_ClientVersion.GetClientVer() )
 	{
 		char szVersion[128];
@@ -1870,7 +1870,7 @@ nowinsock:		g_Log.Event(LOGL_FATAL|LOGM_INIT, "Winsock 1.1 not found!\n");
 		}
 	}
 
-	EXC_SET("finalizing");
+	EXC_SET_BLOCK("finalizing");
 #ifdef _WIN32
 	char *pszTemp = Str_GetTemp();
 	sprintf(pszTemp, SPHERE_TITLE " V" SPHERE_VERSION " - %s", GetName());

@@ -3395,7 +3395,7 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 	{
 		if ( pChar != NULL )
 		{
-			EXC_SET("chardef");
+			EXC_SET_BLOCK("chardef");
 			CUID uidOldAct = pChar->m_Act_UID;
 			pChar->m_Act_UID = GetUID();
 			iRet = pChar->OnTrigger(pszCharTrigName,  pSrc, pArgs );
@@ -3409,7 +3409,7 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 	{
 
 		//	2) EVENTS
-		EXC_SET("events");
+		EXC_SET_BLOCK("events");
 		size_t origEvents = m_OEvents.size();
 		size_t curEvents = origEvents;
 		for ( size_t i = 0; i < curEvents; ++i )			//	2) EVENTS (could be modified ingame!)
@@ -3434,7 +3434,7 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 		}
 
 		// 3) TEVENTS on the item
-		EXC_SET("tevents");
+		EXC_SET_BLOCK("tevents");
 		for ( size_t i = 0; i < pItemDef->m_TEvents.size(); ++i )
 		{
 			CResourceLink * pLink = pItemDef->m_TEvents[i];
@@ -3450,7 +3450,7 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 		}
 
 		// 4) EVENTSITEM triggers
-		EXC_SET("Item triggers - EVENTSITEM"); // EVENTSITEM (constant events of Items set from sphere.ini)
+		EXC_SET_BLOCK("Item triggers - EVENTSITEM"); // EVENTSITEM (constant events of Items set from sphere.ini)
 		for ( size_t i = 0; i < g_Cfg.m_iEventsItemLink.size(); ++i )
 		{
 			CResourceLink * pLink = g_Cfg.m_iEventsItemLink[i];
@@ -3465,7 +3465,7 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 		}
 
 		// 5) TYPEDEF
-		EXC_SET("typedef");
+		EXC_SET_BLOCK("typedef");
 		{
 			// It has an assigned trigger type.
 			CResourceLink * pResourceLink = dynamic_cast <CResourceLink *>( g_Cfg.ResourceGetDef( CResourceID( RES_TYPEDEF, GetType() )));
@@ -3494,7 +3494,7 @@ TRIGRET_TYPE CItem::OnTrigger( lpctstr pszTrigName, CTextConsole * pSrc, CScript
 
 
 		// 6) Look up the trigger in the RES_ITEMDEF. (default)
-		EXC_SET("itemdef");
+		EXC_SET_BLOCK("itemdef");
 		CBaseBaseDef * pResourceLink = Base_GetDef();
 		ASSERT(pResourceLink);
 		if ( pResourceLink->HasTrigger( iAction ))
@@ -3554,7 +3554,7 @@ TRIGRET_TYPE CItem::OnTriggerCreate( CTextConsole * pSrc, CScriptTriggerArgs * p
 	int iCharAction = (CTRIG_TYPE) FindTableSorted( pszCharTrigName, CChar::sm_szTrigName, CountOf(CChar::sm_szTrigName)-1 );
 
 	// 1) Look up the trigger in the RES_ITEMDEF. (default)
-	EXC_SET("itemdef");
+	EXC_SET_BLOCK("itemdef");
 	CBaseBaseDef * pResourceBase = Base_GetDef();
 	ASSERT(pResourceBase);
 	if ( pResourceBase->HasTrigger( iAction ))
@@ -3567,7 +3567,7 @@ TRIGRET_TYPE CItem::OnTriggerCreate( CTextConsole * pSrc, CScriptTriggerArgs * p
 	// 2) Triggers installed on character, sensitive to actions on all items
 	if ( IsTrigUsed(pszCharTrigName) && ( iCharAction > XTRIG_UNKNOWN ))
 	{
-		EXC_SET("chardef");
+		EXC_SET_BLOCK("chardef");
 		if ( pChar != NULL )
 		{
 			CUID uidOldAct = pChar->m_Act_UID;
@@ -3582,7 +3582,7 @@ TRIGRET_TYPE CItem::OnTriggerCreate( CTextConsole * pSrc, CScriptTriggerArgs * p
 	if ( IsTrigUsed(pszTrigName) )
 	{
 		// 3) TEVENTS on the item
-		EXC_SET("tevents");
+		EXC_SET_BLOCK("tevents");
 		for ( size_t i = 0; i < pItemDef->m_TEvents.size(); ++i )
 		{
 			CResourceLink * pLink = pItemDef->m_TEvents[i];
@@ -3598,7 +3598,7 @@ TRIGRET_TYPE CItem::OnTriggerCreate( CTextConsole * pSrc, CScriptTriggerArgs * p
 		}
 
 		// 4) EVENTSITEM triggers
-		EXC_SET("Item triggers - EVENTSITEM"); // EVENTSITEM (constant events of Items set from sphere.ini)
+		EXC_SET_BLOCK("Item triggers - EVENTSITEM"); // EVENTSITEM (constant events of Items set from sphere.ini)
 		for ( size_t i = 0; i < g_Cfg.m_iEventsItemLink.size(); ++i )
 		{
 			CResourceLink * pLink = g_Cfg.m_iEventsItemLink[i];
@@ -3613,7 +3613,7 @@ TRIGRET_TYPE CItem::OnTriggerCreate( CTextConsole * pSrc, CScriptTriggerArgs * p
 		}
 
 		// 5) TYPEDEF
-		EXC_SET("typedef");
+		EXC_SET_BLOCK("typedef");
 		{
 			// It has an assigned trigger type.
 			CResourceLink * pResourceLink = dynamic_cast <CResourceLink *>( g_Cfg.ResourceGetDef( CResourceID( RES_TYPEDEF, GetType() )));
@@ -5640,7 +5640,7 @@ bool CItem::OnTick()
 
 	EXC_TRY("Tick");
 
-	EXC_SET("timer trigger");
+	EXC_SET_BLOCK("timer trigger");
 
     if (GetTopSector()->IsSleeping())
     {
@@ -5671,15 +5671,15 @@ bool CItem::OnTick()
         return iCompRet;    // Stop here
     }
 
-	EXC_SET("GetType");
+	EXC_SET_BLOCK("GetType");
 	IT_TYPE type = m_type;
 
-	EXC_SET("default behaviour");
+	EXC_SET_BLOCK("default behaviour");
 	switch ( type )
 	{
 		case IT_CORPSE:
 			{
-				EXC_SET("default behaviour::IT_CORPSE");
+				EXC_SET_BLOCK("default behaviour::IT_CORPSE");
 				// turn player corpse into bones
 				CChar * pSrc = m_uidLink.CharFind();
 				if ( pSrc && pSrc->m_pPlayer )
@@ -5702,7 +5702,7 @@ bool CItem::OnTick()
 
 		case IT_LIGHT_LIT:
 			{
-				EXC_SET("default behaviour::IT_LIGHT_LIT");
+				EXC_SET_BLOCK("default behaviour::IT_LIGHT_LIT");
 				if ( IsAttr(ATTR_MOVE_NEVER|ATTR_STATIC) )	// infinite charges
 					return true;
 
@@ -5721,28 +5721,28 @@ bool CItem::OnTick()
 
 		case IT_SHIP_PLANK:
 			{
-				EXC_SET("default behaviour::IT_SHIP_PLANK");
+				EXC_SET_BLOCK("default behaviour::IT_SHIP_PLANK");
 				Ship_Plank( false );
 			}
 			return true;
 
 		case IT_EXPLOSION:
 			{
-				EXC_SET("default behaviour::IT_EXPLOSION");
+				EXC_SET_BLOCK("default behaviour::IT_EXPLOSION");
 				OnExplosion();
 			}
 			break;
 
 		case IT_TRAP_ACTIVE:
 			{
-				EXC_SET("default behaviour::IT_TRAP_ACTIVE");
+				EXC_SET_BLOCK("default behaviour::IT_TRAP_ACTIVE");
 				SetTrapState( IT_TRAP_INACTIVE, m_itTrap.m_AnimID, m_itTrap.m_wAnimSec );
 			}
 			return true;
 
 		case IT_TRAP_INACTIVE:
 			{
-				EXC_SET("default behaviour::IT_TRAP_INACTIVE");
+				EXC_SET_BLOCK("default behaviour::IT_TRAP_INACTIVE");
 				// Set inactive til someone triggers it again.
 				if ( m_itTrap.m_fPeriodic )
 					SetTrapState( IT_TRAP_ACTIVE, m_itTrap.m_AnimID, m_itTrap.m_wResetSec );
@@ -5754,7 +5754,7 @@ bool CItem::OnTick()
 		case IT_ANIM_ACTIVE:
 			{
 				// reset the anim
-				EXC_SET("default behaviour::IT_ANIM_ACTIVE");
+				EXC_SET_BLOCK("default behaviour::IT_ANIM_ACTIVE");
 				RemoveFromView();
 				SetDispID( m_itAnim.m_PrevID );
 				m_type = m_itAnim.m_PrevType;
@@ -5768,7 +5768,7 @@ bool CItem::OnTick()
 		case IT_DOOR_LOCKED:	// Temporarily opened locked door.
 			{
 				// Doors should close.
-				EXC_SET("default behaviour::IT_DOOR");
+				EXC_SET_BLOCK("default behaviour::IT_DOOR");
 				//Use_Door( false );
 				Use_DoorNew( false );
 			}
@@ -5776,7 +5776,7 @@ bool CItem::OnTick()
 
 		case IT_POTION:
 			{
-				EXC_SET("default behaviour::IT_POTION");
+				EXC_SET_BLOCK("default behaviour::IT_POTION");
 				// This is a explosion potion?
 				if ( (RES_GET_INDEX(m_itPotion.m_Type) == SPELL_Explosion) && m_itPotion.m_ignited )
 				{
@@ -5801,7 +5801,7 @@ bool CItem::OnTick()
 		case IT_SPAWN_CHAR:	// Spawn a creature (if we are under count).
 		case IT_SPAWN_ITEM:	// Spawn an item (if we are under count).
 			{
-				EXC_SET("default behaviour::IT_SPAWN"); // TODO: CCSpawn is a CComponent and so, it should be moved out of this switch to a loop running this CEntity's CComponents.
+				EXC_SET_BLOCK("default behaviour::IT_SPAWN"); // TODO: CCSpawn is a CComponent and so, it should be moved out of this switch to a loop running this CEntity's CComponents.
                 CCSpawn *pSpawn = static_cast<CCSpawn*>(GetComponent(COMP_SPAWN));
                 if (pSpawn)
                 {
@@ -5811,7 +5811,7 @@ bool CItem::OnTick()
 			return true;
         case IT_SPAWN_CHAMPION:
             {
-                EXC_SET("default behaviour::IT_SPAWN_CHAMPION");
+                EXC_SET_BLOCK("default behaviour::IT_SPAWN_CHAMPION");
                 CCChampion *pChampion = static_cast<CCChampion*>(GetComponent(COMP_CHAMPION));
                 if (pChampion)
                 {
@@ -5823,7 +5823,7 @@ bool CItem::OnTick()
 		case IT_CROPS:
 		case IT_FOLIAGE:
 			{
-				EXC_SET("default behaviour::IT_CROPS");
+				EXC_SET_BLOCK("default behaviour::IT_CROPS");
 				if ( Plant_OnTick())
 					return true;
 			}
@@ -5831,7 +5831,7 @@ bool CItem::OnTick()
 
 		case IT_BEE_HIVE:
 			{
-				EXC_SET("default behaviour::IT_BEE_HIVE");
+				EXC_SET_BLOCK("default behaviour::IT_BEE_HIVE");
 				// Regenerate honey count
 				if ( m_itBeeHive.m_honeycount < 5 )
 					++m_itBeeHive.m_honeycount;
@@ -5841,7 +5841,7 @@ bool CItem::OnTick()
 
 		case IT_CAMPFIRE:
 			{
-				EXC_SET("default behaviour::IT_CAMPFIRE");
+				EXC_SET_BLOCK("default behaviour::IT_CAMPFIRE");
 				if ( GetID() == ITEMID_EMBERS )
 					break;
 				SetID( ITEMID_EMBERS );
@@ -5852,7 +5852,7 @@ bool CItem::OnTick()
 
 		case IT_SIGN_GUMP:	// signs never decay
 			{
-				EXC_SET("default behaviour::IT_SIGN_GUMP");
+				EXC_SET_BLOCK("default behaviour::IT_SIGN_GUMP");
 			}
 			return true;
 
@@ -5860,15 +5860,15 @@ bool CItem::OnTick()
 			break;
 	}
 
-	EXC_SET("default behaviour2");
+	EXC_SET_BLOCK("default behaviour2");
 	if ( IsAttr(ATTR_DECAY) )
 		return false;
 
-	EXC_SET("default behaviour3");
+	EXC_SET_BLOCK("default behaviour3");
 	if ( iRet == TRIGRET_RET_FALSE )
 		return false;
 
-	EXC_SET("default behaviour4");
+	EXC_SET_BLOCK("default behaviour4");
 	DEBUG_ERR(( "Timer expired without DECAY flag '%s' (UID=0%x)?\n", GetName(), (dword)GetUID()));
 	
     EXC_CATCH;

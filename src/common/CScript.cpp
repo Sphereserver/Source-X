@@ -695,17 +695,17 @@ bool CScript::ReadKeyParse() // Read line from script
 {
 	ADDTOCALLSTACK("CScript::ReadKeyParse");
 	EXC_TRY("ReadKeyParse");
-	EXC_SET("read");
+	EXC_SET_BLOCK("read");
 	if ( !ReadKey(true) )
 	{
-		EXC_SET("init");
+		EXC_SET_BLOCK("init");
 		InitKey();
 		return false;	// end of section.
 	}
 
 	ASSERT(m_pszKey);
 	GETNONWHITESPACE( m_pszKey );
-	EXC_SET("parse");
+	EXC_SET_BLOCK("parse");
 	Str_Parse( m_pszKey, &m_pszArg );
 
 	//if ( !m_pszArg[0] || m_pszArg[1] != '=' || !strchr( ".*+-/%|&!^", m_pszArg[0] ) )
@@ -718,7 +718,7 @@ bool CScript::ReadKeyParse() // Read line from script
 		"floatval"
 	};
 
-	EXC_SET("parse");
+	EXC_SET_BLOCK("parse");
 	lpctstr	pszArgs	= m_pszArg;
 	pszArgs += 2;
 	GETNONWHITESPACE( pszArgs );

@@ -413,7 +413,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 	if ( iDex <= 0 )
 		return 2;			// we cannot move now
 
-	EXC_SET("NPC_AI_PATH");
+	EXC_SET_BLOCK("NPC_AI_PATH");
 	//	Use pathfinding
 	if ( NPC_GetAiFlags() & NPC_AI_PATH )
 	{
@@ -458,7 +458,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 		}
 	}
 
-	EXC_SET("Non-Advanced pathfinding");
+	EXC_SET_BLOCK("Non-Advanced pathfinding");
 	pMe.Move( Dir );
 	if ( ! CanMoveWalkTo(pMe, true, false, Dir ) )
 	{
@@ -551,7 +551,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 		}
 	}
 
-	EXC_SET("Finishing Move Action a");
+	EXC_SET_BLOCK("Finishing Move Action a");
 	//Finish Move Action
 
 	// ??? Make sure we are not facing a wall.
@@ -560,29 +560,29 @@ int CChar::NPC_WalkToPoint( bool fRun )
 	if ( fRun && ( ! Can(CAN_C_RUN|CAN_C_FLY) || Stat_GetVal(STAT_DEX) <= 1 ))
 		fRun = false;
 
-	EXC_SET("StatFlag");
+	EXC_SET_BLOCK("StatFlag");
 	StatFlag_Mod(STATF_FLY, fRun);
 
-	EXC_SET("Old Top Point");
+	EXC_SET_BLOCK("Old Top Point");
 	CPointMap ptOld = GetTopPoint();
 
-	EXC_SET("Reveal");
+	EXC_SET_BLOCK("Reveal");
 	CheckRevealOnMove();
 
-	EXC_SET("MoveToChar");
+	EXC_SET_BLOCK("MoveToChar");
 	MoveToChar(pMe);
 
-	EXC_SET("Check Location");
+	EXC_SET_BLOCK("Check Location");
 	if ( CheckLocation(false) == TRIGRET_RET_FALSE )	// check if I stepped on any item/teleport
 	{
 		SetTopPoint(ptOld);		// we already moved, so move back to previous location
 		return 2;
 	}
 
-	EXC_SET("Move Update");
+	EXC_SET_BLOCK("Move Update");
 	UpdateMove(ptOld);
 
-	EXC_SET("Speed counting");
+	EXC_SET_BLOCK("Speed counting");
 	// How fast can they move.
 	int64 iTickNext;
 
@@ -719,7 +719,7 @@ bool CChar::NPC_LookAtCharMonster( CChar * pChar )
 	int iFoodLevel = Food_GetLevelPercent();
 
 	// Attacks those not of my kind.
-	if ( ! Noto_IsCriminal() && iFoodLevel > 40 )		// I am not evil ?
+	if ( ! Noto_IsCriminal() && (iFoodLevel > 40) )	// Am I not evil ?
 		return NPC_LookAtCharHuman( pChar );
 
 	// Attack if i am stronger.
@@ -727,15 +727,13 @@ bool CChar::NPC_LookAtCharMonster( CChar * pChar )
 	int iActMotivation = NPC_GetAttackMotivation( pChar );
 	if ( iActMotivation <= 0 )
 		return false;
-	if ( Fight_IsActive() && m_Act_UID == pChar->GetUID())	// same targ.
+	if ( Fight_IsActive() && (m_Fight_Targ_UID == pChar->GetUID()))	// same targ.
 		return false;
 	if ( iActMotivation < m_pNPC->m_Act_Motivation )
 		return false;
 
 	int iDist = GetTopDist3D( pChar );
-	if ( IsStatFlag( STATF_HIDDEN ) &&
-		! NPC_FightMayCast() &&
-		iDist > 1 )
+	if ( IsStatFlag( STATF_HIDDEN ) && ! NPC_FightMayCast() && (iDist > 1) )
 		return false;	// element of suprise.
 
 	if ( Fight_Attack( pChar ) == false )
@@ -1274,7 +1272,7 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 		return false;
 	}
 
-	EXC_SET("Trigger");
+	EXC_SET_BLOCK("Trigger");
 	if (IsTrigUsed(TRIGGER_NPCACTFOLLOW))
 	{
 		CScriptTriggerArgs Args(fFlee, maxDistance, fMoveAway);
@@ -1299,7 +1297,7 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 		fMoveAway = (Args.m_iN3 != 0);
 	}
 
-	EXC_SET("CanSee");
+	EXC_SET_BLOCK("CanSee");
 	// Have to be able to see target to follow.
 	if (CanSee(pChar))
 	{
@@ -1315,7 +1313,7 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
         }
 	}
 
-	EXC_SET("Distance checks");
+	EXC_SET_BLOCK("Distance checks");
 	int dist = GetTopPoint().GetDist(m_Act_p);
     if (dist > UO_MAP_VIEW_RADAR)		// too far away ?
     {
@@ -1340,12 +1338,11 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 		}
         else if (dist <= maxDistance)
         {
-            Skill_SetTimeout(); // Reactive the current fighting skill.
             return true;
         }
 	}
 
-	EXC_SET("Fleeing");
+	EXC_SET_BLOCK("Fleeing");
 	if (fFlee)
 	{
 		CPointMap ptOld = m_Act_p;
@@ -1356,7 +1353,7 @@ bool CChar::NPC_Act_Follow(bool fFlee, int maxDistance, bool fMoveAway)
 		return (iRet < 2);  // 2 = fail
 	}
 
-	EXC_SET("WalkToPoint 1");
+	EXC_SET_BLOCK("WalkToPoint 1");
 	return (NPC_WalkToPoint(IsStatFlag(STATF_WAR) ? true : (dist > 3)) < 2);    // 2 = fail
 
 	EXC_CATCH;
@@ -2121,13 +2118,13 @@ void CChar::NPC_OnTickAction()
 	}
 	else if (g_Cfg.IsSkillFlag(iSkillActive, SKF_FIGHT))
 	{
-		EXC_SET("fighting");
+		EXC_SET_BLOCK("fighting");
         fSkillFight = true;
 		NPC_Act_Fight();
 	}
 	else if (g_Cfg.IsSkillFlag(iSkillActive, SKF_MAGIC))
 	{
-		EXC_SET("fighting-magic");
+		EXC_SET_BLOCK("fighting-magic");
 		NPC_Act_Fight();
 	}
 	else
@@ -2136,20 +2133,20 @@ void CChar::NPC_OnTickAction()
 		{
 			case SKILL_NONE:
 				// We should try to do something new.
-				EXC_SET("idle: Skill_None");
+				EXC_SET_BLOCK("idle: Skill_None");
 				NPC_Act_Idle();
 				break;
 
 			case SKILL_STEALTH:
 			case SKILL_HIDING:
 				// We are currently hidden.
-				EXC_SET("look around");
+				EXC_SET_BLOCK("look around");
 				if ( NPC_LookAround())
 					break;
 				// just remain hidden unless we find something new to do.
 				if ( Calc_GetRandVal( Skill_GetBase(SKILL_HIDING)))
 					break;
-				EXC_SET("idle: Hidding");
+				EXC_SET_BLOCK("idle: Hidding");
 				NPC_Act_Idle();
 				break;
 
@@ -2160,7 +2157,7 @@ void CChar::NPC_OnTickAction()
 			case SKILL_WRESTLING:
 			case SKILL_THROWING:
 				// If we are fighting . Periodically review our targets.
-				EXC_SET("fight");
+				EXC_SET_BLOCK("fight");
 				NPC_Act_Fight();
 				break;
             case SKILL_MAGERY:
@@ -2168,61 +2165,61 @@ void CChar::NPC_OnTickAction()
             case SKILL_MYSTICISM:
             case SKILL_CHIVALRY:
             case SKILL_SPELLWEAVING:
-                EXC_SET("magic");
+                EXC_SET_BLOCK("magic");
                 NPC_Act_Fight();    // May be we can split Fight and Magic from here?
                 break;
 
 			case NPCACT_GUARD_TARG:
 				// fight with the target, or follow it
-				EXC_SET("guard");
+				EXC_SET_BLOCK("guard");
 				NPC_Act_Guard();
 				break;
 
 			case NPCACT_FOLLOW_TARG:
 				// continue to follow our target.
-				EXC_SET("look at char");
+				EXC_SET_BLOCK("look at char");
 				NPC_LookAtChar( m_Act_UID.CharFind(), 1 );
-				EXC_SET("follow char");
+				EXC_SET_BLOCK("follow char");
 				NPC_Act_Follow();
 				break;
 			case NPCACT_STAY:
 				// Just stay here til told to do otherwise.
 				break;
 			case NPCACT_GOTO:
-				EXC_SET("goto");
+				EXC_SET_BLOCK("goto");
 				NPC_Act_Goto();
 				break;
 			case NPCACT_WANDER:
-				EXC_SET("wander");
+				EXC_SET_BLOCK("wander");
 				NPC_Act_Wander();
 				break;
 			case NPCACT_FLEE:
-				EXC_SET("flee");
+				EXC_SET_BLOCK("flee");
 				NPC_Act_Flee();
 				break;
 			case NPCACT_TALK:
 			case NPCACT_TALK_FOLLOW:
 				// Got bored just talking to you.
-				EXC_SET("talk");
+				EXC_SET_BLOCK("talk");
 				if ( ! NPC_Act_Talk())
 				{
-					EXC_SET("idle: Talk");
+					EXC_SET_BLOCK("idle: Talk");
 					NPC_Act_Idle();	// look for something new to do.
 				}
 				break;
 			case NPCACT_GO_HOME:
-				EXC_SET("go home");
+				EXC_SET_BLOCK("go home");
 				NPC_Act_GoHome();
 				break;
 			case NPCACT_LOOKING:
-				EXC_SET("looking");
+				EXC_SET_BLOCK("looking");
 				if ( NPC_LookAround( true ) )
 					break;
-				EXC_SET("idle: Looking");
+				EXC_SET_BLOCK("idle: Looking");
 				NPC_Act_Idle();
 				break;
 			case NPCACT_FOOD:
-				EXC_SET("Food Skill");
+				EXC_SET_BLOCK("Food Skill");
 				if ( NPC_GetAiFlags() & NPC_AI_INTFOOD )
 				{
 					if ( ! NPC_Act_Food() )
@@ -2230,7 +2227,7 @@ void CChar::NPC_OnTickAction()
 				}
 				break;
 			case NPCACT_RUNTO:
-				EXC_SET("Run To");
+				EXC_SET_BLOCK("Run To");
 				NPC_Act_Runto();
 				break;
 
@@ -2243,7 +2240,7 @@ void CChar::NPC_OnTickAction()
 		}
 	}
 
-	EXC_SET("timer expired (NPC)");
+	EXC_SET_BLOCK("timer expired (NPC)");
 	if ( IsTimerExpired() && !fSkillFight) // If i'm fighting, i don't want to wait to start another swing
 	{
 		int64 timeout = (150-Stat_GetAdjusted(STAT_DEX))/2;
@@ -2271,7 +2268,7 @@ void CChar::NPC_Pathfinding()
 	CPointMap local = GetTopPoint();
 
 	EXC_TRY("Pathfinding");
-	EXC_SET("pre-checking");
+	EXC_SET_BLOCK("pre-checking");
 
 	// If NPC_AI_ALWAYSINT is set, just make it as smart as possible.
 	int			iInt = ( NPC_GetAiFlags() & NPC_AI_ALWAYSINT ) ? 300 : Stat_GetAdjusted(STAT_INT);
@@ -2297,7 +2294,7 @@ void CChar::NPC_Pathfinding()
 	if (( Calc_GetRandVal(300) > iInt ) && ( m_pNPC->m_nextX[0] )) return;
 
 	//	clear saved steps list
-	EXC_SET("clearing last steps");
+	EXC_SET_BLOCK("clearing last steps");
 #ifndef _WIN32
 	for (int i_tmpN=0;i_tmpN < MAX_NPC_PATH_STORAGE_SIZE;i_tmpN++)
 	{
@@ -2310,15 +2307,15 @@ void CChar::NPC_Pathfinding()
 #endif
 
 	//	proceed with the pathfinding
-	EXC_SET("filling the map");
+	EXC_SET_BLOCK("filling the map");
 	CPathFinder	path(this, pTarg);
 
-	EXC_SET("searching the path");
+	EXC_SET_BLOCK("searching the path");
 	if ( path.FindPath() == PATH_NONEXISTENT )
 		return;
 
 	//	save the found path
-	EXC_SET("saving found path");
+	EXC_SET_BLOCK("saving found path");
 
 	CPointMap Next;
 	// Don't read the first step, it's the same as the current position, so i = 1
@@ -2361,7 +2358,7 @@ void CChar::NPC_Food()
 	CItemContainer	*pPack = GetPack();
 	if ( pPack )
 	{
-		EXC_SET("searching in pack");
+		EXC_SET_BLOCK("searching in pack");
 		for ( CItem *pFood = pPack->GetContentHead(); pFood != NULL; pFood = pFood->GetNext() )
 		{
 			// i have some food personaly, so no need to search for something
@@ -2369,7 +2366,7 @@ void CChar::NPC_Food()
 			{
 				if ( (iEatAmount = Food_CanEat(pFood)) > 0 )
 				{
-					EXC_SET("eating from pack");
+					EXC_SET_BLOCK("eating from pack");
 					Use_EatQty(pFood, iEatAmount);
 					return;
 				}
@@ -2378,7 +2375,7 @@ void CChar::NPC_Food()
 	}
 
 	// Search for food nearby
-	EXC_SET("searching nearby");
+	EXC_SET_BLOCK("searching nearby");
 	iSearchDistance = (UO_MAP_VIEW_SIGHT * ( 100 - iFoodLevel ) ) / 100;
 	CWorldSearch AreaItems(GetTopPoint(), minimum(iSearchDistance,m_pNPC->m_Home_Dist_Wander));
 	for (;;)
@@ -2415,7 +2412,7 @@ void CChar::NPC_Food()
 		if ( iClosestFood <= 1 )
 		{
 			//	can take and eat just in place
-			EXC_SET("eating nearby");
+			EXC_SET_BLOCK("eating nearby");
 			short iEaten = (short)(pClosestFood->ConsumeAmount(iEatAmount));
 			EatAnim(pClosestFood->GetName(), iEaten);
 			if ( !pClosestFood->GetAmount() )
@@ -2436,7 +2433,7 @@ void CChar::NPC_Food()
 				case NPCACT_NAPPING:
 				case NPCACT_FLEE:
 					{
-						EXC_SET("walking to desired");
+						EXC_SET_BLOCK("walking to desired");
 						CPointMap pt = pClosestFood->GetTopPoint();
 						if ( CanMoveWalkTo(pt) )
 						{
@@ -2466,13 +2463,13 @@ void CChar::NPC_Food()
 		CCharBase			*pCharDef = Char_GetDef();
 		CResourceIDBase	rid = CResourceID(RES_TYPEDEF, IT_GRASS);
 
-		EXC_SET("searching grass");
+		EXC_SET_BLOCK("searching grass");
 		if ( pCharDef->m_FoodType.ContainsResourceID(rid) ) // do I accept grass as a food?
 		{
 			CItem	*pResBit = g_World.CheckNaturalResource(GetTopPoint(), IT_GRASS, true, this);
 			if ( pResBit && pResBit->GetAmount() && ( pResBit->GetTopPoint().m_z == iMyZ ) )
 			{
-				EXC_SET("eating grass");
+				EXC_SET_BLOCK("eating grass");
 				short iEaten = (short)(pResBit->ConsumeAmount(15));
 				EatAnim("grass", iEaten/10);
 
@@ -2493,7 +2490,7 @@ void CChar::NPC_Food()
 					case NPCACT_NAPPING:
 					case NPCACT_FLEE:
 						{
-							EXC_SET("searching grass nearby");
+							EXC_SET_BLOCK("searching grass nearby");
 							CPointMap pt;
 								pt = g_World.FindTypeNear_Top(GetTopPoint(), IT_GRASS, minimum(iSearchDistance,m_pNPC->m_Home_Dist_Wander));
 							if (( pt.m_x >= 1 ) && ( pt.m_y >= 1 ))
@@ -2502,7 +2499,7 @@ void CChar::NPC_Food()
 								pResBit = g_World.CheckNaturalResource(pt, IT_GRASS, false, this);
 								if ( pResBit != NULL && pResBit->GetAmount() && CanMoveWalkTo(pt) )
 								{
-									EXC_SET("walking to grass");
+									EXC_SET_BLOCK("walking to grass");
 									pResBit->m_TagDefs.SetNum("NOSAVE", 1);
 									pResBit->SetTimeoutS(60*10);
 									m_Act_p = pt;
@@ -2532,7 +2529,7 @@ void CChar::NPC_ExtraAI()
 	if ( GetNPCBrain() != NPCBRAIN_HUMAN )
 		return;
 
-	EXC_SET("init");
+	EXC_SET_BLOCK("init");
 	if ( IsTrigUsed(TRIGGER_NPCACTION) )
 	{
 		if ( OnTrigger( CTRIG_NPCAction, this ) == TRIGRET_RET_TRUE )
@@ -2540,7 +2537,7 @@ void CChar::NPC_ExtraAI()
 	}
 
 	// Equip weapons if possible
-	EXC_SET("weapon/shield");
+	EXC_SET_BLOCK("weapon/shield");
 	if ( IsStatFlag(STATF_WAR) )
 	{
 		CItem *pWeapon = LayerFind(LAYER_HAND1);
@@ -2562,7 +2559,7 @@ void CChar::NPC_ExtraAI()
 	}
 
 	// Equip lightsource at night time
-	EXC_SET("light source");
+	EXC_SET_BLOCK("light source");
 	CPointMap pt = GetTopPoint();
 	CSector *pSector = pt.GetSector();
 	if ( pSector && pSector->IsDark() )

@@ -141,7 +141,7 @@ void NetworkIn::tick(void)
 	static char iPeriodic = 0;
 	if (iPeriodic == 0)
 	{
-		EXC_SET("periodic");
+		EXC_SET_BLOCK("periodic");
 		periodic();
 	}
 
@@ -149,33 +149,33 @@ void NetworkIn::tick(void)
 		iPeriodic = 0;
 
 	// check for incoming data
-	EXC_SET("select");
+	EXC_SET_BLOCK("select");
 	fd_set readfds;
 	int ret = checkForData(&readfds);
 	if (ret <= 0)
 		return;
 
-	EXC_SET("new connection");
+	EXC_SET_BLOCK("new connection");
 	if (FD_ISSET(g_Serv.m_SocketMain.GetSocket(), &readfds))
 		acceptConnection();
 
-	EXC_SET("messages");
+	EXC_SET_BLOCK("messages");
 	byte* buffer = m_buffer;
 	for (int i = 0; i < m_stateCount; i++)
 	{
-		EXC_SET("start network profile");
+		EXC_SET_BLOCK("start network profile");
 		ProfileTask networkTask(PROFILE_NETWORK_RX);
 
-		EXC_SET("messages - next client");
+		EXC_SET_BLOCK("messages - next client");
 		NetState* client = m_states[i];
 		ASSERT(client != NULL);
 
-		EXC_SET("messages - check client");
+		EXC_SET_BLOCK("messages - check client");
 		if (client->isInUse() == false || client->isClosing() ||
 			client->getClient() == NULL || client->m_socket.IsOpen() == false)
 			continue;
 
-		EXC_SET("messages - check frozen");
+		EXC_SET_BLOCK("messages - check frozen");
 		if (!FD_ISSET(client->m_socket.GetSocket(), &readfds))
 		{
 			if ((client->m_client->GetConnectType() != CONNECT_TELNET) && (client->m_client->GetConnectType() != CONNECT_AXIS))
@@ -192,7 +192,7 @@ void NetworkIn::tick(void)
 		}
 
 		// receive data
-		EXC_SET("messages - receive");
+		EXC_SET_BLOCK("messages - receive");
 		size_t received = client->m_socket.Receive(buffer, NETWORK_BUFFERSIZE, 0);
 		if (received <= 0 || received > NETWORK_BUFFERSIZE)
 		{
@@ -200,21 +200,21 @@ void NetworkIn::tick(void)
 			continue;
 		}
 
-		EXC_SET("start client profile");
+		EXC_SET_BLOCK("start client profile");
 		CurrentProfileData.Count(PROFILE_DATA_RX, received);
 		ProfileTask clientTask(PROFILE_CLIENTS);
 
-		EXC_SET("messages - process");
+		EXC_SET_BLOCK("messages - process");
 		if (client->m_client->GetConnectType() == CONNECT_UNK)
 		{
 			if (client->m_seeded == false)
 			{
 				if (received >= 4) // login connection
 				{
-					EXC_SET("login message");
+					EXC_SET_BLOCK("login message");
 					if ( memcmp(buffer, "GET /", 5) == 0 || memcmp(buffer, "POST /", 6) == 0 ) // HTTP
 					{
-						EXC_SET("http request");
+						EXC_SET_BLOCK("http request");
 						if ( g_Cfg.m_fUseHTTP != 2 )
 						{
 							client->markReadClosed();
@@ -231,7 +231,7 @@ void NetworkIn::tick(void)
 						continue;
 					}
 
-					EXC_SET("game client seed");
+					EXC_SET_BLOCK("game client seed");
 					dword seed(0);
 					size_t iSeedLen(0);
 					if (client->m_newseed || (buffer[0] == XCMD_NewSeed && received >= NETWORK_SEEDLEN_NEW))
@@ -297,7 +297,7 @@ void NetworkIn::tick(void)
 						continue;
 					}
 
-					EXC_SET("ping #1");
+					EXC_SET_BLOCK("ping #1");
 					if (client->m_client->OnRxPing(buffer, received) == false)
 						client->markReadClosed();
 
@@ -310,7 +310,7 @@ void NetworkIn::tick(void)
 				if (client->m_seed == 0xFFFFFFFF)
 				{
 					// UOKR Client opens connection with 255.255.255.255
-					EXC_SET("KR client seed");
+					EXC_SET_BLOCK("KR client seed");
 
 					DEBUG_WARN(("UOKR Client Detected.\n"));
 					client->m_client->SetConnectType(CONNECT_CRYPT);
@@ -322,7 +322,7 @@ void NetworkIn::tick(void)
 
 			if (received < 5)
 			{
-				EXC_SET("ping #2");
+				EXC_SET_BLOCK("ping #2");
 				if (client->m_client->OnRxPing(buffer, received) == false)
 					client->markReadClosed();
 
@@ -330,7 +330,7 @@ void NetworkIn::tick(void)
 			}
 
 			// log in the client
-			EXC_SET("messages - setup");
+			EXC_SET_BLOCK("messages - setup");
 			client->m_client->SetConnectType(CONNECT_CRYPT);
 			client->m_client->xProcessClientSetup(static_cast<CEvent*>((void *)buffer), received);
 			continue;
@@ -341,7 +341,7 @@ void NetworkIn::tick(void)
 		// first data on a new connection - find out what should come next
 		if ( client->m_client->m_Crypt.IsInit() == false )
 		{
-			EXC_SET("encryption setup");
+			EXC_SET_BLOCK("encryption setup");
 			ASSERT(received <= sizeof(CEvent));
 
 			CEvent evt;
@@ -354,7 +354,7 @@ void NetworkIn::tick(void)
 				{
 					if (*buffer == XCMD_EncryptionReply && client->isClientKR())
 					{
-						EXC_SET("encryption reply");
+						EXC_SET_BLOCK("encryption reply");
 
 						// receiving response to 0xe3 packet
 						size_t iEncKrLen = evt.EncryptionReply.m_len;
@@ -369,14 +369,14 @@ void NetworkIn::tick(void)
 					}
 					else
 					{
-						EXC_SET("encryption detection");
+						EXC_SET_BLOCK("encryption detection");
 
 						client->m_client->xProcessClientSetup(&evt, received);
 					}
 				}
 				else
 				{
-					EXC_SET("ping #3");
+					EXC_SET_BLOCK("ping #3");
 
 					// not enough data to be a real client
 					client->m_client->SetConnectType(CONNECT_UNK);
@@ -389,7 +389,7 @@ void NetworkIn::tick(void)
 				break;
 
 			case CONNECT_HTTP:
-				EXC_SET("http message");
+				EXC_SET_BLOCK("http message");
 				if ( !client->m_client->OnRxWebPageRequest(evt.m_Raw, received) )
 				{
 					client->markReadClosed();
@@ -398,7 +398,7 @@ void NetworkIn::tick(void)
 				break;
 
 			case CONNECT_TELNET:
-				EXC_SET("telnet message");
+				EXC_SET_BLOCK("telnet message");
 				if ( !client->m_client->OnRxConsole(evt.m_Raw, received) )
 				{
 					client->markReadClosed();
@@ -406,7 +406,7 @@ void NetworkIn::tick(void)
 				}
 				break;
 			case CONNECT_AXIS:
-				EXC_SET("Axis message");
+				EXC_SET_BLOCK("Axis message");
 				if ( !client->m_client->OnRxAxis(evt.m_Raw, received) )
 				{
 					client->markReadClosed();
@@ -424,7 +424,7 @@ void NetworkIn::tick(void)
 		}
 
 		// decrypt the client data and add it to queue
-		EXC_SET("decrypt messages");
+		EXC_SET_BLOCK("decrypt messages");
 		if (!client->m_client->m_Crypt.Decrypt(m_decryptBuffer, buffer, received))
         {
             g_Log.EventError("NET-IN (ST): NetworkIn::tick() ignored received client data (Decrypt).\n");
@@ -448,7 +448,7 @@ void NetworkIn::tick(void)
 		Packet* packet = client->m_incoming.buffer;
 		size_t len = packet->getRemainingLength();
 
-		EXC_SET("record message");
+		EXC_SET_BLOCK("record message");
 		xRecordPacket(client->m_client, packet, "client->server");
 
 		// process the message
@@ -560,7 +560,7 @@ int NetworkIn::checkForData(fd_set* storage)
 	EXC_TRY("CheckForData");
 	int nfds = 0;
 
-	EXC_SET("zero");
+	EXC_SET_BLOCK("zero");
 	FD_ZERO(storage);
 
 #ifndef _WIN32
@@ -569,35 +569,35 @@ int NetworkIn::checkForData(fd_set* storage)
 #endif
 #endif
 	{
-		EXC_SET("main socket");
+		EXC_SET_BLOCK("main socket");
 		ADDTOSELECT(g_Serv.m_SocketMain.GetSocket());
 	}
 
-	EXC_SET("check states");
+	EXC_SET_BLOCK("check states");
 	for (int i = 0; i < m_stateCount; i++ )
 	{
-		EXC_SET("check socket");
+		EXC_SET_BLOCK("check socket");
 		NetState* state = m_states[i];
 		if ( state->isInUse() == false )
 			continue;
 
-		EXC_SET("cleaning queues");
+		EXC_SET_BLOCK("cleaning queues");
 		for (int ii = 0; ii < PacketSend::PRI_QTY; ii++)
 			state->m_outgoing.queue[ii].clean();
 
-		EXC_SET("check closing");
+		EXC_SET_BLOCK("check closing");
 		if (state->isClosing())
 		{
 			if (state->isClosed() == false)
 			{
-				EXC_SET("check pending data");
+				EXC_SET_BLOCK("check pending data");
 				if (state->hasPendingData())
 				{
 					if (state->needsFlush() == false)
 					{
 						DEBUGNETWORK(("%x:Flushing data for client.\n", state->id()));
 
-						EXC_SET("flush data");
+						EXC_SET_BLOCK("flush data");
 						g_NetworkOut.flush(state->getClient());
 					}
 					else
@@ -607,16 +607,16 @@ int NetworkIn::checkForData(fd_set* storage)
 					continue;
 				}
 
-				EXC_SET("mark closed");
+				EXC_SET_BLOCK("mark closed");
 				state->markReadClosed();
 				if (g_NetworkOut.isActive() == false)
 					state->markWriteClosed();
 			}
 
-			EXC_SET("check closed");
+			EXC_SET_BLOCK("check closed");
 			if (state->isClosed() && state->isSendingAsync() == false)
 			{
-				EXC_SET("clear socket");
+				EXC_SET_BLOCK("clear socket");
 				DEBUGNETWORK(("%x:Client is being cleared since marked to close.\n", state->id()));
 				state->clear();
 			}
@@ -626,17 +626,17 @@ int NetworkIn::checkForData(fd_set* storage)
 
 		if (state->m_socket.IsOpen())
 		{
-			EXC_SET("add to select");
+			EXC_SET_BLOCK("add to select");
 			ADDTOSELECT(state->m_socket.GetSocket());
 		}
 	}
 
-	EXC_SET("prepare timeout");
+	EXC_SET_BLOCK("prepare timeout");
 	timeval Timeout;	// time to wait for data.
 	Timeout.tv_sec=0;
 	Timeout.tv_usec=100;	// micro seconds = 1/1000000
 
-	EXC_SET("perform select");
+	EXC_SET_BLOCK("perform select");
 	return select(nfds+1, storage, NULL, NULL, &Timeout);
 
 	EXC_CATCH;
@@ -657,11 +657,11 @@ void NetworkIn::acceptConnection(void)
 
 	DEBUGNETWORK(("Receiving new connection\n"));
 
-	EXC_SET("accept");
+	EXC_SET_BLOCK("accept");
 	SOCKET h = g_Serv.m_SocketMain.Accept(client_addr);
 	if (( h >= 0 ) && ( h != INVALID_SOCKET ))
 	{
-		EXC_SET("ip history");
+		EXC_SET_BLOCK("ip history");
 
 		DEBUGNETWORK(("Retrieving IP history for '%s'.\n", client_addr.GetAddrStr()));
 		HistoryIP& ip = m_ips.getHistoryForIP(client_addr);
@@ -679,7 +679,7 @@ void NetworkIn::acceptConnection(void)
 			( climaxIp && ( ip.m_connected > climaxIp ))
 			)
 		{
-			EXC_SET("rejecting");
+			EXC_SET_BLOCK("rejecting");
 			DEBUGNETWORK(("Closing incoming connection [max ip=%d, clients max ip=%d).\n", maxIp, climaxIp));
 
 			CLOSESOCKET(h);
@@ -697,11 +697,11 @@ void NetworkIn::acceptConnection(void)
 		}
 		else
 		{
-			EXC_SET("detecting slot");
+			EXC_SET_BLOCK("detecting slot");
 			int slot = getStateSlot();
 			if ( slot == -1 )			// we do not have enough empty slots for clients
 			{
-				EXC_SET("no slot ready");
+				EXC_SET_BLOCK("no slot ready");
 				DEBUGNETWORK(("Unable to allocate new slot for client, too many clients already.\n"));
 
 				CLOSESOCKET(h);
@@ -712,12 +712,12 @@ void NetworkIn::acceptConnection(void)
 			{
 				DEBUGNETWORK(("%x:Allocated slot for client (%d).\n", slot, (int)h));
 
-				EXC_SET("assigning slot");
+				EXC_SET_BLOCK("assigning slot");
 				m_states[slot]->init(h, client_addr);
 
 				DEBUGNETWORK(("%x:State initialised, registering client instance.\n", slot));
 
-				EXC_SET("recording client");
+				EXC_SET_BLOCK("recording client");
 				if (m_states[slot]->m_client != NULL)
 					m_clients.InsertHead(m_states[slot]->getClient());
 
@@ -761,7 +761,7 @@ void NetworkIn::periodic(void)
 	int connectingMax = g_Cfg.m_iConnectingMax;
 	if (connectingMax > 0)
 	{
-		EXC_SET("limiting connecting clients");
+		EXC_SET_BLOCK("limiting connecting clients");
 		int connecting = 0;
 
 		ClientIterator clients(this);
@@ -784,14 +784,14 @@ void NetworkIn::periodic(void)
 	}
 
 	// tick the ip history, remove some from the list
-	EXC_SET("ticking history");
+	EXC_SET_BLOCK("ticking history");
 	m_ips.tick();
 
 	// resize m_states to account for m_iClientsMax changes
 	int max = g_Cfg.m_iClientsMax;
 	if (max > m_stateCount)
 	{
-		EXC_SET("increasing network state size");
+		EXC_SET_BLOCK("increasing network state size");
 		DEBUGNETWORK(("Increasing number of client slots from %d to %d\n", m_stateCount, max));
 
 		// reallocate state buffer to accomodate additional clients
@@ -811,7 +811,7 @@ void NetworkIn::periodic(void)
 	}
 	else if (max < m_stateCount)
 	{
-		EXC_SET("decreasing network state size");
+		EXC_SET_BLOCK("decreasing network state size");
 		DEBUGNETWORK(("Decreasing number of client slots from %d to %d\n", m_stateCount, max));
 
 		// move used slots to free spaces if possible
@@ -933,7 +933,7 @@ void NetworkOut::tick(void)
 		toProcess[PacketSend::PRI_LOW]		= ((iCount %  8) == 7);
 		toProcess[PacketSend::PRI_IDLE]		= ((iCount % 16) == 15);
 
-		EXC_SET("flush");
+		EXC_SET_BLOCK("flush");
 		proceedFlush();
 	}
 
@@ -945,27 +945,27 @@ void NetworkOut::tick(void)
 		const NetState* state = client->GetNetState();
 		ASSERT(state != NULL);
 
-		EXC_SET("highest");
+		EXC_SET_BLOCK("highest");
 		if (toProcess[PacketSend::PRI_HIGHEST] && state->isWriteClosed() == false)
 			packetsSent += proceedQueue(client, PacketSend::PRI_HIGHEST);
 
-		EXC_SET("high");
+		EXC_SET_BLOCK("high");
 		if (toProcess[PacketSend::PRI_HIGH] && state->isWriteClosed() == false)
 			packetsSent += proceedQueue(client, PacketSend::PRI_HIGH);
 
-		EXC_SET("normal");
+		EXC_SET_BLOCK("normal");
 		if (toProcess[PacketSend::PRI_NORMAL] && state->isWriteClosed() == false)
 			packetsSent += proceedQueue(client, PacketSend::PRI_NORMAL);
 
-		EXC_SET("low");
+		EXC_SET_BLOCK("low");
 		if (toProcess[PacketSend::PRI_LOW] && state->isWriteClosed() == false)
 			packetsSent += proceedQueue(client, PacketSend::PRI_LOW);
 
-		EXC_SET("idle");
+		EXC_SET_BLOCK("idle");
 		if (toProcess[PacketSend::PRI_IDLE] && state->isWriteClosed() == false)
 			packetsSent += proceedQueue(client, PacketSend::PRI_IDLE);
 
-		EXC_SET("async");
+		EXC_SET_BLOCK("async");
 		if (state->isWriteClosed() == false)
 			packetsSent += proceedQueueAsync(client);
 
@@ -1171,7 +1171,7 @@ int NetworkOut::proceedQueue(CClient* client, int priority)
 		EXC_TRY("proceedQueue");
 		length += packet->getLength();
 
-		EXC_SET("sending");
+		EXC_SET_BLOCK("sending");
 		if (sendPacket(client, packet) == false)
 		{
 			state->clearQueues();
@@ -1179,7 +1179,7 @@ int NetworkOut::proceedQueue(CClient* client, int priority)
 			break;
 		}
 
-		EXC_SET("check length");
+		EXC_SET_BLOCK("check length");
 		if (length > maxClientLength)
 		{
 			//			DEBUGNETWORK(("%x:Packets sending stopped at %d packet due to overall length %d overlapping %d.\n", state->id(), i, length, maxClientLength));
@@ -1346,7 +1346,7 @@ bool NetworkOut::sendPacketNow(CClient* client, PacketSend* packet)
 
 	xRecordPacket(client, packet, "server->client");
 
-	EXC_SET("send trigger");
+	EXC_SET_BLOCK("send trigger");
 	if (packet->onSend(client))
 	{
 		byte* sendBuffer = NULL;
@@ -1371,7 +1371,7 @@ bool NetworkOut::sendPacketNow(CClient* client, PacketSend* packet)
 			if (client->GetConnectType() == CONNECT_GAME)
 			{
 				// game clients require encryption
-				EXC_SET("compress and encrypt");
+				EXC_SET_BLOCK("compress and encrypt");
 
 				// compress
 				size_t compressLength = client->xCompress(m_encryptBuffer, packet->getData(), packet->getLength());
@@ -1445,7 +1445,7 @@ bool NetworkOut::sendPacketNow(CClient* client, PacketSend* packet)
 			while (totalSent < sendBufferLength);
 		}
 
-		EXC_SET("sent trigger");
+		EXC_SET_BLOCK("sent trigger");
 		packet->onSent(client);
 	}
 
@@ -1471,7 +1471,7 @@ int NetworkOut::sendBytesNow(CClient* client, const byte* data, dword length)
 	int ret = 0;
 
 	// send data
-	EXC_SET("sending");
+	EXC_SET_BLOCK("sending");
 
 #if defined(_WIN32) && !defined(_LIBEV)
 	if (state->isAsyncMode())
@@ -1501,7 +1501,7 @@ int NetworkOut::sendBytesNow(CClient* client, const byte* data, dword length)
 	// check for error
 	if (ret <= 0)
 	{
-		EXC_SET("error parse");
+		EXC_SET_BLOCK("error parse");
 		int errCode = CSocket::GetLastError(true);
 
 #ifdef _WIN32
@@ -1529,7 +1529,7 @@ int NetworkOut::sendBytesNow(CClient* client, const byte* data, dword length)
 		}
 		else
 		{
-			EXC_SET("unexpected connection error - delete packet");
+			EXC_SET_BLOCK("unexpected connection error - delete packet");
 
 			if (state->isClosing() == false)
 				g_Log.Event(LOGM_CLIENTS_LOG|LOGL_WARN, "%x:TX Error %d\n", state->id(), errCode);

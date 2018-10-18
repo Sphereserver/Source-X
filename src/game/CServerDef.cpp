@@ -70,7 +70,7 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 #ifdef _WIN32
 			if ( !m_hmPsapiDll )			// try to load psapi.dll if not loaded yet
 			{
-				EXC_SET("load process info");
+				EXC_SET_BLOCK("load process info");
 				m_hmPsapiDll = LoadLibrary(TEXT("psapi.dll"));
 				if (m_hmPsapiDll == NULL)
 				{
@@ -83,15 +83,15 @@ size_t CServerDef::StatGet(SERV_STAT_TYPE i) const
 
 			if ( m_GetProcessMemoryInfo )
 			{
-				EXC_SET("open process");
+				EXC_SET_BLOCK("open process");
 				HANDLE hProcess = GetCurrentProcess();
 				if ( hProcess )
 				{
 					ASSERT( hProcess == (HANDLE)-1 );
-					EXC_SET("get memory info");
+					EXC_SET_BLOCK("get memory info");
 					if ( m_GetProcessMemoryInfo(hProcess, &pcnt, sizeof(pcnt)) )
 					{
-						EXC_SET("read memory info");
+						EXC_SET_BLOCK("read memory info");
 						d = pcnt.WorkingSetSize;
 					}
 					CloseHandle(hProcess);

@@ -336,39 +336,39 @@ int Sphere_InitServer( int argc, char *argv[] )
 	// We don't need an exception translator for the Debug build, since that build would, generally, be used with a debugger.
 	// We don't want that for Release build either because, in order to call _set_se_translator, we should set the /EHa
 	//	compiler flag, which slows down code a bit.
-	EXC_SET("setting exception catcher");
+	EXC_SET_BLOCK("setting exception catcher");
 	SetExceptionTranslator();
 #endif
 #endif // _WIN32
 
 #ifndef _DEBUG
 	// Same as for SetExceptionTranslator, Debug build doesn't need a purecall handler.
-	EXC_SET("setting purecall handler");
+	EXC_SET_BLOCK("setting purecall handler");
 	SetPurecallHandler();
 #endif
 
-	EXC_SET("loading");
+	EXC_SET_BLOCK("loading");
 	if ( !g_Serv.Load() )
 		return -3;
 
 	if ( argc > 1 )
 	{
-		EXC_SET("cmdline");
+		EXC_SET_BLOCK("cmdline");
 		if ( !g_Serv.CommandLine(argc, argv) )
 			return -1;
 	}
 
 	WritePidFile(2);
 
-	EXC_SET("sockets init");
+	EXC_SET_BLOCK("sockets init");
 	if ( !g_Serv.SocketsInit() )
 		return -9;
-	EXC_SET("load world");
+	EXC_SET_BLOCK("load world");
 	if ( !g_World.LoadAll() )
 		return -8;
 
 	//	load auto-complete dictionary
-	EXC_SET("auto-complete");
+	EXC_SET_BLOCK("auto-complete");
 	{
 		CSFileText	dict;
 		if ( dict.Open(SPHERE_FILE ".dic", OF_READ|OF_TEXT|OF_DEFAULTMODE) )
@@ -403,7 +403,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 	// Display EF/OF Flags
 	g_Cfg.PrintEFOFFlags();
 
-	EXC_SET("finalizing");
+	EXC_SET_BLOCK("finalizing");
 	g_Serv.SetServerMode(SERVMODE_Run);	// ready to go.
 
 	g_Log.Event(LOGM_INIT, "%s", g_Serv.GetStatusString(0x24));
@@ -479,39 +479,39 @@ int Sphere_OnTick()
 	const char *m_sClassName = "Sphere";
 	EXC_TRY("Tick");
 #ifdef _WIN32
-	EXC_SET("service");
+	EXC_SET_BLOCK("service");
 	g_Service.OnTick();
 #endif
 
-	EXC_SET("world");
+	EXC_SET_BLOCK("world");
 	g_World.OnTick();
 
 	// process incoming data
-	EXC_SET("network-in");
+	EXC_SET_BLOCK("network-in");
 #ifndef _MTNETWORK
 	g_NetworkIn.tick();
 #else
 	g_NetworkManager.processAllInput();
 #endif
 
-	EXC_SET("server");
+	EXC_SET_BLOCK("server");
 	g_Serv.OnTick();
 
 	// push outgoing data
 #ifndef _MTNETWORK
 	if (g_NetworkOut.isActive() == false)
 	{
-		EXC_SET("network-out");
+		EXC_SET_BLOCK("network-out");
 		g_NetworkOut.tick();
 	}
 #else
-	EXC_SET("network-out");
+	EXC_SET_BLOCK("network-out");
 	g_NetworkManager.processAllOutput();
 #endif
 
 #ifdef _MTNETWORK
 	// don't put the network-tick between in.tick and out.tick, otherwise it will clean the out queue!
-	EXC_SET("network-tick");
+	EXC_SET_BLOCK("network-tick");
 	g_NetworkManager.tick();	// then this thread has to call the network tick
 #endif
 
@@ -535,7 +535,7 @@ static void Sphere_MainMonitorLoop()
 			g_Cfg.m_iFreezeRestartTime = 10;
 		}
 
-		EXC_SET("Sleep");
+		EXC_SET_BLOCK("Sleep");
 		// only sleep 1 second at a time, to avoid getting stuck here when closing
 		// down with large m_iFreezeRestartTime values set
 		for (int i = 0; i < g_Cfg.m_iFreezeRestartTime; ++i)
@@ -550,12 +550,12 @@ static void Sphere_MainMonitorLoop()
 #endif
 		}
 
-		EXC_SET("Checks");
+		EXC_SET_BLOCK("Checks");
 		// Don't look for freezing when doing certain things.
 		if ( g_Serv.IsLoading() || ! g_Cfg.m_fSecure || g_Serv.IsValidBusy() )
 			continue;
 
-		EXC_SET("Check Stuck");
+		EXC_SET_BLOCK("Check Stuck");
 #ifndef _DEBUG
 		if (g_Main.checkStuck() == true)
 			g_Log.Event(LOGL_CRIT, "'%s' thread hang, restarting...\n", g_Main.getName());

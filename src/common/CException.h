@@ -136,21 +136,21 @@ public:
 #define EXC_TRY(a) \
 	lpctstr inLocalBlock = ""; \
 	lpctstr inLocalArgs = a; \
-	uint inLocalBlockCnt(0); \
+	uint inLocalBlockCnt = 0; \
 	bool bCATCHExcept = false; \
 	UNREFERENCED_PARAMETER(bCATCHExcept); \
 	try \
 	{
 
-// EXC_SET
-#define EXC_SET(a)	\
+// EXC_SET_BLOCK
+#define EXC_SET_BLOCK(a)	\
 	inLocalBlock = a; \
 	++inLocalBlockCnt
 
 // EXC_CATCH_EXCEPTION_SPHERE (used inside other macros! don't use it manually!)
 #define EXC_CATCH_EXCEPTION_SPHERE(a) \
     bCATCHExcept = true; \
-	if ( inLocalBlock != NULL && inLocalBlockCnt > 0 ) \
+	if ( inLocalBlock != nullptr && inLocalBlockCnt > 0 ) \
 		g_Log.CatchEvent(a, "%s::%s() #%u \"%s\"", m_sClassName, inLocalArgs, inLocalBlockCnt, inLocalBlock); \
 	else \
 		g_Log.CatchEvent(a, "%s::%s()", m_sClassName, inLocalArgs); \
@@ -159,7 +159,7 @@ public:
 // EXC_CATCH_EXCEPTION_STD (used inside other macros! don't use it manually!)
 #define EXC_CATCH_EXCEPTION_STD(a) \
     bCATCHExcept = true; \
-	if ( inLocalBlock != NULL && inLocalBlockCnt > 0 ) \
+	if ( inLocalBlock != nullptr && inLocalBlockCnt > 0 ) \
 		g_Log.CatchStdException(a, "std::exception in %s::%s() #%u \"%s\"", m_sClassName, inLocalArgs, inLocalBlockCnt, inLocalBlock); \
 	else \
 		g_Log.CatchStdException(a, "std::exception in %s::%s()", m_sClassName, inLocalArgs); \
@@ -187,7 +187,7 @@ public:
 	} \
 	catch (...) \
 	{ \
-		EXC_CATCH_EXCEPTION_SPHERE(NULL); \
+		EXC_CATCH_EXCEPTION_SPHERE(nullptr); \
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
 		EXC_NOTIFY_DEBUGGER; \
 	}
@@ -215,14 +215,14 @@ public:
 #define EXC_TRYSUB(a) \
 	lpctstr inLocalSubBlock = ""; \
 	lpctstr inLocalSubArgs = a; \
-	uint inLocalSubBlockCnt(0); \
+	uint inLocalSubBlockCnt = 0; \
 	bool bCATCHExceptSub = false; \
 	UNREFERENCED_PARAMETER(bCATCHExceptSub); \
 	try \
 	{
 
-// EXC_SETSUB
-#define EXC_SETSUB(a) \
+// EXC_SETSUB_BLOCK
+#define EXC_SETSUB_BLOCK(a) \
 	inLocalSubBlock = a; \
 	++inLocalSubBlockCnt
 
@@ -230,7 +230,7 @@ public:
 #define EXC_CATCH_SUB_EXCEPTION_SPHERE(a,b) \
     bCATCHExceptSub = true; \
     EXC_PRINT_STACK_TRACE; \
-    if ( inLocalSubBlock != NULL && inLocalSubBlockCnt > 0 ) \
+    if ( inLocalSubBlock != nullptr && inLocalSubBlockCnt > 0 ) \
         g_Log.CatchEvent(a, "SUB: %s::%s::%s() #%u \"%s\"", m_sClassName, b, inLocalSubArgs, \
 											                inLocalSubBlockCnt, inLocalSubBlock); \
     else \
@@ -241,7 +241,7 @@ public:
 #define EXC_CATCH_SUB_EXCEPTION_STD(a,b) \
     bCATCHExceptSub = true; \
     EXC_PRINT_STACK_TRACE; \
-    if ( inLocalSubBlock != NULL && inLocalSubBlockCnt > 0 ) \
+    if ( inLocalSubBlock != nullptr && inLocalSubBlockCnt > 0 ) \
         g_Log.CatchStdException(a, "std::exception in SUB: %s::%s::%s() #%u \"%s\"", m_sClassName, b, inLocalSubArgs, \
 														                            inLocalSubBlockCnt, inLocalSubBlock); \
     else \
@@ -270,7 +270,7 @@ public:
 	} \
 	catch (...) \
 	{ \
-		EXC_CATCH_SUB_EXCEPTION_SPHERE(NULL, a); \
+		EXC_CATCH_SUB_EXCEPTION_SPHERE(nullptr, a); \
 		CurrentProfileData.Count(PROFILE_STAT_FAULTS, 1); \
         EXC_NOTIFY_DEBUGGER; \
 	}
@@ -304,8 +304,8 @@ public:
 
 
 	#define EXC_TRY(a) {
-	#define EXC_SET(a)
-	#define EXC_SETSUB(a)
+	#define EXC_SET_BLOCK(a)
+	#define EXC_SETSUB_BLOCK(a)
 	#define EXC_CATCH }
 	#define EXC_TRYSUB(a) {
 	#define EXC_CATCHSUB(a) }
