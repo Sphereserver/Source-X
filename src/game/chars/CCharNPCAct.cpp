@@ -190,7 +190,7 @@ bool CChar::NPC_OnVerb( CScript &s, CTextConsole * pSrc ) // Execute command fro
 			CItem * pItem = NPC_Shrink(); // this deletes the char !!!
 			if ( pItem )
 				pCharSrc->m_Act_UID = pItem->GetUID();
-			if (s.GetArgStr())
+			if (s.HasArgs())
 				pCharSrc->ItemBounce(pItem);
 
 			return ( pItem != NULL );

@@ -1857,16 +1857,16 @@ bool CObjBase::r_LoadVal( CScript & s )
             m_CanMask = dwFlags;
             if (IsItem())
             {
-                g_Log.EventDebug("CObjBase::r_LoadVal(OC_CANMASK)\n");
+                //g_Log.EventDebug("CObjBase::r_LoadVal(OC_CANMASK)\n");
                 CCItemDamageable *pItemDmg = static_cast<CCItemDamageable*>(GetComponent(COMP_ITEMDAMAGEABLE));
                 if ((dwFlags & CAN_I_DAMAGEABLE) && !pItemDmg)
                 {
-                    g_Log.EventDebug("CObjBase::r_LoadVal(OC_CANMASK) 1\n");
+                    //g_Log.EventDebug("CObjBase::r_LoadVal(OC_CANMASK) 1\n");
                     Suscribe(new CCItemDamageable(this));
                 }
                 else if (!(dwFlags & CAN_I_DAMAGEABLE) && pItemDmg)
                 {
-                    g_Log.EventDebug("CObjBase::r_LoadVal(OC_CANMASK) 2\n");
+                    //g_Log.EventDebug("CObjBase::r_LoadVal(OC_CANMASK) 2\n");
                     Unsuscribe(pItemDmg);
                 }
                 Update();   // Required to force the client to allow dragging the item's bar or to do not allow it anymore before trying to do it.
@@ -1874,16 +1874,23 @@ bool CObjBase::r_LoadVal( CScript & s )
             break;
         }
 		case OC_MODMAXWEIGHT:
+        {
 			m_ModMaxWeight = s.GetArgVal();
+            CChar * pChar = dynamic_cast <CChar*>(GetTopLevelObj());
+            if ( pChar )
+                pChar->UpdateStatsFlag();
             fResendTooltip = true;
+        }
 			break;
 		case OC_COLOR:
-			if ( !strnicmp( s.GetArgStr(), "match_shirt", 11 ) || !strnicmp( s.GetArgStr(), "match_hair", 10 ))
+        {
+            tchar* ptcArg = s.GetArgStr();
+			if ( !strnicmp( ptcArg, "match_shirt", 11 ) || !strnicmp( ptcArg, "match_hair", 10 ))
 			{
 				CChar * pChar = dynamic_cast <CChar*>(GetTopLevelObj());
 				if ( pChar )
 				{
-					CItem * pHair = pChar->LayerFind( !strnicmp( s.GetArgStr()+6, "shirt",5 ) ? LAYER_SHIRT : LAYER_HAIR );
+					CItem * pHair = pChar->LayerFind( !strnicmp( ptcArg+6, "shirt", 5 ) ? LAYER_SHIRT : LAYER_HAIR );
 					if ( pHair )
 					{
 						m_wHue = pHair->GetHue();
@@ -1896,6 +1903,7 @@ bool CObjBase::r_LoadVal( CScript & s )
 			RemoveFromView();
 			SetHue((HUE_TYPE)(s.GetArgVal()), false, &g_Serv); //@Dye is called from @Create/.xcolor/script command here // since we can not receive pSrc on this r_LoadVal function ARGO/SRC will be null
 			Update();
+        }
 			break;
 		case OC_EVENTS:
 			return( m_OEvents.r_LoadVal( s, RES_EVENTS ));

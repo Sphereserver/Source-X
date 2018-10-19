@@ -1924,11 +1924,14 @@ bool CChar::ItemBounce( CItem * pItem, bool bDisplayMsg )
 			return false;
 		}
 
-		// Maybe in the trigger call i have changed/overridden the container, so drop it on ground
-		//	only if the item still hasn't a container, or if i'm dragging it but i can't add it to pack
-		if ( (pItem->GetContainer() == NULL) || (pItem->GetContainedLayer() == LAYER_DRAGGING) )
+		// Maybe in a trigger call (like @DropOn_Pack) i have changed/overridden the container, so drop it on ground
+		//	only under specific conditions: if the item still hasn't a container, or if i'm dragging it but i can't add it to pack, or
+        //  if i'm trading it but both the players are overweighted
+        CItem* pItemCont = dynamic_cast<CItem*>(pItem->GetContainer());
+		if ( (pItem->GetContainer() == NULL) || (pItem->GetContainedLayer() == LAYER_DRAGGING) || (pItemCont && (pItemCont->GetType() == IT_EQ_TRADE_WINDOW)))
 		{
 			pszWhere = g_Cfg.GetDefaultMsg(DEFMSG_MSG_FEET);
+            bDisplayMsg = true;
 			pItem->RemoveFromView();
 			pItem->MoveToDecay(GetTopPoint(), pItem->GetDecayTime());	// drop it on ground
 		}

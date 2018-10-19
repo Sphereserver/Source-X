@@ -1218,3 +1218,8 @@ f_adjust_movement_delay
 
 It would be recommended to apply this function also on Taming's success, because pets will never have a base movement value calculated with less than 75 dex
 The lower calls to this function, the better (as for any other), but other formulas (like AI reworks) may need to call it in each @SkillStart/Success/Fail or other cirtumstances.
+
+19-10-2018, Nolok
+- Fixed: SHRINK command always bouncing the figurine (Issue #138).
+- Fixed: Items disappear in trade menu when both players are overweight (Issue #124).
+- Fixed: Changing a player's MODMAXWEIGHT property didn't update the status window.
