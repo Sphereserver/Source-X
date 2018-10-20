@@ -108,8 +108,10 @@ public:
 	bool MoveCharToSector( CChar * pChar );
 
 	// General.
+private:
     void GoSleep();
     void GoAwake();
+public:
 	virtual bool r_LoadVal( CScript & s );
 	virtual bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc );
 	virtual void r_Write();

@@ -119,6 +119,50 @@ CObjPointSortArray::CObjPointSortArray()
 //////////////////////////////////////////////////////////////////
 // -CSectorBase
 
+void CSectorBase::SetAdjacentSectors()
+{
+    int iMaxX = g_MapList.GetSectorCols(m_map);
+    int iMaxY = g_MapList.GetSectorRows(m_map);
+    int iMaxSectors = g_MapList.GetSectorQty(m_map);
+    int index = 0;
+    int iSectorCount = 0;
+    for (int i = 0; i < m_map; ++i) // all sectors are stored in the same array, get a tmp count of all of the lower maps
+    {
+        if (!g_MapList.IsMapSupported(i))   // Skip disabled / unsupported maps
+        {
+            continue;
+        }
+        iSectorCount += g_MapList.GetSectorQty(i);
+    }
+    int tmpIndex[DIR_QTY] =
+    {
+        tmpIndex[DIR_N] = -iMaxX,       // North -iMaxX (an entire row)
+        tmpIndex[DIR_NE] = -(iMaxX - 1),// North East ( -iMaxX  + 1 = -(iMaxX - 1))
+        tmpIndex[DIR_E] = 1,            // East = +1
+        tmpIndex[DIR_SE] = iMaxX + 1,   // SouthEast = iMaxX + 1
+        tmpIndex[DIR_S] = iMaxX,        // South = iMaxX
+        tmpIndex[DIR_SW] = iMaxX - 1,   // SouthWest = iMaxX - 1
+        tmpIndex[DIR_W] = -1,           // West = -1
+        tmpIndex[DIR_NW] = -(iMaxX + 1) // NorthWest = ( -iMaxX - 1 = -(iMaxX + 1))
+    };
+    for (int i = 0; i < (int)DIR_QTY; ++i)
+    {
+        index = iSectorCount + m_index + tmpIndex[i];
+        if ((index <= 0) || (index >= iMaxSectors) || (index % iMaxX == 0) || index % iMaxY == 0) //out out bounds X || Y, first Col or first Row.
+        {
+            _mAdjacentSectors[(DIR_TYPE)i] = nullptr;
+            continue;
+        }
+        _mAdjacentSectors[(DIR_TYPE)i] = g_World.m_Sectors[index];
+    }
+}
+
+CSector *CSectorBase::GetAdjacentSector(DIR_TYPE dir)
+{
+    ASSERT(dir >= DIR_N && dir < DIR_QTY);
+    return _mAdjacentSectors[dir];
+}
+
 CSectorBase::CSectorBase()
 {
 	m_map = 0;

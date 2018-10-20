@@ -343,7 +343,7 @@ bool CChar::Spell_Recall(CItem * pRune, bool fGate)
 
 		const CSpellDef * pSpellDef = g_Cfg.GetSpellDef(SPELL_Gate_Travel);
 		ASSERT(pSpellDef);
-		int iDuration = GetSpellDuration(SPELL_Gate_Travel, Skill_GetBase(SKILL_MAGERY), nullptr) * MSECS_PER_SEC;
+		int iDuration = GetSpellDuration(SPELL_Gate_Travel, Skill_GetBase(SKILL_MAGERY), nullptr);
 
 		CItem * pGate = CItem::CreateBase(pSpellDef->m_idEffect);
 		ASSERT(pGate);
@@ -2041,7 +2041,7 @@ void CChar::Spell_Field(CPointMap pntTarg, ITEMID_TYPE idEW, ITEMID_TYPE idNS, u
 			pSpell->SetAttr(ATTR_MAGIC);
 			pSpell->SetHue(iColor);
 			pSpell->GenerateScript(this);
-			pSpell->MoveToDecay( ptg, iDuration, true);
+			pSpell->MoveToDecay( ptg, iDuration * MSECS_PER_SEC, true);
 		}
 	}
 }
@@ -2719,11 +2719,8 @@ bool CChar::Spell_CastDone()
 
 				if (pObj == NULL)
 				{
-					CItem * pItem = CItem::CreateBase(iT1);
-					ASSERT(pItem);
-					pItem->SetType(IT_SPELL);
-					pItem->m_itSpell.m_spell = SPELL_Flame_Strike;
-					pItem->MoveToDecay(m_Act_p, 2 * MSECS_PER_SEC);
+                    CPointMap pt = m_Act_p;
+                    Effect(EFFECT_XYZ, iT1, pt, nullptr, 20, 30);
 				}
 				else
 				{
@@ -2969,7 +2966,7 @@ int CChar::Spell_CastStart()
 		}
 	}
 
-    int64 iWaitTime = IsPriv(PRIV_GM) ? 1 : (int64)(pSpellDef->m_CastTime.GetLinear(Skill_GetBase((SKILL_TYPE)iSkill)) * MSECS_PER_TENTH); // in tenths of second, converted to MSECS.
+    int64 iWaitTime = IsPriv(PRIV_GM) ? 10 : (int64)(pSpellDef->m_CastTime.GetLinear(Skill_GetBase((SKILL_TYPE)iSkill)) * MSECS_PER_TENTH); // in tenths of second, converted to MSECS.
 	iWaitTime -= GetDefNum("FASTERCASTING", true, true) * 2;	//correct value is 0.25, but for backwards compatibility let's handle only 0.2.
 	if ( iWaitTime < 1 || IsPriv(PRIV_GM) )
 		iWaitTime = 1;
@@ -3661,7 +3658,7 @@ int CChar::GetSpellDuration( SPELL_TYPE spell, int iSkillLevel, CChar * pCharSrc
 				break;
 
             case SPELL_Gate_Travel:
-                iDuration = 60; //Fixed time: 60 seconds
+                iDuration = 60 * MSECS_PER_SEC; //Fixed time: 60 seconds
                 break;
 
 			case SPELL_Polymorph:
