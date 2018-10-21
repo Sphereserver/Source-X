@@ -1222,7 +1222,10 @@ The lower calls to this function, the better (as for any other), but other formu
 19-10-2018, Nolok
 - Fixed: SHRINK command always bouncing the figurine (Issue #138).
 - Fixed: Items disappear in trade menu when both players are overweight (Issue #124).
-- Fixed: Changing a player's MODMAXWEIGHT property didn't update the status window.
+20-10-2018, XuN
+Added: Now Sectors store their adjacent sectors:
+    When a sector awake, all of it's adjacent awake too to avoid the awakening effect for clients (all spawns generating NPCs at once, NPCs starting to move at once, etc)
+    When a sector try to sleep, it checks if the adjacent can't sleep to minimize more the awakening effect.
 
 21-10-2018, Nolok
 - Fixed: Items in trade window being lost if a world save occurred during the trade process and the server was restarted, loading that save.

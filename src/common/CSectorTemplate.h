@@ -12,6 +12,7 @@
 
 class CItem;
 class CServerMapBlock;
+class CSector;
 
 class CCharsDisconnectList : public CSObjList
 {
@@ -101,6 +102,14 @@ public:
 	CCharsDisconnectList	m_Chars_Disconnect;	// dead NPCs, etc
 	CItemsList m_Items_Timer;				// CItem(s) in this CSector that need timers.
 	CItemsList m_Items_Inert;				// CItem(s) in this CSector. (no timer required)
+private:
+    std::map<DIR_TYPE, CSector*> _mAdjacentSectors;
+public:
+    /*
+    * @brief Asign it's adjacent's sectors
+    */
+    void SetAdjacentSectors();
+    CSector *GetAdjacentSector(DIR_TYPE dir);
 public:
 	CSectorBase();
 	virtual ~CSectorBase();

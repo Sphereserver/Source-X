@@ -864,6 +864,14 @@ void CWorld::Init()
 			m_Sectors[m_SectorsQty++] = pSector;
 		}
 	}
+    for (uint s = 0; s < m_SectorsQty; ++s)
+    {
+        CSector *pSector = m_Sectors[s];
+        if (pSector)
+        {
+            pSector->SetAdjacentSectors();
+        }
+    }
     g_Log.Event(LOGM_INIT, "Allocated map sectors:%s\n", static_cast<lpctstr>(z));
 	ASSERT(m_SectorsQty);
 
