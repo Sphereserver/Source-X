@@ -332,9 +332,9 @@ void CChar::NPC_Act_Fight()
         m_Act_UID.InitUID();
         SetTimeoutD(1);
     }
-    if (!IsTimerSet())// Nothing could be done, tick again in a while
+    if (!IsTimerSet()) // Nothing could be done, tick again in a while
     {
-        g_Log.EventWarn("%s [0x%04x] found nothing to do in the fight routines.\n", GetName(), GetUID());
+        g_Log.EventWarn("%s [0x%04x] found nothing to do in the fight routines.\n", GetName(), (dword)GetUID());
         SetTimeoutS(1);
     }
 }

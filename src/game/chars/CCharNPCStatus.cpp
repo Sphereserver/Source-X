@@ -847,14 +847,14 @@ int CChar::NPC_GetAttackContinueMotivation( CChar * pChar, int iMotivation ) con
 		return ( iMotivation + 80 - GetDist( pChar ));	// less interested the further away they are
 
 	// Try to stay on one target.
-	if ( Fight_IsActive() && m_Act_UID == pChar->GetUID())
+	if ( Fight_IsActive() && (m_Fight_Targ_UID == pChar->GetUID()))
 		iMotivation += 8;
 
 	// Less interested the further away they are.
 	iMotivation -= GetDist( pChar );
 
 	if ( !g_Cfg.m_fMonsterFear )
-		return( iMotivation );
+		return iMotivation;
 
 	// I'm just plain stronger.
 	iMotivation += ( Stat_GetAdjusted(STAT_STR) - pChar->Stat_GetAdjusted(STAT_STR));
@@ -869,7 +869,7 @@ int CChar::NPC_GetAttackContinueMotivation( CChar * pChar, int iMotivation ) con
 	// I'm smart and therefore more cowardly. (if injured)
 	iMotivation -= Stat_GetAdjusted(STAT_INT) / 16;
 
-	return( iMotivation );
+	return iMotivation;
 }
 
 int CChar::NPC_GetAttackMotivation( CChar * pChar, int iMotivation ) const
@@ -892,6 +892,15 @@ int CChar::NPC_GetAttackMotivation( CChar * pChar, int iMotivation ) const
 	if ( pChar->m_pArea->IsFlag(REGION_FLAG_SAFE) )
 		return 0;
 
+    if (m_Fight_Targ_UID == pChar->GetUID())    // Am i attacking the same target as before?
+    {
+        // Was i told to attack by my master? This is the only hardcoded case in which we have such an high threat value.
+        // In this case, i want that my pet attacks the target without doing any other consideration.
+        int iCharID = Attacker_GetID(pChar);
+        ASSERT(iCharID != -1);
+        if (Attacker_GetThreat(iCharID) >= ATTACKER_THREAT_TOLDBYMASTER)
+            return 100;
+    }
 	iMotivation += NPC_GetHostilityLevelToward(pChar);
 	if ( iMotivation > 0 )
 		iMotivation = NPC_GetAttackContinueMotivation(pChar, iMotivation);		// Am i injured etc ?

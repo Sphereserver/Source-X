@@ -1080,7 +1080,7 @@ int CChar::Fight_CalcDamage( const CItem * pWeapon, bool bNoRandom, bool bGetMax
 bool CChar::Fight_IsAttackable()
 {
 	ADDTOCALLSTACK("CChar::IsAttackable");
-	return !IsStatFlag(STATF_DEAD|STATF_STONE|STATF_INVISIBLE|STATF_INSUBSTANTIAL|STATF_HIDDEN|STATF_INVUL);
+	return !IsDisconnected() && !IsStatFlag(STATF_DEAD|STATF_STONE|STATF_INVISIBLE|STATF_INSUBSTANTIAL|STATF_HIDDEN|STATF_INVUL);
 }
 
 // Clear all my active targets. Toggle out of war mode.
@@ -1168,7 +1168,7 @@ bool CChar::Fight_Attack( const CChar *pCharTarg, bool btoldByMaster )
 
 	int64 threat = 0;
 	if ( btoldByMaster )
-		threat = 1000 + Attacker_GetHighestThreat();
+		threat = ATTACKER_THREAT_TOLDBYMASTER + Attacker_GetHighestThreat();
 
 	if ( ((IsTrigUsed(TRIGGER_ATTACK)) || (IsTrigUsed(TRIGGER_CHARATTACK))) && m_Fight_Targ_UID != pCharTarg->GetUID() )
 	{
@@ -1327,7 +1327,11 @@ void CChar::Fight_HitTry()
 		{
 			if ( m_pNPC )
             {
-				Fight_Attack(NPC_FightFindBestTarget());
+				Fight_Attack(NPC_FightFindBestTarget());	// keep attacking the same char or change the targ
+                if (!IsTimerSet())	// If i haven't landed the hit yet, keep the NPC AI alive, so that in NPCActFight the NPC can further approach his target.
+                {
+                    SetTimeoutD(1);
+                }
             }
 			return;
 		}

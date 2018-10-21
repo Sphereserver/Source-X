@@ -2180,7 +2180,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 				}
 				//DEBUG_ERR(("this->GetUID() 0%x pThis->GetUID() 0%x pCharSrc->GetUID() 0%x\n",(dword)this->GetUID(),(dword)pThis->GetUID(),(dword)pCharSrc->GetUID()));
-				pThis->Effect( static_cast<EFFECT_TYPE>(piCmd[0]), (ITEMID_TYPE)(RES_GET_INDEX(piCmd[1]) ),
+				pThis->Effect( (EFFECT_TYPE)(piCmd[0]), (ITEMID_TYPE)(RES_GET_INDEX(piCmd[1]) ),
 					pCharSrc,
 					(iArgQty >= 3)? (uchar)(piCmd[2]) : 5,		// byte bSpeedSeconds = 5,
 					(iArgQty >= 4)? (uchar)(piCmd[3]) : 1,		// byte bLoop = 1,
@@ -2264,7 +2264,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				int iMaxLength = iQty > 1 ? ATOI(Arg_ppCmd[1]) : 1;
 
 				CSString sPrompt;
-				sPrompt.Format("%s (# = default)", static_cast<lpctstr>(Arg_ppCmd[0]));
+				sPrompt.Format("%s (# = default)", (lpctstr)(Arg_ppCmd[0]));
 				pClientSrc->addGumpInpVal( true, INPVAL_STYLE_TEXTEDIT,
 					iMaxLength,	sPrompt, sOrgValue, this );
 			}
@@ -2304,7 +2304,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 				CvtSystemToNUNICODE( ncBuffer, CountOf( ncBuffer ), pszArgs[4], -1 );
 				pClientSrc->addBarkUNICODE( ncBuffer, this,
 					(HUE_TYPE)( pszArgs[0][0] ? Exp_GetVal(pszArgs[0]) : HUE_TEXT_DEF ),
-					static_cast<TALKMODE_TYPE>( pszArgs[1][0] ? Exp_GetVal(pszArgs[1]) : TALKMODE_SAY ),
+					(TALKMODE_TYPE)( pszArgs[1][0] ? Exp_GetVal(pszArgs[1]) : TALKMODE_SAY ),
 					(FONT_TYPE)( pszArgs[2][0] ? Exp_GetVal(pszArgs[2]) : FONT_NORMAL ),
 					CLanguageID(pszArgs[3]));
 				break;
@@ -2348,7 +2348,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			EXC_SET_BLOCK("NUDGEDOWN");
 			if ( IsTopLevel())
 			{
-				char zdiff = (char)(s.GetArgVal());
+				char zdiff = s.GetArgCVal();
 				SetTopZ( GetTopZ() - ( zdiff ? zdiff : 1 ));
 				Update();
 			}
@@ -2357,7 +2357,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 			EXC_SET_BLOCK("NUDGEUP");
 			if ( IsTopLevel())
 			{
-				char zdiff = (char)(s.GetArgVal());
+				char zdiff = s.GetArgCVal();
 				SetTopZ( GetTopZ() + ( zdiff ? zdiff : 1 ));
 				Update();
 			}
@@ -2446,7 +2446,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 				SpeakUTF8( pszArgs[4],
 					(HUE_TYPE)( pszArgs[0][0] ? Exp_GetVal(pszArgs[0]) : HUE_TEXT_DEF ),
-					static_cast<TALKMODE_TYPE>( pszArgs[1][0] ? Exp_GetVal(pszArgs[1]) : TALKMODE_SAY ),
+					(TALKMODE_TYPE)( pszArgs[1][0] ? Exp_GetVal(pszArgs[1]) : TALKMODE_SAY ),
 					(FONT_TYPE)( pszArgs[2][0] ? Exp_GetVal(pszArgs[2]) : FONT_NORMAL ),
 					CLanguageID(pszArgs[3]));
 			}

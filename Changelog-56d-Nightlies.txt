@@ -1223,3 +1223,7 @@ The lower calls to this function, the better (as for any other), but other formu
 - Fixed: SHRINK command always bouncing the figurine (Issue #138).
 - Fixed: Items disappear in trade menu when both players are overweight (Issue #124).
 - Fixed: Changing a player's MODMAXWEIGHT property didn't update the status window.
+
+21-10-2018, Nolok
+- Fixed: Items in trade window being lost if a world save occurred during the trade process and the server was restarted, loading that save.
+- Fixed: NPCs sometimes lost the focus on their enemy during combat.

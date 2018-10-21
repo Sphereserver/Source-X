@@ -2686,8 +2686,6 @@ int CChar::Skill_Fighting( SKTRIG_TYPE stage )
 			return -SKTRIG_ABORT;
         }
 
-		Fight_HitTry();	// this cleans up itself, executes the code related to the current m_War_Swing_State and sets the needed timers.
-
         if (m_atFight.m_War_Swing_State == WAR_SWING_EQUIPPING)
         {
             // calculate the chance at every hit
@@ -2695,6 +2693,7 @@ int CChar::Skill_Fighting( SKTRIG_TYPE stage )
             if ( !Skill_CheckSuccess(Skill_GetActive(), m_Act_Difficulty, false) )
                 m_Act_Difficulty = -m_Act_Difficulty;	// will result in failure
         }
+        Fight_HitTry();	// this cleans up itself, executes the code related to the current m_War_Swing_State and sets the needed timers.
 		return -SKTRIG_STROKE;	// Stay in the skill till we hit.
 	}
 

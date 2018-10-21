@@ -783,7 +783,8 @@ int CItem::FixWeirdness()
 			return iResultCode;
 		}
 	}
-	else pChar = NULL;
+	else
+        pChar = nullptr;
 
 	// Make sure the link is valid.
 	if ( m_uidLink.IsValidUID())
@@ -918,6 +919,19 @@ int CItem::FixWeirdness()
 			// Should not exist except equipped. Commented the check on the layer because, right now, placing it on LAYER_SPECIAL is the only way to create script-side a trade window.
 			if ( !IsItemEquipped() || /*GetEquipLayer() != LAYER_NONE ||*/ !pChar || !pChar->m_pPlayer || !pChar->IsClient() )
 			{
+                if (IsItemEquipped())
+                {
+                    CChar* pCharCont = dynamic_cast<CChar*>(GetContainer());
+                    if (pCharCont)
+                    {
+                        CItemContainer* pTradeCont = dynamic_cast<CItemContainer*>(this);
+                        ASSERT(pTradeCont);
+                        for ( CItem *pItem = pTradeCont->GetContentHead(); pItem != nullptr; pItem =  pItem->GetNext() )
+                        {
+                            pCharCont->ItemBounce(pItem, false);
+                        }
+                    }
+                }
 				iResultCode = 0x2220;
 				return iResultCode;	// get rid of it.
 			}

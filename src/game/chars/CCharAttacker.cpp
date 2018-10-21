@@ -68,52 +68,51 @@ bool CChar::Attacker_Add(CChar * pChar, int64 threat)
 }
 
 // Retrieves damage done to nID enemy
-int64 CChar::Attacker_GetDam(size_t attackerIndex)
+int64 CChar::Attacker_GetDam(size_t attackerIndex) const
 {
     ADDTOCALLSTACK("CChar::Attacker_GetDam");
     if (m_lastAttackers.empty())
         return -1;
     if (m_lastAttackers.size() <= attackerIndex)
         return -1;
-    LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
+    const LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
     return refAttacker.amountDone;
 }
 
 // Retrieves the amount of time elapsed since the last hit to nID enemy
-int64 CChar::Attacker_GetElapsed(size_t attackerIndex)
+int64 CChar::Attacker_GetElapsed(size_t attackerIndex) const
 {
     ADDTOCALLSTACK("CChar::Attacker_GetElapsed");
     if (m_lastAttackers.empty())
         return -1;
     if (m_lastAttackers.size() <= attackerIndex)
         return -1;
-    LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
+    const LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
     return refAttacker.elapsed;
 }
 
 // Retrieves Threat value that nID enemy represents against me
-int64 CChar::Attacker_GetThreat(size_t attackerIndex)
+int64 CChar::Attacker_GetThreat(size_t attackerIndex) const
 {
     ADDTOCALLSTACK("CChar::Attacker_GetThreat");
     if (m_lastAttackers.empty())
         return -1;
     if (m_lastAttackers.size() <= attackerIndex)
         return -1;
-    LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
+    const LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
     return refAttacker.threat ? refAttacker.threat : 0;
 }
 
 // Retrieves the character with most Threat
-int64 CChar::Attacker_GetHighestThreat()
+int64 CChar::Attacker_GetHighestThreat() const
 {
     ADDTOCALLSTACK("CChar::Attacker_GetHighestThreat");
     if (m_lastAttackers.empty())
         return -1;
 
     int64 highThreat = 0;
-    for (auto it = m_lastAttackers.begin(), end = m_lastAttackers.end(); it != end; ++it)
+    for (const LastAttackers & refAttacker : m_lastAttackers)
     {
-        LastAttackers & refAttacker = *it;
         if (refAttacker.threat > highThreat)
             highThreat = refAttacker.threat;
     }
@@ -121,14 +120,13 @@ int64 CChar::Attacker_GetHighestThreat()
 }
 
 // Retrieves the last character that I hit
-CChar * CChar::Attacker_GetLast()
+CChar * CChar::Attacker_GetLast() const
 {
     ADDTOCALLSTACK("CChar::Attacker_GetLast");
     int64 dwLastTime = INT32_MAX, dwCurTime = 0;
     CChar * retChar = NULL;
-    for (auto it = m_lastAttackers.begin(), end = m_lastAttackers.end(); it != end; ++it)
+    for (const LastAttackers & refAttacker : m_lastAttackers)
     {
-        LastAttackers & refAttacker = *it;
         dwCurTime = refAttacker.elapsed;
         if (dwCurTime <= dwLastTime)
         {
@@ -145,7 +143,6 @@ void CChar::Attacker_SetElapsed(CChar * pChar, int64 value)
     ADDTOCALLSTACK("CChar::Attacker_SetElapsed(CChar)");
     return Attacker_SetElapsed(Attacker_GetID(pChar), value);
 }
-
 
 // Set elapsed time (refreshing it?)
 void CChar::Attacker_SetElapsed(size_t attackerIndex, int64 value)
@@ -219,21 +216,21 @@ void CChar::Attacker_SetIgnore(size_t attackerIndex, bool fIgnore)
 }
 
 // I'm ignoring pChar?
-bool CChar::Attacker_GetIgnore(CChar * pChar)
+bool CChar::Attacker_GetIgnore(CChar * pChar) const
 {
     ADDTOCALLSTACK("CChar::Attacker_GetIgnore(CChar)");
     return Attacker_GetIgnore(Attacker_GetID(pChar));
 }
 
 // I'm ignoring pChar?
-bool CChar::Attacker_GetIgnore(size_t attackerIndex)
+bool CChar::Attacker_GetIgnore(size_t attackerIndex) const
 {
     ADDTOCALLSTACK("CChar::Attacker_GetIgnore(size_t)");
     if (m_lastAttackers.empty())
         return false;
     if (m_lastAttackers.size() <= attackerIndex)
         return false;
-    LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
+    const LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
     return (refAttacker.ignore != 0);
 }
 
@@ -283,21 +280,21 @@ int CChar::Attacker_GetID(const CChar * pChar) const
 }
 
 // Get nID value of attacker list from the given pChar
-int CChar::Attacker_GetID(CUID pChar)
+int CChar::Attacker_GetID(CUID pChar) const
 {
     ADDTOCALLSTACK("CChar::Attacker_GetID(CUID)");
     return Attacker_GetID(pChar.CharFind()->GetChar());
 }
 
 // Get UID value of attacker list from the given pChar
-CChar * CChar::Attacker_GetUID(size_t attackerIndex)
+CChar * CChar::Attacker_GetUID(size_t attackerIndex) const
 {
     ADDTOCALLSTACK("CChar::Attacker_GetUID");
     if (m_lastAttackers.empty())
         return NULL;
     if (m_lastAttackers.size() <= attackerIndex)
         return NULL;
-    LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
+    const LastAttackers & refAttacker = m_lastAttackers[attackerIndex];
     CChar * pChar = CUID(refAttacker.charUID).CharFind();
     return pChar;
 }

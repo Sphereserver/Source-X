@@ -1000,35 +1000,36 @@ public:
 		ATTACKER_CLEAR_SCRIPT		= 4,
 		//ATTACKER_CLEAR_DEATH		= 3,
 	};
+    #define ATTACKER_THREAT_TOLDBYMASTER 1000
 
-	int		GetAttackersCount() {
+	inline int GetAttackersCount() {
 		return (int)m_lastAttackers.size();
 	}
 	bool	Attacker_Add(CChar * pChar, int64 threat = 0);
-	CChar * Attacker_GetLast();
+	CChar * Attacker_GetLast() const;
 	bool	Attacker_Delete(std::vector<LastAttackers>::iterator &itAttacker, bool bForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
 	bool	Attacker_Delete(size_t attackerIndex, bool bForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
 	bool	Attacker_Delete(CChar * pChar, bool bForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
 	void	Attacker_RemoveChar();
 	void	Attacker_Clear();
 	void	Attacker_CheckTimeout();
-	int64	Attacker_GetDam(size_t attackerIndex);
+	int64	Attacker_GetDam(size_t attackerIndex) const;
 	void	Attacker_SetDam(CChar * pChar, int64 value);
 	void	Attacker_SetDam(size_t attackerIndex, int64 value);
-	CChar * Attacker_GetUID(size_t attackerIndex);
-	int64	Attacker_GetElapsed(size_t attackerIndex);
+	CChar * Attacker_GetUID(size_t attackerIndex) const;
+	int64	Attacker_GetElapsed(size_t attackerIndex) const;
 	void	Attacker_SetElapsed(CChar * pChar, int64 value);
 	void	Attacker_SetElapsed(size_t attackerIndex, int64 value);
-	int64	Attacker_GetThreat(size_t attackerIndex);
+	int64	Attacker_GetThreat(size_t attackerIndex) const;
 	void	Attacker_SetThreat(CChar * pChar, int64 value);
 	void	Attacker_SetThreat(size_t attackerIndex, int64 value);
-	bool	Attacker_GetIgnore(size_t pChar);
-	bool	Attacker_GetIgnore(CChar * pChar);
+	bool	Attacker_GetIgnore(size_t pChar) const;
+	bool	Attacker_GetIgnore(CChar * pChar) const;
 	void	Attacker_SetIgnore(size_t pChar, bool fIgnore);
 	void	Attacker_SetIgnore(CChar * pChar, bool fIgnore);
-	int64	Attacker_GetHighestThreat();
+	int64	Attacker_GetHighestThreat() const;
 	int		Attacker_GetID(const CChar * pChar) const;
-	int		Attacker_GetID(CUID pChar);
+	int		Attacker_GetID(CUID pChar) const;
 
 	//
 	bool Player_OnVerb( CScript &s, CTextConsole * pSrc );

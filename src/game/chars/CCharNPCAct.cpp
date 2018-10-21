@@ -543,7 +543,7 @@ int CChar::NPC_WalkToPoint( bool fRun )
 				// whilst pathfinding we should keep trying to find new ways to our destination
 				if ( bUsePathfinding == true )
 				{
-					SetTimeout( 500 ); // wait a moment before finding a new route
+					SetTimeoutD( 5 ); // wait a moment before finding a new route
 					return 1;
 				}
 				return 2;
@@ -1191,7 +1191,7 @@ void CChar::NPC_Act_Wander()
 	if ( ! Calc_GetRandVal( 7 + (Stat_GetVal(STAT_DEX) / 30)) )
 		iStopWandering = 1;			// i'm stopping to wander "for the dexterity". 
 
-	if ( !Calc_GetRandVal(2 + TENTHS_PER_SEC/2) )
+	if ( !Calc_GetRandVal(2 + TICKS_PER_SEC/2) )
 	{
 		// NPC_LookAround() is very expensive, so since NPC_Act_Wander is called every tick for every char with ACTION == NPCACT_WANDER,
 		//	don't look around every time.
