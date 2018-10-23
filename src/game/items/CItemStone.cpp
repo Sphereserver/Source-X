@@ -1233,7 +1233,7 @@ bool CItemStone::CheckValidMember( CStoneMember * pMember )
 	ASSERT(pMember);
 	ASSERT( pMember->GetParent() == this );
 
-	if ( GetAmount()==0 || g_Serv.m_iExitFlag.load(std::memory_order_acquire) )	// no reason to elect new if the stone is dead.
+	if ( GetAmount()==0 || g_Serv.GetExitFlag() )	// no reason to elect new if the stone is dead.
 		return true;	// we are deleting anyhow.
 
 	switch ( pMember->GetPriv())

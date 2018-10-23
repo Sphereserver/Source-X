@@ -134,7 +134,7 @@ void NetworkIn::tick(void)
 	ADDTOCALLSTACK("NetworkIn::tick");
 
 	EXC_TRY("NetworkIn");
-	if (g_Serv.m_iExitFlag.load(std::memory_order_acquire) || (g_Serv.m_iModeCode.load(std::memory_order_acquire) != SERVMODE_Run) )
+	if (g_Serv.GetExitFlag() || (g_Serv.GetServerMode() != SERVMODE_Run) )
 		return;
 
 	// periodically check ip history
@@ -903,7 +903,7 @@ void NetworkOut::tick(void)
 	ADDTOCALLSTACK("NetworkOut::tick");
 	ProfileTask networkTask(PROFILE_NETWORK_TX);
 
-	if (g_Serv.m_iExitFlag.load(std::memory_order_acquire) || (g_Serv.m_iModeCode.load(std::memory_order_acquire) == SERVMODE_Exiting))
+	if (g_Serv.GetExitFlag() || (g_Serv.GetServerMode() == SERVMODE_Exiting))
 	{
 		setPriority(IThread::Highest);
 		return;

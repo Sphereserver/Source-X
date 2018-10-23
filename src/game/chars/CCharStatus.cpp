@@ -1576,9 +1576,9 @@ bool CChar::IsTakeCrime( const CItem *pItem, CChar ** ppCharMark ) const
 				return true;
 		}
 
-		const CItemCorpse *pCorpseItem = dynamic_cast<const CItemCorpse *>(pObjTop);
+		CItemCorpse *pCorpseItem = dynamic_cast<CItemCorpse *>(pObjTop);
 		if ( pCorpseItem )		// taking stuff off someones corpse can be a crime
-			return const_cast<CChar*>(this)->CheckCorpseCrime(pCorpseItem, true, true);
+			return const_cast<CChar*>(this)->CheckCorpseCrime(pCorpseItem, true, true);     // const_cast is BAD!
 
 		return false;	// I guess it's not a crime
 	}

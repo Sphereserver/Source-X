@@ -33,7 +33,7 @@
 
 CServer::CServer() : CServerDef( SPHERE_TITLE, CSocketAddressIP( SOCKET_LOCAL_ADDRESS ))
 {
-	m_iExitFlag.store(0, std::memory_order_release);
+	SetExitFlag(0);
 	m_fResyncPause = false;
 	m_fResyncRequested = NULL;
 
@@ -81,6 +81,11 @@ void CServer::SetSignals( bool fMsg )
 	}
 }
 
+SERVMODE_TYPE CServer::GetServerMode() const
+{
+    return m_iModeCode.load(std::memory_order_acquire);
+}
+
 void CServer::SetServerMode( SERVMODE_TYPE mode )
 {
 	ADDTOCALLSTACK("CServer::SetServerMode");
@@ -92,30 +97,40 @@ void CServer::SetServerMode( SERVMODE_TYPE mode )
 
 bool CServer::IsValidBusy() const
 {
-	// We might appear to be stopped but it's really ok ?
-	// ?
-	switch ( m_iModeCode.load(std::memory_order_acquire) )
-	{
-		case SERVMODE_Saving:
-			if ( g_World.IsSaving() )
-				return true;
-			break;
-		case SERVMODE_Loading:
-		case SERVMODE_GarbageCollection:
-		case SERVMODE_RestockAll:	// these may look stuck but are not.
-			return true;
-		default:
-			return false;
-	}
-	return false;
+    // We might appear to be stopped but it's really ok ?
+    // ?
+    switch ( GetServerMode() )
+    {
+        case SERVMODE_Saving:
+            if ( g_World.IsSaving() )
+                return true;
+            break;
+        case SERVMODE_Loading:
+        case SERVMODE_GarbageCollection:
+        case SERVMODE_RestockAll:	// these may look stuck but are not.
+            return true;
+        default:
+            return false;
+    }
+    return false;
 }
 
-void CServer::SetExitFlag( int iFlag )
+int CServer::GetExitFlag() const
 {
-	ADDTOCALLSTACK("CServer::SetExitFlag");
-	if ( m_iExitFlag.load(std::memory_order_acquire) )
-		return;
-	m_iExitFlag.store(iFlag, std::memory_order_release);
+    return m_iExitFlag.load(std::memory_order_acquire);
+}
+
+void CServer::SetExitFlag(int iFlag)
+{
+    ADDTOCALLSTACK("CServer::SetExitFlag");
+    if ( GetExitFlag() )
+        return;
+    m_iExitFlag.store(iFlag, std::memory_order_release);
+}
+
+bool CServer::IsLoading() const
+{
+    return ( m_fResyncPause || (GetServerMode() > SERVMODE_Run) );
 }
 
 void CServer::Shutdown( int64 iMinutes ) // If shutdown is initialized

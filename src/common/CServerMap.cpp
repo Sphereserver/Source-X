@@ -276,7 +276,7 @@ bool CServerMapBlockState::CheckTile_Item( dword wItemBlockFlags, char zBottom, 
 
 }
 
-inline void CServerMapBlockState::SetTop( dword &wItemBlockFlags, char &z, dword &dwID )
+void CServerMapBlockState::SetTop( dword &wItemBlockFlags, char &z, dword &dwID )
 {
 	ADDTOCALLSTACK("CServerMapBlockState::SetTop");
 	if ( z < m_Top.m_z )

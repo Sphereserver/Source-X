@@ -357,7 +357,7 @@ void NetworkManager::start(void)
 			{
 				// If we have more than one thread (this hasn't sense... at this point isThreaded should be == true)
 				char name[IThread::m_nameMaxLength];
-				sprintf(name, "T_Worker #%u", (uint)pThread->getId());
+				snprintf(name, sizeof(name), "T_Worker #%u", (uint)pThread->getId());
 				pThread->overwriteInternalThreadName(name);
 			}
 			

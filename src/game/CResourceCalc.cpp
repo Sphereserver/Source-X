@@ -340,7 +340,7 @@ int CServerConfig::Calc_StealingItem( CChar * pCharThief, CItem * pItem, CChar *
 	return( iDifficulty / 2 );
 }
 
-bool CServerConfig::Calc_CrimeSeen( CChar * pCharThief, CChar * pCharViewer, SKILL_TYPE SkillToSee, bool fBonus )
+bool CServerConfig::Calc_CrimeSeen( const CChar * pCharThief, CChar * pCharViewer, SKILL_TYPE SkillToSee, bool fBonus ) const
 {
 	ADDTOCALLSTACK("CServerConfig::Calc_CrimeSeen");
 	// Chance to steal without being seen by a specific person

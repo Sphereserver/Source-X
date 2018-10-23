@@ -817,6 +817,8 @@ int CChar::NPC_GetHostilityLevelToward( const CChar * pCharTarg ) const
 	if ( pMemory )
 	{
 		iHostility += 50;
+        if (pCharTarg->m_pNPC && (pCharTarg->m_pNPC->m_Brain == NPCBRAIN_BERSERK))
+            iHostility += 60;
 	}
 	return( iHostility );
 }

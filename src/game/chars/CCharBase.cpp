@@ -86,6 +86,15 @@ void CCharBase::CopyBasic( const CCharBase * pCharDef )
 	CBaseBaseDef::CopyBasic( pCharDef );	// This will overwrite the CResourceLink!!
 }
 
+void CCharBase::UnLink()
+{
+    // We are being reloaded .
+    m_Speech.clear();
+    m_FoodType.clear();
+    m_Desires.clear();
+    CBaseBaseDef::UnLink();
+}
+
 // Setting the visual "ID" for this.
 bool CCharBase::SetDispID( CREID_TYPE id )
 {
@@ -435,3 +444,36 @@ CCharBase * CCharBase::FindCharBase( CREID_TYPE baseID ) // static
 	return pBase;
 }
 
+bool CCharBase::IsValidDispID( CREID_TYPE id ) //  static
+{
+    return( id > 0 && id < CREID_QTY );
+}
+
+bool CCharBase::IsPlayableID( CREID_TYPE id, bool bCheckGhost)
+{
+    return ( CCharBase::IsHumanID( id, bCheckGhost) || CCharBase::IsElfID( id, bCheckGhost) || CCharBase::IsGargoyleID( id, bCheckGhost));
+}
+
+bool CCharBase::IsHumanID( CREID_TYPE id, bool bCheckGhost ) // static
+{
+    if ( bCheckGhost == true)
+        return( id == CREID_MAN || id == CREID_WOMAN || id == CREID_EQUIP_GM_ROBE  || id == CREID_GHOSTMAN || id == CREID_GHOSTWOMAN);
+    else
+        return( id == CREID_MAN || id == CREID_WOMAN || id == CREID_EQUIP_GM_ROBE);
+}
+
+bool CCharBase::IsElfID( CREID_TYPE id, bool bCheckGhost ) // static
+{
+    if ( bCheckGhost == true)
+        return( id == CREID_ELFMAN || id == CREID_ELFWOMAN || id == CREID_ELFGHOSTMAN || id == CREID_ELFGHOSTWOMAN);
+    else
+        return( id == CREID_ELFMAN || id == CREID_ELFWOMAN );
+}
+
+bool CCharBase::IsGargoyleID( CREID_TYPE id, bool bCheckGhost ) // static
+{
+    if ( bCheckGhost == true)
+        return( id == CREID_GARGMAN || id == CREID_GARGWOMAN || id == CREID_GARGGHOSTMAN || id == CREID_GARGGHOSTWOMAN );
+    else
+        return( id == CREID_GARGMAN || id == CREID_GARGWOMAN );
+}

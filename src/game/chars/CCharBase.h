@@ -67,14 +67,7 @@ private:
 	CCharBase& operator=(const CCharBase& other);
 
 public:
-	virtual void UnLink()
-	{
-		// We are being reloaded .
-        m_Speech.clear();
-        m_FoodType.clear();
-        m_Desires.clear();
-		CBaseBaseDef::UnLink();
-	}
+	virtual void UnLink();
 
 	CREID_TYPE GetID() const
 	{
@@ -106,43 +99,6 @@ public:
 	bool r_WriteVal( lpctstr pszKey, CSString & sVal, CTextConsole * pSrc = NULL );
 	bool r_Load( CScript & s );
 };
-
-
-/* Inline Methods Definitions */
-
-inline bool CCharBase::IsValidDispID( CREID_TYPE id ) //  static
-{
-	return( id > 0 && id < CREID_QTY );
-}
-
-inline bool CCharBase::IsPlayableID( CREID_TYPE id, bool bCheckGhost)
-{
-	return ( CCharBase::IsHumanID( id, bCheckGhost) || CCharBase::IsElfID( id, bCheckGhost) || CCharBase::IsGargoyleID( id, bCheckGhost));
-}
-
-inline bool CCharBase::IsHumanID( CREID_TYPE id, bool bCheckGhost ) // static
-{
-	if ( bCheckGhost == true)
-		return( id == CREID_MAN || id == CREID_WOMAN || id == CREID_EQUIP_GM_ROBE  || id == CREID_GHOSTMAN || id == CREID_GHOSTWOMAN);
-	else
-		return( id == CREID_MAN || id == CREID_WOMAN || id == CREID_EQUIP_GM_ROBE);
-}
-
-inline bool CCharBase::IsElfID( CREID_TYPE id, bool bCheckGhost ) // static
-{
-	if ( bCheckGhost == true)
-		return( id == CREID_ELFMAN || id == CREID_ELFWOMAN || id == CREID_ELFGHOSTMAN || id == CREID_ELFGHOSTWOMAN);
-	else
-		return( id == CREID_ELFMAN || id == CREID_ELFWOMAN );
-}
-
-inline bool CCharBase::IsGargoyleID( CREID_TYPE id, bool bCheckGhost ) // static
-{
-	if ( bCheckGhost == true)
-		return( id == CREID_GARGMAN || id == CREID_GARGWOMAN || id == CREID_GARGGHOSTMAN || id == CREID_GARGGHOSTWOMAN );
-	else
-		return( id == CREID_GARGMAN || id == CREID_GARGWOMAN );
-}
 
 
 #endif // _INC_CCHARBASE_H

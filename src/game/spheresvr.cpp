@@ -33,7 +33,7 @@
 bool WritePidFile(int iMode = 0)
 {
 	lpctstr	file = SPHERE_FILE ".pid";
-	FILE	*pidFile;
+	FILE *pidFile;
 
 	if ( iMode == 1 )		// delete
 	{
@@ -302,7 +302,7 @@ void MainThread::tick()
 
 bool MainThread::shouldExit()
 {
-	if (g_Serv.m_iExitFlag.load(std::memory_order_acquire) != 0)
+	if (g_Serv.GetExitFlag() != 0)
 		return true;
 	return AbstractSphereThread::shouldExit();
 }
@@ -415,7 +415,7 @@ int Sphere_InitServer( int argc, char *argv[] )
 
 	// Trigger server start
 	g_Serv.r_Call("f_onserver_start", &g_Serv, NULL);
-	return g_Serv.m_iExitFlag.load(std::memory_order_acquire);
+	return g_Serv.GetExitFlag();
 
 	EXC_CATCH;
 
@@ -449,7 +449,7 @@ void Sphere_ExitServer()
 	g_World.Close();
 
 	lpctstr Reason;
-	int iExitFlag = g_Serv.m_iExitFlag.load(std::memory_order_acquire);
+	int iExitFlag = g_Serv.GetExitFlag();
 	switch ( iExitFlag )
 	{
 		case -10:	Reason = "Unexpected error occurred";			break;
@@ -516,7 +516,7 @@ int Sphere_OnTick()
 #endif
 
 	EXC_CATCH;
-	return g_Serv.m_iExitFlag.load(std::memory_order_acquire);
+	return g_Serv.GetExitFlag();
 }
 //*****************************************************
 
@@ -525,7 +525,7 @@ static void Sphere_MainMonitorLoop()
 	const char *m_sClassName = "Sphere";
 	// Just make sure the main loop is alive every so often.
 	// This should be the parent thread. try to restart it if it is not.
-	while ( !g_Serv.m_iExitFlag.load(std::memory_order_acquire) )
+	while ( !g_Serv.GetExitFlag() )
 	{
 		EXC_TRY("MainMonitorLoop");
 
@@ -540,7 +540,7 @@ static void Sphere_MainMonitorLoop()
 		// down with large m_iFreezeRestartTime values set
 		for (int i = 0; i < g_Cfg.m_iFreezeRestartTime; ++i)
 		{
-			if ( g_Serv.m_iExitFlag.load(std::memory_order_acquire) )
+			if ( g_Serv.GetExitFlag() )
 				break;
 
 #ifdef _WIN32
@@ -867,8 +867,8 @@ int _cdecl main( int argc, char * argv[] )
 	g_UnixTerminal.prepare();
 #endif
 
-	g_Serv.m_iExitFlag.store( Sphere_InitServer( argc, argv ), std::memory_order_release );
-	if ( ! g_Serv.m_iExitFlag.load(std::memory_order_acquire) )
+	g_Serv.SetExitFlag( Sphere_InitServer( argc, argv ));
+	if ( ! g_Serv.GetExitFlag() )
 	{
 		WritePidFile();
 
@@ -900,7 +900,7 @@ int _cdecl main( int argc, char * argv[] )
 		}
 		else
 		{
-			while( !g_Serv.m_iExitFlag.load(std::memory_order_acquire) )
+			while( !g_Serv.GetExitFlag() )
 			{
 				g_Main.tick();			// Use this thread to do all the work, without monitoring the other threads state
 			}
@@ -912,8 +912,8 @@ int _cdecl main( int argc, char * argv[] )
 #endif
 
 	Sphere_ExitServer();
-	WritePidFile(true);
-	return( g_Serv.m_iExitFlag.load(std::memory_order_acquire) );
+	WritePidFile(1);
+	return( g_Serv.GetExitFlag() );
 }
 
 #include "../tables/classnames.tbl"

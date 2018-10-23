@@ -3620,7 +3620,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 				return rid;
 			}
 #ifdef _DEBUG
-			if ( g_Serv.m_iModeCode.load(std::memory_order_acquire) != SERVMODE_ResyncLoad )	// this really is ok.
+			if ( g_Serv.GetServerMode() != SERVMODE_ResyncLoad )	// this really is ok.
 			{
 				// Warn of duplicates.
 				size_t duplicateIndex = m_ResHash.FindKey( rid );
@@ -3689,7 +3689,7 @@ CResourceID CServerConfig::ResourceGetNewID( RES_TYPE restype, lpctstr pszName, 
 
 				// We are redefining an item we have already read in ?
 				// Why do this unless it's a Resync ?
-				if ( g_Serv.m_iModeCode.load(std::memory_order_acquire) != SERVMODE_ResyncLoad )
+				if ( g_Serv.GetServerMode() != SERVMODE_ResyncLoad )
 				{
 					// Ensure it's not a "type", because hardcoded types indexes are defined in sphere_defs.scp,
 					//  which is usually parsed before sphere_types.scp or its TYPEDEF block. So some time after declaring the
@@ -4169,6 +4169,11 @@ bool CServerConfig::Load( bool fResync )
 
 	for ( size_t j = 0; ; ++j )
 	{
+        if (g_Serv.GetExitFlag())
+        {
+            g_Log.Event(LOGM_INIT, "Script loading aborted!\n");
+            break;
+        }
 		CResourceScript * pResFile = GetResourceFile(j);
 		if ( !pResFile )
 			break;

@@ -2785,7 +2785,7 @@ bool CObjBase::r_Verb( CScript & s, CTextConsole * pSrc ) // Execute command fro
 
 			if (s.HasArgs())
 			{
-				CUID uid = s.GetArgVal();
+				CUID uid = s.GetArgUVal();
 				if ((!uid.ObjFind()) || (!this->IsChar()))
 					return false;
 				pCharSrc->GetClient()->Event_SingleClick(uid);
@@ -2882,7 +2882,6 @@ void CObjBase::RemoveFromView( CClient * pClientExclude, bool fHardcoded )
 	CItem * pItem = fHardcoded ? (dynamic_cast<CItem*>(this)) : (NULL);
 	CChar * pChar = NULL;
 
-
 	ClientIterator it;
 	for (CClient* pClient = it.next(); pClient != NULL; pClient = it.next())
 	{
@@ -2919,7 +2918,6 @@ void CObjBase::ResendOnEquip( bool fAllClients )
 	CObjBaseTemplate * pObjTop = GetTopLevelObj();
 	CItem * pItem = dynamic_cast<CItem*>(this);
 	CChar * pChar = NULL;
-
 
 	ClientIterator it;
 	for (CClient* pClient = it.next(); pClient != NULL; pClient = it.next())
@@ -3019,7 +3017,7 @@ void CObjBase::OnTickStatusUpdate()
     }
 }
 
-void CObjBase::ResendTooltip(bool bSendFull, bool bUseCache)
+void CObjBase::ResendTooltip(bool fSendFull, bool fUseCache)
 {
 	ADDTOCALLSTACK("CObjBase::ResendTooltip");
 
@@ -3031,7 +3029,7 @@ void CObjBase::ResendTooltip(bool bSendFull, bool bUseCache)
 	else if ( IsDisconnected())
 		return;	// not in the world.
 
-	if (bUseCache == false)
+	if (fUseCache == false)
 		FreePropertyList();
 
 	CChar * pChar = NULL;
@@ -3045,7 +3043,7 @@ void CObjBase::ResendTooltip(bool bSendFull, bool bUseCache)
 		if ( !pChar->CanSee( this ) )
 			continue;
 
-		pClient->addAOSTooltip(this, bSendFull);
+		pClient->addAOSTooltip(this, fSendFull);
 	}
 }
 
@@ -3057,12 +3055,12 @@ void CObjBase::DeletePrepare()
 	RemoveSelf();	// Must remove early or else virtuals will fail.
 }
 
-bool CObjBase::IsTriggerActive(lpctstr trig)
+bool CObjBase::IsTriggerActive(lpctstr trig) const
 {
 	return m_RunningTrigger == trig ? true : false;
 }
 
-lpctstr CObjBase::GetTriggerActive()
+lpctstr CObjBase::GetTriggerActive() const
 {
 	return m_RunningTrigger ? m_RunningTrigger : "none";
 }

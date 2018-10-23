@@ -554,7 +554,7 @@ void CNTWindow::OnSize( WPARAM nType, int cx, int cy )
 bool CNTWindow::OnClose()
 {
 	// WM_CLOSE
-	if ( g_Serv.m_iExitFlag.load(std::memory_order_acquire) == 0 )
+	if ( g_Serv.GetExitFlag() == 0 )
 	{
 		int iRet = theApp.m_wndMain.MessageBox("Are you sure you want to close the server?",
 			theApp.m_pszAppName, MB_YESNO|MB_ICONQUESTION );
@@ -948,7 +948,7 @@ void NTWindow_DeleteIcon()
 void NTWindow_Exit()
 {
 	// Unattach the window.
-	int iExitFlag = g_Serv.m_iExitFlag.load(std::memory_order_acquire);
+	int iExitFlag = g_Serv.GetExitFlag();
 	if ( iExitFlag < 0 )
 	{
 		TCHAR *pszMsg = Str_GetTemp();
@@ -968,7 +968,7 @@ void NTWindow_SetWindowTitle( LPCTSTR pszText )
 	// set the title to reflect mode.
 
 	LPCTSTR pszMode;
-	switch ( g_Serv.m_iModeCode.load(std::memory_order_acquire) )
+	switch ( g_Serv.GetServerMode() )
 	{
 	case SERVMODE_RestockAll:	// Major event.
 		pszMode = "Restocking";

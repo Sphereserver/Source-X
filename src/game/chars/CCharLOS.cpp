@@ -98,7 +98,7 @@ bool CChar::CanSeeLOS( const CPointMap &ptDst, CPointMap *pptBlock, int iMaxDist
 //#define CALCITEMHEIGHT(num) num + ((pItemDef->GetTFlags() & 0x400)? pItemDef->GetHeight() / 2 : pItemDef->GetHeight())
 #define WARNLOS(_x_)		if ( g_Cfg.m_iDebugFlags & DEBUGF_LOS ) { g_pLog->EventWarn _x_; }
 
-bool inline CChar::CanSeeLOS_New_Failed( CPointMap *pptBlock, CPointMap &ptNow ) const
+bool CChar::CanSeeLOS_New_Failed( CPointMap *pptBlock, CPointMap &ptNow ) const
 {
 	ADDTOCALLSTACK("CChar::CanSeeLOS_New_Failed");
 	if ( pptBlock )

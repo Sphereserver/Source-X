@@ -83,7 +83,7 @@ void CVarDefContNum::SetValNum( int64 iVal )
 	m_iVal = iVal;
 }
 
-inline lpctstr CVarDefContNum::GetValStr() const
+lpctstr CVarDefContNum::GetValStr() const
 {
 	TemporaryString tsTemp;
 	tchar* pszTemp = static_cast<tchar *>(tsTemp);
@@ -128,11 +128,6 @@ CVarDefContStr::CVarDefContStr( lpctstr pszKey ) : CVarDefCont( pszKey )
 
 CVarDefContStr::~CVarDefContStr()
 {
-}
-
-lpctstr CVarDefContStr::GetValStr() const 
-{ 
-	return m_sVal; 
 }
 
 inline int64 CVarDefContStr::GetValNum() const

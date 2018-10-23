@@ -369,7 +369,7 @@ public:
 	bool CanSeeAsDead( const CChar * pChar = NULL ) const;
 	bool CanSeeInContainer( const CItemContainer * pContItem ) const;
 	bool CanSee( const CObjBaseTemplate * pObj ) const;
-	inline bool CanSeeLOS_New_Failed( CPointMap * pptBlock, CPointMap &ptNow ) const;
+	bool CanSeeLOS_New_Failed( CPointMap * pptBlock, CPointMap &ptNow ) const;
 	bool CanSeeLOS_New( const CPointMap & pd, CPointMap * pBlock = nullptr, int iMaxDist = UO_MAP_VIEW_SIGHT, word wFlags = 0, bool bCombatCheck = false ) const;
 	bool CanSeeLOS( const CPointMap & pd, CPointMap * pBlock = nullptr, int iMaxDist = UO_MAP_VIEW_SIGHT, word wFlags = 0, bool bCombatCheck = false ) const;
 	bool CanSeeLOS( const CObjBaseTemplate * pObj, word wFlags = 0, bool bCombatCheck = false) const;
@@ -978,8 +978,8 @@ public:
 	void Memory_Fight_Start( const CChar * pTarg );
 	bool Memory_Fight_OnTick( CItemMemory * pMemory );
 
-	bool Fight_Attack( const CChar * pCharTarg, bool toldByMaster = false );
-	bool Fight_Clear( const CChar * pCharTarg , bool bForced = false );
+	bool Fight_Attack( CChar * pCharTarg, bool toldByMaster = false );
+	bool Fight_Clear( CChar * pCharTarg , bool bForced = false );
 	void Fight_ClearAll();
 	void Fight_HitTry();
 	WAR_SWING_TYPE Fight_Hit( CChar * pCharTarg );
@@ -1009,24 +1009,24 @@ public:
 	CChar * Attacker_GetLast() const;
 	bool	Attacker_Delete(std::vector<LastAttackers>::iterator &itAttacker, bool bForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
 	bool	Attacker_Delete(size_t attackerIndex, bool bForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
-	bool	Attacker_Delete(CChar * pChar, bool bForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
+	bool	Attacker_Delete(const CChar * pChar, bool bForced = false, ATTACKER_CLEAR_TYPE type = ATTACKER_CLEAR_FORCED);
 	void	Attacker_RemoveChar();
 	void	Attacker_Clear();
 	void	Attacker_CheckTimeout();
 	int64	Attacker_GetDam(size_t attackerIndex) const;
-	void	Attacker_SetDam(CChar * pChar, int64 value);
+	void	Attacker_SetDam(const CChar * pChar, int64 value);
 	void	Attacker_SetDam(size_t attackerIndex, int64 value);
 	CChar * Attacker_GetUID(size_t attackerIndex) const;
 	int64	Attacker_GetElapsed(size_t attackerIndex) const;
-	void	Attacker_SetElapsed(CChar * pChar, int64 value);
+	void	Attacker_SetElapsed(const CChar * pChar, int64 value);
 	void	Attacker_SetElapsed(size_t attackerIndex, int64 value);
 	int64	Attacker_GetThreat(size_t attackerIndex) const;
-	void	Attacker_SetThreat(CChar * pChar, int64 value);
+	void	Attacker_SetThreat(const CChar * pChar, int64 value);
 	void	Attacker_SetThreat(size_t attackerIndex, int64 value);
 	bool	Attacker_GetIgnore(size_t pChar) const;
-	bool	Attacker_GetIgnore(CChar * pChar) const;
+	bool	Attacker_GetIgnore(const CChar * pChar) const;
 	void	Attacker_SetIgnore(size_t pChar, bool fIgnore);
-	void	Attacker_SetIgnore(CChar * pChar, bool fIgnore);
+	void	Attacker_SetIgnore(const CChar * pChar, bool fIgnore);
 	int64	Attacker_GetHighestThreat() const;
 	int		Attacker_GetID(const CChar * pChar) const;
 	int		Attacker_GetID(CUID pChar) const;
@@ -1066,7 +1066,7 @@ public:
 	void Flip();
 	bool SetPoison( int iSkill, int iHits, CChar * pCharSrc );
 	bool SetPoisonCure( int iLevel, bool fExtra );
-	bool CheckCorpseCrime( const CItemCorpse *pCorpse, bool fLooting, bool fTest );
+	bool CheckCorpseCrime( CItemCorpse *pCorpse, bool fLooting, bool fTest );
 	CItemCorpse * FindMyCorpse( bool ignoreLOS = false, int iRadius = 2) const;
 	CItemCorpse * MakeCorpse( bool fFrontFall );
 	bool RaiseCorpse( CItemCorpse * pCorpse );
@@ -1168,7 +1168,7 @@ public:
     int PayGold(CChar * pCharSrc, int iGold, CItem * pGold, ePayGold iReason);
 private:
 	bool NPC_CheckWalkHere( const CPointBase & pt, const CRegion * pArea, dword dwBlockFlags ) const;
-	void NPC_OnNoticeSnoop( CChar * pCharThief, const CChar * pCharMark );
+	void NPC_OnNoticeSnoop( const CChar * pCharThief, const CChar * pCharMark );
 
 	void NPC_LootMemory( CItem * pItem );
 	bool NPC_LookAtCharGuard( CChar * pChar, bool bFromTrigger = false );

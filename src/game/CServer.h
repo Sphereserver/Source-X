@@ -73,15 +73,13 @@ private:
 	CServer& operator=(const CServer& other);
 
 public:
-	bool IsValidBusy() const;
+    SERVMODE_TYPE GetServerMode() const;
 	void SetServerMode( SERVMODE_TYPE mode );
-
-	void SetExitFlag( int iFlag );
+    bool IsValidBusy() const;
+    int GetExitFlag() const;
+    void SetExitFlag(int iFlag);
+    bool IsLoading() const;
 	void Shutdown( int64 iMinutes );
-	bool IsLoading() const
-	{
-		return ( m_fResyncPause || (m_iModeCode.load(std::memory_order_acquire) > SERVMODE_Run) );
-	}
 	void SetSignals( bool fMsg = true );
 
 	bool SocketsInit(); // Initialize sockets

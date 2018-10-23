@@ -567,7 +567,7 @@ void AbstractSphereThread::allocateString(TemporaryString &string)
 
 bool AbstractSphereThread::shouldExit()
 {
-	if ( g_Serv.m_iModeCode.load(std::memory_order_acquire) == SERVMODE_Exiting )
+	if ( g_Serv.GetServerMode() == SERVMODE_Exiting )
 		return true;
 
 	return AbstractThread::shouldExit();

@@ -109,7 +109,7 @@ public:
 	*
 	* @return  true if it succeeds, false if it fails.
 	*/
-	inline bool CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult, bool bFull);
+	bool CallPersonalTrigger(tchar * pArgs, CTextConsole * pSrc, TRIGRET_TYPE & trResult, bool bFull);
 
     /**
      * @fn  CVarDefMap * CObjBase::GetTagDefs();
@@ -136,7 +136,7 @@ public:
      *
      * @return  true if the trigger is active, false if not.
      */
-	bool IsTriggerActive(lpctstr trig) ;
+	bool IsTriggerActive(lpctstr trig) const;
 
     /**
      * @fn  lpctstr CObjBase::GetTriggerActive();
@@ -145,7 +145,7 @@ public:
      *
      * @return  The trigger active.
      */
-	lpctstr GetTriggerActive();
+	lpctstr GetTriggerActive() const;
 
     /**
      * @fn  void CObjBase::SetTriggerActive(lpctstr trig = NULL);
@@ -154,7 +154,7 @@ public:
      *
      * @param   trig    The trig.
      */
-	void SetTriggerActive(lpctstr trig = NULL);
+	void SetTriggerActive(lpctstr trig = nullptr);
 
 public:
 
@@ -616,7 +616,8 @@ public:
      * @param   effectuid       The effectuid.
      * @param   type            The type.
      */
-	void Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSource = NULL, byte bspeedseconds = 5, byte bloop = 1, bool fexplode = false, dword color = 0, dword render = 0, word effectid = 0, word explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0) const;
+	void Effect(EFFECT_TYPE motion, ITEMID_TYPE id, const CObjBase * pSource = NULL, byte bspeedseconds = 5, byte bloop = 1,
+        bool fexplode = false, dword color = 0, dword render = 0, word effectid = 0, word explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0) const;
 	
 	/**
 	* @fn  void CObjBase::Effect(EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap &pt, const CObjBase * pSource = NULL, byte bspeedseconds = 5, byte bloop = 1, bool fexplode = false, dword color = 0, dword render = 0, word effectid = 0, word explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0) const;
@@ -637,7 +638,8 @@ public:
 	* @param   effectuid       The effectuid.
 	* @param   type            The type.
 	*/
-	void Effect(EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap &pt ,const CObjBase * pSource = NULL, byte bspeedseconds = 5, byte bloop = 1, bool fexplode = false, dword color = 0, dword render = 0, word effectid = 0, word explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0) const;
+	void Effect(EFFECT_TYPE motion, ITEMID_TYPE id, CPointMap &pt, const CObjBase * pSource = NULL, byte bspeedseconds = 5, byte bloop = 1,
+        bool fexplode = false, dword color = 0, dword render = 0, word effectid = 0, word explodeid = 0, word explodesound = 0, dword effectuid = 0, byte type = 0) const;
 
 	void r_WriteSafe( CScript & s );
 
@@ -737,10 +739,10 @@ public:
      *
      * @brief   Resend tooltip.
      *
-     * @param   bSendFull   true to send full.
-     * @param   bUseCache   true to use cache.
+     * @param   fSendFull   true to send full.
+     * @param   fUseCache   true to use cache.
      */
-	void ResendTooltip( bool bSendFull = false, bool bUseCache = false );	// force reload of tooltip for this object
+	void ResendTooltip( bool fSendFull = false, bool fUseCache = false );	// force reload of tooltip for this object
 
     /**
      * @fn  void CObjBase::UpdateCanSee( PacketSend * pPacket, CClient * pClientExclude = NULL ) const;
@@ -1015,7 +1017,9 @@ enum WAR_SWING_TYPE	// m_Act_War_Swing_State
 	WAR_SWING_INVALID = -1,
 	WAR_SWING_EQUIPPING = 0,	// we are recoiling our weapon.
 	WAR_SWING_READY,			// we can swing at any time.
-	WAR_SWING_SWINGING			// we are swinging our weapon.
+	WAR_SWING_SWINGING,			// we are swinging our weapon.
+    //--
+    WAR_SWING_EQUIPPING_NOWAIT = 10 // Special return value for CChar::Fight_Hit, DON'T USE IT IN SCRIPTS!
 };
 
 enum CTRIG_TYPE

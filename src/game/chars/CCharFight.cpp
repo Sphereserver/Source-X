@@ -10,7 +10,7 @@
 
 // 1.0 seconds is the minimum animation duration ("delay"), but we have to subtract the tenths of seconds that will pass until the next tick, since
 //  the timer will start on the next tick
-#define COMBAT_MIN_SWING_ANIMATION_DELAY (int16)(TENTHS_PER_SEC)
+#define COMBAT_MIN_SWING_ANIMATION_DELAY (int16)1
 
 // I noticed a crime.
 void CChar::OnNoticeCrime( CChar * pCriminal, const CChar * pCharMark )
@@ -128,7 +128,7 @@ bool CChar::CheckCrimeSeen( SKILL_TYPE SkillToSee, CChar * pCharMark, const CObj
 			{
 				CScriptTriggerArgs Args(pAction);
 				Args.m_iN1 = SkillToSee ? SkillToSee : pCharMark->Skill_GetActive();;
-				Args.m_iN2 = pItem ? (dword)pItem->GetUID() : 0;
+				Args.m_iN2 = pItem ? (dword)pItem->GetUID() : 0;    // here i can modify pItem via scripts, so it isn't really const
 				Args.m_pO1 = pCharMark;
 				TRIGRET_TYPE iRet = pChar->OnTrigger(CTRIG_SeeSnoop, this, &Args);
 
@@ -699,8 +699,8 @@ effect_bounce:
 		}
         int iDmgBonus = 1;
         CCFaction *pSlayer = nullptr;
-        CCFaction *pFaction = GetFaction();
-        CCFaction *pSrCCFaction = pSrc->GetFaction();
+        const CCFaction *pFaction = GetFaction();
+        const CCFaction *pSrCCFaction = pSrc->GetFaction();
         if (pWeapon)
         {
             pSlayer = pWeapon->GetFaction();
@@ -1103,10 +1103,10 @@ void CChar::Fight_ClearAll()
 }
 
 // I no longer want to attack this char.
-bool CChar::Fight_Clear(const CChar *pChar, bool bForced)
+bool CChar::Fight_Clear(CChar *pChar, bool bForced)
 {
 	ADDTOCALLSTACK("CChar::Fight_Clear");
-	if ( !pChar || !Attacker_Delete(const_cast<CChar*>(pChar), bForced, ATTACKER_CLEAR_FORCED) )
+	if ( !pChar || !Attacker_Delete(pChar, bForced, ATTACKER_CLEAR_FORCED) )
 		return false;
 
     m_atFight.m_iRecoilDelay = 0;
@@ -1135,7 +1135,7 @@ bool CChar::Fight_Clear(const CChar *pChar, bool bForced)
 // This is just my intent.
 // RETURN:
 //  true = new attack is accepted.
-bool CChar::Fight_Attack( const CChar *pCharTarg, bool btoldByMaster )
+bool CChar::Fight_Attack( CChar *pCharTarg, bool btoldByMaster )
 {
 	ADDTOCALLSTACK("CChar::Fight_Attack");
 
@@ -1153,12 +1153,12 @@ bool CChar::Fight_Attack( const CChar *pCharTarg, bool btoldByMaster )
 	}
 	else if ( m_pNPC && !CanSee(pCharTarg) )
 	{
-		Attacker_Delete(const_cast<CChar*>(pCharTarg), true, ATTACKER_CLEAR_DISTANCE);
+		Attacker_Delete(pCharTarg, true, ATTACKER_CLEAR_DISTANCE);
 		Skill_Start(SKILL_NONE);
 		return false;
 	}
 
-	CChar *pTarget = const_cast<CChar *>(pCharTarg);
+	CChar *pTarget = pCharTarg;
 
 	if ( g_Cfg.m_fAttackingIsACrime )
 	{
@@ -1253,9 +1253,9 @@ void CChar::Fight_HitTry()
         {
             fPreHit_HadInstaHit = (!m_atFight.m_iRecoilDelay && !m_atFight.m_iSwingAnimationDelay);
             Fight_SetDefaultSwingDelays();
-            const int64 iTimeCur = g_World.GetCurrentTime().GetTimeRaw();
+            const int64 iTimeCur = g_World.GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH;
             // Time required to perform the previous normal hit, without the PreHit delay reduction.
-            const int64 iPreHit_LastHitTag_FullHit_Prev = GetKeyNum("LastHit", true);
+            const int64 iPreHit_LastHitTag_FullHit_Prev = GetKeyNum("LastHit", true);   // TAG.LastHit is in tenths of second
             // Time required to perform the shortened hit with PreHit.
             const int64 iPreHit_LastHitTag_PreHit = iTimeCur + COMBAT_MIN_SWING_ANIMATION_DELAY;   // it's the new m_iRecoilDelay (0) + the new m_iSwingAnimationDelay (COMBAT_MIN_SWING_ANIMATION_DELAY)
             iPreHit_LastHitTag_FullHit = iTimeCur + m_atFight.m_iRecoilDelay + m_atFight.m_iSwingAnimationDelay;
@@ -1311,15 +1311,27 @@ void CChar::Fight_HitTry()
 			return;
 		}
 		case WAR_SWING_EQUIPPING:	// keep hitting the same target
+        case WAR_SWING_EQUIPPING_NOWAIT:
 		{
             if (m_atFight.m_War_Swing_State == WAR_SWING_EQUIPPING) // Ready to start a new swing
             {
-                // Reactivate as soon as possible (without waiting for a new tick) the fighting routines, which are normally called by OnTick(), which in turn calls
-                //  OnTickSkill() -> Skill_Done() -> Skill_Stage() -> Skill_Fighting() ->
-                //  -> Fight_HitTry() (which is this method) -> Fight_Hit() (which sets the recoil and swing delays and more) ...
-                OnTickSkill();
-
-                // If i use SetTimeout(1), i will lose a tick, since i'll start to set the timers for the new swing only on the next tick, not on the current.
+                
+                if (retHit == WAR_SWING_EQUIPPING_NOWAIT)
+                {
+                    // Reactivate as soon as possible (without waiting for a new tick) the fighting routines, which are normally called by OnTick(), which in turn calls
+                    //  OnTickSkill() -> Skill_Done() -> Skill_Stage() -> Skill_Fighting() ->
+                    //  -> Fight_HitTry() (which is this method) -> Fight_Hit() (which sets the recoil and swing delays and more) ...
+                    // If i use SetTimeout(1), i will lose a tick, since i'll start to set the timers for the new swing only on the next tick, not on the current.
+                    OnTickSkill();
+                }
+                else
+                {
+                
+                    // Wait a bit, then check again if i can hit. If i don't wait, the condition that leaded to this point will always be the same,
+                    //  and the combat code and this function will be called recursively.
+                    SetTimeoutD(1);
+                }
+                
             }
 			return;
 		}
@@ -1328,10 +1340,12 @@ void CChar::Fight_HitTry()
 			if ( m_pNPC )
             {
 				Fight_Attack(NPC_FightFindBestTarget());	// keep attacking the same char or change the targ
-                if (!IsTimerSet())	// If i haven't landed the hit yet, keep the NPC AI alive, so that in NPCActFight the NPC can further approach his target.
-                {
-                    SetTimeoutD(1);
-                }
+            }
+            if (!IsTimerSet())	// If i haven't landed the hit yet...
+            {
+                // Player & NPC: wait some time and check again if i can land the hit
+                // NPC: also keeps its AI alive, so that in NPCActFight the NPC can further approach his target.
+                SetTimeoutD(1);
             }
 			return;
 		}
@@ -1507,7 +1521,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 	if ( m_pNPC && (m_pNPC->m_Brain == NPCBRAIN_GUARD) && pCharTarg->m_pNPC && pCharTarg->IsStatFlag(STATF_CONJURED) )
 	{
 		pCharTarg->Delete();
-		return WAR_SWING_EQUIPPING;
+		return WAR_SWING_EQUIPPING; //WAR_SWING_EQUIPPING_NOWAIT;
 	}
 
     // Fix of the bounce back effect with dir update for clients to be able to run in combat easily
@@ -1520,7 +1534,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
     if ( IsSetCombatFlags(COMBAT_PREHIT) && (m_atFight.m_War_Swing_State == WAR_SWING_EQUIPPING) && (!m_atFight.m_iSwingIgnoreLastHitTag) )
     {
-        int64 iTimeDiff = (g_World.GetCurrentTime().GetTimeRaw() - GetKeyNum("LastHit", true));
+        int64 iTimeDiff = ((g_World.GetCurrentTime().GetTimeRaw() / MSECS_PER_TENTH) - GetKeyNum("LastHit", true));
         if (iTimeDiff < 0)
         {
             return WAR_SWING_EQUIPPING;
@@ -1613,15 +1627,18 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 
         if ( IsTrigUsed(TRIGGER_HITTRY) )
         {
-            CScriptTriggerArgs Args(m_atFight.m_iRecoilDelay, 0, pWeapon);
-            Args.m_VarsLocal.SetNum("Anim", (int)m_atFight.m_iSwingAnimation);
-            Args.m_VarsLocal.SetNum("AnimDelay", m_atFight.m_iSwingAnimationDelay);
+            int16& iARGN1Var = IsSetCombatFlags(COMBAT_ANIM_HIT_SMOOTH) ? m_atFight.m_iSwingAnimationDelay : m_atFight.m_iRecoilDelay;
+            int16& iAnimDelayVar = IsSetCombatFlags(COMBAT_ANIM_HIT_SMOOTH) ? m_atFight.m_iRecoilDelay : m_atFight.m_iSwingAnimationDelay;
+
+            CScriptTriggerArgs Args(iARGN1Var, 0, pWeapon);
+            Args.m_VarsLocal.SetNum("Anim", m_atFight.m_iSwingAnimation);
+            Args.m_VarsLocal.SetNum("AnimDelay", iAnimDelayVar);
             if ( OnTrigger(CTRIG_HitTry, pCharTarg, &Args) == TRIGRET_RET_TRUE )
                 return WAR_SWING_READY;
 
             m_atFight.m_iSwingAnimation = (int16)(Args.m_VarsLocal.GetKeyNum("Anim", false));
-            m_atFight.m_iRecoilDelay = (int16)(Args.m_iN1);
-            m_atFight.m_iSwingAnimationDelay = (int16)(Args.m_VarsLocal.GetKeyNum("AnimDelay", true));
+            iARGN1Var = (int16)(Args.m_iN1);
+            iAnimDelayVar = (int16)(Args.m_VarsLocal.GetKeyNum("AnimDelay", true));
             //if (m_atFight.m_iSwingAnimation < (ANIM_TYPE)-1)
             //    m_atFight.m_iSwingAnimation = (int16)animSwingDefault;
             if ( m_atFight.m_iRecoilDelay < 1 )
@@ -1685,7 +1702,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 			if ( pAmmo )
 				Args.m_VarsLocal.SetNum("Arrow", pAmmo->GetUID());
 			if ( OnTrigger(CTRIG_HitMiss, pCharTarg, &Args) == TRIGRET_RET_TRUE )
-				return WAR_SWING_EQUIPPING;
+				return WAR_SWING_EQUIPPING_NOWAIT;
 
 			if ( Args.m_VarsLocal.GetKeyNum("ArrowHandled") != 0 )		// if arrow is handled by script, do nothing with it further!
 				pAmmo = nullptr;
@@ -1720,7 +1737,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		}
 		Sound(iSound);
 
-		return WAR_SWING_EQUIPPING;
+		return WAR_SWING_EQUIPPING_NOWAIT;
 	}
 
 	// We hit
@@ -1735,7 +1752,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 				pItemHit->OnTakeDamage(1, this, iDmgType);
 
 			//Effect(EFFECT_OBJ, ITEMID_FX_GLOW, this, 10, 16);		// moved to scripts (@UseQuick on Parrying skill)
-			return WAR_SWING_EQUIPPING;
+			return WAR_SWING_EQUIPPING_NOWAIT;
 		}
 	}
 
@@ -1916,7 +1933,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		}
 	}
 
-	return WAR_SWING_EQUIPPING;
+	return WAR_SWING_EQUIPPING_NOWAIT;
 }
 
 bool CChar::Fight_Parry(CItem * &pItemParry)
@@ -1994,17 +2011,17 @@ bool CChar::Fight_Parry(CItem * &pItemParry)
             }
         }
 
-        if (iParryChance && (iParrying >= 1000))
+        if ((iParryChance > 0) && (iParrying >= 1000))
             iParryChance += 5;
     }
 
-    //if (iParryChance <= 0)
-    //    return false;
+    if (iParryChance <= 0)
+        return false;
 	
     int iDex = Stat_GetAdjusted(STAT_DEX);
     if (iDex < 80)
     {
-        float fDexMod = (80 - iDex)/100.0f;
+        const float fDexMod = (80 - iDex)/100.0f;
         iParryChance = int((float)iParryChance * (1.0f - fDexMod));
     }
         

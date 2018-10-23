@@ -138,7 +138,7 @@ CChar * CChar::Attacker_GetLast() const
 }
 
 // Set elapsed time (refreshing it?)
-void CChar::Attacker_SetElapsed(CChar * pChar, int64 value)
+void CChar::Attacker_SetElapsed(const CChar * pChar, int64 value)
 {
     ADDTOCALLSTACK("CChar::Attacker_SetElapsed(CChar)");
     return Attacker_SetElapsed(Attacker_GetID(pChar), value);
@@ -157,7 +157,7 @@ void CChar::Attacker_SetElapsed(size_t attackerIndex, int64 value)
 }
 
 // Damaged pChar
-void CChar::Attacker_SetDam(CChar * pChar, int64 value)
+void CChar::Attacker_SetDam(const CChar * pChar, int64 value)
 {
     ADDTOCALLSTACK("CChar::Attacker_SetDam(CChar)");
     return Attacker_SetDam(Attacker_GetID(pChar), value);
@@ -176,7 +176,7 @@ void CChar::Attacker_SetDam(size_t attackerIndex, int64 value)
 }
 
 // New Treat level
-void CChar::Attacker_SetThreat(CChar * pChar, int64 value)
+void CChar::Attacker_SetThreat(const CChar * pChar, int64 value)
 {
     ADDTOCALLSTACK("CChar::Attacker_SetThreat(CChar)");
     return Attacker_SetThreat(Attacker_GetID(pChar), value);
@@ -197,7 +197,7 @@ void CChar::Attacker_SetThreat(size_t attackerIndex, int64 value)
 }
 
 // Ignoring this pChar on Hit checks
-void CChar::Attacker_SetIgnore(CChar * pChar, bool fIgnore)
+void CChar::Attacker_SetIgnore(const CChar * pChar, bool fIgnore)
 {
     ADDTOCALLSTACK("CChar::Attacker_SetIgnore(CChar)");
     return Attacker_SetIgnore(Attacker_GetID(pChar), fIgnore);
@@ -216,7 +216,7 @@ void CChar::Attacker_SetIgnore(size_t attackerIndex, bool fIgnore)
 }
 
 // I'm ignoring pChar?
-bool CChar::Attacker_GetIgnore(CChar * pChar) const
+bool CChar::Attacker_GetIgnore(const CChar * pChar) const
 {
     ADDTOCALLSTACK("CChar::Attacker_GetIgnore(CChar)");
     return Attacker_GetIgnore(Attacker_GetID(pChar));
@@ -345,7 +345,7 @@ bool CChar::Attacker_Delete(size_t attackerIndex, bool bForced, ATTACKER_CLEAR_T
 }
 
 // Removing pChar from list
-bool CChar::Attacker_Delete(CChar * pChar, bool bForced, ATTACKER_CLEAR_TYPE type)
+bool CChar::Attacker_Delete(const CChar * pChar, bool bForced, ATTACKER_CLEAR_TYPE type)
 {
     ADDTOCALLSTACK("CChar::Attacker_Delete(CChar)");
     if (!pChar || m_lastAttackers.empty())

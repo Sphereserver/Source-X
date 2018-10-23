@@ -1222,6 +1222,7 @@ The lower calls to this function, the better (as for any other), but other formu
 19-10-2018, Nolok
 - Fixed: SHRINK command always bouncing the figurine (Issue #138).
 - Fixed: Items disappear in trade menu when both players are overweight (Issue #124).
+
 20-10-2018, XuN
 Added: Now Sectors store their adjacent sectors:
     When a sector awake, all of it's adjacent awake too to avoid the awakening effect for clients (all spawns generating NPCs at once, NPCs starting to move at once, etc)
@@ -1230,3 +1231,9 @@ Added: Now Sectors store their adjacent sectors:
 21-10-2018, Nolok
 - Fixed: Items in trade window being lost if a world save occurred during the trade process and the server was restarted, loading that save.
 - Fixed: NPCs sometimes lost the focus on their enemy during combat.
+
+23-10-2018, Nolok
+- Fixed: Gaining parrying skill regardlessly from CombatParryingEra and the ability to actually parry the blow.
+- Fixed: With COMBAT_ANIM_HIT_SMOOTH, in @HitTry ARGN1 and LOCAL.AnimDelay showed the wrong values (they were inverted).
+- Fixed: NPCs had not enough motivation to fight back a brain_berserk NPC of the same kind, so they kept running away or wandering.
+- Fixed: On Windows, if Sphere's window is closed during the scripts loading, the whole process will now be halted. Before, the loading proceeded and the server was halted only at the startup completition.

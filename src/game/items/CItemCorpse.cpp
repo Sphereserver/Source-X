@@ -46,7 +46,7 @@ int CItemCorpse::GetWeight(word amount) const
 }
 
 
-bool CChar::CheckCorpseCrime( const CItemCorpse *pCorpse, bool fLooting, bool fTest )
+bool CChar::CheckCorpseCrime( CItemCorpse *pCorpse, bool fLooting, bool fTest )
 {
 	ADDTOCALLSTACK("CChar::CheckCorpseCrime");
 	// fLooting = looting as apposed to carving.

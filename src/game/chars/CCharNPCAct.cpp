@@ -355,7 +355,7 @@ void CChar::NPC_OnHear( lpctstr pszCmd, CChar * pSrc, bool fAllPets )
 	}
 }
 
-void CChar::NPC_OnNoticeSnoop( CChar * pCharThief, const CChar * pCharMark )
+void CChar::NPC_OnNoticeSnoop( const CChar * pCharThief, const CChar * pCharMark )
 {
 	ADDTOCALLSTACK("CChar::NPC_OnNoticeSnoop");
 	ASSERT(m_pNPC);

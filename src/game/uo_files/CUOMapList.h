@@ -59,16 +59,16 @@ public:
 protected:
     bool DetectMapSize(int map);
 public:
-    bool IsMapSupported(int map);
-    int GetCenterX(int map);
-    int GetCenterY(int map);
-    int GetSectorCols(int map);
-    int GetSectorQty(int map);
-    int GetX(int map);
-    int GetSectorRows(int map);
-    int GetSectorSize(int map);
-    int GetY(int map);
-    bool IsInitialized(int map);
+    bool IsMapSupported(int map) const;
+    int GetCenterX(int map) const;
+    int GetCenterY(int map) const;
+    int GetSectorCols(int map) const;
+    int GetSectorQty(int map) const;
+    int GetX(int map) const;
+    int GetSectorRows(int map) const;
+    int GetSectorSize(int map) const;
+    int GetY(int map) const;
+    bool IsInitialized(int map) const;
     ///@}
 } g_MapList;
 

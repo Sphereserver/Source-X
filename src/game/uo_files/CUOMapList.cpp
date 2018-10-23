@@ -192,60 +192,68 @@ bool CUOMapList::DetectMapSize(int map)
     return (m_sizex[map] > 0 && m_sizey[map] > 0 && m_sectorsize[map] > 0);
 }
 
-bool CUOMapList::IsMapSupported(int map)
+bool CUOMapList::IsMapSupported(int map) const
 {
-    if (( map < 0 ) || ( map > 255 )) return false;
+    if (( map < 0 ) || ( map > 255 ))
+        return false;
     return( m_maps[map] );
 }
 
-int CUOMapList::GetCenterX(int map)
+int CUOMapList::GetCenterX(int map) const
 {
-    if (( map < 0 ) || ( map > 255 )) return 0;
+    if (( map < 0 ) || ( map > 255 ))
+        return 0;
     return (m_sizex[map]/2);
 }
 
-int CUOMapList::GetCenterY(int map)
+int CUOMapList::GetCenterY(int map) const
 {
-    if (( map < 0 ) || ( map > 255 )) return 0;
+    if (( map < 0 ) || ( map > 255 ))
+        return 0;
     return (m_sizey[map]/2);
 }
 
-int CUOMapList::GetSectorCols(int map)
+int CUOMapList::GetSectorCols(int map) const
 {
-    if (( map < 0 ) || ( map > 255 )) return 0;
+    if (( map < 0 ) || ( map > 255 ))
+        return 0;
     return (m_sizex[map] / GetSectorSize(map));
 }
 
-int CUOMapList::GetSectorQty(int map)
+int CUOMapList::GetSectorQty(int map) const
 {
     return ( GetSectorCols(map) * GetSectorRows(map) );
 }
 
-int CUOMapList::GetX(int map)
+int CUOMapList::GetX(int map) const
 {
-    if (( map < 0 ) || ( map > 255 )) return 0;
+    if (( map < 0 ) || ( map > 255 ))
+        return 0;
     return m_sizex[map];
 }
 
-int CUOMapList::GetSectorRows(int map)
+int CUOMapList::GetSectorRows(int map) const
 {
-    if (( map < 0 ) || ( map > 255 )) return 0;
+    if (( map < 0 ) || ( map > 255 ))
+        return 0;
     return (m_sizey[map] / GetSectorSize(map));
 }
 
-int CUOMapList::GetSectorSize(int map)
+int CUOMapList::GetSectorSize(int map) const
 {
-    if (( map < 0 ) || ( map > 255 )) return 0;
+    if (( map < 0 ) || ( map > 255 ))
+        return 0;
     return m_sectorsize[map];
 }
 
-int CUOMapList::GetY(int map)
+int CUOMapList::GetY(int map) const
 {
-    if (( map < 0 ) || ( map > 255 )) return 0;
+    if (( map < 0 ) || ( map > 255 ))
+        return 0;
     return m_sizey[map];
 }
 
-bool CUOMapList::IsInitialized(int map)
+bool CUOMapList::IsInitialized(int map) const
 {
     return (m_mapsinitalized[map]);
 }

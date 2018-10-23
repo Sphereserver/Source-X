@@ -82,7 +82,9 @@ private:
 	CVarDefContStr& operator=(const CVarDefContStr& other);
 
 public:
-	lpctstr GetValStr() const;
+    inline lpctstr GetValStr() const {
+        return m_sVal; 
+    }
 	void SetValStr( lpctstr pszVal );
 	int64 GetValNum() const;
 

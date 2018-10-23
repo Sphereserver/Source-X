@@ -196,7 +196,7 @@ bool CClient::Cmd_Use_Item( CItem *pItem, bool fTestTouch, bool fScript )
 
             if (pItem->GetType() == IT_CORPSE)
             {
-                const CItemCorpse *pCorpseItem = static_cast<const CItemCorpse *>(pPack);
+                CItemCorpse *pCorpseItem = static_cast<CItemCorpse *>(pPack);
                 if ( m_pChar->CheckCorpseCrime(pCorpseItem, true, true) )
                     SysMessageDefault(DEFMSG_LOOT_CRIMINAL_ACT);
             }

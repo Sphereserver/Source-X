@@ -115,7 +115,7 @@ private:
 
 public:
 	void Init();
-	void InitTime( uint64 lTimeBase );
+	void InitTime( uint64 ullTimeBase );
 	bool Advance();
     inline void AdvanceTick()
     {
@@ -134,24 +134,25 @@ public:
 
 struct TimedObjectsContainer
 {
-    mutable std::shared_mutex _mutex;
-    std::vector<CTimedObject*> _TimedObjectsContainer;};
+    THREAD_CMUTEX_DEF;
+    std::vector<CTimedObject*> _TimedObjectsContainer;
+};
 
 struct WorldTickList
 {
-    mutable std::shared_mutex _mutex;
+    THREAD_CMUTEX_DEF;
     std::map<int64, TimedObjectsContainer> _mTimedObjects;
 };
 
 struct TimedCharsContainer
 {
-    mutable std::shared_mutex _mutex;
+    THREAD_CMUTEX_DEF;
     std::vector<CChar*> _TimedCharsContainer;
 };
 
 struct CharTickList
 {
-    mutable std::shared_mutex _mutex;
+    THREAD_CMUTEX_DEF;
     std::map<int64, TimedCharsContainer> _mTimedChars;
 };
 
@@ -164,11 +165,11 @@ private:
 
 	// Special purpose timers.
 	int64	m_timeSave;				// when to auto save ?
-	bool		m_bSaveNotificationSent;// has notification been sent?
+	bool	m_bSaveNotificationSent;// has notification been sent?
 	int64	m_timeRespawn;			// when to res dead NPC's ?
 	int64	m_timeCallUserFunc;		// when to call next user func
-	ullong		m_ticksWithoutMySQL;	// MySQL should be running constantly if MySQLTicks is true, keep here record of how much ticks since Sphere is not connected.
-    int64       _iLastTick;             // Last tick done.
+	ullong	m_ticksWithoutMySQL;	// MySQL should be running constantly if MySQLTicks is true, keep here record of how much ticks since Sphere is not connected.
+    int64   _iLastTick;             // Last tick done.
 
 	int m_iSaveStage;	// Current stage of the background save.
 	llong	m_savetimer; // Time it takes to save
@@ -230,7 +231,7 @@ private:
 public:
 	void Init();
 
-	CSector *GetSector( int map, int i );	// gets sector # from one map
+	CSector *GetSector( int map, int i ) const;	// gets sector # from one map
 
 	// Time
 

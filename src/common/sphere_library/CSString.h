@@ -204,7 +204,7 @@ public:
     * @param pointer to zero-terminated tchar string to concatenate with.
     * @return The result of concatenate the CSString with string.
     */
-    inline CSString operator+(lpctstr string)
+    CSString operator+(lpctstr string)
     {
         CSString temp(*this);
         temp += string;

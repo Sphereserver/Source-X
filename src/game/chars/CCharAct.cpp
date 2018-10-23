@@ -1638,12 +1638,12 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 	if ( !CanTouch(pItem) || !CanMove(pItem, true) )
 		return -1;
 
-	const CObjBaseTemplate * pObjTop = pItem->GetTopLevelObj();
+	CObjBaseTemplate * pObjTop = pItem->GetTopLevelObj();
 
 	if( IsClient() )
 	{
 		CClient * client = GetClient();
-		const CItem * pItemCont	= dynamic_cast <const CItem*> (pItem->GetParent());
+		CItem * pItemCont	= dynamic_cast <CItem*> (pItem->GetParent());
 
 		if ( pItemCont != NULL )
 		{
@@ -1652,7 +1652,7 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 				return -1;
 
 			// Check sub containers too
-			CChar * pCharTop = dynamic_cast<CChar *>(const_cast<CObjBaseTemplate *>(pObjTop));
+			CChar * pCharTop = dynamic_cast<CChar *>(pObjTop);
 			if ( pCharTop != NULL )
 			{
 				bool bItemContIsInsideBankBox = pCharTop->GetBank()->IsItemInside( pItemCont );
@@ -1665,9 +1665,9 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 			CClient::OpenedContainerMap_t::iterator itContainerFound = client->m_openedContainers.find( pItemCont->GetUID().GetPrivateUID() );
 			if ( itContainerFound != client->m_openedContainers.end() )
 			{
-				dword dwTopContainerUID = (((*itContainerFound).second).first).first;
-				dword dwTopMostContainerUID = (((*itContainerFound).second).first).second;
-				CPointMap ptOpenedContainerPosition = ((*itContainerFound).second).second;
+				dword dwTopContainerUID = itContainerFound->second.first.first;
+				dword dwTopMostContainerUID = itContainerFound->second.first.second;
+				CPointMap ptOpenedContainerPosition = itContainerFound->second.second;
 
 				dword dwTopContainerUID_ToCheck = 0;
 				if ( pItemCont->GetContainer() )
@@ -1684,7 +1684,7 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 					}
 					else
 					{
-						CItem * pItemTop = dynamic_cast<CItem *>(const_cast<CObjBaseTemplate *>(pObjTop));
+						CItem * pItemTop = dynamic_cast<CItem *>(pObjTop);
 						if ( pItemTop && (pItemTop->IsType(IT_SHIP_HOLD) || pItemTop->IsType(IT_SHIP_HOLD_LOCK)) && (pItemTop->GetTopPoint().GetRegion(REGION_TYPE_MULTI) == GetTopPoint().GetRegion(REGION_TYPE_MULTI)) )
 						{
 							isInOpenedContainer = true;
@@ -1697,7 +1697,7 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 				}
 			}
 
-			if( !isInOpenedContainer )
+			if (!isInOpenedContainer)
 				return -1;
 		}
 	}
@@ -1713,7 +1713,7 @@ int CChar::ItemPickup(CItem * pItem, word amount)
 		return -1;
 	}
 
-	const CItemCorpse * pCorpse = dynamic_cast<const CItemCorpse *>(pObjTop);
+	CItemCorpse * pCorpse = dynamic_cast<CItemCorpse *>(pObjTop);
 	if ( pCorpse && pCorpse->m_uidLink == GetUID() )
 	{
 		if ( g_Cfg.m_iRevealFlags & REVEALF_LOOTINGSELF )

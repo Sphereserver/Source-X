@@ -424,7 +424,7 @@ void CChar::Noto_ChangeNewMsg( int iPrvLevel )
 	if ( iPrvLevel != Noto_GetLevel())
 	{
 		// reached a new title level ?
-		SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_MSG_NOTO_GETTITLE ), static_cast<lpctstr>(Noto_GetTitle()));
+		SysMessagef( g_Cfg.GetDefaultMsg( DEFMSG_MSG_NOTO_GETTITLE ), Noto_GetTitle());
 	}
 }
 

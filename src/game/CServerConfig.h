@@ -1604,7 +1604,7 @@ public:
      *
      * @return  true if it succeeds, false if it fails.
      */
-	bool Calc_CrimeSeen( CChar * pCharThief, CChar * pCharViewer, SKILL_TYPE SkillToSee, bool fBonus );
+	bool Calc_CrimeSeen( const CChar * pCharThief, CChar * pCharViewer, SKILL_TYPE SkillToSee, bool fBonus ) const;
 
     /**
      * @fn  int CServerConfig::Calc_FameKill( CChar * pKill );
