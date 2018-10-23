@@ -3,8 +3,8 @@
 #include "CItemVendable.h"
 
 CItemVendable::CItemVendable( ITEMID_TYPE id, CItemBase * pDef ) :
-    CItem( id, pDef ),
-    CTimedObject(PROFILE_ITEMS)
+    CTimedObject(PROFILE_ITEMS),
+    CItem( id, pDef )
 {
 	// Constructor
 	m_price = 0;

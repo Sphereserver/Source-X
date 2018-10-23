@@ -87,7 +87,7 @@ lpctstr const CItem::sm_szTrigName[ITRIG_QTY+1] =	// static
         _uidMultiLockDown = uidMulti;
     }
 
-    CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CObjBase( true ), CTimedObject(PROFILE_ITEMS)
+    CItem::CItem( ITEMID_TYPE id, CItemBase * pItemDef ) : CTimedObject(PROFILE_ITEMS), CObjBase( true )
 {
 	ASSERT( pItemDef );
 

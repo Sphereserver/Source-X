@@ -11,11 +11,11 @@
 
 
 CItemStone::CItemStone( ITEMID_TYPE id, CItemBase * pItemDef ) :
-    CItem( id, pItemDef ),
-    CTimedObject(PROFILE_ITEMS)
+    CTimedObject(PROFILE_ITEMS),
+    CItem( id, pItemDef )
 {
 	m_itStone.m_iAlign = STONEALIGN_STANDARD;
-    g_World.m_Stones.push_back(this);
+    g_World.m_Stones.emplace_back(this);
     _pMultiStorage = new CMultiStorage(UID_UNUSED);
     _iMaxShips = g_Cfg._iMaxShipsGuild;
     _iMaxHouses = g_Cfg._iMaxHousesGuild;

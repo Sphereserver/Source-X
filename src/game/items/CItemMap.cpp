@@ -5,6 +5,17 @@
 /////////////////////////////////////////////////////////////////////////////
 // -CItemMap
 
+CItemMap::CItemMap( ITEMID_TYPE id, CItemBase * pItemDef ) :
+    CTimedObject(PROFILE_ITEMS), CItemVendable( id, pItemDef )
+{
+    m_fPlotMode = false;
+}
+
+CItemMap::~CItemMap()
+{
+    DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
+}
+
 bool CItemMap::IsSameType(const CObjBase *pObj) const
 {
     const CItemMap *pItemMap = dynamic_cast<const CItemMap *>(pObj);
@@ -95,13 +106,3 @@ void CItemMap::DupeCopy(const CItem *pItem)
     m_Pins = pMapItem->m_Pins;
 }
 
-CItemMap::CItemMap( ITEMID_TYPE id, CItemBase * pItemDef ) :
-    CItemVendable( id, pItemDef ),
-    CTimedObject(PROFILE_ITEMS)
-{
-    m_fPlotMode = false;
-}
-
-CItemMap::~CItemMap() {
-    DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
-}

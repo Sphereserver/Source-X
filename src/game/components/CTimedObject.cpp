@@ -17,11 +17,6 @@ CTimedObject::CTimedObject(PROFILE_TYPE profile)
     _timeout = 0;
 }
 
-bool CTimedObject::IsSleeping()
-{
-    return _fIsSleeping;
-}
-
 void CTimedObject::GoSleep()
 {
     _fIsSleeping = true;

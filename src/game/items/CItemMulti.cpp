@@ -14,8 +14,8 @@
 /////////////////////////////////////////////////////////////////////////////
 
 CItemMulti::CItemMulti(ITEMID_TYPE id, CItemBase * pItemDef, bool fTurnable) :	// CItemBaseMulti
-    CItem(id, pItemDef),
     CTimedObject(PROFILE_MULTIS),
+    CItem(id, pItemDef),
     CMultiMovable(fTurnable)
 {
     CItemBaseMulti * pItemBase = static_cast<CItemBaseMulti*>(Base_GetDef());

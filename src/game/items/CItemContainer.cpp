@@ -13,8 +13,7 @@
 // -CItemContainer
 
 CItemContainer::CItemContainer( ITEMID_TYPE id, CItemBase *pItemDef ) :
-    CItemVendable( id, pItemDef ),
-    CTimedObject(PROFILE_ITEMS)
+    CTimedObject(PROFILE_ITEMS), CItemVendable( id, pItemDef )
 {
 	// m_fTinkerTrapped = false;
     _uidMultiSecured.InitUID();
@@ -77,7 +76,7 @@ void CItemContainer::SetCrateOfMulti(CUID uidMulti)
 
 void CItemContainer::r_Write( CScript &s )
 {
-	ADDTOCALLSTACK_INTENSIVE("CItemContainer::r_Write");
+	ADDTOCALLSTACK("CItemContainer::r_Write");
 	CItemVendable::r_Write(s);
 	r_WriteContent(s);
 }

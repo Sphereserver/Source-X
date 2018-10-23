@@ -98,10 +98,10 @@ private:
 class CWorldClock
 {
 private:
-    uint64 _iCurTick;               // Current TICK count of the server from it's first start.
-	CServerTime m_timeClock;        // Internal clock record, on msecs, used to advance the ticks.
-	uint64 m_Clock_SysPrev;	        // SERVER time (in milliseconds) of the last OnTick()
-    CServerTime	m_nextTickTime;	    // next time to do sector stuff.
+    int64 _iCurTick;            // Current TICK count of the server from it's first start.
+	CServerTime m_timeClock;    // Internal clock record, on msecs, used to advance the ticks.
+	int64 m_Clock_SysPrev;	    // SERVER time (in milliseconds) of the last OnTick()
+    CServerTime	m_nextTickTime;	// next time to do sector stuff.
 public:
 	static const char *m_sClassName;
 	CWorldClock()
@@ -115,7 +115,7 @@ private:
 
 public:
 	void Init();
-	void InitTime( uint64 ullTimeBase );
+	void InitTime( int64 ullTimeBase );
 	bool Advance();
     inline void AdvanceTick()
     {
@@ -125,11 +125,11 @@ public:
 	{
 		return m_timeClock;
 	}
-    inline uint64 GetCurrentTick() const
+    inline int64 GetCurrentTick() const
     {
         return _iCurTick;
     }
-	static uint64 GetSystemClock(); // in milliseconds
+	static int64 GetSystemClock(); // in milliseconds
 };
 
 struct TimedObjectsContainer

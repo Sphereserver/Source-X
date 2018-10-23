@@ -979,7 +979,7 @@ bool CSector::MoveCharToSector( CChar * pChar )
 	return true;
 }
 
-inline bool CSector::CanSleep() const
+bool CSector::CanSleep() const
 {
 	ADDTOCALLSTACK_INTENSIVE("CSector::CanSleep");
 	if ( IsFlagSet(SECF_NoSleep) )
@@ -992,25 +992,23 @@ inline bool CSector::CanSleep() const
 		else
 			return true;	// no active client inside, instant sleep
 	}
-    CSector *pThis = const_cast<CSector*>(this);
-    static int maxloops[DIR_QTY];// a max of 1 sector's checks in each direction
-    static CSector *pLast = nullptr;
-    memset(maxloops, 1, DIR_QTY);
+    static int maxloops[DIR_QTY] = {1}; // a max of 1 sector's checks in each direction
+    static const CSector *pLast = nullptr;
     for (int i = 0; i < (int)DIR_QTY; ++i)// Check for adjacent's sectors sleeping allowance.
     {
-        CSector *pSector = pThis->GetAdjacentSector(DIR_N);
+        const CSector *pSector = GetAdjacentSector(DIR_N);
         /*
         * Only check if this sector exist and it's not the last checked (sectors in the hedges of the map doesn't have adjacent on those directions)
         * && Only check if the sector isn't sleeping (IsSleeping()) and then check if CanSleep().
         *
         * || if the counter in this direction reached 0
         */
-        if ((pSector && pSector!= pLast && (!pSector->IsSleeping() && !pSector->CanSleep())) || (maxloops[i] == 0))
+        if ((pSector && (pSector!= pLast) && (!pSector->IsSleeping() && !pSector->CanSleep())) || (maxloops[i] == 0))
         {
             return false;   // asume the base sector can't sleep.
         }
         --maxloops[i]; //Decrease the counter for this direction in each iteration to avoid an infinite loop.
-        pLast = const_cast<CSector*>(this);
+        pLast = this;
     }
 	//default behaviour
 	return (-g_World.GetTimeDiff(GetLastClientTime()) > g_Cfg.m_iSectorSleepMask); // Sector Sleep timeout.

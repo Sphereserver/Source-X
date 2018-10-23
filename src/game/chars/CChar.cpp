@@ -230,9 +230,8 @@ CChar * CChar::CreateBasic(CREID_TYPE baseID) // static
 	return pChar;
 }
 
-CChar::CChar( CREID_TYPE baseID ) : CObjBase( false ), 
-    CTimedObject(PROFILE_CHARS),
-	m_Stat()
+CChar::CChar( CREID_TYPE baseID ) : CTimedObject(PROFILE_CHARS), CObjBase( false ), 
+    m_Stat{}
 {
 	g_Serv.StatInc( SERV_STAT_CHARS );	// Count created CChars.
 

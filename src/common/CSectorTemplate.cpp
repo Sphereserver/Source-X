@@ -157,10 +157,10 @@ void CSectorBase::SetAdjacentSectors()
     }
 }
 
-CSector *CSectorBase::GetAdjacentSector(DIR_TYPE dir)
+CSector *CSectorBase::GetAdjacentSector(DIR_TYPE dir) const
 {
     ASSERT(dir >= DIR_N && dir < DIR_QTY);
-    return _mAdjacentSectors[dir];
+    return _mAdjacentSectors.at(dir);
 }
 
 CSectorBase::CSectorBase()

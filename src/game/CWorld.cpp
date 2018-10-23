@@ -740,7 +740,7 @@ void CWorldThread::GarbageCollection_UIDs()
 //////////////////////////////////////////////////////////////////
 // -CWorldClock
 
-uint64 CWorldClock::GetSystemClock() // static
+int64 CWorldClock::GetSystemClock() // static
 {
 	ADDTOCALLSTACK("CWorldClock::GetSystemClock");
 	// Return system wall-clock using high resolution value (milliseconds)
@@ -748,7 +748,7 @@ uint64 CWorldClock::GetSystemClock() // static
     return std::chrono::duration_cast<std::chrono::milliseconds>(timeMaxResolution).count();
 }
 
-void CWorldClock::InitTime( uint64 ullTimeBase )
+void CWorldClock::InitTime( int64 ullTimeBase )
 {
 	ADDTOCALLSTACK("CWorldClock::InitTime");
 	m_Clock_SysPrev = GetSystemClock();
@@ -767,8 +767,8 @@ void CWorldClock::Init()
 bool CWorldClock::Advance()
 {
 	ADDTOCALLSTACK("CWorldClock::Advance");
-	const uint64 Clock_Sys = GetSystemClock();
-	const uint64 iTimeDiff = Clock_Sys - m_Clock_SysPrev;
+	const int64 Clock_Sys = GetSystemClock();
+	const int64 iTimeDiff = Clock_Sys - m_Clock_SysPrev;
 	if ( iTimeDiff == 0 )
 		return false;
 	else if ( iTimeDiff < 0 )

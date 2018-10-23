@@ -14,8 +14,8 @@
 
 
 CItemShip::CItemShip(ITEMID_TYPE id, CItemBase * pItemDef) :
-    CItemMulti(id, pItemDef, true),
-    CTimedObject(PROFILE_SHIPS)
+    CTimedObject(PROFILE_SHIPS),
+    CItemMulti(id, pItemDef, true)
 {
 }
 

@@ -7,12 +7,13 @@
 // -CItemScript
 
 CItemScript::CItemScript( ITEMID_TYPE id, CItemBase * pItemDef ) :
-    CItemVendable( id, pItemDef ),
-    CTimedObject(PROFILE_ITEMS)
+    CTimedObject(PROFILE_ITEMS),
+    CItemVendable( id, pItemDef )
 {
 }
 
-CItemScript::~CItemScript() {
+CItemScript::~CItemScript()
+{
     DeletePrepare();	// Must remove early because virtuals will fail in child destructor.
 }
 

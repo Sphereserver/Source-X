@@ -17,8 +17,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 CItemMultiCustom::CItemMultiCustom(ITEMID_TYPE id, CItemBase * pItemDef) : 
-    CItemMulti(id, pItemDef, true),
-    CTimedObject(PROFILE_MULTIS)
+    CTimedObject(PROFILE_MULTIS), CItemMulti(id, pItemDef, true)
 {
     m_designMain.m_iRevision = 0;
     m_designMain.m_pData = NULL;

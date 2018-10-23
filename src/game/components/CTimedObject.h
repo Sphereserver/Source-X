@@ -30,8 +30,10 @@ private:
 
 public:
     CTimedObject(PROFILE_TYPE profile);
-    virtual ~CTimedObject(){};
-    bool IsSleeping();
+    virtual ~CTimedObject() = default;
+    inline bool IsSleeping() const {
+        return _fIsSleeping;
+    }
     virtual void GoSleep();
     virtual void GoAwake();
     /**

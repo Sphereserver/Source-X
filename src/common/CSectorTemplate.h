@@ -109,7 +109,7 @@ public:
     * @brief Asign it's adjacent's sectors
     */
     void SetAdjacentSectors();
-    CSector *GetAdjacentSector(DIR_TYPE dir);
+    CSector *GetAdjacentSector(DIR_TYPE dir) const;
 public:
 	CSectorBase();
 	virtual ~CSectorBase();

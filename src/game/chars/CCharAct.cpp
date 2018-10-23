@@ -4109,10 +4109,7 @@ bool CChar::OnTickPeriodic()
     {
         _iRegenTickCount = 0;
         EXC_SET_BLOCK("last attackers");
-        if (g_Cfg.m_iAttackerTimeout >= 0)
-        {
-            Attacker_CheckTimeout();
-        }
+        Attacker_CheckTimeout();
 
         EXC_SET_BLOCK("NOTO timeout");
         if (g_Cfg.m_iNotoTimeout > 0)

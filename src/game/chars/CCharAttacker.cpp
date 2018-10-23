@@ -383,7 +383,8 @@ void CChar::Attacker_CheckTimeout()
             CChar *pEnemy = CUID(refAttacker.charUID).CharFind();
             if (pEnemy)
             {
-                if ( (g_Cfg.m_iAttackerTimeout > 0) && (++(refAttacker.elapsed) > g_Cfg.m_iAttackerTimeout) )
+                // always advance refAttacker.elapsed, i might use it in scripts for a different purpose
+                if ( (++(refAttacker.elapsed) > g_Cfg.m_iAttackerTimeout) && (g_Cfg.m_iAttackerTimeout > 0))
                 {
                     if (!Attacker_Delete(count, true, ATTACKER_CLEAR_ELAPSED))
                     {
