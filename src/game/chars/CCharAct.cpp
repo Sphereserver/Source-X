@@ -1892,17 +1892,26 @@ bool CChar::ItemBounce( CItem * pItem, bool bDisplayMsg )
 
 	lpctstr pszWhere = NULL;
 	bool bCanAddToPack = false;
+    bool bDropOnGround = false;
 
 	if (pPack && CanCarry(pItem) && pPack->CanContainerHold(pItem, this))		// this can happen at load time
 	{
 		bCanAddToPack = true;
 		if (IsTrigUsed(TRIGGER_DROPON_SELF) || IsTrigUsed(TRIGGER_ITEMDROPON_SELF))
 		{
+            CItem* pPrevCont = dynamic_cast<CItem*>(pItem->GetContainer());
 			CScriptTriggerArgs Args(pItem);
 			if (pPack->OnTrigger(ITRIG_DROPON_SELF, this, &Args) == TRIGRET_RET_TRUE)
+            {
 				bCanAddToPack = false;
+                CItem* pCont = dynamic_cast<CItem*>(pItem->GetContainer());
+                if ((pPrevCont == pCont) && (pPrevCont != nullptr))
+                    bDropOnGround = true;
+            }
 		}
 	}
+    else
+        bDropOnGround = true;
 
 	if (bCanAddToPack)
 	{
@@ -1910,7 +1919,7 @@ bool CChar::ItemBounce( CItem * pItem, bool bDisplayMsg )
 		pItem->RemoveFromView();
 		pPack->ContentAdd(pItem);		// add it to pack
 	}
-	else
+	else if (bDropOnGround)
 	{
 		if ( !GetTopPoint().IsValidPoint() )
 		{
@@ -1924,17 +1933,10 @@ bool CChar::ItemBounce( CItem * pItem, bool bDisplayMsg )
 			return false;
 		}
 
-		// Maybe in a trigger call (like @DropOn_Pack) i have changed/overridden the container, so drop it on ground
-		//	only under specific conditions: if the item still hasn't a container, or if i'm dragging it but i can't add it to pack, or
-        //  if i'm trading it but both the players are overweighted
-        CItem* pItemCont = dynamic_cast<CItem*>(pItem->GetContainer());
-		if ( (pItem->GetContainer() == NULL) || (pItem->GetContainedLayer() == LAYER_DRAGGING) || (pItemCont && (pItemCont->GetType() == IT_EQ_TRADE_WINDOW)))
-		{
-			pszWhere = g_Cfg.GetDefaultMsg(DEFMSG_MSG_FEET);
-            bDisplayMsg = true;
-			pItem->RemoveFromView();
-			pItem->MoveToDecay(GetTopPoint(), pItem->GetDecayTime());	// drop it on ground
-		}
+		pszWhere = g_Cfg.GetDefaultMsg(DEFMSG_MSG_FEET);
+        bDisplayMsg = true;
+		pItem->RemoveFromView();
+	    pItem->MoveToDecay(GetTopPoint(), pItem->GetDecayTime());	// drop it on ground
 	}
 
 	Sound(pItem->GetDropSound(pPack));

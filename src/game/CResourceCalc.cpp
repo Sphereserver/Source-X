@@ -38,15 +38,16 @@ int CServerConfig::Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pW
 	//  Should never return a value < 0 to avoid break combat timer/sequence
 
 	ASSERT(pChar);
-	if ( pChar->m_pNPC && pChar->m_pNPC->m_Brain == NPCBRAIN_GUARD && m_fGuardsInstantKill )
+	if ( pChar->m_pNPC && (pChar->m_pNPC->m_Brain == NPCBRAIN_GUARD) && m_fGuardsInstantKill )
 		return 1;
 
-	int iSwingSpeedIncrease = (int)(pChar->GetDefNum("INCREASESWINGSPEED", true));
+    const int iSpeedScaleFactor = g_Cfg.m_iSpeedScaleFactor;
+	const int iSwingSpeedIncrease = (int)(pChar->GetDefNum("INCREASESWINGSPEED", true));
 	int iBaseSpeed = 50;	// Base Wrestling speed (on ML formula it's 2.50)
 	if ( pWeapon )			// If we have a weapon, base speed should match weapon's value.
 		iBaseSpeed = pWeapon->GetSpeed();
     int iSwingSpeed = 100;
-    int iSpeedScaleFactor = g_Cfg.m_iSpeedScaleFactor;  // Old maths were done in tenths, so I convert them to msecs.
+    
 	switch ( g_Cfg.m_iCombatSpeedEra )
 	{
 		case 0:
@@ -112,7 +113,7 @@ int CServerConfig::Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pW
 			iSwingSpeed = (iSpeedScaleFactor / ((pChar->Stat_GetVal(STAT_DEX) + 100) * iSwingSpeed)) - 2;	// get speed in ticks of 0.25s each
 			if ( iSwingSpeed < 5 )
 				iSwingSpeed = 5;
-			iSwingSpeed = (iSwingSpeed * 10) / 4;		// convert 0.25s ticks into ms
+			iSwingSpeed = (iSwingSpeed * 10) / 4;		// convert tenths of second in 0.25s ticks (OSI ticking period)
 			break;
 		}
 
@@ -122,7 +123,7 @@ int CServerConfig::Calc_CombatAttackSpeed( const CChar * pChar, const CItem * pW
 			iSwingSpeed = ((iBaseSpeed * 4) - (pChar->Stat_GetVal(STAT_DEX) / 30)) * (100 / (100 + iSwingSpeedIncrease));	// get speed in ticks of 0.25s each
 			if ( iSwingSpeed < 5 )
 				iSwingSpeed = 5;
-			iSwingSpeed = (iSwingSpeed * 10) / 4;		// convert 0.25s ticks into ms
+			iSwingSpeed = (iSwingSpeed * 10) / 4;		// convert tenths of second in 0.25s ticks (OSI ticking period)
 			break;
 		}
 	}

@@ -408,10 +408,13 @@ void CClient::Event_Item_Drop( CUID uidItem, CPointMap pt, CUID uidOn, uchar gri
 		CItem * pItemOn = dynamic_cast <CItem*> ( pObjOn );
 		if (( pItemOn ) && (( IsTrigUsed(TRIGGER_DROPON_SELF) ) || ( IsTrigUsed(TRIGGER_ITEMDROPON_SELF) )))
 		{
+            CItem* pPrevCont = dynamic_cast<CItem*>(pItem->GetContainer());
 			CScriptTriggerArgs Args( pItem );
 			if ( pItemOn->OnTrigger( ITRIG_DROPON_SELF, m_pChar, &Args ) == TRIGRET_RET_TRUE )
 			{
-				Event_Item_Drop_Fail( pItem );
+                CItem* pCont = dynamic_cast<CItem*>(pItem->GetContainer());
+                if (pPrevCont == pCont)
+				    Event_Item_Drop_Fail( pItem );
 				return;
 			}
 		}

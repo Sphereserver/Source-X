@@ -1237,3 +1237,10 @@ Added: Now Sectors store their adjacent sectors:
 - Fixed: With COMBAT_ANIM_HIT_SMOOTH, in @HitTry ARGN1 and LOCAL.AnimDelay showed the wrong values (they were inverted).
 - Fixed: NPCs had not enough motivation to fight back a brain_berserk NPC of the same kind, so they kept running away or wandering.
 - Fixed: On Windows, if Sphere's window is closed during the scripts loading, the whole process will now be halted. Before, the loading proceeded and the server was halted only at the startup completition.
+
+24-10-2018, Nolok
+- Fixed: When a char was overweight it could equip multiple items on one layer (Issue #143).
+- Fixed: The minimum combat animation delay with COMBAT_ANIM_HIT_SMOOTH on was 0,1 s instead of 1 second.
+- Fixed: Now equipping a light source item doesn't check the CAN flags.
+- Added: Now it's possible to change an item's CONT in @DropOn_Self when the trigger is fired via a drop client event (before it worked only if fired by the BOUNCE keyword).
+	If a RETURN 1 is performed and a new (different) CONT has not been set via scripts on the trigger call, the item drop event fails as before, otherwise the item is left in the new CONT.

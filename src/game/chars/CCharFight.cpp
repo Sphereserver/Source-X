@@ -8,9 +8,8 @@
 #include "CChar.h"
 #include "CCharNPC.h"
 
-// 1.0 seconds is the minimum animation duration ("delay"), but we have to subtract the tenths of seconds that will pass until the next tick, since
-//  the timer will start on the next tick
-#define COMBAT_MIN_SWING_ANIMATION_DELAY (int16)1
+// 1.0 seconds is the minimum animation duration ("delay")
+#define COMBAT_MIN_SWING_ANIMATION_DELAY (int16)10  // in tenths of second
 
 // I noticed a crime.
 void CChar::OnNoticeCrime( CChar * pCriminal, const CChar * pCharMark )
@@ -1556,7 +1555,7 @@ WAR_SWING_TYPE CChar::Fight_Hit( CChar * pCharTarg )
 		else if ( !IsSetCombatFlags(COMBAT_ARCHERYCANMOVE) && !IsStatFlag(STATF_ARCHERCANMOVE) )
 		{
 			// Only start the swing this much tenths of second after the char stopped moving.
-			//  (Values changed between expansions. SE:250ms / AOS:500ms / pre-AOS:1000ms)
+			//  (Values changed between expansions. SE:0,25s / AOS:0,5s / pre-AOS:1,0s)
 			if ( m_pClient && ( -(g_World.GetTimeDiff(m_pClient->m_timeLastEventWalk) / MSECS_PER_TENTH) < g_Cfg.m_iCombatArcheryMovementDelay) )
 				return WAR_SWING_EQUIPPING;
 		}

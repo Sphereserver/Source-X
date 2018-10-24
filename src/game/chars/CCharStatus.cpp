@@ -310,7 +310,7 @@ LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg
 		if ( pItemDef->IsTypeEquippable() && CItemBase::IsVisibleLayer(layer) )
 		{
 			// Test only on players or if requested
-			if ( (m_pPlayer || fTest) && pItemDef->m_ttEquippable.m_iStrReq && (Stat_GetAdjusted(STAT_STR) < pItemDef->m_ttEquippable.m_iStrReq * (100 - pItem->GetDefNum("LOWERREQ", true, true)) / 100) )
+			if ( (m_pPlayer || fTest) && !CanEquipStr(pItem) )
 			{
 				if ( m_pPlayer )	// message only players
 				{
@@ -323,7 +323,7 @@ LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg
 		}
 	}
 
-	if ( pItem->GetParent() == this && pItem->GetEquipLayer() == layer )		// not a visible item LAYER_TYPE
+	if ( (pItem->GetParent() == this) && (pItem->GetEquipLayer() == layer) ) // not a visible item LAYER_TYPE
 		return layer;
 
 	CItem *pItemPrev = NULL;
@@ -368,8 +368,11 @@ LAYER_TYPE CChar::CanEquipLayer( CItem *pItem, LAYER_TYPE layer, CChar *pCharMsg
 		{
 			if ( !pItemDef->IsTypeEquippable() || !Can(CAN_C_USEHANDS) )
 			{
-				fCantEquip = true;
-				break;
+                if ( pItemDef->GetDispID() != ITEMID_LIGHT_SRC )	// this light source item is a memory equipped on LAYER_HAND2, so it's ok to equip it even without proper TYPE/CAN
+                {
+                    fCantEquip = true;
+                    break;
+                }
 			}
 
 			if ( layer == LAYER_HAND2 )
@@ -1494,7 +1497,7 @@ bool CChar::CanMove( CItem *pItem, bool fMsg ) const
 		{
 			pItem->SetAttr(ATTR_IDENTIFIED);
 			if ( fMsg )
-				SysMessagef("%s %s", static_cast<lpctstr>(pItem->GetName()), g_Cfg.GetDefaultMsg(DEFMSG_CANTMOVE_CURSED));
+				SysMessagef("%s %s", pItem->GetName(), g_Cfg.GetDefaultMsg(DEFMSG_CANTMOVE_CURSED));
 
 			return false;
 		}
